@@ -1,880 +1,1005 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: Re: [RFC PATCH 1/1 v7]mmc: Support-FFU-for-eMMC-v5.0
-Date: Fri, 27 Jun 2014 11:33:11 -0700
-Message-ID: <CANEJEGsCcmYT0O=Vg4QL38H3DxhoJMCUtGMbrEPQ+DXhi0GHeA@mail.gmail.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE648AFA7EE@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CANEJEGu9PYi5DxuEWBwEHjUqWt2J-sEDZMKLwvZTUBdUnK=7XA@mail.gmail.com>
-	<CAC1bqKg=qse6MkgYD3bJDcBg0f7eis3dZZ=e3SM7bxE2A-XKPA@mail.gmail.com>
+From: Ondrej Zary <linux@rainbow-software.org>
+Subject: [PATCH] mmc: add Toshiba PCI SD controller driver
+Date: Fri, 27 Jun 2014 20:44:54 +0200
+Message-ID: <201406272044.55123.linux@rainbow-software.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f41.google.com ([209.85.219.41]:60379 "EHLO
-	mail-oa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751374AbaF0SdM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Jun 2014 14:33:12 -0400
-Received: by mail-oa0-f41.google.com with SMTP id l6so6120952oag.28
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Jun 2014 11:33:11 -0700 (PDT)
-In-Reply-To: <CAC1bqKg=qse6MkgYD3bJDcBg0f7eis3dZZ=e3SM7bxE2A-XKPA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain;
+  charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Kernel development list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>
-Cc: Grant Grundler <grundler@chromium.org>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On Mon, Jun 23, 2014 at 6:17 PM, Hsin-Hsiang Tseng
-<hsinhsiangtseng@gmail.com> wrote:
-> Hi, Grant, I am interested in this topic too.
->
-> I have some issues want to discuss here. Should we check the firmware bin
-> file before we execute FFU? (for example, execute checksum to verify
-> firmware bin file)  Should eMMC controller vendors cover this issue?
+This patch resurrects an old never-finished driver for Toshiba PCI SD
+controllers found in some older Toshiba laptops (such as Portege R100):
 
-We _could_.  But I don't see a need for it now.
+02:0d.0 System peripheral [0880]: Toshiba America Info Systems SD TypA Controller [1179:0805] (rev 05)
 
-I expect the existing firmware to check that the new firmware is "valid".
-(e.g. much stronger signatures). I've been suggesting this to HW
-vendors for the past year.
+The hardware is slow (around 2 MB/s - same in Windows) because it does not
+support bus mastering (busmaster enable bit cannot be set in PCI control reg).
+Also the card clock is limited to 16MHz (33MHz PCI clock divided by 2).
 
-> Another issue is about interrupt, because FFU is trigger by ioctl therefore
-> FFU will be execute on OS (like Android) environment. Should OS (host)
-> guarantee the FFU not to be interruptable or eMMC (device) need to handle
-> interrupt when execute FFU?
+SD, SDHC and also MMC cards work. (MMC cards don't work in Windows)
+SDIO is not supported (don't have any SDIO card).
 
-I'm not sure I understand this question. My understand of the current
-patch is the FFU upload is "atomic" (no other commands will get
-interleaved) and the FFU "enable" step is also atomic.
+Signed-off-by: Ondrej Zary <linux@rainbow-software.org>
+---
+ drivers/mmc/host/Kconfig  |    5
+ drivers/mmc/host/Makefile |    1
+ drivers/mmc/host/toshsd.c |  751 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/toshsd.h |  178 ++++++++++++++
+ 4 files changed, 935 insertions(+)
 
-If I misunderstood, SanDisk should be able to answer this question.
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 7fc5099..29dc4ef 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -665,3 +665,8 @@ config MMC_REALTEK_PCI
+ 	help
+ 	  Say Y here to include driver code to support SD/MMC card interface
+ 	  of Realtek PCI-E card reader
++
++config MMC_TOSHIBA_PCI
++	tristate "Toshiba Type A SD/MMC Card Interface Driver"
++	depends on PCI
++	help
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index c41d0c3..2dd1617 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -51,6 +51,7 @@ obj-$(CONFIG_MMC_USHC)		+= ushc.o
+ obj-$(CONFIG_MMC_WMT)		+= wmt-sdmmc.o
+ 
+ obj-$(CONFIG_MMC_REALTEK_PCI)	+= rtsx_pci_sdmmc.o
++obj-$(CONFIG_MMC_TOSHIBA_PCI)	+= toshsd.o
+ 
+ obj-$(CONFIG_MMC_SDHCI_PLTFM)		+= sdhci-pltfm.o
+ obj-$(CONFIG_MMC_SDHCI_CNS3XXX)		+= sdhci-cns3xxx.o
+diff --git a/drivers/mmc/host/toshsd.c b/drivers/mmc/host/toshsd.c
+new file mode 100644
+index 0000000..1fe007a
+--- /dev/null
++++ b/drivers/mmc/host/toshsd.c
+@@ -0,0 +1,751 @@
++/*
++ *  Toshiba PCI Secure Digital Host Controller Interface driver
++ *
++ *  Copyright (C) 2014 Ondrej Zary
++ *  Copyright (C) 2007 Richard Betts, All Rights Reserved.
++ *
++ *	Based on asic3_mmc.c, copyright (c) 2005 SDG Systems, LLC and,
++ *	sdhci.c, copyright (C) 2005-2006 Pierre Ossman
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or (at
++ * your option) any later version.
++ */
++
++#include <linux/delay.h>
++#include <linux/module.h>
++#include <linux/pci.h>
++#include <linux/scatterlist.h>
++#include <linux/interrupt.h>
++
++#include <linux/mmc/host.h>
++#include <linux/mmc/mmc.h>
++
++#include "toshsd.h"
++
++#define DRIVER_NAME "toshsd"
++
++static const struct pci_device_id pci_ids[] = {
++	{ PCI_DEVICE(PCI_VENDOR_ID_TOSHIBA, 0x0805) },
++	{ /* end: all zeroes */ },
++};
++
++MODULE_DEVICE_TABLE(pci, pci_ids);
++
++static void toshsd_init(struct toshsd_host *host);
++static void toshsd_set_ios_unlocked(struct mmc_host *mmc, struct mmc_ios *ios);
++
++static inline u16 toshsd_readw(struct toshsd_host *host, u16 reg)
++{
++	return ioread16(host->ioaddr + reg);
++}
++
++static inline u32 toshsd_readl(struct toshsd_host *host, u16 reg)
++{
++	return ioread32(host->ioaddr + reg);
++}
++
++static inline void toshsd_writew(struct toshsd_host *host, u16 reg, u16 val)
++{
++	iowrite16(val, host->ioaddr + reg);
++}
++
++static inline void toshsd_writel(struct toshsd_host *host, u16 reg, u32 val)
++{
++	iowrite32(val, host->ioaddr + reg);
++}
++
++static inline void toshsd_readl_rep(struct toshsd_host *host, u16 reg,
++				    void *dst, unsigned long count)
++{
++	ioread32_rep(host->ioaddr + reg, dst, count);
++}
++
++static inline void toshsd_writel_rep(struct toshsd_host *host, u16 reg,
++				     const void *src, unsigned long count)
++{
++	iowrite32_rep(host->ioaddr + reg, src, count);
++}
++
++static void toshsd_set_led(struct toshsd_host *host, unsigned char state)
++{
++	toshsd_writew(host, SDIO_BASE + SDIO_LEDCTRL, state);
++}
++
++static void toshsd_finish_request(struct toshsd_host *host)
++{
++	struct mmc_request *mrq = host->mrq;
++
++	/* Write something to end the command */
++	host->mrq = NULL;
++	host->cmd = NULL;
++	host->data = NULL;
++
++	toshsd_set_led(host, 0);
++	mmc_request_done(host->mmc, mrq);
++}
++
++static void toshsd_data_transfer(unsigned long h)
++{
++	struct toshsd_host *host = (struct toshsd_host *) h;
++	struct mmc_data *data = host->data;
++	struct sg_mapping_iter *sg_miter = &host->sg_miter;
++	unsigned short *buf;
++	int count;
++	unsigned long flags;
++
++	if (!data) {
++		dev_warn(&host->pdev->dev, "Spurious Data IRQ\n");
++		if (host->cmd) {
++			host->cmd->error = -EIO;
++			toshsd_finish_request(host);
++		}
++		return;
++	}
++	spin_lock_irqsave(&host->lock, flags);
++
++	if (!sg_miter_next(sg_miter))
++		return;
++	buf = sg_miter->addr;
++
++	/* Ensure we dont read more than one block. The chip will interrupt us
++	 * When the next block is available.
++	 */
++	count = sg_miter->length;
++	if (count > data->blksz)
++		count = data->blksz;
++
++	dev_dbg(&host->pdev->dev, "count: %08x, flags %08x\n", count,
++		data->flags);
++
++	/* Transfer the data */
++	if (data->flags & MMC_DATA_READ)
++		toshsd_readl_rep(host, SD_DATAPORT, buf, count >> 2);
++	else
++		toshsd_writel_rep(host, SD_DATAPORT, buf, count >> 2);
++
++	sg_miter->consumed = count;
++	sg_miter_stop(sg_miter);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++}
++
++static void toshsd_cmd_irq(struct toshsd_host *host)
++{
++	struct mmc_command *cmd = host->cmd;
++	u8 *buf = (u8 *) cmd->resp;
++	u16 data;
++
++	if (!host->cmd) {
++		dev_warn(&host->pdev->dev, "Spurious CMD irq\n");
++		return;
++	}
++
++	host->cmd = NULL;
++
++	if (cmd->flags & MMC_RSP_PRESENT && cmd->flags & MMC_RSP_136) {
++		/* R2 */
++		buf[12] = 0xff;
++		data = toshsd_readw(host, SD_RESPONSE0);
++		buf[13] = data & 0xff;
++		buf[14] = data >> 8;
++		data = toshsd_readw(host, SD_RESPONSE1);
++		buf[15] = data & 0xff;
++		buf[8] = data >> 8;
++		data = toshsd_readw(host, SD_RESPONSE2);
++		buf[9] = data & 0xff;
++		buf[10] = data >> 8;
++		data = toshsd_readw(host, SD_RESPONSE3);
++		buf[11] = data & 0xff;
++		buf[4] = data >> 8;
++		data = toshsd_readw(host, SD_RESPONSE4);
++		buf[5] = data & 0xff;
++		buf[6] = data >> 8;
++		data = toshsd_readw(host, SD_RESPONSE5);
++		buf[7] = data & 0xff;
++		buf[0] = data >> 8;
++		data = toshsd_readw(host, SD_RESPONSE6);
++		buf[1] = data & 0xff;
++		buf[2] = data >> 8;
++		data = toshsd_readw(host, SD_RESPONSE7);
++		buf[3] = data & 0xff;
++	} else if (cmd->flags & MMC_RSP_PRESENT) {
++		/* R1, R1B, R3, R6, R7 */
++		data = toshsd_readw(host, SD_RESPONSE0);
++		buf[0] = data & 0xff;
++		buf[1] = data >> 8;
++		data = toshsd_readw(host, SD_RESPONSE1);
++		buf[2] = data & 0xff;
++		buf[3] = data >> 8;
++	}
++
++	dev_dbg(&host->pdev->dev, "Command IRQ complete %d %d %x\n",
++		cmd->opcode, cmd->error, cmd->flags);
++
++	/* If there is data to handle we will
++	 * finish the request in the mmc_data_end_irq handler.*/
++	if (host->data)
++		return;
++
++	toshsd_finish_request(host);
++}
++
++static void toshsd_data_end_irq(struct toshsd_host *host)
++{
++	struct mmc_data *data = host->data;
++
++	host->data = NULL;
++
++	if (!data) {
++		dev_warn(&host->pdev->dev, "Spurious data end IRQ\n");
++		return;
++	}
++
++	if (data->error == 0)
++		data->bytes_xfered = data->blocks * data->blksz;
++	else
++		data->bytes_xfered = 0;
++
++	dev_dbg(&host->pdev->dev, "Completed data request xfr=%d\n",
++		data->bytes_xfered);
++
++	toshsd_writew(host, SD_STOPINTERNAL, 0);
++
++	toshsd_finish_request(host);
++}
++
++static irqreturn_t toshsd_irq(int irq, void *dev_id)
++{
++	struct toshsd_host *host = dev_id;
++	u32 int_reg, int_mask, int_status, detail;
++	int error = 0;
++
++	spin_lock(&host->lock);
++	int_status = toshsd_readl(host, SD_CARDSTATUS);
++	int_mask = toshsd_readl(host, SD_INTMASKCARD);
++	int_reg = int_status & ~int_mask & ~IRQ_DONT_CARE_BITS;
++
++	dev_dbg(&host->pdev->dev, "IRQ status:%x mask:%x\n",
++		int_status, int_mask);
++
++	/* nothing to do: it's not our IRQ */
++	if (!int_reg) {
++		spin_unlock(&host->lock);
++		return IRQ_NONE;
++	}
++
++	if (int_reg & SD_BUF_CMD_TIMEOUT) {
++		error = -ETIMEDOUT;
++		dev_dbg(&host->pdev->dev, "Timeout\n");
++	} else if (int_reg & SD_BUF_CRC_ERR) {
++		error = -EILSEQ;
++		dev_err(&host->pdev->dev, "BadCRC\n");
++	} else if (int_reg & (SD_BUF_ILLEGAL_ACCESS
++				| SD_BUF_CMD_INDEX_ERR
++				| SD_BUF_STOP_BIT_END_ERR
++				| SD_BUF_OVERFLOW
++				| SD_BUF_UNDERFLOW
++				| SD_BUF_DATA_TIMEOUT)) {
++		dev_err(&host->pdev->dev, "Buffer status error: { %s%s%s%s%s%s}\n",
++			int_reg & SD_BUF_ILLEGAL_ACCESS ? "ILLEGAL_ACC " : "",
++			int_reg & SD_BUF_CMD_INDEX_ERR ? "CMD_INDEX " : "",
++			int_reg & SD_BUF_STOP_BIT_END_ERR ? "STOPBIT_END " : "",
++			int_reg & SD_BUF_OVERFLOW ? "OVERFLOW " : "",
++			int_reg & SD_BUF_UNDERFLOW ? "UNDERFLOW " : "",
++			int_reg & SD_BUF_DATA_TIMEOUT ? "DATA_TIMEOUT " : "");
++
++		detail = toshsd_readl(host, SD_ERRORSTATUS0);
++		dev_err(&host->pdev->dev, "detail error status { %s%s%s%s%s%s%s%s%s%s%s%s%s}\n",
++			detail & SD_ERR0_RESP_CMD_ERR ? "RESP_CMD " : "",
++			detail & SD_ERR0_RESP_NON_CMD12_END_BIT_ERR ? "RESP_END_BIT " : "",
++			detail & SD_ERR0_RESP_CMD12_END_BIT_ERR ? "RESP_END_BIT " : "",
++			detail & SD_ERR0_READ_DATA_END_BIT_ERR ? "READ_DATA_END_BIT " : "",
++			detail & SD_ERR0_WRITE_CRC_STATUS_END_BIT_ERR ? "WRITE_CMD_END_BIT " : "",
++			detail & SD_ERR0_RESP_NON_CMD12_CRC_ERR ? "RESP_CRC " : "",
++			detail & SD_ERR0_RESP_CMD12_CRC_ERR ? "RESP_CRC " : "",
++			detail & SD_ERR0_READ_DATA_CRC_ERR ? "READ_DATA_CRC " : "",
++			detail & SD_ERR0_WRITE_CMD_CRC_ERR ? "WRITE_CMD_CRC " : "",
++			detail & SD_ERR1_NO_CMD_RESP ? "NO_CMD_RESP " : "",
++			detail & SD_ERR1_TIMEOUT_READ_DATA ? "READ_DATA_TIMEOUT " : "",
++			detail & SD_ERR1_TIMEOUT_CRS_STATUS ? "CRS_STATUS_TIMEOUT " : "",
++			detail & SD_ERR1_TIMEOUT_CRC_BUSY ? "CRC_BUSY_TIMEOUT " : "");
++		error = -EIO;
++	}
++
++	if (error) {
++		if (host->cmd)
++			host->cmd->error = error;
++
++		if (error == -ETIMEDOUT) {
++			toshsd_writel(host, SD_CARDSTATUS, int_status &
++				~(SD_BUF_CMD_TIMEOUT | SD_CARD_RESP_END));
++		} else {
++			toshsd_init(host);
++			toshsd_set_ios_unlocked(host->mmc, &host->mmc->ios);
++			goto irq_end;
++		}
++	}
++
++	/* Card insert/remove. The mmc controlling code is stateless. */
++	if (int_reg & (SD_CARD_CARD_INSERTED_0 | SD_CARD_CARD_REMOVED_0)) {
++		toshsd_writel(host, SD_CARDSTATUS, int_status &
++			      ~(SD_CARD_CARD_REMOVED_0 |
++				SD_CARD_CARD_INSERTED_0));
++
++		if (int_reg & SD_CARD_CARD_INSERTED_0)
++			toshsd_init(host);
++
++		mmc_detect_change(host->mmc, 1);
++	}
++
++	/* Data transfer */
++	if (int_reg & (SD_BUF_READ_ENABLE | SD_BUF_WRITE_ENABLE)) {
++		toshsd_writel(host, SD_CARDSTATUS, int_status &
++			      ~(SD_BUF_WRITE_ENABLE | SD_BUF_READ_ENABLE));
++
++		tasklet_schedule(&host->data_read_tasklet);
++	}
++
++	/* Command completion */
++	if (int_reg & SD_CARD_RESP_END) {
++		toshsd_writel(host, SD_CARDSTATUS, int_status &
++			      ~(SD_CARD_RESP_END));
++		toshsd_cmd_irq(host);
++	}
++
++	/* Data transfer completion */
++	if (int_reg & SD_CARD_RW_END) {
++		toshsd_writel(host, SD_CARDSTATUS, int_status &
++			      ~(SD_CARD_RW_END));
++		toshsd_data_end_irq(host);
++	}
++irq_end:
++	spin_unlock(&host->lock);
++	return IRQ_HANDLED;
++}
++
++static void toshsd_start_cmd(struct toshsd_host *host, struct mmc_command *cmd)
++{
++	struct mmc_data *data = host->data;
++	int c = cmd->opcode;
++
++	dev_dbg(&host->pdev->dev, "Command opcode: %d\n", cmd->opcode);
++
++	if (cmd->opcode == MMC_STOP_TRANSMISSION) {
++		toshsd_writew(host, SD_STOPINTERNAL,
++			      SD_STOPINT_ISSSUE_CMD12);
++
++		cmd->resp[0] = cmd->opcode;
++		cmd->resp[1] = 0;
++		cmd->resp[2] = 0;
++		cmd->resp[3] = 0;
++
++		toshsd_finish_request(host);
++		return;
++	}
++
++	switch (mmc_resp_type(cmd)) {
++	case MMC_RSP_NONE:
++		c |= SD_CMD_RESP_TYPE_NORMAL;
++		break;
++
++	case MMC_RSP_R1:
++		c |= SD_CMD_RESP_TYPE_EXT_R1;
++		break;
++	case MMC_RSP_R1B:
++		c |= SD_CMD_RESP_TYPE_EXT_R1B;
++		break;
++	case MMC_RSP_R2:
++		c |= SD_CMD_RESP_TYPE_EXT_R2;
++		break;
++	case MMC_RSP_R3:
++		c |= SD_CMD_RESP_TYPE_EXT_R3;
++		break;
++
++	default:
++		dev_err(&host->pdev->dev, "Unknown response type %d\n",
++			mmc_resp_type(cmd));
++		break;
++	}
++
++	host->cmd = cmd;
++
++	if (cmd->opcode == MMC_APP_CMD)
++		c |= SD_CMD_TYPE_ACMD;
++
++	if (cmd->opcode == MMC_GO_IDLE_STATE)
++		c |= (3 << 8);  /* removed from ipaq-asic3.h for some reason */
++
++	if (data) {
++		c |= SD_CMD_DATA_PRESENT;
++
++		if (data->blocks > 1) {
++			toshsd_writew(host, SD_STOPINTERNAL,
++				      SD_STOPINT_AUTO_ISSUE_CMD12);
++			c |= SD_CMD_MULTI_BLOCK;
++		}
++
++		if (data->flags & MMC_DATA_READ)
++			c |= SD_CMD_TRANSFER_READ;
++
++		/* MMC_DATA_WRITE does not require a bit to be set */
++	}
++
++	/* Send the command */
++	toshsd_writel(host, SD_ARG0, cmd->arg);
++	toshsd_writew(host, SD_CMD, c);
++}
++
++static void toshsd_start_data(struct toshsd_host *host, struct mmc_data *data)
++{
++	unsigned int flags = SG_MITER_ATOMIC;
++
++	dev_dbg(&host->pdev->dev, "setup data transfer: blocksize %08x  nr_blocks %d, offset: %08x\n",
++		data->blksz, data->blocks, data->sg->offset);
++
++	host->data = data;
++
++	if (data->flags & MMC_DATA_READ)
++		flags |= SG_MITER_TO_SG;
++	else
++		flags |= SG_MITER_FROM_SG;
++
++	sg_miter_start(&host->sg_miter, data->sg, data->sg_len, flags);
++
++	/* Set transfer length and blocksize */
++	toshsd_writew(host, SD_BLOCKCOUNT, data->blocks);
++	toshsd_writew(host, SD_CARDXFERDATALEN, data->blksz);
++}
++
++/* Process requests from the MMC layer */
++static void toshsd_request(struct mmc_host *mmc, struct mmc_request *mrq)
++{
++	struct toshsd_host *host = mmc_priv(mmc);
++	unsigned long flags;
++
++	/* abort if card not present */
++	if (!(toshsd_readw(host, SD_CARDSTATUS) & SD_CARD_PRESENT_0)) {
++		mrq->cmd->error = -ENOMEDIUM;
++		mmc_request_done(mmc, mrq);
++		return;
++	}
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	WARN_ON(host->mrq != NULL);
++
++	host->mrq = mrq;
++
++	if (mrq->data)
++		toshsd_start_data(host, mrq->data);
++
++	toshsd_set_led(host, 1);
++
++	toshsd_start_cmd(host, mrq->cmd);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++}
++
++/* Set MMC clock / power.
++ * Note: This controller uses a simple divider scheme therefore it cannot run
++ * SD/MMC cards at full speed (24/20MHz). HCLK (=33MHz PCI clock?) is too high
++ * and the next slowest is 16MHz (div=2).
++ */
++static void toshsd_set_ios_unlocked(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	struct toshsd_host *host = mmc_priv(mmc);
++
++	if (ios->clock) {
++		u16 clk;
++		int div = 1;
++
++		while (ios->clock < HCLK / div)
++			div *= 2;
++
++		clk = div >> 2;
++
++		if (div == 1) { /* disable the divider */
++			pci_write_config_byte(host->pdev, SD_PCICFG_CLKMODE,
++					      SD_PCICFG_CLKMODE_DIV_DISABLE);
++			clk |= SD_CARDCLK_DIV_DISABLE;
++		} else
++			pci_write_config_byte(host->pdev, SD_PCICFG_CLKMODE, 0);
++
++		clk |= SD_CARDCLK_ENABLE_CLOCK;
++		toshsd_writew(host, SD_CARDCLOCKCTRL, clk);
++
++		mdelay(10);
++	} else
++		toshsd_writew(host, SD_CARDCLOCKCTRL, 0);
++
++	switch (ios->power_mode) {
++	case MMC_POWER_OFF:
++		pci_write_config_byte(host->pdev, SD_PCICFG_POWER1,
++					SD_PCICFG_PWR1_OFF);
++		mdelay(1);
++		break;
++	case MMC_POWER_UP:
++		break;
++	case MMC_POWER_ON:
++		pci_write_config_byte(host->pdev, SD_PCICFG_POWER1,
++					SD_PCICFG_PWR1_33V);
++		pci_write_config_byte(host->pdev, SD_PCICFG_POWER2,
++					SD_PCICFG_PWR2_AUTO);
++		mdelay(20);
++		break;
++	}
++
++	switch (ios->bus_width) {
++	case MMC_BUS_WIDTH_1:
++		toshsd_writew(host, SD_CARDOPTIONSETUP, SD_CARDOPT_REQUIRED
++				| SD_CARDOPT_DATA_RESP_TIMEOUT(14)
++				| SD_CARDOPT_C2_MODULE_ABSENT
++				| SD_CARDOPT_DATA_XFR_WIDTH_1);
++		break;
++	case MMC_BUS_WIDTH_4:
++		toshsd_writew(host, SD_CARDOPTIONSETUP, SD_CARDOPT_REQUIRED
++				| SD_CARDOPT_DATA_RESP_TIMEOUT(14)
++				| SD_CARDOPT_C2_MODULE_ABSENT
++				| SD_CARDOPT_DATA_XFR_WIDTH_4);
++		break;
++	}
++}
++
++static void toshsd_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	struct toshsd_host *host = mmc_priv(mmc);
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++	toshsd_set_ios_unlocked(mmc, ios);
++	spin_unlock_irqrestore(&host->lock, flags);
++}
++
++static int toshsd_get_ro(struct mmc_host *mmc)
++{
++	struct toshsd_host *host = mmc_priv(mmc);
++
++	/* active low */
++	return !(toshsd_readw(host, SD_CARDSTATUS) & SD_CARD_WRITE_PROTECT);
++}
++
++static int toshsd_get_cd(struct mmc_host *mmc)
++{
++	struct toshsd_host *host = mmc_priv(mmc);
++
++	return !!(toshsd_readw(host, SD_CARDSTATUS) & SD_CARD_PRESENT_0);
++}
++
++static struct mmc_host_ops toshsd_ops = {
++	.request = toshsd_request,
++	.set_ios = toshsd_set_ios,
++	.get_ro = toshsd_get_ro,
++	.get_cd = toshsd_get_cd,
++};
++
++static void toshsd_init(struct toshsd_host *host)
++{
++	/* enable clock */
++	pci_write_config_byte(host->pdev, SD_PCICFG_CLKSTOP,
++					SD_PCICFG_CLKSTOP_ENABLE_ALL);
++	pci_write_config_byte(host->pdev, SD_PCICFG_CARDDETECT, 2);
++
++	/* reset */
++	toshsd_writew(host, SD_SOFTWARERESET, 0); /* assert */
++	mdelay(2);
++	toshsd_writew(host, SD_SOFTWARERESET, 1); /* deassert */
++	mdelay(2);
++
++	/* Clear card registers */
++	toshsd_writew(host, SD_CARDCLOCKCTRL, 0);
++	toshsd_writel(host, SD_CARDSTATUS, 0);
++	toshsd_writel(host, SD_ERRORSTATUS0, 0);
++	toshsd_writew(host, SD_STOPINTERNAL, 0);
++
++	/* SDIO clock? */
++	toshsd_writew(host, SDIO_BASE + SDIO_CLOCKNWAITCTRL, 0x100);
++
++	/* enable LED */
++	pci_write_config_byte(host->pdev, SD_PCICFG_SDLED_ENABLE1,
++					SD_PCICFG_LED_ENABLE1_START);
++	pci_write_config_byte(host->pdev, SD_PCICFG_SDLED_ENABLE2,
++					SD_PCICFG_LED_ENABLE2_START);
++
++	/* set interrupt masks */
++	toshsd_writel(host, SD_INTMASKCARD, ~(SD_CARD_RESP_END
++					      | SD_CARD_RW_END
++					      | SD_CARD_CARD_REMOVED_0
++					      | SD_CARD_CARD_INSERTED_0
++					      | SD_BUF_READ_ENABLE
++					      | SD_BUF_WRITE_ENABLE
++					      | SD_BUF_CMD_TIMEOUT));
++
++	toshsd_writew(host, SD_TRANSACTIONCTRL, 0x1000);
++}
++
++static void toshsd_powerdown(struct toshsd_host *host)
++{
++	/* mask all interrupts */
++	toshsd_writel(host, SD_INTMASKCARD, 0xffffffff);
++	/* disable card clock */
++	toshsd_writew(host, SDIO_BASE + SDIO_CLOCKNWAITCTRL, 0x000);
++	toshsd_writew(host, SD_CARDCLOCKCTRL, 0);
++	/* power down card */
++	pci_write_config_byte(host->pdev, SD_PCICFG_POWER1, SD_PCICFG_PWR1_OFF);
++	/* disable clock */
++	pci_write_config_byte(host->pdev, SD_PCICFG_CLKSTOP, 0);
++}
++
++#ifdef CONFIG_PM
++
++static int toshsd_suspend(struct pci_dev *pdev, pm_message_t state)
++{
++	struct toshsd_host *host = pci_get_drvdata(pdev);
++
++	toshsd_powerdown(host);
++
++	pci_save_state(pdev);
++	pci_enable_wake(pdev, pci_choose_state(pdev, state), 0);
++	pci_disable_device(pdev);
++	pci_set_power_state(pdev, pci_choose_state(pdev, state));
++
++	return 0;
++}
++
++static int toshsd_resume(struct pci_dev *pdev)
++{
++	struct toshsd_host *host = pci_get_drvdata(pdev);
++	int ret;
++
++	pci_set_power_state(pdev, PCI_D0);
++	pci_restore_state(pdev);
++	ret = pci_enable_device(pdev);
++	if (ret)
++		return ret;
++
++	toshsd_init(host);
++
++	return 0;
++}
++
++#else /* CONFIG_PM */
++
++#define toshsd_suspend NULL
++#define toshsd_resume NULL
++
++#endif /* CONFIG_PM */
++
++static int toshsd_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
++{
++	int ret;
++	struct toshsd_host *host;
++	struct mmc_host *mmc;
++	resource_size_t base;
++
++	ret = pci_enable_device(pdev);
++	if (ret)
++		return ret;
++
++	mmc = mmc_alloc_host(sizeof(struct toshsd_host), &pdev->dev);
++	if (!mmc) {
++		ret = -ENOMEM;
++		goto err;
++	}
++
++	host = mmc_priv(mmc);
++	host->mmc = mmc;
++
++	host->pdev = pdev;
++	pci_set_drvdata(pdev, host);
++
++	ret = pci_request_regions(pdev, DRIVER_NAME);
++	if (ret)
++		goto free;
++
++	host->ioaddr = pci_iomap(pdev, 0, 0);
++	if (!host->ioaddr) {
++		ret = -ENOMEM;
++		goto release;
++	}
++
++	/* Set MMC host parameters */
++	mmc->ops = &toshsd_ops;
++	mmc->caps = MMC_CAP_4_BIT_DATA;
++	mmc->ocr_avail = MMC_VDD_32_33;
++
++	mmc->f_min = HCLK / 512;
++	mmc->f_max = HCLK;
++
++	spin_lock_init(&host->lock);
++
++	tasklet_init(&host->data_read_tasklet, toshsd_data_transfer,
++		     (unsigned long) host);
++
++	toshsd_init(host);
++
++	ret = request_irq(pdev->irq, toshsd_irq, IRQF_SHARED, DRIVER_NAME,
++			  host);
++	if (ret)
++		goto untasklet;
++
++	mmc_add_host(mmc);
++
++	base = pci_resource_start(pdev, 0);
++	dev_dbg(&pdev->dev, "MMIO %pa, IRQ %d\n", &base, pdev->irq);
++
++	return 0;
++
++untasklet:
++	tasklet_kill(&host->data_read_tasklet);
++	pci_iounmap(pdev, host->ioaddr);
++release:
++	pci_release_regions(pdev);
++free:
++	mmc_free_host(mmc);
++	pci_set_drvdata(pdev, NULL);
++err:
++	pci_disable_device(pdev);
++	return ret;
++}
++
++static void toshsd_remove(struct pci_dev *pdev)
++{
++	struct toshsd_host *host = pci_get_drvdata(pdev);
++
++	mmc_remove_host(host->mmc);
++	tasklet_kill(&host->data_read_tasklet);
++	toshsd_powerdown(host);
++	free_irq(pdev->irq, host);
++	pci_iounmap(pdev, host->ioaddr);
++	pci_release_regions(pdev);
++	mmc_free_host(host->mmc);
++	pci_set_drvdata(pdev, NULL);
++	pci_disable_device(pdev);
++}
++
++static struct pci_driver toshsd_driver = {
++	.name = DRIVER_NAME,
++	.id_table = pci_ids,
++	.probe = toshsd_probe,
++	.remove = toshsd_remove,
++	.suspend = toshsd_suspend,
++	.resume = toshsd_resume,
++};
++
++static int __init toshsd_drv_init(void)
++{
++	return pci_register_driver(&toshsd_driver);
++}
++
++static void __exit toshsd_drv_exit(void)
++{
++	pci_unregister_driver(&toshsd_driver);
++}
++
++module_init(toshsd_drv_init);
++module_exit(toshsd_drv_exit);
++
++MODULE_AUTHOR("Ondrej Zary, Richard Betts");
++MODULE_DESCRIPTION("Toshiba PCI Secure Digital Host Controller Interface driver");
++MODULE_LICENSE("GPL");
+diff --git a/drivers/mmc/host/toshsd.h b/drivers/mmc/host/toshsd.h
+new file mode 100644
+index 0000000..2796211
+--- /dev/null
++++ b/drivers/mmc/host/toshsd.h
+@@ -0,0 +1,178 @@
++/*
++ *  Toshiba PCI Secure Digital Host Controller Interface driver
++ *
++ *  Copyright (C) 2014 Ondrej Zary
++ *  Copyright (C) 2007 Richard Betts, All Rights Reserved.
++ *
++ *      Based on asic3_mmc.c Copyright (c) 2005 SDG Systems, LLC
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or (at
++ * your option) any later version.
++ */
++
++#define HCLK	33000000	/* 33 MHz (PCI clock) */
++
++#define SD_PCICFG_CLKSTOP	0x40	/* 0x1f = clock controller, 0 = stop */
++#define SD_PCICFG_GATEDCLK	0x41	/* Gated clock */
++#define SD_PCICFG_CLKMODE	0x42	/* Control clock of SD controller */
++#define SD_PCICFG_PINSTATUS	0x44	/* R/O: read status of SD pins */
++#define SD_PCICFG_POWER1	0x48
++#define SD_PCICFG_POWER2	0x49
++#define SD_PCICFG_POWER3	0x4a
++#define SD_PCICFG_CARDDETECT	0x4c
++#define SD_PCICFG_SLOTS		0x50	/* R/O: define support slot number */
++#define SD_PCICFG_EXTGATECLK1	0xf0	/* Could be used for gated clock */
++#define SD_PCICFG_EXTGATECLK2	0xf1	/* Could be used for gated clock */
++#define SD_PCICFG_EXTGATECLK3	0xf9	/* Bit 1: double buffer/single buffer */
++#define SD_PCICFG_SDLED_ENABLE1	0xfa
++#define SD_PCICFG_SDLED_ENABLE2	0xfe
++
++#define SD_PCICFG_CLKMODE_DIV_DISABLE	(1 << 0)
++#define SD_PCICFG_CLKSTOP_ENABLE_ALL	0x1f
++#define SD_PCICFG_LED_ENABLE1_START	0x12
++#define SD_PCICFG_LED_ENABLE2_START	0x80
++
++#define SD_PCICFG_PWR1_33V	0x08	/* Set for 3.3 volts */
++#define SD_PCICFG_PWR1_OFF	0x00	/* Turn off power */
++#define SD_PCICFG_PWR2_AUTO	0x02
++
++#define SD_CMD			0x00	/* also for SDIO */
++#define SD_ARG0			0x04	/* also for SDIO */
++#define SD_ARG1			0x06	/* also for SDIO */
++#define SD_STOPINTERNAL		0x08
++#define SD_BLOCKCOUNT		0x0a	/* also for SDIO */
++#define SD_RESPONSE0		0x0c	/* also for SDIO */
++#define SD_RESPONSE1		0x0e	/* also for SDIO */
++#define SD_RESPONSE2		0x10	/* also for SDIO */
++#define SD_RESPONSE3		0x12	/* also for SDIO */
++#define SD_RESPONSE4		0x14	/* also for SDIO */
++#define SD_RESPONSE5		0x16	/* also for SDIO */
++#define SD_RESPONSE6		0x18	/* also for SDIO */
++#define SD_RESPONSE7		0x1a	/* also for SDIO */
++#define SD_CARDSTATUS		0x1c	/* also for SDIO */
++#define SD_BUFFERCTRL		0x1e	/* also for SDIO */
++#define SD_INTMASKCARD		0x20	/* also for SDIO */
++#define SD_INTMASKBUFFER	0x22	/* also for SDIO */
++#define SD_CARDCLOCKCTRL	0x24
++#define SD_CARDXFERDATALEN	0x26	/* also for SDIO */
++#define SD_CARDOPTIONSETUP	0x28	/* also for SDIO */
++#define SD_ERRORSTATUS0		0x2c	/* also for SDIO */
++#define SD_ERRORSTATUS1		0x2e	/* also for SDIO */
++#define SD_DATAPORT		0x30	/* also for SDIO */
++#define SD_TRANSACTIONCTRL	0x34	/* also for SDIO */
++#define SD_SOFTWARERESET	0xe0	/* also for SDIO */
++
++/* registers above marked "also for SDIO" and all SDIO registers below can be
++ * accessed at SDIO_BASE + reg address */
++#define SDIO_BASE	 0x100
++
++#define SDIO_CARDPORTSEL	0x02
++#define SDIO_CARDINTCTRL	0x36
++#define SDIO_CLOCKNWAITCTRL	0x38
++#define SDIO_HOSTINFORMATION	0x3a
++#define SDIO_ERRORCTRL		0x3c
++#define SDIO_LEDCTRL		0x3e
++
++#define SD_TRANSCTL_SET		(1 << 8)
++
++#define SD_CARDCLK_DIV_DISABLE	(1 << 15)
++#define SD_CARDCLK_ENABLE_CLOCK	(1 << 8)
++#define SD_CARDCLK_CLK_DIV_512	(1 << 7)
++#define SD_CARDCLK_CLK_DIV_256	(1 << 6)
++#define SD_CARDCLK_CLK_DIV_128	(1 << 5)
++#define SD_CARDCLK_CLK_DIV_64	(1 << 4)
++#define SD_CARDCLK_CLK_DIV_32	(1 << 3)
++#define SD_CARDCLK_CLK_DIV_16	(1 << 2)
++#define SD_CARDCLK_CLK_DIV_8	(1 << 1)
++#define SD_CARDCLK_CLK_DIV_4	(1 << 0)
++#define SD_CARDCLK_CLK_DIV_2	(0 << 0)
++
++#define SD_CARDOPT_REQUIRED		0x000e
++#define SD_CARDOPT_DATA_RESP_TIMEOUT(x)	(((x) & 0x0f) << 4) /* 4 bits */
++#define SD_CARDOPT_C2_MODULE_ABSENT	(1 << 14)
++#define SD_CARDOPT_DATA_XFR_WIDTH_1	(1 << 15)
++#define SD_CARDOPT_DATA_XFR_WIDTH_4	(0 << 15)
++
++#define SD_CMD_TYPE_CMD			(0 << 6)
++#define SD_CMD_TYPE_ACMD		(1 << 6)
++#define SD_CMD_TYPE_AUTHEN		(2 << 6)
++#define SD_CMD_RESP_TYPE_NORMAL		(0 << 8)
++#define SD_CMD_RESP_TYPE_EXT_R1		(4 << 8)
++#define SD_CMD_RESP_TYPE_EXT_R1B	(5 << 8)
++#define SD_CMD_RESP_TYPE_EXT_R2		(6 << 8)
++#define SD_CMD_RESP_TYPE_EXT_R3		(7 << 8)
++#define SD_CMD_RESP_TYPE_EXT_R6		(4 << 8)
++#define SD_CMD_RESP_TYPE_EXT_R7		(4 << 8)
++#define SD_CMD_DATA_PRESENT		(1 << 11)
++#define SD_CMD_TRANSFER_READ		(1 << 12)
++#define SD_CMD_MULTI_BLOCK		(1 << 13)
++#define SD_CMD_SECURITY_CMD		(1 << 14)
++
++#define SD_STOPINT_ISSSUE_CMD12		(1 << 0)
++#define SD_STOPINT_AUTO_ISSUE_CMD12	(1 << 8)
++
++#define SD_CARD_RESP_END	(1 << 0)
++#define SD_CARD_RW_END		(1 << 2)
++#define SD_CARD_CARD_REMOVED_0	(1 << 3)
++#define SD_CARD_CARD_INSERTED_0	(1 << 4)
++#define SD_CARD_PRESENT_0	(1 << 5)
++#define SD_CARD_UNK6		(1 << 6)
++#define SD_CARD_WRITE_PROTECT	(1 << 7)
++#define SD_CARD_CARD_REMOVED_3	(1 << 8)
++#define SD_CARD_CARD_INSERTED_3	(1 << 9)
++#define SD_CARD_PRESENT_3	(1 << 10)
++
++#define SD_BUF_CMD_INDEX_ERR	(1 << 16)
++#define SD_BUF_CRC_ERR		(1 << 17)
++#define SD_BUF_STOP_BIT_END_ERR	(1 << 18)
++#define SD_BUF_DATA_TIMEOUT	(1 << 19)
++#define SD_BUF_OVERFLOW		(1 << 20)
++#define SD_BUF_UNDERFLOW	(1 << 21)
++#define SD_BUF_CMD_TIMEOUT	(1 << 22)
++#define SD_BUF_UNK7		(1 << 23)
++#define SD_BUF_READ_ENABLE	(1 << 24)
++#define SD_BUF_WRITE_ENABLE	(1 << 25)
++#define SD_BUF_ILLEGAL_FUNCTION	(1 << 29)
++#define SD_BUF_CMD_BUSY		(1 << 30)
++#define SD_BUF_ILLEGAL_ACCESS	(1 << 31)
++
++#define SD_ERR0_RESP_CMD_ERR			(1 << 0)
++#define SD_ERR0_RESP_NON_CMD12_END_BIT_ERR	(1 << 2)
++#define SD_ERR0_RESP_CMD12_END_BIT_ERR		(1 << 3)
++#define SD_ERR0_READ_DATA_END_BIT_ERR		(1 << 4)
++#define SD_ERR0_WRITE_CRC_STATUS_END_BIT_ERR	(1 << 5)
++#define SD_ERR0_RESP_NON_CMD12_CRC_ERR		(1 << 8)
++#define SD_ERR0_RESP_CMD12_CRC_ERR		(1 << 9)
++#define SD_ERR0_READ_DATA_CRC_ERR		(1 << 10)
++#define SD_ERR0_WRITE_CMD_CRC_ERR		(1 << 11)
++
++#define SD_ERR1_NO_CMD_RESP		(1 << 16)
++#define SD_ERR1_TIMEOUT_READ_DATA	(1 << 20)
++#define SD_ERR1_TIMEOUT_CRS_STATUS	(1 << 21)
++#define SD_ERR1_TIMEOUT_CRC_BUSY	(1 << 22)
++
++#define IRQ_DONT_CARE_BITS (SD_CARD_PRESENT_3 \
++	| SD_CARD_WRITE_PROTECT \
++	| SD_CARD_UNK6 \
++	| SD_CARD_PRESENT_0 \
++	| SD_BUF_UNK7 \
++	| SD_BUF_CMD_BUSY)
++
++struct toshsd_host {
++	struct pci_dev *pdev;
++	struct mmc_host *mmc;
++
++	spinlock_t lock;
++
++	struct mmc_request *mrq;/* Current request */
++	struct mmc_command *cmd;/* Current command */
++	struct mmc_data *data;	/* Current data request */
++
++	struct sg_mapping_iter sg_miter; /* for PIO */
++
++	void __iomem *ioaddr; /* mapped address */
++
++	struct tasklet_struct data_read_tasklet;
++};
 
-cheers
-grant
 
->
-> thanks,
-> hsinhsiang
->
->
-> 2014-06-24 1:14 GMT+08:00 Grant Grundler <grundler@chromium.org>:
->
->> Chris, Ulf,
->> Any reason the eMMC 5.0 FFU patch can't be integrated into linux-mmc tree?
->>
->> While I can't directly test this patch due to limitations of which HW
->> ChromeOS supports, I believe it's a big step in the right direction.
->>
->> It would also make life easier for other vendors to add FFU support
->> once this "base support" patch has landed (for nboth eMMC 4.5 and 5.0
->> parts).
->>
->> thanks,
->> grant
->>
->>
->> On Mon, May 19, 2014 at 1:01 AM, Avi Shchislowski
->> <Avi.Shchislowski@sandisk.com> wrote:
->> > The Field Firmware Update (FFU) feature is new for eMMC 5.0 spec (Jedec:
->> > JESD84-B50.pdf)
->> >
->> > http://www.jedec.org/standards-documents/technology-focus-areas/flash-memory-ssds-ufs-emmc/e-mmc
->> >
->> > An ioctl has been added to provide the new firmware image's file name to
->> > the  mmc driver and udev is then used to retrieve its data.
->> >
->> > Two new ioctls have been added:
->> > 1. FFU download firmware - transfer the new firmware data from user
->> > space to the eMMC device
->> > 2. FFU install - initializes the new firmware update
->> >
->> >
->> > Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
->> > Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
->> >
->> > ---
->> > V7:
->> > - fixed mangled white space
->> >
->> > V5:
->> > - provides udev (request_firmware) implementation as advised in patch
->> > v2 comments.
->> >
->> > diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig index
->> > 5562308..19ba729 100644
->> > --- a/drivers/mmc/card/Kconfig
->> > +++ b/drivers/mmc/card/Kconfig
->> > @@ -68,3 +68,11 @@ config MMC_TEST
->> >
->> >           This driver is only of interest to those developing or
->> >           testing a host driver. Most people should say N here.
->> > +
->> > +config MMC_FFU
->> > +       bool "FFU SUPPORT"
->> > +       depends on MMC != n
->> > +       help
->> > +         This is an option to run firmware update on eMMC 5.0.
->> > +         Field firmware updates (FFU) enables features enhancment
->> > +         in the field.
->> > diff --git a/drivers/mmc/card/Makefile b/drivers/mmc/card/Makefile index
->> > c73b406..1e9223b 100644
->> > --- a/drivers/mmc/card/Makefile
->> > +++ b/drivers/mmc/card/Makefile
->> > @@ -8,3 +8,4 @@ obj-$(CONFIG_MMC_TEST)          += mmc_test.o
->> >
->> >  obj-$(CONFIG_SDIO_UART)                += sdio_uart.o
->> >
->> > +obj-$(CONFIG_MMC_FFU)          += ffu.o
->> > diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c index
->> > 7b5424f..8311200 100644
->> > --- a/drivers/mmc/card/block.c
->> > +++ b/drivers/mmc/card/block.c
->> > @@ -41,6 +41,7 @@
->> >  #include <linux/mmc/host.h>
->> >  #include <linux/mmc/mmc.h>
->> >  #include <linux/mmc/sd.h>
->> > +#include <linux/mmc/ffu.h>
->> >
->> >  #include <asm/uaccess.h>
->> >
->> > @@ -525,6 +526,17 @@ static int mmc_blk_ioctl_cmd(struct block_device
->> > *bdev,
->> >
->> >         mmc_get_card(card);
->> >
->> > +       if (cmd.opcode == MMC_FFU_DOWNLOAD_OP) {
->> > +               err = mmc_ffu_download(card, &cmd , idata->buf,
->> > +                       idata->buf_bytes);
->> > +               goto cmd_rel_host;
->> > +       }
->> > +
->> > +       if (cmd.opcode == MMC_FFU_INSTALL_OP) {
->> > +               err = mmc_ffu_install(card);
->> > +               goto cmd_rel_host;
->> > +       }
->> > +
->> >         err = mmc_blk_part_switch(card, md);
->> >         if (err)
->> >                 goto cmd_rel_host;
->> > diff --git a/drivers/mmc/card/ffu.c b/drivers/mmc/card/ffu.c new file
->> > mode 100644 index 0000000..7d254fd
->> > --- /dev/null
->> > +++ b/drivers/mmc/card/ffu.c
->> > @@ -0,0 +1,595 @@
->> > +/*
->> > + * *  ffu.c
->> > + *
->> > + *  Copyright 2007-2008 Pierre Ossman
->> > + *
->> > + *  Modified by SanDisk Corp., Copyright (c) 2013 SanDisk Corp.
->> > + *
->> > + * This program is free software; you can redistribute it and/or modify
->> > + * it under the terms of the GNU General Public License as published by
->> > + * the Free Software Foundation; either version 2 of the License, or
->> > +(at
->> > + * your option) any later version.
->> > + *
->> > + * This program includes bug.h, card.h, host.h, mmc.h, scatterlist.h,
->> > + * slab.h, ffu.h & swap.h header files
->> > + * The original, unmodified version of this program - the mmc_test.c
->> > + * file - is obtained under the GPL v2.0 license that is available via
->> > + * http://www.gnu.org/licenses/,
->> > + * or http://www.opensource.org/licenses/gpl-2.0.php
->> > +*/
->> > +
->> > +#include <linux/bug.h>
->> > +#include <linux/errno.h>
->> > +#include <linux/mmc/card.h>
->> > +#include <linux/mmc/host.h>
->> > +#include <linux/mmc/mmc.h>
->> > +#include <linux/scatterlist.h>
->> > +#include <linux/slab.h>
->> > +#include <linux/swap.h>
->> > +#include <linux/mmc/ffu.h>
->> > +#include <linux/firmware.h>
->> > +
->> > +/**
->> > + * struct mmc_ffu_pages - pages allocated by 'alloc_pages()'.
->> > + * @page: first page in the allocation
->> > + * @order: order of the number of pages allocated  */ struct
->> > +mmc_ffu_pages {
->> > +       struct page *page;
->> > +       unsigned int order;
->> > +};
->> > +
->> > +/**
->> > + * struct mmc_ffu_mem - allocated memory.
->> > + * @arr: array of allocations
->> > + * @cnt: number of allocations
->> > + */
->> > +struct mmc_ffu_mem {
->> > +       struct mmc_ffu_pages *arr;
->> > +       unsigned int cnt;
->> > +};
->> > +
->> > +struct mmc_ffu_area {
->> > +       unsigned long max_sz;
->> > +       unsigned int max_tfr;
->> > +       unsigned int max_segs;
->> > +       unsigned int max_seg_sz;
->> > +       unsigned int blocks;
->> > +       unsigned int sg_len;
->> > +       struct mmc_ffu_mem *mem;
->> > +       struct scatterlist *sg;
->> > +};
->> > +
->> > +static void mmc_ffu_prepare_mrq(struct mmc_card *card,
->> > +       struct mmc_request *mrq, struct scatterlist *sg, unsigned int
->> > sg_len,
->> > +       u32 arg, unsigned int blocks, unsigned int blksz, int write) {
->> > +       BUG_ON(!mrq || !mrq->cmd || !mrq->data || !mrq->stop);
->> > +
->> > +       if (blocks > 1) {
->> > +               mrq->cmd->opcode = write ?
->> > +                       MMC_WRITE_MULTIPLE_BLOCK :
->> > MMC_READ_MULTIPLE_BLOCK;
->> > +       } else {
->> > +               mrq->cmd->opcode = write ? MMC_WRITE_BLOCK :
->> > +                       MMC_READ_SINGLE_BLOCK;
->> > +       }
->> > +
->> > +       mrq->cmd->arg = arg;
->> > +       if (!mmc_card_blockaddr(card))
->> > +               mrq->cmd->arg <<= 9;
->> > +
->> > +       mrq->cmd->flags = MMC_RSP_R1 | MMC_CMD_ADTC;
->> > +       if (blocks == 1) {
->> > +               mrq->stop = NULL;
->> > +       } else {
->> > +               mrq->stop->opcode = MMC_STOP_TRANSMISSION;
->> > +               mrq->stop->arg = 0;
->> > +               mrq->stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
->> > +       }
->> > +
->> > +       mrq->data->blksz = blksz;
->> > +       mrq->data->blocks = blocks;
->> > +       mrq->data->flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
->> > +       mrq->data->sg = sg;
->> > +       mrq->data->sg_len = sg_len;
->> > +
->> > +       mmc_set_data_timeout(mrq->data, card); }
->> > +
->> > +/*
->> > + * Checks that a normal transfer didn't have any errors  */ static int
->> > +mmc_ffu_check_result(struct mmc_request *mrq) {
->> > +       BUG_ON(!mrq || !mrq->cmd || !mrq->data);
->> > +
->> > +       if (mrq->cmd->error != 0)
->> > +               return -EINVAL;
->> > +
->> > +       if (mrq->data->error != 0)
->> > +               return -EINVAL;
->> > +
->> > +       if (mrq->stop != NULL && mrq->stop->error != 0)
->> > +               return -1;
->> > +
->> > +       if (mrq->data->bytes_xfered != (mrq->data->blocks *
->> > mrq->data->blksz))
->> > +               return -EINVAL;
->> > +
->> > +       return 0;
->> > +}
->> > +
->> > +static int mmc_ffu_busy(struct mmc_command *cmd) {
->> > +       return !(cmd->resp[0] & R1_READY_FOR_DATA) ||
->> > +               (R1_CURRENT_STATE(cmd->resp[0]) == R1_STATE_PRG); }
->> > +
->> > +static int mmc_ffu_wait_busy(struct mmc_card *card) {
->> > +       int ret, busy = 0;
->> > +       struct mmc_command cmd = {0};
->> > +
->> > +       memset(&cmd, 0, sizeof(struct mmc_command));
->> > +       cmd.opcode = MMC_SEND_STATUS;
->> > +       cmd.arg = card->rca << 16;
->> > +       cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
->> > +
->> > +       do {
->> > +               ret = mmc_wait_for_cmd(card->host, &cmd, 0);
->> > +               if (ret)
->> > +                       break;
->> > +
->> > +               if (!busy && mmc_ffu_busy(&cmd)) {
->> > +                       busy = 1;
->> > +                       if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)
->> > {
->> > +                               pr_warn("%s: Warning: Host did not "
->> > +                                       "wait for busy state to end.\n",
->> > +                                       mmc_hostname(card->host));
->> > +                       }
->> > +               }
->> > +
->> > +       } while (mmc_ffu_busy(&cmd));
->> > +
->> > +       return ret;
->> > +}
->> > +
->> > +/*
->> > + * transfer with certain parameters
->> > + */
->> > +static int mmc_ffu_simple_transfer(struct mmc_card *card,
->> > +       struct scatterlist *sg, unsigned int sg_len, u32 arg,
->> > +       unsigned int blocks, unsigned int blksz, int write) {
->> > +       struct mmc_request mrq = {0};
->> > +       struct mmc_command cmd = {0};
->> > +       struct mmc_command stop = {0};
->> > +       struct mmc_data data = {0};
->> > +
->> > +       mrq.cmd = &cmd;
->> > +       mrq.data = &data;
->> > +       mrq.stop = &stop;
->> > +       mmc_ffu_prepare_mrq(card, &mrq, sg, sg_len, arg, blocks, blksz,
->> > +               write);
->> > +       mmc_wait_for_req(card->host, &mrq);
->> > +
->> > +       mmc_ffu_wait_busy(card);
->> > +
->> > +       return mmc_ffu_check_result(&mrq);
->> > +}
->> > +
->> > +/*
->> > + * Map memory into a scatterlist.
->> > + */
->> > +static unsigned int mmc_ffu_map_sg(struct mmc_ffu_mem *mem, int size,
->> > +       struct scatterlist *sglist, unsigned int max_segs,
->> > +       unsigned int max_seg_sz)
->> > +{
->> > +       struct scatterlist *sg = sglist;
->> > +       unsigned int i;
->> > +       unsigned long sz = size;
->> > +       unsigned int sctr_len = 0;
->> > +       unsigned long len;
->> > +
->> > +       sg_init_table(sglist, max_segs);
->> > +
->> > +       for (i = 0; i < mem->cnt && sz; i++, sz -= len) {
->> > +               len = PAGE_SIZE * (1 << mem->arr[i].order);
->> > +
->> > +               if (len > sz) {
->> > +                       len = sz;
->> > +                       sz = 0;
->> > +               }
->> > +
->> > +               sg_set_page(sg, mem->arr[i].page, len, 0);
->> > +               sg = sg_next(sg);
->> > +               sctr_len += 1;
->> > +       }
->> > +       sg_mark_end(sg);
->> > +
->> > +       return sctr_len;
->> > +}
->> > +
->> > +static void mmc_ffu_free_mem(struct mmc_ffu_mem *mem) {
->> > +       if (!mem)
->> > +               return;
->> > +
->> > +       while (mem->cnt--)
->> > +               __free_pages(mem->arr[mem->cnt].page,
->> > mem->arr[mem->cnt].order);
->> > +
->> > +       kfree(mem->arr);
->> > +       kfree(mem);
->> > +}
->> > +
->> > +/*
->> > + * Cleanup struct mmc_ffu_area.
->> > + */
->> > +static int mmc_ffu_area_cleanup(struct mmc_ffu_area *area) {
->> > +       kfree(area->sg);
->> > +       mmc_ffu_free_mem(area->mem);
->> > +
->> > +       return 0;
->> > +}
->> > +
->> > +/*
->> > + * Allocate a lot of memory, preferably max_sz but at least min_sz. In
->> > +case
->> > + * there isn't much memory do not exceed 1/16th total low mem pages.
->> > +Also do
->> > + * not exceed a maximum number of segments and try not to make segments
->> > +much
->> > + * bigger than maximum segment size.
->> > + */
->> > +static struct mmc_ffu_mem *mmc_ffu_alloc_mem(unsigned long min_sz,
->> > +       unsigned long max_sz, unsigned int max_segs, unsigned int
->> > max_seg_sz)
->> > +{
->> > +       unsigned long max_page_cnt = DIV_ROUND_UP(max_sz, PAGE_SIZE);
->> > +       unsigned long min_page_cnt = DIV_ROUND_UP(min_sz, PAGE_SIZE);
->> > +       unsigned long max_seg_page_cnt = DIV_ROUND_UP(max_seg_sz,
->> > PAGE_SIZE);
->> > +       unsigned long page_cnt = 0;
->> > +       /* we divide by 16 to ensure we will not allocate a big amount
->> > +        * of unnecessary pages */
->> > +       unsigned long limit = nr_free_buffer_pages() >> 4;
->> > +       struct mmc_ffu_mem *mem;
->> > +       gfp_t flags = GFP_KERNEL | GFP_DMA | __GFP_NOWARN |
->> > __GFP_NORETRY;
->> > +
->> > +       if (max_page_cnt > limit)
->> > +               max_page_cnt = limit;
->> > +
->> > +       if (min_page_cnt > max_page_cnt)
->> > +               min_page_cnt = max_page_cnt;
->> > +
->> > +       if (max_segs * max_seg_page_cnt > max_page_cnt)
->> > +               max_segs = DIV_ROUND_UP(max_page_cnt, max_seg_page_cnt);
->> > +
->> > +       mem = kzalloc(sizeof(struct mmc_ffu_mem), GFP_KERNEL);
->> > +       if (!mem)
->> > +               return NULL;
->> > +
->> > +       mem->arr = kzalloc(sizeof(struct mmc_ffu_pages) * max_segs,
->> > +               GFP_KERNEL);
->> > +       if (!mem->arr)
->> > +               goto out_free;
->> > +
->> > +       while (max_page_cnt) {
->> > +               struct page *page;
->> > +               unsigned int order;
->> > +
->> > +               order = get_order(max_seg_page_cnt << PAGE_SHIFT);
->> > +
->> > +               do {
->> > +                       page = alloc_pages(flags, order);
->> > +               } while (!page && order--);
->> > +
->> > +               if (!page)
->> > +                       goto out_free;
->> > +
->> > +               mem->arr[mem->cnt].page = page;
->> > +               mem->arr[mem->cnt].order = order;
->> > +               mem->cnt += 1;
->> > +               if (max_page_cnt <= (1UL << order))
->> > +                       break;
->> > +               max_page_cnt -= 1UL << order;
->> > +               page_cnt += 1UL << order;
->> > +       }
->> > +
->> > +       if (page_cnt < min_page_cnt)
->> > +               goto out_free;
->> > +
->> > +       return mem;
->> > +
->> > +out_free:
->> > +       mmc_ffu_free_mem(mem);
->> > +       return NULL;
->> > +}
->> > +
->> > +/*
->> > + * Initialize an area for data transfers.
->> > + * Copy the data to the allocated pages.
->> > + */
->> > +static int mmc_ffu_area_init(struct mmc_ffu_area *area, struct mmc_card
->> > *card,
->> > +       u8 *data, int size)
->> > +{
->> > +       int ret;
->> > +       int i;
->> > +       int length = 0;
->> > +
->> > +       area->max_tfr = size;
->> > +
->> > +       /* Try to allocate enough memory for a max. sized transfer. Less
->> > is OK
->> > +        * because the same memory can be mapped into the scatterlist
->> > more than
->> > +        * once. Also, take into account the limits imposed on
->> > scatterlist
->> > +        * segments by the host driver.
->> > +        */
->> > +       area->mem = mmc_ffu_alloc_mem(1, area->max_tfr, area->max_segs,
->> > +               area->max_seg_sz);
->> > +       if (!area->mem)
->> > +               return -ENOMEM;
->> > +
->> > +       /* copy data to page */
->> > +       for (i = 0; i < area->mem->cnt; i++) {
->> > +               if (length > size) {
->> > +                       ret = -EINVAL;
->> > +                       goto out_free;
->> > +               }
->> > +
->> > +               memcpy(page_address(area->mem->arr[i].page), data +
->> > length,
->> > +                       min(size - length, (int)area->max_seg_sz));
->> > +               length += area->max_seg_sz;
->> > +       }
->> > +
->> > +       area->sg = kmalloc(sizeof(struct scatterlist) * area->mem->cnt,
->> > +               GFP_KERNEL);
->> > +       if (!area->sg) {
->> > +               ret = -ENOMEM;
->> > +               goto out_free;
->> > +       }
->> > +
->> > +       area->sg_len = mmc_ffu_map_sg(area->mem, size, area->sg,
->> > +               area->max_segs, area->mem->cnt);
->> > +
->> > +       return 0;
->> > +
->> > +out_free:
->> > +       mmc_ffu_area_cleanup(area);
->> > +       return ret;
->> > +}
->> > +
->> > +static int mmc_ffu_write(struct mmc_card *card, u8 *src, u32 arg,
->> > +       int size)
->> > +{
->> > +       int rc;
->> > +       struct mmc_ffu_area area;
->> > +       int max_tfr;
->> > +
->> > +       area.sg = NULL;
->> > +       area.mem = NULL;
->> > +       area.max_segs = card->host->max_segs;
->> > +       area.max_seg_sz = card->host->max_seg_size & ~(CARD_BLOCK_SIZE -
->> > 1);
->> > +       do {
->> > +               max_tfr = size;
->> > +               if (max_tfr >> 9 > card->host->max_blk_count)
->> > +                       max_tfr = card->host->max_blk_count << 9;
->> > +               if (max_tfr > card->host->max_req_size)
->> > +                       max_tfr = card->host->max_req_size;
->> > +               if (DIV_ROUND_UP(max_tfr, area.max_seg_sz) >
->> > area.max_segs)
->> > +                       max_tfr = area.max_segs * area.max_seg_sz;
->> > +
->> > +               rc = mmc_ffu_area_init(&area, card, src, max_tfr);
->> > +               if (rc != 0)
->> > +                       goto exit;
->> > +
->> > +               rc = mmc_ffu_simple_transfer(card, area.sg, area.sg_len,
->> > arg,
->> > +                       max_tfr / CARD_BLOCK_SIZE, CARD_BLOCK_SIZE, 1);
->> > +               if (rc != 0)
->> > +                       goto exit;
->> > +
->> > +               src += max_tfr;
->> > +               size -= max_tfr;
->> > +       } while (size > 0);
->> > +
->> > +exit:
->> > +       mmc_ffu_area_cleanup(&area);
->> > +       return rc;
->> > +}
->> > +
->> > +/* Flush all scheduled work from the MMC work queue.
->> > + * and initialize the MMC device */
->> > +static int mmc_ffu_restart(struct mmc_card *card) {
->> > +       struct mmc_host *host = card->host;
->> > +       int err = 0;
->> > +
->> > +       mmc_cache_ctrl(host, 0);
->> > +       err = mmc_power_save_host(host);
->> > +       if (err) {
->> > +               pr_warn("%s: going to sleep failed (%d)!!!\n",
->> > +                       __func__ , err);
->> > +               goto exit;
->> > +       }
->> > +
->> > +       err = mmc_power_restore_host(host);
->> > +
->> > +exit:
->> > +
->> > +       return err;
->> > +}
->> > +
->> > +int mmc_ffu_download(struct mmc_card *card, struct mmc_command *cmd,
->> > +       u8 *data, int buf_bytes)
->> > +{
->> > +       u8 ext_csd[CARD_BLOCK_SIZE];
->> > +       int err;
->> > +       int ret;
->> > +       u8 *buf = NULL;
->> > +       const struct firmware *fw;
->> > +
->> > +       /* Read the EXT_CSD */
->> > +       err = mmc_send_ext_csd(card, ext_csd);
->> > +       if (err) {
->> > +               pr_err("FFU: %s: error %d sending ext_csd\n",
->> > +                       mmc_hostname(card->host), err);
->> > +               goto exit;
->> > +       }
->> > +
->> > +       /* check if card is eMMC 5.0 or higher */
->> > +       if (card->ext_csd.rev < 7)
->> > +               return -EINVAL;
->> > +
->> > +       /* Check if FFU is supported */
->> > +       if (!FFU_SUPPORTED_MODE(ext_csd[EXT_CSD_SUPPORTED_MODE]) ||
->> > +               FFU_CONFIG(ext_csd[EXT_CSD_FW_CONFIG])) {
->> > +               err = -EINVAL;
->> > +               pr_err("FFU: %s: error %d FFU is not supported\n",
->> > +                       mmc_hostname(card->host), err);
->> > +               goto exit;
->> > +       }
->> > +
->> > +       /* setup FW data buffer */
->> > +       err = request_firmware(&fw, data, &card->dev);
->> > +       if (err) {
->> > +               pr_err("Firmware request failed %d\n", err);
->> > +               goto exit_normal;
->> > +       }
->> > +
->> > +       buf = kmalloc(fw->size, GFP_KERNEL);
->> > +       if (buf == NULL) {
->> > +               pr_err("Allocating memory for firmware failed!\n");
->> > +               goto exit_normal;
->> > +       }
->> > +
->> > +       if ((fw->size % CARD_BLOCK_SIZE)) {
->> > +               pr_warn("FFU: %s: Warning %zd firmware data is not
->> > aligned!!!\n",
->> > +                       mmc_hostname(card->host), fw->size);
->> > +       }
->> > +
->> > +       memcpy(buf, fw->data, fw->size);
->> > +
->> > +       /* set device to FFU mode */
->> > +       err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> > EXT_CSD_MODE_CONFIG,
->> > +               MMC_FFU_MODE_SET, card->ext_csd.generic_cmd6_time);
->> > +       if (err) {
->> > +               pr_err("FFU: %s: error %d FFU is not supported\n",
->> > +                       mmc_hostname(card->host), err);
->> > +               goto exit_normal;
->> > +       }
->> > +
->> > +       /* set CMD ARG */
->> > +       cmd->arg = ext_csd[EXT_CSD_FFU_ARG] |
->> > +               ext_csd[EXT_CSD_FFU_ARG + 1] << 8 |
->> > +               ext_csd[EXT_CSD_FFU_ARG + 2] << 16 |
->> > +               ext_csd[EXT_CSD_FFU_ARG + 3] << 24;
->> > +
->> > +       err = mmc_ffu_write(card, buf, cmd->arg, (int)fw->size);
->> > +
->> > +exit_normal:
->> > +       release_firmware(fw);
->> > +       kfree(buf);
->> > +
->> > +       /* host switch back to work in normal MMC Read/Write commands */
->> > +       ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> > +               EXT_CSD_MODE_CONFIG, MMC_FFU_MODE_NORMAL,
->> > +               card->ext_csd.generic_cmd6_time);
->> > +       if (ret)
->> > +               err = ret;
->> > +exit:
->> > +       return err;
->> > +}
->> > +EXPORT_SYMBOL(mmc_ffu_download);
->> > +
->> > +int mmc_ffu_install(struct mmc_card *card) {
->> > +       u8 ext_csd[CARD_BLOCK_SIZE];
->> > +       int err;
->> > +       u32 ffu_data_len;
->> > +       u32 timeout;
->> > +
->> > +       err = mmc_send_ext_csd(card, ext_csd);
->> > +       if (err) {
->> > +               pr_err("FFU: %s: error %d sending ext_csd\n",
->> > +                       mmc_hostname(card->host), err);
->> > +               goto exit;
->> > +       }
->> > +
->> > +       /* Check if FFU is supported */
->> > +       if (!FFU_SUPPORTED_MODE(ext_csd[EXT_CSD_SUPPORTED_MODE]) ||
->> > +               FFU_CONFIG(ext_csd[EXT_CSD_FW_CONFIG])) {
->> > +               err = -EINVAL;
->> > +               pr_err("FFU: %s: error %d FFU is not supported\n",
->> > +                       mmc_hostname(card->host), err);
->> > +               goto exit;
->> > +       }
->> > +
->> > +       /* check mode operation */
->> > +       if (!FFU_FEATURES(ext_csd[EXT_CSD_FFU_FEATURES])) {
->> > +               /* restart the eMMC */
->> > +               err = mmc_ffu_restart(card);
->> > +               if (err) {
->> > +                       pr_err("FFU: %s: error %d FFU install:\n",
->> > +                               mmc_hostname(card->host), err);
->> > +               }
->> > +       } else {
->> > +
->> > +               ffu_data_len = ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG]|
->> > +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 1] << 8 |
->> > +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 2] << 16 |
->> > +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 3] << 24;
->> > +
->> > +               if (!ffu_data_len) {
->> > +                       err = -EPERM;
->> > +                       return err;
->> > +               }
->> > +               /* set device to FFU mode */
->> > +               err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> > +                       EXT_CSD_MODE_CONFIG, 0x1,
->> > +                       card->ext_csd.generic_cmd6_time);
->> > +
->> > +               if (err) {
->> > +                       pr_err("FFU: %s: error %d FFU is not
->> > supported\n",
->> > +                               mmc_hostname(card->host), err);
->> > +                       goto exit;
->> > +               }
->> > +
->> > +               timeout = ext_csd[EXT_CSD_OPERATION_CODE_TIMEOUT];
->> > +               if (timeout == 0 || timeout > 0x17) {
->> > +                       timeout = 0x17;
->> > +                       pr_warn("FFU: %s: operation code timeout is out
->> > "
->> > +                               "of range. Using maximum timeout.\n",
->> > +                               mmc_hostname(card->host));
->> > +               }
->> > +
->> > +               /* timeout is at millisecond resolution */
->> > +               timeout = (100 * (1 << timeout) / 1000) + 1;
->> > +
->> > +               /* set ext_csd to install mode */
->> > +               err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> > +                       EXT_CSD_MODE_OPERATION_CODES,
->> > +                       MMC_FFU_INSTALL_SET, timeout);
->> > +
->> > +               if (err) {
->> > +                       pr_err("FFU: %s: error %d setting install
->> > mode\n",
->> > +                               mmc_hostname(card->host), err);
->> > +                       goto exit;
->> > +               }
->> > +       }
->> > +
->> > +       /* read ext_csd */
->> > +       err = mmc_send_ext_csd(card, ext_csd);
->> > +       if (err) {
->> > +               pr_err("FFU: %s: error %d sending ext_csd\n",
->> > +                       mmc_hostname(card->host), err);
->> > +               goto exit;
->> > +       }
->> > +
->> > +       /* return status */
->> > +       err = ext_csd[EXT_CSD_FFU_STATUS];
->> > +       if (err) {
->> > +               pr_err("FFU: %s: error %d FFU install:\n",
->> > +                       mmc_hostname(card->host), err);
->> > +               err = -EINVAL;
->> > +               goto exit;
->> > +       }
->> > +
->> > +exit:
->> > +       return err;
->> > +}
->> > +EXPORT_SYMBOL(mmc_ffu_install);
->> > +
->> > diff --git a/include/linux/mmc/ffu.h b/include/linux/mmc/ffu.h new file
->> > mode 100644 index 0000000..be70880
->> > --- /dev/null
->> > +++ b/include/linux/mmc/ffu.h
->> > @@ -0,0 +1,63 @@
->> > +/*
->> > + *
->> > + *  ffu.h
->> > + *
->> > + * Copyright (c) 2013 SanDisk Corp.
->> > + *
->> > + * This program is free software; you can redistribute it and/or modify
->> > + * it under the terms of the GNU General Public License as published by
->> > + * the Free Software Foundation; either version 2 of the License, or
->> > +(at
->> > + * your option) any later version.
->> > + *
->> > + * This program was created by SanDisk Corp
->> > + * The ffu.h file is obtained under the GPL v2.0 license that is
->> > + * available via http://www.gnu.org/licenses/,
->> > + * or http://www.opensource.org/licenses/gpl-2.0.php
->> > +*/
->> > +
->> > +#if !defined(_FFU_H_)
->> > +#define _FFU_H_
->> > +
->> > +#include <linux/mmc/card.h>
->> > +
->> > +#define CARD_BLOCK_SIZE 512
->> > +
->> > +/*
->> > + * eMMC5.0 Field Firmware Update (FFU) opcodes */
->> > +#define MMC_FFU_DOWNLOAD_OP 302
->> > +#define MMC_FFU_INSTALL_OP 303
->> > +
->> > +#define MMC_FFU_MODE_SET 0x1
->> > +#define MMC_FFU_MODE_NORMAL 0x0
->> > +#define MMC_FFU_INSTALL_SET 0x1
->> > +
->> > +#ifdef CONFIG_MMC_FFU
->> > +#define MMC_FFU_ENABLE 0x0
->> > +#define MMC_FFU_CONFIG 0x1
->> > +#define MMC_FFU_SUPPORTED_MODES 0x1
->> > +#define MMC_FFU_FEATURES 0x1
->> > +
->> > +#define FFU_ENABLED(ffu_enable)        (ffu_enable & MMC_FFU_CONFIG)
->> > +#define FFU_SUPPORTED_MODE(ffu_sup_mode) \
->> > +       (ffu_sup_mode && MMC_FFU_SUPPORTED_MODES) #define
->> > +FFU_CONFIG(ffu_config) (ffu_config & MMC_FFU_CONFIG) #define
->> > +FFU_FEATURES(ffu_fetures) (ffu_fetures & MMC_FFU_FEATURES)
->> > +
->> > +int mmc_ffu_download(struct mmc_card *card, struct mmc_command *cmd,
->> > +       u8 *data, int buf_bytes);
->> > +int mmc_ffu_install(struct mmc_card *card); #else static inline int
->> > +mmc_ffu_download(struct mmc_card *card,
->> > +       struct mmc_command *cmd, u8 *data, int buf_bytes) {
->> > +       return -ENOSYS;
->> > +}
->> > +static inline int mmc_ffu_install(struct mmc_card *card) {
->> > +       return -ENOSYS;
->> > +}
->> > +
->> > +#endif
->> > +#endif /* FFU_H_ */
->> > +
->> > diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h index
->> > 50bcde3..bf29e52 100644
->> > --- a/include/linux/mmc/mmc.h
->> > +++ b/include/linux/mmc/mmc.h
->> > @@ -272,6 +272,9 @@ struct _mmc_csd {
->> >   * EXT_CSD fields
->> >   */
->> >
->> > +#define EXT_CSD_FFU_STATUS             26      /* R */
->> > +#define EXT_CSD_MODE_OPERATION_CODES   29      /* W */
->> > +#define EXT_CSD_MODE_CONFIG            30      /* R/W */
->> >  #define EXT_CSD_FLUSH_CACHE            32      /* W */
->> >  #define EXT_CSD_CACHE_CTRL             33      /* R/W */
->> >  #define EXT_CSD_POWER_OFF_NOTIFICATION 34      /* R/W */
->> > @@ -290,6 +293,7 @@ struct _mmc_csd {
->> >  #define EXT_CSD_SANITIZE_START         165     /* W */
->> >  #define EXT_CSD_WR_REL_PARAM           166     /* RO */
->> >  #define EXT_CSD_RPMB_MULT              168     /* RO */
->> > +#define EXT_CSD_FW_CONFIG              169     /* R/W */
->> >  #define EXT_CSD_BOOT_WP                        173     /* R/W */
->> >  #define EXT_CSD_ERASE_GROUP_DEF                175     /* R/W */
->> >  #define EXT_CSD_PART_CONFIG            179     /* R/W */
->> > @@ -325,6 +329,11 @@ struct _mmc_csd {
->> >  #define EXT_CSD_POWER_OFF_LONG_TIME    247     /* RO */
->> >  #define EXT_CSD_GENERIC_CMD6_TIME      248     /* RO */
->> >  #define EXT_CSD_CACHE_SIZE             249     /* RO, 4 bytes */
->> > +#define EXT_CSD_NUM_OF_FW_SEC_PROG     302     /* RO */
->> > +#define EXT_CSD_FFU_ARG                        487     /* RO, 4 bytes
->> > */
->> > +#define EXT_CSD_OPERATION_CODE_TIMEOUT 491     /* RO */
->> > +#define EXT_CSD_FFU_FEATURES           492     /* RO */
->> > +#define EXT_CSD_SUPPORTED_MODE         493     /* RO */
->> >  #define EXT_CSD_TAG_UNIT_SIZE          498     /* RO */
->> >  #define EXT_CSD_DATA_TAG_SUPPORT       499     /* RO */
->> >  #define EXT_CSD_MAX_PACKED_WRITES      500     /* RO */
->> >
->> >
->> > --
->> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> > the body of a message to majordomo@vger.kernel.org More majordomo info at
->> > http://vger.kernel.org/majordomo-info.html
->> >
->> >
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+-- 
+Ondrej Zary
