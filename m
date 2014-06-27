@@ -1,419 +1,256 @@
-From: Vincent Yang <vincent.yang.fujitsu@gmail.com>
-Subject: Re: [RFC PATCH v2 6/6] mmc: core: add manual resume capability
-Date: Fri, 27 Jun 2014 19:00:21 +0800
-Message-ID: <CAOEd-H1c5rOs9ykdyvLNtLNhi6myxj7ExYQ6x1tNBP_LdJZoxg@mail.gmail.com>
-References: <1403763812-5495-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
-	<1403763812-5495-7-git-send-email-Vincent.Yang@tw.fujitsu.com>
-	<8b071848-f7df-4965-bd49-ae05b21ebe2e@email.android.com>
-	<CAOEd-H2Xtpmj9LAnfX6SwcUSu3W1qvD32YNNPpB4ZQn_HF9-wg@mail.gmail.com>
-	<17c3cfc2-ae8c-4d19-8da5-fe40432f565c@email.android.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH 3/3] mmc: dw_mmc: Support voltage changes
+Date: Fri, 27 Jun 2014 20:18:26 +0900
+Message-ID: <001101cf91f9$84111530$8c333f90$%jun@samsung.com>
+References: <1403520321-2431-1-git-send-email-yuvaraj.cd@samsung.com>
+ <1403520321-2431-4-git-send-email-yuvaraj.cd@samsung.com>
+ <001501cf9076$9de45000$d9acf000$%jun@samsung.com>
+ <CAD=FV=UE2LkXZb-UuR8t9kS2+odeVHU59K5fN=veMU8Y513w=A@mail.gmail.com>
+ <005001cf912b$27fb8510$77f28f30$%jun@samsung.com>
+ <CAD=FV=X7h75ktaLG1MYa9Rs0Repu0QNq-p0-4TU2cforgjCdtw@mail.gmail.com>
+ <CAKuRcOJ0=GxmfBTu=Ax0yjLvbXJRjbVDJzHLR=f1nxkGZh9tAg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f178.google.com ([209.85.160.178]:35190 "EHLO
-	mail-yk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752826AbaF0LAV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Jun 2014 07:00:21 -0400
-In-Reply-To: <17c3cfc2-ae8c-4d19-8da5-fe40432f565c@email.android.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <CAKuRcOJ0=GxmfBTu=Ax0yjLvbXJRjbVDJzHLR=f1nxkGZh9tAg@mail.gmail.com>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Yuvaraj Kumar' <yuvaraj.cd@gmail.com>, 'Doug Anderson' <dianders@chromium.org>
+Cc: 'linux-samsung-soc' <linux-samsung-soc@vger.kernel.org>, linux-arm-kernel@lists.infradead.org, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Sonny Rao' <sonnyrao@chromium.org>, 'Tomasz Figa' <t.figa@samsung.com>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'sunil joshi' <joshi@samsung.com>, ks.giri@samsung.com, 'Prashanth G' <prashanth.g@samsung.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "chris@printf.net" <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Anton Vorontsov <anton@enomsg.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "patches@linaro.org" <patches@linaro.org>, Andy Green <andy.green@linaro.org>, Jaswinder Singh <jaswinder.singh@linaro.org>
 
-2014-06-27 17:40 GMT+08:00 Ulf Hansson <ulf.hansson@linaro.org>:
->
->
-> On 27 juni 2014 04:23:42 CEST, Vincent Yang <vincent.yang.fujitsu@gmail.com> wrote:
->>2014-06-26 17:42 GMT+08:00 Ulf Hansson <ulf.hansson@linaro.org>:
->>>
->>>
->>> On 26 juni 2014 08:23:32 CEST, Vincent Yang
->><vincent.yang.fujitsu@gmail.com> wrote:
->>>>This patch adds manual resume for some embedded platforms with rootfs
->>>>stored in SD card. It references CONFIG_MMC_BLOCK_DEFERRED_RESUME in
->>>>kernel 3.10. It lets host controller driver to manually handle resume
->>>>by itself.
->>>>
->>>>[symptom]
->>>>This issue is found on mb86s7x platforms with rootfs stored in SD
->>card.
->>>>It failed to resume form STR suspend mode because SD card cannot be
->>>>ready
->>>>in time. It take longer time (e.g., 600ms) to be ready for access.
->>>>The error log looks like below:
->>>>
->>>>root@localhost:~# echo mem > /sys/power/state
->>>>[   30.441974] SUSPEND
->>>>
->>>>SCB Firmware : Category 01 Version 02.03 Rev. 00_
->>>>    Config   : (no configuration)
->>>>root@localhost:~# [   30.702976] Buffer I/O error on device
->>mmcblk1p2,
->>>>logical block 31349
->>>>[   30.709678] Buffer I/O error on device mmcblk1p2, logical block
->>>>168073
->>>>[   30.716220] Buffer I/O error on device mmcblk1p2, logical block
->>>>168074
->>>>[   30.722759] Buffer I/O error on device mmcblk1p2, logical block
->>>>168075
->>>>[   30.729456] Buffer I/O error on device mmcblk1p2, logical block
->>>>31349
->>>>[   30.735916] Buffer I/O error on device mmcblk1p2, logical block
->>>>31350
->>>>[   30.742370] Buffer I/O error on device mmcblk1p2, logical block
->>>>31351
->>>>[   30.749025] Buffer I/O error on device mmcblk1p2, logical block
->>>>168075
->>>>[   30.755657] Buffer I/O error on device mmcblk1p2, logical block
->>>>31351
->>>>[   30.763130] Aborting journal on device mmcblk1p2-8.
->>>>[   30.768060] JBD2: Error -5 detected when updating journal
->>superblock
->>>>for mmcblk1p2-8.
->>>>[   30.776085] EXT4-fs error (device mmcblk1p2):
->>>>ext4_journal_check_start:56: Detected aborted journal
->>>>[   30.785259] EXT4-fs (mmcblk1p2): Remounting filesystem read-only
->>>>[   31.370716] EXT4-fs error (device mmcblk1p2):
->>ext4_find_entry:1309:
->>>>inode #2490369: comm udevd: reading directory lblock 0
->>>>[   31.382485] EXT4-fs error (device mmcblk1p2):
->>ext4_find_entry:1309:
->>>>inode #1048577: comm udevd: reading directory lblock 0
->>>>
->>>>[analysis]
->>>>In system resume path, mmc_sd_resume() is failed with error code -123
->>>>because at that time SD card is still not ready on mb86s7x platforms.
->>>
->>> So why does it fail? It shouldn't!
->>>
->>> I get the impression that you are solving this in the wrong way.
->>
->>Hi Uffe,
->>On mb86s7x EVB, power for SD card is completely removed when entering
->>STR suspend mode (i.e., echo mem > /sys/power/state). When system
->>starts to resume, it turns on the power for SD card again. However, It
->>take
->>longer time (e.g., 600ms) to get the power ready.
->>This is why mmc_sd_resume() failed with error code -123. At that time
->>point,
->>power for SD card is not ready yet.
->>
->>At first we fixed it by a simple method of using
->>SDHCI_QUIRK_DELAY_AFTER_POWER:
->>
->>diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>index 169e17d..ed28896 100644
->>--- a/drivers/mmc/host/sdhci.c
->>+++ b/drivers/mmc/host/sdhci.c
->>@@ -1283,7 +1283,7 @@ static void sdhci_set_power(struct sdhci_host
->>*host, unsigned char mode,
->>                 * they can apply clock after applying power
->>                 */
->>                if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
->>-                       mdelay(10);
->>+                       mdelay(600);
->>        }
->
-> If you can't model the power to the card through a regulator, this is what you need to do.
+Hi Yuvaraj,
 
-Hi Uffe,
-Yes, I got it.
+On Fri, June 27, 2014, Yuvaraj Kumar wrote:
+> On Thu, Jun 26, 2014 at 10:20 PM, Doug Anderson <dianders@chromium.org> wrote:
+> > Seungwon,
+> >
+> > On Thu, Jun 26, 2014 at 3:41 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> >> On Thu, June 26, 2014, Doug Anderson wrote:
+> >>> Seungwon,
+> >>>
+> >>> On Wed, Jun 25, 2014 at 6:08 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> >>> > On Mon, June 23, 2014, Yuvaraj Kumar C D wrote:
+> >>> >> Subject: [PATCH 3/3] mmc: dw_mmc: Support voltage changes
+> >>> >>
+> >>> >> From: Doug Anderson <dianders@chromium.org>
+> >>> >>
+> >>> >> For UHS cards we need the ability to switch voltages from 3.3V to
+> >>> >> 1.8V.  Add support to the dw_mmc driver to handle this.  Note that
+> >>> >> dw_mmc needs a little bit of extra code since the interface needs a
+> >>> >> special bit programmed to the CMD register while CMD11 is progressing.
+> >>> >> This means adding a few extra states to the state machine to track.
+> >>> >
+> >>> > Overall new additional states makes it complicated.
+> >>> > Can we do that in other way?
+> >>>
+> >>> That was the best I was able to figure out when I thought this
+> >>> through.  If you have ideas for doing it another way I'd imagine that
+> >>> Yuvaraj would be happy to take your feedback.
+> >> Let's clean up SDMMC_CMD_VOLT_SWITCH.
+> >> In turn, we may remove state-handling simply.
+> >>
+> >>>
+> >>>
+> >>> >> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> >>> >> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+> >>> >>
+> >>> >> ---
+> >>> >>  drivers/mmc/host/dw_mmc.c  |  145 +++++++++++++++++++++++++++++++++++++++++---
+> >>> >>  drivers/mmc/host/dw_mmc.h  |    5 +-
+> >>> >>  include/linux/mmc/dw_mmc.h |    2 +
+> >>> >>  3 files changed, 142 insertions(+), 10 deletions(-)
+> >>> >>
+> >>> >> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> >>> >> index e034bce..38eb548 100644
+> >>> >> --- a/drivers/mmc/host/dw_mmc.c
+> >>> >> +++ b/drivers/mmc/host/dw_mmc.c
+> >>> >> @@ -29,6 +29,7 @@
+> >>> >>  #include <linux/irq.h>
+> >>> >>  #include <linux/mmc/host.h>
+> >>> >>  #include <linux/mmc/mmc.h>
+> >>> >> +#include <linux/mmc/sd.h>
+> >>> >>  #include <linux/mmc/sdio.h>
+> >>> >>  #include <linux/mmc/dw_mmc.h>
+> >>> >>  #include <linux/bitops.h>
+> >>> >> @@ -235,10 +236,13 @@ err:
+> >>> >>  }
+> >>> >>  #endif /* defined(CONFIG_DEBUG_FS) */
+> >>> >>
+> >>> >> +static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg);
+> >>> >> +
+> >>> >>  static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+> >>> >>  {
+> >>> >>       struct mmc_data *data;
+> >>> >>       struct dw_mci_slot *slot = mmc_priv(mmc);
+> >>> >> +     struct dw_mci *host = slot->host;
+> >>> >>       const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+> >>> >>       u32 cmdr;
+> >>> >>       cmd->error = -EINPROGRESS;
+> >>> >> @@ -254,6 +258,32 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command
+> >>> *cmd)
+> >>> >>       else if (cmd->opcode != MMC_SEND_STATUS && cmd->data)
+> >>> >>               cmdr |= SDMMC_CMD_PRV_DAT_WAIT;
+> >>> >>
+> >>> >> +     if (cmd->opcode == SD_SWITCH_VOLTAGE) {
+> >>> >> +             u32 clk_en_a;
+> >>> >> +
+> >>> >> +             /* Special bit makes CMD11 not die */
+> >>> >> +             cmdr |= SDMMC_CMD_VOLT_SWITCH;
+> >>> >> +
+> >>> >> +             /* Change state to continue to handle CMD11 weirdness */
+> >>> >> +             WARN_ON(slot->host->state != STATE_SENDING_CMD);
+> >>> >> +             slot->host->state = STATE_SENDING_CMD11;
+> >>> >> +
+> >>> >> +             /*
+> >>> >> +              * We need to disable clock stop while doing voltage switch
+> >>> >> +              * according to 7.4.1.2 Voltage Switch Normal Scenario.
+> >>> >> +              *
+> >>> >> +              * It's assumed that by the next time the CLKENA is updated
+> >>> >> +              * (when we set the clock next) that the voltage change will
+> >>> >> +              * be over, so we don't bother setting any bits to synchronize
+> >>> >> +              * with dw_mci_setup_bus().
+> >>> >> +              */
+> >>> >> +             clk_en_a = mci_readl(host, CLKENA);
+> >>> >> +             clk_en_a &= ~(SDMMC_CLKEN_LOW_PWR << slot->id);
+> >>> >> +             mci_writel(host, CLKENA, clk_en_a);
+> >>> >> +             mci_send_cmd(slot, SDMMC_CMD_UPD_CLK |
+> >>> >> +                          SDMMC_CMD_PRV_DAT_WAIT, 0);
+> >>> > dw_mci_disable_low_power() can be used here.
+> >>>
+> >>> Ah.  I guess we don't have that locally anymore.  Locally we have variants on:
+> >> I'm checking on cjb/mmc branch.
+> >>
+> >>> * https://patchwork.kernel.org/patch/3070311/
+> >>> * https://patchwork.kernel.org/patch/3070251/
+> >>> * https://patchwork.kernel.org/patch/3070221/
+> >>>
+> >>> ...which removed that function.  ...but I guess upstream never picked
+> >>> up those patches, huh?  Looking back it looks like you had some
+> >>> feedback and it needed another spin but somehow fell off my plate.  :(
+> >>>
+> >>> Maybe this is something Yuvaraj would like to pick up?
+> >> It's long ago. I remember that there is no progress since my last comment.
+> >> In case of patch "3070221", I want to pick up for next Kernel.
+> >
+> > Sounds like Yuvaraj has agreed to look at addressing your comments.  Thanks!
+> >
+> >
+> >>> >> +     }
+> >>> >> +
+> >>> >>       if (cmd->flags & MMC_RSP_PRESENT) {
+> >>> >>               /* We expect a response, so set this bit */
+> >>> >>               cmdr |= SDMMC_CMD_RESP_EXP;
+> >>> >> @@ -776,11 +806,15 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+> >>> >>       unsigned int clock = slot->clock;
+> >>> >>       u32 div;
+> >>> >>       u32 clk_en_a;
+> >>> >> +     u32 sdmmc_cmd_bits = SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT;
+> >>> >> +
+> >>> >> +     /* We must continue to set bit 28 in CMD until the change is complete */
+> >>> >> +     if (host->state == STATE_WAITING_CMD11_DONE)
+> >>> >> +             sdmmc_cmd_bits |= SDMMC_CMD_VOLT_SWITCH;
+> >>> > I didn't get the reason SDMMC_CMD_VOLT_SWITCH is needed during clock update(enable/disable)
+> >>> > Can you explain it in details?
+> >>>
+> >>> Simply put: if I didn't do this then the system hung during voltage
+> >>> switch.  It was not documented in the version of the IP manual that I
+> >>> had access to and it took me a bunch of digging / trial and error to
+> >>> figure this out.  Whatever this bit does internally it's important to
+> >>> set it while the voltage change is happening.  Note that this need was
+> >>> the whole reason for adding the extra state to the state machine.
+> >>>
+> >>> Perhaps Yuvaraj can try without it and I'd assume he'll report the
+> >>> same freeze.
+> >> Clarify the necessity of SDMMC_CMD_VOLT_SWITCH.
+> >> As far as I experience, we didn't apply this bit for several projects.
+> >
+> > I just tried this locally on our ChromeOS 3.8 kernel (which has quite
+> > a few backports and matches dw_mmc upstream pretty closely).  When I
+> > take out "sdmmc_cmd_bits |= SDMMC_CMD_VOLT_SWITCH" and bootup it fails
+> > to bringup WiFi chip.  It prints messages like:
+> >
+> > [    4.400842] mmc_host mmc1: Timeout sending command (cmd 0x202000
+> > arg 0x0 status 0x80202000)
+> >
+> > I will let Yuvaraj comment about his testing too.
+> To make it simple and verify, i have just enabled eMMC and SD channels
+> on 3.16-rc1 and tested.
+> Without "sdmmc_cmd_bits |= SDMMC_CMD_VOLT_SWITCH" bootup fails.
+> [    3.015971] mmc_host mmc1: Timeout sending command (cmd 0x202000
+> arg 0x0 status 0x80202000)
+> [    3.530974] mmc_host mmc1: Timeout sending command (cmd 0x202000
+> arg 0x0 status 0x80202000)
+Thank you for test.
+Hmm, it failed during clock update, right?.
+Can you check HLE interrupt at this time?
+I'll investigate for this.
 
->
->>
->>        if (host->vmmc) {
->>
->>However, we found it blocks the system resume path. It can slow down
->>system resume and also booting.
->>Therefore, we would like to resume SD card manually and asynchronously
->>by host controller driver itself. Thus system resume path is not
->>blocked.
->
-> That is accomplished by using MMC_CAP_RUNTIME_RESUME.
+> >
+> >
+> >>> >> +static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+> >>> >> +{
+> >>> >> +     struct dw_mci_slot *slot = mmc_priv(mmc);
+> >>> >> +     struct dw_mci *host = slot->host;
+> >>> >> +     u32 uhs;
+> >>> >> +     u32 v18 = SDMMC_UHS_18V << slot->id;
+> >>> >> +     int min_uv, max_uv;
+> >>> >> +     int ret;
+> >>> >> +
+> >>> >> +     /*
+> >>> >> +      * Program the voltage.  Note that some instances of dw_mmc may use
+> >>> >> +      * the UHS_REG for this.  For other instances (like exynos) the UHS_REG
+> >>> >> +      * does no harm but you need to set the regulator directly.  Try both.
+> >>> >> +      */
+> >>> >> +     uhs = mci_readl(host, UHS_REG);
+> >>> >> +     if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
+> >>> >> +             min_uv = 2700000;
+> >>> >> +             max_uv = 3600000;
+> >>> >> +             uhs &= ~v18;
+> >>> >> +     } else {
+> >>> >> +             min_uv = 1700000;
+> >>> >> +             max_uv = 1950000;
+> >>> >> +             uhs |= v18;
+> >>> >> +     }
+> >>> >> +     if (!IS_ERR(mmc->supply.vqmmc)) {
+> >>> >> +             ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
+> >>> >> +
+> >>> >> +             /*
+> >>> >> +              * Only complain if regulator claims that it's not in the 1.8V
+> >>> >> +              * range.  This avoids a bunch of errors in the case that
+> >>> >> +              * we've got a fixed 1.8V regulator but the core SD code still
+> >>> >> +              * thinks it ought to try to switch to 3.3 and then back to 1.8
+> >>> >> +              */
+> >>> >> +             if (ret) {
+> >>> > I think if ret is error, printing message and returning error is good.
+> >>> > Currently, just returning '0' though it fails.
+> >> Any feedback?
+> >
+> > Whoops, right.  I think you're right that in the case it warns it
+> > should also return the error code.  In the case it doesn't warn it
+> > shouldn't.  Also: possibly we should use a trick like the mmc core
+> > does and use "regulator_count_voltages" to figure out if we're going
+> > to be able to switch voltages...
+> >
+> >>> > Artificially adding SDMMC_INT_CMD_DONE to pending is needed to complete cmd handling?
+> >>> > Is there any reason?
+> >>>
+> >>> I don't remember this for sure since I wrote this a long time ago.
+> >>> Maybe it's not needed?  I may have just been modeling on other
+> >>> interrupts.
+> >> If there is no specific reason, please remove it.
+> >
+> > OK, we'll see how Yuvaraj's testing goes without it.  My incredibly
+> > brief testing in our local Chrome OS 3.8 tree shows that the WiFi is
+> > not detected properly if I comment out the line:
+> >   dw_mci_cmd_interrupt(host,
+> >     pending | SDMMC_INT_CMD_DONE);
+> >
+> > It may be sufficient to simply schedule the tasklet or to do some
+> > other subset of dw_mci_cmd_interrupt().  Yuvaraj can confirm on the
+> > latest kernel and also investigate further.
+How about completing CMD without SDMMC_INT_CMD_DONE?
 
-Yes, I got it.
-Thanks a lot for your review and help.
-I will update it in next version.
-
-
-Best regards,
-Vincent Yang
-
->
-> Kind regards
-> Uffe
->
->
->>Thanks a lot for your review!
->>
->>
->>Best regards,
->>Vincent Yang
->>
->>>
->>> Kind regards
->>> Uffe
->>>
->>>>
->>>>[solution]
->>>>In order to not blocking system resume path, this patch just sets a
->>>>flag
->>>>MMC_BUSRESUME_MANUAL_RESUME when this error happened, and then host
->>>>controller
->>>>driver can understand it by this flag. Then host controller driver
->>have
->>>>to
->>>>resume SD card manually and asynchronously.
->>>>
->>>>Signed-off-by: Vincent Yang <Vincent.Yang@tw.fujitsu.com>
->>>>---
->>>> drivers/mmc/core/core.c          |  4 ++
->>>> drivers/mmc/core/sd.c            |  4 ++
->>>>drivers/mmc/host/sdhci_f_sdh30.c | 89
->>>>++++++++++++++++++++++++++++++++++++++++
->>>> include/linux/mmc/host.h         | 14 +++++++
->>>> 4 files changed, 111 insertions(+)
->>>>
->>>>diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>>>index 764af63..51fce49 100644
->>>>--- a/drivers/mmc/core/core.c
->>>>+++ b/drivers/mmc/core/core.c
->>>>@@ -2648,6 +2648,10 @@ int mmc_pm_notify(struct notifier_block
->>>>*notify_block,
->>>>       case PM_POST_RESTORE:
->>>>
->>>>               spin_lock_irqsave(&host->lock, flags);
->>>>+              if (mmc_bus_manual_resume(host)) {
->>>>+                      spin_unlock_irqrestore(&host->lock, flags);
->>>>+                      break;
->>>>+              }
->>>>               host->rescan_disable = 0;
->>>>               spin_unlock_irqrestore(&host->lock, flags);
->>>>               _mmc_detect_change(host, 0, false);
->>>>diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
->>>>index 0c44510..859390d 100644
->>>>--- a/drivers/mmc/core/sd.c
->>>>+++ b/drivers/mmc/core/sd.c
->>>>@@ -1133,6 +1133,10 @@ static int mmc_sd_resume(struct mmc_host
->>*host)
->>>>
->>>>       if (!(host->caps & MMC_CAP_RUNTIME_RESUME)) {
->>>>               err = _mmc_sd_resume(host);
->>>>+              if ((host->caps2 & MMC_CAP2_MANUAL_RESUME) && err)
->>>>+                      mmc_set_bus_resume_policy(host, 1);
->>>>+              else
->>>>+                      mmc_set_bus_resume_policy(host, 0);
->>>>               pm_runtime_set_active(&host->card->dev);
->>>>               pm_runtime_mark_last_busy(&host->card->dev);
->>>>       }
->>>>diff --git a/drivers/mmc/host/sdhci_f_sdh30.c
->>>>b/drivers/mmc/host/sdhci_f_sdh30.c
->>>>index 6fae509..67bcff2 100644
->>>>--- a/drivers/mmc/host/sdhci_f_sdh30.c
->>>>+++ b/drivers/mmc/host/sdhci_f_sdh30.c
->>>>@@ -30,6 +30,12 @@
->>>> #include "../core/core.h"
->>>>
->>>> #define DRIVER_NAME "f_sdh30"
->>>>+#define RESUME_WAIT_COUNT     100
->>>>+#define RESUME_WAIT_TIME      50
->>>>+#define RESUME_WAIT_JIFFIES   msecs_to_jiffies(RESUME_DETECT_TIME)
->>>>+#define RESUME_DETECT_COUNT   16
->>>>+#define RESUME_DETECT_TIME    50
->>>>+#define RESUME_DETECT_JIFFIES msecs_to_jiffies(RESUME_DETECT_TIME)
->>>>
->>>>
->>>> struct f_sdhost_priv {
->>>>@@ -38,8 +44,59 @@ struct f_sdhost_priv {
->>>>       int gpio_select_1v8;
->>>>       u32 vendor_hs200;
->>>>       struct device *dev;
->>>>+      unsigned int quirks;    /* Deviations from spec. */
->>>>+
->>>>+/* retry to detect mmc device when resume */
->>>>+#define F_SDH30_QUIRK_RESUME_DETECT_RETRY             (1<<0)
->>>>+
->>>>+      struct workqueue_struct *resume_detect_wq;
->>>>+      struct delayed_work resume_detect_work;
->>>>+      unsigned int            resume_detect_count;
->>>>+      unsigned int            resume_wait_count;
->>>> };
->>>>
->>>>+static void sdhci_f_sdh30_resume_detect_work_func(struct work_struct
->>>>*work)
->>>>+{
->>>>+      struct f_sdhost_priv *priv = container_of(work, struct
->>f_sdhost_priv,
->>>>+              resume_detect_work.work);
->>>>+      struct sdhci_host *host = dev_get_drvdata(priv->dev);
->>>>+      int err = 0;
->>>>+
->>>>+      if (mmc_bus_manual_resume(host->mmc)) {
->>>>+              pm_runtime_disable(&host->mmc->card->dev);
->>>>+              mmc_card_set_suspended(host->mmc->card);
->>>>+              err = host->mmc->bus_ops->resume(host->mmc);
->>>>+              if (priv->resume_detect_count-- && err)
->>>>+                      queue_delayed_work(priv->resume_detect_wq,
->>>>+                                         &priv->resume_detect_work,
->>>>+                              RESUME_DETECT_JIFFIES);
->>>>+              else
->>>>+                      pr_debug("%s: resume detection done (count:%d,
->>wait:%d, err:%d)\n",
->>>>+                               mmc_hostname(host->mmc),
->>>>+                               priv->resume_detect_count,
->>>>+                               priv->resume_wait_count, err);
->>>>+      } else {
->>>>+              if (priv->resume_wait_count--)
->>>>+                      queue_delayed_work(priv->resume_detect_wq,
->>>>+                                         &priv->resume_detect_work,
->>>>+                              RESUME_WAIT_JIFFIES);
->>>>+              else
->>>>+                      pr_debug("%s: resume done\n",
->>mmc_hostname(host->mmc));
->>>>+      }
->>>>+}
->>>>+
->>>>+static void sdhci_f_sdh30_resume_detect(struct mmc_host *mmc,
->>>>+                                      int detect, int wait)
->>>>+{
->>>>+      struct sdhci_host *host = mmc_priv(mmc);
->>>>+      struct f_sdhost_priv *priv = sdhci_priv(host);
->>>>+
->>>>+      priv->resume_detect_count = detect;
->>>>+      priv->resume_wait_count = wait;
->>>>+      queue_delayed_work(priv->resume_detect_wq,
->>>>+                         &priv->resume_detect_work, 0);
->>>>+}
->>>>+
->>>> void sdhci_f_sdh30_soft_voltage_switch(struct sdhci_host *host)
->>>> {
->>>>       struct f_sdhost_priv *priv = sdhci_priv(host);
->>>>@@ -146,6 +203,12 @@ static int sdhci_f_sdh30_probe(struct
->>>>platform_device *pdev)
->>>>               }
->>>>       }
->>>>
->>>>+      if (of_find_property(pdev->dev.of_node, "resume-detect-retry",
->>NULL))
->>>>{
->>>>+              dev_info(dev, "Applying resume detect retry quirk\n");
->>>>+              priv->quirks |= F_SDH30_QUIRK_RESUME_DETECT_RETRY;
->>>>+              host->mmc->caps2 |= MMC_CAP2_MANUAL_RESUME;
->>>>+      }
->>>>+
->>>>       ret = mmc_of_parse_voltage(pdev->dev.of_node,
->>&host->ocr_mask);
->>>>       if (ret) {
->>>>               dev_err(dev, "%s: parse voltage error\n", __func__);
->>>>@@ -197,6 +260,18 @@ static int sdhci_f_sdh30_probe(struct
->>>>platform_device *pdev)
->>>>               }
->>>>       }
->>>>
->>>>+      /* Init workqueue */
->>>>+      if (priv->quirks & F_SDH30_QUIRK_RESUME_DETECT_RETRY) {
->>>>+              priv->resume_detect_wq =
->>create_workqueue("sdhci_f_sdh30");
->>>>+              if (priv->resume_detect_wq == NULL) {
->>>>+                      ret = -ENOMEM;
->>>>+                      dev_err(dev, "Failed to create resume
->>detection workqueue\n");
->>>>+                      goto err_init_wq;
->>>>+              }
->>>>+              INIT_DELAYED_WORK(&priv->resume_detect_work,
->>>>+
->>sdhci_f_sdh30_resume_detect_work_func);
->>>>+      }
->>>>+
->>>>       ret = sdhci_add_host(host);
->>>>       if (ret) {
->>>>               dev_err(dev, "%s: host add error\n", __func__);
->>>>@@ -229,6 +304,9 @@ static int sdhci_f_sdh30_probe(struct
->>>>platform_device *pdev)
->>>>       return 0;
->>>>
->>>> err_add_host:
->>>>+      if (priv->quirks & F_SDH30_QUIRK_RESUME_DETECT_RETRY)
->>>>+              destroy_workqueue(priv->resume_detect_wq);
->>>>+err_init_wq:
->>>>       if (gpio_is_valid(priv->gpio_select_1v8)) {
->>>>               gpio_direction_output(priv->gpio_select_1v8, 1);
->>>>               gpio_free(priv->gpio_select_1v8);
->>>>@@ -268,6 +346,9 @@ static int sdhci_f_sdh30_remove(struct
->>>>platform_device *pdev)
->>>>               gpio_free(priv->gpio_select_1v8);
->>>>       }
->>>>
->>>>+      if (priv->quirks & F_SDH30_QUIRK_RESUME_DETECT_RETRY)
->>>>+              destroy_workqueue(priv->resume_detect_wq);
->>>>+
->>>>       sdhci_free_host(host);
->>>>       platform_set_drvdata(pdev, NULL);
->>>>
->>>>@@ -285,7 +366,15 @@ static int sdhci_f_sdh30_suspend(struct device
->>>>*dev)
->>>> static int sdhci_f_sdh30_resume(struct device *dev)
->>>> {
->>>>       struct sdhci_host *host = dev_get_drvdata(dev);
->>>>+      struct f_sdhost_priv *priv = sdhci_priv(host);
->>>>
->>>>+      if (priv->quirks & F_SDH30_QUIRK_RESUME_DETECT_RETRY) {
->>>>+              pr_debug("%s: start resume detect\n",
->>>>+                       mmc_hostname(host->mmc));
->>>>+              sdhci_f_sdh30_resume_detect(host->mmc,
->>>>+                                          RESUME_DETECT_COUNT,
->>>>+                                          RESUME_WAIT_COUNT);
->>>>+      }
->>>>       return sdhci_resume_host(host);
->>>> }
->>>> #endif
->>>>diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->>>>index 7960424..55221dd 100644
->>>>--- a/include/linux/mmc/host.h
->>>>+++ b/include/linux/mmc/host.h
->>>>@@ -283,6 +283,7 @@ struct mmc_host {
->>>> #define MMC_CAP2_HS400                (MMC_CAP2_HS400_1_8V | \
->>>>                                MMC_CAP2_HS400_1_2V)
->>>> #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
->>>>+#define MMC_CAP2_MANUAL_RESUME     (1 << 18)  /* Resume manually
->>when
->>>>error */
->>>>
->>>>       mmc_pm_flag_t           pm_caps;        /* supported pm
->>features */
->>>>
->>>>@@ -338,6 +339,9 @@ struct mmc_host {
->>>>       const struct mmc_bus_ops *bus_ops;      /* current bus driver
->>*/
->>>>       unsigned int            bus_refs;       /* reference counter
->>*/
->>>>
->>>>+      unsigned int            bus_resume_flags;
->>>>+#define MMC_BUSRESUME_MANUAL_RESUME   (1 << 0)
->>>>+
->>>>       unsigned int            sdio_irqs;
->>>>       struct task_struct      *sdio_irq_thread;
->>>>       bool                    sdio_irq_pending;
->>>>@@ -384,6 +388,16 @@ static inline void *mmc_priv(struct mmc_host
->>>>*host)
->>>> #define mmc_dev(x)    ((x)->parent)
->>>> #define mmc_classdev(x)       (&(x)->class_dev)
->>>> #define mmc_hostname(x)       (dev_name(&(x)->class_dev))
->>>>+#define mmc_bus_manual_resume(host) ((host)->bus_resume_flags &
->>         \
->>>>+      MMC_BUSRESUME_MANUAL_RESUME)
->>>>+
->>>>+static inline void mmc_set_bus_resume_policy(struct mmc_host *host,
->>>>int manual)
->>>>+{
->>>>+      if (manual)
->>>>+              host->bus_resume_flags |= MMC_BUSRESUME_MANUAL_RESUME;
->>>>+      else
->>>>+              host->bus_resume_flags &=
->>~MMC_BUSRESUME_MANUAL_RESUME;
->>>>+}
->>>>
->>>> int mmc_power_save_host(struct mmc_host *host);
->>>> int mmc_power_restore_host(struct mmc_host *host);
->>>
->
+Thanks,
+Seungwon Jeon
