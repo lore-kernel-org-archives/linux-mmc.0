@@ -1,66 +1,76 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to handle
- regulators
-Date: Fri, 27 Jun 2014 20:19:26 +0900
-Message-ID: <001201cf91f9$a7924920$f6b6db60$%jun@samsung.com>
-References: <1403520321-2431-1-git-send-email-yuvaraj.cd@samsung.com>
- <1403520321-2431-2-git-send-email-yuvaraj.cd@samsung.com>
- <CAD=FV=UGjm9y3XoBgWKjw9kp9W=ZrwB-S6Lh7T_LBUgCQZn1ag@mail.gmail.com>
- <53AA3F78.3080804@samsung.com>
- <001201cf9067$3c5b2070$b5116150$%jun@samsung.com>
- <CAD=FV=UCinFuZQW+_GYFw=M046ziTLRNvvHUvsx_GQ0kjw5DfQ@mail.gmail.com>
- <004f01cf9129$b4ac9690$1e05c3b0$%jun@samsung.com>
- <CAD=FV=VP6Exg-iJiAk=zNFpFzY8jFbU8HSR=wQQ7S+mfZWTJ=Q@mail.gmail.com>
+From: Andreas Fenkart <afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: mwifiex card reset
+Date: Fri, 27 Jun 2014 16:39:42 +0200
+Message-ID: <CALtMJEBWPM+75wxM2Mp5EX_o6NWtZUJdYRCv6psbvdUn4k295w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:42159 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753332AbaF0LT2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Jun 2014 07:19:28 -0400
-In-reply-to: <CAD=FV=VP6Exg-iJiAk=zNFpFzY8jFbU8HSR=wQQ7S+mfZWTJ=Q@mail.gmail.com>
-Content-language: ko
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Bing Zhao <bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: 'Doug Anderson' <dianders@chromium.org>
-Cc: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Yuvaraj Kumar C D' <yuvaraj.cd@gmail.com>, 'linux-samsung-soc' <linux-samsung-soc@vger.kernel.org>, linux-arm-kernel@lists.infradead.org, 'Chris Ball' <cjb@laptop.org>, linux-mmc@vger.kernel.org, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Sonny Rao' <sonnyrao@chromium.org>, 'Tomasz Figa' <t.figa@samsung.com>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'sunil joshi' <joshi@samsung.com>, ks.giri@samsung.com, 'Prashanth G' <prashanth.g@samsung.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>
 
-On Fri, June 27, 2014, Doug Anderson wrote:
-> Seungwon,
-> 
-> On Thu, Jun 26, 2014 at 3:30 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> > Hi Doug,
-> >
-> > On Thu, June 26, 2014, Doug Anderson wrote:
-> >> Seungwon,
-> >>
-> >> On Wed, Jun 25, 2014 at 4:18 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> >> >> >> +       case MMC_POWER_ON:
-> >> >> >> +               if (!IS_ERR(mmc->supply.vqmmc) &&
-> >> >> >> +                               !test_bit(DW_MMC_IO_POWERED, &slot->flags)) {
-> >> > You can use regulator_is_enabled() instead of flag bit, DW_MMC_IO_POWERED.
-> >>
-> >> I'd be a little worried about regulator_is_enabled() since regulators
-> >> are reference counted.  What if someone else is sharing this
-> >> regulator?  The regulator might happen to be enabled when you check it
-> >> but unless you add your own dw_mmc reference count they might turn it
-> >> off.
-> > Cool, that's a possibility. Some assumption may need.
-> > If mmc's core can guarantee its balance, I think we don't need to consider some flag.
-> 
-> I notice that the mmc core seems to keep a flag itself for vdd (the
-> mmc->regulator_enabled flag).  That would imply that the core thought
-> it was important to have the extra flag and that we should keep our
-> own flag for vqmmc.
-Ok, Good.
+I have an mwifiex module(sd8787) behind omap_hsmmc(am33xx-soc)
+The module is non-removable wired fix to soc. Now the wifi module
+needs 2 clocks; one is a sleep clock the other used when not
+sleeping.
+While the sleep clock is fixed, @32 kHz, the system clock can be
+one out of several values, but can be be derived automatically
+from the sleep clock. But this requires the clock to be present
+when the wifi module comes out of reset.
 
-Thanks,
-Seungwon Jeon
-> 
-> -Doug
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Another problem is software reboot, at initial power on the wifi
+card will react to mmc discovery. After a software reset of the
+host it will not, because it has already been disvovered and
+didn't notice the host rebooted, unless we reset it as well.
+While this seems obvious, the problem is that the reset is needed
+before the card can be discovered. Which means we cannot move the
+reset logic into the mwifiex driver, since that driver has not
+yet been selected through vendor/product id.
 
+the reset logic:
+        gpiod_set_value(card->gpiod_reset, 0);
+        clk_enable(card->sleep_clock);
+        udelay(1000);
+        gpiod_set_value(card->gpiod_reset, 1);
+
+The idea so far was to extend the device-tree node of the
+mmc slot by some reset leafs;
+
+&mmc {
+        ti,non-removable;
+        ..
+        peripheral-clocks = <&clk &clk2 ...>;
+        peripheral-reset-gpios = <&gpio0 1 1 &gpio1 2 3 ...>;
+}
+
+in mmc_add_host, all clocks will be enabled and gpios be pulled
+low for 1 msec
+
+Is this a feasible solution?
+
+
+Another related issue, is the card reset in mwifiex driver:
+
+static void sdio_card_reset_worker(struct work_struct *work)
+{
+        struct mmc_host *target = reset_host;
+
+        pr_err("Resetting card...\n");
+        mmc_remove_host(target);
+        /* 20ms delay is based on experiment with sdhci controller */
+        mdelay(20);
+        mmc_add_host(target);
+}
+static DECLARE_WORK(card_reset_work, sdio_card_reset_worker);
+
+There are obviously a lot of problems with this, e.g. custom debugfs
+entries created in the driver will be lost. But sometimes this
+code might avert disaster in case the command handlers between
+driver and firmware lost synchronization
+
+How could this be done in a better way?
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
