@@ -1,118 +1,419 @@
-From: Yuvaraj Kumar <yuvaraj.cd@gmail.com>
-Subject: Re: [PATCH 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to handle regulators
-Date: Fri, 27 Jun 2014 16:29:45 +0530
-Message-ID: <CAKuRcOLDCFQnw01ReKqNNfiiCwSWwi6Rd7UZFph+JzK2CQ4T_w@mail.gmail.com>
-References: <1403520321-2431-1-git-send-email-yuvaraj.cd@samsung.com>
-	<1403520321-2431-2-git-send-email-yuvaraj.cd@samsung.com>
-	<CAD=FV=UGjm9y3XoBgWKjw9kp9W=ZrwB-S6Lh7T_LBUgCQZn1ag@mail.gmail.com>
-	<CAKuRcO+OaknUtj9mJ+SQJPMj70hdLTMkDYCXq4L5JdwzDKdj6g@mail.gmail.com>
-	<CAD=FV=Vy5vRan0KEDFFwVO0omgsUMwJK6WwCsWxGYynzT-e5ig@mail.gmail.com>
+From: Vincent Yang <vincent.yang.fujitsu@gmail.com>
+Subject: Re: [RFC PATCH v2 6/6] mmc: core: add manual resume capability
+Date: Fri, 27 Jun 2014 19:00:21 +0800
+Message-ID: <CAOEd-H1c5rOs9ykdyvLNtLNhi6myxj7ExYQ6x1tNBP_LdJZoxg@mail.gmail.com>
+References: <1403763812-5495-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
+	<1403763812-5495-7-git-send-email-Vincent.Yang@tw.fujitsu.com>
+	<8b071848-f7df-4965-bd49-ae05b21ebe2e@email.android.com>
+	<CAOEd-H2Xtpmj9LAnfX6SwcUSu3W1qvD32YNNPpB4ZQn_HF9-wg@mail.gmail.com>
+	<17c3cfc2-ae8c-4d19-8da5-fe40432f565c@email.android.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=Vy5vRan0KEDFFwVO0omgsUMwJK6WwCsWxGYynzT-e5ig@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, ks.giri@samsung.com, Prashanth G <prashanth.g@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f178.google.com ([209.85.160.178]:35190 "EHLO
+	mail-yk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752826AbaF0LAV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Jun 2014 07:00:21 -0400
+In-Reply-To: <17c3cfc2-ae8c-4d19-8da5-fe40432f565c@email.android.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "chris@printf.net" <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Anton Vorontsov <anton@enomsg.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "patches@linaro.org" <patches@linaro.org>, Andy Green <andy.green@linaro.org>, Jaswinder Singh <jaswinder.singh@linaro.org>
 
-On Thu, Jun 26, 2014 at 9:48 PM, Doug Anderson <dianders@chromium.org> wrote:
-> Yuvaraj,
+2014-06-27 17:40 GMT+08:00 Ulf Hansson <ulf.hansson@linaro.org>:
 >
-> On Thu, Jun 26, 2014 at 4:21 AM, Yuvaraj Kumar <yuvaraj.cd@gmail.com> wrote:
->> Doug
+>
+> On 27 juni 2014 04:23:42 CEST, Vincent Yang <vincent.yang.fujitsu@gmail.com> wrote:
+>>2014-06-26 17:42 GMT+08:00 Ulf Hansson <ulf.hansson@linaro.org>:
+>>>
+>>>
+>>> On 26 juni 2014 08:23:32 CEST, Vincent Yang
+>><vincent.yang.fujitsu@gmail.com> wrote:
+>>>>This patch adds manual resume for some embedded platforms with rootfs
+>>>>stored in SD card. It references CONFIG_MMC_BLOCK_DEFERRED_RESUME in
+>>>>kernel 3.10. It lets host controller driver to manually handle resume
+>>>>by itself.
+>>>>
+>>>>[symptom]
+>>>>This issue is found on mb86s7x platforms with rootfs stored in SD
+>>card.
+>>>>It failed to resume form STR suspend mode because SD card cannot be
+>>>>ready
+>>>>in time. It take longer time (e.g., 600ms) to be ready for access.
+>>>>The error log looks like below:
+>>>>
+>>>>root@localhost:~# echo mem > /sys/power/state
+>>>>[   30.441974] SUSPEND
+>>>>
+>>>>SCB Firmware : Category 01 Version 02.03 Rev. 00_
+>>>>    Config   : (no configuration)
+>>>>root@localhost:~# [   30.702976] Buffer I/O error on device
+>>mmcblk1p2,
+>>>>logical block 31349
+>>>>[   30.709678] Buffer I/O error on device mmcblk1p2, logical block
+>>>>168073
+>>>>[   30.716220] Buffer I/O error on device mmcblk1p2, logical block
+>>>>168074
+>>>>[   30.722759] Buffer I/O error on device mmcblk1p2, logical block
+>>>>168075
+>>>>[   30.729456] Buffer I/O error on device mmcblk1p2, logical block
+>>>>31349
+>>>>[   30.735916] Buffer I/O error on device mmcblk1p2, logical block
+>>>>31350
+>>>>[   30.742370] Buffer I/O error on device mmcblk1p2, logical block
+>>>>31351
+>>>>[   30.749025] Buffer I/O error on device mmcblk1p2, logical block
+>>>>168075
+>>>>[   30.755657] Buffer I/O error on device mmcblk1p2, logical block
+>>>>31351
+>>>>[   30.763130] Aborting journal on device mmcblk1p2-8.
+>>>>[   30.768060] JBD2: Error -5 detected when updating journal
+>>superblock
+>>>>for mmcblk1p2-8.
+>>>>[   30.776085] EXT4-fs error (device mmcblk1p2):
+>>>>ext4_journal_check_start:56: Detected aborted journal
+>>>>[   30.785259] EXT4-fs (mmcblk1p2): Remounting filesystem read-only
+>>>>[   31.370716] EXT4-fs error (device mmcblk1p2):
+>>ext4_find_entry:1309:
+>>>>inode #2490369: comm udevd: reading directory lblock 0
+>>>>[   31.382485] EXT4-fs error (device mmcblk1p2):
+>>ext4_find_entry:1309:
+>>>>inode #1048577: comm udevd: reading directory lblock 0
+>>>>
+>>>>[analysis]
+>>>>In system resume path, mmc_sd_resume() is failed with error code -123
+>>>>because at that time SD card is still not ready on mb86s7x platforms.
+>>>
+>>> So why does it fail? It shouldn't!
+>>>
+>>> I get the impression that you are solving this in the wrong way.
 >>
->> On Tue, Jun 24, 2014 at 11:30 PM, Doug Anderson <dianders@chromium.org> wrote:
->>> Yuvaraj,
+>>Hi Uffe,
+>>On mb86s7x EVB, power for SD card is completely removed when entering
+>>STR suspend mode (i.e., echo mem > /sys/power/state). When system
+>>starts to resume, it turns on the power for SD card again. However, It
+>>take
+>>longer time (e.g., 600ms) to get the power ready.
+>>This is why mmc_sd_resume() failed with error code -123. At that time
+>>point,
+>>power for SD card is not ready yet.
+>>
+>>At first we fixed it by a simple method of using
+>>SDHCI_QUIRK_DELAY_AFTER_POWER:
+>>
+>>diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>index 169e17d..ed28896 100644
+>>--- a/drivers/mmc/host/sdhci.c
+>>+++ b/drivers/mmc/host/sdhci.c
+>>@@ -1283,7 +1283,7 @@ static void sdhci_set_power(struct sdhci_host
+>>*host, unsigned char mode,
+>>                 * they can apply clock after applying power
+>>                 */
+>>                if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+>>-                       mdelay(10);
+>>+                       mdelay(600);
+>>        }
+>
+> If you can't model the power to the card through a regulator, this is what you need to do.
+
+Hi Uffe,
+Yes, I got it.
+
+>
+>>
+>>        if (host->vmmc) {
+>>
+>>However, we found it blocks the system resume path. It can slow down
+>>system resume and also booting.
+>>Therefore, we would like to resume SD card manually and asynchronously
+>>by host controller driver itself. Thus system resume path is not
+>>blocked.
+>
+> That is accomplished by using MMC_CAP_RUNTIME_RESUME.
+
+Yes, I got it.
+Thanks a lot for your review and help.
+I will update it in next version.
+
+
+Best regards,
+Vincent Yang
+
+>
+> Kind regards
+> Uffe
+>
+>
+>>Thanks a lot for your review!
+>>
+>>
+>>Best regards,
+>>Vincent Yang
+>>
 >>>
->>> On Mon, Jun 23, 2014 at 3:45 AM, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
->>>> This patch makes use of mmc_regulator_get_supply() to handle
->>>> the vmmc and vqmmc regulators.Also it moves the code handling
->>>> the these regulators to dw_mci_set_ios().It turned on the vmmc
->>>> and vqmmc during MMC_POWER_UP and MMC_POWER_ON,and turned off
->>>> during MMC_POWER_OFF.
+>>> Kind regards
+>>> Uffe
+>>>
 >>>>
->>>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
->>>> ---
->>>>  drivers/mmc/host/dw_mmc.c |   71 ++++++++++++++++++++++-----------------------
->>>>  drivers/mmc/host/dw_mmc.h |    2 ++
->>>>  2 files changed, 36 insertions(+), 37 deletions(-)
->>>
->>> Perhaps you could CC me on the whole series for the next version since
->>> I was involved in privately reviewing previous versions?
->> It was just accidental missing you in the CC .Surely i will add you in
->> CC for next versions.
->>>
->>> Overall caveat for my review is that I'm nowhere near an SD/MMC expert.
->>>
->>>
->>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>> index 1ac227c..f5cabce 100644
->>>> --- a/drivers/mmc/host/dw_mmc.c
->>>> +++ b/drivers/mmc/host/dw_mmc.c
->>>> @@ -937,6 +937,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>>>         struct dw_mci_slot *slot = mmc_priv(mmc);
->>>>         const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
->>>>         u32 regs;
->>>> +       int ret;
+>>>>[solution]
+>>>>In order to not blocking system resume path, this patch just sets a
+>>>>flag
+>>>>MMC_BUSRESUME_MANUAL_RESUME when this error happened, and then host
+>>>>controller
+>>>>driver can understand it by this flag. Then host controller driver
+>>have
+>>>>to
+>>>>resume SD card manually and asynchronously.
 >>>>
->>>>         switch (ios->bus_width) {
->>>>         case MMC_BUS_WIDTH_4:
->>>> @@ -975,16 +976,41 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>>Signed-off-by: Vincent Yang <Vincent.Yang@tw.fujitsu.com>
+>>>>---
+>>>> drivers/mmc/core/core.c          |  4 ++
+>>>> drivers/mmc/core/sd.c            |  4 ++
+>>>>drivers/mmc/host/sdhci_f_sdh30.c | 89
+>>>>++++++++++++++++++++++++++++++++++++++++
+>>>> include/linux/mmc/host.h         | 14 +++++++
+>>>> 4 files changed, 111 insertions(+)
 >>>>
->>>>         switch (ios->power_mode) {
->>>>         case MMC_POWER_UP:
->>>> +               if ((!IS_ERR(mmc->supply.vmmc)) &&
->>>> +                               !test_bit(DW_MMC_CARD_POWERED, &slot->flags)) {
->>>> +                       ret = regulator_enable(mmc->supply.vmmc);
->>>> +                       if (!ret)
->>>> +                               set_bit(DW_MMC_CARD_POWERED, &slot->flags);
->>>> +               }
+>>>>diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>>>index 764af63..51fce49 100644
+>>>>--- a/drivers/mmc/core/core.c
+>>>>+++ b/drivers/mmc/core/core.c
+>>>>@@ -2648,6 +2648,10 @@ int mmc_pm_notify(struct notifier_block
+>>>>*notify_block,
+>>>>       case PM_POST_RESTORE:
+>>>>
+>>>>               spin_lock_irqsave(&host->lock, flags);
+>>>>+              if (mmc_bus_manual_resume(host)) {
+>>>>+                      spin_unlock_irqrestore(&host->lock, flags);
+>>>>+                      break;
+>>>>+              }
+>>>>               host->rescan_disable = 0;
+>>>>               spin_unlock_irqrestore(&host->lock, flags);
+>>>>               _mmc_detect_change(host, 0, false);
+>>>>diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+>>>>index 0c44510..859390d 100644
+>>>>--- a/drivers/mmc/core/sd.c
+>>>>+++ b/drivers/mmc/core/sd.c
+>>>>@@ -1133,6 +1133,10 @@ static int mmc_sd_resume(struct mmc_host
+>>*host)
+>>>>
+>>>>       if (!(host->caps & MMC_CAP_RUNTIME_RESUME)) {
+>>>>               err = _mmc_sd_resume(host);
+>>>>+              if ((host->caps2 & MMC_CAP2_MANUAL_RESUME) && err)
+>>>>+                      mmc_set_bus_resume_policy(host, 1);
+>>>>+              else
+>>>>+                      mmc_set_bus_resume_policy(host, 0);
+>>>>               pm_runtime_set_active(&host->card->dev);
+>>>>               pm_runtime_mark_last_busy(&host->card->dev);
+>>>>       }
+>>>>diff --git a/drivers/mmc/host/sdhci_f_sdh30.c
+>>>>b/drivers/mmc/host/sdhci_f_sdh30.c
+>>>>index 6fae509..67bcff2 100644
+>>>>--- a/drivers/mmc/host/sdhci_f_sdh30.c
+>>>>+++ b/drivers/mmc/host/sdhci_f_sdh30.c
+>>>>@@ -30,6 +30,12 @@
+>>>> #include "../core/core.h"
+>>>>
+>>>> #define DRIVER_NAME "f_sdh30"
+>>>>+#define RESUME_WAIT_COUNT     100
+>>>>+#define RESUME_WAIT_TIME      50
+>>>>+#define RESUME_WAIT_JIFFIES   msecs_to_jiffies(RESUME_DETECT_TIME)
+>>>>+#define RESUME_DETECT_COUNT   16
+>>>>+#define RESUME_DETECT_TIME    50
+>>>>+#define RESUME_DETECT_JIFFIES msecs_to_jiffies(RESUME_DETECT_TIME)
+>>>>
+>>>>
+>>>> struct f_sdhost_priv {
+>>>>@@ -38,8 +44,59 @@ struct f_sdhost_priv {
+>>>>       int gpio_select_1v8;
+>>>>       u32 vendor_hs200;
+>>>>       struct device *dev;
+>>>>+      unsigned int quirks;    /* Deviations from spec. */
+>>>>+
+>>>>+/* retry to detect mmc device when resume */
+>>>>+#define F_SDH30_QUIRK_RESUME_DETECT_RETRY             (1<<0)
+>>>>+
+>>>>+      struct workqueue_struct *resume_detect_wq;
+>>>>+      struct delayed_work resume_detect_work;
+>>>>+      unsigned int            resume_detect_count;
+>>>>+      unsigned int            resume_wait_count;
+>>>> };
+>>>>
+>>>>+static void sdhci_f_sdh30_resume_detect_work_func(struct work_struct
+>>>>*work)
+>>>>+{
+>>>>+      struct f_sdhost_priv *priv = container_of(work, struct
+>>f_sdhost_priv,
+>>>>+              resume_detect_work.work);
+>>>>+      struct sdhci_host *host = dev_get_drvdata(priv->dev);
+>>>>+      int err = 0;
+>>>>+
+>>>>+      if (mmc_bus_manual_resume(host->mmc)) {
+>>>>+              pm_runtime_disable(&host->mmc->card->dev);
+>>>>+              mmc_card_set_suspended(host->mmc->card);
+>>>>+              err = host->mmc->bus_ops->resume(host->mmc);
+>>>>+              if (priv->resume_detect_count-- && err)
+>>>>+                      queue_delayed_work(priv->resume_detect_wq,
+>>>>+                                         &priv->resume_detect_work,
+>>>>+                              RESUME_DETECT_JIFFIES);
+>>>>+              else
+>>>>+                      pr_debug("%s: resume detection done (count:%d,
+>>wait:%d, err:%d)\n",
+>>>>+                               mmc_hostname(host->mmc),
+>>>>+                               priv->resume_detect_count,
+>>>>+                               priv->resume_wait_count, err);
+>>>>+      } else {
+>>>>+              if (priv->resume_wait_count--)
+>>>>+                      queue_delayed_work(priv->resume_detect_wq,
+>>>>+                                         &priv->resume_detect_work,
+>>>>+                              RESUME_WAIT_JIFFIES);
+>>>>+              else
+>>>>+                      pr_debug("%s: resume done\n",
+>>mmc_hostname(host->mmc));
+>>>>+      }
+>>>>+}
+>>>>+
+>>>>+static void sdhci_f_sdh30_resume_detect(struct mmc_host *mmc,
+>>>>+                                      int detect, int wait)
+>>>>+{
+>>>>+      struct sdhci_host *host = mmc_priv(mmc);
+>>>>+      struct f_sdhost_priv *priv = sdhci_priv(host);
+>>>>+
+>>>>+      priv->resume_detect_count = detect;
+>>>>+      priv->resume_wait_count = wait;
+>>>>+      queue_delayed_work(priv->resume_detect_wq,
+>>>>+                         &priv->resume_detect_work, 0);
+>>>>+}
+>>>>+
+>>>> void sdhci_f_sdh30_soft_voltage_switch(struct sdhci_host *host)
+>>>> {
+>>>>       struct f_sdhost_priv *priv = sdhci_priv(host);
+>>>>@@ -146,6 +203,12 @@ static int sdhci_f_sdh30_probe(struct
+>>>>platform_device *pdev)
+>>>>               }
+>>>>       }
+>>>>
+>>>>+      if (of_find_property(pdev->dev.of_node, "resume-detect-retry",
+>>NULL))
+>>>>{
+>>>>+              dev_info(dev, "Applying resume detect retry quirk\n");
+>>>>+              priv->quirks |= F_SDH30_QUIRK_RESUME_DETECT_RETRY;
+>>>>+              host->mmc->caps2 |= MMC_CAP2_MANUAL_RESUME;
+>>>>+      }
+>>>>+
+>>>>       ret = mmc_of_parse_voltage(pdev->dev.of_node,
+>>&host->ocr_mask);
+>>>>       if (ret) {
+>>>>               dev_err(dev, "%s: parse voltage error\n", __func__);
+>>>>@@ -197,6 +260,18 @@ static int sdhci_f_sdh30_probe(struct
+>>>>platform_device *pdev)
+>>>>               }
+>>>>       }
+>>>>
+>>>>+      /* Init workqueue */
+>>>>+      if (priv->quirks & F_SDH30_QUIRK_RESUME_DETECT_RETRY) {
+>>>>+              priv->resume_detect_wq =
+>>create_workqueue("sdhci_f_sdh30");
+>>>>+              if (priv->resume_detect_wq == NULL) {
+>>>>+                      ret = -ENOMEM;
+>>>>+                      dev_err(dev, "Failed to create resume
+>>detection workqueue\n");
+>>>>+                      goto err_init_wq;
+>>>>+              }
+>>>>+              INIT_DELAYED_WORK(&priv->resume_detect_work,
+>>>>+
+>>sdhci_f_sdh30_resume_detect_work_func);
+>>>>+      }
+>>>>+
+>>>>       ret = sdhci_add_host(host);
+>>>>       if (ret) {
+>>>>               dev_err(dev, "%s: host add error\n", __func__);
+>>>>@@ -229,6 +304,9 @@ static int sdhci_f_sdh30_probe(struct
+>>>>platform_device *pdev)
+>>>>       return 0;
+>>>>
+>>>> err_add_host:
+>>>>+      if (priv->quirks & F_SDH30_QUIRK_RESUME_DETECT_RETRY)
+>>>>+              destroy_workqueue(priv->resume_detect_wq);
+>>>>+err_init_wq:
+>>>>       if (gpio_is_valid(priv->gpio_select_1v8)) {
+>>>>               gpio_direction_output(priv->gpio_select_1v8, 1);
+>>>>               gpio_free(priv->gpio_select_1v8);
+>>>>@@ -268,6 +346,9 @@ static int sdhci_f_sdh30_remove(struct
+>>>>platform_device *pdev)
+>>>>               gpio_free(priv->gpio_select_1v8);
+>>>>       }
+>>>>
+>>>>+      if (priv->quirks & F_SDH30_QUIRK_RESUME_DETECT_RETRY)
+>>>>+              destroy_workqueue(priv->resume_detect_wq);
+>>>>+
+>>>>       sdhci_free_host(host);
+>>>>       platform_set_drvdata(pdev, NULL);
+>>>>
+>>>>@@ -285,7 +366,15 @@ static int sdhci_f_sdh30_suspend(struct device
+>>>>*dev)
+>>>> static int sdhci_f_sdh30_resume(struct device *dev)
+>>>> {
+>>>>       struct sdhci_host *host = dev_get_drvdata(dev);
+>>>>+      struct f_sdhost_priv *priv = sdhci_priv(host);
+>>>>
+>>>>+      if (priv->quirks & F_SDH30_QUIRK_RESUME_DETECT_RETRY) {
+>>>>+              pr_debug("%s: start resume detect\n",
+>>>>+                       mmc_hostname(host->mmc));
+>>>>+              sdhci_f_sdh30_resume_detect(host->mmc,
+>>>>+                                          RESUME_DETECT_COUNT,
+>>>>+                                          RESUME_WAIT_COUNT);
+>>>>+      }
+>>>>       return sdhci_resume_host(host);
+>>>> }
+>>>> #endif
+>>>>diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+>>>>index 7960424..55221dd 100644
+>>>>--- a/include/linux/mmc/host.h
+>>>>+++ b/include/linux/mmc/host.h
+>>>>@@ -283,6 +283,7 @@ struct mmc_host {
+>>>> #define MMC_CAP2_HS400                (MMC_CAP2_HS400_1_8V | \
+>>>>                                MMC_CAP2_HS400_1_2V)
+>>>> #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
+>>>>+#define MMC_CAP2_MANUAL_RESUME     (1 << 18)  /* Resume manually
+>>when
+>>>>error */
+>>>>
+>>>>       mmc_pm_flag_t           pm_caps;        /* supported pm
+>>features */
+>>>>
+>>>>@@ -338,6 +339,9 @@ struct mmc_host {
+>>>>       const struct mmc_bus_ops *bus_ops;      /* current bus driver
+>>*/
+>>>>       unsigned int            bus_refs;       /* reference counter
+>>*/
+>>>>
+>>>>+      unsigned int            bus_resume_flags;
+>>>>+#define MMC_BUSRESUME_MANUAL_RESUME   (1 << 0)
+>>>>+
+>>>>       unsigned int            sdio_irqs;
+>>>>       struct task_struct      *sdio_irq_thread;
+>>>>       bool                    sdio_irq_pending;
+>>>>@@ -384,6 +388,16 @@ static inline void *mmc_priv(struct mmc_host
+>>>>*host)
+>>>> #define mmc_dev(x)    ((x)->parent)
+>>>> #define mmc_classdev(x)       (&(x)->class_dev)
+>>>> #define mmc_hostname(x)       (dev_name(&(x)->class_dev))
+>>>>+#define mmc_bus_manual_resume(host) ((host)->bus_resume_flags &
+>>         \
+>>>>+      MMC_BUSRESUME_MANUAL_RESUME)
+>>>>+
+>>>>+static inline void mmc_set_bus_resume_policy(struct mmc_host *host,
+>>>>int manual)
+>>>>+{
+>>>>+      if (manual)
+>>>>+              host->bus_resume_flags |= MMC_BUSRESUME_MANUAL_RESUME;
+>>>>+      else
+>>>>+              host->bus_resume_flags &=
+>>~MMC_BUSRESUME_MANUAL_RESUME;
+>>>>+}
+>>>>
+>>>> int mmc_power_save_host(struct mmc_host *host);
+>>>> int mmc_power_restore_host(struct mmc_host *host);
 >>>
->>> As per below, I'm not sure why you'd want to turn on vqmmc and vmmc at
->>> different times.
->> As you can see people's have different opinion on this.When i had a
->> look at the other drivers in the subsystem which does in the same flow
->> as above.However i will change in the next version.
 >
-> Given my self proclaimed lack of SD/MMC knowledge, if others have a
-> good reason for doing them separate then you should do it that way.
-> So far I haven't heard that reason but I certainly could be wrong.
->
->
->>>> @@ -225,6 +225,8 @@ struct dw_mci_slot {
->>>>         unsigned long           flags;
->>>>  #define DW_MMC_CARD_PRESENT    0
->>>>  #define DW_MMC_CARD_NEED_INIT  1
->>>> +#define DW_MMC_CARD_POWERED    2
->>>> +#define DW_MMC_IO_POWERED      3
->>>
->>> I don't really think you should have two bits here.  From my
->>> understanding of SD cards there should be very little reason to have
->>> vqmmc and vmmc not powered at the same time.
->> I think if i can use mmc_regulator_set_ocr(), we don't need additional
->> flag.But for tps65090 mmc_regulator_get_ocr() and
->> mmc_regulator_set_ocr() is failing as its a fixed-regulator.
->
-> Can you explain more about what's failing?  It sure looks like mmc
-> core is supposed to handle this given comments below
->
-> /*
-> * If we're using a fixed/static regulator, don't call
-> * regulator_set_voltage; it would fail.
-> */
-tps65090 driver does not register through fixed regulator framework.It
-uses normal regulator framework and supports only
-enable/disable/is_enabled callbacks.Also it lacks certain callbacks
-for list_voltage, get_voltage ,set_voltage etc.
-[    2.306476] dwmmc_exynos 12220000.mmc: Failed getting OCR mask: -22
-[    2.393403] dwmmc_exynos 12220000.mmc: could not set regulator OCR (-22)
-For the above reason,regulator framework treats fet4 as unused
-regulator and disables the vmmc regulator.
-> voltage = regulator_get_voltage(supply);
->
-> if (!regulator_can_change_voltage(supply))
->   min_uV = max_uV = voltage;
->
->
-> -Doug
