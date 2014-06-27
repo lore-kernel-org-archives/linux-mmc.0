@@ -1,123 +1,118 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [RFC PATCH v2 4/6] mmc: sdhci: host: add new f_sdh30
-Date: Fri, 27 Jun 2014 11:12:49 +0100
-Message-ID: <20140627101248.GD7262@leverpostej>
-References: <1403763812-5495-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
- <1403763812-5495-5-git-send-email-Vincent.Yang@tw.fujitsu.com>
- <20140626110351.GN15240@leverpostej>
- <CAOEd-H3+MwT3DMqMO0XHaZQqYAN0zaQqRMjC_UjyJn5ZwCaMoQ@mail.gmail.com>
+From: Yuvaraj Kumar <yuvaraj.cd@gmail.com>
+Subject: Re: [PATCH 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to handle regulators
+Date: Fri, 27 Jun 2014 16:29:45 +0530
+Message-ID: <CAKuRcOLDCFQnw01ReKqNNfiiCwSWwi6Rd7UZFph+JzK2CQ4T_w@mail.gmail.com>
+References: <1403520321-2431-1-git-send-email-yuvaraj.cd@samsung.com>
+	<1403520321-2431-2-git-send-email-yuvaraj.cd@samsung.com>
+	<CAD=FV=UGjm9y3XoBgWKjw9kp9W=ZrwB-S6Lh7T_LBUgCQZn1ag@mail.gmail.com>
+	<CAKuRcO+OaknUtj9mJ+SQJPMj70hdLTMkDYCXq4L5JdwzDKdj6g@mail.gmail.com>
+	<CAD=FV=Vy5vRan0KEDFFwVO0omgsUMwJK6WwCsWxGYynzT-e5ig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cam-admin0.cambridge.arm.com ([217.140.96.50]:33700 "EHLO
-	cam-admin0.cambridge.arm.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750756AbaF0KNL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Jun 2014 06:13:11 -0400
-Content-Disposition: inline
-In-Reply-To: <CAOEd-H3+MwT3DMqMO0XHaZQqYAN0zaQqRMjC_UjyJn5ZwCaMoQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=Vy5vRan0KEDFFwVO0omgsUMwJK6WwCsWxGYynzT-e5ig@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, ks.giri@samsung.com, Prashanth G <prashanth.g@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Vincent Yang <vincent.yang.fujitsu@gmail.com>
-Cc: "chris@printf.net" <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "anton@enomsg.org" <anton@enomsg.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "patches@linaro.org" <patches@linaro.org>, "andy.green@linaro.org" <andy.green@linaro.org>, "jaswinder.singh@linaro.org" <jaswinder.singh@linaro.org>, "Vincent.Yang@tw.fujitsu.com" <Vincent.Yang@tw.fujitsu.com>
 
-On Fri, Jun 27, 2014 at 04:32:21AM +0100, Vincent Yang wrote:
-> 2014-06-26 19:03 GMT+08:00 Mark Rutland <mark.rutland@arm.com>:
-> > On Thu, Jun 26, 2014 at 07:23:30AM +0100, Vincent Yang wrote:
-> >> This patch adds new host controller driver for
-> >> Fujitsu SDHCI controller f_sdh30.
-> >>
-> >> Signed-off-by: Vincent Yang <Vincent.Yang@tw.fujitsu.com>
-> >> ---
-> >>  .../devicetree/bindings/mmc/sdhci-fujitsu.txt      |  35 +++
-> >>  drivers/mmc/host/Kconfig                           |   7 +
-> >>  drivers/mmc/host/Makefile                          |   1 +
-> >>  drivers/mmc/host/sdhci_f_sdh30.c                   | 346 +++++++++++++++++++++
-> >>  drivers/mmc/host/sdhci_f_sdh30.h                   |  40 +++
-> >>  5 files changed, 429 insertions(+)
-> >>  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
-> >>  create mode 100644 drivers/mmc/host/sdhci_f_sdh30.c
-> >>  create mode 100644 drivers/mmc/host/sdhci_f_sdh30.h
-> >>
-> >> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
-> >> new file mode 100644
-> >> index 0000000..40add438
-> >> --- /dev/null
-> >> +++ b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
-> >> @@ -0,0 +1,35 @@
-> >> +* Fujitsu SDHCI controller
-> >> +
-> >> +This file documents differences between the core properties in mmc.txt
-> >> +and the properties used by the sdhci_f_sdh30 driver.
-> >> +
-> >> +Required properties:
-> >> +- compatible: "fujitsu,f_sdh30"
-> >
-> > Please use '-' rather than '_' in compatible strings.
-> 
-> Hi Mark,
-> Yes, I'll update it to '-' in next version.
-> 
-> >
-> > This seems to be the name of the driver. What is the precise name of the
-> > IP block?
-> 
-> The name of the IP block is "F_SDH30".
-> That's why it uses "fujitsu,f_sdh30"
-
-Hmm. I'd still be tempted to use "fujitsu,f-sdh30".
-
-> >
-> > [...]
-> >
-> >> +       if (!of_property_read_u32(pdev->dev.of_node, "vendor-hs200",
-> >> +                                 &priv->vendor_hs200))
-> >> +               dev_info(dev, "Applying vendor-hs200 setting\n");
-> >> +       else
-> >> +               priv->vendor_hs200 = 0;
-> >
-> > This wasn't in the binding document, and a grep for "vendor-hs200" in a
-> > v3.16-rc2 tree found me nothing.
-> >
-> > Please document this.
-> 
-> Yes, it is a setting for a vendor specific register.
-> I'll update it in next version.
-
-It would be nice to know exactly what this is. We usually shy clear of
-placing register values in dt. I can wait until the next posting if
-you're goin to document that.
-
-> >> +       if (!of_property_read_u32(pdev->dev.of_node, "bus-width", &bus_width)) {
-> >> +               if (bus_width == 8) {
-> >> +                       dev_info(dev, "Applying 8 bit bus width\n");
-> >> +                       host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-> >> +               }
-> >> +       }
-> >
-> > What if bus-width is not 8, or is not present?
-> 
-> In both cases, it will not touch host->mmc->caps at all. Then sdhci_add_host()
-> will handle it and set MMC_CAP_4_BIT_DATA as default:
-> 
-> [...]
+On Thu, Jun 26, 2014 at 9:48 PM, Doug Anderson <dianders@chromium.org> wrote:
+> Yuvaraj,
+>
+> On Thu, Jun 26, 2014 at 4:21 AM, Yuvaraj Kumar <yuvaraj.cd@gmail.com> wrote:
+>> Doug
+>>
+>> On Tue, Jun 24, 2014 at 11:30 PM, Doug Anderson <dianders@chromium.org> wrote:
+>>> Yuvaraj,
+>>>
+>>> On Mon, Jun 23, 2014 at 3:45 AM, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
+>>>> This patch makes use of mmc_regulator_get_supply() to handle
+>>>> the vmmc and vqmmc regulators.Also it moves the code handling
+>>>> the these regulators to dw_mci_set_ios().It turned on the vmmc
+>>>> and vqmmc during MMC_POWER_UP and MMC_POWER_ON,and turned off
+>>>> during MMC_POWER_OFF.
+>>>>
+>>>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+>>>> ---
+>>>>  drivers/mmc/host/dw_mmc.c |   71 ++++++++++++++++++++++-----------------------
+>>>>  drivers/mmc/host/dw_mmc.h |    2 ++
+>>>>  2 files changed, 36 insertions(+), 37 deletions(-)
+>>>
+>>> Perhaps you could CC me on the whole series for the next version since
+>>> I was involved in privately reviewing previous versions?
+>> It was just accidental missing you in the CC .Surely i will add you in
+>> CC for next versions.
+>>>
+>>> Overall caveat for my review is that I'm nowhere near an SD/MMC expert.
+>>>
+>>>
+>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>>> index 1ac227c..f5cabce 100644
+>>>> --- a/drivers/mmc/host/dw_mmc.c
+>>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>>> @@ -937,6 +937,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>>         struct dw_mci_slot *slot = mmc_priv(mmc);
+>>>>         const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+>>>>         u32 regs;
+>>>> +       int ret;
+>>>>
+>>>>         switch (ios->bus_width) {
+>>>>         case MMC_BUS_WIDTH_4:
+>>>> @@ -975,16 +976,41 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>>
+>>>>         switch (ios->power_mode) {
+>>>>         case MMC_POWER_UP:
+>>>> +               if ((!IS_ERR(mmc->supply.vmmc)) &&
+>>>> +                               !test_bit(DW_MMC_CARD_POWERED, &slot->flags)) {
+>>>> +                       ret = regulator_enable(mmc->supply.vmmc);
+>>>> +                       if (!ret)
+>>>> +                               set_bit(DW_MMC_CARD_POWERED, &slot->flags);
+>>>> +               }
+>>>
+>>> As per below, I'm not sure why you'd want to turn on vqmmc and vmmc at
+>>> different times.
+>> As you can see people's have different opinion on this.When i had a
+>> look at the other drivers in the subsystem which does in the same flow
+>> as above.However i will change in the next version.
+>
+> Given my self proclaimed lack of SD/MMC knowledge, if others have a
+> good reason for doing them separate then you should do it that way.
+> So far I haven't heard that reason but I certainly could be wrong.
+>
+>
+>>>> @@ -225,6 +225,8 @@ struct dw_mci_slot {
+>>>>         unsigned long           flags;
+>>>>  #define DW_MMC_CARD_PRESENT    0
+>>>>  #define DW_MMC_CARD_NEED_INIT  1
+>>>> +#define DW_MMC_CARD_POWERED    2
+>>>> +#define DW_MMC_IO_POWERED      3
+>>>
+>>> I don't really think you should have two bits here.  From my
+>>> understanding of SD cards there should be very little reason to have
+>>> vqmmc and vmmc not powered at the same time.
+>> I think if i can use mmc_regulator_set_ocr(), we don't need additional
+>> flag.But for tps65090 mmc_regulator_get_ocr() and
+>> mmc_regulator_set_ocr() is failing as its a fixed-regulator.
+>
+> Can you explain more about what's failing?  It sure looks like mmc
+> core is supposed to handle this given comments below
+>
 > /*
-> * A controller may support 8-bit width, but the board itself
-> * might not have the pins brought out.  Boards that support
-> * 8-bit width must set "mmc->caps |= MMC_CAP_8_BIT_DATA;" in
-> * their platform code before calling sdhci_add_host(), and we
-> * won't assume 8-bit width for hosts without that CAP.
+> * If we're using a fixed/static regulator, don't call
+> * regulator_set_voltage; it would fail.
 > */
-> if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
-> mmc->caps |= MMC_CAP_4_BIT_DATA;
-
-Ok, but does it make sense for a dts to have:
-
-	bus-width = <1>;
-
-If so, we should presumably do something.
-
-If not, we should at least print a warning that the dtb doesn't make
-sense.
-
-Cheers,
-Mark.
+tps65090 driver does not register through fixed regulator framework.It
+uses normal regulator framework and supports only
+enable/disable/is_enabled callbacks.Also it lacks certain callbacks
+for list_voltage, get_voltage ,set_voltage etc.
+[    2.306476] dwmmc_exynos 12220000.mmc: Failed getting OCR mask: -22
+[    2.393403] dwmmc_exynos 12220000.mmc: could not set regulator OCR (-22)
+For the above reason,regulator framework treats fet4 as unused
+regulator and disables the vmmc regulator.
+> voltage = regulator_get_voltage(supply);
+>
+> if (!regulator_can_change_voltage(supply))
+>   min_uV = max_uV = voltage;
+>
+>
+> -Doug
