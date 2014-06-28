@@ -1,112 +1,37 @@
-From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: mwifiex card reset
-Date: Sat, 28 Jun 2014 10:23:23 +0300
-Message-ID: <20140628072322.GC7410@atomide.com>
-References: <CALtMJEBWPM+75wxM2Mp5EX_o6NWtZUJdYRCv6psbvdUn4k295w@mail.gmail.com>
- <20140628052220.GG10407@us.netrek.org>
+From: Clemens Eisserer <linuxhippy@gmail.com>
+Subject: No UHS support for O2 Micro, Inc. OZ600FJ0/OZ900FJ0/OZ600FJS?
+Date: Sat, 28 Jun 2014 09:42:43 +0200
+Message-ID: <CAFvQSYQtVWOqjjn_3Tr6R2VfgKb-=z2sb39A0HowJPehYYagQw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20140628052220.GG10407-kJBlkiJxCS/dtAWm4Da02A@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Cameron <quozl-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Andreas Fenkart <afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Bing Zhao <bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f179.google.com ([209.85.220.179]:62156 "EHLO
+	mail-vc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751079AbaF1Hmo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 28 Jun 2014 03:42:44 -0400
+Received: by mail-vc0-f179.google.com with SMTP id id10so5858185vcb.10
+        for <linux-mmc@vger.kernel.org>; Sat, 28 Jun 2014 00:42:44 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-* James Cameron <quozl-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org> [140628 08:24]:
-> On Fri, Jun 27, 2014 at 04:39:42PM +0200, Andreas Fenkart wrote:
-> > I have an mwifiex module(sd8787) behind omap_hsmmc(am33xx-soc)
-> > The module is non-removable wired fix to soc. Now the wifi module
-> > needs 2 clocks; one is a sleep clock the other used when not
-> > sleeping.
-> > While the sleep clock is fixed, @32 kHz, the system clock can be
-> > one out of several values, but can be be derived automatically
-> > from the sleep clock. But this requires the clock to be present
-> > when the wifi module comes out of reset.
-> > 
-> > Another problem is software reboot, at initial power on the wifi
-> > card will react to mmc discovery. After a software reset of the
-> > host it will not, because it has already been disvovered and
-> > didn't notice the host rebooted, unless we reset it as well.
-> > While this seems obvious, the problem is that the reset is needed
-> > before the card can be discovered. Which means we cannot move the
-> > reset logic into the mwifiex driver, since that driver has not
-> > yet been selected through vendor/product id.
-> > 
-> 
-> we had same problem with sd8787 and a different system design.  we
-> added reset-gpios property [1] and used it in sdhci-pxav3.c [2] as
-> sdhci_pxav3_toggle_reset_gpio()
-> 
-> 1.
-> 
-> http://code.coreboot.org/p/openfirmware/source/tree/HEAD/cpu/arm/olpc/sdhci.fth#L104
-> 
-> 2.
-> 
-> http://dev.laptop.org/git/olpc-kernel/tree/drivers/mmc/host/sdhci-pxav3.c?h=arm-3.5#n229
-> 
-> > the reset logic:
-> >         gpiod_set_value(card->gpiod_reset, 0);
-> >         clk_enable(card->sleep_clock);
-> >         udelay(1000);
-> >         gpiod_set_value(card->gpiod_reset, 1);
-> > 
-> > The idea so far was to extend the device-tree node of the
-> > mmc slot by some reset leafs;
-> > 
-> > &mmc {
-> >         ti,non-removable;
-> >         ..
-> >         peripheral-clocks = <&clk &clk2 ...>;
-> >         peripheral-reset-gpios = <&gpio0 1 1 &gpio1 2 3 ...>;
-> > }
-> > 
-> > in mmc_add_host, all clocks will be enabled and gpios be pulled
-> > low for 1 msec
-> 
-> we used 5ms.
-> 
-> > Is this a feasible solution?
-> > 
-> > 
-> > Another related issue, is the card reset in mwifiex driver:
-> > 
-> > static void sdio_card_reset_worker(struct work_struct *work)
-> > {
-> >         struct mmc_host *target = reset_host;
-> > 
-> >         pr_err("Resetting card...\n");
-> >         mmc_remove_host(target);
-> >         /* 20ms delay is based on experiment with sdhci controller */
-> >         mdelay(20);
-> >         mmc_add_host(target);
-> > }
-> > static DECLARE_WORK(card_reset_work, sdio_card_reset_worker);
-> > 
-> > There are obviously a lot of problems with this, e.g. custom debugfs
-> > entries created in the driver will be lost. But sometimes this
-> > code might avert disaster in case the command handlers between
-> > driver and firmware lost synchronization
-> > 
-> > How could this be done in a better way?
-> 
-> i'm interested as well.
+Hello,
 
-Wouldn't it be best to have the mwifiex properly handle the
-reset GPIOs and idle status pins?
+My Dell latitude has an integrated O2 Micro SDHC card reader, listed
+by lspci as:
+0a:00.0 SD Host controller: O2 Micro, Inc. OZ600FJ0/OZ900FJ0/OZ600FJS
+SD/MMC Card Reader Controller (rev 05)
 
-Those are not part of the SDIO spec AFAIK, and the mmc
-controller should not need to care about those.
+So far I was happily using it with cheap/slow SDHC cards.
+However recently I bought a "Samsung SDHC Pro" card which manages to
+aequentially write about 45mb/s when I dual-boot Windows7.
 
-Also, at least omaps also have an issue where suspend won't
-work with mwifiex loaded FYI.
+The same card caps out on Linux at about ~4-5mb/s:
+> dd if=/dev/sda of=/dev/mmcblk0 conv=fsync bs=4M count=256
+> 1073741824 bytes (1.1 GB) copied, 258.515 s, 4.2 MB/s
 
-Regards,
+My raspberry pi is able to write to the card at about ~8mb/s.
 
-Tony
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Any ideas how to debug this issue would be highly appreciated.
+
+Thank you in advance, Clemens
