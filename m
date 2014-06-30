@@ -1,13 +1,13 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH resend v3 1/2] dt: bindings: mmc: Add sdio
- function subnode documentation
-Date: Mon, 30 Jun 2014 11:07:24 +0200
-Message-ID: <1404119245-5839-2-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH resend v3 2/2] mmc: Add SDIO function devicetree
+ subnode parsing
+Date: Mon, 30 Jun 2014 11:07:25 +0200
+Message-ID: <1404119245-5839-3-git-send-email-hdegoede@redhat.com>
 References: <1404119245-5839-1-git-send-email-hdegoede@redhat.com>
 Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBW6RYSOQKGQECOSUBFA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBYGRYSOQKGQEDWKMRBQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 In-Reply-To: <1404119245-5839-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
@@ -21,81 +21,148 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
 
-While SDIO devices are runtime probable they sometimes need nonprobable
+This adds SDIO devicetree subnode parsing to the mmc core. While
+SDIO devices are runtime probable they sometimes need nonprobable
 additional information on embedded systems, like an additional gpio
-interrupt or a clock. This binding describes how to add child nodes to the
-devicetree to supply this information.
+interrupt or a clock. This patch makes it possible to supply this
+information from the devicetree. SDIO drivers will find a pointer
+to the devicenode in their devices of_node pointer.
 
 Signed-off-by: Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
-[hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org: Documented the need for #address- and #size-cells]
-[hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org: Added a real world example]
+[hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org: Misc. cleanups]
 Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- Documentation/devicetree/bindings/mmc/mmc.txt | 48 ++++++++++++++++++++++++++-
- 1 file changed, 47 insertions(+), 1 deletion(-)
+ drivers/mmc/core/bus.c      |  4 ++++
+ drivers/mmc/core/core.c     | 28 ++++++++++++++++++++++++++++
+ drivers/mmc/core/core.h     |  3 +++
+ drivers/mmc/core/sdio_bus.c | 11 +++++++++++
+ 4 files changed, 46 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index 3c18001..2f362c4 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -62,7 +62,31 @@ Optional SDIO properties:
- - keep-power-in-suspend: Preserves card power during a suspend/resume cycle
- - enable-sdio-wakeup: Enables wake up of host system on SDIO IRQ assertion
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index d2dbf02..3b2fca9 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -16,6 +16,7 @@
+ #include <linux/err.h>
+ #include <linux/slab.h>
+ #include <linux/stat.h>
++#include <linux/of.h>
+ #include <linux/pm_runtime.h>
  
--Example:
-+
-+Use of Function subnodes
-+------------------------
-+
-+On embedded systems the cards connected to a host may need additional
-+properties. These can be specified in subnodes to the host controller node.
-+The subnodes are identified by the standard 'reg' property.
-+Which information exactly can be specified depends on the bindings for the
-+SDIO function driver for the subnode, as specified by the compatible string.
-+
-+Required host node properties when using function subnodes:
-+- #address-cells: should be one. The cell is the slot id.
-+- #size-cells: should be zero.
-+
-+Required function subnode properties:
-+- compatible: name of SDIO function following generic names recommended practice
-+- reg: Must contain the SDIO function number of the function this subnode
-+       describes. A value of 0 denotes the memory SD function, values from
-+       1 to 7 denote the SDIO functions.
-+
-+
-+Examples
-+--------
-+
-+Basic example:
+ #include <linux/mmc/card.h>
+@@ -360,6 +361,8 @@ int mmc_add_card(struct mmc_card *card)
+ #endif
+ 	mmc_init_context_info(card->host);
  
- sdhci@ab000000 {
- 	compatible = "sdhci";
-@@ -76,3 +100,25 @@ sdhci@ab000000 {
- 	keep-power-in-suspend;
- 	enable-sdio-wakeup;
++	card->dev.of_node = mmc_of_find_child_device(card->host, 0);
++
+ 	ret = device_add(&card->dev);
+ 	if (ret)
+ 		return ret;
+@@ -388,6 +391,7 @@ void mmc_remove_card(struct mmc_card *card)
+ 				mmc_hostname(card->host), card->rca);
+ 		}
+ 		device_del(&card->dev);
++		of_node_put(card->dev.of_node);
+ 	}
+ 
+ 	put_device(&card->dev);
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 7dc0c85..ca2577d 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1205,6 +1205,34 @@ EXPORT_SYMBOL(mmc_of_parse_voltage);
+ 
+ #endif /* CONFIG_OF */
+ 
++static int mmc_of_get_func_num(struct device_node *node)
++{
++	u32 reg;
++	int ret;
++
++	ret = of_property_read_u32(node, "reg", &reg);
++	if (ret < 0)
++		return ret;
++
++	return reg;
++}
++
++struct device_node *mmc_of_find_child_device(struct mmc_host *host,
++		unsigned func_num)
++{
++	struct device_node *node;
++
++	if (!host->parent || !host->parent->of_node)
++		return NULL;
++
++	for_each_child_of_node(host->parent->of_node, node) {
++		if (mmc_of_get_func_num(node) == func_num)
++			return node;
++	}
++
++	return NULL;
++}
++
+ #ifdef CONFIG_REGULATOR
+ 
+ /**
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 443a584..f712f6e 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -32,6 +32,9 @@ struct mmc_bus_ops {
+ void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
+ void mmc_detach_bus(struct mmc_host *host);
+ 
++struct device_node *mmc_of_find_child_device(struct mmc_host *host,
++		unsigned func_num);
++
+ void mmc_init_erase(struct mmc_card *card);
+ 
+ void mmc_set_chip_select(struct mmc_host *host, int mode);
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 4fa8fef9..4032d25 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -21,7 +21,9 @@
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/sdio_func.h>
++#include <linux/of.h>
+ 
++#include "core.h"
+ #include "sdio_cis.h"
+ #include "sdio_bus.h"
+ 
+@@ -302,6 +304,13 @@ static void sdio_acpi_set_handle(struct sdio_func *func)
+ static inline void sdio_acpi_set_handle(struct sdio_func *func) {}
+ #endif
+ 
++static void sdio_set_of_node(struct sdio_func *func)
++{
++	struct mmc_host *host = func->card->host;
++
++	func->dev.of_node = mmc_of_find_child_device(host, func->num);
++}
++
+ /*
+  * Register a new SDIO function with the driver model.
+  */
+@@ -311,6 +320,7 @@ int sdio_add_func(struct sdio_func *func)
+ 
+ 	dev_set_name(&func->dev, "%s:%d", mmc_card_id(func->card), func->num);
+ 
++	sdio_set_of_node(func);
+ 	sdio_acpi_set_handle(func);
+ 	ret = device_add(&func->dev);
+ 	if (ret == 0) {
+@@ -334,6 +344,7 @@ void sdio_remove_func(struct sdio_func *func)
+ 
+ 	acpi_dev_pm_detach(&func->dev, false);
+ 	device_del(&func->dev);
++	of_node_put(func->dev.of_node);
+ 	put_device(&func->dev);
  }
-+
-+Example with sdio function subnode:
-+
-+mmc3: mmc@01c12000 {
-+	#address-cells = <1>;
-+	#size-cells = <0>;
-+
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&mmc3_pins_a>;
-+	vmmc-supply = <&reg_vmmc3>;
-+	bus-width = <4>;
-+	non-removable;
-+	status = "okay";
-+
-+	brcmf: bcrmf@1 {
-+		reg = <1>;
-+		compatible = "brcm,bcm43xx-fmac";
-+		interrupt-parent = <&pio>;
-+		interrupts = <10 8>; /* PH10 / EINT10 */
-+		interrupt-names = "host-wake";
-+	};
-+};
+ 
 -- 
 2.0.0
