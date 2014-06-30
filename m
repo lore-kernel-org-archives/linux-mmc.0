@@ -1,76 +1,98 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: Re: [PATCH v3 2/3] mmc: omap_hsmmc: Pin remux workaround to support
- SDIO interrupt on AM335x.
-Date: Mon, 30 Jun 2014 14:23:42 +0200
-Message-ID: <CALtMJEAqmYPy+ALO1FBGGRSvf9_cJx75hWuEB+7SowxVCa2KKg@mail.gmail.com>
-References: <1384761240-11005-1-git-send-email-afenkart@gmail.com>
-	<1384761240-11005-3-git-send-email-afenkart@gmail.com>
-	<CAOf5uw=9KJ312PVzMVEHX-Lj=iYpeZOYFduB8iOu9o+-863CYw@mail.gmail.com>
-	<CALtMJEBfeww=ymGMXWtwjtZrpqpFrkRPEOti_uPrE63SBk3Dtw@mail.gmail.com>
-	<528A3EB2.1010103@ti.com>
-	<20131119154909.GD10317@atomide.com>
-	<528B8ADA.6030703@ti.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to handle regulators
+Date: Mon, 30 Jun 2014 08:06:46 -0700
+Message-ID: <CAD=FV=WCFFvb1+d3XEhTNXgzSksC__t4g1OLvhO-iDXSHHPFsQ@mail.gmail.com>
+References: <1403520321-2431-1-git-send-email-yuvaraj.cd@samsung.com>
+	<1403520321-2431-2-git-send-email-yuvaraj.cd@samsung.com>
+	<CAD=FV=UGjm9y3XoBgWKjw9kp9W=ZrwB-S6Lh7T_LBUgCQZn1ag@mail.gmail.com>
+	<CAKuRcO+OaknUtj9mJ+SQJPMj70hdLTMkDYCXq4L5JdwzDKdj6g@mail.gmail.com>
+	<CAD=FV=Vy5vRan0KEDFFwVO0omgsUMwJK6WwCsWxGYynzT-e5ig@mail.gmail.com>
+	<53B15476.4030000@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <528B8ADA.6030703@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Balaji T K <balajitk@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>, Michael Trimarchi <michael@amarulasolutions.com>, Chris Ball <cjb@laptop.org>, Grant Likely <grant.likely@secretlab.ca>, Felipe Balbi <balbi@ti.com>, Daniel Mack <zonque@gmail.com>, linux-doc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, Linux OMAP Mailing List <linux-omap@vger.kernel.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <53B15476.4030000@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Yuvaraj Kumar <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, ks.giri@samsung.com, Prashanth G <prashanth.g@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Jaehoon,
 
-2013-11-19 16:59 GMT+01:00 Balaji T K <balajitk@ti.com>:
-> On Tuesday 19 November 2013 09:19 PM, Tony Lindgren wrote:
+On Mon, Jun 30, 2014 at 5:13 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> On 06/27/2014 01:18 AM, Doug Anderson wrote:
+>> Yuvaraj,
 >>
->> * Balaji T K <balajitk@ti.com> [131118 08:23]:
+>> On Thu, Jun 26, 2014 at 4:21 AM, Yuvaraj Kumar <yuvaraj.cd@gmail.com> wrote:
+>>> Doug
 >>>
->>> On Monday 18 November 2013 05:45 PM, Andreas Fenkart wrote:
+>>> On Tue, Jun 24, 2014 at 11:30 PM, Doug Anderson <dianders@chromium.org> wrote:
+>>>> Yuvaraj,
 >>>>
->>>> 2013/11/18 Michael Trimarchi <michael@amarulasolutions.com>:
+>>>> On Mon, Jun 23, 2014 at 3:45 AM, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
+>>>>> This patch makes use of mmc_regulator_get_supply() to handle
+>>>>> the vmmc and vqmmc regulators.Also it moves the code handling
+>>>>> the these regulators to dw_mci_set_ios().It turned on the vmmc
+>>>>> and vqmmc during MMC_POWER_UP and MMC_POWER_ON,and turned off
+>>>>> during MMC_POWER_OFF.
 >>>>>
->>>>> On Mon, Nov 18, 2013 at 8:53 AM, Andreas Fenkart <afenkart@gmail.com>
->>>>> wrote:
->>>>>>
->>>>>>   static int omap_hsmmc_card_detect(struct device *dev, int slot)
->>>>>>   {
->>>>>>          struct omap_hsmmc_host *host = dev_get_drvdata(dev);
->>>>>> @@ -452,10 +474,25 @@ static int omap_hsmmc_gpio_init(struct
->>>>>> omap_mmc_platform_data *pdata)
->>>>>>          } else
->>>>>>                  pdata->slots[0].gpio_wp = -EINVAL;
->>>>>>
->>>>>> +       if (gpio_is_valid(pdata->slots[0].gpio_cirq)) {
->>>>>> +               pdata->slots[0].sdio_irq =
->>>>>> +
->>>>>> gpio_to_irq(pdata->slots[0].gpio_cirq);
+>>>>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+>>>>> ---
+>>>>>  drivers/mmc/host/dw_mmc.c |   71 ++++++++++++++++++++++-----------------------
+>>>>>  drivers/mmc/host/dw_mmc.h |    2 ++
+>>>>>  2 files changed, 36 insertions(+), 37 deletions(-)
+>>>>
+>>>> Perhaps you could CC me on the whole series for the next version since
+>>>> I was involved in privately reviewing previous versions?
+>>> It was just accidental missing you in the CC .Surely i will add you in
+>>> CC for next versions.
+>>>>
+>>>> Overall caveat for my review is that I'm nowhere near an SD/MMC expert.
+>>>>
+>>>>
+>>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>>>> index 1ac227c..f5cabce 100644
+>>>>> --- a/drivers/mmc/host/dw_mmc.c
+>>>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>>>> @@ -937,6 +937,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>>>         struct dw_mci_slot *slot = mmc_priv(mmc);
+>>>>>         const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+>>>>>         u32 regs;
+>>>>> +       int ret;
 >>>>>
+>>>>>         switch (ios->bus_width) {
+>>>>>         case MMC_BUS_WIDTH_4:
+>>>>> @@ -975,16 +976,41 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 >>>>>
->>>>> What is this? re-assign the platform data?
+>>>>>         switch (ios->power_mode) {
+>>>>>         case MMC_POWER_UP:
+>>>>> +               if ((!IS_ERR(mmc->supply.vmmc)) &&
+>>>>> +                               !test_bit(DW_MMC_CARD_POWERED, &slot->flags)) {
+>>>>> +                       ret = regulator_enable(mmc->supply.vmmc);
+>>>>> +                       if (!ret)
+>>>>> +                               set_bit(DW_MMC_CARD_POWERED, &slot->flags);
+>>>>> +               }
 >>>>
->>>>
->>>> Seems like, I didn't pay attention to this.
->>>> Simply kept in line how the write protection/read only pins are managed.
->>>> I'd rather not change this part, or not changing it as part of adding
->>>> sdio IRQ support it.
->>>>
->>>> Maybe somebody else on the list can explain why the platform data
->>>> contains elements
->>>> that are modified during runtime.
->>>>
->>>> - set_power / get_ro function callbacks
->>>> - ocr_mask.
->>>>
->>> Hi,
->>>
->>> few params were passed via platform data in non-DT case and never cached
->>> in internal data structure, with non-dt support going away soon, I am
->>> planning to cleanup pdata usage in the driver when it gets to DT only
->>> support.
+>>>> As per below, I'm not sure why you'd want to turn on vqmmc and vmmc at
+>>>> different times.
+>>> As you can see people's have different opinion on this.When i had a
+>>> look at the other drivers in the subsystem which does in the same flow
+>>> as above.However i will change in the next version.
 >>
+>> Given my self proclaimed lack of SD/MMC knowledge, if others have a
+>> good reason for doing them separate then you should do it that way.
+>> So far I haven't heard that reason but I certainly could be wrong.
+>
+> At first time, i had believed nothing problem that it turns on vmmc and vqmmc at different time.
+> It could have the potential problem.
 
-any news on this?
+OK.  As I said I'm nowhere near an expert on SD/MMC, so if there's
+something out there that says that turning vmmc on before vqmmc is the
+right thing to do then I guess that's the answer.  I would still be
+very curious to get more details on what the potential problem is.
+Could you provide a reference to documentation that says vmmc should
+be on before vqmmc or describe a situation where it's important?
 
-I'd like to reuse generic mmc_of_parse, kind of difficult with the
-current driver state
+Thanks!
+
+-Doug
