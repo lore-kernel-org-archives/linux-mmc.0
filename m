@@ -1,62 +1,41 @@
-From: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
-Subject: RE: [RFC PATCH 1/1 v7]mmc: Support-FFU-for-eMMC-v5.0
-Date: Tue, 1 Jul 2014 11:39:19 +0000
-Message-ID: <FDD07FEB422EF948A392FDC201AEEAE64B8EC655@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE648AFA7EE@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CANEJEGu9PYi5DxuEWBwEHjUqWt2J-sEDZMKLwvZTUBdUnK=7XA@mail.gmail.com>
-	<CANEJEGs2dAA0DSZfwYcV8nZn4Z1+MqAa0bJZocTZT5zjXe_dDQ@mail.gmail.com>
-	<868uodnch6.fsf@void.printf.net>
- <CAC1bqKjbPqoyH1D1UYQ35trrPzQboYfkC+7tdkFFBYSijV_Oyw@mail.gmail.com>
+From: Yuvaraj Cd <yuvaraj.lkml@gmail.com>
+Subject: Re: mwifiex card reset
+Date: Tue, 1 Jul 2014 17:50:08 +0530
+Message-ID: <CA+NduCAuRFTQneJUBiKP2Aeq2HCxe71yxg_iDDStkNvhzRg-Rg@mail.gmail.com>
+References: <CALtMJEBWPM+75wxM2Mp5EX_o6NWtZUJdYRCv6psbvdUn4k295w@mail.gmail.com>
+	<20140628052220.GG10407@us.netrek.org>
+	<20140628072322.GC7410@atomide.com>
+	<CALtMJED5vfgkAhMBXKaDP6u9U9n41c-wziyTxt6e_7XTSxG3oQ@mail.gmail.com>
+	<20140630061912.GA2461@atomide.com>
+	<53B1BAC1.3090902@zonque.org>
+	<477F20668A386D41ADCC57781B1F70430FE5F37540@SC-VEXCH1.marvell.com>
+	<20140701065721.GM24891@us.netrek.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1blp0183.outbound.protection.outlook.com ([207.46.163.183]:15216
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750955AbaGALjY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 1 Jul 2014 07:39:24 -0400
-In-Reply-To: <CAC1bqKjbPqoyH1D1UYQ35trrPzQboYfkC+7tdkFFBYSijV_Oyw@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <20140701065721.GM24891@us.netrek.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: James Cameron <quozl@laptop.org>
+Cc: Bing Zhao <bzhao@marvell.com>, Daniel Mack <daniel@zonque.org>, Tony Lindgren <tony@atomide.com>, Andreas Fenkart <afenkart@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Douglas Anderson <dianders@chromium.org>, Tomasz Figa <t.figa@samsung.com>, sunil joshi <joshi@samsung.com>, prashanth.g@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>, Chris Ball <chris@printf.net>
-Cc: Grant Grundler <grundler@chromium.org>, "cjb@laptop.org" <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Olof Johansson <olofj@chromium.org>
 
-SGkgQ2hyaXMsDQoNClJlIHlvdXIgY29uY2VybiB0aGF0IHRoZSBwYXRjaCB3YXMgbm90IHRlc3Rl
-ZCDigJMgc29tZSBvZiBTYW5EaXNr4oCZcyBPRU0gY3VzdG9tZXJzIGhhdmUgaW1wbGVtZW50ZWQg
-dGhlIHBhdGNoLCBhbmQgdGhleSByZXBvcnQgdGhhdCBpdCBpcyB3b3JraW5nIGZvciB0aGVtLg0K
-DQpUaGFua3MNCkF2aQ0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogSHNpbi1I
-c2lhbmcgVHNlbmcgW21haWx0bzpoc2luaHNpYW5ndHNlbmdAZ21haWwuY29tXSANClNlbnQ6IFR1
-ZXNkYXksIEp1bHkgMDEsIDIwMTQgOToyOSBBTQ0KVG86IENocmlzIEJhbGwNCkNjOiBHcmFudCBH
-cnVuZGxlcjsgY2piQGxhcHRvcC5vcmc7IFVsZiBIYW5zc29uOyBsaW51eC1tbWNAdmdlci5rZXJu
-ZWwub3JnOyBBbGV4IExlbWJlcmc7IEF2aSBTaGNoaXNsb3dza2k7IE9sb2YgSm9oYW5zc29uDQpT
-dWJqZWN0OiBSZTogW1JGQyBQQVRDSCAxLzEgdjddbW1jOiBTdXBwb3J0LUZGVS1mb3ItZU1NQy12
-NS4wDQoNCkhpLCBDaHJpcywNCkkgdGhpbmsgdGhlcmUgYXJlIHR3byByZWFzb25zIHdoeSBkb2lu
-ZyBGRlUgaW4ga2VybmVsLXNwYWNlIG1ha2VzIG1vcmUgc2Vuc2UuDQoNCkZpcnN0LCBzb21lIGVN
-TUMgKGFjY29yZGluZyB0byBleHRDU0RbNDkyXSBGRlVfRkVBVFVSRVMpIHdpbGwgbmVlZCB0byBy
-ZXN0YXJ0IGVNTUMgYWZ0ZXIgRkZVLg0KDQpTZWNvbmQsIGlmIGhvc3Qgd2FudCB0byB2b3VjaCAi
-YXRtb2ljIiBpbiBGRlUgcHJvY2Vzcywgd2UgbmVlZCB0byBjYWxsIG1tY19jbGFpbV9ob3N0IEFQ
-SSwgYW5kIHRoaXMgQVBJIGlzIHRoZSBrZXJuZWwtc3BhY2UgY29kZS4gSSBzYWlkICJpZiINCmlz
-IGJlY2F1c2UgZU1NQyB2ZW5kb3JzIG1heSB0YWtlIGNhcmUgdGhpcy4gU28sIGhvc3QgbWF5IG5v
-dCBuZWVkIHRvIHdvcnJ5IGFib3V0IHRoaXMuDQoNClRoYW5rcywNCkhzaW5oc2lhbmcNCg0KMjAx
-NC0wNy0wMSA4OjM0IEdNVCswODowMCBDaHJpcyBCYWxsIDxjaHJpc0BwcmludGYubmV0PjoNCj4g
-SGkgR3JhbnQsIHNvcnJ5IGFib3V0IHRoZSBkZWxheS4NCj4NCj4gT24gVHVlLCBKdWwgMDEgMjAx
-NCwgR3JhbnQgR3J1bmRsZXIgd3JvdGU6DQo+PiBwaW5nPyBBbm90aGVyIHdlZWsgaXMgcGFzdC4N
-Cj4+DQo+PiBJIGtub3cgeW91IGd1eXMgYXJlIGJ1c3kgd2l0aCBvdGhlciBzdHVmZi4gQnV0IHBs
-ZWFzZSBhdCBsZWFzdCANCj4+IHB1Ymxpc2ggd2hhdCB5b3UgdGhpbmsgdGhlIG5leHQgc3RlcHMg
-Zm9yIHRoaXMgcGF0Y2ggYXJlLg0KPj4NCj4+IFRoaXMgaXMgYSBjcml0aWNhbCBwYXRjaCBmb3Ig
-c3VwcG9ydGluZyBlTU1DIHByb2R1Y3RzIGFuZCBhZGRpbmcgDQo+PiBhZGRpdGlvbmFsIHN1cHBv
-cnQgZm9yIG90aGVyIHZlbmRvcnMuIEknZCBsaWtlIHRvIGNvbnRpbnVlIHdvcmtpbmcgDQo+PiB3
-aXRoICJ1cHN0cmVhbSIgYW5kIHRoZSBsYWNrIG9mIHJlc3BvbnNlIGluIHRoaXMgY2FzZSBpcyBt
-YWtpbmcgdGhpcyANCj4+IHVubmVjZXNzYXJpbHkgZGlmZmljdWx0Lg0KPg0KPiBJdCdzIHRvdWdo
-IHRvIG1lcmdlIGEgc2lnbmlmaWNhbnQgcGF0Y2ggdGhhdCB5b3UgaGF2ZW4ndCB0ZXN0ZWQgYW5k
-IHdlIA0KPiBoYXZlbid0IHRlc3RlZC4gIFdlIGNvdWxkIGRvIGl0LCB0aG91Z2ggLS0gSSdkIGxp
-a2UgdG8gaGVhciB3aGF0IFVsZiANCj4gdGhpbmtzLiAgUGxlYXNlIGNvdWxkIHlvdSBnaXZlIGEg
-cXVpY2sgZXhwbGFuYXRpb24gb2Ygd2h5IGRvaW5nIHRoaXMgDQo+IGluIGtlcm5lbC1zcGFjZSBt
-YWtlcyBtb3JlIHNlbnNlIHRoYW4gdXNpbmcgeW91ciBtbWMtdXRpbHMgdmVyc2lvbj8NCj4NCj4g
-VGhhbmtzLA0KPg0KPiAtIENocmlzLg0KPiAtLQ0KPiBDaHJpcyBCYWxsICAgPGh0dHA6Ly9wcmlu
-dGYubmV0Lz4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
-IGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyIgDQo+IGluIHRoZSBib2R5IG9mIGEgbWVzc2Fn
-ZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIA0KPiBpbmZvIGF0
-ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
+On Tue, Jul 1, 2014 at 12:27 PM, James Cameron <quozl@laptop.org> wrote:
+> On Mon, Jun 30, 2014 at 11:44:29PM -0700, Bing Zhao wrote:
+>> I may have missed something, but doesn't the MMC_POWER_OFF and
+>> MMC_POWER_ON|UP handling in controller driver help?
+>> Anyway the clocks/GPIOs/regulators are sort of platform
+>> dependent. Would it be better putting it in /arch/arm/mach-xxxxx/?
+>
+> Wouldn't device tree for mmc be better?
+I have come across same problem.Below is the thread in which more
+discussions happened on this.
+ http://patchwork.ozlabs.org/patch/312444/
+I am adding few more those who are interested in this solution.
+>
+> --
+> James Cameron
+> http://quozl.linux.org.au/
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
