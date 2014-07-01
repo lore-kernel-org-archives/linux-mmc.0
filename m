@@ -1,74 +1,54 @@
-From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+From: Daniel Mack <daniel@zonque.org>
 Subject: Re: mwifiex card reset
-Date: Tue, 1 Jul 2014 10:41:02 +0300
-Message-ID: <20140701074101.GA8806@atomide.com>
-References: <CALtMJEBWPM+75wxM2Mp5EX_o6NWtZUJdYRCv6psbvdUn4k295w@mail.gmail.com>
- <20140628052220.GG10407@us.netrek.org>
- <20140628072322.GC7410@atomide.com>
- <CALtMJED5vfgkAhMBXKaDP6u9U9n41c-wziyTxt6e_7XTSxG3oQ@mail.gmail.com>
- <20140630061912.GA2461@atomide.com>
- <53B1BAC1.3090902@zonque.org>
- <477F20668A386D41ADCC57781B1F70430FE5F37540@SC-VEXCH1.marvell.com>
- <20140701065721.GM24891@us.netrek.org>
- <477F20668A386D41ADCC57781B1F70430FE5F3754E@SC-VEXCH1.marvell.com>
- <20140701070349.GN24891@us.netrek.org>
+Date: Tue, 01 Jul 2014 09:52:40 +0200
+Message-ID: <53B268C8.4030703@zonque.org>
+References: <CALtMJEBWPM+75wxM2Mp5EX_o6NWtZUJdYRCv6psbvdUn4k295w@mail.gmail.com> <20140628052220.GG10407@us.netrek.org> <20140628072322.GC7410@atomide.com> <CALtMJED5vfgkAhMBXKaDP6u9U9n41c-wziyTxt6e_7XTSxG3oQ@mail.gmail.com> <20140630061912.GA2461@atomide.com> <53B1BAC1.3090902@zonque.org> <477F20668A386D41ADCC57781B1F70430FE5F37540@SC-VEXCH1.marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20140701070349.GN24891-kJBlkiJxCS/dtAWm4Da02A@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Cameron <quozl-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>
-Cc: Bing Zhao <bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>, Andreas Fenkart <afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from svenfoo.org ([82.94.215.22]:42917 "EHLO mail.zonque.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751187AbaGAHwr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 1 Jul 2014 03:52:47 -0400
+In-Reply-To: <477F20668A386D41ADCC57781B1F70430FE5F37540@SC-VEXCH1.marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Bing Zhao <bzhao@marvell.com>, Tony Lindgren <tony@atomide.com>, Andreas Fenkart <afenkart@gmail.com>
+Cc: James Cameron <quozl@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 
-* James Cameron <quozl-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org> [140701 10:05]:
-> On Tue, Jul 01, 2014 at 12:02:25AM -0700, Bing Zhao wrote:
-> > Hi James,
-> > 
-> > > On Mon, Jun 30, 2014 at 11:44:29PM -0700, Bing Zhao wrote:
-> > > > I may have missed something, but doesn't the MMC_POWER_OFF and
-> > > > MMC_POWER_ON|UP handling in controller driver help?
-> > > > Anyway the clocks/GPIOs/regulators are sort of platform dependent.
-> > > > Would it be better putting it in /arch/arm/mach-xxxxx/?
-> > > 
-> > > Wouldn't device tree for mmc be better?
-> > 
-> > Yes, device tree is better for defining clocks/GPIO/regulators, etc.
-> > But I guess the reset logic (making use of these definitions) cannot
-> > be device tree?
+Hi Bing,
+
+On 07/01/2014 08:44 AM, Bing Zhao wrote:
+>> Hence, we'll need some sort of internal API for this, and a phandle
+>> in dts. I wonder whether that glue logic might be better off living
+>> in the mmc core, as mwifiex might well be interfaced to other
+>> hosts?
 > 
-> I think the reset logic can exist, but does nothing unless the device
-> tree definitions are present.
+> I may have missed something, but doesn't the MMC_POWER_OFF and
+> MMC_POWER_ON|UP handling in controller driver help? Anyway the
+> clocks/GPIOs/regulators are sort of platform dependent. Would it be
+> better putting it in /arch/arm/mach-xxxxx/?
 
-It might be possible to support the SDIO card specific
-clocks/GPIOs/regulators the MMC bus driver. But that may not
-work well in the long run as those pins are not connected to
-the MMC bus at all. If we wanted to explore adding card
-specific features to the MMC bus, I guess we should have:
+Regulators are not platform specific, they never were. For GPIOs and
+clocks, we can simply depend on CONFIG_GPIO_GENERIC and
+CONFIG_COMMON_CLK. I wouldn't even bother to care for anything else.
+This way, we also get a way of referencing the resources in dts through
+phandles for free.
 
-- Card reset-gpios
+What I was talking about above was that conducting the actual reset from
+the helper must be something that either the mmc core or individual host
+implementations can trigger. We need to repeat this action every time
+mwifiex decides to call its reset routine, which is currently
+implemented like this:
 
-- Card specific regulators on the card controlled by
-  a GPIO
+	mmc_remove_host(target);
+	mdelay(20);
+	mmc_add_host(target);
 
-- External card specific regulators
+But I haven't looked into possible ways of implementation yet.
+MMC_POWER_* might well be a suitable thing to hook into.
 
-- Card specific idle status pin (no idea what these pins
-  do on some of the mwifiex cards though?)
 
-And then these would have to be configured to get the
-SDIO card to probe. And they should be controllable also
-from user space to reset a card or to power it off.
-
-Then if we get a device that muxes two different SDIO cards
-on the same bus, then what do we do? They may both have
-their own regulators and reset GPIO pins.
-
-Regards,
-
-Tony
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+Daniel
