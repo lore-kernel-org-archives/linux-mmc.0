@@ -1,65 +1,50 @@
-From: Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>
-Subject: Re: [RFC PATCH 1/1 v7]mmc: Support-FFU-for-eMMC-v5.0
-Date: Tue, 1 Jul 2014 14:29:13 +0800
-Message-ID: <CAC1bqKjbPqoyH1D1UYQ35trrPzQboYfkC+7tdkFFBYSijV_Oyw@mail.gmail.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE648AFA7EE@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CANEJEGu9PYi5DxuEWBwEHjUqWt2J-sEDZMKLwvZTUBdUnK=7XA@mail.gmail.com>
-	<CANEJEGs2dAA0DSZfwYcV8nZn4Z1+MqAa0bJZocTZT5zjXe_dDQ@mail.gmail.com>
-	<868uodnch6.fsf@void.printf.net>
+From: Bing Zhao <bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Subject: RE: mwifiex card reset
+Date: Mon, 30 Jun 2014 23:44:29 -0700
+Message-ID: <477F20668A386D41ADCC57781B1F70430FE5F37540@SC-VEXCH1.marvell.com>
+References: <CALtMJEBWPM+75wxM2Mp5EX_o6NWtZUJdYRCv6psbvdUn4k295w@mail.gmail.com>
+ <20140628052220.GG10407@us.netrek.org> <20140628072322.GC7410@atomide.com>
+ <CALtMJED5vfgkAhMBXKaDP6u9U9n41c-wziyTxt6e_7XTSxG3oQ@mail.gmail.com>
+ <20140630061912.GA2461@atomide.com> <53B1BAC1.3090902@zonque.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f181.google.com ([209.85.212.181]:41227 "EHLO
-	mail-wi0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752025AbaGAG3O (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Jul 2014 02:29:14 -0400
-Received: by mail-wi0-f181.google.com with SMTP id n3so7121129wiv.8
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Jun 2014 23:29:13 -0700 (PDT)
-In-Reply-To: <868uodnch6.fsf@void.printf.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <53B1BAC1.3090902-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>
+Content-Language: en-US
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Andreas Fenkart <afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: James Cameron <quozl-2X9k7bc8m7Mdnm+yROfE0A@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: Grant Grundler <grundler@chromium.org>, "cjb@laptop.org" <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, Olof Johansson <olofj@chromium.org>
 
-Hi, Chris,
-I think there are two reasons why doing FFU in kernel-space makes more sense.
-
-First, some eMMC (according to extCSD[492] FFU_FEATURES) will need to
-restart eMMC after FFU.
-
-Second, if host want to vouch "atmoic" in FFU process, we need to call
-mmc_claim_host API, and this API is the kernel-space code. I said "if"
-is because eMMC vendors may take care this. So, host may not need to
-worry about this.
-
-Thanks,
-Hsinhsiang
-
-2014-07-01 8:34 GMT+08:00 Chris Ball <chris@printf.net>:
-> Hi Grant, sorry about the delay.
->
-> On Tue, Jul 01 2014, Grant Grundler wrote:
->> ping? Another week is past.
->>
->> I know you guys are busy with other stuff. But please at least publish
->> what you think the next steps for this patch are.
->>
->> This is a critical patch for supporting eMMC products and adding
->> additional support for other vendors. I'd like to continue working
->> with "upstream" and the lack of response in this case is making this
->> unnecessarily difficult.
->
-> It's tough to merge a significant patch that you haven't tested and we
-> haven't tested.  We could do it, though -- I'd like to hear what Ulf
-> thinks.  Please could you give a quick explanation of why doing this
-> in kernel-space makes more sense than using your mmc-utils version?
->
-> Thanks,
->
-> - Chris.
-> --
-> Chris Ball   <http://printf.net/>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgRGFuaWVsLA0KDQo+ID4gT0sgc28gd2UgY2FuJ3QgZG8gbXVjaCBhbnl0aGluZyBhdCBtd2lm
+aWV4IHByb2JlIHRpbWUgb24gU0RJTyBidXMNCj4gPiBiZWNhdXNlIGl0IHdvbid0IHByb2JlIHVu
+bGVzcyB0aGUgcGlucyBhcmUgY29uZmlndXJlZC4NCj4gPg0KPiA+IE1heWJlIHdlIHNob3VsZCBo
+YXZlIGEgc2VwYXJhdGUgbXdpZmlleC1wb3dlciBoZWxwZXIgbW9kdWxlIHRoYXQganVzdA0KPiA+
+IG1hbmFnZXMgdGhlIHJlc2V0L2lkbGUvcmVndWxhdG9yIHBpbnM/IFRoZW4gbXdpZmlleC1yZXNl
+dCBjYW4gYmUNCj4gPiBhbHdheXMgbG9hZGVkIGFuZCBjb25maWd1cmUgdGhpbmdzIHNvIG13aWZp
+ZXgtc2RpbyBjYW4gcHJvYmUgcHJvcGVybHkuDQo+ID4NCj4gPiBBbmQgbXdpZmlleC1yZXNldCBo
+ZWxwZXIgY2FuIGFsc28gcHJvdmlkZSB0aGUgdXNlciBzcGFjZSBpbnRlcmZhY2VzDQo+ID4gZm9y
+IHRoZSByZXNldC9pZGxlL3JlZ3VsYXRvciBwaW5zLg0KPiANCj4gWWVzLCBhIGhlbHBlciBtaWdo
+dCBiZSB0aGUgYmVzdCBzb2x1dGlvbi4gSXQgY291bGQgZXZlbiBiZSBhIGdlbmVyaWMgb25lLCB0
+aGF0DQo+IGp1c3QgdGFrZXMgYW55IG51bWJlciBvZiBjbG9ja3MsIHJlc2V0IEdQSU9zIGFuZCBy
+ZWd1bGF0b3JzIGFuZCB0YWtlcyBjYXJlDQo+IGZvciBzZXF1ZW5jaW5nIHRoZW0uIEhvd2V2ZXIs
+IHdlIG5lZWQgdG8gcmVmZXJlbmNlIHRoYXQgaGVscGVyIGZyb20gdGhlDQo+IG13aWZpZXggZHJp
+dmVyLCBmb3IgdHdvIHJlYXNvbnMuDQo+IA0KPiBhKSB3ZSBuZWVkIHRvIG1ha2Ugc3VyZSB0aGUg
+cmVzZXQgaGVscGVyIGdldHMgdG8gZG8gaXRzIGpvYiBiZWZvcmUgdGhlDQo+IG13aWZpZXggZHJp
+dmVyIHNjYW5zIHRoZSBTRElPIGJ1cywgYW5kDQo+IA0KPiBiKSB0aGUgcmVzZXQgaGVscGVyIG5l
+ZWRzIHRvIGJlIGNhbGxlZCB3aGVuIHRoZSBtbWMgaG9zdCBjb250cm9sbGVyIHdhbnRzDQo+IHRv
+IGRvIGEgY2FyZCByZXNldC4NCj4gDQo+IEhlbmNlLCB3ZSdsbCBuZWVkIHNvbWUgc29ydCBvZiBp
+bnRlcm5hbCBBUEkgZm9yIHRoaXMsIGFuZCBhIHBoYW5kbGUgaW4gZHRzLiBJDQo+IHdvbmRlciB3
+aGV0aGVyIHRoYXQgZ2x1ZSBsb2dpYyBtaWdodCBiZSBiZXR0ZXIgb2ZmIGxpdmluZyBpbiB0aGUg
+bW1jIGNvcmUsIGFzDQo+IG13aWZpZXggbWlnaHQgd2VsbCBiZSBpbnRlcmZhY2VkIHRvIG90aGVy
+IGhvc3RzPw0KDQpJIG1heSBoYXZlIG1pc3NlZCBzb21ldGhpbmcsIGJ1dCBkb2Vzbid0IHRoZSBN
+TUNfUE9XRVJfT0ZGIGFuZCBNTUNfUE9XRVJfT058VVAgaGFuZGxpbmcgaW4gY29udHJvbGxlciBk
+cml2ZXIgaGVscD8NCkFueXdheSB0aGUgY2xvY2tzL0dQSU9zL3JlZ3VsYXRvcnMgYXJlIHNvcnQg
+b2YgcGxhdGZvcm0gZGVwZW5kZW50LiBXb3VsZCBpdCBiZSBiZXR0ZXIgcHV0dGluZyBpdCBpbiAv
+YXJjaC9hcm0vbWFjaC14eHh4eC8/DQoNClRoYW5rcywNCkJpbmcNCg0KPiANCj4gDQo+IFRoYW5r
+cywNCj4gRGFuaWVsDQoNCg==
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
