@@ -1,26 +1,29 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-pci: SDIO host controller support for Intel
- Quark X1000
-Date: Wed, 2 Jul 2014 11:00:53 +0200
-Message-ID: <CAPDyKFq8cQHhadSAcaMG6XTKKaZ3XjX5PQyxsRteqhbcMaYZ0A@mail.gmail.com>
-References: <1403618196-7366-1-git-send-email-alvin.chen@intel.com>
-	<1403618196-7366-2-git-send-email-alvin.chen@intel.com>
+Subject: Re: [PATCH] mmc: sdhci: avoid double-delay while transitioning to 1.8V
+Date: Wed, 2 Jul 2014 11:06:58 +0200
+Message-ID: <CAPDyKFor33wzw1+QjHTT4-zikMvXBtkEZrCF-YRnDMYQ8D+WTg@mail.gmail.com>
+References: <E1X0Azw-0003rY-4v@rmk-PC.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1403618196-7366-2-git-send-email-alvin.chen@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Chen, Alvin" <alvin.chen@intel.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Boon Leong Ong <boon.leong.ong@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f179.google.com ([209.85.216.179]:42242 "EHLO
+	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752780AbaGBJG7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Jul 2014 05:06:59 -0400
+Received: by mail-qc0-f179.google.com with SMTP id x3so9432251qcv.24
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Jul 2014 02:06:58 -0700 (PDT)
+In-Reply-To: <E1X0Azw-0003rY-4v@rmk-PC.arm.linux.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Russell King <rmk+kernel@arm.linux.org.uk>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 24 June 2014 15:56, Chen, Alvin <alvin.chen@intel.com> wrote:
-> From: Derek Browne <Derek.Browne@intel.com>
+On 26 June 2014 16:50, Russell King <rmk+kernel@arm.linux.org.uk> wrote:
+> The MMC core in mmc_set_signal_voltage() already provides for the delay
+> required to switch to 1.8V, so there is no need for drivers to perform
+> this wait themselves.
 >
-> This patch is to enable SDIO host controller for Intel Quark X1000.
->
-> Signed-off-by: Derek Browne <Derek.Browne@intel.com>
-> Signed-off-by: Alvin (Weike) Chen <alvin.chen@intel.com>
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 
 Thanks! Applied for next.
 
@@ -28,60 +31,27 @@ Kind regards
 Uffe
 
 > ---
-> changelog v2:
-> *Delete '#define PCI_DEVICE_ID_INTEL_QUARK_ILB 0x095E' from 'include/linux/pci_ids.h'.
-> *Move '#define PCI_DEVICE_ID_INTEL_QRK_SD 0x08A7' from 'include/linux/pci_ids.h'
->  to 'driver/mmc/host/sdhci-pci.h'.
-> *Update the subject and description.
+> This patch was missed from the previous set because v2 was never sent.
 >
->  drivers/mmc/host/sdhci-pci.c |   12 ++++++++++++
->  drivers/mmc/host/sdhci-pci.h |    1 +
->  2 files changed, 13 insertions(+)
+>  drivers/mmc/host/sdhci.c | 3 ---
+>  1 file changed, 3 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-> index 52c42fc..1aeeefc 100644
-> --- a/drivers/mmc/host/sdhci-pci.c
-> +++ b/drivers/mmc/host/sdhci-pci.c
-> @@ -103,6 +103,10 @@ static const struct sdhci_pci_fixes sdhci_cafe = {
->                           SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
->  };
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index d558f70756b0..3c8b91d3a793 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1762,9 +1762,6 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+>                 ctrl |= SDHCI_CTRL_VDD_180;
+>                 sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
 >
-> +static const struct sdhci_pci_fixes sdhci_intel_qrk = {
-> +       .quirks         = SDHCI_QUIRK_NO_HISPD_BIT,
-> +};
-> +
->  static int mrst_hc_probe_slot(struct sdhci_pci_slot *slot)
->  {
->         slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-> @@ -753,6 +757,14 @@ static const struct pci_device_id pci_ids[] = {
->
->         {
->                 .vendor         = PCI_VENDOR_ID_INTEL,
-> +               .device         = PCI_DEVICE_ID_INTEL_QRK_SD,
-> +               .subvendor      = PCI_ANY_ID,
-> +               .subdevice      = PCI_ANY_ID,
-> +               .driver_data    = (kernel_ulong_t)&sdhci_intel_qrk,
-> +       },
-> +
-> +       {
-> +               .vendor         = PCI_VENDOR_ID_INTEL,
->                 .device         = PCI_DEVICE_ID_INTEL_MRST_SD0,
->                 .subvendor      = PCI_ANY_ID,
->                 .subdevice      = PCI_ANY_ID,
-> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-> index 6d71871..c101477 100644
-> --- a/drivers/mmc/host/sdhci-pci.h
-> +++ b/drivers/mmc/host/sdhci-pci.h
-> @@ -17,6 +17,7 @@
->  #define PCI_DEVICE_ID_INTEL_CLV_SDIO2  0x08fb
->  #define PCI_DEVICE_ID_INTEL_CLV_EMMC0  0x08e5
->  #define PCI_DEVICE_ID_INTEL_CLV_EMMC1  0x08e6
-> +#define PCI_DEVICE_ID_INTEL_QRK_SD     0x08A7
->
->  /*
->   * PCI registers
+> -               /* Wait for 5ms */
+> -               usleep_range(5000, 5500);
+> -
+>                 /* 1.8V regulator output should be stable within 5 ms */
+>                 ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>                 if (ctrl & SDHCI_CTRL_VDD_180)
 > --
-> 1.7.9.5
+> 1.8.3.1
 >
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
