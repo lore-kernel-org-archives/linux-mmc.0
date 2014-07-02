@@ -1,59 +1,60 @@
-From: John Stultz <john.stultz@linaro.org>
-Subject: Re: [PATCH V2 3/3] mmc: mmci: Reverse IRQ handling for the arm_variant
-Date: Tue, 1 Jul 2014 11:19:07 -0700
-Message-ID: <CALAqxLUnB7xXRCgtQEzcv=BwjCV2WnJj1t5+X3EiF7CcgorbAw@mail.gmail.com>
-References: <1402906147-26596-1-git-send-email-ulf.hansson@linaro.org>
-	<CALAqxLWs5HLhLo+BspcgyJe0O++PB1HU2G1GpsoQ=cVP34=v=A@mail.gmail.com>
-	<CAPDyKFqK5G0j7ZKAYJqD+ZqBFCjuLTw=NtjBcAsfM=Xzd4cghA@mail.gmail.com>
-	<CALAqxLXQeYA8jt_hLrJSuWtt7j3t2iZSZjEVAX7ScODAgrmVbA@mail.gmail.com>
-	<CALAqxLX8TcFNDLvA1XozEZ_kf58jX0_SeDETfK9UcXVYajVVRQ@mail.gmail.com>
-	<CAPDyKFry7_=-3kmydz7ikfDW5vMi512gC3Bj35PmuWT2z70GvQ@mail.gmail.com>
-	<CAGXu5j+6Vuywpw_NrMDL0HN3N16TZvZidY0p6MfOakyqAO8TsA@mail.gmail.com>
-	<CALAqxLViuWehKgqHTf5SjLRXOXwzp-yNPehmYkfJGR4At63w7w@mail.gmail.com>
-	<CAGXu5j+DDE+N4wTaj=1MCvkaWdo0GtbrAe0i6EmtkgO+aRi_mg@mail.gmail.com>
+From: Aaron Lu <aaron.lu@intel.com>
+Subject: Re: one doubt about mmc_sdio_init_card function
+Date: Wed, 02 Jul 2014 10:52:02 +0800
+Message-ID: <53B373D2.7000306@intel.com>
+References: <53B249A4.2040404@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f182.google.com ([209.85.220.182]:45743 "EHLO
-	mail-vc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754962AbaGASTI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Jul 2014 14:19:08 -0400
-Received: by mail-vc0-f182.google.com with SMTP id il7so9519098vcb.27
-        for <linux-mmc@vger.kernel.org>; Tue, 01 Jul 2014 11:19:07 -0700 (PDT)
-In-Reply-To: <CAGXu5j+DDE+N4wTaj=1MCvkaWdo0GtbrAe0i6EmtkgO+aRi_mg@mail.gmail.com>
+Received: from mga01.intel.com ([192.55.52.88]:3968 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751243AbaGBCwH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 1 Jul 2014 22:52:07 -0400
+In-Reply-To: <53B249A4.2040404@linux.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kees Cook <keescook@chromium.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Peter Maydell <peter.maydell@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>, chris@printf.net, ulf.hansson@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, jackey.shen@amd.com, gregkh@linuxfoundation.org
 
-On Tue, Jul 1, 2014 at 10:45 AM, Kees Cook <keescook@chromium.org> wrote:
-> On Fri, Jun 27, 2014 at 3:53 PM, John Stultz <john.stultz@linaro.org> wrote:
->> On Fri, Jun 27, 2014 at 1:37 PM, Kees Cook <keescook@chromium.org> wrote:
->> I've been continuing to try to bisect this down with
->> 8d94b54d99ea968a9d188ca0e68793ebed601220 and
->> e7f3d22289e4307b3071cc18b1d8ecc6598c0be4 reverted each step. It seems
->> like it pops up somewhere between 3.15-rc6 and 3.15-rc7, but the
->> bisection results are really inconsistent.  I suspect it actually
->> shows up earlier, its just its harder to trip the problem with the
->> patches reverted, so I'm marking good commits that are actually bad.
->>
->> If you are seeing this on every bootup, it might be worth trying to do
->> the bisection with the two commits above reverted to see if you can
->> narrow it down any better?
->
-> And now I can't reproduce it! I think I was being tricked by
-> filesystem corruption that spanned some of my test boots. I'm going to
-> start this over and try again.
+On 07/01/2014 01:39 PM, Fu, Zhonghui wrote:
+> 
+> Hi, all
+> 
+> The mmc_sdio_init_card(drivers/mmc/core/sdio.c) function calls mmc_alloc_card(drivers/mmc/core/bus.c) function to allocate a card structure. card->dev.bus is assigned with mmc_bus_type in mmc_alloc_card function. Why not assign sdio_bus_type to card->dev.bus?
 
-Yea. :( I've been starting over and over on this quite a bit as well.
-With those two patches reverted, it gets harder to reproduce reliably,
-but I'm still seeing trobule.
+sdio card, mmc card, sd card are all devices on the mmc bus, hence their
+bus type is set to mmc_bus_type.
 
-Bisecting is still not pointing to anything obvious, my current
-earliest bad commit right now is:
-2aafe1a4d451866e3e7b476e2fa0813b69b313c1. I'm still working on it, but
-its slow going.
+sdio function device is a device on the sdio bus, hence its bus type is
+sdio_bus_type.
 
+Hope this helps,
+Aaron
 
-thanks
--john
+> 
+> 
+> struct mmc_card *mmc_alloc_card(struct mmc_host *host, struct device_type *type)
+> {
+>     struct mmc_card *card;
+> 
+>     card = kzalloc(sizeof(struct mmc_card), GFP_KERNEL);
+>     if (!card)
+>         return ERR_PTR(-ENOMEM);
+> 
+>     card->host = host;
+> 
+>     device_initialize(&card->dev);
+> 
+>     card->dev.parent = mmc_classdev(host);
+>     card->dev.bus = &mmc_bus_type;
+>     card->dev.release = mmc_release_card;
+>     card->dev.type = type;
+> 
+>     return card;
+> }
+> 
+> 
+> Thanks,
+> Zhonghui
+> 
+
