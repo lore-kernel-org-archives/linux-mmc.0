@@ -1,178 +1,169 @@
-From: Markus Mayer <markus.mayer@linaro.org>
-Subject: [RESEND PATCH v5] mmc: sdhci: Replace host->mmc with mmc where possible
-Date: Thu, 3 Jul 2014 13:27:42 -0700
-Message-ID: <1404419262-20393-1-git-send-email-markus.mayer@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:35801 "EHLO
-	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750855AbaGCU1y (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Jul 2014 16:27:54 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Marek Belisko <marek-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>
+Subject: [PATCH 1/2] mmc: hsmmc: Add reset gpio configuration option.
+Date: Thu,  3 Jul 2014 22:49:23 +0200
+Message-ID: <1404420564-30245-1-git-send-email-marek@goldelico.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, balajitk-l0cyMroinI0@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org, marek-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org, NeilBrown <neilb-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Tim Kryger <tim.kryger@gmail.com>, Mike Looijmans <mike.looijmans@topic.nl>, Andrew Bresticker <abrestic@chromium.org>, Matt Porter <mporter@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-After the switch to the MMC core regulator infrastucture, we already
-have a local "mmc" pointer in various functions. There is no longer a
-need to access the data structure via host->mmc.
+From: NeilBrown <neilb-l3A5Bk7waGM@public.gmane.org>
 
-Signed-off-by: Markus Mayer <markus.mayer@linaro.org>
-Reviewed-by: Matt Porter <mporter@linaro.org>
+If a 'gpio_reset' is specified, then hold it low while
+turning the power regulator on.
+This is needed for some wi2wi wireless modules, particularly
+when the regulator is held active by some other client.
+The wi2wi needs to be reset if power isn't actually removed, and
+the gpio can be used to do this.
+
+Signed-off-by: NeilBrown <neilb-l3A5Bk7waGM@public.gmane.org>
 ---
+ arch/arm/mach-omap2/hsmmc.c            |  7 ++++++-
+ arch/arm/mach-omap2/hsmmc.h            |  3 +++
+ drivers/mmc/host/omap_hsmmc.c          | 26 +++++++++++++++++++++++---
+ include/linux/platform_data/mmc-omap.h |  1 +
+ 4 files changed, 33 insertions(+), 4 deletions(-)
 
-This patch was posted before as part 2/2 of a series
-(https://lkml.org/lkml/2014/6/13/449). Part 1/2 has since been
-accepted.
-
-Please note that checkpatch still complains about the wrapped strings,
-but issue is not introduced by this patch, nor is it confined to the
-lines changed by this patch. (There are several other locations in
-sdhci.c where strings are wrapped across lines.)
-
-Changes from v4:
-  - Rebased on Ulf's current mmc-next branch.
-
- drivers/mmc/host/sdhci.c | 30 +++++++++++++++---------------
- 1 file changed, 15 insertions(+), 15 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 5cf4a86..26639bf 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1228,7 +1228,7 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index 07d4c7b..046bfdd 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -172,6 +172,10 @@ static inline void omap_hsmmc_mux(struct omap_mmc_platform_data *mmc_controller,
+ 		(mmc_controller->slots[0].gpio_wp < OMAP_MAX_GPIO_LINES))
+ 		omap_mux_init_gpio(mmc_controller->slots[0].gpio_wp,
+ 					OMAP_PIN_INPUT_PULLUP);
++	if (gpio_is_valid(mmc_controller->slots[0].gpio_reset) &&
++		(mmc_controller->slots[0].gpio_reset < OMAP_MAX_GPIO_LINES))
++		omap_mux_init_gpio(mmc_controller->slots[0].gpio_reset,
++					OMAP_PIN_OUTPUT);
+ 	if (cpu_is_omap34xx()) {
+ 		if (controller_nr == 0) {
+ 			omap_mux_init_signal("sdmmc1_clk",
+@@ -270,6 +274,7 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
  
- 	if (!IS_ERR(mmc->supply.vmmc)) {
- 		spin_unlock_irq(&host->lock);
--		mmc_regulator_set_ocr(host->mmc, mmc->supply.vmmc, vdd);
-+		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
- 		spin_lock_irq(&host->lock);
- 		return;
- 	}
-@@ -1450,7 +1450,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		if (!IS_ERR(mmc->supply.vmmc) &&
- 		    ios->power_mode == MMC_POWER_OFF)
--			mmc_regulator_set_ocr(host->mmc, mmc->supply.vmmc, 0);
-+			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
- 		return;
- 	}
+ 	mmc->slots[0].switch_pin = c->gpio_cd;
+ 	mmc->slots[0].gpio_wp = c->gpio_wp;
++	mmc->slots[0].gpio_reset = c->gpio_reset;
  
-@@ -1734,7 +1734,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
- 						    3600000);
- 			if (ret) {
- 				pr_warning("%s: Switching to 3.3V signalling voltage "
--						" failed\n", mmc_hostname(host->mmc));
-+						" failed\n", mmc_hostname(mmc));
- 				return -EIO;
- 			}
- 		}
-@@ -1747,7 +1747,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
- 			return 0;
+ 	mmc->slots[0].remux = c->remux;
+ 	mmc->slots[0].init_card = c->init_card;
+@@ -389,7 +394,7 @@ void omap_hsmmc_late_init(struct omap2_hsmmc_info *c)
+ 			continue;
  
- 		pr_warning("%s: 3.3V regulator output did not became stable\n",
--				mmc_hostname(host->mmc));
-+				mmc_hostname(mmc));
+ 		mmc_pdata->slots[0].switch_pin = c->gpio_cd;
+-		mmc_pdata->slots[0].gpio_wp = c->gpio_wp;
++		mmc_pdata->slots[0].gpio_reset = c->gpio_reset;
  
- 		return -EAGAIN;
- 	case MMC_SIGNAL_VOLTAGE_180:
-@@ -1756,7 +1756,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
- 					1700000, 1950000);
- 			if (ret) {
- 				pr_warning("%s: Switching to 1.8V signalling voltage "
--						" failed\n", mmc_hostname(host->mmc));
-+						" failed\n", mmc_hostname(mmc));
- 				return -EIO;
- 			}
- 		}
-@@ -1777,7 +1777,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
- 			return 0;
+ 		res = omap_device_register(pdev);
+ 		if (res)
+diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
+index 7f2e790..16b2ac5 100644
+--- a/arch/arm/mach-omap2/hsmmc.h
++++ b/arch/arm/mach-omap2/hsmmc.h
+@@ -24,6 +24,9 @@ struct omap2_hsmmc_info {
+ 	bool	deferred;	/* mmc needs a deferred probe */
+ 	int	gpio_cd;	/* or -EINVAL */
+ 	int	gpio_wp;	/* or -EINVAL */
++	int	gpio_reset;	/* or -EINVAL - reset is held low during
++				 * power-on
++				 */
+ 	char	*name;		/* or NULL for default */
+ 	struct platform_device *pdev;	/* mmc controller instance */
+ 	int	ocr_mask;	/* temporary HACK */
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 9656726..4a264fc 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -300,6 +300,8 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+ 	if (!host->vcc)
+ 		return 0;
  
- 		pr_warning("%s: 1.8V regulator output did not became stable\n",
--				mmc_hostname(host->mmc));
-+				mmc_hostname(mmc));
++	if (gpio_is_valid(mmc_slot(host).gpio_reset))
++		gpio_set_value_cansleep(mmc_slot(host).gpio_reset, 0);
+ 	if (mmc_slot(host).before_set_reg)
+ 		mmc_slot(host).before_set_reg(dev, slot, power_on, vdd);
  
- 		return -EAGAIN;
- 	case MMC_SIGNAL_VOLTAGE_120:
-@@ -1786,7 +1786,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
- 						    1300000);
- 			if (ret) {
- 				pr_warning("%s: Switching to 1.2V signalling voltage "
--						" failed\n", mmc_hostname(host->mmc));
-+						" failed\n", mmc_hostname(mmc));
- 				return -EIO;
- 			}
- 		}
-@@ -2825,12 +2825,12 @@ int sdhci_add_host(struct sdhci_host *host)
- 		 * (128) and potentially one alignment transfer for
- 		 * each of those entries.
- 		 */
--		host->adma_desc = dma_alloc_coherent(mmc_dev(host->mmc),
-+		host->adma_desc = dma_alloc_coherent(mmc_dev(mmc),
- 						     ADMA_SIZE, &host->adma_addr,
- 						     GFP_KERNEL);
- 		host->align_buffer = kmalloc(128 * 4, GFP_KERNEL);
- 		if (!host->adma_desc || !host->align_buffer) {
--			dma_free_coherent(mmc_dev(host->mmc), ADMA_SIZE,
-+			dma_free_coherent(mmc_dev(mmc), ADMA_SIZE,
- 					  host->adma_desc, host->adma_addr);
- 			kfree(host->align_buffer);
- 			pr_warning("%s: Unable to allocate ADMA "
-@@ -2843,7 +2843,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 			pr_warning("%s: unable to allocate aligned ADMA descriptor\n",
- 				   mmc_hostname(mmc));
- 			host->flags &= ~SDHCI_USE_ADMA;
--			dma_free_coherent(mmc_dev(host->mmc), ADMA_SIZE,
-+			dma_free_coherent(mmc_dev(mmc), ADMA_SIZE,
- 					  host->adma_desc, host->adma_addr);
- 			kfree(host->align_buffer);
- 			host->adma_desc = NULL;
-@@ -2858,7 +2858,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 	 */
- 	if (!(host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA))) {
- 		host->dma_mask = DMA_BIT_MASK(64);
--		mmc_dev(host->mmc)->dma_mask = &host->dma_mask;
-+		mmc_dev(mmc)->dma_mask = &host->dma_mask;
- 	}
+@@ -365,6 +367,8 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
  
- 	if (host->version >= SDHCI_SPEC_300)
-@@ -2964,7 +2964,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+ 	if (mmc_slot(host).after_set_reg)
+ 		mmc_slot(host).after_set_reg(dev, slot, power_on, vdd);
++	if (gpio_is_valid(mmc_slot(host).gpio_reset))
++		gpio_set_value_cansleep(mmc_slot(host).gpio_reset, 1);
  
- 	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
--	    !(host->mmc->caps & MMC_CAP_NONREMOVABLE))
-+	    !(mmc->caps & MMC_CAP_NONREMOVABLE))
- 		mmc->caps |= MMC_CAP_NEEDS_POLL;
+ error_set_power:
+ 	return ret;
+@@ -481,10 +485,22 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
+ 	} else
+ 		pdata->slots[0].gpio_wp = -EINVAL;
  
- 	/* If there are external regulators, get them */
-@@ -3261,7 +3261,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+-	return 0;
++	if (gpio_is_valid(pdata->slots[0].gpio_reset)) {
++		ret = gpio_request(pdata->slots[0].gpio_reset, "mmc_reset");
++		if (ret)
++			goto err_free_wp;
++		ret = gpio_direction_output(pdata->slots[0].gpio_reset, 1);
++		if (ret)
++			goto err_free_reset;
++	} else
++		pdata->slots[0].gpio_reset = -EINVAL;
  
- 		if (host->mrq) {
- 			pr_err("%s: Controller removed during "
--				" transfer!\n", mmc_hostname(host->mmc));
-+				" transfer!\n", mmc_hostname(mmc));
++	return 0;
++err_free_reset:
++	gpio_free(pdata->slots[0].gpio_reset);
+ err_free_wp:
+-	gpio_free(pdata->slots[0].gpio_wp);
++	if (gpio_is_valid(pdata->slots[0].gpio_wp))
++		gpio_free(pdata->slots[0].gpio_wp);
+ err_free_cd:
+ 	if (gpio_is_valid(pdata->slots[0].switch_pin))
+ err_free_sp:
+@@ -494,6 +510,8 @@ err_free_sp:
  
- 			host->mrq->cmd->error = -ENOMEDIUM;
- 			tasklet_schedule(&host->finish_tasklet);
-@@ -3272,7 +3272,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ static void omap_hsmmc_gpio_free(struct omap_mmc_platform_data *pdata)
+ {
++	if (gpio_is_valid(pdata->slots[0].gpio_reset))
++		gpio_free(pdata->slots[0].gpio_reset);
+ 	if (gpio_is_valid(pdata->slots[0].gpio_wp))
+ 		gpio_free(pdata->slots[0].gpio_wp);
+ 	if (gpio_is_valid(pdata->slots[0].switch_pin))
+@@ -1952,10 +1970,11 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+ 	struct omap_mmc_platform_data *pdata;
+ 	struct device_node *np = dev->of_node;
+ 	u32 bus_width, max_freq;
+-	int cd_gpio, wp_gpio;
++	int cd_gpio, wp_gpio, reset_gpio;
  
- 	sdhci_disable_card_detection(host);
+ 	cd_gpio = of_get_named_gpio(np, "cd-gpios", 0);
+ 	wp_gpio = of_get_named_gpio(np, "wp-gpios", 0);
++	reset_gpio = of_get_named_gpio(np, "reset-gpios", 0);
+ 	if (cd_gpio == -EPROBE_DEFER || wp_gpio == -EPROBE_DEFER)
+ 		return ERR_PTR(-EPROBE_DEFER);
  
--	mmc_remove_host(host->mmc);
-+	mmc_remove_host(mmc);
+@@ -1970,6 +1989,7 @@ static struct omap_mmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+ 	pdata->nr_slots = 1;
+ 	pdata->slots[0].switch_pin = cd_gpio;
+ 	pdata->slots[0].gpio_wp = wp_gpio;
++	pdata->slots[0].gpio_reset = reset_gpio;
  
- #ifdef SDHCI_USE_LEDS_CLASS
- 	led_classdev_unregister(&host->led);
-@@ -3296,7 +3296,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 		regulator_disable(mmc->supply.vqmmc);
+ 	if (of_find_property(np, "ti,non-removable", NULL)) {
+ 		pdata->slots[0].nonremovable = true;
+diff --git a/include/linux/platform_data/mmc-omap.h b/include/linux/platform_data/mmc-omap.h
+index 51e70cf..8f3ee4a 100644
+--- a/include/linux/platform_data/mmc-omap.h
++++ b/include/linux/platform_data/mmc-omap.h
+@@ -116,6 +116,7 @@ struct omap_mmc_platform_data {
  
- 	if (host->adma_desc)
--		dma_free_coherent(mmc_dev(host->mmc), ADMA_SIZE,
-+		dma_free_coherent(mmc_dev(mmc), ADMA_SIZE,
- 				  host->adma_desc, host->adma_addr);
- 	kfree(host->align_buffer);
+ 		int switch_pin;			/* gpio (card detect) */
+ 		int gpio_wp;			/* gpio (write protect) */
++		int gpio_reset;			/* gpio (reset) */
  
+ 		int (*set_bus_mode)(struct device *dev, int slot, int bus_mode);
+ 		int (*set_power)(struct device *dev, int slot,
 -- 
 1.9.1
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
