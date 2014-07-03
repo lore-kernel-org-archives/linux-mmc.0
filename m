@@ -1,155 +1,114 @@
-From: Gwendal Grignou <gwendal@google.com>
-Subject: Re: [RFC PATCH 1/1 v7]mmc: Support-FFU-for-eMMC-v5.0
-Date: Wed, 2 Jul 2014 17:15:42 -0700
-Message-ID: <CAMHSBOVN4O91nwuv8J_dw1XYsbR9u-Z_kZKzWeUPoq6Q1DC8ww@mail.gmail.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [RFC PATCH 1/1 v7]mmc: Support-FFU-for-eMMC-v5.0
+Date: Thu, 3 Jul 2014 12:32:33 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333AD9B212@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <FDD07FEB422EF948A392FDC201AEEAE648AFA7EE@SACMBXIP02.sdcorp.global.sandisk.com>
  <CANEJEGu9PYi5DxuEWBwEHjUqWt2J-sEDZMKLwvZTUBdUnK=7XA@mail.gmail.com>
  <CANEJEGs2dAA0DSZfwYcV8nZn4Z1+MqAa0bJZocTZT5zjXe_dDQ@mail.gmail.com>
- <868uodnch6.fsf@void.printf.net> <CAC1bqKjbPqoyH1D1UYQ35trrPzQboYfkC+7tdkFFBYSijV_Oyw@mail.gmail.com>
+ <868uodnch6.fsf@void.printf.net>
+ <CAC1bqKjbPqoyH1D1UYQ35trrPzQboYfkC+7tdkFFBYSijV_Oyw@mail.gmail.com>
  <FDD07FEB422EF948A392FDC201AEEAE64B8EC655@SACMBXIP01.sdcorp.global.sandisk.com>
  <CAMHSBOUOmbmxERbF-QMc05aK_niaB72h2ACPO0Ti-tu60CxFHA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ve0-f169.google.com ([209.85.128.169]:42861 "EHLO
-	mail-ve0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752041AbaGCAQE convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Jul 2014 20:16:04 -0400
-Received: by mail-ve0-f169.google.com with SMTP id pa12so12216306veb.14
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Jul 2014 17:16:02 -0700 (PDT)
+Received: from mail-bl2lp0207.outbound.protection.outlook.com ([207.46.163.207]:51693
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751303AbaGCMc4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 3 Jul 2014 08:32:56 -0400
 In-Reply-To: <CAMHSBOUOmbmxERbF-QMc05aK_niaB72h2ACPO0Ti-tu60CxFHA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Gwendal Grignou <gwendal@chromium.org>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>, Chris Ball <chris@printf.net>, Grant Grundler <grundler@chromium.org>, "cjb@laptop.org" <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Olof Johansson <olofj@chromium.org>, Puthikorn Voravootivat <puthik@google.com>
+To: Gwendal Grignou <gwendal@chromium.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
+Cc: Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>, Chris Ball <chris@printf.net>, Grant Grundler <grundler@chromium.org>, "cjb@laptop.org" <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Olof Johansson <olofj@chromium.org>, Puthikorn Voravootivat <puthik@google.com>
 
-Also:
-- you don't need to allocate a buffer buf in mmc_ffu_download, you can
-directly call mmc_ffu_write with fw->data; you are memcopying the data
-again in mmc_ffu_area_init().
-- mmc_ffu_prepare_mrq() is a copy of mmc_test_prepare_mrq(), but in
-our case, we don't need the write arg, it will be always 1. Is there a
-way to use an existing function instead of recopying what is in
-mmc_test.c?
-
-Gwendal.
-
-
-On Wed, Jul 2, 2014 at 1:35 PM, Gwendal Grignou <gwendal@chromium.org> =
-wrote:
-> [resent in text mode]
-> Avi,
-> + I am testing the patch on a system where the firmware image is on
-> the emmc itself. It fails most of the time. The problem is
-> mmc_ffu_download has been call with mmc_claim_host called, preventing
-> mmcqd from pulling the firmware from the disk. The dead lock situatio=
-n
-> cause the machine to panic. It the file is in the cache, the firmware
-> upgrade goes further.
->
-> Looking at stacks:
->
-> mmc:
-> ...
-> sleep_on_buffer+0xe/0x12
-> ...
-> bh_submit_read+0x49/0x5b
-> ...
-> _request_firmware+0x3b0/0x84e
-> request_firmware+0x16/0x18
-> mmc_ffu_download+0xc7/0x8d7
->
-> and  mmcqd/0:
-> schedule+0x69/0x6b
-> __mmc_claim_host+0xc6/0x19a
-> ...
-> mmc_get_card+0x25/0x28
-> mmc_blk_issue_rq+0x41/0x403
->
-> + in mmc_ffu_write(), don't you want to check that the eMMC has
-> received the payload by looking at
-> NUMBER_OF_FW_SECTORS_CORRECTLY_PROGRAMMED ext_csd register?
->
-> + did you test with eMMC that do not support MODE_OPERATION_CODES?
-> In mmc_ffu_restart, you call
-> mmc_power_save_host/mmc_power_restore_host. Can the reset be achieve
-> with mmc_hw_reset() which has the advantage to be more atomic?
->
-> Ulf, Chris,
-> + One extra advantage of using request_firmware is if we can trust
-> udev (or whoever is serving the firmware uevent request), we are
-> guaranteed that we can trust the firmware as well. If we can send the
-> firmware payload via ioctl, we can not be sure the caller of that
-> ioctl is not an attacker that wants to put a bad firmware in the eMMC=
-=2E
->
-> On Tue, Jul 1, 2014 at 4:39 AM, Avi Shchislowski
-> <Avi.Shchislowski@sandisk.com> wrote:
->> Hi Chris,
->>
->> Re your concern that the patch was not tested =E2=80=93 some of SanD=
-isk=E2=80=99s OEM customers have implemented the patch, and they report=
- that it is working for them.
->>
->> Thanks
->> Avi
->>
->> -----Original Message-----
->> From: Hsin-Hsiang Tseng [mailto:hsinhsiangtseng@gmail.com]
->> Sent: Tuesday, July 01, 2014 9:29 AM
->> To: Chris Ball
->> Cc: Grant Grundler; cjb@laptop.org; Ulf Hansson; linux-mmc@vger.kern=
-el.org; Alex Lemberg; Avi Shchislowski; Olof Johansson
->> Subject: Re: [RFC PATCH 1/1 v7]mmc: Support-FFU-for-eMMC-v5.0
->>
->> Hi, Chris,
->> I think there are two reasons why doing FFU in kernel-space makes mo=
-re sense.
->>
->> First, some eMMC (according to extCSD[492] FFU_FEATURES) will need t=
-o restart eMMC after FFU.
->>
->> Second, if host want to vouch "atmoic" in FFU process, we need to ca=
-ll mmc_claim_host API, and this API is the kernel-space code. I said "i=
-f"
->> is because eMMC vendors may take care this. So, host may not need to=
- worry about this.
->>
->> Thanks,
->> Hsinhsiang
->>
->> 2014-07-01 8:34 GMT+08:00 Chris Ball <chris@printf.net>:
->>> Hi Grant, sorry about the delay.
->>>
->>> On Tue, Jul 01 2014, Grant Grundler wrote:
->>>> ping? Another week is past.
->>>>
->>>> I know you guys are busy with other stuff. But please at least
->>>> publish what you think the next steps for this patch are.
->>>>
->>>> This is a critical patch for supporting eMMC products and adding
->>>> additional support for other vendors. I'd like to continue working
->>>> with "upstream" and the lack of response in this case is making th=
-is
->>>> unnecessarily difficult.
->>>
->>> It's tough to merge a significant patch that you haven't tested and=
- we
->>> haven't tested.  We could do it, though -- I'd like to hear what Ul=
-f
->>> thinks.  Please could you give a quick explanation of why doing thi=
-s
->>> in kernel-space makes more sense than using your mmc-utils version?
->>>
->>> Thanks,
->>>
->>> - Chris.
->>> --
->>> Chris Ball   <http://printf.net/>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc=
-"
->>> in the body of a message to majordomo@vger.kernel.org More majordom=
-o
->>> info at  http://vger.kernel.org/majordomo-info.html
+SGkgR3dlbmRhbCwNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBsaW51
+eC1tbWMtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86bGludXgtbW1jLQ0KPiBvd25lckB2
+Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBHd2VuZGFsIEdyaWdub3UNCj4gU2VudDogV2Vk
+bmVzZGF5LCBKdWx5IDAyLCAyMDE0IDExOjM1IFBNDQo+IFRvOiBBdmkgU2hjaGlzbG93c2tpDQo+
+IENjOiBIc2luLUhzaWFuZyBUc2VuZzsgQ2hyaXMgQmFsbDsgR3JhbnQgR3J1bmRsZXI7IGNqYkBs
+YXB0b3Aub3JnOyBVbGYNCj4gSGFuc3NvbjsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgQWxl
+eCBMZW1iZXJnOyBPbG9mIEpvaGFuc3NvbjsNCj4gUHV0aGlrb3JuIFZvcmF2b290aXZhdA0KPiBT
+dWJqZWN0OiBSZTogW1JGQyBQQVRDSCAxLzEgdjddbW1jOiBTdXBwb3J0LUZGVS1mb3ItZU1NQy12
+NS4wDQo+IA0KPiBbcmVzZW50IGluIHRleHQgbW9kZV0NCj4gQXZpLA0KPiArIEkgYW0gdGVzdGlu
+ZyB0aGUgcGF0Y2ggb24gYSBzeXN0ZW0gd2hlcmUgdGhlIGZpcm13YXJlIGltYWdlIGlzIG9uDQo+
+IHRoZSBlbW1jIGl0c2VsZi4gSXQgZmFpbHMgbW9zdCBvZiB0aGUgdGltZS4gVGhlIHByb2JsZW0g
+aXMgbW1jX2ZmdV9kb3dubG9hZA0KPiBoYXMgYmVlbiBjYWxsIHdpdGggbW1jX2NsYWltX2hvc3Qg
+Y2FsbGVkLCBwcmV2ZW50aW5nIG1tY3FkIGZyb20gcHVsbGluZw0KPiB0aGUgZmlybXdhcmUgZnJv
+bSB0aGUgZGlzay4gVGhlIGRlYWQgbG9jayBzaXR1YXRpb24gY2F1c2UgdGhlIG1hY2hpbmUgdG8N
+Cj4gcGFuaWMuIEl0IHRoZSBmaWxlIGlzIGluIHRoZSBjYWNoZSwgdGhlIGZpcm13YXJlIHVwZ3Jh
+ZGUgZ29lcyBmdXJ0aGVyLg0KPiANCj4gTG9va2luZyBhdCBzdGFja3M6DQo+IA0KPiBtbWM6DQo+
+IC4uLg0KPiBzbGVlcF9vbl9idWZmZXIrMHhlLzB4MTINCj4gLi4uDQo+IGJoX3N1Ym1pdF9yZWFk
+KzB4NDkvMHg1Yg0KPiAuLi4NCj4gX3JlcXVlc3RfZmlybXdhcmUrMHgzYjAvMHg4NGUNCj4gcmVx
+dWVzdF9maXJtd2FyZSsweDE2LzB4MTgNCj4gbW1jX2ZmdV9kb3dubG9hZCsweGM3LzB4OGQ3DQo+
+IA0KPiBhbmQgIG1tY3FkLzA6DQo+IHNjaGVkdWxlKzB4NjkvMHg2Yg0KPiBfX21tY19jbGFpbV9o
+b3N0KzB4YzYvMHgxOWENCj4gLi4uDQo+IG1tY19nZXRfY2FyZCsweDI1LzB4MjgNCj4gbW1jX2Js
+a19pc3N1ZV9ycSsweDQxLzB4NDAzDQo+IA0KDQpMZXQgdXMgY2hlY2sgdGhpcyBpc3N1ZS4gV2Ug
+d2lsbCB0cnkgdG8gcmVwcm9kdWNlIGl0LiANCldlIHByb2JhYmx5IHdpbGwgbmVlZCB0byBjYWxs
+IHJlcXVlc3RfZmlybXdhcmUgYmVmb3JlIGNsYWltaW5nIHRoZSBob3N0IC0gaS5lLiBjYWxsIGl0
+IHNlcGFyYXRlbHkgaW4gbW1jX2Jsa19pb2N0bF9jbWQNCg0KDQo+ICsgaW4gbW1jX2ZmdV93cml0
+ZSgpLCBkb24ndCB5b3Ugd2FudCB0byBjaGVjayB0aGF0IHRoZSBlTU1DIGhhcw0KPiByZWNlaXZl
+ZCB0aGUgcGF5bG9hZCBieSBsb29raW5nIGF0DQo+IE5VTUJFUl9PRl9GV19TRUNUT1JTX0NPUlJF
+Q1RMWV9QUk9HUkFNTUVEIGV4dF9jc2QgcmVnaXN0ZXI/DQoNCldlIGhhdmVuJ3QgdXNlIHRoaXMg
+cmVnaXN0ZXIgcHJldmlvdXNseSBkdWUgdG8gSU9DVEwgY2h1bmsgc2l6ZSBsaW1pdGF0aW9uLCBi
+dXQgY2FuIHVzZSBpdCBub3cgd2l0aCByZXF1ZXN0X2Zpcm13YXJlDQoNCj4gDQo+ICsgZGlkIHlv
+dSB0ZXN0IHdpdGggZU1NQyB0aGF0IGRvIG5vdCBzdXBwb3J0IE1PREVfT1BFUkFUSU9OX0NPREVT
+Pw0KDQpZZXMNCiANCj4gSW4gbW1jX2ZmdV9yZXN0YXJ0LCB5b3UgY2FsbA0KPiBtbWNfcG93ZXJf
+c2F2ZV9ob3N0L21tY19wb3dlcl9yZXN0b3JlX2hvc3QuIENhbiB0aGUgcmVzZXQgYmUNCj4gYWNo
+aWV2ZSB3aXRoIG1tY19od19yZXNldCgpIHdoaWNoIGhhcyB0aGUgYWR2YW50YWdlIHRvIGJlIG1v
+cmUgYXRvbWljPw0KDQpXaWxsIGNoZWNrIHRoaXMuLi4NCg0KPiANCj4gVWxmLCBDaHJpcywNCj4g
+KyBPbmUgZXh0cmEgYWR2YW50YWdlIG9mIHVzaW5nIHJlcXVlc3RfZmlybXdhcmUgaXMgaWYgd2Ug
+Y2FuIHRydXN0DQo+IHVkZXYgKG9yIHdob2V2ZXIgaXMgc2VydmluZyB0aGUgZmlybXdhcmUgdWV2
+ZW50IHJlcXVlc3QpLCB3ZSBhcmUgZ3VhcmFudGVlZA0KPiB0aGF0IHdlIGNhbiB0cnVzdCB0aGUg
+ZmlybXdhcmUgYXMgd2VsbC4gSWYgd2UgY2FuIHNlbmQgdGhlIGZpcm13YXJlIHBheWxvYWQNCj4g
+dmlhIGlvY3RsLCB3ZSBjYW4gbm90IGJlIHN1cmUgdGhlIGNhbGxlciBvZiB0aGF0IGlvY3RsIGlz
+IG5vdCBhbiBhdHRhY2tlciB0aGF0DQo+IHdhbnRzIHRvIHB1dCBhIGJhZCBmaXJtd2FyZSBpbiB0
+aGUgZU1NQy4NCj4gDQo+IE9uIFR1ZSwgSnVsIDEsIDIwMTQgYXQgNDozOSBBTSwgQXZpIFNoY2hp
+c2xvd3NraQ0KPiA8QXZpLlNoY2hpc2xvd3NraUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+ID4gSGkg
+Q2hyaXMsDQo+ID4NCj4gPiBSZSB5b3VyIGNvbmNlcm4gdGhhdCB0aGUgcGF0Y2ggd2FzIG5vdCB0
+ZXN0ZWQg4oCTIHNvbWUgb2YgU2FuRGlza+KAmXMgT0VNDQo+IGN1c3RvbWVycyBoYXZlIGltcGxl
+bWVudGVkIHRoZSBwYXRjaCwgYW5kIHRoZXkgcmVwb3J0IHRoYXQgaXQgaXMgd29ya2luZyBmb3IN
+Cj4gdGhlbS4NCj4gPg0KPiA+IFRoYW5rcw0KPiA+IEF2aQ0KPiA+DQo+ID4gLS0tLS1PcmlnaW5h
+bCBNZXNzYWdlLS0tLS0NCj4gPiBGcm9tOiBIc2luLUhzaWFuZyBUc2VuZyBbbWFpbHRvOmhzaW5o
+c2lhbmd0c2VuZ0BnbWFpbC5jb21dDQo+ID4gU2VudDogVHVlc2RheSwgSnVseSAwMSwgMjAxNCA5
+OjI5IEFNDQo+ID4gVG86IENocmlzIEJhbGwNCj4gPiBDYzogR3JhbnQgR3J1bmRsZXI7IGNqYkBs
+YXB0b3Aub3JnOyBVbGYgSGFuc3NvbjsNCj4gPiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBB
+bGV4IExlbWJlcmc7IEF2aSBTaGNoaXNsb3dza2k7IE9sb2YNCj4gPiBKb2hhbnNzb24NCj4gPiBT
+dWJqZWN0OiBSZTogW1JGQyBQQVRDSCAxLzEgdjddbW1jOiBTdXBwb3J0LUZGVS1mb3ItZU1NQy12
+NS4wDQo+ID4NCj4gPiBIaSwgQ2hyaXMsDQo+ID4gSSB0aGluayB0aGVyZSBhcmUgdHdvIHJlYXNv
+bnMgd2h5IGRvaW5nIEZGVSBpbiBrZXJuZWwtc3BhY2UgbWFrZXMgbW9yZQ0KPiBzZW5zZS4NCj4g
+Pg0KPiA+IEZpcnN0LCBzb21lIGVNTUMgKGFjY29yZGluZyB0byBleHRDU0RbNDkyXSBGRlVfRkVB
+VFVSRVMpIHdpbGwgbmVlZCB0bw0KPiByZXN0YXJ0IGVNTUMgYWZ0ZXIgRkZVLg0KPiA+DQo+ID4g
+U2Vjb25kLCBpZiBob3N0IHdhbnQgdG8gdm91Y2ggImF0bW9pYyIgaW4gRkZVIHByb2Nlc3MsIHdl
+IG5lZWQgdG8gY2FsbA0KPiBtbWNfY2xhaW1faG9zdCBBUEksIGFuZCB0aGlzIEFQSSBpcyB0aGUg
+a2VybmVsLXNwYWNlIGNvZGUuIEkgc2FpZCAiaWYiDQo+ID4gaXMgYmVjYXVzZSBlTU1DIHZlbmRv
+cnMgbWF5IHRha2UgY2FyZSB0aGlzLiBTbywgaG9zdCBtYXkgbm90IG5lZWQgdG8NCj4gd29ycnkg
+YWJvdXQgdGhpcy4NCj4gPg0KPiA+IFRoYW5rcywNCj4gPiBIc2luaHNpYW5nDQo+ID4NCj4gPiAy
+MDE0LTA3LTAxIDg6MzQgR01UKzA4OjAwIENocmlzIEJhbGwgPGNocmlzQHByaW50Zi5uZXQ+Og0K
+PiA+PiBIaSBHcmFudCwgc29ycnkgYWJvdXQgdGhlIGRlbGF5Lg0KPiA+Pg0KPiA+PiBPbiBUdWUs
+IEp1bCAwMSAyMDE0LCBHcmFudCBHcnVuZGxlciB3cm90ZToNCj4gPj4+IHBpbmc/IEFub3RoZXIg
+d2VlayBpcyBwYXN0Lg0KPiA+Pj4NCj4gPj4+IEkga25vdyB5b3UgZ3V5cyBhcmUgYnVzeSB3aXRo
+IG90aGVyIHN0dWZmLiBCdXQgcGxlYXNlIGF0IGxlYXN0DQo+ID4+PiBwdWJsaXNoIHdoYXQgeW91
+IHRoaW5rIHRoZSBuZXh0IHN0ZXBzIGZvciB0aGlzIHBhdGNoIGFyZS4NCj4gPj4+DQo+ID4+PiBU
+aGlzIGlzIGEgY3JpdGljYWwgcGF0Y2ggZm9yIHN1cHBvcnRpbmcgZU1NQyBwcm9kdWN0cyBhbmQg
+YWRkaW5nDQo+ID4+PiBhZGRpdGlvbmFsIHN1cHBvcnQgZm9yIG90aGVyIHZlbmRvcnMuIEknZCBs
+aWtlIHRvIGNvbnRpbnVlIHdvcmtpbmcNCj4gPj4+IHdpdGggInVwc3RyZWFtIiBhbmQgdGhlIGxh
+Y2sgb2YgcmVzcG9uc2UgaW4gdGhpcyBjYXNlIGlzIG1ha2luZyB0aGlzDQo+ID4+PiB1bm5lY2Vz
+c2FyaWx5IGRpZmZpY3VsdC4NCj4gPj4NCj4gPj4gSXQncyB0b3VnaCB0byBtZXJnZSBhIHNpZ25p
+ZmljYW50IHBhdGNoIHRoYXQgeW91IGhhdmVuJ3QgdGVzdGVkIGFuZA0KPiA+PiB3ZSBoYXZlbid0
+IHRlc3RlZC4gIFdlIGNvdWxkIGRvIGl0LCB0aG91Z2ggLS0gSSdkIGxpa2UgdG8gaGVhciB3aGF0
+DQo+ID4+IFVsZiB0aGlua3MuICBQbGVhc2UgY291bGQgeW91IGdpdmUgYSBxdWljayBleHBsYW5h
+dGlvbiBvZiB3aHkgZG9pbmcNCj4gPj4gdGhpcyBpbiBrZXJuZWwtc3BhY2UgbWFrZXMgbW9yZSBz
+ZW5zZSB0aGFuIHVzaW5nIHlvdXIgbW1jLXV0aWxzIHZlcnNpb24/DQo+ID4+DQo+ID4+IFRoYW5r
+cywNCj4gPj4NCj4gPj4gLSBDaHJpcy4NCj4gPj4gLS0NCj4gPj4gQ2hyaXMgQmFsbCAgIDxodHRw
+Oi8vcHJpbnRmLm5ldC8+DQo+ID4+IC0tDQo+ID4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBs
+aXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiDQo+ID4+IGluIHRoZSBi
+b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUNCj4gbWFq
+b3Jkb21vDQo+ID4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWlu
+Zm8uaHRtbA0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUg
+bGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIiBpbiB0aGUNCj4gYm9keSBvZiBhIG1lc3NhZ2Ug
+dG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+IGh0
+dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
