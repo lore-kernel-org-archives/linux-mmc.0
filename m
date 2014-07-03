@@ -1,114 +1,74 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [RFC PATCH 1/1 v7]mmc: Support-FFU-for-eMMC-v5.0
-Date: Thu, 3 Jul 2014 12:32:33 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333AD9B212@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE648AFA7EE@SACMBXIP02.sdcorp.global.sandisk.com>
- <CANEJEGu9PYi5DxuEWBwEHjUqWt2J-sEDZMKLwvZTUBdUnK=7XA@mail.gmail.com>
- <CANEJEGs2dAA0DSZfwYcV8nZn4Z1+MqAa0bJZocTZT5zjXe_dDQ@mail.gmail.com>
- <868uodnch6.fsf@void.printf.net>
- <CAC1bqKjbPqoyH1D1UYQ35trrPzQboYfkC+7tdkFFBYSijV_Oyw@mail.gmail.com>
- <FDD07FEB422EF948A392FDC201AEEAE64B8EC655@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAMHSBOUOmbmxERbF-QMc05aK_niaB72h2ACPO0Ti-tu60CxFHA@mail.gmail.com>
+From: Oleksij Rempel <linux@rempel-privat.de>
+Subject: Re: [PATCH] mmc: add new au6601 driver
+Date: Thu, 03 Jul 2014 15:54:55 +0200
+Message-ID: <53B560AF.1020609@rempel-privat.de>
+References: <1399543099-31613-1-git-send-email-linux@rempel-privat.de> <CAPDyKFoy9DLQe1235suEwEmGSxxriBfuWSyN+ZG14OmUjrrb8w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="jJw1lDFspdWUbeWjfAQN41d6PabXeixE2"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2lp0207.outbound.protection.outlook.com ([207.46.163.207]:51693
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751303AbaGCMc4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 3 Jul 2014 08:32:56 -0400
-In-Reply-To: <CAMHSBOUOmbmxERbF-QMc05aK_niaB72h2ACPO0Ti-tu60CxFHA@mail.gmail.com>
-Content-Language: en-US
+Received: from mout.gmx.net ([212.227.17.21]:57349 "EHLO mout.gmx.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S964836AbaGCNzF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 3 Jul 2014 09:55:05 -0400
+In-Reply-To: <CAPDyKFoy9DLQe1235suEwEmGSxxriBfuWSyN+ZG14OmUjrrb8w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Gwendal Grignou <gwendal@chromium.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
-Cc: Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>, Chris Ball <chris@printf.net>, Grant Grundler <grundler@chromium.org>, "cjb@laptop.org" <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Olof Johansson <olofj@chromium.org>, Puthikorn Voravootivat <puthik@google.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-SGkgR3dlbmRhbCwNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBsaW51
-eC1tbWMtb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86bGludXgtbW1jLQ0KPiBvd25lckB2
-Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBHd2VuZGFsIEdyaWdub3UNCj4gU2VudDogV2Vk
-bmVzZGF5LCBKdWx5IDAyLCAyMDE0IDExOjM1IFBNDQo+IFRvOiBBdmkgU2hjaGlzbG93c2tpDQo+
-IENjOiBIc2luLUhzaWFuZyBUc2VuZzsgQ2hyaXMgQmFsbDsgR3JhbnQgR3J1bmRsZXI7IGNqYkBs
-YXB0b3Aub3JnOyBVbGYNCj4gSGFuc3NvbjsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgQWxl
-eCBMZW1iZXJnOyBPbG9mIEpvaGFuc3NvbjsNCj4gUHV0aGlrb3JuIFZvcmF2b290aXZhdA0KPiBT
-dWJqZWN0OiBSZTogW1JGQyBQQVRDSCAxLzEgdjddbW1jOiBTdXBwb3J0LUZGVS1mb3ItZU1NQy12
-NS4wDQo+IA0KPiBbcmVzZW50IGluIHRleHQgbW9kZV0NCj4gQXZpLA0KPiArIEkgYW0gdGVzdGlu
-ZyB0aGUgcGF0Y2ggb24gYSBzeXN0ZW0gd2hlcmUgdGhlIGZpcm13YXJlIGltYWdlIGlzIG9uDQo+
-IHRoZSBlbW1jIGl0c2VsZi4gSXQgZmFpbHMgbW9zdCBvZiB0aGUgdGltZS4gVGhlIHByb2JsZW0g
-aXMgbW1jX2ZmdV9kb3dubG9hZA0KPiBoYXMgYmVlbiBjYWxsIHdpdGggbW1jX2NsYWltX2hvc3Qg
-Y2FsbGVkLCBwcmV2ZW50aW5nIG1tY3FkIGZyb20gcHVsbGluZw0KPiB0aGUgZmlybXdhcmUgZnJv
-bSB0aGUgZGlzay4gVGhlIGRlYWQgbG9jayBzaXR1YXRpb24gY2F1c2UgdGhlIG1hY2hpbmUgdG8N
-Cj4gcGFuaWMuIEl0IHRoZSBmaWxlIGlzIGluIHRoZSBjYWNoZSwgdGhlIGZpcm13YXJlIHVwZ3Jh
-ZGUgZ29lcyBmdXJ0aGVyLg0KPiANCj4gTG9va2luZyBhdCBzdGFja3M6DQo+IA0KPiBtbWM6DQo+
-IC4uLg0KPiBzbGVlcF9vbl9idWZmZXIrMHhlLzB4MTINCj4gLi4uDQo+IGJoX3N1Ym1pdF9yZWFk
-KzB4NDkvMHg1Yg0KPiAuLi4NCj4gX3JlcXVlc3RfZmlybXdhcmUrMHgzYjAvMHg4NGUNCj4gcmVx
-dWVzdF9maXJtd2FyZSsweDE2LzB4MTgNCj4gbW1jX2ZmdV9kb3dubG9hZCsweGM3LzB4OGQ3DQo+
-IA0KPiBhbmQgIG1tY3FkLzA6DQo+IHNjaGVkdWxlKzB4NjkvMHg2Yg0KPiBfX21tY19jbGFpbV9o
-b3N0KzB4YzYvMHgxOWENCj4gLi4uDQo+IG1tY19nZXRfY2FyZCsweDI1LzB4MjgNCj4gbW1jX2Js
-a19pc3N1ZV9ycSsweDQxLzB4NDAzDQo+IA0KDQpMZXQgdXMgY2hlY2sgdGhpcyBpc3N1ZS4gV2Ug
-d2lsbCB0cnkgdG8gcmVwcm9kdWNlIGl0LiANCldlIHByb2JhYmx5IHdpbGwgbmVlZCB0byBjYWxs
-IHJlcXVlc3RfZmlybXdhcmUgYmVmb3JlIGNsYWltaW5nIHRoZSBob3N0IC0gaS5lLiBjYWxsIGl0
-IHNlcGFyYXRlbHkgaW4gbW1jX2Jsa19pb2N0bF9jbWQNCg0KDQo+ICsgaW4gbW1jX2ZmdV93cml0
-ZSgpLCBkb24ndCB5b3Ugd2FudCB0byBjaGVjayB0aGF0IHRoZSBlTU1DIGhhcw0KPiByZWNlaXZl
-ZCB0aGUgcGF5bG9hZCBieSBsb29raW5nIGF0DQo+IE5VTUJFUl9PRl9GV19TRUNUT1JTX0NPUlJF
-Q1RMWV9QUk9HUkFNTUVEIGV4dF9jc2QgcmVnaXN0ZXI/DQoNCldlIGhhdmVuJ3QgdXNlIHRoaXMg
-cmVnaXN0ZXIgcHJldmlvdXNseSBkdWUgdG8gSU9DVEwgY2h1bmsgc2l6ZSBsaW1pdGF0aW9uLCBi
-dXQgY2FuIHVzZSBpdCBub3cgd2l0aCByZXF1ZXN0X2Zpcm13YXJlDQoNCj4gDQo+ICsgZGlkIHlv
-dSB0ZXN0IHdpdGggZU1NQyB0aGF0IGRvIG5vdCBzdXBwb3J0IE1PREVfT1BFUkFUSU9OX0NPREVT
-Pw0KDQpZZXMNCiANCj4gSW4gbW1jX2ZmdV9yZXN0YXJ0LCB5b3UgY2FsbA0KPiBtbWNfcG93ZXJf
-c2F2ZV9ob3N0L21tY19wb3dlcl9yZXN0b3JlX2hvc3QuIENhbiB0aGUgcmVzZXQgYmUNCj4gYWNo
-aWV2ZSB3aXRoIG1tY19od19yZXNldCgpIHdoaWNoIGhhcyB0aGUgYWR2YW50YWdlIHRvIGJlIG1v
-cmUgYXRvbWljPw0KDQpXaWxsIGNoZWNrIHRoaXMuLi4NCg0KPiANCj4gVWxmLCBDaHJpcywNCj4g
-KyBPbmUgZXh0cmEgYWR2YW50YWdlIG9mIHVzaW5nIHJlcXVlc3RfZmlybXdhcmUgaXMgaWYgd2Ug
-Y2FuIHRydXN0DQo+IHVkZXYgKG9yIHdob2V2ZXIgaXMgc2VydmluZyB0aGUgZmlybXdhcmUgdWV2
-ZW50IHJlcXVlc3QpLCB3ZSBhcmUgZ3VhcmFudGVlZA0KPiB0aGF0IHdlIGNhbiB0cnVzdCB0aGUg
-ZmlybXdhcmUgYXMgd2VsbC4gSWYgd2UgY2FuIHNlbmQgdGhlIGZpcm13YXJlIHBheWxvYWQNCj4g
-dmlhIGlvY3RsLCB3ZSBjYW4gbm90IGJlIHN1cmUgdGhlIGNhbGxlciBvZiB0aGF0IGlvY3RsIGlz
-IG5vdCBhbiBhdHRhY2tlciB0aGF0DQo+IHdhbnRzIHRvIHB1dCBhIGJhZCBmaXJtd2FyZSBpbiB0
-aGUgZU1NQy4NCj4gDQo+IE9uIFR1ZSwgSnVsIDEsIDIwMTQgYXQgNDozOSBBTSwgQXZpIFNoY2hp
-c2xvd3NraQ0KPiA8QXZpLlNoY2hpc2xvd3NraUBzYW5kaXNrLmNvbT4gd3JvdGU6DQo+ID4gSGkg
-Q2hyaXMsDQo+ID4NCj4gPiBSZSB5b3VyIGNvbmNlcm4gdGhhdCB0aGUgcGF0Y2ggd2FzIG5vdCB0
-ZXN0ZWQg4oCTIHNvbWUgb2YgU2FuRGlza+KAmXMgT0VNDQo+IGN1c3RvbWVycyBoYXZlIGltcGxl
-bWVudGVkIHRoZSBwYXRjaCwgYW5kIHRoZXkgcmVwb3J0IHRoYXQgaXQgaXMgd29ya2luZyBmb3IN
-Cj4gdGhlbS4NCj4gPg0KPiA+IFRoYW5rcw0KPiA+IEF2aQ0KPiA+DQo+ID4gLS0tLS1PcmlnaW5h
-bCBNZXNzYWdlLS0tLS0NCj4gPiBGcm9tOiBIc2luLUhzaWFuZyBUc2VuZyBbbWFpbHRvOmhzaW5o
-c2lhbmd0c2VuZ0BnbWFpbC5jb21dDQo+ID4gU2VudDogVHVlc2RheSwgSnVseSAwMSwgMjAxNCA5
-OjI5IEFNDQo+ID4gVG86IENocmlzIEJhbGwNCj4gPiBDYzogR3JhbnQgR3J1bmRsZXI7IGNqYkBs
-YXB0b3Aub3JnOyBVbGYgSGFuc3NvbjsNCj4gPiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBB
-bGV4IExlbWJlcmc7IEF2aSBTaGNoaXNsb3dza2k7IE9sb2YNCj4gPiBKb2hhbnNzb24NCj4gPiBT
-dWJqZWN0OiBSZTogW1JGQyBQQVRDSCAxLzEgdjddbW1jOiBTdXBwb3J0LUZGVS1mb3ItZU1NQy12
-NS4wDQo+ID4NCj4gPiBIaSwgQ2hyaXMsDQo+ID4gSSB0aGluayB0aGVyZSBhcmUgdHdvIHJlYXNv
-bnMgd2h5IGRvaW5nIEZGVSBpbiBrZXJuZWwtc3BhY2UgbWFrZXMgbW9yZQ0KPiBzZW5zZS4NCj4g
-Pg0KPiA+IEZpcnN0LCBzb21lIGVNTUMgKGFjY29yZGluZyB0byBleHRDU0RbNDkyXSBGRlVfRkVB
-VFVSRVMpIHdpbGwgbmVlZCB0bw0KPiByZXN0YXJ0IGVNTUMgYWZ0ZXIgRkZVLg0KPiA+DQo+ID4g
-U2Vjb25kLCBpZiBob3N0IHdhbnQgdG8gdm91Y2ggImF0bW9pYyIgaW4gRkZVIHByb2Nlc3MsIHdl
-IG5lZWQgdG8gY2FsbA0KPiBtbWNfY2xhaW1faG9zdCBBUEksIGFuZCB0aGlzIEFQSSBpcyB0aGUg
-a2VybmVsLXNwYWNlIGNvZGUuIEkgc2FpZCAiaWYiDQo+ID4gaXMgYmVjYXVzZSBlTU1DIHZlbmRv
-cnMgbWF5IHRha2UgY2FyZSB0aGlzLiBTbywgaG9zdCBtYXkgbm90IG5lZWQgdG8NCj4gd29ycnkg
-YWJvdXQgdGhpcy4NCj4gPg0KPiA+IFRoYW5rcywNCj4gPiBIc2luaHNpYW5nDQo+ID4NCj4gPiAy
-MDE0LTA3LTAxIDg6MzQgR01UKzA4OjAwIENocmlzIEJhbGwgPGNocmlzQHByaW50Zi5uZXQ+Og0K
-PiA+PiBIaSBHcmFudCwgc29ycnkgYWJvdXQgdGhlIGRlbGF5Lg0KPiA+Pg0KPiA+PiBPbiBUdWUs
-IEp1bCAwMSAyMDE0LCBHcmFudCBHcnVuZGxlciB3cm90ZToNCj4gPj4+IHBpbmc/IEFub3RoZXIg
-d2VlayBpcyBwYXN0Lg0KPiA+Pj4NCj4gPj4+IEkga25vdyB5b3UgZ3V5cyBhcmUgYnVzeSB3aXRo
-IG90aGVyIHN0dWZmLiBCdXQgcGxlYXNlIGF0IGxlYXN0DQo+ID4+PiBwdWJsaXNoIHdoYXQgeW91
-IHRoaW5rIHRoZSBuZXh0IHN0ZXBzIGZvciB0aGlzIHBhdGNoIGFyZS4NCj4gPj4+DQo+ID4+PiBU
-aGlzIGlzIGEgY3JpdGljYWwgcGF0Y2ggZm9yIHN1cHBvcnRpbmcgZU1NQyBwcm9kdWN0cyBhbmQg
-YWRkaW5nDQo+ID4+PiBhZGRpdGlvbmFsIHN1cHBvcnQgZm9yIG90aGVyIHZlbmRvcnMuIEknZCBs
-aWtlIHRvIGNvbnRpbnVlIHdvcmtpbmcNCj4gPj4+IHdpdGggInVwc3RyZWFtIiBhbmQgdGhlIGxh
-Y2sgb2YgcmVzcG9uc2UgaW4gdGhpcyBjYXNlIGlzIG1ha2luZyB0aGlzDQo+ID4+PiB1bm5lY2Vz
-c2FyaWx5IGRpZmZpY3VsdC4NCj4gPj4NCj4gPj4gSXQncyB0b3VnaCB0byBtZXJnZSBhIHNpZ25p
-ZmljYW50IHBhdGNoIHRoYXQgeW91IGhhdmVuJ3QgdGVzdGVkIGFuZA0KPiA+PiB3ZSBoYXZlbid0
-IHRlc3RlZC4gIFdlIGNvdWxkIGRvIGl0LCB0aG91Z2ggLS0gSSdkIGxpa2UgdG8gaGVhciB3aGF0
-DQo+ID4+IFVsZiB0aGlua3MuICBQbGVhc2UgY291bGQgeW91IGdpdmUgYSBxdWljayBleHBsYW5h
-dGlvbiBvZiB3aHkgZG9pbmcNCj4gPj4gdGhpcyBpbiBrZXJuZWwtc3BhY2UgbWFrZXMgbW9yZSBz
-ZW5zZSB0aGFuIHVzaW5nIHlvdXIgbW1jLXV0aWxzIHZlcnNpb24/DQo+ID4+DQo+ID4+IFRoYW5r
-cywNCj4gPj4NCj4gPj4gLSBDaHJpcy4NCj4gPj4gLS0NCj4gPj4gQ2hyaXMgQmFsbCAgIDxodHRw
-Oi8vcHJpbnRmLm5ldC8+DQo+ID4+IC0tDQo+ID4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBs
-aXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiDQo+ID4+IGluIHRoZSBi
-b2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUNCj4gbWFq
-b3Jkb21vDQo+ID4+IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWlu
-Zm8uaHRtbA0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUg
-bGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIiBpbiB0aGUNCj4gYm9keSBvZiBhIG1lc3NhZ2Ug
-dG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+IGh0
-dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--jJw1lDFspdWUbeWjfAQN41d6PabXeixE2
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+Hi Ulf,
+
+i would like to use advantages of sg buffer and make dma part of my
+driver a bit simpler, for example make use of dma_map_sg, but this
+controller accept only 4K alignet 32bit addresses. Are there any way to
+force this alignment in mmc-code?
+
+Am 16.06.2014 12:02, schrieb Ulf Hansson:
+> Hi Oleksij,
+>=20
+> Sorry for a late reply.
+>=20
+> On 8 May 2014 11:58, Oleksij Rempel <linux@rempel-privat.de> wrote:
+>> This driver is based on documentation which was based on my RE-work an=
+d
+>> comparision with other MMC drivers.
+>> It works in legacy mode and can provide 20MB/s R/W spead for most mode=
+rn
+>> SD cards, even if at least 40MB/s should be possible on this hardware.=
+
+>> It was not possible provide description for all register. But some of =
+them
+>> are important to make this hardware work in some unknown way.
+>>
+>> Biggest part of RE-work was done by emulating AU6601 in QEMU.
+>>
+
+
+
+--=20
+Regards,
+Oleksij
+
+
+--jJw1lDFspdWUbeWjfAQN41d6PabXeixE2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+Comment: Using GnuPG with Thunderbird - http://www.enigmail.net/
+
+iF4EAREIAAYFAlO1YLIACgkQHwImuRkmbWlvYgD+LVjb7CI73teqnETPT9I9IDLR
+31DHv7+z0+k22EZ5EtAA/0OuSAJ0dxWLeArcV1Ulp2eBg0LHE2Z+RwcmkbBYMuid
+=J/qs
+-----END PGP SIGNATURE-----
+
+--jJw1lDFspdWUbeWjfAQN41d6PabXeixE2--
