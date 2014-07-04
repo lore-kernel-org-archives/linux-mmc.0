@@ -1,49 +1,66 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCHv2 0/5] ARM: remove the sub-node and deprecated
- supports-highspeed property for dwmmc.
-Date: Fri, 04 Jul 2014 20:06:33 +0900
-Message-ID: <53B68AB9.9070109@samsung.com>
-References: <1404128960-27225-1-git-send-email-jh80.chung@samsung.com>
- <CAK5sBcEa5bRKUBB0n422m-K7A7YSshm2kTBUCNPgzwQkws3H8w@mail.gmail.com>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCHv2 4/5] ARM: dts: rockchip: unuse the slot-node and deprecated the supports-highspeed for dw-mmc
+Date: Fri, 04 Jul 2014 13:19:49 +0200
+Message-ID: <1641373.ldKZaK4qer@diego>
+References: <1404128960-27225-1-git-send-email-jh80.chung@samsung.com> <1404128960-27225-5-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <CAK5sBcEa5bRKUBB0n422m-K7A7YSshm2kTBUCNPgzwQkws3H8w@mail.gmail.com>
+In-Reply-To: <1404128960-27225-5-git-send-email-jh80.chung@samsung.com>
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Sachin Kamat <spk.linux@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "open list:OPEN FIRMWARE AND..." <devicetree@vger.kernel.org>, =?UTF-8?B?SGVpa28gU3TDvGJuZXI=?= <heiko@sntech.de>, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, devicetree@vger.kernel.org, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi, All.
+Am Montag, 30. Juni 2014, 20:49:18 schrieb Jaehoon Chung:
+> dw-mmc controller can support multiple slots.
+> But, there are no use-cases anywhere. So we don't need to support the
+> slot-node for dw-mmc controller.
+> And "supports-highspeed" property in dw-mmc is deprecated.
+> "supports-highspeed" property can be replaced to "cap-sd/mmc-highspeed".
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Reviewed-by: Tushar Behera <trblinux@gmail.com>
+> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Any other comment or review? I hope that these are merged.
+Reviewed-by: Heiko Stuebner <heiko@sntech.de>
 
-Best Regards,
-Jaehoon Chung
-
-On 07/01/2014 05:26 PM, Sachin Kamat wrote:
-> Hi Jaehoon,
+> ---
+>  arch/arm/boot/dts/rk3066a-bqcurie2.dts |   16 ++++------------
+>  1 file changed, 4 insertions(+), 12 deletions(-)
 > 
-> On Mon, Jun 30, 2014 at 5:19 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Since used the mmc_of_parse(), didn't parse the sub-node.
->> So we can remove the sub-node, because almost SoC used the only one card per a host.
->> And supports-highspeed can be replaced to "cap-mmc/sd-highspeed" property.
->>
->> Jaehoon Chung (5):
->>   mmc: dw_mmc: modify the dt-binding for removing slot-node and
->>     supports-highspeed
->>   ARM: dts: exynos: unuse the slot-node and deprecated the
->>     supports-highspeed for dw-mmc
->>   ARM: dts: socfpga: unuse the slot-node and deprecated the
->>     supports-highspeed for dw-mmc
->>   ARM: dts: rockchip: unuse the slot-node and deprecated the
->>     supports-highspeed for dw-mmc
->>   mmc: dw_mmc: replace "disable-wp" from slot's quirk to host's quirk
+> diff --git a/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+> b/arch/arm/boot/dts/rk3066a-bqcurie2.dts index afb3273..ecea889 100644
+> --- a/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+> +++ b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+> @@ -59,12 +59,8 @@
+>  			pinctrl-names = "default";
+>  			pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_cd &sd0_bus4>;
+>  			vmmc-supply = <&vcc_sd0>;
+> -
+> -			slot@0 {
+> -				reg = <0>;
+> -				bus-width = <4>;
+> -				disable-wp;
+> -			};
+> +			bus-width = <4>;
+> +			disable-wp;
+>  		};
 > 
-> It is a good practice to include revision history for subsequent versions.
+>  		dwmmc@10218000 { /* wifi */
+> @@ -74,12 +70,8 @@
 > 
-> Tested on Exynos 5250 based Snow and Arndale boards. Works fine now.
+>  			pinctrl-names = "default";
+>  			pinctrl-0 = <&sd1_clk &sd1_cmd &sd1_bus4>;
+> -
+> -			slot@0 {
+> -				reg = <0>;
+> -				bus-width = <4>;
+> -				disable-wp;
+> -			};
+> +			bus-width = <4>;
+> +			disable-wp;
+>  		};
 > 
-> Tested-by: Sachin Kamat <sachin.kamat@samsung.com>
-> 
+>  		gpio-keys {
