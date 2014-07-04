@@ -1,55 +1,48 @@
-From: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Subject: Re: [PATCH 1/2] mmc: hsmmc: Add reset gpio configuration option.
-Date: Fri, 4 Jul 2014 00:01:14 +0100
-Message-ID: <20140703230113.GR3705@n2100.arm.linux.org.uk>
-References: <1404420564-30245-1-git-send-email-marek@goldelico.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: One bug of SDHCI driver
+Date: Fri, 04 Jul 2014 11:40:03 +0900
+Message-ID: <53B61403.7040602@samsung.com>
+References: <53B249A4.2040404@linux.intel.com>
+ <53B57B23.4020607@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1404420564-30245-1-git-send-email-marek-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Marek Belisko <marek-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
-Cc: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org, balajitk-l0cyMroinI0@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hns-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org, NeilBrown <neilb-l3A5Bk7waGM@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:23725 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751617AbaGDCkG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Jul 2014 22:40:06 -0400
+In-reply-to: <53B57B23.4020607@linux.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>, chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, aaron.lu@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, jackey.shen@amd.com, gregkh@linuxfoundation.org
 
-On Thu, Jul 03, 2014 at 10:49:23PM +0200, Marek Belisko wrote:
-> From: NeilBrown <neilb-l3A5Bk7waGM@public.gmane.org>
+Hi,
+
+just use the MMC_CAP2_SDIO_IRQ_NOTHREAD?
+
+if (!err && host->sdio_irq && !(host->quirks & MMC_CAP2_SDIO_IRQ_NOTHREAD))
+	wake_up_process(host->sdio_irq_thread);
+
+I didn't test this..but i believe that it will be fixed.
+
+Best Regards,
+Jaehoon Chung
+
+On 07/04/2014 12:47 AM, Fu, Zhonghui wrote:
 > 
-> If a 'gpio_reset' is specified, then hold it low while
-> turning the power regulator on.
-> This is needed for some wi2wi wireless modules, particularly
-> when the regulator is held active by some other client.
-> The wi2wi needs to be reset if power isn't actually removed, and
-> the gpio can be used to do this.
+> Hi, all
 > 
-> Signed-off-by: NeilBrown <neilb-l3A5Bk7waGM@public.gmane.org>
+> The statement "mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;" is added in "sdhci_add_host" function in host/sdhci.c file. In some cases, this will make  "host->sdio_irq_thread" a NULL pointer in "mmc_sdio_resume" functon of core/sdio.c file and lead to resume failure. Could you please give me some advice how to fix this bug?
+> 
+> 
+> 
+> Thanks,
+> Zhonghui
+> 
+> 
+> 
+> 
+> 
+> 
 
-Obvious statement knowing what's been going on elsewhere...
-
-A while back, Olof produced a couple of patches to add /generic/ support
-to deal with power and reset controls for SDIO WIFI cards.  Patches
-were posted to linux-arm-kernel and other places around January time
-this year.
-
-No real conclusion came out of it, and it kind of died.  The point here
-is that this is not an OMAP problem.  We have this very same problem
-on different platforms and different SoCs.
-
-Why should we have N different solutions to the same problem.  Why can't
-we have one solution to fix this issue, rather than having every host
-driver implement some different solution to what's a common problem.
-
-If everyone is going to run away from generic problems and continue
-inventing their own private solutions to generic problems, the kernel
-is just going to become severely bloated and unmaintainable...
-
-Please, sort out generic problems with generic solutions.
-
--- 
-FTTC broadband for 0.8mile line: now at 9.7Mbps down 460kbps up... slowly
-improving, and getting towards what was expected from it.
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
