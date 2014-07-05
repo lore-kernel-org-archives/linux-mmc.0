@@ -1,122 +1,75 @@
-From: addy ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH] mmc: dw_mmc: add support for RK3288.
-Date: Sat,  5 Jul 2014 20:59:34 +0800
-Message-ID: <1404565174-2923-1-git-send-email-addy.ke@rock-chips.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hj-TNX95d0MmH7DzftRWevZcw@public.gmane.org, kever.yang-TNX95d0MmH7DzftRWevZcw@public.gmane.org, xjq-TNX95d0MmH7DzftRWevZcw@public.gmane.org, huangtao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, zyw-TNX95d0MmH7DzftRWevZcw@public.gmane.org, yzq-TNX95d0MmH7DzftRWevZcw@public.gmane.org, zhenfu.fang-TNX95d0MmH7DzftRWevZcw@public.gmane.org, cf-TNX95d0MmH7DzftRWevZcw@public.gmane.org, zhangqing-TNX95d0MmH7DzftRWevZcw@public.gmane.org, hl-TNX95d0MmH7DzftRWevZcw@public.gmane.org, lintao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, chenfen-TNX95d0MmH7DzftRWevZcw@public.gmane.org, zyf-TNX95d0MmH7DzftRWevZcw@public.gmane.org, addy ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+From: Apelete Seketeli <apelete@seketeli.net>
+Subject: [PATCH v2] Use DMA for data transfers in JZ4740 MMC driver
+Date: Sat,  5 Jul 2014 21:53:35 +0200
+Message-ID: <1404590016-15093-1-git-send-email-apelete@seketeli.net>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from seketeli.net ([94.23.218.202]:48853 "EHLO ms.seketeli.fr"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754566AbaGETxI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 5 Jul 2014 15:53:08 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, H Hartley Sweeten <hsweeten@visionengravers.com>, Lars-Peter Clausen <lars@metafoo.de>, Wei Yongjun <yongjun_wei@trendmicro.com.cn>, Alex Smith <alex.smith@imgtec.com>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
 
-This patch focuses on clock setting for RK3288 mmc controller.
+Hello,
 
-In RK3288 mmc controller, CLKDIV register can only be set 0 or 1,
-and if DDR 8bit mode, CLKDIV register must be set 1.
+MMC driver for JZ4740 SoC is currently relying on PIO mode only for
+data transfers.
 
-Signed-off-by: addy ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
----
- .../devicetree/bindings/mmc/rockchip-dw-mshc.txt   |  4 +-
- drivers/mmc/host/dw_mmc-pltfm.c                    | 50 +++++++++++++++++++++-
- 2 files changed, 51 insertions(+), 3 deletions(-)
+The patch that comes as a follow-up of this message allows the use of
+DMA for data transfers.
 
-diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-index c559f3f..e3f95cd 100644
---- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-@@ -10,7 +10,9 @@ extensions to the Synopsys Designware Mobile Storage Host Controller.
- Required Properties:
- 
- * compatible: should be
--	- "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following
-+	- "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following,
-+							before RK3288
-+	- "rockchip,rk3288-dw-mshc": for Rockchip RK3288
- 
- Example:
- 
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-index d4a47a9..15d796e 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.c
-+++ b/drivers/mmc/host/dw_mmc-pltfm.c
-@@ -21,17 +21,61 @@
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/dw_mmc.h>
- #include <linux/of.h>
-+#include <linux/clk.h>
- 
- #include "dw_mmc.h"
- #include "dw_mmc-pltfm.h"
- 
-+#define RK3288_CLKGEN_DIV	2
-+
- static void dw_mci_pltfm_prepare_command(struct dw_mci *host, u32 *cmdr)
- {
- 	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
- }
- 
--static const struct dw_mci_drv_data rockchip_drv_data = {
-+static int dw_mci_rk3288_setup_clock(struct dw_mci *host)
-+{
-+	host->bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
-+
-+	return 0;
-+}
-+
-+static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-+{
-+	int ret;
-+	unsigned int cclkin;
-+
-+	/*
-+	 * cclkin: source clock of mmc controller.
-+	 * bus_hz: card interface clock generated by CLKGEN.
-+	 * bus_hz = cclkin / RK3288_CLKGEN_DIV;
-+	 * ios->clock = (div == 0) ? bus_hz : (bus_hz / (2 * div))
-+	 *
-+	 * Note: div can only be 0 or 1
-+	 *       if DDR50 8bit mode, div must be set 1
-+	 */
-+	if ((ios->bus_width == MMC_BUS_WIDTH_8) &&
-+	    (ios->timing == MMC_TIMING_UHS_DDR50 ||
-+	     ios->timing == MMC_TIMING_MMC_DDR52))
-+		cclkin = 2 * ios->clock * RK3288_CLKGEN_DIV;
-+	else
-+		cclkin = ios->clock * RK3288_CLKGEN_DIV;
-+
-+	ret = clk_set_rate(host->ciu_clk, cclkin);
-+	if (ret)
-+		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
-+
-+	host->bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
-+}
-+
-+static const struct dw_mci_drv_data rk2928_drv_data = {
-+	.prepare_command	= dw_mci_pltfm_prepare_command,
-+};
-+
-+static const struct dw_mci_drv_data rk3288_drv_data = {
- 	.prepare_command	= dw_mci_pltfm_prepare_command,
-+	.set_ios	= dw_mci_rk3288_set_ios,
-+	.setup_clock	= dw_mci_rk3288_setup_clock,
- };
- 
- static const struct dw_mci_drv_data socfpga_drv_data = {
-@@ -95,7 +139,9 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
- static const struct of_device_id dw_mci_pltfm_match[] = {
- 	{ .compatible = "snps,dw-mshc", },
- 	{ .compatible = "rockchip,rk2928-dw-mshc",
--		.data = &rockchip_drv_data },
-+		.data = &rk2928_drv_data },
-+	{ .compatible = "rockchip,rk3288-dw-mshc",
-+		.data = &rk3288_drv_data },
- 	{ .compatible = "altr,socfpga-dw-mshc",
- 		.data = &socfpga_drv_data },
- 	{},
+Changes since v1:
+  - remove blank line added by mistake in jz_mmc_prepare_data_transfer().
+
+According to the following DMA vs PIO benchmarks there seems to be a
+slight improvement in transfer speed with the Ben NanoNote booting
+from SD card, while load average seems to be roughly on par:
+
+* With DMA:
+
+Test cases |             root@BenNanoNote:/# uptime              |   root@BenNanoNote:/# time zcat root/fedora-16.iso.gz > /dev/null && uptime
+-----------|----------------------------------------------------------------------------------------------------------------------------------
+Test run 1 | 00:20:55 up 1 min,  load average: 1.26, 0.42, 0.14  |  00:26:10 up 6 min,  load average: 2.89, 1.94, 0.89
+Test run 2 | 00:30:22 up 1 min,  load average: 1.16, 0.38, 0.13  |  00:35:34 up 6 min,  load average: 2.68, 1.86, 0.85
+Test run 3 | 00:39:56 up 1 min,  load average: 1.16, 0.38, 0.13  |  00:45:06 up 6 min,  load average: 2.57, 1.76, 0.81
+-----------|----------------------------------------------------------------------------------------------------------------------------------
+  Average  |             1 min,  load average: 1.19, 0.39, 0.13  |              6 min,  load average: 2.71, 1.85, 0.85
+
+
+* With PIO:
+
+Test cases |             root@BenNanoNote:/# uptime              |   root@BenNanoNote:/# time zcat root/fedora-16.iso.gz > /dev/null && uptime
+----------------------------------------------------------------------------------------------------------------------------------------------
+Test run 1 | 00:50:47 up 1 min,  load average: 1.42, 0.49, 0.17  |  00:56:52 up 7 min,  load average: 2.47, 2.00, 0.98
+Test run 2 | 01:00:19 up 1 min,  load average: 1.21, 0.39, 0.14  |  01:06:29 up 7 min,  load average: 2.45, 1.96, 0.96
+Test run 3 | 01:11:27 up 1 min,  load average: 1.15, 0.36, 0.12  |  01:17:33 up 7 min,  load average: 2.63, 2.01, 0.97
+-----------|----------------------------------------------------------------------------------------------------------------------------------
+  Average  |             1 min,  load average: 1.26, 0.41, 0.14  |              7 min,  load average: 2.52, 1.99, 0.97
+
+
+DMA tranfers performance might be further improved with a latter patch
+by taking advantage of the asynchronous request capability of the MMC
+framework.
+
+Changes were rebased on top of linux master branch, built and tested
+successfully.
+
+The following changes since commit 4c83445:
+
+  Linux 3.16-rc3
+
+are available in the git repository at:
+
+  git://git.seketeli.net/~apelete/linux.git mmc-dma-jz4740
+
+Apelete Seketeli (1):
+  mmc: jz4740: add dma infrastructure for data transfers
+
+ drivers/mmc/host/jz4740_mmc.c |  172 +++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 164 insertions(+), 8 deletions(-)
+
 -- 
-1.8.3.2
+1.7.10.4
 
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
