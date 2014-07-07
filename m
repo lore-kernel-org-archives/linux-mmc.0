@@ -1,35 +1,63 @@
-From: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH] mmc: tegra: Do not include asm/gpio.h
-Date: Mon,  7 Jul 2014 14:07:42 +0200
-Message-ID: <1404734862-14894-1-git-send-email-thierry.reding@gmail.com>
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: core: Add DT bindings for card detect debounce time
+Date: Mon, 7 Jul 2014 17:12:47 +0200
+Message-ID: <CACRpkda7s_AgPx4a6qu2=FGhfoPyJiZBCJDbd9iWL5qE3DPtXQ@mail.gmail.com>
+References: <1399649837-27286-1-git-send-email-balajitk@ti.com>
+	<CAPDyKFoZ=zjKg5bUMnK_X2XOatT=XSAnBDpYqu0Q2VOkM7hOOA@mail.gmail.com>
+	<CAAVeFu+CW0DSbqc6k145APao2r907sAyMw0+W=hQXxO6LoQx-g@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <CAAVeFu+CW0DSbqc6k145APao2r907sAyMw0+W=hQXxO6LoQx-g@mail.gmail.com>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Alexandre Courbot <gnurou@gmail.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Balaji T K <balajitk@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+On Sat, Jun 21, 2014 at 9:22 AM, Alexandre Courbot <gnurou@gmail.com> wrote:
 
-This doesn't seem to be used any longer and removing the include fixes
-64-bit ARM builds.
+>> I have added Linus Walleij and Alexandre Courbot, the maintainers of
+>> gpio. Let's see if they can point us in a direction.
+>
+> I agree it would be nice if the debounce value could be handled by the
+> GPIO framework.
 
-Signed-off-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
----
- drivers/mmc/host/sdhci-tegra.c | 2 --
- 1 file changed, 2 deletions(-)
+I agree too.
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index d93a063a36f3..33100d10d176 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -26,8 +26,6 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/slot-gpio.h>
- 
--#include <asm/gpio.h>
--
- #include "sdhci-pltfm.h"
- 
- /* Tegra SDHOST controller vendor register definitions */
--- 
-2.0.1
+> I just wonder what would be the correct way of doing
+> it? Contrary to ACTIVE_LOW and other flags which can be specified with
+> the GPIO phandle, debounce is a numeric value. Maybe using a different
+> property, e.g.:
+>
+> cd-gpios = <&gpio 1 GPIO_ACTIVE_HIGH>;
+> cd-gpios-debounce = <10>;
+>
+> When looking up a GPIO through gpiod_get(), the GPIO framework could
+> then check for -debounce property and set the debounce time
+> accordingly. At first sight I'd say that would work and could be used
+> for MMC and all other subsystems that need something similar.
+
+Yes, but we also need to write generic debounce handling into
+the gpiolib, so it doesn't matter if the GPIO driver can or cannot
+handle this itself. Some hardware has the capability to debounce
+lines in *hardware*.
+
+Right now a call to gpiod_set_debounce() will fail unless the
+hardware has a debounce option.
+
+What we should really do is make gpiod_set_debounce() always
+work, put the debounce value into the gpio_desc, and move some
+logic similar to what exists in drivers/input/keyboard/gpio_keys.c
+into the gpiolib, then get rid of any local implementations like
+in gpio_keys.
+
+Then we can rely on the gpiolib handling this at all times, and also
+to get the debounce config from DT.
+
+Dmitry, opinions on this?
+
+Anyone up for implementing the timer in gpiolib and moving the
+keyboard driver over to using the gpiolib debounce set?
+
+Yours,
+Linus Walleij
