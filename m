@@ -1,71 +1,59 @@
-From: Dmitry Torokhov <dmitry.torokhov@gmail.com>
-Subject: Re: [PATCH] mmc: core: Add DT bindings for card detect debounce time
-Date: Mon, 7 Jul 2014 09:59:46 -0700
-Message-ID: <CAKdAkRSNU+1YHp+gsnwaTBb+ui7W9ZUBW4OBQFwDQ5Px-WEr2g@mail.gmail.com>
-References: <1399649837-27286-1-git-send-email-balajitk@ti.com>
-	<CAPDyKFoZ=zjKg5bUMnK_X2XOatT=XSAnBDpYqu0Q2VOkM7hOOA@mail.gmail.com>
-	<CAAVeFu+CW0DSbqc6k145APao2r907sAyMw0+W=hQXxO6LoQx-g@mail.gmail.com>
-	<CACRpkda7s_AgPx4a6qu2=FGhfoPyJiZBCJDbd9iWL5qE3DPtXQ@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v3] s3cmci: port DMA code to dmaengine API
+Date: Mon, 7 Jul 2014 23:12:39 +0200
+Message-ID: <201407072312.40687.arnd@arndb.de>
+References: <1401643329-6460-1-git-send-email-anarsoul@gmail.com> <CA+E=qVf2QWk+HxPTjwFK8BkD3C+EGbvLDMM4ro1_nYEThe=LtQ@mail.gmail.com> <CA+E=qVeS8DXTz6b9NnVNi4gFufMkf+iUrOU1A0+Ja8ehnBsrhQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: Text/Plain;
+  charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f176.google.com ([209.85.214.176]:37041 "EHLO
-	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751205AbaGGQ7q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Jul 2014 12:59:46 -0400
-In-Reply-To: <CACRpkda7s_AgPx4a6qu2=FGhfoPyJiZBCJDbd9iWL5qE3DPtXQ@mail.gmail.com>
+Received: from mout.kundenserver.de ([212.227.126.130]:56474 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751424AbaGGVNf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Jul 2014 17:13:35 -0400
+In-Reply-To: <CA+E=qVeS8DXTz6b9NnVNi4gFufMkf+iUrOU1A0+Ja8ehnBsrhQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Alexandre Courbot <gnurou@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Balaji T K <balajitk@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>
+To: Vasily Khoruzhick <anarsoul@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, arm-linux <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, Mark Brown <broonie@kernel.org>, Ben Dooks <ben-linux@fluff.org>
 
-On Mon, Jul 7, 2014 at 8:12 AM, Linus Walleij <linus.walleij@linaro.org> wrote:
-> On Sat, Jun 21, 2014 at 9:22 AM, Alexandre Courbot <gnurou@gmail.com> wrote:
->
->>> I have added Linus Walleij and Alexandre Courbot, the maintainers of
->>> gpio. Let's see if they can point us in a direction.
->>
->> I agree it would be nice if the debounce value could be handled by the
->> GPIO framework.
->
-> I agree too.
->
->> I just wonder what would be the correct way of doing
->> it? Contrary to ACTIVE_LOW and other flags which can be specified with
->> the GPIO phandle, debounce is a numeric value. Maybe using a different
->> property, e.g.:
->>
->> cd-gpios = <&gpio 1 GPIO_ACTIVE_HIGH>;
->> cd-gpios-debounce = <10>;
->>
->> When looking up a GPIO through gpiod_get(), the GPIO framework could
->> then check for -debounce property and set the debounce time
->> accordingly. At first sight I'd say that would work and could be used
->> for MMC and all other subsystems that need something similar.
->
-> Yes, but we also need to write generic debounce handling into
-> the gpiolib, so it doesn't matter if the GPIO driver can or cannot
-> handle this itself. Some hardware has the capability to debounce
-> lines in *hardware*.
->
-> Right now a call to gpiod_set_debounce() will fail unless the
-> hardware has a debounce option.
->
-> What we should really do is make gpiod_set_debounce() always
-> work, put the debounce value into the gpio_desc, and move some
-> logic similar to what exists in drivers/input/keyboard/gpio_keys.c
-> into the gpiolib, then get rid of any local implementations like
-> in gpio_keys.
->
-> Then we can rely on the gpiolib handling this at all times, and also
-> to get the debounce config from DT.
->
-> Dmitry, opinions on this?
+On Monday 07 July 2014, Vasily Khoruzhick wrote:
+> On Mon, Jun 30, 2014 at 10:03 PM, Vasily Khoruzhick <anarsoul@gmail.com> wrote:
+> > On Mon, Jun 23, 2014 at 2:31 PM, Vasily Khoruzhick <anarsoul@gmail.com> wrote:
+> >>
+> >> On 1 June 2014 20:22:09 Vasily Khoruzhick wrote:
+> >> > Utilise new s3c24xx-dma dmaengine driver for DMA ops.
+> >> >
+> >> > Signed-off-by: Vasily Khoruzhick <anarsoul@gmail.com>
+> >> > ---
+> >> > v2: - Don't store async dma descriptor, it's not used
+> >> >     - Request DMA channel via dma_request_slave_channel_compat() and use
+> >> >       hardcoded DMA channel.
+> >> >     - Add dependency on S3C24XX_DMAC (s3cmci uses filter function from it)
+> >> > v3: - Use 'depends' instead of 'select' in Kconfig
+> >> >     - Drop useless controller registers reads from dma completion callback
+> >>
+> >> Ping?
+> >
+> > Ping?
+> 
+> Could anyone tell me through which tree this patch should be merged?
+> I'm pretty sure that I've included everyone from get_maintainer.pl
+> output
+> except LKML, but no response from maintainer so far.
 
-I am always happy to hear when common functionality is moved into
-appropriate layer.
+I think you did everything right, Ulf or Chris should really pick up this
+patch. The one thing you could improve is the changeset text which you
+wrote as "Utilise new s3c24xx-dma dmaengine driver for DMA ops." What we
+really need here is an explanation of why we want this, e.g. what problems
+are solved by it etc. I definitely really want this patch as part of 3.17
+so we can enabled multiplatform for the platforms that use this driver.
 
-Thanks.
+You should also list the
 
--- 
-Dmitry
+Acked-by: Arnd Bergmann <arnd@arndb.de>
+
+line under your "Signed-off-by" line.
+
+	Arnd
