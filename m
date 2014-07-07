@@ -1,67 +1,134 @@
-From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
-Subject: Re: One bug of SDHCI driver
-Date: Sun, 06 Jul 2014 23:19:07 +0800
-Message-ID: <53B968EB.60401@linux.intel.com>
-References: <53B249A4.2040404@linux.intel.com> <53B57B23.4020607@linux.intel.com> <53B61403.7040602@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: add support for RK3288.
+Date: Mon, 07 Jul 2014 11:07:08 +0900
+Message-ID: <53BA00CC.2090707@samsung.com>
+References: <1404565174-2923-1-git-send-email-addy.ke@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:18459 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750897AbaGFPTO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 6 Jul 2014 11:19:14 -0400
-In-Reply-To: <53B61403.7040602@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-reply-to: <1404565174-2923-1-git-send-email-addy.ke@rock-chips.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: addy ke <addy.ke@rock-chips.com>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net
+Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, hj@rock-chips.com, kever.yang@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, zhenfu.fang@rock-chips.com, cf@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, aaron.lu@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, jackey.shen@amd.com, gregkh@linuxfoundation.org
 
+Hi, Addy,
 
-Yes, "mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;" of "sdhci_add_host" function in host/sdhci.c file make oops.
+On 07/05/2014 09:59 PM, addy ke wrote:
+> This patch focuses on clock setting for RK3288 mmc controller.
+> 
+> In RK3288 mmc controller, CLKDIV register can only be set 0 or 1,
+> and if DDR 8bit mode, CLKDIV register must be set 1.
+> 
+> Signed-off-by: addy ke <addy.ke@rock-chips.com>
+> ---
+>  .../devicetree/bindings/mmc/rockchip-dw-mshc.txt   |  4 +-
+>  drivers/mmc/host/dw_mmc-pltfm.c                    | 50 +++++++++++++++++++++-
+>  2 files changed, 51 insertions(+), 3 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> index c559f3f..e3f95cd 100644
+> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> @@ -10,7 +10,9 @@ extensions to the Synopsys Designware Mobile Storage Host Controller.
+>  Required Properties:
+>  
+>  * compatible: should be
+> -	- "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following
+> +	- "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following,
+> +							before RK3288
+> +	- "rockchip,rk3288-dw-mshc": for Rockchip RK3288
+>  
+>  Example:
+>  
+> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+> index d4a47a9..15d796e 100644
+> --- a/drivers/mmc/host/dw_mmc-pltfm.c
+> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+> @@ -21,17 +21,61 @@
+>  #include <linux/mmc/mmc.h>
+>  #include <linux/mmc/dw_mmc.h>
+>  #include <linux/of.h>
+> +#include <linux/clk.h>
+>  
+>  #include "dw_mmc.h"
+>  #include "dw_mmc-pltfm.h"
+>  
+> +#define RK3288_CLKGEN_DIV	2
+"2" is used to the general div value at rockchip?
 
-"sdio_card_irq_get" function in core/sdio_irq.c file:
-if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {  /* the condition is false */
-            atomic_set(&host->sdio_irq_thread_abort, 0);
-            host->sdio_irq_thread =                                               
-                kthread_run(sdio_irq_thread, host,
-                        "ksdioirqd/%s", mmc_hostname(host));
+> +
+>  static void dw_mci_pltfm_prepare_command(struct dw_mci *host, u32 *cmdr)
+>  {
+>  	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
+>  }
+>  
+> -static const struct dw_mci_drv_data rockchip_drv_data = {
+> +static int dw_mci_rk3288_setup_clock(struct dw_mci *host)
+> +{
+> +	host->bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
+I knew that you need not to call clk_get_rate(). In dw-mmc.c, it's already called.
+So you can just use the host->bus_hz.
 
+host->bus_hz /= RK3288_CLKGEN_DIV;
 
-This will make  "host->sdio_irq_thread" a NULL pointer in "mmc_sdio_resume" functon of core/sdio.c file.
+Best Regards,
+Jaehoon Chung
 
-
-
-Thanks,
-Zhonghui
-
-
-
-On 2014/7/4 10:40, Jaehoon Chung wrote:
-> Hi,
->
-> just use the MMC_CAP2_SDIO_IRQ_NOTHREAD?
->
-> if (!err && host->sdio_irq && !(host->quirks & MMC_CAP2_SDIO_IRQ_NOTHREAD))
-> 	wake_up_process(host->sdio_irq_thread);
->
-> I didn't test this..but i believe that it will be fixed.
->
-> Best Regards,
-> Jaehoon Chung
->
-> On 07/04/2014 12:47 AM, Fu, Zhonghui wrote:
->> Hi, all
->>
->> The statement "mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;" is added in "sdhci_add_host" function in host/sdhci.c file. In some cases, this will make  "host->sdio_irq_thread" a NULL pointer in "mmc_sdio_resume" functon of core/sdio.c file and lead to resume failure. Could you please give me some advice how to fix this bug?
->>
->>
->>
->> Thanks,
->> Zhonghui
->>
->>
->>
->>
->>
->>
+> +
+> +	return 0;
+> +}
+> +
+> +static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+> +{
+> +	int ret;
+> +	unsigned int cclkin;
+> +
+> +	/*
+> +	 * cclkin: source clock of mmc controller.
+> +	 * bus_hz: card interface clock generated by CLKGEN.
+> +	 * bus_hz = cclkin / RK3288_CLKGEN_DIV;
+> +	 * ios->clock = (div == 0) ? bus_hz : (bus_hz / (2 * div))
+> +	 *
+> +	 * Note: div can only be 0 or 1
+> +	 *       if DDR50 8bit mode, div must be set 1
+> +	 */
+> +	if ((ios->bus_width == MMC_BUS_WIDTH_8) &&
+> +	    (ios->timing == MMC_TIMING_UHS_DDR50 ||
+> +	     ios->timing == MMC_TIMING_MMC_DDR52))
+> +		cclkin = 2 * ios->clock * RK3288_CLKGEN_DIV;
+> +	else
+> +		cclkin = ios->clock * RK3288_CLKGEN_DIV;
+> +
+> +	ret = clk_set_rate(host->ciu_clk, cclkin);
+> +	if (ret)
+> +		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
+> +
+> +	host->bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
+> +}
+> +
+> +static const struct dw_mci_drv_data rk2928_drv_data = {
+> +	.prepare_command	= dw_mci_pltfm_prepare_command,
+> +};
+> +
+> +static const struct dw_mci_drv_data rk3288_drv_data = {
+>  	.prepare_command	= dw_mci_pltfm_prepare_command,
+> +	.set_ios	= dw_mci_rk3288_set_ios,
+> +	.setup_clock	= dw_mci_rk3288_setup_clock,
+>  };
+>  
+>  static const struct dw_mci_drv_data socfpga_drv_data = {
+> @@ -95,7 +139,9 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
+>  static const struct of_device_id dw_mci_pltfm_match[] = {
+>  	{ .compatible = "snps,dw-mshc", },
+>  	{ .compatible = "rockchip,rk2928-dw-mshc",
+> -		.data = &rockchip_drv_data },
+> +		.data = &rk2928_drv_data },
+> +	{ .compatible = "rockchip,rk3288-dw-mshc",
+> +		.data = &rk3288_drv_data },
+>  	{ .compatible = "altr,socfpga-dw-mshc",
+>  		.data = &socfpga_drv_data },
+>  	{},
+> 
 
