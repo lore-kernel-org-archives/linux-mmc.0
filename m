@@ -1,53 +1,53 @@
-From: Vasily Khoruzhick <anarsoul@gmail.com>
-Subject: Re: [PATCH v3] s3cmci: port DMA code to dmaengine API
-Date: Mon, 7 Jul 2014 11:08:45 +0300
-Message-ID: <CA+E=qVeS8DXTz6b9NnVNi4gFufMkf+iUrOU1A0+Ja8ehnBsrhQ@mail.gmail.com>
-References: <1401643329-6460-1-git-send-email-anarsoul@gmail.com>
- <9001585.uuLFNQ0H0y@anarsoul-thinkpad> <CA+E=qVf2QWk+HxPTjwFK8BkD3C+EGbvLDMM4ro1_nYEThe=LtQ@mail.gmail.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCHv2 5/5] mmc: dw_mmc: replace "disable-wp" from slot's quirk
+ to host's quirk
+Date: Mon, 07 Jul 2014 18:19:35 +0900
+Message-ID: <000d01cf99c4$920eb1b0$b62c1510$%jun@samsung.com>
+References: <1404128960-27225-1-git-send-email-jh80.chung@samsung.com>
+ <1404128960-27225-6-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f178.google.com ([209.85.214.178]:53179 "EHLO
-	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750855AbaGGIJH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Jul 2014 04:09:07 -0400
-Received: by mail-ob0-f178.google.com with SMTP id wn1so4224456obc.23
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Jul 2014 01:09:06 -0700 (PDT)
-In-Reply-To: <CA+E=qVf2QWk+HxPTjwFK8BkD3C+EGbvLDMM4ro1_nYEThe=LtQ@mail.gmail.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:49449 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751435AbaGGJTi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Jul 2014 05:19:38 -0400
+In-reply-to: <1404128960-27225-6-git-send-email-jh80.chung@samsung.com>
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: arm-linux <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, Mark Brown <broonie@kernel.org>, Ben Dooks <ben-linux@fluff.org>
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>
+Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, heiko@sntech.de, dinguyen@altera.com, 'Mark Rutland' <mark.rutland@arm.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Mon, Jun 30, 2014 at 10:03 PM, Vasily Khoruzhick <anarsoul@gmail.com> wrote:
-> On Mon, Jun 23, 2014 at 2:31 PM, Vasily Khoruzhick <anarsoul@gmail.com> wrote:
->>
->> On 1 June 2014 20:22:09 Vasily Khoruzhick wrote:
->> > Utilise new s3c24xx-dma dmaengine driver for DMA ops.
->> >
->> > Signed-off-by: Vasily Khoruzhick <anarsoul@gmail.com>
->> > ---
->> > v2: - Don't store async dma descriptor, it's not used
->> >     - Request DMA channel via dma_request_slave_channel_compat() and use
->> >       hardcoded DMA channel.
->> >     - Add dependency on S3C24XX_DMAC (s3cmci uses filter function from it)
->> > v3: - Use 'depends' instead of 'select' in Kconfig
->> >     - Drop useless controller registers reads from dma completion callback
->>
->> Ping?
->
-> Ping?
+Sorry for late review.
+If you're in progress for next, please consider it.
 
-Could anyone tell me through which tree this patch should be merged?
-I'm pretty sure that I've included everyone from get_maintainer.pl
-output
-except LKML, but no response from maintainer so far.
+On Mon, June 30, 2014, Jaehoon Chung wrote:
+> Replaced the "disable-wp" into host's quirks.
+> (Because the slot-node is removed at dt-file.)
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c |   13 ++++++-------
+>  1 file changed, 6 insertions(+), 7 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 1ac227c..6c5d696 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -994,10 +994,11 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
+>  {
+>  	int read_only;
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+> +	struct dw_mci_board *brd = slot->host->pdata;
+>  	int gpio_ro = mmc_gpio_get_ro(mmc);
+> 
+>  	/* Use platform get_ro function, else try on board write protect */
+> -	if (slot->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT)
+It would be better to use host->quirks instead of brd->quirks
+It's finally updated with host->pdata->quirks on probing.
 
-Regards
-Vasily
+Thanks,
+Seungwon Jeon
 
->> >  drivers/mmc/host/Kconfig  |  10 +--
->> >  drivers/mmc/host/s3cmci.c | 180
->> > +++++++++++++--------------------------------- drivers/mmc/host/s3cmci.h |
->> >  4 +-
->> >  3 files changed, 52 insertions(+), 142 deletions(-)
