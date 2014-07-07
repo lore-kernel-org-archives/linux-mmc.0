@@ -1,97 +1,53 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCHv2 2/5] ARM: dts: exynos: unuse the slot-node and deprecated
- the supports-highspeed for dw-mmc
-Date: Mon, 07 Jul 2014 16:33:02 +0900
-Message-ID: <53BA4D2E.40600@samsung.com>
-References: <1404128960-27225-1-git-send-email-jh80.chung@samsung.com>
- <1404128960-27225-3-git-send-email-jh80.chung@samsung.com>
- <000c01cf99b5$34ccc8c0$9e665a40$%jun@samsung.com>
+From: Vasily Khoruzhick <anarsoul@gmail.com>
+Subject: Re: [PATCH v3] s3cmci: port DMA code to dmaengine API
+Date: Mon, 7 Jul 2014 11:08:45 +0300
+Message-ID: <CA+E=qVeS8DXTz6b9NnVNi4gFufMkf+iUrOU1A0+Ja8ehnBsrhQ@mail.gmail.com>
+References: <1401643329-6460-1-git-send-email-anarsoul@gmail.com>
+ <9001585.uuLFNQ0H0y@anarsoul-thinkpad> <CA+E=qVf2QWk+HxPTjwFK8BkD3C+EGbvLDMM4ro1_nYEThe=LtQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=EUC-KR
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:25402 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751231AbaGGHdF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Jul 2014 03:33:05 -0400
-In-reply-to: <000c01cf99b5$34ccc8c0$9e665a40$%jun@samsung.com>
+Received: from mail-ob0-f178.google.com ([209.85.214.178]:53179 "EHLO
+	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750855AbaGGIJH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Jul 2014 04:09:07 -0400
+Received: by mail-ob0-f178.google.com with SMTP id wn1so4224456obc.23
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Jul 2014 01:09:06 -0700 (PDT)
+In-Reply-To: <CA+E=qVf2QWk+HxPTjwFK8BkD3C+EGbvLDMM4ro1_nYEThe=LtQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>
-Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, heiko@sntech.de, dinguyen@altera.com, 'Mark Rutland' <mark.rutland@arm.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: arm-linux <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, Mark Brown <broonie@kernel.org>, Ben Dooks <ben-linux@fluff.org>
 
-Hi, Seungwon.
-
-I will fix it, and add  dt-file related with exynos3250. 
-
-Best Regards,
-Jaehoon Chung
-
-On 07/07/2014 04:29 PM, Seungwon Jeon wrote:
-> Hi Jaehoon,
-> 
-> Please check one thing below.
-> 
-> On Mon, June 30, 2014, Jaehoon Chung wrote:
->> dw-mmc controller can support multiple slots.
->> But, there are no use-cases anywhere. So we don't need to support the
->> slot-node for dw-mmc controller.
->> And "supports-highspeed" property in dw-mmc is deprecated.
->> "supports-highspeed" property can be replaced to "cap-sd/mmc-highspeed".
+On Mon, Jun 30, 2014 at 10:03 PM, Vasily Khoruzhick <anarsoul@gmail.com> wrote:
+> On Mon, Jun 23, 2014 at 2:31 PM, Vasily Khoruzhick <anarsoul@gmail.com> wrote:
 >>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> Reviewed-by: Tushar Behera <trblinux@gmail.com>
->> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
->> ---
-> 
->> diff --git a/arch/arm/boot/dts/exynos5420-arndale-octa.dts b/arch/arm/boot/dts/exynos5420-arndale-
->> octa.dts
->> index 434fd9d..5f37b81 100644
->> --- a/arch/arm/boot/dts/exynos5420-arndale-octa.dts
->> +++ b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
->> @@ -50,7 +50,6 @@
->>  	mmc@12200000 {
->>  		status = "okay";
->>  		broken-cd;
->> -		supports-highspeed;
->>  		card-detect-delay = <200>;
->>  		samsung,dw-mshc-ciu-div = <3>;
->>  		samsung,dw-mshc-sdr-timing = <0 4>;
->> @@ -58,16 +57,12 @@
->>  		pinctrl-names = "default";
->>  		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
->>  		vmmc-supply = <&ldo10_reg>;
->> -
->> -		slot@0 {
->> -			reg = <0>;
->> -			bus-width = <8>;
->> -		};
->> +		bus-width = <8>;
->> +		cap-mmc-highspeed;
->>  	};
+>> On 1 June 2014 20:22:09 Vasily Khoruzhick wrote:
+>> > Utilise new s3c24xx-dma dmaengine driver for DMA ops.
+>> >
+>> > Signed-off-by: Vasily Khoruzhick <anarsoul@gmail.com>
+>> > ---
+>> > v2: - Don't store async dma descriptor, it's not used
+>> >     - Request DMA channel via dma_request_slave_channel_compat() and use
+>> >       hardcoded DMA channel.
+>> >     - Add dependency on S3C24XX_DMAC (s3cmci uses filter function from it)
+>> > v3: - Use 'depends' instead of 'select' in Kconfig
+>> >     - Drop useless controller registers reads from dma completion callback
 >>
->>  	mmc@12220000 {
->>  		status = "okay";
->> -		supports-highspeed;
->>  		card-detect-delay = <200>;
->>  		samsung,dw-mshc-ciu-div = <3>;
->>  		samsung,dw-mshc-sdr-timing = <2 3>;
->> @@ -75,11 +70,8 @@
->>  		pinctrl-names = "default";
->>  		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
->>  		vmmc-supply = <&ldo10_reg>;
->> -
->> -		slot@0 {
->> -			reg = <0>;
->> -			bus-width = <4>;
->> -		};
->> +		bus-width = <8>;
-> <4> is correct?
-> 
->> +		cap-mmc-highspeed;
-> 
-> Thanks,
-> Seungwon Jeon
-> 
-> 
+>> Ping?
+>
+> Ping?
 
+Could anyone tell me through which tree this patch should be merged?
+I'm pretty sure that I've included everyone from get_maintainer.pl
+output
+except LKML, but no response from maintainer so far.
+
+Regards
+Vasily
+
+>> >  drivers/mmc/host/Kconfig  |  10 +--
+>> >  drivers/mmc/host/s3cmci.c | 180
+>> > +++++++++++++--------------------------------- drivers/mmc/host/s3cmci.h |
+>> >  4 +-
+>> >  3 files changed, 52 insertions(+), 142 deletions(-)
