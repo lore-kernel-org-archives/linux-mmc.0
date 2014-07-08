@@ -1,39 +1,74 @@
-From: Vasily Khoruzhick <anarsoul@gmail.com>
-Subject: Re: [PATCH v3] s3cmci: port DMA code to dmaengine API
-Date: Tue, 08 Jul 2014 15:56:14 +0300
-Message-ID: <2209409.5C7y4zWhxp@vasilykh-desktop-i5>
-References: <1401643329-6460-1-git-send-email-anarsoul@gmail.com> <201407072312.40687.arnd@arndb.de> <CAPDyKFoVtJLyBrjwyQYKK6h=8aNd7+SMYU9bS8iStcSZkWs3Fw@mail.gmail.com>
+From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Subject: Re: One bug of SDHCI driver
+Date: Wed, 09 Jul 2014 00:03:26 +0800
+Message-ID: <53BC164E.4040900@linux.intel.com>
+References: <53B249A4.2040404@linux.intel.com> <53B57B23.4020607@linux.intel.com> <53B61403.7040602@samsung.com> <53B968EB.60401@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f179.google.com ([209.85.212.179]:50130 "EHLO
-	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754250AbaGHM5f (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jul 2014 08:57:35 -0400
-Received: by mail-wi0-f179.google.com with SMTP id cc10so941337wib.0
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Jul 2014 05:57:34 -0700 (PDT)
-In-Reply-To: <CAPDyKFoVtJLyBrjwyQYKK6h=8aNd7+SMYU9bS8iStcSZkWs3Fw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <53B968EB.60401@linux.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, aaron.lu@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, jackey.shen@amd.com, gregkh@linuxfoundation.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, arm-linux <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, Mark Brown <broonie@kernel.org>, Ben Dooks <ben-linux@fluff.org>
 
-On 8 July 2014 14:51:01 Ulf Hansson wrote:
 
-> Sorry for the delay.
-> 
-> Thanks! Applied for next with Arnd's ack.
-> 
-> Kind regards
-> Uffe
+Hi,
 
-Thank you!
+Why add "mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;" ?  How to fix this bug?
 
-And since now old s3c24xx DMA (non-dmaengine) has no users we can remove it 
-completely.
+Could you please give out some idea about this bug?
 
-I'll send a patch soon.
 
-Regards
-Vasily
+Thanks,
+Zhonghui
+
+
+On 2014/7/6 23:19, Fu, Zhonghui wrote:
+> Yes, "mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;" of "sdhci_add_host" function in host/sdhci.c file make oops.
+>
+> "sdio_card_irq_get" function in core/sdio_irq.c file:
+> if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {  /* the condition is false */
+>             atomic_set(&host->sdio_irq_thread_abort, 0);
+>             host->sdio_irq_thread =                                               
+>                 kthread_run(sdio_irq_thread, host,
+>                         "ksdioirqd/%s", mmc_hostname(host));
+>
+>
+> This will make  "host->sdio_irq_thread" a NULL pointer in "mmc_sdio_resume" functon of core/sdio.c file.
+>
+>
+>
+> Thanks,
+> Zhonghui
+>
+>
+>
+> On 2014/7/4 10:40, Jaehoon Chung wrote:
+>> Hi,
+>>
+>> just use the MMC_CAP2_SDIO_IRQ_NOTHREAD?
+>>
+>> if (!err && host->sdio_irq && !(host->quirks & MMC_CAP2_SDIO_IRQ_NOTHREAD))
+>> 	wake_up_process(host->sdio_irq_thread);
+>>
+>> I didn't test this..but i believe that it will be fixed.
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>> On 07/04/2014 12:47 AM, Fu, Zhonghui wrote:
+>>> Hi, all
+>>>
+>>> The statement "mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;" is added in "sdhci_add_host" function in host/sdhci.c file. In some cases, this will make  "host->sdio_irq_thread" a NULL pointer in "mmc_sdio_resume" functon of core/sdio.c file and lead to resume failure. Could you please give me some advice how to fix this bug?
+>>>
+>>>
+>>>
+>>> Thanks,
+>>> Zhonghui
+>>>
+>>>
+>>>
+>>>
+>>>
+>>>
