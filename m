@@ -1,51 +1,46 @@
-From: Peter Griffin <peter.griffin@linaro.org>
-Subject: Re: [PATCH v3 01/10] mmc: sdhci-st: Intial support for ST SDHCI
- controller
-Date: Wed, 9 Jul 2014 13:59:34 +0100
-Message-ID: <20140709125934.GA18634@griffinp-ThinkPad-X1-Carbon-2nd>
-References: <1401899424-1365-1-git-send-email-peter.griffin@linaro.org>
- <1401899424-1365-2-git-send-email-peter.griffin@linaro.org>
- <CAPDyKFoFNaFpDTVvMF3fbkrgYwUY1_hcbic89JyJzezFDRtN_w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Matthieu CASTET <matthieu.castet@parrot.com>
+Subject: [PATCH 1/2] sdhci : handle busy timeout irq
+Date: Wed,  9 Jul 2014 17:01:51 +0200
+Message-ID: <1404918112-27195-1-git-send-email-matthieu.castet@parrot.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f180.google.com ([209.85.212.180]:40353 "EHLO
-	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752301AbaGIM7j (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jul 2014 08:59:39 -0400
-Received: by mail-wi0-f180.google.com with SMTP id hi2so2702937wib.7
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Jul 2014 05:59:38 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFoFNaFpDTVvMF3fbkrgYwUY1_hcbic89JyJzezFDRtN_w@mail.gmail.com>
+Received: from mail-wi0-f176.google.com ([209.85.212.176]:43844 "EHLO
+	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750889AbaGIPBv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jul 2014 11:01:51 -0400
+Received: by mail-wi0-f176.google.com with SMTP id n3so2928488wiv.3
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Jul 2014 08:01:47 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Maxime Coquelin <maxime.coquelin@st.com>, Patrice CHOTARD <patrice.chotard@st.com>, Srinivas Kandagatla <srinivas.kandagatla@gmail.com>, kernel@stlinux.com, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Giuseppe Cavallaro <peppe.cavallaro@st.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Matthieu CASTET <matthieu.castet@parrot.com>
 
-Hi Ulf,
+When we wait for busy after sending a command, if there is
+a timeout, we got SDHCI_INT_DATA_TIMEOUT flags.
+Before this commit we got the message :
+"Got data interrupt 0x00100000 even though no data  operation was in progress."
+and we need to wait 10s that sdhci_timeout_timer expires.
 
-On Wed, 09 Jul 2014, Ulf Hansson wrote:
+Signed-off-by: Matthieu CASTET <matthieu.castet@parrot.com>
+---
+ drivers/mmc/host/sdhci.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-> On 4 June 2014 18:30, Peter Griffin <peter.griffin@linaro.org> wrote:
-> > This platform driver adds initial support for the SDHCI host controller
-> > found on STMicroelectronics SoCs.
-> >
-> > It has been tested on STiH41x b2020 platforms currently.
-> >
-> > Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-> > Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
-> > Acked-by: Lee Jones <lee.jones@linaro.org>
-> > Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
-> 
-> Thanks! Applied for next.
-
-Can you drop this patch for the moment?
-
-I was just rebasing the series for Maxime, and noticed this patch needs a few 
-fixups to cope with Russell Kings recent changes in sdhci.c.
-
-regards,
-
-Peter.
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 47055f3..9df59a4 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2301,6 +2301,11 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 		 * above in sdhci_cmd_irq().
+ 		 */
+ 		if (host->cmd && (host->cmd->flags & MMC_RSP_BUSY)) {
++			if (intmask & SDHCI_INT_DATA_TIMEOUT) {
++				host->cmd->error = -ETIMEDOUT;
++				tasklet_schedule(&host->finish_tasklet);
++				return;
++			}
+ 			if (intmask & SDHCI_INT_DATA_END) {
+ 				sdhci_finish_command(host);
+ 				return;
+-- 
+2.0.1
 
