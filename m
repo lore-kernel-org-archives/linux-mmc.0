@@ -1,38 +1,64 @@
-From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v4 10/10] MAINTAINERS: Add sdhci-st file to ARCH/STI architecture
-Date: Wed,  9 Jul 2014 16:07:41 +0100
-Message-ID: <1404918461-25390-11-git-send-email-peter.griffin@linaro.org>
+From: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v4 08/10] ARM: STi: DT: Enable second sdhci controller for stih416 b2020 boards.
+Date: Wed,  9 Jul 2014 16:07:39 +0100
+Message-ID: <1404918461-25390-9-git-send-email-peter.griffin@linaro.org>
 References: <1404918461-25390-1-git-send-email-peter.griffin@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:41177 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755816AbaGIPIa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jul 2014 11:08:30 -0400
-Received: by mail-wi0-f173.google.com with SMTP id cc10so2948110wib.12
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Jul 2014 08:08:27 -0700 (PDT)
-In-Reply-To: <1404918461-25390-1-git-send-email-peter.griffin@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1404918461-25390-1-git-send-email-peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Cc: peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, peppe.cavallaro-qxv4g6HH51o@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, ulf.hansson@linaro.org, chris@printf.net, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com
-Cc: peter.griffin@linaro.org, lee.jones@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, peppe.cavallaro@st.com
 
-Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+The second controller is only present on the stih416 SoC. Also
+mark this as non-removeable as its eMMC.
+
+Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
+Signed-off-by: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Acked-by: Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Acked-by: Maxime Coquelin <maxime.coquelin-qxv4g6HH51o@public.gmane.org>
 ---
- MAINTAINERS | 1 +
- 1 file changed, 1 insertion(+)
+ arch/arm/boot/dts/stih416-b2020.dts  | 8 ++++++++
+ arch/arm/boot/dts/stih416-b2020e.dts | 6 ++++++
+ 2 files changed, 14 insertions(+)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 6813d0a..8596e44 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -1343,6 +1343,7 @@ F:	drivers/pinctrl/pinctrl-st.c
- F:	drivers/media/rc/st_rc.c
- F:	drivers/i2c/busses/i2c-st.c
- F:	drivers/tty/serial/st-asc.c
-+F:	drivers/mmc/host/sdhci-st.c
- 
- ARM/TECHNOLOGIC SYSTEMS TS7250 MACHINE SUPPORT
- M:	Lennert Buytenhek <kernel@wantstofly.org>
+diff --git a/arch/arm/boot/dts/stih416-b2020.dts b/arch/arm/boot/dts/stih416-b2020.dts
+index 4e2df66..d42ff1d 100644
+--- a/arch/arm/boot/dts/stih416-b2020.dts
++++ b/arch/arm/boot/dts/stih416-b2020.dts
+@@ -12,4 +12,12 @@
+ / {
+ 	model = "STiH416 B2020";
+ 	compatible = "st,stih416-b2020", "st,stih416";
++
++	soc {
++		mmc1: sdhci@fe81f000 {
++			status       = "okay";
++			bus-width    = <8>;
++			non-removable;
++		};
++	};
+ };
+diff --git a/arch/arm/boot/dts/stih416-b2020e.dts b/arch/arm/boot/dts/stih416-b2020e.dts
+index ba0fa2c..68dfdaf 100644
+--- a/arch/arm/boot/dts/stih416-b2020e.dts
++++ b/arch/arm/boot/dts/stih416-b2020e.dts
+@@ -31,5 +31,11 @@
+ 		ethernet1: dwmac@fef08000 {
+ 			snps,reset-gpio = <&PIO0 7>;
+ 		};
++
++		mmc1: sdhci@fe81f000 {
++			status       = "okay";
++			bus-width    = <8>;
++			non-removable;
++		};
+ 	};
+ };
 -- 
 1.9.1
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
