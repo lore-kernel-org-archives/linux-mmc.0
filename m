@@ -1,81 +1,59 @@
 From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v4 00/10] Add SDHCI support for ST Microelectronics SoCs
-Date: Wed,  9 Jul 2014 16:07:31 +0100
-Message-ID: <1404918461-25390-1-git-send-email-peter.griffin@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f43.google.com ([74.125.82.43]:61287 "EHLO
-	mail-wg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932489AbaGIPH5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jul 2014 11:07:57 -0400
-Received: by mail-wg0-f43.google.com with SMTP id b13so7514152wgh.2
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Jul 2014 08:07:56 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH v4 04/10] ARM: STi: DT: Add sdhci controller for stih416
+Date: Wed,  9 Jul 2014 16:07:35 +0100
+Message-ID: <1404918461-25390-5-git-send-email-peter.griffin@linaro.org>
+References: <1404918461-25390-1-git-send-email-peter.griffin@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1404918461-25390-1-git-send-email-peter.griffin@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, ulf.hansson@linaro.org, chris@printf.net, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com
 Cc: peter.griffin@linaro.org, lee.jones@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, peppe.cavallaro@st.com
+List-Id: linux-mmc@vger.kernel.org
 
-This series adds a SDHCI platform driver for ST SoCs, along with
-the additional device tree bindings and configuration to enable
-the controller to work properly.
+This patch adds device tree config for both sdhci controllers
+on the stih416 SoC.
 
-Initially it supports the stih416 and stih415 SoCs, and has
-been tested on a stih416-b2020 board.
+Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+Acked-by: Lee Jones <lee.jones@linaro.org>
+Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
+---
+ arch/arm/boot/dts/stih416.dtsi | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
 
-regards,
-
-Peter.
-
-Changes since v1
-- Whitespace cleanups
-- Use readl_relaxed io accessor
-- Add update to MAINTAINERS
-- Remove reset controller code from platform driver
-- Remove #ifdef around sleep ops
-- Use sdhci_pltfm_clk_get_max_clock lib function
-- Pass bus-width etc through board device tree node
-- Remove unncessary header
-- Remove / change some debug messages
-- Remove final break from switch case
-
-Changes since v2
-- Update CC list with alkml and lkml lists
-
-Changes since v3
-- Rebased on v3.16-rc4
-- Use sdhci_set_bus_width lib function for set_bus_width
-- Remove sdhci_st_8bit_width function
-- Use sdhci_set_clock lib function for set_clock
-
-Peter Griffin (10):
-  mmc: sdhci-st: Intial support for ST SDHCI controller
-  mmc: sdhci-st: ST Microelectronics SDHCI binding documentation.
-  ARM: STi: DT: Add sdhci pins for stih416
-  ARM: STi: DT: Add sdhci controller for stih416
-  ARM: STi: DT: Add sdhci pin configuration for stih415
-  ARM: STi: DT: Add sdhci controller for stih415
-  ARM: STi: DT: Enable mmc0 for both stih415 and stih416 SoCs
-  ARM: STi: DT: Enable second sdhci controller for stih416 b2020 boards.
-  ARM: update multi_v7_defconfig for STI
-  MAINTAINERS: Add sdhci-st file to ARCH/STI architecture
-
- Documentation/devicetree/bindings/mmc/sdhci-st.txt |  33 ++++
- MAINTAINERS                                        |   1 +
- arch/arm/boot/dts/stih415-pinctrl.dtsi             |  21 +++
- arch/arm/boot/dts/stih415.dtsi                     |  12 ++
- arch/arm/boot/dts/stih416-b2020.dts                |   8 +
- arch/arm/boot/dts/stih416-b2020e.dts               |   6 +
- arch/arm/boot/dts/stih416-pinctrl.dtsi             |  39 +++++
- arch/arm/boot/dts/stih416.dtsi                     |  24 +++
- arch/arm/boot/dts/stih41x-b2020.dtsi               |   4 +
- arch/arm/boot/dts/stih41x-b2020x.dtsi              |   4 +
- arch/arm/configs/multi_v7_defconfig                |   1 +
- drivers/mmc/host/Kconfig                           |  12 ++
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/sdhci-st.c                        | 176 +++++++++++++++++++++
- 14 files changed, 342 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-st.txt
- create mode 100644 drivers/mmc/host/sdhci-st.c
-
+diff --git a/arch/arm/boot/dts/stih416.dtsi b/arch/arm/boot/dts/stih416.dtsi
+index 84758d7..98c43cc 100644
+--- a/arch/arm/boot/dts/stih416.dtsi
++++ b/arch/arm/boot/dts/stih416.dtsi
+@@ -236,5 +236,29 @@
+ 			resets	= <&powerdown STIH416_KEYSCAN_POWERDOWN>,
+ 				  <&softreset STIH416_KEYSCAN_SOFTRESET>;
+ 		};
++
++		mmc0: sdhci@fe81e000 {
++			compatible	= "st,sdhci";
++			status		= "disabled";
++			reg		= <0xfe81e000 0x1000>;
++			interrupts	= <GIC_SPI 127 IRQ_TYPE_NONE>;
++			interrupt-names	= "mmcirq";
++			pinctrl-names	= "default";
++			pinctrl-0	= <&pinctrl_mmc0>;
++			clock-names	= "mmc";
++			clocks		= <&clk_s_a1_ls 1>;
++		};
++
++		mmc1: sdhci@fe81f000 {
++			compatible	= "st,sdhci";
++			status		= "disabled";
++			reg		= <0xfe81f000 0x1000>;
++			interrupts	= <GIC_SPI 128 IRQ_TYPE_NONE>;
++			interrupt-names	= "mmcirq";
++			pinctrl-names	= "default";
++			pinctrl-0	= <&pinctrl_mmc1>;
++			clock-names	= "mmc";
++			clocks		= <&clk_s_a1_ls 8>;
++		};
+ 	};
+ };
 -- 
 1.9.1
-
