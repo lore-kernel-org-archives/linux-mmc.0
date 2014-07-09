@@ -1,33 +1,37 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 02/10] mmc: sdhci-st: ST Microelectronics SDHCI binding documentation.
-Date: Wed, 9 Jul 2014 14:19:38 +0200
-Message-ID: <CAPDyKFptvLKZ2jyOgTcaXhR8gBXh7jWRWDeExDVcJi-gwreyXQ@mail.gmail.com>
-References: <1401899424-1365-1-git-send-email-peter.griffin@linaro.org>
-	<1401899424-1365-3-git-send-email-peter.griffin@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1401899424-1365-3-git-send-email-peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Maxime Coquelin <maxime.coquelin-qxv4g6HH51o@public.gmane.org>, Patrice CHOTARD <patrice.chotard-qxv4g6HH51o@public.gmane.org>, Srinivas Kandagatla <srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
+From: Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: [PATCH 04/13] mmc: tmio-mmc: Add renesas,sdhi-r8a7791 to binding documentation
+Date: Wed,  9 Jul 2014 14:23:34 +0200
+Message-ID: <1404908623-909-5-git-send-email-geert+renesas@glider.be>
+References: <1404908623-909-1-git-send-email-geert+renesas@glider.be>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1404908623-909-1-git-send-email-geert+renesas@glider.be>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>
+Cc: devicetree@vger.kernel.org, linux-sh@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>, Ian Molton <ian.molton@codethink.co.uk>, Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 4 June 2014 18:30, Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> This patch adds the device tree binding documentation for the ST
-> SDHCI driver. It documents the differences between the core properties
-> described by mmc.txt and the properties used by the sdhci-st driver.
->
-> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
-> Signed-off-by: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Acked-by: Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Acked-by: Maxime Coquelin <maxime.coquelin-qxv4g6HH51o@public.gmane.org>
+The driver already supports the r8a7791 SoC, and "renesas,sdhi-r8a7791"
+is already in use.
 
-Thanks! Applied for next.
+Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Ian Molton <ian.molton@codethink.co.uk>
+Cc: Chris Ball <chris@printf.net>
+Cc: linux-mmc@vger.kernel.org
+---
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 1 +
+ 1 file changed, 1 insertion(+)
 
-Kind regards
-Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+index 6a2a1160a70d..fa0f327cde01 100644
+--- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+@@ -18,6 +18,7 @@ Required properties:
+ 		"renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
+ 		"renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
+ 		"renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
++		"renesas,sdhi-r8a7791" - SDHI IP on R8A7791 SoC
+ 
+ Optional properties:
+ - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
+-- 
+1.9.1
