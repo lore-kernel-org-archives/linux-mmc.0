@@ -1,93 +1,49 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: Re: [RFC PATCH 1/1 v7]mmc: Support-FFU-for-eMMC-v5.0
-Date: Wed, 9 Jul 2014 10:27:45 -0700
-Message-ID: <CANEJEGvRXkCy-R3=hFsPg2DLaD+bOEwC+dUL1ZFgSME+b5Q7KA@mail.gmail.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE648AFA7EE@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CANEJEGu9PYi5DxuEWBwEHjUqWt2J-sEDZMKLwvZTUBdUnK=7XA@mail.gmail.com>
-	<CANEJEGs2dAA0DSZfwYcV8nZn4Z1+MqAa0bJZocTZT5zjXe_dDQ@mail.gmail.com>
-	<868uodnch6.fsf@void.printf.net>
-	<CANEJEGt3nQ=Pryeuapmv-fyjrS0SazN_rEUDAuJtf_6uCvRYMw@mail.gmail.com>
-	<CAPDyKFqx9F6H1B+SdM3RjX1vUYStuMoU1_fnhzKyc3FPwNCEbA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: [PATCH v2 1/3] mmc: MMC_OMAP_HS should depend on HAS_DMA
+Date: Wed,  9 Jul 2014 20:52:40 +0200
+Message-ID: <1404931962-25917-1-git-send-email-geert@linux-m68k.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f178.google.com ([209.85.220.178]:60184 "EHLO
-	mail-vc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751082AbaGIR1q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jul 2014 13:27:46 -0400
-Received: by mail-vc0-f178.google.com with SMTP id ij19so7579235vcb.37
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Jul 2014 10:27:46 -0700 (PDT)
-In-Reply-To: <CAPDyKFqx9F6H1B+SdM3RjX1vUYStuMoU1_fnhzKyc3FPwNCEbA@mail.gmail.com>
+Received: from mail-we0-f172.google.com ([74.125.82.172]:34686 "EHLO
+	mail-we0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756462AbaGISws (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jul 2014 14:52:48 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Grant Grundler <grundler@chromium.org>, Chris Ball <chris@printf.net>, "cjb@laptop.org" <cjb@laptop.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, Olof Johansson <olofj@chromium.org>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>
 
-PIng. :)  Just a friendly reminder.
+If NO_DMA=y:
 
-I am aware of additional issues that Gwendal pointed out. But I still
-think it's better to take this patch now, knowing there are issues
-(which is better than NOT knowing there are issues), and then review
-additional patches for the outstand issues.
+    drivers/built-in.o: In function `omap_hsmmc_pre_dma_transfer':
+    omap_hsmmc.c:(.text+0x5a0928): undefined reference to `dma_map_sg'
+    drivers/built-in.o: In function `omap_hsmmc_dma_cleanup':
+    omap_hsmmc.c:(.text+0x5a0e8e): undefined reference to `dma_unmap_sg'
+    drivers/built-in.o: In function `omap_hsmmc_dma_callback':
+    omap_hsmmc.c:(.text+0x5a1f58): undefined reference to `dma_unmap_sg'
+    drivers/built-in.o: In function `omap_hsmmc_post_req':
+    omap_hsmmc.c:(.text+0x5a2082): undefined reference to `dma_unmap_sg'
 
-thanks,
-grant
+Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
+Acked-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+---
+v2:
+  - Add Acked-by
+---
+ drivers/mmc/host/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
 
-On Tue, Jul 1, 2014 at 10:07 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 1 July 2014 17:47, Grant Grundler <grundler@chromium.org> wrote:
->> On Mon, Jun 30, 2014 at 5:34 PM, Chris Ball <chris@printf.net> wrote:
->>> Hi Grant, sorry about the delay.
->>>
->>> On Tue, Jul 01 2014, Grant Grundler wrote:
->>>> ping? Another week is past.
->>>>
->>>> I know you guys are busy with other stuff. But please at least publish
->>>> what you think the next steps for this patch are.
->>>>
->>>> This is a critical patch for supporting eMMC products and adding
->>>> additional support for other vendors. I'd like to continue working
->>>> with "upstream" and the lack of response in this case is making this
->>>> unnecessarily difficult.
->>>
->>> It's tough to merge a significant patch that you haven't tested and we
->>> haven't tested.
->>
->> Hi Chris!
->> Thanks for the response.
->>
->> You are correct that neither of us has tested the patch. But I know
->> SanDisk, Samsung, and Kingston (IIRC) have.  And in the case that FFU
->> doesn't work, contracts with these HW vendors require FFU works. So
->> they have financial incentives to make it work. I'm comfortable with
->> support that ChromeOS has for this patch in the long term.
->>
->> Most of the magic (for FFU and general flash operation) is in the
->> Vendor Firmware. We depend on those vendors entirely for this to work
->> correctly already. This is not a new dependency and looks more like
->> collaboration when they supply the patch to support "industry
->> standard" features (like FFU).
->>
->>>  We could do it, though -- I'd like to hear what Ulf thinks.
->>
->> Sure - me too. :)
->
-> Hi Grant,
->
-> Sorry for lack of input!
->
-> Unfortunate I am travelling and will have to come back to this next week.
->
->>
->>>  Please could you give a quick explanation of why doing this
->>> in kernel-space makes more sense than using your mmc-utils version?
->>
->> Only the kernel can guarantee no other commands are sent to the device
->> during FFU. User space can attempt to hold this promise but the
->> constraints on when it can are pretty onerous. SanDisk is pushing this
->> patch entirely for this reason and I agree it's a better solution.
->
-> I am open to consider this patch. From my point of view, I need some
-> additional time to review the code.
->
-> Kind regards
-> Uffe
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index a5652548230a..97f6452e0d23 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -303,6 +303,7 @@ config MMC_OMAP
+ 
+ config MMC_OMAP_HS
+ 	tristate "TI OMAP High Speed Multimedia Card Interface support"
++	depends on HAS_DMA
+ 	depends on ARCH_OMAP2PLUS || COMPILE_TEST
+ 	help
+ 	  This selects the TI OMAP High Speed Multimedia card Interface.
+-- 
+1.9.1
+
