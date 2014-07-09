@@ -1,53 +1,37 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 04/13] mmc: tmio-mmc: Add renesas,sdhi-r8a7791 to binding documentation
-Date: Wed, 9 Jul 2014 14:31:23 +0200
-Message-ID: <CAPDyKFoAm_XLe4EHUASsOHZzPMac-4f2YjWAk6HeMOk6QV2C9A@mail.gmail.com>
-References: <1404908623-909-1-git-send-email-geert+renesas@glider.be>
-	<1404908623-909-5-git-send-email-geert+renesas@glider.be>
+Subject: Re: [PATCH] mmc: add new au6601 driver
+Date: Wed, 9 Jul 2014 14:52:07 +0200
+Message-ID: <CAPDyKFpZVKu-uHwNfXocVb7FbgEN3NxiLHCPR38bSh_zsA4w6Q@mail.gmail.com>
+References: <1399543099-31613-1-git-send-email-linux@rempel-privat.de>
+	<CAPDyKFoy9DLQe1235suEwEmGSxxriBfuWSyN+ZG14OmUjrrb8w@mail.gmail.com>
+	<53B3D562.1030707@rempel-privat.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1404908623-909-5-git-send-email-geert+renesas@glider.be>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ian Molton <ian.molton@codethink.co.uk>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f173.google.com ([209.85.216.173]:56546 "EHLO
+	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755360AbaGIMwI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jul 2014 08:52:08 -0400
+Received: by mail-qc0-f173.google.com with SMTP id c9so741085qcz.18
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Jul 2014 05:52:07 -0700 (PDT)
+In-Reply-To: <53B3D562.1030707@rempel-privat.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Oleksij Rempel <linux@rempel-privat.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 9 July 2014 14:23, Geert Uytterhoeven <geert+renesas@glider.be> wrote:
-> The driver already supports the r8a7791 SoC, and "renesas,sdhi-r8a7791"
-> is already in use.
+[snip]
+
+>>
+>> I am just a bit curious, does this controller support hardware busy
+>> detection on DAT1 line while waiting for command completion?
 >
-> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> Cc: Ian Molton <ian.molton@codethink.co.uk>
-> Cc: Chris Ball <chris@printf.net>
-> Cc: linux-mmc@vger.kernel.org
+> Do you mean AU6601_REG_BUS_STATUS?
+> See at the beginning of patch.
 
-Thanks! Applied for next.
+While reviewing the code, it seems like the controller are handling
+hardware busy detection on DAT1. On the other hand you don't enable
+MMC_CAP_WAIT_WHILE_BUSY, shouldn't you be doing that?
 
 Kind regards
 Uffe
-
-> ---
->  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> index 6a2a1160a70d..fa0f327cde01 100644
-> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> @@ -18,6 +18,7 @@ Required properties:
->                 "renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
->                 "renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
->                 "renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
-> +               "renesas,sdhi-r8a7791" - SDHI IP on R8A7791 SoC
->
->  Optional properties:
->  - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
-> --
-> 1.9.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
