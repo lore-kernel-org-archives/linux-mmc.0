@@ -1,58 +1,84 @@
-From: Matthieu CASTET <matthieu.castet@parrot.com>
-Subject: Re: [RFC 1/2] sdhci : recompute timeout_clk when needed
-Date: Thu, 10 Jul 2014 10:03:20 +0200
-Message-ID: <20140710100320.77697cfe@parrot.com>
-References: <1404979264-8070-1-git-send-email-matthieu.castet@parrot.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCHv3 5/5] mmc: dw_mmc: replace "disable-wp" from slot's quirk
+ to host's quirk
+Date: Thu, 10 Jul 2014 11:15:52 +0200
+Message-ID: <CAPDyKFoQ_ER7FAk_jCBURAa3_hVT25GXfQQfiDhMoYypdA=fHg@mail.gmail.com>
+References: <1404976119-10777-1-git-send-email-jh80.chung@samsung.com>
+	<1404976119-10777-6-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.aswsp.com ([193.34.35.150]:25937 "EHLO mail.aswsp.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751610AbaGJIIn convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jul 2014 04:08:43 -0400
-In-Reply-To: <1404979264-8070-1-git-send-email-matthieu.castet@parrot.com>
+Received: from mail-qg0-f43.google.com ([209.85.192.43]:50308 "EHLO
+	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751987AbaGJJPx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jul 2014 05:15:53 -0400
+Received: by mail-qg0-f43.google.com with SMTP id z60so7464211qgd.30
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Jul 2014 02:15:52 -0700 (PDT)
+In-Reply-To: <1404976119-10777-6-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Please ignore this mail, it is a mistake (it was already sent).
+On 10 July 2014 09:08, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Replaced the "disable-wp" into host's quirks.
+> (Because the slot-node is removed at dt-file.)
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Sorry for the noise.
+Hi Jaehoon,
 
-Le Thu, 10 Jul 2014 10:01:03 +0200,
-Matthieu CASTET <matthieu.castet@parrot.com> a =E9crit :
+I plan to carry these patches through my mmc tree and I will share
+them through a PR from an immutable branch with the ARM SoC guys.
+Please tell me if you have any concern with this set up.
 
-> when SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK is set, timeout_clk is sdclk=
-=2E
-> We need to update it when we change sdclk in sdhci_set_clock.
-> This allow to have a more precisse timeout and max_busy_timeout. This
-> can help for command that need a big busy wait (erase, ...).
->=20
-> Signed-off-by: Matthieu CASTET <matthieu.castet@parrot.com>
+Now, while I was applying this patch, I found it had checkpatch
+errors. Please run checkpatch and resend a new version.
+
+Kind regards
+Uffe
+
 > ---
->  drivers/mmc/host/sdhci.c | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 9df59a4..76b1aab 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1192,8 +1192,13 @@ void sdhci_set_clock(struct sdhci_host *host, =
-unsigned int clock)
->  	}
-> =20
->  clock_set:
-> -	if (real_div)
-> +	if (real_div) {
->  		host->mmc->actual_clock =3D (host->max_clk * clk_mul) / real_div;
-> +		if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK) {
-> +			host->timeout_clk =3D host->mmc->actual_clock / 1000;
-> +			host->mmc->max_busy_timeout =3D (1 << 27) / host->timeout_clk;
-> +		}
-> +	}
-> =20
->  	clk |=3D (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
->  	clk |=3D ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
-
+>  drivers/mmc/host/dw_mmc.c |   12 +++++-------
+>  1 file changed, 5 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 1ac227c..a3ccd07 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -997,7 +997,7 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
+>         int gpio_ro = mmc_gpio_get_ro(mmc);
+>
+>         /* Use platform get_ro function, else try on board write protect */
+> -       if (slot->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT)
+> +       if (slot->host->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT)
+>                 read_only = 0;
+>         else if (!IS_ERR_VALUE(gpio_ro))
+>                 read_only = gpio_ro;
+> @@ -2006,12 +2006,7 @@ static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
+>  static struct dw_mci_of_slot_quirks {
+>         char *quirk;
+>         int id;
+> -} of_slot_quirks[] = {
+> -       {
+> -               .quirk  = "disable-wp",
+> -               .id     = DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
+> -       },
+> -};
+> +} of_slot_quirks[] = {};
+>
+>  static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
+>  {
+> @@ -2238,6 +2233,9 @@ static struct dw_mci_of_quirks {
+>         {
+>                 .quirk  = "broken-cd",
+>                 .id     = DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+> +       },{
+> +               .quirk  = "disable-wp",
+> +               .id     = DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
+>         },
+>  };
+>
+> --
+> 1.7.9.5
+>
