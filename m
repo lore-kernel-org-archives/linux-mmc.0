@@ -1,201 +1,77 @@
 From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: change to use recommended reset procedure
-Date: Thu, 10 Jul 2014 21:28:18 +0900
-Message-ID: <002201cf9c3a$6de4a150$49ade3f0$%jun@samsung.com>
-References: <CAPz6YkUzGWnOznZ4UXNsLbe=ehDwfMJwUSjahUKVnVz8w9OcsA@mail.gmail.com>
- <1402351255-7423-1-git-send-email-sonnyrao@chromium.org>
+Subject: RE: [PATCHv3 5/5] mmc: dw_mmc: replace "disable-wp" from slot's quirk
+ to host's quirk
+Date: Thu, 10 Jul 2014 21:43:08 +0900
+Message-ID: <002301cf9c3c$80544190$80fcc4b0$%jun@samsung.com>
+References: <1404976119-10777-1-git-send-email-jh80.chung@samsung.com>
+ <1404976119-10777-6-git-send-email-jh80.chung@samsung.com>
+ <CAPDyKFoQ_ER7FAk_jCBURAa3_hVT25GXfQQfiDhMoYypdA=fHg@mail.gmail.com>
+ <53BE5F9F.6070809@samsung.com>
+ <CAPDyKFrLJJn=SGpjtCq+x88EetBQQBCqgef9z9+3oEVut4upTg@mail.gmail.com>
+ <002101cf9c35$8da5b240$a8f116c0$%jun@samsung.com>
+ <CAPDyKFo4gC8Mmbt+f88EMqGvPH9hqW4Fw9d05hq3YGB=iFgaXw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1402351255-7423-1-git-send-email-sonnyrao@chromium.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:62557 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751484AbaGJMnK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jul 2014 08:43:10 -0400
+In-reply-to: <CAPDyKFo4gC8Mmbt+f88EMqGvPH9hqW4Fw9d05hq3YGB=iFgaXw@mail.gmail.com>
 Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Sonny Rao' <sonnyrao@chromium.org>, linux-mmc@vger.kernel.org
-Cc: grundler@chromium.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jh80.chung@samsung.com, cjb@laptop.org, kgene.kim@samsung.com, joshi@samsung.com, t.figa@samsung.com, dianders@chromium.org, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Kukjin Kim' <kgene.kim@samsung.com>
+Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Chris Ball' <chris@printf.net>, devicetree@vger.kernel.org, =?UTF-8?Q?'Heiko_St=C3=BCbner'?= <heiko@sntech.de>, dinguyen@altera.com, 'Mark Rutland' <mark.rutland@arm.com>, 'linux-samsung-soc' <linux-samsung-soc@vger.kernel.org>, linux-arm-kernel@lists.infradead.org
 
-Hi Sonny,
+On Thu, July 10, 2014, Ulf Hansson wrote:
+> On 10 July 2014 13:53, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> > On Thu, July 10, 2014, Ulf Hansson wrote:
+> >> On 10 July 2014 11:40, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> >> > Hi, Ulf.
+> >> >
+> >> > On 07/10/2014 06:15 PM, Ulf Hansson wrote:
+> >> >> On 10 July 2014 09:08, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> >> >>> Replaced the "disable-wp" into host's quirks.
+> >> >>> (Because the slot-node is removed at dt-file.)
+> >> >>>
+> >> >>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> >> >>
+> >> >> Hi Jaehoon,
+> >> >>
+> >> >> I plan to carry these patches through my mmc tree and I will share
+> >> >> them through a PR from an immutable branch with the ARM SoC guys.
+> >> >> Please tell me if you have any concern with this set up.
+> >>
+> >> Hmm, I having a second thought around this. Could I just apply the mmc
+> >> patches for my next branch instead of involving ARM SoC? In other
+> >> words, are there any decencies? If not, I might just apply patch 1 and
+> >> 5.
+> >>
+> >
+> > [PATCHv4 2/5] ARM: dts: exynos: unuse the slot-node and deprecated the supports-highspeed for dw-mmc
+> > [PATCHv4 4/5] ARM: dts: rockchip: unuse the slot-node and deprecated the supports-highspeed for dw-
+> mmc
+> > [PATCHv4 5/5] mmc: dw_mmc: replace "disable-wp" from slot's quirk to host's quirk
+> >
+> > 2nd and 4th are closely related 5th.
+> > I think it shall be picked together. How about taking whole patch?
+> > And I hope that it is applied for 3.16-rcX fix.
+> > (Also, 3rd patch is close to fix patch.)
+> >
+> > Kukjin,
+> > Is it fine to be taken in Ulf's?
+> 
+> I tried applied the complete patchset for 3.16 rc4, but some of the
+> DTS patches fails. What are these patches based upon?
+I guess it's based on Ulf or Chris?
+It may need to be rebased for 3.16 rc4.
 
-I have missed this patch.
-
-You finally choose to take extra interrupt handling.
-If it is not harm, it's fine.
-
-Please check one thing below.
-
-On Tue, June 10, 2014, Sonny Rao wrote:
-> This patch changes the fifo reset code to follow the reset procedure
-> outlined in the documentation of Synopsys Mobile storage host databook.
 > 
-> Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
-> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
-> ---
-> v2: Add Generic DMA support
->     per the documentation, move interrupt clear before wait
->     make the test for DMA host->use_dma rather than host->using_dma
->     add proper return values (although it appears no caller checks)
-> v3: rename fifo reset function, and change callers
->     use this combined reset function in dw_mci_resume()
->     just one caller left (probe), so get rid of dw_mci_ctrl_all_reset()
->     use DMA reset bit for all systems which use DMA
->     remove extra IDMAC reset in dw_mci_work_routine_card()
->     do CIU clock update in error path, if CIU reset cleared
-> v4: remove comment about FIFO reset in dw_mci_work_routine_card()
->     move down error message when control reset clears but others don't
->      and clarify the error stating that we will still update clocks
->     make flags for all reset bits a macro
-> 
->  drivers/mmc/host/dw_mmc.c | 86 ++++++++++++++++++++++++++++++++++-------------
->  drivers/mmc/host/dw_mmc.h |  5 +++
->  2 files changed, 68 insertions(+), 23 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 55cd110..1d6d984 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -111,8 +111,7 @@ static const u8 tuning_blk_pattern_8bit[] = {
->  	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
->  };
-> 
-> -static inline bool dw_mci_fifo_reset(struct dw_mci *host);
-> -static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host);
-> +static inline bool dw_mci_reset(struct dw_mci *host);
-> 
->  #if defined(CONFIG_DEBUG_FS)
->  static int dw_mci_req_show(struct seq_file *s, void *v)
-> @@ -1254,7 +1253,7 @@ static int dw_mci_data_complete(struct dw_mci *host, struct mmc_data *data)
->  		 * After an error, there may be data lingering
->  		 * in the FIFO
->  		 */
-> -		dw_mci_fifo_reset(host);
-> +		dw_mci_reset(host);
->  	} else {
->  		data->bytes_xfered = data->blocks * data->blksz;
->  		data->error = 0;
-> @@ -1371,7 +1370,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
-> 
->  			/* CMD error in data command */
->  			if (mrq->cmd->error && mrq->data)
-> -				dw_mci_fifo_reset(host);
-> +				dw_mci_reset(host);
-> 
->  			host->cmd = NULL;
->  			host->data = NULL;
-> @@ -1982,14 +1981,8 @@ static void dw_mci_work_routine_card(struct work_struct *work)
->  			}
-> 
->  			/* Power down slot */
-> -			if (present == 0) {
-> -				/* Clear down the FIFO */
-> -				dw_mci_fifo_reset(host);
-> -#ifdef CONFIG_MMC_DW_IDMAC
-> -				dw_mci_idmac_reset(host);
-> -#endif
-> -
-> -			}
-> +			if (present == 0)
-> +				dw_mci_reset(host);
-> 
->  			spin_unlock_bh(&host->lock);
-> 
-> @@ -2323,8 +2316,11 @@ static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset)
->  	return false;
->  }
-> 
-> -static inline bool dw_mci_fifo_reset(struct dw_mci *host)
-> +static inline bool dw_mci_reset(struct dw_mci *host)
->  {
-> +	u32 flags = SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET;
-> +	bool ret = false;
-> +
->  	/*
->  	 * Reseting generates a block interrupt, hence setting
->  	 * the scatter-gather pointer to NULL.
-> @@ -2334,15 +2330,59 @@ static inline bool dw_mci_fifo_reset(struct dw_mci *host)
->  		host->sg = NULL;
->  	}
-> 
-> -	return dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
-> -}
-> +	if (host->use_dma)
-> +		flags |= SDMMC_CTRL_DMA_RESET;
-> 
-> -static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
-> -{
-> -	return dw_mci_ctrl_reset(host,
-> -				 SDMMC_CTRL_FIFO_RESET |
-> -				 SDMMC_CTRL_RESET |
-> -				 SDMMC_CTRL_DMA_RESET);
-> +	if (dw_mci_ctrl_reset(host, flags)) {
-> +		/*
-> +		 * In all cases we clear the RAWINTS register to clear any
-> +		 * interrupts.
-> +		 */
-> +		mci_writel(host, RINTSTS, 0xFFFFFFFF);
-> +
-> +		/* if using dma we wait for dma_req to clear */
-> +		if (host->use_dma) {
-> +			unsigned long timeout = jiffies + msecs_to_jiffies(500);
-> +			u32 status;
-> +			do {
-> +				status = mci_readl(host, STATUS);
-> +				if (!(status & SDMMC_STATUS_DMA_REQ))
-> +					break;
-> +				cpu_relax();
-> +			} while (time_before(jiffies, timeout));
-> +
-> +			if (status & SDMMC_STATUS_DMA_REQ) {
-> +				dev_err(host->dev,
-> +					"%s: Timeout waiting for dma_req to "
-> +					"clear during reset", __func__);
-> +				goto ciu_out;
-> +			}
-> +
-> +			/* when using DMA next we reset the fifo again */
-> +			if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET))
-> +				goto ciu_out;
-> +		}
-> +	} else {
-> +		/* if the controller reset bit did clear, then set clock regs */
-> +		if (!(mci_readl(host, CTRL) & SDMMC_CTRL_RESET)) {
-> +			dev_err(host->dev, "%s: fifo/dma reset bits didn't "
-> +				"clear but ciu was reset, doing clock update.",
-> +				__func__);
-> +			goto ciu_out;
-> +		}
-> +	}
-> +
-> +	if (IS_ENABLED(CONFIG_MMC_DW_IDMAC))
-> +		/* It is also recommended that we reset and reprogram idmac */
-> +		dw_mci_idmac_reset(host);
-> +
-> +	ret = true;
-> +
-> +ciu_out:
-> +	/* After a CTRL reset we need to have CIU set clock registers  */
-> +	mci_send_cmd(host->cur_slot, SDMMC_CMD_UPD_CLK, 0);
-> +
-> +	return ret;
->  }
-> 
->  #ifdef CONFIG_OF
-> @@ -2555,7 +2595,7 @@ int dw_mci_probe(struct dw_mci *host)
->  	}
-> 
->  	/* Reset all blocks */
-> -	if (!dw_mci_ctrl_all_reset(host))
-> +	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS))
->  		return -ENODEV;
-> 
->  	host->dma_ops = host->pdata->dma_ops;
-> @@ -2744,7 +2784,7 @@ int dw_mci_resume(struct dw_mci *host)
->  		}
->  	}
-> 
-> -	if (!dw_mci_ctrl_all_reset(host)) {
-> +	if (!dw_mci_reset(host)) {
-Do you have any reason to use dw_mci_reset() unlike doing on probing?
+> I wonder if it's not best to leave all these for Kukjin to handle
+> instead. You have my ack for all of the mmc patches!
 
 Thanks,
 Seungwon Jeon
+
