@@ -1,66 +1,58 @@
 From: Matthieu CASTET <matthieu.castet@parrot.com>
-Subject: [RFC] mmc : don't disable discard support because max_busy_timeout is too small
-Date: Thu, 10 Jul 2014 10:01:53 +0200
-Message-ID: <1404979313-8111-1-git-send-email-matthieu.castet@parrot.com>
+Subject: Re: [RFC 1/2] sdhci : recompute timeout_clk when needed
+Date: Thu, 10 Jul 2014 10:03:20 +0200
+Message-ID: <20140710100320.77697cfe@parrot.com>
+References: <1404979264-8070-1-git-send-email-matthieu.castet@parrot.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f171.google.com ([209.85.212.171]:34196 "EHLO
-	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750768AbaGJIBo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jul 2014 04:01:44 -0400
-Received: by mail-wi0-f171.google.com with SMTP id f8so3543878wiw.10
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Jul 2014 01:01:43 -0700 (PDT)
+Received: from mail.aswsp.com ([193.34.35.150]:25937 "EHLO mail.aswsp.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751610AbaGJIIn convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jul 2014 04:08:43 -0400
+In-Reply-To: <1404979264-8070-1-git-send-email-matthieu.castet@parrot.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <cjb@laptop.org>, Matthieu CASTET <matthieu.castet@parrot.com>
+Cc: Chris Ball <cjb@laptop.org>
 
-mmc_calc_max_discard compute a worst case : max(erase, trim).
-Without this commit, if the erase time is big (2400ms for example) and
-max_busy_timeout is 1300ms (sdhci running with a clock at 100Mhz and
-SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK), discard support will be disabled.
+Please ignore this mail, it is a mistake (it was already sent).
 
-But trim could be used without exceding max_busy_timeout
+Sorry for the noise.
 
-Also when using secure trim or erase, the max timeout is much bigger, and it is not checked in mmc_calc_max_discard. So we need to check max_busy_timeout in mmc_do_erase to support all case.
+Le Thu, 10 Jul 2014 10:01:03 +0200,
+Matthieu CASTET <matthieu.castet@parrot.com> a =E9crit :
 
-Note I wonder why we don't check status in spi case. Also why can't we use mmc_send_status ?
-It that because of the retry ?
-But what's weird is that in other case of status poll retry is done (for example card_busy_detect in drivers/mmc/card/block.c)
----
- drivers/mmc/core/core.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 7dc0c85..12e69e2 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1952,6 +1952,16 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
- 	cmd.arg = arg;
- 	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
- 	cmd.busy_timeout = mmc_erase_timeout(card, arg, qty);
-+	/*
-+	 * Normally we use R1B responses, but in cases where the host
-+	 * has specified a max_busy_timeout we need to validate it. A failure
-+	 * means we need to prevent the host from doing hw busy detection, which
-+	 * is done by converting to a R1 response instead.
-+	 */
-+	if (cmd.busy_timeout > host->max_busy_timeout) {
-+		cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
-+		cmd.busy_timeout = 0;
-+	}
- 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
- 	if (err) {
- 		pr_err("mmc_erase: erase error %d, status %#x\n",
-@@ -2189,6 +2199,9 @@ unsigned int mmc_calc_max_discard(struct mmc_card *card)
- 	} else if (max_discard < card->erase_size) {
- 		max_discard = 0;
- 	}
-+	/* if max_busy_timeout is too small, we can poll */
-+	if (!max_discard)
-+		max_discard = card->pref_erase;
- 	pr_debug("%s: calculated max. discard sectors %u for timeout %u ms\n",
- 		 mmc_hostname(host), max_discard, host->max_busy_timeout);
- 	return max_discard;
--- 
-2.0.1
+> when SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK is set, timeout_clk is sdclk=
+=2E
+> We need to update it when we change sdclk in sdhci_set_clock.
+> This allow to have a more precisse timeout and max_busy_timeout. This
+> can help for command that need a big busy wait (erase, ...).
+>=20
+> Signed-off-by: Matthieu CASTET <matthieu.castet@parrot.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 9df59a4..76b1aab 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1192,8 +1192,13 @@ void sdhci_set_clock(struct sdhci_host *host, =
+unsigned int clock)
+>  	}
+> =20
+>  clock_set:
+> -	if (real_div)
+> +	if (real_div) {
+>  		host->mmc->actual_clock =3D (host->max_clk * clk_mul) / real_div;
+> +		if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK) {
+> +			host->timeout_clk =3D host->mmc->actual_clock / 1000;
+> +			host->mmc->max_busy_timeout =3D (1 << 27) / host->timeout_clk;
+> +		}
+> +	}
+> =20
+>  	clk |=3D (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
+>  	clk |=3D ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
 
