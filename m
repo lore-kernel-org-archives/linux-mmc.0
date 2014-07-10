@@ -1,63 +1,262 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCHv3 4/5] ARM: dts: rockchip: unuse the slot-node and deprecated
- the supports-highspeed for dw-mmc
-Date: Thu, 10 Jul 2014 16:08:38 +0900
-Message-ID: <1404976119-10777-5-git-send-email-jh80.chung@samsung.com>
-References: <1404976119-10777-1-git-send-email-jh80.chung@samsung.com>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1404976119-10777-1-git-send-email-jh80.chung@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, devicetree@vger.kernel.org, heiko@sntech.de, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jaehoon Chung <jh80.chung@samsung.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v4 01/10] mmc: sdhci-st: Intial support for ST SDHCI controller
+Date: Thu, 10 Jul 2014 09:12:32 +0200
+Message-ID: <CAPDyKFqxEGjgiu-4qB76Bg4Jhv4WEPXSXkbCHVuQ1sS8zw_pmw@mail.gmail.com>
+References: <1404918461-25390-1-git-send-email-peter.griffin@linaro.org>
+	<1404918461-25390-2-git-send-email-peter.griffin@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1404918461-25390-2-git-send-email-peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Maxime Coquelin <maxime.coquelin-qxv4g6HH51o@public.gmane.org>, Patrice CHOTARD <patrice.chotard-qxv4g6HH51o@public.gmane.org>, Srinivas Kandagatla <srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-dw-mmc controller can support multiple slots.
-But, there are no use-cases anywhere. So we don't need to support the
-slot-node for dw-mmc controller.
-And "supports-highspeed" property in dw-mmc is deprecated.
-"supports-highspeed" property can be replaced to "cap-sd/mmc-highspeed".
+On 9 July 2014 17:07, Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> This platform driver adds initial support for the SDHCI host controller
+> found on STMicroelectronics SoCs.
+>
+> It has been tested on STiH41x b2020 platforms currently.
+>
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
+> Signed-off-by: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Acked-by: Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Acked-by: Maxime Coquelin <maxime.coquelin-qxv4g6HH51o@public.gmane.org>
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Reviewed-by: Tushar Behera <trblinux@gmail.com>
-Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
-Reviewed-by: Heiko Stuebner <heiko@sntech.de>
----
- arch/arm/boot/dts/rk3066a-bqcurie2.dts |   16 ++++------------
- 1 file changed, 4 insertions(+), 12 deletions(-)
+Thanks! Applied for next!
 
-diff --git a/arch/arm/boot/dts/rk3066a-bqcurie2.dts b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
-index afb3273..ecea889 100644
---- a/arch/arm/boot/dts/rk3066a-bqcurie2.dts
-+++ b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
-@@ -59,12 +59,8 @@
- 			pinctrl-names = "default";
- 			pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_cd &sd0_bus4>;
- 			vmmc-supply = <&vcc_sd0>;
--
--			slot@0 {
--				reg = <0>;
--				bus-width = <4>;
--				disable-wp;
--			};
-+			bus-width = <4>;
-+			disable-wp;
- 		};
- 
- 		dwmmc@10218000 { /* wifi */
-@@ -74,12 +70,8 @@
- 
- 			pinctrl-names = "default";
- 			pinctrl-0 = <&sd1_clk &sd1_cmd &sd1_bus4>;
--
--			slot@0 {
--				reg = <0>;
--				bus-width = <4>;
--				disable-wp;
--			};
-+			bus-width = <4>;
-+			disable-wp;
- 		};
- 
- 		gpio-keys {
--- 
-1.7.9.5
+Kind regards
+Uffe
+
+> ---
+>  drivers/mmc/host/Kconfig    |  12 +++
+>  drivers/mmc/host/Makefile   |   1 +
+>  drivers/mmc/host/sdhci-st.c | 176 ++++++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 189 insertions(+)
+>  create mode 100644 drivers/mmc/host/sdhci-st.c
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index a565254..6615b79 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -290,6 +290,18 @@ config MMC_MOXART
+>           be found on some embedded hardware such as UC-7112-LX.
+>           If you have a controller with this interface, say Y here.
+>
+> +config MMC_SDHCI_ST
+> +       tristate "SDHCI support on STMicroelectronics SoC"
+> +       depends on ARCH_STI
+> +       depends on MMC_SDHCI_PLTFM
+> +       select MMC_SDHCI_IO_ACCESSORS
+> +       help
+> +         This selects the Secure Digital Host Controller Interface in
+> +         STMicroelectronics SoCs.
+> +
+> +         If you have a controller with this interface, say Y or M here.
+> +         If unsure, say N.
+> +
+>  config MMC_OMAP
+>         tristate "TI OMAP Multimedia Card Interface support"
+>         depends on ARCH_OMAP
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index 7f81ddf..f211eed 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -68,6 +68,7 @@ obj-$(CONFIG_MMC_SDHCI_OF_HLWD)               += sdhci-of-hlwd.o
+>  obj-$(CONFIG_MMC_SDHCI_BCM_KONA)       += sdhci-bcm-kona.o
+>  obj-$(CONFIG_MMC_SDHCI_BCM2835)                += sdhci-bcm2835.o
+>  obj-$(CONFIG_MMC_SDHCI_MSM)            += sdhci-msm.o
+> +obj-$(CONFIG_MMC_SDHCI_ST)             += sdhci-st.o
+>
+>  ifeq ($(CONFIG_CB710_DEBUG),y)
+>         CFLAGS-cb710-mmc        += -DDEBUG
+> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+> new file mode 100644
+> index 0000000..328f348
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-st.c
+> @@ -0,0 +1,176 @@
+> +/*
+> + * Support for SDHCI on STMicroelectronics SoCs
+> + *
+> + * Copyright (C) 2014 STMicroelectronics Ltd
+> + * Author: Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
+> + * Contributors: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> + *
+> + * Based on sdhci-cns3xxx.c
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License version 2 as
+> + * published by the Free Software Foundation.
+> + *
+> + * This program is distributed in the hope that it will be useful,
+> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> + * GNU General Public License for more details.
+> + *
+> + */
+> +
+> +#include <linux/io.h>
+> +#include <linux/of.h>
+> +#include <linux/module.h>
+> +#include <linux/err.h>
+> +#include <linux/mmc/host.h>
+> +
+> +#include "sdhci-pltfm.h"
+> +
+> +static u32 sdhci_st_readl(struct sdhci_host *host, int reg)
+> +{
+> +       u32 ret;
+> +
+> +       switch (reg) {
+> +       case SDHCI_CAPABILITIES:
+> +               ret = readl_relaxed(host->ioaddr + reg);
+> +               /* Support 3.3V and 1.8V */
+> +               ret &= ~SDHCI_CAN_VDD_300;
+> +               break;
+> +       default:
+> +               ret = readl_relaxed(host->ioaddr + reg);
+> +       }
+> +       return ret;
+> +}
+> +
+> +static const struct sdhci_ops sdhci_st_ops = {
+> +       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> +       .set_clock = sdhci_set_clock,
+> +       .set_bus_width = sdhci_set_bus_width,
+> +       .read_l = sdhci_st_readl,
+> +       .reset = sdhci_reset,
+> +};
+> +
+> +static const struct sdhci_pltfm_data sdhci_st_pdata = {
+> +       .ops = &sdhci_st_ops,
+> +       .quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
+> +           SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> +};
+> +
+> +
+> +static int sdhci_st_probe(struct platform_device *pdev)
+> +{
+> +       struct sdhci_host *host;
+> +       struct sdhci_pltfm_host *pltfm_host;
+> +       struct clk *clk;
+> +       int ret = 0;
+> +       u16 host_version;
+> +
+> +       clk =  devm_clk_get(&pdev->dev, "mmc");
+> +       if (IS_ERR(clk)) {
+> +               dev_err(&pdev->dev, "Peripheral clk not found\n");
+> +               return PTR_ERR(clk);
+> +       }
+> +
+> +       host = sdhci_pltfm_init(pdev, &sdhci_st_pdata, 0);
+> +       if (IS_ERR(host)) {
+> +               dev_err(&pdev->dev, "Failed sdhci_pltfm_init\n");
+> +               return PTR_ERR(host);
+> +       }
+> +
+> +       ret = mmc_of_parse(host->mmc);
+> +
+> +       if (ret) {
+> +               dev_err(&pdev->dev, "Failed mmc_of_parse\n");
+> +               return ret;
+> +       }
+> +
+> +       clk_prepare_enable(clk);
+> +
+> +       pltfm_host = sdhci_priv(host);
+> +       pltfm_host->clk = clk;
+> +
+> +       ret = sdhci_add_host(host);
+> +       if (ret) {
+> +               dev_err(&pdev->dev, "Failed sdhci_add_host\n");
+> +               goto err_out;
+> +       }
+> +
+> +       platform_set_drvdata(pdev, host);
+> +
+> +       host_version = readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION));
+> +
+> +       dev_info(&pdev->dev, "SDHCI ST Initialised: Host Version: 0x%x Vendor Version 0x%x\n",
+> +               ((host_version & SDHCI_SPEC_VER_MASK) >> SDHCI_SPEC_VER_SHIFT),
+> +               ((host_version & SDHCI_VENDOR_VER_MASK) >>
+> +               SDHCI_VENDOR_VER_SHIFT));
+> +
+> +       return 0;
+> +
+> +err_out:
+> +       clk_disable_unprepare(clk);
+> +       sdhci_pltfm_free(pdev);
+> +
+> +       return ret;
+> +}
+> +
+> +static int sdhci_st_remove(struct platform_device *pdev)
+> +{
+> +       struct sdhci_host *host = platform_get_drvdata(pdev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +
+> +       clk_disable_unprepare(pltfm_host->clk);
+> +
+> +       return sdhci_pltfm_unregister(pdev);
+> +}
+> +
+> +#ifdef CONFIG_PM_SLEEP
+> +static int sdhci_st_suspend(struct device *dev)
+> +{
+> +       struct sdhci_host *host = dev_get_drvdata(dev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       int ret = sdhci_suspend_host(host);
+> +
+> +       if (ret)
+> +               goto out;
+> +
+> +       clk_disable_unprepare(pltfm_host->clk);
+> +out:
+> +       return ret;
+> +}
+> +
+> +static int sdhci_st_resume(struct device *dev)
+> +{
+> +       struct sdhci_host *host = dev_get_drvdata(dev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +
+> +       clk_prepare_enable(pltfm_host->clk);
+> +
+> +       return sdhci_resume_host(host);
+> +}
+> +#endif
+> +
+> +static SIMPLE_DEV_PM_OPS(sdhci_st_pmops, sdhci_st_suspend, sdhci_st_resume);
+> +
+> +static const struct of_device_id st_sdhci_match[] = {
+> +       { .compatible = "st,sdhci" },
+> +       {},
+> +};
+> +
+> +MODULE_DEVICE_TABLE(of, st_sdhci_match);
+> +
+> +static struct platform_driver sdhci_st_driver = {
+> +       .probe = sdhci_st_probe,
+> +       .remove = sdhci_st_remove,
+> +       .driver = {
+> +                  .name = "sdhci-st",
+> +                  .pm = &sdhci_st_pmops,
+> +                  .of_match_table = of_match_ptr(st_sdhci_match),
+> +                 },
+> +};
+> +
+> +module_platform_driver(sdhci_st_driver);
+> +
+> +MODULE_DESCRIPTION("SDHCI driver for STMicroelectronics SoCs");
+> +MODULE_AUTHOR("Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>");
+> +MODULE_LICENSE("GPL v2");
+> +MODULE_ALIAS("platform:st-sdhci");
+> --
+> 1.9.1
+>
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
