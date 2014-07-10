@@ -1,124 +1,58 @@
-From: Addy Ke <addy.ke@rock-chips.com>
-Subject: [PATCH v2] mmc: dw_mmc: add support for RK3288
-Date: Thu, 10 Jul 2014 11:31:49 +0800
-Message-ID: <1404963109-3906-1-git-send-email-addy.ke@rock-chips.com>
-References: <1404565174-2923-1-git-send-email-addy.ke@rock-chips.com>
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1404565174-2923-1-git-send-email-addy.ke@rock-chips.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net
-Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, zyf@rock-chips.com, Addy Ke <addy.ke@rock-chips.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCHv3 0/5] ARM: remove the sub-node and deprecated
+ supports-highspeed property for dwmmc.
+Date: Thu, 10 Jul 2014 16:08:34 +0900
+Message-ID: <1404976119-10777-1-git-send-email-jh80.chung@samsung.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, devicetree@vger.kernel.org, heiko@sntech.de, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jaehoon Chung <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch focuses on clock setting for RK3288 mmc controller.
+Since used the mmc_of_parse(), didn't parse the sub-node.
+So we can remove the sub-node, because almost SoC used the only one card per a host.
+And supports-highspeed can be replaced to "cap-mmc/sd-highspeed" property.
 
-In RK3288 mmc controller, CLKDIV register can only be set 0 or 1,
-and if DDR 8bit mode, CLKDIV register must be set 1.
+Changelog V3:
+	- Fix the wrong bus-width value.
+	- Use the slot->host->quirks instead of brq->quirks.
+	- Add tested-by and reviewd-by.
+Changelog V2:
+	- Add the "mmc: dw_mmc: replace "disable-wp" from slot's quirks to host's quirk"
 
-Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
----
-changes since v1:
-- dw_mci_rk3288_setup_clock: do not call clk_get_rate(), just use the
-  host->bus_hz which is already called by dw_mmc.c, suggested by Jaehoon Chung
+Jaehoon Chung (5):
+  mmc: dw_mmc: modify the dt-binding for removing slot-node and
+    supports-highspeed
+  ARM: dts: exynos: unuse the slot-node and deprecated the
+    supports-highspeed for dw-mmc
+  ARM: dts: socfpga: unuse the slot-node and deprecated the
+    supports-highspeed for dw-mmc
+  ARM: dts: rockchip: unuse the slot-node and deprecated the
+    supports-highspeed for dw-mmc
+  mmc: dw_mmc: replace "disable-wp" from slot's quirk to host's quirk
 
- .../devicetree/bindings/mmc/rockchip-dw-mshc.txt   |  4 +-
- drivers/mmc/host/dw_mmc-pltfm.c                    | 50 +++++++++++++++++++++-
- 2 files changed, 51 insertions(+), 3 deletions(-)
+ .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   17 ++++---------
+ .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   12 ++++-----
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |   12 ++++-----
+ arch/arm/boot/dts/exynos4412-odroidx.dts           |    8 ++----
+ arch/arm/boot/dts/exynos4412-origen.dts            |    8 ++----
+ arch/arm/boot/dts/exynos4412-trats2.dts            |    8 ++----
+ arch/arm/boot/dts/exynos5250-arndale.dts           |   18 ++++----------
+ arch/arm/boot/dts/exynos5250-cros-common.dtsi      |   26 ++++++--------------
+ arch/arm/boot/dts/exynos5250-smdk5250.dts          |   18 ++++----------
+ arch/arm/boot/dts/exynos5250-snow.dts              |    6 ++---
+ arch/arm/boot/dts/exynos5260-xyref5260.dts         |   18 ++++----------
+ arch/arm/boot/dts/exynos5410-smdk5410.dts          |   18 ++++----------
+ arch/arm/boot/dts/exynos5420-arndale-octa.dts      |   16 +++---------
+ arch/arm/boot/dts/exynos5420-peach-pit.dts         |   16 +++---------
+ arch/arm/boot/dts/exynos5420-smdk5420.dts          |   16 +++---------
+ arch/arm/boot/dts/exynos5800-peach-pi.dts          |   16 +++---------
+ arch/arm/boot/dts/rk3066a-bqcurie2.dts             |   16 +++---------
+ arch/arm/boot/dts/socfpga_arria5.dtsi              |    9 +++----
+ arch/arm/boot/dts/socfpga_cyclone5.dtsi            |    9 +++----
+ arch/arm/boot/dts/socfpga_vt.dts                   |    9 +++----
+ drivers/mmc/host/dw_mmc.c                          |   12 ++++-----
+ 21 files changed, 84 insertions(+), 204 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-index c559f3f..e3f95cd 100644
---- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-@@ -10,7 +10,9 @@ extensions to the Synopsys Designware Mobile Storage Host Controller.
- Required Properties:
- 
- * compatible: should be
--	- "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following
-+	- "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following,
-+							before RK3288
-+	- "rockchip,rk3288-dw-mshc": for Rockchip RK3288
- 
- Example:
- 
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-index d4a47a9..809c28b 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.c
-+++ b/drivers/mmc/host/dw_mmc-pltfm.c
-@@ -21,17 +21,61 @@
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/dw_mmc.h>
- #include <linux/of.h>
-+#include <linux/clk.h>
- 
- #include "dw_mmc.h"
- #include "dw_mmc-pltfm.h"
- 
-+#define RK3288_CLKGEN_DIV	2
-+
- static void dw_mci_pltfm_prepare_command(struct dw_mci *host, u32 *cmdr)
- {
- 	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
- }
- 
--static const struct dw_mci_drv_data rockchip_drv_data = {
-+static int dw_mci_rk3288_setup_clock(struct dw_mci *host)
-+{
-+	host->bus_hz /= RK3288_CLKGEN_DIV;
-+
-+	return 0;
-+}
-+
-+static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-+{
-+	int ret;
-+	unsigned int cclkin;
-+
-+	/*
-+	 * cclkin: source clock of mmc controller.
-+	 * bus_hz: card interface clock generated by CLKGEN.
-+	 * bus_hz = cclkin / RK3288_CLKGEN_DIV;
-+	 * ios->clock = (div == 0) ? bus_hz : (bus_hz / (2 * div))
-+	 *
-+	 * Note: div can only be 0 or 1
-+	 *       if DDR50 8bit mode, div must be set 1
-+	 */
-+	if ((ios->bus_width == MMC_BUS_WIDTH_8) &&
-+	    (ios->timing == MMC_TIMING_UHS_DDR50 ||
-+	     ios->timing == MMC_TIMING_MMC_DDR52))
-+		cclkin = 2 * ios->clock * RK3288_CLKGEN_DIV;
-+	else
-+		cclkin = ios->clock * RK3288_CLKGEN_DIV;
-+
-+	ret = clk_set_rate(host->ciu_clk, cclkin);
-+	if (ret)
-+		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
-+
-+	host->bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
-+}
-+
-+static const struct dw_mci_drv_data rk2928_drv_data = {
-+	.prepare_command	= dw_mci_pltfm_prepare_command,
-+};
-+
-+static const struct dw_mci_drv_data rk3288_drv_data = {
- 	.prepare_command	= dw_mci_pltfm_prepare_command,
-+	.set_ios	= dw_mci_rk3288_set_ios,
-+	.setup_clock	= dw_mci_rk3288_setup_clock,
- };
- 
- static const struct dw_mci_drv_data socfpga_drv_data = {
-@@ -95,7 +139,9 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
- static const struct of_device_id dw_mci_pltfm_match[] = {
- 	{ .compatible = "snps,dw-mshc", },
- 	{ .compatible = "rockchip,rk2928-dw-mshc",
--		.data = &rockchip_drv_data },
-+		.data = &rk2928_drv_data },
-+	{ .compatible = "rockchip,rk3288-dw-mshc",
-+		.data = &rk3288_drv_data },
- 	{ .compatible = "altr,socfpga-dw-mshc",
- 		.data = &socfpga_drv_data },
- 	{},
 -- 
-1.8.3.2
-
-
+1.7.9.5
