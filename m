@@ -1,83 +1,48 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 02/10] mmc: sdhci-st: ST Microelectronics SDHCI binding documentation.
-Date: Thu, 10 Jul 2014 09:13:05 +0200
-Message-ID: <CAPDyKFoP3EUAUs_zdnS2rMwZD=9Pbhym6Yzfh7aHyFHC0VGRXQ@mail.gmail.com>
-References: <1404918461-25390-1-git-send-email-peter.griffin@linaro.org>
-	<1404918461-25390-3-git-send-email-peter.griffin@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Matthieu CASTET <matthieu.castet@parrot.com>
+Subject: [RFC 1/2] sdhci : recompute timeout_clk when needed
+Date: Thu, 10 Jul 2014 10:01:03 +0200
+Message-ID: <1404979264-8070-1-git-send-email-matthieu.castet@parrot.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f49.google.com ([209.85.192.49]:60610 "EHLO
-	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751431AbaGJHNG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jul 2014 03:13:06 -0400
-Received: by mail-qg0-f49.google.com with SMTP id 63so423007qgz.22
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Jul 2014 00:13:05 -0700 (PDT)
-In-Reply-To: <1404918461-25390-3-git-send-email-peter.griffin@linaro.org>
+Received: from mail-wi0-f179.google.com ([209.85.212.179]:62108 "EHLO
+	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751095AbaGJIA5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jul 2014 04:00:57 -0400
+Received: by mail-wi0-f179.google.com with SMTP id cc10so4017615wib.6
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Jul 2014 01:00:55 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Griffin <peter.griffin@linaro.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Maxime Coquelin <maxime.coquelin@st.com>, Patrice CHOTARD <patrice.chotard@st.com>, Srinivas Kandagatla <srinivas.kandagatla@gmail.com>, Lee Jones <lee.jones@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Giuseppe Cavallaro <peppe.cavallaro@st.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Matthieu CASTET <matthieu.castet@parrot.com>
 
-On 9 July 2014 17:07, Peter Griffin <peter.griffin@linaro.org> wrote:
-> This patch adds the device tree binding documentation for the ST
-> SDHCI driver. It documents the differences between the core properties
-> described by mmc.txt and the properties used by the sdhci-st driver.
->
-> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-> Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
-> Acked-by: Lee Jones <lee.jones@linaro.org>
-> Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
+when SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK is set, timeout_clk is sdclk.
+We need to update it when we change sdclk in sdhci_set_clock.
+This allow to have a more precisse timeout and max_busy_timeout. This
+can help for command that need a big busy wait (erase, ...).
 
-Thanks! Applied for next.
+Signed-off-by: Matthieu CASTET <matthieu.castet@parrot.com>
+---
+ drivers/mmc/host/sdhci.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9df59a4..76b1aab 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1192,8 +1192,13 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	}
+ 
+ clock_set:
+-	if (real_div)
++	if (real_div) {
+ 		host->mmc->actual_clock = (host->max_clk * clk_mul) / real_div;
++		if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK) {
++			host->timeout_clk = host->mmc->actual_clock / 1000;
++			host->mmc->max_busy_timeout = (1 << 27) / host->timeout_clk;
++		}
++	}
+ 
+ 	clk |= (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
+ 	clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
+-- 
+2.0.1
 
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-st.txt | 33 ++++++++++++++++++++++
->  1 file changed, 33 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-st.txt
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-st.txt b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
-> new file mode 100644
-> index 0000000..7527db4
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
-> @@ -0,0 +1,33 @@
-> +* STMicroelectronics sdhci-st MMC/SD controller
-> +
-> +This file documents the differences between the core properties in
-> +Documentation/devicetree/bindings/mmc/mmc.txt and the properties
-> +used by the sdhci-st driver.
-> +
-> +Required properties:
-> +- compatible :  Must be "st,sdhci"
-> +- clock-names : Should be "mmc"
-> +                See: Documentation/devicetree/bindings/resource-names.txt
-> +- clocks :      Phandle of the clock used by the sdhci controler
-> +                See: Documentation/devicetree/bindings/clock/clock-bindings.txt
-> +
-> +Optional properties:
-> +- non-removable: non-removable slot
-> +                 See: Documentation/devicetree/bindings/mmc/mmc.txt
-> +- bus-width: Number of data lines
-> +                 See: Documentation/devicetree/bindings/mmc/mmc.txt
-> +
-> +Example:
-> +
-> +mmc0: sdhci@fe81e000 {
-> +       compatible      = "st,sdhci";
-> +       status          = "disabled";
-> +       reg             = <0xfe81e000 0x1000>;
-> +       interrupts      = <GIC_SPI 127 IRQ_TYPE_NONE>;
-> +       interrupt-names = "mmcirq";
-> +       pinctrl-names   = "default";
-> +       pinctrl-0       = <&pinctrl_mmc0>;
-> +       clock-names     = "mmc";
-> +       clocks          = <&clk_s_a1_ls 1>;
-> +       bus-width       = <8>
-> +};
-> --
-> 1.9.1
->
