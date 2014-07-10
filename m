@@ -1,102 +1,75 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCHv3 5/5] mmc: dw_mmc: replace "disable-wp" from slot's quirk
- to host's quirk
-Date: Thu, 10 Jul 2014 12:29:09 +0200
-Message-ID: <CAPDyKFrLJJn=SGpjtCq+x88EetBQQBCqgef9z9+3oEVut4upTg@mail.gmail.com>
-References: <1404976119-10777-1-git-send-email-jh80.chung@samsung.com>
-	<1404976119-10777-6-git-send-email-jh80.chung@samsung.com>
-	<CAPDyKFoQ_ER7FAk_jCBURAa3_hVT25GXfQQfiDhMoYypdA=fHg@mail.gmail.com>
-	<53BE5F9F.6070809@samsung.com>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCHv4 0/5] ARM: remove the sub-node and deprecated
+ supports-highspeed property for dwmmc.
+Date: Thu, 10 Jul 2014 20:27:46 +0900
+Message-ID: <001f01cf9c31$f91c0f50$eb542df0$%jun@samsung.com>
+References: <1404985718-12203-1-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <53BE5F9F.6070809@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:55147 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751015AbaGJL1t (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jul 2014 07:27:49 -0400
+In-reply-to: <1404985718-12203-1-git-send-email-jh80.chung@samsung.com>
+Content-language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'linux-mmc' <linux-mmc@vger.kernel.org>
+Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, heiko@sntech.de, dinguyen@altera.com, 'Mark Rutland' <mark.rutland@arm.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On 10 July 2014 11:40, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi, Ulf.
->
-> On 07/10/2014 06:15 PM, Ulf Hansson wrote:
->> On 10 July 2014 09:08, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>> Replaced the "disable-wp" into host's quirks.
->>> (Because the slot-node is removed at dt-file.)
->>>
->>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->>
->> Hi Jaehoon,
->>
->> I plan to carry these patches through my mmc tree and I will share
->> them through a PR from an immutable branch with the ARM SoC guys.
->> Please tell me if you have any concern with this set up.
+On Thu, July 10, 2014, Jaehoon Chung wrote:
+> Since used the mmc_of_parse(), didn't parse the sub-node.
+> So we can remove the sub-node, because almost SoC used the only one card per a host.
+> And supports-highspeed can be replaced to "cap-mmc/sd-highspeed" property.
+> 
+> Changelog V4:
+> 	- Fix the checkpatch error.
+> Changelog V3:
+> 	- Fix the wrong bus-width value.
+> 	- Use the slot->host->quirks instead of brq->quirks.
+> 	- Add tested-by and reviewd-by.
+> Changelog V2:
+> 	- Add the "mmc: dw_mmc: replace "disable-wp" from slot's quirks to host's quirk"
+> 
+> Jaehoon Chung (5):
+>   mmc: dw_mmc: modify the dt-binding for removing slot-node and
+>     supports-highspeed
+>   ARM: dts: exynos: unuse the slot-node and deprecated the
+>     supports-highspeed for dw-mmc
+>   ARM: dts: socfpga: unuse the slot-node and deprecated the
+>     supports-highspeed for dw-mmc
+>   ARM: dts: rockchip: unuse the slot-node and deprecated the
+>     supports-highspeed for dw-mmc
+>   mmc: dw_mmc: replace "disable-wp" from slot's quirk to host's quirk
+> 
+>  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   17 ++++---------
+>  .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   12 ++++-----
+>  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |   12 ++++-----
+>  arch/arm/boot/dts/exynos4412-odroidx.dts           |    8 ++----
+>  arch/arm/boot/dts/exynos4412-origen.dts            |    8 ++----
+>  arch/arm/boot/dts/exynos4412-trats2.dts            |    8 ++----
+>  arch/arm/boot/dts/exynos5250-arndale.dts           |   18 ++++----------
+>  arch/arm/boot/dts/exynos5250-cros-common.dtsi      |   26 ++++++--------------
+>  arch/arm/boot/dts/exynos5250-smdk5250.dts          |   18 ++++----------
+>  arch/arm/boot/dts/exynos5250-snow.dts              |    6 ++---
+>  arch/arm/boot/dts/exynos5260-xyref5260.dts         |   18 ++++----------
+>  arch/arm/boot/dts/exynos5410-smdk5410.dts          |   18 ++++----------
+>  arch/arm/boot/dts/exynos5420-arndale-octa.dts      |   16 +++---------
+>  arch/arm/boot/dts/exynos5420-peach-pit.dts         |   16 +++---------
+>  arch/arm/boot/dts/exynos5420-smdk5420.dts          |   16 +++---------
+>  arch/arm/boot/dts/exynos5800-peach-pi.dts          |   16 +++---------
+>  arch/arm/boot/dts/rk3066a-bqcurie2.dts             |   16 +++---------
+>  arch/arm/boot/dts/socfpga_arria5.dtsi              |    9 +++----
+>  arch/arm/boot/dts/socfpga_cyclone5.dtsi            |    9 +++----
+>  arch/arm/boot/dts/socfpga_vt.dts                   |    9 +++----
+>  drivers/mmc/host/dw_mmc.c                          |   12 ++++-----
+>  21 files changed, 84 insertions(+), 204 deletions(-)
 
-Hmm, I having a second thought around this. Could I just apply the mmc
-patches for my next branch instead of involving ARM SoC? In other
-words, are there any decencies? If not, I might just apply patch 1 and
-5.
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-Kind regards
-Uffe
+Thanks,
+Seungwon Jeon
 
->>
->> Now, while I was applying this patch, I found it had checkpatch
->> errors. Please run checkpatch and resend a new version.
->
-> Sorry for not checking the patch. I will resend a new version.
-> Thanks for pointing out.
->
-> Best Regards,
-> Jaehoon Chung
->
->>
->> Kind regards
->> Uffe
->>
->>> ---
->>>  drivers/mmc/host/dw_mmc.c |   12 +++++-------
->>>  1 file changed, 5 insertions(+), 7 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>> index 1ac227c..a3ccd07 100644
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -997,7 +997,7 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
->>>         int gpio_ro = mmc_gpio_get_ro(mmc);
->>>
->>>         /* Use platform get_ro function, else try on board write protect */
->>> -       if (slot->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT)
->>> +       if (slot->host->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT)
->>>                 read_only = 0;
->>>         else if (!IS_ERR_VALUE(gpio_ro))
->>>                 read_only = gpio_ro;
->>> @@ -2006,12 +2006,7 @@ static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
->>>  static struct dw_mci_of_slot_quirks {
->>>         char *quirk;
->>>         int id;
->>> -} of_slot_quirks[] = {
->>> -       {
->>> -               .quirk  = "disable-wp",
->>> -               .id     = DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
->>> -       },
->>> -};
->>> +} of_slot_quirks[] = {};
->>>
->>>  static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
->>>  {
->>> @@ -2238,6 +2233,9 @@ static struct dw_mci_of_quirks {
->>>         {
->>>                 .quirk  = "broken-cd",
->>>                 .id     = DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
->>> +       },{
->>> +               .quirk  = "disable-wp",
->>> +               .id     = DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
->>>         },
->>>  };
->>>
->>> --
->>> 1.7.9.5
->>>
->>
->
+
