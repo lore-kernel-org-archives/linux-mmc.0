@@ -1,112 +1,70 @@
-From: Maxime Coquelin <maxime.coquelin@st.com>
-Subject: Re: [PATCH v4 00/10] Add SDHCI support for ST Microelectronics SoCs
-Date: Thu, 10 Jul 2014 14:57:12 +0200
-Message-ID: <53BE8DA8.6@st.com>
-References: <1404918461-25390-1-git-send-email-peter.griffin@linaro.org>	<53BD64E4.5060504@st.com> <CAPDyKFqpqa-nA3i8Z4k3oBqgo7OpppxM5tSCSz-mhxyHRJtZTw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: sdhci: Preset value not supported in Baytrail eMMC
+Date: Thu, 10 Jul 2014 15:00:46 +0200
+Message-ID: <CAPDyKFpwUo-CV0656-YnHUOP_z0322Yu3C6HHAqRNBn-RmS75w@mail.gmail.com>
+References: <1404817861-23359-1-git-send-email-mauricex.r.petallo@intel.com>
+	<1404817861-23359-2-git-send-email-mauricex.r.petallo@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx08-00178001.pphosted.com ([91.207.212.93]:53661 "EHLO
-	mx08-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751484AbaGJM6I (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jul 2014 08:58:08 -0400
-In-Reply-To: <CAPDyKFqpqa-nA3i8Z4k3oBqgo7OpppxM5tSCSz-mhxyHRJtZTw@mail.gmail.com>
+Received: from mail-qa0-f41.google.com ([209.85.216.41]:57615 "EHLO
+	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751205AbaGJNAr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jul 2014 09:00:47 -0400
+Received: by mail-qa0-f41.google.com with SMTP id cm18so7202603qab.14
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Jul 2014 06:00:46 -0700 (PDT)
+In-Reply-To: <1404817861-23359-2-git-send-email-mauricex.r.petallo@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Peter Griffin <peter.griffin@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Patrice CHOTARD <patrice.chotard@st.com>, Srinivas Kandagatla <srinivas.kandagatla@gmail.com>, Lee Jones <lee.jones@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Giuseppe Cavallaro <peppe.cavallaro@st.com>
+To: Maurice Petallo <mauricex.r.petallo@intel.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-
-
-On 07/10/2014 02:51 PM, Ulf Hansson wrote:
-> On 9 July 2014 17:51, Maxime Coquelin <maxime.coquelin@st.com> wrote:
->>
->>
->> On 07/09/2014 05:07 PM, Peter Griffin wrote:
->>>
->>> This series adds a SDHCI platform driver for ST SoCs, along with
->>> the additional device tree bindings and configuration to enable
->>> the controller to work properly.
->>>
->>> Initially it supports the stih416 and stih415 SoCs, and has
->>> been tested on a stih416-b2020 board.
->>>
->>> regards,
->>>
->>> Peter.
->>>
->>> Changes since v1
->>> - Whitespace cleanups
->>> - Use readl_relaxed io accessor
->>> - Add update to MAINTAINERS
->>> - Remove reset controller code from platform driver
->>> - Remove #ifdef around sleep ops
->>> - Use sdhci_pltfm_clk_get_max_clock lib function
->>> - Pass bus-width etc through board device tree node
->>> - Remove unncessary header
->>> - Remove / change some debug messages
->>> - Remove final break from switch case
->>>
->>> Changes since v2
->>> - Update CC list with alkml and lkml lists
->>>
->>> Changes since v3
->>> - Rebased on v3.16-rc4
->>> - Use sdhci_set_bus_width lib function for set_bus_width
->>> - Remove sdhci_st_8bit_width function
->>> - Use sdhci_set_clock lib function for set_clock
->>>
->>> Peter Griffin (10):
->>>     mmc: sdhci-st: Intial support for ST SDHCI controller
->>>     mmc: sdhci-st: ST Microelectronics SDHCI binding documentation.
->>>     ARM: STi: DT: Add sdhci pins for stih416
->>>     ARM: STi: DT: Add sdhci controller for stih416
->>>     ARM: STi: DT: Add sdhci pin configuration for stih415
->>>     ARM: STi: DT: Add sdhci controller for stih415
->>>     ARM: STi: DT: Enable mmc0 for both stih415 and stih416 SoCs
->>>     ARM: STi: DT: Enable second sdhci controller for stih416 b2020 boards.
->>>     ARM: update multi_v7_defconfig for STI
->>>     MAINTAINERS: Add sdhci-st file to ARCH/STI architecture
->>>
->>>    Documentation/devicetree/bindings/mmc/sdhci-st.txt |  33 ++++
->>>    MAINTAINERS                                        |   1 +
->>>    arch/arm/boot/dts/stih415-pinctrl.dtsi             |  21 +++
->>>    arch/arm/boot/dts/stih415.dtsi                     |  12 ++
->>>    arch/arm/boot/dts/stih416-b2020.dts                |   8 +
->>>    arch/arm/boot/dts/stih416-b2020e.dts               |   6 +
->>>    arch/arm/boot/dts/stih416-pinctrl.dtsi             |  39 +++++
->>>    arch/arm/boot/dts/stih416.dtsi                     |  24 +++
->>>    arch/arm/boot/dts/stih41x-b2020.dtsi               |   4 +
->>>    arch/arm/boot/dts/stih41x-b2020x.dtsi              |   4 +
->>>    arch/arm/configs/multi_v7_defconfig                |   1 +
->>>    drivers/mmc/host/Kconfig                           |  12 ++
->>>    drivers/mmc/host/Makefile                          |   1 +
->>>    drivers/mmc/host/sdhci-st.c                        | 176
->>> +++++++++++++++++++++
->>>    14 files changed, 342 insertions(+)
->>>    create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-st.txt
->>>    create mode 100644 drivers/mmc/host/sdhci-st.c
->>>
->>
->> Thanks Peter.
->>
->> DT patches queued to git://git.stlinux.com/devel/kernel/linux-sti.git
->> sti-dt-for-v3.17-1
+On 8 July 2014 13:11, Maurice Petallo <mauricex.r.petallo@intel.com> wrote:
+> "SDHCI_QUIRK2_PRESET_VALUE_BROKEN" quirk is added to prohibit
+> preset value enabling for Baytrail eMMC controller.
 >
-> What about patch9 and 10? Did you take them as well?
->
-> You may add my ack for them, for whatever it's worth.
+> Signed-off-by: Maurice Petallo <mauricex.r.petallo@intel.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Yes I will take them too.
+Thanks! Applied for next.
 
-Regards,
-Maxime
+Kind regards
+Uffe
 
+> ---
+>  drivers/mmc/host/sdhci-acpi.c | 1 +
+>  drivers/mmc/host/sdhci-pci.c  | 1 +
+>  2 files changed, 2 insertions(+)
 >
-> Kind regards
-> Uffe
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 8ce3c28..840788e 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -127,6 +127,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
+>         .caps    = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE | MMC_CAP_HW_RESET,
+>         .caps2   = MMC_CAP2_HC_ERASE_SZ,
+>         .flags   = SDHCI_ACPI_RUNTIME_PM,
+> +       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>  };
 >
->>
->> Regards,
->> Maxime
+>  static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
+> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+> index 52c42fc..7514cc7 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -279,6 +279,7 @@ static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+>  static const struct sdhci_pci_fixes sdhci_intel_byt_emmc = {
+>         .allow_runtime_pm = true,
+>         .probe_slot     = byt_emmc_probe_slot,
+> +       .quirks2        = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>  };
+>
+>  static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
+> --
+> 1.8.1.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
