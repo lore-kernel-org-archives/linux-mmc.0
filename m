@@ -1,309 +1,217 @@
-From: Apelete Seketeli <apelete@seketeli.net>
-Subject: [PATCH v3] mmc: jz4740: add dma infrastructure for data transfers
-Date: Fri, 11 Jul 2014 00:27:26 +0200
-Message-ID: <1405031246-16365-2-git-send-email-apelete@seketeli.net>
-References: <1405031246-16365-1-git-send-email-apelete@seketeli.net>
+From: Sonny Rao <sonnyrao@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: change to use recommended reset procedure
+Date: Thu, 10 Jul 2014 15:35:30 -0700
+Message-ID: <CAPz6YkXgoKPSQEdNOwAQDhEnFGFVArr_0obbVR_okAEOvLxtzA@mail.gmail.com>
+References: <CAPz6YkUzGWnOznZ4UXNsLbe=ehDwfMJwUSjahUKVnVz8w9OcsA@mail.gmail.com>
+ <1402351255-7423-1-git-send-email-sonnyrao@chromium.org> <002201cf9c3a$6de4a150$49ade3f0$%jun@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from seketeli.net ([94.23.218.202]:52707 "EHLO ms.seketeli.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751588AbaGJW0w (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 10 Jul 2014 18:26:52 -0400
-In-Reply-To: <1405031246-16365-1-git-send-email-apelete@seketeli.net>
+Received: from mail-qg0-f47.google.com ([209.85.192.47]:45882 "EHLO
+	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751019AbaGJWfv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jul 2014 18:35:51 -0400
+Received: by mail-qg0-f47.google.com with SMTP id q108so247824qgd.6
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Jul 2014 15:35:50 -0700 (PDT)
+In-Reply-To: <002201cf9c3a$6de4a150$49ade3f0$%jun@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, H Hartley Sweeten <hsweeten@visionengravers.com>, Lars-Peter Clausen <lars@metafoo.de>, Wei Yongjun <yongjun_wei@trendmicro.com.cn>, Alex Smith <alex.smith@imgtec.com>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Grant Grundler <grundler@chromium.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Tomasz Figa <t.figa@samsung.com>, Douglas Anderson <dianders@chromium.org>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
-Until now the MMC driver for JZ4740 SoC was relying on PIO mode only
-for data transfers.
-This patch allows the use of DMA for data trasnfers in addition to PIO
-mode by relying on DMA Engine.
+On Thu, Jul 10, 2014 at 5:28 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+> Hi Sonny,
+>
+> I have missed this patch.
+>
+> You finally choose to take extra interrupt handling.
+> If it is not harm, it's fine.
 
-DMA tranfers performance might be further improved by taking advantage
-of the asynchronous request capability of the MMC framework.
+Hi, thanks for coming back to it.  Based on my tracing, the interrupt
+seems to be okay and is just ignored.
 
-Signed-off-by: Apelete Seketeli <apelete@seketeli.net>
----
- drivers/mmc/host/jz4740_mmc.c |  172 +++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 164 insertions(+), 8 deletions(-)
+>
+> Please check one thing below.
+>
+> On Tue, June 10, 2014, Sonny Rao wrote:
+>> This patch changes the fifo reset code to follow the reset procedure
+>> outlined in the documentation of Synopsys Mobile storage host databook.
+>>
+>> Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
+>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+>> ---
+>> v2: Add Generic DMA support
+>>     per the documentation, move interrupt clear before wait
+>>     make the test for DMA host->use_dma rather than host->using_dma
+>>     add proper return values (although it appears no caller checks)
+>> v3: rename fifo reset function, and change callers
+>>     use this combined reset function in dw_mci_resume()
+>>     just one caller left (probe), so get rid of dw_mci_ctrl_all_reset()
+>>     use DMA reset bit for all systems which use DMA
+>>     remove extra IDMAC reset in dw_mci_work_routine_card()
+>>     do CIU clock update in error path, if CIU reset cleared
+>> v4: remove comment about FIFO reset in dw_mci_work_routine_card()
+>>     move down error message when control reset clears but others don't
+>>      and clarify the error stating that we will still update clocks
+>>     make flags for all reset bits a macro
+>>
+>>  drivers/mmc/host/dw_mmc.c | 86 ++++++++++++++++++++++++++++++++++-------------
+>>  drivers/mmc/host/dw_mmc.h |  5 +++
+>>  2 files changed, 68 insertions(+), 23 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 55cd110..1d6d984 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -111,8 +111,7 @@ static const u8 tuning_blk_pattern_8bit[] = {
+>>       0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
+>>  };
+>>
+>> -static inline bool dw_mci_fifo_reset(struct dw_mci *host);
+>> -static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host);
+>> +static inline bool dw_mci_reset(struct dw_mci *host);
+>>
+>>  #if defined(CONFIG_DEBUG_FS)
+>>  static int dw_mci_req_show(struct seq_file *s, void *v)
+>> @@ -1254,7 +1253,7 @@ static int dw_mci_data_complete(struct dw_mci *host, struct mmc_data *data)
+>>                * After an error, there may be data lingering
+>>                * in the FIFO
+>>                */
+>> -             dw_mci_fifo_reset(host);
+>> +             dw_mci_reset(host);
+>>       } else {
+>>               data->bytes_xfered = data->blocks * data->blksz;
+>>               data->error = 0;
+>> @@ -1371,7 +1370,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>>
+>>                       /* CMD error in data command */
+>>                       if (mrq->cmd->error && mrq->data)
+>> -                             dw_mci_fifo_reset(host);
+>> +                             dw_mci_reset(host);
+>>
+>>                       host->cmd = NULL;
+>>                       host->data = NULL;
+>> @@ -1982,14 +1981,8 @@ static void dw_mci_work_routine_card(struct work_struct *work)
+>>                       }
+>>
+>>                       /* Power down slot */
+>> -                     if (present == 0) {
+>> -                             /* Clear down the FIFO */
+>> -                             dw_mci_fifo_reset(host);
+>> -#ifdef CONFIG_MMC_DW_IDMAC
+>> -                             dw_mci_idmac_reset(host);
+>> -#endif
+>> -
+>> -                     }
+>> +                     if (present == 0)
+>> +                             dw_mci_reset(host);
+>>
+>>                       spin_unlock_bh(&host->lock);
+>>
+>> @@ -2323,8 +2316,11 @@ static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset)
+>>       return false;
+>>  }
+>>
+>> -static inline bool dw_mci_fifo_reset(struct dw_mci *host)
+>> +static inline bool dw_mci_reset(struct dw_mci *host)
+>>  {
+>> +     u32 flags = SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET;
+>> +     bool ret = false;
+>> +
+>>       /*
+>>        * Reseting generates a block interrupt, hence setting
+>>        * the scatter-gather pointer to NULL.
+>> @@ -2334,15 +2330,59 @@ static inline bool dw_mci_fifo_reset(struct dw_mci *host)
+>>               host->sg = NULL;
+>>       }
+>>
+>> -     return dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
+>> -}
+>> +     if (host->use_dma)
+>> +             flags |= SDMMC_CTRL_DMA_RESET;
+>>
+>> -static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
+>> -{
+>> -     return dw_mci_ctrl_reset(host,
+>> -                              SDMMC_CTRL_FIFO_RESET |
+>> -                              SDMMC_CTRL_RESET |
+>> -                              SDMMC_CTRL_DMA_RESET);
+>> +     if (dw_mci_ctrl_reset(host, flags)) {
+>> +             /*
+>> +              * In all cases we clear the RAWINTS register to clear any
+>> +              * interrupts.
+>> +              */
+>> +             mci_writel(host, RINTSTS, 0xFFFFFFFF);
+>> +
+>> +             /* if using dma we wait for dma_req to clear */
+>> +             if (host->use_dma) {
+>> +                     unsigned long timeout = jiffies + msecs_to_jiffies(500);
+>> +                     u32 status;
+>> +                     do {
+>> +                             status = mci_readl(host, STATUS);
+>> +                             if (!(status & SDMMC_STATUS_DMA_REQ))
+>> +                                     break;
+>> +                             cpu_relax();
+>> +                     } while (time_before(jiffies, timeout));
+>> +
+>> +                     if (status & SDMMC_STATUS_DMA_REQ) {
+>> +                             dev_err(host->dev,
+>> +                                     "%s: Timeout waiting for dma_req to "
+>> +                                     "clear during reset", __func__);
+>> +                             goto ciu_out;
+>> +                     }
+>> +
+>> +                     /* when using DMA next we reset the fifo again */
+>> +                     if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET))
+>> +                             goto ciu_out;
+>> +             }
+>> +     } else {
+>> +             /* if the controller reset bit did clear, then set clock regs */
+>> +             if (!(mci_readl(host, CTRL) & SDMMC_CTRL_RESET)) {
+>> +                     dev_err(host->dev, "%s: fifo/dma reset bits didn't "
+>> +                             "clear but ciu was reset, doing clock update.",
+>> +                             __func__);
+>> +                     goto ciu_out;
+>> +             }
+>> +     }
+>> +
+>> +     if (IS_ENABLED(CONFIG_MMC_DW_IDMAC))
+>> +             /* It is also recommended that we reset and reprogram idmac */
+>> +             dw_mci_idmac_reset(host);
+>> +
+>> +     ret = true;
+>> +
+>> +ciu_out:
+>> +     /* After a CTRL reset we need to have CIU set clock registers  */
+>> +     mci_send_cmd(host->cur_slot, SDMMC_CMD_UPD_CLK, 0);
+>> +
+>> +     return ret;
+>>  }
+>>
+>>  #ifdef CONFIG_OF
+>> @@ -2555,7 +2595,7 @@ int dw_mci_probe(struct dw_mci *host)
+>>       }
+>>
+>>       /* Reset all blocks */
+>> -     if (!dw_mci_ctrl_all_reset(host))
+>> +     if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS))
+>>               return -ENODEV;
+>>
+>>       host->dma_ops = host->pdata->dma_ops;
+>> @@ -2744,7 +2784,7 @@ int dw_mci_resume(struct dw_mci *host)
+>>               }
+>>       }
+>>
+>> -     if (!dw_mci_ctrl_all_reset(host)) {
+>> +     if (!dw_mci_reset(host)) {
+> Do you have any reason to use dw_mci_reset() unlike doing on probing?
 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index 537d6c7..2897b49 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -30,7 +30,9 @@
- #include <asm/mach-jz4740/gpio.h>
- #include <asm/cacheflush.h>
- #include <linux/dma-mapping.h>
-+#include <linux/dmaengine.h>
- 
-+#include <asm/mach-jz4740/dma.h>
- #include <asm/mach-jz4740/jz4740_mmc.h>
- 
- #define JZ_REG_MMC_STRPCL	0x00
-@@ -122,6 +124,7 @@ struct jz4740_mmc_host {
- 	int card_detect_irq;
- 
- 	void __iomem *base;
-+	struct resource *mem_res;
- 	struct mmc_request *req;
- 	struct mmc_command *cmd;
- 
-@@ -136,8 +139,132 @@ struct jz4740_mmc_host {
- 	struct timer_list timeout_timer;
- 	struct sg_mapping_iter miter;
- 	enum jz4740_mmc_state state;
-+
-+	/* DMA support */
-+	struct dma_chan *dma_rx;
-+	struct dma_chan *dma_tx;
-+	bool use_dma;
-+	int sg_len;
-+
-+/* The DMA trigger level is 8 words, that is to say, the DMA read
-+ * trigger is when data words in MSC_RXFIFO is >= 8 and the DMA write
-+ * trigger is when data words in MSC_TXFIFO is < 8.
-+ */
-+#define JZ4740_MMC_FIFO_HALF_SIZE 8
- };
- 
-+/*----------------------------------------------------------------------------*/
-+/* DMA infrastructure */
-+
-+static void jz4740_release_dma_channels(struct jz4740_mmc_host *host)
-+{
-+	if (!host->use_dma)
-+		return;
-+
-+	dma_release_channel(host->dma_tx);
-+	dma_release_channel(host->dma_rx);
-+}
-+
-+static int jz4740_acquire_dma_channels(struct jz4740_mmc_host *host)
-+{
-+	dma_cap_mask_t mask;
-+
-+	dma_cap_zero(mask);
-+	dma_cap_set(DMA_SLAVE, mask);
-+
-+	host->dma_tx = dma_request_channel(mask, NULL, host);
-+	if (!host->dma_tx) {
-+		dev_err(mmc_dev(host->mmc), "Failed to get dma_tx channel\n");
-+		return -ENODEV;
-+	}
-+
-+	host->dma_rx = dma_request_channel(mask, NULL, host);
-+	if (!host->dma_rx) {
-+		dev_err(mmc_dev(host->mmc), "Failed to get dma_rx channel\n");
-+		goto free_master_write;
-+	}
-+
-+	return 0;
-+
-+free_master_write:
-+	dma_release_channel(host->dma_tx);
-+	return -ENODEV;
-+}
-+
-+static inline int jz4740_get_dma_dir(struct mmc_data *data)
-+{
-+	return (data->flags & MMC_DATA_READ) ? DMA_FROM_DEVICE : DMA_TO_DEVICE;
-+}
-+
-+static void jz4740_dma_unmap(struct jz4740_mmc_host *host,
-+			     struct mmc_data *data)
-+{
-+	enum dma_data_direction dir = jz4740_get_dma_dir(data);
-+
-+	dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len, dir);
-+}
-+
-+static int jz4740_start_dma_transfer(struct jz4740_mmc_host *host,
-+				     struct mmc_data *data)
-+{
-+	struct dma_chan *chan;
-+	struct dma_async_tx_descriptor *desc;
-+	struct dma_slave_config conf = {
-+		.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
-+		.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
-+		.src_maxburst = JZ4740_MMC_FIFO_HALF_SIZE,
-+		.dst_maxburst = JZ4740_MMC_FIFO_HALF_SIZE,
-+	};
-+	enum dma_data_direction dir = jz4740_get_dma_dir(data);
-+
-+	host->sg_len = dma_map_sg(mmc_dev(host->mmc),
-+				  data->sg,
-+				  data->sg_len,
-+				  dir);
-+
-+	if (host->sg_len < 0) {
-+		dev_err(mmc_dev(host->mmc),
-+			 "Failed to map scatterlist for DMA operation\n");
-+		return -EINVAL;
-+	}
-+
-+	if (dir == DMA_TO_DEVICE) {
-+		conf.direction = DMA_MEM_TO_DEV;
-+		conf.dst_addr = host->mem_res->start + JZ_REG_MMC_TXFIFO;
-+		conf.slave_id = JZ4740_DMA_TYPE_MMC_TRANSMIT;
-+		chan = host->dma_tx;
-+	} else {
-+		conf.direction = DMA_DEV_TO_MEM;
-+		conf.src_addr = host->mem_res->start + JZ_REG_MMC_RXFIFO;
-+		conf.slave_id = JZ4740_DMA_TYPE_MMC_RECEIVE;
-+		chan = host->dma_rx;
-+	}
-+
-+	dmaengine_slave_config(chan, &conf);
-+	desc = dmaengine_prep_slave_sg(chan,
-+				       data->sg,
-+				       host->sg_len,
-+				       conf.direction,
-+				       DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
-+	if (!desc) {
-+		dev_err(mmc_dev(host->mmc),
-+			 "Failed to allocate DMA %s descriptor",
-+			 conf.direction == DMA_MEM_TO_DEV ? "TX" : "RX");
-+		goto dma_unmap;
-+	}
-+
-+	dmaengine_submit(desc);
-+	dma_async_issue_pending(chan);
-+
-+	return 0;
-+
-+dma_unmap:
-+	jz4740_dma_unmap(host, data);
-+	return -ENOMEM;
-+}
-+
-+/*----------------------------------------------------------------------------*/
-+
- static void jz4740_mmc_set_irq_enabled(struct jz4740_mmc_host *host,
- 	unsigned int irq, bool enabled)
- {
-@@ -442,6 +569,8 @@ static void jz4740_mmc_send_command(struct jz4740_mmc_host *host,
- 			cmdat |= JZ_MMC_CMDAT_WRITE;
- 		if (cmd->data->flags & MMC_DATA_STREAM)
- 			cmdat |= JZ_MMC_CMDAT_STREAM;
-+		if (host->use_dma)
-+			cmdat |= JZ_MMC_CMDAT_DMA_EN;
- 
- 		writew(cmd->data->blksz, host->base + JZ_REG_MMC_BLKLEN);
- 		writew(cmd->data->blocks, host->base + JZ_REG_MMC_NOB);
-@@ -474,6 +603,7 @@ static irqreturn_t jz_mmc_irq_worker(int irq, void *devid)
- 	struct jz4740_mmc_host *host = (struct jz4740_mmc_host *)devid;
- 	struct mmc_command *cmd = host->req->cmd;
- 	struct mmc_request *req = host->req;
-+	struct mmc_data *data = cmd->data;
- 	bool timeout = false;
- 
- 	if (cmd->error)
-@@ -484,23 +614,32 @@ static irqreturn_t jz_mmc_irq_worker(int irq, void *devid)
- 		if (cmd->flags & MMC_RSP_PRESENT)
- 			jz4740_mmc_read_response(host, cmd);
- 
--		if (!cmd->data)
-+		if (!data)
- 			break;
- 
- 		jz_mmc_prepare_data_transfer(host);
- 
- 	case JZ4740_MMC_STATE_TRANSFER_DATA:
--		if (cmd->data->flags & MMC_DATA_READ)
--			timeout = jz4740_mmc_read_data(host, cmd->data);
-+		if (host->use_dma) {
-+			/* Use DMA if enabled, data transfer direction was
-+			 * defined  before in jz_mmc_prepare_data_transfer().
-+			 */
-+			timeout = jz4740_start_dma_transfer(host, data);
-+			data->bytes_xfered = data->blocks * data->blksz;
-+		} else if (data->flags & MMC_DATA_READ)
-+			/* If DMA is not enabled, rely on data flags
-+			 * to establish data transfer direction.
-+			 */
-+			timeout = jz4740_mmc_read_data(host, data);
- 		else
--			timeout = jz4740_mmc_write_data(host, cmd->data);
-+			timeout = jz4740_mmc_write_data(host, data);
- 
- 		if (unlikely(timeout)) {
- 			host->state = JZ4740_MMC_STATE_TRANSFER_DATA;
- 			break;
- 		}
- 
--		jz4740_mmc_transfer_check_state(host, cmd->data);
-+		jz4740_mmc_transfer_check_state(host, data);
- 
- 		timeout = jz4740_mmc_poll_irq(host, JZ_MMC_IRQ_DATA_TRAN_DONE);
- 		if (unlikely(timeout)) {
-@@ -757,7 +896,6 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 	struct mmc_host *mmc;
- 	struct jz4740_mmc_host *host;
- 	struct jz4740_mmc_platform_data *pdata;
--	struct resource *res;
- 
- 	pdata = pdev->dev.platform_data;
- 
-@@ -784,10 +922,17 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 		goto err_free_host;
- 	}
- 
--	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	host->base = devm_ioremap_resource(&pdev->dev, res);
-+	host->mem_res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	if (!host->mem_res) {
-+		ret = -EBUSY;
-+		dev_err(&pdev->dev, "Failed to request memory region\n");
-+		goto err_free_host;
-+	}
-+
-+	host->base = devm_ioremap_resource(&pdev->dev, host->mem_res);
- 	if (IS_ERR(host->base)) {
- 		ret = PTR_ERR(host->base);
-+		dev_err(&pdev->dev, "Failed to ioremap base memory\n");
- 		goto err_free_host;
- 	}
- 
-@@ -834,6 +979,10 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 	/* It is not important when it times out, it just needs to timeout. */
- 	set_timer_slack(&host->timeout_timer, HZ);
- 
-+	host->use_dma = true;
-+	if (host->use_dma && jz4740_acquire_dma_channels(host) != 0)
-+		host->use_dma = false;
-+
- 	platform_set_drvdata(pdev, host);
- 	ret = mmc_add_host(mmc);
- 
-@@ -843,6 +992,10 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 	}
- 	dev_info(&pdev->dev, "JZ SD/MMC card driver registered\n");
- 
-+	dev_info(&pdev->dev, "Using %s, %d-bit mode\n",
-+		 host->use_dma ? "DMA" : "PIO",
-+		 (mmc->caps & MMC_CAP_4_BIT_DATA) ? 4 : 1);
-+
- 	return 0;
- 
- err_free_irq:
-@@ -850,6 +1003,8 @@ err_free_irq:
- err_free_gpios:
- 	jz4740_mmc_free_gpios(pdev);
- err_gpio_bulk_free:
-+	if (host->use_dma)
-+		jz4740_release_dma_channels(host);
- 	jz_gpio_bulk_free(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
- err_free_host:
- 	mmc_free_host(mmc);
-@@ -871,6 +1026,7 @@ static int jz4740_mmc_remove(struct platform_device *pdev)
- 
- 	jz4740_mmc_free_gpios(pdev);
- 	jz_gpio_bulk_free(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
-+	jz4740_release_dma_channels(host);
- 
- 	mmc_free_host(host->mmc);
- 
--- 
-1.7.10.4
+I really wanted to use dw_mci_reset() everwhere, including probe,
+because that would be simplest, where there is just one reset function
+always, but the host structure is not completely set up at probe time,
+so the code in dw_mci_reset() where we try to send a command to update
+clock fails, so that's why I had to just do a reset.
 
+> Thanks,
+> Seungwon Jeon
+>
