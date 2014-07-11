@@ -1,144 +1,377 @@
-From: Seungwon Jeon <tgih.jun@samsung.com>
-Subject: RE: [PATCH] mmc: dw_mmc: change to use recommended reset procedure
-Date: Fri, 11 Jul 2014 19:20:48 +0900
-Message-ID: <001301cf9cf1$c91c7310$5b555930$%jun@samsung.com>
-References: <CAPz6YkUzGWnOznZ4UXNsLbe=ehDwfMJwUSjahUKVnVz8w9OcsA@mail.gmail.com>
- <1402351255-7423-1-git-send-email-sonnyrao@chromium.org>
- <002201cf9c3a$6de4a150$49ade3f0$%jun@samsung.com>
- <CAPz6YkXgoKPSQEdNOwAQDhEnFGFVArr_0obbVR_okAEOvLxtzA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <CAPz6YkXgoKPSQEdNOwAQDhEnFGFVArr_0obbVR_okAEOvLxtzA@mail.gmail.com>
-Content-language: ko
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: 'Sonny Rao' <sonnyrao@chromium.org>
-Cc: 'linux-mmc' <linux-mmc@vger.kernel.org>, 'Grant Grundler' <grundler@chromium.org>, 'linux-samsung-soc' <linux-samsung-soc@vger.kernel.org>, linux-arm-kernel@lists.infradead.org, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chris Ball' <cjb@laptop.org>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'sunil joshi' <joshi@samsung.com>, 'Tomasz Figa' <t.figa@samsung.com>, 'Douglas Anderson' <dianders@chromium.org>, 'Yuvaraj Kumar C D' <yuvaraj.cd@samsung.com>
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: [RFC PATCH] mmc: mmci: Add qcom dml support to the driver.
+Date: Fri, 11 Jul 2014 12:48:26 +0100
+Message-ID: <1405079306-1406-1-git-send-email-srinivas.kandagatla@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, linux-kernel@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, July 11, 2014, Sonny Rao wrote:
-> On Thu, Jul 10, 2014 at 5:28 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
-> > Hi Sonny,
-> >
-> > I have missed this patch.
-> >
-> > You finally choose to take extra interrupt handling.
-> > If it is not harm, it's fine.
-> 
-> Hi, thanks for coming back to it.  Based on my tracing, the interrupt
-> seems to be okay and is just ignored.
-> 
-> >> -static inline bool dw_mci_fifo_reset(struct dw_mci *host)
-> >> +static inline bool dw_mci_reset(struct dw_mci *host)
-"inline" is no needed anymore.
+On Qualcomm APQ8064 SOCs, SD card controller has an additional glue
+called DML (Data Mover Local/Lite) to assist dma transfers.
+This hardware needs to be setup before any dma transfer is requested.
+DML itself is not a DMA engine, its just a gule between the SD card
+controller and dma controller.
 
-> >>  {
-> >> +     u32 flags = SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET;
-> >> +     bool ret = false;
-> >> +
-> >>       /*
-> >>        * Reseting generates a block interrupt, hence setting
-> >>        * the scatter-gather pointer to NULL.
-> >> @@ -2334,15 +2330,59 @@ static inline bool dw_mci_fifo_reset(struct dw_mci *host)
-> >>               host->sg = NULL;
-> >>       }
-> >>
-> >> -     return dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
-> >> -}
-> >> +     if (host->use_dma)
-> >> +             flags |= SDMMC_CTRL_DMA_RESET;
-> >>
-> >> -static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
-> >> -{
-> >> -     return dw_mci_ctrl_reset(host,
-> >> -                              SDMMC_CTRL_FIFO_RESET |
-> >> -                              SDMMC_CTRL_RESET |
-> >> -                              SDMMC_CTRL_DMA_RESET);
-> >> +     if (dw_mci_ctrl_reset(host, flags)) {
-> >> +             /*
-> >> +              * In all cases we clear the RAWINTS register to clear any
-> >> +              * interrupts.
-> >> +              */
-> >> +             mci_writel(host, RINTSTS, 0xFFFFFFFF);
-> >> +
-> >> +             /* if using dma we wait for dma_req to clear */
-> >> +             if (host->use_dma) {
-> >> +                     unsigned long timeout = jiffies + msecs_to_jiffies(500);
-> >> +                     u32 status;
-> >> +                     do {
-> >> +                             status = mci_readl(host, STATUS);
-> >> +                             if (!(status & SDMMC_STATUS_DMA_REQ))
-> >> +                                     break;
-> >> +                             cpu_relax();
-> >> +                     } while (time_before(jiffies, timeout));
-> >> +
-> >> +                     if (status & SDMMC_STATUS_DMA_REQ) {
-> >> +                             dev_err(host->dev,
-> >> +                                     "%s: Timeout waiting for dma_req to "
-> >> +                                     "clear during reset", __func__);
-> >> +                             goto ciu_out;
-> >> +                     }
-> >> +
-> >> +                     /* when using DMA next we reset the fifo again */
-> >> +                     if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET))
-> >> +                             goto ciu_out;
-> >> +             }
-> >> +     } else {
-> >> +             /* if the controller reset bit did clear, then set clock regs */
-> >> +             if (!(mci_readl(host, CTRL) & SDMMC_CTRL_RESET)) {
-> >> +                     dev_err(host->dev, "%s: fifo/dma reset bits didn't "
-> >> +                             "clear but ciu was reset, doing clock update.",
-> >> +                             __func__);
-> >> +                     goto ciu_out;
-> >> +             }
-> >> +     }
-> >> +
-> >> +     if (IS_ENABLED(CONFIG_MMC_DW_IDMAC))
-> >> +             /* It is also recommended that we reset and reprogram idmac */
-> >> +             dw_mci_idmac_reset(host);
-> >> +
-> >> +     ret = true;
-> >> +
-> >> +ciu_out:
-> >> +     /* After a CTRL reset we need to have CIU set clock registers  */
-> >> +     mci_send_cmd(host->cur_slot, SDMMC_CMD_UPD_CLK, 0);
-> >> +
-> >> +     return ret;
-> >>  }
-> >>
-> >>  #ifdef CONFIG_OF
-> >> @@ -2555,7 +2595,7 @@ int dw_mci_probe(struct dw_mci *host)
-> >>       }
-> >>
-> >>       /* Reset all blocks */
-> >> -     if (!dw_mci_ctrl_all_reset(host))
-> >> +     if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS))
-> >>               return -ENODEV;
-> >>
-> >>       host->dma_ops = host->pdata->dma_ops;
-> >> @@ -2744,7 +2784,7 @@ int dw_mci_resume(struct dw_mci *host)
-> >>               }
-> >>       }
-> >>
-> >> -     if (!dw_mci_ctrl_all_reset(host)) {
-> >> +     if (!dw_mci_reset(host)) {
-> > Do you have any reason to use dw_mci_reset() unlike doing on probing?
-> 
-> I really wanted to use dw_mci_reset() everwhere, including probe,
-> because that would be simplest, where there is just one reset function
-> always, but the host structure is not completely set up at probe time,
-> so the code in dw_mci_reset() where we try to send a command to update
-> clock fails, so that's why I had to just do a reset.
+Most of this code has been ported from qualcomm's 3.4 kernel.
 
-Yes, if we can keep one interface, it would be good.
-But can you check below?
-Did you see the kernel panic on probing with "host->cur_slot" is NULL?
-If right, resume seems not different from probe in case of removable type.
-And dw_mci_idmac_reset() is redundant when dw_mci_reset() is used at resume.
+This patch adds the code necessary to intialize the hardware and setup
+before doing any dma transfers.
 
-I think dw_mci_ctrl_reset() can be also used at resume like at probe for simple way.
-For safety's sake, "host->cur_slot" should be guaranteed it's not NULL.
+Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+---
 
-Thanks,
-Seungwon Jeon
+Hi All, 
+
+DMA support for Qualcomm SD card controller is missing in my last patchset, the
+reason to post this patch separately is because of the unusual glue logic
+between card controller and the dma-controller. This glue logic is called DML
+(Data mover local/lite).
+
+DML assists dma transfers between sd card controller and dma-controller. As this
+DML gule is part of SD controller IP and needs configuring for every transfer,
+So I thought of keeping it close to driver in drivers/mmc/ directory is more
+usefull, than trying to find a infrastructure to fit it. DML itself is not a DMA
+controller but an logic present on SD card controller and it resides in SD card
+controller IP.
+
+I would like to get your opnion on overall correctness of the approch.
+
+Thanks in advance.
+srini
+
+
+ drivers/mmc/host/Kconfig    |  11 +++
+ drivers/mmc/host/Makefile   |   1 +
+ drivers/mmc/host/mmci.c     |  19 ++++-
+ drivers/mmc/host/qcom_dml.c | 171 ++++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/qcom_dml.h |  17 +++++
+ 5 files changed, 218 insertions(+), 1 deletion(-)
+ create mode 100644 drivers/mmc/host/qcom_dml.c
+ create mode 100644 drivers/mmc/host/qcom_dml.h
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index a565254..f50ccbb 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -14,6 +14,17 @@ config MMC_ARMMMCI
+ 
+ 	  If unsure, say N.
+ 
++config MMC_QCOM_DML
++	tristate "Qualcomm Data Mover for SD Card Controller"
++	depends on MMC_ARMMMCI && ARCH_QCOM
++	default y
++	help
++	  This selects the Qualcomm Data Mover lite/local on SD Card controller.
++	  This option will enable the dma to work correctly, if you are using
++	  Qcom SOCs and MMC, you would probably need this option to get DMA working.
++
++	  if unsure, say N.
++
+ config MMC_PXA
+ 	tristate "Intel PXA25x/26x/27x Multimedia Card Interface support"
+ 	depends on ARCH_PXA
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 7f81ddf..e6a14ac 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -3,6 +3,7 @@
+ #
+ 
+ obj-$(CONFIG_MMC_ARMMMCI)	+= mmci.o
++obj-$(CONFIG_MMC_QCOM_DML)	+= qcom_dml.o
+ obj-$(CONFIG_MMC_PXA)		+= pxamci.o
+ obj-$(CONFIG_MMC_MXC)		+= mxcmmc.o
+ obj-$(CONFIG_MMC_MXS)		+= mxs-mmc.o
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index b66b351..c537296 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -43,6 +43,7 @@
+ #include <asm/sizes.h>
+ 
+ #include "mmci.h"
++#include "qcom_dml.h"
+ 
+ #define DRIVER_NAME "mmci-pl18x"
+ 
+@@ -74,6 +75,7 @@ static unsigned int fmax = 515633;
+  * @pwrreg_nopower: bits in MMCIPOWER don't controls ext. power supply
+  * @explicit_mclk_control: enable explicit mclk control in driver.
+  * @qcom_fifo: enables qcom specific fifo pio read logic.
++ * @qcom_dml: enables qcom specific dml glue for dma transfers.
+  */
+ struct variant_data {
+ 	unsigned int		clkreg;
+@@ -97,6 +99,7 @@ struct variant_data {
+ 	bool			pwrreg_nopower;
+ 	bool			explicit_mclk_control;
+ 	bool			qcom_fifo;
++	bool			qcom_dml;
+ };
+ 
+ static struct variant_data variant_arm = {
+@@ -205,6 +208,7 @@ static struct variant_data variant_qcom = {
+ 	.f_max			= 208000000,
+ 	.explicit_mclk_control	= true,
+ 	.qcom_fifo		= true,
++	.qcom_dml		= true,
+ };
+ 
+ static int mmci_card_busy(struct mmc_host *mmc)
+@@ -418,6 +422,7 @@ static void mmci_dma_setup(struct mmci_host *host)
+ {
+ 	const char *rxname, *txname;
+ 	dma_cap_mask_t mask;
++	struct variant_data *variant = host->variant;
+ 
+ 	host->dma_rx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "rx");
+ 	host->dma_tx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "tx");
+@@ -468,6 +473,11 @@ static void mmci_dma_setup(struct mmci_host *host)
+ 		if (max_seg_size < host->mmc->max_seg_size)
+ 			host->mmc->max_seg_size = max_seg_size;
+ 	}
++
++	if (variant->qcom_dml && host->dma_rx_channel && host->dma_tx_channel) {
++		if (dml_hw_init(host, host->mmc->parent->of_node))
++			variant->qcom_dml = false;
++	}
+ }
+ 
+ /*
+@@ -569,6 +579,7 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 	struct dma_async_tx_descriptor *desc;
+ 	enum dma_data_direction buffer_dirn;
+ 	int nr_sg;
++	u32 flags = DMA_CTRL_ACK;
+ 
+ 	if (data->flags & MMC_DATA_READ) {
+ 		conf.direction = DMA_DEV_TO_MEM;
+@@ -593,9 +604,12 @@ static int __mmci_dma_prep_data(struct mmci_host *host, struct mmc_data *data,
+ 	if (nr_sg == 0)
+ 		return -EINVAL;
+ 
++	if (host->variant->qcom_dml)
++		flags |= DMA_PREP_INTERRUPT;
++
+ 	dmaengine_slave_config(chan, &conf);
+ 	desc = dmaengine_prep_slave_sg(chan, data->sg, nr_sg,
+-					    conf.direction, DMA_CTRL_ACK);
++					    conf.direction, flags);
+ 	if (!desc)
+ 		goto unmap_exit;
+ 
+@@ -644,6 +658,9 @@ static int mmci_dma_start_data(struct mmci_host *host, unsigned int datactrl)
+ 	dmaengine_submit(host->dma_desc_current);
+ 	dma_async_issue_pending(host->dma_current);
+ 
++	if (host->variant->qcom_dml)
++		dml_start_xfer(host, data);
++
+ 	datactrl |= MCI_DPSM_DMAENABLE;
+ 
+ 	/* Trigger the DMA transfer */
+diff --git a/drivers/mmc/host/qcom_dml.c b/drivers/mmc/host/qcom_dml.c
+new file mode 100644
+index 0000000..e2ecd07
+--- /dev/null
++++ b/drivers/mmc/host/qcom_dml.c
+@@ -0,0 +1,171 @@
++#include <linux/of.h>
++#include <linux/of_dma.h>
++#include <linux/bitops.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/card.h>
++#include "mmci.h"
++
++/* Registers */
++#define DML_CONFIG			0x00
++#define PRODUCER_CRCI_MSK		GENMASK(1, 0)
++#define PRODUCER_CRCI_DISABLE		0
++#define PRODUCER_CRCI_X_SEL		BIT(0)
++#define PRODUCER_CRCI_Y_SEL		BIT(1)
++#define CONSUMER_CRCI_MSK		GENMASK(3, 2)
++#define CONSUMER_CRCI_DISABLE		0
++#define CONSUMER_CRCI_X_SEL		BIT(2)
++#define CONSUMER_CRCI_Y_SEL		BIT(3)
++#define PRODUCER_TRANS_END_EN		BIT(4)
++#define BYPASS				BIT(16)
++#define DIRECT_MODE			BIT(17)
++#define INFINITE_CONS_TRANS		BIT(18)
++
++#define DML_SW_RESET			0x08
++#define DML_PRODUCER_START		0x0c
++#define DML_CONSUMER_START		0x10
++#define DML_PRODUCER_PIPE_LOGICAL_SIZE	0x14
++#define DML_CONSUMER_PIPE_LOGICAL_SIZE	0x18
++#define DML_PIPE_ID			0x1c
++#define PRODUCER_PIPE_ID_SHFT		0
++#define PRODUCER_PIPE_ID_MSK		GENMASK(4, 0)
++#define CONSUMER_PIPE_ID_SHFT		16
++#define CONSUMER_PIPE_ID_MSK		GENMASK(20, 16)
++
++#define DML_PRODUCER_BAM_BLOCK_SIZE	0x24
++#define DML_PRODUCER_BAM_TRANS_SIZE	0x28
++
++/* other definitions */
++#define PRODUCER_PIPE_LOGICAL_SIZE	4096
++#define CONSUMER_PIPE_LOGICAL_SIZE	4096
++
++#define DML_OFFSET			0x800
++
++void dml_start_xfer(struct mmci_host *host, struct mmc_data *data)
++{
++	u32 config;
++	void __iomem *dml_base;
++
++	dml_base = host->base + DML_OFFSET;
++
++	if (data->flags & MMC_DATA_READ) {
++		/* Read operation: configure DML for producer operation */
++		/* Set producer CRCI-x and disable consumer CRCI */
++		config = readl(dml_base + DML_CONFIG);
++		config = (config & ~PRODUCER_CRCI_MSK) | PRODUCER_CRCI_X_SEL;
++		config = (config & ~CONSUMER_CRCI_MSK) | CONSUMER_CRCI_DISABLE;
++		writel(config, (dml_base + DML_CONFIG));
++
++		/* Set the Producer BAM block size */
++		writel(data->blksz, (dml_base +	DML_PRODUCER_BAM_BLOCK_SIZE));
++
++		/* Set Producer BAM Transaction size */
++		writel(data->blocks * data->blksz,
++			(dml_base + DML_PRODUCER_BAM_TRANS_SIZE));
++		/* Set Producer Transaction End bit */
++		writel((readl_relaxed(dml_base + DML_CONFIG) |
++			PRODUCER_TRANS_END_EN),
++			(dml_base + DML_CONFIG));
++		/* Trigger producer */
++		writel(1, (dml_base + DML_PRODUCER_START));
++	} else {
++		/* Write operation: configure DML for consumer operation */
++		/* Set consumer CRCI-x and disable producer CRCI*/
++		config = readl(dml_base + DML_CONFIG);
++		config = (config & ~CONSUMER_CRCI_MSK) | CONSUMER_CRCI_X_SEL;
++		config = (config & ~PRODUCER_CRCI_MSK) | PRODUCER_CRCI_DISABLE;
++		writel(config, (dml_base + DML_CONFIG));
++		/* Clear Producer Transaction End bit */
++		writel((readl_relaxed(dml_base + DML_CONFIG)
++			& ~PRODUCER_TRANS_END_EN),
++			(dml_base + DML_CONFIG));
++		/* Trigger consumer */
++		writel(1, (dml_base + DML_CONSUMER_START));
++	}
++}
++
++static int of_get_dml_pipe_index(struct device_node *np, const char *name)
++{
++	int count, i;
++	const char *s;
++	struct of_phandle_args	dma_spec;
++
++	if (!np || !name)
++		return -ENODEV;
++
++	count = of_property_count_strings(np, "dma-names");
++	if (count < 0)
++		return -ENODEV;
++
++	for (i = 0; i < count; i++) {
++
++		if (of_property_read_string_index(np, "dma-names", i, &s))
++			continue;
++
++		if (strcmp(name, s))
++			continue;
++
++		if (of_parse_phandle_with_args(np, "dmas", "#dma-cells", i,
++				       &dma_spec))
++			continue;
++
++		if (dma_spec.args_count)
++			return dma_spec.args[0];
++	}
++
++	return -ENODEV;
++}
++
++/* Initialize the dml hardware connected to SD Card controller */
++int dml_hw_init(struct mmci_host *host, struct device_node *np)
++{
++	u32 config = 0;
++	void __iomem *dml_base;
++	u32 consumer_id = 0, producer_id = 0;
++
++	consumer_id = of_get_dml_pipe_index(np, "tx");
++	producer_id = of_get_dml_pipe_index(np, "rx");
++
++	if (IS_ERR_VALUE(producer_id) || IS_ERR_VALUE(consumer_id))
++		return -ENODEV;
++
++	dml_base = host->base + DML_OFFSET;
++
++	/* Reset the DML block */
++	writel(1, (dml_base + DML_SW_RESET));
++
++	/* Disable the producer and consumer CRCI */
++	config = (PRODUCER_CRCI_DISABLE | CONSUMER_CRCI_DISABLE);
++	/*
++	 * Disable the bypass mode. Bypass mode will only be used
++	 * if data transfer is to happen in PIO mode and don't
++	 * want the BAM interface to connect with SDCC-DML.
++	 */
++	config &= ~BYPASS;
++	/*
++	 * Disable direct mode as we don't DML to MASTER the AHB bus.
++	 * BAM connected with DML should MASTER the AHB bus.
++	 */
++	config &= ~DIRECT_MODE;
++	/*
++	 * Disable infinite mode transfer as we won't be doing any
++	 * infinite size data transfers. All data transfer will be
++	 * of finite data size.
++	 */
++	config &= ~INFINITE_CONS_TRANS;
++	writel(config, (dml_base + DML_CONFIG));
++
++	/*
++	 * Initialize the logical BAM pipe size for producer
++	 * and consumer.
++	 */
++	writel(PRODUCER_PIPE_LOGICAL_SIZE,
++		(dml_base + DML_PRODUCER_PIPE_LOGICAL_SIZE));
++	writel(CONSUMER_PIPE_LOGICAL_SIZE,
++		(dml_base + DML_CONSUMER_PIPE_LOGICAL_SIZE));
++
++	/* Initialize Producer/consumer pipe id */
++	writel(producer_id | (consumer_id << CONSUMER_PIPE_ID_SHFT),
++		(dml_base + DML_PIPE_ID));
++
++	return 0;
++}
+diff --git a/drivers/mmc/host/qcom_dml.h b/drivers/mmc/host/qcom_dml.h
+new file mode 100644
+index 0000000..d2c5aa45
+--- /dev/null
++++ b/drivers/mmc/host/qcom_dml.h
+@@ -0,0 +1,17 @@
++#ifndef __MMC_QCOM_DML_H__
++#define __MMC_QCOM_DML_H__
++
++#ifdef CONFIG_MMC_QCOM_DML
++int dml_hw_init(struct mmci_host *host, struct device_node *np);
++void dml_start_xfer(struct mmci_host *host, struct mmc_data *data);
++#else
++static inline int dml_hw_init(struct mmci_host *host, struct device_node *np)
++{
++	return -ENOSYS;
++}
++static inline void dml_start_xfer(struct mmci_host *host, struct mmc_data *data)
++{
++}
++#endif /* CONFIG_MMC_QCOM_DML */
++
++#endif /* __MMC_QCOM_DML_H__ */
+-- 
+1.9.1
