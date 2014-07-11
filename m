@@ -1,157 +1,130 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH v3] mmc: jz4740: add dma infrastructure for data transfers
-Date: Fri, 11 Jul 2014 02:03:27 +0200
-Message-ID: <26025372.ALyVZ87vgl@avalon>
-References: <1405031246-16365-1-git-send-email-apelete@seketeli.net> <1405031246-16365-2-git-send-email-apelete@seketeli.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:49401 "EHLO
-	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751353AbaGKAD3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jul 2014 20:03:29 -0400
-In-Reply-To: <1405031246-16365-2-git-send-email-apelete@seketeli.net>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCHv5 1/5] mmc: dw_mmc: modify the dt-binding for removing
+ slot-node and supports-highspeed
+Date: Fri, 11 Jul 2014 12:49:43 +0900
+Message-ID: <1405050587-5577-2-git-send-email-jh80.chung@samsung.com>
+References: <1405050587-5577-1-git-send-email-jh80.chung@samsung.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1405050587-5577-1-git-send-email-jh80.chung@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, devicetree@vger.kernel.org, heiko@sntech.de, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jaehoon Chung <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Apelete Seketeli <apelete@seketeli.net>, linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, H Hartley Sweeten <hsweeten@visionengravers.com>, Lars-Peter Clausen <lars@metafoo.de>, Wei Yongjun <yongjun_wei@trendmicro.com.cn>, Alex Smith <alex.smith@imgtec.com>, linux-kernel@vger.kernel.org
 
-Hi Apelete,
+Almost Soc is used the slot per a host.
+Don't use the slot-node and deprecated the "supports-highsped" property.
+Instead, use the cap-mmc/sd-highspeed.
 
-Thank you for the patch.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Reviewed-by: Tushar Behera <trblinux@gmail.com>
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+Tested-by: Sachin Kamat <sachin.kamat@samsung.com>
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+ .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   17 +++++------------
+ .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   12 +++++-------
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |   12 +++++-------
+ 3 files changed, 15 insertions(+), 26 deletions(-)
 
-On Friday 11 July 2014 00:27:26 Apelete Seketeli wrote:
-> Until now the MMC driver for JZ4740 SoC was relying on PIO mode only
-> for data transfers.
-> This patch allows the use of DMA for data trasnfers in addition to PIO
-> mode by relying on DMA Engine.
-> 
-> DMA tranfers performance might be further improved by taking advantage
-> of the asynchronous request capability of the MMC framework.
-> 
-> Signed-off-by: Apelete Seketeli <apelete@seketeli.net>
-> ---
-> drivers/mmc/host/jz4740_mmc.c |  172 +++++++++++++++++++++++++++++++++++++--
-> 1 file changed, 164
-> insertions(+), 8 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-> index 537d6c7..2897b49 100644
-> --- a/drivers/mmc/host/jz4740_mmc.c
-> +++ b/drivers/mmc/host/jz4740_mmc.c
-
-[snip]
-
-> +static void jz4740_dma_unmap(struct jz4740_mmc_host *host,
-> +			     struct mmc_data *data)
-> +{
-> +	enum dma_data_direction dir = jz4740_get_dma_dir(data);
-> +
-> +	dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len, dir);
-> +}
-> +
-> +static int jz4740_start_dma_transfer(struct jz4740_mmc_host *host,
-> +				     struct mmc_data *data)
-> +{
-> +	struct dma_chan *chan;
-> +	struct dma_async_tx_descriptor *desc;
-> +	struct dma_slave_config conf = {
-> +		.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
-> +		.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
-> +		.src_maxburst = JZ4740_MMC_FIFO_HALF_SIZE,
-> +		.dst_maxburst = JZ4740_MMC_FIFO_HALF_SIZE,
-> +	};
-> +	enum dma_data_direction dir = jz4740_get_dma_dir(data);
-> +
-> +	host->sg_len = dma_map_sg(mmc_dev(host->mmc),
-
-You should use the DMA engine device here, not the MMC device, as the memory 
-transfers will be performed by the DMA engine. Same for the dma_unmap_sg() 
-call above.
-
-> +				  data->sg,
-> +				  data->sg_len,
-> +				  dir);
-> +
-> +	if (host->sg_len < 0) {
-> +		dev_err(mmc_dev(host->mmc),
-> +			 "Failed to map scatterlist for DMA operation\n");
-> +		return -EINVAL;
-> +	}
-> +
-> +	if (dir == DMA_TO_DEVICE) {
-> +		conf.direction = DMA_MEM_TO_DEV;
-> +		conf.dst_addr = host->mem_res->start + JZ_REG_MMC_TXFIFO;
-> +		conf.slave_id = JZ4740_DMA_TYPE_MMC_TRANSMIT;
-> +		chan = host->dma_tx;
-> +	} else {
-> +		conf.direction = DMA_DEV_TO_MEM;
-> +		conf.src_addr = host->mem_res->start + JZ_REG_MMC_RXFIFO;
-> +		conf.slave_id = JZ4740_DMA_TYPE_MMC_RECEIVE;
-> +		chan = host->dma_rx;
-> +	}
-> +
-> +	dmaengine_slave_config(chan, &conf);
-> +	desc = dmaengine_prep_slave_sg(chan,
-> +				       data->sg,
-> +				       host->sg_len,
-> +				       conf.direction,
-> +				       DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
-> +	if (!desc) {
-> +		dev_err(mmc_dev(host->mmc),
-> +			 "Failed to allocate DMA %s descriptor",
-> +			 conf.direction == DMA_MEM_TO_DEV ? "TX" : "RX");
-> +		goto dma_unmap;
-> +	}
-> +
-> +	dmaengine_submit(desc);
-> +	dma_async_issue_pending(chan);
-> +
-> +	return 0;
-> +
-> +dma_unmap:
-> +	jz4740_dma_unmap(host, data);
-> +	return -ENOMEM;
-> +}
-> +
-> +/*-------------------------------------------------------------------------
-> ---*/ +
->  static void jz4740_mmc_set_irq_enabled(struct jz4740_mmc_host *host,
->  	unsigned int irq, bool enabled)
->  {
-
-[snip]
-
-> @@ -784,10 +922,17 @@ static int jz4740_mmc_probe(struct platform_device*
-> pdev) goto err_free_host;
->  	}
-> 
-> -	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> -	host->base = devm_ioremap_resource(&pdev->dev, res);
-> +	host->mem_res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +	if (!host->mem_res) {
-> +		ret = -EBUSY;
-> +		dev_err(&pdev->dev, "Failed to request memory region\n");
-> +		goto err_free_host;
-
-The devm_ioremap_resource() call below will handle the mem_res == NULL case 
-and print a message, so you could remove this check.
-
-> +	}
-> +
-> +	host->base = devm_ioremap_resource(&pdev->dev, host->mem_res);
->  	if (IS_ERR(host->base)) {
->  		ret = PTR_ERR(host->base);
-> +		dev_err(&pdev->dev, "Failed to ioremap base memory\n");
->  		goto err_free_host;
->  	}
-> 
-
-[snip]
-
+diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+index 532b1d4..9308325 100644
+--- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+@@ -46,13 +46,14 @@ Required Properties:
+       - if CIU clock divider value is 0 (that is divide by 1), both tx and rx
+         phase shift clocks should be 0.
+ 
+-Required properties for a slot:
++Required properties for a slot (Deprecated - Recommend to use one slot per a host):
+ 
+ * gpios: specifies a list of gpios used for command, clock and data bus. The
+   first gpio is the command line and the second gpio is the clock line. The
+   rest of the gpios (depending on the bus-width property) are the data lines in
+   no particular order. The format of the gpio specifier depends on the gpio
+   controller.
++ (Deprecated - Refer to Documentaion/devicetree/binding/pinctrl/samsung-pinctrl.txt)
+ 
+ Example:
+ 
+@@ -69,21 +70,13 @@ Example:
+ 
+ 	dwmmc0@12200000 {
+ 		num-slots = <1>;
+-		supports-highspeed;
++		cap-mmc-highspeed;
++		cap-sd-highspeed;
+ 		broken-cd;
+ 		fifo-depth = <0x80>;
+ 		card-detect-delay = <200>;
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <2 3>;
+ 		samsung,dw-mshc-ddr-timing = <1 2>;
+-
+-		slot@0 {
+-			reg = <0>;
+-			bus-width = <8>;
+-			gpios = <&gpc0 0 2 0 3>, <&gpc0 1 2 0 3>,
+-				<&gpc1 0 2 3 3>, <&gpc1 1 2 3 3>,
+-				<&gpc1 2 2 3 3>, <&gpc1 3 2 3 3>,
+-				<&gpc0 3 2 3 3>, <&gpc0 4 2 3 3>,
+-				<&gpc0 5 2 3 3>, <&gpc0 6 2 3 3>;
+-		};
++		bus-width = <8>;
+ 	};
+diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+index e5bc49f..3b35449 100644
+--- a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+@@ -34,13 +34,11 @@ Example:
+ 		num-slots = <1>;
+ 		vmmc-supply = <&ldo12>;
+ 		fifo-depth = <0x100>;
+-		supports-highspeed;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&sd_pmx_pins &sd_cfg_func1 &sd_cfg_func2>;
+-		slot@0 {
+-			reg = <0>;
+-			bus-width = <4>;
+-			disable-wp;
+-			cd-gpios = <&gpio10 3 0>;
+-		};
++		bus-width = <4>;
++		disable-wp;
++		cd-gpios = <&gpio10 3 0>;
++		cap-mmc-highspeed;
++		cap-sd-highspeed;
+ 	};
+diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+index 2d4a725..346c609 100644
+--- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+@@ -67,7 +67,8 @@ Optional properties:
+ * card-detect-delay: Delay in milli-seconds before detecting card after card
+   insert event. The default value is 0.
+ 
+-* supports-highspeed: Enables support for high speed cards (up to 50MHz)
++* supports-highspeed (DEPRECATED): Enables support for high speed cards (up to 50MHz)
++			   (use "cap-mmc-highspeed" or "cap-sd-highspeed" instead)
+ 
+ * broken-cd: as documented in mmc core bindings.
+ 
+@@ -98,14 +99,11 @@ board specific portions as listed below.
+ 		clock-frequency = <400000000>;
+ 		clock-freq-min-max = <400000 200000000>;
+ 		num-slots = <1>;
+-		supports-highspeed;
+ 		broken-cd;
+ 		fifo-depth = <0x80>;
+ 		card-detect-delay = <200>;
+ 		vmmc-supply = <&buck8>;
+-
+-		slot@0 {
+-			reg = <0>;
+-			bus-width = <8>;
+-		};
++		bus-width = <8>;
++		cap-mmc-highspeed;
++		cap-sd-highspeed;
+ 	};
 -- 
-Regards,
-
-Laurent Pinchart
-
+1.7.9.5
