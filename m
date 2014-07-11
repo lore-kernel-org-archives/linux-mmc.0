@@ -1,212 +1,91 @@
-From: Sonny Rao <sonnyrao@chromium.org>
-Subject: [PATCHv5] mmc: dw_mmc: change to use recommended reset procedure
-Date: Fri, 11 Jul 2014 13:53:10 -0700
-Message-ID: <1405111990-23452-1-git-send-email-sonnyrao@chromium.org>
-References: <CAPz6YkUKWUuQrSjPbdhwwZ57kkzJ7tLGpue=mvw6+31kkBhauw@mail.gmail.com>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAPz6YkUKWUuQrSjPbdhwwZ57kkzJ7tLGpue=mvw6+31kkBhauw@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: grundler@chromium.org, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jh80.chung@samsung.com, cjb@laptop.org, tgih.jun@samsung.com, kgene.kim@samsung.com, joshi@samsung.com, t.figa@samsung.com, dianders@chromium.org, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, Sonny Rao <sonnyrao@chromium.org>
+From: Apelete Seketeli <apelete@seketeli.net>
+Subject: [PATCH v4] Use DMA for data transfers in JZ4740 MMC driver
+Date: Fri, 11 Jul 2014 22:54:48 +0200
+Message-ID: <1405112089-17500-1-git-send-email-apelete@seketeli.net>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from seketeli.net ([94.23.218.202]:58758 "EHLO ms.seketeli.fr"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751705AbaGKUyO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 11 Jul 2014 16:54:14 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, H Hartley Sweeten <hsweeten@visionengravers.com>, Lars-Peter Clausen <lars@metafoo.de>, Wei Yongjun <yongjun_wei@trendmicro.com.cn>, Alex Smith <alex.smith@imgtec.com>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
 
-This patch changes the fifo reset code to follow the reset procedure
-outlined in the documentation of Synopsys Mobile storage host databook.
+Hello,
 
-Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
-Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
----
-v2: Add Generic DMA support
-    per the documentation, move interrupt clear before wait
-    make the test for DMA host->use_dma rather than host->using_dma
-    add proper return values (although it appears no caller checks)
-v3: rename fifo reset function, and change callers
-    use this combined reset function in dw_mci_resume()
-    just one caller left (probe), so get rid of dw_mci_ctrl_all_reset()
-    use DMA reset bit for all systems which use DMA
-    remove extra IDMAC reset in dw_mci_work_routine_card()
-    do CIU clock update in error path, if CIU reset cleared
-v4: remove comment about FIFO reset in dw_mci_work_routine_card()
-    move down error message when control reset clears but others don't
-     and clarify the error stating that we will still update clocks
-    make flags for all reset bits a macro
-v5: don't use dw_mci_reset() in dw_mci_resume() and instead match what
-    is done in dw_mci_probe() and don't force inline dw_mci_resume()
----
- drivers/mmc/host/dw_mmc.c | 86 ++++++++++++++++++++++++++++++++++-------------
- drivers/mmc/host/dw_mmc.h |  5 +++
- 2 files changed, 68 insertions(+), 23 deletions(-)
+MMC driver for JZ4740 SoC is currently relying on PIO mode only for
+data transfers.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 55cd110..db25494 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -111,8 +111,7 @@ static const u8 tuning_blk_pattern_8bit[] = {
- 	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
- };
- 
--static inline bool dw_mci_fifo_reset(struct dw_mci *host);
--static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host);
-+static bool dw_mci_reset(struct dw_mci *host);
- 
- #if defined(CONFIG_DEBUG_FS)
- static int dw_mci_req_show(struct seq_file *s, void *v)
-@@ -1254,7 +1253,7 @@ static int dw_mci_data_complete(struct dw_mci *host, struct mmc_data *data)
- 		 * After an error, there may be data lingering
- 		 * in the FIFO
- 		 */
--		dw_mci_fifo_reset(host);
-+		dw_mci_reset(host);
- 	} else {
- 		data->bytes_xfered = data->blocks * data->blksz;
- 		data->error = 0;
-@@ -1371,7 +1370,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 
- 			/* CMD error in data command */
- 			if (mrq->cmd->error && mrq->data)
--				dw_mci_fifo_reset(host);
-+				dw_mci_reset(host);
- 
- 			host->cmd = NULL;
- 			host->data = NULL;
-@@ -1982,14 +1981,8 @@ static void dw_mci_work_routine_card(struct work_struct *work)
- 			}
- 
- 			/* Power down slot */
--			if (present == 0) {
--				/* Clear down the FIFO */
--				dw_mci_fifo_reset(host);
--#ifdef CONFIG_MMC_DW_IDMAC
--				dw_mci_idmac_reset(host);
--#endif
--
--			}
-+			if (present == 0)
-+				dw_mci_reset(host);
- 
- 			spin_unlock_bh(&host->lock);
- 
-@@ -2323,8 +2316,11 @@ static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset)
- 	return false;
- }
- 
--static inline bool dw_mci_fifo_reset(struct dw_mci *host)
-+static bool dw_mci_reset(struct dw_mci *host)
- {
-+	u32 flags = SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET;
-+	bool ret = false;
-+
- 	/*
- 	 * Reseting generates a block interrupt, hence setting
- 	 * the scatter-gather pointer to NULL.
-@@ -2334,15 +2330,59 @@ static inline bool dw_mci_fifo_reset(struct dw_mci *host)
- 		host->sg = NULL;
- 	}
- 
--	return dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
--}
-+	if (host->use_dma)
-+		flags |= SDMMC_CTRL_DMA_RESET;
- 
--static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
--{
--	return dw_mci_ctrl_reset(host,
--				 SDMMC_CTRL_FIFO_RESET |
--				 SDMMC_CTRL_RESET |
--				 SDMMC_CTRL_DMA_RESET);
-+	if (dw_mci_ctrl_reset(host, flags)) {
-+		/*
-+		 * In all cases we clear the RAWINTS register to clear any
-+		 * interrupts.
-+		 */
-+		mci_writel(host, RINTSTS, 0xFFFFFFFF);
-+
-+		/* if using dma we wait for dma_req to clear */
-+		if (host->use_dma) {
-+			unsigned long timeout = jiffies + msecs_to_jiffies(500);
-+			u32 status;
-+			do {
-+				status = mci_readl(host, STATUS);
-+				if (!(status & SDMMC_STATUS_DMA_REQ))
-+					break;
-+				cpu_relax();
-+			} while (time_before(jiffies, timeout));
-+
-+			if (status & SDMMC_STATUS_DMA_REQ) {
-+				dev_err(host->dev,
-+					"%s: Timeout waiting for dma_req to "
-+					"clear during reset", __func__);
-+				goto ciu_out;
-+			}
-+
-+			/* when using DMA next we reset the fifo again */
-+			if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET))
-+				goto ciu_out;
-+		}
-+	} else {
-+		/* if the controller reset bit did clear, then set clock regs */
-+		if (!(mci_readl(host, CTRL) & SDMMC_CTRL_RESET)) {
-+			dev_err(host->dev, "%s: fifo/dma reset bits didn't "
-+				"clear but ciu was reset, doing clock update.",
-+				__func__);
-+			goto ciu_out;
-+		}
-+	}
-+
-+	if (IS_ENABLED(CONFIG_MMC_DW_IDMAC))
-+		/* It is also recommended that we reset and reprogram idmac */
-+		dw_mci_idmac_reset(host);
-+
-+	ret = true;
-+
-+ciu_out:
-+	/* After a CTRL reset we need to have CIU set clock registers  */
-+	mci_send_cmd(host->cur_slot, SDMMC_CMD_UPD_CLK, 0);
-+
-+	return ret;
- }
- 
- #ifdef CONFIG_OF
-@@ -2555,7 +2595,7 @@ int dw_mci_probe(struct dw_mci *host)
- 	}
- 
- 	/* Reset all blocks */
--	if (!dw_mci_ctrl_all_reset(host))
-+	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS))
- 		return -ENODEV;
- 
- 	host->dma_ops = host->pdata->dma_ops;
-@@ -2744,7 +2784,7 @@ int dw_mci_resume(struct dw_mci *host)
- 		}
- 	}
- 
--	if (!dw_mci_ctrl_all_reset(host)) {
-+	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
- 		ret = -ENODEV;
- 		return ret;
- 	}
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 6bf24ab..9ab8ccd 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -129,6 +129,7 @@
- #define SDMMC_CMD_INDX(n)		((n) & 0x1F)
- /* Status register defines */
- #define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FFF)
-+#define SDMMC_STATUS_DMA_REQ		BIT(31)
- /* FIFOTH register defines */
- #define SDMMC_SET_FIFOTH(m, r, t)	(((m) & 0x7) << 28 | \
- 					 ((r) & 0xFFF) << 16 | \
-@@ -150,6 +151,10 @@
- /* Card read threshold */
- #define SDMMC_SET_RD_THLD(v, x)		(((v) & 0x1FFF) << 16 | (x))
- 
-+/* All ctrl reset bits */
-+#define SDMMC_CTRL_ALL_RESET_FLAGS \
-+	(SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET | SDMMC_CTRL_DMA_RESET)
-+
- /* Register access macros */
- #define mci_readl(dev, reg)			\
- 	__raw_readl((dev)->regs + SDMMC_##reg)
+The patch that comes as a follow-up of this message allows the use of
+DMA for data transfers.
+
+Changes since v3:
+  - use DMA engine device instead of MMC device in dma_map_sg() and
+    dma_unmap_sg() as the memory transfers will be performed by the
+    DMA engine,
+
+  - remove unnecessary mem_res == NULL check in jz4740_mmc_probe()
+    since devm_ioremap_resource() handles the mem_res == NULL case and
+    print a message,
+
+  - added a check to host->use_dma in jz4740_mmc_remove() to avoid
+    calling jz4740_release_dma_channels() unnecessarily.
+
+Changes since v2:
+  - declare sg_len member of struct jz4740_mmc_host as int instead of
+    unsigned int.
+
+Changes since v1:
+  - remove blank line added by mistake in jz_mmc_prepare_data_transfer().
+
+According to the following DMA vs PIO benchmarks there seems to be a
+slight improvement in transfer speed with the Ben NanoNote booting
+from SD card, while load average seems to be roughly on par:
+
+* With DMA:
+
+Test cases |             root@BenNanoNote:/# uptime              |   root@BenNanoNote:/# time zcat root/fedora-16.iso.gz > /dev/null && uptime
+-----------|----------------------------------------------------------------------------------------------------------------------------------
+Test run 1 | 00:20:55 up 1 min,  load average: 1.26, 0.42, 0.14  |  00:26:10 up 6 min,  load average: 2.89, 1.94, 0.89
+Test run 2 | 00:30:22 up 1 min,  load average: 1.16, 0.38, 0.13  |  00:35:34 up 6 min,  load average: 2.68, 1.86, 0.85
+Test run 3 | 00:39:56 up 1 min,  load average: 1.16, 0.38, 0.13  |  00:45:06 up 6 min,  load average: 2.57, 1.76, 0.81
+-----------|----------------------------------------------------------------------------------------------------------------------------------
+  Average  |             1 min,  load average: 1.19, 0.39, 0.13  |              6 min,  load average: 2.71, 1.85, 0.85
+
+
+* With PIO:
+
+Test cases |             root@BenNanoNote:/# uptime              |   root@BenNanoNote:/# time zcat root/fedora-16.iso.gz > /dev/null && uptime
+----------------------------------------------------------------------------------------------------------------------------------------------
+Test run 1 | 00:50:47 up 1 min,  load average: 1.42, 0.49, 0.17  |  00:56:52 up 7 min,  load average: 2.47, 2.00, 0.98
+Test run 2 | 01:00:19 up 1 min,  load average: 1.21, 0.39, 0.14  |  01:06:29 up 7 min,  load average: 2.45, 1.96, 0.96
+Test run 3 | 01:11:27 up 1 min,  load average: 1.15, 0.36, 0.12  |  01:17:33 up 7 min,  load average: 2.63, 2.01, 0.97
+-----------|----------------------------------------------------------------------------------------------------------------------------------
+  Average  |             1 min,  load average: 1.26, 0.41, 0.14  |              7 min,  load average: 2.52, 1.99, 0.97
+
+
+DMA transfers performance might be further improved with a latter patch
+by taking advantage of the asynchronous request capability of the MMC
+framework.
+
+Changes were rebased on top of linux master branch, built and tested
+successfully.
+
+The following changes since commit cd3de83:
+
+  Linux 3.16-rc4
+
+are available in the git repository at:
+
+  git://git.seketeli.net/~apelete/linux.git jz4740-mmc-dma
+
+Apelete Seketeli (1):
+  mmc: jz4740: add dma infrastructure for data transfers
+
+ drivers/mmc/host/jz4740_mmc.c |  174 +++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 166 insertions(+), 8 deletions(-)
+
 -- 
-1.8.3.2
+1.7.10.4
+
