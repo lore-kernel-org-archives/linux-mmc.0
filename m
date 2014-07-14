@@ -1,72 +1,64 @@
-From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Subject: RE: [PATCH] mmc: blk: add emmc cache flush in shutdown callback
-Date: Mon, 14 Jul 2014 11:09:08 +0000
-Message-ID: <0AA7DC03D52A654FA5AF208AE38A967D01D53990@shsmsx102.ccr.corp.intel.com>
-References: <1405330459-2335-1-git-send-email-yunpeng.gao@intel.com>
- <53C3A818.7030107@samsung.com>
+From: Chris Ball <chris@printf.net>
+Subject: Re: One bug of SDHCI driver
+Date: Mon, 14 Jul 2014 14:26:36 +0100
+Message-ID: <86zjgcjckz.fsf@void.printf.net>
+References: <53B249A4.2040404@linux.intel.com>
+	<53B57B23.4020607@linux.intel.com> <53B61403.7040602@samsung.com>
+	<53B968EB.60401@linux.intel.com> <53BC164E.4040900@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:14068 "EHLO mga02.intel.com"
+Received: from void.printf.net ([89.145.121.20]:36401 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754360AbaGNLJM convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Jul 2014 07:09:12 -0400
-In-Reply-To: <53C3A818.7030107@samsung.com>
-Content-Language: en-US
+	id S1754686AbaGNN0x (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Jul 2014 09:26:53 -0400
+In-Reply-To: <53BC164E.4040900@linux.intel.com> (Zhonghui Fu's message of
+	"Wed, 09 Jul 2014 00:03:26 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, ulf.hansson@linaro.org, tgih.jun@samsung.com, aaron.lu@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, jackey.shen@amd.com, gregkh@linuxfoundation.org
 
-Thanks a lot for the review and comments.
+Hi Zhonghui,
 
-This patch was derived from our old mmc driver code base, which was based on kernel 3.10 and did not implemented the mmc_shutdown() callback in mmc.c yet.
-So it added shutdown callback in drivers/mmc/card/block.c to fix data corruption issue observed at that time.
+On Tue, Jul 08 2014, Fu, Zhonghui wrote:
+> Why add "mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;" ?  How to fix this bug?
+>
+> Could you please give out some idea about this bug?
 
-Since flush eMMC cache in mmc_shutdown() callback is better than in mmc_blk_shutdown(), I think my patch is not needed for current upstream mmc driver any more.
-Please ignore it :-)
+Jaehoon already gave you a patch to fix this bug.  Here it is again in
+proper patch form.  Please can you test it and let us know whether it
+fixes the crash?  Thanks.
 
-Thanks.
 
-Regards,
-Yunpeng
+From: Chris Ball <chris@printf.net>
+Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
 
------Original Message-----
-From: Jaehoon Chung [mailto:jh80.chung@samsung.com] 
-Sent: Monday, July 14, 2014 5:51 PM
-To: Gao, Yunpeng; linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] mmc: blk: add emmc cache flush in shutdown callback
+781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
+bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
+the use of our own custom threaded IRQ handler, but left in an
+unconditional wake_up_process() on that handler at resume-time.
 
-Hi,
+Reported-by: Fu, Zhonghui <zhonghui.fu@linux.intel.com>
+[Patch suggested by Jaehoon Chung]
+Signed-off-by: Chris Ball <chris@printf.net>
+---
+ drivers/mmc/core/sdio.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-On 07/14/2014 06:34 PM, Yunpeng Gao wrote:
-> If eMMC Cache feature enabled, we'd better flush eMMC cache in the 
-> shutdown callback. Otherwise data corruption issue may be observed.
-
-I knew mmc_flush_cache() is called into mmc_shutdown() (driver/mmc/core/mmc.c) Which data corruption is occurred? Could you explain more?
-
-Best Regards,
-Jaehoon Chung 
-
-> 
-> Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
-> ---
->  drivers/mmc/card/block.c |    4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c index 
-> 452782b..8a4010e 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -2509,6 +2509,10 @@ static int _mmc_blk_suspend(struct mmc_card 
-> *card)  static void mmc_blk_shutdown(struct mmc_card *card)  {
->  	_mmc_blk_suspend(card);
-> +
-> +	mmc_claim_host(card->host);
-> +	mmc_flush_cache(card);
-> +	mmc_release_host(card->host);
->  }
->  
->  #ifdef CONFIG_PM
-> 
-
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index e636d9e..2a128e2 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -992,7 +992,8 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 		}
+ 	}
+ 
+-	if (!err && host->sdio_irqs)
++	if (!err && host->sdio_irqs &&
++	    !(host->quirks & MMC_CAP2_SDIO_IRQ_NOTHREAD))
+ 		wake_up_process(host->sdio_irq_thread);
+ 	mmc_release_host(host);
+ 
+-- 
+Chris Ball   <http://printf.net/>
