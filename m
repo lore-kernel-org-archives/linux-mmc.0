@@ -1,84 +1,99 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/6] mmc: sdhci-s3c: Fix local I/O clock gating
-Date: Mon, 14 Jul 2014 17:05:29 +0900
-Message-ID: <53C38F49.7050504@samsung.com>
-References: <1403618235-19353-1-git-send-email-t.figa@samsung.com>
- <1403618235-19353-2-git-send-email-t.figa@samsung.com>
+From: =?ISO-8859-15?Q?Luk=E1=A8_Czerner?= <lczerner@redhat.com>
+Subject: Re: [PATCH] mmc: Do not advertise secure discard if it is
+ blacklisted
+Date: Mon, 14 Jul 2014 10:10:37 +0200 (CEST)
+Message-ID: <alpine.LFD.2.00.1407141008180.13527@localhost.localdomain>
+References: <1403090287-10673-1-git-send-email-lczerner@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:9079 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750960AbaGNIFc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Jul 2014 04:05:32 -0400
-In-reply-to: <1403618235-19353-2-git-send-email-t.figa@samsung.com>
+Received: from mx1.redhat.com ([209.132.183.28]:48157 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750797AbaGNIKv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Jul 2014 04:10:51 -0400
+In-Reply-To: <1403090287-10673-1-git-send-email-lczerner@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tomasz Figa <t.figa@samsung.com>, linux-samsung-soc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Kukjin Kim <kgene.kim@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Tomasz Figa <tomasz.figa@gmail.com>, Ben Dooks <ben-linux@fluff.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, chris@printf.net
 
-Looks good to me.
+On Wed, 18 Jun 2014, Lukas Czerner wrote:
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-On 06/24/2014 10:57 PM, Tomasz Figa wrote:
-> For internal card detection mechanism it is required that the local I/O
-> clock is always running. However while current implementation accounts
-> for this, it does so incorrectly leading to race conditions and warnings
-> about unbalanced clock disables.
+> Date: Wed, 18 Jun 2014 13:18:07 +0200
+> From: Lukas Czerner <lczerner@redhat.com>
+> To: linux-mmc@vger.kernel.org
+> Cc: linux-fsdevel@vger.kernel.org, chris@printf.net,
+>     Lukas Czerner <lczerner@redhat.com>
+> Subject: [PATCH] mmc: Do not advertise secure discard if it is blacklisted
 > 
-> This patch fixes it by inverting the logic, which now increases local
-> I/O clock enable count when internal card detect is used, instead of
-> decreasing it otherwise.
+> Currently when the device secure discard implementation is
+> blacklisted (MMC_QUIRK_SEC_ERASE_TRIM_BROKEN quirk is set)
+> instead of secure discard we're going to do normal discard,
+> which is wrong.
 > 
-> Signed-off-by: Tomasz Figa <t.figa@samsung.com>
-> Cc: Ben Dooks <ben-linux@fluff.org>
-> Cc: Chris Ball <chris@printf.net>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
+> When the secure discard is known to be broken we should just
+> disallow it entirely and not advertise this functionality to
+> the user. Fix it.
+> 
+> Also move mmc_fixup_device() in from of mmc_blk_alloc() so we
+> can get quirks set before we attempt to set queue information.
+
+Where should I send it to get noticed ? It's sitting here for a
+month now.
+
+Thanks!
+-Lukas
+
+> 
+> Signed-off-by: Lukas Czerner <lczerner@redhat.com>
 > ---
->  drivers/mmc/host/sdhci-s3c.c | 17 ++++++++++-------
->  1 file changed, 10 insertions(+), 7 deletions(-)
+>  drivers/mmc/card/block.c | 6 +++---
+>  drivers/mmc/core/core.c  | 3 ++-
+>  2 files changed, 5 insertions(+), 4 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index fa5954a..1795e1f 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -487,8 +487,13 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
->  		goto err_pdata_io_clk;
->  	}
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 452782b..ede41f0 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2028,8 +2028,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>  		/* complete ongoing async transfer before issuing discard */
+>  		if (card->host->areq)
+>  			mmc_blk_issue_rw_rq(mq, NULL);
+> -		if (req->cmd_flags & REQ_SECURE &&
+> -			!(card->quirks & MMC_QUIRK_SEC_ERASE_TRIM_BROKEN))
+> +		if (req->cmd_flags & REQ_SECURE)
+>  			ret = mmc_blk_issue_secdiscard_rq(mq, req);
+>  		else
+>  			ret = mmc_blk_issue_discard_rq(mq, req);
+> @@ -2432,6 +2431,8 @@ static int mmc_blk_probe(struct mmc_card *card)
+>  	if (!(card->csd.cmdclass & CCC_BLOCK_READ))
+>  		return -ENODEV;
 >  
-> -	/* enable the local io clock and keep it running for the moment. */
-> -	clk_prepare_enable(sc->clk_io);
-> +	/*
-> +	 * Keep local I/O clock enabled for internal card detect pin
-> +	 * or runtime PM is disabled.
-> +	 */
-> +	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL
-> +	    || !IS_ENABLED(CONFIG_PM_RUNTIME))
-> +		clk_prepare_enable(sc->clk_io);
+> +	mmc_fixup_device(card, blk_fixups);
+> +
+>  	md = mmc_blk_alloc(card);
+>  	if (IS_ERR(md))
+>  		return PTR_ERR(md);
+> @@ -2446,7 +2447,6 @@ static int mmc_blk_probe(struct mmc_card *card)
+>  		goto out;
 >  
->  	for (clks = 0, ptr = 0; ptr < MAX_BUS_CLK; ptr++) {
->  		char name[14];
-> @@ -611,15 +616,13 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
->  		goto err_req_regs;
->  	}
+>  	mmc_set_drvdata(card, md);
+> -	mmc_fixup_device(card, blk_fixups);
 >  
-> -#ifdef CONFIG_PM_RUNTIME
-> -	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
-> -		clk_disable_unprepare(sc->clk_io);
-> -#endif
+>  	if (mmc_add_disk(md))
+>  		goto out;
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 7dc0c85..d03a080 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2102,7 +2102,8 @@ EXPORT_SYMBOL(mmc_can_sanitize);
+>  
+>  int mmc_can_secure_erase_trim(struct mmc_card *card)
+>  {
+> -	if (card->ext_csd.sec_feature_support & EXT_CSD_SEC_ER_EN)
+> +	if ((card->ext_csd.sec_feature_support & EXT_CSD_SEC_ER_EN) &&
+> +	    !(card->quirks & MMC_QUIRK_SEC_ERASE_TRIM_BROKEN))
+>  		return 1;
 >  	return 0;
->  
->   err_req_regs:
->   err_no_busclks:
-> -	clk_disable_unprepare(sc->clk_io);
-> +	if (pdata->cd_type == S3C_SDHCI_CD_INTERNAL
-> +	    || !IS_ENABLED(CONFIG_PM_RUNTIME))
-> +		clk_disable_unprepare(sc->clk_io);
->  
->   err_pdata_io_clk:
->  	sdhci_free_host(host);
+>  }
 > 
-
