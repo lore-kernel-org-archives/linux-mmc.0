@@ -1,122 +1,65 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: Do not advertise secure discard if it is blacklisted
-Date: Tue, 15 Jul 2014 07:48:29 +0900
-Message-ID: <53C45E3D.90600@samsung.com>
-References: <1403090287-10673-1-git-send-email-lczerner@redhat.com>
- <alpine.LFD.2.00.1407141008180.13527@localhost.localdomain>
+From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Subject: Re: One bug of SDHCI driver
+Date: Tue, 15 Jul 2014 10:54:53 +0800
+Message-ID: <53C497FD.2070000@linux.intel.com>
+References: <53B249A4.2040404@linux.intel.com>	<53B57B23.4020607@linux.intel.com> <53B61403.7040602@samsung.com>	<53B968EB.60401@linux.intel.com> <53BC164E.4040900@linux.intel.com> <86zjgcjckz.fsf@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-reply-to: <alpine.LFD.2.00.1407141008180.13527@localhost.localdomain>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: =?windows-1252?Q?Luk=E1=9A_Czerner?= <lczerner@redhat.com>, linux-mmc@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org, chris@printf.net, Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <86zjgcjckz.fsf@void.printf.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <chris@printf.net>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, ulf.hansson@linaro.org, tgih.jun@samsung.com, aaron.lu@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, jackey.shen@amd.com, gregkh@linuxfoundation.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi, Lukas.
 
-I think it's reasonable. And CC'd Ulf.
+Hi,
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+The data type of "host" is "struct mmc_host", and there is not "quirks" member in this structure.
 
-Best Regards,
-Jaehoon Chung
 
-On 07/14/2014 05:10 PM, Luk=E1=9A Czerner wrote:
-> On Wed, 18 Jun 2014, Lukas Czerner wrote:
->=20
->> Date: Wed, 18 Jun 2014 13:18:07 +0200
->> From: Lukas Czerner <lczerner@redhat.com>
->> To: linux-mmc@vger.kernel.org
->> Cc: linux-fsdevel@vger.kernel.org, chris@printf.net,
->>     Lukas Czerner <lczerner@redhat.com>
->> Subject: [PATCH] mmc: Do not advertise secure discard if it is black=
-listed
->>
->> Currently when the device secure discard implementation is
->> blacklisted (MMC_QUIRK_SEC_ERASE_TRIM_BROKEN quirk is set)
->> instead of secure discard we're going to do normal discard,
->> which is wrong.
->>
->> When the secure discard is known to be broken we should just
->> disallow it entirely and not advertise this functionality to
->> the user. Fix it.
->>
->> Also move mmc_fixup_device() in from of mmc_blk_alloc() so we
->> can get quirks set before we attempt to set queue information.
->=20
-> Where should I send it to get noticed ? It's sitting here for a
-> month now.
->=20
-> Thanks!
-> -Lukas
->=20
->>
->> Signed-off-by: Lukas Czerner <lczerner@redhat.com>
->> ---
->>  drivers/mmc/card/block.c | 6 +++---
->>  drivers/mmc/core/core.c  | 3 ++-
->>  2 files changed, 5 insertions(+), 4 deletions(-)
->>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index 452782b..ede41f0 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -2028,8 +2028,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *=
-mq, struct request *req)
->>  		/* complete ongoing async transfer before issuing discard */
->>  		if (card->host->areq)
->>  			mmc_blk_issue_rw_rq(mq, NULL);
->> -		if (req->cmd_flags & REQ_SECURE &&
->> -			!(card->quirks & MMC_QUIRK_SEC_ERASE_TRIM_BROKEN))
->> +		if (req->cmd_flags & REQ_SECURE)
->>  			ret =3D mmc_blk_issue_secdiscard_rq(mq, req);
->>  		else
->>  			ret =3D mmc_blk_issue_discard_rq(mq, req);
->> @@ -2432,6 +2431,8 @@ static int mmc_blk_probe(struct mmc_card *card=
-)
->>  	if (!(card->csd.cmdclass & CCC_BLOCK_READ))
->>  		return -ENODEV;
->> =20
->> +	mmc_fixup_device(card, blk_fixups);
->> +
->>  	md =3D mmc_blk_alloc(card);
->>  	if (IS_ERR(md))
->>  		return PTR_ERR(md);
->> @@ -2446,7 +2447,6 @@ static int mmc_blk_probe(struct mmc_card *card=
-)
->>  		goto out;
->> =20
->>  	mmc_set_drvdata(card, md);
->> -	mmc_fixup_device(card, blk_fixups);
->> =20
->>  	if (mmc_add_disk(md))
->>  		goto out;
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index 7dc0c85..d03a080 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -2102,7 +2102,8 @@ EXPORT_SYMBOL(mmc_can_sanitize);
->> =20
->>  int mmc_can_secure_erase_trim(struct mmc_card *card)
->>  {
->> -	if (card->ext_csd.sec_feature_support & EXT_CSD_SEC_ER_EN)
->> +	if ((card->ext_csd.sec_feature_support & EXT_CSD_SEC_ER_EN) &&
->> +	    !(card->quirks & MMC_QUIRK_SEC_ERASE_TRIM_BROKEN))
->>  		return 1;
->>  	return 0;
->>  }
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+Thanks,
+Zhonghui
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-fsdevel=
-" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 2014/7/14 21:26, Chris Ball wrote:
+> Hi Zhonghui,
+>
+> On Tue, Jul 08 2014, Fu, Zhonghui wrote:
+>> Why add "mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;" ?  How to fix this bug?
+>>
+>> Could you please give out some idea about this bug?
+> Jaehoon already gave you a patch to fix this bug.  Here it is again in
+> proper patch form.  Please can you test it and let us know whether it
+> fixes the crash?  Thanks.
+>
+>
+> From: Chris Ball <chris@printf.net>
+> Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
+>
+> 781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
+> bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
+> the use of our own custom threaded IRQ handler, but left in an
+> unconditional wake_up_process() on that handler at resume-time.
+>
+> Reported-by: Fu, Zhonghui <zhonghui.fu@linux.intel.com>
+> [Patch suggested by Jaehoon Chung]
+> Signed-off-by: Chris Ball <chris@printf.net>
+> ---
+>  drivers/mmc/core/sdio.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index e636d9e..2a128e2 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -992,7 +992,8 @@ static int mmc_sdio_resume(struct mmc_host *host)
+>  		}
+>  	}
+>  
+> -	if (!err && host->sdio_irqs)
+> +	if (!err && host->sdio_irqs &&
+> +	    !(host->quirks & MMC_CAP2_SDIO_IRQ_NOTHREAD))
+>  		wake_up_process(host->sdio_irq_thread);
+>  	mmc_release_host(host);
+>  
