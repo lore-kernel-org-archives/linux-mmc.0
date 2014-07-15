@@ -1,67 +1,57 @@
 From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Subject: [PATCH 01/11] mmc: sh_mmcif: Document DT bindings
-Date: Wed, 16 Jul 2014 00:45:11 +0200
-Message-ID: <1405464321-4723-2-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Subject: [PATCH 02/11] mmc: sh_mmcif: Fix DMA slave address configuration
+Date: Wed, 16 Jul 2014 00:45:12 +0200
+Message-ID: <1405464321-4723-3-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 References: <1405464321-4723-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:54048 "EHLO
+Received: from perceval.ideasonboard.com ([95.142.166.194]:54069 "EHLO
 	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751282AbaGOWpV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Jul 2014 18:45:21 -0400
+	with ESMTP id S1752963AbaGOWpX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Jul 2014 18:45:23 -0400
 In-Reply-To: <1405464321-4723-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-sh@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian.molton@codethink.co.uk>, devicetree@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian.molton@codethink.co.uk>
 
-The sh-mmcif driver implements DT support but the bindings are not
-documented. Document them.
+Commit e5a233cb647d749de2f188477c9a54b94d90477f ("mmc: sh_mmcif:
+Factorize DMA channel request and configuration code") incorrectly
+set the destination address for both slave channels instead of setting
+the source address for the receive channel. Fix that.
 
-Cc: devicetree@vger.kernel.org
 Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
 ---
- .../devicetree/bindings/mmc/renesas,mmcif.txt      | 32 ++++++++++++++++++++++
- 1 file changed, 32 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+ drivers/mmc/host/sh_mmcif.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
-new file mode 100644
-index 0000000..299081f
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
-@@ -0,0 +1,32 @@
-+* Renesas Multi Media Card Interface (MMCIF) Controller
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 656fbba..436d663 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -386,7 +386,7 @@ sh_mmcif_request_dma_one(struct sh_mmcif_host *host,
+ 			 struct sh_mmcif_plat_data *pdata,
+ 			 enum dma_transfer_direction direction)
+ {
+-	struct dma_slave_config cfg;
++	struct dma_slave_config cfg = { 0, };
+ 	struct dma_chan *chan;
+ 	unsigned int slave_id;
+ 	struct resource *res;
+@@ -417,8 +417,12 @@ sh_mmcif_request_dma_one(struct sh_mmcif_host *host,
+ 	/* In the OF case the driver will get the slave ID from the DT */
+ 	cfg.slave_id = slave_id;
+ 	cfg.direction = direction;
+-	cfg.dst_addr = res->start + MMCIF_CE_DATA;
+-	cfg.src_addr = 0;
 +
-+This file documents differences between the core properties in mmc.txt
-+and the properties used by the MMCIF device.
++	if (direction == DMA_DEV_TO_MEM)
++		cfg.src_addr = res->start + MMCIF_CE_DATA;
++	else
++		cfg.dst_addr = res->start + MMCIF_CE_DATA;
 +
-+
-+Required properties:
-+
-+- compatible: must contain one of the following
-+	- "renesas,mmcif-r8a7740" for the MMCIF found in r8a7740 SoCs
-+	- "renesas,mmcif-r8a7790" for the MMCIF found in r8a7790 SoCs
-+	- "renesas,mmcif-r8a7791" for the MMCIF found in r8a7791 SoCs
-+	- "renesas,sh-mmcif" for the generic MMCIF
-+
-+- clocks: reference to the functional clock
-+
-+- dmas: reference to the DMA channels, one per channel name listed in the
-+  dma-names property.
-+- dma-names: must contain "tx" for the transmit DMA channel and "rx" for the
-+  receive DMA channel.
-+
-+
-+Example: R8A7790 (R-Car H2) MMCIF0
-+
-+	mmcif0: mmc@ee200000 {
-+		compatible = "renesas,mmcif-r8a7790", "renesas,sh-mmcif";
-+		reg = <0 0xee200000 0 0x80>;
-+		interrupts = <0 169 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&mstp3_clks R8A7790_CLK_MMCIF0>;
-+		dmas = <&dmac0 0xd1>, <&dmac0 0xd2>;
-+		dma-names = "tx", "rx";
-+	};
+ 	ret = dmaengine_slave_config(chan, &cfg);
+ 	if (ret < 0) {
+ 		dma_release_channel(chan);
 -- 
 1.8.5.5
 
