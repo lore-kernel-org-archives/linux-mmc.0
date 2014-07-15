@@ -1,79 +1,79 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: sdhci_s3c_consider_clock scheduling while atomic - clk_round_rate
-Date: Tue, 15 Jul 2014 15:33:51 +0900
-Message-ID: <53C4CB4F.6070007@samsung.com>
-References: <CAD8Lp45QV4ZcfXA86hoseKfJLLV_BJ-g0UABnOGPkJW1pMXhFw@mail.gmail.com>
- <53A99EB5.6010907@samsung.com>
+From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Subject: [PATCH] mmc: sdhci-pci: remove PCI PM functions in suspend/resume
+ callback
+Date: Tue, 15 Jul 2014 17:28:05 +0800
+Message-ID: <20140715092805.GA27130@intel.com>
+Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <53A99EB5.6010907@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Tomasz Figa <t.figa@samsung.com>, Daniel Drake <drake@endlessm.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>
-Cc: linux-mmc@vger.kernel.org, ben-linux@fluff.org, Tomasz Figa <tomasz.figa@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Mike Turquette <mturquette@linaro.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:53745 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756689AbaGOJ3t (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 15 Jul 2014 05:29:49 -0400
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-Hi,
+It is not required (in fact it even is not recommended) that a PCI
+driver's suspend() callback save the standard configuration registers
+of the device, prepare it for waking up the system, or put it into a
+low-power state.  All of these operations can very well be taken
+care of by the PCI subsystem, without the driver's participation. Thus
+remove these PCI functions.
 
-It's also related with clock-gating.
-Mainline kernel is using the "clkgate-delay = 0" by default.
-If we use this value, Every request time should be gated/ungated...
-Then it may be faced the race-condition...In my experiment, it occasionally occurred the CRC error or other problem.
-And it's also degraded the performance since add the overhead.
-I'm using "clkgate-delay = 3 ~ 10".
+For the device which has wake up capability, use device_init_wakeup to
+init the wake up capability so that PCI core will help to enable the wakeup
+for it.
 
-Anyway, we need to fix this. I will consider this.
+Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+---
+ drivers/mmc/host/sdhci-pci.c |   23 ++++++-----------------
+ 1 file changed, 6 insertions(+), 17 deletions(-)
 
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 52c42fc..e536526 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -1130,18 +1130,13 @@ static int sdhci_pci_suspend(struct device *dev)
+ 			goto err_pci_suspend;
+ 	}
+ 
+-	pci_save_state(pdev);
+ 	if (pm_flags & MMC_PM_KEEP_POWER) {
+-		if (pm_flags & MMC_PM_WAKE_SDIO_IRQ) {
+-			pci_pme_active(pdev, true);
+-			pci_enable_wake(pdev, PCI_D3hot, 1);
+-		}
+-		pci_set_power_state(pdev, PCI_D3hot);
+-	} else {
+-		pci_enable_wake(pdev, PCI_D3hot, 0);
+-		pci_disable_device(pdev);
+-		pci_set_power_state(pdev, PCI_D3hot);
+-	}
++		if (pm_flags & MMC_PM_WAKE_SDIO_IRQ)
++			device_init_wakeup(dev, true);
++		else
++			device_init_wakeup(dev, false);
++	} else
++		device_init_wakeup(dev, false);
+ 
+ 	return 0;
+ 
+@@ -1162,12 +1157,6 @@ static int sdhci_pci_resume(struct device *dev)
+ 	if (!chip)
+ 		return 0;
+ 
+-	pci_set_power_state(pdev, PCI_D0);
+-	pci_restore_state(pdev);
+-	ret = pci_enable_device(pdev);
+-	if (ret)
+-		return ret;
+-
+ 	if (chip->fixes && chip->fixes->resume) {
+ 		ret = chip->fixes->resume(chip);
+ 		if (ret)
+-- 
+1.7.10.4
 
-Best Regards,
-Jaehoon Chung
-
-On 06/25/2014 12:52 AM, Tomasz Figa wrote:
-> Hi Daniel,
-> 
-> [adding Ulf, Chris and Mike to the discussion]
-> 
-> On 24.06.2014 11:48, Daniel Drake wrote:
->> sdhci_s3c_set_clock is called from sdhci_do_set_ios with interrupts
->> disabled, and this calls into sdhci_s3c_consider_clock().
->>
->> The patch "mmc: sdhci-s3c: Cache bus clock rates" addressed some
->> scheduling while atomic in this function, but there are more issues
->> here, seen while testing 3.16-rc2 on exynos4412:
->>
->> BUG: sleeping function called from invalid context at kernel/locking/mutex.c:103
->> in_atomic(): 1, irqs_disabled(): 128, pid: 75, name: mmcqd/0
->> Preemption disabled at:[<  (null)>]   (null)
->>
->> CPU: 0 PID: 75 Comm: mmcqd/0 Not tainted 3.16.0-rc2-00028-ge9fe7eb-dirty #77
->> [<c0016140>] (unwind_backtrace) from [<c0011e14>] (show_stack+0x10/0x14)
->> [<c0011e14>] (show_stack) from [<c05ce8a8>] (dump_stack+0x84/0xc4)
->> [<c05ce8a8>] (dump_stack) from [<c05d2de0>] (mutex_lock+0x1c/0x3c)
->> [<c05d2de0>] (mutex_lock) from [<c046214c>] (clk_prepare_lock+0x6c/0xf4)
->> [<c046214c>] (clk_prepare_lock) from [<c04625ac>] (clk_round_rate+0x10/0x2c)
->> [<c04625ac>] (clk_round_rate) from [<c0447628>] (sdhci_s3c_set_clock+0x4c/0x1e8)
->> [<c0447628>] (sdhci_s3c_set_clock) from [<c0447818>]
->> (sdhci_cmu_set_clock+0x54/0x140)
->> [<c0447818>] (sdhci_cmu_set_clock) from [<c0443a38>]
->> (sdhci_do_set_ios+0x138/0x58c)
->> [<c0443a38>] (sdhci_do_set_ios) from [<c0443864>] (sdhci_set_ios+0x28/0x34)
->>
->> clk_round_rate cannot be called here because it takes a mutex.
->>
->> sdhci_s3c_set_clock() also calls into clk_prepare_enable() which looks
->> like it could trigger this problem too.
-> 
-> Apparently this is related to generic sdhci code calling .set_clock()
-> under spin_lock_irqsave(). For reference, see sdhci_do_set_ios() and
-> sdhci_tasklet_finish().
-> 
-> Chris, Ulf, any suggestions?
-> 
-> Best regards,
-> Tomasz
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
