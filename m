@@ -1,79 +1,51 @@
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [PATCH] mmc: sdhci-pci: remove PCI PM functions in suspend/resume
- callback
-Date: Tue, 15 Jul 2014 17:28:05 +0800
-Message-ID: <20140715092805.GA27130@intel.com>
-Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: Re: mwifiex card reset
+Date: Tue, 15 Jul 2014 15:25:17 +0200
+Message-ID: <CALtMJEBWVgxbc+Kqna41EBSc8Rwn=jFO-3BNjNWibvp6EQvAUg@mail.gmail.com>
+References: <CALtMJEBWPM+75wxM2Mp5EX_o6NWtZUJdYRCv6psbvdUn4k295w@mail.gmail.com>
+	<20140628052220.GG10407@us.netrek.org>
+	<20140628072322.GC7410@atomide.com>
+	<CALtMJED5vfgkAhMBXKaDP6u9U9n41c-wziyTxt6e_7XTSxG3oQ@mail.gmail.com>
+	<20140630061912.GA2461@atomide.com>
+	<53B1BAC1.3090902@zonque.org>
+	<477F20668A386D41ADCC57781B1F70430FE5F37540@SC-VEXCH1.marvell.com>
+	<20140701065721.GM24891@us.netrek.org>
+	<CA+NduCAuRFTQneJUBiKP2Aeq2HCxe71yxg_iDDStkNvhzRg-Rg@mail.gmail.com>
+	<CAD=FV=Xi5B2=tssgQSgjeKtYVcw-x9pS6Ci580M6OfroPCb+RA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:53745 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756689AbaGOJ3t (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 15 Jul 2014 05:29:49 -0400
-Content-Disposition: inline
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=Xi5B2=tssgQSgjeKtYVcw-x9pS6Ci580M6OfroPCb+RA@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Yuvaraj Cd <yuvaraj.lkml@gmail.com>, Olof Johansson <olof@lixom.net>, James Cameron <quozl@laptop.org>, Bing Zhao <bzhao@marvell.com>, Daniel Mack <daniel@zonque.org>, Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Tomasz Figa <t.figa@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-It is not required (in fact it even is not recommended) that a PCI
-driver's suspend() callback save the standard configuration registers
-of the device, prepare it for waking up the system, or put it into a
-low-power state.  All of these operations can very well be taken
-care of by the PCI subsystem, without the driver's participation. Thus
-remove these PCI functions.
+2014-07-01 17:09 GMT+02:00 Doug Anderson <dianders@chromium.org>:
+> +Olof who posted the patch that Yuvaraj referenced.
+>
+> On Tue, Jul 1, 2014 at 5:20 AM, Yuvaraj Cd <yuvaraj.lkml@gmail.com> wrote:
+>> On Tue, Jul 1, 2014 at 12:27 PM, James Cameron <quozl@laptop.org> wrote:
+>>> On Mon, Jun 30, 2014 at 11:44:29PM -0700, Bing Zhao wrote:
+>>>> I may have missed something, but doesn't the MMC_POWER_OFF and
+>>>> MMC_POWER_ON|UP handling in controller driver help?
+>>>> Anyway the clocks/GPIOs/regulators are sort of platform
+>>>> dependent. Would it be better putting it in /arch/arm/mach-xxxxx/?
+>>>
+>>> Wouldn't device tree for mmc be better?
+>> I have come across same problem.Below is the thread in which more
+>> discussions happened on this.
+>>  http://patchwork.ozlabs.org/patch/312444/
+>> I am adding few more those who are interested in this solution.
+>
+> Thanks to Yuvaraj for referencing the old thread.
 
-For the device which has wake up capability, use device_init_wakeup to
-init the wake up capability so that PCI core will help to enable the wakeup
-for it.
+http://www.spinics.net/lists/linux-mmc/msg26564.html
 
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
----
- drivers/mmc/host/sdhci-pci.c |   23 ++++++-----------------
- 1 file changed, 6 insertions(+), 17 deletions(-)
+Quite a read indeed
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 52c42fc..e536526 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -1130,18 +1130,13 @@ static int sdhci_pci_suspend(struct device *dev)
- 			goto err_pci_suspend;
- 	}
- 
--	pci_save_state(pdev);
- 	if (pm_flags & MMC_PM_KEEP_POWER) {
--		if (pm_flags & MMC_PM_WAKE_SDIO_IRQ) {
--			pci_pme_active(pdev, true);
--			pci_enable_wake(pdev, PCI_D3hot, 1);
--		}
--		pci_set_power_state(pdev, PCI_D3hot);
--	} else {
--		pci_enable_wake(pdev, PCI_D3hot, 0);
--		pci_disable_device(pdev);
--		pci_set_power_state(pdev, PCI_D3hot);
--	}
-+		if (pm_flags & MMC_PM_WAKE_SDIO_IRQ)
-+			device_init_wakeup(dev, true);
-+		else
-+			device_init_wakeup(dev, false);
-+	} else
-+		device_init_wakeup(dev, false);
- 
- 	return 0;
- 
-@@ -1162,12 +1157,6 @@ static int sdhci_pci_resume(struct device *dev)
- 	if (!chip)
- 		return 0;
- 
--	pci_set_power_state(pdev, PCI_D0);
--	pci_restore_state(pdev);
--	ret = pci_enable_device(pdev);
--	if (ret)
--		return ret;
--
- 	if (chip->fixes && chip->fixes->resume) {
- 		ret = chip->fixes->resume(chip);
- 		if (ret)
--- 
-1.7.10.4
+Meanwhile I got a working prototype for omap_hsmmc/mwifiex based on this series:
+http://www.spinics.net/lists/linux-mmc/msg27228.html
 
+I will post my patches, once the FDT format is set in stone, and Ulf
+has had some time to work on v2 of his series.
