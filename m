@@ -1,51 +1,38 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: Re: mwifiex card reset
-Date: Tue, 15 Jul 2014 15:25:17 +0200
-Message-ID: <CALtMJEBWVgxbc+Kqna41EBSc8Rwn=jFO-3BNjNWibvp6EQvAUg@mail.gmail.com>
-References: <CALtMJEBWPM+75wxM2Mp5EX_o6NWtZUJdYRCv6psbvdUn4k295w@mail.gmail.com>
-	<20140628052220.GG10407@us.netrek.org>
-	<20140628072322.GC7410@atomide.com>
-	<CALtMJED5vfgkAhMBXKaDP6u9U9n41c-wziyTxt6e_7XTSxG3oQ@mail.gmail.com>
-	<20140630061912.GA2461@atomide.com>
-	<53B1BAC1.3090902@zonque.org>
-	<477F20668A386D41ADCC57781B1F70430FE5F37540@SC-VEXCH1.marvell.com>
-	<20140701065721.GM24891@us.netrek.org>
-	<CA+NduCAuRFTQneJUBiKP2Aeq2HCxe71yxg_iDDStkNvhzRg-Rg@mail.gmail.com>
-	<CAD=FV=Xi5B2=tssgQSgjeKtYVcw-x9pS6Ci580M6OfroPCb+RA@mail.gmail.com>
+From: Clemens Eisserer <linuxhippy@gmail.com>
+Subject: Re: No UHS support for O2 Micro, Inc. OZ600FJ0/OZ900FJ0/OZ600FJS?
+Date: Tue, 15 Jul 2014 20:14:52 +0200
+Message-ID: <CAFvQSYSaxWSSNo0_zAHFcOkpbeaJP9UOtmBSZnYYrbE6+ON9YQ@mail.gmail.com>
+References: <CAFvQSYQtVWOqjjn_3Tr6R2VfgKb-=z2sb39A0HowJPehYYagQw@mail.gmail.com>
+	<CAFvQSYS32yVA4-gLUzyfzZWbBqSBsGHEAUdA6DPwZnw6U2E0OQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=Xi5B2=tssgQSgjeKtYVcw-x9pS6Ci580M6OfroPCb+RA@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Yuvaraj Cd <yuvaraj.lkml@gmail.com>, Olof Johansson <olof@lixom.net>, James Cameron <quozl@laptop.org>, Bing Zhao <bzhao@marvell.com>, Daniel Mack <daniel@zonque.org>, Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Tomasz Figa <t.figa@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f173.google.com ([209.85.220.173]:52743 "EHLO
+	mail-vc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932704AbaGOSOx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Jul 2014 14:14:53 -0400
+Received: by mail-vc0-f173.google.com with SMTP id hy10so7108473vcb.4
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Jul 2014 11:14:52 -0700 (PDT)
+In-Reply-To: <CAFvQSYS32yVA4-gLUzyfzZWbBqSBsGHEAUdA6DPwZnw6U2E0OQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-2014-07-01 17:09 GMT+02:00 Doug Anderson <dianders@chromium.org>:
-> +Olof who posted the patch that Yuvaraj referenced.
->
-> On Tue, Jul 1, 2014 at 5:20 AM, Yuvaraj Cd <yuvaraj.lkml@gmail.com> wrote:
->> On Tue, Jul 1, 2014 at 12:27 PM, James Cameron <quozl@laptop.org> wrote:
->>> On Mon, Jun 30, 2014 at 11:44:29PM -0700, Bing Zhao wrote:
->>>> I may have missed something, but doesn't the MMC_POWER_OFF and
->>>> MMC_POWER_ON|UP handling in controller driver help?
->>>> Anyway the clocks/GPIOs/regulators are sort of platform
->>>> dependent. Would it be better putting it in /arch/arm/mach-xxxxx/?
->>>
->>> Wouldn't device tree for mmc be better?
->> I have come across same problem.Below is the thread in which more
->> discussions happened on this.
->>  http://patchwork.ozlabs.org/patch/312444/
->> I am adding few more those who are interested in this solution.
->
-> Thanks to Yuvaraj for referencing the old thread.
+Just a short follow-up:
 
-http://www.spinics.net/lists/linux-mmc/msg26564.html
+The card (Samsung SD Pro 16GB) the internal O2 card reader writes to
+sequentially at 4.2mb/s handles 14.4 mb/s in the raspberry pi (and
+about 30mb/s in the O2 + windows 7):
 
-Quite a read indeed
+Raspberry:
+> ce@raspberrypi:~# dd if=/dev/zero of=/dev/mmcblk0 conv=fsync bs=4M count=256
+> 1073741824 bytes (1.1 GB) copied, 74.4169 s, 14.4 MB/s
 
-Meanwhile I got a working prototype for omap_hsmmc/mwifiex based on this series:
-http://www.spinics.net/lists/linux-mmc/msg27228.html
+SandyBridge Core i7 + O2 pci card reader (Linux 3.15.4):
+> dd if=/dev/sda of=/dev/mmcblk0 conv=fsync bs=4M count=256
+> 1073741824 bytes (1.1 GB) copied, 258.515 s, 4.2 MB/s
 
-I will post my patches, once the FDT format is set in stone, and Ulf
-has had some time to work on v2 of his series.
+Any idea what I could do to find out why the internal card reader is
+so slow under Linux?
+
+Thank you in advance, Clemens
