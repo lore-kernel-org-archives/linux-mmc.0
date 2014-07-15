@@ -1,38 +1,59 @@
-From: Clemens Eisserer <linuxhippy@gmail.com>
-Subject: Re: No UHS support for O2 Micro, Inc. OZ600FJ0/OZ900FJ0/OZ600FJS?
-Date: Tue, 15 Jul 2014 20:14:52 +0200
-Message-ID: <CAFvQSYSaxWSSNo0_zAHFcOkpbeaJP9UOtmBSZnYYrbE6+ON9YQ@mail.gmail.com>
-References: <CAFvQSYQtVWOqjjn_3Tr6R2VfgKb-=z2sb39A0HowJPehYYagQw@mail.gmail.com>
-	<CAFvQSYS32yVA4-gLUzyfzZWbBqSBsGHEAUdA6DPwZnw6U2E0OQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+Subject: [PATCH 00/11] MMCIF and SDHI DMA support in DT for R-Car H2 and M2
+Date: Wed, 16 Jul 2014 00:45:10 +0200
+Message-ID: <1405464321-4723-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f173.google.com ([209.85.220.173]:52743 "EHLO
-	mail-vc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932704AbaGOSOx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Jul 2014 14:14:53 -0400
-Received: by mail-vc0-f173.google.com with SMTP id hy10so7108473vcb.4
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Jul 2014 11:14:52 -0700 (PDT)
-In-Reply-To: <CAFvQSYS32yVA4-gLUzyfzZWbBqSBsGHEAUdA6DPwZnw6U2E0OQ@mail.gmail.com>
+Received: from perceval.ideasonboard.com ([95.142.166.194]:54049 "EHLO
+	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752297AbaGOWpU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Jul 2014 18:45:20 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian.molton@codethink.co.uk>
 
-Just a short follow-up:
+Hello,
 
-The card (Samsung SD Pro 16GB) the internal O2 card reader writes to
-sequentially at 4.2mb/s handles 14.4 mb/s in the raspberry pi (and
-about 30mb/s in the O2 + windows 7):
+This patch series enables DMA support for the MMCIF and SDHI devices on R-Car
+H2 (r8a7790) and M2 (r8a7791) when booting through DT.
 
-Raspberry:
-> ce@raspberrypi:~# dd if=/dev/zero of=/dev/mmcblk0 conv=fsync bs=4M count=256
-> 1073741824 bytes (1.1 GB) copied, 74.4169 s, 14.4 MB/s
+The first patch documents DT bindings for the MMCIF device. DT support is
+implemented in the driver, but the bindings documentation was missing. Patches
+02/11 to 05/11 then fix DMA slave configuration in the MMCIF and SDHI drivers.
+Finally patches 06/11 to 11/11 enable DMA support in DT for H2 and M2.
 
-SandyBridge Core i7 + O2 pci card reader (Linux 3.15.4):
-> dd if=/dev/sda of=/dev/mmcblk0 conv=fsync bs=4M count=256
-> 1073741824 bytes (1.1 GB) copied, 258.515 s, 4.2 MB/s
+Patches 08/11 to 11/11 depend on the R-Car Gen2 DMAC driver posted to the
+dmaengine and linux-sh mailing lists as "[PATCH 0/7] R-Car Gen2 DMA Controller
+driver".
 
-Any idea what I could do to find out why the internal card reader is
-so slow under Linux?
+The first five patches (driver changes) should go through the DMA engine tree,
+while the last six patches (platform changes) should go through the Renesas
+tree. If the driver changes could make it to v3.17 merging the platform
+changes will be easier.
 
-Thank you in advance, Clemens
+Laurent Pinchart (11):
+  mmc: sh_mmcif: Document DT bindings
+  mmc: sh_mmcif: Fix DMA slave address configuration
+  mmc: sh_mmcif: Configure DMA slave bus width
+  mmc: tmio: Configure DMA slave bus width
+  mmc: tmio: Fix DMA source address
+  ARM: shmobile: r8a7790: Rename mmcif node to mmc
+  ARM: shmobile: r8a7791: Add MMCIF0 DT node
+  ARM: shmobile: r8a7790: Reference DMA channels in MMCIF DT nodes
+  ARM: shmobile: r8a7791: Reference DMA channels in MMCIF DT node
+  ARM: shmobile: r8a7790: Reference DMA channels in SDHI DT nodes
+  ARM: shmobile: r8a7791: Reference DMA channels in SDHI DT nodes
+
+ .../devicetree/bindings/mmc/renesas,mmcif.txt      | 32 ++++++++++++++++++++++
+ arch/arm/boot/dts/r8a7790.dtsi                     | 14 +++++++++-
+ arch/arm/boot/dts/r8a7791.dtsi                     | 17 ++++++++++++
+ drivers/mmc/host/sh_mmcif.c                        | 13 +++++++--
+ drivers/mmc/host/tmio_mmc_dma.c                    |  4 ++-
+ 5 files changed, 75 insertions(+), 5 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+
+-- 
+Regards,
+
+Laurent Pinchart
+
