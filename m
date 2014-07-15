@@ -1,59 +1,67 @@
 From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Subject: [PATCH 00/11] MMCIF and SDHI DMA support in DT for R-Car H2 and M2
-Date: Wed, 16 Jul 2014 00:45:10 +0200
-Message-ID: <1405464321-4723-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Subject: [PATCH 01/11] mmc: sh_mmcif: Document DT bindings
+Date: Wed, 16 Jul 2014 00:45:11 +0200
+Message-ID: <1405464321-4723-2-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+References: <1405464321-4723-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:54049 "EHLO
+Received: from perceval.ideasonboard.com ([95.142.166.194]:54048 "EHLO
 	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752297AbaGOWpU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Jul 2014 18:45:20 -0400
+	with ESMTP id S1751282AbaGOWpV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Jul 2014 18:45:21 -0400
+In-Reply-To: <1405464321-4723-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-sh@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian.molton@codethink.co.uk>
+Cc: linux-mmc@vger.kernel.org, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian.molton@codethink.co.uk>, devicetree@vger.kernel.org
 
-Hello,
+The sh-mmcif driver implements DT support but the bindings are not
+documented. Document them.
 
-This patch series enables DMA support for the MMCIF and SDHI devices on R-Car
-H2 (r8a7790) and M2 (r8a7791) when booting through DT.
-
-The first patch documents DT bindings for the MMCIF device. DT support is
-implemented in the driver, but the bindings documentation was missing. Patches
-02/11 to 05/11 then fix DMA slave configuration in the MMCIF and SDHI drivers.
-Finally patches 06/11 to 11/11 enable DMA support in DT for H2 and M2.
-
-Patches 08/11 to 11/11 depend on the R-Car Gen2 DMAC driver posted to the
-dmaengine and linux-sh mailing lists as "[PATCH 0/7] R-Car Gen2 DMA Controller
-driver".
-
-The first five patches (driver changes) should go through the DMA engine tree,
-while the last six patches (platform changes) should go through the Renesas
-tree. If the driver changes could make it to v3.17 merging the platform
-changes will be easier.
-
-Laurent Pinchart (11):
-  mmc: sh_mmcif: Document DT bindings
-  mmc: sh_mmcif: Fix DMA slave address configuration
-  mmc: sh_mmcif: Configure DMA slave bus width
-  mmc: tmio: Configure DMA slave bus width
-  mmc: tmio: Fix DMA source address
-  ARM: shmobile: r8a7790: Rename mmcif node to mmc
-  ARM: shmobile: r8a7791: Add MMCIF0 DT node
-  ARM: shmobile: r8a7790: Reference DMA channels in MMCIF DT nodes
-  ARM: shmobile: r8a7791: Reference DMA channels in MMCIF DT node
-  ARM: shmobile: r8a7790: Reference DMA channels in SDHI DT nodes
-  ARM: shmobile: r8a7791: Reference DMA channels in SDHI DT nodes
-
+Cc: devicetree@vger.kernel.org
+Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+---
  .../devicetree/bindings/mmc/renesas,mmcif.txt      | 32 ++++++++++++++++++++++
- arch/arm/boot/dts/r8a7790.dtsi                     | 14 +++++++++-
- arch/arm/boot/dts/r8a7791.dtsi                     | 17 ++++++++++++
- drivers/mmc/host/sh_mmcif.c                        | 13 +++++++--
- drivers/mmc/host/tmio_mmc_dma.c                    |  4 ++-
- 5 files changed, 75 insertions(+), 5 deletions(-)
+ 1 file changed, 32 insertions(+)
  create mode 100644 Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
 
+diff --git a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+new file mode 100644
+index 0000000..299081f
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+@@ -0,0 +1,32 @@
++* Renesas Multi Media Card Interface (MMCIF) Controller
++
++This file documents differences between the core properties in mmc.txt
++and the properties used by the MMCIF device.
++
++
++Required properties:
++
++- compatible: must contain one of the following
++	- "renesas,mmcif-r8a7740" for the MMCIF found in r8a7740 SoCs
++	- "renesas,mmcif-r8a7790" for the MMCIF found in r8a7790 SoCs
++	- "renesas,mmcif-r8a7791" for the MMCIF found in r8a7791 SoCs
++	- "renesas,sh-mmcif" for the generic MMCIF
++
++- clocks: reference to the functional clock
++
++- dmas: reference to the DMA channels, one per channel name listed in the
++  dma-names property.
++- dma-names: must contain "tx" for the transmit DMA channel and "rx" for the
++  receive DMA channel.
++
++
++Example: R8A7790 (R-Car H2) MMCIF0
++
++	mmcif0: mmc@ee200000 {
++		compatible = "renesas,mmcif-r8a7790", "renesas,sh-mmcif";
++		reg = <0 0xee200000 0 0x80>;
++		interrupts = <0 169 IRQ_TYPE_LEVEL_HIGH>;
++		clocks = <&mstp3_clks R8A7790_CLK_MMCIF0>;
++		dmas = <&dmac0 0xd1>, <&dmac0 0xd2>;
++		dma-names = "tx", "rx";
++	};
 -- 
-Regards,
-
-Laurent Pinchart
+1.8.5.5
 
