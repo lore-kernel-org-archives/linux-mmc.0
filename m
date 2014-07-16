@@ -1,108 +1,45 @@
-From: Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCHv5 3/5] ARM: dts: socfpga: unuse the slot-node and
- deprecated the supports-highspeed for dw-mmc
-Date: Wed, 16 Jul 2014 16:06:09 -0500
-Message-ID: <1405544769.6107.1.camel@linux-builds1>
-References: <1405050587-5577-1-git-send-email-jh80.chung@samsung.com>
-	 <1405050587-5577-4-git-send-email-jh80.chung@samsung.com>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: char interface to sdio, chdio.c
+Date: Wed, 16 Jul 2014 16:08:11 -0700
+Message-ID: <53C705DB.3040700@codeaurora.org>
+References: <20140716032655.GB30412@kroah.com> <53C6C2C5.1050804@codeaurora.org> <20140716184409.GB10633@kroah.com> <53C6D4B6.3030506@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1405050587-5577-4-git-send-email-jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.codeaurora.org ([198.145.11.231]:48649 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752261AbaGPXIN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jul 2014 19:08:13 -0400
+In-Reply-To: <53C6D4B6.3030506@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Greg KH <greg@kroah.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Alexander Kolesnikov <akolesni@codeaurora.org>, Konstantin Dorfman <kdorfman@codeaurora.org>
 
-On Fri, 2014-07-11 at 12:49 +0900, Jaehoon Chung wrote:
-> dw-mmc controller can support multiple slots.
-> But, there are no use-cases anywhere. So we don't need to support the
-> slot-node for dw-mmc controller.
-> And "supports-highspeed" property in dw-mmc is deprecated.
-> "supports-highspeed" property can be replaced to "cap-sd/mmc-highspeed".
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-> Reviewed-by: Tushar Behera <trblinux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> Reviewed-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Acked-by: Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-> ---
->  arch/arm/boot/dts/socfpga_arria5.dtsi   |    9 +++------
->  arch/arm/boot/dts/socfpga_cyclone5.dtsi |    9 +++------
->  arch/arm/boot/dts/socfpga_vt.dts        |    9 +++------
->  3 files changed, 9 insertions(+), 18 deletions(-)
-> 
-> diff --git a/arch/arm/boot/dts/socfpga_arria5.dtsi b/arch/arm/boot/dts/socfpga_arria5.dtsi
-> index 12d1c2c..468fc4c 100644
-> --- a/arch/arm/boot/dts/socfpga_arria5.dtsi
-> +++ b/arch/arm/boot/dts/socfpga_arria5.dtsi
-> @@ -29,13 +29,10 @@
->  
->  		dwmmc0@ff704000 {
->  			num-slots = <1>;
-> -			supports-highspeed;
->  			broken-cd;
-> -
-> -			slot@0 {
-> -				reg = <0>;
-> -				bus-width = <4>;
-> -			};
-> +			bus-width = <4>;
-> +			cap-mmc-highspeed;
-> +			cap-sd-highspeed;
->  		};
->  
->  		sysmgr@ffd08000 {
-> diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-> index bf51182..1ee03c4 100644
-> --- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-> +++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-> @@ -30,13 +30,10 @@
->  
->  		dwmmc0@ff704000 {
->  			num-slots = <1>;
-> -			supports-highspeed;
->  			broken-cd;
-> -
-> -			slot@0 {
-> -				reg = <0>;
-> -				bus-width = <4>;
-> -			};
-> +			bus-width = <4>;
-> +			cap-mmc-highspeed;
-> +			cap-sd-highspeed;
->  		};
->  
->  		ethernet@ff702000 {
-> diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
-> index 09792b4..f9345e0 100644
-> --- a/arch/arm/boot/dts/socfpga_vt.dts
-> +++ b/arch/arm/boot/dts/socfpga_vt.dts
-> @@ -43,13 +43,10 @@
->  
->  		dwmmc0@ff704000 {
->  			num-slots = <1>;
-> -			supports-highspeed;
->  			broken-cd;
-> -
-> -			slot@0 {
-> -				reg = <0>;
-> -				bus-width = <4>;
-> -			};
-> +			bus-width = <4>;
-> +			cap-mmc-highspeed;
-> +			cap-sd-highspeed;
->  		};
->  
->  		ethernet@ff700000 {
+On 07/16/14 12:38, Stephen Boyd wrote:
+> On 07/16/14 11:44, Greg KH wrote:
+>> My specific question is why 2 different interfaces?
+> Ok. It definitely looks odd to support set/get of the VDD with sysfs and
+> ioctl interfaces. I'm just guessing, but I suspect it's a permissions
+> thing given that the patch that introduces the VDD stuff also updates
+> the permissions of the device node. Of course, the commit text only
+> mentions an ioctl, nothing about sysfs. The only other sysfs stuff seems
+> to be module parameters to change the vendor ids.
+>
+> I'll have to go repo diving to figure out if the sysfs interface was
+> ever used. Maybe Alex or Konstantin can respond before I have to do that.
+>
+>
 
-Acked-by: Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>
+I couldn't find any usage of the sysfs interface. The only thing I see
+used is the host_name field when the module is inserted, if that even
+happens at all (I'm not sure because it's behind some ifdef that may or
+may not be defined). Sorry this doesn't explain why there are two
+different interfaces for the VDD stuff. Hopefully Alex or Konstantin can
+help.
 
-Thanks,
-Dinh
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+hosted by The Linux Foundation
 
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
