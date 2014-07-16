@@ -1,85 +1,101 @@
-From: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Subject: [PATCH] mmc: sdhci-pxav3: Use devm_* managed helpers
-Date: Wed, 16 Jul 2014 11:53:42 +0200
-Message-ID: <1405504422-4509-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-References: <1405497009-20338-1-git-send-email-wangxfdu@gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 2/8] mmc: sdhci: host: add new f_sdh30
+Date: Wed, 16 Jul 2014 12:10:07 +0200
+Message-ID: <5526913.sJ4RMkanr6@wuerfel>
+References: <1405232971-4607-1-git-send-email-mollie.wu@linaro.org> <7710458.qT0KZ5qsA6@wuerfel> <830AC58E49A426478AC39824BC0FA915D8B8FF0609@fmpitwmsex01.fmpi.sea.css.fujitsu.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from perceval.ideasonboard.com ([95.142.166.194]:57192 "EHLO
-	perceval.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757535AbaGPJxk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jul 2014 05:53:40 -0400
-In-Reply-To: <1405497009-20338-1-git-send-email-wangxfdu@gmail.com>
+Received: from mout.kundenserver.de ([212.227.17.13]:57736 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753248AbaGPKK4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jul 2014 06:10:56 -0400
+In-Reply-To: <830AC58E49A426478AC39824BC0FA915D8B8FF0609@fmpitwmsex01.fmpi.sea.css.fujitsu.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Xiang Wang <wangx@marvell.com>
+To: linux-arm-kernel@lists.infradead.org
+Cc: "Vincent. Yang" <Vincent.Yang@tw.fujitsu.com>, "mark.rutland@arm.com" <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Mollie Wu <mollie.wu@linaro.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "anton@enomsg.org" <anton@enomsg.org>, "pawel.moll@arm.com" <pawel.moll@arm.com>, Tetsuya Takinishi <t.takinishi@jp.fujitsu.com>, "patches@linaro.org" <patches@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, "robh+dt@kernel.org" <robh+dt@kernel.org>, "jaswinder.singh@linaro.org" <jaswinder.singh@linaro.org>, "andy.green@linaro.org" <andy.green@linaro.org>, "olof@lixom.net" <olof@lixom.net>
 
-This simplifies probe error and remove code paths.
+On Wednesday 16 July 2014 17:35:41 Vincent. Yang wrote:
 
-Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
----
- drivers/mmc/host/sdhci-pxav3.c | 12 +++---------
- 1 file changed, 3 insertions(+), 9 deletions(-)
+> >
+> >> +unsigned int sdhci_f_sdh30_get_min_clock(struct sdhci_host *host)
+> >> +{
+> >> +     return F_SDH30_MIN_CLOCK;
+> >> +}
+> >> +
+> >> +void sdhci_f_sdh30_reset(struct sdhci_host *host, u8 mask)
+> >> +{
+> >> +     struct f_sdhost_priv *priv = sdhci_priv(host);
+> >> +
+> >> +     if (gpio_is_valid(priv->gpio_select_1v8))
+> >> +             gpio_direction_output(priv->gpio_select_1v8, 1);
+> >> +
+> >> +     if (sdhci_readw(host, SDHCI_CLOCK_CONTROL) == 0) {
+> >> +             sdhci_writew(host, 0xBC01, SDHCI_CLOCK_CONTROL);
+> >> +             mmiowb();
+> >> +     }
+> >
+> >Can you explain the mmiowb call here?
+> 
+> This came from the original 3.0 based driver. It's trying to be a
+> write memory barrier. It wants to ensure the clock control change
+> actually happened before the following code.
+> I'll change it to a regular wmb in next version.
 
-This patch applies on top of Xiang Wang's " mmc: sdhci-pxav3: fix error
-handling of sdhci_add_host" patch.
+Note that with 'readw'/writew', you shouldn't need any extra barriers.
+If sdhci_writew() is readw_relaxed(), wmb() is the correct barrier.
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 19b7c8a..e90a188 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -288,15 +288,13 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 	int ret;
- 	struct clk *clk;
- 
--	pxa = kzalloc(sizeof(struct sdhci_pxa), GFP_KERNEL);
-+	pxa = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_pxa), GFP_KERNEL);
- 	if (!pxa)
- 		return -ENOMEM;
- 
- 	host = sdhci_pltfm_init(pdev, &sdhci_pxav3_pdata, 0);
--	if (IS_ERR(host)) {
--		kfree(pxa);
-+	if (IS_ERR(host))
- 		return PTR_ERR(host);
--	}
- 
- 	if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
- 		ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
-@@ -308,7 +306,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 	pltfm_host = sdhci_priv(host);
- 	pltfm_host->priv = pxa;
- 
--	clk = clk_get(dev, NULL);
-+	clk = devm_clk_get(dev, NULL);
- 	if (IS_ERR(clk)) {
- 		dev_err(dev, "failed to get io clock\n");
- 		ret = PTR_ERR(clk);
-@@ -389,11 +387,9 @@ err_add_host:
- err_of_parse:
- err_cd_req:
- 	clk_disable_unprepare(clk);
--	clk_put(clk);
- err_clk_get:
- err_mbus_win:
- 	sdhci_pltfm_free(pdev);
--	kfree(pxa);
- 	return ret;
- }
- 
-@@ -408,10 +404,8 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
- 	pm_runtime_disable(&pdev->dev);
- 
- 	clk_disable_unprepare(pltfm_host->clk);
--	clk_put(pltfm_host->clk);
- 
- 	sdhci_pltfm_free(pdev);
--	kfree(pxa);
- 
- 	return 0;
- }
--- 
-Regards,
+> >> +
+> >> +     if (!of_property_read_u32(pdev->dev.of_node, "bus-width", &bus_width))
+> >{
+> >> +             switch (bus_width) {
+> >> +             case 8:
+> >> +                     dev_info(dev, "Applying 8 bit bus width\n");
+> >> +                     host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+> >> +                     break;
+> >> +             case 4:
+> >> +                     dev_info(dev, "Applying 4 bit bus width\n");
+> >> +                     host->mmc->caps |= MMC_CAP_4_BIT_DATA;
+> >> +                     break;
+> >> +             case 1:
+> >> +             default:
+> >> +                     dev_err(dev, "Invalid bus width: %u\n", bus_width);
+> >> +                     break;
+> >> +             }
+> >> +     }
+> >
+> >This should probably be done in generic sdhci code somewhere. How about
+> >adding it to sdhci_get_of_property instead_
+> 
+> I should use generic mmc_of_parse for it. I'll update it in next version.
 
-Laurent Pinchart
+Ah right, I thought we had this in common code already but couldn't find
+it. Using mmc_of_parse() is definitely the correct solution here.
 
+> >> +     priv->clk_sd4 = clk_get(&pdev->dev, "sd_sd4clk");
+> >> +     if (!IS_ERR(priv->clk_sd4)) {
+> >> +             ret = clk_prepare_enable(priv->clk_sd4);
+> >> +             if (ret < 0) {
+> >> +                     dev_err(dev, "Failed to enable sd4 clock: %d\n", ret);
+> >> +                     goto err_clk1;
+> >> +             }
+> >> +     }
+> >> +     priv->clk_b = clk_get(&pdev->dev, "sd_bclk");
+> >> +     if (!IS_ERR(priv->clk_b)) {
+> >> +             ret = clk_prepare_enable(priv->clk_b);
+> >> +             if (ret < 0) {
+> >> +                     dev_err(dev, "Failed to enable clk_b clock: %d\n", ret);
+> >> +                     goto err_clk2;
+> >> +             }
+> >> +     }
+> >
+> >Please pick clock names that match what some of the other drivers use.
+> 
+> I'll use "iface" and "core" for clock names because they match what used
+> in sdhci-msm driver.
+
+Ok, makes sense.
+
+	Arnd
