@@ -1,813 +1,114 @@
 From: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
-Subject: [RFC PATCH 1/1 v8]mmc: Support-FFU-for-eMMC-v5.0
-Date: Wed, 16 Jul 2014 15:47:33 +0000
-Message-ID: <FDD07FEB422EF948A392FDC201AEEAE64B934609@SACMBXIP01.sdcorp.global.sandisk.com>
+Subject: RE: [RFC PATCH 1/1 v7]mmc: Support-FFU-for-eMMC-v5.0
+Date: Wed, 16 Jul 2014 15:54:49 +0000
+Message-ID: <FDD07FEB422EF948A392FDC201AEEAE64B93463F@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <FDD07FEB422EF948A392FDC201AEEAE648AFA7EE@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CANEJEGu9PYi5DxuEWBwEHjUqWt2J-sEDZMKLwvZTUBdUnK=7XA@mail.gmail.com>
+ <CANEJEGs2dAA0DSZfwYcV8nZn4Z1+MqAa0bJZocTZT5zjXe_dDQ@mail.gmail.com>
+ <868uodnch6.fsf@void.printf.net>
+ <CAC1bqKjbPqoyH1D1UYQ35trrPzQboYfkC+7tdkFFBYSijV_Oyw@mail.gmail.com>
+ <FDD07FEB422EF948A392FDC201AEEAE64B8EC655@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAMHSBOUOmbmxERbF-QMc05aK_niaB72h2ACPO0Ti-tu60CxFHA@mail.gmail.com>
+ <CAMHSBOVN4O91nwuv8J_dw1XYsbR9u-Z_kZKzWeUPoq6Q1DC8ww@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1blp0186.outbound.protection.outlook.com ([207.46.163.186]:40982
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+Received: from mail-by2lp0235.outbound.protection.outlook.com ([207.46.163.235]:8491
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S965490AbaGPPrk convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jul 2014 11:47:40 -0400
+	id S932974AbaGPPy4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 16 Jul 2014 11:54:56 -0400
+In-Reply-To: <CAMHSBOVN4O91nwuv8J_dw1XYsbR9u-Z_kZKzWeUPoq6Q1DC8ww@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "'cjb@laptop.org'" <cjb@laptop.org>
-Cc: 'Grant Grundler' <grundler@chromium.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
+To: Gwendal Grignou <gwendal@google.com>, Gwendal Grignou <gwendal@chromium.org>
+Cc: Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>, Chris Ball <chris@printf.net>, Grant Grundler <grundler@chromium.org>, "cjb@laptop.org" <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Olof Johansson <olofj@chromium.org>, Puthikorn Voravootivat <puthik@google.com>
 
-The Field Firmware Update (FFU) feature is new for eMMC 5.0 spec (Jedec: JESD84-B50.pdf)
-  http://www.jedec.org/standards-documents/technology-focus-areas/flash-memory-ssds-ufs-emmc/e-mmc
-  
-An ioctl has been added to provide the new firmware image's file name to the  mmc driver and udev is then used to retrieve its data.
-
-Two new ioctls have been added:
-1. FFU download firmware - transfer the new firmware data from user space to the eMMC device 2. FFU install - initializes the new firmware update
-
-
-Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
-Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
-
----
-V8:
-- Modified according to Gwendal Grignou comments and patch:
-   [PATCH] Fix on top of sandisk patches
- 
-V7:
-- fixed mangled white space
-
-V5:
-- provides udev (request_firmware) implementation as advised in patch
-v2 comments.
-
-diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig index 5562308..19ba729 100644
---- a/drivers/mmc/card/Kconfig
-+++ b/drivers/mmc/card/Kconfig
-@@ -68,3 +68,11 @@ config MMC_TEST
- 
- 	  This driver is only of interest to those developing or
- 	  testing a host driver. Most people should say N here.
-+
-+config MMC_FFU
-+	bool "FFU SUPPORT"
-+	depends on MMC != n
-+	help
-+	  This is an option to run firmware update on eMMC 5.0.
-+	  Field firmware updates (FFU) enables features enhancment
-+	  in the field.
-diff --git a/drivers/mmc/card/Makefile b/drivers/mmc/card/Makefile index c73b406..1e9223b 100644
---- a/drivers/mmc/card/Makefile
-+++ b/drivers/mmc/card/Makefile
-@@ -8,3 +8,4 @@ obj-$(CONFIG_MMC_TEST)		+= mmc_test.o
- 
- obj-$(CONFIG_SDIO_UART)		+= sdio_uart.o
- 
-+obj-$(CONFIG_MMC_FFU)		+= ffu.o
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c index 7b5424f..3ed900b 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -41,6 +41,7 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/sd.h>
-+#include <linux/mmc/ffu.h>
- 
- #include <asm/uaccess.h>
- 
-@@ -523,8 +524,18 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 
- 	mrq.cmd = &cmd;
- 
-+	if (cmd.opcode == MMC_FFU_DOWNLOAD_OP) {
-+			err = mmc_ffu_download(card, idata->buf);
-+			goto cmd_done;
-+		}
-+
- 	mmc_get_card(card);
- 
-+	if (cmd.opcode == MMC_FFU_INSTALL_OP) {
-+		err = mmc_ffu_install(card);
-+		goto cmd_rel_host;
-+	}
-+
- 	err = mmc_blk_part_switch(card, md);
- 	if (err)
- 		goto cmd_rel_host;
-diff --git a/drivers/mmc/card/ffu.c b/drivers/mmc/card/ffu.c new file mode 100644 index 0000000..783673e
---- /dev/null
-+++ b/drivers/mmc/card/ffu.c
-@@ -0,0 +1,607 @@
-+/*
-+ * *  ffu.c
-+ *
-+ *  Copyright 2007-2008 Pierre Ossman
-+ *
-+ *  Modified by SanDisk Corp., Copyright (c) 2013 SanDisk Corp.
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or 
-+(at
-+ * your option) any later version.
-+ *
-+ * This program includes bug.h, card.h, host.h, mmc.h, scatterlist.h,
-+ * slab.h, ffu.h & swap.h header files
-+ * The original, unmodified version of this program - the mmc_test.c
-+ * file - is obtained under the GPL v2.0 license that is available via
-+ * http://www.gnu.org/licenses/,
-+ * or http://www.opensource.org/licenses/gpl-2.0.php
-+*/
-+
-+#include <linux/bug.h>
-+#include <linux/errno.h>
-+#include <linux/mmc/card.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/scatterlist.h>
-+#include <linux/slab.h>
-+#include <linux/swap.h>
-+#include <linux/mmc/ffu.h>
-+#include <linux/firmware.h>
-+
-+/**
-+ * struct mmc_ffu_pages - pages allocated by 'alloc_pages()'.
-+ * @page: first page in the allocation
-+ * @order: order of the number of pages allocated  */ struct 
-+mmc_ffu_pages {
-+	struct page *page;
-+	unsigned int order;
-+};
-+
-+/**
-+ * struct mmc_ffu_mem - allocated memory.
-+ * @arr: array of allocations
-+ * @cnt: number of allocations
-+ */
-+struct mmc_ffu_mem {
-+	struct mmc_ffu_pages *arr;
-+	unsigned int cnt;
-+};
-+
-+struct mmc_ffu_area {
-+	unsigned long max_sz;
-+	unsigned int max_tfr;
-+	unsigned int max_segs;
-+	unsigned int max_seg_sz;
-+	unsigned int blocks;
-+	unsigned int sg_len;
-+	struct mmc_ffu_mem *mem;
-+	struct scatterlist *sg;
-+};
-+
-+static void mmc_ffu_prepare_mrq(struct mmc_card *card,
-+	struct mmc_request *mrq, struct scatterlist *sg, unsigned int sg_len,
-+	u32 arg, unsigned int blocks, unsigned int blksz) {
-+	BUG_ON(!mrq || !mrq->cmd || !mrq->data || !mrq->stop);
-+
-+	if (blocks > 1)
-+		mrq->cmd->opcode = MMC_WRITE_MULTIPLE_BLOCK;
-+	else
-+		mrq->cmd->opcode = MMC_WRITE_BLOCK;
-+
-+	mrq->cmd->arg = arg;
-+	if (!mmc_card_blockaddr(card))
-+		mrq->cmd->arg <<= 9;
-+
-+	mrq->cmd->flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-+	if (blocks == 1) {
-+		mrq->stop = NULL;
-+	} else {
-+		mrq->stop->opcode = MMC_STOP_TRANSMISSION;
-+		mrq->stop->arg = 0;
-+		mrq->stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
-+	}
-+
-+	mrq->data->blksz = blksz;
-+	mrq->data->blocks = blocks;
-+	mrq->data->flags = MMC_DATA_WRITE;
-+	mrq->data->sg = sg;
-+	mrq->data->sg_len = sg_len;
-+
-+	mmc_set_data_timeout(mrq->data, card); }
-+
-+/*
-+ * Checks that a normal transfer didn't have any errors  */ static int 
-+mmc_ffu_check_result(struct mmc_request *mrq) {
-+	BUG_ON(!mrq || !mrq->cmd || !mrq->data);
-+
-+	if (mrq->cmd->error != 0)
-+		return -EINVAL;
-+
-+	if (mrq->data->error != 0)
-+		return -EINVAL;
-+
-+	if (mrq->stop != NULL && mrq->stop->error != 0)
-+		return -1;
-+
-+	if (mrq->data->bytes_xfered != (mrq->data->blocks * mrq->data->blksz))
-+		return -EINVAL;
-+
-+	return 0;
-+}
-+
-+static int mmc_ffu_busy(struct mmc_command *cmd) {
-+	return !(cmd->resp[0] & R1_READY_FOR_DATA) ||
-+		(R1_CURRENT_STATE(cmd->resp[0]) == R1_STATE_PRG); }
-+
-+static int mmc_ffu_wait_busy(struct mmc_card *card) {
-+	int ret, busy = 0;
-+	struct mmc_command cmd = {0};
-+
-+	memset(&cmd, 0, sizeof(struct mmc_command));
-+	cmd.opcode = MMC_SEND_STATUS;
-+	cmd.arg = card->rca << 16;
-+	cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
-+
-+	do {
-+		ret = mmc_wait_for_cmd(card->host, &cmd, 0);
-+		if (ret)
-+			break;
-+
-+		if (!busy && mmc_ffu_busy(&cmd)) {
-+			busy = 1;
-+			if (card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) {
-+				pr_warn("%s: Warning: Host did not "
-+					"wait for busy state to end.\n",
-+					mmc_hostname(card->host));
-+			}
-+		}
-+
-+	} while (mmc_ffu_busy(&cmd));
-+
-+	return ret;
-+}
-+
-+/*
-+ * transfer with certain parameters
-+ */
-+static int mmc_ffu_simple_transfer(struct mmc_card *card,
-+	struct scatterlist *sg, unsigned int sg_len, u32 arg,
-+	unsigned int blocks, unsigned int blksz) {
-+	struct mmc_request mrq = {0};
-+	struct mmc_command cmd = {0};
-+	struct mmc_command stop = {0};
-+	struct mmc_data data = {0};
-+
-+	mrq.cmd = &cmd;
-+	mrq.data = &data;
-+	mrq.stop = &stop;
-+	mmc_ffu_prepare_mrq(card, &mrq, sg, sg_len, arg, blocks, blksz);
-+	mmc_wait_for_req(card->host, &mrq);
-+
-+	mmc_ffu_wait_busy(card);
-+
-+	return mmc_ffu_check_result(&mrq);
-+}
-+
-+/*
-+ * Map memory into a scatterlist.
-+ */
-+static unsigned int mmc_ffu_map_sg(struct mmc_ffu_mem *mem, int size,
-+	struct scatterlist *sglist, unsigned int max_segs,
-+	unsigned int max_seg_sz)
-+{
-+	struct scatterlist *sg = sglist;
-+	unsigned int i;
-+	unsigned long sz = size;
-+	unsigned int sctr_len = 0;
-+	unsigned long len;
-+
-+	sg_init_table(sglist, max_segs);
-+
-+	for (i = 0; i < mem->cnt && sz; i++, sz -= len) {
-+		len = PAGE_SIZE * (1 << mem->arr[i].order);
-+
-+		if (len > sz) {
-+			len = sz;
-+			sz = 0;
-+		}
-+
-+		sg_set_page(sg, mem->arr[i].page, len, 0);
-+		sg = sg_next(sg);
-+		sctr_len += 1;
-+	}
-+	sg_mark_end(sg);
-+
-+	return sctr_len;
-+}
-+
-+static void mmc_ffu_free_mem(struct mmc_ffu_mem *mem) {
-+	if (!mem)
-+		return;
-+
-+	while (mem->cnt--)
-+		__free_pages(mem->arr[mem->cnt].page, mem->arr[mem->cnt].order);
-+
-+	kfree(mem->arr);
-+	kfree(mem);
-+}
-+
-+/*
-+ * Cleanup struct mmc_ffu_area.
-+ */
-+static int mmc_ffu_area_cleanup(struct mmc_ffu_area *area) {
-+	kfree(area->sg);
-+	mmc_ffu_free_mem(area->mem);
-+
-+	return 0;
-+}
-+
-+/*
-+ * Allocate a lot of memory, preferably max_sz but at least min_sz. In 
-+case
-+ * there isn't much memory do not exceed 1/16th total low mem pages. 
-+Also do
-+ * not exceed a maximum number of segments and try not to make segments 
-+much
-+ * bigger than maximum segment size.
-+ */
-+static struct mmc_ffu_mem *mmc_ffu_alloc_mem(unsigned long min_sz,
-+	unsigned long max_sz, unsigned int max_segs, unsigned int max_seg_sz) 
-+{
-+	unsigned long max_page_cnt = DIV_ROUND_UP(max_sz, PAGE_SIZE);
-+	unsigned long min_page_cnt = DIV_ROUND_UP(min_sz, PAGE_SIZE);
-+	unsigned long max_seg_page_cnt = DIV_ROUND_UP(max_seg_sz, PAGE_SIZE);
-+	unsigned long page_cnt = 0;
-+	/* we divide by 16 to ensure we will not allocate a big amount
-+	 * of unnecessary pages */
-+	unsigned long limit = nr_free_buffer_pages() >> 4;
-+	struct mmc_ffu_mem *mem;
-+	gfp_t flags = GFP_KERNEL | GFP_DMA | __GFP_NOWARN | __GFP_NORETRY;
-+
-+	if (max_page_cnt > limit)
-+		max_page_cnt = limit;
-+
-+	if (min_page_cnt > max_page_cnt)
-+		min_page_cnt = max_page_cnt;
-+
-+	if (max_segs * max_seg_page_cnt > max_page_cnt)
-+		max_segs = DIV_ROUND_UP(max_page_cnt, max_seg_page_cnt);
-+
-+	mem = kzalloc(sizeof(struct mmc_ffu_mem), GFP_KERNEL);
-+	if (!mem)
-+		return NULL;
-+
-+	mem->arr = kzalloc(sizeof(struct mmc_ffu_pages) * max_segs,
-+		GFP_KERNEL);
-+	if (!mem->arr)
-+		goto out_free;
-+
-+	while (max_page_cnt) {
-+		struct page *page;
-+		unsigned int order;
-+
-+		order = get_order(max_seg_page_cnt << PAGE_SHIFT);
-+
-+		do {
-+			page = alloc_pages(flags, order);
-+		} while (!page && order--);
-+
-+		if (!page)
-+			goto out_free;
-+
-+		mem->arr[mem->cnt].page = page;
-+		mem->arr[mem->cnt].order = order;
-+		mem->cnt += 1;
-+		if (max_page_cnt <= (1UL << order))
-+			break;
-+		max_page_cnt -= 1UL << order;
-+		page_cnt += 1UL << order;
-+	}
-+
-+	if (page_cnt < min_page_cnt)
-+		goto out_free;
-+
-+	return mem;
-+
-+out_free:
-+	mmc_ffu_free_mem(mem);
-+	return NULL;
-+}
-+
-+/*
-+ * Initialize an area for data transfers.
-+ * Copy the data to the allocated pages.
-+ */
-+static int mmc_ffu_area_init(struct mmc_ffu_area *area, struct mmc_card *card,
-+	const u8 *data, int size)
-+{
-+	int ret;
-+	int i;
-+	int length = 0;
-+
-+	area->max_tfr = size;
-+
-+	/* Try to allocate enough memory for a max. sized transfer. Less is OK
-+	 * because the same memory can be mapped into the scatterlist more than
-+	 * once. Also, take into account the limits imposed on scatterlist
-+	 * segments by the host driver.
-+	 */
-+	area->mem = mmc_ffu_alloc_mem(1, area->max_tfr, area->max_segs,
-+		area->max_seg_sz);
-+	if (!area->mem)
-+		return -ENOMEM;
-+
-+	/* copy data to page */
-+	for (i = 0; i < area->mem->cnt; i++) {
-+		if (length > size) {
-+			ret = -EINVAL;
-+			goto out_free;
-+		}
-+
-+		memcpy(page_address(area->mem->arr[i].page), data + length,
-+			min(size - length, (int)area->max_seg_sz));
-+		length += area->max_seg_sz;
-+	}
-+
-+	area->sg = kmalloc(sizeof(struct scatterlist) * area->mem->cnt,
-+		GFP_KERNEL);
-+	if (!area->sg) {
-+		ret = -ENOMEM;
-+		goto out_free;
-+	}
-+
-+	area->sg_len = mmc_ffu_map_sg(area->mem, size, area->sg,
-+		area->max_segs, area->mem->cnt);
-+
-+	return 0;
-+
-+out_free:
-+	mmc_ffu_area_cleanup(area);
-+	return ret;
-+}
-+
-+static int mmc_ffu_write(struct mmc_card *card, const u8 *src, u32 arg,
-+	int size)
-+{
-+	int rc;
-+	struct mmc_ffu_area area;
-+	int max_tfr;
-+
-+	area.sg = NULL;
-+	area.mem = NULL;
-+	area.max_segs = card->host->max_segs;
-+	area.max_seg_sz = card->host->max_seg_size & ~(CARD_BLOCK_SIZE - 1);
-+	do {
-+		max_tfr = size;
-+		if (max_tfr >> 9 > card->host->max_blk_count)
-+			max_tfr = card->host->max_blk_count << 9;
-+		if (max_tfr > card->host->max_req_size)
-+			max_tfr = card->host->max_req_size;
-+		if (DIV_ROUND_UP(max_tfr, area.max_seg_sz) > area.max_segs)
-+			max_tfr = area.max_segs * area.max_seg_sz;
-+
-+		rc = mmc_ffu_area_init(&area, card, src, max_tfr);
-+		if (rc != 0)
-+			goto exit;
-+
-+		rc = mmc_ffu_simple_transfer(card, area.sg, area.sg_len, arg,
-+			max_tfr / CARD_BLOCK_SIZE, CARD_BLOCK_SIZE);
-+		if (rc != 0)
-+			goto exit;
-+
-+		src += max_tfr;
-+		size -= max_tfr;
-+	} while (size > 0);
-+
-+exit:
-+	mmc_ffu_area_cleanup(&area);
-+	return rc;
-+}
-+
-+/* Flush all scheduled work from the MMC work queue.
-+ * and initialize the MMC device */
-+static int mmc_ffu_restart(struct mmc_card *card) {
-+	struct mmc_host *host = card->host;
-+	int err = 0;
-+
-+	mmc_cache_ctrl(host, 0);
-+	err = mmc_power_save_host(host);
-+	if (err) {
-+		pr_warn("%s: going to sleep failed (%d)!!!\n",
-+			__func__ , err);
-+		goto exit;
-+	}
-+
-+	err = mmc_power_restore_host(host);
-+
-+exit:
-+
-+	return err;
-+}
-+
-+int mmc_ffu_download(struct mmc_card *card, const char *name) {
-+	u8 ext_csd[CARD_BLOCK_SIZE];
-+	int err;
-+	int ret;
-+	u32 arg;
-+	u32 fw_prog_bytes;
-+	const struct firmware *fw;
-+
-+	/* Check if FFU is supported */
-+	if (!card->ext_csd.ffu_capable) {
-+		pr_err("FFU: %s: error FFU is not supported %d rev %d\n",
-+			mmc_hostname(card->host), card->ext_csd.ffu_capable,
-+			card->ext_csd.rev);
-+		return -EOPNOTSUPP;
-+	}
-+
-+	if (strlen(name) > 512) {
-+		pr_err("FFU: %s: %.20s is not a valid argument\n",
-+			mmc_hostname(card->host), name);
-+		return -EINVAL;
-+	}
-+
-+	/* setup FW data buffer */
-+	err = request_firmware(&fw, name, &card->dev);
-+	if (err) {
-+		pr_err("FFU: %s: Firmware request failed %d\n",
-+			mmc_hostname(card->host), err);
-+		return err;
-+	}
-+	if ((fw->size % CARD_BLOCK_SIZE)) {
-+			pr_warn("FFU: %s: Warning %zd firmware data size "
-+			"is not aligned!!!\n",	mmc_hostname(card->host),
-+			fw->size);
-+	}
-+
-+	mmc_get_card(card);
-+
-+	/* set device to FFU mode */
-+	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_MODE_CONFIG,
-+		MMC_FFU_MODE_SET, card->ext_csd.generic_cmd6_time);
-+	if (err) {
-+		pr_err("FFU: %s: error %d FFU is not supported\n",
-+			mmc_hostname(card->host), err);
-+		goto exit;
-+	}
-+
-+	/* Read the EXT_CSD */
-+	err = mmc_send_ext_csd(card, ext_csd);
-+	if (err) {
-+		pr_err("FFU: %s: error %d sending ext_csd\n",
-+			mmc_hostname(card->host), err);
-+		goto exit;
-+	}
-+
-+	/* set CMD ARG */
-+	arg = ext_csd[EXT_CSD_FFU_ARG] |
-+		ext_csd[EXT_CSD_FFU_ARG + 1] << 8 |
-+		ext_csd[EXT_CSD_FFU_ARG + 2] << 16 |
-+		ext_csd[EXT_CSD_FFU_ARG + 3] << 24;
-+
-+	err = mmc_ffu_write(card, fw->data, arg, (int)fw->size);
-+
-+	/* host switch back to work in normal MMC Read/Write commands */
-+	ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+		EXT_CSD_MODE_CONFIG, MMC_FFU_MODE_NORMAL,
-+		card->ext_csd.generic_cmd6_time);
-+	if (ret) {
-+		err = ret;
-+		goto exit;
-+	}
-+
-+	/* Read the EXT_CSD */
-+	err = mmc_send_ext_csd(card, ext_csd);
-+	if (err) {
-+		pr_err("FFU: %s: error %d sending ext_csd\n",
-+			mmc_hostname(card->host), err);
-+		goto exit;
-+	}
-+
-+	/* check that the eMMC has received the payload */
-+	fw_prog_bytes = ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG] |
-+		ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 1] << 8 |
-+		ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 2] << 16 |
-+		ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 3] << 24;
-+
-+	/* convert sector to bytes */
-+	 fw_prog_bytes *=
-+		CARD_BLOCK_SIZE << (ext_csd[EXT_CSD_DATA_SECTOR_SIZE] * 3);
-+	if (fw_prog_bytes != fw->size) {
-+		err = -EINVAL;
-+		pr_err("FFU: %s: error %d number of programmed fw sector\n",
-+			mmc_hostname(card->host), err);
-+	}
-+
-+exit:
-+	release_firmware(fw);
-+	mmc_put_card(card);
-+	return err;
-+}
-+EXPORT_SYMBOL(mmc_ffu_download);
-+
-+int mmc_ffu_install(struct mmc_card *card) {
-+	u8 ext_csd[CARD_BLOCK_SIZE];
-+	int err;
-+	u32 ffu_data_len;
-+	u32 timeout;
-+
-+	/* Check if FFU is supported */
-+	if (!card->ext_csd.ffu_capable) {
-+		pr_err("FFU: %s: error FFU is not supported\n",
-+			mmc_hostname(card->host));
-+		return -EOPNOTSUPP;
-+	}
-+
-+	err = mmc_send_ext_csd(card, ext_csd);
-+	if (err) {
-+		pr_err("FFU: %s: error %d sending ext_csd\n",
-+			mmc_hostname(card->host), err);
-+		return err;
-+	}
-+
-+	/* check mode operation */
-+	if (!FFU_FEATURES(ext_csd[EXT_CSD_FFU_FEATURES])) {
-+		/* restart the eMMC */
-+		err = mmc_ffu_restart(card);
-+		if (err) {
-+			pr_err("FFU: %s: install error %d:\n",
-+				mmc_hostname(card->host), err);
-+			return err;
-+		}
-+	} else {
-+
-+		ffu_data_len = ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG]|
-+			ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 1] << 8 |
-+			ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 2] << 16 |
-+			ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG + 3] << 24;
-+
-+		if (!ffu_data_len) {
-+			err = -EPERM;
-+			return err;
-+		}
-+		/* set device to FFU mode */
-+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			EXT_CSD_MODE_CONFIG, 0x1,
-+			card->ext_csd.generic_cmd6_time);
-+
-+		if (err) {
-+			pr_err("FFU: %s: error %d FFU is not supported\n",
-+				mmc_hostname(card->host), err);
-+			return err;
-+		}
-+
-+		timeout = ext_csd[EXT_CSD_OPERATION_CODE_TIMEOUT];
-+		if (timeout == 0 || timeout > 0x17) {
-+			timeout = 0x17;
-+			pr_warn("FFU: %s: operation code timeout is out "
-+				"of range. Using maximum timeout.\n",
-+				mmc_hostname(card->host));
-+		}
-+
-+		/* timeout is at millisecond resolution */
-+		timeout = (100 * (1 << timeout) / 1000) + 1;
-+
-+		/* set ext_csd to install mode */
-+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			EXT_CSD_MODE_OPERATION_CODES,
-+			MMC_FFU_INSTALL_SET, timeout);
-+
-+		if (err) {
-+			pr_err("FFU: %s: error %d setting install mode\n",
-+				mmc_hostname(card->host), err);
-+			return err;
-+		}
-+	}
-+
-+	/* read ext_csd */
-+	err = mmc_send_ext_csd(card, ext_csd);
-+	if (err) {
-+		pr_err("FFU: %s: error %d sending ext_csd\n",
-+			mmc_hostname(card->host), err);
-+		return err;
-+	}
-+
-+	/* return status */
-+	err = ext_csd[EXT_CSD_FFU_STATUS];
-+	if (err) {
-+		pr_err("FFU: %s: error %d FFU install:\n",
-+			mmc_hostname(card->host), err);
-+		return  -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL(mmc_ffu_install);
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index 98e9eb0..a29065a 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -571,6 +571,14 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		card->ext_csd.data_sector_size = 512;
- 	}
- 
-+	/* eMMC v5 or later */
-+	if (card->ext_csd.rev >= 7) {
-+		card->ext_csd.ffu_capable =
-+			((ext_csd[EXT_CSD_SUPPORTED_MODE] & 1) == 1) &&
-+			((ext_csd[EXT_CSD_FW_CONFIG] & 1) == 0);
-+	} else {
-+		card->ext_csd.ffu_capable = false;
-+	}
- out:
- 	return err;
- }
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h index b730272..bc6f6d0 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -87,6 +87,7 @@ struct mmc_ext_csd {
- 	unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
- 	unsigned int		boot_ro_lock;		/* ro lock support */
- 	bool			boot_ro_lockable;
-+	bool		ffu_capable;	/* FFU support */
- 	u8			raw_exception_status;	/* 54 */
- 	u8			raw_partition_support;	/* 160 */
- 	u8			raw_rpmb_size_mult;	/* 168 */
-diff --git a/include/linux/mmc/ffu.h b/include/linux/mmc/ffu.h new file mode 100644 index 0000000..7e4133d
---- /dev/null
-+++ b/include/linux/mmc/ffu.h
-@@ -0,0 +1,51 @@
-+/*
-+ *
-+ *  ffu.h
-+ *
-+ * Copyright (c) 2013 SanDisk Corp.
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or 
-+(at
-+ * your option) any later version.
-+ *
-+ * This program was created by SanDisk Corp
-+ * The ffu.h file is obtained under the GPL v2.0 license that is
-+ * available via http://www.gnu.org/licenses/,
-+ * or http://www.opensource.org/licenses/gpl-2.0.php
-+*/
-+
-+#if !defined(_FFU_H_)
-+#define _FFU_H_
-+
-+#include <linux/mmc/card.h>
-+
-+#define CARD_BLOCK_SIZE 512
-+
-+/*
-+ * eMMC5.0 Field Firmware Update (FFU) opcodes */ #define 
-+MMC_FFU_DOWNLOAD_OP 302 #define MMC_FFU_INSTALL_OP 303
-+
-+#define MMC_FFU_MODE_SET 0x1
-+#define MMC_FFU_MODE_NORMAL 0x0
-+#define MMC_FFU_INSTALL_SET 0x1
-+
-+#ifdef CONFIG_MMC_FFU
-+#define MMC_FFU_FEATURES 0x1
-+#define FFU_FEATURES(ffu_features) (ffu_features & MMC_FFU_FEATURES)
-+
-+int mmc_ffu_download(struct mmc_card *card, const char *name); int 
-+mmc_ffu_install(struct mmc_card *card); #else static inline int 
-+mmc_ffu_download(struct mmc_card *card, const char *name) {
-+	return -ENOSYS;
-+}
-+static inline int mmc_ffu_install(struct mmc_card *card) {
-+	return -ENOSYS;
-+}
-+#endif
-+#endif /* FFU_H_ */
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h index 50bcde3..3651449 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -272,6 +272,9 @@ struct _mmc_csd {
-  * EXT_CSD fields
-  */
- 
-+#define EXT_CSD_FFU_STATUS		26	/* R */
-+#define EXT_CSD_MODE_OPERATION_CODES	29	/* W */
-+#define EXT_CSD_MODE_CONFIG		30	/* R/W */
- #define EXT_CSD_FLUSH_CACHE		32      /* W */
- #define EXT_CSD_CACHE_CTRL		33      /* R/W */
- #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
-@@ -290,6 +293,7 @@ struct _mmc_csd {
- #define EXT_CSD_SANITIZE_START		165     /* W */
- #define EXT_CSD_WR_REL_PARAM		166	/* RO */
- #define EXT_CSD_RPMB_MULT		168	/* RO */
-+#define EXT_CSD_FW_CONFIG		169	/* R/W */
- #define EXT_CSD_BOOT_WP			173	/* R/W */
- #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
- #define EXT_CSD_PART_CONFIG		179	/* R/W */
-@@ -325,6 +329,11 @@ struct _mmc_csd {
- #define EXT_CSD_POWER_OFF_LONG_TIME	247	/* RO */
- #define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
- #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
-+#define EXT_CSD_NUM_OF_FW_SEC_PROG	302	/* RO, 4 bytes */
-+#define EXT_CSD_FFU_ARG			487	/* RO, 4 bytes */
-+#define EXT_CSD_OPERATION_CODE_TIMEOUT	491	/* RO */
-+#define EXT_CSD_FFU_FEATURES		492	/* RO */
-+#define EXT_CSD_SUPPORTED_MODE		493	/* RO */
- #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
- #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
- #define EXT_CSD_MAX_PACKED_WRITES	500	/* RO */
---
-To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the body of a message to majordomo@vger.kernel.org More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+SGkgR3dhbmRhbA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogR3dlbmRhbCBH
+cmlnbm91IFttYWlsdG86Z3dlbmRhbEBnb29nbGUuY29tXSANClNlbnQ6IFRodXJzZGF5LCBKdWx5
+IDAzLCAyMDE0IDM6MTYgQU0NClRvOiBHd2VuZGFsIEdyaWdub3UNCkNjOiBBdmkgU2hjaGlzbG93
+c2tpOyBIc2luLUhzaWFuZyBUc2VuZzsgQ2hyaXMgQmFsbDsgR3JhbnQgR3J1bmRsZXI7IGNqYkBs
+YXB0b3Aub3JnOyBVbGYgSGFuc3NvbjsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgQWxleCBM
+ZW1iZXJnOyBPbG9mIEpvaGFuc3NvbjsgUHV0aGlrb3JuIFZvcmF2b290aXZhdA0KU3ViamVjdDog
+UmU6IFtSRkMgUEFUQ0ggMS8xIHY3XW1tYzogU3VwcG9ydC1GRlUtZm9yLWVNTUMtdjUuMA0KDQpB
+bHNvOg0KLSB5b3UgZG9uJ3QgbmVlZCB0byBhbGxvY2F0ZSBhIGJ1ZmZlciBidWYgaW4gbW1jX2Zm
+dV9kb3dubG9hZCwgeW91IGNhbiBkaXJlY3RseSBjYWxsIG1tY19mZnVfd3JpdGUgd2l0aCBmdy0+
+ZGF0YTsgeW91IGFyZSBtZW1jb3B5aW5nIHRoZSBkYXRhIGFnYWluIGluIG1tY19mZnVfYXJlYV9p
+bml0KCkuDQotIG1tY19mZnVfcHJlcGFyZV9tcnEoKSBpcyBhIGNvcHkgb2YgbW1jX3Rlc3RfcHJl
+cGFyZV9tcnEoKSwgYnV0IGluIG91ciBjYXNlLCB3ZSBkb24ndCBuZWVkIHRoZSB3cml0ZSBhcmcs
+IGl0IHdpbGwgYmUgYWx3YXlzIDEuIElzIHRoZXJlIGEgd2F5IHRvIHVzZSBhbiBleGlzdGluZyBm
+dW5jdGlvbiBpbnN0ZWFkIG9mIHJlY29weWluZyB3aGF0IGlzIGluIG1tY190ZXN0LmM/DQoNCkd3
+ZW5kYWwuDQoNCg0KT24gV2VkLCBKdWwgMiwgMjAxNCBhdCAxOjM1IFBNLCBHd2VuZGFsIEdyaWdu
+b3UgPGd3ZW5kYWxAY2hyb21pdW0ub3JnPiB3cm90ZToNCj4gW3Jlc2VudCBpbiB0ZXh0IG1vZGVd
+DQo+IEF2aSwNCj4gKyBJIGFtIHRlc3RpbmcgdGhlIHBhdGNoIG9uIGEgc3lzdGVtIHdoZXJlIHRo
+ZSBmaXJtd2FyZSBpbWFnZSBpcyBvbg0KPiB0aGUgZW1tYyBpdHNlbGYuIEl0IGZhaWxzIG1vc3Qg
+b2YgdGhlIHRpbWUuIFRoZSBwcm9ibGVtIGlzIA0KPiBtbWNfZmZ1X2Rvd25sb2FkIGhhcyBiZWVu
+IGNhbGwgd2l0aCBtbWNfY2xhaW1faG9zdCBjYWxsZWQsIHByZXZlbnRpbmcgDQo+IG1tY3FkIGZy
+b20gcHVsbGluZyB0aGUgZmlybXdhcmUgZnJvbSB0aGUgZGlzay4gVGhlIGRlYWQgbG9jayBzaXR1
+YXRpb24gDQo+IGNhdXNlIHRoZSBtYWNoaW5lIHRvIHBhbmljLiBJdCB0aGUgZmlsZSBpcyBpbiB0
+aGUgY2FjaGUsIHRoZSBmaXJtd2FyZSANCj4gdXBncmFkZSBnb2VzIGZ1cnRoZXIuDQo+DQo+IExv
+b2tpbmcgYXQgc3RhY2tzOg0KPg0KPiBtbWM6DQo+IC4uLg0KPiBzbGVlcF9vbl9idWZmZXIrMHhl
+LzB4MTINCj4gLi4uDQo+IGJoX3N1Ym1pdF9yZWFkKzB4NDkvMHg1Yg0KPiAuLi4NCj4gX3JlcXVl
+c3RfZmlybXdhcmUrMHgzYjAvMHg4NGUNCj4gcmVxdWVzdF9maXJtd2FyZSsweDE2LzB4MTgNCj4g
+bW1jX2ZmdV9kb3dubG9hZCsweGM3LzB4OGQ3DQo+DQo+IGFuZCAgbW1jcWQvMDoNCj4gc2NoZWR1
+bGUrMHg2OS8weDZiDQo+IF9fbW1jX2NsYWltX2hvc3QrMHhjNi8weDE5YQ0KPiAuLi4NCj4gbW1j
+X2dldF9jYXJkKzB4MjUvMHgyOA0KPiBtbWNfYmxrX2lzc3VlX3JxKzB4NDEvMHg0MDMNCj4NCj4g
+KyBpbiBtbWNfZmZ1X3dyaXRlKCksIGRvbid0IHlvdSB3YW50IHRvIGNoZWNrIHRoYXQgdGhlIGVN
+TUMgaGFzDQo+IHJlY2VpdmVkIHRoZSBwYXlsb2FkIGJ5IGxvb2tpbmcgYXQNCj4gTlVNQkVSX09G
+X0ZXX1NFQ1RPUlNfQ09SUkVDVExZX1BST0dSQU1NRUQgZXh0X2NzZCByZWdpc3Rlcj8NCkluIHBh
+dGNoIHY4IHdlIGFyZSBsbzBva2luZyBhdCBpdCBhbmQgdXNlIGl0IHRvIGNvbXBhcmUgdGhlIHBh
+eWxvYWQNCj4NCj4gKyBkaWQgeW91IHRlc3Qgd2l0aCBlTU1DIHRoYXQgZG8gbm90IHN1cHBvcnQg
+TU9ERV9PUEVSQVRJT05fQ09ERVM/DQo+IEluIG1tY19mZnVfcmVzdGFydCwgeW91IGNhbGwNCj4g
+bW1jX3Bvd2VyX3NhdmVfaG9zdC9tbWNfcG93ZXJfcmVzdG9yZV9ob3N0LiBDYW4gdGhlIHJlc2V0
+IGJlIGFjaGlldmUgDQo+IHdpdGggbW1jX2h3X3Jlc2V0KCkgd2hpY2ggaGFzIHRoZSBhZHZhbnRh
+Z2UgdG8gYmUgbW9yZSBhdG9taWM/DQpXZSBmb3VuZCBvdXQgdGhhdCB0aGVyZSBwbGF0Zm9ybXMg
+dGhhdCBkbyBub3Qgc3VwcG9ydCB0aGlzIEFQSQ0KPg0KPiBVbGYsIENocmlzLA0KPiArIE9uZSBl
+eHRyYSBhZHZhbnRhZ2Ugb2YgdXNpbmcgcmVxdWVzdF9maXJtd2FyZSBpcyBpZiB3ZSBjYW4gdHJ1
+c3QNCj4gdWRldiAob3Igd2hvZXZlciBpcyBzZXJ2aW5nIHRoZSBmaXJtd2FyZSB1ZXZlbnQgcmVx
+dWVzdCksIHdlIGFyZSANCj4gZ3VhcmFudGVlZCB0aGF0IHdlIGNhbiB0cnVzdCB0aGUgZmlybXdh
+cmUgYXMgd2VsbC4gSWYgd2UgY2FuIHNlbmQgdGhlIA0KPiBmaXJtd2FyZSBwYXlsb2FkIHZpYSBp
+b2N0bCwgd2UgY2FuIG5vdCBiZSBzdXJlIHRoZSBjYWxsZXIgb2YgdGhhdCANCj4gaW9jdGwgaXMg
+bm90IGFuIGF0dGFja2VyIHRoYXQgd2FudHMgdG8gcHV0IGEgYmFkIGZpcm13YXJlIGluIHRoZSBl
+TU1DLg0KPg0KPiBPbiBUdWUsIEp1bCAxLCAyMDE0IGF0IDQ6MzkgQU0sIEF2aSBTaGNoaXNsb3dz
+a2kgDQo+IDxBdmkuU2hjaGlzbG93c2tpQHNhbmRpc2suY29tPiB3cm90ZToNCj4+IEhpIENocmlz
+LA0KPj4NCj4+IFJlIHlvdXIgY29uY2VybiB0aGF0IHRoZSBwYXRjaCB3YXMgbm90IHRlc3RlZCDi
+gJMgc29tZSBvZiBTYW5EaXNr4oCZcyBPRU0gY3VzdG9tZXJzIGhhdmUgaW1wbGVtZW50ZWQgdGhl
+IHBhdGNoLCBhbmQgdGhleSByZXBvcnQgdGhhdCBpdCBpcyB3b3JraW5nIGZvciB0aGVtLg0KPj4N
+Cj4+IFRoYW5rcw0KPj4gQXZpDQo+Pg0KPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+
+IEZyb206IEhzaW4tSHNpYW5nIFRzZW5nIFttYWlsdG86aHNpbmhzaWFuZ3RzZW5nQGdtYWlsLmNv
+bV0NCj4+IFNlbnQ6IFR1ZXNkYXksIEp1bHkgMDEsIDIwMTQgOToyOSBBTQ0KPj4gVG86IENocmlz
+IEJhbGwNCj4+IENjOiBHcmFudCBHcnVuZGxlcjsgY2piQGxhcHRvcC5vcmc7IFVsZiBIYW5zc29u
+OyANCj4+IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IEFsZXggTGVtYmVyZzsgQXZpIFNoY2hp
+c2xvd3NraTsgT2xvZiANCj4+IEpvaGFuc3Nvbg0KPj4gU3ViamVjdDogUmU6IFtSRkMgUEFUQ0gg
+MS8xIHY3XW1tYzogU3VwcG9ydC1GRlUtZm9yLWVNTUMtdjUuMA0KPj4NCj4+IEhpLCBDaHJpcywN
+Cj4+IEkgdGhpbmsgdGhlcmUgYXJlIHR3byByZWFzb25zIHdoeSBkb2luZyBGRlUgaW4ga2VybmVs
+LXNwYWNlIG1ha2VzIG1vcmUgc2Vuc2UuDQo+Pg0KPj4gRmlyc3QsIHNvbWUgZU1NQyAoYWNjb3Jk
+aW5nIHRvIGV4dENTRFs0OTJdIEZGVV9GRUFUVVJFUykgd2lsbCBuZWVkIHRvIHJlc3RhcnQgZU1N
+QyBhZnRlciBGRlUuDQo+Pg0KPj4gU2Vjb25kLCBpZiBob3N0IHdhbnQgdG8gdm91Y2ggImF0bW9p
+YyIgaW4gRkZVIHByb2Nlc3MsIHdlIG5lZWQgdG8gY2FsbCBtbWNfY2xhaW1faG9zdCBBUEksIGFu
+ZCB0aGlzIEFQSSBpcyB0aGUga2VybmVsLXNwYWNlIGNvZGUuIEkgc2FpZCAiaWYiDQo+PiBpcyBi
+ZWNhdXNlIGVNTUMgdmVuZG9ycyBtYXkgdGFrZSBjYXJlIHRoaXMuIFNvLCBob3N0IG1heSBub3Qg
+bmVlZCB0byB3b3JyeSBhYm91dCB0aGlzLg0KPj4NCj4+IFRoYW5rcywNCj4+IEhzaW5oc2lhbmcN
+Cj4+DQo+PiAyMDE0LTA3LTAxIDg6MzQgR01UKzA4OjAwIENocmlzIEJhbGwgPGNocmlzQHByaW50
+Zi5uZXQ+Og0KPj4+IEhpIEdyYW50LCBzb3JyeSBhYm91dCB0aGUgZGVsYXkuDQo+Pj4NCj4+PiBP
+biBUdWUsIEp1bCAwMSAyMDE0LCBHcmFudCBHcnVuZGxlciB3cm90ZToNCj4+Pj4gcGluZz8gQW5v
+dGhlciB3ZWVrIGlzIHBhc3QuDQo+Pj4+DQo+Pj4+IEkga25vdyB5b3UgZ3V5cyBhcmUgYnVzeSB3
+aXRoIG90aGVyIHN0dWZmLiBCdXQgcGxlYXNlIGF0IGxlYXN0IA0KPj4+PiBwdWJsaXNoIHdoYXQg
+eW91IHRoaW5rIHRoZSBuZXh0IHN0ZXBzIGZvciB0aGlzIHBhdGNoIGFyZS4NCj4+Pj4NCj4+Pj4g
+VGhpcyBpcyBhIGNyaXRpY2FsIHBhdGNoIGZvciBzdXBwb3J0aW5nIGVNTUMgcHJvZHVjdHMgYW5k
+IGFkZGluZyANCj4+Pj4gYWRkaXRpb25hbCBzdXBwb3J0IGZvciBvdGhlciB2ZW5kb3JzLiBJJ2Qg
+bGlrZSB0byBjb250aW51ZSB3b3JraW5nIA0KPj4+PiB3aXRoICJ1cHN0cmVhbSIgYW5kIHRoZSBs
+YWNrIG9mIHJlc3BvbnNlIGluIHRoaXMgY2FzZSBpcyBtYWtpbmcgDQo+Pj4+IHRoaXMgdW5uZWNl
+c3NhcmlseSBkaWZmaWN1bHQuDQo+Pj4NCj4+PiBJdCdzIHRvdWdoIHRvIG1lcmdlIGEgc2lnbmlm
+aWNhbnQgcGF0Y2ggdGhhdCB5b3UgaGF2ZW4ndCB0ZXN0ZWQgYW5kIA0KPj4+IHdlIGhhdmVuJ3Qg
+dGVzdGVkLiAgV2UgY291bGQgZG8gaXQsIHRob3VnaCAtLSBJJ2QgbGlrZSB0byBoZWFyIHdoYXQg
+DQo+Pj4gVWxmIHRoaW5rcy4gIFBsZWFzZSBjb3VsZCB5b3UgZ2l2ZSBhIHF1aWNrIGV4cGxhbmF0
+aW9uIG9mIHdoeSBkb2luZyANCj4+PiB0aGlzIGluIGtlcm5lbC1zcGFjZSBtYWtlcyBtb3JlIHNl
+bnNlIHRoYW4gdXNpbmcgeW91ciBtbWMtdXRpbHMgdmVyc2lvbj8NCj4+Pg0KPj4+IFRoYW5rcywN
+Cj4+Pg0KPj4+IC0gQ2hyaXMuDQo+Pj4gLS0NCj4+PiBDaHJpcyBCYWxsICAgPGh0dHA6Ly9wcmlu
+dGYubmV0Lz4NCj4+PiAtLQ0KPj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
+IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiDQo+Pj4gaW4gdGhlIGJvZHkgb2YgYSBt
+ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+Pj4g
+aW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
