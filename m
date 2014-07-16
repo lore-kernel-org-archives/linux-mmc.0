@@ -1,17 +1,13 @@
-From: Vincent.Yang <Vincent.Yang@tw.fujitsu.com>
-Subject: RE: [PATCH 2/8] mmc: sdhci: host: add new f_sdh30
-Date: Wed, 16 Jul 2014 19:07:49 +0800
-Message-ID: <830AC58E49A426478AC39824BC0FA915D8B8FF061A@fmpitwmsex01.fmpi.sea.css.fujitsu.com>
-References: <1405232971-4607-1-git-send-email-mollie.wu@linaro.org>
- <7710458.qT0KZ5qsA6@wuerfel>
- <830AC58E49A426478AC39824BC0FA915D8B8FF0609@fmpitwmsex01.fmpi.sea.css.fujitsu.com>
- <5526913.sJ4RMkanr6@wuerfel>
+From: Markus Niebel <list-09_linux_arm@tqsc.de>
+Subject: [PATCH 2/2] mmc: sdhci-esdhc-imx: implement DSR support
+Date: Wed, 16 Jul 2014 16:19:49 +0200
+Message-ID: <1405520389-32649-3-git-send-email-list-09_linux_arm@tqsc.de>
+References: <1405520389-32649-1-git-send-email-list-09_linux_arm@tqsc.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <5526913.sJ4RMkanr6@wuerfel>
-Content-Language: zh-TW
+In-Reply-To: <1405520389-32649-1-git-send-email-list-09_linux_arm@tqsc.de>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -21,102 +17,74 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Arnd Bergmann <arnd@arndb.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
-Cc: "mark.rutland@arm.com" <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Mollie Wu <mollie.wu@linaro.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "pawel.moll@arm.com" <pawel.moll@arm.com>, Tetsuya Takinishi <t.takinishi@jp.fujitsu.com>, "anton@enomsg.org" <anton@enomsg.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, "andy.green@linaro.org" <andy.green@linaro.org>, "jaswinder.singh@linaro.org" <jaswinder.singh@linaro.org>, "robh+dt@kernel.org" <robh+dt@kernel.org>, "patches@linaro.org" <patches@linaro.org>, "olof@lixom.net" <olof@lixom.net>
+To: linux-arm-kernel@lists.infradead.org
+Cc: Markus Niebel <Markus.Niebel@tq-group.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de
 List-Id: linux-mmc@vger.kernel.org
 
->-----Original Message-----
->From: Arnd Bergmann [mailto:arnd@arndb.de]
->On Wednesday 16 July 2014 17:35:41 Vincent. Yang wrote:
->
->> >
->> >> +unsigned int sdhci_f_sdh30_get_min_clock(struct sdhci_host *host)
->> >> +{
->> >> +     return F_SDH30_MIN_CLOCK;
->> >> +}
->> >> +
->> >> +void sdhci_f_sdh30_reset(struct sdhci_host *host, u8 mask)
->> >> +{
->> >> +     struct f_sdhost_priv *priv = sdhci_priv(host);
->> >> +
->> >> +     if (gpio_is_valid(priv->gpio_select_1v8))
->> >> +             gpio_direction_output(priv->gpio_select_1v8, 1);
->> >> +
->> >> +     if (sdhci_readw(host, SDHCI_CLOCK_CONTROL) == 0) {
->> >> +             sdhci_writew(host, 0xBC01, SDHCI_CLOCK_CONTROL);
->> >> +             mmiowb();
->> >> +     }
->> >
->> >Can you explain the mmiowb call here?
->>
->> This came from the original 3.0 based driver. It's trying to be a
->> write memory barrier. It wants to ensure the clock control change
->> actually happened before the following code.
->> I'll change it to a regular wmb in next version.
->
->Note that with 'readw'/writew', you shouldn't need any extra barriers.
->If sdhci_writew() is readw_relaxed(), wmb() is the correct barrier.
+From: Markus Niebel <Markus.Niebel@tq-group.com>
 
-Hi Arnd,
-The sdhci_writew() is using writew(), so I shouldn't need any extra
-barriers. I'll remove them in next version.
-Thanks a lot for your review!
+nor that we have DSR support implement the configuration
+side for i.MX SDHCI controller
 
+Signed-off-by: Markus Niebel <Markus.Niebel@tq-group.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c          |   15 +++++++++++++++
+ include/linux/platform_data/mmc-esdhc-imx.h |    4 ++++
+ 2 files changed, 19 insertions(+)
 
-Best regards,
-Vincent Yang
-
->
->> >> +
->> >> +     if (!of_property_read_u32(pdev->dev.of_node, "bus-width",
->&bus_width))
->> >{
->> >> +             switch (bus_width) {
->> >> +             case 8:
->> >> +                     dev_info(dev, "Applying 8 bit bus width\n");
->> >> +                     host->mmc->caps |= MMC_CAP_8_BIT_DATA;
->> >> +                     break;
->> >> +             case 4:
->> >> +                     dev_info(dev, "Applying 4 bit bus width\n");
->> >> +                     host->mmc->caps |= MMC_CAP_4_BIT_DATA;
->> >> +                     break;
->> >> +             case 1:
->> >> +             default:
->> >> +                     dev_err(dev, "Invalid bus width: %u\n", bus_width);
->> >> +                     break;
->> >> +             }
->> >> +     }
->> >
->> >This should probably be done in generic sdhci code somewhere. How about
->> >adding it to sdhci_get_of_property instead_
->>
->> I should use generic mmc_of_parse for it. I'll update it in next version.
->
->Ah right, I thought we had this in common code already but couldn't find
->it. Using mmc_of_parse() is definitely the correct solution here.
->
->> >> +     priv->clk_sd4 = clk_get(&pdev->dev, "sd_sd4clk");
->> >> +     if (!IS_ERR(priv->clk_sd4)) {
->> >> +             ret = clk_prepare_enable(priv->clk_sd4);
->> >> +             if (ret < 0) {
->> >> +                     dev_err(dev, "Failed to enable sd4 clock: %d\n", ret);
->> >> +                     goto err_clk1;
->> >> +             }
->> >> +     }
->> >> +     priv->clk_b = clk_get(&pdev->dev, "sd_bclk");
->> >> +     if (!IS_ERR(priv->clk_b)) {
->> >> +             ret = clk_prepare_enable(priv->clk_b);
->> >> +             if (ret < 0) {
->> >> +                     dev_err(dev, "Failed to enable clk_b clock: %d\n", ret);
->> >> +                     goto err_clk2;
->> >> +             }
->> >> +     }
->> >
->> >Please pick clock names that match what some of the other drivers use.
->>
->> I'll use "iface" and "core" for clock names because they match what used
->> in sdhci-msm driver.
->
->Ok, makes sense.
->
->        Arnd
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index ccec0e3..7db39d8 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -942,6 +942,16 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ 	if (of_property_read_u32(np, "fsl,delay-line", &boarddata->delay_line))
+ 		boarddata->delay_line = 0;
+ 
++	if (of_find_property(np, "dsr", NULL)) {
++		u32 tmp;
++
++		of_property_read_u32(np, "dsr", &tmp);
++		boarddata->dsr_req = true;
++		boarddata->dsr = (u16)tmp;
++	} else {
++		boarddata->dsr_req = true;
++	}
++
+ 	return 0;
+ }
+ #else
+@@ -1119,6 +1129,11 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+ 	}
+ 
++	if (boarddata->dsr_req) {
++		host->mmc->dsr_req = 1;
++		host->mmc->dsr = boarddata->dsr;
++	}
++
+ 	err = sdhci_add_host(host);
+ 	if (err)
+ 		goto disable_clk;
+diff --git a/include/linux/platform_data/mmc-esdhc-imx.h b/include/linux/platform_data/mmc-esdhc-imx.h
+index 75f70f6..8b88a40 100644
+--- a/include/linux/platform_data/mmc-esdhc-imx.h
++++ b/include/linux/platform_data/mmc-esdhc-imx.h
+@@ -35,6 +35,8 @@ enum cd_types {
+  * @wp_type:	type of write_protect method (see wp_types enum above)
+  * @cd_type:	type of card_detect method (see cd_types enum above)
+  * @support_vsel:  indicate it supports 1.8v switching
++ * @dsr_req:	indicate DSR is requested
++ * @dsr:	requested driver stage setting
+  */
+ 
+ struct esdhc_platform_data {
+@@ -46,5 +48,7 @@ struct esdhc_platform_data {
+ 	unsigned int f_max;
+ 	bool support_vsel;
+ 	unsigned int delay_line;
++	bool dsr_req;
++	u16 dsr;
+ };
+ #endif /* __ASM_ARCH_IMX_ESDHC_H */
+-- 
+1.7.9.5
