@@ -1,114 +1,60 @@
-From: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
-Subject: RE: [RFC PATCH 1/1 v7]mmc: Support-FFU-for-eMMC-v5.0
-Date: Wed, 16 Jul 2014 15:54:49 +0000
-Message-ID: <FDD07FEB422EF948A392FDC201AEEAE64B93463F@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE648AFA7EE@SACMBXIP02.sdcorp.global.sandisk.com>
- <CANEJEGu9PYi5DxuEWBwEHjUqWt2J-sEDZMKLwvZTUBdUnK=7XA@mail.gmail.com>
- <CANEJEGs2dAA0DSZfwYcV8nZn4Z1+MqAa0bJZocTZT5zjXe_dDQ@mail.gmail.com>
- <868uodnch6.fsf@void.printf.net>
- <CAC1bqKjbPqoyH1D1UYQ35trrPzQboYfkC+7tdkFFBYSijV_Oyw@mail.gmail.com>
- <FDD07FEB422EF948A392FDC201AEEAE64B8EC655@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAMHSBOUOmbmxERbF-QMc05aK_niaB72h2ACPO0Ti-tu60CxFHA@mail.gmail.com>
- <CAMHSBOVN4O91nwuv8J_dw1XYsbR9u-Z_kZKzWeUPoq6Q1DC8ww@mail.gmail.com>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: char interface to sdio, chdio.c
+Date: Wed, 16 Jul 2014 11:21:57 -0700
+Message-ID: <53C6C2C5.1050804@codeaurora.org>
+References: <20140716032655.GB30412@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2lp0235.outbound.protection.outlook.com ([207.46.163.235]:8491
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932974AbaGPPy4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 16 Jul 2014 11:54:56 -0400
-In-Reply-To: <CAMHSBOVN4O91nwuv8J_dw1XYsbR9u-Z_kZKzWeUPoq6Q1DC8ww@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <20140716032655.GB30412@kroah.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Greg KH <greg@kroah.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Alexander Kolesnikov <akolesni@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Gwendal Grignou <gwendal@google.com>, Gwendal Grignou <gwendal@chromium.org>
-Cc: Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>, Chris Ball <chris@printf.net>, Grant Grundler <grundler@chromium.org>, "cjb@laptop.org" <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Olof Johansson <olofj@chromium.org>, Puthikorn Voravootivat <puthik@google.com>
 
-SGkgR3dhbmRhbA0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogR3dlbmRhbCBH
-cmlnbm91IFttYWlsdG86Z3dlbmRhbEBnb29nbGUuY29tXSANClNlbnQ6IFRodXJzZGF5LCBKdWx5
-IDAzLCAyMDE0IDM6MTYgQU0NClRvOiBHd2VuZGFsIEdyaWdub3UNCkNjOiBBdmkgU2hjaGlzbG93
-c2tpOyBIc2luLUhzaWFuZyBUc2VuZzsgQ2hyaXMgQmFsbDsgR3JhbnQgR3J1bmRsZXI7IGNqYkBs
-YXB0b3Aub3JnOyBVbGYgSGFuc3NvbjsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgQWxleCBM
-ZW1iZXJnOyBPbG9mIEpvaGFuc3NvbjsgUHV0aGlrb3JuIFZvcmF2b290aXZhdA0KU3ViamVjdDog
-UmU6IFtSRkMgUEFUQ0ggMS8xIHY3XW1tYzogU3VwcG9ydC1GRlUtZm9yLWVNTUMtdjUuMA0KDQpB
-bHNvOg0KLSB5b3UgZG9uJ3QgbmVlZCB0byBhbGxvY2F0ZSBhIGJ1ZmZlciBidWYgaW4gbW1jX2Zm
-dV9kb3dubG9hZCwgeW91IGNhbiBkaXJlY3RseSBjYWxsIG1tY19mZnVfd3JpdGUgd2l0aCBmdy0+
-ZGF0YTsgeW91IGFyZSBtZW1jb3B5aW5nIHRoZSBkYXRhIGFnYWluIGluIG1tY19mZnVfYXJlYV9p
-bml0KCkuDQotIG1tY19mZnVfcHJlcGFyZV9tcnEoKSBpcyBhIGNvcHkgb2YgbW1jX3Rlc3RfcHJl
-cGFyZV9tcnEoKSwgYnV0IGluIG91ciBjYXNlLCB3ZSBkb24ndCBuZWVkIHRoZSB3cml0ZSBhcmcs
-IGl0IHdpbGwgYmUgYWx3YXlzIDEuIElzIHRoZXJlIGEgd2F5IHRvIHVzZSBhbiBleGlzdGluZyBm
-dW5jdGlvbiBpbnN0ZWFkIG9mIHJlY29weWluZyB3aGF0IGlzIGluIG1tY190ZXN0LmM/DQoNCkd3
-ZW5kYWwuDQoNCg0KT24gV2VkLCBKdWwgMiwgMjAxNCBhdCAxOjM1IFBNLCBHd2VuZGFsIEdyaWdu
-b3UgPGd3ZW5kYWxAY2hyb21pdW0ub3JnPiB3cm90ZToNCj4gW3Jlc2VudCBpbiB0ZXh0IG1vZGVd
-DQo+IEF2aSwNCj4gKyBJIGFtIHRlc3RpbmcgdGhlIHBhdGNoIG9uIGEgc3lzdGVtIHdoZXJlIHRo
-ZSBmaXJtd2FyZSBpbWFnZSBpcyBvbg0KPiB0aGUgZW1tYyBpdHNlbGYuIEl0IGZhaWxzIG1vc3Qg
-b2YgdGhlIHRpbWUuIFRoZSBwcm9ibGVtIGlzIA0KPiBtbWNfZmZ1X2Rvd25sb2FkIGhhcyBiZWVu
-IGNhbGwgd2l0aCBtbWNfY2xhaW1faG9zdCBjYWxsZWQsIHByZXZlbnRpbmcgDQo+IG1tY3FkIGZy
-b20gcHVsbGluZyB0aGUgZmlybXdhcmUgZnJvbSB0aGUgZGlzay4gVGhlIGRlYWQgbG9jayBzaXR1
-YXRpb24gDQo+IGNhdXNlIHRoZSBtYWNoaW5lIHRvIHBhbmljLiBJdCB0aGUgZmlsZSBpcyBpbiB0
-aGUgY2FjaGUsIHRoZSBmaXJtd2FyZSANCj4gdXBncmFkZSBnb2VzIGZ1cnRoZXIuDQo+DQo+IExv
-b2tpbmcgYXQgc3RhY2tzOg0KPg0KPiBtbWM6DQo+IC4uLg0KPiBzbGVlcF9vbl9idWZmZXIrMHhl
-LzB4MTINCj4gLi4uDQo+IGJoX3N1Ym1pdF9yZWFkKzB4NDkvMHg1Yg0KPiAuLi4NCj4gX3JlcXVl
-c3RfZmlybXdhcmUrMHgzYjAvMHg4NGUNCj4gcmVxdWVzdF9maXJtd2FyZSsweDE2LzB4MTgNCj4g
-bW1jX2ZmdV9kb3dubG9hZCsweGM3LzB4OGQ3DQo+DQo+IGFuZCAgbW1jcWQvMDoNCj4gc2NoZWR1
-bGUrMHg2OS8weDZiDQo+IF9fbW1jX2NsYWltX2hvc3QrMHhjNi8weDE5YQ0KPiAuLi4NCj4gbW1j
-X2dldF9jYXJkKzB4MjUvMHgyOA0KPiBtbWNfYmxrX2lzc3VlX3JxKzB4NDEvMHg0MDMNCj4NCj4g
-KyBpbiBtbWNfZmZ1X3dyaXRlKCksIGRvbid0IHlvdSB3YW50IHRvIGNoZWNrIHRoYXQgdGhlIGVN
-TUMgaGFzDQo+IHJlY2VpdmVkIHRoZSBwYXlsb2FkIGJ5IGxvb2tpbmcgYXQNCj4gTlVNQkVSX09G
-X0ZXX1NFQ1RPUlNfQ09SUkVDVExZX1BST0dSQU1NRUQgZXh0X2NzZCByZWdpc3Rlcj8NCkluIHBh
-dGNoIHY4IHdlIGFyZSBsbzBva2luZyBhdCBpdCBhbmQgdXNlIGl0IHRvIGNvbXBhcmUgdGhlIHBh
-eWxvYWQNCj4NCj4gKyBkaWQgeW91IHRlc3Qgd2l0aCBlTU1DIHRoYXQgZG8gbm90IHN1cHBvcnQg
-TU9ERV9PUEVSQVRJT05fQ09ERVM/DQo+IEluIG1tY19mZnVfcmVzdGFydCwgeW91IGNhbGwNCj4g
-bW1jX3Bvd2VyX3NhdmVfaG9zdC9tbWNfcG93ZXJfcmVzdG9yZV9ob3N0LiBDYW4gdGhlIHJlc2V0
-IGJlIGFjaGlldmUgDQo+IHdpdGggbW1jX2h3X3Jlc2V0KCkgd2hpY2ggaGFzIHRoZSBhZHZhbnRh
-Z2UgdG8gYmUgbW9yZSBhdG9taWM/DQpXZSBmb3VuZCBvdXQgdGhhdCB0aGVyZSBwbGF0Zm9ybXMg
-dGhhdCBkbyBub3Qgc3VwcG9ydCB0aGlzIEFQSQ0KPg0KPiBVbGYsIENocmlzLA0KPiArIE9uZSBl
-eHRyYSBhZHZhbnRhZ2Ugb2YgdXNpbmcgcmVxdWVzdF9maXJtd2FyZSBpcyBpZiB3ZSBjYW4gdHJ1
-c3QNCj4gdWRldiAob3Igd2hvZXZlciBpcyBzZXJ2aW5nIHRoZSBmaXJtd2FyZSB1ZXZlbnQgcmVx
-dWVzdCksIHdlIGFyZSANCj4gZ3VhcmFudGVlZCB0aGF0IHdlIGNhbiB0cnVzdCB0aGUgZmlybXdh
-cmUgYXMgd2VsbC4gSWYgd2UgY2FuIHNlbmQgdGhlIA0KPiBmaXJtd2FyZSBwYXlsb2FkIHZpYSBp
-b2N0bCwgd2UgY2FuIG5vdCBiZSBzdXJlIHRoZSBjYWxsZXIgb2YgdGhhdCANCj4gaW9jdGwgaXMg
-bm90IGFuIGF0dGFja2VyIHRoYXQgd2FudHMgdG8gcHV0IGEgYmFkIGZpcm13YXJlIGluIHRoZSBl
-TU1DLg0KPg0KPiBPbiBUdWUsIEp1bCAxLCAyMDE0IGF0IDQ6MzkgQU0sIEF2aSBTaGNoaXNsb3dz
-a2kgDQo+IDxBdmkuU2hjaGlzbG93c2tpQHNhbmRpc2suY29tPiB3cm90ZToNCj4+IEhpIENocmlz
-LA0KPj4NCj4+IFJlIHlvdXIgY29uY2VybiB0aGF0IHRoZSBwYXRjaCB3YXMgbm90IHRlc3RlZCDi
-gJMgc29tZSBvZiBTYW5EaXNr4oCZcyBPRU0gY3VzdG9tZXJzIGhhdmUgaW1wbGVtZW50ZWQgdGhl
-IHBhdGNoLCBhbmQgdGhleSByZXBvcnQgdGhhdCBpdCBpcyB3b3JraW5nIGZvciB0aGVtLg0KPj4N
-Cj4+IFRoYW5rcw0KPj4gQXZpDQo+Pg0KPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+
-IEZyb206IEhzaW4tSHNpYW5nIFRzZW5nIFttYWlsdG86aHNpbmhzaWFuZ3RzZW5nQGdtYWlsLmNv
-bV0NCj4+IFNlbnQ6IFR1ZXNkYXksIEp1bHkgMDEsIDIwMTQgOToyOSBBTQ0KPj4gVG86IENocmlz
-IEJhbGwNCj4+IENjOiBHcmFudCBHcnVuZGxlcjsgY2piQGxhcHRvcC5vcmc7IFVsZiBIYW5zc29u
-OyANCj4+IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IEFsZXggTGVtYmVyZzsgQXZpIFNoY2hp
-c2xvd3NraTsgT2xvZiANCj4+IEpvaGFuc3Nvbg0KPj4gU3ViamVjdDogUmU6IFtSRkMgUEFUQ0gg
-MS8xIHY3XW1tYzogU3VwcG9ydC1GRlUtZm9yLWVNTUMtdjUuMA0KPj4NCj4+IEhpLCBDaHJpcywN
-Cj4+IEkgdGhpbmsgdGhlcmUgYXJlIHR3byByZWFzb25zIHdoeSBkb2luZyBGRlUgaW4ga2VybmVs
-LXNwYWNlIG1ha2VzIG1vcmUgc2Vuc2UuDQo+Pg0KPj4gRmlyc3QsIHNvbWUgZU1NQyAoYWNjb3Jk
-aW5nIHRvIGV4dENTRFs0OTJdIEZGVV9GRUFUVVJFUykgd2lsbCBuZWVkIHRvIHJlc3RhcnQgZU1N
-QyBhZnRlciBGRlUuDQo+Pg0KPj4gU2Vjb25kLCBpZiBob3N0IHdhbnQgdG8gdm91Y2ggImF0bW9p
-YyIgaW4gRkZVIHByb2Nlc3MsIHdlIG5lZWQgdG8gY2FsbCBtbWNfY2xhaW1faG9zdCBBUEksIGFu
-ZCB0aGlzIEFQSSBpcyB0aGUga2VybmVsLXNwYWNlIGNvZGUuIEkgc2FpZCAiaWYiDQo+PiBpcyBi
-ZWNhdXNlIGVNTUMgdmVuZG9ycyBtYXkgdGFrZSBjYXJlIHRoaXMuIFNvLCBob3N0IG1heSBub3Qg
-bmVlZCB0byB3b3JyeSBhYm91dCB0aGlzLg0KPj4NCj4+IFRoYW5rcywNCj4+IEhzaW5oc2lhbmcN
-Cj4+DQo+PiAyMDE0LTA3LTAxIDg6MzQgR01UKzA4OjAwIENocmlzIEJhbGwgPGNocmlzQHByaW50
-Zi5uZXQ+Og0KPj4+IEhpIEdyYW50LCBzb3JyeSBhYm91dCB0aGUgZGVsYXkuDQo+Pj4NCj4+PiBP
-biBUdWUsIEp1bCAwMSAyMDE0LCBHcmFudCBHcnVuZGxlciB3cm90ZToNCj4+Pj4gcGluZz8gQW5v
-dGhlciB3ZWVrIGlzIHBhc3QuDQo+Pj4+DQo+Pj4+IEkga25vdyB5b3UgZ3V5cyBhcmUgYnVzeSB3
-aXRoIG90aGVyIHN0dWZmLiBCdXQgcGxlYXNlIGF0IGxlYXN0IA0KPj4+PiBwdWJsaXNoIHdoYXQg
-eW91IHRoaW5rIHRoZSBuZXh0IHN0ZXBzIGZvciB0aGlzIHBhdGNoIGFyZS4NCj4+Pj4NCj4+Pj4g
-VGhpcyBpcyBhIGNyaXRpY2FsIHBhdGNoIGZvciBzdXBwb3J0aW5nIGVNTUMgcHJvZHVjdHMgYW5k
-IGFkZGluZyANCj4+Pj4gYWRkaXRpb25hbCBzdXBwb3J0IGZvciBvdGhlciB2ZW5kb3JzLiBJJ2Qg
-bGlrZSB0byBjb250aW51ZSB3b3JraW5nIA0KPj4+PiB3aXRoICJ1cHN0cmVhbSIgYW5kIHRoZSBs
-YWNrIG9mIHJlc3BvbnNlIGluIHRoaXMgY2FzZSBpcyBtYWtpbmcgDQo+Pj4+IHRoaXMgdW5uZWNl
-c3NhcmlseSBkaWZmaWN1bHQuDQo+Pj4NCj4+PiBJdCdzIHRvdWdoIHRvIG1lcmdlIGEgc2lnbmlm
-aWNhbnQgcGF0Y2ggdGhhdCB5b3UgaGF2ZW4ndCB0ZXN0ZWQgYW5kIA0KPj4+IHdlIGhhdmVuJ3Qg
-dGVzdGVkLiAgV2UgY291bGQgZG8gaXQsIHRob3VnaCAtLSBJJ2QgbGlrZSB0byBoZWFyIHdoYXQg
-DQo+Pj4gVWxmIHRoaW5rcy4gIFBsZWFzZSBjb3VsZCB5b3UgZ2l2ZSBhIHF1aWNrIGV4cGxhbmF0
-aW9uIG9mIHdoeSBkb2luZyANCj4+PiB0aGlzIGluIGtlcm5lbC1zcGFjZSBtYWtlcyBtb3JlIHNl
-bnNlIHRoYW4gdXNpbmcgeW91ciBtbWMtdXRpbHMgdmVyc2lvbj8NCj4+Pg0KPj4+IFRoYW5rcywN
-Cj4+Pg0KPj4+IC0gQ2hyaXMuDQo+Pj4gLS0NCj4+PiBDaHJpcyBCYWxsICAgPGh0dHA6Ly9wcmlu
-dGYubmV0Lz4NCj4+PiAtLQ0KPj4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5k
-IHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiDQo+Pj4gaW4gdGhlIGJvZHkgb2YgYSBt
-ZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gDQo+Pj4g
-aW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
+On 07/15/14 20:26, Greg KH wrote:
+> Hi Stephen.
+>
+> I had some people ask me about a sdio userspace interface, and ran
+> across the chdio.c file as found in the MSM android kernel trees:
+
+You mean csdio.c right?
+
+>
+> https://android.googlesource.com/kernel/msm/+/57b74303d6f033ab04be039379f6661337fb9279
+
+As you can see in the commit text there, the commit I authored is
+actually a squash of three patches from some previous android kernel
+that we did (looks like it was android-msm-2.6.35) and it's been almost
+4 years since those patches were written. The three original commits
+weren't authored by me so I really don't know the intimate details of
+this driver.
+
+>
+> Any reason why this hasn't been submitted upstream?  Or has it, and was
+> it rejected?
+
+I don't believe we ever submitted this upstream.
+
+>
+> Also, what userspace code uses this?  Is there some android-specific
+> code somewhere that does a weird mix of sysfs and char control of the
+> hardware?  And what type of SDIO devices are controlled with this?
+
+If I recall correctly this driver is for communicating with an external
+modem (in this case it was the Gobi 9k). We used the sdio interface to
+do some IPC stuff with the modem over sdio, mainly because back then the
+SoC didn't have an LTE capable modem, but the Gobi modem was LTE
+capable. Slap the two chips together and you have an LTE phone while you
+wait for us to deliver the first SoC with an integrated LTE modem (msm8960).
+
+The userspace component is the same proprietary software that's used to
+make phone calls on android phones. I'd have to go dig around to find
+that code and confirm if it's using sysfs and char control. I'd rather
+not spend the time digging so let's assume it's doing that unless you
+have a more specific question in mind?
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+hosted by The Linux Foundation
