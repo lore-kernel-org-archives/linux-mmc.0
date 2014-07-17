@@ -1,81 +1,28 @@
-From: Prakash Burla <burlaprakash.linuxkernel@gmail.com>
-Subject: Re: FW: Fwd: [PATCH v6 08/12] mmc: mmci: Add support to data commands
- via variant structure.
-Date: Thu, 17 Jul 2014 17:43:38 +0530
-Message-ID: <CABu_nUQTCr+wGOEEoEJvWf=iFmtA7zu8Y_wvMqQ=GG0Ff+tOmg@mail.gmail.com>
-References: <1405596587.916424959@apps.rackspace.com>
+From: Clemens Eisserer <linuxhippy@gmail.com>
+Subject: Re: No UHS support for O2 Micro, Inc. OZ600FJ0/OZ900FJ0/OZ600FJS?
+Date: Thu, 17 Jul 2014 14:15:26 +0200
+Message-ID: <CAFvQSYSj0rj8pGoBhuR1NURAk0Jbj0aKJgy=RDc9vVgaFxu1yg@mail.gmail.com>
+References: <CAFvQSYQtVWOqjjn_3Tr6R2VfgKb-=z2sb39A0HowJPehYYagQw@mail.gmail.com>
+	<CAFvQSYS32yVA4-gLUzyfzZWbBqSBsGHEAUdA6DPwZnw6U2E0OQ@mail.gmail.com>
+	<CAFvQSYSaxWSSNo0_zAHFcOkpbeaJP9UOtmBSZnYYrbE6+ON9YQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1405596587.916424959@apps.rackspace.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: srinivas.kandagatla@linaro.org
-Cc: linux@arm.linux.org.uk, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, chris@printf.net, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linus.walleij@linaro.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f173.google.com ([209.85.220.173]:63633 "EHLO
+	mail-vc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754868AbaGQMP1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jul 2014 08:15:27 -0400
+Received: by mail-vc0-f173.google.com with SMTP id hy10so4286809vcb.32
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Jul 2014 05:15:26 -0700 (PDT)
+In-Reply-To: <CAFvQSYSaxWSSNo0_zAHFcOkpbeaJP9UOtmBSZnYYrbE6+ON9YQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-tested-by: Prakash Burla <prakash.burla@smartplayin.com
-This driver is tested on IFC6410.
+Hi again,
 
-> From:  <srinivas.kandagatla@linaro.org>
-> Date: Mon, Jun 2, 2014 at 2:39 PM
-> Subject: [PATCH v6 08/12] mmc: mmci: Add support to data commands via
-> variant structure.
-> To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson
-> <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-> Cc: Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org,
-> linux-arm-msm@vger.kernel.org, linus.walleij@linaro.org, Srinivas
-> Kandagatla <srinivas.kandagatla@linaro.org>
->
->
-> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->
-> On some SOCs like Qcom there are explicit bits in the command register
-> to specify if its a data transfer command or not. So this patch adds
-> support to such bits in variant data, giving more flexibility to the
-> driver.
->
-> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
->  drivers/mmc/host/mmci.c | 5 +++++
->  1 file changed, 5 insertions(+)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 4c95a9b..8534c29 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -59,6 +59,7 @@ static unsigned int fmax = 515633;
->   *           is asserted (likewise for RX)
->   * @fifohalfsize: number of bytes that can be written when MCI_TXFIFOHALFEMPTY
->   *               is asserted (likewise for RX)
-> + * @data_cmd_enable: enable value for data commands.
->   * @sdio: variant supports SDIO
->   * @st_clkdiv: true if using a ST-specific clock divider algorithm
->   * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
-> @@ -79,6 +80,7 @@ struct variant_data {
->         unsigned int            datalength_bits;
->         unsigned int            fifosize;
->         unsigned int            fifohalfsize;
-> +       unsigned int            data_cmd_enable;
->         unsigned int            datactrl_mask_ddrmode;
->         bool                    sdio;
->         bool                    st_clkdiv;
-> @@ -839,6 +841,9 @@ mmci_start_command(struct mmci_host *host, struct
-> mmc_command *cmd, u32 c)
->         if (/*interrupt*/0)
->                 c |= MCI_CPSM_INTERRUPT;
->
-> +       if (mmc_cmd_type(cmd) == MMC_CMD_ADTC)
-> +               c |= host->variant->data_cmd_enable;
-> +
->         host->cmd = cmd;
->
->         writel(cmd->arg, base + MMCIARGUMENT);
-> --
-> 1.9.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-arm-msm" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Is this the wrong mailing list to ask about throughput issues with
+linux card reader drivers in general?
+If it is not, please point me to the right list.
+
+Best regards, Clemens
