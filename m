@@ -1,81 +1,81 @@
 From: Prakash Burla <burlaprakash.linuxkernel@gmail.com>
-Subject: Re: FW: Fwd: [RFC PATCH] mmc: mmci: Add qcom dml support to the driver.
-Date: Thu, 17 Jul 2014 17:20:10 +0530
-Message-ID: <CABu_nUQTu1_+sQ_Wkm1R=mOKtCP7GMcie7RJefGL=O6nOYyZrA@mail.gmail.com>
-References: <1405596653.770128886@apps.rackspace.com>
+Subject: Re: FW: Fwd: [PATCH v6 08/12] mmc: mmci: Add support to data commands
+ via variant structure.
+Date: Thu, 17 Jul 2014 17:43:38 +0530
+Message-ID: <CABu_nUQTCr+wGOEEoEJvWf=iFmtA7zu8Y_wvMqQ=GG0Ff+tOmg@mail.gmail.com>
+References: <1405596587.916424959@apps.rackspace.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1405596653.770128886@apps.rackspace.com>
+In-Reply-To: <1405596587.916424959@apps.rackspace.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: srinivas.kandagatla@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org
+Cc: linux@arm.linux.org.uk, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, chris@printf.net, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linus.walleij@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-tested-by: Prakash Burla <prakash.burla@smartplayin.com>
+tested-by: Prakash Burla <prakash.burla@smartplayin.com
 This driver is tested on IFC6410.
 
->
-> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-> Date: Fri, Jul 11, 2014 at 5:18 PM
-> Subject: [RFC PATCH] mmc: mmci: Add qcom dml support to the driver.
-> To: linux-mmc@vger.kernel.org
-> Cc: Linus Walleij <linus.walleij@linaro.org>, Chris Ball
-> <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King
-> <linux@arm.linux.org.uk>, linux-kernel@vger.kernel.org, Srinivas
+> From:  <srinivas.kandagatla@linaro.org>
+> Date: Mon, Jun 2, 2014 at 2:39 PM
+> Subject: [PATCH v6 08/12] mmc: mmci: Add support to data commands via
+> variant structure.
+> To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson
+> <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+> Cc: Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org,
+> linux-arm-msm@vger.kernel.org, linus.walleij@linaro.org, Srinivas
 > Kandagatla <srinivas.kandagatla@linaro.org>
 >
 >
-> On Qualcomm APQ8064 SOCs, SD card controller has an additional glue
-> called DML (Data Mover Local/Lite) to assist dma transfers.
-> This hardware needs to be setup before any dma transfer is requested.
-> DML itself is not a DMA engine, its just a gule between the SD card
-> controller and dma controller.
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 >
-> Most of this code has been ported from qualcomm's 3.4 kernel.
->
-> This patch adds the code necessary to intialize the hardware and setup
-> before doing any dma transfers.
+> On some SOCs like Qcom there are explicit bits in the command register
+> to specify if its a data transfer command or not. So this patch adds
+> support to such bits in variant data, giving more flexibility to the
+> driver.
 >
 > Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 > ---
+>  drivers/mmc/host/mmci.c | 5 +++++
+>  1 file changed, 5 insertions(+)
 >
-> Hi All,
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 4c95a9b..8534c29 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -59,6 +59,7 @@ static unsigned int fmax = 515633;
+>   *           is asserted (likewise for RX)
+>   * @fifohalfsize: number of bytes that can be written when MCI_TXFIFOHALFEMPTY
+>   *               is asserted (likewise for RX)
+> + * @data_cmd_enable: enable value for data commands.
+>   * @sdio: variant supports SDIO
+>   * @st_clkdiv: true if using a ST-specific clock divider algorithm
+>   * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
+> @@ -79,6 +80,7 @@ struct variant_data {
+>         unsigned int            datalength_bits;
+>         unsigned int            fifosize;
+>         unsigned int            fifohalfsize;
+> +       unsigned int            data_cmd_enable;
+>         unsigned int            datactrl_mask_ddrmode;
+>         bool                    sdio;
+>         bool                    st_clkdiv;
+> @@ -839,6 +841,9 @@ mmci_start_command(struct mmci_host *host, struct
+> mmc_command *cmd, u32 c)
+>         if (/*interrupt*/0)
+>                 c |= MCI_CPSM_INTERRUPT;
 >
-> DMA support for Qualcomm SD card controller is missing in my last patchset, the
-> reason to post this patch separately is because of the unusual glue logic
-> between card controller and the dma-controller. This glue logic is called DML
-> (Data mover local/lite).
+> +       if (mmc_cmd_type(cmd) == MMC_CMD_ADTC)
+> +               c |= host->variant->data_cmd_enable;
+> +
+>         host->cmd = cmd;
 >
-> DML assists dma transfers between sd card controller and dma-controller. As this
-> DML gule is part of SD controller IP and needs configuring for every transfer,
-> So I thought of keeping it close to driver in drivers/mmc/ directory is more
-> usefull, than trying to find a infrastructure to fit it. DML itself is not a DMA
-> controller but an logic present on SD card controller and it resides in SD card
-> controller IP.
->
-> I would like to get your opnion on overall correctness of the approch.
->
-> Thanks in advance.
-> srini
->
->
->  drivers/mmc/host/Kconfig    |  11 +++
->  drivers/mmc/host/Makefile   |   1 +
->  drivers/mmc/host/mmci.c     |  19 ++++-
->  drivers/mmc/host/qcom_dml.c | 171 ++++++++++++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/qcom_dml.h |  17 +++++
->  5 files changed, 218 insertions(+), 1 deletion(-)
->  create mode 100644 drivers/mmc/host/qcom_dml.c
->  create mode 100644 drivers/mmc/host/qcom_dml.h
->
-.
-[SNIP]
-.
+>         writel(cmd->arg, base + MMCIARGUMENT);
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> 1.9.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-arm-msm" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
->
 >
