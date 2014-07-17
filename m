@@ -1,19 +1,18 @@
 From: =?ISO-8859-1?Q?Emilio_L=F3pez?= <emilio@elopez.com.ar>
-Subject: Re: [PATCH 02/14] clk: sunxi: factors: Implement clock min and max
- frequencies
-Date: Thu, 17 Jul 2014 13:09:35 -0300
-Message-ID: <53C7F53F.9000902@elopez.com.ar>
-References: <1405588134-2396-1-git-send-email-maxime.ripard@free-electrons.com> <1405588134-2396-3-git-send-email-maxime.ripard@free-electrons.com>
+Subject: Re: [PATCH 03/14] ARM: sunxi: sun5i: Enforce max frequency on PLL6
+Date: Thu, 17 Jul 2014 13:19:34 -0300
+Message-ID: <53C7F796.2050303@elopez.com.ar>
+References: <1405588134-2396-1-git-send-email-maxime.ripard@free-electrons.com> <1405588134-2396-4-git-send-email-maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1;
 	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from yotta.elopez.com.ar ([31.220.24.173]:41000 "EHLO
+Received: from yotta.elopez.com.ar ([31.220.24.173]:41033 "EHLO
 	yotta.elopez.com.ar" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752804AbaGQQJz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jul 2014 12:09:55 -0400
-In-Reply-To: <1405588134-2396-3-git-send-email-maxime.ripard@free-electrons.com>
+	with ESMTP id S933607AbaGQQTs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jul 2014 12:19:48 -0400
+In-Reply-To: <1405588134-2396-4-git-send-email-maxime.ripard@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Maxime Ripard <maxime.ripard@free-electrons.com>
@@ -22,46 +21,39 @@ Cc: Mike Turquette <mturquette@linaro.org>, Hans de Goede <hdegoede@redhat.com>,
 Hi Maxime,
 
 El 17/07/14 06:08, Maxime Ripard escribi=F3:
-> In the A13, the out of reset frequency for the PLL6 is too high to be=
- actually
-> working.
+> PLL6 out of reset is running at 2.4GHz, which is outside of its opera=
+ting
+> boundaries.
 >
-> Hence, we need to be able to lower down its frequency whenever we nee=
-d to use
-> the clock to some acceptable frequency.
->
-> This patch adds two new properties in the clock-nodes, clk-min-freque=
-ncy and
-> clk-max-frequency, to specify acceptable boundaries for proper clock
-> operations.
-
-This paragraph looks out of place
-
->
-> It also adds supports in the sunxi factor clocks driver to use these
-> boundaries, enforce them at prepare time to make sure that the driver=
-s will
-> have a decent frequency, even though it never called set_rate, but al=
-so make
-> sure we never cross these boundaries.
+> Enforce its maximum frequency as set in the datasheet to make sure we=
+ stays
+> within these bounds.
 >
 > Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 > ---
-(...)
+>   arch/arm/boot/dts/sun5i-a13.dtsi | 1 +
+>   1 file changed, 1 insertion(+)
 >
-> @@ -123,6 +147,9 @@ static int clk_factors_set_rate(struct clk_hw *hw=
-, unsigned long rate,
+> diff --git a/arch/arm/boot/dts/sun5i-a13.dtsi b/arch/arm/boot/dts/sun=
+5i-a13.dtsi
+> index bf86e65dd167..de89edc5e5b3 100644
+> --- a/arch/arm/boot/dts/sun5i-a13.dtsi
+> +++ b/arch/arm/boot/dts/sun5i-a13.dtsi
+> @@ -97,6 +97,7 @@
+>   			reg =3D <0x01c20028 0x4>;
+>   			clocks =3D <&osc24M>;
+>   			clock-output-names =3D "pll6_sata", "pll6_other", "pll6";
+> +			clock-max-frequency =3D <1200000000>;
+>   		};
 >
->   	factors->get_factors((u32 *)&rate, (u32)parent_rate, &n, &k, &m, &=
-p);
+>   		/* dummy is 200M */
 >
-> +	if ((rate > factors->max_rate) || (rate < factors->min_rate))
-> +		return -EINVAL;
 
-Printing an error message here may come in handy in the future, what do=
-=20
-you think?
+This patch itself is ok, but I'm not seeing so far where is=20
+"clock-max-frequency" read from the DT and passed to the clock for late=
+r=20
+verification. Did you leave that out by mistake when shuffling patches?
 
-Thanks for working on this!
+Cheers!
 
 Emilio
