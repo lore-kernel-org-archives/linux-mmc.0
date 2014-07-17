@@ -1,77 +1,81 @@
-From: prakash.burla@smartplayin.com
-Subject: RE: Fwd: [PATCH v6 04/12] mmc: mmci: Add Qcom datactrl register variant
-Date: Thu, 17 Jul 2014 06:26:39 -0400 (EDT)
-Message-ID: <1405592799.65820182@apps.rackspace.com>
-References: <1401699818-11329-1-git-send-email-srinivas.kandagatla@linaro.org>
- <1401700146-11588-1-git-send-email-srinivas.kandagatla@linaro.org>
- <CA+neC=Of9Ua5OxUiezmTHfzq9zkXVRCFei3xKMbXi3OGV84EHw@mail.gmail.com>
+From: Prakash Burla <burlaprakash.linuxkernel@gmail.com>
+Subject: Re: FW: Fwd: [RFC PATCH] mmc: mmci: Add qcom dml support to the driver.
+Date: Thu, 17 Jul 2014 17:20:10 +0530
+Message-ID: <CABu_nUQTu1_+sQ_Wkm1R=mOKtCP7GMcie7RJefGL=O6nOYyZrA@mail.gmail.com>
+References: <1405596653.770128886@apps.rackspace.com>
 Mime-Version: 1.0
-Content-Type: text/plain;charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CA+neC=Of9Ua5OxUiezmTHfzq9zkXVRCFei3xKMbXi3OGV84EHw@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1405596653.770128886@apps.rackspace.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: srinivas.kandagatla@linaro.org
-Cc: linux@arm.linux.org.uk, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
 tested-by: Prakash Burla <prakash.burla@smartplayin.com>
-This driver tested on AP806X with mmc Driver.
+This driver is tested on IFC6410.
 
-----------------------------------------------------------------------------------
-From:  <srinivas.kandagatla@linaro.org>
-Date: Mon, Jun 2, 2014 at 2:39 PM
-Subject: [PATCH v6 04/12] mmc: mmci: Add Qcom datactrl register variant
-To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson
-<ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org,
-linux-arm-msm@vger.kernel.org, linus.walleij@linaro.org, Srinivas
-
-
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-
-Instance of this IP on Qualcomm's SOCs has bit different layout for datactrl
-register. Bit position datactrl[16:4] hold the true block size instead of power
-of 2.
-
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
----
- drivers/mmc/host/mmci.c | 5 +++++
- 1 file changed, 5 insertions(+)
-
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index ed20bf5..72981f6 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -60,6 +60,8 @@ static unsigned int fmax = 515633;
-  * @sdio: variant supports SDIO
-  * @st_clkdiv: true if using a ST-specific clock divider algorithm
-  * @blksz_datactrl16: true if Block size is at b16..b30 position in
-datactrl register
-+ * @blksz_datactrl4: true if Block size is at b4..b16 position in datactrl
-+ *                  register
-  * @pwrreg_powerup: power up value for MMCIPOWER register
-  * @signal_direction: input/out direction of bus signals can be indicated
-  * @pwrreg_clkgate: MMCIPOWER register must be used to gate the clock
-@@ -75,6 +77,7 @@ struct variant_data {
-        bool                    sdio;
-        bool                    st_clkdiv;
-        bool                    blksz_datactrl16;
-+       bool                    blksz_datactrl4;
-        u32                     pwrreg_powerup;
-        bool                    signal_direction;
-        bool                    pwrreg_clkgate;
-@@ -731,6 +734,8 @@ static void mmci_start_data(struct mmci_host
-*host, struct mmc_data *data)
-
-        if (variant->blksz_datactrl16)
-                datactrl = MCI_DPSM_ENABLE | (data->blksz << 16);
-+       else if (variant->blksz_datactrl4)
-+               datactrl = MCI_DPSM_ENABLE | (data->blksz << 4);
-        else
-                datactrl = MCI_DPSM_ENABLE | blksz_bits << 4;
-
---
-1.9.1
-
+>
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> Date: Fri, Jul 11, 2014 at 5:18 PM
+> Subject: [RFC PATCH] mmc: mmci: Add qcom dml support to the driver.
+> To: linux-mmc@vger.kernel.org
+> Cc: Linus Walleij <linus.walleij@linaro.org>, Chris Ball
+> <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King
+> <linux@arm.linux.org.uk>, linux-kernel@vger.kernel.org, Srinivas
+> Kandagatla <srinivas.kandagatla@linaro.org>
+>
+>
+> On Qualcomm APQ8064 SOCs, SD card controller has an additional glue
+> called DML (Data Mover Local/Lite) to assist dma transfers.
+> This hardware needs to be setup before any dma transfer is requested.
+> DML itself is not a DMA engine, its just a gule between the SD card
+> controller and dma controller.
+>
+> Most of this code has been ported from qualcomm's 3.4 kernel.
+>
+> This patch adds the code necessary to intialize the hardware and setup
+> before doing any dma transfers.
+>
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> ---
+>
+> Hi All,
+>
+> DMA support for Qualcomm SD card controller is missing in my last patchset, the
+> reason to post this patch separately is because of the unusual glue logic
+> between card controller and the dma-controller. This glue logic is called DML
+> (Data mover local/lite).
+>
+> DML assists dma transfers between sd card controller and dma-controller. As this
+> DML gule is part of SD controller IP and needs configuring for every transfer,
+> So I thought of keeping it close to driver in drivers/mmc/ directory is more
+> usefull, than trying to find a infrastructure to fit it. DML itself is not a DMA
+> controller but an logic present on SD card controller and it resides in SD card
+> controller IP.
+>
+> I would like to get your opnion on overall correctness of the approch.
+>
+> Thanks in advance.
+> srini
+>
+>
+>  drivers/mmc/host/Kconfig    |  11 +++
+>  drivers/mmc/host/Makefile   |   1 +
+>  drivers/mmc/host/mmci.c     |  19 ++++-
+>  drivers/mmc/host/qcom_dml.c | 171 ++++++++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/qcom_dml.h |  17 +++++
+>  5 files changed, 218 insertions(+), 1 deletion(-)
+>  create mode 100644 drivers/mmc/host/qcom_dml.c
+>  create mode 100644 drivers/mmc/host/qcom_dml.h
+>
+.
+[SNIP]
+.
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
+>
+>
