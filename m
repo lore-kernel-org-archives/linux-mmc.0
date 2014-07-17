@@ -1,244 +1,95 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH 04/14] clk: introduce clk_set_phase function & callback
-Date: Thu, 17 Jul 2014 11:08:44 +0200
-Message-ID: <1405588134-2396-5-git-send-email-maxime.ripard@free-electrons.com>
+Subject: [PATCH 05/14] clk: Add a function to retrieve phase
+Date: Thu, 17 Jul 2014 11:08:45 +0200
+Message-ID: <1405588134-2396-6-git-send-email-maxime.ripard@free-electrons.com>
 References: <1405588134-2396-1-git-send-email-maxime.ripard@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from top.free-electrons.com ([176.31.233.9]:41352 "EHLO
+Received: from top.free-electrons.com ([176.31.233.9]:41360 "EHLO
 	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755432AbaGQJKH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jul 2014 05:10:07 -0400
+	with ESMTP id S1753943AbaGQJKI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jul 2014 05:10:08 -0400
 In-Reply-To: <1405588134-2396-1-git-send-email-maxime.ripard@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Mike Turquette <mturquette@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Emilio Lopez <emilio@elopez.com.ar>, chris@printf.net, david.lanzendoerfer@o2s.ch, ulf.hansson@linaro.org
 Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Maxime Ripard <maxime.ripard@free-electrons.com>
 
-From: Mike Turquette <mturquette@linaro.org>
+The current phase API doesn't look into the actual hardware to get the phase
+value, but will rather get it from a variable only set by the set_phase
+function.
 
-A common operation for a clock signal generator is to shift the phase of
-that signal. This patch introduces a new function to the clk.h API to
-dynamically adjust the phase of a clock signal. Additionally this patch
-introduces support for the new function in the common clock framework
-via the .set_phase call back in struct clk_ops.
+This will cause issue when the client driver will never call the set_phase
+function, where we can end up having a reported phase that will not match what
+the hardware has been programmed to by the bootloader or what phase is
+programmed out of reset.
 
-Signed-off-by: Mike Turquette <mturquette@linaro.org>
+Add a new get_phase function for the drivers to implement so that we can get
+this value.
+
 Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 ---
- drivers/clk/clk.c            | 84 +++++++++++++++++++++++++++++++++++++++++---
- include/linux/clk-private.h  |  1 +
- include/linux/clk-provider.h |  5 +++
- include/linux/clk.h          | 29 +++++++++++++++
- 4 files changed, 115 insertions(+), 4 deletions(-)
+ drivers/clk/clk.c            | 17 ++++++++++++++---
+ include/linux/clk-provider.h |  5 +++++
+ 2 files changed, 19 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/clk/clk.c b/drivers/clk/clk.c
-index 8b73edef151d..3eae203cda47 100644
+index 3eae203cda47..a6471df0a3f5 100644
 --- a/drivers/clk/clk.c
 +++ b/drivers/clk/clk.c
-@@ -106,11 +106,11 @@ static void clk_summary_show_one(struct seq_file *s, struct clk *c, int level)
- 	if (!c)
- 		return;
- 
--	seq_printf(s, "%*s%-*s %11d %12d %11lu %10lu\n",
-+	seq_printf(s, "%*s%-*s %11d %12d %11lu %10lu %-3d\n",
- 		   level * 3 + 1, "",
- 		   30 - level * 3, c->name,
- 		   c->enable_count, c->prepare_count, clk_get_rate(c),
--		   clk_get_accuracy(c));
-+		   clk_get_accuracy(c), clk_get_phase(c));
- }
- 
- static void clk_summary_show_subtree(struct seq_file *s, struct clk *c,
-@@ -131,8 +131,8 @@ static int clk_summary_show(struct seq_file *s, void *data)
+@@ -1825,8 +1825,8 @@ out:
+  * clk_get_phase - return the phase shift of a clock signal
+  * @clk: clock signal source
+  *
+- * Returns the phase shift of a clock node in degrees, otherwise returns
+- * -EERROR.
++ * Returns the phase shift of a clock node in degrees. Any negative
++ * values are errors.
+  */
+ int clk_get_phase(struct clk *clk)
  {
- 	struct clk *c;
- 
--	seq_puts(s, "   clock                         enable_cnt  prepare_cnt        rate   accuracy\n");
--	seq_puts(s, "--------------------------------------------------------------------------------\n");
-+	seq_puts(s, "   clock                         enable_cnt  prepare_cnt        rate   accuracy   phase\n");
-+	seq_puts(s, "----------------------------------------------------------------------------------------\n");
+@@ -1836,7 +1836,18 @@ int clk_get_phase(struct clk *clk)
+ 		goto out;
  
  	clk_prepare_lock();
- 
-@@ -170,6 +170,7 @@ static void clk_dump_one(struct seq_file *s, struct clk *c, int level)
- 	seq_printf(s, "\"prepare_count\": %d,", c->prepare_count);
- 	seq_printf(s, "\"rate\": %lu", clk_get_rate(c));
- 	seq_printf(s, "\"accuracy\": %lu", clk_get_accuracy(c));
-+	seq_printf(s, "\"phase\": %d", clk_get_phase(c));
- }
- 
- static void clk_dump_subtree(struct seq_file *s, struct clk *c, int level)
-@@ -256,6 +257,11 @@ static int clk_debug_create_one(struct clk *clk, struct dentry *pdentry)
- 	if (!d)
- 		goto err_out;
- 
-+	d = debugfs_create_u32("clk_phase", S_IRUGO, clk->dentry,
-+			(u32 *)&clk->phase);
-+	if (!d)
-+		goto err_out;
+-	ret = clk->phase;
 +
- 	d = debugfs_create_x32("clk_flags", S_IRUGO, clk->dentry,
- 			(u32 *)&clk->flags);
- 	if (!d)
-@@ -1768,6 +1774,76 @@ out:
- EXPORT_SYMBOL_GPL(clk_set_parent);
- 
- /**
-+ * clk_set_phase - adjust the phase shift of a clock signal
-+ * @clk: clock signal source
-+ * @degrees: number of degrees the signal is shifted
-+ *
-+ * Shifts the phase of a clock signal by the specified degrees. Returns 0 on
-+ * success, -EERROR otherwise.
-+ *
-+ * This function makes no distiction about the input or reference signal that
-+ * we adjust the clock signal phase against. For example phase locked-loop
-+ * clock signal generators we may shift phase with respect to feedback clock
-+ * signal input, but for other cases the clock phase may be shifted with
-+ * respect to some other, unspecified signal.
-+ *
-+ * Additionally the concept of phase shift does not propagate through the clock
-+ * tree hierarchy, which sets it appart from clock rates and clock accuracy. A
-+ * parent clock phase attribute does not have an impact on the phase attribute
-+ * of a child clock.
-+ */
-+int clk_set_phase(struct clk *clk, int degrees)
-+{
-+	int ret = 0;
++	if (clk->phase) {
++		ret = clk->phase;
++		goto out_unlock;
++	}
 +
-+	if (!clk)
-+		goto out;
-+
-+	/* sanity check degrees */
-+	degrees %= 360;
-+	if (degrees < 0)
-+		degrees += 360;
-+
-+	clk_prepare_lock();
-+
-+	if (!clk->ops->set_phase)
++	if (!clk->ops->get_phase)
 +		goto out_unlock;
 +
-+	ret = clk->ops->set_phase(clk->hw, degrees);
-+
-+	if (!ret)
-+		clk->phase = degrees;
++	ret = clk->ops->get_phase(clk->hw);
 +
 +out_unlock:
-+	clk_prepare_unlock();
-+
-+out:
-+	return ret;
-+}
-+
-+/**
-+ * clk_get_phase - return the phase shift of a clock signal
-+ * @clk: clock signal source
-+ *
-+ * Returns the phase shift of a clock node in degrees, otherwise returns
-+ * -EERROR.
-+ */
-+int clk_get_phase(struct clk *clk)
-+{
-+	int ret = 0;
-+
-+	if (!clk)
-+		goto out;
-+
-+	clk_prepare_lock();
-+	ret = clk->phase;
-+	clk_prepare_unlock();
-+
-+out:
-+	return ret;
-+}
-+
-+/**
-  * __clk_init - initialize the data structures in a struct clk
-  * @dev:	device initializing this clk, placeholder for now
-  * @clk:	clk being initialized
-diff --git a/include/linux/clk-private.h b/include/linux/clk-private.h
-index efbf70b9fd84..845be30be50f 100644
---- a/include/linux/clk-private.h
-+++ b/include/linux/clk-private.h
-@@ -46,6 +46,7 @@ struct clk {
- 	unsigned int		enable_count;
- 	unsigned int		prepare_count;
- 	unsigned long		accuracy;
-+	int			phase;
- 	struct hlist_head	children;
- 	struct hlist_node	child_node;
- 	unsigned int		notifier_count;
+ 	clk_prepare_unlock();
+ 
+ out:
 diff --git a/include/linux/clk-provider.h b/include/linux/clk-provider.h
-index 0c287dbbb144..3a35a0647118 100644
+index 3a35a0647118..fa53f90456a9 100644
 --- a/include/linux/clk-provider.h
 +++ b/include/linux/clk-provider.h
 @@ -129,6 +129,10 @@ struct dentry;
   *		set then clock accuracy will be initialized to parent accuracy
   *		or 0 (perfect clock) if clock has no parent.
   *
-+ * @set_phase:	Shift the phase this clock signal in degrees specified
-+ *		by the second argument. Valid values for degrees are
-+ *		0-359. Return 0 on success, otherwise -EERROR.
++ * @get_phase:	Queries the hardware to get the current phase of a clock.
++ *		Returned values are 0-359 degrees on success, negative
++ *		error codes on failure.
 + *
-  * @init:	Perform platform-specific initialization magic.
-  *		This is not not used by any of the basic clock types.
-  *		Please consider other ways of solving initialization problems
-@@ -177,6 +181,7 @@ struct clk_ops {
+  * @set_phase:	Shift the phase this clock signal in degrees specified
+  *		by the second argument. Valid values for degrees are
+  *		0-359. Return 0 on success, otherwise -EERROR.
+@@ -181,6 +185,7 @@ struct clk_ops {
  				    unsigned long parent_rate, u8 index);
  	unsigned long	(*recalc_accuracy)(struct clk_hw *hw,
  					   unsigned long parent_accuracy);
-+	int		(*set_phase)(struct clk_hw *hw, int degrees);
++	int		(*get_phase)(struct clk_hw *hw);
+ 	int		(*set_phase)(struct clk_hw *hw, int degrees);
  	void		(*init)(struct clk_hw *hw);
  	int		(*debug_init)(struct clk_hw *hw, struct dentry *dentry);
- };
-diff --git a/include/linux/clk.h b/include/linux/clk.h
-index fb5e097d8f72..38bdedd3e389 100644
---- a/include/linux/clk.h
-+++ b/include/linux/clk.h
-@@ -106,6 +106,25 @@ int clk_notifier_unregister(struct clk *clk, struct notifier_block *nb);
-  */
- long clk_get_accuracy(struct clk *clk);
- 
-+/**
-+ * clk_set_phase - adjust the phase shift of a clock signal
-+ * @clk: clock signal source
-+ * @degrees: number of degrees the signal is shifted
-+ *
-+ * Shifts the phase of a clock signal by the specified degrees. Returns 0 on
-+ * success, -EERROR otherwise.
-+ */
-+int clk_set_phase(struct clk *clk, int degrees);
-+
-+/**
-+ * clk_get_phase - return the phase shift of a clock signal
-+ * @clk: clock signal source
-+ *
-+ * Returns the phase shift of a clock node in degrees, otherwise returns
-+ * -EERROR.
-+ */
-+int clk_get_phase(struct clk *clk);
-+
- #else
- 
- static inline long clk_get_accuracy(struct clk *clk)
-@@ -113,6 +132,16 @@ static inline long clk_get_accuracy(struct clk *clk)
- 	return -ENOTSUPP;
- }
- 
-+static inline long clk_set_phase(struct clk *clk, int phase)
-+{
-+	return -ENOTSUPP;
-+}
-+
-+static inline long clk_get_phase(struct clk *clk)
-+{
-+	return -ENOTSUPP;
-+}
-+
- #endif
- 
- /**
 -- 
 2.0.1
 
