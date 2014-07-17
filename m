@@ -1,191 +1,156 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH 13/14] mmc: sunxi: Convert MMC driver to the standard clock phase API
-Date: Thu, 17 Jul 2014 11:08:53 +0200
-Message-ID: <1405588134-2396-14-git-send-email-maxime.ripard@free-electrons.com>
-References: <1405588134-2396-1-git-send-email-maxime.ripard@free-electrons.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: char interface to sdio, chdio.c
+Date: Thu, 17 Jul 2014 12:17 +0200
+Message-ID: <7228146.FsqiNq1Vpj@wuerfel>
+References: <20140716032655.GB30412@kroah.com> <53C705DB.3040700@codeaurora.org> <20140717053347.GB22970@kroah.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from top.free-electrons.com ([176.31.233.9]:41405 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755650AbaGQJKV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jul 2014 05:10:21 -0400
-In-Reply-To: <1405588134-2396-1-git-send-email-maxime.ripard@free-electrons.com>
+Received: from mout.kundenserver.de ([212.227.17.10]:53705 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755656AbaGQKRF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jul 2014 06:17:05 -0400
+In-Reply-To: <20140717053347.GB22970@kroah.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mike Turquette <mturquette@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Emilio Lopez <emilio@elopez.com.ar>, chris@printf.net, david.lanzendoerfer@o2s.ch, ulf.hansson@linaro.org
-Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Maxime Ripard <maxime.ripard@free-electrons.com>
+To: Greg KH <greg@kroah.com>
+Cc: Stephen Boyd <sboyd@codeaurora.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, Alexander Kolesnikov <akolesni@codeaurora.org>, Konstantin Dorfman <kdorfman@codeaurora.org>
 
-Now that we have proper support to use the generic phase API in our clock
-driver, switch the MMC driver to use it.
+On Wednesday 16 July 2014 22:33:47 Greg KH wrote:
+> + mmc: Char SDIO Device Driver
 
-Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
----
- .../devicetree/bindings/mmc/sunxi-mmc.txt          |  8 +--
- drivers/mmc/host/sunxi-mmc.c                       | 72 +++++++++++++++-------
- 2 files changed, 53 insertions(+), 27 deletions(-)
+A few comments on the ioctl interface, since I suppose we'll have
+to live with that once it gets merged.
 
-diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-index 91b3a3467150..4bf41d833804 100644
---- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-@@ -10,8 +10,8 @@ Absolute maximum transfer rate is 200MB/s
- Required properties:
-  - compatible : "allwinner,sun4i-a10-mmc" or "allwinner,sun5i-a13-mmc"
-  - reg : mmc controller base registers
-- - clocks : a list with 2 phandle + clock specifier pairs
-- - clock-names : must contain "ahb" and "mmc"
-+ - clocks : a list with 4 phandle + clock specifier pairs
-+ - clock-names : must contain "ahb", "mmc", "output" and "sample"
-  - interrupts : mmc controller interrupt
- 
- Optional properties:
-@@ -25,8 +25,8 @@ Examples:
- 	mmc0: mmc@01c0f000 {
- 		compatible = "allwinner,sun5i-a13-mmc";
- 		reg = <0x01c0f000 0x1000>;
--		clocks = <&ahb_gates 8>, <&mmc0_clk>;
--		clock-names = "ahb", "mod";
-+		clocks = <&ahb_gates 8>, <&mmc0_clk>, <&mmc0_output_clk>, <&mmc0_sample_clk>;
-+		clock-names = "ahb", "mod", "output", "sample";
- 		interrupts = <0 32 4>;
- 		status = "disabled";
- 	};
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 024f67c98cdc..8719cefa590d 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -22,7 +22,6 @@
- 
- #include <linux/clk.h>
- #include <linux/clk-private.h>
--#include <linux/clk/sunxi.h>
- 
- #include <linux/gpio.h>
- #include <linux/platform_device.h>
-@@ -230,6 +229,8 @@ struct sunxi_mmc_host {
- 	/* clock management */
- 	struct clk	*clk_ahb;
- 	struct clk	*clk_mmc;
-+	struct clk	*clk_sample;
-+	struct clk	*clk_output;
- 
- 	/* irq */
- 	spinlock_t	lock;
-@@ -617,7 +618,7 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
- static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 				  struct mmc_ios *ios)
- {
--	u32 rate, oclk_dly, rval, sclk_dly, src_clk;
-+	u32 rate, oclk_dly, rval, sclk_dly;
- 	int ret;
- 
- 	rate = clk_round_rate(host->clk_mmc, ios->clock);
-@@ -643,34 +644,31 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 
- 	/* determine delays */
- 	if (rate <= 400000) {
--		oclk_dly = 0;
--		sclk_dly = 7;
-+		oclk_dly = 180;
-+		sclk_dly = 42;
- 	} else if (rate <= 25000000) {
--		oclk_dly = 0;
--		sclk_dly = 5;
-+		oclk_dly = 180;
-+		sclk_dly = 75;
- 	} else if (rate <= 50000000) {
- 		if (ios->timing == MMC_TIMING_UHS_DDR50) {
--			oclk_dly = 2;
--			sclk_dly = 4;
-+			oclk_dly = 60;
-+			sclk_dly = 120;
- 		} else {
--			oclk_dly = 3;
--			sclk_dly = 5;
-+			oclk_dly = 90;
-+			sclk_dly = 150;
- 		}
-+	} else if (rate <= 100000000) {
-+		oclk_dly = 6;
-+		sclk_dly = 24;
-+	} else if (rate <= 200000000) {
-+		oclk_dly = 3;
-+		sclk_dly = 12;
- 	} else {
--		/* rate > 50000000 */
--		oclk_dly = 2;
--		sclk_dly = 4;
-+		return -EINVAL;
- 	}
- 
--	src_clk = clk_get_rate(clk_get_parent(host->clk_mmc));
--	if (src_clk >= 300000000 && src_clk <= 400000000) {
--		if (oclk_dly)
--			oclk_dly--;
--		if (sclk_dly)
--			sclk_dly--;
--	}
--
--	clk_sunxi_mmc_phase_control(host->clk_mmc, sclk_dly, oclk_dly);
-+	clk_set_phase(host->clk_sample, sclk_dly);
-+	clk_set_phase(host->clk_output, oclk_dly);
- 
- 	return sunxi_mmc_oclk_onoff(host, 1);
- }
-@@ -909,6 +907,18 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
- 		return PTR_ERR(host->clk_mmc);
- 	}
- 
-+	host->clk_output = devm_clk_get(&pdev->dev, "output");
-+	if (IS_ERR(host->clk_output)) {
-+		dev_err(&pdev->dev, "Could not get output clock\n");
-+		return PTR_ERR(host->clk_output);
-+	}
-+
-+	host->clk_sample = devm_clk_get(&pdev->dev, "sample");
-+	if (IS_ERR(host->clk_sample)) {
-+		dev_err(&pdev->dev, "Could not get sample clock\n");
-+		return PTR_ERR(host->clk_sample);
-+	}
-+
- 	host->reset = devm_reset_control_get(&pdev->dev, "ahb");
- 
- 	ret = clk_prepare_enable(host->clk_ahb);
-@@ -923,11 +933,23 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
- 		goto error_disable_clk_ahb;
- 	}
- 
-+	ret = clk_prepare_enable(host->clk_output);
-+	if (ret) {
-+		dev_err(&pdev->dev, "Enable output clk err %d\n", ret);
-+		goto error_disable_clk_mmc;
-+	}
-+
-+	ret = clk_prepare_enable(host->clk_sample);
-+	if (ret) {
-+		dev_err(&pdev->dev, "Enable sample clk err %d\n", ret);
-+		goto error_disable_clk_output;
-+	}
-+
- 	if (!IS_ERR(host->reset)) {
- 		ret = reset_control_deassert(host->reset);
- 		if (ret) {
- 			dev_err(&pdev->dev, "reset err %d\n", ret);
--			goto error_disable_clk_mmc;
-+			goto error_disable_clk_sample;
- 		}
- 	}
- 
-@@ -946,6 +968,10 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
- error_assert_reset:
- 	if (!IS_ERR(host->reset))
- 		reset_control_assert(host->reset);
-+error_disable_clk_sample:
-+	clk_disable_unprepare(host->clk_sample);
-+error_disable_clk_output:
-+	clk_disable_unprepare(host->clk_output);
- error_disable_clk_mmc:
- 	clk_disable_unprepare(host->clk_mmc);
- error_disable_clk_ahb:
--- 
-2.0.1
+> +Interface
+> +=========
+> +The Char SDIO Device Driver has two char device interfaces:
+> + - Control Interface;
+> + - Function Interface.
+> +
+> +Char SDIO Device Driver Control Interface consists of:
+> + - open()   - device node is /dev/csdio0;
+> + - close()
+> + - ioctl()  - the following options are available:
+> +   - CSDIO_IOC_ENABLE_HIGHSPEED_MODE;
+> +   - CSDIO_IOC_SET_DATA_TRANSFER_CLOCKS;
+> +   - CSDIO_IOC_ENABLE_ISR;
+> +   - CSDIO_IOC_DISABLE_ISR.
 
+
+The documentation doesn't match the code.:
+
+CSDIO_IOC_GET/SET_VDD are implemented in the control device,
+not the function device, and that is probably a good idea.
+CSDIO_IOC_ENABLE_HIGHSPEED_MODE is not implemented
+at all. CSDIO_IOC_ENABLE_ISR seems redundant with what
+the CSDIO_IOC_{DIS,}CONNECT_ISR functions do, but I could be
+wrong here.
+
+The sysfs interface may actually be more appropriate than the
+control node, if I was to pick one of the two.
+
+> +Char SDIO Device Driver Function Interface consists of:
+> + - open()  - device node is /dev/csdiofX, where X is Function Id;
+> + - close()
+> + - read()  - send CMD53 read;
+> + - write() - send CMD53 write;
+> + - ioctl() - the following options are available:
+> +   - CSDIO_IOC_SET_OP_CODE - 0 fixed adrress, 1 autoincrement.
+> +   - CSDIO_IOC_FUNCTION_SET_BLOCK_SIZE;
+> +   - CSDIO_IOC_SET_BLOCK_MODE - 0 byte mode, 1 block mode;
+> +   - CSDIO_IOC_CMD52 - execute CMD52, receives the
+> +        following structure as a parameter:
+> +            struct csdio_cmd52_ctrl_t {
+> +	            uint32_t    m_write; // 0 - read, 1 -write
+> +	            uint32_t    m_address;
+> +	            uint32_t    m_data;  // data to write or read data
+> +	            uint32_t    m_ret;   // command execution status
+> +            }__attribute__ ((packed));
+> +   - CSDIO_IOC_CMD53 - setup CMD53 data transfer, receives the
+> +        following structure as a parameter:
+> +            struct csdio_cmd53_ctrl_t {
+> +	            uint32_t    m_block_mode;
+> +	            uint32_t    m_op_code;
+> +	            uint32_t    m_address;
+> +            }__attribute__ ((packed));
+> +   - CSDIO_IOC_CONNECT_ISR;
+> +   - CSDIO_IOC_DISCONNECT_ISR;
+> +   - CSDIO_IOC_GET_VDD;
+> +   - CSDIO_IOC_SET_VDD.
+> +
+> +Additionally, user space application can use fcntl system call with
+> +parameters F_SETOWN and F_SETFL in order to set an asynchronous
+> +callback for SDIO interrupt.
+
+The read/write API seems very strange. SDIO has multiple ways of
+passing data between OS and device using CMD52 and CMD53, and they
+are all done differently here:
+
+- A one-byte read or write uses a single CSDIO_IOC_CMD52 ioctl.
+  This could be done using pread/pwrite with length '1' rather than
+  an ioctl, if we want to.
+
+- a byte-addressed multi-byte read/write needs to first 'seek' using
+  CSDIO_IOC_CMD53 or and then transfer using read() or write().
+
+- a block-addressed read/write is similar, but the number of bytes
+  copied to/from user space is now multiplied with the block size (!).
+  The block size needs to be set using both CSDIO_IOC_SET_BLOCK_MODE
+  and CSDIO_IOC_CMD53, using the same value.
+
+- to do a multi-byte read/write at a constant address rather than
+  a block copy, CSDIO_IOC_CMD53 needs to set at least one bit (not
+  necessarily the one used in the actual command) in m_op_code.
+
+I guess all of this could be done using pread/pwrite, using the
+loff_t value to encode the m_address in the lower bits and the
+mode (single-byte, multi-byte, multi-byte auto-increment,
+block, block auto-increment) in some of the upper bits.
+
+Alternatively, the read/write functions could be removed completely
+and everything be done in the ioctls, but in a more consistent
+way.
+
+> +
+> +#define CSDIO_IOC_MAGIC  'm'
+> +
+> +#define CSDIO_IOC_ENABLE_HIGHSPEED_MODE      _IO(CSDIO_IOC_MAGIC, 0)
+> +#define CSDIO_IOC_SET_DATA_TRANSFER_CLOCKS   _IO(CSDIO_IOC_MAGIC, 1)
+> +#define CSDIO_IOC_SET_OP_CODE                _IO(CSDIO_IOC_MAGIC, 2)
+> +#define CSDIO_IOC_FUNCTION_SET_BLOCK_SIZE    _IO(CSDIO_IOC_MAGIC, 3)
+> +#define CSDIO_IOC_SET_BLOCK_MODE             _IO(CSDIO_IOC_MAGIC, 4)
+> +#define CSDIO_IOC_CONNECT_ISR                _IO(CSDIO_IOC_MAGIC, 5)
+> +#define CSDIO_IOC_DISCONNECT_ISR             _IO(CSDIO_IOC_MAGIC, 6)
+> +#define CSDIO_IOC_CMD52                      _IO(CSDIO_IOC_MAGIC, 7)
+> +#define CSDIO_IOC_CMD53                      _IO(CSDIO_IOC_MAGIC, 8)
+> +#define CSDIO_IOC_ENABLE_ISR                 _IO(CSDIO_IOC_MAGIC, 9)
+> +#define CSDIO_IOC_DISABLE_ISR                _IO(CSDIO_IOC_MAGIC, 10)
+> +#define CSDIO_IOC_SET_VDD                    _IO(CSDIO_IOC_MAGIC, 11)
+> +#define CSDIO_IOC_GET_VDD                    _IO(CSDIO_IOC_MAGIC, 12)
+> +
+> +#define CSDIO_IOC_MAXNR   12
+
+The command codes above should use _IOR or _IOW where appropriate to
+encode the size of the transferred data.
+
+> +
+> +struct csdio_cmd53_ctrl_t {
+> +	uint32_t    m_block_mode;   /* data tran. byte(0)/block(1) mode */
+> +	uint32_t    m_op_code;      /* address auto increment flag */
+> +	uint32_t    m_address;
+> +} __attribute__ ((packed));
+> +
+> +struct csdio_cmd52_ctrl_t {
+> +	uint32_t    m_write;
+> +	uint32_t    m_address;
+> +	uint32_t    m_data;
+> +	uint32_t    m_ret;
+> +} __attribute__ ((packed));
+
+The packing is not necessary here, but at least all of these are
+compatible between 32 and 64 bit, so enabling compat mode is a one-line
+change and requires no conversion.
+
+	Arnd
