@@ -1,306 +1,193 @@
-From: Apelete Seketeli <apelete@seketeli.net>
-Subject: [PATCH v6 1/2] mmc: jz4740: add dma infrastructure for data transfers
-Date: Mon, 21 Jul 2014 06:37:44 +0200
-Message-ID: <1405917465-18185-2-git-send-email-apelete@seketeli.net>
-References: <1405917465-18185-1-git-send-email-apelete@seketeli.net>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1405917465-18185-1-git-send-email-apelete@seketeli.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, H Hartley Sweeten <hsweeten@visionengravers.com>, Lars-Peter Clausen <lars@metafoo.de>, Wei Yongjun <yongjun_wei@trendmicro.com.cn>, Alex Smith <alex.smith@imgtec.com>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
+From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Subject: Re: [PATCH] brcmfmac: prevent watchdog from interfering with scanning
+ and connecting
+Date: Mon, 21 Jul 2014 15:42:04 +0800
+Message-ID: <53CCC44C.2070507@linux.intel.com>
+References: <539E8559.3010601@linux.intel.com> <539EA79C.7010206@broadcom.com> <53A30F96.3010206@linux.intel.com> <53A311E4.301@broadcom.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:41109 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751017AbaGUHmM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 21 Jul 2014 03:42:12 -0400
+In-Reply-To: <53A311E4.301@broadcom.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arend van Spriel <arend@broadcom.com>, brudley@broadcom.com, Franky Lin <frankyl@broadcom.com>, meuleman@broadcom.com, linville@tuxdriver.com, pieterpg@broadcom.com, dekim@broadcom.com, mcgrof@do-not-panic.com, antonio@open-mesh.com, johannes.berg@intel.com
+Cc: linux-wireless@vger.kernel.org, brcm80211-dev-list@broadcom.com, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Russell King <linux@arm.linux.org.uk>
 
-Until now the MMC driver for JZ4740 SoC was relying on PIO mode only
-for data transfers.
-This patch allows the use of DMA for data trasnfers in addition to PIO
-mode by relying on DMA Engine.
 
-DMA tranfers performance might be further improved by taking advantage
-of the asynchronous request capability of the MMC framework.
+On 2014/6/20 0:37, Arend van Spriel wrote:
+> On 19-06-14 18:28, Fu, Zhonghui wrote:
+>>
+>> On 2014/6/16 16:15, Arend van Spriel wrote:
+>>> On 16-06-14 07:49, Fu, Zhonghui wrote:
+>>>>   From 14485894add32aedacb3e486ebb2cc2b73861abf Mon Sep 17 00:00:00 2001
+>>>> From: Fu zhonghui <zhonghui.fu@linux.intel.com>
+>>>> Date: Wed, 11 Jun 2014 11:06:55 +0800
+>>>> Subject: [PATCH] brcmfmac: prevent watchdog from interfering with scanning and connecting
+>>>>
+>>>> Watchdog in brcmfmac driver may make WiFi chip enter sleep mode
+>>>> before completion of scanning or connecting.
+>>>>
+>>>> This will lead to scanning or connecting failure.
+>>>>
+>>>> Increasing temporarily idle-time threshold during scanning or
+>>>> connecting can ensure scanning or connecting success without
+>>>> watchdog interference.
+>>>
+>>> Are you sure you are not having runtime PM enabled. That could be your problem as the host controller code disables sdio irqs. Please see this thread [1]. For our device runtime pm should not be enabled, but I am not sure if that is taken into account in mmc_attach_sdio() (see code below).
+>> I have tried brcmfmac driver with "CONFIG_PM_RUNTIME is not set", and scanning and connecting  always succeeded. This means that CONFIG_PM_RUNTIME should not be set if we use SDIO WiFi device driven by brcmfmac driver, right?
+>
+> Depends which kernel you are using. In 3.16-rc1 the sdio interrupt issue has been fixed so you should be fine to use CONFIG_PM_RUNTIME. Here is the commit
 
-Signed-off-by: Apelete Seketeli <apelete@seketeli.net>
----
- drivers/mmc/host/jz4740_mmc.c |  174 +++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 166 insertions(+), 8 deletions(-)
+I run 3.16-rc4 and 3.16-rc5 kernel with CONFIG_PM_RUNTIME set, the issue still exists as follows:
 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index 537d6c7..049b133 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -30,7 +30,9 @@
- #include <asm/mach-jz4740/gpio.h>
- #include <asm/cacheflush.h>
- #include <linux/dma-mapping.h>
-+#include <linux/dmaengine.h>
- 
-+#include <asm/mach-jz4740/dma.h>
- #include <asm/mach-jz4740/jz4740_mmc.h>
- 
- #define JZ_REG_MMC_STRPCL	0x00
-@@ -122,6 +124,7 @@ struct jz4740_mmc_host {
- 	int card_detect_irq;
- 
- 	void __iomem *base;
-+	struct resource *mem_res;
- 	struct mmc_request *req;
- 	struct mmc_command *cmd;
- 
-@@ -136,8 +139,138 @@ struct jz4740_mmc_host {
- 	struct timer_list timeout_timer;
- 	struct sg_mapping_iter miter;
- 	enum jz4740_mmc_state state;
-+
-+	/* DMA support */
-+	struct dma_chan *dma_rx;
-+	struct dma_chan *dma_tx;
-+	bool use_dma;
-+	int sg_len;
-+
-+/* The DMA trigger level is 8 words, that is to say, the DMA read
-+ * trigger is when data words in MSC_RXFIFO is >= 8 and the DMA write
-+ * trigger is when data words in MSC_TXFIFO is < 8.
-+ */
-+#define JZ4740_MMC_FIFO_HALF_SIZE 8
- };
- 
-+/*----------------------------------------------------------------------------*/
-+/* DMA infrastructure */
-+
-+static void jz4740_mmc_release_dma_channels(struct jz4740_mmc_host *host)
-+{
-+	if (!host->use_dma)
-+		return;
-+
-+	dma_release_channel(host->dma_tx);
-+	dma_release_channel(host->dma_rx);
-+}
-+
-+static int jz4740_mmc_acquire_dma_channels(struct jz4740_mmc_host *host)
-+{
-+	dma_cap_mask_t mask;
-+
-+	dma_cap_zero(mask);
-+	dma_cap_set(DMA_SLAVE, mask);
-+
-+	host->dma_tx = dma_request_channel(mask, NULL, host);
-+	if (!host->dma_tx) {
-+		dev_err(mmc_dev(host->mmc), "Failed to get dma_tx channel\n");
-+		return -ENODEV;
-+	}
-+
-+	host->dma_rx = dma_request_channel(mask, NULL, host);
-+	if (!host->dma_rx) {
-+		dev_err(mmc_dev(host->mmc), "Failed to get dma_rx channel\n");
-+		goto free_master_write;
-+	}
-+
-+	return 0;
-+
-+free_master_write:
-+	dma_release_channel(host->dma_tx);
-+	return -ENODEV;
-+}
-+
-+static inline int jz4740_mmc_get_dma_dir(struct mmc_data *data)
-+{
-+	return (data->flags & MMC_DATA_READ) ? DMA_FROM_DEVICE : DMA_TO_DEVICE;
-+}
-+
-+static void jz4740_mmc_dma_unmap(struct jz4740_mmc_host *host,
-+				 struct mmc_data *data)
-+{
-+	struct dma_chan *chan;
-+	enum dma_data_direction dir = jz4740_mmc_get_dma_dir(data);
-+
-+	if (dir == DMA_TO_DEVICE)
-+		chan = host->dma_tx;
-+	else
-+		chan = host->dma_rx;
-+
-+	dma_unmap_sg(chan->device->dev, data->sg, data->sg_len, dir);
-+}
-+
-+static int jz4740_mmc_start_dma_transfer(struct jz4740_mmc_host *host,
-+					 struct mmc_data *data)
-+{
-+	struct dma_chan *chan;
-+	struct dma_async_tx_descriptor *desc;
-+	struct dma_slave_config conf = {
-+		.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
-+		.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
-+		.src_maxburst = JZ4740_MMC_FIFO_HALF_SIZE,
-+		.dst_maxburst = JZ4740_MMC_FIFO_HALF_SIZE,
-+	};
-+	enum dma_data_direction dir = jz4740_mmc_get_dma_dir(data);
-+
-+	if (dir == DMA_TO_DEVICE) {
-+		conf.direction = DMA_MEM_TO_DEV;
-+		conf.dst_addr = host->mem_res->start + JZ_REG_MMC_TXFIFO;
-+		conf.slave_id = JZ4740_DMA_TYPE_MMC_TRANSMIT;
-+		chan = host->dma_tx;
-+	} else {
-+		conf.direction = DMA_DEV_TO_MEM;
-+		conf.src_addr = host->mem_res->start + JZ_REG_MMC_RXFIFO;
-+		conf.slave_id = JZ4740_DMA_TYPE_MMC_RECEIVE;
-+		chan = host->dma_rx;
-+	}
-+
-+	host->sg_len = dma_map_sg(chan->device->dev,
-+				  data->sg,
-+				  data->sg_len,
-+				  dir);
-+
-+	if (host->sg_len == 0) {
-+		dev_err(mmc_dev(host->mmc),
-+			"Failed to map scatterlist for DMA operation\n");
-+		return -EINVAL;
-+	}
-+
-+	dmaengine_slave_config(chan, &conf);
-+	desc = dmaengine_prep_slave_sg(chan,
-+				       data->sg,
-+				       host->sg_len,
-+				       conf.direction,
-+				       DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
-+	if (!desc) {
-+		dev_err(mmc_dev(host->mmc),
-+			"Failed to allocate DMA %s descriptor",
-+			 conf.direction == DMA_MEM_TO_DEV ? "TX" : "RX");
-+		goto dma_unmap;
-+	}
-+
-+	dmaengine_submit(desc);
-+	dma_async_issue_pending(chan);
-+
-+	return 0;
-+
-+dma_unmap:
-+	jz4740_mmc_dma_unmap(host, data);
-+	return -ENOMEM;
-+}
-+
-+/*----------------------------------------------------------------------------*/
-+
- static void jz4740_mmc_set_irq_enabled(struct jz4740_mmc_host *host,
- 	unsigned int irq, bool enabled)
- {
-@@ -442,6 +575,8 @@ static void jz4740_mmc_send_command(struct jz4740_mmc_host *host,
- 			cmdat |= JZ_MMC_CMDAT_WRITE;
- 		if (cmd->data->flags & MMC_DATA_STREAM)
- 			cmdat |= JZ_MMC_CMDAT_STREAM;
-+		if (host->use_dma)
-+			cmdat |= JZ_MMC_CMDAT_DMA_EN;
- 
- 		writew(cmd->data->blksz, host->base + JZ_REG_MMC_BLKLEN);
- 		writew(cmd->data->blocks, host->base + JZ_REG_MMC_NOB);
-@@ -474,6 +609,7 @@ static irqreturn_t jz_mmc_irq_worker(int irq, void *devid)
- 	struct jz4740_mmc_host *host = (struct jz4740_mmc_host *)devid;
- 	struct mmc_command *cmd = host->req->cmd;
- 	struct mmc_request *req = host->req;
-+	struct mmc_data *data = cmd->data;
- 	bool timeout = false;
- 
- 	if (cmd->error)
-@@ -484,23 +620,32 @@ static irqreturn_t jz_mmc_irq_worker(int irq, void *devid)
- 		if (cmd->flags & MMC_RSP_PRESENT)
- 			jz4740_mmc_read_response(host, cmd);
- 
--		if (!cmd->data)
-+		if (!data)
- 			break;
- 
- 		jz_mmc_prepare_data_transfer(host);
- 
- 	case JZ4740_MMC_STATE_TRANSFER_DATA:
--		if (cmd->data->flags & MMC_DATA_READ)
--			timeout = jz4740_mmc_read_data(host, cmd->data);
-+		if (host->use_dma) {
-+			/* Use DMA if enabled, data transfer direction was
-+			 * defined  before in jz_mmc_prepare_data_transfer().
-+			 */
-+			timeout = jz4740_mmc_start_dma_transfer(host, data);
-+			data->bytes_xfered = data->blocks * data->blksz;
-+		} else if (data->flags & MMC_DATA_READ)
-+			/* If DMA is not enabled, rely on data flags
-+			 * to establish data transfer direction.
-+			 */
-+			timeout = jz4740_mmc_read_data(host, data);
- 		else
--			timeout = jz4740_mmc_write_data(host, cmd->data);
-+			timeout = jz4740_mmc_write_data(host, data);
- 
- 		if (unlikely(timeout)) {
- 			host->state = JZ4740_MMC_STATE_TRANSFER_DATA;
- 			break;
- 		}
- 
--		jz4740_mmc_transfer_check_state(host, cmd->data);
-+		jz4740_mmc_transfer_check_state(host, data);
- 
- 		timeout = jz4740_mmc_poll_irq(host, JZ_MMC_IRQ_DATA_TRAN_DONE);
- 		if (unlikely(timeout)) {
-@@ -757,7 +902,6 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 	struct mmc_host *mmc;
- 	struct jz4740_mmc_host *host;
- 	struct jz4740_mmc_platform_data *pdata;
--	struct resource *res;
- 
- 	pdata = pdev->dev.platform_data;
- 
-@@ -784,10 +928,11 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 		goto err_free_host;
- 	}
- 
--	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	host->base = devm_ioremap_resource(&pdev->dev, res);
-+	host->mem_res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	host->base = devm_ioremap_resource(&pdev->dev, host->mem_res);
- 	if (IS_ERR(host->base)) {
- 		ret = PTR_ERR(host->base);
-+		dev_err(&pdev->dev, "Failed to ioremap base memory\n");
- 		goto err_free_host;
- 	}
- 
-@@ -834,6 +979,10 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 	/* It is not important when it times out, it just needs to timeout. */
- 	set_timer_slack(&host->timeout_timer, HZ);
- 
-+	host->use_dma = true;
-+	if (host->use_dma && jz4740_mmc_acquire_dma_channels(host) != 0)
-+		host->use_dma = false;
-+
- 	platform_set_drvdata(pdev, host);
- 	ret = mmc_add_host(mmc);
- 
-@@ -843,6 +992,10 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 	}
- 	dev_info(&pdev->dev, "JZ SD/MMC card driver registered\n");
- 
-+	dev_info(&pdev->dev, "Using %s, %d-bit mode\n",
-+		 host->use_dma ? "DMA" : "PIO",
-+		 (mmc->caps & MMC_CAP_4_BIT_DATA) ? 4 : 1);
-+
- 	return 0;
- 
- err_free_irq:
-@@ -850,6 +1003,8 @@ err_free_irq:
- err_free_gpios:
- 	jz4740_mmc_free_gpios(pdev);
- err_gpio_bulk_free:
-+	if (host->use_dma)
-+		jz4740_mmc_release_dma_channels(host);
- 	jz_gpio_bulk_free(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
- err_free_host:
- 	mmc_free_host(mmc);
-@@ -872,6 +1027,9 @@ static int jz4740_mmc_remove(struct platform_device *pdev)
- 	jz4740_mmc_free_gpios(pdev);
- 	jz_gpio_bulk_free(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
- 
-+	if (host->use_dma)
-+		jz4740_mmc_release_dma_channels(host);
-+
- 	mmc_free_host(host->mmc);
- 
- 	return 0;
--- 
-1.7.10.4
+1 step: modprobe brcmfmac
+2 step: iwlist wlan1 scan         get scanning result successfully.
+3 step: wait a while, no any operation
+4 step: iwlist wlan1 scan         scanning timeout, can't get scanning result.
+
+
+Thanks,
+Zhonghui
+
+>
+> commit be138554a7923658ded799b0e8794d9c1d08a6e5
+> Author: Russell King <rmk+kernel@arm.linux.org.uk>
+> Date:   Fri Apr 25 12:55:56 2014 +0100
+>
+>     mmc: sdhci: allow sdio interrupts while sdhci runtime suspended
+>
+> Regards,
+> Arend
+>
+>> Thanks,
+>> Zhonghui
+>>>
+>>> Gr. AvS
+>>>
+>>> [1] http://www.spinics.net/lists/linux-mmc/msg25978.html
+>>>
+>>> --8<----------------------------------------------------------------
+>>>
+>>>      /*
+>>>       * Enable runtime PM only if supported by host+card+board
+>>>       */
+>>>      if (host->caps & MMC_CAP_POWER_OFF_CARD) {
+>>>          /*
+>>>           * Let runtime PM core know our card is active
+>>>           */
+>>>          err = pm_runtime_set_active(&card->dev);
+>>>          if (err)
+>>>              goto remove;
+>>>
+>>>          /*
+>>>           * Enable runtime PM for this card
+>>>           */
+>>>          pm_runtime_enable(&card->dev);
+>>>      }
+>>>
+>>>> Signed-off-by: Fu zhonghui <zhonghui.fu@linux.intel.com>
+>>>> ---
+>>>>    drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c |   18 ++++++++++++++++--
+>>>>    .../net/wireless/brcm80211/brcmfmac/wl_cfg80211.c  |    3 ++-
+>>>>    2 files changed, 18 insertions(+), 3 deletions(-)
+>>>>
+>>>> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c b/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
+>>>> index 13c89a0..729deab 100644
+>>>> --- a/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
+>>>> +++ b/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
+>>>> @@ -34,6 +34,7 @@
+>>>>    #include <linux/vmalloc.h>
+>>>>    #include <linux/platform_data/brcmfmac-sdio.h>
+>>>>    #include <linux/moduleparam.h>
+>>>> +#include <net/cfg80211.h>
+>>>>    #include <asm/unaligned.h>
+>>>>    #include <defs.h>
+>>>>    #include <brcmu_wifi.h>
+>>>> @@ -43,6 +44,10 @@
+>>>>    #include "sdio_host.h"
+>>>>    #include "chip.h"
+>>>>    #include "nvram.h"
+>>>> +#include "dhd.h"
+>>>> +#include "fwil_types.h"
+>>>> +#include "p2p.h"
+>>>> +#include "wl_cfg80211.h"
+>>>>
+>>>>    #define DCMD_RESP_TIMEOUT  2000    /* In milli second */
+>>>>
+>>>> @@ -307,6 +312,7 @@ struct rte_console {
+>>>>                         * when idle
+>>>>                         */
+>>>>    #define BRCMF_IDLE_INTERVAL    1
+>>>> +#define BRCMF_IDLE_INTERVAL_SCANNING_CONNECTING    100
+>>>>
+>>>>    #define KSO_WAIT_US 50
+>>>>    #define MAX_KSO_ATTEMPTS (PMU_MAX_TRANSITION_DLY/KSO_WAIT_US)
+>>>> @@ -3613,9 +3619,9 @@ void brcmf_sdio_isr(struct brcmf_sdio *bus)
+>>>>
+>>>>    static bool brcmf_sdio_bus_watchdog(struct brcmf_sdio *bus)
+>>>>    {
+>>>> -#ifdef DEBUG
+>>>>        struct brcmf_bus *bus_if = dev_get_drvdata(bus->sdiodev->dev);
+>>>> -#endif    /* DEBUG */
+>>>> +    struct brcmf_cfg80211_info *cfg = bus_if->drvr->config;
+>>>> +    struct brcmf_if *ifp = cfg->pub->iflist[0];
+>>>>
+>>>>        brcmf_dbg(TIMER, "Enter\n");
+>>>>
+>>>> @@ -3678,6 +3684,14 @@ static bool brcmf_sdio_bus_watchdog(struct brcmf_sdio *bus)
+>>>>
+>>>>        /* On idle timeout clear activity flag and/or turn off clock */
+>>>>        if ((bus->idletime > 0) && (bus->clkstate == CLK_AVAIL)) {
+>>>> +
+>>>> +        if (test_bit(BRCMF_SCAN_STATUS_BUSY, &cfg->scan_status) ||
+>>>> +            test_bit(BRCMF_VIF_STATUS_CONNECTING, &ifp->vif->sme_state)) {
+>>>> +            bus->idletime = BRCMF_IDLE_INTERVAL_SCANNING_CONNECTING;
+>>>> +        } else {
+>>>> +            bus->idletime = BRCMF_IDLE_INTERVAL;
+>>>> +        }
+>>>> +
+>>>>            if (++bus->idlecount >= bus->idletime) {
+>>>>                bus->idlecount = 0;
+>>>>                if (bus->activity) {
+>>>> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c b/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c
+>>>> index be19852..e76517e 100644
+>>>> --- a/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c
+>>>> +++ b/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c
+>>>> @@ -913,6 +913,8 @@ brcmf_cfg80211_escan(struct wiphy *wiphy, struct brcmf_cfg80211_vif *vif,
+>>>>            return -EAGAIN;
+>>>>        }
+>>>>
+>>>> +    set_bit(BRCMF_SCAN_STATUS_BUSY, &cfg->scan_status);
+>>>> +
+>>>>        /* If scan req comes for p2p0, send it over primary I/F */
+>>>>        if (vif == cfg->p2p.bss_idx[P2PAPI_BSSCFG_DEVICE].vif)
+>>>>            vif = cfg->p2p.bss_idx[P2PAPI_BSSCFG_PRIMARY].vif;
+>>>> @@ -933,7 +935,6 @@ brcmf_cfg80211_escan(struct wiphy *wiphy, struct brcmf_cfg80211_vif *vif,
+>>>>        }
+>>>>
+>>>>        cfg->scan_request = request;
+>>>> -    set_bit(BRCMF_SCAN_STATUS_BUSY, &cfg->scan_status);
+>>>>        if (escan_req) {
+>>>>            cfg->escan_info.run = brcmf_run_escan;
+>>>>            err = brcmf_p2p_scan_prep(wiphy, request, vif);
+>>>> -- 1.7.1
+>>>>
+>>>
+>>> -- 
+>>> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> Please read the FAQ at  http://www.tux.org/lkml/
+>>
+>
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
+
