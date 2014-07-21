@@ -1,7 +1,7 @@
 From: Apelete Seketeli <apelete@seketeli.net>
-Subject: [PATCH v6 2/2] mmc: jz4740: prepare next dma transfer in parallel with current transfer
-Date: Mon, 21 Jul 2014 06:37:45 +0200
-Message-ID: <1405917465-18185-3-git-send-email-apelete@seketeli.net>
+Subject: [PATCH v6 1/2] mmc: jz4740: add dma infrastructure for data transfers
+Date: Mon, 21 Jul 2014 06:37:44 +0200
+Message-ID: <1405917465-18185-2-git-send-email-apelete@seketeli.net>
 References: <1405917465-18185-1-git-send-email-apelete@seketeli.net>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1405917465-18185-1-git-send-email-apelete@seketeli.net>
@@ -10,239 +10,297 @@ To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, H Hartl
 Cc: linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Make use of the MMC asynchronous request capability to prepare the
-next DMA transfer request in parallel with the current transfer.
-This is done by adding pre-request and post-request callbacks that are
-used by the MMC framework during an active data transfer.
+Until now the MMC driver for JZ4740 SoC was relying on PIO mode only
+for data transfers.
+This patch allows the use of DMA for data trasnfers in addition to PIO
+mode by relying on DMA Engine.
 
-It should help reduce the impact of DMA preparation overhead on the SD
-card performance.
+DMA tranfers performance might be further improved by taking advantage
+of the asynchronous request capability of the MMC framework.
 
 Signed-off-by: Apelete Seketeli <apelete@seketeli.net>
 ---
- drivers/mmc/host/jz4740_mmc.c |  138 ++++++++++++++++++++++++++++++++++-------
- 1 file changed, 116 insertions(+), 22 deletions(-)
+ drivers/mmc/host/jz4740_mmc.c |  174 +++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 166 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index 049b133..14738cd 100644
+index 537d6c7..049b133 100644
 --- a/drivers/mmc/host/jz4740_mmc.c
 +++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -114,6 +114,11 @@ enum jz4740_mmc_state {
- 	JZ4740_MMC_STATE_DONE,
+@@ -30,7 +30,9 @@
+ #include <asm/mach-jz4740/gpio.h>
+ #include <asm/cacheflush.h>
+ #include <linux/dma-mapping.h>
++#include <linux/dmaengine.h>
+ 
++#include <asm/mach-jz4740/dma.h>
+ #include <asm/mach-jz4740/jz4740_mmc.h>
+ 
+ #define JZ_REG_MMC_STRPCL	0x00
+@@ -122,6 +124,7 @@ struct jz4740_mmc_host {
+ 	int card_detect_irq;
+ 
+ 	void __iomem *base;
++	struct resource *mem_res;
+ 	struct mmc_request *req;
+ 	struct mmc_command *cmd;
+ 
+@@ -136,8 +139,138 @@ struct jz4740_mmc_host {
+ 	struct timer_list timeout_timer;
+ 	struct sg_mapping_iter miter;
+ 	enum jz4740_mmc_state state;
++
++	/* DMA support */
++	struct dma_chan *dma_rx;
++	struct dma_chan *dma_tx;
++	bool use_dma;
++	int sg_len;
++
++/* The DMA trigger level is 8 words, that is to say, the DMA read
++ * trigger is when data words in MSC_RXFIFO is >= 8 and the DMA write
++ * trigger is when data words in MSC_TXFIFO is < 8.
++ */
++#define JZ4740_MMC_FIFO_HALF_SIZE 8
  };
  
-+struct jz4740_mmc_host_next {
-+	int sg_len;
-+	s32 cookie;
-+};
++/*----------------------------------------------------------------------------*/
++/* DMA infrastructure */
 +
- struct jz4740_mmc_host {
- 	struct mmc_host *mmc;
- 	struct platform_device *pdev;
-@@ -143,6 +148,7 @@ struct jz4740_mmc_host {
- 	/* DMA support */
- 	struct dma_chan *dma_rx;
- 	struct dma_chan *dma_tx;
-+	struct jz4740_mmc_host_next next_data;
- 	bool use_dma;
- 	int sg_len;
- 
-@@ -184,6 +190,9 @@ static int jz4740_mmc_acquire_dma_channels(struct jz4740_mmc_host *host)
- 		goto free_master_write;
- 	}
- 
-+	/* Initialize DMA pre request cookie */
-+	host->next_data.cookie = 1;
-+
- 	return 0;
- 
- free_master_write:
-@@ -196,23 +205,72 @@ static inline int jz4740_mmc_get_dma_dir(struct mmc_data *data)
- 	return (data->flags & MMC_DATA_READ) ? DMA_FROM_DEVICE : DMA_TO_DEVICE;
- }
- 
-+static inline struct dma_chan *jz4740_mmc_get_dma_chan(struct jz4740_mmc_host *host,
-+						       struct mmc_data *data)
++static void jz4740_mmc_release_dma_channels(struct jz4740_mmc_host *host)
 +{
-+	return (data->flags & MMC_DATA_READ) ? host->dma_rx : host->dma_tx;
++	if (!host->use_dma)
++		return;
++
++	dma_release_channel(host->dma_tx);
++	dma_release_channel(host->dma_rx);
 +}
 +
- static void jz4740_mmc_dma_unmap(struct jz4740_mmc_host *host,
- 				 struct mmc_data *data)
- {
--	struct dma_chan *chan;
-+	struct dma_chan *chan = jz4740_mmc_get_dma_chan(host, data);
- 	enum dma_data_direction dir = jz4740_mmc_get_dma_dir(data);
- 
--	if (dir == DMA_TO_DEVICE)
--		chan = host->dma_tx;
--	else
--		chan = host->dma_rx;
--
- 	dma_unmap_sg(chan->device->dev, data->sg, data->sg_len, dir);
- }
- 
-+/* Prepares DMA data for current/next transfer, returns non-zero on failure */
-+static int jz4740_mmc_prepare_dma_data(struct jz4740_mmc_host *host,
-+				       struct mmc_data *data,
-+				       struct jz4740_mmc_host_next *next,
-+				       struct dma_chan *chan)
++static int jz4740_mmc_acquire_dma_channels(struct jz4740_mmc_host *host)
 +{
-+	struct jz4740_mmc_host_next *next_data = &host->next_data;
++	dma_cap_mask_t mask;
++
++	dma_cap_zero(mask);
++	dma_cap_set(DMA_SLAVE, mask);
++
++	host->dma_tx = dma_request_channel(mask, NULL, host);
++	if (!host->dma_tx) {
++		dev_err(mmc_dev(host->mmc), "Failed to get dma_tx channel\n");
++		return -ENODEV;
++	}
++
++	host->dma_rx = dma_request_channel(mask, NULL, host);
++	if (!host->dma_rx) {
++		dev_err(mmc_dev(host->mmc), "Failed to get dma_rx channel\n");
++		goto free_master_write;
++	}
++
++	return 0;
++
++free_master_write:
++	dma_release_channel(host->dma_tx);
++	return -ENODEV;
++}
++
++static inline int jz4740_mmc_get_dma_dir(struct mmc_data *data)
++{
++	return (data->flags & MMC_DATA_READ) ? DMA_FROM_DEVICE : DMA_TO_DEVICE;
++}
++
++static void jz4740_mmc_dma_unmap(struct jz4740_mmc_host *host,
++				 struct mmc_data *data)
++{
++	struct dma_chan *chan;
 +	enum dma_data_direction dir = jz4740_mmc_get_dma_dir(data);
-+	int sg_len;
 +
-+	if (!next && data->host_cookie &&
-+	    data->host_cookie != host->next_data.cookie) {
-+		dev_warn(mmc_dev(host->mmc),
-+			 "[%s] invalid cookie: data->host_cookie %d host->next_data.cookie %d\n",
-+			 __func__,
-+			 data->host_cookie,
-+			 host->next_data.cookie);
-+		data->host_cookie = 0;
-+	}
++	if (dir == DMA_TO_DEVICE)
++		chan = host->dma_tx;
++	else
++		chan = host->dma_rx;
 +
-+	/* Check if next job is already prepared */
-+	if (next || data->host_cookie != host->next_data.cookie) {
-+		sg_len = dma_map_sg(chan->device->dev,
-+				    data->sg,
-+				    data->sg_len,
-+				    dir);
++	dma_unmap_sg(chan->device->dev, data->sg, data->sg_len, dir);
++}
 +
++static int jz4740_mmc_start_dma_transfer(struct jz4740_mmc_host *host,
++					 struct mmc_data *data)
++{
++	struct dma_chan *chan;
++	struct dma_async_tx_descriptor *desc;
++	struct dma_slave_config conf = {
++		.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
++		.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
++		.src_maxburst = JZ4740_MMC_FIFO_HALF_SIZE,
++		.dst_maxburst = JZ4740_MMC_FIFO_HALF_SIZE,
++	};
++	enum dma_data_direction dir = jz4740_mmc_get_dma_dir(data);
++
++	if (dir == DMA_TO_DEVICE) {
++		conf.direction = DMA_MEM_TO_DEV;
++		conf.dst_addr = host->mem_res->start + JZ_REG_MMC_TXFIFO;
++		conf.slave_id = JZ4740_DMA_TYPE_MMC_TRANSMIT;
++		chan = host->dma_tx;
 +	} else {
-+		sg_len = next_data->sg_len;
-+		next_data->sg_len = 0;
++		conf.direction = DMA_DEV_TO_MEM;
++		conf.src_addr = host->mem_res->start + JZ_REG_MMC_RXFIFO;
++		conf.slave_id = JZ4740_DMA_TYPE_MMC_RECEIVE;
++		chan = host->dma_rx;
 +	}
 +
-+	if (sg_len <= 0) {
++	host->sg_len = dma_map_sg(chan->device->dev,
++				  data->sg,
++				  data->sg_len,
++				  dir);
++
++	if (host->sg_len == 0) {
 +		dev_err(mmc_dev(host->mmc),
 +			"Failed to map scatterlist for DMA operation\n");
 +		return -EINVAL;
 +	}
 +
-+	if (next) {
-+		next->sg_len = sg_len;
-+		data->host_cookie = ++next->cookie < 0 ? 1 : next->cookie;
-+	} else
-+		host->sg_len = sg_len;
++	dmaengine_slave_config(chan, &conf);
++	desc = dmaengine_prep_slave_sg(chan,
++				       data->sg,
++				       host->sg_len,
++				       conf.direction,
++				       DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
++	if (!desc) {
++		dev_err(mmc_dev(host->mmc),
++			"Failed to allocate DMA %s descriptor",
++			 conf.direction == DMA_MEM_TO_DEV ? "TX" : "RX");
++		goto dma_unmap;
++	}
++
++	dmaengine_submit(desc);
++	dma_async_issue_pending(chan);
 +
 +	return 0;
++
++dma_unmap:
++	jz4740_mmc_dma_unmap(host, data);
++	return -ENOMEM;
 +}
 +
- static int jz4740_mmc_start_dma_transfer(struct jz4740_mmc_host *host,
- 					 struct mmc_data *data)
- {
-+	int ret;
- 	struct dma_chan *chan;
- 	struct dma_async_tx_descriptor *desc;
- 	struct dma_slave_config conf = {
-@@ -221,9 +279,8 @@ static int jz4740_mmc_start_dma_transfer(struct jz4740_mmc_host *host,
- 		.src_maxburst = JZ4740_MMC_FIFO_HALF_SIZE,
- 		.dst_maxburst = JZ4740_MMC_FIFO_HALF_SIZE,
- 	};
--	enum dma_data_direction dir = jz4740_mmc_get_dma_dir(data);
- 
--	if (dir == DMA_TO_DEVICE) {
-+	if (data->flags & MMC_DATA_WRITE) {
- 		conf.direction = DMA_MEM_TO_DEV;
- 		conf.dst_addr = host->mem_res->start + JZ_REG_MMC_TXFIFO;
- 		conf.slave_id = JZ4740_DMA_TYPE_MMC_TRANSMIT;
-@@ -235,16 +292,9 @@ static int jz4740_mmc_start_dma_transfer(struct jz4740_mmc_host *host,
- 		chan = host->dma_rx;
- 	}
- 
--	host->sg_len = dma_map_sg(chan->device->dev,
--				  data->sg,
--				  data->sg_len,
--				  dir);
--
--	if (host->sg_len == 0) {
--		dev_err(mmc_dev(host->mmc),
--			"Failed to map scatterlist for DMA operation\n");
--		return -EINVAL;
--	}
-+	ret = jz4740_mmc_prepare_dma_data(host, data, NULL, chan);
-+	if (ret)
-+		return ret;
- 
- 	dmaengine_slave_config(chan, &conf);
- 	desc = dmaengine_prep_slave_sg(chan,
-@@ -269,6 +319,43 @@ dma_unmap:
- 	return -ENOMEM;
- }
- 
-+static void jz4740_mmc_pre_request(struct mmc_host *mmc,
-+				   struct mmc_request *mrq,
-+				   bool is_first_req)
-+{
-+	struct jz4740_mmc_host *host = mmc_priv(mmc);
-+	struct mmc_data *data = mrq->data;
-+	struct jz4740_mmc_host_next *next_data = &host->next_data;
++/*----------------------------------------------------------------------------*/
 +
-+	BUG_ON(data->host_cookie);
-+
-+	if (host->use_dma) {
-+		struct dma_chan *chan = jz4740_mmc_get_dma_chan(host, data);
-+
-+		if (jz4740_mmc_prepare_dma_data(host, data, next_data, chan))
-+			data->host_cookie = 0;
-+	}
-+}
-+
-+static void jz4740_mmc_post_request(struct mmc_host *mmc,
-+				    struct mmc_request *mrq,
-+				    int err)
-+{
-+	struct jz4740_mmc_host *host = mmc_priv(mmc);
-+	struct mmc_data *data = mrq->data;
-+
-+	if (host->use_dma && data->host_cookie) {
-+		jz4740_mmc_dma_unmap(host, data);
-+		data->host_cookie = 0;
-+	}
-+
-+	if (err) {
-+		struct dma_chan *chan = jz4740_mmc_get_dma_chan(host, data);
-+
-+		dmaengine_terminate_all(chan);
-+	}
-+}
-+
- /*----------------------------------------------------------------------------*/
- 
  static void jz4740_mmc_set_irq_enabled(struct jz4740_mmc_host *host,
-@@ -627,14 +714,19 @@ static irqreturn_t jz_mmc_irq_worker(int irq, void *devid)
+ 	unsigned int irq, bool enabled)
+ {
+@@ -442,6 +575,8 @@ static void jz4740_mmc_send_command(struct jz4740_mmc_host *host,
+ 			cmdat |= JZ_MMC_CMDAT_WRITE;
+ 		if (cmd->data->flags & MMC_DATA_STREAM)
+ 			cmdat |= JZ_MMC_CMDAT_STREAM;
++		if (host->use_dma)
++			cmdat |= JZ_MMC_CMDAT_DMA_EN;
+ 
+ 		writew(cmd->data->blksz, host->base + JZ_REG_MMC_BLKLEN);
+ 		writew(cmd->data->blocks, host->base + JZ_REG_MMC_NOB);
+@@ -474,6 +609,7 @@ static irqreturn_t jz_mmc_irq_worker(int irq, void *devid)
+ 	struct jz4740_mmc_host *host = (struct jz4740_mmc_host *)devid;
+ 	struct mmc_command *cmd = host->req->cmd;
+ 	struct mmc_request *req = host->req;
++	struct mmc_data *data = cmd->data;
+ 	bool timeout = false;
+ 
+ 	if (cmd->error)
+@@ -484,23 +620,32 @@ static irqreturn_t jz_mmc_irq_worker(int irq, void *devid)
+ 		if (cmd->flags & MMC_RSP_PRESENT)
+ 			jz4740_mmc_read_response(host, cmd);
+ 
+-		if (!cmd->data)
++		if (!data)
+ 			break;
+ 
+ 		jz_mmc_prepare_data_transfer(host);
  
  	case JZ4740_MMC_STATE_TRANSFER_DATA:
- 		if (host->use_dma) {
--			/* Use DMA if enabled, data transfer direction was
--			 * defined  before in jz_mmc_prepare_data_transfer().
-+			/* Use DMA if enabled.
-+			 * Data transfer direction is defined later by
-+			 * relying on data flags in
-+			 * jz4740_mmc_prepare_dma_data() and
-+			 * jz4740_mmc_start_dma_transfer().
- 			 */
- 			timeout = jz4740_mmc_start_dma_transfer(host, data);
- 			data->bytes_xfered = data->blocks * data->blksz;
- 		} else if (data->flags & MMC_DATA_READ)
--			/* If DMA is not enabled, rely on data flags
--			 * to establish data transfer direction.
-+			/* Use PIO if DMA is not enabled.
-+			 * Data transfer direction was defined before
-+			 * by relying on data flags in
-+			 * jz_mmc_prepare_data_transfer().
- 			 */
- 			timeout = jz4740_mmc_read_data(host, data);
+-		if (cmd->data->flags & MMC_DATA_READ)
+-			timeout = jz4740_mmc_read_data(host, cmd->data);
++		if (host->use_dma) {
++			/* Use DMA if enabled, data transfer direction was
++			 * defined  before in jz_mmc_prepare_data_transfer().
++			 */
++			timeout = jz4740_mmc_start_dma_transfer(host, data);
++			data->bytes_xfered = data->blocks * data->blksz;
++		} else if (data->flags & MMC_DATA_READ)
++			/* If DMA is not enabled, rely on data flags
++			 * to establish data transfer direction.
++			 */
++			timeout = jz4740_mmc_read_data(host, data);
  		else
-@@ -809,6 +901,8 @@ static void jz4740_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+-			timeout = jz4740_mmc_write_data(host, cmd->data);
++			timeout = jz4740_mmc_write_data(host, data);
  
- static const struct mmc_host_ops jz4740_mmc_ops = {
- 	.request	= jz4740_mmc_request,
-+	.pre_req	= jz4740_mmc_pre_request,
-+	.post_req	= jz4740_mmc_post_request,
- 	.set_ios	= jz4740_mmc_set_ios,
- 	.get_ro		= mmc_gpio_get_ro,
- 	.get_cd		= mmc_gpio_get_cd,
+ 		if (unlikely(timeout)) {
+ 			host->state = JZ4740_MMC_STATE_TRANSFER_DATA;
+ 			break;
+ 		}
+ 
+-		jz4740_mmc_transfer_check_state(host, cmd->data);
++		jz4740_mmc_transfer_check_state(host, data);
+ 
+ 		timeout = jz4740_mmc_poll_irq(host, JZ_MMC_IRQ_DATA_TRAN_DONE);
+ 		if (unlikely(timeout)) {
+@@ -757,7 +902,6 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
+ 	struct mmc_host *mmc;
+ 	struct jz4740_mmc_host *host;
+ 	struct jz4740_mmc_platform_data *pdata;
+-	struct resource *res;
+ 
+ 	pdata = pdev->dev.platform_data;
+ 
+@@ -784,10 +928,11 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
+ 		goto err_free_host;
+ 	}
+ 
+-	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	host->base = devm_ioremap_resource(&pdev->dev, res);
++	host->mem_res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	host->base = devm_ioremap_resource(&pdev->dev, host->mem_res);
+ 	if (IS_ERR(host->base)) {
+ 		ret = PTR_ERR(host->base);
++		dev_err(&pdev->dev, "Failed to ioremap base memory\n");
+ 		goto err_free_host;
+ 	}
+ 
+@@ -834,6 +979,10 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
+ 	/* It is not important when it times out, it just needs to timeout. */
+ 	set_timer_slack(&host->timeout_timer, HZ);
+ 
++	host->use_dma = true;
++	if (host->use_dma && jz4740_mmc_acquire_dma_channels(host) != 0)
++		host->use_dma = false;
++
+ 	platform_set_drvdata(pdev, host);
+ 	ret = mmc_add_host(mmc);
+ 
+@@ -843,6 +992,10 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
+ 	}
+ 	dev_info(&pdev->dev, "JZ SD/MMC card driver registered\n");
+ 
++	dev_info(&pdev->dev, "Using %s, %d-bit mode\n",
++		 host->use_dma ? "DMA" : "PIO",
++		 (mmc->caps & MMC_CAP_4_BIT_DATA) ? 4 : 1);
++
+ 	return 0;
+ 
+ err_free_irq:
+@@ -850,6 +1003,8 @@ err_free_irq:
+ err_free_gpios:
+ 	jz4740_mmc_free_gpios(pdev);
+ err_gpio_bulk_free:
++	if (host->use_dma)
++		jz4740_mmc_release_dma_channels(host);
+ 	jz_gpio_bulk_free(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
+ err_free_host:
+ 	mmc_free_host(mmc);
+@@ -872,6 +1027,9 @@ static int jz4740_mmc_remove(struct platform_device *pdev)
+ 	jz4740_mmc_free_gpios(pdev);
+ 	jz_gpio_bulk_free(jz4740_mmc_pins, jz4740_mmc_num_pins(host));
+ 
++	if (host->use_dma)
++		jz4740_mmc_release_dma_channels(host);
++
+ 	mmc_free_host(host->mmc);
+ 
+ 	return 0;
 -- 
 1.7.10.4
