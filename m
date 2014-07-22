@@ -1,61 +1,65 @@
-From: "Yuan, JuntaoX" <juntaox.yuan@intel.com>
-Subject: [PATCH] Add SDR12 & SDR25 support for sdio cards.
-Date: Tue, 22 Jul 2014 10:52:51 +0000
-Message-ID: <588D8A7789B2934A9950BF189ED6F50AEC21B7@SHSMSX101.ccr.corp.intel.com>
+From: Maxime Coquelin <maxime.coquelin@st.com>
+Subject: Re: [STLinux Kernel] [PATCH v3 10/10] MAINTAINERS: Add sdhci-st file
+ to ARCH/STI architecture
+Date: Tue, 22 Jul 2014 14:13:32 +0200
+Message-ID: <53CE556C.10607@st.com>
+References: <1401899424-1365-1-git-send-email-peter.griffin@linaro.org>	<1401899424-1365-11-git-send-email-peter.griffin@linaro.org>
+ <53A80754.9000900@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: "chris@printf.net" <chris@printf.net>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "Yuan, JuntaoX" <juntaox.yuan@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <53A80754.9000900@st.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Peter Griffin <peter.griffin@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, khilman@linaro.org
+Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, kernel@stlinux.com
 List-Id: linux-mmc@vger.kernel.org
 
->From c8a190816725dd6586bc9de997bf8e50416da428 Mon Sep 17 00:00:00 2001
-From: Yuan Juntao <juntaox.yuan@intel.com>
-Date: Tue, 22 Jul 2014 18:16:34 +0800
-Subject: [PATCH] Add SDR12 & SDR25 support for sdio cards.
+Hi Olof, Arnd, Kevin,
 
-According to SDIO simplified specification v3.0, a card should also
-support SDR25 & SDR12 if one of the DDR50, SDR50, and SDR104 modes
-is supported.
+	I am preparing two tags for v3.17 regarding STi platform.
+	One for DT, and one for defconfigs.
 
-Signed-off-by: Yuan Juntao <juntaox.yuan@intel.com>
----
- drivers/mmc/core/sdio.c |   14 +++++++++++---
- 1 file changed, 11 insertions(+), 3 deletions(-)
+	Except this one, I have no patches for ARM-SoC.
+	Can you take this patch directly?
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 4d721c6..6a8ce6f 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -160,15 +160,23 @@ static int sdio_read_cccr(struct mmc_card *card, u32 ocr)
- 			if (mmc_host_uhs(card->host)) {
- 				if (data & SDIO_UHS_DDR50)
- 					card->sw_caps.sd3_bus_mode
--						|= SD_MODE_UHS_DDR50;
-+						|= SD_MODE_UHS_DDR50 |
-+						   SD_MODE_UHS_SDR50 |
-+						   SD_MODE_UHS_SDR25 |
-+						   SD_MODE_UHS_SDR12;
- 
- 				if (data & SDIO_UHS_SDR50)
- 					card->sw_caps.sd3_bus_mode
--						|= SD_MODE_UHS_SDR50;
-+						|= SD_MODE_UHS_SDR50 |
-+						   SD_MODE_UHS_SDR25 |
-+						   SD_MODE_UHS_SDR12;
- 
- 				if (data & SDIO_UHS_SDR104)
- 					card->sw_caps.sd3_bus_mode
--						|= SD_MODE_UHS_SDR104;
-+						|= SD_MODE_UHS_SDR104 |
-+						   SD_MODE_UHS_SDR50 |
-+						   SD_MODE_UHS_SDR25 |
-+						   SD_MODE_UHS_SDR12;
- 			}
- 
- 			ret = mmc_io_rw_direct(card, 0, 0,
--- 
-1.7.9.5
+	Or should I send a pull request with this one only?
+
+Regards,
+Maxime
+
+On 06/23/2014 12:54 PM, Maxime Coquelin wrote:
+>
+>
+> On 06/04/2014 06:30 PM, Peter Griffin wrote:
+>> Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+>
+> Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
+>
+>> --- MAINTAINERS | 1 + 1 file changed, 1 insertion(+)
+>>
+>> diff --git a/MAINTAINERS b/MAINTAINERS index 6dc67b1..19dc265
+>> 100644 --- a/MAINTAINERS +++ b/MAINTAINERS @@ -1306,6 +1306,7 @@ F:
+>> drivers/pinctrl/pinctrl-st.c F:	drivers/media/rc/st_rc.c F:
+>> drivers/i2c/busses/i2c-st.c F:	drivers/tty/serial/st-asc.c +F:
+>> drivers/mmc/host/sdhci-st.c
+>>
+>> ARM/TECHNOLOGIC SYSTEMS TS7250 MACHINE SUPPORT M:	Lennert Buytenhek
+>> <kernel@wantstofly.org>
+>>
+>
+>
+>
+> _______________________________________________
+> Kernel mailing list
+> Kernel@stlinux.com
+> http://www.stlinux.com/mailman/listinfo/kernel
+>
