@@ -1,34 +1,39 @@
-From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Subject: Re: [PATCH 01/10] mmc: sh_mobile_sdhi: Add EXT_ACC register busy
- check
-Date: Tue, 22 Jul 2014 16:39:44 +0400
-Message-ID: <53CE5B90.1050904@cogentembedded.com>
-References: <d3d6aa34548248768494ad88056cf4bd@SINPR06MB105.apcprd06.prod.outlook.com>	<87simtenpi.wl%kuninori.morimoto.gx@renesas.com>	<cb608c5e763f47b597936724ec05b615@SINPR06MB105.apcprd06.prod.outlook.com>	<87pphxe2q0.wl%kuninori.morimoto.gx@renesas.com>	<53AD638C.5060907@renesas.com>	<87egxehsec.wl%kuninori.morimoto.gx@gmail.com> <87d2cyhs9e.wl%kuninori.morimoto.gx@renesas.com>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [STLinux Kernel] [PATCH v3 10/10] MAINTAINERS: Add sdhci-st file
+ to ARCH/STI architecture
+Date: Tue, 22 Jul 2014 09:00:02 -0700
+Message-ID: <CAOesGMhEnwGJR+SgM6XJhW9WT5LAo_-Hxd+kfQHBz7thu+QFJA@mail.gmail.com>
+References: <1401899424-1365-1-git-send-email-peter.griffin@linaro.org>
+	<1401899424-1365-11-git-send-email-peter.griffin@linaro.org>
+	<53A80754.9000900@st.com>
+	<53CE556C.10607@st.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f50.google.com ([209.85.215.50]:52013 "EHLO
-	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751111AbaGVMjq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Jul 2014 08:39:46 -0400
-Received: by mail-la0-f50.google.com with SMTP id gf5so5865152lab.9
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Jul 2014 05:39:45 -0700 (PDT)
-In-Reply-To: <87d2cyhs9e.wl%kuninori.morimoto.gx@renesas.com>
+Received: from mail-vc0-f182.google.com ([209.85.220.182]:48344 "EHLO
+	mail-vc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755967AbaGVQAD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Jul 2014 12:00:03 -0400
+Received: by mail-vc0-f182.google.com with SMTP id hy4so15754734vcb.27
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Jul 2014 09:00:02 -0700 (PDT)
+In-Reply-To: <53CE556C.10607@st.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Simon <horms@verge.net.au>, Ian Molton <ian@mnementh.co.uk>, Chris Ball <cjb@laptop.org>
-Cc: TOSHIAKI KOMATSU <toshiaki.komatsu.ud@renesas.com>, NAOYA SHIIBA <naoya.shiiba.nx@renesas.com>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, "(Renesas) goda" <yusuke.goda.sx@renesas.com>, linux-mmc@vger.kernel.org, ryo.kataoka.wt@renesas.com, shinobu.uehara.xc@renesas.com, kouei.abe.cp@renesas.com
+To: Maxime Coquelin <maxime.coquelin@st.com>
+Cc: Peter Griffin <peter.griffin@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Patrice CHOTARD <patrice.chotard@st.com>, Srinivas Kandagatla <srinivas.kandagatla@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Kevin Hilman <khilman@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "kernel@stlinux.com" <kernel@stlinux.com>
 
-Hello.
+On Tue, Jul 22, 2014 at 5:13 AM, Maxime Coquelin <maxime.coquelin@st.com> wrote:
+> Hi Olof, Arnd, Kevin,
+>
+>         I am preparing two tags for v3.17 regarding STi platform.
+>         One for DT, and one for defconfigs.
+>
+>         Except this one, I have no patches for ARM-SoC.
+>         Can you take this patch directly?
+>
+>         Or should I send a pull request with this one only?
 
-On 07/22/2014 09:33 AM, Kuninori Morimoto wrote:
+We can apply directly. I'll do that in a moment here.
 
-> From: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
 
-> Signed-off-by: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
-
-   Morimoto-san, when the patches pass thru you, you need to sign off on them.
-
-WBR, Sergei
-
+-Olof
