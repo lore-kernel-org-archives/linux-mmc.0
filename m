@@ -1,187 +1,54 @@
-From: Stephen Boyd <sboyd@codeaurora.org>
-Subject: Re: [PATCH v2] mmc: mmci: Add qcom dml support to the driver.
-Date: Wed, 23 Jul 2014 15:58:43 -0700
-Message-ID: <53D03E23.1000801@codeaurora.org>
-References: <1405625780-13503-1-git-send-email-srinivas.kandagatla@linaro.org> <1405716797-28122-1-git-send-email-srinivas.kandagatla@linaro.org>
+From: Matthieu CASTET <matthieu.castet@parrot.com>
+Subject: Re: [PATCH 1/2] sdhci : handle busy timeout irq
+Date: Thu, 24 Jul 2014 11:37:37 +0200
+Message-ID: <20140724113737.7b06fd18@parrot.com>
+References: <1404918112-27195-1-git-send-email-matthieu.castet@parrot.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1405716797-28122-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, linux-kernel@vger.kernel.org, agross@codeaurora.org, linux-arm-msm@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.aswsp.com ([193.34.35.150]:29938 "EHLO mail.aswsp.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751754AbaGXJh3 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Jul 2014 05:37:29 -0400
+In-Reply-To: <1404918112-27195-1-git-send-email-matthieu.castet@parrot.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On 07/18/14 13:53, Srinivas Kandagatla wrote:
->
-> @@ -468,6 +473,11 @@ static void mmci_dma_setup(struct mmci_host *host)
->  		if (max_seg_size < host->mmc->max_seg_size)
->  			host->mmc->max_seg_size = max_seg_size;
->  	}
-> +
-> +	if (variant->qcom_dml && host->dma_rx_channel && host->dma_tx_channel) {
-> +		if (dml_hw_init(host, host->mmc->parent->of_node))
-> +			variant->qcom_dml = false;
-> +	}
+Any news on these patches ?
 
-Style nit: Braces aren't needed.
+Le Wed, 9 Jul 2014 17:01:51 +0200,
+Matthieu CASTET <matthieu.castet@parrot.com> a =E9crit :
 
-> +
-> +void dml_start_xfer(struct mmci_host *host, struct mmc_data *data)
-> +{
-> +	u32 config;
-> +	void __iomem *base = host->base + DML_OFFSET;
-> +
-> +	if (data->flags & MMC_DATA_READ) {
-> +		/* Read operation: configure DML for producer operation */
-> +		/* Set producer CRCI-x and disable consumer CRCI */
-> +		config = readl_relaxed(base + DML_CONFIG);
-> +		config = (config & ~PRODUCER_CRCI_MSK) | PRODUCER_CRCI_X_SEL;
-> +		config = (config & ~CONSUMER_CRCI_MSK) | CONSUMER_CRCI_DISABLE;
-> +		writel_relaxed(config, base + DML_CONFIG);
-> +
-> +		/* Set the Producer BAM block size */
-> +		writel_relaxed(data->blksz, base + DML_PRODUCER_BAM_BLOCK_SIZE);
-> +
-> +		/* Set Producer BAM Transaction size */
-> +		writel_relaxed(data->blocks * data->blksz,
-> +			       base + DML_PRODUCER_BAM_TRANS_SIZE);
-> +		/* Set Producer Transaction End bit */
-> +		config = readl_relaxed(base + DML_CONFIG);
-> +		config |= PRODUCER_TRANS_END_EN;
-> +		writel_relaxed(config, base + DML_CONFIG);
-> +		/* Trigger producer */
-> +		writel_relaxed(1, base + DML_PRODUCER_START);
-> +	} else {
-> +		/* Write operation: configure DML for consumer operation */
-> +		/* Set consumer CRCI-x and disable producer CRCI*/
-> +		config = readl_relaxed(base + DML_CONFIG);
-> +		config = (config & ~CONSUMER_CRCI_MSK) | CONSUMER_CRCI_X_SEL;
-> +		config = (config & ~PRODUCER_CRCI_MSK) | PRODUCER_CRCI_DISABLE;
-> +		writel_relaxed(config, base + DML_CONFIG);
-> +		/* Clear Producer Transaction End bit */
-> +		config = readl_relaxed(base + DML_CONFIG);
-> +		config &= ~PRODUCER_TRANS_END_EN;
-> +		writel_relaxed(config, base + DML_CONFIG);
-> +		/* Trigger consumer */
-> +		writel_relaxed(1, base + DML_CONSUMER_START);
-> +	}
+> When we wait for busy after sending a command, if there is
+> a timeout, we got SDHCI_INT_DATA_TIMEOUT flags.
+> Before this commit we got the message :
+> "Got data interrupt 0x00100000 even though no data  operation was in =
+progress."
+> and we need to wait 10s that sdhci_timeout_timer expires.
+>=20
+> Signed-off-by: Matthieu CASTET <matthieu.castet@parrot.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 5 +++++
+>  1 file changed, 5 insertions(+)
+>=20
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 47055f3..9df59a4 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2301,6 +2301,11 @@ static void sdhci_data_irq(struct sdhci_host *=
+host, u32 intmask)
+>  		 * above in sdhci_cmd_irq().
+>  		 */
+>  		if (host->cmd && (host->cmd->flags & MMC_RSP_BUSY)) {
+> +			if (intmask & SDHCI_INT_DATA_TIMEOUT) {
+> +				host->cmd->error =3D -ETIMEDOUT;
+> +				tasklet_schedule(&host->finish_tasklet);
+> +				return;
+> +			}
+>  			if (intmask & SDHCI_INT_DATA_END) {
+>  				sdhci_finish_command(host);
+>  				return;
 
-I think we need a memory barrier here. Does the DML need to be enabled
-before the mmci driver sets MCI_DPSM_DMAENABLE? My understanding is that
-relaxed accesses to different devices aren't ordered with respect to one
-another.  So not having a memory barrier here could cause the
-consumer/producer to be enabled after MCI_DPSM_DMAENABLE is set in the
-mmci hardware. Downstream I see that we have an mb(), but I think we
-could just a wmb() because we're just ordering with the mmci hardware right?
-
-Is there any ordering required between bam and dml? I think enabling bam
-could happen after enabling the consumer unless we had a wmb() after we
-kick off bam and before we write a 1 to DML_CONSUMER_START.
-
-> +}
-> +
-> +static int of_get_dml_pipe_index(struct device_node *np, const char *name)
-
-return type of u32?
-
-> +{
-> +	int index;
-> +	struct of_phandle_args	dma_spec;
-> +
-> +	index = of_property_match_string(np, "dma-names", name);
-> +
-> +	if (index < 0)
-> +		return -ENODEV;
-> +
-> +	if (of_parse_phandle_with_args(np, "dmas", "#dma-cells", index,
-> +				       &dma_spec))
-> +		return -ENODEV;
-> +
-> +	if (dma_spec.args_count)
-> +		return dma_spec.args[0];
-> +
-> +	return -ENODEV;
-> +}
-
-Much cleaner!
-
-> +
-> +/* Initialize the dml hardware connected to SD Card controller */
-> +int dml_hw_init(struct mmci_host *host, struct device_node *np)
-> +{
-> +	u32 config;
-> +	void __iomem *base;
-> +	u32 consumer_id, producer_id;
-> +
-> +	consumer_id = of_get_dml_pipe_index(np, "tx");
-> +	producer_id = of_get_dml_pipe_index(np, "rx");
-> +
-> +	if (producer_id < 0 || consumer_id < 0)
-> +		return -ENODEV;
-> +
-> +	base = host->base + DML_OFFSET;
-> +
-> +	/* Reset the DML block */
-> +	writel_relaxed(1, base + DML_SW_RESET);
-> +
-> +	/* Disable the producer and consumer CRCI */
-> +	config = (PRODUCER_CRCI_DISABLE | CONSUMER_CRCI_DISABLE);
-> +	/*
-> +	 * Disable the bypass mode. Bypass mode will only be used
-> +	 * if data transfer is to happen in PIO mode and don't
-> +	 * want the BAM interface to connect with SDCC-DML.
-> +	 */
-> +	config &= ~BYPASS;
-> +	/*
-> +	 * Disable direct mode as we don't DML to MASTER the AHB bus.
-> +	 * BAM connected with DML should MASTER the AHB bus.
-> +	 */
-> +	config &= ~DIRECT_MODE;
-> +	/*
-> +	 * Disable infinite mode transfer as we won't be doing any
-> +	 * infinite size data transfers. All data transfer will be
-> +	 * of finite data size.
-> +	 */
-> +	config &= ~INFINITE_CONS_TRANS;
-> +	writel_relaxed(config, base + DML_CONFIG);
-> +
-> +	/*
-> +	 * Initialize the logical BAM pipe size for producer
-> +	 * and consumer.
-> +	 */
-> +	writel_relaxed(PRODUCER_PIPE_LOGICAL_SIZE,
-> +		       base + DML_PRODUCER_PIPE_LOGICAL_SIZE);
-> +	writel_relaxed(CONSUMER_PIPE_LOGICAL_SIZE,
-> +		       base + DML_CONSUMER_PIPE_LOGICAL_SIZE);
-> +
-> +	/* Initialize Producer/consumer pipe id */
-> +	writel_relaxed(producer_id | (consumer_id << CONSUMER_PIPE_ID_SHFT),
-> +		       base + DML_PIPE_ID);
-> +
-
-We have an mb() here too. Not sure why though. There's lots of comments
-downstream but not where it actually would help!
-
-> +	return 0;
-> +}
-> diff --git a/drivers/mmc/host/mmci_qcom_dml.h b/drivers/mmc/host/mmci_qcom_dml.h
-> new file mode 100644
-> index 0000000..412e9a3
-> --- /dev/null
-> +++ b/drivers/mmc/host/mmci_qcom_dml.h
-> @@ -0,0 +1,31 @@
-> +/*
-> + *
-> + * Copyright (c) 2014, Code Aurora Forum. All rights reserved.
-
-Hmm I see:
-
-Copyright (c) 2011, The Linux Foundation. All rights reserved.
-
-in these files. Can you use that?
-
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-hosted by The Linux Foundation
