@@ -1,90 +1,186 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: Re: [PATCH 00/14] clk: sunxi: Improve MMC clocks support
-Date: Thu, 24 Jul 2014 13:20:36 +0200
-Message-ID: <20140724112036.GS20328@lukather>
-References: <1405588134-2396-1-git-send-email-maxime.ripard@free-electrons.com>
- <53CA4CCA.5040303@redhat.com>
+From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Subject: Re: [PATCH] brcmfmac: prevent watchdog from interfering with scanning
+ and connecting
+Date: Thu, 24 Jul 2014 23:22:27 +0800
+Message-ID: <53D124B3.7030807@linux.intel.com>
+References: <539E8559.3010601@linux.intel.com> <539EA79C.7010206@broadcom.com> <53A30F96.3010206@linux.intel.com> <53A311E4.301@broadcom.com> <53CCC44C.2070507@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="KD3NH8oGZ7XN2Llp"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from top.free-electrons.com ([176.31.233.9]:47454 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751058AbaGXLZF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Jul 2014 07:25:05 -0400
-Content-Disposition: inline
-In-Reply-To: <53CA4CCA.5040303@redhat.com>
+Received: from mga09.intel.com ([134.134.136.24]:42594 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759076AbaGXPWp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 24 Jul 2014 11:22:45 -0400
+In-Reply-To: <53CCC44C.2070507@linux.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Mike Turquette <mturquette@linaro.org>, Emilio Lopez <emilio@elopez.com.ar>, chris@printf.net, david.lanzendoerfer@o2s.ch, ulf.hansson@linaro.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+To: Arend van Spriel <arend@broadcom.com>, brudley@broadcom.com, Franky Lin <frankyl@broadcom.com>, meuleman@broadcom.com, linville@tuxdriver.com, pieterpg@broadcom.com, dekim@broadcom.com, mcgrof@do-not-panic.com, antonio@open-mesh.com, johannes.berg@intel.com
+Cc: linux-wireless@vger.kernel.org, brcm80211-dev-list@broadcom.com, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Russell King <linux@arm.linux.org.uk>
 
 
---KD3NH8oGZ7XN2Llp
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On 2014/7/21 15:42, Fu, Zhonghui wrote:
+> On 2014/6/20 0:37, Arend van Spriel wrote:
+>> On 19-06-14 18:28, Fu, Zhonghui wrote:
+>>> On 2014/6/16 16:15, Arend van Spriel wrote:
+>>>> On 16-06-14 07:49, Fu, Zhonghui wrote:
+>>>>>   From 14485894add32aedacb3e486ebb2cc2b73861abf Mon Sep 17 00:00:00 2001
+>>>>> From: Fu zhonghui <zhonghui.fu@linux.intel.com>
+>>>>> Date: Wed, 11 Jun 2014 11:06:55 +0800
+>>>>> Subject: [PATCH] brcmfmac: prevent watchdog from interfering with scanning and connecting
+>>>>>
+>>>>> Watchdog in brcmfmac driver may make WiFi chip enter sleep mode
+>>>>> before completion of scanning or connecting.
+>>>>>
+>>>>> This will lead to scanning or connecting failure.
+>>>>>
+>>>>> Increasing temporarily idle-time threshold during scanning or
+>>>>> connecting can ensure scanning or connecting success without
+>>>>> watchdog interference.
+>>>> Are you sure you are not having runtime PM enabled. That could be your problem as the host controller code disables sdio irqs. Please see this thread [1]. For our device runtime pm should not be enabled, but I am not sure if that is taken into account in mmc_attach_sdio() (see code below).
+>>> I have tried brcmfmac driver with "CONFIG_PM_RUNTIME is not set", and scanning and connecting  always succeeded. This means that CONFIG_PM_RUNTIME should not be set if we use SDIO WiFi device driven by brcmfmac driver, right?
+>> Depends which kernel you are using. In 3.16-rc1 the sdio interrupt issue has been fixed so you should be fine to use CONFIG_PM_RUNTIME. Here is the commit
+Any clues or comments to the following issue?
+> I run 3.16-rc4 and 3.16-rc5 kernel with CONFIG_PM_RUNTIME set, the issue still exists as follows:
+>
+> 1 step: modprobe brcmfmac
+> 2 step: iwlist wlan1 scan         get scanning result successfully.
+> 3 step: wait a while, no any operation
+> 4 step: iwlist wlan1 scan         scanning timeout, can't get scanning result.
+>
+>
+> Thanks,
+> Zhonghui
+>
+>> commit be138554a7923658ded799b0e8794d9c1d08a6e5
+>> Author: Russell King <rmk+kernel@arm.linux.org.uk>
+>> Date:   Fri Apr 25 12:55:56 2014 +0100
+>>
+>>     mmc: sdhci: allow sdio interrupts while sdhci runtime suspended
+>>
+>> Regards,
+>> Arend
+>>
+>>> Thanks,
+>>> Zhonghui
+>>>> Gr. AvS
+>>>>
+>>>> [1] http://www.spinics.net/lists/linux-mmc/msg25978.html
+>>>>
+>>>> --8<----------------------------------------------------------------
+>>>>
+>>>>      /*
+>>>>       * Enable runtime PM only if supported by host+card+board
+>>>>       */
+>>>>      if (host->caps & MMC_CAP_POWER_OFF_CARD) {
+>>>>          /*
+>>>>           * Let runtime PM core know our card is active
+>>>>           */
+>>>>          err = pm_runtime_set_active(&card->dev);
+>>>>          if (err)
+>>>>              goto remove;
+>>>>
+>>>>          /*
+>>>>           * Enable runtime PM for this card
+>>>>           */
+>>>>          pm_runtime_enable(&card->dev);
+>>>>      }
+>>>>
+>>>>> Signed-off-by: Fu zhonghui <zhonghui.fu@linux.intel.com>
+>>>>> ---
+>>>>>    drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c |   18 ++++++++++++++++--
+>>>>>    .../net/wireless/brcm80211/brcmfmac/wl_cfg80211.c  |    3 ++-
+>>>>>    2 files changed, 18 insertions(+), 3 deletions(-)
+>>>>>
+>>>>> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c b/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
+>>>>> index 13c89a0..729deab 100644
+>>>>> --- a/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
+>>>>> +++ b/drivers/net/wireless/brcm80211/brcmfmac/dhd_sdio.c
+>>>>> @@ -34,6 +34,7 @@
+>>>>>    #include <linux/vmalloc.h>
+>>>>>    #include <linux/platform_data/brcmfmac-sdio.h>
+>>>>>    #include <linux/moduleparam.h>
+>>>>> +#include <net/cfg80211.h>
+>>>>>    #include <asm/unaligned.h>
+>>>>>    #include <defs.h>
+>>>>>    #include <brcmu_wifi.h>
+>>>>> @@ -43,6 +44,10 @@
+>>>>>    #include "sdio_host.h"
+>>>>>    #include "chip.h"
+>>>>>    #include "nvram.h"
+>>>>> +#include "dhd.h"
+>>>>> +#include "fwil_types.h"
+>>>>> +#include "p2p.h"
+>>>>> +#include "wl_cfg80211.h"
+>>>>>
+>>>>>    #define DCMD_RESP_TIMEOUT  2000    /* In milli second */
+>>>>>
+>>>>> @@ -307,6 +312,7 @@ struct rte_console {
+>>>>>                         * when idle
+>>>>>                         */
+>>>>>    #define BRCMF_IDLE_INTERVAL    1
+>>>>> +#define BRCMF_IDLE_INTERVAL_SCANNING_CONNECTING    100
+>>>>>
+>>>>>    #define KSO_WAIT_US 50
+>>>>>    #define MAX_KSO_ATTEMPTS (PMU_MAX_TRANSITION_DLY/KSO_WAIT_US)
+>>>>> @@ -3613,9 +3619,9 @@ void brcmf_sdio_isr(struct brcmf_sdio *bus)
+>>>>>
+>>>>>    static bool brcmf_sdio_bus_watchdog(struct brcmf_sdio *bus)
+>>>>>    {
+>>>>> -#ifdef DEBUG
+>>>>>        struct brcmf_bus *bus_if = dev_get_drvdata(bus->sdiodev->dev);
+>>>>> -#endif    /* DEBUG */
+>>>>> +    struct brcmf_cfg80211_info *cfg = bus_if->drvr->config;
+>>>>> +    struct brcmf_if *ifp = cfg->pub->iflist[0];
+>>>>>
+>>>>>        brcmf_dbg(TIMER, "Enter\n");
+>>>>>
+>>>>> @@ -3678,6 +3684,14 @@ static bool brcmf_sdio_bus_watchdog(struct brcmf_sdio *bus)
+>>>>>
+>>>>>        /* On idle timeout clear activity flag and/or turn off clock */
+>>>>>        if ((bus->idletime > 0) && (bus->clkstate == CLK_AVAIL)) {
+>>>>> +
+>>>>> +        if (test_bit(BRCMF_SCAN_STATUS_BUSY, &cfg->scan_status) ||
+>>>>> +            test_bit(BRCMF_VIF_STATUS_CONNECTING, &ifp->vif->sme_state)) {
+>>>>> +            bus->idletime = BRCMF_IDLE_INTERVAL_SCANNING_CONNECTING;
+>>>>> +        } else {
+>>>>> +            bus->idletime = BRCMF_IDLE_INTERVAL;
+>>>>> +        }
+>>>>> +
+>>>>>            if (++bus->idlecount >= bus->idletime) {
+>>>>>                bus->idlecount = 0;
+>>>>>                if (bus->activity) {
+>>>>> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c b/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c
+>>>>> index be19852..e76517e 100644
+>>>>> --- a/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c
+>>>>> +++ b/drivers/net/wireless/brcm80211/brcmfmac/wl_cfg80211.c
+>>>>> @@ -913,6 +913,8 @@ brcmf_cfg80211_escan(struct wiphy *wiphy, struct brcmf_cfg80211_vif *vif,
+>>>>>            return -EAGAIN;
+>>>>>        }
+>>>>>
+>>>>> +    set_bit(BRCMF_SCAN_STATUS_BUSY, &cfg->scan_status);
+>>>>> +
+>>>>>        /* If scan req comes for p2p0, send it over primary I/F */
+>>>>>        if (vif == cfg->p2p.bss_idx[P2PAPI_BSSCFG_DEVICE].vif)
+>>>>>            vif = cfg->p2p.bss_idx[P2PAPI_BSSCFG_PRIMARY].vif;
+>>>>> @@ -933,7 +935,6 @@ brcmf_cfg80211_escan(struct wiphy *wiphy, struct brcmf_cfg80211_vif *vif,
+>>>>>        }
+>>>>>
+>>>>>        cfg->scan_request = request;
+>>>>> -    set_bit(BRCMF_SCAN_STATUS_BUSY, &cfg->scan_status);
+>>>>>        if (escan_req) {
+>>>>>            cfg->escan_info.run = brcmf_run_escan;
+>>>>>            err = brcmf_p2p_scan_prep(wiphy, request, vif);
+>>>>> -- 1.7.1
+>>>>>
+>>>> -- 
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>> Please read the FAQ at  http://www.tux.org/lkml/
+>> -- 
+>> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Please read the FAQ at  http://www.tux.org/lkml/
 
-Hi Hans,
-
-On Sat, Jul 19, 2014 at 12:47:38PM +0200, Hans de Goede wrote:
-> Hi,
->=20
-> On 07/17/2014 11:08 AM, Maxime Ripard wrote:
-> >Hi everyone,
-> >
-> >Here is an attempt at improving the MMC clock support in the Allwinner
-> >SoCs.
-> >
-> >Until now, the MMC clocks were having a custom phase function that was
-> >directly setting an obscure value in the right register, because we
-> >were not really having any idea of what these values were.
-> >
-> >Now that we have more informations, we can introduce a common function
-> >call to get and set the phase of a particular clock, and use this in
-> >both our provider and our client.
-> >
-> >Another issue we had so far on the A13 was that, out of reset, the
-> >PLL6 driving the MMC was running too high to be working. We can solve
-> >that by adding two new properties in the DT to setup the rate
-> >constraints we might have on a clock.
->=20
-> Looks good to me, thanks for working on this.
->=20
-> Question have you dumped the raw mmc0 clk reg before and after this
-> patch set to verify that the end result is the same ?
-
-I did at 100MHz, but I was missing other test cases, so more testing
-at the various other frequencies we might run at would be very much
-welcome (and some cross-testing).
-
-Maxime
-
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
-
---KD3NH8oGZ7XN2Llp
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJT0OwEAAoJEBx+YmzsjxAgx6AP/AvHDQBurVxIM0n18dhi9VTz
-9CM4kDnLqCmPCK95yqwyCJcd0+chEwE/huOuNUZs7P6UWgTBVRbOnAoB2pfileiJ
-V6LtPG7UGlwshIqexYKAn41yvz5DH89kiBZUWRpjeeARvgbuEpY4I1T90MDJ87oF
-kny75ksNGhp2d/a+WYc6Tza/0WQYacpILzyCzIBku2Hywn+yQeikGaIN5drrSfUM
-6MqUo+ui2yd4z403Gbu+8odH3lfVDfLQh18IJnq1FE/lfKmEqy2RwharCB85cFnC
-6lVFFr22donP48xGaNnIhwCj8/Kwy9kjIRb2i/cOjBoH9BB3LqfSsR1oE+Nvja3Z
-uZSKtlC3+EvXG1tjc+Pk47V9jshWadwSiAgJeTTBQPKJ66sGlJq8LV/NVGpGAIFz
-ki2/j8JFekEFTMQl9D3CDDHb4vY9gFvKJvMBzOdiSwEGtz+8IBvRiaIycX/seIRy
-nrfmWJNHpIhlFDCQx4p8RTKEm3A1JuqLS/M0+li3O/0Io4C/KqJLNv/6aJMylu//
-y5/bVc+iJ6iflV3vlFR07dHNJGIzlWaG9swPXevxQjyX3MJo5UOrZHd9ZRW0kqp6
-/pZpssCobWBCk3cMf8usPWIkakdC4x852RkHrhI+xqyvYGLlfJgq5mHPwMk6riqC
-VowhEj3VYEFe+VipskhB
-=e536
------END PGP SIGNATURE-----
-
---KD3NH8oGZ7XN2Llp--
