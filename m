@@ -1,72 +1,214 @@
-From: Alexandre Courbot <gnurou@gmail.com>
-Subject: Re: [PATCH] gpio: extend gpiod_get*() with flags parameter
-Date: Fri, 25 Jul 2014 10:32:45 +0900
-Message-ID: <CAAVeFuLK2qf1n6ipnW1tK_ur2_j7NOWLegMWYAQGwKw85fnwpA@mail.gmail.com>
-References: <1406214298-20062-1-git-send-email-acourbot@nvidia.com>
- <6059032.T3tqvLkWTo@wuerfel>
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH v2] mmc: mmci: Add qcom dml support to the driver.
+Date: Fri, 25 Jul 2014 05:07:29 +0100
+Message-ID: <53D1D801.6030802@linaro.org>
+References: <1405625780-13503-1-git-send-email-srinivas.kandagatla@linaro.org> <1405716797-28122-1-git-send-email-srinivas.kandagatla@linaro.org> <53D03E23.1000801@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <6059032.T3tqvLkWTo@wuerfel>
-List-Unsubscribe: <http://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <http://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <http://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-wireless <linux-wireless@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "dri-devel@lists.freedesktop.org" <dri-devel@lists.freedesktop.org>, Liam Girdwood <lgirdwood@gmail.com>, Peter Ujfalusi <peter.ujfalusi@ti.com>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Pavel Machek <pavel@ucw.cz>, Jiri Slaby <jslaby@suse.cz>, Florian Fainelli <f.fainelli@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Alexander Shiyan <shc_work@mail.ru>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Lee Jones <lee.jones@linaro.org>, Paul Handrigan <Paul.Handrigan@cirrus.com>, linux-iio@vger.kernel.org, linux-omap@vger.kernel.org, Tomi Valkeinen <tomi.valkeinen@ti.com>, Hans Verkuil <hans.verkuil@cisco.com>, linux-serial@vger.kernel.org, linux-input@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:56195 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750799AbaGYEHi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Jul 2014 00:07:38 -0400
+Received: by mail-pa0-f44.google.com with SMTP id eu11so5322351pac.3
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Jul 2014 21:07:38 -0700 (PDT)
+In-Reply-To: <53D03E23.1000801@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stephen Boyd <sboyd@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, linux-kernel@vger.kernel.org, agross@codeaurora.org, linux-arm-msm@vger.kernel.org
 
-On Fri, Jul 25, 2014 at 1:10 AM, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Friday 25 July 2014 00:04:58 Alexandre Courbot wrote:
->> I'm not sure how this could be applied harmlessly though - maybe through
->> a dedicated branch for -next? Problem is that a lot of new code is not
->> yet merged into mainline, and conflicts are very likely to occur. Linus,
->> do you have any suggestion as to how this can be done without blood being
->> spilled?
->
-> There is a trick that we sometime use in this situation,
-> though it has to be done carefully:
->
->> diff --git a/Documentation/gpio/consumer.txt b/Documentation/gpio/consumer.txt
->> index 7ff30d2..a3fb1d7 100644
->> --- a/Documentation/gpio/consumer.txt
->> +++ b/Documentation/gpio/consumer.txt
->> @@ -29,13 +29,24 @@ gpiod_get() functions. Like many other kernel subsystems, gpiod_get() takes the
->>  device that will use the GPIO and the function the requested GPIO is supposed to
->>  fulfill:
+
+
+On 23/07/14 23:58, Stephen Boyd wrote:
+> On 07/18/14 13:53, Srinivas Kandagatla wrote:
 >>
->> -       struct gpio_desc *gpiod_get(struct device *dev, const char *con_id)
->> +       struct gpio_desc *gpiod_get(struct device *dev, const char *con_id,
->> +                                   enum gpio_flags flags)
->>
->>
+>> @@ -468,6 +473,11 @@ static void mmci_dma_setup(struct mmci_host *host)
+>>   		if (max_seg_size < host->mmc->max_seg_size)
+>>   			host->mmc->max_seg_size = max_seg_size;
+>>   	}
+>> +
+>> +	if (variant->qcom_dml && host->dma_rx_channel && host->dma_tx_channel) {
+>> +		if (dml_hw_init(host, host->mmc->parent->of_node))
+>> +			variant->qcom_dml = false;
+>> +	}
 >
+> Style nit: Braces aren't needed.
+Will fix it in next spin.
 >
-> -       struct gpio_desc *gpiod_get(struct device *dev, const char *con_id)
-> +       struct gpio_desc *__gpiod_get(struct device *dev, const char *con_id,
-> +                                       enum gpio_flags flags);
-> +
-> +#define __gpiod_get(dev, con_id, flags, ...) __gpiod_get(dev, con_id, flags)
-> +#define gpiod_get(varargs ...) __gpiod_get(varargs, 0)
+>> +
+>> +void dml_start_xfer(struct mmci_host *host, struct mmc_data *data)
+>> +{
+>> +	u32 config;
+>> +	void __iomem *base = host->base + DML_OFFSET;
+>> +
+>> +	if (data->flags & MMC_DATA_READ) {
+>> +		/* Read operation: configure DML for producer operation */
+>> +		/* Set producer CRCI-x and disable consumer CRCI */
+>> +		config = readl_relaxed(base + DML_CONFIG);
+>> +		config = (config & ~PRODUCER_CRCI_MSK) | PRODUCER_CRCI_X_SEL;
+>> +		config = (config & ~CONSUMER_CRCI_MSK) | CONSUMER_CRCI_DISABLE;
+>> +		writel_relaxed(config, base + DML_CONFIG);
+>> +
+>> +		/* Set the Producer BAM block size */
+>> +		writel_relaxed(data->blksz, base + DML_PRODUCER_BAM_BLOCK_SIZE);
+>> +
+>> +		/* Set Producer BAM Transaction size */
+>> +		writel_relaxed(data->blocks * data->blksz,
+>> +			       base + DML_PRODUCER_BAM_TRANS_SIZE);
+>> +		/* Set Producer Transaction End bit */
+>> +		config = readl_relaxed(base + DML_CONFIG);
+>> +		config |= PRODUCER_TRANS_END_EN;
+>> +		writel_relaxed(config, base + DML_CONFIG);
+>> +		/* Trigger producer */
+>> +		writel_relaxed(1, base + DML_PRODUCER_START);
+>> +	} else {
+>> +		/* Write operation: configure DML for consumer operation */
+>> +		/* Set consumer CRCI-x and disable producer CRCI*/
+>> +		config = readl_relaxed(base + DML_CONFIG);
+>> +		config = (config & ~CONSUMER_CRCI_MSK) | CONSUMER_CRCI_X_SEL;
+>> +		config = (config & ~PRODUCER_CRCI_MSK) | PRODUCER_CRCI_DISABLE;
+>> +		writel_relaxed(config, base + DML_CONFIG);
+>> +		/* Clear Producer Transaction End bit */
+>> +		config = readl_relaxed(base + DML_CONFIG);
+>> +		config &= ~PRODUCER_TRANS_END_EN;
+>> +		writel_relaxed(config, base + DML_CONFIG);
+>> +		/* Trigger consumer */
+>> +		writel_relaxed(1, base + DML_CONSUMER_START);
+>> +	}
 >
-> This will allow both variants to be called, and any users of the three-argument
-> version will pass zero as the fourth argument (or whatever you choose there).
->
-> Once the conversion is complete, the macros can be removed.
+> I think we need a memory barrier here. Does the DML need to be enabled
+> before the mmci driver sets MCI_DPSM_DMAENABLE? My understanding is that
+> relaxed accesses to different devices aren't ordered with respect to one
+> another.  So not having a memory barrier here could cause the
+> consumer/producer to be enabled after MCI_DPSM_DMAENABLE is set in the
+> mmci hardware. Downstream I see that we have an mb(), but I think we
+> could just a wmb() because we're just ordering with the mmci hardware right?
+yes, I think wmb should work. I will fix this.
 
-Wow, that works great, thanks! Indeed, this will allow me to send more
-localized patches and to not spam half of the kernel developers. Sorry
-about the noise.
+>
+> Is there any ordering required between bam and dml? I think enabling bam
+> could happen after enabling the consumer unless we had a wmb() after we
+> kick off bam and before we write a 1 to DML_CONSUMER_START.
+>
+Am not sure if there is any strict ordering requirement between bam and 
+dml. But I can see a wmb in bam_start_dma().
 
-Let's close this thread, I will submit the gpiolib update with this
-trick first, then update each user before eventually removing the
-macros.
+>> +}
+>> +
+>> +static int of_get_dml_pipe_index(struct device_node *np, const char *name)
+>
+> return type of u32?
+>
+This function is expected to return negative error codes. I think I 
+should change u32 to int in dml_hw_init().
 
-Thanks,
-Alex.
+>> +{
+>> +	int index;
+>> +	struct of_phandle_args	dma_spec;
+>> +
+>> +	index = of_property_match_string(np, "dma-names", name);
+>> +
+>> +	if (index < 0)
+>> +		return -ENODEV;
+>> +
+>> +	if (of_parse_phandle_with_args(np, "dmas", "#dma-cells", index,
+>> +				       &dma_spec))
+>> +		return -ENODEV;
+>> +
+>> +	if (dma_spec.args_count)
+>> +		return dma_spec.args[0];
+>> +
+>> +	return -ENODEV;
+>> +}
+>
+> Much cleaner!
+>
+>> +
+>> +/* Initialize the dml hardware connected to SD Card controller */
+>> +int dml_hw_init(struct mmci_host *host, struct device_node *np)
+>> +{
+>> +	u32 config;
+>> +	void __iomem *base;
+>> +	u32 consumer_id, producer_id;
+>> +
+>> +	consumer_id = of_get_dml_pipe_index(np, "tx");
+>> +	producer_id = of_get_dml_pipe_index(np, "rx");
+>> +
+>> +	if (producer_id < 0 || consumer_id < 0)
+>> +		return -ENODEV;
+>> +
+>> +	base = host->base + DML_OFFSET;
+>> +
+>> +	/* Reset the DML block */
+>> +	writel_relaxed(1, base + DML_SW_RESET);
+>> +
+>> +	/* Disable the producer and consumer CRCI */
+>> +	config = (PRODUCER_CRCI_DISABLE | CONSUMER_CRCI_DISABLE);
+>> +	/*
+>> +	 * Disable the bypass mode. Bypass mode will only be used
+>> +	 * if data transfer is to happen in PIO mode and don't
+>> +	 * want the BAM interface to connect with SDCC-DML.
+>> +	 */
+>> +	config &= ~BYPASS;
+>> +	/*
+>> +	 * Disable direct mode as we don't DML to MASTER the AHB bus.
+>> +	 * BAM connected with DML should MASTER the AHB bus.
+>> +	 */
+>> +	config &= ~DIRECT_MODE;
+>> +	/*
+>> +	 * Disable infinite mode transfer as we won't be doing any
+>> +	 * infinite size data transfers. All data transfer will be
+>> +	 * of finite data size.
+>> +	 */
+>> +	config &= ~INFINITE_CONS_TRANS;
+>> +	writel_relaxed(config, base + DML_CONFIG);
+>> +
+>> +	/*
+>> +	 * Initialize the logical BAM pipe size for producer
+>> +	 * and consumer.
+>> +	 */
+>> +	writel_relaxed(PRODUCER_PIPE_LOGICAL_SIZE,
+>> +		       base + DML_PRODUCER_PIPE_LOGICAL_SIZE);
+>> +	writel_relaxed(CONSUMER_PIPE_LOGICAL_SIZE,
+>> +		       base + DML_CONSUMER_PIPE_LOGICAL_SIZE);
+>> +
+>> +	/* Initialize Producer/consumer pipe id */
+>> +	writel_relaxed(producer_id | (consumer_id << CONSUMER_PIPE_ID_SHFT),
+>> +		       base + DML_PIPE_ID);
+>> +
+>
+> We have an mb() here too. Not sure why though. There's lots of comments
+> downstream but not where it actually would help!
+I will add mb here and try to add some comments here.
+
+
+>
+>> +	return 0;
+>> +}
+>> diff --git a/drivers/mmc/host/mmci_qcom_dml.h b/drivers/mmc/host/mmci_qcom_dml.h
+>> new file mode 100644
+>> index 0000000..412e9a3
+>> --- /dev/null
+>> +++ b/drivers/mmc/host/mmci_qcom_dml.h
+>> @@ -0,0 +1,31 @@
+>> +/*
+>> + *
+>> + * Copyright (c) 2014, Code Aurora Forum. All rights reserved.
+>
+> Hmm I see:
+>
+> Copyright (c) 2011, The Linux Foundation. All rights reserved.
+>
+> in these files. Can you use that?
+https://git.linaro.org/landing-teams/working/qualcomm/kernel.git/blob/refs/heads/inforce/ifc6410/v1.5:/drivers/mmc/host/msm_sdcc_dml.c
+in 3.4 kernel has:
+
+Copyright (c) 2011, Code Aurora Forum. All rights reserved.
+
+Do you still want to add Linux Foundation copyright in it.
+
+thanks,
+srini
+>
