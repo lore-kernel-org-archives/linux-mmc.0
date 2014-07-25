@@ -1,67 +1,57 @@
-From: Pawel Moll <pawel.moll@arm.com>
-Subject: [PATCH 3/5] mmc: sdhci-pltfm: Do not use parent as the host's device
-Date: Fri, 25 Jul 2014 15:23:51 +0100
-Message-ID: <1406298233-27876-3-git-send-email-pawel.moll@arm.com>
-References: <1406298233-27876-1-git-send-email-pawel.moll@arm.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1406298233-27876-1-git-send-email-pawel.moll@arm.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@wwwdotorg.org>, Catalin Marinas <Catalin.Marinas@arm.com>, paul@pwsan.com, Arnd Bergmann <arnd@arndb.de>, Peter De Schrijver <pdeschrijver@nvidia.com>, arm@kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Pawel Moll <pawel.moll@arm.com>, Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
+From: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
+Subject: [PATCH 4/6] mmc: sh_mobile_sdhi: Update sh_mobile_sdhi_of_data for r8a7794
+Date: Fri, 25 Jul 2014 16:40:48 +0200
+Message-ID: <1406299250-23975-5-git-send-email-ulrich.hecht+renesas@gmail.com>
+References: <1406299250-23975-1-git-send-email-ulrich.hecht+renesas@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:59896 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752695AbaGYOll (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Jul 2014 10:41:41 -0400
+In-Reply-To: <1406299250-23975-1-git-send-email-ulrich.hecht+renesas@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-sh@vger.kernel.org
+Cc: magnus.damm@gmail.com, Shinobu Uehara <shinobu.uehara.xc@renesas.com>, Ulrich Hecht <ulrich.hecht+renesas@gmail.com>, linux-mmc@vger.kernel.org
 
-The code selecting a device for the sdhci host has been
-continuously tweaked (4b711cb13843f5082e82970dd1e8031383134a65
-"mmc: sdhci-pltfm: Add structure for host-specific data" and
-a4d2177f00a5252d825236c5124bc1e9918bdb41 "mmc: sdhci-pltfm: dt
-device does not pass parent to sdhci_alloc_host") while there
-does not seem to be any reason to use platform device's parent
-in the first place.
+From: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
 
-The comment saying "Some PCI-based MFD need the parent here"
-seem to refer to Timberdale FPGA driver (the only MFD driver
-registering SDHCI cell, drivers/mfd/timberdale.c) but again,
-the only situation when parent device matter is runtime PM,
-which is not implemented for Timberdale.
+This patch adds DT support for r8a7794.
 
-Cc: Chris Ball <chris@printf.net>
-Cc: Anton Vorontsov <anton@enomsg.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
+[uli: added bindings documentation]
+Signed-off-by: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
 Cc: linux-mmc@vger.kernel.org
-Cc: linuxppc-dev@lists.ozlabs.org
-Signed-off-by: Pawel Moll <pawel.moll@arm.com>
 ---
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 2 ++
+ drivers/mmc/host/sh_mobile_sdhi.c                  | 1 +
+ 2 files changed, 3 insertions(+)
 
-This patch is a part of effort to remove references to platform_bus
-and make it static.
-
-Chris, Anton, Ulf - could you please advise if the assumptions
-above are correct or if I'm completely wrong? Do you know what
-where the real reasons to use parent originally? The PCI comment
-seems like a red herring to me...
-
- drivers/mmc/host/sdhci-pltfm.c | 9 ++-------
- 1 file changed, 2 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index 7e834fb..4996112 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -136,13 +136,8 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
- 	if (resource_size(iomem) < 0x100)
- 		dev_err(&pdev->dev, "Invalid iomem size!\n");
+diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+index 6a2a116..924e516 100644
+--- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+@@ -18,6 +18,8 @@ Required properties:
+ 		"renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
+ 		"renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
+ 		"renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
++		"renesas,sdhi-r8a7791" - SDHI IP on R8A7791 SoC
++		"renesas,sdhi-r8a7794" - SDHI IP on R8A7794 SoC
  
--	/* Some PCI-based MFD need the parent here */
--	if (pdev->dev.parent != &platform_bus && !np)
--		host = sdhci_alloc_host(pdev->dev.parent,
--			sizeof(struct sdhci_pltfm_host) + priv_size);
--	else
--		host = sdhci_alloc_host(&pdev->dev,
--			sizeof(struct sdhci_pltfm_host) + priv_size);
-+	host = sdhci_alloc_host(&pdev->dev,
-+		sizeof(struct sdhci_pltfm_host) + priv_size);
- 
- 	if (IS_ERR(host)) {
- 		ret = PTR_ERR(host);
+ Optional properties:
+ - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 91058da..7591447 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -68,6 +68,7 @@ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+ 	{ .compatible = "renesas,sdhi-r8a7779", .data = &of_rcar_gen1_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7790", .data = &of_rcar_gen2_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7791", .data = &of_rcar_gen2_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
 -- 
-1.9.1
+1.8.4.5
+
