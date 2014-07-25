@@ -1,214 +1,180 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: Re: [PATCH v2] mmc: mmci: Add qcom dml support to the driver.
-Date: Fri, 25 Jul 2014 05:07:29 +0100
-Message-ID: <53D1D801.6030802@linaro.org>
-References: <1405625780-13503-1-git-send-email-srinivas.kandagatla@linaro.org> <1405716797-28122-1-git-send-email-srinivas.kandagatla@linaro.org> <53D03E23.1000801@codeaurora.org>
+From: =?ISO-8859-15?Q?Andreas_F=E4rber?= <afaerber@suse.de>
+Subject: Re: [PATCHv6 1/5] mmc: dw_mmc: modify the dt-binding for removing
+ slot-node and supports-highspeed
+Date: Fri, 25 Jul 2014 14:11:52 +0200
+Message-ID: <53D24988.9010208@suse.de>
+References: <1406250713-22604-1-git-send-email-jh80.chung@samsung.com> <1406250713-22604-2-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f44.google.com ([209.85.220.44]:56195 "EHLO
-	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750799AbaGYEHi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Jul 2014 00:07:38 -0400
-Received: by mail-pa0-f44.google.com with SMTP id eu11so5322351pac.3
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Jul 2014 21:07:38 -0700 (PDT)
-In-Reply-To: <53D03E23.1000801@codeaurora.org>
+Received: from cantor2.suse.de ([195.135.220.15]:39495 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751348AbaGYMMC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 25 Jul 2014 08:12:02 -0400
+In-Reply-To: <1406250713-22604-2-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Boyd <sboyd@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, linux-kernel@vger.kernel.org, agross@codeaurora.org, linux-arm-msm@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, devicetree@vger.kernel.org, heiko@sntech.de, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
+Hi Jaehoon,
 
+Am 25.07.2014 03:11, schrieb Jaehoon Chung:
+> Almost Soc is used the slot per a host.
 
-On 23/07/14 23:58, Stephen Boyd wrote:
-> On 07/18/14 13:53, Srinivas Kandagatla wrote:
->>
->> @@ -468,6 +473,11 @@ static void mmci_dma_setup(struct mmci_host *host)
->>   		if (max_seg_size < host->mmc->max_seg_size)
->>   			host->mmc->max_seg_size = max_seg_size;
->>   	}
->> +
->> +	if (variant->qcom_dml && host->dma_rx_channel && host->dma_tx_channel) {
->> +		if (dml_hw_init(host, host->mmc->parent->of_node))
->> +			variant->qcom_dml = false;
->> +	}
->
-> Style nit: Braces aren't needed.
-Will fix it in next spin.
->
->> +
->> +void dml_start_xfer(struct mmci_host *host, struct mmc_data *data)
->> +{
->> +	u32 config;
->> +	void __iomem *base = host->base + DML_OFFSET;
->> +
->> +	if (data->flags & MMC_DATA_READ) {
->> +		/* Read operation: configure DML for producer operation */
->> +		/* Set producer CRCI-x and disable consumer CRCI */
->> +		config = readl_relaxed(base + DML_CONFIG);
->> +		config = (config & ~PRODUCER_CRCI_MSK) | PRODUCER_CRCI_X_SEL;
->> +		config = (config & ~CONSUMER_CRCI_MSK) | CONSUMER_CRCI_DISABLE;
->> +		writel_relaxed(config, base + DML_CONFIG);
->> +
->> +		/* Set the Producer BAM block size */
->> +		writel_relaxed(data->blksz, base + DML_PRODUCER_BAM_BLOCK_SIZE);
->> +
->> +		/* Set Producer BAM Transaction size */
->> +		writel_relaxed(data->blocks * data->blksz,
->> +			       base + DML_PRODUCER_BAM_TRANS_SIZE);
->> +		/* Set Producer Transaction End bit */
->> +		config = readl_relaxed(base + DML_CONFIG);
->> +		config |= PRODUCER_TRANS_END_EN;
->> +		writel_relaxed(config, base + DML_CONFIG);
->> +		/* Trigger producer */
->> +		writel_relaxed(1, base + DML_PRODUCER_START);
->> +	} else {
->> +		/* Write operation: configure DML for consumer operation */
->> +		/* Set consumer CRCI-x and disable producer CRCI*/
->> +		config = readl_relaxed(base + DML_CONFIG);
->> +		config = (config & ~CONSUMER_CRCI_MSK) | CONSUMER_CRCI_X_SEL;
->> +		config = (config & ~PRODUCER_CRCI_MSK) | PRODUCER_CRCI_DISABLE;
->> +		writel_relaxed(config, base + DML_CONFIG);
->> +		/* Clear Producer Transaction End bit */
->> +		config = readl_relaxed(base + DML_CONFIG);
->> +		config &= ~PRODUCER_TRANS_END_EN;
->> +		writel_relaxed(config, base + DML_CONFIG);
->> +		/* Trigger consumer */
->> +		writel_relaxed(1, base + DML_CONSUMER_START);
->> +	}
->
-> I think we need a memory barrier here. Does the DML need to be enabled
-> before the mmci driver sets MCI_DPSM_DMAENABLE? My understanding is that
-> relaxed accesses to different devices aren't ordered with respect to one
-> another.  So not having a memory barrier here could cause the
-> consumer/producer to be enabled after MCI_DPSM_DMAENABLE is set in the
-> mmci hardware. Downstream I see that we have an mb(), but I think we
-> could just a wmb() because we're just ordering with the mmci hardware right?
-yes, I think wmb should work. I will fix this.
+Something's very wrong with this sentence. What are you trying to say?
+Almost all SoCs use one slot only per host controller device?
 
->
-> Is there any ordering required between bam and dml? I think enabling bam
-> could happen after enabling the consumer unless we had a wmb() after we
-> kick off bam and before we write a 1 to DML_CONSUMER_START.
->
-Am not sure if there is any strict ordering requirement between bam and 
-dml. But I can see a wmb in bam_start_dma().
+> Don't use the slot-node and deprecated the "supports-highsped" proper=
+ty.
 
->> +}
->> +
->> +static int of_get_dml_pipe_index(struct device_node *np, const char *name)
->
-> return type of u32?
->
-This function is expected to return negative error codes. I think I 
-should change u32 to int in dml_hw_init().
+s/deprecated/deprecate/ ?
+s/highsped/highspeed/
 
->> +{
->> +	int index;
->> +	struct of_phandle_args	dma_spec;
->> +
->> +	index = of_property_match_string(np, "dma-names", name);
->> +
->> +	if (index < 0)
->> +		return -ENODEV;
->> +
->> +	if (of_parse_phandle_with_args(np, "dmas", "#dma-cells", index,
->> +				       &dma_spec))
->> +		return -ENODEV;
->> +
->> +	if (dma_spec.args_count)
->> +		return dma_spec.args[0];
->> +
->> +	return -ENODEV;
->> +}
->
-> Much cleaner!
->
->> +
->> +/* Initialize the dml hardware connected to SD Card controller */
->> +int dml_hw_init(struct mmci_host *host, struct device_node *np)
->> +{
->> +	u32 config;
->> +	void __iomem *base;
->> +	u32 consumer_id, producer_id;
->> +
->> +	consumer_id = of_get_dml_pipe_index(np, "tx");
->> +	producer_id = of_get_dml_pipe_index(np, "rx");
->> +
->> +	if (producer_id < 0 || consumer_id < 0)
->> +		return -ENODEV;
->> +
->> +	base = host->base + DML_OFFSET;
->> +
->> +	/* Reset the DML block */
->> +	writel_relaxed(1, base + DML_SW_RESET);
->> +
->> +	/* Disable the producer and consumer CRCI */
->> +	config = (PRODUCER_CRCI_DISABLE | CONSUMER_CRCI_DISABLE);
->> +	/*
->> +	 * Disable the bypass mode. Bypass mode will only be used
->> +	 * if data transfer is to happen in PIO mode and don't
->> +	 * want the BAM interface to connect with SDCC-DML.
->> +	 */
->> +	config &= ~BYPASS;
->> +	/*
->> +	 * Disable direct mode as we don't DML to MASTER the AHB bus.
->> +	 * BAM connected with DML should MASTER the AHB bus.
->> +	 */
->> +	config &= ~DIRECT_MODE;
->> +	/*
->> +	 * Disable infinite mode transfer as we won't be doing any
->> +	 * infinite size data transfers. All data transfer will be
->> +	 * of finite data size.
->> +	 */
->> +	config &= ~INFINITE_CONS_TRANS;
->> +	writel_relaxed(config, base + DML_CONFIG);
->> +
->> +	/*
->> +	 * Initialize the logical BAM pipe size for producer
->> +	 * and consumer.
->> +	 */
->> +	writel_relaxed(PRODUCER_PIPE_LOGICAL_SIZE,
->> +		       base + DML_PRODUCER_PIPE_LOGICAL_SIZE);
->> +	writel_relaxed(CONSUMER_PIPE_LOGICAL_SIZE,
->> +		       base + DML_CONSUMER_PIPE_LOGICAL_SIZE);
->> +
->> +	/* Initialize Producer/consumer pipe id */
->> +	writel_relaxed(producer_id | (consumer_id << CONSUMER_PIPE_ID_SHFT),
->> +		       base + DML_PIPE_ID);
->> +
->
-> We have an mb() here too. Not sure why though. There's lots of comments
-> downstream but not where it actually would help!
-I will add mb here and try to add some comments here.
+> Instead, use the cap-mmc/sd-highspeed.
+>=20
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Reviewed-by: Tushar Behera <trblinux@gmail.com>
+> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Tested-by: Sachin Kamat <sachin.kamat@samsung.com>
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+> ---
+>  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   17 +++++-----=
+-------
+>  .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   12 +++++-----=
+--
+>  .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |   12 +++++-----=
+--
+>  3 files changed, 15 insertions(+), 26 deletions(-)
+>=20
+> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt=
+ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> index 532b1d4..9308325 100644
+> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> @@ -46,13 +46,14 @@ Required Properties:
+>        - if CIU clock divider value is 0 (that is divide by 1), both =
+tx and rx
+>          phase shift clocks should be 0.
+> =20
+> -Required properties for a slot:
+> +Required properties for a slot (Deprecated - Recommend to use one sl=
+ot per a host):
 
+"per host"
 
->
->> +	return 0;
->> +}
->> diff --git a/drivers/mmc/host/mmci_qcom_dml.h b/drivers/mmc/host/mmci_qcom_dml.h
->> new file mode 100644
->> index 0000000..412e9a3
->> --- /dev/null
->> +++ b/drivers/mmc/host/mmci_qcom_dml.h
->> @@ -0,0 +1,31 @@
->> +/*
->> + *
->> + * Copyright (c) 2014, Code Aurora Forum. All rights reserved.
->
-> Hmm I see:
->
-> Copyright (c) 2011, The Linux Foundation. All rights reserved.
->
-> in these files. Can you use that?
-https://git.linaro.org/landing-teams/working/qualcomm/kernel.git/blob/refs/heads/inforce/ifc6410/v1.5:/drivers/mmc/host/msm_sdcc_dml.c
-in 3.4 kernel has:
+> =20
+>  * gpios: specifies a list of gpios used for command, clock and data =
+bus. The
+>    first gpio is the command line and the second gpio is the clock li=
+ne. The
+>    rest of the gpios (depending on the bus-width property) are the da=
+ta lines in
+>    no particular order. The format of the gpio specifier depends on t=
+he gpio
+>    controller.
+> + (Deprecated - Refer to Documentaion/devicetree/binding/pinctrl/sams=
+ung-pinctrl.txt)
 
-Copyright (c) 2011, Code Aurora Forum. All rights reserved.
+"Documentation/"
 
-Do you still want to add Linux Foundation copyright in it.
+Nit: Is the indentation intentional? (parenthesis not aligned with text=
+)
 
-thanks,
-srini
->
+> =20
+>  Example:
+> =20
+> @@ -69,21 +70,13 @@ Example:
+> =20
+>  	dwmmc0@12200000 {
+>  		num-slots =3D <1>;
+> -		supports-highspeed;
+> +		cap-mmc-highspeed;
+> +		cap-sd-highspeed;
+>  		broken-cd;
+>  		fifo-depth =3D <0x80>;
+>  		card-detect-delay =3D <200>;
+>  		samsung,dw-mshc-ciu-div =3D <3>;
+>  		samsung,dw-mshc-sdr-timing =3D <2 3>;
+>  		samsung,dw-mshc-ddr-timing =3D <1 2>;
+> -
+> -		slot@0 {
+> -			reg =3D <0>;
+> -			bus-width =3D <8>;
+> -			gpios =3D <&gpc0 0 2 0 3>, <&gpc0 1 2 0 3>,
+> -				<&gpc1 0 2 3 3>, <&gpc1 1 2 3 3>,
+> -				<&gpc1 2 2 3 3>, <&gpc1 3 2 3 3>,
+> -				<&gpc0 3 2 3 3>, <&gpc0 4 2 3 3>,
+> -				<&gpc0 5 2 3 3>, <&gpc0 6 2 3 3>;
+> -		};
+> +		bus-width =3D <8>;
+>  	};
+> diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/D=
+ocumentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+> index e5bc49f..3b35449 100644
+> --- a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+> @@ -34,13 +34,11 @@ Example:
+>  		num-slots =3D <1>;
+>  		vmmc-supply =3D <&ldo12>;
+>  		fifo-depth =3D <0x100>;
+> -		supports-highspeed;
+>  		pinctrl-names =3D "default";
+>  		pinctrl-0 =3D <&sd_pmx_pins &sd_cfg_func1 &sd_cfg_func2>;
+> -		slot@0 {
+> -			reg =3D <0>;
+> -			bus-width =3D <4>;
+> -			disable-wp;
+> -			cd-gpios =3D <&gpio10 3 0>;
+> -		};
+> +		bus-width =3D <4>;
+> +		disable-wp;
+> +		cd-gpios =3D <&gpio10 3 0>;
+> +		cap-mmc-highspeed;
+> +		cap-sd-highspeed;
+>  	};
+> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.t=
+xt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> index 2d4a725..346c609 100644
+> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+> @@ -67,7 +67,8 @@ Optional properties:
+>  * card-detect-delay: Delay in milli-seconds before detecting card af=
+ter card
+>    insert event. The default value is 0.
+> =20
+> -* supports-highspeed: Enables support for high speed cards (up to 50=
+MHz)
+> +* supports-highspeed (DEPRECATED): Enables support for high speed ca=
+rds (up to 50MHz)
+> +			   (use "cap-mmc-highspeed" or "cap-sd-highspeed" instead)
+> =20
+>  * broken-cd: as documented in mmc core bindings.
+> =20
+> @@ -98,14 +99,11 @@ board specific portions as listed below.
+>  		clock-frequency =3D <400000000>;
+>  		clock-freq-min-max =3D <400000 200000000>;
+>  		num-slots =3D <1>;
+> -		supports-highspeed;
+>  		broken-cd;
+>  		fifo-depth =3D <0x80>;
+>  		card-detect-delay =3D <200>;
+>  		vmmc-supply =3D <&buck8>;
+> -
+> -		slot@0 {
+> -			reg =3D <0>;
+> -			bus-width =3D <8>;
+> -		};
+> +		bus-width =3D <8>;
+> +		cap-mmc-highspeed;
+> +		cap-sd-highspeed;
+>  	};
+
+Regards,
+Andreas
+
+--=20
+SUSE LINUX Products GmbH, Maxfeldstr. 5, 90409 N=FCrnberg, Germany
+GF: Jeff Hawn, Jennifer Guild, Felix Imend=F6rffer; HRB 16746 AG N=FCrn=
+berg
