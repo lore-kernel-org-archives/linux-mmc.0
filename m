@@ -1,80 +1,72 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCHv6 5/5] mmc: dw_mmc: replace "disable-wp" from slot's quirk to
- host's quirk
-Date: Fri, 25 Jul 2014 10:11:53 +0900
-Message-ID: <1406250713-22604-6-git-send-email-jh80.chung@samsung.com>
-References: <1406250713-22604-1-git-send-email-jh80.chung@samsung.com>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1406250713-22604-1-git-send-email-jh80.chung@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, devicetree@vger.kernel.org, heiko@sntech.de, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jaehoon Chung <jh80.chung@samsung.com>
+From: Alexandre Courbot <gnurou@gmail.com>
+Subject: Re: [PATCH] gpio: extend gpiod_get*() with flags parameter
+Date: Fri, 25 Jul 2014 10:36:43 +0900
+Message-ID: <CAAVeFu+R+UWtxftWBM3qghNnf9O6SOf5AeNC-qemG7W05hiuAQ@mail.gmail.com>
+References: <1406214298-20062-1-git-send-email-acourbot@nvidia.com>
+ <1496956.3bpx902hFg@avalon>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <dri-devel-bounces@lists.freedesktop.org>
+In-Reply-To: <1496956.3bpx902hFg@avalon>
+List-Unsubscribe: <http://lists.freedesktop.org/mailman/options/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <http://lists.freedesktop.org/archives/dri-devel>
+List-Post: <mailto:dri-devel@lists.freedesktop.org>
+List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <http://lists.freedesktop.org/mailman/listinfo/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: dri-devel-bounces@lists.freedesktop.org
+Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
+To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Cc: linux-wireless <linux-wireless@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "dri-devel@lists.freedesktop.org" <dri-devel@lists.freedesktop.org>, Liam Girdwood <lgirdwood@gmail.com>, Peter Ujfalusi <peter.ujfalusi@ti.com>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, Pavel Machek <pavel@ucw.cz>, Jiri Slaby <jslaby@suse.cz>, Florian Fainelli <f.fainelli@gmail.com>, Samuel Ortiz <sameo@linux.intel.com>, Alexander Shiyan <shc_work@mail.ru>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Lee Jones <lee.jones@linaro.org>, Paul Handrigan <Paul.Handrigan@cirrus.com>, linux-iio@vger.kernel.org, linux-omap@vger.kernel.org, Tomi Valkeinen <tomi.valkeinen@ti.com>, Hans Verkuil <hans.verkuil@cisco.com>, linux-serial@vger.kernel.org, linux-input@vger.kernel.o
 List-Id: linux-mmc@vger.kernel.org
 
-Replaced the "disable-wp" into host's quirks.
-(Because the slot-node is removed at dt-file.)
+On Fri, Jul 25, 2014 at 1:23 AM, Laurent Pinchart
+<laurent.pinchart@ideasonboard.com> wrote:
+>> diff --git a/Documentation/gpio/consumer.txt
+>> b/Documentation/gpio/consumer.txt index 7ff30d2..a3fb1d7 100644
+>> --- a/Documentation/gpio/consumer.txt
+>> +++ b/Documentation/gpio/consumer.txt
+>> @@ -29,13 +29,24 @@ gpiod_get() functions. Like many other kernel
+>> subsystems, gpiod_get() takes the device that will use the GPIO and the
+>> function the requested GPIO is supposed to fulfill:
+>>
+>> -     struct gpio_desc *gpiod_get(struct device *dev, const char *con_id)
+>> +     struct gpio_desc *gpiod_get(struct device *dev, const char *con_id,
+>> +                                 enum gpio_flags flags)
+>
+> I assume you mean enum gpiod_flags here and in the rest of the documentation.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-Tested-by: Sachin Kamat <sachin.kamat@samsung.com>
-Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
----
- drivers/mmc/host/dw_mmc.c  |   12 +++++-------
- include/linux/mmc/dw_mmc.h |    6 ++----
- 2 files changed, 7 insertions(+), 11 deletions(-)
+Indeed, thanks for pointing it out.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 1ac227c..4a4f66f 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -997,7 +997,7 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
- 	int gpio_ro = mmc_gpio_get_ro(mmc);
- 
- 	/* Use platform get_ro function, else try on board write protect */
--	if (slot->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT)
-+	if (slot->host->quirks & DW_MCI_QUIRK_NO_WRITE_PROTECT)
- 		read_only = 0;
- 	else if (!IS_ERR_VALUE(gpio_ro))
- 		read_only = gpio_ro;
-@@ -2006,12 +2006,7 @@ static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
- static struct dw_mci_of_slot_quirks {
- 	char *quirk;
- 	int id;
--} of_slot_quirks[] = {
--	{
--		.quirk	= "disable-wp",
--		.id	= DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
--	},
--};
-+} of_slot_quirks[] = {};
- 
- static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
- {
-@@ -2238,6 +2233,9 @@ static struct dw_mci_of_quirks {
- 	{
- 		.quirk	= "broken-cd",
- 		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
-+	}, {
-+		.quirk	= "disable-wp",
-+		.id	= DW_MCI_QUIRK_NO_WRITE_PROTECT,
- 	},
- };
- 
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index babaea9..8b4b2d8 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -213,10 +213,8 @@ struct dw_mci_dma_ops {
- #define DW_MCI_QUIRK_HIGHSPEED			BIT(2)
- /* Unreliable card detection */
- #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
--
--/* Slot level quirks */
--/* This slot has no write protect */
--#define DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT	BIT(0)
-+/* No write protect */
-+#define DW_MCI_QUIRK_NO_WRITE_PROTECT		BIT(4)
- 
- struct dma_pdata;
- 
--- 
-1.7.9.5
+>
+>>  If a function is implemented by using several GPIOs together (e.g. a simple
+>> LED device that displays digits), an additional index argument can be
+>> specified:
+>>
+>>       struct gpio_desc *gpiod_get_index(struct device *dev,
+>> -                                       const char *con_id, unsigned int idx)
+>> +                                       const char *con_id, unsigned int idx,
+>> +                                       enum gpio_flags flags)
+>> +
+>> +The flags parameter is used to optionally specify a direction and initial
+>> value +for the GPIO. Values can be:
+>> +
+>> +* AS_IS or 0 to not initialize the GPIO at all. The direction must be set
+>> later
+>> +  with one of the dedicated functions.
+>> +* INPUT to initialize the GPIO as input.
+>> +* OUTPUT_LOW to initialize the GPIO as output with a value of 0.
+>> +* OUTPUT_HIGH to initialize the GPIO as output with a value of 1.
+>
+> Pretty please, could you at least prefix that with GPIOD_ ? Those names are
+> too generic.
+>
+> How about renaming them to GPIOD_AS_IS, GPIOD_IN, GPIOD_OUT_INIT_LOW and
+> GPIOD_OUT_INIT_HIGH in order to match the GPIOF_ flags ?
+
+Yeah, you're right, the possibility of name collision is quite high here.
+
+Thanks,
+Alex.
