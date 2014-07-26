@@ -1,28 +1,23 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 03/11] mmc: sh_mmcif: Configure DMA slave bus width
-Date: Sat, 26 Jul 2014 11:40:40 +0200
-Message-ID: <CAPDyKFoG+MjPTWQg2d96BDL45Bu6fRPRHJBHqUoQv88SC59Vzw@mail.gmail.com>
+Subject: Re: [PATCH 04/11] mmc: tmio: Configure DMA slave bus width
+Date: Sat, 26 Jul 2014 11:41:05 +0200
+Message-ID: <CAPDyKFpJOi7R8KXQydnEM3wkfrr90M4e_c7ywv+9MMF7CrC-og@mail.gmail.com>
 References: <1405464321-4723-1-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-	<1405464321-4723-4-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+	<1405464321-4723-5-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f45.google.com ([209.85.192.45]:45680 "EHLO
-	mail-qg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750870AbaGZJkk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 26 Jul 2014 05:40:40 -0400
-Received: by mail-qg0-f45.google.com with SMTP id f51so6217532qge.32
-        for <linux-mmc@vger.kernel.org>; Sat, 26 Jul 2014 02:40:40 -0700 (PDT)
-In-Reply-To: <1405464321-4723-4-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1405464321-4723-5-git-send-email-laurent.pinchart+renesas@ideasonboard.com>
+Sender: linux-sh-owner@vger.kernel.org
 To: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
 Cc: Linux-sh list <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Ian Molton <ian.molton@codethink.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
 On 16 July 2014 00:45, Laurent Pinchart
 <laurent.pinchart+renesas@ideasonboard.com> wrote:
-> The data register is 4 bytes wide, hardcode the DMA transfer size to
-> 4 bytes in both directions.
+> Even though some implementations support 4-bytes data register access,
+> the tmio driver never configures the hardware in such a way and always
+> performs 2-bytes accesses. Hardcode the DMA transfer size to 2 bytes.
 >
 > Signed-off-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
 
@@ -33,29 +28,29 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sh_mmcif.c | 7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/tmio_mmc_dma.c | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 436d663..cc8ae09 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -418,10 +418,13 @@ sh_mmcif_request_dma_one(struct sh_mmcif_host *host,
->         cfg.slave_id = slave_id;
->         cfg.direction = direction;
->
-> -       if (direction == DMA_DEV_TO_MEM)
-> +       if (direction == DMA_DEV_TO_MEM) {
->                 cfg.src_addr = res->start + MMCIF_CE_DATA;
-> -       else
-> +               cfg.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
-> +       } else {
->                 cfg.dst_addr = res->start + MMCIF_CE_DATA;
-> +               cfg.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
-> +       }
->
->         ret = dmaengine_slave_config(chan, &cfg);
->         if (ret < 0) {
+> diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+> index 03e7b28..eb8f1d5 100644
+> --- a/drivers/mmc/host/tmio_mmc_dma.c
+> +++ b/drivers/mmc/host/tmio_mmc_dma.c
+> @@ -294,6 +294,7 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
+>                         cfg.slave_id = pdata->dma->slave_id_tx;
+>                 cfg.direction = DMA_MEM_TO_DEV;
+>                 cfg.dst_addr = res->start + (CTL_SD_DATA_PORT << host->pdata->bus_shift);
+> +               cfg.dst_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES;
+>                 cfg.src_addr = 0;
+>                 ret = dmaengine_slave_config(host->chan_tx, &cfg);
+>                 if (ret < 0)
+> @@ -312,6 +313,7 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
+>                         cfg.slave_id = pdata->dma->slave_id_rx;
+>                 cfg.direction = DMA_DEV_TO_MEM;
+>                 cfg.src_addr = cfg.dst_addr;
+> +               cfg.src_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES;
+>                 cfg.dst_addr = 0;
+>                 ret = dmaengine_slave_config(host->chan_rx, &cfg);
+>                 if (ret < 0)
 > --
 > 1.8.5.5
 >
