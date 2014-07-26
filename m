@@ -1,68 +1,135 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 4/6] mmc: sh_mobile_sdhi: Update sh_mobile_sdhi_of_data
- for r8a7794
-Date: Sat, 26 Jul 2014 10:49:29 +0200
-Message-ID: <CAPDyKFpRsrJ7ba5SSK=3RC5ET206e=JptO2oco-q9_uPUrCRcg@mail.gmail.com>
-References: <1406299250-23975-1-git-send-email-ulrich.hecht+renesas@gmail.com>
-	<1406299250-23975-5-git-send-email-ulrich.hecht+renesas@gmail.com>
+Subject: Re: [PATCH] mmc: Do not advertise secure discard if it is blacklisted
+Date: Sat, 26 Jul 2014 11:17:17 +0200
+Message-ID: <CAPDyKFp-xgTR6KOSBDUpju-Q5ea-8ncHwdLigMZrAuKTsrQfDg@mail.gmail.com>
+References: <1403090287-10673-1-git-send-email-lczerner@redhat.com>
+	<alpine.LFD.2.00.1407141008180.13527@localhost.localdomain>
+	<53C45E3D.90600@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1406299250-23975-5-git-send-email-ulrich.hecht+renesas@gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
-Cc: Linux-sh list <linux-sh@vger.kernel.org>, Magnus Damm <magnus.damm@gmail.com>, Shinobu Uehara <shinobu.uehara.xc@renesas.com>, linux-mmc <linux-mmc@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f45.google.com ([209.85.216.45]:57284 "EHLO
+	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750732AbaGZJRS convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 26 Jul 2014 05:17:18 -0400
+Received: by mail-qa0-f45.google.com with SMTP id cm18so5577553qab.4
+        for <linux-mmc@vger.kernel.org>; Sat, 26 Jul 2014 02:17:18 -0700 (PDT)
+In-Reply-To: <53C45E3D.90600@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, =?UTF-8?B?THVrw6HFoSBDemVybmVy?= <lczerner@redhat.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-fsdevel@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-On 25 July 2014 16:40, Ulrich Hecht <ulrich.hecht+renesas@gmail.com> wrote:
-> From: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
+On 15 July 2014 00:48, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi, Lukas.
 >
-> This patch adds DT support for r8a7794.
+> I think it's reasonable. And CC'd Ulf.
 >
-> Signed-off-by: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
-> [uli: added bindings documentation]
-> Signed-off-by: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
-> Cc: linux-mmc@vger.kernel.org
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+>
+> Best Regards,
+> Jaehoon Chung
+>
+> On 07/14/2014 05:10 PM, Luk=C3=A1=C5=A1 Czerner wrote:
+>> On Wed, 18 Jun 2014, Lukas Czerner wrote:
+>>
+>>> Date: Wed, 18 Jun 2014 13:18:07 +0200
+>>> From: Lukas Czerner <lczerner@redhat.com>
+>>> To: linux-mmc@vger.kernel.org
+>>> Cc: linux-fsdevel@vger.kernel.org, chris@printf.net,
+>>>     Lukas Czerner <lczerner@redhat.com>
+>>> Subject: [PATCH] mmc: Do not advertise secure discard if it is blac=
+klisted
+>>>
+>>> Currently when the device secure discard implementation is
+>>> blacklisted (MMC_QUIRK_SEC_ERASE_TRIM_BROKEN quirk is set)
+>>> instead of secure discard we're going to do normal discard,
+>>> which is wrong.
+>>>
+>>> When the secure discard is known to be broken we should just
+>>> disallow it entirely and not advertise this functionality to
+>>> the user. Fix it.
+>>>
+>>> Also move mmc_fixup_device() in from of mmc_blk_alloc() so we
+>>> can get quirks set before we attempt to set queue information.
+>>
+>> Where should I send it to get noticed ? It's sitting here for a
+>> month now.
+>>
+>> Thanks!
+>> -Lukas
+>>
+>>>
+>>> Signed-off-by: Lukas Czerner <lczerner@redhat.com>
 
-I guess you prefer this goes together with the rest of the patches in
-this set, please go ahead.
+Sorry for the delay.
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Thanks, applied for next!
 
-> ---
->  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 2 ++
->  drivers/mmc/host/sh_mobile_sdhi.c                  | 1 +
->  2 files changed, 3 insertions(+)
+Kind regards
+Uffe
+
+>>> ---
+>>>  drivers/mmc/card/block.c | 6 +++---
+>>>  drivers/mmc/core/core.c  | 3 ++-
+>>>  2 files changed, 5 insertions(+), 4 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>>> index 452782b..ede41f0 100644
+>>> --- a/drivers/mmc/card/block.c
+>>> +++ b/drivers/mmc/card/block.c
+>>> @@ -2028,8 +2028,7 @@ static int mmc_blk_issue_rq(struct mmc_queue =
+*mq, struct request *req)
+>>>              /* complete ongoing async transfer before issuing disc=
+ard */
+>>>              if (card->host->areq)
+>>>                      mmc_blk_issue_rw_rq(mq, NULL);
+>>> -            if (req->cmd_flags & REQ_SECURE &&
+>>> -                    !(card->quirks & MMC_QUIRK_SEC_ERASE_TRIM_BROK=
+EN))
+>>> +            if (req->cmd_flags & REQ_SECURE)
+>>>                      ret =3D mmc_blk_issue_secdiscard_rq(mq, req);
+>>>              else
+>>>                      ret =3D mmc_blk_issue_discard_rq(mq, req);
+>>> @@ -2432,6 +2431,8 @@ static int mmc_blk_probe(struct mmc_card *car=
+d)
+>>>      if (!(card->csd.cmdclass & CCC_BLOCK_READ))
+>>>              return -ENODEV;
+>>>
+>>> +    mmc_fixup_device(card, blk_fixups);
+>>> +
+>>>      md =3D mmc_blk_alloc(card);
+>>>      if (IS_ERR(md))
+>>>              return PTR_ERR(md);
+>>> @@ -2446,7 +2447,6 @@ static int mmc_blk_probe(struct mmc_card *car=
+d)
+>>>              goto out;
+>>>
+>>>      mmc_set_drvdata(card, md);
+>>> -    mmc_fixup_device(card, blk_fixups);
+>>>
+>>>      if (mmc_add_disk(md))
+>>>              goto out;
+>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>> index 7dc0c85..d03a080 100644
+>>> --- a/drivers/mmc/core/core.c
+>>> +++ b/drivers/mmc/core/core.c
+>>> @@ -2102,7 +2102,8 @@ EXPORT_SYMBOL(mmc_can_sanitize);
+>>>
+>>>  int mmc_can_secure_erase_trim(struct mmc_card *card)
+>>>  {
+>>> -    if (card->ext_csd.sec_feature_support & EXT_CSD_SEC_ER_EN)
+>>> +    if ((card->ext_csd.sec_feature_support & EXT_CSD_SEC_ER_EN) &&
+>>> +        !(card->quirks & MMC_QUIRK_SEC_ERASE_TRIM_BROKEN))
+>>>              return 1;
+>>>      return 0;
+>>>  }
+>>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> index 6a2a116..924e516 100644
-> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> @@ -18,6 +18,8 @@ Required properties:
->                 "renesas,sdhi-r8a7778" - SDHI IP on R8A7778 SoC
->                 "renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
->                 "renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
-> +               "renesas,sdhi-r8a7791" - SDHI IP on R8A7791 SoC
-> +               "renesas,sdhi-r8a7794" - SDHI IP on R8A7794 SoC
->
->  Optional properties:
->  - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
-> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> index 91058da..7591447 100644
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -68,6 +68,7 @@ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
->         { .compatible = "renesas,sdhi-r8a7779", .data = &of_rcar_gen1_compatible, },
->         { .compatible = "renesas,sdhi-r8a7790", .data = &of_rcar_gen2_compatible, },
->         { .compatible = "renesas,sdhi-r8a7791", .data = &of_rcar_gen2_compatible, },
-> +       { .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
->         {},
->  };
->  MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
-> --
-> 1.8.4.5
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
