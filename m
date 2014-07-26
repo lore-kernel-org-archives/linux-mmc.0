@@ -1,217 +1,76 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH 3/3 resend] omap_hsmmc: reuse mmc/slot-gpio for card detect instead of open-coded version
-Date: Sat, 26 Jul 2014 20:34:10 +0200
-Message-ID: <1406399650-671-4-git-send-email-afenkart@gmail.com>
-References: <1406399650-671-1-git-send-email-afenkart@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f171.google.com ([74.125.82.171]:54012 "EHLO
-	mail-we0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751819AbaGZSe2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 26 Jul 2014 14:34:28 -0400
-In-Reply-To: <1406399650-671-1-git-send-email-afenkart@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Belisko Marek <marek.belisko@gmail.com>
+Subject: Re: [PATCH 1/2] mmc: hsmmc: Add reset gpio configuration option.
+Date: Sat, 26 Jul 2014 21:48:38 +0200
+Message-ID: <CAAfyv34tH-A=9vjis3_y613mNpvGGO2O82M9porWJwms9-PFFQ@mail.gmail.com>
+References: <1404420564-30245-1-git-send-email-marek@goldelico.com>
+	<20140703230113.GR3705@n2100.arm.linux.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140703230113.GR3705@n2100.arm.linux.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Olof Johansson <olof@lixom.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, "ijc+devicetree@hellion.org.uk" <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Tony Lindgren <tony@atomide.com>, balajitk@ti.com, chris@printf.net, Ulf Hansson <ulf.hansson@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-mmc@vger.kernel.org, "Dr. H. Nikolaus Schaller" <hns@goldelico.com>, NeilBrown <neilb@suse.de>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Balaji T K <balajitk@ti.com>, daniel@zonque.org, Andreas Fenkart <afenkart@gmail.com>
 
-Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+Hi Russel,
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 1b9f279..25aafa6 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -231,15 +231,6 @@ struct omap_mmc_of_data {
- 
- static void omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host);
- 
--static int omap_hsmmc_card_detect(struct device *dev, int slot)
--{
--	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
--	struct omap_mmc_platform_data *mmc = host->pdata;
--
--	/* NOTE: assumes card detect signal is active-low */
--	return !gpio_get_value_cansleep(mmc->slots[0].switch_pin);
--}
--
- static int omap_hsmmc_get_cover_state(struct device *dev, int slot)
- {
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
-@@ -256,7 +247,7 @@ static int omap_hsmmc_suspend_cdirq(struct device *dev, int slot)
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
- 	struct omap_mmc_platform_data *mmc = host->pdata;
- 
--	disable_irq(mmc->slots[0].card_detect_irq);
-+	disable_irq(mmc->slots[0].cover_detect_irq);
- 	return 0;
- }
- 
-@@ -265,7 +256,7 @@ static int omap_hsmmc_resume_cdirq(struct device *dev, int slot)
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
- 	struct omap_mmc_platform_data *mmc = host->pdata;
- 
--	enable_irq(mmc->slots[0].card_detect_irq);
-+	enable_irq(mmc->slots[0].cover_detect_irq);
- 	return 0;
- }
- 
-@@ -458,23 +449,26 @@ static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
- 			if (ret)
- 				return ret;
- 			ret = gpio_direction_input(pdata->slots[0].switch_pin);
--			if (ret)
--				goto err_free_sp;
-+			if (ret) {
-+				gpio_free(pdata->slots[0].switch_pin);
-+				return ret;
-+			}
- 		} else {
--			pdata->slots[0].card_detect = omap_hsmmc_card_detect;
--			pdata->slots[0].card_detect_irq =
--				gpio_to_irq(pdata->slots[0].switch_pin);
--
--			ret = gpio_request(pdata->slots[0].switch_pin,
--					   "mmc_cd");
--			if (ret)
-+			/* copy & paste from from mmc_of_parse */
-+			ret = mmc_gpio_request_cd(mmc,
-+						  pdata->slots[0].switch_pin,
-+						  0);
-+			if (ret < 0) {
-+				dev_err(pdata->dev,
-+					"Failed to request CD GPIO #%d: %d!\n",
-+					pdata->slots[0].switch_pin, ret);
- 				return ret;
--			ret = gpio_direction_input(pdata->slots[0].switch_pin);
--			if (ret)
--				goto err_free_sp;
-+			} else {
-+				dev_info(pdata->dev, "Got CD GPIO #%d.\n",
-+					pdata->slots[0].switch_pin);
-+			}
- 		}
--	} else
--		pdata->slots[0].switch_pin = -EINVAL;
-+	}
- 
- 	if (gpio_is_valid(pdata->slots[0].gpio_wp)) {
- 		/* copy & paste from from mmc_of_parse */
-@@ -492,8 +486,9 @@ static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
- 	return 0;
- 
- err:
--	if (gpio_is_valid(pdata->slots[0].switch_pin))
--err_free_sp:
-+	mmc_gpio_free_cd(mmc);
-+	if (gpio_is_valid(pdata->slots[0].switch_pin) &&
-+	    (pdata->slots[0].cover))
- 		gpio_free(pdata->slots[0].switch_pin);
- 	return ret;
- }
-@@ -501,8 +496,11 @@ err_free_sp:
- static void omap_hsmmc_gpio_free(struct mmc_host *mmc,
- 				 struct omap_mmc_platform_data *pdata)
- {
-+	mmc_gpio_free_cd(mmc);
- 	mmc_gpio_free_ro(mmc);
--	if (gpio_is_valid(pdata->slots[0].switch_pin))
-+
-+	if (gpio_is_valid(pdata->slots[0].switch_pin) &&
-+	    (pdata->slots[0].cover))
- 		gpio_free(pdata->slots[0].switch_pin);
- }
- 
-@@ -1289,24 +1287,13 @@ static void omap_hsmmc_protect_card(struct omap_hsmmc_host *host)
- /*
-  * irq handler to notify the core about card insertion/removal
-  */
--static irqreturn_t omap_hsmmc_detect(int irq, void *dev_id)
-+static irqreturn_t omap_hsmmc_cover_detect(int irq, void *dev_id)
- {
- 	struct omap_hsmmc_host *host = dev_id;
--	struct omap_mmc_slot_data *slot = &mmc_slot(host);
--	int carddetect;
--
--	if (slot->card_detect) {
--		carddetect = slot->card_detect(host->dev, host->slot_id);
--		if (carddetect)
--			mmc_detect_change(host->mmc, (HZ * 200) / 1000);
--		else
--			mmc_detect_change(host->mmc, (HZ * 50) / 1000);
--	} else {
--		sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
--		omap_hsmmc_protect_card(host);
--		mmc_detect_change(host->mmc, (HZ * 200) / 1000);
--	}
- 
-+	sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
-+	omap_hsmmc_protect_card(host);
-+	mmc_detect_change(host->mmc, (HZ * 200) / 1000);
- 	return IRQ_HANDLED;
- }
- 
-@@ -1669,15 +1656,6 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	pm_runtime_put_autosuspend(host->dev);
- }
- 
--static int omap_hsmmc_get_cd(struct mmc_host *mmc)
--{
--	struct omap_hsmmc_host *host = mmc_priv(mmc);
--
--	if (!mmc_slot(host).card_detect)
--		return -ENOSYS;
--	return mmc_slot(host).card_detect(host->dev, host->slot_id);
--}
--
- static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
- {
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
-@@ -1832,7 +1810,7 @@ static const struct mmc_host_ops omap_hsmmc_ops = {
- 	.pre_req = omap_hsmmc_pre_req,
- 	.request = omap_hsmmc_request,
- 	.set_ios = omap_hsmmc_set_ios,
--	.get_cd = omap_hsmmc_get_cd,
-+	.get_cd = mmc_gpio_get_cd,
- 	.get_ro = mmc_gpio_get_ro,
- 	.init_card = omap_hsmmc_init_card,
- 	.enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
-@@ -2228,10 +2206,10 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	mmc->ocr_avail = mmc_slot(host).ocr_mask;
- 
- 	/* Request IRQ for card detect */
--	if ((mmc_slot(host).card_detect_irq)) {
-+	if ((mmc_slot(host).cover_detect_irq)) {
- 		ret = devm_request_threaded_irq(&pdev->dev,
--						mmc_slot(host).card_detect_irq,
--						NULL, omap_hsmmc_detect,
-+						mmc_slot(host).cover_detect_irq,
-+						NULL, omap_hsmmc_cover_detect,
- 					   IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
- 					   mmc_hostname(mmc), host);
- 		if (ret) {
-@@ -2266,7 +2244,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 		if (ret < 0)
- 			goto err_slot_name;
- 	}
--	if (mmc_slot(host).card_detect_irq && mmc_slot(host).get_cover_state) {
-+	if (mmc_slot(host).cover_detect_irq && mmc_slot(host).get_cover_state) {
- 		ret = device_create_file(&mmc->class_dev,
- 					&dev_attr_cover_switch);
- 		if (ret < 0)
-diff --git a/include/linux/platform_data/mmc-omap.h b/include/linux/platform_data/mmc-omap.h
-index d113005..250b437 100644
---- a/include/linux/platform_data/mmc-omap.h
-+++ b/include/linux/platform_data/mmc-omap.h
-@@ -142,10 +142,6 @@ struct omap_mmc_platform_data {
- 		const char *name;
- 		u32 ocr_mask;
- 
--		/* Card detection IRQs */
--		int card_detect_irq;
--		int (*card_detect)(struct device *dev, int slot);
--
- 		unsigned int ban_openended:1;
- 
- 	} slots[OMAP_MMC_MAX_SLOTS];
+On Fri, Jul 4, 2014 at 1:01 AM, Russell King - ARM Linux
+<linux@arm.linux.org.uk> wrote:
+> On Thu, Jul 03, 2014 at 10:49:23PM +0200, Marek Belisko wrote:
+>> From: NeilBrown <neilb@suse.de>
+>>
+>> If a 'gpio_reset' is specified, then hold it low while
+>> turning the power regulator on.
+>> This is needed for some wi2wi wireless modules, particularly
+>> when the regulator is held active by some other client.
+>> The wi2wi needs to be reset if power isn't actually removed, and
+>> the gpio can be used to do this.
+>>
+>> Signed-off-by: NeilBrown <neilb@suse.de>
+>
+> Obvious statement knowing what's been going on elsewhere...
+>
+> A while back, Olof produced a couple of patches to add /generic/ support
+> to deal with power and reset controls for SDIO WIFI cards.  Patches
+> were posted to linux-arm-kernel and other places around January time
+> this year.
+>
+> No real conclusion came out of it, and it kind of died.  The point here
+> is that this is not an OMAP problem.  We have this very same problem
+> on different platforms and different SoCs.
+Thanks for pointing me to Olof's patches. I pick first + update secod
+for omap_hcmmc.
+I use only card-reset-gios property and it works fine. As you stated
+it's kind of died discussion?
+Sorry for noise and not using more googling on linux-arm ML.
+>
+> Why should we have N different solutions to the same problem.  Why can't
+> we have one solution to fix this issue, rather than having every host
+> driver implement some different solution to what's a common problem.
+>
+> If everyone is going to run away from generic problems and continue
+> inventing their own private solutions to generic problems, the kernel
+> is just going to become severely bloated and unmaintainable...
+>
+> Please, sort out generic problems with generic solutions.
+>
+> --
+> FTTC broadband for 0.8mile line: now at 9.7Mbps down 460kbps up... slowly
+> improving, and getting towards what was expected from it.
+
+BR,
+
+marek
+
 -- 
-2.0.0
+as simple and primitive as possible
+-------------------------------------------------
+Marek Belisko - OPEN-NANDRA
+Freelance Developer
 
+Ruska Nova Ves 219 | Presov, 08005 Slovak Republic
+Tel: +421 915 052 184
+skype: marekwhite
+twitter: #opennandra
+web: http://open-nandra.com
