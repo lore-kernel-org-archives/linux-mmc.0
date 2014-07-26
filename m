@@ -1,187 +1,108 @@
 From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH 1/3 resend] omap_hsmmc: reuse mmc/slot-gpio for write protect detection
-Date: Sat, 26 Jul 2014 20:34:08 +0200
-Message-ID: <1406399650-671-2-git-send-email-afenkart@gmail.com>
+Subject: [PATCH 2/3 resend] omap_hsmmc: separate card_detect/cover detect logic
+Date: Sat, 26 Jul 2014 20:34:09 +0200
+Message-ID: <1406399650-671-3-git-send-email-afenkart@gmail.com>
 References: <1406399650-671-1-git-send-email-afenkart@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f181.google.com ([74.125.82.181]:61993 "EHLO
-	mail-we0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751819AbaGZSeV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 26 Jul 2014 14:34:21 -0400
+Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <1406399650-671-1-git-send-email-afenkart@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-omap-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Balaji T K <balajitk@ti.com>, daniel@zonque.org, Andreas Fenkart <afenkart@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
+
+assuming cover is the door like thing on cameras that needs to be closed
+after replacing sd cards. card detect is a gpio connected to sdio slot.
+in a follow up patch card_detect will be replaced by generic mmc/slot-gpio
+a git bisect patch
 
 Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 2f944d7..1c10e6c 100644
+index 1c10e6c..1b9f279 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -36,6 +36,7 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/core.h>
- #include <linux/mmc/mmc.h>
-+#include <linux/mmc/slot-gpio.h>
- #include <linux/io.h>
- #include <linux/irq.h>
- #include <linux/gpio.h>
-@@ -239,15 +240,6 @@ static int omap_hsmmc_card_detect(struct device *dev, int slot)
- 	return !gpio_get_value_cansleep(mmc->slots[0].switch_pin);
- }
- 
--static int omap_hsmmc_get_wp(struct device *dev, int slot)
--{
--	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
--	struct omap_mmc_platform_data *mmc = host->pdata;
--
--	/* NOTE: assumes write protect signal is active-high */
--	return gpio_get_value_cansleep(mmc->slots[0].gpio_wp);
--}
--
- static int omap_hsmmc_get_cover_state(struct device *dev, int slot)
- {
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
-@@ -449,7 +441,8 @@ static inline int omap_hsmmc_have_reg(void)
- 
- #endif
- 
--static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
-+static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
-+				struct omap_mmc_platform_data *pdata)
- {
+@@ -447,19 +447,32 @@ static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
  	int ret;
  
-@@ -471,31 +464,31 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
+ 	if (gpio_is_valid(pdata->slots[0].switch_pin)) {
+-		if (pdata->slots[0].cover)
++		if (pdata->slots[0].cover) {
+ 			pdata->slots[0].get_cover_state =
+ 					omap_hsmmc_get_cover_state;
+-		else
++			pdata->slots[0].cover_detect_irq =
++				gpio_to_irq(pdata->slots[0].switch_pin);
++
++			ret = gpio_request(pdata->slots[0].switch_pin,
++					   "mmc_cd");
++			if (ret)
++				return ret;
++			ret = gpio_direction_input(pdata->slots[0].switch_pin);
++			if (ret)
++				goto err_free_sp;
++		} else {
+ 			pdata->slots[0].card_detect = omap_hsmmc_card_detect;
+-		pdata->slots[0].card_detect_irq =
++			pdata->slots[0].card_detect_irq =
+ 				gpio_to_irq(pdata->slots[0].switch_pin);
+-		ret = gpio_request(pdata->slots[0].switch_pin, "mmc_cd");
+-		if (ret)
+-			return ret;
+-		ret = gpio_direction_input(pdata->slots[0].switch_pin);
+-		if (ret)
+-			goto err_free_sp;
++
++			ret = gpio_request(pdata->slots[0].switch_pin,
++					   "mmc_cd");
++			if (ret)
++				return ret;
++			ret = gpio_direction_input(pdata->slots[0].switch_pin);
++			if (ret)
++				goto err_free_sp;
++		}
+ 	} else
  		pdata->slots[0].switch_pin = -EINVAL;
  
- 	if (gpio_is_valid(pdata->slots[0].gpio_wp)) {
--		pdata->slots[0].get_ro = omap_hsmmc_get_wp;
--		ret = gpio_request(pdata->slots[0].gpio_wp, "mmc_wp");
--		if (ret)
--			goto err_free_cd;
--		ret = gpio_direction_input(pdata->slots[0].gpio_wp);
--		if (ret)
--			goto err_free_wp;
--	} else
--		pdata->slots[0].gpio_wp = -EINVAL;
-+		/* copy & paste from from mmc_of_parse */
-+		ret = mmc_gpio_request_ro(mmc, pdata->slots[0].gpio_wp);
-+		if (ret < 0) {
-+			dev_err(pdata->dev,
-+				"Failed to request WP GPIO: %d!\n", ret);
-+			goto err;
-+		} else {
-+			dev_info(pdata->dev, "Got WP GPIO #%d.\n",
-+				 pdata->slots[0].gpio_wp);
-+		}
-+	}
+@@ -1282,19 +1295,18 @@ static irqreturn_t omap_hsmmc_detect(int irq, void *dev_id)
+ 	struct omap_mmc_slot_data *slot = &mmc_slot(host);
+ 	int carddetect;
  
- 	return 0;
- 
--err_free_wp:
--	gpio_free(pdata->slots[0].gpio_wp);
--err_free_cd:
-+err:
- 	if (gpio_is_valid(pdata->slots[0].switch_pin))
- err_free_sp:
- 		gpio_free(pdata->slots[0].switch_pin);
- 	return ret;
- }
- 
--static void omap_hsmmc_gpio_free(struct omap_mmc_platform_data *pdata)
-+static void omap_hsmmc_gpio_free(struct mmc_host *mmc,
-+				 struct omap_mmc_platform_data *pdata)
- {
--	if (gpio_is_valid(pdata->slots[0].gpio_wp))
--		gpio_free(pdata->slots[0].gpio_wp);
-+	mmc_gpio_free_ro(mmc);
- 	if (gpio_is_valid(pdata->slots[0].switch_pin))
- 		gpio_free(pdata->slots[0].switch_pin);
- }
-@@ -1673,15 +1666,6 @@ static int omap_hsmmc_get_cd(struct mmc_host *mmc)
- 	return mmc_slot(host).card_detect(host->dev, host->slot_id);
- }
- 
--static int omap_hsmmc_get_ro(struct mmc_host *mmc)
--{
--	struct omap_hsmmc_host *host = mmc_priv(mmc);
+-	sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
 -
--	if (!mmc_slot(host).get_ro)
--		return -ENOSYS;
--	return mmc_slot(host).get_ro(host->dev, 0);
--}
--
- static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
- {
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
-@@ -1837,7 +1821,7 @@ static const struct mmc_host_ops omap_hsmmc_ops = {
- 	.request = omap_hsmmc_request,
- 	.set_ios = omap_hsmmc_set_ios,
- 	.get_cd = omap_hsmmc_get_cd,
--	.get_ro = omap_hsmmc_get_ro,
-+	.get_ro = mmc_gpio_get_ro,
- 	.init_card = omap_hsmmc_init_card,
- 	.enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
- };
-@@ -2063,16 +2047,15 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	if (IS_ERR(base))
- 		return PTR_ERR(base);
- 
--	ret = omap_hsmmc_gpio_init(pdata);
--	if (ret)
--		goto err;
--
- 	mmc = mmc_alloc_host(sizeof(struct omap_hsmmc_host), &pdev->dev);
- 	if (!mmc) {
--		ret = -ENOMEM;
--		goto err_alloc;
-+		return -ENOMEM;
+-	if (slot->card_detect)
++	if (slot->card_detect) {
+ 		carddetect = slot->card_detect(host->dev, host->slot_id);
+-	else {
++		if (carddetect)
++			mmc_detect_change(host->mmc, (HZ * 200) / 1000);
++		else
++			mmc_detect_change(host->mmc, (HZ * 50) / 1000);
++	} else {
++		sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
+ 		omap_hsmmc_protect_card(host);
+-		carddetect = -ENOSYS;
++		mmc_detect_change(host->mmc, (HZ * 200) / 1000);
  	}
  
-+	ret = omap_hsmmc_gpio_init(mmc, pdata);
-+	if (ret)
-+		goto err;
-+
- 	host		= mmc_priv(mmc);
- 	host->mmc	= mmc;
- 	host->pdata	= pdata;
-@@ -2302,10 +2285,9 @@ err_irq:
- 	if (host->dbclk)
- 		clk_disable_unprepare(host->dbclk);
- err1:
--	mmc_free_host(mmc);
--err_alloc:
--	omap_hsmmc_gpio_free(pdata);
-+	omap_hsmmc_gpio_free(mmc, pdata);
- err:
-+	mmc_free_host(mmc);
- 	return ret;
+-	if (carddetect)
+-		mmc_detect_change(host->mmc, (HZ * 200) / 1000);
+-	else
+-		mmc_detect_change(host->mmc, (HZ * 50) / 1000);
+ 	return IRQ_HANDLED;
  }
  
-@@ -2330,7 +2312,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
- 	if (host->dbclk)
- 		clk_disable_unprepare(host->dbclk);
- 
--	omap_hsmmc_gpio_free(host->pdata);
-+	omap_hsmmc_gpio_free(host->mmc, host->pdata);
- 	mmc_free_host(host->mmc);
- 
- 	return 0;
 diff --git a/include/linux/platform_data/mmc-omap.h b/include/linux/platform_data/mmc-omap.h
-index 51e70cf..7fe0c14 100644
+index 7fe0c14..d113005 100644
 --- a/include/linux/platform_data/mmc-omap.h
 +++ b/include/linux/platform_data/mmc-omap.h
-@@ -120,7 +120,6 @@ struct omap_mmc_platform_data {
- 		int (*set_bus_mode)(struct device *dev, int slot, int bus_mode);
- 		int (*set_power)(struct device *dev, int slot,
- 				 int power_on, int vdd);
--		int (*get_ro)(struct device *dev, int slot);
- 		void (*remux)(struct device *dev, int slot, int power_on);
- 		/* Call back before enabling / disabling regulators */
- 		void (*before_set_reg)(struct device *dev, int slot,
+@@ -136,6 +136,7 @@ struct omap_mmc_platform_data {
+ 		 *   0 - closed
+ 		 *   1 - open
+ 		 */
++		int cover_detect_irq;
+ 		int (*get_cover_state)(struct device *dev, int slot);
+ 
+ 		const char *name;
 -- 
 2.0.0
 
