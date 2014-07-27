@@ -1,76 +1,143 @@
-From: Belisko Marek <marek.belisko@gmail.com>
-Subject: Re: [PATCH 1/2] mmc: hsmmc: Add reset gpio configuration option.
-Date: Sat, 26 Jul 2014 21:48:38 +0200
-Message-ID: <CAAfyv34tH-A=9vjis3_y613mNpvGGO2O82M9porWJwms9-PFFQ@mail.gmail.com>
-References: <1404420564-30245-1-git-send-email-marek@goldelico.com>
-	<20140703230113.GR3705@n2100.arm.linux.org.uk>
+From: Seungwon Jeon <tgih.jun@samsung.com>
+Subject: RE: [PATCH v2] mmc: dw_mmc: Make sure we don't get stuck when we get
+ an error
+Date: Sun, 27 Jul 2014 23:15:04 +0900
+Message-ID: <000c01cfa9a5$2979a650$7c6cf2f0$%jun@samsung.com>
+References: <1400623670-2657-1-git-send-email-dianders@chromium.org>
+ <001601cf74d4$3547a410$9fd6ec30$%jun@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20140703230113.GR3705@n2100.arm.linux.org.uk>
+In-reply-to: <001601cf74d4$3547a410$9fd6ec30$%jun@samsung.com>
+Content-language: ko
 Sender: linux-kernel-owner@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Olof Johansson <olof@lixom.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, "ijc+devicetree@hellion.org.uk" <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Tony Lindgren <tony@atomide.com>, balajitk@ti.com, chris@printf.net, Ulf Hansson <ulf.hansson@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-mmc@vger.kernel.org, "Dr. H. Nikolaus Schaller" <hns@goldelico.com>, NeilBrown <neilb@suse.de>
+To: 'Seungwon Jeon' <tgih.jun@samsung.com>, 'Doug Anderson' <dianders@chromium.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>
+Cc: 'Chris Ball' <cjb@laptop.org>, 'Sonny Rao' <sonnyrao@chromium.org>, 'Grant Grundler' <grundler@chromium.org>, 'linux-samsung-soc' <linux-samsung-soc@vger.kernel.org>, 'Kukjin Kim' <kgene.kim@samsung.com>, 'sunil joshi' <joshi@samsung.com>, 'Tomasz Figa' <t.figa@samsung.com>, 'Yuvaraj Kumar C D' <yuvaraj.cd@gmail.com>, chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Russel,
+Hi Chris & Ulf,
 
-On Fri, Jul 4, 2014 at 1:01 AM, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> On Thu, Jul 03, 2014 at 10:49:23PM +0200, Marek Belisko wrote:
->> From: NeilBrown <neilb@suse.de>
->>
->> If a 'gpio_reset' is specified, then hold it low while
->> turning the power regulator on.
->> This is needed for some wi2wi wireless modules, particularly
->> when the regulator is held active by some other client.
->> The wi2wi needs to be reset if power isn't actually removed, and
->> the gpio can be used to do this.
->>
->> Signed-off-by: NeilBrown <neilb@suse.de>
->
-> Obvious statement knowing what's been going on elsewhere...
->
-> A while back, Olof produced a couple of patches to add /generic/ support
-> to deal with power and reset controls for SDIO WIFI cards.  Patches
-> were posted to linux-arm-kernel and other places around January time
-> this year.
->
-> No real conclusion came out of it, and it kind of died.  The point here
-> is that this is not an OMAP problem.  We have this very same problem
-> on different platforms and different SoCs.
-Thanks for pointing me to Olof's patches. I pick first + update secod
-for omap_hcmmc.
-I use only card-reset-gios property and it works fine. As you stated
-it's kind of died discussion?
-Sorry for noise and not using more googling on linux-arm ML.
->
-> Why should we have N different solutions to the same problem.  Why can't
-> we have one solution to fix this issue, rather than having every host
-> driver implement some different solution to what's a common problem.
->
-> If everyone is going to run away from generic problems and continue
-> inventing their own private solutions to generic problems, the kernel
-> is just going to become severely bloated and unmaintainable...
->
-> Please, sort out generic problems with generic solutions.
->
+I hope you find this patch for next.
+
+Thanks,
+Seungwon Jeon
+
+On Wed, May 21, 2014, Seungwon Jeon wrote:
+> On Wed, May 21, 2014, Doug Anderson wrote:
+> > If we happened to get a data error at just the wrong time the dw_mmc
+> > driver could get into a state where it would never complete its
+> > request.  That would leave the caller just hanging there.
+> >
+> > We fix this two ways and both of the two fixes on their own appear to
+> > fix the problems we've seen:
+> >
+> > 1. Fix a race in the tasklet where the interrupt setting the data
+> >    error happens _just after_ we check for it, then we get a
+> >    EVENT_XFER_COMPLETE.  We fix this by repeating a bit of code.
+> > 2. Fix it so that if we detect that we've got an error in the "data
+> >    busy" state and we're not going to do anything else we end the
+> >    request and unblock anyone waiting.
+> >
+> > Signed-off-by: Doug Anderson <dianders@chromium.org>
+> > Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
+> 
+> It will be applied after "mmc: dw_mmc: change to use recommended reset procedure"
+> 
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+> 
+> Thanks,
+> Seungwon Jeon
+> 
+> > ---
+> > Changes in v2:
+> > - Removed TODO
+> > - Set cmd to NULL before calling dw_mci_request_end()
+> >
+> >  drivers/mmc/host/dw_mmc.c | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+> >  1 file changed, 46 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> > index cced599..54ec8b0 100644
+> > --- a/drivers/mmc/host/dw_mmc.c
+> > +++ b/drivers/mmc/host/dw_mmc.c
+> > @@ -1318,6 +1318,14 @@ static void dw_mci_tasklet_func(unsigned long priv)
+> >  			/* fall through */
+> >
+> >  		case STATE_SENDING_DATA:
+> > +			/*
+> > +			 * We could get a data error and never a transfer
+> > +			 * complete so we'd better check for it here.
+> > +			 *
+> > +			 * Note that we don't really care if we also got a
+> > +			 * transfer complete; stopping the DMA and sending an
+> > +			 * abort won't hurt.
+> > +			 */
+> >  			if (test_and_clear_bit(EVENT_DATA_ERROR,
+> >  					       &host->pending_events)) {
+> >  				dw_mci_stop_dma(host);
+> > @@ -1331,7 +1339,29 @@ static void dw_mci_tasklet_func(unsigned long priv)
+> >  				break;
+> >
+> >  			set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
+> > +
+> > +			/*
+> > +			 * Handle an EVENT_DATA_ERROR that might have shown up
+> > +			 * before the transfer completed.  This might not have
+> > +			 * been caught by the check above because the interrupt
+> > +			 * could have gone off between the previous check and
+> > +			 * the check for transfer complete.
+> > +			 *
+> > +			 * Technically this ought not be needed assuming we
+> > +			 * get a DATA_COMPLETE eventually (we'll notice the
+> > +			 * error and end the request), but it shouldn't hurt.
+> > +			 *
+> > +			 * This has the advantage of sending the stop command.
+> > +			 */
+> > +			if (test_and_clear_bit(EVENT_DATA_ERROR,
+> > +					       &host->pending_events)) {
+> > +				dw_mci_stop_dma(host);
+> > +				send_stop_abort(host, data);
+> > +				state = STATE_DATA_ERROR;
+> > +				break;
+> > +			}
+> >  			prev_state = state = STATE_DATA_BUSY;
+> > +
+> >  			/* fall through */
+> >
+> >  		case STATE_DATA_BUSY:
+> > @@ -1354,6 +1384,22 @@ static void dw_mci_tasklet_func(unsigned long priv)
+> >  				/* stop command for open-ended transfer*/
+> >  				if (data->stop)
+> >  					send_stop_abort(host, data);
+> > +			} else {
+> > +				/*
+> > +				 * If we don't have a command complete now we'll
+> > +				 * never get one since we just reset everything;
+> > +				 * better end the request.
+> > +				 *
+> > +				 * If we do have a command complete we'll fall
+> > +				 * through to the SENDING_STOP command and
+> > +				 * everything will be peachy keen.
+> > +				 */
+> > +				if (!test_bit(EVENT_CMD_COMPLETE,
+> > +					      &host->pending_events)) {
+> > +					host->cmd = NULL;
+> > +					dw_mci_request_end(host, mrq);
+> > +					goto unlock;
+> > +				}
+> >  			}
+> >
+> >  			/*
+> > --
+> > 1.9.1.423.g4596e3a
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 > --
-> FTTC broadband for 0.8mile line: now at 9.7Mbps down 460kbps up... slowly
-> improving, and getting towards what was expected from it.
-
-BR,
-
-marek
-
--- 
-as simple and primitive as possible
--------------------------------------------------
-Marek Belisko - OPEN-NANDRA
-Freelance Developer
-
-Ruska Nova Ves 219 | Presov, 08005 Slovak Republic
-Tel: +421 915 052 184
-skype: marekwhite
-twitter: #opennandra
-web: http://open-nandra.com
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
