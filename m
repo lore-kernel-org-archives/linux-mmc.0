@@ -1,75 +1,64 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCHv7 0/5] ARM: remove the sub-node and deprecate
- supports-highspeed property for dwmmc.
-Date: Mon, 28 Jul 2014 11:29:34 +0900
-Message-ID: <1406514579-3769-1-git-send-email-jh80.chung@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:16311 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751041AbaG1C3n (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 27 Jul 2014 22:29:43 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCHv7 4/5] ARM: dts: rockchip: unuse the slot-node and deprecated
+ the supports-highspeed for dw-mmc
+Date: Mon, 28 Jul 2014 11:29:38 +0900
+Message-ID: <1406514579-3769-5-git-send-email-jh80.chung@samsung.com>
+References: <1406514579-3769-1-git-send-email-jh80.chung@samsung.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1406514579-3769-1-git-send-email-jh80.chung@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: linux-mmc <linux-mmc@vger.kernel.org>
 Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, devicetree@vger.kernel.org, heiko@sntech.de, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, afaerber@suse.de, Jaehoon Chung <jh80.chung@samsung.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Since used the mmc_of_parse(), didn't parse the sub-node.
-So we can remove the sub-node, because almost SoC used the only one card per a host.
-And supports-highspeed can be replaced to "cap-mmc/sd-highspeed" property.
+dw-mmc controller can support multiple slots.
+But, there are no use-cases anywhere. So we don't need to support the
+slot-node for dw-mmc controller.
+And "supports-highspeed" property in dw-mmc is deprecated.
+"supports-highspeed" property can be replaced to "cap-sd/mmc-highspeed".
 
-Chnagelog V7:
-	- Fixed typo and modified the commit message.
-Changelog V6:
-	- Fixed Wrong bit control for host's quirks and rename.
-	- Add "Acked-by" for each SoC maintainers.
-Changelog V5:
-	- Rebased on v3.16-rc4.
-	- Add Acked-by.
-Changelog V4:
-	- Fix the checkpatch error.
-Changelog V3:
-	- Fix the wrong bus-width value.
-	- Use the slot->host->quirks instead of brq->quirks.
-	- Add tested-by and reviewd-by.
-Changelog V2:
-	- Add the "mmc: dw_mmc: replace "disable-wp" from slot's quirks to host's quirk"
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Reviewed-by: Tushar Behera <trblinux@gmail.com>
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+Reviewed-by: Heiko Stuebner <heiko@sntech.de>
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+---
+ arch/arm/boot/dts/rk3066a-bqcurie2.dts |   16 ++++------------
+ 1 file changed, 4 insertions(+), 12 deletions(-)
 
-
-Jaehoon Chung (5):
-  mmc: dw_mmc: modify the dt-binding for removing slot-node and
-    supports-highspeed
-  ARM: dts: exynos: unuse the slot-node and deprecated the
-    supports-highspeed for dw-mmc
-  ARM: dts: socfpga: unuse the slot-node and deprecated the
-    supports-highspeed for dw-mmc
-  ARM: dts: rockchip: unuse the slot-node and deprecated the
-    supports-highspeed for dw-mmc
-  mmc: dw_mmc: replace "disable-wp" from slot's quirk to host's quirk
-
- .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   17 ++++---------
- .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   12 ++++-----
- .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |   12 ++++-----
- arch/arm/boot/dts/exynos4412-odroidx.dts           |    8 ++----
- arch/arm/boot/dts/exynos4412-origen.dts            |    8 ++----
- arch/arm/boot/dts/exynos4412-trats2.dts            |    8 ++----
- arch/arm/boot/dts/exynos5250-arndale.dts           |   18 ++++----------
- arch/arm/boot/dts/exynos5250-cros-common.dtsi      |   26 ++++++--------------
- arch/arm/boot/dts/exynos5250-smdk5250.dts          |   18 ++++----------
- arch/arm/boot/dts/exynos5250-snow.dts              |    6 ++---
- arch/arm/boot/dts/exynos5260-xyref5260.dts         |   18 ++++----------
- arch/arm/boot/dts/exynos5410-smdk5410.dts          |   18 ++++----------
- arch/arm/boot/dts/exynos5420-arndale-octa.dts      |   16 +++---------
- arch/arm/boot/dts/exynos5420-peach-pit.dts         |   16 +++---------
- arch/arm/boot/dts/exynos5420-smdk5420.dts          |   16 +++---------
- arch/arm/boot/dts/exynos5800-peach-pi.dts          |   16 +++---------
- arch/arm/boot/dts/rk3066a-bqcurie2.dts             |   16 +++---------
- arch/arm/boot/dts/socfpga_arria5.dtsi              |    9 +++----
- arch/arm/boot/dts/socfpga_cyclone5.dtsi            |    9 +++----
- arch/arm/boot/dts/socfpga_vt.dts                   |    9 +++----
- drivers/mmc/host/dw_mmc.c                          |   12 ++++-----
- include/linux/mmc/dw_mmc.h                         |    6 ++---
- 22 files changed, 86 insertions(+), 208 deletions(-)
-
+diff --git a/arch/arm/boot/dts/rk3066a-bqcurie2.dts b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+index afb3273..ecea889 100644
+--- a/arch/arm/boot/dts/rk3066a-bqcurie2.dts
++++ b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+@@ -59,12 +59,8 @@
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_cd &sd0_bus4>;
+ 			vmmc-supply = <&vcc_sd0>;
+-
+-			slot@0 {
+-				reg = <0>;
+-				bus-width = <4>;
+-				disable-wp;
+-			};
++			bus-width = <4>;
++			disable-wp;
+ 		};
+ 
+ 		dwmmc@10218000 { /* wifi */
+@@ -74,12 +70,8 @@
+ 
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&sd1_clk &sd1_cmd &sd1_bus4>;
+-
+-			slot@0 {
+-				reg = <0>;
+-				bus-width = <4>;
+-				disable-wp;
+-			};
++			bus-width = <4>;
++			disable-wp;
+ 		};
+ 
+ 		gpio-keys {
 -- 
 1.7.9.5
-
