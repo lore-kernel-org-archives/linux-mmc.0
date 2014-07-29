@@ -1,67 +1,78 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: [PATCH 1/5] ARM: dts: Add emmc and sdmmc to the rk3288 device tree
-Date: Tue, 29 Jul 2014 13:31:52 -0700
-Message-ID: <1406665916-23396-2-git-send-email-dianders@chromium.org>
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH 2/5] ARM: dts: Enable emmc and sdmmc on the rk3288-evb boards
+Date: Tue, 29 Jul 2014 13:31:53 -0700
+Message-ID: <1406665916-23396-3-git-send-email-dianders@chromium.org>
 References: <1406665916-23396-1-git-send-email-dianders@chromium.org>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1406665916-23396-1-git-send-email-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Kever Yang <kever.yang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Sonny Rao <sonnyrao-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1406665916-23396-1-git-send-email-dianders@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Heiko Stuebner <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Addy Ke <addy.ke@rock-chips.com>, Kever Yang <kever.yang@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, linux@arm.linux.org.uk, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 This adds support for the sdmmc and emmc ports on the rk3288 using the
 currently posted driver from Addy at:
   https://patchwork.kernel.org/patch/4520631/
 
-Note:
+This enables basic SD and eMMC support.  Things are not yet running at
+the fastest speed and we don't have the regulators specified, but we
+can at least use the eMMC and SD cards now.
+
+A few notes:
+* Doesn't enable DDR mode from eMMC since it didn't work on Addy's
+  patch.  A future patch enables it.
 * This is not baesd on Jaehoon's patch series removing the slot node,
   but it does use new syntax like putting the bus width at the top
   level and using the new cap-mmc-highspeed / cap-sd-highspeed.  A
   future patch will modify this one to remove the slot node.
 
-Signed-off-by: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Signed-off-by: Doug Anderson <dianders@chromium.org>
 ---
- arch/arm/boot/dts/rk3288.dtsi | 22 ++++++++++++++++++++++
- 1 file changed, 22 insertions(+)
+ arch/arm/boot/dts/rk3288-evb.dtsi | 32 ++++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
 
-diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
-index 3ef8951..fd77a65 100644
---- a/arch/arm/boot/dts/rk3288.dtsi
-+++ b/arch/arm/boot/dts/rk3288.dtsi
-@@ -78,6 +78,28 @@
- 		clock-frequency = <24000000>;
+diff --git a/arch/arm/boot/dts/rk3288-evb.dtsi b/arch/arm/boot/dts/rk3288-evb.dtsi
+index 749e20d..e44e34f 100644
+--- a/arch/arm/boot/dts/rk3288-evb.dtsi
++++ b/arch/arm/boot/dts/rk3288-evb.dtsi
+@@ -37,6 +37,38 @@
  	};
+ };
  
-+	sdmmc: dwmmc@ff0c0000 {
-+		compatible = "rockchip,rk3288-dw-mshc";
-+		clocks = <&cru HCLK_SDMMC>, <&cru SCLK_SDMMC>;
-+		clock-names = "biu", "ciu";
-+		fifo-depth = <0x100>;
-+		interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_HIGH>;
-+		reg = <0xff0c0000 0x4000>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+	};
++&emmc {
++	broken-cd;
++	bus-width = <8>;
++	cap-mmc-highspeed;
++	non-removable;
++	num-slots = <1>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&emmc_clk &emmc_cmd &emmc_pwr &emmc_bus8>;
++	status = "okay";
 +
-+	emmc: dwmmc@ff0f0000 {
-+		compatible = "rockchip,rk3288-dw-mshc";
-+		clocks = <&cru HCLK_EMMC>, <&cru SCLK_EMMC>;
-+		clock-names = "biu", "ciu";
-+		fifo-depth = <0x100>;
-+		interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
-+		reg = <0xff0f0000 0x4000>;
-+		#address-cells = <1>;
-+		#size-cells = <0>;
++	slot@0 {
++		reg = <0>;
++		disable-wp;
 +	};
++};
 +
- 	i2c1: i2c@ff140000 {
- 		compatible = "rockchip,rk3288-i2c";
- 		reg = <0xff140000 0x1000>;
++&sdmmc {
++	bus-width = <4>;
++	cap-mmc-highspeed;
++	cap-sd-highspeed;
++	card-detect-delay = <200>;
++	num-slots = <1>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_cd &sdmmc_bus4>;
++	status = "okay";
++
++	slot@0 {
++		reg = <0>;
++		disable-wp;		/* wp not hooked up */
++	};
++};
++
+ &i2c0 {
+ 	status = "okay";
+ };
 -- 
 2.0.0.526.g5318336
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
