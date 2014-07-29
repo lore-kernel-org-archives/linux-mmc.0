@@ -1,7 +1,7 @@
 From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Subject: [PATCH 08/10 v2] mmc: tmio: remove SCLKEN bit setting from tmio_mmc_set_clock()
-Date: Tue, 29 Jul 2014 01:47:15 -0700 (PDT)
-Message-ID: <87bns8o8ku.wl%kuninori.morimoto.gx@renesas.com>
+Subject: [PATCH 09/10 v2] mmc: tmio: ensure that the clock has been stopped before set_clock
+Date: Tue, 29 Jul 2014 01:47:30 -0700 (PDT)
+Message-ID: <87a97so8kf.wl%kuninori.morimoto.gx@renesas.com>
 References: <d3d6aa34548248768494ad88056cf4bd@SINPR06MB105.apcprd06.prod.outlook.com>
 	<87simtenpi.wl%kuninori.morimoto.gx@renesas.com>
 	<cb608c5e763f47b597936724ec05b615@SINPR06MB105.apcprd06.prod.outlook.com>
@@ -20,29 +20,27 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 
-TMIO clock is set via tmio_mmc_set_clock() -> tmio_mmc_clk_start(),
-and SCLKEN bit will be set on tmio_mmc_clk_start().
-It is not needed on tmio_mmc_set_clock() function.
-The required clock setting will not be able to set
-in some clocks without this patch.
+This patch ensures that the clock has been stopped before
+it calls tmio_mmc_set_clock().
+The clock settings might be failed without this patch
 
 Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 ---
- drivers/mmc/host/tmio_mmc_pio.c |    1 -
- 1 file changed, 1 deletion(-)
+ drivers/mmc/host/tmio_mmc_pio.c |    1 +
+ 1 file changed, 1 insertion(+)
 
 diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index b19d0cd..da3c74d 100644
+index da3c74d..1c5a631 100644
 --- a/drivers/mmc/host/tmio_mmc_pio.c
 +++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -150,7 +150,6 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host, int new_clock)
- 		for (clock = host->mmc->f_min, clk = 0x80000080;
- 			new_clock >= (clock<<1); clk >>= 1)
- 			clock <<= 1;
--		clk |= 0x100;
- 	}
- 
- 	if (host->set_clk_div)
+@@ -895,6 +895,7 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		}
+ 		if (host->power == TMIO_MMC_OFF_STOP)
+ 			tmio_mmc_reset(host);
++		tmio_mmc_clk_stop(host);
+ 		tmio_mmc_set_clock(host, ios->clock);
+ 		if (host->power == TMIO_MMC_OFF_STOP)
+ 			/* power up SD card and the bus */
 -- 
 1.7.9.5
 
