@@ -1,49 +1,67 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH 0/5] Add eMMC and SD card support for rk3288-evb
-Date: Tue, 29 Jul 2014 13:31:51 -0700
-Message-ID: <1406665916-23396-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f202.google.com ([209.85.192.202]:51930 "EHLO
-	mail-pd0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751693AbaG2UdL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Jul 2014 16:33:11 -0400
-Received: by mail-pd0-f202.google.com with SMTP id w10so51256pde.5
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Jul 2014 13:33:10 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: [PATCH 1/5] ARM: dts: Add emmc and sdmmc to the rk3288 device tree
+Date: Tue, 29 Jul 2014 13:31:52 -0700
+Message-ID: <1406665916-23396-2-git-send-email-dianders@chromium.org>
+References: <1406665916-23396-1-git-send-email-dianders@chromium.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1406665916-23396-1-git-send-email-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Kever Yang <kever.yang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Sonny Rao <sonnyrao-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiko Stuebner <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Addy Ke <addy.ke@rock-chips.com>, Kever Yang <kever.yang@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, mark.rutland@arm.com, devicetree@vger.kernel.org, linux@arm.linux.org.uk, pawel.moll@arm.com, ijc+devicetree@hellion.org.uk, linux-kernel@vger.kernel.org, robh+dt@kernel.org, galak@codeaurora.org
 
-This series adds basic eMMC and SD card support for the rk3288-evb
-board based on Addy's posted dw_mmc patch from:
+This adds support for the sdmmc and emmc ports on the rk3288 using the
+currently posted driver from Addy at:
   https://patchwork.kernel.org/patch/4520631/
 
-The series is a little tricky because:
-* Addy's patch has a bug w/ DDR50 (see my response there), so I've
-  posted the original support without DDR50 and then a fix (that could
-  be squashed) enabling DDR50.
-* Jaehoon has some outstanding patches to remove the slot node.  Since
-  those haven't landed yet, I've posted my original patch with the
-  slot node and then some future patches that can land with Jaehoon's
-  patches.
+Note:
+* This is not baesd on Jaehoon's patch series removing the slot node,
+  but it does use new syntax like putting the bus width at the top
+  level and using the new cap-mmc-highspeed / cap-sd-highspeed.  A
+  future patch will modify this one to remove the slot node.
 
-Note that we don't have regulators specified yet (no regulator driver
-for rk808-based board).  We also don't yet support UHS modes (which
-require regulator support plus dw_mmc driver support for tuning).
-Those features can come later.
+Signed-off-by: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+---
+ arch/arm/boot/dts/rk3288.dtsi | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
 
-
-Doug Anderson (5):
-  ARM: dts: Add emmc and sdmmc to the rk3288 device tree
-  ARM: dts: Enable emmc and sdmmc on the rk3288-evb boards
-  ARM: dts: Enable DDR50 mode on the eMMC
-  ARM: dts: Take the mmc slot node out of rk3288-evb
-  ARM: dts: mmc slot node gone on rk3288 => no more address / size cells
-
- arch/arm/boot/dts/rk3288-evb.dtsi | 25 +++++++++++++++++++++++++
- arch/arm/boot/dts/rk3288.dtsi     | 18 ++++++++++++++++++
- 2 files changed, 43 insertions(+)
-
+diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+index 3ef8951..fd77a65 100644
+--- a/arch/arm/boot/dts/rk3288.dtsi
++++ b/arch/arm/boot/dts/rk3288.dtsi
+@@ -78,6 +78,28 @@
+ 		clock-frequency = <24000000>;
+ 	};
+ 
++	sdmmc: dwmmc@ff0c0000 {
++		compatible = "rockchip,rk3288-dw-mshc";
++		clocks = <&cru HCLK_SDMMC>, <&cru SCLK_SDMMC>;
++		clock-names = "biu", "ciu";
++		fifo-depth = <0x100>;
++		interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_HIGH>;
++		reg = <0xff0c0000 0x4000>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++	};
++
++	emmc: dwmmc@ff0f0000 {
++		compatible = "rockchip,rk3288-dw-mshc";
++		clocks = <&cru HCLK_EMMC>, <&cru SCLK_EMMC>;
++		clock-names = "biu", "ciu";
++		fifo-depth = <0x100>;
++		interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
++		reg = <0xff0f0000 0x4000>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++	};
++
+ 	i2c1: i2c@ff140000 {
+ 		compatible = "rockchip,rk3288-i2c";
+ 		reg = <0xff140000 0x1000>;
 -- 
 2.0.0.526.g5318336
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
