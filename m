@@ -1,7 +1,7 @@
 From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Subject: [PATCH 03/10 v2] mmc: tmio: clear error IRQ status
-Date: Tue, 29 Jul 2014 01:44:55 -0700 (PDT)
-Message-ID: <87iomgo8oq.wl%kuninori.morimoto.gx@renesas.com>
+Subject: [PATCH 04/10 v2] mmc: tmio: control multiple block transfer mode
+Date: Tue, 29 Jul 2014 01:45:14 -0700 (PDT)
+Message-ID: <87ha20o8o7.wl%kuninori.morimoto.gx@renesas.com>
 References: <d3d6aa34548248768494ad88056cf4bd@SINPR06MB105.apcprd06.prod.outlook.com>
 	<87simtenpi.wl%kuninori.morimoto.gx@renesas.com>
 	<cb608c5e763f47b597936724ec05b615@SINPR06MB105.apcprd06.prod.outlook.com>
@@ -20,29 +20,91 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
 
-Next card access will be always
-error if it didn't clear error status
+Renesas SDHI has "Multiple Block Transfer Mode" settings
+on SD_CMD register which controls CMD12 automatically.
+
+This patch cares it, because
+CMD12 is not needed when CMD53 (= SD_IO_RW_EXTENDED)
+
+[Kuninori Morimoto: tidyuped for upstreaming
+                    enabled this flags for all SH-Mobile/R-Car]
 
 Signed-off-by: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
 Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 ---
- drivers/mmc/host/tmio_mmc_pio.c |    3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/host/sh_mobile_sdhi.c |    5 +++++
+ drivers/mmc/host/tmio_mmc_pio.c   |   10 ++++++++++
+ include/linux/mfd/tmio.h          |    6 ++++++
+ 3 files changed, 21 insertions(+)
 
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 91c6399..1d54b78 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -225,6 +225,11 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	 */
+ 	mmc_data->flags |= TMIO_MMC_SDIO_IRQ;
+ 
++	/*
++	 * All SDHI have CMD12 controll bit
++	 */
++	mmc_data->flags |= TMIO_MMC_HAVE_CMD12_CTRL;
++
+ 	if (of_id && of_id->data) {
+ 		const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
+ 		mmc_data->flags |= of_data->tmio_flags;
 diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index faf0924..c3b1b4e 100644
+index c3b1b4e..1f1fdfb 100644
 --- a/drivers/mmc/host/tmio_mmc_pio.c
 +++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -557,6 +557,9 @@ static void tmio_mmc_card_irq_status(struct tmio_mmc_host *host,
+@@ -44,6 +44,7 @@
+ #include <linux/pm_qos.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/regulator/consumer.h>
++#include <linux/mmc/sdio.h>
+ #include <linux/scatterlist.h>
+ #include <linux/spinlock.h>
+ #include <linux/workqueue.h>
+@@ -295,6 +296,7 @@ static void tmio_mmc_done_work(struct work_struct *work)
+ #define TRANSFER_READ  0x1000
+ #define TRANSFER_MULTI 0x2000
+ #define SECURITY_CMD   0x4000
++#define NO_CMD12_ISSUE 0x4000 /* TMIO_MMC_HAVE_CMD12_CTRL */
  
- 	pr_debug_status(*status);
- 	pr_debug_status(*ireg);
+ static int tmio_mmc_start_command(struct tmio_mmc_host *host, struct mmc_command *cmd)
+ {
+@@ -331,6 +333,14 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host, struct mmc_command
+ 		if (data->blocks > 1) {
+ 			sd_ctrl_write16(host, CTL_STOP_INTERNAL_ACTION, 0x100);
+ 			c |= TRANSFER_MULTI;
 +
-+	/* Clear the status except the interrupt status */
-+	sd_ctrl_write32(host, CTL_STATUS, TMIO_MASK_IRQ);
- }
++			/*
++			 * Disable auto CMD12 at IO_RW_EXTENDED when
++			 * multiple block transfer
++			 */
++			if ((host->pdata->flags & TMIO_MMC_HAVE_CMD12_CTRL) &&
++			    (cmd->opcode == SD_IO_RW_EXTENDED))
++				c |= NO_CMD12_ISSUE;
+ 		}
+ 		if (data->flags & MMC_DATA_READ)
+ 			c |= TRANSFER_READ;
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index 777e29b..7432d95 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -83,6 +83,12 @@
+  */
+ #define TMIO_MMC_HAVE_HIGH_REG		(1 << 6)
  
- static bool __tmio_mmc_card_detect_irq(struct tmio_mmc_host *host,
++/*
++ * Some controllers have CMD12 automatically
++ * issue/non-issue register
++ */
++#define TMIO_MMC_HAVE_CMD12_CTRL	(1 << 7)
++
+ int tmio_core_mmc_enable(void __iomem *cnf, int shift, unsigned long base);
+ int tmio_core_mmc_resume(void __iomem *cnf, int shift, unsigned long base);
+ void tmio_core_mmc_pwr(void __iomem *cnf, int shift, int state);
 -- 
 1.7.9.5
 
