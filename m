@@ -1,7 +1,7 @@
 From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Subject: [PATCH 01/10 v2] mmc: block: add block number limitation flag for multiple block read
-Date: Tue, 29 Jul 2014 01:44:25 -0700 (PDT)
-Message-ID: <87lhrco8pl.wl%kuninori.morimoto.gx@renesas.com>
+Subject: [PATCH 02/10 v2] mmc: tmio: care about DMA tx/rx addr offset
+Date: Tue, 29 Jul 2014 01:44:41 -0700 (PDT)
+Message-ID: <87k36wo8p4.wl%kuninori.morimoto.gx@renesas.com>
 References: <d3d6aa34548248768494ad88056cf4bd@SINPR06MB105.apcprd06.prod.outlook.com>
 	<87simtenpi.wl%kuninori.morimoto.gx@renesas.com>
 	<cb608c5e763f47b597936724ec05b615@SINPR06MB105.apcprd06.prod.outlook.com>
@@ -18,140 +18,78 @@ To: Simon <horms@verge.net.au>, Chris Ball <cjb@laptop.org>
 Cc: Ian Molton <ian@mnementh.co.uk>, TOSHIAKI KOMATSU <toshiaki.komatsu.ud@renesas.com>, NAOYA SHIIBA <naoya.shiiba.nx@renesas.com>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, "goda (Renesas)" <yusuke.goda.sx@renesas.com>, linux-mmc@vger.kernel.org, ryo.kataoka.wt@renesas.com, shinobu.uehara.xc@renesas.com, kouei.abe.cp@renesas.com, cm-hiep@jinso.co.jp, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
+From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 
-In some controllers, when performing a multiple block read of
-one or two blocks, depending on the timing with which the
-response register is read, the response value may not
-be read properly.
-MMC_CAP2_NO_MULTI_READ flags disable all multiple block read,
-but, it is over-kill for this issue.
-This patch adds new MMC_CAP2_2BLKS_LIMIT to use single block read
-when it was two blocks.
-This is additional option of MMC_CAP2_NO_MULTI_READ
+Basically, SD_BUF0 Tx/Rx addresses are same
+in normal TMIO controller,
+but, it is different on Renesas R-Car SDHI controller
+if it uses DMAC
+(Rx address needs to add 0x2000 to Tx address)
 
-[Kuninori Morimoto: tidyup for upstreaming, and cared mach-shmobile]
+This patch adds new .dma_rx_offset and cares it
 
-Signed-off-by: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
+Acked-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+Acked-by: Ben Dooks <ben-linux@fluff.org>
 Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 ---
- arch/arm/mach-shmobile/board-koelsch.c |    6 +++---
- arch/arm/mach-shmobile/board-lager.c   |    4 ++--
- drivers/mmc/card/block.c               |   19 +++++++++++++++++--
- drivers/mmc/host/sh_mobile_sdhi.c      |    2 +-
- include/linux/mmc/host.h               |    3 +++
- 5 files changed, 26 insertions(+), 8 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c |    3 +++
+ drivers/mmc/host/tmio_mmc_dma.c   |    2 +-
+ include/linux/mfd/tmio.h          |    1 +
+ 3 files changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/mach-shmobile/board-koelsch.c b/arch/arm/mach-shmobile/board-koelsch.c
-index 2cd3194..4936436 100644
---- a/arch/arm/mach-shmobile/board-koelsch.c
-+++ b/arch/arm/mach-shmobile/board-koelsch.c
-@@ -333,7 +333,7 @@ SDHI_REGULATOR(2, RCAR_GP_PIN(7, 19), RCAR_GP_PIN(2, 26));
- static struct sh_mobile_sdhi_info sdhi0_info __initdata = {
- 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
- 			  MMC_CAP_POWER_OFF_CARD,
--	.tmio_caps2	= MMC_CAP2_NO_MULTI_READ,
-+	.tmio_caps2	= MMC_CAP2_NO_2BLKS_READ,
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT,
- };
- 
-@@ -346,7 +346,7 @@ static struct resource sdhi0_resources[] __initdata = {
- static struct sh_mobile_sdhi_info sdhi1_info __initdata = {
- 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
- 			  MMC_CAP_POWER_OFF_CARD,
--	.tmio_caps2	= MMC_CAP2_NO_MULTI_READ,
-+	.tmio_caps2	= MMC_CAP2_NO_2BLKS_READ,
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT,
- };
- 
-@@ -359,7 +359,7 @@ static struct resource sdhi1_resources[] __initdata = {
- static struct sh_mobile_sdhi_info sdhi2_info __initdata = {
- 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
- 			  MMC_CAP_POWER_OFF_CARD,
--	.tmio_caps2	= MMC_CAP2_NO_MULTI_READ,
-+	.tmio_caps2	= MMC_CAP2_NO_2BLKS_READ,
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT |
- 			  TMIO_MMC_WRPROTECT_DISABLE,
- };
-diff --git a/arch/arm/mach-shmobile/board-lager.c b/arch/arm/mach-shmobile/board-lager.c
-index b8b2b44..ad85f9d 100644
---- a/arch/arm/mach-shmobile/board-lager.c
-+++ b/arch/arm/mach-shmobile/board-lager.c
-@@ -634,7 +634,7 @@ static void __init lager_add_rsnd_device(void)
- static struct sh_mobile_sdhi_info sdhi0_info __initdata = {
- 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
- 			  MMC_CAP_POWER_OFF_CARD,
--	.tmio_caps2	= MMC_CAP2_NO_MULTI_READ,
-+	.tmio_caps2	= MMC_CAP2_NO_2BLKS_READ,
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT |
- 			  TMIO_MMC_WRPROTECT_DISABLE,
- };
-@@ -648,7 +648,7 @@ static struct resource sdhi0_resources[] __initdata = {
- static struct sh_mobile_sdhi_info sdhi2_info __initdata = {
- 	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
- 			  MMC_CAP_POWER_OFF_CARD,
--	.tmio_caps2	= MMC_CAP2_NO_MULTI_READ,
-+	.tmio_caps2	= MMC_CAP2_NO_2BLKS_READ,
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT |
- 			  TMIO_MMC_WRPROTECT_DISABLE,
- };
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 452782b..f3cbe37 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1400,8 +1400,23 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 
- 		/* Some controllers can't do multiblock reads due to hw bugs */
- 		if (card->host->caps2 & MMC_CAP2_NO_MULTI_READ &&
--		    rq_data_dir(req) == READ)
--			brq->data.blocks = 1;
-+		    rq_data_dir(req) == READ) {
-+
-+			if (card->host->caps2 & MMC_CAP2_2BLKS_LIMIT) {
-+				/*
-+				 * In some controllers, when performing a
-+				 * multiple block read of one or two blocks,
-+				 * depending on the timing with which the
-+				 * response register is read, the response
-+				 * value may not be read properly.
-+				 * Use single block read for this HW bug
-+				 */
-+				if (brq->data.blocks == 2)
-+					brq->data.blocks = 1;
-+			} else {
-+				brq->data.blocks = 1;
-+			}
-+		}
- 	}
- 
- 	if (brq->data.blocks > 1 || do_rel_wr) {
 diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 91058da..b3baa83 100644
+index b3baa83..91c6399 100644
 --- a/drivers/mmc/host/sh_mobile_sdhi.c
 +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -55,7 +55,7 @@ static const struct sh_mobile_sdhi_of_data of_rcar_gen1_compatible = {
- static const struct sh_mobile_sdhi_of_data of_rcar_gen2_compatible = {
+@@ -39,6 +39,7 @@ struct sh_mobile_sdhi_of_data {
+ 	unsigned long tmio_flags;
+ 	unsigned long capabilities;
+ 	unsigned long capabilities2;
++	dma_addr_t dma_rx_offset;
+ };
+ 
+ static const struct sh_mobile_sdhi_of_data sh_mobile_sdhi_of_cfg[] = {
+@@ -56,6 +57,7 @@ static const struct sh_mobile_sdhi_of_data of_rcar_gen2_compatible = {
  	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE,
  	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
--	.capabilities2	= MMC_CAP2_NO_MULTI_READ,
-+	.capabilities2	= MMC_CAP2_NO_2BLKS_READ,
+ 	.capabilities2	= MMC_CAP2_NO_2BLKS_READ,
++	.dma_rx_offset	= 0x2000,
  };
  
  static const struct of_device_id sh_mobile_sdhi_of_match[] = {
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 7960424..3510fba 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -266,6 +266,9 @@ struct mmc_host {
- #define MMC_CAP2_BOOTPART_NOACC	(1 << 0)	/* Boot partition no access */
- #define MMC_CAP2_FULL_PWR_CYCLE	(1 << 2)	/* Can do full power cycle */
- #define MMC_CAP2_NO_MULTI_READ	(1 << 3)	/* Multiblock reads don't work */
-+#define MMC_CAP2_2BLKS_LIMIT	(1 << 4)	/* 2 blocks limit for multi read */
-+#define MMC_CAP2_NO_2BLKS_READ	(MMC_CAP2_NO_MULTI_READ | \
-+				 MMC_CAP2_2BLKS_LIMIT)
- #define MMC_CAP2_HS200_1_8V_SDR	(1 << 5)        /* can support */
- #define MMC_CAP2_HS200_1_2V_SDR	(1 << 6)        /* can support */
- #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
+@@ -228,6 +230,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		mmc_data->flags |= of_data->tmio_flags;
+ 		mmc_data->capabilities |= of_data->capabilities;
+ 		mmc_data->capabilities2 |= of_data->capabilities2;
++		dma_priv->dma_rx_offset = of_data->dma_rx_offset;
+ 	}
+ 
+ 	/* SD control register space size is 0x100, 0x200 for bus_shift=1 */
+diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+index 03e7b28..1925170 100644
+--- a/drivers/mmc/host/tmio_mmc_dma.c
++++ b/drivers/mmc/host/tmio_mmc_dma.c
+@@ -311,7 +311,7 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
+ 		if (pdata->dma->chan_priv_rx)
+ 			cfg.slave_id = pdata->dma->slave_id_rx;
+ 		cfg.direction = DMA_DEV_TO_MEM;
+-		cfg.src_addr = cfg.dst_addr;
++		cfg.src_addr = cfg.dst_addr + pdata->dma->dma_rx_offset;
+ 		cfg.dst_addr = 0;
+ 		ret = dmaengine_slave_config(host->chan_rx, &cfg);
+ 		if (ret < 0)
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index 8f6f2e9..777e29b 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -96,6 +96,7 @@ struct tmio_mmc_dma {
+ 	int slave_id_tx;
+ 	int slave_id_rx;
+ 	int alignment_shift;
++	dma_addr_t dma_rx_offset;
+ 	bool (*filter)(struct dma_chan *chan, void *arg);
+ };
+ 
 -- 
 1.7.9.5
 
