@@ -1,15 +1,19 @@
-From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCHv8 4/5] ARM: dts: rockchip: unuse the slot-node and deprecated
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCHv8 3/5] ARM: dts: socfpga: unuse the slot-node and deprecated
  the supports-highspeed for dw-mmc
-Date: Wed, 30 Jul 2014 20:05:09 +0900
-Message-ID: <1406718310-32078-5-git-send-email-jh80.chung@samsung.com>
+Date: Wed, 30 Jul 2014 20:05:08 +0900
+Message-ID: <1406718310-32078-4-git-send-email-jh80.chung@samsung.com>
 References: <1406718310-32078-1-git-send-email-jh80.chung@samsung.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <1406718310-32078-1-git-send-email-jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Doug Anderson <dianders-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, cpgs-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:43583 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752381AbaG3LFS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Jul 2014 07:05:18 -0400
+In-reply-to: <1406718310-32078-1-git-send-email-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, devicetree@vger.kernel.org, heiko@sntech.de, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Doug Anderson <dianders@google.com>, cpgs@samsung.com, Jaehoon Chung <jh80.chung@samsung.com>
 
 dw-mmc controller can support multiple slots.
 But, there are no use-cases anywhere. So we don't need to support the
@@ -17,53 +21,80 @@ slot-node for dw-mmc controller.
 And "supports-highspeed" property in dw-mmc is deprecated.
 "supports-highspeed" property can be replaced to "cap-sd/mmc-highspeed".
 
-Signed-off-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Reviewed-by: Tushar Behera <trblinux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Reviewed-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Reviewed-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Acked-by: Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Reviewed-by: Tushar Behera <trblinux@gmail.com>
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+Acked-by: Dinh Nguyen <dinguyen@altera.com>
 ---
- arch/arm/boot/dts/rk3066a-bqcurie2.dts |   16 ++++------------
- 1 file changed, 4 insertions(+), 12 deletions(-)
+ arch/arm/boot/dts/socfpga_arria5.dtsi   |    9 +++------
+ arch/arm/boot/dts/socfpga_cyclone5.dtsi |    9 +++------
+ arch/arm/boot/dts/socfpga_vt.dts        |    9 +++------
+ 3 files changed, 9 insertions(+), 18 deletions(-)
 
-diff --git a/arch/arm/boot/dts/rk3066a-bqcurie2.dts b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
-index afb3273..ecea889 100644
---- a/arch/arm/boot/dts/rk3066a-bqcurie2.dts
-+++ b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
-@@ -59,12 +59,8 @@
- 			pinctrl-names = "default";
- 			pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_cd &sd0_bus4>;
- 			vmmc-supply = <&vcc_sd0>;
+diff --git a/arch/arm/boot/dts/socfpga_arria5.dtsi b/arch/arm/boot/dts/socfpga_arria5.dtsi
+index 12d1c2c..468fc4c 100644
+--- a/arch/arm/boot/dts/socfpga_arria5.dtsi
++++ b/arch/arm/boot/dts/socfpga_arria5.dtsi
+@@ -29,13 +29,10 @@
+ 
+ 		dwmmc0@ff704000 {
+ 			num-slots = <1>;
+-			supports-highspeed;
+ 			broken-cd;
 -
 -			slot@0 {
 -				reg = <0>;
 -				bus-width = <4>;
--				disable-wp;
 -			};
 +			bus-width = <4>;
-+			disable-wp;
++			cap-mmc-highspeed;
++			cap-sd-highspeed;
  		};
  
- 		dwmmc@10218000 { /* wifi */
-@@ -74,12 +70,8 @@
+ 		sysmgr@ffd08000 {
+diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+index bf51182..1ee03c4 100644
+--- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
++++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
+@@ -30,13 +30,10 @@
  
- 			pinctrl-names = "default";
- 			pinctrl-0 = <&sd1_clk &sd1_cmd &sd1_bus4>;
+ 		dwmmc0@ff704000 {
+ 			num-slots = <1>;
+-			supports-highspeed;
+ 			broken-cd;
 -
 -			slot@0 {
 -				reg = <0>;
 -				bus-width = <4>;
--				disable-wp;
 -			};
 +			bus-width = <4>;
-+			disable-wp;
++			cap-mmc-highspeed;
++			cap-sd-highspeed;
  		};
  
- 		gpio-keys {
+ 		ethernet@ff702000 {
+diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
+index 09792b4..f9345e0 100644
+--- a/arch/arm/boot/dts/socfpga_vt.dts
++++ b/arch/arm/boot/dts/socfpga_vt.dts
+@@ -43,13 +43,10 @@
+ 
+ 		dwmmc0@ff704000 {
+ 			num-slots = <1>;
+-			supports-highspeed;
+ 			broken-cd;
+-
+-			slot@0 {
+-				reg = <0>;
+-				bus-width = <4>;
+-			};
++			bus-width = <4>;
++			cap-mmc-highspeed;
++			cap-sd-highspeed;
+ 		};
+ 
+ 		ethernet@ff700000 {
 -- 
 1.7.9.5
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
