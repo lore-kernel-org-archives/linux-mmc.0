@@ -1,77 +1,53 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: [PATCHv7 5/5] mmc: dw_mmc: replace "disable-wp" from slot's quirk
- to host's quirk
-Date: Tue, 29 Jul 2014 21:30:58 -0700
-Message-ID: <CAD=FV=V9h5Zfhhgkg8TwAvFzsnwY0PBQnDBHdkiWSYA1LN+o-A@mail.gmail.com>
-References: <1406514579-3769-1-git-send-email-jh80.chung@samsung.com>
-	<1406514579-3769-6-git-send-email-jh80.chung@samsung.com>
-	<CAD=FV=VnP7q0UE0uP_8Hzbhtu6qJqz2kUR9E_sfk4wHbBH_7cg@mail.gmail.com>
-	<53D85CBE.8090104@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <53D85CBE.8090104@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Dinh Nguyen <dinguyen@altera.com>, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, =?UTF-8?Q?Andreas_F=C3=A4rber?= <afaerber@suse.de>, CPGS <cpgs@samsung.com>
+From: Tim Kryger <tim.kryger@gmail.com>
+Subject: [RESEND PATCH] mmc: core: Remove fixed voltage regulator logic
+Date: Tue, 29 Jul 2014 21:46:15 -0700
+Message-ID: <1406695575-13458-1-git-send-email-tim.kryger@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f53.google.com ([209.85.220.53]:63738 "EHLO
+	mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751340AbaG3Eqf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Jul 2014 00:46:35 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Tim Kryger <tim.kryger@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Jaehoon,
+There is no need for regulator consumers to include special logic for
+fixed voltage regulators as they support regulator_set_voltage() just
+like their non-fixed regulator counterparts.
 
-On Tue, Jul 29, 2014 at 7:47 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi, Doug.
->
-> Thanks for review.
->
-> On 07/30/2014 03:01 AM, Doug Anderson wrote:
->> Jaehoon,
->>
->> On Sun, Jul 27, 2014 at 7:29 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>> Replaced the "disable-wp" into host's quirks.
->>> (Because the slot-node is removed at dt-file.)
->>>
->>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->>> Tested-by: Sachin Kamat <sachin.kamat@samsung.com>
->>> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
->>> ---
->>>  drivers/mmc/host/dw_mmc.c  |   12 +++++-------
->>>  include/linux/mmc/dw_mmc.h |    6 ++----
->>>  2 files changed, 7 insertions(+), 11 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>> index 1ac227c..4a4f66f 100644
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -997,7 +997,7 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
->>>         int gpio_ro = mmc_gpio_get_ro(mmc);
->>>
->>>         /* Use platform get_ro function, else try on board write protect */
->>> -       if (slot->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT)
->>> +       if (slot->host->quirks & DW_MCI_QUIRK_NO_WRITE_PROTECT)
->>
->> It doesn't seem like it would be hard to include support for the old
->> binding (and just print a warning).  Then this could land ahead of the
->> device tree changes.
->>
->> Generally I think we're supposed to keep support for old device trees
->> if possible (except in extreme cases).
-> Ok, I see. I will add the Warning message like this. ("Recommend not to use the slot-node...")
+Signed-off-by: Tim Kryger <tim.kryger@gmail.com>
+---
 
-That seems reasonable.
+Since this eliminates logic that was concealing a bug in how the SDHCI
+driver was setting ocr_avail, it is important that the following patch
+to fix that bug be taken first.  Fortunately, it is already queued.
 
+  https://lkml.org/lkml/2014/6/13/451
 
-> Then Developers can change the device-tree, right.
+ drivers/mmc/core/core.c |    8 --------
+ 1 file changed, 8 deletions(-)
 
-Right.  Then this can land even ahead of the dts changes and you could
-change them one at a time (if you wanted) once you have the proper
-acks.
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 7dc0c85..e56375c 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1280,15 +1280,7 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+ 			max_uV = min_uV + 100 * 1000;
+ 		}
+ 
+-		/*
+-		 * If we're using a fixed/static regulator, don't call
+-		 * regulator_set_voltage; it would fail.
+-		 */
+ 		voltage = regulator_get_voltage(supply);
+-
+-		if (!regulator_can_change_voltage(supply))
+-			min_uV = max_uV = voltage;
+-
+ 		if (voltage < 0)
+ 			result = voltage;
+ 		else if (voltage < min_uV || voltage > max_uV)
+-- 
+1.7.9.5
 
-
-> Today, i will send the patch. If you have any other comment, let me know, plz.
-> I want to merge this patch-set into 3.16.
-
-I haven't done a full review, but generally this looked pretty sane to
-me.  It seems like it might be too late for 3.16 but I'm no expert on
-the subject.
-
--Doug
