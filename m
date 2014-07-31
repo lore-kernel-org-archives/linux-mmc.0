@@ -1,38 +1,66 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: [PATCHv9 1/5] mmc: dw_mmc: Slot quirk "disable-wp" is deprecated.
-Date: Thu, 31 Jul 2014 09:02:45 -0700
-Message-ID: <CAD=FV=VfXOqt1A=8-1kq5nhnMrk7PbpCWj-A-UWQN12_U8sW4g@mail.gmail.com>
-References: <1406784907-26349-1-git-send-email-jh80.chung@samsung.com>
-	<1406784907-26349-2-git-send-email-jh80.chung@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1406784907-26349-2-git-send-email-jh80.chung@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Dinh Nguyen <dinguyen@altera.com>, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, =?UTF-8?Q?Andreas_F=C3=A4rber?= <afaerber@suse.de>, cpgs <cpgs@samsung.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH v2 1/4] ARM: dts: Add emmc and sdmmc to the rk3288 device tree
+Date: Thu, 31 Jul 2014 09:13:17 -0700
+Message-ID: <1406823200-20911-2-git-send-email-dianders@chromium.org>
+References: <1406823200-20911-1-git-send-email-dianders@chromium.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1406823200-20911-1-git-send-email-dianders@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Heiko Stuebner <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Addy Ke <addy.ke@rock-chips.com>, Kever Yang <kever.yang@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Doug Anderson <dianders@chromium.org>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, linux@arm.linux.org.uk, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Jaehoon
+This adds support for the sdmmc and emmc ports on the rk3288 using the
+currently posted driver from Addy at:
+  https://patchwork.kernel.org/patch/4653631/
 
-On Wed, Jul 30, 2014 at 10:35 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Slot quirks "disable-wp" is deprecated.
-> Instead, use the host quirk "disable-wp".
-> (Because the slot-node is removed in dt-file.)
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Tested-by: Sachin Kamat <sachin.kamat@samsung.com>
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc.c  |   11 +++++++++--
->  include/linux/mmc/dw_mmc.h |    2 ++
->  2 files changed, 11 insertions(+), 2 deletions(-)
+Note:
+* This is not baesd on Jaehoon's patch series removing the slot node,
+  but it does use new syntax like putting the bus width at the top
+  level and using the new cap-mmc-highspeed / cap-sd-highspeed.  A
+  future patch will modify this one to remove the slot node.
 
-Thanks for taking my suggestion and making it backward compatible.
-This looks great to me.  It tested this in both the backward
-compatible way (with the warning) and the non-backward compatible way.
-I think we should land and patch #2 ASAP and then we can land the rest
-of the series as SoC maintainers see fit.
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+Acked-by: Arnd Bergmann <arnd@arndb.de>
+---
+Changes in v2:
+- New patchwork link for Addy's patch
 
-Reviewed-by: Doug Anderson <dianders@chromium.org>
-Tested-by: Doug Anderson <dianders@chromium.org>
+ arch/arm/boot/dts/rk3288.dtsi | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+index 3ef8951..fd77a65 100644
+--- a/arch/arm/boot/dts/rk3288.dtsi
++++ b/arch/arm/boot/dts/rk3288.dtsi
+@@ -78,6 +78,28 @@
+ 		clock-frequency = <24000000>;
+ 	};
+ 
++	sdmmc: dwmmc@ff0c0000 {
++		compatible = "rockchip,rk3288-dw-mshc";
++		clocks = <&cru HCLK_SDMMC>, <&cru SCLK_SDMMC>;
++		clock-names = "biu", "ciu";
++		fifo-depth = <0x100>;
++		interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_HIGH>;
++		reg = <0xff0c0000 0x4000>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++	};
++
++	emmc: dwmmc@ff0f0000 {
++		compatible = "rockchip,rk3288-dw-mshc";
++		clocks = <&cru HCLK_EMMC>, <&cru SCLK_EMMC>;
++		clock-names = "biu", "ciu";
++		fifo-depth = <0x100>;
++		interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
++		reg = <0xff0f0000 0x4000>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++	};
++
+ 	i2c1: i2c@ff140000 {
+ 		compatible = "rockchip,rk3288-i2c";
+ 		reg = <0xff140000 0x1000>;
+-- 
+2.0.0.526.g5318336
