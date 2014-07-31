@@ -1,47 +1,61 @@
-From: Kukjin Kim <kgene.kim@samsung.com>
-Subject: Re: [PATCHv9 1/5] mmc: dw_mmc: Slot quirk "disable-wp" is deprecated.
-Date: Fri, 01 Aug 2014 03:36:59 +0900
-Message-ID: <53DA8CCB.3080900@samsung.com>
-References: <1406784907-26349-1-git-send-email-jh80.chung@samsung.com>	<1406784907-26349-2-git-send-email-jh80.chung@samsung.com> <CAD=FV=VfXOqt1A=8-1kq5nhnMrk7PbpCWj-A-UWQN12_U8sW4g@mail.gmail.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v2 2/4] ARM: dts: Enable emmc and sdmmc on the rk3288-evb boards
+Date: Thu, 31 Jul 2014 16:44:39 -0700
+Message-ID: <CAD=FV=UcJD08wUB7kJH4DusJEZ+xdH=L-zig5DGZrUgu9HYbmA@mail.gmail.com>
+References: <1406823200-20911-1-git-send-email-dianders@chromium.org>
+	<1406823200-20911-3-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=VfXOqt1A=8-1kq5nhnMrk7PbpCWj-A-UWQN12_U8sW4g@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Doug Anderson <dianders@google.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, =?UTF-8?B?SGVpa28gU3TDvGJuZXI=?= <heiko@sntech.de>, Dinh Nguyen <dinguyen@altera.com>, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, =?UTF-8?B?QW5kcmVhcyBGw6RyYmVy?= <afaerber@suse.de>, cpgs <cpgs@samsung.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1406823200-20911-3-git-send-email-dianders@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Heiko Stuebner <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Addy Ke <addy.ke@rock-chips.com>, Kever Yang <kever.yang@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Doug Anderson <dianders@chromium.org>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Russell King <linux@arm.linux.org.uk>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 08/01/14 01:02, Doug Anderson wrote:
-> Jaehoon
+Hi,
+
+On Thu, Jul 31, 2014 at 9:13 AM, Doug Anderson <dianders@chromium.org> wrote:
+> This adds support for the sdmmc and emmc ports on the rk3288 using the
+> currently posted driver from Addy at:
+>   https://patchwork.kernel.org/patch/4653631/
 >
-> On Wed, Jul 30, 2014 at 10:35 PM, Jaehoon Chung<jh80.chung@samsung.com>  wrote:
->> Slot quirks "disable-wp" is deprecated.
->> Instead, use the host quirk "disable-wp".
->> (Because the slot-node is removed in dt-file.)
->>
->> Signed-off-by: Jaehoon Chung<jh80.chung@samsung.com>
->> Tested-by: Sachin Kamat<sachin.kamat@samsung.com>
->> Acked-by: Seungwon Jeon<tgih.jun@samsung.com>
->> ---
->>   drivers/mmc/host/dw_mmc.c  |   11 +++++++++--
->>   include/linux/mmc/dw_mmc.h |    2 ++
->>   2 files changed, 11 insertions(+), 2 deletions(-)
+> This enables basic SD and eMMC support.  Things are not yet running at
+> the fastest speed and we don't have the regulators specified, but we
+> can at least use the eMMC and SD cards now.
 >
-> Thanks for taking my suggestion and making it backward compatible.
-> This looks great to me.  It tested this in both the backward
-> compatible way (with the warning) and the non-backward compatible way.
-> I think we should land and patch #2 ASAP and then we can land the rest
-> of the series as SoC maintainers see fit.
+> A few notes:
+> * This is not baesd on Jaehoon's patch series removing the slot node,
+>   but it does use new syntax like putting the bus width at the top
+>   level and using the new cap-mmc-highspeed / cap-sd-highspeed.  A
+>   future patch will modify this one to remove the slot node.
 >
-Yes, right if we don't want to see useless merge conflicts...
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> Acked-by: Arnd Bergmann <arnd@arndb.de>
+> ---
+> Changes in v2:
+> - Squashed in the DDR50 mode since Addy spun his patch.
+> - New patchwork link for Addy's patch
+>
+>  arch/arm/boot/dts/rk3288-evb.dtsi | 33 +++++++++++++++++++++++++++++++++
+>  1 file changed, 33 insertions(+)
+>
+> diff --git a/arch/arm/boot/dts/rk3288-evb.dtsi b/arch/arm/boot/dts/rk3288-evb.dtsi
+> index 749e20d..ec580fa 100644
+> --- a/arch/arm/boot/dts/rk3288-evb.dtsi
+> +++ b/arch/arm/boot/dts/rk3288-evb.dtsi
+> @@ -37,6 +37,39 @@
+>         };
+>  };
+>
+> +&emmc {
+> +       broken-cd;
+> +       bus-width = <8>;
+> +       cap-mmc-highspeed;
+> +       mmc-ddr-1_8v;
 
-When I sent ack on exynos stuff, there was no conflict with my tree but 
-happens it now.
+Strangely DDR mode started failing all of a sudden for me.  Even going
+back to old git hashes made things fail.  ...I'd be curious to know if
+DDR mode is working for others.
 
-- Kukjin
-
-
-> Reviewed-by: Doug Anderson<dianders@chromium.org>
-> Tested-by: Doug Anderson<dianders@chromium.org>
+-Doug
