@@ -1,63 +1,42 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCHv9 1/5] mmc: dw_mmc: Slot quirk "disable-wp" is deprecated.
-Date: Fri, 01 Aug 2014 13:26:43 +0900
-Message-ID: <53DB1703.4090002@samsung.com>
-References: <1406784907-26349-1-git-send-email-jh80.chung@samsung.com>
- <1406784907-26349-2-git-send-email-jh80.chung@samsung.com>
- <CAD=FV=VfXOqt1A=8-1kq5nhnMrk7PbpCWj-A-UWQN12_U8sW4g@mail.gmail.com>
- <53DA8CCB.3080900@samsung.com>
+From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Subject: [PATCH] mmc: sdhci: fix the wrong type of curr
+Date: Fri, 1 Aug 2014 14:00:13 +0800
+Message-ID: <20140801060012.GA2568@intel.com>
+Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <53DA8CCB.3080900@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Kukjin Kim <kgene.kim@samsung.com>, Doug Anderson <dianders@google.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, =?UTF-8?B?SGVpa28gU3TDvGJuZXI=?= <heiko@sntech.de>, Dinh Nguyen <dinguyen@altera.com>, Mark Rutland <mark.rutland@arm.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, =?UTF-8?B?QW5kcmVhcyBGw6RyYmVy?= <afaerber@suse.de>, cpgs <cpgs@samsung.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:31312 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750770AbaHAGCG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 1 Aug 2014 02:02:06 -0400
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, cjb@laptop.org, ulf.hansson@linaro.org
 
-Hi, All.
+curr should use signed type since it will contain the returned
+value which is possible to be a negative value. Using u32 will
+make the returned value to be true even there is a negative result.
+Change to use int instead of u32
 
-It seems too late that this patch-set is merged into linux-3.16.
-Also there are some conflicts in device-tree. (I will remove the conflicts)
-So if everybody is ok, I will rebase on linux-next after released linux-3.16.
-At that time, i will send this patch-set to stable kernel, too.
-how about?
-And I want to know who can apply this patch-set(#3~#5).
+Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+---
+ drivers/mmc/host/sdhci.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Best Regards,
-Jaehoon Chung
-
-On 08/01/2014 03:36 AM, Kukjin Kim wrote:
-> On 08/01/14 01:02, Doug Anderson wrote:
->> Jaehoon
->>
->> On Wed, Jul 30, 2014 at 10:35 PM, Jaehoon Chung<jh80.chung@samsung.com>  wrote:
->>> Slot quirks "disable-wp" is deprecated.
->>> Instead, use the host quirk "disable-wp".
->>> (Because the slot-node is removed in dt-file.)
->>>
->>> Signed-off-by: Jaehoon Chung<jh80.chung@samsung.com>
->>> Tested-by: Sachin Kamat<sachin.kamat@samsung.com>
->>> Acked-by: Seungwon Jeon<tgih.jun@samsung.com>
->>> ---
->>>   drivers/mmc/host/dw_mmc.c  |   11 +++++++++--
->>>   include/linux/mmc/dw_mmc.h |    2 ++
->>>   2 files changed, 11 insertions(+), 2 deletions(-)
->>
->> Thanks for taking my suggestion and making it backward compatible.
->> This looks great to me.  It tested this in both the backward
->> compatible way (with the warning) and the non-backward compatible way.
->> I think we should land and patch #2 ASAP and then we can land the rest
->> of the series as SoC maintainers see fit.
->>
-> Yes, right if we don't want to see useless merge conflicts...
-> 
-> When I sent ack on exynos stuff, there was no conflict with my tree but happens it now.
-> 
-> - Kukjin
-> 
-> 
->> Reviewed-by: Doug Anderson<dianders@chromium.org>
->> Tested-by: Doug Anderson<dianders@chromium.org>
-> 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 47055f3..c026ec8 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3078,7 +3078,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	 */
+ 	max_current_caps = sdhci_readl(host, SDHCI_MAX_CURRENT);
+ 	if (!max_current_caps && host->vmmc) {
+-		u32 curr = regulator_get_current_limit(host->vmmc);
++		int curr = regulator_get_current_limit(host->vmmc);
+ 		if (curr > 0) {
+ 
+ 			/* convert to SDHCI_MAX_CURRENT format */
+-- 
+1.7.10.4
