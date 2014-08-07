@@ -1,61 +1,64 @@
-From: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
-Subject: Re: Sandisk MMC I/O errors
-Date: Thu, 7 Aug 2014 09:54:57 +0200
-Message-ID: <CAL8zT=jjx0XOvtSTR14FA9=TqnD9X3imZRo1xBVykqacwKJSEw@mail.gmail.com>
-References: <CAL8zT=iinDtm3_77jSDWG1RSjN5CgEtAgPjA_ju3-=ZS2Qco8A@mail.gmail.com>
- <CAOMZO5B36yQx-renFLaPDSY12kmPuPGVOkXT3nJKb2gRhdTdPQ@mail.gmail.com>
- <CAL8zT=jmbvaDpj+Dhww90ah6gzNRGWkgNwWt_xTVfcygxa0Ocw@mail.gmail.com>
- <CAL8zT=itTv9Uy4HreJQdttwhn29sKcNGc6ccynCNcScrFeWYig@mail.gmail.com>
- <CAOMZO5Dbmk3kxwn__o+fB0Wwumq5f+4tvu0m0x3aqOAZC-GWTQ@mail.gmail.com>
- <CAL8zT=iRtmKZyHNYR+-c0KuOaN06Tg60QiWwePvz+auWhpRtPw@mail.gmail.com>
- <CAC1bqKgct-Hq3+9PZ-6p79qSjf=UNhpLWykJ_e0=1ThGoMPpkg@mail.gmail.com>
- <CAL8zT=gS1rwFU1eUcYNpKmygpnmTDXeQRtg6Uxr9FVXRJ6PmeA@mail.gmail.com>
- <53E21515.3060807@samsung.com> <CAL8zT=hcYUUnP1PXYu_9+JUTx=sqBAQkiY1g7K+=TbLSx4J8-g@mail.gmail.com>
- <CAOMZO5CV7yTT5K4S7L+UcO_No2rRsPGWTqmSh79mQmoL2QKsYg@mail.gmail.com>
- <CAL8zT=h6qxPrnXeys0P48hUxsc21MfO_wWNC-g9UrLB-3YZ=Mg@mail.gmail.com>
- <CAL8zT=iaKfEW32vq5_5yXxuMEAzS8=GsJhUR16TH4bQcK9DgpQ@mail.gmail.com>
- <CAL8zT=giMNWG+xwhcR_N8GbCCPEeucaNDG0QQfOos0v3RcwC6Q@mail.gmail.com> <53E32FE4.8060401@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v3 0/4] Add eMMC and SD card support for rk3288-evb
+Date: Thu, 07 Aug 2014 17:24:37 +0900
+Message-ID: <53E337C5.3020802@samsung.com>
+References: <1407344984-14176-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:49351 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754072AbaHGHzN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Aug 2014 03:55:13 -0400
-Received: by mail-ob0-f174.google.com with SMTP id vb8so2668051obc.5
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Aug 2014 00:55:12 -0700 (PDT)
-In-Reply-To: <53E32FE4.8060401@samsung.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:39567 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754314AbaHGIYl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Aug 2014 04:24:41 -0400
+In-reply-to: <1407344984-14176-1-git-send-email-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Fabio Estevam <festevam@gmail.com>, Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Addy Ke <addy.ke@rock-chips.com>, Kever Yang <kever.yang@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, mark.rutland@arm.com, devicetree@vger.kernel.org, linux@arm.linux.org.uk, pawel.moll@arm.com, ijc+devicetree@hellion.org.uk, linux-kernel@vger.kernel.org, robh+dt@kernel.org, galak@codeaurora.org
 
->> OK, I juste tested to get back on part of the commit
->> 79f7ae7c45a6ccf04e2908337461dee615f6afb0 :
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index 1ab5f3a..e22d851 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1264,7 +1264,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->>                                         goto err;
->>                         }
->>                         mmc_card_set_ddr_mode(card);
->> -                       mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
->> +                       mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
->>                         mmc_set_bus_width(card->host, bus_width);
->>                 }
->>         }
->>
->>
->> I just did the inverse, that means using MMC_TIMING_UHS_DDR50 and not
->> MMC_TIMING_MMC_DDR52 and I don't have any errors now.
->
-> Is your card eMMC or SD(T-flash)? Which card do you use?
-> Did you check dt-file?
+Hi, Doug.
 
-The card is Sandisk SDIN5D1-2G which is a iNAND.
-What should I check in DT ?
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Thanks,
-JM
+On 08/07/2014 02:09 AM, Doug Anderson wrote:
+> This series adds basic eMMC and SD card support for the rk3288-evb
+> board based on Addy's posted dw_mmc patch from:
+>   https://patchwork.kernel.org/patch/4653631/
+> 
+> The series is a little tricky because:
+> * Jaehoon has some outstanding patches to remove the slot node.  Since
+>   those haven't landed yet, I've posted my original patch with the
+>   slot node and then some future patches that can land with Jaehoon's
+>   patches.
+> 
+> So just to be explicit:
+> - Patch #1 and #2 can land after Addy's patch lands.
+> - Patch #3 and #4 can land after Jaehoon's patch lands, though there's
+>   no huge hurry since Jaehoon's patch supports the old mode (it just
+>   prints a warning).
+> 
+> Note that we don't have regulators specified yet (no regulator driver
+> for rk808-based board).  We also don't yet support UHS modes or MMC
+> DDR50 (which require regulator support plus dw_mmc driver support for
+> tuning).  Those features can come later.
+> 
+> Changes in v3:
+> - Removed DDR50 mode since it needs tuning, which isn't there yet.
+> 
+> Changes in v2:
+> - New patchwork link for Addy's patch
+> - Squashed in the DDR50 mode since Addy spun his patch.
+> - Refer to the new title of Jaehoon's patch
+> 
+> Doug Anderson (4):
+>   ARM: dts: Add emmc and sdmmc to the rk3288 device tree
+>   ARM: dts: Enable emmc and sdmmc on the rk3288-evb boards
+>   ARM: dts: Take the mmc slot node out of rk3288-evb
+>   ARM: dts: mmc slot node gone on rk3288 => no more address / size cells
+> 
+>  arch/arm/boot/dts/rk3288-evb.dtsi | 24 ++++++++++++++++++++++++
+>  arch/arm/boot/dts/rk3288.dtsi     | 18 ++++++++++++++++++
+>  2 files changed, 42 insertions(+)
+> 
+
