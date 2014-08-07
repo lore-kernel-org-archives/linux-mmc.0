@@ -1,52 +1,78 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [RFC 2/2] mmc: use SD/MMC host ID for block device name ID
-Date: Wed, 6 Aug 2014 12:50:31 -0700
-Message-ID: <CAD=FV=Va=V4xGqQM9kMFFdQDyYNWDEh_cXJW=b3iYGRrJiH9DQ@mail.gmail.com>
-References: <cover.1396384101.git.stefan@agner.ch>
-	<2f6ac51155f9d34791b274b5102d15a997ff8b99.1396384101.git.stefan@agner.ch>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH 1/5 v2] mmc: shmobile: add renesas,sdhi-rcar-gen1/gen2 in
+ DT compatible
+Date: Thu, 7 Aug 2014 09:43:06 +0900
+Message-ID: <20140807004303.GG32652@verge.net.au>
+References: <87mwbso8sp.wl%kuninori.morimoto.gx@gmail.com>
+ <87oavy8k3v.wl%kuninori.morimoto.gx@gmail.com>
+ <87mwbi8k1z.wl%kuninori.morimoto.gx@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <2f6ac51155f9d34791b274b5102d15a997ff8b99.1396384101.git.stefan-XLVq0VzYD2Y@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: stefan-XLVq0VzYD2Y@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:55692 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753927AbaHGAnK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Aug 2014 20:43:10 -0400
+Content-Disposition: inline
+In-Reply-To: <87mwbi8k1z.wl%kuninori.morimoto.gx@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+Cc: Chris Ball <cjb@laptop.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, goda <yusuke.goda.sx@renesas.com>, linux-mmc@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 
-Stefan,
+On Tue, Aug 05, 2014 at 06:48:42PM -0700, Kuninori Morimoto wrote:
+> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+> 
+> This patch adds DT compatible for Renesas R-Car Gen1/Gen2.
+> Current driver has SoC level .compatible
+> (r8a7778/r8a7779/r8a7790/r8a7791),
+> but these can be match as generation level.
 
-On Tue, Apr 1, 2014 at 1:35 PM,  <stefan-XLVq0VzYD2Y@public.gmane.org> wrote:
-> From: Stefan Agner <stefan-XLVq0VzYD2Y@public.gmane.org>
->
-> By using the SD/MMC host device ID as a starting point for block
-> device numbering, one can reliably predict the first block device
-> name (at least for the first controller). This is especially useful
-> for SoCs with multiple SD/MMC host controller, where the controller
-> with index 0 is connected to a eMMC device.
->
-> Usually the first controller gets the first block device name ID,
-> however this is not guaranteed. Also if the first controller is
-> aliased as second controller and visa-versa (using device tree
-> aliases), the block device name ID assignation is not ordered by
-> the SD/MMC host device ID (since mmc_rescan is called in order of
-> the memory mapped pheripherial addresses).
->
-> Signed-off-by: Stefan Agner <stefan-XLVq0VzYD2Y@public.gmane.org>
+Is this compatibility explicitly documented anywhere?
+
+> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 > ---
->  drivers/mmc/card/block.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-
-As Stephen points out, "mmcblk" IDs for SD cards are not actually
-guaranteed.  Also UUID is a better API for things to use.
-
-That being said, your patch helps me a lot when doing development.  As
-you said, I'm guaranteed that if eMMC is no-removable and enumerated
-at boot that it will be a predictable ID and I can use it in my
-scripts.  Also this helps keep me from having to do lots of extra
-thinking to figure out whether I happened to have an SD card plugged
-in at boot or I didn't.
-
-I'd love to see this land.
-
-Reviewed-by: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Tested-by: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> v1 -> v2
+> 
+>  - update tmio_mmc.txt
+> 
+>  Documentation/devicetree/bindings/mmc/tmio_mmc.txt |    2 ++
+>  drivers/mmc/host/sh_mobile_sdhi.c                  |    2 ++
+>  2 files changed, 4 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> index 6a2a116..51c05cf 100644
+> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> @@ -11,6 +11,8 @@ optional bindings can be used.
+>  
+>  Required properties:
+>  - compatible:	"renesas,sdhi-shmobile" - a generic sh-mobile SDHI unit
+> +		"renesas,sdhi-rcar-gen1" - a generic R-Car Gen1 SDHI unit
+> +		"renesas,sdhi-rcar-gen2" - a generic R-Car Gen2 SDHI unit
+>  		"renesas,sdhi-sh7372" - SDHI IP on SH7372 SoC
+>  		"renesas,sdhi-sh73a0" - SDHI IP on SH73A0 SoC
+>  		"renesas,sdhi-r8a73a4" - SDHI IP on R8A73A4 SoC
+> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+> index 91058da..cb3bb39 100644
+> --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> @@ -64,8 +64,10 @@ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+>  	{ .compatible = "renesas,sdhi-sh73a0", .data = &sh_mobile_sdhi_of_cfg[0], },
+>  	{ .compatible = "renesas,sdhi-r8a73a4", .data = &sh_mobile_sdhi_of_cfg[0], },
+>  	{ .compatible = "renesas,sdhi-r8a7740", .data = &sh_mobile_sdhi_of_cfg[0], },
+> +	{ .compatible = "renesas,sdhi-rcar-gen1", .data = &of_rcar_gen1_compatible, },
+>  	{ .compatible = "renesas,sdhi-r8a7778", .data = &of_rcar_gen1_compatible, },
+>  	{ .compatible = "renesas,sdhi-r8a7779", .data = &of_rcar_gen1_compatible, },
+> +	{ .compatible = "renesas,sdhi-rcar-gen2", .data = &of_rcar_gen2_compatible, },
+>  	{ .compatible = "renesas,sdhi-r8a7790", .data = &of_rcar_gen2_compatible, },
+>  	{ .compatible = "renesas,sdhi-r8a7791", .data = &of_rcar_gen2_compatible, },
+>  	{},
+> -- 
+> 1.7.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-sh" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
