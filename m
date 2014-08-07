@@ -1,78 +1,232 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 1/5 v2] mmc: shmobile: add renesas,sdhi-rcar-gen1/gen2 in
- DT compatible
-Date: Thu, 7 Aug 2014 09:43:06 +0900
-Message-ID: <20140807004303.GG32652@verge.net.au>
-References: <87mwbso8sp.wl%kuninori.morimoto.gx@gmail.com>
- <87oavy8k3v.wl%kuninori.morimoto.gx@gmail.com>
- <87mwbi8k1z.wl%kuninori.morimoto.gx@gmail.com>
+From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Subject: Re: One bug of SDHCI driver
+Date: Thu, 07 Aug 2014 14:58:15 +0800
+Message-ID: <53E32387.20801@linux.intel.com>
+References: <53B249A4.2040404@linux.intel.com> <53B57B23.4020607@linux.intel.com> <53B61403.7040602@samsung.com> <53B968EB.60401@linux.intel.com> <53BC164E.4040900@linux.intel.com> <86zjgcjckz.fsf@void.printf.net> <53C497FD.2070000@linux.intel.com> <53C4AAB5.4070700@samsung.com> <53C4B0CA.1020504@samsung.com> <53CBD775.9000304@linux.intel.com> <53D125D6.3020203@linux.intel.com> <53D85CBF.3070409@linux.intel.com> <53D8691B.8080904@samsung.com> <53E0640D.2030709@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:55692 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753927AbaHGAnK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Aug 2014 20:43:10 -0400
-Content-Disposition: inline
-In-Reply-To: <87mwbi8k1z.wl%kuninori.morimoto.gx@gmail.com>
+Received: from mga09.intel.com ([134.134.136.24]:58087 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753727AbaHGG6U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 7 Aug 2014 02:58:20 -0400
+In-Reply-To: <53E0640D.2030709@linux.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, goda <yusuke.goda.sx@renesas.com>, linux-mmc@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>
+Cc: ulf.hansson@linaro.org, tgih.jun@samsung.com, aaron.lu@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, jackey.shen@amd.com, gregkh@linuxfoundation.org
 
-On Tue, Aug 05, 2014 at 06:48:42PM -0700, Kuninori Morimoto wrote:
-> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-> 
-> This patch adds DT compatible for Renesas R-Car Gen1/Gen2.
-> Current driver has SoC level .compatible
-> (r8a7778/r8a7779/r8a7790/r8a7791),
-> but these can be match as generation level.
 
-Is this compatibility explicitly documented anywhere?
+kindly reminder.
 
-> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Thanks,
+Zhonghui
+
+On 2014/8/5 12:56, Fu, Zhonghui wrote:
+> Hi, Jaehoon
+>
+> According to your comments, I created a new patch for this issue as follows:
+>
+>
+> Thanks,
+> Zhonghui
+>
+>
+> From 6cee984e1d76ba0a3320430f8cf4318ab65fcf06 Mon Sep 17 00:00:00 2001
+> From: Fu Zhonghui <zhonghui.fu@linux.intel.com>
+> Date: Tue, 5 Aug 2014 12:44:38 +0800
+> Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
+>
+> 781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
+> bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
+> the use of our own custom threaded IRQ handler, but left in an
+> unconditional wake_up_process() on that handler at resume-time.
+> Link: https://bugzilla.kernel.org/show_bug.cgi?id=80151
+>
+> In addition, the check for MMC_CAP_SDIO_IRQ capability is added
+> before enable sdio IRQ.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Chris Ball <chris@printf.net>
+> Signed-off-by: Fu Zhonghui <zhonghui.fu@linux.intel.com>
 > ---
-> v1 -> v2
-> 
->  - update tmio_mmc.txt
-> 
->  Documentation/devicetree/bindings/mmc/tmio_mmc.txt |    2 ++
->  drivers/mmc/host/sh_mobile_sdhi.c                  |    2 ++
->  2 files changed, 4 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> index 6a2a116..51c05cf 100644
-> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> @@ -11,6 +11,8 @@ optional bindings can be used.
+>  drivers/mmc/core/sdio.c     |   14 ++++++++++++--
+>  drivers/mmc/core/sdio_irq.c |    4 ++--
+>  2 files changed, 14 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index e636d9e..e04a540 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -992,8 +992,18 @@ static int mmc_sdio_resume(struct mmc_host *host)
+>  		}
+>  	}
 >  
->  Required properties:
->  - compatible:	"renesas,sdhi-shmobile" - a generic sh-mobile SDHI unit
-> +		"renesas,sdhi-rcar-gen1" - a generic R-Car Gen1 SDHI unit
-> +		"renesas,sdhi-rcar-gen2" - a generic R-Car Gen2 SDHI unit
->  		"renesas,sdhi-sh7372" - SDHI IP on SH7372 SoC
->  		"renesas,sdhi-sh73a0" - SDHI IP on SH73A0 SoC
->  		"renesas,sdhi-r8a73a4" - SDHI IP on R8A73A4 SoC
-> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> index 91058da..cb3bb39 100644
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -64,8 +64,10 @@ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
->  	{ .compatible = "renesas,sdhi-sh73a0", .data = &sh_mobile_sdhi_of_cfg[0], },
->  	{ .compatible = "renesas,sdhi-r8a73a4", .data = &sh_mobile_sdhi_of_cfg[0], },
->  	{ .compatible = "renesas,sdhi-r8a7740", .data = &sh_mobile_sdhi_of_cfg[0], },
-> +	{ .compatible = "renesas,sdhi-rcar-gen1", .data = &of_rcar_gen1_compatible, },
->  	{ .compatible = "renesas,sdhi-r8a7778", .data = &of_rcar_gen1_compatible, },
->  	{ .compatible = "renesas,sdhi-r8a7779", .data = &of_rcar_gen1_compatible, },
-> +	{ .compatible = "renesas,sdhi-rcar-gen2", .data = &of_rcar_gen2_compatible, },
->  	{ .compatible = "renesas,sdhi-r8a7790", .data = &of_rcar_gen2_compatible, },
->  	{ .compatible = "renesas,sdhi-r8a7791", .data = &of_rcar_gen2_compatible, },
->  	{},
-> -- 
-> 1.7.9.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sh" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+> -	if (!err && host->sdio_irqs)
+> -		wake_up_process(host->sdio_irq_thread);
+> +	if (!err && host->sdio_irqs) {
+> +		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
+> +			wake_up_process(host->sdio_irq_thread);
+> +		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
+> +			mmc_release_host(host);
+> +			mmc_host_clk_hold(host);
+> +			host->ops->enable_sdio_irq(host, 1);
+> +			mmc_host_clk_release(host);
+> +			mmc_claim_host(host);
+> +		}
+> +	}
+> +
+>  	mmc_release_host(host);
+>  
+>  	host->pm_flags &= ~MMC_PM_KEEP_POWER;
+> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+> index 5cc13c8..696eca4 100644
+> --- a/drivers/mmc/core/sdio_irq.c
+> +++ b/drivers/mmc/core/sdio_irq.c
+> @@ -208,7 +208,7 @@ static int sdio_card_irq_get(struct mmc_card *card)
+>  				host->sdio_irqs--;
+>  				return err;
+>  			}
+> -		} else {
+> +		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
+>  			mmc_host_clk_hold(host);
+>  			host->ops->enable_sdio_irq(host, 1);
+>  			mmc_host_clk_release(host);
+> @@ -229,7 +229,7 @@ static int sdio_card_irq_put(struct mmc_card *card)
+>  		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
+>  			atomic_set(&host->sdio_irq_thread_abort, 1);
+>  			kthread_stop(host->sdio_irq_thread);
+> -		} else {
+> +		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
+>  			mmc_host_clk_hold(host);
+>  			host->ops->enable_sdio_irq(host, 0);
+>  			mmc_host_clk_release(host);
+> -- 1.7.1
+>
+>
+>
+>
+>
+>
+> On 2014/7/30 11:40, Jaehoon Chung wrote:
+>> Hi, Zhonghui.
+>>
+>> On 07/30/2014 11:47 AM, Fu, Zhonghui wrote:
+>>> Hi,
+>>>
+>>> In the resume function, SDIO irq must be enabled, or the interrupts from devices on SDIO bus can't be acknowledged. I also uploaded this new patch to https://bugzilla.kernel.org/show_bug.cgi?id=80151.
+>>> Could you please help to review it?
+>>>
+>>>
+>>>
+>>>
+>>> Thanks,
+>>> Zhonghui
+>>>
+>>> On 2014/7/24 23:27, Fu, Zhonghui wrote:
+>>>> Hi,
+>>>>
+>>>> Any comments for this new patch?
+>>>>
+>>>> Thanks,
+>>>> Zhonghui
+>>>> On 2014/7/20 22:51, Fu, Zhonghui wrote:
+>>>>> Hi,
+>>>>>
+>>>>> Chris' patch is not enough to fix this bug. I made a patch as follows and verified it can work.  Could you please give out some comments about this patch?
+>>>>>
+>>>>>
+>>>>> Thanks,
+>>>>> Zhonghui
+>>>>>
+>>>>> >From 72d6f5b56fa04290fd3a055a3333de1d89e7c8d4 Mon Sep 17 00:00:00 2001
+>>>>> From: Fu Zhonghui <zhonghui.fu@linux.intel.com>
+>>>>> Date: Sun, 20 Jul 2014 22:29:53 +0800
+>>>>> Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
+>>>>>
+>>>>> 781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
+>>>>> bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
+>>>>> the use of our own custom threaded IRQ handler, but left in an
+>>>>> unconditional wake_up_process() on that handler at resume-time.
+>>>>>
+>>>>> Signed-off-by: Fu Zhonghui <zhonghui.fu@linux.intel.com>
+>>>>> ---
+>>>>>  drivers/mmc/core/sdio.c |   14 ++++++++++++--
+>>>>>  1 files changed, 12 insertions(+), 2 deletions(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+>>>>> index e636d9e..8369e56 100644
+>>>>> --- a/drivers/mmc/core/sdio.c
+>>>>> +++ b/drivers/mmc/core/sdio.c
+>>>>> @@ -992,8 +992,18 @@ static int mmc_sdio_resume(struct mmc_host *host)
+>>>>>  		}
+>>>>>  	}
+>>>>>  
+>>>>> -	if (!err && host->sdio_irqs)
+>>>>> -		wake_up_process(host->sdio_irq_thread);
+>>>>> +	if (!err && host->sdio_irqs) {
+>>>>> +		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
+>>>>> +			wake_up_process(host->sdio_irq_thread);
+>>>>> +		} else {
+>>>>> +			mmc_release_host(host);
+>>>>> +			mmc_host_clk_hold(host);
+>>>>> +			host->ops->enable_sdio_irq(host, 1);
+>>>>> +			mmc_host_clk_release(host);
+>>>>> +			mmc_claim_host(host);
+>>>>> +		}
+>>>>> +	}
+>> If you enable the sdio_irq, I think it needs to check whether MMC_CAP_SDIO_IRQ is set or not.
+>>
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>>>> +
+>>>>>  	mmc_release_host(host);
+>>>>>  
+>>>>>  	host->pm_flags &= ~MMC_PM_KEEP_POWER;
+>>>>> -- 1.7.1
+>>>>>
+>>>>>
+>>>>>
+>>>>> On 2014/7/15 12:40, Jaehoon Chung wrote:
+>>>>>> From: Chris Ball <chris@printf.net>
+>>>>>> Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
+>>>>>>
+>>>>>> 781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
+>>>>>> bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
+>>>>>> the use of our own custom threaded IRQ handler, but left in an
+>>>>>> unconditional wake_up_process() on that handler at resume-time.
+>>>>>>
+>>>>>> Reported-by: Fu, Zhonghui <zhonghui.fu@linux.intel.com>
+>>>>>> [Patch suggested by Jaehoon Chung]
+>>>>>> Signed-off-by: Chris Ball <chris@printf.net>
+>>>>>> ---
+>>>>>>  drivers/mmc/core/sdio.c |    3 ++-
+>>>>>>  1 file changed, 2 insertions(+), 1 deletion(-)
+>>>>>>
+>>>>>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+>>>>>> index e636d9e..11cc4e0 100644
+>>>>>> --- a/drivers/mmc/core/sdio.c
+>>>>>> +++ b/drivers/mmc/core/sdio.c
+>>>>>> @@ -992,7 +992,8 @@ static int mmc_sdio_resume(struct mmc_host *host)
+>>>>>>  		}
+>>>>>>  	}
+>>>>>>  
+>>>>>> -	if (!err && host->sdio_irqs)
+>>>>>> +	if (!err && host->sdio_irqs &&
+>>>>>> +			!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD))
+>>>>>>  		wake_up_process(host->sdio_irq_thread);
+>>>>>>  	mmc_release_host(host);
+>>>>>>  
+>>>>> --
+>>>>> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+>>>>> the body of a message to majordomo@vger.kernel.org
+>>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>>> Please read the FAQ at  http://www.tux.org/lkml/
+>>>> --
+>>>> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+>>>> the body of a message to majordomo@vger.kernel.org
+>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>> Please read the FAQ at  http://www.tux.org/lkml/
+
