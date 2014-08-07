@@ -1,216 +1,153 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: change to use recommended reset procedure
-Date: Thu, 07 Aug 2014 17:40:55 +0900
-Message-ID: <53E33B97.90602@samsung.com>
-References: <CAPDyKFq2isO+DKMuLT9Ud8B9reFZiVYKG6LL8ysF0ZTNGfY8Nw@mail.gmail.com>
- <1407201590-26740-1-git-send-email-sonnyrao@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: add support for RK3288
+Date: Thu, 07 Aug 2014 17:47:38 +0900
+Message-ID: <53E33D2A.7030109@samsung.com>
+References: <1404963109-3906-1-git-send-email-addy.ke@rock-chips.com>
+ <1406786498-3935-1-git-send-email-addy.ke@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <1407201590-26740-1-git-send-email-sonnyrao@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sonny Rao <sonnyrao@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: dianders@chromium.org, Stephen Rothwell <sfr@canb.auug.org.au>, linux-samsung-soc@vger.kernel.org, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, grundler@chromium.org, t.figa@samsung.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, joshi@samsung.com, jh80.chung@samsung.com, tgih.jun@samsung.com, linux-next@vger.kernel.org, kgene.kim@samsung.com, cjb@laptop.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-reply-to: <1406786498-3935-1-git-send-email-addy.ke@rock-chips.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Addy Ke <addy.ke@rock-chips.com>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org
+Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
-
-Hi, 
-
-I remembered that this patch was pushed at Ulf's tree.
-
-Since dw_mci_idmac_reset() is located into #if CONFIG_MMC_DW_IDMAC,
-it occurred the compiler error.
-And it seems that didn't need to use "IS_ENABLED()" at there.
 
 Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
 Best Regards,
 Jaehoon Chung
 
-On 08/05/2014 10:19 AM, Sonny Rao wrote:
-> This patch changes the fifo reset code to follow the reset procedure
-> outlined in the documentation of Synopsys Mobile storage host databook.
+On 07/31/2014 03:01 PM, Addy Ke wrote:
+> This patch focuses on clock setting for RK3288 mmc controller.
 > 
-> Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
-> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> [sonnyrao: fix compile for !CONFIG_MMC_DW_IDMAC case]
+> In RK3288 mmc controller, CLKDIV register can only be set 0 or 1,
+> and if DDR 8bit mode, CLKDIV register must be set 1.
+> 
+> Reported-by Doug Anderson <dianders@chromium.org>
+> Suggested-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Suggested-by: Doug Anderson <dianders@chromium.org>
+> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
 > ---
->  drivers/mmc/host/dw_mmc.c | 87 ++++++++++++++++++++++++++++++++++-------------
->  drivers/mmc/host/dw_mmc.h |  5 +++
->  2 files changed, 69 insertions(+), 23 deletions(-)
+> changes since v1:
+> - dw_mci_rk3288_setup_clock: do not call clk_get_rate(), just use the
+>   host->bus_hz which is already called by dw_mmc.c, suggested by Jaehoon Chung
 > 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 1ac227c..39cf54f 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -111,8 +111,7 @@ static const u8 tuning_blk_pattern_8bit[] = {
->  	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
+> changes since v2:
+> - merge from ChromiumOS tree, fix up clock settting bug, 
+>   which cause DDR50 mode for emmc not to work, reported by Doug Anderson
+> - remove MMC_TIMING_UHS_DDR50 condition, because on RK3288 only emmc can work
+>   in 8bit mode, suggested by Doug Anderson
+> 
+>  .../devicetree/bindings/mmc/rockchip-dw-mshc.txt   |  6 ++-
+>  drivers/mmc/host/dw_mmc-pltfm.c                    | 56 +++++++++++++++++++++-
+>  2 files changed, 58 insertions(+), 4 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> index c559f3f..c327c2d 100644
+> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> @@ -10,12 +10,14 @@ extensions to the Synopsys Designware Mobile Storage Host Controller.
+>  Required Properties:
+>  
+>  * compatible: should be
+> -	- "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following
+> +	- "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following,
+> +							before RK3288
+> +	- "rockchip,rk3288-dw-mshc": for Rockchip RK3288
+>  
+>  Example:
+>  
+>  	rkdwmmc0@12200000 {
+> -		compatible = "rockchip,rk2928-dw-mshc";
+> +		compatible = "rockchip,rk3288-dw-mshc";
+>  		reg = <0x12200000 0x1000>;
+>  		interrupts = <0 75 0>;
+>  		#address-cells = <1>;
+> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+> index d4a47a9..b547f7a 100644
+> --- a/drivers/mmc/host/dw_mmc-pltfm.c
+> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+> @@ -21,17 +21,67 @@
+>  #include <linux/mmc/mmc.h>
+>  #include <linux/mmc/dw_mmc.h>
+>  #include <linux/of.h>
+> +#include <linux/clk.h>
+>  
+>  #include "dw_mmc.h"
+>  #include "dw_mmc-pltfm.h"
+>  
+> +#define RK3288_CLKGEN_DIV	2
+> +
+>  static void dw_mci_pltfm_prepare_command(struct dw_mci *host, u32 *cmdr)
+>  {
+>  	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
+>  }
+>  
+> -static const struct dw_mci_drv_data rockchip_drv_data = {
+> +static int dw_mci_rk3288_setup_clock(struct dw_mci *host)
+> +{
+> +	host->bus_hz /= RK3288_CLKGEN_DIV;
+> +
+> +	return 0;
+> +}
+> +
+> +static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+> +{
+> +	int ret;
+> +	unsigned int cclkin;
+> +	u32 bus_hz;
+> +
+> +	/*
+> +	 * cclkin: source clock of mmc controller.
+> +	 * bus_hz: card interface clock generated by CLKGEN.
+> +	 * bus_hz = cclkin / RK3288_CLKGEN_DIV;
+> +	 * ios->clock = (div == 0) ? bus_hz : (bus_hz / (2 * div))
+> +	 *
+> +	 * Note: div can only be 0 or 1
+> +	 *       if DDR50 8bit mode(only emmc work in 8bit mode),
+> +	 *       div must be set 1
+> +	 */
+> +	if ((ios->bus_width == MMC_BUS_WIDTH_8) &&
+> +	    (ios->timing == MMC_TIMING_MMC_DDR52))
+> +		cclkin = 2 * ios->clock * RK3288_CLKGEN_DIV;
+> +	else
+> +		cclkin = ios->clock * RK3288_CLKGEN_DIV;
+> +
+> +	ret = clk_set_rate(host->ciu_clk, cclkin);
+> +	if (ret)
+> +		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
+> +
+> +	bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
+> +	if (bus_hz != host->bus_hz) {
+> +		host->bus_hz = bus_hz;
+> +		/* force dw_mci_setup_bus() */
+> +		host->current_speed = 0;
+> +	}
+> +}
+> +
+> +static const struct dw_mci_drv_data rk2928_drv_data = {
+> +	.prepare_command	= dw_mci_pltfm_prepare_command,
+> +};
+> +
+> +static const struct dw_mci_drv_data rk3288_drv_data = {
+>  	.prepare_command	= dw_mci_pltfm_prepare_command,
+> +	.set_ios	= dw_mci_rk3288_set_ios,
+> +	.setup_clock	= dw_mci_rk3288_setup_clock,
 >  };
 >  
-> -static inline bool dw_mci_fifo_reset(struct dw_mci *host);
-> -static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host);
-> +static bool dw_mci_reset(struct dw_mci *host);
->  
->  #if defined(CONFIG_DEBUG_FS)
->  static int dw_mci_req_show(struct seq_file *s, void *v)
-> @@ -1235,7 +1234,7 @@ static int dw_mci_data_complete(struct dw_mci *host, struct mmc_data *data)
->  		 * After an error, there may be data lingering
->  		 * in the FIFO
->  		 */
-> -		dw_mci_fifo_reset(host);
-> +		dw_mci_reset(host);
->  	} else {
->  		data->bytes_xfered = data->blocks * data->blksz;
->  		data->error = 0;
-> @@ -1352,7 +1351,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
->  
->  			/* CMD error in data command */
->  			if (mrq->cmd->error && mrq->data)
-> -				dw_mci_fifo_reset(host);
-> +				dw_mci_reset(host);
->  
->  			host->cmd = NULL;
->  			host->data = NULL;
-> @@ -1963,14 +1962,8 @@ static void dw_mci_work_routine_card(struct work_struct *work)
->  			}
->  
->  			/* Power down slot */
-> -			if (present == 0) {
-> -				/* Clear down the FIFO */
-> -				dw_mci_fifo_reset(host);
-> -#ifdef CONFIG_MMC_DW_IDMAC
-> -				dw_mci_idmac_reset(host);
-> -#endif
-> -
-> -			}
-> +			if (present == 0)
-> +				dw_mci_reset(host);
->  
->  			spin_unlock_bh(&host->lock);
->  
-> @@ -2208,8 +2201,11 @@ static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset)
->  	return false;
->  }
->  
-> -static inline bool dw_mci_fifo_reset(struct dw_mci *host)
-> +static bool dw_mci_reset(struct dw_mci *host)
->  {
-> +	u32 flags = SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET;
-> +	bool ret = false;
-> +
->  	/*
->  	 * Reseting generates a block interrupt, hence setting
->  	 * the scatter-gather pointer to NULL.
-> @@ -2219,15 +2215,60 @@ static inline bool dw_mci_fifo_reset(struct dw_mci *host)
->  		host->sg = NULL;
->  	}
->  
-> -	return dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET);
-> -}
-> +	if (host->use_dma)
-> +		flags |= SDMMC_CTRL_DMA_RESET;
->  
-> -static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host)
-> -{
-> -	return dw_mci_ctrl_reset(host,
-> -				 SDMMC_CTRL_FIFO_RESET |
-> -				 SDMMC_CTRL_RESET |
-> -				 SDMMC_CTRL_DMA_RESET);
-> +	if (dw_mci_ctrl_reset(host, flags)) {
-> +		/*
-> +		 * In all cases we clear the RAWINTS register to clear any
-> +		 * interrupts.
-> +		 */
-> +		mci_writel(host, RINTSTS, 0xFFFFFFFF);
-> +
-> +		/* if using dma we wait for dma_req to clear */
-> +		if (host->use_dma) {
-> +			unsigned long timeout = jiffies + msecs_to_jiffies(500);
-> +			u32 status;
-> +			do {
-> +				status = mci_readl(host, STATUS);
-> +				if (!(status & SDMMC_STATUS_DMA_REQ))
-> +					break;
-> +				cpu_relax();
-> +			} while (time_before(jiffies, timeout));
-> +
-> +			if (status & SDMMC_STATUS_DMA_REQ) {
-> +				dev_err(host->dev,
-> +					"%s: Timeout waiting for dma_req to "
-> +					"clear during reset\n", __func__);
-> +				goto ciu_out;
-> +			}
-> +
-> +			/* when using DMA next we reset the fifo again */
-> +			if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET))
-> +				goto ciu_out;
-> +		}
-> +	} else {
-> +		/* if the controller reset bit did clear, then set clock regs */
-> +		if (!(mci_readl(host, CTRL) & SDMMC_CTRL_RESET)) {
-> +			dev_err(host->dev, "%s: fifo/dma reset bits didn't "
-> +				"clear but ciu was reset, doing clock update\n",
-> +				__func__);
-> +			goto ciu_out;
-> +		}
-> +	}
-> +
-> +#if IS_ENABLED(CONFIG_MMC_DW_IDMAC)
-> +	/* It is also recommended that we reset and reprogram idmac */
-> +	dw_mci_idmac_reset(host);
-> +#endif
-> +
-> +	ret = true;
-> +
-> +ciu_out:
-> +	/* After a CTRL reset we need to have CIU set clock registers  */
-> +	mci_send_cmd(host->cur_slot, SDMMC_CMD_UPD_CLK, 0);
-> +
-> +	return ret;
->  }
->  
->  #ifdef CONFIG_OF
-> @@ -2425,7 +2466,7 @@ int dw_mci_probe(struct dw_mci *host)
->  	}
->  
->  	/* Reset all blocks */
-> -	if (!dw_mci_ctrl_all_reset(host))
-> +	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS))
->  		return -ENODEV;
->  
->  	host->dma_ops = host->pdata->dma_ops;
-> @@ -2612,7 +2653,7 @@ int dw_mci_resume(struct dw_mci *host)
->  		}
->  	}
->  
-> -	if (!dw_mci_ctrl_all_reset(host)) {
-> +	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
->  		ret = -ENODEV;
->  		return ret;
->  	}
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 738fa24..08fd956 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -129,6 +129,7 @@
->  #define SDMMC_CMD_INDX(n)		((n) & 0x1F)
->  /* Status register defines */
->  #define SDMMC_GET_FCNT(x)		(((x)>>17) & 0x1FFF)
-> +#define SDMMC_STATUS_DMA_REQ		BIT(31)
->  /* FIFOTH register defines */
->  #define SDMMC_SET_FIFOTH(m, r, t)	(((m) & 0x7) << 28 | \
->  					 ((r) & 0xFFF) << 16 | \
-> @@ -150,6 +151,10 @@
->  /* Card read threshold */
->  #define SDMMC_SET_RD_THLD(v, x)		(((v) & 0x1FFF) << 16 | (x))
->  
-> +/* All ctrl reset bits */
-> +#define SDMMC_CTRL_ALL_RESET_FLAGS \
-> +	(SDMMC_CTRL_RESET | SDMMC_CTRL_FIFO_RESET | SDMMC_CTRL_DMA_RESET)
-> +
->  /* Register access macros */
->  #define mci_readl(dev, reg)			\
->  	__raw_readl((dev)->regs + SDMMC_##reg)
+>  static const struct dw_mci_drv_data socfpga_drv_data = {
+> @@ -95,7 +145,9 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
+>  static const struct of_device_id dw_mci_pltfm_match[] = {
+>  	{ .compatible = "snps,dw-mshc", },
+>  	{ .compatible = "rockchip,rk2928-dw-mshc",
+> -		.data = &rockchip_drv_data },
+> +		.data = &rk2928_drv_data },
+> +	{ .compatible = "rockchip,rk3288-dw-mshc",
+> +		.data = &rk3288_drv_data },
+>  	{ .compatible = "altr,socfpga-dw-mshc",
+>  		.data = &socfpga_drv_data },
+>  	{},
 > 
+
