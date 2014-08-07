@@ -1,153 +1,66 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: add support for RK3288
-Date: Thu, 07 Aug 2014 17:47:38 +0900
-Message-ID: <53E33D2A.7030109@samsung.com>
-References: <1404963109-3906-1-git-send-email-addy.ke@rock-chips.com>
- <1406786498-3935-1-git-send-email-addy.ke@rock-chips.com>
+From: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
+Subject: Re: Sandisk MMC I/O errors
+Date: Thu, 7 Aug 2014 10:54:31 +0200
+Message-ID: <CAL8zT=jRJy83oNKd97m=Trx991jL-wGuq4mLgUi3cS6eCcnp_A@mail.gmail.com>
+References: <CAL8zT=iinDtm3_77jSDWG1RSjN5CgEtAgPjA_ju3-=ZS2Qco8A@mail.gmail.com>
+ <CAOMZO5B36yQx-renFLaPDSY12kmPuPGVOkXT3nJKb2gRhdTdPQ@mail.gmail.com>
+ <CAL8zT=jmbvaDpj+Dhww90ah6gzNRGWkgNwWt_xTVfcygxa0Ocw@mail.gmail.com>
+ <CAL8zT=itTv9Uy4HreJQdttwhn29sKcNGc6ccynCNcScrFeWYig@mail.gmail.com>
+ <CAOMZO5Dbmk3kxwn__o+fB0Wwumq5f+4tvu0m0x3aqOAZC-GWTQ@mail.gmail.com>
+ <CAL8zT=iRtmKZyHNYR+-c0KuOaN06Tg60QiWwePvz+auWhpRtPw@mail.gmail.com>
+ <CAC1bqKgct-Hq3+9PZ-6p79qSjf=UNhpLWykJ_e0=1ThGoMPpkg@mail.gmail.com>
+ <CAL8zT=gS1rwFU1eUcYNpKmygpnmTDXeQRtg6Uxr9FVXRJ6PmeA@mail.gmail.com>
+ <53E21515.3060807@samsung.com> <CAL8zT=hcYUUnP1PXYu_9+JUTx=sqBAQkiY1g7K+=TbLSx4J8-g@mail.gmail.com>
+ <CAOMZO5CV7yTT5K4S7L+UcO_No2rRsPGWTqmSh79mQmoL2QKsYg@mail.gmail.com>
+ <CAL8zT=h6qxPrnXeys0P48hUxsc21MfO_wWNC-g9UrLB-3YZ=Mg@mail.gmail.com>
+ <CAL8zT=iaKfEW32vq5_5yXxuMEAzS8=GsJhUR16TH4bQcK9DgpQ@mail.gmail.com>
+ <CAL8zT=giMNWG+xwhcR_N8GbCCPEeucaNDG0QQfOos0v3RcwC6Q@mail.gmail.com>
+ <53E32FE4.8060401@samsung.com> <CAL8zT=jjx0XOvtSTR14FA9=TqnD9X3imZRo1xBVykqacwKJSEw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-reply-to: <1406786498-3935-1-git-send-email-addy.ke@rock-chips.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Addy Ke <addy.ke@rock-chips.com>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org
-Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:58126 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757435AbaHGIyr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Aug 2014 04:54:47 -0400
+Received: by mail-ob0-f174.google.com with SMTP id vb8so2720428obc.33
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Aug 2014 01:54:46 -0700 (PDT)
+In-Reply-To: <CAL8zT=jjx0XOvtSTR14FA9=TqnD9X3imZRo1xBVykqacwKJSEw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Fabio Estevam <festevam@gmail.com>, Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+2014-08-07 9:54 GMT+02:00 Jean-Michel Hautbois
+<jean-michel.hautbois@vodalys.com>:
+>>> OK, I juste tested to get back on part of the commit
+>>> 79f7ae7c45a6ccf04e2908337461dee615f6afb0 :
+>>>
+>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>>> index 1ab5f3a..e22d851 100644
+>>> --- a/drivers/mmc/core/mmc.c
+>>> +++ b/drivers/mmc/core/mmc.c
+>>> @@ -1264,7 +1264,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>>>                                         goto err;
+>>>                         }
+>>>                         mmc_card_set_ddr_mode(card);
+>>> -                       mmc_set_timing(card->host, MMC_TIMING_UHS_DDR50);
+>>> +                       mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
+>>>                         mmc_set_bus_width(card->host, bus_width);
+>>>                 }
+>>>         }
+>>>
+>>>
+>>> I just did the inverse, that means using MMC_TIMING_UHS_DDR50 and not
+>>> MMC_TIMING_MMC_DDR52 and I don't have any errors now.
+>>
+>> Is your card eMMC or SD(T-flash)? Which card do you use?
+>> Did you check dt-file?
+>
+> The card is Sandisk SDIN5D1-2G which is a iNAND.
+> What should I check in DT ?
 
-Best Regards,
-Jaehoon Chung
+I have written too quickly, still have same problem from time to time...
+I don't have a clue, so if anybody has, I am interested...
 
-On 07/31/2014 03:01 PM, Addy Ke wrote:
-> This patch focuses on clock setting for RK3288 mmc controller.
-> 
-> In RK3288 mmc controller, CLKDIV register can only be set 0 or 1,
-> and if DDR 8bit mode, CLKDIV register must be set 1.
-> 
-> Reported-by Doug Anderson <dianders@chromium.org>
-> Suggested-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Suggested-by: Doug Anderson <dianders@chromium.org>
-> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
-> ---
-> changes since v1:
-> - dw_mci_rk3288_setup_clock: do not call clk_get_rate(), just use the
->   host->bus_hz which is already called by dw_mmc.c, suggested by Jaehoon Chung
-> 
-> changes since v2:
-> - merge from ChromiumOS tree, fix up clock settting bug, 
->   which cause DDR50 mode for emmc not to work, reported by Doug Anderson
-> - remove MMC_TIMING_UHS_DDR50 condition, because on RK3288 only emmc can work
->   in 8bit mode, suggested by Doug Anderson
-> 
->  .../devicetree/bindings/mmc/rockchip-dw-mshc.txt   |  6 ++-
->  drivers/mmc/host/dw_mmc-pltfm.c                    | 56 +++++++++++++++++++++-
->  2 files changed, 58 insertions(+), 4 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-> index c559f3f..c327c2d 100644
-> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-> @@ -10,12 +10,14 @@ extensions to the Synopsys Designware Mobile Storage Host Controller.
->  Required Properties:
->  
->  * compatible: should be
-> -	- "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following
-> +	- "rockchip,rk2928-dw-mshc": for Rockchip RK2928 and following,
-> +							before RK3288
-> +	- "rockchip,rk3288-dw-mshc": for Rockchip RK3288
->  
->  Example:
->  
->  	rkdwmmc0@12200000 {
-> -		compatible = "rockchip,rk2928-dw-mshc";
-> +		compatible = "rockchip,rk3288-dw-mshc";
->  		reg = <0x12200000 0x1000>;
->  		interrupts = <0 75 0>;
->  		#address-cells = <1>;
-> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-> index d4a47a9..b547f7a 100644
-> --- a/drivers/mmc/host/dw_mmc-pltfm.c
-> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-> @@ -21,17 +21,67 @@
->  #include <linux/mmc/mmc.h>
->  #include <linux/mmc/dw_mmc.h>
->  #include <linux/of.h>
-> +#include <linux/clk.h>
->  
->  #include "dw_mmc.h"
->  #include "dw_mmc-pltfm.h"
->  
-> +#define RK3288_CLKGEN_DIV	2
-> +
->  static void dw_mci_pltfm_prepare_command(struct dw_mci *host, u32 *cmdr)
->  {
->  	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
->  }
->  
-> -static const struct dw_mci_drv_data rockchip_drv_data = {
-> +static int dw_mci_rk3288_setup_clock(struct dw_mci *host)
-> +{
-> +	host->bus_hz /= RK3288_CLKGEN_DIV;
-> +
-> +	return 0;
-> +}
-> +
-> +static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-> +{
-> +	int ret;
-> +	unsigned int cclkin;
-> +	u32 bus_hz;
-> +
-> +	/*
-> +	 * cclkin: source clock of mmc controller.
-> +	 * bus_hz: card interface clock generated by CLKGEN.
-> +	 * bus_hz = cclkin / RK3288_CLKGEN_DIV;
-> +	 * ios->clock = (div == 0) ? bus_hz : (bus_hz / (2 * div))
-> +	 *
-> +	 * Note: div can only be 0 or 1
-> +	 *       if DDR50 8bit mode(only emmc work in 8bit mode),
-> +	 *       div must be set 1
-> +	 */
-> +	if ((ios->bus_width == MMC_BUS_WIDTH_8) &&
-> +	    (ios->timing == MMC_TIMING_MMC_DDR52))
-> +		cclkin = 2 * ios->clock * RK3288_CLKGEN_DIV;
-> +	else
-> +		cclkin = ios->clock * RK3288_CLKGEN_DIV;
-> +
-> +	ret = clk_set_rate(host->ciu_clk, cclkin);
-> +	if (ret)
-> +		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
-> +
-> +	bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
-> +	if (bus_hz != host->bus_hz) {
-> +		host->bus_hz = bus_hz;
-> +		/* force dw_mci_setup_bus() */
-> +		host->current_speed = 0;
-> +	}
-> +}
-> +
-> +static const struct dw_mci_drv_data rk2928_drv_data = {
-> +	.prepare_command	= dw_mci_pltfm_prepare_command,
-> +};
-> +
-> +static const struct dw_mci_drv_data rk3288_drv_data = {
->  	.prepare_command	= dw_mci_pltfm_prepare_command,
-> +	.set_ios	= dw_mci_rk3288_set_ios,
-> +	.setup_clock	= dw_mci_rk3288_setup_clock,
->  };
->  
->  static const struct dw_mci_drv_data socfpga_drv_data = {
-> @@ -95,7 +145,9 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
->  static const struct of_device_id dw_mci_pltfm_match[] = {
->  	{ .compatible = "snps,dw-mshc", },
->  	{ .compatible = "rockchip,rk2928-dw-mshc",
-> -		.data = &rockchip_drv_data },
-> +		.data = &rk2928_drv_data },
-> +	{ .compatible = "rockchip,rk3288-dw-mshc",
-> +		.data = &rk3288_drv_data },
->  	{ .compatible = "altr,socfpga-dw-mshc",
->  		.data = &socfpga_drv_data },
->  	{},
-> 
-
+JM
