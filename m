@@ -1,232 +1,77 @@
-From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
-Subject: Re: One bug of SDHCI driver
-Date: Thu, 07 Aug 2014 14:58:15 +0800
-Message-ID: <53E32387.20801@linux.intel.com>
-References: <53B249A4.2040404@linux.intel.com> <53B57B23.4020607@linux.intel.com> <53B61403.7040602@samsung.com> <53B968EB.60401@linux.intel.com> <53BC164E.4040900@linux.intel.com> <86zjgcjckz.fsf@void.printf.net> <53C497FD.2070000@linux.intel.com> <53C4AAB5.4070700@samsung.com> <53C4B0CA.1020504@samsung.com> <53CBD775.9000304@linux.intel.com> <53D125D6.3020203@linux.intel.com> <53D85CBF.3070409@linux.intel.com> <53D8691B.8080904@samsung.com> <53E0640D.2030709@linux.intel.com>
+From: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
+Subject: Re: Sandisk MMC I/O errors
+Date: Thu, 7 Aug 2014 08:59:55 +0200
+Message-ID: <CAL8zT=iaKfEW32vq5_5yXxuMEAzS8=GsJhUR16TH4bQcK9DgpQ@mail.gmail.com>
+References: <CAL8zT=iinDtm3_77jSDWG1RSjN5CgEtAgPjA_ju3-=ZS2Qco8A@mail.gmail.com>
+ <CAOMZO5ABt9kwxdfk-tKMTc76jY==fJtPd7AoPZoGvHvSDM6xXg@mail.gmail.com>
+ <CAL8zT=iKKqQeOJk+X4tExA4nSatNHK2VagoaC2Ar+oKjjbWahA@mail.gmail.com>
+ <CAOMZO5B36yQx-renFLaPDSY12kmPuPGVOkXT3nJKb2gRhdTdPQ@mail.gmail.com>
+ <CAL8zT=jmbvaDpj+Dhww90ah6gzNRGWkgNwWt_xTVfcygxa0Ocw@mail.gmail.com>
+ <CAL8zT=itTv9Uy4HreJQdttwhn29sKcNGc6ccynCNcScrFeWYig@mail.gmail.com>
+ <CAOMZO5Dbmk3kxwn__o+fB0Wwumq5f+4tvu0m0x3aqOAZC-GWTQ@mail.gmail.com>
+ <CAL8zT=iRtmKZyHNYR+-c0KuOaN06Tg60QiWwePvz+auWhpRtPw@mail.gmail.com>
+ <CAC1bqKgct-Hq3+9PZ-6p79qSjf=UNhpLWykJ_e0=1ThGoMPpkg@mail.gmail.com>
+ <CAL8zT=gS1rwFU1eUcYNpKmygpnmTDXeQRtg6Uxr9FVXRJ6PmeA@mail.gmail.com>
+ <53E21515.3060807@samsung.com> <CAL8zT=hcYUUnP1PXYu_9+JUTx=sqBAQkiY1g7K+=TbLSx4J8-g@mail.gmail.com>
+ <CAOMZO5CV7yTT5K4S7L+UcO_No2rRsPGWTqmSh79mQmoL2QKsYg@mail.gmail.com> <CAL8zT=h6qxPrnXeys0P48hUxsc21MfO_wWNC-g9UrLB-3YZ=Mg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:58087 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753727AbaHGG6U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 7 Aug 2014 02:58:20 -0400
-In-Reply-To: <53E0640D.2030709@linux.intel.com>
+Received: from mail-oa0-f45.google.com ([209.85.219.45]:59706 "EHLO
+	mail-oa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751400AbaHGHAL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Aug 2014 03:00:11 -0400
+Received: by mail-oa0-f45.google.com with SMTP id i7so2692458oag.18
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Aug 2014 00:00:10 -0700 (PDT)
+In-Reply-To: <CAL8zT=h6qxPrnXeys0P48hUxsc21MfO_wWNC-g9UrLB-3YZ=Mg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>
-Cc: ulf.hansson@linaro.org, tgih.jun@samsung.com, aaron.lu@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, jackey.shen@amd.com, gregkh@linuxfoundation.org
+To: Fabio Estevam <festevam@gmail.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
+2014-08-06 16:21 GMT+02:00 Jean-Michel Hautbois
+<jean-michel.hautbois@vodalys.com>:
+> 2014-08-06 15:37 GMT+02:00 Fabio Estevam <festevam@gmail.com>:
+>> On Wed, Aug 6, 2014 at 10:27 AM, Jean-Michel Hautbois
+>> <jean-michel.hautbois@vodalys.com> wrote:
+>>> 2014-08-06 13:44 GMT+02:00 Jaehoon Chung <jh80.chung@samsung.com>:
+>>>> Hi,
+>>>
+>>> Hi Jaehoon,
+>>>
+>>>> In my case, -84 error is related with timing.
+>>>> I recommend to check your clock source or pin strength.
 
-kindly reminder.
+I have dumped /sys/kernel/debug/mmc1/ios in both kernel releases.
+
+In the current kernel (3.16) :
+$> cat /sys/kernel/debug/mmc1/ios
+clock:          52000000 Hz
+actual clock:   49500000 Hz
+vdd:            21 (3.3 ~ 3.4 V)
+bus mode:       2 (push-pull)
+chip select:    0 (don't care)
+power mode:     2 (on)
+bus width:      3 (8 bits)
+timing spec:    8 (mmc DDR52)
+signal voltage: 0 (3.30 V)
+
+In the Freescale kernel (3.10.17) :
+$> cat /sys/kernel/debug/mmc1/ios
+clock:          52000000 Hz
+actual clock:   49500000 Hz
+vdd:            7 (1.65 - 1.95 V)
+bus mode:       2 (push-pull)
+chip select:    0 (don't care)
+power mode:     2 (on)
+bus width:      3 (8 bits)
+timing spec:    7 (sd uhs DDR50)
+signal voltage: 0 (3.30 V)
+
+As you can see, there is at least too differences : VDD is not the
+same I don't know why yet, and neither is timing spec. This seems to
+be the real cause...
+Investigating now, but any advice is interesting ! :)
 
 Thanks,
-Zhonghui
-
-On 2014/8/5 12:56, Fu, Zhonghui wrote:
-> Hi, Jaehoon
->
-> According to your comments, I created a new patch for this issue as follows:
->
->
-> Thanks,
-> Zhonghui
->
->
-> From 6cee984e1d76ba0a3320430f8cf4318ab65fcf06 Mon Sep 17 00:00:00 2001
-> From: Fu Zhonghui <zhonghui.fu@linux.intel.com>
-> Date: Tue, 5 Aug 2014 12:44:38 +0800
-> Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
->
-> 781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
-> bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
-> the use of our own custom threaded IRQ handler, but left in an
-> unconditional wake_up_process() on that handler at resume-time.
-> Link: https://bugzilla.kernel.org/show_bug.cgi?id=80151
->
-> In addition, the check for MMC_CAP_SDIO_IRQ capability is added
-> before enable sdio IRQ.
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Chris Ball <chris@printf.net>
-> Signed-off-by: Fu Zhonghui <zhonghui.fu@linux.intel.com>
-> ---
->  drivers/mmc/core/sdio.c     |   14 ++++++++++++--
->  drivers/mmc/core/sdio_irq.c |    4 ++--
->  2 files changed, 14 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index e636d9e..e04a540 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -992,8 +992,18 @@ static int mmc_sdio_resume(struct mmc_host *host)
->  		}
->  	}
->  
-> -	if (!err && host->sdio_irqs)
-> -		wake_up_process(host->sdio_irq_thread);
-> +	if (!err && host->sdio_irqs) {
-> +		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
-> +			wake_up_process(host->sdio_irq_thread);
-> +		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
-> +			mmc_release_host(host);
-> +			mmc_host_clk_hold(host);
-> +			host->ops->enable_sdio_irq(host, 1);
-> +			mmc_host_clk_release(host);
-> +			mmc_claim_host(host);
-> +		}
-> +	}
-> +
->  	mmc_release_host(host);
->  
->  	host->pm_flags &= ~MMC_PM_KEEP_POWER;
-> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-> index 5cc13c8..696eca4 100644
-> --- a/drivers/mmc/core/sdio_irq.c
-> +++ b/drivers/mmc/core/sdio_irq.c
-> @@ -208,7 +208,7 @@ static int sdio_card_irq_get(struct mmc_card *card)
->  				host->sdio_irqs--;
->  				return err;
->  			}
-> -		} else {
-> +		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
->  			mmc_host_clk_hold(host);
->  			host->ops->enable_sdio_irq(host, 1);
->  			mmc_host_clk_release(host);
-> @@ -229,7 +229,7 @@ static int sdio_card_irq_put(struct mmc_card *card)
->  		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
->  			atomic_set(&host->sdio_irq_thread_abort, 1);
->  			kthread_stop(host->sdio_irq_thread);
-> -		} else {
-> +		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
->  			mmc_host_clk_hold(host);
->  			host->ops->enable_sdio_irq(host, 0);
->  			mmc_host_clk_release(host);
-> -- 1.7.1
->
->
->
->
->
->
-> On 2014/7/30 11:40, Jaehoon Chung wrote:
->> Hi, Zhonghui.
->>
->> On 07/30/2014 11:47 AM, Fu, Zhonghui wrote:
->>> Hi,
->>>
->>> In the resume function, SDIO irq must be enabled, or the interrupts from devices on SDIO bus can't be acknowledged. I also uploaded this new patch to https://bugzilla.kernel.org/show_bug.cgi?id=80151.
->>> Could you please help to review it?
->>>
->>>
->>>
->>>
->>> Thanks,
->>> Zhonghui
->>>
->>> On 2014/7/24 23:27, Fu, Zhonghui wrote:
->>>> Hi,
->>>>
->>>> Any comments for this new patch?
->>>>
->>>> Thanks,
->>>> Zhonghui
->>>> On 2014/7/20 22:51, Fu, Zhonghui wrote:
->>>>> Hi,
->>>>>
->>>>> Chris' patch is not enough to fix this bug. I made a patch as follows and verified it can work.  Could you please give out some comments about this patch?
->>>>>
->>>>>
->>>>> Thanks,
->>>>> Zhonghui
->>>>>
->>>>> >From 72d6f5b56fa04290fd3a055a3333de1d89e7c8d4 Mon Sep 17 00:00:00 2001
->>>>> From: Fu Zhonghui <zhonghui.fu@linux.intel.com>
->>>>> Date: Sun, 20 Jul 2014 22:29:53 +0800
->>>>> Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
->>>>>
->>>>> 781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
->>>>> bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
->>>>> the use of our own custom threaded IRQ handler, but left in an
->>>>> unconditional wake_up_process() on that handler at resume-time.
->>>>>
->>>>> Signed-off-by: Fu Zhonghui <zhonghui.fu@linux.intel.com>
->>>>> ---
->>>>>  drivers/mmc/core/sdio.c |   14 ++++++++++++--
->>>>>  1 files changed, 12 insertions(+), 2 deletions(-)
->>>>>
->>>>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
->>>>> index e636d9e..8369e56 100644
->>>>> --- a/drivers/mmc/core/sdio.c
->>>>> +++ b/drivers/mmc/core/sdio.c
->>>>> @@ -992,8 +992,18 @@ static int mmc_sdio_resume(struct mmc_host *host)
->>>>>  		}
->>>>>  	}
->>>>>  
->>>>> -	if (!err && host->sdio_irqs)
->>>>> -		wake_up_process(host->sdio_irq_thread);
->>>>> +	if (!err && host->sdio_irqs) {
->>>>> +		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
->>>>> +			wake_up_process(host->sdio_irq_thread);
->>>>> +		} else {
->>>>> +			mmc_release_host(host);
->>>>> +			mmc_host_clk_hold(host);
->>>>> +			host->ops->enable_sdio_irq(host, 1);
->>>>> +			mmc_host_clk_release(host);
->>>>> +			mmc_claim_host(host);
->>>>> +		}
->>>>> +	}
->> If you enable the sdio_irq, I think it needs to check whether MMC_CAP_SDIO_IRQ is set or not.
->>
->>
->> Best Regards,
->> Jaehoon Chung
->>>>> +
->>>>>  	mmc_release_host(host);
->>>>>  
->>>>>  	host->pm_flags &= ~MMC_PM_KEEP_POWER;
->>>>> -- 1.7.1
->>>>>
->>>>>
->>>>>
->>>>> On 2014/7/15 12:40, Jaehoon Chung wrote:
->>>>>> From: Chris Ball <chris@printf.net>
->>>>>> Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
->>>>>>
->>>>>> 781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
->>>>>> bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
->>>>>> the use of our own custom threaded IRQ handler, but left in an
->>>>>> unconditional wake_up_process() on that handler at resume-time.
->>>>>>
->>>>>> Reported-by: Fu, Zhonghui <zhonghui.fu@linux.intel.com>
->>>>>> [Patch suggested by Jaehoon Chung]
->>>>>> Signed-off-by: Chris Ball <chris@printf.net>
->>>>>> ---
->>>>>>  drivers/mmc/core/sdio.c |    3 ++-
->>>>>>  1 file changed, 2 insertions(+), 1 deletion(-)
->>>>>>
->>>>>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
->>>>>> index e636d9e..11cc4e0 100644
->>>>>> --- a/drivers/mmc/core/sdio.c
->>>>>> +++ b/drivers/mmc/core/sdio.c
->>>>>> @@ -992,7 +992,8 @@ static int mmc_sdio_resume(struct mmc_host *host)
->>>>>>  		}
->>>>>>  	}
->>>>>>  
->>>>>> -	if (!err && host->sdio_irqs)
->>>>>> +	if (!err && host->sdio_irqs &&
->>>>>> +			!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD))
->>>>>>  		wake_up_process(host->sdio_irq_thread);
->>>>>>  	mmc_release_host(host);
->>>>>>  
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>> Please read the FAQ at  http://www.tux.org/lkml/
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>> Please read the FAQ at  http://www.tux.org/lkml/
-
+JM
