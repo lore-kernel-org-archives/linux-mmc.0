@@ -1,102 +1,183 @@
-From: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
-Subject: Re: Sandisk MMC I/O errors
-Date: Fri, 8 Aug 2014 09:54:31 +0200
-Message-ID: <CAL8zT=jfjAgoQ-HCWFxsibAHoQ5JHwZvn3Cr9TvDX9kDHGcyRQ@mail.gmail.com>
-References: <CAL8zT=iinDtm3_77jSDWG1RSjN5CgEtAgPjA_ju3-=ZS2Qco8A@mail.gmail.com>
- <CAL8zT=iRtmKZyHNYR+-c0KuOaN06Tg60QiWwePvz+auWhpRtPw@mail.gmail.com>
- <CAC1bqKgct-Hq3+9PZ-6p79qSjf=UNhpLWykJ_e0=1ThGoMPpkg@mail.gmail.com>
- <CAL8zT=gS1rwFU1eUcYNpKmygpnmTDXeQRtg6Uxr9FVXRJ6PmeA@mail.gmail.com>
- <53E21515.3060807@samsung.com> <CAL8zT=hcYUUnP1PXYu_9+JUTx=sqBAQkiY1g7K+=TbLSx4J8-g@mail.gmail.com>
- <CAOMZO5CV7yTT5K4S7L+UcO_No2rRsPGWTqmSh79mQmoL2QKsYg@mail.gmail.com>
- <CAL8zT=h6qxPrnXeys0P48hUxsc21MfO_wWNC-g9UrLB-3YZ=Mg@mail.gmail.com>
- <CAL8zT=iaKfEW32vq5_5yXxuMEAzS8=GsJhUR16TH4bQcK9DgpQ@mail.gmail.com>
- <CAL8zT=giMNWG+xwhcR_N8GbCCPEeucaNDG0QQfOos0v3RcwC6Q@mail.gmail.com>
- <53E32FE4.8060401@samsung.com> <CAL8zT=jjx0XOvtSTR14FA9=TqnD9X3imZRo1xBVykqacwKJSEw@mail.gmail.com>
- <CAL8zT=jRJy83oNKd97m=Trx991jL-wGuq4mLgUi3cS6eCcnp_A@mail.gmail.com>
- <CAC1bqKgQZ-XweMp+mj8Bmm6b6nNzSKOsAjhZcNc=_P91nzx_vg@mail.gmail.com>
- <CAL8zT=hcJOzGbDTgbp3Z7Yc5HhtGoALQ+w1Mhb9KBYSoN7dbAQ@mail.gmail.com>
- <53E4401C.2040708@samsung.com> <CAL8zT=ikgxsK0r4qPgv3FQYtk-hMqFQcucBAVPkF=iRnPuQUDg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f45.google.com ([209.85.218.45]:48368 "EHLO
-	mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755792AbaHHHyr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Aug 2014 03:54:47 -0400
-Received: by mail-oi0-f45.google.com with SMTP id e131so3453843oig.18
-        for <linux-mmc@vger.kernel.org>; Fri, 08 Aug 2014 00:54:47 -0700 (PDT)
-In-Reply-To: <CAL8zT=ikgxsK0r4qPgv3FQYtk-hMqFQcucBAVPkF=iRnPuQUDg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: [PATCH 1/3 resend] omap_hsmmc: reuse mmc/slot-gpio for write protect detection
+Date: Fri,  8 Aug 2014 12:16:58 +0200
+Message-ID: <1407493020-11566-2-git-send-email-afenkart@gmail.com>
+References: <1407493020-11566-1-git-send-email-afenkart@gmail.com>
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1407493020-11566-1-git-send-email-afenkart@gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Balaji T K <balajitk@ti.com>, daniel@zonque.org, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>, Fabio Estevam <festevam@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-2014-08-08 9:06 GMT+02:00 Jean-Michel Hautbois
-<jean-michel.hautbois@vodalys.com>:
-> 2014-08-08 5:12 GMT+02:00 Jaehoon Chung <jh80.chung@samsung.com>:
->> On 08/08/2014 12:44 AM, Jean-Michel Hautbois wrote:
->>> 2014-08-07 17:02 GMT+02:00 Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>:
->>>>> [    1.366291] mmcblk1: error -84 transferring data, sector 0, nr 8,
->>>>> cmd response 0x900, card status 0xb00
->>>>> [    1.374409] mmcblk1: retrying using single block read
->>>>> [    1.378810] mmcblk1: error -84 transferring data, sector 0, nr 8,
->>>>> cmd response 0x900, card status 0x0
->>>> At first, the kernel driver uses multiple read(cmd 18) to read data
->>>> from sector 0 to sector 8, but fail.
->>>> And then, retry by single read(cmd 17), but still fail...
->>>>
->>>>> [    2.050460]  mmcblk1boot0: unable to read partition table
->>>> You are trying to read boot partition data, as I remember when we
->>>> access boot partition, we need to sync the bus width, frequency and
->>>> timing(SDR, DDR).
->>
->> If you don't access at boot partition, use the MMC_CAP2_BOOTPART_NOACC.
->
-> How can I do that properly ?
+Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 
-In modified include/linux/mmc/host.h in order to return 0 in the
-function mmc_boot_partition_access().
-I don't have boot partition access, but still I/O errors :
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 2f944d7..1c10e6c 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -36,6 +36,7 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/core.h>
+ #include <linux/mmc/mmc.h>
++#include <linux/mmc/slot-gpio.h>
+ #include <linux/io.h>
+ #include <linux/irq.h>
+ #include <linux/gpio.h>
+@@ -239,15 +240,6 @@ static int omap_hsmmc_card_detect(struct device *dev, int slot)
+ 	return !gpio_get_value_cansleep(mmc->slots[0].switch_pin);
+ }
+ 
+-static int omap_hsmmc_get_wp(struct device *dev, int slot)
+-{
+-	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
+-	struct omap_mmc_platform_data *mmc = host->pdata;
+-
+-	/* NOTE: assumes write protect signal is active-high */
+-	return gpio_get_value_cansleep(mmc->slots[0].gpio_wp);
+-}
+-
+ static int omap_hsmmc_get_cover_state(struct device *dev, int slot)
+ {
+ 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
+@@ -449,7 +441,8 @@ static inline int omap_hsmmc_have_reg(void)
+ 
+ #endif
+ 
+-static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
++static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
++				struct omap_mmc_platform_data *pdata)
+ {
+ 	int ret;
+ 
+@@ -471,31 +464,31 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
+ 		pdata->slots[0].switch_pin = -EINVAL;
+ 
+ 	if (gpio_is_valid(pdata->slots[0].gpio_wp)) {
+-		pdata->slots[0].get_ro = omap_hsmmc_get_wp;
+-		ret = gpio_request(pdata->slots[0].gpio_wp, "mmc_wp");
+-		if (ret)
+-			goto err_free_cd;
+-		ret = gpio_direction_input(pdata->slots[0].gpio_wp);
+-		if (ret)
+-			goto err_free_wp;
+-	} else
+-		pdata->slots[0].gpio_wp = -EINVAL;
++		/* copy & paste from from mmc_of_parse */
++		ret = mmc_gpio_request_ro(mmc, pdata->slots[0].gpio_wp);
++		if (ret < 0) {
++			dev_err(pdata->dev,
++				"Failed to request WP GPIO: %d!\n", ret);
++			goto err;
++		} else {
++			dev_info(pdata->dev, "Got WP GPIO #%d.\n",
++				 pdata->slots[0].gpio_wp);
++		}
++	}
+ 
+ 	return 0;
+ 
+-err_free_wp:
+-	gpio_free(pdata->slots[0].gpio_wp);
+-err_free_cd:
++err:
+ 	if (gpio_is_valid(pdata->slots[0].switch_pin))
+ err_free_sp:
+ 		gpio_free(pdata->slots[0].switch_pin);
+ 	return ret;
+ }
+ 
+-static void omap_hsmmc_gpio_free(struct omap_mmc_platform_data *pdata)
++static void omap_hsmmc_gpio_free(struct mmc_host *mmc,
++				 struct omap_mmc_platform_data *pdata)
+ {
+-	if (gpio_is_valid(pdata->slots[0].gpio_wp))
+-		gpio_free(pdata->slots[0].gpio_wp);
++	mmc_gpio_free_ro(mmc);
+ 	if (gpio_is_valid(pdata->slots[0].switch_pin))
+ 		gpio_free(pdata->slots[0].switch_pin);
+ }
+@@ -1673,15 +1666,6 @@ static int omap_hsmmc_get_cd(struct mmc_host *mmc)
+ 	return mmc_slot(host).card_detect(host->dev, host->slot_id);
+ }
+ 
+-static int omap_hsmmc_get_ro(struct mmc_host *mmc)
+-{
+-	struct omap_hsmmc_host *host = mmc_priv(mmc);
+-
+-	if (!mmc_slot(host).get_ro)
+-		return -ENOSYS;
+-	return mmc_slot(host).get_ro(host->dev, 0);
+-}
+-
+ static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
+ {
+ 	struct omap_hsmmc_host *host = mmc_priv(mmc);
+@@ -1837,7 +1821,7 @@ static const struct mmc_host_ops omap_hsmmc_ops = {
+ 	.request = omap_hsmmc_request,
+ 	.set_ios = omap_hsmmc_set_ios,
+ 	.get_cd = omap_hsmmc_get_cd,
+-	.get_ro = omap_hsmmc_get_ro,
++	.get_ro = mmc_gpio_get_ro,
+ 	.init_card = omap_hsmmc_init_card,
+ 	.enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
+ };
+@@ -2063,16 +2047,15 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	if (IS_ERR(base))
+ 		return PTR_ERR(base);
+ 
+-	ret = omap_hsmmc_gpio_init(pdata);
+-	if (ret)
+-		goto err;
+-
+ 	mmc = mmc_alloc_host(sizeof(struct omap_hsmmc_host), &pdev->dev);
+ 	if (!mmc) {
+-		ret = -ENOMEM;
+-		goto err_alloc;
++		return -ENOMEM;
+ 	}
+ 
++	ret = omap_hsmmc_gpio_init(mmc, pdata);
++	if (ret)
++		goto err;
++
+ 	host		= mmc_priv(mmc);
+ 	host->mmc	= mmc;
+ 	host->pdata	= pdata;
+@@ -2302,10 +2285,9 @@ err_irq:
+ 	if (host->dbclk)
+ 		clk_disable_unprepare(host->dbclk);
+ err1:
+-	mmc_free_host(mmc);
+-err_alloc:
+-	omap_hsmmc_gpio_free(pdata);
++	omap_hsmmc_gpio_free(mmc, pdata);
+ err:
++	mmc_free_host(mmc);
+ 	return ret;
+ }
+ 
+@@ -2330,7 +2312,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
+ 	if (host->dbclk)
+ 		clk_disable_unprepare(host->dbclk);
+ 
+-	omap_hsmmc_gpio_free(host->pdata);
++	omap_hsmmc_gpio_free(host->mmc, host->pdata);
+ 	mmc_free_host(host->mmc);
+ 
+ 	return 0;
+diff --git a/include/linux/platform_data/mmc-omap.h b/include/linux/platform_data/mmc-omap.h
+index 51e70cf..7fe0c14 100644
+--- a/include/linux/platform_data/mmc-omap.h
++++ b/include/linux/platform_data/mmc-omap.h
+@@ -120,7 +120,6 @@ struct omap_mmc_platform_data {
+ 		int (*set_bus_mode)(struct device *dev, int slot, int bus_mode);
+ 		int (*set_power)(struct device *dev, int slot,
+ 				 int power_on, int vdd);
+-		int (*get_ro)(struct device *dev, int slot);
+ 		void (*remux)(struct device *dev, int slot, int power_on);
+ 		/* Call back before enabling / disabling regulators */
+ 		void (*before_set_reg)(struct device *dev, int slot,
+-- 
+2.0.0
 
-
-[    4.518031] mmcblk1: error -84 transferring data, sector 12, nr 4,
-cmd response 0x900, card status 0x0
-[    4.518063] mmc1: starting CMD17 arg 00001a00 flags 000000b5
-[    4.518085] mmc1:     blksz 512 blocks 1 flags 00000200 tsac 100 ms nsac 0
-[    4.518147] sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
-[    4.518478] sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00200002
-[    4.518545] mmc1: req done (CMD17): 0: 00000900 00000000 00000000 00000000
-[    4.518563] mmc1:     0 bytes transferred: -84
-[    4.518646] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000002
-[    4.518690] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
-[    4.518732] mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-[    4.518746] mmc0:     4096 bytes transferred: 0
-[    4.518756] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
-[    4.518783] mmc1: starting CMD13 arg 00010000 flags 00000195
-[    4.518826] sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
-[    4.518849] mmc1: req done (CMD13): 0: 00000900 00000000 00000000 00000000
-[    4.519005] mmc0: starting CMD18 arg 00062000 flags 000000b5
-[    4.519022] mmc0:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
-[    4.519042] mmc0:     CMD12 arg 00000000 flags 00000095
-[    4.519106] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
-[    4.521216] mmcblk1: error -84 transferring data, sector 13, nr 3,
-cmd response 0x900, card status 0x0
-[    4.521247] mmc1: starting CMD17 arg 00001c00 flags 000000b5
-[    4.521258] mmc1:     blksz 512 blocks 1 flags 00000200 tsac 100 ms nsac 0
-[    4.521309] sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
-[    4.521502] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000002
-[    4.521539] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
-[    4.521566] mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-[    4.521575] mmc0:     4096 bytes transferred: 0
-[    4.521585] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
-[    4.521646] sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00200002
-[    4.521678] mmc1: req done (CMD17): 0: 00000900 00000000 00000000 00000000
-[    4.521688] mmc1:     0 bytes transferred: -84
-[    4.521746] mmc1: starting CMD13 arg 00010000 flags 00000195
-[    4.521790] sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00000001
-[    4.521813] mmc1: req done (CMD13): 0: 00000900 00000000 00000000 00000000
-[    4.523600] mmcblk1: error -84 transferring data, sector 14, nr 2,
-cmd response 0x900, card status 0x0
-
-
-JM
