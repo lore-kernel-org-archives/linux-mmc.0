@@ -1,38 +1,57 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH] mmc: sdhci-pxav3: Remove unused variable in sdhci_pxav3_remove()
-Date: Fri, 8 Aug 2014 17:50:44 +0200
-Message-ID: <CAMuHMdWHz_oF7+KeV3FbLeNdY9BoHwuuJoCdOvCSFcHdWFuMOQ@mail.gmail.com>
-References: <1407511931-26712-1-git-send-email-geert+renesas@glider.be>
-	<6429061.3nhKdDRquU@avalon>
+From: Pawel Moll <pawel.moll@arm.com>
+Subject: Re: [PATCH 3/5] mmc: sdhci-pltfm: Do not use parent as the host's
+ device
+Date: Fri, 08 Aug 2014 17:36:25 +0100
+Message-ID: <1407515785.31897.28.camel@hornet>
+References: <1406298233-27876-1-git-send-email-pawel.moll@arm.com>
+	 <1406298233-27876-3-git-send-email-pawel.moll@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f177.google.com ([209.85.217.177]:39715 "EHLO
-	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752570AbaHHPuq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Aug 2014 11:50:46 -0400
-In-Reply-To: <6429061.3nhKdDRquU@avalon>
+Received: from fw-tnat.austin.arm.com ([217.140.110.23]:21032 "EHLO
+	collaborate-mta1.arm.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752812AbaHHQg2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Aug 2014 12:36:28 -0400
+In-Reply-To: <1406298233-27876-3-git-send-email-pawel.moll@arm.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Linux MMC List <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@wwwdotorg.org>, Catalin Marinas <Catalin.Marinas@arm.com>, "paul@pwsan.com" <paul@pwsan.com>, Arnd Bergmann <arnd@arndb.de>, Peter De Schrijver <pdeschrijver@nvidia.com>, "arm@kernel.org" <arm@kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 
-On Fri, Aug 8, 2014 at 5:38 PM, Laurent Pinchart
-<laurent.pinchart@ideasonboard.com> wrote:
-> Thank you for the patch, but you're a bit too late :-)
->
-> http://article.gmane.org/gmane.linux.kernel.mmc/28097
+On Fri, 2014-07-25 at 15:23 +0100, Pawel Moll wrote:
+> The code selecting a device for the sdhci host has been
+> continuously tweaked (4b711cb13843f5082e82970dd1e8031383134a65
+> "mmc: sdhci-pltfm: Add structure for host-specific data" and
+> a4d2177f00a5252d825236c5124bc1e9918bdb41 "mmc: sdhci-pltfm: dt
+> device does not pass parent to sdhci_alloc_host") while there
+> does not seem to be any reason to use platform device's parent
+> in the first place.
+>=20
+> The comment saying "Some PCI-based MFD need the parent here"
+> seem to refer to Timberdale FPGA driver (the only MFD driver
+> registering SDHCI cell, drivers/mfd/timberdale.c) but again,
+> the only situation when parent device matter is runtime PM,
+> which is not implemented for Timberdale.
+>=20
+> Cc: Chris Ball <chris@printf.net>
+> Cc: Anton Vorontsov <anton@enomsg.org>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linuxppc-dev@lists.ozlabs.org
+> Signed-off-by: Pawel Moll <pawel.moll@arm.com>
+> ---
+>=20
+> This patch is a part of effort to remove references to platform_bus
+> and make it static.
+>=20
+> Chris, Anton, Ulf - could you please advise if the assumptions
+> above are correct or if I'm completely wrong? Do you know what
+> where the real reasons to use parent originally? The PCI comment
+> seems like a red herring to me...
 
-Doh, I'm not (yet) on linux-mmc.
-It's a pity that fix is not yet in -next.
+Can I take the silence as a suggestion that the change looks ok-ish for
+you?
 
-Gr{oetje,eeting}s,
+Pawe=C5=82
 
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
