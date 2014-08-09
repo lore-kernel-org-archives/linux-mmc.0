@@ -1,57 +1,49 @@
-From: Pawel Moll <pawel.moll@arm.com>
-Subject: Re: [PATCH 3/5] mmc: sdhci-pltfm: Do not use parent as the host's
- device
-Date: Fri, 08 Aug 2014 17:36:25 +0100
-Message-ID: <1407515785.31897.28.camel@hornet>
-References: <1406298233-27876-1-git-send-email-pawel.moll@arm.com>
-	 <1406298233-27876-3-git-send-email-pawel.moll@arm.com>
+From: Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>
+Subject: Re: Sandisk MMC I/O errors
+Date: Sat, 9 Aug 2014 17:05:39 +0800
+Message-ID: <CAC1bqKjDHgcqJ9uwS0ELpkfRTm5ZGzPHeYxYPdShBe_r+XA2SA@mail.gmail.com>
+References: <CAL8zT=iinDtm3_77jSDWG1RSjN5CgEtAgPjA_ju3-=ZS2Qco8A@mail.gmail.com>
+	<CAL8zT=iRtmKZyHNYR+-c0KuOaN06Tg60QiWwePvz+auWhpRtPw@mail.gmail.com>
+	<CAC1bqKgct-Hq3+9PZ-6p79qSjf=UNhpLWykJ_e0=1ThGoMPpkg@mail.gmail.com>
+	<CAL8zT=gS1rwFU1eUcYNpKmygpnmTDXeQRtg6Uxr9FVXRJ6PmeA@mail.gmail.com>
+	<53E21515.3060807@samsung.com>
+	<CAL8zT=hcYUUnP1PXYu_9+JUTx=sqBAQkiY1g7K+=TbLSx4J8-g@mail.gmail.com>
+	<CAOMZO5CV7yTT5K4S7L+UcO_No2rRsPGWTqmSh79mQmoL2QKsYg@mail.gmail.com>
+	<CAL8zT=h6qxPrnXeys0P48hUxsc21MfO_wWNC-g9UrLB-3YZ=Mg@mail.gmail.com>
+	<CAL8zT=iaKfEW32vq5_5yXxuMEAzS8=GsJhUR16TH4bQcK9DgpQ@mail.gmail.com>
+	<CAL8zT=giMNWG+xwhcR_N8GbCCPEeucaNDG0QQfOos0v3RcwC6Q@mail.gmail.com>
+	<53E32FE4.8060401@samsung.com>
+	<CAL8zT=jjx0XOvtSTR14FA9=TqnD9X3imZRo1xBVykqacwKJSEw@mail.gmail.com>
+	<CAL8zT=jRJy83oNKd97m=Trx991jL-wGuq4mLgUi3cS6eCcnp_A@mail.gmail.com>
+	<CAC1bqKgQZ-XweMp+mj8Bmm6b6nNzSKOsAjhZcNc=_P91nzx_vg@mail.gmail.com>
+	<CAL8zT=hcJOzGbDTgbp3Z7Yc5HhtGoALQ+w1Mhb9KBYSoN7dbAQ@mail.gmail.com>
+	<53E4401C.2040708@samsung.com>
+	<CAL8zT=ikgxsK0r4qPgv3FQYtk-hMqFQcucBAVPkF=iRnPuQUDg@mail.gmail.com>
+	<CAL8zT=jfjAgoQ-HCWFxsibAHoQ5JHwZvn3Cr9TvDX9kDHGcyRQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from fw-tnat.austin.arm.com ([217.140.110.23]:21032 "EHLO
-	collaborate-mta1.arm.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752812AbaHHQg2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Aug 2014 12:36:28 -0400
-In-Reply-To: <1406298233-27876-3-git-send-email-pawel.moll@arm.com>
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:59797 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751266AbaHIJFl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 9 Aug 2014 05:05:41 -0400
+Received: by mail-wi0-f170.google.com with SMTP id f8so3500331wiw.3
+        for <linux-mmc@vger.kernel.org>; Sat, 09 Aug 2014 02:05:40 -0700 (PDT)
+In-Reply-To: <CAL8zT=jfjAgoQ-HCWFxsibAHoQ5JHwZvn3Cr9TvDX9kDHGcyRQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@wwwdotorg.org>, Catalin Marinas <Catalin.Marinas@arm.com>, "paul@pwsan.com" <paul@pwsan.com>, Arnd Bergmann <arnd@arndb.de>, Peter De Schrijver <pdeschrijver@nvidia.com>, "arm@kernel.org" <arm@kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
+To: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Fabio Estevam <festevam@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Fri, 2014-07-25 at 15:23 +0100, Pawel Moll wrote:
-> The code selecting a device for the sdhci host has been
-> continuously tweaked (4b711cb13843f5082e82970dd1e8031383134a65
-> "mmc: sdhci-pltfm: Add structure for host-specific data" and
-> a4d2177f00a5252d825236c5124bc1e9918bdb41 "mmc: sdhci-pltfm: dt
-> device does not pass parent to sdhci_alloc_host") while there
-> does not seem to be any reason to use platform device's parent
-> in the first place.
->=20
-> The comment saying "Some PCI-based MFD need the parent here"
-> seem to refer to Timberdale FPGA driver (the only MFD driver
-> registering SDHCI cell, drivers/mfd/timberdale.c) but again,
-> the only situation when parent device matter is runtime PM,
-> which is not implemented for Timberdale.
->=20
-> Cc: Chris Ball <chris@printf.net>
-> Cc: Anton Vorontsov <anton@enomsg.org>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linuxppc-dev@lists.ozlabs.org
-> Signed-off-by: Pawel Moll <pawel.moll@arm.com>
-> ---
->=20
-> This patch is a part of effort to remove references to platform_bus
-> and make it static.
->=20
-> Chris, Anton, Ulf - could you please advise if the assumptions
-> above are correct or if I'm completely wrong? Do you know what
-> where the real reasons to use parent originally? The PCI comment
-> seems like a red herring to me...
+Could you change another sample to test?
+As a result, we can check this is a driver issue or sample issue.
 
-Can I take the silence as a suggestion that the change looks ok-ish for
-you?
-
-Pawe=C5=82
-
+> [    4.518732] mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
+> [    4.518746] mmc0:     4096 bytes transferred: 0
+> [    4.518756] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
+the eMMC has change state to data state(0xb00) and the data transferred 0...
+It means the cmd and clk pin work well. I will check the DMA and data
+lines(pin).
+> [    4.518545] mmc1: req done (CMD17): 0: 00000900 00000000 00000000 00000000
+> [    4.518563] mmc1:     0 bytes transferred: -84
+No data transferred from your platform to eMMC....even use single block read.
