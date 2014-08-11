@@ -1,32 +1,121 @@
-From: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Subject: Re: [PATCH 3/5] mmc: sdhci-pltfm: Do not use parent as the host's
-	device
-Date: Mon, 11 Aug 2014 11:02:41 +0100
-Message-ID: <20140811100241.GB30401@n2100.arm.linux.org.uk>
-References: <1406298233-27876-1-git-send-email-pawel.moll@arm.com> <1406298233-27876-3-git-send-email-pawel.moll@arm.com> <1407515785.31897.28.camel@hornet> <CAPDyKFoLU6pnJFmKe7CB0q-hKfwv4uCPSr0cE4aoYMvfhjMteQ@mail.gmail.com> <1407748550.3680.10.camel@hornet>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1407748550.3680.10.camel@hornet>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "paul-DWxLp4Yu+b8AvxtiuMwx3w@public.gmane.org" <paul-DWxLp4Yu+b8AvxtiuMwx3w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Peter De Schrijver <pdeschrijver-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "arm-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <arm-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+From: Yunpeng Gao <yunpeng.gao@intel.com>
+Subject: [PATCH] mmc: sdhci-pci: Enable SD/SDIO host controller support on INTEL Merrifield platform
+Date: Mon, 11 Aug 2014 18:58:19 +0800
+Message-ID: <1407754699-5691-1-git-send-email-yunpeng.gao@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:44684 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751685AbaHKK4e (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Aug 2014 06:56:34 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Yunpeng Gao <yunpeng.gao@intel.com>
 
-On Mon, Aug 11, 2014 at 10:15:50AM +0100, Pawel Moll wrote:
-> On Mon, 2014-08-11 at 10:07 +0100, Ulf Hansson wrote:
-> > Sorry for the delay. I suppose this make sense, but I really don't
-> > know for sure.
-> > 
-> > I guess we need some testing in linux-next, to get some confidence.
-> 
-> Would you take it into -next then? Unless I'm completely wrong there
-> should be no impact on any in-tree driver...
+Current mmc-next mmc driver only supports emmc0/emmc1
+host controllers for Intel Merrifield platform.
+Since Merrifield platform actually disables emmc1 and also
+support SD/SDIO host controllers, submit this patch
+to do:
+1. Enable SDHCI pci host controller support for SD/SDIO;
+2. Change eMMC pin GPIO FLIS setting if eMMC HS200 enabled.
 
-But not until 3.17-rc1 has been released.  linux-next should not receive
-new material other than bug fixes while a merge window is open.
+Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
+---
+ drivers/mmc/host/sdhci-pci.c |   74 ++++++++++++++++++++++++++++++++++++++----
+ 1 file changed, 67 insertions(+), 7 deletions(-)
 
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 52c42fc..6b8351f 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -293,19 +293,79 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
+ 	.own_cd_for_runtime_pm = true,
+ };
+ 
++/* Define Merrifield FLIS register address */
++#define TNG_EMMC_0_FLIS_ADDR		0xff0c0900
++#define TNG_EMMC_FLIS_SLEW		0x00000400
++#define TNG_EMMC_0_CLK_PULLDOWN		0x00000200
++
++static int mrfl_emmc_flis_setup_for_hs200(struct sdhci_pci_slot *slot)
++{
++	void __iomem *flis_addr;
++	unsigned int reg;
++	int i;
++
++	/* If eMMC HS200 not enabled, do nothing and exit */
++	if (slot->host->quirks2 & SDHCI_QUIRK2_BROKEN_HS200)
++		return 0;
++
++	flis_addr = ioremap_nocache(TNG_EMMC_0_FLIS_ADDR, 64);
++	if (!flis_addr) {
++		pr_err("MRFL emmc FLIS addr ioremap failed!\n");
++		return -ENOMEM;
++	}
++
++	pr_info("MRFL emmc mapped FLIS addr: %p\n", flis_addr);
++	/*
++	 * Change TNG gpio FLIS settings for all eMMC0
++	 * CLK/CMD/DAT pins.
++	 * That is, including emmc_0_clk, emmc_0_cmd,
++	 * emmc_0_d_0, emmc_0_d_1, emmc_0_d_2, emmc_0_d_3,
++	 * emmc_0_d_4, emmc_0_d_5, emmc_0_d_6, emmc_0_d_7
++	 */
++	for (i = 0; i < 10; i++) {
++		reg = readl(flis_addr + (i * 4));
++		reg |= TNG_EMMC_FLIS_SLEW; /* SLEW B */
++		writel(reg, flis_addr + (i * 4));
++	}
++
++	/* Disable PullDown for emmc_0_clk */
++	reg = readl(flis_addr);
++	reg &= ~TNG_EMMC_0_CLK_PULLDOWN;
++	writel(reg, flis_addr);
++
++	/* Release the mapped address */
++	iounmap(flis_addr);
++
++	return 0;
++}
++
+ /* Define Host controllers for Intel Merrifield platform */
+ #define INTEL_MRFL_EMMC_0	0
+ #define INTEL_MRFL_EMMC_1	1
++#define INTEL_MRFL_SD		2
++#define INTEL_MRFL_SDIO		3
+ 
+ static int intel_mrfl_mmc_probe_slot(struct sdhci_pci_slot *slot)
+ {
+-	if ((PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFL_EMMC_0) &&
+-	    (PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFL_EMMC_1))
+-		/* SD support is not ready yet */
+-		return -ENODEV;
+-
+-	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
+-				 MMC_CAP_1_8V_DDR;
++	switch (PCI_FUNC(slot->chip->pdev->devfn)) {
++	case INTEL_MRFL_EMMC_0:
++		slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA |
++					MMC_CAP_NONREMOVABLE |
++					MMC_CAP_1_8V_DDR;
++		/* Change FLIS reg setup if eMMC HS200 enabled */
++		mrfl_emmc_flis_setup_for_hs200(slot);
++		break;
++	case INTEL_MRFL_SD:
++		slot->cd_gpio = 77;
++		break;
++	case INTEL_MRFL_SDIO:
++		slot->host->mmc->caps |= MMC_CAP_NONREMOVABLE;
++		break;
++	default:
++		dev_err(&slot->chip->pdev->dev, "Invalid PCI Func %d.\n",
++			PCI_FUNC(slot->chip->pdev->devfn));
++		break;
++	}
+ 
+ 	return 0;
+ }
 -- 
-FTTC broadband for 0.8mile line: currently at 9.5Mbps down 400kbps up
-according to speedtest.net.
+1.7.9.5
+
