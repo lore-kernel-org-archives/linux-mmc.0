@@ -1,71 +1,99 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [PATCH] mmc: rtsx: fix incorrect last byte in R2 response
-Date: Mon, 11 Aug 2014 16:02:54 +0300
-Message-ID: <20140811130254.GP4856@mwanda>
-References: <1407745936-18513-1-git-send-email-rogerable@realtek.com>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCHv10 5/5] ARM: dts: rockchip: unuse the slot-node and
+ deprecate the supports-highspeed for dw-mmc
+Date: Mon, 11 Aug 2014 16:38:31 +0200
+Message-ID: <2216569.yZfKCR5Kzu@diego>
+References: <1407397082-32495-1-git-send-email-jh80.chung@samsung.com>
+ <1407397082-32495-6-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-Content-Disposition: inline
-In-Reply-To: <1407745936-18513-1-git-send-email-rogerable@realtek.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: rogerable@realtek.com
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1407397082-32495-6-git-send-email-jh80.chung@samsung.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, kgene.kim@samsung.com, tgih.jun@samsung.com, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, dinguyen@altera.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Aug 11, 2014 at 04:32:16PM +0800, rogerable@realtek.com wrote:
-> From: Roger Tseng <rogerable@realtek.com>
+Am Donnerstag, 7. August 2014, 16:38:02 schrieb Jaehoon Chung:
+> dw-mmc controller can support multiple slots.
+> But, there are no use-cases anywhere. So we don't need to support the
+> slot-node for dw-mmc controller.
+> And "supports-highspeed" property in dw-mmc is deprecated.
+> "supports-highspeed" property can be replaced with "cap-sd/mmc-highspeed".
 > 
-> Current code erroneously fill the last byte of R2 response with an undefined
-> value. In addition, it is impossible to obtain the real values since the
-> controller actually 'offloads' the last byte(CRC7, end bit) while receiving R2
-> response. This could cause mmc stack to obtain inconsistent CID from the same
-> card after resume and misidentify it as a different card.
-> 
-> Fix by assigning a dummy value 0x01 to the last byte of R2 response.
-> 
-> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Reviewed-by: Tushar Behera <trblinux@gmail.com>
+> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Reviewed-by: Heiko Stuebner <heiko@sntech.de>
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+
+I've added this one to my queue for 3.18
+
+
+Heiko
+
 > ---
->  drivers/mmc/host/rtsx_pci_sdmmc.c |    1 +
->  drivers/mmc/host/rtsx_usb_sdmmc.c |    1 +
->  2 files changed, 2 insertions(+)
+>  arch/arm/boot/dts/rk3066a-bqcurie2.dts |   15 ++++-----------
+>  arch/arm/boot/dts/rk3188-radxarock.dts |    7 ++-----
+>  2 files changed, 6 insertions(+), 16 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index dfde4a2..54849d8 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -412,6 +412,7 @@ static void sd_send_cmd_get_rsp(struct realtek_pci_sdmmc *host,
->  	}
->  
->  	if (rsp_type == SD_RSP_TYPE_R2) {
-> +		ptr[16] = 1;
-
-Avoid magic numbers like 16 and 0x1.
-
-This is subtle enough that it deserves a comment.
-
-		ptr[stat_idx] = 0x1 /* 0x1 chosen randomly */
-
->  		for (i = 0; i < 4; i++) {
->  			cmd->resp[i] = get_unaligned_be32(ptr + 1 + i * 4);
->  			dev_dbg(sdmmc_dev(host), "cmd->resp[%d] = 0x%08x\n",
-
-There are a lot of magic numbers in this function.  We could get rid
-of this i < 4 loop but doing:
-
-		memcpy(cmd->resp, ptr + 1, resp_len);
-
-Currently we don't use resp_len and the resp_len = 5 assignment is off
-by one...  It should be resp_len = 4.  This function is quite ugly.
-
-regards,
-dan carpenter
+> diff --git a/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+> b/arch/arm/boot/dts/rk3066a-bqcurie2.dts index 042f821d..665dd56 100644
+> --- a/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+> +++ b/arch/arm/boot/dts/rk3066a-bqcurie2.dts
+> @@ -150,12 +150,8 @@
+>  	num-slots = <1>;
+>  	status = "okay";
+>  	vmmc-supply = <&vcc_sd0>;
+> -
+> -	slot@0 {
+> -		reg = <0>;
+> -		bus-width = <4>;
+> -		disable-wp;
+> -	};
+> +	bus-width = <4>;
+> +	disable-wp;
+>  };
+> 
+>  &mmc1 { /* wifi */
+> @@ -166,11 +162,8 @@
+>  	pinctrl-names = "default";
+>  	pinctrl-0 = <&sd1_clk &sd1_cmd &sd1_bus4>;
+> 
+> -	slot@0 {
+> -		reg = <0>;
+> -		bus-width = <4>;
+> -		disable-wp;
+> -	};
+> +	bus-width = <4>;
+> +	disable-wp;
+>  };
+> 
+>  &uart0 {
+> diff --git a/arch/arm/boot/dts/rk3188-radxarock.dts
+> b/arch/arm/boot/dts/rk3188-radxarock.dts index 171b610..ef72faf 100644
+> --- a/arch/arm/boot/dts/rk3188-radxarock.dts
+> +++ b/arch/arm/boot/dts/rk3188-radxarock.dts
+> @@ -181,11 +181,8 @@
+>  	status = "okay";
+>  	vmmc-supply = <&vcc_sd0>;
+> 
+> -	slot@0 {
+> -		reg = <0>;
+> -		bus-width = <4>;
+> -		disable-wp;
+> -	};
+> +	bus-width = <4>;
+> +	disable-wp;
+>  };
+> 
+>  &pinctrl {
