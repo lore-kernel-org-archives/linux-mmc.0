@@ -1,50 +1,83 @@
-From: "Chen, Alvin" <alvin.chen@intel.com>
-Subject: RE: [PATCH v2] mmc: sdhci-pci: SDIO host controller support for
- Intel Quark X1000
-Date: Mon, 11 Aug 2014 05:15:18 +0000
-Message-ID: <4656BEB6164FC34F8171C6538F1A595B2E971A1D@SHSMSX101.ccr.corp.intel.com>
-References: <1403618196-7366-1-git-send-email-alvin.chen@intel.com>
-	<1403618196-7366-2-git-send-email-alvin.chen@intel.com>
- <CAPDyKFq8cQHhadSAcaMG6XTKKaZ3XjX5PQyxsRteqhbcMaYZ0A@mail.gmail.com>
- <AF233D1473C1364ABD51D28909A1B1B72F81CCA4@pgsmsx105.gar.corp.intel.com>
+From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio
+ thread
+Date: Mon, 11 Aug 2014 13:49:27 +0800
+Message-ID: <53E85967.5060503@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:18070 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751174AbaHKFPX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Aug 2014 01:15:23 -0400
-In-Reply-To: <AF233D1473C1364ABD51D28909A1B1B72F81CCA4@pgsmsx105.gar.corp.intel.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, ulf.hansson@linaro.org, tgih.jun@samsung.com, aaron.lu@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, jackey.shen@amd.com, gregkh@linuxfoundation.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>
 
-SGkgVWxmLA0KDQpBbnkgdXBkYXRlIGZvciB0aGlzIHBhdGNoPyBKdXN0IHdhbnQgdG8gZm9sbG93
-LXVwLg0KDQoNCg0KQmVzdCByZWdhcmRz77yMQWx2aW4gQ2hlbg0KSUNGUyBQbGF0Zm9ybSBFbmdp
-bmVlcmluZyBTb2x1dGlvbg0KRmxleCBTZXJ2aWNlcyAoQ01NSSBMZXZlbCAzLCBJUUEyMDA1LCBJ
-UUEyMDA4KSzCoEdyZWF0ZXIgQXNpYSBSZWdpb24gSW50ZWwgSW5mb3JtYXRpb24gVGVjaG5vbG9n
-eSBUZWwuIDAxMC04MjE3MTk2MA0KaW5ldC44LTc1ODE5NjANCkVtYWlsLiBhbHZpbi5jaGVuQGlu
-dGVsLmNvbSANCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBPbmcsIEJv
-b24gTGVvbmcNCj4gU2VudDogV2VkbmVzZGF5LCBBdWd1c3QgNiwgMjAxNCAzOjMyIFBNDQo+IFRv
-OiBVbGYgSGFuc3Nvbg0KPiBDYzogQ2hyaXMgQmFsbDsgbGludXgtbW1jOyBsaW51eC1rZXJuZWxA
-dmdlci5rZXJuZWwub3JnOyBDaGVuLCBBbHZpbg0KPiBTdWJqZWN0OiBSRTogW1BBVENIIHYyXSBt
-bWM6IHNkaGNpLXBjaTogU0RJTyBob3N0IGNvbnRyb2xsZXIgc3VwcG9ydCBmb3IgSW50ZWwNCj4g
-UXVhcmsgWDEwMDANCj4gDQo+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPiBGcm9t
-OiBVbGYgSGFuc3NvbiBbbWFpbHRvOnVsZi5oYW5zc29uQGxpbmFyby5vcmddDQo+ID4gU2VudDog
-V2VkbmVzZGF5LCBKdWx5IDAyLCAyMDE0IDU6MDEgUE0NCj4gPiBUbzogQ2hlbiwgQWx2aW4NCj4g
-PiBDYzogQ2hyaXMgQmFsbDsgbGludXgtbW1jOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3Jn
-OyBPbmcsIEJvb24NCj4gPiBMZW9uZw0KPiA+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggdjJdIG1tYzog
-c2RoY2ktcGNpOiBTRElPIGhvc3QgY29udHJvbGxlciBzdXBwb3J0DQo+ID4gZm9yIEludGVsIFF1
-YXJrIFgxMDAwDQo+ID4NCj4gPiBPbiAyNCBKdW5lIDIwMTQgMTU6NTYsIENoZW4sIEFsdmluIDxh
-bHZpbi5jaGVuQGludGVsLmNvbT4gd3JvdGU6DQo+ID4gPiBGcm9tOiBEZXJlayBCcm93bmUgPERl
-cmVrLkJyb3duZUBpbnRlbC5jb20+DQo+ID4gPg0KPiA+ID4gVGhpcyBwYXRjaCBpcyB0byBlbmFi
-bGUgU0RJTyBob3N0IGNvbnRyb2xsZXIgZm9yIEludGVsIFF1YXJrIFgxMDAwLg0KPiA+ID4NCj4g
-PiA+IFNpZ25lZC1vZmYtYnk6IERlcmVrIEJyb3duZSA8RGVyZWsuQnJvd25lQGludGVsLmNvbT4N
-Cj4gPiA+IFNpZ25lZC1vZmYtYnk6IEFsdmluIChXZWlrZSkgQ2hlbiA8YWx2aW4uY2hlbkBpbnRl
-bC5jb20+DQo+ID4NCj4gPiBUaGFua3MhIEFwcGxpZWQgZm9yIG5leHQuDQo+ID4NCj4gDQo+IEhp
-IFVsZiwNCj4gCUZvciB0aGlzIHBhdGNoLCBhcmUgeW91IGluIHByb2dyZXNzIG9mIGdldHRpbmcg
-aXQgaW50byB2My4xNyAgbWVyZ2UNCj4gd2luZG93Pw0KPiAJSnVzdCB3YW50IHRvIGZvbGxvdy11
-cC4NCj4gDQo+IE1hbnkgdGhhbmtzDQo+IEJvb24gTGVvbmcNCg0K
+>From 6cee984e1d76ba0a3320430f8cf4318ab65fcf06 Mon Sep 17 00:00:00 2001
+From: Fu Zhonghui <zhonghui.fu@linux.intel.com>
+Date: Tue, 5 Aug 2014 12:44:38 +0800
+Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
+
+781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
+bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
+the use of our own custom threaded IRQ handler, but left in an
+unconditional wake_up_process() on that handler at resume-time.
+Link: https://bugzilla.kernel.org/show_bug.cgi?id=80151
+
+In addition, the check for MMC_CAP_SDIO_IRQ capability is added
+before enable sdio IRQ.
+
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Chris Ball <chris@printf.net>
+Signed-off-by: Fu Zhonghui <zhonghui.fu@linux.intel.com>
+---
+ drivers/mmc/core/sdio.c     |   14 ++++++++++++--
+ drivers/mmc/core/sdio_irq.c |    4 ++--
+ 2 files changed, 14 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index e636d9e..e04a540 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -992,8 +992,18 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 		}
+ 	}
+ 
+-	if (!err && host->sdio_irqs)
+-		wake_up_process(host->sdio_irq_thread);
++	if (!err && host->sdio_irqs) {
++		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
++			wake_up_process(host->sdio_irq_thread);
++		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
++			mmc_release_host(host);
++			mmc_host_clk_hold(host);
++			host->ops->enable_sdio_irq(host, 1);
++			mmc_host_clk_release(host);
++			mmc_claim_host(host);
++		}
++	}
++
+ 	mmc_release_host(host);
+ 
+ 	host->pm_flags &= ~MMC_PM_KEEP_POWER;
+diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+index 5cc13c8..696eca4 100644
+--- a/drivers/mmc/core/sdio_irq.c
++++ b/drivers/mmc/core/sdio_irq.c
+@@ -208,7 +208,7 @@ static int sdio_card_irq_get(struct mmc_card *card)
+ 				host->sdio_irqs--;
+ 				return err;
+ 			}
+-		} else {
++		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
+ 			mmc_host_clk_hold(host);
+ 			host->ops->enable_sdio_irq(host, 1);
+ 			mmc_host_clk_release(host);
+@@ -229,7 +229,7 @@ static int sdio_card_irq_put(struct mmc_card *card)
+ 		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
+ 			atomic_set(&host->sdio_irq_thread_abort, 1);
+ 			kthread_stop(host->sdio_irq_thread);
+-		} else {
++		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
+ 			mmc_host_clk_hold(host);
+ 			host->ops->enable_sdio_irq(host, 0);
+ 			mmc_host_clk_release(host);
+-- 1.7.1
