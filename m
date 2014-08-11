@@ -1,74 +1,89 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 3/5] mmc: sdhci-pltfm: Do not use parent as the host's device
-Date: Mon, 11 Aug 2014 11:32:40 +0200
-Message-ID: <CAPDyKFruZxUtzUKM+PvsK-_qqcE4OcCaKSkRJ2_01y7TuQMGkA@mail.gmail.com>
-References: <1406298233-27876-1-git-send-email-pawel.moll@arm.com>
-	<1406298233-27876-3-git-send-email-pawel.moll@arm.com>
-	<1407515785.31897.28.camel@hornet>
-	<CAPDyKFoLU6pnJFmKe7CB0q-hKfwv4uCPSr0cE4aoYMvfhjMteQ@mail.gmail.com>
-	<1407748550.3680.10.camel@hornet>
+Subject: Re: [PATCHv10 1/5] mmc: dw_mmc: Slot quirk "disable-wp" is deprecated.
+Date: Mon, 11 Aug 2014 11:45:33 +0200
+Message-ID: <CAPDyKFrbsFzTKSrM+sHrEuH9yd8kOX5vnWG7EiMZTGLU45hUOA@mail.gmail.com>
+References: <1407397082-32495-1-git-send-email-jh80.chung@samsung.com>
+	<1407397082-32495-2-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f53.google.com ([209.85.216.53]:32890 "EHLO
-	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752457AbaHKJcl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Aug 2014 05:32:41 -0400
-Received: by mail-qa0-f53.google.com with SMTP id v10so7469353qac.26
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Aug 2014 02:32:41 -0700 (PDT)
-In-Reply-To: <1407748550.3680.10.camel@hornet>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1407397082-32495-2-git-send-email-jh80.chung@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, Kukjin Kim <kgene.kim@samsung.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Pawel Moll <pawel.moll@arm.com>
-Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Olof Johansson <olof@lixom.net>, Stephen Warren <swarren@wwwdotorg.org>, Catalin Marinas <Catalin.Marinas@arm.com>, "paul@pwsan.com" <paul@pwsan.com>, Arnd Bergmann <arnd@arndb.de>, Peter De Schrijver <pdeschrijver@nvidia.com>, "arm@kernel.org" <arm@kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 
-On 11 August 2014 11:15, Pawel Moll <pawel.moll@arm.com> wrote:
-> On Mon, 2014-08-11 at 10:07 +0100, Ulf Hansson wrote:
->> On 8 August 2014 18:36, Pawel Moll <pawel.moll@arm.com> wrote:
->> > On Fri, 2014-07-25 at 15:23 +0100, Pawel Moll wrote:
->> >> The code selecting a device for the sdhci host has been
->> >> continuously tweaked (4b711cb13843f5082e82970dd1e8031383134a65
->> >> "mmc: sdhci-pltfm: Add structure for host-specific data" and
->> >> a4d2177f00a5252d825236c5124bc1e9918bdb41 "mmc: sdhci-pltfm: dt
->> >> device does not pass parent to sdhci_alloc_host") while there
->> >> does not seem to be any reason to use platform device's parent
->> >> in the first place.
->> >>
->> >> The comment saying "Some PCI-based MFD need the parent here"
->> >> seem to refer to Timberdale FPGA driver (the only MFD driver
->> >> registering SDHCI cell, drivers/mfd/timberdale.c) but again,
->> >> the only situation when parent device matter is runtime PM,
->> >> which is not implemented for Timberdale.
->> >>
->> >> Cc: Chris Ball <chris@printf.net>
->> >> Cc: Anton Vorontsov <anton@enomsg.org>
->> >> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->> >> Cc: linux-mmc@vger.kernel.org
->> >> Cc: linuxppc-dev@lists.ozlabs.org
->> >> Signed-off-by: Pawel Moll <pawel.moll@arm.com>
->> >> ---
->> >>
->> >> This patch is a part of effort to remove references to platform_bus
->> >> and make it static.
->> >>
->> >> Chris, Anton, Ulf - could you please advise if the assumptions
->> >> above are correct or if I'm completely wrong? Do you know what
->> >> where the real reasons to use parent originally? The PCI comment
->> >> seems like a red herring to me...
->> >
->> > Can I take the silence as a suggestion that the change looks ok-ish for
->> > you?
->>
->> Sorry for the delay. I suppose this make sense, but I really don't
->> know for sure.
->>
->> I guess we need some testing in linux-next, to get some confidence.
+On 7 August 2014 09:37, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Slot quirks "disable-wp" is deprecated.
+> Instead, use the host quirk "disable-wp".
+> (Because the slot-node is removed in dt-file.)
 >
-> Would you take it into -next then? Unless I'm completely wrong there
-> should be no impact on any in-tree driver...
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Tested-by: Sachin Kamat <sachin.kamat@samsung.com>
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+> Reviewed-by: Doug Anderson <dianders@chromium.org>
+> Tested-by: Doug Anderson <dianders@chromium.org>
 
-I will take it; though I think it's best to queue it for 3.18 to get
-some more testing.
+Thanks! Applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/dw_mmc.c  |   11 +++++++++--
+>  include/linux/mmc/dw_mmc.h |    2 ++
+>  2 files changed, 11 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 1ac227c..47b52cc 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -997,7 +997,8 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
+>         int gpio_ro = mmc_gpio_get_ro(mmc);
+>
+>         /* Use platform get_ro function, else try on board write protect */
+> -       if (slot->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT)
+> +       if ((slot->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT) ||
+> +                       (slot->host->quirks & DW_MCI_QUIRK_NO_WRITE_PROTECT))
+>                 read_only = 0;
+>         else if (!IS_ERR_VALUE(gpio_ro))
+>                 read_only = gpio_ro;
+> @@ -2021,8 +2022,11 @@ static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
+>
+>         /* get quirks */
+>         for (idx = 0; idx < ARRAY_SIZE(of_slot_quirks); idx++)
+> -               if (of_get_property(np, of_slot_quirks[idx].quirk, NULL))
+> +               if (of_get_property(np, of_slot_quirks[idx].quirk, NULL)) {
+> +                       dev_warn(dev, "Slot quirk %s is deprecated\n",
+> +                                       of_slot_quirks[idx].quirk);
+>                         quirks |= of_slot_quirks[idx].id;
+> +               }
+>
+>         return quirks;
+>  }
+> @@ -2238,6 +2242,9 @@ static struct dw_mci_of_quirks {
+>         {
+>                 .quirk  = "broken-cd",
+>                 .id     = DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+> +       }, {
+> +               .quirk  = "disable-wp",
+> +               .id     = DW_MCI_QUIRK_NO_WRITE_PROTECT,
+>         },
+>  };
+>
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index babaea9..29ce014 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -213,6 +213,8 @@ struct dw_mci_dma_ops {
+>  #define DW_MCI_QUIRK_HIGHSPEED                 BIT(2)
+>  /* Unreliable card detection */
+>  #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION     BIT(3)
+> +/* No write protect */
+> +#define DW_MCI_QUIRK_NO_WRITE_PROTECT          BIT(4)
+>
+>  /* Slot level quirks */
+>  /* This slot has no write protect */
+> --
+> 1.7.9.5
+>
