@@ -1,121 +1,71 @@
-From: Yunpeng Gao <yunpeng.gao@intel.com>
-Subject: [PATCH] mmc: sdhci-pci: Enable SD/SDIO host controller support on INTEL Merrifield platform
-Date: Mon, 11 Aug 2014 18:58:19 +0800
-Message-ID: <1407754699-5691-1-git-send-email-yunpeng.gao@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:44684 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751685AbaHKK4e (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Aug 2014 06:56:34 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: Re: [PATCH] mmc: rtsx: fix incorrect last byte in R2 response
+Date: Mon, 11 Aug 2014 16:02:54 +0300
+Message-ID: <20140811130254.GP4856@mwanda>
+References: <1407745936-18513-1-git-send-email-rogerable@realtek.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Content-Disposition: inline
+In-Reply-To: <1407745936-18513-1-git-send-email-rogerable@realtek.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: rogerable@realtek.com
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Yunpeng Gao <yunpeng.gao@intel.com>
 
-Current mmc-next mmc driver only supports emmc0/emmc1
-host controllers for Intel Merrifield platform.
-Since Merrifield platform actually disables emmc1 and also
-support SD/SDIO host controllers, submit this patch
-to do:
-1. Enable SDHCI pci host controller support for SD/SDIO;
-2. Change eMMC pin GPIO FLIS setting if eMMC HS200 enabled.
+On Mon, Aug 11, 2014 at 04:32:16PM +0800, rogerable@realtek.com wrote:
+> From: Roger Tseng <rogerable@realtek.com>
+> 
+> Current code erroneously fill the last byte of R2 response with an undefined
+> value. In addition, it is impossible to obtain the real values since the
+> controller actually 'offloads' the last byte(CRC7, end bit) while receiving R2
+> response. This could cause mmc stack to obtain inconsistent CID from the same
+> card after resume and misidentify it as a different card.
+> 
+> Fix by assigning a dummy value 0x01 to the last byte of R2 response.
+> 
+> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+> ---
+>  drivers/mmc/host/rtsx_pci_sdmmc.c |    1 +
+>  drivers/mmc/host/rtsx_usb_sdmmc.c |    1 +
+>  2 files changed, 2 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index dfde4a2..54849d8 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -412,6 +412,7 @@ static void sd_send_cmd_get_rsp(struct realtek_pci_sdmmc *host,
+>  	}
+>  
+>  	if (rsp_type == SD_RSP_TYPE_R2) {
+> +		ptr[16] = 1;
 
-Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
----
- drivers/mmc/host/sdhci-pci.c |   74 ++++++++++++++++++++++++++++++++++++++----
- 1 file changed, 67 insertions(+), 7 deletions(-)
+Avoid magic numbers like 16 and 0x1.
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 52c42fc..6b8351f 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -293,19 +293,79 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
- 	.own_cd_for_runtime_pm = true,
- };
- 
-+/* Define Merrifield FLIS register address */
-+#define TNG_EMMC_0_FLIS_ADDR		0xff0c0900
-+#define TNG_EMMC_FLIS_SLEW		0x00000400
-+#define TNG_EMMC_0_CLK_PULLDOWN		0x00000200
-+
-+static int mrfl_emmc_flis_setup_for_hs200(struct sdhci_pci_slot *slot)
-+{
-+	void __iomem *flis_addr;
-+	unsigned int reg;
-+	int i;
-+
-+	/* If eMMC HS200 not enabled, do nothing and exit */
-+	if (slot->host->quirks2 & SDHCI_QUIRK2_BROKEN_HS200)
-+		return 0;
-+
-+	flis_addr = ioremap_nocache(TNG_EMMC_0_FLIS_ADDR, 64);
-+	if (!flis_addr) {
-+		pr_err("MRFL emmc FLIS addr ioremap failed!\n");
-+		return -ENOMEM;
-+	}
-+
-+	pr_info("MRFL emmc mapped FLIS addr: %p\n", flis_addr);
-+	/*
-+	 * Change TNG gpio FLIS settings for all eMMC0
-+	 * CLK/CMD/DAT pins.
-+	 * That is, including emmc_0_clk, emmc_0_cmd,
-+	 * emmc_0_d_0, emmc_0_d_1, emmc_0_d_2, emmc_0_d_3,
-+	 * emmc_0_d_4, emmc_0_d_5, emmc_0_d_6, emmc_0_d_7
-+	 */
-+	for (i = 0; i < 10; i++) {
-+		reg = readl(flis_addr + (i * 4));
-+		reg |= TNG_EMMC_FLIS_SLEW; /* SLEW B */
-+		writel(reg, flis_addr + (i * 4));
-+	}
-+
-+	/* Disable PullDown for emmc_0_clk */
-+	reg = readl(flis_addr);
-+	reg &= ~TNG_EMMC_0_CLK_PULLDOWN;
-+	writel(reg, flis_addr);
-+
-+	/* Release the mapped address */
-+	iounmap(flis_addr);
-+
-+	return 0;
-+}
-+
- /* Define Host controllers for Intel Merrifield platform */
- #define INTEL_MRFL_EMMC_0	0
- #define INTEL_MRFL_EMMC_1	1
-+#define INTEL_MRFL_SD		2
-+#define INTEL_MRFL_SDIO		3
- 
- static int intel_mrfl_mmc_probe_slot(struct sdhci_pci_slot *slot)
- {
--	if ((PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFL_EMMC_0) &&
--	    (PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFL_EMMC_1))
--		/* SD support is not ready yet */
--		return -ENODEV;
--
--	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
--				 MMC_CAP_1_8V_DDR;
-+	switch (PCI_FUNC(slot->chip->pdev->devfn)) {
-+	case INTEL_MRFL_EMMC_0:
-+		slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA |
-+					MMC_CAP_NONREMOVABLE |
-+					MMC_CAP_1_8V_DDR;
-+		/* Change FLIS reg setup if eMMC HS200 enabled */
-+		mrfl_emmc_flis_setup_for_hs200(slot);
-+		break;
-+	case INTEL_MRFL_SD:
-+		slot->cd_gpio = 77;
-+		break;
-+	case INTEL_MRFL_SDIO:
-+		slot->host->mmc->caps |= MMC_CAP_NONREMOVABLE;
-+		break;
-+	default:
-+		dev_err(&slot->chip->pdev->dev, "Invalid PCI Func %d.\n",
-+			PCI_FUNC(slot->chip->pdev->devfn));
-+		break;
-+	}
- 
- 	return 0;
- }
--- 
-1.7.9.5
+This is subtle enough that it deserves a comment.
 
+		ptr[stat_idx] = 0x1 /* 0x1 chosen randomly */
+
+>  		for (i = 0; i < 4; i++) {
+>  			cmd->resp[i] = get_unaligned_be32(ptr + 1 + i * 4);
+>  			dev_dbg(sdmmc_dev(host), "cmd->resp[%d] = 0x%08x\n",
+
+There are a lot of magic numbers in this function.  We could get rid
+of this i < 4 loop but doing:
+
+		memcpy(cmd->resp, ptr + 1, resp_len);
+
+Currently we don't use resp_len and the resp_len = 5 assignment is off
+by one...  It should be resp_len = 4.  This function is quite ugly.
+
+regards,
+dan carpenter
