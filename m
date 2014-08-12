@@ -1,87 +1,57 @@
-From: Roger <rogerable@realtek.com>
-Subject: Re: [PATCH] mmc: rtsx: fix incorrect last byte in R2 response
-Date: Tue, 12 Aug 2014 15:19:12 +0800
-Message-ID: <53E9BFF0.5030506@realtek.com>
-References: <1407745936-18513-1-git-send-email-rogerable@realtek.com>
- <20140811130254.GP4856@mwanda>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20140811130254.GP4856@mwanda>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn
+From: Yunpeng Gao <yunpeng.gao@intel.com>
+Subject: [PATCH] mmc: core: export more sysfs for debugging purpose
+Date: Tue, 12 Aug 2014 15:28:54 +0800
+Message-ID: <1407828534-15846-1-git-send-email-yunpeng.gao@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:49682 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751981AbaHLHgn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 12 Aug 2014 03:36:43 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Yunpeng Gao <yunpeng.gao@intel.com>, Chuanxiao Xiao <chuanxiao.dong@intel.com>
 
+Add some more sysfs export related to eMMC BK Ops,
+HPI and Hardware Reset features. It'll be helpful
+for debugging.
 
-On 08/11/2014 09:02 PM, Dan Carpenter wrote:
-> On Mon, Aug 11, 2014 at 04:32:16PM +0800, rogerable@realtek.com wrote:
->> From: Roger Tseng <rogerable@realtek.com>
->>
->> Current code erroneously fill the last byte of R2 response with an undefined
->> value. In addition, it is impossible to obtain the real values since the
->> controller actually 'offloads' the last byte(CRC7, end bit) while receiving R2
->> response. This could cause mmc stack to obtain inconsistent CID from the same
->> card after resume and misidentify it as a different card.
->>
->> Fix by assigning a dummy value 0x01 to the last byte of R2 response.
->>
->> Signed-off-by: Roger Tseng <rogerable@realtek.com>
->> ---
->>   drivers/mmc/host/rtsx_pci_sdmmc.c |    1 +
->>   drivers/mmc/host/rtsx_usb_sdmmc.c |    1 +
->>   2 files changed, 2 insertions(+)
->>
->> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
->> index dfde4a2..54849d8 100644
->> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
->> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
->> @@ -412,6 +412,7 @@ static void sd_send_cmd_get_rsp(struct realtek_pci_sdmmc *host,
->>   	}
->>
->>   	if (rsp_type == SD_RSP_TYPE_R2) {
->> +		ptr[16] = 1;
->
-> Avoid magic numbers like 16 and 0x1.
->
-> This is subtle enough that it deserves a comment.
->
-> 		ptr[stat_idx] = 0x1 /* 0x1 chosen randomly */
->
-The 0x1 consists of 7-bit dummy zero CRC and stop bit 1, described in SD 
-card. Anyway, I'll give a comment to this in the next version.
->>   		for (i = 0; i < 4; i++) {
->>   			cmd->resp[i] = get_unaligned_be32(ptr + 1 + i * 4);
->>   			dev_dbg(sdmmc_dev(host), "cmd->resp[%d] = 0x%08x\n",
->
-> There are a lot of magic numbers in this function.  We could get rid
-> of this i < 4 loop but doing:
->
-> 		memcpy(cmd->resp, ptr + 1, resp_len);
->
-> Currently we don't use resp_len and the resp_len = 5 assignment is off
-> by one...  It should be resp_len = 4.  This function is quite ugly.
+Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
+Signed-off-by: Chuanxiao Xiao <chuanxiao.dong@intel.com>
+---
+ drivers/mmc/core/mmc.c |   12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
-I can remove the unused rsp_len in this function. But I'm afraid the 
-loop is still required. The destination cmd->resp is cpu-endian, but the 
-raw response from SD card in the buffer (pointed by ptr) is big-endian.
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 793c6f7..15b7ab0 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -710,6 +710,12 @@ MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
+ MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
+ MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
+ MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
++MMC_DEV_ATTR(hpi_support, "%d\n", card->ext_csd.hpi);
++MMC_DEV_ATTR(hpi_enable, "%d\n", card->ext_csd.hpi_en);
++MMC_DEV_ATTR(hpi_command, "%d\n", card->ext_csd.hpi_cmd);
++MMC_DEV_ATTR(hw_reset_support, "%d\n", card->ext_csd.rst_n_function);
++MMC_DEV_ATTR(bkops_support, "%d\n", card->ext_csd.bkops);
++MMC_DEV_ATTR(bkops_enable, "%d\n", card->ext_csd.bkops_en);
+ 
+ static struct attribute *mmc_std_attrs[] = {
+ 	&dev_attr_cid.attr,
+@@ -728,6 +734,12 @@ static struct attribute *mmc_std_attrs[] = {
+ 	&dev_attr_enhanced_area_size.attr,
+ 	&dev_attr_raw_rpmb_size_mult.attr,
+ 	&dev_attr_rel_sectors.attr,
++	&dev_attr_hpi_support.attr,
++	&dev_attr_hpi_enable.attr,
++	&dev_attr_hpi_command.attr,
++	&dev_attr_hw_reset_support.attr,
++	&dev_attr_bkops_support.attr,
++	&dev_attr_bkops_enable.attr,
+ 	NULL,
+ };
+ ATTRIBUTE_GROUPS(mmc_std);
+-- 
+1.7.9.5
 
-> regards,
-> dan carpenter
->
->
-> ------Please consider the environment before printing this e-mail.
-> .
->
-
-Best regards,
-Roger Tseng
