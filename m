@@ -1,40 +1,28 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 3/5 v2] mmc: sdhci-pltfm: Do not use parent as the host's device
-Date: Tue, 12 Aug 2014 13:51:34 +0200
-Message-ID: <CAPDyKFpR2fuCjD3v6wMWkfCqY4gO3K52vOv8nkyfuLtB1e792w@mail.gmail.com>
-References: <CAPDyKFrb9OSbhHtn=wgbs9Yky1t453rdNBJVgGA62vER-65dYw@mail.gmail.com>
-	<1407839872-12864-1-git-send-email-pawel.moll@arm.com>
+Subject: Re: [PATCH] mmc: include linux/types.h for bool definition in atmel-mci.h
+Date: Tue, 12 Aug 2014 13:58:45 +0200
+Message-ID: <CAPDyKFqMmTVG4DPKYDdd=ekmtPJ2ZKGWa=JqrLNztWfjj8f1oQ@mail.gmail.com>
+References: <1407417246-29709-1-git-send-email-egtvedt@samfundet.no>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f177.google.com ([209.85.216.177]:57853 "EHLO
-	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750699AbaHLLvf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Aug 2014 07:51:35 -0400
-Received: by mail-qc0-f177.google.com with SMTP id x13so2714327qcv.36
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Aug 2014 04:51:34 -0700 (PDT)
-In-Reply-To: <1407839872-12864-1-git-send-email-pawel.moll@arm.com>
+Received: from mail-qc0-f181.google.com ([209.85.216.181]:61781 "EHLO
+	mail-qc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751807AbaHLL6q (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Aug 2014 07:58:46 -0400
+Received: by mail-qc0-f181.google.com with SMTP id x13so2699090qcv.40
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Aug 2014 04:58:45 -0700 (PDT)
+In-Reply-To: <1407417246-29709-1-git-send-email-egtvedt@samfundet.no>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pawel Moll <pawel.moll@arm.com>
-Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
+To: Hans-Christian Egtvedt <egtvedt@samfundet.no>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-On 12 August 2014 12:37, Pawel Moll <pawel.moll@arm.com> wrote:
-> The code selecting a device for the sdhci host has been
-> continuously tweaked (4b711cb13843f5082e82970dd1e8031383134a65
-> "mmc: sdhci-pltfm: Add structure for host-specific data" and
-> a4d2177f00a5252d825236c5124bc1e9918bdb41 "mmc: sdhci-pltfm: dt
-> device does not pass parent to sdhci_alloc_host" while there
-> does not seem to be any reason to use platform device's parent
-> in the first place.
+On 7 August 2014 15:14, Hans-Christian Egtvedt <egtvedt@samfundet.no> wrote:
+> This patch adds an include of linux/types.h to make sure bool is defined
+> before utilized in this header file.
 >
-> The comment saying "Some PCI-based MFD need the parent here"
-> seem to refer to Timberdale FPGA driver (the only MFD driver
-> registering SDHCI cell, drivers/mfd/timberdale.c) but again,
-> the only situation when parent device matter is runtime PM,
-> which is not implemented for Timberdale.
->
-> Signed-off-by: Pawel Moll <pawel.moll@arm.com>
+> Signed-off-by: Hans-Christian Egtvedt <egtvedt@samfundet.no>
 
 Thanks! Queued for 3.18.
 
@@ -42,37 +30,26 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-pltfm.c | 10 ++--------
->  1 file changed, 2 insertions(+), 8 deletions(-)
+>  include/linux/atmel-mci.h | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index 7e834fb..c5b01d6 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -123,7 +123,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
->                                     size_t priv_size)
->  {
->         struct sdhci_host *host;
-> -       struct device_node *np = pdev->dev.of_node;
->         struct resource *iomem;
->         int ret;
+> diff --git a/include/linux/atmel-mci.h b/include/linux/atmel-mci.h
+> index 4c7a4b2..91b77f8 100644
+> --- a/include/linux/atmel-mci.h
+> +++ b/include/linux/atmel-mci.h
+> @@ -1,6 +1,8 @@
+>  #ifndef __LINUX_ATMEL_MCI_H
+>  #define __LINUX_ATMEL_MCI_H
 >
-> @@ -136,13 +135,8 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
->         if (resource_size(iomem) < 0x100)
->                 dev_err(&pdev->dev, "Invalid iomem size!\n");
+> +#include <linux/types.h>
+> +
+>  #define ATMCI_MAX_NR_SLOTS     2
 >
-> -       /* Some PCI-based MFD need the parent here */
-> -       if (pdev->dev.parent != &platform_bus && !np)
-> -               host = sdhci_alloc_host(pdev->dev.parent,
-> -                       sizeof(struct sdhci_pltfm_host) + priv_size);
-> -       else
-> -               host = sdhci_alloc_host(&pdev->dev,
-> -                       sizeof(struct sdhci_pltfm_host) + priv_size);
-> +       host = sdhci_alloc_host(&pdev->dev,
-> +               sizeof(struct sdhci_pltfm_host) + priv_size);
->
->         if (IS_ERR(host)) {
->                 ret = PTR_ERR(host);
+>  /**
 > --
 > 1.9.1
 >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
