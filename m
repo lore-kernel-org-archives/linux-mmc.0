@@ -1,72 +1,57 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 3/5] mmc: sdhci-pltfm: Do not use parent as the host's device
-Date: Tue, 12 Aug 2014 10:58:02 +0200
-Message-ID: <CAPDyKFrb9OSbhHtn=wgbs9Yky1t453rdNBJVgGA62vER-65dYw@mail.gmail.com>
-References: <1406298233-27876-1-git-send-email-pawel.moll@arm.com>
-	<1406298233-27876-3-git-send-email-pawel.moll@arm.com>
-	<1407515785.31897.28.camel@hornet>
-	<CAPDyKFoLU6pnJFmKe7CB0q-hKfwv4uCPSr0cE4aoYMvfhjMteQ@mail.gmail.com>
-	<1407748550.3680.10.camel@hornet>
-	<CAPDyKFruZxUtzUKM+PvsK-_qqcE4OcCaKSkRJ2_01y7TuQMGkA@mail.gmail.com>
+From: "Sun, Yi Y" <yi.y.sun@intel.com>
+Subject: RE: [PATCH] mmc: MMC_NUM_PHY_PARTITION is not right.
+Date: Tue, 12 Aug 2014 09:29:40 +0000
+Message-ID: <525EAED47491124EB5123A51BD2FC791019D95FD@SHSMSX101.ccr.corp.intel.com>
+References: <1406876600-9376-1-git-send-email-yi.y.sun@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFruZxUtzUKM+PvsK-_qqcE4OcCaKSkRJ2_01y7TuQMGkA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "paul-DWxLp4Yu+b8AvxtiuMwx3w@public.gmane.org" <paul-DWxLp4Yu+b8AvxtiuMwx3w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Peter De Schrijver <pdeschrijver-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "arm-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <arm-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:22056 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751382AbaHLJbb convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Aug 2014 05:31:31 -0400
+In-Reply-To: <1406876600-9376-1-git-send-email-yi.y.sun@intel.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On 11 August 2014 11:32, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 11 August 2014 11:15, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org> wrote:
->> On Mon, 2014-08-11 at 10:07 +0100, Ulf Hansson wrote:
->>> On 8 August 2014 18:36, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org> wrote:
->>> > On Fri, 2014-07-25 at 15:23 +0100, Pawel Moll wrote:
->>> >> The code selecting a device for the sdhci host has been
->>> >> continuously tweaked (4b711cb13843f5082e82970dd1e8031383134a65
->>> >> "mmc: sdhci-pltfm: Add structure for host-specific data" and
->>> >> a4d2177f00a5252d825236c5124bc1e9918bdb41 "mmc: sdhci-pltfm: dt
->>> >> device does not pass parent to sdhci_alloc_host") while there
->>> >> does not seem to be any reason to use platform device's parent
->>> >> in the first place.
->>> >>
->>> >> The comment saying "Some PCI-based MFD need the parent here"
->>> >> seem to refer to Timberdale FPGA driver (the only MFD driver
->>> >> registering SDHCI cell, drivers/mfd/timberdale.c) but again,
->>> >> the only situation when parent device matter is runtime PM,
->>> >> which is not implemented for Timberdale.
->>> >>
->>> >> Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
->>> >> Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>
->>> >> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>> >> Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->>> >> Cc: linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
->>> >> Signed-off-by: Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>
->>> >> ---
->>> >>
->>> >> This patch is a part of effort to remove references to platform_bus
->>> >> and make it static.
->>> >>
->>> >> Chris, Anton, Ulf - could you please advise if the assumptions
->>> >> above are correct or if I'm completely wrong? Do you know what
->>> >> where the real reasons to use parent originally? The PCI comment
->>> >> seems like a red herring to me...
->>> >
->>> > Can I take the silence as a suggestion that the change looks ok-ish for
->>> > you?
->>>
->>> Sorry for the delay. I suppose this make sense, but I really don't
->>> know for sure.
->>>
->>> I guess we need some testing in linux-next, to get some confidence.
->>
->> Would you take it into -next then? Unless I'm completely wrong there
->> should be no impact on any in-tree driver...
->
-> I will take it; though I think it's best to queue it for 3.18 to get
-> some more testing.
+Hi, Ulf,
 
-This patch causes a compiler warning, could you please fix it.
+Could you please check this fix? Thanks!
 
-Kind regards
-Uffe
+BRs,
+Sun Yi
+
+-----Original Message-----
+From: Sun, Yi Y 
+Sent: Friday, August 01, 2014 3:03 PM
+To: linux-mmc@vger.kernel.org
+Cc: Sun, Yi Y
+Subject: [PATCH] mmc: MMC_NUM_PHY_PARTITION is not right.
+
+eMMC card can support up to 7 partitions, including 2 boot,
+1 RPMB and 4 GPs. But MMC_NUM_PHY_PARTITION is defined to
+6 so we should fix it to 7.
+
+Signed-off-by: yisun1 <yi.y.sun@intel.com>
+---
+ include/linux/mmc/card.h |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h index d424b9d..6dadac2 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -218,7 +218,7 @@ enum mmc_blk_status {
+  */
+ #define MMC_NUM_BOOT_PARTITION	2
+ #define MMC_NUM_GP_PARTITION	4
+-#define MMC_NUM_PHY_PARTITION	6
++#define MMC_NUM_PHY_PARTITION	7
+ #define MAX_MMC_PART_NAME_LEN	20
+ 
+ /*
+--
+1.7.9.5
+
