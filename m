@@ -1,48 +1,33 @@
-From: Roman Peniaev <r.peniaev@gmail.com>
-Subject: Re: [PATCH 0/2] mmc-utils: RPMB support
-Date: Tue, 12 Aug 2014 23:06:28 +0900
-Message-ID: <CACZ9PQUv0chqWfJo=aMAEzs2OAWEchiKRtoQGy5rLEyALJz-ZQ@mail.gmail.com>
-References: <1405947225-6347-1-git-send-email-r.peniaev@gmail.com>
-	<CAPDyKFoE5Bxn_6wojSbECnUrzNQM4C1i++ye_ApkwovvJYsTFA@mail.gmail.com>
-	<86egwl7rai.fsf@void.printf.net>
-	<CACZ9PQVuJv+pup+f8Yu9TOkupvv11KOsRY0WZg223Cp9=7HfSQ@mail.gmail.com>
-	<86a9797qix.fsf@void.printf.net>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH RFC 3/5] mmc: mmci: relax blksz check for SDIO
+Date: Tue, 12 Aug 2014 15:12:43 +0100
+Message-ID: <20140812141242.GI30401@n2100.arm.linux.org.uk>
+References: <1407844950-8072-1-git-send-email-srinivas.kandadgatla@linaro.org> <1407845080-8353-1-git-send-email-srinivas.kandadgatla@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:33445 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751760AbaHLOGa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Aug 2014 10:06:30 -0400
-Received: by mail-wi0-f173.google.com with SMTP id f8so5912824wiw.6
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Aug 2014 07:06:29 -0700 (PDT)
-In-Reply-To: <86a9797qix.fsf@void.printf.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1407845080-8353-1-git-send-email-srinivas.kandadgatla@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ben Gardiner <bengardiner@nanometrics.ca>, linux-mmc <linux-mmc@vger.kernel.org>
 
-ok, I am late :)
-in that case I can create another patch by myself.
-no problem.
+On Tue, Aug 12, 2014 at 01:04:40PM +0100, Srinivas Kandagatla wrote:
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> 
+> This patch adds condition in mmci_validate_data to skip checking
+> blocksize for SDIO card types. SDIO card type can issue blocksizes
+> which are not exactly power of 2 so this check always fails, resulting
+> in SDIO failures.
 
-On Tue, Aug 12, 2014 at 11:04 PM, Chris Ball <chris@printf.net> wrote:
-> Hi Roman,
->
-> On Tue, Aug 12 2014, Roman Peniaev wrote:
->> Hello all.
->>
->> Am I too late to change the second patch?
->> Few weeks ago I added support of multiple blocks read
->> and forgot to send new one :)
->>
->> I do not want to send incremental patch.
->> Can you change the git history?
->
-> If you send a v2, I can turn it into an incremental patch by just
-> copying the changed files over the existing ones.  Does that work?
-> I prefer not to rewrite history.
->
-> - Chris.
-> --
-> Chris Ball   <http://printf.net/>
+Do you understand why this check is there?
+
+Do you realise that the standard MMCI from ARM Ltd can /only/ perform
+power-of-2 block transfers?
+
+Hence, NAK on this change as it stands.
+
+-- 
+FTTC broadband for 0.8mile line: currently at 9.5Mbps down 400kbps up
+according to speedtest.net.
