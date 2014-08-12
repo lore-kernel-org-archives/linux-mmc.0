@@ -1,101 +1,43 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH 4/4] mmc: mmci: augment driver to handle gpio descriptors
-Date: Tue, 12 Aug 2014 19:25:55 +0200
-Message-ID: <1407864355-21545-4-git-send-email-linus.walleij@linaro.org>
-References: <1407864355-21545-1-git-send-email-linus.walleij@linaro.org>
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <1407864355-21545-1-git-send-email-linus.walleij@linaro.org>
-Sender: linux-gpio-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-gpio@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Alexandre Courbot <gnurou@gmail.com>, Russell King <linux@arm.linux.org.uk>
+From: Apelete Seketeli <apelete@seketeli.net>
+Subject: Re: [PATCH v6 2/2] mmc: jz4740: prepare next dma transfer in
+ parallel with current transfer
+Date: Tue, 12 Aug 2014 20:10:17 +0200
+Message-ID: <20140812181017.GA28666@amegan>
+References: <1405917465-18185-1-git-send-email-apelete@seketeli.net>
+ <1405917465-18185-3-git-send-email-apelete@seketeli.net>
+ <CAPDyKFo4q+YWDgezZPqAHet0sBPE5WvnZzm00MHdf-+jZAY93Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from seketeli.net ([94.23.218.202]:37291 "EHLO ms.seketeli.fr"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752765AbaHLSKR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 12 Aug 2014 14:10:17 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFo4q+YWDgezZPqAHet0sBPE5WvnZzm00MHdf-+jZAY93Q@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, H Hartley Sweeten <hsweeten@visionengravers.com>, Lars-Peter Clausen <lars@metafoo.de>, Wei Yongjun <yongjun_wei@trendmicro.com.cn>, Alex Smith <alex.smith@imgtec.com>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Currently the MMCI driver will only handle GPIO descriptors
-implicitly through the device tree probe glue in mmc_of_init(),
-but devices instatiated other ways such as through board files
-and passing descriptors using the GPIO descriptor table will
-not be able to exploit descriptors.
+On Tue, Aug-12-2014 at 06:22:04 PM +0200, Ulf Hansson wrote:
+> On 21 July 2014 06:37, Apelete Seketeli <apelete@seketeli.net> wrote:
+> > Make use of the MMC asynchronous request capability to prepare the
+> > next DMA transfer request in parallel with the current transfer.
+> > This is done by adding pre-request and post-request callbacks that are
+> > used by the MMC framework during an active data transfer.
+> >
+> > It should help reduce the impact of DMA preparation overhead on the SD
+> > card performance.
+> >
+> > Signed-off-by: Apelete Seketeli <apelete@seketeli.net>
+> 
+> Thanks! Queued for 3.18.
 
-Augment the driver to look for a GPIO descriptor if device
-tree is not used for the device, and if that doesn't work,
-fall back to platform data GPIO assignment using the old
-API. The end goal is to get rid of the platform data integer
-GPIO assingments from the kernel.
+W00t \o/ <-- hacker joy. Thank you :).
 
-This enable the MMCI-embedding platforms to be converted to
-GPIO descritor tables.
+Just out of curiosity, why not pulling these for 3.17 ?
 
-Cc: Alexandre Courbot <gnurou@gmail.com>
-Cc: Russell King <linux@arm.linux.org.uk>
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
- drivers/mmc/host/mmci.c | 53 +++++++++++++++++++++++++++++++++++++++----------
- 1 file changed, 43 insertions(+), 10 deletions(-)
-
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 7ad463e9741c..24a83af6d153 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1552,16 +1552,49 @@ static int mmci_probe(struct amba_device *dev,
- 	writel(0, host->base + MMCIMASK1);
- 	writel(0xfff, host->base + MMCICLEAR);
- 
--	/* If DT, cd/wp gpios must be supplied through it. */
--	if (!np && gpio_is_valid(plat->gpio_cd)) {
--		ret = mmc_gpio_request_cd(mmc, plat->gpio_cd, 0);
--		if (ret)
--			goto clk_disable;
--	}
--	if (!np && gpio_is_valid(plat->gpio_wp)) {
--		ret = mmc_gpio_request_ro(mmc, plat->gpio_wp);
--		if (ret)
--			goto clk_disable;
-+	/*
-+	 * If:
-+	 * - not using DT but using a descriptor table, or
-+	 * - using a table of descriptors ALONGSIDE DT, or
-+	 * look up these descriptors named "cd" and "wp" right here, fail
-+	 * silently of these do not exist and proceed to try platform data
-+	 */
-+	if (!np) {
-+		ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0);
-+		if (!ret)
-+			dev_info(mmc_dev(mmc), "got CD GPIO (table)\n");
-+		else {
-+			if (ret == -EPROBE_DEFER)
-+				goto clk_disable;
-+			else if (gpio_is_valid(plat->gpio_cd)) {
-+				ret = mmc_gpio_request_cd(mmc, plat->gpio_cd, 0);
-+				if (ret)
-+					goto clk_disable;
-+				else
-+					dev_info(mmc_dev(mmc), "got CD GPIO (pdata)\n");
-+			} else {
-+				dev_dbg(mmc_dev(mmc),
-+					"no CD GPIO in DT, table or pdata\n");
-+			}
-+		}
-+
-+		ret = mmc_gpiod_request_ro(mmc, "wp", 0, false, 0);
-+		if (!ret)
-+			dev_info(mmc_dev(mmc), "got WP GPIO (table)\n");
-+		else {
-+			if (ret == -EPROBE_DEFER)
-+				goto clk_disable;
-+			else if (gpio_is_valid(plat->gpio_wp)) {
-+				ret = mmc_gpio_request_ro(mmc, plat->gpio_wp);
-+				if (ret)
-+					goto clk_disable;
-+				else
-+					dev_info(mmc_dev(mmc), "got WP GPIO (pdata)\n");
-+			} else {
-+				dev_dbg(mmc_dev(mmc),
-+					"no WP GPIO in DT, table or pdata\n");
-+			}
-+		}
- 	}
- 
- 	ret = devm_request_irq(&dev->dev, dev->irq[0], mmci_irq, IRQF_SHARED,
+Cheers.
 -- 
-1.9.3
-
+        Apelete
