@@ -1,7 +1,7 @@
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: [PATCH RFC 1/5] mmc: mmci: Enable SDIO support for Qualcomm variant data
-Date: Tue, 12 Aug 2014 13:03:33 +0100
-Message-ID: <1407845013-8228-1-git-send-email-srinivas.kandadgatla@linaro.org>
+Subject: [PATCH RFC 2/5] mmc: mmci: move block size validation under relevant code
+Date: Tue, 12 Aug 2014 13:03:49 +0100
+Message-ID: <1407845029-8271-1-git-send-email-srinivas.kandadgatla@linaro.org>
 References: <1407844950-8072-1-git-send-email-srinivas.kandadgatla@linaro.org>
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1407844950-8072-1-git-send-email-srinivas.kandadgatla@linaro.org>
@@ -12,25 +12,44 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-This patch sets sdio flag in qualcomm variant data to enable WLAN
-connected via sdio on IFC6410 board.
+This code moves a BUG_ON condition to relevant if block, this check is
+not necessary for IPs which can set any arbitrary block size in a given
+range.
+This patch is necessary for SDIO which sets block sizes that are exactly
+not power of 2.
+
+Original issue detected while testing WLAN ath6kl on Qualcomm APQ8064 SOC.
 
 Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 ---
- drivers/mmc/host/mmci.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/mmci.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 9059570..8641572 100644
+index 8641572..99fe80a 100644
 --- a/drivers/mmc/host/mmci.c
 +++ b/drivers/mmc/host/mmci.c
-@@ -203,6 +203,7 @@ static struct variant_data variant_qcom = {
- 	.datactrl_mask_ddrmode	= MCI_QCOM_CLK_SELECT_IN_DDR_MODE,
- 	.data_cmd_enable	= MCI_QCOM_CSPM_DATCMD,
- 	.blksz_datactrl4	= true,
-+	.sdio			= true,
- 	.datalength_bits	= 24,
- 	.pwrreg_powerup		= MCI_PWR_UP,
- 	.f_max			= 208000000,
+@@ -793,15 +793,16 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 	writel(timeout, base + MMCIDATATIMER);
+ 	writel(host->size, base + MMCIDATALENGTH);
+ 
+-	blksz_bits = ffs(data->blksz) - 1;
+-	BUG_ON(1 << blksz_bits != data->blksz);
+ 
+-	if (variant->blksz_datactrl16)
++	if (variant->blksz_datactrl16) {
+ 		datactrl = MCI_DPSM_ENABLE | (data->blksz << 16);
+-	else if (variant->blksz_datactrl4)
++	} else if (variant->blksz_datactrl4) {
+ 		datactrl = MCI_DPSM_ENABLE | (data->blksz << 4);
+-	else
++	} else {
++		blksz_bits = ffs(data->blksz) - 1;
++		BUG_ON(1 << blksz_bits != data->blksz);
+ 		datactrl = MCI_DPSM_ENABLE | blksz_bits << 4;
++	}
+ 
+ 	if (data->flags & MMC_DATA_READ)
+ 		datactrl |= MCI_DPSM_DIRECTION;
 -- 
 1.9.1
