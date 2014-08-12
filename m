@@ -1,111 +1,105 @@
-From: Dinh Nguyen <dinh.linux@gmail.com>
-Subject: Re: [PATCHv10 4/5] ARM: dts: socfpga: unuse the slot-node and
- deprecate the supports-highspeed for dw-mmc
-Date: Mon, 11 Aug 2014 16:03:52 -0500
-Message-ID: <CADhT+wcKrL8f-OyLnKKzsBgyU3PSYFLfsZgvCcdAgVV5BAT76Q@mail.gmail.com>
-References: <1407397082-32495-1-git-send-email-jh80.chung@samsung.com>
-	<1407397082-32495-5-git-send-email-jh80.chung@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1407397082-32495-5-git-send-email-jh80.chung@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Kukjin Kim <kgene.kim@samsung.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, linux-samsung-soc@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Dinh Nguyen <dinguyen@altera.com>
+From: Yunpeng Gao <yunpeng.gao@intel.com>
+Subject: [PATCH] mmc: card: not access RPMB partition for normal read and write
+Date: Tue, 12 Aug 2014 12:01:30 +0800
+Message-ID: <1407816090-7671-1-git-send-email-yunpeng.gao@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:7200 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753033AbaHLD7r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Aug 2014 23:59:47 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chuanxiao Dong <chuanxiao.dong@intel.com>, Yunpeng Gao <yunpeng.gao@intel.com>
 
-On Thu, Aug 7, 2014 at 2:38 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> dw-mmc controller can support multiple slots.
-> But, there are no use-cases anywhere. So we don't need to support the
-> slot-node for dw-mmc controller.
-> And "supports-highspeed" property in dw-mmc is deprecated.
-> "supports-highspeed" property can be replaced with "cap-sd/mmc-highspeed".
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Reviewed-by: Tushar Behera <trblinux@gmail.com>
-> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
-> Acked-by: Dinh Nguyen <dinguyen@altera.com>
-> ---
+From: Chuanxiao Dong <chuanxiao.dong@intel.com>
 
-I've queued this patch in my tree for v3.18.
+During kernel boot, it will try to read some logical sectors
+of each block device node for the possible partition table.
 
-Thanks,
-Dinh
+But since RPMB partition is special and can not be accessed
+by normal eMMC read / write CMDs, it will cause below error
+messages during kernel boot:
+...
+<3>[    4.890052] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
+<3>[    4.892160] mmcblk0rpmb: error -110 transferring data, sector 0, nr 32, cmd response 0x900, card status 0xb00
+<4>[    4.892165] mmcblk0rpmb: retrying using single block read
+<3>[    4.895727] mmcblk0rpmb: timed out sending r/w cmd command, card status 0x400900
+<3>[    4.899269] mmcblk0rpmb: timed out sending r/w cmd command, card status 0x400900
+<3>[    4.901466] mmcblk0rpmb: timed out sending r/w cmd command, card status 0x400900
+<3>[    4.905106] mmcblk0rpmb: timed out sending r/w cmd command, card status 0x400900
+<3>[    4.907166] mmcblk0rpmb: timed out sending r/w cmd command, card status 0x400900
+<3>[    4.909235] mmcblk0rpmb: timed out sending r/w cmd command, card status 0x400900
+<3>[    4.909241] end_request: I/O error, dev mmcblk0rpmb, sector 0
+<3>[    4.909247] Buffer I/O error on device mmcblk0rpmb, logical block 0
+<3>[    4.909263] end_request: I/O error, dev mmcblk0rpmb, sector 8
+<3>[    4.909267] Buffer I/O error on device mmcblk0rpmb, logical block 1
+<3>[    4.909272] end_request: I/O error, dev mmcblk0rpmb, sector 16
+<3>[    4.909275] Buffer I/O error on device mmcblk0rpmb, logical block 2
+<3>[    4.909280] end_request: I/O error, dev mmcblk0rpmb, sector 24
+<3>[    4.909283] Buffer I/O error on device mmcblk0rpmb, logical block 3
+...
 
->  arch/arm/boot/dts/socfpga_arria5.dtsi   |    9 +++------
->  arch/arm/boot/dts/socfpga_cyclone5.dtsi |    9 +++------
->  arch/arm/boot/dts/socfpga_vt.dts        |    9 +++------
->  3 files changed, 9 insertions(+), 18 deletions(-)
->
-> diff --git a/arch/arm/boot/dts/socfpga_arria5.dtsi b/arch/arm/boot/dts/socfpga_arria5.dtsi
-> index 12d1c2c..468fc4c 100644
-> --- a/arch/arm/boot/dts/socfpga_arria5.dtsi
-> +++ b/arch/arm/boot/dts/socfpga_arria5.dtsi
-> @@ -29,13 +29,10 @@
->
->                 dwmmc0@ff704000 {
->                         num-slots = <1>;
-> -                       supports-highspeed;
->                         broken-cd;
-> -
-> -                       slot@0 {
-> -                               reg = <0>;
-> -                               bus-width = <4>;
-> -                       };
-> +                       bus-width = <4>;
-> +                       cap-mmc-highspeed;
-> +                       cap-sd-highspeed;
->                 };
->
->                 sysmgr@ffd08000 {
-> diff --git a/arch/arm/boot/dts/socfpga_cyclone5.dtsi b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-> index bf51182..1ee03c4 100644
-> --- a/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-> +++ b/arch/arm/boot/dts/socfpga_cyclone5.dtsi
-> @@ -30,13 +30,10 @@
->
->                 dwmmc0@ff704000 {
->                         num-slots = <1>;
-> -                       supports-highspeed;
->                         broken-cd;
-> -
-> -                       slot@0 {
-> -                               reg = <0>;
-> -                               bus-width = <4>;
-> -                       };
-> +                       bus-width = <4>;
-> +                       cap-mmc-highspeed;
-> +                       cap-sd-highspeed;
->                 };
->
->                 ethernet@ff702000 {
-> diff --git a/arch/arm/boot/dts/socfpga_vt.dts b/arch/arm/boot/dts/socfpga_vt.dts
-> index 09792b4..f9345e0 100644
-> --- a/arch/arm/boot/dts/socfpga_vt.dts
-> +++ b/arch/arm/boot/dts/socfpga_vt.dts
-> @@ -43,13 +43,10 @@
->
->                 dwmmc0@ff704000 {
->                         num-slots = <1>;
-> -                       supports-highspeed;
->                         broken-cd;
-> -
-> -                       slot@0 {
-> -                               reg = <0>;
-> -                               bus-width = <4>;
-> -                       };
-> +                       bus-width = <4>;
-> +                       cap-mmc-highspeed;
-> +                       cap-sd-highspeed;
->                 };
->
->                 ethernet@ff700000 {
-> --
-> 1.7.9.5
->
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+This patch will discard the access request in eMMC queue if
+it is RPMB partition access request. By this way, it avoids
+trigger above error messages.
+
+Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
+Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+---
+ drivers/mmc/card/block.c |   13 +++++++++++++
+ drivers/mmc/card/queue.c |    2 +-
+ drivers/mmc/card/queue.h |    2 ++
+ 3 files changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 452782b..4b79592 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1025,6 +1025,19 @@ static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
+ 	md->reset_done &= ~type;
+ }
+ 
++int mmc_access_rpmb(struct mmc_queue *mq)
++{
++	struct mmc_blk_data *md = mq->data;
++	/*
++	 * If this is a RPMB partition access, return ture
++	 */
++	if (md && md->part_type == EXT_CSD_PART_CONFIG_ACC_RPMB)
++		return true;
++
++	return false;
++}
++EXPORT_SYMBOL_GPL(mmc_access_rpmb);
++
+ static int mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+ {
+ 	struct mmc_blk_data *md = mq->data;
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 3e049c1..6ceede0 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -38,7 +38,7 @@ static int mmc_prep_request(struct request_queue *q, struct request *req)
+ 		return BLKPREP_KILL;
+ 	}
+ 
+-	if (mq && mmc_card_removed(mq->card))
++	if (mq && (mmc_card_removed(mq->card) || mmc_access_rpmb(mq)))
+ 		return BLKPREP_KILL;
+ 
+ 	req->cmd_flags |= REQ_DONTPREP;
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index 5752d50..99e6521 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -73,4 +73,6 @@ extern void mmc_queue_bounce_post(struct mmc_queue_req *);
+ extern int mmc_packed_init(struct mmc_queue *, struct mmc_card *);
+ extern void mmc_packed_clean(struct mmc_queue *);
+ 
++extern int mmc_access_rpmb(struct mmc_queue *);
++
+ #endif
+-- 
+1.7.9.5
+
