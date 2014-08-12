@@ -1,107 +1,78 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-s3c: fix runtime PM handling on
- sdhci_add_host() failure
-Date: Tue, 12 Aug 2014 13:46:53 +0200
-Message-ID: <CAPDyKFoZ=z560H2hydWdP22RwzXUWdLzxJF+pzOXjxx8FGc3pQ@mail.gmail.com>
-References: <5567000.WJnOP5ckul@amdc1032>
+Subject: Re: [PATCH 3/5 v2] mmc: sdhci-pltfm: Do not use parent as the host's device
+Date: Tue, 12 Aug 2014 13:51:34 +0200
+Message-ID: <CAPDyKFpR2fuCjD3v6wMWkfCqY4gO3K52vOv8nkyfuLtB1e792w@mail.gmail.com>
+References: <CAPDyKFrb9OSbhHtn=wgbs9Yky1t453rdNBJVgGA62vER-65dYw@mail.gmail.com>
+	<1407839872-12864-1-git-send-email-pawel.moll@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <5567000.WJnOP5ckul@amdc1032>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Cc: Chris Ball <chris@printf.net>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ben Dooks <ben-linux@fluff.org>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f177.google.com ([209.85.216.177]:57853 "EHLO
+	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750699AbaHLLvf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Aug 2014 07:51:35 -0400
+Received: by mail-qc0-f177.google.com with SMTP id x13so2714327qcv.36
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Aug 2014 04:51:34 -0700 (PDT)
+In-Reply-To: <1407839872-12864-1-git-send-email-pawel.moll@arm.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Pawel Moll <pawel.moll@arm.com>
+Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 
-On 7 August 2014 18:07, Bartlomiej Zolnierkiewicz
-<b.zolnierkie@samsung.com> wrote:
-> Runtime Power Management handling for the sdhci_add_host() failure
-> case in sdhci_s3c_probe() should match the code in sdhci_s3c_remove()
-> (which uses pm_runtime_disable() call which matches the earlier
-> pm_runtime_enable() one).  Fix it.
+On 12 August 2014 12:37, Pawel Moll <pawel.moll@arm.com> wrote:
+> The code selecting a device for the sdhci host has been
+> continuously tweaked (4b711cb13843f5082e82970dd1e8031383134a65
+> "mmc: sdhci-pltfm: Add structure for host-specific data" and
+> a4d2177f00a5252d825236c5124bc1e9918bdb41 "mmc: sdhci-pltfm: dt
+> device does not pass parent to sdhci_alloc_host" while there
+> does not seem to be any reason to use platform device's parent
+> in the first place.
 >
-> This patch fixes "BUG: spinlock bad magic on CPU#0, swapper/0/1" and
-> "Unbalanced pm_runtime_enable!" warnings.
+> The comment saying "Some PCI-based MFD need the parent here"
+> seem to refer to Timberdale FPGA driver (the only MFD driver
+> registering SDHCI cell, drivers/mfd/timberdale.c) but again,
+> the only situation when parent device matter is runtime PM,
+> which is not implemented for Timberdale.
 >
-> From the kernel log:
-> ...
-> [    1.659631] s3c-sdhci 12530000.sdhci: sdhci_add_host() failed
-> [    1.665096] BUG: spinlock bad magic on CPU#0, swapper/0/1
-> [    1.670433]  lock: 0xea01e484, .magic: 00000000, .owner: <none>/-1, .owner_cpu: 0
-> [    1.677895] CPU: 0 PID: 1 Comm: swapper/0 Not tainted 3.16.0-next-20140804-00008-ga59480f-dirty #707
-> [    1.687037] [<c0013ae4>] (unwind_backtrace) from [<c0010d70>] (show_stack+0x10/0x14)
-> [    1.694740] [<c0010d70>] (show_stack) from [<c04050c8>] (dump_stack+0x68/0xb8)
-> [    1.701948] [<c04050c8>] (dump_stack) from [<c0052558>] (do_raw_spin_lock+0x15c/0x1a4)
-> [    1.709848] [<c0052558>] (do_raw_spin_lock) from [<c040a630>] (_raw_spin_lock_irqsave+0x20/0x28)
-> [    1.718619] [<c040a630>] (_raw_spin_lock_irqsave) from [<c030d7d0>] (sdhci_do_set_ios+0x1c/0x5cc)
-> [    1.727464] [<c030d7d0>] (sdhci_do_set_ios) from [<c030ddfc>] (sdhci_runtime_resume_host+0x50/0x104)
-> [    1.736574] [<c030ddfc>] (sdhci_runtime_resume_host) from [<c02462dc>] (pm_generic_runtime_resume+0x2c/0x40)
-> [    1.746383] [<c02462dc>] (pm_generic_runtime_resume) from [<c0247898>] (__rpm_callback+0x34/0x70)
-> [    1.755233] [<c0247898>] (__rpm_callback) from [<c02478fc>] (rpm_callback+0x28/0x88)
-> [    1.762958] [<c02478fc>] (rpm_callback) from [<c02486f0>] (rpm_resume+0x384/0x4ec)
-> [    1.770511] [<c02486f0>] (rpm_resume) from [<c02488b0>] (pm_runtime_forbid+0x58/0x64)
-> [    1.778325] [<c02488b0>] (pm_runtime_forbid) from [<c030ea70>] (sdhci_s3c_probe+0x4a4/0x540)
-> [    1.786749] [<c030ea70>] (sdhci_s3c_probe) from [<c02429cc>] (platform_drv_probe+0x2c/0x5c)
-> [    1.795076] [<c02429cc>] (platform_drv_probe) from [<c02415f0>] (driver_probe_device+0x114/0x234)
-> [    1.803929] [<c02415f0>] (driver_probe_device) from [<c024179c>] (__driver_attach+0x8c/0x90)
-> [    1.812347] [<c024179c>] (__driver_attach) from [<c023ffb4>] (bus_for_each_dev+0x54/0x88)
-> [    1.820506] [<c023ffb4>] (bus_for_each_dev) from [<c0240df8>] (bus_add_driver+0xd8/0x1cc)
-> [    1.828665] [<c0240df8>] (bus_add_driver) from [<c0241db8>] (driver_register+0x78/0xf4)
-> [    1.836652] [<c0241db8>] (driver_register) from [<c00088a4>] (do_one_initcall+0x80/0x1d0)
-> [    1.844816] [<c00088a4>] (do_one_initcall) from [<c059ac94>] (kernel_init_freeable+0x108/0x1d4)
-> [    1.853503] [<c059ac94>] (kernel_init_freeable) from [<c0401300>] (kernel_init+0x8/0xe4)
-> [    1.861568] [<c0401300>] (kernel_init) from [<c000e538>] (ret_from_fork+0x14/0x3c)
-> [    1.869582] platform 12530000.sdhci: Driver s3c-sdhci requests probe deferral
-> ...
-> [    1.997047] s3c-sdhci 12530000.sdhci: Unbalanced pm_runtime_enable!
-> ...
-> [    2.027235] s3c-sdhci 12530000.sdhci: sdhci_add_host() failed
-> [    2.032884] platform 12530000.sdhci: Driver s3c-sdhci requests probe deferral
-> ...
->
-> Tested on Hardkernel's Exynos4412 based ODROID-U3 board.
->
-> Fixes: 9f4e8151dbbc ("mmc: sdhci-s3c: Enable runtime power management")
-> Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> Cc: Ben Dooks <ben-linux@fluff.org>
-> Signed-off-by: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-> Acked-by: Kyungmin Park <kyungmin.park@samsung.com>
+> Signed-off-by: Pawel Moll <pawel.moll@arm.com>
 
-Thanks! Applied for fixes.
+Thanks! Queued for 3.18.
 
 Kind regards
 Uffe
 
 > ---
-> patch is against next-20140804 branch of linux-next kernel
+>  drivers/mmc/host/sdhci-pltfm.c | 10 ++--------
+>  1 file changed, 2 insertions(+), 8 deletions(-)
 >
->  drivers/mmc/host/sdhci-s3c.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+> index 7e834fb..c5b01d6 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -123,7 +123,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+>                                     size_t priv_size)
+>  {
+>         struct sdhci_host *host;
+> -       struct device_node *np = pdev->dev.of_node;
+>         struct resource *iomem;
+>         int ret;
 >
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index fa5954a..1e47903 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -606,8 +606,6 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
->         ret = sdhci_add_host(host);
->         if (ret) {
->                 dev_err(dev, "sdhci_add_host() failed\n");
-> -               pm_runtime_forbid(&pdev->dev);
-> -               pm_runtime_get_noresume(&pdev->dev);
->                 goto err_req_regs;
->         }
+> @@ -136,13 +135,8 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+>         if (resource_size(iomem) < 0x100)
+>                 dev_err(&pdev->dev, "Invalid iomem size!\n");
 >
-> @@ -618,6 +616,8 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
->         return 0;
+> -       /* Some PCI-based MFD need the parent here */
+> -       if (pdev->dev.parent != &platform_bus && !np)
+> -               host = sdhci_alloc_host(pdev->dev.parent,
+> -                       sizeof(struct sdhci_pltfm_host) + priv_size);
+> -       else
+> -               host = sdhci_alloc_host(&pdev->dev,
+> -                       sizeof(struct sdhci_pltfm_host) + priv_size);
+> +       host = sdhci_alloc_host(&pdev->dev,
+> +               sizeof(struct sdhci_pltfm_host) + priv_size);
 >
->   err_req_regs:
-> +       pm_runtime_disable(&pdev->dev);
-> +
->   err_no_busclks:
->         clk_disable_unprepare(sc->clk_io);
->
+>         if (IS_ERR(host)) {
+>                 ret = PTR_ERR(host);
 > --
-> 1.8.2.3
->
+> 1.9.1
 >
