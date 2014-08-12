@@ -1,57 +1,88 @@
 From: Yunpeng Gao <yunpeng.gao@intel.com>
-Subject: [PATCH] mmc: core: export more sysfs for debugging purpose
-Date: Tue, 12 Aug 2014 15:28:54 +0800
-Message-ID: <1407828534-15846-1-git-send-email-yunpeng.gao@intel.com>
+Subject: [PATCH] mmc: sdhci: use udelay instead of mdelay
+Date: Tue, 12 Aug 2014 16:19:28 +0800
+Message-ID: <1407831568-23862-1-git-send-email-yunpeng.gao@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:49682 "EHLO mga11.intel.com"
+Received: from mga14.intel.com ([192.55.52.115]:11680 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751981AbaHLHgn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 12 Aug 2014 03:36:43 -0400
+	id S1751807AbaHLIRr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 12 Aug 2014 04:17:47 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Yunpeng Gao <yunpeng.gao@intel.com>, Chuanxiao Xiao <chuanxiao.dong@intel.com>
+Cc: Chuanxiao Dong <chuanxiao.dong@intel.com>, Yunpeng Gao <yunpeng.gao@intel.com>
 
-Add some more sysfs export related to eMMC BK Ops,
-HPI and Hardware Reset features. It'll be helpful
-for debugging.
+From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+
+This patch uses udelay instead of mdelay when waiting
+for SDHC hardware to be stable. udelay can help to
+reduce the waiting time when is in critical region
+which is protected by spinlock.
 
 Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
-Signed-off-by: Chuanxiao Xiao <chuanxiao.dong@intel.com>
+Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 ---
- drivers/mmc/core/mmc.c |   12 ++++++++++++
- 1 file changed, 12 insertions(+)
+ drivers/mmc/host/sdhci.c |   12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 793c6f7..15b7ab0 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -710,6 +710,12 @@ MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
- MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
- MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
- MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
-+MMC_DEV_ATTR(hpi_support, "%d\n", card->ext_csd.hpi);
-+MMC_DEV_ATTR(hpi_enable, "%d\n", card->ext_csd.hpi_en);
-+MMC_DEV_ATTR(hpi_command, "%d\n", card->ext_csd.hpi_cmd);
-+MMC_DEV_ATTR(hw_reset_support, "%d\n", card->ext_csd.rst_n_function);
-+MMC_DEV_ATTR(bkops_support, "%d\n", card->ext_csd.bkops);
-+MMC_DEV_ATTR(bkops_enable, "%d\n", card->ext_csd.bkops_en);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 47055f3..74d8c42 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -179,7 +179,7 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
+ 	}
  
- static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_cid.attr,
-@@ -728,6 +734,12 @@ static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_enhanced_area_size.attr,
- 	&dev_attr_raw_rpmb_size_mult.attr,
- 	&dev_attr_rel_sectors.attr,
-+	&dev_attr_hpi_support.attr,
-+	&dev_attr_hpi_enable.attr,
-+	&dev_attr_hpi_command.attr,
-+	&dev_attr_hw_reset_support.attr,
-+	&dev_attr_bkops_support.attr,
-+	&dev_attr_bkops_enable.attr,
- 	NULL,
- };
- ATTRIBUTE_GROUPS(mmc_std);
+ 	/* Wait max 100 ms */
+-	timeout = 100;
++	timeout = 10000;
+ 
+ 	/* hw clears the bit when it's done */
+ 	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
+@@ -190,7 +190,7 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
+ 			return;
+ 		}
+ 		timeout--;
+-		mdelay(1);
++		udelay(10);
+ 	}
+ }
+ EXPORT_SYMBOL_GPL(sdhci_reset);
+@@ -975,7 +975,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 	WARN_ON(host->cmd);
+ 
+ 	/* Wait max 10 ms */
+-	timeout = 10;
++	timeout = 1000;
+ 
+ 	mask = SDHCI_CMD_INHIBIT;
+ 	if ((cmd->data != NULL) || (cmd->flags & MMC_RSP_BUSY))
+@@ -996,7 +996,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 			return;
+ 		}
+ 		timeout--;
+-		mdelay(1);
++		udelay(10);
+ 	}
+ 
+ 	timeout = jiffies;
+@@ -1202,7 +1202,7 @@ clock_set:
+ 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+ 
+ 	/* Wait max 20 ms */
+-	timeout = 20;
++	timeout = 2000;
+ 	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+ 		& SDHCI_CLOCK_INT_STABLE)) {
+ 		if (timeout == 0) {
+@@ -1212,7 +1212,7 @@ clock_set:
+ 			return;
+ 		}
+ 		timeout--;
+-		mdelay(1);
++		udelay(10);
+ 	}
+ 
+ 	clk |= SDHCI_CLOCK_CARD_EN;
 -- 
 1.7.9.5
 
