@@ -1,95 +1,87 @@
-From: Tim Kryger <tim.kryger@gmail.com>
-Subject: [PATCH v2] mmc: core: Remove fixed voltage regulator logic
-Date: Mon, 11 Aug 2014 22:05:12 -0700
-Message-ID: <1407819913-2488-1-git-send-email-tim.kryger@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f177.google.com ([209.85.192.177]:65123 "EHLO
-	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751978AbaHLFEl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Aug 2014 01:04:41 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Roger <rogerable@realtek.com>
+Subject: Re: [PATCH] mmc: rtsx: fix incorrect last byte in R2 response
+Date: Tue, 12 Aug 2014 15:19:12 +0800
+Message-ID: <53E9BFF0.5030506@realtek.com>
+References: <1407745936-18513-1-git-send-email-rogerable@realtek.com>
+ <20140811130254.GP4856@mwanda>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20140811130254.GP4856@mwanda>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Tim Kryger <tim.kryger@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-
-There is no need for regulator consumers to include special logic for
-fixed voltage regulators as they support regulator_set_voltage() just
-like their non-fixed regulator counterparts.
-
-Signed-off-by: Tim Kryger <tim.kryger@gmail.com>
----
-
-Changes in v2:
-  - Remove query of the current voltage, just set the desired voltage
 
 
-This simplification of logic is possible due to a recent change that
-allows fixed regulators to return success for regulator_set_voltage
-operations if the requested range overlaps with the fixed voltage.
+On 08/11/2014 09:02 PM, Dan Carpenter wrote:
+> On Mon, Aug 11, 2014 at 04:32:16PM +0800, rogerable@realtek.com wrote:
+>> From: Roger Tseng <rogerable@realtek.com>
+>>
+>> Current code erroneously fill the last byte of R2 response with an undefined
+>> value. In addition, it is impossible to obtain the real values since the
+>> controller actually 'offloads' the last byte(CRC7, end bit) while receiving R2
+>> response. This could cause mmc stack to obtain inconsistent CID from the same
+>> card after resume and misidentify it as a different card.
+>>
+>> Fix by assigning a dummy value 0x01 to the last byte of R2 response.
+>>
+>> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+>> ---
+>>   drivers/mmc/host/rtsx_pci_sdmmc.c |    1 +
+>>   drivers/mmc/host/rtsx_usb_sdmmc.c |    1 +
+>>   2 files changed, 2 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+>> index dfde4a2..54849d8 100644
+>> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+>> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+>> @@ -412,6 +412,7 @@ static void sd_send_cmd_get_rsp(struct realtek_pci_sdmmc *host,
+>>   	}
+>>
+>>   	if (rsp_type == SD_RSP_TYPE_R2) {
+>> +		ptr[16] = 1;
+>
+> Avoid magic numbers like 16 and 0x1.
+>
+> This is subtle enough that it deserves a comment.
+>
+> 		ptr[stat_idx] = 0x1 /* 0x1 chosen randomly */
+>
+The 0x1 consists of 7-bit dummy zero CRC and stop bit 1, described in SD 
+card. Anyway, I'll give a comment to this in the next version.
+>>   		for (i = 0; i < 4; i++) {
+>>   			cmd->resp[i] = get_unaligned_be32(ptr + 1 + i * 4);
+>>   			dev_dbg(sdmmc_dev(host), "cmd->resp[%d] = 0x%08x\n",
+>
+> There are a lot of magic numbers in this function.  We could get rid
+> of this i < 4 loop but doing:
+>
+> 		memcpy(cmd->resp, ptr + 1, resp_len);
+>
+> Currently we don't use resp_len and the resp_len = 5 assignment is off
+> by one...  It should be resp_len = 4.  This function is quite ugly.
 
-c00dc35 regulator: core: Allow regulator_set_voltage for fixed regulators
+I can remove the unused rsp_len in this function. But I'm afraid the 
+loop is still required. The destination cmd->resp is cpu-endian, but the 
+raw response from SD card in the buffer (pointed by ptr) is big-endian.
 
-I have verified this change on a BeagleBone Black where the eMMC and SD
-card receive a fixed 3.3v supply.  The TI HSMMC driver used on the BBB,
-like the Intel PXA MMC driver, ensures that software only requests VMMC
-be set to supported voltage ranges by calling mmc_regulator_get_ocrmask.
-This function considers the capabilities of the regulator in order to
-determine an appropriate OCR mask of supported voltages that constrains
-the set of values which may later be passed into mmc_regulator_set_ocr.
+> regards,
+> dan carpenter
+>
+>
+> ------Please consider the environment before printing this e-mail.
+> .
+>
 
-Once the following (queued) patch is merged, the SDHCI driver will call
-mmc_regulator_get_supply which then calls mmc_regulator_get_ocrmask.
-
-https://lkml.org/lkml/2014/6/13/451
-
-The Atmel, ARM, Freescale MXC, SuperH Internal MMCIF, Allwinner sunxi,
-Toshiba Mobile IO Controller, and Renesas USDHI6ROL0 drivers already
-call mmc_regulator_get_supply so they too only request voltages that
-are achievable.
-
-There are no other callers of mmc_regulator_set_ocr so this patch should
-be safe.
-
-
- drivers/mmc/core/core.c |   18 +-----------------
- 1 file changed, 1 insertion(+), 17 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 7dc0c85..1a3e35b 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1263,7 +1263,6 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
- 
- 	if (vdd_bit) {
- 		int		tmp;
--		int		voltage;
- 
- 		/*
- 		 * REVISIT mmc_vddrange_to_ocrmask() may have set some
-@@ -1280,22 +1279,7 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
- 			max_uV = min_uV + 100 * 1000;
- 		}
- 
--		/*
--		 * If we're using a fixed/static regulator, don't call
--		 * regulator_set_voltage; it would fail.
--		 */
--		voltage = regulator_get_voltage(supply);
--
--		if (!regulator_can_change_voltage(supply))
--			min_uV = max_uV = voltage;
--
--		if (voltage < 0)
--			result = voltage;
--		else if (voltage < min_uV || voltage > max_uV)
--			result = regulator_set_voltage(supply, min_uV, max_uV);
--		else
--			result = 0;
--
-+		result = regulator_set_voltage(supply, min_uV, max_uV);
- 		if (result == 0 && !mmc->regulator_enabled) {
- 			result = regulator_enable(supply);
- 			if (!result)
--- 
-1.7.9.5
-
+Best regards,
+Roger Tseng
