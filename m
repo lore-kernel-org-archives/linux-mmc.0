@@ -1,75 +1,72 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: core: export more sysfs for debugging purpose
-Date: Tue, 12 Aug 2014 17:49:59 +0900
-Message-ID: <53E9D537.6080104@samsung.com>
-References: <1407828534-15846-1-git-send-email-yunpeng.gao@intel.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 3/5] mmc: sdhci-pltfm: Do not use parent as the host's device
+Date: Tue, 12 Aug 2014 10:58:02 +0200
+Message-ID: <CAPDyKFrb9OSbhHtn=wgbs9Yky1t453rdNBJVgGA62vER-65dYw@mail.gmail.com>
+References: <1406298233-27876-1-git-send-email-pawel.moll@arm.com>
+	<1406298233-27876-3-git-send-email-pawel.moll@arm.com>
+	<1407515785.31897.28.camel@hornet>
+	<CAPDyKFoLU6pnJFmKe7CB0q-hKfwv4uCPSr0cE4aoYMvfhjMteQ@mail.gmail.com>
+	<1407748550.3680.10.camel@hornet>
+	<CAPDyKFruZxUtzUKM+PvsK-_qqcE4OcCaKSkRJ2_01y7TuQMGkA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:57341 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752869AbaHLIuC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Aug 2014 04:50:02 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0NA600FAOR7CAP70@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 12 Aug 2014 17:50:00 +0900 (KST)
-In-reply-to: <1407828534-15846-1-git-send-email-yunpeng.gao@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFruZxUtzUKM+PvsK-_qqcE4OcCaKSkRJ2_01y7TuQMGkA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "paul-DWxLp4Yu+b8AvxtiuMwx3w@public.gmane.org" <paul-DWxLp4Yu+b8AvxtiuMwx3w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Peter De Schrijver <pdeschrijver-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "arm-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <arm-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Yunpeng Gao <yunpeng.gao@intel.com>, linux-mmc@vger.kernel.org
-Cc: Chuanxiao Xiao <chuanxiao.dong@intel.com>
 
-Hi,
+On 11 August 2014 11:32, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On 11 August 2014 11:15, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org> wrote:
+>> On Mon, 2014-08-11 at 10:07 +0100, Ulf Hansson wrote:
+>>> On 8 August 2014 18:36, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org> wrote:
+>>> > On Fri, 2014-07-25 at 15:23 +0100, Pawel Moll wrote:
+>>> >> The code selecting a device for the sdhci host has been
+>>> >> continuously tweaked (4b711cb13843f5082e82970dd1e8031383134a65
+>>> >> "mmc: sdhci-pltfm: Add structure for host-specific data" and
+>>> >> a4d2177f00a5252d825236c5124bc1e9918bdb41 "mmc: sdhci-pltfm: dt
+>>> >> device does not pass parent to sdhci_alloc_host") while there
+>>> >> does not seem to be any reason to use platform device's parent
+>>> >> in the first place.
+>>> >>
+>>> >> The comment saying "Some PCI-based MFD need the parent here"
+>>> >> seem to refer to Timberdale FPGA driver (the only MFD driver
+>>> >> registering SDHCI cell, drivers/mfd/timberdale.c) but again,
+>>> >> the only situation when parent device matter is runtime PM,
+>>> >> which is not implemented for Timberdale.
+>>> >>
+>>> >> Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
+>>> >> Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>
+>>> >> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>> >> Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>>> >> Cc: linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+>>> >> Signed-off-by: Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>
+>>> >> ---
+>>> >>
+>>> >> This patch is a part of effort to remove references to platform_bus
+>>> >> and make it static.
+>>> >>
+>>> >> Chris, Anton, Ulf - could you please advise if the assumptions
+>>> >> above are correct or if I'm completely wrong? Do you know what
+>>> >> where the real reasons to use parent originally? The PCI comment
+>>> >> seems like a red herring to me...
+>>> >
+>>> > Can I take the silence as a suggestion that the change looks ok-ish for
+>>> > you?
+>>>
+>>> Sorry for the delay. I suppose this make sense, but I really don't
+>>> know for sure.
+>>>
+>>> I guess we need some testing in linux-next, to get some confidence.
+>>
+>> Would you take it into -next then? Unless I'm completely wrong there
+>> should be no impact on any in-tree driver...
+>
+> I will take it; though I think it's best to queue it for 3.18 to get
+> some more testing.
 
-On 08/12/2014 04:28 PM, Yunpeng Gao wrote:
-> Add some more sysfs export related to eMMC BK Ops,
-> HPI and Hardware Reset features. It'll be helpful
-> for debugging.
+This patch causes a compiler warning, could you please fix it.
 
-Did you use "mmc-utils"?
-
-Best Regards,
-Jaehoon Chung
-> 
-> Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
-> Signed-off-by: Chuanxiao Xiao <chuanxiao.dong@intel.com>
-> ---
->  drivers/mmc/core/mmc.c |   12 ++++++++++++
->  1 file changed, 12 insertions(+)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 793c6f7..15b7ab0 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -710,6 +710,12 @@ MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
->  MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
->  MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
->  MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
-> +MMC_DEV_ATTR(hpi_support, "%d\n", card->ext_csd.hpi);
-> +MMC_DEV_ATTR(hpi_enable, "%d\n", card->ext_csd.hpi_en);
-> +MMC_DEV_ATTR(hpi_command, "%d\n", card->ext_csd.hpi_cmd);
-> +MMC_DEV_ATTR(hw_reset_support, "%d\n", card->ext_csd.rst_n_function);
-> +MMC_DEV_ATTR(bkops_support, "%d\n", card->ext_csd.bkops);
-> +MMC_DEV_ATTR(bkops_enable, "%d\n", card->ext_csd.bkops_en);
->  
->  static struct attribute *mmc_std_attrs[] = {
->  	&dev_attr_cid.attr,
-> @@ -728,6 +734,12 @@ static struct attribute *mmc_std_attrs[] = {
->  	&dev_attr_enhanced_area_size.attr,
->  	&dev_attr_raw_rpmb_size_mult.attr,
->  	&dev_attr_rel_sectors.attr,
-> +	&dev_attr_hpi_support.attr,
-> +	&dev_attr_hpi_enable.attr,
-> +	&dev_attr_hpi_command.attr,
-> +	&dev_attr_hw_reset_support.attr,
-> +	&dev_attr_bkops_support.attr,
-> +	&dev_attr_bkops_enable.attr,
->  	NULL,
->  };
->  ATTRIBUTE_GROUPS(mmc_std);
-> 
-
+Kind regards
+Uffe
