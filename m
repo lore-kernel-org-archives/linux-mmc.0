@@ -1,49 +1,49 @@
-From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH 2/5] mmc: dw_mmc-pci: Remove superflous #else condition on
- CONFIG_PM_SLEEP
-Date: Tue, 12 Aug 2014 17:14:26 +0100
-Message-ID: <1407860069-12706-3-git-send-email-peter.griffin@linaro.org>
+From: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 4/5] mmc: sdhci-pci: Use SET_RUNTIME_PM_OPS macro to set runtime pm callbacks
+Date: Tue, 12 Aug 2014 17:14:28 +0100
+Message-ID: <1407860069-12706-5-git-send-email-peter.griffin@linaro.org>
 References: <1407860069-12706-1-git-send-email-peter.griffin@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1407860069-12706-1-git-send-email-peter.griffin@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, jarkko.lavinen@nokia.com, balajitk@ti.com, baohua@kernel.org, viresh.linux@gmail.com, ian.molton@codethink.co.uk, maxime.ripard@free-electrons.com, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, spear-devel@list.st.com, linux-tegra@vger.kernel.org, michal.simek@xilinx.com, swarren@wwwdotorg.org
-Cc: peter.griffin@linaro.org, lee.jones@linaro.org, patches@linaro.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1407860069-12706-1-git-send-email-peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jarkko.lavinen-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org, balajitk-l0cyMroinI0@public.gmane.org, baohua-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, viresh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, ian.molton-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org, maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, spear-devel-nkJGhpqTU55BDgjK7y7TUQ@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org
+Cc: peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-As the code is using SIMPLE_DEV_PM_OPS helper, this compiles away to
-nothing if CONFIG_PM_SLEEP is disabled. Thus we don't need to #define
-the suspend/resume callbacks to NULL.
+This allows us to get rid of the #else condition, as the macro compiles
+away to nothing if not enabled.
 
-Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+Signed-off-by: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/mmc/host/dw_mmc-pci.c | 3 ---
- 1 file changed, 3 deletions(-)
+ drivers/mmc/host/sdhci-pci.c | 11 ++---------
+ 1 file changed, 2 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc-pci.c
-index f70546a..5523b84 100644
---- a/drivers/mmc/host/dw_mmc-pci.c
-+++ b/drivers/mmc/host/dw_mmc-pci.c
-@@ -95,9 +95,6 @@ static int dw_mci_pci_resume(struct device *dev)
- 
- 	return dw_mci_resume(host);
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 52c42fc..745629d 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -1267,20 +1267,13 @@ static int sdhci_pci_runtime_idle(struct device *dev)
+ 	return 0;
  }
--#else
--#define dw_mci_pci_suspend	NULL
--#define dw_mci_pci_resume	NULL
- #endif /* CONFIG_PM_SLEEP */
  
- static SIMPLE_DEV_PM_OPS(dw_mci_pci_pmops, dw_mci_pci_suspend, dw_mci_pci_resume);
+-#else
+-
+-#define sdhci_pci_runtime_suspend	NULL
+-#define sdhci_pci_runtime_resume	NULL
+-#define sdhci_pci_runtime_idle		NULL
+-
+ #endif
+ 
+ static const struct dev_pm_ops sdhci_pci_pm_ops = {
+ 	.suspend = sdhci_pci_suspend,
+ 	.resume = sdhci_pci_resume,
+-	.runtime_suspend = sdhci_pci_runtime_suspend,
+-	.runtime_resume = sdhci_pci_runtime_resume,
+-	.runtime_idle = sdhci_pci_runtime_idle,
++	SET_RUNTIME_PM_OPS(sdhci_pci_runtime_suspend,
++			sdhci_pci_runtime_resume, sdhci_pci_runtime_idle)
+ };
+ 
+ /*****************************************************************************\
 -- 
 1.9.1
