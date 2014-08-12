@@ -1,125 +1,107 @@
-From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Subject: RE: [PATCH] mmc: card: not access RPMB partition for normal read
- and write
-Date: Tue, 12 Aug 2014 10:54:39 +0000
-Message-ID: <0AA7DC03D52A654FA5AF208AE38A967D01D7A131@shsmsx102.ccr.corp.intel.com>
-References: <1407816090-7671-1-git-send-email-yunpeng.gao@intel.com>
- <CAPDyKFo11JSeEBbCfDG=0XPMnBXd_GHqx15G5yu9dGaR5R4OxA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-s3c: fix runtime PM handling on
+ sdhci_add_host() failure
+Date: Tue, 12 Aug 2014 13:46:53 +0200
+Message-ID: <CAPDyKFoZ=z560H2hydWdP22RwzXUWdLzxJF+pzOXjxx8FGc3pQ@mail.gmail.com>
+References: <5567000.WJnOP5ckul@amdc1032>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:16261 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751274AbaHLKys (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 12 Aug 2014 06:54:48 -0400
-In-Reply-To: <CAPDyKFo11JSeEBbCfDG=0XPMnBXd_GHqx15G5yu9dGaR5R4OxA@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <5567000.WJnOP5ckul@amdc1032>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Cc: Chris Ball <chris@printf.net>, Mark Brown <broonie@opensource.wolfsonmicro.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ben Dooks <ben-linux@fluff.org>, Kyungmin Park <kyungmin.park@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
 
-VGhhbmtzIGZvciB0aGUgcmVtaW5kZXIuDQoNCkkgY29uZmlybWVkIHBhdGNoIDUzZDhmOTc0NjJi
-MGJiYjUxMTUwZjRkNmJjMmZkNDUzMzZhMDA4YjkgLSAnIG1tYzogY2FyZDogRG8gbm90IHNjYW4g
-UlBNQiBwYXJ0aXRpb25zJyBoYXMgYWxyZWFkeSBiZWVuIGluIHRoZSBrZXJuZWwgbW1jIGRyaXZl
-ciBJ4oCZbSB1c2luZy4NCkJ1dCBzZWVtcyBpdCBkb2VzIG5vdCBmaXggdGhpcyBpc3N1ZS4NCg0K
-QWN0dWFsbHksIGFmdGVyIGFkZGluZyBkZWJ1ZyBvdXRwdXQgZm9yICdtZC0+ZGlzay0+ZmxhZ3Mn
-IHdoZW4gZXJyb3IgaGFwcGVuZWQsIGJlbG93IGVycm9yIG1lc3NhZ2UgY2FwdHVyZWQ6DQouLi4N
-CjwzPlsgICAgNS4wNjgyNDldIG1tY2JsazBycG1iOiBlcnJvciAtMTEwIHRyYW5zZmVycmluZyBk
-YXRhLCBzZWN0b3IgMCwgbnIgMzIsIGNtZCByZXNwb25zZSAweDkwMCwgY2FyZCBzdGF0dXMgMHhi
-MDANCjw0PlsgICAgNS4wNjgyNTVdIG1tY2JsazBycG1iOiByZXRyeWluZyB1c2luZyBzaW5nbGUg
-YmxvY2sgcmVhZC4gbWQtPmRpc2stPmZsYWdzOiAweDIxMA0KLi4uDQoNCm1kLT5kaXNrLT5mbGFn
-cyB2YWx1ZSBpcyAnMHgyMTAnLCB3aGljaCBtZWFucyAnIEdFTkhEX0ZMX05PX1BBUlRfU0NBTicg
-KGJpdCA5KSBoYXMgYWxyZWFkeSBiZWVuIHNldC4NClNvLCBJJ20gbm90IHN1cmUgd2h5IGl0IGRv
-ZXMgbm90IHdvcmsuDQoNCkkgb2JzZXJ2ZWQgdGhpcyBpc3N1ZSBvbiBteSBNZXJyaWZpZWxkIFZW
-IGJvYXJkLg0KRGlkIGFueW9uZSBlbHNlIG9ic2VydmVkIHRoZSBzaW1pbGFyIGlzc3VlIG9uIG90
-aGVyIHBsYXRmb3JtPyBUaGFua3MuDQoNClJlZ2FyZHMsDQpZdW5wZW5nDQoNCi0tLS0tT3JpZ2lu
-YWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBsaW51eC1tbWMtb3duZXJAdmdlci5rZXJuZWwub3JnIFtt
-YWlsdG86bGludXgtbW1jLW93bmVyQHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFVsZiBI
-YW5zc29uDQpTZW50OiBUdWVzZGF5LCBBdWd1c3QgMTIsIDIwMTQgNDozNyBQTQ0KVG86IEdhbywg
-WXVucGVuZw0KQ2M6IGxpbnV4LW1tYzsgRG9uZywgQ2h1YW54aWFvDQpTdWJqZWN0OiBSZTogW1BB
-VENIXSBtbWM6IGNhcmQ6IG5vdCBhY2Nlc3MgUlBNQiBwYXJ0aXRpb24gZm9yIG5vcm1hbCByZWFk
-IGFuZCB3cml0ZQ0KDQpPbiAxMiBBdWd1c3QgMjAxNCAwNjowMSwgWXVucGVuZyBHYW8gPHl1bnBl
-bmcuZ2FvQGludGVsLmNvbT4gd3JvdGU6DQo+IEZyb206IENodWFueGlhbyBEb25nIDxjaHVhbnhp
-YW8uZG9uZ0BpbnRlbC5jb20+DQo+DQo+IER1cmluZyBrZXJuZWwgYm9vdCwgaXQgd2lsbCB0cnkg
-dG8gcmVhZCBzb21lIGxvZ2ljYWwgc2VjdG9ycyBvZiBlYWNoIA0KPiBibG9jayBkZXZpY2Ugbm9k
-ZSBmb3IgdGhlIHBvc3NpYmxlIHBhcnRpdGlvbiB0YWJsZS4NCj4NCj4gQnV0IHNpbmNlIFJQTUIg
-cGFydGl0aW9uIGlzIHNwZWNpYWwgYW5kIGNhbiBub3QgYmUgYWNjZXNzZWQgYnkgbm9ybWFsIA0K
-PiBlTU1DIHJlYWQgLyB3cml0ZSBDTURzLCBpdCB3aWxsIGNhdXNlIGJlbG93IGVycm9yIG1lc3Nh
-Z2VzIGR1cmluZyANCj4ga2VybmVsIGJvb3Q6DQoNClRoZSBmb2xsb3dpbmcgcGF0Y2ggd2VyZSBp
-bmNsdWRlZCBpbiAzLjgsIGRvZXMgdGhpcyBzb2x2ZSB5b3VyIGlzc3VlPw0KDQo1M2Q4Zjk3IG1t
-YzogY2FyZDogRG8gbm90IHNjYW4gUlBNQiBwYXJ0aXRpb25zDQoNCktpbmQgcmVnYXJkcw0KVWZm
-ZQ0KDQo+IC4uLg0KPiA8Mz5bICAgIDQuODkwMDUyXSBtbWMwOiBHb3QgZGF0YSBpbnRlcnJ1cHQg
-MHgwMDAwMDAwMiBldmVuIHRob3VnaCBubyBkYXRhIG9wZXJhdGlvbiB3YXMgaW4gcHJvZ3Jlc3Mu
-DQo+IDwzPlsgICAgNC44OTIxNjBdIG1tY2JsazBycG1iOiBlcnJvciAtMTEwIHRyYW5zZmVycmlu
-ZyBkYXRhLCBzZWN0b3IgMCwgbnIgMzIsIGNtZCByZXNwb25zZSAweDkwMCwgY2FyZCBzdGF0dXMg
-MHhiMDANCj4gPDQ+WyAgICA0Ljg5MjE2NV0gbW1jYmxrMHJwbWI6IHJldHJ5aW5nIHVzaW5nIHNp
-bmdsZSBibG9jayByZWFkDQo+IDwzPlsgICAgNC44OTU3MjddIG1tY2JsazBycG1iOiB0aW1lZCBv
-dXQgc2VuZGluZyByL3cgY21kIGNvbW1hbmQsIGNhcmQgc3RhdHVzIDB4NDAwOTAwDQo+IDwzPlsg
-ICAgNC44OTkyNjldIG1tY2JsazBycG1iOiB0aW1lZCBvdXQgc2VuZGluZyByL3cgY21kIGNvbW1h
-bmQsIGNhcmQgc3RhdHVzIDB4NDAwOTAwDQo+IDwzPlsgICAgNC45MDE0NjZdIG1tY2JsazBycG1i
-OiB0aW1lZCBvdXQgc2VuZGluZyByL3cgY21kIGNvbW1hbmQsIGNhcmQgc3RhdHVzIDB4NDAwOTAw
-DQo+IDwzPlsgICAgNC45MDUxMDZdIG1tY2JsazBycG1iOiB0aW1lZCBvdXQgc2VuZGluZyByL3cg
-Y21kIGNvbW1hbmQsIGNhcmQgc3RhdHVzIDB4NDAwOTAwDQo+IDwzPlsgICAgNC45MDcxNjZdIG1t
-Y2JsazBycG1iOiB0aW1lZCBvdXQgc2VuZGluZyByL3cgY21kIGNvbW1hbmQsIGNhcmQgc3RhdHVz
-IDB4NDAwOTAwDQo+IDwzPlsgICAgNC45MDkyMzVdIG1tY2JsazBycG1iOiB0aW1lZCBvdXQgc2Vu
-ZGluZyByL3cgY21kIGNvbW1hbmQsIGNhcmQgc3RhdHVzIDB4NDAwOTAwDQo+IDwzPlsgICAgNC45
-MDkyNDFdIGVuZF9yZXF1ZXN0OiBJL08gZXJyb3IsIGRldiBtbWNibGswcnBtYiwgc2VjdG9yIDAN
-Cj4gPDM+WyAgICA0LjkwOTI0N10gQnVmZmVyIEkvTyBlcnJvciBvbiBkZXZpY2UgbW1jYmxrMHJw
-bWIsIGxvZ2ljYWwgYmxvY2sgMA0KPiA8Mz5bICAgIDQuOTA5MjYzXSBlbmRfcmVxdWVzdDogSS9P
-IGVycm9yLCBkZXYgbW1jYmxrMHJwbWIsIHNlY3RvciA4DQo+IDwzPlsgICAgNC45MDkyNjddIEJ1
-ZmZlciBJL08gZXJyb3Igb24gZGV2aWNlIG1tY2JsazBycG1iLCBsb2dpY2FsIGJsb2NrIDENCj4g
-PDM+WyAgICA0LjkwOTI3Ml0gZW5kX3JlcXVlc3Q6IEkvTyBlcnJvciwgZGV2IG1tY2JsazBycG1i
-LCBzZWN0b3IgMTYNCj4gPDM+WyAgICA0LjkwOTI3NV0gQnVmZmVyIEkvTyBlcnJvciBvbiBkZXZp
-Y2UgbW1jYmxrMHJwbWIsIGxvZ2ljYWwgYmxvY2sgMg0KPiA8Mz5bICAgIDQuOTA5MjgwXSBlbmRf
-cmVxdWVzdDogSS9PIGVycm9yLCBkZXYgbW1jYmxrMHJwbWIsIHNlY3RvciAyNA0KPiA8Mz5bICAg
-IDQuOTA5MjgzXSBCdWZmZXIgSS9PIGVycm9yIG9uIGRldmljZSBtbWNibGswcnBtYiwgbG9naWNh
-bCBibG9jayAzDQo+IC4uLg0KPg0KPiBUaGlzIHBhdGNoIHdpbGwgZGlzY2FyZCB0aGUgYWNjZXNz
-IHJlcXVlc3QgaW4gZU1NQyBxdWV1ZSBpZiBpdCBpcyBSUE1CIA0KPiBwYXJ0aXRpb24gYWNjZXNz
-IHJlcXVlc3QuIEJ5IHRoaXMgd2F5LCBpdCBhdm9pZHMgdHJpZ2dlciBhYm92ZSBlcnJvciANCj4g
-bWVzc2FnZXMuDQo+DQo+IFNpZ25lZC1vZmYtYnk6IFl1bnBlbmcgR2FvIDx5dW5wZW5nLmdhb0Bp
-bnRlbC5jb20+DQo+IFNpZ25lZC1vZmYtYnk6IENodWFueGlhbyBEb25nIDxjaHVhbnhpYW8uZG9u
-Z0BpbnRlbC5jb20+DQo+IC0tLQ0KPiAgZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jIHwgICAxMyAr
-KysrKysrKysrKysrDQo+ICBkcml2ZXJzL21tYy9jYXJkL3F1ZXVlLmMgfCAgICAyICstDQo+ICBk
-cml2ZXJzL21tYy9jYXJkL3F1ZXVlLmggfCAgICAyICsrDQo+ICAzIGZpbGVzIGNoYW5nZWQsIDE2
-IGluc2VydGlvbnMoKyksIDEgZGVsZXRpb24oLSkNCj4NCj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMv
-bW1jL2NhcmQvYmxvY2suYyBiL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYyBpbmRleCANCj4gNDUy
-NzgyYi4uNGI3OTU5MiAxMDA2NDQNCj4gLS0tIGEvZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jDQo+
-ICsrKyBiL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYw0KPiBAQCAtMTAyNSw2ICsxMDI1LDE5IEBA
-IHN0YXRpYyBpbmxpbmUgdm9pZCBtbWNfYmxrX3Jlc2V0X3N1Y2Nlc3Moc3RydWN0IG1tY19ibGtf
-ZGF0YSAqbWQsIGludCB0eXBlKQ0KPiAgICAgICAgIG1kLT5yZXNldF9kb25lICY9IH50eXBlOw0K
-PiAgfQ0KPg0KPiAraW50IG1tY19hY2Nlc3NfcnBtYihzdHJ1Y3QgbW1jX3F1ZXVlICptcSkgew0K
-PiArICAgICAgIHN0cnVjdCBtbWNfYmxrX2RhdGEgKm1kID0gbXEtPmRhdGE7DQo+ICsgICAgICAg
-LyoNCj4gKyAgICAgICAgKiBJZiB0aGlzIGlzIGEgUlBNQiBwYXJ0aXRpb24gYWNjZXNzLCByZXR1
-cm4gdHVyZQ0KPiArICAgICAgICAqLw0KPiArICAgICAgIGlmIChtZCAmJiBtZC0+cGFydF90eXBl
-ID09IEVYVF9DU0RfUEFSVF9DT05GSUdfQUNDX1JQTUIpDQo+ICsgICAgICAgICAgICAgICByZXR1
-cm4gdHJ1ZTsNCj4gKw0KPiArICAgICAgIHJldHVybiBmYWxzZTsNCj4gK30NCj4gK0VYUE9SVF9T
-WU1CT0xfR1BMKG1tY19hY2Nlc3NfcnBtYik7DQo+ICsNCj4gIHN0YXRpYyBpbnQgbW1jX2Jsa19p
-c3N1ZV9kaXNjYXJkX3JxKHN0cnVjdCBtbWNfcXVldWUgKm1xLCBzdHJ1Y3QgDQo+IHJlcXVlc3Qg
-KnJlcSkgIHsNCj4gICAgICAgICBzdHJ1Y3QgbW1jX2Jsa19kYXRhICptZCA9IG1xLT5kYXRhOyBk
-aWZmIC0tZ2l0IA0KPiBhL2RyaXZlcnMvbW1jL2NhcmQvcXVldWUuYyBiL2RyaXZlcnMvbW1jL2Nh
-cmQvcXVldWUuYyBpbmRleCANCj4gM2UwNDljMS4uNmNlZWRlMCAxMDA2NDQNCj4gLS0tIGEvZHJp
-dmVycy9tbWMvY2FyZC9xdWV1ZS5jDQo+ICsrKyBiL2RyaXZlcnMvbW1jL2NhcmQvcXVldWUuYw0K
-PiBAQCAtMzgsNyArMzgsNyBAQCBzdGF0aWMgaW50IG1tY19wcmVwX3JlcXVlc3Qoc3RydWN0IHJl
-cXVlc3RfcXVldWUgKnEsIHN0cnVjdCByZXF1ZXN0ICpyZXEpDQo+ICAgICAgICAgICAgICAgICBy
-ZXR1cm4gQkxLUFJFUF9LSUxMOw0KPiAgICAgICAgIH0NCj4NCj4gLSAgICAgICBpZiAobXEgJiYg
-bW1jX2NhcmRfcmVtb3ZlZChtcS0+Y2FyZCkpDQo+ICsgICAgICAgaWYgKG1xICYmIChtbWNfY2Fy
-ZF9yZW1vdmVkKG1xLT5jYXJkKSB8fCBtbWNfYWNjZXNzX3JwbWIobXEpKSkNCj4gICAgICAgICAg
-ICAgICAgIHJldHVybiBCTEtQUkVQX0tJTEw7DQo+DQo+ICAgICAgICAgcmVxLT5jbWRfZmxhZ3Mg
-fD0gUkVRX0RPTlRQUkVQOyBkaWZmIC0tZ2l0IA0KPiBhL2RyaXZlcnMvbW1jL2NhcmQvcXVldWUu
-aCBiL2RyaXZlcnMvbW1jL2NhcmQvcXVldWUuaCBpbmRleCANCj4gNTc1MmQ1MC4uOTllNjUyMSAx
-MDA2NDQNCj4gLS0tIGEvZHJpdmVycy9tbWMvY2FyZC9xdWV1ZS5oDQo+ICsrKyBiL2RyaXZlcnMv
-bW1jL2NhcmQvcXVldWUuaA0KPiBAQCAtNzMsNCArNzMsNiBAQCBleHRlcm4gdm9pZCBtbWNfcXVl
-dWVfYm91bmNlX3Bvc3Qoc3RydWN0IA0KPiBtbWNfcXVldWVfcmVxICopOyAgZXh0ZXJuIGludCBt
-bWNfcGFja2VkX2luaXQoc3RydWN0IG1tY19xdWV1ZSAqLCANCj4gc3RydWN0IG1tY19jYXJkICop
-OyAgZXh0ZXJuIHZvaWQgbW1jX3BhY2tlZF9jbGVhbihzdHJ1Y3QgbW1jX3F1ZXVlICopOw0KPg0K
-PiArZXh0ZXJuIGludCBtbWNfYWNjZXNzX3JwbWIoc3RydWN0IG1tY19xdWV1ZSAqKTsNCj4gKw0K
-PiAgI2VuZGlmDQo+IC0tDQo+IDEuNy45LjUNCj4NCj4gLS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJv
-bSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyIgDQo+IGlu
-IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUg
-bWFqb3Jkb21vIA0KPiBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1p
-bmZvLmh0bWwNCi0tDQpUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
-ZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFq
-b3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdl
-ci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
+On 7 August 2014 18:07, Bartlomiej Zolnierkiewicz
+<b.zolnierkie@samsung.com> wrote:
+> Runtime Power Management handling for the sdhci_add_host() failure
+> case in sdhci_s3c_probe() should match the code in sdhci_s3c_remove()
+> (which uses pm_runtime_disable() call which matches the earlier
+> pm_runtime_enable() one).  Fix it.
+>
+> This patch fixes "BUG: spinlock bad magic on CPU#0, swapper/0/1" and
+> "Unbalanced pm_runtime_enable!" warnings.
+>
+> From the kernel log:
+> ...
+> [    1.659631] s3c-sdhci 12530000.sdhci: sdhci_add_host() failed
+> [    1.665096] BUG: spinlock bad magic on CPU#0, swapper/0/1
+> [    1.670433]  lock: 0xea01e484, .magic: 00000000, .owner: <none>/-1, .owner_cpu: 0
+> [    1.677895] CPU: 0 PID: 1 Comm: swapper/0 Not tainted 3.16.0-next-20140804-00008-ga59480f-dirty #707
+> [    1.687037] [<c0013ae4>] (unwind_backtrace) from [<c0010d70>] (show_stack+0x10/0x14)
+> [    1.694740] [<c0010d70>] (show_stack) from [<c04050c8>] (dump_stack+0x68/0xb8)
+> [    1.701948] [<c04050c8>] (dump_stack) from [<c0052558>] (do_raw_spin_lock+0x15c/0x1a4)
+> [    1.709848] [<c0052558>] (do_raw_spin_lock) from [<c040a630>] (_raw_spin_lock_irqsave+0x20/0x28)
+> [    1.718619] [<c040a630>] (_raw_spin_lock_irqsave) from [<c030d7d0>] (sdhci_do_set_ios+0x1c/0x5cc)
+> [    1.727464] [<c030d7d0>] (sdhci_do_set_ios) from [<c030ddfc>] (sdhci_runtime_resume_host+0x50/0x104)
+> [    1.736574] [<c030ddfc>] (sdhci_runtime_resume_host) from [<c02462dc>] (pm_generic_runtime_resume+0x2c/0x40)
+> [    1.746383] [<c02462dc>] (pm_generic_runtime_resume) from [<c0247898>] (__rpm_callback+0x34/0x70)
+> [    1.755233] [<c0247898>] (__rpm_callback) from [<c02478fc>] (rpm_callback+0x28/0x88)
+> [    1.762958] [<c02478fc>] (rpm_callback) from [<c02486f0>] (rpm_resume+0x384/0x4ec)
+> [    1.770511] [<c02486f0>] (rpm_resume) from [<c02488b0>] (pm_runtime_forbid+0x58/0x64)
+> [    1.778325] [<c02488b0>] (pm_runtime_forbid) from [<c030ea70>] (sdhci_s3c_probe+0x4a4/0x540)
+> [    1.786749] [<c030ea70>] (sdhci_s3c_probe) from [<c02429cc>] (platform_drv_probe+0x2c/0x5c)
+> [    1.795076] [<c02429cc>] (platform_drv_probe) from [<c02415f0>] (driver_probe_device+0x114/0x234)
+> [    1.803929] [<c02415f0>] (driver_probe_device) from [<c024179c>] (__driver_attach+0x8c/0x90)
+> [    1.812347] [<c024179c>] (__driver_attach) from [<c023ffb4>] (bus_for_each_dev+0x54/0x88)
+> [    1.820506] [<c023ffb4>] (bus_for_each_dev) from [<c0240df8>] (bus_add_driver+0xd8/0x1cc)
+> [    1.828665] [<c0240df8>] (bus_add_driver) from [<c0241db8>] (driver_register+0x78/0xf4)
+> [    1.836652] [<c0241db8>] (driver_register) from [<c00088a4>] (do_one_initcall+0x80/0x1d0)
+> [    1.844816] [<c00088a4>] (do_one_initcall) from [<c059ac94>] (kernel_init_freeable+0x108/0x1d4)
+> [    1.853503] [<c059ac94>] (kernel_init_freeable) from [<c0401300>] (kernel_init+0x8/0xe4)
+> [    1.861568] [<c0401300>] (kernel_init) from [<c000e538>] (ret_from_fork+0x14/0x3c)
+> [    1.869582] platform 12530000.sdhci: Driver s3c-sdhci requests probe deferral
+> ...
+> [    1.997047] s3c-sdhci 12530000.sdhci: Unbalanced pm_runtime_enable!
+> ...
+> [    2.027235] s3c-sdhci 12530000.sdhci: sdhci_add_host() failed
+> [    2.032884] platform 12530000.sdhci: Driver s3c-sdhci requests probe deferral
+> ...
+>
+> Tested on Hardkernel's Exynos4412 based ODROID-U3 board.
+>
+> Fixes: 9f4e8151dbbc ("mmc: sdhci-s3c: Enable runtime power management")
+> Cc: Mark Brown <broonie@opensource.wolfsonmicro.com>
+> Cc: Jaehoon Chung <jh80.chung@samsung.com>
+> Cc: Ben Dooks <ben-linux@fluff.org>
+> Signed-off-by: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+> Acked-by: Kyungmin Park <kyungmin.park@samsung.com>
+
+Thanks! Applied for fixes.
+
+Kind regards
+Uffe
+
+> ---
+> patch is against next-20140804 branch of linux-next kernel
+>
+>  drivers/mmc/host/sdhci-s3c.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index fa5954a..1e47903 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -606,8 +606,6 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+>         ret = sdhci_add_host(host);
+>         if (ret) {
+>                 dev_err(dev, "sdhci_add_host() failed\n");
+> -               pm_runtime_forbid(&pdev->dev);
+> -               pm_runtime_get_noresume(&pdev->dev);
+>                 goto err_req_regs;
+>         }
+>
+> @@ -618,6 +616,8 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
+>         return 0;
+>
+>   err_req_regs:
+> +       pm_runtime_disable(&pdev->dev);
+> +
+>   err_no_busclks:
+>         clk_disable_unprepare(sc->clk_io);
+>
+> --
+> 1.8.2.3
+>
+>
