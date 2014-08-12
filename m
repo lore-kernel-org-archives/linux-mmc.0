@@ -1,103 +1,66 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on
- sdio thread
-Date: Tue, 12 Aug 2014 12:23:33 +0200
-Message-ID: <CAPDyKFqLE-09=3k_6stMXiY3+Ax3xoRBO3q__GHyqH4fd-XmsQ@mail.gmail.com>
-References: <53E85967.5060503@linux.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Pawel Moll <pawel.moll@arm.com>
+Subject: [PATCH 3/5 v2] mmc: sdhci-pltfm: Do not use parent as the host's device
+Date: Tue, 12 Aug 2014 11:37:52 +0100
+Message-ID: <1407839872-12864-1-git-send-email-pawel.moll@arm.com>
+References: <CAPDyKFrb9OSbhHtn=wgbs9Yky1t453rdNBJVgGA62vER-65dYw@mail.gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f179.google.com ([209.85.216.179]:37287 "EHLO
-	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751589AbaHLKXe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Aug 2014 06:23:34 -0400
-Received: by mail-qc0-f179.google.com with SMTP id m20so2641946qcx.10
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Aug 2014 03:23:33 -0700 (PDT)
-In-Reply-To: <53E85967.5060503@linux.intel.com>
+Received: from fw-tnat.austin.arm.com ([217.140.110.23]:53773 "EHLO
+	collaborate-mta1.arm.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751479AbaHLKiR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Aug 2014 06:38:17 -0400
+In-Reply-To: <CAPDyKFrb9OSbhHtn=wgbs9Yky1t453rdNBJVgGA62vER-65dYw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Aaron Lu <aaron.lu@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jackey Shen <jackey.shen@amd.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, Pawel Moll <pawel.moll@arm.com>
 
-On 11 August 2014 07:49, Fu, Zhonghui <zhonghui.fu@linux.intel.com> wrote:
-> From 6cee984e1d76ba0a3320430f8cf4318ab65fcf06 Mon Sep 17 00:00:00 2001
-> From: Fu Zhonghui <zhonghui.fu@linux.intel.com>
-> Date: Tue, 5 Aug 2014 12:44:38 +0800
-> Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
->
-> 781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
-> bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
-> the use of our own custom threaded IRQ handler, but left in an
-> unconditional wake_up_process() on that handler at resume-time.
-> Link: https://bugzilla.kernel.org/show_bug.cgi?id=80151
->
-> In addition, the check for MMC_CAP_SDIO_IRQ capability is added
-> before enable sdio IRQ.
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Chris Ball <chris@printf.net>
-> Signed-off-by: Fu Zhonghui <zhonghui.fu@linux.intel.com>
-> ---
->  drivers/mmc/core/sdio.c     |   14 ++++++++++++--
->  drivers/mmc/core/sdio_irq.c |    4 ++--
->  2 files changed, 14 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index e636d9e..e04a540 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -992,8 +992,18 @@ static int mmc_sdio_resume(struct mmc_host *host)
->                 }
->         }
->
-> -       if (!err && host->sdio_irqs)
-> -               wake_up_process(host->sdio_irq_thread);
-> +       if (!err && host->sdio_irqs) {
-> +               if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
-> +                       wake_up_process(host->sdio_irq_thread);
-> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
-> +                       mmc_release_host(host);
+The code selecting a device for the sdhci host has been
+continuously tweaked (4b711cb13843f5082e82970dd1e8031383134a65
+"mmc: sdhci-pltfm: Add structure for host-specific data" and
+a4d2177f00a5252d825236c5124bc1e9918bdb41 "mmc: sdhci-pltfm: dt
+device does not pass parent to sdhci_alloc_host" while there
+does not seem to be any reason to use platform device's parent
+in the first place.
 
-Why mmc_release_host() and the corresponding mmc_claim_host() below?
-Those shouldn't be needed I think.
+The comment saying "Some PCI-based MFD need the parent here"
+seem to refer to Timberdale FPGA driver (the only MFD driver
+registering SDHCI cell, drivers/mfd/timberdale.c) but again,
+the only situation when parent device matter is runtime PM,
+which is not implemented for Timberdale.
 
+Signed-off-by: Pawel Moll <pawel.moll@arm.com>
+---
+ drivers/mmc/host/sdhci-pltfm.c | 10 ++--------
+ 1 file changed, 2 insertions(+), 8 deletions(-)
 
-> +                       mmc_host_clk_hold(host);
-> +                       host->ops->enable_sdio_irq(host, 1);
-> +                       mmc_host_clk_release(host);
-> +                       mmc_claim_host(host);
-> +               }
-> +       }
-> +
->         mmc_release_host(host);
->
->         host->pm_flags &= ~MMC_PM_KEEP_POWER;
-> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-> index 5cc13c8..696eca4 100644
-> --- a/drivers/mmc/core/sdio_irq.c
-> +++ b/drivers/mmc/core/sdio_irq.c
-> @@ -208,7 +208,7 @@ static int sdio_card_irq_get(struct mmc_card *card)
->                                 host->sdio_irqs--;
->                                 return err;
->                         }
-> -               } else {
-> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
->                         mmc_host_clk_hold(host);
->                         host->ops->enable_sdio_irq(host, 1);
->                         mmc_host_clk_release(host);
-> @@ -229,7 +229,7 @@ static int sdio_card_irq_put(struct mmc_card *card)
->                 if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
->                         atomic_set(&host->sdio_irq_thread_abort, 1);
->                         kthread_stop(host->sdio_irq_thread);
-> -               } else {
-> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
->                         mmc_host_clk_hold(host);
->                         host->ops->enable_sdio_irq(host, 0);
->                         mmc_host_clk_release(host);
-> -- 1.7.1
->
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index 7e834fb..c5b01d6 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -123,7 +123,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+ 				    size_t priv_size)
+ {
+ 	struct sdhci_host *host;
+-	struct device_node *np = pdev->dev.of_node;
+ 	struct resource *iomem;
+ 	int ret;
+ 
+@@ -136,13 +135,8 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+ 	if (resource_size(iomem) < 0x100)
+ 		dev_err(&pdev->dev, "Invalid iomem size!\n");
+ 
+-	/* Some PCI-based MFD need the parent here */
+-	if (pdev->dev.parent != &platform_bus && !np)
+-		host = sdhci_alloc_host(pdev->dev.parent,
+-			sizeof(struct sdhci_pltfm_host) + priv_size);
+-	else
+-		host = sdhci_alloc_host(&pdev->dev,
+-			sizeof(struct sdhci_pltfm_host) + priv_size);
++	host = sdhci_alloc_host(&pdev->dev,
++		sizeof(struct sdhci_pltfm_host) + priv_size);
+ 
+ 	if (IS_ERR(host)) {
+ 		ret = PTR_ERR(host);
+-- 
+1.9.1
 
-Thanks for working on this!
-
-Kind regards
-Uffe
