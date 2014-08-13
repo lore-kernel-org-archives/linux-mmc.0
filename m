@@ -1,80 +1,62 @@
 From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH] mmc: core: use 1.8v signling in ddr mode for some
- special host
-Date: Wed, 13 Aug 2014 02:15:59 +0000
-Message-ID: <17296D9F8FF2234F831FC3DF505A87A911B1F8D6@shsmsx102.ccr.corp.intel.com>
-References: <20140801060816.GA3172@intel.com>
- <CAPDyKFozfn62tkFQkzXC19pVXeGruH-K=eaz3756xk-q3hDQ6w@mail.gmail.com>
+Subject: RE: [PATCH] mmc: sdhci: fix the wrong type of curr
+Date: Wed, 13 Aug 2014 02:18:22 +0000
+Message-ID: <17296D9F8FF2234F831FC3DF505A87A911B1F8F8@shsmsx102.ccr.corp.intel.com>
+References: <20140801060012.GA2568@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:20031 "EHLO mga02.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:20372 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753147AbaHMCQB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 12 Aug 2014 22:16:01 -0400
-In-Reply-To: <CAPDyKFozfn62tkFQkzXC19pVXeGruH-K=eaz3756xk-q3hDQ6w@mail.gmail.com>
+	id S1753488AbaHMCSn convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Aug 2014 22:18:43 -0400
+In-Reply-To: <20140801060012.GA2568@intel.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "chris@printf.org" <chris@printf.org>, "Gao, Yunpeng" <yunpeng.gao@intel.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogbGludXgtbW1jLW93bmVy
-QHZnZXIua2VybmVsLm9yZw0KPiBbbWFpbHRvOmxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5v
-cmddIE9uIEJlaGFsZiBPZiBVbGYgSGFuc3Nvbg0KPiBTZW50OiBUdWVzZGF5LCBBdWd1c3QgMTIs
-IDIwMTQgOToyMSBQTQ0KPiBUbzogRG9uZywgQ2h1YW54aWFvDQo+IENjOiBsaW51eC1tbWM7IGNo
-cmlzQHByaW50Zi5vcmc7IEdhbywgWXVucGVuZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIXSBtbWM6
-IGNvcmU6IHVzZSAxLjh2IHNpZ25saW5nIGluIGRkciBtb2RlIGZvciBzb21lIHNwZWNpYWwNCj4g
-aG9zdA0KPiANCj4gT24gMSBBdWd1c3QgMjAxNCAwODowOCwgQ2h1YW54aWFvIERvbmcgPGNodWFu
-eGlhby5kb25nQGludGVsLmNvbT4gd3JvdGU6DQo+ID4gRXZlbiBlTU1DIGNhcmQgY2FuIHN1cHBv
-cnQgMy4zdiB0byAxLjJ2IHZjY3EgaW4gRERSLCBidXQgbm90IGFsbCBob3N0DQo+ID4gY29udHJv
-bGxlciBjYW4gc3VwcG9ydCB0aGlzLCBsaWtlIHNvbWUgb2YgdGhlIFNESENJIGhvc3Qgd2hpY2gg
-Y29ubmVjdA0KPiA+IHRvIGFuIGVNTUMgZGV2aWNlLiBTb21lIG9mIHRoZXNlIGhvc3QgY29udHJv
-bGxlciBzdGlsbCBuZWVkcyB0byB1c2UNCj4gPiAxLjh2IHZjY3EgZm9yIHN1cHBvcnRpbmcgRERS
-IG1vZGUuDQo+ID4NCj4gPiBJZiBhIGhvc3QgY29udHJvbGxlciBjYW5ub3Qgc3VwcG9ydCAzLjN2
-IGZvciBERFIsIHRyeSAxLjh2Lg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogQ2h1YW54aWFvIERv
-bmcgPGNodWFueGlhby5kb25nQGludGVsLmNvbT4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBZdW5wZW5n
-IEdhbyA8eXVucGVuZy5nYW9AaW50ZWwuY29tPg0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJzL21tYy9j
-b3JlL21tYy5jICAgfCAgIDE5ICsrKysrKysrKysrKysrKysrKysNCj4gPiAgaW5jbHVkZS9saW51
-eC9tbWMvaG9zdC5oIHwgICAgMSArDQo+ID4gIDIgZmlsZXMgY2hhbmdlZCwgMjAgaW5zZXJ0aW9u
-cygrKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMgYi9kcml2
-ZXJzL21tYy9jb3JlL21tYy5jIGluZGV4DQo+ID4gNzkzYzZmNy4uMTNhNWIyNCAxMDA2NDQNCj4g
-PiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvY29y
-ZS9tbWMuYw0KPiA+IEBAIC0xMDAwLDYgKzEwMDAsMjUgQEAgc3RhdGljIGludCBtbWNfc2VsZWN0
-X2hzX2RkcihzdHJ1Y3QgbW1jX2NhcmQNCj4gKmNhcmQpDQo+ID4gICAgICAgICAgICAgICAgICAg
-ICAgICAgcmV0dXJuIGVycjsNCj4gPiAgICAgICAgIH0NCj4gPg0KPiA+ICsgICAgICAgLyoNCj4g
-PiArICAgICAgICAqIEV2ZW4gZU1NQyBjYXJkIGNhbiBzdXBwb3J0IDMuM3YgdG8gMS4ydiB2Y2Nx
-LCBidXQgbm90IGFsbA0KPiA+ICsgICAgICAgICogaG9zdCBjb250cm9sbGVyIGNhbiBzdXBwb3J0
-IHRoaXMsIGxpa2Ugc29tZSBvZiB0aGUgU0RIQ0kNCj4gPiArICAgICAgICAqIGNvbnRyb2xsZXIg
-d2hpY2ggY29ubmVjdCB0byBhbiBlTU1DIGRldmljZS4gU29tZSBvZiB0aGVzZQ0KPiA+ICsgICAg
-ICAgICogaG9zdCBjb250cm9sbGVyIHN0aWxsIG5lZWRzIHRvIHVzZSAxLjh2IHZjY3EgZm9yIHN1
-cHBvcnRpbmcNCj4gPiArICAgICAgICAqIEREUiBtb2RlLg0KPiA+ICsgICAgICAgICoNCj4gPiAr
-ICAgICAgICAqIElmIGEgaG9zdCBjb250cm9sbGVyIGNhbm5vdCBzdXBwb3J0IDMuM3YgZm9yIERE
-UiwgdHJ5IDEuOHYNCj4gPiArICAgICAgICAqLw0KPiA+ICsgICAgICAgaWYgKHVubGlrZWx5KGhv
-c3QtPmNhcHMyICYgTU1DX0NBUDJfTk9fM18zVl9ERFIpKSB7DQo+ID4gKyAgICAgICAgICAgICAg
-IGlmIChjYXJkLT5tbWNfYXZhaWxfdHlwZSAmDQo+IEVYVF9DU0RfQ0FSRF9UWVBFX0hTMjAwXzFf
-OFYpIHsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBlcnIgPSBfX21tY19zZXRfc2lnbmFs
-X3ZvbHRhZ2UoaG9zdCwNCj4gPiArDQo+IE1NQ19TSUdOQUxfVk9MVEFHRV8xODApOw0KPiA+ICsg
-ICAgICAgICAgICAgICAgICAgICAgIGlmIChlcnIpDQo+ID4gKyAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICByZXR1cm4gZXJyOw0KPiA+ICsgICAgICAgICAgICAgICB9IGVsc2UNCj4gPiAr
-ICAgICAgICAgICAgICAgICAgICAgICByZXR1cm4gLUVPUE5PVFNVUFA7DQo+ID4gKyAgICAgICB9
-DQo+IA0KPiBJIGFtIHdvbmRlcmluZyBpZiB3ZSBjb3VsZCB0cnkgYW4gYW5vdGhlciBhcHByb2Fj
-aCB3aGlsZSBjaGFuZ2luZyBzaWduYWwNCj4gdm9sdGFnZSBmb3IgKGUpTU1DLiBTaW1wbHkgc3Rh
-cnQgYnkgdHJ5aW5nIHdpdGggMS4yViwgdGhlbiAxLjhWIGFuZCB0aGVuIDMuM1YuDQo+IE9idmlv
-dXNseSB3ZSBzaG91bGRuJ3QgdHJ5IHdpdGggc29tZXRoaW5nIHRoYXQgaXNuJ3Qgc3VwcG9ydGVk
-LCB3aGljaA0KPiBjYXJkLT5tbWNfYXZhaWxfdHlwZSB0ZWxscyB1cyBhYm91dC4NCj4gDQo+IEkg
-cmVhbGl6ZSB0aGF0IGl0IHdpbGwgbWVhbiBhIGNoYW5nZSBpbiBiZWhhdmlvdXIgYW5kIGRlcGVu
-ZGluZyBvbiBob3cgaG9zdHMNCj4gYXJlIGhhbmRsaW5nIHNpZ25hbCB2b2x0YWdlLCB0aGlzIGlz
-IGEgYml0IHVuY2VydGFpbiBpZiBpdCB3b3VsZCB3b3JrLiBTdGlsbCBJIGZlZWwgaXQNCj4gd291
-bGQgYmUgdGhlIHJpZ2h0IGFwcHJvYWNoLiBDYW4gd2UgZ2l2ZSBhdCBzaG90Pw0KDQpJIGFncmVl
-IHdpdGggeW91LiBBY3R1YWxseSB0aGlzIGlzIGFsc28gb3V0IG9yaWdpbmFsIGFwcHJvYWNoLiA6
-KSBHaXZlbiBpdCB3ZSBjYW5ub3QgdGVzdCB0aGlzIGFwcHJvYWNoIG9uIGFsbCBob3N0IGNvbnRy
-b2xsZXJzLCB0aHVzIGZpbmFsbHkgY2hhbmdlIHRvIGFkZCBhIG5ldyBDQVAgaXMgdG8gYXZvaWQg
-aW1wYWN0aW5nIG90aGVyIGhvc3QgY29udHJvbGxlcnMuDQoNCkkgY2FuIHBvc3QgYSB2MiBwYXRj
-aCB0byBpbXBsZW1lbnQgdGhpcyBJTyBzaWduYWwgdm9sdGFnZSBjaGFuZ2luZyBzZXF1ZW5jZSBm
-b3IgcmV2aWV3Lg0KDQpUaGFua3MNCkNodWFueGlhbw0KDQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4g
-VWZmZQ0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
-ZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIiBpbiB0aGUgYm9keQ0KPiBvZiBhIG1lc3NhZ2UgdG8g
-bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+IGh0dHA6
-Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+Hello,
+
+Any feedback on this fix?
+
+Thanks
+Chuanxiao
+
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org
+> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Chuanxiao Dong
+> Sent: Friday, August 01, 2014 2:00 PM
+> To: linux-mmc@vger.kernel.org; cjb@laptop.org; ulf.hansson@linaro.org
+> Subject: [PATCH] mmc: sdhci: fix the wrong type of curr
+> 
+> curr should use signed type since it will contain the returned value which is
+> possible to be a negative value. Using u32 will make the returned value to be
+> true even there is a negative result.
+> Change to use int instead of u32
+> 
+> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+> ---
+>  drivers/mmc/host/sdhci.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
+> 47055f3..c026ec8 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3078,7 +3078,7 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	 */
+>  	max_current_caps = sdhci_readl(host, SDHCI_MAX_CURRENT);
+>  	if (!max_current_caps && host->vmmc) {
+> -		u32 curr = regulator_get_current_limit(host->vmmc);
+> +		int curr = regulator_get_current_limit(host->vmmc);
+>  		if (curr > 0) {
+> 
+>  			/* convert to SDHCI_MAX_CURRENT format */
+> --
+> 1.7.10.4
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the body
+> of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
