@@ -1,110 +1,211 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: check EXT_CSD_PARTITION_SETTING_COMPLETED before
- creating partitions
-Date: Wed, 13 Aug 2014 10:36:19 +0200
-Message-ID: <CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>
-References: <53C7E45E.2060102@neotion.com>
+Subject: Re: [PATCH 13/14] mmc: sunxi: Convert MMC driver to the standard
+ clock phase API
+Date: Wed, 13 Aug 2014 10:44:42 +0200
+Message-ID: <CAPDyKFq7pnD=0ee1xkY0Ucm9i-HpyEYKvmcsBVPSWPmWoxFSrw@mail.gmail.com>
+References: <1405588134-2396-1-git-send-email-maxime.ripard@free-electrons.com>
+	<1405588134-2396-14-git-send-email-maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f50.google.com ([209.85.192.50]:57772 "EHLO
-	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750743AbaHMIgU convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Aug 2014 04:36:20 -0400
-Received: by mail-qg0-f50.google.com with SMTP id q108so10343551qgd.23
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Aug 2014 01:36:19 -0700 (PDT)
-In-Reply-To: <53C7E45E.2060102@neotion.com>
+Received: from mail-qa0-f48.google.com ([209.85.216.48]:41669 "EHLO
+	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750751AbaHMIon (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Aug 2014 04:44:43 -0400
+Received: by mail-qa0-f48.google.com with SMTP id m5so9843303qaj.35
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Aug 2014 01:44:42 -0700 (PDT)
+In-Reply-To: <1405588134-2396-14-git-send-email-maxime.ripard@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Maxime Ripard <maxime.ripard@free-electrons.com>, Mike Turquette <mturquette@linaro.org>
+Cc: Hans de Goede <hdegoede@redhat.com>, Emilio Lopez <emilio@elopez.com.ar>, Chris Ball <chris@printf.net>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 17 July 2014 16:57, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>=
- wrote:
-> Create MMC general purpose partitions only if
-> EXT_CSD_PARTITION_SETTING_COMPLETED bit is set.
-> Some tools may set general purpose partition size(s) but fail or stop
-> without finalize.
-> Another case is to set invalid partition size(s).
+On 17 July 2014 11:08, Maxime Ripard <maxime.ripard@free-electrons.com> wrote:
+> Now that we have proper support to use the generic phase API in our clock
+> driver, switch the MMC driver to use it.
 >
-> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
-> ---
->  drivers/mmc/core/mmc.c  |   15 +++++++++++----
->  include/linux/mmc/mmc.h |    2 ++
->  2 files changed, 13 insertions(+), 4 deletions(-)
->
-> From commit b6603fe574af289dbe9eb9fb4c540bca04f5a053 in master linux =
-tree.
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 793c6f7..b9fe211 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -471,10 +471,17 @@ static int mmc_read_ext_csd(struct mmc_card *ca=
-rd, u8 *ext_csd)
->                                 ext_csd[EXT_CSD_GP_SIZE_MULT + idx * =
-3];
->                                 part_size *=3D (size_t)(hc_erase_grp_=
-sz *
->                                         hc_wp_grp_sz);
-> -                               mmc_part_add(card, part_size << 19,
-> -                                       EXT_CSD_PART_CONFIG_ACC_GP0 +=
- idx,
-> -                                       "gp%d", idx, false,
-> -                                       MMC_BLK_DATA_AREA_GP);
-> +                               if (ext_csd[EXT_CSD_PARTITION_SETTING=
-_COMPLETED] &
-> +                               EXT_CSD_PART_SETTING_COMPLETED) {
+> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 
-Some minor comments here.
+I see there are a dependency of the clk patches with the mmc patch. I
+suppose it's best to take this set through Mike's clk tree then.
 
-I think you could move this if statement up and into the previous "if"
-where we check for "ext_csd[EXT_CSD_PARTITION_SUPPORT] &
-EXT_CSD_PART_SUPPORT_PART_EN".
-
-Additionally, please run checkpatch.
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 Kind regards
 Uffe
 
-> +                                       mmc_part_add(card, part_size =
-<< 19,
-> +                                               EXT_CSD_PART_CONFIG_A=
-CC_GP0 + idx,
-> +                                               "gp%d", idx, false,
-> +                                               MMC_BLK_DATA_AREA_GP)=
-;
-> +                               } else {
-> +                                       pr_warn("%s: has partition si=
-ze defined, but setting is not complete\n",
-> +                                               mmc_hostname(card->ho=
-st));
-> +                                       break;
-> +                               }
->                         }
+> ---
+>  .../devicetree/bindings/mmc/sunxi-mmc.txt          |  8 +--
+>  drivers/mmc/host/sunxi-mmc.c                       | 72 +++++++++++++++-------
+>  2 files changed, 53 insertions(+), 27 deletions(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> index 91b3a3467150..4bf41d833804 100644
+> --- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> @@ -10,8 +10,8 @@ Absolute maximum transfer rate is 200MB/s
+>  Required properties:
+>   - compatible : "allwinner,sun4i-a10-mmc" or "allwinner,sun5i-a13-mmc"
+>   - reg : mmc controller base registers
+> - - clocks : a list with 2 phandle + clock specifier pairs
+> - - clock-names : must contain "ahb" and "mmc"
+> + - clocks : a list with 4 phandle + clock specifier pairs
+> + - clock-names : must contain "ahb", "mmc", "output" and "sample"
+>   - interrupts : mmc controller interrupt
+>
+>  Optional properties:
+> @@ -25,8 +25,8 @@ Examples:
+>         mmc0: mmc@01c0f000 {
+>                 compatible = "allwinner,sun5i-a13-mmc";
+>                 reg = <0x01c0f000 0x1000>;
+> -               clocks = <&ahb_gates 8>, <&mmc0_clk>;
+> -               clock-names = "ahb", "mod";
+> +               clocks = <&ahb_gates 8>, <&mmc0_clk>, <&mmc0_output_clk>, <&mmc0_sample_clk>;
+> +               clock-names = "ahb", "mod", "output", "sample";
+>                 interrupts = <0 32 4>;
+>                 status = "disabled";
+>         };
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index 024f67c98cdc..8719cefa590d 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -22,7 +22,6 @@
+>
+>  #include <linux/clk.h>
+>  #include <linux/clk-private.h>
+> -#include <linux/clk/sunxi.h>
+>
+>  #include <linux/gpio.h>
+>  #include <linux/platform_device.h>
+> @@ -230,6 +229,8 @@ struct sunxi_mmc_host {
+>         /* clock management */
+>         struct clk      *clk_ahb;
+>         struct clk      *clk_mmc;
+> +       struct clk      *clk_sample;
+> +       struct clk      *clk_output;
+>
+>         /* irq */
+>         spinlock_t      lock;
+> @@ -617,7 +618,7 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+>  static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+>                                   struct mmc_ios *ios)
+>  {
+> -       u32 rate, oclk_dly, rval, sclk_dly, src_clk;
+> +       u32 rate, oclk_dly, rval, sclk_dly;
+>         int ret;
+>
+>         rate = clk_round_rate(host->clk_mmc, ios->clock);
+> @@ -643,34 +644,31 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+>
+>         /* determine delays */
+>         if (rate <= 400000) {
+> -               oclk_dly = 0;
+> -               sclk_dly = 7;
+> +               oclk_dly = 180;
+> +               sclk_dly = 42;
+>         } else if (rate <= 25000000) {
+> -               oclk_dly = 0;
+> -               sclk_dly = 5;
+> +               oclk_dly = 180;
+> +               sclk_dly = 75;
+>         } else if (rate <= 50000000) {
+>                 if (ios->timing == MMC_TIMING_UHS_DDR50) {
+> -                       oclk_dly = 2;
+> -                       sclk_dly = 4;
+> +                       oclk_dly = 60;
+> +                       sclk_dly = 120;
+>                 } else {
+> -                       oclk_dly = 3;
+> -                       sclk_dly = 5;
+> +                       oclk_dly = 90;
+> +                       sclk_dly = 150;
 >                 }
->                 card->ext_csd.sec_trim_mult =3D
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 64ec963..78753bc 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -281,6 +281,7 @@ struct _mmc_csd {
->  #define EXT_CSD_EXP_EVENTS_CTRL                56      /* R/W, 2 byt=
-es */
->  #define EXT_CSD_DATA_SECTOR_SIZE       61      /* R */
->  #define EXT_CSD_GP_SIZE_MULT           143     /* R/W */
-> +#define EXT_CSD_PARTITION_SETTING_COMPLETED 155        /* R/W */
->  #define EXT_CSD_PARTITION_ATTRIBUTE    156     /* R/W */
->  #define EXT_CSD_PARTITION_SUPPORT      160     /* RO */
->  #define EXT_CSD_HPI_MGMT               161     /* R/W */
-> @@ -349,6 +350,7 @@ struct _mmc_csd {
->  #define EXT_CSD_PART_CONFIG_ACC_RPMB   (0x3)
->  #define EXT_CSD_PART_CONFIG_ACC_GP0    (0x4)
+> +       } else if (rate <= 100000000) {
+> +               oclk_dly = 6;
+> +               sclk_dly = 24;
+> +       } else if (rate <= 200000000) {
+> +               oclk_dly = 3;
+> +               sclk_dly = 12;
+>         } else {
+> -               /* rate > 50000000 */
+> -               oclk_dly = 2;
+> -               sclk_dly = 4;
+> +               return -EINVAL;
+>         }
 >
-> +#define EXT_CSD_PART_SETTING_COMPLETED (0x1)
->  #define EXT_CSD_PART_SUPPORT_PART_EN   (0x1)
+> -       src_clk = clk_get_rate(clk_get_parent(host->clk_mmc));
+> -       if (src_clk >= 300000000 && src_clk <= 400000000) {
+> -               if (oclk_dly)
+> -                       oclk_dly--;
+> -               if (sclk_dly)
+> -                       sclk_dly--;
+> -       }
+> -
+> -       clk_sunxi_mmc_phase_control(host->clk_mmc, sclk_dly, oclk_dly);
+> +       clk_set_phase(host->clk_sample, sclk_dly);
+> +       clk_set_phase(host->clk_output, oclk_dly);
 >
->  #define EXT_CSD_CMD_SET_NORMAL         (1<<0)
+>         return sunxi_mmc_oclk_onoff(host, 1);
+>  }
+> @@ -909,6 +907,18 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+>                 return PTR_ERR(host->clk_mmc);
+>         }
+>
+> +       host->clk_output = devm_clk_get(&pdev->dev, "output");
+> +       if (IS_ERR(host->clk_output)) {
+> +               dev_err(&pdev->dev, "Could not get output clock\n");
+> +               return PTR_ERR(host->clk_output);
+> +       }
+> +
+> +       host->clk_sample = devm_clk_get(&pdev->dev, "sample");
+> +       if (IS_ERR(host->clk_sample)) {
+> +               dev_err(&pdev->dev, "Could not get sample clock\n");
+> +               return PTR_ERR(host->clk_sample);
+> +       }
+> +
+>         host->reset = devm_reset_control_get(&pdev->dev, "ahb");
+>
+>         ret = clk_prepare_enable(host->clk_ahb);
+> @@ -923,11 +933,23 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+>                 goto error_disable_clk_ahb;
+>         }
+>
+> +       ret = clk_prepare_enable(host->clk_output);
+> +       if (ret) {
+> +               dev_err(&pdev->dev, "Enable output clk err %d\n", ret);
+> +               goto error_disable_clk_mmc;
+> +       }
+> +
+> +       ret = clk_prepare_enable(host->clk_sample);
+> +       if (ret) {
+> +               dev_err(&pdev->dev, "Enable sample clk err %d\n", ret);
+> +               goto error_disable_clk_output;
+> +       }
+> +
+>         if (!IS_ERR(host->reset)) {
+>                 ret = reset_control_deassert(host->reset);
+>                 if (ret) {
+>                         dev_err(&pdev->dev, "reset err %d\n", ret);
+> -                       goto error_disable_clk_mmc;
+> +                       goto error_disable_clk_sample;
+>                 }
+>         }
+>
+> @@ -946,6 +968,10 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+>  error_assert_reset:
+>         if (!IS_ERR(host->reset))
+>                 reset_control_assert(host->reset);
+> +error_disable_clk_sample:
+> +       clk_disable_unprepare(host->clk_sample);
+> +error_disable_clk_output:
+> +       clk_disable_unprepare(host->clk_output);
+>  error_disable_clk_mmc:
+>         clk_disable_unprepare(host->clk_mmc);
+>  error_disable_clk_ahb:
 > --
-> 1.7.0.4
+> 2.0.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
