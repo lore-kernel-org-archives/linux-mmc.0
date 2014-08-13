@@ -1,46 +1,52 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: host: don't access at boot partition when mode is
- HS200/HS400.
-Date: Wed, 13 Aug 2014 13:46:16 +0900
-Message-ID: <1407905176-6847-1-git-send-email-jh80.chung@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:21876 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750707AbaHMEqU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Aug 2014 00:46:20 -0400
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0NA8005KLAL6MT50@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 13 Aug 2014 13:46:18 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH RFC 3/5] mmc: mmci: relax blksz check for SDIO
+Date: Wed, 13 Aug 2014 06:14:44 +0100
+Message-ID: <53EAF444.8050507@linaro.org>
+References: <1407844950-8072-1-git-send-email-srinivas.kandadgatla@linaro.org> <1407845080-8353-1-git-send-email-srinivas.kandadgatla@linaro.org> <20140812141242.GI30401@n2100.arm.linux.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140812141242.GI30401@n2100.arm.linux.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-HS200/HS400 mode is not supported during boot operation.
+Thankyou for the feedback.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- include/linux/mmc/host.h |    4 ++++
- 1 file changed, 4 insertions(+)
+On 12/08/14 15:12, Russell King - ARM Linux wrote:
+> On Tue, Aug 12, 2014 at 01:04:40PM +0100, Srinivas Kandagatla wrote:
+>> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>>
+>> This patch adds condition in mmci_validate_data to skip checking
+>> blocksize for SDIO card types. SDIO card type can issue blocksizes
+>> which are not exactly power of 2 so this check always fails, resulting
+>> in SDIO failures.
+>
+> Do you understand why this check is there?
+>
+> Do you realise that the standard MMCI from ARM Ltd can /only/ perform
+> power-of-2 block transfers?
 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 7960424..ce5db96 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -445,6 +445,10 @@ static inline int mmc_host_cmd23(struct mmc_host *host)
- 
- static inline int mmc_boot_partition_access(struct mmc_host *host)
- {
-+	/* HS200 & HS400 mode is not supported during boot operation */
-+	if (host->caps2 & (MMC_CAP2_HS200 | MMC_CAP2_HS400))
-+		return 0;
-+
- 	return !(host->caps2 & MMC_CAP2_BOOTPART_NOACC);
- }
- 
--- 
-1.7.9.5
+Yes, I noticed that in pl180 TRM. I agree this patch will break standard 
+MMCI.
 
+In the past Ulf Hansson and Stefan Nilsson have submitted a patch to fix 
+this issue for ux500v2. This patch adds new flag non_power_of_2_blksize 
+/ any_blksize to variant_data.
+
+http://www.spinics.net/lists/linux-mmc/msg12160.html
+http://marc.info/?l=linux-mmc&m=131710963908853&w=2
+
+This patch will fix the issue for Qcom too. If you are Ok with adding 
+new flag non_power_of_2_blksize/any_blksize in the variant_data, I can 
+rebase and include Ulf's patch in next version.
+
+
+thanks,
+--srini
+
+>
+> Hence, NAK on this change as it stands.
+>
