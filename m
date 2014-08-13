@@ -1,89 +1,110 @@
-From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Subject: RE: [PATCH] mmc: core: export more sysfs for debugging purpose
-Date: Wed, 13 Aug 2014 06:18:34 +0000
-Message-ID: <0AA7DC03D52A654FA5AF208AE38A967D01D7B8DA@shsmsx102.ccr.corp.intel.com>
-References: <1407828534-15846-1-git-send-email-yunpeng.gao@intel.com>
- <53E9D537.6080104@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: check EXT_CSD_PARTITION_SETTING_COMPLETED before
+ creating partitions
+Date: Wed, 13 Aug 2014 10:36:19 +0200
+Message-ID: <CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>
+References: <53C7E45E.2060102@neotion.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:39149 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750757AbaHMGSi convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Aug 2014 02:18:38 -0400
-In-Reply-To: <53E9D537.6080104@samsung.com>
-Content-Language: en-US
+Received: from mail-qg0-f50.google.com ([209.85.192.50]:57772 "EHLO
+	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750743AbaHMIgU convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Aug 2014 04:36:20 -0400
+Received: by mail-qg0-f50.google.com with SMTP id q108so10343551qgd.23
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Aug 2014 01:36:19 -0700 (PDT)
+In-Reply-To: <53C7E45E.2060102@neotion.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+To: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-HI Jaehoon,
-
-I have not tried mmc-utils yet.
-Actually, our validation team developed their own test cases of eMMC features and requested us to export these sysfs interfaces.
-
-Thanks.
-
-Regards,
-Yunpeng
-
------Original Message-----
-From: Jaehoon Chung [mailto:jh80.chung@samsung.com] 
-Sent: Tuesday, August 12, 2014 4:50 PM
-To: Gao, Yunpeng; linux-mmc@vger.kernel.org
-Cc: Dong, Chuanxiao
-Subject: Re: [PATCH] mmc: core: export more sysfs for debugging purpose
-
-Hi,
-
-On 08/12/2014 04:28 PM, Yunpeng Gao wrote:
-> Add some more sysfs export related to eMMC BK Ops, HPI and Hardware 
-> Reset features. It'll be helpful for debugging.
-
-Did you use "mmc-utils"?
-
-Best Regards,
-Jaehoon Chung
-> 
-> Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
-> Signed-off-by: Chuanxiao Xiao <chuanxiao.dong@intel.com>
+On 17 July 2014 16:57, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>=
+ wrote:
+> Create MMC general purpose partitions only if
+> EXT_CSD_PARTITION_SETTING_COMPLETED bit is set.
+> Some tools may set general purpose partition size(s) but fail or stop
+> without finalize.
+> Another case is to set invalid partition size(s).
+>
+> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
 > ---
->  drivers/mmc/core/mmc.c |   12 ++++++++++++
->  1 file changed, 12 insertions(+)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index 
-> 793c6f7..15b7ab0 100644
+>  drivers/mmc/core/mmc.c  |   15 +++++++++++----
+>  include/linux/mmc/mmc.h |    2 ++
+>  2 files changed, 13 insertions(+), 4 deletions(-)
+>
+> From commit b6603fe574af289dbe9eb9fb4c540bca04f5a053 in master linux =
+tree.
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 793c6f7..b9fe211 100644
 > --- a/drivers/mmc/core/mmc.c
 > +++ b/drivers/mmc/core/mmc.c
-> @@ -710,6 +710,12 @@ MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",  
-> MMC_DEV_ATTR(enhanced_area_size, "%u\n", 
-> card->ext_csd.enhanced_area_size);
->  MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", 
-> card->ext_csd.raw_rpmb_size_mult);
->  MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
-> +MMC_DEV_ATTR(hpi_support, "%d\n", card->ext_csd.hpi); 
-> +MMC_DEV_ATTR(hpi_enable, "%d\n", card->ext_csd.hpi_en); 
-> +MMC_DEV_ATTR(hpi_command, "%d\n", card->ext_csd.hpi_cmd); 
-> +MMC_DEV_ATTR(hw_reset_support, "%d\n", card->ext_csd.rst_n_function); 
-> +MMC_DEV_ATTR(bkops_support, "%d\n", card->ext_csd.bkops); 
-> +MMC_DEV_ATTR(bkops_enable, "%d\n", card->ext_csd.bkops_en);
->  
->  static struct attribute *mmc_std_attrs[] = {
->  	&dev_attr_cid.attr,
-> @@ -728,6 +734,12 @@ static struct attribute *mmc_std_attrs[] = {
->  	&dev_attr_enhanced_area_size.attr,
->  	&dev_attr_raw_rpmb_size_mult.attr,
->  	&dev_attr_rel_sectors.attr,
-> +	&dev_attr_hpi_support.attr,
-> +	&dev_attr_hpi_enable.attr,
-> +	&dev_attr_hpi_command.attr,
-> +	&dev_attr_hw_reset_support.attr,
-> +	&dev_attr_bkops_support.attr,
-> +	&dev_attr_bkops_enable.attr,
->  	NULL,
->  };
->  ATTRIBUTE_GROUPS(mmc_std);
-> 
+> @@ -471,10 +471,17 @@ static int mmc_read_ext_csd(struct mmc_card *ca=
+rd, u8 *ext_csd)
+>                                 ext_csd[EXT_CSD_GP_SIZE_MULT + idx * =
+3];
+>                                 part_size *=3D (size_t)(hc_erase_grp_=
+sz *
+>                                         hc_wp_grp_sz);
+> -                               mmc_part_add(card, part_size << 19,
+> -                                       EXT_CSD_PART_CONFIG_ACC_GP0 +=
+ idx,
+> -                                       "gp%d", idx, false,
+> -                                       MMC_BLK_DATA_AREA_GP);
+> +                               if (ext_csd[EXT_CSD_PARTITION_SETTING=
+_COMPLETED] &
+> +                               EXT_CSD_PART_SETTING_COMPLETED) {
 
+Some minor comments here.
+
+I think you could move this if statement up and into the previous "if"
+where we check for "ext_csd[EXT_CSD_PARTITION_SUPPORT] &
+EXT_CSD_PART_SUPPORT_PART_EN".
+
+Additionally, please run checkpatch.
+
+Kind regards
+Uffe
+
+> +                                       mmc_part_add(card, part_size =
+<< 19,
+> +                                               EXT_CSD_PART_CONFIG_A=
+CC_GP0 + idx,
+> +                                               "gp%d", idx, false,
+> +                                               MMC_BLK_DATA_AREA_GP)=
+;
+> +                               } else {
+> +                                       pr_warn("%s: has partition si=
+ze defined, but setting is not complete\n",
+> +                                               mmc_hostname(card->ho=
+st));
+> +                                       break;
+> +                               }
+>                         }
+>                 }
+>                 card->ext_csd.sec_trim_mult =3D
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 64ec963..78753bc 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -281,6 +281,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_EXP_EVENTS_CTRL                56      /* R/W, 2 byt=
+es */
+>  #define EXT_CSD_DATA_SECTOR_SIZE       61      /* R */
+>  #define EXT_CSD_GP_SIZE_MULT           143     /* R/W */
+> +#define EXT_CSD_PARTITION_SETTING_COMPLETED 155        /* R/W */
+>  #define EXT_CSD_PARTITION_ATTRIBUTE    156     /* R/W */
+>  #define EXT_CSD_PARTITION_SUPPORT      160     /* RO */
+>  #define EXT_CSD_HPI_MGMT               161     /* R/W */
+> @@ -349,6 +350,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_PART_CONFIG_ACC_RPMB   (0x3)
+>  #define EXT_CSD_PART_CONFIG_ACC_GP0    (0x4)
+>
+> +#define EXT_CSD_PART_SETTING_COMPLETED (0x1)
+>  #define EXT_CSD_PART_SUPPORT_PART_EN   (0x1)
+>
+>  #define EXT_CSD_CMD_SET_NORMAL         (1<<0)
+> --
+> 1.7.0.4
