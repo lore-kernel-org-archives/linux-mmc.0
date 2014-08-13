@@ -1,35 +1,29 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [PATCH] mmc: rtsx: fix incorrect last byte in R2 response
-Date: Wed, 13 Aug 2014 11:50:24 +0300
-Message-ID: <20140813085024.GQ11899@mwanda>
-References: <1407745936-18513-1-git-send-email-rogerable@realtek.com>
- <20140811130254.GP4856@mwanda> <53E9BFF0.5030506@realtek.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH RFC 3/5] mmc: mmci: relax blksz check for SDIO
+Date: Wed, 13 Aug 2014 10:54:52 +0200
+Message-ID: <CACRpkdaWkTp399GoHRifVQJE8WNrYf4GWyThMEg6ZVuy9_H=Tg@mail.gmail.com>
+References: <1407844950-8072-1-git-send-email-srinivas.kandadgatla@linaro.org>
+	<1407845080-8353-1-git-send-email-srinivas.kandadgatla@linaro.org>
+	<20140812141242.GI30401@n2100.arm.linux.org.uk>
+	<53EAF444.8050507@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-Content-Disposition: inline
-In-Reply-To: <53E9BFF0.5030506@realtek.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Roger <rogerable@realtek.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <53EAF444.8050507@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Aug 12, 2014 at 03:19:12PM +0800, Roger wrote:
-> I can remove the unused rsp_len in this function. But I'm afraid the
-> loop is still required. The destination cmd->resp is cpu-endian, but
-> the raw response from SD card in the buffer (pointed by ptr) is
-> big-endian.
+On Wed, Aug 13, 2014 at 7:14 AM, Srinivas Kandagatla
+<srinivas.kandagatla@linaro.org> wrote:
 
-Oh, yes.  Of course.  Sorry for the noise.
+> In the past Ulf Hansson and Stefan Nilsson have submitted a patch to fix
+> this issue for ux500v2. This patch adds new flag non_power_of_2_blksize /
+> any_blksize to variant_data.
 
-regards,
-dan carpenter
+That's the right approach. It makes non-2^n support the exception rather
+than the rule and applies only to the variants relevant so the logic is right.
+
+Yours,
+Linus Walleij
