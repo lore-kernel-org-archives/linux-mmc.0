@@ -1,61 +1,56 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: MMC_NUM_PHY_PARTITION is not right.
-Date: Wed, 13 Aug 2014 17:01:10 +0200
-Message-ID: <CAPDyKFq5uToDGTCsF_FQxjtgPG7WQ-_pARb7t_Rz7jzpoic4MA@mail.gmail.com>
-References: <1407908042-12931-1-git-send-email-yi.y.sun@intel.com>
+Subject: Re: [PATCH v2] mmc: dw_mmc: Make sure we don't get stuck when we get
+ an error
+Date: Wed, 13 Aug 2014 17:04:28 +0200
+Message-ID: <CAPDyKFpEEevF8z+RRqftUVXa6VGdbAiL82wam2AmuoRBBvAxnA@mail.gmail.com>
+References: <1400623670-2657-1-git-send-email-dianders@chromium.org>
+	<001601cf74d4$3547a410$9fd6ec30$%jun@samsung.com>
+	<CAD=FV=XCSTzX04M1TDCf9p4QqZrNsStTKG5s7uYbJNaAKmtkuw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f41.google.com ([209.85.192.41]:53456 "EHLO
-	mail-qg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753118AbaHMPBL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Aug 2014 11:01:11 -0400
-Received: by mail-qg0-f41.google.com with SMTP id q107so11093105qgd.28
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Aug 2014 08:01:10 -0700 (PDT)
-In-Reply-To: <1407908042-12931-1-git-send-email-yi.y.sun@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=XCSTzX04M1TDCf9p4QqZrNsStTKG5s7uYbJNaAKmtkuw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Sonny Rao <sonnyrao@chromium.org>, Grant Grundler <grundler@chromium.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Tomasz Figa <t.figa@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Yi Sun <yi.y.sun@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 13 August 2014 07:34, Yi Sun <yi.y.sun@intel.com> wrote:
-> eMMC card can support up to 7 partitions, including 2 boot,
-> 1 RPMB and 4 GPs. But MMC_NUM_PHY_PARTITION is defined to
-> 6 so we should fix it to 7.
+On 13 August 2014 15:38, Doug Anderson <dianders@chromium.org> wrote:
+> Hi,
 >
-> Signed-off-by: Yi Sun <yi.y.sun@intel.com>
+> On Wed, May 21, 2014 at 2:08 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
+>> On Wed, May 21, 2014, Doug Anderson wrote:
+>>> If we happened to get a data error at just the wrong time the dw_mmc
+>>> driver could get into a state where it would never complete its
+>>> request.  That would leave the caller just hanging there.
+>>>
+>>> We fix this two ways and both of the two fixes on their own appear to
+>>> fix the problems we've seen:
+>>>
+>>> 1. Fix a race in the tasklet where the interrupt setting the data
+>>>    error happens _just after_ we check for it, then we get a
+>>>    EVENT_XFER_COMPLETE.  We fix this by repeating a bit of code.
+>>> 2. Fix it so that if we detect that we've got an error in the "data
+>>>    busy" state and we're not going to do anything else we end the
+>>>    request and unblock anyone waiting.
+>>>
+>>> Signed-off-by: Doug Anderson <dianders@chromium.org>
+>>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
+>>
+>> It will be applied after "mmc: dw_mmc: change to use recommended reset procedure"
+>>
+>> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+>>
+>> Thanks,
+>> Seungwon Jeon
+>
+> I saw that Ulf applied "mmc: dw_mmc: change to use recommended reset
+> procedure".  Could we apply this one now, too?  Do you want me to
+> repost?
 
-Thanks! I queued this one for 3.18. I took the liberty to update the
-author name and made some minor clarifications to the commit message.
-You should probably update your .gitconfig for future patches, to get
-the correct name.
+Please repost and rebase if needed.
 
 Kind regards
 Uffe
-
-> ---
->  include/linux/mmc/card.h |    5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
 >
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index d424b9d..bde5147 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -214,11 +214,12 @@ enum mmc_blk_status {
->  };
->
->  /* The number of MMC physical partitions.  These consist of:
-> - * boot partitions (2), general purpose partitions (4) in MMC v4.4.
-> + * boot partitions (2), general purpose partitions (4) and
-> + * RPMB partition (1) in MMC v4.4.
->   */
->  #define MMC_NUM_BOOT_PARTITION 2
->  #define MMC_NUM_GP_PARTITION   4
-> -#define MMC_NUM_PHY_PARTITION  6
-> +#define MMC_NUM_PHY_PARTITION  7
->  #define MAX_MMC_PART_NAME_LEN  20
->
->  /*
-> --
-> 1.7.9.5
->
+> -Doug
