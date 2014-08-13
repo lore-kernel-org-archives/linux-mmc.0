@@ -1,29 +1,41 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH RFC 3/5] mmc: mmci: relax blksz check for SDIO
-Date: Wed, 13 Aug 2014 10:54:52 +0200
-Message-ID: <CACRpkdaWkTp399GoHRifVQJE8WNrYf4GWyThMEg6ZVuy9_H=Tg@mail.gmail.com>
+Subject: Re: [PATCH RFC 4/5] mmc: mmci: Add sdio enable mask in variant data
+Date: Wed, 13 Aug 2014 10:55:55 +0200
+Message-ID: <CACRpkda2qQ+3eG032Ln2hWYGJ3rkeCwqjvYc9hYBzQFGgGjiOg@mail.gmail.com>
 References: <1407844950-8072-1-git-send-email-srinivas.kandadgatla@linaro.org>
-	<1407845080-8353-1-git-send-email-srinivas.kandadgatla@linaro.org>
-	<20140812141242.GI30401@n2100.arm.linux.org.uk>
-	<53EAF444.8050507@linaro.org>
+	<1407845102-8402-1-git-send-email-srinivas.kandadgatla@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <53EAF444.8050507@linaro.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oa0-f51.google.com ([209.85.219.51]:47320 "EHLO
+	mail-oa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750803AbaHMIz4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Aug 2014 04:55:56 -0400
+Received: by mail-oa0-f51.google.com with SMTP id o6so8298474oag.10
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Aug 2014 01:55:55 -0700 (PDT)
+In-Reply-To: <1407845102-8402-1-git-send-email-srinivas.kandadgatla@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 
-On Wed, Aug 13, 2014 at 7:14 AM, Srinivas Kandagatla
+On Tue, Aug 12, 2014 at 2:05 PM, Srinivas Kandagatla
 <srinivas.kandagatla@linaro.org> wrote:
 
-> In the past Ulf Hansson and Stefan Nilsson have submitted a patch to fix
-> this issue for ux500v2. This patch adds new flag non_power_of_2_blksize /
-> any_blksize to variant_data.
+> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>
+> This patch adds sdio enable mask in variant data, SOCs like ST have
+> special bits in datactrl register to enable sdio. Unconditionally setting
+> this bit in this driver breaks other SOCs like Qualcomm which maps this
+> bits to something else, so making this enable bit to come from variant
+> data solves the issue.
+>
+> Originally the issue is detected while testing WLAN ath6kl on Qualcomm
+> APQ8064.
+>
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-That's the right approach. It makes non-2^n support the exception rather
-than the rule and applies only to the variants relevant so the logic is right.
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
 Yours,
 Linus Walleij
