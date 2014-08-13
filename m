@@ -1,61 +1,66 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH RFC 5/5] mmc: mmci: move ST specific sdio setup under a condition
-Date: Wed, 13 Aug 2014 10:58:45 +0200
-Message-ID: <CACRpkdY-rhuqMgY7ZRB8YEi+AiNMV_SLbSGJy7Nw+ytyjQXMnA@mail.gmail.com>
-References: <1407844950-8072-1-git-send-email-srinivas.kandadgatla@linaro.org>
-	<1407845127-8448-1-git-send-email-srinivas.kandadgatla@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: sdhci_s3c_consider_clock scheduling while atomic - clk_round_rate
+Date: Wed, 13 Aug 2014 11:10:36 +0200
+Message-ID: <CAPDyKFpn5RZY6NqOKB1QwKkFZmQDt0D8aqsA_=PBX6FwJygYEg@mail.gmail.com>
+References: <CAD8Lp45QV4ZcfXA86hoseKfJLLV_BJ-g0UABnOGPkJW1pMXhFw@mail.gmail.com>
+	<53A99EB5.6010907@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f43.google.com ([209.85.219.43]:58157 "EHLO
-	mail-oa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751024AbaHMI6p (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Aug 2014 04:58:45 -0400
-Received: by mail-oa0-f43.google.com with SMTP id i7so8237773oag.16
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Aug 2014 01:58:45 -0700 (PDT)
-In-Reply-To: <1407845127-8448-1-git-send-email-srinivas.kandadgatla@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <53A99EB5.6010907@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Tomasz Figa <t.figa@samsung.com>, Daniel Drake <drake@endlessm.com>
+Cc: linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Ben Dooks <ben-linux@fluff.org>, Tomasz Figa <tomasz.figa@gmail.com>, Chris Ball <chris@printf.net>, Mike Turquette <mturquette@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 
-On Tue, Aug 12, 2014 at 2:05 PM, Srinivas Kandagatla
-<srinivas.kandagatla@linaro.org> wrote:
-
-> From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+On 24 June 2014 17:52, Tomasz Figa <t.figa@samsung.com> wrote:
+> Hi Daniel,
 >
-> This patch moves ST specific sdio setup under a vendor id condition,
-> this will ensure that the ST specfic setup is not done on other vendor
-> like Qualcomm.
+> [adding Ulf, Chris and Mike to the discussion]
 >
-> Originally the issue was detected while testing WLAN ath6kl on IFC6410
-> board with APQ8064 SOC.
+> On 24.06.2014 11:48, Daniel Drake wrote:
+>> sdhci_s3c_set_clock is called from sdhci_do_set_ios with interrupts
+>> disabled, and this calls into sdhci_s3c_consider_clock().
+>>
+>> The patch "mmc: sdhci-s3c: Cache bus clock rates" addressed some
+>> scheduling while atomic in this function, but there are more issues
+>> here, seen while testing 3.16-rc2 on exynos4412:
+>>
+>> BUG: sleeping function called from invalid context at kernel/locking/mutex.c:103
+>> in_atomic(): 1, irqs_disabled(): 128, pid: 75, name: mmcqd/0
+>> Preemption disabled at:[<  (null)>]   (null)
+>>
+>> CPU: 0 PID: 75 Comm: mmcqd/0 Not tainted 3.16.0-rc2-00028-ge9fe7eb-dirty #77
+>> [<c0016140>] (unwind_backtrace) from [<c0011e14>] (show_stack+0x10/0x14)
+>> [<c0011e14>] (show_stack) from [<c05ce8a8>] (dump_stack+0x84/0xc4)
+>> [<c05ce8a8>] (dump_stack) from [<c05d2de0>] (mutex_lock+0x1c/0x3c)
+>> [<c05d2de0>] (mutex_lock) from [<c046214c>] (clk_prepare_lock+0x6c/0xf4)
+>> [<c046214c>] (clk_prepare_lock) from [<c04625ac>] (clk_round_rate+0x10/0x2c)
+>> [<c04625ac>] (clk_round_rate) from [<c0447628>] (sdhci_s3c_set_clock+0x4c/0x1e8)
+>> [<c0447628>] (sdhci_s3c_set_clock) from [<c0447818>]
+>> (sdhci_cmu_set_clock+0x54/0x140)
+>> [<c0447818>] (sdhci_cmu_set_clock) from [<c0443a38>]
+>> (sdhci_do_set_ios+0x138/0x58c)
+>> [<c0443a38>] (sdhci_do_set_ios) from [<c0443864>] (sdhci_set_ios+0x28/0x34)
+>>
+>> clk_round_rate cannot be called here because it takes a mutex.
+>>
+>> sdhci_s3c_set_clock() also calls into clk_prepare_enable() which looks
+>> like it could trigger this problem too.
 >
-> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> Apparently this is related to generic sdhci code calling .set_clock()
+> under spin_lock_irqsave(). For reference, see sdhci_do_set_ios() and
+> sdhci_tasklet_finish().
+>
+> Chris, Ulf, any suggestions?
 
-So instead of again checking hw_designer (I think that's a bit
-messy) and instead of having the flag bool sdio from patch
-1, why not introduce 2 flags in vendor_data:
+Well, the approach I think of is simply to invoke
+spin_unlock_irqrestore() prior the ->set_clock callbacks are invoked.
 
-bool st_sdio;
-bool qcom_sdio;
+The spinlock then needs to be handled by each ->set_clock callback for
+each driver. To simplify for ->set_clock callbacks, we might also want
+to add spinlock handling to the exported library function,
+sdhci_set_clock().
 
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -828,7 +828,8 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
->                          * otherwise the transfer will not start. The threshold
->                          * depends on the rate of MCLK.
->                          */
-> -                       if (data->flags & MMC_DATA_WRITE &&
-> +                       if (host->hw_designer == AMBA_VENDOR_ST &&
-> +                           data->flags & MMC_DATA_WRITE &&
-
-And this becomes just
-
-if (variant->st_sdio)...
-
->                             (host->size < 8 ||
->                              (host->size <= 8 && host->mclk > 50000000)))
->                                 clk = host->clk_reg & ~variant->clkreg_enable;
-
-Yours,
-Linus Walleij
+Kind regards
+Uffe
