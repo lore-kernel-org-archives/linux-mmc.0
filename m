@@ -1,108 +1,80 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH v3 1/4] ARM: dts: Add emmc and sdmmc to the rk3288 device tree
-Date: Tue, 12 Aug 2014 16:24:30 -0700
-Message-ID: <CAD=FV=XCNRTrzScXKskLT-KRFvYODVA-+ODx3T4jZjZapCdO-Q@mail.gmail.com>
-References: <1407344984-14176-1-git-send-email-dianders@chromium.org>
-	<1407344984-14176-2-git-send-email-dianders@chromium.org>
-	<CAD=FV=Wsc-Pkvg9jumdg9i1oO+T1=jtZTfbc+qE5RDrCXaaezA@mail.gmail.com>
-	<1445128.HbmmWnRJOL@phil>
-	<CAPz6YkX2ht62Swzepd=g6bBy6w2+SJ2C2M4xvBmWbtAjRHEocg@mail.gmail.com>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [PATCH] mmc: core: use 1.8v signling in ddr mode for some
+ special host
+Date: Wed, 13 Aug 2014 02:15:59 +0000
+Message-ID: <17296D9F8FF2234F831FC3DF505A87A911B1F8D6@shsmsx102.ccr.corp.intel.com>
+References: <20140801060816.GA3172@intel.com>
+ <CAPDyKFozfn62tkFQkzXC19pVXeGruH-K=eaz3756xk-q3hDQ6w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPz6YkX2ht62Swzepd=g6bBy6w2+SJ2C2M4xvBmWbtAjRHEocg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Sonny Rao <sonnyrao-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Kever Yang <kever.yang-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:20031 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753147AbaHMCQB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 12 Aug 2014 22:16:01 -0400
+In-Reply-To: <CAPDyKFozfn62tkFQkzXC19pVXeGruH-K=eaz3756xk-q3hDQ6w@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "chris@printf.org" <chris@printf.org>, "Gao, Yunpeng" <yunpeng.gao@intel.com>
 
-Sonny and Heiko,
-
-On Tue, Aug 12, 2014 at 3:11 PM, Sonny Rao <sonnyrao-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrot=
-e:
-> On Tue, Aug 12, 2014 at 3:07 PM, Heiko St=C3=BCbner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>=
- wrote:
->> Am Dienstag, 12. August 2014, 14:06:11 schrieb Doug Anderson:
->>> Heiko,
->>>
->>> On Wed, Aug 6, 2014 at 10:09 AM, Doug Anderson <dianders@chromium.o=
-rg>
->> wrote:
->>> > This adds support for the sdmmc and emmc ports on the rk3288 usin=
-g the
->>> >
->>> > currently posted driver from Addy at:
->>> >   https://patchwork.kernel.org/patch/4653631/
->>> >
->>> > Note:
->>> > * This is not baesd on Jaehoon's patch series removing the slot n=
-ode,
->>> >
->>> >   but it does use new syntax like putting the bus width at the to=
-p
->>> >   level and using the new cap-mmc-highspeed / cap-sd-highspeed.  =
-A
->>> >   future patch will modify this one to remove the slot node.
->>> >
->>> > Signed-off-by: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
->>> > Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
->>> > ---
->>> > Changes in v3: None
->>> > Changes in v2:
->>> > - New patchwork link for Addy's patch
->>> >
->>> >  arch/arm/boot/dts/rk3288.dtsi | 22 ++++++++++++++++++++++
->>> >  1 file changed, 22 insertions(+)
->>> >
->>> > diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk=
-3288.dtsi
->>> > index e7cb008..dc98a5b 100644
->>> > --- a/arch/arm/boot/dts/rk3288.dtsi
->>> > +++ b/arch/arm/boot/dts/rk3288.dtsi
->>> > @@ -78,6 +78,28 @@
->>> >
->>> >                 clock-frequency =3D <24000000>;
->>> >
->>> >         };
->>> >
->>> > +       sdmmc: dwmmc@ff0c0000 {
->>> > +               compatible =3D "rockchip,rk3288-dw-mshc";
->>> > +               clocks =3D <&cru HCLK_SDMMC>, <&cru SCLK_SDMMC>;
->>> > +               clock-names =3D "biu", "ciu";
->>> > +               fifo-depth =3D <0x100>;
->>> > +               interrupts =3D <GIC_SPI 32 IRQ_TYPE_LEVEL_HIGH>;
->>> > +               reg =3D <0xff0c0000 0x4000>;
->>> > +               #address-cells =3D <1>;
->>> > +               #size-cells =3D <0>;
->>>
->>> When doing other testing I realized that I missed a:
->>>   status =3D "disabled";
->>>
->>> ...from both of these two nodes.  I'm happy to repost with this fix=
- or
->>> I'm happy if you want to add to the patch when applying.
->>>
->>> Let me know.  Thanks!
->>
->> I don't really have a preference :-) . Btw. I also did plan on mergi=
-ng patches
->> 1 +4 and 2+3 now that the slot-removal series has landed.
->> Would this be ok with you?
->>
->> So if you want to repost, you could do this as two patches already :=
--).
->
-> Please repost with the status =3D "disabled"; the fact that they were
-> enabled by the dtsi was confusing to some of us at least once already
-> :-)
-
-Done.  Please let me know if it looks OK or if there are any other
-spins needed.  ;)
-
--Doug
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" i=
-n
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogbGludXgtbW1jLW93bmVy
+QHZnZXIua2VybmVsLm9yZw0KPiBbbWFpbHRvOmxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5v
+cmddIE9uIEJlaGFsZiBPZiBVbGYgSGFuc3Nvbg0KPiBTZW50OiBUdWVzZGF5LCBBdWd1c3QgMTIs
+IDIwMTQgOToyMSBQTQ0KPiBUbzogRG9uZywgQ2h1YW54aWFvDQo+IENjOiBsaW51eC1tbWM7IGNo
+cmlzQHByaW50Zi5vcmc7IEdhbywgWXVucGVuZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIXSBtbWM6
+IGNvcmU6IHVzZSAxLjh2IHNpZ25saW5nIGluIGRkciBtb2RlIGZvciBzb21lIHNwZWNpYWwNCj4g
+aG9zdA0KPiANCj4gT24gMSBBdWd1c3QgMjAxNCAwODowOCwgQ2h1YW54aWFvIERvbmcgPGNodWFu
+eGlhby5kb25nQGludGVsLmNvbT4gd3JvdGU6DQo+ID4gRXZlbiBlTU1DIGNhcmQgY2FuIHN1cHBv
+cnQgMy4zdiB0byAxLjJ2IHZjY3EgaW4gRERSLCBidXQgbm90IGFsbCBob3N0DQo+ID4gY29udHJv
+bGxlciBjYW4gc3VwcG9ydCB0aGlzLCBsaWtlIHNvbWUgb2YgdGhlIFNESENJIGhvc3Qgd2hpY2gg
+Y29ubmVjdA0KPiA+IHRvIGFuIGVNTUMgZGV2aWNlLiBTb21lIG9mIHRoZXNlIGhvc3QgY29udHJv
+bGxlciBzdGlsbCBuZWVkcyB0byB1c2UNCj4gPiAxLjh2IHZjY3EgZm9yIHN1cHBvcnRpbmcgRERS
+IG1vZGUuDQo+ID4NCj4gPiBJZiBhIGhvc3QgY29udHJvbGxlciBjYW5ub3Qgc3VwcG9ydCAzLjN2
+IGZvciBERFIsIHRyeSAxLjh2Lg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogQ2h1YW54aWFvIERv
+bmcgPGNodWFueGlhby5kb25nQGludGVsLmNvbT4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBZdW5wZW5n
+IEdhbyA8eXVucGVuZy5nYW9AaW50ZWwuY29tPg0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJzL21tYy9j
+b3JlL21tYy5jICAgfCAgIDE5ICsrKysrKysrKysrKysrKysrKysNCj4gPiAgaW5jbHVkZS9saW51
+eC9tbWMvaG9zdC5oIHwgICAgMSArDQo+ID4gIDIgZmlsZXMgY2hhbmdlZCwgMjAgaW5zZXJ0aW9u
+cygrKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMgYi9kcml2
+ZXJzL21tYy9jb3JlL21tYy5jIGluZGV4DQo+ID4gNzkzYzZmNy4uMTNhNWIyNCAxMDA2NDQNCj4g
+PiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvY29y
+ZS9tbWMuYw0KPiA+IEBAIC0xMDAwLDYgKzEwMDAsMjUgQEAgc3RhdGljIGludCBtbWNfc2VsZWN0
+X2hzX2RkcihzdHJ1Y3QgbW1jX2NhcmQNCj4gKmNhcmQpDQo+ID4gICAgICAgICAgICAgICAgICAg
+ICAgICAgcmV0dXJuIGVycjsNCj4gPiAgICAgICAgIH0NCj4gPg0KPiA+ICsgICAgICAgLyoNCj4g
+PiArICAgICAgICAqIEV2ZW4gZU1NQyBjYXJkIGNhbiBzdXBwb3J0IDMuM3YgdG8gMS4ydiB2Y2Nx
+LCBidXQgbm90IGFsbA0KPiA+ICsgICAgICAgICogaG9zdCBjb250cm9sbGVyIGNhbiBzdXBwb3J0
+IHRoaXMsIGxpa2Ugc29tZSBvZiB0aGUgU0RIQ0kNCj4gPiArICAgICAgICAqIGNvbnRyb2xsZXIg
+d2hpY2ggY29ubmVjdCB0byBhbiBlTU1DIGRldmljZS4gU29tZSBvZiB0aGVzZQ0KPiA+ICsgICAg
+ICAgICogaG9zdCBjb250cm9sbGVyIHN0aWxsIG5lZWRzIHRvIHVzZSAxLjh2IHZjY3EgZm9yIHN1
+cHBvcnRpbmcNCj4gPiArICAgICAgICAqIEREUiBtb2RlLg0KPiA+ICsgICAgICAgICoNCj4gPiAr
+ICAgICAgICAqIElmIGEgaG9zdCBjb250cm9sbGVyIGNhbm5vdCBzdXBwb3J0IDMuM3YgZm9yIERE
+UiwgdHJ5IDEuOHYNCj4gPiArICAgICAgICAqLw0KPiA+ICsgICAgICAgaWYgKHVubGlrZWx5KGhv
+c3QtPmNhcHMyICYgTU1DX0NBUDJfTk9fM18zVl9ERFIpKSB7DQo+ID4gKyAgICAgICAgICAgICAg
+IGlmIChjYXJkLT5tbWNfYXZhaWxfdHlwZSAmDQo+IEVYVF9DU0RfQ0FSRF9UWVBFX0hTMjAwXzFf
+OFYpIHsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBlcnIgPSBfX21tY19zZXRfc2lnbmFs
+X3ZvbHRhZ2UoaG9zdCwNCj4gPiArDQo+IE1NQ19TSUdOQUxfVk9MVEFHRV8xODApOw0KPiA+ICsg
+ICAgICAgICAgICAgICAgICAgICAgIGlmIChlcnIpDQo+ID4gKyAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICByZXR1cm4gZXJyOw0KPiA+ICsgICAgICAgICAgICAgICB9IGVsc2UNCj4gPiAr
+ICAgICAgICAgICAgICAgICAgICAgICByZXR1cm4gLUVPUE5PVFNVUFA7DQo+ID4gKyAgICAgICB9
+DQo+IA0KPiBJIGFtIHdvbmRlcmluZyBpZiB3ZSBjb3VsZCB0cnkgYW4gYW5vdGhlciBhcHByb2Fj
+aCB3aGlsZSBjaGFuZ2luZyBzaWduYWwNCj4gdm9sdGFnZSBmb3IgKGUpTU1DLiBTaW1wbHkgc3Rh
+cnQgYnkgdHJ5aW5nIHdpdGggMS4yViwgdGhlbiAxLjhWIGFuZCB0aGVuIDMuM1YuDQo+IE9idmlv
+dXNseSB3ZSBzaG91bGRuJ3QgdHJ5IHdpdGggc29tZXRoaW5nIHRoYXQgaXNuJ3Qgc3VwcG9ydGVk
+LCB3aGljaA0KPiBjYXJkLT5tbWNfYXZhaWxfdHlwZSB0ZWxscyB1cyBhYm91dC4NCj4gDQo+IEkg
+cmVhbGl6ZSB0aGF0IGl0IHdpbGwgbWVhbiBhIGNoYW5nZSBpbiBiZWhhdmlvdXIgYW5kIGRlcGVu
+ZGluZyBvbiBob3cgaG9zdHMNCj4gYXJlIGhhbmRsaW5nIHNpZ25hbCB2b2x0YWdlLCB0aGlzIGlz
+IGEgYml0IHVuY2VydGFpbiBpZiBpdCB3b3VsZCB3b3JrLiBTdGlsbCBJIGZlZWwgaXQNCj4gd291
+bGQgYmUgdGhlIHJpZ2h0IGFwcHJvYWNoLiBDYW4gd2UgZ2l2ZSBhdCBzaG90Pw0KDQpJIGFncmVl
+IHdpdGggeW91LiBBY3R1YWxseSB0aGlzIGlzIGFsc28gb3V0IG9yaWdpbmFsIGFwcHJvYWNoLiA6
+KSBHaXZlbiBpdCB3ZSBjYW5ub3QgdGVzdCB0aGlzIGFwcHJvYWNoIG9uIGFsbCBob3N0IGNvbnRy
+b2xsZXJzLCB0aHVzIGZpbmFsbHkgY2hhbmdlIHRvIGFkZCBhIG5ldyBDQVAgaXMgdG8gYXZvaWQg
+aW1wYWN0aW5nIG90aGVyIGhvc3QgY29udHJvbGxlcnMuDQoNCkkgY2FuIHBvc3QgYSB2MiBwYXRj
+aCB0byBpbXBsZW1lbnQgdGhpcyBJTyBzaWduYWwgdm9sdGFnZSBjaGFuZ2luZyBzZXF1ZW5jZSBm
+b3IgcmV2aWV3Lg0KDQpUaGFua3MNCkNodWFueGlhbw0KDQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4g
+VWZmZQ0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGlu
+ZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIiBpbiB0aGUgYm9keQ0KPiBvZiBhIG1lc3NhZ2UgdG8g
+bWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+IGh0dHA6
+Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
