@@ -1,56 +1,76 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: dw_mmc: Make sure we don't get stuck when we get
- an error
-Date: Wed, 13 Aug 2014 17:04:28 +0200
-Message-ID: <CAPDyKFpEEevF8z+RRqftUVXa6VGdbAiL82wam2AmuoRBBvAxnA@mail.gmail.com>
-References: <1400623670-2657-1-git-send-email-dianders@chromium.org>
-	<001601cf74d4$3547a410$9fd6ec30$%jun@samsung.com>
-	<CAD=FV=XCSTzX04M1TDCf9p4QqZrNsStTKG5s7uYbJNaAKmtkuw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: rtsx: fix incorrect last byte in R2 response
+Date: Wed, 13 Aug 2014 17:09:37 +0200
+Message-ID: <CAPDyKFrTbiHxYgW5YCR48DKX8arxuxK3rz7k_H-waGEMiPFjSg@mail.gmail.com>
+References: <1407745936-18513-1-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=XCSTzX04M1TDCf9p4QqZrNsStTKG5s7uYbJNaAKmtkuw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Sonny Rao <sonnyrao@chromium.org>, Grant Grundler <grundler@chromium.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Tomasz Figa <t.figa@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <1407745936-18513-1-git-send-email-rogerable@realtek.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Roger <rogerable@realtek.com>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, driverdev-devel@linuxdriverproject.org, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei WANG <wei_wang@realsil.com.cn>
 List-Id: linux-mmc@vger.kernel.org
 
-On 13 August 2014 15:38, Doug Anderson <dianders@chromium.org> wrote:
-> Hi,
+On 11 August 2014 10:32,  <rogerable@realtek.com> wrote:
+> From: Roger Tseng <rogerable@realtek.com>
 >
-> On Wed, May 21, 2014 at 2:08 AM, Seungwon Jeon <tgih.jun@samsung.com> wrote:
->> On Wed, May 21, 2014, Doug Anderson wrote:
->>> If we happened to get a data error at just the wrong time the dw_mmc
->>> driver could get into a state where it would never complete its
->>> request.  That would leave the caller just hanging there.
->>>
->>> We fix this two ways and both of the two fixes on their own appear to
->>> fix the problems we've seen:
->>>
->>> 1. Fix a race in the tasklet where the interrupt setting the data
->>>    error happens _just after_ we check for it, then we get a
->>>    EVENT_XFER_COMPLETE.  We fix this by repeating a bit of code.
->>> 2. Fix it so that if we detect that we've got an error in the "data
->>>    busy" state and we're not going to do anything else we end the
->>>    request and unblock anyone waiting.
->>>
->>> Signed-off-by: Doug Anderson <dianders@chromium.org>
->>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
->>
->> It will be applied after "mmc: dw_mmc: change to use recommended reset procedure"
->>
->> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
->>
->> Thanks,
->> Seungwon Jeon
+> Current code erroneously fill the last byte of R2 response with an undefined
+> value. In addition, it is impossible to obtain the real values since the
+> controller actually 'offloads' the last byte(CRC7, end bit) while receiving R2
+> response. This could cause mmc stack to obtain inconsistent CID from the same
+> card after resume and misidentify it as a different card.
 >
-> I saw that Ulf applied "mmc: dw_mmc: change to use recommended reset
-> procedure".  Could we apply this one now, too?  Do you want me to
-> repost?
+> Fix by assigning a dummy value 0x01 to the last byte of R2 response.
+>
+> Signed-off-by: Roger Tseng <rogerable@realtek.com>
 
-Please repost and rebase if needed.
+Thanks! Queued for 3.18.
+
+I guess this should go for stable as well?
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/rtsx_pci_sdmmc.c |    1 +
+>  drivers/mmc/host/rtsx_usb_sdmmc.c |    1 +
+>  2 files changed, 2 insertions(+)
 >
-> -Doug
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index dfde4a2..54849d8 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -412,6 +412,7 @@ static void sd_send_cmd_get_rsp(struct realtek_pci_sdmmc *host,
+>         }
+>
+>         if (rsp_type == SD_RSP_TYPE_R2) {
+> +               ptr[16] = 1;
+>                 for (i = 0; i < 4; i++) {
+>                         cmd->resp[i] = get_unaligned_be32(ptr + 1 + i * 4);
+>                         dev_dbg(sdmmc_dev(host), "cmd->resp[%d] = 0x%08x\n",
+> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> index 5d3766e..ca08df1 100644
+> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> @@ -435,6 +435,7 @@ static void sd_send_cmd_get_rsp(struct rtsx_usb_sdmmc *host,
+>         }
+>
+>         if (rsp_type == SD_RSP_TYPE_R2) {
+> +               ptr[16] = 1;
+>                 for (i = 0; i < 4; i++) {
+>                         cmd->resp[i] = get_unaligned_be32(ptr + 1 + i * 4);
+>                         dev_dbg(sdmmc_dev(host), "cmd->resp[%d] = 0x%08x\n",
+> --
+> 1.7.10.4
+>
