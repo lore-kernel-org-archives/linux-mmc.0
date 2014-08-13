@@ -1,66 +1,145 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: sdhci_s3c_consider_clock scheduling while atomic - clk_round_rate
-Date: Wed, 13 Aug 2014 11:10:36 +0200
-Message-ID: <CAPDyKFpn5RZY6NqOKB1QwKkFZmQDt0D8aqsA_=PBX6FwJygYEg@mail.gmail.com>
-References: <CAD8Lp45QV4ZcfXA86hoseKfJLLV_BJ-g0UABnOGPkJW1pMXhFw@mail.gmail.com>
-	<53A99EB5.6010907@samsung.com>
+From: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
+Subject: Re: [PATCH] mmc: check EXT_CSD_PARTITION_SETTING_COMPLETED before
+ creating partitions
+Date: Wed, 13 Aug 2014 11:20:03 +0200
+Message-ID: <53EB2DC3.2080002@neotion.com>
+References: <53C7E45E.2060102@neotion.com> <CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <53A99EB5.6010907@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Tomasz Figa <t.figa@samsung.com>, Daniel Drake <drake@endlessm.com>
-Cc: linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Ben Dooks <ben-linux@fluff.org>, Tomasz Figa <tomasz.figa@gmail.com>, Chris Ball <chris@printf.net>, Mike Turquette <mturquette@linaro.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="F2OtWnTpmtWc3U43XaW4DN355ddBSqWqf"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 24 June 2014 17:52, Tomasz Figa <t.figa@samsung.com> wrote:
-> Hi Daniel,
->
-> [adding Ulf, Chris and Mike to the discussion]
->
-> On 24.06.2014 11:48, Daniel Drake wrote:
->> sdhci_s3c_set_clock is called from sdhci_do_set_ios with interrupts
->> disabled, and this calls into sdhci_s3c_consider_clock().
->>
->> The patch "mmc: sdhci-s3c: Cache bus clock rates" addressed some
->> scheduling while atomic in this function, but there are more issues
->> here, seen while testing 3.16-rc2 on exynos4412:
->>
->> BUG: sleeping function called from invalid context at kernel/locking/mutex.c:103
->> in_atomic(): 1, irqs_disabled(): 128, pid: 75, name: mmcqd/0
->> Preemption disabled at:[<  (null)>]   (null)
->>
->> CPU: 0 PID: 75 Comm: mmcqd/0 Not tainted 3.16.0-rc2-00028-ge9fe7eb-dirty #77
->> [<c0016140>] (unwind_backtrace) from [<c0011e14>] (show_stack+0x10/0x14)
->> [<c0011e14>] (show_stack) from [<c05ce8a8>] (dump_stack+0x84/0xc4)
->> [<c05ce8a8>] (dump_stack) from [<c05d2de0>] (mutex_lock+0x1c/0x3c)
->> [<c05d2de0>] (mutex_lock) from [<c046214c>] (clk_prepare_lock+0x6c/0xf4)
->> [<c046214c>] (clk_prepare_lock) from [<c04625ac>] (clk_round_rate+0x10/0x2c)
->> [<c04625ac>] (clk_round_rate) from [<c0447628>] (sdhci_s3c_set_clock+0x4c/0x1e8)
->> [<c0447628>] (sdhci_s3c_set_clock) from [<c0447818>]
->> (sdhci_cmu_set_clock+0x54/0x140)
->> [<c0447818>] (sdhci_cmu_set_clock) from [<c0443a38>]
->> (sdhci_do_set_ios+0x138/0x58c)
->> [<c0443a38>] (sdhci_do_set_ios) from [<c0443864>] (sdhci_set_ios+0x28/0x34)
->>
->> clk_round_rate cannot be called here because it takes a mutex.
->>
->> sdhci_s3c_set_clock() also calls into clk_prepare_enable() which looks
->> like it could trigger this problem too.
->
-> Apparently this is related to generic sdhci code calling .set_clock()
-> under spin_lock_irqsave(). For reference, see sdhci_do_set_ios() and
-> sdhci_tasklet_finish().
->
-> Chris, Ulf, any suggestions?
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--F2OtWnTpmtWc3U43XaW4DN355ddBSqWqf
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Well, the approach I think of is simply to invoke
-spin_unlock_irqrestore() prior the ->set_clock callbacks are invoked.
+Le 13/08/2014 10:36, Ulf Hansson a =C3=A9crit :
+> On 17 July 2014 16:57, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>=
+ wrote:
+>> Create MMC general purpose partitions only if
+>> EXT_CSD_PARTITION_SETTING_COMPLETED bit is set.
+>> Some tools may set general purpose partition size(s) but fail or stop
+>> without finalize.
+>> Another case is to set invalid partition size(s).
+>>
+>> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
+>> ---
+>>  drivers/mmc/core/mmc.c  |   15 +++++++++++----
+>>  include/linux/mmc/mmc.h |    2 ++
+>>  2 files changed, 13 insertions(+), 4 deletions(-)
+>>
+>> From commit b6603fe574af289dbe9eb9fb4c540bca04f5a053 in master linux t=
+ree.
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 793c6f7..b9fe211 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -471,10 +471,17 @@ static int mmc_read_ext_csd(struct mmc_card *car=
+d, u8 *ext_csd)
+>>                                 ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3=
+];
+>>                                 part_size *=3D (size_t)(hc_erase_grp_s=
+z *
+>>                                         hc_wp_grp_sz);
+>> -                               mmc_part_add(card, part_size << 19,
+>> -                                       EXT_CSD_PART_CONFIG_ACC_GP0 + =
+idx,
+>> -                                       "gp%d", idx, false,
+>> -                                       MMC_BLK_DATA_AREA_GP);
+>> +                               if (ext_csd[EXT_CSD_PARTITION_SETTING_=
+COMPLETED] &
+>> +                               EXT_CSD_PART_SETTING_COMPLETED) {
+>=20
+> Some minor comments here.
+>=20
+> I think you could move this if statement up and into the previous "if"
+> where we check for "ext_csd[EXT_CSD_PARTITION_SUPPORT] &
+> EXT_CSD_PART_SUPPORT_PART_EN".
+>=20
+> Additionally, please run checkpatch.
+>=20
+> Kind regards
+> Uffe
 
-The spinlock then needs to be handled by each ->set_clock callback for
-each driver. To simplify for ->set_clock callbacks, we might also want
-to add spinlock handling to the exported library function,
-sdhci_set_clock().
+Hello,
 
-Kind regards
-Uffe
+I didn't put the if statement above to warn user in case of bad partition=
+ing.
+I don't want the kernel to silently ignore this error.
+
+checkpatch has been run before sending this patch, I know there are two l=
+ines
+with two extra characters, but names used here are quite long. I hope it =
+will
+not block upstream inclusion.
+
+
+Best regards
+Gr=C3=A9gory Soutad=C3=A9
+
+>=20
+>> +                                       mmc_part_add(card, part_size <=
+< 19,
+>> +                                               EXT_CSD_PART_CONFIG_AC=
+C_GP0 + idx,
+>> +                                               "gp%d", idx, false,
+>> +                                               MMC_BLK_DATA_AREA_GP);=
+
+>> +                               } else {
+>> +                                       pr_warn("%s: has partition siz=
+e defined, but setting is not complete\n",
+>> +                                               mmc_hostname(card->hos=
+t));
+>> +                                       break;
+>> +                               }
+>>                         }
+>>                 }
+>>                 card->ext_csd.sec_trim_mult =3D
+>> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+>> index 64ec963..78753bc 100644
+>> --- a/include/linux/mmc/mmc.h
+>> +++ b/include/linux/mmc/mmc.h
+>> @@ -281,6 +281,7 @@ struct _mmc_csd {
+>>  #define EXT_CSD_EXP_EVENTS_CTRL                56      /* R/W, 2 byte=
+s */
+>>  #define EXT_CSD_DATA_SECTOR_SIZE       61      /* R */
+>>  #define EXT_CSD_GP_SIZE_MULT           143     /* R/W */
+>> +#define EXT_CSD_PARTITION_SETTING_COMPLETED 155        /* R/W */
+>>  #define EXT_CSD_PARTITION_ATTRIBUTE    156     /* R/W */
+>>  #define EXT_CSD_PARTITION_SUPPORT      160     /* RO */
+>>  #define EXT_CSD_HPI_MGMT               161     /* R/W */
+>> @@ -349,6 +350,7 @@ struct _mmc_csd {
+>>  #define EXT_CSD_PART_CONFIG_ACC_RPMB   (0x3)
+>>  #define EXT_CSD_PART_CONFIG_ACC_GP0    (0x4)
+>>
+>> +#define EXT_CSD_PART_SETTING_COMPLETED (0x1)
+>>  #define EXT_CSD_PART_SUPPORT_PART_EN   (0x1)
+>>
+>>  #define EXT_CSD_CMD_SET_NORMAL         (1<<0)
+>> --
+>> 1.7.0.4
+>=20
+
+
+--F2OtWnTpmtWc3U43XaW4DN355ddBSqWqf
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAlPrLcMACgkQgTLQuHmJE0G6kwCfbFipXUTOGeBOfT+4G1BT1X7p
+pn0An1agTPUIh05Sl9ZhDLZLrc4+3JnI
+=bpDo
+-----END PGP SIGNATURE-----
+
+--F2OtWnTpmtWc3U43XaW4DN355ddBSqWqf--
