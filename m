@@ -1,297 +1,47 @@
-From: Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH] mmc: dw_mmc: move rockchip related code to a separate file
-Date: Thu, 14 Aug 2014 16:01:33 +0800
-Message-ID: <1408003293-27375-1-git-send-email-addy.ke@rock-chips.com>
-References: <1406786498-3935-1-git-send-email-addy.ke@rock-chips.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1406786498-3935-1-git-send-email-addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org, dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, zhenfu.fang-TNX95d0MmH7DzftRWevZcw@public.gmane.org, cf-TNX95d0MmH7DzftRWevZcw@public.gmane.org, lintao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, chenfen-TNX95d0MmH7DzftRWevZcw@public.gmane.org, zyf-TNX95d0MmH7DzftRWevZcw@public.gmane.org, xjq-TNX95d0MmH7DzftRWevZcw@public.gmane.org, huangtao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, zyw-TNX95d0MmH7DzftRWevZcw@public.gmane.org, yzq-TNX95d0MmH7DzftRWevZcw@public.gmane.org, hj-TNX95d0MmH7DzftRWevZcw@public.gmane.org, kever.yang-TNX95d0MmH7DzftRWevZcw@public.gmane.org, zhangqing-TNX95d0MmH7DzftRWevZcw@public.gmane.org, hl-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+From: Matthieu CASTET <matthieu.castet@parrot.com>
+Subject: mmc-utils boot enable conflict with mmc_blk_part_switch
+Date: Thu, 14 Aug 2014 11:11:05 +0200
+Message-ID: <20140814111105.55aadaee@parrot.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.aswsp.com ([193.34.35.150]:29246 "EHLO mail.aswsp.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752016AbaHNJKr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 14 Aug 2014 05:10:47 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
 
-To support HS200 and UHS-1, we need add a big hunk of code,
-as shown in the following patches. So a separate file for
-rockchip SOCs is suitable.
-
-Signed-off-by: Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
----
- drivers/mmc/host/Kconfig           |   9 +++
- drivers/mmc/host/Makefile          |   1 +
- drivers/mmc/host/dw_mmc-pltfm.c    |  57 ---------------
- drivers/mmc/host/dw_mmc-rockchip.c | 146 +++++++++++++++++++++++++++++++++++++
- 4 files changed, 156 insertions(+), 57 deletions(-)
- create mode 100644 drivers/mmc/host/dw_mmc-rockchip.c
-
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index a565254..ae61df6 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -621,6 +621,15 @@ config MMC_DW_PCI
- 
- 	  If unsure, say N.
- 
-+config MMC_DW_ROCKCHIP
-+	tristate "Rockchip specific extensions for Synopsys DW Memory Card Interface"
-+	depends on MMC_DW
-+	select MMC_DW_PLTFM
-+	help
-+	  This selects support for Rockchip SoC specific extensions to the
-+	  Synopsys DesignWare Memory Card Interface driver. Select this option
-+	  for platforms based on RK3066, RK3188 and RK3288 SoC's.
-+
- config MMC_SH_MMCIF
- 	tristate "SuperH Internal MMCIF support"
- 	depends on MMC_BLOCK
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 7f81ddf..5fce465 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -45,6 +45,7 @@ obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
- obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
- obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
- obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
-+obj-$(CONFIG_MMC_DW_ROCKCHIP)	+= dw_mmc-rockchip.o
- obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
- obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
- obj-$(CONFIG_MMC_VUB300)	+= vub300.o
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-index b547f7a..0c56c41 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.c
-+++ b/drivers/mmc/host/dw_mmc-pltfm.c
-@@ -26,64 +26,11 @@
- #include "dw_mmc.h"
- #include "dw_mmc-pltfm.h"
- 
--#define RK3288_CLKGEN_DIV	2
--
- static void dw_mci_pltfm_prepare_command(struct dw_mci *host, u32 *cmdr)
- {
- 	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
- }
- 
--static int dw_mci_rk3288_setup_clock(struct dw_mci *host)
--{
--	host->bus_hz /= RK3288_CLKGEN_DIV;
--
--	return 0;
--}
--
--static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
--{
--	int ret;
--	unsigned int cclkin;
--	u32 bus_hz;
--
--	/*
--	 * cclkin: source clock of mmc controller.
--	 * bus_hz: card interface clock generated by CLKGEN.
--	 * bus_hz = cclkin / RK3288_CLKGEN_DIV;
--	 * ios->clock = (div == 0) ? bus_hz : (bus_hz / (2 * div))
--	 *
--	 * Note: div can only be 0 or 1
--	 *       if DDR50 8bit mode(only emmc work in 8bit mode),
--	 *       div must be set 1
--	 */
--	if ((ios->bus_width == MMC_BUS_WIDTH_8) &&
--	    (ios->timing == MMC_TIMING_MMC_DDR52))
--		cclkin = 2 * ios->clock * RK3288_CLKGEN_DIV;
--	else
--		cclkin = ios->clock * RK3288_CLKGEN_DIV;
--
--	ret = clk_set_rate(host->ciu_clk, cclkin);
--	if (ret)
--		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
--
--	bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
--	if (bus_hz != host->bus_hz) {
--		host->bus_hz = bus_hz;
--		/* force dw_mci_setup_bus() */
--		host->current_speed = 0;
--	}
--}
--
--static const struct dw_mci_drv_data rk2928_drv_data = {
--	.prepare_command	= dw_mci_pltfm_prepare_command,
--};
--
--static const struct dw_mci_drv_data rk3288_drv_data = {
--	.prepare_command	= dw_mci_pltfm_prepare_command,
--	.set_ios	= dw_mci_rk3288_set_ios,
--	.setup_clock	= dw_mci_rk3288_setup_clock,
--};
--
- static const struct dw_mci_drv_data socfpga_drv_data = {
- 	.prepare_command	= dw_mci_pltfm_prepare_command,
- };
-@@ -144,10 +91,6 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
- 
- static const struct of_device_id dw_mci_pltfm_match[] = {
- 	{ .compatible = "snps,dw-mshc", },
--	{ .compatible = "rockchip,rk2928-dw-mshc",
--		.data = &rk2928_drv_data },
--	{ .compatible = "rockchip,rk3288-dw-mshc",
--		.data = &rk3288_drv_data },
- 	{ .compatible = "altr,socfpga-dw-mshc",
- 		.data = &socfpga_drv_data },
- 	{},
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-new file mode 100644
-index 0000000..3d86ef3
---- /dev/null
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -0,0 +1,146 @@
-+/*
-+ * Copyright (c) 2014, Fuzhou Rockchip Electronics Co., Ltd
-+ * Author: addy ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or
-+ * (at your option) any later version.
-+ */
-+
-+#include <linux/module.h>
-+#include <linux/platform_device.h>
-+#include <linux/clk.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/dw_mmc.h>
-+#include <linux/of_address.h>
-+
-+#include "dw_mmc.h"
-+#include "dw_mmc-pltfm.h"
-+
-+#define RK3288_CLKGEN_DIV       2
-+
-+static void dw_mci_rockchip_prepare_command(struct dw_mci *host, u32 *cmdr)
-+{
-+	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
-+}
-+
-+static int dw_mci_rk3288_setup_clock(struct dw_mci *host)
-+{
-+	host->bus_hz /= RK3288_CLKGEN_DIV;
-+
-+	return 0;
-+}
-+
-+static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-+{
-+	int ret;
-+	unsigned int cclkin;
-+	u32 bus_hz;
-+
-+	/*
-+	 * cclkin: source clock of mmc controller
-+	 * bus_hz: card interface clock generated by CLKGEN
-+	 * bus_hz = cclkin / RK3288_CLKGEN_DIV
-+	 * os->clock = (div == 0) ? bus_hz : (bus_hz / (2 * div))
-+	 *
-+	 * Note: div can only be 0 or 1
-+	 *       if DDR50 8bit mode(only emmc work in 8bit mode),
-+	 *       div must be set 1
-+	 */
-+	if (ios->bus_width == MMC_BUS_WIDTH_8 &&
-+	    ios->timing == MMC_TIMING_MMC_DDR52)
-+		cclkin = 2 * ios->clock * RK3288_CLKGEN_DIV;
-+	else
-+		cclkin = ios->clock * RK3288_CLKGEN_DIV;
-+
-+	ret = clk_set_rate(host->ciu_clk, cclkin);
-+	if (ret)
-+		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
-+
-+	bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
-+	if (bus_hz != host->bus_hz) {
-+		host->bus_hz = bus_hz;
-+		/* force dw_mci_setup_bus() */
-+		host->current_speed = 0;
-+	}
-+}
-+
-+static const struct dw_mci_drv_data rk2928_drv_data = {
-+	.prepare_command        = dw_mci_rockchip_prepare_command,
-+};
-+
-+static const struct dw_mci_drv_data rk3288_drv_data = {
-+	.prepare_command        = dw_mci_rockchip_prepare_command,
-+	.set_ios		= dw_mci_rk3288_set_ios,
-+	.setup_clock    = dw_mci_rk3288_setup_clock,
-+};
-+
-+static const struct of_device_id dw_mci_rockchip_match[] = {
-+	{ .compatible = "rockchip,rk2928-dw-mshc",
-+		.data = &rk2928_drv_data },
-+	{ .compatible = "rockchip,rk3288-dw-mshc",
-+		.data = &rk3288_drv_data },
-+	{},
-+};
-+MODULE_DEVICE_TABLE(of, dw_mci_rockchip_match);
-+
-+static int dw_mci_rockchip_probe(struct platform_device *pdev)
-+{
-+	const struct dw_mci_drv_data *drv_data;
-+	const struct of_device_id *match;
-+
-+	match = of_match_node(dw_mci_rockchip_match, pdev->dev.of_node);
-+	drv_data = match->data;
-+
-+	return dw_mci_pltfm_register(pdev, drv_data);
-+}
-+
-+#ifdef CONFIG_PM_SLEEP
-+static int dw_mci_rockchip_suspend(struct device *dev)
-+{
-+	struct dw_mci *host = dev_get_drvdata(dev);
-+	int ret;
-+
-+	ret = dw_mci_suspend(host);
-+	if (!ret)
-+		clk_disable_unprepare(host->ciu_clk);
-+
-+	return ret;
-+}
-+
-+static int dw_mci_rockchip_resume(struct device *dev)
-+{
-+	struct dw_mci *host = dev_get_drvdata(dev);
-+	int ret;
-+
-+	ret = clk_prepare_enable(host->ciu_clk);
-+	if (ret) {
-+		dev_err(host->dev, "failed to enable ciu clock\n");
-+		return ret;
-+	}
-+
-+	return dw_mci_resume(host);
-+}
-+#endif /* CONFIG_PM_SLEEP */
-+
-+static SIMPLE_DEV_PM_OPS(dw_mci_rockchip_pmops,
-+			 dw_mci_rockchip_suspend,
-+			 dw_mci_rockchip_resume);
-+
-+static struct platform_driver dw_mci_rockchip_pltfm_driver = {
-+	.probe		= dw_mci_rockchip_probe,
-+	.remove		= dw_mci_pltfm_remove,
-+	.driver		= {
-+		.name		= "dwmmc_rockchip",
-+		.of_match_table	= dw_mci_rockchip_match,
-+		.pm		= &dw_mci_rockchip_pmops,
-+	},
-+};
-+
-+module_platform_driver(dw_mci_rockchip_pltfm_driver);
-+
-+MODULE_AUTHOR("Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>");
-+MODULE_DESCRIPTION("Rockchip Specific DW-MSHC Driver Extension");
-+MODULE_ALIAS("platform:dwmmc-rockchip");
-+MODULE_LICENSE("GPL v2");
--- 
-1.8.3.2
+Hi,
 
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Boot enable setting is enable with writting PARTITION_CONFIG ext csd.
+But the kernel also write it in mmc_blk_part_switch.
+
+This lead to weird result :
+
+
+~ # mmc_utils extcsd read /dev/mmcblk0 | grep PARTITION_CONFIG
+Boot configuration bytes [PARTITION_CONFIG: 0x00]
+## no boot partition enabled
+~ # mmc_utils boot enable 1 1 /dev/mmcblk0
+~ # mmc_utils extcsd read /dev/mmcblk0 | grep PARTITION_CONFIG
+Boot configuration bytes [PARTITION_CONFIG: 0x48]
+## boot partition enabled
+~ # dd if=/dev/mmcblk0boot0 of=/dev/null count=1
+1+0 records in
+1+0 records out
+~ # mmc_utils extcsd read /dev/mmcblk0 | grep PARTITION_CONFIG
+Boot configuration bytes [PARTITION_CONFIG: 0x01]
+## kernel erased your boot partition config.
+
+
+This is because the kernel have a cache of ext_csd in card->ext_csd and
+is not aware of modification done by the mmc_utils.
+
+
+Matthieu
+
