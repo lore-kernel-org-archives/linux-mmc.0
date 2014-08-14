@@ -1,147 +1,46 @@
-From: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
-Subject: Re: [PATCH] mmc: check EXT_CSD_PARTITION_SETTING_COMPLETED before
- creating partitions
-Date: Thu, 14 Aug 2014 15:27:59 +0200
-Message-ID: <53ECB95F.2030207@neotion.com>
-References: <53C7E45E.2060102@neotion.com>	<CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>	<53EB2DC3.2080002@neotion.com> <CAPDyKFpjYqVUZ8GHB76gD8pOx_eMg9ecvbWrMEfbhEd5ffk7mw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="WD8Wf5X3R2cAJC87BdJ0n4Q0mktwiBQFl"
+From: Matthieu CASTET <matthieu.castet@parrot.com>
+Subject: [PATCH 1/2] sdhci : handle busy timeout irq
+Date: Thu, 14 Aug 2014 16:03:17 +0200
+Message-ID: <1408024998-4097-1-git-send-email-matthieu.castet@parrot.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.neotion.com ([5.39.84.84]:39261 "EHLO mail.neotion.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754720AbaHNNau (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 14 Aug 2014 09:30:50 -0400
-In-Reply-To: <CAPDyKFpjYqVUZ8GHB76gD8pOx_eMg9ecvbWrMEfbhEd5ffk7mw@mail.gmail.com>
+Received: from mail-wg0-f43.google.com ([74.125.82.43]:60509 "EHLO
+	mail-wg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754322AbaHNODJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Aug 2014 10:03:09 -0400
+Received: by mail-wg0-f43.google.com with SMTP id l18so1120775wgh.26
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Aug 2014 07:03:07 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Matthieu CASTET <matthieu.castet@parrot.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---WD8Wf5X3R2cAJC87BdJ0n4Q0mktwiBQFl
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+When we wait for busy after sending a command, if there is
+a timeout, we got SDHCI_INT_DATA_TIMEOUT flags.
+Before this commit we got the message :
+"Got data interrupt 0x00100000 even though no data  operation was in progress."
+and we need to wait 10s that sdhci_timeout_timer expires.
 
-Le 14/08/2014 13:46, Ulf Hansson a =C3=A9crit :
-> On 13 August 2014 11:20, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.co=
-m> wrote:
->> Le 13/08/2014 10:36, Ulf Hansson a =C3=A9crit :
->>> On 17 July 2014 16:57, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.co=
-m> wrote:
->>>> Create MMC general purpose partitions only if
->>>> EXT_CSD_PARTITION_SETTING_COMPLETED bit is set.
->>>> Some tools may set general purpose partition size(s) but fail or sto=
-p
->>>> without finalize.
->>>> Another case is to set invalid partition size(s).
->>>>
->>>> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
->>>> ---
->>>>  drivers/mmc/core/mmc.c  |   15 +++++++++++----
->>>>  include/linux/mmc/mmc.h |    2 ++
->>>>  2 files changed, 13 insertions(+), 4 deletions(-)
->>>>
->>>> From commit b6603fe574af289dbe9eb9fb4c540bca04f5a053 in master linux=
- tree.
->>>>
->>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>>> index 793c6f7..b9fe211 100644
->>>> --- a/drivers/mmc/core/mmc.c
->>>> +++ b/drivers/mmc/core/mmc.c
->>>> @@ -471,10 +471,17 @@ static int mmc_read_ext_csd(struct mmc_card *c=
-ard, u8 *ext_csd)
->>>>                                 ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
- 3];
->>>>                                 part_size *=3D (size_t)(hc_erase_grp=
-_sz *
->>>>                                         hc_wp_grp_sz);
->>>> -                               mmc_part_add(card, part_size << 19,
->>>> -                                       EXT_CSD_PART_CONFIG_ACC_GP0 =
-+ idx,
->>>> -                                       "gp%d", idx, false,
->>>> -                                       MMC_BLK_DATA_AREA_GP);
->>>> +                               if (ext_csd[EXT_CSD_PARTITION_SETTIN=
-G_COMPLETED] &
->>>> +                               EXT_CSD_PART_SETTING_COMPLETED) {
->>>
->>> Some minor comments here.
->>>
->>> I think you could move this if statement up and into the previous "if=
-"
->>> where we check for "ext_csd[EXT_CSD_PARTITION_SUPPORT] &
->>> EXT_CSD_PART_SUPPORT_PART_EN".
->>>
->>> Additionally, please run checkpatch.
->>>
->>> Kind regards
->>> Uffe
->>
->> Hello,
->>
->> I didn't put the if statement above to warn user in case of bad partit=
-ioning.
->> I don't want the kernel to silently ignore this error.
->=20
-> Fair enough.
->=20
-> Still I am wondering whether hc_erase_grp_sz, hc_wp_grp_sz and
-> enhanced_area_en should be updated if
-> EXT_CSD_PARTITION_SETTING_COMPLETED isn't set.  That's the case in
-> your patch.
+Signed-off-by: Matthieu CASTET <matthieu.castet@parrot.com>
+---
+ drivers/mmc/host/sdhci.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-I was focused on partitions and I didn't pay attention on enhanced area.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 47055f3..9df59a4 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2301,6 +2301,11 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 		 * above in sdhci_cmd_irq().
+ 		 */
+ 		if (host->cmd && (host->cmd->flags & MMC_RSP_BUSY)) {
++			if (intmask & SDHCI_INT_DATA_TIMEOUT) {
++				host->cmd->error = -ETIMEDOUT;
++				tasklet_schedule(&host->finish_tasklet);
++				return;
++			}
+ 			if (intmask & SDHCI_INT_DATA_END) {
+ 				sdhci_finish_command(host);
+ 				return;
+-- 
+2.1.0.rc1
 
-JEDEC says that partitioning implies :
-* Configure general purpose partitions attributes and sizes
-* Configure enhanced user area offset, attributes and size
-
-and finally set EXT_CSD_PARTITION_SETTING_COMPLETED.
-
-Thus these two parts must checks for setting completed before
-computing values.
-
-Plus, "enhanced_area_en" attribute is set whether or not there is an
-enhanced area defined. I looked at the code, and the only usage of it
-is to set EXT_CSD_ERASE_GROUP_DEF and compute erase size again.
-I suggest using "partition_setting_completed" identifier which is common
-to the two functions and requires EXT_CSD_ERASE_GROUP_DEF to be set.
-
-If you're ok with that, I'll submit another patch.
-
-
-Best regards
-Gr=C3=A9gory Soutad=C3=A9
-
->=20
->>
->> checkpatch has been run before sending this patch, I know there are tw=
-o lines
->> with two extra characters, but names used here are quite long. I hope =
-it will
->> not block upstream inclusion.
->=20
-> The mmc_read_ext_csd() is not one of the nicest piece of code, but for
-> sure we should not move on making it worse. If you need to move code
-> into separate function to prevent checkpatch warnings, please do so.
->=20
-> Kind regards
-> Uffe
->=20
-
-
---WD8Wf5X3R2cAJC87BdJ0n4Q0mktwiBQFl
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
-
-iEYEARECAAYFAlPsuWAACgkQgTLQuHmJE0HmEwCeNnum2bAI/Yjbt7Ap4U4u/lQ8
-/hIAn0S4IyN5RrSlIdo6e02jhOs2HUu9
-=lrr9
------END PGP SIGNATURE-----
-
---WD8Wf5X3R2cAJC87BdJ0n4Q0mktwiBQFl--
