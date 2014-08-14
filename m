@@ -1,95 +1,64 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2] mmc: core: try 1.8v signaling in ddr mode if host and device
-Date: Thu, 14 Aug 2014 14:03:08 +0200
-Message-ID: <CAPDyKFpGW_5iMfmcT=5D+bmT-WT46TqoGs87tkUm3vF-UXo5NA@mail.gmail.com>
-References: <20140814095449.GA3933@intel.com>
+From: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: move rockchip related code to a separate file
+Date: Thu, 14 Aug 2014 14:16:40 +0200
+Message-ID: <1436855.vkDg4bXI8B@amdc1032>
+References: <1406786498-3935-1-git-send-email-addy.ke@rock-chips.com>
+ <1408003293-27375-1-git-send-email-addy.ke@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f176.google.com ([209.85.216.176]:45638 "EHLO
-	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753901AbaHNMDK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Aug 2014 08:03:10 -0400
-Received: by mail-qc0-f176.google.com with SMTP id m20so957302qcx.35
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Aug 2014 05:03:09 -0700 (PDT)
-In-Reply-To: <20140814095449.GA3933@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <1408003293-27375-1-git-send-email-addy.ke@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Addy Ke <addy.ke@rock-chips.com>
+Cc: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, chris@printf.org
 
-On 14 August 2014 11:54, Chuanxiao Dong <chuanxiao.dong@intel.com> wrote:
-> Even (e)MMC card can support 3.3v to 1.2v vccq in DDR, but not all
-> host controller can support this, like some of the SDHCI host
-> which connect to an eMMC device. Some of these host controller
-> still needs to use 1.8v vccq for supporting DDR mode.
->
-> So the sequence will be:
-> if (host and device can both support 1.2v IO)
->         use 1.2v IO;
-> else if (host and device can both support 1.8v IO)
->         use 1.8v IO;
-> so if host and device can only support 3.3v IO, this is the last choice.
->
-> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-> Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
+
+Hi,
+
+On Thursday, August 14, 2014 04:01:33 PM Addy Ke wrote:
+> To support HS200 and UHS-1, we need add a big hunk of code,
+> as shown in the following patches. So a separate file for
+> rockchip SOCs is suitable.
+> 
+> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
 > ---
-> Changelog V2:
->     - For (e)MMC device switching to DDR mode, try 1.2v singaling first. Then
->     try 1.8v. If 1.2v and 1.8v are both not supported, use the default 3.3v
->
->  drivers/mmc/core/mmc.c |   20 ++++++++++++++++++--
->  1 file changed, 18 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 793c6f7..aa5180b 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -988,8 +988,19 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
->          * 1.8V vccq at 3.3V core voltage (vcc) is not required
->          * in the JEDEC spec for DDR.
->          *
-> -        * Do not force change in vccq since we are obviously
-> -        * working and no change to vccq is needed.
-> +        * Even (e)MMC card can support 3.3v to 1.2v vccq, but not all
-> +        * host controller can support this, like some of the SDHCI
-> +        * controller which connect to an eMMC device. Some of these
-> +        * host controller still needs to use 1.8v vccq for supporting
-> +        * DDR mode.
-> +        *
-> +        * So the sequence will be:
-> +        * if (host and device can both support 1.2v IO)
-> +        *      use 1.2v IO;
-> +        * else if (host and device can both support 1.8v IO)
-> +        *      use 1.8v IO;
-> +        * so if host and device can only support 3.3v IO, this is the
-> +        * last choice.
->          *
->          * WARNING: eMMC rules are NOT the same as SD DDR
->          */
-> @@ -998,6 +1009,11 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
->                                 MMC_SIGNAL_VOLTAGE_120);
->                 if (err)
->                         return err;
-> +       } else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_1_8V) {
+>  drivers/mmc/host/Kconfig           |   9 +++
+>  drivers/mmc/host/Makefile          |   1 +
+>  drivers/mmc/host/dw_mmc-pltfm.c    |  57 ---------------
+>  drivers/mmc/host/dw_mmc-rockchip.c | 146 +++++++++++++++++++++++++++++++++++++
+>  4 files changed, 156 insertions(+), 57 deletions(-)
+>  create mode 100644 drivers/mmc/host/dw_mmc-rockchip.c
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index a565254..ae61df6 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -621,6 +621,15 @@ config MMC_DW_PCI
+>  
+>  	  If unsure, say N.
+>  
+> +config MMC_DW_ROCKCHIP
+> +	tristate "Rockchip specific extensions for Synopsys DW Memory Card Interface"
+> +	depends on MMC_DW
 
-If we encounter errors switching to 1.2V, it would be nice to fall
-back and to test with 1.8V.
+While you are at it you may also add (in this or in incremental patch)
+dependency on ARCH_ROCKCHIP so this driver becomes limited to Rockchip
+architecture.
 
-You may get influenced by the code in mmc_select_hs200(), where a
-similar approach is taken.
+> +	select MMC_DW_PLTFM
+> +	help
+> +	  This selects support for Rockchip SoC specific extensions to the
+> +	  Synopsys DesignWare Memory Card Interface driver. Select this option
+> +	  for platforms based on RK3066, RK3188 and RK3288 SoC's.
+> +
+>  config MMC_SH_MMCIF
+>  	tristate "SuperH Internal MMCIF support"
+>  	depends on MMC_BLOCK
 
-
-> +               err = __mmc_set_signal_voltage(host,
-> +                               MMC_SIGNAL_VOLTAGE_180);
-> +               if (err)
-> +                       return err;
->         }
->
->         mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
-> --
-> 1.7.10.4
->
-
-Kind regards
-Uffe
+Best regards,
+--
+Bartlomiej Zolnierkiewicz
+Samsung R&D Institute Poland
+Samsung Electronics
