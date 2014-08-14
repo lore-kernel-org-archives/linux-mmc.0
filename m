@@ -1,94 +1,297 @@
-From: Roger Tseng <rogerable@realtek.com>
-Subject: Re: [PATCH] mmc: rtsx: fix incorrect last byte in R2 response
-Date: Thu, 14 Aug 2014 06:06:20 +0000
-Message-ID: <1407996435.6245.15.camel@debian-rtk5880>
-References: <1407745936-18513-1-git-send-email-rogerable@realtek.com>
- <CAPDyKFrTbiHxYgW5YCR48DKX8arxuxK3rz7k_H-waGEMiPFjSg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <CAPDyKFrTbiHxYgW5YCR48DKX8arxuxK3rz7k_H-waGEMiPFjSg@mail.gmail.com>
-Content-Language: zh-TW
-Content-ID: <8BD32206F24D7E48BDA853A613E1CBDE@realtek.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "driverdev-devel@linuxdriverproject.org" <driverdev-devel@linuxdriverproject.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei_wang <wei_wang@realsil.com.cn>, Dan Carpenter <dan.carpenter@oracle.com>
+From: Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: [PATCH] mmc: dw_mmc: move rockchip related code to a separate file
+Date: Thu, 14 Aug 2014 16:01:33 +0800
+Message-ID: <1408003293-27375-1-git-send-email-addy.ke@rock-chips.com>
+References: <1406786498-3935-1-git-send-email-addy.ke@rock-chips.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1406786498-3935-1-git-send-email-addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org, dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, zhenfu.fang-TNX95d0MmH7DzftRWevZcw@public.gmane.org, cf-TNX95d0MmH7DzftRWevZcw@public.gmane.org, lintao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, chenfen-TNX95d0MmH7DzftRWevZcw@public.gmane.org, zyf-TNX95d0MmH7DzftRWevZcw@public.gmane.org, xjq-TNX95d0MmH7DzftRWevZcw@public.gmane.org, huangtao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, zyw-TNX95d0MmH7DzftRWevZcw@public.gmane.org, yzq-TNX95d0MmH7DzftRWevZcw@public.gmane.org, hj-TNX95d0MmH7DzftRWevZcw@public.gmane.org, kever.yang-TNX95d0MmH7DzftRWevZcw@public.gmane.org, zhangqing-TNX95d0MmH7DzftRWevZcw@public.gmane.org, hl-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 2014-08-13 at 17:09 +0200, Ulf Hansson wrote:
-> On 11 August 2014 10:32,  <rogerable@realtek.com> wrote:
-> > From: Roger Tseng <rogerable@realtek.com>
-> >
-> > Current code erroneously fill the last byte of R2 response with an undefined
-> > value. In addition, it is impossible to obtain the real values since the
-> > controller actually 'offloads' the last byte(CRC7, end bit) while receiving R2
-> > response. This could cause mmc stack to obtain inconsistent CID from the same
-> > card after resume and misidentify it as a different card.
-> >
-> > Fix by assigning a dummy value 0x01 to the last byte of R2 response.
-> >
-> > Signed-off-by: Roger Tseng <rogerable@realtek.com>
-> 
-> Thanks! Queued for 3.18.
-> 
-> I guess this should go for stable as well?
-Yes. However, since rtsx_usb* is present in 3.16 and later, this patch
-will not apply on 3.15.y or older. Should I separately send an adapted
-version to stable?
+To support HS200 and UHS-1, we need add a big hunk of code,
+as shown in the following patches. So a separate file for
+rockchip SOCs is suitable.
 
-By the way, according to Dan's comment I would like to add a few word
-to explain the code. Would you help fix it up by following diff?
+Signed-off-by: Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+---
+ drivers/mmc/host/Kconfig           |   9 +++
+ drivers/mmc/host/Makefile          |   1 +
+ drivers/mmc/host/dw_mmc-pltfm.c    |  57 ---------------
+ drivers/mmc/host/dw_mmc-rockchip.c | 146 +++++++++++++++++++++++++++++++++++++
+ 4 files changed, 156 insertions(+), 57 deletions(-)
+ create mode 100644 drivers/mmc/host/dw_mmc-rockchip.c
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c
-b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 54849d8..ca31279 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -412,7 +412,13 @@ static void sd_send_cmd_get_rsp(struct
-realtek_pci_sdmmc *host,
- 	}
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index a565254..ae61df6 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -621,6 +621,15 @@ config MMC_DW_PCI
  
- 	if (rsp_type == SD_RSP_TYPE_R2) {
-+		/*
-+		 * The controller offloads the last byte {CRC-7, stop bit 1'b1}
-+		 * of response type R2. Assign a dummy CRC, 0, and stop bit to
-+		 * the byte(ptr[16], goes into the LSB of resp[3] later).
-+		 */
- 		ptr[16] = 1;
-+
- 		for (i = 0; i < 4; i++) {
- 			cmd->resp[i] = get_unaligned_be32(ptr + 1 + i * 4);
- 			dev_dbg(sdmmc_dev(host), "cmd->resp[%d] = 0x%08x\n",
-diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c
-b/drivers/mmc/host/rtsx_usb_sdmmc.c
-index ca08df1..727a88d 100644
---- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-@@ -435,7 +435,13 @@ static void sd_send_cmd_get_rsp(struct
-rtsx_usb_sdmmc *host,
- 	}
+ 	  If unsure, say N.
  
- 	if (rsp_type == SD_RSP_TYPE_R2) {
-+		/*
-+		 * The controller offloads the last byte {CRC-7, stop bit 1'b1}
-+		 * of response type R2. Assign a dummy CRC, 0, and stop bit to
-+		 * the byte(ptr[16], goes into the LSB of resp[3] later).
-+		 */
- 		ptr[16] = 1;
++config MMC_DW_ROCKCHIP
++	tristate "Rockchip specific extensions for Synopsys DW Memory Card Interface"
++	depends on MMC_DW
++	select MMC_DW_PLTFM
++	help
++	  This selects support for Rockchip SoC specific extensions to the
++	  Synopsys DesignWare Memory Card Interface driver. Select this option
++	  for platforms based on RK3066, RK3188 and RK3288 SoC's.
 +
- 		for (i = 0; i < 4; i++) {
- 			cmd->resp[i] = get_unaligned_be32(ptr + 1 + i * 4);
- 			dev_dbg(sdmmc_dev(host), "cmd->resp[%d] = 0x%08x\n",
-
+ config MMC_SH_MMCIF
+ 	tristate "SuperH Internal MMCIF support"
+ 	depends on MMC_BLOCK
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 7f81ddf..5fce465 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -45,6 +45,7 @@ obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
+ obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
+ obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
+ obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
++obj-$(CONFIG_MMC_DW_ROCKCHIP)	+= dw_mmc-rockchip.o
+ obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
+ obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
+ obj-$(CONFIG_MMC_VUB300)	+= vub300.o
+diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+index b547f7a..0c56c41 100644
+--- a/drivers/mmc/host/dw_mmc-pltfm.c
++++ b/drivers/mmc/host/dw_mmc-pltfm.c
+@@ -26,64 +26,11 @@
+ #include "dw_mmc.h"
+ #include "dw_mmc-pltfm.h"
+ 
+-#define RK3288_CLKGEN_DIV	2
+-
+ static void dw_mci_pltfm_prepare_command(struct dw_mci *host, u32 *cmdr)
+ {
+ 	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
+ }
+ 
+-static int dw_mci_rk3288_setup_clock(struct dw_mci *host)
+-{
+-	host->bus_hz /= RK3288_CLKGEN_DIV;
+-
+-	return 0;
+-}
+-
+-static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+-{
+-	int ret;
+-	unsigned int cclkin;
+-	u32 bus_hz;
+-
+-	/*
+-	 * cclkin: source clock of mmc controller.
+-	 * bus_hz: card interface clock generated by CLKGEN.
+-	 * bus_hz = cclkin / RK3288_CLKGEN_DIV;
+-	 * ios->clock = (div == 0) ? bus_hz : (bus_hz / (2 * div))
+-	 *
+-	 * Note: div can only be 0 or 1
+-	 *       if DDR50 8bit mode(only emmc work in 8bit mode),
+-	 *       div must be set 1
+-	 */
+-	if ((ios->bus_width == MMC_BUS_WIDTH_8) &&
+-	    (ios->timing == MMC_TIMING_MMC_DDR52))
+-		cclkin = 2 * ios->clock * RK3288_CLKGEN_DIV;
+-	else
+-		cclkin = ios->clock * RK3288_CLKGEN_DIV;
+-
+-	ret = clk_set_rate(host->ciu_clk, cclkin);
+-	if (ret)
+-		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
+-
+-	bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
+-	if (bus_hz != host->bus_hz) {
+-		host->bus_hz = bus_hz;
+-		/* force dw_mci_setup_bus() */
+-		host->current_speed = 0;
+-	}
+-}
+-
+-static const struct dw_mci_drv_data rk2928_drv_data = {
+-	.prepare_command	= dw_mci_pltfm_prepare_command,
+-};
+-
+-static const struct dw_mci_drv_data rk3288_drv_data = {
+-	.prepare_command	= dw_mci_pltfm_prepare_command,
+-	.set_ios	= dw_mci_rk3288_set_ios,
+-	.setup_clock	= dw_mci_rk3288_setup_clock,
+-};
+-
+ static const struct dw_mci_drv_data socfpga_drv_data = {
+ 	.prepare_command	= dw_mci_pltfm_prepare_command,
+ };
+@@ -144,10 +91,6 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
+ 
+ static const struct of_device_id dw_mci_pltfm_match[] = {
+ 	{ .compatible = "snps,dw-mshc", },
+-	{ .compatible = "rockchip,rk2928-dw-mshc",
+-		.data = &rk2928_drv_data },
+-	{ .compatible = "rockchip,rk3288-dw-mshc",
+-		.data = &rk3288_drv_data },
+ 	{ .compatible = "altr,socfpga-dw-mshc",
+ 		.data = &socfpga_drv_data },
+ 	{},
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+new file mode 100644
+index 0000000..3d86ef3
+--- /dev/null
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -0,0 +1,146 @@
++/*
++ * Copyright (c) 2014, Fuzhou Rockchip Electronics Co., Ltd
++ * Author: addy ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/clk.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/dw_mmc.h>
++#include <linux/of_address.h>
++
++#include "dw_mmc.h"
++#include "dw_mmc-pltfm.h"
++
++#define RK3288_CLKGEN_DIV       2
++
++static void dw_mci_rockchip_prepare_command(struct dw_mci *host, u32 *cmdr)
++{
++	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
++}
++
++static int dw_mci_rk3288_setup_clock(struct dw_mci *host)
++{
++	host->bus_hz /= RK3288_CLKGEN_DIV;
++
++	return 0;
++}
++
++static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
++{
++	int ret;
++	unsigned int cclkin;
++	u32 bus_hz;
++
++	/*
++	 * cclkin: source clock of mmc controller
++	 * bus_hz: card interface clock generated by CLKGEN
++	 * bus_hz = cclkin / RK3288_CLKGEN_DIV
++	 * os->clock = (div == 0) ? bus_hz : (bus_hz / (2 * div))
++	 *
++	 * Note: div can only be 0 or 1
++	 *       if DDR50 8bit mode(only emmc work in 8bit mode),
++	 *       div must be set 1
++	 */
++	if (ios->bus_width == MMC_BUS_WIDTH_8 &&
++	    ios->timing == MMC_TIMING_MMC_DDR52)
++		cclkin = 2 * ios->clock * RK3288_CLKGEN_DIV;
++	else
++		cclkin = ios->clock * RK3288_CLKGEN_DIV;
++
++	ret = clk_set_rate(host->ciu_clk, cclkin);
++	if (ret)
++		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
++
++	bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
++	if (bus_hz != host->bus_hz) {
++		host->bus_hz = bus_hz;
++		/* force dw_mci_setup_bus() */
++		host->current_speed = 0;
++	}
++}
++
++static const struct dw_mci_drv_data rk2928_drv_data = {
++	.prepare_command        = dw_mci_rockchip_prepare_command,
++};
++
++static const struct dw_mci_drv_data rk3288_drv_data = {
++	.prepare_command        = dw_mci_rockchip_prepare_command,
++	.set_ios		= dw_mci_rk3288_set_ios,
++	.setup_clock    = dw_mci_rk3288_setup_clock,
++};
++
++static const struct of_device_id dw_mci_rockchip_match[] = {
++	{ .compatible = "rockchip,rk2928-dw-mshc",
++		.data = &rk2928_drv_data },
++	{ .compatible = "rockchip,rk3288-dw-mshc",
++		.data = &rk3288_drv_data },
++	{},
++};
++MODULE_DEVICE_TABLE(of, dw_mci_rockchip_match);
++
++static int dw_mci_rockchip_probe(struct platform_device *pdev)
++{
++	const struct dw_mci_drv_data *drv_data;
++	const struct of_device_id *match;
++
++	match = of_match_node(dw_mci_rockchip_match, pdev->dev.of_node);
++	drv_data = match->data;
++
++	return dw_mci_pltfm_register(pdev, drv_data);
++}
++
++#ifdef CONFIG_PM_SLEEP
++static int dw_mci_rockchip_suspend(struct device *dev)
++{
++	struct dw_mci *host = dev_get_drvdata(dev);
++	int ret;
++
++	ret = dw_mci_suspend(host);
++	if (!ret)
++		clk_disable_unprepare(host->ciu_clk);
++
++	return ret;
++}
++
++static int dw_mci_rockchip_resume(struct device *dev)
++{
++	struct dw_mci *host = dev_get_drvdata(dev);
++	int ret;
++
++	ret = clk_prepare_enable(host->ciu_clk);
++	if (ret) {
++		dev_err(host->dev, "failed to enable ciu clock\n");
++		return ret;
++	}
++
++	return dw_mci_resume(host);
++}
++#endif /* CONFIG_PM_SLEEP */
++
++static SIMPLE_DEV_PM_OPS(dw_mci_rockchip_pmops,
++			 dw_mci_rockchip_suspend,
++			 dw_mci_rockchip_resume);
++
++static struct platform_driver dw_mci_rockchip_pltfm_driver = {
++	.probe		= dw_mci_rockchip_probe,
++	.remove		= dw_mci_pltfm_remove,
++	.driver		= {
++		.name		= "dwmmc_rockchip",
++		.of_match_table	= dw_mci_rockchip_match,
++		.pm		= &dw_mci_rockchip_pmops,
++	},
++};
++
++module_platform_driver(dw_mci_rockchip_pltfm_driver);
++
++MODULE_AUTHOR("Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>");
++MODULE_DESCRIPTION("Rockchip Specific DW-MSHC Driver Extension");
++MODULE_ALIAS("platform:dwmmc-rockchip");
++MODULE_LICENSE("GPL v2");
 -- 
-Best regards,
-Roger Tseng
+1.8.3.2
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
