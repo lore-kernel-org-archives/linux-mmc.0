@@ -1,86 +1,59 @@
-From: Alexandre Courbot <gnurou@gmail.com>
-Subject: Re: [PATCH 4/4] mmc: mmci: augment driver to handle gpio descriptors
-Date: Thu, 14 Aug 2014 07:56:22 -0700
-Message-ID: <CAAVeFuKo0DxN9Ff1G9o+ZXp8T+J-ZBE90cqcu5Pdgsq_jAZouw@mail.gmail.com>
-References: <1407864355-21545-1-git-send-email-linus.walleij@linaro.org> <1407864355-21545-4-git-send-email-linus.walleij@linaro.org>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: ARM: shmobile: Koelsch fails to resume due to sh_mobile_sdhi or regulator-fixed
+Date: Thu, 14 Aug 2014 17:20:34 +0200
+Message-ID: <CAMuHMdWRDHexT94Mxk2LSWDe-GpD2zXD_xv++H7aQDFeNfjJSA@mail.gmail.com>
+References: <CAMuHMdWTudFK_EiL8xQpmL5OmJxYX1i80WjfAA+L2Dfn21NWtA@mail.gmail.com>
+	<20140812214734.GA17528@sirena.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <1407864355-21545-4-git-send-email-linus.walleij@linaro.org>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-la0-f45.google.com ([209.85.215.45]:58734 "EHLO
+	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755536AbaHNPUh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Aug 2014 11:20:37 -0400
+In-Reply-To: <20140812214734.GA17528@sirena.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Mark Brown <broonie@kernel.org>
+Cc: Magnus Damm <magnus.damm@gmail.com>, Ian Molton <ian.molton@codethink.co.uk>, Linux-sh list <linux-sh@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>
 
-On Tue, Aug 12, 2014 at 10:25 AM, Linus Walleij
-<linus.walleij@linaro.org> wrote:
-> -       /* If DT, cd/wp gpios must be supplied through it. */
-> -       if (!np && gpio_is_valid(plat->gpio_cd)) {
-> -               ret = mmc_gpio_request_cd(mmc, plat->gpio_cd, 0);
-> -               if (ret)
-> -                       goto clk_disable;
-> -       }
-> -       if (!np && gpio_is_valid(plat->gpio_wp)) {
-> -               ret = mmc_gpio_request_ro(mmc, plat->gpio_wp);
-> -               if (ret)
-> -                       goto clk_disable;
-> +       /*
-> +        * If:
-> +        * - not using DT but using a descriptor table, or
-> +        * - using a table of descriptors ALONGSIDE DT, or
-> +        * look up these descriptors named "cd" and "wp" right here, fail
-> +        * silently of these do not exist and proceed to try platform data
-> +        */
-> +       if (!np) {
-> +               ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0);
+On Tue, Aug 12, 2014 at 11:47 PM, Mark Brown <broonie@kernel.org> wrote:
+> On Tue, Aug 12, 2014 at 04:28:39PM +0200, Geert Uytterhoeven wrote:
+>> r8a7791/Koelsch fails to resume from s2ram with
+>
+>>     CONFIG_REGULATOR_FIXED_VOLTAGE=y
+>>     CONFIG_REGULATOR_GPIO=y
+>>     CONFIG_MMC_SDHI=y
+>
+>> Disabling CONFIG_REGULATOR_FIXED_VOLTAGE or CONFIG_MMC_SDHI,
+>> or both, fixes resume.
+>
+>> Note that SDHI on r8a7791 uses both regulator-fixed and regulator-gpio.
+>> However, CONFIG_REGULATOR_GPIO doesn't seem to have any impact
+>> on the resume failure, it resumes fine with CONFIG_REGULATOR_GPIO=y.
+>
+>> Anyone with a clue?
+>
+> No idea, I expect it's some bug in the board description - both that
+> regulator driver and that MMC driver should be very well tested.  Given
+> the lack of traces are you sure that the system is actually suspending
+> successfully and not just crashing?  First guess would be that the
+> regulator is being powered off on suspend and the hardware is trying to
+> boot from a powered off device on resume but that really is just a guess.
 
-I am not familiar with this driver, but since mmc_gpiod_request_cd()
-uses gpiod_get(), can't you call it outside of the (!np) condition?
-You should not have to do this kind of check when using the gpiod API.
+It's not a regulator issue.
 
-> +               if (!ret)
-> +                       dev_info(mmc_dev(mmc), "got CD GPIO (table)\n");
-> +               else {
+Further investigation showed that he system locks up when suspending,
+as the SDHI driver's tmio_mmc_host_suspend() accesses the SDHI registers
+while the SDHI module clock is disabled.
 
-I think you want to add brackets around the dev_info() line to make
-checkpatch.pl happy.
+Gr{oetje,eeting}s,
 
-> +                       if (ret == -EPROBE_DEFER)
-> +                               goto clk_disable;
-> +                       else if (gpio_is_valid(plat->gpio_cd)) {
-> +                               ret = mmc_gpio_request_cd(mmc, plat->gpio_cd, 0);
-> +                               if (ret)
-> +                                       goto clk_disable;
-> +                               else
-> +                                       dev_info(mmc_dev(mmc), "got CD GPIO (pdata)\n");
-> +                       } else {
-> +                               dev_dbg(mmc_dev(mmc),
-> +                                       "no CD GPIO in DT, table or pdata\n");
-> +                       }
-> +               }
-> +
-> +               ret = mmc_gpiod_request_ro(mmc, "wp", 0, false, 0);
-> +               if (!ret)
-> +                       dev_info(mmc_dev(mmc), "got WP GPIO (table)\n");
-> +               else {
+                        Geert
 
-Same remark as above.
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-> +                       if (ret == -EPROBE_DEFER)
-> +                               goto clk_disable;
-> +                       else if (gpio_is_valid(plat->gpio_wp)) {
-> +                               ret = mmc_gpio_request_ro(mmc, plat->gpio_wp);
-> +                               if (ret)
-> +                                       goto clk_disable;
-> +                               else
-> +                                       dev_info(mmc_dev(mmc), "got WP GPIO (pdata)\n");
-> +                       } else {
-> +                               dev_dbg(mmc_dev(mmc),
-> +                                       "no WP GPIO in DT, table or pdata\n");
-> +                       }
-> +               }
-
-I wonder (again, without knowing better) if this gpiod/gpio fallback
-logic should not be put directly into mmc_gpio_request_ro/cd instead
-of having two functions? Couldn't other drivers also benefit from it
-that way?
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
