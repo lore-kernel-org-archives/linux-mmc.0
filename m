@@ -1,85 +1,147 @@
-From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Subject: [PATCH 1/1] mmc: core: Use regulator_get_voltage() if OCR mask is empty.
-Date: Thu, 14 Aug 2014 14:39:00 +0200
-Message-ID: <1408019940-11153-1-git-send-email-javier.martinez@collabora.co.uk>
+From: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
+Subject: Re: [PATCH] mmc: check EXT_CSD_PARTITION_SETTING_COMPLETED before
+ creating partitions
+Date: Thu, 14 Aug 2014 15:27:59 +0200
+Message-ID: <53ECB95F.2030207@neotion.com>
+References: <53C7E45E.2060102@neotion.com>	<CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>	<53EB2DC3.2080002@neotion.com> <CAPDyKFpjYqVUZ8GHB76gD8pOx_eMg9ecvbWrMEfbhEd5ffk7mw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="WD8Wf5X3R2cAJC87BdJ0n4Q0mktwiBQFl"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bhuna.collabora.co.uk ([93.93.135.160]:39449 "EHLO
-	bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753689AbaHNMjk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Aug 2014 08:39:40 -0400
+Received: from mail.neotion.com ([5.39.84.84]:39261 "EHLO mail.neotion.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754720AbaHNNau (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 14 Aug 2014 09:30:50 -0400
+In-Reply-To: <CAPDyKFpjYqVUZ8GHB76gD8pOx_eMg9ecvbWrMEfbhEd5ffk7mw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Tim Kryger <tim.kryger@linaro.org>, Haijun Zhang <Haijun.Zhang@freescale.com>, Mark Brown <broonie@kernel.org>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-The operation conditions register (OCR) stores the voltage
-profile of the card, however the list of possible voltages
-is restricted by the voltage range supported by the supply
-used as VCC/VDD. So in mmc_vddrange_to_ocrmask() a OCR mask
-is obtained to filter the not supported voltages, from the
-value read in the host controller OCR register.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--WD8Wf5X3R2cAJC87BdJ0n4Q0mktwiBQFl
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-For fixed regulators, regulator_list_voltage() returns the
-fixed output for the first selector but this doesn't happen
-for switch (FET) regulators that obtain their voltage from
-their parent supply. A call to regulator_get_voltage() is
-needed in this case so the regulator core can return the
-FET's parent supply voltage output.
+Le 14/08/2014 13:46, Ulf Hansson a =C3=A9crit :
+> On 13 August 2014 11:20, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.co=
+m> wrote:
+>> Le 13/08/2014 10:36, Ulf Hansson a =C3=A9crit :
+>>> On 17 July 2014 16:57, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.co=
+m> wrote:
+>>>> Create MMC general purpose partitions only if
+>>>> EXT_CSD_PARTITION_SETTING_COMPLETED bit is set.
+>>>> Some tools may set general purpose partition size(s) but fail or sto=
+p
+>>>> without finalize.
+>>>> Another case is to set invalid partition size(s).
+>>>>
+>>>> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
+>>>> ---
+>>>>  drivers/mmc/core/mmc.c  |   15 +++++++++++----
+>>>>  include/linux/mmc/mmc.h |    2 ++
+>>>>  2 files changed, 13 insertions(+), 4 deletions(-)
+>>>>
+>>>> From commit b6603fe574af289dbe9eb9fb4c540bca04f5a053 in master linux=
+ tree.
+>>>>
+>>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>>>> index 793c6f7..b9fe211 100644
+>>>> --- a/drivers/mmc/core/mmc.c
+>>>> +++ b/drivers/mmc/core/mmc.c
+>>>> @@ -471,10 +471,17 @@ static int mmc_read_ext_csd(struct mmc_card *c=
+ard, u8 *ext_csd)
+>>>>                                 ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
+ 3];
+>>>>                                 part_size *=3D (size_t)(hc_erase_grp=
+_sz *
+>>>>                                         hc_wp_grp_sz);
+>>>> -                               mmc_part_add(card, part_size << 19,
+>>>> -                                       EXT_CSD_PART_CONFIG_ACC_GP0 =
++ idx,
+>>>> -                                       "gp%d", idx, false,
+>>>> -                                       MMC_BLK_DATA_AREA_GP);
+>>>> +                               if (ext_csd[EXT_CSD_PARTITION_SETTIN=
+G_COMPLETED] &
+>>>> +                               EXT_CSD_PART_SETTING_COMPLETED) {
+>>>
+>>> Some minor comments here.
+>>>
+>>> I think you could move this if statement up and into the previous "if=
+"
+>>> where we check for "ext_csd[EXT_CSD_PARTITION_SUPPORT] &
+>>> EXT_CSD_PART_SUPPORT_PART_EN".
+>>>
+>>> Additionally, please run checkpatch.
+>>>
+>>> Kind regards
+>>> Uffe
+>>
+>> Hello,
+>>
+>> I didn't put the if statement above to warn user in case of bad partit=
+ioning.
+>> I don't want the kernel to silently ignore this error.
+>=20
+> Fair enough.
+>=20
+> Still I am wondering whether hc_erase_grp_sz, hc_wp_grp_sz and
+> enhanced_area_en should be updated if
+> EXT_CSD_PARTITION_SETTING_COMPLETED isn't set.  That's the case in
+> your patch.
 
-This change is consistent with the fact that for other
-fixed regulators (that are not FETs) the OCR mask is
-returned even when mmc_regulator_set_ocr() checks if the
-regulator is fixed before calling regulator_set_voltage().
+I was focused on partitions and I didn't pay attention on enhanced area.
 
-Without this patch, the following warning is reported when
-a FET is used as a vmmc-supply:
+JEDEC says that partitioning implies :
+* Configure general purpose partitions attributes and sizes
+* Configure enhanced user area offset, attributes and size
 
-dwmmc_exynos 12220000.mmc: Failed getting OCR mask: -22
+and finally set EXT_CSD_PARTITION_SETTING_COMPLETED.
 
-Signed-off-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
----
+Thus these two parts must checks for setting completed before
+computing values.
 
- drivers/mmc/core/core.c | 14 +++++++++++---
- 1 file changed, 11 insertions(+), 3 deletions(-)
+Plus, "enhanced_area_en" attribute is set whether or not there is an
+enhanced area defined. I looked at the code, and the only usage of it
+is to set EXT_CSD_ERASE_GROUP_DEF and compute erase size again.
+I suggest using "partition_setting_completed" identifier which is common
+to the two functions and requires EXT_CSD_ERASE_GROUP_DEF to be set.
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 7dc0c85..8abae04 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1221,15 +1221,14 @@ int mmc_regulator_get_ocrmask(struct regulator *supply)
- 	int			result = 0;
- 	int			count;
- 	int			i;
-+	int			vdd_uV;
-+	int			vdd_mV;
- 
- 	count = regulator_count_voltages(supply);
- 	if (count < 0)
- 		return count;
- 
- 	for (i = 0; i < count; i++) {
--		int		vdd_uV;
--		int		vdd_mV;
--
- 		vdd_uV = regulator_list_voltage(supply, i);
- 		if (vdd_uV <= 0)
- 			continue;
-@@ -1238,6 +1237,15 @@ int mmc_regulator_get_ocrmask(struct regulator *supply)
- 		result |= mmc_vddrange_to_ocrmask(vdd_mV, vdd_mV);
- 	}
- 
-+	if (!result) {
-+		vdd_uV = regulator_get_voltage(supply);
-+		if (vdd_uV <= 0)
-+			return vdd_uV;
-+
-+		vdd_mV = vdd_uV / 1000;
-+		result = mmc_vddrange_to_ocrmask(vdd_mV, vdd_mV);
-+	}
-+
- 	return result;
- }
- EXPORT_SYMBOL_GPL(mmc_regulator_get_ocrmask);
--- 
-2.0.0.rc2
+If you're ok with that, I'll submit another patch.
 
+
+Best regards
+Gr=C3=A9gory Soutad=C3=A9
+
+>=20
+>>
+>> checkpatch has been run before sending this patch, I know there are tw=
+o lines
+>> with two extra characters, but names used here are quite long. I hope =
+it will
+>> not block upstream inclusion.
+>=20
+> The mmc_read_ext_csd() is not one of the nicest piece of code, but for
+> sure we should not move on making it worse. If you need to move code
+> into separate function to prevent checkpatch warnings, please do so.
+>=20
+> Kind regards
+> Uffe
+>=20
+
+
+--WD8Wf5X3R2cAJC87BdJ0n4Q0mktwiBQFl
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAlPsuWAACgkQgTLQuHmJE0HmEwCeNnum2bAI/Yjbt7Ap4U4u/lQ8
+/hIAn0S4IyN5RrSlIdo6e02jhOs2HUu9
+=lrr9
+-----END PGP SIGNATURE-----
+
+--WD8Wf5X3R2cAJC87BdJ0n4Q0mktwiBQFl--
