@@ -1,59 +1,58 @@
-From: addy ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH] ARM: dts: Add mmc0 and mmc1 aliases for rk3288
-Date: Thu, 14 Aug 2014 11:57:02 +0800
-Message-ID: <53EC338E.9060409@rock-chips.com>
-References: <1407974880-30626-1-git-send-email-dianders@chromium.org>	<53EC177B.1080706@rock-chips.com> <CAD=FV=XNJ9RRnOaJ5e-D60S5vjZu6UbphdWqqfRq_YfZaXoq+A@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAD=FV=XNJ9RRnOaJ5e-D60S5vjZu6UbphdWqqfRq_YfZaXoq+A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
-Cc: heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, sonnyrao-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, stefan-XLVq0VzYD2Y@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Yi Sun <yi.y.sun@intel.com>
+Subject: [PATCH v2] mmc: execute tuning when device is not busy.
+Date: Thu, 14 Aug 2014 13:51:38 +0800
+Message-ID: <1407995498-17634-1-git-send-email-yi.y.sun@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:23258 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751110AbaHNF6A (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 14 Aug 2014 01:58:00 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+Cc: yi.y.sun@intel.com
 
-> Addy,
-> 
-> On Wed, Aug 13, 2014 at 6:57 PM, Addy <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
-> 
->> I think maybe it is suitable as follows:
->> mmc0 = &sdmmc
->> mmc1 = &sdio0
->> mmc2 = &sdio1
->> mmc3 = &emmc
-> 
-> Right, except the only ones that have landed in Heiko's tree are sdmmc
-> and emmc, so we can't do sdio0 and sdio1 yet.  You could post support
-> for sdio0 and adio1?
+We find tuning timeout because of the secure erase operation lasts too long
+so not to do tuning when device is busy.
 
-yes, I will post it today.
-> 
-> Also: it's really handy if emmc is 0.  See below: I don't think it's
-> great to use the ID to find the sysconfig registers.
-> 
-> 
->> So we can get ctrl_id:
->> ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
-> 
-> Somehow I hadn't realized that was there.  I guess we could use that
-> too.  I'd vote to remove that and use the standard "mmc" numbering
-> (and get some momentum to land those patches).  If you want I'll
-> repost using the mshc stuff, though.
-> 
-> 
->> and can get offset of registers:
->> offset = 0x200 + ctrl_id * 8 + 4 * drive_or_sample
-> 
-> I thought the plan was to actually implement the phase stuff as a clock driver.
-> 
-> ...even if we didn't, I'd rather not rely on ID like this to find the
-> right address.  It's really non-obvious.
-> 
-> 
-> 
+Signed-off-by: Yi Sun <yi.y.sun@intel.com>
+---
+ drivers/mmc/host/sdhci.c |    7 ++++---
+ drivers/mmc/host/sdhci.h |    1 +
+ 2 files changed, 5 insertions(+), 3 deletions(-)
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 47055f3..6a584d7 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1355,11 +1355,12 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
+ 		/*
+ 		 * Check if the re-tuning timer has already expired and there
+-		 * is no on-going data transfer. If so, we need to execute
+-		 * tuning procedure before sending command.
++		 * is no on-going data transfer and DAT0 is not busy. If so,
++		 * we need to execute tuning procedure before sending command.
+ 		 */
+ 		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
+-		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
++		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ)) &&
++		    (present_state & SDHCI_DATA_0_LVL_MASK)) {
+ 			if (mmc->card) {
+ 				/* eMMC uses cmd21 but sd and sdio use cmd19 */
+ 				tuning_opcode =
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 4a5cd5e..0ae6b99d 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -72,6 +72,7 @@
+ #define  SDHCI_WRITE_PROTECT	0x00080000
+ #define  SDHCI_DATA_LVL_MASK	0x00F00000
+ #define   SDHCI_DATA_LVL_SHIFT	20
++#define   SDHCI_DATA_0_LVL_MASK	0x00100000
+ 
+ #define SDHCI_HOST_CONTROL	0x28
+ #define  SDHCI_CTRL_LED		0x01
+-- 
+1.7.9.5
+
