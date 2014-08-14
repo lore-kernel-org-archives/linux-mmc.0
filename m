@@ -1,103 +1,95 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: check EXT_CSD_PARTITION_SETTING_COMPLETED before
- creating partitions
-Date: Thu, 14 Aug 2014 13:46:34 +0200
-Message-ID: <CAPDyKFpjYqVUZ8GHB76gD8pOx_eMg9ecvbWrMEfbhEd5ffk7mw@mail.gmail.com>
-References: <53C7E45E.2060102@neotion.com>
-	<CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>
-	<53EB2DC3.2080002@neotion.com>
+Subject: Re: [PATCH V2] mmc: core: try 1.8v signaling in ddr mode if host and device
+Date: Thu, 14 Aug 2014 14:03:08 +0200
+Message-ID: <CAPDyKFpGW_5iMfmcT=5D+bmT-WT46TqoGs87tkUm3vF-UXo5NA@mail.gmail.com>
+References: <20140814095449.GA3933@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f44.google.com ([209.85.216.44]:60084 "EHLO
-	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753901AbaHNLqf convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Aug 2014 07:46:35 -0400
-Received: by mail-qa0-f44.google.com with SMTP id f12so859131qad.3
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Aug 2014 04:46:34 -0700 (PDT)
-In-Reply-To: <53EB2DC3.2080002@neotion.com>
+Received: from mail-qc0-f176.google.com ([209.85.216.176]:45638 "EHLO
+	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753901AbaHNMDK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Aug 2014 08:03:10 -0400
+Received: by mail-qc0-f176.google.com with SMTP id m20so957302qcx.35
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Aug 2014 05:03:09 -0700 (PDT)
+In-Reply-To: <20140814095449.GA3933@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, chris@printf.org
 
-On 13 August 2014 11:20, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.co=
-m> wrote:
-> Le 13/08/2014 10:36, Ulf Hansson a =C3=A9crit :
->> On 17 July 2014 16:57, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.c=
-om> wrote:
->>> Create MMC general purpose partitions only if
->>> EXT_CSD_PARTITION_SETTING_COMPLETED bit is set.
->>> Some tools may set general purpose partition size(s) but fail or st=
-op
->>> without finalize.
->>> Another case is to set invalid partition size(s).
->>>
->>> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
->>> ---
->>>  drivers/mmc/core/mmc.c  |   15 +++++++++++----
->>>  include/linux/mmc/mmc.h |    2 ++
->>>  2 files changed, 13 insertions(+), 4 deletions(-)
->>>
->>> From commit b6603fe574af289dbe9eb9fb4c540bca04f5a053 in master linu=
-x tree.
->>>
->>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>> index 793c6f7..b9fe211 100644
->>> --- a/drivers/mmc/core/mmc.c
->>> +++ b/drivers/mmc/core/mmc.c
->>> @@ -471,10 +471,17 @@ static int mmc_read_ext_csd(struct mmc_card *=
-card, u8 *ext_csd)
->>>                                 ext_csd[EXT_CSD_GP_SIZE_MULT + idx =
-* 3];
->>>                                 part_size *=3D (size_t)(hc_erase_gr=
-p_sz *
->>>                                         hc_wp_grp_sz);
->>> -                               mmc_part_add(card, part_size << 19,
->>> -                                       EXT_CSD_PART_CONFIG_ACC_GP0=
- + idx,
->>> -                                       "gp%d", idx, false,
->>> -                                       MMC_BLK_DATA_AREA_GP);
->>> +                               if (ext_csd[EXT_CSD_PARTITION_SETTI=
-NG_COMPLETED] &
->>> +                               EXT_CSD_PART_SETTING_COMPLETED) {
->>
->> Some minor comments here.
->>
->> I think you could move this if statement up and into the previous "i=
-f"
->> where we check for "ext_csd[EXT_CSD_PARTITION_SUPPORT] &
->> EXT_CSD_PART_SUPPORT_PART_EN".
->>
->> Additionally, please run checkpatch.
->>
->> Kind regards
->> Uffe
+On 14 August 2014 11:54, Chuanxiao Dong <chuanxiao.dong@intel.com> wrote:
+> Even (e)MMC card can support 3.3v to 1.2v vccq in DDR, but not all
+> host controller can support this, like some of the SDHCI host
+> which connect to an eMMC device. Some of these host controller
+> still needs to use 1.8v vccq for supporting DDR mode.
 >
-> Hello,
+> So the sequence will be:
+> if (host and device can both support 1.2v IO)
+>         use 1.2v IO;
+> else if (host and device can both support 1.8v IO)
+>         use 1.8v IO;
+> so if host and device can only support 3.3v IO, this is the last choice.
 >
-> I didn't put the if statement above to warn user in case of bad parti=
-tioning.
-> I don't want the kernel to silently ignore this error.
-
-=46air enough.
-
-Still I am wondering whether hc_erase_grp_sz, hc_wp_grp_sz and
-enhanced_area_en should be updated if
-EXT_CSD_PARTITION_SETTING_COMPLETED isn't set.  That's the case in
-your patch.
-
+> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+> Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
+> ---
+> Changelog V2:
+>     - For (e)MMC device switching to DDR mode, try 1.2v singaling first. Then
+>     try 1.8v. If 1.2v and 1.8v are both not supported, use the default 3.3v
 >
-> checkpatch has been run before sending this patch, I know there are t=
-wo lines
-> with two extra characters, but names used here are quite long. I hope=
- it will
-> not block upstream inclusion.
+>  drivers/mmc/core/mmc.c |   20 ++++++++++++++++++--
+>  1 file changed, 18 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 793c6f7..aa5180b 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -988,8 +988,19 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
+>          * 1.8V vccq at 3.3V core voltage (vcc) is not required
+>          * in the JEDEC spec for DDR.
+>          *
+> -        * Do not force change in vccq since we are obviously
+> -        * working and no change to vccq is needed.
+> +        * Even (e)MMC card can support 3.3v to 1.2v vccq, but not all
+> +        * host controller can support this, like some of the SDHCI
+> +        * controller which connect to an eMMC device. Some of these
+> +        * host controller still needs to use 1.8v vccq for supporting
+> +        * DDR mode.
+> +        *
+> +        * So the sequence will be:
+> +        * if (host and device can both support 1.2v IO)
+> +        *      use 1.2v IO;
+> +        * else if (host and device can both support 1.8v IO)
+> +        *      use 1.8v IO;
+> +        * so if host and device can only support 3.3v IO, this is the
+> +        * last choice.
+>          *
+>          * WARNING: eMMC rules are NOT the same as SD DDR
+>          */
+> @@ -998,6 +1009,11 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
+>                                 MMC_SIGNAL_VOLTAGE_120);
+>                 if (err)
+>                         return err;
+> +       } else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_1_8V) {
 
-The mmc_read_ext_csd() is not one of the nicest piece of code, but for
-sure we should not move on making it worse. If you need to move code
-into separate function to prevent checkpatch warnings, please do so.
+If we encounter errors switching to 1.2V, it would be nice to fall
+back and to test with 1.8V.
+
+You may get influenced by the code in mmc_select_hs200(), where a
+similar approach is taken.
+
+
+> +               err = __mmc_set_signal_voltage(host,
+> +                               MMC_SIGNAL_VOLTAGE_180);
+> +               if (err)
+> +                       return err;
+>         }
+>
+>         mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
+> --
+> 1.7.10.4
+>
 
 Kind regards
 Uffe
