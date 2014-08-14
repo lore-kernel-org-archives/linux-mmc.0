@@ -1,40 +1,40 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH] ARM: dts: Add mmc0 and mmc1 aliases for rk3288
-Date: Wed, 13 Aug 2014 17:08:00 -0700
-Message-ID: <1407974880-30626-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Heiko Stuebner <heiko@sntech.de>, Sonny Rao <sonnyrao@chromium.org>
-Cc: stefan@agner.ch, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Addy Ke <addy.ke@rock-chips.com>, Doug Anderson <dianders@chromium.org>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, linux@arm.linux.org.uk, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Andrew Bresticker <abrestic@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Remove architecture dependency
+Date: Wed, 13 Aug 2014 17:13:23 -0700
+Message-ID: <CAL1qeaFgySoDs_PWA5FtDK0JQMVoFFfgLbOBz6-dshEg7NCdhQ@mail.gmail.com>
+References: <1407951153-918-1-git-send-email-abrestic@chromium.org>
+	<CAGOxZ51_cr_j5vWrNO_ZnfAQsvt8zfEjQZC2f-nWv4w9b5R1kQ@mail.gmail.com>
+	<1786859.jGWg0DZRp1@wuerfel>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f179.google.com ([209.85.220.179]:54773 "EHLO
+	mail-vc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751405AbaHNANY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Aug 2014 20:13:24 -0400
+Received: by mail-vc0-f179.google.com with SMTP id hq11so605098vcb.38
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Aug 2014 17:13:23 -0700 (PDT)
+In-Reply-To: <1786859.jGWg0DZRp1@wuerfel>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Alim Akhtar <alim.akhtar@gmail.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Doug Anderson <dianders@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-It's convenient (and less confusing to people reading logs) if the
-eMMC port on rk3288 is consistenly marked with mmc0 and the sdmmc port
-on rk3288 is consistently marked with mmc1.  Add the appropriate
-aliases.
+> In general, it's best to have specific dependencies on the subsystem
+> a driver uses. You probably need something like
+>
+>         depends on HAS_IOMEM && COMMON_CLK && REGULATOR
+>         depends on COMPILE_TEST || ARC || ARM || MIPS
+>
+> to cover all the possible cases. The specific options are probably
+> not the ones I listed above, but you should get the idea. Most importantly,
+> you don't want to allow building the driver on architectures on which
+> it can't compile.
 
-These aliases only actually do something if a patch like
-(https://patchwork.kernel.org/patch/3925551/) lands, but they don't
-hurt even before that patch.
-
-Signed-off-by: Doug Anderson <dianders@chromium.org>
-Reviewed-by: Sonny Rao <sonnyrao@chromium.org>
----
- arch/arm/boot/dts/rk3288.dtsi | 2 ++
- 1 file changed, 2 insertions(+)
-
-diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
-index 36be7bb..0b54b0d 100644
---- a/arch/arm/boot/dts/rk3288.dtsi
-+++ b/arch/arm/boot/dts/rk3288.dtsi
-@@ -29,6 +29,8 @@
- 		i2c3 = &i2c3;
- 		i2c4 = &i2c4;
- 		i2c5 = &i2c5;
-+		mmc0 = &emmc;
-+		mmc1 = &sdmmc;
- 		serial0 = &uart0;
- 		serial1 = &uart1;
- 		serial2 = &uart2;
--- 
-2.1.0.rc2.206.gedb03e5
+The only compile-time dependencies I see are HAS_IOMEM (which MMC
+already depends on) and HAS_DMA.  There isn't any compile-time
+dependency on COMMON_CLK, REGULATOR, GPIOLIB, OF, etc.  I've compiled
+it successfully for a few non-ARM/ARC architectures, though that
+certainly isn't an exhaustive test.  To be safe though, perhaps I'll
+just update the architecture dependency to include MIPS ||
+COMPILE_TEST as you suggested.
