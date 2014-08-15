@@ -1,95 +1,233 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH v3] mmc: core: try 1.8v signling in ddr mode if host and
- device
-Date: Fri, 15 Aug 2014 08:36:55 +0000
-Message-ID: <17296D9F8FF2234F831FC3DF505A87A911B21734@shsmsx102.ccr.corp.intel.com>
-References: <20140815032806.GA19745@intel.com>
- <CAPDyKFpigfMvzV6t3f2C-hcvKgfa_jErSH=xLCqN4xG4X6zJ7w@mail.gmail.com>
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?=
+	<u.kleine-koenig@pengutronix.de>
+Subject: [PATCH v4] mmc: implement Driver Stage Register handling
+Date: Fri, 15 Aug 2014 10:38:02 +0200
+Message-ID: <1408091882-32123-1-git-send-email-u.kleine-koenig@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:44684 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752807AbaHOIhH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 15 Aug 2014 04:37:07 -0400
-In-Reply-To: <CAPDyKFpigfMvzV6t3f2C-hcvKgfa_jErSH=xLCqN4xG4X6zJ7w@mail.gmail.com>
-Content-Language: en-US
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:51102 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751347AbaHOIiQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Aug 2014 04:38:16 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "chris@printf.org" <chris@printf.org>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, kernel@pengutronix.de, Markus Niebel <Markus.Niebel@tq-group.com>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, Sascha Hauer <s.hauer@pengutronix.de>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
-aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBGcmlkYXksIEF1Z3VzdCAxNSwg
-MjAxNCA0OjM0IFBNDQo+IFRvOiBEb25nLCBDaHVhbnhpYW8NCj4gQ2M6IGxpbnV4LW1tYzsgY2hy
-aXNAcHJpbnRmLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIIHYzXSBtbWM6IGNvcmU6IHRyeSAx
-Ljh2IHNpZ25saW5nIGluIGRkciBtb2RlIGlmIGhvc3QgYW5kDQo+IGRldmljZQ0KPiANCj4gT24g
-MTUgQXVndXN0IDIwMTQgMDU6MjgsIENodWFueGlhbyBEb25nIDxjaHVhbnhpYW8uZG9uZ0BpbnRl
-bC5jb20+DQo+IHdyb3RlOg0KPiA+IEV2ZW4gKGUpTU1DIGNhcmQgY2FuIHN1cHBvcnQgMy4zdiB0
-byAxLjJ2IHZjY3EgaW4gRERSLCBidXQgbm90IGFsbA0KPiA+IGhvc3QgY29udHJvbGxlciBjYW4g
-c3VwcG9ydCB0aGlzLCBsaWtlIHNvbWUgb2YgdGhlIFNESENJIGhvc3Qgd2hpY2gNCj4gPiBjb25u
-ZWN0IHRvIGFuIGVNTUMgZGV2aWNlLiBTb21lIG9mIHRoZXNlIGhvc3QgY29udHJvbGxlciBzdGls
-bCBuZWVkcw0KPiA+IHRvIHVzZSAxLjh2IHZjY3EgZm9yIHN1cHBvcnRpbmcgRERSIG1vZGUuDQo+
-ID4NCj4gPiBTbyB0aGUgc2VxdWVuY2Ugd2lsbCBiZToNCj4gPiBpZiAoaG9zdCBhbmQgZGV2aWNl
-IGNhbiBib3RoIHN1cHBvcnQgMS4ydiBJTykNCj4gPiAgICAgICAgIHVzZSAxLjJ2IElPOw0KPiA+
-IGVsc2UgaWYgKGhvc3QgYW5kIGRldmljZSBjYW4gYm90aCBzdXBwb3J0IDEuOHYgSU8pDQo+ID4g
-ICAgICAgICB1c2UgMS44diBJTzsNCj4gPiBzbyBpZiBob3N0IGFuZCBkZXZpY2UgY2FuIG9ubHkg
-c3VwcG9ydCAzLjN2IElPLCB0aGlzIGlzIHRoZSBsYXN0IGNob2ljZS4NCj4gPg0KPiA+IFNpZ25l
-ZC1vZmYtYnk6IENodWFueGlhbyBEb25nIDxjaHVhbnhpYW8uZG9uZ0BpbnRlbC5jb20+DQo+ID4g
-U2lnbmVkLW9mZi1ieTogWXVucGVuZyBHYW8gPHl1bnBlbmcuZ2FvQGludGVsLmNvbT4NCj4gDQo+
-IFRoaXMgbG9va3MgZ29vZCB0byBtZSEgQnV0IGJlZm9yZSBJIHF1ZXVlIGl0IGZvciAzLjE4IEkg
-d291bGQgYXBwcmVjaWF0ZSBpZiB3ZQ0KPiBjb3VsZCBnZXQgc29tZSBoZWxwIGluIHRlc3Rpbmcg
-dGhpcyBmb3Igc29tZSB2YXJpb3VzIHBsYXRmb3JtcywgdGhhdCBzdXBwb3J0DQo+IE1NQyBERFIu
-DQoNClRoYW5rcyBhIGxvdC4gQlRXLCB0aGlzIHBhdGNoIGlzIGFscmVhZHkgdGVzdGVkIG9uIElu
-dGVsJ3MgcGxhdGZvcm0gd2hpY2ggY2FuIHN1cHBvcnQgTU1DIEREUi4NCg0KVGhhbmtzDQpDaHVh
-bnhpYW8NCj4gDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo+IA0KPiA+IC0tLQ0KPiA+IENoYW5n
-ZWxvZyBWMjoNCj4gPiAgICAgIC0gRm9yIChlKU1NQyBkZXZpY2Ugc3dpdGNoaW5nIHRvIEREUiBt
-b2RlLCB0cnkgMS4ydiBzaW5nYWxpbmcgZmlyc3QuDQo+IFRoZW4NCj4gPiAgICAgIHRyeSAxLjh2
-LiBJZiAxLjJ2IGFuZCAxLjh2IGFyZSBib3RoIG5vdCBzdXBwb3J0ZWQsIHVzZSB0aGUNCj4gPiBk
-ZWZhdWx0DQo+ID4NCj4gPiBDaGFuZ2Vsb2cgVjM6DQo+ID4gICAgICAtIGNvbnRpbnVlIHRvIHRy
-eSAxLjh2LzMuM3YgdmNjcSBpZiB0aGVyZSBpcyBJTyB2b2x0YWdlIHN3aXRjaGluZw0KPiA+IGZh
-aWx1cmUNCj4gPg0KPiA+ICBkcml2ZXJzL21tYy9jb3JlL21tYy5jIHwgICAzNCArKysrKysrKysr
-KysrKysrKysrKysrKysrLS0tLS0tLS0tDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCAyNSBpbnNlcnRp
-b25zKCspLCA5IGRlbGV0aW9ucygtKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1j
-L2NvcmUvbW1jLmMgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5jIGluZGV4DQo+ID4gNzkzYzZmNy4u
-OGQ2OTY3MSAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQo+ID4gKysr
-IGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYw0KPiA+IEBAIC05ODgsMTkgKzk4OCwzNSBAQCBzdGF0
-aWMgaW50IG1tY19zZWxlY3RfaHNfZGRyKHN0cnVjdCBtbWNfY2FyZA0KPiAqY2FyZCkNCj4gPiAg
-ICAgICAgICAqIDEuOFYgdmNjcSBhdCAzLjNWIGNvcmUgdm9sdGFnZSAodmNjKSBpcyBub3QgcmVx
-dWlyZWQNCj4gPiAgICAgICAgICAqIGluIHRoZSBKRURFQyBzcGVjIGZvciBERFIuDQo+ID4gICAg
-ICAgICAgKg0KPiA+IC0gICAgICAgICogRG8gbm90IGZvcmNlIGNoYW5nZSBpbiB2Y2NxIHNpbmNl
-IHdlIGFyZSBvYnZpb3VzbHkNCj4gPiAtICAgICAgICAqIHdvcmtpbmcgYW5kIG5vIGNoYW5nZSB0
-byB2Y2NxIGlzIG5lZWRlZC4NCj4gPiArICAgICAgICAqIEV2ZW4gKGUpTU1DIGNhcmQgY2FuIHN1
-cHBvcnQgMy4zdiB0byAxLjJ2IHZjY3EsIGJ1dCBub3QgYWxsDQo+ID4gKyAgICAgICAgKiBob3N0
-IGNvbnRyb2xsZXIgY2FuIHN1cHBvcnQgdGhpcywgbGlrZSBzb21lIG9mIHRoZSBTREhDSQ0KPiA+
-ICsgICAgICAgICogY29udHJvbGxlciB3aGljaCBjb25uZWN0IHRvIGFuIGVNTUMgZGV2aWNlLiBT
-b21lIG9mIHRoZXNlDQo+ID4gKyAgICAgICAgKiBob3N0IGNvbnRyb2xsZXIgc3RpbGwgbmVlZHMg
-dG8gdXNlIDEuOHYgdmNjcSBmb3Igc3VwcG9ydGluZw0KPiA+ICsgICAgICAgICogRERSIG1vZGUu
-DQo+ID4gKyAgICAgICAgKg0KPiA+ICsgICAgICAgICogU28gdGhlIHNlcXVlbmNlIHdpbGwgYmU6
-DQo+ID4gKyAgICAgICAgKiBpZiAoaG9zdCBhbmQgZGV2aWNlIGNhbiBib3RoIHN1cHBvcnQgMS4y
-diBJTykNCj4gPiArICAgICAgICAqICAgICAgdXNlIDEuMnYgSU87DQo+ID4gKyAgICAgICAgKiBl
-bHNlIGlmIChob3N0IGFuZCBkZXZpY2UgY2FuIGJvdGggc3VwcG9ydCAxLjh2IElPKQ0KPiA+ICsg
-ICAgICAgICogICAgICB1c2UgMS44diBJTzsNCj4gPiArICAgICAgICAqIHNvIGlmIGhvc3QgYW5k
-IGRldmljZSBjYW4gb25seSBzdXBwb3J0IDMuM3YgSU8sIHRoaXMgaXMgdGhlDQo+ID4gKyAgICAg
-ICAgKiBsYXN0IGNob2ljZS4NCj4gPiAgICAgICAgICAqDQo+ID4gICAgICAgICAgKiBXQVJOSU5H
-OiBlTU1DIHJ1bGVzIGFyZSBOT1QgdGhlIHNhbWUgYXMgU0QgRERSDQo+ID4gICAgICAgICAgKi8N
-Cj4gPiAtICAgICAgIGlmIChjYXJkLT5tbWNfYXZhaWxfdHlwZSAmIEVYVF9DU0RfQ0FSRF9UWVBF
-X0REUl8xXzJWKSB7DQo+ID4gLSAgICAgICAgICAgICAgIGVyciA9IF9fbW1jX3NldF9zaWduYWxf
-dm9sdGFnZShob3N0LA0KPiA+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgTU1DX1NJ
-R05BTF9WT0xUQUdFXzEyMCk7DQo+ID4gLSAgICAgICAgICAgICAgIGlmIChlcnIpDQo+ID4gLSAg
-ICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIGVycjsNCj4gPiAtICAgICAgIH0NCj4gPiArICAg
-ICAgIGVyciA9IC1FSU5WQUw7DQo+ID4gKyAgICAgICBpZiAoY2FyZC0+bW1jX2F2YWlsX3R5cGUg
-JiBFWFRfQ1NEX0NBUkRfVFlQRV9ERFJfMV8yVikNCj4gPiArICAgICAgICAgICAgICAgZXJyID0g
-X19tbWNfc2V0X3NpZ25hbF92b2x0YWdlKGhvc3QsDQo+ID4gKyBNTUNfU0lHTkFMX1ZPTFRBR0Vf
-MTIwKTsNCj4gPg0KPiA+IC0gICAgICAgbW1jX3NldF90aW1pbmcoaG9zdCwgTU1DX1RJTUlOR19N
-TUNfRERSNTIpOw0KPiA+ICsgICAgICAgaWYgKGVyciAmJiAoY2FyZC0+bW1jX2F2YWlsX3R5cGUg
-Jg0KPiBFWFRfQ1NEX0NBUkRfVFlQRV9ERFJfMV84VikpDQo+ID4gKyAgICAgICAgICAgICAgIGVy
-ciA9IF9fbW1jX3NldF9zaWduYWxfdm9sdGFnZShob3N0LA0KPiA+ICsgTU1DX1NJR05BTF9WT0xU
-QUdFXzE4MCk7DQo+ID4gKw0KPiA+ICsgICAgICAgLyogbWFrZSBzdXJlIHZjY3EgaXMgMy4zdiBh
-ZnRlciBzd2l0Y2hpbmcgZGlzYXN0ZXIgKi8NCj4gPiArICAgICAgIGlmIChlcnIpDQo+ID4gKyAg
-ICAgICAgICAgICAgIGVyciA9IF9fbW1jX3NldF9zaWduYWxfdm9sdGFnZShob3N0LA0KPiA+ICsg
-TU1DX1NJR05BTF9WT0xUQUdFXzMzMCk7DQo+ID4gKw0KPiA+ICsgICAgICAgaWYgKCFlcnIpDQo+
-ID4gKyAgICAgICAgICAgICAgIG1tY19zZXRfdGltaW5nKGhvc3QsIE1NQ19USU1JTkdfTU1DX0RE
-UjUyKTsNCj4gPg0KPiA+ICAgICAgICAgcmV0dXJuIGVycjsNCj4gPiAgfQ0KPiA+IC0tDQo+ID4g
-MS43LjEwLjQNCj4gPg0K
+=46rom: Sascha Hauer <s.hauer@pengutronix.de>
+
+Some eMMC and SD cards implement a DSR register that allows to tune
+raise/fall times and drive strength of the CMD and DATA outputs.
+The values to use depend on the card in use and the host.
+It might be needed to reduce the drive strength to prevent voltage peak=
+s
+above the host's specification.
+
+Implement a 'dsr' devicetree property that allows to specify the value
+to set the DSR to. For non-dt setups the new members of mmc_host can be
+set by board code.
+
+This patch was initially authored by Sascha Hauer. It contains
+improvements authored by Markus Niebel and Uwe Kleine-K=C3=B6nig.
+
+Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+Signed-off-by: Markus Niebel <Markus.Niebel@tq-group.com>
+Signed-off-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
+---
+Changes since v3:
+
+ - fix a compiler warning about err not being used.
+ - clearified valid range. I didn't write "16-bit value" because the
+   value is still expected to be written as 32-bit value in the device
+   tree.
+ - make host->dsr an u32, which simplified parsing the device tree and
+   also makes casting in mmc_set_dsr unnecessary.
+---
+ Documentation/devicetree/bindings/mmc/mmc.txt |  2 ++
+ drivers/mmc/core/host.c                       |  8 ++++++++
+ drivers/mmc/core/mmc.c                        |  8 ++++++++
+ drivers/mmc/core/mmc_ops.c                    | 20 +++++++++++++++++++=
++
+ drivers/mmc/core/mmc_ops.h                    |  1 +
+ drivers/mmc/core/sd.c                         |  8 ++++++++
+ include/linux/mmc/card.h                      |  3 ++-
+ include/linux/mmc/host.h                      |  3 +++
+ 8 files changed, 52 insertions(+), 1 deletion(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentat=
+ion/devicetree/bindings/mmc/mmc.txt
+index 3c18001dfd5d..a3fe21f2b709 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -40,6 +40,8 @@ Optional properties:
+ - mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
+ - mmc-hs400-1_8v: eMMC HS400 mode(1.8V I/O) is supported
+ - mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
++- dsr: Value the card's (optional) Driver Stage Register (DSR) should =
+be
++  programmed with. Valid range: [0 .. 0xffff].
+=20
+ *NOTE* on CD and WP polarity. To use common for all SD/MMC host contro=
+llers line
+ polarity properties, we have to fix the meaning of the "normal" and "i=
+nverted"
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 95cceae96944..6442eecb672e 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -452,6 +452,14 @@ int mmc_of_parse(struct mmc_host *host)
+ 	if (of_find_property(np, "mmc-hs400-1_2v", &len))
+ 		host->caps2 |=3D MMC_CAP2_HS400_1_2V | MMC_CAP2_HS200_1_2V_SDR;
+=20
++	host->dsr_req =3D of_property_read_u32(np, "dsr", &host->dsr);
++	if (host->dsr_req && (host->dsr & ~0xffff)) {
++		dev_err(host->parent,
++			"device tree specified broken value for DSR: 0x%x, ignoring\n",
++			host->dsr);
++		host->dsr_req =3D 0;
++	}
++
+ 	return 0;
+=20
+ out:
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 793c6f7ddb04..fdc1ac1360c4 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -162,6 +162,7 @@ static int mmc_decode_csd(struct mmc_card *card)
+ 	csd->read_partial =3D UNSTUFF_BITS(resp, 79, 1);
+ 	csd->write_misalign =3D UNSTUFF_BITS(resp, 78, 1);
+ 	csd->read_misalign =3D UNSTUFF_BITS(resp, 77, 1);
++	csd->dsr_imp =3D UNSTUFF_BITS(resp, 76, 1);
+ 	csd->r2w_factor =3D UNSTUFF_BITS(resp, 26, 3);
+ 	csd->write_blkbits =3D UNSTUFF_BITS(resp, 22, 4);
+ 	csd->write_partial =3D UNSTUFF_BITS(resp, 21, 1);
+@@ -1273,6 +1274,13 @@ static int mmc_init_card(struct mmc_host *host, =
+u32 ocr,
+ 	}
+=20
+ 	/*
++	 * handling only for cards supporting DSR and hosts requesting
++	 * DSR configuration
++	 */
++	if (card->csd.dsr_imp && host->dsr_req)
++		mmc_set_dsr(host);
++
++	/*
+ 	 * Select card, as all following commands rely on that.
+ 	 */
+ 	if (!mmc_host_is_spi(host)) {
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index f51b5ba3bbea..ba0275e90617 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -93,6 +93,26 @@ int mmc_deselect_cards(struct mmc_host *host)
+ 	return _mmc_select_card(host, NULL);
+ }
+=20
++/*
++ * Write the value specified in the device tree or board code into the=
+ optional
++ * 16 bit Driver Stage Register. This can be used to tune raise/fall t=
+imes and
++ * drive strength of the DAT and CMD outputs. The actual meaning of a =
+given
++ * value is hardware dependant.
++ * The presence of the DSR register can be determined from the CSD reg=
+ister,
++ * bit 76.
++ */
++int mmc_set_dsr(struct mmc_host *host)
++{
++	struct mmc_command cmd =3D {0};
++
++	cmd.opcode =3D MMC_SET_DSR;
++
++	cmd.arg =3D (host->dsr << 16) | 0xffff;
++	cmd.flags =3D MMC_RSP_NONE | MMC_CMD_AC;
++
++	return mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
++}
++
+ int mmc_go_idle(struct mmc_host *host)
+ {
+ 	int err;
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index 80ae9f4e0293..390dac665b2a 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -14,6 +14,7 @@
+=20
+ int mmc_select_card(struct mmc_card *card);
+ int mmc_deselect_cards(struct mmc_host *host);
++int mmc_set_dsr(struct mmc_host *host);
+ int mmc_go_idle(struct mmc_host *host);
+ int mmc_send_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
+ int mmc_all_send_cid(struct mmc_host *host, u32 *cid);
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 0c44510bf717..25913889cbaa 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -127,6 +127,7 @@ static int mmc_decode_csd(struct mmc_card *card)
+ 		csd->read_partial =3D UNSTUFF_BITS(resp, 79, 1);
+ 		csd->write_misalign =3D UNSTUFF_BITS(resp, 78, 1);
+ 		csd->read_misalign =3D UNSTUFF_BITS(resp, 77, 1);
++		csd->dsr_imp =3D UNSTUFF_BITS(resp, 76, 1);
+ 		csd->r2w_factor =3D UNSTUFF_BITS(resp, 26, 3);
+ 		csd->write_blkbits =3D UNSTUFF_BITS(resp, 22, 4);
+ 		csd->write_partial =3D UNSTUFF_BITS(resp, 21, 1);
+@@ -954,6 +955,13 @@ static int mmc_sd_init_card(struct mmc_host *host,=
+ u32 ocr,
+ 	}
+=20
+ 	/*
++	 * handling only for cards supporting DSR and hosts requesting
++	 * DSR configuration
++	 */
++	if (card->csd.dsr_imp && host->dsr_req)
++		mmc_set_dsr(host);
++
++	/*
+ 	 * Select card, as all following commands rely on that.
+ 	 */
+ 	if (!mmc_host_is_spi(host)) {
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index d424b9de3aff..680a7f0188bb 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -42,7 +42,8 @@ struct mmc_csd {
+ 	unsigned int		read_partial:1,
+ 				read_misalign:1,
+ 				write_partial:1,
+-				write_misalign:1;
++				write_misalign:1,
++				dsr_imp:1;
+ };
+=20
+ struct mmc_ext_csd {
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 7960424d0bc0..8acaebd866a7 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -319,6 +319,7 @@ struct mmc_host {
+ #ifdef CONFIG_MMC_DEBUG
+ 	unsigned int		removed:1;	/* host is being removed */
+ #endif
++	unsigned int		dsr_req:1;	/* DSR is requested for Host */
+=20
+ 	int			rescan_disable;	/* disable card detection */
+ 	int			rescan_entered;	/* used with nonremovable devices */
+@@ -365,6 +366,8 @@ struct mmc_host {
+=20
+ 	unsigned int		slotno;	/* used for sdio acpi binding */
+=20
++	u32			dsr;	/* optional driver stage (DSR) value */
++
+ 	unsigned long		private[0] ____cacheline_aligned;
+ };
+=20
+--=20
+2.0.1
+
