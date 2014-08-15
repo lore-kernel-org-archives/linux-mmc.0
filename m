@@ -1,95 +1,40 @@
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [PATCH v3] mmc: core: try 1.8v signling in ddr mode if host and
- device
-Date: Fri, 15 Aug 2014 11:28:07 +0800
-Message-ID: <20140815032806.GA19745@intel.com>
-Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+From: Tim Kryger <tim.kryger@gmail.com>
+Subject: Re: [PATCH 1/1] mmc: core: Use regulator_get_voltage() if OCR mask is empty.
+Date: Thu, 14 Aug 2014 22:36:18 -0700
+Message-ID: <CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>
+References: <1408019940-11153-1-git-send-email-javier.martinez@collabora.co.uk>
+	<CAD7vxxKvzxvmzgx=S5ZZn54ts99ca2TqBYFvY1SXZQZDkhjq3w@mail.gmail.com>
+	<20140814151958.GY17528@sirena.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:5458 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932122AbaHOD3I (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 14 Aug 2014 23:29:08 -0400
-Content-Disposition: inline
+Received: from mail-ob0-f175.google.com ([209.85.214.175]:57103 "EHLO
+	mail-ob0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750778AbaHOFgT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Aug 2014 01:36:19 -0400
+In-Reply-To: <20140814151958.GY17528@sirena.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, chris@printf.org
+To: Mark Brown <broonie@kernel.org>
+Cc: Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Even (e)MMC card can support 3.3v to 1.2v vccq in DDR, but not all
-host controller can support this, like some of the SDHCI host
-which connect to an eMMC device. Some of these host controller
-still needs to use 1.8v vccq for supporting DDR mode.
+On Thu, Aug 14, 2014 at 8:19 AM, Mark Brown <broonie@kernel.org> wrote:
 
-So the sequence will be:
-if (host and device can both support 1.2v IO)
-	use 1.2v IO;
-else if (host and device can both support 1.8v IO)
-	use 1.8v IO;
-so if host and device can only support 3.3v IO, this is the last choice.
+> Right, there's two things going on here.  One is that as you describe we
+> shouldn't be putting constraints in .dtsi files if we don't know they're
+> OK for a given board.  The other thing is that on this particular board
+> it turns out that there's no support for varying the voltages at all so
+> it doesn't make sense to have to specify a range, there's only one value
+> anyway so the software really should be able to figure out that fixed
+> value all by itself.
 
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
----
-Changelog V2:
-     - For (e)MMC device switching to DDR mode, try 1.2v singaling first. Then
-     try 1.8v. If 1.2v and 1.8v are both not supported, use the default 
+If constraints are truly irrelevant when the voltage supplied to
+consumers is fixed, why doesn't regulator_list_voltage honor this
+exemption and skip the voltage filtering that uses (potentially
+unspecified) constraints when output is entirely determined by a
+parent (or grandparent) supply that can't change its voltage?
 
-Changelog V3:
-     - continue to try 1.8v/3.3v vccq if there is IO voltage switching failure
+It seems odd to make callers be the ones to handle this subtlety.
 
- drivers/mmc/core/mmc.c |   34 +++++++++++++++++++++++++---------
- 1 file changed, 25 insertions(+), 9 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 793c6f7..8d69671 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -988,19 +988,35 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
- 	 * 1.8V vccq at 3.3V core voltage (vcc) is not required
- 	 * in the JEDEC spec for DDR.
- 	 *
--	 * Do not force change in vccq since we are obviously
--	 * working and no change to vccq is needed.
-+	 * Even (e)MMC card can support 3.3v to 1.2v vccq, but not all
-+	 * host controller can support this, like some of the SDHCI
-+	 * controller which connect to an eMMC device. Some of these
-+	 * host controller still needs to use 1.8v vccq for supporting
-+	 * DDR mode.
-+	 *
-+	 * So the sequence will be:
-+	 * if (host and device can both support 1.2v IO)
-+	 *	use 1.2v IO;
-+	 * else if (host and device can both support 1.8v IO)
-+	 * 	use 1.8v IO;
-+	 * so if host and device can only support 3.3v IO, this is the
-+	 * last choice.
- 	 *
- 	 * WARNING: eMMC rules are NOT the same as SD DDR
- 	 */
--	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_1_2V) {
--		err = __mmc_set_signal_voltage(host,
--				MMC_SIGNAL_VOLTAGE_120);
--		if (err)
--			return err;
--	}
-+	err = -EINVAL;
-+	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_1_2V)
-+		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
- 
--	mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
-+	if (err && (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_1_8V))
-+		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
-+
-+	/* make sure vccq is 3.3v after switching disaster */
-+	if (err)
-+		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
-+
-+	if (!err)
-+		mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
- 
- 	return err;
- }
--- 
-1.7.10.4
-
+Thanks,
+Tim Kryger
