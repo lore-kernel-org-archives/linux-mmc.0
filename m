@@ -1,11 +1,14 @@
 From: <rogerable@realtek.com>
-Subject: [PATCH 0/2] mmc: rtsx: fix incorrect last byte in R2 response
-Date: Fri, 15 Aug 2014 14:05:59 +0800
-Message-ID: <1408082761-15333-1-git-send-email-rogerable@realtek.com>
+Subject: [PATCH 1/2] mmc: rtsx_pci_sdmmc: fix incorrect last byte in R2
+ response
+Date: Fri, 15 Aug 2014 14:06:00 +0800
+Message-ID: <1408082761-15333-2-git-send-email-rogerable@realtek.com>
+References: <1408082761-15333-1-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <1408082761-15333-1-git-send-email-rogerable@realtek.com>
 List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
 List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
@@ -21,9 +24,6 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Roger Tseng <rogerable@realtek.com>
 
-(The original patch for PCI and USB was splitted here to make it easier for
-stable tree.)
-
 Current code erroneously fill the last byte of R2 response with an undefined
 value. In addition, the controller actually 'offloads' the last byte
 (CRC7, end bit) while receiving R2 response and thus it's impossible to get the
@@ -32,13 +32,30 @@ same card after resume and misidentify it as a different card.
 
 Fix by assigning dummy CRC and end bit: {7'b0, 1} = 0x1 to the last byte of R2.
 
-Roger Tseng (2):
-  mmc: rtsx_pci_sdmmc: fix incorrect last byte in R2 response
-  mmc: rtsx_usb_sdmmc: fix incorrect last byte in R2 response
-
+Cc: <stable@vger.kernel.org> # v3.8+
+Fixes: ff984e57d36e ("mmc: Add realtek pcie sdmmc host driver")
+Signed-off-by: Roger Tseng <rogerable@realtek.com>
+---
  drivers/mmc/host/rtsx_pci_sdmmc.c |    7 +++++++
- drivers/mmc/host/rtsx_usb_sdmmc.c |    7 +++++++
- 2 files changed, 14 insertions(+)
+ 1 file changed, 7 insertions(+)
 
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index dfde4a210238..b2537e2f26b1 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -412,6 +412,13 @@ static void sd_send_cmd_get_rsp(struct realtek_pci_sdmmc *host,
+ 	}
+ 
+ 	if (rsp_type == SD_RSP_TYPE_R2) {
++		/*
++		 * The controller offloads the last byte {CRC-7, end bit 1'b1}
++		 * of response type R2. Assign dummy CRC, 0, and end bit to the
++		 * byte(ptr[16], goes into the LSB of resp[3] later).
++		 */
++		ptr[16] = 1;
++
+ 		for (i = 0; i < 4; i++) {
+ 			cmd->resp[i] = get_unaligned_be32(ptr + 1 + i * 4);
+ 			dev_dbg(sdmmc_dev(host), "cmd->resp[%d] = 0x%08x\n",
 -- 
 1.7.10.4
