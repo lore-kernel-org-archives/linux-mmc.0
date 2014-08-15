@@ -1,106 +1,95 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] mmc: core: try 1.8v signling in ddr mode if host and device
-Date: Fri, 15 Aug 2014 10:34:29 +0200
-Message-ID: <CAPDyKFpigfMvzV6t3f2C-hcvKgfa_jErSH=xLCqN4xG4X6zJ7w@mail.gmail.com>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [PATCH v3] mmc: core: try 1.8v signling in ddr mode if host and
+ device
+Date: Fri, 15 Aug 2014 08:36:55 +0000
+Message-ID: <17296D9F8FF2234F831FC3DF505A87A911B21734@shsmsx102.ccr.corp.intel.com>
 References: <20140815032806.GA19745@intel.com>
+ <CAPDyKFpigfMvzV6t3f2C-hcvKgfa_jErSH=xLCqN4xG4X6zJ7w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f54.google.com ([209.85.192.54]:34088 "EHLO
-	mail-qg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752286AbaHOIea (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Aug 2014 04:34:30 -0400
-Received: by mail-qg0-f54.google.com with SMTP id z60so2005543qgd.27
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Aug 2014 01:34:29 -0700 (PDT)
-In-Reply-To: <20140815032806.GA19745@intel.com>
+Received: from mga03.intel.com ([143.182.124.21]:44684 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752807AbaHOIhH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 15 Aug 2014 04:37:07 -0400
+In-Reply-To: <CAPDyKFpigfMvzV6t3f2C-hcvKgfa_jErSH=xLCqN4xG4X6zJ7w@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, chris@printf.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "chris@printf.org" <chris@printf.org>
 
-On 15 August 2014 05:28, Chuanxiao Dong <chuanxiao.dong@intel.com> wrote:
-> Even (e)MMC card can support 3.3v to 1.2v vccq in DDR, but not all
-> host controller can support this, like some of the SDHCI host
-> which connect to an eMMC device. Some of these host controller
-> still needs to use 1.8v vccq for supporting DDR mode.
->
-> So the sequence will be:
-> if (host and device can both support 1.2v IO)
->         use 1.2v IO;
-> else if (host and device can both support 1.8v IO)
->         use 1.8v IO;
-> so if host and device can only support 3.3v IO, this is the last choice.
->
-> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-> Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
-
-This looks good to me! But before I queue it for 3.18 I would
-appreciate if we could get some help in testing this for some various
-platforms, that support MMC DDR.
-
-Kind regards
-Uffe
-
-> ---
-> Changelog V2:
->      - For (e)MMC device switching to DDR mode, try 1.2v singaling first. Then
->      try 1.8v. If 1.2v and 1.8v are both not supported, use the default
->
-> Changelog V3:
->      - continue to try 1.8v/3.3v vccq if there is IO voltage switching failure
->
->  drivers/mmc/core/mmc.c |   34 +++++++++++++++++++++++++---------
->  1 file changed, 25 insertions(+), 9 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 793c6f7..8d69671 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -988,19 +988,35 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
->          * 1.8V vccq at 3.3V core voltage (vcc) is not required
->          * in the JEDEC spec for DDR.
->          *
-> -        * Do not force change in vccq since we are obviously
-> -        * working and no change to vccq is needed.
-> +        * Even (e)MMC card can support 3.3v to 1.2v vccq, but not all
-> +        * host controller can support this, like some of the SDHCI
-> +        * controller which connect to an eMMC device. Some of these
-> +        * host controller still needs to use 1.8v vccq for supporting
-> +        * DDR mode.
-> +        *
-> +        * So the sequence will be:
-> +        * if (host and device can both support 1.2v IO)
-> +        *      use 1.2v IO;
-> +        * else if (host and device can both support 1.8v IO)
-> +        *      use 1.8v IO;
-> +        * so if host and device can only support 3.3v IO, this is the
-> +        * last choice.
->          *
->          * WARNING: eMMC rules are NOT the same as SD DDR
->          */
-> -       if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_1_2V) {
-> -               err = __mmc_set_signal_voltage(host,
-> -                               MMC_SIGNAL_VOLTAGE_120);
-> -               if (err)
-> -                       return err;
-> -       }
-> +       err = -EINVAL;
-> +       if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_1_2V)
-> +               err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
->
-> -       mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
-> +       if (err && (card->mmc_avail_type & EXT_CSD_CARD_TYPE_DDR_1_8V))
-> +               err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
-> +
-> +       /* make sure vccq is 3.3v after switching disaster */
-> +       if (err)
-> +               err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
-> +
-> +       if (!err)
-> +               mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
->
->         return err;
->  }
-> --
-> 1.7.10.4
->
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
+aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBGcmlkYXksIEF1Z3VzdCAxNSwg
+MjAxNCA0OjM0IFBNDQo+IFRvOiBEb25nLCBDaHVhbnhpYW8NCj4gQ2M6IGxpbnV4LW1tYzsgY2hy
+aXNAcHJpbnRmLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIIHYzXSBtbWM6IGNvcmU6IHRyeSAx
+Ljh2IHNpZ25saW5nIGluIGRkciBtb2RlIGlmIGhvc3QgYW5kDQo+IGRldmljZQ0KPiANCj4gT24g
+MTUgQXVndXN0IDIwMTQgMDU6MjgsIENodWFueGlhbyBEb25nIDxjaHVhbnhpYW8uZG9uZ0BpbnRl
+bC5jb20+DQo+IHdyb3RlOg0KPiA+IEV2ZW4gKGUpTU1DIGNhcmQgY2FuIHN1cHBvcnQgMy4zdiB0
+byAxLjJ2IHZjY3EgaW4gRERSLCBidXQgbm90IGFsbA0KPiA+IGhvc3QgY29udHJvbGxlciBjYW4g
+c3VwcG9ydCB0aGlzLCBsaWtlIHNvbWUgb2YgdGhlIFNESENJIGhvc3Qgd2hpY2gNCj4gPiBjb25u
+ZWN0IHRvIGFuIGVNTUMgZGV2aWNlLiBTb21lIG9mIHRoZXNlIGhvc3QgY29udHJvbGxlciBzdGls
+bCBuZWVkcw0KPiA+IHRvIHVzZSAxLjh2IHZjY3EgZm9yIHN1cHBvcnRpbmcgRERSIG1vZGUuDQo+
+ID4NCj4gPiBTbyB0aGUgc2VxdWVuY2Ugd2lsbCBiZToNCj4gPiBpZiAoaG9zdCBhbmQgZGV2aWNl
+IGNhbiBib3RoIHN1cHBvcnQgMS4ydiBJTykNCj4gPiAgICAgICAgIHVzZSAxLjJ2IElPOw0KPiA+
+IGVsc2UgaWYgKGhvc3QgYW5kIGRldmljZSBjYW4gYm90aCBzdXBwb3J0IDEuOHYgSU8pDQo+ID4g
+ICAgICAgICB1c2UgMS44diBJTzsNCj4gPiBzbyBpZiBob3N0IGFuZCBkZXZpY2UgY2FuIG9ubHkg
+c3VwcG9ydCAzLjN2IElPLCB0aGlzIGlzIHRoZSBsYXN0IGNob2ljZS4NCj4gPg0KPiA+IFNpZ25l
+ZC1vZmYtYnk6IENodWFueGlhbyBEb25nIDxjaHVhbnhpYW8uZG9uZ0BpbnRlbC5jb20+DQo+ID4g
+U2lnbmVkLW9mZi1ieTogWXVucGVuZyBHYW8gPHl1bnBlbmcuZ2FvQGludGVsLmNvbT4NCj4gDQo+
+IFRoaXMgbG9va3MgZ29vZCB0byBtZSEgQnV0IGJlZm9yZSBJIHF1ZXVlIGl0IGZvciAzLjE4IEkg
+d291bGQgYXBwcmVjaWF0ZSBpZiB3ZQ0KPiBjb3VsZCBnZXQgc29tZSBoZWxwIGluIHRlc3Rpbmcg
+dGhpcyBmb3Igc29tZSB2YXJpb3VzIHBsYXRmb3JtcywgdGhhdCBzdXBwb3J0DQo+IE1NQyBERFIu
+DQoNClRoYW5rcyBhIGxvdC4gQlRXLCB0aGlzIHBhdGNoIGlzIGFscmVhZHkgdGVzdGVkIG9uIElu
+dGVsJ3MgcGxhdGZvcm0gd2hpY2ggY2FuIHN1cHBvcnQgTU1DIEREUi4NCg0KVGhhbmtzDQpDaHVh
+bnhpYW8NCj4gDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo+IA0KPiA+IC0tLQ0KPiA+IENoYW5n
+ZWxvZyBWMjoNCj4gPiAgICAgIC0gRm9yIChlKU1NQyBkZXZpY2Ugc3dpdGNoaW5nIHRvIEREUiBt
+b2RlLCB0cnkgMS4ydiBzaW5nYWxpbmcgZmlyc3QuDQo+IFRoZW4NCj4gPiAgICAgIHRyeSAxLjh2
+LiBJZiAxLjJ2IGFuZCAxLjh2IGFyZSBib3RoIG5vdCBzdXBwb3J0ZWQsIHVzZSB0aGUNCj4gPiBk
+ZWZhdWx0DQo+ID4NCj4gPiBDaGFuZ2Vsb2cgVjM6DQo+ID4gICAgICAtIGNvbnRpbnVlIHRvIHRy
+eSAxLjh2LzMuM3YgdmNjcSBpZiB0aGVyZSBpcyBJTyB2b2x0YWdlIHN3aXRjaGluZw0KPiA+IGZh
+aWx1cmUNCj4gPg0KPiA+ICBkcml2ZXJzL21tYy9jb3JlL21tYy5jIHwgICAzNCArKysrKysrKysr
+KysrKysrKysrKysrKysrLS0tLS0tLS0tDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCAyNSBpbnNlcnRp
+b25zKCspLCA5IGRlbGV0aW9ucygtKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1j
+L2NvcmUvbW1jLmMgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5jIGluZGV4DQo+ID4gNzkzYzZmNy4u
+OGQ2OTY3MSAxMDA2NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQo+ID4gKysr
+IGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYw0KPiA+IEBAIC05ODgsMTkgKzk4OCwzNSBAQCBzdGF0
+aWMgaW50IG1tY19zZWxlY3RfaHNfZGRyKHN0cnVjdCBtbWNfY2FyZA0KPiAqY2FyZCkNCj4gPiAg
+ICAgICAgICAqIDEuOFYgdmNjcSBhdCAzLjNWIGNvcmUgdm9sdGFnZSAodmNjKSBpcyBub3QgcmVx
+dWlyZWQNCj4gPiAgICAgICAgICAqIGluIHRoZSBKRURFQyBzcGVjIGZvciBERFIuDQo+ID4gICAg
+ICAgICAgKg0KPiA+IC0gICAgICAgICogRG8gbm90IGZvcmNlIGNoYW5nZSBpbiB2Y2NxIHNpbmNl
+IHdlIGFyZSBvYnZpb3VzbHkNCj4gPiAtICAgICAgICAqIHdvcmtpbmcgYW5kIG5vIGNoYW5nZSB0
+byB2Y2NxIGlzIG5lZWRlZC4NCj4gPiArICAgICAgICAqIEV2ZW4gKGUpTU1DIGNhcmQgY2FuIHN1
+cHBvcnQgMy4zdiB0byAxLjJ2IHZjY3EsIGJ1dCBub3QgYWxsDQo+ID4gKyAgICAgICAgKiBob3N0
+IGNvbnRyb2xsZXIgY2FuIHN1cHBvcnQgdGhpcywgbGlrZSBzb21lIG9mIHRoZSBTREhDSQ0KPiA+
+ICsgICAgICAgICogY29udHJvbGxlciB3aGljaCBjb25uZWN0IHRvIGFuIGVNTUMgZGV2aWNlLiBT
+b21lIG9mIHRoZXNlDQo+ID4gKyAgICAgICAgKiBob3N0IGNvbnRyb2xsZXIgc3RpbGwgbmVlZHMg
+dG8gdXNlIDEuOHYgdmNjcSBmb3Igc3VwcG9ydGluZw0KPiA+ICsgICAgICAgICogRERSIG1vZGUu
+DQo+ID4gKyAgICAgICAgKg0KPiA+ICsgICAgICAgICogU28gdGhlIHNlcXVlbmNlIHdpbGwgYmU6
+DQo+ID4gKyAgICAgICAgKiBpZiAoaG9zdCBhbmQgZGV2aWNlIGNhbiBib3RoIHN1cHBvcnQgMS4y
+diBJTykNCj4gPiArICAgICAgICAqICAgICAgdXNlIDEuMnYgSU87DQo+ID4gKyAgICAgICAgKiBl
+bHNlIGlmIChob3N0IGFuZCBkZXZpY2UgY2FuIGJvdGggc3VwcG9ydCAxLjh2IElPKQ0KPiA+ICsg
+ICAgICAgICogICAgICB1c2UgMS44diBJTzsNCj4gPiArICAgICAgICAqIHNvIGlmIGhvc3QgYW5k
+IGRldmljZSBjYW4gb25seSBzdXBwb3J0IDMuM3YgSU8sIHRoaXMgaXMgdGhlDQo+ID4gKyAgICAg
+ICAgKiBsYXN0IGNob2ljZS4NCj4gPiAgICAgICAgICAqDQo+ID4gICAgICAgICAgKiBXQVJOSU5H
+OiBlTU1DIHJ1bGVzIGFyZSBOT1QgdGhlIHNhbWUgYXMgU0QgRERSDQo+ID4gICAgICAgICAgKi8N
+Cj4gPiAtICAgICAgIGlmIChjYXJkLT5tbWNfYXZhaWxfdHlwZSAmIEVYVF9DU0RfQ0FSRF9UWVBF
+X0REUl8xXzJWKSB7DQo+ID4gLSAgICAgICAgICAgICAgIGVyciA9IF9fbW1jX3NldF9zaWduYWxf
+dm9sdGFnZShob3N0LA0KPiA+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgTU1DX1NJ
+R05BTF9WT0xUQUdFXzEyMCk7DQo+ID4gLSAgICAgICAgICAgICAgIGlmIChlcnIpDQo+ID4gLSAg
+ICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIGVycjsNCj4gPiAtICAgICAgIH0NCj4gPiArICAg
+ICAgIGVyciA9IC1FSU5WQUw7DQo+ID4gKyAgICAgICBpZiAoY2FyZC0+bW1jX2F2YWlsX3R5cGUg
+JiBFWFRfQ1NEX0NBUkRfVFlQRV9ERFJfMV8yVikNCj4gPiArICAgICAgICAgICAgICAgZXJyID0g
+X19tbWNfc2V0X3NpZ25hbF92b2x0YWdlKGhvc3QsDQo+ID4gKyBNTUNfU0lHTkFMX1ZPTFRBR0Vf
+MTIwKTsNCj4gPg0KPiA+IC0gICAgICAgbW1jX3NldF90aW1pbmcoaG9zdCwgTU1DX1RJTUlOR19N
+TUNfRERSNTIpOw0KPiA+ICsgICAgICAgaWYgKGVyciAmJiAoY2FyZC0+bW1jX2F2YWlsX3R5cGUg
+Jg0KPiBFWFRfQ1NEX0NBUkRfVFlQRV9ERFJfMV84VikpDQo+ID4gKyAgICAgICAgICAgICAgIGVy
+ciA9IF9fbW1jX3NldF9zaWduYWxfdm9sdGFnZShob3N0LA0KPiA+ICsgTU1DX1NJR05BTF9WT0xU
+QUdFXzE4MCk7DQo+ID4gKw0KPiA+ICsgICAgICAgLyogbWFrZSBzdXJlIHZjY3EgaXMgMy4zdiBh
+ZnRlciBzd2l0Y2hpbmcgZGlzYXN0ZXIgKi8NCj4gPiArICAgICAgIGlmIChlcnIpDQo+ID4gKyAg
+ICAgICAgICAgICAgIGVyciA9IF9fbW1jX3NldF9zaWduYWxfdm9sdGFnZShob3N0LA0KPiA+ICsg
+TU1DX1NJR05BTF9WT0xUQUdFXzMzMCk7DQo+ID4gKw0KPiA+ICsgICAgICAgaWYgKCFlcnIpDQo+
+ID4gKyAgICAgICAgICAgICAgIG1tY19zZXRfdGltaW5nKGhvc3QsIE1NQ19USU1JTkdfTU1DX0RE
+UjUyKTsNCj4gPg0KPiA+ICAgICAgICAgcmV0dXJuIGVycjsNCj4gPiAgfQ0KPiA+IC0tDQo+ID4g
+MS43LjEwLjQNCj4gPg0K
