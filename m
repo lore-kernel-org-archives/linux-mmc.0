@@ -1,83 +1,138 @@
-From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Subject: Re: [PATCH 1/1] mmc: core: Use regulator_get_voltage() if OCR mask
- is empty.
-Date: Fri, 15 Aug 2014 09:48:43 +0200
-Message-ID: <53EDBB5B.4000209@collabora.co.uk>
-References: <1408019940-11153-1-git-send-email-javier.martinez@collabora.co.uk>	<CAD7vxxKvzxvmzgx=S5ZZn54ts99ca2TqBYFvY1SXZQZDkhjq3w@mail.gmail.com>	<20140814151958.GY17528@sirena.org.uk> <CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: check EXT_CSD_PARTITION_SETTING_COMPLETED before
+ creating partitions
+Date: Fri, 15 Aug 2014 10:17:10 +0200
+Message-ID: <CAPDyKFp2ekmucHVzMWxeKfyTmuFKTXAYwUEpL5QxvEh8AjFopg@mail.gmail.com>
+References: <53C7E45E.2060102@neotion.com>
+	<CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>
+	<53EB2DC3.2080002@neotion.com>
+	<CAPDyKFpjYqVUZ8GHB76gD8pOx_eMg9ecvbWrMEfbhEd5ffk7mw@mail.gmail.com>
+	<53ECB95F.2030207@neotion.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Tim Kryger <tim.kryger@gmail.com>, Mark Brown <broonie@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <53ECB95F.2030207@neotion.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hello Tim,
-
-On 08/15/2014 07:36 AM, Tim Kryger wrote:
-> On Thu, Aug 14, 2014 at 8:19 AM, Mark Brown <broonie@kernel.org> wrote:
-> 
->> Right, there's two things going on here.  One is that as you describe we
->> shouldn't be putting constraints in .dtsi files if we don't know they're
->> OK for a given board.  The other thing is that on this particular board
->> it turns out that there's no support for varying the voltages at all so
->> it doesn't make sense to have to specify a range, there's only one value
->> anyway so the software really should be able to figure out that fixed
->> value all by itself.
-> 
-> If constraints are truly irrelevant when the voltage supplied to
-> consumers is fixed, why doesn't regulator_list_voltage honor this
-> exemption and skip the voltage filtering that uses (potentially
-> unspecified) constraints when output is entirely determined by a
-> parent (or grandparent) supply that can't change its voltage?
+On 14 August 2014 15:27, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.co=
+m> wrote:
+> Le 14/08/2014 13:46, Ulf Hansson a =C3=A9crit :
+>> On 13 August 2014 11:20, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion=
+=2Ecom> wrote:
+>>> Le 13/08/2014 10:36, Ulf Hansson a =C3=A9crit :
+>>>> On 17 July 2014 16:57, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion=
+=2Ecom> wrote:
+>>>>> Create MMC general purpose partitions only if
+>>>>> EXT_CSD_PARTITION_SETTING_COMPLETED bit is set.
+>>>>> Some tools may set general purpose partition size(s) but fail or =
+stop
+>>>>> without finalize.
+>>>>> Another case is to set invalid partition size(s).
+>>>>>
+>>>>> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
+>>>>> ---
+>>>>>  drivers/mmc/core/mmc.c  |   15 +++++++++++----
+>>>>>  include/linux/mmc/mmc.h |    2 ++
+>>>>>  2 files changed, 13 insertions(+), 4 deletions(-)
+>>>>>
+>>>>> From commit b6603fe574af289dbe9eb9fb4c540bca04f5a053 in master li=
+nux tree.
+>>>>>
+>>>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>>>>> index 793c6f7..b9fe211 100644
+>>>>> --- a/drivers/mmc/core/mmc.c
+>>>>> +++ b/drivers/mmc/core/mmc.c
+>>>>> @@ -471,10 +471,17 @@ static int mmc_read_ext_csd(struct mmc_card=
+ *card, u8 *ext_csd)
+>>>>>                                 ext_csd[EXT_CSD_GP_SIZE_MULT + id=
+x * 3];
+>>>>>                                 part_size *=3D (size_t)(hc_erase_=
+grp_sz *
+>>>>>                                         hc_wp_grp_sz);
+>>>>> -                               mmc_part_add(card, part_size << 1=
+9,
+>>>>> -                                       EXT_CSD_PART_CONFIG_ACC_G=
+P0 + idx,
+>>>>> -                                       "gp%d", idx, false,
+>>>>> -                                       MMC_BLK_DATA_AREA_GP);
+>>>>> +                               if (ext_csd[EXT_CSD_PARTITION_SET=
+TING_COMPLETED] &
+>>>>> +                               EXT_CSD_PART_SETTING_COMPLETED) {
+>>>>
+>>>> Some minor comments here.
+>>>>
+>>>> I think you could move this if statement up and into the previous =
+"if"
+>>>> where we check for "ext_csd[EXT_CSD_PARTITION_SUPPORT] &
+>>>> EXT_CSD_PART_SUPPORT_PART_EN".
+>>>>
+>>>> Additionally, please run checkpatch.
+>>>>
+>>>> Kind regards
+>>>> Uffe
+>>>
+>>> Hello,
+>>>
+>>> I didn't put the if statement above to warn user in case of bad par=
+titioning.
+>>> I don't want the kernel to silently ignore this error.
+>>
+>> Fair enough.
+>>
+>> Still I am wondering whether hc_erase_grp_sz, hc_wp_grp_sz and
+>> enhanced_area_en should be updated if
+>> EXT_CSD_PARTITION_SETTING_COMPLETED isn't set.  That's the case in
+>> your patch.
 >
+> I was focused on partitions and I didn't pay attention on enhanced ar=
+ea.
+>
+> JEDEC says that partitioning implies :
+> * Configure general purpose partitions attributes and sizes
+> * Configure enhanced user area offset, attributes and size
+>
+> and finally set EXT_CSD_PARTITION_SETTING_COMPLETED.
+>
+> Thus these two parts must checks for setting completed before
+> computing values.
+>
+> Plus, "enhanced_area_en" attribute is set whether or not there is an
+> enhanced area defined. I looked at the code, and the only usage of it
+> is to set EXT_CSD_ERASE_GROUP_DEF and compute erase size again.
+> I suggest using "partition_setting_completed" identifier which is com=
+mon
+> to the two functions and requires EXT_CSD_ERASE_GROUP_DEF to be set.
+>
+> If you're ok with that, I'll submit another patch.
 
-I had a similar thought before and proposed the patch:
+Seems reasonable. Please send a v2.
 
-"[RFC 3/5] regulator: core: Only apply constraints if available on list
-voltage" [0].
+Kind regards
+Uffe
 
-But then Mark explained to me that this is wrong since in that case
-regulator_list_voltage() will list voltages that can't really be set [1].
-
-But now I wonder why regulator_list_voltage() even list the voltage for
-fixed regulators (desc->fixed_uV) since they don't have the ability to
-vary voltage. The regulator_list_voltage() documentation says:
-
-"Returns a voltage that can be passed to @regulator_set_voltage(), zero if
-this selector code can't be used on this system, or a negative errno."
-
-But in the case of fixed regulators, it is actually listing a voltage that
-can't be selected. Although regulator_set_voltage() checks if the desired
-voltage is equal to the regulator min_uV and max_uV and just exits in that
-case, it feels wrong to list the voltage for a fixed regulators.
-
-regulator_list_voltage() only works because of the way we define the
-generic fixed voltage regulators and that is assuming that
-"regulator-min-microvolt" and "regulator-max-microvolt" DT properties
-being the same means that the regulator is fixed.
-
-This is kind of unfortunate, maybe it would had been better to define it
-explicitly using a "regulator-fixed-microvolt" or something. If we had
-such a DT property, then constraints wouldn't had been set for fixed
-regulators and regulator_list_voltage() wouldn't list its voltage neither.
-
-> It seems odd to make callers be the ones to handle this subtlety.
-> 
-
-If regulator_list_voltage() didn't list the voltage for fixed regulators,
-then this subtlety should had been handled by callers before but they
-didn't because they rely on regulator_list_voltage() to always return a
-voltage even for fixed regulators.
-
-> Thanks,
-> Tim Kryger
-> 
-
-Best regards,
-Javier
-
-[0]: https://lkml.org/lkml/2014/7/29/418
-[1]: https://lkml.org/lkml/2014/7/29/453
+>
+>
+> Best regards
+> Gr=C3=A9gory Soutad=C3=A9
+>
+>>
+>>>
+>>> checkpatch has been run before sending this patch, I know there are=
+ two lines
+>>> with two extra characters, but names used here are quite long. I ho=
+pe it will
+>>> not block upstream inclusion.
+>>
+>> The mmc_read_ext_csd() is not one of the nicest piece of code, but f=
+or
+>> sure we should not move on making it worse. If you need to move code
+>> into separate function to prevent checkpatch warnings, please do so.
+>>
+>> Kind regards
+>> Uffe
+>>
+>
