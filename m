@@ -1,177 +1,62 @@
-From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?=
-	<u.kleine-koenig@pengutronix.de>
-Subject: Re: [PATCH v4] mmc: implement Driver Stage Register handling
-Date: Fri, 15 Aug 2014 20:42:44 +0200
-Message-ID: <20140815184244.GJ5134@pengutronix.de>
-References: <1408091882-32123-1-git-send-email-u.kleine-koenig@pengutronix.de>
- <CAPDyKFp=1BDeZUC-GNLLT+BK0gqisQ0mP8x4chu43F2pKujGsg@mail.gmail.com>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH 1/1] mmc: core: Use regulator_get_voltage() if OCR mask
+ is empty.
+Date: Fri, 15 Aug 2014 23:29:14 +0100
+Message-ID: <20140815222914.GM17528@sirena.org.uk>
+References: <1408019940-11153-1-git-send-email-javier.martinez@collabora.co.uk>
+ <CAD7vxxKvzxvmzgx=S5ZZn54ts99ca2TqBYFvY1SXZQZDkhjq3w@mail.gmail.com>
+ <20140814151958.GY17528@sirena.org.uk>
+ <CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>
+ <53EDBB5B.4000209@collabora.co.uk>
+ <CAD7vxxKvZCxnDpPn3X1Uch_6m7Hfj_vApNfxUS2Wex9BjjBUdg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from metis.ext.pengutronix.de ([92.198.50.35]:44408 "EHLO
-	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751138AbaHOSmy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Aug 2014 14:42:54 -0400
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="l0GZ4SE/qP5NVpaF"
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFp=1BDeZUC-GNLLT+BK0gqisQ0mP8x4chu43F2pKujGsg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <CAD7vxxKvZCxnDpPn3X1Uch_6m7Hfj_vApNfxUS2Wex9BjjBUdg@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Tim Kryger <tim.kryger@gmail.com>
+Cc: Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Sascha Hauer <kernel@pengutronix.de>, Markus Niebel <Markus.Niebel@tq-group.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>
 
-Hello Ulf,
 
-On Fri, Aug 15, 2014 at 11:05:39AM +0200, Ulf Hansson wrote:
-> On 15 August 2014 10:38, Uwe Kleine-K=F6nig
-> <u.kleine-koenig@pengutronix.de> wrote:
-> > From: Sascha Hauer <s.hauer@pengutronix.de>
-> >
-> > Some eMMC and SD cards implement a DSR register that allows to tune
-> > raise/fall times and drive strength of the CMD and DATA outputs.
-> > The values to use depend on the card in use and the host.
-> > It might be needed to reduce the drive strength to prevent voltage =
-peaks
-> > above the host's specification.
-> >
-> > Implement a 'dsr' devicetree property that allows to specify the va=
-lue
-> > to set the DSR to. For non-dt setups the new members of mmc_host ca=
-n be
-> > set by board code.
-> >
-> > This patch was initially authored by Sascha Hauer. It contains
-> > improvements authored by Markus Niebel and Uwe Kleine-K=F6nig.
-> >
-> > Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
-> > Signed-off-by: Markus Niebel <Markus.Niebel@tq-group.com>
-> > Signed-off-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
-> > ---
-> > Changes since v3:
-> >
-> >  - fix a compiler warning about err not being used.
-> >  - clearified valid range. I didn't write "16-bit value" because th=
-e
-> >    value is still expected to be written as 32-bit value in the dev=
-ice
-> >    tree.
-> >  - make host->dsr an u32, which simplified parsing the device tree =
-and
-> >    also makes casting in mmc_set_dsr unnecessary.
-> > ---
-> >  Documentation/devicetree/bindings/mmc/mmc.txt |  2 ++
-> >  drivers/mmc/core/host.c                       |  8 ++++++++
-> >  drivers/mmc/core/mmc.c                        |  8 ++++++++
-> >  drivers/mmc/core/mmc_ops.c                    | 20 +++++++++++++++=
-+++++
-> >  drivers/mmc/core/mmc_ops.h                    |  1 +
-> >  drivers/mmc/core/sd.c                         |  8 ++++++++
-> >  include/linux/mmc/card.h                      |  3 ++-
-> >  include/linux/mmc/host.h                      |  3 +++
-> >  8 files changed, 52 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Docume=
-ntation/devicetree/bindings/mmc/mmc.txt
-> > index 3c18001dfd5d..a3fe21f2b709 100644
-> > --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> > +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> > @@ -40,6 +40,8 @@ Optional properties:
-> >  - mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
-> >  - mmc-hs400-1_8v: eMMC HS400 mode(1.8V I/O) is supported
-> >  - mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
-> > +- dsr: Value the card's (optional) Driver Stage Register (DSR) sho=
-uld be
-> > +  programmed with. Valid range: [0 .. 0xffff].
-> >
-> >  *NOTE* on CD and WP polarity. To use common for all SD/MMC host co=
-ntrollers line
-> >  polarity properties, we have to fix the meaning of the "normal" an=
-d "inverted"
-> > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> > index 95cceae96944..6442eecb672e 100644
-> > --- a/drivers/mmc/core/host.c
-> > +++ b/drivers/mmc/core/host.c
-> > @@ -452,6 +452,14 @@ int mmc_of_parse(struct mmc_host *host)
-> >         if (of_find_property(np, "mmc-hs400-1_2v", &len))
-> >                 host->caps2 |=3D MMC_CAP2_HS400_1_2V | MMC_CAP2_HS2=
-00_1_2V_SDR;
-> >
-> > +       host->dsr_req =3D of_property_read_u32(np, "dsr", &host->ds=
-r);
-> > +       if (host->dsr_req && (host->dsr & ~0xffff)) {
->=20
-> This doesn't look correct.
-> I guess what you want is: if (!host->dsr_req && (host->dsr & ~0xffff)=
-)
-Ah, you're right. I thought that of_property_read_u32 returned true if
-it worked and false if not. But it returns 0 for success and -ESOMETHIN=
-G
-otherwise.
+--l0GZ4SE/qP5NVpaF
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-So I want host->dsr_req =3D !of_property_read_u32(np, "dsr", &host->dsr=
-);
+On Fri, Aug 15, 2014 at 07:19:41AM -0700, Tim Kryger wrote:
 
-I now have some working hardware again, will test again and send an v5.
+> That is a little different from my suggestion where the constraints
+> check is skipped when the regulator output is fixed.  It effectively
+> does this now when the regulator itself provides the fixed voltage.
+> However, the checks aren't skipped when that fixed voltage is coming
+> from an ancestor.  Why the difference?
 
->=20
-> > +               dev_err(host->parent,
-> > +                       "device tree specified broken value for DSR=
-: 0x%x, ignoring\n",
-> > +                       host->dsr);
-> > +               host->dsr_req =3D 0;
-> > +       }
-> > +
-> >         return 0;
-> >
-> >  out:
-> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> > index 793c6f7ddb04..fdc1ac1360c4 100644
-> > --- a/drivers/mmc/core/mmc.c
-> > +++ b/drivers/mmc/core/mmc.c
-> > @@ -162,6 +162,7 @@ static int mmc_decode_csd(struct mmc_card *card=
-)
-> >         csd->read_partial =3D UNSTUFF_BITS(resp, 79, 1);
-> >         csd->write_misalign =3D UNSTUFF_BITS(resp, 78, 1);
-> >         csd->read_misalign =3D UNSTUFF_BITS(resp, 77, 1);
-> > +       csd->dsr_imp =3D UNSTUFF_BITS(resp, 76, 1);
-> >         csd->r2w_factor =3D UNSTUFF_BITS(resp, 26, 3);
-> >         csd->write_blkbits =3D UNSTUFF_BITS(resp, 22, 4);
-> >         csd->write_partial =3D UNSTUFF_BITS(resp, 21, 1);
-> > @@ -1273,6 +1274,13 @@ static int mmc_init_card(struct mmc_host *ho=
-st, u32 ocr,
-> >         }
-> >
-> >         /*
-> > +        * handling only for cards supporting DSR and hosts request=
-ing
-> > +        * DSR configuration
-> > +        */
-> > +       if (card->csd.dsr_imp && host->dsr_req)
->=20
-> if (card->csd.dsr_imp && !host->dsr_req)
-With the above change my line is correct.
+Nobody has written suitable code, and please bear in mind that even if
+the code is written there will probably be cases where it's too
+expensive for whatever reason so Javier's change is going to be needed.
 
-> >  struct mmc_ext_csd {
-> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> > index 7960424d0bc0..8acaebd866a7 100644
-> > --- a/include/linux/mmc/host.h
-> > +++ b/include/linux/mmc/host.h
-> > @@ -319,6 +319,7 @@ struct mmc_host {
-> >  #ifdef CONFIG_MMC_DEBUG
-> >         unsigned int            removed:1;      /* host is being re=
-moved */
-> >  #endif
-> > +       unsigned int            dsr_req:1;      /* DSR is requested=
- for Host */
->=20
-> Should be an int instead.
-I don't care much, can change to int.
+--l0GZ4SE/qP5NVpaF
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
-Best regards
-Uwe
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
 
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig        =
-    |
-Industrial Linux Solutions                 | http://www.pengutronix.de/=
-  |
+iQIcBAEBAgAGBQJT7om3AAoJELSic+t+oim9h3IP/R1CiGNSrZBydfF6pdNiMt5B
+Z8vjp/9GOdQkZqKc/xgXZc6Gki8n0g6k6VpC+/EPljalIvmIwS3b/Ln94Eu9PhcT
+0kp0WU+zVYkCZ+jX0caIt/O0OIC0yWAsf0VK/OMpcFXQbQYfZRQgeeItYQ/lC8eJ
+nJ18yHXD5eu7dw2CXJtt9jGDkOktC67knVtZHC50gYrEgtMoGG/lxHq0muGvByHT
+InKV339duP9hiNehPotRnuQ50ZM7u4RdWuRlGGOt33s2q7vk876I51cxrjJS0X6v
+zA//XD5QgdjyNhbIe1Q4N04mv+Un240EpqOYl0QdR6FuC/Wg7N/h0j4FSgdLIRCc
+IGKeLE+qRg/j28MQdjxX7dwRJqIv1LWd4WpHFkionkPJoLBcDA/U1N4/EJAxgh6M
+JmSn/g3GVIEEYc4EhVzESctPReGgAmntRBiHDHsW8Dwx2zRN/9jaCwi9vYuIDMke
+4ktZJFHLpmfTeJ6iPt3v4NGRxxglDAGNFrra/keiRwZcpLCoSugERaQkpOmcAyt3
+BrzrgslYLAQS+ubzp/Em5DqwD9Ygz0YdsRhSWCG6jR2JoKMKxJzOy3SFf4qyc1bv
+h05oU6pySwgp5qG8ZOv7SR7d6e8ZxHhr0WvDT4ovPy3ssMMN1S2Kyjn2RPGNWC8S
+n7xCUoG0TJNRH5FIyW1E
+=C0ZE
+-----END PGP SIGNATURE-----
+
+--l0GZ4SE/qP5NVpaF--
