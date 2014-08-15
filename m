@@ -1,40 +1,56 @@
-From: Peter Griffin <peter.griffin@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-pxav3: set_uhs_signaling is initialized
- twice differently
-Date: Fri, 15 Aug 2014 14:05:50 +0100
-Message-ID: <20140815130550.GA20932@griffinp-ThinkPad-X1-Carbon-2nd>
-References: <1408107342-20318-1-git-send-email-peter.griffin@linaro.org>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH v2 1/2] mmc: dw_mmc: Add dependency on DMA
+Date: Fri, 15 Aug 2014 19:00:58 +0530
+Message-ID: <CAGOxZ52uHbp-Ff6+ZK5v1-zcY3h9oSSsPvLh2ieCctYe0_irgA@mail.gmail.com>
+References: <1408034728-4952-1-git-send-email-abrestic@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f43.google.com ([74.125.82.43]:59637 "EHLO
-	mail-wg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751076AbaHONFz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Aug 2014 09:05:55 -0400
-Received: by mail-wg0-f43.google.com with SMTP id l18so2293052wgh.14
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Aug 2014 06:05:54 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <1408107342-20318-1-git-send-email-peter.griffin@linaro.org>
+Received: from mail-yk0-f174.google.com ([209.85.160.174]:63734 "EHLO
+	mail-yk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750884AbaHONbj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Aug 2014 09:31:39 -0400
+In-Reply-To: <1408034728-4952-1-git-send-email-abrestic@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, zhangfei.gao@marvell.com, prakity@marvell.com, rmk+kernel@arm.linux.org.uk
-Cc: patches@linaro.org, lee.jones@linaro.org
+To: Andrew Bresticker <abrestic@chromium.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Doug Anderson <dianders@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>
 
-Hi,
+Hi Andrew,
 
-> This means that uhs is currently broken for this platform currently, as pxav3
-> has some special constriants which means it can't use the generic callback.
-> 
-> This happened in
-> commit 96d7b78cfc2f ("mmc: sdhci: convert sdhci_set_uhs_signaling() into a library function")
-> commit a702c8abb2a9 ("mmc: host: split up sdhci-pxa, create sdhci-pxav3.c")'
-> 
-> Fix this and hopefully prevent it happening in the future by ensuring named
-> initialisers always follow the declaration order in the structure definition.
+On Thu, Aug 14, 2014 at 10:15 PM, Andrew Bresticker
+<abrestic@chromium.org> wrote:
+> The dw_mmc drivers rely on the DMA API, so update the Kconfig entry
+> to depend on HAS_DMA.  Since the drivers should build on any platform
+> with DMA, allow the driver to compile tested on non-ARC/ARM platforms.
+>
+> Signed-off-by: Andrew Bresticker <abrestic@chromium.org>
+> ---
+Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
 
-Or it would if I actually committed the change. Sorry for the noise, please ignore this patch.
-I've just sent a V3.
+>  drivers/mmc/host/Kconfig | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index a565254..385674b 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -563,7 +563,8 @@ config SDH_BFIN_MISSING_CMD_PULLUP_WORKAROUND
+>
+>  config MMC_DW
+>         tristate "Synopsys DesignWare Memory Card Interface"
+> -       depends on ARC || ARM
+> +       depends on HAS_DMA
+> +       depends on ARC || ARM || COMPILE_TEST
+>         help
+>           This selects support for the Synopsys DesignWare Mobile Storage IP
+>           block, this provides host support for SD and MMC interfaces, in both
+> --
+> 2.1.0.rc2.206.gedb03e5
+>
 
-regards,
 
-Peter.
+
+-- 
+Regards,
+Alim
