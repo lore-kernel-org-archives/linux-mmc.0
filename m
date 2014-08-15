@@ -1,138 +1,65 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: check EXT_CSD_PARTITION_SETTING_COMPLETED before
- creating partitions
-Date: Fri, 15 Aug 2014 10:17:10 +0200
-Message-ID: <CAPDyKFp2ekmucHVzMWxeKfyTmuFKTXAYwUEpL5QxvEh8AjFopg@mail.gmail.com>
-References: <53C7E45E.2060102@neotion.com>
-	<CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>
-	<53EB2DC3.2080002@neotion.com>
-	<CAPDyKFpjYqVUZ8GHB76gD8pOx_eMg9ecvbWrMEfbhEd5ffk7mw@mail.gmail.com>
-	<53ECB95F.2030207@neotion.com>
+From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?=
+	<u.kleine-koenig@pengutronix.de>
+Subject: Re: [PATCH v3] mmc: implement Driver Stage Register handling
+Date: Fri, 15 Aug 2014 10:21:48 +0200
+Message-ID: <20140815082148.GF5134@pengutronix.de>
+References: <1407944656-14592-1-git-send-email-u.kleine-koenig@pengutronix.de>
+ <CAPDyKFqKVvwFi+JoOG-O1jznOB1UyhQW_ovb_N=+G_FtoqXQXA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <53ECB95F.2030207@neotion.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:43339 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750981AbaHOIWE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Aug 2014 04:22:04 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqKVvwFi+JoOG-O1jznOB1UyhQW_ovb_N=+G_FtoqXQXA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Sascha Hauer <kernel@pengutronix.de>, Markus Niebel <Markus.Niebel@tq-group.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>
 
-On 14 August 2014 15:27, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.co=
-m> wrote:
-> Le 14/08/2014 13:46, Ulf Hansson a =C3=A9crit :
->> On 13 August 2014 11:20, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion=
-=2Ecom> wrote:
->>> Le 13/08/2014 10:36, Ulf Hansson a =C3=A9crit :
->>>> On 17 July 2014 16:57, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion=
-=2Ecom> wrote:
->>>>> Create MMC general purpose partitions only if
->>>>> EXT_CSD_PARTITION_SETTING_COMPLETED bit is set.
->>>>> Some tools may set general purpose partition size(s) but fail or =
-stop
->>>>> without finalize.
->>>>> Another case is to set invalid partition size(s).
->>>>>
->>>>> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
->>>>> ---
->>>>>  drivers/mmc/core/mmc.c  |   15 +++++++++++----
->>>>>  include/linux/mmc/mmc.h |    2 ++
->>>>>  2 files changed, 13 insertions(+), 4 deletions(-)
->>>>>
->>>>> From commit b6603fe574af289dbe9eb9fb4c540bca04f5a053 in master li=
-nux tree.
->>>>>
->>>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>>>> index 793c6f7..b9fe211 100644
->>>>> --- a/drivers/mmc/core/mmc.c
->>>>> +++ b/drivers/mmc/core/mmc.c
->>>>> @@ -471,10 +471,17 @@ static int mmc_read_ext_csd(struct mmc_card=
- *card, u8 *ext_csd)
->>>>>                                 ext_csd[EXT_CSD_GP_SIZE_MULT + id=
-x * 3];
->>>>>                                 part_size *=3D (size_t)(hc_erase_=
-grp_sz *
->>>>>                                         hc_wp_grp_sz);
->>>>> -                               mmc_part_add(card, part_size << 1=
-9,
->>>>> -                                       EXT_CSD_PART_CONFIG_ACC_G=
-P0 + idx,
->>>>> -                                       "gp%d", idx, false,
->>>>> -                                       MMC_BLK_DATA_AREA_GP);
->>>>> +                               if (ext_csd[EXT_CSD_PARTITION_SET=
-TING_COMPLETED] &
->>>>> +                               EXT_CSD_PART_SETTING_COMPLETED) {
->>>>
->>>> Some minor comments here.
->>>>
->>>> I think you could move this if statement up and into the previous =
-"if"
->>>> where we check for "ext_csd[EXT_CSD_PARTITION_SUPPORT] &
->>>> EXT_CSD_PART_SUPPORT_PART_EN".
->>>>
->>>> Additionally, please run checkpatch.
->>>>
->>>> Kind regards
->>>> Uffe
->>>
->>> Hello,
->>>
->>> I didn't put the if statement above to warn user in case of bad par=
-titioning.
->>> I don't want the kernel to silently ignore this error.
->>
->> Fair enough.
->>
->> Still I am wondering whether hc_erase_grp_sz, hc_wp_grp_sz and
->> enhanced_area_en should be updated if
->> EXT_CSD_PARTITION_SETTING_COMPLETED isn't set.  That's the case in
->> your patch.
->
-> I was focused on partitions and I didn't pay attention on enhanced ar=
-ea.
->
-> JEDEC says that partitioning implies :
-> * Configure general purpose partitions attributes and sizes
-> * Configure enhanced user area offset, attributes and size
->
-> and finally set EXT_CSD_PARTITION_SETTING_COMPLETED.
->
-> Thus these two parts must checks for setting completed before
-> computing values.
->
-> Plus, "enhanced_area_en" attribute is set whether or not there is an
-> enhanced area defined. I looked at the code, and the only usage of it
-> is to set EXT_CSD_ERASE_GROUP_DEF and compute erase size again.
-> I suggest using "partition_setting_completed" identifier which is com=
-mon
-> to the two functions and requires EXT_CSD_ERASE_GROUP_DEF to be set.
->
-> If you're ok with that, I'll submit another patch.
+Hello Ulf,
 
-Seems reasonable. Please send a v2.
+On Thu, Aug 14, 2014 at 11:26:28AM +0200, Ulf Hansson wrote:
+> > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> > index 95cceae96944..52e83f389428 100644
+> > --- a/drivers/mmc/core/host.c
+> > +++ b/drivers/mmc/core/host.c
+> > @@ -452,6 +452,14 @@ int mmc_of_parse(struct mmc_host *host)
+> >         if (of_find_property(np, "mmc-hs400-1_2v", &len))
+> >                 host->caps2 |=3D MMC_CAP2_HS400_1_2V | MMC_CAP2_HS2=
+00_1_2V_SDR;
+> >
+> > +       if (of_find_property(np, "dsr", &len)) {
+> > +               u32 tmp;
+> > +
+> > +               of_property_read_u32(np, "dsr", &tmp);
+> > +               host->dsr_req =3D 1;
+> > +               host->dsr =3D (u16)tmp;
+> > +       }
+> > +
+>=20
+> Let's simplify the above with just:
+> of_property_read_u16(np, "dsr", &host->dsr);
+The downside here is that the syntax changes when using
+of_property_read_u16. Instead of
 
-Kind regards
-Uffe
+	dsr =3D <0x100>
 
->
->
-> Best regards
-> Gr=C3=A9gory Soutad=C3=A9
->
->>
->>>
->>> checkpatch has been run before sending this patch, I know there are=
- two lines
->>> with two extra characters, but names used here are quite long. I ho=
-pe it will
->>> not block upstream inclusion.
->>
->> The mmc_read_ext_csd() is not one of the nicest piece of code, but f=
-or
->> sure we should not move on making it worse. If you need to move code
->> into separate function to prevent checkpatch warnings, please do so.
->>
->> Kind regards
->> Uffe
->>
->
+the following must be written then:
+
+	dsr =3D /bits/ 16 <0x100>;
+
+so I'd prefer to stay with of_property_read_u32. The block can still be
+simplified. Will fix that in v4.
+
+Best regards
+Uwe
+
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig        =
+    |
+Industrial Linux Solutions                 | http://www.pengutronix.de/=
+  |
