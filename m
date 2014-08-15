@@ -1,40 +1,44 @@
-From: Tim Kryger <tim.kryger@gmail.com>
-Subject: Re: [PATCH 1/1] mmc: core: Use regulator_get_voltage() if OCR mask is empty.
-Date: Thu, 14 Aug 2014 22:36:18 -0700
-Message-ID: <CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>
-References: <1408019940-11153-1-git-send-email-javier.martinez@collabora.co.uk>
-	<CAD7vxxKvzxvmzgx=S5ZZn54ts99ca2TqBYFvY1SXZQZDkhjq3w@mail.gmail.com>
-	<20140814151958.GY17528@sirena.org.uk>
+From: <rogerable@realtek.com>
+Subject: [PATCH 0/2] mmc: rtsx: fix incorrect last byte in R2 response
+Date: Fri, 15 Aug 2014 14:05:59 +0800
+Message-ID: <1408082761-15333-1-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f175.google.com ([209.85.214.175]:57103 "EHLO
-	mail-ob0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750778AbaHOFgT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Aug 2014 01:36:19 -0400
-In-Reply-To: <20140814151958.GY17528@sirena.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, Dan Carpenter <dan.carpenter@oracle.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>
-Cc: Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-On Thu, Aug 14, 2014 at 8:19 AM, Mark Brown <broonie@kernel.org> wrote:
+From: Roger Tseng <rogerable@realtek.com>
 
-> Right, there's two things going on here.  One is that as you describe we
-> shouldn't be putting constraints in .dtsi files if we don't know they're
-> OK for a given board.  The other thing is that on this particular board
-> it turns out that there's no support for varying the voltages at all so
-> it doesn't make sense to have to specify a range, there's only one value
-> anyway so the software really should be able to figure out that fixed
-> value all by itself.
+(The original patch for PCI and USB was splitted here to make it easier for
+stable tree.)
 
-If constraints are truly irrelevant when the voltage supplied to
-consumers is fixed, why doesn't regulator_list_voltage honor this
-exemption and skip the voltage filtering that uses (potentially
-unspecified) constraints when output is entirely determined by a
-parent (or grandparent) supply that can't change its voltage?
+Current code erroneously fill the last byte of R2 response with an undefined
+value. In addition, the controller actually 'offloads' the last byte
+(CRC7, end bit) while receiving R2 response and thus it's impossible to get the
+actual value. This could cause mmc stack to obtain inconsistent CID from the
+same card after resume and misidentify it as a different card.
 
-It seems odd to make callers be the ones to handle this subtlety.
+Fix by assigning dummy CRC and end bit: {7'b0, 1} = 0x1 to the last byte of R2.
 
-Thanks,
-Tim Kryger
+Roger Tseng (2):
+  mmc: rtsx_pci_sdmmc: fix incorrect last byte in R2 response
+  mmc: rtsx_usb_sdmmc: fix incorrect last byte in R2 response
+
+ drivers/mmc/host/rtsx_pci_sdmmc.c |    7 +++++++
+ drivers/mmc/host/rtsx_usb_sdmmc.c |    7 +++++++
+ 2 files changed, 14 insertions(+)
+
+-- 
+1.7.10.4
