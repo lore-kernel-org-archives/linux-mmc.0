@@ -1,16 +1,16 @@
 From: Alim Akhtar <alim.akhtar@gmail.com>
-Subject: Re: [PATCH v2 1/2] mmc: dw_mmc: Add dependency on DMA
-Date: Fri, 15 Aug 2014 19:00:58 +0530
-Message-ID: <CAGOxZ52uHbp-Ff6+ZK5v1-zcY3h9oSSsPvLh2ieCctYe0_irgA@mail.gmail.com>
-References: <1408034728-4952-1-git-send-email-abrestic@chromium.org>
+Subject: Re: [PATCH v2 2/2] mmc: dw_mmc: Add support for MIPS
+Date: Fri, 15 Aug 2014 19:02:14 +0530
+Message-ID: <CAGOxZ52wB14=YqjE463p3-0CRWuoDTrbYJ=Q0Mv=hTbkcry8jw@mail.gmail.com>
+References: <1408034728-4952-1-git-send-email-abrestic@chromium.org> <1408034728-4952-2-git-send-email-abrestic@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f174.google.com ([209.85.160.174]:63734 "EHLO
-	mail-yk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750884AbaHONbj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Aug 2014 09:31:39 -0400
-In-Reply-To: <1408034728-4952-1-git-send-email-abrestic@chromium.org>
+Received: from mail-yh0-f46.google.com ([209.85.213.46]:63976 "EHLO
+	mail-yh0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750967AbaHONcz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Aug 2014 09:32:55 -0400
+In-Reply-To: <1408034728-4952-2-git-send-email-abrestic@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Andrew Bresticker <abrestic@chromium.org>
@@ -20,28 +20,25 @@ Hi Andrew,
 
 On Thu, Aug 14, 2014 at 10:15 PM, Andrew Bresticker
 <abrestic@chromium.org> wrote:
-> The dw_mmc drivers rely on the DMA API, so update the Kconfig entry
-> to depend on HAS_DMA.  Since the drivers should build on any platform
-> with DMA, allow the driver to compile tested on non-ARC/ARM platforms.
+> There are upcoming MIPS SoCs with dw_mmc hosts.
 >
 > Signed-off-by: Andrew Bresticker <abrestic@chromium.org>
-> ---
-Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
 
->  drivers/mmc/host/Kconfig | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
+> ---
+>  drivers/mmc/host/Kconfig | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
 > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index a565254..385674b 100644
+> index 385674b..6acc2ab 100644
 > --- a/drivers/mmc/host/Kconfig
 > +++ b/drivers/mmc/host/Kconfig
-> @@ -563,7 +563,8 @@ config SDH_BFIN_MISSING_CMD_PULLUP_WORKAROUND
->
+> @@ -564,7 +564,7 @@ config SDH_BFIN_MISSING_CMD_PULLUP_WORKAROUND
 >  config MMC_DW
 >         tristate "Synopsys DesignWare Memory Card Interface"
-> -       depends on ARC || ARM
-> +       depends on HAS_DMA
-> +       depends on ARC || ARM || COMPILE_TEST
+>         depends on HAS_DMA
+> -       depends on ARC || ARM || COMPILE_TEST
+> +       depends on ARC || ARM || MIPS || COMPILE_TEST
 >         help
 >           This selects support for the Synopsys DesignWare Mobile Storage IP
 >           block, this provides host support for SD and MMC interfaces, in both
