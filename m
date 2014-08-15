@@ -1,60 +1,50 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: tmio: Fix hang during suspend
-Date: Fri, 15 Aug 2014 16:42:33 +0200
-Message-ID: <CAPDyKFpuCyRVJe_oRTukoryDAMK9iN5qoR4VU2wrjnvjMA-+Bg@mail.gmail.com>
-References: <1408029833-6970-1-git-send-email-geert+renesas@glider.be>
+Subject: Re: [PATCH 1/1] mmc: core: Use regulator_get_voltage() if OCR mask is empty.
+Date: Fri, 15 Aug 2014 16:51:38 +0200
+Message-ID: <CAPDyKFpm5nzXp5p0qxDof2NcOML911eYkjPNMsn9a2ttdnW7gQ@mail.gmail.com>
+References: <1408019940-11153-1-git-send-email-javier.martinez@collabora.co.uk>
+	<CAD7vxxKvzxvmzgx=S5ZZn54ts99ca2TqBYFvY1SXZQZDkhjq3w@mail.gmail.com>
+	<20140814151958.GY17528@sirena.org.uk>
+	<CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>
+	<53EDBB5B.4000209@collabora.co.uk>
+	<20140815095528.GH17528@sirena.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1408029833-6970-1-git-send-email-geert+renesas@glider.be>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: Ian Molton <ian.molton@codethink.co.uk>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <20140815095528.GH17528@sirena.org.uk>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Mark Brown <broonie@kernel.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Tim Kryger <tim.kryger@gmail.com>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 14 August 2014 17:23, Geert Uytterhoeven <geert+renesas@glider.be> wrote:
-> On R-Car Gen 2, the SDHI registers cannot be accessed while the SDHI
-> module clock is disabled. Doing so will cause a lock-up.
+On 15 August 2014 11:55, Mark Brown <broonie@kernel.org> wrote:
+> On Fri, Aug 15, 2014 at 09:48:43AM +0200, Javier Martinez Canillas wrote:
 >
-> When suspending, enable the module clock before disabling the SDHI
-> interrupts, and disable the clock again afterwards.
+>> But now I wonder why regulator_list_voltage() even list the voltage for
+>> fixed regulators (desc->fixed_uV) since they don't have the ability to
+>> vary voltage. The regulator_list_voltage() documentation says:
 >
-> This fixes suspend and resume on r8a7791/koelsch.
+> That's because it's very cheap to do and there is a comprehensible thing
+> we can return - if we have to read the voltage that means potentially
+> asking the hardware in an I2C transaction which is not cheap.
+>
+>> > It seems odd to make callers be the ones to handle this subtlety.
+>
+>> If regulator_list_voltage() didn't list the voltage for fixed regulators,
+>> then this subtlety should had been handled by callers before but they
+>> didn't because they rely on regulator_list_voltage() to always return a
+>> voltage even for fixed regulators.
+>
+> There's plenty of potentially variable regulators used in these
+> situations, I expect it's more likely that people were just ignoring the
+> warning since it has no practical effect.
 
-Out of curiosity, are you using CONFIG_PM_RUNTIME to trigger this bug?
+Just wanted to add some input regarding the errors in the mmc case.
+These are of high importance. In principle if you get, "Failed getting
+OCR mask: -22", likely you will be using a wrong OCR mask while
+negotiating the voltage level with the card.
+
+So, somehow we need to address this issue.
 
 Kind regards
 Uffe
-
->
-> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> ---
->  drivers/mmc/host/tmio_mmc_pio.c | 10 ++++++++++
->  1 file changed, 10 insertions(+)
->
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index faf0924e71cb..83192420a7e3 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -1147,8 +1147,18 @@ int tmio_mmc_host_suspend(struct device *dev)
->  {
->         struct mmc_host *mmc = dev_get_drvdata(dev);
->         struct tmio_mmc_host *host = mmc_priv(mmc);
-> +       struct tmio_mmc_data *pdata = host->pdata;
-> +
-> +       if (pdata->clk_enable) {
-> +               unsigned int f;
-> +               pdata->clk_enable(host->pdev, &f);
-> +       }
->
->         tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
-> +
-> +       if (pdata->clk_disable)
-> +               pdata->clk_disable(host->pdev);
-> +
->         return 0;
->  }
->  EXPORT_SYMBOL(tmio_mmc_host_suspend);
-> --
-> 1.9.1
->
