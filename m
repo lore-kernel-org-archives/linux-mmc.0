@@ -1,45 +1,56 @@
-From: "GVA Abogados." <o.nyvlt@post.cz>
-Subject: Transaction XLK-14-TTF/ESP.
-Date: Fri, 15 Aug 2014 15:36:07 +0200
-Message-ID: <e67c722c0a1c9ab2e433f8853687c1dc__38120.426683645$1408110904$gmane$org@i-net.ro>
-Reply-To: gvaintencia@aim.com
+From: Tim Kryger <tim.kryger@gmail.com>
+Subject: Re: [PATCH 1/1] mmc: core: Use regulator_get_voltage() if OCR mask is empty.
+Date: Fri, 15 Aug 2014 07:19:41 -0700
+Message-ID: <CAD7vxxKvZCxnDpPn3X1Uch_6m7Hfj_vApNfxUS2Wex9BjjBUdg@mail.gmail.com>
+References: <1408019940-11153-1-git-send-email-javier.martinez@collabora.co.uk>
+	<CAD7vxxKvzxvmzgx=S5ZZn54ts99ca2TqBYFvY1SXZQZDkhjq3w@mail.gmail.com>
+	<20140814151958.GY17528@sirena.org.uk>
+	<CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>
+	<53EDBB5B.4000209@collabora.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from p2.i-net.ro ([193.230.184.10]:16649 "EHLO
-	mail.comtelnetworks.ro" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751104AbaHONx6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Aug 2014 09:53:58 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <53EDBB5B.4000209@collabora.co.uk>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+Cc: Mark Brown <broonie@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Dear Friend,
+On Fri, Aug 15, 2014 at 12:48 AM, Javier Martinez Canillas
+<javier.martinez@collabora.co.uk> wrote:
+> Hello Tim,
+>
+> On 08/15/2014 07:36 AM, Tim Kryger wrote:
+>> On Thu, Aug 14, 2014 at 8:19 AM, Mark Brown <broonie@kernel.org> wrote:
+>>
+>>> Right, there's two things going on here.  One is that as you describe we
+>>> shouldn't be putting constraints in .dtsi files if we don't know they're
+>>> OK for a given board.  The other thing is that on this particular board
+>>> it turns out that there's no support for varying the voltages at all so
+>>> it doesn't make sense to have to specify a range, there's only one value
+>>> anyway so the software really should be able to figure out that fixed
+>>> value all by itself.
+>>
+>> If constraints are truly irrelevant when the voltage supplied to
+>> consumers is fixed, why doesn't regulator_list_voltage honor this
+>> exemption and skip the voltage filtering that uses (potentially
+>> unspecified) constraints when output is entirely determined by a
+>> parent (or grandparent) supply that can't change its voltage?
+>>
+>
+> I had a similar thought before and proposed the patch:
+>
+> "[RFC 3/5] regulator: core: Only apply constraints if available on list
+> voltage" [0].
 
-                  Please acknowledge and accept my proposal.
+> [0]: https://lkml.org/lkml/2014/7/29/418
 
-My name is Barrister Miguel Martinez Moreno, an Attorney at Law, in 
-Alicante-Spain.
+You proposed constraints only be applied when they are defined.
 
-I am writing to notify you of the unclaimed inheritance deposit of our 
-late client, who passed on to Great beyond on August 21st, 2010 in a 
-motor accident in auto pista de Alcala Del Henares, Madrid-Spain.
+That is a little different from my suggestion where the constraints
+check is skipped when the regulator output is fixed.  It effectively
+does this now when the regulator itself provides the fixed voltage.
+However, the checks aren't skipped when that fixed voltage is coming
+from an ancestor.  Why the difference?
 
-I got your name and email address through a web search engine in my 
-quest to get a reliable individual who shall work with me in claiming 
-this inheritance deposit since all my efforts to get the biological 
-relative has proved abortive.
-
-Conclusively, I await your urgent response to include the following :( 
-1).Your full Names & Address. (2).Your Telephone and Fax numbers. 
-(3).Your business name if any: for more information on how to release 
-the inheritance deposit, amount, procedure and legality of this claim 
-send me an email via: gva_abogados@aim.com
-
-Have a very nice day my friend!
-
-Regards,
-Miguel Martinez Moreno (Esq)
-Attorney At Law.
-gvaintencia@aim.com
+-Tim
