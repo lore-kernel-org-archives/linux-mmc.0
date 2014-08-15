@@ -1,8 +1,8 @@
 From: <rogerable@realtek.com>
-Subject: [PATCH 1/2] mmc: rtsx_pci_sdmmc: fix incorrect last byte in R2
+Subject: [PATCH 2/2] mmc: rtsx_usb_sdmmc: fix incorrect last byte in R2
  response
-Date: Fri, 15 Aug 2014 14:06:00 +0800
-Message-ID: <1408082761-15333-2-git-send-email-rogerable@realtek.com>
+Date: Fri, 15 Aug 2014 14:06:01 +0800
+Message-ID: <1408082761-15333-3-git-send-email-rogerable@realtek.com>
 References: <1408082761-15333-1-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -32,18 +32,18 @@ same card after resume and misidentify it as a different card.
 
 Fix by assigning dummy CRC and end bit: {7'b0, 1} = 0x1 to the last byte of R2.
 
-Cc: <stable@vger.kernel.org> # v3.8+
-Fixes: ff984e57d36e ("mmc: Add realtek pcie sdmmc host driver")
+Cc: <stable@vger.kernel.org> # v3.16+
+Fixes: c7f6558d84af ("mmc: Add realtek USB sdmmc host driver")
 Signed-off-by: Roger Tseng <rogerable@realtek.com>
 ---
- drivers/mmc/host/rtsx_pci_sdmmc.c |    7 +++++++
+ drivers/mmc/host/rtsx_usb_sdmmc.c |    7 +++++++
  1 file changed, 7 insertions(+)
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index dfde4a210238..b2537e2f26b1 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -412,6 +412,13 @@ static void sd_send_cmd_get_rsp(struct realtek_pci_sdmmc *host,
+diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+index 5d3766e792f0..d9153a7d160d 100644
+--- a/drivers/mmc/host/rtsx_usb_sdmmc.c
++++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+@@ -435,6 +435,13 @@ static void sd_send_cmd_get_rsp(struct rtsx_usb_sdmmc *host,
  	}
  
  	if (rsp_type == SD_RSP_TYPE_R2) {
