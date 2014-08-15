@@ -1,42 +1,50 @@
 From: Peter Griffin <peter.griffin@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-pxav3: set_uhs_signaling is initialized twice
- differently
-Date: Fri, 15 Aug 2014 13:52:08 +0100
-Message-ID: <20140815125208.GA19855@griffinp-ThinkPad-X1-Carbon-2nd>
-References: <1408093958-26058-1-git-send-email-peter.griffin@linaro.org>
- <20140815094707.GW30401@n2100.arm.linux.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH v2] mmc: sdhci-pxav3: set_uhs_signaling is initialized twice differently
+Date: Fri, 15 Aug 2014 13:55:42 +0100
+Message-ID: <1408107342-20318-1-git-send-email-peter.griffin@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f46.google.com ([74.125.82.46]:50535 "EHLO
-	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750954AbaHOMwN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Aug 2014 08:52:13 -0400
-Received: by mail-wg0-f46.google.com with SMTP id m15so2285970wgh.5
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Aug 2014 05:52:12 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20140815094707.GW30401@n2100.arm.linux.org.uk>
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:58547 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751079AbaHOMzr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Aug 2014 08:55:47 -0400
+Received: by mail-wi0-f172.google.com with SMTP id n3so797110wiv.11
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Aug 2014 05:55:46 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, zhangfei.gao@marvell.com, prakity@marvell.com, patches@linaro.org, lee.jones@linaro.org
+To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, zhangfei.gao@marvell.com, prakity@marvell.com, rmk+kernel@arm.linux.org.uk
+Cc: peter.griffin@linaro.org, patches@linaro.org, lee.jones@linaro.org
 
-Hi Russell,
+.set_uhs_signaling field is currently initialised twice once to the
+arch specific callback pxav3_set_uhs_signaling, and also to the generic
+sdhci_set_uhs_signaling callback.
 
-> > This happened in
-> > commit 96d7b78cfc2f ("mmc: sdhci: convert sdhci_set_uhs_signaling() into a library function")
-> > commit a702c8abb2a9 ("mmc: host: split up sdhci-pxa, create sdhci-pxav3.c")'
-> 
-> This is exactly why named initialisers should always follow the
-> declaration order in the structure definition.
-> 
-> It also helps avoid git merge to properly resolve two additions of
-> the same member (possibly with a conflict) rather than just adding
-> both.
+This means that uhs is currently broken for this platform currently, as pxav3
+has some special constriants which means it can't use the generic callback.
 
-Ah yes that makes a lot of sense. I will send a V2 in a moment, as the line I
-removed now means that it's not in order with the structure definition.
+This happened in
+commit 96d7b78cfc2f ("mmc: sdhci: convert sdhci_set_uhs_signaling() into a library function")
+commit a702c8abb2a9 ("mmc: host: split up sdhci-pxa, create sdhci-pxav3.c")'
 
-regards,
+Fix this and hopefully prevent it happening in the future by ensuring named
+initialisers always follow the declaration order in the structure definition.
 
-Peter.
+Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+---
+ drivers/mmc/host/sdhci-pxav3.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 6f842fb..3f350ea 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -229,7 +229,6 @@ static const struct sdhci_ops pxav3_sdhci_ops = {
+ 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+ 	.reset = pxav3_reset,
+-	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ };
+ 
+ static struct sdhci_pltfm_data sdhci_pxav3_pdata = {
+-- 
+1.9.1
+
