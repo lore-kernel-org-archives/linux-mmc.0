@@ -1,61 +1,83 @@
-From: <rogerable@realtek.com>
-Subject: [PATCH 2/2] mmc: rtsx_usb_sdmmc: fix incorrect last byte in R2
- response
-Date: Fri, 15 Aug 2014 14:06:01 +0800
-Message-ID: <1408082761-15333-3-git-send-email-rogerable@realtek.com>
-References: <1408082761-15333-1-git-send-email-rogerable@realtek.com>
+From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+Subject: Re: [PATCH 1/1] mmc: core: Use regulator_get_voltage() if OCR mask
+ is empty.
+Date: Fri, 15 Aug 2014 09:48:43 +0200
+Message-ID: <53EDBB5B.4000209@collabora.co.uk>
+References: <1408019940-11153-1-git-send-email-javier.martinez@collabora.co.uk>	<CAD7vxxKvzxvmzgx=S5ZZn54ts99ca2TqBYFvY1SXZQZDkhjq3w@mail.gmail.com>	<20140814151958.GY17528@sirena.org.uk> <CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <1408082761-15333-1-git-send-email-rogerable@realtek.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, Dan Carpenter <dan.carpenter@oracle.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Tim Kryger <tim.kryger@gmail.com>, Mark Brown <broonie@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Roger Tseng <rogerable@realtek.com>
+Hello Tim,
 
-Current code erroneously fill the last byte of R2 response with an undefined
-value. In addition, the controller actually 'offloads' the last byte
-(CRC7, end bit) while receiving R2 response and thus it's impossible to get the
-actual value. This could cause mmc stack to obtain inconsistent CID from the
-same card after resume and misidentify it as a different card.
+On 08/15/2014 07:36 AM, Tim Kryger wrote:
+> On Thu, Aug 14, 2014 at 8:19 AM, Mark Brown <broonie@kernel.org> wrote:
+> 
+>> Right, there's two things going on here.  One is that as you describe we
+>> shouldn't be putting constraints in .dtsi files if we don't know they're
+>> OK for a given board.  The other thing is that on this particular board
+>> it turns out that there's no support for varying the voltages at all so
+>> it doesn't make sense to have to specify a range, there's only one value
+>> anyway so the software really should be able to figure out that fixed
+>> value all by itself.
+> 
+> If constraints are truly irrelevant when the voltage supplied to
+> consumers is fixed, why doesn't regulator_list_voltage honor this
+> exemption and skip the voltage filtering that uses (potentially
+> unspecified) constraints when output is entirely determined by a
+> parent (or grandparent) supply that can't change its voltage?
+>
 
-Fix by assigning dummy CRC and end bit: {7'b0, 1} = 0x1 to the last byte of R2.
+I had a similar thought before and proposed the patch:
 
-Cc: <stable@vger.kernel.org> # v3.16+
-Fixes: c7f6558d84af ("mmc: Add realtek USB sdmmc host driver")
-Signed-off-by: Roger Tseng <rogerable@realtek.com>
----
- drivers/mmc/host/rtsx_usb_sdmmc.c |    7 +++++++
- 1 file changed, 7 insertions(+)
+"[RFC 3/5] regulator: core: Only apply constraints if available on list
+voltage" [0].
 
-diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-index 5d3766e792f0..d9153a7d160d 100644
---- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-@@ -435,6 +435,13 @@ static void sd_send_cmd_get_rsp(struct rtsx_usb_sdmmc *host,
- 	}
- 
- 	if (rsp_type == SD_RSP_TYPE_R2) {
-+		/*
-+		 * The controller offloads the last byte {CRC-7, end bit 1'b1}
-+		 * of response type R2. Assign dummy CRC, 0, and end bit to the
-+		 * byte(ptr[16], goes into the LSB of resp[3] later).
-+		 */
-+		ptr[16] = 1;
-+
- 		for (i = 0; i < 4; i++) {
- 			cmd->resp[i] = get_unaligned_be32(ptr + 1 + i * 4);
- 			dev_dbg(sdmmc_dev(host), "cmd->resp[%d] = 0x%08x\n",
--- 
-1.7.10.4
+But then Mark explained to me that this is wrong since in that case
+regulator_list_voltage() will list voltages that can't really be set [1].
+
+But now I wonder why regulator_list_voltage() even list the voltage for
+fixed regulators (desc->fixed_uV) since they don't have the ability to
+vary voltage. The regulator_list_voltage() documentation says:
+
+"Returns a voltage that can be passed to @regulator_set_voltage(), zero if
+this selector code can't be used on this system, or a negative errno."
+
+But in the case of fixed regulators, it is actually listing a voltage that
+can't be selected. Although regulator_set_voltage() checks if the desired
+voltage is equal to the regulator min_uV and max_uV and just exits in that
+case, it feels wrong to list the voltage for a fixed regulators.
+
+regulator_list_voltage() only works because of the way we define the
+generic fixed voltage regulators and that is assuming that
+"regulator-min-microvolt" and "regulator-max-microvolt" DT properties
+being the same means that the regulator is fixed.
+
+This is kind of unfortunate, maybe it would had been better to define it
+explicitly using a "regulator-fixed-microvolt" or something. If we had
+such a DT property, then constraints wouldn't had been set for fixed
+regulators and regulator_list_voltage() wouldn't list its voltage neither.
+
+> It seems odd to make callers be the ones to handle this subtlety.
+> 
+
+If regulator_list_voltage() didn't list the voltage for fixed regulators,
+then this subtlety should had been handled by callers before but they
+didn't because they rely on regulator_list_voltage() to always return a
+voltage even for fixed regulators.
+
+> Thanks,
+> Tim Kryger
+> 
+
+Best regards,
+Javier
+
+[0]: https://lkml.org/lkml/2014/7/29/418
+[1]: https://lkml.org/lkml/2014/7/29/453
