@@ -1,62 +1,63 @@
 From: Mark Brown <broonie@kernel.org>
 Subject: Re: [PATCH 1/1] mmc: core: Use regulator_get_voltage() if OCR mask
  is empty.
-Date: Fri, 15 Aug 2014 23:29:14 +0100
-Message-ID: <20140815222914.GM17528@sirena.org.uk>
+Date: Sat, 16 Aug 2014 13:59:03 +0100
+Message-ID: <20140816125903.GC28623@sirena.org.uk>
 References: <1408019940-11153-1-git-send-email-javier.martinez@collabora.co.uk>
  <CAD7vxxKvzxvmzgx=S5ZZn54ts99ca2TqBYFvY1SXZQZDkhjq3w@mail.gmail.com>
  <20140814151958.GY17528@sirena.org.uk>
  <CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>
  <53EDBB5B.4000209@collabora.co.uk>
- <CAD7vxxKvZCxnDpPn3X1Uch_6m7Hfj_vApNfxUS2Wex9BjjBUdg@mail.gmail.com>
+ <20140815095528.GH17528@sirena.org.uk>
+ <CAPDyKFpm5nzXp5p0qxDof2NcOML911eYkjPNMsn9a2ttdnW7gQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="l0GZ4SE/qP5NVpaF"
+	protocol="application/pgp-signature"; boundary="jy6Sn24JjFx/iggw"
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAD7vxxKvZCxnDpPn3X1Uch_6m7Hfj_vApNfxUS2Wex9BjjBUdg@mail.gmail.com>
+In-Reply-To: <CAPDyKFpm5nzXp5p0qxDof2NcOML911eYkjPNMsn9a2ttdnW7gQ@mail.gmail.com>
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Tim Kryger <tim.kryger@gmail.com>
-Cc: Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Tim Kryger <tim.kryger@gmail.com>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
 
---l0GZ4SE/qP5NVpaF
+--jy6Sn24JjFx/iggw
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
-On Fri, Aug 15, 2014 at 07:19:41AM -0700, Tim Kryger wrote:
+On Fri, Aug 15, 2014 at 04:51:38PM +0200, Ulf Hansson wrote:
 
-> That is a little different from my suggestion where the constraints
-> check is skipped when the regulator output is fixed.  It effectively
-> does this now when the regulator itself provides the fixed voltage.
-> However, the checks aren't skipped when that fixed voltage is coming
-> from an ancestor.  Why the difference?
+> Just wanted to add some input regarding the errors in the mmc case.
+> These are of high importance. In principle if you get, "Failed getting
+> OCR mask: -22", likely you will be using a wrong OCR mask while
+> negotiating the voltage level with the card.
 
-Nobody has written suitable code, and please bear in mind that even if
-the code is written there will probably be cases where it's too
-expensive for whatever reason so Javier's change is going to be needed.
+> So, somehow we need to address this issue.
 
---l0GZ4SE/qP5NVpaF
+Perhaps a WARN_ON() would help here - I'd not blame users for just
+ignoring the current warning?
+
+--jy6Sn24JjFx/iggw
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2
 
-iQIcBAEBAgAGBQJT7om3AAoJELSic+t+oim9h3IP/R1CiGNSrZBydfF6pdNiMt5B
-Z8vjp/9GOdQkZqKc/xgXZc6Gki8n0g6k6VpC+/EPljalIvmIwS3b/Ln94Eu9PhcT
-0kp0WU+zVYkCZ+jX0caIt/O0OIC0yWAsf0VK/OMpcFXQbQYfZRQgeeItYQ/lC8eJ
-nJ18yHXD5eu7dw2CXJtt9jGDkOktC67knVtZHC50gYrEgtMoGG/lxHq0muGvByHT
-InKV339duP9hiNehPotRnuQ50ZM7u4RdWuRlGGOt33s2q7vk876I51cxrjJS0X6v
-zA//XD5QgdjyNhbIe1Q4N04mv+Un240EpqOYl0QdR6FuC/Wg7N/h0j4FSgdLIRCc
-IGKeLE+qRg/j28MQdjxX7dwRJqIv1LWd4WpHFkionkPJoLBcDA/U1N4/EJAxgh6M
-JmSn/g3GVIEEYc4EhVzESctPReGgAmntRBiHDHsW8Dwx2zRN/9jaCwi9vYuIDMke
-4ktZJFHLpmfTeJ6iPt3v4NGRxxglDAGNFrra/keiRwZcpLCoSugERaQkpOmcAyt3
-BrzrgslYLAQS+ubzp/Em5DqwD9Ygz0YdsRhSWCG6jR2JoKMKxJzOy3SFf4qyc1bv
-h05oU6pySwgp5qG8ZOv7SR7d6e8ZxHhr0WvDT4ovPy3ssMMN1S2Kyjn2RPGNWC8S
-n7xCUoG0TJNRH5FIyW1E
-=C0ZE
+iQIcBAEBAgAGBQJT71WUAAoJELSic+t+oim96VgP/2jbHcBpAmIOtWRxUYHsiKUk
+QAbWtkW+xpUnG9+BGfnGTUKvY9EMl/rIVjyetsxWl85u3l5MxP89XQas59/ftRw5
+DVk/aJEqSP8e5KkPTl9S726ZRjAVAlGzqCFM4EtQfv5ySQH0UYVXsftKSlCkNmFV
+lYfPkEjdT7UuuZ6L2QcitkRTtzpn08rPTx7+e0JCdnO2/mNgu7Kr6z/H45cpuBvW
+UD55rxupcFf+MNQWosj3IscQH2QhT4GQzHcezHRAkoCLHi5BYGauNbjRchvrpFvL
+f0GSyjOSqe3LChIXvXeVL9/2ddypQz84neuC7WkqLkA3GT27t6Fy9Khi8I9f+a2K
+d6eHnaGxQ8HOf++CCF3hu21Vs6sOhSowR0NUJVK/YwtRkpdz4lTJq+MgIa5zv/3I
+Tnme1lvh88yUDWMQrwgq1Y7T97wC+/WKw/vcNKftVh83gnUSHcynB4fHx5qarik6
+x4GYsv8v0DV0XheexiafWZvsKqVxgcLIhlzIpWZSLB096ixCLOFU81LBLTEhCMaV
+p+VBebdR8PbGTs9IUsvvNY8ugaO0qfq7NZAD+ZaQ+aBMLiGL7NZgwmy9nZZHHrlC
+GaVxFULaHO8dhn2KJyMliGW7ZCOfiyFVRmDoFiNCwfz9pxqYxJFLu+YlYwwlluZv
+lAEmAzabsaYjYFsKokea
+=ebub
 -----END PGP SIGNATURE-----
 
---l0GZ4SE/qP5NVpaF--
+--jy6Sn24JjFx/iggw--
