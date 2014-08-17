@@ -1,63 +1,36 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH 1/1] mmc: core: Use regulator_get_voltage() if OCR mask
- is empty.
-Date: Sat, 16 Aug 2014 13:59:03 +0100
-Message-ID: <20140816125903.GC28623@sirena.org.uk>
+From: Tim Kryger <tim.kryger@gmail.com>
+Subject: Re: [PATCH 1/1] mmc: core: Use regulator_get_voltage() if OCR mask is empty.
+Date: Sun, 17 Aug 2014 10:11:30 -0700
+Message-ID: <CAD7vxxKTk2Na9B4ae6EGT8HaKDRp0iu4zX1tB8DPtmePKbHrLw@mail.gmail.com>
 References: <1408019940-11153-1-git-send-email-javier.martinez@collabora.co.uk>
- <CAD7vxxKvzxvmzgx=S5ZZn54ts99ca2TqBYFvY1SXZQZDkhjq3w@mail.gmail.com>
- <20140814151958.GY17528@sirena.org.uk>
- <CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>
- <53EDBB5B.4000209@collabora.co.uk>
- <20140815095528.GH17528@sirena.org.uk>
- <CAPDyKFpm5nzXp5p0qxDof2NcOML911eYkjPNMsn9a2ttdnW7gQ@mail.gmail.com>
+	<CAD7vxxKvzxvmzgx=S5ZZn54ts99ca2TqBYFvY1SXZQZDkhjq3w@mail.gmail.com>
+	<20140814151958.GY17528@sirena.org.uk>
+	<CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>
+	<53EDBB5B.4000209@collabora.co.uk>
+	<CAD7vxxKvZCxnDpPn3X1Uch_6m7Hfj_vApNfxUS2Wex9BjjBUdg@mail.gmail.com>
+	<20140815222914.GM17528@sirena.org.uk>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="jy6Sn24JjFx/iggw"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpm5nzXp5p0qxDof2NcOML911eYkjPNMsn9a2ttdnW7gQ@mail.gmail.com>
+In-Reply-To: <20140815222914.GM17528@sirena.org.uk>
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Tim Kryger <tim.kryger@gmail.com>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Mark Brown <broonie@kernel.org>
+Cc: Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
+On Fri, Aug 15, 2014 at 3:29 PM, Mark Brown <broonie@kernel.org> wrote:
+> On Fri, Aug 15, 2014 at 07:19:41AM -0700, Tim Kryger wrote:
+>
+>> That is a little different from my suggestion where the constraints
+>> check is skipped when the regulator output is fixed.  It effectively
+>> does this now when the regulator itself provides the fixed voltage.
+>> However, the checks aren't skipped when that fixed voltage is coming
+>> from an ancestor.  Why the difference?
+>
+> Nobody has written suitable code, and please bear in mind that even if
+> the code is written there will probably be cases where it's too
+> expensive for whatever reason so Javier's change is going to be needed.
 
---jy6Sn24JjFx/iggw
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-
-On Fri, Aug 15, 2014 at 04:51:38PM +0200, Ulf Hansson wrote:
-
-> Just wanted to add some input regarding the errors in the mmc case.
-> These are of high importance. In principle if you get, "Failed getting
-> OCR mask: -22", likely you will be using a wrong OCR mask while
-> negotiating the voltage level with the card.
-
-> So, somehow we need to address this issue.
-
-Perhaps a WARN_ON() would help here - I'd not blame users for just
-ignoring the current warning?
-
---jy6Sn24JjFx/iggw
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQIcBAEBAgAGBQJT71WUAAoJELSic+t+oim96VgP/2jbHcBpAmIOtWRxUYHsiKUk
-QAbWtkW+xpUnG9+BGfnGTUKvY9EMl/rIVjyetsxWl85u3l5MxP89XQas59/ftRw5
-DVk/aJEqSP8e5KkPTl9S726ZRjAVAlGzqCFM4EtQfv5ySQH0UYVXsftKSlCkNmFV
-lYfPkEjdT7UuuZ6L2QcitkRTtzpn08rPTx7+e0JCdnO2/mNgu7Kr6z/H45cpuBvW
-UD55rxupcFf+MNQWosj3IscQH2QhT4GQzHcezHRAkoCLHi5BYGauNbjRchvrpFvL
-f0GSyjOSqe3LChIXvXeVL9/2ddypQz84neuC7WkqLkA3GT27t6Fy9Khi8I9f+a2K
-d6eHnaGxQ8HOf++CCF3hu21Vs6sOhSowR0NUJVK/YwtRkpdz4lTJq+MgIa5zv/3I
-Tnme1lvh88yUDWMQrwgq1Y7T97wC+/WKw/vcNKftVh83gnUSHcynB4fHx5qarik6
-x4GYsv8v0DV0XheexiafWZvsKqVxgcLIhlzIpWZSLB096ixCLOFU81LBLTEhCMaV
-p+VBebdR8PbGTs9IUsvvNY8ugaO0qfq7NZAD+ZaQ+aBMLiGL7NZgwmy9nZZHHrlC
-GaVxFULaHO8dhn2KJyMliGW7ZCOfiyFVRmDoFiNCwfz9pxqYxJFLu+YlYwwlluZv
-lAEmAzabsaYjYFsKokea
-=ebub
------END PGP SIGNATURE-----
-
---jy6Sn24JjFx/iggw--
+I fail to see how replicating similar logic at all current
+regulator_list_voltage call sites would be any more efficient than
+handling this directly in regulator core.
