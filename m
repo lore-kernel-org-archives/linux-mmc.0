@@ -1,67 +1,102 @@
-From: Barry Song <Barry.Song@csr.com>
-Subject: [PATCH] mmc: core: sd: check card write-protect lock while resuming
-Date: Mon, 18 Aug 2014 18:00:12 +0800
-Message-ID: <1408356012-18867-1-git-send-email-Barry.Song@csr.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: resolve divded by zero panic
+Date: Mon, 18 Aug 2014 11:56:32 +0200
+Message-ID: <CAPDyKFpP69-T-c40e-Fvk6ibUXWCtqsw8qZdTJTJaTSB-bLuzA@mail.gmail.com>
+References: <1408012164-29790-1-git-send-email-yunpeng.gao@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: chris@printf.net, ulf.hansson@linaro.org
-Cc: Barry Song <Baohua.Song@csr.com>, linux-mmc@vger.kernel.org, workgroup.linux@csr.com, linux-arm-kernel@lists.infradead.org, Minda Chen <Minda.Chen@csr.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f53.google.com ([209.85.216.53]:51785 "EHLO
+	mail-qa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752017AbaHRJ4e (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Aug 2014 05:56:34 -0400
+Received: by mail-qa0-f53.google.com with SMTP id v10so4095019qac.40
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2014 02:56:33 -0700 (PDT)
+In-Reply-To: <1408012164-29790-1-git-send-email-yunpeng.gao@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Yunpeng Gao <yunpeng.gao@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chuanxiao Dong <chuanxiao.dong@intel.com>
 
-From: Minda Chen <Minda.Chen@csr.com>
+On 14 August 2014 12:29, Yunpeng Gao <yunpeng.gao@intel.com> wrote:
+> From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+>
+> With one special SD card, below divide by zero error observed:
+> ...
+> [    2.144300] divide error: 0000 [#1] PREEMPT SMP
+> [    2.148860] Modules linked in:
+> [    2.151898]
+> [    2.152685] Set up 4031 stolen pages starting at 0x0001f000, GTT offset 0K
+> [    2.157330] Set up 0 CI stolen pages starting at 0x00000000, GTT offset 131072K
+> [    2.167581] Pid: 5, comm: kworker/u:0 Not tainted 3.0.8-138216-g974a2ab #1
+> [    2.169506] [drm] PSB GTT mem manager ready, tt_start 4031, tt_size 28737 pages
+> [    2.169906] [drm] SGX core id = 0x00000000
+> [    2.169920] [drm] SGX core rev major = 0x00, minor = 0x00
+> [    2.169934] [drm] SGX core rev maintenance = 0x00, designer = 0x00
+> [    2.197370]  Intel Corporation Medfield/iCDKB
+> [    2.201716] EIP: 0060:[<c1697ca6>] EFLAGS: 00010246 CPU: 1
+> [    2.207198] EIP is at mmc_init_erase+0x76/0x150
+> [    2.211704] EAX: 00002000 EBX: dcd1b400 ECX: 00002000 EDX: 00000000
+> [    2.217957] ESI: 00000000 EDI: dcd5c800 EBP: dd867e84 ESP: dd867e7c
+> [    2.224214]  DS: 007b ES: 007b FS: 00d8 GS: 0000 SS: 0068
+> [    2.229605] Process kworker/u:0 (pid: 5, ti=dd866000 task=dd868000 task.ti=dd866000)
+> [    2.237325] Stack:
+> [    2.239322]  dcd1b400 00000000 dd867eb0 c16a06da c1ab7c44 dd995aa8 00000003 00000000
+> [    2.247054]  00000000 00000000 dcd5c800 00000000 dcd1b400 dd867ef8 c16a1012 c1698b00
+> [    2.254785]  00000029 00000001 c194eb80 dcd5c9ec dd867e00 c1239b00 00000000 00000000
+> [    2.262519] Call Trace:
+> [    2.264975]  [<c16a06da>] mmc_sd_setup_card+0x1da/0x4f0
+> [    2.270183]  [<c16a1012>] mmc_sd_init_card+0x192/0xc40
+> [    2.275304]  [<c1698b00>] ? __mmc_claim_host+0x160/0x160
+> [    2.280610]  [<c1239b00>] ? __schedule_bug+0x50/0x80
+> [    2.285556]  [<c16a1b89>] mmc_attach_sd+0xc9/0x230
+> [    2.290333]  [<c169b6ef>] mmc_rescan+0x25f/0x2c0
+> [    2.294943]  [<c1274223>] process_one_work+0x103/0x400
+> [    2.300065]  [<c12670fd>] ? mod_timer+0x1ad/0x3c0
+> [    2.304756]  [<c169b490>] ? mmc_suspend_host+0x1a0/0x1a0
+> [    2.310056]  [<c127502d>] worker_thread+0x12d/0x4a0
+> [    2.314921]  [<c18fcfbd>] ? preempt_schedule+0x2d/0x50
+> [    2.320047]  [<c1274f00[    2.323976] ---[ end trace 5398ec2720494438 ]---
+> ...
+>
+> So, seems this bad SD card does not set valid value in related SSR / CSD register fields.
+> And then the driver will set card->erase_size to 0.
+> Then it triggered this divided by zero error when calculate card->pref_erase.
+>
+> Submit this patch to fix the issue.
+>
+> Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
+> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+> ---
+>  drivers/mmc/core/core.c |    5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 7dc0c85..385373db 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1761,7 +1761,7 @@ void mmc_init_erase(struct mmc_card *card)
+>                 card->erase_shift = ffs(card->ssr.au) - 1;
+>         } else if (card->ext_csd.hc_erase_size) {
+>                 card->pref_erase = card->ext_csd.hc_erase_size;
+> -       } else {
+> +       } else if (card->erase_size) {
+>                 sz = (card->csd.capacity << (card->csd.read_blkbits - 9)) >> 11;
+>                 if (sz < 128)
+>                         card->pref_erase = 512 * 1024 / 512;
+> @@ -1778,7 +1778,8 @@ void mmc_init_erase(struct mmc_card *card)
+>                         if (sz)
+>                                 card->pref_erase += card->erase_size - sz;
+>                 }
+> -       }
+> +       } else
+> +               card->pref_erase = 0;
+>  }
+>
 
-After suspending, unplug the sdcard, and set sd WP lock,
-insert it again, then resume the system. resume codes do
-not check the the sdcard write-proctect lock. now check
-it.
+Overall this seems like a good idea. Though I wonder what happens with
+the QUEUE_FLAG_DISCARD? I suppose we would to prevent it from being
+set when initiating the blk dev queue, right?
 
-Signed-off-by: Minda Chen <Minda.Chen@csr.com>
-Signed-off-by: Barry Song <Baohua.Song@csr.com>
----
- drivers/mmc/core/sd.c | 7 +++++++
- 1 file changed, 7 insertions(+)
-
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 0c44510..890557a 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -910,6 +910,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 	int err;
- 	u32 cid[4];
- 	u32 rocr = 0;
-+	bool oldro, ro;
- 
- 	BUG_ON(!host);
- 	WARN_ON(!host->claimed);
-@@ -922,6 +923,12 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 		if (memcmp(cid, oldcard->raw_cid, sizeof(cid)) != 0)
- 			return -ENOENT;
- 
-+		if (host->ops->get_ro) {
-+			ro = host->ops->get_ro(host) ? true : false;
-+			oldro = mmc_card_readonly(oldcard) ? true : false;
-+			if (oldro ^ ro)
-+				return -ENOENT;
-+		}
- 		card = oldcard;
- 	} else {
- 		/*
--- 
-2.0.4
-
-
-
-Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
-More information can be found at www.csr.com. Keep up to date with CSR on our technical blog, www.csr.com/blog, CSR people blog, www.csr.com/people, YouTube, www.youtube.com/user/CSRplc, Facebook, www.facebook.com/pages/CSR/191038434253534, or follow us on Twitter at www.twitter.com/CSR_plc.
-New for 2014, you can now access the wide range of products powered by aptX at www.aptx.com.
+Kind regards
+Uffe
