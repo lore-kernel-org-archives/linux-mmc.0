@@ -1,61 +1,63 @@
 From: Yunpeng Gao <yunpeng.gao@intel.com>
-Subject: [PATCH] mmc: core: Change the enhanced area sysfs output format
-Date: Mon, 18 Aug 2014 13:24:06 +0800
-Message-ID: <1408339446-7828-1-git-send-email-yunpeng.gao@intel.com>
+Subject: [PATCH] mmc: core: optimize mmc device power up ramp up time
+Date: Mon, 18 Aug 2014 14:17:05 +0800
+Message-ID: <1408342625-23720-1-git-send-email-yunpeng.gao@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:60279 "EHLO mga11.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:65075 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750762AbaHRFWX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 18 Aug 2014 01:22:23 -0400
+	id S1750870AbaHRGPT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 18 Aug 2014 02:15:19 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: "Zhang, YiX X" <yix.x.zhang@intel.com>, Yunpeng Gao <yunpeng.gao@intel.com>
+Cc: Yunpeng Gao <yunpeng.gao@intel.com>, Chuanxiao Dong <chuanxiao.dong@intel.com>
 
-From: "Zhang, YiX X" <yix.x.zhang@intel.com>
+In current kernel mmc driver, it uses two 'msleep(10)'
+for eMMC/SD card power up ramp up time delay.
 
-Current sysfs output format for eMMC Enhanced Area feature
-are incorrect.
+According to Spec, the ramp up time should be max of 74
+eMMC/SD bus clock or 1ms.
+Take the worst eMMC/SD card I can image as the example -
+assume it has to work on 32KHz or 16KHz during the card initialzation,
+then 74 clock should be 2.312ms or 4.625ms.
+So, 5ms delay should be enough.
 
-If the enhanced area feature not enabled, then the driver
-will return error code -EINVAL(-22) as the sysfs value.
+Also, msleep(10) will invlove sechdule and may consume
+more time than what we expected.
+Measured on Merrifield platform showed it consumed almost
+2*20 = 40ms. This is much more than what we expected.
 
-But the definition for those two sysfs items are
-unsigned int and unsigned long long.
-
-So, if Enhanced area feature not enabled on the eMMC device,
-then output similar to below may be observed:
-...
-	#cat /sys/block/mmcblk0/device/enhanced_area_offset
-	#18446744073709551594
-	#cat /sys/block/mmcblk0/device/enhanced_area_size
-	#4294967274
-
-Submit this patch to change the output format to display
-the correct value.
+Submit this patch to reduce the time of mmc boot up and
+the time of mmc D3 resume.
 
 Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
+Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 ---
- drivers/mmc/core/mmc.c |    5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ drivers/mmc/core/core.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 793c6f7..a57827a 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -705,9 +705,10 @@ MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
- MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
- MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);
- MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
--MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
-+MMC_DEV_ATTR(enhanced_area_offset, "%lld\n",
- 		card->ext_csd.enhanced_area_offset);
--MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
-+MMC_DEV_ATTR(enhanced_area_size, "%d KBytes\n",
-+		card->ext_csd.enhanced_area_size);
- MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
- MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 7dc0c85..7bcb797 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1556,7 +1556,7 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
+ 	 * This delay should be sufficient to allow the power supply
+ 	 * to reach the minimum voltage.
+ 	 */
+-	mmc_delay(10);
++	usleep_range(10000, 12000);
  
+ 	host->ios.clock = host->f_init;
+ 
+@@ -1567,7 +1567,7 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
+ 	 * This delay must be at least 74 clock sizes, or 1 ms, or the
+ 	 * time required to reach a stable voltage.
+ 	 */
+-	mmc_delay(10);
++	usleep_range(5000, 6000);
+ 
+ 	mmc_host_clk_release(host);
+ }
 -- 
 1.7.9.5
 
