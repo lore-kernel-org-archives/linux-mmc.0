@@ -1,28 +1,28 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/4] mmc: slot-gpio: add gpiod variant to get wp GPIO
-Date: Mon, 18 Aug 2014 13:25:42 +0200
-Message-ID: <CAPDyKFo_mxvz-gBdkYQO7bm2X_kpVM-dKJe1b0ksTYXQN59T0Q@mail.gmail.com>
+Subject: Re: [PATCH 3/4] mmc: host: switch OF parser to use gpio descriptors
+Date: Mon, 18 Aug 2014 13:26:06 +0200
+Message-ID: <CAPDyKFrt=bQju8ZoK8-PdNgV7kT1tZpNAb178am4PH3Gr0u0cw@mail.gmail.com>
 References: <1407864355-21545-1-git-send-email-linus.walleij@linaro.org>
-	<1407864355-21545-2-git-send-email-linus.walleij@linaro.org>
+	<1407864355-21545-3-git-send-email-linus.walleij@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f51.google.com ([209.85.216.51]:47888 "EHLO
-	mail-qa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751489AbaHRLZo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Aug 2014 07:25:44 -0400
-Received: by mail-qa0-f51.google.com with SMTP id k15so4258897qaq.10
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2014 04:25:44 -0700 (PDT)
-In-Reply-To: <1407864355-21545-2-git-send-email-linus.walleij@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <1407864355-21545-3-git-send-email-linus.walleij@linaro.org>
+Sender: linux-gpio-owner@vger.kernel.org
 To: Linus Walleij <linus.walleij@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, linux-gpio@vger.kernel.org, Alexandre Courbot <gnurou@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
 
 On 12 August 2014 19:25, Linus Walleij <linus.walleij@linaro.org> wrote:
-> This makes it possible to get the write protect (read only)
-> GPIO line from a GPIO descriptor. Written to exactly mirror
-> the card detect function.
+> This switches the central MMC OF parser to use gpio descriptors
+> instead of grabbing GPIOs explicitly from the device tree.
+> This strips out an unecessary use of the integer-based GPIO
+> API that we want to get rid of, cuts down on code as the
+> gpio descriptor code will handle active low flags.
+>
+> As it is in no way a bug not to supply CD/WP GPIOs the messages
+> about them not being specified have been depromoted from
+> dev_err() to dev_dbg().
 >
 > Cc: Alexandre Courbot <gnurou@gmail.com>
 > Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
@@ -34,83 +34,105 @@ Uffe
 
 
 > ---
->  drivers/mmc/core/slot-gpio.c  | 48 +++++++++++++++++++++++++++++++++++++++++++
->  include/linux/mmc/slot-gpio.h |  3 +++
->  2 files changed, 51 insertions(+)
+>  drivers/mmc/core/host.c | 68 +++++++++++++++----------------------------------
+>  1 file changed, 21 insertions(+), 47 deletions(-)
 >
-> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-> index 908c2b29e79f..e3fce4493fab 100644
-> --- a/drivers/mmc/core/slot-gpio.c
-> +++ b/drivers/mmc/core/slot-gpio.c
-> @@ -326,6 +326,54 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
->  EXPORT_SYMBOL(mmc_gpiod_request_cd);
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 95cceae96944..048c6d687cc9 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -310,9 +310,7 @@ int mmc_of_parse(struct mmc_host *host)
+>  {
+>         struct device_node *np;
+>         u32 bus_width;
+> -       bool explicit_inv_wp, gpio_inv_wp = false;
+> -       enum of_gpio_flags flags;
+> -       int len, ret, gpio;
+> +       int len, ret;
 >
->  /**
-> + * mmc_gpiod_request_ro - request a gpio descriptor for write protection
-> + * @host: mmc host
-> + * @con_id: function within the GPIO consumer
-> + * @idx: index of the GPIO to obtain in the consumer
-> + * @override_active_level: ignore %GPIO_ACTIVE_LOW flag
-> + * @debounce: debounce time in microseconds
-> + *
-> + * Use this function in place of mmc_gpio_request_ro() to use the GPIO
-> + * descriptor API.  Note that it is paired with mmc_gpiod_free_ro() not
-> + * mmc_gpio_free_ro().
-> + *
-> + * Returns zero on success, else an error.
-> + */
-> +int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
-> +                        unsigned int idx, bool override_active_level,
-> +                        unsigned int debounce)
-> +{
-> +       struct mmc_gpio *ctx;
-> +       struct gpio_desc *desc;
-> +       int ret;
-> +
-> +       ret = mmc_gpio_alloc(host);
-> +       if (ret < 0)
-> +               return ret;
-> +
-> +       ctx = host->slot.handler_priv;
-> +
-> +       if (!con_id)
-> +               con_id = ctx->ro_label;
-> +
-> +       desc = devm_gpiod_get_index(host->parent, con_id, idx, GPIOD_IN);
-> +       if (IS_ERR(desc))
-> +               return PTR_ERR(desc);
-> +
-> +       if (debounce) {
-> +               ret = gpiod_set_debounce(desc, debounce);
-> +               if (ret < 0)
-> +                       return ret;
-> +       }
-> +
-> +       ctx->override_ro_active_level = override_active_level;
-> +       ctx->ro_gpio = desc;
-> +
-> +       return 0;
-> +}
-> +EXPORT_SYMBOL(mmc_gpiod_request_ro);
-> +
-> +/**
->   * mmc_gpiod_free_cd - free the card-detection gpio descriptor
->   * @host: mmc host
->   *
-> diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
-> index d2433381e828..a0d0442c15bf 100644
-> --- a/include/linux/mmc/slot-gpio.h
-> +++ b/include/linux/mmc/slot-gpio.h
-> @@ -25,6 +25,9 @@ void mmc_gpio_free_cd(struct mmc_host *host);
->  int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
->                          unsigned int idx, bool override_active_level,
->                          unsigned int debounce);
-> +int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
-> +                        unsigned int idx, bool override_active_level,
-> +                        unsigned int debounce);
->  void mmc_gpiod_free_cd(struct mmc_host *host);
->  void mmc_gpiod_request_cd_irq(struct mmc_host *host);
+>         if (!host->parent || !host->parent->of_node)
+>                 return 0;
+> @@ -360,60 +358,36 @@ int mmc_of_parse(struct mmc_host *host)
+>         if (of_find_property(np, "non-removable", &len)) {
+>                 host->caps |= MMC_CAP_NONREMOVABLE;
+>         } else {
+> -               bool explicit_inv_cd, gpio_inv_cd = false;
+> -
+> -               explicit_inv_cd = of_property_read_bool(np, "cd-inverted");
+> +               if (of_property_read_bool(np, "cd-inverted"))
+> +                       host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
 >
+>                 if (of_find_property(np, "broken-cd", &len))
+>                         host->caps |= MMC_CAP_NEEDS_POLL;
+>
+> -               gpio = of_get_named_gpio_flags(np, "cd-gpios", 0, &flags);
+> -               if (gpio == -EPROBE_DEFER)
+> -                       return gpio;
+> -               if (gpio_is_valid(gpio)) {
+> -                       if (!(flags & OF_GPIO_ACTIVE_LOW))
+> -                               gpio_inv_cd = true;
+> -
+> -                       ret = mmc_gpio_request_cd(host, gpio, 0);
+> -                       if (ret < 0) {
+> -                               dev_err(host->parent,
+> -                                       "Failed to request CD GPIO #%d: %d!\n",
+> -                                       gpio, ret);
+> +               ret = mmc_gpiod_request_cd(host, "cd", 0, false, 0);
+> +               if (ret) {
+> +                       if (ret == -EPROBE_DEFER)
+>                                 return ret;
+> -                       } else {
+> -                               dev_info(host->parent, "Got CD GPIO #%d.\n",
+> -                                        gpio);
+> -                       }
+> -               }
+> -
+> -               if (explicit_inv_cd ^ gpio_inv_cd)
+> -                       host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
+> +                       dev_dbg(host->parent,
+> +                               "Failed to request CD GPIO: %d\n",
+> +                               ret);
+> +               } else
+> +                       dev_info(host->parent, "Got CD GPIO\n");
+>         }
+>
+>         /* Parse Write Protection */
+> -       explicit_inv_wp = of_property_read_bool(np, "wp-inverted");
+> +       if (of_property_read_bool(np, "wp-inverted"))
+> +               host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+>
+> -       gpio = of_get_named_gpio_flags(np, "wp-gpios", 0, &flags);
+> -       if (gpio == -EPROBE_DEFER) {
+> -               ret = -EPROBE_DEFER;
+> -               goto out;
+> -       }
+> -       if (gpio_is_valid(gpio)) {
+> -               if (!(flags & OF_GPIO_ACTIVE_LOW))
+> -                       gpio_inv_wp = true;
+> -
+> -               ret = mmc_gpio_request_ro(host, gpio);
+> -               if (ret < 0) {
+> -                       dev_err(host->parent,
+> -                               "Failed to request WP GPIO: %d!\n", ret);
+> +       ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0);
+> +       if (ret) {
+> +               if (ret == -EPROBE_DEFER)
+>                         goto out;
+> -               } else {
+> -                               dev_info(host->parent, "Got WP GPIO #%d.\n",
+> -                                        gpio);
+> -               }
+> -       }
+> -       if (explicit_inv_wp ^ gpio_inv_wp)
+> -               host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+> +               dev_dbg(host->parent,
+> +                       "Failed to request WP GPIO: %d\n",
+> +                       ret);
+> +       } else
+> +               dev_info(host->parent, "Got WP GPIO\n");
+>
+>         if (of_find_property(np, "cap-sd-highspeed", &len))
+>                 host->caps |= MMC_CAP_SD_HIGHSPEED;
 > --
 > 1.9.3
 >
