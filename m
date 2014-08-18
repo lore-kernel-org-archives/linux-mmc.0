@@ -1,97 +1,226 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: tmio: Fix hang during suspend
-Date: Mon, 18 Aug 2014 15:10:53 +0200
-Message-ID: <CAPDyKFpyZM8thDhtcw4PUhGPezdag=6Fv_J9nejvenPNdTu-aA@mail.gmail.com>
-References: <1408029833-6970-1-git-send-email-geert+renesas@glider.be>
-	<20140815134917.da77205b68f18341140c6593@codethink.co.uk>
-	<CAMuHMdXrWgW2iMDd7GA+QC-vcAsp+vH9fidkdnBj-f9F878yAw@mail.gmail.com>
+From: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
+Subject: [PATCH v3 0001/0002] mmc: Replace ext_csd "enhanced_area_en" attribute
+ by "partition_setting_completed"
+Date: Mon, 18 Aug 2014 15:12:03 +0200
+Message-ID: <53F1FBA3.6060108@neotion.com>
+References: <53C7E45E.2060102@neotion.com>	<CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>	<53EB2DC3.2080002@neotion.com>	<CAPDyKFpjYqVUZ8GHB76gD8pOx_eMg9ecvbWrMEfbhEd5ffk7mw@mail.gmail.com>	<53ECB95F.2030207@neotion.com> <CAPDyKFp2ekmucHVzMWxeKfyTmuFKTXAYwUEpL5QxvEh8AjFopg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAMuHMdXrWgW2iMDd7GA+QC-vcAsp+vH9fidkdnBj-f9F878yAw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>, Ian Molton <ian.molton@codethink.co.uk>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Chris Ball <chris@printf.net>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.neotion.com ([5.39.84.84]:34472 "EHLO mail.neotion.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751372AbaHRNOx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 18 Aug 2014 09:14:53 -0400
+In-Reply-To: <CAPDyKFp2ekmucHVzMWxeKfyTmuFKTXAYwUEpL5QxvEh8AjFopg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 18 August 2014 14:36, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> Hi Ian,
->
-> On Fri, Aug 15, 2014 at 2:49 PM, Ian Molton <ian.molton@codethink.co.uk> wrote:
->> On Thu, 14 Aug 2014 17:23:53 +0200
->> Geert Uytterhoeven <geert+renesas@glider.be> wrote:
+Replace ext_csd "enhanced_area_en" attribute by "partition_setting_comp=
+leted".
+It was used whether or not enhanced user area is defined and without ch=
+ecks of
+EXT_CSD_PARTITION_SETTING_COMPLETED bit.
+
+Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
+---
+ drivers/mmc/core/mmc.c   |    8 +++++++-
+ include/linux/mmc/card.h |    2 +-
+ include/linux/mmc/mmc.h  |    2 ++
+ 3 files changed, 10 insertions(+), 2 deletions(-)
+
+>From commit 33caee39925b887a99a2400dc5c980097c3573f9 in master linux t=
+ree.
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 793c6f7..ef25d91 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -403,6 +403,12 @@ static int mmc_read_ext_csd(struct mmc_card *card,=
+ u8 *ext_csd)
+ 		ext_csd[EXT_CSD_TRIM_MULT];
+ 	card->ext_csd.raw_partition_support =3D ext_csd[EXT_CSD_PARTITION_SUP=
+PORT];
+ 	if (card->ext_csd.rev >=3D 4) {
++		if (ext_csd[EXT_CSD_PARTITION_SETTING_COMPLETED] &
++		    EXT_CSD_PART_SETTING_COMPLETED) {
++			card->ext_csd.partition_setting_completed =3D 1;
++		} else {
++			card->ext_csd.partition_setting_completed =3D 0;
++		}
+ 		/*
+ 		 * Enhanced area feature support -- check whether the eMMC
+ 		 * card has the Enhanced area enabled.  If so, export enhanced
+@@ -1309,7 +1315,7 @@ static int mmc_init_card(struct mmc_host *host, u=
+32 ocr,
+ 	 * If enhanced_area_en is TRUE, host needs to enable ERASE_GRP_DEF
+ 	 * bit.  This bit will be lost every time after a reset or power off.
+ 	 */
+-	if (card->ext_csd.enhanced_area_en ||
++	if (card->ext_csd.partition_setting_completed ||
+ 	    (card->ext_csd.rev >=3D 3 && (host->caps2 & MMC_CAP2_HC_ERASE_SZ)=
+)) {
+ 		err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 				 EXT_CSD_ERASE_GROUP_DEF, 1,
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index d424b9d..38175be 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -74,7 +74,7 @@ struct mmc_ext_csd {
+ 	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
+ 	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
+ 	unsigned int		trim_timeout;		/* In milliseconds */
+-	bool			enhanced_area_en;	/* enable bit */
++	bool			partition_setting_completed;	/* enable bit */
+ 	unsigned long long	enhanced_area_offset;	/* Units: Byte */
+ 	unsigned int		enhanced_area_size;	/* Units: KB */
+ 	unsigned int		cache_size;		/* Units: KB */
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 64ec963..78753bc 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -281,6 +281,7 @@ struct _mmc_csd {
+ #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
+ #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
+ #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
++#define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
+ #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+ #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
+ #define EXT_CSD_HPI_MGMT		161	/* R/W */
+@@ -349,6 +350,7 @@ struct _mmc_csd {
+ #define EXT_CSD_PART_CONFIG_ACC_RPMB	(0x3)
+ #define EXT_CSD_PART_CONFIG_ACC_GP0	(0x4)
+
++#define EXT_CSD_PART_SETTING_COMPLETED	(0x1)
+ #define EXT_CSD_PART_SUPPORT_PART_EN	(0x1)
+
+ #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
+--
+1.7.9.5
+
+Le 15/08/2014 10:17, Ulf Hansson a =C3=A9crit :
+> On 14 August 2014 15:27, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.=
+com> wrote:
+>> Le 14/08/2014 13:46, Ulf Hansson a =C3=A9crit :
+>>> On 13 August 2014 11:20, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotio=
+n.com> wrote:
+>>>> Le 13/08/2014 10:36, Ulf Hansson a =C3=A9crit :
+>>>>> On 17 July 2014 16:57, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotio=
+n.com> wrote:
+>>>>>> Create MMC general purpose partitions only if
+>>>>>> EXT_CSD_PARTITION_SETTING_COMPLETED bit is set.
+>>>>>> Some tools may set general purpose partition size(s) but fail or=
+ stop
+>>>>>> without finalize.
+>>>>>> Another case is to set invalid partition size(s).
+>>>>>>
+>>>>>> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
+>>>>>> ---
+>>>>>>  drivers/mmc/core/mmc.c  |   15 +++++++++++----
+>>>>>>  include/linux/mmc/mmc.h |    2 ++
+>>>>>>  2 files changed, 13 insertions(+), 4 deletions(-)
+>>>>>>
+>>>>>> From commit b6603fe574af289dbe9eb9fb4c540bca04f5a053 in master l=
+inux tree.
+>>>>>>
+>>>>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>>>>>> index 793c6f7..b9fe211 100644
+>>>>>> --- a/drivers/mmc/core/mmc.c
+>>>>>> +++ b/drivers/mmc/core/mmc.c
+>>>>>> @@ -471,10 +471,17 @@ static int mmc_read_ext_csd(struct mmc_car=
+d *card, u8 *ext_csd)
+>>>>>>                                 ext_csd[EXT_CSD_GP_SIZE_MULT + i=
+dx * 3];
+>>>>>>                                 part_size *=3D (size_t)(hc_erase=
+_grp_sz *
+>>>>>>                                         hc_wp_grp_sz);
+>>>>>> -                               mmc_part_add(card, part_size << =
+19,
+>>>>>> -                                       EXT_CSD_PART_CONFIG_ACC_=
+GP0 + idx,
+>>>>>> -                                       "gp%d", idx, false,
+>>>>>> -                                       MMC_BLK_DATA_AREA_GP);
+>>>>>> +                               if (ext_csd[EXT_CSD_PARTITION_SE=
+TTING_COMPLETED] &
+>>>>>> +                               EXT_CSD_PART_SETTING_COMPLETED) =
+{
+>>>>>
+>>>>> Some minor comments here.
+>>>>>
+>>>>> I think you could move this if statement up and into the previous=
+ "if"
+>>>>> where we check for "ext_csd[EXT_CSD_PARTITION_SUPPORT] &
+>>>>> EXT_CSD_PART_SUPPORT_PART_EN".
+>>>>>
+>>>>> Additionally, please run checkpatch.
+>>>>>
+>>>>> Kind regards
+>>>>> Uffe
+>>>>
+>>>> Hello,
+>>>>
+>>>> I didn't put the if statement above to warn user in case of bad pa=
+rtitioning.
+>>>> I don't want the kernel to silently ignore this error.
+>>>
+>>> Fair enough.
+>>>
+>>> Still I am wondering whether hc_erase_grp_sz, hc_wp_grp_sz and
+>>> enhanced_area_en should be updated if
+>>> EXT_CSD_PARTITION_SETTING_COMPLETED isn't set.  That's the case in
+>>> your patch.
 >>
->>> On R-Car Gen 2, the SDHI registers cannot be accessed while the SDHI
->>> module clock is disabled. Doing so will cause a lock-up.
->>>
->>> When suspending, enable the module clock before disabling the SDHI
->>> interrupts, and disable the clock again afterwards.
+>> I was focused on partitions and I didn't pay attention on enhanced a=
+rea.
 >>
->> This feels wrong. Why can't interrupts be disabled prior to turning the clock off?
->
-> The clock is handled by runtime PM. So if SDHI becomes idle, the clock
-> is turned off.
-> However, the card insertion interrupt is still enabled.
-> If all interrupts would be disabled when the clock is turned off, I believe card
-> insertion can no longer be detected.
->
-> BTW, I'm still wondering why tmio_mmc_host_resume() works without
-> enabling the clock, as it calls tmio_mmc_enable_dma(), which also writes to
-> an SDHI register (CTL_DMA_ENABLE).
-
-A while ago, I tried to rework the runtime PM handling of tmio.
-
-http://www.spinics.net/lists/linux-mmc/msg23177.html
-
-The hole set never got merged, due to that we couldn't get them tested
-on hardware and there were a lack in review.
-
-We might want to pick them up to see if those may solve our problem. :-)
-
-Kind regards
-Uffe
-
->
->>> This fixes suspend and resume on r8a7791/koelsch.
+>> JEDEC says that partitioning implies :
+>> * Configure general purpose partitions attributes and sizes
+>> * Configure enhanced user area offset, attributes and size
+>>
+>> and finally set EXT_CSD_PARTITION_SETTING_COMPLETED.
+>>
+>> Thus these two parts must checks for setting completed before
+>> computing values.
+>>
+>> Plus, "enhanced_area_en" attribute is set whether or not there is an
+>> enhanced area defined. I looked at the code, and the only usage of i=
+t
+>> is to set EXT_CSD_ERASE_GROUP_DEF and compute erase size again.
+>> I suggest using "partition_setting_completed" identifier which is co=
+mmon
+>> to the two functions and requires EXT_CSD_ERASE_GROUP_DEF to be set.
+>>
+>> If you're ok with that, I'll submit another patch.
+>=20
+> Seems reasonable. Please send a v2.
+>=20
+> Kind regards
+> Uffe
+>=20
+>>
+>>
+>> Best regards
+>> Gr=C3=A9gory Soutad=C3=A9
+>>
 >>>
->>> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
->>> ---
->>>  drivers/mmc/host/tmio_mmc_pio.c | 10 ++++++++++
->>>  1 file changed, 10 insertions(+)
+>>>>
+>>>> checkpatch has been run before sending this patch, I know there ar=
+e two lines
+>>>> with two extra characters, but names used here are quite long. I h=
+ope it will
+>>>> not block upstream inclusion.
 >>>
->>> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
->>> index faf0924e71cb..83192420a7e3 100644
->>> --- a/drivers/mmc/host/tmio_mmc_pio.c
->>> +++ b/drivers/mmc/host/tmio_mmc_pio.c
->>> @@ -1147,8 +1147,18 @@ int tmio_mmc_host_suspend(struct device *dev)
->>>  {
->>>       struct mmc_host *mmc = dev_get_drvdata(dev);
->>>       struct tmio_mmc_host *host = mmc_priv(mmc);
->>> +     struct tmio_mmc_data *pdata = host->pdata;
->>> +
->>> +     if (pdata->clk_enable) {
->>> +             unsigned int f;
->>> +             pdata->clk_enable(host->pdev, &f);
->>> +     }
+>>> The mmc_read_ext_csd() is not one of the nicest piece of code, but =
+for
+>>> sure we should not move on making it worse. If you need to move cod=
+e
+>>> into separate function to prevent checkpatch warnings, please do so=
+=2E
 >>>
->>>       tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
->>> +
->>> +     if (pdata->clk_disable)
->>> +             pdata->clk_disable(host->pdev);
->>> +
->>>       return 0;
->>>  }
->>>  EXPORT_SYMBOL(tmio_mmc_host_suspend);
->>> --
->>> 1.9.1
->
-> Gr{oetje,eeting}s,
->
->                         Geert
->
-> --
-> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
->
-> In personal conversations with technical people, I call myself a hacker. But
-> when I'm talking to journalists I just say "programmer" or something like that.
->                                 -- Linus Torvalds
+>>> Kind regards
+>>> Uffe
+>>>
+>>
+>=20
