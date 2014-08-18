@@ -1,68 +1,97 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] mmc: sdhci-pxav3: set_uhs_signaling is initialized
- twice differently
-Date: Mon, 18 Aug 2014 14:40:07 +0200
-Message-ID: <CAPDyKFrC-8UE5k3FG8SumB8yTg+G0hGY0dzEXuV0RfQKt=64qg@mail.gmail.com>
-References: <1408107735-20775-1-git-send-email-peter.griffin@linaro.org>
+Subject: Re: [PATCH] mmc: tmio: Fix hang during suspend
+Date: Mon, 18 Aug 2014 15:10:53 +0200
+Message-ID: <CAPDyKFpyZM8thDhtcw4PUhGPezdag=6Fv_J9nejvenPNdTu-aA@mail.gmail.com>
+References: <1408029833-6970-1-git-send-email-geert+renesas@glider.be>
+	<20140815134917.da77205b68f18341140c6593@codethink.co.uk>
+	<CAMuHMdXrWgW2iMDd7GA+QC-vcAsp+vH9fidkdnBj-f9F878yAw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f43.google.com ([209.85.216.43]:47702 "EHLO
-	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750826AbaHRMkI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Aug 2014 08:40:08 -0400
-Received: by mail-qa0-f43.google.com with SMTP id w8so4301899qac.16
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2014 05:40:07 -0700 (PDT)
-In-Reply-To: <1408107735-20775-1-git-send-email-peter.griffin@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAMuHMdXrWgW2iMDd7GA+QC-vcAsp+vH9fidkdnBj-f9F878yAw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>, Ian Molton <ian.molton@codethink.co.uk>
+Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Chris Ball <chris@printf.net>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Griffin <peter.griffin@linaro.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, zhangfei.gao@marvell.com, Philip Rakity <prakity@marvell.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Patch Tracking <patches@linaro.org>, Lee Jones <lee.jones@linaro.org>
 
-On 15 August 2014 15:02, Peter Griffin <peter.griffin@linaro.org> wrote:
-> .set_uhs_signaling field is currently initialised twice once to the
-> arch specific callback pxav3_set_uhs_signaling, and also to the generic
-> sdhci_set_uhs_signaling callback.
+On 18 August 2014 14:36, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+> Hi Ian,
 >
-> This means that uhs is currently broken for this platform currently, as pxav3
-> has some special constriants which means it can't use the generic callback.
+> On Fri, Aug 15, 2014 at 2:49 PM, Ian Molton <ian.molton@codethink.co.uk> wrote:
+>> On Thu, 14 Aug 2014 17:23:53 +0200
+>> Geert Uytterhoeven <geert+renesas@glider.be> wrote:
+>>
+>>> On R-Car Gen 2, the SDHI registers cannot be accessed while the SDHI
+>>> module clock is disabled. Doing so will cause a lock-up.
+>>>
+>>> When suspending, enable the module clock before disabling the SDHI
+>>> interrupts, and disable the clock again afterwards.
+>>
+>> This feels wrong. Why can't interrupts be disabled prior to turning the clock off?
 >
-> This happened in
-> commit 96d7b78cfc2f ("mmc: sdhci: convert sdhci_set_uhs_signaling() into a library function")
-> commit a702c8abb2a9 ("mmc: host: split up sdhci-pxa, create sdhci-pxav3.c")'
+> The clock is handled by runtime PM. So if SDHI becomes idle, the clock
+> is turned off.
+> However, the card insertion interrupt is still enabled.
+> If all interrupts would be disabled when the clock is turned off, I believe card
+> insertion can no longer be detected.
 >
-> Fix this and hopefully prevent it happening in the future by ensuring named
-> initialisers always follow the declaration order in the structure definition.
->
-> Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+> BTW, I'm still wondering why tmio_mmc_host_resume() works without
+> enabling the clock, as it calls tmio_mmc_enable_dma(), which also writes to
+> an SDHI register (CTL_DMA_ENABLE).
 
-Thanks! Applied for next and added a stable tag for v3.16+
+A while ago, I tried to rework the runtime PM handling of tmio.
+
+http://www.spinics.net/lists/linux-mmc/msg23177.html
+
+The hole set never got merged, due to that we couldn't get them tested
+on hardware and there were a lack in review.
+
+We might want to pick them up to see if those may solve our problem. :-)
 
 Kind regards
 Uffe
 
-> ---
->  drivers/mmc/host/sdhci-pxav3.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> index 6f842fb..3434c79 100644
-> --- a/drivers/mmc/host/sdhci-pxav3.c
-> +++ b/drivers/mmc/host/sdhci-pxav3.c
-> @@ -224,12 +224,11 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+>>> This fixes suspend and resume on r8a7791/koelsch.
+>>>
+>>> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+>>> ---
+>>>  drivers/mmc/host/tmio_mmc_pio.c | 10 ++++++++++
+>>>  1 file changed, 10 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+>>> index faf0924e71cb..83192420a7e3 100644
+>>> --- a/drivers/mmc/host/tmio_mmc_pio.c
+>>> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+>>> @@ -1147,8 +1147,18 @@ int tmio_mmc_host_suspend(struct device *dev)
+>>>  {
+>>>       struct mmc_host *mmc = dev_get_drvdata(dev);
+>>>       struct tmio_mmc_host *host = mmc_priv(mmc);
+>>> +     struct tmio_mmc_data *pdata = host->pdata;
+>>> +
+>>> +     if (pdata->clk_enable) {
+>>> +             unsigned int f;
+>>> +             pdata->clk_enable(host->pdev, &f);
+>>> +     }
+>>>
+>>>       tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
+>>> +
+>>> +     if (pdata->clk_disable)
+>>> +             pdata->clk_disable(host->pdev);
+>>> +
+>>>       return 0;
+>>>  }
+>>>  EXPORT_SYMBOL(tmio_mmc_host_suspend);
+>>> --
+>>> 1.9.1
 >
->  static const struct sdhci_ops pxav3_sdhci_ops = {
->         .set_clock = sdhci_set_clock,
-> -       .set_uhs_signaling = pxav3_set_uhs_signaling,
->         .platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
->         .get_max_clock = sdhci_pltfm_clk_get_max_clock,
->         .set_bus_width = sdhci_set_bus_width,
->         .reset = pxav3_reset,
-> -       .set_uhs_signaling = sdhci_set_uhs_signaling,
-> +       .set_uhs_signaling = pxav3_set_uhs_signaling,
->  };
+> Gr{oetje,eeting}s,
 >
->  static struct sdhci_pltfm_data sdhci_pxav3_pdata = {
+>                         Geert
+>
 > --
-> 1.9.1
+> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 >
+> In personal conversations with technical people, I call myself a hacker. But
+> when I'm talking to journalists I just say "programmer" or something like that.
+>                                 -- Linus Torvalds
