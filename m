@@ -1,23 +1,27 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: rtsx_pci_sdmmc: fix incorrect last byte in R2 response
-Date: Mon, 18 Aug 2014 11:33:15 +0200
-Message-ID: <CAPDyKFrd8VzoHrYE17xZEncnfHquC5xBbj_ncHSw08WQHjYK8w@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: rtsx_usb_sdmmc: fix incorrect last byte in R2
+ response
+Date: Mon, 18 Aug 2014 11:33:36 +0200
+Message-ID: <CAPDyKFpwu_Zas+oBRnrsTzYoNYzn1mrWyBJ_LepgP+US-55h5Q@mail.gmail.com>
 References: <1408082761-15333-1-git-send-email-rogerable@realtek.com>
-	<1408082761-15333-2-git-send-email-rogerable@realtek.com>
+ <1408082761-15333-3-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f47.google.com ([209.85.192.47]:43964 "EHLO
-	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750762AbaHRJdP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Aug 2014 05:33:15 -0400
-Received: by mail-qg0-f47.google.com with SMTP id i50so4213386qgf.20
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2014 02:33:15 -0700 (PDT)
-In-Reply-To: <1408082761-15333-2-git-send-email-rogerable@realtek.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <1408082761-15333-3-git-send-email-rogerable@realtek.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
 To: Roger <rogerable@realtek.com>
-Cc: Chris Ball <chris@printf.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "driverdev-devel@linuxdriverproject.org" <driverdev-devel@linuxdriverproject.org>, Wei WANG <wei_wang@realsil.com.cn>, micky <micky_ching@realsil.com.cn>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "driverdev-devel@linuxdriverproject.org" <driverdev-devel@linuxdriverproject.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei WANG <wei_wang@realsil.com.cn>, Dan Carpenter <dan.carpenter@oracle.com>
+List-Id: linux-mmc@vger.kernel.org
 
 On 15 August 2014 08:06,  <rogerable@realtek.com> wrote:
 > From: Roger Tseng <rogerable@realtek.com>
@@ -29,25 +33,26 @@ On 15 August 2014 08:06,  <rogerable@realtek.com> wrote:
 > same card after resume and misidentify it as a different card.
 >
 > Fix by assigning dummy CRC and end bit: {7'b0, 1} = 0x1 to the last byte of R2.
+>
+> Cc: <stable@vger.kernel.org> # v3.16+
+> Fixes: c7f6558d84af ("mmc: Add realtek USB sdmmc host driver")
+> Signed-off-by: Roger Tseng <rogerable@realtek.com>
 
 Thanks! Applied for next.
 
 Kind regards
 Uffe
 
->
-> Cc: <stable@vger.kernel.org> # v3.8+
-> Fixes: ff984e57d36e ("mmc: Add realtek pcie sdmmc host driver")
-> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+
 > ---
->  drivers/mmc/host/rtsx_pci_sdmmc.c |    7 +++++++
+>  drivers/mmc/host/rtsx_usb_sdmmc.c |    7 +++++++
 >  1 file changed, 7 insertions(+)
 >
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index dfde4a210238..b2537e2f26b1 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -412,6 +412,13 @@ static void sd_send_cmd_get_rsp(struct realtek_pci_sdmmc *host,
+> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> index 5d3766e792f0..d9153a7d160d 100644
+> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> @@ -435,6 +435,13 @@ static void sd_send_cmd_get_rsp(struct rtsx_usb_sdmmc *host,
 >         }
 >
 >         if (rsp_type == SD_RSP_TYPE_R2) {
