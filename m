@@ -1,51 +1,42 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: select GPIOLIB for MMC support
-Date: Mon, 18 Aug 2014 18:00:37 +0200
-Message-ID: <CAPDyKFoUO7GLfZxVFq0c5BtpnVUSCv0cnb1uz6S2A_4_OcVhqw@mail.gmail.com>
-References: <1408375217-20500-1-git-send-email-linus.walleij@linaro.org>
+From: Kukjin Kim <kgene.kim@samsung.com>
+Subject: Re: [PATCHv10 3/5] ARM: dts: exynos: unuse the slot-node and deprecate
+ the supports-highspeed for dw-mmc
+Date: Mon, 18 Aug 2014 11:54:19 -0500
+Message-ID: <53F22FBB.4010801@samsung.com>
+References: <1407397082-32495-1-git-send-email-jh80.chung@samsung.com> <1407397082-32495-4-git-send-email-jh80.chung@samsung.com> <53F1F027.7060609@samsung.com> <53F20955.2050806@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <1408375217-20500-1-git-send-email-linus.walleij@linaro.org>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, linux-gpio@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <53F20955.2050806@suse.de>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: =?ISO-8859-1?Q?Andreas_F=E4rber?= <afaerber@suse.de>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, devicetree@vger.kernel.org, heiko@sntech.de, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 18 August 2014 17:20, Linus Walleij <linus.walleij@linaro.org> wrote:
-> The slot-gpio support has been compiled into the core for some time,
-> and it basically requires GPIOLIB to be present, very few systems
-> are using the archaic GPIO API (just defined function names) and
-> those should be migrated to GPIOLIB anyway.
+On 08/18/14 09:10, Andreas F=E4rber wrote:
+> Hi Jaehoon,
 >
-> The rewrite to use GPIO descriptors require that we enable GPIOLIB,
-> so make CONFIG_MMC select CONFIG_GPIOLIB.
+> Am 18.08.2014 14:23, schrieb Jaehoon Chung:
+>> Socfpga and Rockchip were queued into each SoC tree.
+>> I want to know whether this patch is queued or not into Samsung-Soc =
+tree.
+>> Do you have any other plan for this patch?
 >
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-
-Thanks! Applied for next.
-
-I put it prior the other GPIO descriptor patches to not break bisectability.
-
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/Kconfig | 1 +
->  1 file changed, 1 insertion(+)
+> It isn't applied in his tree:
 >
-> diff --git a/drivers/mmc/Kconfig b/drivers/mmc/Kconfig
-> index f2eeb38efa65..bf44002793c4 100644
-> --- a/drivers/mmc/Kconfig
-> +++ b/drivers/mmc/Kconfig
-> @@ -5,6 +5,7 @@
->  menuconfig MMC
->         tristate "MMC/SD/SDIO card support"
->         depends on HAS_IOMEM
-> +       select GPIOLIB
->         help
->           This selects MultiMediaCard, Secure Digital and Secure
->           Digital I/O support.
-> --
-> 1.9.3
+> http://git.kernel.org/cgit/linux/kernel/git/kgene/linux-samsung.git/
 >
+> In fact Kukjin has not applied any patches for 3 weeks now, which lik=
+ely
+> means he's on vacation. I am hoping he will review this and the other
+> pending conflicting patches to decide on a merge order and fix any
+> trivial conflicts himself. ;)
+>
+Oh, I thought it has been queued in previous merge window with my ack.
+
+OK, I've applied this in my tree for 3.18.
+
+Thanks,
+Kukjin
