@@ -1,46 +1,75 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/2] mmc: dw_mmc: Add support for MIPS
-Date: Mon, 18 Aug 2014 13:41:25 +0200
-Message-ID: <CAPDyKFrC9yHHU6bcLOgcs0do9fUPWc9VNBUCtbKzz1j_D0n+Pg@mail.gmail.com>
-References: <1408034728-4952-1-git-send-email-abrestic@chromium.org>
-	<1408034728-4952-2-git-send-email-abrestic@chromium.org>
+Subject: Re: [PATCH] mmc: core: sd: check card write-protect lock while resuming
+Date: Mon, 18 Aug 2014 13:57:32 +0200
+Message-ID: <CAPDyKFpFLoREZ=rYp8bQvJ7Fczq=HyLL90jv7Hjzai9xTNBNYg@mail.gmail.com>
+References: <1408356012-18867-1-git-send-email-Barry.Song@csr.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1408034728-4952-2-git-send-email-abrestic@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Bresticker <abrestic@chromium.org>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Doug Anderson <dianders@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alim Akhtar <alim.akhtar@gmail.com>, Arnd Bergmann <arnd@arndb.de>
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f52.google.com ([209.85.216.52]:62670 "EHLO
+	mail-qa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751355AbaHRL5d convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Aug 2014 07:57:33 -0400
+Received: by mail-qa0-f52.google.com with SMTP id j15so4241361qaq.39
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2014 04:57:32 -0700 (PDT)
+In-Reply-To: <1408356012-18867-1-git-send-email-Barry.Song@csr.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Barry Song <Barry.Song@csr.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, workgroup.linux@csr.com, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-On 14 August 2014 18:45, Andrew Bresticker <abrestic@chromium.org> wrote:
-> There are upcoming MIPS SoCs with dw_mmc hosts.
+On 18 August 2014 12:00, Barry Song <Barry.Song@csr.com> wrote:
+> From: Minda Chen <Minda.Chen@csr.com>
 >
-> Signed-off-by: Andrew Bresticker <abrestic@chromium.org>
+> After suspending, unplug the sdcard, and set sd WP lock,
+> insert it again, then resume the system. resume codes do
+> not check the the sdcard write-proctect lock. now check
+> it.
+>
+> Signed-off-by: Minda Chen <Minda.Chen@csr.com>
+> Signed-off-by: Barry Song <Baohua.Song@csr.com>
+> ---
+>  drivers/mmc/core/sd.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 0c44510..890557a 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -910,6 +910,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>         int err;
+>         u32 cid[4];
+>         u32 rocr = 0;
+> +       bool oldro, ro;
+>
+>         BUG_ON(!host);
+>         WARN_ON(!host->claimed);
+> @@ -922,6 +923,12 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>                 if (memcmp(cid, oldcard->raw_cid, sizeof(cid)) != 0)
+>                         return -ENOENT;
+>
+> +               if (host->ops->get_ro) {
+> +                       ro = host->ops->get_ro(host) ? true : false;
+> +                       oldro = mmc_card_readonly(oldcard) ? true : false;
+> +                       if (oldro ^ ro)
+> +                               return -ENOENT;
+> +               }
 
-Thanks! Applied for next.
+Seems like this code belongs better in mmc_sd_setup_card(). Could you
+try moving it there.
 
 Kind regards
 Uffe
 
-
-> ---
->  drivers/mmc/host/Kconfig | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 385674b..6acc2ab 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -564,7 +564,7 @@ config SDH_BFIN_MISSING_CMD_PULLUP_WORKAROUND
->  config MMC_DW
->         tristate "Synopsys DesignWare Memory Card Interface"
->         depends on HAS_DMA
-> -       depends on ARC || ARM || COMPILE_TEST
-> +       depends on ARC || ARM || MIPS || COMPILE_TEST
->         help
->           This selects support for the Synopsys DesignWare Mobile Storage IP
->           block, this provides host support for SD and MMC interfaces, in both
+>                 card = oldcard;
+>         } else {
+>                 /*
 > --
-> 2.1.0.rc2.206.gedb03e5
+> 2.0.4
 >
+>
+>
+> Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
+> More information can be found at www.csr.com. Keep up to date with CSR on our technical blog, www.csr.com/blog, CSR people blog, www.csr.com/people, YouTube, www.youtube.com/user/CSRplc, Facebook, www.facebook.com/pages/CSR/191038434253534, or follow us on Twitter at www.twitter.com/CSR_plc.
+> New for 2014, you can now access the wide range of products powered by aptX at www.aptx.com.
