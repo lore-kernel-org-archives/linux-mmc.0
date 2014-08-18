@@ -1,294 +1,572 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 0002/0002] mmc: check EXT_CSD_PARTITION_SETTING_COMPLETED
- before creating partitions
-Date: Mon, 18 Aug 2014 14:15:14 +0200
-Message-ID: <CAPDyKFoD6j37LQnvyTi2STrntKTohBq2tmOq9SOekP0YND5Xbg@mail.gmail.com>
-References: <53C7E45E.2060102@neotion.com>
-	<53F1DA68.1040409@neotion.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCHv10 3/5] ARM: dts: exynos: unuse the slot-node and deprecate
+ the supports-highspeed for dw-mmc
+Date: Mon, 18 Aug 2014 21:23:03 +0900
+Message-ID: <53F1F027.7060609@samsung.com>
+References: <1407397082-32495-1-git-send-email-jh80.chung@samsung.com>
+ <1407397082-32495-4-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f50.google.com ([209.85.192.50]:48152 "EHLO
-	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750836AbaHRMPP convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Aug 2014 08:15:15 -0400
-Received: by mail-qg0-f50.google.com with SMTP id z107so971895qgd.23
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2014 05:15:14 -0700 (PDT)
-In-Reply-To: <53F1DA68.1040409@neotion.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1407397082-32495-4-git-send-email-jh80.chung@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, devicetree@vger.kernel.org, heiko@sntech.de, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 18 August 2014 12:50, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.co=
-m> wrote:
-> Checks EXT_CSD_PARTITION_SETTING_COMPLETED bit before
-> computing enhanced user area and adding mmc partitions
-> (as described in JEDEC standard).
->
-> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
+Hi, Kukjin.
 
-Hi Gr=C3=A9gory,
+Socfpga and Rockchip were queued into each SoC tree.
+I want to know whether this patch is queued or not into Samsung-Soc tree.
+Do you have any other plan for this patch?
 
-=46irst, could you rename patches so they actually describe what they
-actually do. Currently both of them have the same header.
-Second, I really appreciate if there could be some version history of
-the patches since it helps review process.
+Best Regards,
+Jaehoon Chung
 
-Could you please resend them?
-
-Kind regards
-Uffe
-
+On 08/07/2014 04:38 PM, Jaehoon Chung wrote:
+> dw-mmc controller can support multiple slots.
+> But, there are no use-cases anywhere. So we don't need to support the
+> slot-node for dw-mmc controller.
+> And "supports-highspeed" property in dw-mmc is deprecated.
+> "supports-highspeed" property can be replaced with "cap-sd/mmc-highspeed".
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Reviewed-by: Tushar Behera <trblinux@gmail.com>
+> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Tested-by: Sachin Kamat <sachin.kamat@samsung.com>
 > ---
->  drivers/mmc/core/mmc.c |  167 +++++++++++++++++++++++++++-----------=
-----------
->  1 file changed, 95 insertions(+), 72 deletions(-)
->
-> Changelog v2:
->         Move code for user area and general purpose partitions
->         into functions.
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index ef25d91..3158470 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -298,6 +298,99 @@ static void mmc_select_card_type(struct mmc_card=
- *card)
->         card->mmc_avail_type =3D avail_type;
->  }
->
-> +static void mmc_manage_enhanced_area(struct mmc_card *card, u8 *ext_=
-csd)
-> +{
-> +       u8 hc_erase_grp_sz, hc_wp_grp_sz;
-> +
-> +       /*
-> +        * Enhanced area feature support -- check whether the eMMC
-> +        * card has the Enhanced area enabled.  If so, export enhance=
-d
-> +        * area offset and size to user by adding sysfs interface.
-> +        */
-> +       if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
-> +           (ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
-> +               if (card->ext_csd.partition_setting_completed) {
-> +                       hc_erase_grp_sz =3D
-> +                               ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-> +                       hc_wp_grp_sz =3D
-> +                               ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-> +                       /*
-> +                        * calculate the enhanced data area offset, i=
-n bytes
-> +                        */
-> +                       card->ext_csd.enhanced_area_offset =3D
-> +                               (ext_csd[139] << 24) + (ext_csd[138] =
-<< 16) +
-> +                               (ext_csd[137] << 8) + ext_csd[136];
-> +                       if (mmc_card_blockaddr(card))
-> +                               card->ext_csd.enhanced_area_offset <<=
-=3D 9;
-> +                       /*
-> +                        * calculate the enhanced data area size, in =
-kilobytes
-> +                        */
-> +                       card->ext_csd.enhanced_area_size =3D
-> +                               (ext_csd[142] << 16) + (ext_csd[141] =
-<< 8) +
-> +                               ext_csd[140];
-> +                       card->ext_csd.enhanced_area_size *=3D
-> +                               (size_t)(hc_erase_grp_sz * hc_wp_grp_=
-sz);
-> +                       card->ext_csd.enhanced_area_size <<=3D 9;
-> +               } else {
-> +                       pr_warn("%s: defines enhanced area without pa=
-rtition setting complete\n",
-> +                               mmc_hostname(card->host));
-> +               }
-> +       } else {
-> +               /*
-> +                * If the enhanced area is not enabled, disable these
-> +                * device attributes.
-> +                */
-> +               card->ext_csd.enhanced_area_offset =3D -EINVAL;
-> +               card->ext_csd.enhanced_area_size =3D -EINVAL;
-> +       }
-> +}
-> +
-> +static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_=
-csd)
-> +{
-> +       int idx;
-> +       u8 hc_erase_grp_sz, hc_wp_grp_sz;
-> +       unsigned int part_size;
-> +
-> +       /*
-> +        * General purpose partition feature support --
-> +        * If ext_csd has the size of general purpose partitions,
-> +        * set size, part_cfg, partition name in mmc_part.
-> +        */
-> +       if (ext_csd[EXT_CSD_PARTITION_SUPPORT] &
-> +           EXT_CSD_PART_SUPPORT_PART_EN) {
-> +               hc_erase_grp_sz =3D
-> +                       ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-> +               hc_wp_grp_sz =3D
-> +                       ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-> +
-> +               for (idx =3D 0; idx < MMC_NUM_GP_PARTITION; idx++) {
-> +                       if (!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3] =
-&&
-> +                           !ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 +=
- 1] &&
-> +                           !ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 +=
- 2])
-> +                               continue;
-> +
-> +                       if (card->ext_csd.partition_setting_completed=
- =3D=3D 0) {
-> +                               pr_warn("%s: has partition size defin=
-ed without partition complete\n",
-> +                                       mmc_hostname(card->host));
-> +                               break;
-> +                       }
-> +
-> +                       part_size =3D
-> +                               (ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
- 3 + 2]
-> +                               << 16) +
-> +                               (ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
- 3 + 1]
-> +                               << 8) +
-> +                               ext_csd[EXT_CSD_GP_SIZE_MULT + idx * =
-3];
-> +                       part_size *=3D (size_t)(hc_erase_grp_sz *
-> +                               hc_wp_grp_sz);
-> +                       mmc_part_add(card, part_size << 19,
-> +                               EXT_CSD_PART_CONFIG_ACC_GP0 + idx,
-> +                               "gp%d", idx, false,
-> +                               MMC_BLK_DATA_AREA_GP);
-> +               }
-> +       }
-> +}
-> +
->  /*
->   * Decode extended CSD.
->   */
-> @@ -305,7 +398,6 @@ static int mmc_read_ext_csd(struct mmc_card *card=
-, u8 *ext_csd)
->  {
->         int err =3D 0, idx;
->         unsigned int part_size;
-> -       u8 hc_erase_grp_sz =3D 0, hc_wp_grp_sz =3D 0;
->
->         BUG_ON(!card);
->
-> @@ -409,80 +501,11 @@ static int mmc_read_ext_csd(struct mmc_card *ca=
-rd, u8 *ext_csd)
->                 } else {
->                         card->ext_csd.partition_setting_completed =3D=
- 0;
->                 }
-> -               /*
-> -                * Enhanced area feature support -- check whether the=
- eMMC
-> -                * card has the Enhanced area enabled.  If so, export=
- enhanced
-> -                * area offset and size to user by adding sysfs inter=
-face.
-> -                */
-> -               if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
-> -                   (ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
-> -                       hc_erase_grp_sz =3D
-> -                               ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-> -                       hc_wp_grp_sz =3D
-> -                               ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
->
-> -                       card->ext_csd.enhanced_area_en =3D 1;
-> -                       /*
-> -                        * calculate the enhanced data area offset, i=
-n bytes
-> -                        */
-> -                       card->ext_csd.enhanced_area_offset =3D
-> -                               (ext_csd[139] << 24) + (ext_csd[138] =
-<< 16) +
-> -                               (ext_csd[137] << 8) + ext_csd[136];
-> -                       if (mmc_card_blockaddr(card))
-> -                               card->ext_csd.enhanced_area_offset <<=
-=3D 9;
-> -                       /*
-> -                        * calculate the enhanced data area size, in =
-kilobytes
-> -                        */
-> -                       card->ext_csd.enhanced_area_size =3D
-> -                               (ext_csd[142] << 16) + (ext_csd[141] =
-<< 8) +
-> -                               ext_csd[140];
-> -                       card->ext_csd.enhanced_area_size *=3D
-> -                               (size_t)(hc_erase_grp_sz * hc_wp_grp_=
-sz);
-> -                       card->ext_csd.enhanced_area_size <<=3D 9;
-> -               } else {
-> -                       /*
-> -                        * If the enhanced area is not enabled, disab=
-le these
-> -                        * device attributes.
-> -                        */
-> -                       card->ext_csd.enhanced_area_offset =3D -EINVA=
-L;
-> -                       card->ext_csd.enhanced_area_size =3D -EINVAL;
-> -               }
-> +               mmc_manage_enhanced_area(card, ext_csd);
->
-> -               /*
-> -                * General purpose partition feature support --
-> -                * If ext_csd has the size of general purpose partiti=
-ons,
-> -                * set size, part_cfg, partition name in mmc_part.
-> -                */
-> -               if (ext_csd[EXT_CSD_PARTITION_SUPPORT] &
-> -                       EXT_CSD_PART_SUPPORT_PART_EN) {
-> -                       if (card->ext_csd.enhanced_area_en !=3D 1) {
-> -                               hc_erase_grp_sz =3D
-> -                                       ext_csd[EXT_CSD_HC_ERASE_GRP_=
-SIZE];
-> -                               hc_wp_grp_sz =3D
-> -                                       ext_csd[EXT_CSD_HC_WP_GRP_SIZ=
-E];
+>  arch/arm/boot/dts/exynos4412-odroid-common.dtsi |    8 ++------
+>  arch/arm/boot/dts/exynos4412-origen.dts         |    8 ++------
+>  arch/arm/boot/dts/exynos4412-trats2.dts         |    8 ++------
+>  arch/arm/boot/dts/exynos5250-arndale.dts        |   18 +++++-----------
+>  arch/arm/boot/dts/exynos5250-cros-common.dtsi   |   25 +++++++----------------
+>  arch/arm/boot/dts/exynos5250-smdk5250.dts       |   18 +++++-----------
+>  arch/arm/boot/dts/exynos5250-snow.dts           |    6 ++----
+>  arch/arm/boot/dts/exynos5260-xyref5260.dts      |   18 +++++-----------
+>  arch/arm/boot/dts/exynos5410-smdk5410.dts       |   18 +++++-----------
+>  arch/arm/boot/dts/exynos5420-arndale-octa.dts   |   16 ++++-----------
+>  arch/arm/boot/dts/exynos5420-peach-pit.dts      |   16 ++++-----------
+>  arch/arm/boot/dts/exynos5420-smdk5420.dts       |   16 ++++-----------
+>  arch/arm/boot/dts/exynos5800-peach-pi.dts       |   16 ++++-----------
+>  13 files changed, 51 insertions(+), 140 deletions(-)
+> 
+> diff --git a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
+> index 6d6d23c..f5c0f81 100644
+> --- a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
+> +++ b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
+> @@ -54,17 +54,13 @@
+>  		status = "okay";
+>  
+>  		num-slots = <1>;
+> -		supports-highspeed;
+>  		broken-cd;
+>  		card-detect-delay = <200>;
+>  		samsung,dw-mshc-ciu-div = <3>;
+>  		samsung,dw-mshc-sdr-timing = <2 3>;
+>  		samsung,dw-mshc-ddr-timing = <1 2>;
 > -
-> -                               card->ext_csd.enhanced_area_en =3D 1;
-> -                       }
-> +               mmc_manage_gp_partitions(card, ext_csd);
->
-> -                       for (idx =3D 0; idx < MMC_NUM_GP_PARTITION; i=
-dx++) {
-> -                               if (!ext_csd[EXT_CSD_GP_SIZE_MULT + i=
-dx * 3] &&
-> -                               !ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
- 3 + 1] &&
-> -                               !ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
- 3 + 2])
-> -                                       continue;
-> -                               part_size =3D
-> -                               (ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
- 3 + 2]
-> -                                       << 16) +
-> -                               (ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
- 3 + 1]
-> -                                       << 8) +
-> -                               ext_csd[EXT_CSD_GP_SIZE_MULT + idx * =
-3];
-> -                               part_size *=3D (size_t)(hc_erase_grp_=
-sz *
-> -                                       hc_wp_grp_sz);
-> -                               mmc_part_add(card, part_size << 19,
-> -                                       EXT_CSD_PART_CONFIG_ACC_GP0 +=
- idx,
-> -                                       "gp%d", idx, false,
-> -                                       MMC_BLK_DATA_AREA_GP);
-> -                       }
-> -               }
->                 card->ext_csd.sec_trim_mult =3D
->                         ext_csd[EXT_CSD_SEC_TRIM_MULT];
->                 card->ext_csd.sec_erase_mult =3D
-> --
-> 1.7.9.5
+> -		slot@0 {
+> -			reg = <0>;
+> -			bus-width = <8>;
+> -		};
+> +		bus-width = <8>;
+> +		cap-mmc-highspeed;
+>  	};
+>  
+>  	watchdog@10060000 {
+> diff --git a/arch/arm/boot/dts/exynos4412-origen.dts b/arch/arm/boot/dts/exynos4412-origen.dts
+> index e925c9f..de15114 100644
+> --- a/arch/arm/boot/dts/exynos4412-origen.dts
+> +++ b/arch/arm/boot/dts/exynos4412-origen.dts
+> @@ -137,17 +137,13 @@
+>  		status = "okay";
+>  
+>  		num-slots = <1>;
+> -		supports-highspeed;
+>  		broken-cd;
+>  		card-detect-delay = <200>;
+>  		samsung,dw-mshc-ciu-div = <3>;
+>  		samsung,dw-mshc-sdr-timing = <2 3>;
+>  		samsung,dw-mshc-ddr-timing = <1 2>;
+> -
+> -		slot@0 {
+> -			reg = <0>;
+> -			bus-width = <8>;
+> -		};
+> +		bus-width = <8>;
+> +		cap-mmc-highspeed;
+>  	};
+>  
+>  	codec@13400000 {
+> diff --git a/arch/arm/boot/dts/exynos4412-trats2.dts b/arch/arm/boot/dts/exynos4412-trats2.dts
+> index 11967f4..5e066cd 100644
+> --- a/arch/arm/boot/dts/exynos4412-trats2.dts
+> +++ b/arch/arm/boot/dts/exynos4412-trats2.dts
+> @@ -520,7 +520,6 @@
+>  
+>  	mmc@12550000 {
+>  		num-slots = <1>;
+> -		supports-highspeed;
+>  		broken-cd;
+>  		non-removable;
+>  		card-detect-delay = <200>;
+> @@ -532,11 +531,8 @@
+>  		pinctrl-0 = <&sd4_clk &sd4_cmd &sd4_bus4 &sd4_bus8>;
+>  		pinctrl-names = "default";
+>  		status = "okay";
+> -
+> -		slot@0 {
+> -			reg = <0>;
+> -			bus-width = <8>;
+> -		};
+> +		bus-width = <8>;
+> +		cap-mmc-highspeed;
+>  	};
+>  
+>  	serial@13800000 {
+> diff --git a/arch/arm/boot/dts/exynos5250-arndale.dts b/arch/arm/boot/dts/exynos5250-arndale.dts
+> index d0de1f5..42a3590 100644
+> --- a/arch/arm/boot/dts/exynos5250-arndale.dts
+> +++ b/arch/arm/boot/dts/exynos5250-arndale.dts
+> @@ -401,7 +401,6 @@
+>  	mmc_0: mmc@12200000 {
+>  		status = "okay";
+>  		num-slots = <1>;
+> -		supports-highspeed;
+>  		broken-cd;
+>  		card-detect-delay = <200>;
+>  		samsung,dw-mshc-ciu-div = <3>;
+> @@ -410,17 +409,13 @@
+>  		vmmc-supply = <&mmc_reg>;
+>  		pinctrl-names = "default";
+>  		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+> -
+> -		slot@0 {
+> -			reg = <0>;
+> -			bus-width = <8>;
+> -		};
+> +		bus-width = <8>;
+> +		cap-mmc-highspeed;
+>  	};
+>  
+>  	mmc_2: mmc@12220000 {
+>  		status = "okay";
+>  		num-slots = <1>;
+> -		supports-highspeed;
+>  		card-detect-delay = <200>;
+>  		samsung,dw-mshc-ciu-div = <3>;
+>  		samsung,dw-mshc-sdr-timing = <2 3>;
+> @@ -428,12 +423,9 @@
+>  		vmmc-supply = <&mmc_reg>;
+>  		pinctrl-names = "default";
+>  		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
+> -
+> -		slot@0 {
+> -			reg = <0>;
+> -			bus-width = <4>;
+> -			disable-wp;
+> -		};
+> +		bus-width = <4>;
+> +		disable-wp;
+> +		cap-sd-highspeed;
+>  	};
+>  
+>  	i2s0: i2s@03830000 {
+> diff --git a/arch/arm/boot/dts/exynos5250-cros-common.dtsi b/arch/arm/boot/dts/exynos5250-cros-common.dtsi
+> index e603e9c..89034fd 100644
+> --- a/arch/arm/boot/dts/exynos5250-cros-common.dtsi
+> +++ b/arch/arm/boot/dts/exynos5250-cros-common.dtsi
+> @@ -89,7 +89,6 @@
+>  
+>  	mmc@12200000 {
+>  		num-slots = <1>;
+> -		supports-highspeed;
+>  		broken-cd;
+>  		card-detect-delay = <200>;
+>  		samsung,dw-mshc-ciu-div = <3>;
+> @@ -97,33 +96,25 @@
+>  		samsung,dw-mshc-ddr-timing = <1 2>;
+>  		pinctrl-names = "default";
+>  		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_cd &sd0_bus4 &sd0_bus8>;
+> -
+> -		slot@0 {
+> -			reg = <0>;
+> -			bus-width = <8>;
+> -		};
+> +		bus-width = <8>;
+> +		cap-mmc-highspeed;
+>  	};
+>  
+>  	mmc@12220000 {
+>  		num-slots = <1>;
+> -		supports-highspeed;
+>  		card-detect-delay = <200>;
+>  		samsung,dw-mshc-ciu-div = <3>;
+>  		samsung,dw-mshc-sdr-timing = <2 3>;
+>  		samsung,dw-mshc-ddr-timing = <1 2>;
+>  		pinctrl-names = "default";
+>  		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
+> -
+> -		slot@0 {
+> -			reg = <0>;
+> -			bus-width = <4>;
+> -			wp-gpios = <&gpc2 1 0>;
+> -		};
+> +		bus-width = <4>;
+> +		wp-gpios = <&gpc2 1 0>;
+> +		cap-sd-highspeed;
+>  	};
+>  
+>  	mmc@12230000 {
+>  		num-slots = <1>;
+> -		supports-highspeed;
+>  		broken-cd;
+>  		card-detect-delay = <200>;
+>  		samsung,dw-mshc-ciu-div = <3>;
+> @@ -131,10 +122,8 @@
+>  		samsung,dw-mshc-ddr-timing = <1 2>;
+>  		/* See board-specific dts files for pin setup */
+>  
+> -		slot@0 {
+> -			reg = <0>;
+> -			bus-width = <4>;
+> -		};
+> +		bus-width = <4>;
+> +		cap-sd-highspeed;
+>  	};
+>  
+>  	spi_1: spi@12d30000 {
+> diff --git a/arch/arm/boot/dts/exynos5250-smdk5250.dts b/arch/arm/boot/dts/exynos5250-smdk5250.dts
+> index b4b35ad..6a0f4c0 100644
+> --- a/arch/arm/boot/dts/exynos5250-smdk5250.dts
+> +++ b/arch/arm/boot/dts/exynos5250-smdk5250.dts
+> @@ -284,7 +284,6 @@
+>  	mmc@12200000 {
+>  		status = "okay";
+>  		num-slots = <1>;
+> -		supports-highspeed;
+>  		broken-cd;
+>  		card-detect-delay = <200>;
+>  		samsung,dw-mshc-ciu-div = <3>;
+> @@ -292,29 +291,22 @@
+>  		samsung,dw-mshc-ddr-timing = <1 2>;
+>  		pinctrl-names = "default";
+>  		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+> -
+> -		slot@0 {
+> -			reg = <0>;
+> -			bus-width = <8>;
+> -		};
+> +		bus-width = <8>;
+> +		cap-mmc-highspeed;
+>  	};
+>  
+>  	mmc@12220000 {
+>  		status = "okay";
+>  		num-slots = <1>;
+> -		supports-highspeed;
+>  		card-detect-delay = <200>;
+>  		samsung,dw-mshc-ciu-div = <3>;
+>  		samsung,dw-mshc-sdr-timing = <2 3>;
+>  		samsung,dw-mshc-ddr-timing = <1 2>;
+>  		pinctrl-names = "default";
+>  		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
+> -
+> -		slot@0 {
+> -			reg = <0>;
+> -			bus-width = <4>;
+> -			disable-wp;
+> -		};
+> +		bus-width = <4>;
+> +		disable-wp;
+> +		cap-sd-highspeed;
+>  	};
+>  
+>  	spi_1: spi@12d30000 {
+> diff --git a/arch/arm/boot/dts/exynos5250-snow.dts b/arch/arm/boot/dts/exynos5250-snow.dts
+> index f2b8c41..eb437f6 100644
+> --- a/arch/arm/boot/dts/exynos5250-snow.dts
+> +++ b/arch/arm/boot/dts/exynos5250-snow.dts
+> @@ -240,10 +240,8 @@
+>  	 */
+>  	mmc@12230000 {
+>  		status = "okay";
+> -		slot@0 {
+> -			pinctrl-names = "default";
+> -			pinctrl-0 = <&sd3_clk &sd3_cmd &sd3_bus4>;
+> -		};
+> +		pinctrl-names = "default";
+> +		pinctrl-0 = <&sd3_clk &sd3_cmd &sd3_bus4>;
+>  	};
+>  
+>  	i2c@12CD0000 {
+> diff --git a/arch/arm/boot/dts/exynos5260-xyref5260.dts b/arch/arm/boot/dts/exynos5260-xyref5260.dts
+> index 8c84ab2..a803b60 100644
+> --- a/arch/arm/boot/dts/exynos5260-xyref5260.dts
+> +++ b/arch/arm/boot/dts/exynos5260-xyref5260.dts
+> @@ -69,7 +69,7 @@
+>  	num-slots = <1>;
+>  	broken-cd;
+>  	bypass-smu;
+> -	supports-highspeed;
+> +	cap-mmc-highspeed;
+>  	supports-hs200-mode; /* 200 Mhz */
+>  	card-detect-delay = <200>;
+>  	samsung,dw-mshc-ciu-div = <3>;
+> @@ -77,27 +77,19 @@
+>  	samsung,dw-mshc-ddr-timing = <0 2>;
+>  	pinctrl-names = "default";
+>  	pinctrl-0 = <&sd0_rdqs &sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8>;
+> -
+> -	slot@0 {
+> -		reg = <0>;
+> -		bus-width = <8>;
+> -	};
+> +	bus-width = <8>;
+>  };
+>  
+>  &mmc_2 {
+>  	status = "okay";
+>  	num-slots = <1>;
+> -	supports-highspeed;
+> +	cap-sd-highspeed;
+>  	card-detect-delay = <200>;
+>  	samsung,dw-mshc-ciu-div = <3>;
+>  	samsung,dw-mshc-sdr-timing = <2 3>;
+>  	samsung,dw-mshc-ddr-timing = <1 2>;
+>  	pinctrl-names = "default";
+>  	pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus1 &sd2_bus4>;
+> -
+> -	slot@0 {
+> -		reg = <0>;
+> -		bus-width = <4>;
+> -		disable-wp;
+> -	};
+> +	bus-width = <4>;
+> +	disable-wp;
+>  };
+> diff --git a/arch/arm/boot/dts/exynos5410-smdk5410.dts b/arch/arm/boot/dts/exynos5410-smdk5410.dts
+> index 7275bbd..be3e025 100644
+> --- a/arch/arm/boot/dts/exynos5410-smdk5410.dts
+> +++ b/arch/arm/boot/dts/exynos5410-smdk5410.dts
+> @@ -40,33 +40,25 @@
+>  &mmc_0 {
+>  	status = "okay";
+>  	num-slots = <1>;
+> -	supports-highspeed;
+> +	cap-mmc-highspeed;
+>  	broken-cd;
+>  	card-detect-delay = <200>;
+>  	samsung,dw-mshc-ciu-div = <3>;
+>  	samsung,dw-mshc-sdr-timing = <2 3>;
+>  	samsung,dw-mshc-ddr-timing = <1 2>;
+> -
+> -	slot@0 {
+> -		reg = <0>;
+> -		bus-width = <8>;
+> -	};
+> +	bus-width = <8>;
+>  };
+>  
+>  &mmc_2 {
+>  	status = "okay";
+>  	num-slots = <1>;
+> -	supports-highspeed;
+> +	cap-sd-highspeed;
+>  	card-detect-delay = <200>;
+>  	samsung,dw-mshc-ciu-div = <3>;
+>  	samsung,dw-mshc-sdr-timing = <2 3>;
+>  	samsung,dw-mshc-ddr-timing = <1 2>;
+> -
+> -	slot@0 {
+> -		reg = <0>;
+> -		bus-width = <4>;
+> -		disable-wp;
+> -	};
+> +	bus-width = <4>;
+> +	disable-wp;
+>  };
+>  
+>  &uart0 {
+> diff --git a/arch/arm/boot/dts/exynos5420-arndale-octa.dts b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
+> index 434fd9d..70a559c 100644
+> --- a/arch/arm/boot/dts/exynos5420-arndale-octa.dts
+> +++ b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
+> @@ -50,7 +50,6 @@
+>  	mmc@12200000 {
+>  		status = "okay";
+>  		broken-cd;
+> -		supports-highspeed;
+>  		card-detect-delay = <200>;
+>  		samsung,dw-mshc-ciu-div = <3>;
+>  		samsung,dw-mshc-sdr-timing = <0 4>;
+> @@ -58,16 +57,12 @@
+>  		pinctrl-names = "default";
+>  		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+>  		vmmc-supply = <&ldo10_reg>;
+> -
+> -		slot@0 {
+> -			reg = <0>;
+> -			bus-width = <8>;
+> -		};
+> +		bus-width = <8>;
+> +		cap-mmc-highspeed;
+>  	};
+>  
+>  	mmc@12220000 {
+>  		status = "okay";
+> -		supports-highspeed;
+>  		card-detect-delay = <200>;
+>  		samsung,dw-mshc-ciu-div = <3>;
+>  		samsung,dw-mshc-sdr-timing = <2 3>;
+> @@ -75,11 +70,8 @@
+>  		pinctrl-names = "default";
+>  		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
+>  		vmmc-supply = <&ldo10_reg>;
+> -
+> -		slot@0 {
+> -			reg = <0>;
+> -			bus-width = <4>;
+> -		};
+> +		bus-width = <4>;
+> +		cap-sd-highspeed;
+>  	};
+>  
+>  	hsi2c_4: i2c@12CA0000 {
+> diff --git a/arch/arm/boot/dts/exynos5420-peach-pit.dts b/arch/arm/boot/dts/exynos5420-peach-pit.dts
+> index 228a6b1..7b1ed2c 100644
+> --- a/arch/arm/boot/dts/exynos5420-peach-pit.dts
+> +++ b/arch/arm/boot/dts/exynos5420-peach-pit.dts
+> @@ -187,7 +187,7 @@
+>  	num-slots = <1>;
+>  	broken-cd;
+>  	caps2-mmc-hs200-1_8v;
+> -	supports-highspeed;
+> +	cap-mmc-highspeed;
+>  	non-removable;
+>  	card-detect-delay = <200>;
+>  	clock-frequency = <400000000>;
+> @@ -196,17 +196,13 @@
+>  	samsung,dw-mshc-ddr-timing = <0 2>;
+>  	pinctrl-names = "default";
+>  	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+> -
+> -	slot@0 {
+> -		reg = <0>;
+> -		bus-width = <8>;
+> -	};
+> +	bus-width = <8>;
+>  };
+>  
+>  &mmc_2 {
+>  	status = "okay";
+>  	num-slots = <1>;
+> -	supports-highspeed;
+> +	cap-sd-highspeed;
+>  	card-detect-delay = <200>;
+>  	clock-frequency = <400000000>;
+>  	samsung,dw-mshc-ciu-div = <3>;
+> @@ -214,11 +210,7 @@
+>  	samsung,dw-mshc-ddr-timing = <1 2>;
+>  	pinctrl-names = "default";
+>  	pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
+> -
+> -	slot@0 {
+> -		reg = <0>;
+> -		bus-width = <4>;
+> -	};
+> +	bus-width = <4>;
+>  };
+>  
+>  
+> diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+> index 6052aa9..8be3d7b 100644
+> --- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
+> +++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+> @@ -76,34 +76,26 @@
+>  	mmc@12200000 {
+>  		status = "okay";
+>  		broken-cd;
+> -		supports-highspeed;
+>  		card-detect-delay = <200>;
+>  		samsung,dw-mshc-ciu-div = <3>;
+>  		samsung,dw-mshc-sdr-timing = <0 4>;
+>  		samsung,dw-mshc-ddr-timing = <0 2>;
+>  		pinctrl-names = "default";
+>  		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+> -
+> -		slot@0 {
+> -			reg = <0>;
+> -			bus-width = <8>;
+> -		};
+> +		bus-width = <8>;
+> +		cap-mmc-highspeed;
+>  	};
+>  
+>  	mmc@12220000 {
+>  		status = "okay";
+> -		supports-highspeed;
+>  		card-detect-delay = <200>;
+>  		samsung,dw-mshc-ciu-div = <3>;
+>  		samsung,dw-mshc-sdr-timing = <2 3>;
+>  		samsung,dw-mshc-ddr-timing = <1 2>;
+>  		pinctrl-names = "default";
+>  		pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
+> -
+> -		slot@0 {
+> -			reg = <0>;
+> -			bus-width = <4>;
+> -		};
+> +		bus-width = <4>;
+> +		cap-sd-highspeed;
+>  	};
+>  
+>  	dp-controller@145B0000 {
+> diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+> index f3ee48b..a587dd6 100644
+> --- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
+> +++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+> @@ -185,7 +185,7 @@
+>  	num-slots = <1>;
+>  	broken-cd;
+>  	caps2-mmc-hs200-1_8v;
+> -	supports-highspeed;
+> +	cap-mmc-highspeed;
+>  	non-removable;
+>  	card-detect-delay = <200>;
+>  	clock-frequency = <400000000>;
+> @@ -194,17 +194,13 @@
+>  	samsung,dw-mshc-ddr-timing = <0 2>;
+>  	pinctrl-names = "default";
+>  	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+> -
+> -	slot@0 {
+> -		reg = <0>;
+> -		bus-width = <8>;
+> -	};
+> +	bus-width = <8>;
+>  };
+>  
+>  &mmc_2 {
+>  	status = "okay";
+>  	num-slots = <1>;
+> -	supports-highspeed;
+> +	cap-sd-highspeed;
+>  	card-detect-delay = <200>;
+>  	clock-frequency = <400000000>;
+>  	samsung,dw-mshc-ciu-div = <3>;
+> @@ -212,11 +208,7 @@
+>  	samsung,dw-mshc-ddr-timing = <1 2>;
+>  	pinctrl-names = "default";
+>  	pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
+> -
+> -	slot@0 {
+> -		reg = <0>;
+> -		bus-width = <4>;
+> -	};
+> +	bus-width = <4>;
+>  };
+>  
+>  
+> 
