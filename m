@@ -1,56 +1,66 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: au1xmmc: fix error return code in au1xmmc_probe()
-Date: Mon, 18 Aug 2014 11:20:57 +0200
-Message-ID: <CAPDyKFrUAci5V3Pv-W_G-CGACOqwJtwyRdRfScUbLwXwzczf9A@mail.gmail.com>
-References: <1407978019-15673-1-git-send-email-weiyj_lk@163.com>
+Subject: Re: [PATCH 1/2] mmc: rtsx_pci_sdmmc: fix incorrect last byte in R2 response
+Date: Mon, 18 Aug 2014 11:33:15 +0200
+Message-ID: <CAPDyKFrd8VzoHrYE17xZEncnfHquC5xBbj_ncHSw08WQHjYK8w@mail.gmail.com>
+References: <1408082761-15333-1-git-send-email-rogerable@realtek.com>
+	<1408082761-15333-2-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f51.google.com ([209.85.192.51]:50087 "EHLO
-	mail-qg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750951AbaHRJU6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Aug 2014 05:20:58 -0400
-Received: by mail-qg0-f51.google.com with SMTP id a108so4279996qge.38
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2014 02:20:57 -0700 (PDT)
-In-Reply-To: <1407978019-15673-1-git-send-email-weiyj_lk@163.com>
+Received: from mail-qg0-f47.google.com ([209.85.192.47]:43964 "EHLO
+	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750762AbaHRJdP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Aug 2014 05:33:15 -0400
+Received: by mail-qg0-f47.google.com with SMTP id i50so4213386qgf.20
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2014 02:33:15 -0700 (PDT)
+In-Reply-To: <1408082761-15333-2-git-send-email-rogerable@realtek.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: weiyj_lk@163.com
-Cc: Manuel Lauss <manuel.lauss@gmail.com>, Chris Ball <chris@printf.net>, Wei Yongjun <yongjun_wei@trendmicro.com.cn>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Roger <rogerable@realtek.com>
+Cc: Chris Ball <chris@printf.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "driverdev-devel@linuxdriverproject.org" <driverdev-devel@linuxdriverproject.org>, Wei WANG <wei_wang@realsil.com.cn>, micky <micky_ching@realsil.com.cn>
 
-On 14 August 2014 03:00,  <weiyj_lk@163.com> wrote:
-> From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+On 15 August 2014 08:06,  <rogerable@realtek.com> wrote:
+> From: Roger Tseng <rogerable@realtek.com>
 >
-> Fix to return a negative error code from the error handling
-> case instead of 0, as done elsewhere in this function.
+> Current code erroneously fill the last byte of R2 response with an undefined
+> value. In addition, the controller actually 'offloads' the last byte
+> (CRC7, end bit) while receiving R2 response and thus it's impossible to get the
+> actual value. This could cause mmc stack to obtain inconsistent CID from the
+> same card after resume and misidentify it as a different card.
 >
-> Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+> Fix by assigning dummy CRC and end bit: {7'b0, 1} = 0x1 to the last byte of R2.
 
 Thanks! Applied for next.
 
 Kind regards
 Uffe
 
-> ---
->  drivers/mmc/host/au1xmmc.c | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
-> index 9c9f6af..725f6a6 100644
-> --- a/drivers/mmc/host/au1xmmc.c
-> +++ b/drivers/mmc/host/au1xmmc.c
-> @@ -1028,9 +1028,12 @@ static int au1xmmc_probe(struct platform_device *pdev)
->         host->clk = clk_get(&pdev->dev, ALCHEMY_PERIPH_CLK);
->         if (IS_ERR(host->clk)) {
->                 dev_err(&pdev->dev, "cannot find clock\n");
-> +               ret = PTR_ERR(host->clk);
->                 goto out_irq;
+> Cc: <stable@vger.kernel.org> # v3.8+
+> Fixes: ff984e57d36e ("mmc: Add realtek pcie sdmmc host driver")
+> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+> ---
+>  drivers/mmc/host/rtsx_pci_sdmmc.c |    7 +++++++
+>  1 file changed, 7 insertions(+)
+>
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index dfde4a210238..b2537e2f26b1 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -412,6 +412,13 @@ static void sd_send_cmd_get_rsp(struct realtek_pci_sdmmc *host,
 >         }
-> -       if (clk_prepare_enable(host->clk)) {
+>
+>         if (rsp_type == SD_RSP_TYPE_R2) {
+> +               /*
+> +                * The controller offloads the last byte {CRC-7, end bit 1'b1}
+> +                * of response type R2. Assign dummy CRC, 0, and end bit to the
+> +                * byte(ptr[16], goes into the LSB of resp[3] later).
+> +                */
+> +               ptr[16] = 1;
 > +
-> +       ret = clk_prepare_enable(host->clk);
-> +       if (ret) {
->                 dev_err(&pdev->dev, "cannot enable clock\n");
->                 goto out_clk;
->         }
+>                 for (i = 0; i < 4; i++) {
+>                         cmd->resp[i] = get_unaligned_be32(ptr + 1 + i * 4);
+>                         dev_dbg(sdmmc_dev(host), "cmd->resp[%d] = 0x%08x\n",
+> --
+> 1.7.10.4
 >
