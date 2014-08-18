@@ -1,65 +1,122 @@
-From: Yunpeng Gao <yunpeng.gao@intel.com>
-Subject: [PATCH] mmc: sdhci-pci: disable preset register for Baytrail and Merrifield
-Date: Mon, 18 Aug 2014 15:32:09 +0800
-Message-ID: <1408347129-733-1-git-send-email-yunpeng.gao@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:24198 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751517AbaHRHaY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 18 Aug 2014 03:30:24 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [REPOST PATCH v2] mmc: dw_mmc: Make sure we don't get stuck when
+ we get an error
+Date: Mon, 18 Aug 2014 11:15:13 +0200
+Message-ID: <CAPDyKFpX0PmpuPvgc0WizXAizNiCiqj2y0y4GzcSMt1y4yzyiA@mail.gmail.com>
+References: <1407942823-4271-1-git-send-email-dianders@chromium.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1407942823-4271-1-git-send-email-dianders@chromium.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <tomasz.figa@gmail.com>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Yunpeng Gao <yunpeng.gao@intel.com>, Chuanxiao Dong <chuanxiao.dong@intel.com>
 
-Due to HW issue, SDHCI host controller on Intel
-Baytrail/Merrifield platforms can not use preset
-register. So, disable preset registers for them by quirks.
+On 13 August 2014 17:13, Doug Anderson <dianders@chromium.org> wrote:
+> If we happened to get a data error at just the wrong time the dw_mmc
+> driver could get into a state where it would never complete its
+> request.  That would leave the caller just hanging there.
+>
+> We fix this two ways and both of the two fixes on their own appear to
+> fix the problems we've seen:
+>
+> 1. Fix a race in the tasklet where the interrupt setting the data
+>    error happens _just after_ we check for it, then we get a
+>    EVENT_XFER_COMPLETE.  We fix this by repeating a bit of code.
+> 2. Fix it so that if we detect that we've got an error in the "data
+>    busy" state and we're not going to do anything else we end the
+>    request and unblock anyone waiting.
+>
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
+> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
 
-Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
----
- drivers/mmc/host/sdhci-pci.c |   10 +++++++---
- 1 file changed, 7 insertions(+), 3 deletions(-)
+Thanks! Applied for next.
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 52c42fc..98187ae 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -277,18 +277,21 @@ static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
- }
- 
- static const struct sdhci_pci_fixes sdhci_intel_byt_emmc = {
-+	.quirks2	= SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	.allow_runtime_pm = true,
- 	.probe_slot	= byt_emmc_probe_slot,
- };
- 
- static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
--	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON,
-+	.quirks2	= SDHCI_QUIRK2_HOST_OFF_CARD_ON |
-+			SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	.allow_runtime_pm = true,
- 	.probe_slot	= byt_sdio_probe_slot,
- };
- 
- static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
--	.quirks2	= SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON,
-+	.quirks2	= SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
-+			SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	.allow_runtime_pm = true,
- 	.own_cd_for_runtime_pm = true,
- };
-@@ -312,7 +315,8 @@ static int intel_mrfl_mmc_probe_slot(struct sdhci_pci_slot *slot)
- 
- static const struct sdhci_pci_fixes sdhci_intel_mrfl_mmc = {
- 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
--	.quirks2	= SDHCI_QUIRK2_BROKEN_HS200,
-+	.quirks2	= SDHCI_QUIRK2_BROKEN_HS200 |
-+			SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	.probe_slot	= intel_mrfl_mmc_probe_slot,
- };
- 
--- 
-1.7.9.5
+Kind regards
+Uffe
 
+> ---
+> Changes in v2:
+> - Removed TODO
+> - Set cmd to NULL before calling dw_mci_request_end()
+>
+>  drivers/mmc/host/dw_mmc.c | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 46 insertions(+)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 8f216ed..7f227e9 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1299,6 +1299,14 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>                         /* fall through */
+>
+>                 case STATE_SENDING_DATA:
+> +                       /*
+> +                        * We could get a data error and never a transfer
+> +                        * complete so we'd better check for it here.
+> +                        *
+> +                        * Note that we don't really care if we also got a
+> +                        * transfer complete; stopping the DMA and sending an
+> +                        * abort won't hurt.
+> +                        */
+>                         if (test_and_clear_bit(EVENT_DATA_ERROR,
+>                                                &host->pending_events)) {
+>                                 dw_mci_stop_dma(host);
+> @@ -1312,7 +1320,29 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>                                 break;
+>
+>                         set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
+> +
+> +                       /*
+> +                        * Handle an EVENT_DATA_ERROR that might have shown up
+> +                        * before the transfer completed.  This might not have
+> +                        * been caught by the check above because the interrupt
+> +                        * could have gone off between the previous check and
+> +                        * the check for transfer complete.
+> +                        *
+> +                        * Technically this ought not be needed assuming we
+> +                        * get a DATA_COMPLETE eventually (we'll notice the
+> +                        * error and end the request), but it shouldn't hurt.
+> +                        *
+> +                        * This has the advantage of sending the stop command.
+> +                        */
+> +                       if (test_and_clear_bit(EVENT_DATA_ERROR,
+> +                                              &host->pending_events)) {
+> +                               dw_mci_stop_dma(host);
+> +                               send_stop_abort(host, data);
+> +                               state = STATE_DATA_ERROR;
+> +                               break;
+> +                       }
+>                         prev_state = state = STATE_DATA_BUSY;
+> +
+>                         /* fall through */
+>
+>                 case STATE_DATA_BUSY:
+> @@ -1335,6 +1365,22 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>                                 /* stop command for open-ended transfer*/
+>                                 if (data->stop)
+>                                         send_stop_abort(host, data);
+> +                       } else {
+> +                               /*
+> +                                * If we don't have a command complete now we'll
+> +                                * never get one since we just reset everything;
+> +                                * better end the request.
+> +                                *
+> +                                * If we do have a command complete we'll fall
+> +                                * through to the SENDING_STOP command and
+> +                                * everything will be peachy keen.
+> +                                */
+> +                               if (!test_bit(EVENT_CMD_COMPLETE,
+> +                                             &host->pending_events)) {
+> +                                       host->cmd = NULL;
+> +                                       dw_mci_request_end(host, mrq);
+> +                                       goto unlock;
+> +                               }
+>                         }
+>
+>                         /*
+> --
+> 2.1.0.rc2.206.gedb03e5
+>
