@@ -1,236 +1,45 @@
-From: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
-Subject: [PATCH v3 0002/0002] mmc: Checks EXT_CSD_PARTITION_SETTING_COMPLETED
- bit before partitions computation
-Date: Mon, 18 Aug 2014 15:12:07 +0200
-Message-ID: <53F1FBA7.8000707@neotion.com>
-References: <53C7E45E.2060102@neotion.com>	<CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>	<53EB2DC3.2080002@neotion.com>	<CAPDyKFpjYqVUZ8GHB76gD8pOx_eMg9ecvbWrMEfbhEd5ffk7mw@mail.gmail.com>	<53ECB95F.2030207@neotion.com> <CAPDyKFp2ekmucHVzMWxeKfyTmuFKTXAYwUEpL5QxvEh8AjFopg@mail.gmail.com>
+From: =?ISO-8859-1?Q?Andreas_F=E4rber?= <afaerber@suse.de>
+Subject: Re: [PATCHv10 3/5] ARM: dts: exynos: unuse the slot-node and deprecate
+ the supports-highspeed for dw-mmc
+Date: Mon, 18 Aug 2014 16:10:29 +0200
+Message-ID: <53F20955.2050806@suse.de>
+References: <1407397082-32495-1-git-send-email-jh80.chung@samsung.com> <1407397082-32495-4-git-send-email-jh80.chung@samsung.com> <53F1F027.7060609@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFp2ekmucHVzMWxeKfyTmuFKTXAYwUEpL5QxvEh8AjFopg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from cantor2.suse.de ([195.135.220.15]:33283 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750924AbaHROKf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 18 Aug 2014 10:10:35 -0400
+In-Reply-To: <53F1F027.7060609@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, devicetree@vger.kernel.org, heiko@sntech.de, dinguyen@altera.com, Mark Rutland <mark.rutland@arm.com>, kgene.kim@samsung.com, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Checks EXT_CSD_PARTITION_SETTING_COMPLETED bit before
-computing enhanced user area offset and size, and adding
-mmc general purpose partitions.
-The two needs EXT_CSD_PARTITION_SETTING_COMPLETED bit be set
-to be valid (as described in JEDEC standard).
+Hi Jaehoon,
 
-Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
----
- drivers/mmc/core/mmc.c |  167 +++++++++++++++++++++++++++-------------=
---------
- 1 file changed, 95 insertions(+), 72 deletions(-)
+Am 18.08.2014 14:23, schrieb Jaehoon Chung:
+> Socfpga and Rockchip were queued into each SoC tree.
+> I want to know whether this patch is queued or not into Samsung-Soc t=
+ree.
+> Do you have any other plan for this patch?
 
-Changelog v2:
-	Move code for user area and general purpose partitions
-	into functions.
+It isn't applied in his tree:
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index ef25d91..3158470 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -298,6 +298,99 @@ static void mmc_select_card_type(struct mmc_card *=
-card)
- 	card->mmc_avail_type =3D avail_type;
- }
+http://git.kernel.org/cgit/linux/kernel/git/kgene/linux-samsung.git/
 
-+static void mmc_manage_enhanced_area(struct mmc_card *card, u8 *ext_cs=
-d)
-+{
-+	u8 hc_erase_grp_sz, hc_wp_grp_sz;
-+
-+	/*
-+	 * Enhanced area feature support -- check whether the eMMC
-+	 * card has the Enhanced area enabled.  If so, export enhanced
-+	 * area offset and size to user by adding sysfs interface.
-+	 */
-+	if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
-+	    (ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
-+		if (card->ext_csd.partition_setting_completed) {
-+			hc_erase_grp_sz =3D
-+				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-+			hc_wp_grp_sz =3D
-+				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-+			/*
-+			 * calculate the enhanced data area offset, in bytes
-+			 */
-+			card->ext_csd.enhanced_area_offset =3D
-+				(ext_csd[139] << 24) + (ext_csd[138] << 16) +
-+				(ext_csd[137] << 8) + ext_csd[136];
-+			if (mmc_card_blockaddr(card))
-+				card->ext_csd.enhanced_area_offset <<=3D 9;
-+			/*
-+			 * calculate the enhanced data area size, in kilobytes
-+			 */
-+			card->ext_csd.enhanced_area_size =3D
-+				(ext_csd[142] << 16) + (ext_csd[141] << 8) +
-+				ext_csd[140];
-+			card->ext_csd.enhanced_area_size *=3D
-+				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
-+			card->ext_csd.enhanced_area_size <<=3D 9;
-+		} else {
-+			pr_warn("%s: defines enhanced area without partition setting comple=
-te\n",
-+				mmc_hostname(card->host));
-+		}
-+	} else {
-+		/*
-+		 * If the enhanced area is not enabled, disable these
-+		 * device attributes.
-+		 */
-+		card->ext_csd.enhanced_area_offset =3D -EINVAL;
-+		card->ext_csd.enhanced_area_size =3D -EINVAL;
-+	}
-+}
-+
-+static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_cs=
-d)
-+{
-+	int idx;
-+	u8 hc_erase_grp_sz, hc_wp_grp_sz;
-+	unsigned int part_size;
-+
-+	/*
-+	 * General purpose partition feature support --
-+	 * If ext_csd has the size of general purpose partitions,
-+	 * set size, part_cfg, partition name in mmc_part.
-+	 */
-+	if (ext_csd[EXT_CSD_PARTITION_SUPPORT] &
-+	    EXT_CSD_PART_SUPPORT_PART_EN) {
-+		hc_erase_grp_sz =3D
-+			ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-+		hc_wp_grp_sz =3D
-+			ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-+
-+		for (idx =3D 0; idx < MMC_NUM_GP_PARTITION; idx++) {
-+			if (!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3] &&
-+			    !ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1] &&
-+			    !ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 2])
-+				continue;
-+
-+			if (card->ext_csd.partition_setting_completed =3D=3D 0) {
-+				pr_warn("%s: has partition size defined without partition complete=
-\n",
-+					mmc_hostname(card->host));
-+				break;
-+			}
-+
-+			part_size =3D
-+				(ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 2]
-+				<< 16) +
-+				(ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1]
-+				<< 8) +
-+				ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3];
-+			part_size *=3D (size_t)(hc_erase_grp_sz *
-+				hc_wp_grp_sz);
-+			mmc_part_add(card, part_size << 19,
-+				EXT_CSD_PART_CONFIG_ACC_GP0 + idx,
-+				"gp%d", idx, false,
-+				MMC_BLK_DATA_AREA_GP);
-+		}
-+	}
-+}
-+
- /*
-  * Decode extended CSD.
-  */
-@@ -305,7 +398,6 @@ static int mmc_read_ext_csd(struct mmc_card *card, =
-u8 *ext_csd)
- {
- 	int err =3D 0, idx;
- 	unsigned int part_size;
--	u8 hc_erase_grp_sz =3D 0, hc_wp_grp_sz =3D 0;
+In fact Kukjin has not applied any patches for 3 weeks now, which likel=
+y
+means he's on vacation. I am hoping he will review this and the other
+pending conflicting patches to decide on a merge order and fix any
+trivial conflicts himself. ;)
 
- 	BUG_ON(!card);
+Cheers,
+Andreas
 
-@@ -409,80 +501,11 @@ static int mmc_read_ext_csd(struct mmc_card *card=
-, u8 *ext_csd)
- 		} else {
- 			card->ext_csd.partition_setting_completed =3D 0;
- 		}
--		/*
--		 * Enhanced area feature support -- check whether the eMMC
--		 * card has the Enhanced area enabled.  If so, export enhanced
--		 * area offset and size to user by adding sysfs interface.
--		 */
--		if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
--		    (ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
--			hc_erase_grp_sz =3D
--				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
--			hc_wp_grp_sz =3D
--				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-
--			card->ext_csd.enhanced_area_en =3D 1;
--			/*
--			 * calculate the enhanced data area offset, in bytes
--			 */
--			card->ext_csd.enhanced_area_offset =3D
--				(ext_csd[139] << 24) + (ext_csd[138] << 16) +
--				(ext_csd[137] << 8) + ext_csd[136];
--			if (mmc_card_blockaddr(card))
--				card->ext_csd.enhanced_area_offset <<=3D 9;
--			/*
--			 * calculate the enhanced data area size, in kilobytes
--			 */
--			card->ext_csd.enhanced_area_size =3D
--				(ext_csd[142] << 16) + (ext_csd[141] << 8) +
--				ext_csd[140];
--			card->ext_csd.enhanced_area_size *=3D
--				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
--			card->ext_csd.enhanced_area_size <<=3D 9;
--		} else {
--			/*
--			 * If the enhanced area is not enabled, disable these
--			 * device attributes.
--			 */
--			card->ext_csd.enhanced_area_offset =3D -EINVAL;
--			card->ext_csd.enhanced_area_size =3D -EINVAL;
--		}
-+		mmc_manage_enhanced_area(card, ext_csd);
-
--		/*
--		 * General purpose partition feature support --
--		 * If ext_csd has the size of general purpose partitions,
--		 * set size, part_cfg, partition name in mmc_part.
--		 */
--		if (ext_csd[EXT_CSD_PARTITION_SUPPORT] &
--			EXT_CSD_PART_SUPPORT_PART_EN) {
--			if (card->ext_csd.enhanced_area_en !=3D 1) {
--				hc_erase_grp_sz =3D
--					ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
--				hc_wp_grp_sz =3D
--					ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
--
--				card->ext_csd.enhanced_area_en =3D 1;
--			}
-+		mmc_manage_gp_partitions(card, ext_csd);
-
--			for (idx =3D 0; idx < MMC_NUM_GP_PARTITION; idx++) {
--				if (!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3] &&
--				!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1] &&
--				!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 2])
--					continue;
--				part_size =3D
--				(ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 2]
--					<< 16) +
--				(ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1]
--					<< 8) +
--				ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3];
--				part_size *=3D (size_t)(hc_erase_grp_sz *
--					hc_wp_grp_sz);
--				mmc_part_add(card, part_size << 19,
--					EXT_CSD_PART_CONFIG_ACC_GP0 + idx,
--					"gp%d", idx, false,
--					MMC_BLK_DATA_AREA_GP);
--			}
--		}
- 		card->ext_csd.sec_trim_mult =3D
- 			ext_csd[EXT_CSD_SEC_TRIM_MULT];
- 		card->ext_csd.sec_erase_mult =3D
---
-1.7.9.5
+--=20
+SUSE LINUX Products GmbH, Maxfeldstr. 5, 90409 N=FCrnberg, Germany
+GF: Jeff Hawn, Jennifer Guild, Felix Imend=F6rffer; HRB 16746 AG N=FCrn=
+berg
