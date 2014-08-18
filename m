@@ -1,36 +1,30 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [REPOST PATCH v2] mmc: dw_mmc: Make sure we don't get stuck when
- we get an error
-Date: Mon, 18 Aug 2014 11:15:13 +0200
-Message-ID: <CAPDyKFpX0PmpuPvgc0WizXAizNiCiqj2y0y4GzcSMt1y4yzyiA@mail.gmail.com>
-References: <1407942823-4271-1-git-send-email-dianders@chromium.org>
+Subject: Re: [PATCH] mmc: au1xmmc: fix error return code in au1xmmc_probe()
+Date: Mon, 18 Aug 2014 11:20:57 +0200
+Message-ID: <CAPDyKFrUAci5V3Pv-W_G-CGACOqwJtwyRdRfScUbLwXwzczf9A@mail.gmail.com>
+References: <1407978019-15673-1-git-send-email-weiyj_lk@163.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1407942823-4271-1-git-send-email-dianders@chromium.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <tomasz.figa@gmail.com>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f51.google.com ([209.85.192.51]:50087 "EHLO
+	mail-qg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750951AbaHRJU6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Aug 2014 05:20:58 -0400
+Received: by mail-qg0-f51.google.com with SMTP id a108so4279996qge.38
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2014 02:20:57 -0700 (PDT)
+In-Reply-To: <1407978019-15673-1-git-send-email-weiyj_lk@163.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: weiyj_lk@163.com
+Cc: Manuel Lauss <manuel.lauss@gmail.com>, Chris Ball <chris@printf.net>, Wei Yongjun <yongjun_wei@trendmicro.com.cn>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 13 August 2014 17:13, Doug Anderson <dianders@chromium.org> wrote:
-> If we happened to get a data error at just the wrong time the dw_mmc
-> driver could get into a state where it would never complete its
-> request.  That would leave the caller just hanging there.
+On 14 August 2014 03:00,  <weiyj_lk@163.com> wrote:
+> From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
 >
-> We fix this two ways and both of the two fixes on their own appear to
-> fix the problems we've seen:
+> Fix to return a negative error code from the error handling
+> case instead of 0, as done elsewhere in this function.
 >
-> 1. Fix a race in the tasklet where the interrupt setting the data
->    error happens _just after_ we check for it, then we get a
->    EVENT_XFER_COMPLETE.  We fix this by repeating a bit of code.
-> 2. Fix it so that if we detect that we've got an error in the "data
->    busy" state and we're not going to do anything else we end the
->    request and unblock anyone waiting.
->
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
-> Acked-by: Seungwon Jeon <tgih.jun@samsung.com>
+> Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
 
 Thanks! Applied for next.
 
@@ -38,85 +32,25 @@ Kind regards
 Uffe
 
 > ---
-> Changes in v2:
-> - Removed TODO
-> - Set cmd to NULL before calling dw_mci_request_end()
+>  drivers/mmc/host/au1xmmc.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
 >
->  drivers/mmc/host/dw_mmc.c | 46 ++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 46 insertions(+)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 8f216ed..7f227e9 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1299,6 +1299,14 @@ static void dw_mci_tasklet_func(unsigned long priv)
->                         /* fall through */
->
->                 case STATE_SENDING_DATA:
-> +                       /*
-> +                        * We could get a data error and never a transfer
-> +                        * complete so we'd better check for it here.
-> +                        *
-> +                        * Note that we don't really care if we also got a
-> +                        * transfer complete; stopping the DMA and sending an
-> +                        * abort won't hurt.
-> +                        */
->                         if (test_and_clear_bit(EVENT_DATA_ERROR,
->                                                &host->pending_events)) {
->                                 dw_mci_stop_dma(host);
-> @@ -1312,7 +1320,29 @@ static void dw_mci_tasklet_func(unsigned long priv)
->                                 break;
->
->                         set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
+> diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
+> index 9c9f6af..725f6a6 100644
+> --- a/drivers/mmc/host/au1xmmc.c
+> +++ b/drivers/mmc/host/au1xmmc.c
+> @@ -1028,9 +1028,12 @@ static int au1xmmc_probe(struct platform_device *pdev)
+>         host->clk = clk_get(&pdev->dev, ALCHEMY_PERIPH_CLK);
+>         if (IS_ERR(host->clk)) {
+>                 dev_err(&pdev->dev, "cannot find clock\n");
+> +               ret = PTR_ERR(host->clk);
+>                 goto out_irq;
+>         }
+> -       if (clk_prepare_enable(host->clk)) {
 > +
-> +                       /*
-> +                        * Handle an EVENT_DATA_ERROR that might have shown up
-> +                        * before the transfer completed.  This might not have
-> +                        * been caught by the check above because the interrupt
-> +                        * could have gone off between the previous check and
-> +                        * the check for transfer complete.
-> +                        *
-> +                        * Technically this ought not be needed assuming we
-> +                        * get a DATA_COMPLETE eventually (we'll notice the
-> +                        * error and end the request), but it shouldn't hurt.
-> +                        *
-> +                        * This has the advantage of sending the stop command.
-> +                        */
-> +                       if (test_and_clear_bit(EVENT_DATA_ERROR,
-> +                                              &host->pending_events)) {
-> +                               dw_mci_stop_dma(host);
-> +                               send_stop_abort(host, data);
-> +                               state = STATE_DATA_ERROR;
-> +                               break;
-> +                       }
->                         prev_state = state = STATE_DATA_BUSY;
-> +
->                         /* fall through */
->
->                 case STATE_DATA_BUSY:
-> @@ -1335,6 +1365,22 @@ static void dw_mci_tasklet_func(unsigned long priv)
->                                 /* stop command for open-ended transfer*/
->                                 if (data->stop)
->                                         send_stop_abort(host, data);
-> +                       } else {
-> +                               /*
-> +                                * If we don't have a command complete now we'll
-> +                                * never get one since we just reset everything;
-> +                                * better end the request.
-> +                                *
-> +                                * If we do have a command complete we'll fall
-> +                                * through to the SENDING_STOP command and
-> +                                * everything will be peachy keen.
-> +                                */
-> +                               if (!test_bit(EVENT_CMD_COMPLETE,
-> +                                             &host->pending_events)) {
-> +                                       host->cmd = NULL;
-> +                                       dw_mci_request_end(host, mrq);
-> +                                       goto unlock;
-> +                               }
->                         }
->
->                         /*
-> --
-> 2.1.0.rc2.206.gedb03e5
+> +       ret = clk_prepare_enable(host->clk);
+> +       if (ret) {
+>                 dev_err(&pdev->dev, "cannot enable clock\n");
+>                 goto out_clk;
+>         }
 >
