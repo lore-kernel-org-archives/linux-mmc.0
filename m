@@ -1,193 +1,294 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on
- sdio thread
-Date: Mon, 18 Aug 2014 14:07:38 +0200
-Message-ID: <CAPDyKFrfXe0f6S0z8HUG2Mg29JVU39C0VOBimgKtq-HL47HZrA@mail.gmail.com>
-References: <53E85967.5060503@linux.intel.com>
-	<CAPDyKFqLE-09=3k_6stMXiY3+Ax3xoRBO3q__GHyqH4fd-XmsQ@mail.gmail.com>
-	<53F16D28.5010500@linux.intel.com>
+Subject: Re: [PATCH v2 0002/0002] mmc: check EXT_CSD_PARTITION_SETTING_COMPLETED
+ before creating partitions
+Date: Mon, 18 Aug 2014 14:15:14 +0200
+Message-ID: <CAPDyKFoD6j37LQnvyTi2STrntKTohBq2tmOq9SOekP0YND5Xbg@mail.gmail.com>
+References: <53C7E45E.2060102@neotion.com>
+	<53F1DA68.1040409@neotion.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f52.google.com ([209.85.216.52]:36492 "EHLO
-	mail-qa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750977AbaHRMHj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Aug 2014 08:07:39 -0400
-Received: by mail-qa0-f52.google.com with SMTP id j15so4250441qaq.39
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2014 05:07:39 -0700 (PDT)
-In-Reply-To: <53F16D28.5010500@linux.intel.com>
+Received: from mail-qg0-f50.google.com ([209.85.192.50]:48152 "EHLO
+	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750836AbaHRMPP convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Aug 2014 08:15:15 -0400
+Received: by mail-qg0-f50.google.com with SMTP id z107so971895qgd.23
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2014 05:15:14 -0700 (PDT)
+In-Reply-To: <53F1DA68.1040409@neotion.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Aaron Lu <aaron.lu@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jackey Shen <jackey.shen@amd.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 18 August 2014 05:04, Fu, Zhonghui <zhonghui.fu@linux.intel.com> wrote:
-> From 21266249bbbaf9407c1e88cd5950e06ac88aeebf Mon Sep 17 00:00:00 2001
-> From: Fu Zhonghui <zhonghui.fu@linux.intel.com>
-> Date: Mon, 18 Aug 2014 10:48:14 +0800
-> Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
+On 18 August 2014 12:50, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.co=
+m> wrote:
+> Checks EXT_CSD_PARTITION_SETTING_COMPLETED bit before
+> computing enhanced user area and adding mmc partitions
+> (as described in JEDEC standard).
 >
-> 781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
-> bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
-> the use of our own custom threaded IRQ handler, but left in an
-> unconditional wake_up_process() on that handler at resume-time.
-> Link: https://bugzilla.kernel.org/show_bug.cgi?id=80151
->
-> In addition, the check for MMC_CAP_SDIO_IRQ capability is added
-> before enable sdio IRQ.
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Chris Ball <chris@printf.net>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Fu Zhonghui <zhonghui.fu@linux.intel.com>
+> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
 
-Thanks! Applied for next and added a stable tag for v3.16+.
+Hi Gr=C3=A9gory,
+
+=46irst, could you rename patches so they actually describe what they
+actually do. Currently both of them have the same header.
+Second, I really appreciate if there could be some version history of
+the patches since it helps review process.
+
+Could you please resend them?
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/sdio.c     |   12 ++++++++++--
->  drivers/mmc/core/sdio_irq.c |    4 ++--
->  2 files changed, 12 insertions(+), 4 deletions(-)
+>  drivers/mmc/core/mmc.c |  167 +++++++++++++++++++++++++++-----------=
+----------
+>  1 file changed, 95 insertions(+), 72 deletions(-)
 >
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index e636d9e..3fc40a7 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -992,8 +992,16 @@ static int mmc_sdio_resume(struct mmc_host *host)
->                 }
->         }
+> Changelog v2:
+>         Move code for user area and general purpose partitions
+>         into functions.
 >
-> -       if (!err && host->sdio_irqs)
-> -               wake_up_process(host->sdio_irq_thread);
-> +       if (!err && host->sdio_irqs) {
-> +               if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
-> +                       wake_up_process(host->sdio_irq_thread);
-> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
-> +                       mmc_host_clk_hold(host);
-> +                       host->ops->enable_sdio_irq(host, 1);
-> +                       mmc_host_clk_release(host);
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index ef25d91..3158470 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -298,6 +298,99 @@ static void mmc_select_card_type(struct mmc_card=
+ *card)
+>         card->mmc_avail_type =3D avail_type;
+>  }
+>
+> +static void mmc_manage_enhanced_area(struct mmc_card *card, u8 *ext_=
+csd)
+> +{
+> +       u8 hc_erase_grp_sz, hc_wp_grp_sz;
+> +
+> +       /*
+> +        * Enhanced area feature support -- check whether the eMMC
+> +        * card has the Enhanced area enabled.  If so, export enhance=
+d
+> +        * area offset and size to user by adding sysfs interface.
+> +        */
+> +       if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
+> +           (ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
+> +               if (card->ext_csd.partition_setting_completed) {
+> +                       hc_erase_grp_sz =3D
+> +                               ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+> +                       hc_wp_grp_sz =3D
+> +                               ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
+> +                       /*
+> +                        * calculate the enhanced data area offset, i=
+n bytes
+> +                        */
+> +                       card->ext_csd.enhanced_area_offset =3D
+> +                               (ext_csd[139] << 24) + (ext_csd[138] =
+<< 16) +
+> +                               (ext_csd[137] << 8) + ext_csd[136];
+> +                       if (mmc_card_blockaddr(card))
+> +                               card->ext_csd.enhanced_area_offset <<=
+=3D 9;
+> +                       /*
+> +                        * calculate the enhanced data area size, in =
+kilobytes
+> +                        */
+> +                       card->ext_csd.enhanced_area_size =3D
+> +                               (ext_csd[142] << 16) + (ext_csd[141] =
+<< 8) +
+> +                               ext_csd[140];
+> +                       card->ext_csd.enhanced_area_size *=3D
+> +                               (size_t)(hc_erase_grp_sz * hc_wp_grp_=
+sz);
+> +                       card->ext_csd.enhanced_area_size <<=3D 9;
+> +               } else {
+> +                       pr_warn("%s: defines enhanced area without pa=
+rtition setting complete\n",
+> +                               mmc_hostname(card->host));
+> +               }
+> +       } else {
+> +               /*
+> +                * If the enhanced area is not enabled, disable these
+> +                * device attributes.
+> +                */
+> +               card->ext_csd.enhanced_area_offset =3D -EINVAL;
+> +               card->ext_csd.enhanced_area_size =3D -EINVAL;
+> +       }
+> +}
+> +
+> +static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_=
+csd)
+> +{
+> +       int idx;
+> +       u8 hc_erase_grp_sz, hc_wp_grp_sz;
+> +       unsigned int part_size;
+> +
+> +       /*
+> +        * General purpose partition feature support --
+> +        * If ext_csd has the size of general purpose partitions,
+> +        * set size, part_cfg, partition name in mmc_part.
+> +        */
+> +       if (ext_csd[EXT_CSD_PARTITION_SUPPORT] &
+> +           EXT_CSD_PART_SUPPORT_PART_EN) {
+> +               hc_erase_grp_sz =3D
+> +                       ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+> +               hc_wp_grp_sz =3D
+> +                       ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
+> +
+> +               for (idx =3D 0; idx < MMC_NUM_GP_PARTITION; idx++) {
+> +                       if (!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3] =
+&&
+> +                           !ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 +=
+ 1] &&
+> +                           !ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 +=
+ 2])
+> +                               continue;
+> +
+> +                       if (card->ext_csd.partition_setting_completed=
+ =3D=3D 0) {
+> +                               pr_warn("%s: has partition size defin=
+ed without partition complete\n",
+> +                                       mmc_hostname(card->host));
+> +                               break;
+> +                       }
+> +
+> +                       part_size =3D
+> +                               (ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
+ 3 + 2]
+> +                               << 16) +
+> +                               (ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
+ 3 + 1]
+> +                               << 8) +
+> +                               ext_csd[EXT_CSD_GP_SIZE_MULT + idx * =
+3];
+> +                       part_size *=3D (size_t)(hc_erase_grp_sz *
+> +                               hc_wp_grp_sz);
+> +                       mmc_part_add(card, part_size << 19,
+> +                               EXT_CSD_PART_CONFIG_ACC_GP0 + idx,
+> +                               "gp%d", idx, false,
+> +                               MMC_BLK_DATA_AREA_GP);
 > +               }
 > +       }
+> +}
 > +
->         mmc_release_host(host);
+>  /*
+>   * Decode extended CSD.
+>   */
+> @@ -305,7 +398,6 @@ static int mmc_read_ext_csd(struct mmc_card *card=
+, u8 *ext_csd)
+>  {
+>         int err =3D 0, idx;
+>         unsigned int part_size;
+> -       u8 hc_erase_grp_sz =3D 0, hc_wp_grp_sz =3D 0;
 >
->         host->pm_flags &= ~MMC_PM_KEEP_POWER;
-> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-> index 5cc13c8..696eca4 100644
-> --- a/drivers/mmc/core/sdio_irq.c
-> +++ b/drivers/mmc/core/sdio_irq.c
-> @@ -208,7 +208,7 @@ static int sdio_card_irq_get(struct mmc_card *card)
->                                 host->sdio_irqs--;
->                                 return err;
->                         }
+>         BUG_ON(!card);
+>
+> @@ -409,80 +501,11 @@ static int mmc_read_ext_csd(struct mmc_card *ca=
+rd, u8 *ext_csd)
+>                 } else {
+>                         card->ext_csd.partition_setting_completed =3D=
+ 0;
+>                 }
+> -               /*
+> -                * Enhanced area feature support -- check whether the=
+ eMMC
+> -                * card has the Enhanced area enabled.  If so, export=
+ enhanced
+> -                * area offset and size to user by adding sysfs inter=
+face.
+> -                */
+> -               if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
+> -                   (ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
+> -                       hc_erase_grp_sz =3D
+> -                               ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+> -                       hc_wp_grp_sz =3D
+> -                               ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
+>
+> -                       card->ext_csd.enhanced_area_en =3D 1;
+> -                       /*
+> -                        * calculate the enhanced data area offset, i=
+n bytes
+> -                        */
+> -                       card->ext_csd.enhanced_area_offset =3D
+> -                               (ext_csd[139] << 24) + (ext_csd[138] =
+<< 16) +
+> -                               (ext_csd[137] << 8) + ext_csd[136];
+> -                       if (mmc_card_blockaddr(card))
+> -                               card->ext_csd.enhanced_area_offset <<=
+=3D 9;
+> -                       /*
+> -                        * calculate the enhanced data area size, in =
+kilobytes
+> -                        */
+> -                       card->ext_csd.enhanced_area_size =3D
+> -                               (ext_csd[142] << 16) + (ext_csd[141] =
+<< 8) +
+> -                               ext_csd[140];
+> -                       card->ext_csd.enhanced_area_size *=3D
+> -                               (size_t)(hc_erase_grp_sz * hc_wp_grp_=
+sz);
+> -                       card->ext_csd.enhanced_area_size <<=3D 9;
 > -               } else {
-> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
->                         mmc_host_clk_hold(host);
->                         host->ops->enable_sdio_irq(host, 1);
->                         mmc_host_clk_release(host);
-> @@ -229,7 +229,7 @@ static int sdio_card_irq_put(struct mmc_card *card)
->                 if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
->                         atomic_set(&host->sdio_irq_thread_abort, 1);
->                         kthread_stop(host->sdio_irq_thread);
-> -               } else {
-> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
->                         mmc_host_clk_hold(host);
->                         host->ops->enable_sdio_irq(host, 0);
->                         mmc_host_clk_release(host);
-> -- 1.7.1
+> -                       /*
+> -                        * If the enhanced area is not enabled, disab=
+le these
+> -                        * device attributes.
+> -                        */
+> -                       card->ext_csd.enhanced_area_offset =3D -EINVA=
+L;
+> -                       card->ext_csd.enhanced_area_size =3D -EINVAL;
+> -               }
+> +               mmc_manage_enhanced_area(card, ext_csd);
 >
-> On 2014/8/12 18:23, Ulf Hansson wrote:
->> On 11 August 2014 07:49, Fu, Zhonghui <zhonghui.fu@linux.intel.com> wrote:
->>> From 6cee984e1d76ba0a3320430f8cf4318ab65fcf06 Mon Sep 17 00:00:00 2001
->>> From: Fu Zhonghui <zhonghui.fu@linux.intel.com>
->>> Date: Tue, 5 Aug 2014 12:44:38 +0800
->>> Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
->>>
->>> 781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
->>> bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
->>> the use of our own custom threaded IRQ handler, but left in an
->>> unconditional wake_up_process() on that handler at resume-time.
->>> Link: https://bugzilla.kernel.org/show_bug.cgi?id=80151
->>>
->>> In addition, the check for MMC_CAP_SDIO_IRQ capability is added
->>> before enable sdio IRQ.
->>>
->>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->>> Signed-off-by: Chris Ball <chris@printf.net>
->>> Signed-off-by: Fu Zhonghui <zhonghui.fu@linux.intel.com>
->>> ---
->>>  drivers/mmc/core/sdio.c     |   14 ++++++++++++--
->>>  drivers/mmc/core/sdio_irq.c |    4 ++--
->>>  2 files changed, 14 insertions(+), 4 deletions(-)
->>>
->>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
->>> index e636d9e..e04a540 100644
->>> --- a/drivers/mmc/core/sdio.c
->>> +++ b/drivers/mmc/core/sdio.c
->>> @@ -992,8 +992,18 @@ static int mmc_sdio_resume(struct mmc_host *host)
->>>                 }
->>>         }
->>>
->>> -       if (!err && host->sdio_irqs)
->>> -               wake_up_process(host->sdio_irq_thread);
->>> +       if (!err && host->sdio_irqs) {
->>> +               if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
->>> +                       wake_up_process(host->sdio_irq_thread);
->>> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
->>> +                       mmc_release_host(host);
->> Why mmc_release_host() and the corresponding mmc_claim_host() below?
->> Those shouldn't be needed I think.
+> -               /*
+> -                * General purpose partition feature support --
+> -                * If ext_csd has the size of general purpose partiti=
+ons,
+> -                * set size, part_cfg, partition name in mmc_part.
+> -                */
+> -               if (ext_csd[EXT_CSD_PARTITION_SUPPORT] &
+> -                       EXT_CSD_PART_SUPPORT_PART_EN) {
+> -                       if (card->ext_csd.enhanced_area_en !=3D 1) {
+> -                               hc_erase_grp_sz =3D
+> -                                       ext_csd[EXT_CSD_HC_ERASE_GRP_=
+SIZE];
+> -                               hc_wp_grp_sz =3D
+> -                                       ext_csd[EXT_CSD_HC_WP_GRP_SIZ=
+E];
+> -
+> -                               card->ext_csd.enhanced_area_en =3D 1;
+> -                       }
+> +               mmc_manage_gp_partitions(card, ext_csd);
 >
-> You are right. These two functions shouldn't be invoked here. I made a new patch as above.
->
->
-> Thanks,
-> Zhonghui
->>
->>
->>> +                       mmc_host_clk_hold(host);
->>> +                       host->ops->enable_sdio_irq(host, 1);
->>> +                       mmc_host_clk_release(host);
->>> +                       mmc_claim_host(host);
->>> +               }
->>> +       }
->>> +
->>>         mmc_release_host(host);
->>>
->>>         host->pm_flags &= ~MMC_PM_KEEP_POWER;
->>> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
->>> index 5cc13c8..696eca4 100644
->>> --- a/drivers/mmc/core/sdio_irq.c
->>> +++ b/drivers/mmc/core/sdio_irq.c
->>> @@ -208,7 +208,7 @@ static int sdio_card_irq_get(struct mmc_card *card)
->>>                                 host->sdio_irqs--;
->>>                                 return err;
->>>                         }
->>> -               } else {
->>> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
->>>                         mmc_host_clk_hold(host);
->>>                         host->ops->enable_sdio_irq(host, 1);
->>>                         mmc_host_clk_release(host);
->>> @@ -229,7 +229,7 @@ static int sdio_card_irq_put(struct mmc_card *card)
->>>                 if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
->>>                         atomic_set(&host->sdio_irq_thread_abort, 1);
->>>                         kthread_stop(host->sdio_irq_thread);
->>> -               } else {
->>> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
->>>                         mmc_host_clk_hold(host);
->>>                         host->ops->enable_sdio_irq(host, 0);
->>>                         mmc_host_clk_release(host);
->>> -- 1.7.1
->>>
->> Thanks for working on this!
->>
->> Kind regards
->> Uffe
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> Please read the FAQ at  http://www.tux.org/lkml/
->
+> -                       for (idx =3D 0; idx < MMC_NUM_GP_PARTITION; i=
+dx++) {
+> -                               if (!ext_csd[EXT_CSD_GP_SIZE_MULT + i=
+dx * 3] &&
+> -                               !ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
+ 3 + 1] &&
+> -                               !ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
+ 3 + 2])
+> -                                       continue;
+> -                               part_size =3D
+> -                               (ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
+ 3 + 2]
+> -                                       << 16) +
+> -                               (ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
+ 3 + 1]
+> -                                       << 8) +
+> -                               ext_csd[EXT_CSD_GP_SIZE_MULT + idx * =
+3];
+> -                               part_size *=3D (size_t)(hc_erase_grp_=
+sz *
+> -                                       hc_wp_grp_sz);
+> -                               mmc_part_add(card, part_size << 19,
+> -                                       EXT_CSD_PART_CONFIG_ACC_GP0 +=
+ idx,
+> -                                       "gp%d", idx, false,
+> -                                       MMC_BLK_DATA_AREA_GP);
+> -                       }
+> -               }
+>                 card->ext_csd.sec_trim_mult =3D
+>                         ext_csd[EXT_CSD_SEC_TRIM_MULT];
+>                 card->ext_csd.sec_erase_mult =3D
+> --
+> 1.7.9.5
