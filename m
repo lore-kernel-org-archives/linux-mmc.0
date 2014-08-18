@@ -1,36 +1,183 @@
-From: Tim Kryger <tim.kryger@gmail.com>
-Subject: Re: [PATCH 1/1] mmc: core: Use regulator_get_voltage() if OCR mask is empty.
-Date: Sun, 17 Aug 2014 10:11:30 -0700
-Message-ID: <CAD7vxxKTk2Na9B4ae6EGT8HaKDRp0iu4zX1tB8DPtmePKbHrLw@mail.gmail.com>
-References: <1408019940-11153-1-git-send-email-javier.martinez@collabora.co.uk>
-	<CAD7vxxKvzxvmzgx=S5ZZn54ts99ca2TqBYFvY1SXZQZDkhjq3w@mail.gmail.com>
-	<20140814151958.GY17528@sirena.org.uk>
-	<CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>
-	<53EDBB5B.4000209@collabora.co.uk>
-	<CAD7vxxKvZCxnDpPn3X1Uch_6m7Hfj_vApNfxUS2Wex9BjjBUdg@mail.gmail.com>
-	<20140815222914.GM17528@sirena.org.uk>
+From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Subject: Re: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process()
+ on sdio thread
+Date: Mon, 18 Aug 2014 11:04:08 +0800
+Message-ID: <53F16D28.5010500@linux.intel.com>
+References: <53E85967.5060503@linux.intel.com> <CAPDyKFqLE-09=3k_6stMXiY3+Ax3xoRBO3q__GHyqH4fd-XmsQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <20140815222914.GM17528@sirena.org.uk>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>
-Cc: Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:53432 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751613AbaHRDEM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 17 Aug 2014 23:04:12 -0400
+In-Reply-To: <CAPDyKFqLE-09=3k_6stMXiY3+Ax3xoRBO3q__GHyqH4fd-XmsQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Aaron Lu <aaron.lu@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jackey Shen <jackey.shen@amd.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
-On Fri, Aug 15, 2014 at 3:29 PM, Mark Brown <broonie@kernel.org> wrote:
-> On Fri, Aug 15, 2014 at 07:19:41AM -0700, Tim Kryger wrote:
->
->> That is a little different from my suggestion where the constraints
->> check is skipped when the regulator output is fixed.  It effectively
->> does this now when the regulator itself provides the fixed voltage.
->> However, the checks aren't skipped when that fixed voltage is coming
->> from an ancestor.  Why the difference?
->
-> Nobody has written suitable code, and please bear in mind that even if
-> the code is written there will probably be cases where it's too
-> expensive for whatever reason so Javier's change is going to be needed.
+>From 21266249bbbaf9407c1e88cd5950e06ac88aeebf Mon Sep 17 00:00:00 2001
+From: Fu Zhonghui <zhonghui.fu@linux.intel.com>
+Date: Mon, 18 Aug 2014 10:48:14 +0800
+Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
 
-I fail to see how replicating similar logic at all current
-regulator_list_voltage call sites would be any more efficient than
-handling this directly in regulator core.
+781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
+bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
+the use of our own custom threaded IRQ handler, but left in an
+unconditional wake_up_process() on that handler at resume-time.
+Link: https://bugzilla.kernel.org/show_bug.cgi?id=80151
+
+In addition, the check for MMC_CAP_SDIO_IRQ capability is added
+before enable sdio IRQ.
+
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Chris Ball <chris@printf.net>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Fu Zhonghui <zhonghui.fu@linux.intel.com>
+---
+ drivers/mmc/core/sdio.c     |   12 ++++++++++--
+ drivers/mmc/core/sdio_irq.c |    4 ++--
+ 2 files changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index e636d9e..3fc40a7 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -992,8 +992,16 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 		}
+ 	}
+ 
+-	if (!err && host->sdio_irqs)
+-		wake_up_process(host->sdio_irq_thread);
++	if (!err && host->sdio_irqs) {
++		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
++			wake_up_process(host->sdio_irq_thread);
++		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
++			mmc_host_clk_hold(host);
++			host->ops->enable_sdio_irq(host, 1);
++			mmc_host_clk_release(host);
++		}
++	}
++
+ 	mmc_release_host(host);
+ 
+ 	host->pm_flags &= ~MMC_PM_KEEP_POWER;
+diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+index 5cc13c8..696eca4 100644
+--- a/drivers/mmc/core/sdio_irq.c
++++ b/drivers/mmc/core/sdio_irq.c
+@@ -208,7 +208,7 @@ static int sdio_card_irq_get(struct mmc_card *card)
+ 				host->sdio_irqs--;
+ 				return err;
+ 			}
+-		} else {
++		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
+ 			mmc_host_clk_hold(host);
+ 			host->ops->enable_sdio_irq(host, 1);
+ 			mmc_host_clk_release(host);
+@@ -229,7 +229,7 @@ static int sdio_card_irq_put(struct mmc_card *card)
+ 		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
+ 			atomic_set(&host->sdio_irq_thread_abort, 1);
+ 			kthread_stop(host->sdio_irq_thread);
+-		} else {
++		} else if (host->caps & MMC_CAP_SDIO_IRQ) {
+ 			mmc_host_clk_hold(host);
+ 			host->ops->enable_sdio_irq(host, 0);
+ 			mmc_host_clk_release(host);
+-- 1.7.1
+
+On 2014/8/12 18:23, Ulf Hansson wrote:
+> On 11 August 2014 07:49, Fu, Zhonghui <zhonghui.fu@linux.intel.com> wrote:
+>> From 6cee984e1d76ba0a3320430f8cf4318ab65fcf06 Mon Sep 17 00:00:00 2001
+>> From: Fu Zhonghui <zhonghui.fu@linux.intel.com>
+>> Date: Tue, 5 Aug 2014 12:44:38 +0800
+>> Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
+>>
+>> 781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
+>> bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
+>> the use of our own custom threaded IRQ handler, but left in an
+>> unconditional wake_up_process() on that handler at resume-time.
+>> Link: https://bugzilla.kernel.org/show_bug.cgi?id=80151
+>>
+>> In addition, the check for MMC_CAP_SDIO_IRQ capability is added
+>> before enable sdio IRQ.
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Chris Ball <chris@printf.net>
+>> Signed-off-by: Fu Zhonghui <zhonghui.fu@linux.intel.com>
+>> ---
+>>  drivers/mmc/core/sdio.c     |   14 ++++++++++++--
+>>  drivers/mmc/core/sdio_irq.c |    4 ++--
+>>  2 files changed, 14 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+>> index e636d9e..e04a540 100644
+>> --- a/drivers/mmc/core/sdio.c
+>> +++ b/drivers/mmc/core/sdio.c
+>> @@ -992,8 +992,18 @@ static int mmc_sdio_resume(struct mmc_host *host)
+>>                 }
+>>         }
+>>
+>> -       if (!err && host->sdio_irqs)
+>> -               wake_up_process(host->sdio_irq_thread);
+>> +       if (!err && host->sdio_irqs) {
+>> +               if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
+>> +                       wake_up_process(host->sdio_irq_thread);
+>> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
+>> +                       mmc_release_host(host);
+> Why mmc_release_host() and the corresponding mmc_claim_host() below?
+> Those shouldn't be needed I think.
+
+You are right. These two functions shouldn't be invoked here. I made a new patch as above.
+
+
+Thanks,
+Zhonghui
+>
+>
+>> +                       mmc_host_clk_hold(host);
+>> +                       host->ops->enable_sdio_irq(host, 1);
+>> +                       mmc_host_clk_release(host);
+>> +                       mmc_claim_host(host);
+>> +               }
+>> +       }
+>> +
+>>         mmc_release_host(host);
+>>
+>>         host->pm_flags &= ~MMC_PM_KEEP_POWER;
+>> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+>> index 5cc13c8..696eca4 100644
+>> --- a/drivers/mmc/core/sdio_irq.c
+>> +++ b/drivers/mmc/core/sdio_irq.c
+>> @@ -208,7 +208,7 @@ static int sdio_card_irq_get(struct mmc_card *card)
+>>                                 host->sdio_irqs--;
+>>                                 return err;
+>>                         }
+>> -               } else {
+>> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
+>>                         mmc_host_clk_hold(host);
+>>                         host->ops->enable_sdio_irq(host, 1);
+>>                         mmc_host_clk_release(host);
+>> @@ -229,7 +229,7 @@ static int sdio_card_irq_put(struct mmc_card *card)
+>>                 if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
+>>                         atomic_set(&host->sdio_irq_thread_abort, 1);
+>>                         kthread_stop(host->sdio_irq_thread);
+>> -               } else {
+>> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
+>>                         mmc_host_clk_hold(host);
+>>                         host->ops->enable_sdio_irq(host, 0);
+>>                         mmc_host_clk_release(host);
+>> -- 1.7.1
+>>
+> Thanks for working on this!
+>
+> Kind regards
+> Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
+
