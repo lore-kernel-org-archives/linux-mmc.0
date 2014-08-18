@@ -1,82 +1,74 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH] mmc: tmio: Fix hang during suspend
-Date: Mon, 18 Aug 2014 14:36:52 +0200
-Message-ID: <CAMuHMdXrWgW2iMDd7GA+QC-vcAsp+vH9fidkdnBj-f9F878yAw@mail.gmail.com>
-References: <1408029833-6970-1-git-send-email-geert+renesas@glider.be>
-	<20140815134917.da77205b68f18341140c6593@codethink.co.uk>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 0/5] MMC cleanup of dev_pm_ops and .owner
+Date: Mon, 18 Aug 2014 14:38:06 +0200
+Message-ID: <CAPDyKFr5ESzjEd3DUO7aMKN9K_Ytuw8GY-fgEyCM4sCGJAX3NQ@mail.gmail.com>
+References: <1407860069-12706-1-git-send-email-peter.griffin@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20140815134917.da77205b68f18341140c6593@codethink.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ian Molton <ian.molton@codethink.co.uk>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1407860069-12706-1-git-send-email-peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org" <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, jarkko.lavinen-xNZwKgViW5gAvxtiuMwx3w@public.gmane.org, balajitk <balajitk-l0cyMroinI0@public.gmane.org>, Barry Song <baohua-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Viresh Kumar <viresh.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ian Molton <ian.molton-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-omap <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, spear-devel-nkJGhpqTU55BDgjK7y7TUQ@public.gmane.org, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Patch Tracking <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ian,
-
-On Fri, Aug 15, 2014 at 2:49 PM, Ian Molton <ian.molton@codethink.co.uk> wrote:
-> On Thu, 14 Aug 2014 17:23:53 +0200
-> Geert Uytterhoeven <geert+renesas@glider.be> wrote:
+On 12 August 2014 18:14, Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> This series cleans up a few platform drivers in how they are declaring there
+> dev_pm_ops structs, and gets rid of a few now redundant #else conditions.
 >
->> On R-Car Gen 2, the SDHI registers cannot be accessed while the SDHI
->> module clock is disabled. Doing so will cause a lock-up.
->>
->> When suspending, enable the module clock before disabling the SDHI
->> interrupts, and disable the clock again afterwards.
+> Also it removes the .owner field of drivers which use module_platform_driver
+> api to register themselves, as this field gets overwritten.
 >
-> This feels wrong. Why can't interrupts be disabled prior to turning the clock off?
+> Peter Griffin (5):
+>   mmc: remove .owner field for drivers using module_platform_driver
+>   mmc: dw_mmc-pci: Remove superflous #else condition on CONFIG_PM_SLEEP
+>   mmc: dw_mmc-pltfm: Remove superflous #else condition on
+>     CONFIG_PM_SLEEP
+>   mmc: sdhci-pci: Use SET_RUNTIME_PM_OPS macro to set runtime pm
+>     callbacks
+>   mmc: sdhci-acpi.c: Use SET_RUNTIME_PM_OPS macro to set runtime pm
+>     callbacks
 
-The clock is handled by runtime PM. So if SDHI becomes idle, the clock
-is turned off.
-However, the card insertion interrupt is still enabled.
-If all interrupts would be disabled when the clock is turned off, I believe card
-insertion can no longer be detected.
+Thanks! Applied for next!
 
-BTW, I'm still wondering why tmio_mmc_host_resume() works without
-enabling the clock, as it calls tmio_mmc_enable_dma(), which also writes to
-an SDHI register (CTL_DMA_ENABLE).
+Kind regards
+Uffe
 
->> This fixes suspend and resume on r8a7791/koelsch.
->>
->> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
->> ---
->>  drivers/mmc/host/tmio_mmc_pio.c | 10 ++++++++++
->>  1 file changed, 10 insertions(+)
->>
->> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
->> index faf0924e71cb..83192420a7e3 100644
->> --- a/drivers/mmc/host/tmio_mmc_pio.c
->> +++ b/drivers/mmc/host/tmio_mmc_pio.c
->> @@ -1147,8 +1147,18 @@ int tmio_mmc_host_suspend(struct device *dev)
->>  {
->>       struct mmc_host *mmc = dev_get_drvdata(dev);
->>       struct tmio_mmc_host *host = mmc_priv(mmc);
->> +     struct tmio_mmc_data *pdata = host->pdata;
->> +
->> +     if (pdata->clk_enable) {
->> +             unsigned int f;
->> +             pdata->clk_enable(host->pdev, &f);
->> +     }
->>
->>       tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
->> +
->> +     if (pdata->clk_disable)
->> +             pdata->clk_disable(host->pdev);
->> +
->>       return 0;
->>  }
->>  EXPORT_SYMBOL(tmio_mmc_host_suspend);
->> --
->> 1.9.1
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+>
+>  drivers/mmc/host/dw_mmc-pci.c      |  3 ---
+>  drivers/mmc/host/dw_mmc-pltfm.c    |  3 ---
+>  drivers/mmc/host/jz4740_mmc.c      |  1 -
+>  drivers/mmc/host/moxart-mmc.c      |  1 -
+>  drivers/mmc/host/mxcmmc.c          |  1 -
+>  drivers/mmc/host/mxs-mmc.c         |  1 -
+>  drivers/mmc/host/omap.c            |  1 -
+>  drivers/mmc/host/omap_hsmmc.c      |  1 -
+>  drivers/mmc/host/pxamci.c          |  1 -
+>  drivers/mmc/host/rtsx_pci_sdmmc.c  |  1 -
+>  drivers/mmc/host/rtsx_usb_sdmmc.c  |  1 -
+>  drivers/mmc/host/s3cmci.c          |  1 -
+>  drivers/mmc/host/sdhci-acpi.c      | 11 ++---------
+>  drivers/mmc/host/sdhci-bcm-kona.c  |  1 -
+>  drivers/mmc/host/sdhci-bcm2835.c   |  1 -
+>  drivers/mmc/host/sdhci-cns3xxx.c   |  1 -
+>  drivers/mmc/host/sdhci-dove.c      |  1 -
+>  drivers/mmc/host/sdhci-esdhc-imx.c |  1 -
+>  drivers/mmc/host/sdhci-msm.c       |  1 -
+>  drivers/mmc/host/sdhci-of-arasan.c |  1 -
+>  drivers/mmc/host/sdhci-of-esdhc.c  |  1 -
+>  drivers/mmc/host/sdhci-of-hlwd.c   |  1 -
+>  drivers/mmc/host/sdhci-pci.c       | 11 ++---------
+>  drivers/mmc/host/sdhci-pxav2.c     |  1 -
+>  drivers/mmc/host/sdhci-pxav3.c     |  1 -
+>  drivers/mmc/host/sdhci-s3c.c       |  1 -
+>  drivers/mmc/host/sdhci-sirf.c      |  1 -
+>  drivers/mmc/host/sdhci-spear.c     |  1 -
+>  drivers/mmc/host/sdhci-tegra.c     |  1 -
+>  drivers/mmc/host/sh_mmcif.c        |  1 -
+>  drivers/mmc/host/sh_mobile_sdhi.c  |  1 -
+>  drivers/mmc/host/sunxi-mmc.c       |  1 -
+>  32 files changed, 4 insertions(+), 52 deletions(-)
+>
+> --
+> 1.9.1
+>
