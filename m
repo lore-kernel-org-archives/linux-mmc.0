@@ -1,78 +1,91 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: slot-gpio: restore error reporting
-Date: Tue, 19 Aug 2014 09:29:59 +0200
-Message-ID: <CAPDyKFq4CjwRfZeCbLf-wtBc7LU+YyLcD8xThPJQKbi49KpZ6g@mail.gmail.com>
-References: <1408418880-10250-1-git-send-email-linus.walleij@linaro.org>
+Subject: Re: [PATCH v2] mmc: execute tuning when device is not busy.
+Date: Tue, 19 Aug 2014 09:39:15 +0200
+Message-ID: <CAPDyKFo5DiHG38Q++e2tNNfFXiOUjap67GewwUwSB89vGKDqcQ@mail.gmail.com>
+References: <1407995498-17634-1-git-send-email-yi.y.sun@intel.com>
+	<525EAED47491124EB5123A51BD2FC791019DCB1B@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <1408418880-10250-1-git-send-email-linus.walleij@linaro.org>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, linux-gpio@vger.kernel.org, Simon Baatz <gmbnomis@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f41.google.com ([209.85.216.41]:49505 "EHLO
+	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752728AbaHSHjQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Aug 2014 03:39:16 -0400
+Received: by mail-qa0-f41.google.com with SMTP id j7so5433556qaq.28
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Aug 2014 00:39:15 -0700 (PDT)
+In-Reply-To: <525EAED47491124EB5123A51BD2FC791019DCB1B@SHSMSX101.ccr.corp.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Sun, Yi Y" <yi.y.sun@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 19 August 2014 05:28, Linus Walleij <linus.walleij@linaro.org> wrote:
-> The patch switching the MMC core to use GPIO descriptors
-> depromoted errors to debug messages for unsuccessful attempt
-> to get CD or WP GPIOs. This was because sometimes these are
-> not specified, and that should not be an error.
+On 19 August 2014 05:53, Sun, Yi Y <yi.y.sun@intel.com> wrote:
+> Hi, Uffe,
 >
-> However that is not so helpful: explicitly check whether a
-> GPIO is not specified (i.e. -ENOENT is returned) and if there
-> is some other error, report it with dev_err().
+> Could you please review the patch? Thanks!
 >
-> Reported-by: Simon Baatz <gmbnomis@gmail.com>
-> Cc: Simon Baatz <gmbnomis@gmail.com>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> BRs,
+> Sun Yi
 
-Until we have a fix for the !GPIOLIB, I will drop the four gpiod
-patches I recently applied.
+Please don't top post.
 
-I suggest we fold this change into one of the earlier patcher instead.
-Please send a new version of the complete patchset.
+I am not the only one to review sdhci patches. There are probably
+other better suited and I rely to get some input on this kind of
+patch.
 
 Kind regards
 Uffe
 
-> ---
->  drivers/mmc/core/host.c | 16 ++++++++++------
->  1 file changed, 10 insertions(+), 6 deletions(-)
 >
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 048c6d687cc9..6f7ed9c50346 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -368,9 +368,11 @@ int mmc_of_parse(struct mmc_host *host)
->                 if (ret) {
->                         if (ret == -EPROBE_DEFER)
->                                 return ret;
-> -                       dev_dbg(host->parent,
-> -                               "Failed to request CD GPIO: %d\n",
-> -                               ret);
-> +                       if (ret != -ENOENT) {
-> +                               dev_err(host->parent,
-> +                                       "Failed to request CD GPIO: %d\n",
-> +                                       ret);
-> +                       }
->                 } else
->                         dev_info(host->parent, "Got CD GPIO\n");
->         }
-> @@ -383,9 +385,11 @@ int mmc_of_parse(struct mmc_host *host)
->         if (ret) {
->                 if (ret == -EPROBE_DEFER)
->                         goto out;
-> -               dev_dbg(host->parent,
-> -                       "Failed to request WP GPIO: %d\n",
-> -                       ret);
-> +               if (ret != -ENOENT) {
-> +                       dev_err(host->parent,
-> +                               "Failed to request WP GPIO: %d\n",
-> +                               ret);
-> +               }
->         } else
->                 dev_info(host->parent, "Got WP GPIO\n");
+> -----Original Message-----
+> From: Sun, Yi Y
+> Sent: Thursday, August 14, 2014 1:52 PM
+> To: linux-mmc@vger.kernel.org; ulf.hansson@linaro.org
+> Cc: Sun, Yi Y
+> Subject: [PATCH v2] mmc: execute tuning when device is not busy.
+>
+> We find tuning timeout because of the secure erase operation lasts too long so not to do tuning when device is busy.
+>
+> Signed-off-by: Yi Sun <yi.y.sun@intel.com>
+> ---
+>  drivers/mmc/host/sdhci.c |    7 ++++---
+>  drivers/mmc/host/sdhci.h |    1 +
+>  2 files changed, 5 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index 47055f3..6a584d7 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1355,11 +1355,12 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>                 present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
+>                 /*
+>                  * Check if the re-tuning timer has already expired and there
+> -                * is no on-going data transfer. If so, we need to execute
+> -                * tuning procedure before sending command.
+> +                * is no on-going data transfer and DAT0 is not busy. If so,
+> +                * we need to execute tuning procedure before sending command.
+>                  */
+>                 if ((host->flags & SDHCI_NEEDS_RETUNING) &&
+> -                   !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
+> +                   !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ)) &&
+> +                   (present_state & SDHCI_DATA_0_LVL_MASK)) {
+>                         if (mmc->card) {
+>                                 /* eMMC uses cmd21 but sd and sdio use cmd19 */
+>                                 tuning_opcode =
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h index 4a5cd5e..0ae6b99d 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -72,6 +72,7 @@
+>  #define  SDHCI_WRITE_PROTECT   0x00080000
+>  #define  SDHCI_DATA_LVL_MASK   0x00F00000
+>  #define   SDHCI_DATA_LVL_SHIFT 20
+> +#define   SDHCI_DATA_0_LVL_MASK        0x00100000
+>
+>  #define SDHCI_HOST_CONTROL     0x28
+>  #define  SDHCI_CTRL_LED                0x01
+> --
+> 1.7.9.5
 >
 > --
-> 1.9.3
->
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
