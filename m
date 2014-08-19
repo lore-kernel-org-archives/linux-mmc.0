@@ -1,58 +1,78 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [ulf.hansson-mmc:next 17/29] drivers/input/touchscreen/cyttsp4_core.c:1218:1:
- warning: 'cyttsp4_irq' uses dynamic stack allocation
-Date: Tue, 19 Aug 2014 09:19:53 +0200
-Message-ID: <CAPDyKFrqQuTrrg2im=hMtSjRrJb0Lq4M1u7C6C-13cZLXdwZ1w@mail.gmail.com>
-References: <53f22c36.qbCHWEfTMJdv7qIU%fengguang.wu@intel.com>
-	<CACRpkdbJ=qLr5-jiJrtOKA-qaV1XrXs0uYQ+9NdgO42vAo0GMA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: slot-gpio: restore error reporting
+Date: Tue, 19 Aug 2014 09:29:59 +0200
+Message-ID: <CAPDyKFq4CjwRfZeCbLf-wtBc7LU+YyLcD8xThPJQKbi49KpZ6g@mail.gmail.com>
+References: <1408418880-10250-1-git-send-email-linus.walleij@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f49.google.com ([209.85.192.49]:56921 "EHLO
-	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752604AbaHSHTy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Aug 2014 03:19:54 -0400
-Received: by mail-qg0-f49.google.com with SMTP id j107so5629316qga.36
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Aug 2014 00:19:54 -0700 (PDT)
-In-Reply-To: <CACRpkdbJ=qLr5-jiJrtOKA-qaV1XrXs0uYQ+9NdgO42vAo0GMA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <1408418880-10250-1-git-send-email-linus.walleij@linaro.org>
+Sender: linux-gpio-owner@vger.kernel.org
 To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "kbuild-all@01.org" <kbuild-all@01.org>, kbuild test robot <fengguang.wu@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, linux-gpio@vger.kernel.org, Simon Baatz <gmbnomis@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
 
-On 18 August 2014 19:13, Linus Walleij <linus.walleij@linaro.org> wrote:
-> On Mon, Aug 18, 2014 at 11:39 AM, kbuild test robot
-> <fengguang.wu@intel.com> wrote:
+On 19 August 2014 05:28, Linus Walleij <linus.walleij@linaro.org> wrote:
+> The patch switching the MMC core to use GPIO descriptors
+> depromoted errors to debug messages for unsuccessful attempt
+> to get CD or WP GPIOs. This was because sometimes these are
+> not specified, and that should not be an error.
 >
->> tree:   git://git.linaro.org/people/ulf.hansson/mmc next
->> head:   612b2c14449ba90b633f51fcfba83dd66614697a
->> commit: f907645be3f76558c3eb89bdd72e3451a762059c [17/29] mmc: select GPIOLIB for MMC support
->> config: make ARCH=s390 allmodconfig
->>
->> All warnings:
->>
->> warning: (ARCH_REQUIRE_GPIOLIB && MMC && PINCTRL_AT91 && PINCTRL_NOMADIK && MFD_TC6393XB && FB_VIA) selects GPIOLIB which has unmet direct dependencies (ARCH_WANT_OPTIONAL_GPIOLIB || ARCH_REQUIRE_GPIOLIB)
->>    drivers/input/touchscreen/cyttsp4_core.c: In function 'cyttsp4_irq':
->>>> drivers/input/touchscreen/cyttsp4_core.c:1218:1: warning: 'cyttsp4_irq' uses dynamic stack allocation
+> However that is not so helpful: explicitly check whether a
+> GPIO is not specified (i.e. -ENOENT is returned) and if there
+> is some other error, report it with dev_err().
 >
-> This error comes from selecting something that is optional.
->
-> Grrr should I use "depends on GPIOLIB" for MMC instead?
+> Reported-by: Simon Baatz <gmbnomis@gmail.com>
+> Cc: Simon Baatz <gmbnomis@gmail.com>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 
-Not sure that will be any better.
+Until we have a fix for the !GPIOLIB, I will drop the four gpiod
+patches I recently applied.
 
->
-> Or maybe even do the second approach of putting stubs in slot-gpio.h
-> for !GPIOLIB...
-
-Hmm, that doesn't sound the proper solution either.
-
-Currently there are already stubs for the "gpiod" API in
-gpio/consumer.h. I think the original error was that the "GPIOD_IN"
-flag couldn't be found for !GPIOLIB.
-So, how about actually move these flags and it's corresponding defines
-to be available for !GPIOLIB as well. That should solve this problem
-for other subsytems using gpiod API as well, right?
+I suggest we fold this change into one of the earlier patcher instead.
+Please send a new version of the complete patchset.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/core/host.c | 16 ++++++++++------
+>  1 file changed, 10 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 048c6d687cc9..6f7ed9c50346 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -368,9 +368,11 @@ int mmc_of_parse(struct mmc_host *host)
+>                 if (ret) {
+>                         if (ret == -EPROBE_DEFER)
+>                                 return ret;
+> -                       dev_dbg(host->parent,
+> -                               "Failed to request CD GPIO: %d\n",
+> -                               ret);
+> +                       if (ret != -ENOENT) {
+> +                               dev_err(host->parent,
+> +                                       "Failed to request CD GPIO: %d\n",
+> +                                       ret);
+> +                       }
+>                 } else
+>                         dev_info(host->parent, "Got CD GPIO\n");
+>         }
+> @@ -383,9 +385,11 @@ int mmc_of_parse(struct mmc_host *host)
+>         if (ret) {
+>                 if (ret == -EPROBE_DEFER)
+>                         goto out;
+> -               dev_dbg(host->parent,
+> -                       "Failed to request WP GPIO: %d\n",
+> -                       ret);
+> +               if (ret != -ENOENT) {
+> +                       dev_err(host->parent,
+> +                               "Failed to request WP GPIO: %d\n",
+> +                               ret);
+> +               }
+>         } else
+>                 dev_info(host->parent, "Got WP GPIO\n");
+>
+> --
+> 1.9.3
+>
