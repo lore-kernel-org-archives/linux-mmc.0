@@ -1,84 +1,58 @@
-From: Barry Song <Barry.Song@csr.com>
-Subject: [PATCH] mmc: sdhci-sirf: fix 8bit width enable by overwriting set_bus_width
-Date: Tue, 19 Aug 2014 15:07:47 +0800
-Message-ID: <1408432067-5257-1-git-send-email-Barry.Song@csr.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [ulf.hansson-mmc:next 17/29] drivers/input/touchscreen/cyttsp4_core.c:1218:1:
+ warning: 'cyttsp4_irq' uses dynamic stack allocation
+Date: Tue, 19 Aug 2014 09:19:53 +0200
+Message-ID: <CAPDyKFrqQuTrrg2im=hMtSjRrJb0Lq4M1u7C6C-13cZLXdwZ1w@mail.gmail.com>
+References: <53f22c36.qbCHWEfTMJdv7qIU%fengguang.wu@intel.com>
+	<CACRpkdbJ=qLr5-jiJrtOKA-qaV1XrXs0uYQ+9NdgO42vAo0GMA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cluster-d.mailcontrol.com ([85.115.60.190]:34948 "EHLO
-	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752726AbaHSHI2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Aug 2014 03:08:28 -0400
+Received: from mail-qg0-f49.google.com ([209.85.192.49]:56921 "EHLO
+	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752604AbaHSHTy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Aug 2014 03:19:54 -0400
+Received: by mail-qg0-f49.google.com with SMTP id j107so5629316qga.36
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Aug 2014 00:19:54 -0700 (PDT)
+In-Reply-To: <CACRpkdbJ=qLr5-jiJrtOKA-qaV1XrXs0uYQ+9NdgO42vAo0GMA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: chris@printf.net, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, workgroup.linux@csr.com, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "kbuild-all@01.org" <kbuild-all@01.org>, kbuild test robot <fengguang.wu@intel.com>
 
-From: Minda Chen <Minda.Chen@csr.com>
+On 18 August 2014 19:13, Linus Walleij <linus.walleij@linaro.org> wrote:
+> On Mon, Aug 18, 2014 at 11:39 AM, kbuild test robot
+> <fengguang.wu@intel.com> wrote:
+>
+>> tree:   git://git.linaro.org/people/ulf.hansson/mmc next
+>> head:   612b2c14449ba90b633f51fcfba83dd66614697a
+>> commit: f907645be3f76558c3eb89bdd72e3451a762059c [17/29] mmc: select GPIOLIB for MMC support
+>> config: make ARCH=s390 allmodconfig
+>>
+>> All warnings:
+>>
+>> warning: (ARCH_REQUIRE_GPIOLIB && MMC && PINCTRL_AT91 && PINCTRL_NOMADIK && MFD_TC6393XB && FB_VIA) selects GPIOLIB which has unmet direct dependencies (ARCH_WANT_OPTIONAL_GPIOLIB || ARCH_REQUIRE_GPIOLIB)
+>>    drivers/input/touchscreen/cyttsp4_core.c: In function 'cyttsp4_irq':
+>>>> drivers/input/touchscreen/cyttsp4_core.c:1218:1: warning: 'cyttsp4_irq' uses dynamic stack allocation
+>
+> This error comes from selecting something that is optional.
+>
+> Grrr should I use "depends on GPIOLIB" for MMC instead?
 
-8bit-width enable bit of CSR MMC hosts is 3, while stardard hosts use
-bit 5. this patch fixes the functionality of 8bit transfer in CSR mmc
-controllers and improve performance for mmc0 a lot.
+Not sure that will be any better.
 
-Signed-off-by: Minda Chen <Minda.Chen@csr.com>
-Signed-off-by: Barry Song <Baohua.Song@csr.com>
----
- drivers/mmc/host/sdhci-sirf.c | 27 ++++++++++++++++++++++++++-
- 1 file changed, 26 insertions(+), 1 deletion(-)
+>
+> Or maybe even do the second approach of putting stubs in slot-gpio.h
+> for !GPIOLIB...
 
-diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
-index 1700453..376f45f 100644
---- a/drivers/mmc/host/sdhci-sirf.c
-+++ b/drivers/mmc/host/sdhci-sirf.c
-@@ -15,6 +15,8 @@
- #include <linux/mmc/slot-gpio.h>
- #include "sdhci-pltfm.h"
- 
-+#define SDHCI_SIRF_8BITBUS BIT(3)
-+
- struct sdhci_sirf_priv {
- 	struct clk *clk;
- 	int gpio_cd;
-@@ -27,10 +29,33 @@ static unsigned int sdhci_sirf_get_max_clk(struct sdhci_host *host)
- 	return clk_get_rate(priv->clk);
- }
- 
-+static void sdhci_sirf_set_bus_width(struct sdhci_host *host, int width)
-+{
-+        u8 ctrl;
-+
-+        ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+        if (width == MMC_BUS_WIDTH_8) {
-+                ctrl &= ~SDHCI_CTRL_4BITBUS;
-+                /*
-+                 * 8bit-width enable bit of CSR MMC hosts is 3,
-+                 * while stardard hosts use bit 5
-+                 */
-+                ctrl |= SDHCI_SIRF_8BITBUS;
-+        } else {
-+                if (host->version >= SDHCI_SPEC_300)
-+                        ctrl &= ~SDHCI_SIRF_8BITBUS;
-+                if (width == MMC_BUS_WIDTH_4)
-+                        ctrl |= SDHCI_CTRL_4BITBUS;
-+                else
-+                        ctrl &= ~SDHCI_CTRL_4BITBUS;
-+        }
-+        sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+}
-+
- static struct sdhci_ops sdhci_sirf_ops = {
- 	.set_clock = sdhci_set_clock,
- 	.get_max_clock	= sdhci_sirf_get_max_clk,
--	.set_bus_width = sdhci_set_bus_width,
-+	.set_bus_width = sdhci_sirf_set_bus_width,
- 	.reset = sdhci_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- };
--- 
-2.0.4
+Hmm, that doesn't sound the proper solution either.
 
+Currently there are already stubs for the "gpiod" API in
+gpio/consumer.h. I think the original error was that the "GPIOD_IN"
+flag couldn't be found for !GPIOLIB.
+So, how about actually move these flags and it's corresponding defines
+to be available for !GPIOLIB as well. That should solve this problem
+for other subsytems using gpiod API as well, right?
 
-
-Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
-More information can be found at www.csr.com. Keep up to date with CSR on our technical blog, www.csr.com/blog, CSR people blog, www.csr.com/people, YouTube, www.youtube.com/user/CSRplc, Facebook, www.facebook.com/pages/CSR/191038434253534, or follow us on Twitter at www.twitter.com/CSR_plc.
-New for 2014, you can now access the wide range of products powered by aptX at www.aptx.com.
+Kind regards
+Uffe
