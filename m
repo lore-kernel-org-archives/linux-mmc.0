@@ -1,65 +1,62 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 4/4] mmc: mmci: augment driver to handle gpio descriptors
-Date: Mon, 18 Aug 2014 16:11:51 -0500
-Message-ID: <CACRpkda9VSKG4w67bDUAwg_1p1kbOcbrUR=zcXHwM6dvftaRUA@mail.gmail.com>
-References: <1407864355-21545-1-git-send-email-linus.walleij@linaro.org>
-	<1407864355-21545-4-git-send-email-linus.walleij@linaro.org>
-	<CAAVeFuKo0DxN9Ff1G9o+ZXp8T+J-ZBE90cqcu5Pdgsq_jAZouw@mail.gmail.com>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [PATCH] mmc: sdhci: check 1.2v IO capability for SDHC host
+Date: Tue, 19 Aug 2014 02:06:16 +0000
+Message-ID: <17296D9F8FF2234F831FC3DF505A87A911B232FB@shsmsx102.ccr.corp.intel.com>
+References: <20140814100559.GB3933@intel.com>
+ <CAPDyKFo=Ua6to8cTjZiS6pU=LRHC5r6xnBC5j8Gcwr3_abDa+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <CAAVeFuKo0DxN9Ff1G9o+ZXp8T+J-ZBE90cqcu5Pdgsq_jAZouw@mail.gmail.com>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Alexandre Courbot <gnurou@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga03.intel.com ([143.182.124.21]:7581 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752351AbaHSCGV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 18 Aug 2014 22:06:21 -0400
+In-Reply-To: <CAPDyKFo=Ua6to8cTjZiS6pU=LRHC5r6xnBC5j8Gcwr3_abDa+A@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "chris@printf.org" <chris@printf.org>
 
-On Thu, Aug 14, 2014 at 9:56 AM, Alexandre Courbot <gnurou@gmail.com> wrote:
-> On Tue, Aug 12, 2014 at 10:25 AM, Linus Walleij
-> <linus.walleij@linaro.org> wrote:
->> -       /* If DT, cd/wp gpios must be supplied through it. */
->> -       if (!np && gpio_is_valid(plat->gpio_cd)) {
->> -               ret = mmc_gpio_request_cd(mmc, plat->gpio_cd, 0);
->> -               if (ret)
->> -                       goto clk_disable;
->> -       }
->> -       if (!np && gpio_is_valid(plat->gpio_wp)) {
->> -               ret = mmc_gpio_request_ro(mmc, plat->gpio_wp);
->> -               if (ret)
->> -                       goto clk_disable;
->> +       /*
->> +        * If:
->> +        * - not using DT but using a descriptor table, or
->> +        * - using a table of descriptors ALONGSIDE DT, or
->> +        * look up these descriptors named "cd" and "wp" right here, fail
->> +        * silently of these do not exist and proceed to try platform data
->> +        */
->> +       if (!np) {
->> +               ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0);
->
-> I am not familiar with this driver, but since mmc_gpiod_request_cd()
-> uses gpiod_get(), can't you call it outside of the (!np) condition?
-> You should not have to do this kind of check when using the gpiod API.
-(...)
-> I wonder (again, without knowing better) if this gpiod/gpio fallback
-> logic should not be put directly into mmc_gpio_request_ro/cd instead
-> of having two functions? Couldn't other drivers also benefit from it
-> that way?
-
-So this is a side-effect of the fact that in the MMC subsystem, the
-gpio descriptor is only used in the device tree parsing code.
-mmc_of_parse() in drivers/mmc/core/host.c
-
-So if you're *not* using device tree (as some of the MMCI platforms)
-they need to make these calls elsewhere.
-
-I agree that there may be a refactoring lurking here, that would
-move this out of the DT parse code and into the MMC core.
-It should then be called *before* parsing the DT as DT adds
-additional options to the GPIO (explicit inversion).
-
-It can be done on top of this patch set though, once these things
-are in place.
-
-Yours,
-Linus Walleij
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
+aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBNb25kYXksIEF1Z3VzdCAxOCwg
+MjAxNCA1OjM5IFBNDQo+IFRvOiBEb25nLCBDaHVhbnhpYW8NCj4gQ2M6IGxpbnV4LW1tYzsgY2hy
+aXNAcHJpbnRmLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIXSBtbWM6IHNkaGNpOiBjaGVjayAx
+LjJ2IElPIGNhcGFiaWxpdHkgZm9yIFNESEMgaG9zdA0KPiANCj4gT24gMTQgQXVndXN0IDIwMTQg
+MTI6MDUsIENodWFueGlhbyBEb25nIDxjaHVhbnhpYW8uZG9uZ0BpbnRlbC5jb20+DQo+IHdyb3Rl
+Og0KPiA+IFJpZ2h0IG5vdyBlbmFibGUgMS4ydiBJTyB2b2x0YWdlIGZvciBTREhDIGlzIGJ5IHVz
+aW5nIHZxbW1jLg0KPiA+IFRodXMgZm9yIHRoZSBob3N0IHdoaWNoIGRvZXNuJ3QgaGF2ZSB2cW1t
+Yywgb3IgaXRzIHZxbW1jIGRvZXMgbm90DQo+ID4gc3VwcG9ydCAxLjJ2LCBkaXJlY3RseSB1c2Ug
+TU1DX0NBUDJfSFMyMDAgbWF5IGNhdXNlIEhTMjAwIGZhaWx1cmUuDQo+ID4NCj4gPiBTbyBuZWVk
+cyB0byBjaGVjayBpZiB2cW1tYyBpcyBhYmxlIHRvIHN1cHBvcnQgMS4ydi4gSWYgaXQgZG9lcyBu
+b3QNCj4gPiBzdXBwb3J0LCBkaXNhYmxlIDEuMnYgSU8gZm9yIEhTMjAwLg0KPiA+DQo+ID4gU2ln
+bmVkLW9mZi1ieTogQ2h1YW54aWFvIERvbmcgPGNodWFueGlhby5kb25nQGludGVsLmNvbT4NCj4g
+PiAtLS0NCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jIHwgICAgNiArKysrKy0NCj4gPiAg
+MSBmaWxlIGNoYW5nZWQsIDUgaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbigtKQ0KPiA+DQo+ID4g
+ZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyBiL2RyaXZlcnMvbW1jL2hvc3Qv
+c2RoY2kuYyBpbmRleA0KPiA+IGMwMjZlYzguLjZiNzAxZTEgMTAwNjQ0DQo+ID4gLS0tIGEvZHJp
+dmVycy9tbWMvaG9zdC9zZGhjaS5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5j
+DQo+ID4gQEAgLTI5OTksOCArMjk5OSwxMiBAQCBpbnQgc2RoY2lfYWRkX2hvc3Qoc3RydWN0IHNk
+aGNpX2hvc3QgKmhvc3QpDQo+ID4gICAgICAgICAgICAgICAgIC8qIFNEMy4wOiBTRFIxMDQgaXMg
+c3VwcG9ydGVkIHNvIChmb3IgZU1NQykgdGhlIGNhcHMyDQo+ID4gICAgICAgICAgICAgICAgICAq
+IGZpZWxkIGNhbiBiZSBwcm9tb3RlZCB0byBzdXBwb3J0IEhTMjAwLg0KPiA+ICAgICAgICAgICAg
+ICAgICAgKi8NCj4gPiAtICAgICAgICAgICAgICAgaWYgKCEoaG9zdC0+cXVpcmtzMiAmIFNESENJ
+X1FVSVJLMl9CUk9LRU5fSFMyMDApKQ0KPiA+ICsgICAgICAgICAgICAgICBpZiAoIShob3N0LT5x
+dWlya3MyICYgU0RIQ0lfUVVJUksyX0JST0tFTl9IUzIwMCkpIHsNCj4gPiAgICAgICAgICAgICAg
+ICAgICAgICAgICBtbWMtPmNhcHMyIHw9IE1NQ19DQVAyX0hTMjAwOw0KPiA+ICsgICAgICAgICAg
+ICAgICAgICAgICAgIGlmICghaG9zdC0+dnFtbWMgfHwNCj4gPiArICFyZWd1bGF0b3JfaXNfc3Vw
+cG9ydGVkX3ZvbHRhZ2UNCj4gDQo+IFRoaXMgbmVlZHMgYSByZWJhc2UgYW5kIHBsZWFzZSB1c2Ug
+SVNfRVJSLg0KPiANCj4gKCFJU19FUlIobW1jLT5zdXBwbHkudnFtbWMpIC4uLg0KT2gsIEkgc3Rp
+bGwgdXNlIHRoZSBvbGQgbW1jLW5leHQgdHJlZS4gV2lsbCBkbyB0aGUgcmViYXNlOw0KDQpUaGFu
+a3MNCkNodWFueGlhbw0KDQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KPiANCj4gDQo+ID4g
+KyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIChob3N0LT52cW1tYywgMTEw
+MDAwMCwNCj4gMTMwMDAwMCkpDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBt
+bWMtPmNhcHMyICY9DQo+IH5NTUNfQ0FQMl9IUzIwMF8xXzJWX1NEUjsNCj4gPiArICAgICAgICAg
+ICAgICAgfQ0KPiA+ICAgICAgICAgfSBlbHNlIGlmIChjYXBzWzFdICYgU0RIQ0lfU1VQUE9SVF9T
+RFI1MCkNCj4gPiAgICAgICAgICAgICAgICAgbW1jLT5jYXBzIHw9IE1NQ19DQVBfVUhTX1NEUjUw
+Ow0KPiA+DQo+ID4gLS0NCj4gPiAxLjcuMTAuNA0KPiA+DQo+ID4gLS0NCj4gPiBUbyB1bnN1YnNj
+cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1j
+Ig0KPiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
+b3JnIE1vcmUgbWFqb3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9t
+YWpvcmRvbW8taW5mby5odG1sDQo=
