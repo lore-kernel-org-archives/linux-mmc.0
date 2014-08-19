@@ -1,37 +1,77 @@
-From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Subject: Re: [PATCH 1/1] mmc: core: Use regulator_get_voltage() if OCR mask
- is empty.
-Date: Tue, 19 Aug 2014 13:29:32 +0200
-Message-ID: <53F3351C.1020500@collabora.co.uk>
-References: <1408019940-11153-1-git-send-email-javier.martinez@collabora.co.uk>	<CAD7vxxKvzxvmzgx=S5ZZn54ts99ca2TqBYFvY1SXZQZDkhjq3w@mail.gmail.com>	<20140814151958.GY17528@sirena.org.uk>	<CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>	<53EDBB5B.4000209@collabora.co.uk>	<20140815095528.GH17528@sirena.org.uk> <CAPDyKFpm5nzXp5p0qxDof2NcOML911eYkjPNMsn9a2ttdnW7gQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 2/4] mmc: mmci: move block size validation under
+ relevant code
+Date: Tue, 19 Aug 2014 13:55:37 +0200
+Message-ID: <CAPDyKFok=r__hx1RaXFgttCQkeocSADY59nSPTZ6DUXQdddBRg@mail.gmail.com>
+References: <1408446785-1399-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1408446866-1649-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpm5nzXp5p0qxDof2NcOML911eYkjPNMsn9a2ttdnW7gQ@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Mark Brown <broonie@kernel.org>, Tim Kryger <tim.kryger@gmail.com>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f170.google.com ([209.85.216.170]:33061 "EHLO
+	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751492AbaHSLzi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Aug 2014 07:55:38 -0400
+Received: by mail-qc0-f170.google.com with SMTP id x3so6133130qcv.1
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Aug 2014 04:55:37 -0700 (PDT)
+In-Reply-To: <1408446866-1649-1-git-send-email-srinivas.kandagatla@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Russell King <linux@arm.linux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 
-Hello Ulf,
-
-On 08/15/2014 04:51 PM, Ulf Hansson wrote:
-> 
-> Just wanted to add some input regarding the errors in the mmc case.
-> These are of high importance. In principle if you get, "Failed getting
-> OCR mask: -22", likely you will be using a wrong OCR mask while
-> negotiating the voltage level with the card.
-> 
-> So, somehow we need to address this issue.
+On 19 August 2014 13:14, Srinivas Kandagatla
+<srinivas.kandagatla@linaro.org> wrote:
+> This code moves a BUG_ON condition to relevant if block, this check is
+> not necessary for IPs which can set any arbitrary block size in a given
+> range.
+> This patch is necessary for SDIO which sets block sizes that are exactly
+> not power of 2.
 >
+> Original issue detected while testing WLAN ath6kl on Qualcomm APQ8064 SOC.
+>
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> ---
+>  drivers/mmc/host/mmci.c | 11 ++++++-----
+>  1 file changed, 6 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 3089fba..1c99195 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -800,15 +800,16 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+>         writel(timeout, base + MMCIDATATIMER);
+>         writel(host->size, base + MMCIDATALENGTH);
+>
+> -       blksz_bits = ffs(data->blksz) - 1;
+> -       BUG_ON(1 << blksz_bits != data->blksz);
 
-And do you think that $subject is the right approach to solve this issue?
-If not please let me know so I can address that.
+I don't like this BUG_ON at all, I would prefer if we remove it. The
+original patch "mmc: mmci: Support any block sizes for ux500v2", did
+so as well.
 
-> Kind regards
-> Uffe
-> 
+Now, if we still think removing it is fragile, let additional tests in
+mmci_validate_data() and return and error code from there.
 
-Best regards,
-Javier
+Kind regards
+Uffe
+
+>
+> -       if (variant->blksz_datactrl16)
+> +       if (variant->blksz_datactrl16) {
+>                 datactrl = MCI_DPSM_ENABLE | (data->blksz << 16);
+> -       else if (variant->blksz_datactrl4)
+> +       } else if (variant->blksz_datactrl4) {
+>                 datactrl = MCI_DPSM_ENABLE | (data->blksz << 4);
+> -       else
+> +       } else {
+> +               blksz_bits = ffs(data->blksz) - 1;
+> +               BUG_ON(1 << blksz_bits != data->blksz);
+>                 datactrl = MCI_DPSM_ENABLE | blksz_bits << 4;
+> +       }
+>
+>         if (data->flags & MMC_DATA_READ)
+>                 datactrl |= MCI_DPSM_DIRECTION;
+> --
+> 1.9.1
+>
