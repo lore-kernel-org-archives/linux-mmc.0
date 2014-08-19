@@ -1,82 +1,59 @@
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: [PATCH v2 1/4] mmc: mmci: Support any block sizes for ux500v2 and qcom variant
-Date: Tue, 19 Aug 2014 12:14:07 +0100
-Message-ID: <1408446847-1604-1-git-send-email-srinivas.kandagatla@linaro.org>
-References: <1408446785-1399-1-git-send-email-srinivas.kandagatla@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1408446785-1399-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Subject: [PATCH v2 0/4] mmc: mmci: sdio related fixes
+Date: Tue, 19 Aug 2014 12:13:05 +0100
+Message-ID: <1408446785-1399-1-git-send-email-srinivas.kandagatla@linaro.org>
+References: <1407844950-8072-1-git-send-email-srinivas.kandadgatla@linaro.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1407844950-8072-1-git-send-email-srinivas.kandadgatla@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+This patchset fixes few sdio related issues encountered while testing
+WLAN ath6kl via SDIO on IFC6410 board with Qualcomm APQ8064 SOC.
 
-For the ux500v2 variant of the PL18x block, any block sizes are
-supported. This will make it possible to decrease data overhead
-for SDIO transfers.
+Patch: "mmc: mmci: Support any block sizes for ux500v2 and qcom variant" is
+a very old patch by Ulf to support IPs which support any size of block sizes.
+http://www.spinics.net/lists/linux-mmc/msg12160.html I modified the subject
+line to include qcom.
 
-This patch is based on Ulf Hansson patch
-http://www.spinics.net/lists/linux-mmc/msg12160.html
+Patches "mmc: mmci: move block size validation under relevant code" 
+Moves a BUG check to relevant code path.
 
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-	enabled this support on qcom variant.
+Both of the patches fixes below issues reported while testing sdio.
+The issue was ath6kl driver was issuing 12 bytes and 24 bytes reads
+which are caught as part of the error handing in the driver and
+resulting in failures. 
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
- drivers/mmc/host/mmci.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
+Patch "mmc: mmci: Add sdio enable mask in variant data" adds extra
+variant parameter to enable sdio. This makes mmci driver more flexible.
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index c11cb05..3089fba 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -77,6 +77,7 @@ static unsigned int fmax = 515633;
-  * @qcom_fifo: enables qcom specific fifo pio read logic.
-  * @reversed_irq_handling: handle data irq before cmd irq.
-  * @qcom_dml: enables qcom specific dma glue for dma transfers.
-+ * @any_blksize: true if block any sizes are supported
-  */
- struct variant_data {
- 	unsigned int		clkreg;
-@@ -102,6 +103,7 @@ struct variant_data {
- 	bool			qcom_fifo;
- 	bool			reversed_irq_handling;
- 	bool			qcom_dml;
-+	bool			any_blksize;
- };
- 
- static struct variant_data variant_arm = {
-@@ -194,6 +196,7 @@ static struct variant_data variant_ux500v2 = {
- 	.pwrreg_clkgate		= true,
- 	.busy_detect		= true,
- 	.pwrreg_nopower		= true,
-+	.any_blksize		= true,
- };
- 
- static struct variant_data variant_qcom = {
-@@ -212,6 +215,7 @@ static struct variant_data variant_qcom = {
- 	.explicit_mclk_control	= true,
- 	.qcom_fifo		= true,
- 	.qcom_dml		= true,
-+	.any_blksize		= true,
- };
- 
- static int mmci_card_busy(struct mmc_host *mmc)
-@@ -239,10 +243,11 @@ static int mmci_card_busy(struct mmc_host *mmc)
- static int mmci_validate_data(struct mmci_host *host,
- 			      struct mmc_data *data)
- {
-+	struct variant_data *variant = host->variant;
-+
- 	if (!data)
- 		return 0;
--
--	if (!is_power_of_2(data->blksz)) {
-+	if (!is_power_of_2(data->blksz) && !variant->any_blksize) {
- 		dev_err(mmc_dev(host->mmc),
- 			"unsupported block size (%d bytes)\n", data->blksz);
- 		return -EINVAL;
+Patch "mmc: mmci: rename sdio flag in vendor data to st_sdio" renames sdio
+flag in vendor data to st_sdio, as this flag is only used to setup st
+specific sdio logic.
+
+All these patches are tested on IFC6410 board with ath6kl WLAN via SDIO.
+
+Thanks to Linus W and Russell for comments on RFC.
+
+Changes since RFC:
+	- moved sdio flag to st_sdio to simplify the checks.
+	- use Ulf's patch to address IP's which support anysize blocks.
+
+Thanks,
+srini
+
+Srinivas Kandagatla (3):
+  mmc: mmci: move block size validation under relevant code
+  mmc: mmci: Add sdio enable mask in variant data
+  mmc: mmci: rename sdio flag in vendor data to st_sdio
+
+Ulf Hansson (1):
+  mmc: mmci: Support any block sizes for ux500v2 and qcom variant
+
+ drivers/mmc/host/mmci.c | 78 ++++++++++++++++++++++++++-----------------------
+ 1 file changed, 42 insertions(+), 36 deletions(-)
+
 -- 
 1.9.1
