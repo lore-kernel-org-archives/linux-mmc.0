@@ -1,74 +1,305 @@
-From: "Sun, Yi Y" <yi.y.sun@intel.com>
-Subject: RE: [PATCH v2] mmc: execute tuning when device is not busy.
-Date: Tue, 19 Aug 2014 03:53:43 +0000
-Message-ID: <525EAED47491124EB5123A51BD2FC791019DCB1B@SHSMSX101.ccr.corp.intel.com>
-References: <1407995498-17634-1-git-send-email-yi.y.sun@intel.com>
+From: Addy Ke <addy.ke@rock-chips.com>
+Subject: [PATCH v2] mmc: dw_mmc: move rockchip related code to a separate file
+Date: Tue, 19 Aug 2014 12:36:14 +0800
+Message-ID: <1408422974-22301-1-git-send-email-addy.ke@rock-chips.com>
+References: <1408003293-27375-1-git-send-email-addy.ke@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:36223 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752380AbaHSDyN convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Aug 2014 23:54:13 -0400
-In-Reply-To: <1407995498-17634-1-git-send-email-yi.y.sun@intel.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1408003293-27375-1-git-send-email-addy.ke@rock-chips.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org
+Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com, Addy Ke <addy.ke@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
 
-Hi, Uffe,
+To support HS200 and UHS-1, we need add a big hunk of code,
+as shown in the following patches. So a separate file for
+rockchip SOCs is suitable.
 
-Could you please review the patch? Thanks!
-
-BRs,
-Sun Yi
-
------Original Message-----
-From: Sun, Yi Y 
-Sent: Thursday, August 14, 2014 1:52 PM
-To: linux-mmc@vger.kernel.org; ulf.hansson@linaro.org
-Cc: Sun, Yi Y
-Subject: [PATCH v2] mmc: execute tuning when device is not busy.
-
-We find tuning timeout because of the secure erase operation lasts too long so not to do tuning when device is busy.
-
-Signed-off-by: Yi Sun <yi.y.sun@intel.com>
+Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
 ---
- drivers/mmc/host/sdhci.c |    7 ++++---
- drivers/mmc/host/sdhci.h |    1 +
- 2 files changed, 5 insertions(+), 3 deletions(-)
+Changes in v2:
+- Kconfig: depend on ARCH_ROCKCHIP, suggested by Bartlomiej Zolnierkiew=
+icz
+- Kconfig: depend on OF, suggested by Doug Anderson
+- Not change suspend/resume code, suggested by Doug Anderson
+- If pdev->dev.of_node is NULL, then return -ENODEV, suggested by Heiko=
+ St=C3=BCbner
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index 47055f3..6a584d7 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1355,11 +1355,12 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
- 		/*
- 		 * Check if the re-tuning timer has already expired and there
--		 * is no on-going data transfer. If so, we need to execute
--		 * tuning procedure before sending command.
-+		 * is no on-going data transfer and DAT0 is not busy. If so,
-+		 * we need to execute tuning procedure before sending command.
- 		 */
- 		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
--		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
-+		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ)) &&
-+		    (present_state & SDHCI_DATA_0_LVL_MASK)) {
- 			if (mmc->card) {
- 				/* eMMC uses cmd21 but sd and sdio use cmd19 */
- 				tuning_opcode =
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h index 4a5cd5e..0ae6b99d 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -72,6 +72,7 @@
- #define  SDHCI_WRITE_PROTECT	0x00080000
- #define  SDHCI_DATA_LVL_MASK	0x00F00000
- #define   SDHCI_DATA_LVL_SHIFT	20
-+#define   SDHCI_DATA_0_LVL_MASK	0x00100000
- 
- #define SDHCI_HOST_CONTROL	0x28
- #define  SDHCI_CTRL_LED		0x01
---
-1.7.9.5
+ drivers/mmc/host/Kconfig           |   9 +++
+ drivers/mmc/host/Makefile          |   1 +
+ drivers/mmc/host/dw_mmc-pltfm.c    |  57 ----------------
+ drivers/mmc/host/dw_mmc-rockchip.c | 136 +++++++++++++++++++++++++++++=
+++++++++
+ 4 files changed, 146 insertions(+), 57 deletions(-)
+ create mode 100644 drivers/mmc/host/dw_mmc-rockchip.c
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index a565254..f6095f6 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -621,6 +621,15 @@ config MMC_DW_PCI
+=20
+ 	  If unsure, say N.
+=20
++config MMC_DW_ROCKCHIP
++	tristate "Rockchip specific extensions for Synopsys DW Memory Card In=
+terface"
++	depends on MMC_DW && ARCH_ROCKCHIP && OF
++	select MMC_DW_PLTFM
++	help
++	  This selects support for Rockchip SoC specific extensions to the
++	  Synopsys DesignWare Memory Card Interface driver. Select this optio=
+n
++	  for platforms based on RK3066, RK3188 and RK3288 SoC's.
++
+ config MMC_SH_MMCIF
+ 	tristate "SuperH Internal MMCIF support"
+ 	depends on MMC_BLOCK
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 7f81ddf..5fce465 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -45,6 +45,7 @@ obj-$(CONFIG_MMC_DW_PLTFM)	+=3D dw_mmc-pltfm.o
+ obj-$(CONFIG_MMC_DW_EXYNOS)	+=3D dw_mmc-exynos.o
+ obj-$(CONFIG_MMC_DW_K3)		+=3D dw_mmc-k3.o
+ obj-$(CONFIG_MMC_DW_PCI)	+=3D dw_mmc-pci.o
++obj-$(CONFIG_MMC_DW_ROCKCHIP)	+=3D dw_mmc-rockchip.o
+ obj-$(CONFIG_MMC_SH_MMCIF)	+=3D sh_mmcif.o
+ obj-$(CONFIG_MMC_JZ4740)	+=3D jz4740_mmc.o
+ obj-$(CONFIG_MMC_VUB300)	+=3D vub300.o
+diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-=
+pltfm.c
+index b547f7a..0c56c41 100644
+--- a/drivers/mmc/host/dw_mmc-pltfm.c
++++ b/drivers/mmc/host/dw_mmc-pltfm.c
+@@ -26,64 +26,11 @@
+ #include "dw_mmc.h"
+ #include "dw_mmc-pltfm.h"
+=20
+-#define RK3288_CLKGEN_DIV	2
+-
+ static void dw_mci_pltfm_prepare_command(struct dw_mci *host, u32 *cmd=
+r)
+ {
+ 	*cmdr |=3D SDMMC_CMD_USE_HOLD_REG;
+ }
+=20
+-static int dw_mci_rk3288_setup_clock(struct dw_mci *host)
+-{
+-	host->bus_hz /=3D RK3288_CLKGEN_DIV;
+-
+-	return 0;
+-}
+-
+-static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios =
+*ios)
+-{
+-	int ret;
+-	unsigned int cclkin;
+-	u32 bus_hz;
+-
+-	/*
+-	 * cclkin: source clock of mmc controller.
+-	 * bus_hz: card interface clock generated by CLKGEN.
+-	 * bus_hz =3D cclkin / RK3288_CLKGEN_DIV;
+-	 * ios->clock =3D (div =3D=3D 0) ? bus_hz : (bus_hz / (2 * div))
+-	 *
+-	 * Note: div can only be 0 or 1
+-	 *       if DDR50 8bit mode(only emmc work in 8bit mode),
+-	 *       div must be set 1
+-	 */
+-	if ((ios->bus_width =3D=3D MMC_BUS_WIDTH_8) &&
+-	    (ios->timing =3D=3D MMC_TIMING_MMC_DDR52))
+-		cclkin =3D 2 * ios->clock * RK3288_CLKGEN_DIV;
+-	else
+-		cclkin =3D ios->clock * RK3288_CLKGEN_DIV;
+-
+-	ret =3D clk_set_rate(host->ciu_clk, cclkin);
+-	if (ret)
+-		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
+-
+-	bus_hz =3D clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
+-	if (bus_hz !=3D host->bus_hz) {
+-		host->bus_hz =3D bus_hz;
+-		/* force dw_mci_setup_bus() */
+-		host->current_speed =3D 0;
+-	}
+-}
+-
+-static const struct dw_mci_drv_data rk2928_drv_data =3D {
+-	.prepare_command	=3D dw_mci_pltfm_prepare_command,
+-};
+-
+-static const struct dw_mci_drv_data rk3288_drv_data =3D {
+-	.prepare_command	=3D dw_mci_pltfm_prepare_command,
+-	.set_ios	=3D dw_mci_rk3288_set_ios,
+-	.setup_clock	=3D dw_mci_rk3288_setup_clock,
+-};
+-
+ static const struct dw_mci_drv_data socfpga_drv_data =3D {
+ 	.prepare_command	=3D dw_mci_pltfm_prepare_command,
+ };
+@@ -144,10 +91,6 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
+=20
+ static const struct of_device_id dw_mci_pltfm_match[] =3D {
+ 	{ .compatible =3D "snps,dw-mshc", },
+-	{ .compatible =3D "rockchip,rk2928-dw-mshc",
+-		.data =3D &rk2928_drv_data },
+-	{ .compatible =3D "rockchip,rk3288-dw-mshc",
+-		.data =3D &rk3288_drv_data },
+ 	{ .compatible =3D "altr,socfpga-dw-mshc",
+ 		.data =3D &socfpga_drv_data },
+ 	{},
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_m=
+mc-rockchip.c
+new file mode 100644
+index 0000000..f0c2cb1
+--- /dev/null
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -0,0 +1,136 @@
++/*
++ * Copyright (c) 2014, Fuzhou Rockchip Electronics Co., Ltd
++ *
++ * This program is free software; you can redistribute it and/or modif=
+y
++ * it under the terms of the GNU General Public License as published b=
+y
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/clk.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/dw_mmc.h>
++#include <linux/of_address.h>
++
++#include "dw_mmc.h"
++#include "dw_mmc-pltfm.h"
++
++#define RK3288_CLKGEN_DIV       2
++
++static void dw_mci_rockchip_prepare_command(struct dw_mci *host, u32 *=
+cmdr)
++{
++	*cmdr |=3D SDMMC_CMD_USE_HOLD_REG;
++}
++
++static int dw_mci_rk3288_setup_clock(struct dw_mci *host)
++{
++	host->bus_hz /=3D RK3288_CLKGEN_DIV;
++
++	return 0;
++}
++
++static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios =
+*ios)
++{
++	int ret;
++	unsigned int cclkin;
++	u32 bus_hz;
++
++	/*
++	 * cclkin: source clock of mmc controller
++	 * bus_hz: card interface clock generated by CLKGEN
++	 * bus_hz =3D cclkin / RK3288_CLKGEN_DIV
++	 * ios->clock =3D (div =3D=3D 0) ? bus_hz : (bus_hz / (2 * div))
++	 *
++	 * Note: div can only be 0 or 1
++	 *       if DDR50 8bit mode(only emmc work in 8bit mode),
++	 *       div must be set 1
++	 */
++	if (ios->bus_width =3D=3D MMC_BUS_WIDTH_8 &&
++	    ios->timing =3D=3D MMC_TIMING_MMC_DDR52)
++		cclkin =3D 2 * ios->clock * RK3288_CLKGEN_DIV;
++	else
++		cclkin =3D ios->clock * RK3288_CLKGEN_DIV;
++
++	ret =3D clk_set_rate(host->ciu_clk, cclkin);
++	if (ret)
++		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
++
++	bus_hz =3D clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
++	if (bus_hz !=3D host->bus_hz) {
++		host->bus_hz =3D bus_hz;
++		/* force dw_mci_setup_bus() */
++		host->current_speed =3D 0;
++	}
++}
++
++static const struct dw_mci_drv_data rk2928_drv_data =3D {
++	.prepare_command        =3D dw_mci_rockchip_prepare_command,
++};
++
++static const struct dw_mci_drv_data rk3288_drv_data =3D {
++	.prepare_command        =3D dw_mci_rockchip_prepare_command,
++	.set_ios		=3D dw_mci_rk3288_set_ios,
++	.setup_clock    =3D dw_mci_rk3288_setup_clock,
++};
++
++static const struct of_device_id dw_mci_rockchip_match[] =3D {
++	{ .compatible =3D "rockchip,rk2928-dw-mshc",
++		.data =3D &rk2928_drv_data },
++	{ .compatible =3D "rockchip,rk3288-dw-mshc",
++		.data =3D &rk3288_drv_data },
++	{},
++};
++MODULE_DEVICE_TABLE(of, dw_mci_rockchip_match);
++
++static int dw_mci_rockchip_probe(struct platform_device *pdev)
++{
++	const struct dw_mci_drv_data *drv_data;
++	const struct of_device_id *match;
++
++	if (!pdev->dev.of_node)
++		return -ENODEV;
++
++	match =3D of_match_node(dw_mci_rockchip_match, pdev->dev.of_node);
++	drv_data =3D match->data;
++
++	return dw_mci_pltfm_register(pdev, drv_data);
++}
++
++#ifdef CONFIG_PM_SLEEP
++static int dw_mci_rockchip_suspend(struct device *dev)
++{
++	struct dw_mci *host =3D dev_get_drvdata(dev);
++
++	return dw_mci_suspend(host);
++}
++
++static int dw_mci_rockchip_resume(struct device *dev)
++{
++	struct dw_mci *host =3D dev_get_drvdata(dev);
++
++	return dw_mci_resume(host);
++}
++#endif /* CONFIG_PM_SLEEP */
++
++static SIMPLE_DEV_PM_OPS(dw_mci_rockchip_pmops,
++			 dw_mci_rockchip_suspend,
++			 dw_mci_rockchip_resume);
++
++static struct platform_driver dw_mci_rockchip_pltfm_driver =3D {
++	.probe		=3D dw_mci_rockchip_probe,
++	.remove		=3D __exit_p(dw_mci_pltfm_remove),
++	.driver		=3D {
++		.name		=3D "dwmmc_rockchip",
++		.of_match_table	=3D dw_mci_rockchip_match,
++		.pm		=3D &dw_mci_rockchip_pmops,
++	},
++};
++
++module_platform_driver(dw_mci_rockchip_pltfm_driver);
++
++MODULE_AUTHOR("Addy Ke <addy.ke@rock-chips.com>");
++MODULE_DESCRIPTION("Rockchip Specific DW-MSHC Driver Extension");
++MODULE_ALIAS("platform:dwmmc-rockchip");
++MODULE_LICENSE("GPL v2");
+--=20
+1.8.3.2
+
 
