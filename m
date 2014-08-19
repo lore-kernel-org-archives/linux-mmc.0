@@ -1,55 +1,35 @@
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [PATCH V2] mmc: sdhci: check 1.2v IO capability for SDHC host
-Date: Tue, 19 Aug 2014 11:02:41 +0800
-Message-ID: <20140819030240.GA3201@intel.com>
-Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 3/4] mmc: host: switch OF parser to use gpio descriptors
+Date: Mon, 18 Aug 2014 22:27:40 -0500
+Message-ID: <CACRpkdasvUXgyJ24OR3tz83Qwt+RYXGMTrKh82ER-g=YX=e9Zg@mail.gmail.com>
+References: <1407864355-21545-1-git-send-email-linus.walleij@linaro.org>
+	<1407864355-21545-3-git-send-email-linus.walleij@linaro.org>
+	<20140818194655.GA2565@schnuecks.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:17191 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752025AbaHSDDI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 18 Aug 2014 23:03:08 -0400
-Content-Disposition: inline
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <20140818194655.GA2565@schnuecks.de>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Simon Baatz <gmbnomis@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, chris@printf.org
-Cc: linux-mmc@vger.kernel.org
 
-Right now enable 1.2v IO voltage for SDHC is by using vqmmc.
-Thus for the host which doesn't have vqmmc, or its vqmmc does
-not support 1.2v, directly use MMC_CAP2_HS200 may cause HS200
-failure.
+On Mon, Aug 18, 2014 at 2:46 PM, Simon Baatz <gmbnomis@gmail.com> wrote:
+> On Tue, Aug 12, 2014 at 07:25:54PM +0200, Linus Walleij wrote:
+>> This switches the central MMC OF parser to use gpio descriptors
+>> instead of grabbing GPIOs explicitly from the device tree.
+>> This strips out an unecessary use of the integer-based GPIO
+>> API that we want to get rid of, cuts down on code as the
+>> gpio descriptor code will handle active low flags.
+>>
+>> As it is in no way a bug not to supply CD/WP GPIOs the messages
+>> about them not being specified have been depromoted from
+>> dev_err() to dev_dbg().
+>
+> I think the intention of the current code is to issue an
+> error if a valid GPIO was specified but could not be obtained.
 
-So needs to check if vqmmc is able to support 1.2v. If it does
-not support, disable 1.2v IO for HS200.
+OK I'll post a fixup.
 
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
----
-Changelog V2: rebase this patch, and use IS_ERR to check vqmmc.
-
- drivers/mmc/host/sdhci.c |    7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 4cc2ff9..a23738c 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3009,8 +3009,13 @@ int sdhci_add_host(struct sdhci_host *host)
- 		/* SD3.0: SDR104 is supported so (for eMMC) the caps2
- 		 * field can be promoted to support HS200.
- 		 */
--		if (!(host->quirks2 & SDHCI_QUIRK2_BROKEN_HS200))
-+		if (!(host->quirks2 & SDHCI_QUIRK2_BROKEN_HS200)) {
- 			mmc->caps2 |= MMC_CAP2_HS200;
-+			if (IS_ERR(mmc->supply.vqmmc) ||
-+					!regulator_is_supported_voltage
-+					(mmc->supply.vqmmc, 1100000, 1300000))
-+				mmc->caps2 &= ~MMC_CAP2_HS200_1_2V_SDR;
-+		}
- 	} else if (caps[1] & SDHCI_SUPPORT_SDR50)
- 		mmc->caps |= MMC_CAP_UHS_SDR50;
- 
--- 
-1.7.10.4
-
+Yours,
+Linus Walleij
