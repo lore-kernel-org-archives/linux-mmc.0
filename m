@@ -1,59 +1,53 @@
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: [PATCH v2 0/4] mmc: mmci: sdio related fixes
-Date: Tue, 19 Aug 2014 12:13:05 +0100
-Message-ID: <1408446785-1399-1-git-send-email-srinivas.kandagatla@linaro.org>
-References: <1407844950-8072-1-git-send-email-srinivas.kandadgatla@linaro.org>
+Subject: [PATCH v2 2/4] mmc: mmci: move block size validation under relevant code
+Date: Tue, 19 Aug 2014 12:14:26 +0100
+Message-ID: <1408446866-1649-1-git-send-email-srinivas.kandagatla@linaro.org>
+References: <1408446785-1399-1-git-send-email-srinivas.kandagatla@linaro.org>
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1407844950-8072-1-git-send-email-srinivas.kandadgatla@linaro.org>
+In-Reply-To: <1408446785-1399-1-git-send-email-srinivas.kandagatla@linaro.org>
 Sender: linux-arm-msm-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This patchset fixes few sdio related issues encountered while testing
-WLAN ath6kl via SDIO on IFC6410 board with Qualcomm APQ8064 SOC.
+This code moves a BUG_ON condition to relevant if block, this check is
+not necessary for IPs which can set any arbitrary block size in a given
+range.
+This patch is necessary for SDIO which sets block sizes that are exactly
+not power of 2.
 
-Patch: "mmc: mmci: Support any block sizes for ux500v2 and qcom variant" is
-a very old patch by Ulf to support IPs which support any size of block sizes.
-http://www.spinics.net/lists/linux-mmc/msg12160.html I modified the subject
-line to include qcom.
+Original issue detected while testing WLAN ath6kl on Qualcomm APQ8064 SOC.
 
-Patches "mmc: mmci: move block size validation under relevant code" 
-Moves a BUG check to relevant code path.
+Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+---
+ drivers/mmc/host/mmci.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-Both of the patches fixes below issues reported while testing sdio.
-The issue was ath6kl driver was issuing 12 bytes and 24 bytes reads
-which are caught as part of the error handing in the driver and
-resulting in failures. 
-
-Patch "mmc: mmci: Add sdio enable mask in variant data" adds extra
-variant parameter to enable sdio. This makes mmci driver more flexible.
-
-Patch "mmc: mmci: rename sdio flag in vendor data to st_sdio" renames sdio
-flag in vendor data to st_sdio, as this flag is only used to setup st
-specific sdio logic.
-
-All these patches are tested on IFC6410 board with ath6kl WLAN via SDIO.
-
-Thanks to Linus W and Russell for comments on RFC.
-
-Changes since RFC:
-	- moved sdio flag to st_sdio to simplify the checks.
-	- use Ulf's patch to address IP's which support anysize blocks.
-
-Thanks,
-srini
-
-Srinivas Kandagatla (3):
-  mmc: mmci: move block size validation under relevant code
-  mmc: mmci: Add sdio enable mask in variant data
-  mmc: mmci: rename sdio flag in vendor data to st_sdio
-
-Ulf Hansson (1):
-  mmc: mmci: Support any block sizes for ux500v2 and qcom variant
-
- drivers/mmc/host/mmci.c | 78 ++++++++++++++++++++++++++-----------------------
- 1 file changed, 42 insertions(+), 36 deletions(-)
-
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 3089fba..1c99195 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -800,15 +800,16 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+ 	writel(timeout, base + MMCIDATATIMER);
+ 	writel(host->size, base + MMCIDATALENGTH);
+ 
+-	blksz_bits = ffs(data->blksz) - 1;
+-	BUG_ON(1 << blksz_bits != data->blksz);
+ 
+-	if (variant->blksz_datactrl16)
++	if (variant->blksz_datactrl16) {
+ 		datactrl = MCI_DPSM_ENABLE | (data->blksz << 16);
+-	else if (variant->blksz_datactrl4)
++	} else if (variant->blksz_datactrl4) {
+ 		datactrl = MCI_DPSM_ENABLE | (data->blksz << 4);
+-	else
++	} else {
++		blksz_bits = ffs(data->blksz) - 1;
++		BUG_ON(1 << blksz_bits != data->blksz);
+ 		datactrl = MCI_DPSM_ENABLE | blksz_bits << 4;
++	}
+ 
+ 	if (data->flags & MMC_DATA_READ)
+ 		datactrl |= MCI_DPSM_DIRECTION;
 -- 
 1.9.1
