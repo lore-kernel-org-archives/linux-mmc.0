@@ -1,49 +1,73 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [ulf.hansson-mmc:next 17/29] drivers/input/touchscreen/cyttsp4_core.c:1218:1:
- warning: 'cyttsp4_irq' uses dynamic stack allocation
-Date: Tue, 19 Aug 2014 12:06:33 -0500
-Message-ID: <CACRpkda1=2EZLe-eOw2n-sPWEDi_S31rjRxKFWxu47NeatZRpQ@mail.gmail.com>
-References: <53f22c36.qbCHWEfTMJdv7qIU%fengguang.wu@intel.com>
-	<CACRpkdbJ=qLr5-jiJrtOKA-qaV1XrXs0uYQ+9NdgO42vAo0GMA@mail.gmail.com>
-	<CAPDyKFrqQuTrrg2im=hMtSjRrJb0Lq4M1u7C6C-13cZLXdwZ1w@mail.gmail.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v2] mmc: dw_mmc: move rockchip related code to a separate file
+Date: Tue, 19 Aug 2014 10:28:12 -0700
+Message-ID: <CAD=FV=Xri1gVdBvmEmxzsyf3z=+Qpuzj4afJ-A2NJfPY0in00A@mail.gmail.com>
+References: <1408003293-27375-1-git-send-email-addy.ke@rock-chips.com>
+	<1408422974-22301-1-git-send-email-addy.ke@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f178.google.com ([209.85.214.178]:41159 "EHLO
-	mail-ob0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753816AbaHSRGe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Aug 2014 13:06:34 -0400
-Received: by mail-ob0-f178.google.com with SMTP id va2so3353093obc.37
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Aug 2014 10:06:33 -0700 (PDT)
-In-Reply-To: <CAPDyKFrqQuTrrg2im=hMtSjRrJb0Lq4M1u7C6C-13cZLXdwZ1w@mail.gmail.com>
+Received: from mail-vc0-f181.google.com ([209.85.220.181]:41263 "EHLO
+	mail-vc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753183AbaHSR2O convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Aug 2014 13:28:14 -0400
+Received: by mail-vc0-f181.google.com with SMTP id lf12so7733504vcb.40
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Aug 2014 10:28:13 -0700 (PDT)
+In-Reply-To: <1408422974-22301-1-git-send-email-addy.ke@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "kbuild-all@01.org" <kbuild-all@01.org>, kbuild test robot <fengguang.wu@intel.com>
+To: Addy Ke <addy.ke@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "zhenfu.fang" <zhenfu.fang@rock-chips.com>, Eddie Cai <cf@rock-chips.com>, lintao <lintao@rock-chips.com>, chenfen <chenfen@rock-chips.com>, zyf <zyf@rock-chips.com>, Jianqun Xu <xjq@rock-chip>
 
-On Tue, Aug 19, 2014 at 2:19 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 18 August 2014 19:13, Linus Walleij <linus.walleij@linaro.org> wrote:
+Hi,
 
->> Or maybe even do the second approach of putting stubs in slot-gpio.h
->> for !GPIOLIB...
+On Mon, Aug 18, 2014 at 9:36 PM, Addy Ke <addy.ke@rock-chips.com> wrote=
+:
+> To support HS200 and UHS-1, we need add a big hunk of code,
+> as shown in the following patches. So a separate file for
+> rockchip SOCs is suitable.
 >
-> Hmm, that doesn't sound the proper solution either.
+> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+> ---
+> Changes in v2:
+> - Kconfig: depend on ARCH_ROCKCHIP, suggested by Bartlomiej Zolnierki=
+ewicz
+> - Kconfig: depend on OF, suggested by Doug Anderson
+> - Not change suspend/resume code, suggested by Doug Anderson
+> - If pdev->dev.of_node is NULL, then return -ENODEV, suggested by Hei=
+ko St=C3=BCbner
 >
-> Currently there are already stubs for the "gpiod" API in
-> gpio/consumer.h. I think the original error was that the "GPIOD_IN"
-> flag couldn't be found for !GPIOLIB.
-> So, how about actually move these flags and it's corresponding defines
-> to be available for !GPIOLIB as well. That should solve this problem
-> for other subsytems using gpiod API as well, right?
+>  drivers/mmc/host/Kconfig           |   9 +++
+>  drivers/mmc/host/Makefile          |   1 +
+>  drivers/mmc/host/dw_mmc-pltfm.c    |  57 ----------------
+>  drivers/mmc/host/dw_mmc-rockchip.c | 136 +++++++++++++++++++++++++++=
+++++++++++
+>  4 files changed, 146 insertions(+), 57 deletions(-)
+>  create mode 100644 drivers/mmc/host/dw_mmc-rockchip.c
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index a565254..f6095f6 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -621,6 +621,15 @@ config MMC_DW_PCI
+>
+>           If unsure, say N.
+>
+> +config MMC_DW_ROCKCHIP
+> +       tristate "Rockchip specific extensions for Synopsys DW Memory=
+ Card Interface"
+> +       depends on MMC_DW && ARCH_ROCKCHIP && OF
 
-Yeah you're right, I've sent such a patch now, I will queue this for
-fixes so we can rely on it in the development trees.
+Actually, Heiko's change to check if pdev->dev.of_node is NULL means
+that you don't need to depend on OF anymore.
 
-But I still think it's kind of awkward that slot-gpio is compiled into
-the MMC core even if GPIOLIB is not available on the machine :-/
-it simply doesn't make much sense, since it never will add anything.
-But this path should get us to the situation where everything
-just compiles nicely atleast. I will try it on zeroday builds.
+Ulf: do you want Addy to spin again, or do you want to just remove
+this "&& OF" when applying the patch?
 
-Yours,
-Linus Walleij
+=2E..I've tested this both with and without the "&& OF", and the "&& OF=
+"
+won't really hurt anything, so:
+
+Tested-by: Doug Anderson <dianders@chromium.org>
+Reviewed-by: Doug Anderson <dianders@chromium.org>
