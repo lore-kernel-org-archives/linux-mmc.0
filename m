@@ -1,62 +1,55 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH] mmc: sdhci: check 1.2v IO capability for SDHC host
-Date: Tue, 19 Aug 2014 02:06:16 +0000
-Message-ID: <17296D9F8FF2234F831FC3DF505A87A911B232FB@shsmsx102.ccr.corp.intel.com>
-References: <20140814100559.GB3933@intel.com>
- <CAPDyKFo=Ua6to8cTjZiS6pU=LRHC5r6xnBC5j8Gcwr3_abDa+A@mail.gmail.com>
+From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Subject: [PATCH V2] mmc: sdhci: check 1.2v IO capability for SDHC host
+Date: Tue, 19 Aug 2014 11:02:41 +0800
+Message-ID: <20140819030240.GA3201@intel.com>
+Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([143.182.124.21]:7581 "EHLO mga03.intel.com"
+Received: from mga14.intel.com ([192.55.52.115]:17191 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752351AbaHSCGV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 18 Aug 2014 22:06:21 -0400
-In-Reply-To: <CAPDyKFo=Ua6to8cTjZiS6pU=LRHC5r6xnBC5j8Gcwr3_abDa+A@mail.gmail.com>
-Content-Language: en-US
+	id S1752025AbaHSDDI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 18 Aug 2014 23:03:08 -0400
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "chris@printf.org" <chris@printf.org>
+To: ulf.hansson@linaro.org, chris@printf.org
+Cc: linux-mmc@vger.kernel.org
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
-aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBNb25kYXksIEF1Z3VzdCAxOCwg
-MjAxNCA1OjM5IFBNDQo+IFRvOiBEb25nLCBDaHVhbnhpYW8NCj4gQ2M6IGxpbnV4LW1tYzsgY2hy
-aXNAcHJpbnRmLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIXSBtbWM6IHNkaGNpOiBjaGVjayAx
-LjJ2IElPIGNhcGFiaWxpdHkgZm9yIFNESEMgaG9zdA0KPiANCj4gT24gMTQgQXVndXN0IDIwMTQg
-MTI6MDUsIENodWFueGlhbyBEb25nIDxjaHVhbnhpYW8uZG9uZ0BpbnRlbC5jb20+DQo+IHdyb3Rl
-Og0KPiA+IFJpZ2h0IG5vdyBlbmFibGUgMS4ydiBJTyB2b2x0YWdlIGZvciBTREhDIGlzIGJ5IHVz
-aW5nIHZxbW1jLg0KPiA+IFRodXMgZm9yIHRoZSBob3N0IHdoaWNoIGRvZXNuJ3QgaGF2ZSB2cW1t
-Yywgb3IgaXRzIHZxbW1jIGRvZXMgbm90DQo+ID4gc3VwcG9ydCAxLjJ2LCBkaXJlY3RseSB1c2Ug
-TU1DX0NBUDJfSFMyMDAgbWF5IGNhdXNlIEhTMjAwIGZhaWx1cmUuDQo+ID4NCj4gPiBTbyBuZWVk
-cyB0byBjaGVjayBpZiB2cW1tYyBpcyBhYmxlIHRvIHN1cHBvcnQgMS4ydi4gSWYgaXQgZG9lcyBu
-b3QNCj4gPiBzdXBwb3J0LCBkaXNhYmxlIDEuMnYgSU8gZm9yIEhTMjAwLg0KPiA+DQo+ID4gU2ln
-bmVkLW9mZi1ieTogQ2h1YW54aWFvIERvbmcgPGNodWFueGlhby5kb25nQGludGVsLmNvbT4NCj4g
-PiAtLS0NCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jIHwgICAgNiArKysrKy0NCj4gPiAg
-MSBmaWxlIGNoYW5nZWQsIDUgaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbigtKQ0KPiA+DQo+ID4g
-ZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyBiL2RyaXZlcnMvbW1jL2hvc3Qv
-c2RoY2kuYyBpbmRleA0KPiA+IGMwMjZlYzguLjZiNzAxZTEgMTAwNjQ0DQo+ID4gLS0tIGEvZHJp
-dmVycy9tbWMvaG9zdC9zZGhjaS5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5j
-DQo+ID4gQEAgLTI5OTksOCArMjk5OSwxMiBAQCBpbnQgc2RoY2lfYWRkX2hvc3Qoc3RydWN0IHNk
-aGNpX2hvc3QgKmhvc3QpDQo+ID4gICAgICAgICAgICAgICAgIC8qIFNEMy4wOiBTRFIxMDQgaXMg
-c3VwcG9ydGVkIHNvIChmb3IgZU1NQykgdGhlIGNhcHMyDQo+ID4gICAgICAgICAgICAgICAgICAq
-IGZpZWxkIGNhbiBiZSBwcm9tb3RlZCB0byBzdXBwb3J0IEhTMjAwLg0KPiA+ICAgICAgICAgICAg
-ICAgICAgKi8NCj4gPiAtICAgICAgICAgICAgICAgaWYgKCEoaG9zdC0+cXVpcmtzMiAmIFNESENJ
-X1FVSVJLMl9CUk9LRU5fSFMyMDApKQ0KPiA+ICsgICAgICAgICAgICAgICBpZiAoIShob3N0LT5x
-dWlya3MyICYgU0RIQ0lfUVVJUksyX0JST0tFTl9IUzIwMCkpIHsNCj4gPiAgICAgICAgICAgICAg
-ICAgICAgICAgICBtbWMtPmNhcHMyIHw9IE1NQ19DQVAyX0hTMjAwOw0KPiA+ICsgICAgICAgICAg
-ICAgICAgICAgICAgIGlmICghaG9zdC0+dnFtbWMgfHwNCj4gPiArICFyZWd1bGF0b3JfaXNfc3Vw
-cG9ydGVkX3ZvbHRhZ2UNCj4gDQo+IFRoaXMgbmVlZHMgYSByZWJhc2UgYW5kIHBsZWFzZSB1c2Ug
-SVNfRVJSLg0KPiANCj4gKCFJU19FUlIobW1jLT5zdXBwbHkudnFtbWMpIC4uLg0KT2gsIEkgc3Rp
-bGwgdXNlIHRoZSBvbGQgbW1jLW5leHQgdHJlZS4gV2lsbCBkbyB0aGUgcmViYXNlOw0KDQpUaGFu
-a3MNCkNodWFueGlhbw0KDQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KPiANCj4gDQo+ID4g
-KyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIChob3N0LT52cW1tYywgMTEw
-MDAwMCwNCj4gMTMwMDAwMCkpDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBt
-bWMtPmNhcHMyICY9DQo+IH5NTUNfQ0FQMl9IUzIwMF8xXzJWX1NEUjsNCj4gPiArICAgICAgICAg
-ICAgICAgfQ0KPiA+ICAgICAgICAgfSBlbHNlIGlmIChjYXBzWzFdICYgU0RIQ0lfU1VQUE9SVF9T
-RFI1MCkNCj4gPiAgICAgICAgICAgICAgICAgbW1jLT5jYXBzIHw9IE1NQ19DQVBfVUhTX1NEUjUw
-Ow0KPiA+DQo+ID4gLS0NCj4gPiAxLjcuMTAuNA0KPiA+DQo+ID4gLS0NCj4gPiBUbyB1bnN1YnNj
-cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1j
-Ig0KPiA+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
-b3JnIE1vcmUgbWFqb3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9t
-YWpvcmRvbW8taW5mby5odG1sDQo=
+Right now enable 1.2v IO voltage for SDHC is by using vqmmc.
+Thus for the host which doesn't have vqmmc, or its vqmmc does
+not support 1.2v, directly use MMC_CAP2_HS200 may cause HS200
+failure.
+
+So needs to check if vqmmc is able to support 1.2v. If it does
+not support, disable 1.2v IO for HS200.
+
+Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+---
+Changelog V2: rebase this patch, and use IS_ERR to check vqmmc.
+
+ drivers/mmc/host/sdhci.c |    7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 4cc2ff9..a23738c 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3009,8 +3009,13 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		/* SD3.0: SDR104 is supported so (for eMMC) the caps2
+ 		 * field can be promoted to support HS200.
+ 		 */
+-		if (!(host->quirks2 & SDHCI_QUIRK2_BROKEN_HS200))
++		if (!(host->quirks2 & SDHCI_QUIRK2_BROKEN_HS200)) {
+ 			mmc->caps2 |= MMC_CAP2_HS200;
++			if (IS_ERR(mmc->supply.vqmmc) ||
++					!regulator_is_supported_voltage
++					(mmc->supply.vqmmc, 1100000, 1300000))
++				mmc->caps2 &= ~MMC_CAP2_HS200_1_2V_SDR;
++		}
+ 	} else if (caps[1] & SDHCI_SUPPORT_SDR50)
+ 		mmc->caps |= MMC_CAP_UHS_SDR50;
+ 
+-- 
+1.7.10.4
+
