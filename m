@@ -1,35 +1,63 @@
 From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH 3/4] mmc: host: switch OF parser to use gpio descriptors
-Date: Mon, 18 Aug 2014 22:27:40 -0500
-Message-ID: <CACRpkdasvUXgyJ24OR3tz83Qwt+RYXGMTrKh82ER-g=YX=e9Zg@mail.gmail.com>
-References: <1407864355-21545-1-git-send-email-linus.walleij@linaro.org>
-	<1407864355-21545-3-git-send-email-linus.walleij@linaro.org>
-	<20140818194655.GA2565@schnuecks.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH] mmc: slot-gpio: restore error reporting
+Date: Mon, 18 Aug 2014 22:28:00 -0500
+Message-ID: <1408418880-10250-1-git-send-email-linus.walleij@linaro.org>
 Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <20140818194655.GA2565@schnuecks.de>
 Sender: linux-gpio-owner@vger.kernel.org
-To: Simon Baatz <gmbnomis@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-gpio@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Simon Baatz <gmbnomis@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Aug 18, 2014 at 2:46 PM, Simon Baatz <gmbnomis@gmail.com> wrote:
-> On Tue, Aug 12, 2014 at 07:25:54PM +0200, Linus Walleij wrote:
->> This switches the central MMC OF parser to use gpio descriptors
->> instead of grabbing GPIOs explicitly from the device tree.
->> This strips out an unecessary use of the integer-based GPIO
->> API that we want to get rid of, cuts down on code as the
->> gpio descriptor code will handle active low flags.
->>
->> As it is in no way a bug not to supply CD/WP GPIOs the messages
->> about them not being specified have been depromoted from
->> dev_err() to dev_dbg().
->
-> I think the intention of the current code is to issue an
-> error if a valid GPIO was specified but could not be obtained.
+The patch switching the MMC core to use GPIO descriptors
+depromoted errors to debug messages for unsuccessful attempt
+to get CD or WP GPIOs. This was because sometimes these are
+not specified, and that should not be an error.
 
-OK I'll post a fixup.
+However that is not so helpful: explicitly check whether a
+GPIO is not specified (i.e. -ENOENT is returned) and if there
+is some other error, report it with dev_err().
 
-Yours,
-Linus Walleij
+Reported-by: Simon Baatz <gmbnomis@gmail.com>
+Cc: Simon Baatz <gmbnomis@gmail.com>
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ drivers/mmc/core/host.c | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 048c6d687cc9..6f7ed9c50346 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -368,9 +368,11 @@ int mmc_of_parse(struct mmc_host *host)
+ 		if (ret) {
+ 			if (ret == -EPROBE_DEFER)
+ 				return ret;
+-			dev_dbg(host->parent,
+-				"Failed to request CD GPIO: %d\n",
+-				ret);
++			if (ret != -ENOENT) {
++				dev_err(host->parent,
++					"Failed to request CD GPIO: %d\n",
++					ret);
++			}
+ 		} else
+ 			dev_info(host->parent, "Got CD GPIO\n");
+ 	}
+@@ -383,9 +385,11 @@ int mmc_of_parse(struct mmc_host *host)
+ 	if (ret) {
+ 		if (ret == -EPROBE_DEFER)
+ 			goto out;
+-		dev_dbg(host->parent,
+-			"Failed to request WP GPIO: %d\n",
+-			ret);
++		if (ret != -ENOENT) {
++			dev_err(host->parent,
++				"Failed to request WP GPIO: %d\n",
++				ret);
++		}
+ 	} else
+ 		dev_info(host->parent, "Got WP GPIO\n");
+ 
+-- 
+1.9.3
+
