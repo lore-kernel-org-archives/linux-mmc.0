@@ -1,82 +1,50 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 1/4] mmc: mmci: Support any block sizes for ux500v2 and
- qcom variant
-Date: Tue, 19 Aug 2014 14:37:23 +0200
-Message-ID: <CAPDyKFongXKhdM+2jVgzyaxjcsryCXOAztH727um5DCObrj-xw@mail.gmail.com>
-References: <1408446785-1399-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<1408446847-1604-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH 1/1] mmc: core: Use regulator_get_voltage() if OCR mask is empty.
+Date: Tue, 19 Aug 2014 14:43:36 +0200
+Message-ID: <CAPDyKFrW1ZojV0sWTswapWDvkmgshtyb=NP9CrY+GymdQeRq5w@mail.gmail.com>
+References: <1408019940-11153-1-git-send-email-javier.martinez@collabora.co.uk>
+	<CAD7vxxKvzxvmzgx=S5ZZn54ts99ca2TqBYFvY1SXZQZDkhjq3w@mail.gmail.com>
+	<20140814151958.GY17528@sirena.org.uk>
+	<CAD7vxxLHtk2ywHGoBtDp6x3-5BtDdaFnCdc_pfgMwq63Cg8Qow@mail.gmail.com>
+	<53EDBB5B.4000209@collabora.co.uk>
+	<20140815095528.GH17528@sirena.org.uk>
+	<CAPDyKFpm5nzXp5p0qxDof2NcOML911eYkjPNMsn9a2ttdnW7gQ@mail.gmail.com>
+	<53F3351C.1020500@collabora.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f46.google.com ([209.85.192.46]:34382 "EHLO
-	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753160AbaHSMhZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Aug 2014 08:37:25 -0400
-Received: by mail-qg0-f46.google.com with SMTP id z60so2357053qgd.5
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Aug 2014 05:37:23 -0700 (PDT)
-In-Reply-To: <1408446847-1604-1-git-send-email-srinivas.kandagatla@linaro.org>
+Received: from mail-qg0-f53.google.com ([209.85.192.53]:55416 "EHLO
+	mail-qg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751894AbaHSMnh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Aug 2014 08:43:37 -0400
+Received: by mail-qg0-f53.google.com with SMTP id z60so2367544qgd.26
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Aug 2014 05:43:36 -0700 (PDT)
+In-Reply-To: <53F3351C.1020500@collabora.co.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Russell King <linux@arm.linux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+To: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+Cc: Mark Brown <broonie@kernel.org>, Tim Kryger <tim.kryger@gmail.com>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Haijun Zhang <Haijun.Zhang@freescale.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-On 19 August 2014 13:14, Srinivas Kandagatla
-<srinivas.kandagatla@linaro.org> wrote:
-> From: Ulf Hansson <ulf.hansson@linaro.org>
+On 19 August 2014 13:29, Javier Martinez Canillas
+<javier.martinez@collabora.co.uk> wrote:
+> Hello Ulf,
 >
-> For the ux500v2 variant of the PL18x block, any block sizes are
-> supported. This will make it possible to decrease data overhead
-> for SDIO transfers.
+> On 08/15/2014 04:51 PM, Ulf Hansson wrote:
+>>
+>> Just wanted to add some input regarding the errors in the mmc case.
+>> These are of high importance. In principle if you get, "Failed getting
+>> OCR mask: -22", likely you will be using a wrong OCR mask while
+>> negotiating the voltage level with the card.
+>>
+>> So, somehow we need to address this issue.
+>>
 >
-> This patch is based on Ulf Hansson patch
-> http://www.spinics.net/lists/linux-mmc/msg12160.html
->
-> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->         enabled this support on qcom variant.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
->  drivers/mmc/host/mmci.c | 9 +++++++--
->  1 file changed, 7 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index c11cb05..3089fba 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -77,6 +77,7 @@ static unsigned int fmax = 515633;
->   * @qcom_fifo: enables qcom specific fifo pio read logic.
->   * @reversed_irq_handling: handle data irq before cmd irq.
->   * @qcom_dml: enables qcom specific dma glue for dma transfers.
-> + * @any_blksize: true if block any sizes are supported
->   */
->  struct variant_data {
->         unsigned int            clkreg;
-> @@ -102,6 +103,7 @@ struct variant_data {
->         bool                    qcom_fifo;
->         bool                    reversed_irq_handling;
->         bool                    qcom_dml;
-> +       bool                    any_blksize;
->  };
->
->  static struct variant_data variant_arm = {
-> @@ -194,6 +196,7 @@ static struct variant_data variant_ux500v2 = {
->         .pwrreg_clkgate         = true,
->         .busy_detect            = true,
->         .pwrreg_nopower         = true,
-> +       .any_blksize            = true,
->  };
+> And do you think that $subject is the right approach to solve this issue?
+> If not please let me know so I can address that.
 
-There are some prerequisites of the data buffers to supports any block
-size, at least for ux500.
-Try read up on this discussion:
-http://marc.info/?t=135005062400002&r=2&w=2
-
-The conclusion from the above is that we need to adopt
-mmci_pio_write() to handle corner cases.
-
-Now, I suppose, unless someone objects, we could go ahead and merge
-this patch. Then you will have to fixup mmci_pio_write() later on.
+Well, currently this seems like the best approach. If we end up having
+some new regulator helper function, future wise, we can convert to
+such later on.
 
 Kind regards
 Uffe
