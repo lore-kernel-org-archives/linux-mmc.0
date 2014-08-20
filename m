@@ -1,110 +1,77 @@
-From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Subject: RE: [PATCH] mmc: core: resolve divded by zero panic
-Date: Wed, 20 Aug 2014 08:55:18 +0000
-Message-ID: <0AA7DC03D52A654FA5AF208AE38A967D01D7E4A5@shsmsx102.ccr.corp.intel.com>
-References: <1408012164-29790-1-git-send-email-yunpeng.gao@intel.com>
- <CAPDyKFpP69-T-c40e-Fvk6ibUXWCtqsw8qZdTJTJaTSB-bLuzA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Mika Westerberg <mika.westerberg@linux.intel.com>
+Subject: [PATCH] mmc: sdhci: Add PCI IDs for Intel Braswell
+Date: Wed, 20 Aug 2014 13:27:44 +0300
+Message-ID: <1408530464-8025-1-git-send-email-mika.westerberg@linux.intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:50867 "EHLO mga14.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:63381 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750745AbaHTIzW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Aug 2014 04:55:22 -0400
-In-Reply-To: <CAPDyKFpP69-T-c40e-Fvk6ibUXWCtqsw8qZdTJTJaTSB-bLuzA@mail.gmail.com>
-Content-Language: en-US
+	id S1750861AbaHTK1r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 20 Aug 2014 06:27:47 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alan Cox <alan@linux.intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
-aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBNb25kYXksIEF1Z3VzdCAxOCwg
-MjAxNCA1OjU3IFBNDQo+IFRvOiBHYW8sIFl1bnBlbmcNCj4gQ2M6IGxpbnV4LW1tYzsgRG9uZywg
-Q2h1YW54aWFvDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0hdIG1tYzogY29yZTogcmVzb2x2ZSBkaXZk
-ZWQgYnkgemVybyBwYW5pYw0KPiANCj4gT24gMTQgQXVndXN0IDIwMTQgMTI6MjksIFl1bnBlbmcg
-R2FvIDx5dW5wZW5nLmdhb0BpbnRlbC5jb20+IHdyb3RlOg0KPiA+IEZyb206IENodWFueGlhbyBE
-b25nIDxjaHVhbnhpYW8uZG9uZ0BpbnRlbC5jb20+DQo+ID4NCj4gPiBXaXRoIG9uZSBzcGVjaWFs
-IFNEIGNhcmQsIGJlbG93IGRpdmlkZSBieSB6ZXJvIGVycm9yIG9ic2VydmVkOg0KPiA+IC4uLg0K
-PiA+IFsgICAgMi4xNDQzMDBdIGRpdmlkZSBlcnJvcjogMDAwMCBbIzFdIFBSRUVNUFQgU01QDQo+
-ID4gWyAgICAyLjE0ODg2MF0gTW9kdWxlcyBsaW5rZWQgaW46DQo+ID4gWyAgICAyLjE1MTg5OF0N
-Cj4gPiBbICAgIDIuMTUyNjg1XSBTZXQgdXAgNDAzMSBzdG9sZW4gcGFnZXMgc3RhcnRpbmcgYXQg
-MHgwMDAxZjAwMCwgR1RUIG9mZnNldA0KPiAwSw0KPiA+IFsgICAgMi4xNTczMzBdIFNldCB1cCAw
-IENJIHN0b2xlbiBwYWdlcyBzdGFydGluZyBhdCAweDAwMDAwMDAwLCBHVFQgb2Zmc2V0DQo+IDEz
-MTA3MksNCj4gPiBbICAgIDIuMTY3NTgxXSBQaWQ6IDUsIGNvbW06IGt3b3JrZXIvdTowIE5vdCB0
-YWludGVkDQo+IDMuMC44LTEzODIxNi1nOTc0YTJhYiAjMQ0KPiA+IFsgICAgMi4xNjk1MDZdIFtk
-cm1dIFBTQiBHVFQgbWVtIG1hbmFnZXIgcmVhZHksIHR0X3N0YXJ0IDQwMzEsIHR0X3NpemUNCj4g
-Mjg3MzcgcGFnZXMNCj4gPiBbICAgIDIuMTY5OTA2XSBbZHJtXSBTR1ggY29yZSBpZCA9IDB4MDAw
-MDAwMDANCj4gPiBbICAgIDIuMTY5OTIwXSBbZHJtXSBTR1ggY29yZSByZXYgbWFqb3IgPSAweDAw
-LCBtaW5vciA9IDB4MDANCj4gPiBbICAgIDIuMTY5OTM0XSBbZHJtXSBTR1ggY29yZSByZXYgbWFp
-bnRlbmFuY2UgPSAweDAwLCBkZXNpZ25lciA9IDB4MDANCj4gPiBbICAgIDIuMTk3MzcwXSAgSW50
-ZWwgQ29ycG9yYXRpb24gTWVkZmllbGQvaUNES0INCj4gPiBbICAgIDIuMjAxNzE2XSBFSVA6IDAw
-NjA6WzxjMTY5N2NhNj5dIEVGTEFHUzogMDAwMTAyNDYgQ1BVOiAxDQo+ID4gWyAgICAyLjIwNzE5
-OF0gRUlQIGlzIGF0IG1tY19pbml0X2VyYXNlKzB4NzYvMHgxNTANCj4gPiBbICAgIDIuMjExNzA0
-XSBFQVg6IDAwMDAyMDAwIEVCWDogZGNkMWI0MDAgRUNYOiAwMDAwMjAwMCBFRFg6DQo+IDAwMDAw
-MDAwDQo+ID4gWyAgICAyLjIxNzk1N10gRVNJOiAwMDAwMDAwMCBFREk6IGRjZDVjODAwIEVCUDog
-ZGQ4NjdlODQgRVNQOiBkZDg2N2U3Yw0KPiA+IFsgICAgMi4yMjQyMTRdICBEUzogMDA3YiBFUzog
-MDA3YiBGUzogMDBkOCBHUzogMDAwMCBTUzogMDA2OA0KPiA+IFsgICAgMi4yMjk2MDVdIFByb2Nl
-c3Mga3dvcmtlci91OjAgKHBpZDogNSwgdGk9ZGQ4NjYwMDAgdGFzaz1kZDg2ODAwMA0KPiB0YXNr
-LnRpPWRkODY2MDAwKQ0KPiA+IFsgICAgMi4yMzczMjVdIFN0YWNrOg0KPiA+IFsgICAgMi4yMzkz
-MjJdICBkY2QxYjQwMCAwMDAwMDAwMCBkZDg2N2ViMCBjMTZhMDZkYSBjMWFiN2M0NA0KPiBkZDk5
-NWFhOCAwMDAwMDAwMyAwMDAwMDAwMA0KPiA+IFsgICAgMi4yNDcwNTRdICAwMDAwMDAwMCAwMDAw
-MDAwMCBkY2Q1YzgwMCAwMDAwMDAwMCBkY2QxYjQwMA0KPiBkZDg2N2VmOCBjMTZhMTAxMiBjMTY5
-OGIwMA0KPiA+IFsgICAgMi4yNTQ3ODVdICAwMDAwMDAyOSAwMDAwMDAwMSBjMTk0ZWI4MCBkY2Q1
-YzllYyBkZDg2N2UwMA0KPiBjMTIzOWIwMCAwMDAwMDAwMCAwMDAwMDAwMA0KPiA+IFsgICAgMi4y
-NjI1MTldIENhbGwgVHJhY2U6DQo+ID4gWyAgICAyLjI2NDk3NV0gIFs8YzE2YTA2ZGE+XSBtbWNf
-c2Rfc2V0dXBfY2FyZCsweDFkYS8weDRmMA0KPiA+IFsgICAgMi4yNzAxODNdICBbPGMxNmExMDEy
-Pl0gbW1jX3NkX2luaXRfY2FyZCsweDE5Mi8weGM0MA0KPiA+IFsgICAgMi4yNzUzMDRdICBbPGMx
-Njk4YjAwPl0gPyBfX21tY19jbGFpbV9ob3N0KzB4MTYwLzB4MTYwDQo+ID4gWyAgICAyLjI4MDYx
-MF0gIFs8YzEyMzliMDA+XSA/IF9fc2NoZWR1bGVfYnVnKzB4NTAvMHg4MA0KPiA+IFsgICAgMi4y
-ODU1NTZdICBbPGMxNmExYjg5Pl0gbW1jX2F0dGFjaF9zZCsweGM5LzB4MjMwDQo+ID4gWyAgICAy
-LjI5MDMzM10gIFs8YzE2OWI2ZWY+XSBtbWNfcmVzY2FuKzB4MjVmLzB4MmMwDQo+ID4gWyAgICAy
-LjI5NDk0M10gIFs8YzEyNzQyMjM+XSBwcm9jZXNzX29uZV93b3JrKzB4MTAzLzB4NDAwDQo+ID4g
-WyAgICAyLjMwMDA2NV0gIFs8YzEyNjcwZmQ+XSA/IG1vZF90aW1lcisweDFhZC8weDNjMA0KPiA+
-IFsgICAgMi4zMDQ3NTZdICBbPGMxNjliNDkwPl0gPyBtbWNfc3VzcGVuZF9ob3N0KzB4MWEwLzB4
-MWEwDQo+ID4gWyAgICAyLjMxMDA1Nl0gIFs8YzEyNzUwMmQ+XSB3b3JrZXJfdGhyZWFkKzB4MTJk
-LzB4NGEwDQo+ID4gWyAgICAyLjMxNDkyMV0gIFs8YzE4ZmNmYmQ+XSA/IHByZWVtcHRfc2NoZWR1
-bGUrMHgyZC8weDUwDQo+ID4gWyAgICAyLjMyMDA0N10gIFs8YzEyNzRmMDBbICAgIDIuMzIzOTc2
-XSAtLS1bIGVuZCB0cmFjZQ0KPiA1Mzk4ZWMyNzIwNDk0NDM4IF0tLS0NCj4gPiAuLi4NCj4gPg0K
-PiA+IFNvLCBzZWVtcyB0aGlzIGJhZCBTRCBjYXJkIGRvZXMgbm90IHNldCB2YWxpZCB2YWx1ZSBp
-biByZWxhdGVkIFNTUiAvIENTRA0KPiByZWdpc3RlciBmaWVsZHMuDQo+ID4gQW5kIHRoZW4gdGhl
-IGRyaXZlciB3aWxsIHNldCBjYXJkLT5lcmFzZV9zaXplIHRvIDAuDQo+ID4gVGhlbiBpdCB0cmln
-Z2VyZWQgdGhpcyBkaXZpZGVkIGJ5IHplcm8gZXJyb3Igd2hlbiBjYWxjdWxhdGUgY2FyZC0+cHJl
-Zl9lcmFzZS4NCj4gPg0KPiA+IFN1Ym1pdCB0aGlzIHBhdGNoIHRvIGZpeCB0aGUgaXNzdWUuDQo+
-ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBZdW5wZW5nIEdhbyA8eXVucGVuZy5nYW9AaW50ZWwuY29t
-Pg0KPiA+IFNpZ25lZC1vZmYtYnk6IENodWFueGlhbyBEb25nIDxjaHVhbnhpYW8uZG9uZ0BpbnRl
-bC5jb20+DQo+ID4gLS0tDQo+ID4gIGRyaXZlcnMvbW1jL2NvcmUvY29yZS5jIHwgICAgNSArKyst
-LQ0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgMyBpbnNlcnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQ0K
-PiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jIGIvZHJpdmVycy9t
-bWMvY29yZS9jb3JlLmMgaW5kZXgNCj4gPiA3ZGMwYzg1Li4zODUzNzNkYiAxMDA2NDQNCj4gPiAt
-LS0gYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUv
-Y29yZS5jDQo+ID4gQEAgLTE3NjEsNyArMTc2MSw3IEBAIHZvaWQgbW1jX2luaXRfZXJhc2Uoc3Ry
-dWN0IG1tY19jYXJkICpjYXJkKQ0KPiA+ICAgICAgICAgICAgICAgICBjYXJkLT5lcmFzZV9zaGlm
-dCA9IGZmcyhjYXJkLT5zc3IuYXUpIC0gMTsNCj4gPiAgICAgICAgIH0gZWxzZSBpZiAoY2FyZC0+
-ZXh0X2NzZC5oY19lcmFzZV9zaXplKSB7DQo+ID4gICAgICAgICAgICAgICAgIGNhcmQtPnByZWZf
-ZXJhc2UgPSBjYXJkLT5leHRfY3NkLmhjX2VyYXNlX3NpemU7DQo+ID4gLSAgICAgICB9IGVsc2Ug
-ew0KPiA+ICsgICAgICAgfSBlbHNlIGlmIChjYXJkLT5lcmFzZV9zaXplKSB7DQo+ID4gICAgICAg
-ICAgICAgICAgIHN6ID0gKGNhcmQtPmNzZC5jYXBhY2l0eSA8PCAoY2FyZC0+Y3NkLnJlYWRfYmxr
-Yml0cyAtIDkpKSA+Pg0KPiAxMTsNCj4gPiAgICAgICAgICAgICAgICAgaWYgKHN6IDwgMTI4KQ0K
-PiA+ICAgICAgICAgICAgICAgICAgICAgICAgIGNhcmQtPnByZWZfZXJhc2UgPSA1MTIgKiAxMDI0
-IC8gNTEyOyBAQA0KPiA+IC0xNzc4LDcgKzE3NzgsOCBAQCB2b2lkIG1tY19pbml0X2VyYXNlKHN0
-cnVjdCBtbWNfY2FyZCAqY2FyZCkNCj4gPiAgICAgICAgICAgICAgICAgICAgICAgICBpZiAoc3op
-DQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjYXJkLT5wcmVmX2VyYXNlICs9
-DQo+IGNhcmQtPmVyYXNlX3NpemUgLSBzejsNCj4gPiAgICAgICAgICAgICAgICAgfQ0KPiA+IC0g
-ICAgICAgfQ0KPiA+ICsgICAgICAgfSBlbHNlDQo+ID4gKyAgICAgICAgICAgICAgIGNhcmQtPnBy
-ZWZfZXJhc2UgPSAwOw0KPiA+ICB9DQo+ID4NCj4gDQo+IE92ZXJhbGwgdGhpcyBzZWVtcyBsaWtl
-IGEgZ29vZCBpZGVhLiBUaG91Z2ggSSB3b25kZXIgd2hhdCBoYXBwZW5zIHdpdGggdGhlDQo+IFFV
-RVVFX0ZMQUdfRElTQ0FSRD8gSSBzdXBwb3NlIHdlIHdvdWxkIHRvIHByZXZlbnQgaXQgZnJvbSBi
-ZWluZyBzZXQgd2hlbg0KPiBpbml0aWF0aW5nIHRoZSBibGsgZGV2IHF1ZXVlLCByaWdodD8NCg0K
-SW4gbW1jX2luaXRfcXVldWUoKSBvZiBmaWxlIHF1ZXVlLmMsIGl0IHdpbGwgZmlyc3QgY2hlY2sg
-J2lmIChtbWNfY2FuX2VyYXNlKGNhcmQpKScgYW5kIHRoZW4gY2FsbCBtbWNfcXVldWVfc2V0dXBf
-ZGlzY2FyZCgpLCBhbmQgd2hpY2ggZnVuY3Rpb24gd2lsbCBzZXQgUVVFVUVfRkxBR19ESVNDQVJE
-IGZsYWcuDQpTaW5jZSBpbnNpZGUgbW1jX2Nhbl9lcmFzZShjYXJkKSwgaXQgd2lsbCBjaGVjayAn
-Y2FyZC0+ZXJhc2Vfc2l6ZScgYW5kIHdpbGwgcmV0dXJuICcwJyBpZiAnY2FyZC0+ZXJhc2Vfc2l6
-ZScgaXMgMCwgdGhhdCBtZWFucyBRVUVVRV9GTEFHX0RJU0NBUkQgZmxhZyB3aWxsIG5vdCBiZSBz
-ZXQgaWYgJ2NhcmQtPmVyYXNlX3NpemUnIGlzIDAuDQpTbywgeWVzLCBpZiB0aGlzIGNhc2UgLSB0
-byBTRCBjYXJkLCAnY2FyZC0+ZXJhc2Vfc2l6ZScgaXMgMCAtIHRoZW4gUVVFVUVfRkxBR19ESVND
-QVJEIGZsYWcgd2lsbCBub3QgYmUgc2V0LiBUaGlzIGhhcyBhbHJlYWR5IGJlZW4gaW1wbGVtZW50
-ZWQgaW4gY3VycmVudCBkcml2ZXIuDQoNClRoYW5rcy4NCll1bnBlbmcNCg0KPiBLaW5kIHJlZ2Fy
-ZHMNCj4gVWZmZQ0KDQo=
+From: Alan Cox <alan@linux.intel.com>
+
+The hardware is the same as used in Baytrail. Add these new PCI IDs to the
+driver's list of supported IDs.
+
+Signed-off-by: Alan Cox <alan@linux.intel.com>
+Signed-off-by: Mika Westerberg <mika.westerberg@linux.intel.com>
+---
+ drivers/mmc/host/sdhci-pci.c | 23 +++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci.h |  3 +++
+ 2 files changed, 26 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index c3a1debc9289..03daad56d884 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -876,6 +876,29 @@ static const struct pci_device_id pci_ids[] = {
+ 		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
+ 	},
+ 
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_BSW_EMMC,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
++	},
++
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_BSW_SDIO,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
++	},
++
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_BSW_SD,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sd,
++	},
+ 
+ 	{
+ 		.vendor		= PCI_VENDOR_ID_INTEL,
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index c101477ef3be..9c1909b2a3ad 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -11,6 +11,9 @@
+ #define PCI_DEVICE_ID_INTEL_BYT_SDIO	0x0f15
+ #define PCI_DEVICE_ID_INTEL_BYT_SD	0x0f16
+ #define PCI_DEVICE_ID_INTEL_BYT_EMMC2	0x0f50
++#define PCI_DEVICE_ID_INTEL_BSW_EMMC	0x2294
++#define PCI_DEVICE_ID_INTEL_BSW_SDIO	0x2295
++#define PCI_DEVICE_ID_INTEL_BSW_SD	0x2296
+ #define PCI_DEVICE_ID_INTEL_MRFL_MMC	0x1190
+ #define PCI_DEVICE_ID_INTEL_CLV_SDIO0	0x08f9
+ #define PCI_DEVICE_ID_INTEL_CLV_SDIO1	0x08fa
+-- 
+2.1.0
+
