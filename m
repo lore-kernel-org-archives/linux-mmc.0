@@ -1,44 +1,89 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sunxi: Declare ERASE capability
-Date: Wed, 20 Aug 2014 16:20:22 +0200
-Message-ID: <CAPDyKFq1yzdu19ReECRZzVynHZByN4803WdZ=vjgCnC9F0+MiA@mail.gmail.com>
-References: <1408541960-14788-1-git-send-email-wens@csie.org>
-	<3728016.4j3Ljjy6eM@dizzy-6.o2s.ch>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Romain Izard <romain.izard.pro@gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci-sirf: fix 8bit width enable by
+ overwriting set_bus_width
+Date: Wed, 20 Aug 2014 14:25:23 +0000 (UTC)
+Message-ID: <lt2b4j$tk3$1@ger.gmane.org>
+References: <1408453153-8125-1-git-send-email-21cnbao@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f51.google.com ([209.85.216.51]:60675 "EHLO
-	mail-qa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751736AbaHTOU0 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Aug 2014 10:20:26 -0400
-Received: by mail-qa0-f51.google.com with SMTP id k15so6920771qaq.24
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2014 07:20:25 -0700 (PDT)
-In-Reply-To: <3728016.4j3Ljjy6eM@dizzy-6.o2s.ch>
+Received: from plane.gmane.org ([80.91.229.3]:52872 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750703AbaHTOZx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 20 Aug 2014 10:25:53 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1XK6pV-0004Aj-FA
+	for linux-mmc@vger.kernel.org; Wed, 20 Aug 2014 16:25:37 +0200
+Received: from 146.187.3.109.rev.sfr.net ([109.3.187.146])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2014 16:25:37 +0200
+Received: from romain.izard.pro by 146.187.3.109.rev.sfr.net with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2014 16:25:37 +0200
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>
-Cc: Chen-Yu Tsai <wens@csie.org>, Chris Ball <chris@printf.net>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Hans de Goede <hdegoede@redhat.com>
+To: linux-mmc@vger.kernel.org
 
-On 20 August 2014 16:10, David Lanzend=C3=B6rfer <david.lanzendoerfer@o=
-2s.ch> wrote:
-> Hi
->> Declare ERASE capability so we can use filesystems with the discard
->> option and the fstrim tool.
-> I totally agree with you that information about such capabilities sho=
-uld be
-> exposed but maybe it would be wiser to use DT instead of hardcoding i=
-t?
+["Followup-To:" header set to gmane.linux.kernel.mmc.]
+On 2014-08-19, Barry Song <21cnbao@gmail.com> wrote:
+> From: Minda Chen <Minda.Chen@csr.com>
+>
+> 8bit-width enable bit of CSR MMC hosts is 3, while stardard hosts use
+> bit 5. this patch fixes the functionality of 8bit transfer in CSR mmc
+> controllers and improve performance for mmc0 a lot.
+>
+> Signed-off-by: Minda Chen <Minda.Chen@csr.com>
+> Signed-off-by: Barry Song <Baohua.Song@csr.com>
+> ---
+>  -v2: check for host->version >= SDHCI_SPEC_300
+>
 
-Nope, this is pure software support. No HW config.
+Hi Barry,
 
-What we should do future wise, is to remove the MMC_CAP_ERASE
-entirely. Due to current existing bugs, mainly in mmc core layer
-regarding erase, we can't do it yet.
+Did you check the runtime behaviour of the device after this change ?
 
-> I mean a WiFi device won't support erase functionality...
+>From the SiRFprimaII/SiRFatlasVI data sheets, it appears that the
+implementation of the SDHCI controller is a modified version of the one
+described in the 1.0 specification, and not a normal 3.0 controller.
+This explains why the independent development of the 8-bit wide transfer
+bus does not use the same bit as the standard one.
 
-That's already covered by the mmc core layer. No worries.
+As a result, the description of the SPEC_VER field in the
+SD_SLOT_INT_STATUS register indicates a read-only value of 0, which
+corresponds to SDHCI_SPEC_100 in the "sdhci.h" header. On a real
+SiRFatlasVI chip, the value is 0 as well.
 
-Kind regards
-Uffe
+I believe the correct change would be to remove the control on the
+version >= SDHCI_SPEC_300 in both 4-bit and 8-bit cases, instead of
+adding it in both cases. There are no supported SiRF SoCs where the 8-bit
+bus is not supported at the controller level.
+
+In my opinion, this should look like this:
+ 
++static void sdhci_sirf_set_bus_width(struct sdhci_host *host, int width)
++{
++       u8 ctrl;
++
++       ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
++       /* The 8-bit bus width configuration bit is not standard */
++       ctrl &= ~(SDHCI_CTRL_4BITBUS | SDHCI_SIRF_8BITBUS);
++       if (width == MMC_BUS_WIDTH_8) {
++               ctrl |= SDHCI_SIRF_8BITBUS;
++       } else if (width == MMC_BUS_WIDTH_4)
++               ctrl |= SDHCI_CTRL_4BITBUS;
++       }
++       sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
++}
++
+
+You can use it verbatim with my signoff if you want.
+Signed-off-by: Romain Izard <romain.izard.pro@gmail.com>
+
+
+But you should try it on your board, as I do not have a setup to test
+the mainline kernel on SiRFatlasVI available.
+
+Best regards,
+-- 
+Romain Izard
+
