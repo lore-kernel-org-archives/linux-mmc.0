@@ -1,100 +1,44 @@
-From: David =?ISO-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [PATCH] mmc: sunxi: Declare ERASE capability
-Date: Wed, 20 Aug 2014 16:10:14 +0200
-Message-ID: <3728016.4j3Ljjy6eM@dizzy-6.o2s.ch>
+Date: Wed, 20 Aug 2014 16:20:22 +0200
+Message-ID: <CAPDyKFq1yzdu19ReECRZzVynHZByN4803WdZ=vjgCnC9F0+MiA@mail.gmail.com>
 References: <1408541960-14788-1-git-send-email-wens@csie.org>
+	<3728016.4j3Ljjy6eM@dizzy-6.o2s.ch>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============5207536148215424027=="
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1408541960-14788-1-git-send-email-wens@csie.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Hans de Goede <hdegoede@redhat.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f51.google.com ([209.85.216.51]:60675 "EHLO
+	mail-qa0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751736AbaHTOU0 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Aug 2014 10:20:26 -0400
+Received: by mail-qa0-f51.google.com with SMTP id k15so6920771qaq.24
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2014 07:20:25 -0700 (PDT)
+In-Reply-To: <3728016.4j3Ljjy6eM@dizzy-6.o2s.ch>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>
+Cc: Chen-Yu Tsai <wens@csie.org>, Chris Ball <chris@printf.net>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Hans de Goede <hdegoede@redhat.com>
 
+On 20 August 2014 16:10, David Lanzend=C3=B6rfer <david.lanzendoerfer@o=
+2s.ch> wrote:
+> Hi
+>> Declare ERASE capability so we can use filesystems with the discard
+>> option and the fstrim tool.
+> I totally agree with you that information about such capabilities sho=
+uld be
+> exposed but maybe it would be wiser to use DT instead of hardcoding i=
+t?
 
---===============5207536148215424027==
-Content-Type: multipart/signed; boundary="nextPart2679549.LirVWx1bSs"; micalg="pgp-sha1"; protocol="application/pgp-signature"
+Nope, this is pure software support. No HW config.
 
+What we should do future wise, is to remove the MMC_CAP_ERASE
+entirely. Due to current existing bugs, mainly in mmc core layer
+regarding erase, we can't do it yet.
 
---nextPart2679549.LirVWx1bSs
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="iso-8859-1"
+> I mean a WiFi device won't support erase functionality...
 
-Hi
-> Declare ERASE capability so we can use filesystems with the discard
-> option and the fstrim tool.
-I totally agree with you that information about such capabilities shoul=
-d be
-exposed but maybe it would be wiser to use DT instead of hardcoding it?=
+That's already covered by the mmc core layer. No worries.
 
-I mean a WiFi device won't support erase functionality...
-http://lists.infradead.org/pipermail/linux-arm-kernel/2011-October/0682=
-10.html
-
-> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->=20
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mm=
-c.c
-> index 024f67c..7bf5c1c 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -990,7 +990,8 @@ static int sunxi_mmc_probe(struct platform_device=
- *pdev)
-> /* 400kHz ~ 50MHz */
->  =09mmc->f_min=09=09=3D   400000;
->  =09mmc->f_max=09=09=3D 50000000;
-> -=09mmc->caps=09       |=3D MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSP=
-EED;
-> +=09mmc->caps=09       |=3D MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSP=
-EED |
-> +=09=09=09=09  MMC_CAP_ERASE;
->=20
->  =09ret =3D mmc_of_parse(mmc);
->  =09if (ret)
-
-=2D-=20
-David Lanzend=F6rfer
-OpenSourceSupport GmbH
-System engineer and supporter
-http://www.o2s.ch/
---nextPart2679549.LirVWx1bSs
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part.
-Content-Transfer-Encoding: 7Bit
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEABECAAYFAlP0rEwACgkQAeZw77btGjoskgCffEFflv/5FMeeQC7If4uEr+BM
-Ht0AmwfyvW721rypo+87qxGvnYLBaerj
-=w04k
------END PGP SIGNATURE-----
-
---nextPart2679549.LirVWx1bSs--
-
-
-
---===============5207536148215424027==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============5207536148215424027==--
+Kind regards
+Uffe
