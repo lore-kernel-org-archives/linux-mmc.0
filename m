@@ -1,77 +1,45 @@
-From: Mika Westerberg <mika.westerberg@linux.intel.com>
-Subject: [PATCH] mmc: sdhci: Add PCI IDs for Intel Braswell
-Date: Wed, 20 Aug 2014 13:27:44 +0300
-Message-ID: <1408530464-8025-1-git-send-email-mika.westerberg@linux.intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:63381 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750861AbaHTK1r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Aug 2014 06:27:47 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Chen-Yu Tsai <wens@csie.org>
+Subject: [PATCH] mmc: sunxi: Declare ERASE capability
+Date: Wed, 20 Aug 2014 21:39:20 +0800
+Message-ID: <1408541960-14788-1-git-send-email-wens@csie.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: david.lanzendoerfer@o2s.ch, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Alan Cox <alan@linux.intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-From: Alan Cox <alan@linux.intel.com>
+Declare ERASE capability so we can use filesystems with the discard
+option and the fstrim tool.
 
-The hardware is the same as used in Baytrail. Add these new PCI IDs to the
-driver's list of supported IDs.
-
-Signed-off-by: Alan Cox <alan@linux.intel.com>
-Signed-off-by: Mika Westerberg <mika.westerberg@linux.intel.com>
+Signed-off-by: Chen-Yu Tsai <wens@csie.org>
 ---
- drivers/mmc/host/sdhci-pci.c | 23 +++++++++++++++++++++++
- drivers/mmc/host/sdhci-pci.h |  3 +++
- 2 files changed, 26 insertions(+)
+ drivers/mmc/host/sunxi-mmc.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index c3a1debc9289..03daad56d884 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -876,6 +876,29 @@ static const struct pci_device_id pci_ids[] = {
- 		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
- 	},
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 024f67c..7bf5c1c 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -990,7 +990,8 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+ 	/* 400kHz ~ 50MHz */
+ 	mmc->f_min		=   400000;
+ 	mmc->f_max		= 50000000;
+-	mmc->caps	       |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED;
++	mmc->caps	       |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
++				  MMC_CAP_ERASE;
  
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_BSW_EMMC,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_BSW_SDIO,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
-+	},
-+
-+	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_BSW_SD,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sd,
-+	},
- 
- 	{
- 		.vendor		= PCI_VENDOR_ID_INTEL,
-diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-index c101477ef3be..9c1909b2a3ad 100644
---- a/drivers/mmc/host/sdhci-pci.h
-+++ b/drivers/mmc/host/sdhci-pci.h
-@@ -11,6 +11,9 @@
- #define PCI_DEVICE_ID_INTEL_BYT_SDIO	0x0f15
- #define PCI_DEVICE_ID_INTEL_BYT_SD	0x0f16
- #define PCI_DEVICE_ID_INTEL_BYT_EMMC2	0x0f50
-+#define PCI_DEVICE_ID_INTEL_BSW_EMMC	0x2294
-+#define PCI_DEVICE_ID_INTEL_BSW_SDIO	0x2295
-+#define PCI_DEVICE_ID_INTEL_BSW_SD	0x2296
- #define PCI_DEVICE_ID_INTEL_MRFL_MMC	0x1190
- #define PCI_DEVICE_ID_INTEL_CLV_SDIO0	0x08f9
- #define PCI_DEVICE_ID_INTEL_CLV_SDIO1	0x08fa
+ 	ret = mmc_of_parse(mmc);
+ 	if (ret)
 -- 
 2.1.0
-
