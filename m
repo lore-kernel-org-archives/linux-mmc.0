@@ -1,91 +1,51 @@
-From: Chanho Min <chanho.min@lge.com>
-Subject: [PATCH] mmc:sdhci: handle busy-end interrupt during command
-Date: Thu, 21 Aug 2014 10:53:09 +0900
-Message-ID: <1408585989-1084-1-git-send-email-chanho.min@lge.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chanho Min <chanho.min@lge.com>, Hankyung Yu <hankyung.yu@lge.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc:sdhci: handle busy-end interrupt during command
+Date: Thu, 21 Aug 2014 09:26:54 +0200
+Message-ID: <CAPDyKFoeONs8OXZ3=2ZT54Nfdq_dLqgatMcq2DyZ=rs1r0x+dg@mail.gmail.com>
+References: <1408585989-1084-1-git-send-email-chanho.min@lge.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f43.google.com ([209.85.192.43]:39569 "EHLO
+	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753757AbaHUH0z (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Aug 2014 03:26:55 -0400
+Received: by mail-qg0-f43.google.com with SMTP id a108so8638015qge.30
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Aug 2014 00:26:55 -0700 (PDT)
+In-Reply-To: <1408585989-1084-1-git-send-email-chanho.min@lge.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chanho Min <chanho.min@lge.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hankyung Yu <hankyung.yu@lge.com>, Gwendal Grignou <gwendal@chromium.org>
 
-It is fully legal for a controller to start handling busy-end interrupt
-before it has signaled that the command has completed. So make sure
-we do things in the proper order, Or it results that command interrupt
-is ignored so it can cause unexpected operations. This is founded at some
-toshiba emmc with the bellow warning.
+On 21 August 2014 03:53, Chanho Min <chanho.min@lge.com> wrote:
+> It is fully legal for a controller to start handling busy-end interrupt
+> before it has signaled that the command has completed. So make sure
+> we do things in the proper order, Or it results that command interrupt
+> is ignored so it can cause unexpected operations. This is founded at some
+> toshiba emmc with the bellow warning.
+>
+> "mmc0: Got command interrupt 0x00000001 even though
+> no command operation was in progress."
+>
+> This issue has been also reported by Youssef TRIKI:
+> It is not specific to Toshiba devices, and happens with eMMC devices
+> as well as SD card which support Auto-CMD12 rather than CMD23.
+>
+> Also, similar patch is submitted by:
+> Gwendal Grignou <gwendal@chromium.org>
+>
+> Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
+> Signed-off-by: Chanho Min <chanho.min@lge.com>
+> Tested-by: Youssef TRIKI <youssef.triki@st.com>
 
-"mmc0: Got command interrupt 0x00000001 even though
-no command operation was in progress."
+Hi Chanho,
 
-This issue has been also reported by Youssef TRIKI:
-It is not specific to Toshiba devices, and happens with eMMC devices
-as well as SD card which support Auto-CMD12 rather than CMD23.
+This patch has been around for quite some time, sorry for lack of
+response. Appreciate if we could get this tested on a few more
+variants of sdhci, I am not able to test myself.
 
-Also, similar patch is submitted by:
-Gwendal Grignou <gwendal@chromium.org>
+I plan to queue this for 3.18, unless someone objects soon.
 
-Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
-Signed-off-by: Chanho Min <chanho.min@lge.com>
-Tested-by: Youssef TRIKI <youssef.triki@st.com>
----
- drivers/mmc/host/sdhci.c  |   17 +++++++++++++++--
- include/linux/mmc/sdhci.h |    1 +
- 2 files changed, 16 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 47055f3..2383be0 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1007,6 +1007,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 	mod_timer(&host->timer, timeout);
- 
- 	host->cmd = cmd;
-+	host->busy_handle = 0;
- 
- 	sdhci_prepare_data(host, cmd);
- 
-@@ -2238,8 +2239,12 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
- 		if (host->cmd->data)
- 			DBG("Cannot wait for busy signal when also "
- 				"doing a data transfer");
--		else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ))
-+		else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ)
-+				&& !host->busy_handle) {
-+			/* Mark that command complete before busy is ended */
-+			host->busy_handle = 1;
- 			return;
-+		}
- 
- 		/* The controller does not support the end-of-busy IRQ,
- 		 * fall through and take the SDHCI_INT_RESPONSE */
-@@ -2302,7 +2307,15 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 		 */
- 		if (host->cmd && (host->cmd->flags & MMC_RSP_BUSY)) {
- 			if (intmask & SDHCI_INT_DATA_END) {
--				sdhci_finish_command(host);
-+				/*
-+				 * Some cards handle busy-end interrupt
-+				 * before the command completed, so make
-+				 * sure we do things in the proper order.
-+				 */
-+				if (host->busy_handle)
-+					sdhci_finish_command(host);
-+				else
-+					host->busy_handle = 1;
- 				return;
- 			}
- 		}
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 08abe99..f91085b 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -149,6 +149,7 @@ struct sdhci_host {
- 	struct mmc_command *cmd;	/* Current command */
- 	struct mmc_data *data;	/* Current data request */
- 	unsigned int data_early:1;	/* Data finished before cmd */
-+	unsigned int busy_handle:1;	/* Handling the order of Busy-end */
- 
- 	struct sg_mapping_iter sg_miter;	/* SG state for PIO */
- 	unsigned int blocks;	/* remaining PIO blocks */
--- 
-1.7.9.5
+Kind regards
+Uffe
