@@ -1,89 +1,91 @@
-From: Romain Izard <romain.izard.pro@gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-sirf: fix 8bit width enable by
- overwriting set_bus_width
-Date: Wed, 20 Aug 2014 14:25:23 +0000 (UTC)
-Message-ID: <lt2b4j$tk3$1@ger.gmane.org>
-References: <1408453153-8125-1-git-send-email-21cnbao@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:52872 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750703AbaHTOZx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Aug 2014 10:25:53 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <glkm-linux-mmc@m.gmane.org>)
-	id 1XK6pV-0004Aj-FA
-	for linux-mmc@vger.kernel.org; Wed, 20 Aug 2014 16:25:37 +0200
-Received: from 146.187.3.109.rev.sfr.net ([109.3.187.146])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2014 16:25:37 +0200
-Received: from romain.izard.pro by 146.187.3.109.rev.sfr.net with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2014 16:25:37 +0200
-Sender: linux-mmc-owner@vger.kernel.org
+From: Chanho Min <chanho.min@lge.com>
+Subject: [PATCH] mmc:sdhci: handle busy-end interrupt during command
+Date: Thu, 21 Aug 2014 10:53:09 +0900
+Message-ID: <1408585989-1084-1-git-send-email-chanho.min@lge.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chanho Min <chanho.min@lge.com>, Hankyung Yu <hankyung.yu@lge.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-["Followup-To:" header set to gmane.linux.kernel.mmc.]
-On 2014-08-19, Barry Song <21cnbao@gmail.com> wrote:
-> From: Minda Chen <Minda.Chen@csr.com>
->
-> 8bit-width enable bit of CSR MMC hosts is 3, while stardard hosts use
-> bit 5. this patch fixes the functionality of 8bit transfer in CSR mmc
-> controllers and improve performance for mmc0 a lot.
->
-> Signed-off-by: Minda Chen <Minda.Chen@csr.com>
-> Signed-off-by: Barry Song <Baohua.Song@csr.com>
-> ---
->  -v2: check for host->version >= SDHCI_SPEC_300
->
+It is fully legal for a controller to start handling busy-end interrupt
+before it has signaled that the command has completed. So make sure
+we do things in the proper order, Or it results that command interrupt
+is ignored so it can cause unexpected operations. This is founded at some
+toshiba emmc with the bellow warning.
 
-Hi Barry,
+"mmc0: Got command interrupt 0x00000001 even though
+no command operation was in progress."
 
-Did you check the runtime behaviour of the device after this change ?
+This issue has been also reported by Youssef TRIKI:
+It is not specific to Toshiba devices, and happens with eMMC devices
+as well as SD card which support Auto-CMD12 rather than CMD23.
 
->From the SiRFprimaII/SiRFatlasVI data sheets, it appears that the
-implementation of the SDHCI controller is a modified version of the one
-described in the 1.0 specification, and not a normal 3.0 controller.
-This explains why the independent development of the 8-bit wide transfer
-bus does not use the same bit as the standard one.
+Also, similar patch is submitted by:
+Gwendal Grignou <gwendal@chromium.org>
 
-As a result, the description of the SPEC_VER field in the
-SD_SLOT_INT_STATUS register indicates a read-only value of 0, which
-corresponds to SDHCI_SPEC_100 in the "sdhci.h" header. On a real
-SiRFatlasVI chip, the value is 0 as well.
+Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
+Signed-off-by: Chanho Min <chanho.min@lge.com>
+Tested-by: Youssef TRIKI <youssef.triki@st.com>
+---
+ drivers/mmc/host/sdhci.c  |   17 +++++++++++++++--
+ include/linux/mmc/sdhci.h |    1 +
+ 2 files changed, 16 insertions(+), 2 deletions(-)
 
-I believe the correct change would be to remove the control on the
-version >= SDHCI_SPEC_300 in both 4-bit and 8-bit cases, instead of
-adding it in both cases. There are no supported SiRF SoCs where the 8-bit
-bus is not supported at the controller level.
-
-In my opinion, this should look like this:
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 47055f3..2383be0 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1007,6 +1007,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 	mod_timer(&host->timer, timeout);
  
-+static void sdhci_sirf_set_bus_width(struct sdhci_host *host, int width)
-+{
-+       u8 ctrl;
-+
-+       ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+       /* The 8-bit bus width configuration bit is not standard */
-+       ctrl &= ~(SDHCI_CTRL_4BITBUS | SDHCI_SIRF_8BITBUS);
-+       if (width == MMC_BUS_WIDTH_8) {
-+               ctrl |= SDHCI_SIRF_8BITBUS;
-+       } else if (width == MMC_BUS_WIDTH_4)
-+               ctrl |= SDHCI_CTRL_4BITBUS;
-+       }
-+       sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+}
-+
-
-You can use it verbatim with my signoff if you want.
-Signed-off-by: Romain Izard <romain.izard.pro@gmail.com>
-
-
-But you should try it on your board, as I do not have a setup to test
-the mainline kernel on SiRFatlasVI available.
-
-Best regards,
+ 	host->cmd = cmd;
++	host->busy_handle = 0;
+ 
+ 	sdhci_prepare_data(host, cmd);
+ 
+@@ -2238,8 +2239,12 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
+ 		if (host->cmd->data)
+ 			DBG("Cannot wait for busy signal when also "
+ 				"doing a data transfer");
+-		else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ))
++		else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ)
++				&& !host->busy_handle) {
++			/* Mark that command complete before busy is ended */
++			host->busy_handle = 1;
+ 			return;
++		}
+ 
+ 		/* The controller does not support the end-of-busy IRQ,
+ 		 * fall through and take the SDHCI_INT_RESPONSE */
+@@ -2302,7 +2307,15 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 		 */
+ 		if (host->cmd && (host->cmd->flags & MMC_RSP_BUSY)) {
+ 			if (intmask & SDHCI_INT_DATA_END) {
+-				sdhci_finish_command(host);
++				/*
++				 * Some cards handle busy-end interrupt
++				 * before the command completed, so make
++				 * sure we do things in the proper order.
++				 */
++				if (host->busy_handle)
++					sdhci_finish_command(host);
++				else
++					host->busy_handle = 1;
+ 				return;
+ 			}
+ 		}
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 08abe99..f91085b 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -149,6 +149,7 @@ struct sdhci_host {
+ 	struct mmc_command *cmd;	/* Current command */
+ 	struct mmc_data *data;	/* Current data request */
+ 	unsigned int data_early:1;	/* Data finished before cmd */
++	unsigned int busy_handle:1;	/* Handling the order of Busy-end */
+ 
+ 	struct sg_mapping_iter sg_miter;	/* SG state for PIO */
+ 	unsigned int blocks;	/* remaining PIO blocks */
 -- 
-Romain Izard
-
+1.7.9.5
