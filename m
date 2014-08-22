@@ -1,115 +1,69 @@
-From: Barry Song <Barry.Song@csr.com>
-Subject: RE: [PATCH] mmc: core: sd: check card write-protect lock while
- resuming
-Date: Fri, 22 Aug 2014 06:55:36 +0000
-Message-ID: <5EB3BFCD089AD643B9BB63439F5FD5E9012C98252C@SHAASIEXM01.ASIA.ROOT.PRI>
-References: <1408356012-18867-1-git-send-email-Barry.Song@csr.com>
- <CAPDyKFpFLoREZ=rYp8bQvJ7Fczq=HyLL90jv7Hjzai9xTNBNYg@mail.gmail.com>
+From: romain izard <romain.izard@mobile-devices.fr>
+Subject: Re: [PATCH v2] mmc: sdhci-sirf: fix 8bit width enable by overwriting set_bus_width
+Date: Fri, 22 Aug 2014 10:15:09 +0200
+Message-ID: <CAGkQfmPfYsEZ+QSep9pmm4xe0oYZ0L7eTjr5ROCksoqxnxqKSg@mail.gmail.com>
+References: <1408453153-8125-1-git-send-email-21cnbao@gmail.com>
+ <lt2b4j$tk3$1@ger.gmane.org> <CAGsJ_4yC+7G26pPGCMSmfKSCbw+k7VxhBMmxn3BNtqF-A08pqw@mail.gmail.com>
+ <5EB3BFCD089AD643B9BB63439F5FD5E9012C982503@SHAASIEXM01.ASIA.ROOT.PRI>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cluster-d.mailcontrol.com ([85.115.60.190]:53257 "EHLO
-	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755647AbaHVG4O (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Aug 2014 02:56:14 -0400
-In-Reply-To: <CAPDyKFpFLoREZ=rYp8bQvJ7Fczq=HyLL90jv7Hjzai9xTNBNYg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-ob0-f170.google.com ([209.85.214.170]:51049 "EHLO
+	mail-ob0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752640AbaHVIPa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Aug 2014 04:15:30 -0400
+Received: by mail-ob0-f170.google.com with SMTP id wp4so8343845obc.29
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Aug 2014 01:15:30 -0700 (PDT)
+In-Reply-To: <5EB3BFCD089AD643B9BB63439F5FD5E9012C982503@SHAASIEXM01.ASIA.ROOT.PRI>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Minda Chen <Minda.Chen@csr.com>, DL-SHA-WorkGroupLinux <DL-SHA-WorkGroupLinux@internal.csr.com>
+To: Barry Song <Barry.Song@csr.com>
+Cc: Barry Song <21cnbao@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Minda Chen <Minda.Chen@csr.com>, DL-SHA-WorkGroupLinux <DL-SHA-WorkGroupLinux@internal.csr.com>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFu
-c3NvbiBbbWFpbHRvOnVsZi5oYW5zc29uQGxpbmFyby5vcmddDQo+IFNlbnQ6
-IE1vbmRheSwgQXVndXN0IDE4LCAyMDE0IDc6NTggUE0NCj4gVG86IEJhcnJ5
-IFNvbmcNCj4gQ2M6IENocmlzIEJhbGw7IGxpbnV4LW1tYzsgbGludXgtYXJt
-LWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnOyBETC1TSEEtDQo+IFdvcmtH
-cm91cExpbnV4OyBNaW5kYSBDaGVuOyBCYXJyeSBTb25nDQo+IFN1YmplY3Q6
-IFJlOiBbUEFUQ0hdIG1tYzogY29yZTogc2Q6IGNoZWNrIGNhcmQgd3JpdGUt
-cHJvdGVjdCBsb2NrIHdoaWxlDQo+IHJlc3VtaW5nDQo+IA0KPiBPbiAxOCBB
-dWd1c3QgMjAxNCAxMjowMCwgQmFycnkgU29uZyA8QmFycnkuU29uZ0Bjc3Iu
-Y29tPiB3cm90ZToNCj4gPiBGcm9tOiBNaW5kYSBDaGVuIDxNaW5kYS5DaGVu
-QGNzci5jb20+DQo+ID4NCj4gPiBBZnRlciBzdXNwZW5kaW5nLCB1bnBsdWcg
-dGhlIHNkY2FyZCwgYW5kIHNldCBzZCBXUCBsb2NrLCBpbnNlcnQgaXQNCj4g
-PiBhZ2FpbiwgdGhlbiByZXN1bWUgdGhlIHN5c3RlbS4gcmVzdW1lIGNvZGVz
-IGRvIG5vdCBjaGVjayB0aGUgdGhlDQo+ID4gc2RjYXJkIHdyaXRlLXByb2N0
-ZWN0IGxvY2suIG5vdyBjaGVjayBpdC4NCj4gPg0KPiA+IFNpZ25lZC1vZmYt
-Ynk6IE1pbmRhIENoZW4gPE1pbmRhLkNoZW5AY3NyLmNvbT4NCj4gPiBTaWdu
-ZWQtb2ZmLWJ5OiBCYXJyeSBTb25nIDxCYW9odWEuU29uZ0Bjc3IuY29tPg0K
-PiA+IC0tLQ0KPiA+ICBkcml2ZXJzL21tYy9jb3JlL3NkLmMgfCA3ICsrKysr
-KysNCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDcgaW5zZXJ0aW9ucygrKQ0KPiA+
-DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvc2QuYyBiL2Ry
-aXZlcnMvbW1jL2NvcmUvc2QuYyBpbmRleA0KPiA+IDBjNDQ1MTAuLjg5MDU1
-N2EgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9zZC5jDQo+
-ID4gKysrIGIvZHJpdmVycy9tbWMvY29yZS9zZC5jDQo+ID4gQEAgLTkxMCw2
-ICs5MTAsNyBAQCBzdGF0aWMgaW50IG1tY19zZF9pbml0X2NhcmQoc3RydWN0
-IG1tY19ob3N0DQo+ICpob3N0LCB1MzIgb2NyLA0KPiA+ICAgICAgICAgaW50
-IGVycjsNCj4gPiAgICAgICAgIHUzMiBjaWRbNF07DQo+ID4gICAgICAgICB1
-MzIgcm9jciA9IDA7DQo+ID4gKyAgICAgICBib29sIG9sZHJvLCBybzsNCj4g
-Pg0KPiA+ICAgICAgICAgQlVHX09OKCFob3N0KTsNCj4gPiAgICAgICAgIFdB
-Uk5fT04oIWhvc3QtPmNsYWltZWQpOw0KPiA+IEBAIC05MjIsNiArOTIzLDEy
-IEBAIHN0YXRpYyBpbnQgbW1jX3NkX2luaXRfY2FyZChzdHJ1Y3QgbW1jX2hv
-c3QNCj4gKmhvc3QsIHUzMiBvY3IsDQo+ID4gICAgICAgICAgICAgICAgIGlm
-IChtZW1jbXAoY2lkLCBvbGRjYXJkLT5yYXdfY2lkLCBzaXplb2YoY2lkKSkg
-IT0gMCkNCj4gPiAgICAgICAgICAgICAgICAgICAgICAgICByZXR1cm4gLUVO
-T0VOVDsNCj4gPg0KPiA+ICsgICAgICAgICAgICAgICBpZiAoaG9zdC0+b3Bz
-LT5nZXRfcm8pIHsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBybyA9
-IGhvc3QtPm9wcy0+Z2V0X3JvKGhvc3QpID8gdHJ1ZSA6IGZhbHNlOw0KPiA+
-ICsgICAgICAgICAgICAgICAgICAgICAgIG9sZHJvID0gbW1jX2NhcmRfcmVh
-ZG9ubHkob2xkY2FyZCkgPyB0cnVlIDogZmFsc2U7DQo+ID4gKyAgICAgICAg
-ICAgICAgICAgICAgICAgaWYgKG9sZHJvIF4gcm8pDQo+ID4gKyAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICByZXR1cm4gLUVOT0VOVDsNCj4gPiAr
-ICAgICAgICAgICAgICAgfQ0KPiANCj4gU2VlbXMgbGlrZSB0aGlzIGNvZGUg
-YmVsb25ncyBiZXR0ZXIgaW4gbW1jX3NkX3NldHVwX2NhcmQoKS4gQ291bGQg
-eW91IHRyeQ0KPiBtb3ZpbmcgaXQgdGhlcmUuDQpbQmFycnkgU29uZ10gDQpX
-ZWxsLiBIb3cgYWJvdXQ6DQoNCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9j
-b3JlL3NkLmMgYi9kcml2ZXJzL21tYy9jb3JlL3NkLmMNCmluZGV4IDBjNDQ1
-MTAuLjY0M2JjODJkOCAxMDA2NDQNCi0tLSBhL2RyaXZlcnMvbW1jL2NvcmUv
-c2QuYw0KKysrIGIvZHJpdmVycy9tbWMvY29yZS9zZC5jDQpAQCAtODE1LDYg
-KzgxNSw3IEBAIGludCBtbWNfc2Rfc2V0dXBfY2FyZChzdHJ1Y3QgbW1jX2hv
-c3QgKmhvc3QsIHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwNCiAJYm9vbCByZWlu
-aXQpDQogew0KIAlpbnQgZXJyOw0KKwlpbnQgb2xkcm8sIHJvID0gLTE7DQog
-DQogCWlmICghcmVpbml0KSB7DQogCQkvKg0KQEAgLTg2MSwyMyArODYyLDI4
-IEBAIGludCBtbWNfc2Rfc2V0dXBfY2FyZChzdHJ1Y3QgbW1jX2hvc3QgKmhv
-c3QsIHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwNCiAJLyoNCiAJICogQ2hlY2sg
-aWYgcmVhZC1vbmx5IHN3aXRjaCBpcyBhY3RpdmUuDQogCSAqLw0KLQlpZiAo
-IXJlaW5pdCkgew0KLQkJaW50IHJvID0gLTE7DQogDQotCQlpZiAoaG9zdC0+
-b3BzLT5nZXRfcm8pIHsNCi0JCQltbWNfaG9zdF9jbGtfaG9sZChjYXJkLT5o
-b3N0KTsNCi0JCQlybyA9IGhvc3QtPm9wcy0+Z2V0X3JvKGhvc3QpOw0KLQkJ
-CW1tY19ob3N0X2Nsa19yZWxlYXNlKGNhcmQtPmhvc3QpOw0KLQkJfQ0KKwlp
-ZiAoaG9zdC0+b3BzLT5nZXRfcm8pIHsNCisJCW1tY19ob3N0X2Nsa19ob2xk
-KGNhcmQtPmhvc3QpOw0KKwkJcm8gPSBob3N0LT5vcHMtPmdldF9ybyhob3N0
-KTsNCisJCW1tY19ob3N0X2Nsa19yZWxlYXNlKGNhcmQtPmhvc3QpOw0KKwl9
-DQogDQotCQlpZiAocm8gPCAwKSB7DQotCQkJcHJfd2FybmluZygiJXM6IGhv
-c3QgZG9lcyBub3QgIg0KLQkJCQkic3VwcG9ydCByZWFkaW5nIHJlYWQtb25s
-eSAiDQotCQkJCSJzd2l0Y2guIGFzc3VtaW5nIHdyaXRlLWVuYWJsZS5cbiIs
-DQotCQkJCW1tY19ob3N0bmFtZShob3N0KSk7DQotCQl9IGVsc2UgaWYgKHJv
-ID4gMCkgew0KLQkJCW1tY19jYXJkX3NldF9yZWFkb25seShjYXJkKTsNCi0J
-CX0NCisJaWYgKHJvIDwgMCkNCisJCXByX3dhcm5pbmcoIiVzOiBob3N0IGRv
-ZXMgbm90ICINCisJCQkic3VwcG9ydCByZWFkaW5nIHJlYWQtb25seSAiDQor
-CQkJInN3aXRjaC4gYXNzdW1pbmcgd3JpdGUtZW5hYmxlLlxuIiwNCisJCQlt
-bWNfaG9zdG5hbWUoaG9zdCkpOw0KKw0KKwlpZiAoIXJlaW5pdCAmJiAocm8g
-PiAwKSkNCisJCW1tY19jYXJkX3NldF9yZWFkb25seShjYXJkKTsNCisJZWxz
-ZSBpZiAocmVpbml0ICYmIChybyA+PSAwKSkgew0KKwkJLyogY2hlY2sgaWYg
-dGhlIHdyaXRlLXByb3RlY3Rpb24gbG9jayBpcyBjaGFuZ2VkICovDQorCQlv
-bGRybyA9IG1tY19jYXJkX3JlYWRvbmx5KGNhcmQpID8gMSA6IDA7DQorCQly
-byA9IChybyA+IDApID8gMSA6IDA7DQorDQorCQlpZiAob2xkcm8gXiBybykN
-CisJCQlyZXR1cm4gLUVOT0VOVDsNCiAJfQ0KIA0KIAlyZXR1cm4gMDsNCj4g
-DQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo+IA0KPiA+ICAgICAgICAgICAg
-ICAgICBjYXJkID0gb2xkY2FyZDsNCj4gPiAgICAgICAgIH0gZWxzZSB7DQo+
-ID4gICAgICAgICAgICAgICAgIC8qDQotYmFycnkNCg0KCgpNZW1iZXIgb2Yg
-dGhlIENTUiBwbGMgZ3JvdXAgb2YgY29tcGFuaWVzLiBDU1IgcGxjIHJlZ2lz
-dGVyZWQgaW4gRW5nbGFuZCBhbmQgV2FsZXMsIHJlZ2lzdGVyZWQgbnVtYmVy
-IDQxODczNDYsIHJlZ2lzdGVyZWQgb2ZmaWNlIENodXJjaGlsbCBIb3VzZSwg
-Q2FtYnJpZGdlIEJ1c2luZXNzIFBhcmssIENvd2xleSBSb2FkLCBDYW1icmlk
-Z2UsIENCNCAwV1osIFVuaXRlZCBLaW5nZG9tCk1vcmUgaW5mb3JtYXRpb24g
-Y2FuIGJlIGZvdW5kIGF0IHd3dy5jc3IuY29tLiBLZWVwIHVwIHRvIGRhdGUg
-d2l0aCBDU1Igb24gb3VyIHRlY2huaWNhbCBibG9nLCB3d3cuY3NyLmNvbS9i
-bG9nLCBDU1IgcGVvcGxlIGJsb2csIHd3dy5jc3IuY29tL3Blb3BsZSwgWW91
-VHViZSwgd3d3LnlvdXR1YmUuY29tL3VzZXIvQ1NScGxjLCBGYWNlYm9vaywg
-d3d3LmZhY2Vib29rLmNvbS9wYWdlcy9DU1IvMTkxMDM4NDM0MjUzNTM0LCBv
-ciBmb2xsb3cgdXMgb24gVHdpdHRlciBhdCB3d3cudHdpdHRlci5jb20vQ1NS
-X3BsYy4KTmV3IGZvciAyMDE0LCB5b3UgY2FuIG5vdyBhY2Nlc3MgdGhlIHdp
-ZGUgcmFuZ2Ugb2YgcHJvZHVjdHMgcG93ZXJlZCBieSBhcHRYIGF0IHd3dy5h
-cHR4LmNvbS4K
+2014-08-22 8:48 GMT+02:00 Barry Song <Barry.Song@csr.com>:
+>
+> Minda's version is:
+> static void sdhci_sirf_set_bus_width(struct sdhci_host *host, int width)
+> {
+>         u8 ctrl;
+>
+>         ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>         ctrl &= ~(SDHCI_CTRL_4BITBUS | SDHCI_SIRF_8BITBUS);
+>
+>         if (width == MMC_BUS_WIDTH_8) {
+>                 /*
+>                  * CSR atlas7 and prima2 SD host version is not 3.0
+>                  * 8bit-width enable bit of CSR SD hosts is 3,
+>                  * while stardard hosts use bit 5
+>                  */
+>                 ctrl |= SDHCI_SIRF_8BITBUS;
+>         } else if (width == MMC_BUS_WIDTH_4)
+>                 ctrl |= SDHCI_CTRL_4BITBUS;
+
+Here, the braces are not right. The coding style requires braces for both
+sides of an 'else', or none of them
+
+>
+>         sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> }
+>
+> It is basically same with you.
+>
+Yes.
+
+>> > You can use it verbatim with my signoff if you want.
+>> > Signed-off-by: Romain Izard <romain.izard.pro@gmail.com>
+>
+> do you mean a Reviewed-by?
+>
+
+In case you wanted to take the code snipplet I provided without changing it,
+I provided you my Signed-off-by to be sure that there is no issue. Since Minda
+wrote it on his/her own, it's not necessary.
+
+But now, you can use:
+Reviewed-by: Romain Izard <romain.izard.pro@gmail.com>
+
+Best regards,
+-- 
+Romain Izard
