@@ -1,152 +1,192 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: sd: check card write-protect lock while resuming
-Date: Fri, 22 Aug 2014 12:00:01 +0200
-Message-ID: <CAPDyKFp4vV_n5KEGSkdjfDMtbvhFzrdU0oB6N6WpmS9Ant8EOw@mail.gmail.com>
-References: <1408356012-18867-1-git-send-email-Barry.Song@csr.com>
-	<CAPDyKFpFLoREZ=rYp8bQvJ7Fczq=HyLL90jv7Hjzai9xTNBNYg@mail.gmail.com>
-	<5EB3BFCD089AD643B9BB63439F5FD5E9012C98252C@SHAASIEXM01.ASIA.ROOT.PRI>
+Subject: Re: [PATCH 01/10 v2 resend] mmc: block: add block number limitation
+ flag for multiple block read
+Date: Fri, 22 Aug 2014 12:31:19 +0200
+Message-ID: <CAPDyKFqwDTBu53t6iiiA6REe3feBFWWmgd-V93RsOh5XFPpc4w@mail.gmail.com>
+References: <d3d6aa34548248768494ad88056cf4bd@SINPR06MB105.apcprd06.prod.outlook.com>
+	<87simtenpi.wl%kuninori.morimoto.gx@renesas.com>
+	<cb608c5e763f47b597936724ec05b615@SINPR06MB105.apcprd06.prod.outlook.com>
+	<87pphxe2q0.wl%kuninori.morimoto.gx@renesas.com>
+	<53AD638C.5060907@renesas.com>
+	<87egxehsec.wl%kuninori.morimoto.gx@gmail.com>
+	<8761hk7wgy.wl%kuninori.morimoto.gx@gmail.com>
+	<874mx47wf9.wl%kuninori.morimoto.gx@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f170.google.com ([209.85.217.170]:39663 "EHLO
-	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750729AbaHVKAD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Aug 2014 06:00:03 -0400
-Received: by mail-lb0-f170.google.com with SMTP id l4so9254979lbv.1
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Aug 2014 03:00:01 -0700 (PDT)
-In-Reply-To: <5EB3BFCD089AD643B9BB63439F5FD5E9012C98252C@SHAASIEXM01.ASIA.ROOT.PRI>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <874mx47wf9.wl%kuninori.morimoto.gx@gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+Cc: Simon <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>, Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Barry Song <Barry.Song@csr.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Minda Chen <Minda.Chen@csr.com>, DL-SHA-WorkGroupLinux <DL-SHA-WorkGroupLinux@internal.csr.com>
 
-On 22 August 2014 08:55, Barry Song <Barry.Song@csr.com> wrote:
->> -----Original Message-----
->> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
->> Sent: Monday, August 18, 2014 7:58 PM
->> To: Barry Song
->> Cc: Chris Ball; linux-mmc; linux-arm-kernel@lists.infradead.org; DL-SHA-
->> WorkGroupLinux; Minda Chen; Barry Song
->> Subject: Re: [PATCH] mmc: core: sd: check card write-protect lock while
->> resuming
->>
->> On 18 August 2014 12:00, Barry Song <Barry.Song@csr.com> wrote:
->> > From: Minda Chen <Minda.Chen@csr.com>
->> >
->> > After suspending, unplug the sdcard, and set sd WP lock, insert it
->> > again, then resume the system. resume codes do not check the the
->> > sdcard write-proctect lock. now check it.
->> >
->> > Signed-off-by: Minda Chen <Minda.Chen@csr.com>
->> > Signed-off-by: Barry Song <Baohua.Song@csr.com>
->> > ---
->> >  drivers/mmc/core/sd.c | 7 +++++++
->> >  1 file changed, 7 insertions(+)
->> >
->> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
->> > 0c44510..890557a 100644
->> > --- a/drivers/mmc/core/sd.c
->> > +++ b/drivers/mmc/core/sd.c
->> > @@ -910,6 +910,7 @@ static int mmc_sd_init_card(struct mmc_host
->> *host, u32 ocr,
->> >         int err;
->> >         u32 cid[4];
->> >         u32 rocr = 0;
->> > +       bool oldro, ro;
->> >
->> >         BUG_ON(!host);
->> >         WARN_ON(!host->claimed);
->> > @@ -922,6 +923,12 @@ static int mmc_sd_init_card(struct mmc_host
->> *host, u32 ocr,
->> >                 if (memcmp(cid, oldcard->raw_cid, sizeof(cid)) != 0)
->> >                         return -ENOENT;
->> >
->> > +               if (host->ops->get_ro) {
->> > +                       ro = host->ops->get_ro(host) ? true : false;
->> > +                       oldro = mmc_card_readonly(oldcard) ? true : false;
->> > +                       if (oldro ^ ro)
->> > +                               return -ENOENT;
->> > +               }
->>
->> Seems like this code belongs better in mmc_sd_setup_card(). Could you try
->> moving it there.
-> [Barry Song]
-> Well. How about:
+On 22 August 2014 10:36, Kuninori Morimoto
+<kuninori.morimoto.gx@gmail.com> wrote:
+> From: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
 >
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 0c44510..643bc82d8 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -815,6 +815,7 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
->         bool reinit)
->  {
->         int err;
-> +       int oldro, ro = -1;
->
->         if (!reinit) {
->                 /*
-> @@ -861,23 +862,28 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
->         /*
->          * Check if read-only switch is active.
->          */
-> -       if (!reinit) {
-> -               int ro = -1;
->
-> -               if (host->ops->get_ro) {
-> -                       mmc_host_clk_hold(card->host);
-> -                       ro = host->ops->get_ro(host);
-> -                       mmc_host_clk_release(card->host);
-> -               }
-> +       if (host->ops->get_ro) {
-> +               mmc_host_clk_hold(card->host);
-> +               ro = host->ops->get_ro(host);
-> +               mmc_host_clk_release(card->host);
-> +       }
->
-> -               if (ro < 0) {
-> -                       pr_warning("%s: host does not "
-> -                               "support reading read-only "
-> -                               "switch. assuming write-enable.\n",
-> -                               mmc_hostname(host));
-> -               } else if (ro > 0) {
-> -                       mmc_card_set_readonly(card);
-> -               }
-> +       if (ro < 0)
-> +               pr_warning("%s: host does not "
-> +                       "support reading read-only "
-> +                       "switch. assuming write-enable.\n",
-> +                       mmc_hostname(host));
+> In some controllers, when performing a multiple block read of
+> one or two blocks, depending on the timing with which the
+> response register is read, the response value may not
+> be read properly.
 
-I don't wont this pr_warning to spam the log each resume.
-I suppose we could print it only for !reinit, right?
+Can't his be solved in software in the host driver? Or is it pure bug in the HW?
 
+> MMC_CAP2_NO_MULTI_READ flags disable all multiple block read,
+> but, it is over-kill for this issue.
+> This patch adds new MMC_CAP2_2BLKS_LIMIT to use single block read
+> when it was two blocks.
+> This is additional option of MMC_CAP2_NO_MULTI_READ
+>
+> [Kuninori Morimoto: tidyup for upstreaming, and cared mach-shmobile]
+>
+> Tested-by: Nguyen Xuan Nui <nx-nui@jinso.co.jp>
+> Tested-by: Hiep Cao Minh <cm-hiep@jinso.co.jp>
+> Signed-off-by: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
+> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+> ---
+>  arch/arm/mach-shmobile/board-koelsch.c |    6 +++---
+>  arch/arm/mach-shmobile/board-lager.c   |    4 ++--
+
+I prefer to split up patches into ARM patches and MMC patches if it's possible.
+That makes it easier to review and collect acks from SoC maintainers.
+
+>  drivers/mmc/card/block.c               |   19 +++++++++++++++++--
+>  drivers/mmc/host/sh_mobile_sdhi.c      |    2 +-
+>  include/linux/mmc/host.h               |    3 +++
+>  5 files changed, 26 insertions(+), 8 deletions(-)
+>
+> diff --git a/arch/arm/mach-shmobile/board-koelsch.c b/arch/arm/mach-shmobile/board-koelsch.c
+> index b7d5bc7..32a2b2a 100644
+> --- a/arch/arm/mach-shmobile/board-koelsch.c
+> +++ b/arch/arm/mach-shmobile/board-koelsch.c
+> @@ -331,7 +331,7 @@ SDHI_REGULATOR(2, RCAR_GP_PIN(7, 19), RCAR_GP_PIN(2, 26));
+>  static struct sh_mobile_sdhi_info sdhi0_info __initdata = {
+>         .tmio_caps      = MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+>                           MMC_CAP_POWER_OFF_CARD,
+> -       .tmio_caps2     = MMC_CAP2_NO_MULTI_READ,
+> +       .tmio_caps2     = MMC_CAP2_NO_2BLKS_READ,
+
+Why are MMC_CAP2_NO_MULTI_READ /MMC_CAP2_NO_2BLKS_READ configured from
+platform data. If this is HW bug, aren't that related to the actual
+mmc controller and version of it - not the board/platform?
+
+This applies to more caps and boards further down below in this patch as well.
+
+To me, it seems like these belongs into the host driver instead!?
+
+>         .tmio_flags     = TMIO_MMC_HAS_IDLE_WAIT,
+>  };
+>
+> @@ -344,7 +344,7 @@ static struct resource sdhi0_resources[] __initdata = {
+>  static struct sh_mobile_sdhi_info sdhi1_info __initdata = {
+>         .tmio_caps      = MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+>                           MMC_CAP_POWER_OFF_CARD,
+> -       .tmio_caps2     = MMC_CAP2_NO_MULTI_READ,
+> +       .tmio_caps2     = MMC_CAP2_NO_2BLKS_READ,
+>         .tmio_flags     = TMIO_MMC_HAS_IDLE_WAIT,
+>  };
+>
+> @@ -357,7 +357,7 @@ static struct resource sdhi1_resources[] __initdata = {
+>  static struct sh_mobile_sdhi_info sdhi2_info __initdata = {
+>         .tmio_caps      = MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+>                           MMC_CAP_POWER_OFF_CARD,
+> -       .tmio_caps2     = MMC_CAP2_NO_MULTI_READ,
+> +       .tmio_caps2     = MMC_CAP2_NO_2BLKS_READ,
+>         .tmio_flags     = TMIO_MMC_HAS_IDLE_WAIT |
+>                           TMIO_MMC_WRPROTECT_DISABLE,
+>  };
+> diff --git a/arch/arm/mach-shmobile/board-lager.c b/arch/arm/mach-shmobile/board-lager.c
+> index e1d8215..953f9c9 100644
+> --- a/arch/arm/mach-shmobile/board-lager.c
+> +++ b/arch/arm/mach-shmobile/board-lager.c
+> @@ -630,7 +630,7 @@ static void __init lager_add_rsnd_device(void)
+>  static struct sh_mobile_sdhi_info sdhi0_info __initdata = {
+>         .tmio_caps      = MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+>                           MMC_CAP_POWER_OFF_CARD,
+> -       .tmio_caps2     = MMC_CAP2_NO_MULTI_READ,
+> +       .tmio_caps2     = MMC_CAP2_NO_2BLKS_READ,
+>         .tmio_flags     = TMIO_MMC_HAS_IDLE_WAIT |
+>                           TMIO_MMC_WRPROTECT_DISABLE,
+>  };
+> @@ -644,7 +644,7 @@ static struct resource sdhi0_resources[] __initdata = {
+>  static struct sh_mobile_sdhi_info sdhi2_info __initdata = {
+>         .tmio_caps      = MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+>                           MMC_CAP_POWER_OFF_CARD,
+> -       .tmio_caps2     = MMC_CAP2_NO_MULTI_READ,
+> +       .tmio_caps2     = MMC_CAP2_NO_2BLKS_READ,
+>         .tmio_flags     = TMIO_MMC_HAS_IDLE_WAIT |
+>                           TMIO_MMC_WRPROTECT_DISABLE,
+>  };
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index ede41f0..98c7e8c 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -1400,8 +1400,23 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>
+>                 /* Some controllers can't do multiblock reads due to hw bugs */
+>                 if (card->host->caps2 & MMC_CAP2_NO_MULTI_READ &&
+> -                   rq_data_dir(req) == READ)
+> -                       brq->data.blocks = 1;
+> +                   rq_data_dir(req) == READ) {
 > +
-> +       if (!reinit && (ro > 0))
-> +               mmc_card_set_readonly(card);
-> +       else if (reinit && (ro >= 0)) {
-> +               /* check if the write-protection lock is changed */
-> +               oldro = mmc_card_readonly(card) ? 1 : 0;
-> +               ro = (ro > 0) ? 1 : 0;
-> +
-> +               if (oldro ^ ro)
-> +                       return -ENOENT;
+> +                       if (card->host->caps2 & MMC_CAP2_2BLKS_LIMIT) {
 
-This will have the effect of quickly returning an error to the mmc
-bus' ->suspend callback. That path are not able remove the card
-device, which I guess is what you would like to happen, right?
+This conforms to what the commit message states, that
+MMC_CAP2_2BLKS_LIMIT needs to be used together with
+MMC_CAP2_NO_MULTI_READ to take effect. I think I would prefer to have
+them separate.
 
-I am not completely sure, but I believe the card will still be
-operational after resuming. Moreover it will be using the
-initialization frequency and 1-bit bus width and thus performing
-poorly. This is definitely not what we want.
+Anyway, according to your cap configuration changes, you are replacing
+MMC_CAP2_NO_MULTI_READ with MMC_CAP2_2BLKS_LIMIT, instead of adding
+it...
 
-How did you test this patch? Can you confirm my theory above?
-
-The card may only be removed from the mmc_rescan work, scheduled at
-PM_POST_SUSPEND phase. What I think you should do here, is to also set
-the card state into MMC_CARD_REMOVED, by invoking
-mmc_card_set_removed(). Thus the SD's bus_ops->detect callback will
-remove the card during this phase.
+> +                               /*
+> +                                * In some controllers, when performing a
+> +                                * multiple block read of one or two blocks,
+> +                                * depending on the timing with which the
+> +                                * response register is read, the response
+> +                                * value may not be read properly.
+> +                                * Use single block read for this HW bug
+> +                                */
+> +                               if (brq->data.blocks == 2)
+> +                                       brq->data.blocks = 1;
+> +                       } else {
+> +                               brq->data.blocks = 1;
+> +                       }
+> +               }
+>         }
+>
+>         if (brq->data.blocks > 1 || do_rel_wr) {
+> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+> index 91058da..b3baa83 100644
+> --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> @@ -55,7 +55,7 @@ static const struct sh_mobile_sdhi_of_data of_rcar_gen1_compatible = {
+>  static const struct sh_mobile_sdhi_of_data of_rcar_gen2_compatible = {
+>         .tmio_flags     = TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE,
+>         .capabilities   = MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
+> -       .capabilities2  = MMC_CAP2_NO_MULTI_READ,
+> +       .capabilities2  = MMC_CAP2_NO_2BLKS_READ,
+>  };
+>
+>  static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 7960424..3510fba 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -266,6 +266,9 @@ struct mmc_host {
+>  #define MMC_CAP2_BOOTPART_NOACC        (1 << 0)        /* Boot partition no access */
+>  #define MMC_CAP2_FULL_PWR_CYCLE        (1 << 2)        /* Can do full power cycle */
+>  #define MMC_CAP2_NO_MULTI_READ (1 << 3)        /* Multiblock reads don't work */
+> +#define MMC_CAP2_2BLKS_LIMIT   (1 << 4)        /* 2 blocks limit for multi read */
+> +#define MMC_CAP2_NO_2BLKS_READ (MMC_CAP2_NO_MULTI_READ | \
+> +                                MMC_CAP2_2BLKS_LIMIT)
+>  #define MMC_CAP2_HS200_1_8V_SDR        (1 << 5)        /* can support */
+>  #define MMC_CAP2_HS200_1_2V_SDR        (1 << 6)        /* can support */
+>  #define MMC_CAP2_HS200         (MMC_CAP2_HS200_1_8V_SDR | \
+> --
+> 1.7.9.5
+>
 
 Kind regards
 Uffe
