@@ -1,45 +1,65 @@
-From: Peter Griffin <peter.griffin@linaro.org>
-Subject: Re: [PATCH 1/5] mmc: remove .owner field for drivers using
- module_platform_driver
-Date: Thu, 21 Aug 2014 14:11:07 +0100
-Message-ID: <20140821131107.GA17487@griffinp-ThinkPad-X1-Carbon-2nd>
-References: <1407860069-12706-1-git-send-email-peter.griffin@linaro.org>
- <1407860069-12706-2-git-send-email-peter.griffin@linaro.org>
- <3815db00-4b32-4484-b97e-2144dc5abb45@BY2FFO11FD040.protection.gbl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: [PATCH v3 0/3] mmc: mmci: sdio related fixes
+Date: Fri, 22 Aug 2014 05:53:39 +0100
+Message-ID: <1408683219-7939-1-git-send-email-srinivas.kandagatla@linaro.org>
+References: <1408446785-1399-1-git-send-email-srinivas.kandagatla@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f180.google.com ([74.125.82.180]:35089 "EHLO
-	mail-we0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754501AbaHUNLM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Aug 2014 09:11:12 -0400
-Received: by mail-we0-f180.google.com with SMTP id w61so9280928wes.11
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Aug 2014 06:11:11 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <3815db00-4b32-4484-b97e-2144dc5abb45@BY2FFO11FD040.protection.gbl>
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:44136 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751232AbaHVEyX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Aug 2014 00:54:23 -0400
+Received: by mail-pa0-f43.google.com with SMTP id lf10so15519128pab.2
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Aug 2014 21:54:23 -0700 (PDT)
+In-Reply-To: <1408446785-1399-1-git-send-email-srinivas.kandagatla@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Michal Simek <michal.simek@xilinx.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, jarkko.lavinen@nokia.com, balajitk@ti.com, baohua@kernel.org, viresh.linux@gmail.com, ian.molton@codethink.co.uk, maxime.ripard@free-electrons.com, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, spear-devel@list.st.com, linux-tegra@vger.kernel.org, swarren@wwwdotorg.org, patches@linaro.org, lee.jones@linaro.org
+To: linux-mmc@vger.kernel.org
+Cc: Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-Hi Michal,
+This patchset fixes few sdio related issues encountered while testing
+WLAN ath6kl via SDIO on IFC6410 board with Qualcomm APQ8064 SOC.
 
-On Mon, 18 Aug 2014, Michal Simek wrote:
+Patch: "mmc: mmci: Support any block sizes for ux500v2 and qcom variant" is
+a very old patch by Ulf to support IPs which support any size of block sizes.
+http://www.spinics.net/lists/linux-mmc/msg12160.html I modified the subject
+line to include qcom.
+Patch fixes below issues reported while testing sdio.
+The issue was ath6kl driver was issuing 12 bytes and 24 bytes reads
+which are caught as part of the error handing in the driver and
+resulting in failures. 
 
-> I have checked this for all xilinx drivers we have in the tree
-> and I have sent similar patches.
-> This problem is probably in all subsystems.
+Patch "mmc: mmci: Add sdio enable mask in variant data" adds extra
+variant parameter to enable sdio. This makes mmci driver more flexible.
 
-Yep
+Patch "mmc: mmci: rename sdio flag in vendor data to st_sdio" renames sdio
+flag in vendor data to st_sdio, as this flag is only used to setup st
+specific sdio logic.
 
-> With communication with Mark Brown. Don't you have
-> cocinelle script for fixing this everywhere?
+All these patches are tested on IFC6410 board with ath6kl WLAN via SDIO.
 
-Nope. Never really looked at cocinelle until now, but it looks like
-a useful tool for these sort of mass updates.
+Thanks to Linus W, Ulf annd Russell for comments since RFC.
 
-regards,
+Changes since v2:
+	- removed "mmc: mmci: move block size validation under relevant code" patch
+	as this is already fixed by original patch from Ulf.
 
-Peter.
+Changes since RFC:
+	- moved sdio flag to st_sdio to simplify the checks.
+	- use Ulf's patch to address IP's which support anysize blocks.
 
+Thanks,
+srini
+
+Srinivas Kandagatla (2):
+  mmc: mmci: Add sdio enable mask in variant data
+  mmc: mmci: rename sdio flag in vendor data to st_sdio
+
+Ulf Hansson (1):
+  mmc: mmci: Support any block sizes for ux500v2 and qcom variant
+
+ drivers/mmc/host/mmci.c | 68 ++++++++++++++++++++++++++-----------------------
+ 1 file changed, 36 insertions(+), 32 deletions(-)
+
+-- 
+1.9.1
 
