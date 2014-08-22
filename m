@@ -1,129 +1,115 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: [PATCH v3 3/3] mmc: mmci: rename sdio flag in vendor data to st_sdio
-Date: Fri, 22 Aug 2014 05:55:16 +0100
-Message-ID: <1408683316-8074-1-git-send-email-srinivas.kandagatla@linaro.org>
-References: <1408683219-7939-1-git-send-email-srinivas.kandagatla@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1408683219-7939-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+From: Barry Song <Barry.Song@csr.com>
+Subject: RE: [PATCH v2] mmc: sdhci-sirf: fix 8bit width enable by
+ overwriting set_bus_width
+Date: Fri, 22 Aug 2014 06:48:07 +0000
+Message-ID: <5EB3BFCD089AD643B9BB63439F5FD5E9012C982503@SHAASIEXM01.ASIA.ROOT.PRI>
+References: <1408453153-8125-1-git-send-email-21cnbao@gmail.com>
+ <lt2b4j$tk3$1@ger.gmane.org>
+ <CAGsJ_4yC+7G26pPGCMSmfKSCbw+k7VxhBMmxn3BNtqF-A08pqw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from cluster-d.mailcontrol.com ([85.115.60.190]:40136 "EHLO
+	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754827AbaHVGsZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Aug 2014 02:48:25 -0400
+In-Reply-To: <CAGsJ_4yC+7G26pPGCMSmfKSCbw+k7VxhBMmxn3BNtqF-A08pqw@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Barry Song <21cnbao@gmail.com>, Romain Izard <romain.izard.pro@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Minda Chen <Minda.Chen@csr.com>, DL-SHA-WorkGroupLinux <DL-SHA-WorkGroupLinux@internal.csr.com>
 
-This patch renames sdio flag in vendor data to st_sdio, as this flag is
-only used to enable ST specific sdio setup. This will also ensure that
-the ST specfic setup is not done on other vendor like Qualcomm.
-
-Originally the issue was detected while testing WLAN ath6kl on IFC6410
-board with APQ8064 SOC.
-
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
----
- drivers/mmc/host/mmci.c | 48 ++++++++++++++++++++++++------------------------
- 1 file changed, 24 insertions(+), 24 deletions(-)
-
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index a25759e..264c947 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -61,7 +61,7 @@ static unsigned int fmax = 515633;
-  * @fifohalfsize: number of bytes that can be written when MCI_TXFIFOHALFEMPTY
-  *		  is asserted (likewise for RX)
-  * @data_cmd_enable: enable value for data commands.
-- * @sdio: variant supports SDIO
-+ * @st_sdio: enable ST specific SDIO logic
-  * @st_clkdiv: true if using a ST-specific clock divider algorithm
-  * @datactrl_mask_ddrmode: ddr mode mask in datactrl register.
-  * @blksz_datactrl16: true if Block size is at b16..b30 position in datactrl register
-@@ -91,7 +91,7 @@ struct variant_data {
- 	unsigned int		data_cmd_enable;
- 	unsigned int		datactrl_mask_ddrmode;
- 	unsigned int		datactrl_mask_sdio;
--	bool			sdio;
-+	bool			st_sdio;
- 	bool			st_clkdiv;
- 	bool			blksz_datactrl16;
- 	bool			blksz_datactrl4;
-@@ -141,7 +141,7 @@ static struct variant_data variant_u300 = {
- 	.clkreg_8bit_bus_enable = MCI_ST_8BIT_BUS,
- 	.datalength_bits	= 16,
- 	.datactrl_mask_sdio	= MCI_ST_DPSM_SDIOEN,
--	.sdio			= true,
-+	.st_sdio			= true,
- 	.pwrreg_powerup		= MCI_PWR_ON,
- 	.f_max			= 100000000,
- 	.signal_direction	= true,
-@@ -155,7 +155,7 @@ static struct variant_data variant_nomadik = {
- 	.clkreg			= MCI_CLK_ENABLE,
- 	.datalength_bits	= 24,
- 	.datactrl_mask_sdio	= MCI_ST_DPSM_SDIOEN,
--	.sdio			= true,
-+	.st_sdio		= true,
- 	.st_clkdiv		= true,
- 	.pwrreg_powerup		= MCI_PWR_ON,
- 	.f_max			= 100000000,
-@@ -173,7 +173,7 @@ static struct variant_data variant_ux500 = {
- 	.clkreg_neg_edge_enable	= MCI_ST_UX500_NEG_EDGE,
- 	.datalength_bits	= 24,
- 	.datactrl_mask_sdio	= MCI_ST_DPSM_SDIOEN,
--	.sdio			= true,
-+	.st_sdio		= true,
- 	.st_clkdiv		= true,
- 	.pwrreg_powerup		= MCI_PWR_ON,
- 	.f_max			= 100000000,
-@@ -193,7 +193,7 @@ static struct variant_data variant_ux500v2 = {
- 	.datactrl_mask_ddrmode	= MCI_ST_DPSM_DDRMODE,
- 	.datalength_bits	= 24,
- 	.datactrl_mask_sdio	= MCI_ST_DPSM_SDIOEN,
--	.sdio			= true,
-+	.st_sdio		= true,
- 	.st_clkdiv		= true,
- 	.blksz_datactrl16	= true,
- 	.pwrreg_powerup		= MCI_PWR_ON,
-@@ -818,26 +818,26 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
- 	if (data->flags & MMC_DATA_READ)
- 		datactrl |= MCI_DPSM_DIRECTION;
- 
--	if (variant->sdio && host->mmc->card)
--		if (mmc_card_sdio(host->mmc->card)) {
--			u32 clk;
--			datactrl |= variant->datactrl_mask_sdio;
-+	if (host->mmc->card && mmc_card_sdio(host->mmc->card)) {
-+		u32 clk;
- 
--			/*
--			 * The ST Micro variant for SDIO small write transfers
--			 * needs to have clock H/W flow control disabled,
--			 * otherwise the transfer will not start. The threshold
--			 * depends on the rate of MCLK.
--			 */
--			if (data->flags & MMC_DATA_WRITE &&
--			    (host->size < 8 ||
--			     (host->size <= 8 && host->mclk > 50000000)))
--				clk = host->clk_reg & ~variant->clkreg_enable;
--			else
--				clk = host->clk_reg | variant->clkreg_enable;
-+		datactrl |= variant->datactrl_mask_sdio;
- 
--			mmci_write_clkreg(host, clk);
--		}
-+		/*
-+		 * The ST Micro variant for SDIO small write transfers
-+		 * needs to have clock H/W flow control disabled,
-+		 * otherwise the transfer will not start. The threshold
-+		 * depends on the rate of MCLK.
-+		 */
-+		if (variant->st_sdio && data->flags & MMC_DATA_WRITE &&
-+		    (host->size < 8 ||
-+		     (host->size <= 8 && host->mclk > 50000000)))
-+			clk = host->clk_reg & ~variant->clkreg_enable;
-+		else
-+			clk = host->clk_reg | variant->clkreg_enable;
-+
-+		mmci_write_clkreg(host, clk);
-+	}
- 
- 	if (host->mmc->ios.timing == MMC_TIMING_UHS_DDR50 ||
- 	    host->mmc->ios.timing == MMC_TIMING_MMC_DDR52)
--- 
-1.9.1
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCYXJyeSBT
+b25nIFttYWlsdG86MjFjbmJhb0BnbWFpbC5jb21dDQo+IFNlbnQ6IFRodXJz
+ZGF5LCBBdWd1c3QgMjEsIDIwMTQgNjowOSBQTQ0KPiBUbzogUm9tYWluIEl6
+YXJkDQo+IENjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBNaW5kYSBD
+aGVuOyBETC1TSEEtV29ya0dyb3VwTGludXgNCj4gU3ViamVjdDogUmU6IFtQ
+QVRDSCB2Ml0gbW1jOiBzZGhjaS1zaXJmOiBmaXggOGJpdCB3aWR0aCBlbmFi
+bGUgYnkgb3ZlcndyaXRpbmcNCj4gc2V0X2J1c193aWR0aA0KPiANCj4gMjAx
+NC0wOC0yMCAyMjoyNSBHTVQrMDg6MDAgUm9tYWluIEl6YXJkIDxyb21haW4u
+aXphcmQucHJvQGdtYWlsLmNvbT46DQo+ID4gWyJGb2xsb3d1cC1UbzoiIGhl
+YWRlciBzZXQgdG8gZ21hbmUubGludXgua2VybmVsLm1tYy5dIE9uIDIwMTQt
+MDgtMTksDQo+ID4gQmFycnkgU29uZyA8MjFjbmJhb0BnbWFpbC5jb20+IHdy
+b3RlOg0KPiA+PiBGcm9tOiBNaW5kYSBDaGVuIDxNaW5kYS5DaGVuQGNzci5j
+b20+DQo+ID4+DQo+ID4+IDhiaXQtd2lkdGggZW5hYmxlIGJpdCBvZiBDU1Ig
+TU1DIGhvc3RzIGlzIDMsIHdoaWxlIHN0YXJkYXJkIGhvc3RzIHVzZQ0KPiA+
+PiBiaXQgNS4gdGhpcyBwYXRjaCBmaXhlcyB0aGUgZnVuY3Rpb25hbGl0eSBv
+ZiA4Yml0IHRyYW5zZmVyIGluIENTUiBtbWMNCj4gPj4gY29udHJvbGxlcnMg
+YW5kIGltcHJvdmUgcGVyZm9ybWFuY2UgZm9yIG1tYzAgYSBsb3QuDQo+ID4+
+DQo+ID4+IFNpZ25lZC1vZmYtYnk6IE1pbmRhIENoZW4gPE1pbmRhLkNoZW5A
+Y3NyLmNvbT4NCj4gPj4gU2lnbmVkLW9mZi1ieTogQmFycnkgU29uZyA8QmFv
+aHVhLlNvbmdAY3NyLmNvbT4NCj4gPj4gLS0tDQo+ID4+ICAtdjI6IGNoZWNr
+IGZvciBob3N0LT52ZXJzaW9uID49IFNESENJX1NQRUNfMzAwDQo+ID4+DQo+
+ID4NCj4gPiBIaSBCYXJyeSwNCj4gPg0KPiA+IERpZCB5b3UgY2hlY2sgdGhl
+IHJ1bnRpbWUgYmVoYXZpb3VyIG9mIHRoZSBkZXZpY2UgYWZ0ZXIgdGhpcyBj
+aGFuZ2UgPw0KPiA+DQo+ID4gRnJvbSB0aGUgU2lSRnByaW1hSUkvU2lSRmF0
+bGFzVkkgZGF0YSBzaGVldHMsIGl0IGFwcGVhcnMgdGhhdCB0aGUNCj4gPiBp
+bXBsZW1lbnRhdGlvbiBvZiB0aGUgU0RIQ0kgY29udHJvbGxlciBpcyBhIG1v
+ZGlmaWVkIHZlcnNpb24gb2YgdGhlDQo+ID4gb25lIGRlc2NyaWJlZCBpbiB0
+aGUgMS4wIHNwZWNpZmljYXRpb24sIGFuZCBub3QgYSBub3JtYWwgMy4wIGNv
+bnRyb2xsZXIuDQo+ID4gVGhpcyBleHBsYWlucyB3aHkgdGhlIGluZGVwZW5k
+ZW50IGRldmVsb3BtZW50IG9mIHRoZSA4LWJpdCB3aWRlDQo+ID4gdHJhbnNm
+ZXIgYnVzIGRvZXMgbm90IHVzZSB0aGUgc2FtZSBiaXQgYXMgdGhlIHN0YW5k
+YXJkIG9uZS4NCj4gPg0KPiA+IEFzIGEgcmVzdWx0LCB0aGUgZGVzY3JpcHRp
+b24gb2YgdGhlIFNQRUNfVkVSIGZpZWxkIGluIHRoZQ0KPiA+IFNEX1NMT1Rf
+SU5UX1NUQVRVUyByZWdpc3RlciBpbmRpY2F0ZXMgYSByZWFkLW9ubHkgdmFs
+dWUgb2YgMCwgd2hpY2gNCj4gPiBjb3JyZXNwb25kcyB0byBTREhDSV9TUEVD
+XzEwMCBpbiB0aGUgInNkaGNpLmgiIGhlYWRlci4gT24gYSByZWFsDQo+ID4g
+U2lSRmF0bGFzVkkgY2hpcCwgdGhlIHZhbHVlIGlzIDAgYXMgd2VsbC4NCj4g
+Pg0KPiA+IEkgYmVsaWV2ZSB0aGUgY29ycmVjdCBjaGFuZ2Ugd291bGQgYmUg
+dG8gcmVtb3ZlIHRoZSBjb250cm9sIG9uIHRoZQ0KPiA+IHZlcnNpb24gPj0g
+U0RIQ0lfU1BFQ18zMDAgaW4gYm90aCA0LWJpdCBhbmQgOC1iaXQgY2FzZXMs
+IGluc3RlYWQgb2YNCj4gPiBhZGRpbmcgaXQgaW4gYm90aCBjYXNlcy4gVGhl
+cmUgYXJlIG5vIHN1cHBvcnRlZCBTaVJGIFNvQ3Mgd2hlcmUgdGhlDQo+ID4g
+OC1iaXQgYnVzIGlzIG5vdCBzdXBwb3J0ZWQgYXQgdGhlIGNvbnRyb2xsZXIg
+bGV2ZWwuDQo+ID4NCj4gPiBJbiBteSBvcGluaW9uLCB0aGlzIHNob3VsZCBs
+b29rIGxpa2UgdGhpczoNCj4gPg0KPiA+ICtzdGF0aWMgdm9pZCBzZGhjaV9z
+aXJmX3NldF9idXNfd2lkdGgoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIGlu
+dA0KPiA+ICt3aWR0aCkgew0KPiA+ICsgICAgICAgdTggY3RybDsNCj4gPiAr
+DQo+ID4gKyAgICAgICBjdHJsID0gc2RoY2lfcmVhZGIoaG9zdCwgU0RIQ0lf
+SE9TVF9DT05UUk9MKTsNCj4gPiArICAgICAgIC8qIFRoZSA4LWJpdCBidXMg
+d2lkdGggY29uZmlndXJhdGlvbiBiaXQgaXMgbm90IHN0YW5kYXJkICovDQo+
+ID4gKyAgICAgICBjdHJsICY9IH4oU0RIQ0lfQ1RSTF80QklUQlVTIHwgU0RI
+Q0lfU0lSRl84QklUQlVTKTsNCj4gPiArICAgICAgIGlmICh3aWR0aCA9PSBN
+TUNfQlVTX1dJRFRIXzgpIHsNCj4gPiArICAgICAgICAgICAgICAgY3RybCB8
+PSBTREhDSV9TSVJGXzhCSVRCVVM7DQo+ID4gKyAgICAgICB9IGVsc2UgaWYg
+KHdpZHRoID09IE1NQ19CVVNfV0lEVEhfNCkNCj4gPiArICAgICAgICAgICAg
+ICAgY3RybCB8PSBTREhDSV9DVFJMXzRCSVRCVVM7DQo+ID4gKyAgICAgICB9
+DQo+ID4gKyAgICAgICBzZGhjaV93cml0ZWIoaG9zdCwgY3RybCwgU0RIQ0lf
+SE9TVF9DT05UUk9MKTsgfQ0KPiA+ICsNCj4gDQo+IGhpIFJvbWFpbiwNCj4g
+dGhhbmtzIHZlcnkgbXVjaCEgTWluZGEgd2lsbCBkb3VibGUtY2hlY2sgdGhl
+IEhXIGJlaGF2aW91ciBhbmQgY29uZmlybQ0KPiB3aGF0IHlvdSBzYWlkLg0K
+DQpbQmFycnkgU29uZ10gDQpSb21haW4sDQoNCk1pbmRhJ3MgdmVyc2lvbiBp
+czoNCnN0YXRpYyB2b2lkIHNkaGNpX3NpcmZfc2V0X2J1c193aWR0aChzdHJ1
+Y3Qgc2RoY2lfaG9zdCAqaG9zdCwgaW50IHdpZHRoKQ0Kew0KCXU4IGN0cmw7
+DQoNCgljdHJsID0gc2RoY2lfcmVhZGIoaG9zdCwgU0RIQ0lfSE9TVF9DT05U
+Uk9MKTsNCgljdHJsICY9IH4oU0RIQ0lfQ1RSTF80QklUQlVTIHwgU0RIQ0lf
+U0lSRl84QklUQlVTKTsNCg0KCWlmICh3aWR0aCA9PSBNTUNfQlVTX1dJRFRI
+XzgpIHsNCgkJLyoNCgkJICogQ1NSIGF0bGFzNyBhbmQgcHJpbWEyIFNEIGhv
+c3QgdmVyc2lvbiBpcyBub3QgMy4wDQoJCSAqIDhiaXQtd2lkdGggZW5hYmxl
+IGJpdCBvZiBDU1IgU0QgaG9zdHMgaXMgMywNCgkJICogd2hpbGUgc3RhcmRh
+cmQgaG9zdHMgdXNlIGJpdCA1DQoJCSAqLw0KCQljdHJsIHw9IFNESENJX1NJ
+UkZfOEJJVEJVUzsNCgl9IGVsc2UgaWYgKHdpZHRoID09IE1NQ19CVVNfV0lE
+VEhfNCkNCgkJY3RybCB8PSBTREhDSV9DVFJMXzRCSVRCVVM7DQoNCglzZGhj
+aV93cml0ZWIoaG9zdCwgY3RybCwgU0RIQ0lfSE9TVF9DT05UUk9MKTsNCn0N
+Cg0KSXQgaXMgYmFzaWNhbGx5IHNhbWUgd2l0aCB5b3UuDQoNCj4gDQo+ID4N
+Cj4gPiBZb3UgY2FuIHVzZSBpdCB2ZXJiYXRpbSB3aXRoIG15IHNpZ25vZmYg
+aWYgeW91IHdhbnQuDQo+ID4gU2lnbmVkLW9mZi1ieTogUm9tYWluIEl6YXJk
+IDxyb21haW4uaXphcmQucHJvQGdtYWlsLmNvbT4NCg0KW0JhcnJ5IFNvbmdd
+IGRvIHlvdSBtZWFuIGEgUmV2aWV3ZWQtYnk/DQoNCi1iYXJyeQ0KDQoKCk1l
+bWJlciBvZiB0aGUgQ1NSIHBsYyBncm91cCBvZiBjb21wYW5pZXMuIENTUiBw
+bGMgcmVnaXN0ZXJlZCBpbiBFbmdsYW5kIGFuZCBXYWxlcywgcmVnaXN0ZXJl
+ZCBudW1iZXIgNDE4NzM0NiwgcmVnaXN0ZXJlZCBvZmZpY2UgQ2h1cmNoaWxs
+IEhvdXNlLCBDYW1icmlkZ2UgQnVzaW5lc3MgUGFyaywgQ293bGV5IFJvYWQs
+IENhbWJyaWRnZSwgQ0I0IDBXWiwgVW5pdGVkIEtpbmdkb20KTW9yZSBpbmZv
+cm1hdGlvbiBjYW4gYmUgZm91bmQgYXQgd3d3LmNzci5jb20uIEtlZXAgdXAg
+dG8gZGF0ZSB3aXRoIENTUiBvbiBvdXIgdGVjaG5pY2FsIGJsb2csIHd3dy5j
+c3IuY29tL2Jsb2csIENTUiBwZW9wbGUgYmxvZywgd3d3LmNzci5jb20vcGVv
+cGxlLCBZb3VUdWJlLCB3d3cueW91dHViZS5jb20vdXNlci9DU1JwbGMsIEZh
+Y2Vib29rLCB3d3cuZmFjZWJvb2suY29tL3BhZ2VzL0NTUi8xOTEwMzg0MzQy
+NTM1MzQsIG9yIGZvbGxvdyB1cyBvbiBUd2l0dGVyIGF0IHd3dy50d2l0dGVy
+LmNvbS9DU1JfcGxjLgpOZXcgZm9yIDIwMTQsIHlvdSBjYW4gbm93IGFjY2Vz
+cyB0aGUgd2lkZSByYW5nZSBvZiBwcm9kdWN0cyBwb3dlcmVkIGJ5IGFwdFgg
+YXQgd3d3LmFwdHguY29tLgo=
