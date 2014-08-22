@@ -1,7 +1,7 @@
 From: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
-Subject: [PATCH 05/10 v2 resend] mmc: tmio: add TMIO_MMC_SDIO_STATUS_QUIRK
-Date: Fri, 22 Aug 2014 01:40:08 -0700 (PDT)
-Message-ID: <87y4ug6hp5.wl%kuninori.morimoto.gx@gmail.com>
+Subject: [PATCH 06/10 v2 resend] mmc: tmio: check ILL_FUNC instead of CBSY
+Date: Fri, 22 Aug 2014 01:40:25 -0700 (PDT)
+Message-ID: <87wqa06hoo.wl%kuninori.morimoto.gx@gmail.com>
 References: <d3d6aa34548248768494ad88056cf4bd@SINPR06MB105.apcprd06.prod.outlook.com>
 	<87simtenpi.wl%kuninori.morimoto.gx@renesas.com>
 	<cb608c5e763f47b597936724ec05b615@SINPR06MB105.apcprd06.prod.outlook.com>
@@ -20,81 +20,58 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
 
-Renesas R-Car SDHI should set reserved bits
-on CTL_SDIO_STATUS register when writing.
-This patch adds new TMIO_MMC_SDIO_STATUS_QUIRK flags
-for this purpose
+Some controllers need to check SD bus status when writing data.
+Then, it checks ILL_FUNC bit on SD_INFO2 register,
+and this method is controlled via TMIO_MMC_HAS_IDLE_WAIT flags.
+Same method is required on tmio_mmc_data_irq() which will
+be called after writing data.
 
-[Kuninori Morimoto: tidyuped for upstreaming
-                    enabled this flags for all SH-Mobile/R-Car]
+Current driver is checking CBSY bit for this purpose,
+but, some controllers doesn't have CBSY bit.
+This patch checks ILL_FUNC bit instead of CBSY bit
+if it has TMIO_MMC_HAS_IDLE_WAIT flags
+
+[Kuninori Morimoto: tidyuped for upstreaming]
 
 Tested-by: Nguyen Xuan Nui <nx-nui@jinso.co.jp>
 Tested-by: Hiep Cao Minh <cm-hiep@jinso.co.jp>
 Signed-off-by: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
 Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c |    5 +++++
- drivers/mmc/host/tmio_mmc_pio.c   |    7 ++++++-
- include/linux/mfd/tmio.h          |    5 +++++
- 3 files changed, 16 insertions(+), 1 deletion(-)
+ drivers/mmc/host/tmio_mmc_pio.c |   13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 1d54b78..ad00fb8 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -230,6 +230,11 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	 */
- 	mmc_data->flags |= TMIO_MMC_HAVE_CMD12_CTRL;
- 
-+	/*
-+	 * All SDHI need SDIO_INFO1 reserved bit
-+	 */
-+	mmc_data->flags |= TMIO_MMC_SDIO_STATUS_QUIRK;
-+
- 	if (of_id && of_id->data) {
- 		const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
- 		mmc_data->flags |= of_data->tmio_flags;
 diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 1f1fdfb..e51a993 100644
+index e51a993..b19d0cd 100644
 --- a/drivers/mmc/host/tmio_mmc_pio.c
 +++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -650,6 +650,7 @@ irqreturn_t tmio_mmc_sdio_irq(int irq, void *devid)
- 	struct mmc_host *mmc = host->mmc;
- 	struct tmio_mmc_data *pdata = host->pdata;
- 	unsigned int ireg, status;
-+	unsigned int sdio_status;
+@@ -475,6 +475,9 @@ static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
+ 		goto out;
  
- 	if (!(pdata->flags & TMIO_MMC_SDIO_IRQ))
- 		return IRQ_HANDLED;
-@@ -657,7 +658,11 @@ irqreturn_t tmio_mmc_sdio_irq(int irq, void *devid)
- 	status = sd_ctrl_read16(host, CTL_SDIO_STATUS);
- 	ireg = status & TMIO_SDIO_MASK_ALL & ~host->sdcard_irq_mask;
- 
--	sd_ctrl_write16(host, CTL_SDIO_STATUS, status & ~TMIO_SDIO_MASK_ALL);
-+	sdio_status = status & ~TMIO_SDIO_MASK_ALL;
-+	if (pdata->flags & TMIO_MMC_SDIO_STATUS_QUIRK)
-+		sdio_status |= 6;
+ 	if (host->chan_tx && (data->flags & MMC_DATA_WRITE) && !host->force_pio) {
++		u32 status = sd_ctrl_read32(host, CTL_STATUS);
++		bool done = false;
 +
-+	sd_ctrl_write16(host, CTL_SDIO_STATUS, sdio_status);
- 
- 	if (mmc->caps & MMC_CAP_SDIO_IRQ && ireg & TMIO_SDIO_STAT_IOIRQ)
- 		mmc_signal_sdio_irq(mmc);
-diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-index 7432d95..a7493ae 100644
---- a/include/linux/mfd/tmio.h
-+++ b/include/linux/mfd/tmio.h
-@@ -89,6 +89,11 @@
-  */
- #define TMIO_MMC_HAVE_CMD12_CTRL	(1 << 7)
- 
-+/*
-+ * Some controllers needs to set 1 on SDIO status reserved bits
-+ */
-+#define TMIO_MMC_SDIO_STATUS_QUIRK	(1 << 8)
+ 		/*
+ 		 * Has all data been written out yet? Testing on SuperH showed,
+ 		 * that in most cases the first interrupt comes already with the
+@@ -483,7 +486,15 @@ static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
+ 		 * DATAEND interrupt with the BUSY bit set, in this cases
+ 		 * waiting for one more interrupt fixes the problem.
+ 		 */
+-		if (!(sd_ctrl_read32(host, CTL_STATUS) & TMIO_STAT_CMD_BUSY)) {
++		if (host->pdata->flags & TMIO_MMC_HAS_IDLE_WAIT) {
++			if (status & TMIO_STAT_ILL_FUNC)
++				done = true;
++		} else {
++			if (!(status & TMIO_STAT_CMD_BUSY))
++				done = true;
++		}
 +
- int tmio_core_mmc_enable(void __iomem *cnf, int shift, unsigned long base);
- int tmio_core_mmc_resume(void __iomem *cnf, int shift, unsigned long base);
- void tmio_core_mmc_pwr(void __iomem *cnf, int shift, int state);
++		if (done) {
+ 			tmio_mmc_disable_mmc_irqs(host, TMIO_STAT_DATAEND);
+ 			tasklet_schedule(&host->dma_complete);
+ 		}
 -- 
 1.7.9.5
 
