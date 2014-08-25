@@ -1,99 +1,110 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH V2 3/3] mmc: dw_mmc: Dont cut off vqmmc and vmmc
-Date: Mon, 25 Aug 2014 17:50:15 +0900
-Message-ID: <53FAF8C7.8040007@samsung.com>
-References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
- <1408715272-13833-4-git-send-email-yuvaraj.cd@samsung.com>
- <CAPDyKFqz8sGj2td=ihZXN4zvAqmu9FHZjWdCn-ZRcdHugNHe2g@mail.gmail.com>
- <CAPz6YkXH1mMOTwcLkKdffdUHN+TaCAhpa8oG0h+rFn9i+GMoCw@mail.gmail.com>
- <CAPDyKFqp7oEt9ASmdxrgUwbQ8aTZzAuJ7uD1oGN50iuzPzBfVg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 01/10 v2 resend] mmc: block: add block number limitation
+ flag for multiple block read
+Date: Mon, 25 Aug 2014 10:50:57 +0200
+Message-ID: <CAPDyKFqkstphRrj_0EFx52Snboaz8NryxXkFgY8Zb-CLeGhMZw@mail.gmail.com>
+References: <d3d6aa34548248768494ad88056cf4bd@SINPR06MB105.apcprd06.prod.outlook.com>
+	<87simtenpi.wl%kuninori.morimoto.gx@renesas.com>
+	<cb608c5e763f47b597936724ec05b615@SINPR06MB105.apcprd06.prod.outlook.com>
+	<87pphxe2q0.wl%kuninori.morimoto.gx@renesas.com>
+	<53AD638C.5060907@renesas.com>
+	<87egxehsec.wl%kuninori.morimoto.gx@gmail.com>
+	<8761hk7wgy.wl%kuninori.morimoto.gx@gmail.com>
+	<874mx47wf9.wl%kuninori.morimoto.gx@gmail.com>
+	<CAPDyKFqwDTBu53t6iiiA6REe3feBFWWmgd-V93RsOh5XFPpc4w@mail.gmail.com>
+	<87fvgltmnn.wl%kuninori.morimoto.gx@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:63144 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752240AbaHYIuS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Aug 2014 04:50:18 -0400
-In-reply-to: <CAPDyKFqp7oEt9ASmdxrgUwbQ8aTZzAuJ7uD1oGN50iuzPzBfVg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <87fvgltmnn.wl%kuninori.morimoto.gx@gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+Cc: Simon <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>, Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Sonny Rao <sonnyrao@chromium.org>
-Cc: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Doug Anderson <dianders@google.com>, Doug Anderson <dianders@chromium.org>, Chris Ball <cjb@laptop.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, cpgs@samsung.com
 
-On 08/25/2014 05:13 PM, Ulf Hansson wrote:
-> On 22 August 2014 20:27, Sonny Rao <sonnyrao@chromium.org> wrote:
->> On Fri, Aug 22, 2014 at 8:31 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> On 22 August 2014 15:47, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
->>>> Exynos 5250 and 5420 based boards uses built-in CD# line for card
->>>> detection.But unfortunately CD# line is on the same voltage rails
->>>> as of I/O voltage rails. When we cut off vqmmc,the consequent card
->>>> detection will break in these boards.
-
-I didn't know that use CD# line for card detect.
-And if CD# voltage rails and I/O voltage rail are same voltage, it doesn't make sense.
-Which card is used with same voltages? (eMMC? SD? SDIO?)
-
-Well, I have checked Exynos5250 and 5420, but it looks like not same rails.
-
->>>
->>> I am not sure I follow here.
->>>
->>> Is the card detect mechanism handled internally by the dw_mmc controller?
+On 25 August 2014 02:53, Kuninori Morimoto
+<kuninori.morimoto.gx@gmail.com> wrote:
+>
+> Hi Ulf
+>
+> Thank you for your feedback
+>
+>> > MMC_CAP2_NO_MULTI_READ flags disable all multiple block read,
+>> > but, it is over-kill for this issue.
+>> > This patch adds new MMC_CAP2_2BLKS_LIMIT to use single block read
+>> > when it was two blocks.
+>> > This is additional option of MMC_CAP2_NO_MULTI_READ
+>> >
+>> > [Kuninori Morimoto: tidyup for upstreaming, and cared mach-shmobile]
+>> >
+>> > Tested-by: Nguyen Xuan Nui <nx-nui@jinso.co.jp>
+>> > Tested-by: Hiep Cao Minh <cm-hiep@jinso.co.jp>
+>> > Signed-off-by: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
+>> > Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+>> > ---
+>> >  arch/arm/mach-shmobile/board-koelsch.c |    6 +++---
+>> >  arch/arm/mach-shmobile/board-lager.c   |    4 ++--
 >>
->> Yes
-
-What card detect mechanism?
-
-> 
-> Just out of curiosity.
-> 
-> Do you know how the power to the actual dw_mmc controller is handled?
-> I expect it to be SoC specific and I am guessing power domain
-> regulators may be involved!?
-> 
+>> I prefer to split up patches into ARM patches and MMC patches if it's possible.
+>> That makes it easier to review and collect acks from SoC maintainers.
+>
+> I see. will do
+>
+>> > @@ -331,7 +331,7 @@ SDHI_REGULATOR(2, RCAR_GP_PIN(7, 19), RCAR_GP_PIN(2, 26));
+>> >  static struct sh_mobile_sdhi_info sdhi0_info __initdata = {
+>> >         .tmio_caps      = MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+>> >                           MMC_CAP_POWER_OFF_CARD,
+>> > -       .tmio_caps2     = MMC_CAP2_NO_MULTI_READ,
+>> > +       .tmio_caps2     = MMC_CAP2_NO_2BLKS_READ,
 >>
->>>
->>> I thought HW engineers long time ago realized that this should be done
->>> separately on a GPIO line to be able to save power while waiting for a
->>> card to be inserted. But that's not case then?
+>> Why are MMC_CAP2_NO_MULTI_READ /MMC_CAP2_NO_2BLKS_READ configured from
+>> platform data. If this is HW bug, aren't that related to the actual
+>> mmc controller and version of it - not the board/platform?
+>
+> In historical reason, your idea can be implemented on DT case.
+> But above style is very normal for non-DT case in this driver...
+>
+>> This applies to more caps and boards further down below in this patch as well.
 >>
->> At least in my limited experience, this seems to be common among SoC
->> vendors who are using dw_mmc, as we've seen this elsewhere as well and
->> after seeing it here we know that we need to ignore the CD pin that's
->> routed to dw_mmc and use a separately powered GPIO on the board, but
->> still there are probably many SoCs/boards which are doing it this way.
+>> To me, it seems like these belongs into the host driver instead!?
+>
+> This issue is similar to MMC_CAP2_NO_MULTI_READ,
+> and it is located in block.c.
+> So, we added it there too.
+>
+> If you can't accept it, we will consider it again.
+> But is it possilbe to keep consistency if host side exchange block size
+> without using framework ??
+
+Nope, we need adaptations to the framework and I have no objections to that.
+
+>
+>> > @@ -1400,8 +1400,23 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>> >
+>> >                 /* Some controllers can't do multiblock reads due to hw bugs */
+>> >                 if (card->host->caps2 & MMC_CAP2_NO_MULTI_READ &&
+>> > -                   rq_data_dir(req) == READ)
+>> > -                       brq->data.blocks = 1;
+>> > +                   rq_data_dir(req) == READ) {
+>> > +
+>> > +                       if (card->host->caps2 & MMC_CAP2_2BLKS_LIMIT) {
 >>
->>>>
->>>> These hosts (obviously) need to keep vqmmc (and thus vmmc) on all the
->>>> time, even when the mmc core tells them to power off. However, one
->>>> problem is that these cards won't properly handle mmc_power_cycle().
->>>> That's needed to handle error cases when trying to switch voltages
->>>> (see 0797e5f mmc:core: Fixup signal voltage switch).
->>>>
->>>> This patch adds a new MMC_POWER_OFF_HARD mode when it's doing a power
->>>> cycle.  This mode differs from the normal MMC_POWER_OFF mode in that
->>>> the mmc core will promise to power the slot back on before it expects
->>>> the host to detect card insertion or removal.
+>> This conforms to what the commit message states, that
+>> MMC_CAP2_2BLKS_LIMIT needs to be used together with
+>> MMC_CAP2_NO_MULTI_READ to take effect. I think I would prefer to have
+>> them separate.
 >>
->> This patch is based off of one that Doug wrote (sent privately to
->> Yuvaraj) which just modifies the MMC core, and should be split into
->> two patches.
->> One that modifies the mmc core and one that implements this in dw_mmc.
-> 
-> I looked at the mmc core parts, it seems like the wrong approach.
-> 
-> I think you shall be able use MMC_CAP_NEEDS_POLL, to handle this
-> broken card detect mechanism. We even have a DT binding for that,
-> "broken-cd".
+>> Anyway, according to your cap configuration changes, you are replacing
+>> MMC_CAP2_NO_MULTI_READ with MMC_CAP2_2BLKS_LIMIT, instead of adding
+>> it...
+>
+> Because this method will check caps2 flag twice for
+> MMC_CAP2_2BLKS_LIMIT and MMC_CAP2_NO_MULTI_READ in such case.
+> But, these are similar flag, and is no effect for almost all drivers.
+> We avoided such checks.
 
-I agreed with Ulf's opinion.
+I see, but I don't think such "optimization" is worth much. To me it
+just adds a bit of confusion. I would prefer to have them separate.
 
-Best Regards,
-Jaehoon Chung
-
-> 
-> Kind regards
-> Uffe
-> 
-
+Kind regards
+Uffe
