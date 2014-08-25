@@ -1,92 +1,109 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: Re: [PATCH 07/14] clk: sunxi: Introduce mbus compatible
-Date: Mon, 25 Aug 2014 17:18:47 +0200
-Message-ID: <20140825151847.GD15297@lukather>
-References: <1405588134-2396-1-git-send-email-maxime.ripard@free-electrons.com>
- <1405588134-2396-8-git-send-email-maxime.ripard@free-electrons.com>
- <CAGb2v64xzwySFcnhAAmPFvUOWGechLZpoxfmb0OmEGOZbV+58Q@mail.gmail.com>
+From: Doug Anderson <dianders@google.com>
+Subject: Re: [PATCH V2 3/3] mmc: dw_mmc: Dont cut off vqmmc and vmmc
+Date: Mon, 25 Aug 2014 08:20:40 -0700
+Message-ID: <CAD=FV=VQWzhiSU+iULACj+Dp_tDf3SszQ8ELLEGqVEyJJRQy1Q@mail.gmail.com>
+References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
+	<1408715272-13833-4-git-send-email-yuvaraj.cd@samsung.com>
+	<CAPDyKFqz8sGj2td=ihZXN4zvAqmu9FHZjWdCn-ZRcdHugNHe2g@mail.gmail.com>
+	<CAPz6YkXH1mMOTwcLkKdffdUHN+TaCAhpa8oG0h+rFn9i+GMoCw@mail.gmail.com>
+	<CAPDyKFqp7oEt9ASmdxrgUwbQ8aTZzAuJ7uD1oGN50iuzPzBfVg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="IDa9Kr4PlLWO/T7L"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from top.free-electrons.com ([176.31.233.9]:37456 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754580AbaHYPUH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Aug 2014 11:20:07 -0400
-Content-Disposition: inline
-In-Reply-To: <CAGb2v64xzwySFcnhAAmPFvUOWGechLZpoxfmb0OmEGOZbV+58Q@mail.gmail.com>
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:49845 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754580AbaHYPUm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Aug 2014 11:20:42 -0400
+Received: by mail-vc0-f174.google.com with SMTP id la4so15427335vcb.33
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Aug 2014 08:20:41 -0700 (PDT)
+In-Reply-To: <CAPDyKFqp7oEt9ASmdxrgUwbQ8aTZzAuJ7uD1oGN50iuzPzBfVg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Mike Turquette <mturquette@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Emilio Lopez <emilio@elopez.com.ar>, Chris Ball <chris@printf.net>, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Sonny Rao <sonnyrao@chromium.org>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+
+Ulf,
+
+On Mon, Aug 25, 2014 at 1:13 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 22 August 2014 20:27, Sonny Rao <sonnyrao@chromium.org> wrote:
+>> On Fri, Aug 22, 2014 at 8:31 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>> On 22 August 2014 15:47, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
+>>>> Exynos 5250 and 5420 based boards uses built-in CD# line for card
+>>>> detection.But unfortunately CD# line is on the same voltage rails
+>>>> as of I/O voltage rails. When we cut off vqmmc,the consequent card
+>>>> detection will break in these boards.
+>>>
+>>> I am not sure I follow here.
+>>>
+>>> Is the card detect mechanism handled internally by the dw_mmc controller?
+>>
+>> Yes
+>
+> Just out of curiosity.
+>
+> Do you know how the power to the actual dw_mmc controller is handled?
+> I expect it to be SoC specific and I am guessing power domain
+> regulators may be involved!?
+
+You can likely read the dw_mmc registers when vqmmc is off.  Is that
+what you're asking?  Certainly if vqmmc is not powered then the lines
+themselves will be useless, won't they?  The "vqmmc" supply goes to
+the "VDDQ_MMC2" pin on 5420.  In my 5420 user manual, I see that
+"clk", "cmd", "cd", "datN", "wp" and "biuvr" pins are all in this same
+voltage (VDDQ_MMC2) domain.  Can you really read a pin without
+powering that part of the SoC?
 
 
---IDa9Kr4PlLWO/T7L
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+>>> I thought HW engineers long time ago realized that this should be done
+>>> separately on a GPIO line to be able to save power while waiting for a
+>>> card to be inserted. But that's not case then?
+>>
+>> At least in my limited experience, this seems to be common among SoC
+>> vendors who are using dw_mmc, as we've seen this elsewhere as well and
+>> after seeing it here we know that we need to ignore the CD pin that's
+>> routed to dw_mmc and use a separately powered GPIO on the board, but
+>> still there are probably many SoCs/boards which are doing it this way.
+>>
+>>>>
+>>>> These hosts (obviously) need to keep vqmmc (and thus vmmc) on all the
+>>>> time, even when the mmc core tells them to power off. However, one
+>>>> problem is that these cards won't properly handle mmc_power_cycle().
+>>>> That's needed to handle error cases when trying to switch voltages
+>>>> (see 0797e5f mmc:core: Fixup signal voltage switch).
+>>>>
+>>>> This patch adds a new MMC_POWER_OFF_HARD mode when it's doing a power
+>>>> cycle.  This mode differs from the normal MMC_POWER_OFF mode in that
+>>>> the mmc core will promise to power the slot back on before it expects
+>>>> the host to detect card insertion or removal.
+>>
+>> This patch is based off of one that Doug wrote (sent privately to
+>> Yuvaraj) which just modifies the MMC core, and should be split into
+>> two patches.
+>> One that modifies the mmc core and one that implements this in dw_mmc.
+>
+> I looked at the mmc core parts, it seems like the wrong approach.
+>
+> I think you shall be able use MMC_CAP_NEEDS_POLL, to handle this
+> broken card detect mechanism. We even have a DT binding for that,
+> "broken-cd".
 
-On Mon, Aug 25, 2014 at 10:17:37PM +0800, Chen-Yu Tsai wrote:
-> Hi,
->=20
-> On Thu, Jul 17, 2014 at 5:08 PM, Maxime Ripard
-> <maxime.ripard@free-electrons.com> wrote:
-> > Even though the mbus clock is a regular module clock, given its nature,=
- it
-> > needs to be enabled all the time.
-> >
-> > Introduce a new compatible, to differentiate it from the other module c=
-locks.
-> >
-> > Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
-> > ---
-> >  Documentation/devicetree/bindings/clock/sunxi.txt | 1 +
-> >  drivers/clk/sunxi/clk-sunxi.c                     | 1 +
-> >  2 files changed, 2 insertions(+)
-> >
-> > diff --git a/Documentation/devicetree/bindings/clock/sunxi.txt b/Docume=
-ntation/devicetree/bindings/clock/sunxi.txt
-> > index d3a5c3c6d677..112d8525b6e0 100644
-> > --- a/Documentation/devicetree/bindings/clock/sunxi.txt
-> > +++ b/Documentation/devicetree/bindings/clock/sunxi.txt
-> > @@ -46,6 +46,7 @@ Required properties:
-> >         "allwinner,sun6i-a31-apb2-div-clk" - for the APB2 gates on A31
-> >         "allwinner,sun6i-a31-apb2-gates-clk" - for the APB2 gates on A31
-> >         "allwinner,sun8i-a23-apb2-gates-clk" - for the APB2 gates on A23
-> > +       "allwinner,sun4i-a10-mbus-clk" - for the MBUS clock on A10
->=20
-> This should probably be sun5i-a13-mbus-clk?
-> AFAIK the A10 doesn't have MBUS.
+I don't think this is possible, but let me explain why I think so and
+you can correct me.
 
-Ah, right, thanks!
+The voltage domain of the "card detect" pin on the SoC is vqmmc,
+right?  That means that you won't be able to read the pin without
+turning on vqmmc.  Even if you could read the pin without turning on
+vqmmc, the pullup on this line is connected to vqmmc too.  ...so if
+vqmmc is off then there's no pulup and you can't use card detect.
 
-Maxime
+Are you suggesting that we should flip the voltage of vqmmc (and thus
+vmmc to prevent damaging the card) during polling?  That seems ugly.
 
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
 
---IDa9Kr4PlLWO/T7L
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+One other thing to mention: we didn't find any power savings by
+actually turning off vmmc and vqmmc when there was no card inserted.
+There's no current running through the lines when there is no card
+inserted and apparently everything is efficient enough that there was
+no problem.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJT+1PXAAoJEBx+YmzsjxAgJ7EQAI15/xQ2wCQScV67ZZP6W6N6
-zR2+MZy941REJbPjAkPg/C4a+Fwl0se99TPO/fMsTFJ3VDqe/YQu6800qlDt5ka1
-T4S/NS9JGNuJPLtZTL6durVyoTvR82HDJFN6GF8V3/9vHEzDXlzUX/TQk5PcHe64
-rFza7jPpw/dfib5GeHQSa31ReLX0RSEWaGrMX+CmCM83kBbYiTUrqvyNXMOd+/xo
-ClrcOXSAMRbCDOGD0Uof0J60TRxoQ9D3EOX90A/KslQWJyN8XFaqj/VeICjRJmmU
-e143T2yvKzeh0NEMZxW5ZAFF5X/0ESuGh3Lgi/vew37pw2aUqS66bvvojg4beEnj
-jfueCafENOykDIl7vBDsekXjKEEMvRt560rA1joFAlA+UbiysjXga5RW/nOpW+PU
-q4bGot6n7qLw4YirZ2rvlBNwEorpM7gpxKylfb7n607x44F8NnlbgsPrKC2PrXEX
-4iI1bSTbVJnezX1LAxaRkGz61qzOJPDsC8QxihZq8Gn4N8kGVzVK73nrHlGtCCsj
-OevlttLqyHoEHefcNXYiodfQ3P7iU3FSDdJhGv2RgdQFXaJFvoaMbWqYjohEnfFU
-RRUq9IsAo6tBd6nD2M429bKxTsNmjqNhF14ki0RKtuVFQgYV3TEg1X+RspIwY7HW
-ykV+BOL7ByZUjWSnwMvy
-=t0aE
------END PGP SIGNATURE-----
-
---IDa9Kr4PlLWO/T7L--
+-Doug
