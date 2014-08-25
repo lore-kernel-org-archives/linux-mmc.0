@@ -1,56 +1,39 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 07/12] mmc: tmio: Make runtime PM callbacks available for CONFIG_PM
-Date: Mon, 25 Aug 2014 14:25:59 +0200
-Message-ID: <1408969564-6335-8-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 09/12] mmc: tmio_mmc: Enable runtime PM support
+Date: Mon, 25 Aug 2014 14:26:01 +0200
+Message-ID: <1408969564-6335-10-git-send-email-ulf.hansson@linaro.org>
 References: <1408969564-6335-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f178.google.com ([74.125.82.178]:64388 "EHLO
-	mail-we0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932347AbaHYM0h (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Aug 2014 08:26:37 -0400
-Received: by mail-we0-f178.google.com with SMTP id w61so13290755wes.9
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Aug 2014 05:26:36 -0700 (PDT)
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1408969564-6335-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ian Molton <ian.molton@codethink.co.uk>, Chris Ball <chris@printf.net>
 Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Linux-sh list <linux-sh@vger.kernel.org>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
-To give the option for tmio hosts to use the runtime PM callbacks for
-CONFIG_PM_SLEEP as well as CONFIG_PM_RUNTIME, move them to CONFIG_PM.
+To take advantage of the clock gating support, use the runtime PM
+callbacks provided by the tmio core.
+
+Additionally, we make use of the SET_PM_RUNTIME_PM_OPS, which is a
+preparation needed to simplify system PM.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/tmio_mmc.h     | 2 +-
- drivers/mmc/host/tmio_mmc_pio.c | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/tmio_mmc.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index f1ee3e4..2ad52d6 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -149,7 +149,7 @@ int tmio_mmc_host_suspend(struct device *dev);
- int tmio_mmc_host_resume(struct device *dev);
- #endif
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index cfad844..58f50ef 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -135,6 +135,9 @@ static int tmio_mmc_remove(struct platform_device *pdev)
  
--#ifdef CONFIG_PM_RUNTIME
-+#ifdef CONFIG_PM
- int tmio_mmc_host_runtime_suspend(struct device *dev);
- int tmio_mmc_host_runtime_resume(struct device *dev);
- #endif
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index d52280d..494ecc5 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -1162,7 +1162,7 @@ int tmio_mmc_host_resume(struct device *dev)
- EXPORT_SYMBOL(tmio_mmc_host_resume);
- #endif
+ static const struct dev_pm_ops tmio_mmc_dev_pm_ops = {
+ 	SET_SYSTEM_SLEEP_PM_OPS(tmio_mmc_suspend, tmio_mmc_resume)
++	SET_PM_RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
++			tmio_mmc_host_runtime_resume,
++			NULL)
+ };
  
--#ifdef CONFIG_PM_RUNTIME
-+#ifdef CONFIG_PM
- int tmio_mmc_host_runtime_suspend(struct device *dev)
- {
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
+ static struct platform_driver tmio_mmc_driver = {
 -- 
 1.9.1
-
