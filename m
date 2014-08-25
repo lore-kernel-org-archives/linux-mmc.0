@@ -1,70 +1,81 @@
-From: Chen-Yu Tsai <wens@csie.org>
-Subject: Re: [PATCH 07/14] clk: sunxi: Introduce mbus compatible
-Date: Mon, 25 Aug 2014 22:17:37 +0800
-Message-ID: <CAGb2v64xzwySFcnhAAmPFvUOWGechLZpoxfmb0OmEGOZbV+58Q@mail.gmail.com>
-References: <1405588134-2396-1-git-send-email-maxime.ripard@free-electrons.com>
- <1405588134-2396-8-git-send-email-maxime.ripard@free-electrons.com>
+From: Doug Anderson <dianders@google.com>
+Subject: Re: [PATCH V2 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to
+ handle regulators
+Date: Mon, 25 Aug 2014 08:06:50 -0700
+Message-ID: <CAD=FV=U-izXxh2DcBs=ZmS5vhvByHYL9yX7xOsDq-0te=dmC8Q@mail.gmail.com>
+References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
+	<1408715272-13833-2-git-send-email-yuvaraj.cd@samsung.com>
+	<53FB2CC2.9070905@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f181.google.com ([209.85.223.181]:40825 "EHLO
-	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753785AbaHYOR6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Aug 2014 10:17:58 -0400
-In-Reply-To: <1405588134-2396-8-git-send-email-maxime.ripard@free-electrons.com>
+Received: from mail-vc0-f181.google.com ([209.85.220.181]:44602 "EHLO
+	mail-vc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755846AbaHYPGw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Aug 2014 11:06:52 -0400
+Received: by mail-vc0-f181.google.com with SMTP id lf12so15446659vcb.12
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Aug 2014 08:06:50 -0700 (PDT)
+In-Reply-To: <53FB2CC2.9070905@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: Mike Turquette <mturquette@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Emilio Lopez <emilio@elopez.com.ar>, Chris Ball <chris@printf.net>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Abhilash Kesavan <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, CPGS <cpgs@samsung.com>
 
-Hi,
+Jaehoon,
 
-On Thu, Jul 17, 2014 at 5:08 PM, Maxime Ripard
-<maxime.ripard@free-electrons.com> wrote:
-> Even though the mbus clock is a regular module clock, given its nature, it
-> needs to be enabled all the time.
+On Mon, Aug 25, 2014 at 5:32 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> On 08/22/2014 10:47 PM, Yuvaraj Kumar C D wrote:
+>> This patch makes use of mmc_regulator_get_supply() to handle
+>> the vmmc and vqmmc regulators.Also it moves the code handling
+>> the these regulators to dw_mci_set_ios().It turned on the vmmc
+>> and vqmmc during MMC_POWER_UP and MMC_POWER_ON,and turned off
+>> during MMC_POWER_OFF.
+>>
+>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+>> ---
+>> changes from v1:
+>>       1.Used mmc_regulator_set_ocr() instead of regulator_enable() for vmmc.
+>>       2.Turned on vmmc and vqmmc during MMC_POWER_UP.
+>>       3. Removed the flags DW_MMC_CARD_POWERED and DW_MMC_IO_POWERED which
+>>          added during the initial version of this patch.
+>>       4. Added error message, if it failed to turn on regulator's.
+>>
+>>  drivers/mmc/host/dw_mmc.c  |   72 +++++++++++++++++++++-----------------------
+>>  include/linux/mmc/dw_mmc.h |    2 +-
+>>  2 files changed, 36 insertions(+), 38 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 7f227e9..aadb0d6 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -936,6 +936,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>       struct dw_mci_slot *slot = mmc_priv(mmc);
+>>       const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+>>       u32 regs;
+>> +     int ret;
+>>
+>>       switch (ios->bus_width) {
+>>       case MMC_BUS_WIDTH_4:
+>> @@ -974,12 +975,38 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>
+>>       switch (ios->power_mode) {
+>>       case MMC_POWER_UP:
+>> +             if (!IS_ERR(mmc->supply.vmmc)) {
+>> +                     ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
+>> +                                     ios->vdd);
+>> +                     if (ret) {
+>> +                             dev_err(slot->host->dev,
+>> +                                     "failed to enable vmmc regulator\n");
+>> +                             /*return, if failed turn on vmmc*/
+>> +                             return;
+>> +                     }
+>> +             }
+>> +             if (!IS_ERR(mmc->supply.vqmmc) && !slot->host->vqmmc_enabled) {
 >
-> Introduce a new compatible, to differentiate it from the other module clocks.
->
-> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
-> ---
->  Documentation/devicetree/bindings/clock/sunxi.txt | 1 +
->  drivers/clk/sunxi/clk-sunxi.c                     | 1 +
->  2 files changed, 2 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/clock/sunxi.txt b/Documentation/devicetree/bindings/clock/sunxi.txt
-> index d3a5c3c6d677..112d8525b6e0 100644
-> --- a/Documentation/devicetree/bindings/clock/sunxi.txt
-> +++ b/Documentation/devicetree/bindings/clock/sunxi.txt
-> @@ -46,6 +46,7 @@ Required properties:
->         "allwinner,sun6i-a31-apb2-div-clk" - for the APB2 gates on A31
->         "allwinner,sun6i-a31-apb2-gates-clk" - for the APB2 gates on A31
->         "allwinner,sun8i-a23-apb2-gates-clk" - for the APB2 gates on A23
-> +       "allwinner,sun4i-a10-mbus-clk" - for the MBUS clock on A10
+> Can't use the regulator_is_enabled() instead of "slot->host->vqmmc_enabled"?
 
-This should probably be sun5i-a13-mbus-clk?
-AFAIK the A10 doesn't have MBUS.
+I think we mentioned this before, but regulator_is_enabled() won't do
+what you want with shared regulators since they are refcounted.  You
+need to keep track of whether you've enabled the regulator yourself.
 
->         "allwinner,sun4i-a10-mod0-clk" - for the module 0 family of clocks
->         "allwinner,sun7i-a20-out-clk" - for the external output clocks
->         "allwinner,sun7i-a20-gmac-clk" - for the GMAC clock module on A20/A31
-> diff --git a/drivers/clk/sunxi/clk-sunxi.c b/drivers/clk/sunxi/clk-sunxi.c
-> index 130e0d1ae510..bfb82bafbf9b 100644
-> --- a/drivers/clk/sunxi/clk-sunxi.c
-> +++ b/drivers/clk/sunxi/clk-sunxi.c
-> @@ -1110,6 +1110,7 @@ static const struct of_device_id clk_factors_match[] __initconst = {
->         {.compatible = "allwinner,sun7i-a20-pll4-clk", .data = &sun7i_a20_pll4_data,},
->         {.compatible = "allwinner,sun6i-a31-pll6-clk", .data = &sun6i_a31_pll6_data,},
->         {.compatible = "allwinner,sun4i-a10-apb1-clk", .data = &sun4i_apb1_data,},
-> +       {.compatible = "allwinner,sun4i-a10-mbus-clk", .data = &sun4i_mod0_data,},
->         {.compatible = "allwinner,sun4i-a10-mod0-clk", .data = &sun4i_mod0_data,},
->         {.compatible = "allwinner,sun7i-a20-out-clk", .data = &sun7i_a20_out_data,},
->         {}
-> --
-> 2.0.1
->
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+-Doug
