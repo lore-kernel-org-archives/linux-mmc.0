@@ -1,7 +1,7 @@
 From: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
-Subject: [PATCH 1/9 v3] mmc: tmio: care about DMA tx/rx addr offset
-Date: Sun, 24 Aug 2014 19:58:48 -0700 (PDT)
-Message-ID: <87a96ttguy.wl%kuninori.morimoto.gx@gmail.com>
+Subject: [PATCH 2/9 v3] mmc: tmio: clear error IRQ status
+Date: Sun, 24 Aug 2014 19:59:22 -0700 (PDT)
+Message-ID: <878umdtgu0.wl%kuninori.morimoto.gx@gmail.com>
 References: <d3d6aa34548248768494ad88056cf4bd@SINPR06MB105.apcprd06.prod.outlook.com>
 	<87simtenpi.wl%kuninori.morimoto.gx@renesas.com>
 	<cb608c5e763f47b597936724ec05b615@SINPR06MB105.apcprd06.prod.outlook.com>
@@ -18,84 +18,37 @@ To: Simon <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.ha
 Cc: Ian Molton <ian@mnementh.co.uk>, Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+From: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
 
-Basically, SD_BUF0 Tx/Rx addresses are same
-in normal TMIO controller,
-but, it is different on Renesas R-Car SDHI controller
-if it uses DMAC
-(Rx address needs to add 0x2000 to Tx address)
-
-This patch adds new .dma_rx_offset and cares it
+Next card access will be always
+error if it didn't clear error status
 
 Tested-by: Nguyen Xuan Nui <nx-nui@jinso.co.jp>
 Tested-by: Hiep Cao Minh <cm-hiep@jinso.co.jp>
-Acked-by: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-Acked-by: Ben Dooks <ben-linux@fluff.org>
+Signed-off-by: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
 Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 ---
 v2 -> v3
 
  - no change
 
- drivers/mmc/host/sh_mobile_sdhi.c |    3 +++
- drivers/mmc/host/tmio_mmc_dma.c   |    2 +-
- include/linux/mfd/tmio.h          |    1 +
- 3 files changed, 5 insertions(+), 1 deletion(-)
+ drivers/mmc/host/tmio_mmc_pio.c |    3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 91058da..1ccf49b 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -39,6 +39,7 @@ struct sh_mobile_sdhi_of_data {
- 	unsigned long tmio_flags;
- 	unsigned long capabilities;
- 	unsigned long capabilities2;
-+	dma_addr_t dma_rx_offset;
- };
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index faf0924..c3b1b4e 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -557,6 +557,9 @@ static void tmio_mmc_card_irq_status(struct tmio_mmc_host *host,
  
- static const struct sh_mobile_sdhi_of_data sh_mobile_sdhi_of_cfg[] = {
-@@ -56,6 +57,7 @@ static const struct sh_mobile_sdhi_of_data of_rcar_gen2_compatible = {
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE,
- 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
- 	.capabilities2	= MMC_CAP2_NO_MULTI_READ,
-+	.dma_rx_offset	= 0x2000,
- };
+ 	pr_debug_status(*status);
+ 	pr_debug_status(*ireg);
++
++	/* Clear the status except the interrupt status */
++	sd_ctrl_write32(host, CTL_STATUS, TMIO_MASK_IRQ);
+ }
  
- static const struct of_device_id sh_mobile_sdhi_of_match[] = {
-@@ -228,6 +230,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		mmc_data->flags |= of_data->tmio_flags;
- 		mmc_data->capabilities |= of_data->capabilities;
- 		mmc_data->capabilities2 |= of_data->capabilities2;
-+		dma_priv->dma_rx_offset = of_data->dma_rx_offset;
- 	}
- 
- 	/* SD control register space size is 0x100, 0x200 for bus_shift=1 */
-diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
-index eb8f1d5..bd646b0 100644
---- a/drivers/mmc/host/tmio_mmc_dma.c
-+++ b/drivers/mmc/host/tmio_mmc_dma.c
-@@ -312,7 +312,7 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
- 		if (pdata->dma->chan_priv_rx)
- 			cfg.slave_id = pdata->dma->slave_id_rx;
- 		cfg.direction = DMA_DEV_TO_MEM;
--		cfg.src_addr = cfg.dst_addr;
-+		cfg.src_addr = cfg.dst_addr + pdata->dma->dma_rx_offset;
- 		cfg.src_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES;
- 		cfg.dst_addr = 0;
- 		ret = dmaengine_slave_config(host->chan_rx, &cfg);
-diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-index 8f6f2e9..777e29b 100644
---- a/include/linux/mfd/tmio.h
-+++ b/include/linux/mfd/tmio.h
-@@ -96,6 +96,7 @@ struct tmio_mmc_dma {
- 	int slave_id_tx;
- 	int slave_id_rx;
- 	int alignment_shift;
-+	dma_addr_t dma_rx_offset;
- 	bool (*filter)(struct dma_chan *chan, void *arg);
- };
- 
+ static bool __tmio_mmc_card_detect_irq(struct tmio_mmc_host *host,
 -- 
 1.7.9.5
 
