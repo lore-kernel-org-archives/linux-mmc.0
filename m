@@ -1,7 +1,7 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 12/12] mmc: tmio: Remove library functions for system PM
-Date: Mon, 25 Aug 2014 14:26:04 +0200
-Message-ID: <1408969564-6335-13-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 08/12] mmc: sdhi: Make runtime PM callbacks available for CONFIG_PM
+Date: Mon, 25 Aug 2014 14:26:00 +0200
+Message-ID: <1408969564-6335-9-git-send-email-ulf.hansson@linaro.org>
 References: <1408969564-6335-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1408969564-6335-1-git-send-email-ulf.hansson@linaro.org>
@@ -10,63 +10,26 @@ To: linux-mmc@vger.kernel.org, Ian Molton <ian.molton@codethink.co.uk>, Chris Ba
 Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Linux-sh list <linux-sh@vger.kernel.org>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-These library functions aren't used and nor needed, let's remove them.
+To be able to simplify system PM, let's re-use the runtime PM callbacks
+by converting to the SET_PM_RUNTIME_PM_OPS macro.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/tmio_mmc.h     |  5 -----
- drivers/mmc/host/tmio_mmc_pio.c | 23 -----------------------
- 2 files changed, 28 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 2ad52d6..a34ecbe 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -144,11 +144,6 @@ static inline void tmio_mmc_abort_dma(struct tmio_mmc_host *host)
- }
- #endif
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index be5e25d..4cd0f09 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -333,7 +333,7 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
  
--#ifdef CONFIG_PM_SLEEP
--int tmio_mmc_host_suspend(struct device *dev);
--int tmio_mmc_host_resume(struct device *dev);
--#endif
--
- #ifdef CONFIG_PM
- int tmio_mmc_host_runtime_suspend(struct device *dev);
- int tmio_mmc_host_runtime_resume(struct device *dev);
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 494ecc5..a993208 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -1139,29 +1139,6 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
- }
- EXPORT_SYMBOL(tmio_mmc_host_remove);
- 
--#ifdef CONFIG_PM_SLEEP
--int tmio_mmc_host_suspend(struct device *dev)
--{
--	struct mmc_host *mmc = dev_get_drvdata(dev);
--	struct tmio_mmc_host *host = mmc_priv(mmc);
--
--	tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
--	return 0;
--}
--EXPORT_SYMBOL(tmio_mmc_host_suspend);
--
--int tmio_mmc_host_resume(struct device *dev)
--{
--	struct mmc_host *mmc = dev_get_drvdata(dev);
--	struct tmio_mmc_host *host = mmc_priv(mmc);
--
--	tmio_mmc_enable_dma(host, true);
--
--	return 0;
--}
--EXPORT_SYMBOL(tmio_mmc_host_resume);
--#endif
--
- #ifdef CONFIG_PM
- int tmio_mmc_host_runtime_suspend(struct device *dev)
- {
+ static const struct dev_pm_ops tmio_mmc_dev_pm_ops = {
+ 	SET_SYSTEM_SLEEP_PM_OPS(tmio_mmc_host_suspend, tmio_mmc_host_resume)
+-	SET_RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
++	SET_PM_RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
+ 			tmio_mmc_host_runtime_resume,
+ 			NULL)
+ };
 -- 
 1.9.1
