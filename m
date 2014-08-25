@@ -1,7 +1,7 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 10/12] mmc: sdhi: Fixup system PM suspend lock-up
-Date: Mon, 25 Aug 2014 14:26:02 +0200
-Message-ID: <1408969564-6335-11-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 01/12] mmc: tmio: Keep host active while SDIO IRQ is enabled
+Date: Mon, 25 Aug 2014 14:25:53 +0200
+Message-ID: <1408969564-6335-2-git-send-email-ulf.hansson@linaro.org>
 References: <1408969564-6335-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1408969564-6335-1-git-send-email-ulf.hansson@linaro.org>
@@ -10,36 +10,70 @@ To: linux-mmc@vger.kernel.org, Ian Molton <ian.molton@codethink.co.uk>, Chris Ba
 Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Linux-sh list <linux-sh@vger.kernel.org>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-At system PM suspend, the tmio core accessed the internal registers of
-the controller without first moving the device into active state. This
-caused a lock-up in system PM suspend phase.
+The host must be kept active to be able to serve SDIO IRQs, thus let's
+prevent it from going inactive while SDIO IRQ is enabled.
 
-The reason for the register access were masking of IRQs. Since that is
-managed via the runtime PM suspend path, let's just re-use that path
-for system PM suspend.
-
-In other words force the device into runtime PM suspend state at system
-PM suspend and restore it to active state at system PM resume.
-
-Reported-by: Geert Uytterhoeven <geert+renesas@glider.be>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/tmio_mmc.h     |  1 +
+ drivers/mmc/host/tmio_mmc_pio.c | 19 +++++++++++++++----
+ 2 files changed, 16 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 4cd0f09..2dafe28 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -332,7 +332,8 @@ static int sh_mobile_sdhi_remove(struct platform_device *pdev)
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 100ffe0..d6ceb1a 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -101,6 +101,7 @@ struct tmio_mmc_host {
+ 	struct mutex		ios_lock;	/* protect set_ios() context */
+ 	bool			native_hotplug;
+ 	bool			resuming;
++	bool			sdio_irq_enabled;
+ };
+ 
+ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index faf0924..5c2e5a3 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -129,15 +129,22 @@ static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ {
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
+ 
+-	if (enable) {
++	if (enable && !host->sdio_irq_enabled) {
++		/* Keep device active while SDIO irq is enabled */
++		pm_runtime_get_sync(mmc_dev(mmc));
++		host->sdio_irq_enabled = true;
++
+ 		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL &
+ 					~TMIO_SDIO_STAT_IOIRQ;
+ 		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
+ 		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
+-	} else {
++	} else if (!enable && host->sdio_irq_enabled) {
+ 		host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
+ 		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
+ 		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0000);
++
++		host->sdio_irq_enabled = false;
++		pm_runtime_put(mmc_dev(mmc));
+ 	}
  }
  
- static const struct dev_pm_ops tmio_mmc_dev_pm_ops = {
--	SET_SYSTEM_SLEEP_PM_OPS(tmio_mmc_host_suspend, tmio_mmc_host_resume)
-+	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-+			pm_runtime_force_resume)
- 	SET_PM_RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
- 			tmio_mmc_host_runtime_resume,
- 			NULL)
+@@ -1074,8 +1081,12 @@ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
+ 
+ 	_host->sdcard_irq_mask &= ~irq_mask;
+ 
+-	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
+-		tmio_mmc_enable_sdio_irq(mmc, 0);
++	_host->sdio_irq_enabled = false;
++	if (pdata->flags & TMIO_MMC_SDIO_IRQ) {
++		_host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
++		sd_ctrl_write16(_host, CTL_SDIO_IRQ_MASK, _host->sdio_irq_mask);
++		sd_ctrl_write16(_host, CTL_TRANSACTION_CTL, 0x0000);
++	}
+ 
+ 	spin_lock_init(&_host->lock);
+ 	mutex_init(&_host->ios_lock);
 -- 
 1.9.1
