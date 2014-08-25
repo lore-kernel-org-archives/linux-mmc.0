@@ -1,81 +1,92 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: [PATCH V2 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to
- handle regulators
-Date: Mon, 25 Aug 2014 08:06:50 -0700
-Message-ID: <CAD=FV=U-izXxh2DcBs=ZmS5vhvByHYL9yX7xOsDq-0te=dmC8Q@mail.gmail.com>
-References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
-	<1408715272-13833-2-git-send-email-yuvaraj.cd@samsung.com>
-	<53FB2CC2.9070905@samsung.com>
+From: Maxime Ripard <maxime.ripard@free-electrons.com>
+Subject: Re: [PATCH 07/14] clk: sunxi: Introduce mbus compatible
+Date: Mon, 25 Aug 2014 17:18:47 +0200
+Message-ID: <20140825151847.GD15297@lukather>
+References: <1405588134-2396-1-git-send-email-maxime.ripard@free-electrons.com>
+ <1405588134-2396-8-git-send-email-maxime.ripard@free-electrons.com>
+ <CAGb2v64xzwySFcnhAAmPFvUOWGechLZpoxfmb0OmEGOZbV+58Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="IDa9Kr4PlLWO/T7L"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f181.google.com ([209.85.220.181]:44602 "EHLO
-	mail-vc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755846AbaHYPGw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Aug 2014 11:06:52 -0400
-Received: by mail-vc0-f181.google.com with SMTP id lf12so15446659vcb.12
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Aug 2014 08:06:50 -0700 (PDT)
-In-Reply-To: <53FB2CC2.9070905@samsung.com>
+Received: from top.free-electrons.com ([176.31.233.9]:37456 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1754580AbaHYPUH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Aug 2014 11:20:07 -0400
+Content-Disposition: inline
+In-Reply-To: <CAGb2v64xzwySFcnhAAmPFvUOWGechLZpoxfmb0OmEGOZbV+58Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <cjb@laptop.org>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Abhilash Kesavan <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, CPGS <cpgs@samsung.com>
+To: Chen-Yu Tsai <wens@csie.org>
+Cc: Mike Turquette <mturquette@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Emilio Lopez <emilio@elopez.com.ar>, Chris Ball <chris@printf.net>, David =?iso-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 
-Jaehoon,
 
-On Mon, Aug 25, 2014 at 5:32 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> On 08/22/2014 10:47 PM, Yuvaraj Kumar C D wrote:
->> This patch makes use of mmc_regulator_get_supply() to handle
->> the vmmc and vqmmc regulators.Also it moves the code handling
->> the these regulators to dw_mci_set_ios().It turned on the vmmc
->> and vqmmc during MMC_POWER_UP and MMC_POWER_ON,and turned off
->> during MMC_POWER_OFF.
->>
->> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
->> ---
->> changes from v1:
->>       1.Used mmc_regulator_set_ocr() instead of regulator_enable() for vmmc.
->>       2.Turned on vmmc and vqmmc during MMC_POWER_UP.
->>       3. Removed the flags DW_MMC_CARD_POWERED and DW_MMC_IO_POWERED which
->>          added during the initial version of this patch.
->>       4. Added error message, if it failed to turn on regulator's.
->>
->>  drivers/mmc/host/dw_mmc.c  |   72 +++++++++++++++++++++-----------------------
->>  include/linux/mmc/dw_mmc.h |    2 +-
->>  2 files changed, 36 insertions(+), 38 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 7f227e9..aadb0d6 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -936,6 +936,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>       struct dw_mci_slot *slot = mmc_priv(mmc);
->>       const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
->>       u32 regs;
->> +     int ret;
->>
->>       switch (ios->bus_width) {
->>       case MMC_BUS_WIDTH_4:
->> @@ -974,12 +975,38 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>
->>       switch (ios->power_mode) {
->>       case MMC_POWER_UP:
->> +             if (!IS_ERR(mmc->supply.vmmc)) {
->> +                     ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
->> +                                     ios->vdd);
->> +                     if (ret) {
->> +                             dev_err(slot->host->dev,
->> +                                     "failed to enable vmmc regulator\n");
->> +                             /*return, if failed turn on vmmc*/
->> +                             return;
->> +                     }
->> +             }
->> +             if (!IS_ERR(mmc->supply.vqmmc) && !slot->host->vqmmc_enabled) {
->
-> Can't use the regulator_is_enabled() instead of "slot->host->vqmmc_enabled"?
+--IDa9Kr4PlLWO/T7L
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-I think we mentioned this before, but regulator_is_enabled() won't do
-what you want with shared regulators since they are refcounted.  You
-need to keep track of whether you've enabled the regulator yourself.
+On Mon, Aug 25, 2014 at 10:17:37PM +0800, Chen-Yu Tsai wrote:
+> Hi,
+>=20
+> On Thu, Jul 17, 2014 at 5:08 PM, Maxime Ripard
+> <maxime.ripard@free-electrons.com> wrote:
+> > Even though the mbus clock is a regular module clock, given its nature,=
+ it
+> > needs to be enabled all the time.
+> >
+> > Introduce a new compatible, to differentiate it from the other module c=
+locks.
+> >
+> > Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+> > ---
+> >  Documentation/devicetree/bindings/clock/sunxi.txt | 1 +
+> >  drivers/clk/sunxi/clk-sunxi.c                     | 1 +
+> >  2 files changed, 2 insertions(+)
+> >
+> > diff --git a/Documentation/devicetree/bindings/clock/sunxi.txt b/Docume=
+ntation/devicetree/bindings/clock/sunxi.txt
+> > index d3a5c3c6d677..112d8525b6e0 100644
+> > --- a/Documentation/devicetree/bindings/clock/sunxi.txt
+> > +++ b/Documentation/devicetree/bindings/clock/sunxi.txt
+> > @@ -46,6 +46,7 @@ Required properties:
+> >         "allwinner,sun6i-a31-apb2-div-clk" - for the APB2 gates on A31
+> >         "allwinner,sun6i-a31-apb2-gates-clk" - for the APB2 gates on A31
+> >         "allwinner,sun8i-a23-apb2-gates-clk" - for the APB2 gates on A23
+> > +       "allwinner,sun4i-a10-mbus-clk" - for the MBUS clock on A10
+>=20
+> This should probably be sun5i-a13-mbus-clk?
+> AFAIK the A10 doesn't have MBUS.
 
--Doug
+Ah, right, thanks!
+
+Maxime
+
+--=20
+Maxime Ripard, Free Electrons
+Embedded Linux, Kernel and Android engineering
+http://free-electrons.com
+
+--IDa9Kr4PlLWO/T7L
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJT+1PXAAoJEBx+YmzsjxAgJ7EQAI15/xQ2wCQScV67ZZP6W6N6
+zR2+MZy941REJbPjAkPg/C4a+Fwl0se99TPO/fMsTFJ3VDqe/YQu6800qlDt5ka1
+T4S/NS9JGNuJPLtZTL6durVyoTvR82HDJFN6GF8V3/9vHEzDXlzUX/TQk5PcHe64
+rFza7jPpw/dfib5GeHQSa31ReLX0RSEWaGrMX+CmCM83kBbYiTUrqvyNXMOd+/xo
+ClrcOXSAMRbCDOGD0Uof0J60TRxoQ9D3EOX90A/KslQWJyN8XFaqj/VeICjRJmmU
+e143T2yvKzeh0NEMZxW5ZAFF5X/0ESuGh3Lgi/vew37pw2aUqS66bvvojg4beEnj
+jfueCafENOykDIl7vBDsekXjKEEMvRt560rA1joFAlA+UbiysjXga5RW/nOpW+PU
+q4bGot6n7qLw4YirZ2rvlBNwEorpM7gpxKylfb7n607x44F8NnlbgsPrKC2PrXEX
+4iI1bSTbVJnezX1LAxaRkGz61qzOJPDsC8QxihZq8Gn4N8kGVzVK73nrHlGtCCsj
+OevlttLqyHoEHefcNXYiodfQ3P7iU3FSDdJhGv2RgdQFXaJFvoaMbWqYjohEnfFU
+RRUq9IsAo6tBd6nD2M429bKxTsNmjqNhF14ki0RKtuVFQgYV3TEg1X+RspIwY7HW
+ykV+BOL7ByZUjWSnwMvy
+=t0aE
+-----END PGP SIGNATURE-----
+
+--IDa9Kr4PlLWO/T7L--
