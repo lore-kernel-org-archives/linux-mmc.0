@@ -1,134 +1,49 @@
-From: Yunpeng Gao <yunpeng.gao@intel.com>
-Subject: [PATCH] mmc: sdhci-acpi: add probe_slot method for emmc/sd/sdio
-Date: Tue, 26 Aug 2014 20:00:55 +0800
-Message-ID: <1409054455-7782-1-git-send-email-yunpeng.gao@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:18601 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754717AbaHZL7c (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 26 Aug 2014 07:59:32 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 6/9] mmc: sdio: Convert to dev_pm_domain_attach|detach()
+Date: Tue, 26 Aug 2014 14:07:14 +0200
+Message-ID: <1409054837-5667-7-git-send-email-ulf.hansson@linaro.org>
+References: <1409054837-5667-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <1409054837-5667-1-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-pm-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pm@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, linux-acpi@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>, Kevin Hilman <khilman@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Daniel Lezcano <daniel.lezcano@linaro.org>, Tomasz Figa <tomasz.figa@gmail.com>, devicetree@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Ben Dooks <ben-linux@fluff.org>, Kukjin Kim <kgene.kim@samsung.com>, Stephen Boyd <sboyd@codeaurora.org>, Philipp Zabel <philipp.zabel@gmail.com>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Yunpeng Gao <yunpeng.gao@intel.com>, Chuanxiao Dong <chuanxiao.dong@intel.com>
 
-Similar to sdhci-pci controller, also add probe_slot
-and remove_slot method in the sdhci-acpi driver.
+Previously only the ACPI power domain was supported by the i2c bus.
 
-Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Let's convert to the common attach/detach functions for power domains,
+which currently means we are extending the support to include the
+generic power domain as well.
+
+Cc: linux-mmc@vger.kernel.org
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/sdhci-acpi.c |   58 +++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 58 insertions(+)
+ drivers/mmc/core/sdio_bus.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 8ce3c28..93dabf7 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -67,6 +67,8 @@ struct sdhci_acpi_slot {
- 	unsigned int	caps2;
- 	mmc_pm_flag_t	pm_caps;
- 	unsigned int	flags;
-+	int (*probe_slot) (struct platform_device *);
-+	int (*remove_slot) (struct platform_device *);
- };
- 
- struct sdhci_acpi_host {
-@@ -122,11 +124,57 @@ static const struct sdhci_acpi_chip sdhci_acpi_chip_int = {
- 	.ops = &sdhci_acpi_ops_int,
- };
- 
-+static int sdhci_acpi_emmc_probe_slot(struct platform_device *pdev)
-+{
-+	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
-+	struct sdhci_host *host;
-+
-+	if (!c || !c->host)
-+		return 0;
-+
-+	host = c->host;
-+
-+	/* Platform specific code during emmc proble slot goes here */
-+
-+	return 0;
-+}
-+
-+static int sdhci_acpi_sdio_probe_slot(struct platform_device *pdev)
-+{
-+	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
-+	struct sdhci_host *host;
-+
-+	if (!c || !c->host)
-+		return 0;
-+
-+	host = c->host;
-+
-+	/* Platform specific code during emmc proble slot goes here */
-+
-+	return 0;
-+}
-+
-+static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev)
-+{
-+	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
-+	struct sdhci_host *host;
-+
-+	if (!c || !c->host || !c->slot)
-+		return 0;
-+
-+	host = c->host;
-+
-+	/* Platform specific code during emmc proble slot goes here */
-+
-+	return 0;
-+}
-+
- static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
- 	.chip    = &sdhci_acpi_chip_int,
- 	.caps    = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE | MMC_CAP_HW_RESET,
- 	.caps2   = MMC_CAP2_HC_ERASE_SZ,
- 	.flags   = SDHCI_ACPI_RUNTIME_PM,
-+	.probe_slot	= sdhci_acpi_emmc_probe_slot,
- };
- 
- static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
-@@ -135,12 +183,14 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
- 	.caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD,
- 	.flags   = SDHCI_ACPI_RUNTIME_PM,
- 	.pm_caps = MMC_PM_KEEP_POWER,
-+	.probe_slot	= sdhci_acpi_sdio_probe_slot,
- };
- 
- static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sd = {
- 	.flags   = SDHCI_ACPI_SD_CD | SDHCI_ACPI_SD_CD_OVERRIDE_LEVEL |
- 		   SDHCI_ACPI_RUNTIME_PM,
- 	.quirks2 = SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON,
-+	.probe_slot	= sdhci_acpi_sd_probe_slot,
- };
- 
- struct sdhci_acpi_uid_slot {
-@@ -275,6 +325,11 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 4fa8fef9..1df0fc6 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -315,7 +315,7 @@ int sdio_add_func(struct sdio_func *func)
+ 	ret = device_add(&func->dev);
+ 	if (ret == 0) {
+ 		sdio_func_set_present(func);
+-		acpi_dev_pm_attach(&func->dev, false);
++		dev_pm_domain_attach(&func->dev, false);
  	}
  
- 	if (c->slot) {
-+		if (c->slot->probe_slot) {
-+			err = c->slot->probe_slot(pdev);
-+			if (err)
-+				goto err_free;
-+		}
- 		if (c->slot->chip) {
- 			host->ops            = c->slot->chip->ops;
- 			host->quirks        |= c->slot->chip->quirks;
-@@ -332,6 +387,9 @@ static int sdhci_acpi_remove(struct platform_device *pdev)
- 		pm_runtime_put_noidle(dev);
- 	}
+ 	return ret;
+@@ -332,7 +332,7 @@ void sdio_remove_func(struct sdio_func *func)
+ 	if (!sdio_func_present(func))
+ 		return;
  
-+	if (c->slot && c->slot->remove_slot)
-+		c->slot->remove_slot(pdev);
-+
- 	dead = (sdhci_readl(c->host, SDHCI_INT_STATUS) == ~0);
- 	sdhci_remove_host(c->host, dead);
- 	sdhci_free_host(c->host);
+-	acpi_dev_pm_detach(&func->dev, false);
++	dev_pm_domain_detach(&func->dev, false);
+ 	device_del(&func->dev);
+ 	put_device(&func->dev);
+ }
 -- 
-1.7.9.5
+1.9.1
 
