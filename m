@@ -1,88 +1,127 @@
-From: Barry Song <Barry.Song@csr.com>
-Subject: [PATCH v3] mmc: sdhci-sirf: fix 8bit width enable by overwriting set_bus_width
-Date: Tue, 26 Aug 2014 10:50:42 +0800
-Message-ID: <1409021442-4105-1-git-send-email-Barry.Song@csr.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V2 3/3] mmc: dw_mmc: Dont cut off vqmmc and vmmc
+Date: Tue, 26 Aug 2014 09:37:29 +0200
+Message-ID: <CAPDyKFo9-5=uPqD8RvLGsYtSCynBFnGGeSCpwLZuzDtW+652hA@mail.gmail.com>
+References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
+	<1408715272-13833-4-git-send-email-yuvaraj.cd@samsung.com>
+	<CAPDyKFqz8sGj2td=ihZXN4zvAqmu9FHZjWdCn-ZRcdHugNHe2g@mail.gmail.com>
+	<CAPz6YkXH1mMOTwcLkKdffdUHN+TaCAhpa8oG0h+rFn9i+GMoCw@mail.gmail.com>
+	<CAPDyKFqp7oEt9ASmdxrgUwbQ8aTZzAuJ7uD1oGN50iuzPzBfVg@mail.gmail.com>
+	<CAD=FV=VQWzhiSU+iULACj+Dp_tDf3SszQ8ELLEGqVEyJJRQy1Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cluster-d.mailcontrol.com ([85.115.60.190]:45772 "EHLO
-	cluster-d.mailcontrol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755217AbaHZCvA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Aug 2014 22:51:00 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=VQWzhiSU+iULACj+Dp_tDf3SszQ8ELLEGqVEyJJRQy1Q@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Doug Anderson <dianders@google.com>
+Cc: Sonny Rao <sonnyrao@chromium.org>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: romain.izard.pro@gmail.com, workgroup.linux@csr.com, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-From: Minda Chen <Minda.Chen@csr.com>
+On 25 August 2014 17:20, Doug Anderson <dianders@google.com> wrote:
+> Ulf,
+>
+> On Mon, Aug 25, 2014 at 1:13 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 22 August 2014 20:27, Sonny Rao <sonnyrao@chromium.org> wrote:
+>>> On Fri, Aug 22, 2014 at 8:31 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>> On 22 August 2014 15:47, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
+>>>>> Exynos 5250 and 5420 based boards uses built-in CD# line for card
+>>>>> detection.But unfortunately CD# line is on the same voltage rails
+>>>>> as of I/O voltage rails. When we cut off vqmmc,the consequent card
+>>>>> detection will break in these boards.
+>>>>
+>>>> I am not sure I follow here.
+>>>>
+>>>> Is the card detect mechanism handled internally by the dw_mmc controller?
+>>>
+>>> Yes
+>>
+>> Just out of curiosity.
+>>
+>> Do you know how the power to the actual dw_mmc controller is handled?
+>> I expect it to be SoC specific and I am guessing power domain
+>> regulators may be involved!?
+>
+> You can likely read the dw_mmc registers when vqmmc is off.  Is that
+> what you're asking?  Certainly if vqmmc is not powered then the lines
+> themselves will be useless, won't they?  The "vqmmc" supply goes to
+> the "VDDQ_MMC2" pin on 5420.  In my 5420 user manual, I see that
+> "clk", "cmd", "cd", "datN", "wp" and "biuvr" pins are all in this same
+> voltage (VDDQ_MMC2) domain.  Can you really read a pin without
+> powering that part of the SoC?
 
-the implementation of CSR SDHCI controller is a modified version of
-the one described in the 1.0 specification, and not a normal 3.0
-controller.
-and 8bit-width enable bit of CSR MMC hosts is 3, while stardard hosts
-use bit 5.
-this patch fixes the functionality of 8bit transfer in mmc controllers
-and improve performance for mmc0 a lot.
+Can you verify that you can't re-route these signals to GPIOs on your
+Exynos board, especially for wp and cd?
 
-Signed-off-by: Minda Chen <Minda.Chen@csr.com>
-Signed-off-by: Barry Song <Baohua.Song@csr.com>
-Reviewed-by: Romain Izard <romain.izard.pro@gmail.com>
----
- -v3:fix the HW version check according to Romain's feedback
+That would mean, you don't need the internal logic of the dw_mmc to
+get either card detect or write protect, which would solve your
+problem.
 
- drivers/mmc/host/sdhci-sirf.c | 24 +++++++++++++++++++++++-
- 1 file changed, 23 insertions(+), 1 deletion(-)
+>
+>
+>>>> I thought HW engineers long time ago realized that this should be done
+>>>> separately on a GPIO line to be able to save power while waiting for a
+>>>> card to be inserted. But that's not case then?
+>>>
+>>> At least in my limited experience, this seems to be common among SoC
+>>> vendors who are using dw_mmc, as we've seen this elsewhere as well and
+>>> after seeing it here we know that we need to ignore the CD pin that's
+>>> routed to dw_mmc and use a separately powered GPIO on the board, but
+>>> still there are probably many SoCs/boards which are doing it this way.
+>>>
+>>>>>
+>>>>> These hosts (obviously) need to keep vqmmc (and thus vmmc) on all the
+>>>>> time, even when the mmc core tells them to power off. However, one
+>>>>> problem is that these cards won't properly handle mmc_power_cycle().
+>>>>> That's needed to handle error cases when trying to switch voltages
+>>>>> (see 0797e5f mmc:core: Fixup signal voltage switch).
+>>>>>
+>>>>> This patch adds a new MMC_POWER_OFF_HARD mode when it's doing a power
+>>>>> cycle.  This mode differs from the normal MMC_POWER_OFF mode in that
+>>>>> the mmc core will promise to power the slot back on before it expects
+>>>>> the host to detect card insertion or removal.
+>>>
+>>> This patch is based off of one that Doug wrote (sent privately to
+>>> Yuvaraj) which just modifies the MMC core, and should be split into
+>>> two patches.
+>>> One that modifies the mmc core and one that implements this in dw_mmc.
+>>
+>> I looked at the mmc core parts, it seems like the wrong approach.
+>>
+>> I think you shall be able use MMC_CAP_NEEDS_POLL, to handle this
+>> broken card detect mechanism. We even have a DT binding for that,
+>> "broken-cd".
+>
+> I don't think this is possible, but let me explain why I think so and
+> you can correct me.
+>
+> The voltage domain of the "card detect" pin on the SoC is vqmmc,
+> right?  That means that you won't be able to read the pin without
+> turning on vqmmc.  Even if you could read the pin without turning on
+> vqmmc, the pullup on this line is connected to vqmmc too.  ...so if
+> vqmmc is off then there's no pulup and you can't use card detect.
+>
+> Are you suggesting that we should flip the voltage of vqmmc (and thus
+> vmmc to prevent damaging the card) during polling?  That seems ugly.
 
-diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
-index 1700453..d7b02e5 100644
---- a/drivers/mmc/host/sdhci-sirf.c
-+++ b/drivers/mmc/host/sdhci-sirf.c
-@@ -15,6 +15,8 @@
- #include <linux/mmc/slot-gpio.h>
- #include "sdhci-pltfm.h"
- 
-+#define SDHCI_SIRF_8BITBUS BIT(3)
-+
- struct sdhci_sirf_priv {
- 	struct clk *clk;
- 	int gpio_cd;
-@@ -27,10 +29,30 @@ static unsigned int sdhci_sirf_get_max_clk(struct sdhci_host *host)
- 	return clk_get_rate(priv->clk);
- }
- 
-+static void sdhci_sirf_set_bus_width(struct sdhci_host *host, int width)
-+{
-+	u8 ctrl;
-+
-+	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+	ctrl &= ~(SDHCI_CTRL_4BITBUS | SDHCI_SIRF_8BITBUS);
-+
-+	/*
-+	 * CSR atlas7 and prima2 SD host version is not 3.0
-+	 * 8bit-width enable bit of CSR SD hosts is 3,
-+	 * while stardard hosts use bit 5
-+	 */
-+	if (width == MMC_BUS_WIDTH_8)
-+		ctrl |= SDHCI_SIRF_8BITBUS;
-+	else if (width == MMC_BUS_WIDTH_4)
-+		ctrl |= SDHCI_CTRL_4BITBUS;
-+
-+	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+}
-+
- static struct sdhci_ops sdhci_sirf_ops = {
- 	.set_clock = sdhci_set_clock,
- 	.get_max_clock	= sdhci_sirf_get_max_clk,
--	.set_bus_width = sdhci_set_bus_width,
-+	.set_bus_width = sdhci_sirf_set_bus_width,
- 	.reset = sdhci_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- };
--- 
-2.1.0
+I am not sure I follow to understand the problem. All I am saying is:
+>From your ->set_ios() when you get MMC_POWER_UP, enable vcc and vccq.
+>From your ->set_ios() when you get MMC_POWER_OFF, disable vccq and vcc.
 
+The rest is taken care of from mmc core, when trying to initialize the card.
 
+>
+>
+> One other thing to mention: we didn't find any power savings by
+> actually turning off vmmc and vqmmc when there was no card inserted.
+> There's no current running through the lines when there is no card
+> inserted and apparently everything is efficient enough that there was
+> no problem.
 
-Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
-More information can be found at www.csr.com. Keep up to date with CSR on our technical blog, www.csr.com/blog, CSR people blog, www.csr.com/people, YouTube, www.youtube.com/user/CSRplc, Facebook, www.facebook.com/pages/CSR/191038434253534, or follow us on Twitter at www.twitter.com/CSR_plc.
-New for 2014, you can now access the wide range of products powered by aptX at www.aptx.com.
+On what level of current leakage did you measure?
+
+In an system PM suspend state we are chasing uA; I find it hard that
+no leakage is added when the power is enabled. Anyway, let's leave
+that as a separate discussion. :-)
+
+Kind regards
+Uffe
