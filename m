@@ -1,76 +1,87 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH V3 1/6] mmc: sdhci: add platfrom get_max_timeout_count hook
-Date: Wed, 27 Aug 2014 15:26:27 +0800
-Message-ID: <1409124392-28899-2-git-send-email-b29396@freescale.com>
+Subject: [PATCH V3 3/6] mmc: sdhci: add platform set_timeout hook
+Date: Wed, 27 Aug 2014 15:26:29 +0800
+Message-ID: <1409124392-28899-4-git-send-email-b29396@freescale.com>
 References: <1409124392-28899-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1blp0187.outbound.protection.outlook.com ([207.46.163.187]:22937
+Received: from mail-bn1blp0186.outbound.protection.outlook.com ([207.46.163.186]:19113
 	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751187AbaH0Hpr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 27 Aug 2014 03:45:47 -0400
+	id S1752562AbaH0Hpv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 27 Aug 2014 03:45:51 -0400
 In-Reply-To: <1409124392-28899-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, chris@printf.net, shawn.guo@linaro.org, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
 
-Currently the max timeout count is hardcode to 1 << 27 for calcuate
-the max_busy_timeout, however, for some platforms the max timeout
-count may not be 1 << 27, e.g. i.MX uSDHC is 1 << 28.
-Thus 1 << 27 is not correct for such platform.
+Currently the common code assume 0xE is the maximum timeout counter
+value and use it to write into the timeout counter register.
+However, it's fairly possible that some other SoCs may have different
+max timeout register value. That means 0xE may be incorrect and
+becomes meaningless.
 
-It is also possible that other platforms may have different values.
-To be flexible, we add a get_max_timeout_count hook to get the correct
-maximum timeout value for these platforms.
+It's also possible that other platforms has different timeout
+calculation algorithm. To be flexible, this patch provides a .set_timeout
+hook for those platforms to set the timeout on their way if they need.
 
 Reviewed-by: Shawn Guo <shawn.guo@linaro.org>
 Signed-off-by: Dong Aisheng <b29396@freescale.com>
 ---
- drivers/mmc/host/sdhci.c |   11 ++++++++---
- drivers/mmc/host/sdhci.h |    1 +
- 2 files changed, 9 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci.c |   19 ++++++++++++++-----
+ drivers/mmc/host/sdhci.h |    2 ++
+ 2 files changed, 16 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 4cc2ff9..d633f288 100644
+index d633f288..881a7a0 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1196,8 +1196,11 @@ clock_set:
- 		host->mmc->actual_clock = (host->max_clk * clk_mul) / real_div;
- 		if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK) {
- 			host->timeout_clk = host->mmc->actual_clock / 1000;
--			host->mmc->max_busy_timeout =
--				(1 << 27) / host->timeout_clk;
-+			mmc->max_busy_timeout =
-+					host->ops->get_max_timeout_count ?
-+					host->ops->get_max_timeout_count(host) :
-+					1 << 27;
-+			mmc->max_busy_timeout /= host->timeout_clk;
- 		}
- 	}
+@@ -707,19 +707,28 @@ static void sdhci_set_transfer_irqs(struct sdhci_host *host)
+ 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+ }
  
-@@ -2937,7 +2940,9 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
- 		host->timeout_clk = mmc->f_max / 1000;
+-static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
++static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ {
+ 	u8 count;
++
++	if (host->ops->set_timeout) {
++		host->ops->set_timeout(host, cmd);
++	} else {
++		count = sdhci_calc_timeout(host, cmd);
++		sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
++	}
++}
++
++static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
++{
+ 	u8 ctrl;
+ 	struct mmc_data *data = cmd->data;
+ 	int ret;
  
--	mmc->max_busy_timeout = (1 << 27) / host->timeout_clk;
-+	mmc->max_busy_timeout = host->ops->get_max_timeout_count ?
-+			host->ops->get_max_timeout_count(host) : 1 << 27;
-+	mmc->max_busy_timeout /= host->timeout_clk;
+ 	WARN_ON(host->data);
  
- 	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
- 	mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
+-	if (data || (cmd->flags & MMC_RSP_BUSY)) {
+-		count = sdhci_calc_timeout(host, cmd);
+-		sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
+-	}
++	if (data || (cmd->flags & MMC_RSP_BUSY))
++		sdhci_set_timeout(host, cmd);
+ 
+ 	if (!data)
+ 		return;
 diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 4a5cd5e..b130509 100644
+index b130509..9828ff8 100644
 --- a/drivers/mmc/host/sdhci.h
 +++ b/drivers/mmc/host/sdhci.h
-@@ -281,6 +281,7 @@ struct sdhci_ops {
- 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+@@ -282,6 +282,8 @@ struct sdhci_ops {
  	unsigned int	(*get_min_clock)(struct sdhci_host *host);
  	unsigned int	(*get_timeout_clock)(struct sdhci_host *host);
-+	unsigned int	(*get_max_timeout_count)(struct sdhci_host *host);
+ 	unsigned int	(*get_max_timeout_count)(struct sdhci_host *host);
++	void		(*set_timeout)(struct sdhci_host *host,
++				       struct mmc_command *cmd);
  	void		(*set_bus_width)(struct sdhci_host *host, int width);
  	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
  					     u8 power_mode);
