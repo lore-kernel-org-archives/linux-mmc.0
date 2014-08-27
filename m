@@ -1,60 +1,80 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH V3 2/6] mmc: sdhci-esdhc-imx: fix incorrect max timeout cout for uSDHC
-Date: Wed, 27 Aug 2014 15:26:28 +0800
-Message-ID: <1409124392-28899-3-git-send-email-b29396@freescale.com>
+Subject: [PATCH V3 5/6] mmc: sdhci: calculate timeout_clk conditionally in sdhci_add_host
+Date: Wed, 27 Aug 2014 15:26:31 +0800
+Message-ID: <1409124392-28899-6-git-send-email-b29396@freescale.com>
 References: <1409124392-28899-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1blp0182.outbound.protection.outlook.com ([207.46.163.182]:23012
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+Received: from mail-by2lp0243.outbound.protection.outlook.com ([207.46.163.243]:57248
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751187AbaH0Hps (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 27 Aug 2014 03:45:48 -0400
+	id S1754008AbaH0HqF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 27 Aug 2014 03:46:05 -0400
 In-Reply-To: <1409124392-28899-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, chris@printf.net, shawn.guo@linaro.org, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
 
-The default sdhci code use the 1 << 27 as the max timeout counter to
-to calculate the max_busy_timeout, however it's not correct for uSDHC
-since its the max counter is 1 << 28.
-Implement esdhc_get_max_timeout_cout to handle it correctly.
+The timeout_clk calculation code in sdhci_add_host is meaningless for
+SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK.
+So only execute them with no SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK set.
 
-Reviewed-by: Shawn Guo <shawn.guo@linaro.org>
 Signed-off-by: Dong Aisheng <b29396@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |    9 +++++++++
- 1 files changed, 9 insertions(+), 0 deletions(-)
+ drivers/mmc/host/sdhci.c |   34 +++++++++++++++++-----------------
+ 1 files changed, 17 insertions(+), 17 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 46677f0..546ed02 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -880,6 +880,14 @@ static void esdhc_reset(struct sdhci_host *host, u8 mask)
- 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
- }
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 881a7a0..0253eb1 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2931,27 +2931,27 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	} else
+ 		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
  
-+static unsigned int esdhc_get_max_timeout_count(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+
-+	return esdhc_is_usdhc(imx_data) ? 1 << 28 : 1 << 27;
-+}
-+
- static struct sdhci_ops sdhci_esdhc_ops = {
- 	.read_l = esdhc_readl_le,
- 	.read_w = esdhc_readw_le,
-@@ -889,6 +897,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
- 	.set_clock = esdhc_pltfm_set_clock,
- 	.get_max_clock = esdhc_pltfm_get_max_clock,
- 	.get_min_clock = esdhc_pltfm_get_min_clock,
-+	.get_max_timeout_count = esdhc_get_max_timeout_count,
- 	.get_ro = esdhc_pltfm_get_ro,
- 	.set_bus_width = esdhc_pltfm_set_bus_width,
- 	.set_uhs_signaling = esdhc_set_uhs_signaling,
+-	host->timeout_clk =
+-		(caps[0] & SDHCI_TIMEOUT_CLK_MASK) >> SDHCI_TIMEOUT_CLK_SHIFT;
+-	if (host->timeout_clk == 0) {
+-		if (host->ops->get_timeout_clock) {
+-			host->timeout_clk = host->ops->get_timeout_clock(host);
+-		} else if (!(host->quirks &
+-				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
+-			pr_err("%s: Hardware doesn't specify timeout clock "
+-			       "frequency.\n", mmc_hostname(mmc));
+-			return -ENODEV;
++	if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
++		host->timeout_clk = (caps[0] & SDHCI_TIMEOUT_CLK_MASK) >>
++					SDHCI_TIMEOUT_CLK_SHIFT;
++		if (host->timeout_clk == 0) {
++			if (host->ops->get_timeout_clock) {
++				host->timeout_clk =
++					host->ops->get_timeout_clock(host);
++			} else {
++				pr_err("%s: Hardware doesn't specify timeout clock frequency.\n",
++					mmc_hostname(mmc));
++				return -ENODEV;
++			}
+ 		}
+-	}
+-	if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT)
+-		host->timeout_clk *= 1000;
+ 
+-	if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)
+-		host->timeout_clk = mmc->f_max / 1000;
++		if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT)
++			host->timeout_clk *= 1000;
+ 
+-	mmc->max_busy_timeout = host->ops->get_max_timeout_count ?
++		mmc->max_busy_timeout = host->ops->get_max_timeout_count ?
+ 			host->ops->get_max_timeout_count(host) : 1 << 27;
+-	mmc->max_busy_timeout /= host->timeout_clk;
++		mmc->max_busy_timeout /= host->timeout_clk;
++	}
+ 
+ 	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
+ 	mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
 -- 
 1.7.8
 
