@@ -1,74 +1,84 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Pass back errors from mmc_of_parse()
-Date: Wed, 27 Aug 2014 13:13:11 +0900
-Message-ID: <53FD5AD7.1010402@samsung.com>
-References: <1408990744-1093-1-git-send-email-dianders@chromium.org>
+From: Doug Anderson <dianders@google.com>
+Subject: Re: [PATCH V2 3/3] mmc: dw_mmc: Dont cut off vqmmc and vmmc
+Date: Tue, 26 Aug 2014 21:14:11 -0700
+Message-ID: <CAD=FV=VCw1mLpArSY1uj+1zorWROjqGeT3dcTJYzr_1J6jdsBQ@mail.gmail.com>
+References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
+	<1408715272-13833-4-git-send-email-yuvaraj.cd@samsung.com>
+	<CAPDyKFqz8sGj2td=ihZXN4zvAqmu9FHZjWdCn-ZRcdHugNHe2g@mail.gmail.com>
+	<CAPz6YkXH1mMOTwcLkKdffdUHN+TaCAhpa8oG0h+rFn9i+GMoCw@mail.gmail.com>
+	<CAPDyKFqp7oEt9ASmdxrgUwbQ8aTZzAuJ7uD1oGN50iuzPzBfVg@mail.gmail.com>
+	<53FAF8C7.8040007@samsung.com>
+	<CAD=FV=XbV7R+FqRRucA5Cv2A+=3g8zccASwxcTtJD6YyO-ioCg@mail.gmail.com>
+	<53FD5501.1010007@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:17355 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932097AbaH0ENO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Aug 2014 00:13:14 -0400
-In-reply-to: <1408990744-1093-1-git-send-email-dianders@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <53FD5501.1010007@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Sonny Rao <sonnyrao@chromium.org>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <cjb@laptop.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, "cpgs ." <cpgs@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Addy Ke <addy.ke@rock-chips.com>, olof@lixom.net, Sonny Rao <sonnyrao@chromium.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <cjb@laptop.org>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Looks good to me.
+Jaehoon,
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+On Tue, Aug 26, 2014 at 8:48 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi, Doug,
+>
+> On 08/26/2014 12:25 AM, Doug Anderson wrote:
+>> Jaehoon,
+>>
+>> On Mon, Aug 25, 2014 at 1:50 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>>> On 08/25/2014 05:13 PM, Ulf Hansson wrote:
+>>>> On 22 August 2014 20:27, Sonny Rao <sonnyrao@chromium.org> wrote:
+>>>>> On Fri, Aug 22, 2014 at 8:31 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>>> On 22 August 2014 15:47, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
+>>>>>>> Exynos 5250 and 5420 based boards uses built-in CD# line for card
+>>>>>>> detection.But unfortunately CD# line is on the same voltage rails
+>>>>>>> as of I/O voltage rails. When we cut off vqmmc,the consequent card
+>>>>>>> detection will break in these boards.
+>>>
+>>> I didn't know that use CD# line for card detect.
+>>> And if CD# voltage rails and I/O voltage rail are same voltage, it doesn't make sense.
+>>> Which card is used with same voltages? (eMMC? SD? SDIO?)
+>>>
+>>> Well, I have checked Exynos5250 and 5420, but it looks like not same rails.
+>>
+>> I'm not sure I totally understood what you said.  In my manual I have
+>> a table titled "Table 2-1 Exynos 5420 Pin List".  Look in this table
+>> for XMMC2CDN and XMMC2DATA_0.  Look to the right of the table and
+>> you'll see the power domain.  For both it shows VDDQ_MMC2.  If that
+>> doesn't mean that the two are in the same voltage domain then I don't
+>> know what does.  Can you point to any examples where they have
+>> different voltage domains?
+> I think you're mis-understanding for it.
+> Right, It's described at exynos5420, but it's not connected.
 
-Best Regards,
-Jaehoon Chung
+"It's not connected".  What do you mean?  If I were to guess I'd say
+that on some particular board you're looking at they don't happen to
+use the "CD" pin for card detect.  If this is what you mean, it
+doesn't help me.  exynos5420-peach-pit does use the CD pin for card
+detect.  You can look at the DTS file and confirm it.
 
-On 08/26/2014 03:19 AM, Doug Anderson wrote:
-> It's possible that mmc_of_parse() could return errors (possibly in
-> some future version it might return -EPROBE_DEFER even).  Let's pass
-> those errors back.
-> 
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> ---
->  drivers/mmc/host/dw_mmc.c | 10 ++++++----
->  1 file changed, 6 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 7f227e9..9ef4df0 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2131,7 +2131,9 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->  	if (host->pdata->caps2)
->  		mmc->caps2 = host->pdata->caps2;
->  
-> -	mmc_of_parse(mmc);
-> +	ret = mmc_of_parse(mmc);
-> +	if (ret)
-> +		goto err_host_allocated;
->  
->  	if (host->pdata->blk_settings) {
->  		mmc->max_segs = host->pdata->blk_settings->max_segs;
-> @@ -2163,7 +2165,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->  
->  	ret = mmc_add_host(mmc);
->  	if (ret)
-> -		goto err_setup_bus;
-> +		goto err_host_allocated;
->  
->  #if defined(CONFIG_DEBUG_FS)
->  	dw_mci_init_debugfs(slot);
-> @@ -2174,9 +2176,9 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->  
->  	return 0;
->  
-> -err_setup_bus:
-> +err_host_allocated:
->  	mmc_free_host(mmc);
-> -	return -EINVAL;
-> +	return ret;
->  }
->  
->  static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
-> 
+...or are you saying that the CD pin somehow changes voltage domains
+when configured as a GPIO?  I find that very hard to believe.  What
+voltage domain does it go to?  If it goes to a 1.8V voltage domain
+then that would be bad when vqmmc was 3.3V.  If it goes to a 3.3V
+voltage domain then that would be bad when vqmmc was 1.8V.  Remember
+that externally we've got a pull up to vqmmc.
 
+Even if somehow magically we can read the card detect pin with vqmmc
+off, we have an external pullup on this line that goes directly to the
+"vqmmc" power rail.  If the vqmmc power rail is off then this external
+pull up would not work and would actually act as an external pull down
+if you could somehow configure the internal line to be a pullup.
+
+
+> Exynos4 series are also described, but we used the broken card detection scheme and power used one of "always-on" powers.
+> Because Card-detection rail need to enable as "always-on".
+>
+> We don't need to consider this. I checked the circuit, this patch didn't need.
+>
+> exynos5 also used the gpio-pin for card-detection. And we can use the slot-gpio API.
+
+When you say "exynos5", what do you mean here?  Do you mean the smdk
+for 5250, or something else?
