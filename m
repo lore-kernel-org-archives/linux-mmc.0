@@ -1,61 +1,71 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 00/12] mmc: tmio: Fixup PM support
-Date: Wed, 27 Aug 2014 14:59:57 +0200
-Message-ID: <CAPDyKFr3b6zKAdGrUDM_aMOymLsAag=UvUVX2V4jLYOt_rzKAg@mail.gmail.com>
-References: <1408969564-6335-1-git-send-email-ulf.hansson@linaro.org>
-	<CAMuHMdWwhLuPp_-4Mhnk4tb_azCeLU7bYEgBUf4zR5bMmd6RHQ@mail.gmail.com>
+Subject: Re: [PATCH 0/9 v3] mmc: tmio: fixup patches
+Date: Wed, 27 Aug 2014 15:11:15 +0200
+Message-ID: <CAPDyKFrzr_tjLFqZ1nQg63Zfr0xRAf71HWAmge6DcMzTkwCLiQ@mail.gmail.com>
+References: <d3d6aa34548248768494ad88056cf4bd@SINPR06MB105.apcprd06.prod.outlook.com>
+	<87simtenpi.wl%kuninori.morimoto.gx@renesas.com>
+	<cb608c5e763f47b597936724ec05b615@SINPR06MB105.apcprd06.prod.outlook.com>
+	<87pphxe2q0.wl%kuninori.morimoto.gx@renesas.com>
+	<53AD638C.5060907@renesas.com>
+	<87egxehsec.wl%kuninori.morimoto.gx@gmail.com>
+	<87bnr9tgwj.wl%kuninori.morimoto.gx@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <CAMuHMdWwhLuPp_-4Mhnk4tb_azCeLU7bYEgBUf4zR5bMmd6RHQ@mail.gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Ian Molton <ian.molton@codethink.co.uk>, Chris Ball <chris@printf.net>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f176.google.com ([209.85.217.176]:37579 "EHLO
+	mail-lb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933467AbaH0NLQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Aug 2014 09:11:16 -0400
+Received: by mail-lb0-f176.google.com with SMTP id c11so287554lbj.21
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Aug 2014 06:11:15 -0700 (PDT)
+In-Reply-To: <87bnr9tgwj.wl%kuninori.morimoto.gx@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+Cc: Simon <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>, Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 26 August 2014 09:46, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> Hi Ulf,
+On 25 August 2014 04:57, Kuninori Morimoto
+<kuninori.morimoto.gx@gmail.com> wrote:
 >
-> On Mon, Aug 25, 2014 at 2:25 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> This patchset fixup the PM support for tmio and the tmio hosts.
->> Some re-structuring of the code was also necessary to accomplish the above.
->>
->> A few of these patches has been posted earlier, but at that time I couldn't get
->> help in testing them on hardware. Let's give this a second try now.
->>
->> http://www.spinics.net/lists/linux-mmc/msg23177.html
->>
->> Ulf Hansson (12):
->>   mmc: tmio: Keep host active while SDIO IRQ is enabled
->>   mmc: tmio: Keep host active while serving requests
->>   mmc: tmio: Extract bus_width modifications to a separate function
->>   mmc: tmio: Restructure ->set_ios() and adapt ->probe() to it
->>   mmc: tmio: Handle clock gating from runtime PM functions
->>   mmc: tmio: Mask all IRQs when inactive
->>   mmc: tmio: Make runtime PM callbacks available for CONFIG_PM
->>   mmc: sdhi: Make runtime PM callbacks available for CONFIG_PM
->>   mmc: tmio_mmc: Enable runtime PM support
->>   mmc: sdhi: Fixup system PM suspend lock-up
->>   mmc: tmio_mmc: Fixup system PM suspend lock-up
->>   mmc: tmio: Remove library functions for system PM
+> Hi Chris, Ulf, Simon
 >
-> I gave this series a test run on r8a7791/Koelsch, everything seems to
-> work fine.
-> Even more important, s2ram was fixed by "mmc: sdhi: Fixup system PM
-> suspend lock-up".
->
-> For the whole series:
-> Acked-by: Geert Uytterhoeven <geert+renesas@glider.be>
->
-> Thanks!
->
-> Gr{oetje,eeting}s,
->
->                         Geert
+> These are v3 fixup patches for mmc tmio/shmobile.
+> I dropped [1/10] patch (which Ulf was pointed) from v2 patch-set.
+> We will post it again in the future,
+> but we want last 9 patches in upstream at this point.
 
-Geert, thanks helping out testing etc.
+Thanks Kuninori and Shinobu!
 
-I have applied this series with your ack/tested by tag.
+I have applied all patches but "mmc: tmio: ensure that the clock has
+been stopped before set_clock".
+
+Since I decided to apply my own tmio patchset prior this series, the
+above patch needs to be re-based, if needed at all. Could you please
+have a look and send and possibly send a new version.
 
 Kind regards
 Uffe
+
+>
+> Kuninori Morimoto (4):
+>       mmc: tmio: care about DMA tx/rx addr offset
+>       mmc: tmio: remove Renesas specific #ifdef
+>       mmc: tmio: remove SCLKEN bit setting from tmio_mmc_set_clock()
+>       mmc: tmio: ensure that the clock has been stopped before set_clock
+>
+> Shinobu Uehara (5):
+>       mmc: tmio: clear error IRQ status
+>       mmc: tmio: control multiple block transfer mode
+>       mmc: tmio: add TMIO_MMC_SDIO_STATUS_QUIRK
+>       mmc: tmio: check ILL_FUNC instead of CBSY
+>       mmc: tmio: add actual clock support as option
+>
+>  drivers/mmc/host/sh_mobile_sdhi.c |   24 ++++++++++++++++++++--
+>  drivers/mmc/host/tmio_mmc_dma.c   |    8 +++-----
+>  drivers/mmc/host/tmio_mmc_pio.c   |   40 ++++++++++++++++++++++++++++++++++---
+>  include/linux/mfd/tmio.h          |   22 ++++++++++++++++++++
+>  4 files changed, 84 insertions(+), 10 deletions(-)
+>
+> Best regards
+> ---
+> Kuninori Morimoto
