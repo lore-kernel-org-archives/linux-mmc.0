@@ -1,182 +1,246 @@
-From: Yuvaraj Kumar <yuvaraj.cd@gmail.com>
-Subject: Re: [PATCH V2 3/3] mmc: dw_mmc: Dont cut off vqmmc and vmmc
-Date: Thu, 28 Aug 2014 10:24:35 +0530
-Message-ID: <CAKuRcOJGSY77W8_KCvj2dc48DgTZQzzo7yhFZ4e6ukkgqLK+Qw@mail.gmail.com>
-References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
-	<1408715272-13833-4-git-send-email-yuvaraj.cd@samsung.com>
-	<CAPDyKFqz8sGj2td=ihZXN4zvAqmu9FHZjWdCn-ZRcdHugNHe2g@mail.gmail.com>
-	<CAPz6YkXH1mMOTwcLkKdffdUHN+TaCAhpa8oG0h+rFn9i+GMoCw@mail.gmail.com>
-	<CAPDyKFqp7oEt9ASmdxrgUwbQ8aTZzAuJ7uD1oGN50iuzPzBfVg@mail.gmail.com>
-	<53FAF8C7.8040007@samsung.com>
-	<CAD=FV=XbV7R+FqRRucA5Cv2A+=3g8zccASwxcTtJD6YyO-ioCg@mail.gmail.com>
-	<53FD5501.1010007@samsung.com>
-	<CAD=FV=VCw1mLpArSY1uj+1zorWROjqGeT3dcTJYzr_1J6jdsBQ@mail.gmail.com>
-	<53FD62C6.8010100@samsung.com>
-	<CAD=FV=X+BsvTth4J3oqLJ=pMw_NB-GoYnaqJgyOSr9foLreLvQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: FW: [PATCH] mmc: core: sd: check card write-protect lock while resuming
+Date: Thu, 28 Aug 2014 08:25:52 +0200
+Message-ID: <CAPDyKFq1wLcnufSpqGYnqZ9XoFk2ozvJnjyhX=sHD-PEyT7agA@mail.gmail.com>
+References: <1408356012-18867-1-git-send-email-Barry.Song@csr.com>
+	<CAPDyKFpFLoREZ=rYp8bQvJ7Fczq=HyLL90jv7Hjzai9xTNBNYg@mail.gmail.com>
+	<5EB3BFCD089AD643B9BB63439F5FD5E9012C98252C@SHAASIEXM01.ASIA.ROOT.PRI>
+	<CAPDyKFp4vV_n5KEGSkdjfDMtbvhFzrdU0oB6N6WpmS9Ant8EOw@mail.gmail.com>
+	<7960C73727803F45B9F4D2B2441DA8AC0CE80220@SHAASIEXM01.ASIA.ROOT.PRI>
+	<CAGOPJ8trAePgNK3DtNjrGf5y7rKp-j9L7k2ivn8qwoGTKuMANQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=X+BsvTth4J3oqLJ=pMw_NB-GoYnaqJgyOSr9foLreLvQ@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Doug Anderson <dianders@google.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Sonny Rao <sonnyrao@chromium.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <cjb@laptop.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, "cpgs ." <cpgs@samsung.com>
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f171.google.com ([209.85.217.171]:49181 "EHLO
+	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751235AbaH1GZy convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Aug 2014 02:25:54 -0400
+Received: by mail-lb0-f171.google.com with SMTP id n15so339765lbi.2
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Aug 2014 23:25:52 -0700 (PDT)
+In-Reply-To: <CAGOPJ8trAePgNK3DtNjrGf5y7rKp-j9L7k2ivn8qwoGTKuMANQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: minda chen <mdchen8791@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, workgroup.linux@csr.com
 
-On Wed, Aug 27, 2014 at 9:19 PM, Doug Anderson <dianders@google.com> wrote:
-> Jaehoon,
->
-> On Tue, Aug 26, 2014 at 9:47 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Doug,
+On 28 August 2014 04:02, minda chen <mdchen8791@gmail.com> wrote:
+> 2014-08-26 13:01 GMT+08:00 Minda Chen <Minda.Chen@csr.com>:
 >>
->> On 08/27/2014 01:14 PM, Doug Anderson wrote:
->>> Jaehoon,
->>>
->>> On Tue, Aug 26, 2014 at 8:48 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>>> Hi, Doug,
+>>
+>> -----Original Message-----
+>> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+>> Sent: Friday, August 22, 2014 6:00 PM
+>> To: Barry Song
+>> Cc: Chris Ball; linux-mmc; linux-arm-kernel@lists.infradead.org; Minda Chen; DL-SHA-WorkGroupLinux
+>> Subject: Re: [PATCH] mmc: core: sd: check card write-protect lock while resuming
+>>
+>> On 22 August 2014 08:55, Barry Song <Barry.Song@csr.com> wrote:
+>>>> -----Original Message-----
+>>>> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+>>>> Sent: Monday, August 18, 2014 7:58 PM
+>>>> To: Barry Song
+>>>> Cc: Chris Ball; linux-mmc; linux-arm-kernel@lists.infradead.org;
+>>>> DL-SHA- WorkGroupLinux; Minda Chen; Barry Song
+>>>> Subject: Re: [PATCH] mmc: core: sd: check card write-protect lock
+>>>> while resuming
 >>>>
->>>> On 08/26/2014 12:25 AM, Doug Anderson wrote:
->>>>> Jaehoon,
->>>>>
->>>>> On Mon, Aug 25, 2014 at 1:50 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>>>>> On 08/25/2014 05:13 PM, Ulf Hansson wrote:
->>>>>>> On 22 August 2014 20:27, Sonny Rao <sonnyrao@chromium.org> wrote:
->>>>>>>> On Fri, Aug 22, 2014 at 8:31 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>>>>>>>> On 22 August 2014 15:47, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
->>>>>>>>>> Exynos 5250 and 5420 based boards uses built-in CD# line for card
->>>>>>>>>> detection.But unfortunately CD# line is on the same voltage rails
->>>>>>>>>> as of I/O voltage rails. When we cut off vqmmc,the consequent card
->>>>>>>>>> detection will break in these boards.
->>>>>>
->>>>>> I didn't know that use CD# line for card detect.
->>>>>> And if CD# voltage rails and I/O voltage rail are same voltage, it doesn't make sense.
->>>>>> Which card is used with same voltages? (eMMC? SD? SDIO?)
->>>>>>
->>>>>> Well, I have checked Exynos5250 and 5420, but it looks like not same rails.
->>>>>
->>>>> I'm not sure I totally understood what you said.  In my manual I have
->>>>> a table titled "Table 2-1 Exynos 5420 Pin List".  Look in this table
->>>>> for XMMC2CDN and XMMC2DATA_0.  Look to the right of the table and
->>>>> you'll see the power domain.  For both it shows VDDQ_MMC2.  If that
->>>>> doesn't mean that the two are in the same voltage domain then I don't
->>>>> know what does.  Can you point to any examples where they have
->>>>> different voltage domains?
->>>> I think you're mis-understanding for it.
->>>> Right, It's described at exynos5420, but it's not connected.
+>>>> On 18 August 2014 12:00, Barry Song <Barry.Song@csr.com> wrote:
+>>>> > From: Minda Chen <Minda.Chen@csr.com>
+>>>> >
+>>>> > After suspending, unplug the sdcard, and set sd WP lock, insert it
+>>>> > again, then resume the system. resume codes do not check the the
+>>>> > sdcard write-proctect lock. now check it.
+>>>> >
+>>>> > Signed-off-by: Minda Chen <Minda.Chen@csr.com>
+>>>> > Signed-off-by: Barry Song <Baohua.Song@csr.com>
+>>>> > ---
+>>>> >  drivers/mmc/core/sd.c | 7 +++++++
+>>>> >  1 file changed, 7 insertions(+)
+>>>> >
+>>>> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
+>>>> > 0c44510..890557a 100644
+>>>> > --- a/drivers/mmc/core/sd.c
+>>>> > +++ b/drivers/mmc/core/sd.c
+>>>> > @@ -910,6 +910,7 @@ static int mmc_sd_init_card(struct mmc_host
+>>>> *host, u32 ocr,
+>>>> >         int err;
+>>>> >         u32 cid[4];
+>>>> >         u32 rocr = 0;
+>>>> > +       bool oldro, ro;
+>>>> >
+>>>> >         BUG_ON(!host);
+>>>> >         WARN_ON(!host->claimed);
+>>>> > @@ -922,6 +923,12 @@ static int mmc_sd_init_card(struct mmc_host
+>>>> *host, u32 ocr,
+>>>> >                 if (memcmp(cid, oldcard->raw_cid, sizeof(cid)) != 0)
+>>>> >                         return -ENOENT;
+>>>> >
+>>>> > +               if (host->ops->get_ro) {
+>>>> > +                       ro = host->ops->get_ro(host) ? true : false;
+>>>> > +                       oldro = mmc_card_readonly(oldcard) ? true : false;
+>>>> > +                       if (oldro ^ ro)
+>>>> > +                               return -ENOENT;
+>>>> > +               }
+>>>>
+>>>> Seems like this code belongs better in mmc_sd_setup_card(). Could you
+>>>> try moving it there.
+>>> [Barry Song]
+>>> Well. How about:
 >>>
->>> "It's not connected".  What do you mean?  If I were to guess I'd say
->>> that on some particular board you're looking at they don't happen to
->>> use the "CD" pin for card detect.  If this is what you mean, it
->>> doesn't help me.  exynos5420-peach-pit does use the CD pin for card
->>> detect.  You can look at the DTS file and confirm it.
+>>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
+>>> 0c44510..643bc82d8 100644
+>>> --- a/drivers/mmc/core/sd.c
+>>> +++ b/drivers/mmc/core/sd.c
+>>> @@ -815,6 +815,7 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
+>>>         bool reinit)
+>>>  {
+>>>         int err;
+>>> +       int oldro, ro = -1;
+>>>
+>>>         if (!reinit) {
+>>>                 /*
+>>> @@ -861,23 +862,28 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
+>>>         /*
+>>>          * Check if read-only switch is active.
+>>>          */
+>>> -       if (!reinit) {
+>>> -               int ro = -1;
+>>>
+>>> -               if (host->ops->get_ro) {
+>>> -                       mmc_host_clk_hold(card->host);
+>>> -                       ro = host->ops->get_ro(host);
+>>> -                       mmc_host_clk_release(card->host);
+>>> -               }
+>>> +       if (host->ops->get_ro) {
+>>> +               mmc_host_clk_hold(card->host);
+>>> +               ro = host->ops->get_ro(host);
+>>> +               mmc_host_clk_release(card->host);
+>>> +       }
+>>>
+>>> -               if (ro < 0) {
+>>> -                       pr_warning("%s: host does not "
+>>> -                               "support reading read-only "
+>>> -                               "switch. assuming write-enable.\n",
+>>> -                               mmc_hostname(host));
+>>> -               } else if (ro > 0) {
+>>> -                       mmc_card_set_readonly(card);
+>>> -               }
+>>> +       if (ro < 0)
+>>> +               pr_warning("%s: host does not "
+>>> +                       "support reading read-only "
+>>> +                       "switch. assuming write-enable.\n",
+>>> +                       mmc_hostname(host));
 >>
->> I didn't know how exynos5420-peach-pit's circuit is configured.
->> But i guess that almost all exynos5 boards are configured with the similar circuit.
+>> I don't wont this pr_warning to spam the log each resume.
+>> I suppose we could print it only for !reinit, right?
 >>
->> At Almost all Exynos5 board, CD-pin is used, but not included in Same power domain.
->> (CD-pin is external card-detect pin. - like XEINT_# pin)
->> You mentioned CD# and DATA# lines is used the same power domain, right?
->> In Circuit (not exynos5420-peach-pit), DATA# line and CMD/CLK(vqmmc) is same power supply, and vdd is used other power supply.
->> Not use the CD# pin, used the XEINT_# pin.
->> So i think we don't need to consider the CD#.
->> If exynos5420-peach-pit board is used the CD#-pin, then our discussion can be changed.
+> ok
+>>> +
+>>> +       if (!reinit && (ro > 0))
+>>> +               mmc_card_set_readonly(card);
+>>> +       else if (reinit && (ro >= 0)) {
+>>> +               /* check if the write-protection lock is changed */
+>>> +               oldro = mmc_card_readonly(card) ? 1 : 0;
+>>> +               ro = (ro > 0) ? 1 : 0;
+>>> +
+>>> +               if (oldro ^ ro)
+>>> +                       return -ENOENT;
+>>
+>> This will have the effect of quickly returning an error to the mmc bus' ->suspend callback. That path are not able remove the card device, which I guess is what you would like to happen, right?
+>>
+>> I am not completely sure, but I believe the card will still be operational after resuming. Moreover it will be using the initialization frequency and 1-bit bus width and thus performing poorly. This is definitely not what we want.
+>>
+>> How did you test this patch? Can you confirm my theory above?
+> Sorry, I didn't check it carefully.
 >
-> Maybe on your board you have CD connected to a "gpx" line.  ...but not
-> mine.  The guys who designed our hardware followed the SMDK5420
-> reference schematics which connect the SD card slot card detect to
-> "gpc2_2", which is the card detect pin.
+>>
+>> The card may only be removed from the mmc_rescan work, scheduled at PM_POST_SUSPEND phase. What I think you should do here, is to also set the card state into MMC_CARD_REMOVED, by invoking mmc_card_set_removed(). Thus the SD's bus_ops->detect callback will remove the card during this phase.
+>>
+>> Kind regards
+>> Uffe
+>>
+>>  To report this email as spam click https://www.mailcontrol.com/sr/MZbqvYs5QwJvpeaetUwhCQ== .
+>>
+>>
+>> Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
+>> More information can be found at www.csr.com. Keep up to date with CSR on our technical blog, www.csr.com/blog, CSR people blog, www.csr.com/people, YouTube, www.youtube.com/user/CSRplc, Facebook, www.facebook.com/pages/CSR/191038434253534, or follow us on Twitter at www.twitter.com/CSR_plc.
+>> New for 2014, you can now access the wide range of products powered by aptX at www.aptx.com.
 >
-> See "arch/arm/boot/dts/exynos5420-smdk5420.dts", specifically noting
-> the lack of a GPIO card detect and the inclusion of "sd2_cd"
+> I have a suggestion.
 >
-> mmc@12220000 {
->   status = "okay";
->   card-detect-delay = <200>;
->   samsung,dw-mshc-ciu-div = <3>;
->   samsung,dw-mshc-sdr-timing = <2 3>;
->   samsung,dw-mshc-ddr-timing = <1 2>;
->   pinctrl-names = "default";
->   pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
->   bus-width = <4>;
->   cap-sd-highspeed;
-> };
->
-> See "arch/arm/boot/dts/exynos5420-peach-pit.dts" too:
->
-> &mmc_2 {
->   status = "okay";
->   num-slots = <1>;
->   cap-sd-highspeed;
->   card-detect-delay = <200>;
->   clock-frequency = <400000000>;
->   samsung,dw-mshc-ciu-div = <3>;
->   samsung,dw-mshc-sdr-timing = <2 3>;
->   samsung,dw-mshc-ddr-timing = <1 2>;
->   pinctrl-names = "default";
->   pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
->   bus-width = <4>;
-> };
->
->
-> Here, see this ASCII art that shows how some lines are hooked up on
-> peach-pit.  You might need to paste this into something with a
-> fixed-width font.
->
->                      +--------------------
->                      |    Exynos 5420
->                      |
->                      |
-> P2.8V_LOUT4 ---------|- VDDQ_MMC2 (AK7)
->     |                |
->     |                |
->   +-+- 10K res -+----|- XMMC2CDN (AK6)
->   |             |    |
->   |             |    |
->   |             |    |
->   |           Ext CD |
->   |                  |
->   +-- 10K res-+--+---|- XMMC2CMD (AK8)
->                  |
->                  |
->                Ext CMD
->
-> You can see from the above that the external card detect signal (that
-> goes to the connector) named "Ext CD" is pulled up to the same voltage
-> as the external CMD signal (that also goes to the connector).  This is
-> vqmmc.  If we turn off vqmmc then the 10K resistor will (I think) act
-> as a pull down, or in the best case it will be floating.
->
-> Said another way: we can't read card detect when vqmmc is off.
->
->> Your commit message looks like all exynos5250/5420 board are used CD# line.
->
-> The commit message should be clearer, agreed.  I think I asked Yuvaraj
-> to make sure that the code only invoked this quirk on exynos and only
-> if a GPIO was not used for card detect.  Yuvaraj: can you make it more
-> obvious that not all exynos5250/5420 boards need this, only those that
-> use the "official" card detect line?
+> Compared with first patch ,mmc_sd_setup_card function select card
+> command (cmd7) is executed. So In mmc_rescan function the card can not
+> be removed. How about reset the card in this case?
 
- if (!(brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION) &&
-                     IS_ERR_VALUE(mmc_gpio_get_cd(mmc)))
-This check will not enable the quirk, if a GPIO was used for the card
-detect.Did I miss something?
-I will change the commit message to exclude "all exynos5250/5420 boards".
+So, in principle that should have the same effect.
+
+Maybe we should actually do _both_ what you suggest and set the card
+state to MMC_CARD_REMOVED, by invoking mmc_card_set_removed().
+
+That will let mmc_rescan remove the card as soon as possible without
+sending additional cmds and if there shows up any blk requests from
+the block layer, these will for sure also fail.
+
+What do you think? Can you test this carefully?
+
+Kind regards
+Uffe
 
 >
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 0c44510..7db61dc 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -815,6 +815,7 @@ int mmc_sd_setup_card(struct mmc_host *host,
+> struct mmc_card *card,
+>     bool reinit)
+>  {
+>     int err;
+> +   int oldro, ro = -1;
 >
->>> ...or are you saying that the CD pin somehow changes voltage domains
->>> when configured as a GPIO?  I find that very hard to believe.  What
->>> voltage domain does it go to?  If it goes to a 1.8V voltage domain
->>> then that would be bad when vqmmc was 3.3V.  If it goes to a 3.3V
->>> voltage domain then that would be bad when vqmmc was 1.8V.  Remember
->>> that externally we've got a pull up to vqmmc.
->>
->> It is used with XEINT_# pin instead of CD# pin.
->> As i mentioned above, if exynos5420-peach-pit is used CD# line and not used XEINT_# pin,
->> my point is meaningless. :)
->>
->> Is exynos5420-peach-pit board used with CD#pin, not XEINT_# pin?
+>     if (!reinit) {
+>         /*
+> @@ -858,18 +859,16 @@ int mmc_sd_setup_card(struct mmc_host *host,
+> struct mmc_card *card,
+>             return err;
+>     }
 >
-> Yes.  It is using CD#.  Do you remove your objections to this patch,
-> then (once the commit message is clearer)?
+> +   if (host->ops->get_ro) {
+> +       mmc_host_clk_hold(card->host);
+> +       ro = host->ops->get_ro(host);
+> +       mmc_host_clk_release(card->host);
+> +   }
+> +
+>     /*
+>      * Check if read-only switch is active.
+>      */
+>     if (!reinit) {
+> -       int ro = -1;
+> -
+> -       if (host->ops->get_ro) {
+> -           mmc_host_clk_hold(card->host);
+> -           ro = host->ops->get_ro(host);
+> -           mmc_host_clk_release(card->host);
+> -       }
+> -
+>         if (ro < 0) {
+>             pr_warning("%s: host does not "
+>                 "support reading read-only "
+> @@ -878,6 +877,15 @@ int mmc_sd_setup_card(struct mmc_host *host,
+> struct mmc_card *card,
+>         } else if (ro > 0) {
+>             mmc_card_set_readonly(card);
+>         }
+> +   } else if (reinit && (ro >= 0)) {
+> +       /* check if the write-protection lock is changed */
+> +       oldro = mmc_card_readonly(card) ? 1 : 0;
+> +       ro = (ro > 0) ? 1 : 0;
+> +
+> +       if (oldro ^ ro) {
+> +           mmc_go_idle(host);
+> +           return -ENOENT;
+> +       }
+>     }
 >
-> -Doug
+>     return 0;
