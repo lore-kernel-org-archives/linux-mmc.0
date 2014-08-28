@@ -1,58 +1,53 @@
-From: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
-Subject: Re: Sandisk MMC I/O errors
-Date: Thu, 28 Aug 2014 09:28:16 +0200
-Message-ID: <CAL8zT=hAr50MO6foNaAUcNZj-ocCx5J9C1R4qf96szvcZa5Ybw@mail.gmail.com>
-References: <CAL8zT=iinDtm3_77jSDWG1RSjN5CgEtAgPjA_ju3-=ZS2Qco8A@mail.gmail.com>
- <CAL8zT=iRtmKZyHNYR+-c0KuOaN06Tg60QiWwePvz+auWhpRtPw@mail.gmail.com>
- <CAC1bqKgct-Hq3+9PZ-6p79qSjf=UNhpLWykJ_e0=1ThGoMPpkg@mail.gmail.com>
- <CAL8zT=gS1rwFU1eUcYNpKmygpnmTDXeQRtg6Uxr9FVXRJ6PmeA@mail.gmail.com>
- <53E21515.3060807@samsung.com> <CAL8zT=hcYUUnP1PXYu_9+JUTx=sqBAQkiY1g7K+=TbLSx4J8-g@mail.gmail.com>
- <CAOMZO5CV7yTT5K4S7L+UcO_No2rRsPGWTqmSh79mQmoL2QKsYg@mail.gmail.com>
- <CAL8zT=h6qxPrnXeys0P48hUxsc21MfO_wWNC-g9UrLB-3YZ=Mg@mail.gmail.com>
- <CAL8zT=iaKfEW32vq5_5yXxuMEAzS8=GsJhUR16TH4bQcK9DgpQ@mail.gmail.com>
- <CAL8zT=giMNWG+xwhcR_N8GbCCPEeucaNDG0QQfOos0v3RcwC6Q@mail.gmail.com>
- <53E32FE4.8060401@samsung.com> <CAL8zT=jjx0XOvtSTR14FA9=TqnD9X3imZRo1xBVykqacwKJSEw@mail.gmail.com>
- <CAL8zT=jRJy83oNKd97m=Trx991jL-wGuq4mLgUi3cS6eCcnp_A@mail.gmail.com>
- <CAC1bqKgQZ-XweMp+mj8Bmm6b6nNzSKOsAjhZcNc=_P91nzx_vg@mail.gmail.com>
- <CAL8zT=hcJOzGbDTgbp3Z7Yc5HhtGoALQ+w1Mhb9KBYSoN7dbAQ@mail.gmail.com>
- <53E4401C.2040708@samsung.com> <CAL8zT=ikgxsK0r4qPgv3FQYtk-hMqFQcucBAVPkF=iRnPuQUDg@mail.gmail.com>
- <CAL8zT=jfjAgoQ-HCWFxsibAHoQ5JHwZvn3Cr9TvDX9kDHGcyRQ@mail.gmail.com> <CAC1bqKjDHgcqJ9uwS0ELpkfRTm5ZGzPHeYxYPdShBe_r+XA2SA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f41.google.com ([209.85.219.41]:46328 "EHLO
-	mail-oa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933927AbaH1H2c (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Aug 2014 03:28:32 -0400
-Received: by mail-oa0-f41.google.com with SMTP id i7so300426oag.14
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Aug 2014 00:28:31 -0700 (PDT)
-In-Reply-To: <CAC1bqKjDHgcqJ9uwS0ELpkfRTm5ZGzPHeYxYPdShBe_r+XA2SA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: [PATCH v2] mmc: tmio-mmc: Add support for SDHI on new R-Car Gen2 SoCs
+Date: Thu, 28 Aug 2014 10:07:19 +0200
+Message-ID: <1409213239-5413-1-git-send-email-geert+renesas@glider.be>
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>
 List-Id: linux-mmc@vger.kernel.org
-To: Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Fabio Estevam <festevam@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi,
+  - r8a7792 (R-Car V2H)
+  - r8a7793 (R-Car M2-N)
+  - r8a7794 (R-Car E2)
 
-2014-08-09 11:05 GMT+02:00 Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>:
-> Could you change another sample to test?
-> As a result, we can check this is a driver issue or sample issue.
+Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+---
+v2: Drop RFC
+---
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 3 +++
+ drivers/mmc/host/sh_mobile_sdhi.c                  | 3 +++
+ 2 files changed, 6 insertions(+)
 
-I can change whatever you want :). I noticed that on first boot it
-seems to be working fine, but after some minutes, if I reboot (POR or
-poweroff/poweron) I have those messages.
+diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+index fa0f327cde01..400b640fabc7 100644
+--- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+@@ -19,6 +19,9 @@ Required properties:
+ 		"renesas,sdhi-r8a7779" - SDHI IP on R8A7779 SoC
+ 		"renesas,sdhi-r8a7790" - SDHI IP on R8A7790 SoC
+ 		"renesas,sdhi-r8a7791" - SDHI IP on R8A7791 SoC
++		"renesas,sdhi-r8a7792" - SDHI IP on R8A7792 SoC
++		"renesas,sdhi-r8a7793" - SDHI IP on R8A7793 SoC
++		"renesas,sdhi-r8a7794" - SDHI IP on R8A7794 SoC
+ 
+ Optional properties:
+ - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index d5d493719491..f2585b6c1414 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -72,6 +72,9 @@ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+ 	{ .compatible = "renesas,sdhi-r8a7779", .data = &of_rcar_gen1_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7790", .data = &of_rcar_gen2_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7791", .data = &of_rcar_gen2_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7792", .data = &of_rcar_gen2_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7793", .data = &of_rcar_gen2_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
+-- 
+1.9.1
 
->> [    4.518732] mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
->> [    4.518746] mmc0:     4096 bytes transferred: 0
->> [    4.518756] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
-> the eMMC has change state to data state(0xb00) and the data transferred 0...
-> It means the cmd and clk pin work well. I will check the DMA and data
-> lines(pin).
->> [    4.518545] mmc1: req done (CMD17): 0: 00000900 00000000 00000000 00000000
->> [    4.518563] mmc1:     0 bytes transferred: -84
-> No data transferred from your platform to eMMC....even use single block read.
-
-What is the next step ? BTW, I am now on the latest 3.17-rc2 tag.
-
-Thanks,
-JM
