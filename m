@@ -1,246 +1,101 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: FW: [PATCH] mmc: core: sd: check card write-protect lock while resuming
-Date: Thu, 28 Aug 2014 08:25:52 +0200
-Message-ID: <CAPDyKFq1wLcnufSpqGYnqZ9XoFk2ozvJnjyhX=sHD-PEyT7agA@mail.gmail.com>
-References: <1408356012-18867-1-git-send-email-Barry.Song@csr.com>
-	<CAPDyKFpFLoREZ=rYp8bQvJ7Fczq=HyLL90jv7Hjzai9xTNBNYg@mail.gmail.com>
-	<5EB3BFCD089AD643B9BB63439F5FD5E9012C98252C@SHAASIEXM01.ASIA.ROOT.PRI>
-	<CAPDyKFp4vV_n5KEGSkdjfDMtbvhFzrdU0oB6N6WpmS9Ant8EOw@mail.gmail.com>
-	<7960C73727803F45B9F4D2B2441DA8AC0CE80220@SHAASIEXM01.ASIA.ROOT.PRI>
-	<CAGOPJ8trAePgNK3DtNjrGf5y7rKp-j9L7k2ivn8qwoGTKuMANQ@mail.gmail.com>
+Subject: Re: [PATCH v4] mmc: tmio: ensure that the clock has been stopped
+ before set_clock
+Date: Thu, 28 Aug 2014 09:11:41 +0200
+Message-ID: <CAPDyKFo2rv-33cgEx+uGnpkDfDDTQfSmLOiAA3Eb=mrfeRab9w@mail.gmail.com>
+References: <d3d6aa34548248768494ad88056cf4bd@SINPR06MB105.apcprd06.prod.outlook.com>
+	<87simtenpi.wl%kuninori.morimoto.gx@renesas.com>
+	<cb608c5e763f47b597936724ec05b615@SINPR06MB105.apcprd06.prod.outlook.com>
+	<87pphxe2q0.wl%kuninori.morimoto.gx@renesas.com>
+	<53AD638C.5060907@renesas.com>
+	<87egxehsec.wl%kuninori.morimoto.gx@gmail.com>
+	<87bnr9tgwj.wl%kuninori.morimoto.gx@gmail.com>
+	<CAPDyKFrzr_tjLFqZ1nQg63Zfr0xRAf71HWAmge6DcMzTkwCLiQ@mail.gmail.com>
+	<87bnr5ic6h.wl%kuninori.morimoto.gx@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f171.google.com ([209.85.217.171]:49181 "EHLO
-	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751235AbaH1GZy convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Aug 2014 02:25:54 -0400
-Received: by mail-lb0-f171.google.com with SMTP id n15so339765lbi.2
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Aug 2014 23:25:52 -0700 (PDT)
-In-Reply-To: <CAGOPJ8trAePgNK3DtNjrGf5y7rKp-j9L7k2ivn8qwoGTKuMANQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <87bnr5ic6h.wl%kuninori.morimoto.gx@gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+Cc: Simon <horms@verge.net.au>, Chris Ball <cjb@laptop.org>, Ian Molton <ian@mnementh.co.uk>, Morimoto <kuninori.morimoto.gx@renesas.com>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: minda chen <mdchen8791@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, workgroup.linux@csr.com
 
-On 28 August 2014 04:02, minda chen <mdchen8791@gmail.com> wrote:
-> 2014-08-26 13:01 GMT+08:00 Minda Chen <Minda.Chen@csr.com>:
->>
->>
->> -----Original Message-----
->> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
->> Sent: Friday, August 22, 2014 6:00 PM
->> To: Barry Song
->> Cc: Chris Ball; linux-mmc; linux-arm-kernel@lists.infradead.org; Minda Chen; DL-SHA-WorkGroupLinux
->> Subject: Re: [PATCH] mmc: core: sd: check card write-protect lock while resuming
->>
->> On 22 August 2014 08:55, Barry Song <Barry.Song@csr.com> wrote:
->>>> -----Original Message-----
->>>> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
->>>> Sent: Monday, August 18, 2014 7:58 PM
->>>> To: Barry Song
->>>> Cc: Chris Ball; linux-mmc; linux-arm-kernel@lists.infradead.org;
->>>> DL-SHA- WorkGroupLinux; Minda Chen; Barry Song
->>>> Subject: Re: [PATCH] mmc: core: sd: check card write-protect lock
->>>> while resuming
->>>>
->>>> On 18 August 2014 12:00, Barry Song <Barry.Song@csr.com> wrote:
->>>> > From: Minda Chen <Minda.Chen@csr.com>
->>>> >
->>>> > After suspending, unplug the sdcard, and set sd WP lock, insert it
->>>> > again, then resume the system. resume codes do not check the the
->>>> > sdcard write-proctect lock. now check it.
->>>> >
->>>> > Signed-off-by: Minda Chen <Minda.Chen@csr.com>
->>>> > Signed-off-by: Barry Song <Baohua.Song@csr.com>
->>>> > ---
->>>> >  drivers/mmc/core/sd.c | 7 +++++++
->>>> >  1 file changed, 7 insertions(+)
->>>> >
->>>> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
->>>> > 0c44510..890557a 100644
->>>> > --- a/drivers/mmc/core/sd.c
->>>> > +++ b/drivers/mmc/core/sd.c
->>>> > @@ -910,6 +910,7 @@ static int mmc_sd_init_card(struct mmc_host
->>>> *host, u32 ocr,
->>>> >         int err;
->>>> >         u32 cid[4];
->>>> >         u32 rocr = 0;
->>>> > +       bool oldro, ro;
->>>> >
->>>> >         BUG_ON(!host);
->>>> >         WARN_ON(!host->claimed);
->>>> > @@ -922,6 +923,12 @@ static int mmc_sd_init_card(struct mmc_host
->>>> *host, u32 ocr,
->>>> >                 if (memcmp(cid, oldcard->raw_cid, sizeof(cid)) != 0)
->>>> >                         return -ENOENT;
->>>> >
->>>> > +               if (host->ops->get_ro) {
->>>> > +                       ro = host->ops->get_ro(host) ? true : false;
->>>> > +                       oldro = mmc_card_readonly(oldcard) ? true : false;
->>>> > +                       if (oldro ^ ro)
->>>> > +                               return -ENOENT;
->>>> > +               }
->>>>
->>>> Seems like this code belongs better in mmc_sd_setup_card(). Could you
->>>> try moving it there.
->>> [Barry Song]
->>> Well. How about:
->>>
->>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
->>> 0c44510..643bc82d8 100644
->>> --- a/drivers/mmc/core/sd.c
->>> +++ b/drivers/mmc/core/sd.c
->>> @@ -815,6 +815,7 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
->>>         bool reinit)
->>>  {
->>>         int err;
->>> +       int oldro, ro = -1;
->>>
->>>         if (!reinit) {
->>>                 /*
->>> @@ -861,23 +862,28 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
->>>         /*
->>>          * Check if read-only switch is active.
->>>          */
->>> -       if (!reinit) {
->>> -               int ro = -1;
->>>
->>> -               if (host->ops->get_ro) {
->>> -                       mmc_host_clk_hold(card->host);
->>> -                       ro = host->ops->get_ro(host);
->>> -                       mmc_host_clk_release(card->host);
->>> -               }
->>> +       if (host->ops->get_ro) {
->>> +               mmc_host_clk_hold(card->host);
->>> +               ro = host->ops->get_ro(host);
->>> +               mmc_host_clk_release(card->host);
->>> +       }
->>>
->>> -               if (ro < 0) {
->>> -                       pr_warning("%s: host does not "
->>> -                               "support reading read-only "
->>> -                               "switch. assuming write-enable.\n",
->>> -                               mmc_hostname(host));
->>> -               } else if (ro > 0) {
->>> -                       mmc_card_set_readonly(card);
->>> -               }
->>> +       if (ro < 0)
->>> +               pr_warning("%s: host does not "
->>> +                       "support reading read-only "
->>> +                       "switch. assuming write-enable.\n",
->>> +                       mmc_hostname(host));
->>
->> I don't wont this pr_warning to spam the log each resume.
->> I suppose we could print it only for !reinit, right?
->>
-> ok
->>> +
->>> +       if (!reinit && (ro > 0))
->>> +               mmc_card_set_readonly(card);
->>> +       else if (reinit && (ro >= 0)) {
->>> +               /* check if the write-protection lock is changed */
->>> +               oldro = mmc_card_readonly(card) ? 1 : 0;
->>> +               ro = (ro > 0) ? 1 : 0;
->>> +
->>> +               if (oldro ^ ro)
->>> +                       return -ENOENT;
->>
->> This will have the effect of quickly returning an error to the mmc bus' ->suspend callback. That path are not able remove the card device, which I guess is what you would like to happen, right?
->>
->> I am not completely sure, but I believe the card will still be operational after resuming. Moreover it will be using the initialization frequency and 1-bit bus width and thus performing poorly. This is definitely not what we want.
->>
->> How did you test this patch? Can you confirm my theory above?
-> Sorry, I didn't check it carefully.
+On 28 August 2014 04:24, Kuninori Morimoto
+<kuninori.morimoto.gx@gmail.com> wrote:
+> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 >
->>
->> The card may only be removed from the mmc_rescan work, scheduled at PM_POST_SUSPEND phase. What I think you should do here, is to also set the card state into MMC_CARD_REMOVED, by invoking mmc_card_set_removed(). Thus the SD's bus_ops->detect callback will remove the card during this phase.
->>
->> Kind regards
->> Uffe
->>
->>  To report this email as spam click https://www.mailcontrol.com/sr/MZbqvYs5QwJvpeaetUwhCQ== .
->>
->>
->> Member of the CSR plc group of companies. CSR plc registered in England and Wales, registered number 4187346, registered office Churchill House, Cambridge Business Park, Cowley Road, Cambridge, CB4 0WZ, United Kingdom
->> More information can be found at www.csr.com. Keep up to date with CSR on our technical blog, www.csr.com/blog, CSR people blog, www.csr.com/people, YouTube, www.youtube.com/user/CSRplc, Facebook, www.facebook.com/pages/CSR/191038434253534, or follow us on Twitter at www.twitter.com/CSR_plc.
->> New for 2014, you can now access the wide range of products powered by aptX at www.aptx.com.
+> This patch ensures that the clock has been stopped before
+> it calls tmio_mmc_set_clock().
+> The clock settings might be failed without this patch
 >
-> I have a suggestion.
+> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+> ---
+> v3 -> v4
 >
-> Compared with first patch ,mmc_sd_setup_card function select card
-> command (cmd7) is executed. So In mmc_rescan function the card can not
-> be removed. How about reset the card in this case?
+>  - based on latest git://git.linaro.org/people/ulf.hansson/mmc.git#next
+>
+>  drivers/mmc/host/tmio_mmc_pio.c |    3 +++
+>  1 file changed, 3 insertions(+)
+>
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index ba45413..7289331 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -924,12 +924,14 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>                 tmio_mmc_clk_stop(host);
+>                 break;
+>         case MMC_POWER_UP:
+> +               tmio_mmc_clk_stop(host);
 
-So, in principle that should have the same effect.
+I don't think this is needed. Let me elaborate on why.
 
-Maybe we should actually do _both_ what you suggest and set the card
-state to MMC_CARD_REMOVED, by invoking mmc_card_set_removed().
+There two scenarios for when you may come down this path.
 
-That will let mmc_rescan remove the card as soon as possible without
-sending additional cmds and if there shows up any blk requests from
-the block layer, these will for sure also fail.
+Either after ->probe() or after a MMC_POWER_OFF has been handled. In
+both scenarios, tmio_mmc_clk_stop(host) has already been invoked.
 
-What do you think? Can you test this carefully?
+Well, actually in the ->probe() we invoke tmio_mmc_clk_stop() and then
+tmio_mmc_reset(), should those maybe be done in reverse order to make
+sure the clock is stopped?
+
+>                 tmio_mmc_set_clock(host, ios->clock);
+>                 tmio_mmc_power_on(host, ios->vdd);
+>                 tmio_mmc_clk_start(host);
+>                 tmio_mmc_set_bus_width(host, ios->bus_width);
+>                 break;
+>         case MMC_POWER_ON:
+> +               tmio_mmc_clk_stop(host);
+>                 tmio_mmc_set_clock(host, ios->clock);
+>                 tmio_mmc_clk_start(host);
+>                 tmio_mmc_set_bus_width(host, ios->bus_width);
+> @@ -1199,6 +1201,7 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
+>         tmio_mmc_clk_update(host);
+>
+>         if (host->clk_cache) {
+> +               tmio_mmc_clk_stop(host);
+
+This should also not be needed.
+
+To get runtime PM resumed, you must first be runtime PM suspended. In
+the runtime PM suspend callback we have already invoked
+tmio_mmc_set_clock().
+
+Well, again it may depend on if tmio_mmc_reset() should be followed by
+a tmio_mmc_clk_stop(), which isn't the case right now.
+
+>                 tmio_mmc_set_clock(host, host->clk_cache);
+>                 tmio_mmc_clk_start(host);
+>         }
+> --
+> 1.7.9.5
+>
+
+Finally, another question - somewhat related to clocks but not so much
+to this patch.
+
+Shouldn't tmio_mmc_set_clock() when requested rate is 0, actually
+invoke tmio_mmc_clk_stop()? How will otherwise the clock be stopped?
 
 Kind regards
 Uffe
-
->
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 0c44510..7db61dc 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -815,6 +815,7 @@ int mmc_sd_setup_card(struct mmc_host *host,
-> struct mmc_card *card,
->     bool reinit)
->  {
->     int err;
-> +   int oldro, ro = -1;
->
->     if (!reinit) {
->         /*
-> @@ -858,18 +859,16 @@ int mmc_sd_setup_card(struct mmc_host *host,
-> struct mmc_card *card,
->             return err;
->     }
->
-> +   if (host->ops->get_ro) {
-> +       mmc_host_clk_hold(card->host);
-> +       ro = host->ops->get_ro(host);
-> +       mmc_host_clk_release(card->host);
-> +   }
-> +
->     /*
->      * Check if read-only switch is active.
->      */
->     if (!reinit) {
-> -       int ro = -1;
-> -
-> -       if (host->ops->get_ro) {
-> -           mmc_host_clk_hold(card->host);
-> -           ro = host->ops->get_ro(host);
-> -           mmc_host_clk_release(card->host);
-> -       }
-> -
->         if (ro < 0) {
->             pr_warning("%s: host does not "
->                 "support reading read-only "
-> @@ -878,6 +877,15 @@ int mmc_sd_setup_card(struct mmc_host *host,
-> struct mmc_card *card,
->         } else if (ro > 0) {
->             mmc_card_set_readonly(card);
->         }
-> +   } else if (reinit && (ro >= 0)) {
-> +       /* check if the write-protection lock is changed */
-> +       oldro = mmc_card_readonly(card) ? 1 : 0;
-> +       ro = (ro > 0) ? 1 : 0;
-> +
-> +       if (oldro ^ ro) {
-> +           mmc_go_idle(host);
-> +           return -ENOENT;
-> +       }
->     }
->
->     return 0;
