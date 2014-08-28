@@ -1,88 +1,91 @@
-From: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
-Subject: Re: Sandisk MMC I/O errors
-Date: Thu, 28 Aug 2014 16:31:15 +0200
-Message-ID: <CAL8zT=h=jkSTU4Adah1Kb7qJJpq2Sm-7f=ru8SBpjn-iujbv0Q@mail.gmail.com>
-References: <CAL8zT=iinDtm3_77jSDWG1RSjN5CgEtAgPjA_ju3-=ZS2Qco8A@mail.gmail.com>
- <CAL8zT=iRtmKZyHNYR+-c0KuOaN06Tg60QiWwePvz+auWhpRtPw@mail.gmail.com>
- <CAC1bqKgct-Hq3+9PZ-6p79qSjf=UNhpLWykJ_e0=1ThGoMPpkg@mail.gmail.com>
- <CAL8zT=gS1rwFU1eUcYNpKmygpnmTDXeQRtg6Uxr9FVXRJ6PmeA@mail.gmail.com>
- <53E21515.3060807@samsung.com> <CAL8zT=hcYUUnP1PXYu_9+JUTx=sqBAQkiY1g7K+=TbLSx4J8-g@mail.gmail.com>
- <CAOMZO5CV7yTT5K4S7L+UcO_No2rRsPGWTqmSh79mQmoL2QKsYg@mail.gmail.com>
- <CAL8zT=h6qxPrnXeys0P48hUxsc21MfO_wWNC-g9UrLB-3YZ=Mg@mail.gmail.com>
- <CAL8zT=iaKfEW32vq5_5yXxuMEAzS8=GsJhUR16TH4bQcK9DgpQ@mail.gmail.com>
- <CAL8zT=giMNWG+xwhcR_N8GbCCPEeucaNDG0QQfOos0v3RcwC6Q@mail.gmail.com>
- <53E32FE4.8060401@samsung.com> <CAL8zT=jjx0XOvtSTR14FA9=TqnD9X3imZRo1xBVykqacwKJSEw@mail.gmail.com>
- <CAL8zT=jRJy83oNKd97m=Trx991jL-wGuq4mLgUi3cS6eCcnp_A@mail.gmail.com>
- <CAC1bqKgQZ-XweMp+mj8Bmm6b6nNzSKOsAjhZcNc=_P91nzx_vg@mail.gmail.com>
- <CAL8zT=hcJOzGbDTgbp3Z7Yc5HhtGoALQ+w1Mhb9KBYSoN7dbAQ@mail.gmail.com>
- <53E4401C.2040708@samsung.com> <CAL8zT=ikgxsK0r4qPgv3FQYtk-hMqFQcucBAVPkF=iRnPuQUDg@mail.gmail.com>
- <CAL8zT=jfjAgoQ-HCWFxsibAHoQ5JHwZvn3Cr9TvDX9kDHGcyRQ@mail.gmail.com>
- <CAC1bqKjDHgcqJ9uwS0ELpkfRTm5ZGzPHeYxYPdShBe_r+XA2SA@mail.gmail.com>
- <CAL8zT=hAr50MO6foNaAUcNZj-ocCx5J9C1R4qf96szvcZa5Ybw@mail.gmail.com> <CAC1bqKhdEuXtvBFMT49GSVat6EYhLuBJ48L5+HjZY+Fiwi2VUA@mail.gmail.com>
+From: Doug Anderson <dianders@google.com>
+Subject: Re: [PATCH V2 3/3] mmc: dw_mmc: Dont cut off vqmmc and vmmc
+Date: Thu, 28 Aug 2014 08:50:25 -0700
+Message-ID: <CAD=FV=UykPjixODXJ-s6vrZVs3O3=rX2iUakm6WnqiqvJNkoqQ@mail.gmail.com>
+References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
+	<1408715272-13833-4-git-send-email-yuvaraj.cd@samsung.com>
+	<CAPDyKFqz8sGj2td=ihZXN4zvAqmu9FHZjWdCn-ZRcdHugNHe2g@mail.gmail.com>
+	<CAPz6YkXH1mMOTwcLkKdffdUHN+TaCAhpa8oG0h+rFn9i+GMoCw@mail.gmail.com>
+	<CAPDyKFqp7oEt9ASmdxrgUwbQ8aTZzAuJ7uD1oGN50iuzPzBfVg@mail.gmail.com>
+	<CAD=FV=VQWzhiSU+iULACj+Dp_tDf3SszQ8ELLEGqVEyJJRQy1Q@mail.gmail.com>
+	<CAPDyKFo9-5=uPqD8RvLGsYtSCynBFnGGeSCpwLZuzDtW+652hA@mail.gmail.com>
+	<CAD=FV=VveHTYmiBu42DJeFFGARV2+1bS6Y2CQM995YkX_O9SQA@mail.gmail.com>
+	<CAPDyKFpUU643iXVbxuu9Vx1zY0K7x4z-ZxxVEWd+Lsuwp0iA+g@mail.gmail.com>
+	<CAD=FV=Vqz=kA=D5KDyq_QuPi-6B05VixYManTsFe2PC-fzxRkw@mail.gmail.com>
+	<CAPDyKFrcA183V-R-nbZcY8wXCRqONb1WUu3BS_0vNJe2+Ej2_w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f53.google.com ([209.85.218.53]:65447 "EHLO
-	mail-oi0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750748AbaH1Obb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Aug 2014 10:31:31 -0400
-Received: by mail-oi0-f53.google.com with SMTP id i138so597980oig.40
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Aug 2014 07:31:30 -0700 (PDT)
-In-Reply-To: <CAC1bqKhdEuXtvBFMT49GSVat6EYhLuBJ48L5+HjZY+Fiwi2VUA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrcA183V-R-nbZcY8wXCRqONb1WUu3BS_0vNJe2+Ej2_w@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Sonny Rao <sonnyrao@chromium.org>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Fabio Estevam <festevam@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-I will try to as clear as possible.
+Ulf,
 
-When I reset, this is a complete reset of the board.
-I tried Freescale's kernel version, and it works, even after reset and
-several minutes.
-The same sample, the same board, but with a 3.17-rc2 kernel, I get
-those errors  would say about 95% of times. The first but can be ok,
-but this is not invariable...
-
-On another board, with another sample, it has the same problem, but I
-would say about 80% of times.
-I tried to use dynamic debug on boot in order to get all dev_dbg
-messages, but for the moment I don't have them...
-
-Thanks,
-JM
-
-
-2014-08-28 16:20 GMT+02:00 Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>:
-> No matter which sample you changed to test has this issue?
+On Thu, Aug 28, 2014 at 12:25 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 27 August 2014 17:52, Doug Anderson <dianders@google.com> wrote:
+>> Ulf,
+>>
+>> On Wed, Aug 27, 2014 at 4:17 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>> Now, we've got MMC_CAP_NEEDS_POLL, so dw_mmc will periodically be
+>>>> called to check the card detect line, but with vmmc and vqmmc off.  It
+>>>> will be unable to return a sensible value without actually turning on
+>>>> vmmc and vqmmc.
+>>>
+>>> Currently MMC_CAP_NEEDS_POLL mean the mmc rescan work will reschedule
+>>> itself with HZ interval. This to check for card insert/removal.
+>>>
+>>> Now, mmc_rescan() will, if present, invoke host's ->get_cd() callback
+>>> to check whether it's worth to continue initialization sequence or if
+>>> it should re-schedule itself again.
+>>>
+>>> If your host driver can distinguish whether a card is inserted, which
+>>> in this case are when vccq is turned off, your ->get_cd() callback need
+>>> to return 1. That will allow mmc_rescan() to continue it's
+>>> initialization sequence and do mmc_power_up().
+>>
+>> As per my other email, we can't tell whether a card is inserted when
+>> vqmmc is off.
 >
-> Is your reboot means only re-init eMMC or entire platform?
-> If you re-init eMMC by your customized flow, you need to guarantee the
-> frequency and bus-width between host and device.
+> I understand.
 >
+> The solution I proposed above, is:
 >
-> 2014-08-28 15:28 GMT+08:00 Jean-Michel Hautbois
-> <jean-michel.hautbois@vodalys.com>:
->> Hi,
->>
->> 2014-08-09 11:05 GMT+02:00 Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>:
->>> Could you change another sample to test?
->>> As a result, we can check this is a driver issue or sample issue.
->>
->> I can change whatever you want :). I noticed that on first boot it
->> seems to be working fine, but after some minutes, if I reboot (POR or
->> poweroff/poweron) I have those messages.
->>
->>>> [    4.518732] mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
->>>> [    4.518746] mmc0:     4096 bytes transferred: 0
->>>> [    4.518756] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
->>> the eMMC has change state to data state(0xb00) and the data transferred 0...
->>> It means the cmd and clk pin work well. I will check the DMA and data
->>> lines(pin).
->>>> [    4.518545] mmc1: req done (CMD17): 0: 00000900 00000000 00000000 00000000
->>>> [    4.518563] mmc1:     0 bytes transferred: -84
->>> No data transferred from your platform to eMMC....even use single block read.
->>
->> What is the next step ? BTW, I am now on the latest 3.17-rc2 tag.
->>
->> Thanks,
->> JM
+> 1) Enable MMC_CAP_NEEDS_POLL.
+> 2) Make ->get_cd() return 1, when you can't distinguish if the card is inserted.
+>
+> That will solve this issue and without messing up the mmc core.
+
+Ah, I see!  So every 1 second, we'll do the following:
+
+1. Call get_cd(), which returns 1.
+
+2. MMC core will power everything up (turn on all regulators) for MMC.
+
+3. We'll start to initialize a card.
+
+4. We'll notice that, oops, there's no card there.
+
+5. MMC core will shut things down again.
+
+
+That seems awfully expensive to do every second when the card detect
+line actually does work (as long as you keep power lines).  Is the
+patch to separate out the concepts of "power off because no card is
+inserted" and "power off because we're power cycling the card" really
+bad enough to warrant forcing us to use the above?
+
+I'm not an EE, but cycling regulators on and off every second doesn't
+seem super ideal, but maybe they're designed for it?
+
+
+Personally, I'd be tempted to just leave the power on all the time and
+if a card somehow needs to be power cycled (because UHS negotiation
+failed?) then that card just isn't supported.  This could be done in
+the dts by saying that the regulator is "always on" and no need to
+pollute any source files.
+
+
+-Doug
