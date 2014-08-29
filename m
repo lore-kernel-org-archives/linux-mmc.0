@@ -1,240 +1,80 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: exynos: Add support for exynos7
-Date: Fri, 29 Aug 2014 19:44:32 +0900
-Message-ID: <54005990.8070306@samsung.com>
-References: <1409231933-14796-1-git-send-email-yuvaraj.cd@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: dw_mmc: move rockchip related code to a separate file
+Date: Fri, 29 Aug 2014 13:05:39 +0200
+Message-ID: <CAPDyKFqAx=WVk2T6FwsSZ0hHsC5ARZF4KhHnn9MCbT6DkAAXkg@mail.gmail.com>
+References: <1408003293-27375-1-git-send-email-addy.ke@rock-chips.com>
+	<1408422974-22301-1-git-send-email-addy.ke@rock-chips.com>
+	<CAD=FV=Xri1gVdBvmEmxzsyf3z=+Qpuzj4afJ-A2NJfPY0in00A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1409231933-14796-1-git-send-email-yuvaraj.cd@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, dianders@google.com, dianders@chromium.org, cjb@laptop.org, tgih.jun@samsung.com, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Cc: sonnyrao@chromium.org, t.figa@samsung.com, kgene.kim@samsung.com, joshi@samsung.com, prashanth.g@samsung.com, alim.akhtar@samsung.com, Abhilash Kesavan <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, CPGS <cpgs@samsung.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-la0-f49.google.com ([209.85.215.49]:33365 "EHLO
+	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751611AbaH2LFl convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Aug 2014 07:05:41 -0400
+Received: by mail-la0-f49.google.com with SMTP id b17so2432139lan.8
+        for <linux-mmc@vger.kernel.org>; Fri, 29 Aug 2014 04:05:39 -0700 (PDT)
+In-Reply-To: <CAD=FV=Xri1gVdBvmEmxzsyf3z=+Qpuzj4afJ-A2NJfPY0in00A@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>, Addy Ke <addy.ke@rock-chips.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "zhenfu.fang" <zhenfu.fang@rock-chips.com>, Eddie Cai <cf@rock-chips.com>, lintao <lintao@rock-chips.com>, chenfen <chenfen@rock-chips.com>, zyf <zyf@rock-chips.com>, Jianqun Xu <xjq@rock-chip>
 
-Hi, Abhilash.
+On 19 August 2014 19:28, Doug Anderson <dianders@chromium.org> wrote:
+> Hi,
+>
+> On Mon, Aug 18, 2014 at 9:36 PM, Addy Ke <addy.ke@rock-chips.com> wro=
+te:
+>> To support HS200 and UHS-1, we need add a big hunk of code,
+>> as shown in the following patches. So a separate file for
+>> rockchip SOCs is suitable.
+>>
+>> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+>> ---
+>> Changes in v2:
+>> - Kconfig: depend on ARCH_ROCKCHIP, suggested by Bartlomiej Zolnierk=
+iewicz
+>> - Kconfig: depend on OF, suggested by Doug Anderson
+>> - Not change suspend/resume code, suggested by Doug Anderson
+>> - If pdev->dev.of_node is NULL, then return -ENODEV, suggested by He=
+iko St=C3=BCbner
+>>
+>>  drivers/mmc/host/Kconfig           |   9 +++
+>>  drivers/mmc/host/Makefile          |   1 +
+>>  drivers/mmc/host/dw_mmc-pltfm.c    |  57 ----------------
+>>  drivers/mmc/host/dw_mmc-rockchip.c | 136 ++++++++++++++++++++++++++=
++++++++++++
+>>  4 files changed, 146 insertions(+), 57 deletions(-)
+>>  create mode 100644 drivers/mmc/host/dw_mmc-rockchip.c
+>>
+>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> index a565254..f6095f6 100644
+>> --- a/drivers/mmc/host/Kconfig
+>> +++ b/drivers/mmc/host/Kconfig
+>> @@ -621,6 +621,15 @@ config MMC_DW_PCI
+>>
+>>           If unsure, say N.
+>>
+>> +config MMC_DW_ROCKCHIP
+>> +       tristate "Rockchip specific extensions for Synopsys DW Memor=
+y Card Interface"
+>> +       depends on MMC_DW && ARCH_ROCKCHIP && OF
+>
+> Actually, Heiko's change to check if pdev->dev.of_node is NULL means
+> that you don't need to depend on OF anymore.
+>
+> Ulf: do you want Addy to spin again, or do you want to just remove
+> this "&& OF" when applying the patch?
+>
+> ...I've tested this both with and without the "&& OF", and the "&& OF=
+"
+> won't really hurt anything, so:
+>
+> Tested-by: Doug Anderson <dianders@chromium.org>
+> Reviewed-by: Doug Anderson <dianders@chromium.org>
 
-On 08/28/2014 10:18 PM, Yuvaraj Kumar C D wrote:
-> From: Abhilash Kesavan <a.kesavan@samsung.com>
-> 
-> The Exynos7 has a DWMMC controller (v2.70a) which is different from
-> prior versions. This patch adds new compatible strings for exynos7.
-> This patch also fixes the CLKSEL register offset on exynos7.
+Thanks! Applied for next and by removing the dependency to "OF".
 
-If support the 64bit, dw-mmc.c need to modify.(according to v2.70, some offset is changed for 64-bit address)
-But i didn't see any patches at mailing. 
-Do you have the plan which send patch of dw-mmc.c?
-
-Best Regards,
-Jaehoon Chung
-> 
-> Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
-> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
-> ---
->  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    4 +
->  drivers/mmc/host/dw_mmc-exynos.c                   |   91 +++++++++++++++++---
->  2 files changed, 82 insertions(+), 13 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> index 6cd3525..ee4fc05 100644
-> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> @@ -18,6 +18,10 @@ Required Properties:
->  	  specific extensions.
->  	- "samsung,exynos5420-dw-mshc": for controllers with Samsung Exynos5420
->  	  specific extensions.
-> +	- "samsung,exynos7-dw-mshc": for controllers with Samsung Exynos7
-> +	  specific extensions.
-> +	- "samsung,exynos7-dw-mshc-smu": for controllers with Samsung Exynos7
-> +	  specific extensions having an SMU.
->  
->  * samsung,dw-mshc-ciu-div: Specifies the divider value for the card interface
->    unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index 0fbc53a..509365c 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -25,6 +25,7 @@
->  #define NUM_PINS(x)			(x + 2)
->  
->  #define SDMMC_CLKSEL			0x09C
-> +#define SDMMC_CLKSEL64			0x0A8
->  #define SDMMC_CLKSEL_CCLK_SAMPLE(x)	(((x) & 7) << 0)
->  #define SDMMC_CLKSEL_CCLK_DRIVE(x)	(((x) & 7) << 16)
->  #define SDMMC_CLKSEL_CCLK_DIVIDER(x)	(((x) & 7) << 24)
-> @@ -65,6 +66,8 @@ enum dw_mci_exynos_type {
->  	DW_MCI_TYPE_EXYNOS5250,
->  	DW_MCI_TYPE_EXYNOS5420,
->  	DW_MCI_TYPE_EXYNOS5420_SMU,
-> +	DW_MCI_TYPE_EXYNOS7,
-> +	DW_MCI_TYPE_EXYNOS7_SMU,
->  };
->  
->  /* Exynos implementation specific driver private data */
-> @@ -95,6 +98,12 @@ static struct dw_mci_exynos_compatible {
->  	}, {
->  		.compatible	= "samsung,exynos5420-dw-mshc-smu",
->  		.ctrl_type	= DW_MCI_TYPE_EXYNOS5420_SMU,
-> +	}, {
-> +		.compatible	= "samsung,exynos7-dw-mshc",
-> +		.ctrl_type	= DW_MCI_TYPE_EXYNOS7,
-> +	}, {
-> +		.compatible	= "samsung,exynos7-dw-mshc-smu",
-> +		.ctrl_type	= DW_MCI_TYPE_EXYNOS7_SMU,
->  	},
->  };
->  
-> @@ -102,7 +111,8 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
->  {
->  	struct dw_mci_exynos_priv_data *priv = host->priv;
->  
-> -	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420_SMU) {
-> +	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420_SMU ||
-> +		priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU) {
->  		mci_writel(host, MPSBEGIN0, 0);
->  		mci_writel(host, MPSEND0, DWMCI_BLOCK_NUM);
->  		mci_writel(host, MPSCTRL0, DWMCI_MPSCTRL_SECURE_WRITE_BIT |
-> @@ -153,11 +163,22 @@ static int dw_mci_exynos_resume(struct device *dev)
->  static int dw_mci_exynos_resume_noirq(struct device *dev)
->  {
->  	struct dw_mci *host = dev_get_drvdata(dev);
-> +	struct dw_mci_exynos_priv_data *priv = host->priv;
->  	u32 clksel;
->  
-> -	clksel = mci_readl(host, CLKSEL);
-> -	if (clksel & SDMMC_CLKSEL_WAKEUP_INT)
-> -		mci_writel(host, CLKSEL, clksel);
-> +	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
-> +		priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
-> +		clksel = mci_readl(host, CLKSEL64);
-> +	else
-> +		clksel = mci_readl(host, CLKSEL);
-> +
-> +	if (clksel & SDMMC_CLKSEL_WAKEUP_INT) {
-> +		if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
-> +			priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
-> +			mci_writel(host, CLKSEL64, clksel);
-> +		else
-> +			mci_writel(host, CLKSEL, clksel);
-> +	}
->  
->  	return 0;
->  }
-> @@ -169,6 +190,7 @@ static int dw_mci_exynos_resume_noirq(struct device *dev)
->  
->  static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
->  {
-> +	struct dw_mci_exynos_priv_data *priv = host->priv;
->  	/*
->  	 * Exynos4412 and Exynos5250 extends the use of CMD register with the
->  	 * use of bit 29 (which is reserved on standard MSHC controllers) for
-> @@ -176,8 +198,14 @@ static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
->  	 * HOLD register should be bypassed in case there is no phase shift
->  	 * applied on CMD/DATA that is sent to the card.
->  	 */
-> -	if (SDMMC_CLKSEL_GET_DRV_WD3(mci_readl(host, CLKSEL)))
-> -		*cmdr |= SDMMC_CMD_USE_HOLD_REG;
-> +	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
-> +		priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU) {
-> +		if (SDMMC_CLKSEL_GET_DRV_WD3(mci_readl(host, CLKSEL64)))
-> +			*cmdr |= SDMMC_CMD_USE_HOLD_REG;
-> +	 } else {
-> +		if (SDMMC_CLKSEL_GET_DRV_WD3(mci_readl(host, CLKSEL)))
-> +			*cmdr |= SDMMC_CMD_USE_HOLD_REG;
-> +	}
->  }
->  
->  static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-> @@ -188,12 +216,20 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->  	u8 div = priv->ciu_div + 1;
->  
->  	if (ios->timing == MMC_TIMING_MMC_DDR52) {
-> -		mci_writel(host, CLKSEL, priv->ddr_timing);
-> +		if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
-> +			priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
-> +			mci_writel(host, CLKSEL64, priv->ddr_timing);
-> +		else
-> +			mci_writel(host, CLKSEL, priv->ddr_timing);
->  		/* Should be double rate for DDR mode */
->  		if (ios->bus_width == MMC_BUS_WIDTH_8)
->  			wanted <<= 1;
->  	} else {
-> -		mci_writel(host, CLKSEL, priv->sdr_timing);
-> +		if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
-> +			priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
-> +			mci_writel(host, CLKSEL64, priv->sdr_timing);
-> +		else
-> +			mci_writel(host, CLKSEL, priv->sdr_timing);
->  	}
->  
->  	/* Don't care if wanted clock is zero */
-> @@ -265,26 +301,51 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
->  
->  static inline u8 dw_mci_exynos_get_clksmpl(struct dw_mci *host)
->  {
-> -	return SDMMC_CLKSEL_CCLK_SAMPLE(mci_readl(host, CLKSEL));
-> +	struct dw_mci_exynos_priv_data *priv = host->priv;
-> +
-> +	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
-> +		priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
-> +		return SDMMC_CLKSEL_CCLK_SAMPLE(mci_readl(host, CLKSEL64));
-> +	else
-> +		return SDMMC_CLKSEL_CCLK_SAMPLE(mci_readl(host, CLKSEL));
->  }
->  
->  static inline void dw_mci_exynos_set_clksmpl(struct dw_mci *host, u8 sample)
->  {
->  	u32 clksel;
-> -	clksel = mci_readl(host, CLKSEL);
-> +	struct dw_mci_exynos_priv_data *priv = host->priv;
-> +
-> +	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
-> +		priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
-> +		clksel = mci_readl(host, CLKSEL64);
-> +	else
-> +		clksel = mci_readl(host, CLKSEL);
->  	clksel = (clksel & ~0x7) | SDMMC_CLKSEL_CCLK_SAMPLE(sample);
-> -	mci_writel(host, CLKSEL, clksel);
-> +	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
-> +		priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
-> +		mci_writel(host, CLKSEL64, clksel);
-> +	else
-> +		mci_writel(host, CLKSEL, clksel);
->  }
->  
->  static inline u8 dw_mci_exynos_move_next_clksmpl(struct dw_mci *host)
->  {
-> +	struct dw_mci_exynos_priv_data *priv = host->priv;
->  	u32 clksel;
->  	u8 sample;
->  
-> -	clksel = mci_readl(host, CLKSEL);
-> +	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
-> +		priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
-> +		clksel = mci_readl(host, CLKSEL64);
-> +	else
-> +		clksel = mci_readl(host, CLKSEL);
->  	sample = (clksel + 1) & 0x7;
->  	clksel = (clksel & ~0x7) | sample;
-> -	mci_writel(host, CLKSEL, clksel);
-> +	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
-> +		priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
-> +		mci_writel(host, CLKSEL64, clksel);
-> +	else
-> +		mci_writel(host, CLKSEL, clksel);
->  	return sample;
->  }
->  
-> @@ -411,6 +472,10 @@ static const struct of_device_id dw_mci_exynos_match[] = {
->  			.data = &exynos_drv_data, },
->  	{ .compatible = "samsung,exynos5420-dw-mshc-smu",
->  			.data = &exynos_drv_data, },
-> +	{ .compatible = "samsung,exynos7-dw-mshc",
-> +			.data = &exynos_drv_data, },
-> +	{ .compatible = "samsung,exynos7-dw-mshc-smu",
-> +			.data = &exynos_drv_data, },
->  	{},
->  };
->  MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
-> 
+Kind regards
+Uffe
