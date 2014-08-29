@@ -1,72 +1,27 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: resolve divded by zero panic
-Date: Fri, 29 Aug 2014 13:26:46 +0200
-Message-ID: <CAPDyKFrSZhA=77ECWEgmHiYn2gQZjLVzUxF9aWU=8o8=rVk3nQ@mail.gmail.com>
-References: <1408012164-29790-1-git-send-email-yunpeng.gao@intel.com>
+Subject: Re: [PATCH V2 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to
+ handle regulators
+Date: Fri, 29 Aug 2014 13:34:44 +0200
+Message-ID: <CAPDyKFqiv+eGQ_kRpXjRY207PN4J3DGcZU1n5UU0evp_5Dn_Pg@mail.gmail.com>
+References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
+	<1408715272-13833-2-git-send-email-yuvaraj.cd@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f44.google.com ([209.85.215.44]:62326 "EHLO
-	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751461AbaH2L0s (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Aug 2014 07:26:48 -0400
-Received: by mail-la0-f44.google.com with SMTP id hz20so2541542lab.17
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Aug 2014 04:26:46 -0700 (PDT)
-In-Reply-To: <1408012164-29790-1-git-send-email-yunpeng.gao@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1408715272-13833-2-git-send-email-yuvaraj.cd@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
+Cc: linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Doug Anderson <dianders@google.com>, Doug Anderson <dianders@chromium.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Yunpeng Gao <yunpeng.gao@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chuanxiao Dong <chuanxiao.dong@intel.com>
 
-On 14 August 2014 12:29, Yunpeng Gao <yunpeng.gao@intel.com> wrote:
-> From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+On 22 August 2014 15:47, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
+> This patch makes use of mmc_regulator_get_supply() to handle
+> the vmmc and vqmmc regulators.Also it moves the code handling
+> the these regulators to dw_mci_set_ios().It turned on the vmmc
+> and vqmmc during MMC_POWER_UP and MMC_POWER_ON,and turned off
+> during MMC_POWER_OFF.
 >
-> With one special SD card, below divide by zero error observed:
-> ...
-> [    2.144300] divide error: 0000 [#1] PREEMPT SMP
-> [    2.148860] Modules linked in:
-> [    2.151898]
-> [    2.152685] Set up 4031 stolen pages starting at 0x0001f000, GTT offset 0K
-> [    2.157330] Set up 0 CI stolen pages starting at 0x00000000, GTT offset 131072K
-> [    2.167581] Pid: 5, comm: kworker/u:0 Not tainted 3.0.8-138216-g974a2ab #1
-> [    2.169506] [drm] PSB GTT mem manager ready, tt_start 4031, tt_size 28737 pages
-> [    2.169906] [drm] SGX core id = 0x00000000
-> [    2.169920] [drm] SGX core rev major = 0x00, minor = 0x00
-> [    2.169934] [drm] SGX core rev maintenance = 0x00, designer = 0x00
-> [    2.197370]  Intel Corporation Medfield/iCDKB
-> [    2.201716] EIP: 0060:[<c1697ca6>] EFLAGS: 00010246 CPU: 1
-> [    2.207198] EIP is at mmc_init_erase+0x76/0x150
-> [    2.211704] EAX: 00002000 EBX: dcd1b400 ECX: 00002000 EDX: 00000000
-> [    2.217957] ESI: 00000000 EDI: dcd5c800 EBP: dd867e84 ESP: dd867e7c
-> [    2.224214]  DS: 007b ES: 007b FS: 00d8 GS: 0000 SS: 0068
-> [    2.229605] Process kworker/u:0 (pid: 5, ti=dd866000 task=dd868000 task.ti=dd866000)
-> [    2.237325] Stack:
-> [    2.239322]  dcd1b400 00000000 dd867eb0 c16a06da c1ab7c44 dd995aa8 00000003 00000000
-> [    2.247054]  00000000 00000000 dcd5c800 00000000 dcd1b400 dd867ef8 c16a1012 c1698b00
-> [    2.254785]  00000029 00000001 c194eb80 dcd5c9ec dd867e00 c1239b00 00000000 00000000
-> [    2.262519] Call Trace:
-> [    2.264975]  [<c16a06da>] mmc_sd_setup_card+0x1da/0x4f0
-> [    2.270183]  [<c16a1012>] mmc_sd_init_card+0x192/0xc40
-> [    2.275304]  [<c1698b00>] ? __mmc_claim_host+0x160/0x160
-> [    2.280610]  [<c1239b00>] ? __schedule_bug+0x50/0x80
-> [    2.285556]  [<c16a1b89>] mmc_attach_sd+0xc9/0x230
-> [    2.290333]  [<c169b6ef>] mmc_rescan+0x25f/0x2c0
-> [    2.294943]  [<c1274223>] process_one_work+0x103/0x400
-> [    2.300065]  [<c12670fd>] ? mod_timer+0x1ad/0x3c0
-> [    2.304756]  [<c169b490>] ? mmc_suspend_host+0x1a0/0x1a0
-> [    2.310056]  [<c127502d>] worker_thread+0x12d/0x4a0
-> [    2.314921]  [<c18fcfbd>] ? preempt_schedule+0x2d/0x50
-> [    2.320047]  [<c1274f00[    2.323976] ---[ end trace 5398ec2720494438 ]---
-> ...
->
-> So, seems this bad SD card does not set valid value in related SSR / CSD register fields.
-> And then the driver will set card->erase_size to 0.
-> Then it triggered this divided by zero error when calculate card->pref_erase.
->
-> Submit this patch to fix the issue.
->
-> Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
-> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
 Thanks! Applied for next.
 
@@ -74,36 +29,175 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/core.c |    5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
+> changes from v1:
+>         1.Used mmc_regulator_set_ocr() instead of regulator_enable() for vmmc.
+>         2.Turned on vmmc and vqmmc during MMC_POWER_UP.
+>         3. Removed the flags DW_MMC_CARD_POWERED and DW_MMC_IO_POWERED which
+>            added during the initial version of this patch.
+>         4. Added error message, if it failed to turn on regulator's.
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 7dc0c85..385373db 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1761,7 +1761,7 @@ void mmc_init_erase(struct mmc_card *card)
->                 card->erase_shift = ffs(card->ssr.au) - 1;
->         } else if (card->ext_csd.hc_erase_size) {
->                 card->pref_erase = card->ext_csd.hc_erase_size;
-> -       } else {
-> +       } else if (card->erase_size) {
->                 sz = (card->csd.capacity << (card->csd.read_blkbits - 9)) >> 11;
->                 if (sz < 128)
->                         card->pref_erase = 512 * 1024 / 512;
-> @@ -1778,7 +1778,8 @@ void mmc_init_erase(struct mmc_card *card)
->                         if (sz)
->                                 card->pref_erase += card->erase_size - sz;
->                 }
-> -       }
-> +       } else
-> +               card->pref_erase = 0;
+>  drivers/mmc/host/dw_mmc.c  |   72 +++++++++++++++++++++-----------------------
+>  include/linux/mmc/dw_mmc.h |    2 +-
+>  2 files changed, 36 insertions(+), 38 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 7f227e9..aadb0d6 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -936,6 +936,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         struct dw_mci_slot *slot = mmc_priv(mmc);
+>         const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+>         u32 regs;
+> +       int ret;
+>
+>         switch (ios->bus_width) {
+>         case MMC_BUS_WIDTH_4:
+> @@ -974,12 +975,38 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>
+>         switch (ios->power_mode) {
+>         case MMC_POWER_UP:
+> +               if (!IS_ERR(mmc->supply.vmmc)) {
+> +                       ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
+> +                                       ios->vdd);
+> +                       if (ret) {
+> +                               dev_err(slot->host->dev,
+> +                                       "failed to enable vmmc regulator\n");
+> +                               /*return, if failed turn on vmmc*/
+> +                               return;
+> +                       }
+> +               }
+> +               if (!IS_ERR(mmc->supply.vqmmc) && !slot->host->vqmmc_enabled) {
+> +                       ret = regulator_enable(mmc->supply.vqmmc);
+> +                       if (ret < 0)
+> +                               dev_err(slot->host->dev,
+> +                                       "failed to enable vqmmc regulator\n");
+> +                       else
+> +                               slot->host->vqmmc_enabled = true;
+> +               }
+>                 set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+>                 regs = mci_readl(slot->host, PWREN);
+>                 regs |= (1 << slot->id);
+>                 mci_writel(slot->host, PWREN, regs);
+>                 break;
+>         case MMC_POWER_OFF:
+> +               if (!IS_ERR(mmc->supply.vmmc))
+> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+> +
+> +               if (!IS_ERR(mmc->supply.vqmmc) && slot->host->vqmmc_enabled) {
+> +                       regulator_disable(mmc->supply.vqmmc);
+> +                       slot->host->vqmmc_enabled = false;
+> +               }
+> +
+>                 regs = mci_readl(slot->host, PWREN);
+>                 regs &= ~(1 << slot->id);
+>                 mci_writel(slot->host, PWREN, regs);
+> @@ -2110,7 +2137,13 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>                 mmc->f_max = freq[1];
+>         }
+>
+> -       mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+> +       /*if there are external regulators, get them*/
+> +       ret = mmc_regulator_get_supply(mmc);
+> +       if (ret == -EPROBE_DEFER)
+> +               goto err_setup_bus;
+> +
+> +       if (!mmc->ocr_avail)
+> +               mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+>
+>         if (host->pdata->caps)
+>                 mmc->caps = host->pdata->caps;
+> @@ -2176,7 +2209,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>
+>  err_setup_bus:
+>         mmc_free_host(mmc);
+> -       return -EINVAL;
+> +       return ret;
 >  }
 >
->  static unsigned int mmc_mmc_erase_timeout(struct mmc_card *card,
-> --
-> 1.7.9.5
+>  static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
+> @@ -2469,24 +2502,6 @@ int dw_mci_probe(struct dw_mci *host)
+>                 }
+>         }
 >
+> -       host->vmmc = devm_regulator_get_optional(host->dev, "vmmc");
+> -       if (IS_ERR(host->vmmc)) {
+> -               ret = PTR_ERR(host->vmmc);
+> -               if (ret == -EPROBE_DEFER)
+> -                       goto err_clk_ciu;
+> -
+> -               dev_info(host->dev, "no vmmc regulator found: %d\n", ret);
+> -               host->vmmc = NULL;
+> -       } else {
+> -               ret = regulator_enable(host->vmmc);
+> -               if (ret) {
+> -                       if (ret != -EPROBE_DEFER)
+> -                               dev_err(host->dev,
+> -                                       "regulator_enable fail: %d\n", ret);
+> -                       goto err_clk_ciu;
+> -               }
+> -       }
+> -
+>         host->quirks = host->pdata->quirks;
+>
+>         spin_lock_init(&host->lock);
+> @@ -2630,8 +2645,6 @@ err_workqueue:
+>  err_dmaunmap:
+>         if (host->use_dma && host->dma_ops->exit)
+>                 host->dma_ops->exit(host);
+> -       if (host->vmmc)
+> -               regulator_disable(host->vmmc);
+>
+>  err_clk_ciu:
+>         if (!IS_ERR(host->ciu_clk))
+> @@ -2667,9 +2680,6 @@ void dw_mci_remove(struct dw_mci *host)
+>         if (host->use_dma && host->dma_ops->exit)
+>                 host->dma_ops->exit(host);
+>
+> -       if (host->vmmc)
+> -               regulator_disable(host->vmmc);
+> -
+>         if (!IS_ERR(host->ciu_clk))
+>                 clk_disable_unprepare(host->ciu_clk);
+>
+> @@ -2686,9 +2696,6 @@ EXPORT_SYMBOL(dw_mci_remove);
+>   */
+>  int dw_mci_suspend(struct dw_mci *host)
+>  {
+> -       if (host->vmmc)
+> -               regulator_disable(host->vmmc);
+> -
+>         return 0;
+>  }
+>  EXPORT_SYMBOL(dw_mci_suspend);
+> @@ -2697,15 +2704,6 @@ int dw_mci_resume(struct dw_mci *host)
+>  {
+>         int i, ret;
+>
+> -       if (host->vmmc) {
+> -               ret = regulator_enable(host->vmmc);
+> -               if (ret) {
+> -                       dev_err(host->dev,
+> -                               "failed to enable regulator: %d\n", ret);
+> -                       return ret;
+> -               }
+> -       }
+> -
+>         if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
+>                 ret = -ENODEV;
+>                 return ret;
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index 29ce014..84e2827 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -188,7 +188,7 @@ struct dw_mci {
+>         /* Workaround flags */
+>         u32                     quirks;
+>
+> -       struct regulator        *vmmc;  /* Power regulator */
+> +       bool                    vqmmc_enabled;
+>         unsigned long           irq_flags; /* IRQ flags */
+>         int                     irq;
+>  };
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 1.7.10.4
+>
