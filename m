@@ -1,80 +1,91 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: dw_mmc: move rockchip related code to a separate file
-Date: Fri, 29 Aug 2014 13:05:39 +0200
-Message-ID: <CAPDyKFqAx=WVk2T6FwsSZ0hHsC5ARZF4KhHnn9MCbT6DkAAXkg@mail.gmail.com>
-References: <1408003293-27375-1-git-send-email-addy.ke@rock-chips.com>
-	<1408422974-22301-1-git-send-email-addy.ke@rock-chips.com>
-	<CAD=FV=Xri1gVdBvmEmxzsyf3z=+Qpuzj4afJ-A2NJfPY0in00A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: Add PCI IDs for Intel Braswell
+Date: Fri, 29 Aug 2014 13:08:25 +0200
+Message-ID: <CAPDyKFp+NYUOVwjiHLDAB2idSXmUFDGNGxVLUyNRW_XuVCoRkw@mail.gmail.com>
+References: <1408530464-8025-1-git-send-email-mika.westerberg@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f49.google.com ([209.85.215.49]:33365 "EHLO
-	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751611AbaH2LFl convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Aug 2014 07:05:41 -0400
-Received: by mail-la0-f49.google.com with SMTP id b17so2432139lan.8
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Aug 2014 04:05:39 -0700 (PDT)
-In-Reply-To: <CAD=FV=Xri1gVdBvmEmxzsyf3z=+Qpuzj4afJ-A2NJfPY0in00A@mail.gmail.com>
+Received: from mail-lb0-f173.google.com ([209.85.217.173]:58518 "EHLO
+	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753177AbaH2LI1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Aug 2014 07:08:27 -0400
+Received: by mail-lb0-f173.google.com with SMTP id c11so2399403lbj.18
+        for <linux-mmc@vger.kernel.org>; Fri, 29 Aug 2014 04:08:26 -0700 (PDT)
+In-Reply-To: <1408530464-8025-1-git-send-email-mika.westerberg@linux.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>, Addy Ke <addy.ke@rock-chips.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "zhenfu.fang" <zhenfu.fang@rock-chips.com>, Eddie Cai <cf@rock-chips.com>, lintao <lintao@rock-chips.com>, chenfen <chenfen@rock-chips.com>, zyf <zyf@rock-chips.com>, Jianqun Xu <xjq@rock-chip>
+To: Mika Westerberg <mika.westerberg@linux.intel.com>
+Cc: Chris Ball <chris@printf.net>, Alan Cox <alan@linux.intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 19 August 2014 19:28, Doug Anderson <dianders@chromium.org> wrote:
-> Hi,
+On 20 August 2014 12:27, Mika Westerberg
+<mika.westerberg@linux.intel.com> wrote:
+> From: Alan Cox <alan@linux.intel.com>
 >
-> On Mon, Aug 18, 2014 at 9:36 PM, Addy Ke <addy.ke@rock-chips.com> wro=
-te:
->> To support HS200 and UHS-1, we need add a big hunk of code,
->> as shown in the following patches. So a separate file for
->> rockchip SOCs is suitable.
->>
->> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
->> ---
->> Changes in v2:
->> - Kconfig: depend on ARCH_ROCKCHIP, suggested by Bartlomiej Zolnierk=
-iewicz
->> - Kconfig: depend on OF, suggested by Doug Anderson
->> - Not change suspend/resume code, suggested by Doug Anderson
->> - If pdev->dev.of_node is NULL, then return -ENODEV, suggested by He=
-iko St=C3=BCbner
->>
->>  drivers/mmc/host/Kconfig           |   9 +++
->>  drivers/mmc/host/Makefile          |   1 +
->>  drivers/mmc/host/dw_mmc-pltfm.c    |  57 ----------------
->>  drivers/mmc/host/dw_mmc-rockchip.c | 136 ++++++++++++++++++++++++++=
-+++++++++++
->>  4 files changed, 146 insertions(+), 57 deletions(-)
->>  create mode 100644 drivers/mmc/host/dw_mmc-rockchip.c
->>
->> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->> index a565254..f6095f6 100644
->> --- a/drivers/mmc/host/Kconfig
->> +++ b/drivers/mmc/host/Kconfig
->> @@ -621,6 +621,15 @@ config MMC_DW_PCI
->>
->>           If unsure, say N.
->>
->> +config MMC_DW_ROCKCHIP
->> +       tristate "Rockchip specific extensions for Synopsys DW Memor=
-y Card Interface"
->> +       depends on MMC_DW && ARCH_ROCKCHIP && OF
+> The hardware is the same as used in Baytrail. Add these new PCI IDs to the
+> driver's list of supported IDs.
 >
-> Actually, Heiko's change to check if pdev->dev.of_node is NULL means
-> that you don't need to depend on OF anymore.
->
-> Ulf: do you want Addy to spin again, or do you want to just remove
-> this "&& OF" when applying the patch?
->
-> ...I've tested this both with and without the "&& OF", and the "&& OF=
-"
-> won't really hurt anything, so:
->
-> Tested-by: Doug Anderson <dianders@chromium.org>
-> Reviewed-by: Doug Anderson <dianders@chromium.org>
+> Signed-off-by: Alan Cox <alan@linux.intel.com>
+> Signed-off-by: Mika Westerberg <mika.westerberg@linux.intel.com>
 
-Thanks! Applied for next and by removing the dependency to "OF".
+Thanks! Applied for next.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-pci.c | 23 +++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-pci.h |  3 +++
+>  2 files changed, 26 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+> index c3a1debc9289..03daad56d884 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -876,6 +876,29 @@ static const struct pci_device_id pci_ids[] = {
+>                 .driver_data    = (kernel_ulong_t)&sdhci_intel_byt_emmc,
+>         },
+>
+> +       {
+> +               .vendor         = PCI_VENDOR_ID_INTEL,
+> +               .device         = PCI_DEVICE_ID_INTEL_BSW_EMMC,
+> +               .subvendor      = PCI_ANY_ID,
+> +               .subdevice      = PCI_ANY_ID,
+> +               .driver_data    = (kernel_ulong_t)&sdhci_intel_byt_emmc,
+> +       },
+> +
+> +       {
+> +               .vendor         = PCI_VENDOR_ID_INTEL,
+> +               .device         = PCI_DEVICE_ID_INTEL_BSW_SDIO,
+> +               .subvendor      = PCI_ANY_ID,
+> +               .subdevice      = PCI_ANY_ID,
+> +               .driver_data    = (kernel_ulong_t)&sdhci_intel_byt_sdio,
+> +       },
+> +
+> +       {
+> +               .vendor         = PCI_VENDOR_ID_INTEL,
+> +               .device         = PCI_DEVICE_ID_INTEL_BSW_SD,
+> +               .subvendor      = PCI_ANY_ID,
+> +               .subdevice      = PCI_ANY_ID,
+> +               .driver_data    = (kernel_ulong_t)&sdhci_intel_byt_sd,
+> +       },
+>
+>         {
+>                 .vendor         = PCI_VENDOR_ID_INTEL,
+> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+> index c101477ef3be..9c1909b2a3ad 100644
+> --- a/drivers/mmc/host/sdhci-pci.h
+> +++ b/drivers/mmc/host/sdhci-pci.h
+> @@ -11,6 +11,9 @@
+>  #define PCI_DEVICE_ID_INTEL_BYT_SDIO   0x0f15
+>  #define PCI_DEVICE_ID_INTEL_BYT_SD     0x0f16
+>  #define PCI_DEVICE_ID_INTEL_BYT_EMMC2  0x0f50
+> +#define PCI_DEVICE_ID_INTEL_BSW_EMMC   0x2294
+> +#define PCI_DEVICE_ID_INTEL_BSW_SDIO   0x2295
+> +#define PCI_DEVICE_ID_INTEL_BSW_SD     0x2296
+>  #define PCI_DEVICE_ID_INTEL_MRFL_MMC   0x1190
+>  #define PCI_DEVICE_ID_INTEL_CLV_SDIO0  0x08f9
+>  #define PCI_DEVICE_ID_INTEL_CLV_SDIO1  0x08fa
+> --
+> 2.1.0
+>
