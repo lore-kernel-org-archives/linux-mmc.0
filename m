@@ -1,108 +1,152 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: [PATCH V2 3/3] mmc: dw_mmc: Dont cut off vqmmc and vmmc
-Date: Thu, 28 Aug 2014 21:08:10 -0700
-Message-ID: <CAD=FV=XyBmdd1WZduY5u3S8=Nr_EmdP8JO-RhKitr+ZH64dqTg@mail.gmail.com>
-References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
-	<1408715272-13833-4-git-send-email-yuvaraj.cd@samsung.com>
-	<CAPDyKFqz8sGj2td=ihZXN4zvAqmu9FHZjWdCn-ZRcdHugNHe2g@mail.gmail.com>
-	<CAPz6YkXH1mMOTwcLkKdffdUHN+TaCAhpa8oG0h+rFn9i+GMoCw@mail.gmail.com>
-	<CAPDyKFqp7oEt9ASmdxrgUwbQ8aTZzAuJ7uD1oGN50iuzPzBfVg@mail.gmail.com>
-	<CAD=FV=VQWzhiSU+iULACj+Dp_tDf3SszQ8ELLEGqVEyJJRQy1Q@mail.gmail.com>
-	<CAPDyKFo9-5=uPqD8RvLGsYtSCynBFnGGeSCpwLZuzDtW+652hA@mail.gmail.com>
-	<CAD=FV=VveHTYmiBu42DJeFFGARV2+1bS6Y2CQM995YkX_O9SQA@mail.gmail.com>
-	<CAPDyKFpUU643iXVbxuu9Vx1zY0K7x4z-ZxxVEWd+Lsuwp0iA+g@mail.gmail.com>
-	<CAD=FV=Vqz=kA=D5KDyq_QuPi-6B05VixYManTsFe2PC-fzxRkw@mail.gmail.com>
-	<CAPDyKFrcA183V-R-nbZcY8wXCRqONb1WUu3BS_0vNJe2+Ej2_w@mail.gmail.com>
-	<CAD=FV=UykPjixODXJ-s6vrZVs3O3=rX2iUakm6WnqiqvJNkoqQ@mail.gmail.com>
-	<CAPz6YkXOxunSP9ZT_Ur+i3CicZ+rv-pvTE2M+rvODTqh8PHZrA@mail.gmail.com>
+From: Mike Looijmans <mike.looijmans@topic.nl>
+Subject: Re: [PATCH] davinci-mmc: Use IRQ to detect "card not busy" status
+ change
+Date: Fri, 29 Aug 2014 08:43:41 +0200
+Message-ID: <5400211D.1060107@topic.nl>
+References: <1409294496-4220-1-git-send-email-mike.looijmans@topic.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAPz6YkXOxunSP9ZT_Ur+i3CicZ+rv-pvTE2M+rvODTqh8PHZrA@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Sonny Rao <sonnyrao@chromium.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp07.online.nl ([194.134.42.52]:36011 "EHLO smtp07.online.nl"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751321AbaH2Gvr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 29 Aug 2014 02:51:47 -0400
+In-Reply-To: <1409294496-4220-1-git-send-email-mike.looijmans@topic.nl>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: cjb@laptop.org, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org
 
-Hi,
+Note: I have not been able to test or even compile this on recent 
+kernels. Can somebody verify that this does not kill the SD driver?
 
-On Thu, Aug 28, 2014 at 10:50 AM, Sonny Rao <sonnyrao@chromium.org> wrote:
-> On Thu, Aug 28, 2014 at 8:50 AM, Doug Anderson <dianders@google.com> wrote:
->> Ulf,
->>
->> On Thu, Aug 28, 2014 at 12:25 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> On 27 August 2014 17:52, Doug Anderson <dianders@google.com> wrote:
->>>> Ulf,
->>>>
->>>> On Wed, Aug 27, 2014 at 4:17 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>>>>> Now, we've got MMC_CAP_NEEDS_POLL, so dw_mmc will periodically be
->>>>>> called to check the card detect line, but with vmmc and vqmmc off.  It
->>>>>> will be unable to return a sensible value without actually turning on
->>>>>> vmmc and vqmmc.
->>>>>
->>>>> Currently MMC_CAP_NEEDS_POLL mean the mmc rescan work will reschedule
->>>>> itself with HZ interval. This to check for card insert/removal.
->>>>>
->>>>> Now, mmc_rescan() will, if present, invoke host's ->get_cd() callback
->>>>> to check whether it's worth to continue initialization sequence or if
->>>>> it should re-schedule itself again.
->>>>>
->>>>> If your host driver can distinguish whether a card is inserted, which
->>>>> in this case are when vccq is turned off, your ->get_cd() callback need
->>>>> to return 1. That will allow mmc_rescan() to continue it's
->>>>> initialization sequence and do mmc_power_up().
->>>>
->>>> As per my other email, we can't tell whether a card is inserted when
->>>> vqmmc is off.
->>>
->>> I understand.
->>>
->>> The solution I proposed above, is:
->>>
->>> 1) Enable MMC_CAP_NEEDS_POLL.
->>> 2) Make ->get_cd() return 1, when you can't distinguish if the card is inserted.
->>>
->>> That will solve this issue and without messing up the mmc core.
->>
->> Ah, I see!  So every 1 second, we'll do the following:
->>
->> 1. Call get_cd(), which returns 1.
->>
->> 2. MMC core will power everything up (turn on all regulators) for MMC.
->>
->> 3. We'll start to initialize a card.
->>
->> 4. We'll notice that, oops, there's no card there.
->>
->> 5. MMC core will shut things down again.
->>
->>
->> That seems awfully expensive to do every second when the card detect
->> line actually does work (as long as you keep power lines).  Is the
->> patch to separate out the concepts of "power off because no card is
->> inserted" and "power off because we're power cycling the card" really
->> bad enough to warrant forcing us to use the above?
->>
->> I'm not an EE, but cycling regulators on and off every second doesn't
->> seem super ideal, but maybe they're designed for it?
->>
->>
->> Personally, I'd be tempted to just leave the power on all the time and
->> if a card somehow needs to be power cycled (because UHS negotiation
->> failed?) then that card just isn't supported.  This could be done in
->> the dts by saying that the regulator is "always on" and no need to
->> pollute any source files.
+Mike.
+
+On 08/29/2014 08:41 AM, Mike Looijmans wrote:
+> The davinci-mmc driver uses a busy wait loop to wait for the card to
+> become ready (BUSY signal). The MMC card uses this to signal the
+> controller that it's busy writing and cannot handle new requests yet.
+> This loop often takes 100k cycles and 10ms to complete.
 >
-> Yeah, power cycling the regulators constantly doesn't seem like a
-> great idea, we can ask the EEs what they think.
+> The controller can raise an interrupt when the BUSY signal is deasserted,
+> so the routine has been adapted to trigger an interrupt and wait for it
+> using a wait_event_timeout instead of a busy wait loop.
 >
-> This scheme of leaving them on all the time would prevent us from
-> being able to actually power cycle the card, which I think is required
-> by the spec in case UHS negotiation fails.
+> This reduces the CPU usage of the mmcqd process drastically, from 35% to
+> 2% when writing to SD. No noticable change in performance or reliability.
+>
+> Tested on a custom board with an OMAP-L138 CPU. Patch originally applied
+> to a 2.6.37 kernel and ported to 3.14.
+>
+> Signed-off-by: Mike Looijmans <mike.looijmans@topic.nl>
+> ---
+>   drivers/mmc/host/davinci_mmc.c |   52 +++++++++++++++++++++++++---------------
+>   1 file changed, 33 insertions(+), 19 deletions(-)
+>
+> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+> index d615374..50458f4 100644
+> --- a/drivers/mmc/host/davinci_mmc.c
+> +++ b/drivers/mmc/host/davinci_mmc.c
+> @@ -223,6 +223,7 @@ struct mmc_davinci_host {
+>   #ifdef CONFIG_CPU_FREQ
+>   	struct notifier_block	freq_transition;
+>   #endif
+> +	wait_queue_head_t 	wait_while_busy_queue
+>   };
+>
+>   static irqreturn_t mmc_davinci_irq(int irq, void *dev_id);
+> @@ -628,23 +629,28 @@ mmc_davinci_prepare_data(struct mmc_davinci_host *host, struct mmc_request *req)
+>   static void mmc_davinci_request(struct mmc_host *mmc, struct mmc_request *req)
+>   {
+>   	struct mmc_davinci_host *host = mmc_priv(mmc);
+> -	unsigned long timeout = jiffies + msecs_to_jiffies(900);
+> -	u32 mmcst1 = 0;
+> +	unsigned int remaining;
+>
+>   	/* Card may still be sending BUSY after a previous operation,
+>   	 * typically some kind of write.  If so, we can't proceed yet.
+>   	 */
+> -	while (time_before(jiffies, timeout)) {
+> -		mmcst1  = readl(host->base + DAVINCI_MMCST1);
+> -		if (!(mmcst1 & MMCST1_BUSY))
+> -			break;
+> -		cpu_relax();
+> -	}
+> -	if (mmcst1 & MMCST1_BUSY) {
+> -		dev_err(mmc_dev(host->mmc), "still BUSY? bad ... \n");
+> -		req->cmd->error = -ETIMEDOUT;
+> -		mmc_request_done(mmc, req);
+> -		return;
+> +	if (readl(host->base + DAVINCI_MMCST1) & MMCST1_BUSY) {
+> +		/* Arm BSYDNE interrupt and wait for it */
+> +		writel(MMCST0_BSYDNE, host->base + DAVINCI_MMCIM);
+> +		remaining = wait_event_timeout(
+> +				host->wait_while_busy_queue,
+> +				((readl(host->base + DAVINCI_MMCST1) & MMCST1_BUSY) == 0),
+> +				msecs_to_jiffies(900));
+> +		writel(0, host->base + DAVINCI_MMCIM);
+> +		if (unlikely(remaining == 0))
+> +		{
+> +			if (readl(host->base + DAVINCI_MMCST1) & MMCST1_BUSY) {
+> +				dev_err(mmc_dev(host->mmc), "Timeout waiting for BSYDNE interrupt.\n");
+> +				req->cmd->error = -ETIMEDOUT;
+> +				mmc_request_done(mmc, req);
+> +				return;
+> +			}
+> +		}
+>   	}
+>
+>   	host->do_dma = 0;
+> @@ -914,18 +920,21 @@ static irqreturn_t mmc_davinci_irq(int irq, void *dev_id)
+>   	int end_transfer = 0;
+>   	struct mmc_data *data = host->data;
+>
+> +	status = readl(host->base + DAVINCI_MMCST0);
+> +	qstatus = status;
+> +
+>   	if (host->cmd == NULL && host->data == NULL) {
+> -		status = readl(host->base + DAVINCI_MMCST0);
+> -		dev_dbg(mmc_dev(host->mmc),
+> -			"Spurious interrupt 0x%04x\n", status);
+> +		/* We may have been waiting for the busy-done signal */
+> +		if (qstatus & MMCST0_BSYDNE) {
+> +			wake_up(&host->wait_while_busy_queue);
+> +			return IRQ_HANDLED;
+> +		}
+> +		dev_dbg(mmc_dev(host->mmc), "Spurious interrupt %#x\n", status);
+>   		/* Disable the interrupt from mmcsd */
+>   		writel(0, host->base + DAVINCI_MMCIM);
+>   		return IRQ_NONE;
+>   	}
+>
+> -	status = readl(host->base + DAVINCI_MMCST0);
+> -	qstatus = status;
+> -
+>   	/* handle FIFO first when using PIO for data.
+>   	 * bytes_left will decrease to zero as I/O progress and status will
+>   	 * read zero over iteration because this controller status
+> @@ -1044,6 +1053,10 @@ static irqreturn_t mmc_davinci_irq(int irq, void *dev_id)
+>   		end_command = (int) host->cmd;
+>   	}
+>
+> +	if (qstatus & MMCST0_BSYDNE) {
+> +		wake_up(&host->wait_while_busy_queue);
+> +	}
+> +
+>   	if (end_command)
+>   		mmc_davinci_cmd_done(host, host->cmd);
+>   	if (end_transfer)
+> @@ -1261,6 +1274,7 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
+>
+>   	host = mmc_priv(mmc);
+>   	host->mmc = mmc;	/* Important */
+> +	init_waitqueue_head(&host->wait_while_busy_queue);
+>
+>   	r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+>   	if (!r)
+>
 
-OK, fair enough.  I guess polling is less bad than nor supporting card
-power cycling.  ...it still feels like adding this quirk to the core
-isn't super ugly, but if everyone is against it...
 
-
--Doug
+-- 
+Mike Looijmans
