@@ -1,78 +1,192 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v2 00/12] clk: sunxi: Improve MMC clocks support
-Date: Sat, 30 Aug 2014 22:02:59 +0200
-Message-ID: <1409428991-2442-1-git-send-email-maxime.ripard@free-electrons.com>
+Subject: [PATCH v2 11/12] mmc: sunxi: Convert MMC driver to the standard clock phase API
+Date: Sat, 30 Aug 2014 22:03:10 +0200
+Message-ID: <1409428991-2442-12-git-send-email-maxime.ripard@free-electrons.com>
+References: <1409428991-2442-1-git-send-email-maxime.ripard@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from top.free-electrons.com ([176.31.233.9]:53592 "EHLO
+Received: from top.free-electrons.com ([176.31.233.9]:53598 "EHLO
 	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751640AbaH3UFF (ORCPT
+	with ESMTP id S1751711AbaH3UFF (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Sat, 30 Aug 2014 16:05:05 -0400
+In-Reply-To: <1409428991-2442-1-git-send-email-maxime.ripard@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Mike Turquette <mturquette@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Emilio Lopez <emilio@elopez.com.ar>, chris@printf.net, david.lanzendoerfer@o2s.ch, ulf.hansson@linaro.org
 Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Maxime Ripard <maxime.ripard@free-electrons.com>
 
-Hi everyone,
+Now that we have proper support to use the generic phase API in our clock
+driver, switch the MMC driver to use it.
 
-Here is an attempt at improving the MMC clock support in the Allwinner
-SoCs.
+Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ .../devicetree/bindings/mmc/sunxi-mmc.txt          |  8 +--
+ drivers/mmc/host/sunxi-mmc.c                       | 72 +++++++++++++++-------
+ 2 files changed, 53 insertions(+), 27 deletions(-)
 
-Until now, the MMC clocks were having a custom phase function that was
-directly setting an obscure value in the right register, because we
-were not really having any idea of what these values were.
-
-Now that we have more informations, we can introduce a common function
-call to get and set the phase of a particular clock, and use this in
-both our provider and our client.
-
-Thanks,
-Maxime
-
-Changes from v1:
-  - Dropped the patches to enforce rate boundaries on the clocks. This
-    is partly covered by the Tomeu, and should be based on this
-    whenever it will be merged.
-  - Fixed a few typos here and there
-  - Added a patch to include of.h from clk-provider.h
-
-Maxime Ripard (11):
-  clk: Include of.h in clock-provider.h
-  clk: Add a function to retrieve phase
-  clk: sunxi: factors: Invert the probing logic
-  clk: sunxi: Introduce mbus compatible
-  ARM: sunxi: dt: Switch to the new mbus compatible
-  clk: sunxi: Move mod0 clock to a file of its own
-  clk: sunxi: Move mbus to mod0 file
-  ARM: sunxi: dt: Add sample and output mmc clocks
-  clk: sunxi: mod0: Introduce MMC proper phase handling
-  mmc: sunxi: Convert MMC driver to the standard clock phase API
-  clk: sunxi: Remove custom phase function
-
-Mike Turquette (1):
-  clk: introduce clk_set_phase function & callback
-
- Documentation/devicetree/bindings/clock/sunxi.txt  |   3 +
- .../devicetree/bindings/mmc/sunxi-mmc.txt          |   8 +-
- arch/arm/boot/dts/sun4i-a10.dtsi                   | 104 +++++++-
- arch/arm/boot/dts/sun5i-a10s.dtsi                  |  81 +++++-
- arch/arm/boot/dts/sun5i-a13.dtsi                   |  82 +++++-
- arch/arm/boot/dts/sun6i-a31.dtsi                   | 104 +++++++-
- arch/arm/boot/dts/sun7i-a20.dtsi                   | 106 +++++++-
- drivers/clk/clk.c                                  |  96 ++++++-
- drivers/clk/sunxi/Makefile                         |   1 +
- drivers/clk/sunxi/clk-factors.c                    | 101 +++++++-
- drivers/clk/sunxi/clk-factors.h                    |  16 +-
- drivers/clk/sunxi/clk-mod0.c                       | 283 +++++++++++++++++++++
- drivers/clk/sunxi/clk-sunxi.c                      | 189 +-------------
- drivers/mmc/host/sunxi-mmc.c                       |  72 ++++--
- include/linux/clk-private.h                        |   1 +
- include/linux/clk-provider.h                       |  11 +
- include/linux/clk.h                                |  29 +++
- include/linux/clk/sunxi.h                          |  22 --
- 18 files changed, 1019 insertions(+), 290 deletions(-)
- create mode 100644 drivers/clk/sunxi/clk-mod0.c
- delete mode 100644 include/linux/clk/sunxi.h
-
+diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+index 91b3a3467150..4bf41d833804 100644
+--- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+@@ -10,8 +10,8 @@ Absolute maximum transfer rate is 200MB/s
+ Required properties:
+  - compatible : "allwinner,sun4i-a10-mmc" or "allwinner,sun5i-a13-mmc"
+  - reg : mmc controller base registers
+- - clocks : a list with 2 phandle + clock specifier pairs
+- - clock-names : must contain "ahb" and "mmc"
++ - clocks : a list with 4 phandle + clock specifier pairs
++ - clock-names : must contain "ahb", "mmc", "output" and "sample"
+  - interrupts : mmc controller interrupt
+ 
+ Optional properties:
+@@ -25,8 +25,8 @@ Examples:
+ 	mmc0: mmc@01c0f000 {
+ 		compatible = "allwinner,sun5i-a13-mmc";
+ 		reg = <0x01c0f000 0x1000>;
+-		clocks = <&ahb_gates 8>, <&mmc0_clk>;
+-		clock-names = "ahb", "mod";
++		clocks = <&ahb_gates 8>, <&mmc0_clk>, <&mmc0_output_clk>, <&mmc0_sample_clk>;
++		clock-names = "ahb", "mod", "output", "sample";
+ 		interrupts = <0 32 4>;
+ 		status = "disabled";
+ 	};
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 024f67c98cdc..8719cefa590d 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -22,7 +22,6 @@
+ 
+ #include <linux/clk.h>
+ #include <linux/clk-private.h>
+-#include <linux/clk/sunxi.h>
+ 
+ #include <linux/gpio.h>
+ #include <linux/platform_device.h>
+@@ -230,6 +229,8 @@ struct sunxi_mmc_host {
+ 	/* clock management */
+ 	struct clk	*clk_ahb;
+ 	struct clk	*clk_mmc;
++	struct clk	*clk_sample;
++	struct clk	*clk_output;
+ 
+ 	/* irq */
+ 	spinlock_t	lock;
+@@ -617,7 +618,7 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 				  struct mmc_ios *ios)
+ {
+-	u32 rate, oclk_dly, rval, sclk_dly, src_clk;
++	u32 rate, oclk_dly, rval, sclk_dly;
+ 	int ret;
+ 
+ 	rate = clk_round_rate(host->clk_mmc, ios->clock);
+@@ -643,34 +644,31 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 
+ 	/* determine delays */
+ 	if (rate <= 400000) {
+-		oclk_dly = 0;
+-		sclk_dly = 7;
++		oclk_dly = 180;
++		sclk_dly = 42;
+ 	} else if (rate <= 25000000) {
+-		oclk_dly = 0;
+-		sclk_dly = 5;
++		oclk_dly = 180;
++		sclk_dly = 75;
+ 	} else if (rate <= 50000000) {
+ 		if (ios->timing == MMC_TIMING_UHS_DDR50) {
+-			oclk_dly = 2;
+-			sclk_dly = 4;
++			oclk_dly = 60;
++			sclk_dly = 120;
+ 		} else {
+-			oclk_dly = 3;
+-			sclk_dly = 5;
++			oclk_dly = 90;
++			sclk_dly = 150;
+ 		}
++	} else if (rate <= 100000000) {
++		oclk_dly = 6;
++		sclk_dly = 24;
++	} else if (rate <= 200000000) {
++		oclk_dly = 3;
++		sclk_dly = 12;
+ 	} else {
+-		/* rate > 50000000 */
+-		oclk_dly = 2;
+-		sclk_dly = 4;
++		return -EINVAL;
+ 	}
+ 
+-	src_clk = clk_get_rate(clk_get_parent(host->clk_mmc));
+-	if (src_clk >= 300000000 && src_clk <= 400000000) {
+-		if (oclk_dly)
+-			oclk_dly--;
+-		if (sclk_dly)
+-			sclk_dly--;
+-	}
+-
+-	clk_sunxi_mmc_phase_control(host->clk_mmc, sclk_dly, oclk_dly);
++	clk_set_phase(host->clk_sample, sclk_dly);
++	clk_set_phase(host->clk_output, oclk_dly);
+ 
+ 	return sunxi_mmc_oclk_onoff(host, 1);
+ }
+@@ -909,6 +907,18 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+ 		return PTR_ERR(host->clk_mmc);
+ 	}
+ 
++	host->clk_output = devm_clk_get(&pdev->dev, "output");
++	if (IS_ERR(host->clk_output)) {
++		dev_err(&pdev->dev, "Could not get output clock\n");
++		return PTR_ERR(host->clk_output);
++	}
++
++	host->clk_sample = devm_clk_get(&pdev->dev, "sample");
++	if (IS_ERR(host->clk_sample)) {
++		dev_err(&pdev->dev, "Could not get sample clock\n");
++		return PTR_ERR(host->clk_sample);
++	}
++
+ 	host->reset = devm_reset_control_get(&pdev->dev, "ahb");
+ 
+ 	ret = clk_prepare_enable(host->clk_ahb);
+@@ -923,11 +933,23 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+ 		goto error_disable_clk_ahb;
+ 	}
+ 
++	ret = clk_prepare_enable(host->clk_output);
++	if (ret) {
++		dev_err(&pdev->dev, "Enable output clk err %d\n", ret);
++		goto error_disable_clk_mmc;
++	}
++
++	ret = clk_prepare_enable(host->clk_sample);
++	if (ret) {
++		dev_err(&pdev->dev, "Enable sample clk err %d\n", ret);
++		goto error_disable_clk_output;
++	}
++
+ 	if (!IS_ERR(host->reset)) {
+ 		ret = reset_control_deassert(host->reset);
+ 		if (ret) {
+ 			dev_err(&pdev->dev, "reset err %d\n", ret);
+-			goto error_disable_clk_mmc;
++			goto error_disable_clk_sample;
+ 		}
+ 	}
+ 
+@@ -946,6 +968,10 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+ error_assert_reset:
+ 	if (!IS_ERR(host->reset))
+ 		reset_control_assert(host->reset);
++error_disable_clk_sample:
++	clk_disable_unprepare(host->clk_sample);
++error_disable_clk_output:
++	clk_disable_unprepare(host->clk_output);
+ error_disable_clk_mmc:
+ 	clk_disable_unprepare(host->clk_mmc);
+ error_disable_clk_ahb:
 -- 
 2.0.2
 
