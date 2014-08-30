@@ -1,65 +1,100 @@
-From: David =?ISO-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>
-Subject: Re: [PATCH] mmc: sunxi: Declare ERASE capability
-Date: Sat, 30 Aug 2014 01:16:14 +0200
-Message-ID: <3040533.uqhIdSSGxW@dizzy-6.o2s.ch>
-References: <1408541960-14788-1-git-send-email-wens@csie.org> <3728016.4j3Ljjy6eM@dizzy-6.o2s.ch> <CAPDyKFq1yzdu19ReECRZzVynHZByN4803WdZ=vjgCnC9F0+MiA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="nextPart2336499.IqaWaCkYNV"; micalg="pgp-sha1"; protocol="application/pgp-signature"
+From: Chanho Min <chanho.min@lge.com>
+Subject: [PATCH v2] mmc:sdhci: handle busy-end interrupt during command
+Date: Sat, 30 Aug 2014 12:40:40 +0900
+Message-ID: <1409370040-14225-1-git-send-email-chanho.min@lge.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kolab.o2s.ch ([77.109.136.180]:60258 "EHLO kolab.o2s.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750995AbaH2XRF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 29 Aug 2014 19:17:05 -0400
-In-Reply-To: <CAPDyKFq1yzdu19ReECRZzVynHZByN4803WdZ=vjgCnC9F0+MiA@mail.gmail.com>
+Received: from lgeamrelo04.lge.com ([156.147.1.127]:58096 "EHLO
+	lgeamrelo04.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750878AbaH3Dkz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Aug 2014 23:40:55 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chen-Yu Tsai <wens@csie.org>, Chris Ball <chris@printf.net>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Hans de Goede <hdegoede@redhat.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Hankyung Yu <hankyung.yu@lge.com>, Gwendal Grignou <gwendal@chromium.org>, Chanho Min <chanho.min@lge.com>
 
+It is fully legal for a controller to start handling busy-end interrupt
+before it has signaled that the command has completed. So make sure
+we do things in the proper order, Or it results that command interrupt
+is ignored so it can cause unexpected operations. This is founded at some
+toshiba emmc with the bellow warning.
 
---nextPart2336499.IqaWaCkYNV
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="iso-8859-1"
+"mmc0: Got command interrupt 0x00000001 even though
+no command operation was in progress."
 
-Hi
-> > I totally agree with you that information about such capabilities s=
-hould
-> > be
-> > exposed but maybe it would be wiser to use DT instead of hardcoding=
- it?
->=20
-> Nope, this is pure software support. No HW config.
-Okey!
-> What we should do future wise, is to remove the MMC_CAP_ERASE
-> entirely. Due to current existing bugs, mainly in mmc core layer
-> regarding erase, we can't do it yet.
-I see.
-> > I mean a WiFi device won't support erase functionality...
->=20
-> That's already covered by the mmc core layer. No worries.
-Splendid!
-Ok then. Let's have it in our driver so far until we can get rid of thi=
-s flag
-for good.
+This issue has been also reported by Youssef TRIKI:
+It is not specific to Toshiba devices, and happens with eMMC devices
+as well as SD card which support Auto-CMD12 rather than CMD23.
 
-cheers
-=2D-=20
-David Lanzend=F6rfer
-OpenSourceSupport GmbH
-System engineer and supporter
-http://www.o2s.ch/
---nextPart2336499.IqaWaCkYNV
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part.
-Content-Transfer-Encoding: 7Bit
+Also, similar patch is submitted by:
+Gwendal Grignou <gwendal@chromium.org>
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
+Changes since v1:
+ Fixed conflict with the next of git.linaro.org/people/ulf.hansson/mmc.git
+ and Tested if issue is fixed again. 
 
-iEYEABECAAYFAlQBCcIACgkQAeZw77btGjqu7QCgrDg/Qs3jY7jMVvar/ST0EGWA
-uJUAn3uGK7jsC8FXch79BbkSTDxWlsCH
-=DTLE
------END PGP SIGNATURE-----
+Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
+Signed-off-by: Chanho Min <chanho.min@lge.com>
+Tested-by: Youssef TRIKI <youssef.triki@st.com>
+---
+ drivers/mmc/host/sdhci.c  |   17 +++++++++++++++--
+ include/linux/mmc/sdhci.h |    1 +
+ 2 files changed, 16 insertions(+), 2 deletions(-)
 
---nextPart2336499.IqaWaCkYNV--
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index f6a683b..8428148 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1016,6 +1016,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 	mod_timer(&host->timer, timeout);
+ 
+ 	host->cmd = cmd;
++	host->busy_handle = 0;
+ 
+ 	sdhci_prepare_data(host, cmd);
+ 
+@@ -2261,8 +2262,12 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
+ 		if (host->cmd->data)
+ 			DBG("Cannot wait for busy signal when also "
+ 				"doing a data transfer");
+-		else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ))
++		else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ)
++				&& !host->busy_handle) {
++			/* Mark that command complete before busy is ended */
++			host->busy_handle = 1;
+ 			return;
++		}
+ 
+ 		/* The controller does not support the end-of-busy IRQ,
+ 		 * fall through and take the SDHCI_INT_RESPONSE */
+@@ -2330,7 +2335,15 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 				return;
+ 			}
+ 			if (intmask & SDHCI_INT_DATA_END) {
+-				sdhci_finish_command(host);
++				/*
++				 * Some cards handle busy-end interrupt
++				 * before the command completed, so make
++				 * sure we do things in the proper order.
++				 */
++				if (host->busy_handle)
++					sdhci_finish_command(host);
++				else
++					host->busy_handle = 1;
+ 				return;
+ 			}
+ 		}
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 09ebe57..0aa85ca 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -146,6 +146,7 @@ struct sdhci_host {
+ 	struct mmc_command *cmd;	/* Current command */
+ 	struct mmc_data *data;	/* Current data request */
+ 	unsigned int data_early:1;	/* Data finished before cmd */
++	unsigned int busy_handle:1;	/* Handling the order of Busy-end */
+ 
+ 	struct sg_mapping_iter sg_miter;	/* SG state for PIO */
+ 	unsigned int blocks;	/* remaining PIO blocks */
+-- 
+1.7.9.5
 
