@@ -1,336 +1,257 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v2 04/12] clk: sunxi: factors: Invert the probing logic
-Date: Sat, 30 Aug 2014 22:03:03 +0200
-Message-ID: <1409428991-2442-5-git-send-email-maxime.ripard@free-electrons.com>
+Subject: [PATCH v2 10/12] clk: sunxi: mod0: Introduce MMC proper phase handling
+Date: Sat, 30 Aug 2014 22:03:09 +0200
+Message-ID: <1409428991-2442-11-git-send-email-maxime.ripard@free-electrons.com>
 References: <1409428991-2442-1-git-send-email-maxime.ripard@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from top.free-electrons.com ([176.31.233.9]:53627 "EHLO
+Received: from top.free-electrons.com ([176.31.233.9]:53672 "EHLO
 	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751912AbaH3UFL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 30 Aug 2014 16:05:11 -0400
+	with ESMTP id S1751994AbaH3UFV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 30 Aug 2014 16:05:21 -0400
 In-Reply-To: <1409428991-2442-1-git-send-email-maxime.ripard@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Mike Turquette <mturquette@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Emilio Lopez <emilio@elopez.com.ar>, chris@printf.net, david.lanzendoerfer@o2s.ch, ulf.hansson@linaro.org
 Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Maxime Ripard <maxime.ripard@free-electrons.com>
 
-Until now, the factors clock probing was done directly by sunxi_init_clocks,
-with the factors registration being called directly with the clocks data passed
-as an argument.
+The MMC clock we thought we had until now are actually not one but three
+different clocks.
 
-This approch has shown its limits when we added more clocks, since we couldn't
-really split code with such a logic in smaller files, and led to a huge file
-having all the clocks.
+The main one is unchanged, and will have three outputs:
+  - The clock fed into the MMC
+  - a sample and output clocks, to deal with when should we output/sample data
+    to/from the MMC bus
 
-Introduce an intermediate probing function, so that factor clocks will be able
-to directly be called by CLK_OF_DECLARE, which will in turn ease the split into
-several files.
+The phase control we had are actually controlling the two latter clocks, but
+the main MMC one is unchanged.
+
+We can adjust the phase with a 3 bits value, from 0 to 7, 0 meaning a 180 phase
+shift, and the other values being the number of periods from the MMC parent
+clock to outphase the clock of.
 
 Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 ---
- drivers/clk/sunxi/clk-factors.c | 101 +++++++++++++++++++++++++++++++++++++---
- drivers/clk/sunxi/clk-factors.h |  16 ++++++-
- drivers/clk/sunxi/clk-sunxi.c   |  95 ++-----------------------------------
- 3 files changed, 113 insertions(+), 99 deletions(-)
+ Documentation/devicetree/bindings/clock/sunxi.txt |   2 +
+ drivers/clk/sunxi/clk-mod0.c                      | 189 ++++++++++++++++++++++
+ 2 files changed, 191 insertions(+)
 
-diff --git a/drivers/clk/sunxi/clk-factors.c b/drivers/clk/sunxi/clk-factors.c
-index 2057c8ac648f..f83ba097126c 100644
---- a/drivers/clk/sunxi/clk-factors.c
-+++ b/drivers/clk/sunxi/clk-factors.c
-@@ -9,18 +9,18 @@
-  */
- 
- #include <linux/clk-provider.h>
-+#include <linux/delay.h>
-+#include <linux/err.h>
-+#include <linux/io.h>
- #include <linux/module.h>
-+#include <linux/of_address.h>
- #include <linux/slab.h>
--#include <linux/io.h>
--#include <linux/err.h>
- #include <linux/string.h>
- 
--#include <linux/delay.h>
--
- #include "clk-factors.h"
- 
- /*
-- * DOC: basic adjustable factor-based clock that cannot gate
-+ * DOC: basic adjustable factor-based clock
-  *
-  * Traits of this clock:
-  * prepare - clk_prepare only ensures that parents are prepared
-@@ -32,6 +32,8 @@
- 
- #define to_clk_factors(_hw) container_of(_hw, struct clk_factors, hw)
- 
-+#define FACTORS_MAX_PARENTS		5
-+
- #define SETMASK(len, pos)		(((1U << (len)) - 1) << (pos))
- #define CLRMASK(len, pos)		(~(SETMASK(len, pos)))
- #define FACTOR_GET(bit, len, reg)	(((reg) & SETMASK(len, bit)) >> (bit))
-@@ -147,9 +149,96 @@ static int clk_factors_set_rate(struct clk_hw *hw, unsigned long rate,
- 	return 0;
- }
- 
--const struct clk_ops clk_factors_ops = {
-+static const struct clk_ops clk_factors_ops = {
- 	.determine_rate = clk_factors_determine_rate,
- 	.recalc_rate = clk_factors_recalc_rate,
- 	.round_rate = clk_factors_round_rate,
- 	.set_rate = clk_factors_set_rate,
- };
-+
-+struct clk * __init sunxi_factors_register(struct device_node *node,
-+					   const struct factors_data *data,
-+					   spinlock_t *lock)
-+{
-+	struct clk *clk;
-+	struct clk_factors *factors;
-+	struct clk_gate *gate = NULL;
-+	struct clk_mux *mux = NULL;
-+	struct clk_hw *gate_hw = NULL;
-+	struct clk_hw *mux_hw = NULL;
-+	const char *clk_name = node->name;
-+	const char *parents[FACTORS_MAX_PARENTS];
-+	void __iomem *reg;
-+	int i = 0;
-+
-+	reg = of_iomap(node, 0);
-+
-+	/* if we have a mux, we will have >1 parents */
-+	while (i < FACTORS_MAX_PARENTS &&
-+	       (parents[i] = of_clk_get_parent_name(node, i)) != NULL)
-+		i++;
-+
-+	/*
-+	 * some factor clocks, such as pll5 and pll6, may have multiple
-+	 * outputs, and have their name designated in factors_data
-+	 */
-+	if (data->name)
-+		clk_name = data->name;
-+	else
-+		of_property_read_string(node, "clock-output-names", &clk_name);
-+
-+	factors = kzalloc(sizeof(struct clk_factors), GFP_KERNEL);
-+	if (!factors)
-+		return NULL;
-+
-+	/* set up factors properties */
-+	factors->reg = reg;
-+	factors->config = data->table;
-+	factors->get_factors = data->getter;
-+	factors->lock = lock;
-+
-+	/* Add a gate if this factor clock can be gated */
-+	if (data->enable) {
-+		gate = kzalloc(sizeof(struct clk_gate), GFP_KERNEL);
-+		if (!gate) {
-+			kfree(factors);
-+			return NULL;
-+		}
-+
-+		/* set up gate properties */
-+		gate->reg = reg;
-+		gate->bit_idx = data->enable;
-+		gate->lock = factors->lock;
-+		gate_hw = &gate->hw;
-+	}
-+
-+	/* Add a mux if this factor clock can be muxed */
-+	if (data->mux) {
-+		mux = kzalloc(sizeof(struct clk_mux), GFP_KERNEL);
-+		if (!mux) {
-+			kfree(factors);
-+			kfree(gate);
-+			return NULL;
-+		}
-+
-+		/* set up gate properties */
-+		mux->reg = reg;
-+		mux->shift = data->mux;
-+		mux->mask = SUNXI_FACTORS_MUX_MASK;
-+		mux->lock = factors->lock;
-+		mux_hw = &mux->hw;
-+	}
-+
-+	clk = clk_register_composite(NULL, clk_name,
-+			parents, i,
-+			mux_hw, &clk_mux_ops,
-+			&factors->hw, &clk_factors_ops,
-+			gate_hw, &clk_gate_ops, 0);
-+
-+	if (!IS_ERR(clk)) {
-+		of_clk_add_provider(node, of_clk_src_simple_get, clk);
-+		clk_register_clkdev(clk, clk_name, NULL);
-+	}
-+
-+	return clk;
-+}
-diff --git a/drivers/clk/sunxi/clk-factors.h b/drivers/clk/sunxi/clk-factors.h
-index d2d0efa39379..9913840018d3 100644
---- a/drivers/clk/sunxi/clk-factors.h
-+++ b/drivers/clk/sunxi/clk-factors.h
-@@ -3,9 +3,12 @@
+diff --git a/Documentation/devicetree/bindings/clock/sunxi.txt b/Documentation/devicetree/bindings/clock/sunxi.txt
+index b938a990602a..eb690ed92a53 100644
+--- a/Documentation/devicetree/bindings/clock/sunxi.txt
++++ b/Documentation/devicetree/bindings/clock/sunxi.txt
+@@ -47,6 +47,8 @@ Required properties:
+ 	"allwinner,sun6i-a31-apb2-gates-clk" - for the APB2 gates on A31
+ 	"allwinner,sun8i-a23-apb2-gates-clk" - for the APB2 gates on A23
+ 	"allwinner,sun5i-a13-mbus-clk" - for the MBUS clock on A13
++	"allwinner,sun4i-a10-mmc-output-clk" - for the MMC output clock on A10
++	"allwinner,sun4i-a10-mmc-sample-clk" - for the MMC sample clock on A10
+ 	"allwinner,sun4i-a10-mod0-clk" - for the module 0 family of clocks
+ 	"allwinner,sun7i-a20-out-clk" - for the external output clocks
+ 	"allwinner,sun7i-a20-gmac-clk" - for the GMAC clock module on A20/A31
+diff --git a/drivers/clk/sunxi/clk-mod0.c b/drivers/clk/sunxi/clk-mod0.c
+index 8a7f7036aea3..4a563850ee6e 100644
+--- a/drivers/clk/sunxi/clk-mod0.c
++++ b/drivers/clk/sunxi/clk-mod0.c
+@@ -16,6 +16,7 @@
  
  #include <linux/clk-provider.h>
  #include <linux/clkdev.h>
-+#include <linux/spinlock.h>
- 
- #define SUNXI_FACTORS_NOT_APPLICABLE	(0)
- 
-+#define SUNXI_FACTORS_MUX_MASK 0x3
-+
- struct clk_factors_config {
- 	u8 nshift;
- 	u8 nwidth;
-@@ -18,6 +21,14 @@ struct clk_factors_config {
- 	u8 n_start;
- };
- 
-+struct factors_data {
-+	int enable;
-+	int mux;
-+	struct clk_factors_config *table;
-+	void (*getter) (u32 *rate, u32 parent_rate, u8 *n, u8 *k, u8 *m, u8 *p);
-+	const char *name;
-+};
-+
- struct clk_factors {
- 	struct clk_hw hw;
- 	void __iomem *reg;
-@@ -26,5 +37,8 @@ struct clk_factors {
- 	spinlock_t *lock;
- };
- 
--extern const struct clk_ops clk_factors_ops;
-+struct clk * __init sunxi_factors_register(struct device_node *node,
-+					   const struct factors_data *data,
-+					   spinlock_t *lock);
-+
- #endif
-diff --git a/drivers/clk/sunxi/clk-sunxi.c b/drivers/clk/sunxi/clk-sunxi.c
-index b654b7b1d137..953479041431 100644
---- a/drivers/clk/sunxi/clk-sunxi.c
-+++ b/drivers/clk/sunxi/clk-sunxi.c
-@@ -19,6 +19,7 @@
- #include <linux/of.h>
- #include <linux/of_address.h>
- #include <linux/reset-controller.h>
-+#include <linux/spinlock.h>
++#include <linux/of_address.h>
  
  #include "clk-factors.h"
  
-@@ -440,16 +441,6 @@ EXPORT_SYMBOL(clk_sunxi_mmc_phase_control);
-  * sunxi_factors_clk_setup() - Setup function for factor clocks
-  */
- 
--#define SUNXI_FACTORS_MUX_MASK 0x3
--
--struct factors_data {
--	int enable;
--	int mux;
--	struct clk_factors_config *table;
--	void (*getter) (u32 *rate, u32 parent_rate, u8 *n, u8 *k, u8 *m, u8 *p);
--	const char *name;
--};
--
- static struct clk_factors_config sun4i_pll1_config = {
- 	.nshift = 8,
- 	.nwidth = 5,
-@@ -583,89 +574,9 @@ static const struct factors_data sun7i_a20_out_data __initconst = {
- };
- 
- static struct clk * __init sunxi_factors_clk_setup(struct device_node *node,
--						const struct factors_data *data)
-+						   const struct factors_data *data)
- {
--	struct clk *clk;
--	struct clk_factors *factors;
--	struct clk_gate *gate = NULL;
--	struct clk_mux *mux = NULL;
--	struct clk_hw *gate_hw = NULL;
--	struct clk_hw *mux_hw = NULL;
--	const char *clk_name = node->name;
--	const char *parents[SUNXI_MAX_PARENTS];
--	void __iomem *reg;
--	int i = 0;
--
--	reg = of_iomap(node, 0);
--
--	/* if we have a mux, we will have >1 parents */
--	while (i < SUNXI_MAX_PARENTS &&
--	       (parents[i] = of_clk_get_parent_name(node, i)) != NULL)
--		i++;
--
--	/*
--	 * some factor clocks, such as pll5 and pll6, may have multiple
--	 * outputs, and have their name designated in factors_data
--	 */
--	if (data->name)
--		clk_name = data->name;
--	else
--		of_property_read_string(node, "clock-output-names", &clk_name);
--
--	factors = kzalloc(sizeof(struct clk_factors), GFP_KERNEL);
--	if (!factors)
--		return NULL;
--
--	/* Add a gate if this factor clock can be gated */
--	if (data->enable) {
--		gate = kzalloc(sizeof(struct clk_gate), GFP_KERNEL);
--		if (!gate) {
--			kfree(factors);
--			return NULL;
--		}
--
--		/* set up gate properties */
--		gate->reg = reg;
--		gate->bit_idx = data->enable;
--		gate->lock = &clk_lock;
--		gate_hw = &gate->hw;
--	}
--
--	/* Add a mux if this factor clock can be muxed */
--	if (data->mux) {
--		mux = kzalloc(sizeof(struct clk_mux), GFP_KERNEL);
--		if (!mux) {
--			kfree(factors);
--			kfree(gate);
--			return NULL;
--		}
--
--		/* set up gate properties */
--		mux->reg = reg;
--		mux->shift = data->mux;
--		mux->mask = SUNXI_FACTORS_MUX_MASK;
--		mux->lock = &clk_lock;
--		mux_hw = &mux->hw;
--	}
--
--	/* set up factors properties */
--	factors->reg = reg;
--	factors->config = data->table;
--	factors->get_factors = data->getter;
--	factors->lock = &clk_lock;
--
--	clk = clk_register_composite(NULL, clk_name,
--			parents, i,
--			mux_hw, &clk_mux_ops,
--			&factors->hw, &clk_factors_ops,
--			gate_hw, &clk_gate_ops, 0);
--
--	if (!IS_ERR(clk)) {
--		of_clk_add_provider(node, of_clk_src_simple_get, clk);
--		clk_register_clkdev(clk, clk_name, NULL);
--	}
--
--	return clk;
-+	return sunxi_factors_register(node, data, &clk_lock);
+@@ -92,3 +93,191 @@ static void __init sun5i_a13_mbus_setup(struct device_node *node)
+ 	clk_prepare_enable(mbus);
  }
- 
- 
+ CLK_OF_DECLARE(sun5i_a13_mbus, "allwinner,sun5i-a13-mbus-clk", sun5i_a13_mbus_setup);
++
++struct mmc_phase_data {
++	u8	offset;
++};
++
++struct mmc_phase {
++	struct clk_hw		hw;
++	void __iomem		*reg;
++	struct mmc_phase_data	*data;
++	spinlock_t		*lock;
++};
++
++#define to_mmc_phase(_hw) container_of(_hw, struct mmc_phase, hw)
++
++static int mmc_get_phase(struct clk_hw *hw)
++{
++	struct clk *mmc, *mmc_parent, *clk = hw->clk;
++	struct mmc_phase *phase = to_mmc_phase(hw);
++	unsigned int mmc_rate, mmc_parent_rate;
++	u16 step, mmc_div;
++	u32 value;
++	u8 delay;
++
++	value = readl(phase->reg);
++	delay = (value >> phase->data->offset) & 0x3;
++
++	if (!delay)
++		return 180;
++
++	/* Get the main MMC clock */
++	mmc = clk_get_parent(clk);
++	if (!mmc)
++		return -EINVAL;
++
++	/* And its rate */
++	mmc_rate = clk_get_rate(mmc);
++	if (!mmc_rate)
++		return -EINVAL;
++
++	/* Now, get the MMC parent (most likely some PLL) */
++	mmc_parent = clk_get_parent(mmc);
++	if (!mmc_parent)
++		return -EINVAL;
++
++	/* And its rate */
++	mmc_parent_rate = clk_get_rate(mmc_parent);
++	if (!mmc_parent_rate)
++		return -EINVAL;
++
++	/* Get MMC clock divider */
++	mmc_div = mmc_parent_rate / mmc_rate;
++
++	step = DIV_ROUND_CLOSEST(360, mmc_div);
++	return delay * step;
++}
++
++static int mmc_set_phase(struct clk_hw *hw, int degrees)
++{
++	struct clk *mmc, *mmc_parent, *clk = hw->clk;
++	struct mmc_phase *phase = to_mmc_phase(hw);
++	unsigned int mmc_rate, mmc_parent_rate;
++	unsigned long flags;
++	u32 value;
++	u8 delay;
++
++	/* Get the main MMC clock */
++	mmc = clk_get_parent(clk);
++	if (!mmc)
++		return -EINVAL;
++
++	/* And its rate */
++	mmc_rate = clk_get_rate(mmc);
++	if (!mmc_rate)
++		return -EINVAL;
++
++	/* Now, get the MMC parent (most likely some PLL) */
++	mmc_parent = clk_get_parent(mmc);
++	if (!mmc_parent)
++		return -EINVAL;
++
++	/* And its rate */
++	mmc_parent_rate = clk_get_rate(mmc_parent);
++	if (!mmc_parent_rate)
++		return -EINVAL;
++
++	if (degrees != 180) {
++		u16 step, mmc_div;
++
++		/* Get MMC clock divider */
++		mmc_div = mmc_parent_rate / mmc_rate;
++
++		/*
++		 * We can only outphase the clocks by multiple of the
++		 * PLL's period.
++		 *
++		 * Since the MMC clock in only a divider, and the
++		 * formula to get the outphasing in degrees is deg =
++		 * 360 * delta / period
++		 *
++		 * If we simplify this formula, we can see that the
++		 * only thing that we're concerned about is the number
++		 * of period we want to outphase our clock from, and
++		 * the divider set by the MMC clock.
++		 */
++		step = DIV_ROUND_CLOSEST(360, mmc_div);
++		delay = DIV_ROUND_CLOSEST(degrees, step);
++	} else {
++		delay = 0;
++	}
++
++	spin_lock_irqsave(phase->lock, flags);
++	value = readl(phase->reg);
++	value &= ~GENMASK(phase->data->offset + 3, phase->data->offset);
++	value |= delay << phase->data->offset;
++	writel(value, phase->reg);
++	spin_unlock_irqrestore(phase->lock, flags);
++
++	return 0;
++}
++
++static const struct clk_ops mmc_clk_ops = {
++	.get_phase	= mmc_get_phase,
++	.set_phase	= mmc_set_phase,
++};
++
++static void __init sun4i_a10_mmc_phase_setup(struct device_node *node,
++					     struct mmc_phase_data *data)
++{
++	const char *parent_names[1] = { of_clk_get_parent_name(node, 0) };
++	struct clk_init_data init = {
++		.num_parents	= 1,
++		.parent_names	= parent_names,
++		.ops		= &mmc_clk_ops,
++	};
++
++	struct mmc_phase *phase;
++	struct clk *clk;
++
++	phase = kmalloc(sizeof(*phase), GFP_KERNEL);
++	if (!phase)
++		return;
++
++	phase->hw.init = &init;
++
++	phase->reg = of_iomap(node, 0);
++	if (!phase->reg)
++		goto err_free;
++
++	phase->data = data;
++	phase->lock = &sun4i_a10_mod0_lock;
++
++	if (of_property_read_string(node, "clock-output-names", &init.name))
++		init.name = node->name;
++
++	clk = clk_register(NULL, &phase->hw);
++	if (IS_ERR(clk))
++		goto err_unmap;
++
++	of_clk_add_provider(node, of_clk_src_simple_get, clk);
++
++	return;
++
++err_unmap:
++	iounmap(phase->reg);
++err_free:
++	kfree(phase);
++}
++
++
++static struct mmc_phase_data mmc_output_clk = {
++	.offset	= 8,
++};
++
++static struct mmc_phase_data mmc_sample_clk = {
++	.offset	= 20,
++};
++
++static void __init sun4i_a10_mmc_output_setup(struct device_node *node)
++{
++	sun4i_a10_mmc_phase_setup(node, &mmc_output_clk);
++}
++CLK_OF_DECLARE(sun4i_a10_mmc_output, "allwinner,sun4i-a10-mmc-output-clk", sun4i_a10_mmc_output_setup);
++
++static void __init sun4i_a10_mmc_sample_setup(struct device_node *node)
++{
++	sun4i_a10_mmc_phase_setup(node, &mmc_sample_clk);
++}
++CLK_OF_DECLARE(sun4i_a10_mmc_sample, "allwinner,sun4i-a10-mmc-sample-clk", sun4i_a10_mmc_sample_setup);
 -- 
 2.0.2
 
