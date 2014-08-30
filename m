@@ -1,257 +1,773 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: [PATCH v2 10/12] clk: sunxi: mod0: Introduce MMC proper phase handling
-Date: Sat, 30 Aug 2014 22:03:09 +0200
-Message-ID: <1409428991-2442-11-git-send-email-maxime.ripard@free-electrons.com>
+Subject: [PATCH v2 09/12] ARM: sunxi: dt: Add sample and output mmc clocks
+Date: Sat, 30 Aug 2014 22:03:08 +0200
+Message-ID: <1409428991-2442-10-git-send-email-maxime.ripard@free-electrons.com>
 References: <1409428991-2442-1-git-send-email-maxime.ripard@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from top.free-electrons.com ([176.31.233.9]:53672 "EHLO
+Received: from top.free-electrons.com ([176.31.233.9]:53664 "EHLO
 	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751994AbaH3UFV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 30 Aug 2014 16:05:21 -0400
+	with ESMTP id S1751912AbaH3UFT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 30 Aug 2014 16:05:19 -0400
 In-Reply-To: <1409428991-2442-1-git-send-email-maxime.ripard@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Mike Turquette <mturquette@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Emilio Lopez <emilio@elopez.com.ar>, chris@printf.net, david.lanzendoerfer@o2s.ch, ulf.hansson@linaro.org
 Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Maxime Ripard <maxime.ripard@free-electrons.com>
 
-The MMC clock we thought we had until now are actually not one but three
-different clocks.
-
-The main one is unchanged, and will have three outputs:
-  - The clock fed into the MMC
-  - a sample and output clocks, to deal with when should we output/sample data
-    to/from the MMC bus
-
-The phase control we had are actually controlling the two latter clocks, but
-the main MMC one is unchanged.
-
-We can adjust the phase with a 3 bits value, from 0 to 7, 0 meaning a 180 phase
-shift, and the other values being the number of periods from the MMC parent
-clock to outphase the clock of.
+Add the sample and output clocks for the MMC phase support.
 
 Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
 ---
- Documentation/devicetree/bindings/clock/sunxi.txt |   2 +
- drivers/clk/sunxi/clk-mod0.c                      | 189 ++++++++++++++++++++++
- 2 files changed, 191 insertions(+)
+ arch/arm/boot/dts/sun4i-a10.dtsi  | 104 +++++++++++++++++++++++++++++++++++---
+ arch/arm/boot/dts/sun5i-a10s.dtsi |  79 ++++++++++++++++++++++++++---
+ arch/arm/boot/dts/sun5i-a13.dtsi  |  80 +++++++++++++++++++++++++----
+ arch/arm/boot/dts/sun6i-a31.dtsi  | 104 +++++++++++++++++++++++++++++++++++---
+ arch/arm/boot/dts/sun7i-a20.dtsi  | 104 +++++++++++++++++++++++++++++++++++---
+ 5 files changed, 430 insertions(+), 41 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/clock/sunxi.txt b/Documentation/devicetree/bindings/clock/sunxi.txt
-index b938a990602a..eb690ed92a53 100644
---- a/Documentation/devicetree/bindings/clock/sunxi.txt
-+++ b/Documentation/devicetree/bindings/clock/sunxi.txt
-@@ -47,6 +47,8 @@ Required properties:
- 	"allwinner,sun6i-a31-apb2-gates-clk" - for the APB2 gates on A31
- 	"allwinner,sun8i-a23-apb2-gates-clk" - for the APB2 gates on A23
- 	"allwinner,sun5i-a13-mbus-clk" - for the MBUS clock on A13
-+	"allwinner,sun4i-a10-mmc-output-clk" - for the MMC output clock on A10
-+	"allwinner,sun4i-a10-mmc-sample-clk" - for the MMC sample clock on A10
- 	"allwinner,sun4i-a10-mod0-clk" - for the module 0 family of clocks
- 	"allwinner,sun7i-a20-out-clk" - for the external output clocks
- 	"allwinner,sun7i-a20-gmac-clk" - for the GMAC clock module on A20/A31
-diff --git a/drivers/clk/sunxi/clk-mod0.c b/drivers/clk/sunxi/clk-mod0.c
-index 8a7f7036aea3..4a563850ee6e 100644
---- a/drivers/clk/sunxi/clk-mod0.c
-+++ b/drivers/clk/sunxi/clk-mod0.c
-@@ -16,6 +16,7 @@
+diff --git a/arch/arm/boot/dts/sun4i-a10.dtsi b/arch/arm/boot/dts/sun4i-a10.dtsi
+index 380f914b226d..3183436528e1 100644
+--- a/arch/arm/boot/dts/sun4i-a10.dtsi
++++ b/arch/arm/boot/dts/sun4i-a10.dtsi
+@@ -227,6 +227,22 @@
+ 			clock-output-names = "mmc0";
+ 		};
  
- #include <linux/clk-provider.h>
- #include <linux/clkdev.h>
-+#include <linux/of_address.h>
++		mmc0_output_clk: clk_mmc_output@01c20088 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c20088 0x4>;
++			clocks = <&mmc0_clk>;
++			clock-output-names = "mmc0_output";
++		};
++
++		mmc0_sample_clk: clk_mmc_sample@01c20088 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c20088 0x4>;
++			clocks = <&mmc0_clk>;
++			clock-output-names = "mmc0_sample";
++		};
++
+ 		mmc1_clk: clk@01c2008c {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -235,6 +251,22 @@
+ 			clock-output-names = "mmc1";
+ 		};
  
- #include "clk-factors.h"
++		mmc1_output_clk: clk_mmc_output@01c2008c {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c2008c 0x4>;
++			clocks = <&mmc1_clk>;
++			clock-output-names = "mmc1_output";
++		};
++
++		mmc1_sample_clk: clk_mmc_sample@01c2008c {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c2008c 0x4>;
++			clocks = <&mmc1_clk>;
++			clock-output-names = "mmc1_sample";
++		};
++
+ 		mmc2_clk: clk@01c20090 {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -243,6 +275,22 @@
+ 			clock-output-names = "mmc2";
+ 		};
  
-@@ -92,3 +93,191 @@ static void __init sun5i_a13_mbus_setup(struct device_node *node)
- 	clk_prepare_enable(mbus);
- }
- CLK_OF_DECLARE(sun5i_a13_mbus, "allwinner,sun5i-a13-mbus-clk", sun5i_a13_mbus_setup);
++		mmc2_output_clk: clk_mmc_output@01c20090 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c20090 0x4>;
++			clocks = <&mmc2_clk>;
++			clock-output-names = "mmc2_output";
++		};
 +
-+struct mmc_phase_data {
-+	u8	offset;
-+};
++		mmc2_sample_clk: clk_mmc_sample@01c20090 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c20090 0x4>;
++			clocks = <&mmc2_clk>;
++			clock-output-names = "mmc2_sample";
++		};
 +
-+struct mmc_phase {
-+	struct clk_hw		hw;
-+	void __iomem		*reg;
-+	struct mmc_phase_data	*data;
-+	spinlock_t		*lock;
-+};
+ 		mmc3_clk: clk@01c20094 {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -251,6 +299,22 @@
+ 			clock-output-names = "mmc3";
+ 		};
+ 
++		mmc3_output_clk: clk_mmc_output@01c20094 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c20094 0x4>;
++			clocks = <&mmc3_clk>;
++			clock-output-names = "mmc3_output";
++		};
 +
-+#define to_mmc_phase(_hw) container_of(_hw, struct mmc_phase, hw)
++		mmc3_sample_clk: clk_mmc_sample@01c20094 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c20094 0x4>;
++			clocks = <&mmc3_clk>;
++			clock-output-names = "mmc3_sample";
++		};
 +
-+static int mmc_get_phase(struct clk_hw *hw)
-+{
-+	struct clk *mmc, *mmc_parent, *clk = hw->clk;
-+	struct mmc_phase *phase = to_mmc_phase(hw);
-+	unsigned int mmc_rate, mmc_parent_rate;
-+	u16 step, mmc_div;
-+	u32 value;
-+	u8 delay;
+ 		ts_clk: clk@01c20098 {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -392,8 +456,14 @@
+ 		mmc0: mmc@01c0f000 {
+ 			compatible = "allwinner,sun4i-a10-mmc";
+ 			reg = <0x01c0f000 0x1000>;
+-			clocks = <&ahb_gates 8>, <&mmc0_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb_gates 8>,
++				 <&mmc0_clk>,
++				 <&mmc0_sample_clk>,
++				 <&mmc0_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			interrupts = <32>;
+ 			status = "disabled";
+ 		};
+@@ -401,8 +471,14 @@
+ 		mmc1: mmc@01c10000 {
+ 			compatible = "allwinner,sun4i-a10-mmc";
+ 			reg = <0x01c10000 0x1000>;
+-			clocks = <&ahb_gates 9>, <&mmc1_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb_gates 9>,
++				 <&mmc1_clk>,
++				 <&mmc1_sample_clk>,
++				 <&mmc1_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			interrupts = <33>;
+ 			status = "disabled";
+ 		};
+@@ -410,8 +486,14 @@
+ 		mmc2: mmc@01c11000 {
+ 			compatible = "allwinner,sun4i-a10-mmc";
+ 			reg = <0x01c11000 0x1000>;
+-			clocks = <&ahb_gates 10>, <&mmc2_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb_gates 10>,
++				 <&mmc2_clk>,
++				 <&mmc2_sample_clk>,
++				 <&mmc2_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			interrupts = <34>;
+ 			status = "disabled";
+ 		};
+@@ -419,8 +501,14 @@
+ 		mmc3: mmc@01c12000 {
+ 			compatible = "allwinner,sun4i-a10-mmc";
+ 			reg = <0x01c12000 0x1000>;
+-			clocks = <&ahb_gates 11>, <&mmc3_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb_gates 11>,
++				 <&mmc3_clk>,
++				 <&mmc3_sample_clk>,
++				 <&mmc3_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			interrupts = <35>;
+ 			status = "disabled";
+ 		};
+diff --git a/arch/arm/boot/dts/sun5i-a10s.dtsi b/arch/arm/boot/dts/sun5i-a10s.dtsi
+index 531272c0e526..4f5eb763e05a 100644
+--- a/arch/arm/boot/dts/sun5i-a10s.dtsi
++++ b/arch/arm/boot/dts/sun5i-a10s.dtsi
+@@ -212,6 +212,22 @@
+ 			clock-output-names = "mmc0";
+ 		};
+ 
++		mmc0_output_clk: clk_mmc_output@01c20088 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c20088 0x4>;
++			clocks = <&mmc0_clk>;
++			clock-output-names = "mmc0_output";
++		};
 +
-+	value = readl(phase->reg);
-+	delay = (value >> phase->data->offset) & 0x3;
++		mmc0_sample_clk: clk_mmc_sample@01c20088 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c20088 0x4>;
++			clocks = <&mmc0_clk>;
++			clock-output-names = "mmc0_sample";
++		};
 +
-+	if (!delay)
-+		return 180;
+ 		mmc1_clk: clk@01c2008c {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -220,6 +236,22 @@
+ 			clock-output-names = "mmc1";
+ 		};
+ 
++		mmc1_output_clk: clk_mmc_output@01c2008c {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c2008c 0x4>;
++			clocks = <&mmc1_clk>;
++			clock-output-names = "mmc1_output";
++		};
 +
-+	/* Get the main MMC clock */
-+	mmc = clk_get_parent(clk);
-+	if (!mmc)
-+		return -EINVAL;
++		mmc1_sample_clk: clk_mmc_sample@01c2008c {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c2008c 0x4>;
++			clocks = <&mmc1_clk>;
++			clock-output-names = "mmc1_sample";
++		};
 +
-+	/* And its rate */
-+	mmc_rate = clk_get_rate(mmc);
-+	if (!mmc_rate)
-+		return -EINVAL;
+ 		mmc2_clk: clk@01c20090 {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -228,6 +260,22 @@
+ 			clock-output-names = "mmc2";
+ 		};
+ 
++		mmc2_output_clk: clk_mmc_output@01c20090 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c20090 0x4>;
++			clocks = <&mmc2_clk>;
++			clock-output-names = "mmc2_output";
++		};
 +
-+	/* Now, get the MMC parent (most likely some PLL) */
-+	mmc_parent = clk_get_parent(mmc);
-+	if (!mmc_parent)
-+		return -EINVAL;
++		mmc2_sample_clk: clk_mmc_sample@01c20090 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c20090 0x4>;
++			clocks = <&mmc2_clk>;
++			clock-output-names = "mmc2_sample";
++		};
 +
-+	/* And its rate */
-+	mmc_parent_rate = clk_get_rate(mmc_parent);
-+	if (!mmc_parent_rate)
-+		return -EINVAL;
+ 		ts_clk: clk@01c20098 {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -353,8 +401,14 @@
+ 		mmc0: mmc@01c0f000 {
+ 			compatible = "allwinner,sun5i-a13-mmc";
+ 			reg = <0x01c0f000 0x1000>;
+-			clocks = <&ahb_gates 8>, <&mmc0_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb_gates 8>,
++				 <&mmc0_clk>,
++				 <&mmc0_sample_clk>,
++				 <&mmc0_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			interrupts = <32>;
+ 			status = "disabled";
+ 		};
+@@ -362,8 +416,14 @@
+ 		mmc1: mmc@01c10000 {
+ 			compatible = "allwinner,sun5i-a13-mmc";
+ 			reg = <0x01c10000 0x1000>;
+-			clocks = <&ahb_gates 9>, <&mmc1_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb_gates 9>,
++				 <&mmc1_clk>,
++				 <&mmc1_sample_clk>,
++				 <&mmc1_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			interrupts = <33>;
+ 			status = "disabled";
+ 		};
+@@ -371,12 +431,17 @@
+ 		mmc2: mmc@01c11000 {
+ 			compatible = "allwinner,sun5i-a13-mmc";
+ 			reg = <0x01c11000 0x1000>;
+-			clocks = <&ahb_gates 10>, <&mmc2_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb_gates 10>,
++				 <&mmc2_clk>,
++				 <&mmc2_sample_clk>,
++				 <&mmc2_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			interrupts = <34>;
+ 			status = "disabled";
+ 		};
+-
+ 		usbphy: phy@01c13400 {
+ 			#phy-cells = <1>;
+ 			compatible = "allwinner,sun5i-a13-usb-phy";
+diff --git a/arch/arm/boot/dts/sun5i-a13.dtsi b/arch/arm/boot/dts/sun5i-a13.dtsi
+index b131068f4f35..73f99ff6ac6f 100644
+--- a/arch/arm/boot/dts/sun5i-a13.dtsi
++++ b/arch/arm/boot/dts/sun5i-a13.dtsi
+@@ -202,30 +202,78 @@
+ 			clock-output-names = "ms";
+ 		};
+ 
+-		mmc0_clk: clk@01c20088 {
++		mmc0_clk: clk_mmc@01c20088 {
+ 			#clock-cells = <0>;
+-			compatible = "allwinner,sun4i-a10-mod0-clk";
++			compatible = "allwinner,sun4i-a10-mmc-clk";
+ 			reg = <0x01c20088 0x4>;
+ 			clocks = <&osc24M>, <&pll6 1>, <&pll5 1>;
+ 			clock-output-names = "mmc0";
+ 		};
+ 
+-		mmc1_clk: clk@01c2008c {
++		mmc0_output_clk: clk_mmc_output@01c20088 {
+ 			#clock-cells = <0>;
+-			compatible = "allwinner,sun4i-a10-mod0-clk";
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c20088 0x4>;
++			clocks = <&mmc0_clk>;
++			clock-output-names = "mmc0_output";
++		};
 +
-+	/* Get MMC clock divider */
-+	mmc_div = mmc_parent_rate / mmc_rate;
++		mmc0_sample_clk: clk_mmc_sample@01c20088 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c20088 0x4>;
++			clocks = <&mmc0_clk>;
++			clock-output-names = "mmc0_sample";
++		};
 +
-+	step = DIV_ROUND_CLOSEST(360, mmc_div);
-+	return delay * step;
-+}
++		mmc1_clk: clk_mmc@01c2008c {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-clk";
+ 			reg = <0x01c2008c 0x4>;
+ 			clocks = <&osc24M>, <&pll6 1>, <&pll5 1>;
+ 			clock-output-names = "mmc1";
+ 		};
+ 
+-		mmc2_clk: clk@01c20090 {
++		mmc1_output_clk: clk_mmc_output@01c2008c {
+ 			#clock-cells = <0>;
+-			compatible = "allwinner,sun4i-a10-mod0-clk";
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c2008c 0x4>;
++			clocks = <&mmc1_clk>;
++			clock-output-names = "mmc1_output";
++		};
 +
-+static int mmc_set_phase(struct clk_hw *hw, int degrees)
-+{
-+	struct clk *mmc, *mmc_parent, *clk = hw->clk;
-+	struct mmc_phase *phase = to_mmc_phase(hw);
-+	unsigned int mmc_rate, mmc_parent_rate;
-+	unsigned long flags;
-+	u32 value;
-+	u8 delay;
++		mmc1_sample_clk: clk_mmc_sample@01c2008c {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c2008c 0x4>;
++			clocks = <&mmc1_clk>;
++			clock-output-names = "mmc1_sample";
++		};
 +
-+	/* Get the main MMC clock */
-+	mmc = clk_get_parent(clk);
-+	if (!mmc)
-+		return -EINVAL;
++		mmc2_clk: clk_mmc@01c20090 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-clk";
+ 			reg = <0x01c20090 0x4>;
+ 			clocks = <&osc24M>, <&pll6 1>, <&pll5 1>;
+ 			clock-output-names = "mmc2";
+ 		};
+ 
++		mmc2_output_clk: clk_mmc_output@01c20090 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c20090 0x4>;
++			clocks = <&mmc2_clk>;
++			clock-output-names = "mmc2_output";
++		};
 +
-+	/* And its rate */
-+	mmc_rate = clk_get_rate(mmc);
-+	if (!mmc_rate)
-+		return -EINVAL;
++		mmc2_sample_clk: clk_mmc_sample@01c20090 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c20090 0x4>;
++			clocks = <&mmc2_clk>;
++			clock-output-names = "mmc2_sample";
++		};
 +
-+	/* Now, get the MMC parent (most likely some PLL) */
-+	mmc_parent = clk_get_parent(mmc);
-+	if (!mmc_parent)
-+		return -EINVAL;
+ 		ts_clk: clk@01c20098 {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -335,8 +383,14 @@
+ 		mmc0: mmc@01c0f000 {
+ 			compatible = "allwinner,sun5i-a13-mmc";
+ 			reg = <0x01c0f000 0x1000>;
+-			clocks = <&ahb_gates 8>, <&mmc0_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb_gates 8>,
++				 <&mmc0_clk>,
++				 <&mmc0_sample_clk>,
++				 <&mmc0_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			interrupts = <32>;
+ 			status = "disabled";
+ 		};
+@@ -344,8 +398,14 @@
+ 		mmc2: mmc@01c11000 {
+ 			compatible = "allwinner,sun5i-a13-mmc";
+ 			reg = <0x01c11000 0x1000>;
+-			clocks = <&ahb_gates 10>, <&mmc2_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb_gates 10>,
++				 <&mmc2_clk>,
++				 <&mmc2_sample_clk>,
++				 <&mmc2_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			interrupts = <34>;
+ 			status = "disabled";
+ 		};
+diff --git a/arch/arm/boot/dts/sun6i-a31.dtsi b/arch/arm/boot/dts/sun6i-a31.dtsi
+index 1c2ec913e650..574e6f19a0f6 100644
+--- a/arch/arm/boot/dts/sun6i-a31.dtsi
++++ b/arch/arm/boot/dts/sun6i-a31.dtsi
+@@ -216,6 +216,22 @@
+ 			clock-output-names = "mmc0";
+ 		};
+ 
++		mmc0_output_clk: clk_mmc_output@01c20088 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c20088 0x4>;
++			clocks = <&mmc0_clk>;
++			clock-output-names = "mmc0_output";
++		};
 +
-+	/* And its rate */
-+	mmc_parent_rate = clk_get_rate(mmc_parent);
-+	if (!mmc_parent_rate)
-+		return -EINVAL;
++		mmc0_sample_clk: clk_mmc_sample@01c20088 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c20088 0x4>;
++			clocks = <&mmc0_clk>;
++			clock-output-names = "mmc0_sample";
++		};
 +
-+	if (degrees != 180) {
-+		u16 step, mmc_div;
+ 		mmc1_clk: clk@01c2008c {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -224,6 +240,22 @@
+ 			clock-output-names = "mmc1";
+ 		};
+ 
++		mmc1_output_clk: clk_mmc_output@01c2008c {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c2008c 0x4>;
++			clocks = <&mmc1_clk>;
++			clock-output-names = "mmc1_output";
++		};
 +
-+		/* Get MMC clock divider */
-+		mmc_div = mmc_parent_rate / mmc_rate;
++		mmc1_sample_clk: clk_mmc_sample@01c2008c {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c2008c 0x4>;
++			clocks = <&mmc1_clk>;
++			clock-output-names = "mmc1_sample";
++		};
 +
-+		/*
-+		 * We can only outphase the clocks by multiple of the
-+		 * PLL's period.
-+		 *
-+		 * Since the MMC clock in only a divider, and the
-+		 * formula to get the outphasing in degrees is deg =
-+		 * 360 * delta / period
-+		 *
-+		 * If we simplify this formula, we can see that the
-+		 * only thing that we're concerned about is the number
-+		 * of period we want to outphase our clock from, and
-+		 * the divider set by the MMC clock.
-+		 */
-+		step = DIV_ROUND_CLOSEST(360, mmc_div);
-+		delay = DIV_ROUND_CLOSEST(degrees, step);
-+	} else {
-+		delay = 0;
-+	}
+ 		mmc2_clk: clk@01c20090 {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -232,6 +264,22 @@
+ 			clock-output-names = "mmc2";
+ 		};
+ 
++		mmc2_output_clk: clk_mmc_output@01c20090 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c20090 0x4>;
++			clocks = <&mmc2_clk>;
++			clock-output-names = "mmc2_output";
++		};
 +
-+	spin_lock_irqsave(phase->lock, flags);
-+	value = readl(phase->reg);
-+	value &= ~GENMASK(phase->data->offset + 3, phase->data->offset);
-+	value |= delay << phase->data->offset;
-+	writel(value, phase->reg);
-+	spin_unlock_irqrestore(phase->lock, flags);
++		mmc2_sample_clk: clk_mmc_sample@01c20090 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c20090 0x4>;
++			clocks = <&mmc2_clk>;
++			clock-output-names = "mmc2_sample";
++		};
 +
-+	return 0;
-+}
+ 		mmc3_clk: clk@01c20094 {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -240,6 +288,22 @@
+ 			clock-output-names = "mmc3";
+ 		};
+ 
++		mmc3_output_clk: clk_mmc_output@01c20094 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c20094 0x4>;
++			clocks = <&mmc3_clk>;
++			clock-output-names = "mmc3_output";
++		};
 +
-+static const struct clk_ops mmc_clk_ops = {
-+	.get_phase	= mmc_get_phase,
-+	.set_phase	= mmc_set_phase,
-+};
++		mmc3_sample_clk: clk_mmc_sample@01c20094 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c20094 0x4>;
++			clocks = <&mmc3_clk>;
++			clock-output-names = "mmc3_sample";
++		};
 +
-+static void __init sun4i_a10_mmc_phase_setup(struct device_node *node,
-+					     struct mmc_phase_data *data)
-+{
-+	const char *parent_names[1] = { of_clk_get_parent_name(node, 0) };
-+	struct clk_init_data init = {
-+		.num_parents	= 1,
-+		.parent_names	= parent_names,
-+		.ops		= &mmc_clk_ops,
-+	};
+ 		spi0_clk: clk@01c200a0 {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -330,8 +394,14 @@
+ 		mmc0: mmc@01c0f000 {
+ 			compatible = "allwinner,sun5i-a13-mmc";
+ 			reg = <0x01c0f000 0x1000>;
+-			clocks = <&ahb1_gates 8>, <&mmc0_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb1_gates 8>,
++				 <&mmc0_clk>,
++				 <&mmc0_sample_clk>,
++				 <&mmc0_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			resets = <&ahb1_rst 8>;
+ 			reset-names = "ahb";
+ 			interrupts = <0 60 4>;
+@@ -341,8 +411,14 @@
+ 		mmc1: mmc@01c10000 {
+ 			compatible = "allwinner,sun5i-a13-mmc";
+ 			reg = <0x01c10000 0x1000>;
+-			clocks = <&ahb1_gates 9>, <&mmc1_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb1_gates 9>,
++				 <&mmc1_clk>,
++				 <&mmc1_sample_clk>,
++				 <&mmc1_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			resets = <&ahb1_rst 9>;
+ 			reset-names = "ahb";
+ 			interrupts = <0 61 4>;
+@@ -352,8 +428,14 @@
+ 		mmc2: mmc@01c11000 {
+ 			compatible = "allwinner,sun5i-a13-mmc";
+ 			reg = <0x01c11000 0x1000>;
+-			clocks = <&ahb1_gates 10>, <&mmc2_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb1_gates 10>,
++				 <&mmc2_clk>,
++				 <&mmc2_sample_clk>,
++				 <&mmc2_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			resets = <&ahb1_rst 10>;
+ 			reset-names = "ahb";
+ 			interrupts = <0 62 4>;
+@@ -363,8 +445,14 @@
+ 		mmc3: mmc@01c12000 {
+ 			compatible = "allwinner,sun5i-a13-mmc";
+ 			reg = <0x01c12000 0x1000>;
+-			clocks = <&ahb1_gates 11>, <&mmc3_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb1_gates 11>,
++				 <&mmc3_clk>,
++				 <&mmc3_sample_clk>,
++				 <&mmc3_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			resets = <&ahb1_rst 11>;
+ 			reset-names = "ahb";
+ 			interrupts = <0 63 4>;
+diff --git a/arch/arm/boot/dts/sun7i-a20.dtsi b/arch/arm/boot/dts/sun7i-a20.dtsi
+index ec5603da595e..fc0a90d54d63 100644
+--- a/arch/arm/boot/dts/sun7i-a20.dtsi
++++ b/arch/arm/boot/dts/sun7i-a20.dtsi
+@@ -239,6 +239,22 @@
+ 			clock-output-names = "mmc0";
+ 		};
+ 
++		mmc0_output_clk: clk_mmc_output@01c20088 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c20088 0x4>;
++			clocks = <&mmc0_clk>;
++			clock-output-names = "mmc0_output";
++		};
 +
-+	struct mmc_phase *phase;
-+	struct clk *clk;
++		mmc0_sample_clk: clk_mmc_sample@01c20088 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c20088 0x4>;
++			clocks = <&mmc0_clk>;
++			clock-output-names = "mmc0_sample";
++		};
 +
-+	phase = kmalloc(sizeof(*phase), GFP_KERNEL);
-+	if (!phase)
-+		return;
+ 		mmc1_clk: clk@01c2008c {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -247,6 +263,22 @@
+ 			clock-output-names = "mmc1";
+ 		};
+ 
++		mmc1_output_clk: clk_mmc_output@01c2008c {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c2008c 0x4>;
++			clocks = <&mmc1_clk>;
++			clock-output-names = "mmc1_output";
++		};
 +
-+	phase->hw.init = &init;
++		mmc1_sample_clk: clk_mmc_sample@01c2008c {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c2008c 0x4>;
++			clocks = <&mmc1_clk>;
++			clock-output-names = "mmc1_sample";
++		};
 +
-+	phase->reg = of_iomap(node, 0);
-+	if (!phase->reg)
-+		goto err_free;
+ 		mmc2_clk: clk@01c20090 {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -255,6 +287,22 @@
+ 			clock-output-names = "mmc2";
+ 		};
+ 
++		mmc2_output_clk: clk_mmc_output@01c20090 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c20090 0x4>;
++			clocks = <&mmc2_clk>;
++			clock-output-names = "mmc2_output";
++		};
 +
-+	phase->data = data;
-+	phase->lock = &sun4i_a10_mod0_lock;
++		mmc2_sample_clk: clk_mmc_sample@01c20090 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c20090 0x4>;
++			clocks = <&mmc2_clk>;
++			clock-output-names = "mmc2_sample";
++		};
 +
-+	if (of_property_read_string(node, "clock-output-names", &init.name))
-+		init.name = node->name;
+ 		mmc3_clk: clk@01c20094 {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -263,6 +311,22 @@
+ 			clock-output-names = "mmc3";
+ 		};
+ 
++		mmc3_output_clk: clk_mmc_output@01c20094 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-output-clk";
++			reg = <0x01c20094 0x4>;
++			clocks = <&mmc3_clk>;
++			clock-output-names = "mmc3_output";
++		};
 +
-+	clk = clk_register(NULL, &phase->hw);
-+	if (IS_ERR(clk))
-+		goto err_unmap;
++		mmc3_sample_clk: clk_mmc_sample@01c20094 {
++			#clock-cells = <0>;
++			compatible = "allwinner,sun4i-a10-mmc-sample-clk";
++			reg = <0x01c20094 0x4>;
++			clocks = <&mmc3_clk>;
++			clock-output-names = "mmc3_sample";
++		};
 +
-+	of_clk_add_provider(node, of_clk_src_simple_get, clk);
-+
-+	return;
-+
-+err_unmap:
-+	iounmap(phase->reg);
-+err_free:
-+	kfree(phase);
-+}
-+
-+
-+static struct mmc_phase_data mmc_output_clk = {
-+	.offset	= 8,
-+};
-+
-+static struct mmc_phase_data mmc_sample_clk = {
-+	.offset	= 20,
-+};
-+
-+static void __init sun4i_a10_mmc_output_setup(struct device_node *node)
-+{
-+	sun4i_a10_mmc_phase_setup(node, &mmc_output_clk);
-+}
-+CLK_OF_DECLARE(sun4i_a10_mmc_output, "allwinner,sun4i-a10-mmc-output-clk", sun4i_a10_mmc_output_setup);
-+
-+static void __init sun4i_a10_mmc_sample_setup(struct device_node *node)
-+{
-+	sun4i_a10_mmc_phase_setup(node, &mmc_sample_clk);
-+}
-+CLK_OF_DECLARE(sun4i_a10_mmc_sample, "allwinner,sun4i-a10-mmc-sample-clk", sun4i_a10_mmc_sample_setup);
+ 		ts_clk: clk@01c20098 {
+ 			#clock-cells = <0>;
+ 			compatible = "allwinner,sun4i-a10-mod0-clk";
+@@ -476,8 +540,14 @@
+ 		mmc0: mmc@01c0f000 {
+ 			compatible = "allwinner,sun5i-a13-mmc";
+ 			reg = <0x01c0f000 0x1000>;
+-			clocks = <&ahb_gates 8>, <&mmc0_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb_gates 8>,
++				 <&mmc0_clk>,
++				 <&mmc0_sample_clk>,
++				 <&mmc0_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			interrupts = <0 32 4>;
+ 			status = "disabled";
+ 		};
+@@ -485,8 +555,14 @@
+ 		mmc1: mmc@01c10000 {
+ 			compatible = "allwinner,sun5i-a13-mmc";
+ 			reg = <0x01c10000 0x1000>;
+-			clocks = <&ahb_gates 9>, <&mmc1_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb_gates 9>,
++				 <&mmc1_clk>,
++				 <&mmc1_sample_clk>,
++				 <&mmc1_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			interrupts = <0 33 4>;
+ 			status = "disabled";
+ 		};
+@@ -494,8 +570,14 @@
+ 		mmc2: mmc@01c11000 {
+ 			compatible = "allwinner,sun5i-a13-mmc";
+ 			reg = <0x01c11000 0x1000>;
+-			clocks = <&ahb_gates 10>, <&mmc2_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb_gates 10>,
++				 <&mmc2_clk>,
++				 <&mmc2_sample_clk>,
++				 <&mmc2_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			interrupts = <0 34 4>;
+ 			status = "disabled";
+ 		};
+@@ -503,8 +585,14 @@
+ 		mmc3: mmc@01c12000 {
+ 			compatible = "allwinner,sun5i-a13-mmc";
+ 			reg = <0x01c12000 0x1000>;
+-			clocks = <&ahb_gates 11>, <&mmc3_clk>;
+-			clock-names = "ahb", "mmc";
++			clocks = <&ahb_gates 11>,
++				 <&mmc3_clk>,
++				 <&mmc3_sample_clk>,
++				 <&mmc3_output_clk>;
++			clock-names = "ahb",
++				      "mmc",
++				      "sample",
++				      "output";
+ 			interrupts = <0 35 4>;
+ 			status = "disabled";
+ 		};
 -- 
 2.0.2
 
