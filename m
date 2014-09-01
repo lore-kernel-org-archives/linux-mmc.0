@@ -1,119 +1,271 @@
 From: Mike Turquette <mturquette@linaro.org>
-Subject: Re: [PATCH v2 03/12] clk: Add a function to retrieve phase
-Date: Mon, 01 Sep 2014 12:00:54 -0700
-Message-ID: <20140901190054.5251.56409@quantum>
+Subject: Re: [PATCH v2 10/12] clk: sunxi: mod0: Introduce MMC proper phase handling
+Date: Mon, 01 Sep 2014 14:39:45 -0700
+Message-ID: <20140901213945.5251.37105@quantum>
 References: <1409428991-2442-1-git-send-email-maxime.ripard@free-electrons.com>
- <1409428991-2442-4-git-send-email-maxime.ripard@free-electrons.com>
+ <1409428991-2442-11-git-send-email-maxime.ripard@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f175.google.com ([209.85.192.175]:41169 "EHLO
-	mail-pd0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751251AbaIATBH convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Sep 2014 15:01:07 -0400
-Received: by mail-pd0-f175.google.com with SMTP id ft15so6779631pdb.34
-        for <linux-mmc@vger.kernel.org>; Mon, 01 Sep 2014 12:01:06 -0700 (PDT)
-In-Reply-To: <1409428991-2442-4-git-send-email-maxime.ripard@free-electrons.com>
+Received: from mail-pd0-f179.google.com ([209.85.192.179]:33264 "EHLO
+	mail-pd0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751698AbaIAVj5 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Sep 2014 17:39:57 -0400
+Received: by mail-pd0-f179.google.com with SMTP id z10so6915038pdj.24
+        for <linux-mmc@vger.kernel.org>; Mon, 01 Sep 2014 14:39:57 -0700 (PDT)
+In-Reply-To: <1409428991-2442-11-git-send-email-maxime.ripard@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Hans de Goede <hdegoede@redhat.com>, Emilio Lopez <emilio@elopez.com.ar>, chris@printf.net, david.lanzendoerfer@o2s.ch, ulf.hansson@linaro.org
 Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Maxime Ripard <maxime.ripard@free-electrons.com>
 
-Quoting Maxime Ripard (2014-08-30 13:03:02)
-> The current phase API doesn't look into the actual hardware to get the phase
-> value, but will rather get it from a variable only set by the set_phase
-> function.
+Quoting Maxime Ripard (2014-08-30 13:03:09)
+> The MMC clock we thought we had until now are actually not one but three
+> different clocks.
 > 
-> This will cause issue when the client driver will never call the set_phase
-> function, where we can end up having a reported phase that will not match what
-> the hardware has been programmed to by the bootloader or what phase is
-> programmed out of reset.
+> The main one is unchanged, and will have three outputs:
+>   - The clock fed into the MMC
+>   - a sample and output clocks, to deal with when should we output/sample data
+>     to/from the MMC bus
 > 
-> Add a new get_phase function for the drivers to implement so that we can get
-> this value.
+> The phase control we had are actually controlling the two latter clocks, but
+> the main MMC one is unchanged.
+> 
+> We can adjust the phase with a 3 bits value, from 0 to 7, 0 meaning a 180 phase
+> shift, and the other values being the number of periods from the MMC parent
+> clock to outphase the clock of.
 > 
 > Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
-> ---
->  drivers/clk/clk.c            | 17 ++++++++++++++---
->  include/linux/clk-provider.h |  5 +++++
->  2 files changed, 19 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/clk/clk.c b/drivers/clk/clk.c
-> index d87661af0c72..7dbceca694f1 100644
-> --- a/drivers/clk/clk.c
-> +++ b/drivers/clk/clk.c
-> @@ -1797,8 +1797,8 @@ out:
->   * clk_get_phase - return the phase shift of a clock signal
->   * @clk: clock signal source
->   *
-> - * Returns the phase shift of a clock node in degrees, otherwise returns
-> - * -EERROR.
-> + * Returns the phase shift of a clock node in degrees. Any negative
-> + * values are errors.
->   */
->  int clk_get_phase(struct clk *clk)
->  {
-> @@ -1808,7 +1808,18 @@ int clk_get_phase(struct clk *clk)
->                 goto out;
->  
->         clk_prepare_lock();
-> -       ret = clk->phase;
-> +
-> +       if (clk->phase) {
 
-So if a phase is zero, then we fall through and query the hardware?
-Seems like this case might be hit a lot for clocks that implement
-.get_phase but never have their phase shifted, and accesses to the
-registers may be much slower than to memory.
-
-Do you expect the phase to be changed behind our backs? E.g. firmware
-changes it, or coming in and out of idle state, etc. If not then we can
-store the phase at clock registration time and use a cached value.
-
-See how the CLK_GET_RATE_NOCACHE and CLK_GET_ACCURACY_NOCACHE flags are
-used for details on how we can handle the case where the phase might
-change behind our back.
+Looks good. Thanks a lot for revisiting this after talking to your
+hardware team!
 
 Regards,
 Mike
 
-> +               ret = clk->phase;
-> +               goto out_unlock;
+> ---
+>  Documentation/devicetree/bindings/clock/sunxi.txt |   2 +
+>  drivers/clk/sunxi/clk-mod0.c                      | 189 ++++++++++++++++++++++
+>  2 files changed, 191 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/clock/sunxi.txt b/Documentation/devicetree/bindings/clock/sunxi.txt
+> index b938a990602a..eb690ed92a53 100644
+> --- a/Documentation/devicetree/bindings/clock/sunxi.txt
+> +++ b/Documentation/devicetree/bindings/clock/sunxi.txt
+> @@ -47,6 +47,8 @@ Required properties:
+>         "allwinner,sun6i-a31-apb2-gates-clk" - for the APB2 gates on A31
+>         "allwinner,sun8i-a23-apb2-gates-clk" - for the APB2 gates on A23
+>         "allwinner,sun5i-a13-mbus-clk" - for the MBUS clock on A13
+> +       "allwinner,sun4i-a10-mmc-output-clk" - for the MMC output clock on A10
+> +       "allwinner,sun4i-a10-mmc-sample-clk" - for the MMC sample clock on A10
+>         "allwinner,sun4i-a10-mod0-clk" - for the module 0 family of clocks
+>         "allwinner,sun7i-a20-out-clk" - for the external output clocks
+>         "allwinner,sun7i-a20-gmac-clk" - for the GMAC clock module on A20/A31
+> diff --git a/drivers/clk/sunxi/clk-mod0.c b/drivers/clk/sunxi/clk-mod0.c
+> index 8a7f7036aea3..4a563850ee6e 100644
+> --- a/drivers/clk/sunxi/clk-mod0.c
+> +++ b/drivers/clk/sunxi/clk-mod0.c
+> @@ -16,6 +16,7 @@
+>  
+>  #include <linux/clk-provider.h>
+>  #include <linux/clkdev.h>
+> +#include <linux/of_address.h>
+>  
+>  #include "clk-factors.h"
+>  
+> @@ -92,3 +93,191 @@ static void __init sun5i_a13_mbus_setup(struct device_node *node)
+>         clk_prepare_enable(mbus);
+>  }
+>  CLK_OF_DECLARE(sun5i_a13_mbus, "allwinner,sun5i-a13-mbus-clk", sun5i_a13_mbus_setup);
+> +
+> +struct mmc_phase_data {
+> +       u8      offset;
+> +};
+> +
+> +struct mmc_phase {
+> +       struct clk_hw           hw;
+> +       void __iomem            *reg;
+> +       struct mmc_phase_data   *data;
+> +       spinlock_t              *lock;
+> +};
+> +
+> +#define to_mmc_phase(_hw) container_of(_hw, struct mmc_phase, hw)
+> +
+> +static int mmc_get_phase(struct clk_hw *hw)
+> +{
+> +       struct clk *mmc, *mmc_parent, *clk = hw->clk;
+> +       struct mmc_phase *phase = to_mmc_phase(hw);
+> +       unsigned int mmc_rate, mmc_parent_rate;
+> +       u16 step, mmc_div;
+> +       u32 value;
+> +       u8 delay;
+> +
+> +       value = readl(phase->reg);
+> +       delay = (value >> phase->data->offset) & 0x3;
+> +
+> +       if (!delay)
+> +               return 180;
+> +
+> +       /* Get the main MMC clock */
+> +       mmc = clk_get_parent(clk);
+> +       if (!mmc)
+> +               return -EINVAL;
+> +
+> +       /* And its rate */
+> +       mmc_rate = clk_get_rate(mmc);
+> +       if (!mmc_rate)
+> +               return -EINVAL;
+> +
+> +       /* Now, get the MMC parent (most likely some PLL) */
+> +       mmc_parent = clk_get_parent(mmc);
+> +       if (!mmc_parent)
+> +               return -EINVAL;
+> +
+> +       /* And its rate */
+> +       mmc_parent_rate = clk_get_rate(mmc_parent);
+> +       if (!mmc_parent_rate)
+> +               return -EINVAL;
+> +
+> +       /* Get MMC clock divider */
+> +       mmc_div = mmc_parent_rate / mmc_rate;
+> +
+> +       step = DIV_ROUND_CLOSEST(360, mmc_div);
+> +       return delay * step;
+> +}
+> +
+> +static int mmc_set_phase(struct clk_hw *hw, int degrees)
+> +{
+> +       struct clk *mmc, *mmc_parent, *clk = hw->clk;
+> +       struct mmc_phase *phase = to_mmc_phase(hw);
+> +       unsigned int mmc_rate, mmc_parent_rate;
+> +       unsigned long flags;
+> +       u32 value;
+> +       u8 delay;
+> +
+> +       /* Get the main MMC clock */
+> +       mmc = clk_get_parent(clk);
+> +       if (!mmc)
+> +               return -EINVAL;
+> +
+> +       /* And its rate */
+> +       mmc_rate = clk_get_rate(mmc);
+> +       if (!mmc_rate)
+> +               return -EINVAL;
+> +
+> +       /* Now, get the MMC parent (most likely some PLL) */
+> +       mmc_parent = clk_get_parent(mmc);
+> +       if (!mmc_parent)
+> +               return -EINVAL;
+> +
+> +       /* And its rate */
+> +       mmc_parent_rate = clk_get_rate(mmc_parent);
+> +       if (!mmc_parent_rate)
+> +               return -EINVAL;
+> +
+> +       if (degrees != 180) {
+> +               u16 step, mmc_div;
+> +
+> +               /* Get MMC clock divider */
+> +               mmc_div = mmc_parent_rate / mmc_rate;
+> +
+> +               /*
+> +                * We can only outphase the clocks by multiple of the
+> +                * PLL's period.
+> +                *
+> +                * Since the MMC clock in only a divider, and the
+> +                * formula to get the outphasing in degrees is deg =
+> +                * 360 * delta / period
+> +                *
+> +                * If we simplify this formula, we can see that the
+> +                * only thing that we're concerned about is the number
+> +                * of period we want to outphase our clock from, and
+> +                * the divider set by the MMC clock.
+> +                */
+> +               step = DIV_ROUND_CLOSEST(360, mmc_div);
+> +               delay = DIV_ROUND_CLOSEST(degrees, step);
+> +       } else {
+> +               delay = 0;
 > +       }
 > +
-> +       if (!clk->ops->get_phase)
-> +               goto out_unlock;
+> +       spin_lock_irqsave(phase->lock, flags);
+> +       value = readl(phase->reg);
+> +       value &= ~GENMASK(phase->data->offset + 3, phase->data->offset);
+> +       value |= delay << phase->data->offset;
+> +       writel(value, phase->reg);
+> +       spin_unlock_irqrestore(phase->lock, flags);
 > +
-> +       ret = clk->ops->get_phase(clk->hw);
+> +       return 0;
+> +}
 > +
-> +out_unlock:
->         clk_prepare_unlock();
->  
->  out:
-> diff --git a/include/linux/clk-provider.h b/include/linux/clk-provider.h
-> index 69b20d4c1e1a..abec961092a7 100644
-> --- a/include/linux/clk-provider.h
-> +++ b/include/linux/clk-provider.h
-> @@ -130,6 +130,10 @@ struct dentry;
->   *             set then clock accuracy will be initialized to parent accuracy
->   *             or 0 (perfect clock) if clock has no parent.
->   *
-> + * @get_phase: Queries the hardware to get the current phase of a clock.
-> + *             Returned values are 0-359 degrees on success, negative
-> + *             error codes on failure.
-> + *
->   * @set_phase: Shift the phase this clock signal in degrees specified
->   *             by the second argument. Valid values for degrees are
->   *             0-359. Return 0 on success, otherwise -EERROR.
-> @@ -182,6 +186,7 @@ struct clk_ops {
->                                     unsigned long parent_rate, u8 index);
->         unsigned long   (*recalc_accuracy)(struct clk_hw *hw,
->                                            unsigned long parent_accuracy);
-> +       int             (*get_phase)(struct clk_hw *hw);
->         int             (*set_phase)(struct clk_hw *hw, int degrees);
->         void            (*init)(struct clk_hw *hw);
->         int             (*debug_init)(struct clk_hw *hw, struct dentry *dentry);
+> +static const struct clk_ops mmc_clk_ops = {
+> +       .get_phase      = mmc_get_phase,
+> +       .set_phase      = mmc_set_phase,
+> +};
+> +
+> +static void __init sun4i_a10_mmc_phase_setup(struct device_node *node,
+> +                                            struct mmc_phase_data *data)
+> +{
+> +       const char *parent_names[1] = { of_clk_get_parent_name(node, 0) };
+> +       struct clk_init_data init = {
+> +               .num_parents    = 1,
+> +               .parent_names   = parent_names,
+> +               .ops            = &mmc_clk_ops,
+> +       };
+> +
+> +       struct mmc_phase *phase;
+> +       struct clk *clk;
+> +
+> +       phase = kmalloc(sizeof(*phase), GFP_KERNEL);
+> +       if (!phase)
+> +               return;
+> +
+> +       phase->hw.init = &init;
+> +
+> +       phase->reg = of_iomap(node, 0);
+> +       if (!phase->reg)
+> +               goto err_free;
+> +
+> +       phase->data = data;
+> +       phase->lock = &sun4i_a10_mod0_lock;
+> +
+> +       if (of_property_read_string(node, "clock-output-names", &init.name))
+> +               init.name = node->name;
+> +
+> +       clk = clk_register(NULL, &phase->hw);
+> +       if (IS_ERR(clk))
+> +               goto err_unmap;
+> +
+> +       of_clk_add_provider(node, of_clk_src_simple_get, clk);
+> +
+> +       return;
+> +
+> +err_unmap:
+> +       iounmap(phase->reg);
+> +err_free:
+> +       kfree(phase);
+> +}
+> +
+> +
+> +static struct mmc_phase_data mmc_output_clk = {
+> +       .offset = 8,
+> +};
+> +
+> +static struct mmc_phase_data mmc_sample_clk = {
+> +       .offset = 20,
+> +};
+> +
+> +static void __init sun4i_a10_mmc_output_setup(struct device_node *node)
+> +{
+> +       sun4i_a10_mmc_phase_setup(node, &mmc_output_clk);
+> +}
+> +CLK_OF_DECLARE(sun4i_a10_mmc_output, "allwinner,sun4i-a10-mmc-output-clk", sun4i_a10_mmc_output_setup);
+> +
+> +static void __init sun4i_a10_mmc_sample_setup(struct device_node *node)
+> +{
+> +       sun4i_a10_mmc_phase_setup(node, &mmc_sample_clk);
+> +}
+> +CLK_OF_DECLARE(sun4i_a10_mmc_sample, "allwinner,sun4i-a10-mmc-sample-clk", sun4i_a10_mmc_sample_setup);
 > -- 
 > 2.0.2
 > 
