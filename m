@@ -1,81 +1,90 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH 1/1 v8]mmc: Support-FFU-for-eMMC-v5.0
-Date: Mon, 1 Sep 2014 13:27:44 +0200
-Message-ID: <CAPDyKFpUCvHaq2XrgGVhYJCuDVBALjv9H4bV5g0Z9pKf0ZbieQ@mail.gmail.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE64B934609@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFr52GkJC-2A4b6dy7VYZZsVgCHnT-GdL_9ZkF=Hd4H=Jw@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333AE73534@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFoFq+XkjVqycEorUDU_aKACPQkHvEsdJjJkj+P=FET5cA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333AE8EC81@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFqumUdoxnGg8nU9FfqEUOGvBfFNBdfg4kW=V4WF5r_OSg@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333AEB94FF@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: [PATCH v2 03/12] clk: Add a function to retrieve phase
+Date: Mon, 01 Sep 2014 13:27:28 +0200
+Message-ID: <54045820.7080102@redhat.com>
+References: <1409428991-2442-1-git-send-email-maxime.ripard@free-electrons.com> <1409428991-2442-4-git-send-email-maxime.ripard@free-electrons.com> <5402F5D6.4080100@redhat.com> <20140901102026.GL15297@lukather>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f49.google.com ([209.85.215.49]:38144 "EHLO
-	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751439AbaIAL1q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Sep 2014 07:27:46 -0400
-Received: by mail-la0-f49.google.com with SMTP id b17so5982569lan.36
-        for <linux-mmc@vger.kernel.org>; Mon, 01 Sep 2014 04:27:44 -0700 (PDT)
-In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED5333AEB94FF@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mx1.redhat.com ([209.132.183.28]:65273 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751439AbaIAL2U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 1 Sep 2014 07:28:20 -0400
+In-Reply-To: <20140901102026.GL15297@lukather>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, Grant Grundler <grundler@chromium.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "Gwendal Grignou (gwendal@chromium.org)" <gwendal@chromium.org>
+To: Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: Mike Turquette <mturquette@linaro.org>, Emilio Lopez <emilio@elopez.com.ar>, chris@printf.net, david.lanzendoerfer@o2s.ch, ulf.hansson@linaro.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-On 1 September 2014 11:26, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
-> [snip]
->
->> My conclusion from that is (correct me if I am wrong, since it may be vendor
->> specific), that only minor modifications should be needed to the mmc ioctl. We
->> need to add special treatment for when "cmd.opcode ==
->> MMC_FFU_DOWNLOAD_OP". In such scenario the following sequence needs to
->> be maintained.
+Hi,
+
+On 09/01/2014 12:20 PM, Maxime Ripard wrote:
+> Hi,
+> 
+> On Sun, Aug 31, 2014 at 12:15:50PM +0200, Hans de Goede wrote:
+>> Hi,
 >>
->> 1. Claim host etc.
->> 2. Set FFU mode.
->> 3. Write some sectors to the FFU area, but in the same way as any other mmc
->> ioctl WRITE is done.
->> 4. Set normal mode.
->> 5. Relase host etc.
+>> On 08/30/2014 10:03 PM, Maxime Ripard wrote:
+>>> The current phase API doesn't look into the actual hardware to get the phase
+>>> value, but will rather get it from a variable only set by the set_phase
+>>> function.
+>>>
+>>> This will cause issue when the client driver will never call the set_phase
+>>> function, where we can end up having a reported phase that will not match what
+>>> the hardware has been programmed to by the bootloader or what phase is
+>>> programmed out of reset.
+>>>
+>>> Add a new get_phase function for the drivers to implement so that we can get
+>>> this value.
+>>>
+>>> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+>>> ---
+>>>  drivers/clk/clk.c            | 17 ++++++++++++++---
+>>>  include/linux/clk-provider.h |  5 +++++
+>>>  2 files changed, 19 insertions(+), 3 deletions(-)
+>>>
+>>> diff --git a/drivers/clk/clk.c b/drivers/clk/clk.c
+>>> index d87661af0c72..7dbceca694f1 100644
+>>> --- a/drivers/clk/clk.c
+>>> +++ b/drivers/clk/clk.c
+>>> @@ -1797,8 +1797,8 @@ out:
+>>>   * clk_get_phase - return the phase shift of a clock signal
+>>>   * @clk: clock signal source
+>>>   *
+>>> - * Returns the phase shift of a clock node in degrees, otherwise returns
+>>> - * -EERROR.
+>>> + * Returns the phase shift of a clock node in degrees. Any negative
+>>> + * values are errors.
+>>>   */
+>>>  int clk_get_phase(struct clk *clk)
+>>>  {
+>>> @@ -1808,7 +1808,18 @@ int clk_get_phase(struct clk *clk)
+>>>  		goto out;
+>>>  
+>>>  	clk_prepare_lock();
+>>> -	ret = clk->phase;
+>>> +
+>>> +	if (clk->phase) {
+>>> +		ret = clk->phase;
+>>> +		goto out_unlock;
+>>> +	}
 >>
->> That sequence then needs to be repeated to write the complete firmware,
->> depending on buffer size. Between each and every piece of FFU data that is
->> written, normal READ/WRITE operations can be served.
->> Right?
->
-> We checked again the current IOCTL implementation, and we see issues
-> In implementing FFU as suggested above:
->
-> 1. No support for multiple Write operations.
->     For running Multiple I/O, user need to send CMD23 or CMD12.
->     So structures "sbc" or "stop" of "mmc_blk_request" should be set accordingly.
+>> 0 is a valid phase, so this will cause the phase to
+>> be read from the hardware each time if the phase is 0.
+>>
+>> Perhaps make clk->phase signed (if it is not already), init it
+>> to -1, and check for it not being -1 ?
+> 
+> Yeah, I'm not really proud of this code either, but yours would expose
+> this -1 into debugfs, so I'm not sure it's really better :) 
+> 
+> (with -1 being a valid phase too)
 
-You are right regarding multiple I/O!
+According to the comments in the patch adding the original phase functions
+valid values are 0 - 359. And you could use clk_get_phase from the debugfs
+code.
 
-I suppose using single block write option (CMD24) still can be used
-for FFU, right?
+Regards,
 
-Yes, we would suffer from unoptimized performance, but on the other
-hand - how much data could we typically be expected to write? Do you
-have some rough numbers that you can share?
-
->
-> 2. There is a limit in chunk size in current implementation of IOCTL.
->      From some reason we can't write more than 64KB on our platform,
->      Although, the MMC_IOC_MAX_BYTES is defined to be 128KB
-
-That is likely because the mmc host driver may limit the size, due to
-it's controller HW.
-
->
-> Based on this, we think that using existing IOCTL implementation is not
-> a good solution for FFU.
-
-Okay, let's for now continue with your current approach and try to
-address those concerns I have raised while reviewing the code. I will
-happily review new versions of the patch(es).
-
-Kind regards
-Uffe
+Hans
