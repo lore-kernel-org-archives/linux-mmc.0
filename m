@@ -1,111 +1,119 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: [PATCH v2 03/12] clk: Add a function to retrieve phase
-Date: Sun, 31 Aug 2014 12:15:50 +0200
-Message-ID: <5402F5D6.4080100@redhat.com>
-References: <1409428991-2442-1-git-send-email-maxime.ripard@free-electrons.com> <1409428991-2442-4-git-send-email-maxime.ripard@free-electrons.com>
+From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
+Subject: RE: [PATCH] mmc: sdhci-acpi: add probe_slot method for emmc/sd/sdio
+Date: Mon, 1 Sep 2014 03:17:15 +0000
+Message-ID: <0AA7DC03D52A654FA5AF208AE38A967D01D83322@shsmsx102.ccr.corp.intel.com>
+References: <1409054455-7782-1-git-send-email-yunpeng.gao@intel.com>
+ <CAPDyKFrBekJ-4W-LVE+6efG9Y75KP8ZrOd6vwfhH4LJSV9mcnA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:38766 "EHLO mx1.redhat.com"
+Received: from mga11.intel.com ([192.55.52.93]:44340 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751018AbaHaKQj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 31 Aug 2014 06:16:39 -0400
-In-Reply-To: <1409428991-2442-4-git-send-email-maxime.ripard@free-electrons.com>
+	id S1752203AbaIADRT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 31 Aug 2014 23:17:19 -0400
+In-Reply-To: <CAPDyKFrBekJ-4W-LVE+6efG9Y75KP8ZrOd6vwfhH4LJSV9mcnA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>, Mike Turquette <mturquette@linaro.org>, Emilio Lopez <emilio@elopez.com.ar>, chris@printf.net, david.lanzendoerfer@o2s.ch, ulf.hansson@linaro.org
-Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
 
-Hi,
-
-On 08/30/2014 10:03 PM, Maxime Ripard wrote:
-> The current phase API doesn't look into the actual hardware to get the phase
-> value, but will rather get it from a variable only set by the set_phase
-> function.
-> 
-> This will cause issue when the client driver will never call the set_phase
-> function, where we can end up having a reported phase that will not match what
-> the hardware has been programmed to by the bootloader or what phase is
-> programmed out of reset.
-> 
-> Add a new get_phase function for the drivers to implement so that we can get
-> this value.
-> 
-> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
-> ---
->  drivers/clk/clk.c            | 17 ++++++++++++++---
->  include/linux/clk-provider.h |  5 +++++
->  2 files changed, 19 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/clk/clk.c b/drivers/clk/clk.c
-> index d87661af0c72..7dbceca694f1 100644
-> --- a/drivers/clk/clk.c
-> +++ b/drivers/clk/clk.c
-> @@ -1797,8 +1797,8 @@ out:
->   * clk_get_phase - return the phase shift of a clock signal
->   * @clk: clock signal source
->   *
-> - * Returns the phase shift of a clock node in degrees, otherwise returns
-> - * -EERROR.
-> + * Returns the phase shift of a clock node in degrees. Any negative
-> + * values are errors.
->   */
->  int clk_get_phase(struct clk *clk)
->  {
-> @@ -1808,7 +1808,18 @@ int clk_get_phase(struct clk *clk)
->  		goto out;
->  
->  	clk_prepare_lock();
-> -	ret = clk->phase;
-> +
-> +	if (clk->phase) {
-> +		ret = clk->phase;
-> +		goto out_unlock;
-> +	}
-
-0 is a valid phase, so this will cause the phase to
-be read from the hardware each time if the phase is 0.
-
-Perhaps make clk->phase signed (if it is not already), init it
-to -1, and check for it not being -1 ?
-
-Regards,
-
-Hans
-
-
-> +
-> +	if (!clk->ops->get_phase)
-> +		goto out_unlock;
-> +
-> +	ret = clk->ops->get_phase(clk->hw);
-> +
-> +out_unlock:
->  	clk_prepare_unlock();
->  
->  out:
-> diff --git a/include/linux/clk-provider.h b/include/linux/clk-provider.h
-> index 69b20d4c1e1a..abec961092a7 100644
-> --- a/include/linux/clk-provider.h
-> +++ b/include/linux/clk-provider.h
-> @@ -130,6 +130,10 @@ struct dentry;
->   *		set then clock accuracy will be initialized to parent accuracy
->   *		or 0 (perfect clock) if clock has no parent.
->   *
-> + * @get_phase:	Queries the hardware to get the current phase of a clock.
-> + *		Returned values are 0-359 degrees on success, negative
-> + *		error codes on failure.
-> + *
->   * @set_phase:	Shift the phase this clock signal in degrees specified
->   *		by the second argument. Valid values for degrees are
->   *		0-359. Return 0 on success, otherwise -EERROR.
-> @@ -182,6 +186,7 @@ struct clk_ops {
->  				    unsigned long parent_rate, u8 index);
->  	unsigned long	(*recalc_accuracy)(struct clk_hw *hw,
->  					   unsigned long parent_accuracy);
-> +	int		(*get_phase)(struct clk_hw *hw);
->  	int		(*set_phase)(struct clk_hw *hw, int degrees);
->  	void		(*init)(struct clk_hw *hw);
->  	int		(*debug_init)(struct clk_hw *hw, struct dentry *dentry);
-> 
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogbGludXgtbW1jLW93bmVy
+QHZnZXIua2VybmVsLm9yZw0KPiBbbWFpbHRvOmxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5v
+cmddIE9uIEJlaGFsZiBPZiBVbGYgSGFuc3Nvbg0KPiBTZW50OiBGcmlkYXksIEF1Z3VzdCAyOSwg
+MjAxNCA4OjA0IFBNDQo+IFRvOiBHYW8sIFl1bnBlbmcNCj4gQ2M6IGxpbnV4LW1tYzsgRG9uZywg
+Q2h1YW54aWFvDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0hdIG1tYzogc2RoY2ktYWNwaTogYWRkIHBy
+b2JlX3Nsb3QgbWV0aG9kIGZvcg0KPiBlbW1jL3NkL3NkaW8NCj4gDQo+IE9uIDI2IEF1Z3VzdCAy
+MDE0IDE0OjAwLCBZdW5wZW5nIEdhbyA8eXVucGVuZy5nYW9AaW50ZWwuY29tPiB3cm90ZToNCj4g
+PiBTaW1pbGFyIHRvIHNkaGNpLXBjaSBjb250cm9sbGVyLCBhbHNvIGFkZCBwcm9iZV9zbG90IGFu
+ZCByZW1vdmVfc2xvdA0KPiA+IG1ldGhvZCBpbiB0aGUgc2RoY2ktYWNwaSBkcml2ZXIuDQo+ID4N
+Cj4gPiBTaWduZWQtb2ZmLWJ5OiBZdW5wZW5nIEdhbyA8eXVucGVuZy5nYW9AaW50ZWwuY29tPg0K
+PiA+IFNpZ25lZC1vZmYtYnk6IENodWFueGlhbyBEb25nIDxjaHVhbnhpYW8uZG9uZ0BpbnRlbC5j
+b20+DQo+IA0KPiBUaGlzIG9uZSBoYXZlIGNoZWNrcGF0Y2ggZXJyb3JzLiBQbGVhc2UgZml4dXAg
+YW5kIHJlc2VuZCBhIG5ldyB2ZXJzaW9uLg0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg0K
+VGhhbmtzIGEgbG90IGZvciB0aGUgcmV2aWV3LiBJJ20gc29ycnkgZm9yIG5vdCBydW5uaW5nIHRo
+ZSBjaGVja3BhdGNoLnBsIGJlZm9yZSBzZW5kaW5nIHRoaXMgcGF0Y2ggb3V0IDooDQpJJ2xsIHJl
+LXNlbmQgdGhpcyBwYXRjaCBzb29uIGFmdGVyIGZpeCB0aGUgY2hlY2twYXRjaCBlcnJvcnMuDQoN
+ClRoYW5rcy4NCg0KUmVnYXJkcywNCll1bnBlbmcNCg0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJzL21t
+Yy9ob3N0L3NkaGNpLWFjcGkuYyB8ICAgNTgNCj4gKysrKysrKysrKysrKysrKysrKysrKysrKysr
+KysrKysrKysrKysrKysNCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDU4IGluc2VydGlvbnMoKykNCj4g
+Pg0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLWFjcGkuYw0KPiA+IGIv
+ZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1hY3BpLmMgaW5kZXggOGNlM2MyOC4uOTNkYWJmNyAxMDA2
+NDQNCj4gPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLWFjcGkuYw0KPiA+ICsrKyBiL2Ry
+aXZlcnMvbW1jL2hvc3Qvc2RoY2ktYWNwaS5jDQo+ID4gQEAgLTY3LDYgKzY3LDggQEAgc3RydWN0
+IHNkaGNpX2FjcGlfc2xvdCB7DQo+ID4gICAgICAgICB1bnNpZ25lZCBpbnQgICAgY2FwczI7DQo+
+ID4gICAgICAgICBtbWNfcG1fZmxhZ190ICAgcG1fY2FwczsNCj4gPiAgICAgICAgIHVuc2lnbmVk
+IGludCAgICBmbGFnczsNCj4gPiArICAgICAgIGludCAoKnByb2JlX3Nsb3QpIChzdHJ1Y3QgcGxh
+dGZvcm1fZGV2aWNlICopOw0KPiA+ICsgICAgICAgaW50ICgqcmVtb3ZlX3Nsb3QpIChzdHJ1Y3Qg
+cGxhdGZvcm1fZGV2aWNlICopOw0KPiA+ICB9Ow0KPiA+DQo+ID4gIHN0cnVjdCBzZGhjaV9hY3Bp
+X2hvc3Qgew0KPiA+IEBAIC0xMjIsMTEgKzEyNCw1NyBAQCBzdGF0aWMgY29uc3Qgc3RydWN0IHNk
+aGNpX2FjcGlfY2hpcA0KPiBzZGhjaV9hY3BpX2NoaXBfaW50ID0gew0KPiA+ICAgICAgICAgLm9w
+cyA9ICZzZGhjaV9hY3BpX29wc19pbnQsDQo+ID4gIH07DQo+ID4NCj4gPiArc3RhdGljIGludCBz
+ZGhjaV9hY3BpX2VtbWNfcHJvYmVfc2xvdChzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KSB7
+DQo+ID4gKyAgICAgICBzdHJ1Y3Qgc2RoY2lfYWNwaV9ob3N0ICpjID0gcGxhdGZvcm1fZ2V0X2Ry
+dmRhdGEocGRldik7DQo+ID4gKyAgICAgICBzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdDsNCj4gPiAr
+DQo+ID4gKyAgICAgICBpZiAoIWMgfHwgIWMtPmhvc3QpDQo+ID4gKyAgICAgICAgICAgICAgIHJl
+dHVybiAwOw0KPiA+ICsNCj4gPiArICAgICAgIGhvc3QgPSBjLT5ob3N0Ow0KPiA+ICsNCj4gPiAr
+ICAgICAgIC8qIFBsYXRmb3JtIHNwZWNpZmljIGNvZGUgZHVyaW5nIGVtbWMgcHJvYmxlIHNsb3Qg
+Z29lcyBoZXJlICovDQo+ID4gKw0KPiA+ICsgICAgICAgcmV0dXJuIDA7DQo+ID4gK30NCj4gPiAr
+DQo+ID4gK3N0YXRpYyBpbnQgc2RoY2lfYWNwaV9zZGlvX3Byb2JlX3Nsb3Qoc3RydWN0IHBsYXRm
+b3JtX2RldmljZSAqcGRldikgew0KPiA+ICsgICAgICAgc3RydWN0IHNkaGNpX2FjcGlfaG9zdCAq
+YyA9IHBsYXRmb3JtX2dldF9kcnZkYXRhKHBkZXYpOw0KPiA+ICsgICAgICAgc3RydWN0IHNkaGNp
+X2hvc3QgKmhvc3Q7DQo+ID4gKw0KPiA+ICsgICAgICAgaWYgKCFjIHx8ICFjLT5ob3N0KQ0KPiA+
+ICsgICAgICAgICAgICAgICByZXR1cm4gMDsNCj4gPiArDQo+ID4gKyAgICAgICBob3N0ID0gYy0+
+aG9zdDsNCj4gPiArDQo+ID4gKyAgICAgICAvKiBQbGF0Zm9ybSBzcGVjaWZpYyBjb2RlIGR1cmlu
+ZyBlbW1jIHByb2JsZSBzbG90IGdvZXMgaGVyZSAqLw0KPiA+ICsNCj4gPiArICAgICAgIHJldHVy
+biAwOw0KPiA+ICt9DQo+ID4gKw0KPiA+ICtzdGF0aWMgaW50IHNkaGNpX2FjcGlfc2RfcHJvYmVf
+c2xvdChzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KSB7DQo+ID4gKyAgICAgICBzdHJ1Y3Qg
+c2RoY2lfYWNwaV9ob3N0ICpjID0gcGxhdGZvcm1fZ2V0X2RydmRhdGEocGRldik7DQo+ID4gKyAg
+ICAgICBzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdDsNCj4gPiArDQo+ID4gKyAgICAgICBpZiAoIWMg
+fHwgIWMtPmhvc3QgfHwgIWMtPnNsb3QpDQo+ID4gKyAgICAgICAgICAgICAgIHJldHVybiAwOw0K
+PiA+ICsNCj4gPiArICAgICAgIGhvc3QgPSBjLT5ob3N0Ow0KPiA+ICsNCj4gPiArICAgICAgIC8q
+IFBsYXRmb3JtIHNwZWNpZmljIGNvZGUgZHVyaW5nIGVtbWMgcHJvYmxlIHNsb3QgZ29lcyBoZXJl
+ICovDQo+ID4gKw0KPiA+ICsgICAgICAgcmV0dXJuIDA7DQo+ID4gK30NCj4gPiArDQo+ID4gIHN0
+YXRpYyBjb25zdCBzdHJ1Y3Qgc2RoY2lfYWNwaV9zbG90IHNkaGNpX2FjcGlfc2xvdF9pbnRfZW1t
+YyA9IHsNCj4gPiAgICAgICAgIC5jaGlwICAgID0gJnNkaGNpX2FjcGlfY2hpcF9pbnQsDQo+ID4g
+ICAgICAgICAuY2FwcyAgICA9IE1NQ19DQVBfOF9CSVRfREFUQSB8DQo+IE1NQ19DQVBfTk9OUkVN
+T1ZBQkxFIHwgTU1DX0NBUF9IV19SRVNFVCwNCj4gPiAgICAgICAgIC5jYXBzMiAgID0gTU1DX0NB
+UDJfSENfRVJBU0VfU1osDQo+ID4gICAgICAgICAuZmxhZ3MgICA9IFNESENJX0FDUElfUlVOVElN
+RV9QTSwNCj4gPiArICAgICAgIC5wcm9iZV9zbG90ICAgICA9IHNkaGNpX2FjcGlfZW1tY19wcm9i
+ZV9zbG90LA0KPiA+ICB9Ow0KPiA+DQo+ID4gIHN0YXRpYyBjb25zdCBzdHJ1Y3Qgc2RoY2lfYWNw
+aV9zbG90IHNkaGNpX2FjcGlfc2xvdF9pbnRfc2RpbyA9IHsgQEANCj4gPiAtMTM1LDEyICsxODMs
+MTQgQEAgc3RhdGljIGNvbnN0IHN0cnVjdCBzZGhjaV9hY3BpX3Nsb3QNCj4gc2RoY2lfYWNwaV9z
+bG90X2ludF9zZGlvID0gew0KPiA+ICAgICAgICAgLmNhcHMgICAgPSBNTUNfQ0FQX05PTlJFTU9W
+QUJMRSB8DQo+IE1NQ19DQVBfUE9XRVJfT0ZGX0NBUkQsDQo+ID4gICAgICAgICAuZmxhZ3MgICA9
+IFNESENJX0FDUElfUlVOVElNRV9QTSwNCj4gPiAgICAgICAgIC5wbV9jYXBzID0gTU1DX1BNX0tF
+RVBfUE9XRVIsDQo+ID4gKyAgICAgICAucHJvYmVfc2xvdCAgICAgPSBzZGhjaV9hY3BpX3NkaW9f
+cHJvYmVfc2xvdCwNCj4gPiAgfTsNCj4gPg0KPiA+ICBzdGF0aWMgY29uc3Qgc3RydWN0IHNkaGNp
+X2FjcGlfc2xvdCBzZGhjaV9hY3BpX3Nsb3RfaW50X3NkID0gew0KPiA+ICAgICAgICAgLmZsYWdz
+ICAgPSBTREhDSV9BQ1BJX1NEX0NEIHwNCj4gU0RIQ0lfQUNQSV9TRF9DRF9PVkVSUklERV9MRVZF
+TCB8DQo+ID4gICAgICAgICAgICAgICAgICAgIFNESENJX0FDUElfUlVOVElNRV9QTSwNCj4gPiAg
+ICAgICAgIC5xdWlya3MyID0gU0RIQ0lfUVVJUksyX0NBUkRfT05fTkVFRFNfQlVTX09OLA0KPiA+
+ICsgICAgICAgLnByb2JlX3Nsb3QgICAgID0gc2RoY2lfYWNwaV9zZF9wcm9iZV9zbG90LA0KPiA+
+ICB9Ow0KPiA+DQo+ID4gIHN0cnVjdCBzZGhjaV9hY3BpX3VpZF9zbG90IHsNCj4gPiBAQCAtMjc1
+LDYgKzMyNSwxMSBAQCBzdGF0aWMgaW50IHNkaGNpX2FjcGlfcHJvYmUoc3RydWN0IHBsYXRmb3Jt
+X2RldmljZQ0KPiAqcGRldikNCj4gPiAgICAgICAgIH0NCj4gPg0KPiA+ICAgICAgICAgaWYgKGMt
+PnNsb3QpIHsNCj4gPiArICAgICAgICAgICAgICAgaWYgKGMtPnNsb3QtPnByb2JlX3Nsb3QpIHsN
+Cj4gPiArICAgICAgICAgICAgICAgICAgICAgICBlcnIgPSBjLT5zbG90LT5wcm9iZV9zbG90KHBk
+ZXYpOw0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGlmIChlcnIpDQo+ID4gKyAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICBnb3RvIGVycl9mcmVlOw0KPiA+ICsgICAgICAgICAgICAg
+ICB9DQo+ID4gICAgICAgICAgICAgICAgIGlmIChjLT5zbG90LT5jaGlwKSB7DQo+ID4gICAgICAg
+ICAgICAgICAgICAgICAgICAgaG9zdC0+b3BzICAgICAgICAgICAgPSBjLT5zbG90LT5jaGlwLT5v
+cHM7DQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgaG9zdC0+cXVpcmtzICAgICAgICB8PSBj
+LT5zbG90LT5jaGlwLT5xdWlya3M7DQo+ID4gQEAgLTMzMiw2ICszODcsOSBAQCBzdGF0aWMgaW50
+IHNkaGNpX2FjcGlfcmVtb3ZlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UNCj4gKnBkZXYpDQo+ID4g
+ICAgICAgICAgICAgICAgIHBtX3J1bnRpbWVfcHV0X25vaWRsZShkZXYpOw0KPiA+ICAgICAgICAg
+fQ0KPiA+DQo+ID4gKyAgICAgICBpZiAoYy0+c2xvdCAmJiBjLT5zbG90LT5yZW1vdmVfc2xvdCkN
+Cj4gPiArICAgICAgICAgICAgICAgYy0+c2xvdC0+cmVtb3ZlX3Nsb3QocGRldik7DQo+ID4gKw0K
+PiA+ICAgICAgICAgZGVhZCA9IChzZGhjaV9yZWFkbChjLT5ob3N0LCBTREhDSV9JTlRfU1RBVFVT
+KSA9PSB+MCk7DQo+ID4gICAgICAgICBzZGhjaV9yZW1vdmVfaG9zdChjLT5ob3N0LCBkZWFkKTsN
+Cj4gPiAgICAgICAgIHNkaGNpX2ZyZWVfaG9zdChjLT5ob3N0KTsNCj4gPiAtLQ0KPiA+IDEuNy45
+LjUNCj4gPg0KPiA+IC0tDQo+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQg
+dGhlIGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyINCj4gPiBpbiB0aGUgYm9keSBvZiBhIG1l
+c3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbw0KPiA+IGlu
+Zm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0KPiAtLQ0K
+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3Jp
+YmUgbGludXgtbW1jIiBpbiB0aGUgYm9keQ0KPiBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
+ZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+IGh0dHA6Ly92Z2VyLmtlcm5l
+bC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
