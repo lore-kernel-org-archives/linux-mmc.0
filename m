@@ -1,136 +1,264 @@
-From: Yunpeng Gao <yunpeng.gao@intel.com>
-Subject: [PATCH v2] mmc: sdhci-acpi: add probe_slot method for emmc/sd/sdio
-Date: Mon,  1 Sep 2014 11:35:40 +0800
-Message-ID: <1409542540-18267-1-git-send-email-yunpeng.gao@intel.com>
+From: Abhilash Kesavan <kesavan.abhilash@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: exynos: Add support for exynos7
+Date: Mon, 1 Sep 2014 11:14:05 +0530
+Message-ID: <CAM4voan4ih-dD1qm85CQP9Yd0fo8xDbf7WyMdPFyHse9qO9=JA@mail.gmail.com>
+References: <1409231933-14796-1-git-send-email-yuvaraj.cd@samsung.com>
+	<54005990.8070306@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:6168 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751942AbaIADdy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 31 Aug 2014 23:33:54 -0400
+Received: from mail-qa0-f48.google.com ([209.85.216.48]:45387 "EHLO
+	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751078AbaIAFoG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Sep 2014 01:44:06 -0400
+In-Reply-To: <54005990.8070306@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Yunpeng Gao <yunpeng.gao@intel.com>, Chuanxiao Dong <chuanxiao.dong@intel.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>, prabu.t@synopsys.com
+Cc: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Doug Anderson <dianders@google.com>, Douglas Anderson <dianders@chromium.org>, cjb@laptop.org, tgih.jun@samsung.com, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <t.figa@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, CPGS <cpgs@samsung.com>
 
-Similar to sdhci-pci controller, also add probe_slot
-and remove_slot method in the sdhci-acpi driver.
+Hi Jaehoon,
 
-This is the v2 version patch and fixed checkpatch errors.
++Prabu Thangamuthu
 
-Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
----
- drivers/mmc/host/sdhci-acpi.c |   58 +++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 58 insertions(+)
+On Fri, Aug 29, 2014 at 4:14 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi, Abhilash.
+>
+> On 08/28/2014 10:18 PM, Yuvaraj Kumar C D wrote:
+>> From: Abhilash Kesavan <a.kesavan@samsung.com>
+>>
+>> The Exynos7 has a DWMMC controller (v2.70a) which is different from
+>> prior versions. This patch adds new compatible strings for exynos7.
+>> This patch also fixes the CLKSEL register offset on exynos7.
+>
+> If support the 64bit, dw-mmc.c need to modify.(according to v2.70, some offset is changed for 64-bit address)
+> But i didn't see any patches at mailing.
+> Do you have the plan which send patch of dw-mmc.c?
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 8ce3c28..0f610e8 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -67,6 +67,8 @@ struct sdhci_acpi_slot {
- 	unsigned int	caps2;
- 	mmc_pm_flag_t	pm_caps;
- 	unsigned int	flags;
-+	int (*probe_slot)(struct platform_device *);
-+	int (*remove_slot)(struct platform_device *);
- };
- 
- struct sdhci_acpi_host {
-@@ -122,11 +124,57 @@ static const struct sdhci_acpi_chip sdhci_acpi_chip_int = {
- 	.ops = &sdhci_acpi_ops_int,
- };
- 
-+static int sdhci_acpi_emmc_probe_slot(struct platform_device *pdev)
-+{
-+	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
-+	struct sdhci_host *host;
-+
-+	if (!c || !c->host)
-+		return 0;
-+
-+	host = c->host;
-+
-+	/* Platform specific code during emmc proble slot goes here */
-+
-+	return 0;
-+}
-+
-+static int sdhci_acpi_sdio_probe_slot(struct platform_device *pdev)
-+{
-+	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
-+	struct sdhci_host *host;
-+
-+	if (!c || !c->host)
-+		return 0;
-+
-+	host = c->host;
-+
-+	/* Platform specific code during emmc proble slot goes here */
-+
-+	return 0;
-+}
-+
-+static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev)
-+{
-+	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
-+	struct sdhci_host *host;
-+
-+	if (!c || !c->host || !c->slot)
-+		return 0;
-+
-+	host = c->host;
-+
-+	/* Platform specific code during emmc proble slot goes here */
-+
-+	return 0;
-+}
-+
- static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
- 	.chip    = &sdhci_acpi_chip_int,
- 	.caps    = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE | MMC_CAP_HW_RESET,
- 	.caps2   = MMC_CAP2_HC_ERASE_SZ,
- 	.flags   = SDHCI_ACPI_RUNTIME_PM,
-+	.probe_slot	= sdhci_acpi_emmc_probe_slot,
- };
- 
- static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
-@@ -135,12 +183,14 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
- 	.caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD,
- 	.flags   = SDHCI_ACPI_RUNTIME_PM,
- 	.pm_caps = MMC_PM_KEEP_POWER,
-+	.probe_slot	= sdhci_acpi_sdio_probe_slot,
- };
- 
- static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sd = {
- 	.flags   = SDHCI_ACPI_SD_CD | SDHCI_ACPI_SD_CD_OVERRIDE_LEVEL |
- 		   SDHCI_ACPI_RUNTIME_PM,
- 	.quirks2 = SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON,
-+	.probe_slot	= sdhci_acpi_sd_probe_slot,
- };
- 
- struct sdhci_acpi_uid_slot {
-@@ -275,6 +325,11 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 	}
- 
- 	if (c->slot) {
-+		if (c->slot->probe_slot) {
-+			err = c->slot->probe_slot(pdev);
-+			if (err)
-+				goto err_free;
-+		}
- 		if (c->slot->chip) {
- 			host->ops            = c->slot->chip->ops;
- 			host->quirks        |= c->slot->chip->quirks;
-@@ -332,6 +387,9 @@ static int sdhci_acpi_remove(struct platform_device *pdev)
- 		pm_runtime_put_noidle(dev);
- 	}
- 
-+	if (c->slot && c->slot->remove_slot)
-+		c->slot->remove_slot(pdev);
-+
- 	dead = (sdhci_readl(c->host, SDHCI_INT_STATUS) == ~0);
- 	sdhci_remove_host(c->host, dead);
- 	sdhci_free_host(c->host);
--- 
-1.7.9.5
+We are using a rebased version of
+http://www.spinics.net/lists/linux-mmc/msg21742.html to handle the
+dwmmc side changes. We should have mentioned this dependency as the
+patch is required for proper functioning of dwmmc on Exynos7.
+Stress tests are on-going with that patch and once it looks good, we
+will post our results so that the original patch may be taken forward.
 
+Regards,
+Abhilash
+>
+> Best Regards,
+> Jaehoon Chung
+>>
+>> Signed-off-by: Abhilash Kesavan <a.kesavan@samsung.com>
+>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+>> ---
+>>  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    4 +
+>>  drivers/mmc/host/dw_mmc-exynos.c                   |   91 +++++++++++++++++---
+>>  2 files changed, 82 insertions(+), 13 deletions(-)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+>> index 6cd3525..ee4fc05 100644
+>> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+>> @@ -18,6 +18,10 @@ Required Properties:
+>>         specific extensions.
+>>       - "samsung,exynos5420-dw-mshc": for controllers with Samsung Exynos5420
+>>         specific extensions.
+>> +     - "samsung,exynos7-dw-mshc": for controllers with Samsung Exynos7
+>> +       specific extensions.
+>> +     - "samsung,exynos7-dw-mshc-smu": for controllers with Samsung Exynos7
+>> +       specific extensions having an SMU.
+>>
+>>  * samsung,dw-mshc-ciu-div: Specifies the divider value for the card interface
+>>    unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
+>> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+>> index 0fbc53a..509365c 100644
+>> --- a/drivers/mmc/host/dw_mmc-exynos.c
+>> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+>> @@ -25,6 +25,7 @@
+>>  #define NUM_PINS(x)                  (x + 2)
+>>
+>>  #define SDMMC_CLKSEL                 0x09C
+>> +#define SDMMC_CLKSEL64                       0x0A8
+>>  #define SDMMC_CLKSEL_CCLK_SAMPLE(x)  (((x) & 7) << 0)
+>>  #define SDMMC_CLKSEL_CCLK_DRIVE(x)   (((x) & 7) << 16)
+>>  #define SDMMC_CLKSEL_CCLK_DIVIDER(x) (((x) & 7) << 24)
+>> @@ -65,6 +66,8 @@ enum dw_mci_exynos_type {
+>>       DW_MCI_TYPE_EXYNOS5250,
+>>       DW_MCI_TYPE_EXYNOS5420,
+>>       DW_MCI_TYPE_EXYNOS5420_SMU,
+>> +     DW_MCI_TYPE_EXYNOS7,
+>> +     DW_MCI_TYPE_EXYNOS7_SMU,
+>>  };
+>>
+>>  /* Exynos implementation specific driver private data */
+>> @@ -95,6 +98,12 @@ static struct dw_mci_exynos_compatible {
+>>       }, {
+>>               .compatible     = "samsung,exynos5420-dw-mshc-smu",
+>>               .ctrl_type      = DW_MCI_TYPE_EXYNOS5420_SMU,
+>> +     }, {
+>> +             .compatible     = "samsung,exynos7-dw-mshc",
+>> +             .ctrl_type      = DW_MCI_TYPE_EXYNOS7,
+>> +     }, {
+>> +             .compatible     = "samsung,exynos7-dw-mshc-smu",
+>> +             .ctrl_type      = DW_MCI_TYPE_EXYNOS7_SMU,
+>>       },
+>>  };
+>>
+>> @@ -102,7 +111,8 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
+>>  {
+>>       struct dw_mci_exynos_priv_data *priv = host->priv;
+>>
+>> -     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420_SMU) {
+>> +     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420_SMU ||
+>> +             priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU) {
+>>               mci_writel(host, MPSBEGIN0, 0);
+>>               mci_writel(host, MPSEND0, DWMCI_BLOCK_NUM);
+>>               mci_writel(host, MPSCTRL0, DWMCI_MPSCTRL_SECURE_WRITE_BIT |
+>> @@ -153,11 +163,22 @@ static int dw_mci_exynos_resume(struct device *dev)
+>>  static int dw_mci_exynos_resume_noirq(struct device *dev)
+>>  {
+>>       struct dw_mci *host = dev_get_drvdata(dev);
+>> +     struct dw_mci_exynos_priv_data *priv = host->priv;
+>>       u32 clksel;
+>>
+>> -     clksel = mci_readl(host, CLKSEL);
+>> -     if (clksel & SDMMC_CLKSEL_WAKEUP_INT)
+>> -             mci_writel(host, CLKSEL, clksel);
+>> +     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
+>> +             priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
+>> +             clksel = mci_readl(host, CLKSEL64);
+>> +     else
+>> +             clksel = mci_readl(host, CLKSEL);
+>> +
+>> +     if (clksel & SDMMC_CLKSEL_WAKEUP_INT) {
+>> +             if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
+>> +                     priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
+>> +                     mci_writel(host, CLKSEL64, clksel);
+>> +             else
+>> +                     mci_writel(host, CLKSEL, clksel);
+>> +     }
+>>
+>>       return 0;
+>>  }
+>> @@ -169,6 +190,7 @@ static int dw_mci_exynos_resume_noirq(struct device *dev)
+>>
+>>  static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
+>>  {
+>> +     struct dw_mci_exynos_priv_data *priv = host->priv;
+>>       /*
+>>        * Exynos4412 and Exynos5250 extends the use of CMD register with the
+>>        * use of bit 29 (which is reserved on standard MSHC controllers) for
+>> @@ -176,8 +198,14 @@ static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
+>>        * HOLD register should be bypassed in case there is no phase shift
+>>        * applied on CMD/DATA that is sent to the card.
+>>        */
+>> -     if (SDMMC_CLKSEL_GET_DRV_WD3(mci_readl(host, CLKSEL)))
+>> -             *cmdr |= SDMMC_CMD_USE_HOLD_REG;
+>> +     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
+>> +             priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU) {
+>> +             if (SDMMC_CLKSEL_GET_DRV_WD3(mci_readl(host, CLKSEL64)))
+>> +                     *cmdr |= SDMMC_CMD_USE_HOLD_REG;
+>> +      } else {
+>> +             if (SDMMC_CLKSEL_GET_DRV_WD3(mci_readl(host, CLKSEL)))
+>> +                     *cmdr |= SDMMC_CMD_USE_HOLD_REG;
+>> +     }
+>>  }
+>>
+>>  static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>> @@ -188,12 +216,20 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>>       u8 div = priv->ciu_div + 1;
+>>
+>>       if (ios->timing == MMC_TIMING_MMC_DDR52) {
+>> -             mci_writel(host, CLKSEL, priv->ddr_timing);
+>> +             if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
+>> +                     priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
+>> +                     mci_writel(host, CLKSEL64, priv->ddr_timing);
+>> +             else
+>> +                     mci_writel(host, CLKSEL, priv->ddr_timing);
+>>               /* Should be double rate for DDR mode */
+>>               if (ios->bus_width == MMC_BUS_WIDTH_8)
+>>                       wanted <<= 1;
+>>       } else {
+>> -             mci_writel(host, CLKSEL, priv->sdr_timing);
+>> +             if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
+>> +                     priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
+>> +                     mci_writel(host, CLKSEL64, priv->sdr_timing);
+>> +             else
+>> +                     mci_writel(host, CLKSEL, priv->sdr_timing);
+>>       }
+>>
+>>       /* Don't care if wanted clock is zero */
+>> @@ -265,26 +301,51 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+>>
+>>  static inline u8 dw_mci_exynos_get_clksmpl(struct dw_mci *host)
+>>  {
+>> -     return SDMMC_CLKSEL_CCLK_SAMPLE(mci_readl(host, CLKSEL));
+>> +     struct dw_mci_exynos_priv_data *priv = host->priv;
+>> +
+>> +     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
+>> +             priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
+>> +             return SDMMC_CLKSEL_CCLK_SAMPLE(mci_readl(host, CLKSEL64));
+>> +     else
+>> +             return SDMMC_CLKSEL_CCLK_SAMPLE(mci_readl(host, CLKSEL));
+>>  }
+>>
+>>  static inline void dw_mci_exynos_set_clksmpl(struct dw_mci *host, u8 sample)
+>>  {
+>>       u32 clksel;
+>> -     clksel = mci_readl(host, CLKSEL);
+>> +     struct dw_mci_exynos_priv_data *priv = host->priv;
+>> +
+>> +     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
+>> +             priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
+>> +             clksel = mci_readl(host, CLKSEL64);
+>> +     else
+>> +             clksel = mci_readl(host, CLKSEL);
+>>       clksel = (clksel & ~0x7) | SDMMC_CLKSEL_CCLK_SAMPLE(sample);
+>> -     mci_writel(host, CLKSEL, clksel);
+>> +     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
+>> +             priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
+>> +             mci_writel(host, CLKSEL64, clksel);
+>> +     else
+>> +             mci_writel(host, CLKSEL, clksel);
+>>  }
+>>
+>>  static inline u8 dw_mci_exynos_move_next_clksmpl(struct dw_mci *host)
+>>  {
+>> +     struct dw_mci_exynos_priv_data *priv = host->priv;
+>>       u32 clksel;
+>>       u8 sample;
+>>
+>> -     clksel = mci_readl(host, CLKSEL);
+>> +     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
+>> +             priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
+>> +             clksel = mci_readl(host, CLKSEL64);
+>> +     else
+>> +             clksel = mci_readl(host, CLKSEL);
+>>       sample = (clksel + 1) & 0x7;
+>>       clksel = (clksel & ~0x7) | sample;
+>> -     mci_writel(host, CLKSEL, clksel);
+>> +     if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
+>> +             priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
+>> +             mci_writel(host, CLKSEL64, clksel);
+>> +     else
+>> +             mci_writel(host, CLKSEL, clksel);
+>>       return sample;
+>>  }
+>>
+>> @@ -411,6 +472,10 @@ static const struct of_device_id dw_mci_exynos_match[] = {
+>>                       .data = &exynos_drv_data, },
+>>       { .compatible = "samsung,exynos5420-dw-mshc-smu",
+>>                       .data = &exynos_drv_data, },
+>> +     { .compatible = "samsung,exynos7-dw-mshc",
+>> +                     .data = &exynos_drv_data, },
+>> +     { .compatible = "samsung,exynos7-dw-mshc-smu",
+>> +                     .data = &exynos_drv_data, },
+>>       {},
+>>  };
+>>  MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
+>>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
