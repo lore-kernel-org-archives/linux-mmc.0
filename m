@@ -1,51 +1,52 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [RFC PATCH 1/1 v8]mmc: Support-FFU-for-eMMC-v5.0
-Date: Mon, 1 Sep 2014 09:26:16 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333AEB94FF@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE64B934609@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFr52GkJC-2A4b6dy7VYZZsVgCHnT-GdL_9ZkF=Hd4H=Jw@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333AE73534@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFoFq+XkjVqycEorUDU_aKACPQkHvEsdJjJkj+P=FET5cA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333AE8EC81@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAPDyKFqumUdoxnGg8nU9FfqEUOGvBfFNBdfg4kW=V4WF5r_OSg@mail.gmail.com>
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: Re: [PATCH 2/7] mmc: omap_hsmmc: use blk_size_workaround
+Date: Mon, 01 Sep 2014 14:05:49 +0400
+Message-ID: <540444FD.4040800@cogentembedded.com>
+References: <87r3zvzohj.wl%kuninori.morimoto.gx@gmail.com> <87oauzzofe.wl%kuninori.morimoto.gx@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2on0095.outbound.protection.outlook.com ([65.55.169.95]:36544
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751405AbaIAKAt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 1 Sep 2014 06:00:49 -0400
-In-Reply-To: <CAPDyKFqumUdoxnGg8nU9FfqEUOGvBfFNBdfg4kW=V4WF5r_OSg@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-lb0-f175.google.com ([209.85.217.175]:35424 "EHLO
+	mail-lb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752363AbaIAKFt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Sep 2014 06:05:49 -0400
+Received: by mail-lb0-f175.google.com with SMTP id u10so5564781lbd.6
+        for <linux-mmc@vger.kernel.org>; Mon, 01 Sep 2014 03:05:48 -0700 (PDT)
+In-Reply-To: <87oauzzofe.wl%kuninori.morimoto.gx@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, Grant Grundler <grundler@chromium.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "Gwendal Grignou (gwendal@chromium.org)" <gwendal@chromium.org>
+To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-W3NuaXBdDQoNCj4gTXkgY29uY2x1c2lvbiBmcm9tIHRoYXQgaXMgKGNvcnJlY3QgbWUgaWYgSSBh
-bSB3cm9uZywgc2luY2UgaXQgbWF5IGJlIHZlbmRvcg0KPiBzcGVjaWZpYyksIHRoYXQgb25seSBt
-aW5vciBtb2RpZmljYXRpb25zIHNob3VsZCBiZSBuZWVkZWQgdG8gdGhlIG1tYyBpb2N0bC4gV2UN
-Cj4gbmVlZCB0byBhZGQgc3BlY2lhbCB0cmVhdG1lbnQgZm9yIHdoZW4gImNtZC5vcGNvZGUgPT0N
-Cj4gTU1DX0ZGVV9ET1dOTE9BRF9PUCIuIEluIHN1Y2ggc2NlbmFyaW8gdGhlIGZvbGxvd2luZyBz
-ZXF1ZW5jZSBuZWVkcyB0bw0KPiBiZSBtYWludGFpbmVkLg0KPiANCj4gMS4gQ2xhaW0gaG9zdCBl
-dGMuDQo+IDIuIFNldCBGRlUgbW9kZS4NCj4gMy4gV3JpdGUgc29tZSBzZWN0b3JzIHRvIHRoZSBG
-RlUgYXJlYSwgYnV0IGluIHRoZSBzYW1lIHdheSBhcyBhbnkgb3RoZXIgbW1jDQo+IGlvY3RsIFdS
-SVRFIGlzIGRvbmUuDQo+IDQuIFNldCBub3JtYWwgbW9kZS4NCj4gNS4gUmVsYXNlIGhvc3QgZXRj
-Lg0KPiANCj4gVGhhdCBzZXF1ZW5jZSB0aGVuIG5lZWRzIHRvIGJlIHJlcGVhdGVkIHRvIHdyaXRl
-IHRoZSBjb21wbGV0ZSBmaXJtd2FyZSwNCj4gZGVwZW5kaW5nIG9uIGJ1ZmZlciBzaXplLiBCZXR3
-ZWVuIGVhY2ggYW5kIGV2ZXJ5IHBpZWNlIG9mIEZGVSBkYXRhIHRoYXQgaXMNCj4gd3JpdHRlbiwg
-bm9ybWFsIFJFQUQvV1JJVEUgb3BlcmF0aW9ucyBjYW4gYmUgc2VydmVkLg0KPiBSaWdodD8NCg0K
-V2UgY2hlY2tlZCBhZ2FpbiB0aGUgY3VycmVudCBJT0NUTCBpbXBsZW1lbnRhdGlvbiwgYW5kIHdl
-IHNlZSBpc3N1ZXMNCkluIGltcGxlbWVudGluZyBGRlUgYXMgc3VnZ2VzdGVkIGFib3ZlOg0KDQox
-LiBObyBzdXBwb3J0IGZvciBtdWx0aXBsZSBXcml0ZSBvcGVyYXRpb25zLg0KICAgIEZvciBydW5u
-aW5nIE11bHRpcGxlIEkvTywgdXNlciBuZWVkIHRvIHNlbmQgQ01EMjMgb3IgQ01EMTIuDQogICAg
-U28gc3RydWN0dXJlcyAic2JjIiBvciAic3RvcCIgb2YgIm1tY19ibGtfcmVxdWVzdCIgc2hvdWxk
-IGJlIHNldCBhY2NvcmRpbmdseS4NCg0KMi4gVGhlcmUgaXMgYSBsaW1pdCBpbiBjaHVuayBzaXpl
-IGluIGN1cnJlbnQgaW1wbGVtZW50YXRpb24gb2YgSU9DVEwuDQogICAgIEZyb20gc29tZSByZWFz
-b24gd2UgY2FuJ3Qgd3JpdGUgbW9yZSB0aGFuIDY0S0Igb24gb3VyIHBsYXRmb3JtLA0KICAgICBB
-bHRob3VnaCwgdGhlIE1NQ19JT0NfTUFYX0JZVEVTIGlzIGRlZmluZWQgdG8gYmUgMTI4S0INCg0K
-QmFzZWQgb24gdGhpcywgd2UgdGhpbmsgdGhhdCB1c2luZyBleGlzdGluZyBJT0NUTCBpbXBsZW1l
-bnRhdGlvbiBpcyBub3QgDQphIGdvb2Qgc29sdXRpb24gZm9yIEZGVS4NCg0KDQpUaGFua3MsDQpB
-bGV4DQoNCg0KDQo=
+Hello.
+
+On 9/1/2014 1:21 PM, Kuninori Morimoto wrote:
+
+> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+
+> Now, omap_hsmmc can use blk_size_workaround instead of
+> MMC_CAP2_NO_MULTI_READ. let's use it.
+
+> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+> ---
+>   drivers/mmc/host/omap_hsmmc.c |   17 ++++++++++++++++-
+>   1 file changed, 16 insertions(+), 1 deletion(-)
+
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index ece1634..6d2696b 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+[...]
+> @@ -1840,6 +1854,7 @@ static const struct mmc_host_ops omap_hsmmc_ops = {
+>   	.get_ro = omap_hsmmc_get_ro,
+>   	.init_card = omap_hsmmc_init_card,
+>   	.enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
+> +	.blk_workaround = omap_hsmmc_blk_size_workaround,
+
+    Not '.blk_size_workaround'?
+
+[...]
+
+WBR, Sergei
+
