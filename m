@@ -1,86 +1,46 @@
-From: Dong Aisheng <b29396@freescale.com>
-Subject: Re: [ulf.hansson-mmc:next 62/67] drivers/mmc/host/sdhci.c:1199:4:
- error: 'mmc' undeclared
-Date: Tue, 2 Sep 2014 10:17:44 +0800
-Message-ID: <20140902021729.GA11563@shlinux1.ap.freescale.net>
-References: <54007fae.5BYLcypTZgZbcj+t%fengguang.wu@intel.com>
- <20140901024022.GA24746@shlinux1.ap.freescale.net>
- <CAPDyKFo4Xe-rvM0J-Jp3Tu1TzXgfmFBfNMtxAUm1gENy8tnj0g@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: pxamci: prepare and unprepare the clocks
+Date: Tue, 2 Sep 2014 09:53:51 +0200
+Message-ID: <CAPDyKFqZOthoLqVVkeGY2d+KgQbn4Hm2E48mJt0W1hX3bpxkDw@mail.gmail.com>
+References: <1402343774-1072-1-git-send-email-robert.jarzmik@free.fr>
+	<CAPDyKFr2SXz2yco5jzbkmrRZvCNQNbA7OjjX=WAtmcBJ1vYynw@mail.gmail.com>
+	<871trv5y6t.fsf@free.fr>
+	<CAPDyKFpaX4UHW-_z=yy7UA1Xuv2LZqQkttJ-tWugZYSXD4VwiQ@mail.gmail.com>
+	<87sikb4gi5.fsf@free.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1blp0181.outbound.protection.outlook.com ([207.46.163.181]:5107
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751832AbaIBCit (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 1 Sep 2014 22:38:49 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFo4Xe-rvM0J-Jp3Tu1TzXgfmFBfNMtxAUm1gENy8tnj0g@mail.gmail.com>
+Received: from mail-lb0-f182.google.com ([209.85.217.182]:38719 "EHLO
+	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752003AbaIBHxx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Sep 2014 03:53:53 -0400
+Received: by mail-lb0-f182.google.com with SMTP id u10so7159595lbd.27
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Sep 2014 00:53:51 -0700 (PDT)
+In-Reply-To: <87sikb4gi5.fsf@free.fr>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: kbuild test robot <fengguang.wu@intel.com>, "kbuild-all@01.org" <kbuild-all@01.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Robert Jarzmik <robert.jarzmik@free.fr>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Mon, Sep 01, 2014 at 09:32:29AM +0200, Ulf Hansson wrote:
-> On 1 September 2014 04:40, Dong Aisheng <b29396@freescale.com> wrote:
-> > Hi Ulf,
-> >
-> > On Fri, Aug 29, 2014 at 09:27:10PM +0800, kbuild test robot wrote:
-> >> tree:   git://git.linaro.org/people/ulf.hansson/mmc next
-> >> head:   1a3c4f637e87dbdda6000b5d5cd9b590d3ec6f46
-> >> commit: cdfd9a2374ab63189ddeb5bf456bd3418ec559ec [62/67] mmc: sdhci: add platfrom get_max_timeout_count hook
-> >> config: make ARCH=x86_64 allmodconfig
-> >>
-> >> Note: the ulf.hansson-mmc/next HEAD 1a3c4f637e87dbdda6000b5d5cd9b590d3ec6f46 builds fine.
-> >>       It only hurts bisectibility.
-> >>
-> >> All error/warnings:
-> >>
-> >>    drivers/mmc/host/sdhci.c: In function 'sdhci_set_clock':
-> >> >> drivers/mmc/host/sdhci.c:1199:4: error: 'mmc' undeclared (first use in this function)
-> >>        mmc->max_busy_timeout =
-> >>        ^
-> >>    drivers/mmc/host/sdhci.c:1199:4: note: each undeclared identifier is reported only once for each function it appears in
-> >>
-> >> vim +/mmc +1199 drivers/mmc/host/sdhci.c
-> >>
-> >>   1193
-> >>   1194        clock_set:
-> >>   1195                if (real_div) {
-> >>   1196                        host->mmc->actual_clock = (host->max_clk * clk_mul) / real_div;
-> >>   1197                        if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK) {
-> >>   1198                                host->timeout_clk = host->mmc->actual_clock / 1000;
-> >> > 1199                                mmc->max_busy_timeout =
-> >>   1200                                                host->ops->get_max_timeout_count ?
-> >>   1201                                                host->ops->get_max_timeout_count(host) :
-> >>   1202                                                1 << 27;
-> >>
-> >
-> > Sorry for this bisect issue.
-> > Can you squash the following changes into the original commit to fix it?
-> >
-> > commit 94c10a5d2e78f7dddb67e0881799448ed5d650d3
-> > Author: Dong Aisheng <b29396@freescale.com>
-> > Date:   Mon Sep 1 10:33:16 2014 +0800
-> >
-> >     mmc: sdhci: fix bisect issue
-> >
-> >     Signed-off-by: Dong Aisheng <b29396@freescale.com>
-> 
-> Hi Dong,
-> 
-> Thanks for fix, I have squashed it into the original commit.
-> 
-> Additionally, while rebasing the branch the last patch in this series
-> hit a merge conflict, but managed to fix that myself. Still you may
-> want to have a look at the end result to verify I didn't screw up.
-> 
+On 1 September 2014 15:28, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+> Ulf Hansson <ulf.hansson@linaro.org> writes:
+>
+>> I understand your concern, but I don't see why there should be any
+>> major difference in clock management code (clk tree wise), due to this
+>> patch. It worked before, so likely it will work now!?
+>
+> It will ony work *differently*, it will change the clock management. It won't
+> break, but again it's *not* the purpose of the patch.  The patch is aimed at
+> removing a warning.
 
-I checked it's ok.
-Thanks a lot.
+Sorry if I was to vague, you must have misinterpreted my proposal. Let
+me try clarify how I think a patch should look like to solve the
+warning.
 
-Regards
-Dong Aisheng
+1) In pxamci_set_ios() replace " clk_enable()" with clk_prepare_enable().
+2) In pxamci_set_ios() replace " clk_disable()" with clk_disable_unprepare().
 
-> Kind regards
-> Uffe
+That should do the trick!
+
+Kind regards
+Uffe
