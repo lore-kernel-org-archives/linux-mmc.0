@@ -1,49 +1,58 @@
 From: Jean-Michel Hautbois <jhautbois@gmail.com>
-Subject: Re: sdhci-esdhc-imx : cannot read eMMC
-Date: Tue, 2 Sep 2014 17:10:14 +0200
-Message-ID: <CAL8zT=gpiV9OMToH80Qr5B7HUUbVDp0m_WK9PaCvuaMGwrBSJA@mail.gmail.com>
-References: <CAL8zT=gJtnyGSnVz+YWW3Z1LPXPp-Oe3SsGqvBvV=2LBpZ-t9Q@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: core: try 1.8v signling in ddr mode if host and device
+Date: Tue, 2 Sep 2014 17:31:56 +0200
+Message-ID: <CAL8zT=hEJDrtGjga9RG6B3xC5fw+Jj6Ppxzq379Qjra2mWRkoQ@mail.gmail.com>
+References: <20140815032806.GA19745@intel.com> <CAPDyKFpigfMvzV6t3f2C-hcvKgfa_jErSH=xLCqN4xG4X6zJ7w@mail.gmail.com>
+ <17296D9F8FF2234F831FC3DF505A87A911B21734@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f50.google.com ([209.85.219.50]:40438 "EHLO
-	mail-oa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751791AbaIBPK3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Sep 2014 11:10:29 -0400
-Received: by mail-oa0-f50.google.com with SMTP id o6so4900396oag.9
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Sep 2014 08:10:29 -0700 (PDT)
-In-Reply-To: <CAL8zT=gJtnyGSnVz+YWW3Z1LPXPp-Oe3SsGqvBvV=2LBpZ-t9Q@mail.gmail.com>
+Received: from mail-oi0-f51.google.com ([209.85.218.51]:43610 "EHLO
+	mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754463AbaIBPcM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Sep 2014 11:32:12 -0400
+Received: by mail-oi0-f51.google.com with SMTP id v63so4549481oia.38
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Sep 2014 08:32:11 -0700 (PDT)
+In-Reply-To: <17296D9F8FF2234F831FC3DF505A87A911B21734@shsmsx102.ccr.corp.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Jean-Michel Hautbois <jhautbois@gmail.com>
+To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "chris@printf.org" <chris@printf.org>
 
-2014-09-02 11:20 GMT+02:00 Jean-Michel Hautbois
-<jean-michel.hautbois@vodalys.com>:
-> Hi there,
+2014-08-15 10:36 GMT+02:00 Dong, Chuanxiao <chuanxiao.dong@intel.com>:
 >
-> I start a new thread, as I have done lots of test and this will be clearer.
-> I have problems reading and writing eMMC on my i.MX6 board with 3.17-rc3.
-> Sometimes I don't have read errors explicitly in dmesg, but fdisk has
-> no effects.
-> I activated MMC debug in my config file, and here is an extract of
-> mmc0 register dump and all mmc1 part.
-> On Freescale kernel, I confirm it works well with the same board and
-> sample, I can write a partition on mmc1.
+>
+>> -----Original Message-----
+>> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+>> Sent: Friday, August 15, 2014 4:34 PM
+>> To: Dong, Chuanxiao
+>> Cc: linux-mmc; chris@printf.org
+>> Subject: Re: [PATCH v3] mmc: core: try 1.8v signling in ddr mode if host and
+>> device
+>>
+>> On 15 August 2014 05:28, Chuanxiao Dong <chuanxiao.dong@intel.com>
+>> wrote:
+>> > Even (e)MMC card can support 3.3v to 1.2v vccq in DDR, but not all
+>> > host controller can support this, like some of the SDHCI host which
+>> > connect to an eMMC device. Some of these host controller still needs
+>> > to use 1.8v vccq for supporting DDR mode.
+>> >
+>> > So the sequence will be:
+>> > if (host and device can both support 1.2v IO)
+>> >         use 1.2v IO;
+>> > else if (host and device can both support 1.8v IO)
+>> >         use 1.8v IO;
+>> > so if host and device can only support 3.3v IO, this is the last choice.
+>> >
+>> > Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+>> > Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
+>>
+>> This looks good to me! But before I queue it for 3.18 I would appreciate if we
+>> could get some help in testing this for some various platforms, that support
+>> MMC DDR.
+>
+> Thanks a lot. BTW, this patch is already tested on Intel's platform which can support MMC DDR.
 
-<snip>
-
-> [    3.099853] sdhci [sdhci_add_host()]: mmc1: Auto-CMD23 available
-> [    3.100143] sdhci-esdhc-imx 219c000.usdhc: No vqmmc regulator found
-
-I have set my vqmmc-supply in my DT, and it works well now...
-I don't really know why specifying vqmmc-supply is better, but I can
-assure it is : I can mount the partition created on the eMMC.
-The only remaining errors are on boot partitions reading.
-Maybe should we have a parameter in DT in order to tell if we want to
-get thse partitions or not, instead of the return value of
-mmc_boot_partition_access() which is always 1 (if I don't miss
-something) ?
-
-Thanks,
+This patch associated with vqmmc-supply and vmmc-supply in the DT is
+working for me too on i.MX6.
 JM
