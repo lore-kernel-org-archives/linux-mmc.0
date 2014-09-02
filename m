@@ -1,113 +1,130 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc:sdhci: handle busy-end interrupt during command
-Date: Tue, 2 Sep 2014 11:27:51 +0200
-Message-ID: <CAPDyKFqK-bpEw8Yyfc8yM=yrvwK7FzG430m3Ve7ChgKOaqzFCA@mail.gmail.com>
-References: <1409370040-14225-1-git-send-email-chanho.min@lge.com>
+From: Maxime Ripard <maxime.ripard@free-electrons.com>
+Subject: Re: [PATCH v2 03/12] clk: Add a function to retrieve phase
+Date: Tue, 2 Sep 2014 11:34:28 +0200
+Message-ID: <20140902093428.GS15297@lukather>
+References: <1409428991-2442-1-git-send-email-maxime.ripard@free-electrons.com>
+ <1409428991-2442-4-git-send-email-maxime.ripard@free-electrons.com>
+ <20140901190054.5251.56409@quantum>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="zVHGwpeVr3D20HrI"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f42.google.com ([209.85.215.42]:48570 "EHLO
-	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753431AbaIBJ1x (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Sep 2014 05:27:53 -0400
-Received: by mail-la0-f42.google.com with SMTP id mc6so7494951lab.29
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Sep 2014 02:27:51 -0700 (PDT)
-In-Reply-To: <1409370040-14225-1-git-send-email-chanho.min@lge.com>
+Received: from top.free-electrons.com ([176.31.233.9]:36541 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752643AbaIBJfS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Sep 2014 05:35:18 -0400
+Content-Disposition: inline
+In-Reply-To: <20140901190054.5251.56409@quantum>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chanho Min <chanho.min@lge.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hankyung Yu <hankyung.yu@lge.com>, Gwendal Grignou <gwendal@chromium.org>
+To: Mike Turquette <mturquette@linaro.org>
+Cc: Hans de Goede <hdegoede@redhat.com>, Emilio Lopez <emilio@elopez.com.ar>, chris@printf.net, david.lanzendoerfer@o2s.ch, ulf.hansson@linaro.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-On 30 August 2014 05:40, Chanho Min <chanho.min@lge.com> wrote:
-> It is fully legal for a controller to start handling busy-end interrupt
-> before it has signaled that the command has completed. So make sure
-> we do things in the proper order, Or it results that command interrupt
-> is ignored so it can cause unexpected operations. This is founded at some
-> toshiba emmc with the bellow warning.
->
-> "mmc0: Got command interrupt 0x00000001 even though
-> no command operation was in progress."
->
-> This issue has been also reported by Youssef TRIKI:
-> It is not specific to Toshiba devices, and happens with eMMC devices
-> as well as SD card which support Auto-CMD12 rather than CMD23.
->
-> Also, similar patch is submitted by:
-> Gwendal Grignou <gwendal@chromium.org>
->
-> Changes since v1:
->  Fixed conflict with the next of git.linaro.org/people/ulf.hansson/mmc.git
->  and Tested if issue is fixed again.
->
-> Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
-> Signed-off-by: Chanho Min <chanho.min@lge.com>
-> Tested-by: Youssef TRIKI <youssef.triki@st.com>
 
-Thanks! Applied for next.
+--zVHGwpeVr3D20HrI
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Kind regards
-Uffe
+Hi,
 
-> ---
->  drivers/mmc/host/sdhci.c  |   17 +++++++++++++++--
->  include/linux/mmc/sdhci.h |    1 +
->  2 files changed, 16 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index f6a683b..8428148 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1016,6 +1016,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->         mod_timer(&host->timer, timeout);
->
->         host->cmd = cmd;
-> +       host->busy_handle = 0;
->
->         sdhci_prepare_data(host, cmd);
->
-> @@ -2261,8 +2262,12 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
->                 if (host->cmd->data)
->                         DBG("Cannot wait for busy signal when also "
->                                 "doing a data transfer");
-> -               else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ))
-> +               else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ)
-> +                               && !host->busy_handle) {
-> +                       /* Mark that command complete before busy is ended */
-> +                       host->busy_handle = 1;
->                         return;
-> +               }
->
->                 /* The controller does not support the end-of-busy IRQ,
->                  * fall through and take the SDHCI_INT_RESPONSE */
-> @@ -2330,7 +2335,15 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->                                 return;
->                         }
->                         if (intmask & SDHCI_INT_DATA_END) {
-> -                               sdhci_finish_command(host);
-> +                               /*
-> +                                * Some cards handle busy-end interrupt
-> +                                * before the command completed, so make
-> +                                * sure we do things in the proper order.
-> +                                */
-> +                               if (host->busy_handle)
-> +                                       sdhci_finish_command(host);
-> +                               else
-> +                                       host->busy_handle = 1;
->                                 return;
->                         }
->                 }
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index 09ebe57..0aa85ca 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -146,6 +146,7 @@ struct sdhci_host {
->         struct mmc_command *cmd;        /* Current command */
->         struct mmc_data *data;  /* Current data request */
->         unsigned int data_early:1;      /* Data finished before cmd */
-> +       unsigned int busy_handle:1;     /* Handling the order of Busy-end */
->
->         struct sg_mapping_iter sg_miter;        /* SG state for PIO */
->         unsigned int blocks;    /* remaining PIO blocks */
-> --
-> 1.7.9.5
->
+On Mon, Sep 01, 2014 at 12:00:54PM -0700, Mike Turquette wrote:
+> Quoting Maxime Ripard (2014-08-30 13:03:02)
+> > The current phase API doesn't look into the actual hardware to get the =
+phase
+> > value, but will rather get it from a variable only set by the set_phase
+> > function.
+> >=20
+> > This will cause issue when the client driver will never call the set_ph=
+ase
+> > function, where we can end up having a reported phase that will not mat=
+ch what
+> > the hardware has been programmed to by the bootloader or what phase is
+> > programmed out of reset.
+> >=20
+> > Add a new get_phase function for the drivers to implement so that we ca=
+n get
+> > this value.
+> >=20
+> > Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+> > ---
+> >  drivers/clk/clk.c            | 17 ++++++++++++++---
+> >  include/linux/clk-provider.h |  5 +++++
+> >  2 files changed, 19 insertions(+), 3 deletions(-)
+> >=20
+> > diff --git a/drivers/clk/clk.c b/drivers/clk/clk.c
+> > index d87661af0c72..7dbceca694f1 100644
+> > --- a/drivers/clk/clk.c
+> > +++ b/drivers/clk/clk.c
+> > @@ -1797,8 +1797,8 @@ out:
+> >   * clk_get_phase - return the phase shift of a clock signal
+> >   * @clk: clock signal source
+> >   *
+> > - * Returns the phase shift of a clock node in degrees, otherwise retur=
+ns
+> > - * -EERROR.
+> > + * Returns the phase shift of a clock node in degrees. Any negative
+> > + * values are errors.
+> >   */
+> >  int clk_get_phase(struct clk *clk)
+> >  {
+> > @@ -1808,7 +1808,18 @@ int clk_get_phase(struct clk *clk)
+> >                 goto out;
+> > =20
+> >         clk_prepare_lock();
+> > -       ret =3D clk->phase;
+> > +
+> > +       if (clk->phase) {
+>=20
+> So if a phase is zero, then we fall through and query the hardware?
+> Seems like this case might be hit a lot for clocks that implement
+> .get_phase but never have their phase shifted, and accesses to the
+> registers may be much slower than to memory.
+
+Yep, which is exactly why I'm not that proud of it :)
+
+> Do you expect the phase to be changed behind our backs? E.g. firmware
+> changes it, or coming in and out of idle state, etc. If not then we can
+> store the phase at clock registration time and use a cached value.
+
+This is exactly what happens in our case. Since in order to use the
+MMC, you have to change the phase of the output and sample clocks,
+every time the firmware will have to use the MMC, it will change these
+clocks phase. Which happens pretty much all the time.
+
+> See how the CLK_GET_RATE_NOCACHE and CLK_GET_ACCURACY_NOCACHE flags are
+> used for details on how we can handle the case where the phase might
+> change behind our back.
+
+Ah, yes, of course. Thanks!
+
+Maxime
+
+--=20
+Maxime Ripard, Free Electrons
+Embedded Linux, Kernel and Android engineering
+http://free-electrons.com
+
+--zVHGwpeVr3D20HrI
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJUBY8kAAoJEBx+YmzsjxAgFvAP/iBy2TuOu89Ml4jQV1gshfAW
+NkGGtzAkrAzdfsmLVLPQphHU74fQvUxRcD1mK+/XkfIDUTy3bCd+K+gSmZpg9u3y
+SmyBvVrebxu/HVh0KDN3lU+8tP7ZyB3/bggNyeuAeCLQ4BrqVmrbPZdpcqKj3saj
+/h+g1ovzjVovOEVBoRjXn6G0yn8x7ByR1AMtfyckLQ8ZYm8eWraakpkPDS44JlFR
+gu5U97nUIUdGiWSvm/xFp4vJJTvLJkKTXpSnuKI4etT2J9I0sdJQmNY0wM4wlHZA
+JXPfYB0H9pyDRKUjNRcTdyTk7EYA6KBSPQ+h8G+ljJcS3fzr1m0hlnyR+7ja+JJW
+tffqebg7xLGRFZWMzLAKoJ8kOrGoseoFsurWmvDu55d8XwBJypUs5C9lGF/KCXSW
+K2k4MjU+oJEBprjjEf37LQEd0OFL6rIyURfXzpe6+uU05Ne70+9q9gjJG4NqAwhR
+K7McBgLu+jEjKOezaShvrBOMin2XcR3z3c5xlN9VtEM+z8oa96jMe4UHRFgPQlGJ
+Zq/zm9IJhwY9Lr+NKx8+pm/+4JW57z2UI9VE8L/InOqR1tVYa/9TuaObSH470iLA
+4cdJscFKg5ok8L5qQDf0PS3QdWV5nJHSB9g13suqxCN93fN8+jmK2Nxv0xTy+RuR
+s6IuFw9tbHjFIm5ywTvs
+=Nltr
+-----END PGP SIGNATURE-----
+
+--zVHGwpeVr3D20HrI--
