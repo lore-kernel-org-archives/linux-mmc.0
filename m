@@ -1,71 +1,61 @@
-From: David =?ISO-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>
-Subject: Re: [PATCH v2 03/12] clk: Add a function to retrieve phase
-Date: Tue, 02 Sep 2014 13:03:58 +0200
-Message-ID: <8168039.eGpGMdvNGO@dizzy-6.o2s.ch>
-References: <1409428991-2442-1-git-send-email-maxime.ripard@free-electrons.com>
- <54045820.7080102@redhat.com> <20140902095008.GT15297@lukather>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: pxamci: prepare and unprepare the clocks
+Date: Tue, 2 Sep 2014 12:53:20 +0200
+Message-ID: <CAPDyKFrxLue+XTROXbOvC+G0=AQ8-jMNYjQ3n7mMk=Ce-iLtKw@mail.gmail.com>
+References: <1409649835-13778-1-git-send-email-robert.jarzmik@free.fr>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============3765067576371511371=="
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20140902095008.GT15297@lukather>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: devicetree@vger.kernel.org, ulf.hansson@linaro.org, Mike Turquette <mturquette@linaro.org>, Emilio Lopez <emilio@elopez.com.ar>, linux-mmc@vger.kernel.org, chris@printf.net, Hans de Goede <hdegoede@redhat.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-la0-f48.google.com ([209.85.215.48]:64035 "EHLO
+	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753707AbaIBKxV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Sep 2014 06:53:21 -0400
+Received: by mail-la0-f48.google.com with SMTP id gl10so7605074lab.35
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Sep 2014 03:53:20 -0700 (PDT)
+In-Reply-To: <1409649835-13778-1-git-send-email-robert.jarzmik@free.fr>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Robert Jarzmik <robert.jarzmik@free.fr>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
+On 2 September 2014 11:23, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+> Add the clock prepare and unprepare call to the driver set_ios calls
+> phase. This will remove a warning once the PXA architecture is migrated
+> to the clock infrastructure.
+>
+> Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
 
---===============3765067576371511371==
-Content-Type: multipart/signed; boundary="nextPart1751503.O1r69vEWON"; micalg="pgp-sha1"; protocol="application/pgp-signature"
+Thanks! Applied for next.
 
+Kind regards
+Uffe
 
---nextPart1751503.O1r69vEWON
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="iso-8859-1"
-
-Hi
-> Yep, except that if I see a value -1 as a phase, I would assume that
-> it's 359, but maybe it's just me :)
-=2D1 looks suspiciously like an error return value from somewhere...
-
-=2D-=20
-David Lanzend=F6rfer
-OpenSourceSupport GmbH
-System engineer and supporter
-http://www.o2s.ch/
---nextPart1751503.O1r69vEWON
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part.
-Content-Transfer-Encoding: 7Bit
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iEYEABECAAYFAlQFpCIACgkQAeZw77btGjoPdACgi4h1ZPdor9qE1J+11efIfOHS
-7Q0AmgI7YW9PTY/QaqpTC+AV200yv56f
-=O9zQ
------END PGP SIGNATURE-----
-
---nextPart1751503.O1r69vEWON--
-
-
-
---===============3765067576371511371==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============3765067576371511371==--
+> ---
+>  drivers/mmc/host/pxamci.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+> index 32fe113..96406e8 100644
+> --- a/drivers/mmc/host/pxamci.c
+> +++ b/drivers/mmc/host/pxamci.c
+> @@ -474,7 +474,7 @@ static void pxamci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>                 unsigned int clk = rate / ios->clock;
+>
+>                 if (host->clkrt == CLKRT_OFF)
+> -                       clk_enable(host->clk);
+> +                       clk_prepare_enable(host->clk);
+>
+>                 if (ios->clock == 26000000) {
+>                         /* to support 26MHz */
+> @@ -501,7 +501,7 @@ static void pxamci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>                 pxamci_stop_clock(host);
+>                 if (host->clkrt != CLKRT_OFF) {
+>                         host->clkrt = CLKRT_OFF;
+> -                       clk_disable(host->clk);
+> +                       clk_disable_unprepare(host->clk);
+>                 }
+>         }
+>
+> --
+> 1.9.1
+>
