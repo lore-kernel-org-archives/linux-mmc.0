@@ -1,77 +1,90 @@
-From: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
-Subject: [PATCH] mmc: sdhci-esdhc-imx: Enable boot partition access from DT
-Date: Tue,  2 Sep 2014 17:49:37 +0200
-Message-ID: <1409672977-26972-1-git-send-email-jean-michel.hautbois@vodalys.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f180.google.com ([74.125.82.180]:62237 "EHLO
-	mail-we0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751764AbaIBPt7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Sep 2014 11:49:59 -0400
-Received: by mail-we0-f180.google.com with SMTP id w61so7184567wes.11
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Sep 2014 08:49:57 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH] mmc: dw_mmc: Don't enable interrupts until we're ready
+Date: Tue,  2 Sep 2014 16:37:14 -0700
+Message-ID: <1409701034-28526-1-git-send-email-dianders@chromium.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, Addy Ke <addy.ke@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, Doug Anderson <dianders@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
-Cc: rmk+kernel@arm.linux.org.uk, shawn.guo@linaro.org, b29396@freescale.com, peter.griffin@linaro.org, tgih.jun@samsung.com, h80.chung@samsung.com, ulf.hansson@linaro.org, chris@printf.net, galak@codeaurora.org, ijc+devicetree@hellion.org.uk, mark.rutland@arm.com, pawel.moll@arm.com, robh+dt@kernel.org, Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
 
-This property is useful when we don't want to access boot partitions on eMMC
+On dw_mmc there's a small race if you happen to get a card detect
+interrupt at just the wrong time during probe.  You may have enabled
+the interrupt but host->slot[0] may be NULL.
 
-Signed-off-by: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
+Fix the race by enabling interrupts all the way at the end of the
+probe.  We can also use free_irq() instead of dw_mmc specific masking
+to mask the IRQ at removal time.  Note that since we're now managing
+freeing of the irq ourselves, there's no need to use devm.
+
+FYI, the crash would look like:
+  dwmmc_rockchip ff0c0000.dwmmc: DW MMC controller at irq 64, 32 bit host data width, 256 deep fifo
+  Unable to handle kernel NULL pointer dereference at virtual address 00000000
+  pgd = c0004000
+  [00000000] *pgd=00000000
+  ...
+  ...
+  [<c0499380>] (dw_mci_work_routine_card) from [<c0134b94>] (process_one_work+0x260/0x3c4)
+  [<c0134b94>] (process_one_work) from [<c0135b10>] (worker_thread+0x240/0x3a8)
+  [<c0135b10>] (worker_thread) from [<c013b64c>] (kthread+0x100/0x118)
+  [<c013b64c>] (kthread) from [<c0106418>] (ret_from_fork+0x14/0x20)
+
+Signed-off-by: Doug Anderson <dianders@chromium.org>
 ---
- Documentation/devicetree/bindings/mmc/mmc.txt | 1 +
- drivers/mmc/host/sdhci-esdhc-imx.c            | 8 ++++++++
- include/linux/platform_data/mmc-esdhc-imx.h   | 1 +
- 3 files changed, 10 insertions(+)
+FYI: making dw_mmc into a module and trying module removal was not
+tested.  I'd appreciate any testing that folks can do there.  This
+code should be the equivalent and makes the error case of probe match
+the removal case more closely now.
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index 431716e..59cc854 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -40,6 +40,7 @@ Optional properties:
- - mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
- - mmc-hs400-1_8v: eMMC HS400 mode(1.8V I/O) is supported
- - mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
-+- no-boot-part : when preset, tells to access boot partitions
+ drivers/mmc/host/dw_mmc.c | 17 +++++++++++------
+ 1 file changed, 11 insertions(+), 6 deletions(-)
 
- *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
- polarity properties, we have to fix the meaning of the "normal" and "inverted"
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index ccec0e3..439e663 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -942,6 +942,11 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
-	if (of_property_read_u32(np, "fsl,delay-line", &boarddata->delay_line))
-		boarddata->delay_line = 0;
-
-+	if (of_find_property(np, "no-boot-part", NULL))
-+		boarddata->access_boot_part = false;
-+	else
-+		boarddata->access_boot_part = true;
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 7f227e9..540ba3c 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2577,10 +2577,6 @@ int dw_mci_probe(struct dw_mci *host)
+ 		goto err_dmaunmap;
+ 	}
+ 	INIT_WORK(&host->card_work, dw_mci_work_routine_card);
+-	ret = devm_request_irq(host->dev, host->irq, dw_mci_interrupt,
+-			       host->irq_flags, "dw-mci", host);
+-	if (ret)
+-		goto err_workqueue;
+ 
+ 	if (host->pdata->num_slots)
+ 		host->num_slots = host->pdata->num_slots;
+@@ -2619,11 +2615,21 @@ int dw_mci_probe(struct dw_mci *host)
+ 		goto err_workqueue;
+ 	}
+ 
++	ret = request_irq(host->irq, dw_mci_interrupt, host->irq_flags,
++			  "dw-mci", host);
++	if (ret)
++		goto err_initted;
 +
-	return 0;
- }
- #else
-@@ -1119,6 +1124,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
-		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
-	}
-
-+	if (!boarddata->access_boot_part)
-+		host->mmc->caps2 |= MMC_CAP2_BOOTPART_NOACC;
+ 	if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO)
+ 		dev_info(host->dev, "Internal DMAC interrupt fix enabled.\n");
+ 
+ 	return 0;
+ 
++err_initted:
++	for (i = 0; i < host->num_slots; i++)
++		if (host->slot[i])
++			dw_mci_cleanup_slot(host->slot[i], i);
 +
-	err = sdhci_add_host(host);
-	if (err)
-		goto disable_clk;
-diff --git a/include/linux/platform_data/mmc-esdhc-imx.h b/include/linux/platform_data/mmc-esdhc-imx.h
-index 75f70f6..a34ee9e 100644
---- a/include/linux/platform_data/mmc-esdhc-imx.h
-+++ b/include/linux/platform_data/mmc-esdhc-imx.h
-@@ -46,5 +46,6 @@ struct esdhc_platform_data {
-	unsigned int f_max;
-	bool support_vsel;
-	unsigned int delay_line;
-+	bool access_boot_part;
- };
- #endif /* __ASM_ARCH_IMX_ESDHC_H */
-
-2.0.4
-
+ err_workqueue:
+ 	destroy_workqueue(host->card_workqueue);
+ 
+@@ -2649,8 +2655,7 @@ void dw_mci_remove(struct dw_mci *host)
+ {
+ 	int i;
+ 
+-	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+-	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
++	free_irq(host->irq, host);
+ 
+ 	for (i = 0; i < host->num_slots; i++) {
+ 		dev_dbg(host->dev, "remove slot %d\n", i);
+-- 
+2.1.0.rc2.206.gedb03e5
