@@ -1,38 +1,61 @@
-From: Husam Al Sayed <oscar55@post.sk>
-Subject: FROM: Husam Al Sayed.
-Date: Wed, 3 Sep 2014 20:55:22 +0200 (CEST)
-Message-ID: <145671244.347288.1409770522769.JavaMail.root__39101.4969828122$1409771158$gmane$org@mbox05>
-Reply-To: "alsayedhusa@hotmail.com" <alsayedhusa@hotmail.com>
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: Re: [PATCH] tmio_mmc_pio: prevent endless loop in tmio_mmc_set_clock()
+Date: Wed, 03 Sep 2014 23:27:38 +0400
+Message-ID: <54076BAA.4030105@cogentembedded.com>
+References: <201405040219.30018.sergei.shtylyov@cogentembedded.com> <53AC7B06.9070501@cogentembedded.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <kvm-owner@vger.kernel.org>
-Sender: kvm-owner@vger.kernel.org
-Cc: rusty@rustcorp.com.au, mst@redhat.com, kvm@vger.kernel.org, virtio-dev@lists.oasis-open.org, rl@hellgate.ch, brucechang@via.com.tw, HaraldWelte@viatech.com, FlorianSchandinat@gmx.de, linux-fbdev@vger.kernel.org, romieu@fr.zoreil.com, hverkuil@xs4all.nl, kaber@trash.net, florian@openwrt.org, openwrt-devel@lists.openwrt.org, martyn.welch@ge.com, manohar.vanga@gmail.com, gregkh@linuxfoundation.org, devel@driverdev.osuosl.org, akataria@vmware.com, virtualization@lists.linux-foundation.org, sbhatewara@vmware.com, arvindkumar@vmware.com, pv-drivers@vmware.com, lgirdwood@gmail.com, juergh@gmail.com, vt8231@hiddenengine.co.uk, tony.olech@elandigitalsystems.com, linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org, zbr@ioremap.net
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <53AC7B06.9070501@cogentembedded.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, ian@mnementh.co.uk, linux-sh@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-FROM: Husam Al Sayed.
+Hello.
 
-EMAIL:alsayedhusa@hotmail.com
- 
-Hello,
- 
-I decided to write you this proposal in good faith, believing that you will
-not betray me. I am Mr. Husam Al Sayed, a Bank officer here in U.A.E.
- 
-One Mr. Peter Adams, a citizen of your country and Crude Oil dealer made a fixed deposit with my bank in 2005 for 108 calendar months, valued at US$30,000,000.00 (Thirty Million United State Dollars) the due date for this deposit contract was last 22nd of January 2014. Sadly Peter was among the death victims in the May 27 2006 Earthquake disaster in Java, Indonesia that killed over 5,000 people. He was in Indonesia on a business trip and that was how he met his untimely end. My bank management is yet to know about his death, I knew about it because he was my friend and I am his Account Officer. Peter did not mention any Next of Kin/ Heir when the account was opened, he was not married and no children. Last week my Bank Management requested that Peter should give instructions on what to do 
- about his funds, if to renew the contract.
- 
-I know this will happen and that is why I have been looking for a means to handle the situation, because if my Bank Directors happens to know that Peter is dead and do not have any Heir, they will take the funds for their personal use, so I don't want such to happen. That is why I am seeking your co-operation to present you as the Next of Kin/ Heir to the account, since you are a foreigner and my bank head quarters will release the account to you. There is no risk involved; the transaction will be executed under a legitimate arrangement that will protect us from any breach of law. It is better that we claim the money, than allowing the Bank Directors to take it, they are rich already. I am not a greedy person, so I am suggesting we share the funds in this ratio, 50/50%, equal sharing. Let 
- me know your mind on this and please do treat this information highly confidential. We shall go over the details once I receive your urgent response. Please Urgently get back to me through this email address as soon as possible:
- 
- 
- 
-Have a nice day and God bless. Anticipating your communication.
- 
-Regards,
-FROM: Husam Al Sayed.
-EMAIL: alsayedhusa@hotmail.com
-_____________________________________________________________________
+On 06/26/2014 11:56 PM, Sergei Shtylyov wrote:
 
-Presny televizny program najdete na http://www.ahaho.sk
+>> I've spent a couple of days with the driver just hanging due to me forgetting
+>> to specify the external crystal frequency, so that clk_get_rate() returned 0
+>> and thus the loop in tmio_mmc_set_clock() never ended. I don't think that's an
+>> acceptable behavior, so I suggest that the minimum frequency is checked for 0
+>> in tmio_mmc_host_probe().
+
+>> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+
+>> ---
+>> The patch is against Chris Ball's 'mmc.git' repo's 'master' branch.
+
+>     I'm still not seeing this patch applied anywhere in this repo... what's
+> the problem with it?
+
+    Chris, Ulf, Ian, what's the issue with this patch? Do you want me to 
+rework it?
+
+>>   drivers/mmc/host/tmio_mmc_pio.c |    9 +++++++++
+>>   1 file changed, 9 insertions(+)
+>
+>> Index: mmc/drivers/mmc/host/tmio_mmc_pio.c
+>> ===================================================================
+>> --- mmc.orig/drivers/mmc/host/tmio_mmc_pio.c
+>> +++ mmc/drivers/mmc/host/tmio_mmc_pio.c
+>> @@ -1044,6 +1044,15 @@ int tmio_mmc_host_probe(struct tmio_mmc_
+>>       }
+>>
+>>       /*
+>> +     * Check the sanity of mmc->f_min to prevent tmio_mmc_set_clock() from
+>> +     * looping forever...
+>> +     */
+>> +    if (mmc->f_min == 0) {
+>> +        ret = -EINVAL;
+>> +        goto pm_disable;
+>> +    }
+>> +
+>> +    /*
+>>        * There are 4 different scenarios for the card detection:
+>>        *  1) an external gpio irq handles the cd (best for power savings)
+>>        *  2) internal sdhi irq handles the cd
+
+WBR, Sergei
+
