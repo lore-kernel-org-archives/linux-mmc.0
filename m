@@ -1,36 +1,69 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH 0/7] mmc: sdhci/imx: a few clean up and fixes
-Date: Wed, 3 Sep 2014 20:04:56 +0800
-Message-ID: <1409745903-26550-1-git-send-email-b29396@freescale.com>
+Subject: [PATCH 7/7] mmc: sdhci-esdhc-imx: add quirk SDHCI_QUIRK2_BROKEN_HS200 for imx6qdl
+Date: Wed, 3 Sep 2014 20:05:03 +0800
+Message-ID: <1409745903-26550-8-git-send-email-b29396@freescale.com>
+References: <1409745903-26550-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2lp0235.outbound.protection.outlook.com ([207.46.163.235]:5160
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+Received: from mail-bl2lp0208.outbound.protection.outlook.com ([207.46.163.208]:28451
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932185AbaICM0k (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 3 Sep 2014 08:26:40 -0400
+	id S932142AbaICM1I (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 3 Sep 2014 08:27:08 -0400
+In-Reply-To: <1409745903-26550-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, chris@printf.net, shawn.guo@linaro.org, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
 
-A few clean up and fixes.
+The iMX6Q/DL can not support HS200 mode while iMX6SL and iMX6SX can,
+so introduce a new flag to distinguish them.
 
-Dong Aisheng (7):
-  mmc: sdhci-esdhc-imx: remove duplicated lines
-  mmc: sdhci-esdhc-imx: usdhc does not have missing card interrupt
-    issue
-  mmc: sdhci-esdhc-imx: add ADMA Length Mismatch errata fix
-  mmc: sdhci: do not enable card detect interrupt for gpio cd type
-  mmc: sdhci: do not enable card cd wakeup for gpio case
-  mmc: sdhci-esdhc-imx: add imx6sx support
-  mmc: sdhci-esdhc-imx: add quirk SDHCI_QUIRK2_BROKEN_HS200 for imx6qdl
+Signed-off-by: Dong Aisheng <b29396@freescale.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c |   10 ++++++++--
+ 1 files changed, 8 insertions(+), 2 deletions(-)
 
- drivers/mmc/host/sdhci-esdhc-imx.c |   44 ++++++++++++++++++++++++++++-------
- drivers/mmc/host/sdhci.c           |    8 +++++-
- 2 files changed, 41 insertions(+), 11 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 87179c4..16eff00 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -120,6 +120,8 @@
+  * when reading data from the card
+  */
+ #define ESDHC_FLAG_ERR004536		BIT(7)
++/* The IP supports HS200 mode */
++#define ESDHC_FLAG_HS200		BIT(8)
+ 
+ struct esdhc_soc_data {
+ 	u32 flags;
+@@ -147,12 +149,13 @@ static struct esdhc_soc_data usdhc_imx6q_data = {
+ 
+ static struct esdhc_soc_data usdhc_imx6sl_data = {
+ 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+-			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536,
++			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536
++			| ESDHC_FLAG_HS200,
+ };
+ 
+ static struct esdhc_soc_data usdhc_imx6sx_data = {
+ 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+-			| ESDHC_FLAG_HAVE_CAP1,
++			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200,
+ };
+ 
+ struct pltfm_imx_data {
+@@ -1063,6 +1066,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+ 		host->mmc->caps |= MMC_CAP_1_8V_DDR;
+ 
++		if (!(imx_data->socdata->flags & ESDHC_FLAG_HS200))
++			host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
++
+ 		/*
+ 		 * errata ESDHC_FLAG_ERR004536 fix for MX6Q TO1.2 and MX6DL
+ 		 * TO1.1, it's harmless for MX6SL
 -- 
 1.7.8
 
