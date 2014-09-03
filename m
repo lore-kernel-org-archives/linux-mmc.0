@@ -1,74 +1,74 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] mmc: core: try 1.8v signling in ddr mode if host and device
-Date: Wed, 3 Sep 2014 09:21:27 +0200
-Message-ID: <CAPDyKFqJ2o1nMR--bpk24+C7KC5+yADjt5OKJBj9XkNh9=pPFA@mail.gmail.com>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [PATCH v3] mmc: core: try 1.8v signling in ddr mode if host and
+ device
+Date: Wed, 3 Sep 2014 07:23:51 +0000
+Message-ID: <17296D9F8FF2234F831FC3DF505A87A911B312FA@shsmsx102.ccr.corp.intel.com>
 References: <20140815032806.GA19745@intel.com>
 	<CAPDyKFpigfMvzV6t3f2C-hcvKgfa_jErSH=xLCqN4xG4X6zJ7w@mail.gmail.com>
 	<17296D9F8FF2234F831FC3DF505A87A911B21734@shsmsx102.ccr.corp.intel.com>
 	<CAL8zT=hEJDrtGjga9RG6B3xC5fw+Jj6Ppxzq379Qjra2mWRkoQ@mail.gmail.com>
+ <CAPDyKFqJ2o1nMR--bpk24+C7KC5+yADjt5OKJBj9XkNh9=pPFA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f50.google.com ([209.85.215.50]:48436 "EHLO
-	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753703AbaICHV3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Sep 2014 03:21:29 -0400
-Received: by mail-la0-f50.google.com with SMTP id mc6so9222840lab.37
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2014 00:21:27 -0700 (PDT)
-In-Reply-To: <CAL8zT=hEJDrtGjga9RG6B3xC5fw+Jj6Ppxzq379Qjra2mWRkoQ@mail.gmail.com>
+Received: from mga02.intel.com ([134.134.136.20]:23270 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755835AbaICHX4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 3 Sep 2014 03:23:56 -0400
+In-Reply-To: <CAPDyKFqJ2o1nMR--bpk24+C7KC5+yADjt5OKJBj9XkNh9=pPFA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jean-Michel Hautbois <jhautbois@gmail.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Jean-Michel Hautbois <jhautbois@gmail.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, "chris@printf.org" <chris@printf.org>
 
-On 2 September 2014 17:31, Jean-Michel Hautbois <jhautbois@gmail.com> wrote:
-> 2014-08-15 10:36 GMT+02:00 Dong, Chuanxiao <chuanxiao.dong@intel.com>:
->>
->>
->>> -----Original Message-----
->>> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
->>> Sent: Friday, August 15, 2014 4:34 PM
->>> To: Dong, Chuanxiao
->>> Cc: linux-mmc; chris@printf.org
->>> Subject: Re: [PATCH v3] mmc: core: try 1.8v signling in ddr mode if host and
->>> device
->>>
->>> On 15 August 2014 05:28, Chuanxiao Dong <chuanxiao.dong@intel.com>
->>> wrote:
->>> > Even (e)MMC card can support 3.3v to 1.2v vccq in DDR, but not all
->>> > host controller can support this, like some of the SDHCI host which
->>> > connect to an eMMC device. Some of these host controller still needs
->>> > to use 1.8v vccq for supporting DDR mode.
->>> >
->>> > So the sequence will be:
->>> > if (host and device can both support 1.2v IO)
->>> >         use 1.2v IO;
->>> > else if (host and device can both support 1.8v IO)
->>> >         use 1.8v IO;
->>> > so if host and device can only support 3.3v IO, this is the last choice.
->>> >
->>> > Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
->>> > Signed-off-by: Yunpeng Gao <yunpeng.gao@intel.com>
->>>
->>> This looks good to me! But before I queue it for 3.18 I would appreciate if we
->>> could get some help in testing this for some various platforms, that support
->>> MMC DDR.
->>
->> Thanks a lot. BTW, this patch is already tested on Intel's platform which can support MMC DDR.
->
-> This patch associated with vqmmc-supply and vmmc-supply in the DT is
-> working for me too on i.MX6.
-> JM
-
-Thanks! Applied for next.
-
-I took the liberty of updating the commit msg header to "mmc: core:
-Fix sequence for I/O voltage in DDR mode for eMMC", to get a better
-description of the patch.
-
-I also added a tested by tag from "JM".
-
-Please tell me if you have any concern with my changes.
-
-Kind regards
-Uffe
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogbGludXgtbW1jLW93bmVy
+QHZnZXIua2VybmVsLm9yZw0KPiBbbWFpbHRvOmxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5v
+cmddIE9uIEJlaGFsZiBPZiBVbGYgSGFuc3Nvbg0KPiBTZW50OiBXZWRuZXNkYXksIFNlcHRlbWJl
+ciAwMywgMjAxNCAzOjIxIFBNDQo+IFRvOiBKZWFuLU1pY2hlbCBIYXV0Ym9pczsgRG9uZywgQ2h1
+YW54aWFvDQo+IENjOiBsaW51eC1tbWM7IGNocmlzQHByaW50Zi5vcmcNCj4gU3ViamVjdDogUmU6
+IFtQQVRDSCB2M10gbW1jOiBjb3JlOiB0cnkgMS44diBzaWdubGluZyBpbiBkZHIgbW9kZSBpZiBo
+b3N0IGFuZA0KPiBkZXZpY2UNCj4gDQo+IE9uIDIgU2VwdGVtYmVyIDIwMTQgMTc6MzEsIEplYW4t
+TWljaGVsIEhhdXRib2lzIDxqaGF1dGJvaXNAZ21haWwuY29tPg0KPiB3cm90ZToNCj4gPiAyMDE0
+LTA4LTE1IDEwOjM2IEdNVCswMjowMCBEb25nLCBDaHVhbnhpYW8NCj4gPGNodWFueGlhby5kb25n
+QGludGVsLmNvbT46DQo+ID4+DQo+ID4+DQo+ID4+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0t
+LQ0KPiA+Pj4gRnJvbTogVWxmIEhhbnNzb24gW21haWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3Jn
+XQ0KPiA+Pj4gU2VudDogRnJpZGF5LCBBdWd1c3QgMTUsIDIwMTQgNDozNCBQTQ0KPiA+Pj4gVG86
+IERvbmcsIENodWFueGlhbw0KPiA+Pj4gQ2M6IGxpbnV4LW1tYzsgY2hyaXNAcHJpbnRmLm9yZw0K
+PiA+Pj4gU3ViamVjdDogUmU6IFtQQVRDSCB2M10gbW1jOiBjb3JlOiB0cnkgMS44diBzaWdubGlu
+ZyBpbiBkZHIgbW9kZSBpZg0KPiA+Pj4gaG9zdCBhbmQgZGV2aWNlDQo+ID4+Pg0KPiA+Pj4gT24g
+MTUgQXVndXN0IDIwMTQgMDU6MjgsIENodWFueGlhbyBEb25nIDxjaHVhbnhpYW8uZG9uZ0BpbnRl
+bC5jb20+DQo+ID4+PiB3cm90ZToNCj4gPj4+ID4gRXZlbiAoZSlNTUMgY2FyZCBjYW4gc3VwcG9y
+dCAzLjN2IHRvIDEuMnYgdmNjcSBpbiBERFIsIGJ1dCBub3QgYWxsDQo+ID4+PiA+IGhvc3QgY29u
+dHJvbGxlciBjYW4gc3VwcG9ydCB0aGlzLCBsaWtlIHNvbWUgb2YgdGhlIFNESENJIGhvc3QNCj4g
+Pj4+ID4gd2hpY2ggY29ubmVjdCB0byBhbiBlTU1DIGRldmljZS4gU29tZSBvZiB0aGVzZSBob3N0
+IGNvbnRyb2xsZXINCj4gPj4+ID4gc3RpbGwgbmVlZHMgdG8gdXNlIDEuOHYgdmNjcSBmb3Igc3Vw
+cG9ydGluZyBERFIgbW9kZS4NCj4gPj4+ID4NCj4gPj4+ID4gU28gdGhlIHNlcXVlbmNlIHdpbGwg
+YmU6DQo+ID4+PiA+IGlmIChob3N0IGFuZCBkZXZpY2UgY2FuIGJvdGggc3VwcG9ydCAxLjJ2IElP
+KQ0KPiA+Pj4gPiAgICAgICAgIHVzZSAxLjJ2IElPOw0KPiA+Pj4gPiBlbHNlIGlmIChob3N0IGFu
+ZCBkZXZpY2UgY2FuIGJvdGggc3VwcG9ydCAxLjh2IElPKQ0KPiA+Pj4gPiAgICAgICAgIHVzZSAx
+Ljh2IElPOw0KPiA+Pj4gPiBzbyBpZiBob3N0IGFuZCBkZXZpY2UgY2FuIG9ubHkgc3VwcG9ydCAz
+LjN2IElPLCB0aGlzIGlzIHRoZSBsYXN0IGNob2ljZS4NCj4gPj4+ID4NCj4gPj4+ID4gU2lnbmVk
+LW9mZi1ieTogQ2h1YW54aWFvIERvbmcgPGNodWFueGlhby5kb25nQGludGVsLmNvbT4NCj4gPj4+
+ID4gU2lnbmVkLW9mZi1ieTogWXVucGVuZyBHYW8gPHl1bnBlbmcuZ2FvQGludGVsLmNvbT4NCj4g
+Pj4+DQo+ID4+PiBUaGlzIGxvb2tzIGdvb2QgdG8gbWUhIEJ1dCBiZWZvcmUgSSBxdWV1ZSBpdCBm
+b3IgMy4xOCBJIHdvdWxkDQo+ID4+PiBhcHByZWNpYXRlIGlmIHdlIGNvdWxkIGdldCBzb21lIGhl
+bHAgaW4gdGVzdGluZyB0aGlzIGZvciBzb21lDQo+ID4+PiB2YXJpb3VzIHBsYXRmb3JtcywgdGhh
+dCBzdXBwb3J0IE1NQyBERFIuDQo+ID4+DQo+ID4+IFRoYW5rcyBhIGxvdC4gQlRXLCB0aGlzIHBh
+dGNoIGlzIGFscmVhZHkgdGVzdGVkIG9uIEludGVsJ3MgcGxhdGZvcm0gd2hpY2ggY2FuDQo+IHN1
+cHBvcnQgTU1DIEREUi4NCj4gPg0KPiA+IFRoaXMgcGF0Y2ggYXNzb2NpYXRlZCB3aXRoIHZxbW1j
+LXN1cHBseSBhbmQgdm1tYy1zdXBwbHkgaW4gdGhlIERUIGlzDQo+ID4gd29ya2luZyBmb3IgbWUg
+dG9vIG9uIGkuTVg2Lg0KPiA+IEpNDQo+IA0KPiBUaGFua3MhIEFwcGxpZWQgZm9yIG5leHQuDQo+
+IA0KPiBJIHRvb2sgdGhlIGxpYmVydHkgb2YgdXBkYXRpbmcgdGhlIGNvbW1pdCBtc2cgaGVhZGVy
+IHRvICJtbWM6IGNvcmU6DQo+IEZpeCBzZXF1ZW5jZSBmb3IgSS9PIHZvbHRhZ2UgaW4gRERSIG1v
+ZGUgZm9yIGVNTUMiLCB0byBnZXQgYSBiZXR0ZXINCj4gZGVzY3JpcHRpb24gb2YgdGhlIHBhdGNo
+Lg0KPiANCj4gSSBhbHNvIGFkZGVkIGEgdGVzdGVkIGJ5IHRhZyBmcm9tICJKTSIuDQo+IA0KPiBQ
+bGVhc2UgdGVsbCBtZSBpZiB5b3UgaGF2ZSBhbnkgY29uY2VybiB3aXRoIG15IGNoYW5nZXMuDQpO
+byBjb25jZXJuIGZyb20gbXkgc2lkZS4NCg0KVGhhbmtzIEpNIGZvciB0ZXN0aW5nIHRoaXMgcGF0
+Y2gsIGFuZCBhbHNvIHRoYW5rcyBVbGYgZm9yIG1ha2luZyB0aGlzIHBhdGNoIGJldHRlciA6KQ0K
+DQpUaGFua3MNCkNodWFueGlhbw0KDQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KPiAtLQ0K
+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3Jp
+YmUgbGludXgtbW1jIiBpbiB0aGUgYm9keQ0KPiBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZn
+ZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+IGh0dHA6Ly92Z2VyLmtlcm5l
+bC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
