@@ -1,75 +1,97 @@
-From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
-Subject: RE: [PATCH] mmc: sdhci-pci: disable preset register for Baytrail
- and Merrifield
-Date: Wed, 3 Sep 2014 03:04:52 +0000
-Message-ID: <0AA7DC03D52A654FA5AF208AE38A967D01D83D65@shsmsx102.ccr.corp.intel.com>
-References: <1408347129-733-1-git-send-email-yunpeng.gao@intel.com>
- <CAPDyKFp3JMnHPJHBEnjaravC=Y=40kDp1xfqN9qaBqZ9Y3YJew@mail.gmail.com>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Enable boot partition access
+ from DT
+Date: Wed, 3 Sep 2014 10:59:48 +0800
+Message-ID: <20140903025944.GA18325@shlinux1.ap.freescale.net>
+References: <1409672977-26972-1-git-send-email-jean-michel.hautbois@vodalys.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:33210 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751115AbaICDFh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 2 Sep 2014 23:05:37 -0400
-In-Reply-To: <CAPDyKFp3JMnHPJHBEnjaravC=Y=40kDp1xfqN9qaBqZ9Y3YJew@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-bn1blp0182.outbound.protection.outlook.com ([207.46.163.182]:7446
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753108AbaICDVP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 2 Sep 2014 23:21:15 -0400
+Content-Disposition: inline
+In-Reply-To: <1409672977-26972-1-git-send-email-jean-michel.hautbois@vodalys.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+To: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, rmk+kernel@arm.linux.org.uk, shawn.guo@linaro.org, peter.griffin@linaro.org, tgih.jun@samsung.com, h80.chung@samsung.com, ulf.hansson@linaro.org, chris@printf.net, galak@codeaurora.org, ijc+devicetree@hellion.org.uk, mark.rutland@arm.com, pawel.moll@arm.com, robh+dt@kernel.org
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
-aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBUdWVzZGF5LCBTZXB0ZW1iZXIg
-MDIsIDIwMTQgNjowNiBQTQ0KPiBUbzogR2FvLCBZdW5wZW5nDQo+IENjOiBsaW51eC1tbWM7IERv
-bmcsIENodWFueGlhbw0KPiBTdWJqZWN0OiBSZTogW1BBVENIXSBtbWM6IHNkaGNpLXBjaTogZGlz
-YWJsZSBwcmVzZXQgcmVnaXN0ZXIgZm9yIEJheXRyYWlsIGFuZA0KPiBNZXJyaWZpZWxkDQo+IA0K
-PiBPbiAxOCBBdWd1c3QgMjAxNCAwOTozMiwgWXVucGVuZyBHYW8gPHl1bnBlbmcuZ2FvQGludGVs
-LmNvbT4gd3JvdGU6DQo+ID4gRHVlIHRvIEhXIGlzc3VlLCBTREhDSSBob3N0IGNvbnRyb2xsZXIg
-b24gSW50ZWwgQmF5dHJhaWwvTWVycmlmaWVsZA0KPiA+IHBsYXRmb3JtcyBjYW4gbm90IHVzZSBw
-cmVzZXQgcmVnaXN0ZXIuIFNvLCBkaXNhYmxlIHByZXNldCByZWdpc3RlcnMNCj4gPiBmb3IgdGhl
-bSBieSBxdWlya3MuDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBZdW5wZW5nIEdhbyA8eXVucGVu
-Zy5nYW9AaW50ZWwuY29tPg0KPiA+IFNpZ25lZC1vZmYtYnk6IENodWFueGlhbyBEb25nIDxjaHVh
-bnhpYW8uZG9uZ0BpbnRlbC5jb20+DQo+IA0KPiBIaSBZdW5wZW5nLA0KPiANCj4gQ291bGQgeW91
-IHBsZWFzZSByZWJhc2UgdGhpcyBwYXRjaCwgaXQgZGlkbid0IGFwcGx5IHRvIG15IG5leHQgYnJh
-bmNoLg0KDQpPSy4gSSdsbCBnaXQgY2xvbmUgbXkgbW1jX25leHQgdHJlZSBhbmQgcmViYXNlIHRo
-ZSBwYXRjaC4gQW5kIHdpbGwgc3VibWl0IGl0IGFnYWluIG9uY2UgZG9uZS4NClRoYW5rcyBmb3Ig
-dGhlIHJldmlldy4NCg0KVGhhbmtzLg0KDQpSZWdhcmRzLA0KWXVucGVuZw0KDQo+IEtpbmQgcmVn
-YXJkcw0KPiBVZmZlDQo+IA0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBj
-aS5jIHwgICAxMCArKysrKysrLS0tDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCA3IGluc2VydGlvbnMo
-KyksIDMgZGVsZXRpb25zKC0pDQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9z
-dC9zZGhjaS1wY2kuYw0KPiA+IGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1wY2kuYyBpbmRleCA1
-MmM0MmZjLi45ODE4N2FlIDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kt
-cGNpLmMNCj4gPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS5jDQo+ID4gQEAgLTI3
-NywxOCArMjc3LDIxIEBAIHN0YXRpYyBpbnQgYnl0X3NkaW9fcHJvYmVfc2xvdChzdHJ1Y3QNCj4g
-PiBzZGhjaV9wY2lfc2xvdCAqc2xvdCkgIH0NCj4gPg0KPiA+ICBzdGF0aWMgY29uc3Qgc3RydWN0
-IHNkaGNpX3BjaV9maXhlcyBzZGhjaV9pbnRlbF9ieXRfZW1tYyA9IHsNCj4gPiArICAgICAgIC5x
-dWlya3MyICAgICAgICA9IFNESENJX1FVSVJLMl9QUkVTRVRfVkFMVUVfQlJPS0VOLA0KPiA+ICAg
-ICAgICAgLmFsbG93X3J1bnRpbWVfcG0gPSB0cnVlLA0KPiA+ICAgICAgICAgLnByb2JlX3Nsb3Qg
-ICAgID0gYnl0X2VtbWNfcHJvYmVfc2xvdCwNCj4gPiAgfTsNCj4gPg0KPiA+ICBzdGF0aWMgY29u
-c3Qgc3RydWN0IHNkaGNpX3BjaV9maXhlcyBzZGhjaV9pbnRlbF9ieXRfc2RpbyA9IHsNCj4gPiAt
-ICAgICAgIC5xdWlya3MyICAgICAgICA9IFNESENJX1FVSVJLMl9IT1NUX09GRl9DQVJEX09OLA0K
-PiA+ICsgICAgICAgLnF1aXJrczIgICAgICAgID0gU0RIQ0lfUVVJUksyX0hPU1RfT0ZGX0NBUkRf
-T04gfA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIFNESENJX1FVSVJLMl9QUkVTRVRfVkFM
-VUVfQlJPS0VOLA0KPiA+ICAgICAgICAgLmFsbG93X3J1bnRpbWVfcG0gPSB0cnVlLA0KPiA+ICAg
-ICAgICAgLnByb2JlX3Nsb3QgICAgID0gYnl0X3NkaW9fcHJvYmVfc2xvdCwNCj4gPiAgfTsNCj4g
-Pg0KPiA+ICBzdGF0aWMgY29uc3Qgc3RydWN0IHNkaGNpX3BjaV9maXhlcyBzZGhjaV9pbnRlbF9i
-eXRfc2QgPSB7DQo+ID4gLSAgICAgICAucXVpcmtzMiAgICAgICAgPSBTREhDSV9RVUlSSzJfQ0FS
-RF9PTl9ORUVEU19CVVNfT04sDQo+ID4gKyAgICAgICAucXVpcmtzMiAgICAgICAgPSBTREhDSV9R
-VUlSSzJfQ0FSRF9PTl9ORUVEU19CVVNfT04gfA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAg
-IFNESENJX1FVSVJLMl9QUkVTRVRfVkFMVUVfQlJPS0VOLA0KPiA+ICAgICAgICAgLmFsbG93X3J1
-bnRpbWVfcG0gPSB0cnVlLA0KPiA+ICAgICAgICAgLm93bl9jZF9mb3JfcnVudGltZV9wbSA9IHRy
-dWUsICB9OyBAQCAtMzEyLDcgKzMxNSw4IEBADQo+IHN0YXRpYw0KPiA+IGludCBpbnRlbF9tcmZs
-X21tY19wcm9iZV9zbG90KHN0cnVjdCBzZGhjaV9wY2lfc2xvdCAqc2xvdCkNCj4gPg0KPiA+ICBz
-dGF0aWMgY29uc3Qgc3RydWN0IHNkaGNpX3BjaV9maXhlcyBzZGhjaV9pbnRlbF9tcmZsX21tYyA9
-IHsNCj4gPiAgICAgICAgIC5xdWlya3MgICAgICAgICA9IFNESENJX1FVSVJLX05PX0VOREFUVFJf
-SU5fTk9QREVTQywNCj4gPiAtICAgICAgIC5xdWlya3MyICAgICAgICA9IFNESENJX1FVSVJLMl9C
-Uk9LRU5fSFMyMDAsDQo+ID4gKyAgICAgICAucXVpcmtzMiAgICAgICAgPSBTREhDSV9RVUlSSzJf
-QlJPS0VOX0hTMjAwIHwNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBTREhDSV9RVUlSSzJf
-UFJFU0VUX1ZBTFVFX0JST0tFTiwNCj4gPiAgICAgICAgIC5wcm9iZV9zbG90ICAgICA9IGludGVs
-X21yZmxfbW1jX3Byb2JlX3Nsb3QsDQo+ID4gIH07DQo+ID4NCj4gPiAtLQ0KPiA+IDEuNy45LjUN
-Cj4gPg0KPiA+IC0tDQo+ID4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhl
-IGxpbmUgInVuc3Vic2NyaWJlIGxpbnV4LW1tYyINCj4gPiBpbiB0aGUgYm9keSBvZiBhIG1lc3Nh
-Z2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbw0KPiA+IGluZm8g
-YXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+On Tue, Sep 02, 2014 at 05:49:37PM +0200, Jean-Michel Hautbois wrote:
+> This property is useful when we don't want to access boot partitions on eMMC
+> 
+
+Any special reason why not access boot partitions on eMMC?
+Not allow user to access it?
+
+> Signed-off-by: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc.txt | 1 +
+>  drivers/mmc/host/sdhci-esdhc-imx.c            | 8 ++++++++
+>  include/linux/platform_data/mmc-esdhc-imx.h   | 1 +
+>  3 files changed, 10 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> index 431716e..59cc854 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> @@ -40,6 +40,7 @@ Optional properties:
+>  - mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
+>  - mmc-hs400-1_8v: eMMC HS400 mode(1.8V I/O) is supported
+>  - mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
+> +- no-boot-part : when preset, tells to access boot partitions
+
+The file you changed is common mmc binding doc.
+You may also want to add the support in mmc_of_parse.
+
+And since sdhci-esdhc-imx is not using mmc_of_parse currently, maybe it's time
+to convert to it.
+
+Regards
+Dong Aisheng
+
+> 
+>  *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+>  polarity properties, we have to fix the meaning of the "normal" and "inverted"
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index ccec0e3..439e663 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -942,6 +942,11 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+> 	if (of_property_read_u32(np, "fsl,delay-line", &boarddata->delay_line))
+> 		boarddata->delay_line = 0;
+> 
+> +	if (of_find_property(np, "no-boot-part", NULL))
+> +		boarddata->access_boot_part = false;
+> +	else
+> +		boarddata->access_boot_part = true;
+> +
+> 	return 0;
+>  }
+>  #else
+> @@ -1119,6 +1124,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+> 		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+> 	}
+> 
+> +	if (!boarddata->access_boot_part)
+> +		host->mmc->caps2 |= MMC_CAP2_BOOTPART_NOACC;
+> +
+> 	err = sdhci_add_host(host);
+> 	if (err)
+> 		goto disable_clk;
+> diff --git a/include/linux/platform_data/mmc-esdhc-imx.h b/include/linux/platform_data/mmc-esdhc-imx.h
+> index 75f70f6..a34ee9e 100644
+> --- a/include/linux/platform_data/mmc-esdhc-imx.h
+> +++ b/include/linux/platform_data/mmc-esdhc-imx.h
+> @@ -46,5 +46,6 @@ struct esdhc_platform_data {
+> 	unsigned int f_max;
+> 	bool support_vsel;
+> 	unsigned int delay_line;
+> +	bool access_boot_part;
+>  };
+>  #endif /* __ASM_ARCH_IMX_ESDHC_H */
+> 
+> 2.0.4
+> 
