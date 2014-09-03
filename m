@@ -1,43 +1,58 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH 2/7] mmc: sdhci-esdhc-imx: usdhc does not have missing card interrupt issue
-Date: Wed, 3 Sep 2014 20:04:58 +0800
-Message-ID: <1409745903-26550-3-git-send-email-b29396@freescale.com>
+Subject: [PATCH 6/7] mmc: sdhci-esdhc-imx: add imx6sx support
+Date: Wed, 3 Sep 2014 20:05:02 +0800
+Message-ID: <1409745903-26550-7-git-send-email-b29396@freescale.com>
 References: <1409745903-26550-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2lp0209.outbound.protection.outlook.com ([207.46.163.209]:58160
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932185AbaICM0z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 3 Sep 2014 08:26:55 -0400
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1409745903-26550-1-git-send-email-b29396@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, chris@printf.net, shawn.guo@linaro.org, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
+Cc: ulf.hansson@linaro.org, shawn.guo@linaro.org, b29396@freescale.com, chris@printf.net, linux-arm-kernel@lists.infradead.org
+List-Id: linux-mmc@vger.kernel.org
 
-The usdhc does not have missing card interrupt issue, so execute the
-workaround conditionally.
+The imx6sx usdhc is derived from imx6sl, the difference is minor.
+imx6sx have the errata ESDHC_FLAG_ERR004536 fixed.
+So introduce a new compatible string for imx6sx to distinguish them.
 
 Signed-off-by: Dong Aisheng <b29396@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 256c901..9594bf8 100644
+index dc0e384..87179c4 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -300,7 +300,7 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
- 	u32 data;
+@@ -150,6 +150,11 @@ static struct esdhc_soc_data usdhc_imx6sl_data = {
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536,
+ };
  
- 	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
--		if (val & SDHCI_INT_CARD_INT) {
-+		if ((val & SDHCI_INT_CARD_INT) && !esdhc_is_usdhc(imx_data)) {
- 			/*
- 			 * Clear and then set D3CD bit to avoid missing the
- 			 * card interrupt.  This is a eSDHC controller problem
++static struct esdhc_soc_data usdhc_imx6sx_data = {
++	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
++			| ESDHC_FLAG_HAVE_CAP1,
++};
++
+ struct pltfm_imx_data {
+ 	u32 scratchpad;
+ 	struct pinctrl *pinctrl;
+@@ -190,6 +195,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
+ 	{ .compatible = "fsl,imx35-esdhc", .data = &esdhc_imx35_data, },
+ 	{ .compatible = "fsl,imx51-esdhc", .data = &esdhc_imx51_data, },
+ 	{ .compatible = "fsl,imx53-esdhc", .data = &esdhc_imx53_data, },
++	{ .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
+ 	{ .compatible = "fsl,imx6sl-usdhc", .data = &usdhc_imx6sl_data, },
+ 	{ .compatible = "fsl,imx6q-usdhc", .data = &usdhc_imx6q_data, },
+ 	{ /* sentinel */ }
 -- 
 1.7.8
-
