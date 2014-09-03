@@ -1,60 +1,52 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH 1/7] mmc: sdhci-esdhc-imx: remove duplicated lines
-Date: Wed, 3 Sep 2014 20:04:57 +0800
-Message-ID: <1409745903-26550-2-git-send-email-b29396@freescale.com>
+Subject: [PATCH 5/7] mmc: sdhci: do not enable card cd wakeup for gpio case
+Date: Wed, 3 Sep 2014 20:05:01 +0800
+Message-ID: <1409745903-26550-6-git-send-email-b29396@freescale.com>
 References: <1409745903-26550-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2lp0205.outbound.protection.outlook.com ([207.46.163.205]:17627
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+Received: from mail-bn1lp0140.outbound.protection.outlook.com ([207.46.163.140]:21974
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932185AbaICM0w (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 3 Sep 2014 08:26:52 -0400
+	id S932185AbaICM0u (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 3 Sep 2014 08:26:50 -0400
 In-Reply-To: <1409745903-26550-1-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, chris@printf.net, shawn.guo@linaro.org, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
 
-There is already the same register check above, no need the later one.
-Move them into one place and delete the later one.
+Do not need to enable the controller card cd interrupt wakeup
+if using GPIO as card detect since it's meaningless.
 
 Signed-off-by: Dong Aisheng <b29396@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |   12 +++++-------
- 1 files changed, 5 insertions(+), 7 deletions(-)
+ drivers/mmc/host/sdhci.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 587ee0e..256c901 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -315,6 +315,11 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
- 			data |= ESDHC_CTRL_D3CD;
- 			writel(data, host->ioaddr + SDHCI_HOST_CONTROL);
- 		}
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 4d0b7b5..7aa98b9 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2548,13 +2548,16 @@ static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
+ void sdhci_enable_irq_wakeups(struct sdhci_host *host)
+ {
+ 	u8 val;
++	int gpio_cd = mmc_gpio_get_cd(host->mmc);
 +
-+		if (val & SDHCI_INT_ADMA_ERROR) {
-+			val &= ~SDHCI_INT_ADMA_ERROR;
-+			val |= ESDHC_INT_VENDOR_SPEC_DMA_ERR;
-+		}
- 	}
+ 	u8 mask = SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE
+ 			| SDHCI_WAKE_ON_INT;
  
- 	if (unlikely((imx_data->socdata->flags & ESDHC_FLAG_MULTIBLK_NO_INT)
-@@ -335,13 +340,6 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
- 			}
- 	}
- 
--	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
--		if (val & SDHCI_INT_ADMA_ERROR) {
--			val &= ~SDHCI_INT_ADMA_ERROR;
--			val |= ESDHC_INT_VENDOR_SPEC_DMA_ERR;
--		}
--	}
--
- 	writel(val, host->ioaddr + reg);
+ 	val = sdhci_readb(host, SDHCI_WAKE_UP_CONTROL);
+ 	val |= mask ;
+ 	/* Avoid fake wake up */
+-	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
++	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION ||
++	    !IS_ERR_VALUE(gpio_cd))
+ 		val &= ~(SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE);
+ 	sdhci_writeb(host, val, SDHCI_WAKE_UP_CONTROL);
  }
- 
 -- 
 1.7.8
 
