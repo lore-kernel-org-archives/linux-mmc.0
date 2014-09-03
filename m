@@ -1,43 +1,101 @@
-From: Dong Aisheng <b29396@freescale.com>
-Subject: Re: [PATCH 0/7] mmc: sdhci/imx: a few clean up and fixes
-Date: Wed, 3 Sep 2014 20:19:33 +0800
-Message-ID: <20140903121929.GA31326@shlinux1.ap.freescale.net>
-References: <1409745903-26550-1-git-send-email-b29396@freescale.com>
- <CAOMZO5D8GaMTCnGo4iO+eKYr6xXx3iyN-9pyNMUT-0f-dv1+FQ@mail.gmail.com>
+From: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Enable boot partition access from DT
+Date: Wed, 3 Sep 2014 15:08:51 +0200
+Message-ID: <CAL8zT=j0TfC=RaA5L+Zm3ACk=D57tb+k6HNrQnSjd4JY_iupCQ@mail.gmail.com>
+References: <1409672977-26972-1-git-send-email-jean-michel.hautbois@vodalys.com>
+ <CAPDyKFrwCzQJvbpbue4T=HWLmbq5sZOP3RXwiupKvXe71uboUw@mail.gmail.com>
+ <5406D942.4080405@intel.com> <CAPDyKFrnF4biUGkLgkzz2RNdY1yLp2_bfvoWMM55yx-_TG6ENw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1lp0142.outbound.protection.outlook.com ([207.46.163.142]:13996
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S932220AbaICMlF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 3 Sep 2014 08:41:05 -0400
-Content-Disposition: inline
-In-Reply-To: <CAOMZO5D8GaMTCnGo4iO+eKYr6xXx3iyN-9pyNMUT-0f-dv1+FQ@mail.gmail.com>
+Received: from mail-ob0-f174.google.com ([209.85.214.174]:47865 "EHLO
+	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932520AbaICNJH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Sep 2014 09:09:07 -0400
+In-Reply-To: <CAPDyKFrnF4biUGkLgkzz2RNdY1yLp2_bfvoWMM55yx-_TG6ENw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawn.guo@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Shawn Guo <shawn.guo@linaro.org>, Dong Aisheng <b29396@freescale.com>, Peter Griffin <peter.griffin@linaro.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, h80.chung@samsung.com, Chris Ball <chris@printf.net>, Kumar Gala <galak@codeaurora.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Mark Rutland <mark.rutland@arm.com>, Pawel Moll <pawel.moll@arm.com>, Rob Herring <robh+dt@kernel.org>
 
-On Wed, Sep 03, 2014 at 09:34:28AM -0300, Fabio Estevam wrote:
-> Hi Dong,
-> 
-> On Wed, Sep 3, 2014 at 9:04 AM, Dong Aisheng <b29396@freescale.com> wrote:
-> > A few clean up and fixes.
-> 
-> Usually it is a good idea to separate cleanup from fixes. Do any of
-> the fixes should go to 3.17-rc or stable?
-> 
+2014-09-03 11:09 GMT+02:00 Ulf Hansson <ulf.hansson@linaro.org>:
+> On 3 September 2014 11:02, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 09/03/2014 11:30 AM, Ulf Hansson wrote:
+>>> On 2 September 2014 17:49, Jean-Michel Hautbois
+>>> <jean-michel.hautbois@vodalys.com> wrote:
+>>>> This property is useful when we don't want to access boot partitions on eMMC
+>>>>
+>>>> Signed-off-by: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
+>>>> ---
+>>>>  Documentation/devicetree/bindings/mmc/mmc.txt | 1 +
+>>>>  drivers/mmc/host/sdhci-esdhc-imx.c            | 8 ++++++++
+>>>>  include/linux/platform_data/mmc-esdhc-imx.h   | 1 +
+>>>>  3 files changed, 10 insertions(+)
+>>>>
+>>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+>>>> index 431716e..59cc854 100644
+>>>> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+>>>> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+>>>> @@ -40,6 +40,7 @@ Optional properties:
+>>>>  - mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
+>>>>  - mmc-hs400-1_8v: eMMC HS400 mode(1.8V I/O) is supported
+>>>>  - mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
+>>>> +- no-boot-part : when preset, tells to access boot partitions
+>>>>
+>>>>  *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+>>>>  polarity properties, we have to fix the meaning of the "normal" and "inverted"
+>>>> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+>>>> index ccec0e3..439e663 100644
+>>>> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+>>>> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+>>>> @@ -942,6 +942,11 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+>>>>         if (of_property_read_u32(np, "fsl,delay-line", &boarddata->delay_line))
+>>>>                 boarddata->delay_line = 0;
+>>>>
+>>>> +       if (of_find_property(np, "no-boot-part", NULL))
+>>>> +               boarddata->access_boot_part = false;
+>>>> +       else
+>>>> +               boarddata->access_boot_part = true;
+>>>> +
+>>>>         return 0;
+>>>>  }
+>>>>  #else
+>>>> @@ -1119,6 +1124,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>>>>                 host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+>>>>         }
+>>>>
+>>>> +       if (!boarddata->access_boot_part)
+>>>> +               host->mmc->caps2 |= MMC_CAP2_BOOTPART_NOACC;
+>>>> +
+>>>
+>>> Hmm, I don't think MMC_CAP2_BOOTPART_NOACC should have a DT binding.
+>>> Does it describe the hardware in some form?
+>>>
+>>> Actually I would like to question why MMC_CAP2_BOOTPART_NOACC exists
+>>> at all. If there are cards that don't supports the BOOT area,
+>>> shouldn't we have a card quirk for it instead of a host cap? Maybe
+>>> Adrian Hunter, how originally wrote the patch for adding
+>>> MMC_CAP2_BOOTPART_NOACC, could help me understand the reasons behind
+>>> it!?
+>>
+>> It was added because platform firmware was able to prevent access to the
+>> boot partitions (for security I think), so attempts to access them would
+>> fail messily.  It was not related to any specific card.
+>
+> Adrian, appreciate your clarification. After all it seems like adding
+> a DT binding for it should be appropriate.
+>
+> Kind regards
+> Uffe
 
-Thanks for reminder.
-Most are tiny fixes and clean up.
-If to be strictly, Patch 3 mmc: sdhci-esdhc-imx: add ADMA Length Mismatch errata fix
-could go to stable although the issue is very very hard to reproduce as stated
-in errata.
+Thanks Adrian :).
+Well, there is boot partitions and rpmb partition, and maybe should we
+have a binding to prevent access to both of them ?
+Something else came to my mind, when you want to boot on eMMC, do you
+need to write u-boot in boot partitions or is it written at the
+logical adress 0 which is what fdisk uses as start ?
+Because, if this is not usuable but just scanned I can't see why we
+bother doing it... ?
 
-Regards
-Dong Aisheng
-
-> Regards,
-> 
-> Fabio Estevam
+Thanks,
+JM
