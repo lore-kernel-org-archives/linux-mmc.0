@@ -1,109 +1,42 @@
-From: Jean-Michel Hautbois <jhautbois@gmail.com>
-Subject: Re: sdhci-esdhc-imx : cannot read eMMC
-Date: Wed, 3 Sep 2014 17:11:05 +0200
-Message-ID: <CAL8zT=gUZd294v1w_PGgfg6kmPK9OuxuO3xd0tJWvSQE+RFQ9A@mail.gmail.com>
-References: <CAL8zT=gJtnyGSnVz+YWW3Z1LPXPp-Oe3SsGqvBvV=2LBpZ-t9Q@mail.gmail.com>
- <CAL8zT=gpiV9OMToH80Qr5B7HUUbVDp0m_WK9PaCvuaMGwrBSJA@mail.gmail.com> <CAA+hA=QQ=AYnKts0cq0VpWkWUyt-r1v-LxCk1pQiyo=CFSCurA@mail.gmail.com>
+From: Husam Al Sayed <oscar55@post.sk>
+Subject: FROM: Husam Al Sayed.
+Date: Wed, 3 Sep 2014 20:55:22 +0200 (CEST)
+Message-ID: <145671244.347288.1409770522769.JavaMail.root__46315.7277358279$1409771125$gmane$org@mbox05>
+Reply-To: "alsayedhusa@hotmail.com" <alsayedhusa@hotmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f54.google.com ([209.85.219.54]:51981 "EHLO
-	mail-oa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932641AbaICPLZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Sep 2014 11:11:25 -0400
-Received: by mail-oa0-f54.google.com with SMTP id g18so6032988oah.13
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2014 08:11:20 -0700 (PDT)
-In-Reply-To: <CAA+hA=QQ=AYnKts0cq0VpWkWUyt-r1v-LxCk1pQiyo=CFSCurA@mail.gmail.com>
+Received: from smtp02.post.sk ([195.146.144.202]:47646 "EHLO smtp02.post.sk"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753305AbaICTFK convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Sep 2014 15:05:10 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: rusty@rustcorp.com.au, mst@redhat.com, kvm@vger.kernel.org, virtio-dev@lists.oasis-open.org, rl@hellgate.ch, brucechang@via.com.tw, HaraldWelte@viatech.com, FlorianSchandinat@gmx.de, linux-fbdev@vger.kernel.org, romieu@fr.zoreil.com, hverkuil@xs4all.nl, kaber@trash.net, florian@openwrt.org, openwrt-devel@lists.openwrt.org, martyn.welch@ge.com, manohar.vanga@gmail.com, gregkh@linuxfoundation.org, devel@driverdev.osuosl.org, akataria@vmware.com, virtualization@lists.linux-foundation.org, sbhatewara@vmware.com, arvindkumar@vmware.com, pv-drivers@vmware.com, lgirdwood@gmail.com, juergh@gmail.com, vt8231@hiddenengine.co.uk, tony.olech@elandigitalsystems.com, linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org, zbr@ioremap.net
 
-2014-09-03 10:15 GMT+02:00 Dong Aisheng <dongas86@gmail.com>:
-> Hi JM,
->
-> On Tue, Sep 2, 2014 at 11:10 PM, Jean-Michel Hautbois
-> <jhautbois@gmail.com> wrote:
->> 2014-09-02 11:20 GMT+02:00 Jean-Michel Hautbois
->> <jean-michel.hautbois@vodalys.com>:
->>> Hi there,
->>>
->>> I start a new thread, as I have done lots of test and this will be clearer.
->>> I have problems reading and writing eMMC on my i.MX6 board with 3.17-rc3.
->>> Sometimes I don't have read errors explicitly in dmesg, but fdisk has
->>> no effects.
->>> I activated MMC debug in my config file, and here is an extract of
->>> mmc0 register dump and all mmc1 part.
->>> On Freescale kernel, I confirm it works well with the same board and
->>> sample, I can write a partition on mmc1.
->>
->
-> My iMX6Q SabreSD board seems ok.
-> What board did you use?
-> What reading/writing problems did you meet?
-> I did not see errors in your log.
-> Can you paste the error log?
+FROM: Husam Al Sayed.
 
-When CONFIG_MMC_DEBUG=y there is no error.
-When CONFIG_MMC_DEBUG=n then, I get :
+EMAIL:alsayedhusa@hotmail.com
+ 
+Hello,
+ 
+I decided to write you this proposal in good faith, believing that you will
+not betray me. I am Mr. Husam Al Sayed, a Bank officer here in U.A.E.
+ 
+One Mr. Peter Adams, a citizen of your country and Crude Oil dealer made a fixed deposit with my bank in 2005 for 108 calendar months, valued at US$30,000,000.00 (Thirty Million United State Dollars) the due date for this deposit contract was last 22nd of January 2014. Sadly Peter was among the death victims in the May 27 2006 Earthquake disaster in Java, Indonesia that killed over 5,000 people. He was in Indonesia on a business trip and that was how he met his untimely end. My bank management is yet to know about his death, I knew about it because he was my friend and I am his Account Officer. Peter did not mention any Next of Kin/ Heir when the account was opened, he was not married and no children. Last week my Bank Management requested that Peter should give instructions on what to do 
+ about his funds, if to renew the contract.
+ 
+I know this will happen and that is why I have been looking for a means to handle the situation, because if my Bank Directors happens to know that Peter is dead and do not have any Heir, they will take the funds for their personal use, so I don't want such to happen. That is why I am seeking your co-operation to present you as the Next of Kin/ Heir to the account, since you are a foreigner and my bank head quarters will release the account to you. There is no risk involved; the transaction will be executed under a legitimate arrangement that will protect us from any breach of law. It is better that we claim the money, than allowing the Bank Directors to take it, they are rich already. I am not a greedy person, so I am suggesting we share the funds in this ratio, 50/50%, equal sharing. Let 
+ me know your mind on this and please do treat this information highly confidential. We shall go over the details once I receive your urgent response. Please Urgently get back to me through this email address as soon as possible:
+ 
+ 
+ 
+Have a nice day and God bless. Anticipating your communication.
+ 
+Regards,
+FROM: Husam Al Sayed.
+EMAIL: alsayedhusa@hotmail.com
+_____________________________________________________________________
 
-[    2.036958] SW2: Restricting voltage, 3300000-1950000uV
-[    2.036965] mmc1: Switching to 1.8V signalling voltage  failed
-[    2.043714] mmc1: new DDR MMC card at address 0001
-[    2.044738] mmcblk1: mmc1:0001 SEM02G 1.82 GiB
-[    2.045007] mmcblk1rpmb: mmc1:0001 SEM02G partition 3 128 KiB
-[    2.048345] mmcblk1: error -84 transferring data, sector 0, nr 8,
-cmd response 0x900, card status 0xb00
-[    2.048352] mmcblk1: retrying using single block read
-[    2.048858] mmcblk1: error -84 transferring data, sector 0, nr 8,
-cmd response 0x900, card status 0x0
-[    2.048933] end_request: I/O error, dev mmcblk1, sector 0
-[    2.049449] mmcblk1: error -84 transferring data, sector 1, nr 7,
-cmd response 0x900, card status 0x0
-[    2.049459] end_request: I/O error, dev mmcblk1, sector 1
-[    2.049969] mmcblk1: error -84 transferring data, sector 2, nr 6,
-cmd response 0x900, card status 0x0
-[    2.049978] end_request: I/O error, dev mmcblk1, sector 2
-[    2.050484] mmcblk1: error -84 transferring data, sector 3, nr 5,
-cmd response 0x900, card status 0x0
-[    2.050493] end_request: I/O error, dev mmcblk1, sector 3
-[    2.050998] mmcblk1: error -84 transferring data, sector 4, nr 4,
-cmd response 0x900, card status 0x0
-[    2.051008] end_request: I/O error, dev mmcblk1, sector 4
-[    2.051512] mmcblk1: error -84 transferring data, sector 5, nr 3,
-cmd response 0x900, card status 0x0
-[    2.051521] end_request: I/O error, dev mmcblk1, sector 5
-[    2.052028] mmcblk1: error -84 transferring data, sector 6, nr 2,
-cmd response 0x900, card status 0x0
-[    2.052038] end_request: I/O error, dev mmcblk1, sector 6
-[    2.052542] mmcblk1: error -84 transferring data, sector 7, nr 1,
-cmd response 0x900, card status 0x0
-[    2.052551] end_request: I/O error, dev mmcblk1, sector 7
-[    2.052620] Buffer I/O error on device mmcblk1, logical block 0
-[    2.053338] mmcblk1: error -84 transferring data, sector 0, nr 8,
-cmd response 0x900, card status 0xb00
-[    2.053345] mmcblk1: retrying using single block read
-[    2.053849] mmcblk1: error -84 transferring data, sector 0, nr 8,
-cmd response 0x900, card status 0x0
-[    2.053859] end_request: I/O error, dev mmcblk1, sector 0
-[    2.054378] mmcblk1: error -84 transferring data, sector 1, nr 7,
-cmd response 0x900, card status 0x0
-[    2.054388] end_request: I/O error, dev mmcblk1, sector 1
-[    2.054892] mmcblk1: error -84 transferring data, sector 2, nr 6,
-cmd response 0x900, card status 0x0
-[    2.055403] mmcblk1: error -84 transferring data, sector 3, nr 5,
-cmd response 0x900, card status 0x0
-[    2.055917] mmcblk1: error -84 transferring data, sector 4, nr 4,
-cmd response 0x900, card status 0x0
-[    2.056428] mmcblk1: error -84 transferring data, sector 5, nr 3,
-cmd response 0x900, card status 0x0
-[    2.056937] mmcblk1: error -84 transferring data, sector 6, nr 2,
-cmd response 0x900, card status 0x0
-[    2.057446] mmcblk1: error -84 transferring data, sector 7, nr 1,
-cmd response 0x900, card status 0x0
-[    2.057460] Buffer I/O error on device mmcblk1, logical block 0
-[    2.057506]  mmcblk1: unable to read partition table
-
-So, I can't get MMC_DEBUG info when the problem occurs, as it disappears :/.
-Thanks,
-JM
+Presny televizny program najdete na http://www.ahaho.sk
