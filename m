@@ -1,232 +1,128 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on
- sdio thread
-Date: Wed, 03 Sep 2014 11:12:27 +0900
-Message-ID: <5406790B.1090305@samsung.com>
-References: <53E85967.5060503@linux.intel.com>
- <CAPDyKFqLE-09=3k_6stMXiY3+Ax3xoRBO3q__GHyqH4fd-XmsQ@mail.gmail.com>
- <53F16D28.5010500@linux.intel.com>
- <CAPDyKFrfXe0f6S0z8HUG2Mg29JVU39C0VOBimgKtq-HL47HZrA@mail.gmail.com>
- <53FB5FDD.6030202@linux.intel.com> <5406789C.7040706@linux.intel.com>
+From: "Gao, Yunpeng" <yunpeng.gao@intel.com>
+Subject: RE: [PATCH v2] mmc: sdhci-acpi: add probe_slot method for
+ emmc/sd/sdio
+Date: Wed, 3 Sep 2014 03:03:03 +0000
+Message-ID: <0AA7DC03D52A654FA5AF208AE38A967D01D83D43@shsmsx102.ccr.corp.intel.com>
+References: <1409542540-18267-1-git-send-email-yunpeng.gao@intel.com>
+ <CAPDyKFpt4Pc2YycxbQyE97N+RoCkT=ayv1xBxfbqKbd7KU2gyA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:25461 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752272AbaICCMa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Sep 2014 22:12:30 -0400
-In-reply-to: <5406789C.7040706@linux.intel.com>
+Received: from mga09.intel.com ([134.134.136.24]:32842 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751130AbaICDDI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 2 Sep 2014 23:03:08 -0400
+In-Reply-To: <CAPDyKFpt4Pc2YycxbQyE97N+RoCkT=ayv1xBxfbqKbd7KU2gyA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Aaron Lu <aaron.lu@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jackey Shen <jackey.shen@amd.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
 
-Hi,
-
-On 09/03/2014 11:10 AM, Fu, Zhonghui wrote:
-> 
-> Hi,Uffe
-> 
-> Could you please tell me into which git repository this patch is merged now?
-
-I knew it was merged into Ulf's git repository.
-You can refer to below git.
-
-url = http://git.linaro.org/git/people/ulf.hansson/mmc.git
-
-
-Best Regards,
-Jaehoon Chung
-> 
-> 
-> 
-> Thanks,
-> Zhonghui 
-> 
-> 
-> 
-> On 2014/8/26 0:10, Fu, Zhonghui wrote:
->>
->> Many thanks for your helps.
->>
->>
->>
->> Thanks,
->> Zhonghui
->>
->>
->> On 2014/8/18 20:07, Ulf Hansson wrote:
->>> On 18 August 2014 05:04, Fu, Zhonghui <zhonghui.fu@linux.intel.com> wrote:
->>>> From 21266249bbbaf9407c1e88cd5950e06ac88aeebf Mon Sep 17 00:00:00 2001
->>>> From: Fu Zhonghui <zhonghui.fu@linux.intel.com>
->>>> Date: Mon, 18 Aug 2014 10:48:14 +0800
->>>> Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
->>>>
->>>> 781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
->>>> bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
->>>> the use of our own custom threaded IRQ handler, but left in an
->>>> unconditional wake_up_process() on that handler at resume-time.
->>>> Link: https://bugzilla.kernel.org/show_bug.cgi?id=80151
->>>>
->>>> In addition, the check for MMC_CAP_SDIO_IRQ capability is added
->>>> before enable sdio IRQ.
->>>>
->>>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->>>> Signed-off-by: Chris Ball <chris@printf.net>
->>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>>> Signed-off-by: Fu Zhonghui <zhonghui.fu@linux.intel.com>
->>> Thanks! Applied for next and added a stable tag for v3.16+.
->>>
->>> Kind regards
->>> Uffe
->>>
->>>> ---
->>>>  drivers/mmc/core/sdio.c     |   12 ++++++++++--
->>>>  drivers/mmc/core/sdio_irq.c |    4 ++--
->>>>  2 files changed, 12 insertions(+), 4 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
->>>> index e636d9e..3fc40a7 100644
->>>> --- a/drivers/mmc/core/sdio.c
->>>> +++ b/drivers/mmc/core/sdio.c
->>>> @@ -992,8 +992,16 @@ static int mmc_sdio_resume(struct mmc_host *host)
->>>>                 }
->>>>         }
->>>>
->>>> -       if (!err && host->sdio_irqs)
->>>> -               wake_up_process(host->sdio_irq_thread);
->>>> +       if (!err && host->sdio_irqs) {
->>>> +               if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
->>>> +                       wake_up_process(host->sdio_irq_thread);
->>>> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
->>>> +                       mmc_host_clk_hold(host);
->>>> +                       host->ops->enable_sdio_irq(host, 1);
->>>> +                       mmc_host_clk_release(host);
->>>> +               }
->>>> +       }
->>>> +
->>>>         mmc_release_host(host);
->>>>
->>>>         host->pm_flags &= ~MMC_PM_KEEP_POWER;
->>>> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
->>>> index 5cc13c8..696eca4 100644
->>>> --- a/drivers/mmc/core/sdio_irq.c
->>>> +++ b/drivers/mmc/core/sdio_irq.c
->>>> @@ -208,7 +208,7 @@ static int sdio_card_irq_get(struct mmc_card *card)
->>>>                                 host->sdio_irqs--;
->>>>                                 return err;
->>>>                         }
->>>> -               } else {
->>>> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
->>>>                         mmc_host_clk_hold(host);
->>>>                         host->ops->enable_sdio_irq(host, 1);
->>>>                         mmc_host_clk_release(host);
->>>> @@ -229,7 +229,7 @@ static int sdio_card_irq_put(struct mmc_card *card)
->>>>                 if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
->>>>                         atomic_set(&host->sdio_irq_thread_abort, 1);
->>>>                         kthread_stop(host->sdio_irq_thread);
->>>> -               } else {
->>>> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
->>>>                         mmc_host_clk_hold(host);
->>>>                         host->ops->enable_sdio_irq(host, 0);
->>>>                         mmc_host_clk_release(host);
->>>> -- 1.7.1
->>>>
->>>> On 2014/8/12 18:23, Ulf Hansson wrote:
->>>>> On 11 August 2014 07:49, Fu, Zhonghui <zhonghui.fu@linux.intel.com> wrote:
->>>>>> From 6cee984e1d76ba0a3320430f8cf4318ab65fcf06 Mon Sep 17 00:00:00 2001
->>>>>> From: Fu Zhonghui <zhonghui.fu@linux.intel.com>
->>>>>> Date: Tue, 5 Aug 2014 12:44:38 +0800
->>>>>> Subject: [PATCH] mmc: core: sdio: Fix unconditional wake_up_process() on sdio thread
->>>>>>
->>>>>> 781e989cf59 ("mmc: sdhci: convert to new SDIO IRQ handling") and
->>>>>> bf3b5ec66bd ("mmc: sdio_irq: rework sdio irq handling") disabled
->>>>>> the use of our own custom threaded IRQ handler, but left in an
->>>>>> unconditional wake_up_process() on that handler at resume-time.
->>>>>> Link: https://bugzilla.kernel.org/show_bug.cgi?id=80151
->>>>>>
->>>>>> In addition, the check for MMC_CAP_SDIO_IRQ capability is added
->>>>>> before enable sdio IRQ.
->>>>>>
->>>>>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->>>>>> Signed-off-by: Chris Ball <chris@printf.net>
->>>>>> Signed-off-by: Fu Zhonghui <zhonghui.fu@linux.intel.com>
->>>>>> ---
->>>>>>  drivers/mmc/core/sdio.c     |   14 ++++++++++++--
->>>>>>  drivers/mmc/core/sdio_irq.c |    4 ++--
->>>>>>  2 files changed, 14 insertions(+), 4 deletions(-)
->>>>>>
->>>>>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
->>>>>> index e636d9e..e04a540 100644
->>>>>> --- a/drivers/mmc/core/sdio.c
->>>>>> +++ b/drivers/mmc/core/sdio.c
->>>>>> @@ -992,8 +992,18 @@ static int mmc_sdio_resume(struct mmc_host *host)
->>>>>>                 }
->>>>>>         }
->>>>>>
->>>>>> -       if (!err && host->sdio_irqs)
->>>>>> -               wake_up_process(host->sdio_irq_thread);
->>>>>> +       if (!err && host->sdio_irqs) {
->>>>>> +               if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
->>>>>> +                       wake_up_process(host->sdio_irq_thread);
->>>>>> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
->>>>>> +                       mmc_release_host(host);
->>>>> Why mmc_release_host() and the corresponding mmc_claim_host() below?
->>>>> Those shouldn't be needed I think.
->>>> You are right. These two functions shouldn't be invoked here. I made a new patch as above.
->>>>
->>>>
->>>> Thanks,
->>>> Zhonghui
->>>>>> +                       mmc_host_clk_hold(host);
->>>>>> +                       host->ops->enable_sdio_irq(host, 1);
->>>>>> +                       mmc_host_clk_release(host);
->>>>>> +                       mmc_claim_host(host);
->>>>>> +               }
->>>>>> +       }
->>>>>> +
->>>>>>         mmc_release_host(host);
->>>>>>
->>>>>>         host->pm_flags &= ~MMC_PM_KEEP_POWER;
->>>>>> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
->>>>>> index 5cc13c8..696eca4 100644
->>>>>> --- a/drivers/mmc/core/sdio_irq.c
->>>>>> +++ b/drivers/mmc/core/sdio_irq.c
->>>>>> @@ -208,7 +208,7 @@ static int sdio_card_irq_get(struct mmc_card *card)
->>>>>>                                 host->sdio_irqs--;
->>>>>>                                 return err;
->>>>>>                         }
->>>>>> -               } else {
->>>>>> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
->>>>>>                         mmc_host_clk_hold(host);
->>>>>>                         host->ops->enable_sdio_irq(host, 1);
->>>>>>                         mmc_host_clk_release(host);
->>>>>> @@ -229,7 +229,7 @@ static int sdio_card_irq_put(struct mmc_card *card)
->>>>>>                 if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
->>>>>>                         atomic_set(&host->sdio_irq_thread_abort, 1);
->>>>>>                         kthread_stop(host->sdio_irq_thread);
->>>>>> -               } else {
->>>>>> +               } else if (host->caps & MMC_CAP_SDIO_IRQ) {
->>>>>>                         mmc_host_clk_hold(host);
->>>>>>                         host->ops->enable_sdio_irq(host, 0);
->>>>>>                         mmc_host_clk_release(host);
->>>>>> -- 1.7.1
->>>>>>
->>>>> Thanks for working on this!
->>>>>
->>>>> Kind regards
->>>>> Uffe
->>>>> --
->>>>> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
->>>>> the body of a message to majordomo@vger.kernel.org
->>>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>> Please read the FAQ at  http://www.tux.org/lkml/
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> Please read the FAQ at  http://www.tux.org/lkml/
-> 
-> 
-
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogbGludXgtbW1jLW93bmVy
+QHZnZXIua2VybmVsLm9yZw0KPiBbbWFpbHRvOmxpbnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5v
+cmddIE9uIEJlaGFsZiBPZiBVbGYgSGFuc3Nvbg0KPiBTZW50OiBUdWVzZGF5LCBTZXB0ZW1iZXIg
+MDIsIDIwMTQgNzowMyBQTQ0KPiBUbzogR2FvLCBZdW5wZW5nDQo+IENjOiBsaW51eC1tbWM7IERv
+bmcsIENodWFueGlhbw0KPiBTdWJqZWN0OiBSZTogW1BBVENIIHYyXSBtbWM6IHNkaGNpLWFjcGk6
+IGFkZCBwcm9iZV9zbG90IG1ldGhvZCBmb3INCj4gZW1tYy9zZC9zZGlvDQo+IA0KPiBPbiAxIFNl
+cHRlbWJlciAyMDE0IDA1OjM1LCBZdW5wZW5nIEdhbyA8eXVucGVuZy5nYW9AaW50ZWwuY29tPiB3
+cm90ZToNCj4gPiBTaW1pbGFyIHRvIHNkaGNpLXBjaSBjb250cm9sbGVyLCBhbHNvIGFkZCBwcm9i
+ZV9zbG90IGFuZCByZW1vdmVfc2xvdA0KPiA+IG1ldGhvZCBpbiB0aGUgc2RoY2ktYWNwaSBkcml2
+ZXIuDQo+ID4NCj4gPiBUaGlzIGlzIHRoZSB2MiB2ZXJzaW9uIHBhdGNoIGFuZCBmaXhlZCBjaGVj
+a3BhdGNoIGVycm9ycy4NCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IFl1bnBlbmcgR2FvIDx5dW5w
+ZW5nLmdhb0BpbnRlbC5jb20+DQo+ID4gU2lnbmVkLW9mZi1ieTogQ2h1YW54aWFvIERvbmcgPGNo
+dWFueGlhby5kb25nQGludGVsLmNvbT4NCj4gDQo+IFRoaXMgcGF0Y2ggZGlkIHJlcXVpcmUgYSBy
+ZWJhc2UsIGJ1dCBJIG1hbmFnZSB0byByZXNvbHZlIHRoZSBjb25mbGljdCB3aGlsZQ0KPiBhcHBs
+eWluZyB0aGUgcGF0Y2ggb24gbXkgbmV4dCB0cmFjay4gUGxlYXNlIGhhdmUgYSBsb29rIGF0IHRo
+ZSByZXN1bHQuIFRoYW5rcyENCg0KVGhlIHBhdGNoIGxvb2tzIGZpbmUgdG8gbWUuIFRoYW5rcyBm
+b3IgdGhlIHJlYmFzZSB3b3JrLg0KSSdtIG5vdCBzdXJlIHdoYXQncyB3cm9uZyBteSBsb2NhbCBt
+bWNfbmV4dCB0cmVlLCBtYXliZSBpdCdzIHRvbyBvbGQuIEknbGwgZ2l0IGNsb25lIGl0IGFnYWlu
+Lg0KDQo+IEFsc28sIEkgdG9vayB0aGUgbGliZXJ0eSBvZiByZW1vdmluZyB0aGUgaW5mb3JtYXRp
+b24gYWJvdXQgdGhhdCB0aGlzIGlzIGEgdjIgcGF0Y2gNCj4gZnJvbSB0aGUgY29tbWl0IG1lc3Nh
+Z2UuIEZ1dHVyZSB3aXNlLCBwbGVhc2UgZG9uJ3QgaW5jbHVkZSB0aGF0IGluIHRoZSBhY3R1YWwN
+Cj4gY29tbWl0IG1zZywgYnV0IGtlZXAgaXQgYXMgInBhdGNoIGluZm9ybWF0aW9uIi4NCg0KVGhh
+bmtzIGZvciB0aGUgZWR1Y2F0aW9uLiBJJ2xsIG5vdCBpbmNsdWRlIHRob3NlIGtpbmQgb2YgaW5m
+byBpbiB0aGUgYWN0dWFsbCBjb21taXQgbWVzc2FnZSBpbiBmdXR1cmUuDQoNClRoYW5rcy4NCg0K
+UmVnYXJkcywNCll1bnBlbmcNCg0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KPiANCj4gPiAtLS0N
+Cj4gPiAgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1hY3BpLmMgfCAgIDU4DQo+ICsrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCA1OCBp
+bnNlcnRpb25zKCspDQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhj
+aS1hY3BpLmMNCj4gPiBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktYWNwaS5jIGluZGV4IDhjZTNj
+MjguLjBmNjEwZTggMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1hY3Bp
+LmMNCj4gPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLWFjcGkuYw0KPiA+IEBAIC02Nyw2
+ICs2Nyw4IEBAIHN0cnVjdCBzZGhjaV9hY3BpX3Nsb3Qgew0KPiA+ICAgICAgICAgdW5zaWduZWQg
+aW50ICAgIGNhcHMyOw0KPiA+ICAgICAgICAgbW1jX3BtX2ZsYWdfdCAgIHBtX2NhcHM7DQo+ID4g
+ICAgICAgICB1bnNpZ25lZCBpbnQgICAgZmxhZ3M7DQo+ID4gKyAgICAgICBpbnQgKCpwcm9iZV9z
+bG90KShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICopOw0KPiA+ICsgICAgICAgaW50ICgqcmVtb3Zl
+X3Nsb3QpKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKik7DQo+ID4gIH07DQo+ID4NCj4gPiAgc3Ry
+dWN0IHNkaGNpX2FjcGlfaG9zdCB7DQo+ID4gQEAgLTEyMiwxMSArMTI0LDU3IEBAIHN0YXRpYyBj
+b25zdCBzdHJ1Y3Qgc2RoY2lfYWNwaV9jaGlwDQo+IHNkaGNpX2FjcGlfY2hpcF9pbnQgPSB7DQo+
+ID4gICAgICAgICAub3BzID0gJnNkaGNpX2FjcGlfb3BzX2ludCwNCj4gPiAgfTsNCj4gPg0KPiA+
+ICtzdGF0aWMgaW50IHNkaGNpX2FjcGlfZW1tY19wcm9iZV9zbG90KHN0cnVjdCBwbGF0Zm9ybV9k
+ZXZpY2UgKnBkZXYpIHsNCj4gPiArICAgICAgIHN0cnVjdCBzZGhjaV9hY3BpX2hvc3QgKmMgPSBw
+bGF0Zm9ybV9nZXRfZHJ2ZGF0YShwZGV2KTsNCj4gPiArICAgICAgIHN0cnVjdCBzZGhjaV9ob3N0
+ICpob3N0Ow0KPiA+ICsNCj4gPiArICAgICAgIGlmICghYyB8fCAhYy0+aG9zdCkNCj4gPiArICAg
+ICAgICAgICAgICAgcmV0dXJuIDA7DQo+ID4gKw0KPiA+ICsgICAgICAgaG9zdCA9IGMtPmhvc3Q7
+DQo+ID4gKw0KPiA+ICsgICAgICAgLyogUGxhdGZvcm0gc3BlY2lmaWMgY29kZSBkdXJpbmcgZW1t
+YyBwcm9ibGUgc2xvdCBnb2VzIGhlcmUgKi8NCj4gPiArDQo+ID4gKyAgICAgICByZXR1cm4gMDsN
+Cj4gPiArfQ0KPiA+ICsNCj4gPiArc3RhdGljIGludCBzZGhjaV9hY3BpX3NkaW9fcHJvYmVfc2xv
+dChzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KSB7DQo+ID4gKyAgICAgICBzdHJ1Y3Qgc2Ro
+Y2lfYWNwaV9ob3N0ICpjID0gcGxhdGZvcm1fZ2V0X2RydmRhdGEocGRldik7DQo+ID4gKyAgICAg
+ICBzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdDsNCj4gPiArDQo+ID4gKyAgICAgICBpZiAoIWMgfHwg
+IWMtPmhvc3QpDQo+ID4gKyAgICAgICAgICAgICAgIHJldHVybiAwOw0KPiA+ICsNCj4gPiArICAg
+ICAgIGhvc3QgPSBjLT5ob3N0Ow0KPiA+ICsNCj4gPiArICAgICAgIC8qIFBsYXRmb3JtIHNwZWNp
+ZmljIGNvZGUgZHVyaW5nIGVtbWMgcHJvYmxlIHNsb3QgZ29lcyBoZXJlICovDQo+ID4gKw0KPiA+
+ICsgICAgICAgcmV0dXJuIDA7DQo+ID4gK30NCj4gPiArDQo+ID4gK3N0YXRpYyBpbnQgc2RoY2lf
+YWNwaV9zZF9wcm9iZV9zbG90KHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYpIHsNCj4gPiAr
+ICAgICAgIHN0cnVjdCBzZGhjaV9hY3BpX2hvc3QgKmMgPSBwbGF0Zm9ybV9nZXRfZHJ2ZGF0YShw
+ZGV2KTsNCj4gPiArICAgICAgIHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0Ow0KPiA+ICsNCj4gPiAr
+ICAgICAgIGlmICghYyB8fCAhYy0+aG9zdCB8fCAhYy0+c2xvdCkNCj4gPiArICAgICAgICAgICAg
+ICAgcmV0dXJuIDA7DQo+ID4gKw0KPiA+ICsgICAgICAgaG9zdCA9IGMtPmhvc3Q7DQo+ID4gKw0K
+PiA+ICsgICAgICAgLyogUGxhdGZvcm0gc3BlY2lmaWMgY29kZSBkdXJpbmcgZW1tYyBwcm9ibGUg
+c2xvdCBnb2VzIGhlcmUgKi8NCj4gPiArDQo+ID4gKyAgICAgICByZXR1cm4gMDsNCj4gPiArfQ0K
+PiA+ICsNCj4gPiAgc3RhdGljIGNvbnN0IHN0cnVjdCBzZGhjaV9hY3BpX3Nsb3Qgc2RoY2lfYWNw
+aV9zbG90X2ludF9lbW1jID0gew0KPiA+ICAgICAgICAgLmNoaXAgICAgPSAmc2RoY2lfYWNwaV9j
+aGlwX2ludCwNCj4gPiAgICAgICAgIC5jYXBzICAgID0gTU1DX0NBUF84X0JJVF9EQVRBIHwNCj4g
+TU1DX0NBUF9OT05SRU1PVkFCTEUgfCBNTUNfQ0FQX0hXX1JFU0VULA0KPiA+ICAgICAgICAgLmNh
+cHMyICAgPSBNTUNfQ0FQMl9IQ19FUkFTRV9TWiwNCj4gPiAgICAgICAgIC5mbGFncyAgID0gU0RI
+Q0lfQUNQSV9SVU5USU1FX1BNLA0KPiA+ICsgICAgICAgLnByb2JlX3Nsb3QgICAgID0gc2RoY2lf
+YWNwaV9lbW1jX3Byb2JlX3Nsb3QsDQo+ID4gIH07DQo+ID4NCj4gPiAgc3RhdGljIGNvbnN0IHN0
+cnVjdCBzZGhjaV9hY3BpX3Nsb3Qgc2RoY2lfYWNwaV9zbG90X2ludF9zZGlvID0geyBAQA0KPiA+
+IC0xMzUsMTIgKzE4MywxNCBAQCBzdGF0aWMgY29uc3Qgc3RydWN0IHNkaGNpX2FjcGlfc2xvdA0K
+PiBzZGhjaV9hY3BpX3Nsb3RfaW50X3NkaW8gPSB7DQo+ID4gICAgICAgICAuY2FwcyAgICA9IE1N
+Q19DQVBfTk9OUkVNT1ZBQkxFIHwNCj4gTU1DX0NBUF9QT1dFUl9PRkZfQ0FSRCwNCj4gPiAgICAg
+ICAgIC5mbGFncyAgID0gU0RIQ0lfQUNQSV9SVU5USU1FX1BNLA0KPiA+ICAgICAgICAgLnBtX2Nh
+cHMgPSBNTUNfUE1fS0VFUF9QT1dFUiwNCj4gPiArICAgICAgIC5wcm9iZV9zbG90ICAgICA9IHNk
+aGNpX2FjcGlfc2Rpb19wcm9iZV9zbG90LA0KPiA+ICB9Ow0KPiA+DQo+ID4gIHN0YXRpYyBjb25z
+dCBzdHJ1Y3Qgc2RoY2lfYWNwaV9zbG90IHNkaGNpX2FjcGlfc2xvdF9pbnRfc2QgPSB7DQo+ID4g
+ICAgICAgICAuZmxhZ3MgICA9IFNESENJX0FDUElfU0RfQ0QgfA0KPiBTREhDSV9BQ1BJX1NEX0NE
+X09WRVJSSURFX0xFVkVMIHwNCj4gPiAgICAgICAgICAgICAgICAgICAgU0RIQ0lfQUNQSV9SVU5U
+SU1FX1BNLA0KPiA+ICAgICAgICAgLnF1aXJrczIgPSBTREhDSV9RVUlSSzJfQ0FSRF9PTl9ORUVE
+U19CVVNfT04sDQo+ID4gKyAgICAgICAucHJvYmVfc2xvdCAgICAgPSBzZGhjaV9hY3BpX3NkX3By
+b2JlX3Nsb3QsDQo+ID4gIH07DQo+ID4NCj4gPiAgc3RydWN0IHNkaGNpX2FjcGlfdWlkX3Nsb3Qg
+ew0KPiA+IEBAIC0yNzUsNiArMzI1LDExIEBAIHN0YXRpYyBpbnQgc2RoY2lfYWNwaV9wcm9iZShz
+dHJ1Y3QgcGxhdGZvcm1fZGV2aWNlDQo+ICpwZGV2KQ0KPiA+ICAgICAgICAgfQ0KPiA+DQo+ID4g
+ICAgICAgICBpZiAoYy0+c2xvdCkgew0KPiA+ICsgICAgICAgICAgICAgICBpZiAoYy0+c2xvdC0+
+cHJvYmVfc2xvdCkgew0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGVyciA9IGMtPnNsb3Qt
+PnByb2JlX3Nsb3QocGRldik7DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgaWYgKGVycikN
+Cj4gPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gZXJyX2ZyZWU7DQo+ID4g
+KyAgICAgICAgICAgICAgIH0NCj4gPiAgICAgICAgICAgICAgICAgaWYgKGMtPnNsb3QtPmNoaXAp
+IHsNCj4gPiAgICAgICAgICAgICAgICAgICAgICAgICBob3N0LT5vcHMgICAgICAgICAgICA9IGMt
+PnNsb3QtPmNoaXAtPm9wczsNCj4gPiAgICAgICAgICAgICAgICAgICAgICAgICBob3N0LT5xdWly
+a3MgICAgICAgIHw9IGMtPnNsb3QtPmNoaXAtPnF1aXJrczsNCj4gPiBAQCAtMzMyLDYgKzM4Nyw5
+IEBAIHN0YXRpYyBpbnQgc2RoY2lfYWNwaV9yZW1vdmUoc3RydWN0IHBsYXRmb3JtX2RldmljZQ0K
+PiAqcGRldikNCj4gPiAgICAgICAgICAgICAgICAgcG1fcnVudGltZV9wdXRfbm9pZGxlKGRldik7
+DQo+ID4gICAgICAgICB9DQo+ID4NCj4gPiArICAgICAgIGlmIChjLT5zbG90ICYmIGMtPnNsb3Qt
+PnJlbW92ZV9zbG90KQ0KPiA+ICsgICAgICAgICAgICAgICBjLT5zbG90LT5yZW1vdmVfc2xvdChw
+ZGV2KTsNCj4gPiArDQo+ID4gICAgICAgICBkZWFkID0gKHNkaGNpX3JlYWRsKGMtPmhvc3QsIFNE
+SENJX0lOVF9TVEFUVVMpID09IH4wKTsNCj4gPiAgICAgICAgIHNkaGNpX3JlbW92ZV9ob3N0KGMt
+Pmhvc3QsIGRlYWQpOw0KPiA+ICAgICAgICAgc2RoY2lfZnJlZV9ob3N0KGMtPmhvc3QpOw0KPiA+
+IC0tDQo+ID4gMS43LjkuNQ0KPiA+DQo+ID4gLS0NCj4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
+aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIg0KPiA+IGluIHRo
+ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFq
+b3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
+by5odG1sDQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBs
+aW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIGluIHRoZSBib2R5DQo+IG9mIGEgbWVzc2FnZSB0
+byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vIGluZm8gYXQNCj4gaHR0
+cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo=
