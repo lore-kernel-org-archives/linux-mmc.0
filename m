@@ -1,23 +1,19 @@
-From: Husam Al Sayed <oscar55@post.sk>
+From: Husam Al Sayed <oscar55-azLpJcbXd5U@public.gmane.org>
 Subject: FROM: Husam Al Sayed.
 Date: Wed, 3 Sep 2014 20:55:22 +0200 (CEST)
-Message-ID: <145671244.347288.1409770522769.JavaMail.root__46315.7277358279$1409771125$gmane$org@mbox05>
-Reply-To: "alsayedhusa@hotmail.com" <alsayedhusa@hotmail.com>
+Message-ID: <145671244.347288.1409770522769.JavaMail.root__39098.0111588307$1409771153$gmane$org@mbox05>
+Reply-To: "alsayedhusa-PkbjNfxxIARBDgjK7y7TUQ@public.gmane.org" <alsayedhusa-PkbjNfxxIARBDgjK7y7TUQ@public.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp02.post.sk ([195.146.144.202]:47646 "EHLO smtp02.post.sk"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753305AbaICTFK convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Sep 2014 15:05:10 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org, mst-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, kvm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, virtio-dev-sDuHXQ4OtrM4h7I2RyI4rWD2FQJk+8+b@public.gmane.org, rl-7uj+XXdSDtwfv37vnLkPlQ@public.gmane.org, brucechang-6hSdJfI2Hxp9nmWX13WWKA@public.gmane.org, HaraldWelte-yS34VQbMlVtBDgjK7y7TUQ@public.gmane.org, FlorianSchandinat-Mmb7MZpHnFY@public.gmane.org, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, romieu-W8zweXLXuWQS+FvcfC7Uqw@public.gmane.org, hverkuil-qWit8jRvyhVmR6Xm/wNWPw@public.gmane.org, kaber-dcUjhNyLwpNeoWH0uzbU5w@public.gmane.org, florian-p3rKhJxN3npAfugRpC6u6w@public.gmane.org, openwrt-devel-ZwoEplunGu0+xA9t4nZiwti2O/JbrIOy@public.gmane.org, martyn.welch-JJi787mZWgc@public.gmane.org, manohar.vanga-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, akataria-pghWNbHTmq7QT0dZR+AlfA@public.gmane.org, virtualization-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, sbhatewara-pghWNbHTmq7QT0dZR+AlfA@public.gmane.org, arvindkumar-pghWNbHTmq7QT0dZR+AlfA@public.gmane.org, pv-drivers-pghWNbHTmq7QT0dZR+AlfA@public.gmane.org, lgirdwood-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, juergh-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, vt8231-axJp7WQJGNJVXiCEl89EsLVCufUGDwFn@public.gmane.org, tony.olech-ze5PQcJzaeOs0fm86SgGizGjJy/sRE9J@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, zbr-i6C2adt8DTjR7s880joybQ@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-Cc: rusty@rustcorp.com.au, mst@redhat.com, kvm@vger.kernel.org, virtio-dev@lists.oasis-open.org, rl@hellgate.ch, brucechang@via.com.tw, HaraldWelte@viatech.com, FlorianSchandinat@gmx.de, linux-fbdev@vger.kernel.org, romieu@fr.zoreil.com, hverkuil@xs4all.nl, kaber@trash.net, florian@openwrt.org, openwrt-devel@lists.openwrt.org, martyn.welch@ge.com, manohar.vanga@gmail.com, gregkh@linuxfoundation.org, devel@driverdev.osuosl.org, akataria@vmware.com, virtualization@lists.linux-foundation.org, sbhatewara@vmware.com, arvindkumar@vmware.com, pv-drivers@vmware.com, lgirdwood@gmail.com, juergh@gmail.com, vt8231@hiddenengine.co.uk, tony.olech@elandigitalsystems.com, linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org, zbr@ioremap.net
 
 FROM: Husam Al Sayed.
 
-EMAIL:alsayedhusa@hotmail.com
+EMAIL:alsayedhusa-PkbjNfxxIARBDgjK7y7TUQ@public.gmane.org
  
 Hello,
  
@@ -36,7 +32,11 @@ Have a nice day and God bless. Anticipating your communication.
  
 Regards,
 FROM: Husam Al Sayed.
-EMAIL: alsayedhusa@hotmail.com
+EMAIL: alsayedhusa-PkbjNfxxIARBDgjK7y7TUQ@public.gmane.org
 _____________________________________________________________________
 
 Presny televizny program najdete na http://www.ahaho.sk
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
