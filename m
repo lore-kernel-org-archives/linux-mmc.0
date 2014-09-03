@@ -1,61 +1,48 @@
-From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Subject: Re: [PATCH] tmio_mmc_pio: prevent endless loop in tmio_mmc_set_clock()
-Date: Wed, 03 Sep 2014 23:27:38 +0400
-Message-ID: <54076BAA.4030105@cogentembedded.com>
-References: <201405040219.30018.sergei.shtylyov@cogentembedded.com> <53AC7B06.9070501@cogentembedded.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <53AC7B06.9070501@cogentembedded.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, ian@mnementh.co.uk, linux-sh@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org
+From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: [PATCH v2] ARM: dts: Add mshc aliases for rk3288
+Date: Wed,  3 Sep 2014 16:05:23 -0700
+Message-ID: <1409785523-12209-1-git-send-email-dianders@chromium.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Sonny Rao <sonnyrao-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: stefan-XLVq0VzYD2Y@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hello.
+It's convenient (and less confusing to people reading logs) if the
+eMMC port on rk3288 is consistenly marked with mmc0 and the sdmmc port
+on rk3288 is consistently marked with mmc1.  Add the appropriate
+aliases.
 
-On 06/26/2014 11:56 PM, Sergei Shtylyov wrote:
+Signed-off-by: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Reviewed-by: Sonny Rao <sonnyrao-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+---
 
->> I've spent a couple of days with the driver just hanging due to me forgetting
->> to specify the external crystal frequency, so that clk_get_rate() returned 0
->> and thus the loop in tmio_mmc_set_clock() never ended. I don't think that's an
->> acceptable behavior, so I suggest that the minimum frequency is checked for 0
->> in tmio_mmc_host_probe().
+Changes in v2:
+- Use mshc aliases now
+- Adds sdio0/1 aliases since those are in the dts.
 
->> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+ arch/arm/boot/dts/rk3288.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
 
->> ---
->> The patch is against Chris Ball's 'mmc.git' repo's 'master' branch.
+diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+index 5f866e0..2c5d01f 100644
+--- a/arch/arm/boot/dts/rk3288.dtsi
++++ b/arch/arm/boot/dts/rk3288.dtsi
+@@ -29,6 +29,10 @@
+ 		i2c3 = &i2c3;
+ 		i2c4 = &i2c4;
+ 		i2c5 = &i2c5;
++		mshc0 = &emmc;
++		mshc1 = &sdmmc;
++		mshc2 = &sdio0;
++		mshc3 = &sdio1;
+ 		serial0 = &uart0;
+ 		serial1 = &uart1;
+ 		serial2 = &uart2;
+-- 
+2.1.0.rc2.206.gedb03e5
 
->     I'm still not seeing this patch applied anywhere in this repo... what's
-> the problem with it?
-
-    Chris, Ulf, Ian, what's the issue with this patch? Do you want me to 
-rework it?
-
->>   drivers/mmc/host/tmio_mmc_pio.c |    9 +++++++++
->>   1 file changed, 9 insertions(+)
->
->> Index: mmc/drivers/mmc/host/tmio_mmc_pio.c
->> ===================================================================
->> --- mmc.orig/drivers/mmc/host/tmio_mmc_pio.c
->> +++ mmc/drivers/mmc/host/tmio_mmc_pio.c
->> @@ -1044,6 +1044,15 @@ int tmio_mmc_host_probe(struct tmio_mmc_
->>       }
->>
->>       /*
->> +     * Check the sanity of mmc->f_min to prevent tmio_mmc_set_clock() from
->> +     * looping forever...
->> +     */
->> +    if (mmc->f_min == 0) {
->> +        ret = -EINVAL;
->> +        goto pm_disable;
->> +    }
->> +
->> +    /*
->>        * There are 4 different scenarios for the card detection:
->>        *  1) an external gpio irq handles the cd (best for power savings)
->>        *  2) internal sdhi irq handles the cd
-
-WBR, Sergei
-
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
