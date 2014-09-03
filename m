@@ -1,101 +1,96 @@
-From: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Enable boot partition access from DT
-Date: Wed, 3 Sep 2014 15:08:51 +0200
-Message-ID: <CAL8zT=j0TfC=RaA5L+Zm3ACk=D57tb+k6HNrQnSjd4JY_iupCQ@mail.gmail.com>
-References: <1409672977-26972-1-git-send-email-jean-michel.hautbois@vodalys.com>
- <CAPDyKFrwCzQJvbpbue4T=HWLmbq5sZOP3RXwiupKvXe71uboUw@mail.gmail.com>
- <5406D942.4080405@intel.com> <CAPDyKFrnF4biUGkLgkzz2RNdY1yLp2_bfvoWMM55yx-_TG6ENw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: [PATCH] mmc: sdhci-msm: Make tuning block table endian agnostic
+Date: Wed,  3 Sep 2014 06:57:02 -0700
+Message-ID: <1409752622-7564-1-git-send-email-sboyd@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:47865 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932520AbaICNJH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Sep 2014 09:09:07 -0400
-In-Reply-To: <CAPDyKFrnF4biUGkLgkzz2RNdY1yLp2_bfvoWMM55yx-_TG6ENw@mail.gmail.com>
+Received: from smtp.codeaurora.org ([198.145.11.231]:45367 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932379AbaICN5H (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Sep 2014 09:57:07 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Shawn Guo <shawn.guo@linaro.org>, Dong Aisheng <b29396@freescale.com>, Peter Griffin <peter.griffin@linaro.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, h80.chung@samsung.com, Chris Ball <chris@printf.net>, Kumar Gala <galak@codeaurora.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Mark Rutland <mark.rutland@arm.com>, Pawel Moll <pawel.moll@arm.com>, Rob Herring <robh+dt@kernel.org>
+Cc: linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Georgi Djakov <gdjakov@mm-sol.com>, Asutosh Das <asutoshd@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>
 
-2014-09-03 11:09 GMT+02:00 Ulf Hansson <ulf.hansson@linaro.org>:
-> On 3 September 2014 11:02, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 09/03/2014 11:30 AM, Ulf Hansson wrote:
->>> On 2 September 2014 17:49, Jean-Michel Hautbois
->>> <jean-michel.hautbois@vodalys.com> wrote:
->>>> This property is useful when we don't want to access boot partitions on eMMC
->>>>
->>>> Signed-off-by: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
->>>> ---
->>>>  Documentation/devicetree/bindings/mmc/mmc.txt | 1 +
->>>>  drivers/mmc/host/sdhci-esdhc-imx.c            | 8 ++++++++
->>>>  include/linux/platform_data/mmc-esdhc-imx.h   | 1 +
->>>>  3 files changed, 10 insertions(+)
->>>>
->>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
->>>> index 431716e..59cc854 100644
->>>> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
->>>> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
->>>> @@ -40,6 +40,7 @@ Optional properties:
->>>>  - mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
->>>>  - mmc-hs400-1_8v: eMMC HS400 mode(1.8V I/O) is supported
->>>>  - mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
->>>> +- no-boot-part : when preset, tells to access boot partitions
->>>>
->>>>  *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
->>>>  polarity properties, we have to fix the meaning of the "normal" and "inverted"
->>>> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
->>>> index ccec0e3..439e663 100644
->>>> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
->>>> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
->>>> @@ -942,6 +942,11 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
->>>>         if (of_property_read_u32(np, "fsl,delay-line", &boarddata->delay_line))
->>>>                 boarddata->delay_line = 0;
->>>>
->>>> +       if (of_find_property(np, "no-boot-part", NULL))
->>>> +               boarddata->access_boot_part = false;
->>>> +       else
->>>> +               boarddata->access_boot_part = true;
->>>> +
->>>>         return 0;
->>>>  }
->>>>  #else
->>>> @@ -1119,6 +1124,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
->>>>                 host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
->>>>         }
->>>>
->>>> +       if (!boarddata->access_boot_part)
->>>> +               host->mmc->caps2 |= MMC_CAP2_BOOTPART_NOACC;
->>>> +
->>>
->>> Hmm, I don't think MMC_CAP2_BOOTPART_NOACC should have a DT binding.
->>> Does it describe the hardware in some form?
->>>
->>> Actually I would like to question why MMC_CAP2_BOOTPART_NOACC exists
->>> at all. If there are cards that don't supports the BOOT area,
->>> shouldn't we have a card quirk for it instead of a host cap? Maybe
->>> Adrian Hunter, how originally wrote the patch for adding
->>> MMC_CAP2_BOOTPART_NOACC, could help me understand the reasons behind
->>> it!?
->>
->> It was added because platform firmware was able to prevent access to the
->> boot partitions (for security I think), so attempts to access them would
->> fail messily.  It was not related to any specific card.
->
-> Adrian, appreciate your clarification. After all it seems like adding
-> a DT binding for it should be appropriate.
->
-> Kind regards
-> Uffe
+If we're tuning on a big-endian CPU we'll never determine we properly
+tuned the device because we compare the data we received from the
+controller with a table that assumes the CPU is little-endian.
+Change the table to be an array of bytes instead of 32-bit words
+so we can use memcmp() without needing to byte-swap every word
+depending on the endianess of the CPU.
 
-Thanks Adrian :).
-Well, there is boot partitions and rpmb partition, and maybe should we
-have a binding to prevent access to both of them ?
-Something else came to my mind, when you want to boot on eMMC, do you
-need to write u-boot in boot partitions or is it written at the
-logical adress 0 which is what fdisk uses as start ?
-Because, if this is not usuable but just scanned I can't see why we
-bother doing it... ?
+Cc: Asutosh Das <asutoshd@codeaurora.org>
+Cc: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+Reviewed-by: Georgi Djakov <gdjakov@mm-sol.com>
+Fixes: 415b5a75da43 "mmc: sdhci-msm: Add platform_execute_tuning implementation"
+Signed-off-by: Stephen Boyd <sboyd@codeaurora.org>
+---
+ drivers/mmc/host/sdhci-msm.c | 42 +++++++++++++++++++++++++++---------------
+ 1 file changed, 27 insertions(+), 15 deletions(-)
 
-Thanks,
-JM
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 40573a58486a..5aabffc15ae8 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -47,22 +47,34 @@
+ #define CMUX_SHIFT_PHASE_SHIFT	24
+ #define CMUX_SHIFT_PHASE_MASK	(7 << CMUX_SHIFT_PHASE_SHIFT)
+ 
+-static const u32 tuning_block_64[] = {
+-	0x00ff0fff, 0xccc3ccff, 0xffcc3cc3, 0xeffefffe,
+-	0xddffdfff, 0xfbfffbff, 0xff7fffbf, 0xefbdf777,
+-	0xf0fff0ff, 0x3cccfc0f, 0xcfcc33cc, 0xeeffefff,
+-	0xfdfffdff, 0xffbfffdf, 0xfff7ffbb, 0xde7b7ff7
++static const u8 tuning_block_64[] = {
++	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
++	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
++	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
++	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
++	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
++	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
++	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
++	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
+ };
+ 
+-static const u32 tuning_block_128[] = {
+-	0xff00ffff, 0x0000ffff, 0xccccffff, 0xcccc33cc,
+-	0xcc3333cc, 0xffffcccc, 0xffffeeff, 0xffeeeeff,
+-	0xffddffff, 0xddddffff, 0xbbffffff, 0xbbffffff,
+-	0xffffffbb, 0xffffff77, 0x77ff7777, 0xffeeddbb,
+-	0x00ffffff, 0x00ffffff, 0xccffff00, 0xcc33cccc,
+-	0x3333cccc, 0xffcccccc, 0xffeeffff, 0xeeeeffff,
+-	0xddffffff, 0xddffffff, 0xffffffdd, 0xffffffbb,
+-	0xffffbbbb, 0xffff77ff, 0xff7777ff, 0xeeddbb77
++static const u8 tuning_block_128[] = {
++	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
++	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
++	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
++	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
++	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
++	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
++	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
++	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
++	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
++	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
++	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
++	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
++	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
++	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
++	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
++	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
+ };
+ 
+ struct sdhci_msm_host {
+@@ -359,7 +371,7 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
+ {
+ 	int tuning_seq_cnt = 3;
+ 	u8 phase, *data_buf, tuned_phases[16], tuned_phase_cnt = 0;
+-	const u32 *tuning_block_pattern = tuning_block_64;
++	const u8 *tuning_block_pattern = tuning_block_64;
+ 	int size = sizeof(tuning_block_64);	/* Pattern size in bytes */
+ 	int rc;
+ 	struct mmc_host *mmc = host->mmc;
+-- 
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+hosted by The Linux Foundation
+
