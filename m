@@ -1,64 +1,75 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2] mmc: sdhci: check 1.2v IO capability for SDHC host
-Date: Wed, 3 Sep 2014 09:25:49 +0200
-Message-ID: <CAPDyKFr4k47-OuUwYFXziP=teiDizuP6Lv8uJ_MPLufFmbJiww@mail.gmail.com>
-References: <20140819030240.GA3201@intel.com>
+Subject: Re: [PATCH 00/13] mmc: Improve busy detection for MMC_CAP_WAIT_WHILE_BUSY
+Date: Wed, 3 Sep 2014 09:32:35 +0200
+Message-ID: <CAPDyKFp55i7cMJ2jNnoLPzLFdkHfW7F_-86y0P1wb94usec3nA@mail.gmail.com>
+References: <1391035085-2747-1-git-send-email-ulf.hansson@linaro.org>
+	<CAA+hA=QaCcFt8fm9xohnAhcH5T4RmASNte542jDs6v7-q-6bdw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f180.google.com ([209.85.217.180]:48771 "EHLO
-	mail-lb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755570AbaICHZu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Sep 2014 03:25:50 -0400
-Received: by mail-lb0-f180.google.com with SMTP id w7so8925833lbi.39
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2014 00:25:49 -0700 (PDT)
-In-Reply-To: <20140819030240.GA3201@intel.com>
+Received: from mail-la0-f50.google.com ([209.85.215.50]:35022 "EHLO
+	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755493AbaICHch (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Sep 2014 03:32:37 -0400
+Received: by mail-la0-f50.google.com with SMTP id mc6so9342884lab.9
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2014 00:32:35 -0700 (PDT)
+In-Reply-To: <CAA+hA=QaCcFt8fm9xohnAhcH5T4RmASNte542jDs6v7-q-6bdw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: "chris@printf.org" <chris@printf.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Dong Aisheng <dongas86@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Dong Aisheng <b29396@freescale.com>, Stephen Warren <swarren@nvidia.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 19 August 2014 05:02, Chuanxiao Dong <chuanxiao.dong@intel.com> wrote:
-> Right now enable 1.2v IO voltage for SDHC is by using vqmmc.
-> Thus for the host which doesn't have vqmmc, or its vqmmc does
-> not support 1.2v, directly use MMC_CAP2_HS200 may cause HS200
-> failure.
+On 3 September 2014 08:51, Dong Aisheng <dongas86@gmail.com> wrote:
+> Hi Ulf,
 >
-> So needs to check if vqmmc is able to support 1.2v. If it does
-> not support, disable 1.2v IO for HS200.
+> On Thu, Jan 30, 2014 at 6:37 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> This patchset improves the handling around busy detection in the mmc core layer
+>> while operating on host supporting MMC_CAP_WAIT_WHILE_BUSY.
+>>
+>> A R1B response is for an mmc command, specified as and R1 but with an optional
+>> busy assertion on the DAT0 line. Hosts supporting MMC_CAP_WAIT_WHILE_BUSY,
+>> normally has a busy detection mechanism build in it's controller HW.
+>>
+>> Using such a feature decreases the need for polling of the card's status using
+>> CMD13, which is the fallback method used by the mmc core for hosts that don't
+>> support MMC_CAP_WAIT_WHILE_BUSY.
+>>
+>> Typcial commands that expects R1B responses are CMD6 (SWITCH), CMD12 (STOP),
+>> CMD38 (ERASE) and CMD5 (SLEEP). This patchset adresses CMD6, CMD5 and improves
+>> some parts where CMD12 are used. If the implemented approach becomes accepted,
+>> a future patchset for CMD38 can be based on top if this patchset.
+>>
+>> Do note, the final two patches implements support for busy detection for the
+>> mmci host driver, since some of it's HW variants do supports busy detection.
+>>
+>> Future suggested improvements related to this patchset: (Please, feel free to
+>> implement any of them :-) ).
+>>
+>> a) For CMD38, select a fixed number maximum blocks to accept for
+>> erase/discard/trim operations. Compute the needed timeout depending on each
+>> card's erase information provided through it's CSD/EXT_CSD registers. Then
+>> follow the same principle as for sending a CMD6.
+>>
+>> b) At least for CMD38, but likely for other commands as well, we could benefit
+>> from doing a _periodic_ CMD13 polling to handle the busy completion. This will
+>> also be useful for hosts supporting MMC_CAP_WAIT_WHILE_BUSY, in particular for
+>> cases where the host are unable to support the needed busy timeout.
+>>
 >
-> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+> Do you have the plan to implement above two items?
 
-Thanks! Applied for next!
+Yes, it's on top of my TODO list for MMC. I really need to get this
+done asap. Thanks for pinging me about this.
+
+> Since currently the max_discard_sectors is still calculated based on
+> max_busy_timeout of host,
+> it is possible that for some eMMC chips, the max_discard_sectors is 1,
+> which then cause the erase operation terribly slow.
+
+Yes!
+
+Another issue to fix is get MMC_CAP_ERASE removed - and that should be
+possible once the above described problem has been solved.
 
 Kind regards
 Uffe
-
-> ---
-> Changelog V2: rebase this patch, and use IS_ERR to check vqmmc.
->
->  drivers/mmc/host/sdhci.c |    7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 4cc2ff9..a23738c 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3009,8 +3009,13 @@ int sdhci_add_host(struct sdhci_host *host)
->                 /* SD3.0: SDR104 is supported so (for eMMC) the caps2
->                  * field can be promoted to support HS200.
->                  */
-> -               if (!(host->quirks2 & SDHCI_QUIRK2_BROKEN_HS200))
-> +               if (!(host->quirks2 & SDHCI_QUIRK2_BROKEN_HS200)) {
->                         mmc->caps2 |= MMC_CAP2_HS200;
-> +                       if (IS_ERR(mmc->supply.vqmmc) ||
-> +                                       !regulator_is_supported_voltage
-> +                                       (mmc->supply.vqmmc, 1100000, 1300000))
-> +                               mmc->caps2 &= ~MMC_CAP2_HS200_1_2V_SDR;
-> +               }
->         } else if (caps[1] & SDHCI_SUPPORT_SDR50)
->                 mmc->caps |= MMC_CAP_UHS_SDR50;
->
-> --
-> 1.7.10.4
->
