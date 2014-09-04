@@ -1,30 +1,59 @@
-From: Stephen Boyd <sboyd@codeaurora.org>
-Subject: Re: [PATCH] mmc: sdhci-msm: Make tuning block table endian agnostic
-Date: Thu, 04 Sep 2014 14:22:36 -0700
-Message-ID: <5408D81C.7070602@codeaurora.org>
-References: <1409752622-7564-1-git-send-email-sboyd@codeaurora.org>	<5407F364.9030303@samsung.com> <CAPDyKFp0LwK=DABHaP-Ke=QZFP8bY5MO9RnYmUBqeEdDKp63BA@mail.gmail.com>
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: Re: [PATCH] tmio_mmc_pio: prevent endless loop in tmio_mmc_set_clock()
+Date: Fri, 05 Sep 2014 01:51:07 +0400
+Message-ID: <5408DECB.6000102@cogentembedded.com>
+References: <201405040219.30018.sergei.shtylyov@cogentembedded.com>	<53AC7B06.9070501@cogentembedded.com>	<54076BAA.4030105@cogentembedded.com> <CAPDyKFoWxCiVdeqJfx1s1bOPAr-_QmfxrXBHpZfmaupD4ED_bQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFp0LwK=DABHaP-Ke=QZFP8bY5MO9RnYmUBqeEdDKp63BA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Georgi Djakov <gdjakov@mm-sol.com>, Asutosh Das <asutoshd@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:47633 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755316AbaIDVvL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Sep 2014 17:51:11 -0400
+Received: by mail-lb0-f181.google.com with SMTP id s7so4117619lbd.12
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Sep 2014 14:51:09 -0700 (PDT)
+In-Reply-To: <CAPDyKFoWxCiVdeqJfx1s1bOPAr-_QmfxrXBHpZfmaupD4ED_bQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, Linux-sh list <linux-sh@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-On 09/04/14 03:53, Ulf Hansson wrote:
-> On 4 September 2014 07:06, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>
->> In dw-mmc.c, tuning_block values are same.
->> So I think we can move these value into generic header. how about?
-> Actually, I believe these values comes from the eMMC specification?
-> Shouldn't they be moved to the mmc core instead?
+Hello.
 
-That sounds like good consolidation, but can we do that in a follow-up
-patch? This fixes the driver for me and I was hoping to make something
-minimal to go back to stable trees.
+On 09/04/2014 03:00 PM, Ulf Hansson wrote:
 
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-hosted by The Linux Foundation
+>>>> I've spent a couple of days with the driver just hanging due to me
+>>>> forgetting
+>>>> to specify the external crystal frequency, so that clk_get_rate()
+>>>> returned 0
+>>>> and thus the loop in tmio_mmc_set_clock() never ended. I don't think
+>>>> that's an
+>>>> acceptable behavior, so I suggest that the minimum frequency is checked
+>>>> for 0
+>>>> in tmio_mmc_host_probe().
+
+>>>> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+
+>>>> ---
+>>>> The patch is against Chris Ball's 'mmc.git' repo's 'master' branch.
+
+>>>      I'm still not seeing this patch applied anywhere in this repo...
+>>> what's
+>>> the problem with it?
+
+>>     Chris, Ulf, Ian, what's the issue with this patch? Do you want me to
+>> rework it?
+
+> I guess it has been forgotten, sorry about that.
+
+> Please rebase it towards my mmc tree, which is the one we are using
+> currently and repost it.
+
+    It should still apply flawlessly to your tree, want me to repost it anyway?
+
+> Kind regards
+> Uffe
+
+WBR, Sergei
+
