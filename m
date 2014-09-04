@@ -1,103 +1,40 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: sdhci-msm: Make tuning block table endian agnostic
-Date: Thu, 04 Sep 2014 14:06:44 +0900
-Message-ID: <5407F364.9030303@samsung.com>
-References: <1409752622-7564-1-git-send-email-sboyd@codeaurora.org>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH 0/7] mmc: sdhci/imx: a few clean up and fixes
+Date: Thu, 4 Sep 2014 13:07:32 +0800
+Message-ID: <20140904050730.GA18688@dragon>
+References: <1409745903-26550-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-reply-to: <1409752622-7564-1-git-send-email-sboyd@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Stephen Boyd <sboyd@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Georgi Djakov <gdjakov@mm-sol.com>, Asutosh Das <asutoshd@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1409745903-26550-1-git-send-email-b29396@freescale.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Dong Aisheng <b29396@freescale.com>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, chris@printf.net, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi, Stephen.
-
-On 09/03/2014 10:57 PM, Stephen Boyd wrote:
-> If we're tuning on a big-endian CPU we'll never determine we properly
-> tuned the device because we compare the data we received from the
-> controller with a table that assumes the CPU is little-endian.
-> Change the table to be an array of bytes instead of 32-bit words
-> so we can use memcmp() without needing to byte-swap every word
-> depending on the endianess of the CPU.
+On Wed, Sep 03, 2014 at 08:04:56PM +0800, Dong Aisheng wrote:
+> A few clean up and fixes.
 > 
-> Cc: Asutosh Das <asutoshd@codeaurora.org>
-> Cc: Venkat Gopalakrishnan <venkatg@codeaurora.org>
-> Reviewed-by: Georgi Djakov <gdjakov@mm-sol.com>
-> Fixes: 415b5a75da43 "mmc: sdhci-msm: Add platform_execute_tuning implementation"
-> Signed-off-by: Stephen Boyd <sboyd@codeaurora.org>
-> ---
->  drivers/mmc/host/sdhci-msm.c | 42 +++++++++++++++++++++++++++---------------
->  1 file changed, 27 insertions(+), 15 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 40573a58486a..5aabffc15ae8 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -47,22 +47,34 @@
->  #define CMUX_SHIFT_PHASE_SHIFT	24
->  #define CMUX_SHIFT_PHASE_MASK	(7 << CMUX_SHIFT_PHASE_SHIFT)
->  
-> -static const u32 tuning_block_64[] = {
-> -	0x00ff0fff, 0xccc3ccff, 0xffcc3cc3, 0xeffefffe,
-> -	0xddffdfff, 0xfbfffbff, 0xff7fffbf, 0xefbdf777,
-> -	0xf0fff0ff, 0x3cccfc0f, 0xcfcc33cc, 0xeeffefff,
-> -	0xfdfffdff, 0xffbfffdf, 0xfff7ffbb, 0xde7b7ff7
-> +static const u8 tuning_block_64[] = {
-> +	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
-> +	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
-> +	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
-> +	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
-> +	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
-> +	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
-> +	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
-> +	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
->  };
->  
-> -static const u32 tuning_block_128[] = {
-> -	0xff00ffff, 0x0000ffff, 0xccccffff, 0xcccc33cc,
-> -	0xcc3333cc, 0xffffcccc, 0xffffeeff, 0xffeeeeff,
-> -	0xffddffff, 0xddddffff, 0xbbffffff, 0xbbffffff,
-> -	0xffffffbb, 0xffffff77, 0x77ff7777, 0xffeeddbb,
-> -	0x00ffffff, 0x00ffffff, 0xccffff00, 0xcc33cccc,
-> -	0x3333cccc, 0xffcccccc, 0xffeeffff, 0xeeeeffff,
-> -	0xddffffff, 0xddffffff, 0xffffffdd, 0xffffffbb,
-> -	0xffffbbbb, 0xffff77ff, 0xff7777ff, 0xeeddbb77
-> +static const u8 tuning_block_128[] = {
-> +	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
-> +	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
-> +	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
-> +	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
-> +	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
-> +	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
-> +	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
-> +	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
-> +	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
-> +	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
-> +	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
-> +	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
-> +	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
-> +	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
-> +	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
-> +	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
->  };
-In dw-mmc.c, tuning_block values are same.
-So I think we can move these value into generic header. how about?
+> Dong Aisheng (7):
+>   mmc: sdhci-esdhc-imx: remove duplicated lines
+>   mmc: sdhci-esdhc-imx: usdhc does not have missing card interrupt
+>     issue
+>   mmc: sdhci-esdhc-imx: add ADMA Length Mismatch errata fix
+>   mmc: sdhci: do not enable card detect interrupt for gpio cd type
+>   mmc: sdhci: do not enable card cd wakeup for gpio case
+>   mmc: sdhci-esdhc-imx: add imx6sx support
+>   mmc: sdhci-esdhc-imx: add quirk SDHCI_QUIRK2_BROKEN_HS200 for imx6qdl
 
-Best Regards,
-Jaehoon Chung
+For all 7,
 
->  
->  struct sdhci_msm_host {
-> @@ -359,7 +371,7 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
->  {
->  	int tuning_seq_cnt = 3;
->  	u8 phase, *data_buf, tuned_phases[16], tuned_phase_cnt = 0;
-> -	const u32 *tuning_block_pattern = tuning_block_64;
-> +	const u8 *tuning_block_pattern = tuning_block_64;
->  	int size = sizeof(tuning_block_64);	/* Pattern size in bytes */
->  	int rc;
->  	struct mmc_host *mmc = host->mmc;
-> 
+Reviewed-by: Shawn Guo <shawn.guo@linaro.org>
