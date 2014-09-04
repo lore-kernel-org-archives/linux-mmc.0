@@ -1,59 +1,115 @@
-From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Subject: Re: [PATCH] tmio_mmc_pio: prevent endless loop in tmio_mmc_set_clock()
-Date: Fri, 05 Sep 2014 01:51:07 +0400
-Message-ID: <5408DECB.6000102@cogentembedded.com>
-References: <201405040219.30018.sergei.shtylyov@cogentembedded.com>	<53AC7B06.9070501@cogentembedded.com>	<54076BAA.4030105@cogentembedded.com> <CAPDyKFoWxCiVdeqJfx1s1bOPAr-_QmfxrXBHpZfmaupD4ED_bQ@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Don't enable interrupts until we're ready
+Date: Fri, 05 Sep 2014 06:53:33 +0900
+Message-ID: <5408DF5D.4020808@samsung.com>
+References: <1409701034-28526-1-git-send-email-dianders@chromium.org>
+ <5407F6F1.60900@samsung.com>
+ <CAD=FV=WfCmC=jPDv0annedsP2KVJ5Na=+EYGJXv-9+NSfN30_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f181.google.com ([209.85.217.181]:47633 "EHLO
-	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755316AbaIDVvL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Sep 2014 17:51:11 -0400
-Received: by mail-lb0-f181.google.com with SMTP id s7so4117619lbd.12
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Sep 2014 14:51:09 -0700 (PDT)
-In-Reply-To: <CAPDyKFoWxCiVdeqJfx1s1bOPAr-_QmfxrXBHpZfmaupD4ED_bQ@mail.gmail.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:61577 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755306AbaIDVxg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Sep 2014 17:53:36 -0400
+In-reply-to: <CAD=FV=WfCmC=jPDv0annedsP2KVJ5Na=+EYGJXv-9+NSfN30_w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, Linux-sh list <linux-sh@vger.kernel.org>, Chris Ball <chris@printf.net>
+To: Doug Anderson <dianders@chromium.org>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Addy Ke <addy.ke@rock-chips.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Sonny Rao <sonnyrao@chromium.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hello.
+Doug,
 
-On 09/04/2014 03:00 PM, Ulf Hansson wrote:
+On 09/05/2014 04:21 AM, Doug Anderson wrote:
+> Jaehoon,
+> 
+> On Wed, Sep 3, 2014 at 10:21 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> Hi Doug
+>>
+>> On 09/03/2014 08:37 AM, Doug Anderson wrote:
+>>> On dw_mmc there's a small race if you happen to get a card detect
+>>> interrupt at just the wrong time during probe.  You may have enabled
+>>> the interrupt but host->slot[0] may be NULL.
+>>>
+>>> Fix the race by enabling interrupts all the way at the end of the
+>>> probe.  We can also use free_irq() instead of dw_mmc specific masking
+>>> to mask the IRQ at removal time.  Note that since we're now managing
+>>> freeing of the irq ourselves, there's no need to use devm.
+>>>
+>>> FYI, the crash would look like:
+>>>   dwmmc_rockchip ff0c0000.dwmmc: DW MMC controller at irq 64, 32 bit host data width, 256 deep fifo
+>>>   Unable to handle kernel NULL pointer dereference at virtual address 00000000
+>>>   pgd = c0004000
+>>>   [00000000] *pgd=00000000
+>>>   ...
+>>>   ...
+>>>   [<c0499380>] (dw_mci_work_routine_card) from [<c0134b94>] (process_one_work+0x260/0x3c4)
+>>>   [<c0134b94>] (process_one_work) from [<c0135b10>] (worker_thread+0x240/0x3a8)
+>>>   [<c0135b10>] (worker_thread) from [<c013b64c>] (kthread+0x100/0x118)
+>>>   [<c013b64c>] (kthread) from [<c0106418>] (ret_from_fork+0x14/0x20)
+>>>
+>>> Signed-off-by: Doug Anderson <dianders@chromium.org>
+>>> ---
+>>> FYI: making dw_mmc into a module and trying module removal was not
+>>> tested.  I'd appreciate any testing that folks can do there.  This
+>>> code should be the equivalent and makes the error case of probe match
+>>> the removal case more closely now.
+>>>
+>>>  drivers/mmc/host/dw_mmc.c | 17 +++++++++++------
+>>>  1 file changed, 11 insertions(+), 6 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index 7f227e9..540ba3c 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -2577,10 +2577,6 @@ int dw_mci_probe(struct dw_mci *host)
+>>>               goto err_dmaunmap;
+>>>       }
+>>>       INIT_WORK(&host->card_work, dw_mci_work_routine_card);
+>>> -     ret = devm_request_irq(host->dev, host->irq, dw_mci_interrupt,
+>>> -                            host->irq_flags, "dw-mci", host);
+>>> -     if (ret)
+>>> -             goto err_workqueue;
+>>>
+>>>       if (host->pdata->num_slots)
+>>>               host->num_slots = host->pdata->num_slots;
+>>> @@ -2619,11 +2615,21 @@ int dw_mci_probe(struct dw_mci *host)
+>>>               goto err_workqueue;
+>>>       }
+>>>
+>>> +     ret = request_irq(host->irq, dw_mci_interrupt, host->irq_flags,
+>>> +                       "dw-mci", host);
+>>> +     if (ret)
+>>> +             goto err_initted;
+>>
+>> I didn't test and consider race condition yet.
+>> But if located "request_irq" at here, we can be confused something,
+>> since there is "dev_info(host->dev, "%d slots initialized\n", init_slots)" message at above.
+>>
+>> I think you can relocate this.
+> 
+> OK, good point.  Maybe we should skip this patch after all.  There is
+> definitely a race there, but I'm not 100% sure this is the right fix
+> for it.
 
->>>> I've spent a couple of days with the driver just hanging due to me
->>>> forgetting
->>>> to specify the external crystal frequency, so that clk_get_rate()
->>>> returned 0
->>>> and thus the loop in tmio_mmc_set_clock() never ended. I don't think
->>>> that's an
->>>> acceptable behavior, so I suggest that the minimum frequency is checked
->>>> for 0
->>>> in tmio_mmc_host_probe().
+I'm not sure this patch is fixed for it, too.
+So i will check more with your patch.
+But i think if we can maintain current status, it will be the best.
 
->>>> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Best Regards,
+Jaehoon Chung
 
->>>> ---
->>>> The patch is against Chris Ball's 'mmc.git' repo's 'master' branch.
-
->>>      I'm still not seeing this patch applied anywhere in this repo...
->>> what's
->>> the problem with it?
-
->>     Chris, Ulf, Ian, what's the issue with this patch? Do you want me to
->> rework it?
-
-> I guess it has been forgotten, sorry about that.
-
-> Please rebase it towards my mmc tree, which is the one we are using
-> currently and repost it.
-
-    It should still apply flawlessly to your tree, want me to repost it anyway?
-
-> Kind regards
-> Uffe
-
-WBR, Sergei
+> 
+> In general we probably need to look at the dw_mci_work_routine_card()
+> a bit more (used for card detect) since that's only used for official
+> "CD" lines.  ...and as we've talked about anyone who wants to properly
+> power their card off should be using GPIOs, thus they won't get the
+> benefit of whatever dw_mci_work_routine_card() does.
+> 
+> I did play around a little bit with trying to test the module remove.
+> Both before and after my patch it hung.
+> 
+> -Doug
+> 
 
