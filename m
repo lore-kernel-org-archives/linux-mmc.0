@@ -1,95 +1,121 @@
-From: Hsin-Hsiang Tseng <hsinhsiangtseng@gmail.com>
-Subject: Re: [RFC PATCH 1/1 v8]mmc: Support-FFU-for-eMMC-v5.0
-Date: Thu, 4 Sep 2014 09:06:25 +0800
-Message-ID: <CAC1bqKgvUeXewN202yc=txnJuan88GJTQMPKCeA38N1SGEzAmA@mail.gmail.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE64B934609@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFr52GkJC-2A4b6dy7VYZZsVgCHnT-GdL_9ZkF=Hd4H=Jw@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333AE73534@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFoFq+XkjVqycEorUDU_aKACPQkHvEsdJjJkj+P=FET5cA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333AE8EC81@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFqumUdoxnGg8nU9FfqEUOGvBfFNBdfg4kW=V4WF5r_OSg@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333AEB94FF@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFpUCvHaq2XrgGVhYJCuDVBALjv9H4bV5g0Z9pKf0ZbieQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-msm: Make tuning block table endian agnostic
+Date: Thu, 4 Sep 2014 12:53:45 +0200
+Message-ID: <CAPDyKFp0LwK=DABHaP-Ke=QZFP8bY5MO9RnYmUBqeEdDKp63BA@mail.gmail.com>
+References: <1409752622-7564-1-git-send-email-sboyd@codeaurora.org>
+	<5407F364.9030303@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f170.google.com ([74.125.82.170]:33726 "EHLO
-	mail-we0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933102AbaIDBG1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Sep 2014 21:06:27 -0400
-Received: by mail-we0-f170.google.com with SMTP id p10so9482926wes.15
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2014 18:06:26 -0700 (PDT)
-In-Reply-To: <CAPDyKFpUCvHaq2XrgGVhYJCuDVBALjv9H4bV5g0Z9pKf0ZbieQ@mail.gmail.com>
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:60206 "EHLO
+	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753335AbaIDKxr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Sep 2014 06:53:47 -0400
+Received: by mail-qc0-f175.google.com with SMTP id c9so10226546qcz.34
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Sep 2014 03:53:45 -0700 (PDT)
+In-Reply-To: <5407F364.9030303@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Alex Lemberg <Alex.Lemberg@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "cjb@laptop.org" <cjb@laptop.org>, Grant Grundler <grundler@chromium.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "Gwendal Grignou (gwendal@chromium.org)" <gwendal@chromium.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Stephen Boyd <sboyd@codeaurora.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Georgi Djakov <gdjakov@mm-sol.com>, Asutosh Das <asutoshd@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>
 
-Hi, Ulf
+On 4 September 2014 07:06, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi, Stephen.
+>
+> On 09/03/2014 10:57 PM, Stephen Boyd wrote:
+>> If we're tuning on a big-endian CPU we'll never determine we properly
+>> tuned the device because we compare the data we received from the
+>> controller with a table that assumes the CPU is little-endian.
+>> Change the table to be an array of bytes instead of 32-bit words
+>> so we can use memcmp() without needing to byte-swap every word
+>> depending on the endianess of the CPU.
+>>
+>> Cc: Asutosh Das <asutoshd@codeaurora.org>
+>> Cc: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+>> Reviewed-by: Georgi Djakov <gdjakov@mm-sol.com>
+>> Fixes: 415b5a75da43 "mmc: sdhci-msm: Add platform_execute_tuning implementation"
+>> Signed-off-by: Stephen Boyd <sboyd@codeaurora.org>
+>> ---
+>>  drivers/mmc/host/sdhci-msm.c | 42 +++++++++++++++++++++++++++---------------
+>>  1 file changed, 27 insertions(+), 15 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index 40573a58486a..5aabffc15ae8 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -47,22 +47,34 @@
+>>  #define CMUX_SHIFT_PHASE_SHIFT       24
+>>  #define CMUX_SHIFT_PHASE_MASK        (7 << CMUX_SHIFT_PHASE_SHIFT)
+>>
+>> -static const u32 tuning_block_64[] = {
+>> -     0x00ff0fff, 0xccc3ccff, 0xffcc3cc3, 0xeffefffe,
+>> -     0xddffdfff, 0xfbfffbff, 0xff7fffbf, 0xefbdf777,
+>> -     0xf0fff0ff, 0x3cccfc0f, 0xcfcc33cc, 0xeeffefff,
+>> -     0xfdfffdff, 0xffbfffdf, 0xfff7ffbb, 0xde7b7ff7
+>> +static const u8 tuning_block_64[] = {
+>> +     0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
+>> +     0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
+>> +     0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
+>> +     0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
+>> +     0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
+>> +     0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
+>> +     0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
+>> +     0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
+>>  };
+>>
+>> -static const u32 tuning_block_128[] = {
+>> -     0xff00ffff, 0x0000ffff, 0xccccffff, 0xcccc33cc,
+>> -     0xcc3333cc, 0xffffcccc, 0xffffeeff, 0xffeeeeff,
+>> -     0xffddffff, 0xddddffff, 0xbbffffff, 0xbbffffff,
+>> -     0xffffffbb, 0xffffff77, 0x77ff7777, 0xffeeddbb,
+>> -     0x00ffffff, 0x00ffffff, 0xccffff00, 0xcc33cccc,
+>> -     0x3333cccc, 0xffcccccc, 0xffeeffff, 0xeeeeffff,
+>> -     0xddffffff, 0xddffffff, 0xffffffdd, 0xffffffbb,
+>> -     0xffffbbbb, 0xffff77ff, 0xff7777ff, 0xeeddbb77
+>> +static const u8 tuning_block_128[] = {
+>> +     0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
+>> +     0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
+>> +     0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
+>> +     0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
+>> +     0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
+>> +     0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
+>> +     0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
+>> +     0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
+>> +     0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
+>> +     0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
+>> +     0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
+>> +     0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
+>> +     0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
+>> +     0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
+>> +     0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
+>> +     0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
+>>  };
+> In dw-mmc.c, tuning_block values are same.
+> So I think we can move these value into generic header. how about?
 
-the data we expected to write in my case is about 288KB.
-BTW, Alex's FFU flow already implemented on my platform which using
-exynos SoC without problem.
+Actually, I believe these values comes from the eMMC specification?
+Shouldn't they be moved to the mmc core instead?
 
-Thanks,
-Hsinhsiang
+Kind regards
+Uffe
 
-2014-09-01 19:27 GMT+08:00 Ulf Hansson <ulf.hansson@linaro.org>:
-> On 1 September 2014 11:26, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
->> [snip]
->>
->>> My conclusion from that is (correct me if I am wrong, since it may be vendor
->>> specific), that only minor modifications should be needed to the mmc ioctl. We
->>> need to add special treatment for when "cmd.opcode ==
->>> MMC_FFU_DOWNLOAD_OP". In such scenario the following sequence needs to
->>> be maintained.
->>>
->>> 1. Claim host etc.
->>> 2. Set FFU mode.
->>> 3. Write some sectors to the FFU area, but in the same way as any other mmc
->>> ioctl WRITE is done.
->>> 4. Set normal mode.
->>> 5. Relase host etc.
->>>
->>> That sequence then needs to be repeated to write the complete firmware,
->>> depending on buffer size. Between each and every piece of FFU data that is
->>> written, normal READ/WRITE operations can be served.
->>> Right?
->>
->> We checked again the current IOCTL implementation, and we see issues
->> In implementing FFU as suggested above:
->>
->> 1. No support for multiple Write operations.
->>     For running Multiple I/O, user need to send CMD23 or CMD12.
->>     So structures "sbc" or "stop" of "mmc_blk_request" should be set accordingly.
 >
-> You are right regarding multiple I/O!
->
-> I suppose using single block write option (CMD24) still can be used
-> for FFU, right?
->
-> Yes, we would suffer from unoptimized performance, but on the other
-> hand - how much data could we typically be expected to write? Do you
-> have some rough numbers that you can share?
+> Best Regards,
+> Jaehoon Chung
 >
 >>
->> 2. There is a limit in chunk size in current implementation of IOCTL.
->>      From some reason we can't write more than 64KB on our platform,
->>      Although, the MMC_IOC_MAX_BYTES is defined to be 128KB
->
-> That is likely because the mmc host driver may limit the size, due to
-> it's controller HW.
->
+>>  struct sdhci_msm_host {
+>> @@ -359,7 +371,7 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
+>>  {
+>>       int tuning_seq_cnt = 3;
+>>       u8 phase, *data_buf, tuned_phases[16], tuned_phase_cnt = 0;
+>> -     const u32 *tuning_block_pattern = tuning_block_64;
+>> +     const u8 *tuning_block_pattern = tuning_block_64;
+>>       int size = sizeof(tuning_block_64);     /* Pattern size in bytes */
+>>       int rc;
+>>       struct mmc_host *mmc = host->mmc;
 >>
->> Based on this, we think that using existing IOCTL implementation is not
->> a good solution for FFU.
 >
-> Okay, let's for now continue with your current approach and try to
-> address those concerns I have raised while reviewing the code. I will
-> happily review new versions of the patch(es).
->
-> Kind regards
-> Uffe
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
