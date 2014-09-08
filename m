@@ -1,53 +1,56 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 0002/0002] mmc: Checks EXT_CSD_PARTITION_SETTING_COMPLETED
- bit before partitions computation
-Date: Mon, 8 Sep 2014 14:15:31 +0200
-Message-ID: <CAPDyKFrpj=tuZTBHC1wsOz=v-Rh6zGkWrawQzVRrwe36tEpRyg@mail.gmail.com>
-References: <53C7E45E.2060102@neotion.com>
-	<CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>
-	<53EB2DC3.2080002@neotion.com>
-	<CAPDyKFpjYqVUZ8GHB76gD8pOx_eMg9ecvbWrMEfbhEd5ffk7mw@mail.gmail.com>
-	<53ECB95F.2030207@neotion.com>
-	<CAPDyKFp2ekmucHVzMWxeKfyTmuFKTXAYwUEpL5QxvEh8AjFopg@mail.gmail.com>
-	<53F1FBA7.8000707@neotion.com>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: add support for ARM64
+Date: Tue, 9 Sep 2014 03:58:17 +0530
+Message-ID: <CAGOxZ50__yVJPCF1f8fjFfX3uyZ+G_=VYA0UdCAcsLdcjLtewA@mail.gmail.com>
+References: <1409307891-16523-1-git-send-email-alim.akhtar@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f43.google.com ([209.85.192.43]:45166 "EHLO
-	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752925AbaIHMPd convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Sep 2014 08:15:33 -0400
-Received: by mail-qg0-f43.google.com with SMTP id a108so3650959qge.2
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Sep 2014 05:15:32 -0700 (PDT)
-In-Reply-To: <53F1FBA7.8000707@neotion.com>
+Received: from mail-yk0-f181.google.com ([209.85.160.181]:44655 "EHLO
+	mail-yk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754665AbaIHW26 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Sep 2014 18:28:58 -0400
+In-Reply-To: <1409307891-16523-1-git-send-email-alim.akhtar@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Alim Akhtar <alim.akhtar@samsung.com>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Andrew Bresticker <abrestic@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
-On 18 August 2014 15:12, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.co=
-m> wrote:
-> Checks EXT_CSD_PARTITION_SETTING_COMPLETED bit before
-> computing enhanced user area offset and size, and adding
-> mmc general purpose partitions.
-> The two needs EXT_CSD_PARTITION_SETTING_COMPLETED bit be set
-> to be valid (as described in JEDEC standard).
+Hi Chrish, Ulf, Arnd
+
+Any comments/suggestions?
+
+On Fri, Aug 29, 2014 at 3:54 PM, Alim Akhtar <alim.akhtar@samsung.com> wrote:
+> There are upcoming ARM64 SoCs with dw_mmc host controller.
 >
-> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
+> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
 > ---
->  drivers/mmc/core/mmc.c |  167 +++++++++++++++++++++++++++-----------=
-----------
->  1 file changed, 95 insertions(+), 72 deletions(-)
+>  drivers/mmc/host/Kconfig |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> Changelog v2:
->         Move code for user area and general purpose partitions
->         into functions.
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index a43295c..72dd6c2 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -580,7 +580,7 @@ config SDH_BFIN_MISSING_CMD_PULLUP_WORKAROUND
+>  config MMC_DW
+>         tristate "Synopsys DesignWare Memory Card Interface"
+>         depends on HAS_DMA
+> -       depends on ARC || ARM || MIPS || COMPILE_TEST
+> +       depends on ARC || ARM || ARM64 || MIPS || COMPILE_TEST
+>         help
+>           This selects support for the Synopsys DesignWare Mobile Storage IP
+>           block, this provides host support for SD and MMC interfaces, in both
+> --
+> 1.7.10.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Overall I like the end-result of this patch.
 
-What I don't like is that you move code and fix bugs in same patch.
-Could possibly, split this up into two patches?
 
-Kind regards
-Uffe
+-- 
+Regards,
+Alim
