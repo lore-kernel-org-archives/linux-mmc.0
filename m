@@ -1,39 +1,59 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 0/7 v3] mmc: remove MMC_CAP2_NO_MULTI_READ flags
-Date: Tue, 9 Sep 2014 12:56:21 +0900
-Message-ID: <20140909035618.GI31320@verge.net.au>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/7 v3] mmc: use .multi_io_quirk on omap_hsmmc
+Date: Tue, 9 Sep 2014 08:00:02 +0200
+Message-ID: <CAPDyKFpns_+s3LQ-j=yE6vx-uzRtm5MwhxZVeB8r=fnBqJ8vBA@mail.gmail.com>
 References: <87r3zvzohj.wl%kuninori.morimoto.gx@gmail.com>
- <87bnqx78xr.wl%kuninori.morimoto.gx@gmail.com>
- <20140909024310.GE31320@verge.net.au>
- <87sik17bqg.wl%kuninori.morimoto.gx@gmail.com>
+	<87bnqx78xr.wl%kuninori.morimoto.gx@gmail.com>
+	<878um178vn.wl%kuninori.morimoto.gx@gmail.com>
+	<CAPDyKFoj2_3APb1q_tJ8P8qmDb8RftOyx4+j_Sbb74kDSKEe7Q@mail.gmail.com>
+	<87zje97izx.wl%kuninori.morimoto.gx@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <87sik17bqg.wl%kuninori.morimoto.gx@gmail.com>
+In-Reply-To: <87zje97izx.wl%kuninori.morimoto.gx@gmail.com>
 Sender: linux-sh-owner@vger.kernel.org
 To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Sep 08, 2014 at 07:45:46PM -0700, Kuninori Morimoto wrote:
-> 
-> Hi Simon
-> 
-> > > Kuninori Morimoto (7):
-> > >       mmc: add .multi_io_quirk callback for multi I/O HW bug
-> > >       mmc: use .multi_io_quirk on omap_hsmmc
-> > >       mmc: use .multi_io_quirk on tmio_mmc
-> > >       mmc: use .multi_io_quirk on sh_mobile
-> > >       ARM: shmobile: remove MMC_CAP2_NO_MULTI_READ from koelsch
-> > >       ARM: shmobile: remove MMC_CAP2_NO_MULTI_READ from lager
-> > 
-> > Hi Morimoto-san,
-> > 
-> > could you let me know about the dependencies for the above two patches?
-> 
-> These have deep dependencies.
-> "ARM: shmobile: remove xxx" patches are based on 1) - 4) patches,
-> and, it is required to last patch.
+On 9 September 2014 02:09, Kuninori Morimoto
+<kuninori.morimoto.gx@gmail.com> wrote:
+>
+> Hi Ulf
+>
+>> > diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+>> > index ece1634..7b41f57 100644
+>> > --- a/drivers/mmc/host/omap_hsmmc.c
+>> > +++ b/drivers/mmc/host/omap_hsmmc.c
+>> > @@ -219,6 +219,7 @@ struct omap_hsmmc_host {
+>> >  #define AUTO_CMD23             (1 << 0)        /* Auto CMD23 support */
+>> >  #define HSMMC_SDIO_IRQ_ENABLED (1 << 1)        /* SDIO irq enabled */
+>> >  #define HSMMC_WAKE_IRQ_ENABLED (1 << 2)
+>> > +#define HSMMC_NO_MULTI_READ    (1 << 3)
+>> >         struct omap_hsmmc_next  next_data;
+>> >         struct  omap_mmc_platform_data  *pdata;
+>> >  };
+> (snip)
+>> >  #ifdef CONFIG_DEBUG_FS
+>> > @@ -2101,7 +2116,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>> >
+>> >         if (host->pdata->controller_flags & OMAP_HSMMC_BROKEN_MULTIBLOCK_READ) {
+>> >                 dev_info(&pdev->dev, "multiblock reads disabled due to 35xx erratum 2.1.1.128; MMC read performance may suffer\n");
+>> > -               mmc->caps2 |= MMC_CAP2_NO_MULTI_READ;
+>>
+>> An option to adding yet another flag, would be to assign
+>> ->multi_io_quirk = omap_hsmmc_multi_io_quirk() here? Isn't that
+>> actually better for those variants that doesn't suffer from this HW
+>> bug?
+>
+> This means we need to copy this ops for each driver ?
+> Otherwise, it breaks behavior if many drivers were probed.
 
-Thanks, I understand.
+The are only one driver for omap_hsmmc, this is not tmio, which
+certainly is a different story.
+
+What you need to do, is to make omap_hsmmc_ops non const - and assign
+the function pointer here. That should work.
+
+Kind regards
+Uffe
