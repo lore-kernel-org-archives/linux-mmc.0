@@ -1,40 +1,32 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [GIT PULL 1/2] SOCFPGA updates for 3.18
-Date: Tue, 09 Sep 2014 17:02:34 +0200
-Message-ID: <4134101.OOENTRabu1@wuerfel>
-References: <1409847105-27241-1-git-send-email-dinguyen@opensource.altera.com> <20140909141756.GA30100@amd>
+From: Olof Johansson <olof@lixom.net>
+Subject: Re: [PATCH] fix mmc hang during boot on socfpga
+Date: Tue, 9 Sep 2014 10:32:14 -0700
+Message-ID: <CAOesGMgvqvQw2WzdQWQ7NSE_CKgH0MR-46UABkck0cQbpV4P=g@mail.gmail.com>
+References: <20140909121902.GA22965@amd>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.24]:52224 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752836AbaIIPCs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Sep 2014 11:02:48 -0400
-In-Reply-To: <20140909141756.GA30100@amd>
+Received: from mail-la0-f44.google.com ([209.85.215.44]:45646 "EHLO
+	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752840AbaIIRcQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Sep 2014 13:32:16 -0400
+Received: by mail-la0-f44.google.com with SMTP id mc6so4592017lab.3
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Sep 2014 10:32:14 -0700 (PDT)
+In-Reply-To: <20140909121902.GA22965@amd>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pavel Machek <pavel@denx.de>
-Cc: dinguyen@opensource.altera.com, khilman@linaro.org, olof@lixom.net, arm@kernel.org, dinh.linux@gmail.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+To: Pavel Machek <pavel@ucw.cz>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, =?UTF-8?B?TWFyZWsgVmHFoXV0?= <marex@denx.de>
 
-On Tuesday 09 September 2014 16:17:56 Pavel Machek wrote:
-> > Jaehoon Chung (1):
-> >       ARM: dts: socfpga: unuse the slot-node and deprecate the supports-highspeed for dw-mmc
-> > 
-> 
-> This patch is a bad idea. It removes support for two mmc cards on a
-> single controller -- configuration hardware supports and configuration
-> that allows using u-SD card on mcvevk board.
-> 
+On Tue, Sep 9, 2014 at 5:19 AM, Pavel Machek <pavel@ucw.cz> wrote:
+>
+> Without this patch, boot hangs when trying to mount root filesystem on
+> socfpga platform in about 50% cases.
 
-Your objection comes too late, and to the wrong patch, since the
-driver and all other users have already been changed. We had a long
-discussion about this when the issue first came up, and we could
-not find any example of dw-mmc actually being used in a scenario
-with one controller that has multiple devices attached.
+I think this should have a better description than this -- this is too
+vague. Did it use to always work, is this a new failure? You enable
+some more error checking and improved stop handling, why was the
+previous one inadequate on this platform?
 
-Apparently every user out there instead uses multiple controller
-instances instead. Are you sure that the socfpga implementation
-is an exception from this?
 
-	Arnd
+-Olof
