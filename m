@@ -1,51 +1,77 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v4 6/9] mmc: sdio: Convert to dev_pm_domain_attach|detach()
-Date: Tue,  9 Sep 2014 13:36:07 +0200
-Message-ID: <1410262570-22785-7-git-send-email-ulf.hansson@linaro.org>
-References: <1409838756-31963-1-git-send-email-ulf.hansson@linaro.org>
- <1410262570-22785-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <1410262570-22785-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-pm-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pm@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, linux-acpi@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>, Kevin Hilman <khilman@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Daniel Lezcano <daniel.lezcano@linaro.org>, Tomasz Figa <tomasz.figa@gmail.com>, devicetree@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Ben Dooks <ben-linux@fluff.org>, Kukjin Kim <kgene.kim@samsung.com>, Stephen Boyd <sboyd@codeaurora.org>, Philipp Zabel <philipp.zabel@gmail.com>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH] mmc: mmci_qcom_dml: fix is never less than zero warning.
+Date: Tue, 9 Sep 2014 13:53:13 +0200
+Message-ID: <CAPDyKFr=rLk2paKktTd_fkX7TcS+YW=A0RS-e5rYXGST3KAy7A@mail.gmail.com>
+References: <1408683219-7939-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1410251689-12740-1-git-send-email-srinivas.kandagatla@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1410251689-12740-1-git-send-email-srinivas.kandagatla@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Previously only the ACPI PM domain was supported by the sdio bus.
+On 9 September 2014 10:34, Srinivas Kandagatla
+<srinivas.kandagatla@linaro.org> wrote:
+> This patch fixes a typo which resulted in 'is never less
+> than zero warning' reported by static checker.
+>
+>         drivers/mmc/host/mmci_qcom_dml.c:131 dml_hw_init()
+>         warn: unsigned 'producer_id' is never less than zero.
+>
+> drivers/mmc/host/mmci_qcom_dml.c
+>    121  /* Initialize the dml hardware connected to SD Card controller */
+>    122  int dml_hw_init(struct mmci_host *host, struct device_node *np)
+>    123  {
+>    124          u32 config;
+>    125          void __iomem *base;
+>    126          u32 consumer_id, producer_id;
+>    127
+>    128          consumer_id = of_get_dml_pipe_index(np, "tx");
+>    129          producer_id = of_get_dml_pipe_index(np, "rx");
+>    130
+>    131          if (producer_id < 0 || consumer_id < 0)
+>                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>    132
+>
+> Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> ---
+> Hi Ulf,
+>
+> This patch is on top of https://git.linaro.org/people/ulf.hansson/mmc.git next branch
+> to fix up a warning reported by static checker tool.
+>
+> Are you ok to take this patch as it is or do you think I should resend the
+> original DML patch with this fix?
+>
 
-Let's convert to the common attach/detach functions for PM domains,
-which currently means we are extending the support to include the
-generic PM domain as well.
+I am fine with this, I will fold it into the original patch. Applied for next.
 
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Reviewed-by: Kevin Hilman <khilman@linaro.org>
----
- drivers/mmc/core/sdio_bus.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Kind regards
+Uffe
 
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 4fa8fef9..1df0fc6 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -315,7 +315,7 @@ int sdio_add_func(struct sdio_func *func)
- 	ret = device_add(&func->dev);
- 	if (ret == 0) {
- 		sdio_func_set_present(func);
--		acpi_dev_pm_attach(&func->dev, false);
-+		dev_pm_domain_attach(&func->dev, false);
- 	}
- 
- 	return ret;
-@@ -332,7 +332,7 @@ void sdio_remove_func(struct sdio_func *func)
- 	if (!sdio_func_present(func))
- 		return;
- 
--	acpi_dev_pm_detach(&func->dev, false);
-+	dev_pm_domain_detach(&func->dev, false);
- 	device_del(&func->dev);
- 	put_device(&func->dev);
- }
--- 
-1.9.1
-
+> thanks,
+> srini
+>
+>  drivers/mmc/host/mmci_qcom_dml.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
+> index 300ef50..2b7fc37 100644
+> --- a/drivers/mmc/host/mmci_qcom_dml.c
+> +++ b/drivers/mmc/host/mmci_qcom_dml.c
+> @@ -123,7 +123,7 @@ int dml_hw_init(struct mmci_host *host, struct device_node *np)
+>  {
+>         u32 config;
+>         void __iomem *base;
+> -       u32 consumer_id, producer_id;
+> +       int consumer_id, producer_id;
+>
+>         consumer_id = of_get_dml_pipe_index(np, "tx");
+>         producer_id = of_get_dml_pipe_index(np, "rx");
+> --
+> 1.9.1
+>
