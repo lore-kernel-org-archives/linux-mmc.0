@@ -1,55 +1,65 @@
-From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH v2] ARM: dts: Add mshc aliases for rk3288
-Date: Tue, 09 Sep 2014 10:28:36 +0200
-Message-ID: <18318098.Hm4yenW6Sf@diego>
-References: <1409785523-12209-1-git-send-email-dianders@chromium.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:46445 "EHLO gloria.sntech.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752567AbaIII0h (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 9 Sep 2014 04:26:37 -0400
-In-Reply-To: <1409785523-12209-1-git-send-email-dianders@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: [PATCH] mmc: mmci_qcom_dml: fix is never less than zero warning.
+Date: Tue,  9 Sep 2014 09:34:49 +0100
+Message-ID: <1410251689-12740-1-git-send-email-srinivas.kandagatla@linaro.org>
+References: <1408683219-7939-1-git-send-email-srinivas.kandagatla@linaro.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1408683219-7939-1-git-send-email-srinivas.kandagatla@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Sonny Rao <sonnyrao@chromium.org>, stefan@agner.ch, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, Addy Ke <addy.ke@rock-chips.com>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Russell King <linux@arm.linux.org.uk>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Am Mittwoch, 3. September 2014, 16:05:23 schrieb Doug Anderson:
-> It's convenient (and less confusing to people reading logs) if the
-> eMMC port on rk3288 is consistenly marked with mmc0 and the sdmmc port
-> on rk3288 is consistently marked with mmc1.  Add the appropriate
-> aliases.
+This patch fixes a typo which resulted in 'is never less
+than zero warning' reported by static checker.
 
-Added to my v3.18-next/dts branch
+	drivers/mmc/host/mmci_qcom_dml.c:131 dml_hw_init()
+	warn: unsigned 'producer_id' is never less than zero.
 
-> 
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> Reviewed-by: Sonny Rao <sonnyrao@chromium.org>
-> ---
-> 
-> Changes in v2:
-> - Use mshc aliases now
-> - Adds sdio0/1 aliases since those are in the dts.
-> 
->  arch/arm/boot/dts/rk3288.dtsi | 4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
-> index 5f866e0..2c5d01f 100644
-> --- a/arch/arm/boot/dts/rk3288.dtsi
-> +++ b/arch/arm/boot/dts/rk3288.dtsi
-> @@ -29,6 +29,10 @@
->  		i2c3 = &i2c3;
->  		i2c4 = &i2c4;
->  		i2c5 = &i2c5;
-> +		mshc0 = &emmc;
-> +		mshc1 = &sdmmc;
-> +		mshc2 = &sdio0;
-> +		mshc3 = &sdio1;
->  		serial0 = &uart0;
->  		serial1 = &uart1;
->  		serial2 = &uart2;
+drivers/mmc/host/mmci_qcom_dml.c
+   121  /* Initialize the dml hardware connected to SD Card controller */
+   122  int dml_hw_init(struct mmci_host *host, struct device_node *np)
+   123  {
+   124          u32 config;
+   125          void __iomem *base;
+   126          u32 consumer_id, producer_id;
+   127
+   128          consumer_id = of_get_dml_pipe_index(np, "tx");
+   129          producer_id = of_get_dml_pipe_index(np, "rx");
+   130
+   131          if (producer_id < 0 || consumer_id < 0)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   132
 
+Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+---
+Hi Ulf, 
+
+This patch is on top of https://git.linaro.org/people/ulf.hansson/mmc.git next branch
+to fix up a warning reported by static checker tool.
+
+Are you ok to take this patch as it is or do you think I should resend the 
+original DML patch with this fix?
+
+thanks,
+srini
+
+ drivers/mmc/host/mmci_qcom_dml.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
+index 300ef50..2b7fc37 100644
+--- a/drivers/mmc/host/mmci_qcom_dml.c
++++ b/drivers/mmc/host/mmci_qcom_dml.c
+@@ -123,7 +123,7 @@ int dml_hw_init(struct mmci_host *host, struct device_node *np)
+ {
+ 	u32 config;
+ 	void __iomem *base;
+-	u32 consumer_id, producer_id;
++	int consumer_id, producer_id;
+ 
+ 	consumer_id = of_get_dml_pipe_index(np, "tx");
+ 	producer_id = of_get_dml_pipe_index(np, "rx");
+-- 
+1.9.1
