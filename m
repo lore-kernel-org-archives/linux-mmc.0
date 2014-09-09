@@ -1,54 +1,49 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/6 v4] mmc: remove MMC_CAP2_NO_MULTI_READ flags
-Date: Tue, 9 Sep 2014 14:19:50 +0200
-Message-ID: <CAPDyKFoSSjQfssnXOzGSKTzxLr=O6mduLGiC085YU8=0nRoTDg@mail.gmail.com>
-References: <87r3zvzohj.wl%kuninori.morimoto.gx@gmail.com>
-	<87k35d70pz.wl%kuninori.morimoto.gx@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <87k35d70pz.wl%kuninori.morimoto.gx@gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
-Cc: Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Lee Jones <lee.jones@linaro.org>
+From: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
+Subject: [PATCH] mmc: Add delay between CMD6 and CMD13 for Sandisk eMMC cards
+Date: Tue,  9 Sep 2014 14:26:54 +0200
+Message-ID: <1410265614-3275-1-git-send-email-jean-michel.hautbois@vodalys.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f52.google.com ([74.125.82.52]:57231 "EHLO
+	mail-wg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755703AbaIIM1I (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Sep 2014 08:27:08 -0400
+Received: by mail-wg0-f52.google.com with SMTP id x13so3296483wgg.11
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Sep 2014 05:27:05 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: tgih.jun@samsung.com, ulf.hansson@linaro.org, chris@printf.net, Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
 
-On 9 September 2014 08:43, Kuninori Morimoto
-<kuninori.morimoto.gx@gmail.com> wrote:
->
-> Hi Ulf, Chris, and Simon
->
-> These are v4 patches of removing MMC_CAP2_NO_MULTI_READ from mmc.
->
-> Simon
-> 4) and 5) are for sh-arm patches.
-> Can you check these, and give it your Acked-by ?
->
-> Kuninori Morimoto (6):
->       1) mmc: use .multi_io_quirk on omap_hsmmc
->       2) mmc: use .multi_io_quirk on tmio_mmc
->       3) mmc: use .multi_io_quirk on sh_mobile
->       4) ARM: shmobile: remove MMC_CAP2_NO_MULTI_READ from koelsch
->       5) ARM: shmobile: remove MMC_CAP2_NO_MULTI_READ from lager
->       6) mmc: remove MMC_CAP2_NO_MULTI_READ flags
+Tested on a i.MX6 board, with Sandisk SDIN5D1-2G.
+Without this patch, I/O errors occur.
+This eMMC seems to have a different Manufacturer ID as it reads 0x45
+and not 0x2 as specified in datasheet.
 
-Thanks! Applied for next, with Simon's and Lee's acks.
+Signed-off-by: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
+---
+ drivers/mmc/core/mmc_ops.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index f51b5ba..91babaa 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -458,6 +458,15 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 	if (!use_busy_signal)
+ 		return 0;
+ 
++	/* WORKAROUND: for Sandisk eMMC cards, it might need certain delay
++	 * before sending CMD13 after CMD6
++	 * On SDIN5D1-2G MANFID is 0x45 and not 0x2 as specified in datasheet
++	 */
++	if (card->cid.manfid == CID_MANFID_SANDISK ||
++		card->cid.manfid == 0x45) {
++		msleep(1);
++	}
++
+ 	/*
+ 	 * CRC errors shall only be ignored in cases were CMD13 is used to poll
+ 	 * to detect busy completion.
+-- 
+2.0.4
 
->
->  arch/arm/mach-shmobile/board-koelsch.c |    3 ---
->  arch/arm/mach-shmobile/board-lager.c   |    2 --
->  drivers/mmc/card/block.c               |    5 -----
->  drivers/mmc/host/omap_hsmmc.c          |   14 ++++++++++++--
->  drivers/mmc/host/sh_mobile_sdhi.c      |   20 +++++++++++++++++++-
->  drivers/mmc/host/tmio_mmc_pio.c        |   13 +++++++++++++
->  include/linux/mfd/tmio.h               |    3 +++
->  include/linux/mmc/host.h               |    1 -
->  8 files changed, 47 insertions(+), 14 deletions(-)
->
->
-> Best regards
-> ---
-> Kuninori Morimoto
