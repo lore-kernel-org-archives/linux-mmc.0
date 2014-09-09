@@ -1,65 +1,61 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: [PATCH] mmc: mmci_qcom_dml: fix is never less than zero warning.
-Date: Tue,  9 Sep 2014 09:34:49 +0100
-Message-ID: <1410251689-12740-1-git-send-email-srinivas.kandagatla@linaro.org>
-References: <1408683219-7939-1-git-send-email-srinivas.kandagatla@linaro.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1408683219-7939-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+From: Johan Rudholm <jrudholm@gmail.com>
+Subject: Re: SD-card endurance, wear and crappiness
+Date: Tue, 9 Sep 2014 10:54:51 +0200
+Message-ID: <CA+20K0DfrGWOSQDgDNPzBYw8W=yq3s9EohEwiTxtUMnPp_sJEA@mail.gmail.com>
+References: <CA+20K0DpX_zts4DgLstU4UUM1WZQWxPQWXBOjwreD6RZeUwfsQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f47.google.com ([209.85.192.47]:38686 "EHLO
+	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752589AbaIIIyw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Sep 2014 04:54:52 -0400
+Received: by mail-qg0-f47.google.com with SMTP id i50so2573679qgf.34
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Sep 2014 01:54:51 -0700 (PDT)
+In-Reply-To: <CA+20K0DpX_zts4DgLstU4UUM1WZQWxPQWXBOjwreD6RZeUwfsQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, arnd@arndb.de
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-This patch fixes a typo which resulted in 'is never less
-than zero warning' reported by static checker.
+Hi Ulf, Arnd,
 
-	drivers/mmc/host/mmci_qcom_dml.c:131 dml_hw_init()
-	warn: unsigned 'producer_id' is never less than zero.
+do you guys have any thoughts on this?
 
-drivers/mmc/host/mmci_qcom_dml.c
-   121  /* Initialize the dml hardware connected to SD Card controller */
-   122  int dml_hw_init(struct mmci_host *host, struct device_node *np)
-   123  {
-   124          u32 config;
-   125          void __iomem *base;
-   126          u32 consumer_id, producer_id;
-   127
-   128          consumer_id = of_get_dml_pipe_index(np, "tx");
-   129          producer_id = of_get_dml_pipe_index(np, "rx");
-   130
-   131          if (producer_id < 0 || consumer_id < 0)
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   132
+Kind regards, Johan
 
-Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
----
-Hi Ulf, 
-
-This patch is on top of https://git.linaro.org/people/ulf.hansson/mmc.git next branch
-to fix up a warning reported by static checker tool.
-
-Are you ok to take this patch as it is or do you think I should resend the 
-original DML patch with this fix?
-
-thanks,
-srini
-
- drivers/mmc/host/mmci_qcom_dml.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
-index 300ef50..2b7fc37 100644
---- a/drivers/mmc/host/mmci_qcom_dml.c
-+++ b/drivers/mmc/host/mmci_qcom_dml.c
-@@ -123,7 +123,7 @@ int dml_hw_init(struct mmci_host *host, struct device_node *np)
- {
- 	u32 config;
- 	void __iomem *base;
--	u32 consumer_id, producer_id;
-+	int consumer_id, producer_id;
- 
- 	consumer_id = of_get_dml_pipe_index(np, "tx");
- 	producer_id = of_get_dml_pipe_index(np, "rx");
--- 
-1.9.1
+2014-09-03 16:24 GMT+02:00 Johan Rudholm <jrudholm@gmail.com>:
+> Hi all,
+>
+> as you know, NAND flash can be programmed a limited number of times
+> before it reaches end of life, the number of times varies with the
+> NAND technology used, among other things.
+>
+> As far as I can tell from the simplified SD-spec, there is no way of
+> asking the card about how many program/erase cycles it can handle, or
+> how many p/e cycles are left before reaching EOL. Right?
+>
+> So, if one should want to give the user some kind of early warning
+> that it's time to change SD-cards, is there a way? Also, when a card
+> has reached EOL, is there a way of telling this condition apart from
+> all other error conditions that may arise? As you know, depending on
+> the quality of the card and controller, read timeouts, write timeouts,
+> lockups etc may occur but can usually be fixed with a power cycle.
+>
+> I'm thinking of collecting simple statistics from for instance
+> card/block.c and exposing it via an ioctl or sysfs. The statistics can
+> be gathered and processed by some user space process which can
+> determine if the user needs to be alerted. The statistics can be, for
+> instance:
+>
+> * Writes/reads that timeout, but succeed after a retry
+> * Writes/reads that timeout and never succeeds
+> * Different kinds of errors in the card status
+> * Anything else?
+>
+> Perhaps it's not possible to detect worn out cards this way, but at
+> least it could point out and warn about crappy cards?
+>
+> Any thoughts about this?
+>
+> Kind regards, Johan
