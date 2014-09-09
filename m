@@ -1,57 +1,60 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 3/4 v2] mmc: host: switch OF parser to use gpio descriptors
-Date: Tue, 9 Sep 2014 14:29:35 +0200
-Message-ID: <CAPDyKFpXqQLH0mBJ1skQ0sSD_BPg9dN4zkcx19wDUi=Jea4hPQ@mail.gmail.com>
-References: <1409137253-25189-1-git-send-email-linus.walleij@linaro.org>
-	<1409137253-25189-3-git-send-email-linus.walleij@linaro.org>
-	<CACRpkdasOHPvb8ev5BrT4LPVYSJYATXnpRjazdAupb6zy4-NrA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Johan Rudholm <johan.rudholm@axis.com>
+Subject: [PATCH] mmc: core: make hw_reset power cycle SD-cards
+Date: Tue,  9 Sep 2014 16:21:48 +0200
+Message-ID: <1410272508-4885-1-git-send-email-johanru@axis.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f179.google.com ([209.85.216.179]:59327 "EHLO
-	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755917AbaIIM3f (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Sep 2014 08:29:35 -0400
-Received: by mail-qc0-f179.google.com with SMTP id o8so1080576qcw.38
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Sep 2014 05:29:35 -0700 (PDT)
-In-Reply-To: <CACRpkdasOHPvb8ev5BrT4LPVYSJYATXnpRjazdAupb6zy4-NrA@mail.gmail.com>
+Received: from bes.se.axis.com ([195.60.68.10]:41540 "EHLO bes.se.axis.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751431AbaIIO3U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 9 Sep 2014 10:29:20 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>
+To: ulf.hansson@linaro.org, cjb@laptop.org
+Cc: linux-mmc@vger.kernel.org, Johan Rudholm <johanru@axis.com>
 
-On 9 September 2014 09:05, Linus Walleij <linus.walleij@linaro.org> wrote:
-> On Wed, Aug 27, 2014 at 1:00 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
->
->> This switches the central MMC OF parser to use gpio descriptors
->> instead of grabbing GPIOs explicitly from the device tree.
->> This strips out an unecessary use of the integer-based GPIO
->> API that we want to get rid of, cuts down on code as the
->> gpio descriptor code will handle active low flags.
->>
->> Acked-by: Alexandre Courbot <acourbot@nvidia.com>
->> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
->> ---
->> ChangeLog v1->v2:
->> - Restore error reporting as done in previous stand-alone
->>   patch.
->
-> Hi Ulf,
->
-> the v2 version of this patch set should be working fine on
-> v3.17-rc4, as I merged a patch setting up the correct
-> prototypes for systems without gpiolib.
->
-> Fenguang's build tests are working on it atleast, I promise...
->
-> Tell me if you want me to resend the patch set or if you can
-> take the same patches again, but on top of -rc4. There is
-> no change in them.
->
+SD-cards cannot be reset, but they can be power cycled. Power cycling
+a buggy SD-card sometimes helps it get back on track.
 
-Hi Linus,
+Signed-off-by: Johan Rudholm <johanru@axis.com>
+---
+ drivers/mmc/core/core.c |   16 +++++++++++-----
+ 1 files changed, 11 insertions(+), 5 deletions(-)
 
-I have re-applied them again, let's hope for better luck this time. :-)
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index d03a080..9171aa9 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2250,19 +2250,25 @@ static int mmc_do_hw_reset(struct mmc_host *host, int check)
+ {
+ 	struct mmc_card *card = host->card;
+ 
+-	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
+-		return -EOPNOTSUPP;
+-
+ 	if (!card)
+ 		return -EINVAL;
+ 
+-	if (!mmc_can_reset(card))
++	if (!mmc_card_sd(card) && !((host->caps & MMC_CAP_HW_RESET) &&
++							host->ops->hw_reset))
++		return -EOPNOTSUPP;
++
++	if (!mmc_card_sd(card) && !mmc_can_reset(card))
+ 		return -EOPNOTSUPP;
+ 
+ 	mmc_host_clk_hold(host);
+ 	mmc_set_clock(host, host->f_init);
+ 
+-	host->ops->hw_reset(host);
++	if (mmc_card_sd(card))
++		mmc_power_cycle(host, card->ocr);
++	else
++		host->ops->hw_reset(host);
++
++	pr_warning("%s: reset device\n", mmc_hostname(host));
+ 
+ 	/* If the reset has happened, then a status command will fail */
+ 	if (check) {
+-- 
+1.7.2.5
 
-Kind regards
-Uffe
