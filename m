@@ -1,72 +1,58 @@
-From: "Sun, Yi Y" <yi.y.sun@intel.com>
-Subject: RE: [PATCH v2] mmc: execute tuning when device is not busy.
-Date: Tue, 9 Sep 2014 02:13:59 +0000
-Message-ID: <525EAED47491124EB5123A51BD2FC791019E1099@SHSMSX101.ccr.corp.intel.com>
-References: <1407995498-17634-1-git-send-email-yi.y.sun@intel.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH 0/7 v3] mmc: remove MMC_CAP2_NO_MULTI_READ flags
+Date: Tue, 9 Sep 2014 11:43:16 +0900
+Message-ID: <20140909024310.GE31320@verge.net.au>
+References: <87r3zvzohj.wl%kuninori.morimoto.gx@gmail.com>
+ <87bnqx78xr.wl%kuninori.morimoto.gx@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:56049 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752618AbaIICOE convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Sep 2014 22:14:04 -0400
-In-Reply-To: <1407995498-17634-1-git-send-email-yi.y.sun@intel.com>
-Content-Language: en-US
+Received: from kirsty.vergenet.net ([202.4.237.240]:50198 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754512AbaIICnT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Sep 2014 22:43:19 -0400
+Content-Disposition: inline
+In-Reply-To: <87bnqx78xr.wl%kuninori.morimoto.gx@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-Kind remind.
+On Tue, Sep 02, 2014 at 07:08:02PM -0700, Kuninori Morimoto wrote:
+> 
+> Hi Ulf, Chris, and Simon
+> 
+> These are v3 patches of removing MMC_CAP2_NO_MULTI_READ from mmc.
+> 
+> Simon
+> 5) and 6) are for sh-arm patches.
+> Can you check it ?
+> 
+> Kuninori Morimoto (7):
+>       mmc: add .multi_io_quirk callback for multi I/O HW bug
+>       mmc: use .multi_io_quirk on omap_hsmmc
+>       mmc: use .multi_io_quirk on tmio_mmc
+>       mmc: use .multi_io_quirk on sh_mobile
+>       ARM: shmobile: remove MMC_CAP2_NO_MULTI_READ from koelsch
+>       ARM: shmobile: remove MMC_CAP2_NO_MULTI_READ from lager
 
-BRs,
-Yi Sun
+Hi Morimoto-san,
 
------Original Message-----
-From: Sun, Yi Y 
-Sent: Thursday, August 14, 2014 1:52 PM
-To: linux-mmc@vger.kernel.org; ulf.hansson@linaro.org
-Cc: Sun, Yi Y
-Subject: [PATCH v2] mmc: execute tuning when device is not busy.
+could you let me know about the dependencies for the above two patches?
 
-We find tuning timeout because of the secure erase operation lasts too long so not to do tuning when device is busy.
-
-Signed-off-by: Yi Sun <yi.y.sun@intel.com>
----
- drivers/mmc/host/sdhci.c |    7 ++++---
- drivers/mmc/host/sdhci.h |    1 +
- 2 files changed, 5 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index 47055f3..6a584d7 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1355,11 +1355,12 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
- 		/*
- 		 * Check if the re-tuning timer has already expired and there
--		 * is no on-going data transfer. If so, we need to execute
--		 * tuning procedure before sending command.
-+		 * is no on-going data transfer and DAT0 is not busy. If so,
-+		 * we need to execute tuning procedure before sending command.
- 		 */
- 		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
--		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ))) {
-+		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ)) &&
-+		    (present_state & SDHCI_DATA_0_LVL_MASK)) {
- 			if (mmc->card) {
- 				/* eMMC uses cmd21 but sd and sdio use cmd19 */
- 				tuning_opcode =
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h index 4a5cd5e..0ae6b99d 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -72,6 +72,7 @@
- #define  SDHCI_WRITE_PROTECT	0x00080000
- #define  SDHCI_DATA_LVL_MASK	0x00F00000
- #define   SDHCI_DATA_LVL_SHIFT	20
-+#define   SDHCI_DATA_0_LVL_MASK	0x00100000
- 
- #define SDHCI_HOST_CONTROL	0x28
- #define  SDHCI_CTRL_LED		0x01
---
-1.7.9.5
-
+>       mmc: remove MMC_CAP2_NO_MULTI_READ flags
+> 
+>  arch/arm/mach-shmobile/board-koelsch.c |    3 ---
+>  arch/arm/mach-shmobile/board-lager.c   |    2 --
+>  drivers/mmc/card/block.c               |   13 +++++++++----
+>  drivers/mmc/host/omap_hsmmc.c          |   17 ++++++++++++++++-
+>  drivers/mmc/host/sh_mobile_sdhi.c      |   20 +++++++++++++++++++-
+>  drivers/mmc/host/tmio_mmc_pio.c        |   13 +++++++++++++
+>  include/linux/mfd/tmio.h               |    4 ++++
+>  include/linux/mmc/host.h               |    8 +++++++-
+>  8 files changed, 68 insertions(+), 12 deletions(-)
+> 
+> Best regards
+> ---
+> Kuninori Morimoto
+> 
