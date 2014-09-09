@@ -1,63 +1,55 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 5/6 v4] ARM: shmobile: remove MMC_CAP2_NO_MULTI_READ from
- lager
-Date: Tue, 9 Sep 2014 17:21:01 +0900
-Message-ID: <20140909082058.GB5819@verge.net.au>
-References: <87r3zvzohj.wl%kuninori.morimoto.gx@gmail.com>
- <87k35d70pz.wl%kuninori.morimoto.gx@gmail.com>
- <87d2b570l6.wl%kuninori.morimoto.gx@gmail.com>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCH v2] ARM: dts: Add mshc aliases for rk3288
+Date: Tue, 09 Sep 2014 10:28:36 +0200
+Message-ID: <18318098.Hm4yenW6Sf@diego>
+References: <1409785523-12209-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:56433 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755870AbaIIIVE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Sep 2014 04:21:04 -0400
-Content-Disposition: inline
-In-Reply-To: <87d2b570l6.wl%kuninori.morimoto.gx@gmail.com>
+Received: from gloria.sntech.de ([95.129.55.99]:46445 "EHLO gloria.sntech.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752567AbaIII0h (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 9 Sep 2014 04:26:37 -0400
+In-Reply-To: <1409785523-12209-1-git-send-email-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Doug Anderson <dianders@chromium.org>
+Cc: Sonny Rao <sonnyrao@chromium.org>, stefan@agner.ch, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, Addy Ke <addy.ke@rock-chips.com>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Russell King <linux@arm.linux.org.uk>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Mon, Sep 08, 2014 at 11:46:32PM -0700, Kuninori Morimoto wrote:
-> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Am Mittwoch, 3. September 2014, 16:05:23 schrieb Doug Anderson:
+> It's convenient (and less confusing to people reading logs) if the
+> eMMC port on rk3288 is consistenly marked with mmc0 and the sdmmc port
+> on rk3288 is consistently marked with mmc1.  Add the appropriate
+> aliases.
+
+Added to my v3.18-next/dts branch
+
 > 
-> sh_mobile_sdhi cares multiblock read bug.
-> remove MMC_CAP2_NO_MULTI_READ flag from board code
-> 
-> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-
-Acked-by: Simon Horman <horms+renesas@verge.net.au>
-
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> Reviewed-by: Sonny Rao <sonnyrao@chromium.org>
 > ---
-> v3 -> v4
 > 
-> - no change
+> Changes in v2:
+> - Use mshc aliases now
+> - Adds sdio0/1 aliases since those are in the dts.
 > 
->  arch/arm/mach-shmobile/board-lager.c |    2 --
->  1 file changed, 2 deletions(-)
+>  arch/arm/boot/dts/rk3288.dtsi | 4 ++++
+>  1 file changed, 4 insertions(+)
 > 
-> diff --git a/arch/arm/mach-shmobile/board-lager.c b/arch/arm/mach-shmobile/board-lager.c
-> index e1d8215..f5a98e2 100644
-> --- a/arch/arm/mach-shmobile/board-lager.c
-> +++ b/arch/arm/mach-shmobile/board-lager.c
-> @@ -630,7 +630,6 @@ static void __init lager_add_rsnd_device(void)
->  static struct sh_mobile_sdhi_info sdhi0_info __initdata = {
->  	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
->  			  MMC_CAP_POWER_OFF_CARD,
-> -	.tmio_caps2	= MMC_CAP2_NO_MULTI_READ,
->  	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT |
->  			  TMIO_MMC_WRPROTECT_DISABLE,
->  };
-> @@ -644,7 +643,6 @@ static struct resource sdhi0_resources[] __initdata = {
->  static struct sh_mobile_sdhi_info sdhi2_info __initdata = {
->  	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
->  			  MMC_CAP_POWER_OFF_CARD,
-> -	.tmio_caps2	= MMC_CAP2_NO_MULTI_READ,
->  	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT |
->  			  TMIO_MMC_WRPROTECT_DISABLE,
->  };
-> -- 
-> 1.7.9.5
-> 
+> diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+> index 5f866e0..2c5d01f 100644
+> --- a/arch/arm/boot/dts/rk3288.dtsi
+> +++ b/arch/arm/boot/dts/rk3288.dtsi
+> @@ -29,6 +29,10 @@
+>  		i2c3 = &i2c3;
+>  		i2c4 = &i2c4;
+>  		i2c5 = &i2c5;
+> +		mshc0 = &emmc;
+> +		mshc1 = &sdmmc;
+> +		mshc2 = &sdio0;
+> +		mshc3 = &sdio1;
+>  		serial0 = &uart0;
+>  		serial1 = &uart1;
+>  		serial2 = &uart2;
+
