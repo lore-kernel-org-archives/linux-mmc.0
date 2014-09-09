@@ -1,64 +1,71 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: SD-card endurance, wear and crappiness
-Date: Tue, 09 Sep 2014 11:11:24 +0200
-Message-ID: <3904705.sVTpylx3OE@wuerfel>
-References: <CA+20K0DpX_zts4DgLstU4UUM1WZQWxPQWXBOjwreD6RZeUwfsQ@mail.gmail.com> <CA+20K0DfrGWOSQDgDNPzBYw8W=yq3s9EohEwiTxtUMnPp_sJEA@mail.gmail.com>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: add support for ARM64
+Date: Tue, 9 Sep 2014 17:01:26 +0530
+Message-ID: <CAGOxZ506d5FNs1mZTX=ck9WPZsqzR+3ON-aKS2P8v5_iRyFV7w@mail.gmail.com>
+References: <1409307891-16523-1-git-send-email-alim.akhtar@samsung.com> <CAPDyKFqk1pwGFuitE0Fk1pqyP_FZiQK1=5OtGUM9Zw6Mp_rWXw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.13]:54697 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755354AbaIIJL2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Sep 2014 05:11:28 -0400
-In-Reply-To: <CA+20K0DfrGWOSQDgDNPzBYw8W=yq3s9EohEwiTxtUMnPp_sJEA@mail.gmail.com>
+Received: from mail-yh0-f44.google.com ([209.85.213.44]:47020 "EHLO
+	mail-yh0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753352AbaIILcH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Sep 2014 07:32:07 -0400
+In-Reply-To: <CAPDyKFqk1pwGFuitE0Fk1pqyP_FZiQK1=5OtGUM9Zw6Mp_rWXw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <jrudholm@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alim Akhtar <alim.akhtar@samsung.com>, Chris Ball <chris@printf.net>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Arnd Bergmann <arnd@arndb.de>, Andrew Bresticker <abrestic@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 
-On Tuesday 09 September 2014 10:54:51 Johan Rudholm wrote:
-> 2014-09-03 16:24 GMT+02:00 Johan Rudholm <jrudholm@gmail.com>:
-> > Hi all,
-> >
-> > as you know, NAND flash can be programmed a limited number of times
-> > before it reaches end of life, the number of times varies with the
-> > NAND technology used, among other things.
-> >
-> > As far as I can tell from the simplified SD-spec, there is no way of
-> > asking the card about how many program/erase cycles it can handle, or
-> > how many p/e cycles are left before reaching EOL. Right?
+Hi Ulf,
 
-I think that is correct.
+On Tue, Sep 9, 2014 at 12:21 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 29 August 2014 12:24, Alim Akhtar <alim.akhtar@samsung.com> wrote:
+>> There are upcoming ARM64 SoCs with dw_mmc host controller.
+>>
+>> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+>> ---
+>>  drivers/mmc/host/Kconfig |    2 +-
+>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> index a43295c..72dd6c2 100644
+>> --- a/drivers/mmc/host/Kconfig
+>> +++ b/drivers/mmc/host/Kconfig
+>> @@ -580,7 +580,7 @@ config SDH_BFIN_MISSING_CMD_PULLUP_WORKAROUND
+>>  config MMC_DW
+>>         tristate "Synopsys DesignWare Memory Card Interface"
+>>         depends on HAS_DMA
+>> -       depends on ARC || ARM || MIPS || COMPILE_TEST
+>> +       depends on ARC || ARM || ARM64 || MIPS || COMPILE_TEST
+>
+> Before enabling this, wouldn't it be better to add the needed support
+> in dw_mmc first? Or there are no changes needed?
+>
+> There are also ongoing development and discussions for exynos7, which
+> I guess relates to this?
+> http://www.spinics.net/lists/linux-mmc/msg28294.html
+Thanks for looking into this.
 
-> > So, if one should want to give the user some kind of early warning
-> > that it's time to change SD-cards, is there a way? Also, when a card
-> > has reached EOL, is there a way of telling this condition apart from
-> > all other error conditions that may arise? As you know, depending on
-> > the quality of the card and controller, read timeouts, write timeouts,
-> > lockups etc may occur but can usually be fixed with a power cycle.
-> >
-> > I'm thinking of collecting simple statistics from for instance
-> > card/block.c and exposing it via an ioctl or sysfs. The statistics can
-> > be gathered and processed by some user space process which can
-> > determine if the user needs to be alerted. The statistics can be, for
-> > instance:
-> >
-> > * Writes/reads that timeout, but succeed after a retry
-> > * Writes/reads that timeout and never succeeds
-> > * Different kinds of errors in the card status
-> > * Anything else?
-> >
-> > Perhaps it's not possible to detect worn out cards this way, but at
-> > least it could point out and warn about crappy cards?
-> >
-> > Any thoughts about this?
+Yes, this patch is being tested on exynos7 platform which is ongoing
+development.
+The above link is one of them.
+I feel this patch is too generic in nature and we now known at least
+exynos7 is going to use this.
+I don't know if there are any other ARM64 platform with dw_mmc controller.
 
-Have you tried if this works? In my experience, the worn-out cards
-I have either just fail completely, or they return incorrect data,
-but I have not looked at this side of the problem much.
+So, I am going to leave this upto you to decide when to take this
+patch, incase you decided to take it after exynos7 support lands, I
+will send a reminder for this.
+>
+> Kind regards
+> Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Do you have cards that sometimes time out but always still return
-correct data on retry?
 
-	Arnd
+
+-- 
+Regards,
+Alim
