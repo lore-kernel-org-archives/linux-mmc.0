@@ -1,69 +1,80 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [GIT PULL 1/2] SOCFPGA updates for 3.18
-Date: Wed, 10 Sep 2014 09:13:27 +0200
-Message-ID: <CAPDyKFr35646zQUDUnv9LYy9jtY7r343hev9FrhxOfjVMb6MJw@mail.gmail.com>
-References: <1409847105-27241-1-git-send-email-dinguyen@opensource.altera.com>
-	<20140909141756.GA30100@amd>
-	<4134101.OOENTRabu1@wuerfel>
-	<20140909210232.GA539@amd>
+From: Johan Rudholm <jrudholm@gmail.com>
+Subject: Re: SD-card endurance, wear and crappiness
+Date: Wed, 10 Sep 2014 09:18:51 +0200
+Message-ID: <CA+20K0DFuk-3pBJoQhLci-EbFSO-8y3u=kP1zba1a70zgF9CRg@mail.gmail.com>
+References: <CA+20K0DpX_zts4DgLstU4UUM1WZQWxPQWXBOjwreD6RZeUwfsQ@mail.gmail.com>
+	<CA+20K0DfrGWOSQDgDNPzBYw8W=yq3s9EohEwiTxtUMnPp_sJEA@mail.gmail.com>
+	<3904705.sVTpylx3OE@wuerfel>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f43.google.com ([209.85.192.43]:52381 "EHLO
-	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750770AbaIJHN2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Sep 2014 03:13:28 -0400
-Received: by mail-qg0-f43.google.com with SMTP id a108so6925548qge.16
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Sep 2014 00:13:27 -0700 (PDT)
-In-Reply-To: <20140909210232.GA539@amd>
+Received: from mail-qc0-f182.google.com ([209.85.216.182]:60465 "EHLO
+	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751497AbaIJHSw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Sep 2014 03:18:52 -0400
+Received: by mail-qc0-f182.google.com with SMTP id x13so5503426qcv.41
+        for <linux-mmc@vger.kernel.org>; Wed, 10 Sep 2014 00:18:51 -0700 (PDT)
+In-Reply-To: <3904705.sVTpylx3OE@wuerfel>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pavel Machek <pavel@denx.de>
-Cc: Arnd Bergmann <arnd@arndb.de>, marex@denx.de, dinguyen@opensource.altera.com, Kevin Hilman <khilman@linaro.org>, Olof Johansson <olof@lixom.net>, "arm@kernel.org" <arm@kernel.org>, dinh.linux@gmail.com, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 9 September 2014 23:02, Pavel Machek <pavel@denx.de> wrote:
-> On Tue 2014-09-09 17:02:34, Arnd Bergmann wrote:
->> On Tuesday 09 September 2014 16:17:56 Pavel Machek wrote:
->> > > Jaehoon Chung (1):
->> > >       ARM: dts: socfpga: unuse the slot-node and deprecate the supports-highspeed for dw-mmc
->> > >
+2014-09-09 11:11 GMT+02:00 Arnd Bergmann <arnd@arndb.de>:
+> On Tuesday 09 September 2014 10:54:51 Johan Rudholm wrote:
+>> 2014-09-03 16:24 GMT+02:00 Johan Rudholm <jrudholm@gmail.com>:
+>> > Hi all,
 >> >
->> > This patch is a bad idea. It removes support for two mmc cards on a
->> > single controller -- configuration hardware supports and configuration
->> > that allows using u-SD card on mcvevk board.
+>> > as you know, NAND flash can be programmed a limited number of times
+>> > before it reaches end of life, the number of times varies with the
+>> > NAND technology used, among other things.
 >> >
->>
->> Your objection comes too late, and to the wrong patch, since the
->> driver and all other users have already been changed. We had a long
->> discussion about this when the issue first came up, and we could
->> not find any example of dw-mmc actually being used in a scenario
->> with one controller that has multiple devices attached.
+>> > As far as I can tell from the simplified SD-spec, there is no way of
+>> > asking the card about how many program/erase cycles it can handle, or
+>> > how many p/e cycles are left before reaching EOL. Right?
 >
-> Well, this is not first time I raised this. 3.17 is not yet out, so we
-> still have chance to fix regressions without major fuss.
+> I think that is correct.
 >
->> Apparently every user out there instead uses multiple controller
->> instances instead. Are you sure that the socfpga implementation
->> is an exception from this?
+>> > So, if one should want to give the user some kind of early warning
+>> > that it's time to change SD-cards, is there a way? Also, when a card
+>> > has reached EOL, is there a way of telling this condition apart from
+>> > all other error conditions that may arise? As you know, depending on
+>> > the quality of the card and controller, read timeouts, write timeouts,
+>> > lockups etc may occur but can usually be fixed with a power cycle.
+>> >
+>> > I'm thinking of collecting simple statistics from for instance
+>> > card/block.c and exposing it via an ioctl or sysfs. The statistics can
+>> > be gathered and processed by some user space process which can
+>> > determine if the user needs to be alerted. The statistics can be, for
+>> > instance:
+>> >
+>> > * Writes/reads that timeout, but succeed after a retry
+>> > * Writes/reads that timeout and never succeeds
+>> > * Different kinds of errors in the card status
+>> > * Anything else?
+>> >
+>> > Perhaps it's not possible to detect worn out cards this way, but at
+>> > least it could point out and warn about crappy cards?
+>> >
+>> > Any thoughts about this?
 >
-> Marek Vasut has the hardware. His board apprently has uSD and eMMC,
-> and I believe it has just one controller. I'll try to get details.
+> Have you tried if this works? In my experience, the worn-out cards
+> I have either just fail completely, or they return incorrect data,
+> but I have not looked at this side of the problem much.
 >
+> Do you have cards that sometimes time out but always still return
+> correct data on retry?
 
-Just wanted to highlight some of the reasons to why the earlier
-discussion we have had, came to the conclusion to remove the slot
-node.
+I have noticed that some cards time out on a multi block read, but
+then succeeds when single block reads are attempted. I've also
+experimented with retrying the multi block read instead of falling
+back to single block reads, and some cards succeed after a number (>
+10) of retries. However, these cards have not been close to being worn
+out.
 
-1) The mmc core don't support multiple cards attached to the same
-host, it never has. Also, I am not aware of any requests that
-suggested us to add it. Due to obvious reasons from performance
-perspective it's simply a really bad idea, that's likely also why
-there haven't been any requests for it.
+I have almost never seen an SD-card that's died because of wear, at
+least not under controlled circumstances. So, thanks for sharing your
+experiences! Maybe the bottom line will be that there is no guaranteed
+way of detecting that a card is nearing EOL.
 
-2) On the host level, the support for handle multiple slots in DT for
-dw-mmc has been broken. While dw-mmc parsed the DT nodes for slots, it
-screwed up configurations. Thus the support for slots have never
-worked as expected from DT point of view.
-
-Kind regards
-Uffe
+//Johan
