@@ -1,108 +1,87 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [GIT PULL 1/2] SOCFPGA updates for 3.18
-Date: Wed, 10 Sep 2014 12:42:23 +0200
-Message-ID: <CAPDyKFoXiNOHQ3W=U08jU2PG-fz4F_7wuW-KNEoDfcQzrLKmVA@mail.gmail.com>
-References: <1409847105-27241-1-git-send-email-dinguyen@opensource.altera.com>
-	<20140909141756.GA30100@amd>
-	<4134101.OOENTRabu1@wuerfel>
-	<20140909210232.GA539@amd>
-	<CAPDyKFr35646zQUDUnv9LYy9jtY7r343hev9FrhxOfjVMb6MJw@mail.gmail.com>
-	<20140910083337.GA5178@amd>
+Subject: Re: [PATCH v3 1/3] mmc: mmci: Support any block sizes for ux500v2 and
+ qcom variant
+Date: Wed, 10 Sep 2014 12:51:13 +0200
+Message-ID: <CAPDyKFrObvDf6rCWrEt8S2OydLJx0iz9bT0O0-danUuLs-PQvQ@mail.gmail.com>
+References: <1408683219-7939-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1408683272-7984-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<CAPDyKFqJw0Dc8ac2i0tebJpuHVhUVd=YUnGHZDTHNd2AAJqOtg@mail.gmail.com>
+	<541014C8.7050303@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f175.google.com ([209.85.216.175]:57582 "EHLO
-	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751048AbaIJKmY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Sep 2014 06:42:24 -0400
-Received: by mail-qc0-f175.google.com with SMTP id c9so18990301qcz.6
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Sep 2014 03:42:23 -0700 (PDT)
-In-Reply-To: <20140910083337.GA5178@amd>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <541014C8.7050303@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Russell King <linux@arm.linux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Pavel Machek <pavel@denx.de>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <robh+dt@kernel.org>, Arnd Bergmann <arnd@arndb.de>, marex@denx.de, dinguyen@opensource.altera.com, Kevin Hilman <khilman@linaro.org>, Olof Johansson <olof@lixom.net>, "arm@kernel.org" <arm@kernel.org>, dinh.linux@gmail.com, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 10 September 2014 10:33, Pavel Machek <pavel@denx.de> wrote:
-> On Wed 2014-09-10 09:13:27, Ulf Hansson wrote:
->> On 9 September 2014 23:02, Pavel Machek <pavel@denx.de> wrote:
->> > On Tue 2014-09-09 17:02:34, Arnd Bergmann wrote:
->> >> On Tuesday 09 September 2014 16:17:56 Pavel Machek wrote:
->> >> > > Jaehoon Chung (1):
->> >> > >       ARM: dts: socfpga: unuse the slot-node and deprecate the supports-highspeed for dw-mmc
->> >> > >
->> >> >
->> >> > This patch is a bad idea. It removes support for two mmc cards on a
->> >> > single controller -- configuration hardware supports and configuration
->> >> > that allows using u-SD card on mcvevk board.
->> >> >
->> >>
->> >> Your objection comes too late, and to the wrong patch, since the
->> >> driver and all other users have already been changed. We had a long
->> >> discussion about this when the issue first came up, and we could
->> >> not find any example of dw-mmc actually being used in a scenario
->> >> with one controller that has multiple devices attached.
->> >
->> > Well, this is not first time I raised this. 3.17 is not yet out, so we
->> > still have chance to fix regressions without major fuss.
->> >
->> >> Apparently every user out there instead uses multiple controller
->> >> instances instead. Are you sure that the socfpga implementation
->> >> is an exception from this?
->> >
->> > Marek Vasut has the hardware. His board apprently has uSD and eMMC,
->> > and I believe it has just one controller. I'll try to get details.
->> >
+On 10 September 2014 11:07, Srinivas Kandagatla
+<srinivas.kandagatla@linaro.org> wrote:
+> Hi Ulf,
+>
+> On 10/09/14 08:58, Ulf Hansson wrote:
 >>
->> Just wanted to highlight some of the reasons to why the earlier
->> discussion we have had, came to the conclusion to remove the slot
->> node.
+>> On 22 August 2014 06:54, Srinivas Kandagatla
+>> <srinivas.kandagatla@linaro.org> wrote:
+>>>
+>>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>>
+>>> For the ux500v2 variant of the PL18x block, any block sizes are
+>>> supported. This will make it possible to decrease data overhead
+>>> for SDIO transfers.
+>>>
+>>> This patch is based on Ulf Hansson patch
+>>> http://www.spinics.net/lists/linux-mmc/msg12160.html
+>>>
+>>> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>>>          enabled this support on qcom variant.
+>>>
+>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 >>
->> 1) The mmc core don't support multiple cards attached to the same
->> host, it never has. Also, I am not aware of any requests that
->> suggested us to add it. Due to obvious reasons from performance
->> perspective it's simply a really bad idea, that's likely also why
->> there haven't been any requests for it.
+>>
+>> I am not sure how to handle this patch.
+>>
+>> It will as you say in the cover letter for this patchset, improve
+>> situations for the ath6kl driver when it's issuing 12 bytes and 24
+>> bytes reads and solve those issues.
+>>
+>> On the other hand, as stated earlier mmci_pio_write need to be fixed
+>> to have full support for any block size. That applies to the qcom
+>> variant as well.
 >
-> Well, that's Linux problem, right? (And why is it bad idea, btw? The
-> bandwidth will be shared between the controllers, ok, that does not
-> sound too bad.)
+> looking at current mmci_pio_write, I see it can support any block sizes as
+> it is. Unless Am missing something obvious.
+>
+> block size aligned to 4 is taken care in the code and is straight forward.
+> block sizes not aligned to 4 are also partly taken care in pio_write and
+> partly by programming blksz in datactrl register. However Am not sure if it
+> was safe to handle the buffer pointer out of its boundary.
 
-Bandwidth is just one issue. Latency is yet another, which is probably
-far worse to handle than bandwidth.
+There are some prerequisites of the data buffers to supports any block
+size. Make sure you read up on this discussion to really understand the problem.
 
->
->> 2) On the host level, the support for handle multiple slots in DT for
->> dw-mmc has been broken. While dw-mmc parsed the DT nodes for slots, it
->> screwed up configurations. Thus the support for slots have never
->> worked as expected from DT point of view.
->
-> Well, DT is supposed to describe the hardware. From your description,
-> it seems that linux does not support two slots on one controller and
-> DT parsing code basically ignores the slots. (Logical, if it can't
-> support two slots).
->
-> So now we are breaking DT description due to Linux limitations. Which
->
-> a) makes it hard for any other os not having same limitation
->
-> b) makes it hard for people to fix the limitation
->
-> c) does not really solve anything
+http://marc.info/?t=135005062400002&r=2&w=2
 
-Yes it does, the problem in 2) gets fixed.
-
+>>
+>>
+>> For ux500, I am sure this won't cause any regressions since the cw1200
+>> isn't probed. Also, I am not sure the "any block size" support is even
+>> enabled for that driver.
+>>
+>> How about, that we add a comment in the pio_write function describing
+>> that we need to fix it for "SDIO any block size" support? And leave
+>> that as a future improvement?
 >
-> d) breaks backward compatibility with old dts
-
-According to 2), it has never worked - so we don't break anything.
-
 >
-> If nothing, d) should be argument not to do this.
->                                                                         Pavel
-> --
-> (english) http://www.livejournal.com/~pavelmachek
-> (cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+> Is below patch any good?
+> With the below patch It should be possible to address the case where buffer
+> passed the length is handled safely. If you ok with the approach I can send
+> a patch as RFC.
+
+Please go ahead an send a patch :-) This has been on my todo list
+forever, I would happily like to remove it from there.
 
 Kind regards
 Uffe
