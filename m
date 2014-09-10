@@ -1,63 +1,62 @@
-From: Pavel Machek <pavel@denx.de>
-Subject: Re: [GIT PULL 1/2] SOCFPGA updates for 3.18
-Date: Wed, 10 Sep 2014 13:00:57 +0200
-Message-ID: <20140910110057.GA9354@amd>
-References: <1409847105-27241-1-git-send-email-dinguyen@opensource.altera.com>
- <20140909141756.GA30100@amd>
- <4134101.OOENTRabu1@wuerfel>
- <20140909210232.GA539@amd>
- <CAPDyKFr35646zQUDUnv9LYy9jtY7r343hev9FrhxOfjVMb6MJw@mail.gmail.com>
- <20140910083337.GA5178@amd>
- <CAPDyKFoXiNOHQ3W=U08jU2PG-fz4F_7wuW-KNEoDfcQzrLKmVA@mail.gmail.com>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH] mmc: sdhci-pxav3: fix error handling of sdhci_add_host
+Date: Wed, 10 Sep 2014 16:24:22 +0300
+Message-ID: <2073138.qpVRy5Xj3H@avalon>
+References: <1405497009-20338-1-git-send-email-wangxfdu@gmail.com> <5513748.05vsM1lCJN@avalon>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:52088 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751659AbaIJLBA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Sep 2014 07:01:00 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFoXiNOHQ3W=U08jU2PG-fz4F_7wuW-KNEoDfcQzrLKmVA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <5513748.05vsM1lCJN@avalon>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Xiang Wang <wangxfdu@gmail.com>
+Cc: Xiang Wang <wangx@marvell.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Marcin Wojtas <mw@semihalf.com>, H Hartley Sweeten <hsweeten@visionengravers.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Chao Xie <cxie4@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <robh+dt@kernel.org>, Arnd Bergmann <arnd@arndb.de>, marex@denx.de, dinguyen@opensource.altera.com, Kevin Hilman <khilman@linaro.org>, Olof Johansson <olof@lixom.net>, "arm@kernel.org" <arm@kernel.org>, dinh.linux@gmail.com, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi!
-
-> >> 2) On the host level, the support for handle multiple slots in DT for
-> >> dw-mmc has been broken. While dw-mmc parsed the DT nodes for slots, it
-> >> screwed up configurations. Thus the support for slots have never
-> >> worked as expected from DT point of view.
-> >
-> > Well, DT is supposed to describe the hardware. From your description,
-> > it seems that linux does not support two slots on one controller and
-> > DT parsing code basically ignores the slots. (Logical, if it can't
-> > support two slots).
-> >
-> > So now we are breaking DT description due to Linux limitations. Which
-> >
-> > a) makes it hard for any other os not having same limitation
-> >
-> > b) makes it hard for people to fix the limitation
-> >
-> > c) does not really solve anything
+On Wednesday 16 July 2014 11:53:21 Laurent Pinchart wrote:
+> On Wednesday 16 July 2014 15:50:09 Xiang Wang wrote:
+> > From: Xiang Wang <wangx@marvell.com>
+> > 
+> > Commit 0dcaa2499b7d111bd70da5b0976c34210c850fb3 improved error
+> > handling of sdhci_add_host. However, "err_of_parse" and "err_cd_req"
+> > should be placed after "pm_runtime_disable(&pdev->dev)".
+> > 
+> > Signed-off-by: Xiang Wang <wangx@marvell.com>
 > 
-> Yes it does, the problem in 2) gets fixed.
-> 
-> >
-> > d) breaks backward compatibility with old dts
-> 
-> According to 2), it has never worked - so we don't break anything.
+> Acked-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
 
-Umm? u-SD worked for me in 3.14, 3.15 and 3.16 with the device tree,
-and with single-slot described in the device tree. Now I have to
-change dtb-s to keep working configuration, which is something device
-tree should never ever do.
+I can't find the patch in mainline, has it been lost somewhere ?
 
-Is it so hard to just fix the multiple slot parsing?
+> > ---
+> > 
+> >  drivers/mmc/host/sdhci-pxav3.c |    4 ++--
+> >  1 files changed, 2 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-pxav3.c
+> > b/drivers/mmc/host/sdhci-pxav3.c index 2fd73b3..0644655 100644
+> > --- a/drivers/mmc/host/sdhci-pxav3.c
+> > +++ b/drivers/mmc/host/sdhci-pxav3.c
+> > @@ -380,11 +380,11 @@ static int sdhci_pxav3_probe(struct platform_device
+> > *pdev)
+> > 
+> >  	return 0;
+> > 
+> > -err_of_parse:
+> > 
+> > -err_cd_req:
+> >  err_add_host:
+> >  	pm_runtime_put_sync(&pdev->dev);
+> >  	pm_runtime_disable(&pdev->dev);
+> > 
+> > +err_of_parse:
+> > 
+> > +err_cd_req:
+> >  	clk_disable_unprepare(clk);
+> >  	clk_put(clk);
+> >  
+> >  err_clk_get:
 
-									Pavel
 -- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+Regards,
+
+Laurent Pinchart
