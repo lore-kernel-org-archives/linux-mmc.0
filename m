@@ -1,72 +1,53 @@
-From: Dinh Nguyen <dinguyen@opensource.altera.com>
+From: Marek Vasut <marex@denx.de>
 Subject: Re: [GIT PULL 1/2] SOCFPGA updates for 3.18
-Date: Wed, 10 Sep 2014 09:19:18 -0500
-Message-ID: <54105DE6.9070807@opensource.altera.com>
-References: <1409847105-27241-1-git-send-email-dinguyen@opensource.altera.com>
- <20140909141756.GA30100@amd> <4134101.OOENTRabu1@wuerfel>
- <20140909210232.GA539@amd>
- <CAPDyKFr35646zQUDUnv9LYy9jtY7r343hev9FrhxOfjVMb6MJw@mail.gmail.com>
- <20140910083337.GA5178@amd>
- <CAPDyKFoXiNOHQ3W=U08jU2PG-fz4F_7wuW-KNEoDfcQzrLKmVA@mail.gmail.com>
- <20140910110057.GA9354@amd>
+Date: Wed, 10 Sep 2014 16:36:47 +0200
+Message-ID: <201409101636.47989.marex@denx.de>
+References: <1409847105-27241-1-git-send-email-dinguyen@opensource.altera.com> <4134101.OOENTRabu1@wuerfel> <20140909210232.GA539@amd>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: Text/Plain;
+  charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20140910110057.GA9354@amd>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Pavel Machek <pavel@denx.de>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: marex@denx.de, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Kevin Hilman <khilman@linaro.org>, dinh.linux@gmail.com, "arm@kernel.org" <arm@kernel.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, Olof Johansson <olof@lixom.net>, Rob Herring <robh+dt@kernel.org>, Grant Likely <grant.likely@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-out.m-online.net ([212.18.0.10]:33863 "EHLO
+	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751861AbaIJOgu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Sep 2014 10:36:50 -0400
+In-Reply-To: <20140909210232.GA539@amd>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Pavel Machek <pavel@denx.de>
+Cc: Arnd Bergmann <arnd@arndb.de>, dinguyen@opensource.altera.com, khilman@linaro.org, olof@lixom.net, arm@kernel.org, dinh.linux@gmail.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
+On Tuesday, September 09, 2014 at 11:02:32 PM, Pavel Machek wrote:
+> On Tue 2014-09-09 17:02:34, Arnd Bergmann wrote:
+> > On Tuesday 09 September 2014 16:17:56 Pavel Machek wrote:
+> > > > Jaehoon Chung (1):
+> > > >       ARM: dts: socfpga: unuse the slot-node and deprecate the
+> > > >       supports-highspeed for dw-mmc
+> > > 
+> > > This patch is a bad idea. It removes support for two mmc cards on a
+> > > single controller -- configuration hardware supports and configuration
+> > > that allows using u-SD card on mcvevk board.
 
+This is not true, the MCVEVK does _NOT_ have two cards on a single controller.
 
-On 9/10/14, 6:00 AM, Pavel Machek wrote:
-> Hi!
+> > Your objection comes too late, and to the wrong patch, since the
+> > driver and all other users have already been changed. We had a long
+> > discussion about this when the issue first came up, and we could
+> > not find any example of dw-mmc actually being used in a scenario
+> > with one controller that has multiple devices attached.
 > 
->>>> 2) On the host level, the support for handle multiple slots in DT for
->>>> dw-mmc has been broken. While dw-mmc parsed the DT nodes for slots, it
->>>> screwed up configurations. Thus the support for slots have never
->>>> worked as expected from DT point of view.
->>>
->>> Well, DT is supposed to describe the hardware. From your description,
->>> it seems that linux does not support two slots on one controller and
->>> DT parsing code basically ignores the slots. (Logical, if it can't
->>> support two slots).
->>>
->>> So now we are breaking DT description due to Linux limitations. Which
->>>
->>> a) makes it hard for any other os not having same limitation
->>>
->>> b) makes it hard for people to fix the limitation
->>>
->>> c) does not really solve anything
->>
->> Yes it does, the problem in 2) gets fixed.
->>
->>>
->>> d) breaks backward compatibility with old dts
->>
->> According to 2), it has never worked - so we don't break anything.
+> Well, this is not first time I raised this. 3.17 is not yet out, so we
+> still have chance to fix regressions without major fuss.
 > 
-> Umm? u-SD worked for me in 3.14, 3.15 and 3.16 with the device tree,
-> and with single-slot described in the device tree. Now I have to
-> change dtb-s to keep working configuration, which is something device
-> tree should never ever do.
+> > Apparently every user out there instead uses multiple controller
+> > instances instead. Are you sure that the socfpga implementation
+> > is an exception from this?
+> 
+> Marek Vasut has the hardware. His board apprently has uSD and eMMC,
+> and I believe it has just one controller. I'll try to get details.
 
-I tested the DTB with and without the patch, and it all works fine.
+So please go ahead with this PR, sorry for blocking it.
 
-Dinh
-> 
-> Is it so hard to just fix the multiple slot parsing?
-> 
-> 									Pavel
-> 
+Best regards,
+Marek Vasut
