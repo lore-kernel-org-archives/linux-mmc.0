@@ -1,48 +1,69 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH v2] mmc: tmio: enable odd number size access
-Date: Wed, 10 Sep 2014 09:11:24 +0200
-Message-ID: <CAMuHMdW_xLeP6gxdqs9vx6HnwDUQe_DV31j5Pqd6vZ387+ychw@mail.gmail.com>
-References: <8761gwz2jb.wl%kuninori.morimoto.gx@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [GIT PULL 1/2] SOCFPGA updates for 3.18
+Date: Wed, 10 Sep 2014 09:13:27 +0200
+Message-ID: <CAPDyKFr35646zQUDUnv9LYy9jtY7r343hev9FrhxOfjVMb6MJw@mail.gmail.com>
+References: <1409847105-27241-1-git-send-email-dinguyen@opensource.altera.com>
+	<20140909141756.GA30100@amd>
+	<4134101.OOENTRabu1@wuerfel>
+	<20140909210232.GA539@amd>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <8761gwz2jb.wl%kuninori.morimoto.gx@gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Shinobu Uehara <shinobu.uehara.xc@renesas.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f43.google.com ([209.85.192.43]:52381 "EHLO
+	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750770AbaIJHN2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Sep 2014 03:13:28 -0400
+Received: by mail-qg0-f43.google.com with SMTP id a108so6925548qge.16
+        for <linux-mmc@vger.kernel.org>; Wed, 10 Sep 2014 00:13:27 -0700 (PDT)
+In-Reply-To: <20140909210232.GA539@amd>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Pavel Machek <pavel@denx.de>
+Cc: Arnd Bergmann <arnd@arndb.de>, marex@denx.de, dinguyen@opensource.altera.com, Kevin Hilman <khilman@linaro.org>, Olof Johansson <olof@lixom.net>, "arm@kernel.org" <arm@kernel.org>, dinh.linux@gmail.com, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Morimoto-san,
+On 9 September 2014 23:02, Pavel Machek <pavel@denx.de> wrote:
+> On Tue 2014-09-09 17:02:34, Arnd Bergmann wrote:
+>> On Tuesday 09 September 2014 16:17:56 Pavel Machek wrote:
+>> > > Jaehoon Chung (1):
+>> > >       ARM: dts: socfpga: unuse the slot-node and deprecate the supports-highspeed for dw-mmc
+>> > >
+>> >
+>> > This patch is a bad idea. It removes support for two mmc cards on a
+>> > single controller -- configuration hardware supports and configuration
+>> > that allows using u-SD card on mcvevk board.
+>> >
+>>
+>> Your objection comes too late, and to the wrong patch, since the
+>> driver and all other users have already been changed. We had a long
+>> discussion about this when the issue first came up, and we could
+>> not find any example of dw-mmc actually being used in a scenario
+>> with one controller that has multiple devices attached.
+>
+> Well, this is not first time I raised this. 3.17 is not yet out, so we
+> still have chance to fix regressions without major fuss.
+>
+>> Apparently every user out there instead uses multiple controller
+>> instances instead. Are you sure that the socfpga implementation
+>> is an exception from this?
+>
+> Marek Vasut has the hardware. His board apprently has uSD and eMMC,
+> and I believe it has just one controller. I'll try to get details.
+>
 
-On Wed, Sep 10, 2014 at 3:29 AM, Kuninori Morimoto
-<kuninori.morimoto.gx@gmail.com> wrote:
-> +       if (is_read) {
-> +               extra = sd_ctrl_read16(host, CTL_SD_DATA_PORT);
-> +
-> +               *buf8 = (u8)(extra & 0xff);
-> +       } else {
-> +               extra = (u16)(*buf8);
-> +
-> +               sd_ctrl_write16(host, CTL_SD_DATA_PORT, extra);
+Just wanted to highlight some of the reasons to why the earlier
+discussion we have had, came to the conclusion to remove the slot
+node.
 
-The casts to "u8" resp. "u16" are not needed.
+1) The mmc core don't support multiple cards attached to the same
+host, it never has. Also, I am not aware of any requests that
+suggested us to add it. Due to obvious reasons from performance
+perspective it's simply a really bad idea, that's likely also why
+there haven't been any requests for it.
 
-You can even avoid introducing the "extra" variable:
+2) On the host level, the support for handle multiple slots in DT for
+dw-mmc has been broken. While dw-mmc parsed the DT nodes for slots, it
+screwed up configurations. Thus the support for slots have never
+worked as expected from DT point of view.
 
-if (is_read)
-        *buf8 = sd_ctrl_read16(host, CTL_SD_DATA_PORT) & 0xff;
-else
-        sd_ctrl_write16(host, CTL_SD_DATA_PORT, *buf8);
-
-Technically, the "& 0xff" is also not needed, but I'd keep it for clarity.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Kind regards
+Uffe
