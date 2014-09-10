@@ -1,92 +1,171 @@
-From: Pavel Machek <pavel@denx.de>
-Subject: Re: [GIT PULL 1/2] SOCFPGA updates for 3.18
-Date: Wed, 10 Sep 2014 10:33:37 +0200
-Message-ID: <20140910083337.GA5178@amd>
-References: <1409847105-27241-1-git-send-email-dinguyen@opensource.altera.com>
- <20140909141756.GA30100@amd>
- <4134101.OOENTRabu1@wuerfel>
- <20140909210232.GA539@amd>
- <CAPDyKFr35646zQUDUnv9LYy9jtY7r343hev9FrhxOfjVMb6MJw@mail.gmail.com>
+From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Subject: Re: [PATCH v3 1/3] mmc: mmci: Support any block sizes for ux500v2
+ and qcom variant
+Date: Wed, 10 Sep 2014 10:07:20 +0100
+Message-ID: <541014C8.7050303@linaro.org>
+References: <1408683219-7939-1-git-send-email-srinivas.kandagatla@linaro.org>	<1408683272-7984-1-git-send-email-srinivas.kandagatla@linaro.org> <CAPDyKFqJw0Dc8ac2i0tebJpuHVhUVd=YUnGHZDTHNd2AAJqOtg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:45961 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751245AbaIJIdk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Sep 2014 04:33:40 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFr35646zQUDUnv9LYy9jtY7r343hev9FrhxOfjVMb6MJw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFqJw0Dc8ac2i0tebJpuHVhUVd=YUnGHZDTHNd2AAJqOtg@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Russell King <linux@arm.linux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, grant.likely@linaro.org, robh+dt@kernel.org
-Cc: Arnd Bergmann <arnd@arndb.de>, marex@denx.de, dinguyen@opensource.altera.com, Kevin Hilman <khilman@linaro.org>, Olof Johansson <olof@lixom.net>, "arm@kernel.org" <arm@kernel.org>, dinh.linux@gmail.com, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Wed 2014-09-10 09:13:27, Ulf Hansson wrote:
-> On 9 September 2014 23:02, Pavel Machek <pavel@denx.de> wrote:
-> > On Tue 2014-09-09 17:02:34, Arnd Bergmann wrote:
-> >> On Tuesday 09 September 2014 16:17:56 Pavel Machek wrote:
-> >> > > Jaehoon Chung (1):
-> >> > >       ARM: dts: socfpga: unuse the slot-node and deprecate the supports-highspeed for dw-mmc
-> >> > >
-> >> >
-> >> > This patch is a bad idea. It removes support for two mmc cards on a
-> >> > single controller -- configuration hardware supports and configuration
-> >> > that allows using u-SD card on mcvevk board.
-> >> >
-> >>
-> >> Your objection comes too late, and to the wrong patch, since the
-> >> driver and all other users have already been changed. We had a long
-> >> discussion about this when the issue first came up, and we could
-> >> not find any example of dw-mmc actually being used in a scenario
-> >> with one controller that has multiple devices attached.
-> >
-> > Well, this is not first time I raised this. 3.17 is not yet out, so we
-> > still have chance to fix regressions without major fuss.
-> >
-> >> Apparently every user out there instead uses multiple controller
-> >> instances instead. Are you sure that the socfpga implementation
-> >> is an exception from this?
-> >
-> > Marek Vasut has the hardware. His board apprently has uSD and eMMC,
-> > and I believe it has just one controller. I'll try to get details.
-> >
-> 
-> Just wanted to highlight some of the reasons to why the earlier
-> discussion we have had, came to the conclusion to remove the slot
-> node.
-> 
-> 1) The mmc core don't support multiple cards attached to the same
-> host, it never has. Also, I am not aware of any requests that
-> suggested us to add it. Due to obvious reasons from performance
-> perspective it's simply a really bad idea, that's likely also why
-> there haven't been any requests for it.
+Hi Ulf,
 
-Well, that's Linux problem, right? (And why is it bad idea, btw? The
-bandwidth will be shared between the controllers, ok, that does not
-sound too bad.)
+On 10/09/14 08:58, Ulf Hansson wrote:
+> On 22 August 2014 06:54, Srinivas Kandagatla
+> <srinivas.kandagatla@linaro.org> wrote:
+>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>
+>> For the ux500v2 variant of the PL18x block, any block sizes are
+>> supported. This will make it possible to decrease data overhead
+>> for SDIO transfers.
+>>
+>> This patch is based on Ulf Hansson patch
+>> http://www.spinics.net/lists/linux-mmc/msg12160.html
+>>
+>> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+>>          enabled this support on qcom variant.
+>>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+>
+> I am not sure how to handle this patch.
+>
+> It will as you say in the cover letter for this patchset, improve
+> situations for the ath6kl driver when it's issuing 12 bytes and 24
+> bytes reads and solve those issues.
+>
+> On the other hand, as stated earlier mmci_pio_write need to be fixed
+> to have full support for any block size. That applies to the qcom
+> variant as well.
+looking at current mmci_pio_write, I see it can support any block sizes 
+as it is. Unless Am missing something obvious.
 
-> 2) On the host level, the support for handle multiple slots in DT for
-> dw-mmc has been broken. While dw-mmc parsed the DT nodes for slots, it
-> screwed up configurations. Thus the support for slots have never
-> worked as expected from DT point of view.
+block size aligned to 4 is taken care in the code and is straight forward.
+block sizes not aligned to 4 are also partly taken care in pio_write and 
+partly by programming blksz in datactrl register. However Am not sure if 
+it was safe to handle the buffer pointer out of its boundary.
+>
+> For ux500, I am sure this won't cause any regressions since the cw1200
+> isn't probed. Also, I am not sure the "any block size" support is even
+> enabled for that driver.
+>
+> How about, that we add a comment in the pio_write function describing
+> that we need to fix it for "SDIO any block size" support? And leave
+> that as a future improvement?
 
-Well, DT is supposed to describe the hardware. From your description,
-it seems that linux does not support two slots on one controller and
-DT parsing code basically ignores the slots. (Logical, if it can't
-support two slots).
+Is below patch any good?
+With the below patch It should be possible to address the case where 
+buffer passed the length is handled safely. If you ok with the approach 
+I can send a patch as RFC.
 
-So now we are breaking DT description due to Linux limitations. Which
 
-a) makes it hard for any other os not having same limitation
+----cut here----
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 264c947..8480c02 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1134,7 +1134,20 @@ static int mmci_pio_write(struct mmci_host *host, 
+char *buffer, unsigned int rem
+                  * byte become a 32bit write, 7 bytes will be two
+                  * 32bit writes etc.
+                  */
+-               iowrite32_rep(base + MMCIFIFO, ptr, (count + 3) >> 2);
++               if (unlikely(count & 0x3)) {
++                       unsigned char buf[4] = {0, };
++
++                       if (count < 4) {
++                               memcpy(buf, ptr, count);
++                               iowrite32_rep(base + MMCIFIFO, buf, 1);
++                       } else {
++                               iowrite32_rep(base + MMCIFIFO, ptr, 
+count >> 2);
++                               memcpy(buf, ptr + (count & ~0x3), count 
+& 0x3);
++                               iowrite32_rep(base + MMCIFIFO, buf, 1);
++                       }
++               } else {
++                       iowrite32_rep(base + MMCIFIFO, ptr, count >> 2);
++               }
 
-b) makes it hard for people to fix the limitation
+                 ptr += count;
+                 remain -= count;
 
-c) does not really solve anything
+----cut here----
 
-d) breaks backward compatibility with old dts
-
-If nothing, d) should be argument not to do this.
-									Pavel
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+thanks,
+srini
+>
+> Kind regards
+> Uffe
+>
+>> ---
+>>   drivers/mmc/host/mmci.c | 10 +++++++---
+>>   1 file changed, 7 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+>> index c11cb05..533ad2b 100644
+>> --- a/drivers/mmc/host/mmci.c
+>> +++ b/drivers/mmc/host/mmci.c
+>> @@ -77,6 +77,7 @@ static unsigned int fmax = 515633;
+>>    * @qcom_fifo: enables qcom specific fifo pio read logic.
+>>    * @reversed_irq_handling: handle data irq before cmd irq.
+>>    * @qcom_dml: enables qcom specific dma glue for dma transfers.
+>> + * @any_blksize: true if block any sizes are supported
+>>    */
+>>   struct variant_data {
+>>          unsigned int            clkreg;
+>> @@ -102,6 +103,7 @@ struct variant_data {
+>>          bool                    qcom_fifo;
+>>          bool                    reversed_irq_handling;
+>>          bool                    qcom_dml;
+>> +       bool                    any_blksize;
+>>   };
+>>
+>>   static struct variant_data variant_arm = {
+>> @@ -194,6 +196,7 @@ static struct variant_data variant_ux500v2 = {
+>>          .pwrreg_clkgate         = true,
+>>          .busy_detect            = true,
+>>          .pwrreg_nopower         = true,
+>> +       .any_blksize            = true,
+>>   };
+>>
+>>   static struct variant_data variant_qcom = {
+>> @@ -212,6 +215,7 @@ static struct variant_data variant_qcom = {
+>>          .explicit_mclk_control  = true,
+>>          .qcom_fifo              = true,
+>>          .qcom_dml               = true,
+>> +       .any_blksize            = true,
+>>   };
+>>
+>>   static int mmci_card_busy(struct mmc_host *mmc)
+>> @@ -239,10 +243,11 @@ static int mmci_card_busy(struct mmc_host *mmc)
+>>   static int mmci_validate_data(struct mmci_host *host,
+>>                                struct mmc_data *data)
+>>   {
+>> +       struct variant_data *variant = host->variant;
+>> +
+>>          if (!data)
+>>                  return 0;
+>> -
+>> -       if (!is_power_of_2(data->blksz)) {
+>> +       if (!is_power_of_2(data->blksz) && !variant->any_blksize) {
+>>                  dev_err(mmc_dev(host->mmc),
+>>                          "unsupported block size (%d bytes)\n", data->blksz);
+>>                  return -EINVAL;
+>> @@ -796,7 +801,6 @@ static void mmci_start_data(struct mmci_host *host, struct mmc_data *data)
+>>          writel(host->size, base + MMCIDATALENGTH);
+>>
+>>          blksz_bits = ffs(data->blksz) - 1;
+>> -       BUG_ON(1 << blksz_bits != data->blksz);
+>>
+>>          if (variant->blksz_datactrl16)
+>>                  datactrl = MCI_DPSM_ENABLE | (data->blksz << 16);
+>> --
+>> 1.9.1
+>>
