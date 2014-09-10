@@ -1,87 +1,63 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 1/3] mmc: mmci: Support any block sizes for ux500v2 and
- qcom variant
-Date: Wed, 10 Sep 2014 12:51:13 +0200
-Message-ID: <CAPDyKFrObvDf6rCWrEt8S2OydLJx0iz9bT0O0-danUuLs-PQvQ@mail.gmail.com>
-References: <1408683219-7939-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<1408683272-7984-1-git-send-email-srinivas.kandagatla@linaro.org>
-	<CAPDyKFqJw0Dc8ac2i0tebJpuHVhUVd=YUnGHZDTHNd2AAJqOtg@mail.gmail.com>
-	<541014C8.7050303@linaro.org>
+From: Pavel Machek <pavel@denx.de>
+Subject: Re: [GIT PULL 1/2] SOCFPGA updates for 3.18
+Date: Wed, 10 Sep 2014 13:00:57 +0200
+Message-ID: <20140910110057.GA9354@amd>
+References: <1409847105-27241-1-git-send-email-dinguyen@opensource.altera.com>
+ <20140909141756.GA30100@amd>
+ <4134101.OOENTRabu1@wuerfel>
+ <20140909210232.GA539@amd>
+ <CAPDyKFr35646zQUDUnv9LYy9jtY7r343hev9FrhxOfjVMb6MJw@mail.gmail.com>
+ <20140910083337.GA5178@amd>
+ <CAPDyKFoXiNOHQ3W=U08jU2PG-fz4F_7wuW-KNEoDfcQzrLKmVA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <541014C8.7050303@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Chris Ball <chris@printf.net>, Russell King <linux@arm.linux.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:52088 "EHLO
+	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751659AbaIJLBA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Sep 2014 07:01:00 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFoXiNOHQ3W=U08jU2PG-fz4F_7wuW-KNEoDfcQzrLKmVA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <robh+dt@kernel.org>, Arnd Bergmann <arnd@arndb.de>, marex@denx.de, dinguyen@opensource.altera.com, Kevin Hilman <khilman@linaro.org>, Olof Johansson <olof@lixom.net>, "arm@kernel.org" <arm@kernel.org>, dinh.linux@gmail.com, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 10 September 2014 11:07, Srinivas Kandagatla
-<srinivas.kandagatla@linaro.org> wrote:
-> Hi Ulf,
->
-> On 10/09/14 08:58, Ulf Hansson wrote:
->>
->> On 22 August 2014 06:54, Srinivas Kandagatla
->> <srinivas.kandagatla@linaro.org> wrote:
->>>
->>> From: Ulf Hansson <ulf.hansson@linaro.org>
->>>
->>> For the ux500v2 variant of the PL18x block, any block sizes are
->>> supported. This will make it possible to decrease data overhead
->>> for SDIO transfers.
->>>
->>> This patch is based on Ulf Hansson patch
->>> http://www.spinics.net/lists/linux-mmc/msg12160.html
->>>
->>> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
->>>          enabled this support on qcom variant.
->>>
->>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
->>
->>
->> I am not sure how to handle this patch.
->>
->> It will as you say in the cover letter for this patchset, improve
->> situations for the ath6kl driver when it's issuing 12 bytes and 24
->> bytes reads and solve those issues.
->>
->> On the other hand, as stated earlier mmci_pio_write need to be fixed
->> to have full support for any block size. That applies to the qcom
->> variant as well.
->
-> looking at current mmci_pio_write, I see it can support any block sizes as
-> it is. Unless Am missing something obvious.
->
-> block size aligned to 4 is taken care in the code and is straight forward.
-> block sizes not aligned to 4 are also partly taken care in pio_write and
-> partly by programming blksz in datactrl register. However Am not sure if it
-> was safe to handle the buffer pointer out of its boundary.
+Hi!
 
-There are some prerequisites of the data buffers to supports any block
-size. Make sure you read up on this discussion to really understand the problem.
+> >> 2) On the host level, the support for handle multiple slots in DT for
+> >> dw-mmc has been broken. While dw-mmc parsed the DT nodes for slots, it
+> >> screwed up configurations. Thus the support for slots have never
+> >> worked as expected from DT point of view.
+> >
+> > Well, DT is supposed to describe the hardware. From your description,
+> > it seems that linux does not support two slots on one controller and
+> > DT parsing code basically ignores the slots. (Logical, if it can't
+> > support two slots).
+> >
+> > So now we are breaking DT description due to Linux limitations. Which
+> >
+> > a) makes it hard for any other os not having same limitation
+> >
+> > b) makes it hard for people to fix the limitation
+> >
+> > c) does not really solve anything
+> 
+> Yes it does, the problem in 2) gets fixed.
+> 
+> >
+> > d) breaks backward compatibility with old dts
+> 
+> According to 2), it has never worked - so we don't break anything.
 
-http://marc.info/?t=135005062400002&r=2&w=2
+Umm? u-SD worked for me in 3.14, 3.15 and 3.16 with the device tree,
+and with single-slot described in the device tree. Now I have to
+change dtb-s to keep working configuration, which is something device
+tree should never ever do.
 
->>
->>
->> For ux500, I am sure this won't cause any regressions since the cw1200
->> isn't probed. Also, I am not sure the "any block size" support is even
->> enabled for that driver.
->>
->> How about, that we add a comment in the pio_write function describing
->> that we need to fix it for "SDIO any block size" support? And leave
->> that as a future improvement?
->
->
-> Is below patch any good?
-> With the below patch It should be possible to address the case where buffer
-> passed the length is handled safely. If you ok with the approach I can send
-> a patch as RFC.
+Is it so hard to just fix the multiple slot parsing?
 
-Please go ahead an send a patch :-) This has been on my todo list
-forever, I would happily like to remove it from there.
-
-Kind regards
-Uffe
+									Pavel
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
