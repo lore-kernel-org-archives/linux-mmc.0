@@ -1,42 +1,54 @@
-From: Nishanth Menon <nm@ti.com>
-Subject: Re: 3.15+: omap4: mmc: multi_v7: can't boot off mmc
-Date: Wed, 10 Sep 2014 11:50:01 -0500
-Message-ID: <20140910165000.GA3026@splat>
-References: <20140910153316.GA12169@luxor.wired.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] fix mmc hang during boot on socfpga
+Date: Thu, 11 Sep 2014 11:14:11 +0900
+Message-ID: <54110573.3070304@samsung.com>
+References: <20140909121902.GA22965@amd>
+ <CAOesGMgvqvQw2WzdQWQ7NSE_CKgH0MR-46UABkck0cQbpV4P=g@mail.gmail.com>
+ <20140909205618.GA32688@amd>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:33217 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751767AbaIJQuC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 10 Sep 2014 12:50:02 -0400
-Content-Disposition: inline
-In-Reply-To: <20140910153316.GA12169@luxor.wired.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:49011 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751222AbaIKCOO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Sep 2014 22:14:14 -0400
+In-reply-to: <20140909205618.GA32688@amd>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Paolo Pisati <p.pisati@gmail.com>
-Cc: linux-omap <linux-omap@vger.kernel.org>, linux-mmc' <linux-mmc@vger.kernel.org>
+To: Pavel Machek <pavel@denx.de>, Olof Johansson <olof@lixom.net>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, =?windows-1252?Q?Marek_Va=9Aut?= <marex@denx.de>
 
-On 17:33-20140910, Paolo Pisati wrote:
-> I'm having an hard time making the vanilla v7_defconfig boot off the mmc on my
-> pandaboard:
+Hi, Pavel.
 
-V3.15:
-https://github.com/nmenon/kernel-test-logs/blob/v3.15/multi_v7_defconfig/pandaboard-vanilla.txt
-https://github.com/nmenon/kernel-test-logs/blob/v3.15/multi_v7_defconfig/pandaboard-es.txt
+On 09/10/2014 05:56 AM, Pavel Machek wrote:
+> On Tue 2014-09-09 10:32:14, Olof Johansson wrote:
+>> On Tue, Sep 9, 2014 at 5:19 AM, Pavel Machek <pavel@ucw.cz> wrote:
+>>>
+>>> Without this patch, boot hangs when trying to mount root filesystem on
+>>> socfpga platform in about 50% cases.
+>>
+>> I think this should have a better description than this -- this is too
+>> vague. Did it use to always work, is this a new failure? You enable
+>> some more error checking and improved stop handling, why was the
+>> previous one inadequate on this platform?
+> 
+> I don't think it ever worked reliably. I don't know what is different
+> for socfpga, or if it is broken on other platforms, too. I have two
+> socfpga boards here, but no other dw_mmc board.
 
-v3.16:
-https://github.com/nmenon/kernel-test-logs/blob/v3.16/multi_v7_defconfig/pandaboard-es.txt
-https://github.com/nmenon/kernel-test-logs/blob/v3.16/multi_v7_defconfig/pandaboard-vanilla.txt
-
-Latest tag: v3.17-rc4
-https://github.com/nmenon/kernel-test-logs/blob/v3.17-rc4/multi_v7_defconfig/pandaboard-es.txt
-https://github.com/nmenon/kernel-test-logs/blob/v3.17-rc4/multi_v7_defconfig/pandaboard-vanilla.txt
+I didn't know what error is occurred at your board. But i guess it looks like HLE error, right?
+Or you can share how booting is failed. than i think we can discuss more detailedly about your problem.
 
 
-You might be interested in using partuuid to be careful about the probe
-order deltas that may take place.
+Best Regards,
+Jaehoon Chung
 
--- 
-Regards,
-Nishanth Menon
+> 
+> Patch was separated from rocketboards.org repository.
+> 
+> Hope this helps,
+> 
+> 									Pavel
+> 
+
