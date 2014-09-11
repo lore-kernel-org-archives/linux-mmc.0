@@ -1,59 +1,257 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Add small delay after enabling power
-Date: Thu, 11 Sep 2014 16:15:41 +0200
-Message-ID: <CAPDyKFp9JKb=XOo5m7YQEQFbF4Rtn_DKP2ia3jCBMhRa6aJVZQ@mail.gmail.com>
-References: <1410444665-24492-1-git-send-email-sr@denx.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1410444665-24492-1-git-send-email-sr@denx.de>
-Sender: linux-omap-owner@vger.kernel.org
-To: Stefan Roese <sr@denx.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, Thorsten Einsbein <thorsten.eisbein@head-acoustics.de>, Balaji T K <balajitk@ti.com>
+From: Maxime Ripard <maxime.ripard@free-electrons.com>
+Subject: [PATCH v3 10/12] clk: sunxi: mod0: Introduce MMC proper phase handling
+Date: Thu, 11 Sep 2014 22:18:24 +0200
+Message-ID: <1410466706-27386-11-git-send-email-maxime.ripard@free-electrons.com>
+References: <1410466706-27386-1-git-send-email-maxime.ripard@free-electrons.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from top.free-electrons.com ([176.31.233.9]:49689 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755165AbaIKUWV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Sep 2014 16:22:21 -0400
+In-Reply-To: <1410466706-27386-1-git-send-email-maxime.ripard@free-electrons.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Mike Turquette <mturquette@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Emilio Lopez <emilio@elopez.com.ar>, chris@printf.net, david.lanzendoerfer@o2s.ch, ulf.hansson@linaro.org
+Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, wens@csie.org, Maxime Ripard <maxime.ripard@free-electrons.com>
 
-On 11 September 2014 16:11, Stefan Roese <sr@denx.de> wrote:
-> From: Thorsten Einsbein <thorsten.eisbein@head-acoustics.de>
->
-> On the TAO3530 (OMAP3530 based) we noticed that some SD cards are not
-> detected reliably upon bootup (timeout). Especially the SanDisk Ultra
-> 8GiB seems to be problematic here. The SanDisk Extreme also has this
-> problem on this platform, but not that often. A Samsung 8 GiB type 6
-> doesn't show this problem at all.
->
-> This patch now adds a short delay after enabling the power on the slot.
-> With this delay all cards are detected reliably.
+The MMC clock we thought we had until now are actually not one but three
+different clocks.
 
-Is this delay related to regulator ramp up/down time? Then I think it
-maybe should be a part of the regulator code/DT.
+The main one is unchanged, and will have three outputs:
+  - The clock fed into the MMC
+  - a sample and output clocks, to deal with when should we output/sample data
+    to/from the MMC bus
 
-Kind regards
-Uffe
+The phase control we had are actually controlling the two latter clocks, but
+the main MMC one is unchanged.
 
->
-> Signed-off-by: Thorsten Einsbein <thorsten.eisbein@head-acoustics.de>
-> Signed-off-by: Stefan Roese <sr@denx.de>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Balaji T K <balajitk@ti.com>
-> ---
->  drivers/mmc/host/omap_hsmmc.c | 4 ++++
->  1 file changed, 4 insertions(+)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 9656726..62ff0a7 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -335,6 +335,10 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
->                                 ret = mmc_regulator_set_ocr(host->mmc,
->                                                         host->vcc, 0);
->                 }
-> +
-> +               dev_dbg(host->dev, "omap_hsmmc_set_power: wait a little (slot %d)\n",
-> +                       slot);
-> +               msleep(5);
->         } else {
->                 /* Shut down the rail */
->                 if (host->vcc_aux)
-> --
-> 2.1.0
->
+We can adjust the phase with a 3 bits value, from 0 to 7, 0 meaning a 180 phase
+shift, and the other values being the number of periods from the MMC parent
+clock to outphase the clock of.
+
+Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+---
+ Documentation/devicetree/bindings/clock/sunxi.txt |   2 +
+ drivers/clk/sunxi/clk-mod0.c                      | 189 ++++++++++++++++++++++
+ 2 files changed, 191 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/clock/sunxi.txt b/Documentation/devicetree/bindings/clock/sunxi.txt
+index b938a990602a..eb690ed92a53 100644
+--- a/Documentation/devicetree/bindings/clock/sunxi.txt
++++ b/Documentation/devicetree/bindings/clock/sunxi.txt
+@@ -47,6 +47,8 @@ Required properties:
+ 	"allwinner,sun6i-a31-apb2-gates-clk" - for the APB2 gates on A31
+ 	"allwinner,sun8i-a23-apb2-gates-clk" - for the APB2 gates on A23
+ 	"allwinner,sun5i-a13-mbus-clk" - for the MBUS clock on A13
++	"allwinner,sun4i-a10-mmc-output-clk" - for the MMC output clock on A10
++	"allwinner,sun4i-a10-mmc-sample-clk" - for the MMC sample clock on A10
+ 	"allwinner,sun4i-a10-mod0-clk" - for the module 0 family of clocks
+ 	"allwinner,sun7i-a20-out-clk" - for the external output clocks
+ 	"allwinner,sun7i-a20-gmac-clk" - for the GMAC clock module on A20/A31
+diff --git a/drivers/clk/sunxi/clk-mod0.c b/drivers/clk/sunxi/clk-mod0.c
+index 8a7f7036aea3..4a563850ee6e 100644
+--- a/drivers/clk/sunxi/clk-mod0.c
++++ b/drivers/clk/sunxi/clk-mod0.c
+@@ -16,6 +16,7 @@
+ 
+ #include <linux/clk-provider.h>
+ #include <linux/clkdev.h>
++#include <linux/of_address.h>
+ 
+ #include "clk-factors.h"
+ 
+@@ -92,3 +93,191 @@ static void __init sun5i_a13_mbus_setup(struct device_node *node)
+ 	clk_prepare_enable(mbus);
+ }
+ CLK_OF_DECLARE(sun5i_a13_mbus, "allwinner,sun5i-a13-mbus-clk", sun5i_a13_mbus_setup);
++
++struct mmc_phase_data {
++	u8	offset;
++};
++
++struct mmc_phase {
++	struct clk_hw		hw;
++	void __iomem		*reg;
++	struct mmc_phase_data	*data;
++	spinlock_t		*lock;
++};
++
++#define to_mmc_phase(_hw) container_of(_hw, struct mmc_phase, hw)
++
++static int mmc_get_phase(struct clk_hw *hw)
++{
++	struct clk *mmc, *mmc_parent, *clk = hw->clk;
++	struct mmc_phase *phase = to_mmc_phase(hw);
++	unsigned int mmc_rate, mmc_parent_rate;
++	u16 step, mmc_div;
++	u32 value;
++	u8 delay;
++
++	value = readl(phase->reg);
++	delay = (value >> phase->data->offset) & 0x3;
++
++	if (!delay)
++		return 180;
++
++	/* Get the main MMC clock */
++	mmc = clk_get_parent(clk);
++	if (!mmc)
++		return -EINVAL;
++
++	/* And its rate */
++	mmc_rate = clk_get_rate(mmc);
++	if (!mmc_rate)
++		return -EINVAL;
++
++	/* Now, get the MMC parent (most likely some PLL) */
++	mmc_parent = clk_get_parent(mmc);
++	if (!mmc_parent)
++		return -EINVAL;
++
++	/* And its rate */
++	mmc_parent_rate = clk_get_rate(mmc_parent);
++	if (!mmc_parent_rate)
++		return -EINVAL;
++
++	/* Get MMC clock divider */
++	mmc_div = mmc_parent_rate / mmc_rate;
++
++	step = DIV_ROUND_CLOSEST(360, mmc_div);
++	return delay * step;
++}
++
++static int mmc_set_phase(struct clk_hw *hw, int degrees)
++{
++	struct clk *mmc, *mmc_parent, *clk = hw->clk;
++	struct mmc_phase *phase = to_mmc_phase(hw);
++	unsigned int mmc_rate, mmc_parent_rate;
++	unsigned long flags;
++	u32 value;
++	u8 delay;
++
++	/* Get the main MMC clock */
++	mmc = clk_get_parent(clk);
++	if (!mmc)
++		return -EINVAL;
++
++	/* And its rate */
++	mmc_rate = clk_get_rate(mmc);
++	if (!mmc_rate)
++		return -EINVAL;
++
++	/* Now, get the MMC parent (most likely some PLL) */
++	mmc_parent = clk_get_parent(mmc);
++	if (!mmc_parent)
++		return -EINVAL;
++
++	/* And its rate */
++	mmc_parent_rate = clk_get_rate(mmc_parent);
++	if (!mmc_parent_rate)
++		return -EINVAL;
++
++	if (degrees != 180) {
++		u16 step, mmc_div;
++
++		/* Get MMC clock divider */
++		mmc_div = mmc_parent_rate / mmc_rate;
++
++		/*
++		 * We can only outphase the clocks by multiple of the
++		 * PLL's period.
++		 *
++		 * Since the MMC clock in only a divider, and the
++		 * formula to get the outphasing in degrees is deg =
++		 * 360 * delta / period
++		 *
++		 * If we simplify this formula, we can see that the
++		 * only thing that we're concerned about is the number
++		 * of period we want to outphase our clock from, and
++		 * the divider set by the MMC clock.
++		 */
++		step = DIV_ROUND_CLOSEST(360, mmc_div);
++		delay = DIV_ROUND_CLOSEST(degrees, step);
++	} else {
++		delay = 0;
++	}
++
++	spin_lock_irqsave(phase->lock, flags);
++	value = readl(phase->reg);
++	value &= ~GENMASK(phase->data->offset + 3, phase->data->offset);
++	value |= delay << phase->data->offset;
++	writel(value, phase->reg);
++	spin_unlock_irqrestore(phase->lock, flags);
++
++	return 0;
++}
++
++static const struct clk_ops mmc_clk_ops = {
++	.get_phase	= mmc_get_phase,
++	.set_phase	= mmc_set_phase,
++};
++
++static void __init sun4i_a10_mmc_phase_setup(struct device_node *node,
++					     struct mmc_phase_data *data)
++{
++	const char *parent_names[1] = { of_clk_get_parent_name(node, 0) };
++	struct clk_init_data init = {
++		.num_parents	= 1,
++		.parent_names	= parent_names,
++		.ops		= &mmc_clk_ops,
++	};
++
++	struct mmc_phase *phase;
++	struct clk *clk;
++
++	phase = kmalloc(sizeof(*phase), GFP_KERNEL);
++	if (!phase)
++		return;
++
++	phase->hw.init = &init;
++
++	phase->reg = of_iomap(node, 0);
++	if (!phase->reg)
++		goto err_free;
++
++	phase->data = data;
++	phase->lock = &sun4i_a10_mod0_lock;
++
++	if (of_property_read_string(node, "clock-output-names", &init.name))
++		init.name = node->name;
++
++	clk = clk_register(NULL, &phase->hw);
++	if (IS_ERR(clk))
++		goto err_unmap;
++
++	of_clk_add_provider(node, of_clk_src_simple_get, clk);
++
++	return;
++
++err_unmap:
++	iounmap(phase->reg);
++err_free:
++	kfree(phase);
++}
++
++
++static struct mmc_phase_data mmc_output_clk = {
++	.offset	= 8,
++};
++
++static struct mmc_phase_data mmc_sample_clk = {
++	.offset	= 20,
++};
++
++static void __init sun4i_a10_mmc_output_setup(struct device_node *node)
++{
++	sun4i_a10_mmc_phase_setup(node, &mmc_output_clk);
++}
++CLK_OF_DECLARE(sun4i_a10_mmc_output, "allwinner,sun4i-a10-mmc-output-clk", sun4i_a10_mmc_output_setup);
++
++static void __init sun4i_a10_mmc_sample_setup(struct device_node *node)
++{
++	sun4i_a10_mmc_phase_setup(node, &mmc_sample_clk);
++}
++CLK_OF_DECLARE(sun4i_a10_mmc_sample, "allwinner,sun4i-a10-mmc-sample-clk", sun4i_a10_mmc_sample_setup);
+-- 
+2.1.0
+
