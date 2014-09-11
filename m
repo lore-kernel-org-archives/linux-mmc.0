@@ -1,91 +1,47 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: make hw_reset power cycle SD-cards
-Date: Thu, 11 Sep 2014 13:03:00 +0200
-Message-ID: <CAPDyKFrNV1qoDkTMsRwSf=SihHBwGUhqP4yL3NNfwhnn9wf9Hg@mail.gmail.com>
-References: <1410272508-4885-1-git-send-email-johanru@axis.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f171.google.com ([209.85.216.171]:57356 "EHLO
-	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754214AbaIKLDC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Sep 2014 07:03:02 -0400
-Received: by mail-qc0-f171.google.com with SMTP id x3so20528804qcv.2
-        for <linux-mmc@vger.kernel.org>; Thu, 11 Sep 2014 04:03:01 -0700 (PDT)
-In-Reply-To: <1410272508-4885-1-git-send-email-johanru@axis.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Stefan Roese <sr@denx.de>
+Subject: [PATCH] mmc: omap_hsmmc: Add small delay after enabling power
+Date: Thu, 11 Sep 2014 16:11:05 +0200
+Message-ID: <1410444665-24492-1-git-send-email-sr@denx.de>
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-omap@vger.kernel.org, Thorsten Einsbein <thorsten.eisbein@head-acoustics.de>, Ulf Hansson <ulf.hansson@linaro.org>, Balaji T K <balajitk@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <johan.rudholm@axis.com>
-Cc: Chris Ball <cjb@laptop.org>, linux-mmc <linux-mmc@vger.kernel.org>, Johan Rudholm <johanru@axis.com>
 
-On 9 September 2014 16:21, Johan Rudholm <johan.rudholm@axis.com> wrote:
-> SD-cards cannot be reset, but they can be power cycled. Power cycling
-> a buggy SD-card sometimes helps it get back on track.
+From: Thorsten Einsbein <thorsten.eisbein@head-acoustics.de>
 
-Hi Johan,
+On the TAO3530 (OMAP3530 based) we noticed that some SD cards are not
+detected reliably upon bootup (timeout). Especially the SanDisk Ultra
+8GiB seems to be problematic here. The SanDisk Extreme also has this
+problem on this platform, but not that often. A Samsung 8 GiB type 6
+doesn't show this problem at all.
 
-This feature has been missing for too long - really great that you are
-working on this!
+This patch now adds a short delay after enabling the power on the slot.
+With this delay all cards are detected reliably.
 
->
-> Signed-off-by: Johan Rudholm <johanru@axis.com>
-> ---
->  drivers/mmc/core/core.c |   16 +++++++++++-----
->  1 files changed, 11 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index d03a080..9171aa9 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2250,19 +2250,25 @@ static int mmc_do_hw_reset(struct mmc_host *host, int check)
->  {
->         struct mmc_card *card = host->card;
->
-> -       if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
-> -               return -EOPNOTSUPP;
-> -
->         if (!card)
->                 return -EINVAL;
->
-> -       if (!mmc_can_reset(card))
-> +       if (!mmc_card_sd(card) && !((host->caps & MMC_CAP_HW_RESET) &&
-> +                                                       host->ops->hw_reset))
-> +               return -EOPNOTSUPP;
-> +
-> +       if (!mmc_card_sd(card) && !mmc_can_reset(card))
->                 return -EOPNOTSUPP;
->
->         mmc_host_clk_hold(host);
->         mmc_set_clock(host, host->f_init);
->
-> -       host->ops->hw_reset(host);
-> +       if (mmc_card_sd(card))
-> +               mmc_power_cycle(host, card->ocr);
-> +       else
-> +               host->ops->hw_reset(host);
-> +
-> +       pr_warning("%s: reset device\n", mmc_hostname(host));
->
->         /* If the reset has happened, then a status command will fail */
->         if (check) {
-> --
-> 1.7.2.5
->
+Signed-off-by: Thorsten Einsbein <thorsten.eisbein@head-acoustics.de>
+Signed-off-by: Stefan Roese <sr@denx.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Balaji T K <balajitk@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-Before we decide to go ahead an continue to hack on the current reset
-code as your patch does, could you possibly consider to do some more
-extensive rework this code?
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 9656726..62ff0a7 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -335,6 +335,10 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
+ 				ret = mmc_regulator_set_ocr(host->mmc,
+ 							host->vcc, 0);
+ 		}
++
++		dev_dbg(host->dev, "omap_hsmmc_set_power: wait a little (slot %d)\n",
++			slot);
++		msleep(5);
+ 	} else {
+ 		/* Shut down the rail */
+ 		if (host->vcc_aux)
+-- 
+2.1.0
 
-Here are some of the ideas that I had in mind.
-
-1) Invent a new bus_ops callback for reset. Or maybe we should re-use
-the ->power_save|restore ones, since those already exist!?
-2) Since those bus_ops are specific for sd/mmc/sdio we shall handle
-those related parts in there.
-3) Then let's mmc_do_hw_reset invoke the above bus_ops.
-4) Remove the mmc_hw_reset_check() API. Currently only used by mmc_test.
-
-What do you think?
-
-Kind regards
-Uffe
