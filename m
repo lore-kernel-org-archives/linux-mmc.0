@@ -1,67 +1,101 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: Add delay between CMD6 and CMD13 for Sandisk eMMC
- cards
-Date: Thu, 11 Sep 2014 11:38:33 +0900
-Message-ID: <54110B29.7030303@samsung.com>
-References: <1410265614-3275-1-git-send-email-jean-michel.hautbois@vodalys.com>
+Subject: Re: [PATCH] mmc: dw_mmc: add support for ARM64
+Date: Thu, 11 Sep 2014 13:45:02 +0900
+Message-ID: <541128CE.9060804@samsung.com>
+References: <1409307891-16523-1-git-send-email-alim.akhtar@samsung.com>
+ <CAPDyKFqk1pwGFuitE0Fk1pqyP_FZiQK1=5OtGUM9Zw6Mp_rWXw@mail.gmail.com>
+ <CAGOxZ506d5FNs1mZTX=ck9WPZsqzR+3ON-aKS2P8v5_iRyFV7w@mail.gmail.com>
+ <54110688.30604@samsung.com>
+ <CAGOxZ50Jy8YCb4v77MhdnDqfVOe6bvssrdnojEBiPuCE9RDLmA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:54742 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752035AbaIKCig (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Sep 2014 22:38:36 -0400
-In-reply-to: <1410265614-3275-1-git-send-email-jean-michel.hautbois@vodalys.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:16791 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751652AbaIKEpG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Sep 2014 00:45:06 -0400
+In-reply-to: <CAGOxZ50Jy8YCb4v77MhdnDqfVOe6bvssrdnojEBiPuCE9RDLmA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: tgih.jun@samsung.com, ulf.hansson@linaro.org, chris@printf.net
+To: Alim Akhtar <alim.akhtar@gmail.com>
+Cc: Alim Akhtar <alim.akhtar@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, Andrew Bresticker <abrestic@chromium.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>
 
-Hi,
+Hi, Alim.
 
-On 09/09/2014 09:26 PM, Jean-Michel Hautbois wrote:
-> Tested on a i.MX6 board, with Sandisk SDIN5D1-2G.
-> Without this patch, I/O errors occur.
-> This eMMC seems to have a different Manufacturer ID as it reads 0x45
-> and not 0x2 as specified in datasheet.
+On 09/11/2014 11:35 AM, Alim Akhtar wrote:
+> Hi Jaehoon,
+> On Sep 11, 2014 11:18 AM, "Jaehoon Chung" <jh80.chung@samsung.com <mailto:jh80.chung@samsung.com>> wrote:
+>>
+>> On 09/09/2014 08:31 PM, Alim Akhtar wrote:
+>> > Hi Ulf,
+>> >
+>> > On Tue, Sep 9, 2014 at 12:21 PM, Ulf Hansson <ulf.hansson@linaro.org <mailto:ulf.hansson@linaro.org>> wrote:
+>> >> On 29 August 2014 12:24, Alim Akhtar <alim.akhtar@samsung.com <mailto:alim.akhtar@samsung.com>> wrote:
+>> >>> There are upcoming ARM64 SoCs with dw_mmc host controller.
+>> >>>
+>> >>> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com <mailto:alim.akhtar@samsung.com>>
+>> >>> ---
+>> >>>  drivers/mmc/host/Kconfig |    2 +-
+>> >>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>> >>>
+>> >>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> >>> index a43295c..72dd6c2 100644
+>> >>> --- a/drivers/mmc/host/Kconfig
+>> >>> +++ b/drivers/mmc/host/Kconfig
+>> >>> @@ -580,7 +580,7 @@ config SDH_BFIN_MISSING_CMD_PULLUP_WORKAROUND
+>> >>>  config MMC_DW
+>> >>>         tristate "Synopsys DesignWare Memory Card Interface"
+>> >>>         depends on HAS_DMA
+>> >>> -       depends on ARC || ARM || MIPS || COMPILE_TEST
+>> >>> +       depends on ARC || ARM || ARM64 || MIPS || COMPILE_TEST
+>> >>
+>> >> Before enabling this, wouldn't it be better to add the needed support
+>> >> in dw_mmc first? Or there are no changes needed?
+>> >>
+>> >> There are also ongoing development and discussions for exynos7, which
+>> >> I guess relates to this?
+>> >> http://www.spinics.net/lists/linux-mmc/msg28294.html
+>> > Thanks for looking into this.
+>> >
+>> > Yes, this patch is being tested on exynos7 platform which is ongoing
+>> > development.
+>> > The above link is one of them.
+>> > I feel this patch is too generic in nature and we now known at least
+>> > exynos7 is going to use this.
+>> > I don't know if there are any other ARM64 platform with dw_mmc controller.
+>>
+>> If we need to prepare the ARM64, the above patch(linked patch) has to merge, why not?
+> I am not in hurry to merge this now, as I said, its upto the maintainers to decide when to take this and I am ok with that.
+>> But it needs to test for other SoCs and rework it.
+> What rework you are anticipating here?
 
-I think this patch don't merge into mainline.
-This is not solution for problem.
-you mentioned the below comment, this is workaround.
-
-> 
-> Signed-off-by: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
-> ---
->  drivers/mmc/core/mmc_ops.c | 9 +++++++++
->  1 file changed, 9 insertions(+)
-> 
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index f51b5ba..91babaa 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -458,6 +458,15 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->  	if (!use_busy_signal)
->  		return 0;
->  
-> +	/* WORKAROUND: for Sandisk eMMC cards, it might need certain delay
-> +	 * before sending CMD13 after CMD6
-> +	 * On SDIN5D1-2G MANFID is 0x45 and not 0x2 as specified in datasheet
-> +	 */
-> +	if (card->cid.manfid == CID_MANFID_SANDISK ||
-> +		card->cid.manfid == 0x45) {
-> +		msleep(1);
-> +	}
-
-If it's a general problem of Sandisk SDIN5D1-2G,
-I think you need to verify this problem. And can you use the MMC_FIXUP() and QUIRK?
+Sorry for confusing you. (I didn't see the above URL.)
+You need to use this patch (http://www.spinics.net/lists/linux-mmc/msg21742.html), right?
+Then need to rework it.
 
 Best Regards,
 Jaehoon Chung
-
-> +
->  	/*
->  	 * CRC errors shall only be ignored in cases were CMD13 is used to poll
->  	 * to detect busy completion.
+> 
+> Thanks.
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>> >
+>> > So, I am going to leave this upto you to decide when to take this
+>> > patch, incase you decided to take it after exynos7 support lands, I
+>> > will send a reminder for this.
+>> >>
+>> >> Kind regards
+>> >> Uffe
+>> >> --
+>> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> >> the body of a message to majordomo@vger.kernel.org <mailto:majordomo@vger.kernel.org>
+>> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> >
+>> >
+>> >
+>>
 > 
 
