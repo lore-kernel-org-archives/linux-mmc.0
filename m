@@ -1,101 +1,445 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: add support for ARM64
-Date: Thu, 11 Sep 2014 13:45:02 +0900
-Message-ID: <541128CE.9060804@samsung.com>
-References: <1409307891-16523-1-git-send-email-alim.akhtar@samsung.com>
- <CAPDyKFqk1pwGFuitE0Fk1pqyP_FZiQK1=5OtGUM9Zw6Mp_rWXw@mail.gmail.com>
- <CAGOxZ506d5FNs1mZTX=ck9WPZsqzR+3ON-aKS2P8v5_iRyFV7w@mail.gmail.com>
- <54110688.30604@samsung.com>
- <CAGOxZ50Jy8YCb4v77MhdnDqfVOe6bvssrdnojEBiPuCE9RDLmA@mail.gmail.com>
+From: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
+Subject: [PATCH v4 0001/0003] mmc: Move code that manages user area and gp
+ partitions into functions
+Date: Thu, 11 Sep 2014 08:38:20 +0200
+Message-ID: <5411435C.3080905@neotion.com>
+References: <53C7E45E.2060102@neotion.com>	<CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>	<53EB2DC3.2080002@neotion.com>	<CAPDyKFpjYqVUZ8GHB76gD8pOx_eMg9ecvbWrMEfbhEd5ffk7mw@mail.gmail.com>	<53ECB95F.2030207@neotion.com> <CAPDyKFp2ekmucHVzMWxeKfyTmuFKTXAYwUEpL5QxvEh8AjFopg@mail.gmail.com> <53F1FBA3.6060108@neotion.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:16791 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751652AbaIKEpG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Sep 2014 00:45:06 -0400
-In-reply-to: <CAGOxZ50Jy8YCb4v77MhdnDqfVOe6bvssrdnojEBiPuCE9RDLmA@mail.gmail.com>
+Received: from mail.neotion.com ([5.39.84.84]:33504 "EHLO mail.neotion.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752366AbaIKGl3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 11 Sep 2014 02:41:29 -0400
+In-Reply-To: <53F1FBA3.6060108@neotion.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@gmail.com>
-Cc: Alim Akhtar <alim.akhtar@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, Andrew Bresticker <abrestic@chromium.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi, Alim.
+Move code that manages user area and general purpose
+ partitions into functions.
 
-On 09/11/2014 11:35 AM, Alim Akhtar wrote:
-> Hi Jaehoon,
-> On Sep 11, 2014 11:18 AM, "Jaehoon Chung" <jh80.chung@samsung.com <mailto:jh80.chung@samsung.com>> wrote:
->>
->> On 09/09/2014 08:31 PM, Alim Akhtar wrote:
->> > Hi Ulf,
->> >
->> > On Tue, Sep 9, 2014 at 12:21 PM, Ulf Hansson <ulf.hansson@linaro.org <mailto:ulf.hansson@linaro.org>> wrote:
->> >> On 29 August 2014 12:24, Alim Akhtar <alim.akhtar@samsung.com <mailto:alim.akhtar@samsung.com>> wrote:
->> >>> There are upcoming ARM64 SoCs with dw_mmc host controller.
->> >>>
->> >>> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com <mailto:alim.akhtar@samsung.com>>
->> >>> ---
->> >>>  drivers/mmc/host/Kconfig |    2 +-
->> >>>  1 file changed, 1 insertion(+), 1 deletion(-)
->> >>>
->> >>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->> >>> index a43295c..72dd6c2 100644
->> >>> --- a/drivers/mmc/host/Kconfig
->> >>> +++ b/drivers/mmc/host/Kconfig
->> >>> @@ -580,7 +580,7 @@ config SDH_BFIN_MISSING_CMD_PULLUP_WORKAROUND
->> >>>  config MMC_DW
->> >>>         tristate "Synopsys DesignWare Memory Card Interface"
->> >>>         depends on HAS_DMA
->> >>> -       depends on ARC || ARM || MIPS || COMPILE_TEST
->> >>> +       depends on ARC || ARM || ARM64 || MIPS || COMPILE_TEST
->> >>
->> >> Before enabling this, wouldn't it be better to add the needed support
->> >> in dw_mmc first? Or there are no changes needed?
->> >>
->> >> There are also ongoing development and discussions for exynos7, which
->> >> I guess relates to this?
->> >> http://www.spinics.net/lists/linux-mmc/msg28294.html
->> > Thanks for looking into this.
->> >
->> > Yes, this patch is being tested on exynos7 platform which is ongoing
->> > development.
->> > The above link is one of them.
->> > I feel this patch is too generic in nature and we now known at least
->> > exynos7 is going to use this.
->> > I don't know if there are any other ARM64 platform with dw_mmc controller.
->>
->> If we need to prepare the ARM64, the above patch(linked patch) has to merge, why not?
-> I am not in hurry to merge this now, as I said, its upto the maintainers to decide when to take this and I am ok with that.
->> But it needs to test for other SoCs and rework it.
-> What rework you are anticipating here?
+Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
+---
+ drivers/mmc/core/mmc.c |  162 ++++++++++++++++++++++++++--------------=
+--------
+ 1 file changed, 89 insertions(+), 73 deletions(-)
 
-Sorry for confusing you. (I didn't see the above URL.)
-You need to use this patch (http://www.spinics.net/lists/linux-mmc/msg21742.html), right?
-Then need to rework it.
+>From commit 480cadc2b7e0fa2bbab20141efb547dfe0c3707c in master linux t=
+ree.
 
-Best Regards,
-Jaehoon Chung
-> 
-> Thanks.
->>
->> Best Regards,
->> Jaehoon Chung
->>
->> >
->> > So, I am going to leave this upto you to decide when to take this
->> > patch, incase you decided to take it after exynos7 support lands, I
->> > will send a reminder for this.
->> >>
->> >> Kind regards
->> >> Uffe
->> >> --
->> >> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> >> the body of a message to majordomo@vger.kernel.org <mailto:majordomo@vger.kernel.org>
->> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> >
->> >
->> >
->>
-> 
+Changelog v3:
+	Move code BEFORE fixing bugs.
+Changelog v2:
+	Move code for user area and general purpose partitions
+	into functions.
 
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 1eda8dd..77b4cf3 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -298,6 +298,93 @@ static void mmc_select_card_type(struct mmc_card *=
+card)
+ 	card->mmc_avail_type =3D avail_type;
+ }
+
++static void mmc_manage_enhanced_area(struct mmc_card *card, u8 *ext_cs=
+d)
++{
++	u8 hc_erase_grp_sz =3D 0, hc_wp_grp_sz =3D 0;
++
++	/*
++	 * Enhanced area feature support -- check whether the eMMC
++	 * card has the Enhanced area enabled.  If so, export enhanced
++	 * area offset and size to user by adding sysfs interface.
++	 */
++	if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
++	    (ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
++		hc_erase_grp_sz =3D
++			ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
++		hc_wp_grp_sz =3D
++			ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
++
++		card->ext_csd.enhanced_area_en =3D 1;
++		/*
++		 * calculate the enhanced data area offset, in bytes
++		 */
++		card->ext_csd.enhanced_area_offset =3D
++			(ext_csd[139] << 24) + (ext_csd[138] << 16) +
++			(ext_csd[137] << 8) + ext_csd[136];
++		if (mmc_card_blockaddr(card))
++			card->ext_csd.enhanced_area_offset <<=3D 9;
++		/*
++		 * calculate the enhanced data area size, in kilobytes
++		 */
++		card->ext_csd.enhanced_area_size =3D
++			(ext_csd[142] << 16) + (ext_csd[141] << 8) +
++			ext_csd[140];
++		card->ext_csd.enhanced_area_size *=3D
++			(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
++		card->ext_csd.enhanced_area_size <<=3D 9;
++	} else {
++		/*
++		 * If the enhanced area is not enabled, disable these
++		 * device attributes.
++		 */
++		card->ext_csd.enhanced_area_offset =3D -EINVAL;
++		card->ext_csd.enhanced_area_size =3D -EINVAL;
++	}
++}
++
++static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_cs=
+d)
++{
++	unsigned int part_size;
++	u8 hc_erase_grp_sz =3D 0, hc_wp_grp_sz =3D 0;
++	int idx;
++
++	/*
++	 * General purpose partition feature support --
++	 * If ext_csd has the size of general purpose partitions,
++	 * set size, part_cfg, partition name in mmc_part.
++	 */
++	if (ext_csd[EXT_CSD_PARTITION_SUPPORT] &
++	    EXT_CSD_PART_SUPPORT_PART_EN) {
++		if (card->ext_csd.enhanced_area_en !=3D 1) {
++			hc_erase_grp_sz =3D
++				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
++			hc_wp_grp_sz =3D
++				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
++
++			card->ext_csd.enhanced_area_en =3D 1;
++		}
++
++		for (idx =3D 0; idx < MMC_NUM_GP_PARTITION; idx++) {
++			if (!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3] &&
++			    !ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1] &&
++			    !ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 2])
++				continue;
++			part_size =3D
++				(ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 2]
++				<< 16) +
++				(ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1]
++				<< 8) +
++				ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3];
++			part_size *=3D (size_t)(hc_erase_grp_sz *
++				hc_wp_grp_sz);
++			mmc_part_add(card, part_size << 19,
++				EXT_CSD_PART_CONFIG_ACC_GP0 + idx,
++				"gp%d", idx, false,
++				MMC_BLK_DATA_AREA_GP);
++		}
++	}
++}
++
+ /*
+  * Decode extended CSD.
+  */
+@@ -305,7 +392,6 @@ static int mmc_read_ext_csd(struct mmc_card *card, =
+u8 *ext_csd)
+ {
+ 	int err =3D 0, idx;
+ 	unsigned int part_size;
+-	u8 hc_erase_grp_sz =3D 0, hc_wp_grp_sz =3D 0;
+
+ 	BUG_ON(!card);
+
+@@ -402,80 +488,10 @@ static int mmc_read_ext_csd(struct mmc_card *card=
+, u8 *ext_csd)
+ 		ext_csd[EXT_CSD_TRIM_MULT];
+ 	card->ext_csd.raw_partition_support =3D ext_csd[EXT_CSD_PARTITION_SUP=
+PORT];
+ 	if (card->ext_csd.rev >=3D 4) {
+-		/*
+-		 * Enhanced area feature support -- check whether the eMMC
+-		 * card has the Enhanced area enabled.  If so, export enhanced
+-		 * area offset and size to user by adding sysfs interface.
+-		 */
+-		if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
+-		    (ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
+-			hc_erase_grp_sz =3D
+-				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+-			hc_wp_grp_sz =3D
+-				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
++		mmc_manage_enhanced_area(card, ext_csd);
+
+-			card->ext_csd.enhanced_area_en =3D 1;
+-			/*
+-			 * calculate the enhanced data area offset, in bytes
+-			 */
+-			card->ext_csd.enhanced_area_offset =3D
+-				(ext_csd[139] << 24) + (ext_csd[138] << 16) +
+-				(ext_csd[137] << 8) + ext_csd[136];
+-			if (mmc_card_blockaddr(card))
+-				card->ext_csd.enhanced_area_offset <<=3D 9;
+-			/*
+-			 * calculate the enhanced data area size, in kilobytes
+-			 */
+-			card->ext_csd.enhanced_area_size =3D
+-				(ext_csd[142] << 16) + (ext_csd[141] << 8) +
+-				ext_csd[140];
+-			card->ext_csd.enhanced_area_size *=3D
+-				(size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
+-			card->ext_csd.enhanced_area_size <<=3D 9;
+-		} else {
+-			/*
+-			 * If the enhanced area is not enabled, disable these
+-			 * device attributes.
+-			 */
+-			card->ext_csd.enhanced_area_offset =3D -EINVAL;
+-			card->ext_csd.enhanced_area_size =3D -EINVAL;
+-		}
++		mmc_manage_gp_partitions(card, ext_csd);
+
+-		/*
+-		 * General purpose partition feature support --
+-		 * If ext_csd has the size of general purpose partitions,
+-		 * set size, part_cfg, partition name in mmc_part.
+-		 */
+-		if (ext_csd[EXT_CSD_PARTITION_SUPPORT] &
+-			EXT_CSD_PART_SUPPORT_PART_EN) {
+-			if (card->ext_csd.enhanced_area_en !=3D 1) {
+-				hc_erase_grp_sz =3D
+-					ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
+-				hc_wp_grp_sz =3D
+-					ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
+-
+-				card->ext_csd.enhanced_area_en =3D 1;
+-			}
+-
+-			for (idx =3D 0; idx < MMC_NUM_GP_PARTITION; idx++) {
+-				if (!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3] &&
+-				!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1] &&
+-				!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 2])
+-					continue;
+-				part_size =3D
+-				(ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 2]
+-					<< 16) +
+-				(ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1]
+-					<< 8) +
+-				ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3];
+-				part_size *=3D (size_t)(hc_erase_grp_sz *
+-					hc_wp_grp_sz);
+-				mmc_part_add(card, part_size << 19,
+-					EXT_CSD_PART_CONFIG_ACC_GP0 + idx,
+-					"gp%d", idx, false,
+-					MMC_BLK_DATA_AREA_GP);
+-			}
+-		}
+ 		card->ext_csd.sec_trim_mult =3D
+ 			ext_csd[EXT_CSD_SEC_TRIM_MULT];
+ 		card->ext_csd.sec_erase_mult =3D
+--=20
+1.7.9.5
+
+> Replace ext_csd "enhanced_area_en" attribute by "partition_setting_co=
+mpleted".
+> It was used whether or not enhanced user area is defined and without =
+checks of
+> EXT_CSD_PARTITION_SETTING_COMPLETED bit.
+>=20
+> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
+> ---
+>  drivers/mmc/core/mmc.c   |    8 +++++++-
+>  include/linux/mmc/card.h |    2 +-
+>  include/linux/mmc/mmc.h  |    2 ++
+>  3 files changed, 10 insertions(+), 2 deletions(-)
+>=20
+>>From commit 33caee39925b887a99a2400dc5c980097c3573f9 in master linux =
+tree.
+>=20
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 793c6f7..ef25d91 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -403,6 +403,12 @@ static int mmc_read_ext_csd(struct mmc_card *car=
+d, u8 *ext_csd)
+>  		ext_csd[EXT_CSD_TRIM_MULT];
+>  	card->ext_csd.raw_partition_support =3D ext_csd[EXT_CSD_PARTITION_S=
+UPPORT];
+>  	if (card->ext_csd.rev >=3D 4) {
+> +		if (ext_csd[EXT_CSD_PARTITION_SETTING_COMPLETED] &
+> +		    EXT_CSD_PART_SETTING_COMPLETED) {
+> +			card->ext_csd.partition_setting_completed =3D 1;
+> +		} else {
+> +			card->ext_csd.partition_setting_completed =3D 0;
+> +		}
+>  		/*
+>  		 * Enhanced area feature support -- check whether the eMMC
+>  		 * card has the Enhanced area enabled.  If so, export enhanced
+> @@ -1309,7 +1315,7 @@ static int mmc_init_card(struct mmc_host *host,=
+ u32 ocr,
+>  	 * If enhanced_area_en is TRUE, host needs to enable ERASE_GRP_DEF
+>  	 * bit.  This bit will be lost every time after a reset or power of=
+f.
+>  	 */
+> -	if (card->ext_csd.enhanced_area_en ||
+> +	if (card->ext_csd.partition_setting_completed ||
+>  	    (card->ext_csd.rev >=3D 3 && (host->caps2 & MMC_CAP2_HC_ERASE_S=
+Z))) {
+>  		err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>  				 EXT_CSD_ERASE_GROUP_DEF, 1,
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index d424b9d..38175be 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -74,7 +74,7 @@ struct mmc_ext_csd {
+>  	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
+>  	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
+>  	unsigned int		trim_timeout;		/* In milliseconds */
+> -	bool			enhanced_area_en;	/* enable bit */
+> +	bool			partition_setting_completed;	/* enable bit */
+>  	unsigned long long	enhanced_area_offset;	/* Units: Byte */
+>  	unsigned int		enhanced_area_size;	/* Units: KB */
+>  	unsigned int		cache_size;		/* Units: KB */
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 64ec963..78753bc 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -281,6 +281,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
+>  #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
+>  #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
+> +#define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
+>  #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+>  #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
+>  #define EXT_CSD_HPI_MGMT		161	/* R/W */
+> @@ -349,6 +350,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_PART_CONFIG_ACC_RPMB	(0x3)
+>  #define EXT_CSD_PART_CONFIG_ACC_GP0	(0x4)
+>=20
+> +#define EXT_CSD_PART_SETTING_COMPLETED	(0x1)
+>  #define EXT_CSD_PART_SUPPORT_PART_EN	(0x1)
+>=20
+>  #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
+> --
+> 1.7.9.5
+>=20
+> Le 15/08/2014 10:17, Ulf Hansson a =C3=A9crit :
+>> On 14 August 2014 15:27, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion=
+=2Ecom> wrote:
+>>> Le 14/08/2014 13:46, Ulf Hansson a =C3=A9crit :
+>>>> On 13 August 2014 11:20, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neoti=
+on.com> wrote:
+>>>>> Le 13/08/2014 10:36, Ulf Hansson a =C3=A9crit :
+>>>>>> On 17 July 2014 16:57, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neoti=
+on.com> wrote:
+>>>>>>> Create MMC general purpose partitions only if
+>>>>>>> EXT_CSD_PARTITION_SETTING_COMPLETED bit is set.
+>>>>>>> Some tools may set general purpose partition size(s) but fail o=
+r stop
+>>>>>>> without finalize.
+>>>>>>> Another case is to set invalid partition size(s).
+>>>>>>>
+>>>>>>> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
+>>>>>>> ---
+>>>>>>>  drivers/mmc/core/mmc.c  |   15 +++++++++++----
+>>>>>>>  include/linux/mmc/mmc.h |    2 ++
+>>>>>>>  2 files changed, 13 insertions(+), 4 deletions(-)
+>>>>>>>
+>>>>>>> From commit b6603fe574af289dbe9eb9fb4c540bca04f5a053 in master =
+linux tree.
+>>>>>>>
+>>>>>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>>>>>>> index 793c6f7..b9fe211 100644
+>>>>>>> --- a/drivers/mmc/core/mmc.c
+>>>>>>> +++ b/drivers/mmc/core/mmc.c
+>>>>>>> @@ -471,10 +471,17 @@ static int mmc_read_ext_csd(struct mmc_ca=
+rd *card, u8 *ext_csd)
+>>>>>>>                                 ext_csd[EXT_CSD_GP_SIZE_MULT + =
+idx * 3];
+>>>>>>>                                 part_size *=3D (size_t)(hc_eras=
+e_grp_sz *
+>>>>>>>                                         hc_wp_grp_sz);
+>>>>>>> -                               mmc_part_add(card, part_size <<=
+ 19,
+>>>>>>> -                                       EXT_CSD_PART_CONFIG_ACC=
+_GP0 + idx,
+>>>>>>> -                                       "gp%d", idx, false,
+>>>>>>> -                                       MMC_BLK_DATA_AREA_GP);
+>>>>>>> +                               if (ext_csd[EXT_CSD_PARTITION_S=
+ETTING_COMPLETED] &
+>>>>>>> +                               EXT_CSD_PART_SETTING_COMPLETED)=
+ {
+>>>>>>
+>>>>>> Some minor comments here.
+>>>>>>
+>>>>>> I think you could move this if statement up and into the previou=
+s "if"
+>>>>>> where we check for "ext_csd[EXT_CSD_PARTITION_SUPPORT] &
+>>>>>> EXT_CSD_PART_SUPPORT_PART_EN".
+>>>>>>
+>>>>>> Additionally, please run checkpatch.
+>>>>>>
+>>>>>> Kind regards
+>>>>>> Uffe
+>>>>>
+>>>>> Hello,
+>>>>>
+>>>>> I didn't put the if statement above to warn user in case of bad p=
+artitioning.
+>>>>> I don't want the kernel to silently ignore this error.
+>>>>
+>>>> Fair enough.
+>>>>
+>>>> Still I am wondering whether hc_erase_grp_sz, hc_wp_grp_sz and
+>>>> enhanced_area_en should be updated if
+>>>> EXT_CSD_PARTITION_SETTING_COMPLETED isn't set.  That's the case in
+>>>> your patch.
+>>>
+>>> I was focused on partitions and I didn't pay attention on enhanced =
+area.
+>>>
+>>> JEDEC says that partitioning implies :
+>>> * Configure general purpose partitions attributes and sizes
+>>> * Configure enhanced user area offset, attributes and size
+>>>
+>>> and finally set EXT_CSD_PARTITION_SETTING_COMPLETED.
+>>>
+>>> Thus these two parts must checks for setting completed before
+>>> computing values.
+>>>
+>>> Plus, "enhanced_area_en" attribute is set whether or not there is a=
+n
+>>> enhanced area defined. I looked at the code, and the only usage of =
+it
+>>> is to set EXT_CSD_ERASE_GROUP_DEF and compute erase size again.
+>>> I suggest using "partition_setting_completed" identifier which is c=
+ommon
+>>> to the two functions and requires EXT_CSD_ERASE_GROUP_DEF to be set=
+=2E
+>>>
+>>> If you're ok with that, I'll submit another patch.
+>>
+>> Seems reasonable. Please send a v2.
+>>
+>> Kind regards
+>> Uffe
+>>
+>>>
+>>>
+>>> Best regards
+>>> Gr=C3=A9gory Soutad=C3=A9
+>>>
+>>>>
+>>>>>
+>>>>> checkpatch has been run before sending this patch, I know there a=
+re two lines
+>>>>> with two extra characters, but names used here are quite long. I =
+hope it will
+>>>>> not block upstream inclusion.
+>>>>
+>>>> The mmc_read_ext_csd() is not one of the nicest piece of code, but=
+ for
+>>>> sure we should not move on making it worse. If you need to move co=
+de
+>>>> into separate function to prevent checkpatch warnings, please do s=
+o.
+>>>>
+>>>> Kind regards
+>>>> Uffe
+>>>>
+>>>
+>>
