@@ -1,185 +1,105 @@
 From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: mmc: freeing host while host->detect work queue is still active
-Date: Fri, 12 Sep 2014 10:08:48 -0600
-Message-ID: <54131A90.4020501@wwwdotorg.org>
-References: <54121C1C.8080408@wwwdotorg.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH] mmc: don't request CD IRQ until mmc_start_host()
+Date: Fri, 12 Sep 2014 11:18:58 -0600
+Message-ID: <1410542338-24565-1-git-send-email-swarren@wwwdotorg.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:51075 "EHLO
+Received: from avon.wwwdotorg.org ([70.85.31.133]:38322 "EHLO
 	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752012AbaILQIg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Sep 2014 12:08:36 -0400
-In-Reply-To: <54121C1C.8080408@wwwdotorg.org>
+	with ESMTP id S1750846AbaILRS7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Sep 2014 13:18:59 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King <linux@arm.linux.org.uk>, Adrian Hunter <adrian.hunter@intel.com>, Alexandre Courbot <acourbot@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Stephen Warren <swarren@nvidia.com>, Russell King <linux@arm.linux.org.uk>, Adrian Hunter <adrian.hunter@intel.com>, Alexandre Courbot <acourbot@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On 09/11/2014 04:03 PM, Stephen Warren wrote:
-> Running Fedora rawhides's 3.17.0-0.rc4.git2.1.fc22.armv7hl kernel on
-> Jetson TK1 (an ARM board containing Tegra SoC), I see the following
-> during boot most times the Tegra SDHCI driver defers probe for the SD slot:
+From: Stephen Warren <swarren@nvidia.com>
 
-(and indeed I can reproduce the same issue in plain old v3.17-rc4, so 
-this isn't at all Fedora specific)
+As soon as the CD IRQ is requested, it can trigger, since it's an
+externally controlled event. If it does, delayed_work host->detect will
+be scheduled.
 
->> [    8.377719] sdhci-tegra 700b0400.sdhci: Got CD GPIO #170.
->> [    8.377780] sdhci-tegra 700b0400.sdhci: Got WP GPIO #132.
->> [    8.377898] mmc1: Unknown controller version (3). You may
->> experience problems.
->> [    8.379796] sdhci-tegra 700b0400.sdhci: No vmmc regulator found
->> [    8.380225] ------------[ cut here ]------------
->> [    8.380243] WARNING: CPU: 2 PID: 6 at lib/debugobjects.c:263
->> debug_print_object+0x8c/0xb4()
->> [    8.380261] ODEBUG: free active (active state 0) object type:
->> timer_list hint: delayed_work_timer_fn+0x0/0x18
->> [    8.380308] Modules linked in: ehci_tegra(+) sdhci_tegra
->> sdhci_pltfm sdhci phy_tegra_usb mmc_core i2c_tegra tegra_drm
->> drm_kms_helper drm host1x
->> [    8.380319] CPU: 2 PID: 6 Comm: kworker/u8:0 Not tainted
->> 3.17.0-0.rc4.git2.1.fc22.armv7hl #1
->> [    8.380336] Workqueue: deferwq deferred_probe_work_func
->> [    8.380358] [<c0218ffc>] (unwind_backtrace) from [<c0212bf0>]
->> (show_stack+0x18/0x1c)
->> [    8.380374] [<c0212bf0>] (show_stack) from [<c094dbe0>]
->> (dump_stack+0x84/0xb0)
->> [    8.380395] [<c094dbe0>] (dump_stack) from [<c0251690>]
->> (warn_slowpath_common+0x70/0x94)
->> [    8.380413] [<c0251690>] (warn_slowpath_common) from [<c02516e8>]
->> (warn_slowpath_fmt+0x34/0x44)
->> [    8.380426] [<c02516e8>] (warn_slowpath_fmt) from [<c057ec6c>]
->> (debug_print_object+0x8c/0xb4)
->> [    8.380439] [<c057ec6c>] (debug_print_object) from [<c057f8d8>]
->> (debug_check_no_obj_freed+0xf4/0x1dc)
->> [    8.380453] [<c057f8d8>] (debug_check_no_obj_freed) from
->> [<c0398174>] (kfree+0x160/0x308)
->> [    8.380465] [<c0398174>] (kfree) from [<c0658094>]
->> (device_release+0x64/0x98)
->> [    8.380479] [<c0658094>] (device_release) from [<c056a8a4>]
->> (kobject_release+0x12c/0x19c)
->> [    8.380498] [<c056a8a4>] (kobject_release) from [<bf2994b0>]
->> (sdhci_tegra_probe+0x190/0x1bc [sdhci_tegra])
->> [    8.380810] [<bf2994b0>] (sdhci_tegra_probe [sdhci_tegra]) from
->> [<c065e024>] (platform_drv_probe+0x34/0x68)
->> [    8.380825] [<c065e024>] (platform_drv_probe) from [<c065c0bc>]
->> (driver_probe_device+0x13c/0x33c)
->> [    8.380838] [<c065c0bc>] (driver_probe_device) from [<c065a5f8>]
->> (bus_for_each_drv+0x8c/0x9c)
->> [    8.380852] [<c065a5f8>] (bus_for_each_drv) from [<c065bf08>]
->> (device_attach+0x70/0x94)
->> [    8.380865] [<c065bf08>] (device_attach) from [<c065b464>]
->> (bus_probe_device+0x30/0xa4)
->> [    8.380878] [<c065b464>] (bus_probe_device) from [<c065b954>]
->> (deferred_probe_work_func+0x88/0xb8)
->> [    8.380894] [<c065b954>] (deferred_probe_work_func) from
->> [<c026b0e8>] (process_one_work+0x2a0/0x5f8)
->> [    8.380908] [<c026b0e8>] (process_one_work) from [<c026c7e4>]
->> (worker_thread+0x2d0/0x40c)
->> [    8.380922] [<c026c7e4>] (worker_thread) from [<c027153c>]
->> (kthread+0xd4/0xe8)
->> [    8.380936] [<c027153c>] (kthread) from [<c020ecc8>]
->> (ret_from_fork+0x14/0x20)
->> [    8.380941] ---[ end trace b1f4b0fe632eb3a4 ]---
->
-> The problem is as follows:
->
-> The following sequence of calls requests the CD (Change Detect) IRQ for
-> the SD slot:
->
-> sdhci_tegra_probe()
-> sdhci_tegra_parse_dt()
-> mmc_of_parse()
-> mmc_gpio_request_cd()
-> devm_request_threaded_irq()
->
-> The IRQ is triggered by a pin on the SD slot, so could be in any state,
-> and might fire immediately. This causes the IRQ handler
-> mmc_gpio_cd_irqt() to run, which calls mmc_detect_change() which calls
-> mmc_schedule_delayed_work(&host->detect, ...); Thus, the work queue can
-> be immediately active.
->
-> However, if later part of sdhci_tegra_probe() fails, e.g.
-> sdhci_add_host() -> mmc_regulator_get_supply() ->
-> devm_regulator_get_optional() -> -EPROBE_DEFER, then sdhci_tegra_probe()
-> needs to tear everything down, and so calls sdhci_pltfm_free() ->
-> sdhci_free_host() -> mmc_free_host() -> put_device(&host->class_dev) ->
-> mmc_host_classdev_release() -> kfree(host). However, host->detect is
-> part of host and may still be active at this point, which is what
-> triggers the ODETECT log spew mentioned above.
->
-> This doesn't happen in linux-next, because mmc_gpiod_request_cd()
-> doesn't set up the IRQ handler. Rather this happens inside
-> mmc_gpiod_request_cd_irq() which is called from mmc_start_host(), which
-> I believe is well after deferred probe could occur.
->
-> Some possible options for fixing this in 3.17 are:
->
-> a) Back-port whatever changes in mainline stopped mmc_of_parse()() from
-> requesting the IRQ. That is commit 740a221ef0e5 "mmc: slot-gpio: Add
-> GPIO descriptor based CD GPIO API". I haven't investigated how many
-> other commits would be required for that commit to apply, but I'm
-> nervous it'd be too many to apply to 3.17.
+Many host controller probe()s are roughly structured as:
 
-Sorry, I quoted the wrong commit ID there. That commit is already 
-present in 3.17 (and some earlier). That commit adds the separate 
-mmc_gpiod_request_cd_irq() function that's necessary to solve the 
-problem, and adds a call to it from mmc_start_host(). However, it still 
-leaves a call to mmc_gpiod_request_cd_irq() in mmc_gpio_request_cd(), 
-thus leaving the problem in place.
+*_probe() {
+    host = sdhci_pltfm_init();
+    mmc_of_parse(host->mmc);
+    rc = sdhci_add_host(host);
+    if (rc) {
+        sdhci_pltfm_free();
+        return rc;
+    }
 
-The following commit from linux-next actually solves the problem for me, 
-by having mmc_of_parse() call mmc_gpiod_request_cd() [which doesn't call 
-mmc_gpiod_request_cd_irq()] rather than mmc_gpio_request_cd():
+In 3.17, CD IRQs can are enabled quite early via *_probe() ->
+mmc_of_parse() -> mmc_gpio_request_cd() -> mmc_gpiod_request_cd_irq().
 
-98e90de99a0c mmc: host: switch OF parser to use gpio descriptors
+Note that in linux-next, mmc_of_parse() calls mmc_gpio*d*_request_cd()
+rather than mmc_gpio_request_cd(), and mmc_gpio*d*_request_cd() doesn't
+call mmc_gpiod_request_cd_irq(). However, this issue still exists for
+any other direct users of mmc_gpio_request_cd().
 
-That commit relies on at least one of the following two commits in order 
-to successfully build directly on top of 3.17-rc4:
+sdhci_add_host() may fail part way through (e.g. due to deferred
+probe for a vmmc regulator), and sdhci_pltfm_free() does nothing to
+unrequest the CD IRQ nor cancel the delayed_work. sdhci_pltfm_free() is
+coded to assume that if sdhci_add_host() failed, then the delayed_work
+cannot (or should not) have been triggered.
 
-9d2fa2428ae1 mmc: slot-gpio: add gpiod variant to get wp GPIO
-9fbc695075e9 mmc: slot-gpio: switch to use flags when getting GPIO
+This can lead to the following with CONFIG_DEBUG_OBJECTS_* enabled, when
+kfree(host) is eventually called inside sdhci_pltfm_free():
 
-Is that too much to apply for 3.17 too?
+WARNING: CPU: 2 PID: 6 at lib/debugobjects.c:263 debug_print_object+0x8c/0xb4()
+ODEBUG: free active (active state 0) object type: timer_list hint: delayed_work_timer_fn+0x0/0x18
 
-However I note that this only solves the problem for any user of 
-mmc_of_parse(); any code still calling mmc_gpio_request_cd() directly 
-could still be exposed to the issue. I wonder if we shouldn't also 
-remove the call to mmc_gpiod_request_cd_irq() from mmc_gpio_request_cd().
+The object being complained about is host->detect.
 
-So...
+There's no need to request the CD IRQ so early; mmc_start_host() already
+requests it, and I *assume* that mmc_start_host() is called somehow for
+all host controllers. For SDHCI hosts at least, the typical call path
+that does this is: *_probe() -> sdhci_add_host() -> mmc_add_host() ->
+mmc_start_host(). So, remove the call to mmc_gpiod_request_cd_irq() from
+mmc_gpio_request_cd(). This matches mmc_gpio*d*_request_cd(), which
+already doesn't call mmc_gpiod_request_cd_irq().
 
-> b) Fix the -EPROBE_DEFER cleanup path to explicitly free the IRQ (so it
-> can't schedule the work queue any more), and then cancel the work queue
-> (so it isn't active and doesn't trigger the ODETECT message).
->
-> A naive patch might be like:
->
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 31969436d77c..8125f916be4a 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -586,6 +586,9 @@ void mmc_free_host(struct mmc_host *host)
->       idr_remove(&mmc_host_idr, host->index);
->       spin_unlock(&mmc_host_lock);
->
-> +    mmc_gpiod_free_cd(host);
-> +    cancel_delayed_work_sync(&host->detect);
-> +
->       put_device(&host->class_dev);
->   }
+This solves the problem (eliminates the kernel error message above),
+since it guarantees that the IRQ can't trigger before mmc_start_host()
+is called.
 
-... something like that (but calling a new mmc_gpiod_free_cd_irq()) 
-might still be the best approach. I guess I should just send a patch to 
-do that?
+The critical point here is that once sdhci_add_host() calls
+mmc_add_host() -> mmc_start_host(), sdhci_add_host() is coded not to
+fail. In other words, if there's a chance that mmc_start_host() may have
+been called, and CD IRQs triggered, and the delayed_work scheduled,
+sdhci_add_host() won't fail, and so cleanup is no longer via
+sdhci_pltfm_free() (which doesn't free the IRQ or cancel the work queue)
+but instead must be via sdhci_remove_host(), which calls mmc_remove_host()
+-> mmc_stop_host(), which does free the IRQ and cancel the work queue.
 
-> However, that's problematic, since I think mmc_free_host() would have to
-> somehow determine whether it needs to call mmc_gpio_free_cd() or
-> mmc_gpiod_free_cd()? Perhaps we should *just* call devm_free_irq()
-> there, rather than tearing down all the GPIO stuff too, i.e. split out a
-> separate mmc_gpio_free_cd_irq() function rather like there's a separate
-> IRQ request function?
->
-> What approach do people prefer and/or does anyone have any other ideas
-> for a fix?
+This fixes what I might conclude to be a mistake in commit 740a221ef0e5
+("mmc: slot-gpio: Add GPIO descriptor based CD GPIO API"), which added the
+call from mmc_start_host() to mmc_gpiod_request_cd_irq(), but also added
+incorrectly added a call from mmc_gpio_request_cd() to
+mmc_gpiod_request_cd_irq().
+
+CC: Russell King <linux@arm.linux.org.uk>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Alexandre Courbot <acourbot@nvidia.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>
+Signed-off-by: Stephen Warren <swarren@nvidia.com>
+---
+ drivers/mmc/core/slot-gpio.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index 5f89cb83d5f0..187f48a5795a 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -221,8 +221,6 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio,
+ 	ctx->override_cd_active_level = true;
+ 	ctx->cd_gpio = gpio_to_desc(gpio);
+ 
+-	mmc_gpiod_request_cd_irq(host);
+-
+ 	return 0;
+ }
+ EXPORT_SYMBOL(mmc_gpio_request_cd);
+-- 
+1.9.1
+
