@@ -1,105 +1,558 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: [PATCH] mmc: don't request CD IRQ until mmc_start_host()
-Date: Fri, 12 Sep 2014 11:18:58 -0600
-Message-ID: <1410542338-24565-1-git-send-email-swarren@wwwdotorg.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:38322 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750846AbaILRS7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Sep 2014 13:18:59 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+From: Joe Perches <joe@perches.com>
+Subject: [PATCH] mmc: Convert pr_warning to pr_warn
+Date: Fri, 12 Sep 2014 14:56:56 -0700
+Message-ID: <1410559016.9942.53.camel@joe-AO725>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Stephen Warren <swarren@nvidia.com>, Russell King <linux@arm.linux.org.uk>, Adrian Hunter <adrian.hunter@intel.com>, Alexandre Courbot <acourbot@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
-From: Stephen Warren <swarren@nvidia.com>
+Use the much more common pr_warn instead of pr_warning.
 
-As soon as the CD IRQ is requested, it can trigger, since it's an
-externally controlled event. If it does, delayed_work host->detect will
-be scheduled.
+Other miscellanea:
 
-Many host controller probe()s are roughly structured as:
+o Coalesce formats
+o Realign arguments
+o Remove extra spaces when coalescing formats
 
-*_probe() {
-    host = sdhci_pltfm_init();
-    mmc_of_parse(host->mmc);
-    rc = sdhci_add_host(host);
-    if (rc) {
-        sdhci_pltfm_free();
-        return rc;
-    }
-
-In 3.17, CD IRQs can are enabled quite early via *_probe() ->
-mmc_of_parse() -> mmc_gpio_request_cd() -> mmc_gpiod_request_cd_irq().
-
-Note that in linux-next, mmc_of_parse() calls mmc_gpio*d*_request_cd()
-rather than mmc_gpio_request_cd(), and mmc_gpio*d*_request_cd() doesn't
-call mmc_gpiod_request_cd_irq(). However, this issue still exists for
-any other direct users of mmc_gpio_request_cd().
-
-sdhci_add_host() may fail part way through (e.g. due to deferred
-probe for a vmmc regulator), and sdhci_pltfm_free() does nothing to
-unrequest the CD IRQ nor cancel the delayed_work. sdhci_pltfm_free() is
-coded to assume that if sdhci_add_host() failed, then the delayed_work
-cannot (or should not) have been triggered.
-
-This can lead to the following with CONFIG_DEBUG_OBJECTS_* enabled, when
-kfree(host) is eventually called inside sdhci_pltfm_free():
-
-WARNING: CPU: 2 PID: 6 at lib/debugobjects.c:263 debug_print_object+0x8c/0xb4()
-ODEBUG: free active (active state 0) object type: timer_list hint: delayed_work_timer_fn+0x0/0x18
-
-The object being complained about is host->detect.
-
-There's no need to request the CD IRQ so early; mmc_start_host() already
-requests it, and I *assume* that mmc_start_host() is called somehow for
-all host controllers. For SDHCI hosts at least, the typical call path
-that does this is: *_probe() -> sdhci_add_host() -> mmc_add_host() ->
-mmc_start_host(). So, remove the call to mmc_gpiod_request_cd_irq() from
-mmc_gpio_request_cd(). This matches mmc_gpio*d*_request_cd(), which
-already doesn't call mmc_gpiod_request_cd_irq().
-
-This solves the problem (eliminates the kernel error message above),
-since it guarantees that the IRQ can't trigger before mmc_start_host()
-is called.
-
-The critical point here is that once sdhci_add_host() calls
-mmc_add_host() -> mmc_start_host(), sdhci_add_host() is coded not to
-fail. In other words, if there's a chance that mmc_start_host() may have
-been called, and CD IRQs triggered, and the delayed_work scheduled,
-sdhci_add_host() won't fail, and so cleanup is no longer via
-sdhci_pltfm_free() (which doesn't free the IRQ or cancel the work queue)
-but instead must be via sdhci_remove_host(), which calls mmc_remove_host()
--> mmc_stop_host(), which does free the IRQ and cancel the work queue.
-
-This fixes what I might conclude to be a mistake in commit 740a221ef0e5
-("mmc: slot-gpio: Add GPIO descriptor based CD GPIO API"), which added the
-call from mmc_start_host() to mmc_gpiod_request_cd_irq(), but also added
-incorrectly added a call from mmc_gpio_request_cd() to
-mmc_gpiod_request_cd_irq().
-
-CC: Russell King <linux@arm.linux.org.uk>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Alexandre Courbot <acourbot@nvidia.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>
-Signed-off-by: Stephen Warren <swarren@nvidia.com>
+Signed-off-by: Joe Perches <joe@perches.com>
 ---
- drivers/mmc/core/slot-gpio.c | 2 --
- 1 file changed, 2 deletions(-)
+ drivers/mmc/card/block.c     |  4 ++--
+ drivers/mmc/card/queue.c     |  6 ++----
+ drivers/mmc/card/sdio_uart.c |  9 ++++-----
+ drivers/mmc/core/core.c      |  8 ++++----
+ drivers/mmc/core/mmc.c       | 17 +++++++----------
+ drivers/mmc/core/mmc_ops.c   |  4 ++--
+ drivers/mmc/core/sd.c        | 33 ++++++++++++++-------------------
+ drivers/mmc/core/sdio.c      |  7 +++----
+ drivers/mmc/core/sdio_bus.c  |  4 ++--
+ drivers/mmc/core/sdio_irq.c  |  7 +++----
+ drivers/mmc/host/s3cmci.c    |  3 ++-
+ drivers/mmc/host/sdhci.c     | 34 ++++++++++++++++------------------
+ drivers/mmc/host/tifm_sd.c   |  4 ++--
+ drivers/mmc/host/wbsd.c      | 21 ++++++---------------
+ 14 files changed, 69 insertions(+), 92 deletions(-)
 
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index 5f89cb83d5f0..187f48a5795a 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -221,8 +221,6 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio,
- 	ctx->override_cd_active_level = true;
- 	ctx->cd_gpio = gpio_to_desc(gpio);
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index e248b96..ec8ac2a 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1928,8 +1928,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 		case MMC_BLK_ECC_ERR:
+ 			if (brq->data.blocks > 1) {
+ 				/* Redo read one sector at a time */
+-				pr_warning("%s: retrying using single block read\n",
+-					   req->rq_disk->disk_name);
++				pr_warn("%s: retrying using single block read\n",
++					req->rq_disk->disk_name);
+ 				disable_multi = 1;
+ 				break;
+ 			}
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 3e049c1..feea926 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -229,14 +229,12 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 		if (bouncesz > 512) {
+ 			mqrq_cur->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
+ 			if (!mqrq_cur->bounce_buf) {
+-				pr_warning("%s: unable to "
+-					"allocate bounce cur buffer\n",
++				pr_warn("%s: unable to allocate bounce cur buffer\n",
+ 					mmc_card_name(card));
+ 			}
+ 			mqrq_prev->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
+ 			if (!mqrq_prev->bounce_buf) {
+-				pr_warning("%s: unable to "
+-					"allocate bounce prev buffer\n",
++				pr_warn("%s: unable to allocate bounce prev buffer\n",
+ 					mmc_card_name(card));
+ 				kfree(mqrq_cur->bounce_buf);
+ 				mqrq_cur->bounce_buf = NULL;
+diff --git a/drivers/mmc/card/sdio_uart.c b/drivers/mmc/card/sdio_uart.c
+index f093cea..d2de592 100644
+--- a/drivers/mmc/card/sdio_uart.c
++++ b/drivers/mmc/card/sdio_uart.c
+@@ -1063,8 +1063,8 @@ static int sdio_uart_probe(struct sdio_func *func,
+ 		return -ENOMEM;
  
--	mmc_gpiod_request_cd_irq(host);
--
- 	return 0;
+ 	if (func->class == SDIO_CLASS_UART) {
+-		pr_warning("%s: need info on UART class basic setup\n",
+-		       sdio_func_id(func));
++		pr_warn("%s: need info on UART class basic setup\n",
++			sdio_func_id(func));
+ 		kfree(port);
+ 		return -ENOSYS;
+ 	} else if (func->class == SDIO_CLASS_GPS) {
+@@ -1082,9 +1082,8 @@ static int sdio_uart_probe(struct sdio_func *func,
+ 				break;
+ 		}
+ 		if (!tpl) {
+-			pr_warning(
+-       "%s: can't find tuple 0x91 subtuple 0 (SUBTPL_SIOREG) for GPS class\n",
+-			       sdio_func_id(func));
++			pr_warn("%s: can't find tuple 0x91 subtuple 0 (SUBTPL_SIOREG) for GPS class\n",
++				sdio_func_id(func));
+ 			kfree(port);
+ 			return -EINVAL;
+ 		}
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index e2e1dd4..b1e209f 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -433,8 +433,8 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
+ 		 */
+ 		if (cmd->sanitize_busy && cmd->error == -ETIMEDOUT) {
+ 			if (!mmc_interrupt_hpi(host->card)) {
+-				pr_warning("%s: %s: Interrupted sanitize\n",
+-					   mmc_hostname(host), __func__);
++				pr_warn("%s: %s: Interrupted sanitize\n",
++					mmc_hostname(host), __func__);
+ 				cmd->error = 0;
+ 				break;
+ 			} else {
+@@ -1417,8 +1417,8 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, u32 ocr)
+ 	if (!host->ops->start_signal_voltage_switch)
+ 		return -EPERM;
+ 	if (!host->ops->card_busy)
+-		pr_warning("%s: cannot verify signal voltage switch\n",
+-				mmc_hostname(host));
++		pr_warn("%s: cannot verify signal voltage switch\n",
++			mmc_hostname(host));
+ 
+ 	cmd.opcode = SD_SWITCH_VOLTAGE;
+ 	cmd.arg = 0;
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 69e6273..51085b4 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -226,9 +226,7 @@ static int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd)
+ 				"Card will be ignored.\n",
+ 				mmc_hostname(card->host));
+ 		} else {
+-			pr_warning("%s: unable to read "
+-				"EXT_CSD, performance might "
+-				"suffer.\n",
++			pr_warn("%s: unable to read EXT_CSD, performance might suffer\n",
+ 				mmc_hostname(card->host));
+ 			err = 0;
+ 		}
+@@ -790,8 +788,8 @@ static int __mmc_select_powerclass(struct mmc_card *card,
+ 				ext_csd->raw_pwr_cl_200_360;
+ 		break;
+ 	default:
+-		pr_warning("%s: Voltage range not supported "
+-			   "for power class.\n", mmc_hostname(host));
++		pr_warn("%s: Voltage range not supported for power class\n",
++			mmc_hostname(host));
+ 		return -EINVAL;
+ 	}
+ 
+@@ -1432,8 +1430,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		if (err && err != -EBADMSG)
+ 			goto free_card;
+ 		if (err) {
+-			pr_warning("%s: Enabling HPI failed\n",
+-				   mmc_hostname(card->host));
++			pr_warn("%s: Enabling HPI failed\n",
++				mmc_hostname(card->host));
+ 			err = 0;
+ 		} else
+ 			card->ext_csd.hpi_en = 1;
+@@ -1454,9 +1452,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		 * Only if no error, cache is turned on successfully.
+ 		 */
+ 		if (err) {
+-			pr_warning("%s: Cache is supported, "
+-					"but failed to turn on (%d)\n",
+-					mmc_hostname(card->host), err);
++			pr_warn("%s: Cache is supported, but failed to turn on (%d)\n",
++				mmc_hostname(card->host), err);
+ 			card->ext_csd.cache_ctrl = 0;
+ 			err = 0;
+ 		} else {
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index ba0275e..7911e05 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -649,8 +649,8 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
+ 	int err;
+ 
+ 	if (!card->ext_csd.hpi) {
+-		pr_warning("%s: Card didn't support HPI command\n",
+-			   mmc_hostname(card->host));
++		pr_warn("%s: Card didn't support HPI command\n",
++			mmc_hostname(card->host));
+ 		return -EINVAL;
+ 	}
+ 
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 2591388..d90a6de 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -229,8 +229,8 @@ static int mmc_read_ssr(struct mmc_card *card)
+ 	u32 *ssr;
+ 
+ 	if (!(card->csd.cmdclass & CCC_APP_SPEC)) {
+-		pr_warning("%s: card lacks mandatory SD Status "
+-			"function.\n", mmc_hostname(card->host));
++		pr_warn("%s: card lacks mandatory SD Status function\n",
++			mmc_hostname(card->host));
+ 		return 0;
+ 	}
+ 
+@@ -240,8 +240,8 @@ static int mmc_read_ssr(struct mmc_card *card)
+ 
+ 	err = mmc_app_sd_status(card, ssr);
+ 	if (err) {
+-		pr_warning("%s: problem reading SD Status "
+-			"register.\n", mmc_hostname(card->host));
++		pr_warn("%s: problem reading SD Status register\n",
++			mmc_hostname(card->host));
+ 		err = 0;
+ 		goto out;
+ 	}
+@@ -265,8 +265,8 @@ static int mmc_read_ssr(struct mmc_card *card)
+ 				card->ssr.erase_offset = eo * 1000;
+ 			}
+ 		} else {
+-			pr_warning("%s: SD Status: Invalid Allocation Unit size.\n",
+-				   mmc_hostname(card->host));
++			pr_warn("%s: SD Status: Invalid Allocation Unit size\n",
++				mmc_hostname(card->host));
+ 		}
+ 	}
+ out:
+@@ -286,8 +286,7 @@ static int mmc_read_switch(struct mmc_card *card)
+ 		return 0;
+ 
+ 	if (!(card->csd.cmdclass & CCC_SWITCH)) {
+-		pr_warning("%s: card lacks mandatory switch "
+-			"function, performance might suffer.\n",
++		pr_warn("%s: card lacks mandatory switch function, performance might suffer\n",
+ 			mmc_hostname(card->host));
+ 		return 0;
+ 	}
+@@ -316,7 +315,7 @@ static int mmc_read_switch(struct mmc_card *card)
+ 		if (err != -EINVAL && err != -ENOSYS && err != -EFAULT)
+ 			goto out;
+ 
+-		pr_warning("%s: problem reading Bus Speed modes.\n",
++		pr_warn("%s: problem reading Bus Speed modes\n",
+ 			mmc_hostname(card->host));
+ 		err = 0;
+ 
+@@ -372,8 +371,7 @@ int mmc_sd_switch_hs(struct mmc_card *card)
+ 		goto out;
+ 
+ 	if ((status[16] & 0xF) != 1) {
+-		pr_warning("%s: Problem switching card "
+-			"into high-speed mode!\n",
++		pr_warn("%s: Problem switching card into high-speed mode!\n",
+ 			mmc_hostname(card->host));
+ 		err = 0;
+ 	} else {
+@@ -440,7 +438,7 @@ static int sd_select_driver_type(struct mmc_card *card, u8 *status)
+ 		return err;
+ 
+ 	if ((status[15] & 0xF) != drive_strength) {
+-		pr_warning("%s: Problem setting drive strength!\n",
++		pr_warn("%s: Problem setting drive strength!\n",
+ 			mmc_hostname(card->host));
+ 		return 0;
+ 	}
+@@ -518,7 +516,7 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
+ 		return err;
+ 
+ 	if ((status[16] & 0xF) != card->sd_bus_speed)
+-		pr_warning("%s: Problem setting bus speed mode!\n",
++		pr_warn("%s: Problem setting bus speed mode!\n",
+ 			mmc_hostname(card->host));
+ 	else {
+ 		mmc_set_timing(card->host, timing);
+@@ -598,7 +596,7 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
+ 			return err;
+ 
+ 		if (((status[15] >> 4) & 0x0F) != current_limit)
+-			pr_warning("%s: Problem setting current limit!\n",
++			pr_warn("%s: Problem setting current limit!\n",
+ 				mmc_hostname(card->host));
+ 
+ 	}
+@@ -727,8 +725,7 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
+ try_again:
+ 	if (!retries) {
+ 		ocr &= ~SD_OCR_S18R;
+-		pr_warning("%s: Skipping voltage switch\n",
+-			mmc_hostname(host));
++		pr_warn("%s: Skipping voltage switch\n", mmc_hostname(host));
+ 	}
+ 
+ 	/*
+@@ -872,9 +869,7 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
+ 		}
+ 
+ 		if (ro < 0) {
+-			pr_warning("%s: host does not "
+-				"support reading read-only "
+-				"switch. assuming write-enable.\n",
++			pr_warn("%s: host does not support reading read-only switch, assuming write-enable\n",
+ 				mmc_hostname(host));
+ 		} else if (ro > 0) {
+ 			mmc_card_set_readonly(card);
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 3fc40a7..2439e71 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -216,8 +216,8 @@ static int sdio_enable_wide(struct mmc_card *card)
+ 		return ret;
+ 
+ 	if ((ctrl & SDIO_BUS_WIDTH_MASK) == SDIO_BUS_WIDTH_RESERVED)
+-		pr_warning("%s: SDIO_CCCR_IF is invalid: 0x%02x\n",
+-			   mmc_hostname(card->host), ctrl);
++		pr_warn("%s: SDIO_CCCR_IF is invalid: 0x%02x\n",
++			mmc_hostname(card->host), ctrl);
+ 
+ 	/* set as 4-bit bus width */
+ 	ctrl &= ~SDIO_BUS_WIDTH_MASK;
+@@ -605,8 +605,7 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 
+ try_again:
+ 	if (!retries) {
+-		pr_warning("%s: Skipping voltage switch\n",
+-				mmc_hostname(host));
++		pr_warn("%s: Skipping voltage switch\n", mmc_hostname(host));
+ 		ocr &= ~R4_18V_PRESENT;
+ 	}
+ 
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 4fa8fef9..e4eb456 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -177,8 +177,8 @@ static int sdio_bus_remove(struct device *dev)
+ 	drv->remove(func);
+ 
+ 	if (func->irq_handler) {
+-		pr_warning("WARNING: driver %s did not remove "
+-			"its interrupt handler!\n", drv->name);
++		pr_warn("WARNING: driver %s did not remove its interrupt handler!\n",
++			drv->name);
+ 		sdio_claim_host(func);
+ 		sdio_release_irq(func);
+ 		sdio_release_host(func);
+diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
+index 696eca4..09cc67d 100644
+--- a/drivers/mmc/core/sdio_irq.c
++++ b/drivers/mmc/core/sdio_irq.c
+@@ -69,16 +69,15 @@ static int process_sdio_pending_irqs(struct mmc_host *host)
+ 		if (pending & (1 << i)) {
+ 			func = card->sdio_func[i - 1];
+ 			if (!func) {
+-				pr_warning("%s: pending IRQ for "
+-					"non-existent function\n",
++				pr_warn("%s: pending IRQ for non-existent function\n",
+ 					mmc_card_id(card));
+ 				ret = -EINVAL;
+ 			} else if (func->irq_handler) {
+ 				func->irq_handler(func);
+ 				count++;
+ 			} else {
+-				pr_warning("%s: pending IRQ with no handler\n",
+-				       sdio_func_id(func));
++				pr_warn("%s: pending IRQ with no handler\n",
++					sdio_func_id(func));
+ 				ret = -EINVAL;
+ 			}
+ 		}
+diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+index e4e1a53..94cddf3 100644
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -985,7 +985,8 @@ static int s3cmci_setup_data(struct s3cmci_host *host, struct mmc_data *data)
+ 		 * one block being transferred. */
+ 
+ 		if (data->blocks > 1) {
+-			pr_warning("%s: can't do non-word sized block transfers (blksz %d)\n", __func__, data->blksz);
++			pr_warn("%s: can't do non-word sized block transfers (blksz %d)\n",
++				__func__, data->blksz);
+ 			return -EINVAL;
+ 		}
+ 	}
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 7481bd8..db113ab 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1754,8 +1754,8 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ 			ret = regulator_set_voltage(mmc->supply.vqmmc, 2700000,
+ 						    3600000);
+ 			if (ret) {
+-				pr_warning("%s: Switching to 3.3V signalling voltage "
+-						" failed\n", mmc_hostname(mmc));
++				pr_warn("%s: Switching to 3.3V signalling voltage failed\n",
++					mmc_hostname(mmc));
+ 				return -EIO;
+ 			}
+ 		}
+@@ -1767,8 +1767,8 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ 		if (!(ctrl & SDHCI_CTRL_VDD_180))
+ 			return 0;
+ 
+-		pr_warning("%s: 3.3V regulator output did not became stable\n",
+-				mmc_hostname(mmc));
++		pr_warn("%s: 3.3V regulator output did not became stable\n",
++			mmc_hostname(mmc));
+ 
+ 		return -EAGAIN;
+ 	case MMC_SIGNAL_VOLTAGE_180:
+@@ -1776,8 +1776,8 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ 			ret = regulator_set_voltage(mmc->supply.vqmmc,
+ 					1700000, 1950000);
+ 			if (ret) {
+-				pr_warning("%s: Switching to 1.8V signalling voltage "
+-						" failed\n", mmc_hostname(mmc));
++				pr_warn("%s: Switching to 1.8V signalling voltage failed\n",
++					mmc_hostname(mmc));
+ 				return -EIO;
+ 			}
+ 		}
+@@ -1794,8 +1794,8 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ 		if (ctrl & SDHCI_CTRL_VDD_180)
+ 			return 0;
+ 
+-		pr_warning("%s: 1.8V regulator output did not became stable\n",
+-				mmc_hostname(mmc));
++		pr_warn("%s: 1.8V regulator output did not became stable\n",
++			mmc_hostname(mmc));
+ 
+ 		return -EAGAIN;
+ 	case MMC_SIGNAL_VOLTAGE_120:
+@@ -1803,8 +1803,8 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ 			ret = regulator_set_voltage(mmc->supply.vqmmc, 1100000,
+ 						    1300000);
+ 			if (ret) {
+-				pr_warning("%s: Switching to 1.2V signalling voltage "
+-						" failed\n", mmc_hostname(mmc));
++				pr_warn("%s: Switching to 1.2V signalling voltage failed\n",
++					mmc_hostname(mmc));
+ 				return -EIO;
+ 			}
+ 		}
+@@ -2844,8 +2844,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+ 		if (host->ops->enable_dma) {
+ 			if (host->ops->enable_dma(host)) {
+-				pr_warning("%s: No suitable DMA "
+-					"available. Falling back to PIO.\n",
++				pr_warn("%s: No suitable DMA available - falling back to PIO\n",
+ 					mmc_hostname(mmc));
+ 				host->flags &=
+ 					~(SDHCI_USE_SDMA | SDHCI_USE_ADMA);
+@@ -2867,15 +2866,14 @@ int sdhci_add_host(struct sdhci_host *host)
+ 			dma_free_coherent(mmc_dev(mmc), ADMA_SIZE,
+ 					  host->adma_desc, host->adma_addr);
+ 			kfree(host->align_buffer);
+-			pr_warning("%s: Unable to allocate ADMA "
+-				"buffers. Falling back to standard DMA.\n",
++			pr_warn("%s: Unable to allocate ADMA buffers - falling back to standard DMA\n",
+ 				mmc_hostname(mmc));
+ 			host->flags &= ~SDHCI_USE_ADMA;
+ 			host->adma_desc = NULL;
+ 			host->align_buffer = NULL;
+ 		} else if (host->adma_addr & 3) {
+-			pr_warning("%s: unable to allocate aligned ADMA descriptor\n",
+-				   mmc_hostname(mmc));
++			pr_warn("%s: unable to allocate aligned ADMA descriptor\n",
++				mmc_hostname(mmc));
+ 			host->flags &= ~SDHCI_USE_ADMA;
+ 			dma_free_coherent(mmc_dev(mmc), ADMA_SIZE,
+ 					  host->adma_desc, host->adma_addr);
+@@ -3202,8 +3200,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		mmc->max_blk_size = (caps[0] & SDHCI_MAX_BLOCK_MASK) >>
+ 				SDHCI_MAX_BLOCK_SHIFT;
+ 		if (mmc->max_blk_size >= 3) {
+-			pr_warning("%s: Invalid maximum block size, "
+-				"assuming 512 bytes\n", mmc_hostname(mmc));
++			pr_warn("%s: Invalid maximum block size, assuming 512 bytes\n",
++				mmc_hostname(mmc));
+ 			mmc->max_blk_size = 0;
+ 		}
+ 	}
+diff --git a/drivers/mmc/host/tifm_sd.c b/drivers/mmc/host/tifm_sd.c
+index d1760eb..93c4b40 100644
+--- a/drivers/mmc/host/tifm_sd.c
++++ b/drivers/mmc/host/tifm_sd.c
+@@ -952,8 +952,8 @@ static int tifm_sd_probe(struct tifm_dev *sock)
+ 
+ 	if (!(TIFM_SOCK_STATE_OCCUPIED
+ 	      & readl(sock->addr + SOCK_PRESENT_STATE))) {
+-		pr_warning("%s : card gone, unexpectedly\n",
+-		       dev_name(&sock->dev));
++		pr_warn("%s : card gone, unexpectedly\n",
++			dev_name(&sock->dev));
+ 		return rc;
+ 	}
+ 
+diff --git a/drivers/mmc/host/wbsd.c b/drivers/mmc/host/wbsd.c
+index 1defd5e..9a6dfb0 100644
+--- a/drivers/mmc/host/wbsd.c
++++ b/drivers/mmc/host/wbsd.c
+@@ -803,8 +803,7 @@ static void wbsd_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 
+ 		default:
+ #ifdef CONFIG_MMC_DEBUG
+-			pr_warning("%s: Data command %d is not "
+-				"supported by this controller.\n",
++			pr_warn("%s: Data command %d is not supported by this controller\n",
+ 				mmc_hostname(host->mmc), cmd->opcode);
+ #endif
+ 			cmd->error = -EINVAL;
+@@ -1429,8 +1428,8 @@ free:
+ 	free_dma(dma);
+ 
+ err:
+-	pr_warning(DRIVER_NAME ": Unable to allocate DMA %d. "
+-		"Falling back on FIFO.\n", dma);
++	pr_warn(DRIVER_NAME ": Unable to allocate DMA %d - falling back on FIFO\n",
++		dma);
  }
- EXPORT_SYMBOL(mmc_gpio_request_cd);
--- 
-1.9.1
-
+ 
+ static void wbsd_release_dma(struct wbsd_host *host)
+@@ -1664,9 +1663,7 @@ static int wbsd_init(struct device *dev, int base, int irq, int dma,
+ 	ret = wbsd_scan(host);
+ 	if (ret) {
+ 		if (pnp && (ret == -ENODEV)) {
+-			pr_warning(DRIVER_NAME
+-				": Unable to confirm device presence. You may "
+-				"experience lock-ups.\n");
++			pr_warn(DRIVER_NAME ": Unable to confirm device presence - you may experience lock-ups\n");
+ 		} else {
+ 			wbsd_free_mmc(dev);
+ 			return ret;
+@@ -1688,10 +1685,7 @@ static int wbsd_init(struct device *dev, int base, int irq, int dma,
+ 	 */
+ 	if (pnp) {
+ 		if ((host->config != 0) && !wbsd_chip_validate(host)) {
+-			pr_warning(DRIVER_NAME
+-				": PnP active but chip not configured! "
+-				"You probably have a buggy BIOS. "
+-				"Configuring chip manually.\n");
++			pr_warn(DRIVER_NAME ": PnP active but chip not configured! You probably have a buggy BIOS. Configuring chip manually.\n");
+ 			wbsd_chip_config(host);
+ 		}
+ 	} else
+@@ -1884,10 +1878,7 @@ static int wbsd_pnp_resume(struct pnp_dev *pnp_dev)
+ 	 */
+ 	if (host->config != 0) {
+ 		if (!wbsd_chip_validate(host)) {
+-			pr_warning(DRIVER_NAME
+-				": PnP active but chip not configured! "
+-				"You probably have a buggy BIOS. "
+-				"Configuring chip manually.\n");
++			pr_warn(DRIVER_NAME ": PnP active but chip not configured! You probably have a buggy BIOS. Configuring chip manually.\n");
+ 			wbsd_chip_config(host);
+ 		}
+ 	}
