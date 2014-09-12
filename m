@@ -1,58 +1,81 @@
-From: <micky_ching@realsil.com.cn>
-Subject: [PATCH] mmc: rtsx: add card power off during probe
-Date: Fri, 12 Sep 2014 09:39:59 +0800
-Message-ID: <1410485999-10939-1-git-send-email-micky_ching@realsil.com.cn>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: mmc:  eMMC BKOPS status handling lock for non urgent case
+Date: Fri, 12 Sep 2014 11:45:28 +0900
+Message-ID: <54125E48.7030603@samsung.com>
+References: <5400AF04.2040708@tqsc.de> <5406731D.8000802@samsung.com>
+ <540D65B5.3010206@tqsc.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=ISO-8859-15
 Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: chris@printf.net, ulf.hansson@linaro.org, sameo@linux.intel.com
-Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, devel@linuxdriverproject.org, rogerable@realtek.com, dan.carpenter@oracle.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:40800 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751300AbaILCpa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Sep 2014 22:45:30 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0NBR00IRJOZSEBB0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 12 Sep 2014 11:45:28 +0900 (KST)
+In-reply-to: <540D65B5.3010206@tqsc.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Markus Niebel <list-09_linux-mmc@tqsc.de>
+Cc: linux-mmc@vger.kernel.org
 
-From: Roger Tseng <rogerable@realtek.com>
+Hi,
 
-Some platform have both UEFI driver and MFD/mmc driver, if entering
-linux while card in the slot, the card power is already on, and rtsx-mmc
-driver have no chance to make card power off. This will lead UHSI card
-failed to enter UHSI mode.
+On 09/08/2014 05:15 PM, Markus Niebel wrote:
+> Hello Jaehoon Chung
+> 
+> Am 03.09.2014 03:47, wrote Jaehoon Chung:
+>> Hi, Markus
+>>
+>> Sorry for replying too late.
+>>
+>> On 08/30/2014 01:49 AM, Markus Niebel wrote:
+>>> Hello,
+>>>
+>>> experimenting with the current BKOPS code we found, that when triggering from BKOPS_LEVEL 1,
+>>> the status stored with mmc_card_set_doing_bkops is never reset preventing BKOPS from working.
+>> In now, bkops is working for upper case than LEVEL_2 (urgent case).
+>> Patch of LEVEL_1's case has sent at mailing, maybe you can found it.
+> 
+> I will look for it.
+> 
+>>
+>>>
+>>> Since I'm not an expert in the mmc subsystem I ask for a hint where to look for completion
+>>> and implement proper status reset.
+>>
+>> Could you explain to me more?
+> 
+> If starting BKOPS with BKOPS_LEVEL 1 a switch (CMD6) without wait for completion (status polling)
+> is issued an a status variable is set. I did'nt find a place where this status is reset.
 
-It is hard to control the UEFI driver leaving state, so we power off the
-card power during probe.
+You means when BKOPS_LEVEL_1 is set, this status didn't reset anywhere, right?
+I didn't know why this value needs to reset.
+Before starting BKOPS, always read the bkops-status from card's ext_csd register.
+Then it should be re-assigned to the new status value.
 
-Signed-off-by: Roger Tseng <rogerable@realtek.com>
-Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c |    7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+we didn't refer to bkops-status for starting bkops or not.
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index dfde4a2..57b0796 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -1341,8 +1341,13 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
- 	host->pcr = pcr;
- 	host->mmc = mmc;
- 	host->pdev = pdev;
--	host->power_state = SDMMC_POWER_OFF;
- 	INIT_WORK(&host->work, sd_request);
-+	sd_power_off(host);
-+	/*
-+	 * ref: SD spec 3.01: 6.4.1.2 Power On or Power Cycle
-+	 */
-+	usleep_range(1000, 2000);
-+
- 	platform_set_drvdata(pdev, host);
- 	pcr->slots[RTSX_SD_CARD].p_dev = pdev;
- 	pcr->slots[RTSX_SD_CARD].card_event = rtsx_pci_sdmmc_card_event;
--- 
-1.7.9.5
+Best Regards,
+Jaehoon Chung
+
+> 
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>>>
+>>> Thanks in advance
+>>>
+>>> Markus Niebel
+>>>
+>  
+> Best Regards,
+> Markus Niebel
+> 
+
