@@ -1,73 +1,75 @@
-From: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
-Subject: Re: [PATCH] mmc: Add delay between CMD6 and CMD13 for Sandisk eMMC cards
-Date: Mon, 15 Sep 2014 12:53:55 +0200
-Message-ID: <CAL8zT=jVWTp5tzW3Pi2MFAq6gySeinvACwSyFdj+4SpYEW2YXg@mail.gmail.com>
-References: <1410265614-3275-1-git-send-email-jean-michel.hautbois@vodalys.com>
- <54110B29.7030303@samsung.com> <CAL8zT=iezoevh_12GAZyDOdRy1dAS876RZDUJGVTZyY4zYZbaQ@mail.gmail.com>
- <5416C30C.6010400@samsung.com>
+From: Ian Molton <ian.molton@codethink.co.uk>
+Subject: Re: [PATCH v3] tmio_mmc_pio: prevent endless loop in
+ tmio_mmc_set_clock()
+Date: Mon, 15 Sep 2014 12:14:30 +0100
+Message-ID: <20140915121430.b19ec6531ef5336fdd683c85@codethink.co.uk>
+References: <3179866.4yEKrAKQ30@wasted.cogentembedded.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f47.google.com ([209.85.218.47]:49426 "EHLO
-	mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753158AbaIOKyL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Sep 2014 06:54:11 -0400
-In-Reply-To: <5416C30C.6010400@samsung.com>
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:34119 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753237AbaIOLOn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Sep 2014 07:14:43 -0400
+In-Reply-To: <3179866.4yEKrAKQ30@wasted.cogentembedded.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-kernel <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Cc: linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org, linux-sh@vger.kernel.org
 
-2014-09-15 12:44 GMT+02:00 Jaehoon Chung <jh80.chung@samsung.com>:
-> On 09/15/2014 07:08 PM, Jean-Michel Hautbois wrote:
->> Hi Jaehoon,
->>
->>> On 09/09/2014 09:26 PM, Jean-Michel Hautbois wrote:
->>>> Tested on a i.MX6 board, with Sandisk SDIN5D1-2G.
->>>> Without this patch, I/O errors occur.
->>>> This eMMC seems to have a different Manufacturer ID as it reads 0x45
->>>> and not 0x2 as specified in datasheet.
->>>
->>> I think this patch don't merge into mainline.
->>> This is not solution for problem.
->>> you mentioned the below comment, this is workaround.
->>
->> Yes
->>
->>>>
->>>> Signed-off-by: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
->>>> ---
->>>>  drivers/mmc/core/mmc_ops.c | 9 +++++++++
->>>>  1 file changed, 9 insertions(+)
->>>>
->>>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
->>>> index f51b5ba..91babaa 100644
->>>> --- a/drivers/mmc/core/mmc_ops.c
->>>> +++ b/drivers/mmc/core/mmc_ops.c
->>>> @@ -458,6 +458,15 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->>>>       if (!use_busy_signal)
->>>>               return 0;
->>>>
->>>> +     /* WORKAROUND: for Sandisk eMMC cards, it might need certain delay
->>>> +      * before sending CMD13 after CMD6
->>>> +      * On SDIN5D1-2G MANFID is 0x45 and not 0x2 as specified in datasheet
->>>> +      */
->>>> +     if (card->cid.manfid == CID_MANFID_SANDISK ||
->>>> +             card->cid.manfid == 0x45) {
->>>> +             msleep(1);
->>>> +     }
->>>
->>> If it's a general problem of Sandisk SDIN5D1-2G,
->>> I think you need to verify this problem. And can you use the MMC_FIXUP() and QUIRK?
->>
->> Well, this is difficult to verify, I know that on all my SDIN5D1-2G I
->> have this MANFID different from what is defined by CID_MANFID_SANDISK.
->> How should I use MMC_FIXUP ? Like this ?
->
-> I think you need to explain why delay is need.
-> i didn't have same card, but it might be your host controller or other problem.
+Seems reasonable,
 
-Well, I don't know why it is needed, this is undocumented, nothing in
-datasheet explains anything about this.
+Acked-by: Ian Molton <ian.molton@codethink.co.uk>
 
-JM
+-Ian
+
+On Sun, 14 Sep 2014 23:51:24 +0400
+Sergei Shtylyov <sergei.shtylyov@cogentembedded.com> wrote:
+
+> I spent a couple of days with the driver just hanging due to me forgetting to
+> specify the external crystal frequency,  so that clk_get_rate() returned 0 and
+> thus the loop in tmio_mmc_set_clock() never ended. I don't think that's an
+> acceptable behavior, so I suggest that the minimum frequency is checked for 0
+> in tmio_mmc_host_probe().
+> 
+> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+> Cc: stable@vger.kernel.org
+> 
+> ---
+> The patch is against Ulf Hansson's 'mmc.git' repo's 'fixes' branch.
+> 
+> Changes in version 3:
+> - added Cc: stable.
+> 
+> Changes in version 2:
+> - fixed grammar in the changelog.
+> 
+>  drivers/mmc/host/tmio_mmc_pio.c |    9 +++++++++
+>  1 file changed, 9 insertions(+)
+> 
+> Index: mmc/drivers/mmc/host/tmio_mmc_pio.c
+> ===================================================================
+> --- mmc.orig/drivers/mmc/host/tmio_mmc_pio.c
+> +++ mmc/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -1044,6 +1044,15 @@ int tmio_mmc_host_probe(struct tmio_mmc_
+>  	}
+>  
+>  	/*
+> +	 * Check the sanity of mmc->f_min to prevent tmio_mmc_set_clock() from
+> +	 * looping forever...
+> +	 */
+> +	if (mmc->f_min == 0) {
+> +		ret = -EINVAL;
+> +		goto pm_disable;
+> +	}
+> +
+> +	/*
+>  	 * There are 4 different scenarios for the card detection:
+>  	 *  1) an external gpio irq handles the cd (best for power savings)
+>  	 *  2) internal sdhi irq handles the cd
+> 
+
+
+-- 
+Ian Molton <ian.molton@codethink.co.uk>
