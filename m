@@ -1,137 +1,73 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v5 0002/0003] mmc: Replace "enhanced_area_en" attribute by
- "partition_setting_completed"
-Date: Mon, 15 Sep 2014 13:20:36 +0900
-Message-ID: <54166914.4080706@samsung.com>
-References: <53C7E45E.2060102@neotion.com>
- <CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>
- <53EB2DC3.2080002@neotion.com>
- <CAPDyKFpjYqVUZ8GHB76gD8pOx_eMg9ecvbWrMEfbhEd5ffk7mw@mail.gmail.com>
- <53ECB95F.2030207@neotion.com>
- <CAPDyKFp2ekmucHVzMWxeKfyTmuFKTXAYwUEpL5QxvEh8AjFopg@mail.gmail.com>
- <53F1FBA3.6060108@neotion.com> <5411435C.3080905@neotion.com>
- <541303B8.2060208@neotion.com>
+From: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
+Subject: Re: [PATCH] mmc: Add delay between CMD6 and CMD13 for Sandisk eMMC cards
+Date: Mon, 15 Sep 2014 12:08:47 +0200
+Message-ID: <CAL8zT=iezoevh_12GAZyDOdRy1dAS876RZDUJGVTZyY4zYZbaQ@mail.gmail.com>
+References: <1410265614-3275-1-git-send-email-jean-michel.hautbois@vodalys.com>
+ <54110B29.7030303@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:30493 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750735AbaIOEUj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Sep 2014 00:20:39 -0400
-In-reply-to: <541303B8.2060208@neotion.com>
+Received: from mail-oi0-f42.google.com ([209.85.218.42]:51459 "EHLO
+	mail-oi0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753350AbaIOKJI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Sep 2014 06:09:08 -0400
+In-Reply-To: <54110B29.7030303@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-kernel <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 
-On 09/12/2014 11:31 PM, Gr=C3=A9gory Soutad=C3=A9 wrote:
-> Replace ext_csd "enhanced_area_en" attribute by
->  "partition_setting_completed". It was used whether or
->  not enhanced user area is defined and without checks of
->  EXT_CSD_PARTITION_SETTING_COMPLETED bit.
->=20
-> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
-> ---
->  drivers/mmc/core/mmc.c   |   14 +++++++++-----
->  include/linux/mmc/card.h |    2 +-
->  include/linux/mmc/mmc.h  |    2 ++
->  3 files changed, 12 insertions(+), 6 deletions(-)
->=20
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 77b4cf3..d8d3aef 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -314,7 +314,6 @@ static void mmc_manage_enhanced_area(struct mmc_c=
-ard *card, u8 *ext_csd)
->  		hc_wp_grp_sz =3D
->  			ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
->=20
-> -		card->ext_csd.enhanced_area_en =3D 1;
->  		/*
->  		 * calculate the enhanced data area offset, in bytes
->  		 */
-> @@ -355,13 +354,11 @@ static void mmc_manage_gp_partitions(struct mmc=
-_card *card, u8 *ext_csd)
->  	 */
->  	if (ext_csd[EXT_CSD_PARTITION_SUPPORT] &
->  	    EXT_CSD_PART_SUPPORT_PART_EN) {
-> -		if (card->ext_csd.enhanced_area_en !=3D 1) {
-> +		if (card->ext_csd.partition_setting_completed) {
->  			hc_erase_grp_sz =3D
->  				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
->  			hc_wp_grp_sz =3D
->  				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-> -
-> -			card->ext_csd.enhanced_area_en =3D 1;
->  		}
->=20
->  		for (idx =3D 0; idx < MMC_NUM_GP_PARTITION; idx++) {
-> @@ -488,6 +485,13 @@ static int mmc_read_ext_csd(struct mmc_card *car=
-d, u8 *ext_csd)
->  		ext_csd[EXT_CSD_TRIM_MULT];
->  	card->ext_csd.raw_partition_support =3D ext_csd[EXT_CSD_PARTITION_S=
-UPPORT];
->  	if (card->ext_csd.rev >=3D 4) {
-> +		if (ext_csd[EXT_CSD_PARTITION_SETTING_COMPLETED] &
-> +		    EXT_CSD_PART_SETTING_COMPLETED) {
-> +			card->ext_csd.partition_setting_completed =3D 1;
-> +		} else {
-> +			card->ext_csd.partition_setting_completed =3D 0;
-> +		}
+Hi Jaehoon,
 
-I remembered that Ulf mentioned these brackets can be removed.
+> On 09/09/2014 09:26 PM, Jean-Michel Hautbois wrote:
+>> Tested on a i.MX6 board, with Sandisk SDIN5D1-2G.
+>> Without this patch, I/O errors occur.
+>> This eMMC seems to have a different Manufacturer ID as it reads 0x45
+>> and not 0x2 as specified in datasheet.
+>
+> I think this patch don't merge into mainline.
+> This is not solution for problem.
+> you mentioned the below comment, this is workaround.
 
-Best Regards,
-Jaehoon Chung
-> +
->  		mmc_manage_enhanced_area(card, ext_csd);
->=20
->  		mmc_manage_gp_partitions(card, ext_csd);
-> @@ -1324,7 +1328,7 @@ static int mmc_init_card(struct mmc_host *host,=
- u32 ocr,
->  	 * If enhanced_area_en is TRUE, host needs to enable ERASE_GRP_DEF
->  	 * bit.  This bit will be lost every time after a reset or power of=
-f.
->  	 */
-> -	if (card->ext_csd.enhanced_area_en ||
-> +	if (card->ext_csd.partition_setting_completed ||
->  	    (card->ext_csd.rev >=3D 3 && (host->caps2 & MMC_CAP2_HC_ERASE_S=
-Z))) {
->  		err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->  				 EXT_CSD_ERASE_GROUP_DEF, 1,
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index d424b9d..38175be 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -74,7 +74,7 @@ struct mmc_ext_csd {
->  	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
->  	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
->  	unsigned int		trim_timeout;		/* In milliseconds */
-> -	bool			enhanced_area_en;	/* enable bit */
-> +	bool			partition_setting_completed;	/* enable bit */
->  	unsigned long long	enhanced_area_offset;	/* Units: Byte */
->  	unsigned int		enhanced_area_size;	/* Units: KB */
->  	unsigned int		cache_size;		/* Units: KB */
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 64ec963..78753bc 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -281,6 +281,7 @@ struct _mmc_csd {
->  #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
->  #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
->  #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
-> +#define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
->  #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
->  #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
->  #define EXT_CSD_HPI_MGMT		161	/* R/W */
-> @@ -349,6 +350,7 @@ struct _mmc_csd {
->  #define EXT_CSD_PART_CONFIG_ACC_RPMB	(0x3)
->  #define EXT_CSD_PART_CONFIG_ACC_GP0	(0x4)
->=20
-> +#define EXT_CSD_PART_SETTING_COMPLETED	(0x1)
->  #define EXT_CSD_PART_SUPPORT_PART_EN	(0x1)
->=20
->  #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
->=20
+Yes
 
+>>
+>> Signed-off-by: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
+>> ---
+>>  drivers/mmc/core/mmc_ops.c | 9 +++++++++
+>>  1 file changed, 9 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>> index f51b5ba..91babaa 100644
+>> --- a/drivers/mmc/core/mmc_ops.c
+>> +++ b/drivers/mmc/core/mmc_ops.c
+>> @@ -458,6 +458,15 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>>       if (!use_busy_signal)
+>>               return 0;
+>>
+>> +     /* WORKAROUND: for Sandisk eMMC cards, it might need certain delay
+>> +      * before sending CMD13 after CMD6
+>> +      * On SDIN5D1-2G MANFID is 0x45 and not 0x2 as specified in datasheet
+>> +      */
+>> +     if (card->cid.manfid == CID_MANFID_SANDISK ||
+>> +             card->cid.manfid == 0x45) {
+>> +             msleep(1);
+>> +     }
+>
+> If it's a general problem of Sandisk SDIN5D1-2G,
+> I think you need to verify this problem. And can you use the MMC_FIXUP() and QUIRK?
+
+Well, this is difficult to verify, I know that on all my SDIN5D1-2G I
+have this MANFID different from what is defined by CID_MANFID_SANDISK.
+How should I use MMC_FIXUP ? Like this ?
+MMC_FIXUP("SEM02G", 0x45, CID_OEMID_ANY, add_quirk, MMC_QUIRK_INAND_CMD13) ?
+
+If so, can I use :
+if (card->quirks & MMC_QUIRK_INAND_CMD38)
+    msleep(1);
+
+In drivers/mmc/core/mmc_ops.c ?
+Is this the good way ?
+
+Thanks,
+JM
