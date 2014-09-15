@@ -1,67 +1,91 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: dw_mmc-exynos: fixed wrong sample-clock selection
-Date: Mon, 15 Sep 2014 19:26:08 +0900
-Message-ID: <1410776768-1303-1-git-send-email-jh80.chung@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:55007 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753321AbaIOK0L (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Sep 2014 06:26:11 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0NBX00LUSUBL06D0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 15 Sep 2014 19:26:09 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: Re: [PATCH] mmc: Add delay between CMD6 and CMD13 for Sandisk eMMC
+ cards
+Date: Mon, 15 Sep 2014 19:44:28 +0900
+Message-ID: <5416C30C.6010400@samsung.com>
+References: <1410265614-3275-1-git-send-email-jean-michel.hautbois@vodalys.com>
+ <54110B29.7030303@samsung.com>
+ <CAL8zT=iezoevh_12GAZyDOdRy1dAS876RZDUJGVTZyY4zYZbaQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <CAL8zT=iezoevh_12GAZyDOdRy1dAS876RZDUJGVTZyY4zYZbaQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-kernel <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-Almost all case is selected to 0.
-(It's not correct sample-clock value.)
-Since it set to wrong value, HS200 mode don't work fine.
-If we want to select the correct value, it has to check from 1 to 7.(skip 0)
+On 09/15/2014 07:08 PM, Jean-Michel Hautbois wrote:
+> Hi Jaehoon,
+> 
+>> On 09/09/2014 09:26 PM, Jean-Michel Hautbois wrote:
+>>> Tested on a i.MX6 board, with Sandisk SDIN5D1-2G.
+>>> Without this patch, I/O errors occur.
+>>> This eMMC seems to have a different Manufacturer ID as it reads 0x45
+>>> and not 0x2 as specified in datasheet.
+>>
+>> I think this patch don't merge into mainline.
+>> This is not solution for problem.
+>> you mentioned the below comment, this is workaround.
+> 
+> Yes
+> 
+>>>
+>>> Signed-off-by: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
+>>> ---
+>>>  drivers/mmc/core/mmc_ops.c | 9 +++++++++
+>>>  1 file changed, 9 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>>> index f51b5ba..91babaa 100644
+>>> --- a/drivers/mmc/core/mmc_ops.c
+>>> +++ b/drivers/mmc/core/mmc_ops.c
+>>> @@ -458,6 +458,15 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>>>       if (!use_busy_signal)
+>>>               return 0;
+>>>
+>>> +     /* WORKAROUND: for Sandisk eMMC cards, it might need certain delay
+>>> +      * before sending CMD13 after CMD6
+>>> +      * On SDIN5D1-2G MANFID is 0x45 and not 0x2 as specified in datasheet
+>>> +      */
+>>> +     if (card->cid.manfid == CID_MANFID_SANDISK ||
+>>> +             card->cid.manfid == 0x45) {
+>>> +             msleep(1);
+>>> +     }
+>>
+>> If it's a general problem of Sandisk SDIN5D1-2G,
+>> I think you need to verify this problem. And can you use the MMC_FIXUP() and QUIRK?
+> 
+> Well, this is difficult to verify, I know that on all my SDIN5D1-2G I
+> have this MANFID different from what is defined by CID_MANFID_SANDISK.
+> How should I use MMC_FIXUP ? Like this ?
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- drivers/mmc/host/dw_mmc-exynos.c |    9 ++++++++-
- 1 file changed, 8 insertions(+), 1 deletion(-)
+I think you need to explain why delay is need.
+i didn't have same card, but it might be your host controller or other problem. 
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 0fbc53a..5294035 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -25,6 +25,7 @@
- #define NUM_PINS(x)			(x + 2)
- 
- #define SDMMC_CLKSEL			0x09C
-+#define SDMMC_CLKSEL_CCLK_SAMPLE_MASK	0x7
- #define SDMMC_CLKSEL_CCLK_SAMPLE(x)	(((x) & 7) << 0)
- #define SDMMC_CLKSEL_CCLK_DRIVE(x)	(((x) & 7) << 16)
- #define SDMMC_CLKSEL_CCLK_DIVIDER(x)	(((x) & 7) << 24)
-@@ -330,6 +331,12 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
- 	if (!blk_test)
- 		return -ENOMEM;
- 
-+	/*
-+	 * In order to check all selclk_sample clock,
-+	 * it needs to reset to 0.
-+	 */
-+	dw_mci_exynos_set_clksmpl(host, 0);
-+
- 	start_smpl = dw_mci_exynos_get_clksmpl(host);
- 
- 	do {
-@@ -372,7 +379,7 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
- 				"Tuning error: cmd.error:%d, data.error:%d\n",
- 				cmd.error, data.error);
- 		}
--	} while (start_smpl != smpl);
-+	} while (start_smpl < SDMMC_CLKSEL_CCLK_SAMPLE_MASK);
- 
- 	found = dw_mci_exynos_get_best_clksmpl(candiates);
- 	if (found >= 0)
--- 
-1.7.9.5
+You can define the 0x45 with other naming.
+ex) CID_MANFID_SANDISK_2	0x45 ? Just example.:)
 
+And Your first patch is applied for every Sandisk card, isn't?
+
+Best Regards,
+Jaehoon Chung
+
+> MMC_FIXUP("SEM02G", 0x45, CID_OEMID_ANY, add_quirk, MMC_QUIRK_INAND_CMD13) ?
+> 
+> If so, can I use :
+> if (card->quirks & MMC_QUIRK_INAND_CMD38)
+>     msleep(1);
+> 
+> In drivers/mmc/core/mmc_ops.c ?
+> Is this the good way ?
+> 
+> Thanks,
+> JM
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
+> 
