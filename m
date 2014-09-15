@@ -1,77 +1,72 @@
-From: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
-Subject: Re: [PATCH] mmc: Add delay between CMD6 and CMD13 for Sandisk eMMC cards
-Date: Mon, 15 Sep 2014 13:29:10 +0200
-Message-ID: <CAL8zT=j86XDU7TZMALYnP+359dxGZHqWsERtRJaO8r-DES1dgg@mail.gmail.com>
-References: <1410265614-3275-1-git-send-email-jean-michel.hautbois@vodalys.com>
- <54110B29.7030303@samsung.com> <CAL8zT=iezoevh_12GAZyDOdRy1dAS876RZDUJGVTZyY4zYZbaQ@mail.gmail.com>
- <5416C30C.6010400@samsung.com> <CAL8zT=jVWTp5tzW3Pi2MFAq6gySeinvACwSyFdj+4SpYEW2YXg@mail.gmail.com>
+From: Markus Niebel <list-09_linux-mmc@tqsc.de>
+Subject: Re: mmc:  eMMC BKOPS status handling lock for non urgent case
+Date: Mon, 15 Sep 2014 15:13:39 +0200
+Message-ID: <5416E603.7050406@tqsc.de>
+References: <5400AF04.2040708@tqsc.de> <5406731D.8000802@samsung.com> <540D65B5.3010206@tqsc.de> <54125E48.7030603@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAL8zT=jVWTp5tzW3Pi2MFAq6gySeinvACwSyFdj+4SpYEW2YXg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-kernel <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Content-Type: text/plain; charset=iso-8859-15
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtprelay01.ispgateway.de ([80.67.31.28]:47832 "EHLO
+	smtprelay01.ispgateway.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751036AbaIONG4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Sep 2014 09:06:56 -0400
+In-Reply-To: <54125E48.7030603@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org
 
-2014-09-15 12:53 GMT+02:00 Jean-Michel Hautbois
-<jean-michel.hautbois@vodalys.com>:
-> 2014-09-15 12:44 GMT+02:00 Jaehoon Chung <jh80.chung@samsung.com>:
->> On 09/15/2014 07:08 PM, Jean-Michel Hautbois wrote:
->>> Hi Jaehoon,
->>>
->>>> On 09/09/2014 09:26 PM, Jean-Michel Hautbois wrote:
->>>>> Tested on a i.MX6 board, with Sandisk SDIN5D1-2G.
->>>>> Without this patch, I/O errors occur.
->>>>> This eMMC seems to have a different Manufacturer ID as it reads 0x45
->>>>> and not 0x2 as specified in datasheet.
->>>>
->>>> I think this patch don't merge into mainline.
->>>> This is not solution for problem.
->>>> you mentioned the below comment, this is workaround.
->>>
->>> Yes
->>>
->>>>>
->>>>> Signed-off-by: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
->>>>> ---
->>>>>  drivers/mmc/core/mmc_ops.c | 9 +++++++++
->>>>>  1 file changed, 9 insertions(+)
->>>>>
->>>>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
->>>>> index f51b5ba..91babaa 100644
->>>>> --- a/drivers/mmc/core/mmc_ops.c
->>>>> +++ b/drivers/mmc/core/mmc_ops.c
->>>>> @@ -458,6 +458,15 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->>>>>       if (!use_busy_signal)
->>>>>               return 0;
->>>>>
->>>>> +     /* WORKAROUND: for Sandisk eMMC cards, it might need certain delay
->>>>> +      * before sending CMD13 after CMD6
->>>>> +      * On SDIN5D1-2G MANFID is 0x45 and not 0x2 as specified in datasheet
->>>>> +      */
->>>>> +     if (card->cid.manfid == CID_MANFID_SANDISK ||
->>>>> +             card->cid.manfid == 0x45) {
->>>>> +             msleep(1);
->>>>> +     }
->>>>
->>>> If it's a general problem of Sandisk SDIN5D1-2G,
->>>> I think you need to verify this problem. And can you use the MMC_FIXUP() and QUIRK?
->>>
->>> Well, this is difficult to verify, I know that on all my SDIN5D1-2G I
->>> have this MANFID different from what is defined by CID_MANFID_SANDISK.
->>> How should I use MMC_FIXUP ? Like this ?
+Hello,
+Am 12.09.2014 um 04:45 schrieb Jaehoon Chung:
+> Hi,
+> 
+> On 09/08/2014 05:15 PM, Markus Niebel wrote:
+>> Hello Jaehoon Chung
 >>
->> I think you need to explain why delay is need.
->> i didn't have same card, but it might be your host controller or other problem.
->
-> Well, I don't know why it is needed, this is undocumented, nothing in
-> datasheet explains anything about this.
+>>>> Hello,
+>>>>
+>>>> experimenting with the current BKOPS code we found, that when triggering from BKOPS_LEVEL 1,
+>>>> the status stored with mmc_card_set_doing_bkops is never reset preventing BKOPS from working.
+>>> In now, bkops is working for upper case than LEVEL_2 (urgent case).
+>>> Patch of LEVEL_1's case has sent at mailing, maybe you can found it.
+>>
+>> I will look for it.
+>>
+>>>
+>>>>
+>>>> Since I'm not an expert in the mmc subsystem I ask for a hint where to look for completion
+>>>> and implement proper status reset.
+>>>
+>>> Could you explain to me more?
+>>
+>> If starting BKOPS with BKOPS_LEVEL 1 a switch (CMD6) without wait for completion (status polling)
+>> is issued an a status variable is set. I did'nt find a place where this status is reset.
+> 
+> You means when BKOPS_LEVEL_1 is set, this status didn't reset anywhere, right?
+> I didn't know why this value needs to reset.
+> Before starting BKOPS, always read the bkops-status from card's ext_csd register.
+> Then it should be re-assigned to the new status value.
+> 
+> we didn't refer to bkops-status for starting bkops or not.
+> 
 
-It seems to be uSDHC / DDR mode related. I don't even know if this is
-limited to Sandisk !
-And I don't have another board with another manufacturer eMMC to test.
-Maybe some guys from Freescale could help with this ?
+in drivers/mmc/core/core.c:
 
-Thanks,
-JM
+void mmc_start_bkops(struct mmc_card *card, bool from_exception)
+
+a driver internal status is checked with mmc_card_doing_bkops(card)
+and in case the state is set nothing will be done
+
+At the end of the function the state is set with mmc_card_set_doing_bkops(card)
+for the non urgent case
+
+The state is only reset from mmc_stop_bkops which is only called from _mmc_suspend
+
+> Best Regards,
+> Jaehoon Chung
+
+
+Best Regards,
+Markus Niebel
+
