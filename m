@@ -1,231 +1,215 @@
-From: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
-Subject: [PATCH v6 0002/0003] mmc: Replace "enhanced_area_en" attribute by
- "partition_setting_completed"
-Date: Mon, 15 Sep 2014 17:47:09 +0200
-Message-ID: <541709FD.8090004@neotion.com>
-References: <53C7E45E.2060102@neotion.com> <CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com> <53EB2DC3.2080002@neotion.com> <CAPDyKFpjYqVUZ8GHB76gD8pOx_eMg9ecvbWrMEfbhEd5ffk7mw@mail.gmail.com> <53ECB95F.2030207@neotion.com> <CAPDyKFp2ekmucHVzMWxeKfyTmuFKTXAYwUEpL5QxvEh8AjFopg@mail.gmail.com> <53F1FBA3.6060108@neotion.com> <5411435C.3080905@neotion.com> <541303B8.2060208@neotion.com> <54166914.4080706@samsung.com>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: [PATCH] mmc: sdhci-msm: Make tuning block table endian agnostic
+Date: Mon, 15 Sep 2014 14:45:42 -0700
+Message-ID: <54175E06.1030203@codeaurora.org>
+References: <1409752622-7564-1-git-send-email-sboyd@codeaurora.org> <5407F364.9030303@samsung.com> <CAPDyKFp0LwK=DABHaP-Ke=QZFP8bY5MO9RnYmUBqeEdDKp63BA@mail.gmail.com> <5408D81C.7070602@codeaurora.org> <5408E074.7090008@samsung.com> <20140904220126.GC28256@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <54166914.4080706@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.codeaurora.org ([198.145.11.231]:60088 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756117AbaIOVpq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Sep 2014 17:45:46 -0400
+In-Reply-To: <20140904220126.GC28256@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Georgi Djakov <gdjakov@mm-sol.com>, Asutosh Das <asutoshd@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>
 
-Replace ext_csd "enhanced_area_en" attribute by
- "partition_setting_completed". It was used whether or
- not enhanced user area is defined and without checks of
- EXT_CSD_PARTITION_SETTING_COMPLETED bit.
+On 09/04/14 15:01, Stephen Boyd wrote:
+>
+> ----8<----
+> From: Stephen Boyd <sboyd@codeaurora.org>
+> Subject: [PATCH] mmc: Consolidate emmc tuning blocks
+>
+> The same tuning block array exists in the dw_mmc h.c and sdhci-msm.c
+> files. Move these into mmc.c so that they can be shared across
+> drivers.
+>
+> Reported-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Stephen Boyd <sboyd@codeaurora.org>
+> ---
 
-Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
----
- drivers/mmc/core/mmc.c   |   13 ++++++++-----
- include/linux/mmc/card.h |    2 +-
- include/linux/mmc/mmc.h  |    2 ++
- 3 files changed, 11 insertions(+), 6 deletions(-)
+Hi Ulf,
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 77b4cf3..64d0371 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -314,7 +314,6 @@ static void mmc_manage_enhanced_area(struct mmc_car=
-d *card, u8 *ext_csd)
- 		hc_wp_grp_sz =3D
- 			ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
+Can this and the previous patch be picked up for 3.18?
 
--		card->ext_csd.enhanced_area_en =3D 1;
- 		/*
- 		 * calculate the enhanced data area offset, in bytes
- 		 */
-@@ -355,13 +354,11 @@ static void mmc_manage_gp_partitions(struct mmc_c=
-ard *card, u8 *ext_csd)
- 	 */
- 	if (ext_csd[EXT_CSD_PARTITION_SUPPORT] &
- 	    EXT_CSD_PART_SUPPORT_PART_EN) {
--		if (card->ext_csd.enhanced_area_en !=3D 1) {
-+		if (card->ext_csd.partition_setting_completed) {
- 			hc_erase_grp_sz =3D
- 				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
- 			hc_wp_grp_sz =3D
- 				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
--
--			card->ext_csd.enhanced_area_en =3D 1;
- 		}
+Thanks,
+Stephen
 
- 		for (idx =3D 0; idx < MMC_NUM_GP_PARTITION; idx++) {
-@@ -488,6 +485,12 @@ static int mmc_read_ext_csd(struct mmc_card *card,=
- u8 *ext_csd)
- 		ext_csd[EXT_CSD_TRIM_MULT];
- 	card->ext_csd.raw_partition_support =3D ext_csd[EXT_CSD_PARTITION_SUP=
-PORT];
- 	if (card->ext_csd.rev >=3D 4) {
-+		if (ext_csd[EXT_CSD_PARTITION_SETTING_COMPLETED] &
-+		    EXT_CSD_PART_SETTING_COMPLETED)
-+			card->ext_csd.partition_setting_completed =3D 1;
-+		else
-+			card->ext_csd.partition_setting_completed =3D 0;
-+
- 		mmc_manage_enhanced_area(card, ext_csd);
+>  drivers/mmc/core/mmc.c       | 32 ++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/dw_mmc.c    | 30 ------------------------------
+>  drivers/mmc/host/sdhci-msm.c | 38 ++++----------------------------------
+>  include/linux/mmc/mmc.h      |  5 +++++
+>  4 files changed, 41 insertions(+), 64 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 793c6f7ddb04..9608cc8a1f65 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1135,6 +1135,38 @@ bus_speed:
+>  	return err;
+>  }
+>  
+> +const u8 tuning_blk_pattern_4bit[MMC_TUNING_BLK_PATTERN_4BIT_SIZE] = {
+> +	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
+> +	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
+> +	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
+> +	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
+> +	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
+> +	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
+> +	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
+> +	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
+> +};
+> +EXPORT_SYMBOL(tuning_blk_pattern_4bit);
+> +
+> +const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE] = {
+> +	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
+> +	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
+> +	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
+> +	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
+> +	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
+> +	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
+> +	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
+> +	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
+> +	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
+> +	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
+> +	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
+> +	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
+> +	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
+> +	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
+> +	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
+> +	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
+> +};
+> +EXPORT_SYMBOL(tuning_blk_pattern_8bit);
+> +
+>  /*
+>   * Execute tuning sequence to seek the proper bus operating
+>   * conditions for HS200 and HS400, which sends CMD21 to the device.
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 1ac227c603b7..f1cefdf5e2d0 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -81,36 +81,6 @@ struct idmac_desc {
+>  };
+>  #endif /* CONFIG_MMC_DW_IDMAC */
+>  
+> -static const u8 tuning_blk_pattern_4bit[] = {
+> -	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
+> -	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
+> -	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
+> -	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
+> -	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
+> -	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
+> -	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
+> -	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
+> -};
+> -
+> -static const u8 tuning_blk_pattern_8bit[] = {
+> -	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
+> -	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
+> -	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
+> -	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
+> -	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
+> -	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
+> -	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
+> -	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
+> -	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
+> -	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
+> -	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
+> -	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
+> -	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
+> -	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
+> -	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
+> -	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
+> -};
+> -
+>  static inline bool dw_mci_fifo_reset(struct dw_mci *host);
+>  static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host);
+>  
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 5aabffc15ae8..da74c77f34cc 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -47,36 +47,6 @@
+>  #define CMUX_SHIFT_PHASE_SHIFT	24
+>  #define CMUX_SHIFT_PHASE_MASK	(7 << CMUX_SHIFT_PHASE_SHIFT)
+>  
+> -static const u8 tuning_block_64[] = {
+> -	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
+> -	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
+> -	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
+> -	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
+> -	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
+> -	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
+> -	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
+> -	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
+> -};
+> -
+> -static const u8 tuning_block_128[] = {
+> -	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
+> -	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
+> -	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
+> -	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
+> -	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
+> -	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
+> -	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
+> -	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
+> -	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
+> -	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
+> -	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
+> -	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
+> -	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
+> -	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
+> -	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
+> -	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
+> -};
+> -
+>  struct sdhci_msm_host {
+>  	struct platform_device *pdev;
+>  	void __iomem *core_mem;	/* MSM SDCC mapped address */
+> @@ -371,8 +341,8 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
+>  {
+>  	int tuning_seq_cnt = 3;
+>  	u8 phase, *data_buf, tuned_phases[16], tuned_phase_cnt = 0;
+> -	const u8 *tuning_block_pattern = tuning_block_64;
+> -	int size = sizeof(tuning_block_64);	/* Pattern size in bytes */
+> +	const u8 *tuning_block_pattern = tuning_blk_pattern_4bit;
+> +	int size = sizeof(tuning_blk_pattern_4bit);
+>  	int rc;
+>  	struct mmc_host *mmc = host->mmc;
+>  	struct mmc_ios ios = host->mmc->ios;
+> @@ -388,8 +358,8 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
+>  
+>  	if ((opcode == MMC_SEND_TUNING_BLOCK_HS200) &&
+>  	    (mmc->ios.bus_width == MMC_BUS_WIDTH_8)) {
+> -		tuning_block_pattern = tuning_block_128;
+> -		size = sizeof(tuning_block_128);
+> +		tuning_block_pattern = tuning_blk_pattern_8bit;
+> +		size = sizeof(tuning_blk_pattern_8bit);
+>  	}
+>  
+>  	data_buf = kmalloc(size, GFP_KERNEL);
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 64ec963ed347..cff1f2622061 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -53,6 +53,11 @@
+>  #define MMC_SEND_TUNING_BLOCK    19   /* adtc                    R1  */
+>  #define MMC_SEND_TUNING_BLOCK_HS200	21	/* adtc R1  */
+>  
+> +#define MMC_TUNING_BLK_PATTERN_4BIT_SIZE	 64
+> +#define MMC_TUNING_BLK_PATTERN_8BIT_SIZE	128
+> +extern const u8 tuning_blk_pattern_4bit[MMC_TUNING_BLK_PATTERN_4BIT_SIZE];
+> +extern const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE];
+> +
+>    /* class 3 */
+>  #define MMC_WRITE_DAT_UNTIL_STOP 20   /* adtc [31:0] data addr   R1  */
+>  
 
- 		mmc_manage_gp_partitions(card, ext_csd);
-@@ -1324,7 +1327,7 @@ static int mmc_init_card(struct mmc_host *host, u=
-32 ocr,
- 	 * If enhanced_area_en is TRUE, host needs to enable ERASE_GRP_DEF
- 	 * bit.  This bit will be lost every time after a reset or power off.
- 	 */
--	if (card->ext_csd.enhanced_area_en ||
-+	if (card->ext_csd.partition_setting_completed ||
- 	    (card->ext_csd.rev >=3D 3 && (host->caps2 & MMC_CAP2_HC_ERASE_SZ)=
-)) {
- 		err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 				 EXT_CSD_ERASE_GROUP_DEF, 1,
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index d424b9d..38175be 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -74,7 +74,7 @@ struct mmc_ext_csd {
- 	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
- 	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
- 	unsigned int		trim_timeout;		/* In milliseconds */
--	bool			enhanced_area_en;	/* enable bit */
-+	bool			partition_setting_completed;	/* enable bit */
- 	unsigned long long	enhanced_area_offset;	/* Units: Byte */
- 	unsigned int		enhanced_area_size;	/* Units: KB */
- 	unsigned int		cache_size;		/* Units: KB */
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 64ec963..78753bc 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -281,6 +281,7 @@ struct _mmc_csd {
- #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
- #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
- #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
-+#define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
- #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
- #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
- #define EXT_CSD_HPI_MGMT		161	/* R/W */
-@@ -349,6 +350,7 @@ struct _mmc_csd {
- #define EXT_CSD_PART_CONFIG_ACC_RPMB	(0x3)
- #define EXT_CSD_PART_CONFIG_ACC_GP0	(0x4)
 
-+#define EXT_CSD_PART_SETTING_COMPLETED	(0x1)
- #define EXT_CSD_PART_SUPPORT_PART_EN	(0x1)
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+hosted by The Linux Foundation
 
- #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
---=20
-1.7.9.5
-
-Le 15/09/2014 06:20, Jaehoon Chung a =C3=A9crit :
-> On 09/12/2014 11:31 PM, Gr=C3=A9gory Soutad=C3=A9 wrote:
->> Replace ext_csd "enhanced_area_en" attribute by
->>  "partition_setting_completed". It was used whether or
->>  not enhanced user area is defined and without checks of
->>  EXT_CSD_PARTITION_SETTING_COMPLETED bit.
->>
->> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
->> ---
->>  drivers/mmc/core/mmc.c   |   14 +++++++++-----
->>  include/linux/mmc/card.h |    2 +-
->>  include/linux/mmc/mmc.h  |    2 ++
->>  3 files changed, 12 insertions(+), 6 deletions(-)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index 77b4cf3..d8d3aef 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -314,7 +314,6 @@ static void mmc_manage_enhanced_area(struct mmc_=
-card *card, u8 *ext_csd)
->>  		hc_wp_grp_sz =3D
->>  			ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
->>
->> -		card->ext_csd.enhanced_area_en =3D 1;
->>  		/*
->>  		 * calculate the enhanced data area offset, in bytes
->>  		 */
->> @@ -355,13 +354,11 @@ static void mmc_manage_gp_partitions(struct mm=
-c_card *card, u8 *ext_csd)
->>  	 */
->>  	if (ext_csd[EXT_CSD_PARTITION_SUPPORT] &
->>  	    EXT_CSD_PART_SUPPORT_PART_EN) {
->> -		if (card->ext_csd.enhanced_area_en !=3D 1) {
->> +		if (card->ext_csd.partition_setting_completed) {
->>  			hc_erase_grp_sz =3D
->>  				ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
->>  			hc_wp_grp_sz =3D
->>  				ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
->> -
->> -			card->ext_csd.enhanced_area_en =3D 1;
->>  		}
->>
->>  		for (idx =3D 0; idx < MMC_NUM_GP_PARTITION; idx++) {
->> @@ -488,6 +485,13 @@ static int mmc_read_ext_csd(struct mmc_card *ca=
-rd, u8 *ext_csd)
->>  		ext_csd[EXT_CSD_TRIM_MULT];
->>  	card->ext_csd.raw_partition_support =3D ext_csd[EXT_CSD_PARTITION_=
-SUPPORT];
->>  	if (card->ext_csd.rev >=3D 4) {
->> +		if (ext_csd[EXT_CSD_PARTITION_SETTING_COMPLETED] &
->> +		    EXT_CSD_PART_SETTING_COMPLETED) {
->> +			card->ext_csd.partition_setting_completed =3D 1;
->> +		} else {
->> +			card->ext_csd.partition_setting_completed =3D 0;
->> +		}
->=20
-> I remembered that Ulf mentioned these brackets can be removed.
->=20
-> Best Regards,
-> Jaehoon Chung
->> +
->>  		mmc_manage_enhanced_area(card, ext_csd);
->>
->>  		mmc_manage_gp_partitions(card, ext_csd);
->> @@ -1324,7 +1328,7 @@ static int mmc_init_card(struct mmc_host *host=
-, u32 ocr,
->>  	 * If enhanced_area_en is TRUE, host needs to enable ERASE_GRP_DEF
->>  	 * bit.  This bit will be lost every time after a reset or power o=
-ff.
->>  	 */
->> -	if (card->ext_csd.enhanced_area_en ||
->> +	if (card->ext_csd.partition_setting_completed ||
->>  	    (card->ext_csd.rev >=3D 3 && (host->caps2 & MMC_CAP2_HC_ERASE_=
-SZ))) {
->>  		err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>  				 EXT_CSD_ERASE_GROUP_DEF, 1,
->> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
->> index d424b9d..38175be 100644
->> --- a/include/linux/mmc/card.h
->> +++ b/include/linux/mmc/card.h
->> @@ -74,7 +74,7 @@ struct mmc_ext_csd {
->>  	unsigned int		sec_trim_mult;	/* Secure trim multiplier  */
->>  	unsigned int		sec_erase_mult;	/* Secure erase multiplier */
->>  	unsigned int		trim_timeout;		/* In milliseconds */
->> -	bool			enhanced_area_en;	/* enable bit */
->> +	bool			partition_setting_completed;	/* enable bit */
->>  	unsigned long long	enhanced_area_offset;	/* Units: Byte */
->>  	unsigned int		enhanced_area_size;	/* Units: KB */
->>  	unsigned int		cache_size;		/* Units: KB */
->> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
->> index 64ec963..78753bc 100644
->> --- a/include/linux/mmc/mmc.h
->> +++ b/include/linux/mmc/mmc.h
->> @@ -281,6 +281,7 @@ struct _mmc_csd {
->>  #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
->>  #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
->>  #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
->> +#define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
->>  #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
->>  #define EXT_CSD_PARTITION_SUPPORT	160	/* RO */
->>  #define EXT_CSD_HPI_MGMT		161	/* R/W */
->> @@ -349,6 +350,7 @@ struct _mmc_csd {
->>  #define EXT_CSD_PART_CONFIG_ACC_RPMB	(0x3)
->>  #define EXT_CSD_PART_CONFIG_ACC_GP0	(0x4)
->>
->> +#define EXT_CSD_PART_SETTING_COMPLETED	(0x1)
->>  #define EXT_CSD_PART_SUPPORT_PART_EN	(0x1)
->>
->>  #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
->>
->=20
->=20
