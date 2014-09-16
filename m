@@ -1,128 +1,81 @@
-From: Pramod Gurav <pramod.gurav@smartplayin.com>
-Subject: [PATCH 3/5] mmc: msm_sdcc: Replace pr_ with dev_
-Date: Tue, 16 Sep 2014 16:47:46 +0530
-Message-ID: <1410866268-15185-4-git-send-email-pramod.gurav@smartplayin.com>
-References: <1410866268-15185-1-git-send-email-pramod.gurav@smartplayin.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1410866268-15185-1-git-send-email-pramod.gurav@smartplayin.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: David Brown <davidb@codeaurora.org>, Daniel Walker <dwalker@fifo99.com>, Bryan Huntsman <bryanh@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+From: =?UTF-8?Q?David_M=c3=bcller_=28ELSOFT_AG=29?= <d.mueller@elsoft.ch>
+Subject: "Card stuck in programming state! __mmc_switch" problem on i.MX6 + eMMC
+Date: Tue, 16 Sep 2014 16:37:13 +0200
+Message-ID: <54184B19.4080909@elsoft.ch>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.hostpark.net ([212.243.197.30]:50987 "EHLO
+	mail.hostpark.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754248AbaIPOqH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Sep 2014 10:46:07 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by mail.hostpark.net (Postfix) with ESMTP id 035F316C4C
+	for <linux-mmc@vger.kernel.org>; Tue, 16 Sep 2014 16:37:04 +0200 (CEST)
+Received: from mail.hostpark.net ([127.0.0.1])
+	by localhost (mail1.hostpark.net [127.0.0.1]) (amavisd-new, port 10124)
+	with ESMTP id SGBxAtRtC50z for <linux-mmc@vger.kernel.org>;
+	Tue, 16 Sep 2014 16:37:03 +0200 (CEST)
+Received: from [192.168.11.10] (80-218-111-224.dclient.hispeed.ch [80.218.111.224])
+	by mail.hostpark.net (Postfix) with ESMTPA id CDF7616E1E
+	for <linux-mmc@vger.kernel.org>; Tue, 16 Sep 2014 16:37:03 +0200 (CEST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-This replaces pr_* with dev_ for message logging and also does away
-with printing function names in logs.
+Hello
 
-Cc: David Brown <davidb@codeaurora.org>
-Cc: Daniel Walker <dwalker@fifo99.com>
-Cc: Bryan Huntsman <bryanh@codeaurora.org>
-CC: Ulf Hansson <ulf.hansson@linaro.org>
-CC: linux-mmc@vger.kernel.org
-CC: linux-arm-msm@vger.kernel.org
-Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
----
- drivers/mmc/host/msm_sdcc.c |   34 ++++++++++++++++++----------------
- 1 file changed, 18 insertions(+), 16 deletions(-)
+I have a custom i.MX6Q based board with a Hynix eMMC chip attached to
+USDHC3. OS is a vanilla Linux 3.16 with some patches.
 
-diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
-index 3e0536d..2111c03 100644
---- a/drivers/mmc/host/msm_sdcc.c
-+++ b/drivers/mmc/host/msm_sdcc.c
-@@ -1177,7 +1177,7 @@ msmsdcc_probe(struct platform_device *pdev)
- 
- 	/* must have platform data */
- 	if (!plat) {
--		pr_err("%s: Platform data not available\n", __func__);
-+		dev_err(&pdev->dev, "Platform data not available\n");
- 		ret = -EINVAL;
- 		goto out;
- 	}
-@@ -1186,7 +1186,7 @@ msmsdcc_probe(struct platform_device *pdev)
- 		return -EINVAL;
- 
- 	if (pdev->resource == NULL || pdev->num_resources < 2) {
--		pr_err("%s: Invalid resource\n", __func__);
-+		dev_err(&pdev->dev, "Invalid resource\n");
- 		return -ENXIO;
- 	}
- 
-@@ -1196,9 +1196,8 @@ msmsdcc_probe(struct platform_device *pdev)
- 						  "cmd_irq");
- 	stat_irqres = platform_get_resource_byname(pdev, IORESOURCE_IRQ,
- 						   "status_irq");
--
- 	if (!cmd_irqres || !memres) {
--		pr_err("%s: Invalid resource\n", __func__);
-+		dev_err(&pdev->dev, "Invalid resource\n");
- 		return -ENXIO;
- 	}
- 
-@@ -1264,7 +1263,7 @@ msmsdcc_probe(struct platform_device *pdev)
- 
- 	ret = clk_set_rate(host->clk, msmsdcc_fmin);
- 	if (ret) {
--		pr_err("%s: Clock rate set failed (%d)\n", __func__, ret);
-+		dev_err(&pdev->dev, "Clock rate set failed (%d)\n", ret);
- 		goto dma_free;
- 	}
- 
-@@ -1328,14 +1327,14 @@ msmsdcc_probe(struct platform_device *pdev)
- 				  DRIVER_NAME " (slot)",
- 				  host);
- 		if (ret) {
--			pr_err("%s: Unable to get slot IRQ %d (%d)\n",
-+			dev_err(&pdev->dev, "%s: Unable to get slot IRQ %d (%d)\n",
- 			       mmc_hostname(mmc), host->stat_irq, ret);
- 			goto clk_disable;
- 		}
- 	} else if (plat->register_status_notify) {
- 		plat->register_status_notify(msmsdcc_status_notify_cb, host);
- 	} else if (!plat->status)
--		pr_err("%s: No card detect facilities available\n",
-+		dev_err(&pdev->dev, "%s: No card detect facilities available\n",
- 		       mmc_hostname(mmc));
- 	else {
- 		init_timer(&host->timer);
-@@ -1364,28 +1363,31 @@ msmsdcc_probe(struct platform_device *pdev)
- 	mmc_set_drvdata(pdev, mmc);
- 	mmc_add_host(mmc);
- 
--	pr_info("%s: Qualcomm MSM SDCC at 0x%016llx irq %d,%d dma %d\n",
-+	dev_info(&pdev->dev, "%s: Qualcomm MSM SDCC at 0x%016llx irq %d,%d dma %d\n",
- 		mmc_hostname(mmc), (unsigned long long)memres->start,
- 		(unsigned int) cmd_irqres->start,
- 		(unsigned int) host->stat_irq, host->dma.channel);
--	pr_info("%s: 4 bit data mode %s\n", mmc_hostname(mmc),
-+	dev_info(&pdev->dev, "%s: 4 bit data mode %s\n", mmc_hostname(mmc),
- 		(mmc->caps & MMC_CAP_4_BIT_DATA ? "enabled" : "disabled"));
--	pr_info("%s: MMC clock %u -> %u Hz, PCLK %u Hz\n",
-+	dev_info(&pdev->dev, "%s: MMC clock %u -> %u Hz, PCLK %u Hz\n",
- 		mmc_hostname(mmc), msmsdcc_fmin, msmsdcc_fmax, host->pclk_rate);
--	pr_info("%s: Slot eject status = %d\n", mmc_hostname(mmc), host->eject);
--	pr_info("%s: Power save feature enable = %d\n",
-+	dev_info(&pdev->dev, "%s: Slot eject status = %d\n", mmc_hostname(mmc),
-+		host->eject);
-+	dev_info(&pdev->dev, "%s: Power save feature enable = %d\n",
- 		mmc_hostname(mmc), msmsdcc_pwrsave);
- 
- 	if (host->dma.channel != -1) {
--		pr_info("%s: DM non-cached buffer at %p, dma_addr 0x%.8x\n",
-+		dev_info(&pdev->dev, "%s: DM non-cached buffer at %p, dma_addr 0x%.8x\n",
- 			mmc_hostname(mmc), host->dma.nc, host->dma.nc_busaddr);
--		pr_info("%s: DM cmd busaddr 0x%.8x, cmdptr busaddr 0x%.8x\n",
-+		dev_info(&pdev->dev, "%s: DM cmd busaddr 0x%.8x, cmdptr busaddr 0x%.8x\n",
- 			mmc_hostname(mmc), host->dma.cmd_busaddr,
- 			host->dma.cmdptr_busaddr);
- 	} else
--		pr_info("%s: PIO transfer enabled\n", mmc_hostname(mmc));
-+		dev_info(&pdev->dev, "%s: PIO transfer enabled\n",
-+			 mmc_hostname(mmc));
- 	if (host->timer.function)
--		pr_info("%s: Polling status mode enabled\n", mmc_hostname(mmc));
-+		dev_info(&pdev->dev, "%s: Polling status mode enabled\n",
-+			 mmc_hostname(mmc));
- 
- 	return 0;
- 
--- 
-1.7.9.5
+Loading the iMX SDHC driver results in the following error:
+
+modprobe sdhci-esdhc-imx
+sdhci: Secure Digital Host Controller Interface driver
+sdhci: Copyright(c) Pierre Ossman
+sdhci-pltfm: SDHCI platform and OF driver helper
+mmc0: no vqmmc regulator found
+mmc0: SDHCI controller on 2198000.usdhc [2198000.usdhc] using ADMA
+mmc0: BKOPS_EN bit is not set
+mmc0: Card stuck in programming state! __mmc_switch
+mmc0: error -110 whilst initialising MMC card
+mmc0: BKOPS_EN bit is not set
+mmc0: Card stuck in programming state! __mmc_switch
+mmc0: error -110 whilst initialising MMC card
+mmc0: BKOPS_EN bit is not set
+mmc0: Card stuck in programming state! __mmc_switch
+mmc0: error -110 whilst initialising MMC card
+mmc0: BKOPS_EN bit is not set
+mmc0: Card stuck in programming state! __mmc_switch
+mmc0: error -110 whilst initialising MMC card
+
+
+Pin muxing looks ok nevertheless I played around with it to see if it
+makes a difference. I also tried the "Add delay between CMD6 and CMD13
+for Sandisk eMMC cards" workaround previously mentioned on this list.
+
+As the whole thing is working under U-Boot as shown below, I tend to
+rule out soldering problems and non-functional hardware.
+
+=> ver
+U-Boot 2014.07-00045-g0955ecc-dirty (Aug 26 2014 - 12:47:21)
+=> mmc dev 1
+switch to partitions #0, OK
+mmc1(part 0) is current device
+=> mmc info
+Device: FSL_SDHC
+Manufacturer ID: 90
+OEM: 14a
+Name: H8G2d
+Tran Speed: 52000000
+Rd Block Len: 512
+MMC version 4.41
+High Capacity: Yes
+Capacity: 7.2 GiB
+Bus Width: 8-bit
+
+
+Any idea what is going wrong?
+Has anybody a Hynix eMMC working under Linux?
+
