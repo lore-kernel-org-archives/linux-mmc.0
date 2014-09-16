@@ -1,215 +1,105 @@
-From: Stephen Boyd <sboyd@codeaurora.org>
-Subject: Re: [PATCH] mmc: sdhci-msm: Make tuning block table endian agnostic
-Date: Mon, 15 Sep 2014 14:45:42 -0700
-Message-ID: <54175E06.1030203@codeaurora.org>
-References: <1409752622-7564-1-git-send-email-sboyd@codeaurora.org> <5407F364.9030303@samsung.com> <CAPDyKFp0LwK=DABHaP-Ke=QZFP8bY5MO9RnYmUBqeEdDKp63BA@mail.gmail.com> <5408D81C.7070602@codeaurora.org> <5408E074.7090008@samsung.com> <20140904220126.GC28256@codeaurora.org>
+From: <hisanao.kinkawa@toshiba.co.jp>
+Subject: Re: [PATCH] mmc: Add delay between CMD6 and CMD13 for Sandisk eMMC
+ cards
+Date: Tue, 16 Sep 2014 00:53:34 +0000
+Message-ID: <54178A0D.1050004@toshiba.co.jp>
+References: <1410265614-3275-1-git-send-email-jean-michel.hautbois@vodalys.com>
+ <54110B29.7030303@samsung.com>
+ <CAL8zT=iezoevh_12GAZyDOdRy1dAS876RZDUJGVTZyY4zYZbaQ@mail.gmail.com>
+ <5416C30C.6010400@samsung.com>
+ <CAL8zT=jVWTp5tzW3Pi2MFAq6gySeinvACwSyFdj+4SpYEW2YXg@mail.gmail.com>
+ <CAL8zT=j86XDU7TZMALYnP+359dxGZHqWsERtRJaO8r-DES1dgg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.11.231]:60088 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756117AbaIOVpq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Sep 2014 17:45:46 -0400
-In-Reply-To: <20140904220126.GC28256@codeaurora.org>
+Received: from imx9.toshiba.co.jp ([202.33.96.51]:62980 "EHLO
+	imx9.toshiba.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754689AbaIPB0C (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Sep 2014 21:26:02 -0400
+In-Reply-To: <CAL8zT=j86XDU7TZMALYnP+359dxGZHqWsERtRJaO8r-DES1dgg@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <67135EB60333E5478C9A6E1CF358AD93@toshiba.local>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Georgi Djakov <gdjakov@mm-sol.com>, Asutosh Das <asutoshd@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>
+To: jean-michel.hautbois@vodalys.com, jh80.chung@samsung.com
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, tgih.jun@samsung.com, ulf.hansson@linaro.org, chris@printf.net
 
-On 09/04/14 15:01, Stephen Boyd wrote:
->
-> ----8<----
-> From: Stephen Boyd <sboyd@codeaurora.org>
-> Subject: [PATCH] mmc: Consolidate emmc tuning blocks
->
-> The same tuning block array exists in the dw_mmc h.c and sdhci-msm.c
-> files. Move these into mmc.c so that they can be shared across
-> drivers.
->
-> Reported-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Stephen Boyd <sboyd@codeaurora.org>
-> ---
-
-Hi Ulf,
-
-Can this and the previous patch be picked up for 3.18?
-
-Thanks,
-Stephen
-
->  drivers/mmc/core/mmc.c       | 32 ++++++++++++++++++++++++++++++++
->  drivers/mmc/host/dw_mmc.c    | 30 ------------------------------
->  drivers/mmc/host/sdhci-msm.c | 38 ++++----------------------------------
->  include/linux/mmc/mmc.h      |  5 +++++
->  4 files changed, 41 insertions(+), 64 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 793c6f7ddb04..9608cc8a1f65 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1135,6 +1135,38 @@ bus_speed:
->  	return err;
->  }
->  
-> +const u8 tuning_blk_pattern_4bit[MMC_TUNING_BLK_PATTERN_4BIT_SIZE] = {
-> +	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
-> +	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
-> +	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
-> +	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
-> +	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
-> +	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
-> +	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
-> +	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
-> +};
-> +EXPORT_SYMBOL(tuning_blk_pattern_4bit);
-> +
-> +const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE] = {
-> +	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
-> +	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
-> +	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
-> +	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
-> +	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
-> +	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
-> +	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
-> +	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
-> +	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
-> +	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
-> +	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
-> +	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
-> +	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
-> +	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
-> +	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
-> +	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
-> +};
-> +EXPORT_SYMBOL(tuning_blk_pattern_8bit);
-> +
->  /*
->   * Execute tuning sequence to seek the proper bus operating
->   * conditions for HS200 and HS400, which sends CMD21 to the device.
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 1ac227c603b7..f1cefdf5e2d0 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -81,36 +81,6 @@ struct idmac_desc {
->  };
->  #endif /* CONFIG_MMC_DW_IDMAC */
->  
-> -static const u8 tuning_blk_pattern_4bit[] = {
-> -	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
-> -	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
-> -	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
-> -	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
-> -	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
-> -	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
-> -	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
-> -	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
-> -};
-> -
-> -static const u8 tuning_blk_pattern_8bit[] = {
-> -	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
-> -	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
-> -	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
-> -	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
-> -	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
-> -	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
-> -	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
-> -	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
-> -	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
-> -	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
-> -	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
-> -	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
-> -	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
-> -	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
-> -	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
-> -	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
-> -};
-> -
->  static inline bool dw_mci_fifo_reset(struct dw_mci *host);
->  static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host);
->  
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 5aabffc15ae8..da74c77f34cc 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -47,36 +47,6 @@
->  #define CMUX_SHIFT_PHASE_SHIFT	24
->  #define CMUX_SHIFT_PHASE_MASK	(7 << CMUX_SHIFT_PHASE_SHIFT)
->  
-> -static const u8 tuning_block_64[] = {
-> -	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
-> -	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
-> -	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
-> -	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
-> -	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
-> -	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
-> -	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
-> -	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
-> -};
-> -
-> -static const u8 tuning_block_128[] = {
-> -	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
-> -	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
-> -	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
-> -	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
-> -	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
-> -	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
-> -	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
-> -	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
-> -	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
-> -	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
-> -	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
-> -	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
-> -	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
-> -	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
-> -	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
-> -	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
-> -};
-> -
->  struct sdhci_msm_host {
->  	struct platform_device *pdev;
->  	void __iomem *core_mem;	/* MSM SDCC mapped address */
-> @@ -371,8 +341,8 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
->  {
->  	int tuning_seq_cnt = 3;
->  	u8 phase, *data_buf, tuned_phases[16], tuned_phase_cnt = 0;
-> -	const u8 *tuning_block_pattern = tuning_block_64;
-> -	int size = sizeof(tuning_block_64);	/* Pattern size in bytes */
-> +	const u8 *tuning_block_pattern = tuning_blk_pattern_4bit;
-> +	int size = sizeof(tuning_blk_pattern_4bit);
->  	int rc;
->  	struct mmc_host *mmc = host->mmc;
->  	struct mmc_ios ios = host->mmc->ios;
-> @@ -388,8 +358,8 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
->  
->  	if ((opcode == MMC_SEND_TUNING_BLOCK_HS200) &&
->  	    (mmc->ios.bus_width == MMC_BUS_WIDTH_8)) {
-> -		tuning_block_pattern = tuning_block_128;
-> -		size = sizeof(tuning_block_128);
-> +		tuning_block_pattern = tuning_blk_pattern_8bit;
-> +		size = sizeof(tuning_blk_pattern_8bit);
->  	}
->  
->  	data_buf = kmalloc(size, GFP_KERNEL);
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 64ec963ed347..cff1f2622061 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -53,6 +53,11 @@
->  #define MMC_SEND_TUNING_BLOCK    19   /* adtc                    R1  */
->  #define MMC_SEND_TUNING_BLOCK_HS200	21	/* adtc R1  */
->  
-> +#define MMC_TUNING_BLK_PATTERN_4BIT_SIZE	 64
-> +#define MMC_TUNING_BLK_PATTERN_8BIT_SIZE	128
-> +extern const u8 tuning_blk_pattern_4bit[MMC_TUNING_BLK_PATTERN_4BIT_SIZE];
-> +extern const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE];
-> +
->    /* class 3 */
->  #define MMC_WRITE_DAT_UNTIL_STOP 20   /* adtc [31:0] data addr   R1  */
->  
-
-
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-hosted by The Linux Foundation
-
+SGkNCg0KRG8gbm90IGhpdCB0aGUgZm9sbG93aW5nIGJ1Zz8NCk9mdGVuLCBUaGlzIGJ1ZyBmYWls
+cyBzZXR0aW5nIG9mIENNRDYuDQoNCi0tLS0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0tLS0N
+ClN1YmplY3Q6IAlSZTogW1BBVENIIHYyXSBtbWM6c2RoY2k6IGhhbmRsZSBidXN5LWVuZCBpbnRl
+cnJ1cHQgZHVyaW5nIGNvbW1hbmQNCkRhdGU6IAlUdWUsIDIgU2VwIDIwMTQgMTE6Mjc6NTEgKzAy
+MDANCkZyb206IAlVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NClRvOiAJQ2hh
+bmhvIE1pbiA8Y2hhbmhvLm1pbkBsZ2UuY29tPg0KDQoJDQoNCk9uIDMwIEF1Z3VzdCAyMDE0IDA1
+OjQwLCBDaGFuaG8gTWluIDxjaGFuaG8ubWluQGxnZS5jb20+IHdyb3RlOg0KPiBJdCBpcyBmdWxs
+eSBsZWdhbCBmb3IgYSBjb250cm9sbGVyIHRvIHN0YXJ0IGhhbmRsaW5nIGJ1c3ktZW5kIGludGVy
+cnVwdA0KPiBiZWZvcmUgaXQgaGFzIHNpZ25hbGVkIHRoYXQgdGhlIGNvbW1hbmQgaGFzIGNvbXBs
+ZXRlZC4gU28gbWFrZSBzdXJlDQo+IHdlIGRvIHRoaW5ncyBpbiB0aGUgcHJvcGVyIG9yZGVyLCBP
+ciBpdCByZXN1bHRzIHRoYXQgY29tbWFuZCBpbnRlcnJ1cHQNCj4gaXMgaWdub3JlZCBzbyBpdCBj
+YW4gY2F1c2UgdW5leHBlY3RlZCBvcGVyYXRpb25zLiBUaGlzIGlzIGZvdW5kZWQgYXQgc29tZQ0K
+PiB0b3NoaWJhIGVtbWMgd2l0aCB0aGUgYmVsbG93IHdhcm5pbmcuDQo+DQo+ICJtbWMwOiBHb3Qg
+Y29tbWFuZCBpbnRlcnJ1cHQgMHgwMDAwMDAwMSBldmVuIHRob3VnaA0KPiBubyBjb21tYW5kIG9w
+ZXJhdGlvbiB3YXMgaW4gcHJvZ3Jlc3MuIg0KPg0KPiBUaGlzIGlzc3VlIGhhcyBiZWVuIGFsc28g
+cmVwb3J0ZWQgYnkgWW91c3NlZiBUUklLSToNCj4gSXQgaXMgbm90IHNwZWNpZmljIHRvIFRvc2hp
+YmEgZGV2aWNlcywgYW5kIGhhcHBlbnMgd2l0aCBlTU1DIGRldmljZXMNCj4gYXMgd2VsbCBhcyBT
+RCBjYXJkIHdoaWNoIHN1cHBvcnQgQXV0by1DTUQxMiByYXRoZXIgdGhhbiBDTUQyMy4NCj4NCj4g
+QWxzbywgc2ltaWxhciBwYXRjaCBpcyBzdWJtaXR0ZWQgYnk6DQo+IEd3ZW5kYWwgR3JpZ25vdSA8
+Z3dlbmRhbEBjaHJvbWl1bS5vcmc+DQo+DQo+IENoYW5nZXMgc2luY2UgdjE6DQo+ICBGaXhlZCBj
+b25mbGljdCB3aXRoIHRoZSBuZXh0IG9mIGdpdC5saW5hcm8ub3JnL3Blb3BsZS91bGYuaGFuc3Nv
+bi9tbWMuZ2l0DQo+ICBhbmQgVGVzdGVkIGlmIGlzc3VlIGlzIGZpeGVkIGFnYWluLg0KPg0KPiBT
+aWduZWQtb2ZmLWJ5OiBIYW5reXVuZyBZdSA8aGFua3l1bmcueXVAbGdlLmNvbT4NCj4gU2lnbmVk
+LW9mZi1ieTogQ2hhbmhvIE1pbiA8Y2hhbmhvLm1pbkBsZ2UuY29tPg0KPiBUZXN0ZWQtYnk6IFlv
+dXNzZWYgVFJJS0kgPHlvdXNzZWYudHJpa2lAc3QuY29tPg0KDQpCZXN0IFJlZ2FyZHMsDQo9PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09DQpIaXNh
+bmFvIEtpbmthd2EgICAgICBbaGlzYW5hby5raW5rYXdhQHRvc2hpYmEuY28uanAgPG1haWx0bzpo
+aXNhbmFvLmtpbmthd2FAdG9zaGliYS5jby5qcD5dDQo9PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09DQoNCg0KKDIwMTQvMDkvMTUgMjA6MjkpLCBK
+ZWFuLU1pY2hlbCBIYXV0Ym9pcyB3cm90ZToNCj4gMjAxNC0wOS0xNSAxMjo1MyBHTVQrMDI6MDAg
+SmVhbi1NaWNoZWwgSGF1dGJvaXMNCj4gPGplYW4tbWljaGVsLmhhdXRib2lzQHZvZGFseXMuY29t
+PjoNCj4+IDIwMTQtMDktMTUgMTI6NDQgR01UKzAyOjAwIEphZWhvb24gQ2h1bmcgPGpoODAuY2h1
+bmdAc2Ftc3VuZy5jb20+Og0KPj4+IE9uIDA5LzE1LzIwMTQgMDc6MDggUE0sIEplYW4tTWljaGVs
+IEhhdXRib2lzIHdyb3RlOg0KPj4+PiBIaSBKYWVob29uLA0KPj4+Pg0KPj4+Pj4gT24gMDkvMDkv
+MjAxNCAwOToyNiBQTSwgSmVhbi1NaWNoZWwgSGF1dGJvaXMgd3JvdGU6DQo+Pj4+Pj4gVGVzdGVk
+IG9uIGEgaS5NWDYgYm9hcmQsIHdpdGggU2FuZGlzayBTRElONUQxLTJHLg0KPj4+Pj4+IFdpdGhv
+dXQgdGhpcyBwYXRjaCwgSS9PIGVycm9ycyBvY2N1ci4NCj4+Pj4+PiBUaGlzIGVNTUMgc2VlbXMg
+dG8gaGF2ZSBhIGRpZmZlcmVudCBNYW51ZmFjdHVyZXIgSUQgYXMgaXQgcmVhZHMgMHg0NQ0KPj4+
+Pj4+IGFuZCBub3QgMHgyIGFzIHNwZWNpZmllZCBpbiBkYXRhc2hlZXQuDQo+Pj4+PiBJIHRoaW5r
+IHRoaXMgcGF0Y2ggZG9uJ3QgbWVyZ2UgaW50byBtYWlubGluZS4NCj4+Pj4+IFRoaXMgaXMgbm90
+IHNvbHV0aW9uIGZvciBwcm9ibGVtLg0KPj4+Pj4geW91IG1lbnRpb25lZCB0aGUgYmVsb3cgY29t
+bWVudCwgdGhpcyBpcyB3b3JrYXJvdW5kLg0KPj4+PiBZZXMNCj4+Pj4NCj4+Pj4+PiBTaWduZWQt
+b2ZmLWJ5OiBKZWFuLU1pY2hlbCBIYXV0Ym9pcyA8amVhbi1taWNoZWwuaGF1dGJvaXNAdm9kYWx5
+cy5jb20+DQo+Pj4+Pj4gLS0tDQo+Pj4+Pj4gICBkcml2ZXJzL21tYy9jb3JlL21tY19vcHMuYyB8
+IDkgKysrKysrKysrDQo+Pj4+Pj4gICAxIGZpbGUgY2hhbmdlZCwgOSBpbnNlcnRpb25zKCspDQo+
+Pj4+Pj4NCj4+Pj4+PiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWNfb3BzLmMgYi9k
+cml2ZXJzL21tYy9jb3JlL21tY19vcHMuYw0KPj4+Pj4+IGluZGV4IGY1MWI1YmEuLjkxYmFiYWEg
+MTAwNjQ0DQo+Pj4+Pj4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9tbWNfb3BzLmMNCj4+Pj4+PiAr
+KysgYi9kcml2ZXJzL21tYy9jb3JlL21tY19vcHMuYw0KPj4+Pj4+IEBAIC00NTgsNiArNDU4LDE1
+IEBAIGludCBfX21tY19zd2l0Y2goc3RydWN0IG1tY19jYXJkICpjYXJkLCB1OCBzZXQsIHU4IGlu
+ZGV4LCB1OCB2YWx1ZSwNCj4+Pj4+PiAgICAgICAgaWYgKCF1c2VfYnVzeV9zaWduYWwpDQo+Pj4+
+Pj4gICAgICAgICAgICAgICAgcmV0dXJuIDA7DQo+Pj4+Pj4NCj4+Pj4+PiArICAgICAvKiBXT1JL
+QVJPVU5EOiBmb3IgU2FuZGlzayBlTU1DIGNhcmRzLCBpdCBtaWdodCBuZWVkIGNlcnRhaW4gZGVs
+YXkNCj4+Pj4+PiArICAgICAgKiBiZWZvcmUgc2VuZGluZyBDTUQxMyBhZnRlciBDTUQ2DQo+Pj4+
+Pj4gKyAgICAgICogT24gU0RJTjVEMS0yRyBNQU5GSUQgaXMgMHg0NSBhbmQgbm90IDB4MiBhcyBz
+cGVjaWZpZWQgaW4gZGF0YXNoZWV0DQo+Pj4+Pj4gKyAgICAgICovDQo+Pj4+Pj4gKyAgICAgaWYg
+KGNhcmQtPmNpZC5tYW5maWQgPT0gQ0lEX01BTkZJRF9TQU5ESVNLIHx8DQo+Pj4+Pj4gKyAgICAg
+ICAgICAgICBjYXJkLT5jaWQubWFuZmlkID09IDB4NDUpIHsNCj4+Pj4+PiArICAgICAgICAgICAg
+IG1zbGVlcCgxKTsNCj4+Pj4+PiArICAgICB9DQo+Pj4+PiBJZiBpdCdzIGEgZ2VuZXJhbCBwcm9i
+bGVtIG9mIFNhbmRpc2sgU0RJTjVEMS0yRywNCj4+Pj4+IEkgdGhpbmsgeW91IG5lZWQgdG8gdmVy
+aWZ5IHRoaXMgcHJvYmxlbS4gQW5kIGNhbiB5b3UgdXNlIHRoZSBNTUNfRklYVVAoKSBhbmQgUVVJ
+Uks/DQo+Pj4+IFdlbGwsIHRoaXMgaXMgZGlmZmljdWx0IHRvIHZlcmlmeSwgSSBrbm93IHRoYXQg
+b24gYWxsIG15IFNESU41RDEtMkcgSQ0KPj4+PiBoYXZlIHRoaXMgTUFORklEIGRpZmZlcmVudCBm
+cm9tIHdoYXQgaXMgZGVmaW5lZCBieSBDSURfTUFORklEX1NBTkRJU0suDQo+Pj4+IEhvdyBzaG91
+bGQgSSB1c2UgTU1DX0ZJWFVQID8gTGlrZSB0aGlzID8NCj4+PiBJIHRoaW5rIHlvdSBuZWVkIHRv
+IGV4cGxhaW4gd2h5IGRlbGF5IGlzIG5lZWQuDQo+Pj4gaSBkaWRuJ3QgaGF2ZSBzYW1lIGNhcmQs
+IGJ1dCBpdCBtaWdodCBiZSB5b3VyIGhvc3QgY29udHJvbGxlciBvciBvdGhlciBwcm9ibGVtLg0K
+Pj4gV2VsbCwgSSBkb24ndCBrbm93IHdoeSBpdCBpcyBuZWVkZWQsIHRoaXMgaXMgdW5kb2N1bWVu
+dGVkLCBub3RoaW5nIGluDQo+PiBkYXRhc2hlZXQgZXhwbGFpbnMgYW55dGhpbmcgYWJvdXQgdGhp
+cy4NCj4gSXQgc2VlbXMgdG8gYmUgdVNESEMgLyBERFIgbW9kZSByZWxhdGVkLiBJIGRvbid0IGV2
+ZW4ga25vdyBpZiB0aGlzIGlzDQo+IGxpbWl0ZWQgdG8gU2FuZGlzayAhDQo+IEFuZCBJIGRvbid0
+IGhhdmUgYW5vdGhlciBib2FyZCB3aXRoIGFub3RoZXIgbWFudWZhY3R1cmVyIGVNTUMgdG8gdGVz
+dC4NCj4gTWF5YmUgc29tZSBndXlzIGZyb20gRnJlZXNjYWxlIGNvdWxkIGhlbHAgd2l0aCB0aGlz
+ID8NCj4NCj4gVGhhbmtzLA0KPiBKTQ0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMg
+bGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIiBpbg0KPiB0aGUgYm9k
+eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiBNb3JlIG1ham9y
+ZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwN
+Cj4gLg0KPg0KDQo=
