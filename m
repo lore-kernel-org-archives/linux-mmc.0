@@ -1,12 +1,12 @@
 From: Pramod Gurav <pramod.gurav@smartplayin.com>
 Subject: [PATCH 1/5] mmc: msm_sdcc: Switch to using managed resources
-Date: Tue, 16 Sep 2014 16:45:42 +0530
-Message-ID: <1410866146-15144-2-git-send-email-pramod.gurav@smartplayin.com>
-References: <1410866146-15144-1-git-send-email-pramod.gurav@smartplayin.com>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1410866146-15144-1-git-send-email-pramod.gurav@smartplayin.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: pramod.gurav.etc@gmail.com
+Date: Tue, 16 Sep 2014 16:47:44 +0530
+Message-ID: <1410866268-15185-2-git-send-email-pramod.gurav@smartplayin.com>
+References: <1410866268-15185-1-git-send-email-pramod.gurav@smartplayin.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1410866268-15185-1-git-send-email-pramod.gurav@smartplayin.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
 Cc: David Brown <davidb@codeaurora.org>, Daniel Walker <dwalker@fifo99.com>, Bryan Huntsman <bryanh@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
