@@ -1,105 +1,51 @@
-From: <hisanao.kinkawa@toshiba.co.jp>
-Subject: Re: [PATCH] mmc: Add delay between CMD6 and CMD13 for Sandisk eMMC
- cards
-Date: Tue, 16 Sep 2014 00:53:34 +0000
-Message-ID: <54178A0D.1050004@toshiba.co.jp>
-References: <1410265614-3275-1-git-send-email-jean-michel.hautbois@vodalys.com>
- <54110B29.7030303@samsung.com>
- <CAL8zT=iezoevh_12GAZyDOdRy1dAS876RZDUJGVTZyY4zYZbaQ@mail.gmail.com>
- <5416C30C.6010400@samsung.com>
- <CAL8zT=jVWTp5tzW3Pi2MFAq6gySeinvACwSyFdj+4SpYEW2YXg@mail.gmail.com>
- <CAL8zT=j86XDU7TZMALYnP+359dxGZHqWsERtRJaO8r-DES1dgg@mail.gmail.com>
+From: Tobias Klauser <tklauser@distanz.ch>
+Subject: [PATCH] mmc: dw_mmc: Remove unused function for !CONFIG_OF
+Date: Tue, 16 Sep 2014 09:54:55 +0200
+Message-ID: <1410854095-10460-1-git-send-email-tklauser@distanz.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from imx9.toshiba.co.jp ([202.33.96.51]:62980 "EHLO
-	imx9.toshiba.co.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754689AbaIPB0C (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Sep 2014 21:26:02 -0400
-In-Reply-To: <CAL8zT=j86XDU7TZMALYnP+359dxGZHqWsERtRJaO8r-DES1dgg@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <67135EB60333E5478C9A6E1CF358AD93@toshiba.local>
+Received: from mail.zhinst.com ([212.126.164.98]:48387 "EHLO mail.zhinst.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753428AbaIPHzF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 16 Sep 2014 03:55:05 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: jean-michel.hautbois@vodalys.com, jh80.chung@samsung.com
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, tgih.jun@samsung.com, ulf.hansson@linaro.org, chris@printf.net
+To: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
 
-SGkNCg0KRG8gbm90IGhpdCB0aGUgZm9sbG93aW5nIGJ1Zz8NCk9mdGVuLCBUaGlzIGJ1ZyBmYWls
-cyBzZXR0aW5nIG9mIENNRDYuDQoNCi0tLS0tLS0tIE9yaWdpbmFsIE1lc3NhZ2UgLS0tLS0tLS0N
-ClN1YmplY3Q6IAlSZTogW1BBVENIIHYyXSBtbWM6c2RoY2k6IGhhbmRsZSBidXN5LWVuZCBpbnRl
-cnJ1cHQgZHVyaW5nIGNvbW1hbmQNCkRhdGU6IAlUdWUsIDIgU2VwIDIwMTQgMTE6Mjc6NTEgKzAy
-MDANCkZyb206IAlVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NClRvOiAJQ2hh
-bmhvIE1pbiA8Y2hhbmhvLm1pbkBsZ2UuY29tPg0KDQoJDQoNCk9uIDMwIEF1Z3VzdCAyMDE0IDA1
-OjQwLCBDaGFuaG8gTWluIDxjaGFuaG8ubWluQGxnZS5jb20+IHdyb3RlOg0KPiBJdCBpcyBmdWxs
-eSBsZWdhbCBmb3IgYSBjb250cm9sbGVyIHRvIHN0YXJ0IGhhbmRsaW5nIGJ1c3ktZW5kIGludGVy
-cnVwdA0KPiBiZWZvcmUgaXQgaGFzIHNpZ25hbGVkIHRoYXQgdGhlIGNvbW1hbmQgaGFzIGNvbXBs
-ZXRlZC4gU28gbWFrZSBzdXJlDQo+IHdlIGRvIHRoaW5ncyBpbiB0aGUgcHJvcGVyIG9yZGVyLCBP
-ciBpdCByZXN1bHRzIHRoYXQgY29tbWFuZCBpbnRlcnJ1cHQNCj4gaXMgaWdub3JlZCBzbyBpdCBj
-YW4gY2F1c2UgdW5leHBlY3RlZCBvcGVyYXRpb25zLiBUaGlzIGlzIGZvdW5kZWQgYXQgc29tZQ0K
-PiB0b3NoaWJhIGVtbWMgd2l0aCB0aGUgYmVsbG93IHdhcm5pbmcuDQo+DQo+ICJtbWMwOiBHb3Qg
-Y29tbWFuZCBpbnRlcnJ1cHQgMHgwMDAwMDAwMSBldmVuIHRob3VnaA0KPiBubyBjb21tYW5kIG9w
-ZXJhdGlvbiB3YXMgaW4gcHJvZ3Jlc3MuIg0KPg0KPiBUaGlzIGlzc3VlIGhhcyBiZWVuIGFsc28g
-cmVwb3J0ZWQgYnkgWW91c3NlZiBUUklLSToNCj4gSXQgaXMgbm90IHNwZWNpZmljIHRvIFRvc2hp
-YmEgZGV2aWNlcywgYW5kIGhhcHBlbnMgd2l0aCBlTU1DIGRldmljZXMNCj4gYXMgd2VsbCBhcyBT
-RCBjYXJkIHdoaWNoIHN1cHBvcnQgQXV0by1DTUQxMiByYXRoZXIgdGhhbiBDTUQyMy4NCj4NCj4g
-QWxzbywgc2ltaWxhciBwYXRjaCBpcyBzdWJtaXR0ZWQgYnk6DQo+IEd3ZW5kYWwgR3JpZ25vdSA8
-Z3dlbmRhbEBjaHJvbWl1bS5vcmc+DQo+DQo+IENoYW5nZXMgc2luY2UgdjE6DQo+ICBGaXhlZCBj
-b25mbGljdCB3aXRoIHRoZSBuZXh0IG9mIGdpdC5saW5hcm8ub3JnL3Blb3BsZS91bGYuaGFuc3Nv
-bi9tbWMuZ2l0DQo+ICBhbmQgVGVzdGVkIGlmIGlzc3VlIGlzIGZpeGVkIGFnYWluLg0KPg0KPiBT
-aWduZWQtb2ZmLWJ5OiBIYW5reXVuZyBZdSA8aGFua3l1bmcueXVAbGdlLmNvbT4NCj4gU2lnbmVk
-LW9mZi1ieTogQ2hhbmhvIE1pbiA8Y2hhbmhvLm1pbkBsZ2UuY29tPg0KPiBUZXN0ZWQtYnk6IFlv
-dXNzZWYgVFJJS0kgPHlvdXNzZWYudHJpa2lAc3QuY29tPg0KDQpCZXN0IFJlZ2FyZHMsDQo9PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09DQpIaXNh
-bmFvIEtpbmthd2EgICAgICBbaGlzYW5hby5raW5rYXdhQHRvc2hpYmEuY28uanAgPG1haWx0bzpo
-aXNhbmFvLmtpbmthd2FAdG9zaGliYS5jby5qcD5dDQo9PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09DQoNCg0KKDIwMTQvMDkvMTUgMjA6MjkpLCBK
-ZWFuLU1pY2hlbCBIYXV0Ym9pcyB3cm90ZToNCj4gMjAxNC0wOS0xNSAxMjo1MyBHTVQrMDI6MDAg
-SmVhbi1NaWNoZWwgSGF1dGJvaXMNCj4gPGplYW4tbWljaGVsLmhhdXRib2lzQHZvZGFseXMuY29t
-PjoNCj4+IDIwMTQtMDktMTUgMTI6NDQgR01UKzAyOjAwIEphZWhvb24gQ2h1bmcgPGpoODAuY2h1
-bmdAc2Ftc3VuZy5jb20+Og0KPj4+IE9uIDA5LzE1LzIwMTQgMDc6MDggUE0sIEplYW4tTWljaGVs
-IEhhdXRib2lzIHdyb3RlOg0KPj4+PiBIaSBKYWVob29uLA0KPj4+Pg0KPj4+Pj4gT24gMDkvMDkv
-MjAxNCAwOToyNiBQTSwgSmVhbi1NaWNoZWwgSGF1dGJvaXMgd3JvdGU6DQo+Pj4+Pj4gVGVzdGVk
-IG9uIGEgaS5NWDYgYm9hcmQsIHdpdGggU2FuZGlzayBTRElONUQxLTJHLg0KPj4+Pj4+IFdpdGhv
-dXQgdGhpcyBwYXRjaCwgSS9PIGVycm9ycyBvY2N1ci4NCj4+Pj4+PiBUaGlzIGVNTUMgc2VlbXMg
-dG8gaGF2ZSBhIGRpZmZlcmVudCBNYW51ZmFjdHVyZXIgSUQgYXMgaXQgcmVhZHMgMHg0NQ0KPj4+
-Pj4+IGFuZCBub3QgMHgyIGFzIHNwZWNpZmllZCBpbiBkYXRhc2hlZXQuDQo+Pj4+PiBJIHRoaW5r
-IHRoaXMgcGF0Y2ggZG9uJ3QgbWVyZ2UgaW50byBtYWlubGluZS4NCj4+Pj4+IFRoaXMgaXMgbm90
-IHNvbHV0aW9uIGZvciBwcm9ibGVtLg0KPj4+Pj4geW91IG1lbnRpb25lZCB0aGUgYmVsb3cgY29t
-bWVudCwgdGhpcyBpcyB3b3JrYXJvdW5kLg0KPj4+PiBZZXMNCj4+Pj4NCj4+Pj4+PiBTaWduZWQt
-b2ZmLWJ5OiBKZWFuLU1pY2hlbCBIYXV0Ym9pcyA8amVhbi1taWNoZWwuaGF1dGJvaXNAdm9kYWx5
-cy5jb20+DQo+Pj4+Pj4gLS0tDQo+Pj4+Pj4gICBkcml2ZXJzL21tYy9jb3JlL21tY19vcHMuYyB8
-IDkgKysrKysrKysrDQo+Pj4+Pj4gICAxIGZpbGUgY2hhbmdlZCwgOSBpbnNlcnRpb25zKCspDQo+
-Pj4+Pj4NCj4+Pj4+PiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWNfb3BzLmMgYi9k
-cml2ZXJzL21tYy9jb3JlL21tY19vcHMuYw0KPj4+Pj4+IGluZGV4IGY1MWI1YmEuLjkxYmFiYWEg
-MTAwNjQ0DQo+Pj4+Pj4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9tbWNfb3BzLmMNCj4+Pj4+PiAr
-KysgYi9kcml2ZXJzL21tYy9jb3JlL21tY19vcHMuYw0KPj4+Pj4+IEBAIC00NTgsNiArNDU4LDE1
-IEBAIGludCBfX21tY19zd2l0Y2goc3RydWN0IG1tY19jYXJkICpjYXJkLCB1OCBzZXQsIHU4IGlu
-ZGV4LCB1OCB2YWx1ZSwNCj4+Pj4+PiAgICAgICAgaWYgKCF1c2VfYnVzeV9zaWduYWwpDQo+Pj4+
-Pj4gICAgICAgICAgICAgICAgcmV0dXJuIDA7DQo+Pj4+Pj4NCj4+Pj4+PiArICAgICAvKiBXT1JL
-QVJPVU5EOiBmb3IgU2FuZGlzayBlTU1DIGNhcmRzLCBpdCBtaWdodCBuZWVkIGNlcnRhaW4gZGVs
-YXkNCj4+Pj4+PiArICAgICAgKiBiZWZvcmUgc2VuZGluZyBDTUQxMyBhZnRlciBDTUQ2DQo+Pj4+
-Pj4gKyAgICAgICogT24gU0RJTjVEMS0yRyBNQU5GSUQgaXMgMHg0NSBhbmQgbm90IDB4MiBhcyBz
-cGVjaWZpZWQgaW4gZGF0YXNoZWV0DQo+Pj4+Pj4gKyAgICAgICovDQo+Pj4+Pj4gKyAgICAgaWYg
-KGNhcmQtPmNpZC5tYW5maWQgPT0gQ0lEX01BTkZJRF9TQU5ESVNLIHx8DQo+Pj4+Pj4gKyAgICAg
-ICAgICAgICBjYXJkLT5jaWQubWFuZmlkID09IDB4NDUpIHsNCj4+Pj4+PiArICAgICAgICAgICAg
-IG1zbGVlcCgxKTsNCj4+Pj4+PiArICAgICB9DQo+Pj4+PiBJZiBpdCdzIGEgZ2VuZXJhbCBwcm9i
-bGVtIG9mIFNhbmRpc2sgU0RJTjVEMS0yRywNCj4+Pj4+IEkgdGhpbmsgeW91IG5lZWQgdG8gdmVy
-aWZ5IHRoaXMgcHJvYmxlbS4gQW5kIGNhbiB5b3UgdXNlIHRoZSBNTUNfRklYVVAoKSBhbmQgUVVJ
-Uks/DQo+Pj4+IFdlbGwsIHRoaXMgaXMgZGlmZmljdWx0IHRvIHZlcmlmeSwgSSBrbm93IHRoYXQg
-b24gYWxsIG15IFNESU41RDEtMkcgSQ0KPj4+PiBoYXZlIHRoaXMgTUFORklEIGRpZmZlcmVudCBm
-cm9tIHdoYXQgaXMgZGVmaW5lZCBieSBDSURfTUFORklEX1NBTkRJU0suDQo+Pj4+IEhvdyBzaG91
-bGQgSSB1c2UgTU1DX0ZJWFVQID8gTGlrZSB0aGlzID8NCj4+PiBJIHRoaW5rIHlvdSBuZWVkIHRv
-IGV4cGxhaW4gd2h5IGRlbGF5IGlzIG5lZWQuDQo+Pj4gaSBkaWRuJ3QgaGF2ZSBzYW1lIGNhcmQs
-IGJ1dCBpdCBtaWdodCBiZSB5b3VyIGhvc3QgY29udHJvbGxlciBvciBvdGhlciBwcm9ibGVtLg0K
-Pj4gV2VsbCwgSSBkb24ndCBrbm93IHdoeSBpdCBpcyBuZWVkZWQsIHRoaXMgaXMgdW5kb2N1bWVu
-dGVkLCBub3RoaW5nIGluDQo+PiBkYXRhc2hlZXQgZXhwbGFpbnMgYW55dGhpbmcgYWJvdXQgdGhp
-cy4NCj4gSXQgc2VlbXMgdG8gYmUgdVNESEMgLyBERFIgbW9kZSByZWxhdGVkLiBJIGRvbid0IGV2
-ZW4ga25vdyBpZiB0aGlzIGlzDQo+IGxpbWl0ZWQgdG8gU2FuZGlzayAhDQo+IEFuZCBJIGRvbid0
-IGhhdmUgYW5vdGhlciBib2FyZCB3aXRoIGFub3RoZXIgbWFudWZhY3R1cmVyIGVNTUMgdG8gdGVz
-dC4NCj4gTWF5YmUgc29tZSBndXlzIGZyb20gRnJlZXNjYWxlIGNvdWxkIGhlbHAgd2l0aCB0aGlz
-ID8NCj4NCj4gVGhhbmtzLA0KPiBKTQ0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMg
-bGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIiBpbg0KPiB0aGUgYm9k
-eSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZw0KPiBNb3JlIG1ham9y
-ZG9tbyBpbmZvIGF0ICBodHRwOi8vdmdlci5rZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwN
-Cj4gLg0KPg0KDQo=
+dw_mci_of_find_slot_node() is only used in dw_mci_of_get_slot_quirks()
+if CONFIG_OF is defined, thus there is no need to have a !CONFIG_OF
+version of it. Fixes the following compile warning with !CONFIG_OF:
+
+  CC [M]  drivers/mmc/host/dw_mmc.o
+drivers/mmc/host/dw_mmc.c:2223:28: warning: =E2=80=98dw_mci_of_find_slo=
+t_node=E2=80=99 defined but not used [-Wunused-function]
+
+Signed-off-by: Tobias Klauser <tklauser@distanz.ch>
+---
+ drivers/mmc/host/dw_mmc.c | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 835e913..109fefe 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2220,10 +2220,6 @@ static int dw_mci_of_get_slot_quirks(struct devi=
+ce *dev, u8 slot)
+ {
+ 	return 0;
+ }
+-static struct device_node *dw_mci_of_find_slot_node(struct device *dev=
+, u8 slot)
+-{
+-	return NULL;
+-}
+ #endif /* CONFIG_OF */
+=20
+ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+--=20
+2.0.1
+
+
