@@ -1,187 +1,55 @@
-From: Pramod Gurav <pramod.gurav.etc@gmail.com>
-Subject: Re: [PATCH 1/5] mmc: msm_sdcc: Switch to using managed resources
-Date: Wed, 17 Sep 2014 11:13:59 +0530
-Message-ID: <CAMf-jSnXtSh6JYJZD3gbhSjdmSjGTzwfvip72Ws8UqQRK4A0SQ@mail.gmail.com>
-References: <1410866146-15144-1-git-send-email-pramod.gurav@smartplayin.com>
-	<1410866146-15144-2-git-send-email-pramod.gurav@smartplayin.com>
-	<5418B5A5.9000400@linaro.org>
+From: =?UTF-8?Q?David_M=c3=bcller_=28ELSOFT_AG=29?= <d.mueller@elsoft.ch>
+Subject: Re: "Card stuck in programming state! __mmc_switch" problem
+ on i.MX6 + eMMC
+Date: Wed, 17 Sep 2014 09:45:57 +0200
+Message-ID: <54193C35.8060104@elsoft.ch>
+References: <54184B19.4080909@elsoft.ch> <CAL8zT=hahrDA++0Y3K=m5XXvwRBNRyfW2NWfQWjFV0cg6sHS2A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f179.google.com ([209.85.217.179]:51205 "EHLO
-	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751113AbaIQFoB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Sep 2014 01:44:01 -0400
-In-Reply-To: <5418B5A5.9000400@linaro.org>
+Received: from mail.hostpark.net ([212.243.197.30]:42424 "EHLO
+	mail.hostpark.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751829AbaIQHpr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Sep 2014 03:45:47 -0400
+In-Reply-To: <CAL8zT=hahrDA++0Y3K=m5XXvwRBNRyfW2NWfQWjFV0cg6sHS2A@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Cc: Pramod Gurav <pramod.gurav@smartplayin.com>, David Brown <davidb@codeaurora.org>, Daniel Walker <dwalker@fifo99.com>, Bryan Huntsman <bryanh@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-msm <linux-arm-msm@vger.kernel.org>
+To: Jean-Michel Hautbois <jhautbois@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Thanks Srini. :)
-I should have known this. Thanks again.
+Hi Jean-Michel
 
+Jean-Michel Hautbois wrote:
+> Can you show your DT (at least pinmux part and usdhc3 node) ?
 
-On Wed, Sep 17, 2014 at 3:41 AM, Srinivas Kandagatla
-<srinivas.kandagatla@linaro.org> wrote:
-> Hi Pramod,
-> Thankyou for the patches.
->
-> You should be aware that this driver is due to be *Removed* very soon.
->
-> Basically msm_sdcc is a hacked version of mmci driver.
-> From v3.17 mmci driver added support for qualcomm specific customization to
-> pl180.
-> So msm platform should be able to use pl180 mmci driver, rather than using
-> msm_sdcc.
->
-> Thanks,
-> srini
->
->
->
-> On 16/09/14 12:15, Pramod Gurav wrote:
->>
->> This change makes changes to use managed version of ioremap, clk_get,
->> request_irq etc for clean unloading of modules. This does away with
->> lables to release these resources.
->>
->> Cc: David Brown <davidb@codeaurora.org>
->> Cc: Daniel Walker <dwalker@fifo99.com>
->> Cc: Bryan Huntsman <bryanh@codeaurora.org>
->> CC: Ulf Hansson <ulf.hansson@linaro.org>
->> CC: linux-mmc@vger.kernel.org
->> CC: linux-arm-msm@vger.kernel.org
->> Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
->> ---
->>   drivers/mmc/host/msm_sdcc.c |   43
->> +++++++++++++++++--------------------------
->>   1 file changed, 17 insertions(+), 26 deletions(-)
->>
->> diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
->> index 9405ecd..2b8ac9c 100644
->> --- a/drivers/mmc/host/msm_sdcc.c
->> +++ b/drivers/mmc/host/msm_sdcc.c
->> @@ -1224,7 +1224,7 @@ msmsdcc_probe(struct platform_device *pdev)
->>
->>         host->cmdpoll = 1;
->>
->> -       host->base = ioremap(memres->start, PAGE_SIZE);
->> +       host->base = devm_ioremap(&pdev->dev, memres->start, PAGE_SIZE);
->>         if (!host->base) {
->>                 ret = -ENOMEM;
->>                 goto host_free;
->> @@ -1244,33 +1244,33 @@ msmsdcc_probe(struct platform_device *pdev)
->>         if (host->dmares) {
->>                 ret = msmsdcc_init_dma(host);
->>                 if (ret)
->> -                       goto ioremap_free;
->> +                       goto tasklet_kill;
->>         } else {
->>                 host->dma.channel = -1;
->>         }
->>
->>         /* Get our clocks */
->> -       host->pclk = clk_get(&pdev->dev, "sdc_pclk");
->> +       host->pclk = devm_clk_get(&pdev->dev, "sdc_pclk");
->>         if (IS_ERR(host->pclk)) {
->>                 ret = PTR_ERR(host->pclk);
->>                 goto dma_free;
->>         }
->>
->> -       host->clk = clk_get(&pdev->dev, "sdc_clk");
->> +       host->clk = devm_clk_get(&pdev->dev, "sdc_clk");
->>         if (IS_ERR(host->clk)) {
->>                 ret = PTR_ERR(host->clk);
->> -               goto pclk_put;
->> +               goto dma_free;
->>         }
->>
->>         ret = clk_set_rate(host->clk, msmsdcc_fmin);
->>         if (ret) {
->>                 pr_err("%s: Clock rate set failed (%d)\n", __func__, ret);
->> -               goto clk_put;
->> +               goto dma_free;
->>         }
->>
->>         ret = clk_prepare(host->pclk);
->>         if (ret)
->> -               goto clk_put;
->> +               goto dma_free;
->>
->>         ret = clk_prepare(host->clk);
->>         if (ret)
->> @@ -1322,7 +1322,7 @@ msmsdcc_probe(struct platform_device *pdev)
->>                         (stat_irqres->flags & IRQF_TRIGGER_MASK);
->>
->>                 host->stat_irq = stat_irqres->start;
->> -               ret = request_irq(host->stat_irq,
->> +               ret = devm_request_irq(&pdev->dev, host->stat_irq,
->>                                   msmsdcc_platform_status_irq,
->>                                   irqflags,
->>                                   DRIVER_NAME " (slot)",
->> @@ -1350,15 +1350,15 @@ msmsdcc_probe(struct platform_device *pdev)
->>                 host->eject = !host->oldstat;
->>         }
->>
->> -       ret = request_irq(cmd_irqres->start, msmsdcc_irq, IRQF_SHARED,
->> -                         DRIVER_NAME " (cmd)", host);
->> +       ret = devm_request_irq(&pdev->dev, cmd_irqres->start, msmsdcc_irq,
->> +                              IRQF_SHARED, DRIVER_NAME " (cmd)", host);
->>         if (ret)
->> -               goto stat_irq_free;
->> +               goto clk_disable;
->>
->> -       ret = request_irq(cmd_irqres->start, msmsdcc_pio_irq, IRQF_SHARED,
->> -                         DRIVER_NAME " (pio)", host);
->> +       ret = devm_request_irq(&pdev->dev, cmd_irqres->start,
->> msmsdcc_pio_irq,
->> +                              IRQF_SHARED, DRIVER_NAME " (pio)", host);
->>         if (ret)
->> -               goto cmd_irq_free;
->> +               goto clk_disable;
->>
->>         mmc_set_drvdata(pdev, mmc);
->>         mmc_add_host(mmc);
->> @@ -1387,28 +1387,19 @@ msmsdcc_probe(struct platform_device *pdev)
->>                 pr_info("%s: Polling status mode enabled\n",
->> mmc_hostname(mmc));
->>
->>         return 0;
->> - cmd_irq_free:
->> -       free_irq(cmd_irqres->start, host);
->> - stat_irq_free:
->> -       if (host->stat_irq)
->> -               free_irq(host->stat_irq, host);
->> +
->>    clk_disable:
->>         msmsdcc_disable_clocks(host, 0);
->>    clk_unprepare:
->>         clk_unprepare(host->clk);
->>    clk_unprepare_p:
->>         clk_unprepare(host->pclk);
->> - clk_put:
->> -       clk_put(host->clk);
->> - pclk_put:
->> -       clk_put(host->pclk);
->> -dma_free:
->> + dma_free:
->>         if (host->dmares)
->>                 dma_free_coherent(NULL, sizeof(struct msmsdcc_nc_dmadata),
->>                                         host->dma.nc,
->> host->dma.nc_busaddr);
->> -ioremap_free:
->> + tasklet_kill:
->>         tasklet_kill(&host->dma_tlet);
->> -       iounmap(host->base);
->>    host_free:
->>         mmc_free_host(mmc);
->>    out:
->>
->
+	pinctrl_usdhc3: usdhc3grp {
+		fsl,pins = <
+			MX6QDL_PAD_SD3_CMD__SD3_CMD    0x1b0b1
+			MX6QDL_PAD_SD3_CLK__SD3_CLK    0x100b1
+			MX6QDL_PAD_SD3_DAT0__SD3_DATA0 0x1b0b1
+			MX6QDL_PAD_SD3_DAT1__SD3_DATA1 0x1b0b1
+			MX6QDL_PAD_SD3_DAT2__SD3_DATA2 0x1b0b1
+			MX6QDL_PAD_SD3_DAT3__SD3_DATA3 0x1b0b1
+			MX6QDL_PAD_SD3_DAT4__SD3_DATA4 0x1b0b1
+			MX6QDL_PAD_SD3_DAT5__SD3_DATA5 0x1b0b1
+			MX6QDL_PAD_SD3_DAT6__SD3_DATA6 0x1b0b1
+			MX6QDL_PAD_SD3_DAT7__SD3_DATA7 0x1b0b1
+			MX6QDL_PAD_SD3_RST__SD3_RESET  0x1b070
+		>;
+	};
+
+&usdhc3 { /* eMMC */
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usdhc3>;
+	vmmc-supply = <&reg_3v15>;
+	non-removable;
+	no-1-8-v;
+	bus-width = <8>;
+	status = "okay";
+};
 
 
+I've tracked the problem down to the point were the MMC code tries to
+switch the eMMC to 8bit bus width (mmc_select_bus_width()).
 
--- 
-Thanks and Regards
-Pramod
