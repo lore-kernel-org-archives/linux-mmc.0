@@ -1,187 +1,66 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v6 0003/0003] mmc: Checks EXT_CSD_PARTITION_SETTING_COMPLETED
- before partitions computation
-Date: Thu, 18 Sep 2014 00:13:17 +0200
-Message-ID: <CAPDyKFpMS3WseK3hqR=s813DbeDqkHaQhDoTnWm7NnF=XQn_Jg@mail.gmail.com>
-References: <53C7E45E.2060102@neotion.com>
-	<CAPDyKFoRpQBHGGCMPvEKdeVGjTO-rnyYVostLZGCV3dudD1rmA@mail.gmail.com>
-	<53EB2DC3.2080002@neotion.com>
-	<CAPDyKFpjYqVUZ8GHB76gD8pOx_eMg9ecvbWrMEfbhEd5ffk7mw@mail.gmail.com>
-	<53ECB95F.2030207@neotion.com>
-	<CAPDyKFp2ekmucHVzMWxeKfyTmuFKTXAYwUEpL5QxvEh8AjFopg@mail.gmail.com>
-	<53F1FBA3.6060108@neotion.com>
-	<5411435C.3080905@neotion.com>
-	<541303BB.1000602@neotion.com>
-	<541709FF.6010408@neotion.com>
+Subject: Re: [PATCH 6/7] mmc: sdhci-esdhc-imx: add imx6sx support
+Date: Thu, 18 Sep 2014 00:29:52 +0200
+Message-ID: <CAPDyKFo5TfuQyb-ECDR+uzCfwio3guY+7LPxHzHXLNBacMbW_A@mail.gmail.com>
+References: <1409745903-26550-1-git-send-email-b29396@freescale.com>
+	<1409745903-26550-7-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <541709FF.6010408@neotion.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f52.google.com ([209.85.192.52]:53813 "EHLO
+	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756623AbaIQW3x (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Sep 2014 18:29:53 -0400
+Received: by mail-qg0-f52.google.com with SMTP id i50so26496qgf.25
+        for <linux-mmc@vger.kernel.org>; Wed, 17 Sep 2014 15:29:52 -0700 (PDT)
+In-Reply-To: <1409745903-26550-7-git-send-email-b29396@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <b29396@freescale.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawn.guo@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 15 September 2014 17:47, Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion=
-=2Ecom> wrote:
-> Checks EXT_CSD_PARTITION_SETTING_COMPLETED bit before
->  computing enhanced user area offset and size, and
->  adding mmc general purpose partitions. The two needs
->  EXT_CSD_PARTITION_SETTING_COMPLETED bit be set to be
->  valid (as described in JEDEC standard).
-> Warn user in case of misconfiguration.
+On 3 September 2014 14:05, Dong Aisheng <b29396@freescale.com> wrote:
+> The imx6sx usdhc is derived from imx6sl, the difference is minor.
+> imx6sx have the errata ESDHC_FLAG_ERR004536 fixed.
+> So introduce a new compatible string for imx6sx to distinguish them.
 >
-> Signed-off-by: Gr=C3=A9gory Soutad=C3=A9 <gsoutade@neotion.com>
+> Signed-off-by: Dong Aisheng <b29396@freescale.com>
 
-Thanks! Applied for next.
+Hi Dong,
+
+This one has checkpatch errors due to missing DT documentation.
 
 Kind regards
 Uffe
 
-
 > ---
->  drivers/mmc/core/mmc.c |   81 ++++++++++++++++++++++++++------------=
-----------
->  1 file changed, 44 insertions(+), 37 deletions(-)
+>  drivers/mmc/host/sdhci-esdhc-imx.c |    6 ++++++
+>  1 files changed, 6 insertions(+), 0 deletions(-)
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 64d0371..66928b0 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -300,7 +300,13 @@ static void mmc_select_card_type(struct mmc_card=
- *card)
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index dc0e384..87179c4 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -150,6 +150,11 @@ static struct esdhc_soc_data usdhc_imx6sl_data = {
+>                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536,
+>  };
 >
->  static void mmc_manage_enhanced_area(struct mmc_card *card, u8 *ext_=
-csd)
->  {
-> -       u8 hc_erase_grp_sz =3D 0, hc_wp_grp_sz =3D 0;
-> +       u8 hc_erase_grp_sz, hc_wp_grp_sz;
+> +static struct esdhc_soc_data usdhc_imx6sx_data = {
+> +       .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+> +                       | ESDHC_FLAG_HAVE_CAP1,
+> +};
 > +
-> +       /*
-> +        * Disable these attributes by default
-> +        */
-> +       card->ext_csd.enhanced_area_offset =3D -EINVAL;
-> +       card->ext_csd.enhanced_area_size =3D -EINVAL;
->
->         /*
->          * Enhanced area feature support -- check whether the eMMC
-> @@ -309,43 +315,41 @@ static void mmc_manage_enhanced_area(struct mmc=
-_card *card, u8 *ext_csd)
->          */
->         if ((ext_csd[EXT_CSD_PARTITION_SUPPORT] & 0x2) &&
->             (ext_csd[EXT_CSD_PARTITION_ATTRIBUTE] & 0x1)) {
-> -               hc_erase_grp_sz =3D
-> -                       ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-> -               hc_wp_grp_sz =3D
-> -                       ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-> +               if (card->ext_csd.partition_setting_completed) {
-> +                       hc_erase_grp_sz =3D
-> +                               ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-> +                       hc_wp_grp_sz =3D
-> +                               ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
->
-> -               /*
-> -                * calculate the enhanced data area offset, in bytes
-> -                */
-> -               card->ext_csd.enhanced_area_offset =3D
-> -                       (ext_csd[139] << 24) + (ext_csd[138] << 16) +
-> -                       (ext_csd[137] << 8) + ext_csd[136];
-> -               if (mmc_card_blockaddr(card))
-> -                       card->ext_csd.enhanced_area_offset <<=3D 9;
-> -               /*
-> -                * calculate the enhanced data area size, in kilobyte=
-s
-> -                */
-> -               card->ext_csd.enhanced_area_size =3D
-> -                       (ext_csd[142] << 16) + (ext_csd[141] << 8) +
-> -                       ext_csd[140];
-> -               card->ext_csd.enhanced_area_size *=3D
-> -                       (size_t)(hc_erase_grp_sz * hc_wp_grp_sz);
-> -               card->ext_csd.enhanced_area_size <<=3D 9;
-> -       } else {
-> -               /*
-> -                * If the enhanced area is not enabled, disable these
-> -                * device attributes.
-> -                */
-> -               card->ext_csd.enhanced_area_offset =3D -EINVAL;
-> -               card->ext_csd.enhanced_area_size =3D -EINVAL;
-> +                       /*
-> +                        * calculate the enhanced data area offset, i=
-n bytes
-> +                        */
-> +                       card->ext_csd.enhanced_area_offset =3D
-> +                               (ext_csd[139] << 24) + (ext_csd[138] =
-<< 16) +
-> +                               (ext_csd[137] << 8) + ext_csd[136];
-> +                       if (mmc_card_blockaddr(card))
-> +                               card->ext_csd.enhanced_area_offset <<=
-=3D 9;
-> +                       /*
-> +                        * calculate the enhanced data area size, in =
-kilobytes
-> +                        */
-> +                       card->ext_csd.enhanced_area_size =3D
-> +                               (ext_csd[142] << 16) + (ext_csd[141] =
-<< 8) +
-> +                               ext_csd[140];
-> +                       card->ext_csd.enhanced_area_size *=3D
-> +                               (size_t)(hc_erase_grp_sz * hc_wp_grp_=
-sz);
-> +                       card->ext_csd.enhanced_area_size <<=3D 9;
-> +               } else {
-> +                       pr_warn("%s: defines enhanced area without pa=
-rtition setting complete\n",
-> +                               mmc_hostname(card->host));
-> +               }
->         }
->  }
->
->  static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_=
-csd)
->  {
-> -       unsigned int part_size;
-> -       u8 hc_erase_grp_sz =3D 0, hc_wp_grp_sz =3D 0;
->         int idx;
-> +       u8 hc_erase_grp_sz, hc_wp_grp_sz;
-> +       unsigned int part_size;
->
->         /*
->          * General purpose partition feature support --
-> @@ -354,18 +358,21 @@ static void mmc_manage_gp_partitions(struct mmc=
-_card *card, u8 *ext_csd)
->          */
->         if (ext_csd[EXT_CSD_PARTITION_SUPPORT] &
->             EXT_CSD_PART_SUPPORT_PART_EN) {
-> -               if (card->ext_csd.partition_setting_completed) {
-> -                       hc_erase_grp_sz =3D
-> -                               ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-> -                       hc_wp_grp_sz =3D
-> -                               ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
-> -               }
-> +               hc_erase_grp_sz =3D
-> +                       ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-> +               hc_wp_grp_sz =3D
-> +                       ext_csd[EXT_CSD_HC_WP_GRP_SIZE];
->
->                 for (idx =3D 0; idx < MMC_NUM_GP_PARTITION; idx++) {
->                         if (!ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3] =
-&&
->                             !ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 +=
- 1] &&
->                             !ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 +=
- 2])
->                                 continue;
-> +                       if (card->ext_csd.partition_setting_completed=
- =3D=3D 0) {
-> +                               pr_warn("%s: has partition size defin=
-ed without partition complete\n",
-> +                                       mmc_hostname(card->host));
-> +                               break;
-> +                       }
->                         part_size =3D
->                                 (ext_csd[EXT_CSD_GP_SIZE_MULT + idx *=
- 3 + 2]
->                                 << 16) +
+>  struct pltfm_imx_data {
+>         u32 scratchpad;
+>         struct pinctrl *pinctrl;
+> @@ -190,6 +195,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
+>         { .compatible = "fsl,imx35-esdhc", .data = &esdhc_imx35_data, },
+>         { .compatible = "fsl,imx51-esdhc", .data = &esdhc_imx51_data, },
+>         { .compatible = "fsl,imx53-esdhc", .data = &esdhc_imx53_data, },
+> +       { .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
+>         { .compatible = "fsl,imx6sl-usdhc", .data = &usdhc_imx6sl_data, },
+>         { .compatible = "fsl,imx6q-usdhc", .data = &usdhc_imx6q_data, },
+>         { /* sentinel */ }
 > --
-> 1.7.9.5
+> 1.7.8
+>
