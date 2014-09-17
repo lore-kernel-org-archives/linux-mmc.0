@@ -1,39 +1,85 @@
-From: Johan Rudholm <johan.rudholm@axis.com>
-Subject: [PATCH] mmc: block: change stop errors to info
-Date: Wed, 17 Sep 2014 09:50:42 +0200
-Message-ID: <1410940242-2792-1-git-send-email-johanru@axis.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bastet.se.axis.com ([195.60.68.11]:60877 "EHLO
-	bastet.se.axis.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751506AbaIQHuz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Sep 2014 03:50:55 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: micky <micky_ching@realsil.com.cn>
+Subject: Re: [PATCH] mmc: rtsx: add card power off during probe
+Date: Wed, 17 Sep 2014 17:11:18 +0800
+Message-ID: <54195036.2010409@realsil.com.cn>
+References: <1410485999-10939-1-git-send-email-micky_ching@realsil.com.cn>
+ <CAPDyKFqcbK9OuQXbegignwiS7rz3L8resQ7Jfc8WvqXEKTcWVA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <CAPDyKFqcbK9OuQXbegignwiS7rz3L8resQ7Jfc8WvqXEKTcWVA@mail.gmail.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Wei WANG <wei_wang@realsil.com.cn>, Roger <rogerable@realtek.com>, "driverdev-devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, Dan Carpenter <dan.carpenter@oracle.com>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, cjb@laptop.org
-Cc: linux-mmc@vger.kernel.org, Johan Rudholm <johanru@axis.com>
 
-Stop command errors are not fatal to the transfer since we make sure
-that the card returns to the transfer state and check the card status.
-Change an unnecessary error to an info.
+On 09/17/2014 02:01 AM, Ulf Hansson wrote:
+> On 12 September 2014 03:39,  <micky_ching@realsil.com.cn> wrote:
+>> From: Roger Tseng <rogerable@realtek.com>
+>>
+>> Some platform have both UEFI driver and MFD/mmc driver, if entering
+>> linux while card in the slot, the card power is already on, and rtsx-mmc
+>> driver have no chance to make card power off. This will lead UHSI card
+>> failed to enter UHSI mode.
+>>
+>> It is hard to control the UEFI driver leaving state, so we power off the
+>> card power during probe.
+>>
+>> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+>> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+>> ---
+>>   drivers/mmc/host/rtsx_pci_sdmmc.c |    7 ++++++-
+>>   1 file changed, 6 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+>> index dfde4a2..57b0796 100644
+>> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+>> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+>> @@ -1341,8 +1341,13 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
+>>          host->pcr = pcr;
+>>          host->mmc = mmc;
+>>          host->pdev = pdev;
+>> -       host->power_state = SDMMC_POWER_OFF;
+>>          INIT_WORK(&host->work, sd_request);
+>> +       sd_power_off(host);
+>> +       /*
+>> +        * ref: SD spec 3.01: 6.4.1.2 Power On or Power Cycle
+>> +        */
+>> +       usleep_range(1000, 2000);
+>> +
+> This won't work in cases were you power off eMMC cards, unless you can
+> do a full power cycle - cut both VCC and VCCQ. Can you?
+Hi Uffe,
 
-Signed-off-by: Johan Rudholm <johanru@axis.com>
----
- drivers/mmc/card/block.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+VCCQ will poweroff at the same time.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 452782b..fea0376 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -977,7 +977,7 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
- 		return ERR_CONTINUE;
- 
- 	/* Now for stop errors.  These aren't fatal to the transfer. */
--	pr_err("%s: error %d sending stop command, original cmd response %#x, card status %#x\n",
-+	pr_info("%s: error %d sending stop command, original cmd response %#x, card status %#x\n",
- 	       req->rq_disk->disk_name, brq->stop.error,
- 	       brq->cmd.resp[0], status);
- 
--- 
-1.7.2.5
+if MMC_CAP2_NO_PRESCAN_POWERUP enable, will call mmc_power_off() at start,
+then it will check ios.power_mode, but the state is MMC_POWER_OFF and just return.
 
+Best Regards.
+micky.
+
+> There are also another option you might want to use,
+> MMC_CAP2_NO_PRESCAN_POWERUP. But again, it must only be used for those
+> hosts that you are able to do a full power cycle for.
+>
+> Kind regards
+> Uffe
+>
+>>          platform_set_drvdata(pdev, host);
+>>          pcr->slots[RTSX_SD_CARD].p_dev = pdev;
+>>          pcr->slots[RTSX_SD_CARD].card_event = rtsx_pci_sdmmc_card_event;
+>> --
+>> 1.7.9.5
+>>
+> .
+>
