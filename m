@@ -1,52 +1,63 @@
-From: Stephen Boyd <sboyd@codeaurora.org>
-Subject: Re: [PATCH] mmc: sdhci-msm: Make tuning block table endian agnostic
-Date: Wed, 17 Sep 2014 15:57:11 -0700
-Message-ID: <20140917225711.GD10233@codeaurora.org>
-References: <1409752622-7564-1-git-send-email-sboyd@codeaurora.org>
- <5407F364.9030303@samsung.com>
- <CAPDyKFp0LwK=DABHaP-Ke=QZFP8bY5MO9RnYmUBqeEdDKp63BA@mail.gmail.com>
- <5408D81C.7070602@codeaurora.org>
- <5408E074.7090008@samsung.com>
- <20140904220126.GC28256@codeaurora.org>
- <54175E06.1030203@codeaurora.org>
- <CAPDyKFomqt5OMBvnFw6+h=R-PP7pywMb0XbFe1sheSXV=VENug@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Remove unused function for !CONFIG_OF
+Date: Thu, 18 Sep 2014 00:57:42 +0200
+Message-ID: <CAPDyKFpdhrsxF-cocQT2nocDiG5ZoOSaYsRE=Jp2n=oBA1Y5WA@mail.gmail.com>
+References: <1410854095-10460-1-git-send-email-tklauser@distanz.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFomqt5OMBvnFw6+h=R-PP7pywMb0XbFe1sheSXV=VENug@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Georgi Djakov <gdjakov@mm-sol.com>, Asutosh Das <asutoshd@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f173.google.com ([209.85.216.173]:46525 "EHLO
+	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757119AbaIQW5n convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Sep 2014 18:57:43 -0400
+Received: by mail-qc0-f173.google.com with SMTP id i8so76176qcq.18
+        for <linux-mmc@vger.kernel.org>; Wed, 17 Sep 2014 15:57:42 -0700 (PDT)
+In-Reply-To: <1410854095-10460-1-git-send-email-tklauser@distanz.ch>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tobias Klauser <tklauser@distanz.ch>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 09/18, Ulf Hansson wrote:
-> 2014-09-15 23:45 GMT+02:00 Stephen Boyd <sboyd@codeaurora.org>:
-> > On 09/04/14 15:01, Stephen Boyd wrote:
-> >>
-> >> ----8<----
-> >> From: Stephen Boyd <sboyd@codeaurora.org>
-> >> Subject: [PATCH] mmc: Consolidate emmc tuning blocks
-> >>
-> >> The same tuning block array exists in the dw_mmc h.c and sdhci-msm.c
-> >> files. Move these into mmc.c so that they can be shared across
-> >> drivers.
-> >>
-> >> Reported-by: Jaehoon Chung <jh80.chung@samsung.com>
-> >> Signed-off-by: Stephen Boyd <sboyd@codeaurora.org>
-> >> ---
-> >
-> > Hi Ulf,
-> >
-> > Can this and the previous patch be picked up for 3.18?
-> 
-> Sure, seems reasonable. Though I am having a bit hard to follow the
-> mail and patches here. Could you please repost the patches and please
-> do not reply to previous mail threads while doing that.
-> 
+On 16 September 2014 09:54, Tobias Klauser <tklauser@distanz.ch> wrote:
+> dw_mci_of_find_slot_node() is only used in dw_mci_of_get_slot_quirks(=
+)
+> if CONFIG_OF is defined, thus there is no need to have a !CONFIG_OF
+> version of it. Fixes the following compile warning with !CONFIG_OF:
+>
+>   CC [M]  drivers/mmc/host/dw_mmc.o
+> drivers/mmc/host/dw_mmc.c:2223:28: warning: =E2=80=98dw_mci_of_find_s=
+lot_node=E2=80=99 defined but not used [-Wunused-function]
+>
+> Signed-off-by: Tobias Klauser <tklauser@distanz.ch>
 
-Ok. No problem.
+Thanks! Applied for next.
 
--- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-hosted by The Linux Foundation
+Kind regards
+Uffe
+
+> ---
+>  drivers/mmc/host/dw_mmc.c | 4 ----
+>  1 file changed, 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 835e913..109fefe 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2220,10 +2220,6 @@ static int dw_mci_of_get_slot_quirks(struct de=
+vice *dev, u8 slot)
+>  {
+>         return 0;
+>  }
+> -static struct device_node *dw_mci_of_find_slot_node(struct device *d=
+ev, u8 slot)
+> -{
+> -       return NULL;
+> -}
+>  #endif /* CONFIG_OF */
+>
+>  static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+> --
+> 2.0.1
+>
+>
