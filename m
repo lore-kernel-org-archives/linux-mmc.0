@@ -1,107 +1,187 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc-exynos: fixed wrong sample-clock selection
-Date: Wed, 17 Sep 2014 11:36:37 +0900
-Message-ID: <5418F3B5.40706@samsung.com>
-References: <1410776768-1303-1-git-send-email-jh80.chung@samsung.com>
- <CAGOxZ53veu=t+8yzkqCmh0wTWKBBDvuE99qbNbfZuuPxAG=m=Q@mail.gmail.com>
+From: Pramod Gurav <pramod.gurav.etc@gmail.com>
+Subject: Re: [PATCH 1/5] mmc: msm_sdcc: Switch to using managed resources
+Date: Wed, 17 Sep 2014 11:13:59 +0530
+Message-ID: <CAMf-jSnXtSh6JYJZD3gbhSjdmSjGTzwfvip72Ws8UqQRK4A0SQ@mail.gmail.com>
+References: <1410866146-15144-1-git-send-email-pramod.gurav@smartplayin.com>
+	<1410866146-15144-2-git-send-email-pramod.gurav@smartplayin.com>
+	<5418B5A5.9000400@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:18483 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753720AbaIQCgl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Sep 2014 22:36:41 -0400
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0NC000F0LXX2NYE0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 17 Sep 2014 11:36:38 +0900 (KST)
-In-reply-to: <CAGOxZ53veu=t+8yzkqCmh0wTWKBBDvuE99qbNbfZuuPxAG=m=Q@mail.gmail.com>
+Received: from mail-lb0-f179.google.com ([209.85.217.179]:51205 "EHLO
+	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751113AbaIQFoB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Sep 2014 01:44:01 -0400
+In-Reply-To: <5418B5A5.9000400@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: Pramod Gurav <pramod.gurav@smartplayin.com>, David Brown <davidb@codeaurora.org>, Daniel Walker <dwalker@fifo99.com>, Bryan Huntsman <bryanh@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 
-Hi, Alim.
+Thanks Srini. :)
+I should have known this. Thanks again.
 
-On 09/17/2014 07:27 AM, Alim Akhtar wrote:
-> Hi Jaehoon,
-> 
-> On Mon, Sep 15, 2014 at 3:56 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Almost all case is selected to 0.
->> (It's not correct sample-clock value.)
->> Since it set to wrong value, HS200 mode don't work fine.
-> Can you please explain what problem you are facing here?
 
-When i try to use HS200 with some eMMC card, Some card is working fine and other isn't working fine.
-(DWMMC is occured the DCRC error.)
-DCRC error might be occurred when the wrong sample-clock is set.
-So i tried to see what value is selected to sample-clock.
-(Selected value - Working fine card : 0, Not working fine card : 0)
-
-When i skip to 0, it's selected to other value for best sample-clock.
-(Selected value - Working fine card : 4, Not working fine card : 6)
-
-After working fine card is selected to 6, it's working fine.
-I didn't know which value is set for other card. But in my case, best sample-clock is selected to 0.
-
-I think it has the some problem for selecting the sample-clock.
-
-Best Regards,
-Jaehoon Chung
-
-> It is not clear from your patch description.
->> If we want to select the correct value, it has to check from 1 to 7.(skip 0)
+On Wed, Sep 17, 2014 at 3:41 AM, Srinivas Kandagatla
+<srinivas.kandagatla@linaro.org> wrote:
+> Hi Pramod,
+> Thankyou for the patches.
+>
+> You should be aware that this driver is due to be *Removed* very soon.
+>
+> Basically msm_sdcc is a hacked version of mmci driver.
+> From v3.17 mmci driver added support for qualcomm specific customization to
+> pl180.
+> So msm platform should be able to use pl180 mmci driver, rather than using
+> msm_sdcc.
+>
+> Thanks,
+> srini
+>
+>
+>
+> On 16/09/14 12:15, Pramod Gurav wrote:
 >>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> This change makes changes to use managed version of ioremap, clk_get,
+>> request_irq etc for clean unloading of modules. This does away with
+>> lables to release these resources.
+>>
+>> Cc: David Brown <davidb@codeaurora.org>
+>> Cc: Daniel Walker <dwalker@fifo99.com>
+>> Cc: Bryan Huntsman <bryanh@codeaurora.org>
+>> CC: Ulf Hansson <ulf.hansson@linaro.org>
+>> CC: linux-mmc@vger.kernel.org
+>> CC: linux-arm-msm@vger.kernel.org
+>> Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
 >> ---
->>  drivers/mmc/host/dw_mmc-exynos.c |    9 ++++++++-
->>  1 file changed, 8 insertions(+), 1 deletion(-)
+>>   drivers/mmc/host/msm_sdcc.c |   43
+>> +++++++++++++++++--------------------------
+>>   1 file changed, 17 insertions(+), 26 deletions(-)
 >>
->> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
->> index 0fbc53a..5294035 100644
->> --- a/drivers/mmc/host/dw_mmc-exynos.c
->> +++ b/drivers/mmc/host/dw_mmc-exynos.c
->> @@ -25,6 +25,7 @@
->>  #define NUM_PINS(x)                    (x + 2)
+>> diff --git a/drivers/mmc/host/msm_sdcc.c b/drivers/mmc/host/msm_sdcc.c
+>> index 9405ecd..2b8ac9c 100644
+>> --- a/drivers/mmc/host/msm_sdcc.c
+>> +++ b/drivers/mmc/host/msm_sdcc.c
+>> @@ -1224,7 +1224,7 @@ msmsdcc_probe(struct platform_device *pdev)
 >>
->>  #define SDMMC_CLKSEL                   0x09C
->> +#define SDMMC_CLKSEL_CCLK_SAMPLE_MASK  0x7
->>  #define SDMMC_CLKSEL_CCLK_SAMPLE(x)    (((x) & 7) << 0)
->>  #define SDMMC_CLKSEL_CCLK_DRIVE(x)     (((x) & 7) << 16)
->>  #define SDMMC_CLKSEL_CCLK_DIVIDER(x)   (((x) & 7) << 24)
->> @@ -330,6 +331,12 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
->>         if (!blk_test)
->>                 return -ENOMEM;
+>>         host->cmdpoll = 1;
 >>
->> +       /*
->> +        * In order to check all selclk_sample clock,
->> +        * it needs to reset to 0.
->> +        */
->> +       dw_mci_exynos_set_clksmpl(host, 0);
+>> -       host->base = ioremap(memres->start, PAGE_SIZE);
+>> +       host->base = devm_ioremap(&pdev->dev, memres->start, PAGE_SIZE);
+>>         if (!host->base) {
+>>                 ret = -ENOMEM;
+>>                 goto host_free;
+>> @@ -1244,33 +1244,33 @@ msmsdcc_probe(struct platform_device *pdev)
+>>         if (host->dmares) {
+>>                 ret = msmsdcc_init_dma(host);
+>>                 if (ret)
+>> -                       goto ioremap_free;
+>> +                       goto tasklet_kill;
+>>         } else {
+>>                 host->dma.channel = -1;
+>>         }
+>>
+>>         /* Get our clocks */
+>> -       host->pclk = clk_get(&pdev->dev, "sdc_pclk");
+>> +       host->pclk = devm_clk_get(&pdev->dev, "sdc_pclk");
+>>         if (IS_ERR(host->pclk)) {
+>>                 ret = PTR_ERR(host->pclk);
+>>                 goto dma_free;
+>>         }
+>>
+>> -       host->clk = clk_get(&pdev->dev, "sdc_clk");
+>> +       host->clk = devm_clk_get(&pdev->dev, "sdc_clk");
+>>         if (IS_ERR(host->clk)) {
+>>                 ret = PTR_ERR(host->clk);
+>> -               goto pclk_put;
+>> +               goto dma_free;
+>>         }
+>>
+>>         ret = clk_set_rate(host->clk, msmsdcc_fmin);
+>>         if (ret) {
+>>                 pr_err("%s: Clock rate set failed (%d)\n", __func__, ret);
+>> -               goto clk_put;
+>> +               goto dma_free;
+>>         }
+>>
+>>         ret = clk_prepare(host->pclk);
+>>         if (ret)
+>> -               goto clk_put;
+>> +               goto dma_free;
+>>
+>>         ret = clk_prepare(host->clk);
+>>         if (ret)
+>> @@ -1322,7 +1322,7 @@ msmsdcc_probe(struct platform_device *pdev)
+>>                         (stat_irqres->flags & IRQF_TRIGGER_MASK);
+>>
+>>                 host->stat_irq = stat_irqres->start;
+>> -               ret = request_irq(host->stat_irq,
+>> +               ret = devm_request_irq(&pdev->dev, host->stat_irq,
+>>                                   msmsdcc_platform_status_irq,
+>>                                   irqflags,
+>>                                   DRIVER_NAME " (slot)",
+>> @@ -1350,15 +1350,15 @@ msmsdcc_probe(struct platform_device *pdev)
+>>                 host->eject = !host->oldstat;
+>>         }
+>>
+>> -       ret = request_irq(cmd_irqres->start, msmsdcc_irq, IRQF_SHARED,
+>> -                         DRIVER_NAME " (cmd)", host);
+>> +       ret = devm_request_irq(&pdev->dev, cmd_irqres->start, msmsdcc_irq,
+>> +                              IRQF_SHARED, DRIVER_NAME " (cmd)", host);
+>>         if (ret)
+>> -               goto stat_irq_free;
+>> +               goto clk_disable;
+>>
+>> -       ret = request_irq(cmd_irqres->start, msmsdcc_pio_irq, IRQF_SHARED,
+>> -                         DRIVER_NAME " (pio)", host);
+>> +       ret = devm_request_irq(&pdev->dev, cmd_irqres->start,
+>> msmsdcc_pio_irq,
+>> +                              IRQF_SHARED, DRIVER_NAME " (pio)", host);
+>>         if (ret)
+>> -               goto cmd_irq_free;
+>> +               goto clk_disable;
+>>
+>>         mmc_set_drvdata(pdev, mmc);
+>>         mmc_add_host(mmc);
+>> @@ -1387,28 +1387,19 @@ msmsdcc_probe(struct platform_device *pdev)
+>>                 pr_info("%s: Polling status mode enabled\n",
+>> mmc_hostname(mmc));
+>>
+>>         return 0;
+>> - cmd_irq_free:
+>> -       free_irq(cmd_irqres->start, host);
+>> - stat_irq_free:
+>> -       if (host->stat_irq)
+>> -               free_irq(host->stat_irq, host);
 >> +
->>         start_smpl = dw_mci_exynos_get_clksmpl(host);
+>>    clk_disable:
+>>         msmsdcc_disable_clocks(host, 0);
+>>    clk_unprepare:
+>>         clk_unprepare(host->clk);
+>>    clk_unprepare_p:
+>>         clk_unprepare(host->pclk);
+>> - clk_put:
+>> -       clk_put(host->clk);
+>> - pclk_put:
+>> -       clk_put(host->pclk);
+>> -dma_free:
+>> + dma_free:
+>>         if (host->dmares)
+>>                 dma_free_coherent(NULL, sizeof(struct msmsdcc_nc_dmadata),
+>>                                         host->dma.nc,
+>> host->dma.nc_busaddr);
+>> -ioremap_free:
+>> + tasklet_kill:
+>>         tasklet_kill(&host->dma_tlet);
+>> -       iounmap(host->base);
+>>    host_free:
+>>         mmc_free_host(mmc);
+>>    out:
 >>
->>         do {
->> @@ -372,7 +379,7 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
->>                                 "Tuning error: cmd.error:%d, data.error:%d\n",
->>                                 cmd.error, data.error);
->>                 }
->> -       } while (start_smpl != smpl);
->> +       } while (start_smpl < SDMMC_CLKSEL_CCLK_SAMPLE_MASK);
->>
->>         found = dw_mci_exynos_get_best_clksmpl(candiates);
->>         if (found >= 0)
->> --
->> 1.7.9.5
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> 
+>
 
+
+
+-- 
+Thanks and Regards
+Pramod
