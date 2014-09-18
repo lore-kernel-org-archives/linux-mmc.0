@@ -1,114 +1,170 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: don't request CD IRQ until mmc_start_host()
-Date: Thu, 18 Sep 2014 09:49:06 +0300
-Message-ID: <541A8062.3020008@intel.com>
-References: <1410542338-24565-1-git-send-email-swarren@wwwdotorg.org> <CAPDyKFq63LKHKJ_1JD=SGU=V1eE-1105qPLy1EQtf=4k8dwKkA@mail.gmail.com> <5419E7B6.7020708@wwwdotorg.org> <541A6CAD.1020001@intel.com>
+From: Roger Tseng <rogerable@realtek.com>
+Subject: Re: [PATCH] mmc: rtsx: add card power off during probe
+Date: Thu, 18 Sep 2014 07:19:47 +0000
+Message-ID: <1411024883.27455.11.camel@debian-rtk5880>
+References: <1410485999-10939-1-git-send-email-micky_ching@realsil.com.cn>
+ <CAPDyKFqcbK9OuQXbegignwiS7rz3L8resQ7Jfc8WvqXEKTcWVA@mail.gmail.com>
+ <54195036.2010409@realsil.com.cn>
+ <CAPDyKFrbMaDxU3VkhMO63+tLRMipKPqGvYC5cT2PTeVU1CTTQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:56994 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751217AbaIRGuy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 18 Sep 2014 02:50:54 -0400
-In-Reply-To: <541A6CAD.1020001@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <CAPDyKFrbMaDxU3VkhMO63+tLRMipKPqGvYC5cT2PTeVU1CTTQg@mail.gmail.com>
+Content-Language: zh-TW
+Content-ID: <95890B71182D7543B66998E6F2AB86B3@realtek.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Stephen Warren <swarren@wwwdotorg.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Stephen Warren <swarren@nvidia.com>, Russell King <linux@arm.linux.org.uk>, Alexandre Courbot <acourbot@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei_wang <wei_wang@realsil.com.cn>, "driverdev-devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, Dan Carpenter <dan.carpenter@oracle.com>
+List-Id: linux-mmc@vger.kernel.org
 
-On 09/18/2014 08:25 AM, Adrian Hunter wrote:
-> On 09/17/2014 10:57 PM, Stephen Warren wrote:
->> On 09/17/2014 01:55 PM, Ulf Hansson wrote:
->>> On 12 September 2014 19:18, Stephen Warren <swarren@wwwdotorg.org> wrote:
->>>> From: Stephen Warren <swarren@nvidia.com>
->>>>
->>>> As soon as the CD IRQ is requested, it can trigger, since it's an
->>>> externally controlled event. If it does, delayed_work host->detect will
->>>> be scheduled.
->>>>
->>>> Many host controller probe()s are roughly structured as:
->>>>
->>>> *_probe() {
->>>>      host = sdhci_pltfm_init();
->>>>      mmc_of_parse(host->mmc);
->>>>      rc = sdhci_add_host(host);
->>>>      if (rc) {
->>>>          sdhci_pltfm_free();
->>>>          return rc;
->>>>      }
->>>>
->>>> In 3.17, CD IRQs can are enabled quite early via *_probe() ->
->>>> mmc_of_parse() -> mmc_gpio_request_cd() -> mmc_gpiod_request_cd_irq().
->>>>
->>>> Note that in linux-next, mmc_of_parse() calls mmc_gpio*d*_request_cd()
->>>> rather than mmc_gpio_request_cd(), and mmc_gpio*d*_request_cd() doesn't
->>>> call mmc_gpiod_request_cd_irq(). However, this issue still exists for
->>>> any other direct users of mmc_gpio_request_cd().
->>>>
->>>> sdhci_add_host() may fail part way through (e.g. due to deferred
->>>> probe for a vmmc regulator), and sdhci_pltfm_free() does nothing to
->>>> unrequest the CD IRQ nor cancel the delayed_work. sdhci_pltfm_free() is
->>>> coded to assume that if sdhci_add_host() failed, then the delayed_work
->>>> cannot (or should not) have been triggered.
->>>>
->>>> This can lead to the following with CONFIG_DEBUG_OBJECTS_* enabled, when
->>>> kfree(host) is eventually called inside sdhci_pltfm_free():
->>>>
->>>> WARNING: CPU: 2 PID: 6 at lib/debugobjects.c:263
->>>> debug_print_object+0x8c/0xb4()
->>>> ODEBUG: free active (active state 0) object type: timer_list hint:
->>>> delayed_work_timer_fn+0x0/0x18
->>>>
->>>> The object being complained about is host->detect.
->>>>
->>>> There's no need to request the CD IRQ so early; mmc_start_host() already
->>>> requests it, and I *assume* that mmc_start_host() is called somehow for
->>>> all host controllers. For SDHCI hosts at least, the typical call path
->>>> that does this is: *_probe() -> sdhci_add_host() -> mmc_add_host() ->
->>>> mmc_start_host(). So, remove the call to mmc_gpiod_request_cd_irq() from
->>>> mmc_gpio_request_cd(). This matches mmc_gpio*d*_request_cd(), which
->>>> already doesn't call mmc_gpiod_request_cd_irq().
->>>>
->>>> This solves the problem (eliminates the kernel error message above),
->>>> since it guarantees that the IRQ can't trigger before mmc_start_host()
->>>> is called.
->>>>
->>>> The critical point here is that once sdhci_add_host() calls
->>>> mmc_add_host() -> mmc_start_host(), sdhci_add_host() is coded not to
->>>> fail. In other words, if there's a chance that mmc_start_host() may have
->>>> been called, and CD IRQs triggered, and the delayed_work scheduled,
->>>> sdhci_add_host() won't fail, and so cleanup is no longer via
->>>> sdhci_pltfm_free() (which doesn't free the IRQ or cancel the work queue)
->>>> but instead must be via sdhci_remove_host(), which calls mmc_remove_host()
->>>> -> mmc_stop_host(), which does free the IRQ and cancel the work queue.
->>>>
->>>> This fixes what I might conclude to be a mistake in commit 740a221ef0e5
->>>> ("mmc: slot-gpio: Add GPIO descriptor based CD GPIO API"), which added the
->>>> call from mmc_start_host() to mmc_gpiod_request_cd_irq(), but also added
->>>> incorrectly added a call from mmc_gpio_request_cd() to
->>>> mmc_gpiod_request_cd_irq().
-
-That comment is wrong.  mmc_gpio_request_cd() has always set up the irq.
-
->>>>
->>>> CC: Russell King <linux@arm.linux.org.uk>
->>>> Cc: Adrian Hunter <adrian.hunter@intel.com>
->>>> Cc: Alexandre Courbot <acourbot@nvidia.com>
->>>> Cc: Linus Walleij <linus.walleij@linaro.org>
->>>> Signed-off-by: Stephen Warren <swarren@nvidia.com>
->>>
->>> Hi Stephen,
->>>
->>> Thanks for looking into this. It seems like this issue has been
->>> present for quite a while.
->>> I believe your patch should have a stable tag for 3.15+ as well,
->>> unless you object I will add it.
->>
->> Yes, that probably makes sense, thanks.
+On Wed, 2014-09-17 at 21:29 +0200, Ulf Hansson wrote:
+> On 17 September 2014 11:11, micky <micky_ching@realsil.com.cn> wrote:
+> > On 09/17/2014 02:01 AM, Ulf Hansson wrote:
+> >>
+> >> On 12 September 2014 03:39,  <micky_ching@realsil.com.cn> wrote:
+> >>>
+> >>> From: Roger Tseng <rogerable@realtek.com>
+> >>>
+> >>> Some platform have both UEFI driver and MFD/mmc driver, if entering
+> >>> linux while card in the slot, the card power is already on, and rtsx-mmc
+> >>> driver have no chance to make card power off. This will lead UHSI card
+> >>> failed to enter UHSI mode.
+> >>>
+> >>> It is hard to control the UEFI driver leaving state, so we power off the
+> >>> card power during probe.
+> >>>
+> >>> Signed-off-by: Roger Tseng <rogerable@realtek.com>
+> >>> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+> >>> ---
+> >>>   drivers/mmc/host/rtsx_pci_sdmmc.c |    7 ++++++-
+> >>>   1 file changed, 6 insertions(+), 1 deletion(-)
+> >>>
+> >>> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> >>> b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> >>> index dfde4a2..57b0796 100644
+> >>> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> >>> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> >>> @@ -1341,8 +1341,13 @@ static int rtsx_pci_sdmmc_drv_probe(struct
+> >>> platform_device *pdev)
+> >>>          host->pcr = pcr;
+> >>>          host->mmc = mmc;
+> >>>          host->pdev = pdev;
+> >>> -       host->power_state = SDMMC_POWER_OFF;
+> >>>          INIT_WORK(&host->work, sd_request);
+> >>> +       sd_power_off(host);
+> >>> +       /*
+> >>> +        * ref: SD spec 3.01: 6.4.1.2 Power On or Power Cycle
+> >>> +        */
+> >>> +       usleep_range(1000, 2000);
+> >>> +
+> >>
+> >> This won't work in cases were you power off eMMC cards, unless you can
+> >> do a full power cycle - cut both VCC and VCCQ. Can you?
+> >
+> > Hi Uffe,
+> >
+> > VCCQ will poweroff at the same time.
 > 
-> Doesn't this patch break the drivers that call mmc_gpio_request_cd() after
-> mmc_add_host() like mmc_spi.c or sdhci-sirf.c or tmio_mmc_pio.c ?
+> In that case, don't forget to enable MMC_CAP2_FULL_PWR_CYCLE.
+> 
+> >
+> > if MMC_CAP2_NO_PRESCAN_POWERUP enable, will call mmc_power_off() at start,
+> > then it will check ios.power_mode, but the state is MMC_POWER_OFF and just
+> > return.
+> 
+> Uhh, that's right! So, I wonder why we invokes mmc_power_off() from
+> that path at all.
+> 
+> Hmm, I think we should change the behavior in mmc_start_host(), like below:
+> 1) Add a "MMC_POWER_UNDEFINED" state which is what the power state
+> should be assigned to at allocation.
+> 2 ) From mmc_start_host(), invoke mmc_power_off() when
+> MMC_CAP2_NO_PRESCAN_POWERUP and MMC_CAP2_FULL_PWR_CYCLE is set.
+> 
+> Would that work?
+Yes. I have confirmed this by following changes. The MMC_POWER_UNDEFINED
+designation in mmc_start_host() will eventually cause a power-off
+operation.
 
-Ulf, this should be reverted.
+But I wonder if we need to additionally check MMC_CAP2_FULL_PWR_CYCLE
+before calling mmc_power_off()?
 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index d03a080fb9cd..3457b0f74b71 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2489,7 +2489,9 @@ void mmc_start_host(struct mmc_host *host)
+ {
+        host->f_init = max(freqs[0], host->f_min);
+        host->rescan_disable = 0;
+-       if (host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)
++       host->ios.power_mode = MMC_POWER_UNDEFINED;
++       if (host->caps2 & (MMC_CAP2_NO_PRESCAN_POWERUP |
++           MMC_CAP2_FULL_PWR_CYCLE))
+                mmc_power_off(host);
+        else
+                mmc_power_up(host, host->ocr_avail);
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c
+b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index dfde4a210238..d49460b5ff07 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -1292,6 +1292,7 @@ static void realtek_init_host(struct
+realtek_pci_sdmmc *host)
+        mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED |
+                MMC_CAP_MMC_HIGHSPEED | MMC_CAP_BUS_WIDTH_TEST |
+                MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
++       mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP |
+MMC_CAP2_FULL_PWR_CYCLE;
+        mmc->max_current_330 = 400;
+        mmc->max_current_180 = 800;
+        mmc->ops = &realtek_pci_sdmmc_ops;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 7960424d0bc0..b3bfa609816a 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -42,6 +42,7 @@ struct mmc_ios {
+ #define MMC_POWER_OFF          0
+ #define MMC_POWER_UP           1
+ #define MMC_POWER_ON           2
++#define MMC_POWER_UNDEFINED    3
+ 
+        unsigned char   bus_width;              /* data bus width */
+
+> Kind regards
+> Uffe
+> 
+> > Best Regards.
+> > micky.
+> >
+> >> There are also another option you might want to use,
+> >> MMC_CAP2_NO_PRESCAN_POWERUP. But again, it must only be used for those
+> >> hosts that you are able to do a full power cycle for.
+> >>
+> >> Kind regards
+> >> Uffe
+> >>
+> >>>          platform_set_drvdata(pdev, host);
+> >>>          pcr->slots[RTSX_SD_CARD].p_dev = pdev;
+> >>>          pcr->slots[RTSX_SD_CARD].card_event = rtsx_pci_sdmmc_card_event;
+> >>> --
+> >>> 1.7.9.5
+> >>>
+> >> .
+> >>
+> >
+> 
+> ------Please consider the environment before printing this e-mail.
+
+-- 
+Best regards,
+Roger Tseng
