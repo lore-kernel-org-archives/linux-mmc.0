@@ -1,130 +1,114 @@
-From: Dong Aisheng <b29396@freescale.com>
-Subject: Re: [PATCH 6/7] mmc: sdhci-esdhc-imx: add imx6sx support
-Date: Thu, 18 Sep 2014 13:35:01 +0800
-Message-ID: <20140918053457.GA15363@shlinux1.ap.freescale.net>
-References: <1409745903-26550-1-git-send-email-b29396@freescale.com>
- <1409745903-26550-7-git-send-email-b29396@freescale.com>
- <CAPDyKFo5TfuQyb-ECDR+uzCfwio3guY+7LPxHzHXLNBacMbW_A@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: don't request CD IRQ until mmc_start_host()
+Date: Thu, 18 Sep 2014 09:49:06 +0300
+Message-ID: <541A8062.3020008@intel.com>
+References: <1410542338-24565-1-git-send-email-swarren@wwwdotorg.org> <CAPDyKFq63LKHKJ_1JD=SGU=V1eE-1105qPLy1EQtf=4k8dwKkA@mail.gmail.com> <5419E7B6.7020708@wwwdotorg.org> <541A6CAD.1020001@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFo5TfuQyb-ECDR+uzCfwio3guY+7LPxHzHXLNBacMbW_A@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Shawn Guo <shawn.guo@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:56994 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751217AbaIRGuy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 18 Sep 2014 02:50:54 -0400
+In-Reply-To: <541A6CAD.1020001@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Stephen Warren <swarren@nvidia.com>, Russell King <linux@arm.linux.org.uk>, Alexandre Courbot <acourbot@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-On Thu, Sep 18, 2014 at 12:29:52AM +0200, Ulf Hansson wrote:
-> On 3 September 2014 14:05, Dong Aisheng <b29396@freescale.com> wrote:
-> > The imx6sx usdhc is derived from imx6sl, the difference is minor.
-> > imx6sx have the errata ESDHC_FLAG_ERR004536 fixed.
-> > So introduce a new compatible string for imx6sx to distinguish them.
-> >
-> > Signed-off-by: Dong Aisheng <b29396@freescale.com>
+On 09/18/2014 08:25 AM, Adrian Hunter wrote:
+> On 09/17/2014 10:57 PM, Stephen Warren wrote:
+>> On 09/17/2014 01:55 PM, Ulf Hansson wrote:
+>>> On 12 September 2014 19:18, Stephen Warren <swarren@wwwdotorg.org> wrote:
+>>>> From: Stephen Warren <swarren@nvidia.com>
+>>>>
+>>>> As soon as the CD IRQ is requested, it can trigger, since it's an
+>>>> externally controlled event. If it does, delayed_work host->detect will
+>>>> be scheduled.
+>>>>
+>>>> Many host controller probe()s are roughly structured as:
+>>>>
+>>>> *_probe() {
+>>>>      host = sdhci_pltfm_init();
+>>>>      mmc_of_parse(host->mmc);
+>>>>      rc = sdhci_add_host(host);
+>>>>      if (rc) {
+>>>>          sdhci_pltfm_free();
+>>>>          return rc;
+>>>>      }
+>>>>
+>>>> In 3.17, CD IRQs can are enabled quite early via *_probe() ->
+>>>> mmc_of_parse() -> mmc_gpio_request_cd() -> mmc_gpiod_request_cd_irq().
+>>>>
+>>>> Note that in linux-next, mmc_of_parse() calls mmc_gpio*d*_request_cd()
+>>>> rather than mmc_gpio_request_cd(), and mmc_gpio*d*_request_cd() doesn't
+>>>> call mmc_gpiod_request_cd_irq(). However, this issue still exists for
+>>>> any other direct users of mmc_gpio_request_cd().
+>>>>
+>>>> sdhci_add_host() may fail part way through (e.g. due to deferred
+>>>> probe for a vmmc regulator), and sdhci_pltfm_free() does nothing to
+>>>> unrequest the CD IRQ nor cancel the delayed_work. sdhci_pltfm_free() is
+>>>> coded to assume that if sdhci_add_host() failed, then the delayed_work
+>>>> cannot (or should not) have been triggered.
+>>>>
+>>>> This can lead to the following with CONFIG_DEBUG_OBJECTS_* enabled, when
+>>>> kfree(host) is eventually called inside sdhci_pltfm_free():
+>>>>
+>>>> WARNING: CPU: 2 PID: 6 at lib/debugobjects.c:263
+>>>> debug_print_object+0x8c/0xb4()
+>>>> ODEBUG: free active (active state 0) object type: timer_list hint:
+>>>> delayed_work_timer_fn+0x0/0x18
+>>>>
+>>>> The object being complained about is host->detect.
+>>>>
+>>>> There's no need to request the CD IRQ so early; mmc_start_host() already
+>>>> requests it, and I *assume* that mmc_start_host() is called somehow for
+>>>> all host controllers. For SDHCI hosts at least, the typical call path
+>>>> that does this is: *_probe() -> sdhci_add_host() -> mmc_add_host() ->
+>>>> mmc_start_host(). So, remove the call to mmc_gpiod_request_cd_irq() from
+>>>> mmc_gpio_request_cd(). This matches mmc_gpio*d*_request_cd(), which
+>>>> already doesn't call mmc_gpiod_request_cd_irq().
+>>>>
+>>>> This solves the problem (eliminates the kernel error message above),
+>>>> since it guarantees that the IRQ can't trigger before mmc_start_host()
+>>>> is called.
+>>>>
+>>>> The critical point here is that once sdhci_add_host() calls
+>>>> mmc_add_host() -> mmc_start_host(), sdhci_add_host() is coded not to
+>>>> fail. In other words, if there's a chance that mmc_start_host() may have
+>>>> been called, and CD IRQs triggered, and the delayed_work scheduled,
+>>>> sdhci_add_host() won't fail, and so cleanup is no longer via
+>>>> sdhci_pltfm_free() (which doesn't free the IRQ or cancel the work queue)
+>>>> but instead must be via sdhci_remove_host(), which calls mmc_remove_host()
+>>>> -> mmc_stop_host(), which does free the IRQ and cancel the work queue.
+>>>>
+>>>> This fixes what I might conclude to be a mistake in commit 740a221ef0e5
+>>>> ("mmc: slot-gpio: Add GPIO descriptor based CD GPIO API"), which added the
+>>>> call from mmc_start_host() to mmc_gpiod_request_cd_irq(), but also added
+>>>> incorrectly added a call from mmc_gpio_request_cd() to
+>>>> mmc_gpiod_request_cd_irq().
+
+That comment is wrong.  mmc_gpio_request_cd() has always set up the irq.
+
+>>>>
+>>>> CC: Russell King <linux@arm.linux.org.uk>
+>>>> Cc: Adrian Hunter <adrian.hunter@intel.com>
+>>>> Cc: Alexandre Courbot <acourbot@nvidia.com>
+>>>> Cc: Linus Walleij <linus.walleij@linaro.org>
+>>>> Signed-off-by: Stephen Warren <swarren@nvidia.com>
+>>>
+>>> Hi Stephen,
+>>>
+>>> Thanks for looking into this. It seems like this issue has been
+>>> present for quite a while.
+>>> I believe your patch should have a stable tag for 3.15+ as well,
+>>> unless you object I will add it.
+>>
+>> Yes, that probably makes sense, thanks.
 > 
-> Hi Dong,
-> 
-> This one has checkpatch errors due to missing DT documentation.
-> 
+> Doesn't this patch break the drivers that call mmc_gpio_request_cd() after
+> mmc_add_host() like mmc_spi.c or sdhci-sirf.c or tmio_mmc_pio.c ?
 
-The original binding doc is writing in the format of:
- Required properties:
--- compatible : Should be "fsl,<chip>-esdhc"
-It just provides a rule and does not provide the specific compatible string.
-So i did not update the doc before.
+Ulf, this should be reverted.
 
-But i think it's better to fix it to avoid future warning again.
-
-Can you help add below patch before this commit or do you need me
-to resend the patch series again with this patch added?
-
->From 467b84e5ffcba543b9ac88913b1d2dc1159dfa72 Mon Sep 17 00:00:00 2001
-From: Dong Aisheng <b29396@freescale.com>
-Date: Thu, 18 Sep 2014 13:11:03 +0800
-Subject: [PATCH 6/8] mmc: sdhci-esdhc-imx: using specific compatible string
- in binding doc
-
-Using specific compatible string in binding doc to make the binding
-more clear.
-It's also used to avoid checkpatch warning in the future like follows:
-0005-mmc-sdhci-do-not-enable-card-cd-wakeup-for-gpio-case.patch has no obvious style problems and is ready for submission.
-WARNING: DT compatible string "fsl,imx6sx-usdhc" appears un-documented -- check ./Documentation/devicetree/bindings/
-+       { .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
-
-total: 0 errors, 1 warnings, 18 lines checked
-
-Signed-off-by: Dong Aisheng <b29396@freescale.com>
----
- .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |    9 ++++++++-
- 1 files changed, 8 insertions(+), 1 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-index 9046ba06..c415d34 100644
---- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-@@ -7,7 +7,14 @@ This file documents differences between the core properties described
- by mmc.txt and the properties used by the sdhci-esdhc-imx driver.
-
- Required properties:
--- compatible : Should be "fsl,<chip>-esdhc"
-+- compatible : Should be "fsl,<chip>-esdhc", the supported chips include
-+              "fsl,imx25-esdhc"
-+              "fsl,imx35-esdhc"
-+              "fsl,imx51-esdhc"
-+              "fsl,imx53-esdhc"
-+              "fsl,imx6q-usdhc"
-+              "fsl,imx6sl-usdhc"
-+              "fsl,imx6sx-usdhc"
-
- Optional properties:
- - fsl,cd-controller : Indicate to use controller internal card detection
---
-1.7.8
-
-Regards
-Dong Aisheng
-
-> Kind regards
-> Uffe
-> 
-> > ---
-> >  drivers/mmc/host/sdhci-esdhc-imx.c |    6 ++++++
-> >  1 files changed, 6 insertions(+), 0 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > index dc0e384..87179c4 100644
-> > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > @@ -150,6 +150,11 @@ static struct esdhc_soc_data usdhc_imx6sl_data = {
-> >                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536,
-> >  };
-> >
-> > +static struct esdhc_soc_data usdhc_imx6sx_data = {
-> > +       .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
-> > +                       | ESDHC_FLAG_HAVE_CAP1,
-> > +};
-> > +
-> >  struct pltfm_imx_data {
-> >         u32 scratchpad;
-> >         struct pinctrl *pinctrl;
-> > @@ -190,6 +195,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
-> >         { .compatible = "fsl,imx35-esdhc", .data = &esdhc_imx35_data, },
-> >         { .compatible = "fsl,imx51-esdhc", .data = &esdhc_imx51_data, },
-> >         { .compatible = "fsl,imx53-esdhc", .data = &esdhc_imx53_data, },
-> > +       { .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
-> >         { .compatible = "fsl,imx6sl-usdhc", .data = &usdhc_imx6sl_data, },
-> >         { .compatible = "fsl,imx6q-usdhc", .data = &usdhc_imx6q_data, },
-> >         { /* sentinel */ }
-> > --
-> > 1.7.8
-> >
