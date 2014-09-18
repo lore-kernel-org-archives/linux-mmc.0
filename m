@@ -1,139 +1,114 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc-exynos: fixed wrong sample-clock selection
-Date: Thu, 18 Sep 2014 19:50:21 +0900
-Message-ID: <541AB8ED.1000003@samsung.com>
-References: <1410776768-1303-1-git-send-email-jh80.chung@samsung.com>
- <CAGOxZ53veu=t+8yzkqCmh0wTWKBBDvuE99qbNbfZuuPxAG=m=Q@mail.gmail.com>
- <5418F3B5.40706@samsung.com>
- <CAGOxZ50T8=Dz_ioyvAKP_1TkObU90DpOC=TFQtBaPMEUPc-gpw@mail.gmail.com>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: [PATCH] mmc: don't request CD IRQ until mmc_start_host()
+Date: Thu, 18 Sep 2014 10:39:38 -0600
+Message-ID: <541B0ACA.6020808@wwwdotorg.org>
+References: <1410542338-24565-1-git-send-email-swarren@wwwdotorg.org> <CAPDyKFq63LKHKJ_1JD=SGU=V1eE-1105qPLy1EQtf=4k8dwKkA@mail.gmail.com> <5419E7B6.7020708@wwwdotorg.org> <541A6CAD.1020001@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:50496 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756501AbaIRKuX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Sep 2014 06:50:23 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0NC300NQNFFX2N60@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 18 Sep 2014 19:50:21 +0900 (KST)
-In-reply-to: <CAGOxZ50T8=Dz_ioyvAKP_1TkObU90DpOC=TFQtBaPMEUPc-gpw@mail.gmail.com>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:46138 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932092AbaIRQjV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Sep 2014 12:39:21 -0400
+In-Reply-To: <541A6CAD.1020001@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Stephen Warren <swarren@nvidia.com>, Russell King <linux@arm.linux.org.uk>, Alexandre Courbot <acourbot@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-Hi, Alim.
-
-On 09/17/2014 09:49 PM, Alim Akhtar wrote:
-> Hi Jaehoon
-> 
-> On Wed, Sep 17, 2014 at 8:06 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Hi, Alim.
->>
->> On 09/17/2014 07:27 AM, Alim Akhtar wrote:
->>> Hi Jaehoon,
+On 09/17/2014 11:25 PM, Adrian Hunter wrote:
+> On 09/17/2014 10:57 PM, Stephen Warren wrote:
+>> On 09/17/2014 01:55 PM, Ulf Hansson wrote:
+>>> On 12 September 2014 19:18, Stephen Warren <swarren@wwwdotorg.org> wrote:
+>>>> From: Stephen Warren <swarren@nvidia.com>
+>>>>
+>>>> As soon as the CD IRQ is requested, it can trigger, since it's an
+>>>> externally controlled event. If it does, delayed_work host->detect will
+>>>> be scheduled.
+>>>>
+>>>> Many host controller probe()s are roughly structured as:
+>>>>
+>>>> *_probe() {
+>>>>       host = sdhci_pltfm_init();
+>>>>       mmc_of_parse(host->mmc);
+>>>>       rc = sdhci_add_host(host);
+>>>>       if (rc) {
+>>>>           sdhci_pltfm_free();
+>>>>           return rc;
+>>>>       }
+>>>>
+>>>> In 3.17, CD IRQs can are enabled quite early via *_probe() ->
+>>>> mmc_of_parse() -> mmc_gpio_request_cd() -> mmc_gpiod_request_cd_irq().
+>>>>
+>>>> Note that in linux-next, mmc_of_parse() calls mmc_gpio*d*_request_cd()
+>>>> rather than mmc_gpio_request_cd(), and mmc_gpio*d*_request_cd() doesn't
+>>>> call mmc_gpiod_request_cd_irq(). However, this issue still exists for
+>>>> any other direct users of mmc_gpio_request_cd().
+>>>>
+>>>> sdhci_add_host() may fail part way through (e.g. due to deferred
+>>>> probe for a vmmc regulator), and sdhci_pltfm_free() does nothing to
+>>>> unrequest the CD IRQ nor cancel the delayed_work. sdhci_pltfm_free() is
+>>>> coded to assume that if sdhci_add_host() failed, then the delayed_work
+>>>> cannot (or should not) have been triggered.
+>>>>
+>>>> This can lead to the following with CONFIG_DEBUG_OBJECTS_* enabled, when
+>>>> kfree(host) is eventually called inside sdhci_pltfm_free():
+>>>>
+>>>> WARNING: CPU: 2 PID: 6 at lib/debugobjects.c:263
+>>>> debug_print_object+0x8c/0xb4()
+>>>> ODEBUG: free active (active state 0) object type: timer_list hint:
+>>>> delayed_work_timer_fn+0x0/0x18
+>>>>
+>>>> The object being complained about is host->detect.
+>>>>
+>>>> There's no need to request the CD IRQ so early; mmc_start_host() already
+>>>> requests it, and I *assume* that mmc_start_host() is called somehow for
+>>>> all host controllers. For SDHCI hosts at least, the typical call path
+>>>> that does this is: *_probe() -> sdhci_add_host() -> mmc_add_host() ->
+>>>> mmc_start_host(). So, remove the call to mmc_gpiod_request_cd_irq() from
+>>>> mmc_gpio_request_cd(). This matches mmc_gpio*d*_request_cd(), which
+>>>> already doesn't call mmc_gpiod_request_cd_irq().
+>>>>
+>>>> This solves the problem (eliminates the kernel error message above),
+>>>> since it guarantees that the IRQ can't trigger before mmc_start_host()
+>>>> is called.
+>>>>
+>>>> The critical point here is that once sdhci_add_host() calls
+>>>> mmc_add_host() -> mmc_start_host(), sdhci_add_host() is coded not to
+>>>> fail. In other words, if there's a chance that mmc_start_host() may have
+>>>> been called, and CD IRQs triggered, and the delayed_work scheduled,
+>>>> sdhci_add_host() won't fail, and so cleanup is no longer via
+>>>> sdhci_pltfm_free() (which doesn't free the IRQ or cancel the work queue)
+>>>> but instead must be via sdhci_remove_host(), which calls mmc_remove_host()
+>>>> -> mmc_stop_host(), which does free the IRQ and cancel the work queue.
+>>>>
+>>>> This fixes what I might conclude to be a mistake in commit 740a221ef0e5
+>>>> ("mmc: slot-gpio: Add GPIO descriptor based CD GPIO API"), which added the
+>>>> call from mmc_start_host() to mmc_gpiod_request_cd_irq(), but also added
+>>>> incorrectly added a call from mmc_gpio_request_cd() to
+>>>> mmc_gpiod_request_cd_irq().
+>>>>
+>>>> CC: Russell King <linux@arm.linux.org.uk>
+>>>> Cc: Adrian Hunter <adrian.hunter@intel.com>
+>>>> Cc: Alexandre Courbot <acourbot@nvidia.com>
+>>>> Cc: Linus Walleij <linus.walleij@linaro.org>
+>>>> Signed-off-by: Stephen Warren <swarren@nvidia.com>
 >>>
->>> On Mon, Sep 15, 2014 at 3:56 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>>> Almost all case is selected to 0.
->>>> (It's not correct sample-clock value.)
->>>> Since it set to wrong value, HS200 mode don't work fine.
->>> Can you please explain what problem you are facing here?
->>
->> When i try to use HS200 with some eMMC card, Some card is working fine and other isn't working fine.
->> (DWMMC is occured the DCRC error.)
->> DCRC error might be occurred when the wrong sample-clock is set.
->> So i tried to see what value is selected to sample-clock.
->> (Selected value - Working fine card : 0, Not working fine card : 0)
->>
->> When i skip to 0, it's selected to other value for best sample-clock.
->> (Selected value - Working fine card : 4, Not working fine card : 6)
->>
->> After working fine card is selected to 6, it's working fine.
->> I didn't know which value is set for other card. But in my case, best sample-clock is selected to 0.
-> I am not if this is only reason for the failure on you board.
-> When I tested this patch on my exynos5800 based Pi board, HS200 does
-> not work at all. Even the eMMC card detection does not happening,
-> forget about getting a DCRC error.
-> Can you confirm what base kernel you are testing on? FYI, I am testing
-> on Ulf's -next branch, which has two recently merged patches specially
-> for HS200 on dw_mmc controller.
-> In case you are using the same branch as mine, then some more debug
-> log will be good for more analysis of the problem.
-
-Thanks for pointing out. Well, i didn't test with other boards.
-So your testing is helpful to me. I think it's not my board's problem.
-Do you ensure that sample-clock is correct value?
-
-I tested with 3.16-kerenl. Which value is selected at exynos5800 board?
-I will test with kernel on Ulf's repository.
-
-Best Regards,
-Jaehoon Chung
-
->>
->> I think it has the some problem for selecting the sample-clock.
->>
->> Best Regards,
->> Jaehoon Chung
->>
->>> It is not clear from your patch description.
->>>> If we want to select the correct value, it has to check from 1 to 7.(skip 0)
->>>>
->>>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->>>> ---
->>>>  drivers/mmc/host/dw_mmc-exynos.c |    9 ++++++++-
->>>>  1 file changed, 8 insertions(+), 1 deletion(-)
->>>>
->>>> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
->>>> index 0fbc53a..5294035 100644
->>>> --- a/drivers/mmc/host/dw_mmc-exynos.c
->>>> +++ b/drivers/mmc/host/dw_mmc-exynos.c
->>>> @@ -25,6 +25,7 @@
->>>>  #define NUM_PINS(x)                    (x + 2)
->>>>
->>>>  #define SDMMC_CLKSEL                   0x09C
->>>> +#define SDMMC_CLKSEL_CCLK_SAMPLE_MASK  0x7
->>>>  #define SDMMC_CLKSEL_CCLK_SAMPLE(x)    (((x) & 7) << 0)
->>>>  #define SDMMC_CLKSEL_CCLK_DRIVE(x)     (((x) & 7) << 16)
->>>>  #define SDMMC_CLKSEL_CCLK_DIVIDER(x)   (((x) & 7) << 24)
->>>> @@ -330,6 +331,12 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
->>>>         if (!blk_test)
->>>>                 return -ENOMEM;
->>>>
->>>> +       /*
->>>> +        * In order to check all selclk_sample clock,
->>>> +        * it needs to reset to 0.
->>>> +        */
->>>> +       dw_mci_exynos_set_clksmpl(host, 0);
->>>> +
->>>>         start_smpl = dw_mci_exynos_get_clksmpl(host);
->>>>
->>>>         do {
->>>> @@ -372,7 +379,7 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
->>>>                                 "Tuning error: cmd.error:%d, data.error:%d\n",
->>>>                                 cmd.error, data.error);
->>>>                 }
->>>> -       } while (start_smpl != smpl);
->>>> +       } while (start_smpl < SDMMC_CLKSEL_CCLK_SAMPLE_MASK);
->>>>
->>>>         found = dw_mci_exynos_get_best_clksmpl(candiates);
->>>>         if (found >= 0)
->>>> --
->>>> 1.7.9.5
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>> Hi Stephen,
 >>>
->>>
->>>
+>>> Thanks for looking into this. It seems like this issue has been
+>>> present for quite a while.
+>>> I believe your patch should have a stable tag for 3.15+ as well,
+>>> unless you object I will add it.
 >>
-> 
-> 
-> 
+>> Yes, that probably makes sense, thanks.
+>
+> Doesn't this patch break the drivers that call mmc_gpio_request_cd() after
+> mmc_add_host() like mmc_spi.c or sdhci-sirf.c or tmio_mmc_pio.c ?
+
+Oh, if there are drivers that do that, this patch might cause an issue.
+
+But why are they doing that? Shouldn't all the drivers set up the same 
+kinds of resources in the same order and way?
 
