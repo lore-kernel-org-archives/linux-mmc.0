@@ -1,54 +1,76 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v5 07/11] mmc: sdio: Convert to dev_pm_domain_attach|detach()
-Date: Fri, 19 Sep 2014 20:27:40 +0200
-Message-ID: <1411151264-16245-8-git-send-email-ulf.hansson@linaro.org>
-References: <1411151264-16245-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1411151264-16245-1-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>, Kevin Hilman <khilman-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Daniel Lezcano <daniel.lezcano-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tomasz Figa <tomasz.figa-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ben Dooks <ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org>, Kukjin Kim <kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Philipp Zabel <philipp.zabel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Dmitry Torokhov <dmitry.torokhov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4] tmio_mmc_pio: prevent endless loop in tmio_mmc_set_clock()
+Date: Fri, 19 Sep 2014 20:46:29 +0200
+Message-ID: <CAPDyKFpZnkkDbUHX3HmcGK7+7NEnUU526RADFO+O1xS6mzUhnQ@mail.gmail.com>
+References: <10228473.uOqbQ0oioV@wasted.cogentembedded.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f49.google.com ([209.85.216.49]:37974 "EHLO
+	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756771AbaISSqa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Sep 2014 14:46:30 -0400
+Received: by mail-qa0-f49.google.com with SMTP id j7so56169qaq.8
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Sep 2014 11:46:29 -0700 (PDT)
+In-Reply-To: <10228473.uOqbQ0oioV@wasted.cogentembedded.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ian Molton <ian.molton@codethink.co.uk>, Chris Ball <chris@printf.net>, Linux-sh list <linux-sh@vger.kernel.org>
 
-Previously only the ACPI PM domain was supported by the sdio bus.
+On 18 September 2014 21:33, Sergei Shtylyov
+<sergei.shtylyov@cogentembedded.com> wrote:
+> I spent a couple of days with the driver just hanging due to me forgetting to
+> specify the external crystal frequency,  so that clk_get_rate() returned 0 and
+> thus the loop in tmio_mmc_set_clock() never ended. I don't think that's an
+> acceptable behavior, so I suggest that the minimum frequency is checked for 0
+> in tmio_mmc_host_probe().
+>
+> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+> Acked-by: Ian Molton <ian.molton@codethink.co.uk>
+> Cc: stable@vger.kernel.org
 
-Let's convert to the common attach/detach functions for PM domains,
-which currently means we are extending the support to include the
-generic PM domain as well.
+Thanks! Applied for next with a smaller change - adding a "mmc" prefix
+for the commit message subject.
 
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Reviewed-by: Kevin Hilman <khilman-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/mmc/core/sdio_bus.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Kind regards
+Uffe
 
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 4fa8fef9..1df0fc6 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -315,7 +315,7 @@ int sdio_add_func(struct sdio_func *func)
- 	ret = device_add(&func->dev);
- 	if (ret == 0) {
- 		sdio_func_set_present(func);
--		acpi_dev_pm_attach(&func->dev, false);
-+		dev_pm_domain_attach(&func->dev, false);
- 	}
- 
- 	return ret;
-@@ -332,7 +332,7 @@ void sdio_remove_func(struct sdio_func *func)
- 	if (!sdio_func_present(func))
- 		return;
- 
--	acpi_dev_pm_detach(&func->dev, false);
-+	dev_pm_domain_detach(&func->dev, false);
- 	device_del(&func->dev);
- 	put_device(&func->dev);
- }
--- 
-1.9.1
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> ---
+> The patch is against Ulf Hansson's 'mmc.git' repo's 'next' branch.
+>
+> Changes in version 4:
+> - rebased to the 'next' branch, resolving reject;
+> - added Ian Molton's ACK.
+>
+> Changes in version 3:
+> - added Cc: stable.
+>
+> Changes in version 2:
+> - fixed grammar in the changelog.
+>
+>  drivers/mmc/host/tmio_mmc_pio.c |    9 +++++++++
+>  1 file changed, 9 insertions(+)
+>
+> Index: mmc/drivers/mmc/host/tmio_mmc_pio.c
+> ===================================================================
+> --- mmc.orig/drivers/mmc/host/tmio_mmc_pio.c
+> +++ mmc/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -1091,6 +1091,15 @@ int tmio_mmc_host_probe(struct tmio_mmc_
+>         }
+>
+>         /*
+> +        * Check the sanity of mmc->f_min to prevent tmio_mmc_set_clock() from
+> +        * looping forever...
+> +        */
+> +       if (mmc->f_min == 0) {
+> +               ret = -EINVAL;
+> +               goto host_free;
+> +       }
+> +
+> +       /*
+>          * While using internal tmio hardware logic for card detection, we need
+>          * to ensure it stays powered for it to work.
+>          */
+>
