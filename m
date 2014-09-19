@@ -1,134 +1,54 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 6/7] mmc: sdhci-esdhc-imx: add imx6sx support
-Date: Fri, 19 Sep 2014 19:54:41 +0200
-Message-ID: <CAPDyKFqBTARHoXskmwkkWqMWytNAohcQksUygz1g8Aky45j=DA@mail.gmail.com>
-References: <1409745903-26550-1-git-send-email-b29396@freescale.com>
-	<1409745903-26550-7-git-send-email-b29396@freescale.com>
-	<CAPDyKFo5TfuQyb-ECDR+uzCfwio3guY+7LPxHzHXLNBacMbW_A@mail.gmail.com>
-	<20140918053457.GA15363@shlinux1.ap.freescale.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f41.google.com ([209.85.216.41]:57929 "EHLO
-	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756771AbaISRym (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Sep 2014 13:54:42 -0400
-Received: by mail-qa0-f41.google.com with SMTP id f12so2973246qad.0
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Sep 2014 10:54:42 -0700 (PDT)
-In-Reply-To: <20140918053457.GA15363@shlinux1.ap.freescale.net>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v5 07/11] mmc: sdio: Convert to dev_pm_domain_attach|detach()
+Date: Fri, 19 Sep 2014 20:27:40 +0200
+Message-ID: <1411151264-16245-8-git-send-email-ulf.hansson@linaro.org>
+References: <1411151264-16245-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1411151264-16245-1-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Geert Uytterhoeven <geert+renesas-gXvu3+zWzMSzQB+pC5nmwQ@public.gmane.org>, Kevin Hilman <khilman-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Daniel Lezcano <daniel.lezcano-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tomasz Figa <tomasz.figa-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, Magnus Damm <magnus.damm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ben Dooks <ben-linux-elnMNo+KYs3YtjvyW6yDsg@public.gmane.org>, Kukjin Kim <kgene.kim-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Philipp Zabel <philipp.zabel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Dmitry Torokhov <dmitry.torokhov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawn.guo@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 18 September 2014 07:35, Dong Aisheng <b29396@freescale.com> wrote:
-> On Thu, Sep 18, 2014 at 12:29:52AM +0200, Ulf Hansson wrote:
->> On 3 September 2014 14:05, Dong Aisheng <b29396@freescale.com> wrote:
->> > The imx6sx usdhc is derived from imx6sl, the difference is minor.
->> > imx6sx have the errata ESDHC_FLAG_ERR004536 fixed.
->> > So introduce a new compatible string for imx6sx to distinguish them.
->> >
->> > Signed-off-by: Dong Aisheng <b29396@freescale.com>
->>
->> Hi Dong,
->>
->> This one has checkpatch errors due to missing DT documentation.
->>
->
-> The original binding doc is writing in the format of:
->  Required properties:
-> -- compatible : Should be "fsl,<chip>-esdhc"
-> It just provides a rule and does not provide the specific compatible string.
-> So i did not update the doc before.
->
-> But i think it's better to fix it to avoid future warning again.
->
-> Can you help add below patch before this commit or do you need me
-> to resend the patch series again with this patch added?
+Previously only the ACPI PM domain was supported by the sdio bus.
 
-Please make resend, that's easier for me to handle.
+Let's convert to the common attach/detach functions for PM domains,
+which currently means we are extending the support to include the
+generic PM domain as well.
 
-Kind regards
-Uffe
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Reviewed-by: Kevin Hilman <khilman-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/mmc/core/sdio_bus.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
->
-> From 467b84e5ffcba543b9ac88913b1d2dc1159dfa72 Mon Sep 17 00:00:00 2001
-> From: Dong Aisheng <b29396@freescale.com>
-> Date: Thu, 18 Sep 2014 13:11:03 +0800
-> Subject: [PATCH 6/8] mmc: sdhci-esdhc-imx: using specific compatible string
->  in binding doc
->
-> Using specific compatible string in binding doc to make the binding
-> more clear.
-> It's also used to avoid checkpatch warning in the future like follows:
-> 0005-mmc-sdhci-do-not-enable-card-cd-wakeup-for-gpio-case.patch has no obvious style problems and is ready for submission.
-> WARNING: DT compatible string "fsl,imx6sx-usdhc" appears un-documented -- check ./Documentation/devicetree/bindings/
-> +       { .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
->
-> total: 0 errors, 1 warnings, 18 lines checked
->
-> Signed-off-by: Dong Aisheng <b29396@freescale.com>
-> ---
->  .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |    9 ++++++++-
->  1 files changed, 8 insertions(+), 1 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-> index 9046ba06..c415d34 100644
-> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-> @@ -7,7 +7,14 @@ This file documents differences between the core properties described
->  by mmc.txt and the properties used by the sdhci-esdhc-imx driver.
->
->  Required properties:
-> -- compatible : Should be "fsl,<chip>-esdhc"
-> +- compatible : Should be "fsl,<chip>-esdhc", the supported chips include
-> +              "fsl,imx25-esdhc"
-> +              "fsl,imx35-esdhc"
-> +              "fsl,imx51-esdhc"
-> +              "fsl,imx53-esdhc"
-> +              "fsl,imx6q-usdhc"
-> +              "fsl,imx6sl-usdhc"
-> +              "fsl,imx6sx-usdhc"
->
->  Optional properties:
->  - fsl,cd-controller : Indicate to use controller internal card detection
-> --
-> 1.7.8
->
-> Regards
-> Dong Aisheng
->
->> Kind regards
->> Uffe
->>
->> > ---
->> >  drivers/mmc/host/sdhci-esdhc-imx.c |    6 ++++++
->> >  1 files changed, 6 insertions(+), 0 deletions(-)
->> >
->> > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
->> > index dc0e384..87179c4 100644
->> > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
->> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
->> > @@ -150,6 +150,11 @@ static struct esdhc_soc_data usdhc_imx6sl_data = {
->> >                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536,
->> >  };
->> >
->> > +static struct esdhc_soc_data usdhc_imx6sx_data = {
->> > +       .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
->> > +                       | ESDHC_FLAG_HAVE_CAP1,
->> > +};
->> > +
->> >  struct pltfm_imx_data {
->> >         u32 scratchpad;
->> >         struct pinctrl *pinctrl;
->> > @@ -190,6 +195,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
->> >         { .compatible = "fsl,imx35-esdhc", .data = &esdhc_imx35_data, },
->> >         { .compatible = "fsl,imx51-esdhc", .data = &esdhc_imx51_data, },
->> >         { .compatible = "fsl,imx53-esdhc", .data = &esdhc_imx53_data, },
->> > +       { .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
->> >         { .compatible = "fsl,imx6sl-usdhc", .data = &usdhc_imx6sl_data, },
->> >         { .compatible = "fsl,imx6q-usdhc", .data = &usdhc_imx6q_data, },
->> >         { /* sentinel */ }
->> > --
->> > 1.7.8
->> >
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 4fa8fef9..1df0fc6 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -315,7 +315,7 @@ int sdio_add_func(struct sdio_func *func)
+ 	ret = device_add(&func->dev);
+ 	if (ret == 0) {
+ 		sdio_func_set_present(func);
+-		acpi_dev_pm_attach(&func->dev, false);
++		dev_pm_domain_attach(&func->dev, false);
+ 	}
+ 
+ 	return ret;
+@@ -332,7 +332,7 @@ void sdio_remove_func(struct sdio_func *func)
+ 	if (!sdio_func_present(func))
+ 		return;
+ 
+-	acpi_dev_pm_detach(&func->dev, false);
++	dev_pm_domain_detach(&func->dev, false);
+ 	device_del(&func->dev);
+ 	put_device(&func->dev);
+ }
+-- 
+1.9.1
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
