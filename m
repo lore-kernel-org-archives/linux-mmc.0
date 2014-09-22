@@ -1,8 +1,7 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH v2 3/8] mmc: sdhci-esdhc-imx: add ADMA Length Mismatch errata
- fix
-Date: Mon, 22 Sep 2014 17:12:06 +0800
-Message-ID: <1411377131-19741-4-git-send-email-b29396@freescale.com>
+Subject: [PATCH v2 7/8] mmc: sdhci-esdhc-imx: add imx6sx support
+Date: Mon, 22 Sep 2014 17:12:10 +0800
+Message-ID: <1411377131-19741-8-git-send-email-b29396@freescale.com>
 References: <1411377131-19741-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,66 +21,38 @@ To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, shawn.guo@linaro.org, b29396@freescale.com, chris@printf.net, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-The uSDHC has an ADMA Length Mismatch errata ERR004536 which may
-cause ADMA work abnormally. The errata has already been fixed for
-i.MX6Q TO1.2 and i.MX6DL TO1.1 by enable the bit 7 in 0x6c register.
-Unfortunately this fix is not included in i.MX6SL.
-So we disable ADMA for i.MX6SL and use SDMA instead.
+The imx6sx usdhc is derived from imx6sl, the difference is minor.
+imx6sx have the errata ESDHC_FLAG_ERR004536 fixed.
+So introduce a new compatible string for imx6sx to distinguish them.
 
 Signed-off-by: Dong Aisheng <b29396@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |   18 +++++++++++++++++-
- 1 files changed, 17 insertions(+), 1 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 9594bf8..dc0e384 100644
+index dc0e384..87179c4 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -114,6 +114,12 @@
- #define ESDHC_FLAG_STD_TUNING		BIT(5)
- /* The IP has SDHCI_CAPABILITIES_1 register */
- #define ESDHC_FLAG_HAVE_CAP1		BIT(6)
-+/*
-+ * The IP has errata ERR004536
-+ * uSDHC: ADMA Length Mismatch Error occurs if the AHB read access is slow,
-+ * when reading data from the card
-+ */
-+#define ESDHC_FLAG_ERR004536		BIT(7)
- 
- struct esdhc_soc_data {
- 	u32 flags;
-@@ -141,7 +147,7 @@ static struct esdhc_soc_data usdhc_imx6q_data = {
- 
- static struct esdhc_soc_data usdhc_imx6sl_data = {
- 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
--			| ESDHC_FLAG_HAVE_CAP1,
-+			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536,
+@@ -150,6 +150,11 @@ static struct esdhc_soc_data usdhc_imx6sl_data = {
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536,
  };
  
++static struct esdhc_soc_data usdhc_imx6sx_data = {
++	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
++			| ESDHC_FLAG_HAVE_CAP1,
++};
++
  struct pltfm_imx_data {
-@@ -1050,6 +1056,13 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 		writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
- 		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
- 		host->mmc->caps |= MMC_CAP_1_8V_DDR;
-+
-+		/*
-+		 * errata ESDHC_FLAG_ERR004536 fix for MX6Q TO1.2 and MX6DL
-+		 * TO1.1, it's harmless for MX6SL
-+		 */
-+		writel(readl(host->ioaddr + 0x6c) | BIT(7),
-+			host->ioaddr + 0x6c);
- 	}
- 
- 	if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
-@@ -1061,6 +1074,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 			ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP,
- 			host->ioaddr + ESDHC_TUNING_CTRL);
- 
-+	if (imx_data->socdata->flags & ESDHC_FLAG_ERR004536)
-+		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
-+
- 	boarddata = &imx_data->boarddata;
- 	if (sdhci_esdhc_imx_probe_dt(pdev, boarddata) < 0) {
- 		if (!host->mmc->parent->platform_data) {
+ 	u32 scratchpad;
+ 	struct pinctrl *pinctrl;
+@@ -190,6 +195,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
+ 	{ .compatible = "fsl,imx35-esdhc", .data = &esdhc_imx35_data, },
+ 	{ .compatible = "fsl,imx51-esdhc", .data = &esdhc_imx51_data, },
+ 	{ .compatible = "fsl,imx53-esdhc", .data = &esdhc_imx53_data, },
++	{ .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
+ 	{ .compatible = "fsl,imx6sl-usdhc", .data = &usdhc_imx6sl_data, },
+ 	{ .compatible = "fsl,imx6q-usdhc", .data = &usdhc_imx6q_data, },
+ 	{ /* sentinel */ }
 -- 
 1.7.8
