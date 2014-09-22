@@ -1,191 +1,162 @@
-From: Stephen Boyd <sboyd@codeaurora.org>
-Subject: [PATCH 2/2] mmc: Consolidate emmc tuning blocks
-Date: Mon, 22 Sep 2014 12:26:10 -0700
-Message-ID: <1411413970-17480-2-git-send-email-sboyd@codeaurora.org>
-References: <1411413970-17480-1-git-send-email-sboyd@codeaurora.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1411413970-17480-1-git-send-email-sboyd@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Georgi Djakov <gdjakov@mm-sol.com>, Jaehoon Chung <jh80.chung@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: don't request CD IRQ until mmc_start_host()
+Date: Mon, 22 Sep 2014 22:44:35 +0300
+Message-ID: <54207C23.7010107@intel.com>
+References: <1411401462-1509-1-git-send-email-swarren@wwwdotorg.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:65033 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750914AbaIVTpf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 22 Sep 2014 15:45:35 -0400
+In-Reply-To: <1411401462-1509-1-git-send-email-swarren@wwwdotorg.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stephen Warren <swarren@wwwdotorg.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Stephen Warren <swarren@nvidia.com>, Russell King <linux@arm.linux.org.uk>, Alexandre Courbot <acourbot@nvidia.com>, Linus Walleij <linus.walleij@linaro.org>
 
-The same tuning block exists in the dw_mmc h.c and sdhci-msm.c
-files. Move these into mmc.c so that they can be shared across
-drivers.
+On 22/09/2014 6:57 p.m., Stephen Warren wrote:
+> From: Stephen Warren <swarren@nvidia.com>
+>
+> As soon as the CD IRQ is requested, it can trigger, since it's an
+> externally controlled event. If it does, delayed_work host->detect will
+> be scheduled.
+>
+> Many host controller probe()s are roughly structured as:
+>
+> *_probe() {
+>      host = sdhci_pltfm_init();
+>      mmc_of_parse(host->mmc);
+>      rc = sdhci_add_host(host);
+>      if (rc) {
+>          sdhci_pltfm_free();
+>          return rc;
+>      }
+>
+> In 3.17, CD IRQs can are enabled quite early via *_probe() ->
+> mmc_of_parse() -> mmc_gpio_request_cd() -> mmc_gpiod_request_cd_irq().
+>
+> Note that in linux-next, mmc_of_parse() calls mmc_gpio*d*_request_cd()
+> rather than mmc_gpio_request_cd(), and mmc_gpio*d*_request_cd() doesn't
+> call mmc_gpiod_request_cd_irq(). However, this issue still exists if
+> mmc_gpio_request_cd() is called directly before mmc_start_host().
+>
+> sdhci_add_host() may fail part way through (e.g. due to deferred
+> probe for a vmmc regulator), and sdhci_pltfm_free() does nothing to
+> unrequest the CD IRQ nor cancel the delayed_work. sdhci_pltfm_free() is
+> coded to assume that if sdhci_add_host() failed, then the delayed_work
+> cannot (or should not) have been triggered.
+>
+> This can lead to the following with CONFIG_DEBUG_OBJECTS_* enabled, when
+> kfree(host) is eventually called inside sdhci_pltfm_free():
+>
+> WARNING: CPU: 2 PID: 6 at lib/debugobjects.c:263 debug_print_object+0x8c/0xb4()
+> ODEBUG: free active (active state 0) object type: timer_list hint: delayed_work_timer_fn+0x0/0x18
+>
+> The object being complained about is host->detect.
+>
+> There's no need to request the CD IRQ so early; mmc_start_host() already
+> requests it. For most SDHCI hosts at least, the typical call path that
+> does this is: *_probe() -> sdhci_add_host() -> mmc_add_host() ->
+> mmc_start_host(). Therefore, remove the call to mmc_gpiod_request_cd_irq()
+> from mmc_gpio_request_cd(). This also matches mmc_gpio*d*_request_cd(),
+> which already doesn't call mmc_gpiod_request_cd_irq().
+>
+> However, some host controller drivers call mmc_gpio_request_cd() after
+> mmc_start_host() has already been called, and assume that this will also
+> call mmc_gpiod_request_cd_irq(). Update those drivers to explicitly call
+> mmc_gpiod_request_cd_irq() themselves. Ideally, these drivers should be
+> modified to move their call to mmc_gpio_request_cd() before their call
+> to mmc_add_host(). However that's too large a change for stable.
+>
+> This solves the problem (eliminates the kernel error message above),
+> since it guarantees that the IRQ can't trigger before mmc_start_host()
+> is called.
+>
+> The critical point here is that once sdhci_add_host() calls
+> mmc_add_host() -> mmc_start_host(), sdhci_add_host() is coded not to
+> fail. In other words, if there's a chance that mmc_start_host() may have
+> been called, and CD IRQs triggered, and the delayed_work scheduled,
+> sdhci_add_host() won't fail, and so cleanup is no longer via
+> sdhci_pltfm_free() (which doesn't free the IRQ or cancel the work queue)
+> but instead must be via sdhci_remove_host(), which calls mmc_remove_host()
+> -> mmc_stop_host(), which does free the IRQ and cancel the work queue.
+>
+> CC: Russell King <linux@arm.linux.org.uk>
+> Cc: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: Alexandre Courbot <acourbot@nvidia.com>
+> Cc: Linus Walleij <linus.walleij@linaro.org>
+> Signed-off-by: Stephen Warren <swarren@nvidia.com>
 
-Reported-by: Jaehoon Chung <jh80.chung@samsung.com>
-Signed-off-by: Stephen Boyd <sboyd@codeaurora.org>
----
- drivers/mmc/core/mmc.c       | 32 ++++++++++++++++++++++++++++++++
- drivers/mmc/host/dw_mmc.c    | 30 ------------------------------
- drivers/mmc/host/sdhci-msm.c | 38 ++++----------------------------------
- include/linux/mmc/mmc.h      |  5 +++++
- 4 files changed, 41 insertions(+), 64 deletions(-)
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 793c6f7ddb04..9608cc8a1f65 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1135,6 +1135,38 @@ bus_speed:
- 	return err;
- }
- 
-+const u8 tuning_blk_pattern_4bit[MMC_TUNING_BLK_PATTERN_4BIT_SIZE] = {
-+	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
-+	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
-+	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
-+	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
-+	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
-+	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
-+	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
-+	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
-+};
-+EXPORT_SYMBOL(tuning_blk_pattern_4bit);
-+
-+const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE] = {
-+	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
-+	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
-+	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
-+	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
-+	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
-+	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
-+	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
-+	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
-+	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
-+	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
-+	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
-+	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
-+	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
-+	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
-+	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
-+	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
-+};
-+EXPORT_SYMBOL(tuning_blk_pattern_8bit);
-+
- /*
-  * Execute tuning sequence to seek the proper bus operating
-  * conditions for HS200 and HS400, which sends CMD21 to the device.
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 1ac227c603b7..f1cefdf5e2d0 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -81,36 +81,6 @@ struct idmac_desc {
- };
- #endif /* CONFIG_MMC_DW_IDMAC */
- 
--static const u8 tuning_blk_pattern_4bit[] = {
--	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
--	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
--	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
--	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
--	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
--	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
--	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
--	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
--};
--
--static const u8 tuning_blk_pattern_8bit[] = {
--	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
--	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
--	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
--	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
--	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
--	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
--	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
--	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
--	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
--	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
--	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
--	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
--	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
--	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
--	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
--	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
--};
--
- static inline bool dw_mci_fifo_reset(struct dw_mci *host);
- static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host);
- 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 5aabffc15ae8..da74c77f34cc 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -47,36 +47,6 @@
- #define CMUX_SHIFT_PHASE_SHIFT	24
- #define CMUX_SHIFT_PHASE_MASK	(7 << CMUX_SHIFT_PHASE_SHIFT)
- 
--static const u8 tuning_block_64[] = {
--	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
--	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
--	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
--	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
--	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
--	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
--	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
--	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
--};
--
--static const u8 tuning_block_128[] = {
--	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
--	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
--	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
--	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
--	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
--	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
--	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
--	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
--	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
--	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
--	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
--	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
--	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
--	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
--	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
--	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
--};
--
- struct sdhci_msm_host {
- 	struct platform_device *pdev;
- 	void __iomem *core_mem;	/* MSM SDCC mapped address */
-@@ -371,8 +341,8 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
- {
- 	int tuning_seq_cnt = 3;
- 	u8 phase, *data_buf, tuned_phases[16], tuned_phase_cnt = 0;
--	const u8 *tuning_block_pattern = tuning_block_64;
--	int size = sizeof(tuning_block_64);	/* Pattern size in bytes */
-+	const u8 *tuning_block_pattern = tuning_blk_pattern_4bit;
-+	int size = sizeof(tuning_blk_pattern_4bit);
- 	int rc;
- 	struct mmc_host *mmc = host->mmc;
- 	struct mmc_ios ios = host->mmc->ios;
-@@ -388,8 +358,8 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
- 
- 	if ((opcode == MMC_SEND_TUNING_BLOCK_HS200) &&
- 	    (mmc->ios.bus_width == MMC_BUS_WIDTH_8)) {
--		tuning_block_pattern = tuning_block_128;
--		size = sizeof(tuning_block_128);
-+		tuning_block_pattern = tuning_blk_pattern_8bit;
-+		size = sizeof(tuning_blk_pattern_8bit);
- 	}
- 
- 	data_buf = kmalloc(size, GFP_KERNEL);
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 64ec963ed347..cff1f2622061 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -53,6 +53,11 @@
- #define MMC_SEND_TUNING_BLOCK    19   /* adtc                    R1  */
- #define MMC_SEND_TUNING_BLOCK_HS200	21	/* adtc R1  */
- 
-+#define MMC_TUNING_BLK_PATTERN_4BIT_SIZE	 64
-+#define MMC_TUNING_BLK_PATTERN_8BIT_SIZE	128
-+extern const u8 tuning_blk_pattern_4bit[MMC_TUNING_BLK_PATTERN_4BIT_SIZE];
-+extern const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE];
-+
-   /* class 3 */
- #define MMC_WRITE_DAT_UNTIL_STOP 20   /* adtc [31:0] data addr   R1  */
- 
--- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-hosted by The Linux Foundation
+> ---
+> Note: This is a patch for v3.17 (and perhaps earlier); linux-next doesn't
+> have this problem due to other code re-structing. However, I think those
+> patches are too large to backport.
+>
+> v3: Explicitly call mmc_gpiod_request_cd_irq() from drivers that call
+> mmc_gpio_request_cd() after calling mmc_add_host(), rather than modifying
+> the function signature of mmc_gpio_request_cd().
+>
+> v2: Rather than completely removing mmc_gpio_request_cd()'s call to
+> mmc_gpiod_request_cd_irq(), make the call conditional.
+> ---
+>   drivers/mmc/core/slot-gpio.c    | 2 --
+>   drivers/mmc/host/mmc_spi.c      | 1 +
+>   drivers/mmc/host/sdhci-sirf.c   | 1 +
+>   drivers/mmc/host/tmio_mmc_pio.c | 1 +
+>   4 files changed, 3 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+> index 5f89cb83d5f0..187f48a5795a 100644
+> --- a/drivers/mmc/core/slot-gpio.c
+> +++ b/drivers/mmc/core/slot-gpio.c
+> @@ -221,8 +221,6 @@ int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio,
+>   	ctx->override_cd_active_level = true;
+>   	ctx->cd_gpio = gpio_to_desc(gpio);
+>
+> -	mmc_gpiod_request_cd_irq(host);
+> -
+>   	return 0;
+>   }
+>   EXPORT_SYMBOL(mmc_gpio_request_cd);
+> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+> index cc8d4a6099cd..e4a07546f8b6 100644
+> --- a/drivers/mmc/host/mmc_spi.c
+> +++ b/drivers/mmc/host/mmc_spi.c
+> @@ -1436,6 +1436,7 @@ static int mmc_spi_probe(struct spi_device *spi)
+>   					     host->pdata->cd_debounce);
+>   		if (status != 0)
+>   			goto fail_add_host;
+> +		mmc_gpiod_request_cd_irq(mmc);
+>   	}
+>
+>   	if (host->pdata && host->pdata->flags & MMC_SPI_USE_RO_GPIO) {
+> diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
+> index 17004531d089..b6db259aea9e 100644
+> --- a/drivers/mmc/host/sdhci-sirf.c
+> +++ b/drivers/mmc/host/sdhci-sirf.c
+> @@ -94,6 +94,7 @@ static int sdhci_sirf_probe(struct platform_device *pdev)
+>   				ret);
+>   			goto err_request_cd;
+>   		}
+> +		mmc_gpiod_request_cd_irq(host->mmc);
+>   	}
+>
+>   	return 0;
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index faf0924e71cb..59d9a7249b2e 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -1103,6 +1103,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host **host,
+>   			tmio_mmc_host_remove(_host);
+>   			return ret;
+>   		}
+> +		mmc_gpiod_request_cd_irq(mmc);
+>   	}
+>
+>   	*host = _host;
+>
