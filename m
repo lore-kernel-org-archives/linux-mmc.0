@@ -1,129 +1,38 @@
-From: Pramod Gurav <pramod.gurav@smartplayin.com>
-Subject: [PATCH] mmc: omap_hsmmc:  Switch to using managed version to gpio request
-Date: Mon, 22 Sep 2014 17:59:24 +0530
-Message-ID: <1411388964-25803-1-git-send-email-pramod.gurav@smartplayin.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp84.ord1c.emailsrvr.com ([108.166.43.84]:57474 "EHLO
-	smtp84.ord1c.emailsrvr.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753691AbaIVM0C (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Sep 2014 08:26:02 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 1/4] mmc: slot-gpio: switch to use flags when getting GPIO
+Date: Mon, 22 Sep 2014 14:37:51 +0200
+Message-ID: <CACRpkdbBq0VCBAOv7QX8pk73-_hU5Yy6QWURr5NohpG+osaYow@mail.gmail.com>
+References: <1409137253-25189-1-git-send-email-linus.walleij@linaro.org>
+	<CAPDyKFqw2N9zg41iz=qo3kQghmdYpafYdy545NYuu-Ji6pJELQ@mail.gmail.com>
+	<541FDBC0.4020302@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <541FDBC0.4020302@intel.com>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Pramod Gurav <pramod.gurav@smartplayin.com>, Balaji T K <balajitk@ti.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-This change switches to managed version of gpio_request to simplify
-module unloading and failure cases and does away with code to release
-gpio resources.
+On Mon, Sep 22, 2014 at 10:20 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-Cc: Balaji T K <balajitk@ti.com>
-Cc: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
----
- drivers/mmc/host/omap_hsmmc.c |   38 +++++++++++---------------------------
- 1 file changed, 11 insertions(+), 27 deletions(-)
+> Unfortunately it doesn't seem to work.  I needed the patch
+> below.
+>
+>
+> From: Adrian Hunter <adrian.hunter@intel.com>
+> Date: Mon, 22 Sep 2014 11:01:16 +0300
+> Subject: [PATCH] gpio: Fix gpio direction flags not getting set
+>
+> GPIO direction flags are not getting set because
+> an 'if' statement is the wrong way around.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 9656726..761d408 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -449,7 +449,8 @@ static inline int omap_hsmmc_have_reg(void)
- 
- #endif
- 
--static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
-+static int omap_hsmmc_gpio_init(struct platform_device *pdev,
-+				struct omap_mmc_platform_data *pdata)
- {
- 	int ret;
- 
-@@ -461,43 +462,29 @@ static int omap_hsmmc_gpio_init(struct omap_mmc_platform_data *pdata)
- 			pdata->slots[0].card_detect = omap_hsmmc_card_detect;
- 		pdata->slots[0].card_detect_irq =
- 				gpio_to_irq(pdata->slots[0].switch_pin);
--		ret = gpio_request(pdata->slots[0].switch_pin, "mmc_cd");
-+		ret = devm_gpio_request(&pdev->dev, pdata->slots[0].switch_pin,
-+					"mmc_cd");
- 		if (ret)
- 			return ret;
- 		ret = gpio_direction_input(pdata->slots[0].switch_pin);
- 		if (ret)
--			goto err_free_sp;
-+			return ret;
- 	} else
- 		pdata->slots[0].switch_pin = -EINVAL;
- 
- 	if (gpio_is_valid(pdata->slots[0].gpio_wp)) {
- 		pdata->slots[0].get_ro = omap_hsmmc_get_wp;
--		ret = gpio_request(pdata->slots[0].gpio_wp, "mmc_wp");
-+		ret = devm_gpio_request(&pdev->dev, pdata->slots[0].gpio_wp,
-+					"mmc_wp");
- 		if (ret)
--			goto err_free_cd;
-+			return ret;
- 		ret = gpio_direction_input(pdata->slots[0].gpio_wp);
- 		if (ret)
--			goto err_free_wp;
-+			return ret;
- 	} else
- 		pdata->slots[0].gpio_wp = -EINVAL;
- 
- 	return 0;
--
--err_free_wp:
--	gpio_free(pdata->slots[0].gpio_wp);
--err_free_cd:
--	if (gpio_is_valid(pdata->slots[0].switch_pin))
--err_free_sp:
--		gpio_free(pdata->slots[0].switch_pin);
--	return ret;
--}
--
--static void omap_hsmmc_gpio_free(struct omap_mmc_platform_data *pdata)
--{
--	if (gpio_is_valid(pdata->slots[0].gpio_wp))
--		gpio_free(pdata->slots[0].gpio_wp);
--	if (gpio_is_valid(pdata->slots[0].switch_pin))
--		gpio_free(pdata->slots[0].switch_pin);
- }
- 
- /*
-@@ -2052,14 +2039,14 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	if (IS_ERR(base))
- 		return PTR_ERR(base);
- 
--	ret = omap_hsmmc_gpio_init(pdata);
-+	ret = omap_hsmmc_gpio_init(pdev, pdata);
- 	if (ret)
- 		goto err;
- 
- 	mmc = mmc_alloc_host(sizeof(struct omap_hsmmc_host), &pdev->dev);
- 	if (!mmc) {
- 		ret = -ENOMEM;
--		goto err_alloc;
-+		goto err;
- 	}
- 
- 	host		= mmc_priv(mmc);
-@@ -2282,8 +2269,6 @@ err_irq:
- 		clk_disable_unprepare(host->dbclk);
- err1:
- 	mmc_free_host(mmc);
--err_alloc:
--	omap_hsmmc_gpio_free(pdata);
- err:
- 	return ret;
- }
-@@ -2309,7 +2294,6 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
- 	if (host->dbclk)
- 		clk_disable_unprepare(host->dbclk);
- 
--	omap_hsmmc_gpio_free(host->pdata);
- 	mmc_free_host(host->mmc);
- 
- 	return 0;
--- 
-1.7.9.5
+Oopps that's a bug, patch applied for fixes, so it'll work when
+this hits upstream.
 
+Alex: confirm?
+
+Yours,
+Linus Walleij
