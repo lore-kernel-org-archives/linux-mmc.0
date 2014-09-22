@@ -1,7 +1,8 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH v2 5/8] mmc: sdhci: do not enable card cd wakeup for gpio case
-Date: Mon, 22 Sep 2014 17:12:08 +0800
-Message-ID: <1411377131-19741-6-git-send-email-b29396@freescale.com>
+Subject: [PATCH v2 6/8] mmc: sdhci-esdhc-imx: using specific compatible string
+ in binding doc
+Date: Mon, 22 Sep 2014 17:12:09 +0800
+Message-ID: <1411377131-19741-7-git-send-email-b29396@freescale.com>
 References: <1411377131-19741-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,35 +22,39 @@ To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, shawn.guo@linaro.org, b29396@freescale.com, chris@printf.net, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Do not need to enable the controller card cd interrupt wakeup
-if using GPIO as card detect since it's meaningless.
+Using specific compatible string in binding doc to make the binding
+more clear.
+It's also used to avoid checkpatch warning in the future like follows:
+0005-mmc-sdhci-do-not-enable-card-cd-wakeup-for-gpio-case.patch has no obvious style problems and is ready for submission.
+WARNING: DT compatible string "fsl,imx6sx-usdhc" appears un-documented -- check ./Documentation/devicetree/bindings/
++       { .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
+
+total: 0 errors, 1 warnings, 18 lines checked
 
 Signed-off-by: Dong Aisheng <b29396@freescale.com>
 ---
- drivers/mmc/host/sdhci.c |    5 ++++-
- 1 files changed, 4 insertions(+), 1 deletions(-)
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |    9 ++++++++-
+ 1 files changed, 8 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 85cbf45..2b5bba1 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2561,13 +2561,16 @@ static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
- void sdhci_enable_irq_wakeups(struct sdhci_host *host)
- {
- 	u8 val;
-+	int gpio_cd = mmc_gpio_get_cd(host->mmc);
-+
- 	u8 mask = SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE
- 			| SDHCI_WAKE_ON_INT;
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+index 9046ba06..c415d34 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+@@ -7,7 +7,14 @@ This file documents differences between the core properties described
+ by mmc.txt and the properties used by the sdhci-esdhc-imx driver.
  
- 	val = sdhci_readb(host, SDHCI_WAKE_UP_CONTROL);
- 	val |= mask ;
- 	/* Avoid fake wake up */
--	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
-+	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION ||
-+	    !IS_ERR_VALUE(gpio_cd))
- 		val &= ~(SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE);
- 	sdhci_writeb(host, val, SDHCI_WAKE_UP_CONTROL);
- }
+ Required properties:
+-- compatible : Should be "fsl,<chip>-esdhc"
++- compatible : Should be "fsl,<chip>-esdhc", the supported chips include
++	       "fsl,imx25-esdhc"
++	       "fsl,imx35-esdhc"
++	       "fsl,imx51-esdhc"
++	       "fsl,imx53-esdhc"
++	       "fsl,imx6q-usdhc"
++	       "fsl,imx6sl-usdhc"
++	       "fsl,imx6sx-usdhc"
+ 
+ Optional properties:
+ - fsl,cd-controller : Indicate to use controller internal card detection
 -- 
 1.7.8
