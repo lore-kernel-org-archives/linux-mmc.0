@@ -1,42 +1,38 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 01/13] mmc: Fix use of wrong device in mmc_gpiod_free_cd()
-Date: Mon, 22 Sep 2014 13:17:32 +0300
-Message-ID: <1411381064-1703-2-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 08/13] mmc: sdhci-acpi: Add a HID and UID for a SD Card host controller
+Date: Mon, 22 Sep 2014 13:17:39 +0300
+Message-ID: <1411381064-1703-9-git-send-email-adrian.hunter@intel.com>
 References: <1411381064-1703-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga02.intel.com ([134.134.136.20]:4573 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753274AbaIVKT1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 22 Sep 2014 06:19:27 -0400
+	id S1753577AbaIVKTa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 22 Sep 2014 06:19:30 -0400
 In-Reply-To: <1411381064-1703-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-mmc_gpiod_free_cd() is paired with mmc_gpiod_request_cd()
-and both must reference the same device which is the
-actual host controller device not the mmc_host class
-device.
+Add a HID (INT33BB) and UID (3) for a SD Card host controller.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/slot-gpio.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-acpi.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index e3fce44..06616cd 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -392,7 +392,7 @@ void mmc_gpiod_free_cd(struct mmc_host *host)
- 		host->slot.cd_irq = -EINVAL;
- 	}
- 
--	devm_gpiod_put(&host->class_dev, ctx->cd_gpio);
-+	devm_gpiod_put(host->parent, ctx->cd_gpio);
- 
- 	ctx->cd_gpio = NULL;
- }
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 1bc92c6..c38f089 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -207,6 +207,7 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
+ 	{ "80860F14" , "3" , &sdhci_acpi_slot_int_sd   },
+ 	{ "80860F16" , NULL, &sdhci_acpi_slot_int_sd   },
+ 	{ "INT33BB"  , "2" , &sdhci_acpi_slot_int_sdio },
++	{ "INT33BB"  , "3" , &sdhci_acpi_slot_int_sd },
+ 	{ "INT33C6"  , NULL, &sdhci_acpi_slot_int_sdio },
+ 	{ "INT3436"  , NULL, &sdhci_acpi_slot_int_sdio },
+ 	{ "PNP0D40"  },
 -- 
 1.8.3.2
 
