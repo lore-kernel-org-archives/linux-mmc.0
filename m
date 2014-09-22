@@ -1,69 +1,63 @@
 From: Dong Aisheng <b29396@freescale.com>
-Subject: [PATCH v2 8/8] mmc: sdhci-esdhc-imx: add quirk SDHCI_QUIRK2_BROKEN_HS200 for imx6qdl
-Date: Mon, 22 Sep 2014 17:12:11 +0800
-Message-ID: <1411377131-19741-9-git-send-email-b29396@freescale.com>
+Subject: [PATCH v2 1/8] mmc: sdhci-esdhc-imx: remove duplicated lines
+Date: Mon, 22 Sep 2014 17:12:04 +0800
+Message-ID: <1411377131-19741-2-git-send-email-b29396@freescale.com>
 References: <1411377131-19741-1-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2on0145.outbound.protection.outlook.com ([65.55.169.145]:54944
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752372AbaIVJkY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 22 Sep 2014 05:40:24 -0400
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1411377131-19741-1-git-send-email-b29396@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, chris@printf.net, shawn.guo@linaro.org, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
+Cc: ulf.hansson@linaro.org, shawn.guo@linaro.org, b29396@freescale.com, chris@printf.net, linux-arm-kernel@lists.infradead.org
+List-Id: linux-mmc@vger.kernel.org
 
-The iMX6Q/DL can not support HS200 mode while iMX6SL and iMX6SX can,
-so introduce a new flag to distinguish them.
+There is already the same register check above, no need the later one.
+Move them into one place and delete the later one.
 
 Signed-off-by: Dong Aisheng <b29396@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c |   10 ++++++++--
- 1 files changed, 8 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c |   12 +++++-------
+ 1 files changed, 5 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 87179c4..16eff00 100644
+index 587ee0e..256c901 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -120,6 +120,8 @@
-  * when reading data from the card
-  */
- #define ESDHC_FLAG_ERR004536		BIT(7)
-+/* The IP supports HS200 mode */
-+#define ESDHC_FLAG_HS200		BIT(8)
- 
- struct esdhc_soc_data {
- 	u32 flags;
-@@ -147,12 +149,13 @@ static struct esdhc_soc_data usdhc_imx6q_data = {
- 
- static struct esdhc_soc_data usdhc_imx6sl_data = {
- 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
--			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536,
-+			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536
-+			| ESDHC_FLAG_HS200,
- };
- 
- static struct esdhc_soc_data usdhc_imx6sx_data = {
- 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
--			| ESDHC_FLAG_HAVE_CAP1,
-+			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200,
- };
- 
- struct pltfm_imx_data {
-@@ -1063,6 +1066,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
- 		host->mmc->caps |= MMC_CAP_1_8V_DDR;
- 
-+		if (!(imx_data->socdata->flags & ESDHC_FLAG_HS200))
-+			host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
+@@ -315,6 +315,11 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+ 			data |= ESDHC_CTRL_D3CD;
+ 			writel(data, host->ioaddr + SDHCI_HOST_CONTROL);
+ 		}
 +
- 		/*
- 		 * errata ESDHC_FLAG_ERR004536 fix for MX6Q TO1.2 and MX6DL
- 		 * TO1.1, it's harmless for MX6SL
++		if (val & SDHCI_INT_ADMA_ERROR) {
++			val &= ~SDHCI_INT_ADMA_ERROR;
++			val |= ESDHC_INT_VENDOR_SPEC_DMA_ERR;
++		}
+ 	}
+ 
+ 	if (unlikely((imx_data->socdata->flags & ESDHC_FLAG_MULTIBLK_NO_INT)
+@@ -335,13 +340,6 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+ 			}
+ 	}
+ 
+-	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
+-		if (val & SDHCI_INT_ADMA_ERROR) {
+-			val &= ~SDHCI_INT_ADMA_ERROR;
+-			val |= ESDHC_INT_VENDOR_SPEC_DMA_ERR;
+-		}
+-	}
+-
+ 	writel(val, host->ioaddr + reg);
+ }
+ 
 -- 
 1.7.8
-
