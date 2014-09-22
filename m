@@ -1,79 +1,107 @@
-From: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
-Subject: Re: [PATCH] mmc: Add delay between CMD6 and CMD13 for Sandisk eMMC cards
-Date: Mon, 22 Sep 2014 09:23:09 +0200
-Message-ID: <CAL8zT=hs_OoZKn=Emu-aA2h5zpurJTo6NcwbKFZyh1HPxKFWzg@mail.gmail.com>
-References: <1410265614-3275-1-git-send-email-jean-michel.hautbois@vodalys.com>
- <54110B29.7030303@samsung.com> <CAL8zT=iezoevh_12GAZyDOdRy1dAS876RZDUJGVTZyY4zYZbaQ@mail.gmail.com>
- <5416C30C.6010400@samsung.com> <20140921174827.GB11414@xo-6d-61-c0.localdomain>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 1/4] mmc: slot-gpio: switch to use flags when getting
+ GPIO
+Date: Mon, 22 Sep 2014 11:20:16 +0300
+Message-ID: <541FDBC0.4020302@intel.com>
+References: <1409137253-25189-1-git-send-email-linus.walleij@linaro.org> <CAPDyKFqw2N9zg41iz=qo3kQghmdYpafYdy545NYuu-Ji6pJELQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oa0-f41.google.com ([209.85.219.41]:43596 "EHLO
-	mail-oa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750914AbaIVHXZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Sep 2014 03:23:25 -0400
-In-Reply-To: <20140921174827.GB11414@xo-6d-61-c0.localdomain>
+Received: from mga14.intel.com ([192.55.52.115]:61925 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753387AbaIVIVk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 22 Sep 2014 04:21:40 -0400
+In-Reply-To: <CAPDyKFqw2N9zg41iz=qo3kQghmdYpafYdy545NYuu-Ji6pJELQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-kernel <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+To: Linus Walleij <linus.walleij@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, linux-gpio@vger.kernel.org
 
-2014-09-21 19:48 GMT+02:00 Pavel Machek <pavel@ucw.cz>:
-> On Mon 2014-09-15 19:44:28, Jaehoon Chung wrote:
->> On 09/15/2014 07:08 PM, Jean-Michel Hautbois wrote:
->> > Hi Jaehoon,
->> >
->> >> On 09/09/2014 09:26 PM, Jean-Michel Hautbois wrote:
->> >>> Tested on a i.MX6 board, with Sandisk SDIN5D1-2G.
->> >>> Without this patch, I/O errors occur.
->> >>> This eMMC seems to have a different Manufacturer ID as it reads 0x45
->> >>> and not 0x2 as specified in datasheet.
->> >>
->> >> I think this patch don't merge into mainline.
->> >> This is not solution for problem.
->> >> you mentioned the below comment, this is workaround.
->> >
->> > Yes
->> >
->> >>>
->> >>> Signed-off-by: Jean-Michel Hautbois <jean-michel.hautbois@vodalys.com>
->> >>> ---
->> >>>  drivers/mmc/core/mmc_ops.c | 9 +++++++++
->> >>>  1 file changed, 9 insertions(+)
->> >>>
->> >>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
->> >>> index f51b5ba..91babaa 100644
->> >>> --- a/drivers/mmc/core/mmc_ops.c
->> >>> +++ b/drivers/mmc/core/mmc_ops.c
->> >>> @@ -458,6 +458,15 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->> >>>       if (!use_busy_signal)
->> >>>               return 0;
->> >>>
->> >>> +     /* WORKAROUND: for Sandisk eMMC cards, it might need certain delay
->> >>> +      * before sending CMD13 after CMD6
->> >>> +      * On SDIN5D1-2G MANFID is 0x45 and not 0x2 as specified in datasheet
->> >>> +      */
->> >>> +     if (card->cid.manfid == CID_MANFID_SANDISK ||
->> >>> +             card->cid.manfid == 0x45) {
->> >>> +             msleep(1);
->> >>> +     }
->> >>
->> >> If it's a general problem of Sandisk SDIN5D1-2G,
->> >> I think you need to verify this problem. And can you use the MMC_FIXUP() and QUIRK?
->> >
->> > Well, this is difficult to verify, I know that on all my SDIN5D1-2G I
->> > have this MANFID different from what is defined by CID_MANFID_SANDISK.
->> > How should I use MMC_FIXUP ? Like this ?
+On 08/29/2014 03:16 PM, Ulf Hansson wrote:
+> On 27 August 2014 13:00, Linus Walleij <linus.walleij@linaro.org> wrote:
+>> When the slot GPIO driver gets the GPIO to be used for card
+>> detect, it is now possible to specify a flag to have the line
+>> set up as input. Get rid of the explicit setup call for input
+>> and use the flag.
 >>
->> I think you need to explain why delay is need.
->> i didn't have same card, but it might be your host controller or other problem.
->
-> Datasheet says it is needed, so we need to do the delay.
->
-> Adding pointer to the datasheet (page, chapter) to the comment might be good idea.
+>> The extra argument works as there are transition varargs
+>> macros in place in the <linux/gpio/consumer.h> header, in
+>> the future we will make the flags argument compulsory.
+>>
+>> Reviewed-by: Alexandre Courbot <acourbot@nvidia.com>
+>> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> 
+> Thanks! Applied for next.
 
-I can't find the page saying a delay must be added... Can you point me
-to the correct line ?
-BTW, the MANFID is 0x45 on SDIN*-L parts. I will add a comment for this too.
+Unfortunately it doesn't seem to work.  I needed the patch
+below.
 
-JM
+
+From: Adrian Hunter <adrian.hunter@intel.com>
+Date: Mon, 22 Sep 2014 11:01:16 +0300
+Subject: [PATCH] gpio: Fix gpio direction flags not getting set
+
+GPIO direction flags are not getting set because
+an 'if' statement is the wrong way around.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/gpio/gpiolib.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/gpio/gpiolib.c b/drivers/gpio/gpiolib.c
+index 15cc0bb..3b54edf 100644
+--- a/drivers/gpio/gpiolib.c
++++ b/drivers/gpio/gpiolib.c
+@@ -1674,7 +1674,7 @@ struct gpio_desc *__must_check __gpiod_get_index(struct device *dev,
+ 		set_bit(FLAG_OPEN_SOURCE, &desc->flags);
+ 
+ 	/* No particular flag request, return here... */
+-	if (flags & GPIOD_FLAGS_BIT_DIR_SET)
++	if (!(flags & GPIOD_FLAGS_BIT_DIR_SET))
+ 		return desc;
+ 
+ 	/* Process flags */
+-- 
+1.8.3.2
+
+
+
+> 
+> Kind regards
+> Uffe
+> 
+>> ---
+>>  drivers/mmc/core/slot-gpio.c | 6 +-----
+>>  1 file changed, 1 insertion(+), 5 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+>> index 5f89cb83d5f0..908c2b29e79f 100644
+>> --- a/drivers/mmc/core/slot-gpio.c
+>> +++ b/drivers/mmc/core/slot-gpio.c
+>> @@ -308,14 +308,10 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
+>>         if (!con_id)
+>>                 con_id = ctx->cd_label;
+>>
+>> -       desc = devm_gpiod_get_index(host->parent, con_id, idx);
+>> +       desc = devm_gpiod_get_index(host->parent, con_id, idx, GPIOD_IN);
+>>         if (IS_ERR(desc))
+>>                 return PTR_ERR(desc);
+>>
+>> -       ret = gpiod_direction_input(desc);
+>> -       if (ret < 0)
+>> -               return ret;
+>> -
+>>         if (debounce) {
+>>                 ret = gpiod_set_debounce(desc, debounce);
+>>                 if (ret < 0)
+>> --
+>> 1.9.3
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-gpio" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
