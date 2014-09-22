@@ -1,203 +1,96 @@
-From: Pramod Gurav <pramod.gurav@smartplayin.com>
-Subject: Re: [PATCH 1/2] mmc: atmel-mci: Switch to using managed resource
- in probe
-Date: Mon, 22 Sep 2014 21:52:19 +0530
-Message-ID: <54204CBB.5000603@smartplayin.com>
-References: <1411195951-10630-1-git-send-email-pramod.gurav@smartplayin.com> <20140922154540.GS22877@ldesroches-Latitude-E6320>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20140922154540.GS22877@ldesroches-Latitude-E6320>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: [PATCH 1/2] mmc: sdhci-msm: Make tuning block table endian agnostic
+Date: Mon, 22 Sep 2014 12:26:09 -0700
+Message-ID: <1411413970-17480-1-git-send-email-sboyd@codeaurora.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.codeaurora.org ([198.145.11.231]:57165 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753603AbaIVT0Q (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Sep 2014 15:26:16 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Georgi Djakov <gdjakov@mm-sol.com>, Jaehoon Chung <jh80.chung@samsung.com>, Asutosh Das <asutoshd@codeaurora.org>, Venkat Gopalakrishnan <venkatg@codeaurora.org>
 
+If we're tuning on a big-endian CPU we'll never determine we properly
+tuned the device because we compare the data we received from the
+controller with a table that assumes the CPU is little-endian.
+Change the table to be an array of bytes instead of 32-bit words
+so we can use memcmp() without needing to byte-swap every word
+depending on the endianess of the CPU.
 
+Cc: Asutosh Das <asutoshd@codeaurora.org>
+Cc: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+Reviewed-by: Georgi Djakov <gdjakov@mm-sol.com>
+Fixes: 415b5a75da43 "mmc: sdhci-msm: Add platform_execute_tuning implementation"
+Signed-off-by: Stephen Boyd <sboyd@codeaurora.org>
+---
+ drivers/mmc/host/sdhci-msm.c | 42 +++++++++++++++++++++++++++---------------
+ 1 file changed, 27 insertions(+), 15 deletions(-)
 
-On 22-09-2014 09:15 PM, Ludovic Desroches wrote:
-> Hi Pramod,
-> 
-> Thanks for taking care of device managed resources conversion. My only
-> concern is about using devm_request_irq. There are several discussions
-> about races which can occur when using it.
-> 
-> Keeping request_irq and free_irq the time it takes to solve this issue
-> is probably better.
-Oh, Thanks for letting me know this. I will resend this patch keeping
-request_irq and free_irq in driver.
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 40573a58486a..5aabffc15ae8 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -47,22 +47,34 @@
+ #define CMUX_SHIFT_PHASE_SHIFT	24
+ #define CMUX_SHIFT_PHASE_MASK	(7 << CMUX_SHIFT_PHASE_SHIFT)
+ 
+-static const u32 tuning_block_64[] = {
+-	0x00ff0fff, 0xccc3ccff, 0xffcc3cc3, 0xeffefffe,
+-	0xddffdfff, 0xfbfffbff, 0xff7fffbf, 0xefbdf777,
+-	0xf0fff0ff, 0x3cccfc0f, 0xcfcc33cc, 0xeeffefff,
+-	0xfdfffdff, 0xffbfffdf, 0xfff7ffbb, 0xde7b7ff7
++static const u8 tuning_block_64[] = {
++	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
++	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
++	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
++	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
++	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
++	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
++	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
++	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
+ };
+ 
+-static const u32 tuning_block_128[] = {
+-	0xff00ffff, 0x0000ffff, 0xccccffff, 0xcccc33cc,
+-	0xcc3333cc, 0xffffcccc, 0xffffeeff, 0xffeeeeff,
+-	0xffddffff, 0xddddffff, 0xbbffffff, 0xbbffffff,
+-	0xffffffbb, 0xffffff77, 0x77ff7777, 0xffeeddbb,
+-	0x00ffffff, 0x00ffffff, 0xccffff00, 0xcc33cccc,
+-	0x3333cccc, 0xffcccccc, 0xffeeffff, 0xeeeeffff,
+-	0xddffffff, 0xddffffff, 0xffffffdd, 0xffffffbb,
+-	0xffffbbbb, 0xffff77ff, 0xff7777ff, 0xeeddbb77
++static const u8 tuning_block_128[] = {
++	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
++	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
++	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
++	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
++	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
++	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
++	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
++	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
++	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
++	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
++	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
++	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
++	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
++	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
++	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
++	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
+ };
+ 
+ struct sdhci_msm_host {
+@@ -359,7 +371,7 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
+ {
+ 	int tuning_seq_cnt = 3;
+ 	u8 phase, *data_buf, tuned_phases[16], tuned_phase_cnt = 0;
+-	const u32 *tuning_block_pattern = tuning_block_64;
++	const u8 *tuning_block_pattern = tuning_block_64;
+ 	int size = sizeof(tuning_block_64);	/* Pattern size in bytes */
+ 	int rc;
+ 	struct mmc_host *mmc = host->mmc;
+-- 
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+hosted by The Linux Foundation
 
-> 
-> Regards
-> 
-> Ludovic
-> 
-> On Sat, Sep 20, 2014 at 12:22:30PM +0530, Pramod Gurav wrote:
->> This change uses managed resource APIs to allocate resources such as,
->> clk, gpio, irq in order to simplify the driver unload or failure cases.
->> Hence does away with release statements of the same resorces in error
->> lables and remove function.
->>
->> Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
->> Cc: Chris Ball <chris@printf.net>
->> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->> Cc: linux-mmc@vger.kernel.org
->> Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
->> ---
->>  drivers/mmc/host/atmel-mci.c | 57 ++++++++++++++++----------------------------
->>  1 file changed, 20 insertions(+), 37 deletions(-)
->>
->> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
->> index bb585d9..21a222c 100644
->> --- a/drivers/mmc/host/atmel-mci.c
->> +++ b/drivers/mmc/host/atmel-mci.c
->> @@ -17,6 +17,7 @@
->>  #include <linux/gpio.h>
->>  #include <linux/init.h>
->>  #include <linux/interrupt.h>
->> +#include <linux/io.h>
->>  #include <linux/ioport.h>
->>  #include <linux/module.h>
->>  #include <linux/of.h>
->> @@ -2195,7 +2196,8 @@ static int __init atmci_init_slot(struct atmel_mci *host,
->>  	/* Assume card is present initially */
->>  	set_bit(ATMCI_CARD_PRESENT, &slot->flags);
->>  	if (gpio_is_valid(slot->detect_pin)) {
->> -		if (gpio_request(slot->detect_pin, "mmc_detect")) {
->> +		if (devm_gpio_request(&host->pdev->dev, slot->detect_pin,
->> +				      "mmc_detect")) {
->>  			dev_dbg(&mmc->class_dev, "no detect pin available\n");
->>  			slot->detect_pin = -EBUSY;
->>  		} else if (gpio_get_value(slot->detect_pin) ^
->> @@ -2208,7 +2210,8 @@ static int __init atmci_init_slot(struct atmel_mci *host,
->>  		mmc->caps |= MMC_CAP_NEEDS_POLL;
->>  
->>  	if (gpio_is_valid(slot->wp_pin)) {
->> -		if (gpio_request(slot->wp_pin, "mmc_wp")) {
->> +		if (devm_gpio_request(&host->pdev->dev, slot->wp_pin,
->> +				      "mmc_wp")) {
->>  			dev_dbg(&mmc->class_dev, "no WP pin available\n");
->>  			slot->wp_pin = -EBUSY;
->>  		}
->> @@ -2224,7 +2227,8 @@ static int __init atmci_init_slot(struct atmel_mci *host,
->>  		setup_timer(&slot->detect_timer, atmci_detect_change,
->>  				(unsigned long)slot);
->>  
->> -		ret = request_irq(gpio_to_irq(slot->detect_pin),
->> +		ret = devm_request_irq(&host->pdev->dev,
->> +				gpio_to_irq(slot->detect_pin),
->>  				atmci_detect_interrupt,
->>  				IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
->>  				"mmc-detect", slot);
->> @@ -2232,7 +2236,6 @@ static int __init atmci_init_slot(struct atmel_mci *host,
->>  			dev_dbg(&mmc->class_dev,
->>  				"could not request IRQ %d for detect pin\n",
->>  				gpio_to_irq(slot->detect_pin));
->> -			gpio_free(slot->detect_pin);
->>  			slot->detect_pin = -EBUSY;
->>  		}
->>  	}
->> @@ -2252,15 +2255,8 @@ static void __exit atmci_cleanup_slot(struct atmel_mci_slot *slot,
->>  
->>  	mmc_remove_host(slot->mmc);
->>  
->> -	if (gpio_is_valid(slot->detect_pin)) {
->> -		int pin = slot->detect_pin;
->> -
->> -		free_irq(gpio_to_irq(pin), slot);
->> +	if (gpio_is_valid(slot->detect_pin))
->>  		del_timer_sync(&slot->detect_timer);
->> -		gpio_free(pin);
->> -	}
->> -	if (gpio_is_valid(slot->wp_pin))
->> -		gpio_free(slot->wp_pin);
->>  
->>  	slot->host->slot[id] = NULL;
->>  	mmc_free_host(slot->mmc);
->> @@ -2395,7 +2391,7 @@ static int __init atmci_probe(struct platform_device *pdev)
->>  	if (irq < 0)
->>  		return irq;
->>  
->> -	host = kzalloc(sizeof(struct atmel_mci), GFP_KERNEL);
->> +	host = devm_kzalloc(&pdev->dev, sizeof(*host), GFP_KERNEL);
->>  	if (!host)
->>  		return -ENOMEM;
->>  
->> @@ -2403,20 +2399,18 @@ static int __init atmci_probe(struct platform_device *pdev)
->>  	spin_lock_init(&host->lock);
->>  	INIT_LIST_HEAD(&host->queue);
->>  
->> -	host->mck = clk_get(&pdev->dev, "mci_clk");
->> -	if (IS_ERR(host->mck)) {
->> -		ret = PTR_ERR(host->mck);
->> -		goto err_clk_get;
->> -	}
->> +	host->mck = devm_clk_get(&pdev->dev, "mci_clk");
->> +	if (IS_ERR(host->mck))
->> +		return PTR_ERR(host->mck);
->>  
->> -	ret = -ENOMEM;
->> -	host->regs = ioremap(regs->start, resource_size(regs));
->> +	host->regs = devm_ioremap(&pdev->dev, regs->start, resource_size(regs));
->>  	if (!host->regs)
->> -		goto err_ioremap;
->> +		return -ENOMEM;
->>  
->>  	ret = clk_prepare_enable(host->mck);
->>  	if (ret)
->> -		goto err_request_irq;
->> +		return ret;
->> +
->>  	atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
->>  	host->bus_hz = clk_get_rate(host->mck);
->>  	clk_disable_unprepare(host->mck);
->> @@ -2425,9 +2419,10 @@ static int __init atmci_probe(struct platform_device *pdev)
->>  
->>  	tasklet_init(&host->tasklet, atmci_tasklet_func, (unsigned long)host);
->>  
->> -	ret = request_irq(irq, atmci_interrupt, 0, dev_name(&pdev->dev), host);
->> +	ret = devm_request_irq(&pdev->dev, irq, atmci_interrupt, 0,
->> +			       dev_name(&pdev->dev), host);
->>  	if (ret)
->> -		goto err_request_irq;
->> +		return ret;
->>  
->>  	/* Get MCI capabilities and set operations according to it */
->>  	atmci_get_cap(host);
->> @@ -2498,13 +2493,7 @@ static int __init atmci_probe(struct platform_device *pdev)
->>  err_init_slot:
->>  	if (host->dma.chan)
->>  		dma_release_channel(host->dma.chan);
->> -	free_irq(irq, host);
->> -err_request_irq:
->> -	iounmap(host->regs);
->> -err_ioremap:
->> -	clk_put(host->mck);
->> -err_clk_get:
->> -	kfree(host);
->> +
->>  	return ret;
->>  }
->>  
->> @@ -2531,12 +2520,6 @@ static int __exit atmci_remove(struct platform_device *pdev)
->>  	if (host->dma.chan)
->>  		dma_release_channel(host->dma.chan);
->>  
->> -	free_irq(platform_get_irq(pdev, 0), host);
->> -	iounmap(host->regs);
->> -
->> -	clk_put(host->mck);
->> -	kfree(host);
->> -
->>  	return 0;
->>  }
->>  
->> -- 
->> 1.8.3.2
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
-> 
