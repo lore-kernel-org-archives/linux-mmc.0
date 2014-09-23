@@ -1,76 +1,159 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: rtsx: add card power off during probe
-Date: Tue, 23 Sep 2014 11:20:42 +0200
-Message-ID: <CAPDyKFq+NJ33AT4Lg0cvfZWnOKew6fTaLW--SVZ0w0xKvXw+Wg@mail.gmail.com>
-References: <1410485999-10939-1-git-send-email-micky_ching@realsil.com.cn>
-	<CAPDyKFqcbK9OuQXbegignwiS7rz3L8resQ7Jfc8WvqXEKTcWVA@mail.gmail.com>
-	<54195036.2010409@realsil.com.cn>
-	<CAPDyKFrbMaDxU3VkhMO63+tLRMipKPqGvYC5cT2PTeVU1CTTQg@mail.gmail.com>
-	<1411024883.27455.11.camel@debian-rtk5880>
-	<CAPDyKFqokjwerEC+6A=2h4cPH29rnX0tyW=2=KQX2rSE=SEKHw@mail.gmail.com>
-	<1411380672.24091.18.camel@debian-rtk5880>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1411380672.24091.18.camel@debian-rtk5880>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Roger Tseng <rogerable@realtek.com>
-Cc: micky <micky_ching@realsil.com.cn>, Chris Ball <chris@printf.net>, Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, "driverdev-devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Wei_wang <wei_wang@realsil.com.cn>, Adrian Hunter <adrian.hunter@intel.com>
+From: Pramod Gurav <pramod.gurav@smartplayin.com>
+Subject: [PATCH v2 1/2] mmc: atmel-mci: Switch to using managed resource in probe
+Date: Tue, 23 Sep 2014 15:50:05 +0530
+Message-ID: <1411467606-13041-1-git-send-email-pramod.gurav@smartplayin.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp68.ord1c.emailsrvr.com ([108.166.43.68]:50311 "EHLO
+	smtp68.ord1c.emailsrvr.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754322AbaIWKQf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Sep 2014 06:16:35 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Pramod Gurav <pramod.gurav@smartplayin.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-On 22 September 2014 12:09, Roger Tseng <rogerable@realtek.com> wrote:
-> On Thu, 2014-09-18 at 23:14 +0200, Ulf Hansson wrote:
->> [...]
->>
->> >>
->> >> In that case, don't forget to enable MMC_CAP2_FULL_PWR_CYCLE.
->> >>
->> >> >
->> >> > if MMC_CAP2_NO_PRESCAN_POWERUP enable, will call mmc_power_off() at start,
->> >> > then it will check ios.power_mode, but the state is MMC_POWER_OFF and just
->> >> > return.
->> >>
->> >> Uhh, that's right! So, I wonder why we invokes mmc_power_off() from
->> >> that path at all.
->> >>
->> >> Hmm, I think we should change the behavior in mmc_start_host(), like below:
->> >> 1) Add a "MMC_POWER_UNDEFINED" state which is what the power state
->> >> should be assigned to at allocation.
->> >> 2 ) From mmc_start_host(), invoke mmc_power_off() when
->> >> MMC_CAP2_NO_PRESCAN_POWERUP and MMC_CAP2_FULL_PWR_CYCLE is set.
->> >>
->> >> Would that work?
->> > Yes. I have confirmed this by following changes. The MMC_POWER_UNDEFINED
->> > designation in mmc_start_host() will eventually cause a power-off
->> > operation.
->> >
->> > But I wonder if we need to additionally check MMC_CAP2_FULL_PWR_CYCLE
->> > before calling mmc_power_off()?
->>
->> The intent from my side was to keep the current behaviour for those
->> that already used MMC_CAP2_NO_PRESCAN_POWERUP, but it's s not a big
->> deal.
->>
->
-> I checked the log and found the commit that invokes mmc_power_off():
-> a08b17be8b984a7c51cd5a480cd977363df353f9
-> 0d3e3350d5871c53464be4c92d57198744247005
-> (https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg19638.html )
->
-> The proposed change might bring back some delay since invoking
-> mmc_power_off() in mmc_start_host() is more than NOP now and triggers
-> real power-off and re-init in sdhci.
+This change uses managed resource APIs to allocate resources such as,
+clk, gpio, io in order to simplify the driver unload or failure cases.
+Hence does away with release statements of the same resorces in error
+lables and remove function.
 
-Actually the above commits was added due to the below commit:
+Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: Chris Ball <chris@printf.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
+Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
 
-fa5501890d8974301042e0202d342a6cbe8609f4
+---
+Changes since v1:
+- Dropped using devm_request_irq as suggested by Ludovic Desroches
+  as it seems there are race conditions seen with them.
+- Added another patch to fix failure path in probe to call atmci_cleanup_slot
+  after dma_alloc_coherent() fails to release mmc_host resources.
+---
+ drivers/mmc/host/atmel-mci.c |   41 ++++++++++++++---------------------------
+ 1 file changed, 14 insertions(+), 27 deletions(-)
 
-But the commits you refer to, didn't bring back the old behaviour,
-which I think was the intent. Instead we added a NOP call to
-mmc_power_off() from mmc_start_host().
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index bb585d9..36212fb 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -17,6 +17,7 @@
+ #include <linux/gpio.h>
+ #include <linux/init.h>
+ #include <linux/interrupt.h>
++#include <linux/io.h>
+ #include <linux/ioport.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+@@ -2195,7 +2196,8 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+ 	/* Assume card is present initially */
+ 	set_bit(ATMCI_CARD_PRESENT, &slot->flags);
+ 	if (gpio_is_valid(slot->detect_pin)) {
+-		if (gpio_request(slot->detect_pin, "mmc_detect")) {
++		if (devm_gpio_request(&host->pdev->dev, slot->detect_pin,
++				      "mmc_detect")) {
+ 			dev_dbg(&mmc->class_dev, "no detect pin available\n");
+ 			slot->detect_pin = -EBUSY;
+ 		} else if (gpio_get_value(slot->detect_pin) ^
+@@ -2208,7 +2210,8 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+ 		mmc->caps |= MMC_CAP_NEEDS_POLL;
+ 
+ 	if (gpio_is_valid(slot->wp_pin)) {
+-		if (gpio_request(slot->wp_pin, "mmc_wp")) {
++		if (devm_gpio_request(&host->pdev->dev, slot->wp_pin,
++				      "mmc_wp")) {
+ 			dev_dbg(&mmc->class_dev, "no WP pin available\n");
+ 			slot->wp_pin = -EBUSY;
+ 		}
+@@ -2232,7 +2235,6 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+ 			dev_dbg(&mmc->class_dev,
+ 				"could not request IRQ %d for detect pin\n",
+ 				gpio_to_irq(slot->detect_pin));
+-			gpio_free(slot->detect_pin);
+ 			slot->detect_pin = -EBUSY;
+ 		}
+ 	}
+@@ -2257,10 +2259,7 @@ static void __exit atmci_cleanup_slot(struct atmel_mci_slot *slot,
+ 
+ 		free_irq(gpio_to_irq(pin), slot);
+ 		del_timer_sync(&slot->detect_timer);
+-		gpio_free(pin);
+ 	}
+-	if (gpio_is_valid(slot->wp_pin))
+-		gpio_free(slot->wp_pin);
+ 
+ 	slot->host->slot[id] = NULL;
+ 	mmc_free_host(slot->mmc);
+@@ -2395,7 +2394,7 @@ static int __init atmci_probe(struct platform_device *pdev)
+ 	if (irq < 0)
+ 		return irq;
+ 
+-	host = kzalloc(sizeof(struct atmel_mci), GFP_KERNEL);
++	host = devm_kzalloc(&pdev->dev, sizeof(*host), GFP_KERNEL);
+ 	if (!host)
+ 		return -ENOMEM;
+ 
+@@ -2403,20 +2402,18 @@ static int __init atmci_probe(struct platform_device *pdev)
+ 	spin_lock_init(&host->lock);
+ 	INIT_LIST_HEAD(&host->queue);
+ 
+-	host->mck = clk_get(&pdev->dev, "mci_clk");
+-	if (IS_ERR(host->mck)) {
+-		ret = PTR_ERR(host->mck);
+-		goto err_clk_get;
+-	}
++	host->mck = devm_clk_get(&pdev->dev, "mci_clk");
++	if (IS_ERR(host->mck))
++		return PTR_ERR(host->mck);
+ 
+-	ret = -ENOMEM;
+-	host->regs = ioremap(regs->start, resource_size(regs));
++	host->regs = devm_ioremap(&pdev->dev, regs->start, resource_size(regs));
+ 	if (!host->regs)
+-		goto err_ioremap;
++		return -ENOMEM;
+ 
+ 	ret = clk_prepare_enable(host->mck);
+ 	if (ret)
+-		goto err_request_irq;
++		return ret;
++
+ 	atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
+ 	host->bus_hz = clk_get_rate(host->mck);
+ 	clk_disable_unprepare(host->mck);
+@@ -2427,7 +2424,7 @@ static int __init atmci_probe(struct platform_device *pdev)
+ 
+ 	ret = request_irq(irq, atmci_interrupt, 0, dev_name(&pdev->dev), host);
+ 	if (ret)
+-		goto err_request_irq;
++		return ret;
+ 
+ 	/* Get MCI capabilities and set operations according to it */
+ 	atmci_get_cap(host);
+@@ -2499,12 +2496,6 @@ err_init_slot:
+ 	if (host->dma.chan)
+ 		dma_release_channel(host->dma.chan);
+ 	free_irq(irq, host);
+-err_request_irq:
+-	iounmap(host->regs);
+-err_ioremap:
+-	clk_put(host->mck);
+-err_clk_get:
+-	kfree(host);
+ 	return ret;
+ }
+ 
+@@ -2532,10 +2523,6 @@ static int __exit atmci_remove(struct platform_device *pdev)
+ 		dma_release_channel(host->dma.chan);
+ 
+ 	free_irq(platform_get_irq(pdev, 0), host);
+-	iounmap(host->regs);
+-
+-	clk_put(host->mck);
+-	kfree(host);
+ 
+ 	return 0;
+ }
+-- 
+1.7.9.5
 
-We have few options on how to go forward, but let's loop in Adrian
-Hunter first, since he might be able to comment on this as well.
-
-Kind regards
-Uffe
