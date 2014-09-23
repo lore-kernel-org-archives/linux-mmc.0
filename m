@@ -1,81 +1,76 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 4/8] mmc: sdhci: do not enable card detect interrupt
- for gpio cd type
-Date: Tue, 23 Sep 2014 10:17:12 +0200
-Message-ID: <CAPDyKFrYDz43h=M+PDRWVxitpW-+pv+14+gqmGprNZNaKfo5Nw@mail.gmail.com>
-References: <1411377131-19741-1-git-send-email-b29396@freescale.com>
-	<1411377131-19741-5-git-send-email-b29396@freescale.com>
-	<CAPDyKFoD6G7w5gZEBGeqrmxDWyGHMy0_daikSmUfLCnZzZ-K_w@mail.gmail.com>
-	<20140923071027.GA12146@shlinux1.ap.freescale.net>
+Subject: Re: [PATCH] mmc: rtsx: add card power off during probe
+Date: Tue, 23 Sep 2014 11:20:42 +0200
+Message-ID: <CAPDyKFq+NJ33AT4Lg0cvfZWnOKew6fTaLW--SVZ0w0xKvXw+Wg@mail.gmail.com>
+References: <1410485999-10939-1-git-send-email-micky_ching@realsil.com.cn>
+	<CAPDyKFqcbK9OuQXbegignwiS7rz3L8resQ7Jfc8WvqXEKTcWVA@mail.gmail.com>
+	<54195036.2010409@realsil.com.cn>
+	<CAPDyKFrbMaDxU3VkhMO63+tLRMipKPqGvYC5cT2PTeVU1CTTQg@mail.gmail.com>
+	<1411024883.27455.11.camel@debian-rtk5880>
+	<CAPDyKFqokjwerEC+6A=2h4cPH29rnX0tyW=2=KQX2rSE=SEKHw@mail.gmail.com>
+	<1411380672.24091.18.camel@debian-rtk5880>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f175.google.com ([209.85.216.175]:56331 "EHLO
-	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755073AbaIWIRN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Sep 2014 04:17:13 -0400
-Received: by mail-qc0-f175.google.com with SMTP id o8so1360754qcw.6
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Sep 2014 01:17:12 -0700 (PDT)
-In-Reply-To: <20140923071027.GA12146@shlinux1.ap.freescale.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1411380672.24091.18.camel@debian-rtk5880>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Roger Tseng <rogerable@realtek.com>
+Cc: micky <micky_ching@realsil.com.cn>, Chris Ball <chris@printf.net>, Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, "driverdev-devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Wei_wang <wei_wang@realsil.com.cn>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawn.guo@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 23 September 2014 09:10, Dong Aisheng <b29396@freescale.com> wrote:
-> On Tue, Sep 23, 2014 at 09:27:49AM +0200, Ulf Hansson wrote:
->> On 22 September 2014 11:12, Dong Aisheng <b29396@freescale.com> wrote:
->> > Except SDHCI_QUIRK_BROKEN_CARD_DETECTION and MMC_CAP_NONREMOVABLE,
->> > we also do not need to handle controller native card detect interrupt
->> > for gpio as card detect case.
->> > If we wrong enabled the card detect interrupt for gpio case,
->> > it will cause a lot of unexpected card detect interrupts during data transfer
->> > which should not happen.
+On 22 September 2014 12:09, Roger Tseng <rogerable@realtek.com> wrote:
+> On Thu, 2014-09-18 at 23:14 +0200, Ulf Hansson wrote:
+>> [...]
+>>
+>> >>
+>> >> In that case, don't forget to enable MMC_CAP2_FULL_PWR_CYCLE.
+>> >>
+>> >> >
+>> >> > if MMC_CAP2_NO_PRESCAN_POWERUP enable, will call mmc_power_off() at start,
+>> >> > then it will check ios.power_mode, but the state is MMC_POWER_OFF and just
+>> >> > return.
+>> >>
+>> >> Uhh, that's right! So, I wonder why we invokes mmc_power_off() from
+>> >> that path at all.
+>> >>
+>> >> Hmm, I think we should change the behavior in mmc_start_host(), like below:
+>> >> 1) Add a "MMC_POWER_UNDEFINED" state which is what the power state
+>> >> should be assigned to at allocation.
+>> >> 2 ) From mmc_start_host(), invoke mmc_power_off() when
+>> >> MMC_CAP2_NO_PRESCAN_POWERUP and MMC_CAP2_FULL_PWR_CYCLE is set.
+>> >>
+>> >> Would that work?
+>> > Yes. I have confirmed this by following changes. The MMC_POWER_UNDEFINED
+>> > designation in mmc_start_host() will eventually cause a power-off
+>> > operation.
+>> >
+>> > But I wonder if we need to additionally check MMC_CAP2_FULL_PWR_CYCLE
+>> > before calling mmc_power_off()?
+>>
+>> The intent from my side was to keep the current behaviour for those
+>> that already used MMC_CAP2_NO_PRESCAN_POWERUP, but it's s not a big
+>> deal.
+>>
+>
+> I checked the log and found the commit that invokes mmc_power_off():
+> a08b17be8b984a7c51cd5a480cd977363df353f9
+> 0d3e3350d5871c53464be4c92d57198744247005
+> (https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg19638.html )
+>
+> The proposed change might bring back some delay since invoking
+> mmc_power_off() in mmc_start_host() is more than NOP now and triggers
+> real power-off and re-init in sdhci.
 
-I see. But shouldn't you then check for MMC_CAP_NEEDS_POLL instead of
-reading the current state of the gpio_cd pin?
+Actually the above commits was added due to the below commit:
+
+fa5501890d8974301042e0202d342a6cbe8609f4
+
+But the commits you refer to, didn't bring back the old behaviour,
+which I think was the intent. Instead we added a NOP call to
+mmc_power_off() from mmc_start_host().
+
+We have few options on how to go forward, but let's loop in Adrian
+Hunter first, since he might be able to comment on this as well.
 
 Kind regards
 Uffe
-
->> >
->> > Signed-off-by: Dong Aisheng <b29396@freescale.com>
->> > ---
->> >  drivers/mmc/host/sdhci.c |    3 ++-
->> >  1 files changed, 2 insertions(+), 1 deletions(-)
->> >
->> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> > index 7481bd8..85cbf45 100644
->> > --- a/drivers/mmc/host/sdhci.c
->> > +++ b/drivers/mmc/host/sdhci.c
->> > @@ -136,9 +136,10 @@ static void sdhci_dumpregs(struct sdhci_host *host)
->> >  static void sdhci_set_card_detection(struct sdhci_host *host, bool enable)
->> >  {
->> >         u32 present;
->> > +       int gpio_cd = mmc_gpio_get_cd(host->mmc);
->> >
->> >         if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
->> > -           (host->mmc->caps & MMC_CAP_NONREMOVABLE))
->> > +           (host->mmc->caps & MMC_CAP_NONREMOVABLE) || !IS_ERR_VALUE(gpio_cd))
->>
->> If you have a properly working gpio_cd, then why does you also have
->> SDHCI_QUIRK_BROKEN_CARD_DETECTION set? Isn't that the actual problem?
->>
->
-> SDHCI_QUIRK_BROKEN_CARD_DETECTION seems only for controller CD function.
-> Thus even we're using gpio_cd, we still have this quirk set for controller
-> to avoid enable controller cd interrupts.
-> Does it make sense?
->
-> Regards
-> Dong Aisheng
->
->> Kind regards
->> Uffe
->>
->> >                 return;
->> >
->> >         if (enable) {
->> > --
->> > 1.7.8
->> >
