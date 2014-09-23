@@ -1,64 +1,71 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 5/6] mmc: block: Fix SD card stop cmd response type
-Date: Tue, 23 Sep 2014 23:00:29 +0300
-Message-ID: <1411502430-25535-6-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 6/6] mmc: sdhci: Transfer Complete has higher priority than Data Timeout Error
+Date: Tue, 23 Sep 2014 23:00:30 +0300
+Message-ID: <1411502430-25535-7-git-send-email-adrian.hunter@intel.com>
 References: <1411502430-25535-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga14.intel.com ([192.55.52.115]:41324 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756188AbaIWUCB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 23 Sep 2014 16:02:01 -0400
+	id S1756259AbaIWUCC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 23 Sep 2014 16:02:02 -0400
 In-Reply-To: <1411502430-25535-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Nowhere in the SD Association Specifications does
-it state that the stop command has an R1 response
-type.  It is always R1B.  Change accordingly.
+According to the SD Host Controller Standard Specification:
 
-Note that, for SD cards, this puts the situation back
-to what it was prior to commit
-bcc3e1726d827c2d6f62f0e0e7bbc99eed7ad925.
+"...Transfer Complete has higher priority than Data Timeout
+Error. If both bits are set to 1, execution of a command
+can be considered to be completed."
+
+Adjust the checking of SDHCI_INT_DATA_TIMEOUT and
+SDHCI_INT_DATA_END (Transfer Complete) accordingly.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/block.c | 14 +++++++++++---
- 1 file changed, 11 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci.c | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index c3770dd..0736efb 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -801,6 +801,9 @@ static int send_stop(struct mmc_card *card, unsigned int timeout_ms,
- 	if (host->max_busy_timeout && (timeout_ms > host->max_busy_timeout))
- 		use_r1b_resp = false;
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 7481bd8..7a8586f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2329,11 +2329,6 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 		 * above in sdhci_cmd_irq().
+ 		 */
+ 		if (host->cmd && (host->cmd->flags & MMC_RSP_BUSY)) {
+-			if (intmask & SDHCI_INT_DATA_TIMEOUT) {
+-				host->cmd->error = -ETIMEDOUT;
+-				tasklet_schedule(&host->finish_tasklet);
+-				return;
+-			}
+ 			if (intmask & SDHCI_INT_DATA_END) {
+ 				/*
+ 				 * Some cards handle busy-end interrupt
+@@ -2346,6 +2341,11 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 					host->busy_handle = 1;
+ 				return;
+ 			}
++			if (intmask & SDHCI_INT_DATA_TIMEOUT) {
++				host->cmd->error = -ETIMEDOUT;
++				tasklet_schedule(&host->finish_tasklet);
++				return;
++			}
+ 		}
  
-+	if (!mmc_card_mmc(card))
-+		use_r1b_resp = true;
-+
- 	cmd.opcode = MMC_STOP_TRANSMISSION;
- 	if (use_r1b_resp) {
- 		cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-@@ -1436,9 +1439,14 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 	if (rq_data_dir(req) == READ) {
- 		brq->cmd.opcode = readcmd;
- 		brq->data.flags |= MMC_DATA_READ;
--		if (brq->mrq.stop)
--			brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
--					MMC_CMD_AC;
-+		if (brq->mrq.stop) {
-+			if (mmc_card_mmc(card))
-+				brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
-+						  MMC_CMD_AC;
-+			else
-+				brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1B |
-+						  MMC_CMD_AC;
-+		}
- 	} else {
- 		brq->cmd.opcode = writecmd;
- 		brq->data.flags |= MMC_DATA_WRITE;
+ 		pr_err("%s: Got data interrupt 0x%08x even "
+@@ -2356,7 +2356,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 		return;
+ 	}
+ 
+-	if (intmask & SDHCI_INT_DATA_TIMEOUT)
++	if ((intmask & SDHCI_INT_DATA_TIMEOUT) &&
++	    !(intmask & SDHCI_INT_DATA_END))
+ 		host->data->error = -ETIMEDOUT;
+ 	else if (intmask & SDHCI_INT_DATA_END_BIT)
+ 		host->data->error = -EILSEQ;
 -- 
 1.8.3.2
 
