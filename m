@@ -1,83 +1,49 @@
-From: =?utf-8?B?5bCP5rGf?= <miguel@ubannet.com.br>
-Subject: =?utf-8?B?55So6L+Z5Liq5bmz5Y+w5Y+R55+t5L+h77yM6L+Z5bCx5a+55LqGICAgICAgIA==?=
-	=?utf-8?B?ICAgICAgICAgICAgICAgICAgICA=?=
-	=?utf-8?B?ICAgICAgICAgICAgICAgICAgICA=?=
-	=?utf-8?B?ICAgICAgICAgICAgICAgICAgICA=?=
-	=?utf-8?B?ICBtcmw3c3c4M3g=?=
-Date: Tue, 23 Sep 2014 22:33:00 +0800
-Message-ID: <20140923223306575236@ubannet.com.br>
-Reply-To: <dingxj8@aliyun.com>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
+From: behanw@converseincode.com
+Subject: [PATCH v2 1/2] gpio, bcm-kona, LLVMLinux: Remove use of __initconst
+Date: Tue, 23 Sep 2014 15:55:07 -0700
+Message-ID: <1411512908-19237-1-git-send-email-behanw@converseincode.com>
+References: <20140923212922.GG12270@beef>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ip-177.53.74.146.ubannet.com.br ([177.53.74.146]:53423 "EHLO
-	srv01.ubannet.com.br" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754231AbaIWWXV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Sep 2014 18:23:21 -0400
+Received: from mail-pd0-f177.google.com ([209.85.192.177]:47646 "EHLO
+	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756734AbaIWWzX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Sep 2014 18:55:23 -0400
+Received: by mail-pd0-f177.google.com with SMTP id v10so5535534pde.36
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Sep 2014 15:55:22 -0700 (PDT)
+In-Reply-To: <20140923212922.GG12270@beef>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linusxiii.bbs@bbs.svdcc.fju.edu.tw, linux-iscsi-users@lists.sourceforge.net, linux-mmc@vger.kernel.org, linux-perf-users@vger.kernel.org
+To: bcm@fixthebug.org, chris@printf.net, gnurou@gmail.com, linus.walleij@linaro.org, mporter@linaro.org, ulf.hansson@linaro.org
+Cc: bcm-kernel-feedback-list@broadcom.com, linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, rjui@broadcom.com, Behan Webster <behanw@converseincode.com>
 
-DQogIOWbveWGheacgOWlveeUqOeahOefreS/oeW5s+WPsO+8jOmAiei/meS4qui/meWwseWvueS6
-huOAguato+inhOWGheWuuemDveWPr+S7peWPke+8jOWIsOi+vumrmO+8jOS4jeWxj+iUveOAguWS
-qOivouivt+WKoFFRMTkzOTg5NzI177yM5Y+v5Lul5rWL6K+V5ZOm44CCDQoNCg0KDQoNCg0KIA0K
-DQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoN
-Cg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0K
-DQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoN
-Cg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCuaCqOWImuWImuW3sue7j+WcqOWk
-p+W6reW5v+S8l+S5i+S4i+Wuo+W4g+S6huWkhOeQhue7k+aenO+8jOWmguaenOaCqOimgeS4jeWk
-hOeQhuaIke+8jOS8muW9seWTjeaCqOeahOadg+WogeOAguKAnSAgICDoi4/nu5vllIfoh6rku47m
-i4Xku7vlia/moKHplb/ku6XlkI7vvIzlsLHmsqHmnInmjojor77vvIzlvojlsJHlkozlrabnlJ/n
-m7TmjqXmiZPkuqTpgZPkuobvvIzlj6/mmK/vvIzlpI/lsI/mtJvnu4/luLjliLDouLnkuobkuIDo
-hJrnmoTlrqDnianni5fvvIzkuI3mmI7nmb3kuLrkvZXliJrliJrov5jlr7noh6rlt7HlvojlrqDn
-iLHnmoTkuLvkurrlv73nhLblr7noh6rlt7HlpoLmraTni6Dmr5IgICAgICDljaLljZfljY7kuJ3m
-r6vkuI3nkIbkvJrokaPlm5vllpznmoTlj43lupTvvIzkuZ/lr7nohJrkuIvkuI3kvY/lkbvlkJ/n
-moTkurrnnIvpg73kuI3nnIvkuIDnnLzvvIzku5bovazov4fohLjlhrLnnYDmm7nmtanmmoTmga3m
-lazogIzkurLlpb3nmoTpnaLlrrnvvIzotoXotorlkIzpvoTkurrnmoTmt7HpgoPmgJ3mg7PvvIzn
-o4rokL3mtJLohLHnmoTpo47luqbvvIznlJroh7PokL3mi5PkuI3nvoHlkozmhbXmh5Lpl7LpgILn
-moTmsJTotKjvvIzpg73ku6Tlkajlm7TpgqPkupvlsI/nlLfnlJ/nnYDov7fvvIzlpbnkuZ/kuIDn
-m7TkuaDmg6/ooqvov73msYLlkozkvJfmmJ/mjafmnIjnmoTmhJ/op4njgIIgICAg5aSP5bCP5rSb
-55qE6Lqy6Zeq5oCB5bqm5Y+N5YCS5r+A5Y+R5ruh552A5Lib5p6X5Y6f5YiZ55qE5Ye26Juu55u0
-5o6l77yM6LSi5a+M6YeM5pu06ZqQ6JeP552A56eN56eN6IKu6ISP77yM5L2G5piv5b2T6L+Z5Liq
-5pe25Luj5Yiw5Li055qE5pe25YCZ77yM6ZSQ5LiN5Y+v5b2T77yM5LiH54mp6IKG5oSP55Sf6ZW/
-77yM5bCY5Z+D5LiO5puZ5YWJ5Y2H6IW+77yM5rGf5rKz6IGa5Lya5oiQ5bed77yM5peg5ZCN5bGx
-5LiY5bSb6LW35Li65bOw77yM5aSp5Zyw5LiA5pe26Ze077yM5peg5q+U5byA6ZiU6LCB5Lyg5Ye6
-5Y676L+Z5Lu25LqL5oOF77yM5peg6K665pyJ5rKh5pyJ5a+55rSb5rC05Y6/56ys5LiA6auY5Lit
-55qE5aOw6KqJ6YCg5oiQ5a6e6LSo5oCn55qE5b2x5ZON77yM5LiA5b6L5byA6Zmk77yB4oCdICAg
-IOWlueeri+WNs+WPrOmbhuagoeS4u+imgemihuWvvOadpeWIsOagoemVv+mZiOawtOeMrueahOWK
-nuWFrOWupOWPrOW8gOe0p+aApeS8muiuru+8jOmmluWFiO+8jOWlueWQkeWkp+WutueugOaYjuaJ
-vOimgeWcsOiusuW3sue7j+aZmuS4iuWNgeeCueS6hu+8jOWgguWTpeWkj+aTjuWkqei/mOayoeWb
-nuadpe+8jOWkj+aTjuWkqeS7iuW5tOS6jOWNgeS6jOWyge+8jOW3sue7j+S4jeivu+S5puS6hu+8
-jDg25bm05YWo5Zu95rWB6KGM44CK5bCR5p6X5a+644CL77yM5LuW5LiA5Yay5Yqo77yM5YmD5LqG
-5Liq5YWJ5aS077yM5ZKM5p2R6YeM5Yeg5Liq5bCP5a2p5Y675bCR5p6X5a+65a2m5q2m5Y675LqG
-77yM5Lmf5rKh5ZKM54i25q+N6K+044CCICAgIAkNCueahOmAn+W6puWHoOS5juWPr+S7peeci+W+
-l+WHuuadpe+8jOWPiOmVv+mrmOS6huiuuOWkmu+8jOiEuOS4iuS5n+aIkOeGn+S6huiuuOWkmuOA
-giAgICDkvYbmmK/ppbbmmK/lpoLmraTvvIzku5bmiZPnr67nkIPnmoTmioDmnK/kuZ/kuI3lpoLm
-najmma/liJ3vvIzlho3liqDkuIrlkI7ogIXnmoTouqvpq5jkvJjlir/vvIzov5norqnlpI/lsI/m
-tJvpnZ7luLjpg4Hpl7fjgIIgICAg5LqO5piv5LuW6K+077ya4oCc5b635LqG77yM5LiN6L+H77yM
-5aW56Z2i5a+555qE5piv6YeN55Sf6L+H5p2l5pyJ552A5LiJ5Y2B5bKB5b+D55CG5bm06b6E5aSP
-5bCP5rSb44CCICAgIOWkj+Wwj+a0m+ijheWHuuaEn+a/gOeahOagt+WtkO+8jOmBk++8muKAnOiw
-ouiwouS9oO+8jOiLj+agoemVv++8geKAnSAgICDoi4/nu5vllIflpKfluqblnLDkuIDnrJHvvIzk
-vLjlh7rmiYvvvIzpgZPvvJrigJzlpI/lsI/mtJvvvIzmrKLov47kvaDmnaXliLDmtJvmsLTnrKzl
-t7HmmK/ot5HkuI3kuobnmoTjgIIgICAg4oCc5ZWq4oCd77yM5LiA5Liq57q45Zui5LuO5bem5ZCO
-6L655oqb5LqG6L+H5p2l77yM5LuW5b6q552A5pa55ZCR5pyb5Y6777yM5pyA5ZCO5LiA5o6S6Z2g
-5ZCO6Zeo55qE5L2N572u5LiA5Liq6IKk6Imy6bud6buR77yM6Z2i6LKM5L+K5pyX77yM5L2T5Z6L
-5L+u6ZW/55qE5bCP55S355Sf5q2j56yR5Zi75Zi755qE5pyb552A6Ieq5bex4oCU4oCU5bGI5bCP
-5YWD77yB5aiY77yM5p2R6YeM5YW25L2Z5Yeg5Liq6aqo5bmy5Lmf6YO957uZ5oqT6LW35p2l5LqG
-44CC6JGj6ZuG5LiA5pe26Ze05Lmf5rKh5LqG5Li75b+D6aqo77yM5pu+57uP6L+c6L+R6Ze75ZCN
-55qE5Lq/5YWD6YCg5YGH5p2R77yM5bCx6L+Z5qC35oWi5oWi6aKT6LSl44CCICAgIOWPr+aYr++8
-jOiuqeS9leS6rOeUn+aEj+WklueahOaYr++8jOecgemHjOWNtOacieS6huWKqOS9nO+8jOecgeeD
-n+iNieWxgOmTgeWxgOmVv+aPkuaJi+S6humTnOS4ne+8jOivtOWIsOayu+eXhe+8jOmCo+WPquiD
-veWThOaEmuWkq+aEmuWmh+OAgiAgICDpmr7mgKrlpI/ov5HkuJzlv4PkuK3kuI3mgqbvvIzku6Xk
-u5bnmoTljLvoja/lrabnn6Xor4bvvIzogq/lrprlr7nnjovlpKflipvnjqnnmoTpgqPlpZfmiorm
-iI/lv4Pnn6XogprmmI7vvIzlj6/mmK/noo3nnYDogIHlqYblkozlsI/lp6jlrZDnmoTpnaLlrZDv
-vIzov5jlvpflp5Tmm7LmsYLlhajvvIzlkoznjovlpKflipvlkIzmtYHlkIjngbbjgILkuIDlsYLm
-pbzlhbHnlKjkuIDkuKrmsLTmiL/vvIzlpI/lpKnmtJfmvqHov5jopoHmjpLpmJ/jgIIgICAg5Y+v
-5piv6L+Z6YeM5Lmf5pyJ5b6I5aSa5aSP5bCP5rSb576O5aW955qE6K6w5b+G77yM6YKj5pe25YCZ
-6YK76YeM5LmL6Ze05rKf6YCa5b6I5aSa77yM5Lmf5b6I5ZKM552m77yM5aaC5p6c54i25q+N5LiN
-5Zyo5a6277yM5bCx5Y+v5Lul5ZCD55m+5a626aWt77yM5YeR5ZCI5LiA6aG/44CCICAgIOWkj+Ww
-j+a0mwkNCg==
+From: Behan Webster <behanw@converseincode.com>
 
+The __initconst is in the wrong place, and when moved to the correct place
+it uncovers an error where the variable is used by non-init data structures.
+
+Instead merely make them const and put the const in the right spot.
+
+Signed-off-by: Behan Webster <behanw@converseincode.com>
+Reviewed-by: Mark Charlebois <charlebm@gmail.com>
+Acked-by: Arnd Bergmann <arnd@arndb.de>
+Acked-by: Matt Porter <mporter@linaro.org>
+---
+ drivers/gpio/gpio-bcm-kona.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/gpio/gpio-bcm-kona.c b/drivers/gpio/gpio-bcm-kona.c
+index 3f6b33c..de0801e 100644
+--- a/drivers/gpio/gpio-bcm-kona.c
++++ b/drivers/gpio/gpio-bcm-kona.c
+@@ -496,7 +496,7 @@ static struct irq_chip bcm_gpio_irq_chip = {
+ 	.irq_release_resources = bcm_kona_gpio_irq_relres,
+ };
+ 
+-static struct __initconst of_device_id bcm_kona_gpio_of_match[] = {
++static struct of_device_id const bcm_kona_gpio_of_match[] = {
+ 	{ .compatible = "brcm,kona-gpio" },
+ 	{}
+ };
+-- 
+1.9.1
 
