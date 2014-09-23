@@ -1,54 +1,76 @@
-From: behanw@converseincode.com
-Subject: [PATCH] gpio, bcm-kona, LLVMLinux: Remove use of __initconst
-Date: Tue, 23 Sep 2014 12:30:16 -0700
-Message-ID: <1411500616-12863-1-git-send-email-behanw@converseincode.com>
-Return-path: <linux-gpio-owner@vger.kernel.org>
-Sender: linux-gpio-owner@vger.kernel.org
-To: bcm@fixthebug.org, chris@printf.net, gnurou@gmail.com, linus.walleij@linaro.org, mporter@linaro.org, ulf.hansson@linaro.org
-Cc: bcm-kernel-feedback-list@broadcom.com, linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, rjui@broadcom.com, Behan Webster <behanw@converseincode.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: rtsx: add card power off during probe
+Date: Tue, 23 Sep 2014 22:51:21 +0300
+Message-ID: <5421CF39.2060309@intel.com>
+References: <1410485999-10939-1-git-send-email-micky_ching@realsil.com.cn>	<CAPDyKFqcbK9OuQXbegignwiS7rz3L8resQ7Jfc8WvqXEKTcWVA@mail.gmail.com>	<54195036.2010409@realsil.com.cn>	<CAPDyKFrbMaDxU3VkhMO63+tLRMipKPqGvYC5cT2PTeVU1CTTQg@mail.gmail.com>	<1411024883.27455.11.camel@debian-rtk5880>	<CAPDyKFqokjwerEC+6A=2h4cPH29rnX0tyW=2=KQX2rSE=SEKHw@mail.gmail.com>	<1411380672.24091.18.camel@debian-rtk5880> <CAPDyKFq+NJ33AT4Lg0cvfZWnOKew6fTaLW--SVZ0w0xKvXw+Wg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:41275 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751568AbaIWTv1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 23 Sep 2014 15:51:27 -0400
+In-Reply-To: <CAPDyKFq+NJ33AT4Lg0cvfZWnOKew6fTaLW--SVZ0w0xKvXw+Wg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Roger Tseng <rogerable@realtek.com>
+Cc: micky <micky_ching@realsil.com.cn>, Chris Ball <chris@printf.net>, Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, "driverdev-devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Wei_wang <wei_wang@realsil.com.cn>
 
-From: Behan Webster <behanw@converseincode.com>
+On 23/09/2014 12:20 p.m., Ulf Hansson wrote:
+> On 22 September 2014 12:09, Roger Tseng <rogerable@realtek.com> wrote:
+>> On Thu, 2014-09-18 at 23:14 +0200, Ulf Hansson wrote:
+>>> [...]
+>>>
+>>>>>
+>>>>> In that case, don't forget to enable MMC_CAP2_FULL_PWR_CYCLE.
+>>>>>
+>>>>>>
+>>>>>> if MMC_CAP2_NO_PRESCAN_POWERUP enable, will call mmc_power_off() at start,
+>>>>>> then it will check ios.power_mode, but the state is MMC_POWER_OFF and just
+>>>>>> return.
+>>>>>
+>>>>> Uhh, that's right! So, I wonder why we invokes mmc_power_off() from
+>>>>> that path at all.
+>>>>>
+>>>>> Hmm, I think we should change the behavior in mmc_start_host(), like below:
+>>>>> 1) Add a "MMC_POWER_UNDEFINED" state which is what the power state
+>>>>> should be assigned to at allocation.
+>>>>> 2 ) From mmc_start_host(), invoke mmc_power_off() when
+>>>>> MMC_CAP2_NO_PRESCAN_POWERUP and MMC_CAP2_FULL_PWR_CYCLE is set.
+>>>>>
+>>>>> Would that work?
+>>>> Yes. I have confirmed this by following changes. The MMC_POWER_UNDEFINED
+>>>> designation in mmc_start_host() will eventually cause a power-off
+>>>> operation.
+>>>>
+>>>> But I wonder if we need to additionally check MMC_CAP2_FULL_PWR_CYCLE
+>>>> before calling mmc_power_off()?
+>>>
+>>> The intent from my side was to keep the current behaviour for those
+>>> that already used MMC_CAP2_NO_PRESCAN_POWERUP, but it's s not a big
+>>> deal.
+>>>
+>>
+>> I checked the log and found the commit that invokes mmc_power_off():
+>> a08b17be8b984a7c51cd5a480cd977363df353f9
+>> 0d3e3350d5871c53464be4c92d57198744247005
+>> (https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg19638.html )
+>>
+>> The proposed change might bring back some delay since invoking
+>> mmc_power_off() in mmc_start_host() is more than NOP now and triggers
+>> real power-off and re-init in sdhci.
+>
+> Actually the above commits was added due to the below commit:
+>
+> fa5501890d8974301042e0202d342a6cbe8609f4
+>
+> But the commits you refer to, didn't bring back the old behaviour,
+> which I think was the intent. Instead we added a NOP call to
+> mmc_power_off() from mmc_start_host().
+>
+> We have few options on how to go forward, but let's loop in Adrian
+> Hunter first, since he might be able to comment on this as well.
 
-The __initconst is in the wrong place, and when moved to the correct place
-it uncovers an error where the variable is used by non-init data structures.
-
-Instead merely make them const and put the const in the right spot.
-
-Signed-off-by: Behan Webster <behanw@converseincode.com>
-Reviewed-by: Mark Charlebois <charlebm@gmail.com>
-Acked-by: Arnd Bergmann <arnd@arndb.de>
----
- drivers/gpio/gpio-bcm-kona.c      | 2 +-
- drivers/mmc/host/sdhci-bcm-kona.c | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/gpio/gpio-bcm-kona.c b/drivers/gpio/gpio-bcm-kona.c
-index 3f6b33c..de0801e 100644
---- a/drivers/gpio/gpio-bcm-kona.c
-+++ b/drivers/gpio/gpio-bcm-kona.c
-@@ -496,7 +496,7 @@ static struct irq_chip bcm_gpio_irq_chip = {
- 	.irq_release_resources = bcm_kona_gpio_irq_relres,
- };
- 
--static struct __initconst of_device_id bcm_kona_gpio_of_match[] = {
-+static struct of_device_id const bcm_kona_gpio_of_match[] = {
- 	{ .compatible = "brcm,kona-gpio" },
- 	{}
- };
-diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-index dd780c3..4bb06c8 100644
---- a/drivers/mmc/host/sdhci-bcm-kona.c
-+++ b/drivers/mmc/host/sdhci-bcm-kona.c
-@@ -225,7 +225,7 @@ static struct sdhci_pltfm_data sdhci_pltfm_data_kona = {
- 		SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
- };
- 
--static struct __initconst of_device_id sdhci_bcm_kona_of_match[] = {
-+static struct of_device_id const sdhci_bcm_kona_of_match[] = {
- 	{ .compatible = "brcm,kona-sdhci"},
- 	{ .compatible = "bcm,kona-sdhci"}, /* deprecated name */
- 	{}
--- 
-1.9.1
-
+Having mmc_power_off() in mmc_start_host()
+actually power off should be OK.
