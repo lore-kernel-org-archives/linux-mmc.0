@@ -1,209 +1,61 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: Consolidate emmc tuning blocks
-Date: Tue, 23 Sep 2014 09:14:58 +0200
-Message-ID: <CAPDyKFpuKSdZtnX46hc65RaOQ4sGzgFgV-iB6KQOt75whrTxvg@mail.gmail.com>
-References: <1411413970-17480-1-git-send-email-sboyd@codeaurora.org>
-	<1411413970-17480-2-git-send-email-sboyd@codeaurora.org>
+Subject: Re: [PATCH v2 4/8] mmc: sdhci: do not enable card detect interrupt
+ for gpio cd type
+Date: Tue, 23 Sep 2014 09:27:49 +0200
+Message-ID: <CAPDyKFoD6G7w5gZEBGeqrmxDWyGHMy0_daikSmUfLCnZzZ-K_w@mail.gmail.com>
+References: <1411377131-19741-1-git-send-email-b29396@freescale.com>
+	<1411377131-19741-5-git-send-email-b29396@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f45.google.com ([209.85.192.45]:56019 "EHLO
-	mail-qg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752969AbaIWHO7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Sep 2014 03:14:59 -0400
-Received: by mail-qg0-f45.google.com with SMTP id q108so4011760qgd.32
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Sep 2014 00:14:59 -0700 (PDT)
-In-Reply-To: <1411413970-17480-2-git-send-email-sboyd@codeaurora.org>
+Received: from mail-qc0-f172.google.com ([209.85.216.172]:64112 "EHLO
+	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753337AbaIWH1u (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Sep 2014 03:27:50 -0400
+Received: by mail-qc0-f172.google.com with SMTP id c9so1300292qcz.17
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Sep 2014 00:27:49 -0700 (PDT)
+In-Reply-To: <1411377131-19741-5-git-send-email-b29396@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Boyd <sboyd@codeaurora.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Georgi Djakov <gdjakov@mm-sol.com>, Jaehoon Chung <jh80.chung@samsung.com>
+To: Dong Aisheng <b29396@freescale.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawn.guo@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 22 September 2014 21:26, Stephen Boyd <sboyd@codeaurora.org> wrote:
-> The same tuning block exists in the dw_mmc h.c and sdhci-msm.c
-> files. Move these into mmc.c so that they can be shared across
-> drivers.
+On 22 September 2014 11:12, Dong Aisheng <b29396@freescale.com> wrote:
+> Except SDHCI_QUIRK_BROKEN_CARD_DETECTION and MMC_CAP_NONREMOVABLE,
+> we also do not need to handle controller native card detect interrupt
+> for gpio as card detect case.
+> If we wrong enabled the card detect interrupt for gpio case,
+> it will cause a lot of unexpected card detect interrupts during data transfer
+> which should not happen.
 >
-> Reported-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Signed-off-by: Stephen Boyd <sboyd@codeaurora.org>
+> Signed-off-by: Dong Aisheng <b29396@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci.c |    3 ++-
+>  1 files changed, 2 insertions(+), 1 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 7481bd8..85cbf45 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -136,9 +136,10 @@ static void sdhci_dumpregs(struct sdhci_host *host)
+>  static void sdhci_set_card_detection(struct sdhci_host *host, bool enable)
+>  {
+>         u32 present;
+> +       int gpio_cd = mmc_gpio_get_cd(host->mmc);
+>
+>         if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
+> -           (host->mmc->caps & MMC_CAP_NONREMOVABLE))
+> +           (host->mmc->caps & MMC_CAP_NONREMOVABLE) || !IS_ERR_VALUE(gpio_cd))
 
-Thanks! Applied for next.
+If you have a properly working gpio_cd, then why does you also have
+SDHCI_QUIRK_BROKEN_CARD_DETECTION set? Isn't that the actual problem?
 
 Kind regards
 Uffe
 
-
-> ---
->  drivers/mmc/core/mmc.c       | 32 ++++++++++++++++++++++++++++++++
->  drivers/mmc/host/dw_mmc.c    | 30 ------------------------------
->  drivers/mmc/host/sdhci-msm.c | 38 ++++----------------------------------
->  include/linux/mmc/mmc.h      |  5 +++++
->  4 files changed, 41 insertions(+), 64 deletions(-)
+>                 return;
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 793c6f7ddb04..9608cc8a1f65 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1135,6 +1135,38 @@ bus_speed:
->         return err;
->  }
->
-> +const u8 tuning_blk_pattern_4bit[MMC_TUNING_BLK_PATTERN_4BIT_SIZE] = {
-> +       0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
-> +       0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
-> +       0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
-> +       0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
-> +       0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
-> +       0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
-> +       0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
-> +       0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
-> +};
-> +EXPORT_SYMBOL(tuning_blk_pattern_4bit);
-> +
-> +const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE] = {
-> +       0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
-> +       0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
-> +       0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
-> +       0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
-> +       0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
-> +       0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
-> +       0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
-> +       0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
-> +       0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
-> +       0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
-> +       0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
-> +       0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
-> +       0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
-> +       0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
-> +       0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
-> +       0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
-> +};
-> +EXPORT_SYMBOL(tuning_blk_pattern_8bit);
-> +
->  /*
->   * Execute tuning sequence to seek the proper bus operating
->   * conditions for HS200 and HS400, which sends CMD21 to the device.
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 1ac227c603b7..f1cefdf5e2d0 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -81,36 +81,6 @@ struct idmac_desc {
->  };
->  #endif /* CONFIG_MMC_DW_IDMAC */
->
-> -static const u8 tuning_blk_pattern_4bit[] = {
-> -       0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
-> -       0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
-> -       0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
-> -       0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
-> -       0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
-> -       0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
-> -       0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
-> -       0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
-> -};
-> -
-> -static const u8 tuning_blk_pattern_8bit[] = {
-> -       0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
-> -       0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
-> -       0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
-> -       0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
-> -       0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
-> -       0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
-> -       0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
-> -       0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
-> -       0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
-> -       0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
-> -       0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
-> -       0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
-> -       0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
-> -       0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
-> -       0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
-> -       0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
-> -};
-> -
->  static inline bool dw_mci_fifo_reset(struct dw_mci *host);
->  static inline bool dw_mci_ctrl_all_reset(struct dw_mci *host);
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 5aabffc15ae8..da74c77f34cc 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -47,36 +47,6 @@
->  #define CMUX_SHIFT_PHASE_SHIFT 24
->  #define CMUX_SHIFT_PHASE_MASK  (7 << CMUX_SHIFT_PHASE_SHIFT)
->
-> -static const u8 tuning_block_64[] = {
-> -       0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
-> -       0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
-> -       0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
-> -       0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
-> -       0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
-> -       0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
-> -       0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
-> -       0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
-> -};
-> -
-> -static const u8 tuning_block_128[] = {
-> -       0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
-> -       0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
-> -       0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
-> -       0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
-> -       0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
-> -       0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
-> -       0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
-> -       0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
-> -       0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
-> -       0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
-> -       0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
-> -       0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
-> -       0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
-> -       0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
-> -       0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
-> -       0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
-> -};
-> -
->  struct sdhci_msm_host {
->         struct platform_device *pdev;
->         void __iomem *core_mem; /* MSM SDCC mapped address */
-> @@ -371,8 +341,8 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
->  {
->         int tuning_seq_cnt = 3;
->         u8 phase, *data_buf, tuned_phases[16], tuned_phase_cnt = 0;
-> -       const u8 *tuning_block_pattern = tuning_block_64;
-> -       int size = sizeof(tuning_block_64);     /* Pattern size in bytes */
-> +       const u8 *tuning_block_pattern = tuning_blk_pattern_4bit;
-> +       int size = sizeof(tuning_blk_pattern_4bit);
->         int rc;
->         struct mmc_host *mmc = host->mmc;
->         struct mmc_ios ios = host->mmc->ios;
-> @@ -388,8 +358,8 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
->
->         if ((opcode == MMC_SEND_TUNING_BLOCK_HS200) &&
->             (mmc->ios.bus_width == MMC_BUS_WIDTH_8)) {
-> -               tuning_block_pattern = tuning_block_128;
-> -               size = sizeof(tuning_block_128);
-> +               tuning_block_pattern = tuning_blk_pattern_8bit;
-> +               size = sizeof(tuning_blk_pattern_8bit);
->         }
->
->         data_buf = kmalloc(size, GFP_KERNEL);
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 64ec963ed347..cff1f2622061 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -53,6 +53,11 @@
->  #define MMC_SEND_TUNING_BLOCK    19   /* adtc                    R1  */
->  #define MMC_SEND_TUNING_BLOCK_HS200    21      /* adtc R1  */
->
-> +#define MMC_TUNING_BLK_PATTERN_4BIT_SIZE        64
-> +#define MMC_TUNING_BLK_PATTERN_8BIT_SIZE       128
-> +extern const u8 tuning_blk_pattern_4bit[MMC_TUNING_BLK_PATTERN_4BIT_SIZE];
-> +extern const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE];
-> +
->    /* class 3 */
->  #define MMC_WRITE_DAT_UNTIL_STOP 20   /* adtc [31:0] data addr   R1  */
->
+>         if (enable) {
 > --
-> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-> hosted by The Linux Foundation
+> 1.7.8
 >
