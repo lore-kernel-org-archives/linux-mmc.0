@@ -1,31 +1,23 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 1/2] mmc: atmel-mci: Switch to using managed resource
+Subject: Re: [PATCH v2 2/2] mmc: atmel-mci: Release mmc resources on failure
  in probe
-Date: Wed, 24 Sep 2014 10:48:50 +0200
-Message-ID: <CAPDyKFr-yytpn9CFSoY+dd4+Cf+=qAVqPvch-2nB+vOHAudUSQ@mail.gmail.com>
-References: <1411476708-13551-1-git-send-email-pramod.gurav@smartplayin.com>
+Date: Wed, 24 Sep 2014 10:49:20 +0200
+Message-ID: <CAPDyKFrCSLvRXfqihwTc_68cfRROfA-m4sATL1p84ySqVoPJvw@mail.gmail.com>
+References: <1411467606-13041-1-git-send-email-pramod.gurav@smartplayin.com>
+	<1411467606-13041-2-git-send-email-pramod.gurav@smartplayin.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f51.google.com ([209.85.192.51]:44042 "EHLO
-	mail-qg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750772AbaIXIsv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Sep 2014 04:48:51 -0400
-Received: by mail-qg0-f51.google.com with SMTP id a108so5763973qge.10
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Sep 2014 01:48:50 -0700 (PDT)
-In-Reply-To: <1411476708-13551-1-git-send-email-pramod.gurav@smartplayin.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1411467606-13041-2-git-send-email-pramod.gurav@smartplayin.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Pramod Gurav <pramod.gurav@smartplayin.com>
 Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
-On 23 September 2014 14:51, Pramod Gurav <pramod.gurav@smartplayin.com> wrote:
-> This change uses managed resource APIs to allocate resources such as,
-> clk, gpio, io in order to simplify the driver unload or failure cases.
-> Hence does away with release statements of the same resources in error
-> labels and remove function.
+On 23 September 2014 12:20, Pramod Gurav <pramod.gurav@smartplayin.com> wrote:
+> This change takes care of releasing mmc resources on error cases in
+> probe function which was missing. Also release timer in remove function.
 >
-> Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 > Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
 > Cc: Chris Ball <chris@printf.net>
 > Cc: Ulf Hansson <ulf.hansson@linaro.org>
@@ -34,146 +26,59 @@ On 23 September 2014 14:51, Pramod Gurav <pramod.gurav@smartplayin.com> wrote:
 
 Thanks! Applied for next.
 
-You don't need this extensive list of "Cc" in the commit message for
-future patches. It's also recommended to add acks etc in chronological
-order, thus Ludovic's ack should have been put below your sob.
-
 Kind regards
 Uffe
 
+> ---
+> Changes since v1: None
 >
-> ---
-> Changes since v1:
-> - Dropped using devm_request_irq as suggested by Ludovic Desroches
->   as it seems there are race conditions seen with them.
-> - Added another patch to fix failure path in probe to call atmci_cleanup_slot
->   after dma_alloc_coherent() fails to release mmc_host resources.
-> - Fixed typos in commit message
-> ---
->  drivers/mmc/host/atmel-mci.c |   41 ++++++++++++++---------------------------
->  1 file changed, 14 insertions(+), 27 deletions(-)
+>  drivers/mmc/host/atmel-mci.c |   11 +++++++++--
+>  1 file changed, 9 insertions(+), 2 deletions(-)
 >
 > diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index bb585d9..36212fb 100644
+> index 36212fb..288bcc1 100644
 > --- a/drivers/mmc/host/atmel-mci.c
 > +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -17,6 +17,7 @@
->  #include <linux/gpio.h>
->  #include <linux/init.h>
->  #include <linux/interrupt.h>
-> +#include <linux/io.h>
->  #include <linux/ioport.h>
->  #include <linux/module.h>
->  #include <linux/of.h>
-> @@ -2195,7 +2196,8 @@ static int __init atmci_init_slot(struct atmel_mci *host,
->         /* Assume card is present initially */
->         set_bit(ATMCI_CARD_PRESENT, &slot->flags);
->         if (gpio_is_valid(slot->detect_pin)) {
-> -               if (gpio_request(slot->detect_pin, "mmc_detect")) {
-> +               if (devm_gpio_request(&host->pdev->dev, slot->detect_pin,
-> +                                     "mmc_detect")) {
->                         dev_dbg(&mmc->class_dev, "no detect pin available\n");
->                         slot->detect_pin = -EBUSY;
->                 } else if (gpio_get_value(slot->detect_pin) ^
-> @@ -2208,7 +2210,8 @@ static int __init atmci_init_slot(struct atmel_mci *host,
->                 mmc->caps |= MMC_CAP_NEEDS_POLL;
+> @@ -2376,7 +2376,7 @@ static int __init atmci_probe(struct platform_device *pdev)
+>         struct resource                 *regs;
+>         unsigned int                    nr_slots;
+>         int                             irq;
+> -       int                             ret;
+> +       int                             ret, i;
 >
->         if (gpio_is_valid(slot->wp_pin)) {
-> -               if (gpio_request(slot->wp_pin, "mmc_wp")) {
-> +               if (devm_gpio_request(&host->pdev->dev, slot->wp_pin,
-> +                                     "mmc_wp")) {
->                         dev_dbg(&mmc->class_dev, "no WP pin available\n");
->                         slot->wp_pin = -EBUSY;
->                 }
-> @@ -2232,7 +2235,6 @@ static int __init atmci_init_slot(struct atmel_mci *host,
->                         dev_dbg(&mmc->class_dev,
->                                 "could not request IRQ %d for detect pin\n",
->                                 gpio_to_irq(slot->detect_pin));
-> -                       gpio_free(slot->detect_pin);
->                         slot->detect_pin = -EBUSY;
+>         regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>         if (!regs)
+> @@ -2482,7 +2482,7 @@ static int __init atmci_probe(struct platform_device *pdev)
+>                 if (!host->buffer) {
+>                         ret = -ENOMEM;
+>                         dev_err(&pdev->dev, "buffer allocation failed\n");
+> -                       goto err_init_slot;
+> +                       goto err_dma_alloc;
 >                 }
 >         }
-> @@ -2257,10 +2259,7 @@ static void __exit atmci_cleanup_slot(struct atmel_mci_slot *slot,
 >
->                 free_irq(gpio_to_irq(pin), slot);
->                 del_timer_sync(&slot->detect_timer);
-> -               gpio_free(pin);
->         }
-> -       if (gpio_is_valid(slot->wp_pin))
-> -               gpio_free(slot->wp_pin);
+> @@ -2492,7 +2492,13 @@ static int __init atmci_probe(struct platform_device *pdev)
 >
->         slot->host->slot[id] = NULL;
->         mmc_free_host(slot->mmc);
-> @@ -2395,7 +2394,7 @@ static int __init atmci_probe(struct platform_device *pdev)
->         if (irq < 0)
->                 return irq;
+>         return 0;
 >
-> -       host = kzalloc(sizeof(struct atmel_mci), GFP_KERNEL);
-> +       host = devm_kzalloc(&pdev->dev, sizeof(*host), GFP_KERNEL);
->         if (!host)
->                 return -ENOMEM;
->
-> @@ -2403,20 +2402,18 @@ static int __init atmci_probe(struct platform_device *pdev)
->         spin_lock_init(&host->lock);
->         INIT_LIST_HEAD(&host->queue);
->
-> -       host->mck = clk_get(&pdev->dev, "mci_clk");
-> -       if (IS_ERR(host->mck)) {
-> -               ret = PTR_ERR(host->mck);
-> -               goto err_clk_get;
-> -       }
-> +       host->mck = devm_clk_get(&pdev->dev, "mci_clk");
-> +       if (IS_ERR(host->mck))
-> +               return PTR_ERR(host->mck);
->
-> -       ret = -ENOMEM;
-> -       host->regs = ioremap(regs->start, resource_size(regs));
-> +       host->regs = devm_ioremap(&pdev->dev, regs->start, resource_size(regs));
->         if (!host->regs)
-> -               goto err_ioremap;
-> +               return -ENOMEM;
->
->         ret = clk_prepare_enable(host->mck);
->         if (ret)
-> -               goto err_request_irq;
-> +               return ret;
-> +
->         atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
->         host->bus_hz = clk_get_rate(host->mck);
->         clk_disable_unprepare(host->mck);
-> @@ -2427,7 +2424,7 @@ static int __init atmci_probe(struct platform_device *pdev)
->
->         ret = request_irq(irq, atmci_interrupt, 0, dev_name(&pdev->dev), host);
->         if (ret)
-> -               goto err_request_irq;
-> +               return ret;
->
->         /* Get MCI capabilities and set operations according to it */
->         atmci_get_cap(host);
-> @@ -2499,12 +2496,6 @@ err_init_slot:
+> +err_dma_alloc:
+> +       for (i = 0; i < ATMCI_MAX_NR_SLOTS; i++) {
+> +               if (host->slot[i])
+> +                       atmci_cleanup_slot(host->slot[i], i);
+> +       }
+>  err_init_slot:
+> +       del_timer_sync(&host->timer);
 >         if (host->dma.chan)
 >                 dma_release_channel(host->dma.chan);
 >         free_irq(irq, host);
-> -err_request_irq:
-> -       iounmap(host->regs);
-> -err_ioremap:
-> -       clk_put(host->mck);
-> -err_clk_get:
-> -       kfree(host);
->         return ret;
->  }
+> @@ -2519,6 +2525,7 @@ static int __exit atmci_remove(struct platform_device *pdev)
+>         atmci_readl(host, ATMCI_SR);
+>         clk_disable_unprepare(host->mck);
 >
-> @@ -2532,10 +2523,6 @@ static int __exit atmci_remove(struct platform_device *pdev)
+> +       del_timer_sync(&host->timer);
+>         if (host->dma.chan)
 >                 dma_release_channel(host->dma.chan);
 >
->         free_irq(platform_get_irq(pdev, 0), host);
-> -       iounmap(host->regs);
-> -
-> -       clk_put(host->mck);
-> -       kfree(host);
->
->         return 0;
->  }
 > --
 > 1.7.9.5
 >
