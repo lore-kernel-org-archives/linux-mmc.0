@@ -1,55 +1,179 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] MAINTAINERS: omap_hsmmc: remove myself from MAINTAINERS
-Date: Wed, 24 Sep 2014 10:20:38 +0200
-Message-ID: <CAPDyKFpd+4rgG1+eANGD7L6KUyFbFUmywEU5fVQpS_49aXCW5w@mail.gmail.com>
-References: <1410974411-2938-1-git-send-email-balajitk2@gmail.com>
+Subject: Re: [PATCH v2 1/2] mmc: atmel-mci: Switch to using managed resource
+ in probe
+Date: Wed, 24 Sep 2014 10:48:50 +0200
+Message-ID: <CAPDyKFr-yytpn9CFSoY+dd4+Cf+=qAVqPvch-2nB+vOHAudUSQ@mail.gmail.com>
+References: <1411476708-13551-1-git-send-email-pramod.gurav@smartplayin.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f47.google.com ([209.85.192.47]:45306 "EHLO
-	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753156AbaIXIUj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Sep 2014 04:20:39 -0400
-Received: by mail-qg0-f47.google.com with SMTP id z107so5643555qgd.6
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Sep 2014 01:20:38 -0700 (PDT)
-In-Reply-To: <1410974411-2938-1-git-send-email-balajitk2@gmail.com>
+Received: from mail-qg0-f51.google.com ([209.85.192.51]:44042 "EHLO
+	mail-qg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750772AbaIXIsv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Sep 2014 04:48:51 -0400
+Received: by mail-qg0-f51.google.com with SMTP id a108so5763973qge.10
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Sep 2014 01:48:50 -0700 (PDT)
+In-Reply-To: <1411476708-13551-1-git-send-email-pramod.gurav@smartplayin.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Balaji T K <balajitk2@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, linux-omap <linux-omap@vger.kernel.org>
+To: Pramod Gurav <pramod.gurav@smartplayin.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 17 September 2014 19:20, Balaji T K <balajitk2@gmail.com> wrote:
-> As I won't be able to maintain omap_hsmmc driver
+On 23 September 2014 14:51, Pramod Gurav <pramod.gurav@smartplayin.com> wrote:
+> This change uses managed resource APIs to allocate resources such as,
+> clk, gpio, io in order to simplify the driver unload or failure cases.
+> Hence does away with release statements of the same resources in error
+> labels and remove function.
 >
-> Signed-off-by: Balaji T K <balajitk2@gmail.com>
+> Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
+> Cc: Chris Ball <chris@printf.net>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
 
-Sorry to see you go Balaji. Thanks for all your support!
+Thanks! Applied for next.
 
-Patch applied for next.
+You don't need this extensive list of "Cc" in the commit message for
+future patches. It's also recommended to add acks etc in chronological
+order, thus Ludovic's ack should have been put below your sob.
 
 Kind regards
 Uffe
 
+>
 > ---
->  MAINTAINERS | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
+> Changes since v1:
+> - Dropped using devm_request_irq as suggested by Ludovic Desroches
+>   as it seems there are race conditions seen with them.
+> - Added another patch to fix failure path in probe to call atmci_cleanup_slot
+>   after dma_alloc_coherent() fails to release mmc_host resources.
+> - Fixed typos in commit message
+> ---
+>  drivers/mmc/host/atmel-mci.c |   41 ++++++++++++++---------------------------
+>  1 file changed, 14 insertions(+), 27 deletions(-)
 >
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 5e7866a..b296e43 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -6540,10 +6540,9 @@ S:       Maintained
->  F:     drivers/mmc/host/omap.c
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index bb585d9..36212fb 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -17,6 +17,7 @@
+>  #include <linux/gpio.h>
+>  #include <linux/init.h>
+>  #include <linux/interrupt.h>
+> +#include <linux/io.h>
+>  #include <linux/ioport.h>
+>  #include <linux/module.h>
+>  #include <linux/of.h>
+> @@ -2195,7 +2196,8 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+>         /* Assume card is present initially */
+>         set_bit(ATMCI_CARD_PRESENT, &slot->flags);
+>         if (gpio_is_valid(slot->detect_pin)) {
+> -               if (gpio_request(slot->detect_pin, "mmc_detect")) {
+> +               if (devm_gpio_request(&host->pdev->dev, slot->detect_pin,
+> +                                     "mmc_detect")) {
+>                         dev_dbg(&mmc->class_dev, "no detect pin available\n");
+>                         slot->detect_pin = -EBUSY;
+>                 } else if (gpio_get_value(slot->detect_pin) ^
+> @@ -2208,7 +2210,8 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+>                 mmc->caps |= MMC_CAP_NEEDS_POLL;
 >
->  OMAP HS MMC SUPPORT
-> -M:     Balaji T K <balajitk@ti.com>
->  L:     linux-mmc@vger.kernel.org
->  L:     linux-omap@vger.kernel.org
-> -S:     Maintained
-> +S:     Orphan
->  F:     drivers/mmc/host/omap_hsmmc.c
+>         if (gpio_is_valid(slot->wp_pin)) {
+> -               if (gpio_request(slot->wp_pin, "mmc_wp")) {
+> +               if (devm_gpio_request(&host->pdev->dev, slot->wp_pin,
+> +                                     "mmc_wp")) {
+>                         dev_dbg(&mmc->class_dev, "no WP pin available\n");
+>                         slot->wp_pin = -EBUSY;
+>                 }
+> @@ -2232,7 +2235,6 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+>                         dev_dbg(&mmc->class_dev,
+>                                 "could not request IRQ %d for detect pin\n",
+>                                 gpio_to_irq(slot->detect_pin));
+> -                       gpio_free(slot->detect_pin);
+>                         slot->detect_pin = -EBUSY;
+>                 }
+>         }
+> @@ -2257,10 +2259,7 @@ static void __exit atmci_cleanup_slot(struct atmel_mci_slot *slot,
 >
->  OMAP RANDOM NUMBER GENERATOR SUPPORT
+>                 free_irq(gpio_to_irq(pin), slot);
+>                 del_timer_sync(&slot->detect_timer);
+> -               gpio_free(pin);
+>         }
+> -       if (gpio_is_valid(slot->wp_pin))
+> -               gpio_free(slot->wp_pin);
+>
+>         slot->host->slot[id] = NULL;
+>         mmc_free_host(slot->mmc);
+> @@ -2395,7 +2394,7 @@ static int __init atmci_probe(struct platform_device *pdev)
+>         if (irq < 0)
+>                 return irq;
+>
+> -       host = kzalloc(sizeof(struct atmel_mci), GFP_KERNEL);
+> +       host = devm_kzalloc(&pdev->dev, sizeof(*host), GFP_KERNEL);
+>         if (!host)
+>                 return -ENOMEM;
+>
+> @@ -2403,20 +2402,18 @@ static int __init atmci_probe(struct platform_device *pdev)
+>         spin_lock_init(&host->lock);
+>         INIT_LIST_HEAD(&host->queue);
+>
+> -       host->mck = clk_get(&pdev->dev, "mci_clk");
+> -       if (IS_ERR(host->mck)) {
+> -               ret = PTR_ERR(host->mck);
+> -               goto err_clk_get;
+> -       }
+> +       host->mck = devm_clk_get(&pdev->dev, "mci_clk");
+> +       if (IS_ERR(host->mck))
+> +               return PTR_ERR(host->mck);
+>
+> -       ret = -ENOMEM;
+> -       host->regs = ioremap(regs->start, resource_size(regs));
+> +       host->regs = devm_ioremap(&pdev->dev, regs->start, resource_size(regs));
+>         if (!host->regs)
+> -               goto err_ioremap;
+> +               return -ENOMEM;
+>
+>         ret = clk_prepare_enable(host->mck);
+>         if (ret)
+> -               goto err_request_irq;
+> +               return ret;
+> +
+>         atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
+>         host->bus_hz = clk_get_rate(host->mck);
+>         clk_disable_unprepare(host->mck);
+> @@ -2427,7 +2424,7 @@ static int __init atmci_probe(struct platform_device *pdev)
+>
+>         ret = request_irq(irq, atmci_interrupt, 0, dev_name(&pdev->dev), host);
+>         if (ret)
+> -               goto err_request_irq;
+> +               return ret;
+>
+>         /* Get MCI capabilities and set operations according to it */
+>         atmci_get_cap(host);
+> @@ -2499,12 +2496,6 @@ err_init_slot:
+>         if (host->dma.chan)
+>                 dma_release_channel(host->dma.chan);
+>         free_irq(irq, host);
+> -err_request_irq:
+> -       iounmap(host->regs);
+> -err_ioremap:
+> -       clk_put(host->mck);
+> -err_clk_get:
+> -       kfree(host);
+>         return ret;
+>  }
+>
+> @@ -2532,10 +2523,6 @@ static int __exit atmci_remove(struct platform_device *pdev)
+>                 dma_release_channel(host->dma.chan);
+>
+>         free_irq(platform_get_irq(pdev, 0), host);
+> -       iounmap(host->regs);
+> -
+> -       clk_put(host->mck);
+> -       kfree(host);
+>
+>         return 0;
+>  }
 > --
-> 1.9.1
+> 1.7.9.5
 >
