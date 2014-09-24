@@ -1,66 +1,62 @@
-From: Vinod Koul <vinod.koul@intel.com>
-Subject: [PATCH 15/27] mmc: mmci: use pm_runtime_last_busy_and_autosuspend helper
-Date: Wed, 24 Sep 2014 21:45:05 +0530
-Message-ID: <1411575342-31048-16-git-send-email-vinod.koul@intel.com>
-References: <1411575342-31048-1-git-send-email-vinod.koul@intel.com>
+From: Behan Webster <behanw@converseincode.com>
+Subject: Re: [PATCH v2 2/2] mmc, sdhci, bcm-kona, LLVMLinux: Remove use of
+ __initconst
+Date: Wed, 24 Sep 2014 11:21:16 -0700
+Message-ID: <54230B9C.9090703@converseincode.com>
+References: <20140923212922.GG12270@beef> <1411512908-19237-1-git-send-email-behanw@converseincode.com> <1411512908-19237-2-git-send-email-behanw@converseincode.com> <5774775.2EcFmuR4sV@wuerfel>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1411575342-31048-1-git-send-email-vinod.koul@intel.com>
+In-Reply-To: <5774775.2EcFmuR4sV@wuerfel>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: subhransu.s.prusty@intel.com, vinod.koul@intel.com, Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: bcm@fixthebug.org, chris@printf.net, gnurou@gmail.com, linus.walleij@linaro.org, mporter@linaro.org, ulf.hansson@linaro.org, bcm-kernel-feedback-list@broadcom.com, linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, rjui@broadcom.comlinus.walleij@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-Use the new pm_runtime_last_busy_and_autosuspend helper instead of open
-coding the same code
+On 09/24/14 02:22, Arnd Bergmann wrote:
+> On Tuesday 23 September 2014 15:55:08 behanw@converseincode.com wrote:
+>> --- a/drivers/mmc/host/sdhci-bcm-kona.c
+>> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
+>> @@ -225,7 +225,7 @@ static struct sdhci_pltfm_data sdhci_pltfm_data_kona = {
+>>                  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+>>   };
+>>   
+>> -static struct __initconst of_device_id sdhci_bcm_kona_of_match[] = {
+>> +static struct of_device_id const sdhci_bcm_kona_of_match[] = {
+>>          { .compatible = "brcm,kona-sdhci"},
+>>          { .compatible = "bcm,kona-sdhci"}, /* deprecated name */
+>>          {}
+>>
+> Sorry for giving you trouble over such a simple patch (especially
+> one that I have acked already), but I just noticed that this is
+> not following the common style we use in the kernel.
+It's all good. It's not like you haven't saved me a tonne of time 
+already! :)
 
-Signed-off-by: Vinod Koul <vinod.koul@intel.com>
----
- drivers/mmc/host/mmci.c |   12 ++++--------
- 1 files changed, 4 insertions(+), 8 deletions(-)
+> Almost everywhere in Linux, we use
+>
+> static const struct of_device_id sdhci_bcm_kona_of_match[] = {
+>
+> not
+>
+> static struct of_device_id const sdhci_bcm_kona_of_match[] = {
+True enough. I put the const where I did to be in keeping with the 
+intent of __initconst, making the array const instead of the contained type.
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index e4d4707..27dcfba 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -223,8 +223,7 @@ static int mmci_card_busy(struct mmc_host *mmc)
- 		busy = 1;
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
--	pm_runtime_mark_last_busy(mmc_dev(mmc));
--	pm_runtime_put_autosuspend(mmc_dev(mmc));
-+	pm_runtime_last_busy_and_autosuspend(mmc_dev(mmc));
- 
- 	return busy;
- }
-@@ -372,8 +371,7 @@ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
- 
- 	mmc_request_done(host->mmc, mrq);
- 
--	pm_runtime_mark_last_busy(mmc_dev(host->mmc));
--	pm_runtime_put_autosuspend(mmc_dev(host->mmc));
-+	pm_runtime_last_busy_and_autosuspend(mmc_dev(host->mmc));
- }
- 
- static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
-@@ -1397,8 +1395,7 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
--	pm_runtime_mark_last_busy(mmc_dev(mmc));
--	pm_runtime_put_autosuspend(mmc_dev(mmc));
-+	pm_runtime_last_busy_and_autosuspend(mmc_dev(mmc));
- }
- 
- static int mmci_get_cd(struct mmc_host *mmc)
-@@ -1442,8 +1439,7 @@ static int mmci_sig_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
- 		if (ret)
- 			dev_warn(mmc_dev(mmc), "Voltage switch failed\n");
- 
--		pm_runtime_mark_last_busy(mmc_dev(mmc));
--		pm_runtime_put_autosuspend(mmc_dev(mmc));
-+		pm_runtime_last_busy_and_autosuspend(mmc_dev(mmc));
- 	}
- 
- 	return ret;
+> AFAICT they behave in identical ways,
+Indeed. For C in both cases the resulting array of struct of_device_id 
+ends up in .rodata, so functionally equivalent.
+
+>   but the first one seems
+> easier to read for someone familiar with kernel code.
+No worries. Happy to post a v3.
+
+Linus Walleij: Would you like me to respin the "gpio, bcm-kona, 
+LLVMLinux: Remove use of __initconst" patch as well?
+
+Behan
+
 -- 
-1.7.0.4
+Behan Webster
+behanw@converseincode.com
