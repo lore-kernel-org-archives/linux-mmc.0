@@ -1,43 +1,80 @@
-From: Alexandre Courbot <gnurou@gmail.com>
-Subject: Re: [PATCH 1/4] mmc: slot-gpio: switch to use flags when getting GPIO
-Date: Wed, 24 Sep 2014 16:38:18 +0900
-Message-ID: <CAAVeFuK+RLFu-RgU-qyKe7rj2kgVDBVxXgBeg-teLo2NXLEfYA@mail.gmail.com>
-References: <1409137253-25189-1-git-send-email-linus.walleij@linaro.org>
- <CAPDyKFqw2N9zg41iz=qo3kQghmdYpafYdy545NYuu-Ji6pJELQ@mail.gmail.com>
- <541FDBC0.4020302@intel.com> <CACRpkdbBq0VCBAOv7QX8pk73-_hU5Yy6QWURr5NohpG+osaYow@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 00/13] mmc: Some Braswell and misc patches
+Date: Wed, 24 Sep 2014 10:45:54 +0300
+Message-ID: <542276B2.6010201@intel.com>
+References: <1411381064-1703-1-git-send-email-adrian.hunter@intel.com> <CAPDyKFp9u1ausSkzo9wEM1YRH5aJb6BXmPmToncpgx5P95Rx-A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f176.google.com ([209.85.213.176]:42596 "EHLO
-	mail-ig0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752796AbaIXHij (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Sep 2014 03:38:39 -0400
-In-Reply-To: <CACRpkdbBq0VCBAOv7QX8pk73-_hU5Yy6QWURr5NohpG+osaYow@mail.gmail.com>
+Received: from mga01.intel.com ([192.55.52.88]:29831 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751921AbaIXHp5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 24 Sep 2014 03:45:57 -0400
+In-Reply-To: <CAPDyKFp9u1ausSkzo9wEM1YRH5aJb6BXmPmToncpgx5P95Rx-A@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Mon, Sep 22, 2014 at 9:37 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
-> On Mon, Sep 22, 2014 at 10:20 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On 23/09/2014 10:34 a.m., Ulf Hansson wrote:
+> On 22 September 2014 12:17, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> Hi
+>>
+>> Here are some patches to further support for Intel Braswell
+>> SoC plus some miscellaneous changes.
+>>
+>> The patches needed for Braswell are:
+>>
+>>        mmc: sdhci: Add quirk for always getting TC with stop cmd
+>>        mmc: sdhci-acpi: Set SDHCI_QUIRK2_STOP_WITH_TC for Intel host controllers
+>>        mmc: sdhci-acpi: Add a HID and UID for a SD Card host controller
+>>        mmc: sdhci-pci: Set SDHCI_QUIRK2_STOP_WITH_TC for Intel BYT host controllers
+>>        mmc: sdhci-pci: Add Bay Trail and Braswell SD card detect
+>>        mmc: sdhci: Let a driver override timeout clock frequency
+>>        mmc: sdhci-pci: Fix Braswell eMMC timeout clock frequency
+>>
 >
->> Unfortunately it doesn't seem to work.  I needed the patch
->> below.
->>
->>
->> From: Adrian Hunter <adrian.hunter@intel.com>
->> Date: Mon, 22 Sep 2014 11:01:16 +0300
->> Subject: [PATCH] gpio: Fix gpio direction flags not getting set
->>
->> GPIO direction flags are not getting set because
->> an 'if' statement is the wrong way around.
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->
-> Oopps that's a bug, patch applied for fixes, so it'll work when
-> this hits upstream.
->
-> Alex: confirm?
+> The above seems like a good argument to at least split this patchset
+> into two pieces, could you please do that?
 
-Oh yes absolutely, this was a mistake of mine. Thanks and sorry for
-the inconvenience.
+OK, split into 2 patch sets:
+
+	http://marc.info/?l=linux-mmc&m=141150256610085&w=2
+	http://marc.info/?l=linux-mmc&m=141154429821225&w=2
+
+>
+> Kind regards
+> Uffe
+>
+>>
+>> Adrian Hunter (13):
+>>        mmc: Fix use of wrong device in mmc_gpiod_free_cd()
+>>        mmc: Fix incorrect warning when setting 0 Hz via debugfs
+>>        mmc: It is not an error for the card to be removed while suspended
+>>        mmc: block: Fix error recovery stop cmd timeout calculation
+>>        mmc: block: Fix SD card stop cmd response type
+>>        mmc: sdhci: Add quirk for always getting TC with stop cmd
+>>        mmc: sdhci-acpi: Set SDHCI_QUIRK2_STOP_WITH_TC for Intel host controllers
+>>        mmc: sdhci-acpi: Add a HID and UID for a SD Card host controller
+>>        mmc: sdhci-pci: Set SDHCI_QUIRK2_STOP_WITH_TC for Intel BYT host controllers
+>>        mmc: sdhci-pci: Add Bay Trail and Braswell SD card detect
+>>        mmc: sdhci: Let a driver override timeout clock frequency
+>>        mmc: sdhci-pci: Fix Braswell eMMC timeout clock frequency
+>>        mmc: sdhci: Transfer Complete has higher priority than Data Timeout Error
+>>
+>>   drivers/mmc/card/block.c      | 30 ++++++++++++++++++++++++------
+>>   drivers/mmc/core/core.c       |  2 +-
+>>   drivers/mmc/core/mmc.c        |  2 +-
+>>   drivers/mmc/core/sd.c         |  2 +-
+>>   drivers/mmc/core/slot-gpio.c  |  2 +-
+>>   drivers/mmc/host/sdhci-acpi.c |  6 ++++--
+>>   drivers/mmc/host/sdhci-pci.c  | 28 +++++++++++++++++++++++++---
+>>   drivers/mmc/host/sdhci-pci.h  |  4 ++++
+>>   drivers/mmc/host/sdhci.c      | 27 +++++++++++++++++++--------
+>>   include/linux/mmc/sdhci.h     |  2 ++
+>>   10 files changed, 82 insertions(+), 23 deletions(-)
+>>
+>>
+>> Regards
+>> Adrian
