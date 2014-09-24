@@ -1,84 +1,53 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/2] mmc: atmel-mci: Release mmc resources on failure
- in probe
-Date: Wed, 24 Sep 2014 10:49:20 +0200
-Message-ID: <CAPDyKFrCSLvRXfqihwTc_68cfRROfA-m4sATL1p84ySqVoPJvw@mail.gmail.com>
-References: <1411467606-13041-1-git-send-email-pramod.gurav@smartplayin.com>
-	<1411467606-13041-2-git-send-email-pramod.gurav@smartplayin.com>
+Subject: Re: [PATCH 0/6] unshare and simplify omap_hsmmc platform struct
+Date: Wed, 24 Sep 2014 10:55:42 +0200
+Message-ID: <CAPDyKFq2ZTGQ-cL7kEQatHg3WomNFJbxzDFx4TP8+PkyYc-v-w@mail.gmail.com>
+References: <1411386911-8158-1-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1411467606-13041-2-git-send-email-pramod.gurav@smartplayin.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Pramod Gurav <pramod.gurav@smartplayin.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:38675 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751509AbaIXIzn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Sep 2014 04:55:43 -0400
+Received: by mail-qc0-f174.google.com with SMTP id i8so1809726qcq.19
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Sep 2014 01:55:42 -0700 (PDT)
+In-Reply-To: <1411386911-8158-1-git-send-email-afenkart@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Balaji T K <balajitk@ti.com>, pascal.huerst@gmail.com
 
-On 23 September 2014 12:20, Pramod Gurav <pramod.gurav@smartplayin.com> wrote:
-> This change takes care of releasing mmc resources on error cases in
-> probe function which was missing. Also release timer in remove function.
->
-> Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
-> Cc: Chris Ball <chris@printf.net>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-> Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
+On 22 September 2014 13:55, Andreas Fenkart <afenkart@gmail.com> wrote:
+> mmci and omap_hsmmc share very little fields in the platform
 
-Thanks! Applied for next.
+mmci? Should be omap right?
+
+I noticed the similar typo for one of the patches as well.
 
 Kind regards
 Uffe
 
-> ---
-> Changes since v1: None
+> struct. unsharing significantly simplifies the omap_hsmmc driver
 >
->  drivers/mmc/host/atmel-mci.c |   11 +++++++++--
->  1 file changed, 9 insertions(+), 2 deletions(-)
+> Andreas Fenkart (6):
+>   omap_hsmmc: unshare platform data struct with mmci driver
+>   omap_hsmmc: remove unused callbacks from platform data struct
+>   omap_hsmmc: remove unused fields in platform_data
+>   omap_hsmmc: remove unused get_context_loss_count callback
+>   omap_hsmmc: remove un-initialized callbacks from platform data
+>   omap_hsmmc: remove un-initialized get_cover_state callback
 >
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 36212fb..288bcc1 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -2376,7 +2376,7 @@ static int __init atmci_probe(struct platform_device *pdev)
->         struct resource                 *regs;
->         unsigned int                    nr_slots;
->         int                             irq;
-> -       int                             ret;
-> +       int                             ret, i;
->
->         regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->         if (!regs)
-> @@ -2482,7 +2482,7 @@ static int __init atmci_probe(struct platform_device *pdev)
->                 if (!host->buffer) {
->                         ret = -ENOMEM;
->                         dev_err(&pdev->dev, "buffer allocation failed\n");
-> -                       goto err_init_slot;
-> +                       goto err_dma_alloc;
->                 }
->         }
->
-> @@ -2492,7 +2492,13 @@ static int __init atmci_probe(struct platform_device *pdev)
->
->         return 0;
->
-> +err_dma_alloc:
-> +       for (i = 0; i < ATMCI_MAX_NR_SLOTS; i++) {
-> +               if (host->slot[i])
-> +                       atmci_cleanup_slot(host->slot[i], i);
-> +       }
->  err_init_slot:
-> +       del_timer_sync(&host->timer);
->         if (host->dma.chan)
->                 dma_release_channel(host->dma.chan);
->         free_irq(irq, host);
-> @@ -2519,6 +2525,7 @@ static int __exit atmci_remove(struct platform_device *pdev)
->         atmci_readl(host, ATMCI_SR);
->         clk_disable_unprepare(host->mck);
->
-> +       del_timer_sync(&host->timer);
->         if (host->dma.chan)
->                 dma_release_channel(host->dma.chan);
+>  arch/arm/mach-omap2/hsmmc.c                        |  61 ++--------
+>  arch/arm/mach-omap2/hsmmc.h                        |  10 --
+>  arch/arm/mach-omap2/mmc.h                          |   6 +-
+>  .../mach-omap2/omap_hwmod_33xx_43xx_ipblock_data.c |   6 +-
+>  arch/arm/mach-omap2/omap_hwmod_3xxx_data.c         |   6 +-
+>  drivers/mmc/host/omap_hsmmc.c                      | 133 +++------------------
+>  include/linux/platform_data/hsmmc-omap.h           | 103 ++++++++++++++++
+>  7 files changed, 142 insertions(+), 183 deletions(-)
+>  create mode 100644 include/linux/platform_data/hsmmc-omap.h
 >
 > --
-> 1.7.9.5
+> 2.1.0
 >
