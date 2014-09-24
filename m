@@ -1,13 +1,13 @@
 From: Vinod Koul <vinod.koul@intel.com>
-Subject: [PATCH 17/27] mmc: sdhci-pxav3: use pm_runtime_last_busy_and_autosuspend helper
-Date: Wed, 24 Sep 2014 21:45:07 +0530
-Message-ID: <1411575342-31048-18-git-send-email-vinod.koul@intel.com>
+Subject: [PATCH 15/27] mmc: mmci: use pm_runtime_last_busy_and_autosuspend helper
+Date: Wed, 24 Sep 2014 21:45:05 +0530
+Message-ID: <1411575342-31048-16-git-send-email-vinod.koul@intel.com>
 References: <1411575342-31048-1-git-send-email-vinod.koul@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1411575342-31048-1-git-send-email-vinod.koul@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: subhransu.s.prusty@intel.com, vinod.koul@intel.com, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Marcin Wojtas <mw@semihalf.com>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-mmc@vger.kernel.org
+Cc: subhransu.s.prusty@intel.com, vinod.koul@intel.com, Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
 Use the new pm_runtime_last_busy_and_autosuspend helper instead of open
@@ -15,32 +15,52 @@ coding the same code
 
 Signed-off-by: Vinod Koul <vinod.koul@intel.com>
 ---
- drivers/mmc/host/sdhci-pxav3.c |    6 ++----
- 1 files changed, 2 insertions(+), 4 deletions(-)
+ drivers/mmc/host/mmci.c |   12 ++++--------
+ 1 files changed, 4 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 6f842fb..2706d3f 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -417,8 +417,7 @@ static int sdhci_pxav3_suspend(struct device *dev)
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index e4d4707..27dcfba 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -223,8 +223,7 @@ static int mmci_card_busy(struct mmc_host *mmc)
+ 		busy = 1;
+ 	spin_unlock_irqrestore(&host->lock, flags);
  
- 	pm_runtime_get_sync(dev);
- 	ret = sdhci_suspend_host(host);
--	pm_runtime_mark_last_busy(dev);
--	pm_runtime_put_autosuspend(dev);
-+	pm_runtime_last_busy_and_autosuspend(dev);
+-	pm_runtime_mark_last_busy(mmc_dev(mmc));
+-	pm_runtime_put_autosuspend(mmc_dev(mmc));
++	pm_runtime_last_busy_and_autosuspend(mmc_dev(mmc));
+ 
+ 	return busy;
+ }
+@@ -372,8 +371,7 @@ mmci_request_end(struct mmci_host *host, struct mmc_request *mrq)
+ 
+ 	mmc_request_done(host->mmc, mrq);
+ 
+-	pm_runtime_mark_last_busy(mmc_dev(host->mmc));
+-	pm_runtime_put_autosuspend(mmc_dev(host->mmc));
++	pm_runtime_last_busy_and_autosuspend(mmc_dev(host->mmc));
+ }
+ 
+ static void mmci_set_mask1(struct mmci_host *host, unsigned int mask)
+@@ -1397,8 +1395,7 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+-	pm_runtime_mark_last_busy(mmc_dev(mmc));
+-	pm_runtime_put_autosuspend(mmc_dev(mmc));
++	pm_runtime_last_busy_and_autosuspend(mmc_dev(mmc));
+ }
+ 
+ static int mmci_get_cd(struct mmc_host *mmc)
+@@ -1442,8 +1439,7 @@ static int mmci_sig_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		if (ret)
+ 			dev_warn(mmc_dev(mmc), "Voltage switch failed\n");
+ 
+-		pm_runtime_mark_last_busy(mmc_dev(mmc));
+-		pm_runtime_put_autosuspend(mmc_dev(mmc));
++		pm_runtime_last_busy_and_autosuspend(mmc_dev(mmc));
+ 	}
  
  	return ret;
- }
-@@ -430,8 +429,7 @@ static int sdhci_pxav3_resume(struct device *dev)
- 
- 	pm_runtime_get_sync(dev);
- 	ret = sdhci_resume_host(host);
--	pm_runtime_mark_last_busy(dev);
--	pm_runtime_put_autosuspend(dev);
-+	pm_runtime_last_busy_and_autosuspend(dev);
- 
- 	return ret;
- }
 -- 
 1.7.0.4
