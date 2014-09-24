@@ -1,60 +1,75 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 6/7] mmc: sdhci: Let a driver override timeout clock frequency
-Date: Wed, 24 Sep 2014 10:27:32 +0300
-Message-ID: <1411543653-3728-7-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 1/7] mmc: sdhci: Add quirk for always getting TC with stop cmd
+Date: Wed, 24 Sep 2014 10:27:27 +0300
+Message-ID: <1411543653-3728-2-git-send-email-adrian.hunter@intel.com>
 References: <1411543653-3728-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:49240 "EHLO mga11.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:23084 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752157AbaIXHiM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 24 Sep 2014 03:38:12 -0400
+	id S1752966AbaIXHiP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 24 Sep 2014 03:38:15 -0400
 In-Reply-To: <1411543653-3728-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Let a driver override the timeout clock frequency by
-populating it before calling sdhci_add_host().  Note
-the value will otherwise be zero because sdhci_host is
-zeroed when allocated.
+Add a quirk for a host controller that always sets
+a Transfer Complete interrupt status for the stop
+command even when a busy response is not indicated.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+ drivers/mmc/host/sdhci.c  | 8 ++++++--
+ include/linux/mmc/sdhci.h | 2 ++
+ 2 files changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index abad5e5..6ada726 100644
+index 7a8586f..abad5e5 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -2791,6 +2791,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 	u32 caps[2] = {0, 0};
- 	u32 max_current_caps;
- 	unsigned int ocr_avail;
-+	unsigned int override_timeout_clk;
- 	int ret;
+@@ -2224,7 +2224,7 @@ static void sdhci_tuning_timer(unsigned long data)
+  *                                                                           *
+ \*****************************************************************************/
  
- 	WARN_ON(host == NULL);
-@@ -2804,6 +2805,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 	if (debug_quirks2)
- 		host->quirks2 = debug_quirks2;
+-static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
++static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *mask)
+ {
+ 	BUG_ON(intmask == 0);
  
-+	override_timeout_clk = host->timeout_clk;
-+
- 	sdhci_do_reset(host, SDHCI_RESET_ALL);
+@@ -2271,6 +2271,9 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask)
  
- 	host->version = sdhci_readw(host, SDHCI_HOST_VERSION);
-@@ -2972,6 +2975,9 @@ int sdhci_add_host(struct sdhci_host *host)
- 		mmc->max_busy_timeout /= host->timeout_clk;
+ 		/* The controller does not support the end-of-busy IRQ,
+ 		 * fall through and take the SDHCI_INT_RESPONSE */
++	} else if ((host->quirks2 & SDHCI_QUIRK2_STOP_WITH_TC) &&
++		   host->cmd->opcode == MMC_STOP_TRANSMISSION && !host->data) {
++		*mask &= ~SDHCI_INT_DATA_END;
  	}
  
-+	if (override_timeout_clk)
-+		host->timeout_clk = override_timeout_clk;
-+
- 	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
- 	mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
+ 	if (intmask & SDHCI_INT_RESPONSE)
+@@ -2481,7 +2484,8 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 		}
  
+ 		if (intmask & SDHCI_INT_CMD_MASK)
+-			sdhci_cmd_irq(host, intmask & SDHCI_INT_CMD_MASK);
++			sdhci_cmd_irq(host, intmask & SDHCI_INT_CMD_MASK,
++				      &intmask);
+ 
+ 		if (intmask & SDHCI_INT_DATA_MASK)
+ 			sdhci_data_irq(host, intmask & SDHCI_INT_DATA_MASK);
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 0aa85ca..dba793e 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -98,6 +98,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK2_BROKEN_HS200			(1<<6)
+ /* Controller does not support DDR50 */
+ #define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
++/* Stop command (CMD12) can set Transfer Complete when not using MMC_RSP_BUSY */
++#define SDHCI_QUIRK2_STOP_WITH_TC			(1<<8)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
 -- 
 1.8.3.2
 
