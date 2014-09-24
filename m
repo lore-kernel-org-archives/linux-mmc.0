@@ -1,59 +1,49 @@
-From: Roger Tseng <rogerable@realtek.com>
-Subject: [PATCH 2/2] mmc: rtsx_pci: Set power related cap2 macros
-Date: Wed, 24 Sep 2014 17:07:14 +0800
-Message-ID: <1411549634-28683-3-git-send-email-rogerable@realtek.com>
-References: <1411549634-28683-1-git-send-email-rogerable@realtek.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v2 2/2] mmc, sdhci, bcm-kona, LLVMLinux: Remove use of __initconst
+Date: Wed, 24 Sep 2014 11:22:50 +0200
+Message-ID: <5774775.2EcFmuR4sV@wuerfel>
+References: <20140923212922.GG12270@beef> <1411512908-19237-1-git-send-email-behanw@converseincode.com> <1411512908-19237-2-git-send-email-behanw@converseincode.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <1411549634-28683-1-git-send-email-rogerable@realtek.com>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: driverdev-devel@linuxdriverproject.org, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, Roger Tseng <rogerable@realtek.com>
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.17.13]:58828 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750742AbaIXJW7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Sep 2014 05:22:59 -0400
+In-Reply-To: <1411512908-19237-2-git-send-email-behanw@converseincode.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: behanw@converseincode.com
+Cc: bcm@fixthebug.org, chris@printf.net, gnurou@gmail.com, linus.walleij@linaro.org, mporter@linaro.org, ulf.hansson@linaro.org, bcm-kernel-feedback-list@broadcom.com, linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, rjui@broadcom.com
 
-Set MMC_CAP2_NO_PRESCAN_POWERUP and MMC_CAP2_FULL_PWR_CYCLE for
-rtsx_pci_sdmmc and rtsx_usb_sdmmc to reflect properties of Realtek
-card reader hosts.
+On Tuesday 23 September 2014 15:55:08 behanw@converseincode.com wrote:
+> --- a/drivers/mmc/host/sdhci-bcm-kona.c
+> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
+> @@ -225,7 +225,7 @@ static struct sdhci_pltfm_data sdhci_pltfm_data_kona = {
+>                 SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+>  };
+>  
+> -static struct __initconst of_device_id sdhci_bcm_kona_of_match[] = {
+> +static struct of_device_id const sdhci_bcm_kona_of_match[] = {
+>         { .compatible = "brcm,kona-sdhci"},
+>         { .compatible = "bcm,kona-sdhci"}, /* deprecated name */
+>         {}
+> 
 
-Signed-off-by: Roger Tseng <rogerable@realtek.com>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c |    1 +
- drivers/mmc/host/rtsx_usb_sdmmc.c |    1 +
- 2 files changed, 2 insertions(+)
+Sorry for giving you trouble over such a simple patch (especially
+one that I have acked already), but I just noticed that this is
+not following the common style we use in the kernel.
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index dfde4a210238..d49460b5ff07 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -1292,6 +1292,7 @@ static void realtek_init_host(struct realtek_pci_sdmmc *host)
- 	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED |
- 		MMC_CAP_MMC_HIGHSPEED | MMC_CAP_BUS_WIDTH_TEST |
- 		MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
-+	mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_FULL_PWR_CYCLE;
- 	mmc->max_current_330 = 400;
- 	mmc->max_current_180 = 800;
- 	mmc->ops = &realtek_pci_sdmmc_ops;
-diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-index 5d3766e792f0..a884631d7eea 100644
---- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-@@ -1329,6 +1329,7 @@ static void rtsx_usb_init_host(struct rtsx_usb_sdmmc *host)
- 		MMC_CAP_MMC_HIGHSPEED | MMC_CAP_BUS_WIDTH_TEST |
- 		MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 | MMC_CAP_UHS_SDR50 |
- 		MMC_CAP_NEEDS_POLL;
-+	mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_FULL_PWR_CYCLE;
- 
- 	mmc->max_current_330 = 400;
- 	mmc->max_current_180 = 800;
--- 
-1.7.10.4
+Almost everywhere in Linux, we use
+
+static const struct of_device_id sdhci_bcm_kona_of_match[] = {
+
+not
+
+static struct of_device_id const sdhci_bcm_kona_of_match[] = {
+
+AFAICT they behave in identical ways, but the first one seems
+easier to read for someone familiar with kernel code.
+
+	Arnd
