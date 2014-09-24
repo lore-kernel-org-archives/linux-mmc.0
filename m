@@ -1,62 +1,105 @@
-From: Behan Webster <behanw@converseincode.com>
-Subject: Re: [PATCH v2 2/2] mmc, sdhci, bcm-kona, LLVMLinux: Remove use of
- __initconst
-Date: Wed, 24 Sep 2014 11:21:16 -0700
-Message-ID: <54230B9C.9090703@converseincode.com>
-References: <20140923212922.GG12270@beef> <1411512908-19237-1-git-send-email-behanw@converseincode.com> <1411512908-19237-2-git-send-email-behanw@converseincode.com> <5774775.2EcFmuR4sV@wuerfel>
+From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Subject: Re: [PATCH 00/27] add pm_runtime_last_busy_and_autosuspend() helper
+Date: Wed, 24 Sep 2014 22:28:07 +0200
+Message-ID: <6374313.I12loOK9hA@vostro.rjw.lan>
+References: <1411575342-31048-1-git-send-email-vinod.koul@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5774775.2EcFmuR4sV@wuerfel>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: bcm@fixthebug.org, chris@printf.net, gnurou@gmail.com, linus.walleij@linaro.org, mporter@linaro.org, ulf.hansson@linaro.org, bcm-kernel-feedback-list@broadcom.com, linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, rjui@broadcom.comlinus.walleij@linaro.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1411575342-31048-1-git-send-email-vinod.koul@intel.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Vinod Koul <vinod.koul@intel.com>
+Cc: linux-kernel@vger.kernel.org, subhransu.s.prusty@intel.com, Alan Stern <stern@rowland.harvard.edu>, Alexandre Courbot <acourbot@nvidia.com>, Andrew Morton <akpm@linux-foundation.org>, Andy Gross <agross@codeaurora.org>, Baruch Siach <baruch@tkos.co.il>, Ben Skeggs <bskeggs@redhat.com>, Bjorn Andersson <bjorn.andersson@sonymobile.com>, "Chew, Chiau Ee" <chiau.ee.chew@intel.com>, Chris Ball <chris@printf.net>, Dan Carpenter <dan.carpenter@oracle.com>, Daniel Vetter <daniel.vetter@ffwll.ch>, Dave Airlie <airlied@redhat.com>, David Herrmann <dh.herrmann@gmail.com>, dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org, "Du, Wenkai" <wenkai.du@intel.com>, Grant Grundler <grundler@chromium.org>, Ilia Mirkin <imirkin@alum.mit.edu>, intel-gfx@lists.freedesktop.org, "Ivan T. Ivanov" <iivanov@mm-sol.com>, Jaehoon Chung <jh80.chung@samsung.com>, Jani Nikula <jani.nikul>
 List-Id: linux-mmc@vger.kernel.org
 
-On 09/24/14 02:22, Arnd Bergmann wrote:
-> On Tuesday 23 September 2014 15:55:08 behanw@converseincode.com wrote:
->> --- a/drivers/mmc/host/sdhci-bcm-kona.c
->> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
->> @@ -225,7 +225,7 @@ static struct sdhci_pltfm_data sdhci_pltfm_data_kona = {
->>                  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
->>   };
->>   
->> -static struct __initconst of_device_id sdhci_bcm_kona_of_match[] = {
->> +static struct of_device_id const sdhci_bcm_kona_of_match[] = {
->>          { .compatible = "brcm,kona-sdhci"},
->>          { .compatible = "bcm,kona-sdhci"}, /* deprecated name */
->>          {}
->>
-> Sorry for giving you trouble over such a simple patch (especially
-> one that I have acked already), but I just noticed that this is
-> not following the common style we use in the kernel.
-It's all good. It's not like you haven't saved me a tonne of time 
-already! :)
+On Wednesday, September 24, 2014 09:44:50 PM Vinod Koul wrote:
+> This patch series adds a simple macro pm_runtime_last_busy_and_autosuspend()
+> which invokes pm_runtime_mark_last_busy() and pm_runtime_put_autosuspend()
+> sequentially. Then we do a tree wide update of current patterns which are
+> present. As evident from log below this pattern is frequent in the
+> kernel.
+> 
+> This series can be found at
+> git://git.kernel.org/pub/scm/linux/kernel/git/vkoul/slave-dma.git
+> topic/pm_runtime_last_busy_and_autosuspend
+> 
+> Fengguang's kbuild has tested it so it shouldn't break things for anyone.
+> Barring one patch (explictyly mentioned in its changelog) rest are simple
+> replacements.
+> 
+> If all are okay, this should be merged thru PM tree as it depends on macro
+> addition.
+> 
+> Subhransu S. Prusty (1):
+>   PM: Add helper pm_runtime_last_busy_and_autosuspend()
+> 
+> Vinod Koul (26):
+>   dmaengine: ste_dma: use pm_runtime_last_busy_and_autosuspend helper
+>   extcon: arizona: use pm_runtime_last_busy_and_autosuspend helper
+>   drm/i915: use pm_runtime_last_busy_and_autosuspend helper
+>   drm/nouveau: use pm_runtime_last_busy_and_autosuspend helper
+>   drm/radeon: use pm_runtime_last_busy_and_autosuspend helper
+>   vga_switcheroo: use pm_runtime_last_busy_and_autosuspend helper
+>   i2c: designware: use pm_runtime_last_busy_and_autosuspend helper
+>   i2c: omap: use pm_runtime_last_busy_and_autosuspend helper
+>   i2c: qup: use pm_runtime_last_busy_and_autosuspend helper
+>   mfd: ab8500-gpadc: use pm_runtime_last_busy_and_autosuspend helper
+>   mfd: arizona: use pm_runtime_last_busy_and_autosuspend helper
+>   mei: use pm_runtime_last_busy_and_autosuspend helper
+>   mmc: use pm_runtime_last_busy_and_autosuspend helper
+>   mmc: mmci: use pm_runtime_last_busy_and_autosuspend helper
+>   mmc: omap_hsmmc: use pm_runtime_last_busy_and_autosuspend helper
+>   mmc: sdhci-pxav3: use pm_runtime_last_busy_and_autosuspend helper
+>   mmc: sdhci: use pm_runtime_last_busy_and_autosuspend helper
+>   NFC: trf7970a: use pm_runtime_last_busy_and_autosuspend helper
+>   pm2301-charger: use pm_runtime_last_busy_and_autosuspend helper
+>   spi: omap2-mcspi: use pm_runtime_last_busy_and_autosuspend helper
+>   spi: orion: use pm_runtime_last_busy_and_autosuspend helper
+>   spi: ti-qspi: use pm_runtime_last_busy_and_autosuspend helper
+>   spi: core: use pm_runtime_last_busy_and_autosuspend helper
+>   tty: serial: omap: use pm_runtime_last_busy_and_autosuspend helper
+>   usb: musb: omap2430: use pm_runtime_last_busy_and_autosuspend helper
+>   video: fbdev: use pm_runtime_last_busy_and_autosuspend helper
+> 
+>  Documentation/power/runtime_pm.txt          |    4 ++
+>  drivers/dma/ste_dma40.c                     |   30 ++++---------
+>  drivers/extcon/extcon-arizona.c             |    6 +--
+>  drivers/gpu/drm/i915/intel_pm.c             |    3 +-
+>  drivers/gpu/drm/nouveau/nouveau_connector.c |    3 +-
+>  drivers/gpu/drm/nouveau/nouveau_drm.c       |    9 +---
+>  drivers/gpu/drm/radeon/radeon_connectors.c  |   15 ++----
+>  drivers/gpu/drm/radeon/radeon_drv.c         |    5 +-
+>  drivers/gpu/drm/radeon/radeon_kms.c         |    6 +--
+>  drivers/gpu/vga/vga_switcheroo.c            |    7 +--
+>  drivers/i2c/busses/i2c-designware-core.c    |    3 +-
+>  drivers/i2c/busses/i2c-omap.c               |    6 +--
+>  drivers/i2c/busses/i2c-qup.c                |    3 +-
+>  drivers/mfd/ab8500-gpadc.c                  |    6 +--
+>  drivers/mfd/arizona-irq.c                   |    3 +-
+>  drivers/misc/mei/client.c                   |   12 ++----
+>  drivers/mmc/core/core.c                     |    3 +-
+>  drivers/mmc/host/mmci.c                     |   12 ++----
+>  drivers/mmc/host/omap_hsmmc.c               |   19 ++-------
+>  drivers/mmc/host/sdhci-pxav3.c              |    6 +--
+>  drivers/mmc/host/sdhci.c                    |    3 +-
+>  drivers/nfc/trf7970a.c                      |    3 +-
+>  drivers/power/pm2301_charger.c              |    3 +-
+>  drivers/spi/spi-omap2-mcspi.c               |    9 +---
+>  drivers/spi/spi-orion.c                     |    3 +-
+>  drivers/spi/spi-ti-qspi.c                   |    5 +-
+>  drivers/spi/spi.c                           |    6 +--
+>  drivers/tty/serial/omap-serial.c            |   60 +++++++++------------------
+>  drivers/usb/musb/omap2430.c                 |    6 +--
+>  drivers/video/fbdev/auo_k190x.c             |    9 +---
+>  include/linux/pm_runtime.h                  |    6 +++
+>  31 files changed, 97 insertions(+), 177 deletions(-)
 
-> Almost everywhere in Linux, we use
->
-> static const struct of_device_id sdhci_bcm_kona_of_match[] = {
->
-> not
->
-> static struct of_device_id const sdhci_bcm_kona_of_match[] = {
-True enough. I put the const where I did to be in keeping with the 
-intent of __initconst, making the array const instead of the contained type.
+OK, I guess this is as good as it gets.
 
-> AFAICT they behave in identical ways,
-Indeed. For C in both cases the resulting array of struct of_device_id 
-ends up in .rodata, so functionally equivalent.
+What tree would you like it go through?
 
->   but the first one seems
-> easier to read for someone familiar with kernel code.
-No worries. Happy to post a v3.
-
-Linus Walleij: Would you like me to respin the "gpio, bcm-kona, 
-LLVMLinux: Remove use of __initconst" patch as well?
-
-Behan
 
 -- 
-Behan Webster
-behanw@converseincode.com
+I speak only for myself.
+Rafael J. Wysocki, Intel Open Source Technology Center.
