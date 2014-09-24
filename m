@@ -1,49 +1,77 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v2 2/2] mmc, sdhci, bcm-kona, LLVMLinux: Remove use of __initconst
-Date: Wed, 24 Sep 2014 11:22:50 +0200
-Message-ID: <5774775.2EcFmuR4sV@wuerfel>
-References: <20140923212922.GG12270@beef> <1411512908-19237-1-git-send-email-behanw@converseincode.com> <1411512908-19237-2-git-send-email-behanw@converseincode.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: core: Add new power_mode MMC_POWER_UNDEFINED
+Date: Wed, 24 Sep 2014 11:23:54 +0200
+Message-ID: <CAPDyKFqO-FCD1CMy4KitjWUtNg=__Vvmv4JmC6S0182iB-ONsQ@mail.gmail.com>
+References: <1411549634-28683-1-git-send-email-rogerable@realtek.com>
+ <1411549634-28683-2-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.13]:58828 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750742AbaIXJW7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Sep 2014 05:22:59 -0400
-In-Reply-To: <1411512908-19237-2-git-send-email-behanw@converseincode.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <1411549634-28683-2-git-send-email-rogerable@realtek.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Roger Tseng <rogerable@realtek.com>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "driverdev-devel@linuxdriverproject.org" <driverdev-devel@linuxdriverproject.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wei WANG <wei_wang@realsil.com.cn>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: behanw@converseincode.com
-Cc: bcm@fixthebug.org, chris@printf.net, gnurou@gmail.com, linus.walleij@linaro.org, mporter@linaro.org, ulf.hansson@linaro.org, bcm-kernel-feedback-list@broadcom.com, linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, rjui@broadcom.com
 
-On Tuesday 23 September 2014 15:55:08 behanw@converseincode.com wrote:
-> --- a/drivers/mmc/host/sdhci-bcm-kona.c
-> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-> @@ -225,7 +225,7 @@ static struct sdhci_pltfm_data sdhci_pltfm_data_kona = {
->                 SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
->  };
->  
-> -static struct __initconst of_device_id sdhci_bcm_kona_of_match[] = {
-> +static struct of_device_id const sdhci_bcm_kona_of_match[] = {
->         { .compatible = "brcm,kona-sdhci"},
->         { .compatible = "bcm,kona-sdhci"}, /* deprecated name */
->         {}
-> 
+On 24 September 2014 11:07, Roger Tseng <rogerable@realtek.com> wrote:
+> Define new macro MMC_POWER_UNDEFINED for power_mode in struct mmc_ios.
+> It will also be set as the initial value of host->ios.power_mode in
+> mmc_start_host().
+>
+> For hosts with MMC_CAP2_NO_PRESCAN_POWERUP, this makes the later
+> mmc_power_off() do real power-off things instead of NOP, and further
+> prevents state messed up in cards that was already initialized(eg. by
+> BIOS of UEFI driver).
+>
+> Signed-off-by: Roger Tseng <rogerable@realtek.com>
 
-Sorry for giving you trouble over such a simple patch (especially
-one that I have acked already), but I just noticed that this is
-not following the common style we use in the kernel.
+Thanks! Applied for next!
 
-Almost everywhere in Linux, we use
+I changes some minor parts of the commit message and set the author of
+the patch to "Roger Tseng <rogerable@realtek.com>" instead of
+"<rogerable@realtek.com>". Please fix that in for future patches.
 
-static const struct of_device_id sdhci_bcm_kona_of_match[] = {
+Kind regards
+Uffe
 
-not
-
-static struct of_device_id const sdhci_bcm_kona_of_match[] = {
-
-AFAICT they behave in identical ways, but the first one seems
-easier to read for someone familiar with kernel code.
-
-	Arnd
+> ---
+>  drivers/mmc/core/core.c  |    1 +
+>  include/linux/mmc/host.h |    1 +
+>  2 files changed, 2 insertions(+)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index d03a080fb9cd..7dad1a1adf18 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2489,6 +2489,7 @@ void mmc_start_host(struct mmc_host *host)
+>  {
+>         host->f_init = max(freqs[0], host->f_min);
+>         host->rescan_disable = 0;
+> +       host->ios.power_mode = MMC_POWER_UNDEFINED;
+>         if (host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)
+>                 mmc_power_off(host);
+>         else
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 7960424d0bc0..b3bfa609816a 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -42,6 +42,7 @@ struct mmc_ios {
+>  #define MMC_POWER_OFF          0
+>  #define MMC_POWER_UP           1
+>  #define MMC_POWER_ON           2
+> +#define MMC_POWER_UNDEFINED    3
+>
+>         unsigned char   bus_width;              /* data bus width */
+>
+> --
+> 1.7.10.4
+>
