@@ -1,14 +1,14 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: core: Add new power_mode MMC_POWER_UNDEFINED
-Date: Wed, 24 Sep 2014 11:23:54 +0200
-Message-ID: <CAPDyKFqO-FCD1CMy4KitjWUtNg=__Vvmv4JmC6S0182iB-ONsQ@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: rtsx_pci: Set power related cap2 macros
+Date: Wed, 24 Sep 2014 11:24:22 +0200
+Message-ID: <CAPDyKFoW0Yb0G0nVK2SdAKm3ndbQT8KyPQkdeQntR0tz=Y=-Kg@mail.gmail.com>
 References: <1411549634-28683-1-git-send-email-rogerable@realtek.com>
- <1411549634-28683-2-git-send-email-rogerable@realtek.com>
+ <1411549634-28683-3-git-send-email-rogerable@realtek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <1411549634-28683-2-git-send-email-rogerable@realtek.com>
+In-Reply-To: <1411549634-28683-3-git-send-email-rogerable@realtek.com>
 List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
 List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
@@ -23,55 +23,46 @@ Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "driverdev-devel@linuxdrive
 List-Id: linux-mmc@vger.kernel.org
 
 On 24 September 2014 11:07, Roger Tseng <rogerable@realtek.com> wrote:
-> Define new macro MMC_POWER_UNDEFINED for power_mode in struct mmc_ios.
-> It will also be set as the initial value of host->ios.power_mode in
-> mmc_start_host().
->
-> For hosts with MMC_CAP2_NO_PRESCAN_POWERUP, this makes the later
-> mmc_power_off() do real power-off things instead of NOP, and further
-> prevents state messed up in cards that was already initialized(eg. by
-> BIOS of UEFI driver).
+> Set MMC_CAP2_NO_PRESCAN_POWERUP and MMC_CAP2_FULL_PWR_CYCLE for
+> rtsx_pci_sdmmc and rtsx_usb_sdmmc to reflect properties of Realtek
+> card reader hosts.
 >
 > Signed-off-by: Roger Tseng <rogerable@realtek.com>
 
 Thanks! Applied for next!
 
-I changes some minor parts of the commit message and set the author of
-the patch to "Roger Tseng <rogerable@realtek.com>" instead of
-"<rogerable@realtek.com>". Please fix that in for future patches.
-
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/core.c  |    1 +
->  include/linux/mmc/host.h |    1 +
+>  drivers/mmc/host/rtsx_pci_sdmmc.c |    1 +
+>  drivers/mmc/host/rtsx_usb_sdmmc.c |    1 +
 >  2 files changed, 2 insertions(+)
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index d03a080fb9cd..7dad1a1adf18 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2489,6 +2489,7 @@ void mmc_start_host(struct mmc_host *host)
->  {
->         host->f_init = max(freqs[0], host->f_min);
->         host->rescan_disable = 0;
-> +       host->ios.power_mode = MMC_POWER_UNDEFINED;
->         if (host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)
->                 mmc_power_off(host);
->         else
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 7960424d0bc0..b3bfa609816a 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -42,6 +42,7 @@ struct mmc_ios {
->  #define MMC_POWER_OFF          0
->  #define MMC_POWER_UP           1
->  #define MMC_POWER_ON           2
-> +#define MMC_POWER_UNDEFINED    3
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index dfde4a210238..d49460b5ff07 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -1292,6 +1292,7 @@ static void realtek_init_host(struct realtek_pci_sdmmc *host)
+>         mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED |
+>                 MMC_CAP_MMC_HIGHSPEED | MMC_CAP_BUS_WIDTH_TEST |
+>                 MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
+> +       mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_FULL_PWR_CYCLE;
+>         mmc->max_current_330 = 400;
+>         mmc->max_current_180 = 800;
+>         mmc->ops = &realtek_pci_sdmmc_ops;
+> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> index 5d3766e792f0..a884631d7eea 100644
+> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> @@ -1329,6 +1329,7 @@ static void rtsx_usb_init_host(struct rtsx_usb_sdmmc *host)
+>                 MMC_CAP_MMC_HIGHSPEED | MMC_CAP_BUS_WIDTH_TEST |
+>                 MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 | MMC_CAP_UHS_SDR50 |
+>                 MMC_CAP_NEEDS_POLL;
+> +       mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_FULL_PWR_CYCLE;
 >
->         unsigned char   bus_width;              /* data bus width */
->
+>         mmc->max_current_330 = 400;
+>         mmc->max_current_180 = 800;
 > --
 > 1.7.10.4
 >
