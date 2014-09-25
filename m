@@ -1,112 +1,71 @@
-From: Vinod Koul <vinod.koul@intel.com>
-Subject: Re: [PATCH 00/27] add
-	pm_runtime_last_busy_and_autosuspend() helper
-Date: Thu, 25 Sep 2014 13:27:18 +0530
-Message-ID: <20140925075718.GW24663@intel.com>
-References: <1411575342-31048-1-git-send-email-vinod.koul@intel.com>
- <6374313.I12loOK9hA@vostro.rjw.lan>
- <20140924201558.GX17997@saruman>
- <2322320.9rETJijE2n@vostro.rjw.lan>
- <20140924203219.GZ17997@saruman>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 3/6] mmc: It is not an error for the card to be removed
+ while suspended
+Date: Thu, 25 Sep 2014 10:27:11 +0200
+Message-ID: <CAPDyKFr2=Buo3xSsEPX-GhAtfMRP_VDAxXUppEKMeDLBDd2xEg@mail.gmail.com>
+References: <1411502430-25535-1-git-send-email-adrian.hunter@intel.com>
+	<1411502430-25535-4-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============0566900095=="
-Return-path: <intel-gfx-bounces@lists.freedesktop.org>
-In-Reply-To: <20140924203219.GZ17997@saruman>
-List-Unsubscribe: <http://lists.freedesktop.org/mailman/options/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <http://lists.freedesktop.org/archives/intel-gfx>
-List-Post: <mailto:intel-gfx@lists.freedesktop.org>
-List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <http://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: intel-gfx-bounces@lists.freedesktop.org
-Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
-To: Felipe Balbi <balbi@ti.com>
-Cc: linux-wireless@vger.kernel.org, Baruch Siach <baruch@tkos.co.il>, patches@opensource.wolfsonmicro.com, linux-doc@vger.kernel.org, linux-mmc@vger.kernel.org, Daniel Vetter <daniel.vetter@ffwll.ch>, Chris Ball <chris@printf.net>, dri-devel@lists.freedesktop.org, Marcin Wojtas <mw@semihalf.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, David Herrmann <dh.herrmann@gmail.com>, Shinya Kuribayashi <skuribay@pobox.com>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, Jingoo Han <jg1.han@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Jani Nikula <jani.nikula@intel.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, Alan Stern <stern@rowland.harvard.edu>, Ben Skeggs <bskeggs@redhat.com>, Bjorn Andersson <bjorn.andersson@sonymobile.com>, Wolfram Sang <wsa@the-dreams>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f173.google.com ([209.85.216.173]:43613 "EHLO
+	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751368AbaIYI1M (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Sep 2014 04:27:12 -0400
+Received: by mail-qc0-f173.google.com with SMTP id r5so2508949qcx.18
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Sep 2014 01:27:11 -0700 (PDT)
+In-Reply-To: <1411502430-25535-4-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
+On 23 September 2014 22:00, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> A removable card can be removed while it is runtime suspended.
+> Do not print an error message.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>  drivers/mmc/core/mmc.c | 2 +-
+>  drivers/mmc/core/sd.c  | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index ce11d89..1d827eb 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1804,7 +1804,7 @@ static int mmc_runtime_resume(struct mmc_host *host)
+>                 return 0;
+>
+>         err = _mmc_resume(host);
+> -       if (err)
+> +       if (err && (err != -ENOMEDIUM || (host->caps & MMC_CAP_NONREMOVABLE)))
 
---===============0566900095==
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="eNMatiwYGLtwo1cJ"
-Content-Disposition: inline
+The check for NONREMOVABLE cap shouldn't be needed!? I mean -ENOMEDIUM
+can't be set for such devices anyway.
 
+>                 pr_err("%s: error %d doing aggessive resume\n",
+>                         mmc_hostname(host), err);
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 2591388..28089b3 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -1178,7 +1178,7 @@ static int mmc_sd_runtime_resume(struct mmc_host *host)
+>                 return 0;
+>
+>         err = _mmc_sd_resume(host);
+> -       if (err)
+> +       if (err && (err != -ENOMEDIUM || (host->caps & MMC_CAP_NONREMOVABLE)))
 
---eNMatiwYGLtwo1cJ
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Same comment as above.
 
-On Wed, Sep 24, 2014 at 03:32:19PM -0500, Felipe Balbi wrote:
-> > > > OK, I guess this is as good as it gets.
-> > > >=20
-> > > > What tree would you like it go through?
-> > >=20
-> > > Do we really need this new helper ? I mean, the very moment when we
-> > > decide to implement ->runtime_idle() we will need to get rid of this
-> > > change. I wonder if it's really valid...
-> >=20
-> > I'm not sure I'm following?  This seems to simply implement what drivers
-> > have been doing already as one function.  Why would it be invalid to re=
-duce
-> > code duplication?
->=20
-> For two reasons:
->=20
-> 1) the helper has no inteligence whatsoever. It just calls the same
-> functions.
->=20
-> 2) the duplication will vanish whenever someone implements
-> ->runtime_idle() and have that call pm_runtime_autosuspend() (like PCI
-> and USB buses are doing today). This will just be yet another line that
-> needs to change.
->=20
-> Frankly though, no strong feelings, I just think it's a commit that
-> doesn't bring that any benefits other than looking like one line was
-> removed.
-and yes that is what it tries to do nothing more nothing less. If in future
-there are no users (today we have quite a few), then we can remove the dead
-macro, no harm. But that is not the situation today.
+>                 pr_err("%s: error %d doing aggessive resume\n",
+>                         mmc_hostname(host), err);
+>
+> --
+> 1.8.3.2
+>
 
-Thanks
---=20
-~Vinod
-
-
---eNMatiwYGLtwo1cJ
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
-
-iQIcBAEBAgAGBQJUI8reAAoJEHwUBw8lI4NH7iUQAI/dJy4cYCZgJFK0u2QRL4Kd
-SWRQc+4wR1nBjQGUXerHL07UjXyr3ZR9BohfNggAqBrAHV/ecdBp/0xslMiub+RQ
-dP50Gh6BnO3JWvJ7PRib5Y4grzczodaQKmdYaaLzVWLK2V6AAa1SDN2jl3RLhWEc
-rz84lo3sRGAkzloG5XB9M/xjRYiXxl3CAsKJL9nXeAhPj/owMBwtHHgNB4O5KU+W
-WxabjUY1rp7T4ThAO+3Lay5iWO7rhMR2tWo0qP8YieoEpDSrQjEeyzxRbmmeM7EE
-l9+t4C6M72XMIZsZvn1ElQSPr95Rvjk38f6XKtIixRowLCbelhMpVXeVwSCWNJ+0
-3YA62bsfZPCXUknj2foA3yRvvUTpWz3ndnu/6FuBti2yU0iv+HvYeBadvtGNvwe4
-w7QUA8JTa0V7kX2UqZ9Iw+RDlZGp3pAMC7W1WRfHQzPM4xthJ1/a8ImsfTFGtLRf
-Gdjnf7xq0aOzNeHOd1jzhGdtwOnnokTvJe6JNhlo/r4e5tgm3jxViEfVTFUcJCZf
-FVxrDQ0s2a0XKdjMOOCEQADUzwv5gj4+/HvhXeSoVYjGn5eIeIZG7jTQPf2rtHVF
-lROVSqr18dI0gXyzr9ZXeEQjW39pL8xrjgNIP90s1tr39ba4HrV/C+DJgne6F2yD
-nVfd1ryI3YoxO/ok++NZ
-=C09N
------END PGP SIGNATURE-----
-
---eNMatiwYGLtwo1cJ--
-
---===============0566900095==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-Intel-gfx mailing list
-Intel-gfx@lists.freedesktop.org
-http://lists.freedesktop.org/mailman/listinfo/intel-gfx
-
---===============0566900095==--
+Kind regards
+Uffe
