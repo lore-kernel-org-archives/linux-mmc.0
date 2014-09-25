@@ -1,42 +1,75 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 5/6] mmc: block: Fix SD card stop cmd response type
-Date: Thu, 25 Sep 2014 11:20:12 +0200
-Message-ID: <CAPDyKFr4YuCyW9DhbQRyFDTkMdm1meK96z7x7-gUvRCvy0U+qg@mail.gmail.com>
-References: <1411502430-25535-1-git-send-email-adrian.hunter@intel.com>
-	<1411502430-25535-6-git-send-email-adrian.hunter@intel.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 3/6] mmc: It is not an error for the card to be removed
+ while suspended
+Date: Thu, 25 Sep 2014 12:26:45 +0300
+Message-ID: <5423DFD5.2090306@intel.com>
+References: <1411502430-25535-1-git-send-email-adrian.hunter@intel.com>	<1411502430-25535-4-git-send-email-adrian.hunter@intel.com> <CAPDyKFr2=Buo3xSsEPX-GhAtfMRP_VDAxXUppEKMeDLBDd2xEg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f52.google.com ([209.85.192.52]:56386 "EHLO
-	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752632AbaIYJUN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Sep 2014 05:20:13 -0400
-Received: by mail-qg0-f52.google.com with SMTP id j5so6204350qga.25
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Sep 2014 02:20:13 -0700 (PDT)
-In-Reply-To: <1411502430-25535-6-git-send-email-adrian.hunter@intel.com>
+Received: from mga01.intel.com ([192.55.52.88]:39795 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752095AbaIYJ0s (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 25 Sep 2014 05:26:48 -0400
+In-Reply-To: <CAPDyKFr2=Buo3xSsEPX-GhAtfMRP_VDAxXUppEKMeDLBDd2xEg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 23 September 2014 22:00, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Nowhere in the SD Association Specifications does
-> it state that the stop command has an R1 response
-> type.  It is always R1B.  Change accordingly.
+On 25/09/2014 11:27 a.m., Ulf Hansson wrote:
+> On 23 September 2014 22:00, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> A removable card can be removed while it is runtime suspended.
+>> Do not print an error message.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>> ---
+>>   drivers/mmc/core/mmc.c | 2 +-
+>>   drivers/mmc/core/sd.c  | 2 +-
+>>   2 files changed, 2 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index ce11d89..1d827eb 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1804,7 +1804,7 @@ static int mmc_runtime_resume(struct mmc_host *host)
+>>                  return 0;
+>>
+>>          err = _mmc_resume(host);
+>> -       if (err)
+>> +       if (err && (err != -ENOMEDIUM || (host->caps & MMC_CAP_NONREMOVABLE)))
+>
+> The check for NONREMOVABLE cap shouldn't be needed!? I mean -ENOMEDIUM
+> can't be set for such devices anyway.
 
-It depends on how detailed you read the spec. :-)
+So it would be a bug if it did return -ENOMEDIUM so we should
+definitely print the error message, which is what the code does.
 
-First, R1B is the same as R1, but with optional busy signalling on DAT0.
-
-Just reading the table listing CMDS their related response types,
-confirms what you are saying. CMD12 has an R1B.
-
-Though, going into the details of the "Timing" section where this is
-clearly visualized in diagrams, you realize there are no busy
-signalling associated with a DATA READ, only for DATA WRITE. It is
-also indicated in earlier sections of the spec when "DATA READ/WRITE
-sequences are described", but I think the "Timing" section describes
-this the best.
-
-Kind regards
-Uffe
+>
+>>                  pr_err("%s: error %d doing aggessive resume\n",
+>>                          mmc_hostname(host), err);
+>>
+>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+>> index 2591388..28089b3 100644
+>> --- a/drivers/mmc/core/sd.c
+>> +++ b/drivers/mmc/core/sd.c
+>> @@ -1178,7 +1178,7 @@ static int mmc_sd_runtime_resume(struct mmc_host *host)
+>>                  return 0;
+>>
+>>          err = _mmc_sd_resume(host);
+>> -       if (err)
+>> +       if (err && (err != -ENOMEDIUM || (host->caps & MMC_CAP_NONREMOVABLE)))
+>
+> Same comment as above.
+>
+>>                  pr_err("%s: error %d doing aggessive resume\n",
+>>                          mmc_hostname(host), err);
+>>
+>> --
+>> 1.8.3.2
+>>
+>
+> Kind regards
+> Uffe
+>
