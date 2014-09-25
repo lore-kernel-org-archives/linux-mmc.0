@@ -1,38 +1,33 @@
-From: Vinod Koul <vinod.koul@intel.com>
-Subject: Re: [PATCH 00/27] add
-	pm_runtime_last_busy_and_autosuspend() helper
-Date: Thu, 25 Sep 2014 13:16:08 +0530
-Message-ID: <20140925074607.GV24663@intel.com>
-References: <1411575342-31048-1-git-send-email-vinod.koul@intel.com>
- <6374313.I12loOK9hA@vostro.rjw.lan>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH v2 2/2] mmc, sdhci, bcm-kona, LLVMLinux: Remove use of __initconst
+Date: Thu, 25 Sep 2014 10:18:28 +0200
+Message-ID: <CACRpkdYR25dswGSd+qc8rSG=F8qL6jf6=BJdMVJXfzFV3cvsnQ@mail.gmail.com>
+References: <20140923212922.GG12270@beef>
+	<1411512908-19237-1-git-send-email-behanw@converseincode.com>
+	<1411512908-19237-2-git-send-email-behanw@converseincode.com>
+	<5774775.2EcFmuR4sV@wuerfel>
+	<54230B9C.9090703@converseincode.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <intel-gfx-bounces@lists.freedesktop.org>
-Content-Disposition: inline
-In-Reply-To: <6374313.I12loOK9hA@vostro.rjw.lan>
-List-Unsubscribe: <http://lists.freedesktop.org/mailman/options/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <http://lists.freedesktop.org/archives/intel-gfx>
-List-Post: <mailto:intel-gfx@lists.freedesktop.org>
-List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <http://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
- <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: intel-gfx-bounces@lists.freedesktop.org
-Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
-To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Cc: linux-wireless@vger.kernel.org, Baruch Siach <baruch@tkos.co.il>, patches@opensource.wolfsonmicro.com, linux-doc@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, Daniel Vetter <daniel.vetter@ffwll.ch>, Chris Ball <chris@printf.net>, dri-devel@lists.freedesktop.org, Marcin Wojtas <mw@semihalf.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, David Herrmann <dh.herrmann@gmail.com>, Shinya Kuribayashi <skuribay@pobox.com>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, Jingoo Han <jg1.han@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Jani Nikula <jani.nikula@intel.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, Alan Stern <stern@rowland.harvard.edu>, Ben Skeggs <bskeggs@redhat.com>, Bjorn Andersson <bjorn.andersson@sonymobile.com>, Wolfram Sang <wsa@the-dreams.de>, Dave Airlie <airlied@r>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <54230B9C.9090703@converseincode.com>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Behan Webster <behanw@converseincode.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Christian Daudt <bcm@fixthebug.org>, Chris Ball <chris@printf.net>, Alexandre Courbot <gnurou@gmail.com>, Matt Porter <mporter@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ray Jui <rjui@broadcom.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Sep 24, 2014 at 10:28:07PM +0200, Rafael J. Wysocki wrote:
-> 
-> OK, I guess this is as good as it gets.
-> 
-> What tree would you like it go through?
+On Wed, Sep 24, 2014 at 8:21 PM, Behan Webster
+<behanw@converseincode.com> wrote:
+> On 09/24/14 02:22, Arnd Bergmann wrote:
+>>   but the first one seems
+>> easier to read for someone familiar with kernel code.
+>
+> No worries. Happy to post a v3.
+>
+> Linus Walleij: Would you like me to respin the "gpio, bcm-kona, LLVMLinux:
+> Remove use of __initconst" patch as well?
 
-Since rest of the patches are dependent upon 1st patch which should go thru
-your tree, we should merge this thru your tree
+No it's already applied.
 
-Thanks
--- 
-~Vinod
+Yours,
+Linus Walleij
