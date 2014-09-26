@@ -1,45 +1,84 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH] mmc: atmel-mci: fix mismatched section on atmci_cleanup_slot
-Date: Fri, 26 Sep 2014 21:34:58 +0200
-Message-ID: <201409262134.58457.arnd@arndb.de>
-References: <1411467606-13041-1-git-send-email-pramod.gurav@smartplayin.com> <1411467606-13041-2-git-send-email-pramod.gurav@smartplayin.com>
+From: David =?ISO-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>
+Subject: Re: [PATCH v3 11/12] mmc: sunxi: Convert MMC driver to the standard clock phase API
+Date: Fri, 26 Sep 2014 22:47:40 +0200
+Message-ID: <16423025.s6ZiXuohCJ@dizzy-6.o2s.ch>
+References: <1410466706-27386-1-git-send-email-maxime.ripard@free-electrons.com> <3992138.y6J8TjIuMq@pagira.o2s.ch> <20140926150204.GT15315@lukather>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-15"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1411467606-13041-2-git-send-email-pramod.gurav@smartplayin.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Pramod Gurav <pramod.gurav@smartplayin.com>
-Cc: linux-kernel@vger.kernel.org, Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Content-Type: multipart/signed; boundary="nextPart7437499.kAG72mjR6x"; micalg="pgp-sha1"; protocol="application/pgp-signature"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kolab.o2s.ch ([77.109.136.180]:38051 "EHLO kolab.o2s.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755545AbaIZUsq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 26 Sep 2014 16:48:46 -0400
+In-Reply-To: <20140926150204.GT15315@lukather>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: Mike Turquette <mturquette@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Emilio Lopez <emilio@elopez.com.ar>, chris@printf.net, ulf.hansson@linaro.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, wens@csie.org
 
-As of 528bc7808f4e ("mmc: atmel-mci: Release mmc resources on failure in probe"),
-the atmci_probe() function calls atmci_cleanup_slot in the failure path.
 
-This causes a new warning whenever the driver is built:
+--nextPart7437499.kAG72mjR6x
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="iso-8859-1"
 
-WARNING: drivers/mmc/host/built-in.o(.init.text+0xa04): Section mismatch in reference from the function atmci_probe() to the function .exit.text:atmci_cleanup_slot()
-The function __init atmci_probe() references
-a function __exit atmci_cleanup_slot().
+Hi
+Great! Since I didn't see any mistakes from my side it shouldn't be a p=
+roblem.
+Because someone has borrowed my UART2USB(FT232)-cable I unfortunately c=
+an't
+test the code for now.
+If you can verfiy that all the adaptions are working properly on A10/A2=
+0 and
+all the others you my assume my:
+=09Acked-by: David Lanzend=F6rfer <david.lanzendoerfer@o2s.ch>
 
-Gcc correctly warns about this function getting dropped in the link stage
-for the built-in case, which would cause undefined behavior when this error
-path is hit. The solution is to simply drop the __exit annotation.
+chears and all the best
+david
 
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-Fixes: 528bc7808f4e ("mmc: atmel-mci: Release mmc resources on failure in probe")
+> > > [...]
+> > How did you calculate the actual phase values from the original
+> > parameters?
+>
+> Like shown in the clock driver. 0 is always a 180 deg phase shift, an=
+d
+> any other value is the number of the parent clock cycle to outphase
+> the clock of.
+>=20
+> the clock out phase is calculating using:
+>=20
+> phase =3D 360 * interval / period.
+>=20
+> with period =3D 1 / (parent_freq / divider)
+> and interval =3D reg / parent_freq
+>=20
+> which makes
+>=20
+> phase =3D 360 * (reg / parent_freq) * (parent_freq / divider)
+>=20
+> If we simplify by removing the parent_freq, we end up with
+>=20
+> phase =3D 360 * reg / divider, which makes it rather trivial to
+> calculate.
+>=20
+> Maxime
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 772ef5b0e4d5..974626087732 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -2244,7 +2244,7 @@ static int __init atmci_init_slot(struct atmel_mci *host,
- 	return 0;
- }
- 
--static void __exit atmci_cleanup_slot(struct atmel_mci_slot *slot,
-+static void atmci_cleanup_slot(struct atmel_mci_slot *slot,
- 		unsigned int id)
- {
- 	/* Debugfs stuff is cleaned up by mmc core */
+=2D-=20
+David Lanzend=F6rfer
+OpenSourceSupport GmbH
+System engineer and supporter
+http://www.o2s.ch/
+--nextPart7437499.kAG72mjR6x
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part.
+Content-Transfer-Encoding: 7Bit
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.22 (GNU/Linux)
+
+iEYEABECAAYFAlQl0OwACgkQAeZw77btGjoO0gCeNCNBoamkTSH/41FIDXDH34dN
+ysAAnR6JmNgXGWWfl6ql4PFEaEw8w9k0
+=T99B
+-----END PGP SIGNATURE-----
+
+--nextPart7437499.kAG72mjR6x--
+
