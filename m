@@ -1,40 +1,60 @@
-From: Behan Webster <behanw@converseincode.com>
-Subject: [PATCH v3] mmc, sdhci, bcm-kona, LLVMLinux: Remove use of __initconst
-Date: Thu, 25 Sep 2014 15:45:22 -0700
-Message-ID: <1411685122-21867-1-git-send-email-behanw@converseincode.com>
-References: <5774775.2EcFmuR4sV@wuerfel>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5774775.2EcFmuR4sV@wuerfel>
-Sender: linux-kernel-owner@vger.kernel.org
-To: bcm@fixthebug.org, chris@printf.net, mporter@linaro.org, ulf.hansson@linaro.org
-Cc: behanw@converseincode.com, bcm-kernel-feedback-list@broadcom.com, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+From: Mike Turquette <mturquette@linaro.org>
+Subject: Re: [PATCH v3 00/12] clk: sunxi: Improve MMC clocks support
+Date: Thu, 25 Sep 2014 17:42:18 -0700
+Message-ID: <20140926004218.19023.88602@quantum>
+References: <1410466706-27386-1-git-send-email-maxime.ripard@free-electrons.com>
+ <20140922113133.GF15315@lukather>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20140922113133.GF15315@lukather>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: devicetree@vger.kernel.org, ulf.hansson@linaro.org, Emilio Lopez <emilio@elopez.com.ar>, linux-mmc@vger.kernel.org, chris@printf.net, Hans de Goede <hdegoede@redhat.com>, wens@csie.org, david.lanzendoerfer@o2s.ch, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-The __initconst is in the wrong place, and when moved to the correct place
-it uncovers an error where the variable is used by non-init data structures.
+Quoting Maxime Ripard (2014-09-22 04:31:33)
+> Mike,
+> 
+> On Thu, Sep 11, 2014 at 10:18:14PM +0200, Maxime Ripard wrote:
+> > Hi everyone,
+> > 
+> > Here is an attempt at improving the MMC clock support in the Allwinner
+> > SoCs.
+> > 
+> > Until now, the MMC clocks were having a custom phase function that was
+> > directly setting an obscure value in the right register, because we
+> > were not really having any idea of what these values were.
+> > 
+> > Now that we have more informations, we can introduce a common function
+> > call to get and set the phase of a particular clock, and use this in
+> > both our provider and our client.
+> 
+> It would be great that we have that custom phase API out of the kernel
+> for 3.18, and you were one of the greatest supporters to that idea,
+> could we please have your view on this?
 
-Instead merely make them const and put the const in the right spot.
+Patches all look good to me. Did you want the whole series to go through
+the clk tree? If so we'll need an Ack for the MMC patch and for the ARM
+DTS patches as well.
 
-Signed-off-by: Behan Webster <behanw@converseincode.com>
-Reviewed-by: Mark Charlebois <charlebm@gmail.com>
-Acked-by: Arnd Bergmann <arnd@arndb.de>
-Acked-by: Matt Porter <mporter@linaro.org>
----
- drivers/mmc/host/sdhci-bcm-kona.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Regards,
+Mike
 
-diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-index dd780c3..d085dfe 100644
---- a/drivers/mmc/host/sdhci-bcm-kona.c
-+++ b/drivers/mmc/host/sdhci-bcm-kona.c
-@@ -225,7 +225,7 @@ static struct sdhci_pltfm_data sdhci_pltfm_data_kona = {
- 		SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
- };
- 
--static struct __initconst of_device_id sdhci_bcm_kona_of_match[] = {
-+static const struct of_device_id sdhci_bcm_kona_of_match[] = {
- 	{ .compatible = "brcm,kona-sdhci"},
- 	{ .compatible = "bcm,kona-sdhci"}, /* deprecated name */
- 	{}
--- 
-1.9.1
+> 
+> Thanks,
+> Maxime
+> 
+> -- 
+> Maxime Ripard, Free Electrons
+> Embedded Linux, Kernel and Android engineering
+> http://free-electrons.com
