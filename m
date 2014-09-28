@@ -1,102 +1,94 @@
-From: Mike Turquette <mturquette@linaro.org>
-Subject: Re: [PATCH v3 03/12] clk: Add a function to retrieve phase
-Date: Sat, 27 Sep 2014 17:17:32 -0700
-Message-ID: <20140928001732.19023.2496@quantum>
-References: <1410466706-27386-1-git-send-email-maxime.ripard@free-electrons.com>
- <1410466706-27386-4-git-send-email-maxime.ripard@free-electrons.com>
+From: Vinod Koul <vinod.koul@intel.com>
+Subject: Re: [PATCH 00/27] add
+	pm_runtime_last_busy_and_autosuspend() helper
+Date: Sun, 28 Sep 2014 21:07:19 +0530
+Message-ID: <20140928153719.GG1638@intel.com>
+References: <1411575342-31048-1-git-send-email-vinod.koul@intel.com>
+ <20140925142201.GD28045@saruman> <20140925142758.GB1316@katana>
+ <32849712.0gtj7BlKY3@vostro.rjw.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f53.google.com ([209.85.220.53]:53259 "EHLO
-	mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750917AbaI1AR4 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 27 Sep 2014 20:17:56 -0400
-Received: by mail-pa0-f53.google.com with SMTP id kq14so3355398pab.40
-        for <linux-mmc@vger.kernel.org>; Sat, 27 Sep 2014 17:17:56 -0700 (PDT)
-In-Reply-To: <1410466706-27386-4-git-send-email-maxime.ripard@free-electrons.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <intel-gfx-bounces@lists.freedesktop.org>
+Content-Disposition: inline
+In-Reply-To: <32849712.0gtj7BlKY3@vostro.rjw.lan>
+List-Unsubscribe: <http://lists.freedesktop.org/mailman/options/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <http://lists.freedesktop.org/archives/intel-gfx>
+List-Post: <mailto:intel-gfx@lists.freedesktop.org>
+List-Help: <mailto:intel-gfx-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <http://lists.freedesktop.org/mailman/listinfo/intel-gfx>,
+ <mailto:intel-gfx-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: intel-gfx-bounces@lists.freedesktop.org
+Sender: "Intel-gfx" <intel-gfx-bounces@lists.freedesktop.org>
+To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Cc: linux-wireless@vger.kernel.org, Baruch Siach <baruch@tkos.co.il>, patches@opensource.wolfsonmicro.com, Wolfram Sang <wsa@the-dreams.de>, linux-mmc@vger.kernel.org, Daniel Vetter <daniel.vetter@ffwll.ch>, Chris Ball <chris@printf.net>, dri-devel@lists.freedesktop.org, Marcin Wojtas <mw@semihalf.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, David Herrmann <dh.herrmann@gmail.com>, Shinya Kuribayashi <skuribay@pobox.com>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, Jingoo Han <jg1.han@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Jani Nikula <jani.nikula@intel.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, Alan Stern <stern@rowland.harvard.edu>, Ben Skeggs <bskeggs@redhat.com>, Bjorn Andersson <bjorn.andersson@sonymobile.com>, Dave Airlie <airlied@>
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>, Emilio Lopez <emilio@elopez.com.ar>, chris@printf.net, david.lanzendoerfer@o2s.ch, ulf.hansson@linaro.org
-Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, wens@csie.org, Maxime Ripard <maxime.ripard@free-electrons.com>
 
-Quoting Maxime Ripard (2014-09-11 13:18:17)
-> The current phase API doesn't look into the actual hardware to get the phase
-> value, but will rather get it from a variable only set by the set_phase
-> function.
+On Thu, Sep 25, 2014 at 09:54:36PM +0200, Rafael J. Wysocki wrote:
+> On Thursday, September 25, 2014 04:27:58 PM Wolfram Sang wrote:
+> > 
+> > --Bn2rw/3z4jIqBvZU
+> > Content-Type: text/plain; charset=us-ascii
+> > Content-Disposition: inline
+> > Content-Transfer-Encoding: quoted-printable
+> > 
+> > On Thu, Sep 25, 2014 at 09:22:01AM -0500, Felipe Balbi wrote:
+> > > On Thu, Sep 25, 2014 at 01:27:18PM +0530, Vinod Koul wrote:
+> > > > On Wed, Sep 24, 2014 at 03:32:19PM -0500, Felipe Balbi wrote:
+> > > > > > > > OK, I guess this is as good as it gets.
+> > > > > > > >=20
+> > > > > > > > What tree would you like it go through?
+> > > > > > >=20
+> > > > > > > Do we really need this new helper ? I mean, the very moment when =
+> > we
+> > > > > > > decide to implement ->runtime_idle() we will need to get rid of t=
+> > his
+> > > > > > > change. I wonder if it's really valid...
+> > > > > >=20
+> > > > > > I'm not sure I'm following?  This seems to simply implement what dr=
+> > ivers
+> > > > > > have been doing already as one function.  Why would it be invalid t=
+> > o reduce
+> > > > > > code duplication?
+> > > > >=20
+> > > > > For two reasons:
+> > > > >=20
+> > > > > 1) the helper has no inteligence whatsoever. It just calls the same
+> > > > > functions.
+> > > > >=20
+> > > > > 2) the duplication will vanish whenever someone implements
+> > > > > ->runtime_idle() and have that call pm_runtime_autosuspend() (like PCI
+> > > > > and USB buses are doing today). This will just be yet another line th=
+> > at
+> > > > > needs to change.
+> > > > >=20
+> > > > > Frankly though, no strong feelings, I just think it's a commit that
+> > > > > doesn't bring that any benefits other than looking like one line was
+> > > > > removed.
+> > > > and yes that is what it tries to do nothing more nothing less. If in fu=
+> > ture
+> > > > there are no users (today we have quite a few), then we can remove the =
+> > dead
+> > > > macro, no harm. But that is not the situation today.
+> > >=20
+> > > as I said, a commit that's bound to be useless. It's not like you're
+> > > saving 10 lines of code, it's only one. Replacing two simple lines with
+> > > a function which takes <joke> almost as many characters to type </joke>.
+> > >=20
+> > > IMO, this is pretty useless and I'd rather not see them in the drivers I
+> > > maintain, sorry.
+> > 
+> > It is not a NACK from me; yet from a high-level perspective I agree with
+> > Felipe.
 > 
-> This will cause issue when the client driver will never call the set_phase
-> function, where we can end up having a reported phase that will not match what
-> the hardware has been programmed to by the bootloader or what phase is
-> programmed out of reset.
+> OK
 > 
-> Add a new get_phase function for the drivers to implement so that we can get
-> this value.
+> I'd rather not merge something that driver people don't want to use.
 > 
-> Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
-> ---
->  drivers/clk/clk.c            | 10 ++++++++++
->  include/linux/clk-provider.h |  5 +++++
->  2 files changed, 15 insertions(+)
-> 
-> diff --git a/drivers/clk/clk.c b/drivers/clk/clk.c
-> index d87661af0c72..113d75db371d 100644
-> --- a/drivers/clk/clk.c
-> +++ b/drivers/clk/clk.c
-> @@ -1934,6 +1934,16 @@ int __clk_init(struct device *dev, struct clk *clk)
->                 clk->accuracy = 0;
->  
->         /*
-> +        * Set clk's phase.
-> +        * Since a phase is by definition relative to its parent, just
-> +        * query the current clock phase, or just assume it's in phase.
-> +        */
-> +       if (clk->ops->get_phase)
-> +               clk->phase = clk->ops->get_phase(clk->hw);
-> +       else
-> +               clk->phase = 0;
+> Vinod?
+There have been quite a few ACKs as well. Either way am okay. If you feel
+this will get removed as discussed, then there is no point in merging
 
-I probably wasn't paying enough attention to this. Based on the
-coverletter I thought that v3 would introduce something like
-CLK_GET_PHASE_NOCACHE and stuff that logic into a __clk_get_phase
-function? Looks like this version of the series doesn't handle phases
-that can be changed by hardware (e.g. coming out of idle).
-
-Correct me if I am wrong, but it looks like we retrieve the phase only
-once at init and then never again? The rest of the time we rely on
-clk->phase to always be accurate...
-
-Regards,
-Mike
-
-> +
-> +       /*
->          * Set clk's rate.  The preferred method is to use .recalc_rate.  For
->          * simple clocks and lazy developers the default fallback is to use the
->          * parent's rate.  If a clock doesn't have a parent (or is orphaned)
-> diff --git a/include/linux/clk-provider.h b/include/linux/clk-provider.h
-> index 69b20d4c1e1a..abec961092a7 100644
-> --- a/include/linux/clk-provider.h
-> +++ b/include/linux/clk-provider.h
-> @@ -130,6 +130,10 @@ struct dentry;
->   *             set then clock accuracy will be initialized to parent accuracy
->   *             or 0 (perfect clock) if clock has no parent.
->   *
-> + * @get_phase: Queries the hardware to get the current phase of a clock.
-> + *             Returned values are 0-359 degrees on success, negative
-> + *             error codes on failure.
-> + *
->   * @set_phase: Shift the phase this clock signal in degrees specified
->   *             by the second argument. Valid values for degrees are
->   *             0-359. Return 0 on success, otherwise -EERROR.
-> @@ -182,6 +186,7 @@ struct clk_ops {
->                                     unsigned long parent_rate, u8 index);
->         unsigned long   (*recalc_accuracy)(struct clk_hw *hw,
->                                            unsigned long parent_accuracy);
-> +       int             (*get_phase)(struct clk_hw *hw);
->         int             (*set_phase)(struct clk_hw *hw, int degrees);
->         void            (*init)(struct clk_hw *hw);
->         int             (*debug_init)(struct clk_hw *hw, struct dentry *dentry);
-> -- 
-> 2.1.0
-> 
+-- 
+~Vinod
