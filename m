@@ -1,83 +1,34 @@
-From: Pramod Gurav <pramod.gurav@smartplayin.com>
-Subject: [PATCH] mmc: sdhci-pxav3: Fix Sparse warning of duplicate set_uhs_signaling entry
-Date: Mon, 29 Sep 2014 18:55:37 +0530
-Message-ID: <1411997137-13034-1-git-send-email-pramod.gurav@smartplayin.com>
+From: Holger Schurig <holgerschurig@gmail.com>
+Subject: eMMC and "mkfs.ext3" hangs without "-E nodiscard"
+Date: Mon, 29 Sep 2014 15:46:10 +0200
+Message-ID: <CAOpc7mF+9DgEeikB-gjGphPnsC_Ku+9=AtdGUaQEZYK6Jm77vA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp68.ord1c.emailsrvr.com ([108.166.43.68]:49805 "EHLO
-	smtp68.ord1c.emailsrvr.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753861AbaI2NWG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Sep 2014 09:22:06 -0400
+Received: from mail-wg0-f45.google.com ([74.125.82.45]:49061 "EHLO
+	mail-wg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754173AbaI2NqM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Sep 2014 09:46:12 -0400
+Received: by mail-wg0-f45.google.com with SMTP id m15so466439wgh.16
+        for <linux-mmc@vger.kernel.org>; Mon, 29 Sep 2014 06:46:11 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Pramod Gurav <pramod.gurav@smartplayin.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-This fixes below sparse warning:
-drivers/mmc/host/sdhci-pxav3.c:227:10: warning: Initializer entry defined twice
-drivers/mmc/host/sdhci-pxav3.c:232:10:   also defined here
+Hi all,
 
-by removing duplicate initialization of .set_uhs_signaling in
-struct sdhci_ops. Also does away with duplcated function.
+on kernel 3.16.3 running on an i.MX6 with an eMMC card formatting a
+partition won't work, it hangs. With an added -v the last thing it
+spit out is "Discarding device blocks: 4096/196608".
 
-Cc: Russell King <rmk+kernel@arm.linux.org.uk>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
----
- drivers/mmc/host/sdhci-pxav3.c |   37 -------------------------------------
- 1 file changed, 37 deletions(-)
+When I run mkfs with "-E nodiscard", formatting & booting works.
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 6f842fb..fd93e60 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -186,45 +186,8 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
- 	pxa->power_mode = power_mode;
- }
- 
--static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
--{
--	u16 ctrl_2;
--
--	/*
--	 * Set V18_EN -- UHS modes do not work without this.
--	 * does not change signaling voltage
--	 */
--	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--
--	/* Select Bus Speed Mode for host */
--	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
--	switch (uhs) {
--	case MMC_TIMING_UHS_SDR12:
--		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
--		break;
--	case MMC_TIMING_UHS_SDR25:
--		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
--		break;
--	case MMC_TIMING_UHS_SDR50:
--		ctrl_2 |= SDHCI_CTRL_UHS_SDR50 | SDHCI_CTRL_VDD_180;
--		break;
--	case MMC_TIMING_UHS_SDR104:
--		ctrl_2 |= SDHCI_CTRL_UHS_SDR104 | SDHCI_CTRL_VDD_180;
--		break;
--	case MMC_TIMING_UHS_DDR50:
--		ctrl_2 |= SDHCI_CTRL_UHS_DDR50 | SDHCI_CTRL_VDD_180;
--		break;
--	}
--
--	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
--	dev_dbg(mmc_dev(host->mmc),
--		"%s uhs = %d, ctrl_2 = %04X\n",
--		__func__, uhs, ctrl_2);
--}
--
- static const struct sdhci_ops pxav3_sdhci_ops = {
- 	.set_clock = sdhci_set_clock,
--	.set_uhs_signaling = pxav3_set_uhs_signaling,
- 	.platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
- 	.set_bus_width = sdhci_set_bus_width,
--- 
-1.7.9.5
 
+Noteworthy: when the eMMC device was still in virgin mode,
+partitioning without "-E nodiscard" worked. But last week I used the
+mmc tool to turn the user space into enhanced format. Basically, I
+first run "mmc extcsd read /dev/mmcblk0" and used the number after
+MAX_ENH_SIZE_MULT for an "mmc enh_area set -y 0 7651323 /dev/mmcblk0".
+Then, after a power-cycle, I also turned bkops on because kernel was
+complaining that it wasn't enabled. And since the default discard
+option of mkfs.ext3 doesn't seem to work anymore.
