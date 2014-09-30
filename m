@@ -1,86 +1,241 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: "Card stuck in programming state! __mmc_switch" problem on i.MX6
- + eMMC
-Date: Mon, 29 Sep 2014 21:35:58 -0300
-Message-ID: <CAOMZO5AKugbS_Q5CRPHZ-wSKD0NndxeJD6uQSYSxwCHyt+CZNw@mail.gmail.com>
-References: <54184B19.4080909@elsoft.ch>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH V2 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to handle
+ regulators
+Date: Tue, 30 Sep 2014 14:23:44 +0900
+Message-ID: <542A3E60.1000401@samsung.com>
+References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
+ <1408715272-13833-2-git-send-email-yuvaraj.cd@samsung.com>
+ <CAPDyKFqiv+eGQ_kRpXjRY207PN4J3DGcZU1n5UU0evp_5Dn_Pg@mail.gmail.com>
+ <28242432.noIRZ0lve1@amdc1032>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f44.google.com ([209.85.215.44]:56245 "EHLO
-	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754178AbaI3Af7 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Sep 2014 20:35:59 -0400
-Received: by mail-la0-f44.google.com with SMTP id gi9so8850160lab.31
-        for <linux-mmc@vger.kernel.org>; Mon, 29 Sep 2014 17:35:58 -0700 (PDT)
-In-Reply-To: <54184B19.4080909@elsoft.ch>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <28242432.noIRZ0lve1@amdc1032>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Doug Anderson <dianders@google.com>, Doug Anderson <dianders@chromium.org>, Chris Ball <cjb@laptop.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <tomasz.figa@gmail.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, CPGS <cpgs@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?Q?David_M=C3=BCller_=28ELSOFT_AG=29?= <d.mueller@elsoft.ch>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi David,
+Hi
 
-On Tue, Sep 16, 2014 at 11:37 AM, David M=C3=BCller (ELSOFT AG)
-<d.mueller@elsoft.ch> wrote:
-> Hello
->
-> I have a custom i.MX6Q based board with a Hynix eMMC chip attached to
-> USDHC3. OS is a vanilla Linux 3.16 with some patches.
->
-> Loading the iMX SDHC driver results in the following error:
->
-> modprobe sdhci-esdhc-imx
-> sdhci: Secure Digital Host Controller Interface driver
-> sdhci: Copyright(c) Pierre Ossman
-> sdhci-pltfm: SDHCI platform and OF driver helper
-> mmc0: no vqmmc regulator found
-> mmc0: SDHCI controller on 2198000.usdhc [2198000.usdhc] using ADMA
-> mmc0: BKOPS_EN bit is not set
-> mmc0: Card stuck in programming state! __mmc_switch
-> mmc0: error -110 whilst initialising MMC card
-> mmc0: BKOPS_EN bit is not set
-> mmc0: Card stuck in programming state! __mmc_switch
-> mmc0: error -110 whilst initialising MMC card
-> mmc0: BKOPS_EN bit is not set
-> mmc0: Card stuck in programming state! __mmc_switch
-> mmc0: error -110 whilst initialising MMC card
-> mmc0: BKOPS_EN bit is not set
-> mmc0: Card stuck in programming state! __mmc_switch
-> mmc0: error -110 whilst initialising MMC card
->
->
-> Pin muxing looks ok nevertheless I played around with it to see if it
-> makes a difference. I also tried the "Add delay between CMD6 and CMD1=
-3
-> for Sandisk eMMC cards" workaround previously mentioned on this list.
->
-> As the whole thing is working under U-Boot as shown below, I tend to
-> rule out soldering problems and non-functional hardware.
->
-> =3D> ver
-> U-Boot 2014.07-00045-g0955ecc-dirty (Aug 26 2014 - 12:47:21)
-> =3D> mmc dev 1
-> switch to partitions #0, OK
-> mmc1(part 0) is current device
-> =3D> mmc info
-> Device: FSL_SDHC
-> Manufacturer ID: 90
-> OEM: 14a
-> Name: H8G2d
-> Tran Speed: 52000000
-> Rd Block Len: 512
-> MMC version 4.41
-> High Capacity: Yes
-> Capacity: 7.2 GiB
-> Bus Width: 8-bit
->
->
-> Any idea what is going wrong?
-> Has anybody a Hynix eMMC working under Linux?
+On 09/29/2014 09:31 PM, Bartlomiej Zolnierkiewicz wrote:
+> 
+> Hi,
+> 
+> On Friday, August 29, 2014 01:34:44 PM Ulf Hansson wrote:
+>> On 22 August 2014 15:47, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
+>>> This patch makes use of mmc_regulator_get_supply() to handle
+>>> the vmmc and vqmmc regulators.Also it moves the code handling
+>>> the these regulators to dw_mci_set_ios().It turned on the vmmc
+>>> and vqmmc during MMC_POWER_UP and MMC_POWER_ON,and turned off
+>>> during MMC_POWER_OFF.
+>>>
+>>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+>>
+>> Thanks! Applied for next.
+> 
+> Unfortunately this patch breaks mmc1 card (Kingston 32GB micro SDHC)
+> detection on Exynos5420 Arndale Octa for me:
+> 
+> [   10.797979] dwmmc_exynos 12220000.mmc: no support for card's volts
+> [   10.797998] mmc1: error -22 whilst initialising SD card
 
-I remember having similar issues and they were fixed by this series:
-http://www.spinics.net/lists/linux-mmc/msg28260.html
+OCR value is not matched. Which values are supported about the mmc_host's value and card's value?
+Could you share the value?
 
-You can try linux-next as this series is already applied there already.
+Best Regards,
+Jaehoon Chung
+
+> 
+> Without the patch:
+> 
+> [   10.866926] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot req 50000000Hz, actual 50000000HZ div = 0)
+> [   10.866977] mmc1: new high speed SDHC card at address 1234
+> [   10.868730] mmcblk1: mmc1:1234 SA32G 29.3 GiB 
+> [   10.915054]  mmcblk1: p1 p2 p3
+> 
+> The config is attached (exynos_defconfig doesn't work correctly for
+> this board yet).
+> 
+> Best regards,
+> --
+> Bartlomiej Zolnierkiewicz
+> Samsung R&D Institute Poland
+> Samsung Electronics
+> 
+>> Kind regards
+>> Uffe
+>>
+>>> ---
+>>> changes from v1:
+>>>         1.Used mmc_regulator_set_ocr() instead of regulator_enable() for vmmc.
+>>>         2.Turned on vmmc and vqmmc during MMC_POWER_UP.
+>>>         3. Removed the flags DW_MMC_CARD_POWERED and DW_MMC_IO_POWERED which
+>>>            added during the initial version of this patch.
+>>>         4. Added error message, if it failed to turn on regulator's.
+>>>
+>>>  drivers/mmc/host/dw_mmc.c  |   72 +++++++++++++++++++++-----------------------
+>>>  include/linux/mmc/dw_mmc.h |    2 +-
+>>>  2 files changed, 36 insertions(+), 38 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index 7f227e9..aadb0d6 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -936,6 +936,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>         struct dw_mci_slot *slot = mmc_priv(mmc);
+>>>         const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+>>>         u32 regs;
+>>> +       int ret;
+>>>
+>>>         switch (ios->bus_width) {
+>>>         case MMC_BUS_WIDTH_4:
+>>> @@ -974,12 +975,38 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>
+>>>         switch (ios->power_mode) {
+>>>         case MMC_POWER_UP:
+>>> +               if (!IS_ERR(mmc->supply.vmmc)) {
+>>> +                       ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
+>>> +                                       ios->vdd);
+>>> +                       if (ret) {
+>>> +                               dev_err(slot->host->dev,
+>>> +                                       "failed to enable vmmc regulator\n");
+>>> +                               /*return, if failed turn on vmmc*/
+>>> +                               return;
+>>> +                       }
+>>> +               }
+>>> +               if (!IS_ERR(mmc->supply.vqmmc) && !slot->host->vqmmc_enabled) {
+>>> +                       ret = regulator_enable(mmc->supply.vqmmc);
+>>> +                       if (ret < 0)
+>>> +                               dev_err(slot->host->dev,
+>>> +                                       "failed to enable vqmmc regulator\n");
+>>> +                       else
+>>> +                               slot->host->vqmmc_enabled = true;
+>>> +               }
+>>>                 set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+>>>                 regs = mci_readl(slot->host, PWREN);
+>>>                 regs |= (1 << slot->id);
+>>>                 mci_writel(slot->host, PWREN, regs);
+>>>                 break;
+>>>         case MMC_POWER_OFF:
+>>> +               if (!IS_ERR(mmc->supply.vmmc))
+>>> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+>>> +
+>>> +               if (!IS_ERR(mmc->supply.vqmmc) && slot->host->vqmmc_enabled) {
+>>> +                       regulator_disable(mmc->supply.vqmmc);
+>>> +                       slot->host->vqmmc_enabled = false;
+>>> +               }
+>>> +
+>>>                 regs = mci_readl(slot->host, PWREN);
+>>>                 regs &= ~(1 << slot->id);
+>>>                 mci_writel(slot->host, PWREN, regs);
+>>> @@ -2110,7 +2137,13 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>>                 mmc->f_max = freq[1];
+>>>         }
+>>>
+>>> -       mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+>>> +       /*if there are external regulators, get them*/
+>>> +       ret = mmc_regulator_get_supply(mmc);
+>>> +       if (ret == -EPROBE_DEFER)
+>>> +               goto err_setup_bus;
+>>> +
+>>> +       if (!mmc->ocr_avail)
+>>> +               mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+>>>
+>>>         if (host->pdata->caps)
+>>>                 mmc->caps = host->pdata->caps;
+>>> @@ -2176,7 +2209,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>>
+>>>  err_setup_bus:
+>>>         mmc_free_host(mmc);
+>>> -       return -EINVAL;
+>>> +       return ret;
+>>>  }
+>>>
+>>>  static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
+>>> @@ -2469,24 +2502,6 @@ int dw_mci_probe(struct dw_mci *host)
+>>>                 }
+>>>         }
+>>>
+>>> -       host->vmmc = devm_regulator_get_optional(host->dev, "vmmc");
+>>> -       if (IS_ERR(host->vmmc)) {
+>>> -               ret = PTR_ERR(host->vmmc);
+>>> -               if (ret == -EPROBE_DEFER)
+>>> -                       goto err_clk_ciu;
+>>> -
+>>> -               dev_info(host->dev, "no vmmc regulator found: %d\n", ret);
+>>> -               host->vmmc = NULL;
+>>> -       } else {
+>>> -               ret = regulator_enable(host->vmmc);
+>>> -               if (ret) {
+>>> -                       if (ret != -EPROBE_DEFER)
+>>> -                               dev_err(host->dev,
+>>> -                                       "regulator_enable fail: %d\n", ret);
+>>> -                       goto err_clk_ciu;
+>>> -               }
+>>> -       }
+>>> -
+>>>         host->quirks = host->pdata->quirks;
+>>>
+>>>         spin_lock_init(&host->lock);
+>>> @@ -2630,8 +2645,6 @@ err_workqueue:
+>>>  err_dmaunmap:
+>>>         if (host->use_dma && host->dma_ops->exit)
+>>>                 host->dma_ops->exit(host);
+>>> -       if (host->vmmc)
+>>> -               regulator_disable(host->vmmc);
+>>>
+>>>  err_clk_ciu:
+>>>         if (!IS_ERR(host->ciu_clk))
+>>> @@ -2667,9 +2680,6 @@ void dw_mci_remove(struct dw_mci *host)
+>>>         if (host->use_dma && host->dma_ops->exit)
+>>>                 host->dma_ops->exit(host);
+>>>
+>>> -       if (host->vmmc)
+>>> -               regulator_disable(host->vmmc);
+>>> -
+>>>         if (!IS_ERR(host->ciu_clk))
+>>>                 clk_disable_unprepare(host->ciu_clk);
+>>>
+>>> @@ -2686,9 +2696,6 @@ EXPORT_SYMBOL(dw_mci_remove);
+>>>   */
+>>>  int dw_mci_suspend(struct dw_mci *host)
+>>>  {
+>>> -       if (host->vmmc)
+>>> -               regulator_disable(host->vmmc);
+>>> -
+>>>         return 0;
+>>>  }
+>>>  EXPORT_SYMBOL(dw_mci_suspend);
+>>> @@ -2697,15 +2704,6 @@ int dw_mci_resume(struct dw_mci *host)
+>>>  {
+>>>         int i, ret;
+>>>
+>>> -       if (host->vmmc) {
+>>> -               ret = regulator_enable(host->vmmc);
+>>> -               if (ret) {
+>>> -                       dev_err(host->dev,
+>>> -                               "failed to enable regulator: %d\n", ret);
+>>> -                       return ret;
+>>> -               }
+>>> -       }
+>>> -
+>>>         if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
+>>>                 ret = -ENODEV;
+>>>                 return ret;
+>>> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+>>> index 29ce014..84e2827 100644
+>>> --- a/include/linux/mmc/dw_mmc.h
+>>> +++ b/include/linux/mmc/dw_mmc.h
+>>> @@ -188,7 +188,7 @@ struct dw_mci {
+>>>         /* Workaround flags */
+>>>         u32                     quirks;
+>>>
+>>> -       struct regulator        *vmmc;  /* Power regulator */
+>>> +       bool                    vqmmc_enabled;
+>>>         unsigned long           irq_flags; /* IRQ flags */
+>>>         int                     irq;
+>>>  };
+>>> --
+>>> 1.7.10.4
