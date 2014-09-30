@@ -1,56 +1,60 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: add new au6601 driver
-Date: Tue, 30 Sep 2014 13:00:45 +0200
-Message-ID: <CAPDyKFoAzeYjvuP=5W8r7NQjnL9OzWXP=+Y+b_1ZZgWRbUXsZg@mail.gmail.com>
-References: <1399543099-31613-1-git-send-email-linux@rempel-privat.de>
-	<CAPDyKFoy9DLQe1235suEwEmGSxxriBfuWSyN+ZG14OmUjrrb8w@mail.gmail.com>
-	<53B3D562.1030707@rempel-privat.de>
-	<CAPDyKFpZVKu-uHwNfXocVb7FbgEN3NxiLHCPR38bSh_zsA4w6Q@mail.gmail.com>
-	<542A81EC.40708@rempel-privat.de>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 5/6] mmc: block: Fix SD card stop cmd response type
+Date: Tue, 30 Sep 2014 14:21:43 +0300
+Message-ID: <542A9247.3050302@intel.com>
+References: <1411502430-25535-1-git-send-email-adrian.hunter@intel.com>	<1411502430-25535-6-git-send-email-adrian.hunter@intel.com> <CAPDyKFr4YuCyW9DhbQRyFDTkMdm1meK96z7x7-gUvRCvy0U+qg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f175.google.com ([209.85.216.175]:64452 "EHLO
-	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750992AbaI3LAq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Sep 2014 07:00:46 -0400
-Received: by mail-qc0-f175.google.com with SMTP id w7so217150qcr.6
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Sep 2014 04:00:45 -0700 (PDT)
-In-Reply-To: <542A81EC.40708@rempel-privat.de>
+Received: from mga03.intel.com ([134.134.136.65]:57012 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751220AbaI3LXI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 30 Sep 2014 07:23:08 -0400
+In-Reply-To: <CAPDyKFr4YuCyW9DhbQRyFDTkMdm1meK96z7x7-gUvRCvy0U+qg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Oleksij Rempel <linux@rempel-privat.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 30 September 2014 12:11, Oleksij Rempel <linux@rempel-privat.de> wrote:
-> Am 09.07.2014 um 14:52 schrieb Ulf Hansson:
->> [snip]
->>
->>>>
->>>> I am just a bit curious, does this controller support hardware busy
->>>> detection on DAT1 line while waiting for command completion?
->>>
->>> Do you mean AU6601_REG_BUS_STATUS?
->>> See at the beginning of patch.
->>
->> While reviewing the code, it seems like the controller are handling
->> hardware busy detection on DAT1. On the other hand you don't enable
->> MMC_CAP_WAIT_WHILE_BUSY, shouldn't you be doing that?
->
-> Hi Ulf,
->
-> what is better way to use sg with dma? This controller support only
-> 0x4000 alight addresses. It is possible to solve it per driver basis,
-> but i have seen already more then one driver which need it. Should it be
-> done in  mmc block code? Any other suggestions?
+On 25/09/14 12:20, Ulf Hansson wrote:
+> On 23 September 2014 22:00, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> Nowhere in the SD Association Specifications does
+>> it state that the stop command has an R1 response
+>> type.  It is always R1B.  Change accordingly.
+> 
+> It depends on how detailed you read the spec. :-)
+> 
+> First, R1B is the same as R1, but with optional busy signalling on DAT0.
 
-I don't quite follow. Does your DMA controller put constraints on
-buffer alignment/length or is it the mmc controller?
+Not exactly:
 
-I am aware of that drivers may have special treatments of buffer
-alignment/length to be able to handle some corner cases. And yes we
-don't have a common interface in the mmc core to handle that. I am not
-sure how that could be done? Do you have any suggestions?
+"R1b is identical to R1 with an optional busy signal
+transmitted on the data line. The card may become
+busy after receiving these commands based on its
+state prior to the command reception. The Host shall
+check for busy at the response. Refer to Section 4.12.3
+for a detailed description and timing diagrams."
 
-Kind regards
-Uffe
+Note it says "The Host shall check for busy at the response."
+It does not say "The Host is not affected"
+
+> 
+> Just reading the table listing CMDS their related response types,
+> confirms what you are saying. CMD12 has an R1B.
+
+Which is explicit and definitive.
+
+> Though, going into the details of the "Timing" section where this is
+> clearly visualized in diagrams, you realize there are no busy
+> signalling associated with a DATA READ, only for DATA WRITE. It is
+> also indicated in earlier sections of the spec when "DATA READ/WRITE
+> sequences are described", but I think the "Timing" section describes
+> this the best.
+
+You are looking at it only from the point of view of the card.  The host
+controller can expect that CMD12/R1b is the only valid combination
+because that is what the specification defines.  You can't know what
+the host controller will do if you tell it to do CMD12/R1 because that
+is outside the spec.
+
