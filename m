@@ -1,19 +1,21 @@
 From: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
-Subject: [PATCH 0/2] mxcmmc driver fixes
-Date: Tue, 30 Sep 2014 16:59:36 +0200
-Message-ID: <1412089178-21946-1-git-send-email-matteo.facchinetti@sirius-es.it>
+Subject: [PATCH 2/2] mmc: mxcmmc: fix the default value for available voltages into mxcmci_probe
+Date: Tue, 30 Sep 2014 16:59:38 +0200
+Message-ID: <1412089178-21946-3-git-send-email-matteo.facchinetti@sirius-es.it>
+References: <1412089178-21946-1-git-send-email-matteo.facchinetti@sirius-es.it>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx.vmgattei.com ([77.223.18.35]:48168 "EHLO mx.vmgattei.com"
+Received: from mx.vmgattei.com ([77.223.18.35]:48165 "EHLO mx.vmgattei.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751166AbaI3PKP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 30 Sep 2014 11:10:15 -0400
+	id S1751185AbaI3PKQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 30 Sep 2014 11:10:16 -0400
 Received: from localhost (mx.vmgattei.com [127.0.0.1])
-	by mx.vmgattei.com (Postfix) with ESMTP id 5462520E3A
-	for <linux-mmc@vger.kernel.org>; Tue, 30 Sep 2014 17:01:09 +0200 (CEST)
+	by mx.vmgattei.com (Postfix) with ESMTP id 9553820E4A
+	for <linux-mmc@vger.kernel.org>; Tue, 30 Sep 2014 17:02:35 +0200 (CEST)
 Received: from mx.vmgattei.com ([127.0.0.1])
 	by localhost (mx.vmgattei.com [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id Kj3UOHI4OuJ6 for <linux-mmc@vger.kernel.org>;
-	Tue, 30 Sep 2014 17:01:04 +0200 (CEST)
+	with ESMTP id 792hUk8YHj9G for <linux-mmc@vger.kernel.org>;
+	Tue, 30 Sep 2014 17:02:30 +0200 (CEST)
+In-Reply-To: <1412089178-21946-1-git-send-email-matteo.facchinetti@sirius-es.it>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: chris@printf.net, ulf.hansson@linaro.org
@@ -21,42 +23,42 @@ Cc: shc_work@mail.ru, s.hauer@pengutronix.de, peter.griffin@linaro.org, linux-mm
 
 From: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
 
-Hi,
+If available voltages are not given, mmc_regulator_get_supply() function
+returns 0 and mxcmmc driver doesn't set a value for ocr_avail mask.
 
-this patchset contains fixes for the mxcmmc driver.
+In accordance with the comment in platform_data/mmc-mxcmmc.h,
+fix it, assuming MMC_VDD_32_33 | MMC_VDD_33_34 as default value.
 
-*Patch 1:
-fix a rare race condition that breaks a data trasfer when mxcmmc
-driver use dma.
-To reproduce this error, use mmc as rootfs and start at boot time
-a realtime Xenomai application.
-The realtime it's not directly related but entropy produced by
-ipipe scheduler highlights the problem.
-When this event occurs, the mxcmmc watchdog expires,
-this cause a read error and application doesn't run.
+Signed-off-by: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
+---
+ drivers/mmc/host/mxcmmc.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
-*Patch 2:
-fix the default value for available voltages into mxcmci_probe
-
-Applied to mainline Linux-3.17.0-rc6-next on arch mpc512x.
-Tested on mpc5125twr evaluation board
-
-Applied to custom Linux-3.9.4 on arch mpc512x
-Tested on a mpc5125 custom board.
-
-Regards,
-Matteo Facchinetti
-Sirius Electronic Systems
-
-
-Matteo Facchinetti (2):
-  mmc: mxcmmc: fix race condition when dma finish a data transfer
-  mmc: mxcmmc: fix the default value for available voltages into
-    mxcmci_probe
-
- drivers/mmc/host/mxcmmc.c | 27 ++++++++++-----------------
- 1 file changed, 10 insertions(+), 17 deletions(-)
-
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index 536a898..5350dc5 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -1077,13 +1077,13 @@ static int mxcmci_probe(struct platform_device *pdev)
+ 		dat3_card_detect = true;
+ 
+ 	ret = mmc_regulator_get_supply(mmc);
+-	if (ret) {
+-		if (pdata && ret != -EPROBE_DEFER)
+-			mmc->ocr_avail = pdata->ocr_avail ? :
+-				MMC_VDD_32_33 | MMC_VDD_33_34;
+-		else
+-			goto out_free;
+-	}
++	if (ret == -EPROBE_DEFER)
++		goto out_free;
++
++	if (pdata && pdata->ocr_avail)
++		mmc->ocr_avail = pdata->ocr_avail;
++	else
++		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+ 
+ 	if (dat3_card_detect)
+ 		host->default_irq_mask =
 -- 
 1.8.3.2
 
