@@ -1,60 +1,169 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 5/6] mmc: block: Fix SD card stop cmd response type
-Date: Tue, 30 Sep 2014 14:21:43 +0300
-Message-ID: <542A9247.3050302@intel.com>
-References: <1411502430-25535-1-git-send-email-adrian.hunter@intel.com>	<1411502430-25535-6-git-send-email-adrian.hunter@intel.com> <CAPDyKFr4YuCyW9DhbQRyFDTkMdm1meK96z7x7-gUvRCvy0U+qg@mail.gmail.com>
+From: Javier Martinez Canillas <javier@dowhile0.org>
+Subject: Re: [PATCH 3/4 v2] mmc: host: switch OF parser to use gpio descriptors
+Date: Tue, 30 Sep 2014 13:30:44 +0200
+Message-ID: <CABxcv==ipqvs+XpuWMVjmLPTHArBa2Kqk2Zcxn5du5+oXK3RyQ@mail.gmail.com>
+References: <1409137253-25189-1-git-send-email-linus.walleij@linaro.org>
+	<1409137253-25189-3-git-send-email-linus.walleij@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:57012 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751220AbaI3LXI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 30 Sep 2014 07:23:08 -0400
-In-Reply-To: <CAPDyKFr4YuCyW9DhbQRyFDTkMdm1meK96z7x7-gUvRCvy0U+qg@mail.gmail.com>
+Received: from mail-oi0-f47.google.com ([209.85.218.47]:33899 "EHLO
+	mail-oi0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751190AbaI3Lap (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Sep 2014 07:30:45 -0400
+Received: by mail-oi0-f47.google.com with SMTP id g201so5820336oib.34
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Sep 2014 04:30:45 -0700 (PDT)
+In-Reply-To: <1409137253-25189-3-git-send-email-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linux GPIO List <linux-gpio@vger.kernel.org>
 
-On 25/09/14 12:20, Ulf Hansson wrote:
-> On 23 September 2014 22:00, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> Nowhere in the SD Association Specifications does
->> it state that the stop command has an R1 response
->> type.  It is always R1B.  Change accordingly.
-> 
-> It depends on how detailed you read the spec. :-)
-> 
-> First, R1B is the same as R1, but with optional busy signalling on DAT0.
+Hello Linus,
 
-Not exactly:
+On Wed, Aug 27, 2014 at 1:00 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
+> This switches the central MMC OF parser to use gpio descriptors
+> instead of grabbing GPIOs explicitly from the device tree.
+> This strips out an unecessary use of the integer-based GPIO
+> API that we want to get rid of, cuts down on code as the
+> gpio descriptor code will handle active low flags.
+>
+> Acked-by: Alexandre Courbot <acourbot@nvidia.com>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+>
 
-"R1b is identical to R1 with an optional busy signal
-transmitted on the data line. The card may become
-busy after receiving these commands based on its
-state prior to the command reception. The Host shall
-check for busy at the response. Refer to Section 4.12.3
-for a detailed description and timing diagrams."
+Card detection is failing in some boards because this patch changes
+some semantics. I tried to come up with a fix but I didn't find an
+obvious way to do it (more on that below).
 
-Note it says "The Host shall check for busy at the response."
-It does not say "The Host is not affected"
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 95cceae96944..6f7ed9c50346 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -310,9 +310,7 @@ int mmc_of_parse(struct mmc_host *host)
+>  {
+>         struct device_node *np;
+>         u32 bus_width;
+> -       bool explicit_inv_wp, gpio_inv_wp = false;
+> -       enum of_gpio_flags flags;
+> -       int len, ret, gpio;
+> +       int len, ret;
+>
+>         if (!host->parent || !host->parent->of_node)
+>                 return 0;
+> @@ -360,60 +358,40 @@ int mmc_of_parse(struct mmc_host *host)
+>         if (of_find_property(np, "non-removable", &len)) {
+>                 host->caps |= MMC_CAP_NONREMOVABLE;
+>         } else {
+> -               bool explicit_inv_cd, gpio_inv_cd = false;
+> -
+> -               explicit_inv_cd = of_property_read_bool(np, "cd-inverted");
+> +               if (of_property_read_bool(np, "cd-inverted"))
+> +                       host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
+>
 
-> 
-> Just reading the table listing CMDS their related response types,
-> confirms what you are saying. CMD12 has an R1B.
+The card-detect signal active high flag is set if the "cd-inverted"
+property is found but in the original code MMC_CAP2_CD_ACTIVE_HIGH was
+set only if "cd-inverted" was true and the card detect GPIO flag was
+OF_GPIO_ACTIVE_HIGH.
 
-Which is explicit and definitive.
+>                 if (of_find_property(np, "broken-cd", &len))
+>                         host->caps |= MMC_CAP_NEEDS_POLL;
+>
+> -               gpio = of_get_named_gpio_flags(np, "cd-gpios", 0, &flags);
+> -               if (gpio == -EPROBE_DEFER)
+> -                       return gpio;
+> -               if (gpio_is_valid(gpio)) {
+> -                       if (!(flags & OF_GPIO_ACTIVE_LOW))
+> -                               gpio_inv_cd = true;
+> -
+> -                       ret = mmc_gpio_request_cd(host, gpio, 0);
+> -                       if (ret < 0) {
+> -                               dev_err(host->parent,
+> -                                       "Failed to request CD GPIO #%d: %d!\n",
+> -                                       gpio, ret);
+> +               ret = mmc_gpiod_request_cd(host, "cd", 0, false, 0);
 
-> Though, going into the details of the "Timing" section where this is
-> clearly visualized in diagrams, you realize there are no busy
-> signalling associated with a DATA READ, only for DATA WRITE. It is
-> also indicated in earlier sections of the spec when "DATA READ/WRITE
-> sequences are described", but I think the "Timing" section describes
-> this the best.
+Now false is passed as the override_active_level bool parameter but
+mmc_gpio_request_cd() sets ctx->override_cd_active_level = true. Which
+means that after this patch, mmc_gpio_get_cd() does not take into
+account if host->caps2 has MMC_CAP2_CD_ACTIVE_HIGH set.
 
-You are looking at it only from the point of view of the card.  The host
-controller can expect that CMD12/R1b is the only valid combination
-because that is what the specification defines.  You can't know what
-the host controller will do if you tell it to do CMD12/R1 because that
-is outside the spec.
+> +               if (ret) {
+> +                       if (ret == -EPROBE_DEFER)
+>                                 return ret;
+> -                       } else {
+> -                               dev_info(host->parent, "Got CD GPIO #%d.\n",
+> -                                        gpio);
+> +                       if (ret != -ENOENT) {
+> +                               dev_err(host->parent,
+> +                                       "Failed to request CD GPIO: %d\n",
+> +                                       ret);
+>                         }
+> -               }
+> -
+> -               if (explicit_inv_cd ^ gpio_inv_cd)
+> -                       host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
+> +               } else
+> +                       dev_info(host->parent, "Got CD GPIO\n");
+>         }
+>
+>         /* Parse Write Protection */
+> -       explicit_inv_wp = of_property_read_bool(np, "wp-inverted");
+> -
+> -       gpio = of_get_named_gpio_flags(np, "wp-gpios", 0, &flags);
+> -       if (gpio == -EPROBE_DEFER) {
+> -               ret = -EPROBE_DEFER;
+> -               goto out;
+> -       }
+> -       if (gpio_is_valid(gpio)) {
+> -               if (!(flags & OF_GPIO_ACTIVE_LOW))
+> -                       gpio_inv_wp = true;
+> +       if (of_property_read_bool(np, "wp-inverted"))
+> +               host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+>
+> -               ret = mmc_gpio_request_ro(host, gpio);
+> -               if (ret < 0) {
+> -                       dev_err(host->parent,
+> -                               "Failed to request WP GPIO: %d!\n", ret);
+> +       ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0);
+> +       if (ret) {
+> +               if (ret == -EPROBE_DEFER)
+>                         goto out;
+> -               } else {
+> -                               dev_info(host->parent, "Got WP GPIO #%d.\n",
+> -                                        gpio);
+> +               if (ret != -ENOENT) {
+> +                       dev_err(host->parent,
+> +                               "Failed to request WP GPIO: %d\n",
+> +                               ret);
+>                 }
+> -       }
+> -       if (explicit_inv_wp ^ gpio_inv_wp)
+> -               host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
 
+Same issue with write-protect signal active high. After this patch
+MMC_CAP2_RO_ACTIVE_HIGH is always set while before it was
+conditionally set depending of the write-protect GPIO flag value.
+
+> +       } else
+> +               dev_info(host->parent, "Got WP GPIO\n");
+>
+>         if (of_find_property(np, "cap-sd-highspeed", &len))
+>                 host->caps |= MMC_CAP_SD_HIGHSPEED;
+> --
+
+Passing true to mmc_gpiod_request_cd() and not setting
+MMC_CAP2_RO_ACTIVE_HIGH makes card detection work again on this board.
+The former is a one-liner but the later is more complicated since
+AFAIU the idea of the GPIO descriptor code is to handle the flags but
+in this case this detail is needed.
+
+Should we set MMC_CAP2_{CD,RO}_ACTIVE_HIGH in
+mmc_gpiod_request_{cd,ro} or add functions to get the flags for these
+cd and wp GPIO in order to set the host->caps2 flags according to the
+old logic?
+
+Thanks a lot and best regards,
+Javier
