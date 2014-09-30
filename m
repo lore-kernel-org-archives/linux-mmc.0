@@ -1,131 +1,98 @@
-From: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
-Subject: [PATCH 1/2] mmc: mxcmmc: fix race condition when dma finish a data transfer
-Date: Tue, 30 Sep 2014 16:59:37 +0200
-Message-ID: <1412089178-21946-2-git-send-email-matteo.facchinetti@sirius-es.it>
-References: <1412089178-21946-1-git-send-email-matteo.facchinetti@sirius-es.it>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1412089178-21946-1-git-send-email-matteo.facchinetti@sirius-es.it>
-Sender: linux-kernel-owner@vger.kernel.org
-To: chris@printf.net, ulf.hansson@linaro.org
-Cc: shc_work@mail.ru, s.hauer@pengutronix.de, peter.griffin@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linucppc-dev@lists.ozlabs.org, agust@denx.de, gsi@denx.de, sbabic@denx.de, Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
+From: Doug Anderson <dianders@google.com>
+Subject: Re: [PATCH V2 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to
+ handle regulators
+Date: Tue, 30 Sep 2014 10:22:34 -0700
+Message-ID: <CAD=FV=W_KiXUU7SmGxTu-JzagW-zEs6AYAbrRMFU3KvppVk_BA@mail.gmail.com>
+References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
+	<1408715272-13833-2-git-send-email-yuvaraj.cd@samsung.com>
+	<CAPDyKFqiv+eGQ_kRpXjRY207PN4J3DGcZU1n5UU0evp_5Dn_Pg@mail.gmail.com>
+	<28242432.noIRZ0lve1@amdc1032>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <28242432.noIRZ0lve1@amdc1032>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
+Cc: linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <tomasz.figa@gmail.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
+Bartlomiej
 
-During a read of data block using dma, driver might have two ways to finish to read
-and free the resources:
-1) checking STATUS_DATA_TRANS_DONE mask, in the mxcmci_irq() routine
-   (pending to mmc irq)
-2) mxmmc driver, registers also a mxcmci_dma_callback() and when transfer is finished,
-   dma driver calls this callback. (pending to dma irq)
-Both ways are concurrent with each other.
+On Mon, Sep 29, 2014 at 5:31 AM, Bartlomiej Zolnierkiewicz
+<b.zolnierkie@samsung.com> wrote:
+>
+> Hi,
+>
+> On Friday, August 29, 2014 01:34:44 PM Ulf Hansson wrote:
+>> On 22 August 2014 15:47, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
+>> > This patch makes use of mmc_regulator_get_supply() to handle
+>> > the vmmc and vqmmc regulators.Also it moves the code handling
+>> > the these regulators to dw_mci_set_ios().It turned on the vmmc
+>> > and vqmmc during MMC_POWER_UP and MMC_POWER_ON,and turned off
+>> > during MMC_POWER_OFF.
+>> >
+>> > Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+>>
+>> Thanks! Applied for next.
+>
+> Unfortunately this patch breaks mmc1 card (Kingston 32GB micro SDHC)
+> detection on Exynos5420 Arndale Octa for me:
+>
+> [   10.797979] dwmmc_exynos 12220000.mmc: no support for card's volts
+> [   10.797998] mmc1: error -22 whilst initialising SD card
+>
+> Without the patch:
+>
+> [   10.866926] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot req 50000000Hz, actual 50000000HZ div = 0)
+> [   10.866977] mmc1: new high speed SDHC card at address 1234
+> [   10.868730] mmcblk1: mmc1:1234 SA32G 29.3 GiB
+> [   10.915054]  mmcblk1: p1 p2 p3
+>
+> The config is attached (exynos_defconfig doesn't work correctly for
+> this board yet).
 
-Race condition happens when following events occur:
-/* (1) mxcmci driver start data transfer */
-         158.418970: mpc_dma_execute: mpc_dma_execute(): will_access_peripheral start cid=31
-         158.418976: mpc_dma_issue_pending <-mxcmci_request
-         158.418983: mxcmci_start_cmd <-mxcmci_request
-/* (2) mxcmci driver receive mmc irq */
-         158.419656: mxcmci_irq <-handle_irq_event_percpu
-         158.419692: mxcmci_read_response <-mxcmci_irq
-/* (3) mxcmci driver checks that transfer is complete and call mxcmci_finish_data() */
-         158.419726: mxcmci_data_done <-mxcmci_irq
-         158.419729: mxcmci_finish_data <-mxcmci_data_done
-         158.419733: dma_direct_unmap_sg <-mxcmci_finish_data
-         158.419736: mxcmci_swap_buffers.isra.24 <-mxcmci_finish_data
-         158.419762: mxcmci_read_response <-mxcmci_data_done
-/* (4) mxcmci driver (no dma): send stop command */
-         158.419765: mxcmci_start_cmd <-mxcmci_data_done
-/* (5) mxcmci driver (no dma): receive the stop command irq response */
-         158.419782: mxcmci_irq <-handle_irq_event_percpu
-         158.419812: mxcmci_read_response <-mxcmci_irq
-         158.419843: mxcmci_finish_request <-mxcmci_irq
-/* (6) dma driver: receive dma irq (finish data transfer) related by request on step 1 */
-         158.419853: mpc_dma_irq <-handle_irq_event_percpu
-         158.420001: mpc_dma_irq_process <-mpc_dma_irq
-         158.420004: mpc_dma_irq_process <-mpc_dma_irq
-/* (7) dma driver: start dma tasklet to finish the dma irq handling */
-         158.420008: mpc_dma_irq_process: mpc_dma_irq_process(): completed ch:31
-/* (8) mxcmci driver: start next data transfer using dma */
-         158.420174: mxcmci_request <-mmc_start_req
-         158.420182: dma_direct_map_sg <-mxcmci_request
-         158.420192: mpc_dma_prep_slave_sg <-mxcmci_request
-/* (9) dma driver: schedule irq tasklet and execute mxcmci dma driver callback */
-         158.420250: mpc_dma_tasklet <-tasklet_action
-         158.420254: mpc_dma_process_completed <-tasklet_action
-         158.420267: mxcmci_dma_callback <-mpc_dma_process_completed
-/* ERROR!!! (10) mxcmci driver callback works on dma data related to the step 1
-                 that is already finished */
-         158.420271: mxcmci_data_done <-mpc_dma_process_completed
-         158.420273: mxcmci_finish_data <-mxcmci_data_done
-/* ERROR!!! (11) mxcmci driver: clear data that should be used by step 8 and
-                 send an other mmc stop command (already sended on step 4) */
-         158.420276: dma_direct_unmap_sg <-mxcmci_finish_data
-         158.420279: mxcmci_swap_buffers.isra.24 <-mxcmci_finish_data
-         158.420330: mxcmci_read_response <-mxcmci_data_done
-         158.420333: mxcmci_start_cmd <-mxcmci_data_done
-         158.420338: dma_run_dependencies <-mpc_dma_process_completed
-...
-...
-...
-         168.474223: mxcmci_watchdog <-call_timer_fn
-         168.474236: mxcmci_watchdog: mxcmci_watchdog
-         168.474397: mpc_dma_device_control <-mxcmci_watchdog
+Yup, this is an expected behavior, unfortunately.  This was talked
+about extensively during the review of this patch series.
+
+I believe that patch #3 in Yuvaraj's series would fix your problem.
+Specifically <https://patchwork.kernel.org/patch/4763891/>.
 
 
-In accordance with the other drivers that using the dma engine,
-fix it, leaving *only* to dma driver the complete control to
-ending the read operation.
+The current summary of this issue is (Ulf, please correct me if I got
+anything wrong):
 
-Removing STATUS_READ_OP_DONE event activation, has as effect
-to force mxcmci driver to handle the finish data transfer only
-by mxcmci dma callback.
+1. If nothing else, Yuvaraj's patch should probably be split in two.
+One half should be the MMC core half that I originally sent Yuvaraj.
+I just rebased and re-uploaed it at
+<https://chromium-review.googlesource.com/220560> in case you're
+curious.  The second half should be the dw_mmc piece that Yuvaraj
+wrote.
 
-Signed-off-by: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
+2. Ulf has indicated that he thinks that the MMC core change (and thus
+Yuvaraj's patch) is ugly and not necessary.  He advocates instead
+using the MMC_CAP_NEEDS_POLL on all affected platforms.  That means
+we'll turn on the power every second, check for the card, then turn
+off power.
+
+3. I'm still of the opinion that the MMC core change isn't _that_
+ugly.  Given that there are a large number of systems affected (across
+at least two SoC vendors) and that it would be nice if those systems
+didn't have to poll, I'd still be happy if the MMC core change could
+go in.  ...but I'm a pragmatist and know that the polling isn't
+_terrible_, so if that's the way we need to go then so be it.
+
+--
+
+My understanding was that Yuvaraj was going to spin his patch to use a
+similar type of scheme to autodetect affected SoCs (looking for SoCs
+known to have this problem where the platform data shows them using
+the built-in card detect) and then enable MMC_CAP_NEEDS_POLL.  I
+haven't seen a patch from him, so maybe you could post this up?
+
+Note: the reason why exynos5250-snow and some other boards aren't
+affected yet is that the regulator is simply not specified in the
+device tree (it's just left always on).
+
 ---
- drivers/mmc/host/mxcmmc.c | 13 +++----------
- 1 file changed, 3 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index ad11142..536a898 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -373,13 +373,9 @@ static void mxcmci_dma_callback(void *data)
- 	del_timer(&host->watchdog);
- 
- 	stat = mxcmci_readl(host, MMC_REG_STATUS);
--	mxcmci_writel(host, stat & ~STATUS_DATA_TRANS_DONE, MMC_REG_STATUS);
- 
- 	dev_dbg(mmc_dev(host->mmc), "%s: 0x%08x\n", __func__, stat);
- 
--	if (stat & STATUS_READ_OP_DONE)
--		mxcmci_writel(host, STATUS_READ_OP_DONE, MMC_REG_STATUS);
--
- 	mxcmci_data_done(host, stat);
- }
- 
-@@ -743,10 +739,8 @@ static irqreturn_t mxcmci_irq(int irq, void *devid)
- 	sdio_irq = (stat & STATUS_SDIO_INT_ACTIVE) && host->use_sdio;
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
--	if (mxcmci_use_dma(host) &&
--	    (stat & (STATUS_READ_OP_DONE | STATUS_WRITE_OP_DONE)))
--		mxcmci_writel(host, STATUS_READ_OP_DONE | STATUS_WRITE_OP_DONE,
--			MMC_REG_STATUS);
-+	if (mxcmci_use_dma(host) && (stat & (STATUS_WRITE_OP_DONE)))
-+		mxcmci_writel(host, STATUS_WRITE_OP_DONE, MMC_REG_STATUS);
- 
- 	if (sdio_irq) {
- 		mxcmci_writel(host, STATUS_SDIO_INT_ACTIVE, MMC_REG_STATUS);
-@@ -756,8 +750,7 @@ static irqreturn_t mxcmci_irq(int irq, void *devid)
- 	if (stat & STATUS_END_CMD_RESP)
- 		mxcmci_cmd_done(host, stat);
- 
--	if (mxcmci_use_dma(host) &&
--		  (stat & (STATUS_DATA_TRANS_DONE | STATUS_WRITE_OP_DONE))) {
-+	if (mxcmci_use_dma(host) && (stat & STATUS_WRITE_OP_DONE)) {
- 		del_timer(&host->watchdog);
- 		mxcmci_data_done(host, stat);
- 	}
--- 
-1.8.3.2
+-Doug
