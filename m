@@ -1,241 +1,94 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH V2 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to handle
- regulators
-Date: Tue, 30 Sep 2014 14:23:44 +0900
-Message-ID: <542A3E60.1000401@samsung.com>
-References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
- <1408715272-13833-2-git-send-email-yuvaraj.cd@samsung.com>
- <CAPDyKFqiv+eGQ_kRpXjRY207PN4J3DGcZU1n5UU0evp_5Dn_Pg@mail.gmail.com>
- <28242432.noIRZ0lve1@amdc1032>
+From: Mike Turquette <mturquette@linaro.org>
+Subject: Re: [PATCH v3 03/12] clk: Add a function to retrieve phase
+Date: Tue, 30 Sep 2014 00:01:17 -0700
+Message-ID: <20140930070117.19023.51389@quantum>
+References: <1410466706-27386-1-git-send-email-maxime.ripard@free-electrons.com>
+ <1410466706-27386-4-git-send-email-maxime.ripard@free-electrons.com>
+ <20140928001732.19023.2496@quantum> <20140929082421.GA4388@lukather>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <28242432.noIRZ0lve1@amdc1032>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Doug Anderson <dianders@google.com>, Doug Anderson <dianders@chromium.org>, Chris Ball <cjb@laptop.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <tomasz.figa@gmail.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, CPGS <cpgs@samsung.com>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20140929082421.GA4388@lukather>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: devicetree@vger.kernel.org, ulf.hansson@linaro.org, Emilio Lopez <emilio@elopez.com.ar>, linux-mmc@vger.kernel.org, chris@printf.net, Hans de Goede <hdegoede@redhat.com>, wens@csie.org, david.lanzendoerfer@o2s.ch, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi
+Quoting Maxime Ripard (2014-09-29 01:24:21)
+> Hi Mike,
+> 
+> On Sat, Sep 27, 2014 at 05:17:32PM -0700, Mike Turquette wrote:
+> > Quoting Maxime Ripard (2014-09-11 13:18:17)
+> > > The current phase API doesn't look into the actual hardware to get the phase
+> > > value, but will rather get it from a variable only set by the set_phase
+> > > function.
+> > > 
+> > > This will cause issue when the client driver will never call the set_phase
+> > > function, where we can end up having a reported phase that will not match what
+> > > the hardware has been programmed to by the bootloader or what phase is
+> > > programmed out of reset.
+> > > 
+> > > Add a new get_phase function for the drivers to implement so that we can get
+> > > this value.
+> > > 
+> > > Signed-off-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+> > > ---
+> > >  drivers/clk/clk.c            | 10 ++++++++++
+> > >  include/linux/clk-provider.h |  5 +++++
+> > >  2 files changed, 15 insertions(+)
+> > > 
+> > > diff --git a/drivers/clk/clk.c b/drivers/clk/clk.c
+> > > index d87661af0c72..113d75db371d 100644
+> > > --- a/drivers/clk/clk.c
+> > > +++ b/drivers/clk/clk.c
+> > > @@ -1934,6 +1934,16 @@ int __clk_init(struct device *dev, struct clk *clk)
+> > >                 clk->accuracy = 0;
+> > >  
+> > >         /*
+> > > +        * Set clk's phase.
+> > > +        * Since a phase is by definition relative to its parent, just
+> > > +        * query the current clock phase, or just assume it's in phase.
+> > > +        */
+> > > +       if (clk->ops->get_phase)
+> > > +               clk->phase = clk->ops->get_phase(clk->hw);
+> > > +       else
+> > > +               clk->phase = 0;
+> > 
+> > I probably wasn't paying enough attention to this. Based on the
+> > coverletter I thought that v3 would introduce something like
+> > CLK_GET_PHASE_NOCACHE and stuff that logic into a __clk_get_phase
+> > function? Looks like this version of the series doesn't handle phases
+> > that can be changed by hardware (e.g. coming out of idle).
+> > 
+> > Correct me if I am wrong, but it looks like we retrieve the phase only
+> > once at init and then never again? The rest of the time we rely on
+> > clk->phase to always be accurate...
+> 
+> Yeah, I didn't have any use for it at the moment, and thought that if
+> someone ever needed it, it would be trivial to add, so I left it out.
+> 
+> If you want me to still do it, I can send an additional patch.
 
-On 09/29/2014 09:31 PM, Bartlomiej Zolnierkiewicz wrote:
-> 
-> Hi,
-> 
-> On Friday, August 29, 2014 01:34:44 PM Ulf Hansson wrote:
->> On 22 August 2014 15:47, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
->>> This patch makes use of mmc_regulator_get_supply() to handle
->>> the vmmc and vqmmc regulators.Also it moves the code handling
->>> the these regulators to dw_mci_set_ios().It turned on the vmmc
->>> and vqmmc during MMC_POWER_UP and MMC_POWER_ON,and turned off
->>> during MMC_POWER_OFF.
->>>
->>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
->>
->> Thanks! Applied for next.
-> 
-> Unfortunately this patch breaks mmc1 card (Kingston 32GB micro SDHC)
-> detection on Exynos5420 Arndale Octa for me:
-> 
-> [   10.797979] dwmmc_exynos 12220000.mmc: no support for card's volts
-> [   10.797998] mmc1: error -22 whilst initialising SD card
+No it is fine. A bit asymmetrical for my brain but it is dead code if no
+one is using it (yet).
 
-OCR value is not matched. Which values are supported about the mmc_host's value and card's value?
-Could you share the value?
-
-Best Regards,
-Jaehoon Chung
+Regards,
+Mike
 
 > 
-> Without the patch:
+> Thanks!
+> Maxime
 > 
-> [   10.866926] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot req 50000000Hz, actual 50000000HZ div = 0)
-> [   10.866977] mmc1: new high speed SDHC card at address 1234
-> [   10.868730] mmcblk1: mmc1:1234 SA32G 29.3 GiB 
-> [   10.915054]  mmcblk1: p1 p2 p3
-> 
-> The config is attached (exynos_defconfig doesn't work correctly for
-> this board yet).
-> 
-> Best regards,
-> --
-> Bartlomiej Zolnierkiewicz
-> Samsung R&D Institute Poland
-> Samsung Electronics
-> 
->> Kind regards
->> Uffe
->>
->>> ---
->>> changes from v1:
->>>         1.Used mmc_regulator_set_ocr() instead of regulator_enable() for vmmc.
->>>         2.Turned on vmmc and vqmmc during MMC_POWER_UP.
->>>         3. Removed the flags DW_MMC_CARD_POWERED and DW_MMC_IO_POWERED which
->>>            added during the initial version of this patch.
->>>         4. Added error message, if it failed to turn on regulator's.
->>>
->>>  drivers/mmc/host/dw_mmc.c  |   72 +++++++++++++++++++++-----------------------
->>>  include/linux/mmc/dw_mmc.h |    2 +-
->>>  2 files changed, 36 insertions(+), 38 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>> index 7f227e9..aadb0d6 100644
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -936,6 +936,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>>         struct dw_mci_slot *slot = mmc_priv(mmc);
->>>         const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
->>>         u32 regs;
->>> +       int ret;
->>>
->>>         switch (ios->bus_width) {
->>>         case MMC_BUS_WIDTH_4:
->>> @@ -974,12 +975,38 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>>
->>>         switch (ios->power_mode) {
->>>         case MMC_POWER_UP:
->>> +               if (!IS_ERR(mmc->supply.vmmc)) {
->>> +                       ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
->>> +                                       ios->vdd);
->>> +                       if (ret) {
->>> +                               dev_err(slot->host->dev,
->>> +                                       "failed to enable vmmc regulator\n");
->>> +                               /*return, if failed turn on vmmc*/
->>> +                               return;
->>> +                       }
->>> +               }
->>> +               if (!IS_ERR(mmc->supply.vqmmc) && !slot->host->vqmmc_enabled) {
->>> +                       ret = regulator_enable(mmc->supply.vqmmc);
->>> +                       if (ret < 0)
->>> +                               dev_err(slot->host->dev,
->>> +                                       "failed to enable vqmmc regulator\n");
->>> +                       else
->>> +                               slot->host->vqmmc_enabled = true;
->>> +               }
->>>                 set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
->>>                 regs = mci_readl(slot->host, PWREN);
->>>                 regs |= (1 << slot->id);
->>>                 mci_writel(slot->host, PWREN, regs);
->>>                 break;
->>>         case MMC_POWER_OFF:
->>> +               if (!IS_ERR(mmc->supply.vmmc))
->>> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
->>> +
->>> +               if (!IS_ERR(mmc->supply.vqmmc) && slot->host->vqmmc_enabled) {
->>> +                       regulator_disable(mmc->supply.vqmmc);
->>> +                       slot->host->vqmmc_enabled = false;
->>> +               }
->>> +
->>>                 regs = mci_readl(slot->host, PWREN);
->>>                 regs &= ~(1 << slot->id);
->>>                 mci_writel(slot->host, PWREN, regs);
->>> @@ -2110,7 +2137,13 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->>>                 mmc->f_max = freq[1];
->>>         }
->>>
->>> -       mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
->>> +       /*if there are external regulators, get them*/
->>> +       ret = mmc_regulator_get_supply(mmc);
->>> +       if (ret == -EPROBE_DEFER)
->>> +               goto err_setup_bus;
->>> +
->>> +       if (!mmc->ocr_avail)
->>> +               mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
->>>
->>>         if (host->pdata->caps)
->>>                 mmc->caps = host->pdata->caps;
->>> @@ -2176,7 +2209,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->>>
->>>  err_setup_bus:
->>>         mmc_free_host(mmc);
->>> -       return -EINVAL;
->>> +       return ret;
->>>  }
->>>
->>>  static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
->>> @@ -2469,24 +2502,6 @@ int dw_mci_probe(struct dw_mci *host)
->>>                 }
->>>         }
->>>
->>> -       host->vmmc = devm_regulator_get_optional(host->dev, "vmmc");
->>> -       if (IS_ERR(host->vmmc)) {
->>> -               ret = PTR_ERR(host->vmmc);
->>> -               if (ret == -EPROBE_DEFER)
->>> -                       goto err_clk_ciu;
->>> -
->>> -               dev_info(host->dev, "no vmmc regulator found: %d\n", ret);
->>> -               host->vmmc = NULL;
->>> -       } else {
->>> -               ret = regulator_enable(host->vmmc);
->>> -               if (ret) {
->>> -                       if (ret != -EPROBE_DEFER)
->>> -                               dev_err(host->dev,
->>> -                                       "regulator_enable fail: %d\n", ret);
->>> -                       goto err_clk_ciu;
->>> -               }
->>> -       }
->>> -
->>>         host->quirks = host->pdata->quirks;
->>>
->>>         spin_lock_init(&host->lock);
->>> @@ -2630,8 +2645,6 @@ err_workqueue:
->>>  err_dmaunmap:
->>>         if (host->use_dma && host->dma_ops->exit)
->>>                 host->dma_ops->exit(host);
->>> -       if (host->vmmc)
->>> -               regulator_disable(host->vmmc);
->>>
->>>  err_clk_ciu:
->>>         if (!IS_ERR(host->ciu_clk))
->>> @@ -2667,9 +2680,6 @@ void dw_mci_remove(struct dw_mci *host)
->>>         if (host->use_dma && host->dma_ops->exit)
->>>                 host->dma_ops->exit(host);
->>>
->>> -       if (host->vmmc)
->>> -               regulator_disable(host->vmmc);
->>> -
->>>         if (!IS_ERR(host->ciu_clk))
->>>                 clk_disable_unprepare(host->ciu_clk);
->>>
->>> @@ -2686,9 +2696,6 @@ EXPORT_SYMBOL(dw_mci_remove);
->>>   */
->>>  int dw_mci_suspend(struct dw_mci *host)
->>>  {
->>> -       if (host->vmmc)
->>> -               regulator_disable(host->vmmc);
->>> -
->>>         return 0;
->>>  }
->>>  EXPORT_SYMBOL(dw_mci_suspend);
->>> @@ -2697,15 +2704,6 @@ int dw_mci_resume(struct dw_mci *host)
->>>  {
->>>         int i, ret;
->>>
->>> -       if (host->vmmc) {
->>> -               ret = regulator_enable(host->vmmc);
->>> -               if (ret) {
->>> -                       dev_err(host->dev,
->>> -                               "failed to enable regulator: %d\n", ret);
->>> -                       return ret;
->>> -               }
->>> -       }
->>> -
->>>         if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
->>>                 ret = -ENODEV;
->>>                 return ret;
->>> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
->>> index 29ce014..84e2827 100644
->>> --- a/include/linux/mmc/dw_mmc.h
->>> +++ b/include/linux/mmc/dw_mmc.h
->>> @@ -188,7 +188,7 @@ struct dw_mci {
->>>         /* Workaround flags */
->>>         u32                     quirks;
->>>
->>> -       struct regulator        *vmmc;  /* Power regulator */
->>> +       bool                    vqmmc_enabled;
->>>         unsigned long           irq_flags; /* IRQ flags */
->>>         int                     irq;
->>>  };
->>> --
->>> 1.7.10.4
+> -- 
+> Maxime Ripard, Free Electrons
+> Embedded Linux, Kernel and Android engineering
+> http://free-electrons.com
