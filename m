@@ -1,66 +1,62 @@
-From: Javier Martinez Canillas <javier@dowhile0.org>
-Subject: Re: [PATCH] mmc: core: restore detect line inversion semantics
-Date: Tue, 30 Sep 2014 17:07:19 +0200
-Message-ID: <CABxcv=n-+H3wrAr_vzEsXK_vOwQc8520wM=LJhzw70ZoSbJ_Ew@mail.gmail.com>
-References: <1412085943-16872-1-git-send-email-linus.walleij@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <1412085943-16872-1-git-send-email-linus.walleij@linaro.org>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linux GPIO List <linux-gpio@vger.kernel.org>
+From: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
+Subject: [PATCH 0/2] mxcmmc driver fixes
+Date: Tue, 30 Sep 2014 16:59:36 +0200
+Message-ID: <1412089178-21946-1-git-send-email-matteo.facchinetti@sirius-es.it>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx.vmgattei.com ([77.223.18.35]:48168 "EHLO mx.vmgattei.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751166AbaI3PKP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 30 Sep 2014 11:10:15 -0400
+Received: from localhost (mx.vmgattei.com [127.0.0.1])
+	by mx.vmgattei.com (Postfix) with ESMTP id 5462520E3A
+	for <linux-mmc@vger.kernel.org>; Tue, 30 Sep 2014 17:01:09 +0200 (CEST)
+Received: from mx.vmgattei.com ([127.0.0.1])
+	by localhost (mx.vmgattei.com [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id Kj3UOHI4OuJ6 for <linux-mmc@vger.kernel.org>;
+	Tue, 30 Sep 2014 17:01:04 +0200 (CEST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: chris@printf.net, ulf.hansson@linaro.org
+Cc: shc_work@mail.ru, s.hauer@pengutronix.de, peter.griffin@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linucppc-dev@lists.ozlabs.org, agust@denx.de, gsi@denx.de, sbabic@denx.de, Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
 
-Hello Linus,
+From: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
 
-On Tue, Sep 30, 2014 at 4:05 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
-> commit 98e90de99a0c43bd434da814c882c4332441871e
-> "mmc: host: switch OF parser to use gpio descriptors"
-> switched the semantic behaviour of card detect and read
-> only flags such that the inversion capability flag would
-> only be set if inversion was explicitly specified in the
-> device tree, in the hopes that no-one was using double
-> inversion.
->
-> It turns out that the XOR:ing between the explicit
-> inversion was indeed in use, so we need to restore the
-> old semantics where both ways of inversion are checked
-> and the end result XOR:ed.
->
-> Reported-by: Javier Martinez Canillas <javier@dowhile0.org>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+Hi,
 
-Thanks a lot for the quick patch. It makes the card detection work
-again but needs two subtle changes to have the same semantics than
-before.
+this patchset contains fixes for the mxcmmc driver.
 
-> -               ret = mmc_gpiod_request_cd(host, "cd", 0, false, 0);
-> +               ret = mmc_gpiod_request_cd(host, "cd", 0, false,
-> +                                          0, &gpio_invert);
+*Patch 1:
+fix a rare race condition that breaks a data trasfer when mxcmmc
+driver use dma.
+To reproduce this error, use mmc as rootfs and start at boot time
+a realtime Xenomai application.
+The realtime it's not directly related but entropy produced by
+ipipe scheduler highlights the problem.
+When this event occurs, the mxcmmc watchdog expires,
+this cause a read error and application doesn't run.
 
-As mentioned in the other thread, the old code uses
-mmc_gpio_request_cd() which always sets override_active_level to true
-so this should be:
+*Patch 2:
+fix the default value for available voltages into mxcmci_probe
 
-ret = mmc_gpiod_request_cd(host, "cd", 0, true, 0, &gpio_invert);
+Applied to mainline Linux-3.17.0-rc6-next on arch mpc512x.
+Tested on mpc5125twr evaluation board
 
-> @@ -316,6 +317,8 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
->                         return ret;
->         }
->
-> +       *gpio_invert = gpiod_is_active_low(desc);
-> +
+Applied to custom Linux-3.9.4 on arch mpc512x
+Tested on a mpc5125 custom board.
 
-The old code set gpio_inv_cd if (!(flags & OF_GPIO_ACTIVE_LOW)) so the
-above should be:
+Regards,
+Matteo Facchinetti
+Sirius Electronic Systems
 
-*gpio_invert = !gpiod_is_active_low(desc);
 
-And the same applies to the gpio_invert assignment in
-mmc_gpiod_request_ro(). With these two changes:
+Matteo Facchinetti (2):
+  mmc: mxcmmc: fix race condition when dma finish a data transfer
+  mmc: mxcmmc: fix the default value for available voltages into
+    mxcmci_probe
 
-Tested-by: Javier Martinez Canillas <javier@dowhile0.org>
+ drivers/mmc/host/mxcmmc.c | 27 ++++++++++-----------------
+ 1 file changed, 10 insertions(+), 17 deletions(-)
 
-Best regards,
-Javier
+-- 
+1.8.3.2
+
