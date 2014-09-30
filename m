@@ -1,85 +1,65 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 5/6] mmc: block: Fix SD card stop cmd response type
-Date: Tue, 30 Sep 2014 15:41:53 +0300
-Message-ID: <542AA511.5010904@intel.com>
-References: <1411502430-25535-1-git-send-email-adrian.hunter@intel.com>	<1411502430-25535-6-git-send-email-adrian.hunter@intel.com>	<CAPDyKFr4YuCyW9DhbQRyFDTkMdm1meK96z7x7-gUvRCvy0U+qg@mail.gmail.com>	<542A9247.3050302@intel.com> <CAPDyKFrMPW_MhPpKnviZnBXoVtJkMWEBC5K3GotyVhktue+9_w@mail.gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH 3/4 v2] mmc: host: switch OF parser to use gpio descriptors
+Date: Tue, 30 Sep 2014 16:01:03 +0200
+Message-ID: <CACRpkdaH=FtB2+4cg2rQa_Md5HuRwz8VzAJ_GvM-gE3VQ8pEgQ@mail.gmail.com>
+References: <1409137253-25189-1-git-send-email-linus.walleij@linaro.org>
+	<1409137253-25189-3-git-send-email-linus.walleij@linaro.org>
+	<CABxcv==ipqvs+XpuWMVjmLPTHArBa2Kqk2Zcxn5du5+oXK3RyQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:55901 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751411AbaI3MnY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 30 Sep 2014 08:43:24 -0400
-In-Reply-To: <CAPDyKFrMPW_MhPpKnviZnBXoVtJkMWEBC5K3GotyVhktue+9_w@mail.gmail.com>
+Received: from mail-ie0-f169.google.com ([209.85.223.169]:50235 "EHLO
+	mail-ie0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750937AbaI3OBF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Sep 2014 10:01:05 -0400
+Received: by mail-ie0-f169.google.com with SMTP id tr6so4791595ieb.14
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Sep 2014 07:01:03 -0700 (PDT)
+In-Reply-To: <CABxcv==ipqvs+XpuWMVjmLPTHArBa2Kqk2Zcxn5du5+oXK3RyQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Javier Martinez Canillas <javier@dowhile0.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linux GPIO List <linux-gpio@vger.kernel.org>
 
-On 30/09/14 15:09, Ulf Hansson wrote:
-> On 30 September 2014 13:21, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 25/09/14 12:20, Ulf Hansson wrote:
->>> On 23 September 2014 22:00, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>> Nowhere in the SD Association Specifications does
->>>> it state that the stop command has an R1 response
->>>> type.  It is always R1B.  Change accordingly.
->>>
->>> It depends on how detailed you read the spec. :-)
->>>
->>> First, R1B is the same as R1, but with optional busy signalling on DAT0.
->>
->> Not exactly:
->>
->> "R1b is identical to R1 with an optional busy signal
->> transmitted on the data line. The card may become
->> busy after receiving these commands based on its
->> state prior to the command reception. The Host shall
->> check for busy at the response. Refer to Section 4.12.3
->> for a detailed description and timing diagrams."
->>
->> Note it says "The Host shall check for busy at the response."
->> It does not say "The Host is not affected"
-> 
-> Sorry, I was a bit unclear. I was referring to the format of the response.
-> 
->>
->>>
->>> Just reading the table listing CMDS their related response types,
->>> confirms what you are saying. CMD12 has an R1B.
->>
->> Which is explicit and definitive.
->>
->>> Though, going into the details of the "Timing" section where this is
->>> clearly visualized in diagrams, you realize there are no busy
->>> signalling associated with a DATA READ, only for DATA WRITE. It is
->>> also indicated in earlier sections of the spec when "DATA READ/WRITE
->>> sequences are described", but I think the "Timing" section describes
->>> this the best.
->>
->> You are looking at it only from the point of view of the card. The host
->> controller can expect that CMD12/R1b is the only valid combination
->> because that is what the specification defines.  You can't know what
->> the host controller will do if you tell it to do CMD12/R1 because that
->> is outside the spec.
->>
-> 
-> It doesn't matter from what point of view we look at it. It's all
-> about the details of the spec, which tells us there are no busy
-> signalling involved with a READ. HW designers of MMC controllers
-> should know this as well.
+On Tue, Sep 30, 2014 at 1:30 PM, Javier Martinez Canillas
+<javier@dowhile0.org> wrote:
+> On Wed, Aug 27, 2014 at 1:00 PM, Linus Walleij <linus.walleij@linaro.org> wrote:
 
-HW designers may well choose to follow the spec.
+>> This switches the central MMC OF parser to use gpio descriptors
+>> instead of grabbing GPIOs explicitly from the device tree.
+>> This strips out an unecessary use of the integer-based GPIO
+>> API that we want to get rid of, cuts down on code as the
+>> gpio descriptor code will handle active low flags.
+>>
+>> Acked-by: Alexandre Courbot <acourbot@nvidia.com>
+>> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+>
+> Card detection is failing in some boards because this patch changes
+> some semantics. I tried to come up with a fix but I didn't find an
+> obvious way to do it (more on that below).
 
-> 
-> Unless you really are fixing a regression here, I can't see the need
-> for your patch.
+I think some of this may be weird semantics: the CAP flags in the
+MMC subsystem, MMC_CAP2_CD_ACTIVE_HIGH and
+MMC_CAP2_RO_ACTIVE_HIGH are somewhat confusing since
+the GPIO subsystem nowadays has its own concept of a line
+active high or low.
 
-No, I have a host controller that wants to give a TC interrupt on CMD12
-which is correct if the response type is R1b but incorrect if the
-response type is R1.  However I am anyway fixing that with a quirk because
-theoretically MMC is affected too - although not in practice because it uses
-CMD23 instead of CMD12.
+The MMC caps make a lot of sense if the host has dedicated lines
+to read CD and WP, and does not use a GPIO for this.
 
-That got me thinking that we really ought to follow the spec and use R1b.
+When a GPIO descriptor is in use, the thing gets a bit convoluted:
+what if both the GPIO *and* the CAP flag is set to inversion?
 
+So the old code did this with XOR:
+
+        if (explicit_inv_cd ^ gpio_inv_cd)
+            host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
+
+Meaning double inversion -> no inversion.
+
+I guess I was sort of hoping that nobody did this crazy thing.
+Turns out I was wrong, so have to restore the old semantics...
+
+I'm sending a patch for you to test.
+
+Yours,
+Linus Walleij
