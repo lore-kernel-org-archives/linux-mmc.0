@@ -1,98 +1,223 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: [PATCH V2 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to
- handle regulators
-Date: Tue, 30 Sep 2014 10:22:34 -0700
-Message-ID: <CAD=FV=W_KiXUU7SmGxTu-JzagW-zEs6AYAbrRMFU3KvppVk_BA@mail.gmail.com>
-References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
-	<1408715272-13833-2-git-send-email-yuvaraj.cd@samsung.com>
-	<CAPDyKFqiv+eGQ_kRpXjRY207PN4J3DGcZU1n5UU0evp_5Dn_Pg@mail.gmail.com>
-	<28242432.noIRZ0lve1@amdc1032>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <28242432.noIRZ0lve1@amdc1032>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>
-Cc: linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <tomasz.figa@gmail.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH v2] mmc: core: restore detect line inversion semantics
+Date: Wed,  1 Oct 2014 09:51:58 +0200
+Message-ID: <1412149918-25648-1-git-send-email-linus.walleij@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:61085 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750998AbaJAHwF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Oct 2014 03:52:05 -0400
+Received: by mail-wg0-f44.google.com with SMTP id y10so372355wgg.3
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Oct 2014 00:52:03 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>, Javier Martinez Canillas <javier@dowhile0.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>
 
-Bartlomiej
+commit 98e90de99a0c43bd434da814c882c4332441871e
+"mmc: host: switch OF parser to use gpio descriptors"
+switched the semantic behaviour of card detect and read
+only flags such that the inversion capability flag would
+only be set if inversion was explicitly specified in the
+device tree, in the hopes that no-one was using double
+inversion.
 
-On Mon, Sep 29, 2014 at 5:31 AM, Bartlomiej Zolnierkiewicz
-<b.zolnierkie@samsung.com> wrote:
->
-> Hi,
->
-> On Friday, August 29, 2014 01:34:44 PM Ulf Hansson wrote:
->> On 22 August 2014 15:47, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
->> > This patch makes use of mmc_regulator_get_supply() to handle
->> > the vmmc and vqmmc regulators.Also it moves the code handling
->> > the these regulators to dw_mci_set_ios().It turned on the vmmc
->> > and vqmmc during MMC_POWER_UP and MMC_POWER_ON,and turned off
->> > during MMC_POWER_OFF.
->> >
->> > Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
->>
->> Thanks! Applied for next.
->
-> Unfortunately this patch breaks mmc1 card (Kingston 32GB micro SDHC)
-> detection on Exynos5420 Arndale Octa for me:
->
-> [   10.797979] dwmmc_exynos 12220000.mmc: no support for card's volts
-> [   10.797998] mmc1: error -22 whilst initialising SD card
->
-> Without the patch:
->
-> [   10.866926] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot req 50000000Hz, actual 50000000HZ div = 0)
-> [   10.866977] mmc1: new high speed SDHC card at address 1234
-> [   10.868730] mmcblk1: mmc1:1234 SA32G 29.3 GiB
-> [   10.915054]  mmcblk1: p1 p2 p3
->
-> The config is attached (exynos_defconfig doesn't work correctly for
-> this board yet).
+It turns out that the XOR:ing between the explicit
+inversion was indeed in use, so we need to restore the
+old semantics where both ways of inversion are checked
+and the end result XOR:ed.
 
-Yup, this is an expected behavior, unfortunately.  This was talked
-about extensively during the review of this patch series.
-
-I believe that patch #3 in Yuvaraj's series would fix your problem.
-Specifically <https://patchwork.kernel.org/patch/4763891/>.
-
-
-The current summary of this issue is (Ulf, please correct me if I got
-anything wrong):
-
-1. If nothing else, Yuvaraj's patch should probably be split in two.
-One half should be the MMC core half that I originally sent Yuvaraj.
-I just rebased and re-uploaed it at
-<https://chromium-review.googlesource.com/220560> in case you're
-curious.  The second half should be the dw_mmc piece that Yuvaraj
-wrote.
-
-2. Ulf has indicated that he thinks that the MMC core change (and thus
-Yuvaraj's patch) is ugly and not necessary.  He advocates instead
-using the MMC_CAP_NEEDS_POLL on all affected platforms.  That means
-we'll turn on the power every second, check for the card, then turn
-off power.
-
-3. I'm still of the opinion that the MMC core change isn't _that_
-ugly.  Given that there are a large number of systems affected (across
-at least two SoC vendors) and that it would be nice if those systems
-didn't have to poll, I'd still be happy if the MMC core change could
-go in.  ...but I'm a pragmatist and know that the polling isn't
-_terrible_, so if that's the way we need to go then so be it.
-
---
-
-My understanding was that Yuvaraj was going to spin his patch to use a
-similar type of scheme to autodetect affected SoCs (looking for SoCs
-known to have this problem where the platform data shows them using
-the built-in card detect) and then enable MMC_CAP_NEEDS_POLL.  I
-haven't seen a patch from him, so maybe you could post this up?
-
-Note: the reason why exynos5250-snow and some other boards aren't
-affected yet is that the regulator is simply not specified in the
-device tree (it's just left always on).
-
+Reported-by: Javier Martinez Canillas <javier@dowhile0.org>
+Tested-by: Javier Martinez Canillas <javier@dowhile0.org>
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
+ChangeLog v1->v2:
+- Always set override_active_level when getting CD GPIO
+- Invert the return value from gpiod_is_active_low() to
+  follow the old semantics
+---
+ drivers/mmc/core/host.c       | 32 ++++++++++++++++++++++++++++----
+ drivers/mmc/core/slot-gpio.c  | 10 ++++++++--
+ drivers/mmc/host/mmci.c       |  5 +++--
+ include/linux/mmc/slot-gpio.h |  4 ++--
+ 4 files changed, 41 insertions(+), 10 deletions(-)
 
--Doug
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 31969436d77c..03c53b72a2d6 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -311,6 +311,7 @@ int mmc_of_parse(struct mmc_host *host)
+ 	struct device_node *np;
+ 	u32 bus_width;
+ 	int len, ret;
++	bool cap_invert, gpio_invert;
+ 
+ 	if (!host->parent || !host->parent->of_node)
+ 		return 0;
+@@ -359,12 +360,15 @@ int mmc_of_parse(struct mmc_host *host)
+ 		host->caps |= MMC_CAP_NONREMOVABLE;
+ 	} else {
+ 		if (of_property_read_bool(np, "cd-inverted"))
+-			host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
++			cap_invert = true;
++		else
++			cap_invert = false;
+ 
+ 		if (of_find_property(np, "broken-cd", &len))
+ 			host->caps |= MMC_CAP_NEEDS_POLL;
+ 
+-		ret = mmc_gpiod_request_cd(host, "cd", 0, false, 0);
++		ret = mmc_gpiod_request_cd(host, "cd", 0, true,
++					   0, &gpio_invert);
+ 		if (ret) {
+ 			if (ret == -EPROBE_DEFER)
+ 				return ret;
+@@ -375,13 +379,29 @@ int mmc_of_parse(struct mmc_host *host)
+ 			}
+ 		} else
+ 			dev_info(host->parent, "Got CD GPIO\n");
++
++		/*
++		 * There are two ways to flag that the CD line is inverted:
++		 * through the cd-inverted flag and by the GPIO line itself
++		 * being inverted from the GPIO subsystem. This is a leftover
++		 * from the times when the GPIO subsystem did not make it
++		 * possible to flag a line as inverted.
++		 *
++		 * If the capability on the host AND the GPIO line are
++		 * both inverted, the end result is that the CD line is
++		 * not inverted.
++		 */
++		if (cap_invert ^ gpio_invert)
++			host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
+ 	}
+ 
+ 	/* Parse Write Protection */
+ 	if (of_property_read_bool(np, "wp-inverted"))
+-		host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
++		cap_invert = true;
++	else
++		cap_invert = false;
+ 
+-	ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0);
++	ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0, &gpio_invert);
+ 	if (ret) {
+ 		if (ret == -EPROBE_DEFER)
+ 			goto out;
+@@ -393,6 +413,10 @@ int mmc_of_parse(struct mmc_host *host)
+ 	} else
+ 		dev_info(host->parent, "Got WP GPIO\n");
+ 
++	/* See the comment on CD inversion above */
++	if (cap_invert ^ gpio_invert)
++		host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
++
+ 	if (of_find_property(np, "cap-sd-highspeed", &len))
+ 		host->caps |= MMC_CAP_SD_HIGHSPEED;
+ 	if (of_find_property(np, "cap-mmc-highspeed", &len))
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index 38f76555d4bf..411f643fa369 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -281,6 +281,7 @@ EXPORT_SYMBOL(mmc_gpio_free_cd);
+  * @idx: index of the GPIO to obtain in the consumer
+  * @override_active_level: ignore %GPIO_ACTIVE_LOW flag
+  * @debounce: debounce time in microseconds
++ * @gpio_invert: will return whether the GPIO line is inverted or not
+  *
+  * Use this function in place of mmc_gpio_request_cd() to use the GPIO
+  * descriptor API.  Note that it is paired with mmc_gpiod_free_cd() not
+@@ -291,7 +292,7 @@ EXPORT_SYMBOL(mmc_gpio_free_cd);
+  */
+ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
+ 			 unsigned int idx, bool override_active_level,
+-			 unsigned int debounce)
++			 unsigned int debounce, bool *gpio_invert)
+ {
+ 	struct mmc_gpio *ctx;
+ 	struct gpio_desc *desc;
+@@ -316,6 +317,8 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
+ 			return ret;
+ 	}
+ 
++	*gpio_invert = !gpiod_is_active_low(desc);
++
+ 	ctx->override_cd_active_level = override_active_level;
+ 	ctx->cd_gpio = desc;
+ 
+@@ -330,6 +333,7 @@ EXPORT_SYMBOL(mmc_gpiod_request_cd);
+  * @idx: index of the GPIO to obtain in the consumer
+  * @override_active_level: ignore %GPIO_ACTIVE_LOW flag
+  * @debounce: debounce time in microseconds
++ * @gpio_invert: will return whether the GPIO line is inverted or not
+  *
+  * Use this function in place of mmc_gpio_request_ro() to use the GPIO
+  * descriptor API.  Note that it is paired with mmc_gpiod_free_ro() not
+@@ -339,7 +343,7 @@ EXPORT_SYMBOL(mmc_gpiod_request_cd);
+  */
+ int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
+ 			 unsigned int idx, bool override_active_level,
+-			 unsigned int debounce)
++			 unsigned int debounce, bool *gpio_invert)
+ {
+ 	struct mmc_gpio *ctx;
+ 	struct gpio_desc *desc;
+@@ -364,6 +368,8 @@ int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
+ 			return ret;
+ 	}
+ 
++	*gpio_invert = !gpiod_is_active_low(desc);
++
+ 	ctx->override_ro_active_level = override_active_level;
+ 	ctx->ro_gpio = desc;
+ 
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index c9dafed550f2..5c9f2d543144 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1512,6 +1512,7 @@ static int mmci_probe(struct amba_device *dev,
+ 	struct variant_data *variant = id->data;
+ 	struct mmci_host *host;
+ 	struct mmc_host *mmc;
++	bool dummy;
+ 	int ret;
+ 
+ 	/* Must have platform data or Device Tree. */
+@@ -1682,7 +1683,7 @@ static int mmci_probe(struct amba_device *dev,
+ 	 * silently of these do not exist and proceed to try platform data
+ 	 */
+ 	if (!np) {
+-		ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0);
++		ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0, &dummy);
+ 		if (ret < 0) {
+ 			if (ret == -EPROBE_DEFER)
+ 				goto clk_disable;
+@@ -1693,7 +1694,7 @@ static int mmci_probe(struct amba_device *dev,
+ 			}
+ 		}
+ 
+-		ret = mmc_gpiod_request_ro(mmc, "wp", 0, false, 0);
++		ret = mmc_gpiod_request_ro(mmc, "wp", 0, false, 0, &dummy);
+ 		if (ret < 0) {
+ 			if (ret == -EPROBE_DEFER)
+ 				goto clk_disable;
+diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
+index a0d0442c15bf..e56fa24c9322 100644
+--- a/include/linux/mmc/slot-gpio.h
++++ b/include/linux/mmc/slot-gpio.h
+@@ -24,10 +24,10 @@ void mmc_gpio_free_cd(struct mmc_host *host);
+ 
+ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
+ 			 unsigned int idx, bool override_active_level,
+-			 unsigned int debounce);
++			 unsigned int debounce, bool *gpio_invert);
+ int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
+ 			 unsigned int idx, bool override_active_level,
+-			 unsigned int debounce);
++			 unsigned int debounce, bool *gpio_invert);
+ void mmc_gpiod_free_cd(struct mmc_host *host);
+ void mmc_gpiod_request_cd_irq(struct mmc_host *host);
+ 
+-- 
+1.9.3
+
