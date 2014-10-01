@@ -1,239 +1,103 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: core: restore detect line inversion semantics
-Date: Wed, 1 Oct 2014 10:24:16 +0200
-Message-ID: <CAPDyKFoQ3h0aza8YfRgZoz2JmES2_qCwHjH4xiGDo903w3vkVQ@mail.gmail.com>
-References: <1412149918-25648-1-git-send-email-linus.walleij@linaro.org>
+Subject: Re: [PATCH 5/6] mmc: block: Fix SD card stop cmd response type
+Date: Wed, 1 Oct 2014 10:36:16 +0200
+Message-ID: <CAPDyKFpzEgCJHJ2=pKCz1Ysu7h_eRF7FptRFLfTPQM1GkzGTtA@mail.gmail.com>
+References: <1411502430-25535-1-git-send-email-adrian.hunter@intel.com>
+	<1411502430-25535-6-git-send-email-adrian.hunter@intel.com>
+	<CAPDyKFr4YuCyW9DhbQRyFDTkMdm1meK96z7x7-gUvRCvy0U+qg@mail.gmail.com>
+	<542A9247.3050302@intel.com>
+	<CAPDyKFrMPW_MhPpKnviZnBXoVtJkMWEBC5K3GotyVhktue+9_w@mail.gmail.com>
+	<542AA511.5010904@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f43.google.com ([209.85.192.43]:34963 "EHLO
-	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750998AbaJAIYR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Oct 2014 04:24:17 -0400
-Received: by mail-qg0-f43.google.com with SMTP id j107so191701qga.30
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Oct 2014 01:24:16 -0700 (PDT)
-In-Reply-To: <1412149918-25648-1-git-send-email-linus.walleij@linaro.org>
+Received: from mail-qa0-f54.google.com ([209.85.216.54]:35092 "EHLO
+	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750981AbaJAIgR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Oct 2014 04:36:17 -0400
+Received: by mail-qa0-f54.google.com with SMTP id i13so180687qae.27
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Oct 2014 01:36:16 -0700 (PDT)
+In-Reply-To: <542AA511.5010904@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Javier Martinez Canillas <javier@dowhile0.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 1 October 2014 09:51, Linus Walleij <linus.walleij@linaro.org> wrote:
-> commit 98e90de99a0c43bd434da814c882c4332441871e
-> "mmc: host: switch OF parser to use gpio descriptors"
-> switched the semantic behaviour of card detect and read
-> only flags such that the inversion capability flag would
-> only be set if inversion was explicitly specified in the
-> device tree, in the hopes that no-one was using double
-> inversion.
+On 30 September 2014 14:41, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 30/09/14 15:09, Ulf Hansson wrote:
+>> On 30 September 2014 13:21, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> On 25/09/14 12:20, Ulf Hansson wrote:
+>>>> On 23 September 2014 22:00, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>> Nowhere in the SD Association Specifications does
+>>>>> it state that the stop command has an R1 response
+>>>>> type.  It is always R1B.  Change accordingly.
+>>>>
+>>>> It depends on how detailed you read the spec. :-)
+>>>>
+>>>> First, R1B is the same as R1, but with optional busy signalling on DAT0.
+>>>
+>>> Not exactly:
+>>>
+>>> "R1b is identical to R1 with an optional busy signal
+>>> transmitted on the data line. The card may become
+>>> busy after receiving these commands based on its
+>>> state prior to the command reception. The Host shall
+>>> check for busy at the response. Refer to Section 4.12.3
+>>> for a detailed description and timing diagrams."
+>>>
+>>> Note it says "The Host shall check for busy at the response."
+>>> It does not say "The Host is not affected"
+>>
+>> Sorry, I was a bit unclear. I was referring to the format of the response.
+>>
+>>>
+>>>>
+>>>> Just reading the table listing CMDS their related response types,
+>>>> confirms what you are saying. CMD12 has an R1B.
+>>>
+>>> Which is explicit and definitive.
+>>>
+>>>> Though, going into the details of the "Timing" section where this is
+>>>> clearly visualized in diagrams, you realize there are no busy
+>>>> signalling associated with a DATA READ, only for DATA WRITE. It is
+>>>> also indicated in earlier sections of the spec when "DATA READ/WRITE
+>>>> sequences are described", but I think the "Timing" section describes
+>>>> this the best.
+>>>
+>>> You are looking at it only from the point of view of the card. The host
+>>> controller can expect that CMD12/R1b is the only valid combination
+>>> because that is what the specification defines.  You can't know what
+>>> the host controller will do if you tell it to do CMD12/R1 because that
+>>> is outside the spec.
+>>>
+>>
+>> It doesn't matter from what point of view we look at it. It's all
+>> about the details of the spec, which tells us there are no busy
+>> signalling involved with a READ. HW designers of MMC controllers
+>> should know this as well.
 >
-> It turns out that the XOR:ing between the explicit
-> inversion was indeed in use, so we need to restore the
-> old semantics where both ways of inversion are checked
-> and the end result XOR:ed.
+> HW designers may well choose to follow the spec.
 >
-> Reported-by: Javier Martinez Canillas <javier@dowhile0.org>
-> Tested-by: Javier Martinez Canillas <javier@dowhile0.org>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
-> ChangeLog v1->v2:
-> - Always set override_active_level when getting CD GPIO
-> - Invert the return value from gpiod_is_active_low() to
->   follow the old semantics
-> ---
->  drivers/mmc/core/host.c       | 32 ++++++++++++++++++++++++++++----
->  drivers/mmc/core/slot-gpio.c  | 10 ++++++++--
->  drivers/mmc/host/mmci.c       |  5 +++--
->  include/linux/mmc/slot-gpio.h |  4 ++--
->  4 files changed, 41 insertions(+), 10 deletions(-)
+>>
+>> Unless you really are fixing a regression here, I can't see the need
+>> for your patch.
 >
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 31969436d77c..03c53b72a2d6 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -311,6 +311,7 @@ int mmc_of_parse(struct mmc_host *host)
->         struct device_node *np;
->         u32 bus_width;
->         int len, ret;
-> +       bool cap_invert, gpio_invert;
+> No, I have a host controller that wants to give a TC interrupt on CMD12
+> which is correct if the response type is R1b but incorrect if the
+> response type is R1.  However I am anyway fixing that with a quirk because
+> theoretically MMC is affected too - although not in practice because it uses
+> CMD23 instead of CMD12.
 >
->         if (!host->parent || !host->parent->of_node)
->                 return 0;
-> @@ -359,12 +360,15 @@ int mmc_of_parse(struct mmc_host *host)
->                 host->caps |= MMC_CAP_NONREMOVABLE;
->         } else {
->                 if (of_property_read_bool(np, "cd-inverted"))
-> -                       host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
-> +                       cap_invert = true;
-> +               else
-> +                       cap_invert = false;
->
->                 if (of_find_property(np, "broken-cd", &len))
->                         host->caps |= MMC_CAP_NEEDS_POLL;
->
-> -               ret = mmc_gpiod_request_cd(host, "cd", 0, false, 0);
-> +               ret = mmc_gpiod_request_cd(host, "cd", 0, true,
-> +                                          0, &gpio_invert);
->                 if (ret) {
->                         if (ret == -EPROBE_DEFER)
->                                 return ret;
-> @@ -375,13 +379,29 @@ int mmc_of_parse(struct mmc_host *host)
->                         }
->                 } else
->                         dev_info(host->parent, "Got CD GPIO\n");
-> +
-> +               /*
-> +                * There are two ways to flag that the CD line is inverted:
-> +                * through the cd-inverted flag and by the GPIO line itself
-> +                * being inverted from the GPIO subsystem. This is a leftover
-> +                * from the times when the GPIO subsystem did not make it
-> +                * possible to flag a line as inverted.
-> +                *
-> +                * If the capability on the host AND the GPIO line are
-> +                * both inverted, the end result is that the CD line is
-> +                * not inverted.
-> +                */
-> +               if (cap_invert ^ gpio_invert)
-> +                       host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
->         }
->
->         /* Parse Write Protection */
->         if (of_property_read_bool(np, "wp-inverted"))
-> -               host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
-> +               cap_invert = true;
-> +       else
-> +               cap_invert = false;
->
-> -       ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0);
-> +       ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0, &gpio_invert);
->         if (ret) {
->                 if (ret == -EPROBE_DEFER)
->                         goto out;
-> @@ -393,6 +413,10 @@ int mmc_of_parse(struct mmc_host *host)
->         } else
->                 dev_info(host->parent, "Got WP GPIO\n");
->
-> +       /* See the comment on CD inversion above */
-> +       if (cap_invert ^ gpio_invert)
-> +               host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
-> +
->         if (of_find_property(np, "cap-sd-highspeed", &len))
->                 host->caps |= MMC_CAP_SD_HIGHSPEED;
->         if (of_find_property(np, "cap-mmc-highspeed", &len))
-> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-> index 38f76555d4bf..411f643fa369 100644
-> --- a/drivers/mmc/core/slot-gpio.c
-> +++ b/drivers/mmc/core/slot-gpio.c
-> @@ -281,6 +281,7 @@ EXPORT_SYMBOL(mmc_gpio_free_cd);
->   * @idx: index of the GPIO to obtain in the consumer
->   * @override_active_level: ignore %GPIO_ACTIVE_LOW flag
->   * @debounce: debounce time in microseconds
-> + * @gpio_invert: will return whether the GPIO line is inverted or not
->   *
->   * Use this function in place of mmc_gpio_request_cd() to use the GPIO
->   * descriptor API.  Note that it is paired with mmc_gpiod_free_cd() not
-> @@ -291,7 +292,7 @@ EXPORT_SYMBOL(mmc_gpio_free_cd);
->   */
->  int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
->                          unsigned int idx, bool override_active_level,
-> -                        unsigned int debounce)
-> +                        unsigned int debounce, bool *gpio_invert)
->  {
->         struct mmc_gpio *ctx;
->         struct gpio_desc *desc;
-> @@ -316,6 +317,8 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
->                         return ret;
->         }
->
-> +       *gpio_invert = !gpiod_is_active_low(desc);
-> +
+> That got me thinking that we really ought to follow the spec and use R1b.
 
-May I suggest to add "if (!gpio_invert)" before assigning the value to it.
+I will certainly keep this in mind. Likely a similar situation will
+occur when I fixup mmc erase/discard.
 
-That means callers of this function gets to decide whether the result
-of gpio_invert is interesting. Those that think not, can provide
-"NULL".
+In principle host drivers must pay attention to MMC_RSP_R1B and act
+accordingly both if set and not set. I suppose you will add some extra
+quirks around that in your driver.
+
+Anyway, thanks for the discussion, it was useful!
 
 Kind regards
 Uffe
-
-
->         ctx->override_cd_active_level = override_active_level;
->         ctx->cd_gpio = desc;
->
-> @@ -330,6 +333,7 @@ EXPORT_SYMBOL(mmc_gpiod_request_cd);
->   * @idx: index of the GPIO to obtain in the consumer
->   * @override_active_level: ignore %GPIO_ACTIVE_LOW flag
->   * @debounce: debounce time in microseconds
-> + * @gpio_invert: will return whether the GPIO line is inverted or not
->   *
->   * Use this function in place of mmc_gpio_request_ro() to use the GPIO
->   * descriptor API.  Note that it is paired with mmc_gpiod_free_ro() not
-> @@ -339,7 +343,7 @@ EXPORT_SYMBOL(mmc_gpiod_request_cd);
->   */
->  int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
->                          unsigned int idx, bool override_active_level,
-> -                        unsigned int debounce)
-> +                        unsigned int debounce, bool *gpio_invert)
->  {
->         struct mmc_gpio *ctx;
->         struct gpio_desc *desc;
-> @@ -364,6 +368,8 @@ int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
->                         return ret;
->         }
->
-> +       *gpio_invert = !gpiod_is_active_low(desc);
-> +
->         ctx->override_ro_active_level = override_active_level;
->         ctx->ro_gpio = desc;
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index c9dafed550f2..5c9f2d543144 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -1512,6 +1512,7 @@ static int mmci_probe(struct amba_device *dev,
->         struct variant_data *variant = id->data;
->         struct mmci_host *host;
->         struct mmc_host *mmc;
-> +       bool dummy;
->         int ret;
->
->         /* Must have platform data or Device Tree. */
-> @@ -1682,7 +1683,7 @@ static int mmci_probe(struct amba_device *dev,
->          * silently of these do not exist and proceed to try platform data
->          */
->         if (!np) {
-> -               ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0);
-> +               ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0, &dummy);
->                 if (ret < 0) {
->                         if (ret == -EPROBE_DEFER)
->                                 goto clk_disable;
-> @@ -1693,7 +1694,7 @@ static int mmci_probe(struct amba_device *dev,
->                         }
->                 }
->
-> -               ret = mmc_gpiod_request_ro(mmc, "wp", 0, false, 0);
-> +               ret = mmc_gpiod_request_ro(mmc, "wp", 0, false, 0, &dummy);
->                 if (ret < 0) {
->                         if (ret == -EPROBE_DEFER)
->                                 goto clk_disable;
-> diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
-> index a0d0442c15bf..e56fa24c9322 100644
-> --- a/include/linux/mmc/slot-gpio.h
-> +++ b/include/linux/mmc/slot-gpio.h
-> @@ -24,10 +24,10 @@ void mmc_gpio_free_cd(struct mmc_host *host);
->
->  int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
->                          unsigned int idx, bool override_active_level,
-> -                        unsigned int debounce);
-> +                        unsigned int debounce, bool *gpio_invert);
->  int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
->                          unsigned int idx, bool override_active_level,
-> -                        unsigned int debounce);
-> +                        unsigned int debounce, bool *gpio_invert);
->  void mmc_gpiod_free_cd(struct mmc_host *host);
->  void mmc_gpiod_request_cd_irq(struct mmc_host *host);
->
-> --
-> 1.9.3
->
