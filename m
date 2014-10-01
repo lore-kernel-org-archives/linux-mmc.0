@@ -1,276 +1,227 @@
-From: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Subject: Re: [PATCH V2 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to handle
- regulators
-Date: Wed, 01 Oct 2014 16:14:32 +0200
-Message-ID: <3871520.cBV7rop9YT@amdc1032>
-References: <1408715272-13833-1-git-send-email-yuvaraj.cd@samsung.com>
- <542A3E60.1000401@samsung.com> <3515419.FCCWMziJlh@amdc1032>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3] mmc: core: restore detect line inversion semantics
+Date: Wed, 1 Oct 2014 16:44:31 +0200
+Message-ID: <CAPDyKFpRUCgs2PJXB-v_+QwN8hZFXdi+Vn=m3UugQda6hC_BQw@mail.gmail.com>
+References: <1412171139-3421-1-git-send-email-linus.walleij@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:19179 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751477AbaJAOOr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Oct 2014 10:14:47 -0400
-In-reply-to: <3515419.FCCWMziJlh@amdc1032>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <1412171139-3421-1-git-send-email-linus.walleij@linaro.org>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Javier Martinez Canillas <javier@dowhile0.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Doug Anderson <dianders@google.com>, Doug Anderson <dianders@chromium.org>, Chris Ball <cjb@laptop.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <tomasz.figa@gmail.com>, Kukjin Kim <kgene.kim@samsung.com>, sunil joshi <joshi@samsung.com>, Prashanth G <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, CPGS <cpgs@samsung.com>
 
-On Wednesday, October 01, 2014 03:57:54 PM Bartlomiej Zolnierkiewicz wrote:
-> 
-> Hi,
-> 
-> On Tuesday, September 30, 2014 02:23:44 PM Jaehoon Chung wrote:
-> > Hi
-> > 
-> > On 09/29/2014 09:31 PM, Bartlomiej Zolnierkiewicz wrote:
-> > > 
-> > > Hi,
-> > > 
-> > > On Friday, August 29, 2014 01:34:44 PM Ulf Hansson wrote:
-> > >> On 22 August 2014 15:47, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com> wrote:
-> > >>> This patch makes use of mmc_regulator_get_supply() to handle
-> > >>> the vmmc and vqmmc regulators.Also it moves the code handling
-> > >>> the these regulators to dw_mci_set_ios().It turned on the vmmc
-> > >>> and vqmmc during MMC_POWER_UP and MMC_POWER_ON,and turned off
-> > >>> during MMC_POWER_OFF.
-> > >>>
-> > >>> Signed-off-by: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
-> > >>
-> > >> Thanks! Applied for next.
-> > > 
-> > > Unfortunately this patch breaks mmc1 card (Kingston 32GB micro SDHC)
-> > > detection on Exynos5420 Arndale Octa for me:
-> > > 
-> > > [   10.797979] dwmmc_exynos 12220000.mmc: no support for card's volts
-> > > [   10.797998] mmc1: error -22 whilst initialising SD card
-> > 
-> > OCR value is not matched. Which values are supported about the mmc_host's value and card's value?
-> > Could you share the value?
-> 
-> Sure.  I've added dev_info()s at the beginning of mmc_select_voltage():
-> 
-> +	dev_warn(mmc_dev(host), "card's volts: 0x%0x\n", ocr);
-> +	dev_warn(mmc_dev(host), "host's volts: 0x%0x\n", host->ocr_avail);
-> 
-> and got following results:
-> 
-> [   10.851678] dwmmc_exynos 12220000.mmc: card's volts: 0xff8000
-> [   10.851691] dwmmc_exynos 12220000.mmc: host's volts: 0x80
+On 1 October 2014 15:45, Linus Walleij <linus.walleij@linaro.org> wrote:
+> commit 98e90de99a0c43bd434da814c882c4332441871e
+> "mmc: host: switch OF parser to use gpio descriptors"
+> switched the semantic behaviour of card detect and read
+> only flags such that the inversion capability flag would
+> only be set if inversion was explicitly specified in the
+> device tree, in the hopes that no-one was using double
+> inversion.
+>
+> It turns out that the XOR:ing between the explicit
+> inversion was indeed in use, so we need to restore the
+> old semantics where both ways of inversion are checked
+> and the end result XOR:ed.
+>
+> Reported-by: Javier Martinez Canillas <javier@dowhile0.org>
+> Tested-by: Javier Martinez Canillas <javier@dowhile0.org>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 
-Data for the working kernel:
+Thanks! Applied for next!
 
-[   10.856214] dwmmc_exynos 12220000.mmc: card's volts: 0xff8000
-[   10.856227] dwmmc_exynos 12220000.mmc: host's volts: 0x300000
+Kind regards
+Uffe
 
-Best regards,
---
-Bartlomiej Zolnierkiewicz
-Samsung R&D Institute Poland
-Samsung Electronics
-
-> Best regards,
+> ---
+> ChangeLog v2->v3:
+> - Make it possible to pass NULL as pointer for the gpio_invert
+>   variable, so we don't need dummy variables in callers
+> ChangeLog v1->v2:
+> - Always set override_active_level when getting CD GPIO
+> - Invert the return value from gpiod_is_active_low() to
+>   follow the old semantics
+> ---
+>  drivers/mmc/core/host.c       | 32 ++++++++++++++++++++++++++++----
+>  drivers/mmc/core/slot-gpio.c  | 14 ++++++++++++--
+>  drivers/mmc/host/mmci.c       |  4 ++--
+>  include/linux/mmc/slot-gpio.h |  4 ++--
+>  4 files changed, 44 insertions(+), 10 deletions(-)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 31969436d77c..03c53b72a2d6 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -311,6 +311,7 @@ int mmc_of_parse(struct mmc_host *host)
+>         struct device_node *np;
+>         u32 bus_width;
+>         int len, ret;
+> +       bool cap_invert, gpio_invert;
+>
+>         if (!host->parent || !host->parent->of_node)
+>                 return 0;
+> @@ -359,12 +360,15 @@ int mmc_of_parse(struct mmc_host *host)
+>                 host->caps |= MMC_CAP_NONREMOVABLE;
+>         } else {
+>                 if (of_property_read_bool(np, "cd-inverted"))
+> -                       host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
+> +                       cap_invert = true;
+> +               else
+> +                       cap_invert = false;
+>
+>                 if (of_find_property(np, "broken-cd", &len))
+>                         host->caps |= MMC_CAP_NEEDS_POLL;
+>
+> -               ret = mmc_gpiod_request_cd(host, "cd", 0, false, 0);
+> +               ret = mmc_gpiod_request_cd(host, "cd", 0, true,
+> +                                          0, &gpio_invert);
+>                 if (ret) {
+>                         if (ret == -EPROBE_DEFER)
+>                                 return ret;
+> @@ -375,13 +379,29 @@ int mmc_of_parse(struct mmc_host *host)
+>                         }
+>                 } else
+>                         dev_info(host->parent, "Got CD GPIO\n");
+> +
+> +               /*
+> +                * There are two ways to flag that the CD line is inverted:
+> +                * through the cd-inverted flag and by the GPIO line itself
+> +                * being inverted from the GPIO subsystem. This is a leftover
+> +                * from the times when the GPIO subsystem did not make it
+> +                * possible to flag a line as inverted.
+> +                *
+> +                * If the capability on the host AND the GPIO line are
+> +                * both inverted, the end result is that the CD line is
+> +                * not inverted.
+> +                */
+> +               if (cap_invert ^ gpio_invert)
+> +                       host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
+>         }
+>
+>         /* Parse Write Protection */
+>         if (of_property_read_bool(np, "wp-inverted"))
+> -               host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+> +               cap_invert = true;
+> +       else
+> +               cap_invert = false;
+>
+> -       ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0);
+> +       ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0, &gpio_invert);
+>         if (ret) {
+>                 if (ret == -EPROBE_DEFER)
+>                         goto out;
+> @@ -393,6 +413,10 @@ int mmc_of_parse(struct mmc_host *host)
+>         } else
+>                 dev_info(host->parent, "Got WP GPIO\n");
+>
+> +       /* See the comment on CD inversion above */
+> +       if (cap_invert ^ gpio_invert)
+> +               host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+> +
+>         if (of_find_property(np, "cap-sd-highspeed", &len))
+>                 host->caps |= MMC_CAP_SD_HIGHSPEED;
+>         if (of_find_property(np, "cap-mmc-highspeed", &len))
+> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+> index 38f76555d4bf..69bbf2adb329 100644
+> --- a/drivers/mmc/core/slot-gpio.c
+> +++ b/drivers/mmc/core/slot-gpio.c
+> @@ -281,6 +281,8 @@ EXPORT_SYMBOL(mmc_gpio_free_cd);
+>   * @idx: index of the GPIO to obtain in the consumer
+>   * @override_active_level: ignore %GPIO_ACTIVE_LOW flag
+>   * @debounce: debounce time in microseconds
+> + * @gpio_invert: will return whether the GPIO line is inverted or not, set
+> + * to NULL to ignore
+>   *
+>   * Use this function in place of mmc_gpio_request_cd() to use the GPIO
+>   * descriptor API.  Note that it is paired with mmc_gpiod_free_cd() not
+> @@ -291,7 +293,7 @@ EXPORT_SYMBOL(mmc_gpio_free_cd);
+>   */
+>  int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
+>                          unsigned int idx, bool override_active_level,
+> -                        unsigned int debounce)
+> +                        unsigned int debounce, bool *gpio_invert)
+>  {
+>         struct mmc_gpio *ctx;
+>         struct gpio_desc *desc;
+> @@ -316,6 +318,9 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
+>                         return ret;
+>         }
+>
+> +       if (gpio_invert)
+> +               *gpio_invert = !gpiod_is_active_low(desc);
+> +
+>         ctx->override_cd_active_level = override_active_level;
+>         ctx->cd_gpio = desc;
+>
+> @@ -330,6 +335,8 @@ EXPORT_SYMBOL(mmc_gpiod_request_cd);
+>   * @idx: index of the GPIO to obtain in the consumer
+>   * @override_active_level: ignore %GPIO_ACTIVE_LOW flag
+>   * @debounce: debounce time in microseconds
+> + * @gpio_invert: will return whether the GPIO line is inverted or not,
+> + * set to NULL to ignore
+>   *
+>   * Use this function in place of mmc_gpio_request_ro() to use the GPIO
+>   * descriptor API.  Note that it is paired with mmc_gpiod_free_ro() not
+> @@ -339,7 +346,7 @@ EXPORT_SYMBOL(mmc_gpiod_request_cd);
+>   */
+>  int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
+>                          unsigned int idx, bool override_active_level,
+> -                        unsigned int debounce)
+> +                        unsigned int debounce, bool *gpio_invert)
+>  {
+>         struct mmc_gpio *ctx;
+>         struct gpio_desc *desc;
+> @@ -364,6 +371,9 @@ int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
+>                         return ret;
+>         }
+>
+> +       if (gpio_invert)
+> +               *gpio_invert = !gpiod_is_active_low(desc);
+> +
+>         ctx->override_ro_active_level = override_active_level;
+>         ctx->ro_gpio = desc;
+>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index c9dafed550f2..43af791e2e45 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -1682,7 +1682,7 @@ static int mmci_probe(struct amba_device *dev,
+>          * silently of these do not exist and proceed to try platform data
+>          */
+>         if (!np) {
+> -               ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0);
+> +               ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0, NULL);
+>                 if (ret < 0) {
+>                         if (ret == -EPROBE_DEFER)
+>                                 goto clk_disable;
+> @@ -1693,7 +1693,7 @@ static int mmci_probe(struct amba_device *dev,
+>                         }
+>                 }
+>
+> -               ret = mmc_gpiod_request_ro(mmc, "wp", 0, false, 0);
+> +               ret = mmc_gpiod_request_ro(mmc, "wp", 0, false, 0, NULL);
+>                 if (ret < 0) {
+>                         if (ret == -EPROBE_DEFER)
+>                                 goto clk_disable;
+> diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
+> index a0d0442c15bf..e56fa24c9322 100644
+> --- a/include/linux/mmc/slot-gpio.h
+> +++ b/include/linux/mmc/slot-gpio.h
+> @@ -24,10 +24,10 @@ void mmc_gpio_free_cd(struct mmc_host *host);
+>
+>  int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
+>                          unsigned int idx, bool override_active_level,
+> -                        unsigned int debounce);
+> +                        unsigned int debounce, bool *gpio_invert);
+>  int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
+>                          unsigned int idx, bool override_active_level,
+> -                        unsigned int debounce);
+> +                        unsigned int debounce, bool *gpio_invert);
+>  void mmc_gpiod_free_cd(struct mmc_host *host);
+>  void mmc_gpiod_request_cd_irq(struct mmc_host *host);
+>
 > --
-> Bartlomiej Zolnierkiewicz
-> Samsung R&D Institute Poland
-> Samsung Electronics
-> 
-> > Best Regards,
-> > Jaehoon Chung
-> > 
-> > > 
-> > > Without the patch:
-> > > 
-> > > [   10.866926] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot req 50000000Hz, actual 50000000HZ div = 0)
-> > > [   10.866977] mmc1: new high speed SDHC card at address 1234
-> > > [   10.868730] mmcblk1: mmc1:1234 SA32G 29.3 GiB 
-> > > [   10.915054]  mmcblk1: p1 p2 p3
-> > > 
-> > > The config is attached (exynos_defconfig doesn't work correctly for
-> > > this board yet).
-> > > 
-> > > Best regards,
-> > > --
-> > > Bartlomiej Zolnierkiewicz
-> > > Samsung R&D Institute Poland
-> > > Samsung Electronics
-> > > 
-> > >> Kind regards
-> > >> Uffe
-> > >>
-> > >>> ---
-> > >>> changes from v1:
-> > >>>         1.Used mmc_regulator_set_ocr() instead of regulator_enable() for vmmc.
-> > >>>         2.Turned on vmmc and vqmmc during MMC_POWER_UP.
-> > >>>         3. Removed the flags DW_MMC_CARD_POWERED and DW_MMC_IO_POWERED which
-> > >>>            added during the initial version of this patch.
-> > >>>         4. Added error message, if it failed to turn on regulator's.
-> > >>>
-> > >>>  drivers/mmc/host/dw_mmc.c  |   72 +++++++++++++++++++++-----------------------
-> > >>>  include/linux/mmc/dw_mmc.h |    2 +-
-> > >>>  2 files changed, 36 insertions(+), 38 deletions(-)
-> > >>>
-> > >>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> > >>> index 7f227e9..aadb0d6 100644
-> > >>> --- a/drivers/mmc/host/dw_mmc.c
-> > >>> +++ b/drivers/mmc/host/dw_mmc.c
-> > >>> @@ -936,6 +936,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> > >>>         struct dw_mci_slot *slot = mmc_priv(mmc);
-> > >>>         const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
-> > >>>         u32 regs;
-> > >>> +       int ret;
-> > >>>
-> > >>>         switch (ios->bus_width) {
-> > >>>         case MMC_BUS_WIDTH_4:
-> > >>> @@ -974,12 +975,38 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> > >>>
-> > >>>         switch (ios->power_mode) {
-> > >>>         case MMC_POWER_UP:
-> > >>> +               if (!IS_ERR(mmc->supply.vmmc)) {
-> > >>> +                       ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
-> > >>> +                                       ios->vdd);
-> > >>> +                       if (ret) {
-> > >>> +                               dev_err(slot->host->dev,
-> > >>> +                                       "failed to enable vmmc regulator\n");
-> > >>> +                               /*return, if failed turn on vmmc*/
-> > >>> +                               return;
-> > >>> +                       }
-> > >>> +               }
-> > >>> +               if (!IS_ERR(mmc->supply.vqmmc) && !slot->host->vqmmc_enabled) {
-> > >>> +                       ret = regulator_enable(mmc->supply.vqmmc);
-> > >>> +                       if (ret < 0)
-> > >>> +                               dev_err(slot->host->dev,
-> > >>> +                                       "failed to enable vqmmc regulator\n");
-> > >>> +                       else
-> > >>> +                               slot->host->vqmmc_enabled = true;
-> > >>> +               }
-> > >>>                 set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
-> > >>>                 regs = mci_readl(slot->host, PWREN);
-> > >>>                 regs |= (1 << slot->id);
-> > >>>                 mci_writel(slot->host, PWREN, regs);
-> > >>>                 break;
-> > >>>         case MMC_POWER_OFF:
-> > >>> +               if (!IS_ERR(mmc->supply.vmmc))
-> > >>> +                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> > >>> +
-> > >>> +               if (!IS_ERR(mmc->supply.vqmmc) && slot->host->vqmmc_enabled) {
-> > >>> +                       regulator_disable(mmc->supply.vqmmc);
-> > >>> +                       slot->host->vqmmc_enabled = false;
-> > >>> +               }
-> > >>> +
-> > >>>                 regs = mci_readl(slot->host, PWREN);
-> > >>>                 regs &= ~(1 << slot->id);
-> > >>>                 mci_writel(slot->host, PWREN, regs);
-> > >>> @@ -2110,7 +2137,13 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
-> > >>>                 mmc->f_max = freq[1];
-> > >>>         }
-> > >>>
-> > >>> -       mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-> > >>> +       /*if there are external regulators, get them*/
-> > >>> +       ret = mmc_regulator_get_supply(mmc);
-> > >>> +       if (ret == -EPROBE_DEFER)
-> > >>> +               goto err_setup_bus;
-> > >>> +
-> > >>> +       if (!mmc->ocr_avail)
-> > >>> +               mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-> > >>>
-> > >>>         if (host->pdata->caps)
-> > >>>                 mmc->caps = host->pdata->caps;
-> > >>> @@ -2176,7 +2209,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
-> > >>>
-> > >>>  err_setup_bus:
-> > >>>         mmc_free_host(mmc);
-> > >>> -       return -EINVAL;
-> > >>> +       return ret;
-> > >>>  }
-> > >>>
-> > >>>  static void dw_mci_cleanup_slot(struct dw_mci_slot *slot, unsigned int id)
-> > >>> @@ -2469,24 +2502,6 @@ int dw_mci_probe(struct dw_mci *host)
-> > >>>                 }
-> > >>>         }
-> > >>>
-> > >>> -       host->vmmc = devm_regulator_get_optional(host->dev, "vmmc");
-> > >>> -       if (IS_ERR(host->vmmc)) {
-> > >>> -               ret = PTR_ERR(host->vmmc);
-> > >>> -               if (ret == -EPROBE_DEFER)
-> > >>> -                       goto err_clk_ciu;
-> > >>> -
-> > >>> -               dev_info(host->dev, "no vmmc regulator found: %d\n", ret);
-> > >>> -               host->vmmc = NULL;
-> > >>> -       } else {
-> > >>> -               ret = regulator_enable(host->vmmc);
-> > >>> -               if (ret) {
-> > >>> -                       if (ret != -EPROBE_DEFER)
-> > >>> -                               dev_err(host->dev,
-> > >>> -                                       "regulator_enable fail: %d\n", ret);
-> > >>> -                       goto err_clk_ciu;
-> > >>> -               }
-> > >>> -       }
-> > >>> -
-> > >>>         host->quirks = host->pdata->quirks;
-> > >>>
-> > >>>         spin_lock_init(&host->lock);
-> > >>> @@ -2630,8 +2645,6 @@ err_workqueue:
-> > >>>  err_dmaunmap:
-> > >>>         if (host->use_dma && host->dma_ops->exit)
-> > >>>                 host->dma_ops->exit(host);
-> > >>> -       if (host->vmmc)
-> > >>> -               regulator_disable(host->vmmc);
-> > >>>
-> > >>>  err_clk_ciu:
-> > >>>         if (!IS_ERR(host->ciu_clk))
-> > >>> @@ -2667,9 +2680,6 @@ void dw_mci_remove(struct dw_mci *host)
-> > >>>         if (host->use_dma && host->dma_ops->exit)
-> > >>>                 host->dma_ops->exit(host);
-> > >>>
-> > >>> -       if (host->vmmc)
-> > >>> -               regulator_disable(host->vmmc);
-> > >>> -
-> > >>>         if (!IS_ERR(host->ciu_clk))
-> > >>>                 clk_disable_unprepare(host->ciu_clk);
-> > >>>
-> > >>> @@ -2686,9 +2696,6 @@ EXPORT_SYMBOL(dw_mci_remove);
-> > >>>   */
-> > >>>  int dw_mci_suspend(struct dw_mci *host)
-> > >>>  {
-> > >>> -       if (host->vmmc)
-> > >>> -               regulator_disable(host->vmmc);
-> > >>> -
-> > >>>         return 0;
-> > >>>  }
-> > >>>  EXPORT_SYMBOL(dw_mci_suspend);
-> > >>> @@ -2697,15 +2704,6 @@ int dw_mci_resume(struct dw_mci *host)
-> > >>>  {
-> > >>>         int i, ret;
-> > >>>
-> > >>> -       if (host->vmmc) {
-> > >>> -               ret = regulator_enable(host->vmmc);
-> > >>> -               if (ret) {
-> > >>> -                       dev_err(host->dev,
-> > >>> -                               "failed to enable regulator: %d\n", ret);
-> > >>> -                       return ret;
-> > >>> -               }
-> > >>> -       }
-> > >>> -
-> > >>>         if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
-> > >>>                 ret = -ENODEV;
-> > >>>                 return ret;
-> > >>> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> > >>> index 29ce014..84e2827 100644
-> > >>> --- a/include/linux/mmc/dw_mmc.h
-> > >>> +++ b/include/linux/mmc/dw_mmc.h
-> > >>> @@ -188,7 +188,7 @@ struct dw_mci {
-> > >>>         /* Workaround flags */
-> > >>>         u32                     quirks;
-> > >>>
-> > >>> -       struct regulator        *vmmc;  /* Power regulator */
-> > >>> +       bool                    vqmmc_enabled;
-> > >>>         unsigned long           irq_flags; /* IRQ flags */
-> > >>>         int                     irq;
-> > >>>  };
-> > >>> --
-> > >>> 1.7.10.4
-
+> 1.9.3
+>
