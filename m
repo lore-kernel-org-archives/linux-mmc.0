@@ -1,73 +1,59 @@
-From: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Subject: Re: [PATCH] ARM: dts: fix MMC2 regulators for Exynos5420 Arndale Octa
- board
-Date: Thu, 02 Oct 2014 18:39:27 +0200
-Message-ID: <2384118.ElmRrZpdEv@amdc1032>
-References: <2750153.I3nVqzmXTP@amdc1032>
- <CAD=FV=XtJVWkUwWK8=E+mvSdvBn1MuS9c+_91VPhbOSQ3kF_kA@mail.gmail.com>
+From: Felipe Balbi <balbi@ti.com>
+Subject: Re: [PATCH v2 9/9] omap_hsmmc: remove unused slot_id parameter
+Date: Thu, 2 Oct 2014 11:42:52 -0500
+Message-ID: <20141002164252.GE7933@saruman>
+References: <1411983179-28677-1-git-send-email-afenkart@gmail.com>
+ <1411983179-28677-10-git-send-email-afenkart@gmail.com>
+Reply-To: <balbi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7Bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="VUDLurXRWRKrGuMn"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:45703 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753053AbaJBQjn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Oct 2014 12:39:43 -0400
-In-reply-to: <CAD=FV=XtJVWkUwWK8=E+mvSdvBn1MuS9c+_91VPhbOSQ3kF_kA@mail.gmail.com>
+Received: from comal.ext.ti.com ([198.47.26.152]:59502 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751473AbaJBQmt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 2 Oct 2014 12:42:49 -0400
+Content-Disposition: inline
+In-Reply-To: <1411983179-28677-10-git-send-email-afenkart@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@google.com>
-Cc: Kukjin Kim <kgene.kim@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, "cpgs ." <cpgs@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Seung-Won Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <tomasz.figa@gmail.com>, SUNIL JOSHI <joshi@samsung.com>, PRASHANTH GODREHAL <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Abhilash Kesavan <a.kesavan@samsung.com>
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>, pascal.huerst@gmail.com
 
-On Thursday, October 02, 2014 09:19:08 AM Doug Anderson wrote:
-> Bartiomiej,
-> 
-> On Thu, Oct 2, 2014 at 9:10 AM, Bartlomiej Zolnierkiewicz
-> <b.zolnierkie@samsung.com> wrote:
-> > Regulators for MMC2 (SD card) are PVDD_TFLASH_2V8 (LDO19) for vmmc
-> > and PVDD_APIO_MMCOFF_2V8 (LDO13) for vqmmc.  Currently the device
-> > tree entry for MMC2 uses PVDD_PRE_1V8 (LDO10) for vmmc and vqmmc is
-> > not specified.  Fix it.
-> >
-> > Without this patch:
-> > - "mmc: dw_mmc: use mmc_regulator_get_supply to handle regulators"
-> >   patch causes a SD card detection to fail
-> > - "mmc: dw_mmc: Support voltage changes" patch causes a boot hang
-> >
-> > This patch fixes both above problems.
-> >
-> > Suggested-by: Doug Anderson <dianders@google.com>
-> > Cc: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
-> > Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> > Signed-off-by: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-> > Acked-by: Kyungmin Park <kyungmin.park@samsung.com>
-> > ---
-> >  arch/arm/boot/dts/exynos5420-arndale-octa.dts |    3 ++-
-> >  1 file changed, 2 insertions(+), 1 deletion(-)
-> >
-> > Index: b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
-> > ===================================================================
-> > --- a/arch/arm/boot/dts/exynos5420-arndale-octa.dts     2014-10-02 15:44:53.014826886 +0200
-> > +++ b/arch/arm/boot/dts/exynos5420-arndale-octa.dts     2014-10-02 17:35:24.110600398 +0200
-> > @@ -74,7 +74,8 @@
-> >                 samsung,dw-mshc-ddr-timing = <1 2>;
-> >                 pinctrl-names = "default";
-> >                 pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
-> > -               vmmc-supply = <&ldo10_reg>;
-> > +               vmmc-supply = <&ldo19_reg>;
-> > +               vqmmc-supply = <&ldo13_reg>;
-> 
-> This looks right to me.  ...but I notice that ldo13 and ldo19 are not
-> "always-on" in the DTS.  Are you sure card detect works for you if you
-> eject your card and try to put it back in?
-> 
-> ...eventually the "always-on" won't be needed, but for now I think it is...
+--VUDLurXRWRKrGuMn
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Card detection works fine without "always-on".
+On Mon, Sep 29, 2014 at 11:32:59AM +0200, Andreas Fenkart wrote:
+> omap_hsmmc only supports one slot. So slot id is always zero, and
+> slot id is never used in the callbacks
 
-Best regards,
---
-Bartlomiej Zolnierkiewicz
-Samsung R&D Institute Poland
-Samsung Electronics
+I wonder if this will break slot multiplexing on n8x0.
 
+--=20
+balbi
+
+--VUDLurXRWRKrGuMn
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJULYCMAAoJEIaOsuA1yqRECXwP/0ckbZofZAUvU0vR271fZ0Oa
+e5K95GSqH+cSWG6hZbX2cNOV/GBSlFgnkLacHNAHZBoMbjAtbkMeAiaBMIVqIOd5
+ZIoVOfH/m/LHgbfLPV44+QB3zqfYXpRgfwwOolbqxZ5ZTTd3V9/K49tslfHMYBai
+mxIT0deEZjB4yPxg/JLT0SjQxjkhSpmqAdhBtdglzwiGe0wvZuLJMDxogQLPXO7b
+N/cKc57i1DxaweDfpdKM+zfvr3ZbziJV+L/psyuq510QCeLbRQ50JWBlbeZmd9qJ
+kZg0POukgS+WwvlYaKCj0fql/k2xZdZwKl7+lmxx73p/SlpHZJHPbW85k+hCCZ/K
+dhqYDZnMMnMW/oa2IcwjCoxUI6nrjfMgIaMaYOHqLXqhx2Eo0oSJLeO/EXnVDYIp
+txZs4uqHj3FCwfI5LezTO+lFXyxSMabmyC0ehy9uPIaDPHZf0LzoicDEftWEieYV
+pY6uf5VO9v7YrMCjtJX0A8ga4B+xWOrp9QZqhNRH3Q9Ys+3DWgQfLsb9IR5uhXf0
+V1CBpAoeDRwNPXh2wjfm1N2tpxku1t+gzBTD2omO6osKT36ybgThpcdMZvBbdeG0
+6Nx0dVqjVfh2Uni6XDmHqT3BCdWahfb2h6HvnjmnufUMbFkVD0EQFR7Atdb8Vc59
+qrtGHUAgi4u42B9KcHb2
+=fgLD
+-----END PGP SIGNATURE-----
+
+--VUDLurXRWRKrGuMn--
