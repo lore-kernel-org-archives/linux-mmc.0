@@ -1,244 +1,93 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4] mmc: core: restore detect line inversion semantics
-Date: Thu, 2 Oct 2014 12:11:12 +0200
-Message-ID: <CAPDyKFrZ-HsCx-t6PWv5Zp_n3G_GsT9qS=QmDCrgg1-eQzb2Fg@mail.gmail.com>
-References: <1412233726-16797-1-git-send-email-linus.walleij@linaro.org>
+From: Oleksij Rempel <linux@rempel-privat.de>
+Subject: Re: [PATCH] mmc: add new au6601 driver
+Date: Thu, 02 Oct 2014 13:49:57 +0200
+Message-ID: <542D3BE5.2050407@rempel-privat.de>
+References: <1399543099-31613-1-git-send-email-linux@rempel-privat.de>	<CAPDyKFoy9DLQe1235suEwEmGSxxriBfuWSyN+ZG14OmUjrrb8w@mail.gmail.com>	<53B3D562.1030707@rempel-privat.de>	<CAPDyKFpZVKu-uHwNfXocVb7FbgEN3NxiLHCPR38bSh_zsA4w6Q@mail.gmail.com>	<542A81EC.40708@rempel-privat.de> <CAPDyKFoAzeYjvuP=5W8r7NQjnL9OzWXP=+Y+b_1ZZgWRbUXsZg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <1412233726-16797-1-git-send-email-linus.walleij@linaro.org>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Javier Martinez Canillas <javier@dowhile0.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="mmq6h3CMWVvjx12a7GmuoDRCvKjk3u3fP"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.gmx.net ([212.227.15.19]:59502 "EHLO mout.gmx.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750987AbaJBLuH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 2 Oct 2014 07:50:07 -0400
+In-Reply-To: <CAPDyKFoAzeYjvuP=5W8r7NQjnL9OzWXP=+Y+b_1ZZgWRbUXsZg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 2 October 2014 09:08, Linus Walleij <linus.walleij@linaro.org> wrote:
-> commit 98e90de99a0c43bd434da814c882c4332441871e
-> "mmc: host: switch OF parser to use gpio descriptors"
-> switched the semantic behaviour of card detect and read
-> only flags such that the inversion capability flag would
-> only be set if inversion was explicitly specified in the
-> device tree, in the hopes that no-one was using double
-> inversion.
->
-> It turns out that the XOR:ing between the explicit
-> inversion was indeed in use, so we need to restore the
-> old semantics where both ways of inversion are checked
-> and the end result XOR:ed.
->
-> Reported-by: Javier Martinez Canillas <javier@dowhile0.org>
-> Tested-by: Javier Martinez Canillas <javier@dowhile0.org>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--mmq6h3CMWVvjx12a7GmuoDRCvKjk3u3fP
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Thanks! Applied for next!
+Am 30.09.2014 um 13:00 schrieb Ulf Hansson:
+> On 30 September 2014 12:11, Oleksij Rempel <linux@rempel-privat.de> wro=
+te:
+>> Am 09.07.2014 um 14:52 schrieb Ulf Hansson:
+>>> [snip]
+>>>
+>>>>>
+>>>>> I am just a bit curious, does this controller support hardware busy=
 
-Kind regards
-Uffe
+>>>>> detection on DAT1 line while waiting for command completion?
+>>>>
+>>>> Do you mean AU6601_REG_BUS_STATUS?
+>>>> See at the beginning of patch.
+>>>
+>>> While reviewing the code, it seems like the controller are handling
+>>> hardware busy detection on DAT1. On the other hand you don't enable
+>>> MMC_CAP_WAIT_WHILE_BUSY, shouldn't you be doing that?
+>>
+>> Hi Ulf,
+>>
+>> what is better way to use sg with dma? This controller support only
+>> 0x4000 alight addresses. It is possible to solve it per driver basis,
+>> but i have seen already more then one driver which need it. Should it =
+be
+>> done in  mmc block code? Any other suggestions?
+>=20
+> I don't quite follow. Does your DMA controller put constraints on
+> buffer alignment/length or is it the mmc controller?
 
-> ---
-> ChangeLog v3->v4:
-> - Fix breakage in sdhci-acpi.c due to changed function
->   prototype.
-> ChangeLog v2->v3:
-> - Make it possible to pass NULL as pointer for the gpio_invert
->   variable, so we don't need dummy variables in callers
-> ChangeLog v1->v2:
-> - Always set override_active_level when getting CD GPIO
-> - Invert the return value from gpiod_is_active_low() to
->   follow the old semantics
-> ---
->  drivers/mmc/core/host.c       | 32 ++++++++++++++++++++++++++++----
->  drivers/mmc/core/slot-gpio.c  | 14 ++++++++++++--
->  drivers/mmc/host/mmci.c       |  4 ++--
->  drivers/mmc/host/sdhci-acpi.c |  2 +-
->  include/linux/mmc/slot-gpio.h |  4 ++--
->  5 files changed, 45 insertions(+), 11 deletions(-)
->
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 31969436d77c..03c53b72a2d6 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -311,6 +311,7 @@ int mmc_of_parse(struct mmc_host *host)
->         struct device_node *np;
->         u32 bus_width;
->         int len, ret;
-> +       bool cap_invert, gpio_invert;
->
->         if (!host->parent || !host->parent->of_node)
->                 return 0;
-> @@ -359,12 +360,15 @@ int mmc_of_parse(struct mmc_host *host)
->                 host->caps |= MMC_CAP_NONREMOVABLE;
->         } else {
->                 if (of_property_read_bool(np, "cd-inverted"))
-> -                       host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
-> +                       cap_invert = true;
-> +               else
-> +                       cap_invert = false;
->
->                 if (of_find_property(np, "broken-cd", &len))
->                         host->caps |= MMC_CAP_NEEDS_POLL;
->
-> -               ret = mmc_gpiod_request_cd(host, "cd", 0, false, 0);
-> +               ret = mmc_gpiod_request_cd(host, "cd", 0, true,
-> +                                          0, &gpio_invert);
->                 if (ret) {
->                         if (ret == -EPROBE_DEFER)
->                                 return ret;
-> @@ -375,13 +379,29 @@ int mmc_of_parse(struct mmc_host *host)
->                         }
->                 } else
->                         dev_info(host->parent, "Got CD GPIO\n");
-> +
-> +               /*
-> +                * There are two ways to flag that the CD line is inverted:
-> +                * through the cd-inverted flag and by the GPIO line itself
-> +                * being inverted from the GPIO subsystem. This is a leftover
-> +                * from the times when the GPIO subsystem did not make it
-> +                * possible to flag a line as inverted.
-> +                *
-> +                * If the capability on the host AND the GPIO line are
-> +                * both inverted, the end result is that the CD line is
-> +                * not inverted.
-> +                */
-> +               if (cap_invert ^ gpio_invert)
-> +                       host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
->         }
->
->         /* Parse Write Protection */
->         if (of_property_read_bool(np, "wp-inverted"))
-> -               host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
-> +               cap_invert = true;
-> +       else
-> +               cap_invert = false;
->
-> -       ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0);
-> +       ret = mmc_gpiod_request_ro(host, "wp", 0, false, 0, &gpio_invert);
->         if (ret) {
->                 if (ret == -EPROBE_DEFER)
->                         goto out;
-> @@ -393,6 +413,10 @@ int mmc_of_parse(struct mmc_host *host)
->         } else
->                 dev_info(host->parent, "Got WP GPIO\n");
->
-> +       /* See the comment on CD inversion above */
-> +       if (cap_invert ^ gpio_invert)
-> +               host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
-> +
->         if (of_find_property(np, "cap-sd-highspeed", &len))
->                 host->caps |= MMC_CAP_SD_HIGHSPEED;
->         if (of_find_property(np, "cap-mmc-highspeed", &len))
-> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-> index 38f76555d4bf..69bbf2adb329 100644
-> --- a/drivers/mmc/core/slot-gpio.c
-> +++ b/drivers/mmc/core/slot-gpio.c
-> @@ -281,6 +281,8 @@ EXPORT_SYMBOL(mmc_gpio_free_cd);
->   * @idx: index of the GPIO to obtain in the consumer
->   * @override_active_level: ignore %GPIO_ACTIVE_LOW flag
->   * @debounce: debounce time in microseconds
-> + * @gpio_invert: will return whether the GPIO line is inverted or not, set
-> + * to NULL to ignore
->   *
->   * Use this function in place of mmc_gpio_request_cd() to use the GPIO
->   * descriptor API.  Note that it is paired with mmc_gpiod_free_cd() not
-> @@ -291,7 +293,7 @@ EXPORT_SYMBOL(mmc_gpio_free_cd);
->   */
->  int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
->                          unsigned int idx, bool override_active_level,
-> -                        unsigned int debounce)
-> +                        unsigned int debounce, bool *gpio_invert)
->  {
->         struct mmc_gpio *ctx;
->         struct gpio_desc *desc;
-> @@ -316,6 +318,9 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
->                         return ret;
->         }
->
-> +       if (gpio_invert)
-> +               *gpio_invert = !gpiod_is_active_low(desc);
-> +
->         ctx->override_cd_active_level = override_active_level;
->         ctx->cd_gpio = desc;
->
-> @@ -330,6 +335,8 @@ EXPORT_SYMBOL(mmc_gpiod_request_cd);
->   * @idx: index of the GPIO to obtain in the consumer
->   * @override_active_level: ignore %GPIO_ACTIVE_LOW flag
->   * @debounce: debounce time in microseconds
-> + * @gpio_invert: will return whether the GPIO line is inverted or not,
-> + * set to NULL to ignore
->   *
->   * Use this function in place of mmc_gpio_request_ro() to use the GPIO
->   * descriptor API.  Note that it is paired with mmc_gpiod_free_ro() not
-> @@ -339,7 +346,7 @@ EXPORT_SYMBOL(mmc_gpiod_request_cd);
->   */
->  int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
->                          unsigned int idx, bool override_active_level,
-> -                        unsigned int debounce)
-> +                        unsigned int debounce, bool *gpio_invert)
->  {
->         struct mmc_gpio *ctx;
->         struct gpio_desc *desc;
-> @@ -364,6 +371,9 @@ int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
->                         return ret;
->         }
->
-> +       if (gpio_invert)
-> +               *gpio_invert = !gpiod_is_active_low(desc);
-> +
->         ctx->override_ro_active_level = override_active_level;
->         ctx->ro_gpio = desc;
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index c9dafed550f2..43af791e2e45 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -1682,7 +1682,7 @@ static int mmci_probe(struct amba_device *dev,
->          * silently of these do not exist and proceed to try platform data
->          */
->         if (!np) {
-> -               ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0);
-> +               ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0, NULL);
->                 if (ret < 0) {
->                         if (ret == -EPROBE_DEFER)
->                                 goto clk_disable;
-> @@ -1693,7 +1693,7 @@ static int mmci_probe(struct amba_device *dev,
->                         }
->                 }
->
-> -               ret = mmc_gpiod_request_ro(mmc, "wp", 0, false, 0);
-> +               ret = mmc_gpiod_request_ro(mmc, "wp", 0, false, 0, NULL);
->                 if (ret < 0) {
->                         if (ret == -EPROBE_DEFER)
->                                 goto clk_disable;
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index 3483c089baa7..327bc24ec8ce 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -352,7 +352,7 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
->         if (sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD)) {
->                 bool v = sdhci_acpi_flag(c, SDHCI_ACPI_SD_CD_OVERRIDE_LEVEL);
->
-> -               if (mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0)) {
-> +               if (mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0, NULL)) {
->                         dev_warn(dev, "failed to setup card detect gpio\n");
->                         c->use_runtime_pm = false;
->                 }
-> diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
-> index a0d0442c15bf..e56fa24c9322 100644
-> --- a/include/linux/mmc/slot-gpio.h
-> +++ b/include/linux/mmc/slot-gpio.h
-> @@ -24,10 +24,10 @@ void mmc_gpio_free_cd(struct mmc_host *host);
->
->  int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
->                          unsigned int idx, bool override_active_level,
-> -                        unsigned int debounce);
-> +                        unsigned int debounce, bool *gpio_invert);
->  int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
->                          unsigned int idx, bool override_active_level,
-> -                        unsigned int debounce);
-> +                        unsigned int debounce, bool *gpio_invert);
->  void mmc_gpiod_free_cd(struct mmc_host *host);
->  void mmc_gpiod_request_cd_irq(struct mmc_host *host);
->
-> --
-> 1.9.3
->
+mmc controller. it can only accept addresses aligned to the PAGE_SIZE.
+
+> I am aware of that drivers may have special treatments of buffer
+> alignment/length to be able to handle some corner cases. And yes we
+> don't have a common interface in the mmc core to handle that. I am not
+> sure how that could be done? Do you have any suggestions?
+
+hmm... theoretically SG allocation should always be page aligned.
+Right now i found probable reason for this issue. Looks like i
+misinterpreted max_segs parameter. If i use value bigger then 1, then
+can get fragmented SG request. For example, by limit to blk_size=3D512,
+block_count=3D8 and  max_segs > 1 request will be 4K (=3Dpage size), but =
+the
+request can be spread to different pages with offsets !=3D the page begin=
+=2E
+Which is not optimal for many reasons. On other side, if max_segs=3D1,
+then all requests will be aligned.
+I don't know if it is expected behavior. If yes, then looks like some
+drivers can be simplified just by setting max_segs=3D1.
+
+--=20
+Regards,
+Oleksij
+
+
+--mmq6h3CMWVvjx12a7GmuoDRCvKjk3u3fP
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iF4EAREIAAYFAlQtO+oACgkQHwImuRkmbWlRzgD/einvp22H35gfL2Wy2WGGb7ty
+/qeEox5z5GaG19a22qUBAJHd1myHQXGLtCPjvPxf76E5i7x0gYufMEPDghpBbrA7
+=A6sP
+-----END PGP SIGNATURE-----
+
+--mmq6h3CMWVvjx12a7GmuoDRCvKjk3u3fP--
