@@ -1,64 +1,70 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: [PATCH] ARM: dts: fix MMC2 regulators for Exynos5420 Arndale Octa board
-Date: Thu, 2 Oct 2014 09:19:08 -0700
-Message-ID: <CAD=FV=XtJVWkUwWK8=E+mvSdvBn1MuS9c+_91VPhbOSQ3kF_kA@mail.gmail.com>
-References: <2750153.I3nVqzmXTP@amdc1032>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v2 0/9] unshare and simplify omap_hsmmc platform struct
+Date: Thu, 2 Oct 2014 09:36:34 -0700
+Message-ID: <20141002163633.GK3122@atomide.com>
+References: <1411983179-28677-1-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f182.google.com ([209.85.220.182]:49749 "EHLO
-	mail-vc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754085AbaJBQTJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Oct 2014 12:19:09 -0400
-Received: by mail-vc0-f182.google.com with SMTP id la4so1589428vcb.41
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Oct 2014 09:19:08 -0700 (PDT)
-In-Reply-To: <2750153.I3nVqzmXTP@amdc1032>
+Received: from mho-02-ewr.mailhop.org ([204.13.248.72]:18784 "EHLO
+	mho-02-ewr.mailhop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752417AbaJBQg0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Oct 2014 12:36:26 -0400
+Content-Disposition: inline
+In-Reply-To: <1411983179-28677-1-git-send-email-afenkart@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Cc: Kukjin Kim <kgene.kim@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, "cpgs ." <cpgs@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Seung-Won Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <tomasz.figa@gmail.com>, SUNIL JOSHI <joshi@samsung.com>, PRASHANTH GODREHAL <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Abhilash Kesavan <a.kesavan@samsung.com>
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, pascal.huerst@gmail.com
 
-Bartiomiej,
+* Andreas Fenkart <afenkart@gmail.com> [140929 02:33]:
+> v2:
+> - replace erroneous mmci by omap1/2
+> - add description to all patches
+> - full compile check with:
+> 	CONFIG_MACH_OMAP3_BEAGLE=y
+> 	CONFIG_MACH_DEVKIT8000=y
+> 	CONFIG_MACH_OMAP_LDP=y
+> 	CONFIG_MACH_OMAP3530_LV_SOM=y
+> 	CONFIG_MACH_OMAP3_TORPEDO=y
+> 	CONFIG_MACH_OVERO=y
+> 	CONFIG_MACH_OMAP3517EVM=y
+> 	CONFIG_MACH_CRANEBOARD=y
+> 	CONFIG_MACH_OMAP3_PANDORA=y
+> 	CONFIG_MACH_TOUCHBOOK=y
+> 	CONFIG_MACH_OMAP_3430SDP=y
+> 	CONFIG_MACH_NOKIA_RX51=y
+> 	CONFIG_MACH_CM_T35=y
+> 	CONFIG_MACH_CM_T3517=y
+> 	CONFIG_MACH_CM_T3730=y
+> 	CONFIG_MACH_SBC3530=y
+> - reorganized and added more patches, hence no blank ack added
+> 
+> 
+> Andreas Fenkart (9):
+>   omap_hsmmc: use separate platform data for ompa3 and omap 1/2 driver
+>   omap_hsmmc: remove unused fields in platform_data
+>   omap_hsmmc: remove un-initialized callbacks from platform data
+>   omap_hsmmc: remove un-ready power_saving field in omap2_hsmmc_info
+>   omap_hsmmc: remove unused get_context_loss_count callback
+>   omap_hsmmc: remove unnecessary omap_hsmmc_slot_data indirection
+>   omap_hsmmc: pass mmc_priv struct to gpio init / free
+>   omap_hsmmc: Remove unnecessary callbacks from platform data
+>   omap_hsmmc: remove unused slot_id parameter
+> 
+>  arch/arm/mach-omap2/board-rx51-peripherals.c       |   4 +-
+>  arch/arm/mach-omap2/hsmmc.c                        | 155 +++++------
+>  arch/arm/mach-omap2/hsmmc.h                        |   9 +-
+>  arch/arm/mach-omap2/mmc.h                          |   6 +-
+>  .../mach-omap2/omap_hwmod_33xx_43xx_ipblock_data.c |   6 +-
+>  arch/arm/mach-omap2/omap_hwmod_3xxx_data.c         |   6 +-
+>  drivers/mmc/host/omap_hsmmc.c                      | 282 ++++++++++-----------
+>  include/linux/platform_data/hsmmc-omap.h           |  88 +++++++
+>  8 files changed, 299 insertions(+), 257 deletions(-)
+>  create mode 100644 include/linux/platform_data/hsmmc-omap.h
 
-On Thu, Oct 2, 2014 at 9:10 AM, Bartlomiej Zolnierkiewicz
-<b.zolnierkie@samsung.com> wrote:
-> Regulators for MMC2 (SD card) are PVDD_TFLASH_2V8 (LDO19) for vmmc
-> and PVDD_APIO_MMCOFF_2V8 (LDO13) for vqmmc.  Currently the device
-> tree entry for MMC2 uses PVDD_PRE_1V8 (LDO10) for vmmc and vqmmc is
-> not specified.  Fix it.
->
-> Without this patch:
-> - "mmc: dw_mmc: use mmc_regulator_get_supply to handle regulators"
->   patch causes a SD card detection to fail
-> - "mmc: dw_mmc: Support voltage changes" patch causes a boot hang
->
-> This patch fixes both above problems.
->
-> Suggested-by: Doug Anderson <dianders@google.com>
-> Cc: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-> Acked-by: Kyungmin Park <kyungmin.park@samsung.com>
-> ---
->  arch/arm/boot/dts/exynos5420-arndale-octa.dts |    3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> Index: b/arch/arm/boot/dts/exynos5420-arndale-octa.dts
-> ===================================================================
-> --- a/arch/arm/boot/dts/exynos5420-arndale-octa.dts     2014-10-02 15:44:53.014826886 +0200
-> +++ b/arch/arm/boot/dts/exynos5420-arndale-octa.dts     2014-10-02 17:35:24.110600398 +0200
-> @@ -74,7 +74,8 @@
->                 samsung,dw-mshc-ddr-timing = <1 2>;
->                 pinctrl-names = "default";
->                 pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
-> -               vmmc-supply = <&ldo10_reg>;
-> +               vmmc-supply = <&ldo19_reg>;
-> +               vqmmc-supply = <&ldo13_reg>;
+Looks good to me, please feel free to merge via the MMC
+tree as this should not conflict with omap changes. For the
+whole series:
 
-This looks right to me.  ...but I notice that ldo13 and ldo19 are not
-"always-on" in the DTS.  Are you sure card detect works for you if you
-eject your card and try to put it back in?
-
-...eventually the "always-on" won't be needed, but for now I think it is...
-
--Doug
+Acked-by: Tony Lindgren <tony@atomide.com>
