@@ -1,119 +1,57 @@
-From: Doug Anderson <dianders@google.com>
-Subject: Re: [PATCH V2 1/3] mmc: dw_mmc: use mmc_regulator_get_supply to
- handle regulators
-Date: Wed, 1 Oct 2014 09:04:09 -0700
-Message-ID: <CAD=FV=Xcv6E57u=kUj4QSWOpxCwOuJ4UyrFhSg1z0O1zx8nCag@mail.gmail.com>
-References: <01.09.14890.83F4B245@epcpsbge5.samsung.com>
-	<1831792.g28ajrp9B5@amdc1032>
+From: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+Subject: Re: [PATCH v5 07/11] mmc: sdio: Convert to
+ dev_pm_domain_attach|detach()
+Date: Wed, 1 Oct 2014 17:27:05 -0700
+Message-ID: <20141002002705.GA29177@dtor-ws>
+References: <1411151264-16245-1-git-send-email-ulf.hansson@linaro.org>
+ <1411151264-16245-8-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f170.google.com ([209.85.220.170]:40023 "EHLO
-	mail-vc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751910AbaJAQEL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Oct 2014 12:04:11 -0400
-Received: by mail-vc0-f170.google.com with SMTP id hy10so480075vcb.15
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Oct 2014 09:04:10 -0700 (PDT)
-In-Reply-To: <1831792.g28ajrp9B5@amdc1032>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-pm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1411151264-16245-8-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-pm-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-acpi@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>, Kevin Hilman <khilman@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Daniel Lezcano <daniel.lezcano@linaro.org>, Tomasz Figa <tomasz.figa@gmail.com>, devicetree@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Ben Dooks <ben-linux@fluff.org>, Kukjin Kim <kgene.kim@samsung.com>, Stephen Boyd <sboyd@codeaurora.org>, Philipp Zabel <philipp.zabel@gmail.com>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Russell King <linux@arm.linux.org.uk>li
 List-Id: linux-mmc@vger.kernel.org
-To: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Cc: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, "cpgs ." <cpgs@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Seung-Won Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <tomasz.figa@gmail.com>, Kukjin Kim <kgene.kim@samsung.com>, SUNIL JOSHI <joshi@samsung.com>, PRASHANTH GODREHAL <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Abhilash Kesavan <a.kesavan@samsung.com>
 
-Hi,
+Hi Ulf,
 
-On Wed, Oct 1, 2014 at 7:00 AM, Bartlomiej Zolnierkiewicz
-<b.zolnierkie@samsung.com> wrote:
->
-> Hi,
->
-> On Wednesday, October 01, 2014 12:47:52 AM YUVARAJ CD wrote:
->
->> Since I am out of station, i dont have an access to my work set up.
->> Can you send me the dts entries of sd crad and their corresponding regulator entries?
->
-> From arch/arm/boot/dts/exynos5420-arndale-octa.dts:
->
-> ...
->         mmc@12200000 {
->                 status = "okay";
->                 broken-cd;
->                 supports-highspeed;
->                 card-detect-delay = <200>;
->                 samsung,dw-mshc-ciu-div = <3>;
->                 samsung,dw-mshc-sdr-timing = <0 4>;
->                 samsung,dw-mshc-ddr-timing = <0 2>;
->                 pinctrl-names = "default";
->                 pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
->                 vmmc-supply = <&ldo10_reg>;
->
->                 slot@0 {
->                         reg = <0>;
->                         bus-width = <8>;
->                 };
->         };
->
->         mmc@12220000 {
->                 status = "okay";
->                 supports-highspeed;
->                 card-detect-delay = <200>;
->                 samsung,dw-mshc-ciu-div = <3>;
->                 samsung,dw-mshc-sdr-timing = <2 3>;
->                 samsung,dw-mshc-ddr-timing = <1 2>;
->                 pinctrl-names = "default";
->                 pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
->                 vmmc-supply = <&ldo10_reg>;
->
->                 slot@0 {
->                         reg = <0>;
->                         bus-width = <4>;
->                 };
->         };
-> ...
->                                 ldo10_reg: LDO10 {
->                                         regulator-name = "PVDD_PRE_1V8";
->                                         regulator-min-microvolt = <1800000>;
->                                         regulator-max-microvolt = <1800000>;
->                                         regulator-always-on;
->                                 };
+On Fri, Sep 19, 2014 at 08:27:40PM +0200, Ulf Hansson wrote:
+> Previously only the ACPI PM domain was supported by the sdio bus.
+> 
+> Let's convert to the common attach/detach functions for PM domains,
+> which currently means we are extending the support to include the
+> generic PM domain as well.
+> 
+> Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Reviewed-by: Kevin Hilman <khilman@linaro.org>
+> ---
+>  drivers/mmc/core/sdio_bus.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+> index 4fa8fef9..1df0fc6 100644
+> --- a/drivers/mmc/core/sdio_bus.c
+> +++ b/drivers/mmc/core/sdio_bus.c
+> @@ -315,7 +315,7 @@ int sdio_add_func(struct sdio_func *func)
+>  	ret = device_add(&func->dev);
+>  	if (ret == 0) {
+>  		sdio_func_set_present(func);
+> -		acpi_dev_pm_attach(&func->dev, false);
+> +		dev_pm_domain_attach(&func->dev, false);
 
-I don't have schematics for Arndale Octa, but the above is really
-fishy.  "vmmc" shouldn't be 1.8V.  That's the general power signal to
-MMC and should be 2.7V - 3.6V.  "vqmmc" could be 1.8V in certain
-situations, but my understanding is that for maximum compatibility it
-should at least start out identical to "vmmc" (and later go down to
-1.7V - 1.95V).
+Admittedly it is not brought in by your change, but I am a bit worried
+about this code. In all other busses we attach power domain to a device
+before probing it (and detach if probe fails). Why here we only attach
+it to power domain after adding the device to the bus? If driver for the
+function has already been loaded the probe() would run without device
+being attached to a power domain...
 
-My first thought would be to just remove the "vmmc-supply" from your
-DTS.  I think we could land that and pick it back easily.  That will
-get you something working and won't introduce any regressions because:
-1. MMC core will give you a dummy regulator
-2. The code will default to assuming that vmmc is 3.3V, which is what
-it used to do anyway.
-3. The only referenced regulator is always on anyway.
+Adding Aaron as he's the author of the original change.
 
-Separately you could specify a proper vmmc and maybe even a vqmmc.
+Thanks.
 
-On SMDK5420 I see this for the SD card (mmc2):
-* vmmc should be "VDD_SD_2V8".  From LDO19.
-* vqmmc should be "VDDQ_MMC2_AP".  From LDO13.
-
-OK, I dug up the Arndale schematics.  For mmc2:
-* vmmc should be PVDD_TFLASH_2V8.  That's LDO19.
-* vqmmc (hooked up to VDDQ_MMC2): PVDD_APIO_MMCOFF_2V8.  LDO13 just like SMDK.
-
-...sadly it looks like Anrdale has a schematics problem that prevents
-you from doing UHS.  I see that the data lines are pulled up to
-PVDD_TFLASH_2V8 (vmmc), not pulled up to PVDD_APIO_MMCOFF_2V8 (vqmmc).
-I think that means that if you ever lower vqmmc to 1.8V (as needed for
-UHS) then you'll still be pulling up to 2.8V.  That's not good.  You
-should probably make sure that both LDO13 and LDO19 are listed as
-being exactly 2.8V.
-
-
-Anyway, the above has (obviously) not been tested and is just based on
-a casual browsing of schematics.  Please let me know how it goes.
-
-
-
--Doug
+-- 
+Dmitry
