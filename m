@@ -1,57 +1,57 @@
-From: Dmitry Torokhov <dmitry.torokhov@gmail.com>
-Subject: Re: [PATCH v5 07/11] mmc: sdio: Convert to
- dev_pm_domain_attach|detach()
-Date: Wed, 1 Oct 2014 17:27:05 -0700
-Message-ID: <20141002002705.GA29177@dtor-ws>
-References: <1411151264-16245-1-git-send-email-ulf.hansson@linaro.org>
- <1411151264-16245-8-git-send-email-ulf.hansson@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 0/7] mmc: Some Braswell patches
+Date: Thu, 02 Oct 2014 08:04:33 +0300
+Message-ID: <542CDCE1.4070900@intel.com>
+References: <1411543653-3728-1-git-send-email-adrian.hunter@intel.com> <542A9C20.8060902@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-pm-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1411151264-16245-8-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-pm-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-pm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-acpi@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>, Kevin Hilman <khilman@linaro.org>, Alan Stern <stern@rowland.harvard.edu>, Daniel Lezcano <daniel.lezcano@linaro.org>, Tomasz Figa <tomasz.figa@gmail.com>, devicetree@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Ben Dooks <ben-linux@fluff.org>, Kukjin Kim <kgene.kim@samsung.com>, Stephen Boyd <sboyd@codeaurora.org>, Philipp Zabel <philipp.zabel@gmail.com>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Russell King <linux@arm.linux.org.uk>li
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:50577 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751085AbaJBFF6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 2 Oct 2014 01:05:58 -0400
+In-Reply-To: <542A9C20.8060902@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Ulf,
+Ping?
 
-On Fri, Sep 19, 2014 at 08:27:40PM +0200, Ulf Hansson wrote:
-> Previously only the ACPI PM domain was supported by the sdio bus.
+On 30/09/14 15:03, Adrian Hunter wrote:
+> Hi
 > 
-> Let's convert to the common attach/detach functions for PM domains,
-> which currently means we are extending the support to include the
-> generic PM domain as well.
+> Any comments on these?
 > 
-> Cc: linux-mmc@vger.kernel.org
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Reviewed-by: Kevin Hilman <khilman@linaro.org>
-> ---
->  drivers/mmc/core/sdio_bus.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
-> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-> index 4fa8fef9..1df0fc6 100644
-> --- a/drivers/mmc/core/sdio_bus.c
-> +++ b/drivers/mmc/core/sdio_bus.c
-> @@ -315,7 +315,7 @@ int sdio_add_func(struct sdio_func *func)
->  	ret = device_add(&func->dev);
->  	if (ret == 0) {
->  		sdio_func_set_present(func);
-> -		acpi_dev_pm_attach(&func->dev, false);
-> +		dev_pm_domain_attach(&func->dev, false);
+> On 24/09/14 10:27, Adrian Hunter wrote:
+>> Hi
+>>
+>> Here are some patches to further support for Intel Braswell
+>> SoC.
+>>
+>>
+>> Adrian Hunter (7):
+>>       mmc: sdhci: Add quirk for always getting TC with stop cmd
+>>       mmc: sdhci-acpi: Set SDHCI_QUIRK2_STOP_WITH_TC for Intel host controllers
+>>       mmc: sdhci-acpi: Add a HID and UID for a SD Card host controller
+>>       mmc: sdhci-pci: Set SDHCI_QUIRK2_STOP_WITH_TC for Intel BYT host controllers
+>>       mmc: sdhci-pci: Add Bay Trail and Braswell SD card detect
+>>       mmc: sdhci: Let a driver override timeout clock frequency
+>>       mmc: sdhci-pci: Fix Braswell eMMC timeout clock frequency
+>>
+>>  drivers/mmc/host/sdhci-acpi.c |  6 ++++--
+>>  drivers/mmc/host/sdhci-pci.c  | 28 +++++++++++++++++++++++++---
+>>  drivers/mmc/host/sdhci-pci.h  |  4 ++++
+>>  drivers/mmc/host/sdhci.c      | 14 ++++++++++++--
+>>  include/linux/mmc/sdhci.h     |  2 ++
+>>  5 files changed, 47 insertions(+), 7 deletions(-)
+>>
+>>
+>> Regards
+>> Adrian
+> 
+> 
+> 
 
-Admittedly it is not brought in by your change, but I am a bit worried
-about this code. In all other busses we attach power domain to a device
-before probing it (and detach if probe fails). Why here we only attach
-it to power domain after adding the device to the bus? If driver for the
-function has already been loaded the probe() would run without device
-being attached to a power domain...
-
-Adding Aaron as he's the author of the original change.
-
-Thanks.
-
--- 
-Dmitry
