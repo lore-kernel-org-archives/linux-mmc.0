@@ -1,7 +1,7 @@
 From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Subject: [PATCH 03/12] mmc: sdhci-pxav3: Move private driver data to driver source
-Date: Fri,  3 Oct 2014 17:55:38 +0200
-Message-ID: <1412351747-4188-4-git-send-email-sebastian.hesselbarth@gmail.com>
+Subject: [PATCH 04/12] mmc: sdhci-pxav3: Remove unused clk_enable from sdhci_pxa
+Date: Fri,  3 Oct 2014 17:55:39 +0200
+Message-ID: <1412351747-4188-5-git-send-email-sebastian.hesselbarth@gmail.com>
 References: <1412351747-4188-1-git-send-email-sebastian.hesselbarth@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1412351747-4188-1-git-send-email-sebastian.hesselbarth@gmail.com>
@@ -10,8 +10,8 @@ To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
 Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Antoine Tenart <antoine.tenart@free-electrons.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-struct sdhci_pxa is only used in sdhci_pxa driver itself, so move it
-there.
+clk_enable from struct sdhci_pxa is unused, remove it from the private
+driver data.
 
 Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
 ---
@@ -22,39 +22,20 @@ Cc: linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org
 Cc: linux-kernel@vger.kernel.org
 ---
- drivers/mmc/host/sdhci-pxav3.c          | 5 +++++
- include/linux/platform_data/pxa_sdhci.h | 5 -----
- 2 files changed, 5 insertions(+), 5 deletions(-)
+ drivers/mmc/host/sdhci-pxav3.c | 1 -
+ 1 file changed, 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index b55c807982fe..48bc8179c8fc 100644
+index 48bc8179c8fc..d1f63d32b2cd 100644
 --- a/drivers/mmc/host/sdhci-pxav3.c
 +++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -58,6 +58,11 @@
- #define SDCE_MISC_INT		(1<<2)
+@@ -59,7 +59,6 @@
  #define SDCE_MISC_INT_EN	(1<<1)
  
-+struct sdhci_pxa {
-+	u8	clk_enable;
-+	u8	power_mode;
-+};
-+
- /*
-  * These registers are relative to the second register region, for the
-  * MBus bridge.
-diff --git a/include/linux/platform_data/pxa_sdhci.h b/include/linux/platform_data/pxa_sdhci.h
-index 27d3156d093a..9e20c2fb4ffd 100644
---- a/include/linux/platform_data/pxa_sdhci.h
-+++ b/include/linux/platform_data/pxa_sdhci.h
-@@ -55,9 +55,4 @@ struct sdhci_pxa_platdata {
- 	unsigned int	quirks2;
- 	unsigned int	pm_caps;
- };
--
--struct sdhci_pxa {
+ struct sdhci_pxa {
 -	u8	clk_enable;
--	u8	power_mode;
--};
- #endif /* _PXA_SDHCI_H_ */
+ 	u8	power_mode;
+ };
+ 
 -- 
 2.1.1
