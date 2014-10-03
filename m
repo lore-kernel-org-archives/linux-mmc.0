@@ -1,45 +1,82 @@
-From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Subject: [PATCH 07/12] mmc: sdhci-pxav3: Try to get named I/O clock first
-Date: Fri,  3 Oct 2014 17:55:42 +0200
-Message-ID: <1412351747-4188-8-git-send-email-sebastian.hesselbarth@gmail.com>
-References: <1412351747-4188-1-git-send-email-sebastian.hesselbarth@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1412351747-4188-1-git-send-email-sebastian.hesselbarth@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Antoine Tenart <antoine.tenart@free-electrons.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+From: Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH 00/12] SDHCI PXA cleanup and clocks
+Date: Fri,  3 Oct 2014 17:55:35 +0200
+Message-ID: <1412351747-4188-1-git-send-email-sebastian.hesselbarth@gmail.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Antoine Tenart <antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-With support for more than one clock, we'll need to distinguish between
-the clock by name. Change clock probing to first try to get "io" clock
-before falling back to unnamed clock.
+This patch set does a little cleanup on PXA v2/v3 drivers and
+adds an additional, optional core clock to v3 driver that is
+required on Marvell Berlin BG2 and BG2CD SoCs.
 
-Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
----
-Cc: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Antoine Tenart <antoine.tenart@free-electrons.com>
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: linux-kernel@vger.kernel.org
----
- drivers/mmc/host/sdhci-pxav3.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+Patch 1 removes the unused private driver data from pxav2 driver.
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index a34a589670e6..3dfd97977515 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -309,7 +309,9 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 	pltfm_host = sdhci_priv(host);
- 	pltfm_host->priv = pxa;
- 
--	pxa->clk_io = devm_clk_get(dev, NULL);
-+	pxa->clk_io = devm_clk_get(dev, "io");
-+	if (IS_ERR(pxa->clk_io))
-+		pxa->clk_io = devm_clk_get(dev, NULL);
- 	if (IS_ERR(pxa->clk_io)) {
- 		dev_err(dev, "failed to get io clock\n");
- 		ret = PTR_ERR(pxa->clk_io);
+Patch 2 is a fix for pxav3 driver to honor MMC_DDR52 timing on
+uhs signaling. AFAICS, up to now there was no user affected by it
+but Sony NSZ-GS7 will be.
+
+Patch 3 moves struct sdhci_pxa from global include to the only
+driver using it now. Patch 4 removes the unused clk_enable from
+it.
+
+Patch 5 removes some wrong and unnecessary checks on struct clk
+from v3 driver. Patch 6 moves the struct clk for I/O clock to
+the private driver data, while Patch 7 prepares the driver for
+named clocks.
+
+Patch 8 adds support for an additional, optional core clock that
+is now also documented in the binding with Patch 9.
+
+Patches 10-12 finally add corresponding sdhci nodes to berlin2
+and berlin2cd, Chromecast and NSZ-GS7 DT files.
+
+The patches are currently based on next-20141003 and are intended
+for v3.19, i.e. I'll resend the series as soon as v3.18-rc1 drops.
+
+A branch with the patches applied on top of next-201410-03 can be
+found on
+
+git://git.infradead.org/users/hesselba/linux-berlin.git devel/bg2-bg2cd-sdhci-v1
+
+Sebastian Hesselbarth (12):
+  mmc: sdhci-pxav2: Drop unused struct sdhci_pxa
+  mmc: sdhci-pxav3: Respect MMC_DDR52 timing on uhs signaling
+  mmc: sdhci-pxav3: Move private driver data to driver source
+  mmc: sdhci-pxav3: Remove unused clk_enable from sdhci_pxa
+  mmc: sdhci-pxav3: Remove checks for mandatory host clock
+  mmc: sdhci-pxav3: Move I/O clock to private data
+  mmc: sdhci-pxav3: Try to get named I/O clock first
+  mmc: sdhci-pxav3: Get optional core clock
+  mmc: sdhci-pxav3: Document clocks and additional clock-names property
+  ARM: dts: berlin: Add SDHCI controller nodes to BG2/BG2CD
+  ARM: dts: berlin: Enable WiFi on Google Chromecast
+  ARM: dts: berlin: Enable eMMC on Sony NSZ-GS7
+
+ .../devicetree/bindings/mmc/sdhci-pxa.txt          |  7 +++
+ arch/arm/boot/dts/berlin2-sony-nsz-gs7.dts         |  7 +++
+ arch/arm/boot/dts/berlin2.dtsi                     | 34 ++++++++++++
+ arch/arm/boot/dts/berlin2cd-google-chromecast.dts  |  9 ++++
+ arch/arm/boot/dts/berlin2cd.dtsi                   |  9 ++++
+ drivers/mmc/host/sdhci-pxav2.c                     | 15 ++----
+ drivers/mmc/host/sdhci-pxav3.c                     | 60 ++++++++++++++--------
+ include/linux/platform_data/pxa_sdhci.h            |  5 --
+ 8 files changed, 108 insertions(+), 38 deletions(-)
+
+---
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Antoine Tenart <antoine.tenart-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 -- 
 2.1.1
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
