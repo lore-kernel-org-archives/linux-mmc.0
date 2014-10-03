@@ -1,50 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/7] mmc: Some Braswell patches
-Date: Fri, 3 Oct 2014 14:57:17 +0200
-Message-ID: <CAPDyKFro_jDAuD1Hgk4hBePRLh0_Y9yKNuEzGVRoJ2ErKsXf3A@mail.gmail.com>
-References: <1411543653-3728-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH v3] mmc, sdhci, bcm-kona, LLVMLinux: Remove use of __initconst
+Date: Fri, 3 Oct 2014 14:59:07 +0200
+Message-ID: <CAPDyKFruar4iax_goZUmCbyoAM9BwNFLzyss1Fc+pZVkse+a7A@mail.gmail.com>
+References: <5774775.2EcFmuR4sV@wuerfel>
+	<1411685122-21867-1-git-send-email-behanw@converseincode.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f47.google.com ([209.85.216.47]:49274 "EHLO
-	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752063AbaJCM5S (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Oct 2014 08:57:18 -0400
-Received: by mail-qa0-f47.google.com with SMTP id cm18so791783qab.6
-        for <linux-mmc@vger.kernel.org>; Fri, 03 Oct 2014 05:57:18 -0700 (PDT)
-In-Reply-To: <1411543653-3728-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-qc0-f180.google.com ([209.85.216.180]:46889 "EHLO
+	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751314AbaJCM7I (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Oct 2014 08:59:08 -0400
+Received: by mail-qc0-f180.google.com with SMTP id x3so879224qcv.39
+        for <linux-mmc@vger.kernel.org>; Fri, 03 Oct 2014 05:59:07 -0700 (PDT)
+In-Reply-To: <1411685122-21867-1-git-send-email-behanw@converseincode.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Behan Webster <behanw@converseincode.com>
+Cc: Christian Daudt <bcm@fixthebug.org>, Chris Ball <chris@printf.net>, Matt Porter <mporter@linaro.org>, bcm-kernel-feedback-list@broadcom.com, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 24 September 2014 09:27, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Hi
+On 26 September 2014 00:45, Behan Webster <behanw@converseincode.com> wrote:
+> The __initconst is in the wrong place, and when moved to the correct place
+> it uncovers an error where the variable is used by non-init data structures.
 >
-> Here are some patches to further support for Intel Braswell
-> SoC.
+> Instead merely make them const and put the const in the right spot.
 >
->
-> Adrian Hunter (7):
->       mmc: sdhci: Add quirk for always getting TC with stop cmd
->       mmc: sdhci-acpi: Set SDHCI_QUIRK2_STOP_WITH_TC for Intel host controllers
->       mmc: sdhci-acpi: Add a HID and UID for a SD Card host controller
->       mmc: sdhci-pci: Set SDHCI_QUIRK2_STOP_WITH_TC for Intel BYT host controllers
->       mmc: sdhci-pci: Add Bay Trail and Braswell SD card detect
->       mmc: sdhci: Let a driver override timeout clock frequency
->       mmc: sdhci-pci: Fix Braswell eMMC timeout clock frequency
->
->  drivers/mmc/host/sdhci-acpi.c |  6 ++++--
->  drivers/mmc/host/sdhci-pci.c  | 28 +++++++++++++++++++++++++---
->  drivers/mmc/host/sdhci-pci.h  |  4 ++++
->  drivers/mmc/host/sdhci.c      | 14 ++++++++++++--
->  include/linux/mmc/sdhci.h     |  2 ++
->  5 files changed, 47 insertions(+), 7 deletions(-)
->
->
+> Signed-off-by: Behan Webster <behanw@converseincode.com>
+> Reviewed-by: Mark Charlebois <charlebm@gmail.com>
+> Acked-by: Arnd Bergmann <arnd@arndb.de>
+> Acked-by: Matt Porter <mporter@linaro.org>
 
-Thanks! Applied for next. It required a minor fix for patch 5, since
-the mmc_gpiod_request_cd() now takes one more parameter.
+Thanks! Applied for next.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-bcm-kona.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+> index dd780c3..d085dfe 100644
+> --- a/drivers/mmc/host/sdhci-bcm-kona.c
+> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
+> @@ -225,7 +225,7 @@ static struct sdhci_pltfm_data sdhci_pltfm_data_kona = {
+>                 SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+>  };
+>
+> -static struct __initconst of_device_id sdhci_bcm_kona_of_match[] = {
+> +static const struct of_device_id sdhci_bcm_kona_of_match[] = {
+>         { .compatible = "brcm,kona-sdhci"},
+>         { .compatible = "bcm,kona-sdhci"}, /* deprecated name */
+>         {}
+> --
+> 1.9.1
+>
