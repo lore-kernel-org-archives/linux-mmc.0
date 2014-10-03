@@ -1,47 +1,53 @@
 From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Subject: [PATCH 02/12] mmc: sdhci-pxav3: Respect MMC_DDR52 timing on uhs signaling
-Date: Fri,  3 Oct 2014 17:55:37 +0200
-Message-ID: <1412351747-4188-3-git-send-email-sebastian.hesselbarth@gmail.com>
+Subject: [PATCH 11/12] ARM: dts: berlin: Enable WiFi on Google Chromecast
+Date: Fri,  3 Oct 2014 17:55:46 +0200
+Message-ID: <1412351747-4188-12-git-send-email-sebastian.hesselbarth@gmail.com>
 References: <1412351747-4188-1-git-send-email-sebastian.hesselbarth@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:57998 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754136AbaJCP4A (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Oct 2014 11:56:00 -0400
 In-Reply-To: <1412351747-4188-1-git-send-email-sebastian.hesselbarth@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Antoine Tenart <antoine.tenart@free-electrons.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Antoine Tenart <antoine.tenart@free-electrons.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 
-commit bb8175a8aa42d731a840cd474e348ac3367eb5a0
-  ("mmc: sdhci: clarify DDR timing mode between SD-UHS and eMMC")
-added MMC_DDR52 as eMMC's DDR mode to be distinguished from SD-UHS.
-
-While the differentation may be useful, pxav3 SDHCI controller lacks
-a corresponding check in its custom .set_uhs_signaling callback for
-MMC_DDR52. This patch adds a new switch case for MMC_TIMING_MMC_DDR52
-to MMC_TIMING_UHS_DDR50 case.
+With SDHCI for BG2CD, we can now enable the port and allow to access
+AzureWave WiFi/BT module on Google Chromecast.
 
 Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
 ---
-Cc: Chris Ball <chris@printf.net> 
-Cc: Ulf Hansson <ulf.hansson@linaro.org> 
+Cc: Chris Ball <chris@printf.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Antoine Tenart <antoine.tenart@free-electrons.com>
-Cc: linux-mmc@vger.kernel.org 
+Cc: linux-mmc@vger.kernel.org
+Cc: devicetree@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org
 Cc: linux-kernel@vger.kernel.org
 ---
- drivers/mmc/host/sdhci-pxav3.c | 1 +
- 1 file changed, 1 insertion(+)
+ arch/arm/boot/dts/berlin2cd-google-chromecast.dts | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 5036d7d39529..b55c807982fe 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -211,6 +211,7 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
- 	case MMC_TIMING_UHS_SDR104:
- 		ctrl_2 |= SDHCI_CTRL_UHS_SDR104 | SDHCI_CTRL_VDD_180;
- 		break;
-+	case MMC_TIMING_MMC_DDR52:
- 	case MMC_TIMING_UHS_DDR50:
- 		ctrl_2 |= SDHCI_CTRL_UHS_DDR50 | SDHCI_CTRL_VDD_180;
- 		break;
+diff --git a/arch/arm/boot/dts/berlin2cd-google-chromecast.dts b/arch/arm/boot/dts/berlin2cd-google-chromecast.dts
+index 0816890a5c0d..bdcaff7c321e 100644
+--- a/arch/arm/boot/dts/berlin2cd-google-chromecast.dts
++++ b/arch/arm/boot/dts/berlin2cd-google-chromecast.dts
+@@ -43,4 +43,13 @@
+ 	};
+ };
+ 
++/*
++ * AzureWave AW-NH387 (Marvell 88W8787)
++ * 802.11b/g/n + Bluetooth 2.1
++ */
++&sdhci0 {
++	non-removable;
++	status = "okay";
++};
++
+ &uart0 { status = "okay"; };
 -- 
 2.1.1
+
