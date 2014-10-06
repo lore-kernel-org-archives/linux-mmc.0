@@ -1,54 +1,32 @@
-From: Sonny Rao <sonnyrao@chromium.org>
-Subject: [PATCH] mmc: dw_mmc: Reset DMA before enabling IDMAC
-Date: Mon,  6 Oct 2014 10:53:40 -0700
-Message-ID: <1412618020-22278-1-git-send-email-sonnyrao@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f202.google.com ([209.85.213.202]:53374 "EHLO
-	mail-ig0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752080AbaJFRx4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Oct 2014 13:53:56 -0400
-Received: by mail-ig0-f202.google.com with SMTP id r10so590014igi.1
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Oct 2014 10:53:55 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Reset DMA before enabling IDMAC
+Date: Mon, 6 Oct 2014 11:11:05 -0700
+Message-ID: <CAD=FV=W-GW0c8m_5Oaet=ZhJJwmk4RWJ7QurcySB7T8YvKr6Sg@mail.gmail.com>
+References: <1412618020-22278-1-git-send-email-sonnyrao@chromium.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1412618020-22278-1-git-send-email-sonnyrao@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sonny Rao <sonnyrao@chromium.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Heiko Stuebner <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Eddie Cai <eddie.cai@rock-chips.com>, Addy Ke <addy.ke@rock-chips.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Heiko Stuebner <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, dianders@chromium.org, eddie.cai@rock-chips.com, addy.ke@rock-chips.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Sonny Rao <sonnyrao@chromium.org>
 
-We've already got a reset of DMA after it's done.  Add one before we
-start DMA too.  This fixes a data corruption on Rockchip SoCs which
-will get bad data when doing a DMA transfer after doing a PIO transfer.
+Sonny,
 
-We tested this on an Exynos 5800 with HS200 and didn't notice any
-difference in sequential read throughput.
+On Mon, Oct 6, 2014 at 10:53 AM, Sonny Rao <sonnyrao@chromium.org> wrote:
+> We've already got a reset of DMA after it's done.  Add one before we
+> start DMA too.  This fixes a data corruption on Rockchip SoCs which
+> will get bad data when doing a DMA transfer after doing a PIO transfer.
+>
+> We tested this on an Exynos 5800 with HS200 and didn't notice any
+> difference in sequential read throughput.
+>
+> Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 4 ++++
+>  1 file changed, 4 insertions(+)
 
-Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
- drivers/mmc/host/dw_mmc.c | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 69f0cc6..2b5401e 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -83,6 +83,7 @@ struct idmac_desc {
- #endif /* CONFIG_MMC_DW_IDMAC */
- 
- static bool dw_mci_reset(struct dw_mci *host);
-+static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
- 
- #if defined(CONFIG_DEBUG_FS)
- static int dw_mci_req_show(struct seq_file *s, void *v)
-@@ -448,6 +449,9 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
- 
- 	dw_mci_translate_sglist(host, host->data, sg_len);
- 
-+	/* Make sure to reset DMA in case we did PIO before this */
-+	dw_mci_ctrl_reset(host, SDMMC_CTRL_DMA_RESET);
-+
- 	/* Select IDMAC interface */
- 	temp = mci_readl(host, CTRL);
- 	temp |= SDMMC_CTRL_USE_IDMAC;
--- 
-1.8.3.2
-
+Reviewed-by: Doug Anderson <dianders@chromium.org>
+Tested-by: Doug Anderson <dianders@chromium.org>
