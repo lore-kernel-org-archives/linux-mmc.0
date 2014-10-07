@@ -1,57 +1,77 @@
-From: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
-Subject: Re: [PATCH 0/2] mxcmmc driver fixes
-Date: Tue, 07 Oct 2014 14:50:51 +0200
-Message-ID: <5433E1AB.7070204@sirius-es.it>
-References: <1412089178-21946-1-git-send-email-matteo.facchinetti@sirius-es.it>
+From: Jens Axboe <axboe@kernel.dk>
+Subject: Re: question about block layer and dma alignment issue.
+Date: Tue, 07 Oct 2014 09:25:36 -0600
+Message-ID: <543405F0.4030103@kernel.dk>
+References: <542F9AD9.7020104@rempel-privat.de> <543027BD.5090009@kernel.dk> <5433B469.4060807@rempel-privat.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1412089178-21946-1-git-send-email-matteo.facchinetti@sirius-es.it>
-Sender: linux-kernel-owner@vger.kernel.org
-To: chris@printf.net, ulf.hansson@linaro.org
-Cc: shc_work@mail.ru, s.hauer@pengutronix.de, peter.griffin@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, agust@denx.de, gsi@denx.de, sbabic@denx.de
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:56900 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754367AbaJGPZk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Oct 2014 11:25:40 -0400
+Received: by mail-pa0-f44.google.com with SMTP id et14so7436263pad.3
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Oct 2014 08:25:40 -0700 (PDT)
+In-Reply-To: <5433B469.4060807@rempel-privat.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Oleksij Rempel <linux@rempel-privat.de>, "ulf.hansson@linaro.org >> Ulf Hansson" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org >> linux-mmc" <linux-mmc@vger.kernel.org>
 
-Does anyone have any comments?
+On 10/07/2014 03:37 AM, Oleksij Rempel wrote:
+> Am 04.10.2014 um 19:00 schrieb Jens Axboe:
+>> On 2014-10-04 00:59, Oleksij Rempel wrote:
+>>> Hello Jens,
+>>>
+>>> i hope it is OK to ask you directly, i didn't found better way to do
+>>> this.
+>>> I'm writing MMC driver based on reverse engineering for au6601 mmc
+>>> controller. This driver uses MMC API, and last one trying to use BLK API
+>>> as directly as possible. So far so gut, but i have a problem by using SG
+>>> requests with DMA without conversation. This controller accepts only
+>>> addresses with this mask 0xffff.f000 - also page aligned.
+>>> Till now i tried different QUEUE_FLAG_ flags and blk_queue settings, but
+>>> i never had absolute aligned quarantine.
+>>> Please tell me if i do some thing wrong or go in the wrong direction.
+>>
+>> Unless you can accept a 4kb hardware block size (and I'm assuming you
+>> cannot, since you need to support 512b file systems?), then you'd have
+>> to bounce the requests that don't align properly. You can fix some of
+>> them by setting blk_queue_dma_alignment(q, 4095).
+> 
+> I needed to include MMC list with Ulf Hansson at the beginning, so here
+> we are.
+> 
+> Hi Ulf,
+> 
+> here is the list of drivers which do care about dma alignment . Some of
+> them use bounce_buffer, some will use PIO instead of DMA, for not
+> aligned requests:
+> 
+> dw_mmc.c: dw_mci_pre_dma_transfer
+> wbsd.c
+> usdhi6rol0.c
+> tmio_mmc_dma.c
+> sunxi-mmc.c
+> sdhci.c
+> pxamci.c
+> mvsdio.c
+> au6601.c(not upstream jet)
+> 
+> The problem of all this driver is that each of them use own solution. I
+> think this code can be moved to some common place. For example, it can
+> be done in drivers/mmc/card/queue.c and enabled by
+> mmc_host_dma_alignment variable. Or provide a mmc_sg_align() function,
+> which should be called explicatively by driver.
+> 
+> Which option is preferable?
 
+I would roll a block version that they all can use, you can look at
+block/bounce.c for inspiration. That file deals with bouncing higher
+pages to lower memory, so it's not exactly what you want. But the metod
+of allocating a new bio that meets criteria and copying data over, that
+is the same that you need.
 
-On 30/09/2014 16:59, Matteo Facchinetti wrote:
-> From: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
->
-> Hi,
->
-> this patchset contains fixes for the mxcmmc driver.
->
-> *Patch 1:
-> fix a rare race condition that breaks a data trasfer when mxcmmc
-> driver use dma.
-> To reproduce this error, use mmc as rootfs and start at boot time
-> a realtime Xenomai application.
-> The realtime it's not directly related but entropy produced by
-> ipipe scheduler highlights the problem.
-> When this event occurs, the mxcmmc watchdog expires,
-> this cause a read error and application doesn't run.
->
-> *Patch 2:
-> fix the default value for available voltages into mxcmci_probe
->
-> Applied to mainline Linux-3.17.0-rc6-next on arch mpc512x.
-> Tested on mpc5125twr evaluation board
->
-> Applied to custom Linux-3.9.4 on arch mpc512x
-> Tested on a mpc5125 custom board.
->
-> Regards,
-> Matteo Facchinetti
-> Sirius Electronic Systems
->
->
-> Matteo Facchinetti (2):
->    mmc: mxcmmc: fix race condition when dma finish a data transfer
->    mmc: mxcmmc: fix the default value for available voltages into
->      mxcmci_probe
->
->   drivers/mmc/host/mxcmmc.c | 27 ++++++++++-----------------
->   1 file changed, 10 insertions(+), 17 deletions(-)
->
+-- 
+Jens Axboe
+
