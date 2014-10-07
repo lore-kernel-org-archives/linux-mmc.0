@@ -1,32 +1,87 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Reset DMA before enabling IDMAC
-Date: Mon, 6 Oct 2014 11:11:05 -0700
-Message-ID: <CAD=FV=W-GW0c8m_5Oaet=ZhJJwmk4RWJ7QurcySB7T8YvKr6Sg@mail.gmail.com>
-References: <1412618020-22278-1-git-send-email-sonnyrao@chromium.org>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [RFC PATCH] mmc: sdhci: switch from programmable clock mode to divided one if needed
+Date: Tue, 7 Oct 2014 10:11:35 +0200
+Message-ID: <1412669495-5629-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1412618020-22278-1-git-send-email-sonnyrao@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sonny Rao <sonnyrao@chromium.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Heiko Stuebner <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Eddie Cai <eddie.cai@rock-chips.com>, Addy Ke <addy.ke@rock-chips.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:25413 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752794AbaJGILo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Oct 2014 04:11:44 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: chris@printf.net, ulf.hansson@linaro.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Sonny,
+In programmable mode, if the clock frequency is too high, the divider
+can be too small to meet the clock frequency requirement especially to
+init the SD card. In this case, switch to the divided clock mode.
 
-On Mon, Oct 6, 2014 at 10:53 AM, Sonny Rao <sonnyrao@chromium.org> wrote:
-> We've already got a reset of DMA after it's done.  Add one before we
-> start DMA too.  This fixes a data corruption on Rockchip SoCs which
-> will get bad data when doing a DMA transfer after doing a PIO transfer.
->
-> We tested this on an Exynos 5800 with HS200 and didn't notice any
-> difference in sequential read throughput.
->
-> Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> ---
->  drivers/mmc/host/dw_mmc.c | 4 ++++
->  1 file changed, 4 insertions(+)
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
 
-Reviewed-by: Doug Anderson <dianders@chromium.org>
-Tested-by: Doug Anderson <dianders@chromium.org>
+Hi all,
+
+I would like to know if this patch can be accepted. Use case, I have a base
+clock at 12 MHz, M is 40. So in programmable mode, using the greater divider,
+minimum clock frequency will be higher than 400 KHz so it could cause issues to
+init the card.
+
+Thanks for your feedback.
+
+Ludovic
+
+ drivers/mmc/host/sdhci.c | 29 ++++++++++++++++++++---------
+ 1 file changed, 20 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index df0e7e1..70d4c18 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1126,6 +1126,7 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	int real_div = div, clk_mul = 1;
+ 	u16 clk = 0;
+ 	unsigned long timeout;
++	bool switch_base_clk = false;
+ 
+ 	host->mmc->actual_clock = 0;
+ 
+@@ -1163,15 +1164,25 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 					<= clock)
+ 					break;
+ 			}
+-			/*
+-			 * Set Programmable Clock Mode in the Clock
+-			 * Control register.
+-			 */
+-			clk = SDHCI_PROG_CLOCK_MODE;
+-			real_div = div;
+-			clk_mul = host->clk_mul;
+-			div--;
+-		} else {
++			if ((host->max_clk * host->clk_mul / div) <= clock) {
++				/*
++				 * Set Programmable Clock Mode in the Clock
++				 * Control register.
++				 */
++				clk = SDHCI_PROG_CLOCK_MODE;
++				real_div = div;
++				clk_mul = host->clk_mul;
++				div--;
++			} else {
++				/*
++				 * Divisor can be too small to reach clock
++				 * speed requirement. Then use the base clock.
++				 */
++				switch_base_clk = true;
++			}
++		}
++
++		if (!host->clk_mul || switch_base_clk) {
+ 			/* Version 3.00 divisors must be a multiple of 2. */
+ 			if (host->max_clk <= clock)
+ 				div = 1;
+-- 
+2.0.3
+
