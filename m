@@ -1,53 +1,61 @@
-From: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
-Subject: [PATCH v2 2/2] mmc: mxcmmc: fix the default value for available voltages into mxcmci_probe
-Date: Wed,  8 Oct 2014 16:24:33 +0200
-Message-ID: <1412778273-13464-1-git-send-email-matteo.facchinetti@sirius-es.it>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: chris@printf.net, ulf.hansson@linaro.org
-Cc: shc_work@mail.ru, s.hauer@pengutronix.de, peter.griffin@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, agust@denx.de, gsi@denx.de, sbabic@denx.de, Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] ARM: dts: fix MMC2 regulators for Exynos5420 Arndale Octa board
+Date: Wed, 08 Oct 2014 17:20:42 +0200
+Message-ID: <1998495.eXa2FjeVGo@wuerfel>
+References: <2750153.I3nVqzmXTP@amdc1032> <3871564.7PhRGhHd6U@wuerfel> <CAPDyKFowKK2UbwQ3uUmX7yzgsyFVxQ+sKb=dh+a0_T5K4agYGw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.17.10]:61337 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754842AbaJHPVK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Oct 2014 11:21:10 -0400
+In-Reply-To: <CAPDyKFowKK2UbwQ3uUmX7yzgsyFVxQ+sKb=dh+a0_T5K4agYGw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, Doug Anderson <dianders@google.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, "cpgs ." <cpgs@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Seung-Won Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <tomasz.figa@gmail.com>, SUNIL JOSHI <joshi@samsung.com>, PRASHANTH GODREHAL <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Abhilash Kesavan <a.kesavan@samsung.com>
 
-From: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
+On Wednesday 08 October 2014 14:50:46 Ulf Hansson wrote:
+> On 8 October 2014 14:07, Arnd Bergmann <arnd@arndb.de> wrote:
+> > On Thursday 02 October 2014 20:16:44 Ulf Hansson wrote:
+> >> On 2 October 2014 18:10, Bartlomiej Zolnierkiewicz
+> >> <b.zolnierkie@samsung.com> wrote:
+> >> > Regulators for MMC2 (SD card) are PVDD_TFLASH_2V8 (LDO19) for vmmc
+> >> > and PVDD_APIO_MMCOFF_2V8 (LDO13) for vqmmc.  Currently the device
+> >> > tree entry for MMC2 uses PVDD_PRE_1V8 (LDO10) for vmmc and vqmmc is
+> >> > not specified.  Fix it.
+> >> >
+> >> > Without this patch:
+> >> > - "mmc: dw_mmc: use mmc_regulator_get_supply to handle regulators"
+> >> >   patch causes a SD card detection to fail
+> >> > - "mmc: dw_mmc: Support voltage changes" patch causes a boot hang
+> >> >
+> >> > This patch fixes both above problems.
+> >> >
+> >> > Suggested-by: Doug Anderson <dianders@google.com>
+> >> > Cc: Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>
+> >> > Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> >> > Signed-off-by: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+> >> > Acked-by: Kyungmin Park <kyungmin.park@samsung.com>
+> >>
+> >> Unless it causes a bunch non-trivial conflicts, I suggest we take this
+> >> through my mmc tree to not break bisectability.
+> >
+> > Have you tried if it conflicts with arm-soc? If not,
+> >
+> > Acked-by: Arnd Bergmann <arnd@arndb.de>
+> 
+> In conflicts, but it's trivial to fix it.
+> 
+> Since it actually fixes a regression which is inserted from my mmc
+> tree, I thought it makes sense to take it through here. Anyway, the
+> decision is yours.
+> 
 
-If available voltages are not given, mmc_regulator_get_supply() function
-returns 0 and mxcmmc driver doesn't set a value for ocr_avail mask.
+Why does it cause a regression though? Does this mean you are breaking
+any boot with an old DT file and a new kernel? That would be very
+bad, the driver is supposed to keep working with an existing dtb.
 
-In accordance with the comment in platform_data/mmc-mxcmmc.h,
-fix it, assuming MMC_VDD_32_33 | MMC_VDD_33_34 as default value.
-
-Signed-off-by: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
----
-v2:
-* Add test to check if mmc->ocr_avail is setted by mmc_regulator_get_supply().
-  This will prevent that it be overwritten unconditionally.
----
- drivers/mmc/host/mxcmmc.c | 12 +++++++-----
- 1 file changed, 7 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 536a898..5316d9b 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -1077,12 +1077,14 @@ static int mxcmci_probe(struct platform_device *pdev)
- 		dat3_card_detect = true;
- 
- 	ret = mmc_regulator_get_supply(mmc);
--	if (ret) {
--		if (pdata && ret != -EPROBE_DEFER)
--			mmc->ocr_avail = pdata->ocr_avail ? :
--				MMC_VDD_32_33 | MMC_VDD_33_34;
-+	if (ret == -EPROBE_DEFER)
-+		goto out_free;
-+
-+	if (!mmc->ocr_avail) {
-+		if (pdata && pdata->ocr_avail)
-+			mmc->ocr_avail = pdata->ocr_avail;
- 		else
--			goto out_free;
-+			mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
- 	}
- 
- 	if (dat3_card_detect)
--- 
-1.8.3.2
+	Arnd
