@@ -1,35 +1,51 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] ARM: dts: fix MMC2 regulators for Exynos5420 Arndale Octa board
-Date: Wed, 08 Oct 2014 20:28:31 +0200
-Message-ID: <1819182.VPTrtc9d2P@wuerfel>
-References: <2750153.I3nVqzmXTP@amdc1032> <1998495.eXa2FjeVGo@wuerfel> <CAD=FV=VB_eK9pSmmTBRHoQmkORweHzT-OFaMWA6haFYnQuQaUQ@mail.gmail.com>
+From: Prabu Thangamuthu <Prabu.T@synopsys.com>
+Subject: RE: [PATCH v5] mmc: dw_mmc: Add IDMAC 64-bit address mode support
+Date: Thu, 9 Oct 2014 07:37:40 +0000
+Message-ID: <705D14B1C7978B40A723277C067CEDE21B33369C@IN01WEMBXB.internal.synopsys.com>
+References: <705D14B1C7978B40A723277C067CEDE21B32D001@IN01WEMBXB.internal.synopsys.com>
+ <CAGOxZ52-vKJh=FUGbB7X1MDkvGp3c-T_kgsKHPH80DGciyR=QA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.24]:55464 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753338AbaJHS3O (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Oct 2014 14:29:14 -0400
-In-Reply-To: <CAD=FV=VB_eK9pSmmTBRHoQmkORweHzT-OFaMWA6haFYnQuQaUQ@mail.gmail.com>
+Received: from smtprelay2.synopsys.com ([198.182.60.111]:43503 "EHLO
+	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750967AbaJIHjl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Oct 2014 03:39:41 -0400
+In-Reply-To: <CAGOxZ52-vKJh=FUGbB7X1MDkvGp3c-T_kgsKHPH80DGciyR=QA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@google.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Kukjin Kim <kgene.kim@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@samsung.com>, "cpgs ." <cpgs@samsung.com>, Yuvaraj Kumar C D <yuvaraj.cd@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <cjb@laptop.org>, Seung-Won Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Sonny Rao <sonnyrao@chromium.org>, Tomasz Figa <tomasz.figa@gmail.com>, SUNIL JOSHI <joshi@samsung.com>, PRASHANTH GODREHAL <prashanth.g@samsung.com>, ALIM AKHTAR <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Abhilash Kesavan <a.kesavan@samsung.com>
+To: Alim Akhtar <alim.akhtar@gmail.com>, Prabu Thangamuthu <Prabu.T@synopsys.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>
 
-On Wednesday 08 October 2014 08:29:16 Doug Anderson wrote:
-> 
-> On Wed, Oct 8, 2014 at 8:20 AM, Arnd Bergmann <arnd@arndb.de> wrote:
-> > Why does it cause a regression though? Does this mean you are breaking
-> > any boot with an old DT file and a new kernel? That would be very
-> > bad, the driver is supposed to keep working with an existing dtb.
-> 
-> The old dts file specified completely the wrong regulator.  It
-> happened that the old code didn't really care, but when the code was
-> fixed to care then things broke.  If we need to keep old dts files
-> working then the most sensible place to do it would be in a "fixup old
-> broken device trees" stage somewhere in kernel boot.
-
-Ok, got it. I guess it's better to apply this one first then.
-
-	Arnd
+SGkgQWxpbSwNCg0KVGhhbmsgeW91IGZvciByZXZpZXdpbmcgYW5kIHRlc3Rpbmcgb3VyIFBhdGNo
+Lg0KDQpPbiBXZWQsIE9jdCA4LCAyMDE0IGF0IDc6MTcgUE0sIEFsaW0gQWtodGFyIDxhbGltLmFr
+aHRhckBnbWFpbC5jb20gPiB3cm90ZToNCj4gSGkgUHJhYnUsDQo+IA0KPiBPbiBUdWUsIE9jdCA3
+LCAyMDE0IGF0IDU6MTcgUE0sIFByYWJ1IFRoYW5nYW11dGh1DQo+IDxQcmFidS5UQHN5bm9wc3lz
+LmNvbT4gd3JvdGU6DQo+ID4gU3lub3BzeXMgRFdfTU1DIElQIGNvcmUgc3VwcG9ydHMgSW50ZXJu
+YWwgRE1BIENvbnRyb2xsZXIgd2l0aCA2NC1iaXQNCj4gYWRkcmVzcyBtb2RlIGZyb20gSVAgdmVy
+c2lvbiAyLjcwYSBvbndhcmRzLg0KPiA+IFVwZGF0ZWQgdGhlIGR3X21tYyBkcml2ZXIgdG8gc3Vw
+cG9ydCBJRE1BQyA2NC1iaXQgYWRkcmVzc2luZyBtb2RlLg0KPiA+DQo+ID4gVGVzdGVkIHRoZSBm
+ZWF0dXJlcyBpbiBEV19NTUMgY29yZSB2Mi43MGEgYW5kIHYyLjQwYSB3aXRoIEhBUFMtNTENCj4g
+c2V0dXAgYW5kIGRyaXZlciBpcyB3b3JraW5nIGZpbmUuDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5
+OiBQcmFidSBUaGFuZ2FtdXRodSA8cHJhYnUudEBzeW5vcHN5cy5jb20+DQo+ID4gLS0tDQo+IFdp
+dGggYSBtaW5vciBuaXQgYmVsb3csIHRoaXMgbG9va3MgZ29vZCB0byBtZS4NCj4gDQo+IFNvLCBS
+ZXZpZXdlZC1ieTogQWxpbSBBa2h0YXIgPGFsaW0uYWtodGFyQHNhbXN1bmcuY29tPg0KPiANCj4g
+SGF2ZSB0ZXN0ZWQgdGhpcyBvbiBleHlub3M3IHBsYXRmb3JtIHdoaWNoIGhhcyBkd19tbWMgY29u
+dHJvbGxlciB2ZXJzaW9uDQo+IDIuNzBhLCBIYXZlIHRlc3RlZCB0aGlzIG9uIGV4eW5vczU4MDAg
+UGkgYm9hcmQgYW5kIGZvdW5kIG5vIGlzc3VlLg0KPiANCj4gU28sIFRlc3RlZC1ieTogQWxpbSBB
+a2h0YXIgPGFsaW0uYWtodGFyQHNhbXN1bmcuY29tPg0KPiANCj4gPiBDaGFuZ2UgbG9nIHY1Og0K
+PiA+ICAgICAgICAgLSBSZWNyZWF0ZWQgdGhlIHBhdGNoIGFnYWluc3QgbGludXgtbmV4dCBhcyB0
+aGlzIHBhdGNoIGlzDQo+ID4gcmVxdWlyZWQgZm9yIGFub3RoZXIgcGF0Y2gNCj4gPiBodHRwOi8v
+d3d3LnNwaW5pY3MubmV0L2xpc3RzL2FybS1rZXJuZWwvbXNnMzU3OTg1Lmh0bWwNCj4gPg0KPiB5
+ZXMsIHdlIGFyZSB1c2luZyB0aGlzIG9uIGV4eW5vczcgcGxhdGZvcm0uIFRoYW5rcyBmb3IgcmUt
+YmFzaW5nIGFuZCByZS0NCj4gcG9zdGluZyAuDQo+ID4gKyAgICAgICAgICAgICAgIC8qIFNldCB0
+aGUgbGFzdCBkZXNjcmlwdG9yIGFzIHRoZSBlbmQtb2YtcmluZyBkZXNjcmlwdG9yICovDQo+ID4g
+KyAgICAgICAgICAgICAgIHAtPmRlczMgPSBob3N0LT5zZ19kbWE7DQo+ID4gKyAgICAgICAgICAg
+ICAgIHAtPmRlczAgPSBJRE1BQ19ERVMwX0VSOw0KPiA+ICsgICAgICAgfQ0KPiA+ICsNCj4gPiAr
+ICAgICAgIG1jaV93cml0ZWwoaG9zdCwgQk1PRCwgU0RNTUNfSURNQUNfU1dSRVNFVCk7DQo+IEFu
+eSByZWFzb24gdG8gdXNlIHRoaXMgaW5zdGVhZCBvZiBlYXJsaWVyIHVzZSBvZiAgZHdfbWNpX2lk
+bWFjX3Jlc2V0KGhvc3QpPw0KVGhhbmtzIGZvciBwb2ludGluZyB0aGlzLiBJdCdzIGEgdHlwby4g
+SSB3aWxsIHJlc2VuZCB0aGUgcGF0Y2ggd2l0aCB0aGlzIG1vZGlmaWNhdGlvbi4NCg0KUmVnYXJk
+cywNClByYWJ1IFRoYW5nYW11dGh1Lg0KDQo=
