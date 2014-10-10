@@ -1,60 +1,79 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Reset DMA before enabling IDMAC
-Date: Thu, 9 Oct 2014 17:36:19 -0700
-Message-ID: <CAD=FV=VQe-9c+QOYEmsuHwY+9qF1tkTgiakdSUWhUoWw6zuHSA@mail.gmail.com>
-References: <1412618020-22278-1-git-send-email-sonnyrao@chromium.org>
-	<CAGOxZ53bviLbuA27=1QjNUgxA_WMMP-6siV=DajuN8iSqsasMg@mail.gmail.com>
-	<CAO3aYcqi0g=eJta33s5oM-tAAmAhe86VvHd43p5RJ7qMPZzfrg@mail.gmail.com>
-	<CAGOxZ520EXdS9FoCVW7GPvheNSZu=xqc2makJY5D0c3zjVBkDw@mail.gmail.com>
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: [PATCH v2 2/2] mmc: mxcmmc: fix the default value for available
+ voltages into mxcmci_probe
+Date: Fri, 10 Oct 2014 09:51:28 +0200
+Message-ID: <20141010075128.GP4992@pengutronix.de>
+References: <1412778273-13464-1-git-send-email-matteo.facchinetti@sirius-es.it>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f177.google.com ([209.85.220.177]:54291 "EHLO
-	mail-vc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751060AbaJJAgU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Oct 2014 20:36:20 -0400
-Received: by mail-vc0-f177.google.com with SMTP id hq11so1898488vcb.36
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Oct 2014 17:36:19 -0700 (PDT)
-In-Reply-To: <CAGOxZ520EXdS9FoCVW7GPvheNSZu=xqc2makJY5D0c3zjVBkDw@mail.gmail.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:57069 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751601AbaJJHvj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Oct 2014 03:51:39 -0400
+Content-Disposition: inline
+In-Reply-To: <1412778273-13464-1-git-send-email-matteo.facchinetti@sirius-es.it>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@gmail.com>
-Cc: =?UTF-8?B?RWRkaWUgQ2FpKOiUoeaeqyk=?= <eddie.cai@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Heiko Stuebner <heiko@sntech.de>, Sonny Rao <sonnyrao@chromium.org>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Addy Ke <addy.ke@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
+Cc: chris@printf.net, ulf.hansson@linaro.org, shc_work@mail.ru, peter.griffin@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, agust@denx.de, gsi@denx.de, sbabic@denx.de
 
-Alim,
+On Wed, Oct 08, 2014 at 04:24:33PM +0200, Matteo Facchinetti wrote:
+> From: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
+> 
+> If available voltages are not given, mmc_regulator_get_supply() function
+> returns 0 and mxcmmc driver doesn't set a value for ocr_avail mask.
+> 
+> In accordance with the comment in platform_data/mmc-mxcmmc.h,
+> fix it, assuming MMC_VDD_32_33 | MMC_VDD_33_34 as default value.
+> 
+> Signed-off-by: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
 
-On Thu, Oct 9, 2014 at 3:19 PM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
-> Thats fine, I think every vendor (most of them) has a custom
-> implementation of dw_mmc, but they do have VERID register to check the
-> dw_mmc version.
-> The reason why I asked is, I have seen inconsistency in card
-> enumeration on few controller version, and this patch alone does not
-> help, and adding a call to dw_mci_idmac_reset() after DMA reset is
-> needed. And this is what is recommended in the synopsys's data book
-> also.
-> Do you see any issue/side effect after adding dw_mci_idmac_reset()?
+Looks okay now.
 
-A quick test shows no problem with adding this to Sonny's patch:
+Reviewed-by: Sascha Hauer <s.hauer@pengutronix.de>
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 66dc8fe..588b5b8 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -481,6 +481,7 @@ static void dw_mci_idmac_start_dma(struct dw_mci
-*host, unsigned int sg_len)
+Sascha
 
-        /* Make sure to reset DMA in case we did PIO before this */
-        dw_mci_ctrl_reset(host, SDMMC_CTRL_DMA_RESET);
-+       dw_mci_idmac_reset(host);
+> ---
+> v2:
+> * Add test to check if mmc->ocr_avail is setted by mmc_regulator_get_supply().
+>   This will prevent that it be overwritten unconditionally.
+> ---
+>  drivers/mmc/host/mxcmmc.c | 12 +++++++-----
+>  1 file changed, 7 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> index 536a898..5316d9b 100644
+> --- a/drivers/mmc/host/mxcmmc.c
+> +++ b/drivers/mmc/host/mxcmmc.c
+> @@ -1077,12 +1077,14 @@ static int mxcmci_probe(struct platform_device *pdev)
+>  		dat3_card_detect = true;
+>  
+>  	ret = mmc_regulator_get_supply(mmc);
+> -	if (ret) {
+> -		if (pdata && ret != -EPROBE_DEFER)
+> -			mmc->ocr_avail = pdata->ocr_avail ? :
+> -				MMC_VDD_32_33 | MMC_VDD_33_34;
+> +	if (ret == -EPROBE_DEFER)
+> +		goto out_free;
+> +
+> +	if (!mmc->ocr_avail) {
+> +		if (pdata && pdata->ocr_avail)
+> +			mmc->ocr_avail = pdata->ocr_avail;
+>  		else
+> -			goto out_free;
+> +			mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+>  	}
+>  
+>  	if (dat3_card_detect)
+> -- 
+> 1.8.3.2
+> 
+> 
 
-        /* Select IDMAC interface */
-        temp = mci_readl(host, CTRL);
-
-I'll start reboot tests now to see how it behaves...  I think Sonny is
-out of the office for a few days so we might need to wait for a spin,
-but I'll run with that change in the meantime and see how it behaves
-for me.
-
-Thanks!
-
--Doug
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
