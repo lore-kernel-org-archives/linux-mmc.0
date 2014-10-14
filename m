@@ -1,72 +1,64 @@
 From: Alim Akhtar <alim.akhtar@gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Reset DMA before enabling IDMAC
-Date: Wed, 15 Oct 2014 01:28:01 +0530
-Message-ID: <CAGOxZ52an-GUiHadN9Xp29L_WvPH4pS2LSz7BbsQrm7qLXjzQw@mail.gmail.com>
-References: <1412618020-22278-1-git-send-email-sonnyrao@chromium.org>
- <CAGOxZ53bviLbuA27=1QjNUgxA_WMMP-6siV=DajuN8iSqsasMg@mail.gmail.com>
- <CAO3aYcqi0g=eJta33s5oM-tAAmAhe86VvHd43p5RJ7qMPZzfrg@mail.gmail.com>
- <CAGOxZ520EXdS9FoCVW7GPvheNSZu=xqc2makJY5D0c3zjVBkDw@mail.gmail.com>
- <CAD=FV=VQe-9c+QOYEmsuHwY+9qF1tkTgiakdSUWhUoWw6zuHSA@mail.gmail.com> <CAD=FV=W57417Jdp8d-=yZgjUdTJyMKnzSvwg6YuXz3eTvTZZuQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Change signal voltage error to dev_dbg()
+Date: Wed, 15 Oct 2014 01:34:00 +0530
+Message-ID: <CAGOxZ51U+2swUJFwZKNfPN6UWzCVNFVHdRsR8D1cppD41-GstQ@mail.gmail.com>
+References: <1413000976-2038-1-git-send-email-dianders@chromium.org>
+ <CAGOxZ51vPf7wR8FccbCjv=08Zjs_mNCj7CiWBE_j6qr7ZHSD9Q@mail.gmail.com> <CAD=FV=Vr422LByF2crb+vvHkhvt5LSxq3oFF8BXVMBBEZYFZTg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f175.google.com ([209.85.160.175]:47987 "EHLO
-	mail-yk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755499AbaJNT6m (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Oct 2014 15:58:42 -0400
-In-Reply-To: <CAD=FV=W57417Jdp8d-=yZgjUdTJyMKnzSvwg6YuXz3eTvTZZuQ@mail.gmail.com>
+Received: from mail-yh0-f53.google.com ([209.85.213.53]:49678 "EHLO
+	mail-yh0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755434AbaJNUEl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Oct 2014 16:04:41 -0400
+In-Reply-To: <CAD=FV=Vr422LByF2crb+vvHkhvt5LSxq3oFF8BXVMBBEZYFZTg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Doug Anderson <dianders@chromium.org>
-Cc: =?UTF-8?B?RWRkaWUgQ2FpKOiUoeaeqyk=?= <eddie.cai@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Heiko Stuebner <heiko@sntech.de>, Sonny Rao <sonnyrao@chromium.org>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Addy Ke <addy.ke@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Addy Ke <addy.ke@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
 Hi Doug,
 
-On Tue, Oct 14, 2014 at 10:21 PM, Doug Anderson <dianders@chromium.org> wrote:
-> Hi,
+On Tue, Oct 14, 2014 at 9:57 PM, Doug Anderson <dianders@chromium.org> wrote:
+> Alim,
 >
-> On Thu, Oct 9, 2014 at 5:36 PM, Doug Anderson <dianders@chromium.org> wrote:
->> Alim,
->>
->> On Thu, Oct 9, 2014 at 3:19 PM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
->>> Thats fine, I think every vendor (most of them) has a custom
->>> implementation of dw_mmc, but they do have VERID register to check the
->>> dw_mmc version.
->>> The reason why I asked is, I have seen inconsistency in card
->>> enumeration on few controller version, and this patch alone does not
->>> help, and adding a call to dw_mci_idmac_reset() after DMA reset is
->>> needed. And this is what is recommended in the synopsys's data book
->>> also.
->>> Do you see any issue/side effect after adding dw_mci_idmac_reset()?
->>
->> A quick test shows no problem with adding this to Sonny's patch:
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 66dc8fe..588b5b8 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -481,6 +481,7 @@ static void dw_mci_idmac_start_dma(struct dw_mci
->> *host, unsigned int sg_len)
->>
->>         /* Make sure to reset DMA in case we did PIO before this */
->>         dw_mci_ctrl_reset(host, SDMMC_CTRL_DMA_RESET);
->> +       dw_mci_idmac_reset(host);
->>
->>         /* Select IDMAC interface */
->>         temp = mci_readl(host, CTRL);
->>
->> I'll start reboot tests now to see how it behaves...  I think Sonny is
->> out of the office for a few days so we might need to wait for a spin,
->> but I'll run with that change in the meantime and see how it behaves
->> for me.
->>
->> Thanks!
+> On Tue, Oct 14, 2014 at 5:02 AM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -1075,7 +1075,7 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>                 ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
+>>>
+>>>                 if (ret) {
+>>> -                       dev_err(&mmc->class_dev,
+>>> +                       dev_dbg(&mmc->class_dev,
+>>>                                          "Regulator set error %d: %d - %d\n",
+>>>                                          ret, min_uv, max_uv);
+>>>                         return ret;
+>> Well, I am ok with this but this info is very useful, what if PMIC
+>> failed to actually set the voltage? may be because of some PMIC driver
+>> bug or i2c driver bug? Ofcourse this can be found by turning MMC_DEBUG
+>> ON, but is that worth in this case. Or is there a way to print that,
+>> this failure is because of a regulator re-try?
+>> your thoughts?
 >
-> Just FYI that I've been running with Alim's proposed change for
-> several days and it seems solid.  I think Sonny may be able to spin
-> his patch this week.  :)
+> I think that the regulator framework and the i2c framework are
+> supposed to be reliable.  If they aren't reliable there will be lots
+> of places that will have problems.  I think that you _could_:
 >
-Sounds great. Thanks for testing.
+> * In your regulator driver print an error when an i2c transfer fails.
+>
+> * In your regulator driver print an error if some unexpected event
+> happens (like a regulator reports that the voltage didn't actually
+> change).
+>
+> That would get you want you want, right?  ...but an error here doesn't
+> belong and that's pretty much determined by (28f92b5 mmc: core: Try
+> other signal levels during power up).  That patch wants to be able to
+> try several different voltage levels and if we print an error in that
+> case then it's going to be very confusing to the user.
+>
+Hmm...Ok, convincing enough to me, so
+Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
 > -Doug
 
 
