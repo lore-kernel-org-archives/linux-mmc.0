@@ -1,41 +1,63 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 0/7] mmc: Cleanup and modernize PM callbacks
-Date: Tue, 14 Oct 2014 13:45:13 +0200
-Message-ID: <1413287120-10914-1-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 1/7] mmc: core: Remove superfluous ifdefs for SDIO bus' PM callbacks
+Date: Tue, 14 Oct 2014 13:45:14 +0200
+Message-ID: <1413287120-10914-2-git-send-email-ulf.hansson@linaro.org>
+References: <1413287120-10914-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:65476 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755061AbaJNLpb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Oct 2014 07:45:31 -0400
-Received: by mail-lb0-f174.google.com with SMTP id p9so8020965lbv.19
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Oct 2014 04:45:29 -0700 (PDT)
+Received: from mail-la0-f44.google.com ([209.85.215.44]:36207 "EHLO
+	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755061AbaJNLpd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Oct 2014 07:45:33 -0400
+Received: by mail-la0-f44.google.com with SMTP id hs14so8371293lab.3
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Oct 2014 04:45:31 -0700 (PDT)
+In-Reply-To: <1413287120-10914-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-This patchset cleanup and modernize how to set up PM callbacks for the
-mmc_driver in the mmc core. There shouldn't be any functional changes.
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/sdio_bus.c | 12 +-----------
+ 1 file changed, 1 insertion(+), 11 deletions(-)
 
-
-Ulf Hansson (7):
-  mmc: core: Remove superfluous ifdefs for SDIO bus' PM callbacks
-  mmc: core: Don't export the to_sdio_driver macro
-  mmc: core: Convert the mmc_driver to use the modern PM ops
-  mmc: core: Convert mmc_driver to device_driver
-  mmc: msm_sdcc: Use platform_set|get_drvdata
-  mmc: block: Use dev_set|get_drvdata()
-  mmc: core: Remove unused mmc_list_to_card() macro
-
- drivers/mmc/card/block.c      | 55 ++++++++++++++++++++++---------------------
- drivers/mmc/card/mmc_test.c   | 18 ++++++++------
- drivers/mmc/core/bus.c        | 55 ++++++++++---------------------------------
- drivers/mmc/core/sdio_bus.c   | 14 +++--------
- drivers/mmc/host/msm_sdcc.c   |  6 ++---
- include/linux/mmc/card.h      | 20 ++--------------
- include/linux/mmc/sdio_func.h |  2 --
- 7 files changed, 59 insertions(+), 111 deletions(-)
-
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index e4eb456..5c02367 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -195,8 +195,6 @@ static int sdio_bus_remove(struct device *dev)
+ 	return ret;
+ }
+ 
+-#ifdef CONFIG_PM
+-
+ static const struct dev_pm_ops sdio_bus_pm_ops = {
+ 	SET_SYSTEM_SLEEP_PM_OPS(pm_generic_suspend, pm_generic_resume)
+ 	SET_RUNTIME_PM_OPS(
+@@ -206,14 +204,6 @@ static const struct dev_pm_ops sdio_bus_pm_ops = {
+ 	)
+ };
+ 
+-#define SDIO_PM_OPS_PTR	(&sdio_bus_pm_ops)
+-
+-#else /* !CONFIG_PM */
+-
+-#define SDIO_PM_OPS_PTR	NULL
+-
+-#endif /* !CONFIG_PM */
+-
+ static struct bus_type sdio_bus_type = {
+ 	.name		= "sdio",
+ 	.dev_groups	= sdio_dev_groups,
+@@ -221,7 +211,7 @@ static struct bus_type sdio_bus_type = {
+ 	.uevent		= sdio_bus_uevent,
+ 	.probe		= sdio_bus_probe,
+ 	.remove		= sdio_bus_remove,
+-	.pm		= SDIO_PM_OPS_PTR,
++	.pm		= &sdio_bus_pm_ops,
+ };
+ 
+ int sdio_register_bus(void)
 -- 
 1.9.1
 
