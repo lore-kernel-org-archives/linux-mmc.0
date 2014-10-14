@@ -1,87 +1,41 @@
-From: Andrew Gabbasov <andrew_gabbasov@mentor.com>
-Subject: RE: [PATCH] mmc: sdhci-esdhc-imx: don't exit in case of no pinctrl states
-Date: Mon, 13 Oct 2014 16:02:53 +0400
-Message-ID: <000201cfe6dd$9e6e3fa0$db4abee0$@mentor.com>
-References: <1412155532-32504-1-git-send-email-andrew_gabbasov@mentor.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 0/7] mmc: Cleanup and modernize PM callbacks
+Date: Tue, 14 Oct 2014 13:45:13 +0200
+Message-ID: <1413287120-10914-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relay1.mentorg.com ([192.94.38.131]:46419 "EHLO
-	relay1.mentorg.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753309AbaJMMDA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Oct 2014 08:03:00 -0400
-In-Reply-To: <1412155532-32504-1-git-send-email-andrew_gabbasov@mentor.com>
-Content-Language: en-us
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:65476 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755061AbaJNLpb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Oct 2014 07:45:31 -0400
+Received: by mail-lb0-f174.google.com with SMTP id p9so8020965lbv.19
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Oct 2014 04:45:29 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-Hi,
+This patchset cleanup and modernize how to set up PM callbacks for the
+mmc_driver in the mmc core. There shouldn't be any functional changes.
 
-Any comments on this?
 
-> -----Original Message-----
-> From: Andrew Gabbasov [mailto:andrew_gabbasov@mentor.com] 
-> Sent: Wednesday, October 01, 2014 1:26 PM
-> To: linux-mmc@vger.kernel.org
-> Subject: [PATCH] mmc: sdhci-esdhc-imx: don't exit in case of no pinctrl
-states
-> 
-> From: Dirk Behme <dirk.behme@de.bosch.com>
-> 
-> The commit ad93220de7da ("mmc: sdhci-esdhc-imx: change pinctrl state
-> according to uhs mode") exits the probe in case there are no valid
-> pinctrl states found.
-> 
-> As there are configurations doing the pin mux properly in the boot
-> loader, don't exit. Just warn, but go on in case if there are no
-> pinctrl states in the device tree.
-> 
-> Signed-off-by: Dirk Behme <dirk.behme@de.bosch.com>
-> Signed-off-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 7 +++----
->  1 file changed, 3 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
-b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index ccec0e3..b714b9d 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1012,9 +1012,7 @@ static int sdhci_esdhc_imx_probe(struct
-platform_device *pdev)
->  	imx_data->pins_default = pinctrl_lookup_state(imx_data->pinctrl,
->  						PINCTRL_STATE_DEFAULT);
->  	if (IS_ERR(imx_data->pins_default)) {
-> -		err = PTR_ERR(imx_data->pins_default);
-> -		dev_err(mmc_dev(host->mmc), "could not get default
-state\n");
-> -		goto disable_clk;
-> +		dev_warn(mmc_dev(host->mmc), "could not get default
-state\n");
->  	}
->  
->  	host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-> @@ -1103,7 +1101,8 @@ static int sdhci_esdhc_imx_probe(struct
-platform_device *pdev)
->  	}
->  
->  	/* sdr50 and sdr104 needs work on 1.8v signal voltage */
-> -	if ((boarddata->support_vsel) && esdhc_is_usdhc(imx_data)) {
-> +	if ((boarddata->support_vsel) && esdhc_is_usdhc(imx_data) &&
-> +	    !IS_ERR(imx_data->pins_default)) {
->  		imx_data->pins_100mhz =
-pinctrl_lookup_state(imx_data->pinctrl,
->  						ESDHC_PINCTRL_STATE_100MHZ);
->  		imx_data->pins_200mhz =
-pinctrl_lookup_state(imx_data->pinctrl,
-> -- 
-> 2.1.0
+Ulf Hansson (7):
+  mmc: core: Remove superfluous ifdefs for SDIO bus' PM callbacks
+  mmc: core: Don't export the to_sdio_driver macro
+  mmc: core: Convert the mmc_driver to use the modern PM ops
+  mmc: core: Convert mmc_driver to device_driver
+  mmc: msm_sdcc: Use platform_set|get_drvdata
+  mmc: block: Use dev_set|get_drvdata()
+  mmc: core: Remove unused mmc_list_to_card() macro
 
-Thanks.
+ drivers/mmc/card/block.c      | 55 ++++++++++++++++++++++---------------------
+ drivers/mmc/card/mmc_test.c   | 18 ++++++++------
+ drivers/mmc/core/bus.c        | 55 ++++++++++---------------------------------
+ drivers/mmc/core/sdio_bus.c   | 14 +++--------
+ drivers/mmc/host/msm_sdcc.c   |  6 ++---
+ include/linux/mmc/card.h      | 20 ++--------------
+ include/linux/mmc/sdio_func.h |  2 --
+ 7 files changed, 59 insertions(+), 111 deletions(-)
 
-Best regards,
-Andrew Gabbasov
-
+-- 
+1.9.1
 
