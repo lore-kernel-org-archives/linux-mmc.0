@@ -1,45 +1,62 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH] mmc: dw_mmc: rockchip: Don't recalc the clock when it goes off
-Date: Tue, 14 Oct 2014 09:39:12 -0700
-Message-ID: <1413304752-7823-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f173.google.com ([209.85.192.173]:55252 "EHLO
-	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752909AbaJNQjT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Oct 2014 12:39:19 -0400
-Received: by mail-pd0-f173.google.com with SMTP id g10so7829528pdj.32
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Oct 2014 09:39:19 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: Re: [PATCH] mmc: dw_mmc: Reset DMA before enabling IDMAC
+Date: Tue, 14 Oct 2014 09:51:26 -0700
+Message-ID: <CAD=FV=W57417Jdp8d-=yZgjUdTJyMKnzSvwg6YuXz3eTvTZZuQ@mail.gmail.com>
+References: <1412618020-22278-1-git-send-email-sonnyrao@chromium.org>
+	<CAGOxZ53bviLbuA27=1QjNUgxA_WMMP-6siV=DajuN8iSqsasMg@mail.gmail.com>
+	<CAO3aYcqi0g=eJta33s5oM-tAAmAhe86VvHd43p5RJ7qMPZzfrg@mail.gmail.com>
+	<CAGOxZ520EXdS9FoCVW7GPvheNSZu=xqc2makJY5D0c3zjVBkDw@mail.gmail.com>
+	<CAD=FV=VQe-9c+QOYEmsuHwY+9qF1tkTgiakdSUWhUoWw6zuHSA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=VQe-9c+QOYEmsuHwY+9qF1tkTgiakdSUWhUoWw6zuHSA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Alim Akhtar <alim.akhtar@gmail.com>
+Cc: =?UTF-8?B?RWRkaWUgQ2FpKOiUoeaeqyk=?= <eddie.cai@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Heiko Stuebner <heiko@sntech.de>, Sonny Rao <sonnyrao@chromium.org>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Addy Ke <addy.ke@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Addy Ke <addy.ke@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Andrew Bresticker <abrestic@chromium.org>, Doug Anderson <dianders@chromium.org>, heiko@sntech.de, chris@printf.net, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org
 
-The "set_ios" function is called with a clock of 0 when the clock is
-turning off.  There's no reason to go through all the extra Rockchip
-logic (whose goal is to make sure DIV is 0 or 1) in that case.  The
-Rockchip logic happened to work because the CCF will pick the lowest
-possible rate when you ask it for a clock of 0, but it's silly to go
-through all the remuxing and adjusting for no reason.
+Hi,
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
- drivers/mmc/host/dw_mmc-rockchip.c | 3 +++
- 1 file changed, 3 insertions(+)
+On Thu, Oct 9, 2014 at 5:36 PM, Doug Anderson <dianders@chromium.org> wrote:
+> Alim,
+>
+> On Thu, Oct 9, 2014 at 3:19 PM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+>> Thats fine, I think every vendor (most of them) has a custom
+>> implementation of dw_mmc, but they do have VERID register to check the
+>> dw_mmc version.
+>> The reason why I asked is, I have seen inconsistency in card
+>> enumeration on few controller version, and this patch alone does not
+>> help, and adding a call to dw_mci_idmac_reset() after DMA reset is
+>> needed. And this is what is recommended in the synopsys's data book
+>> also.
+>> Do you see any issue/side effect after adding dw_mci_idmac_reset()?
+>
+> A quick test shows no problem with adding this to Sonny's patch:
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 66dc8fe..588b5b8 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -481,6 +481,7 @@ static void dw_mci_idmac_start_dma(struct dw_mci
+> *host, unsigned int sg_len)
+>
+>         /* Make sure to reset DMA in case we did PIO before this */
+>         dw_mci_ctrl_reset(host, SDMMC_CTRL_DMA_RESET);
+> +       dw_mci_idmac_reset(host);
+>
+>         /* Select IDMAC interface */
+>         temp = mci_readl(host, CTRL);
+>
+> I'll start reboot tests now to see how it behaves...  I think Sonny is
+> out of the office for a few days so we might need to wait for a spin,
+> but I'll run with that change in the meantime and see how it behaves
+> for me.
+>
+> Thanks!
 
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index f0c2cb1..bbb4ec3 100644
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -37,6 +37,9 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- 	unsigned int cclkin;
- 	u32 bus_hz;
- 
-+	if (ios->clock == 0)
-+		return;
-+
- 	/*
- 	 * cclkin: source clock of mmc controller
- 	 * bus_hz: card interface clock generated by CLKGEN
--- 
-2.1.0.rc2.206.gedb03e5
+Just FYI that I've been running with Alim's proposed change for
+several days and it seems solid.  I think Sonny may be able to spin
+his patch this week.  :)
 
+-Doug
