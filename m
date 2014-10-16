@@ -1,102 +1,312 @@
-From: Prabu Thangamuthu <Prabu.T@synopsys.com>
-Subject: RE: [PATCH v6] mmc: dw_mmc: Add IDMAC 64-bit address mode support
-Date: Thu, 16 Oct 2014 12:01:26 +0000
-Message-ID: <705D14B1C7978B40A723277C067CEDE21B333F60@IN01WEMBXB.internal.synopsys.com>
-References: <705D14B1C7978B40A723277C067CEDE21B3336B2@IN01WEMBXB.internal.synopsys.com>
- <CAGOxZ51fzvoqUQ7=8312iLyu4jwgmskkaysgXQHju-E5EM5gNQ@mail.gmail.com>
- <CAFp+6iFQ=MU-R-mYLeL0=H5fVWkxVu5s4ineh3RcSExCUNAjCA@mail.gmail.com>
- <543F6A93.1070008@samsung.com>
- <705D14B1C7978B40A723277C067CEDE21B333F07@IN01WEMBXB.internal.synopsys.com>
- <CAFp+6iEXMNzaEgcpFE_vCYj6xwPLJvLzBhA5NFrfnEt1kSyk8Q@mail.gmail.com>
- <543FA7E7.5030009@samsung.com>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Remove old card detect infrastructure
+Date: Thu, 16 Oct 2014 18:27:12 +0530
+Message-ID: <CAGOxZ507j5QjnT_hW2y0KPZsw6WDJWRPLdesTBm4+C8D2EznWw@mail.gmail.com>
+References: <1413304389-6580-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtprelay2.synopsys.com ([198.182.60.111]:52797 "EHLO
-	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750819AbaJPMDZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Oct 2014 08:03:25 -0400
-In-Reply-To: <543FA7E7.5030009@samsung.com>
-Content-Language: en-US
+Received: from mail-yh0-f51.google.com ([209.85.213.51]:48354 "EHLO
+	mail-yh0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752335AbaJPM5y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Oct 2014 08:57:54 -0400
+In-Reply-To: <1413304389-6580-1-git-send-email-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Vivek Gautam <gautam.vivek@samsung.com>, Prabu Thangamuthu <Prabu.T@synopsys.com>
-Cc: Alim Akhtar <alim.akhtar@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>
+To: Doug Anderson <dianders@chromium.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Addy Ke <addy.ke@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Andrew Bresticker <abrestic@chromium.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-SGksDQoNCk9uIFRodSwgT2N0IDE2LCAyMDE0IGF0IDQ6NDIgUE0sIEphZWhvb24gQ2h1bmcgPGpo
-ODAuY2h1bmdAc2Ftc3VuZy5jb20+IHdyb3RlOg0KPiBPbiAxMC8xNi8yMDE0IDA4OjA5IFBNLCBW
-aXZlayBHYXV0YW0gd3JvdGU6DQo+ID4gSGkgUHJhYnUsDQo+ID4NCj4gPg0KPiA+IE9uIFRodSwg
-T2N0IDE2LCAyMDE0IGF0IDQ6MDkgUE0sIFByYWJ1IFRoYW5nYW11dGh1DQo+IDxQcmFidS5UQHN5
-bm9wc3lzLmNvbT4gd3JvdGU6DQo+ID4+DQo+ID4+IEhpIEphZWhvb24sIFZpdmVrLCBBbGltLA0K
-PiA+Pg0KPiA+PiBUaGFua3MgZm9yIHlvdXIgcmV2aWV3IGNvbW1lbnRzLg0KPiA+Pg0KPiA+PiBP
-biBUaHUsIE9jdCAxNiwgMjAxNCBhdCAxMjoyMCBQTSwgSmFlaG9vbiBDaHVuZw0KPiA8amg4MC5j
-aHVuZ0BzYW1zdW5nLmNvbT4gd3JvdGU6DQo+ID4+PiBIaSwgUHJhYnUuDQo+ID4+Pg0KPiA+Pj4g
-T24gMTAvMTUvMjAxNCAwOTowNSBQTSwgVml2ZWsgR2F1dGFtIHdyb3RlOg0KPiA+Pj4+IEhpIFBy
-YWJ1LA0KPiA+Pj4+DQo+ID4+Pj4NCj4gPj4+PiBPbiBUdWUsIE9jdCAxNCwgMjAxNCBhdCA1OjQx
-IFBNLCBBbGltIEFraHRhcg0KPiA+Pj4+IDxhbGltLmFraHRhckBnbWFpbC5jb20+DQo+ID4+PiB3
-cm90ZToNCj4gPj4+Pj4gSGkgUHJhaHUsDQo+ID4+Pj4+IFRoYW5rcyBmb3IgYSBxdWljayByZS1z
-cGluIG8gdGhlIHBhdGNoLg0KPiA+Pj4+PiBPbmUgbGFzdCBjb21tZW50LCB0aGlzIGlzIG1vcmUg
-b2YgYSBpbmZvcm1hdGlvbiBzZWVrLg0KPiA+Pj4+PiBPbiBUaHUsIE9jdCA5LCAyMDE0IGF0IDE6
-MDkgUE0sIFByYWJ1IFRoYW5nYW11dGh1DQo+ID4+PiA8UHJhYnUuVEBzeW5vcHN5cy5jb20+IHdy
-b3RlOg0KPiA+Pj4+Pj4gU3lub3BzeXMgRFdfTU1DIElQIGNvcmUgc3VwcG9ydHMgSW50ZXJuYWwg
-RE1BIENvbnRyb2xsZXIgd2l0aA0KPiA+Pj4+Pj4gNjQtYml0DQo+ID4+PiBhZGRyZXNzIG1vZGUg
-ZnJvbSBJUCB2ZXJzaW9uIDIuNzBhIG9ud2FyZHMuDQo+ID4+Pj4+PiBVcGRhdGVkIHRoZSBkcml2
-ZXIgdG8gc3VwcG9ydCBJRE1BQyA2NC1iaXQgYWRkcmVzc2luZyBtb2RlLg0KPiA+Pj4+Pj4NCj4g
-Pj4+Pj4+IFRlc3RlZCB0aGUgZmVhdHVyZXMgaW4gRFdfTU1DIGNvcmUgdjIuNzBhIGFuZCB2Mi40
-MGEgd2l0aCBIQVBTLQ0KPiA1MQ0KPiA+Pj4gc2V0dXAgYW5kIGRyaXZlciBpcyB3b3JraW5nIGZp
-bmUuDQo+ID4+Pj4+Pg0KPiA+Pj4+Pj4gU2lnbmVkLW9mZi1ieTogUHJhYnUgVGhhbmdhbXV0aHUg
-PHByYWJ1LnRAc3lub3BzeXMuY29tPg0KPiA+Pj4+Pj4gLS0tDQo+ID4+Pj4+PiBDaGFuZ2UgbG9n
-IHY2Og0KPiA+Pj4+Pj4gICAgICAgICAtIFVwZGF0ZWQgd2l0aCByZXZpZXcgY29tbWVudC4NCj4g
-Pj4+Pj4+DQo+ID4+Pj4+PiBDaGFuZ2UgbG9nIHY1Og0KPiA+Pj4+Pj4gICAgICAgICAtIFJlY3Jl
-YXRlZCB0aGUgcGF0Y2ggYWdhaW5zdCBsaW51eC1uZXh0IGFzIHRoaXMgcGF0Y2ggaXMNCj4gPj4+
-Pj4+IHJlcXVpcmVkIGZvciBhbm90aGVyIHBhdGNoDQo+ID4+Pj4+PiBodHRwOi8vd3d3LnNwaW5p
-Y3MubmV0L2xpc3RzL2FybS1rZXJuZWwvbXNnMzU3OTg1Lmh0bWwNCj4gPj4+Pj4+DQo+ID4+Pj4+
-PiBDaGFuZ2UgbG9nIHY0Og0KPiA+Pj4+Pj4gICAgICAgICAtIEFkZCB0aGUgZHluYW1pYyBzdXBw
-b3J0IGZvciAzMi1iaXQgYW5kIDY0LWJpdCBhZGRyZXNzDQo+ID4+Pj4+PiBtb2RlIGJhc2VkDQo+
-ID4+PiBvbiBodyBjb25maWd1cmF0aW9uLg0KPiA+Pj4+Pj4gICAgICAgICAtIFJlbW92ZWQgdGhl
-IENPTkZJR19NTUNfRFdfSURNQUNfNjRCSVRfQUREUkVTUw0KPiBtYWNyby4NCj4gPj4+Pj4+DQo+
-ID4+Pj4+PiAgZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYyAgfCAgMTk1DQo+ID4+PiArKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysrKysrKy0tLS0tLS0tLQ0KPiA+Pj4+Pj4gIGRyaXZlcnMv
-bW1jL2hvc3QvZHdfbW1jLmggIHwgICAxMSArKysNCj4gPj4+Pj4+ICBpbmNsdWRlL2xpbnV4L21t
-Yy9kd19tbWMuaCB8ICAgIDIgKw0KPiA+Pj4+Pj4gIDMgZmlsZXMgY2hhbmdlZCwgMTcwIGluc2Vy
-dGlvbnMoKyksIDM4IGRlbGV0aW9ucygtKQ0KPiA+Pj4+Pj4NCj4gPj4+Pj4+IGRpZmYgLS1naXQg
-YS9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy5jDQo+ID4+PiBiL2RyaXZlcnMvbW1jL2hvc3QvZHdf
-bW1jLmMNCj4gPj4+Pj4+IGluZGV4IDY5ZjBjYzYuLmMzYjc1YTUgMTAwNjQ0DQo+ID4+Pj4+PiAt
-LS0gYS9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy5jDQo+ID4+Pj4+PiArKysgYi9kcml2ZXJzL21t
-Yy9ob3N0L2R3X21tYy5jDQo+ID4+Pj4+PiBAQCAtNjIsNiArNjIsMjQgQEANCj4gPj4+Pj4+ICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFNETU1DX0lETUFDX0lOVF9GQkUgfA0KPiBT
-RE1NQ19JRE1BQ19JTlRfUkkgfCBcDQo+ID4+Pj4+PiAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICBTRE1NQ19JRE1BQ19JTlRfVEkpDQo+ID4+Pj4+Pg0KPiA+Pj4+Pj4gK3N0cnVjdCBp
-ZG1hY19kZXNjXzY0YWRkciB7DQo+ID4+Pj4+PiArICAgICAgIHUzMiAgICAgICAgICAgICBkZXMw
-OyAgIC8qIENvbnRyb2wgRGVzY3JpcHRvciAqLw0KPiA+Pj4+Pj4gKw0KPiA+Pj4+Pj4gKyAgICAg
-ICB1MzIgICAgICAgICAgICAgZGVzMTsgICAvKiBSZXNlcnZlZCAqLw0KPiA+Pj4+PiBXaGF0IGlz
-IHRoZSBkZWZhdWx0IHZhbHVlIG9mIHRoZXNlIF9SZXNlcnZlZF8gZGVzY3JpcHRvcnM/IEFzDQo+
-ID4+Pj4+IHRoZXNlIGFyZSBwb2ludGVycywgZG8geW91IHRoaW5nIGluaXRpYWxpemluZyB0aGVu
-IHRvIHplcm8gbWFrZSBzZW5zZT8NCj4gPj4NCj4gPj4gV2UgZG9uJ3QgdGhpbmsgaXQncyByZXF1
-aXJlZCB0byBhc3NpZ24gemVybyB0byByZXNlcnZlZCBkZXMgZmllbGQgYXMNCj4gbW9ic3RlciBj
-b3JlIG5vdCBnb2luZyB0byB1c2UgdGhpcyBmaWVsZCdzIGZvciBhbnkgb3BlcmF0aW9ucyB1bmxl
-c3MgdXNlciBoYXMNCj4gbW9kaWZpZWQgaXQuDQo+ID4+IEFsc28gaXQncyB3b3JraW5nIGZpbmUg
-aW4gb3VyIHRlc3Qgc2V0LXVwIHdpdGhvdXQgaW5pdGlhbGl6aW5nIHRoZW0gdG8gemVyby4NCj4g
-DQo+IFJpZ2h0LCBpdCdzIG5vdCByZXF1aXJlZCB0byBhc3NpZ24gemVybyB0byB0aGVyZS4gQW5k
-IEl0J3Mgd29ya2luZyBmaW5lLCBiZWNhdXNlDQo+IGl0J3Mgbm90IHVzZWQgb3IgcmVmZXJyZWQg
-YW55d2hlcmUuDQo+IEp1c3QgUmVjb21tZW5kIHRvIGluaXRpYWxpemUgdG8gemVyby4NCg0KRmlu
-ZS4NCiANCj4gQWN0dWFsbHksIGkgZG9uJ3QgdW5kZXJzdGFuZCB3aHkgZGVzMSBpcyByZXNlcnZl
-ZC4uDQoNCkl0J3MgcmVzZXJ2ZWQgZm9yIGZ1dHVyZSBlbmhhbmNlbWVudC4NCg0KPiA+Pg0KPiA+
-Pj4+DQo+ID4+Pj4gSSB0aGluayB0aGUgZGVmYXVsdCByZXNldCB2YWx1ZSBvZiB0aGVzZSBkZXNj
-cmlwdG9ycyB3aWxsIGRlcGVuZCBvbg0KPiA+Pj4+IGhvdyBkd21tYyBpcyBpbnRlZ3JhdGVkIGlu
-IGgvdyBhbmQgaG93IHRoZXNlIGRlc2NyaXB0b3JzIGFyZSB0aGVuDQo+ID4+Pj4gY29uZmlndXJl
-ZC4NCj4gPj4+Pg0KPiA+Pj4+IFNvIGl0IG1ha2VzIHNlbnNlIHRvIGluaXRpYWxpemUgdGhlc2Ug
-ZGVzY3JpcHRvcnMgdG8gemVybyBiZWZvcmUgdXNlLg0KPiA+Pj4+IFdlIGhhdmUgc2VlbiBvbiBv
-dXIgZXh5bm9zNyBzeXN0ZW0sIHRoYXQgd2UgbmVlZCB0byBpbml0aWFsaXplIHRoZQ0KPiA+Pj4+
-IGRlc2NyaXB0b3JzIGRlczEgYW5kIGRlczIgdG8gemVybyBiZWZvcmUgd2UgdXNlIHRoZW0gZnVy
-dGhlci4NCj4gPj4NCj4gPj4gSXQgbG9va3MgbGlrZSBleHlub3M3IGlzIHVzaW5nIHRoaXMgcmVz
-ZXJ2ZWQgZmllbGRzIGZvciBzb21lIG90aGVyIHB1cnBvc2VzLg0KPiBUbyBtYWtlIGl0IGdlbmVy
-aWMsIHdlIHdpbGwgaW5pdGlhbGl6ZSB0aGUgcmVzZXJ2ZWQgZmllbGRzIHRvIHplcm8uDQo+ID4+
-DQo+ID4+IERvZXMgZXh5bm9zNyByZXF1aXJlcyBkZXMyIChCdWZmZXIgc2l6ZXMpIGFsc28gdG8g
-YmUgaW5pdGlhbGl6ZWQgdG8gemVybz8NCj4gPg0KPiA+IFllcywgd2UgbmVlZCBkZXMyIHRvIGJl
-IGluaXRpYWxpemVkIHRvIHplcm8uDQo+ID4gT25lIHF1ZXN0aW9uIGhvd2V2ZXIsIGRvIHdlIGhh
-dmUgc29tZSBkZWZhdWx0IHJlc2V0IHZhbHVlIHNldCB0byB0aGVzZQ0KPiA+IGRlc2NyaXB0b3Jz
-ID8gSWYgeWVzIHRoZW4gaG93IGNhbiB3ZSBjaGVjayB0aGlzIHZhbHVlID8NCj4gDQo+IEkga25l
-dyBpdCBkb2Vzbid0IGhhdmUgdGhlIHJlc2V0IHZhbHVlIGZvciBkZXNjcmlwdG9ycy4NCj4gDQoN
-ClllcywgaXQncyBjb3JyZWN0Lg0KDQoNClJlZ2FyZHMsDQpQcmFidSBUaGFuZ2FtdXRodS4NCg==
+Hi Doug,
+
+On Tue, Oct 14, 2014 at 10:03 PM, Doug Anderson <dianders@chromium.org> wrote:
+> The dw_mmc driver had a bunch of code that ran whenever a card was
+> ejected and inserted.  However, this code was old and crufty and
+> should be removed.  Some evidence that it's really not needed:
+>
+> 1. Is is supposed to be legal to use 'cd-gpio' on dw_mmc instead of
+>    using the built-in card detect mechanism.  The 'cd-gpio' code
+>    doesn't run any of the crufty old code but yet still works.
+>
+> 2. While looking at this, I realized that my old change (369ac86 mmc:
+>    dw_mmc: don't queue up a card detect at slot startup) actually
+>    castrated the old code a little bit already and nobody noticed.
+>    Specifically "last_detect_state" was left as 0 at bootup.  That
+>    means that on the first card removal none of the crufty code ran.
+>
+Yes, right most of these codes are _almost_ never call. But I see
+dw_mci_reset() being called on card removal (after first
+insert/removal).
+I tested this on exynos5800 and this looks working fine. We need to
+test once cross suspend/resume as well.
+And as Jaehoon pointed out,probably lets look in TRM if there are some
+recommended  steps for cd-detect.
+Otherwise this looks good to me.
+
+> 3. I can run "while true; do dd if=/dev/mmcblk1 of=/dev/null; done"
+>    while ejecting and inserting an SD Card and the world doesn't
+>    explode.
+>
+> If some of the crufty old code is actually needed, we should justify
+> it and also put it in some place where it will be run even with
+> "cd-gpio".
+>
+> Note that in my case I'm using the "cd-gpio" mechanism but for various
+> reasons the hardware triggers a dw_mmc "card detect" at bootup.  That
+> was actually causing a real bug.  The card detect workqueue was
+> running while the system was trying to enumerate the card.  The
+> "present != slot->last_detect_state" triggered and we were doing all
+> kinds of crazy stuff and messing up enumeration.  The new mechanism of
+> just asking the core to check the card is much safer and then the
+> bogus interrupt doesn't hurt.
+>
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> ---
+>  drivers/mmc/host/dw_mmc.c  | 121 ++++++++-------------------------------------
+>  drivers/mmc/host/dw_mmc.h  |   2 -
+>  include/linux/mmc/dw_mmc.h |   2 -
+>  3 files changed, 20 insertions(+), 105 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 69f0cc6..6a86495 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -34,7 +34,6 @@
+>  #include <linux/mmc/dw_mmc.h>
+>  #include <linux/bitops.h>
+>  #include <linux/regulator/consumer.h>
+> -#include <linux/workqueue.h>
+>  #include <linux/of.h>
+>  #include <linux/of_gpio.h>
+>  #include <linux/mmc/slot-gpio.h>
+> @@ -1954,6 +1953,23 @@ static void dw_mci_cmd_interrupt(struct dw_mci *host, u32 status)
+>         tasklet_schedule(&host->tasklet);
+>  }
+>
+> +static void dw_mci_handle_cd(struct dw_mci *host)
+> +{
+> +       int i;
+> +
+> +       for (i = 0; i < host->num_slots; i++) {
+> +               struct dw_mci_slot *slot = host->slot[i];
+> +
+> +               if (!slot)
+> +                       continue;
+> +
+> +               if (slot->mmc->ops->card_event)
+> +                       slot->mmc->ops->card_event(slot->mmc);
+> +               mmc_detect_change(slot->mmc,
+> +                       msecs_to_jiffies(host->pdata->detect_delay_ms));
+> +       }
+> +}
+> +
+>  static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>  {
+>         struct dw_mci *host = dev_id;
+> @@ -2029,7 +2045,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>
+>                 if (pending & SDMMC_INT_CD) {
+>                         mci_writel(host, RINTSTS, SDMMC_INT_CD);
+> -                       queue_work(host->card_workqueue, &host->card_work);
+> +                       dw_mci_handle_cd(host);
+>                 }
+>
+>                 /* Handle SDIO Interrupts */
+> @@ -2056,88 +2072,6 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>         return IRQ_HANDLED;
+>  }
+>
+> -static void dw_mci_work_routine_card(struct work_struct *work)
+> -{
+> -       struct dw_mci *host = container_of(work, struct dw_mci, card_work);
+> -       int i;
+> -
+> -       for (i = 0; i < host->num_slots; i++) {
+> -               struct dw_mci_slot *slot = host->slot[i];
+> -               struct mmc_host *mmc = slot->mmc;
+> -               struct mmc_request *mrq;
+> -               int present;
+> -
+> -               present = dw_mci_get_cd(mmc);
+> -               while (present != slot->last_detect_state) {
+> -                       dev_dbg(&slot->mmc->class_dev, "card %s\n",
+> -                               present ? "inserted" : "removed");
+> -
+> -                       spin_lock_bh(&host->lock);
+> -
+> -                       /* Card change detected */
+> -                       slot->last_detect_state = present;
+> -
+> -                       /* Clean up queue if present */
+> -                       mrq = slot->mrq;
+> -                       if (mrq) {
+> -                               if (mrq == host->mrq) {
+> -                                       host->data = NULL;
+> -                                       host->cmd = NULL;
+> -
+> -                                       switch (host->state) {
+> -                                       case STATE_IDLE:
+> -                                       case STATE_WAITING_CMD11_DONE:
+> -                                               break;
+> -                                       case STATE_SENDING_CMD11:
+> -                                       case STATE_SENDING_CMD:
+> -                                               mrq->cmd->error = -ENOMEDIUM;
+> -                                               if (!mrq->data)
+> -                                                       break;
+> -                                               /* fall through */
+> -                                       case STATE_SENDING_DATA:
+> -                                               mrq->data->error = -ENOMEDIUM;
+> -                                               dw_mci_stop_dma(host);
+> -                                               break;
+> -                                       case STATE_DATA_BUSY:
+> -                                       case STATE_DATA_ERROR:
+> -                                               if (mrq->data->error == -EINPROGRESS)
+> -                                                       mrq->data->error = -ENOMEDIUM;
+> -                                               /* fall through */
+> -                                       case STATE_SENDING_STOP:
+> -                                               if (mrq->stop)
+> -                                                       mrq->stop->error = -ENOMEDIUM;
+> -                                               break;
+> -                                       }
+> -
+> -                                       dw_mci_request_end(host, mrq);
+> -                               } else {
+> -                                       list_del(&slot->queue_node);
+> -                                       mrq->cmd->error = -ENOMEDIUM;
+> -                                       if (mrq->data)
+> -                                               mrq->data->error = -ENOMEDIUM;
+> -                                       if (mrq->stop)
+> -                                               mrq->stop->error = -ENOMEDIUM;
+> -
+> -                                       spin_unlock(&host->lock);
+> -                                       mmc_request_done(slot->mmc, mrq);
+> -                                       spin_lock(&host->lock);
+> -                               }
+> -                       }
+> -
+> -                       /* Power down slot */
+> -                       if (present == 0)
+> -                               dw_mci_reset(host);
+> -
+> -                       spin_unlock_bh(&host->lock);
+> -
+> -                       present = dw_mci_get_cd(mmc);
+> -               }
+> -
+> -               mmc_detect_change(slot->mmc,
+> -                       msecs_to_jiffies(host->pdata->detect_delay_ms));
+> -       }
+> -}
+> -
+>  #ifdef CONFIG_OF
+>  /* given a slot id, find out the device node representing that slot */
+>  static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
+> @@ -2289,9 +2223,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>         dw_mci_init_debugfs(slot);
+>  #endif
+>
+> -       /* Card initially undetected */
+> -       slot->last_detect_state = 0;
+> -
+>         return 0;
+>
+>  err_host_allocated:
+> @@ -2672,17 +2603,10 @@ int dw_mci_probe(struct dw_mci *host)
+>                 host->data_offset = DATA_240A_OFFSET;
+>
+>         tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
+> -       host->card_workqueue = alloc_workqueue("dw-mci-card",
+> -                       WQ_MEM_RECLAIM, 1);
+> -       if (!host->card_workqueue) {
+> -               ret = -ENOMEM;
+> -               goto err_dmaunmap;
+> -       }
+> -       INIT_WORK(&host->card_work, dw_mci_work_routine_card);
+>         ret = devm_request_irq(host->dev, host->irq, dw_mci_interrupt,
+>                                host->irq_flags, "dw-mci", host);
+>         if (ret)
+> -               goto err_workqueue;
+> +               goto err_dmaunmap;
+>
+>         if (host->pdata->num_slots)
+>                 host->num_slots = host->pdata->num_slots;
+> @@ -2718,7 +2642,7 @@ int dw_mci_probe(struct dw_mci *host)
+>         } else {
+>                 dev_dbg(host->dev, "attempted to initialize %d slots, "
+>                                         "but failed on all\n", host->num_slots);
+> -               goto err_workqueue;
+> +               goto err_dmaunmap;
+>         }
+>
+>         if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO)
+> @@ -2726,9 +2650,6 @@ int dw_mci_probe(struct dw_mci *host)
+>
+>         return 0;
+>
+> -err_workqueue:
+> -       destroy_workqueue(host->card_workqueue);
+> -
+>  err_dmaunmap:
+>         if (host->use_dma && host->dma_ops->exit)
+>                 host->dma_ops->exit(host);
+> @@ -2762,8 +2683,6 @@ void dw_mci_remove(struct dw_mci *host)
+>         mci_writel(host, CLKENA, 0);
+>         mci_writel(host, CLKSRC, 0);
+>
+> -       destroy_workqueue(host->card_workqueue);
+> -
+>         if (host->use_dma && host->dma_ops->exit)
+>                 host->dma_ops->exit(host);
+>
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 01b99e8..71d4995 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -214,7 +214,6 @@ extern int dw_mci_resume(struct dw_mci *host);
+>   *     with CONFIG_MMC_CLKGATE.
+>   * @flags: Random state bits associated with the slot.
+>   * @id: Number of this slot.
+> - * @last_detect_state: Most recently observed card detect state.
+>   */
+>  struct dw_mci_slot {
+>         struct mmc_host         *mmc;
+> @@ -234,7 +233,6 @@ struct dw_mci_slot {
+>  #define DW_MMC_CARD_PRESENT    0
+>  #define DW_MMC_CARD_NEED_INIT  1
+>         int                     id;
+> -       int                     last_detect_state;
+>  };
+>
+>  struct dw_mci_tuning_data {
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index 0013669..69d0814 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -135,7 +135,6 @@ struct dw_mci {
+>         struct mmc_command      stop_abort;
+>         unsigned int            prev_blksz;
+>         unsigned char           timing;
+> -       struct workqueue_struct *card_workqueue;
+>
+>         /* DMA interface members*/
+>         int                     use_dma;
+> @@ -154,7 +153,6 @@ struct dw_mci {
+>         u32                     stop_cmdr;
+>         u32                     dir_status;
+>         struct tasklet_struct   tasklet;
+> -       struct work_struct      card_work;
+>         unsigned long           pending_events;
+>         unsigned long           completed_events;
+>         enum dw_mci_state       state;
+> --
+> 2.1.0.rc2.206.gedb03e5
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Regards,
+Alim
