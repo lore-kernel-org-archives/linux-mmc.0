@@ -1,73 +1,56 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Remove old card detect infrastructure
-Date: Thu, 16 Oct 2014 09:10:37 -0700
-Message-ID: <CAD=FV=X+q2ymbB0EZkjj_tip9_PLdFV+Tfee+MkeUDSfD3E-ig@mail.gmail.com>
-References: <1413304389-6580-1-git-send-email-dianders@chromium.org>
-	<CAGOxZ507j5QjnT_hW2y0KPZsw6WDJWRPLdesTBm4+C8D2EznWw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Sonny Rao <sonnyrao@chromium.org>
+Subject: [PATCH v2] mmc: dw_mmc: Reset DMA before enabling IDMAC
+Date: Thu, 16 Oct 2014 09:58:05 -0700
+Message-ID: <1413478686-6857-1-git-send-email-sonnyrao@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f173.google.com ([209.85.220.173]:46494 "EHLO
-	mail-vc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751604AbaJPQKi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Oct 2014 12:10:38 -0400
-Received: by mail-vc0-f173.google.com with SMTP id ij19so2957420vcb.4
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Oct 2014 09:10:37 -0700 (PDT)
-In-Reply-To: <CAGOxZ507j5QjnT_hW2y0KPZsw6WDJWRPLdesTBm4+C8D2EznWw@mail.gmail.com>
+Received: from mail-oi0-f73.google.com ([209.85.218.73]:50690 "EHLO
+	mail-oi0-f73.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751298AbaJPQ6L (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Oct 2014 12:58:11 -0400
+Received: by mail-oi0-f73.google.com with SMTP id u20so565654oif.0
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Oct 2014 09:58:10 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Addy Ke <addy.ke@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Andrew Bresticker <abrestic@chromium.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Alim Akhtar <alim.akhtar@gmail.com>, linux-mmc@vger.kernel.org
+Cc: Heiko Stuebner <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, dianders@chromium.org, eddie.cai@rock-chips.com, addy.ke@rock-chips.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Sonny Rao <sonnyrao@chromium.org>
 
-Alim,
+We've already got a reset of DMA after it's done.  Add one before we
+start DMA too.  This fixes a data corruption on Rockchip SoCs which
+will get bad data when doing a DMA transfer after doing a PIO transfer.
 
-On Thu, Oct 16, 2014 at 5:57 AM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
-> Hi Doug,
->
-> On Tue, Oct 14, 2014 at 10:03 PM, Doug Anderson <dianders@chromium.org> wrote:
->> The dw_mmc driver had a bunch of code that ran whenever a card was
->> ejected and inserted.  However, this code was old and crufty and
->> should be removed.  Some evidence that it's really not needed:
->>
->> 1. Is is supposed to be legal to use 'cd-gpio' on dw_mmc instead of
->>    using the built-in card detect mechanism.  The 'cd-gpio' code
->>    doesn't run any of the crufty old code but yet still works.
->>
->> 2. While looking at this, I realized that my old change (369ac86 mmc:
->>    dw_mmc: don't queue up a card detect at slot startup) actually
->>    castrated the old code a little bit already and nobody noticed.
->>    Specifically "last_detect_state" was left as 0 at bootup.  That
->>    means that on the first card removal none of the crufty code ran.
->>
-> Yes, right most of these codes are _almost_ never call. But I see
-> dw_mci_reset() being called on card removal (after first
-> insert/removal).
+We tested this on an Exynos 5800 with HS200 and didn't notice any
+difference in sequential read throughput.
 
-Right.  The old crufty code was called on the 2nd removal, not the
-1st.  That meant that the two were accidentally different.  My point
-was that if the old code was really required that someone would have
-noticed crashes on the 1st removal after each boot.  Since nobody is
-reporting crashes with that then it means it can't be too terrible.
+Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+Tested-by: Doug Anderson <dianders@chromium.org>
+---
+ drivers/mmc/host/dw_mmc.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-One thing to note: I remember in the last Chromebook project you were
-trying to track down crashes associated with constant eject / insert
-of SD Cards.  I wonder if my patch will fix these crashes?
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 69f0cc6..ca67f69 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -83,6 +83,7 @@ struct idmac_desc {
+ #endif /* CONFIG_MMC_DW_IDMAC */
+ 
+ static bool dw_mci_reset(struct dw_mci *host);
++static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
+ 
+ #if defined(CONFIG_DEBUG_FS)
+ static int dw_mci_req_show(struct seq_file *s, void *v)
+@@ -448,6 +449,10 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
+ 
+ 	dw_mci_translate_sglist(host, host->data, sg_len);
+ 
++	/* Make sure to reset DMA in case we did PIO before this */
++	dw_mci_ctrl_reset(host, SDMMC_CTRL_DMA_RESET);
++	dw_mci_idmac_reset(host);
++
+ 	/* Select IDMAC interface */
+ 	temp = mci_readl(host, CTRL);
+ 	temp |= SDMMC_CTRL_USE_IDMAC;
+-- 
+2.1.2
 
-
-> I tested this on exynos5800 and this looks working fine. We need to
-> test once cross suspend/resume as well.
-
-Good idea.  Can you test that?  I know that there's been lots of flux
-with suspend/resume on exynos and I'm not sure I have all the latest
-patches, but I'll search for them if you are unable to test easily.
-
-
-> And as Jaehoon pointed out,probably lets look in TRM if there are some
-> recommended  steps for cd-detect.
-> Otherwise this looks good to me.
-
-If you see some other requirement than the one I addressed in my email
-to Jaehoon, please let me know.
-
-
--Doug
