@@ -1,162 +1,79 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: Report firmware version for eMMC 5.0 devices.
-Date: Thu, 16 Oct 2014 15:28:16 +0200
-Message-ID: <CAPDyKFpzdKHJ5mR+s42L-+TZdzE-m7RoWqix29gYe_CMm46B9Q@mail.gmail.com>
-References: <1413414288-4667-1-git-send-email-gwendal@chromium.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: question about block layer and dma alignment issue.
+Date: Thu, 16 Oct 2014 17:31:54 +0300
+Message-ID: <543FD6DA.3090703@intel.com>
+References: <542F9AD9.7020104@rempel-privat.de> <543027BD.5090009@kernel.dk> <5433B469.4060807@rempel-privat.de> <543405F0.4030103@kernel.dk> <5434DE9A.1030009@rempel-privat.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f52.google.com ([209.85.192.52]:63036 "EHLO
-	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751872AbaJPN2R (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Oct 2014 09:28:17 -0400
-Received: by mail-qg0-f52.google.com with SMTP id q108so2456998qgd.25
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Oct 2014 06:28:16 -0700 (PDT)
-In-Reply-To: <1413414288-4667-1-git-send-email-gwendal@chromium.org>
+Received: from mga01.intel.com ([192.55.52.88]:62797 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751035AbaJPOb6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 16 Oct 2014 10:31:58 -0400
+In-Reply-To: <5434DE9A.1030009@rempel-privat.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Gwendal Grignou <gwendal@chromium.org>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Oleksij Rempel <linux@rempel-privat.de>, Jens Axboe <axboe@kernel.dk>, "ulf.hansson@linaro.org >> Ulf Hansson" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org >> linux-mmc" <linux-mmc@vger.kernel.org>
 
-On 16 October 2014 01:04, Gwendal Grignou <gwendal@chromium.org> wrote:
-> For eMMC 5.0 compliant device, firmware version is stored in ext_csd.
-> Report firmware as a 64bit hexa decimal. Vendor can use hexa or ascii
-> string to report firmware version.
-> Also add FFU related EXT_CSD register and note if the device is FFU capable.
+On 8/10/2014 9:50 a.m., Oleksij Rempel wrote:
+> Am 07.10.2014 um 17:25 schrieb Jens Axboe:
+>> On 10/07/2014 03:37 AM, Oleksij Rempel wrote:
+>>> Am 04.10.2014 um 19:00 schrieb Jens Axboe:
+>>>> On 2014-10-04 00:59, Oleksij Rempel wrote:
+>>>>> Hello Jens,
+>>>>>
+>>>>> i hope it is OK to ask you directly, i didn't found better way to do
+>>>>> this.
+>>>>> I'm writing MMC driver based on reverse engineering for au6601 mmc
+>>>>> controller. This driver uses MMC API, and last one trying to use BLK API
+>>>>> as directly as possible. So far so gut, but i have a problem by using SG
+>>>>> requests with DMA without conversation. This controller accepts only
+>>>>> addresses with this mask 0xffff.f000 - also page aligned.
+>>>>> Till now i tried different QUEUE_FLAG_ flags and blk_queue settings, but
+>>>>> i never had absolute aligned quarantine.
+>>>>> Please tell me if i do some thing wrong or go in the wrong direction.
+>>>> Unless you can accept a 4kb hardware block size (and I'm assuming you
+>>>> cannot, since you need to support 512b file systems?), then you'd have
+>>>> to bounce the requests that don't align properly. You can fix some of
+>>>> them by setting blk_queue_dma_alignment(q, 4095).
+>>> I needed to include MMC list with Ulf Hansson at the beginning, so here
+>>> we are.
+>>>
+>>> Hi Ulf,
+>>>
+>>> here is the list of drivers which do care about dma alignment . Some of
+>>> them use bounce_buffer, some will use PIO instead of DMA, for not
+>>> aligned requests:
+>>>
+>>> dw_mmc.c: dw_mci_pre_dma_transfer
+>>> wbsd.c
+>>> usdhi6rol0.c
+>>> tmio_mmc_dma.c
+>>> sunxi-mmc.c
+>>> sdhci.c
+>>> pxamci.c
+>>> mvsdio.c
+>>> au6601.c(not upstream jet)
+>>>
+>>> The problem of all this driver is that each of them use own solution. I
+>>> think this code can be moved to some common place. For example, it can
+>>> be done in drivers/mmc/card/queue.c and enabled by
+>>> mmc_host_dma_alignment variable. Or provide a mmc_sg_align() function,
+>>> which should be called explicatively by driver.
+>>>
+>>> Which option is preferable?
+>> I would roll a block version that they all can use, you can look at
+>> block/bounce.c for inspiration. That file deals with bouncing higher
+>> pages to lower memory, so it's not exactly what you want. But the metod
+>> of allocating a new bio that meets criteria and copying data over, that
+>> is the same that you need.
+
+Not all cards are block devices e.g. SDIO wifi.  And there is also mmc_test.
+
+> Ok,
 >
-> Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
-
-Nitpick: Please prefix patch with "mmc: core:"
-
-> ---
->  drivers/mmc/core/mmc.c   | 24 +++++++++++++++++++++++-
->  include/linux/mmc/card.h |  2 ++
->  include/linux/mmc/mmc.h  | 10 ++++++++++
->  3 files changed, 35 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 1eda8dd..a0663cf 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -603,6 +603,25 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
->                 card->ext_csd.data_sector_size = 512;
->         }
->
-> +       /* eMMC v5 or later */
-> +       if (card->ext_csd.rev >= 7) {
-> +               u64 fwrev;
-> +
-> +               memcpy(&fwrev, &ext_csd[EXT_CSD_FIRMWARE_VERSION],
-> +                      sizeof(fwrev));
-> +               card->ext_csd.ffu_capable =
-> +                       ((ext_csd[EXT_CSD_SUPPORTED_MODE] & 1) == 1) &&
-> +                       ((ext_csd[EXT_CSD_FW_CONFIG] & 1) == 0);
-
-Please convert the above statement into this:
-
-card->ext_csd.ffu_capable = ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1 &&
-!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1)
-
-> +               /*
-> +                * Firmware version can be a string or a hexa decimal number.
-> +                * In case of string, the first byte should be printed first.
-> +                * in case of hexadecimal, we can assume the first byte is the
-> +                * more significant, therefore we print it first as well.
-
-I had a quick look in the eMMC 5.0 spec. I can't find were the above
-is stated, or maybe what you are saying is just a consequence of that
-there are some pieces missing in the spec? :-)
-
-Anyway, I wonder if just should skip the conversion and keep the raw format.
-
-> +                */
-> +               card->ext_csd.fwrev = be64_to_cpu(fwrev);
-> +       } else {
-
-The "else" isn't needed, ffu_capable's default value is already false.
-
-> +               card->ext_csd.ffu_capable = false;
-> +       }
->  out:
->         return err;
->  }
-> @@ -697,7 +716,9 @@ MMC_DEV_ATTR(csd, "%08x%08x%08x%08x\n", card->raw_csd[0], card->raw_csd[1],
->  MMC_DEV_ATTR(date, "%02d/%04d\n", card->cid.month, card->cid.year);
->  MMC_DEV_ATTR(erase_size, "%u\n", card->erase_size << 9);
->  MMC_DEV_ATTR(preferred_erase_size, "%u\n", card->pref_erase << 9);
-> -MMC_DEV_ATTR(fwrev, "0x%x\n", card->cid.fwrev);
-> +MMC_DEV_ATTR(fwrev, "0x%llx\n", (card->ext_csd.rev >= 7 ?
-> +               card->ext_csd.fwrev : card->cid.fwrev));
-
-cid.fwrev is not an u64.
-
-> +MMC_DEV_ATTR(ffu_capable, "0x%x\n", card->ext_csd.ffu_capable);
->  MMC_DEV_ATTR(hwrev, "0x%x\n", card->cid.hwrev);
->  MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
->  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
-> @@ -717,6 +738,7 @@ static struct attribute *mmc_std_attrs[] = {
->         &dev_attr_erase_size.attr,
->         &dev_attr_preferred_erase_size.attr,
->         &dev_attr_fwrev.attr,
-> +       &dev_attr_ffu_capable.attr,
->         &dev_attr_hwrev.attr,
->         &dev_attr_manfid.attr,
->         &dev_attr_name.attr,
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index d424b9d..67bae22 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -87,6 +87,8 @@ struct mmc_ext_csd {
->         unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
->         unsigned int            boot_ro_lock;           /* ro lock support */
->         bool                    boot_ro_lockable;
-> +       bool                    ffu_capable;    /* FFU support */
-> +       u64                     fwrev;          /* Firmware version */
->         u8                      raw_exception_status;   /* 54 */
->         u8                      raw_partition_support;  /* 160 */
->         u8                      raw_rpmb_size_mult;     /* 168 */
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 64ec963..9216519 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -272,6 +272,9 @@ struct _mmc_csd {
->   * EXT_CSD fields
->   */
->
-> +#define EXT_CSD_FFU_STATUS             26      /* R */
-> +#define EXT_CSD_MODE_OPERATION_CODES   29      /* W */
-> +#define EXT_CSD_MODE_CONFIG            30      /* R/W */
->  #define EXT_CSD_FLUSH_CACHE            32      /* W */
->  #define EXT_CSD_CACHE_CTRL             33      /* R/W */
->  #define EXT_CSD_POWER_OFF_NOTIFICATION 34      /* R/W */
-> @@ -290,6 +293,7 @@ struct _mmc_csd {
->  #define EXT_CSD_SANITIZE_START         165     /* W */
->  #define EXT_CSD_WR_REL_PARAM           166     /* RO */
->  #define EXT_CSD_RPMB_MULT              168     /* RO */
-> +#define EXT_CSD_FW_CONFIG              169     /* R/W */
->  #define EXT_CSD_BOOT_WP                        173     /* R/W */
->  #define EXT_CSD_ERASE_GROUP_DEF                175     /* R/W */
->  #define EXT_CSD_PART_CONFIG            179     /* R/W */
-> @@ -326,6 +330,12 @@ struct _mmc_csd {
->  #define EXT_CSD_GENERIC_CMD6_TIME      248     /* RO */
->  #define EXT_CSD_CACHE_SIZE             249     /* RO, 4 bytes */
->  #define EXT_CSD_PWR_CL_DDR_200_360     253     /* RO */
-> +#define EXT_CSD_FIRMWARE_VERSION       254     /* RO, 8 bytes */
-> +#define EXT_CSD_NUM_OF_FW_SEC_PROG     302     /* RO, 4 bytes */
-> +#define EXT_CSD_FFU_ARG                        487     /* RO, 4 bytes */
-> +#define EXT_CSD_OPERATION_CODE_TIMEOUT 491     /* RO */
-> +#define EXT_CSD_FFU_FEATURES           492     /* RO */
-> +#define EXT_CSD_SUPPORTED_MODE         493     /* RO */
->  #define EXT_CSD_TAG_UNIT_SIZE          498     /* RO */
->  #define EXT_CSD_DATA_TAG_SUPPORT       499     /* RO */
->  #define EXT_CSD_MAX_PACKED_WRITES      500     /* RO */
-> --
-> 2.1.0.rc2.206.gedb03e5
+> i will need to setup testing board for this kind of work. It will take
+> some time.
 >
 
-Nitpick: You are adding a few EXT_CSD defines that's not required by
-this patch. Normally I would prefer to keep things separate, could you
-maybe split those pieces?
-
-Kind regards
-Uffe
