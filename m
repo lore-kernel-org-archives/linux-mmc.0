@@ -1,70 +1,111 @@
-From: Jon Pry <jonpry@gmail.com>
-Subject: [BUG] sdhci-acpi/adma/64-bit/3.17 data corruption
-Date: Thu, 16 Oct 2014 11:26:00 -0400
-Message-ID: <CA+3xLx7Munmd7y_9er8s6vOvdwrhFsCeNyE=Q=edK=TKN4R_1w@mail.gmail.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Remove old card detect infrastructure
+Date: Thu, 16 Oct 2014 09:05:33 -0700
+Message-ID: <CAD=FV=XxXV3pEfVfU0CUSrNwPEnv4sn0QYmxO17xr88K9+jW5Q@mail.gmail.com>
+References: <1413304389-6580-1-git-send-email-dianders@chromium.org>
+	<543F7F91.1010609@samsung.com>
+	<543F9202.8010806@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f171.google.com ([209.85.220.171]:52116 "EHLO
-	mail-vc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751196AbaJPP0D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Oct 2014 11:26:03 -0400
-Received: by mail-vc0-f171.google.com with SMTP id hy10so2855187vcb.16
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Oct 2014 08:26:02 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <543F9202.8010806@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Addy Ke <addy.ke@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Andrew Bresticker <abrestic@chromium.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-Hi,
+Jaehoon,
 
-    Be forewarned, this is probably the worst bug report ever, but the
-nature of the problem is making it difficult to learn anything more
-about. Issue is also very serious, causing continuous and unreported
-corruption of the entire filesystem. My platform is ASUS T100 using
-Intel Baytrail-T aka VLV. Which is using the sdhci-acpi driver.
+On Thu, Oct 16, 2014 at 2:38 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi, Doug.
+>
+> Add one comment.
+>
+> On 10/16/2014 05:19 PM, Jaehoon Chung wrote:
+>> Hi, Doug.
+>>
+>> Looks good to me.
+>>
+>> Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> with exynos3/4 series.
+>>
+>> Need to check exynos5 with using other "card detect" mechanism.
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>> On 10/15/2014 01:33 AM, Doug Anderson wrote:
+>>> The dw_mmc driver had a bunch of code that ran whenever a card was
+>>> ejected and inserted.  However, this code was old and crufty and
+>>> should be removed.  Some evidence that it's really not needed:
+>>>
+>>> 1. Is is supposed to be legal to use 'cd-gpio' on dw_mmc instead of
+>>>    using the built-in card detect mechanism.  The 'cd-gpio' code
+>>>    doesn't run any of the crufty old code but yet still works.
+>>>
+>>> 2. While looking at this, I realized that my old change (369ac86 mmc:
+>>>    dw_mmc: don't queue up a card detect at slot startup) actually
+>>>    castrated the old code a little bit already and nobody noticed.
+>>>    Specifically "last_detect_state" was left as 0 at bootup.  That
+>>>    means that on the first card removal none of the crufty code ran.
+>>>
+>>> 3. I can run "while true; do dd if=/dev/mmcblk1 of=/dev/null; done"
+>>>    while ejecting and inserting an SD Card and the world doesn't
+>>>    explode.
+>>>
+>>> If some of the crufty old code is actually needed, we should justify
+>>> it and also put it in some place where it will be run even with
+>>> "cd-gpio".
+>>>
+>>> Note that in my case I'm using the "cd-gpio" mechanism but for various
+>>> reasons the hardware triggers a dw_mmc "card detect" at bootup.  That
+>>> was actually causing a real bug.  The card detect workqueue was
+>>> running while the system was trying to enumerate the card.  The
+>>> "present != slot->last_detect_state" triggered and we were doing all
+>>> kinds of crazy stuff and messing up enumeration.  The new mechanism of
+>>> just asking the core to check the card is much safer and then the
+>>> bogus interrupt doesn't hurt.
+>
+> Did you read the Card-detect Recommendation?
+> There is a Recommendation for Card-detect(CDT) at TRM.
+> We don't read the CDETECT register(0x50) anywhere. Could you share this register value after detecting?
 
-Some background:
+Sure we do.  Look at dw_mci_get_cd().  I see "mci_readl(slot->host, CDETECT)".
 
-    I started messing with the eMMC trying to get it to work
-correctly. This doesn't work out-of-the-box do to various timeout
-problems. There are non-mainline patches available for these issues.
-The one most relevant is to use pm_qos to prevent device from hitting
-C3 while transfers are in progress. There are at least 2 versions of
-the patch running around. The intel authored one that inserts pm_qos
-into mmc/core and an android one that uses runtime-pm hooks and auto
-idle for the same purpose. The intel one has commit message like "ADMA
-error unreproducible with this patch". I've found that is not exactly
-true, it is just much less frequent. I guess they did not try very
-hard. The runtime-pm version however does seem to eliminate the
-timeout errors.
 
-   So at this point I have an eMMC setup that will run indefinitely.
-Don't have to worry about system hangs after transferring 1GB or so.
-I started getting the feeling that my data was being corrupted though.
-To verify this i would run debsum -c, and sure enough on every run, a
-different list of corrupted files would show up, with the previous
-files being magically fixed. We are talking error rates of about 5 to
-100 per 10GB. Not sure if these errors are bits/bytes/sectors/blocks
-or what, but they are present for sure.
+> And I think "last_detect_state" is used for "software should read card detect register and store in memory."
 
-   No errors show up in dmesg, that is until the filesystem eventually
-gets so trashed that ext4 starts catching it. Seeing as how mmc has
-data crc, and no errors were found, I suspected that actual transfer
-to/from emmc was flawless and somehow things were getting messed up
-after rx. First thing was to run memtest, but everything was fine. I
-then disabled ADMA in sdhc-acpi via quirk, causing a switch to SDMA,
-and bam, errors all gone.
+Well yeah, last_detect_state DID store the result of the card detect
+register in memory.  ...but it wasn't the only place that the card
+detect state was stored in memory.  The MMC core handles things for
+you, right?  Said another way: put a printout in dw_mci_get_cd() when
+the CDETECT is read.  Insert a card.  You should see your printout.
+Now try to access your card.  Did your printout happen?  It shouldn't.
+Linux knows that the card is still inserted because it stored that
+fact in memory (in some MMC core data structure).
 
-   It has been reported by one of my minions that there is no data
-corruption on 32bit build of the same kernel. It is unclear to me if
-this is a specific issue with VLV hardware, or general issue with
-64bit ADMA. Also not clear if issue is specific to 3.17. It will be
-hard to bisect since my patches only fit on top of 3.17.
+The MMC core handles polling the card detect at boot time (calling
+dw_mci_get_cd()) to see if there is a card inserted.  The Linux core
+also handles calling dw_mci_get_cd() as appropriate when you tell it
+something may have changed with mmc_detect_change().  Let's let the
+core do its work.
 
-   I already have a fix that works for me. I'm writing this so that if
-others get similar issues there will be another data point to help
-determine the root cause and/or breadth of the issue.
+If we _really_ need to follow the recommendation in the Designware
+TRM, we should:
 
-Cheers,
+1. Before enabling interrupts cache the CDETECT (per slot)
 
-Jon Pry
+2. In the IRQ handler read the CDETECT.
+
+3. Never read CDETECT in dw_mci_get_cd().  Only use the cached value.
+
+If you insist I'll spin the patch for that, but I'd rather not since:
+
+* The old code definitely didn't get CDETECT in the irq handler (it
+read it in the work routine), so it already violated the
+recommendation.
+
+* The designware guide shows this as a recommendation, not a
+requirement.  I think they are just trying to make things simpler for
+you, but nothing could be simpler than letting the MMC core do all the
+heavy lifting.
