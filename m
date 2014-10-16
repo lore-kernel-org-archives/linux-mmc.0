@@ -1,111 +1,73 @@
 From: Doug Anderson <dianders@chromium.org>
 Subject: Re: [PATCH] mmc: dw_mmc: Remove old card detect infrastructure
-Date: Thu, 16 Oct 2014 09:05:33 -0700
-Message-ID: <CAD=FV=XxXV3pEfVfU0CUSrNwPEnv4sn0QYmxO17xr88K9+jW5Q@mail.gmail.com>
+Date: Thu, 16 Oct 2014 09:10:37 -0700
+Message-ID: <CAD=FV=X+q2ymbB0EZkjj_tip9_PLdFV+Tfee+MkeUDSfD3E-ig@mail.gmail.com>
 References: <1413304389-6580-1-git-send-email-dianders@chromium.org>
-	<543F7F91.1010609@samsung.com>
-	<543F9202.8010806@samsung.com>
+	<CAGOxZ507j5QjnT_hW2y0KPZsw6WDJWRPLdesTBm4+C8D2EznWw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <543F9202.8010806@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Addy Ke <addy.ke@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Andrew Bresticker <abrestic@chromium.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f173.google.com ([209.85.220.173]:46494 "EHLO
+	mail-vc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751604AbaJPQKi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Oct 2014 12:10:38 -0400
+Received: by mail-vc0-f173.google.com with SMTP id ij19so2957420vcb.4
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Oct 2014 09:10:37 -0700 (PDT)
+In-Reply-To: <CAGOxZ507j5QjnT_hW2y0KPZsw6WDJWRPLdesTBm4+C8D2EznWw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alim Akhtar <alim.akhtar@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Addy Ke <addy.ke@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Andrew Bresticker <abrestic@chromium.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Jaehoon,
+Alim,
 
-On Thu, Oct 16, 2014 at 2:38 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi, Doug.
+On Thu, Oct 16, 2014 at 5:57 AM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+> Hi Doug,
 >
-> Add one comment.
->
-> On 10/16/2014 05:19 PM, Jaehoon Chung wrote:
->> Hi, Doug.
+> On Tue, Oct 14, 2014 at 10:03 PM, Doug Anderson <dianders@chromium.org> wrote:
+>> The dw_mmc driver had a bunch of code that ran whenever a card was
+>> ejected and inserted.  However, this code was old and crufty and
+>> should be removed.  Some evidence that it's really not needed:
 >>
->> Looks good to me.
+>> 1. Is is supposed to be legal to use 'cd-gpio' on dw_mmc instead of
+>>    using the built-in card detect mechanism.  The 'cd-gpio' code
+>>    doesn't run any of the crufty old code but yet still works.
 >>
->> Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
->> with exynos3/4 series.
+>> 2. While looking at this, I realized that my old change (369ac86 mmc:
+>>    dw_mmc: don't queue up a card detect at slot startup) actually
+>>    castrated the old code a little bit already and nobody noticed.
+>>    Specifically "last_detect_state" was left as 0 at bootup.  That
+>>    means that on the first card removal none of the crufty code ran.
 >>
->> Need to check exynos5 with using other "card detect" mechanism.
->>
->> Best Regards,
->> Jaehoon Chung
->>
->> On 10/15/2014 01:33 AM, Doug Anderson wrote:
->>> The dw_mmc driver had a bunch of code that ran whenever a card was
->>> ejected and inserted.  However, this code was old and crufty and
->>> should be removed.  Some evidence that it's really not needed:
->>>
->>> 1. Is is supposed to be legal to use 'cd-gpio' on dw_mmc instead of
->>>    using the built-in card detect mechanism.  The 'cd-gpio' code
->>>    doesn't run any of the crufty old code but yet still works.
->>>
->>> 2. While looking at this, I realized that my old change (369ac86 mmc:
->>>    dw_mmc: don't queue up a card detect at slot startup) actually
->>>    castrated the old code a little bit already and nobody noticed.
->>>    Specifically "last_detect_state" was left as 0 at bootup.  That
->>>    means that on the first card removal none of the crufty code ran.
->>>
->>> 3. I can run "while true; do dd if=/dev/mmcblk1 of=/dev/null; done"
->>>    while ejecting and inserting an SD Card and the world doesn't
->>>    explode.
->>>
->>> If some of the crufty old code is actually needed, we should justify
->>> it and also put it in some place where it will be run even with
->>> "cd-gpio".
->>>
->>> Note that in my case I'm using the "cd-gpio" mechanism but for various
->>> reasons the hardware triggers a dw_mmc "card detect" at bootup.  That
->>> was actually causing a real bug.  The card detect workqueue was
->>> running while the system was trying to enumerate the card.  The
->>> "present != slot->last_detect_state" triggered and we were doing all
->>> kinds of crazy stuff and messing up enumeration.  The new mechanism of
->>> just asking the core to check the card is much safer and then the
->>> bogus interrupt doesn't hurt.
->
-> Did you read the Card-detect Recommendation?
-> There is a Recommendation for Card-detect(CDT) at TRM.
-> We don't read the CDETECT register(0x50) anywhere. Could you share this register value after detecting?
+> Yes, right most of these codes are _almost_ never call. But I see
+> dw_mci_reset() being called on card removal (after first
+> insert/removal).
 
-Sure we do.  Look at dw_mci_get_cd().  I see "mci_readl(slot->host, CDETECT)".
+Right.  The old crufty code was called on the 2nd removal, not the
+1st.  That meant that the two were accidentally different.  My point
+was that if the old code was really required that someone would have
+noticed crashes on the 1st removal after each boot.  Since nobody is
+reporting crashes with that then it means it can't be too terrible.
+
+One thing to note: I remember in the last Chromebook project you were
+trying to track down crashes associated with constant eject / insert
+of SD Cards.  I wonder if my patch will fix these crashes?
 
 
-> And I think "last_detect_state" is used for "software should read card detect register and store in memory."
+> I tested this on exynos5800 and this looks working fine. We need to
+> test once cross suspend/resume as well.
 
-Well yeah, last_detect_state DID store the result of the card detect
-register in memory.  ...but it wasn't the only place that the card
-detect state was stored in memory.  The MMC core handles things for
-you, right?  Said another way: put a printout in dw_mci_get_cd() when
-the CDETECT is read.  Insert a card.  You should see your printout.
-Now try to access your card.  Did your printout happen?  It shouldn't.
-Linux knows that the card is still inserted because it stored that
-fact in memory (in some MMC core data structure).
+Good idea.  Can you test that?  I know that there's been lots of flux
+with suspend/resume on exynos and I'm not sure I have all the latest
+patches, but I'll search for them if you are unable to test easily.
 
-The MMC core handles polling the card detect at boot time (calling
-dw_mci_get_cd()) to see if there is a card inserted.  The Linux core
-also handles calling dw_mci_get_cd() as appropriate when you tell it
-something may have changed with mmc_detect_change().  Let's let the
-core do its work.
 
-If we _really_ need to follow the recommendation in the Designware
-TRM, we should:
+> And as Jaehoon pointed out,probably lets look in TRM if there are some
+> recommended  steps for cd-detect.
+> Otherwise this looks good to me.
 
-1. Before enabling interrupts cache the CDETECT (per slot)
+If you see some other requirement than the one I addressed in my email
+to Jaehoon, please let me know.
 
-2. In the IRQ handler read the CDETECT.
 
-3. Never read CDETECT in dw_mci_get_cd().  Only use the cached value.
-
-If you insist I'll spin the patch for that, but I'd rather not since:
-
-* The old code definitely didn't get CDETECT in the irq handler (it
-read it in the work routine), so it already violated the
-recommendation.
-
-* The designware guide shows this as a recommendation, not a
-requirement.  I think they are just trying to make things simpler for
-you, but nothing could be simpler than letting the MMC core do all the
-heavy lifting.
+-Doug
