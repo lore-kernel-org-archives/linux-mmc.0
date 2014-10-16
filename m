@@ -1,312 +1,162 @@
-From: Alim Akhtar <alim.akhtar@gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Remove old card detect infrastructure
-Date: Thu, 16 Oct 2014 18:27:12 +0530
-Message-ID: <CAGOxZ507j5QjnT_hW2y0KPZsw6WDJWRPLdesTBm4+C8D2EznWw@mail.gmail.com>
-References: <1413304389-6580-1-git-send-email-dianders@chromium.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: Report firmware version for eMMC 5.0 devices.
+Date: Thu, 16 Oct 2014 15:28:16 +0200
+Message-ID: <CAPDyKFpzdKHJ5mR+s42L-+TZdzE-m7RoWqix29gYe_CMm46B9Q@mail.gmail.com>
+References: <1413414288-4667-1-git-send-email-gwendal@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yh0-f51.google.com ([209.85.213.51]:48354 "EHLO
-	mail-yh0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752335AbaJPM5y (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Oct 2014 08:57:54 -0400
-In-Reply-To: <1413304389-6580-1-git-send-email-dianders@chromium.org>
+Received: from mail-qg0-f52.google.com ([209.85.192.52]:63036 "EHLO
+	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751872AbaJPN2R (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Oct 2014 09:28:17 -0400
+Received: by mail-qg0-f52.google.com with SMTP id q108so2456998qgd.25
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Oct 2014 06:28:16 -0700 (PDT)
+In-Reply-To: <1413414288-4667-1-git-send-email-gwendal@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Addy Ke <addy.ke@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Andrew Bresticker <abrestic@chromium.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Gwendal Grignou <gwendal@chromium.org>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Doug,
+On 16 October 2014 01:04, Gwendal Grignou <gwendal@chromium.org> wrote:
+> For eMMC 5.0 compliant device, firmware version is stored in ext_csd.
+> Report firmware as a 64bit hexa decimal. Vendor can use hexa or ascii
+> string to report firmware version.
+> Also add FFU related EXT_CSD register and note if the device is FFU capable.
+>
+> Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
 
-On Tue, Oct 14, 2014 at 10:03 PM, Doug Anderson <dianders@chromium.org> wrote:
-> The dw_mmc driver had a bunch of code that ran whenever a card was
-> ejected and inserted.  However, this code was old and crufty and
-> should be removed.  Some evidence that it's really not needed:
->
-> 1. Is is supposed to be legal to use 'cd-gpio' on dw_mmc instead of
->    using the built-in card detect mechanism.  The 'cd-gpio' code
->    doesn't run any of the crufty old code but yet still works.
->
-> 2. While looking at this, I realized that my old change (369ac86 mmc:
->    dw_mmc: don't queue up a card detect at slot startup) actually
->    castrated the old code a little bit already and nobody noticed.
->    Specifically "last_detect_state" was left as 0 at bootup.  That
->    means that on the first card removal none of the crufty code ran.
->
-Yes, right most of these codes are _almost_ never call. But I see
-dw_mci_reset() being called on card removal (after first
-insert/removal).
-I tested this on exynos5800 and this looks working fine. We need to
-test once cross suspend/resume as well.
-And as Jaehoon pointed out,probably lets look in TRM if there are some
-recommended  steps for cd-detect.
-Otherwise this looks good to me.
+Nitpick: Please prefix patch with "mmc: core:"
 
-> 3. I can run "while true; do dd if=/dev/mmcblk1 of=/dev/null; done"
->    while ejecting and inserting an SD Card and the world doesn't
->    explode.
->
-> If some of the crufty old code is actually needed, we should justify
-> it and also put it in some place where it will be run even with
-> "cd-gpio".
->
-> Note that in my case I'm using the "cd-gpio" mechanism but for various
-> reasons the hardware triggers a dw_mmc "card detect" at bootup.  That
-> was actually causing a real bug.  The card detect workqueue was
-> running while the system was trying to enumerate the card.  The
-> "present != slot->last_detect_state" triggered and we were doing all
-> kinds of crazy stuff and messing up enumeration.  The new mechanism of
-> just asking the core to check the card is much safer and then the
-> bogus interrupt doesn't hurt.
->
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
 > ---
->  drivers/mmc/host/dw_mmc.c  | 121 ++++++++-------------------------------------
->  drivers/mmc/host/dw_mmc.h  |   2 -
->  include/linux/mmc/dw_mmc.h |   2 -
->  3 files changed, 20 insertions(+), 105 deletions(-)
+>  drivers/mmc/core/mmc.c   | 24 +++++++++++++++++++++++-
+>  include/linux/mmc/card.h |  2 ++
+>  include/linux/mmc/mmc.h  | 10 ++++++++++
+>  3 files changed, 35 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 69f0cc6..6a86495 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -34,7 +34,6 @@
->  #include <linux/mmc/dw_mmc.h>
->  #include <linux/bitops.h>
->  #include <linux/regulator/consumer.h>
-> -#include <linux/workqueue.h>
->  #include <linux/of.h>
->  #include <linux/of_gpio.h>
->  #include <linux/mmc/slot-gpio.h>
-> @@ -1954,6 +1953,23 @@ static void dw_mci_cmd_interrupt(struct dw_mci *host, u32 status)
->         tasklet_schedule(&host->tasklet);
->  }
->
-> +static void dw_mci_handle_cd(struct dw_mci *host)
-> +{
-> +       int i;
-> +
-> +       for (i = 0; i < host->num_slots; i++) {
-> +               struct dw_mci_slot *slot = host->slot[i];
-> +
-> +               if (!slot)
-> +                       continue;
-> +
-> +               if (slot->mmc->ops->card_event)
-> +                       slot->mmc->ops->card_event(slot->mmc);
-> +               mmc_detect_change(slot->mmc,
-> +                       msecs_to_jiffies(host->pdata->detect_delay_ms));
-> +       }
-> +}
-> +
->  static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->  {
->         struct dw_mci *host = dev_id;
-> @@ -2029,7 +2045,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->
->                 if (pending & SDMMC_INT_CD) {
->                         mci_writel(host, RINTSTS, SDMMC_INT_CD);
-> -                       queue_work(host->card_workqueue, &host->card_work);
-> +                       dw_mci_handle_cd(host);
->                 }
->
->                 /* Handle SDIO Interrupts */
-> @@ -2056,88 +2072,6 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->         return IRQ_HANDLED;
->  }
->
-> -static void dw_mci_work_routine_card(struct work_struct *work)
-> -{
-> -       struct dw_mci *host = container_of(work, struct dw_mci, card_work);
-> -       int i;
-> -
-> -       for (i = 0; i < host->num_slots; i++) {
-> -               struct dw_mci_slot *slot = host->slot[i];
-> -               struct mmc_host *mmc = slot->mmc;
-> -               struct mmc_request *mrq;
-> -               int present;
-> -
-> -               present = dw_mci_get_cd(mmc);
-> -               while (present != slot->last_detect_state) {
-> -                       dev_dbg(&slot->mmc->class_dev, "card %s\n",
-> -                               present ? "inserted" : "removed");
-> -
-> -                       spin_lock_bh(&host->lock);
-> -
-> -                       /* Card change detected */
-> -                       slot->last_detect_state = present;
-> -
-> -                       /* Clean up queue if present */
-> -                       mrq = slot->mrq;
-> -                       if (mrq) {
-> -                               if (mrq == host->mrq) {
-> -                                       host->data = NULL;
-> -                                       host->cmd = NULL;
-> -
-> -                                       switch (host->state) {
-> -                                       case STATE_IDLE:
-> -                                       case STATE_WAITING_CMD11_DONE:
-> -                                               break;
-> -                                       case STATE_SENDING_CMD11:
-> -                                       case STATE_SENDING_CMD:
-> -                                               mrq->cmd->error = -ENOMEDIUM;
-> -                                               if (!mrq->data)
-> -                                                       break;
-> -                                               /* fall through */
-> -                                       case STATE_SENDING_DATA:
-> -                                               mrq->data->error = -ENOMEDIUM;
-> -                                               dw_mci_stop_dma(host);
-> -                                               break;
-> -                                       case STATE_DATA_BUSY:
-> -                                       case STATE_DATA_ERROR:
-> -                                               if (mrq->data->error == -EINPROGRESS)
-> -                                                       mrq->data->error = -ENOMEDIUM;
-> -                                               /* fall through */
-> -                                       case STATE_SENDING_STOP:
-> -                                               if (mrq->stop)
-> -                                                       mrq->stop->error = -ENOMEDIUM;
-> -                                               break;
-> -                                       }
-> -
-> -                                       dw_mci_request_end(host, mrq);
-> -                               } else {
-> -                                       list_del(&slot->queue_node);
-> -                                       mrq->cmd->error = -ENOMEDIUM;
-> -                                       if (mrq->data)
-> -                                               mrq->data->error = -ENOMEDIUM;
-> -                                       if (mrq->stop)
-> -                                               mrq->stop->error = -ENOMEDIUM;
-> -
-> -                                       spin_unlock(&host->lock);
-> -                                       mmc_request_done(slot->mmc, mrq);
-> -                                       spin_lock(&host->lock);
-> -                               }
-> -                       }
-> -
-> -                       /* Power down slot */
-> -                       if (present == 0)
-> -                               dw_mci_reset(host);
-> -
-> -                       spin_unlock_bh(&host->lock);
-> -
-> -                       present = dw_mci_get_cd(mmc);
-> -               }
-> -
-> -               mmc_detect_change(slot->mmc,
-> -                       msecs_to_jiffies(host->pdata->detect_delay_ms));
-> -       }
-> -}
-> -
->  #ifdef CONFIG_OF
->  /* given a slot id, find out the device node representing that slot */
->  static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
-> @@ -2289,9 +2223,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->         dw_mci_init_debugfs(slot);
->  #endif
->
-> -       /* Card initially undetected */
-> -       slot->last_detect_state = 0;
-> -
->         return 0;
->
->  err_host_allocated:
-> @@ -2672,17 +2603,10 @@ int dw_mci_probe(struct dw_mci *host)
->                 host->data_offset = DATA_240A_OFFSET;
->
->         tasklet_init(&host->tasklet, dw_mci_tasklet_func, (unsigned long)host);
-> -       host->card_workqueue = alloc_workqueue("dw-mci-card",
-> -                       WQ_MEM_RECLAIM, 1);
-> -       if (!host->card_workqueue) {
-> -               ret = -ENOMEM;
-> -               goto err_dmaunmap;
-> -       }
-> -       INIT_WORK(&host->card_work, dw_mci_work_routine_card);
->         ret = devm_request_irq(host->dev, host->irq, dw_mci_interrupt,
->                                host->irq_flags, "dw-mci", host);
->         if (ret)
-> -               goto err_workqueue;
-> +               goto err_dmaunmap;
->
->         if (host->pdata->num_slots)
->                 host->num_slots = host->pdata->num_slots;
-> @@ -2718,7 +2642,7 @@ int dw_mci_probe(struct dw_mci *host)
->         } else {
->                 dev_dbg(host->dev, "attempted to initialize %d slots, "
->                                         "but failed on all\n", host->num_slots);
-> -               goto err_workqueue;
-> +               goto err_dmaunmap;
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 1eda8dd..a0663cf 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -603,6 +603,25 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>                 card->ext_csd.data_sector_size = 512;
 >         }
 >
->         if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO)
-> @@ -2726,9 +2650,6 @@ int dw_mci_probe(struct dw_mci *host)
->
->         return 0;
->
-> -err_workqueue:
-> -       destroy_workqueue(host->card_workqueue);
-> -
->  err_dmaunmap:
->         if (host->use_dma && host->dma_ops->exit)
->                 host->dma_ops->exit(host);
-> @@ -2762,8 +2683,6 @@ void dw_mci_remove(struct dw_mci *host)
->         mci_writel(host, CLKENA, 0);
->         mci_writel(host, CLKSRC, 0);
->
-> -       destroy_workqueue(host->card_workqueue);
-> -
->         if (host->use_dma && host->dma_ops->exit)
->                 host->dma_ops->exit(host);
->
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 01b99e8..71d4995 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -214,7 +214,6 @@ extern int dw_mci_resume(struct dw_mci *host);
->   *     with CONFIG_MMC_CLKGATE.
->   * @flags: Random state bits associated with the slot.
->   * @id: Number of this slot.
-> - * @last_detect_state: Most recently observed card detect state.
+> +       /* eMMC v5 or later */
+> +       if (card->ext_csd.rev >= 7) {
+> +               u64 fwrev;
+> +
+> +               memcpy(&fwrev, &ext_csd[EXT_CSD_FIRMWARE_VERSION],
+> +                      sizeof(fwrev));
+> +               card->ext_csd.ffu_capable =
+> +                       ((ext_csd[EXT_CSD_SUPPORTED_MODE] & 1) == 1) &&
+> +                       ((ext_csd[EXT_CSD_FW_CONFIG] & 1) == 0);
+
+Please convert the above statement into this:
+
+card->ext_csd.ffu_capable = ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1 &&
+!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1)
+
+> +               /*
+> +                * Firmware version can be a string or a hexa decimal number.
+> +                * In case of string, the first byte should be printed first.
+> +                * in case of hexadecimal, we can assume the first byte is the
+> +                * more significant, therefore we print it first as well.
+
+I had a quick look in the eMMC 5.0 spec. I can't find were the above
+is stated, or maybe what you are saying is just a consequence of that
+there are some pieces missing in the spec? :-)
+
+Anyway, I wonder if just should skip the conversion and keep the raw format.
+
+> +                */
+> +               card->ext_csd.fwrev = be64_to_cpu(fwrev);
+> +       } else {
+
+The "else" isn't needed, ffu_capable's default value is already false.
+
+> +               card->ext_csd.ffu_capable = false;
+> +       }
+>  out:
+>         return err;
+>  }
+> @@ -697,7 +716,9 @@ MMC_DEV_ATTR(csd, "%08x%08x%08x%08x\n", card->raw_csd[0], card->raw_csd[1],
+>  MMC_DEV_ATTR(date, "%02d/%04d\n", card->cid.month, card->cid.year);
+>  MMC_DEV_ATTR(erase_size, "%u\n", card->erase_size << 9);
+>  MMC_DEV_ATTR(preferred_erase_size, "%u\n", card->pref_erase << 9);
+> -MMC_DEV_ATTR(fwrev, "0x%x\n", card->cid.fwrev);
+> +MMC_DEV_ATTR(fwrev, "0x%llx\n", (card->ext_csd.rev >= 7 ?
+> +               card->ext_csd.fwrev : card->cid.fwrev));
+
+cid.fwrev is not an u64.
+
+> +MMC_DEV_ATTR(ffu_capable, "0x%x\n", card->ext_csd.ffu_capable);
+>  MMC_DEV_ATTR(hwrev, "0x%x\n", card->cid.hwrev);
+>  MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
+>  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
+> @@ -717,6 +738,7 @@ static struct attribute *mmc_std_attrs[] = {
+>         &dev_attr_erase_size.attr,
+>         &dev_attr_preferred_erase_size.attr,
+>         &dev_attr_fwrev.attr,
+> +       &dev_attr_ffu_capable.attr,
+>         &dev_attr_hwrev.attr,
+>         &dev_attr_manfid.attr,
+>         &dev_attr_name.attr,
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index d424b9d..67bae22 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -87,6 +87,8 @@ struct mmc_ext_csd {
+>         unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
+>         unsigned int            boot_ro_lock;           /* ro lock support */
+>         bool                    boot_ro_lockable;
+> +       bool                    ffu_capable;    /* FFU support */
+> +       u64                     fwrev;          /* Firmware version */
+>         u8                      raw_exception_status;   /* 54 */
+>         u8                      raw_partition_support;  /* 160 */
+>         u8                      raw_rpmb_size_mult;     /* 168 */
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 64ec963..9216519 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -272,6 +272,9 @@ struct _mmc_csd {
+>   * EXT_CSD fields
 >   */
->  struct dw_mci_slot {
->         struct mmc_host         *mmc;
-> @@ -234,7 +233,6 @@ struct dw_mci_slot {
->  #define DW_MMC_CARD_PRESENT    0
->  #define DW_MMC_CARD_NEED_INIT  1
->         int                     id;
-> -       int                     last_detect_state;
->  };
 >
->  struct dw_mci_tuning_data {
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 0013669..69d0814 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -135,7 +135,6 @@ struct dw_mci {
->         struct mmc_command      stop_abort;
->         unsigned int            prev_blksz;
->         unsigned char           timing;
-> -       struct workqueue_struct *card_workqueue;
->
->         /* DMA interface members*/
->         int                     use_dma;
-> @@ -154,7 +153,6 @@ struct dw_mci {
->         u32                     stop_cmdr;
->         u32                     dir_status;
->         struct tasklet_struct   tasklet;
-> -       struct work_struct      card_work;
->         unsigned long           pending_events;
->         unsigned long           completed_events;
->         enum dw_mci_state       state;
+> +#define EXT_CSD_FFU_STATUS             26      /* R */
+> +#define EXT_CSD_MODE_OPERATION_CODES   29      /* W */
+> +#define EXT_CSD_MODE_CONFIG            30      /* R/W */
+>  #define EXT_CSD_FLUSH_CACHE            32      /* W */
+>  #define EXT_CSD_CACHE_CTRL             33      /* R/W */
+>  #define EXT_CSD_POWER_OFF_NOTIFICATION 34      /* R/W */
+> @@ -290,6 +293,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_SANITIZE_START         165     /* W */
+>  #define EXT_CSD_WR_REL_PARAM           166     /* RO */
+>  #define EXT_CSD_RPMB_MULT              168     /* RO */
+> +#define EXT_CSD_FW_CONFIG              169     /* R/W */
+>  #define EXT_CSD_BOOT_WP                        173     /* R/W */
+>  #define EXT_CSD_ERASE_GROUP_DEF                175     /* R/W */
+>  #define EXT_CSD_PART_CONFIG            179     /* R/W */
+> @@ -326,6 +330,12 @@ struct _mmc_csd {
+>  #define EXT_CSD_GENERIC_CMD6_TIME      248     /* RO */
+>  #define EXT_CSD_CACHE_SIZE             249     /* RO, 4 bytes */
+>  #define EXT_CSD_PWR_CL_DDR_200_360     253     /* RO */
+> +#define EXT_CSD_FIRMWARE_VERSION       254     /* RO, 8 bytes */
+> +#define EXT_CSD_NUM_OF_FW_SEC_PROG     302     /* RO, 4 bytes */
+> +#define EXT_CSD_FFU_ARG                        487     /* RO, 4 bytes */
+> +#define EXT_CSD_OPERATION_CODE_TIMEOUT 491     /* RO */
+> +#define EXT_CSD_FFU_FEATURES           492     /* RO */
+> +#define EXT_CSD_SUPPORTED_MODE         493     /* RO */
+>  #define EXT_CSD_TAG_UNIT_SIZE          498     /* RO */
+>  #define EXT_CSD_DATA_TAG_SUPPORT       499     /* RO */
+>  #define EXT_CSD_MAX_PACKED_WRITES      500     /* RO */
 > --
 > 2.1.0.rc2.206.gedb03e5
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+Nitpick: You are adding a few EXT_CSD defines that's not required by
+this patch. Normally I would prefer to keep things separate, could you
+maybe split those pieces?
 
-
--- 
-Regards,
-Alim
+Kind regards
+Uffe
