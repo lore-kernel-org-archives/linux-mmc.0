@@ -1,86 +1,160 @@
-From: Prabu Thangamuthu <Prabu.T@synopsys.com>
-Subject: RE: [PATCH v6] mmc: dw_mmc: Add IDMAC 64-bit address mode support
-Date: Thu, 16 Oct 2014 10:39:34 +0000
-Message-ID: <705D14B1C7978B40A723277C067CEDE21B333F07@IN01WEMBXB.internal.synopsys.com>
+From: Vivek Gautam <gautam.vivek@samsung.com>
+Subject: Re: [PATCH v6] mmc: dw_mmc: Add IDMAC 64-bit address mode support
+Date: Thu, 16 Oct 2014 16:39:08 +0530
+Message-ID: <CAFp+6iEXMNzaEgcpFE_vCYj6xwPLJvLzBhA5NFrfnEt1kSyk8Q@mail.gmail.com>
 References: <705D14B1C7978B40A723277C067CEDE21B3336B2@IN01WEMBXB.internal.synopsys.com>
- <CAGOxZ51fzvoqUQ7=8312iLyu4jwgmskkaysgXQHju-E5EM5gNQ@mail.gmail.com>
- <CAFp+6iFQ=MU-R-mYLeL0=H5fVWkxVu5s4ineh3RcSExCUNAjCA@mail.gmail.com>
- <543F6A93.1070008@samsung.com>
+	<CAGOxZ51fzvoqUQ7=8312iLyu4jwgmskkaysgXQHju-E5EM5gNQ@mail.gmail.com>
+	<CAFp+6iFQ=MU-R-mYLeL0=H5fVWkxVu5s4ineh3RcSExCUNAjCA@mail.gmail.com>
+	<543F6A93.1070008@samsung.com>
+	<705D14B1C7978B40A723277C067CEDE21B333F07@IN01WEMBXB.internal.synopsys.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <543F6A93.1070008@samsung.com>
-Content-Language: en-US
+In-Reply-To: <705D14B1C7978B40A723277C067CEDE21B333F07@IN01WEMBXB.internal.synopsys.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Vivek Gautam <gautam.vivek@samsung.com>, Alim Akhtar <alim.akhtar@gmail.com>
-Cc: Prabu Thangamuthu <Prabu.T@synopsys.com>, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>
+To: Prabu Thangamuthu <Prabu.T@synopsys.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Alim Akhtar <alim.akhtar@gmail.com>, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
-DQpIaSBKYWVob29uLCBWaXZlaywgQWxpbSwNCg0KVGhhbmtzIGZvciB5b3VyIHJldmlldyBjb21t
-ZW50cy4NCg0KT24gVGh1LCBPY3QgMTYsIDIwMTQgYXQgMTI6MjAgUE0sIEphZWhvb24gQ2h1bmcg
-PGpoODAuY2h1bmdAc2Ftc3VuZy5jb20+IHdyb3RlOg0KPiBIaSwgUHJhYnUuDQo+IA0KPiBPbiAx
-MC8xNS8yMDE0IDA5OjA1IFBNLCBWaXZlayBHYXV0YW0gd3JvdGU6DQo+ID4gSGkgUHJhYnUsDQo+
-ID4NCj4gPg0KPiA+IE9uIFR1ZSwgT2N0IDE0LCAyMDE0IGF0IDU6NDEgUE0sIEFsaW0gQWtodGFy
-IDxhbGltLmFraHRhckBnbWFpbC5jb20+DQo+IHdyb3RlOg0KPiA+PiBIaSBQcmFodSwNCj4gPj4g
-VGhhbmtzIGZvciBhIHF1aWNrIHJlLXNwaW4gbyB0aGUgcGF0Y2guDQo+ID4+IE9uZSBsYXN0IGNv
-bW1lbnQsIHRoaXMgaXMgbW9yZSBvZiBhIGluZm9ybWF0aW9uIHNlZWsuDQo+ID4+IE9uIFRodSwg
-T2N0IDksIDIwMTQgYXQgMTowOSBQTSwgUHJhYnUgVGhhbmdhbXV0aHUNCj4gPFByYWJ1LlRAc3lu
-b3BzeXMuY29tPiB3cm90ZToNCj4gPj4+IFN5bm9wc3lzIERXX01NQyBJUCBjb3JlIHN1cHBvcnRz
-IEludGVybmFsIERNQSBDb250cm9sbGVyIHdpdGggNjQtYml0DQo+IGFkZHJlc3MgbW9kZSBmcm9t
-IElQIHZlcnNpb24gMi43MGEgb253YXJkcy4NCj4gPj4+IFVwZGF0ZWQgdGhlIGRyaXZlciB0byBz
-dXBwb3J0IElETUFDIDY0LWJpdCBhZGRyZXNzaW5nIG1vZGUuDQo+ID4+Pg0KPiA+Pj4gVGVzdGVk
-IHRoZSBmZWF0dXJlcyBpbiBEV19NTUMgY29yZSB2Mi43MGEgYW5kIHYyLjQwYSB3aXRoIEhBUFMt
-NTENCj4gc2V0dXAgYW5kIGRyaXZlciBpcyB3b3JraW5nIGZpbmUuDQo+ID4+Pg0KPiA+Pj4gU2ln
-bmVkLW9mZi1ieTogUHJhYnUgVGhhbmdhbXV0aHUgPHByYWJ1LnRAc3lub3BzeXMuY29tPg0KPiA+
-Pj4gLS0tDQo+ID4+PiBDaGFuZ2UgbG9nIHY2Og0KPiA+Pj4gICAgICAgICAtIFVwZGF0ZWQgd2l0
-aCByZXZpZXcgY29tbWVudC4NCj4gPj4+DQo+ID4+PiBDaGFuZ2UgbG9nIHY1Og0KPiA+Pj4gICAg
-ICAgICAtIFJlY3JlYXRlZCB0aGUgcGF0Y2ggYWdhaW5zdCBsaW51eC1uZXh0IGFzIHRoaXMgcGF0
-Y2ggaXMNCj4gPj4+IHJlcXVpcmVkIGZvciBhbm90aGVyIHBhdGNoDQo+ID4+PiBodHRwOi8vd3d3
-LnNwaW5pY3MubmV0L2xpc3RzL2FybS1rZXJuZWwvbXNnMzU3OTg1Lmh0bWwNCj4gPj4+DQo+ID4+
-PiBDaGFuZ2UgbG9nIHY0Og0KPiA+Pj4gICAgICAgICAtIEFkZCB0aGUgZHluYW1pYyBzdXBwb3J0
-IGZvciAzMi1iaXQgYW5kIDY0LWJpdCBhZGRyZXNzIG1vZGUgYmFzZWQNCj4gb24gaHcgY29uZmln
-dXJhdGlvbi4NCj4gPj4+ICAgICAgICAgLSBSZW1vdmVkIHRoZSBDT05GSUdfTU1DX0RXX0lETUFD
-XzY0QklUX0FERFJFU1MgbWFjcm8uDQo+ID4+Pg0KPiA+Pj4gIGRyaXZlcnMvbW1jL2hvc3QvZHdf
-bW1jLmMgIHwgIDE5NQ0KPiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKy0tLS0t
-LS0tLQ0KPiA+Pj4gIGRyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmggIHwgICAxMSArKysNCj4gPj4+
-ICBpbmNsdWRlL2xpbnV4L21tYy9kd19tbWMuaCB8ICAgIDIgKw0KPiA+Pj4gIDMgZmlsZXMgY2hh
-bmdlZCwgMTcwIGluc2VydGlvbnMoKyksIDM4IGRlbGV0aW9ucygtKQ0KPiA+Pj4NCj4gPj4+IGRp
-ZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy5jDQo+IGIvZHJpdmVycy9tbWMvaG9z
-dC9kd19tbWMuYw0KPiA+Pj4gaW5kZXggNjlmMGNjNi4uYzNiNzVhNSAxMDA2NDQNCj4gPj4+IC0t
-LSBhL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMNCj4gPj4+ICsrKyBiL2RyaXZlcnMvbW1jL2hv
-c3QvZHdfbW1jLmMNCj4gPj4+IEBAIC02Miw2ICs2MiwyNCBAQA0KPiA+Pj4gICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgU0RNTUNfSURNQUNfSU5UX0ZCRSB8IFNETU1DX0lETUFDX0lO
-VF9SSSB8IFwNCj4gPj4+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFNETU1DX0lE
-TUFDX0lOVF9USSkNCj4gPj4+DQo+ID4+PiArc3RydWN0IGlkbWFjX2Rlc2NfNjRhZGRyIHsNCj4g
-Pj4+ICsgICAgICAgdTMyICAgICAgICAgICAgIGRlczA7ICAgLyogQ29udHJvbCBEZXNjcmlwdG9y
-ICovDQo+ID4+PiArDQo+ID4+PiArICAgICAgIHUzMiAgICAgICAgICAgICBkZXMxOyAgIC8qIFJl
-c2VydmVkICovDQo+ID4+IFdoYXQgaXMgdGhlIGRlZmF1bHQgdmFsdWUgb2YgdGhlc2UgX1Jlc2Vy
-dmVkXyBkZXNjcmlwdG9ycz8gQXMgdGhlc2UNCj4gPj4gYXJlIHBvaW50ZXJzLCBkbyB5b3UgdGhp
-bmcgaW5pdGlhbGl6aW5nIHRoZW4gdG8gemVybyBtYWtlIHNlbnNlPw0KDQpXZSBkb24ndCB0aGlu
-ayBpdCdzIHJlcXVpcmVkIHRvIGFzc2lnbiB6ZXJvIHRvIHJlc2VydmVkIGRlcyBmaWVsZCBhcyBt
-b2JzdGVyIGNvcmUgbm90IGdvaW5nIHRvIHVzZSB0aGlzIGZpZWxkJ3MgZm9yIGFueSBvcGVyYXRp
-b25zIHVubGVzcyB1c2VyIGhhcyBtb2RpZmllZCBpdC4gDQpBbHNvIGl0J3Mgd29ya2luZyBmaW5l
-IGluIG91ciB0ZXN0IHNldC11cCB3aXRob3V0IGluaXRpYWxpemluZyB0aGVtIHRvIHplcm8uDQoN
-Cj4gPg0KPiA+IEkgdGhpbmsgdGhlIGRlZmF1bHQgcmVzZXQgdmFsdWUgb2YgdGhlc2UgZGVzY3Jp
-cHRvcnMgd2lsbCBkZXBlbmQgb24NCj4gPiBob3cgZHdtbWMgaXMgaW50ZWdyYXRlZCBpbiBoL3cg
-YW5kIGhvdyB0aGVzZSBkZXNjcmlwdG9ycyBhcmUgdGhlbg0KPiA+IGNvbmZpZ3VyZWQuDQo+ID4N
-Cj4gPiBTbyBpdCBtYWtlcyBzZW5zZSB0byBpbml0aWFsaXplIHRoZXNlIGRlc2NyaXB0b3JzIHRv
-IHplcm8gYmVmb3JlIHVzZS4NCj4gPiBXZSBoYXZlIHNlZW4gb24gb3VyIGV4eW5vczcgc3lzdGVt
-LCB0aGF0IHdlIG5lZWQgdG8gaW5pdGlhbGl6ZSB0aGUNCj4gPiBkZXNjcmlwdG9ycyBkZXMxIGFu
-ZCBkZXMyIHRvIHplcm8gYmVmb3JlIHdlIHVzZSB0aGVtIGZ1cnRoZXIuDQoNCkl0IGxvb2tzIGxp
-a2UgZXh5bm9zNyBpcyB1c2luZyB0aGlzIHJlc2VydmVkIGZpZWxkcyBmb3Igc29tZSBvdGhlciBw
-dXJwb3Nlcy4gVG8gbWFrZSBpdCBnZW5lcmljLCB3ZSB3aWxsIGluaXRpYWxpemUgdGhlIHJlc2Vy
-dmVkIGZpZWxkcyB0byB6ZXJvLg0KDQpEb2VzIGV4eW5vczcgcmVxdWlyZXMgZGVzMiAoQnVmZmVy
-IHNpemVzKSBhbHNvIHRvIGJlIGluaXRpYWxpemVkIHRvIHplcm8/IA0KDQo+IA0KPiBJIGFncmVl
-ZCB3aXRoIFZpdmVrIGFuZCBBbGltJ3MgY29tbWVudC4NCj4gDQo+IEFuZCBJIHRoaW5rIHlvdSBj
-YW4gZml4IHRoZSBiZWxvdyBjb21waWxlIHdhcm5pbmcuDQo+IA0KPiBkcml2ZXJzL21tYy9ob3N0
-L2R3X21tYy5jOiBJbiBmdW5jdGlvbiDigJhkd19tY2lfaWRtYWNfaW5pdOKAmToNCj4gZHJpdmVy
-cy9tbWMvaG9zdC9kd19tbWMuYzo1NDI6MjE6IHdhcm5pbmc6IHJpZ2h0IHNoaWZ0IGNvdW50ID49
-IHdpZHRoIG9mDQo+IHR5cGUgW2VuYWJsZWQgYnkgZGVmYXVsdF0NCj4gZHJpdmVycy9tbWMvaG9z
-dC9kd19tbWMuYzo1NDc6Mzogd2FybmluZzogcmlnaHQgc2hpZnQgY291bnQgPj0gd2lkdGggb2YN
-Cj4gdHlwZSBbZW5hYmxlZCBieSBkZWZhdWx0XQ0KPiBkcml2ZXJzL21tYy9ob3N0L2R3X21tYy5j
-OjU3NTozOiB3YXJuaW5nOiByaWdodCBzaGlmdCBjb3VudCA+PSB3aWR0aCBvZg0KPiB0eXBlIFtl
-bmFibGVkIGJ5IGRlZmF1bHRdDQo+IA0KPiBJIHdpbGwgY2hlY2sgdGhpcyBwYXRjaCB3aXRoIDIu
-NzBhIGFuZCBvdGhlciB2ZXJzaW9uLg0KPiANCg0KV2Ugd2lsbCBmaXggdGhlIHdhcm5pbmdzIGFu
-ZCBwb3N0IHRoZSBuZXcgcGF0Y2guDQoNClJlZ2FyZHMsDQpQcmFidSBUaGFuZ2FtdXRodS4NCg0K
+Hi Prabu,
+
+
+On Thu, Oct 16, 2014 at 4:09 PM, Prabu Thangamuthu <Prabu.T@synopsys.co=
+m> wrote:
+>
+> Hi Jaehoon, Vivek, Alim,
+>
+> Thanks for your review comments.
+>
+> On Thu, Oct 16, 2014 at 12:20 PM, Jaehoon Chung <jh80.chung@samsung.c=
+om> wrote:
+>> Hi, Prabu.
+>>
+>> On 10/15/2014 09:05 PM, Vivek Gautam wrote:
+>> > Hi Prabu,
+>> >
+>> >
+>> > On Tue, Oct 14, 2014 at 5:41 PM, Alim Akhtar <alim.akhtar@gmail.co=
+m>
+>> wrote:
+>> >> Hi Prahu,
+>> >> Thanks for a quick re-spin o the patch.
+>> >> One last comment, this is more of a information seek.
+>> >> On Thu, Oct 9, 2014 at 1:09 PM, Prabu Thangamuthu
+>> <Prabu.T@synopsys.com> wrote:
+>> >>> Synopsys DW_MMC IP core supports Internal DMA Controller with 64=
+-bit
+>> address mode from IP version 2.70a onwards.
+>> >>> Updated the driver to support IDMAC 64-bit addressing mode.
+>> >>>
+>> >>> Tested the features in DW_MMC core v2.70a and v2.40a with HAPS-5=
+1
+>> setup and driver is working fine.
+>> >>>
+>> >>> Signed-off-by: Prabu Thangamuthu <prabu.t@synopsys.com>
+>> >>> ---
+>> >>> Change log v6:
+>> >>>         - Updated with review comment.
+>> >>>
+>> >>> Change log v5:
+>> >>>         - Recreated the patch against linux-next as this patch i=
+s
+>> >>> required for another patch
+>> >>> http://www.spinics.net/lists/arm-kernel/msg357985.html
+>> >>>
+>> >>> Change log v4:
+>> >>>         - Add the dynamic support for 32-bit and 64-bit address =
+mode based
+>> on hw configuration.
+>> >>>         - Removed the CONFIG_MMC_DW_IDMAC_64BIT_ADDRESS macro.
+>> >>>
+>> >>>  drivers/mmc/host/dw_mmc.c  |  195
+>> +++++++++++++++++++++++++++++++++++---------
+>> >>>  drivers/mmc/host/dw_mmc.h  |   11 +++
+>> >>>  include/linux/mmc/dw_mmc.h |    2 +
+>> >>>  3 files changed, 170 insertions(+), 38 deletions(-)
+>> >>>
+>> >>> diff --git a/drivers/mmc/host/dw_mmc.c
+>> b/drivers/mmc/host/dw_mmc.c
+>> >>> index 69f0cc6..c3b75a5 100644
+>> >>> --- a/drivers/mmc/host/dw_mmc.c
+>> >>> +++ b/drivers/mmc/host/dw_mmc.c
+>> >>> @@ -62,6 +62,24 @@
+>> >>>                                  SDMMC_IDMAC_INT_FBE | SDMMC_IDM=
+AC_INT_RI | \
+>> >>>                                  SDMMC_IDMAC_INT_TI)
+>> >>>
+>> >>> +struct idmac_desc_64addr {
+>> >>> +       u32             des0;   /* Control Descriptor */
+>> >>> +
+>> >>> +       u32             des1;   /* Reserved */
+>> >> What is the default value of these _Reserved_ descriptors? As the=
+se
+>> >> are pointers, do you thing initializing then to zero make sense?
+>
+> We don't think it's required to assign zero to reserved des field as =
+mobster core not going to use this field's for any operations unless us=
+er has modified it.
+> Also it's working fine in our test set-up without initializing them t=
+o zero.
+>
+>> >
+>> > I think the default reset value of these descriptors will depend o=
+n
+>> > how dwmmc is integrated in h/w and how these descriptors are then
+>> > configured.
+>> >
+>> > So it makes sense to initialize these descriptors to zero before u=
+se.
+>> > We have seen on our exynos7 system, that we need to initialize the
+>> > descriptors des1 and des2 to zero before we use them further.
+>
+> It looks like exynos7 is using this reserved fields for some other pu=
+rposes. To make it generic, we will initialize the reserved fields to z=
+ero.
+>
+> Does exynos7 requires des2 (Buffer sizes) also to be initialized to z=
+ero?
+
+Yes, we need des2 to be initialized to zero.
+One question however, do we have some default reset value set to these
+descriptors ? If yes then how can we check this value ?
+I just tried printing the value of des1 and des2 in dw_mci_translate_sg=
+list()
+where we are assigning these descriptors.
+
+>
+>>
+>> I agreed with Vivek and Alim's comment.
+>>
+>> And I think you can fix the below compile warning.
+>>
+>> drivers/mmc/host/dw_mmc.c: In function =E2=80=98dw_mci_idmac_init=E2=
+=80=99:
+>> drivers/mmc/host/dw_mmc.c:542:21: warning: right shift count >=3D wi=
+dth of
+>> type [enabled by default]
+>> drivers/mmc/host/dw_mmc.c:547:3: warning: right shift count >=3D wid=
+th of
+>> type [enabled by default]
+>> drivers/mmc/host/dw_mmc.c:575:3: warning: right shift count >=3D wid=
+th of
+>> type [enabled by default]
+>>
+>> I will check this patch with 2.70a and other version.
+>>
+>
+> We will fix the warnings and post the new patch.
+>
+> Regards,
+> Prabu Thangamuthu.
+>
+
+
+
+--=20
+Best Regards
+Vivek Gautam
+Samsung R&D Institute, Bangalore
+India
