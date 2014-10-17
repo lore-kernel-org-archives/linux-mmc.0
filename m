@@ -1,69 +1,71 @@
-From: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-Subject: [PATCHv2 1/3] mmc: atmel-mci: move mache header to platform_data
-Date: Fri, 17 Oct 2014 10:26:36 +0200
-Message-ID: <1413534398-22645-2-git-send-email-alexandre.belloni@free-electrons.com>
-References: <1413534398-22645-1-git-send-email-alexandre.belloni@free-electrons.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1413534398-22645-1-git-send-email-alexandre.belloni@free-electrons.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Nicolas Ferre <nicolas.ferre@atmel.com>, Chris Ball <chris@printf.net>, Hans-Christian Egtvedt <egtvedt@samfundet.no>
-Cc: Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Haavard Skinnemoen <hskinnemoen@gmail.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Alexandre Belloni <alexandre.belloni@free-electrons.com>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH v2] mmc: dw_mmc: Reset DMA before enabling IDMAC
+Date: Fri, 17 Oct 2014 17:58:22 +0530
+Message-ID: <CAGOxZ53C8DNpK92G9_OhdtU5xT+jqSimgDCkqMF1mvsNDnA2+A@mail.gmail.com>
+References: <1413478686-6857-1-git-send-email-sonnyrao@chromium.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f172.google.com ([209.85.160.172]:45223 "EHLO
+	mail-yk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751215AbaJQM3E (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Oct 2014 08:29:04 -0400
+In-Reply-To: <1413478686-6857-1-git-send-email-sonnyrao@chromium.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sonny Rao <sonnyrao@chromium.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Heiko Stuebner <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Douglas Anderson <dianders@chromium.org>, Eddie Cai <eddie.cai@rock-chips.com>, Addy Ke <addy.ke@rock-chips.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Move the mach header that can come either from arm/mach-at91 or avr32 to
-platform_data to be able to switch the AT91 platforms to multiplatform.
+Hi Sonny,
 
-Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
----
- drivers/mmc/host/atmel-mci.c                |  2 +-
- include/linux/platform_data/mmc-atmel-mci.h | 22 ++++++++++++++++++++++
- 2 files changed, 23 insertions(+), 1 deletion(-)
- create mode 100644 include/linux/platform_data/mmc-atmel-mci.h
+On Thu, Oct 16, 2014 at 10:28 PM, Sonny Rao <sonnyrao@chromium.org> wrote:
+> We've already got a reset of DMA after it's done.  Add one before we
+> start DMA too.  This fixes a data corruption on Rockchip SoCs which
+> will get bad data when doing a DMA transfer after doing a PIO transfer.
+>
+> We tested this on an Exynos 5800 with HS200 and didn't notice any
+> difference in sequential read throughput.
+>
+> Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> Tested-by: Doug Anderson <dianders@chromium.org>
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index bb585d940901..b1231835b031 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -29,11 +29,11 @@
- #include <linux/stat.h>
- #include <linux/types.h>
- #include <linux/platform_data/atmel.h>
-+#include <linux/platform_data/mmc-atmel-mci.h>
- 
- #include <linux/mmc/host.h>
- #include <linux/mmc/sdio.h>
- 
--#include <mach/atmel-mci.h>
- #include <linux/atmel-mci.h>
- #include <linux/atmel_pdc.h>
- 
-diff --git a/include/linux/platform_data/mmc-atmel-mci.h b/include/linux/platform_data/mmc-atmel-mci.h
-new file mode 100644
-index 000000000000..ebe7ae4f72e4
---- /dev/null
-+++ b/include/linux/platform_data/mmc-atmel-mci.h
-@@ -0,0 +1,22 @@
-+#ifndef __MMC_ATMEL_MCI_H
-+#define __MMC_ATMEL_MCI_H
-+
-+#include <linux/platform_data/dma-atmel.h>
-+#include <linux/dw_dmac.h>
-+
-+/**
-+ * struct mci_dma_data - DMA data for MCI interface
-+ */
-+struct mci_dma_data {
-+#ifdef CONFIG_ARM
-+	struct at_dma_slave     sdata;
-+#else
-+	struct dw_dma_slave     sdata;
-+#endif
-+};
-+
-+/* accessor macros */
-+#define	slave_data_ptr(s)	(&(s)->sdata)
-+#define find_slave_dev(s)	((s)->sdata.dma_dev)
-+
-+#endif /* __MMC_ATMEL_MCI_H */
+This looks fine.
+
+Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 5 +++++
+>  1 file changed, 5 insertions(+)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 69f0cc6..ca67f69 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -83,6 +83,7 @@ struct idmac_desc {
+>  #endif /* CONFIG_MMC_DW_IDMAC */
+>
+>  static bool dw_mci_reset(struct dw_mci *host);
+> +static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
+>
+>  #if defined(CONFIG_DEBUG_FS)
+>  static int dw_mci_req_show(struct seq_file *s, void *v)
+> @@ -448,6 +449,10 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
+>
+>         dw_mci_translate_sglist(host, host->data, sg_len);
+>
+> +       /* Make sure to reset DMA in case we did PIO before this */
+> +       dw_mci_ctrl_reset(host, SDMMC_CTRL_DMA_RESET);
+> +       dw_mci_idmac_reset(host);
+> +
+>         /* Select IDMAC interface */
+>         temp = mci_readl(host, CTRL);
+>         temp |= SDMMC_CTRL_USE_IDMAC;
+> --
+> 2.1.2
+>
+
+
+
 -- 
-1.9.1
+Regards,
+Alim
