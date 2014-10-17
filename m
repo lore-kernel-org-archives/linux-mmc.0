@@ -1,28 +1,40 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: [PATCH 1/1] mmc: sdhci-bcm2835: added quirk and removed udelay
- in write ops
-Date: Thu, 16 Oct 2014 20:50:21 -0600
-Message-ID: <544083ED.4090705@wwwdotorg.org>
-References: <Scott Branden <sbranden@broadcom.com> <1413338512-14546-1-git-send-email-sbranden@broadcom.com> <1413338512-14546-2-git-send-email-sbranden@broadcom.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+From: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+Subject: [PATCH 0/3] Remove mach/atmel-mci.h
+Date: Fri, 17 Oct 2014 09:52:43 +0200
+Message-ID: <1413532366-1317-1-git-send-email-alexandre.belloni@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:54892 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752503AbaJQCuY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Oct 2014 22:50:24 -0400
-In-Reply-To: <1413338512-14546-2-git-send-email-sbranden@broadcom.com>
+Received: from top.free-electrons.com ([176.31.233.9]:45957 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750729AbaJQHxI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Oct 2014 03:53:08 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Scott Branden <sbranden@broadcom.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Peter Griffin <peter.griffin@linaro.org>
-Cc: Ray Jui <rjui@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rpi-kernel@lists.infradead.org
+To: Nicolas Ferre <nicolas.ferre@atmel.com>, Chris Ball <chris@printf.net>, Hans-Christian Egtvedt <egtvedt@samfundet.no>
+Cc: Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Haavard Skinnemoen <hskinnemoen@gmail.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Alexandre Belloni <alexandre.belloni@free-electrons.com>
 
-On 10/14/2014 08:01 PM, Scott Branden wrote:
-> Added quirk SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 present in controller.
-> Removed udelay in write ops by using shadow registers for 16 bit
-> accesses to 32-bit registers (where necessary).
-> Optimized 32-bit operations when doing 8/16 register accesses.
+This patch series removes the uses of mach/atmel-mci.h and the files themselves.
+The final goal is to be able to switch AT91 to multiplatform.
 
-I'm going to assume this is identical to the patch you sent 8/15? So,
-I'll ignore this copy...
+The first patch introduces a new platform_data file and uses it in the driver.
+The two following patches remove the uses of mach/atmel-mci.h and the header
+itself from avR32 and ARM/at91.
+
+Alexandre Belloni (3):
+  mmc: atmel-mci: move mache header to platform_data
+  ARM: at91: remove mach/atmel-mci.h
+  avr32: remove mach/atmel-mci.h
+
+ arch/arm/mach-at91/at91sam9g45_devices.c        |  2 +-
+ arch/arm/mach-at91/include/mach/atmel-mci.h     | 17 -----------------
+ arch/avr32/mach-at32ap/at32ap700x.c             |  2 +-
+ arch/avr32/mach-at32ap/include/mach/atmel-mci.h | 17 -----------------
+ drivers/mmc/host/atmel-mci.c                    |  2 +-
+ include/linux/platform_data/mmc-atmel-mci.h     | 22 ++++++++++++++++++++++
+ 6 files changed, 25 insertions(+), 37 deletions(-)
+ delete mode 100644 arch/arm/mach-at91/include/mach/atmel-mci.h
+ delete mode 100644 arch/avr32/mach-at32ap/include/mach/atmel-mci.h
+ create mode 100644 include/linux/platform_data/mmc-atmel-mci.h
+
+-- 
+1.9.1
+
