@@ -1,74 +1,128 @@
-From: Sonny Rao <sonnyrao@chromium.org>
-Subject: Re: [PATCH v2] mmc: dw_mmc: Reset DMA before enabling IDMAC
-Date: Sat, 18 Oct 2014 14:14:49 -0700
-Message-ID: <CAPz6YkWgStHxDJjm0yD4L+qj=1PcB_RQBKVLKLEqLGE8B_smFg@mail.gmail.com>
-References: <1413478686-6857-1-git-send-email-sonnyrao@chromium.org> <5440D2BF.8070702@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f45.google.com ([209.85.192.45]:63500 "EHLO
-	mail-qg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750899AbaJRVPK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Oct 2014 17:15:10 -0400
-Received: by mail-qg0-f45.google.com with SMTP id q107so1958249qgd.4
-        for <linux-mmc@vger.kernel.org>; Sat, 18 Oct 2014 14:15:09 -0700 (PDT)
-In-Reply-To: <5440D2BF.8070702@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>
+Subject: [PATCH 5/5] mmc: host: vub300.c:  Cleaning up missing null-terminate by switching from strncpy to strzcpy
+Date: Sun, 19 Oct 2014 00:19:23 +0200
+Message-ID: <1413670763-6662-1-git-send-email-rickard_strandqvist@spectrumdigital.se>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tony Olech <tony.olech@elandigitalsystems.com>, Chris Ball <chris@printf.net>
+Cc: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>, Andi Kleen <ak@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, Grant Likely <grant.likely@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Alim Akhtar <alim.akhtar@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Heiko Stuebner <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Douglas Anderson <dianders@chromium.org>, Eddie Cai <eddie.cai@rock-chips.com>, Addy Ke <addy.ke@rock-chips.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Fri, Oct 17, 2014 at 1:26 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi, Sonny.
->
-> On 10/17/2014 01:58 AM, Sonny Rao wrote:
->> We've already got a reset of DMA after it's done.  Add one before we
->> start DMA too.  This fixes a data corruption on Rockchip SoCs which
->> will get bad data when doing a DMA transfer after doing a PIO transfer.
->>
->> We tested this on an Exynos 5800 with HS200 and didn't notice any
->> difference in sequential read throughput.
->
-> Didn't affect the write throughput?
+Ensures that the string is null-terminate in connection with the
+use of strncpy, by switching from strncpy to strzcpy.
 
-Write is usually much slower than read, but I went ahead and re-tested
-and saw no difference on writes.
+Signed-off-by: Rickard Strandqvist <rickard_strandqvist@spectrumdigital.se>
+---
+ drivers/mmc/host/vub300.c |   24 ++++++++++++------------
+ 1 file changed, 12 insertions(+), 12 deletions(-)
 
-> I tested this on exynos3/4 with DDR50 and HS200.
->
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
->
->>
->> Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
->> Signed-off-by: Doug Anderson <dianders@chromium.org>
->> Tested-by: Doug Anderson <dianders@chromium.org>
->> ---
->>  drivers/mmc/host/dw_mmc.c | 5 +++++
->>  1 file changed, 5 insertions(+)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 69f0cc6..ca67f69 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -83,6 +83,7 @@ struct idmac_desc {
->>  #endif /* CONFIG_MMC_DW_IDMAC */
->>
->>  static bool dw_mci_reset(struct dw_mci *host);
->> +static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
->>
->>  #if defined(CONFIG_DEBUG_FS)
->>  static int dw_mci_req_show(struct seq_file *s, void *v)
->> @@ -448,6 +449,10 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
->>
->>       dw_mci_translate_sglist(host, host->data, sg_len);
->>
->> +     /* Make sure to reset DMA in case we did PIO before this */
->> +     dw_mci_ctrl_reset(host, SDMMC_CTRL_DMA_RESET);
->> +     dw_mci_idmac_reset(host);
->> +
->>       /* Select IDMAC interface */
->>       temp = mci_readl(host, CTRL);
->>       temp |= SDMMC_CTRL_USE_IDMAC;
->>
->
+diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+index 4262296..191e649 100644
+--- a/drivers/mmc/host/vub300.c
++++ b/drivers/mmc/host/vub300.c
+@@ -515,7 +515,7 @@ static void new_system_port_status(struct vub300_mmc_host *vub300)
+ 		vub300->card_present = 1;
+ 		vub300->bus_width = 0;
+ 		if (disable_offload_processing)
+-			strncpy(vub300->vub_name, "EMPTY Processing Disabled",
++			strzcpy(vub300->vub_name, "EMPTY Processing Disabled",
+ 				sizeof(vub300->vub_name));
+ 		else
+ 			vub300->vub_name[0] = 0;
+@@ -1222,7 +1222,7 @@ static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
+ 		dev_err(&vub300->udev->dev,
+ 			"corrupt offload pseudocode in firmware %s\n",
+ 			vub300->vub_name);
+-		strncpy(vub300->vub_name, "corrupt offload pseudocode",
++		strzcpy(vub300->vub_name, "corrupt offload pseudocode",
+ 			sizeof(vub300->vub_name));
+ 		return;
+ 	}
+@@ -1250,7 +1250,7 @@ static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
+ 						xfer_buffer, xfer_length, HZ);
+ 			kfree(xfer_buffer);
+ 			if (retval < 0) {
+-				strncpy(vub300->vub_name,
++				strzcpy(vub300->vub_name,
+ 					"SDIO pseudocode download failed",
+ 					sizeof(vub300->vub_name));
+ 				return;
+@@ -1260,7 +1260,7 @@ static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
+ 				"not enough memory for xfer buffer to send"
+ 				" INTERRUPT_PSEUDOCODE for %s %s\n", fw->data,
+ 				vub300->vub_name);
+-			strncpy(vub300->vub_name,
++			strzcpy(vub300->vub_name,
+ 				"SDIO interrupt pseudocode download failed",
+ 				sizeof(vub300->vub_name));
+ 			return;
+@@ -1269,7 +1269,7 @@ static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
+ 		dev_err(&vub300->udev->dev,
+ 			"corrupt interrupt pseudocode in firmware %s %s\n",
+ 			fw->data, vub300->vub_name);
+-		strncpy(vub300->vub_name, "corrupt interrupt pseudocode",
++		strzcpy(vub300->vub_name, "corrupt interrupt pseudocode",
+ 			sizeof(vub300->vub_name));
+ 		return;
+ 	}
+@@ -1297,7 +1297,7 @@ static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
+ 						xfer_buffer, xfer_length, HZ);
+ 			kfree(xfer_buffer);
+ 			if (retval < 0) {
+-				strncpy(vub300->vub_name,
++				strzcpy(vub300->vub_name,
+ 					"SDIO pseudocode download failed",
+ 					sizeof(vub300->vub_name));
+ 				return;
+@@ -1307,7 +1307,7 @@ static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
+ 				"not enough memory for xfer buffer to send"
+ 				" TRANSFER_PSEUDOCODE for %s %s\n", fw->data,
+ 				vub300->vub_name);
+-			strncpy(vub300->vub_name,
++			strzcpy(vub300->vub_name,
+ 				"SDIO transfer pseudocode download failed",
+ 				sizeof(vub300->vub_name));
+ 			return;
+@@ -1316,7 +1316,7 @@ static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
+ 		dev_err(&vub300->udev->dev,
+ 			"corrupt transfer pseudocode in firmware %s %s\n",
+ 			fw->data, vub300->vub_name);
+-		strncpy(vub300->vub_name, "corrupt transfer pseudocode",
++		strzcpy(vub300->vub_name, "corrupt transfer pseudocode",
+ 			sizeof(vub300->vub_name));
+ 		return;
+ 	}
+@@ -1350,7 +1350,7 @@ static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
+ 		dev_err(&vub300->udev->dev,
+ 			"corrupt dynamic registers in firmware %s\n",
+ 			vub300->vub_name);
+-		strncpy(vub300->vub_name, "corrupt dynamic registers",
++		strzcpy(vub300->vub_name, "corrupt dynamic registers",
+ 			sizeof(vub300->vub_name));
+ 		return;
+ 	}
+@@ -1380,11 +1380,11 @@ static void download_offload_pseudocode(struct vub300_mmc_host *vub300)
+ 		 vub300->vub_name);
+ 	retval = request_firmware(&fw, vub300->vub_name, &card->dev);
+ 	if (retval < 0) {
+-		strncpy(vub300->vub_name, "vub_default.bin",
++		strzcpy(vub300->vub_name, "vub_default.bin",
+ 			sizeof(vub300->vub_name));
+ 		retval = request_firmware(&fw, vub300->vub_name, &card->dev);
+ 		if (retval < 0) {
+-			strncpy(vub300->vub_name,
++			strzcpy(vub300->vub_name,
+ 				"no SDIO offload firmware found",
+ 				sizeof(vub300->vub_name));
+ 		} else {
+@@ -1766,7 +1766,7 @@ static void vub300_cmndwork_thread(struct work_struct *work)
+ 			 * has been already downloaded to the VUB300 chip
+ 			 */
+ 		} else if (0 == vub300->mmc->card->sdio_funcs) {
+-			strncpy(vub300->vub_name, "SD memory device",
++			strzcpy(vub300->vub_name, "SD memory device",
+ 				sizeof(vub300->vub_name));
+ 		} else {
+ 			download_offload_pseudocode(vub300);
+-- 
+1.7.10.4
