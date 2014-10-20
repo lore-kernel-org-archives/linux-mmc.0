@@ -1,54 +1,71 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCHv2 0/3] Remove mach/atmel-mci.h
-Date: Mon, 20 Oct 2014 14:22:45 +0200
-Message-ID: <20141020122245.GA7443@ldesroches-Latitude-E6320>
-References: <1413534398-22645-1-git-send-email-alexandre.belloni@free-electrons.com>
+From: Chip Doc <chipdoc555@gmail.com>
+Subject: eMMC issue in linux 3.16 & 3.17
+Date: Mon, 20 Oct 2014 13:43:45 -0400
+Message-ID: <CAGv=n3em6zj-VcFQXjcGeScrrHVOHSswqjrMRwg+8dxckw=YGQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:54285 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751763AbaJTMWq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Oct 2014 08:22:46 -0400
-Content-Disposition: inline
-In-Reply-To: <1413534398-22645-1-git-send-email-alexandre.belloni@free-electrons.com>
+Received: from mail-pa0-f68.google.com ([209.85.220.68]:52142 "EHLO
+	mail-pa0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752165AbaJTRnq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Oct 2014 13:43:46 -0400
+Received: by mail-pa0-f68.google.com with SMTP id kq14so3170371pab.7
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Oct 2014 10:43:45 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, Chris Ball <chris@printf.net>, Hans-Christian Egtvedt <egtvedt@samfundet.no>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Haavard Skinnemoen <hskinnemoen@gmail.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-On Fri, Oct 17, 2014 at 10:26:35AM +0200, Alexandre Belloni wrote:
-> This patch series removes the uses of mach/atmel-mci.h and the files themselves.
-> The final goal is to be able to switch AT91 to multiplatform.
-> 
-> The first patch introduces a new platform_data file and uses it in the driver.
-> The two following patches remove the uses of mach/atmel-mci.h and the header
-> itself from avR32 and ARM/at91.
-> 
-> Changes in v2:
->  - include back linux/atmel-mci.h and really remove mach/atmel-mci.h in at91sam9g45_devices.c
+I am building a custom linux kernel and testing on an ECS LIVA system.
+It has a 32GB eMMC flash drive built-in. I tested 3.13.10, 3.14.22 and
+3.15.10 kernels and they recognize the device fine, but the 3.16.6 and
+3.17.1 kernels do not.
 
-s/move mache header/move mach header. Otherwise, for the whole series:
+When the kernel works I see this:
 
-Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+mmc0: SDHCI controller on ACPI [80860F14:00] using ADMA
 
-> 
-> Alexandre Belloni (3):
->   mmc: atmel-mci: move mache header to platform_data
->   ARM: at91: remove mach/atmel-mci.h
->   avr32: remove mach/atmel-mci.h
-> 
->  arch/arm/mach-at91/at91sam9g45_devices.c        |  2 +-
->  arch/arm/mach-at91/include/mach/atmel-mci.h     | 17 -----------------
->  arch/avr32/mach-at32ap/at32ap700x.c             |  2 +-
->  arch/avr32/mach-at32ap/include/mach/atmel-mci.h | 17 -----------------
->  drivers/mmc/host/atmel-mci.c                    |  2 +-
->  include/linux/platform_data/mmc-atmel-mci.h     | 22 ++++++++++++++++++++++
->  6 files changed, 25 insertions(+), 37 deletions(-)
->  delete mode 100644 arch/arm/mach-at91/include/mach/atmel-mci.h
->  delete mode 100644 arch/avr32/mach-at32ap/include/mach/atmel-mci.h
->  create mode 100644 include/linux/platform_data/mmc-atmel-mci.h
-> 
-> -- 
-> 1.9.1
-> 
+When the kernel doesn't work, I get nothing in the log for the device.
+
+My relevant .config is:
+
+CONFIG_MMC=y
+CONFIG_MMC_DEBUG=y
+# CONFIG_MMC_CLKGATE is not set
+
+#
+# MMC/SD/SDIO Card Drivers
+#
+CONFIG_MMC_BLOCK=y
+CONFIG_MMC_BLOCK_MINORS=8
+CONFIG_MMC_BLOCK_BOUNCE=y
+CONFIG_SDIO_UART=m
+# CONFIG_MMC_TEST is not set
+
+#
+# MMC/SD/SDIO Host Controller Drivers
+#
+CONFIG_MMC_SDHCI=y
+CONFIG_MMC_SDHCI_PCI=y
+# CONFIG_MMC_RICOH_MMC is not set
+CONFIG_MMC_SDHCI_ACPI=y
+CONFIG_MMC_SDHCI_PLTFM=y
+CONFIG_MMC_WBSD=m
+CONFIG_MMC_TIFM_SD=m
+CONFIG_MMC_SPI=m
+CONFIG_MMC_SDRICOH_CS=m
+CONFIG_MMC_CB710=m
+CONFIG_MMC_VIA_SDMMC=m
+CONFIG_MMC_VUB300=m
+CONFIG_MMC_USHC=m
+CONFIG_MMC_USDHI6ROL0=m
+# CONFIG_MEMSTICK is not set
+CONFIG_NEW_LEDS=y
+CONFIG_LEDS_CLASS=y
+
+
+Are there any known config changes that I might be missing in 3.16? If
+so, I would be happy to post the full .config. Please let me know if
+there is anything I can do it help narrow this down.
+
+
+- C
