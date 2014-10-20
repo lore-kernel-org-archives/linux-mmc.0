@@ -1,33 +1,99 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCHv2 0/3] Remove mach/atmel-mci.h
-Date: Sun, 19 Oct 2014 22:15:51 +0200
-Message-ID: <2020417.En5p6XBEWH@wuerfel>
-References: <1413534398-22645-1-git-send-email-alexandre.belloni@free-electrons.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Remove old card detect infrastructure
+Date: Mon, 20 Oct 2014 12:23:15 +0900
+Message-ID: <54448023.1050008@samsung.com>
+References: <1413304389-6580-1-git-send-email-dianders@chromium.org>
+ <CAGOxZ507j5QjnT_hW2y0KPZsw6WDJWRPLdesTBm4+C8D2EznWw@mail.gmail.com>
+ <CAD=FV=X+q2ymbB0EZkjj_tip9_PLdFV+Tfee+MkeUDSfD3E-ig@mail.gmail.com>
+ <CAGOxZ51x8cd9XmNg49aaUdZQkw-hhEA-mC=34ZSjLf0XF8Zbvw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.10]:60970 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751621AbaJSUQI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Oct 2014 16:16:08 -0400
-In-Reply-To: <1413534398-22645-1-git-send-email-alexandre.belloni@free-electrons.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:13530 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750807AbaJTDXS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Oct 2014 23:23:18 -0400
+In-reply-to: <CAGOxZ51x8cd9XmNg49aaUdZQkw-hhEA-mC=34ZSjLf0XF8Zbvw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, Chris Ball <chris@printf.net>, Hans-Christian Egtvedt <egtvedt@samfundet.no>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Haavard Skinnemoen <hskinnemoen@gmail.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+To: Alim Akhtar <alim.akhtar@gmail.com>, Doug Anderson <dianders@chromium.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Addy Ke <addy.ke@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Andrew Bresticker <abrestic@chromium.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Friday 17 October 2014 10:26:35 Alexandre Belloni wrote:
-> This patch series removes the uses of mach/atmel-mci.h and the files themselves.
-> The final goal is to be able to switch AT91 to multiplatform.
+Hi.
+
+On 10/17/2014 09:44 PM, Alim Akhtar wrote:
+> Hi Doug,
 > 
-> The first patch introduces a new platform_data file and uses it in the driver.
-> The two following patches remove the uses of mach/atmel-mci.h and the header
-> itself from avR32 and ARM/at91.
+> On Thu, Oct 16, 2014 at 9:40 PM, Doug Anderson <dianders@chromium.org> wrote:
+>> Alim,
+>>
+>> On Thu, Oct 16, 2014 at 5:57 AM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+>>> Hi Doug,
+>>>
+>>> On Tue, Oct 14, 2014 at 10:03 PM, Doug Anderson <dianders@chromium.org> wrote:
+>>>> The dw_mmc driver had a bunch of code that ran whenever a card was
+>>>> ejected and inserted.  However, this code was old and crufty and
+>>>> should be removed.  Some evidence that it's really not needed:
+>>>>
+>>>> 1. Is is supposed to be legal to use 'cd-gpio' on dw_mmc instead of
+>>>>    using the built-in card detect mechanism.  The 'cd-gpio' code
+>>>>    doesn't run any of the crufty old code but yet still works.
+>>>>
+>>>> 2. While looking at this, I realized that my old change (369ac86 mmc:
+>>>>    dw_mmc: don't queue up a card detect at slot startup) actually
+>>>>    castrated the old code a little bit already and nobody noticed.
+>>>>    Specifically "last_detect_state" was left as 0 at bootup.  That
+>>>>    means that on the first card removal none of the crufty code ran.
+>>>>
+>>> Yes, right most of these codes are _almost_ never call. But I see
+>>> dw_mci_reset() being called on card removal (after first
+>>> insert/removal).
+>>
+>> Right.  The old crufty code was called on the 2nd removal, not the
+>> 1st.  That meant that the two were accidentally different.  My point
+>> was that if the old code was really required that someone would have
+>> noticed crashes on the 1st removal after each boot.  Since nobody is
+>> reporting crashes with that then it means it can't be too terrible.
+>>
+>> One thing to note: I remember in the last Chromebook project you were
+>> trying to track down crashes associated with constant eject / insert
+>> of SD Cards.  I wonder if my patch will fix these crashes?
+>>
+> Ah, yes, reproducing that and checking with this patch will be really
+> interesting.
 > 
-> Changes in v2:
->  - include back linux/atmel-mci.h and really remove mach/atmel-mci.h in at91sam9g45_devices.c
+>>
+>>> I tested this on exynos5800 and this looks working fine. We need to
+>>> test once cross suspend/resume as well.
+>>
+>> Good idea.  Can you test that?  I know that there's been lots of flux
+>> with suspend/resume on exynos and I'm not sure I have all the latest
+>> patches, but I'll search for them if you are unable to test easily.
+>>
+> Sure, I will do that..but probably sometime next week, as I will out
+> of office for few days.
+>>
+>>> And as Jaehoon pointed out,probably lets look in TRM if there are some
+>>> recommended  steps for cd-detect.
+>>> Otherwise this looks good to me.
+>>
+>> If you see some other requirement than the one I addressed in my email
+>> to Jaehoon, please let me know.
+
+I know there is no other requirement for detecting card. 
+So this patch can be applied after testing the above case(suspend/resume).
+
+Best Regards,
+Jaehoon Chung
+
+>>
+> Well, as most of the current CD detect code are dead code, so lets see
+> more test results, specially across a suspend/resume and warm reboot
+> test and take this forward.
+>>
+>> -Doug
+> 
 > 
 > 
 
-Acked-by: Arnd Bergmann <arnd@arndb.de>
