@@ -1,52 +1,75 @@
 From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Subject: [PATCH RESEND 11/12] ARM: dts: berlin: Enable WiFi on Google Chromecast
-Date: Tue, 21 Oct 2014 11:22:43 +0200
-Message-ID: <1413883364-681-12-git-send-email-sebastian.hesselbarth@gmail.com>
+Subject: [PATCH RESEND 10/12] ARM: dts: berlin: Add SDHCI controller nodes to
+ BG2/BG2CD
+Date: Tue, 21 Oct 2014 11:22:42 +0200
+Message-ID: <1413883364-681-11-git-send-email-sebastian.hesselbarth@gmail.com>
 References: <1413883364-681-1-git-send-email-sebastian.hesselbarth@gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1413883364-681-1-git-send-email-sebastian.hesselbarth@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart@free-electrons.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart@free-electrons.com>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-With SDHCI for BG2CD, we can now enable the port and allow to access
-AzureWave WiFi/BT module on Google Chromecast.
-
-Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
----
-Cc: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "Antoine T=C3=A9nart" <antoine.tenart@free-electrons.com>
-Cc: linux-mmc@vger.kernel.org
-Cc: devicetree@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: linux-kernel@vger.kernel.org
----
- arch/arm/boot/dts/berlin2cd-google-chromecast.dts | 9 +++++++++
- 1 file changed, 9 insertions(+)
-
-diff --git a/arch/arm/boot/dts/berlin2cd-google-chromecast.dts b/arch/a=
-rm/boot/dts/berlin2cd-google-chromecast.dts
-index bcd81ffc495d..8c26a2dfd4a3 100644
---- a/arch/arm/boot/dts/berlin2cd-google-chromecast.dts
-+++ b/arch/arm/boot/dts/berlin2cd-google-chromecast.dts
-@@ -26,4 +26,13 @@
- 	};
- };
-=20
-+/*
-+ * AzureWave AW-NH387 (Marvell 88W8787)
-+ * 802.11b/g/n + Bluetooth 2.1
-+ */
-+&sdhci0 {
-+	non-removable;
-+	status =3D "okay";
-+};
-+
- &uart0 { status =3D "okay"; };
---=20
-2.1.1
+TWFydmVsbCBCZXJsaW4gQkcyIGhhcyB0aHJlZSwgQkcyQ0QganVzdCBvbmUgcHhhdjMgY29tcGF0
+aWJsZQpzZGhjaSBjb250cm9sbGVycywgYWRkIHRoZW0gdG8gdGhlIGNvcnJlc3BvbmRpbmcgRFQg
+U29DCmluY2x1ZGVzLgoKU2lnbmVkLW9mZi1ieTogU2ViYXN0aWFuIEhlc3NlbGJhcnRoIDxzZWJh
+c3RpYW4uaGVzc2VsYmFydGhAZ21haWwuY29tPgotLS0KQ2M6IENocmlzIEJhbGwgPGNocmlzQHBy
+aW50Zi5uZXQ+CkNjOiBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4KQ2M6ICJB
+bnRvaW5lIFTDqW5hcnQiIDxhbnRvaW5lLnRlbmFydEBmcmVlLWVsZWN0cm9ucy5jb20+CkNjOiBs
+aW51eC1tbWNAdmdlci5rZXJuZWwub3JnCkNjOiBkZXZpY2V0cmVlQHZnZXIua2VybmVsLm9yZwpD
+YzogbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCkNjOiBsaW51eC1rZXJuZWxA
+dmdlci5rZXJuZWwub3JnCi0tLQogYXJjaC9hcm0vYm9vdC9kdHMvYmVybGluMi5kdHNpICAgfCAz
+NCArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrCiBhcmNoL2FybS9ib290L2R0cy9i
+ZXJsaW4yY2QuZHRzaSB8ICA5ICsrKysrKysrKwogMiBmaWxlcyBjaGFuZ2VkLCA0MyBpbnNlcnRp
+b25zKCspCgpkaWZmIC0tZ2l0IGEvYXJjaC9hcm0vYm9vdC9kdHMvYmVybGluMi5kdHNpIGIvYXJj
+aC9hcm0vYm9vdC9kdHMvYmVybGluMi5kdHNpCmluZGV4IDlkN2M4MTBlYmQwYi4uNTA0ZjFhZGQx
+OTM4IDEwMDY0NAotLS0gYS9hcmNoL2FybS9ib290L2R0cy9iZXJsaW4yLmR0c2kKKysrIGIvYXJj
+aC9hcm0vYm9vdC9kdHMvYmVybGluMi5kdHNpCkBAIC01Myw2ICs1MywzNSBAQAogCiAJCXJhbmdl
+cyA9IDwwIDB4ZjcwMDAwMDAgMHgxMDAwMDAwPjsKIAorCQlzZGhjaTA6IHNkaGNpQGFiMDAwMCB7
+CisJCQljb21wYXRpYmxlID0gIm1ydmwscHhhdjMtbW1jIjsKKwkJCXJlZyA9IDwweGFiMDAwMCAw
+eDIwMD47CisJCQljbG9ja3MgPSA8JmNoaXAgQ0xLSURfU0RJTzBYSU4+LCA8JmNoaXAgQ0xLSURf
+U0RJTzA+OworCQkJY2xvY2stbmFtZXMgPSAiaW8iLCAiY29yZSI7CisJCQlpbnRlcnJ1cHRzID0g
+PEdJQ19TUEkgMTcgSVJRX1RZUEVfTEVWRUxfSElHSD47CisJCQlzdGF0dXMgPSAiZGlzYWJsZWQi
+OworCQl9OworCisJCXNkaGNpMTogc2RoY2lAYWIwODAwIHsKKwkJCWNvbXBhdGlibGUgPSAibXJ2
+bCxweGF2My1tbWMiOworCQkJcmVnID0gPDB4YWIwODAwIDB4MjAwPjsKKwkJCWNsb2NrcyA9IDwm
+Y2hpcCBDTEtJRF9TRElPMVhJTj4sIDwmY2hpcCBDTEtJRF9TRElPMT47CisJCQljbG9jay1uYW1l
+cyA9ICJpbyIsICJjb3JlIjsKKwkJCWludGVycnVwdHMgPSA8R0lDX1NQSSAyMCBJUlFfVFlQRV9M
+RVZFTF9ISUdIPjsKKwkJCXN0YXR1cyA9ICJkaXNhYmxlZCI7CisJCX07CisKKwkJc2RoY2kyOiBz
+ZGhjaUBhYjEwMDAgeworCQkJY29tcGF0aWJsZSA9ICJtcnZsLHB4YXYzLW1tYyI7CisJCQlyZWcg
+PSA8MHhhYjEwMDAgMHgyMDA+OworCQkJaW50ZXJydXB0cyA9IDxHSUNfU1BJIDI4IElSUV9UWVBF
+X0xFVkVMX0hJR0g+OworCQkJY2xvY2tzID0gPCZjaGlwIENMS0lEX05GQ19FQ0M+LCA8JmNoaXAg
+Q0xLSURfTkZDPjsKKwkJCWNsb2NrLW5hbWVzID0gImlvIiwgImNvcmUiOworCQkJcGluY3RybC0w
+ID0gPCZlbW1jX3BtdXg+OworCQkJcGluY3RybC1uYW1lcyA9ICJkZWZhdWx0IjsKKwkJCXN0YXR1
+cyA9ICJkaXNhYmxlZCI7CisJCX07CisKIAkJbDI6IGwyLWNhY2hlLWNvbnRyb2xsZXJAYWMwMDAw
+IHsKIAkJCWNvbXBhdGlibGUgPSAibWFydmVsbCx0YXVyb3MzLWNhY2hlIiwgImFybSxwbDMxMC1j
+YWNoZSI7CiAJCQlyZWcgPSA8MHhhYzAwMDAgMHgxMDAwPjsKQEAgLTI1Miw2ICsyODEsMTEgQEAK
+IAkJCXJlZyA9IDwweGVhMDAwMCAweDQwMD47CiAJCQljbG9ja3MgPSA8JnJlZmNsaz47CiAJCQlj
+bG9jay1uYW1lcyA9ICJyZWZjbGsiOworCisJCQllbW1jX3BtdXg6IGVtbWMtcG11eCB7CisJCQkJ
+Z3JvdXBzID0gIkcyNiI7CisJCQkJZnVuY3Rpb24gPSAiZW1tYyI7CisJCQl9OwogCQl9OwogCiAJ
+CWFwYkBmYzAwMDAgewpkaWZmIC0tZ2l0IGEvYXJjaC9hcm0vYm9vdC9kdHMvYmVybGluMmNkLmR0
+c2kgYi9hcmNoL2FybS9ib290L2R0cy9iZXJsaW4yY2QuZHRzaQppbmRleCBjYzFkZjY1ZGE1MDQu
+LjVhMTkwMTdiNWQ3MSAxMDA2NDQKLS0tIGEvYXJjaC9hcm0vYm9vdC9kdHMvYmVybGluMmNkLmR0
+c2kKKysrIGIvYXJjaC9hcm0vYm9vdC9kdHMvYmVybGluMmNkLmR0c2kKQEAgLTQ1LDYgKzQ1LDE1
+IEBACiAKIAkJcmFuZ2VzID0gPDAgMHhmNzAwMDAwMCAweDEwMDAwMDA+OwogCisJCXNkaGNpMDog
+c2RoY2lAYWIwMDAwIHsKKwkJCWNvbXBhdGlibGUgPSAibXJ2bCxweGF2My1tbWMiOworCQkJcmVn
+ID0gPDB4YWIwMDAwIDB4MjAwPjsKKwkJCWNsb2NrcyA9IDwmY2hpcCBDTEtJRF9TRElPMFhJTj4s
+IDwmY2hpcCBDTEtJRF9TRElPMD47CisJCQljbG9jay1uYW1lcyA9ICJpbyIsICJjb3JlIjsKKwkJ
+CWludGVycnVwdHMgPSA8R0lDX1NQSSAxNyBJUlFfVFlQRV9MRVZFTF9ISUdIPjsKKwkJCXN0YXR1
+cyA9ICJkaXNhYmxlZCI7CisJCX07CisKIAkJbDI6IGwyLWNhY2hlLWNvbnRyb2xsZXJAYWMwMDAw
+IHsKIAkJCWNvbXBhdGlibGUgPSAiYXJtLHBsMzEwLWNhY2hlIjsKIAkJCXJlZyA9IDwweGFjMDAw
+MCAweDEwMDA+OwotLSAKMi4xLjEKCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2Vy
+bmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1h
+bi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
