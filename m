@@ -1,51 +1,51 @@
 From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Subject: [PATCH RESEND 07/12] mmc: sdhci-pxav3: Try to get named I/O clock first
-Date: Tue, 21 Oct 2014 11:22:39 +0200
-Message-ID: <1413883364-681-8-git-send-email-sebastian.hesselbarth@gmail.com>
+Subject: [PATCH RESEND 02/12] mmc: sdhci-pxav3: Respect MMC_DDR52 timing on
+ uhs signaling
+Date: Tue, 21 Oct 2014 11:22:34 +0200
+Message-ID: <1413883364-681-3-git-send-email-sebastian.hesselbarth@gmail.com>
 References: <1413883364-681-1-git-send-email-sebastian.hesselbarth@gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1413883364-681-1-git-send-email-sebastian.hesselbarth@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart@free-electrons.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, =?UTF-8?q?Antoine=20T=C3=A9nart?= <antoine.tenart@free-electrons.com>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-With support for more than one clock, we'll need to distinguish between
-the clock by name. Change clock probing to first try to get "io" clock
-before falling back to unnamed clock.
-
-Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
----
-Cc: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "Antoine T=C3=A9nart" <antoine.tenart@free-electrons.com>
-Cc: linux-mmc@vger.kernel.org
-Cc: devicetree@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: linux-kernel@vger.kernel.org
----
- drivers/mmc/host/sdhci-pxav3.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-px=
-av3.c
-index a34a589670e6..3dfd97977515 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -309,7 +309,9 @@ static int sdhci_pxav3_probe(struct platform_device=
- *pdev)
- 	pltfm_host =3D sdhci_priv(host);
- 	pltfm_host->priv =3D pxa;
-=20
--	pxa->clk_io =3D devm_clk_get(dev, NULL);
-+	pxa->clk_io =3D devm_clk_get(dev, "io");
-+	if (IS_ERR(pxa->clk_io))
-+		pxa->clk_io =3D devm_clk_get(dev, NULL);
- 	if (IS_ERR(pxa->clk_io)) {
- 		dev_err(dev, "failed to get io clock\n");
- 		ret =3D PTR_ERR(pxa->clk_io);
---=20
-2.1.1
+Y29tbWl0IGJiODE3NWE4YWE0MmQ3MzFhODQwY2Q0NzRlMzQ4YWMzMzY3ZWI1YTAKICAoIm1tYzog
+c2RoY2k6IGNsYXJpZnkgRERSIHRpbWluZyBtb2RlIGJldHdlZW4gU0QtVUhTIGFuZCBlTU1DIikK
+YWRkZWQgTU1DX0REUjUyIGFzIGVNTUMncyBERFIgbW9kZSB0byBiZSBkaXN0aW5ndWlzaGVkIGZy
+b20gU0QtVUhTLgoKV2hpbGUgdGhlIGRpZmZlcmVudGF0aW9uIG1heSBiZSB1c2VmdWwsIHB4YXYz
+IFNESENJIGNvbnRyb2xsZXIgbGFja3MKYSBjb3JyZXNwb25kaW5nIGNoZWNrIGluIGl0cyBjdXN0
+b20gLnNldF91aHNfc2lnbmFsaW5nIGNhbGxiYWNrIGZvcgpNTUNfRERSNTIuIFRoaXMgcGF0Y2gg
+YWRkcyBhIG5ldyBzd2l0Y2ggY2FzZSBmb3IgTU1DX1RJTUlOR19NTUNfRERSNTIKdG8gTU1DX1RJ
+TUlOR19VSFNfRERSNTAgY2FzZS4KClNpZ25lZC1vZmYtYnk6IFNlYmFzdGlhbiBIZXNzZWxiYXJ0
+aCA8c2ViYXN0aWFuLmhlc3NlbGJhcnRoQGdtYWlsLmNvbT4KLS0tCkNjOiBDaHJpcyBCYWxsIDxj
+aHJpc0BwcmludGYubmV0PgpDYzogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+
+CkNjOiAiQW50b2luZSBUw6luYXJ0IiA8YW50b2luZS50ZW5hcnRAZnJlZS1lbGVjdHJvbnMuY29t
+PgpDYzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZwpDYzogZGV2aWNldHJlZUB2Z2VyLmtlcm5l
+bC5vcmcKQ2M6IGxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZwpDYzogbGludXgt
+a2VybmVsQHZnZXIua2VybmVsLm9yZwotLS0KIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcHhhdjMu
+YyB8IDEgKwogMSBmaWxlIGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspCgpkaWZmIC0tZ2l0IGEvZHJp
+dmVycy9tbWMvaG9zdC9zZGhjaS1weGF2My5jIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1weGF2
+My5jCmluZGV4IDUwMzZkN2QzOTUyOS4uYjU1YzgwNzk4MmZlIDEwMDY0NAotLS0gYS9kcml2ZXJz
+L21tYy9ob3N0L3NkaGNpLXB4YXYzLmMKKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1weGF2
+My5jCkBAIC0yMTEsNiArMjExLDcgQEAgc3RhdGljIHZvaWQgcHhhdjNfc2V0X3Voc19zaWduYWxp
+bmcoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIHVuc2lnbmVkIGludCB1aHMpCiAJY2FzZSBNTUNf
+VElNSU5HX1VIU19TRFIxMDQ6CiAJCWN0cmxfMiB8PSBTREhDSV9DVFJMX1VIU19TRFIxMDQgfCBT
+REhDSV9DVFJMX1ZERF8xODA7CiAJCWJyZWFrOworCWNhc2UgTU1DX1RJTUlOR19NTUNfRERSNTI6
+CiAJY2FzZSBNTUNfVElNSU5HX1VIU19ERFI1MDoKIAkJY3RybF8yIHw9IFNESENJX0NUUkxfVUhT
+X0REUjUwIHwgU0RIQ0lfQ1RSTF9WRERfMTgwOwogCQlicmVhazsKLS0gCjIuMS4xCgoKX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5l
+bCBtYWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6
+Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
