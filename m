@@ -1,250 +1,304 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 08/15] mmc: sdhci: Parameterize ADMA sizes and alignment
-Date: Tue, 21 Oct 2014 12:26:18 +0300
-Message-ID: <1413883585-16299-9-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 12/15] mmc: sdhci: Add 64-bit ADMA support
+Date: Tue, 21 Oct 2014 12:26:22 +0300
+Message-ID: <1413883585-16299-13-git-send-email-adrian.hunter@intel.com>
 References: <1413883585-16299-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga09.intel.com ([134.134.136.24]:44625 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932316AbaJUJ2H (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 21 Oct 2014 05:28:07 -0400
+	id S932322AbaJUJ2N (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 21 Oct 2014 05:28:13 -0400
 In-Reply-To: <1413883585-16299-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-In preparation for 64-bit ADMA, parameterize ADMA sizes
-and alignment.  64-bit ADMA has a larger descriptor
-because it contains a 64-bit address instead of a 32-bit
-address.  Also data must be 8-byte aligned instead
-of 4-byte aligned.  Consequently, sdhci_host members
-are added for descriptor, table, and buffer sizes
-and alignment.
+Add 64-bit ADMA support including:
+	- add 64-bit ADMA descriptor
+	- add SDHCI_USE_64_BIT_DMA flag
+	- set upper 32-bits of DMA addresses
+	- ability to select 64-bit ADMA
+	- ability to use 64-bit ADMA sizes and alignment
+	- display "ADMA 64-bit" when host is added
+
+It is assumed that a 64-bit capable device has set a 64-bit DMA mask
+and *must* do 64-bit DMA.  A driver has the opportunity to change
+that during the first call to ->enable_dma().  Similarly
+SDHCI_QUIRK2_BROKEN_64_BIT_DMA must be left to the drivers to
+implement.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c  | 68 +++++++++++++++++++++++------------------------
- include/linux/mmc/sdhci.h |  7 +++++
- 2 files changed, 41 insertions(+), 34 deletions(-)
+ drivers/mmc/host/sdhci.c  | 109 ++++++++++++++++++++++++++++++++++------------
+ drivers/mmc/host/sdhci.h  |  18 ++++++++
+ include/linux/mmc/sdhci.h |   3 ++
+ 3 files changed, 102 insertions(+), 28 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index a4322e2..41a3f79 100644
+index e503fd4..9918225 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -44,14 +44,6 @@
+@@ -117,10 +117,17 @@ static void sdhci_dumpregs(struct sdhci_host *host)
+ 	pr_debug(DRIVER_NAME ": Host ctl2: 0x%08x\n",
+ 		sdhci_readw(host, SDHCI_HOST_CONTROL2));
  
- #define MAX_TUNING_LOOP 40
+-	if (host->flags & SDHCI_USE_ADMA)
+-		pr_debug(DRIVER_NAME ": ADMA Err: 0x%08x | ADMA Ptr: 0x%08x\n",
+-		       readl(host->ioaddr + SDHCI_ADMA_ERROR),
+-		       readl(host->ioaddr + SDHCI_ADMA_ADDRESS));
++	if (host->flags & SDHCI_USE_ADMA) {
++		if (host->flags & SDHCI_USE_64_BIT_DMA)
++			pr_debug(DRIVER_NAME ": ADMA Err: 0x%08x | ADMA Ptr: 0x%08x%08x\n",
++				 readl(host->ioaddr + SDHCI_ADMA_ERROR),
++				 readl(host->ioaddr + SDHCI_ADMA_ADDRESS_HI),
++				 readl(host->ioaddr + SDHCI_ADMA_ADDRESS));
++		else
++			pr_debug(DRIVER_NAME ": ADMA Err: 0x%08x | ADMA Ptr: 0x%08x\n",
++				 readl(host->ioaddr + SDHCI_ADMA_ERROR),
++				 readl(host->ioaddr + SDHCI_ADMA_ADDRESS));
++	}
  
--/*
-- * The ADMA2 descriptor table size is calculated as the maximum number of
-- * segments (128), times 2 to allow for an alignment descriptor for each
-- * segment, plus 1 for a nop end descriptor, all multipled by the 32-bit
-- * descriptor size (8).
-- */
--#define ADMA_SIZE	((128 * 2 + 1) * 8)
--
- static unsigned int debug_quirks = 0;
- static unsigned int debug_quirks2;
+ 	pr_debug(DRIVER_NAME ": ===========================================\n");
+ }
+@@ -446,19 +453,25 @@ static void sdhci_kunmap_atomic(void *buffer, unsigned long *flags)
+ 	local_irq_restore(*flags);
+ }
  
-@@ -502,10 +494,10 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 		direction = DMA_TO_DEVICE;
+-static void sdhci_adma_write_desc(void *desc, u32 addr, int len, unsigned cmd)
++static void sdhci_adma_write_desc(struct sdhci_host *host, void *desc,
++				  dma_addr_t addr, int len, unsigned cmd)
+ {
+-	struct sdhci_adma2_32_desc *dma_desc = desc;
++	struct sdhci_adma2_64_desc *dma_desc = desc;
  
- 	host->align_addr = dma_map_single(mmc_dev(host->mmc),
--		host->align_buffer, 128 * 4, direction);
-+		host->align_buffer, host->align_buffer_sz, direction);
- 	if (dma_mapping_error(mmc_dev(host->mmc), host->align_addr))
- 		goto fail;
--	BUG_ON(host->align_addr & 0x3);
-+	BUG_ON(host->align_addr & host->align_mask);
++	/* 32-bit and 64-bit descriptors have these members in same position */
+ 	dma_desc->cmd = cpu_to_le16(cmd);
+ 	dma_desc->len = cpu_to_le16(len);
+-	dma_desc->addr = cpu_to_le32(addr);
++	dma_desc->addr_lo = cpu_to_le32((u32)addr);
++
++	if (host->flags & SDHCI_USE_64_BIT_DMA)
++		dma_desc->addr_hi = cpu_to_le32((u64)addr >> 32);
+ }
  
- 	host->sg_count = dma_map_sg(mmc_dev(host->mmc),
- 		data->sg, data->sg_len, direction);
-@@ -528,7 +520,8 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 		 * the (up to three) bytes that screw up the
- 		 * alignment.
- 		 */
--		offset = (4 - (addr & 0x3)) & 0x3;
-+		offset = (host->align_sz - (addr & host->align_mask)) &
-+			 host->align_mask;
- 		if (offset) {
- 			if (data->flags & MMC_DATA_WRITE) {
- 				buffer = sdhci_kmap_atomic(sg, &flags);
-@@ -543,10 +536,10 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
+ static void sdhci_adma_mark_end(void *desc)
+ {
+-	struct sdhci_adma2_32_desc *dma_desc = desc;
++	struct sdhci_adma2_64_desc *dma_desc = desc;
+ 
++	/* 32-bit and 64-bit descriptors have 'cmd' in same position */
+ 	dma_desc->cmd |= cpu_to_le16(ADMA2_END);
+ }
+ 
+@@ -527,7 +540,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
+ 			}
+ 
+ 			/* tran, valid */
+-			sdhci_adma_write_desc(desc, align_addr, offset,
++			sdhci_adma_write_desc(host, desc, align_addr, offset,
+ 					      ADMA2_TRAN_VALID);
  
  			BUG_ON(offset > 65536);
- 
--			align += 4;
--			align_addr += 4;
-+			align += host->align_sz;
-+			align_addr += host->align_sz;
- 
--			desc += 8;
-+			desc += host->desc_sz;
- 
- 			addr += offset;
- 			len -= offset;
-@@ -556,13 +549,13 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
+@@ -544,7 +557,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
+ 		BUG_ON(len > 65536);
  
  		/* tran, valid */
- 		sdhci_adma_write_desc(desc, addr, len, 0x21);
--		desc += 8;
-+		desc += host->desc_sz;
+-		sdhci_adma_write_desc(desc, addr, len, ADMA2_TRAN_VALID);
++		sdhci_adma_write_desc(host, desc, addr, len, ADMA2_TRAN_VALID);
+ 		desc += host->desc_sz;
  
  		/*
- 		 * If this triggers then we have a calculation bug
- 		 * somewhere. :/
- 		 */
--		WARN_ON((desc - host->adma_table) >= ADMA_SIZE);
-+		WARN_ON((desc - host->adma_table) >= host->adma_table_sz);
- 	}
- 
- 	if (host->quirks & SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC) {
-@@ -570,7 +563,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 		* Mark the last descriptor as the terminating descriptor
+@@ -568,7 +581,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
  		*/
- 		if (desc != host->adma_table) {
--			desc -= 8;
-+			desc -= host->desc_sz;
- 			sdhci_adma_mark_end(desc);
- 		}
- 	} else {
-@@ -587,14 +580,14 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 	 */
- 	if (data->flags & MMC_DATA_WRITE) {
- 		dma_sync_single_for_device(mmc_dev(host->mmc),
--			host->align_addr, 128 * 4, direction);
-+			host->align_addr, host->align_buffer_sz, direction);
+ 
+ 		/* nop, end, valid */
+-		sdhci_adma_write_desc(desc, 0, 0, ADMA2_NOP_END_VALID);
++		sdhci_adma_write_desc(host, desc, 0, 0, ADMA2_NOP_END_VALID);
  	}
  
- 	return 0;
- 
- unmap_align:
- 	dma_unmap_single(mmc_dev(host->mmc), host->align_addr,
--		128 * 4, direction);
-+		host->align_buffer_sz, direction);
- fail:
- 	return -EINVAL;
- }
-@@ -617,12 +610,12 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
- 		direction = DMA_TO_DEVICE;
- 
- 	dma_unmap_single(mmc_dev(host->mmc), host->align_addr,
--		128 * 4, direction);
-+		host->align_buffer_sz, direction);
- 
- 	/* Do a quick scan of the SG list for any unaligned mappings */
- 	has_unaligned = false;
- 	for_each_sg(data->sg, sg, host->sg_count, i)
--		if (sg_dma_address(sg) & 3) {
-+		if (sg_dma_address(sg) & host->align_mask) {
- 			has_unaligned = true;
- 			break;
- 		}
-@@ -634,8 +627,9 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
- 		align = host->align_buffer;
- 
- 		for_each_sg(data->sg, sg, host->sg_count, i) {
--			if (sg_dma_address(sg) & 0x3) {
--				size = 4 - (sg_dma_address(sg) & 0x3);
-+			if (sg_dma_address(sg) & host->align_mask) {
-+				size = host->align_sz -
-+				       (sg_dma_address(sg) & host->align_mask);
- 
- 				buffer = sdhci_kmap_atomic(sg, &flags);
- 				WARN_ON(((long)buffer & (PAGE_SIZE - 1)) >
-@@ -643,7 +637,7 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
- 				memcpy(buffer, align, size);
- 				sdhci_kunmap_atomic(buffer, &flags);
- 
--				align += 4;
-+				align += host->align_sz;
+ 	/*
+@@ -827,6 +840,10 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 			} else {
+ 				sdhci_writel(host, host->adma_addr,
+ 					SDHCI_ADMA_ADDRESS);
++				if (host->flags & SDHCI_USE_64_BIT_DMA)
++					sdhci_writel(host,
++						     (u64)host->adma_addr >> 32,
++						     SDHCI_ADMA_ADDRESS_HI);
  			}
+ 		} else {
+ 			int sg_cnt;
+@@ -860,10 +877,14 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+ 		ctrl &= ~SDHCI_CTRL_DMA_MASK;
+ 		if ((host->flags & SDHCI_REQ_USE_DMA) &&
+-			(host->flags & SDHCI_USE_ADMA))
+-			ctrl |= SDHCI_CTRL_ADMA32;
+-		else
++			(host->flags & SDHCI_USE_ADMA)) {
++			if (host->flags & SDHCI_USE_64_BIT_DMA)
++				ctrl |= SDHCI_CTRL_ADMA64;
++			else
++				ctrl |= SDHCI_CTRL_ADMA32;
++		} else {
+ 			ctrl |= SDHCI_CTRL_SDMA;
++		}
+ 		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+ 	}
+ 
+@@ -2295,12 +2316,19 @@ static void sdhci_adma_show_error(struct sdhci_host *host)
+ 	sdhci_dumpregs(host);
+ 
+ 	while (true) {
+-		struct sdhci_adma2_32_desc *dma_desc = desc;
+-
+-		DBG("%s: %p: DMA 0x%08x, LEN 0x%04x, Attr=0x%02x\n",
+-		    name, desc, le32_to_cpu(dma_desc->addr),
+-		    le16_to_cpu(dma_desc->len),
+-		    le16_to_cpu(dma_desc->cmd));
++		struct sdhci_adma2_64_desc *dma_desc = desc;
++
++		if (host->flags & SDHCI_USE_64_BIT_DMA)
++			DBG("%s: %p: DMA 0x%08x%08x, LEN 0x%04x, Attr=0x%02x\n",
++			    name, desc, le32_to_cpu(dma_desc->addr_hi),
++			    le32_to_cpu(dma_desc->addr_lo),
++			    le16_to_cpu(dma_desc->len),
++			    le16_to_cpu(dma_desc->cmd));
++		else
++			DBG("%s: %p: DMA 0x%08x, LEN 0x%04x, Attr=0x%02x\n",
++			    name, desc, le32_to_cpu(dma_desc->addr_lo),
++			    le16_to_cpu(dma_desc->len),
++			    le16_to_cpu(dma_desc->cmd));
+ 
+ 		desc += host->desc_sz;
+ 
+@@ -2851,6 +2879,16 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		host->flags &= ~SDHCI_USE_ADMA;
+ 	}
+ 
++	/*
++	 * It is assumed that a 64-bit capable device has set a 64-bit DMA mask
++	 * and *must* do 64-bit DMA.  A driver has the opportunity to change
++	 * that during the first call to ->enable_dma().  Similarly
++	 * SDHCI_QUIRK2_BROKEN_64_BIT_DMA must be left to the drivers to
++	 * implement.
++	 */
++	if (sdhci_readl(host, SDHCI_CAPABILITIES) & SDHCI_CAN_64BIT)
++		host->flags |= SDHCI_USE_64_BIT_DMA;
++
+ 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+ 		if (host->ops->enable_dma) {
+ 			if (host->ops->enable_dma(host)) {
+@@ -2862,6 +2900,10 @@ int sdhci_add_host(struct sdhci_host *host)
  		}
  	}
-@@ -2315,7 +2309,7 @@ static void sdhci_adma_show_error(struct sdhci_host *host)
- 		DBG("%s: %p: DMA 0x%08x, LEN 0x%04x, Attr=0x%02x\n",
- 		    name, desc, le32_to_cpu(*dma), le16_to_cpu(*len), attr);
  
--		desc += 8;
-+		desc += host->desc_sz;
- 
- 		if (attr & 2)
- 			break;
-@@ -2877,17 +2871,23 @@ int sdhci_add_host(struct sdhci_host *host)
- 
++	/* SDMA does not support 64-bit DMA */
++	if (host->flags & SDHCI_USE_64_BIT_DMA)
++		host->flags &= ~SDHCI_USE_SDMA;
++
  	if (host->flags & SDHCI_USE_ADMA) {
  		/*
--		 * We need to allocate descriptors for all sg entries
--		 * (128) and potentially one alignment transfer for
--		 * each of those entries.
-+		 * The DMA descriptor table size is calculated as the maximum
-+		 * number of segments times 2, to allow for an alignment
-+		 * descriptor for each segment, plus 1 for a nop end descriptor,
-+		 * all multipled by the descriptor size.
+ 		 * The DMA descriptor table size is calculated as the maximum
+@@ -2869,13 +2911,23 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		 * descriptor for each segment, plus 1 for a nop end descriptor,
+ 		 * all multipled by the descriptor size.
  		 */
-+		host->adma_table_sz = (128 * 2 + 1) * 8;
-+		host->align_buffer_sz = 128 * 4;
-+		host->desc_sz = 8;
-+		host->align_sz = 4;
-+		host->align_mask = 3;
+-		host->adma_table_sz = (SDHCI_MAX_SEGS * 2 + 1) *
+-				      SDHCI_ADMA2_32_DESC_SZ;
+-		host->align_buffer_sz = SDHCI_MAX_SEGS *
+-					SDHCI_ADMA2_32_ALIGN;
+-		host->desc_sz = SDHCI_ADMA2_32_DESC_SZ;
+-		host->align_sz = SDHCI_ADMA2_32_ALIGN;
+-		host->align_mask = SDHCI_ADMA2_32_ALIGN - 1;
++		if (host->flags & SDHCI_USE_64_BIT_DMA) {
++			host->adma_table_sz = (SDHCI_MAX_SEGS * 2 + 1) *
++					      SDHCI_ADMA2_64_DESC_SZ;
++			host->align_buffer_sz = SDHCI_MAX_SEGS *
++						SDHCI_ADMA2_64_ALIGN;
++			host->desc_sz = SDHCI_ADMA2_64_DESC_SZ;
++			host->align_sz = SDHCI_ADMA2_64_ALIGN;
++			host->align_mask = SDHCI_ADMA2_64_ALIGN - 1;
++		} else {
++			host->adma_table_sz = (SDHCI_MAX_SEGS * 2 + 1) *
++					      SDHCI_ADMA2_32_DESC_SZ;
++			host->align_buffer_sz = SDHCI_MAX_SEGS *
++						SDHCI_ADMA2_32_ALIGN;
++			host->desc_sz = SDHCI_ADMA2_32_DESC_SZ;
++			host->align_sz = SDHCI_ADMA2_32_ALIGN;
++			host->align_mask = SDHCI_ADMA2_32_ALIGN - 1;
++		}
  		host->adma_table = dma_alloc_coherent(mmc_dev(mmc),
--						      ADMA_SIZE,
-+						      host->adma_table_sz,
+ 						      host->adma_table_sz,
  						      &host->adma_addr,
- 						      GFP_KERNEL);
--		host->align_buffer = kmalloc(128 * 4, GFP_KERNEL);
-+		host->align_buffer = kmalloc(host->align_buffer_sz, GFP_KERNEL);
- 		if (!host->adma_table || !host->align_buffer) {
--			dma_free_coherent(mmc_dev(mmc), ADMA_SIZE,
-+			dma_free_coherent(mmc_dev(mmc), host->adma_table_sz,
- 					  host->adma_table, host->adma_addr);
- 			kfree(host->align_buffer);
- 			pr_warn("%s: Unable to allocate ADMA buffers - falling back to standard DMA\n",
-@@ -2895,11 +2895,11 @@ int sdhci_add_host(struct sdhci_host *host)
- 			host->flags &= ~SDHCI_USE_ADMA;
- 			host->adma_table = NULL;
- 			host->align_buffer = NULL;
--		} else if (host->adma_addr & 3) {
-+		} else if (host->adma_addr & host->align_mask) {
- 			pr_warn("%s: unable to allocate aligned ADMA descriptor\n",
- 				mmc_hostname(mmc));
- 			host->flags &= ~SDHCI_USE_ADMA;
--			dma_free_coherent(mmc_dev(mmc), ADMA_SIZE,
-+			dma_free_coherent(mmc_dev(mmc), host->adma_table_sz,
- 					  host->adma_table, host->adma_addr);
- 			kfree(host->align_buffer);
- 			host->adma_table = NULL;
-@@ -3362,7 +3362,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 		regulator_disable(mmc->supply.vqmmc);
+@@ -3288,7 +3340,8 @@ int sdhci_add_host(struct sdhci_host *host)
  
- 	if (host->adma_table)
--		dma_free_coherent(mmc_dev(mmc), ADMA_SIZE,
-+		dma_free_coherent(mmc_dev(mmc), host->adma_table_sz,
- 				  host->adma_table, host->adma_addr);
- 	kfree(host->align_buffer);
+ 	pr_info("%s: SDHCI controller on %s [%s] using %s\n",
+ 		mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)),
+-		(host->flags & SDHCI_USE_ADMA) ? "ADMA" :
++		(host->flags & SDHCI_USE_ADMA) ?
++		(host->flags & SDHCI_USE_64_BIT_DMA) ? "ADMA 64-bit" : "ADMA" :
+ 		(host->flags & SDHCI_USE_SDMA) ? "DMA" : "PIO");
  
+ 	sdhci_enable_card_detection(host);
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 14c8b67..c2ec7fc 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -227,6 +227,7 @@
+ /* 55-57 reserved */
+ 
+ #define SDHCI_ADMA_ADDRESS	0x58
++#define SDHCI_ADMA_ADDRESS_HI	0x5C
+ 
+ /* 60-FB reserved */
+ 
+@@ -279,6 +280,23 @@ struct sdhci_adma2_32_desc {
+ 	__le32	addr;
+ }  __packed __aligned(SDHCI_ADMA2_32_ALIGN);
+ 
++/* ADMA2 64-bit DMA descriptor size */
++#define SDHCI_ADMA2_64_DESC_SZ	12
++
++/* ADMA2 64-bit DMA alignment */
++#define SDHCI_ADMA2_64_ALIGN	8
++
++/*
++ * ADMA2 64-bit descriptor. Note 12-byte descriptor can't always be 8-byte
++ * aligned.
++ */
++struct sdhci_adma2_64_desc {
++	__le16	cmd;
++	__le16	len;
++	__le32	addr_lo;
++	__le32	addr_hi;
++}  __packed __aligned(4);
++
+ #define ADMA2_TRAN_VALID	0x21
+ #define ADMA2_NOP_END_VALID	0x3
+ #define ADMA2_END		0x2
 diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 933dbbb..2a72e95 100644
+index 2a72e95..931ac5e 100644
 --- a/include/linux/mmc/sdhci.h
 +++ b/include/linux/mmc/sdhci.h
-@@ -158,9 +158,16 @@ struct sdhci_host {
- 	void *adma_table;	/* ADMA descriptor table */
- 	void *align_buffer;	/* Bounce buffer */
+@@ -100,6 +100,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
+ /* Stop command (CMD12) can set Transfer Complete when not using MMC_RSP_BUSY */
+ #define SDHCI_QUIRK2_STOP_WITH_TC			(1<<8)
++/* Controller does not support 64-bit DMA */
++#define SDHCI_QUIRK2_BROKEN_64_BIT_DMA			(1<<9)
  
-+	size_t adma_table_sz;	/* ADMA descriptor table size */
-+	size_t align_buffer_sz;	/* Bounce buffer size */
-+
- 	dma_addr_t adma_addr;	/* Mapped ADMA descr. table */
- 	dma_addr_t align_addr;	/* Mapped bounce buffer */
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
+@@ -130,6 +132,7 @@ struct sdhci_host {
+ #define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
+ #define SDHCI_SDR104_NEEDS_TUNING (1<<10)	/* SDR104/HS200 needs tuning */
+ #define SDHCI_USING_RETUNING_TIMER (1<<11)	/* Host is using a retuning timer for the card */
++#define SDHCI_USE_64_BIT_DMA	(1<<12)	/* Use 64-bit DMA */
  
-+	unsigned int desc_sz;	/* ADMA descriptor size */
-+	unsigned int align_sz;	/* ADMA alignment */
-+	unsigned int align_mask;	/* ADMA alignment mask */
-+
- 	struct tasklet_struct finish_tasklet;	/* Tasklet structures */
+ 	unsigned int version;	/* SDHCI spec. version */
  
- 	struct timer_list timer;	/* Timer for timeouts */
 -- 
 1.9.1
 
