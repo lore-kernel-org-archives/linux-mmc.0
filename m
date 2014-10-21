@@ -1,153 +1,96 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 08/15] mmc: core: Let's callers of from mmc_get_ext_csd() do error handling
-Date: Tue, 21 Oct 2014 19:19:06 +0200
-Message-ID: <1413911953-19012-9-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 06/15] mmc: core: Add helper function for EXT_CSD support
+Date: Tue, 21 Oct 2014 19:19:04 +0200
+Message-ID: <1413911953-19012-7-git-send-email-ulf.hansson@linaro.org>
 References: <1413911953-19012-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f52.google.com ([209.85.215.52]:60229 "EHLO
-	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933135AbaJURTe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Oct 2014 13:19:34 -0400
-Received: by mail-la0-f52.google.com with SMTP id hz20so1482135lab.11
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Oct 2014 10:19:33 -0700 (PDT)
+Received: from mail-lb0-f180.google.com ([209.85.217.180]:48714 "EHLO
+	mail-lb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933122AbaJURTc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Oct 2014 13:19:32 -0400
+Received: by mail-lb0-f180.google.com with SMTP id n15so1407816lbi.11
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Oct 2014 10:19:31 -0700 (PDT)
 In-Reply-To: <1413911953-19012-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 
-The callers of mmc_get_ext_csd() need the flexibility to handle errors
-themselves, because they behave differently.
-
-Let's clean up mmc_get_ext_csd() with its friends and adopt the error
-handling as stated above.
+The helper function mmc_can_ext_csd() will return a positive value if
+the card supports the EXT_CSD register. Start using it at relavant
+places in the mmc core.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/mmc.c | 70 ++++++++++++++++++++++----------------------------
- 1 file changed, 31 insertions(+), 39 deletions(-)
+ drivers/mmc/core/mmc.c     | 8 ++++----
+ drivers/mmc/core/mmc_ops.c | 5 +++++
+ drivers/mmc/core/mmc_ops.h | 1 +
+ 3 files changed, 10 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index f10f932..755019d 100644
+index 1ed3d82..24dc30f 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -188,10 +188,8 @@ static int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd)
- 	BUG_ON(!card);
- 	BUG_ON(!new_ext_csd);
+@@ -190,7 +190,7 @@ static int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd)
  
--	*new_ext_csd = NULL;
--
- 	if (!mmc_can_ext_csd(card))
--		return 0;
-+		return -EOPNOTSUPP;
+ 	*new_ext_csd = NULL;
  
- 	/*
- 	 * As the ext_csd is so large and mostly unused, we don't store the
-@@ -202,32 +200,9 @@ static int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd)
- 		return -ENOMEM;
- 
- 	err = mmc_send_ext_csd(card, ext_csd);
--	if (err) {
-+	if (err)
- 		kfree(ext_csd);
--		*new_ext_csd = NULL;
--
--		/* If the host or the card can't do the switch,
--		 * fail more gracefully. */
--		if ((err != -EINVAL)
--		 && (err != -ENOSYS)
--		 && (err != -EFAULT))
--			return err;
--
--		/*
--		 * High capacity cards should have this "magic" size
--		 * stored in their CSD.
--		 */
--		if (card->csd.capacity == (4096 * 512)) {
--			pr_err("%s: unable to read EXT_CSD "
--				"on a possible high capacity card. "
--				"Card will be ignored.\n",
--				mmc_hostname(card->host));
--		} else {
--			pr_warn("%s: unable to read EXT_CSD, performance might suffer\n",
--				mmc_hostname(card->host));
--			err = 0;
--		}
--	} else
-+	else
- 		*new_ext_csd = ext_csd;
- 
- 	return err;
-@@ -395,9 +370,6 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 
- 	BUG_ON(!card);
- 
--	if (!ext_csd)
--		return 0;
--
- 	/* Version is coded in the CSD_STRUCTURE byte in the EXT_CSD register */
- 	card->ext_csd.raw_ext_csd_structure = ext_csd[EXT_CSD_STRUCTURE];
- 	if (card->csd.structure == 3) {
-@@ -631,12 +603,36 @@ out:
- 
- static int mmc_read_ext_csd(struct mmc_card *card)
- {
--	u8 *ext_csd = NULL;
-+	u8 *ext_csd;
- 	int err;
- 
+-	if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
 +	if (!mmc_can_ext_csd(card))
-+		return 0;
-+
- 	err = mmc_get_ext_csd(card, &ext_csd);
--	if (err)
-+	if (err) {
-+		/* If the host or the card can't do the switch,
-+		 * fail more gracefully. */
-+		if ((err != -EINVAL)
-+		 && (err != -ENOSYS)
-+		 && (err != -EFAULT))
-+			return err;
-+
-+		/*
-+		 * High capacity cards should have this "magic" size
-+		 * stored in their CSD.
-+		 */
-+		if (card->csd.capacity == (4096 * 512)) {
-+			pr_err("%s: unable to read EXT_CSD on a possible high capacity card. Card will be ignored.\n",
-+				mmc_hostname(card->host));
-+		} else {
-+			pr_warn("%s: unable to read EXT_CSD, performance might suffer\n",
-+				mmc_hostname(card->host));
-+			err = 0;
-+		}
-+
- 		return err;
-+	}
- 
- 	err = mmc_decode_ext_csd(card, ext_csd);
- 	kfree(ext_csd);
-@@ -652,11 +648,8 @@ static int mmc_compare_ext_csds(struct mmc_card *card, unsigned bus_width)
  		return 0;
  
- 	err = mmc_get_ext_csd(card, &bw_ext_csd);
--
--	if (err || bw_ext_csd == NULL) {
--		err = -EINVAL;
--		goto out;
--	}
-+	if (err)
-+		return err;
+ 	/*
+@@ -827,7 +827,7 @@ static int mmc_select_powerclass(struct mmc_card *card)
+ 	int err, ddr;
  
- 	/* only compare read only fields */
- 	err = !((card->ext_csd.raw_partition_support ==
-@@ -715,7 +708,6 @@ static int mmc_compare_ext_csds(struct mmc_card *card, unsigned bus_width)
- 	if (err)
- 		err = -EINVAL;
+ 	/* Power class selection is supported for versions >= 4.0 */
+-	if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
++	if (!mmc_can_ext_csd(card))
+ 		return 0;
  
--out:
- 	kfree(bw_ext_csd);
- 	return err;
+ 	bus_width = host->ios.bus_width;
+@@ -888,7 +888,7 @@ static int mmc_select_bus_width(struct mmc_card *card)
+ 	unsigned idx, bus_width = 0;
+ 	int err = 0;
+ 
+-	if ((card->csd.mmca_vsn < CSD_SPEC_VER_4) &&
++	if (!mmc_can_ext_csd(card) &&
+ 	    !(host->caps & (MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA)))
+ 		return 0;
+ 
+@@ -1129,7 +1129,7 @@ static int mmc_select_timing(struct mmc_card *card)
+ {
+ 	int err = 0;
+ 
+-	if (card->csd.mmca_vsn < CSD_SPEC_VER_4)
++	if (!mmc_can_ext_csd(card))
+ 		goto bus_speed;
+ 
+ 	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 7911e05..1db60be4 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -675,3 +675,8 @@ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
+ 
+ 	return 0;
  }
++
++int mmc_can_ext_csd(struct mmc_card *card)
++{
++	return (card && card->csd.mmca_vsn > CSD_SPEC_VER_3);
++}
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index f752ec6..6f4b00e 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -26,6 +26,7 @@ int mmc_spi_read_ocr(struct mmc_host *host, int highcap, u32 *ocrp);
+ int mmc_spi_set_crc(struct mmc_host *host, int use_crc);
+ int mmc_bus_test(struct mmc_card *card, u8 bus_width);
+ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status);
++int mmc_can_ext_csd(struct mmc_card *card);
+ 
+ #endif
+ 
 -- 
 1.9.1
 
