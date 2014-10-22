@@ -1,72 +1,108 @@
-From: Chanho Min <chanho.min@lge.com>
-Subject: [PATCH] mmc:core: fix hs400 timing selection
-Date: Wed, 22 Oct 2014 11:55:55 +0900
-Message-ID: <1413946555-1266-1-git-send-email-chanho.min@lge.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, HyoJun Im <hyojun.im@lge.com>, gunho.lee@lge.com, Hankyung Yu <hankyung.yu@lge.com>, Chanho Min <chanho.min@lge.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Remove old card detect infrastructure
+Date: Wed, 22 Oct 2014 09:36:58 -0700
+Message-ID: <CAD=FV=UhdHHYqaF=Nprr2Lz2b4w7guuBquBdBrB82BmYhGC0=Q@mail.gmail.com>
+References: <1413304389-6580-1-git-send-email-dianders@chromium.org>
+	<CAGOxZ507j5QjnT_hW2y0KPZsw6WDJWRPLdesTBm4+C8D2EznWw@mail.gmail.com>
+	<CAD=FV=X+q2ymbB0EZkjj_tip9_PLdFV+Tfee+MkeUDSfD3E-ig@mail.gmail.com>
+	<CAGOxZ51x8cd9XmNg49aaUdZQkw-hhEA-mC=34ZSjLf0XF8Zbvw@mail.gmail.com>
+	<54448023.1050008@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f52.google.com ([209.85.218.52]:54721 "EHLO
+	mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752610AbaJVQg7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Oct 2014 12:36:59 -0400
+Received: by mail-oi0-f52.google.com with SMTP id a3so3001608oib.39
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Oct 2014 09:36:58 -0700 (PDT)
+In-Reply-To: <54448023.1050008@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Alim Akhtar <alim.akhtar@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Addy Ke <addy.ke@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Andrew Bresticker <abrestic@chromium.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>
 
-According to JEDEC v5.01 spec (6.6.5), In order to switch to HS400 mode,
-host should perform the following steps.
+Hi,
 
- 1. HS200 mode selection completed
- 2. Set HS_TIMING to 0x01(High Speed)
- 3. Host changes frequency to =< 52MHz
- 4. Set the bus width to DDR 8bit (CMD6)
- 5. Host may read Driver Strength (CMD8)
- 6. Set HS_TIMING to 0x03 (HS400)
+On Sun, Oct 19, 2014 at 8:23 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi.
+>
+> On 10/17/2014 09:44 PM, Alim Akhtar wrote:
+>> Hi Doug,
+>>
+>> On Thu, Oct 16, 2014 at 9:40 PM, Doug Anderson <dianders@chromium.org> wrote:
+>>> Alim,
+>>>
+>>> On Thu, Oct 16, 2014 at 5:57 AM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+>>>> Hi Doug,
+>>>>
+>>>> On Tue, Oct 14, 2014 at 10:03 PM, Doug Anderson <dianders@chromium.org> wrote:
+>>>>> The dw_mmc driver had a bunch of code that ran whenever a card was
+>>>>> ejected and inserted.  However, this code was old and crufty and
+>>>>> should be removed.  Some evidence that it's really not needed:
+>>>>>
+>>>>> 1. Is is supposed to be legal to use 'cd-gpio' on dw_mmc instead of
+>>>>>    using the built-in card detect mechanism.  The 'cd-gpio' code
+>>>>>    doesn't run any of the crufty old code but yet still works.
+>>>>>
+>>>>> 2. While looking at this, I realized that my old change (369ac86 mmc:
+>>>>>    dw_mmc: don't queue up a card detect at slot startup) actually
+>>>>>    castrated the old code a little bit already and nobody noticed.
+>>>>>    Specifically "last_detect_state" was left as 0 at bootup.  That
+>>>>>    means that on the first card removal none of the crufty code ran.
+>>>>>
+>>>> Yes, right most of these codes are _almost_ never call. But I see
+>>>> dw_mci_reset() being called on card removal (after first
+>>>> insert/removal).
+>>>
+>>> Right.  The old crufty code was called on the 2nd removal, not the
+>>> 1st.  That meant that the two were accidentally different.  My point
+>>> was that if the old code was really required that someone would have
+>>> noticed crashes on the 1st removal after each boot.  Since nobody is
+>>> reporting crashes with that then it means it can't be too terrible.
+>>>
+>>> One thing to note: I remember in the last Chromebook project you were
+>>> trying to track down crashes associated with constant eject / insert
+>>> of SD Cards.  I wonder if my patch will fix these crashes?
+>>>
+>> Ah, yes, reproducing that and checking with this patch will be really
+>> interesting.
+>>
+>>>
+>>>> I tested this on exynos5800 and this looks working fine. We need to
+>>>> test once cross suspend/resume as well.
+>>>
+>>> Good idea.  Can you test that?  I know that there's been lots of flux
+>>> with suspend/resume on exynos and I'm not sure I have all the latest
+>>> patches, but I'll search for them if you are unable to test easily.
+>>>
+>> Sure, I will do that..but probably sometime next week, as I will out
+>> of office for few days.
+>>>
+>>>> And as Jaehoon pointed out,probably lets look in TRM if there are some
+>>>> recommended  steps for cd-detect.
+>>>> Otherwise this looks good to me.
+>>>
+>>> If you see some other requirement than the one I addressed in my email
+>>> to Jaehoon, please let me know.
+>
+> I know there is no other requirement for detecting card.
+> So this patch can be applied after testing the above case(suspend/resume).
 
-In current implementation, the order of 2 and 3 is reversed.
-The HS_TIMING field should be set to 0x1 before the clock frequency
-is set to a value not greater than 52 MHz. Otherwise, Initialization of
-timing can be failed. Also, the host contoller's UHS timing mode should
-be set to DDR50 after the bus width is set to DDR 8bit.
+I put a kernel based upon 3.17 on an exynos5250-snow (specifically
+git://git.collabora.co.uk/git/user/javier/linux.git branch
+max77802-op-modes-v3, git hash 98cf5a0).  Snow uses the builtin card
+detect on dw_mmc.  Resume wasn't terribly reliable to start with even
+without my patch (it often woke up right after suspend), but it worked
+well enough for testing.  I tested the following scenarios:
 
-Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
-Signed-off-by: Chanho Min <chanho.min@lge.com>
----
- drivers/mmc/core/mmc.c |   13 ++++++++++---
- 1 file changed, 10 insertions(+), 3 deletions(-)
+1. Leave card in and mounted.  Suspend/resume.  Card is still usable
+after resume
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index a301a78..52f78e0 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1061,9 +1061,6 @@ static int mmc_select_hs400(struct mmc_card *card)
- 	 * Before switching to dual data rate operation for HS400,
- 	 * it is required to convert from HS200 mode to HS mode.
- 	 */
--	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
--	mmc_set_bus_speed(card);
--
- 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
- 			   card->ext_csd.generic_cmd6_time,
-@@ -1074,6 +1071,14 @@ static int mmc_select_hs400(struct mmc_card *card)
- 		return err;
- 	}
- 
-+	/*
-+	 * According to JEDEC v5.01 spec (6.6.5), Clock frequency should
-+	 * be set to a value not greater than 52MHz after the HS_TIMING
-+	 * field is set to 0x1.
-+	 */
-+	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
-+	mmc_set_bus_speed(card);
-+
- 	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 			 EXT_CSD_BUS_WIDTH,
- 			 EXT_CSD_DDR_BUS_WIDTH_8,
-@@ -1084,6 +1089,8 @@ static int mmc_select_hs400(struct mmc_card *card)
- 		return err;
- 	}
- 
-+	mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
-+
- 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS400,
- 			   card->ext_csd.generic_cmd6_time,
--- 
-1.7.9.5
+2. Suspend and insert card.  Resume.  Card is detected upon resume.
+
+3. Suspend and remove card.  Resume.  Card is removed upon resume.
+
+How does that sound?
+
+-Doug
