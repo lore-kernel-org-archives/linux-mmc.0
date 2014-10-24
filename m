@@ -1,81 +1,46 @@
-From: Timo Kokkonen <timo.kokkonen@offcode.fi>
-Subject: [PATCH] mmc: host: atmel-mci: Add support for non-removable slots
-Date: Fri, 24 Oct 2014 13:50:03 +0300
-Message-ID: <1414147803-29202-1-git-send-email-timo.kokkonen@offcode.fi>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: Timo Kokkonen <timo.kokkonen@offcode.fi>
+From: Johan Rudholm <johan.rudholm@axis.com>
+Subject: [PATCH 1/4] mmc: core: use mmc_send_status to check hw_reset
+Date: Fri, 24 Oct 2014 14:46:27 +0200
+Message-ID: <1414154790-20893-2-git-send-email-johanru@axis.com>
+References: <1414154790-20893-1-git-send-email-johanru@axis.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bastet.se.axis.com ([195.60.68.11]:48645 "EHLO
+	bastet.se.axis.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756505AbaJXMrI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Oct 2014 08:47:08 -0400
+In-Reply-To: <1414154790-20893-1-git-send-email-johanru@axis.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>, Johan Rudholm <johanru@axis.com>
 
-Add support for non-removable slots which have no card detection GPIO
-and which should not be polled for a card change.
-
-Signed-off-by: Timo Kokkonen <timo.kokkonen@offcode.fi>
+Signed-off-by: Johan Rudholm <johanru@axis.com>
 ---
- drivers/mmc/host/atmel-mci.c | 11 +++++++++--
- include/linux/atmel-mci.h    |  2 ++
- 2 files changed, 11 insertions(+), 2 deletions(-)
+ drivers/mmc/core/core.c |   10 ++--------
+ 1 files changed, 2 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 77250d4..4de1a31 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -560,6 +560,9 @@ atmci_of_init(struct platform_device *pdev)
- 		pdata->slot[slot_id].detect_is_active_high =
- 			of_property_read_bool(cnp, "cd-inverted");
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 7dc0c85..5d215ee 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2265,15 +2265,9 @@ static int mmc_do_hw_reset(struct mmc_host *host, int check)
  
-+		pdata->slot[slot_id].non_removable =
-+			of_property_read_bool(cnp, "non-removable");
-+
- 		pdata->slot[slot_id].wp_pin =
- 			of_get_named_gpio(cnp, "wp-gpios", 0);
- 	}
-@@ -2206,8 +2209,12 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+ 	/* If the reset has happened, then a status command will fail */
+ 	if (check) {
+-		struct mmc_command cmd = {0};
+-		int err;
++		u32 status;
+ 
+-		cmd.opcode = MMC_SEND_STATUS;
+-		if (!mmc_host_is_spi(card->host))
+-			cmd.arg = card->rca << 16;
+-		cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
+-		err = mmc_wait_for_cmd(card->host, &cmd, 0);
+-		if (!err) {
++		if (!mmc_send_status(card, &status)) {
+ 			mmc_host_clk_release(host);
+ 			return -ENOSYS;
  		}
- 	}
- 
--	if (!gpio_is_valid(slot->detect_pin))
--		mmc->caps |= MMC_CAP_NEEDS_POLL;
-+	if (!gpio_is_valid(slot->detect_pin)) {
-+		if (slot_data->non_removable)
-+			mmc->caps |= MMC_CAP_NONREMOVABLE;
-+		else
-+			mmc->caps |= MMC_CAP_NEEDS_POLL;
-+	}
- 
- 	if (gpio_is_valid(slot->wp_pin)) {
- 		if (devm_gpio_request(&host->pdev->dev, slot->wp_pin,
-diff --git a/include/linux/atmel-mci.h b/include/linux/atmel-mci.h
-index 91b77f8..9177947 100644
---- a/include/linux/atmel-mci.h
-+++ b/include/linux/atmel-mci.h
-@@ -11,6 +11,7 @@
-  * @detect_pin: GPIO pin wired to the card detect switch
-  * @wp_pin: GPIO pin wired to the write protect sensor
-  * @detect_is_active_high: The state of the detect pin when it is active
-+ * @non_removable: The slot is not removable, only detect once
-  *
-  * If a given slot is not present on the board, @bus_width should be
-  * set to 0. The other fields are ignored in this case.
-@@ -26,6 +27,7 @@ struct mci_slot_pdata {
- 	int			detect_pin;
- 	int			wp_pin;
- 	bool			detect_is_active_high;
-+	bool			non_removable;
- };
- 
- /**
 -- 
-1.9.1
+1.7.2.5
+
