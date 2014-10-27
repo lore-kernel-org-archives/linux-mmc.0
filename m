@@ -1,141 +1,86 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: core: Report firmware version for eMMC 5.0 devices.
-Date: Mon, 27 Oct 2014 15:25:25 +0100
-Message-ID: <CAPDyKFowa254rgt-36vWOnM_e-XTWN9iZhAwDQYYCAkbFkZ-tQ@mail.gmail.com>
-References: <1413484036-21476-1-git-send-email-gwendal@chromium.org>
+Subject: Re: [PATCHv2 1/3] mmc: atmel-mci: move mache header to platform_data
+Date: Mon, 27 Oct 2014 15:46:17 +0100
+Message-ID: <CAPDyKFobcRL7_+ZiEkWFGXxq5Hznf5fZcpqUP+Z6VxW67mWBEw@mail.gmail.com>
+References: <1413534398-22645-1-git-send-email-alexandre.belloni@free-electrons.com>
+	<1413534398-22645-2-git-send-email-alexandre.belloni@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f42.google.com ([209.85.216.42]:46488 "EHLO
-	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753029AbaJ0OZ0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Oct 2014 10:25:26 -0400
-Received: by mail-qa0-f42.google.com with SMTP id cs9so3908193qab.29
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Oct 2014 07:25:26 -0700 (PDT)
-In-Reply-To: <1413484036-21476-1-git-send-email-gwendal@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1413534398-22645-2-git-send-email-alexandre.belloni@free-electrons.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, Chris Ball <chris@printf.net>, Hans-Christian Egtvedt <egtvedt@samfundet.no>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Haavard Skinnemoen <hskinnemoen@gmail.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Gwendal Grignou <gwendal@chromium.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 16 October 2014 20:27, Gwendal Grignou <gwendal@chromium.org> wrote:
-> For eMMC 5.0 compliant device, firmware version is stored in ext_csd.
-> Report firmware as a 64bit hexa decimal. Vendor can use hexa or ascii
-> string to report firmware version.
-> Also add FFU related EXT_CSD register and note if the device is FFU capable.
+On 17 October 2014 10:26, Alexandre Belloni
+<alexandre.belloni@free-electrons.com> wrote:
+> Move the mach header that can come either from arm/mach-at91 or avr32 to
+> platform_data to be able to switch the AT91 platforms to multiplatform.
 >
-> Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
+> Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
 
-Thanks! Applied for next.
-
-I did a minor change, see below.
+Thanks! Applied for next!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/mmc.c   | 27 ++++++++++++++++++++++++++-
->  include/linux/mmc/card.h |  3 +++
->  include/linux/mmc/mmc.h  |  3 +++
->  3 files changed, 32 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/atmel-mci.c                |  2 +-
+>  include/linux/platform_data/mmc-atmel-mci.h | 22 ++++++++++++++++++++++
+>  2 files changed, 23 insertions(+), 1 deletion(-)
+>  create mode 100644 include/linux/platform_data/mmc-atmel-mci.h
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 1eda8dd..9a7663a 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -603,6 +603,14 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
->                 card->ext_csd.data_sector_size = 512;
->         }
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index bb585d940901..b1231835b031 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -29,11 +29,11 @@
+>  #include <linux/stat.h>
+>  #include <linux/types.h>
+>  #include <linux/platform_data/atmel.h>
+> +#include <linux/platform_data/mmc-atmel-mci.h>
 >
-> +       /* eMMC v5 or later */
-> +       if (card->ext_csd.rev >= 7) {
-> +               memcpy(card->ext_csd.fwrev, &ext_csd[EXT_CSD_FIRMWARE_VERSION],
-> +                      MMC_FIRMWARE_LEN);
-> +               card->ext_csd.ffu_capable =
-> +                       (ext_csd[EXT_CSD_SUPPORTED_MODE] & 1) &&
-> +                       !(ext_csd[EXT_CSD_FW_CONFIG] & 1);
-
-/s /1 /0x1
-
-> +       }
->  out:
->         return err;
->  }
-> @@ -697,7 +705,7 @@ MMC_DEV_ATTR(csd, "%08x%08x%08x%08x\n", card->raw_csd[0], card->raw_csd[1],
->  MMC_DEV_ATTR(date, "%02d/%04d\n", card->cid.month, card->cid.year);
->  MMC_DEV_ATTR(erase_size, "%u\n", card->erase_size << 9);
->  MMC_DEV_ATTR(preferred_erase_size, "%u\n", card->pref_erase << 9);
-> -MMC_DEV_ATTR(fwrev, "0x%x\n", card->cid.fwrev);
-> +MMC_DEV_ATTR(ffu_capable, "%d\n", card->ext_csd.ffu_capable);
->  MMC_DEV_ATTR(hwrev, "0x%x\n", card->cid.hwrev);
->  MMC_DEV_ATTR(manfid, "0x%06x\n", card->cid.manfid);
->  MMC_DEV_ATTR(name, "%s\n", card->cid.prod_name);
-> @@ -710,6 +718,22 @@ MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
->  MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
->  MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/sdio.h>
 >
-> +static ssize_t mmc_fwrev_show(struct device *dev,
-> +                             struct device_attribute *attr,
-> +                             char *buf)
-> +{
-> +       struct mmc_card *card = mmc_dev_to_card(dev);
+> -#include <mach/atmel-mci.h>
+>  #include <linux/atmel-mci.h>
+>  #include <linux/atmel_pdc.h>
+>
+> diff --git a/include/linux/platform_data/mmc-atmel-mci.h b/include/linux/platform_data/mmc-atmel-mci.h
+> new file mode 100644
+> index 000000000000..ebe7ae4f72e4
+> --- /dev/null
+> +++ b/include/linux/platform_data/mmc-atmel-mci.h
+> @@ -0,0 +1,22 @@
+> +#ifndef __MMC_ATMEL_MCI_H
+> +#define __MMC_ATMEL_MCI_H
 > +
-> +       if (card->ext_csd.rev < 7) {
-> +               return sprintf(buf, "0x%x\n", card->cid.fwrev);
-> +       } else {
-> +               return sprintf(buf, "0x%*phN\n", MMC_FIRMWARE_LEN,
-> +                              card->ext_csd.fwrev);
-> +       }
-> +}
+> +#include <linux/platform_data/dma-atmel.h>
+> +#include <linux/dw_dmac.h>
 > +
-> +static DEVICE_ATTR(fwrev, S_IRUGO, mmc_fwrev_show, NULL);
+> +/**
+> + * struct mci_dma_data - DMA data for MCI interface
+> + */
+> +struct mci_dma_data {
+> +#ifdef CONFIG_ARM
+> +       struct at_dma_slave     sdata;
+> +#else
+> +       struct dw_dma_slave     sdata;
+> +#endif
+> +};
 > +
->  static struct attribute *mmc_std_attrs[] = {
->         &dev_attr_cid.attr,
->         &dev_attr_csd.attr,
-> @@ -717,6 +741,7 @@ static struct attribute *mmc_std_attrs[] = {
->         &dev_attr_erase_size.attr,
->         &dev_attr_preferred_erase_size.attr,
->         &dev_attr_fwrev.attr,
-> +       &dev_attr_ffu_capable.attr,
->         &dev_attr_hwrev.attr,
->         &dev_attr_manfid.attr,
->         &dev_attr_name.attr,
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index d424b9d..14b54ff 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -87,6 +87,9 @@ struct mmc_ext_csd {
->         unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
->         unsigned int            boot_ro_lock;           /* ro lock support */
->         bool                    boot_ro_lockable;
-> +       bool                    ffu_capable;    /* Firmware upgrade support */
-> +#define MMC_FIRMWARE_LEN 8
-> +       u8                      fwrev[MMC_FIRMWARE_LEN];  /* FW version */
->         u8                      raw_exception_status;   /* 54 */
->         u8                      raw_partition_support;  /* 160 */
->         u8                      raw_rpmb_size_mult;     /* 168 */
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 64ec963..1af1dff 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -290,6 +290,7 @@ struct _mmc_csd {
->  #define EXT_CSD_SANITIZE_START         165     /* W */
->  #define EXT_CSD_WR_REL_PARAM           166     /* RO */
->  #define EXT_CSD_RPMB_MULT              168     /* RO */
-> +#define EXT_CSD_FW_CONFIG              169     /* R/W */
->  #define EXT_CSD_BOOT_WP                        173     /* R/W */
->  #define EXT_CSD_ERASE_GROUP_DEF                175     /* R/W */
->  #define EXT_CSD_PART_CONFIG            179     /* R/W */
-> @@ -326,6 +327,8 @@ struct _mmc_csd {
->  #define EXT_CSD_GENERIC_CMD6_TIME      248     /* RO */
->  #define EXT_CSD_CACHE_SIZE             249     /* RO, 4 bytes */
->  #define EXT_CSD_PWR_CL_DDR_200_360     253     /* RO */
-> +#define EXT_CSD_FIRMWARE_VERSION       254     /* RO, 8 bytes */
-> +#define EXT_CSD_SUPPORTED_MODE         493     /* RO */
->  #define EXT_CSD_TAG_UNIT_SIZE          498     /* RO */
->  #define EXT_CSD_DATA_TAG_SUPPORT       499     /* RO */
->  #define EXT_CSD_MAX_PACKED_WRITES      500     /* RO */
+> +/* accessor macros */
+> +#define        slave_data_ptr(s)       (&(s)->sdata)
+> +#define find_slave_dev(s)      ((s)->sdata.dma_dev)
+> +
+> +#endif /* __MMC_ATMEL_MCI_H */
 > --
-> 2.1.0.rc2.206.gedb03e5
+> 1.9.1
 >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
