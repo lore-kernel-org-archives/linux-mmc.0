@@ -1,90 +1,51 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RESEND 05/12] mmc: sdhci-pxav3: Remove checks for
- mandatory host clock
-Date: Mon, 27 Oct 2014 14:39:42 +0100
-Message-ID: <CAPDyKFqn2=rm8ROGBuvYuBscd6oNuOGLk=Z6pmW0Q3GqfPBzVQ@mail.gmail.com>
-References: <1413883364-681-1-git-send-email-sebastian.hesselbarth@gmail.com>
-	<1413883364-681-6-git-send-email-sebastian.hesselbarth@gmail.com>
+Subject: Re: [PATCH 0/7] mmc: Cleanup and modernize PM callbacks
+Date: Mon, 27 Oct 2014 14:48:17 +0100
+Message-ID: <CAPDyKFpfeRrj5NVw5i4j6qCQy3OcYgZoL1QOCkLYOabi47gSgg@mail.gmail.com>
+References: <1413287120-10914-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1413883364-681-6-git-send-email-sebastian.hesselbarth@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Cc: Chris Ball <chris@printf.net>, =?UTF-8?Q?Antoine_T=C3=A9nart?= <antoine.tenart@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f45.google.com ([209.85.192.45]:57236 "EHLO
+	mail-qg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753253AbaJ0NsV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Oct 2014 09:48:21 -0400
+Received: by mail-qg0-f45.google.com with SMTP id z107so2037399qgd.4
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Oct 2014 06:48:17 -0700 (PDT)
+In-Reply-To: <1413287120-10914-1-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-On 21 October 2014 11:22, Sebastian Hesselbarth
-<sebastian.hesselbarth@gmail.com> wrote:
-> NULL-checking a struct clk it not only wrong but also not required as
-> for PXAv3 driver the corresponding clock is mandatory. Remove the
-> checks from sdhci_pxav3_runtime_{suspend,resume}.
+On 14 October 2014 13:45, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> This patchset cleanup and modernize how to set up PM callbacks for the
+> mmc_driver in the mmc core. There shouldn't be any functional changes.
 >
-> Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com=
 >
+> Ulf Hansson (7):
+>   mmc: core: Remove superfluous ifdefs for SDIO bus' PM callbacks
+>   mmc: core: Don't export the to_sdio_driver macro
+>   mmc: core: Convert the mmc_driver to use the modern PM ops
+>   mmc: core: Convert mmc_driver to device_driver
+>   mmc: msm_sdcc: Use platform_set|get_drvdata
+>   mmc: block: Use dev_set|get_drvdata()
+>   mmc: core: Remove unused mmc_list_to_card() macro
+>
+>  drivers/mmc/card/block.c      | 55 ++++++++++++++++++++++---------------------
+>  drivers/mmc/card/mmc_test.c   | 18 ++++++++------
+>  drivers/mmc/core/bus.c        | 55 ++++++++++---------------------------------
+>  drivers/mmc/core/sdio_bus.c   | 14 +++--------
+>  drivers/mmc/host/msm_sdcc.c   |  6 ++---
+>  include/linux/mmc/card.h      | 20 ++--------------
+>  include/linux/mmc/sdio_func.h |  2 --
+>  7 files changed, 59 insertions(+), 111 deletions(-)
+>
+> --
+> 1.9.1
 
-Thanks! Applied for next!
+I haven't got any complaints about this patchset, thus I decided to
+apply it for next.
 
 Kind regards
 Uffe
-
-
-> ---
-> Cc: Chris Ball <chris@printf.net>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: "Antoine T=C3=A9nart" <antoine.tenart@free-electrons.com>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: devicetree@vger.kernel.org
-> Cc: linux-arm-kernel@lists.infradead.org
-> Cc: linux-kernel@vger.kernel.org
-> ---
->  drivers/mmc/host/sdhci-pxav3.c | 20 ++++++++------------
->  1 file changed, 8 insertions(+), 12 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-=
-pxav3.c
-> index d1f63d32b2cd..e52bbbb09d88 100644
-> --- a/drivers/mmc/host/sdhci-pxav3.c
-> +++ b/drivers/mmc/host/sdhci-pxav3.c
-> @@ -448,13 +448,11 @@ static int sdhci_pxav3_runtime_suspend(struct d=
-evice *dev)
->         struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
->         unsigned long flags;
->
-> -       if (pltfm_host->clk) {
-> -               spin_lock_irqsave(&host->lock, flags);
-> -               host->runtime_suspended =3D true;
-> -               spin_unlock_irqrestore(&host->lock, flags);
-> +       spin_lock_irqsave(&host->lock, flags);
-> +       host->runtime_suspended =3D true;
-> +       spin_unlock_irqrestore(&host->lock, flags);
->
-> -               clk_disable_unprepare(pltfm_host->clk);
-> -       }
-> +       clk_disable_unprepare(pltfm_host->clk);
->
->         return 0;
->  }
-> @@ -465,13 +463,11 @@ static int sdhci_pxav3_runtime_resume(struct de=
-vice *dev)
->         struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
->         unsigned long flags;
->
-> -       if (pltfm_host->clk) {
-> -               clk_prepare_enable(pltfm_host->clk);
-> +       clk_prepare_enable(pltfm_host->clk);
->
-> -               spin_lock_irqsave(&host->lock, flags);
-> -               host->runtime_suspended =3D false;
-> -               spin_unlock_irqrestore(&host->lock, flags);
-> -       }
-> +       spin_lock_irqsave(&host->lock, flags);
-> +       host->runtime_suspended =3D false;
-> +       spin_unlock_irqrestore(&host->lock, flags);
->
->         return 0;
->  }
-> --
-> 2.1.1
->
