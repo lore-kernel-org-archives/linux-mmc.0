@@ -1,41 +1,146 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sunxi: Remove unused includes of linux/clk-private.h
-Date: Mon, 27 Oct 2014 14:20:30 +0100
-Message-ID: <CAPDyKFrp0cqUhH-2XUhCiMdWonb6TJ_v6TA9568KUKEx5=CGDA@mail.gmail.com>
-References: <1412351606-29453-1-git-send-email-tomeu.vizoso@collabora.com>
+Subject: Re: [PATCH RESEND 06/12] mmc: sdhci-pxav3: Move I/O clock to private data
+Date: Mon, 27 Oct 2014 14:28:41 +0100
+Message-ID: <CAPDyKFroUmuQU_mBmSNEQAHe9Y-OF4pkkK=4Qe=JtibWThaHPA@mail.gmail.com>
+References: <1413883364-681-1-git-send-email-sebastian.hesselbarth@gmail.com>
+	<1413883364-681-7-git-send-email-sebastian.hesselbarth@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1412351606-29453-1-git-send-email-tomeu.vizoso@collabora.com>
+In-Reply-To: <1413883364-681-7-git-send-email-sebastian.hesselbarth@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Tomeu Vizoso <tomeu.vizoso@collabora.com>
-Cc: Mike Turquette <mturquette@linaro.org>, Chris Ball <chris@printf.net>, Maxime Ripard <maxime.ripard@free-electrons.com>, Arnd Bergmann <arnd@arndb.de>, Hans de Goede <hdegoede@redhat.com>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Cc: Chris Ball <chris@printf.net>, =?UTF-8?Q?Antoine_T=C3=A9nart?= <antoine.tenart@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 3 October 2014 17:53, Tomeu Vizoso <tomeu.vizoso@collabora.com> wrote:
-> Signed-off-by: Tomeu Vizoso <tomeu.vizoso@collabora.com>
+On 21 October 2014 11:22, Sebastian Hesselbarth
+<sebastian.hesselbarth@gmail.com> wrote:
+> As we are using references to the I/O clock throughout the driver,
+> move it to the private data. Also, in preparation for core clock,
+> rename it to clk_io.
+>
+> Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com=
+>
+> ---
+> Cc: Chris Ball <chris@printf.net>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: "Antoine T=C3=A9nart" <antoine.tenart@free-electrons.com>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: devicetree@vger.kernel.org
+> Cc: linux-arm-kernel@lists.infradead.org
+> Cc: linux-kernel@vger.kernel.org
+> ---
+>  drivers/mmc/host/sdhci-pxav3.c | 24 +++++++++++++-----------
+>  1 file changed, 13 insertions(+), 11 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-=
+pxav3.c
+> index e52bbbb09d88..a34a589670e6 100644
+> --- a/drivers/mmc/host/sdhci-pxav3.c
+> +++ b/drivers/mmc/host/sdhci-pxav3.c
+> @@ -59,6 +59,7 @@
+>  #define SDCE_MISC_INT_EN       (1<<1)
+>
+>  struct sdhci_pxa {
+> +       struct clk *clk_io;
+>         u8      power_mode;
+>  };
+>
+> @@ -288,9 +289,7 @@ static int sdhci_pxav3_probe(struct platform_devi=
+ce *pdev)
+>         struct sdhci_host *host =3D NULL;
+>         struct sdhci_pxa *pxa =3D NULL;
+>         const struct of_device_id *match;
+> -
+>         int ret;
+> -       struct clk *clk;
+>
+>         pxa =3D devm_kzalloc(&pdev->dev, sizeof(struct sdhci_pxa), GF=
+P_KERNEL);
+>         if (!pxa)
+> @@ -310,14 +309,14 @@ static int sdhci_pxav3_probe(struct platform_de=
+vice *pdev)
+>         pltfm_host =3D sdhci_priv(host);
+>         pltfm_host->priv =3D pxa;
+>
+> -       clk =3D devm_clk_get(dev, NULL);
+> -       if (IS_ERR(clk)) {
+> +       pxa->clk_io =3D devm_clk_get(dev, NULL);
+> +       if (IS_ERR(pxa->clk_io)) {
+>                 dev_err(dev, "failed to get io clock\n");
+> -               ret =3D PTR_ERR(clk);
+> +               ret =3D PTR_ERR(pxa->clk_io);
+>                 goto err_clk_get;
+>         }
+> -       pltfm_host->clk =3D clk;
+> -       clk_prepare_enable(clk);
+> +       pltfm_host->clk =3D pxa->clk_io;
 
-Thanks! Applied for next.
+Is the above still needed?
+
+> +       clk_prepare_enable(pxa->clk_io);
+>
+>         /* enable 1/8V DDR capable */
+>         host->mmc->caps |=3D MMC_CAP_1_8V_DDR;
+> @@ -390,7 +389,7 @@ err_add_host:
+>         pm_runtime_disable(&pdev->dev);
+>  err_of_parse:
+>  err_cd_req:
+> -       clk_disable_unprepare(clk);
+> +       clk_disable_unprepare(pxa->clk_io);
+>  err_clk_get:
+>  err_mbus_win:
+>         sdhci_pltfm_free(pdev);
+> @@ -401,12 +400,13 @@ static int sdhci_pxav3_remove(struct platform_d=
+evice *pdev)
+>  {
+>         struct sdhci_host *host =3D platform_get_drvdata(pdev);
+>         struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> +       struct sdhci_pxa *pxa =3D pltfm_host->priv;
+>
+>         pm_runtime_get_sync(&pdev->dev);
+>         sdhci_remove_host(host, 1);
+>         pm_runtime_disable(&pdev->dev);
+>
+> -       clk_disable_unprepare(pltfm_host->clk);
+> +       clk_disable_unprepare(pxa->clk_io);
+>
+>         sdhci_pltfm_free(pdev);
+>
+> @@ -446,13 +446,14 @@ static int sdhci_pxav3_runtime_suspend(struct d=
+evice *dev)
+>  {
+>         struct sdhci_host *host =3D dev_get_drvdata(dev);
+>         struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> +       struct sdhci_pxa *pxa =3D pltfm_host->priv;
+>         unsigned long flags;
+>
+>         spin_lock_irqsave(&host->lock, flags);
+>         host->runtime_suspended =3D true;
+>         spin_unlock_irqrestore(&host->lock, flags);
+>
+> -       clk_disable_unprepare(pltfm_host->clk);
+> +       clk_disable_unprepare(pxa->clk_io);
+>
+>         return 0;
+>  }
+> @@ -461,9 +462,10 @@ static int sdhci_pxav3_runtime_resume(struct dev=
+ice *dev)
+>  {
+>         struct sdhci_host *host =3D dev_get_drvdata(dev);
+>         struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> +       struct sdhci_pxa *pxa =3D pltfm_host->priv;
+>         unsigned long flags;
+>
+> -       clk_prepare_enable(pltfm_host->clk);
+> +       clk_prepare_enable(pxa->clk_io);
+>
+>         spin_lock_irqsave(&host->lock, flags);
+>         host->runtime_suspended =3D false;
+> --
+> 2.1.1
+>
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 1 -
->  1 file changed, 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 024f67c..647955d 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -21,7 +21,6 @@
->  #include <linux/err.h>
->
->  #include <linux/clk.h>
-> -#include <linux/clk-private.h>
->  #include <linux/clk/sunxi.h>
->
->  #include <linux/gpio.h>
-> --
-> 1.9.3
->
