@@ -1,13 +1,13 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCHv2 2/3] ARM: at91: remove mach/atmel-mci.h
-Date: Mon, 27 Oct 2014 15:47:02 +0100
-Message-ID: <CAPDyKFo4-rKnQ3kMF46qmZ0raXZOM_CcRh+fzcKAGFweO7=N2Q@mail.gmail.com>
+Subject: Re: [PATCHv2 3/3] avr32: remove mach/atmel-mci.h
+Date: Mon, 27 Oct 2014 15:48:53 +0100
+Message-ID: <CAPDyKFqLiTP6ZoqM788+W5qpaCYsRRiYe0UA5+fZWd73cgCLrw@mail.gmail.com>
 References: <1413534398-22645-1-git-send-email-alexandre.belloni@free-electrons.com>
-	<1413534398-22645-3-git-send-email-alexandre.belloni@free-electrons.com>
+	<1413534398-22645-4-git-send-email-alexandre.belloni@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1413534398-22645-3-git-send-email-alexandre.belloni@free-electrons.com>
+In-Reply-To: <1413534398-22645-4-git-send-email-alexandre.belloni@free-electrons.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Alexandre Belloni <alexandre.belloni@free-electrons.com>
 Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, Chris Ball <chris@printf.net>, Hans-Christian Egtvedt <egtvedt@samfundet.no>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Haavard Skinnemoen <hskinnemoen@gmail.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
@@ -21,52 +21,49 @@ On 17 October 2014 10:26, Alexandre Belloni
 
 Thanks! Applied for next!
 
+Do note, this one required me to resolve a conflict for removing the
+header file. Please have a look to make sure I haven't broken
+something.
+
 Kind regards
 Uffe
 
 
 > ---
->  arch/arm/mach-at91/at91sam9g45_devices.c    |  2 +-
->  arch/arm/mach-at91/include/mach/atmel-mci.h | 17 -----------------
+>  arch/avr32/mach-at32ap/at32ap700x.c             |  2 +-
+>  arch/avr32/mach-at32ap/include/mach/atmel-mci.h | 17 -----------------
 >  2 files changed, 1 insertion(+), 18 deletions(-)
->  delete mode 100644 arch/arm/mach-at91/include/mach/atmel-mci.h
+>  delete mode 100644 arch/avr32/mach-at32ap/include/mach/atmel-mci.h
 >
-> diff --git a/arch/arm/mach-at91/at91sam9g45_devices.c b/arch/arm/mach-at91/at91sam9g45_devices.c
-> index 21ab782cc8e9..06ecbafd01ee 100644
-> --- a/arch/arm/mach-at91/at91sam9g45_devices.c
-> +++ b/arch/arm/mach-at91/at91sam9g45_devices.c
-> @@ -19,6 +19,7 @@
->  #include <linux/i2c-gpio.h>
->  #include <linux/atmel-mci.h>
->  #include <linux/platform_data/crypto-atmel.h>
-> +#include <linux/platform_data/mmc-atmel-mci.h>
+> diff --git a/arch/avr32/mach-at32ap/at32ap700x.c b/arch/avr32/mach-at32ap/at32ap700x.c
+> index db85b5ec3351..f8deca560e4d 100644
+> --- a/arch/avr32/mach-at32ap/at32ap700x.c
+> +++ b/arch/avr32/mach-at32ap/at32ap700x.c
+> @@ -17,7 +17,7 @@
+>  #include <linux/spi/spi.h>
+>  #include <linux/usb/atmel_usba_udc.h>
 >
->  #include <linux/platform_data/at91_adc.h>
->
-> @@ -30,7 +31,6 @@
->  #include <mach/at91_matrix.h>
->  #include <mach/at91sam9_smc.h>
->  #include <linux/platform_data/dma-atmel.h>
 > -#include <mach/atmel-mci.h>
->  #include <mach/hardware.h>
+> +#include <linux/platform_data/mmc-atmel-mci.h>
+>  #include <linux/atmel-mci.h>
 >
->  #include <media/atmel-isi.h>
-> diff --git a/arch/arm/mach-at91/include/mach/atmel-mci.h b/arch/arm/mach-at91/include/mach/atmel-mci.h
+>  #include <asm/io.h>
+> diff --git a/arch/avr32/mach-at32ap/include/mach/atmel-mci.h b/arch/avr32/mach-at32ap/include/mach/atmel-mci.h
 > deleted file mode 100644
-> index 3069e4135573..000000000000
-> --- a/arch/arm/mach-at91/include/mach/atmel-mci.h
+> index 4bba58561d5c..000000000000
+> --- a/arch/avr32/mach-at32ap/include/mach/atmel-mci.h
 > +++ /dev/null
 > @@ -1,17 +0,0 @@
 > -#ifndef __MACH_ATMEL_MCI_H
 > -#define __MACH_ATMEL_MCI_H
 > -
-> -#include <linux/platform_data/dma-atmel.h>
+> -#include <linux/dw_dmac.h>
 > -
 > -/**
 > - * struct mci_dma_data - DMA data for MCI interface
 > - */
 > -struct mci_dma_data {
-> -       struct at_dma_slave     sdata;
+> -       struct dw_dma_slave     sdata;
 > -};
 > -
 > -/* accessor macros */
@@ -78,6 +75,7 @@ Uffe
 > 1.9.1
 >
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
