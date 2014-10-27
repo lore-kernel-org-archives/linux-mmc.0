@@ -1,191 +1,69 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: davinci: Fix and simplify probe failure path
-Date: Mon, 27 Oct 2014 12:18:29 +0100
-Message-ID: <CAPDyKFpy2FjvpEWyo9R6PNGpHsWDwfAr1eatNQr+rhJWNLsM6g@mail.gmail.com>
-References: <1411726268-12605-1-git-send-email-pramod.gurav@smartplayin.com>
+Subject: Re: [PATCH] mmc: block: add newline to sysfs display of force_ro
+Date: Mon, 27 Oct 2014 12:29:18 +0100
+Message-ID: <CAPDyKFqPbhCzbep9ZEvsVBLp9QBzftMP=ZczDbpG1ka9p4ie+A@mail.gmail.com>
+References: <f7fa9dd28f967c578a07333d92eba159f3f63863.1411369971.git.baruch@tkos.co.il>
+	<20141021092012.GB2220@tarshish>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f169.google.com ([209.85.216.169]:60080 "EHLO
-	mail-qc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751518AbaJ0LSh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Oct 2014 07:18:37 -0400
-Received: by mail-qc0-f169.google.com with SMTP id i17so2021805qcy.0
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Oct 2014 04:18:37 -0700 (PDT)
-In-Reply-To: <1411726268-12605-1-git-send-email-pramod.gurav@smartplayin.com>
+Received: from mail-qc0-f177.google.com ([209.85.216.177]:44655 "EHLO
+	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751573AbaJ0L3U (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Oct 2014 07:29:20 -0400
+Received: by mail-qc0-f177.google.com with SMTP id l6so3474953qcy.8
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Oct 2014 04:29:19 -0700 (PDT)
+In-Reply-To: <20141021092012.GB2220@tarshish>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pramod Gurav <pramod.gurav@smartplayin.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Baruch Siach <baruch@tkos.co.il>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andrei Warkentin <andrey.warkentin@gmail.com>
 
-On 26 September 2014 12:11, Pramod Gurav <pramod.gurav@smartplayin.com> wrote:
-> The sequence of resource release in probe failure path in this
-> driver was wrong and needed fixes to cleanly unload the driver.
-> This changes does the same by switching to managed resources and
-> fixes return path to release resource in proper sequence.
+On 21 October 2014 11:20, Baruch Siach <baruch@tkos.co.il> wrote:
+> Hi Chris, Ulf,
 >
-> Cc: Chris Ball <chris@printf.net>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-> Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
+> Ping?
 >
-> ---
->  drivers/mmc/host/davinci_mmc.c |   91 +++++++++++++++-------------------------
->  1 file changed, 33 insertions(+), 58 deletions(-)
+> Not a big deal, I guess, but still nice to have for consistency sake.
 >
-> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-> index 5d4c5e0..160b7e8 100644
-> --- a/drivers/mmc/host/davinci_mmc.c
-> +++ b/drivers/mmc/host/davinci_mmc.c
-> @@ -1242,22 +1242,20 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
->                 return -ENOENT;
->         }
->
-> -       ret = -ENODEV;
->         r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->         irq = platform_get_irq(pdev, 0);
->         if (!r || irq == NO_IRQ)
-> -               goto out;
-> +               return -ENODEV;
->
-> -       ret = -EBUSY;
->         mem_size = resource_size(r);
-> -       mem = request_mem_region(r->start, mem_size, pdev->name);
-> +       mem = devm_request_mem_region(&pdev->dev, r->start, mem_size,
-> +                                     pdev->name);
->         if (!mem)
-> -               goto out;
-> +               return -EBUSY;
->
-> -       ret = -ENOMEM;
->         mmc = mmc_alloc_host(sizeof(struct mmc_davinci_host), &pdev->dev);
->         if (!mmc)
-> -               goto out;
-> +               return -ENOMEM;
->
->         host = mmc_priv(mmc);
->         host->mmc = mmc;        /* Important */
-> @@ -1275,15 +1273,16 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
->                 host->txdma = r->start;
->
->         host->mem_res = mem;
-> -       host->base = ioremap(mem->start, mem_size);
-> -       if (!host->base)
-> -               goto out;
-> +       host->base = devm_ioremap(&pdev->dev, mem->start, mem_size);
-> +       if (IS_ERR(host->base)) {
+> When applying please make sure to change Andrei's email address.
 
-devm_ioremap() doesn't return an error which you could check with IS_ERR().
-
-> +               ret = PTR_ERR(host->base);
-> +               goto err_ioremap;
-> +       }
->
-> -       ret = -ENXIO;
-> -       host->clk = clk_get(&pdev->dev, "MMCSDCLK");
-> +       host->clk = devm_clk_get(&pdev->dev, "MMCSDCLK");
->         if (IS_ERR(host->clk)) {
->                 ret = PTR_ERR(host->clk);
-> -               goto out;
-> +               goto err_ioremap;
->         }
->         clk_enable(host->clk);
->         host->mmc_input_clk = clk_get_rate(host->clk);
-> @@ -1350,20 +1349,22 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
->         ret = mmc_davinci_cpufreq_register(host);
->         if (ret) {
->                 dev_err(&pdev->dev, "failed to register cpufreq\n");
-> -               goto cpu_freq_fail;
-> +               goto err_cpu_freq;
->         }
->
->         ret = mmc_add_host(mmc);
->         if (ret < 0)
-> -               goto out;
-> +               goto err_mmc_add;
->
-> -       ret = request_irq(irq, mmc_davinci_irq, 0, mmc_hostname(mmc), host);
-> +       ret = devm_request_irq(&pdev->dev, irq, mmc_davinci_irq, 0,
-> +                              mmc_hostname(mmc), host);
->         if (ret)
-> -               goto out;
-> +               goto err_request_irq;
->
->         if (host->sdio_irq >= 0) {
-> -               ret = request_irq(host->sdio_irq, mmc_davinci_sdio_irq, 0,
-> -                                 mmc_hostname(mmc), host);
-> +               ret = devm_request_irq(&pdev->dev, host->sdio_irq,
-> +                                      mmc_davinci_sdio_irq, 0,
-> +                                      mmc_hostname(mmc), host);
->                 if (!ret)
->                         mmc->caps |= MMC_CAP_SDIO_IRQ;
->         }
-> @@ -1376,27 +1377,15 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
->
->         return 0;
->
-> -out:
-> +err_request_irq:
-> +       mmc_free_host(mmc);
-> +err_mmc_add:
->         mmc_davinci_cpufreq_deregister(host);
-> -cpu_freq_fail:
-> -       if (host) {
-> -               davinci_release_dma_channels(host);
-> -
-> -               if (host->clk) {
-> -                       clk_disable(host->clk);
-> -                       clk_put(host->clk);
-> -               }
-> -
-> -               if (host->base)
-> -                       iounmap(host->base);
-> -       }
-> -
-> -       if (mmc)
-> -               mmc_free_host(mmc);
-> -
-> -       if (mem)
-> -               release_resource(mem);
-> -
-> +err_cpu_freq:
-> +       davinci_release_dma_channels(host);
-> +       clk_disable(host->clk);
-> +err_ioremap:
-> +       mmc_remove_host(mmc);
->         dev_dbg(&pdev->dev, "probe err %d\n", ret);
->
->         return ret;
-> @@ -1406,25 +1395,11 @@ static int __exit davinci_mmcsd_remove(struct platform_device *pdev)
->  {
->         struct mmc_davinci_host *host = platform_get_drvdata(pdev);
->
-> -       if (host) {
-> -               mmc_davinci_cpufreq_deregister(host);
-> -
-> -               mmc_remove_host(host->mmc);
-> -               free_irq(host->mmc_irq, host);
-> -               if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
-> -                       free_irq(host->sdio_irq, host);
-> -
-> -               davinci_release_dma_channels(host);
-> -
-> -               clk_disable(host->clk);
-> -               clk_put(host->clk);
-> -
-> -               iounmap(host->base);
-> -
-> -               release_resource(host->mem_res);
-> -
-> -               mmc_free_host(host->mmc);
-> -       }
-> +       mmc_free_host(host->mmc);
-> +       mmc_davinci_cpufreq_deregister(host);
-> +       davinci_release_dma_channels(host);
-> +       clk_disable(host->clk);
-> +       mmc_remove_host(host->mmc);
-
-mmc_remove_host() needs to be invoked earlier.
+Thanks! Applied for next!
 
 Kind regards
 Uffe
+
+>
+> Thanks,
+> baruch
+>
+> On Mon, Sep 22, 2014 at 10:12:51AM +0300, Baruch Siach wrote:
+>> Make force_ro consistent with other sysfs entries.
+>>
+>> Fixes: 371a689f64b0d ('mmc: MMC boot partitions support')
+>> Cc: Andrei Warkentin <andreiw@motorola.com>
+>> Signed-off-by: Baruch Siach <baruch@tkos.co.il>
+>> ---
+>>  drivers/mmc/card/block.c | 2 +-
+>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index ede41f05c392..dad364b09952 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -260,7 +260,7 @@ static ssize_t force_ro_show(struct device *dev, struct device_attribute *attr,
+>>       int ret;
+>>       struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
+>>
+>> -     ret = snprintf(buf, PAGE_SIZE, "%d",
+>> +     ret = snprintf(buf, PAGE_SIZE, "%d\n",
+>>                      get_disk_ro(dev_to_disk(dev)) ^
+>>                      md->read_only);
+>>       mmc_blk_put(md);
+>> --
+>> 2.1.0
+>
+> --
+>      http://baruch.siach.name/blog/                  ~. .~   Tk Open Systems
+> =}------------------------------------------------ooO--U--Ooo------------{=
+>    - baruch@tkos.co.il - tel: +972.2.679.5364, http://www.tkos.co.il -
