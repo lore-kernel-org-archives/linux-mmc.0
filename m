@@ -1,34 +1,23 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: dw_mmc: Reset DMA before enabling IDMAC
-Date: Mon, 27 Oct 2014 15:13:03 +0100
-Message-ID: <CAPDyKFoBw8p_cGCz9+j5naNeCXu6tn_YEuLss3tSUSowbCAeGQ@mail.gmail.com>
-References: <1413478686-6857-1-git-send-email-sonnyrao@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Change signal voltage error to dev_dbg()
+Date: Mon, 27 Oct 2014 15:15:41 +0100
+Message-ID: <CAPDyKFr1DVqgNXzV4z5pJVr2Kn_Szzv+TU+95CScxS-L_bxh_A@mail.gmail.com>
+References: <1413000976-2038-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f179.google.com ([209.85.216.179]:65109 "EHLO
-	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752786AbaJ0ONP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Oct 2014 10:13:15 -0400
-Received: by mail-qc0-f179.google.com with SMTP id o8so1966853qcw.10
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Oct 2014 07:13:14 -0700 (PDT)
-In-Reply-To: <1413478686-6857-1-git-send-email-sonnyrao@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1413000976-2038-1-git-send-email-dianders@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Addy Ke <addy.ke@rock-chips.com>, Sonny Rao <sonnyrao@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Sonny Rao <sonnyrao@chromium.org>
-Cc: Alim Akhtar <alim.akhtar@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Heiko Stuebner <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Doug Anderson <dianders@chromium.org>, eddie.cai@rock-chips.com, Addy Ke <addy.ke@rock-chips.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 16 October 2014 18:58, Sonny Rao <sonnyrao@chromium.org> wrote:
-> We've already got a reset of DMA after it's done.  Add one before we
-> start DMA too.  This fixes a data corruption on Rockchip SoCs which
-> will get bad data when doing a DMA transfer after doing a PIO transfer.
+On 11 October 2014 06:16, Doug Anderson <dianders@chromium.org> wrote:
+> In (28f92b5 mmc: core: Try other signal levels during power up) we can
+> see that there are times when it's valid to try several signal
+> voltages.  Don't print an ugly error in the logs when that happens.
 >
-> We tested this on an Exynos 5800 with HS200 and didn't notice any
-> difference in sequential read throughput.
->
-> Signed-off-by: Sonny Rao <sonnyrao@chromium.org>
 > Signed-off-by: Doug Anderson <dianders@chromium.org>
-> Tested-by: Doug Anderson <dianders@chromium.org>
 
 Thanks! Applied for next!
 
@@ -36,32 +25,22 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/dw_mmc.c | 5 +++++
->  1 file changed, 5 insertions(+)
+>  drivers/mmc/host/dw_mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
 > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 69f0cc6..ca67f69 100644
+> index 69f0cc6..c4afbdd 100644
 > --- a/drivers/mmc/host/dw_mmc.c
 > +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -83,6 +83,7 @@ struct idmac_desc {
->  #endif /* CONFIG_MMC_DW_IDMAC */
+> @@ -1075,7 +1075,7 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+>                 ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
 >
->  static bool dw_mci_reset(struct dw_mci *host);
-> +static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
->
->  #if defined(CONFIG_DEBUG_FS)
->  static int dw_mci_req_show(struct seq_file *s, void *v)
-> @@ -448,6 +449,10 @@ static void dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
->
->         dw_mci_translate_sglist(host, host->data, sg_len);
->
-> +       /* Make sure to reset DMA in case we did PIO before this */
-> +       dw_mci_ctrl_reset(host, SDMMC_CTRL_DMA_RESET);
-> +       dw_mci_idmac_reset(host);
-> +
->         /* Select IDMAC interface */
->         temp = mci_readl(host, CTRL);
->         temp |= SDMMC_CTRL_USE_IDMAC;
+>                 if (ret) {
+> -                       dev_err(&mmc->class_dev,
+> +                       dev_dbg(&mmc->class_dev,
+>                                          "Regulator set error %d: %d - %d\n",
+>                                          ret, min_uv, max_uv);
+>                         return ret;
 > --
-> 2.1.2
+> 2.1.0.rc2.206.gedb03e5
 >
