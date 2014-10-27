@@ -1,150 +1,78 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: mxcmmc: fix race condition when dma finish a
- data transfer
-Date: Mon, 27 Oct 2014 13:12:04 +0100
-Message-ID: <CAPDyKFo7SuWA81QeitBzr6JyyKERkL2N4VK-KEOSK+31oZiYCQ@mail.gmail.com>
-References: <1412089178-21946-1-git-send-email-matteo.facchinetti@sirius-es.it>
-	<1412089178-21946-2-git-send-email-matteo.facchinetti@sirius-es.it>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: don't exit in case of no pinctrl states
+Date: Mon, 27 Oct 2014 13:24:23 +0100
+Message-ID: <CAPDyKFq+Rqrbrs6Rkq2x8dTsbYd8fyfK7ULdfynNWmcwZcn7sQ@mail.gmail.com>
+References: <1412155532-32504-1-git-send-email-andrew_gabbasov@mentor.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f52.google.com ([209.85.192.52]:38476 "EHLO
-	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752572AbaJ0MMF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Oct 2014 08:12:05 -0400
-Received: by mail-qg0-f52.google.com with SMTP id a108so1178973qge.11
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Oct 2014 05:12:04 -0700 (PDT)
-In-Reply-To: <1412089178-21946-2-git-send-email-matteo.facchinetti@sirius-es.it>
+Received: from mail-qa0-f44.google.com ([209.85.216.44]:54377 "EHLO
+	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751149AbaJ0MYe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Oct 2014 08:24:34 -0400
+Received: by mail-qa0-f44.google.com with SMTP id w8so3730899qac.3
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Oct 2014 05:24:32 -0700 (PDT)
+In-Reply-To: <1412155532-32504-1-git-send-email-andrew_gabbasov@mentor.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
-Cc: Chris Ball <chris@printf.net>, Alexander Shiyan <shc_work@mail.ru>, Sascha Hauer <s.hauer@pengutronix.de>, Peter Griffin <peter.griffin@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linucppc-dev@lists.ozlabs.org, Anatolij Gustschin <agust@denx.de>, gsi@denx.de, sbabic@denx.de
+To: Andrew Gabbasov <andrew_gabbasov@mentor.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 30 September 2014 16:59, Matteo Facchinetti
-<matteo.facchinetti@sirius-es.it> wrote:
-> From: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
+On 1 October 2014 11:25, Andrew Gabbasov <andrew_gabbasov@mentor.com> wrote:
+> From: Dirk Behme <dirk.behme@de.bosch.com>
 >
-> During a read of data block using dma, driver might have two ways to finish to read
-> and free the resources:
-> 1) checking STATUS_DATA_TRANS_DONE mask, in the mxcmci_irq() routine
->    (pending to mmc irq)
-> 2) mxmmc driver, registers also a mxcmci_dma_callback() and when transfer is finished,
->    dma driver calls this callback. (pending to dma irq)
-> Both ways are concurrent with each other.
+> The commit ad93220de7da ("mmc: sdhci-esdhc-imx: change pinctrl state
+> according to uhs mode") exits the probe in case there are no valid
+> pinctrl states found.
 >
-> Race condition happens when following events occur:
-> /* (1) mxcmci driver start data transfer */
->          158.418970: mpc_dma_execute: mpc_dma_execute(): will_access_peripheral start cid=31
->          158.418976: mpc_dma_issue_pending <-mxcmci_request
->          158.418983: mxcmci_start_cmd <-mxcmci_request
-> /* (2) mxcmci driver receive mmc irq */
->          158.419656: mxcmci_irq <-handle_irq_event_percpu
->          158.419692: mxcmci_read_response <-mxcmci_irq
-> /* (3) mxcmci driver checks that transfer is complete and call mxcmci_finish_data() */
->          158.419726: mxcmci_data_done <-mxcmci_irq
->          158.419729: mxcmci_finish_data <-mxcmci_data_done
->          158.419733: dma_direct_unmap_sg <-mxcmci_finish_data
->          158.419736: mxcmci_swap_buffers.isra.24 <-mxcmci_finish_data
->          158.419762: mxcmci_read_response <-mxcmci_data_done
-> /* (4) mxcmci driver (no dma): send stop command */
->          158.419765: mxcmci_start_cmd <-mxcmci_data_done
-> /* (5) mxcmci driver (no dma): receive the stop command irq response */
->          158.419782: mxcmci_irq <-handle_irq_event_percpu
->          158.419812: mxcmci_read_response <-mxcmci_irq
->          158.419843: mxcmci_finish_request <-mxcmci_irq
-> /* (6) dma driver: receive dma irq (finish data transfer) related by request on step 1 */
->          158.419853: mpc_dma_irq <-handle_irq_event_percpu
->          158.420001: mpc_dma_irq_process <-mpc_dma_irq
->          158.420004: mpc_dma_irq_process <-mpc_dma_irq
-> /* (7) dma driver: start dma tasklet to finish the dma irq handling */
->          158.420008: mpc_dma_irq_process: mpc_dma_irq_process(): completed ch:31
-> /* (8) mxcmci driver: start next data transfer using dma */
->          158.420174: mxcmci_request <-mmc_start_req
->          158.420182: dma_direct_map_sg <-mxcmci_request
->          158.420192: mpc_dma_prep_slave_sg <-mxcmci_request
-> /* (9) dma driver: schedule irq tasklet and execute mxcmci dma driver callback */
->          158.420250: mpc_dma_tasklet <-tasklet_action
->          158.420254: mpc_dma_process_completed <-tasklet_action
->          158.420267: mxcmci_dma_callback <-mpc_dma_process_completed
-> /* ERROR!!! (10) mxcmci driver callback works on dma data related to the step 1
->                  that is already finished */
->          158.420271: mxcmci_data_done <-mpc_dma_process_completed
->          158.420273: mxcmci_finish_data <-mxcmci_data_done
-> /* ERROR!!! (11) mxcmci driver: clear data that should be used by step 8 and
->                  send an other mmc stop command (already sended on step 4) */
->          158.420276: dma_direct_unmap_sg <-mxcmci_finish_data
->          158.420279: mxcmci_swap_buffers.isra.24 <-mxcmci_finish_data
->          158.420330: mxcmci_read_response <-mxcmci_data_done
->          158.420333: mxcmci_start_cmd <-mxcmci_data_done
->          158.420338: dma_run_dependencies <-mpc_dma_process_completed
-> ...
-> ...
-> ...
->          168.474223: mxcmci_watchdog <-call_timer_fn
->          168.474236: mxcmci_watchdog: mxcmci_watchdog
->          168.474397: mpc_dma_device_control <-mxcmci_watchdog
+> As there are configurations doing the pin mux properly in the boot
+> loader, don't exit. Just warn, but go on in case if there are no
+> pinctrl states in the device tree.
 >
->
-> In accordance with the other drivers that using the dma engine,
-> fix it, leaving *only* to dma driver the complete control to
-> ending the read operation.
->
-> Removing STATUS_READ_OP_DONE event activation, has as effect
-> to force mxcmci driver to handle the finish data transfer only
-> by mxcmci dma callback.
->
-> Signed-off-by: Matteo Facchinetti <matteo.facchinetti@sirius-es.it>
+> Signed-off-by: Dirk Behme <dirk.behme@de.bosch.com>
+> Signed-off-by: Andrew Gabbasov <andrew_gabbasov@mentor.com>
 
-Thanks! Applied for next!
+Thanks! Applied for next with a minor fix, see below!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/mxcmmc.c | 13 +++----------
->  1 file changed, 3 insertions(+), 10 deletions(-)
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 7 +++----
+>  1 file changed, 3 insertions(+), 4 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index ad11142..536a898 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -373,13 +373,9 @@ static void mxcmci_dma_callback(void *data)
->         del_timer(&host->watchdog);
->
->         stat = mxcmci_readl(host, MMC_REG_STATUS);
-> -       mxcmci_writel(host, stat & ~STATUS_DATA_TRANS_DONE, MMC_REG_STATUS);
->
->         dev_dbg(mmc_dev(host->mmc), "%s: 0x%08x\n", __func__, stat);
->
-> -       if (stat & STATUS_READ_OP_DONE)
-> -               mxcmci_writel(host, STATUS_READ_OP_DONE, MMC_REG_STATUS);
-> -
->         mxcmci_data_done(host, stat);
->  }
->
-> @@ -743,10 +739,8 @@ static irqreturn_t mxcmci_irq(int irq, void *devid)
->         sdio_irq = (stat & STATUS_SDIO_INT_ACTIVE) && host->use_sdio;
->         spin_unlock_irqrestore(&host->lock, flags);
->
-> -       if (mxcmci_use_dma(host) &&
-> -           (stat & (STATUS_READ_OP_DONE | STATUS_WRITE_OP_DONE)))
-> -               mxcmci_writel(host, STATUS_READ_OP_DONE | STATUS_WRITE_OP_DONE,
-> -                       MMC_REG_STATUS);
-> +       if (mxcmci_use_dma(host) && (stat & (STATUS_WRITE_OP_DONE)))
-> +               mxcmci_writel(host, STATUS_WRITE_OP_DONE, MMC_REG_STATUS);
->
->         if (sdio_irq) {
->                 mxcmci_writel(host, STATUS_SDIO_INT_ACTIVE, MMC_REG_STATUS);
-> @@ -756,8 +750,7 @@ static irqreturn_t mxcmci_irq(int irq, void *devid)
->         if (stat & STATUS_END_CMD_RESP)
->                 mxcmci_cmd_done(host, stat);
->
-> -       if (mxcmci_use_dma(host) &&
-> -                 (stat & (STATUS_DATA_TRANS_DONE | STATUS_WRITE_OP_DONE))) {
-> +       if (mxcmci_use_dma(host) && (stat & STATUS_WRITE_OP_DONE)) {
->                 del_timer(&host->watchdog);
->                 mxcmci_data_done(host, stat);
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index ccec0e3..b714b9d 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1012,9 +1012,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>         imx_data->pins_default = pinctrl_lookup_state(imx_data->pinctrl,
+>                                                 PINCTRL_STATE_DEFAULT);
+>         if (IS_ERR(imx_data->pins_default)) {
+> -               err = PTR_ERR(imx_data->pins_default);
+> -               dev_err(mmc_dev(host->mmc), "could not get default state\n");
+> -               goto disable_clk;
+> +               dev_warn(mmc_dev(host->mmc), "could not get default state\n");
+
+This "if" don't need the brackets any more. I removed them.
+
 >         }
-> --
-> 1.8.3.2
 >
+>         host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+> @@ -1103,7 +1101,8 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>         }
+>
+>         /* sdr50 and sdr104 needs work on 1.8v signal voltage */
+> -       if ((boarddata->support_vsel) && esdhc_is_usdhc(imx_data)) {
+> +       if ((boarddata->support_vsel) && esdhc_is_usdhc(imx_data) &&
+> +           !IS_ERR(imx_data->pins_default)) {
+>                 imx_data->pins_100mhz = pinctrl_lookup_state(imx_data->pinctrl,
+>                                                 ESDHC_PINCTRL_STATE_100MHZ);
+>                 imx_data->pins_200mhz = pinctrl_lookup_state(imx_data->pinctrl,
+> --
+> 2.1.0
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
