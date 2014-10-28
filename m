@@ -1,48 +1,46 @@
 From: =?ks_c_5601-1987?B?wK/H0bDm?= <hankyung.yu@lge.com>
 Subject: RE: [PATCH] mmc:core: fix hs400 timing selection
-Date: Wed, 29 Oct 2014 08:30:00 +0900
-Message-ID: <00b501cff307$1de03fb0$59a0bf10$@lge.com>
-References: <1413946555-1266-1-git-send-email-chanho.min@lge.com> <544F98DD.6040605@intel.com>
+Date: Wed, 29 Oct 2014 08:52:30 +0900
+Message-ID: <00b601cff30a$3c57e710$b507b530$@lge.com>
+References: <1413946555-1266-1-git-send-email-chanho.min@lge.com> <544F1DB3.9050204@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
 	charset="ks_c_5601-1987"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lgeamrelo04.lge.com ([156.147.1.127]:61422 "EHLO
+Received: from lgeamrelo04.lge.com ([156.147.1.127]:46735 "EHLO
 	lgeamrelo04.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755130AbaJ1XaP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Oct 2014 19:30:15 -0400
-In-Reply-To: <544F98DD.6040605@intel.com>
+	with ESMTP id S1751773AbaJ1Xwc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Oct 2014 19:52:32 -0400
+In-Reply-To: <544F1DB3.9050204@samsung.com>
 Content-Language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Adrian Hunter' <adrian.hunter@intel.com>, 'Chanho Min' <chanho.min@lge.com>
-Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Seungwon Jeon' <tgih.jun@samsung.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'HyoJun Im' <hyojun.im@lge.com>, gunho.lee@lge.com
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chanho Min' <chanho.min@lge.com>, 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Seungwon Jeon' <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'HyoJun Im' <hyojun.im@lge.com>, gunho.lee@lge.com, 'CPGS' <cpgs@samsung.com>
 
 Hi I'm Hankyung Yu
 
 I will answer instead Chanho Min
 
-HS200 mode right thing to support less than 52Mhz
+After mmc_set_timing(card->host, MMC_TIMING_MMC_HS); 
 
-However CLK <-> DATA delay timing is dependent on the clock.
+Host controller set to SDR transfer
 
-So only lower clock without adjusting the timing and mode of a control h/w
-ever the problem may occur.
-
-So change the operating mode and to lower the clock.
+so is to change to a DDR transfer mode.
 
 
 -----Original Message-----
-From: Adrian Hunter [mailto:adrian.hunter@intel.com] 
-Sent: Tuesday, October 28, 2014 10:24 PM
-To: Chanho Min
-Cc: Chris Ball; Ulf Hansson; Seungwon Jeon; Jaehoon Chung; linux-
-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; HyoJun Im; gunho.lee@lge.
-com; Hankyung Yu
+From: Jaehoon Chung [mailto:jh80.chung@samsung.com] 
+Sent: Tuesday, October 28, 2014 1:38 PM
+To: Chanho Min; Chris Ball; Ulf Hansson; Seungwon Jeon; Jaehoon Chung
+Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; HyoJun Im;
+gunho.lee@lge.com; Hankyung Yu; CPGS
 Subject: Re: [PATCH] mmc:core: fix hs400 timing selection
 
-On 22/10/14 05:55, Chanho Min wrote:
+Hi, Chanho.
+
+On 10/22/2014 11:55 AM, Chanho Min wrote:
 > According to JEDEC v5.01 spec (6.6.5), In order to switch to HS400 
 > mode, host should perform the following steps.
 > 
@@ -53,15 +51,6 @@ On 22/10/14 05:55, Chanho Min wrote:
 > to 0x03 (HS400)
 > 
 > In current implementation, the order of 2 and 3 is reversed.
-
-But HS200 mode supports running at speeds less than 52 MHz whereas High
-Speed mode does not support running at speeds greater than
-52 MHz.
-
-So the switch command might succeed, but the subsequent send_status command
-(see __mmc_switch) could be expected to fail unless the frequency is
-changed first.
-
 > The HS_TIMING field should be set to 0x1 before the clock frequency is 
 > set to a value not greater than 52 MHz. Otherwise, Initialization of 
 > timing can be failed. Also, the host contoller's UHS timing mode 
@@ -109,6 +98,12 @@ changed first.
 >  
 > +	mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
 > +
+
+I didn't know why timing is set to ddr50.
+
+Best Regards,
+Jaehoon Chung
+
 >  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
 >  			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS400,
 >  			   card->ext_csd.generic_cmd6_time,
