@@ -1,54 +1,66 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH V2] mmc: sdhci-acpi: Add 64-bit DMA support
-Date: Tue, 28 Oct 2014 10:43:14 +0100
-Message-ID: <2454740.pP45kZThrO@wuerfel>
-References: <26081691.uIqsxnCCe6@wuerfel> <1414485440-29673-1-git-send-email-adrian.hunter@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc/host/sdhci-of-arasan.c: Omit superfluous error messages
+Date: Tue, 28 Oct 2014 10:49:25 +0100
+Message-ID: <CAPDyKFrOCV4EWmVpGfNR9ggST0BJTh95de0aU_Y4TtgC0Er+Xw@mail.gmail.com>
+References: <CAPDyKFpuiPqZ+5h-SS2-7XeVVh4J2v3SQr=RtjaTZw=0=bXABw@mail.gmail.com>
+	<1414482801-3773-1-git-send-email-mike.looijmans@topic.nl>
+	<1414482801-3773-2-git-send-email-mike.looijmans@topic.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.24]:53024 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750892AbaJ1Jn0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Oct 2014 05:43:26 -0400
-In-Reply-To: <1414485440-29673-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-qa0-f47.google.com ([209.85.216.47]:47934 "EHLO
+	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754991AbaJ1Jt0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Oct 2014 05:49:26 -0400
+Received: by mail-qa0-f47.google.com with SMTP id dc16so159799qab.20
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Oct 2014 02:49:25 -0700 (PDT)
+In-Reply-To: <1414482801-3773-2-git-send-email-mike.looijmans@topic.nl>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Mike Looijmans <mike.looijmans@topic.nl>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Michal Simek <michal.simek@xilinx.com>, Chris Ball <chris@printf.net>
 
-On Tuesday 28 October 2014 10:37:20 Adrian Hunter wrote:
->  static int sdhci_acpi_enable_dma(struct sdhci_host *host)
->  {
-> -       return 0;
-> +       struct sdhci_acpi_host *c = sdhci_priv(host);
-> +       struct device *dev = &c->pdev->dev;
-> +       int err = -1;
-> +
-> +       if (c->dma_setup)
-> +               return 0;
-> +
-> +       if (host->flags & SDHCI_USE_64_BIT_DMA) {
-> +               if (host->quirks2 & SDHCI_QUIRK2_BROKEN_64_BIT_DMA) {
-> +                       host->flags &= ~SDHCI_USE_64_BIT_DMA;
-> +               } else {
-> +                       err = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
-> +                       if (err)
-> +                               dev_warn(dev, "Failed to set 64-bit DMA mask\n");
-> +               }
-> +       }
-> +
-> +       if (err)
-> +               err = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32));
-> +
-> +       c->dma_setup = !err;
-> +
-> +       return err;
->  }
-> 
+On 28 October 2014 08:53, Mike Looijmans <mike.looijmans@topic.nl> wrote:
+> sdhci_add_host and sdhci_platfm_init already report failure,
+> so don't emit error messages when a failure occurs. This prevents
+> occurences of "deferred" messages when required power supplies
+> are not ready for operation yet.
+>
+> Signed-off-by: Mike Looijmans <mike.looijmans@topic.nl>
 
-I don't think it's worth a dev_warn() message (maybe dev_info), there is nothing
-wrong in this case, but you probably have to clear the SDHCI_USE_64_BIT_DMA to
-ensure that the driver won't try to to use the 64-bit DMA if the mask is not set.
+Thanks! Applied for next.
 
-	Arnd
+Kind regards
+Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c |    5 +----
+>  1 file changed, 1 insertion(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 7ac6718..75bea2e 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -161,7 +161,6 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>         host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata, 0);
+>         if (IS_ERR(host)) {
+>                 ret = PTR_ERR(host);
+> -               dev_err(&pdev->dev, "platform init failed (%d)\n", ret);
+>                 goto clk_disable_all;
+>         }
+>
+> @@ -171,10 +170,8 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>         pltfm_host->clk = clk_xin;
+>
+>         ret = sdhci_add_host(host);
+> -       if (ret) {
+> -               dev_err(&pdev->dev, "platform register failed (%d)\n", ret);
+> +       if (ret)
+>                 goto err_pltfm_free;
+> -       }
+>
+>         return 0;
+>
+> --
+> 1.7.9.5
+>
