@@ -1,86 +1,101 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH V2] mmc: sdhci-acpi: Add 64-bit DMA support
-Date: Tue, 28 Oct 2014 16:38:15 +0100
-Message-ID: <5303217.pZOl7Wlk1k@wuerfel>
-References: <26081691.uIqsxnCCe6@wuerfel> <4336818.R3suaoNj0R@wuerfel> <544FB2D1.8010003@intel.com>
+From: Pramod Gurav <pramod.gurav.etc@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pxav3: Fix Sparse warning of duplicate
+ set_uhs_signaling entry
+Date: Tue, 28 Oct 2014 22:11:24 +0530
+Message-ID: <CAMf-jSn7=AkQqWCHuNyXg7aEUq6WAE6S+Vr-s8+ye0TQqFbxfw@mail.gmail.com>
+References: <1411997137-13034-1-git-send-email-pramod.gurav@smartplayin.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.13]:53553 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751155AbaJ1Pia (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Oct 2014 11:38:30 -0400
-In-Reply-To: <544FB2D1.8010003@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1411997137-13034-1-git-send-email-pramod.gurav@smartplayin.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Pramod Gurav <pramod.gurav@smartplayin.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Tuesday 28 October 2014 17:14:25 Adrian Hunter wrote:
-> On 28/10/2014 5:08 p.m., Arnd Bergmann wrote:
-> > On Tuesday 28 October 2014 16:14:46 Adrian Hunter wrote:
-> >> On 28/10/2014 3:54 p.m., Arnd Bergmann wrote:
-> >>> On Tuesday 28 October 2014 13:41:30 Adrian Hunter wrote:
-> >>>> On 28/10/14 12:18, Arnd Bergmann wrote:
-> >>>>> On Tuesday 28 October 2014 12:05:30 Adrian Hunter wrote:
-> >>>>>> On 28/10/14 11:43, Arnd Bergmann wrote:
-> >>>>>>> On Tuesday 28 October 2014 10:37:20 Adrian Hunter wrote:
-> >>>>>>>>    static int sdhci_acpi_enable_dma(struct sdhci_host *host)
-> >>>>>>>>    {
-> >>>>>>>> -       return 0;
-> >>>>>>>> +       struct sdhci_acpi_host *c = sdhci_priv(host);
-> >>>>>>>> +       struct device *dev = &c->pdev->dev;
-> >>>>>>>> +       int err = -1;
-> >>>>>>>> +
-> >>>>>>>> +       if (c->dma_setup)
-> >>>>>>>> +               return 0;
-> >>>>>>>> +
-> >>>>>>>> +       if (host->flags & SDHCI_USE_64_BIT_DMA) {
-> >>>>>>>> +               if (host->quirks2 & SDHCI_QUIRK2_BROKEN_64_BIT_DMA) {
-> >>>>>>>> +                       host->flags &= ~SDHCI_USE_64_BIT_DMA;
-> >>>>>>>> +               } else {
-> >>>>>>>> +                       err = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
-> >>>>>>>> +                       if (err)
-> >>>>>>>> +                               dev_warn(dev, "Failed to set 64-bit DMA mask\n");
-> >>>>>>>> +               }
-> >>>>>>>> +       }
-> >>>>>>>> +
-> >>>>>>>> +       if (err)
-> >>>>>>>> +               err = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32));
-> >>>>>>>> +
-> >>>>>>>> +       c->dma_setup = !err;
-> >>>>>>>> +
-> >>>>>>>> +       return err;
-> >>>>>>>>    }
-> >>>>>>>>
-> >>>>>>>
-> >>>>>>> I don't think it's worth a dev_warn() message (maybe dev_info), there is nothing
-> >>>>>>
-> >>>>>> It is worth a dev_warn because 32-bit DMA can allocate memory for bounce
-> >>>>>> buffers which jeopardizes memory reclaim.
-> >>>>>
-> >>>>> Then you should also warn if SDHCI_USE_64_BIT_DMA isn't or if
-> >>>>> SDHCI_QUIRK2_BROKEN_64_BIT_DMA is set I guess.
-> >>>>
-> >>>> The warning is for when the controller supports 64-bit, not when it doesn't.
-> >>>
-> >>> But why warn about a feature of the controller being present? You just
-> >>> said it's a problem for memory reclaim if 64-bit DMA is not supported.
-> >>
-> >> The warning is for when the controller supports 64-bit but it can't
-> >> get a 64-bit DMA mask, and might therefore need to bounce things.
-> >
-> > What does "can't get a 64-bit DMA mask" mean? This is just a different
-> > way to say it doesn't support 64-bit for some reason.
-> 
-> The host controller advertises whether it is capable of 64-bit DMA.  If
-> it is 64-bit capable but the driver cannot get a 64-bit DMA mask it issues
-> a warning.
+Hi Ulf,
 
-But the host controller doesn't know if it's 64-bit capable, nor should
-it know. All the host controller knows is that it has registers to perform
-64-bit DMA, but the platform code (ACPI in your case) is the only thing that
-knows how many of those address lines are connected to an upstream bus.
+Is this good to go?
 
-	Arnd
+On Mon, Sep 29, 2014 at 6:55 PM, Pramod Gurav
+<pramod.gurav@smartplayin.com> wrote:
+> This fixes below sparse warning:
+> drivers/mmc/host/sdhci-pxav3.c:227:10: warning: Initializer entry defined twice
+> drivers/mmc/host/sdhci-pxav3.c:232:10:   also defined here
+>
+> by removing duplicate initialization of .set_uhs_signaling in
+> struct sdhci_ops. Also does away with duplcated function.
+>
+> Cc: Russell King <rmk+kernel@arm.linux.org.uk>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Chris Ball <chris@printf.net>
+> Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
+> ---
+>  drivers/mmc/host/sdhci-pxav3.c |   37 -------------------------------------
+>  1 file changed, 37 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+> index 6f842fb..fd93e60 100644
+> --- a/drivers/mmc/host/sdhci-pxav3.c
+> +++ b/drivers/mmc/host/sdhci-pxav3.c
+> @@ -186,45 +186,8 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
+>         pxa->power_mode = power_mode;
+>  }
+>
+> -static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+> -{
+> -       u16 ctrl_2;
+> -
+> -       /*
+> -        * Set V18_EN -- UHS modes do not work without this.
+> -        * does not change signaling voltage
+> -        */
+> -       ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> -
+> -       /* Select Bus Speed Mode for host */
+> -       ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
+> -       switch (uhs) {
+> -       case MMC_TIMING_UHS_SDR12:
+> -               ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
+> -               break;
+> -       case MMC_TIMING_UHS_SDR25:
+> -               ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
+> -               break;
+> -       case MMC_TIMING_UHS_SDR50:
+> -               ctrl_2 |= SDHCI_CTRL_UHS_SDR50 | SDHCI_CTRL_VDD_180;
+> -               break;
+> -       case MMC_TIMING_UHS_SDR104:
+> -               ctrl_2 |= SDHCI_CTRL_UHS_SDR104 | SDHCI_CTRL_VDD_180;
+> -               break;
+> -       case MMC_TIMING_UHS_DDR50:
+> -               ctrl_2 |= SDHCI_CTRL_UHS_DDR50 | SDHCI_CTRL_VDD_180;
+> -               break;
+> -       }
+> -
+> -       sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+> -       dev_dbg(mmc_dev(host->mmc),
+> -               "%s uhs = %d, ctrl_2 = %04X\n",
+> -               __func__, uhs, ctrl_2);
+> -}
+> -
+>  static const struct sdhci_ops pxav3_sdhci_ops = {
+>         .set_clock = sdhci_set_clock,
+> -       .set_uhs_signaling = pxav3_set_uhs_signaling,
+>         .platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
+>         .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>         .set_bus_width = sdhci_set_bus_width,
+> --
+> 1.7.9.5
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
+
+
+
+-- 
+Thanks and Regards
+Pramod
