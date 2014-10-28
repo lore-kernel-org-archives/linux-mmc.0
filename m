@@ -1,90 +1,85 @@
-From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Subject: Re: [PATCH RESEND 06/12] mmc: sdhci-pxav3: Move I/O clock to private
- data
-Date: Mon, 27 Oct 2014 19:15:40 +0100
-Message-ID: <544E8BCC.5080208@gmail.com>
-References: <1413883364-681-1-git-send-email-sebastian.hesselbarth@gmail.com> <1413883364-681-7-git-send-email-sebastian.hesselbarth@gmail.com> <CAPDyKFroUmuQU_mBmSNEQAHe9Y-OF4pkkK=4Qe=JtibWThaHPA@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc:core: fix hs400 timing selection
+Date: Tue, 28 Oct 2014 13:38:11 +0900
+Message-ID: <544F1DB3.9050204@samsung.com>
+References: <1413946555-1266-1-git-send-email-chanho.min@lge.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFroUmuQU_mBmSNEQAHe9Y-OF4pkkK=4Qe=JtibWThaHPA@mail.gmail.com>
+In-reply-to: <1413946555-1266-1-git-send-email-chanho.min@lge.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, =?UTF-8?B?QW50b2luZSBUw6luYXJ0?= <antoine.tenart@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Chanho Min <chanho.min@lge.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, HyoJun Im <hyojun.im@lge.com>, gunho.lee@lge.com, Hankyung Yu <hankyung.yu@lge.com>, CPGS <cpgs@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 10/27/2014 02:28 PM, Ulf Hansson wrote:
-> On 21 October 2014 11:22, Sebastian Hesselbarth
-> <sebastian.hesselbarth@gmail.com> wrote:
->> As we are using references to the I/O clock throughout the driver,
->> move it to the private data. Also, in preparation for core clock,
->> rename it to clk_io.
->>
->> Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.co=
-m>
->> ---
->> Cc: Chris Ball <chris@printf.net>
->> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->> Cc: "Antoine T=C3=A9nart" <antoine.tenart@free-electrons.com>
->> Cc: linux-mmc@vger.kernel.org
->> Cc: devicetree@vger.kernel.org
->> Cc: linux-arm-kernel@lists.infradead.org
->> Cc: linux-kernel@vger.kernel.org
->> ---
->>   drivers/mmc/host/sdhci-pxav3.c | 24 +++++++++++++-----------
->>   1 file changed, 13 insertions(+), 11 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci=
--pxav3.c
->> index e52bbbb09d88..a34a589670e6 100644
->> --- a/drivers/mmc/host/sdhci-pxav3.c
->> +++ b/drivers/mmc/host/sdhci-pxav3.c
->> @@ -59,6 +59,7 @@
->>   #define SDCE_MISC_INT_EN       (1<<1)
->>
->>   struct sdhci_pxa {
->> +       struct clk *clk_io;
->>          u8      power_mode;
->>   };
->>
->> @@ -288,9 +289,7 @@ static int sdhci_pxav3_probe(struct platform_dev=
-ice *pdev)
->>          struct sdhci_host *host =3D NULL;
->>          struct sdhci_pxa *pxa =3D NULL;
->>          const struct of_device_id *match;
->> -
->>          int ret;
->> -       struct clk *clk;
->>
->>          pxa =3D devm_kzalloc(&pdev->dev, sizeof(struct sdhci_pxa), =
-GFP_KERNEL);
->>          if (!pxa)
->> @@ -310,14 +309,14 @@ static int sdhci_pxav3_probe(struct platform_d=
-evice *pdev)
->>          pltfm_host =3D sdhci_priv(host);
->>          pltfm_host->priv =3D pxa;
->>
->> -       clk =3D devm_clk_get(dev, NULL);
->> -       if (IS_ERR(clk)) {
->> +       pxa->clk_io =3D devm_clk_get(dev, NULL);
->> +       if (IS_ERR(pxa->clk_io)) {
->>                  dev_err(dev, "failed to get io clock\n");
->> -               ret =3D PTR_ERR(clk);
->> +               ret =3D PTR_ERR(pxa->clk_io);
->>                  goto err_clk_get;
->>          }
->> -       pltfm_host->clk =3D clk;
->> -       clk_prepare_enable(clk);
->> +       pltfm_host->clk =3D pxa->clk_io;
->
-> Is the above still needed?
->
->> +       clk_prepare_enable(pxa->clk_io);
+Hi, Chanho.
 
-Ulf,
+On 10/22/2014 11:55 AM, Chanho Min wrote:
+> According to JEDEC v5.01 spec (6.6.5), In order to switch to HS400 mode,
+> host should perform the following steps.
+> 
+>  1. HS200 mode selection completed
+>  2. Set HS_TIMING to 0x01(High Speed)
+>  3. Host changes frequency to =< 52MHz
+>  4. Set the bus width to DDR 8bit (CMD6)
+>  5. Host may read Driver Strength (CMD8)
+>  6. Set HS_TIMING to 0x03 (HS400)
+> 
+> In current implementation, the order of 2 and 3 is reversed.
+> The HS_TIMING field should be set to 0x1 before the clock frequency
+> is set to a value not greater than 52 MHz. Otherwise, Initialization of
+> timing can be failed. Also, the host contoller's UHS timing mode should
+> be set to DDR50 after the bus width is set to DDR 8bit.
+> 
+> Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
+> Signed-off-by: Chanho Min <chanho.min@lge.com>
+> ---
+>  drivers/mmc/core/mmc.c |   13 ++++++++++---
+>  1 file changed, 10 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index a301a78..52f78e0 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1061,9 +1061,6 @@ static int mmc_select_hs400(struct mmc_card *card)
+>  	 * Before switching to dual data rate operation for HS400,
+>  	 * it is required to convert from HS200 mode to HS mode.
+>  	 */
+> -	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+> -	mmc_set_bus_speed(card);
+> -
+>  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>  			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
+>  			   card->ext_csd.generic_cmd6_time,
+> @@ -1074,6 +1071,14 @@ static int mmc_select_hs400(struct mmc_card *card)
+>  		return err;
+>  	}
+>  
+> +	/*
+> +	 * According to JEDEC v5.01 spec (6.6.5), Clock frequency should
+> +	 * be set to a value not greater than 52MHz after the HS_TIMING
+> +	 * field is set to 0x1.
+> +	 */
+> +	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+> +	mmc_set_bus_speed(card);
+> +
+>  	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>  			 EXT_CSD_BUS_WIDTH,
+>  			 EXT_CSD_DDR_BUS_WIDTH_8,
+> @@ -1084,6 +1089,8 @@ static int mmc_select_hs400(struct mmc_card *card)
+>  		return err;
+>  	}
+>  
+> +	mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
+> +
 
-I guess it is. It sets sdhci_pltfm_host's clk field which is used
-by sdhci-pltfm.c to e.g. determine sdhci clock rate.
+I didn't know why timing is set to ddr50.
 
-Sebastian
+Best Regards,
+Jaehoon Chung
+
+>  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>  			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS400,
+>  			   card->ext_csd.generic_cmd6_time,
+> 
