@@ -1,293 +1,159 @@
-From: Wenyou Yang <wenyou.yang@atmel.com>
-Subject: [PATCH] mmc: atmel-mci: add pm runtime support
-Date: Wed, 29 Oct 2014 10:15:57 +0800
-Message-ID: <1414548958-10537-1-git-send-email-wenyou.yang@atmel.com>
+From: =?ks_c_5601-1987?B?wK/H0bDm?= <hankyung.yu@lge.com>
+Subject: RE: [PATCH] mmc:core: fix hs400 timing selection
+Date: Wed, 29 Oct 2014 14:14:14 +0900
+Message-ID: <010501cff337$2e9e9790$8bdbc6b0$@lge.com>
+References: <1413946555-1266-1-git-send-email-chanho.min@lge.com> <544F1DB3.9050204@samsung.com> <00b601cff30a$3c57e710$b507b530$@lge.com> <54504B4E.2070208@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, chris@printf.net
-Cc: khilman@kernel.org, nicolas.ferre@atmel.com, ludovic.desroches@atmel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, wenyou.yang@atmel.com
+Content-Type: text/plain; charset=ks_c_5601-1987
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lgeamrelo02.lge.com ([156.147.1.126]:37514 "EHLO
+	lgeamrelo02.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751234AbaJ2FOQ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Oct 2014 01:14:16 -0400
+In-Reply-To: <54504B4E.2070208@samsung.com>
+Content-Language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chanho Min' <chanho.min@lge.com>, 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Seungwon Jeon' <tgih.jun@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'HyoJun Im' <hyojun.im@lge.com>, gunho.lee@lge.com, 'CPGS' <cpgs@samsung.com>
 
-Signed-off-by: Wenyou Yang <wenyou.yang@atmel.com>
----
- drivers/mmc/host/atmel-mci.c |  116 ++++++++++++++++++++++++++++++++++--------
- 1 file changed, 94 insertions(+), 22 deletions(-)
+Hi
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 0b9ddf8..e9d32d0 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -37,6 +37,8 @@
- 
- #include <linux/atmel-mci.h>
- #include <linux/atmel_pdc.h>
-+#include <linux/pm.h>
-+#include <linux/pm_runtime.h>
- 
- #include <asm/cacheflush.h>
- #include <asm/io.h>
-@@ -44,6 +46,8 @@
- 
- #include "atmel-mci-regs.h"
- 
-+#define AUTOSUSPEND_DELAY	50
-+
- #define ATMCI_DATA_ERROR_FLAGS	(ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
- #define ATMCI_DMA_THRESHOLD	16
- 
-@@ -386,20 +390,19 @@ static int atmci_regs_show(struct seq_file *s, void *v)
- 	if (!buf)
- 		return -ENOMEM;
- 
-+	pm_runtime_get_sync(&host->pdev->dev);
-+
- 	/*
- 	 * Grab a more or less consistent snapshot. Note that we're
- 	 * not disabling interrupts, so IMR and SR may not be
- 	 * consistent.
- 	 */
--	ret = clk_prepare_enable(host->mck);
--	if (ret)
--		goto out;
--
- 	spin_lock_bh(&host->lock);
- 	memcpy_fromio(buf, host->regs, ATMCI_REGS_SIZE);
- 	spin_unlock_bh(&host->lock);
- 
--	clk_disable_unprepare(host->mck);
-+	pm_runtime_mark_last_busy(&host->pdev->dev);
-+	pm_runtime_put_autosuspend(&host->pdev->dev);
- 
- 	seq_printf(s, "MR:\t0x%08x%s%s ",
- 			buf[ATMCI_MR / 4],
-@@ -449,7 +452,6 @@ static int atmci_regs_show(struct seq_file *s, void *v)
- 				val & ATMCI_CFG_LSYNC ? " LSYNC" : "");
- 	}
- 
--out:
- 	kfree(buf);
- 
- 	return ret;
-@@ -1252,6 +1254,8 @@ static void atmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	WARN_ON(slot->mrq);
- 	dev_dbg(&host->pdev->dev, "MRQ: cmd %u\n", mrq->cmd->opcode);
- 
-+	pm_runtime_get_sync(&host->pdev->dev);
-+
- 	/*
- 	 * We may "know" the card is gone even though there's still an
- 	 * electrical connection. If so, we really need to communicate
-@@ -1281,7 +1285,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	struct atmel_mci_slot	*slot = mmc_priv(mmc);
- 	struct atmel_mci	*host = slot->host;
- 	unsigned int		i;
--	bool			unprepare_clk;
-+
-+	pm_runtime_get_sync(&host->pdev->dev);
- 
- 	slot->sdc_reg &= ~ATMCI_SDCBUS_MASK;
- 	switch (ios->bus_width) {
-@@ -1297,13 +1302,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		unsigned int clock_min = ~0U;
- 		u32 clkdiv;
- 
--		clk_prepare(host->mck);
--		unprepare_clk = true;
--
- 		spin_lock_bh(&host->lock);
- 		if (!host->mode_reg) {
--			clk_enable(host->mck);
--			unprepare_clk = false;
- 			atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
- 			atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIEN);
- 			if (host->caps.has_cfg_reg)
-@@ -1371,8 +1371,6 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	} else {
- 		bool any_slot_active = false;
- 
--		unprepare_clk = false;
--
- 		spin_lock_bh(&host->lock);
- 		slot->clock = 0;
- 		for (i = 0; i < ATMCI_MAX_NR_SLOTS; i++) {
-@@ -1385,17 +1383,12 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
- 			if (host->mode_reg) {
- 				atmci_readl(host, ATMCI_MR);
--				clk_disable(host->mck);
--				unprepare_clk = true;
- 			}
- 			host->mode_reg = 0;
- 		}
- 		spin_unlock_bh(&host->lock);
- 	}
- 
--	if (unprepare_clk)
--		clk_unprepare(host->mck);
--
- 	switch (ios->power_mode) {
- 	case MMC_POWER_OFF:
- 		if (!IS_ERR(mmc->supply.vmmc))
-@@ -1421,6 +1414,9 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		 */
- 		break;
- 	}
-+
-+	pm_runtime_mark_last_busy(&host->pdev->dev);
-+	pm_runtime_put_autosuspend(&host->pdev->dev);
- }
- 
- static int atmci_get_ro(struct mmc_host *mmc)
-@@ -1512,6 +1508,9 @@ static void atmci_request_end(struct atmel_mci *host, struct mmc_request *mrq)
- 	spin_unlock(&host->lock);
- 	mmc_request_done(prev_mmc, mrq);
- 	spin_lock(&host->lock);
-+
-+	pm_runtime_mark_last_busy(&host->pdev->dev);
-+	pm_runtime_put_autosuspend(&host->pdev->dev);
- }
- 
- static void atmci_command_complete(struct atmel_mci *host,
-@@ -2417,7 +2416,6 @@ static int __init atmci_probe(struct platform_device *pdev)
- 
- 	atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
- 	host->bus_hz = clk_get_rate(host->mck);
--	clk_disable_unprepare(host->mck);
- 
- 	host->mapbase = regs->start;
- 
-@@ -2449,6 +2447,12 @@ static int __init atmci_probe(struct platform_device *pdev)
- 
- 	setup_timer(&host->timer, atmci_timeout_timer, (unsigned long)host);
- 
-+	pm_runtime_enable(&pdev->dev);
-+	pm_runtime_get_sync(&pdev->dev);
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, AUTOSUSPEND_DELAY);
-+	pm_runtime_use_autosuspend(&pdev->dev);
-+	pm_suspend_ignore_children(&pdev->dev, 1);
-+
- 	/* We need at least one slot to succeed */
- 	nr_slots = 0;
- 	ret = -ENODEV;
-@@ -2491,6 +2495,9 @@ static int __init atmci_probe(struct platform_device *pdev)
- 			"Atmel MCI controller at 0x%08lx irq %d, %u slots\n",
- 			host->mapbase, irq, nr_slots);
- 
-+	pm_runtime_mark_last_busy(&host->pdev->dev);
-+	pm_runtime_put_autosuspend(&pdev->dev);
-+
- 	return 0;
- 
- err_dma_alloc:
-@@ -2499,6 +2506,9 @@ err_dma_alloc:
- 			atmci_cleanup_slot(host->slot[i], i);
- 	}
- err_init_slot:
-+	pm_runtime_put_sync(&pdev->dev);
-+	pm_runtime_disable(&pdev->dev);
-+
- 	del_timer_sync(&host->timer);
- 	if (host->dma.chan)
- 		dma_release_channel(host->dma.chan);
-@@ -2511,6 +2521,8 @@ static int __exit atmci_remove(struct platform_device *pdev)
- 	struct atmel_mci	*host = platform_get_drvdata(pdev);
- 	unsigned int		i;
- 
-+	pm_runtime_get_sync(&pdev->dev);
-+
- 	if (host->buffer)
- 		dma_free_coherent(&pdev->dev, host->buf_size,
- 		                  host->buffer, host->buf_phys_addr);
-@@ -2520,11 +2532,9 @@ static int __exit atmci_remove(struct platform_device *pdev)
- 			atmci_cleanup_slot(host->slot[i], i);
- 	}
- 
--	clk_prepare_enable(host->mck);
- 	atmci_writel(host, ATMCI_IDR, ~0UL);
- 	atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
- 	atmci_readl(host, ATMCI_SR);
--	clk_disable_unprepare(host->mck);
- 
- 	del_timer_sync(&host->timer);
- 	if (host->dma.chan)
-@@ -2532,14 +2542,76 @@ static int __exit atmci_remove(struct platform_device *pdev)
- 
- 	free_irq(platform_get_irq(pdev, 0), host);
- 
-+	pm_runtime_put_sync(&pdev->dev);
-+	pm_runtime_disable(&pdev->dev);
-+
-+	clk_disable_unprepare(host->mck);
-+
- 	return 0;
- }
- 
-+#ifdef CONFIG_PM
-+static int atmci_suspend(struct device *dev)
-+{
-+	struct atmel_mci *host = dev_get_drvdata(dev);
-+
-+	pm_runtime_get_sync(dev);
-+
-+	clk_disable_unprepare(host->mck);
-+
-+	pm_runtime_mark_last_busy(dev);
-+	pm_runtime_put_autosuspend(dev);
-+
-+	return 0;
-+}
-+
-+static int atmci_resume(struct device *dev)
-+{
-+	struct atmel_mci *host = dev_get_drvdata(dev);
-+	int ret;
-+
-+	pm_runtime_get_sync(dev);
-+
-+	ret = clk_prepare_enable(host->mck);
-+
-+	pm_runtime_mark_last_busy(dev);
-+	pm_runtime_put_autosuspend(dev);
-+
-+	return ret;
-+}
-+
-+static int atmci_runtime_suspend(struct device *dev)
-+{
-+	struct atmel_mci *host = dev_get_drvdata(dev);
-+
-+	clk_disable_unprepare(host->mck);
-+
-+	return 0;
-+}
-+
-+static int atmci_runtime_resume(struct device *dev)
-+{
-+	struct atmel_mci *host = dev_get_drvdata(dev);
-+
-+	return clk_prepare_enable(host->mck);
-+}
-+
-+static const struct dev_pm_ops atmci_dev_pm_ops = {
-+	SET_SYSTEM_SLEEP_PM_OPS(atmci_suspend, atmci_resume)
-+	SET_RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
-+};
-+
-+#define ATMCI_PM_OPS	(&atmci_dev_pm_ops)
-+#else
-+#define ATMCI_PM_OPS	NULL
-+#endif
-+
- static struct platform_driver atmci_driver = {
- 	.remove		= __exit_p(atmci_remove),
- 	.driver		= {
- 		.name		= "atmel_mci",
- 		.of_match_table	= of_match_ptr(atmci_dt_ids),
-+		.pm		= ATMCI_PM_OPS,
- 	},
- };
- 
--- 
-1.7.9.5
+I have read the specifications document to answer your question.
+It is better, I think, the host controller is changed into DDR50 mode w=
+hen
+to change the eMMC bus mode into DDR50
+There will no problem because the no data line will be used in DDR50 mo=
+de
+during the transition to HS400.
+
+
+So we drop this patch
+
+Sorry for confusing. Thanks for the helpful response.
+
+-----Original Message-----
+=46rom: Jaehoon Chung [mailto:jh80.chung@samsung.com]=20
+Sent: Wednesday, October 29, 2014 11:05 AM
+To: =C0=AF=C7=D1=B0=E6; 'Jaehoon Chung'; 'Chanho Min'; 'Chris Ball'; 'U=
+lf Hansson';
+'Seungwon Jeon'
+Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; 'HyoJun Im=
+';
+gunho.lee@lge.com; 'CPGS'
+Subject: Re: [PATCH] mmc:core: fix hs400 timing selection
+
+Hi,
+
+On 10/29/2014 08:52 AM, =C0=AF=C7=D1=B0=E6 wrote:
+> Hi I'm Hankyung Yu
+>=20
+> I will answer instead Chanho Min
+>=20
+> After mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+>=20
+> Host controller set to SDR transfer
+>=20
+> so is to change to a DDR transfer mode.
+
+As commit message was mentioned, I have checked the JEDEC v5.01 spec(6.=
+6.5).
+There is no mention that mode needs to change to DDR mode.
+
+And i know HS400 mode is only support the 8bit buswidth.
+If HS200 mode was set to 4bit buswidth, is HS400 working fine?
+
+Best Regards,
+Jaehoon Chung
+
+>=20
+>=20
+> -----Original Message-----
+> From: Jaehoon Chung [mailto:jh80.chung@samsung.com]
+> Sent: Tuesday, October 28, 2014 1:38 PM
+> To: Chanho Min; Chris Ball; Ulf Hansson; Seungwon Jeon; Jaehoon Chung
+> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; HyoJun=20
+> Im; gunho.lee@lge.com; Hankyung Yu; CPGS
+> Subject: Re: [PATCH] mmc:core: fix hs400 timing selection
+>=20
+> Hi, Chanho.
+>=20
+> On 10/22/2014 11:55 AM, Chanho Min wrote:
+>> According to JEDEC v5.01 spec (6.6.5), In order to switch to HS400=20
+>> mode, host should perform the following steps.
+>>
+>>  1. HS200 mode selection completed
+>>  2. Set HS_TIMING to 0x01(High Speed)  3. Host changes frequency to=20
+>> =3D< 52MHz  4. Set the bus width to DDR 8bit (CMD6)  5. Host may rea=
+d=20
+>> Driver Strength (CMD8)  6. Set HS_TIMING to 0x03 (HS400)
+>>
+>> In current implementation, the order of 2 and 3 is reversed.
+>> The HS_TIMING field should be set to 0x1 before the clock frequency=20
+>> is set to a value not greater than 52 MHz. Otherwise, Initialization=
+=20
+>> of timing can be failed. Also, the host contoller's UHS timing mode=20
+>> should be set to DDR50 after the bus width is set to DDR 8bit.
+>>
+>> Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
+>> Signed-off-by: Chanho Min <chanho.min@lge.com>
+>> ---
+>>  drivers/mmc/core/mmc.c |   13 ++++++++++---
+>>  1 file changed, 10 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
+>> a301a78..52f78e0 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1061,9 +1061,6 @@ static int mmc_select_hs400(struct mmc_card *c=
+ard)
+>>  	 * Before switching to dual data rate operation for HS400,
+>>  	 * it is required to convert from HS200 mode to HS mode.
+>>  	 */
+>> -	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+>> -	mmc_set_bus_speed(card);
+>> -
+>>  	err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>>  			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
+>>  			   card->ext_csd.generic_cmd6_time, @@ -1074,6
+> +1071,14 @@ static
+>> int mmc_select_hs400(struct mmc_card *card)
+>>  		return err;
+>>  	}
+>> =20
+>> +	/*
+>> +	 * According to JEDEC v5.01 spec (6.6.5), Clock frequency should
+>> +	 * be set to a value not greater than 52MHz after the HS_TIMING
+>> +	 * field is set to 0x1.
+>> +	 */
+>> +	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+>> +	mmc_set_bus_speed(card);
+>> +
+>>  	err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>>  			 EXT_CSD_BUS_WIDTH,
+>>  			 EXT_CSD_DDR_BUS_WIDTH_8,
+>> @@ -1084,6 +1089,8 @@ static int mmc_select_hs400(struct mmc_card *c=
+ard)
+>>  		return err;
+>>  	}
+>> =20
+>> +	mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
+>> +
+>=20
+> I didn't know why timing is set to ddr50.
+>=20
+> Best Regards,
+> Jaehoon Chung
+>=20
+>>  	err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>>  			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS400,
+>>  			   card->ext_csd.generic_cmd6_time,
+>>
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=20
+> in the body of a message to majordomo@vger.kernel.org More majordomo=20
+> info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
