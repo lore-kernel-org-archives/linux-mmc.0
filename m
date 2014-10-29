@@ -1,292 +1,351 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc:core: fix hs400 timing selection
-Date: Wed, 29 Oct 2014 11:33:57 +0200
-Message-ID: <5450B485.5050705@intel.com>
-References: <1413946555-1266-1-git-send-email-chanho.min@lge.com> <544F98DD.6040605@intel.com> <00b501cff307$1de03fb0$59a0bf10$@lge.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: atmel-mci: add pm runtime support
+Date: Wed, 29 Oct 2014 11:06:23 +0100
+Message-ID: <CAPDyKFr30M3kR9rC8RFYwc2MZDDgV3o9LPta4WT4uiSemrd4Jg@mail.gmail.com>
+References: <1414548958-10537-1-git-send-email-wenyou.yang@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=euc-kr
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <00b501cff307$1de03fb0$59a0bf10$@lge.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: =?EUC-KR?B?wK/H0bDm?= <hankyung.yu@lge.com>, 'Chanho Min' <chanho.min@lge.com>
-Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Seungwon Jeon' <tgih.jun@samsung.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'HyoJun Im' <hyojun.im@lge.com>, gunho.lee@lge.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f49.google.com ([209.85.216.49]:41612 "EHLO
+	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756230AbaJ2KGY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Oct 2014 06:06:24 -0400
+Received: by mail-qa0-f49.google.com with SMTP id i13so1772268qae.36
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Oct 2014 03:06:23 -0700 (PDT)
+In-Reply-To: <1414548958-10537-1-git-send-email-wenyou.yang@atmel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wenyou Yang <wenyou.yang@atmel.com>
+Cc: Chris Ball <chris@printf.net>, Kevin Hilman <khilman@kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 29/10/14 01:30, =C0=AF=C7=D1=B0=E6 wrote:
-> Hi I'm Hankyung Yu
->=20
-> I will answer instead Chanho Min
->=20
-> HS200 mode right thing to support less than 52Mhz
->=20
-> However CLK <-> DATA delay timing is dependent on the clock.
->=20
-> So only lower clock without adjusting the timing and mode of a contro=
-l h/w
-> ever the problem may occur.
->=20
-> So change the operating mode and to lower the clock.
+On 29 October 2014 03:15, Wenyou Yang <wenyou.yang@atmel.com> wrote:
 
-I meant something different.
+Hi Wenyou,
 
-With your patch I find that __mmc_switch() -> send_status() fails.
+Could you please provide some more information in the commit message.
 
-So I suggest something like this:
+> Signed-off-by: Wenyou Yang <wenyou.yang@atmel.com>
+> ---
+>  drivers/mmc/host/atmel-mci.c |  116 ++++++++++++++++++++++++++++++++++--------
+>  1 file changed, 94 insertions(+), 22 deletions(-)
+>
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index 0b9ddf8..e9d32d0 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -37,6 +37,8 @@
+>
+>  #include <linux/atmel-mci.h>
+>  #include <linux/atmel_pdc.h>
+> +#include <linux/pm.h>
+> +#include <linux/pm_runtime.h>
+>
+>  #include <asm/cacheflush.h>
+>  #include <asm/io.h>
+> @@ -44,6 +46,8 @@
+>
+>  #include "atmel-mci-regs.h"
+>
+> +#define AUTOSUSPEND_DELAY      50
+> +
+>  #define ATMCI_DATA_ERROR_FLAGS (ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
+>  #define ATMCI_DMA_THRESHOLD    16
+>
+> @@ -386,20 +390,19 @@ static int atmci_regs_show(struct seq_file *s, void *v)
+>         if (!buf)
+>                 return -ENOMEM;
+>
+> +       pm_runtime_get_sync(&host->pdev->dev);
+> +
+>         /*
+>          * Grab a more or less consistent snapshot. Note that we're
+>          * not disabling interrupts, so IMR and SR may not be
+>          * consistent.
+>          */
+> -       ret = clk_prepare_enable(host->mck);
+> -       if (ret)
+> -               goto out;
+> -
+>         spin_lock_bh(&host->lock);
+>         memcpy_fromio(buf, host->regs, ATMCI_REGS_SIZE);
+>         spin_unlock_bh(&host->lock);
+>
+> -       clk_disable_unprepare(host->mck);
+> +       pm_runtime_mark_last_busy(&host->pdev->dev);
+> +       pm_runtime_put_autosuspend(&host->pdev->dev);
+>
+>         seq_printf(s, "MR:\t0x%08x%s%s ",
+>                         buf[ATMCI_MR / 4],
+> @@ -449,7 +452,6 @@ static int atmci_regs_show(struct seq_file *s, void *v)
+>                                 val & ATMCI_CFG_LSYNC ? " LSYNC" : "");
+>         }
+>
+> -out:
+>         kfree(buf);
+>
+>         return ret;
+> @@ -1252,6 +1254,8 @@ static void atmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>         WARN_ON(slot->mrq);
+>         dev_dbg(&host->pdev->dev, "MRQ: cmd %u\n", mrq->cmd->opcode);
+>
+> +       pm_runtime_get_sync(&host->pdev->dev);
+> +
+>         /*
+>          * We may "know" the card is gone even though there's still an
+>          * electrical connection. If so, we really need to communicate
+> @@ -1281,7 +1285,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         struct atmel_mci_slot   *slot = mmc_priv(mmc);
+>         struct atmel_mci        *host = slot->host;
+>         unsigned int            i;
+> -       bool                    unprepare_clk;
+> +
+> +       pm_runtime_get_sync(&host->pdev->dev);
+>
+>         slot->sdc_reg &= ~ATMCI_SDCBUS_MASK;
+>         switch (ios->bus_width) {
+> @@ -1297,13 +1302,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>                 unsigned int clock_min = ~0U;
+>                 u32 clkdiv;
+>
+> -               clk_prepare(host->mck);
+> -               unprepare_clk = true;
+> -
+>                 spin_lock_bh(&host->lock);
+>                 if (!host->mode_reg) {
+> -                       clk_enable(host->mck);
+> -                       unprepare_clk = false;
+>                         atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
+>                         atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIEN);
+>                         if (host->caps.has_cfg_reg)
+> @@ -1371,8 +1371,6 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         } else {
+>                 bool any_slot_active = false;
+>
+> -               unprepare_clk = false;
+> -
+>                 spin_lock_bh(&host->lock);
+>                 slot->clock = 0;
+>                 for (i = 0; i < ATMCI_MAX_NR_SLOTS; i++) {
+> @@ -1385,17 +1383,12 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>                         atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
+>                         if (host->mode_reg) {
+>                                 atmci_readl(host, ATMCI_MR);
+> -                               clk_disable(host->mck);
+> -                               unprepare_clk = true;
+>                         }
+>                         host->mode_reg = 0;
+>                 }
+>                 spin_unlock_bh(&host->lock);
+>         }
+>
+> -       if (unprepare_clk)
+> -               clk_unprepare(host->mck);
+> -
+>         switch (ios->power_mode) {
+>         case MMC_POWER_OFF:
+>                 if (!IS_ERR(mmc->supply.vmmc))
+> @@ -1421,6 +1414,9 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>                  */
+>                 break;
+>         }
+> +
+> +       pm_runtime_mark_last_busy(&host->pdev->dev);
+> +       pm_runtime_put_autosuspend(&host->pdev->dev);
+>  }
+>
+>  static int atmci_get_ro(struct mmc_host *mmc)
+> @@ -1512,6 +1508,9 @@ static void atmci_request_end(struct atmel_mci *host, struct mmc_request *mrq)
+>         spin_unlock(&host->lock);
+>         mmc_request_done(prev_mmc, mrq);
+>         spin_lock(&host->lock);
+> +
+> +       pm_runtime_mark_last_busy(&host->pdev->dev);
+> +       pm_runtime_put_autosuspend(&host->pdev->dev);
+>  }
+>
+>  static void atmci_command_complete(struct atmel_mci *host,
+> @@ -2417,7 +2416,6 @@ static int __init atmci_probe(struct platform_device *pdev)
+>
+>         atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
+>         host->bus_hz = clk_get_rate(host->mck);
+> -       clk_disable_unprepare(host->mck);
+>
+>         host->mapbase = regs->start;
+>
+> @@ -2449,6 +2447,12 @@ static int __init atmci_probe(struct platform_device *pdev)
+>
+>         setup_timer(&host->timer, atmci_timeout_timer, (unsigned long)host);
+>
+> +       pm_runtime_enable(&pdev->dev);
+> +       pm_runtime_get_sync(&pdev->dev);
+> +       pm_runtime_set_autosuspend_delay(&pdev->dev, AUTOSUSPEND_DELAY);
+> +       pm_runtime_use_autosuspend(&pdev->dev);
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 92247c2..195d48a 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1045,21 +1045,28 @@ static int mmc_select_hs400(struct mmc_card *ca=
-rd)
- 	err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
- 			   card->ext_csd.generic_cmd6_time,
--			   true, true, true);
-+			   true, false, false);
-+	if (!err) {
-+		u32 status;
-+
-+		/*
-+		 * According to JEDEC v5.01 spec (6.6.5), Clock frequency should
-+		 * be set to a value not greater than 52MHz after the HS_TIMING
-+		 * field is set to 0x1.
-+		*/
-+		mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
-+		mmc_set_bus_speed(card);
-+
-+		err =3D __mmc_send_status(card, &status, false, 1);
-+		if (!err)
-+			err =3D mmc_check_switch_status(card->host, status);
-+	}
- 	if (err) {
- 		pr_err("%s: switch to high-speed from hs200 failed, err:%d\n",
- 			mmc_hostname(host), err);
- 		return err;
- 	}
-=20
--	/*
--	 * According to JEDEC v5.01 spec (6.6.5), Clock frequency should
--	 * be set to a value not greater than 52MHz after the HS_TIMING
--	 * field is set to 0x1.
--	 */
--	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
--	mmc_set_bus_speed(card);
--
- 	err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 			 EXT_CSD_BUS_WIDTH,
- 			 EXT_CSD_DDR_BUS_WIDTH_8,
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 23aa3a3..f917527 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -23,15 +23,12 @@
-=20
- #define MMC_OPS_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
-=20
--static inline int __mmc_send_status(struct mmc_card *card, u32 *status=
-,
--				    bool ignore_crc)
-+int __mmc_send_status(struct mmc_card *card, u32 *status, bool ignore_=
-crc,
-+		      int retries)
- {
- 	int err;
- 	struct mmc_command cmd =3D {0};
-=20
--	BUG_ON(!card);
--	BUG_ON(!card->host);
--
- 	cmd.opcode =3D MMC_SEND_STATUS;
- 	if (!mmc_host_is_spi(card->host))
- 		cmd.arg =3D card->rca << 16;
-@@ -39,7 +36,7 @@ static inline int __mmc_send_status(struct mmc_card *=
-card, u32 *status,
- 	if (ignore_crc)
- 		cmd.flags &=3D ~MMC_RSP_CRC;
-=20
--	err =3D mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
-+	err =3D mmc_wait_for_cmd(card->host, &cmd, retries);
- 	if (err)
- 		return err;
-=20
-@@ -54,7 +51,7 @@ static inline int __mmc_send_status(struct mmc_card *=
-card, u32 *status,
-=20
- int mmc_send_status(struct mmc_card *card, u32 *status)
- {
--	return __mmc_send_status(card, status, false);
-+	return __mmc_send_status(card, status, false, MMC_CMD_RETRIES);
- }
-=20
- static int _mmc_select_card(struct mmc_host *host, struct mmc_card *ca=
-rd)
-@@ -419,6 +416,21 @@ int mmc_spi_set_crc(struct mmc_host *host, int use=
-_crc)
- 	return err;
- }
-=20
-+int mmc_check_switch_status(struct mmc_host *host, u32 status)
-+{
-+	if (mmc_host_is_spi(host)) {
-+		if (status & R1_SPI_ILLEGAL_COMMAND)
-+			return -EBADMSG;
-+	} else {
-+		if (status & 0xFDFFA000)
-+			pr_warn("%s: unexpected status %#x after switch\n",
-+				mmc_hostname(host), status);
-+		if (status & R1_SWITCH_ERROR)
-+			return -EBADMSG;
-+	}
-+	return 0;
-+}
-+
- /**
-  *	__mmc_switch - modify EXT_CSD register
-  *	@card: the MMC card associated with the data transfer
-@@ -497,7 +509,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 =
-index, u8 value,
- 	timeout =3D jiffies + msecs_to_jiffies(timeout_ms);
- 	do {
- 		if (send_status) {
--			err =3D __mmc_send_status(card, &status, ignore_crc);
-+			err =3D __mmc_send_status(card, &status, ignore_crc, 1);
- 			if (err)
- 				return err;
- 		}
-@@ -524,18 +536,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8=
- index, u8 value,
- 		}
- 	} while (R1_CURRENT_STATE(status) =3D=3D R1_STATE_PRG);
-=20
--	if (mmc_host_is_spi(host)) {
--		if (status & R1_SPI_ILLEGAL_COMMAND)
--			return -EBADMSG;
--	} else {
--		if (status & 0xFDFFA000)
--			pr_warn("%s: unexpected status %#x after switch\n",
--				mmc_hostname(host), status);
--		if (status & R1_SWITCH_ERROR)
--			return -EBADMSG;
--	}
--
--	return 0;
-+	return mmc_check_switch_status(host, status);
- }
- EXPORT_SYMBOL_GPL(__mmc_switch);
-=20
-diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
-index 6f4b00e..a59319c 100644
---- a/drivers/mmc/core/mmc_ops.h
-+++ b/drivers/mmc/core/mmc_ops.h
-@@ -20,7 +20,10 @@ int mmc_send_op_cond(struct mmc_host *host, u32 ocr,=
- u32 *rocr);
- int mmc_all_send_cid(struct mmc_host *host, u32 *cid);
- int mmc_set_relative_addr(struct mmc_card *card);
- int mmc_send_csd(struct mmc_card *card, u32 *csd);
-+int __mmc_send_status(struct mmc_card *card, u32 *status, bool ignore_=
-crc,
-+		      int retries);
- int mmc_send_status(struct mmc_card *card, u32 *status);
-+int mmc_check_switch_status(struct mmc_host *host, u32 status);
- int mmc_send_cid(struct mmc_host *host, u32 *cid);
- int mmc_spi_read_ocr(struct mmc_host *host, int highcap, u32 *ocrp);
- int mmc_spi_set_crc(struct mmc_host *host, int use_crc);
+The above is wrong. You will get clock unbalance issues, meaning that
+the clock will never be gated at runtime PM suspend.
 
+Fix it by change the hole chunk of code above to:
 
+pm_runtime_get_noresume();
+pm_runtime_set_active();
+pm_runtime_set_autosuspend_delay();
+pm_runtime_use_autosuspend();
+pm_runtime_enable();
 
->=20
->=20
-> -----Original Message-----
-> From: Adrian Hunter [mailto:adrian.hunter@intel.com]=20
-> Sent: Tuesday, October 28, 2014 10:24 PM
-> To: Chanho Min
-> Cc: Chris Ball; Ulf Hansson; Seungwon Jeon; Jaehoon Chung; linux-
-> mmc@vger.kernel.org; linux-kernel@vger.kernel.org; HyoJun Im; gunho.l=
-ee@lge.
-> com; Hankyung Yu
-> Subject: Re: [PATCH] mmc:core: fix hs400 timing selection
->=20
-> On 22/10/14 05:55, Chanho Min wrote:
->> According to JEDEC v5.01 spec (6.6.5), In order to switch to HS400=20
->> mode, host should perform the following steps.
->>
->>  1. HS200 mode selection completed
->>  2. Set HS_TIMING to 0x01(High Speed)
->>  3. Host changes frequency to =3D< 52MHz  4. Set the bus width to DD=
-R=20
->> 8bit (CMD6)  5. Host may read Driver Strength (CMD8)  6. Set HS_TIMI=
-NG=20
->> to 0x03 (HS400)
->>
->> In current implementation, the order of 2 and 3 is reversed.
->=20
-> But HS200 mode supports running at speeds less than 52 MHz whereas Hi=
-gh
-> Speed mode does not support running at speeds greater than
-> 52 MHz.
->=20
-> So the switch command might succeed, but the subsequent send_status c=
-ommand
-> (see __mmc_switch) could be expected to fail unless the frequency is
-> changed first.
->=20
->> The HS_TIMING field should be set to 0x1 before the clock frequency =
-is=20
->> set to a value not greater than 52 MHz. Otherwise, Initialization of=
-=20
->> timing can be failed. Also, the host contoller's UHS timing mode=20
->> should be set to DDR50 after the bus width is set to DDR 8bit.
->>
->> Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
->> Signed-off-by: Chanho Min <chanho.min@lge.com>
->> ---
->>  drivers/mmc/core/mmc.c |   13 ++++++++++---
->>  1 file changed, 10 insertions(+), 3 deletions(-)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index=20
->> a301a78..52f78e0 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1061,9 +1061,6 @@ static int mmc_select_hs400(struct mmc_card *c=
-ard)
->>  	 * Before switching to dual data rate operation for HS400,
->>  	 * it is required to convert from HS200 mode to HS mode.
->>  	 */
->> -	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
->> -	mmc_set_bus_speed(card);
->> -
->>  	err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>  			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
->>  			   card->ext_csd.generic_cmd6_time, @@ -1074,6
-> +1071,14 @@ static=20
->> int mmc_select_hs400(struct mmc_card *card)
->>  		return err;
->>  	}
->> =20
->> +	/*
->> +	 * According to JEDEC v5.01 spec (6.6.5), Clock frequency should
->> +	 * be set to a value not greater than 52MHz after the HS_TIMING
->> +	 * field is set to 0x1.
->> +	 */
->> +	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
->> +	mmc_set_bus_speed(card);
->> +
->>  	err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>  			 EXT_CSD_BUS_WIDTH,
->>  			 EXT_CSD_DDR_BUS_WIDTH_8,
->> @@ -1084,6 +1089,8 @@ static int mmc_select_hs400(struct mmc_card *c=
-ard)
->>  		return err;
->>  	}
->> =20
->> +	mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
->> +
->>  	err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>  			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS400,
->>  			   card->ext_csd.generic_cmd6_time,
->>
->=20
->=20
->=20
+> +       pm_suspend_ignore_children(&pdev->dev, 1);
+
+Is this needed?
+
+> +
+>         /* We need at least one slot to succeed */
+>         nr_slots = 0;
+>         ret = -ENODEV;
+> @@ -2491,6 +2495,9 @@ static int __init atmci_probe(struct platform_device *pdev)
+>                         "Atmel MCI controller at 0x%08lx irq %d, %u slots\n",
+>                         host->mapbase, irq, nr_slots);
+>
+> +       pm_runtime_mark_last_busy(&host->pdev->dev);
+> +       pm_runtime_put_autosuspend(&pdev->dev);
+> +
+>         return 0;
+>
+>  err_dma_alloc:
+> @@ -2499,6 +2506,9 @@ err_dma_alloc:
+>                         atmci_cleanup_slot(host->slot[i], i);
+>         }
+>  err_init_slot:
+> +       pm_runtime_put_sync(&pdev->dev);
+> +       pm_runtime_disable(&pdev->dev);
+
+According to upper comment, you must switch order, and you should use
+pm_runtime_put_noidle() instead.
+
+Moreover you needs to have a clk_disable_uprepare() in the error
+handling and prior the above.
+
+> +
+>         del_timer_sync(&host->timer);
+>         if (host->dma.chan)
+>                 dma_release_channel(host->dma.chan);
+> @@ -2511,6 +2521,8 @@ static int __exit atmci_remove(struct platform_device *pdev)
+>         struct atmel_mci        *host = platform_get_drvdata(pdev);
+>         unsigned int            i;
+>
+> +       pm_runtime_get_sync(&pdev->dev);
+> +
+>         if (host->buffer)
+>                 dma_free_coherent(&pdev->dev, host->buf_size,
+>                                   host->buffer, host->buf_phys_addr);
+> @@ -2520,11 +2532,9 @@ static int __exit atmci_remove(struct platform_device *pdev)
+>                         atmci_cleanup_slot(host->slot[i], i);
+>         }
+>
+> -       clk_prepare_enable(host->mck);
+>         atmci_writel(host, ATMCI_IDR, ~0UL);
+>         atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
+>         atmci_readl(host, ATMCI_SR);
+> -       clk_disable_unprepare(host->mck);
+>
+>         del_timer_sync(&host->timer);
+>         if (host->dma.chan)
+> @@ -2532,14 +2542,76 @@ static int __exit atmci_remove(struct platform_device *pdev)
+>
+>         free_irq(platform_get_irq(pdev, 0), host);
+>
+> +       pm_runtime_put_sync(&pdev->dev);
+> +       pm_runtime_disable(&pdev->dev);
+> +
+> +       clk_disable_unprepare(host->mck);
+
+Same comment as for fixing the error handling in ->probe().
+
+> +
+>         return 0;
+>  }
+>
+> +#ifdef CONFIG_PM
+> +static int atmci_suspend(struct device *dev)
+> +{
+> +       struct atmel_mci *host = dev_get_drvdata(dev);
+> +
+> +       pm_runtime_get_sync(dev);
+> +
+> +       clk_disable_unprepare(host->mck);
+> +
+> +       pm_runtime_mark_last_busy(dev);
+> +       pm_runtime_put_autosuspend(dev);
+> +
+> +       return 0;
+> +}
+> +
+> +static int atmci_resume(struct device *dev)
+> +{
+> +       struct atmel_mci *host = dev_get_drvdata(dev);
+> +       int ret;
+> +
+> +       pm_runtime_get_sync(dev);
+> +
+> +       ret = clk_prepare_enable(host->mck);
+> +
+> +       pm_runtime_mark_last_busy(dev);
+> +       pm_runtime_put_autosuspend(dev);
+> +
+> +       return ret;
+> +}
+> +
+> +static int atmci_runtime_suspend(struct device *dev)
+> +{
+> +       struct atmel_mci *host = dev_get_drvdata(dev);
+> +
+> +       clk_disable_unprepare(host->mck);
+> +
+> +       return 0;
+> +}
+> +
+> +static int atmci_runtime_resume(struct device *dev)
+> +{
+> +       struct atmel_mci *host = dev_get_drvdata(dev);
+> +
+> +       return clk_prepare_enable(host->mck);
+> +}
+> +
+> +static const struct dev_pm_ops atmci_dev_pm_ops = {
+> +       SET_SYSTEM_SLEEP_PM_OPS(atmci_suspend, atmci_resume)
+> +       SET_RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
+> +};
+
+I would suggest the following changes to simplify code and to improve
+runtime PM support a bit.
+
+SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
+SET_PM_RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
+
+Do note the change from SET_RUNTIME_PM_OPS -> SET_PM_RUNTIME_PM_OPS.
+
+That means you will be able to remove atmci_suspend|resume() functions entirely.
+
+> +
+> +#define ATMCI_PM_OPS   (&atmci_dev_pm_ops)
+> +#else
+> +#define ATMCI_PM_OPS   NULL
+> +#endif
+
+This is micro optimization, not needed. Just use the atmci_dev_pm_ops
+directly below instead.
+
+> +
+>  static struct platform_driver atmci_driver = {
+>         .remove         = __exit_p(atmci_remove),
+>         .driver         = {
+>                 .name           = "atmel_mci",
+>                 .of_match_table = of_match_ptr(atmci_dt_ids),
+> +               .pm             = ATMCI_PM_OPS,
+>         },
+>  };
+>
+> --
+> 1.7.9.5
+>
+
+Kind regards
+Ulf Hansson
