@@ -1,116 +1,323 @@
-From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-Subject: Re: [PATCH RESEND 10/12] ARM: dts: berlin: Add SDHCI controller nodes
- to BG2/BG2CD
-Date: Wed, 29 Oct 2014 19:39:23 +0100
-Message-ID: <5451345B.5000703@gmail.com>
-References: <1413883364-681-1-git-send-email-sebastian.hesselbarth@gmail.com> <1413883364-681-11-git-send-email-sebastian.hesselbarth@gmail.com>
+From: =?ks_c_5601-1987?B?wK/H0bDm?= <hankyung.yu@lge.com>
+Subject: RE: [PATCH] mmc:core: fix hs400 timing selection
+Date: Thu, 30 Oct 2014 08:27:59 +0900
+Message-ID: <000201cff3cf$fa6226b0$ef267410$@lge.com>
+References: <1413946555-1266-1-git-send-email-chanho.min@lge.com> <544F98DD.6040605@intel.com> <00b501cff307$1de03fb0$59a0bf10$@lge.com> <5450B485.5050705@intel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Type: text/plain; charset=ks_c_5601-1987
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1413883364-681-11-git-send-email-sebastian.hesselbarth@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, =?UTF-8?B?QW50b2luZSBUw6luYXJ0?= <antoine.tenart@free-electrons.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lgeamrelo04.lge.com ([156.147.1.127]:56636 "EHLO
+	lgeamrelo04.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756934AbaJ2X2C convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Oct 2014 19:28:02 -0400
+In-Reply-To: <5450B485.5050705@intel.com>
+Content-Language: ko
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: 'Adrian Hunter' <adrian.hunter@intel.com>, 'Chanho Min' <chanho.min@lge.com>
+Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Seungwon Jeon' <tgih.jun@samsung.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'HyoJun Im' <hyojun.im@lge.com>, gunho.lee@lge.com
 
-On 21.10.2014 11:22, Sebastian Hesselbarth wrote:
-> Marvell Berlin BG2 has three, BG2CD just one pxav3 compatible
-> sdhci controllers, add them to the corresponding DT SoC
-> includes.
->
-> Signed-off-by: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com=
->
+Hi=20
 
-Applied the three DT patches to berlin/dt.
+I think your suggestion is looks good
 
-Sebastian
+I reconsideration my patch & original src
 
-> ---
-> Cc: Chris Ball <chris@printf.net>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: "Antoine T=C3=A9nart" <antoine.tenart@free-electrons.com>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: devicetree@vger.kernel.org
-> Cc: linux-arm-kernel@lists.infradead.org
-> Cc: linux-kernel@vger.kernel.org
-> ---
->   arch/arm/boot/dts/berlin2.dtsi   | 34 +++++++++++++++++++++++++++++=
-+++++
->   arch/arm/boot/dts/berlin2cd.dtsi |  9 +++++++++
->   2 files changed, 43 insertions(+)
->
-> diff --git a/arch/arm/boot/dts/berlin2.dtsi b/arch/arm/boot/dts/berli=
-n2.dtsi
-> index 9d7c810ebd0b..504f1add1938 100644
-> --- a/arch/arm/boot/dts/berlin2.dtsi
-> +++ b/arch/arm/boot/dts/berlin2.dtsi
-> @@ -53,6 +53,35 @@
->
->   		ranges =3D <0 0xf7000000 0x1000000>;
->
-> +		sdhci0: sdhci@ab0000 {
-> +			compatible =3D "mrvl,pxav3-mmc";
-> +			reg =3D <0xab0000 0x200>;
-> +			clocks =3D <&chip CLKID_SDIO0XIN>, <&chip CLKID_SDIO0>;
-> +			clock-names =3D "io", "core";
-> +			interrupts =3D <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		sdhci1: sdhci@ab0800 {
-> +			compatible =3D "mrvl,pxav3-mmc";
-> +			reg =3D <0xab0800 0x200>;
-> +			clocks =3D <&chip CLKID_SDIO1XIN>, <&chip CLKID_SDIO1>;
-> +			clock-names =3D "io", "core";
-> +			interrupts =3D <GIC_SPI 20 IRQ_TYPE_LEVEL_HIGH>;
-> +			status =3D "disabled";
-> +		};
-> +
-> +		sdhci2: sdhci@ab1000 {
-> +			compatible =3D "mrvl,pxav3-mmc";
-> +			reg =3D <0xab1000 0x200>;
-> +			interrupts =3D <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>;
-> +			clocks =3D <&chip CLKID_NFC_ECC>, <&chip CLKID_NFC>;
-> +			clock-names =3D "io", "core";
-> +			pinctrl-0 =3D <&emmc_pmux>;
-> +			pinctrl-names =3D "default";
-> +			status =3D "disabled";
-> +		};
-> +
->   		l2: l2-cache-controller@ac0000 {
->   			compatible =3D "marvell,tauros3-cache", "arm,pl310-cache";
->   			reg =3D <0xac0000 0x1000>;
-> @@ -252,6 +281,11 @@
->   			reg =3D <0xea0000 0x400>;
->   			clocks =3D <&refclk>;
->   			clock-names =3D "refclk";
-> +
-> +			emmc_pmux: emmc-pmux {
-> +				groups =3D "G26";
-> +				function =3D "emmc";
-> +			};
->   		};
->
->   		apb@fc0000 {
-> diff --git a/arch/arm/boot/dts/berlin2cd.dtsi b/arch/arm/boot/dts/ber=
-lin2cd.dtsi
-> index cc1df65da504..5a19017b5d71 100644
-> --- a/arch/arm/boot/dts/berlin2cd.dtsi
-> +++ b/arch/arm/boot/dts/berlin2cd.dtsi
-> @@ -45,6 +45,15 @@
->
->   		ranges =3D <0 0xf7000000 0x1000000>;
->
-> +		sdhci0: sdhci@ab0000 {
-> +			compatible =3D "mrvl,pxav3-mmc";
-> +			reg =3D <0xab0000 0x200>;
-> +			clocks =3D <&chip CLKID_SDIO0XIN>, <&chip CLKID_SDIO0>;
-> +			clock-names =3D "io", "core";
-> +			interrupts =3D <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
-> +			status =3D "disabled";
-> +		};
-> +
->   		l2: l2-cache-controller@ac0000 {
->   			compatible =3D "arm,pl310-cache";
->   			reg =3D <0xac0000 0x1000>;
->
+Although Original src is not recommendations of JDEC
+
+Actually change setting order of host controller & emmc device
+There would be no problem.
+
+So we drop this patch
+
+Sorry for confusing. Thanks for the helpful response.
+
+-----Original Message-----
+=46rom: Adrian Hunter [mailto:adrian.hunter@intel.com]=20
+Sent: Wednesday, October 29, 2014 6:34 PM
+To: =C0=AF=C7=D1=B0=E6; 'Chanho Min'
+Cc: 'Chris Ball'; 'Ulf Hansson'; 'Seungwon Jeon'; 'Jaehoon Chung'; linu=
+x-
+mmc@vger.kernel.org; linux-kernel@vger.kernel.org; 'HyoJun Im';
+gunho.lee@lge.com
+Subject: Re: [PATCH] mmc:core: fix hs400 timing selection
+
+On 29/10/14 01:30, =C0=AF=C7=D1=B0=E6 wrote:
+> Hi I'm Hankyung Yu
+>=20
+> I will answer instead Chanho Min
+>=20
+> HS200 mode right thing to support less than 52Mhz
+>=20
+> However CLK <-> DATA delay timing is dependent on the clock.
+>=20
+> So only lower clock without adjusting the timing and mode of a contro=
+l=20
+> h/w ever the problem may occur.
+>=20
+> So change the operating mode and to lower the clock.
+
+I meant something different.
+
+With your patch I find that __mmc_switch() -> send_status() fails.
+
+So I suggest something like this:
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index 9224=
+7c2..
+195d48a 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1045,21 +1045,28 @@ static int mmc_select_hs400(struct mmc_card *ca=
+rd)
+ 	err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
+ 			   card->ext_csd.generic_cmd6_time,
+-			   true, true, true);
++			   true, false, false);
++	if (!err) {
++		u32 status;
++
++		/*
++		 * According to JEDEC v5.01 spec (6.6.5), Clock frequency
+should
++		 * be set to a value not greater than 52MHz after the
+HS_TIMING
++		 * field is set to 0x1.
++		*/
++		mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
++		mmc_set_bus_speed(card);
++
++		err =3D __mmc_send_status(card, &status, false, 1);
++		if (!err)
++			err =3D mmc_check_switch_status(card->host, status);
++	}
+ 	if (err) {
+ 		pr_err("%s: switch to high-speed from hs200 failed,
+err:%d\n",
+ 			mmc_hostname(host), err);
+ 		return err;
+ 	}
+=20
+-	/*
+-	 * According to JEDEC v5.01 spec (6.6.5), Clock frequency should
+-	 * be set to a value not greater than 52MHz after the HS_TIMING
+-	 * field is set to 0x1.
+-	 */
+-	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+-	mmc_set_bus_speed(card);
+-
+ 	err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 			 EXT_CSD_BUS_WIDTH,
+ 			 EXT_CSD_DDR_BUS_WIDTH_8,
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c in=
+dex
+23aa3a3..f917527 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -23,15 +23,12 @@
+=20
+ #define MMC_OPS_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
+=20
+-static inline int __mmc_send_status(struct mmc_card *card, u32 *status=
+,
+-				    bool ignore_crc)
++int __mmc_send_status(struct mmc_card *card, u32 *status, bool ignore_=
+crc,
++		      int retries)
+ {
+ 	int err;
+ 	struct mmc_command cmd =3D {0};
+=20
+-	BUG_ON(!card);
+-	BUG_ON(!card->host);
+-
+ 	cmd.opcode =3D MMC_SEND_STATUS;
+ 	if (!mmc_host_is_spi(card->host))
+ 		cmd.arg =3D card->rca << 16;
+@@ -39,7 +36,7 @@ static inline int __mmc_send_status(struct mmc_card
+*card, u32 *status,
+ 	if (ignore_crc)
+ 		cmd.flags &=3D ~MMC_RSP_CRC;
+=20
+-	err =3D mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
++	err =3D mmc_wait_for_cmd(card->host, &cmd, retries);
+ 	if (err)
+ 		return err;
+=20
+@@ -54,7 +51,7 @@ static inline int __mmc_send_status(struct mmc_card
+*card, u32 *status,
+=20
+ int mmc_send_status(struct mmc_card *card, u32 *status)  {
+-	return __mmc_send_status(card, status, false);
++	return __mmc_send_status(card, status, false, MMC_CMD_RETRIES);
+ }
+=20
+ static int _mmc_select_card(struct mmc_host *host, struct mmc_card *ca=
+rd)
+@@ -419,6 +416,21 @@ int mmc_spi_set_crc(struct mmc_host *host, int use=
+_crc)
+ 	return err;
+ }
+=20
++int mmc_check_switch_status(struct mmc_host *host, u32 status) {
++	if (mmc_host_is_spi(host)) {
++		if (status & R1_SPI_ILLEGAL_COMMAND)
++			return -EBADMSG;
++	} else {
++		if (status & 0xFDFFA000)
++			pr_warn("%s: unexpected status %#x after switch\n",
++				mmc_hostname(host), status);
++		if (status & R1_SWITCH_ERROR)
++			return -EBADMSG;
++	}
++	return 0;
++}
++
+ /**
+  *	__mmc_switch - modify EXT_CSD register
+  *	@card: the MMC card associated with the data transfer
+@@ -497,7 +509,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8
+index, u8 value,
+ 	timeout =3D jiffies + msecs_to_jiffies(timeout_ms);
+ 	do {
+ 		if (send_status) {
+-			err =3D __mmc_send_status(card, &status, ignore_crc);
++			err =3D __mmc_send_status(card, &status, ignore_crc,
+1);
+ 			if (err)
+ 				return err;
+ 		}
+@@ -524,18 +536,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8
+index, u8 value,
+ 		}
+ 	} while (R1_CURRENT_STATE(status) =3D=3D R1_STATE_PRG);
+=20
+-	if (mmc_host_is_spi(host)) {
+-		if (status & R1_SPI_ILLEGAL_COMMAND)
+-			return -EBADMSG;
+-	} else {
+-		if (status & 0xFDFFA000)
+-			pr_warn("%s: unexpected status %#x after switch\n",
+-				mmc_hostname(host), status);
+-		if (status & R1_SWITCH_ERROR)
+-			return -EBADMSG;
+-	}
+-
+-	return 0;
++	return mmc_check_switch_status(host, status);
+ }
+ EXPORT_SYMBOL_GPL(__mmc_switch);
+=20
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h in=
+dex
+6f4b00e..a59319c 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -20,7 +20,10 @@ int mmc_send_op_cond(struct mmc_host *host, u32 ocr,=
+ u32
+*rocr);  int mmc_all_send_cid(struct mmc_host *host, u32 *cid);  int
+mmc_set_relative_addr(struct mmc_card *card);  int mmc_send_csd(struct
+mmc_card *card, u32 *csd);
++int __mmc_send_status(struct mmc_card *card, u32 *status, bool ignore_=
+crc,
++		      int retries);
+ int mmc_send_status(struct mmc_card *card, u32 *status);
++int mmc_check_switch_status(struct mmc_host *host, u32 status);
+ int mmc_send_cid(struct mmc_host *host, u32 *cid);  int
+mmc_spi_read_ocr(struct mmc_host *host, int highcap, u32 *ocrp);  int
+mmc_spi_set_crc(struct mmc_host *host, int use_crc);
+
+
+
+>=20
+>=20
+> -----Original Message-----
+> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
+> Sent: Tuesday, October 28, 2014 10:24 PM
+> To: Chanho Min
+> Cc: Chris Ball; Ulf Hansson; Seungwon Jeon; Jaehoon Chung; linux-=20
+> mmc@vger.kernel.org; linux-kernel@vger.kernel.org; HyoJun Im;
+gunho.lee@lge.
+> com; Hankyung Yu
+> Subject: Re: [PATCH] mmc:core: fix hs400 timing selection
+>=20
+> On 22/10/14 05:55, Chanho Min wrote:
+>> According to JEDEC v5.01 spec (6.6.5), In order to switch to HS400=20
+>> mode, host should perform the following steps.
+>>
+>>  1. HS200 mode selection completed
+>>  2. Set HS_TIMING to 0x01(High Speed)  3. Host changes frequency to=20
+>> =3D< 52MHz  4. Set the bus width to DDR 8bit (CMD6)  5. Host may rea=
+d=20
+>> Driver Strength (CMD8)  6. Set HS_TIMING to 0x03 (HS400)
+>>
+>> In current implementation, the order of 2 and 3 is reversed.
+>=20
+> But HS200 mode supports running at speeds less than 52 MHz whereas=20
+> High Speed mode does not support running at speeds greater than
+> 52 MHz.
+>=20
+> So the switch command might succeed, but the subsequent send_status=20
+> command (see __mmc_switch) could be expected to fail unless the=20
+> frequency is changed first.
+>=20
+>> The HS_TIMING field should be set to 0x1 before the clock frequency=20
+>> is set to a value not greater than 52 MHz. Otherwise, Initialization=
+=20
+>> of timing can be failed. Also, the host contoller's UHS timing mode=20
+>> should be set to DDR50 after the bus width is set to DDR 8bit.
+>>
+>> Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
+>> Signed-off-by: Chanho Min <chanho.min@lge.com>
+>> ---
+>>  drivers/mmc/core/mmc.c |   13 ++++++++++---
+>>  1 file changed, 10 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
+>> a301a78..52f78e0 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1061,9 +1061,6 @@ static int mmc_select_hs400(struct mmc_card *c=
+ard)
+>>  	 * Before switching to dual data rate operation for HS400,
+>>  	 * it is required to convert from HS200 mode to HS mode.
+>>  	 */
+>> -	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+>> -	mmc_set_bus_speed(card);
+>> -
+>>  	err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>>  			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
+>>  			   card->ext_csd.generic_cmd6_time, @@ -1074,6
+> +1071,14 @@ static
+>> int mmc_select_hs400(struct mmc_card *card)
+>>  		return err;
+>>  	}
+>> =20
+>> +	/*
+>> +	 * According to JEDEC v5.01 spec (6.6.5), Clock frequency should
+>> +	 * be set to a value not greater than 52MHz after the HS_TIMING
+>> +	 * field is set to 0x1.
+>> +	 */
+>> +	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
+>> +	mmc_set_bus_speed(card);
+>> +
+>>  	err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>>  			 EXT_CSD_BUS_WIDTH,
+>>  			 EXT_CSD_DDR_BUS_WIDTH_8,
+>> @@ -1084,6 +1089,8 @@ static int mmc_select_hs400(struct mmc_card *c=
+ard)
+>>  		return err;
+>>  	}
+>> =20
+>> +	mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
+>> +
+>>  	err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>>  			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS400,
+>>  			   card->ext_csd.generic_cmd6_time,
+>>
+>=20
+>=20
+>=20
+
