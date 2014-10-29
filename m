@@ -1,159 +1,94 @@
-From: =?ks_c_5601-1987?B?wK/H0bDm?= <hankyung.yu@lge.com>
-Subject: RE: [PATCH] mmc:core: fix hs400 timing selection
-Date: Wed, 29 Oct 2014 14:14:14 +0900
-Message-ID: <010501cff337$2e9e9790$8bdbc6b0$@lge.com>
-References: <1413946555-1266-1-git-send-email-chanho.min@lge.com> <544F1DB3.9050204@samsung.com> <00b601cff30a$3c57e710$b507b530$@lge.com> <54504B4E.2070208@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V2] mmc: sdhci-acpi: Add 64-bit DMA support
+Date: Wed, 29 Oct 2014 10:53:31 +0200
+Message-ID: <5450AB0B.90908@intel.com>
+References: <26081691.uIqsxnCCe6@wuerfel> <4336818.R3suaoNj0R@wuerfel> <544FB2D1.8010003@intel.com> <5303217.pZOl7Wlk1k@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ks_c_5601-1987
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lgeamrelo02.lge.com ([156.147.1.126]:37514 "EHLO
-	lgeamrelo02.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751234AbaJ2FOQ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Oct 2014 01:14:16 -0400
-In-Reply-To: <54504B4E.2070208@samsung.com>
-Content-Language: ko
+Received: from mga09.intel.com ([134.134.136.24]:57296 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755504AbaJ2IzC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Oct 2014 04:55:02 -0400
+In-Reply-To: <5303217.pZOl7Wlk1k@wuerfel>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Chanho Min' <chanho.min@lge.com>, 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Seungwon Jeon' <tgih.jun@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'HyoJun Im' <hyojun.im@lge.com>, gunho.lee@lge.com, 'CPGS' <cpgs@samsung.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi
-
-I have read the specifications document to answer your question.
-It is better, I think, the host controller is changed into DDR50 mode w=
-hen
-to change the eMMC bus mode into DDR50
-There will no problem because the no data line will be used in DDR50 mo=
-de
-during the transition to HS400.
-
-
-So we drop this patch
-
-Sorry for confusing. Thanks for the helpful response.
-
------Original Message-----
-=46rom: Jaehoon Chung [mailto:jh80.chung@samsung.com]=20
-Sent: Wednesday, October 29, 2014 11:05 AM
-To: =C0=AF=C7=D1=B0=E6; 'Jaehoon Chung'; 'Chanho Min'; 'Chris Ball'; 'U=
-lf Hansson';
-'Seungwon Jeon'
-Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; 'HyoJun Im=
-';
-gunho.lee@lge.com; 'CPGS'
-Subject: Re: [PATCH] mmc:core: fix hs400 timing selection
-
-Hi,
-
-On 10/29/2014 08:52 AM, =C0=AF=C7=D1=B0=E6 wrote:
-> Hi I'm Hankyung Yu
->=20
-> I will answer instead Chanho Min
->=20
-> After mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
->=20
-> Host controller set to SDR transfer
->=20
-> so is to change to a DDR transfer mode.
-
-As commit message was mentioned, I have checked the JEDEC v5.01 spec(6.=
-6.5).
-There is no mention that mode needs to change to DDR mode.
-
-And i know HS400 mode is only support the 8bit buswidth.
-If HS200 mode was set to 4bit buswidth, is HS400 working fine?
-
-Best Regards,
-Jaehoon Chung
-
->=20
->=20
-> -----Original Message-----
-> From: Jaehoon Chung [mailto:jh80.chung@samsung.com]
-> Sent: Tuesday, October 28, 2014 1:38 PM
-> To: Chanho Min; Chris Ball; Ulf Hansson; Seungwon Jeon; Jaehoon Chung
-> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; HyoJun=20
-> Im; gunho.lee@lge.com; Hankyung Yu; CPGS
-> Subject: Re: [PATCH] mmc:core: fix hs400 timing selection
->=20
-> Hi, Chanho.
->=20
-> On 10/22/2014 11:55 AM, Chanho Min wrote:
->> According to JEDEC v5.01 spec (6.6.5), In order to switch to HS400=20
->> mode, host should perform the following steps.
+On 28/10/14 17:38, Arnd Bergmann wrote:
+> On Tuesday 28 October 2014 17:14:25 Adrian Hunter wrote:
+>> On 28/10/2014 5:08 p.m., Arnd Bergmann wrote:
+>>> On Tuesday 28 October 2014 16:14:46 Adrian Hunter wrote:
+>>>> On 28/10/2014 3:54 p.m., Arnd Bergmann wrote:
+>>>>> On Tuesday 28 October 2014 13:41:30 Adrian Hunter wrote:
+>>>>>> On 28/10/14 12:18, Arnd Bergmann wrote:
+>>>>>>> On Tuesday 28 October 2014 12:05:30 Adrian Hunter wrote:
+>>>>>>>> On 28/10/14 11:43, Arnd Bergmann wrote:
+>>>>>>>>> On Tuesday 28 October 2014 10:37:20 Adrian Hunter wrote:
+>>>>>>>>>>    static int sdhci_acpi_enable_dma(struct sdhci_host *host)
+>>>>>>>>>>    {
+>>>>>>>>>> -       return 0;
+>>>>>>>>>> +       struct sdhci_acpi_host *c = sdhci_priv(host);
+>>>>>>>>>> +       struct device *dev = &c->pdev->dev;
+>>>>>>>>>> +       int err = -1;
+>>>>>>>>>> +
+>>>>>>>>>> +       if (c->dma_setup)
+>>>>>>>>>> +               return 0;
+>>>>>>>>>> +
+>>>>>>>>>> +       if (host->flags & SDHCI_USE_64_BIT_DMA) {
+>>>>>>>>>> +               if (host->quirks2 & SDHCI_QUIRK2_BROKEN_64_BIT_DMA) {
+>>>>>>>>>> +                       host->flags &= ~SDHCI_USE_64_BIT_DMA;
+>>>>>>>>>> +               } else {
+>>>>>>>>>> +                       err = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
+>>>>>>>>>> +                       if (err)
+>>>>>>>>>> +                               dev_warn(dev, "Failed to set 64-bit DMA mask\n");
+>>>>>>>>>> +               }
+>>>>>>>>>> +       }
+>>>>>>>>>> +
+>>>>>>>>>> +       if (err)
+>>>>>>>>>> +               err = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32));
+>>>>>>>>>> +
+>>>>>>>>>> +       c->dma_setup = !err;
+>>>>>>>>>> +
+>>>>>>>>>> +       return err;
+>>>>>>>>>>    }
+>>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> I don't think it's worth a dev_warn() message (maybe dev_info), there is nothing
+>>>>>>>>
+>>>>>>>> It is worth a dev_warn because 32-bit DMA can allocate memory for bounce
+>>>>>>>> buffers which jeopardizes memory reclaim.
+>>>>>>>
+>>>>>>> Then you should also warn if SDHCI_USE_64_BIT_DMA isn't or if
+>>>>>>> SDHCI_QUIRK2_BROKEN_64_BIT_DMA is set I guess.
+>>>>>>
+>>>>>> The warning is for when the controller supports 64-bit, not when it doesn't.
+>>>>>
+>>>>> But why warn about a feature of the controller being present? You just
+>>>>> said it's a problem for memory reclaim if 64-bit DMA is not supported.
+>>>>
+>>>> The warning is for when the controller supports 64-bit but it can't
+>>>> get a 64-bit DMA mask, and might therefore need to bounce things.
+>>>
+>>> What does "can't get a 64-bit DMA mask" mean? This is just a different
+>>> way to say it doesn't support 64-bit for some reason.
 >>
->>  1. HS200 mode selection completed
->>  2. Set HS_TIMING to 0x01(High Speed)  3. Host changes frequency to=20
->> =3D< 52MHz  4. Set the bus width to DDR 8bit (CMD6)  5. Host may rea=
-d=20
->> Driver Strength (CMD8)  6. Set HS_TIMING to 0x03 (HS400)
->>
->> In current implementation, the order of 2 and 3 is reversed.
->> The HS_TIMING field should be set to 0x1 before the clock frequency=20
->> is set to a value not greater than 52 MHz. Otherwise, Initialization=
-=20
->> of timing can be failed. Also, the host contoller's UHS timing mode=20
->> should be set to DDR50 after the bus width is set to DDR 8bit.
->>
->> Signed-off-by: Hankyung Yu <hankyung.yu@lge.com>
->> Signed-off-by: Chanho Min <chanho.min@lge.com>
->> ---
->>  drivers/mmc/core/mmc.c |   13 ++++++++++---
->>  1 file changed, 10 insertions(+), 3 deletions(-)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
->> a301a78..52f78e0 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1061,9 +1061,6 @@ static int mmc_select_hs400(struct mmc_card *c=
-ard)
->>  	 * Before switching to dual data rate operation for HS400,
->>  	 * it is required to convert from HS200 mode to HS mode.
->>  	 */
->> -	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
->> -	mmc_set_bus_speed(card);
->> -
->>  	err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>  			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
->>  			   card->ext_csd.generic_cmd6_time, @@ -1074,6
-> +1071,14 @@ static
->> int mmc_select_hs400(struct mmc_card *card)
->>  		return err;
->>  	}
->> =20
->> +	/*
->> +	 * According to JEDEC v5.01 spec (6.6.5), Clock frequency should
->> +	 * be set to a value not greater than 52MHz after the HS_TIMING
->> +	 * field is set to 0x1.
->> +	 */
->> +	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
->> +	mmc_set_bus_speed(card);
->> +
->>  	err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>  			 EXT_CSD_BUS_WIDTH,
->>  			 EXT_CSD_DDR_BUS_WIDTH_8,
->> @@ -1084,6 +1089,8 @@ static int mmc_select_hs400(struct mmc_card *c=
-ard)
->>  		return err;
->>  	}
->> =20
->> +	mmc_set_timing(card->host, MMC_TIMING_MMC_DDR52);
->> +
->=20
-> I didn't know why timing is set to ddr50.
->=20
-> Best Regards,
-> Jaehoon Chung
->=20
->>  	err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>  			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS400,
->>  			   card->ext_csd.generic_cmd6_time,
->>
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=20
-> in the body of a message to majordomo@vger.kernel.org More majordomo=20
-> info at  http://vger.kernel.org/majordomo-info.html
->=20
+>> The host controller advertises whether it is capable of 64-bit DMA.  If
+>> it is 64-bit capable but the driver cannot get a 64-bit DMA mask it issues
+>> a warning.
+> 
+> But the host controller doesn't know if it's 64-bit capable, nor should
+> it know. All the host controller knows is that it has registers to perform
+> 64-bit DMA, but the platform code (ACPI in your case) is the only thing that
+> knows how many of those address lines are connected to an upstream bus.
+
+No, the SDHCI spec. says:
+
+	64-bit System Bus Support
+	Setting 1 to this bit indicates that the Host Controller supports 64-bit
+	address descriptor mode and is connected to 64-bit address system bus.
+
+So the expectation is that it is on a 64-bit bus.  The warning is reasonable.
 
