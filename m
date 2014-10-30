@@ -1,148 +1,63 @@
-From: Addy Ke <addy.ke@rock-chips.com>
-Subject: [PATCH] mmc: dw_mmc: add support for the other bit of sdio interrupt
-Date: Thu, 30 Oct 2014 18:50:40 +0800
-Message-ID: <1414666240-16782-1-git-send-email-addy.ke@rock-chips.com>
-References: <1414635679-12565-1-git-send-email-addy.ke@rock-chips.com>
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1414635679-12565-1-git-send-email-addy.ke@rock-chips.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org
-Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com, Addy Ke <addy.ke@rock-chips.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 00/15] mmc: sdhci: Add 64-bit ADMA support
+Date: Thu, 30 Oct 2014 12:50:59 +0200
+Message-ID: <54521813.9050308@intel.com>
+References: <1413883585-16299-1-git-send-email-adrian.hunter@intel.com> <2905300.MGH0Qn3mUo@wuerfel> <5451F96C.6070606@intel.com> <7275405.tTXMrp5n17@wuerfel>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga03.intel.com ([134.134.136.65]:26919 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1758954AbaJ3Kw3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 30 Oct 2014 06:52:29 -0400
+In-Reply-To: <7275405.tTXMrp5n17@wuerfel>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-The bit of sdio interrupt is 16 in designware implementation,
-but it is 24 in RK3288. This patch add sdio_id0 for the number
-of slot0 in the SDIO interrupt registers, which can be set in
-platform DT table, such as:
-- rockchip,sdio-interrupt-slot0 = <8>;
+On 30/10/14 12:00, Arnd Bergmann wrote:
+> On Thursday 30 October 2014 10:40:12 Adrian Hunter wrote:
+>> On 30/10/14 10:05, Arnd Bergmann wrote:
+>>> On Thursday 30 October 2014 09:25:54 Adrian Hunter wrote:
+>>>> On 21/10/14 12:26, Adrian Hunter wrote:
+>>>>> Hi
+>>>>>
+>>>>> Here are patches to add 64-bit ADMA support to the SDHCI driver.
+>>>>>
+>>>>> The patchset starts with 3 minor fixes related to SDHCI ADMA,
+>>>>> then there are 8 preparatory patches, then 3 main patches, then
+>>>>> the mmc_test "Badly aligned" tests are extended slightly.
+>>>>
+>>>> Hi Ulf
+>>>>
+>>>> Can you take these?  Note that there was a V2 of
+>>>> "mmc: sdhci-acpi: Add 64-bit DMA support".  Also
+>>>> that patch is dependent (for functionality not
+>>>> compilation) on a patch in v3.18-rc2 so it is slightly
+>>>> preferable if you pull v3.18-rc2 first.
+>>>
+>>> You still haven't addressed my comments about clearing
+>>> the SDHCI_USE_64_BIT_DMA flag if the platform finds that
+>>> hardware has set this bit incorrectly.
+>>
+>> Yes I did.  I said there was no need:
+>>
+>>         http://marc.info/?l=linux-mmc&m=141449082331402&w=2
+>>
+>> I would also note that the SDHCI spec does not say explicitly
+>> that a 64-bit device supports 32-bit DMA descriptors.
+>>
+>> If the hardware really is broken, the SDHCI_QUIRK2_BROKEN_64_BIT_DMA
+>> should be used.
+> 
+> You also said that the flag is defined to mean that 64-bit DMA
+> is working and that you want to show the warning when the hardware
+> and the firmware disagree about this.  If you have an (at least)
+> 50% chance that the hardware is lying, you really shouldn't believe
+> it.
 
-Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
----
- drivers/mmc/host/dw_mmc-rockchip.c | 13 +++++++++++++
- drivers/mmc/host/dw_mmc.c          | 12 +++++++-----
- drivers/mmc/host/dw_mmc.h          |  2 ++
- include/linux/mmc/dw_mmc.h         |  3 +++
- 4 files changed, 25 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index f0c2cb1..54655e7 100644
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -65,6 +65,18 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- 	}
- }
- 
-+static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
-+{
-+	struct device_node *np = host->dev->of_node;
-+	int sdio_id0;
-+
-+	if (!of_property_read_u32(np, "rockchip,sdio-interrupt-slot0",
-+				  &sdio_id0))
-+		host->sdio_id0 = sdio_id0;
-+
-+	return 0;
-+}
-+
- static const struct dw_mci_drv_data rk2928_drv_data = {
- 	.prepare_command        = dw_mci_rockchip_prepare_command,
- };
-@@ -73,6 +85,7 @@ static const struct dw_mci_drv_data rk3288_drv_data = {
- 	.prepare_command        = dw_mci_rockchip_prepare_command,
- 	.set_ios		= dw_mci_rk3288_set_ios,
- 	.setup_clock    = dw_mci_rk3288_setup_clock,
-+	.parse_dt	= dw_mci_rk3288_parse_dt,
- };
- 
- static const struct of_device_id dw_mci_rockchip_match[] = {
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 69f0cc6..2ea7467 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -819,7 +819,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
- 
- 		/* enable clock; only low power if no SDIO */
- 		clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
--		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->id)))
-+		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->sdio_id)))
- 			clk_en_a |= SDMMC_CLKEN_LOW_PWR << slot->id;
- 		mci_writel(host, CLKENA, clk_en_a);
- 
-@@ -1180,10 +1180,10 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
- 		dw_mci_disable_low_power(slot);
- 
- 		mci_writel(host, INTMASK,
--			   (int_mask | SDMMC_INT_SDIO(slot->id)));
-+			   (int_mask | SDMMC_INT_SDIO(slot->sdio_id)));
- 	} else {
- 		mci_writel(host, INTMASK,
--			   (int_mask & ~SDMMC_INT_SDIO(slot->id)));
-+			   (int_mask & ~SDMMC_INT_SDIO(slot->sdio_id)));
- 	}
- }
- 
-@@ -2035,8 +2035,9 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 		/* Handle SDIO Interrupts */
- 		for (i = 0; i < host->num_slots; i++) {
- 			struct dw_mci_slot *slot = host->slot[i];
--			if (pending & SDMMC_INT_SDIO(i)) {
--				mci_writel(host, RINTSTS, SDMMC_INT_SDIO(i));
-+			if (pending & SDMMC_INT_SDIO(slot->sdio_id)) {
-+				mci_writel(host, RINTSTS,
-+					   SDMMC_INT_SDIO(slot->sdio_id));
- 				mmc_signal_sdio_irq(slot->mmc);
- 			}
- 		}
-@@ -2206,6 +2207,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 
- 	slot = mmc_priv(mmc);
- 	slot->id = id;
-+	slot->sdio_id = host->sdio_id0 + id;
- 	slot->mmc = mmc;
- 	slot->host = host;
- 	host->slot[id] = slot;
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 01b99e8..3e966a9 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -214,6 +214,7 @@ extern int dw_mci_resume(struct dw_mci *host);
-  *	with CONFIG_MMC_CLKGATE.
-  * @flags: Random state bits associated with the slot.
-  * @id: Number of this slot.
-+ * @sdio_id: Number of this slot in the SDIO interrupt registers.
-  * @last_detect_state: Most recently observed card detect state.
-  */
- struct dw_mci_slot {
-@@ -234,6 +235,7 @@ struct dw_mci_slot {
- #define DW_MMC_CARD_PRESENT	0
- #define DW_MMC_CARD_NEED_INIT	1
- 	int			id;
-+	int			sdio_id;
- 	int			last_detect_state;
- };
- 
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 0013669..4c0d3f2 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -96,6 +96,7 @@ struct mmc_data;
-  * @quirks: Set of quirks that apply to specific versions of the IP.
-  * @irq_flags: The flags to be passed to request_irq.
-  * @irq: The irq value to be passed to request_irq.
-+ * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
-  *
-  * Locking
-  * =======
-@@ -193,6 +194,8 @@ struct dw_mci {
- 	bool			vqmmc_enabled;
- 	unsigned long		irq_flags; /* IRQ flags */
- 	int			irq;
-+
-+	int			sdio_id0;
- };
- 
- /* DMA ops for Internal/External DMAC interface */
--- 
-1.8.3.2
-
+Just because there are two options does not mean they are each equally
+likely.
 
