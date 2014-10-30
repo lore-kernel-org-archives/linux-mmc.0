@@ -1,122 +1,41 @@
-From: Vincent Wan <vincent.wan@amd.com>
-Subject: [PATCH] mmc:  Add a quirk for AMD  SDHC transfer mode register need
- to be cleared for cmd without data
-Date: Thu, 30 Oct 2014 12:06:27 +0800
-Message-ID: <5451B943.3060104@amd.com>
-References: <541A7F3D.70909@amd.com>
+From: Scott Branden <sbranden@broadcom.com>
+Subject: [PATCHv2 0/5] sdhci-bcm2835: added quirk and removed udelay in write ops
+Date: Wed, 29 Oct 2014 23:36:52 -0700
+Message-ID: <1414651017-3545-1-git-send-email-sbranden@broadcom.com>
+References: <Scott Branden <sbranden@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bbn0104.outbound.protection.outlook.com ([157.56.111.104]:10507
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750777AbaJ3FCm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 30 Oct 2014 01:02:42 -0400
-In-Reply-To: <541A7F3D.70909@amd.com>
+Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:15186 "EHLO
+	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757260AbaJ3GhD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Oct 2014 02:37:03 -0400
+In-Reply-To: <Scott Branden <sbranden@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-kernel@vger.kernel.org
-Cc: "Huang, Ray" <Ray.Huang@amd.com>, Wan Zongshun <mcuos.com@gmail.com>, Arindam Nath <arindam.nath@amd.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Peter Griffin <peter.griffin@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Chris Ball <chris@printf.net>, Piotr Krol <pietrushnic@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Joe Perches <joe@perches.com>, linux-rpi-kernel@lists.infradead.org, Ray Jui <rjui@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, Scott Branden <sbranden@broadcom.com>
 
-SDHC controller in AMD chipsets require SDHC transfer mode
-register to be cleared for commands without data. The issue was
-uncovered during testing eMMC cards on KB/ML based platforms.
+This patch contains driver cleanup of sdhci-bcm2835.
+Please note that this has not actually been tested on bcm2835 yet.
+Testing comes from other devices with the same sdhci controller.
 
-Signed-off-by: Vincent Wan <vincent.wan@amd.com>
-Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-Tested-by: Vikram B <vikram.b@amd.com>
-Tested-by: Raghavendra Swamy <raghavendra.swamy@amd.com>
+This patch is being put out for testing and acceptance on the 2835.
+Please test and comment.
 
----
-  drivers/mmc/host/sdhci-pci.c | 27 +++++++++++++++++++++++++++
-  drivers/mmc/host/sdhci.c     | 11 ++++++++---
-  include/linux/mmc/sdhci.h    |  2 ++
-  3 files changed, 37 insertions(+), 3 deletions(-)
+Scott Branden (5):
+  mmc: sdhci-bcm2835: group read and write functions to improve
+    readability
+  mmc: sdhci-bcm2835: make shift calculations consistent
+  mmc: shdci-bcm2835: add efficient back-to-back write workaround
+  mmc: shdci-bcm2835: add verify for 32-bit back-to-back workaround
+  mmc: sdhci-bcm2835: add sdhci quirk
+    SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 6119297..8f5c998 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -645,6 +645,23 @@ static const struct sdhci_pci_fixes sdhci_rtsx = {
-  	.probe_slot	= rtsx_probe_slot,
-  };
+ drivers/mmc/host/Kconfig         |    9 ++
+ drivers/mmc/host/sdhci-bcm2835.c |  172 +++++++++++++++++++++-----------------
+ 2 files changed, 105 insertions(+), 76 deletions(-)
 
-+static int amd_probe(struct sdhci_pci_chip *chip)
-+{
-+	struct pci_dev	*smbus_dev;
-+
-+	smbus_dev = pci_get_device(PCI_VENDOR_ID_AMD,
-+			PCI_DEVICE_ID_AMD_HUDSON2_SMBUS, NULL);
-+
-+	if (smbus_dev && (smbus_dev->revision < 0x51))
-+		chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
-+
-+	return 0;
-+}
-+
-+static const struct sdhci_pci_fixes sdhci_amd = {
-+	.probe		= amd_probe,
-+};
-+
-  static const struct pci_device_id pci_ids[] = {
-  	{
-  		.vendor		= PCI_VENDOR_ID_RICOH,
-@@ -1045,6 +1062,16 @@ static const struct pci_device_id pci_ids[] = {
-  		.driver_data	= (kernel_ulong_t)&sdhci_o2,
-  	},
-
-+	{
-+		.vendor		= PCI_VENDOR_ID_AMD,
-+		.device		= PCI_ANY_ID,
-+		.class		= PCI_CLASS_SYSTEM_SDHCI << 8,
-+		.class_mask	= 0xFFFF00,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_amd,
-+	},
-+
-  	{	/* Generic SD host controller */
-  		PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
-  	},
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ada1a3e..8085f26 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -889,10 +889,15 @@ static void sdhci_set_transfer_mode(struct 
-sdhci_host *host,
-  	struct mmc_data *data = cmd->data;
-
-  	if (data == NULL) {
--		/* clear Auto CMD settings for no data CMDs */
--		mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
--		sdhci_writew(host, mode & ~(SDHCI_TRNS_AUTO_CMD12 |
-+		if (host->quirks2 &
-+			SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD) {
-+			sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
-+		} else {
-+			/* clear Auto CMD settings for no data CMDs */
-+			mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
-+			sdhci_writew(host, mode & ~(SDHCI_TRNS_AUTO_CMD12 |
-  				SDHCI_TRNS_AUTO_CMD23), SDHCI_TRANSFER_MODE);
-+		}
-  		return;
-  	}
-
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index dba793e..0a287aa 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -100,6 +100,8 @@ struct sdhci_host {
-  #define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
-  /* Stop command (CMD12) can set Transfer Complete when not using 
-MMC_RSP_BUSY */
-  #define SDHCI_QUIRK2_STOP_WITH_TC			(1<<8)
-+/* need clear transfer mode register before send cmd */
-+#define SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD	(1<<9)
-
-  	int irq;		/* Device IRQ */
-  	void __iomem *ioaddr;	/* Mapped address */
 -- 
-1.8.1.2
+1.7.9.5
 
