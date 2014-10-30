@@ -1,179 +1,76 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: add support for the other bit of sdio
- interrupt
-Date: Thu, 30 Oct 2014 20:17:58 +0900
-Message-ID: <54521E66.2080300@samsung.com>
-References: <1414635679-12565-1-git-send-email-addy.ke@rock-chips.com>
- <1414666240-16782-1-git-send-email-addy.ke@rock-chips.com>
- <CAPDyKFqgNmLbbJpATCqwu0R65xuf=TKP0+pjskGj4xZOjXN8Hw@mail.gmail.com>
+From: Pramod Gurav <pramod.gurav.etc@gmail.com>
+Subject: Re: [PATCH v2] mmc: davinci: Fix and simplify probe failure path
+Date: Thu, 30 Oct 2014 17:15:42 +0530
+Message-ID: <CAMf-jSm-Fc6gcnSqB4cixjqZSQOrvSLaQ2hXqy1TZncFrjn8hw@mail.gmail.com>
+References: <1414655193-16952-1-git-send-email-pramod.gurav@smartplayin.com>
+	<CAPDyKFqFOb9L6WyFhLbSY-dQy_75YVUhTzVsBku1BKcEMmgpBg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-reply-to: <CAPDyKFqgNmLbbJpATCqwu0R65xuf=TKP0+pjskGj4xZOjXN8Hw@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Addy Ke <addy.ke@rock-chips.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?B?SGVpa28gU3TDvGJuZXI=?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Doug Anderson <dianders@chromium.org>, Sonny Rao <sonnyrao@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-rockchip@lists.infradead.org, zhenfu
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:59668 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759041AbaJ3Lpo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Oct 2014 07:45:44 -0400
+In-Reply-To: <CAPDyKFqFOb9L6WyFhLbSY-dQy_75YVUhTzVsBku1BKcEMmgpBg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Pramod Gurav <pramod.gurav@smartplayin.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 10/30/2014 08:11 PM, Ulf Hansson wrote:
-> On 30 October 2014 11:50, Addy Ke <addy.ke@rock-chips.com> wrote:
->> The bit of sdio interrupt is 16 in designware implementation,
->> but it is 24 in RK3288. This patch add sdio_id0 for the number
->> of slot0 in the SDIO interrupt registers, which can be set in
->> platform DT table, such as:
->> - rockchip,sdio-interrupt-slot0 = <8>;
-> 
-> No, this shouldn't be information in DT.
-> 
-> Instead this can be kept in the driver, depending on what version of
-> the mmc controller that is being used. Right!?
+Thanks Ulf,
 
-sdio-interrupt slot doesn't depend on IP version.
-maybe it depends on rock-chip board.
+On Thu, Oct 30, 2014 at 4:38 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 30 October 2014 08:46, Pramod Gurav <pramod.gurav@smartplayin.com> wrote:
+>> The sequence of resource release in probe failure path in this
+>> driver was wrong and needed fixes to cleanly unload the driver.
+>> This changes does the same by switching to managed resources and
+>> fixes return path to release resource in proper sequence.
+>>
+>> Cc: Chris Ball <chris@printf.net>
+>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+>> Cc: linux-mmc@vger.kernel.org
+>
+> Please remove these Ccs above from the commit message. It's not needed
+> when you anyway need to send the patches directly to these addresses.
+Will remove Cc.
 
-Best Regards,
-Jaehoon Chung
+>
+>> Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
+>> ---
+..
 
-> 
+>>
+>>         host = mmc_priv(mmc);
+>>         host->mmc = mmc;        /* Important */
+>> @@ -1275,15 +1273,16 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
+>>                 host->txdma = r->start;
+>>
+>>         host->mem_res = mem;
+>> -       host->base = ioremap(mem->start, mem_size);
+>> -       if (!host->base)
+>> -               goto out;
+>> +       host->base = devm_ioremap(&pdev->dev, mem->start, mem_size);
+>
+> I realized that you should use devm_ioremap_resource() instead. That
+> would simplify the code even more.
+>
+Yes, we could have used devm_ioremap_resource() but this driver stores
+the return from devm_request_mem_region() in host->mem_res and uses
+the same in the other part of drivers. Is there a way to work this
+around?
+
+> [...]
+>
 > Kind regards
 > Uffe
-> 
->>
->> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
->> ---
->>  drivers/mmc/host/dw_mmc-rockchip.c | 13 +++++++++++++
->>  drivers/mmc/host/dw_mmc.c          | 12 +++++++-----
->>  drivers/mmc/host/dw_mmc.h          |  2 ++
->>  include/linux/mmc/dw_mmc.h         |  3 +++
->>  4 files changed, 25 insertions(+), 5 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
->> index f0c2cb1..54655e7 100644
->> --- a/drivers/mmc/host/dw_mmc-rockchip.c
->> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
->> @@ -65,6 +65,18 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->>         }
->>  }
->>
->> +static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
->> +{
->> +       struct device_node *np = host->dev->of_node;
->> +       int sdio_id0;
->> +
->> +       if (!of_property_read_u32(np, "rockchip,sdio-interrupt-slot0",
->> +                                 &sdio_id0))
->> +               host->sdio_id0 = sdio_id0;
->> +
->> +       return 0;
->> +}
->> +
->>  static const struct dw_mci_drv_data rk2928_drv_data = {
->>         .prepare_command        = dw_mci_rockchip_prepare_command,
->>  };
->> @@ -73,6 +85,7 @@ static const struct dw_mci_drv_data rk3288_drv_data = {
->>         .prepare_command        = dw_mci_rockchip_prepare_command,
->>         .set_ios                = dw_mci_rk3288_set_ios,
->>         .setup_clock    = dw_mci_rk3288_setup_clock,
->> +       .parse_dt       = dw_mci_rk3288_parse_dt,
->>  };
->>
->>  static const struct of_device_id dw_mci_rockchip_match[] = {
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 69f0cc6..2ea7467 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -819,7 +819,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->>
->>                 /* enable clock; only low power if no SDIO */
->>                 clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
->> -               if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->id)))
->> +               if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->sdio_id)))
->>                         clk_en_a |= SDMMC_CLKEN_LOW_PWR << slot->id;
->>                 mci_writel(host, CLKENA, clk_en_a);
->>
->> @@ -1180,10 +1180,10 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
->>                 dw_mci_disable_low_power(slot);
->>
->>                 mci_writel(host, INTMASK,
->> -                          (int_mask | SDMMC_INT_SDIO(slot->id)));
->> +                          (int_mask | SDMMC_INT_SDIO(slot->sdio_id)));
->>         } else {
->>                 mci_writel(host, INTMASK,
->> -                          (int_mask & ~SDMMC_INT_SDIO(slot->id)));
->> +                          (int_mask & ~SDMMC_INT_SDIO(slot->sdio_id)));
->>         }
->>  }
->>
->> @@ -2035,8 +2035,9 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->>                 /* Handle SDIO Interrupts */
->>                 for (i = 0; i < host->num_slots; i++) {
->>                         struct dw_mci_slot *slot = host->slot[i];
->> -                       if (pending & SDMMC_INT_SDIO(i)) {
->> -                               mci_writel(host, RINTSTS, SDMMC_INT_SDIO(i));
->> +                       if (pending & SDMMC_INT_SDIO(slot->sdio_id)) {
->> +                               mci_writel(host, RINTSTS,
->> +                                          SDMMC_INT_SDIO(slot->sdio_id));
->>                                 mmc_signal_sdio_irq(slot->mmc);
->>                         }
->>                 }
->> @@ -2206,6 +2207,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->>
->>         slot = mmc_priv(mmc);
->>         slot->id = id;
->> +       slot->sdio_id = host->sdio_id0 + id;
->>         slot->mmc = mmc;
->>         slot->host = host;
->>         host->slot[id] = slot;
->> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
->> index 01b99e8..3e966a9 100644
->> --- a/drivers/mmc/host/dw_mmc.h
->> +++ b/drivers/mmc/host/dw_mmc.h
->> @@ -214,6 +214,7 @@ extern int dw_mci_resume(struct dw_mci *host);
->>   *     with CONFIG_MMC_CLKGATE.
->>   * @flags: Random state bits associated with the slot.
->>   * @id: Number of this slot.
->> + * @sdio_id: Number of this slot in the SDIO interrupt registers.
->>   * @last_detect_state: Most recently observed card detect state.
->>   */
->>  struct dw_mci_slot {
->> @@ -234,6 +235,7 @@ struct dw_mci_slot {
->>  #define DW_MMC_CARD_PRESENT    0
->>  #define DW_MMC_CARD_NEED_INIT  1
->>         int                     id;
->> +       int                     sdio_id;
->>         int                     last_detect_state;
->>  };
->>
->> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
->> index 0013669..4c0d3f2 100644
->> --- a/include/linux/mmc/dw_mmc.h
->> +++ b/include/linux/mmc/dw_mmc.h
->> @@ -96,6 +96,7 @@ struct mmc_data;
->>   * @quirks: Set of quirks that apply to specific versions of the IP.
->>   * @irq_flags: The flags to be passed to request_irq.
->>   * @irq: The irq value to be passed to request_irq.
->> + * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
->>   *
->>   * Locking
->>   * =======
->> @@ -193,6 +194,8 @@ struct dw_mci {
->>         bool                    vqmmc_enabled;
->>         unsigned long           irq_flags; /* IRQ flags */
->>         int                     irq;
->> +
->> +       int                     sdio_id0;
->>  };
->>
->>  /* DMA ops for Internal/External DMAC interface */
->> --
->> 1.8.3.2
->>
->>
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > Please read the FAQ at  http://www.tux.org/lkml/
-> 
 
+
+
+-- 
+Thanks and Regards
+Pramod
