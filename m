@@ -1,136 +1,283 @@
-From: Addy Ke <addy.ke@rock-chips.com>
-Subject: [PATCH] mmc: dw_mmc: add a quirk for the defferent bit of sdio interrupt
-Date: Thu, 30 Oct 2014 10:21:19 +0800
-Message-ID: <1414635679-12565-1-git-send-email-addy.ke@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from regular2.263xmail.com ([211.157.152.4]:59260 "EHLO
-	regular2.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932997AbaJ3CVy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Oct 2014 22:21:54 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Wenyou Yang <wenyou.yang@atmel.com>
+Subject: [PATCH v2] mmc: atmel-mci: add runtime pm support
+Date: Thu, 30 Oct 2014 12:00:41 +0800
+Message-ID: <1414641641-32691-1-git-send-email-wenyou.yang@atmel.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, chris@printf.net
+Cc: khilman@kernel.org, nicolas.ferre@atmel.com, ludovic.desroches@atmel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, wenyou.yang@atmel.com
 List-Id: linux-mmc@vger.kernel.org
-To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org
-Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com, Addy Ke <addy.ke@rock-chips.com>
 
-This patch add a quirk: DW_MCI_QUIRK_SDIO_INT_24BIT.
+Add runtime pm support to atmel mci controller.
+Use runtime pm APIs to enable/disable atmel mci's clock.
+Use runtime autosuspend APIs to enable auto suspend delay.
 
-The bit of sdio interrupt is 16 in designware implementation, but
-is 24 in RK3288. To support RK3288 mmc controller, we need add
-a quirk for it.
-
-Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+Signed-off-by: Wenyou Yang <wenyou.yang@atmel.com>
 ---
- drivers/mmc/host/dw_mmc.c  | 32 +++++++++++++++++++++++++++-----
- drivers/mmc/host/dw_mmc.h  |  1 +
- include/linux/mmc/dw_mmc.h |  2 ++
- 3 files changed, 30 insertions(+), 5 deletions(-)
+Changes v1 -> v2:
+* Adjust the APIs and invoking sequence to avoid clock unbalance issue during ->probe.
+* Fix miss to invoke clk_disable_unprepare() in the error handling in ->probe.
+* Remove atmci_suspend/resume and use pm_runtime_force_suspend/resume() to simplify code.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 69f0cc6..db29621 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -778,6 +778,12 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
- 	u32 div;
- 	u32 clk_en_a;
- 	u32 sdmmc_cmd_bits = SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT;
-+	u32 sdio_int_bit;
+ drivers/mmc/host/atmel-mci.c |   90 +++++++++++++++++++++++++++++++-----------
+ 1 file changed, 67 insertions(+), 23 deletions(-)
+
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 0b9ddf8..f8f2bbe 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -37,6 +37,8 @@
+ 
+ #include <linux/atmel-mci.h>
+ #include <linux/atmel_pdc.h>
++#include <linux/pm.h>
++#include <linux/pm_runtime.h>
+ 
+ #include <asm/cacheflush.h>
+ #include <asm/io.h>
+@@ -44,6 +46,8 @@
+ 
+ #include "atmel-mci-regs.h"
+ 
++#define AUTOSUSPEND_DELAY	50
 +
-+	if (host->quirks & DW_MCI_QUIRK_SDIO_INT_24BIT)
-+		sdio_int_bit = SDMMC_INT_SDIO_24BIT(slot->id);
-+	else
-+		sdio_int_bit = SDMMC_INT_SDIO(slot->id);
+ #define ATMCI_DATA_ERROR_FLAGS	(ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
+ #define ATMCI_DMA_THRESHOLD	16
  
- 	/* We must continue to set bit 28 in CMD until the change is complete */
- 	if (host->state == STATE_WAITING_CMD11_DONE)
-@@ -819,7 +825,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+@@ -386,20 +390,19 @@ static int atmci_regs_show(struct seq_file *s, void *v)
+ 	if (!buf)
+ 		return -ENOMEM;
  
- 		/* enable clock; only low power if no SDIO */
- 		clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
--		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->id)))
-+		if (!(mci_readl(host, INTMASK) & sdio_int_bit))
- 			clk_en_a |= SDMMC_CLKEN_LOW_PWR << slot->id;
- 		mci_writel(host, CLKENA, clk_en_a);
- 
-@@ -1167,6 +1173,12 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
- 	struct dw_mci *host = slot->host;
- 	u32 int_mask;
-+	u32 sdio_int_bit;
++	pm_runtime_get_sync(&host->pdev->dev);
 +
-+	if (host->quirks & DW_MCI_QUIRK_SDIO_INT_24BIT)
-+		sdio_int_bit = SDMMC_INT_SDIO_24BIT(slot->id);
-+	else
-+		sdio_int_bit = SDMMC_INT_SDIO(slot->id);
+ 	/*
+ 	 * Grab a more or less consistent snapshot. Note that we're
+ 	 * not disabling interrupts, so IMR and SR may not be
+ 	 * consistent.
+ 	 */
+-	ret = clk_prepare_enable(host->mck);
+-	if (ret)
+-		goto out;
+-
+ 	spin_lock_bh(&host->lock);
+ 	memcpy_fromio(buf, host->regs, ATMCI_REGS_SIZE);
+ 	spin_unlock_bh(&host->lock);
  
- 	/* Enable/disable Slot Specific SDIO interrupt */
- 	int_mask = mci_readl(host, INTMASK);
-@@ -1180,10 +1192,10 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
- 		dw_mci_disable_low_power(slot);
+-	clk_disable_unprepare(host->mck);
++	pm_runtime_mark_last_busy(&host->pdev->dev);
++	pm_runtime_put_autosuspend(&host->pdev->dev);
  
- 		mci_writel(host, INTMASK,
--			   (int_mask | SDMMC_INT_SDIO(slot->id)));
-+			   (int_mask | sdio_int_bit));
- 	} else {
- 		mci_writel(host, INTMASK,
--			   (int_mask & ~SDMMC_INT_SDIO(slot->id)));
-+			   (int_mask & ~sdio_int_bit));
+ 	seq_printf(s, "MR:\t0x%08x%s%s ",
+ 			buf[ATMCI_MR / 4],
+@@ -449,7 +452,6 @@ static int atmci_regs_show(struct seq_file *s, void *v)
+ 				val & ATMCI_CFG_LSYNC ? " LSYNC" : "");
  	}
+ 
+-out:
+ 	kfree(buf);
+ 
+ 	return ret;
+@@ -1252,6 +1254,8 @@ static void atmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	WARN_ON(slot->mrq);
+ 	dev_dbg(&host->pdev->dev, "MRQ: cmd %u\n", mrq->cmd->opcode);
+ 
++	pm_runtime_get_sync(&host->pdev->dev);
++
+ 	/*
+ 	 * We may "know" the card is gone even though there's still an
+ 	 * electrical connection. If so, we really need to communicate
+@@ -1281,7 +1285,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	struct atmel_mci_slot	*slot = mmc_priv(mmc);
+ 	struct atmel_mci	*host = slot->host;
+ 	unsigned int		i;
+-	bool			unprepare_clk;
++
++	pm_runtime_get_sync(&host->pdev->dev);
+ 
+ 	slot->sdc_reg &= ~ATMCI_SDCBUS_MASK;
+ 	switch (ios->bus_width) {
+@@ -1297,13 +1302,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		unsigned int clock_min = ~0U;
+ 		u32 clkdiv;
+ 
+-		clk_prepare(host->mck);
+-		unprepare_clk = true;
+-
+ 		spin_lock_bh(&host->lock);
+ 		if (!host->mode_reg) {
+-			clk_enable(host->mck);
+-			unprepare_clk = false;
+ 			atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
+ 			atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIEN);
+ 			if (host->caps.has_cfg_reg)
+@@ -1371,8 +1371,6 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	} else {
+ 		bool any_slot_active = false;
+ 
+-		unprepare_clk = false;
+-
+ 		spin_lock_bh(&host->lock);
+ 		slot->clock = 0;
+ 		for (i = 0; i < ATMCI_MAX_NR_SLOTS; i++) {
+@@ -1385,17 +1383,12 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
+ 			if (host->mode_reg) {
+ 				atmci_readl(host, ATMCI_MR);
+-				clk_disable(host->mck);
+-				unprepare_clk = true;
+ 			}
+ 			host->mode_reg = 0;
+ 		}
+ 		spin_unlock_bh(&host->lock);
+ 	}
+ 
+-	if (unprepare_clk)
+-		clk_unprepare(host->mck);
+-
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_OFF:
+ 		if (!IS_ERR(mmc->supply.vmmc))
+@@ -1421,6 +1414,9 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		 */
+ 		break;
+ 	}
++
++	pm_runtime_mark_last_busy(&host->pdev->dev);
++	pm_runtime_put_autosuspend(&host->pdev->dev);
  }
  
-@@ -2035,8 +2047,15 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 		/* Handle SDIO Interrupts */
- 		for (i = 0; i < host->num_slots; i++) {
- 			struct dw_mci_slot *slot = host->slot[i];
--			if (pending & SDMMC_INT_SDIO(i)) {
--				mci_writel(host, RINTSTS, SDMMC_INT_SDIO(i));
-+			u32 sdio_int_bit;
+ static int atmci_get_ro(struct mmc_host *mmc)
+@@ -1512,6 +1508,9 @@ static void atmci_request_end(struct atmel_mci *host, struct mmc_request *mrq)
+ 	spin_unlock(&host->lock);
+ 	mmc_request_done(prev_mmc, mrq);
+ 	spin_lock(&host->lock);
 +
-+			if (host->quirks & DW_MCI_QUIRK_SDIO_INT_24BIT)
-+				sdio_int_bit = SDMMC_INT_SDIO_24BIT(i);
-+			else
-+				sdio_int_bit = SDMMC_INT_SDIO(i);
++	pm_runtime_mark_last_busy(&host->pdev->dev);
++	pm_runtime_put_autosuspend(&host->pdev->dev);
+ }
+ 
+ static void atmci_command_complete(struct atmel_mci *host,
+@@ -2417,15 +2416,16 @@ static int __init atmci_probe(struct platform_device *pdev)
+ 
+ 	atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
+ 	host->bus_hz = clk_get_rate(host->mck);
+-	clk_disable_unprepare(host->mck);
+ 
+ 	host->mapbase = regs->start;
+ 
+ 	tasklet_init(&host->tasklet, atmci_tasklet_func, (unsigned long)host);
+ 
+ 	ret = request_irq(irq, atmci_interrupt, 0, dev_name(&pdev->dev), host);
+-	if (ret)
++	if (ret) {
++		clk_disable_unprepare(host->mck);
+ 		return ret;
++	}
+ 
+ 	/* Get MCI capabilities and set operations according to it */
+ 	atmci_get_cap(host);
+@@ -2449,6 +2449,12 @@ static int __init atmci_probe(struct platform_device *pdev)
+ 
+ 	setup_timer(&host->timer, atmci_timeout_timer, (unsigned long)host);
+ 
++	pm_runtime_get_noresume(&pdev->dev);
++	pm_runtime_set_active(&pdev->dev);
++	pm_runtime_set_autosuspend_delay(&pdev->dev, AUTOSUSPEND_DELAY);
++	pm_runtime_use_autosuspend(&pdev->dev);
++	pm_runtime_enable(&pdev->dev);
 +
-+			if (pending & sdio_int_bit) {
-+				mci_writel(host, RINTSTS, sdio_int_bit);
- 				mmc_signal_sdio_irq(slot->mmc);
- 			}
- 		}
-@@ -2452,6 +2471,9 @@ static struct dw_mci_of_quirks {
- 	}, {
- 		.quirk	= "disable-wp",
- 		.id	= DW_MCI_QUIRK_NO_WRITE_PROTECT,
-+	}, {
-+		.quirk	= "sdio-int-24bit",
-+		.id	= DW_MCI_QUIRK_SDIO_INT_24BIT,
+ 	/* We need at least one slot to succeed */
+ 	nr_slots = 0;
+ 	ret = -ENODEV;
+@@ -2491,6 +2497,9 @@ static int __init atmci_probe(struct platform_device *pdev)
+ 			"Atmel MCI controller at 0x%08lx irq %d, %u slots\n",
+ 			host->mapbase, irq, nr_slots);
+ 
++	pm_runtime_mark_last_busy(&host->pdev->dev);
++	pm_runtime_put_autosuspend(&pdev->dev);
++
+ 	return 0;
+ 
+ err_dma_alloc:
+@@ -2499,6 +2508,11 @@ err_dma_alloc:
+ 			atmci_cleanup_slot(host->slot[i], i);
+ 	}
+ err_init_slot:
++	clk_disable_unprepare(host->mck);
++
++	pm_runtime_disable(&pdev->dev);
++	pm_runtime_put_noidle(&pdev->dev);
++
+ 	del_timer_sync(&host->timer);
+ 	if (host->dma.chan)
+ 		dma_release_channel(host->dma.chan);
+@@ -2511,6 +2525,8 @@ static int __exit atmci_remove(struct platform_device *pdev)
+ 	struct atmel_mci	*host = platform_get_drvdata(pdev);
+ 	unsigned int		i;
+ 
++	pm_runtime_get_sync(&pdev->dev);
++
+ 	if (host->buffer)
+ 		dma_free_coherent(&pdev->dev, host->buf_size,
+ 		                  host->buffer, host->buf_phys_addr);
+@@ -2520,11 +2536,9 @@ static int __exit atmci_remove(struct platform_device *pdev)
+ 			atmci_cleanup_slot(host->slot[i], i);
+ 	}
+ 
+-	clk_prepare_enable(host->mck);
+ 	atmci_writel(host, ATMCI_IDR, ~0UL);
+ 	atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
+ 	atmci_readl(host, ATMCI_SR);
+-	clk_disable_unprepare(host->mck);
+ 
+ 	del_timer_sync(&host->timer);
+ 	if (host->dma.chan)
+@@ -2532,14 +2546,44 @@ static int __exit atmci_remove(struct platform_device *pdev)
+ 
+ 	free_irq(platform_get_irq(pdev, 0), host);
+ 
++	clk_disable_unprepare(host->mck);
++
++	pm_runtime_disable(&pdev->dev);
++	pm_runtime_put_noidle(&pdev->dev);
++
++	return 0;
++}
++
++#ifdef CONFIG_PM
++static int atmci_runtime_suspend(struct device *dev)
++{
++	struct atmel_mci *host = dev_get_drvdata(dev);
++
++	clk_disable_unprepare(host->mck);
++
+ 	return 0;
+ }
+ 
++static int atmci_runtime_resume(struct device *dev)
++{
++	struct atmel_mci *host = dev_get_drvdata(dev);
++
++	return clk_prepare_enable(host->mck);
++}
++
++static const struct dev_pm_ops atmci_dev_pm_ops = {
++	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
++				pm_runtime_force_resume)
++	SET_PM_RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
++};
++#endif
++
+ static struct platform_driver atmci_driver = {
+ 	.remove		= __exit_p(atmci_remove),
+ 	.driver		= {
+ 		.name		= "atmel_mci",
+ 		.of_match_table	= of_match_ptr(atmci_dt_ids),
++		.pm		= &atmci_dev_pm_ops,
  	},
  };
  
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 01b99e8..6a48015 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -92,6 +92,7 @@
- #define SDMMC_CTYPE_4BIT		BIT(0)
- #define SDMMC_CTYPE_1BIT		0
- /* Interrupt status & mask register defines */
-+#define SDMMC_INT_SDIO_24BIT(n)		BIT(24 + (n))
- #define SDMMC_INT_SDIO(n)		BIT(16 + (n))
- #define SDMMC_INT_EBE			BIT(15)
- #define SDMMC_INT_ACD			BIT(14)
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 0013669..6d4669e 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -217,6 +217,8 @@ struct dw_mci_dma_ops {
- #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
- /* No write protect */
- #define DW_MCI_QUIRK_NO_WRITE_PROTECT		BIT(4)
-+/* In RK3288, the bit of sdio interrupt is 24 */
-+#define DW_MCI_QUIRK_SDIO_INT_24BIT		BIT(5)
- 
- /* Slot level quirks */
- /* This slot has no write protect */
 -- 
-1.8.3.2
-
-
+1.7.9.5
