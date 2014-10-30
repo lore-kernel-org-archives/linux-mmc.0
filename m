@@ -1,21 +1,122 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: add a quirk for the defferent bit of sdio interrupt
-Date: Wed, 29 Oct 2014 21:49:48 -0700
-Message-ID: <CAD=FV=VgCjhO5n5VPo_8QmMPBg1ZDMR8nvmVHS=Le8bxEFmzeA@mail.gmail.com>
-References: <1414635679-12565-1-git-send-email-addy.ke@rock-chips.com>
-	<CAD=FV=Uo3gcnGFn=gpZhV1r+qyZxJ_tpAEiSsu06P=csHTScug@mail.gmail.com>
+From: Vincent Wan <vincent.wan@amd.com>
+Subject: [PATCH] mmc:  Add a quirk for AMD  SDHC transfer mode register need
+ to be cleared for cmd without data
+Date: Thu, 30 Oct 2014 12:06:27 +0800
+Message-ID: <5451B943.3060104@amd.com>
+References: <541A7F3D.70909@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=Uo3gcnGFn=gpZhV1r+qyZxJ_tpAEiSsu06P=csHTScug@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Addy Ke <addy.ke@rock-chips.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>"open list:ARM/Rockchip SoC..." <linux>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1bbn0104.outbound.protection.outlook.com ([157.56.111.104]:10507
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750777AbaJ3FCm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 30 Oct 2014 01:02:42 -0400
+In-Reply-To: <541A7F3D.70909@amd.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-kernel@vger.kernel.org
+Cc: "Huang, Ray" <Ray.Huang@amd.com>, Wan Zongshun <mcuos.com@gmail.com>, Arindam Nath <arindam.nath@amd.com>
 
-Addy,
+SDHC controller in AMD chipsets require SDHC transfer mode
+register to be cleared for commands without data. The issue was
+uncovered during testing eMMC cards on KB/ML based platforms.
 
-On Wed, Oct 29, 2014 at 9:41 PM, Doug Anderson <dianders@chromium.org> wrote:
-> You can avoid a lot of "if" tests if you just add a new "sdio->id"
+Signed-off-by: Vincent Wan <vincent.wan@amd.com>
+Signed-off-by: Arindam Nath <arindam.nath@amd.com>
+Tested-by: Vikram B <vikram.b@amd.com>
+Tested-by: Raghavendra Swamy <raghavendra.swamy@amd.com>
 
-Whoops, I mean "slot->sdio_id"
+---
+  drivers/mmc/host/sdhci-pci.c | 27 +++++++++++++++++++++++++++
+  drivers/mmc/host/sdhci.c     | 11 ++++++++---
+  include/linux/mmc/sdhci.h    |  2 ++
+  3 files changed, 37 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 6119297..8f5c998 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -645,6 +645,23 @@ static const struct sdhci_pci_fixes sdhci_rtsx = {
+  	.probe_slot	= rtsx_probe_slot,
+  };
+
++static int amd_probe(struct sdhci_pci_chip *chip)
++{
++	struct pci_dev	*smbus_dev;
++
++	smbus_dev = pci_get_device(PCI_VENDOR_ID_AMD,
++			PCI_DEVICE_ID_AMD_HUDSON2_SMBUS, NULL);
++
++	if (smbus_dev && (smbus_dev->revision < 0x51))
++		chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
++
++	return 0;
++}
++
++static const struct sdhci_pci_fixes sdhci_amd = {
++	.probe		= amd_probe,
++};
++
+  static const struct pci_device_id pci_ids[] = {
+  	{
+  		.vendor		= PCI_VENDOR_ID_RICOH,
+@@ -1045,6 +1062,16 @@ static const struct pci_device_id pci_ids[] = {
+  		.driver_data	= (kernel_ulong_t)&sdhci_o2,
+  	},
+
++	{
++		.vendor		= PCI_VENDOR_ID_AMD,
++		.device		= PCI_ANY_ID,
++		.class		= PCI_CLASS_SYSTEM_SDHCI << 8,
++		.class_mask	= 0xFFFF00,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_amd,
++	},
++
+  	{	/* Generic SD host controller */
+  		PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
+  	},
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index ada1a3e..8085f26 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -889,10 +889,15 @@ static void sdhci_set_transfer_mode(struct 
+sdhci_host *host,
+  	struct mmc_data *data = cmd->data;
+
+  	if (data == NULL) {
+-		/* clear Auto CMD settings for no data CMDs */
+-		mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
+-		sdhci_writew(host, mode & ~(SDHCI_TRNS_AUTO_CMD12 |
++		if (host->quirks2 &
++			SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD) {
++			sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
++		} else {
++			/* clear Auto CMD settings for no data CMDs */
++			mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
++			sdhci_writew(host, mode & ~(SDHCI_TRNS_AUTO_CMD12 |
+  				SDHCI_TRNS_AUTO_CMD23), SDHCI_TRANSFER_MODE);
++		}
+  		return;
+  	}
+
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index dba793e..0a287aa 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -100,6 +100,8 @@ struct sdhci_host {
+  #define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
+  /* Stop command (CMD12) can set Transfer Complete when not using 
+MMC_RSP_BUSY */
+  #define SDHCI_QUIRK2_STOP_WITH_TC			(1<<8)
++/* need clear transfer mode register before send cmd */
++#define SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD	(1<<9)
+
+  	int irq;		/* Device IRQ */
+  	void __iomem *ioaddr;	/* Mapped address */
+-- 
+1.8.1.2
+
