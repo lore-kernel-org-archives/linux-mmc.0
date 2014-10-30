@@ -1,185 +1,42 @@
-From: Pramod Gurav <pramod.gurav@smartplayin.com>
-Subject: [PATCH v2] mmc: davinci: Fix and simplify probe failure path
-Date: Thu, 30 Oct 2014 13:16:33 +0530
-Message-ID: <1414655193-16952-1-git-send-email-pramod.gurav@smartplayin.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 00/15] mmc: sdhci: Add 64-bit ADMA support
+Date: Thu, 30 Oct 2014 09:05:50 +0100
+Message-ID: <2905300.MGH0Qn3mUo@wuerfel>
+References: <1413883585-16299-1-git-send-email-adrian.hunter@intel.com> <5451E802.1010704@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp100.ord1c.emailsrvr.com ([108.166.43.100]:43490 "EHLO
-	smtp100.ord1c.emailsrvr.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752564AbaJ3HnD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Oct 2014 03:43:03 -0400
+Received: from mout.kundenserver.de ([212.227.126.131]:60322 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758245AbaJ3IGA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Oct 2014 04:06:00 -0400
+In-Reply-To: <5451E802.1010704@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Pramod Gurav <pramod.gurav@smartplayin.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-The sequence of resource release in probe failure path in this
-driver was wrong and needed fixes to cleanly unload the driver.
-This changes does the same by switching to managed resources and
-fixes return path to release resource in proper sequence.
+On Thursday 30 October 2014 09:25:54 Adrian Hunter wrote:
+> On 21/10/14 12:26, Adrian Hunter wrote:
+> > Hi
+> > 
+> > Here are patches to add 64-bit ADMA support to the SDHCI driver.
+> > 
+> > The patchset starts with 3 minor fixes related to SDHCI ADMA,
+> > then there are 8 preparatory patches, then 3 main patches, then
+> > the mmc_test "Badly aligned" tests are extended slightly.
+> 
+> Hi Ulf
+> 
+> Can you take these?  Note that there was a V2 of
+> "mmc: sdhci-acpi: Add 64-bit DMA support".  Also
+> that patch is dependent (for functionality not
+> compilation) on a patch in v3.18-rc2 so it is slightly
+> preferable if you pull v3.18-rc2 first.
 
-Cc: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
----
-Changes since v1:
-- Dropped IS_ERR check on devm_ioremap() return.
-- Fixed sequence on mmc_remove_host in fail as well as in remove function
+You still haven't addressed my comments about clearing
+the SDHCI_USE_64_BIT_DMA flag if the platform finds that
+hardware has set this bit incorrectly.
 
- drivers/mmc/host/davinci_mmc.c |   91 +++++++++++++++-------------------------
- 1 file changed, 33 insertions(+), 58 deletions(-)
-
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index 5d4c5e0..dc49b22 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -1242,22 +1242,20 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
- 		return -ENOENT;
- 	}
- 
--	ret = -ENODEV;
- 	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	irq = platform_get_irq(pdev, 0);
- 	if (!r || irq == NO_IRQ)
--		goto out;
-+		return -ENODEV;
- 
--	ret = -EBUSY;
- 	mem_size = resource_size(r);
--	mem = request_mem_region(r->start, mem_size, pdev->name);
-+	mem = devm_request_mem_region(&pdev->dev, r->start, mem_size,
-+				      pdev->name);
- 	if (!mem)
--		goto out;
-+		return -EBUSY;
- 
--	ret = -ENOMEM;
- 	mmc = mmc_alloc_host(sizeof(struct mmc_davinci_host), &pdev->dev);
- 	if (!mmc)
--		goto out;
-+		return -ENOMEM;
- 
- 	host = mmc_priv(mmc);
- 	host->mmc = mmc;	/* Important */
-@@ -1275,15 +1273,16 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
- 		host->txdma = r->start;
- 
- 	host->mem_res = mem;
--	host->base = ioremap(mem->start, mem_size);
--	if (!host->base)
--		goto out;
-+	host->base = devm_ioremap(&pdev->dev, mem->start, mem_size);
-+	if (!host->base) {
-+		ret = -ENOMEM;
-+		goto err_ioremap;
-+	}
- 
--	ret = -ENXIO;
--	host->clk = clk_get(&pdev->dev, "MMCSDCLK");
-+	host->clk = devm_clk_get(&pdev->dev, "MMCSDCLK");
- 	if (IS_ERR(host->clk)) {
- 		ret = PTR_ERR(host->clk);
--		goto out;
-+		goto err_ioremap;
- 	}
- 	clk_enable(host->clk);
- 	host->mmc_input_clk = clk_get_rate(host->clk);
-@@ -1350,20 +1349,22 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
- 	ret = mmc_davinci_cpufreq_register(host);
- 	if (ret) {
- 		dev_err(&pdev->dev, "failed to register cpufreq\n");
--		goto cpu_freq_fail;
-+		goto err_cpu_freq;
- 	}
- 
- 	ret = mmc_add_host(mmc);
- 	if (ret < 0)
--		goto out;
-+		goto err_mmc_add;
- 
--	ret = request_irq(irq, mmc_davinci_irq, 0, mmc_hostname(mmc), host);
-+	ret = devm_request_irq(&pdev->dev, irq, mmc_davinci_irq, 0,
-+			       mmc_hostname(mmc), host);
- 	if (ret)
--		goto out;
-+		goto err_request_irq;
- 
- 	if (host->sdio_irq >= 0) {
--		ret = request_irq(host->sdio_irq, mmc_davinci_sdio_irq, 0,
--				  mmc_hostname(mmc), host);
-+		ret = devm_request_irq(&pdev->dev, host->sdio_irq,
-+				       mmc_davinci_sdio_irq, 0,
-+				       mmc_hostname(mmc), host);
- 		if (!ret)
- 			mmc->caps |= MMC_CAP_SDIO_IRQ;
- 	}
-@@ -1376,27 +1377,15 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
- 
- 	return 0;
- 
--out:
-+err_request_irq:
-+	mmc_remove_host(mmc);
-+err_mmc_add:
- 	mmc_davinci_cpufreq_deregister(host);
--cpu_freq_fail:
--	if (host) {
--		davinci_release_dma_channels(host);
--
--		if (host->clk) {
--			clk_disable(host->clk);
--			clk_put(host->clk);
--		}
--
--		if (host->base)
--			iounmap(host->base);
--	}
--
--	if (mmc)
--		mmc_free_host(mmc);
--
--	if (mem)
--		release_resource(mem);
--
-+err_cpu_freq:
-+	davinci_release_dma_channels(host);
-+	clk_disable(host->clk);
-+err_ioremap:
-+	mmc_free_host(mmc);
- 	dev_dbg(&pdev->dev, "probe err %d\n", ret);
- 
- 	return ret;
-@@ -1406,25 +1395,11 @@ static int __exit davinci_mmcsd_remove(struct platform_device *pdev)
- {
- 	struct mmc_davinci_host *host = platform_get_drvdata(pdev);
- 
--	if (host) {
--		mmc_davinci_cpufreq_deregister(host);
--
--		mmc_remove_host(host->mmc);
--		free_irq(host->mmc_irq, host);
--		if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
--			free_irq(host->sdio_irq, host);
--
--		davinci_release_dma_channels(host);
--
--		clk_disable(host->clk);
--		clk_put(host->clk);
--
--		iounmap(host->base);
--
--		release_resource(host->mem_res);
--
--		mmc_free_host(host->mmc);
--	}
-+	mmc_remove_host(host->mmc);
-+	mmc_davinci_cpufreq_deregister(host);
-+	davinci_release_dma_channels(host);
-+	clk_disable(host->clk);
-+	mmc_free_host(host->mmc);
- 
- 	return 0;
- }
--- 
-1.7.9.5
-
+	Arnd
