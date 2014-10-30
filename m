@@ -1,234 +1,136 @@
-From: "Yang, Wenyou" <Wenyou.Yang@atmel.com>
-Subject: RE: [PATCH] mmc: atmel-mci: add pm runtime support
-Date: Thu, 30 Oct 2014 01:13:49 +0000
-Message-ID: <B256D81BAE5131468A838E5D7A243641BF5A0F78@penmbx01>
-References: <1414548958-10537-1-git-send-email-wenyou.yang@atmel.com>
- <CAPDyKFr30M3kR9rC8RFYwc2MZDDgV3o9LPta4WT4uiSemrd4Jg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFr30M3kR9rC8RFYwc2MZDDgV3o9LPta4WT4uiSemrd4Jg@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Kevin Hilman <khilman@kernel.org>, "Ferre, Nicolas" <Nicolas.FERRE@atmel.com>, "Desroches, Ludovic" <Ludovic.Desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+From: Addy Ke <addy.ke@rock-chips.com>
+Subject: [PATCH] mmc: dw_mmc: add a quirk for the defferent bit of sdio interrupt
+Date: Thu, 30 Oct 2014 10:21:19 +0800
+Message-ID: <1414635679-12565-1-git-send-email-addy.ke@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from regular2.263xmail.com ([211.157.152.4]:59260 "EHLO
+	regular2.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932997AbaJ3CVy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Oct 2014 22:21:54 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org
+Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com, Addy Ke <addy.ke@rock-chips.com>
 
-SGVsbG8gVWxmLA0KDQpUaGFuayB5b3UgdmVyeSBtdWNoIGZvciBzbyBtYW55IGNvbW1lbnRzLg0K
-DQpJIHdpbGwgZG8gaXQuDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTog
-VWxmIEhhbnNzb24gW21haWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBXZWRu
-ZXNkYXksIE9jdG9iZXIgMjksIDIwMTQgNjowNiBQTQ0KPiBUbzogWWFuZywgV2VueW91DQo+IENj
-OiBDaHJpcyBCYWxsOyBLZXZpbiBIaWxtYW47IEZlcnJlLCBOaWNvbGFzOyBEZXNyb2NoZXMsIEx1
-ZG92aWM7IGxpbnV4LW1tYzsgbGludXgtDQo+IGtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4
-LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIXSBt
-bWM6IGF0bWVsLW1jaTogYWRkIHBtIHJ1bnRpbWUgc3VwcG9ydA0KPiANCj4gT24gMjkgT2N0b2Jl
-ciAyMDE0IDAzOjE1LCBXZW55b3UgWWFuZyA8d2VueW91LnlhbmdAYXRtZWwuY29tPiB3cm90ZToN
-Cj4gDQo+IEhpIFdlbnlvdSwNCj4gDQo+IENvdWxkIHlvdSBwbGVhc2UgcHJvdmlkZSBzb21lIG1v
-cmUgaW5mb3JtYXRpb24gaW4gdGhlIGNvbW1pdCBtZXNzYWdlLg0KPiANCj4gPiBTaWduZWQtb2Zm
-LWJ5OiBXZW55b3UgWWFuZyA8d2VueW91LnlhbmdAYXRtZWwuY29tPg0KPiA+IC0tLQ0KPiA+ICBk
-cml2ZXJzL21tYy9ob3N0L2F0bWVsLW1jaS5jIHwgIDExNg0KPiA+ICsrKysrKysrKysrKysrKysr
-KysrKysrKysrKysrKysrKystLS0tLS0tLQ0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgOTQgaW5zZXJ0
-aW9ucygrKSwgMjIgZGVsZXRpb25zKC0pDQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9t
-bWMvaG9zdC9hdG1lbC1tY2kuYw0KPiA+IGIvZHJpdmVycy9tbWMvaG9zdC9hdG1lbC1tY2kuYyBp
-bmRleCAwYjlkZGY4Li5lOWQzMmQwIDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qv
-YXRtZWwtbWNpLmMNCj4gPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L2F0bWVsLW1jaS5jDQo+ID4g
-QEAgLTM3LDYgKzM3LDggQEANCj4gPg0KPiA+ICAjaW5jbHVkZSA8bGludXgvYXRtZWwtbWNpLmg+
-DQo+ID4gICNpbmNsdWRlIDxsaW51eC9hdG1lbF9wZGMuaD4NCj4gPiArI2luY2x1ZGUgPGxpbnV4
-L3BtLmg+DQo+ID4gKyNpbmNsdWRlIDxsaW51eC9wbV9ydW50aW1lLmg+DQo+ID4NCj4gPiAgI2lu
-Y2x1ZGUgPGFzbS9jYWNoZWZsdXNoLmg+DQo+ID4gICNpbmNsdWRlIDxhc20vaW8uaD4NCj4gPiBA
-QCAtNDQsNiArNDYsOCBAQA0KPiA+DQo+ID4gICNpbmNsdWRlICJhdG1lbC1tY2ktcmVncy5oIg0K
-PiA+DQo+ID4gKyNkZWZpbmUgQVVUT1NVU1BFTkRfREVMQVkgICAgICA1MA0KPiA+ICsNCj4gPiAg
-I2RlZmluZSBBVE1DSV9EQVRBX0VSUk9SX0ZMQUdTIChBVE1DSV9EQ1JDRSB8IEFUTUNJX0RUT0Ug
-fA0KPiBBVE1DSV9PVlJFIHwgQVRNQ0lfVU5SRSkNCj4gPiAgI2RlZmluZSBBVE1DSV9ETUFfVEhS
-RVNIT0xEICAgIDE2DQo+ID4NCj4gPiBAQCAtMzg2LDIwICszOTAsMTkgQEAgc3RhdGljIGludCBh
-dG1jaV9yZWdzX3Nob3coc3RydWN0IHNlcV9maWxlICpzLCB2b2lkICp2KQ0KPiA+ICAgICAgICAg
-aWYgKCFidWYpDQo+ID4gICAgICAgICAgICAgICAgIHJldHVybiAtRU5PTUVNOw0KPiA+DQo+ID4g
-KyAgICAgICBwbV9ydW50aW1lX2dldF9zeW5jKCZob3N0LT5wZGV2LT5kZXYpOw0KPiA+ICsNCj4g
-PiAgICAgICAgIC8qDQo+ID4gICAgICAgICAgKiBHcmFiIGEgbW9yZSBvciBsZXNzIGNvbnNpc3Rl
-bnQgc25hcHNob3QuIE5vdGUgdGhhdCB3ZSdyZQ0KPiA+ICAgICAgICAgICogbm90IGRpc2FibGlu
-ZyBpbnRlcnJ1cHRzLCBzbyBJTVIgYW5kIFNSIG1heSBub3QgYmUNCj4gPiAgICAgICAgICAqIGNv
-bnNpc3RlbnQuDQo+ID4gICAgICAgICAgKi8NCj4gPiAtICAgICAgIHJldCA9IGNsa19wcmVwYXJl
-X2VuYWJsZShob3N0LT5tY2spOw0KPiA+IC0gICAgICAgaWYgKHJldCkNCj4gPiAtICAgICAgICAg
-ICAgICAgZ290byBvdXQ7DQo+ID4gLQ0KPiA+ICAgICAgICAgc3Bpbl9sb2NrX2JoKCZob3N0LT5s
-b2NrKTsNCj4gPiAgICAgICAgIG1lbWNweV9mcm9taW8oYnVmLCBob3N0LT5yZWdzLCBBVE1DSV9S
-RUdTX1NJWkUpOw0KPiA+ICAgICAgICAgc3Bpbl91bmxvY2tfYmgoJmhvc3QtPmxvY2spOw0KPiA+
-DQo+ID4gLSAgICAgICBjbGtfZGlzYWJsZV91bnByZXBhcmUoaG9zdC0+bWNrKTsNCj4gPiArICAg
-ICAgIHBtX3J1bnRpbWVfbWFya19sYXN0X2J1c3koJmhvc3QtPnBkZXYtPmRldik7DQo+ID4gKyAg
-ICAgICBwbV9ydW50aW1lX3B1dF9hdXRvc3VzcGVuZCgmaG9zdC0+cGRldi0+ZGV2KTsNCj4gPg0K
-PiA+ICAgICAgICAgc2VxX3ByaW50ZihzLCAiTVI6XHQweCUwOHglcyVzICIsDQo+ID4gICAgICAg
-ICAgICAgICAgICAgICAgICAgYnVmW0FUTUNJX01SIC8gNF0sIEBAIC00NDksNyArNDUyLDYgQEAg
-c3RhdGljDQo+ID4gaW50IGF0bWNpX3JlZ3Nfc2hvdyhzdHJ1Y3Qgc2VxX2ZpbGUgKnMsIHZvaWQg
-KnYpDQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB2YWwgJiBBVE1DSV9DRkdf
-TFNZTkMgPyAiIExTWU5DIiA6ICIiKTsNCj4gPiAgICAgICAgIH0NCj4gPg0KPiA+IC1vdXQ6DQo+
-ID4gICAgICAgICBrZnJlZShidWYpOw0KPiA+DQo+ID4gICAgICAgICByZXR1cm4gcmV0Ow0KPiA+
-IEBAIC0xMjUyLDYgKzEyNTQsOCBAQCBzdGF0aWMgdm9pZCBhdG1jaV9yZXF1ZXN0KHN0cnVjdCBt
-bWNfaG9zdCAqbW1jLA0KPiBzdHJ1Y3QgbW1jX3JlcXVlc3QgKm1ycSkNCj4gPiAgICAgICAgIFdB
-Uk5fT04oc2xvdC0+bXJxKTsNCj4gPiAgICAgICAgIGRldl9kYmcoJmhvc3QtPnBkZXYtPmRldiwg
-Ik1SUTogY21kICV1XG4iLCBtcnEtPmNtZC0+b3Bjb2RlKTsNCj4gPg0KPiA+ICsgICAgICAgcG1f
-cnVudGltZV9nZXRfc3luYygmaG9zdC0+cGRldi0+ZGV2KTsNCj4gPiArDQo+ID4gICAgICAgICAv
-Kg0KPiA+ICAgICAgICAgICogV2UgbWF5ICJrbm93IiB0aGUgY2FyZCBpcyBnb25lIGV2ZW4gdGhv
-dWdoIHRoZXJlJ3Mgc3RpbGwgYW4NCj4gPiAgICAgICAgICAqIGVsZWN0cmljYWwgY29ubmVjdGlv
-bi4gSWYgc28sIHdlIHJlYWxseSBuZWVkIHRvIGNvbW11bmljYXRlDQo+ID4gQEAgLTEyODEsNyAr
-MTI4NSw4IEBAIHN0YXRpYyB2b2lkIGF0bWNpX3NldF9pb3Moc3RydWN0IG1tY19ob3N0ICptbWMs
-DQo+IHN0cnVjdCBtbWNfaW9zICppb3MpDQo+ID4gICAgICAgICBzdHJ1Y3QgYXRtZWxfbWNpX3Ns
-b3QgICAqc2xvdCA9IG1tY19wcml2KG1tYyk7DQo+ID4gICAgICAgICBzdHJ1Y3QgYXRtZWxfbWNp
-ICAgICAgICAqaG9zdCA9IHNsb3QtPmhvc3Q7DQo+ID4gICAgICAgICB1bnNpZ25lZCBpbnQgICAg
-ICAgICAgICBpOw0KPiA+IC0gICAgICAgYm9vbCAgICAgICAgICAgICAgICAgICAgdW5wcmVwYXJl
-X2NsazsNCj4gPiArDQo+ID4gKyAgICAgICBwbV9ydW50aW1lX2dldF9zeW5jKCZob3N0LT5wZGV2
-LT5kZXYpOw0KPiA+DQo+ID4gICAgICAgICBzbG90LT5zZGNfcmVnICY9IH5BVE1DSV9TRENCVVNf
-TUFTSzsNCj4gPiAgICAgICAgIHN3aXRjaCAoaW9zLT5idXNfd2lkdGgpIHsNCj4gPiBAQCAtMTI5
-NywxMyArMTMwMiw4IEBAIHN0YXRpYyB2b2lkIGF0bWNpX3NldF9pb3Moc3RydWN0IG1tY19ob3N0
-ICptbWMsDQo+IHN0cnVjdCBtbWNfaW9zICppb3MpDQo+ID4gICAgICAgICAgICAgICAgIHVuc2ln
-bmVkIGludCBjbG9ja19taW4gPSB+MFU7DQo+ID4gICAgICAgICAgICAgICAgIHUzMiBjbGtkaXY7
-DQo+ID4NCj4gPiAtICAgICAgICAgICAgICAgY2xrX3ByZXBhcmUoaG9zdC0+bWNrKTsNCj4gPiAt
-ICAgICAgICAgICAgICAgdW5wcmVwYXJlX2NsayA9IHRydWU7DQo+ID4gLQ0KPiA+ICAgICAgICAg
-ICAgICAgICBzcGluX2xvY2tfYmgoJmhvc3QtPmxvY2spOw0KPiA+ICAgICAgICAgICAgICAgICBp
-ZiAoIWhvc3QtPm1vZGVfcmVnKSB7DQo+ID4gLSAgICAgICAgICAgICAgICAgICAgICAgY2xrX2Vu
-YWJsZShob3N0LT5tY2spOw0KPiA+IC0gICAgICAgICAgICAgICAgICAgICAgIHVucHJlcGFyZV9j
-bGsgPSBmYWxzZTsNCj4gPiAgICAgICAgICAgICAgICAgICAgICAgICBhdG1jaV93cml0ZWwoaG9z
-dCwgQVRNQ0lfQ1IsIEFUTUNJX0NSX1NXUlNUKTsNCj4gPiAgICAgICAgICAgICAgICAgICAgICAg
-ICBhdG1jaV93cml0ZWwoaG9zdCwgQVRNQ0lfQ1IsIEFUTUNJX0NSX01DSUVOKTsNCj4gPiAgICAg
-ICAgICAgICAgICAgICAgICAgICBpZiAoaG9zdC0+Y2Fwcy5oYXNfY2ZnX3JlZykgQEAgLTEzNzEs
-OCArMTM3MSw2DQo+ID4gQEAgc3RhdGljIHZvaWQgYXRtY2lfc2V0X2lvcyhzdHJ1Y3QgbW1jX2hv
-c3QgKm1tYywgc3RydWN0IG1tY19pb3MgKmlvcykNCj4gPiAgICAgICAgIH0gZWxzZSB7DQo+ID4g
-ICAgICAgICAgICAgICAgIGJvb2wgYW55X3Nsb3RfYWN0aXZlID0gZmFsc2U7DQo+ID4NCj4gPiAt
-ICAgICAgICAgICAgICAgdW5wcmVwYXJlX2NsayA9IGZhbHNlOw0KPiA+IC0NCj4gPiAgICAgICAg
-ICAgICAgICAgc3Bpbl9sb2NrX2JoKCZob3N0LT5sb2NrKTsNCj4gPiAgICAgICAgICAgICAgICAg
-c2xvdC0+Y2xvY2sgPSAwOw0KPiA+ICAgICAgICAgICAgICAgICBmb3IgKGkgPSAwOyBpIDwgQVRN
-Q0lfTUFYX05SX1NMT1RTOyBpKyspIHsgQEAgLTEzODUsMTcNCj4gPiArMTM4MywxMiBAQCBzdGF0
-aWMgdm9pZCBhdG1jaV9zZXRfaW9zKHN0cnVjdCBtbWNfaG9zdCAqbW1jLCBzdHJ1Y3QgbW1jX2lv
-cw0KPiAqaW9zKQ0KPiA+ICAgICAgICAgICAgICAgICAgICAgICAgIGF0bWNpX3dyaXRlbChob3N0
-LCBBVE1DSV9DUiwgQVRNQ0lfQ1JfTUNJRElTKTsNCj4gPiAgICAgICAgICAgICAgICAgICAgICAg
-ICBpZiAoaG9zdC0+bW9kZV9yZWcpIHsNCj4gPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgIGF0bWNpX3JlYWRsKGhvc3QsIEFUTUNJX01SKTsNCj4gPiAtICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgIGNsa19kaXNhYmxlKGhvc3QtPm1jayk7DQo+ID4gLSAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICB1bnByZXBhcmVfY2xrID0gdHJ1ZTsNCj4gPiAgICAgICAgICAgICAg
-ICAgICAgICAgICB9DQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgaG9zdC0+bW9kZV9yZWcg
-PSAwOw0KPiA+ICAgICAgICAgICAgICAgICB9DQo+ID4gICAgICAgICAgICAgICAgIHNwaW5fdW5s
-b2NrX2JoKCZob3N0LT5sb2NrKTsNCj4gPiAgICAgICAgIH0NCj4gPg0KPiA+IC0gICAgICAgaWYg
-KHVucHJlcGFyZV9jbGspDQo+ID4gLSAgICAgICAgICAgICAgIGNsa191bnByZXBhcmUoaG9zdC0+
-bWNrKTsNCj4gPiAtDQo+ID4gICAgICAgICBzd2l0Y2ggKGlvcy0+cG93ZXJfbW9kZSkgew0KPiA+
-ICAgICAgICAgY2FzZSBNTUNfUE9XRVJfT0ZGOg0KPiA+ICAgICAgICAgICAgICAgICBpZiAoIUlT
-X0VSUihtbWMtPnN1cHBseS52bW1jKSkgQEAgLTE0MjEsNiArMTQxNCw5IEBADQo+ID4gc3RhdGlj
-IHZvaWQgYXRtY2lfc2V0X2lvcyhzdHJ1Y3QgbW1jX2hvc3QgKm1tYywgc3RydWN0IG1tY19pb3Mg
-KmlvcykNCj4gPiAgICAgICAgICAgICAgICAgICovDQo+ID4gICAgICAgICAgICAgICAgIGJyZWFr
-Ow0KPiA+ICAgICAgICAgfQ0KPiA+ICsNCj4gPiArICAgICAgIHBtX3J1bnRpbWVfbWFya19sYXN0
-X2J1c3koJmhvc3QtPnBkZXYtPmRldik7DQo+ID4gKyAgICAgICBwbV9ydW50aW1lX3B1dF9hdXRv
-c3VzcGVuZCgmaG9zdC0+cGRldi0+ZGV2KTsNCj4gPiAgfQ0KPiA+DQo+ID4gIHN0YXRpYyBpbnQg
-YXRtY2lfZ2V0X3JvKHN0cnVjdCBtbWNfaG9zdCAqbW1jKSBAQCAtMTUxMiw2ICsxNTA4LDkgQEAN
-Cj4gPiBzdGF0aWMgdm9pZCBhdG1jaV9yZXF1ZXN0X2VuZChzdHJ1Y3QgYXRtZWxfbWNpICpob3N0
-LCBzdHJ1Y3QgbW1jX3JlcXVlc3QgKm1ycSkNCj4gPiAgICAgICAgIHNwaW5fdW5sb2NrKCZob3N0
-LT5sb2NrKTsNCj4gPiAgICAgICAgIG1tY19yZXF1ZXN0X2RvbmUocHJldl9tbWMsIG1ycSk7DQo+
-ID4gICAgICAgICBzcGluX2xvY2soJmhvc3QtPmxvY2spOw0KPiA+ICsNCj4gPiArICAgICAgIHBt
-X3J1bnRpbWVfbWFya19sYXN0X2J1c3koJmhvc3QtPnBkZXYtPmRldik7DQo+ID4gKyAgICAgICBw
-bV9ydW50aW1lX3B1dF9hdXRvc3VzcGVuZCgmaG9zdC0+cGRldi0+ZGV2KTsNCj4gPiAgfQ0KPiA+
-DQo+ID4gIHN0YXRpYyB2b2lkIGF0bWNpX2NvbW1hbmRfY29tcGxldGUoc3RydWN0IGF0bWVsX21j
-aSAqaG9zdCwgQEAgLTI0MTcsNw0KPiA+ICsyNDE2LDYgQEAgc3RhdGljIGludCBfX2luaXQgYXRt
-Y2lfcHJvYmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikNCj4gPg0KPiA+ICAgICAgICAg
-YXRtY2lfd3JpdGVsKGhvc3QsIEFUTUNJX0NSLCBBVE1DSV9DUl9TV1JTVCk7DQo+ID4gICAgICAg
-ICBob3N0LT5idXNfaHogPSBjbGtfZ2V0X3JhdGUoaG9zdC0+bWNrKTsNCj4gPiAtICAgICAgIGNs
-a19kaXNhYmxlX3VucHJlcGFyZShob3N0LT5tY2spOw0KPiA+DQo+ID4gICAgICAgICBob3N0LT5t
-YXBiYXNlID0gcmVncy0+c3RhcnQ7DQo+ID4NCj4gPiBAQCAtMjQ0OSw2ICsyNDQ3LDEyIEBAIHN0
-YXRpYyBpbnQgX19pbml0IGF0bWNpX3Byb2JlKHN0cnVjdA0KPiA+IHBsYXRmb3JtX2RldmljZSAq
-cGRldikNCj4gPg0KPiA+ICAgICAgICAgc2V0dXBfdGltZXIoJmhvc3QtPnRpbWVyLCBhdG1jaV90
-aW1lb3V0X3RpbWVyLCAodW5zaWduZWQNCj4gPiBsb25nKWhvc3QpOw0KPiA+DQo+ID4gKyAgICAg
-ICBwbV9ydW50aW1lX2VuYWJsZSgmcGRldi0+ZGV2KTsNCj4gPiArICAgICAgIHBtX3J1bnRpbWVf
-Z2V0X3N5bmMoJnBkZXYtPmRldik7DQo+ID4gKyAgICAgICBwbV9ydW50aW1lX3NldF9hdXRvc3Vz
-cGVuZF9kZWxheSgmcGRldi0+ZGV2LA0KPiBBVVRPU1VTUEVORF9ERUxBWSk7DQo+ID4gKyAgICAg
-ICBwbV9ydW50aW1lX3VzZV9hdXRvc3VzcGVuZCgmcGRldi0+ZGV2KTsNCj4gDQo+IFRoZSBhYm92
-ZSBpcyB3cm9uZy4gWW91IHdpbGwgZ2V0IGNsb2NrIHVuYmFsYW5jZSBpc3N1ZXMsIG1lYW5pbmcg
-dGhhdCB0aGUgY2xvY2sNCj4gd2lsbCBuZXZlciBiZSBnYXRlZCBhdCBydW50aW1lIFBNIHN1c3Bl
-bmQuDQo+IA0KPiBGaXggaXQgYnkgY2hhbmdlIHRoZSBob2xlIGNodW5rIG9mIGNvZGUgYWJvdmUg
-dG86DQo+IA0KPiBwbV9ydW50aW1lX2dldF9ub3Jlc3VtZSgpOw0KPiBwbV9ydW50aW1lX3NldF9h
-Y3RpdmUoKTsNCj4gcG1fcnVudGltZV9zZXRfYXV0b3N1c3BlbmRfZGVsYXkoKTsNCj4gcG1fcnVu
-dGltZV91c2VfYXV0b3N1c3BlbmQoKTsNCj4gcG1fcnVudGltZV9lbmFibGUoKTsNCj4gDQo+ID4g
-KyAgICAgICBwbV9zdXNwZW5kX2lnbm9yZV9jaGlsZHJlbigmcGRldi0+ZGV2LCAxKTsNCj4gDQo+
-IElzIHRoaXMgbmVlZGVkPw0KPiANCj4gPiArDQo+ID4gICAgICAgICAvKiBXZSBuZWVkIGF0IGxl
-YXN0IG9uZSBzbG90IHRvIHN1Y2NlZWQgKi8NCj4gPiAgICAgICAgIG5yX3Nsb3RzID0gMDsNCj4g
-PiAgICAgICAgIHJldCA9IC1FTk9ERVY7DQo+ID4gQEAgLTI0OTEsNiArMjQ5NSw5IEBAIHN0YXRp
-YyBpbnQgX19pbml0IGF0bWNpX3Byb2JlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UNCj4gKnBkZXYp
-DQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgIkF0bWVsIE1DSSBjb250cm9sbGVyIGF0IDB4
-JTA4bHggaXJxICVkLCAldSBzbG90c1xuIiwNCj4gPiAgICAgICAgICAgICAgICAgICAgICAgICBo
-b3N0LT5tYXBiYXNlLCBpcnEsIG5yX3Nsb3RzKTsNCj4gPg0KPiA+ICsgICAgICAgcG1fcnVudGlt
-ZV9tYXJrX2xhc3RfYnVzeSgmaG9zdC0+cGRldi0+ZGV2KTsNCj4gPiArICAgICAgIHBtX3J1bnRp
-bWVfcHV0X2F1dG9zdXNwZW5kKCZwZGV2LT5kZXYpOw0KPiA+ICsNCj4gPiAgICAgICAgIHJldHVy
-biAwOw0KPiA+DQo+ID4gIGVycl9kbWFfYWxsb2M6DQo+ID4gQEAgLTI0OTksNiArMjUwNiw5IEBA
-IGVycl9kbWFfYWxsb2M6DQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgYXRtY2lfY2xlYW51
-cF9zbG90KGhvc3QtPnNsb3RbaV0sIGkpOw0KPiA+ICAgICAgICAgfQ0KPiA+ICBlcnJfaW5pdF9z
-bG90Og0KPiA+ICsgICAgICAgcG1fcnVudGltZV9wdXRfc3luYygmcGRldi0+ZGV2KTsNCj4gPiAr
-ICAgICAgIHBtX3J1bnRpbWVfZGlzYWJsZSgmcGRldi0+ZGV2KTsNCj4gDQo+IEFjY29yZGluZyB0
-byB1cHBlciBjb21tZW50LCB5b3UgbXVzdCBzd2l0Y2ggb3JkZXIsIGFuZCB5b3Ugc2hvdWxkIHVz
-ZQ0KPiBwbV9ydW50aW1lX3B1dF9ub2lkbGUoKSBpbnN0ZWFkLg0KPiANCj4gTW9yZW92ZXIgeW91
-IG5lZWRzIHRvIGhhdmUgYSBjbGtfZGlzYWJsZV91cHJlcGFyZSgpIGluIHRoZSBlcnJvciBoYW5k
-bGluZyBhbmQNCj4gcHJpb3IgdGhlIGFib3ZlLg0KPiANCj4gPiArDQo+ID4gICAgICAgICBkZWxf
-dGltZXJfc3luYygmaG9zdC0+dGltZXIpOw0KPiA+ICAgICAgICAgaWYgKGhvc3QtPmRtYS5jaGFu
-KQ0KPiA+ICAgICAgICAgICAgICAgICBkbWFfcmVsZWFzZV9jaGFubmVsKGhvc3QtPmRtYS5jaGFu
-KTsNCj4gPiBAQCAtMjUxMSw2ICsyNTIxLDggQEAgc3RhdGljIGludCBfX2V4aXQgYXRtY2lfcmVt
-b3ZlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UNCj4gKnBkZXYpDQo+ID4gICAgICAgICBzdHJ1Y3Qg
-YXRtZWxfbWNpICAgICAgICAqaG9zdCA9IHBsYXRmb3JtX2dldF9kcnZkYXRhKHBkZXYpOw0KPiA+
-ICAgICAgICAgdW5zaWduZWQgaW50ICAgICAgICAgICAgaTsNCj4gPg0KPiA+ICsgICAgICAgcG1f
-cnVudGltZV9nZXRfc3luYygmcGRldi0+ZGV2KTsNCj4gPiArDQo+ID4gICAgICAgICBpZiAoaG9z
-dC0+YnVmZmVyKQ0KPiA+ICAgICAgICAgICAgICAgICBkbWFfZnJlZV9jb2hlcmVudCgmcGRldi0+
-ZGV2LCBob3N0LT5idWZfc2l6ZSwNCj4gPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgaG9zdC0+YnVmZmVyLCBob3N0LT5idWZfcGh5c19hZGRyKTsNCj4gPiBAQCAtMjUyMCwxMSAr
-MjUzMiw5IEBAIHN0YXRpYyBpbnQgX19leGl0IGF0bWNpX3JlbW92ZShzdHJ1Y3QgcGxhdGZvcm1f
-ZGV2aWNlDQo+ICpwZGV2KQ0KPiA+ICAgICAgICAgICAgICAgICAgICAgICAgIGF0bWNpX2NsZWFu
-dXBfc2xvdChob3N0LT5zbG90W2ldLCBpKTsNCj4gPiAgICAgICAgIH0NCj4gPg0KPiA+IC0gICAg
-ICAgY2xrX3ByZXBhcmVfZW5hYmxlKGhvc3QtPm1jayk7DQo+ID4gICAgICAgICBhdG1jaV93cml0
-ZWwoaG9zdCwgQVRNQ0lfSURSLCB+MFVMKTsNCj4gPiAgICAgICAgIGF0bWNpX3dyaXRlbChob3N0
-LCBBVE1DSV9DUiwgQVRNQ0lfQ1JfTUNJRElTKTsNCj4gPiAgICAgICAgIGF0bWNpX3JlYWRsKGhv
-c3QsIEFUTUNJX1NSKTsNCj4gPiAtICAgICAgIGNsa19kaXNhYmxlX3VucHJlcGFyZShob3N0LT5t
-Y2spOw0KPiA+DQo+ID4gICAgICAgICBkZWxfdGltZXJfc3luYygmaG9zdC0+dGltZXIpOw0KPiA+
-ICAgICAgICAgaWYgKGhvc3QtPmRtYS5jaGFuKQ0KPiA+IEBAIC0yNTMyLDE0ICsyNTQyLDc2IEBA
-IHN0YXRpYyBpbnQgX19leGl0IGF0bWNpX3JlbW92ZShzdHJ1Y3QNCj4gPiBwbGF0Zm9ybV9kZXZp
-Y2UgKnBkZXYpDQo+ID4NCj4gPiAgICAgICAgIGZyZWVfaXJxKHBsYXRmb3JtX2dldF9pcnEocGRl
-diwgMCksIGhvc3QpOw0KPiA+DQo+ID4gKyAgICAgICBwbV9ydW50aW1lX3B1dF9zeW5jKCZwZGV2
-LT5kZXYpOw0KPiA+ICsgICAgICAgcG1fcnVudGltZV9kaXNhYmxlKCZwZGV2LT5kZXYpOw0KPiA+
-ICsNCj4gPiArICAgICAgIGNsa19kaXNhYmxlX3VucHJlcGFyZShob3N0LT5tY2spOw0KPiANCj4g
-U2FtZSBjb21tZW50IGFzIGZvciBmaXhpbmcgdGhlIGVycm9yIGhhbmRsaW5nIGluIC0+cHJvYmUo
-KS4NCj4gDQo+ID4gKw0KPiA+ICAgICAgICAgcmV0dXJuIDA7DQo+ID4gIH0NCj4gPg0KPiA+ICsj
-aWZkZWYgQ09ORklHX1BNDQo+ID4gK3N0YXRpYyBpbnQgYXRtY2lfc3VzcGVuZChzdHJ1Y3QgZGV2
-aWNlICpkZXYpIHsNCj4gPiArICAgICAgIHN0cnVjdCBhdG1lbF9tY2kgKmhvc3QgPSBkZXZfZ2V0
-X2RydmRhdGEoZGV2KTsNCj4gPiArDQo+ID4gKyAgICAgICBwbV9ydW50aW1lX2dldF9zeW5jKGRl
-dik7DQo+ID4gKw0KPiA+ICsgICAgICAgY2xrX2Rpc2FibGVfdW5wcmVwYXJlKGhvc3QtPm1jayk7
-DQo+ID4gKw0KPiA+ICsgICAgICAgcG1fcnVudGltZV9tYXJrX2xhc3RfYnVzeShkZXYpOw0KPiA+
-ICsgICAgICAgcG1fcnVudGltZV9wdXRfYXV0b3N1c3BlbmQoZGV2KTsNCj4gPiArDQo+ID4gKyAg
-ICAgICByZXR1cm4gMDsNCj4gPiArfQ0KPiA+ICsNCj4gPiArc3RhdGljIGludCBhdG1jaV9yZXN1
-bWUoc3RydWN0IGRldmljZSAqZGV2KSB7DQo+ID4gKyAgICAgICBzdHJ1Y3QgYXRtZWxfbWNpICpo
-b3N0ID0gZGV2X2dldF9kcnZkYXRhKGRldik7DQo+ID4gKyAgICAgICBpbnQgcmV0Ow0KPiA+ICsN
-Cj4gPiArICAgICAgIHBtX3J1bnRpbWVfZ2V0X3N5bmMoZGV2KTsNCj4gPiArDQo+ID4gKyAgICAg
-ICByZXQgPSBjbGtfcHJlcGFyZV9lbmFibGUoaG9zdC0+bWNrKTsNCj4gPiArDQo+ID4gKyAgICAg
-ICBwbV9ydW50aW1lX21hcmtfbGFzdF9idXN5KGRldik7DQo+ID4gKyAgICAgICBwbV9ydW50aW1l
-X3B1dF9hdXRvc3VzcGVuZChkZXYpOw0KPiA+ICsNCj4gPiArICAgICAgIHJldHVybiByZXQ7DQo+
-ID4gK30NCj4gPiArDQo+ID4gK3N0YXRpYyBpbnQgYXRtY2lfcnVudGltZV9zdXNwZW5kKHN0cnVj
-dCBkZXZpY2UgKmRldikgew0KPiA+ICsgICAgICAgc3RydWN0IGF0bWVsX21jaSAqaG9zdCA9IGRl
-dl9nZXRfZHJ2ZGF0YShkZXYpOw0KPiA+ICsNCj4gPiArICAgICAgIGNsa19kaXNhYmxlX3VucHJl
-cGFyZShob3N0LT5tY2spOw0KPiA+ICsNCj4gPiArICAgICAgIHJldHVybiAwOw0KPiA+ICt9DQo+
-ID4gKw0KPiA+ICtzdGF0aWMgaW50IGF0bWNpX3J1bnRpbWVfcmVzdW1lKHN0cnVjdCBkZXZpY2Ug
-KmRldikgew0KPiA+ICsgICAgICAgc3RydWN0IGF0bWVsX21jaSAqaG9zdCA9IGRldl9nZXRfZHJ2
-ZGF0YShkZXYpOw0KPiA+ICsNCj4gPiArICAgICAgIHJldHVybiBjbGtfcHJlcGFyZV9lbmFibGUo
-aG9zdC0+bWNrKTsgfQ0KPiA+ICsNCj4gPiArc3RhdGljIGNvbnN0IHN0cnVjdCBkZXZfcG1fb3Bz
-IGF0bWNpX2Rldl9wbV9vcHMgPSB7DQo+ID4gKyAgICAgICBTRVRfU1lTVEVNX1NMRUVQX1BNX09Q
-UyhhdG1jaV9zdXNwZW5kLCBhdG1jaV9yZXN1bWUpDQo+ID4gKyAgICAgICBTRVRfUlVOVElNRV9Q
-TV9PUFMoYXRtY2lfcnVudGltZV9zdXNwZW5kLA0KPiA+ICthdG1jaV9ydW50aW1lX3Jlc3VtZSwg
-TlVMTCkgfTsNCj4gDQo+IEkgd291bGQgc3VnZ2VzdCB0aGUgZm9sbG93aW5nIGNoYW5nZXMgdG8g
-c2ltcGxpZnkgY29kZSBhbmQgdG8gaW1wcm92ZSBydW50aW1lDQo+IFBNIHN1cHBvcnQgYSBiaXQu
-DQo+IA0KPiBTRVRfU1lTVEVNX1NMRUVQX1BNX09QUyhwbV9ydW50aW1lX2ZvcmNlX3N1c3BlbmQs
-DQo+IHBtX3J1bnRpbWVfZm9yY2VfcmVzdW1lKSBTRVRfUE1fUlVOVElNRV9QTV9PUFMoYXRtY2lf
-cnVudGltZV9zdXNwZW5kLA0KPiBhdG1jaV9ydW50aW1lX3Jlc3VtZSwgTlVMTCkNCj4gDQo+IERv
-IG5vdGUgdGhlIGNoYW5nZSBmcm9tIFNFVF9SVU5USU1FX1BNX09QUyAtPg0KPiBTRVRfUE1fUlVO
-VElNRV9QTV9PUFMuDQo+IA0KPiBUaGF0IG1lYW5zIHlvdSB3aWxsIGJlIGFibGUgdG8gcmVtb3Zl
-IGF0bWNpX3N1c3BlbmR8cmVzdW1lKCkgZnVuY3Rpb25zIGVudGlyZWx5Lg0KPiANCj4gPiArDQo+
-ID4gKyNkZWZpbmUgQVRNQ0lfUE1fT1BTICAgKCZhdG1jaV9kZXZfcG1fb3BzKQ0KPiA+ICsjZWxz
-ZQ0KPiA+ICsjZGVmaW5lIEFUTUNJX1BNX09QUyAgIE5VTEwNCj4gPiArI2VuZGlmDQo+IA0KPiBU
-aGlzIGlzIG1pY3JvIG9wdGltaXphdGlvbiwgbm90IG5lZWRlZC4gSnVzdCB1c2UgdGhlIGF0bWNp
-X2Rldl9wbV9vcHMgZGlyZWN0bHkNCj4gYmVsb3cgaW5zdGVhZC4NCj4gDQo+ID4gKw0KPiA+ICBz
-dGF0aWMgc3RydWN0IHBsYXRmb3JtX2RyaXZlciBhdG1jaV9kcml2ZXIgPSB7DQo+ID4gICAgICAg
-ICAucmVtb3ZlICAgICAgICAgPSBfX2V4aXRfcChhdG1jaV9yZW1vdmUpLA0KPiA+ICAgICAgICAg
-LmRyaXZlciAgICAgICAgID0gew0KPiA+ICAgICAgICAgICAgICAgICAubmFtZSAgICAgICAgICAg
-PSAiYXRtZWxfbWNpIiwNCj4gPiAgICAgICAgICAgICAgICAgLm9mX21hdGNoX3RhYmxlID0gb2Zf
-bWF0Y2hfcHRyKGF0bWNpX2R0X2lkcyksDQo+ID4gKyAgICAgICAgICAgICAgIC5wbSAgICAgICAg
-ICAgICA9IEFUTUNJX1BNX09QUywNCj4gPiAgICAgICAgIH0sDQo+ID4gIH07DQo+ID4NCj4gPiAt
-LQ0KPiA+IDEuNy45LjUNCj4gPg0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVsZiBIYW5zc29uDQoN
-CkJlc3QgUmVnYXJkcywNCldlbnlvdSBZYW5nDQo=
+This patch add a quirk: DW_MCI_QUIRK_SDIO_INT_24BIT.
+
+The bit of sdio interrupt is 16 in designware implementation, but
+is 24 in RK3288. To support RK3288 mmc controller, we need add
+a quirk for it.
+
+Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+---
+ drivers/mmc/host/dw_mmc.c  | 32 +++++++++++++++++++++++++++-----
+ drivers/mmc/host/dw_mmc.h  |  1 +
+ include/linux/mmc/dw_mmc.h |  2 ++
+ 3 files changed, 30 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 69f0cc6..db29621 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -778,6 +778,12 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+ 	u32 div;
+ 	u32 clk_en_a;
+ 	u32 sdmmc_cmd_bits = SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT;
++	u32 sdio_int_bit;
++
++	if (host->quirks & DW_MCI_QUIRK_SDIO_INT_24BIT)
++		sdio_int_bit = SDMMC_INT_SDIO_24BIT(slot->id);
++	else
++		sdio_int_bit = SDMMC_INT_SDIO(slot->id);
+ 
+ 	/* We must continue to set bit 28 in CMD until the change is complete */
+ 	if (host->state == STATE_WAITING_CMD11_DONE)
+@@ -819,7 +825,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+ 
+ 		/* enable clock; only low power if no SDIO */
+ 		clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
+-		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->id)))
++		if (!(mci_readl(host, INTMASK) & sdio_int_bit))
+ 			clk_en_a |= SDMMC_CLKEN_LOW_PWR << slot->id;
+ 		mci_writel(host, CLKENA, clk_en_a);
+ 
+@@ -1167,6 +1173,12 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+ 	struct dw_mci_slot *slot = mmc_priv(mmc);
+ 	struct dw_mci *host = slot->host;
+ 	u32 int_mask;
++	u32 sdio_int_bit;
++
++	if (host->quirks & DW_MCI_QUIRK_SDIO_INT_24BIT)
++		sdio_int_bit = SDMMC_INT_SDIO_24BIT(slot->id);
++	else
++		sdio_int_bit = SDMMC_INT_SDIO(slot->id);
+ 
+ 	/* Enable/disable Slot Specific SDIO interrupt */
+ 	int_mask = mci_readl(host, INTMASK);
+@@ -1180,10 +1192,10 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+ 		dw_mci_disable_low_power(slot);
+ 
+ 		mci_writel(host, INTMASK,
+-			   (int_mask | SDMMC_INT_SDIO(slot->id)));
++			   (int_mask | sdio_int_bit));
+ 	} else {
+ 		mci_writel(host, INTMASK,
+-			   (int_mask & ~SDMMC_INT_SDIO(slot->id)));
++			   (int_mask & ~sdio_int_bit));
+ 	}
+ }
+ 
+@@ -2035,8 +2047,15 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 		/* Handle SDIO Interrupts */
+ 		for (i = 0; i < host->num_slots; i++) {
+ 			struct dw_mci_slot *slot = host->slot[i];
+-			if (pending & SDMMC_INT_SDIO(i)) {
+-				mci_writel(host, RINTSTS, SDMMC_INT_SDIO(i));
++			u32 sdio_int_bit;
++
++			if (host->quirks & DW_MCI_QUIRK_SDIO_INT_24BIT)
++				sdio_int_bit = SDMMC_INT_SDIO_24BIT(i);
++			else
++				sdio_int_bit = SDMMC_INT_SDIO(i);
++
++			if (pending & sdio_int_bit) {
++				mci_writel(host, RINTSTS, sdio_int_bit);
+ 				mmc_signal_sdio_irq(slot->mmc);
+ 			}
+ 		}
+@@ -2452,6 +2471,9 @@ static struct dw_mci_of_quirks {
+ 	}, {
+ 		.quirk	= "disable-wp",
+ 		.id	= DW_MCI_QUIRK_NO_WRITE_PROTECT,
++	}, {
++		.quirk	= "sdio-int-24bit",
++		.id	= DW_MCI_QUIRK_SDIO_INT_24BIT,
+ 	},
+ };
+ 
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 01b99e8..6a48015 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -92,6 +92,7 @@
+ #define SDMMC_CTYPE_4BIT		BIT(0)
+ #define SDMMC_CTYPE_1BIT		0
+ /* Interrupt status & mask register defines */
++#define SDMMC_INT_SDIO_24BIT(n)		BIT(24 + (n))
+ #define SDMMC_INT_SDIO(n)		BIT(16 + (n))
+ #define SDMMC_INT_EBE			BIT(15)
+ #define SDMMC_INT_ACD			BIT(14)
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 0013669..6d4669e 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -217,6 +217,8 @@ struct dw_mci_dma_ops {
+ #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
+ /* No write protect */
+ #define DW_MCI_QUIRK_NO_WRITE_PROTECT		BIT(4)
++/* In RK3288, the bit of sdio interrupt is 24 */
++#define DW_MCI_QUIRK_SDIO_INT_24BIT		BIT(5)
+ 
+ /* Slot level quirks */
+ /* This slot has no write protect */
+-- 
+1.8.3.2
+
+
