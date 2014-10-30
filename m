@@ -1,76 +1,37 @@
-From: Pramod Gurav <pramod.gurav.etc@gmail.com>
-Subject: Re: [PATCH v2] mmc: davinci: Fix and simplify probe failure path
-Date: Thu, 30 Oct 2014 17:15:42 +0530
-Message-ID: <CAMf-jSm-Fc6gcnSqB4cixjqZSQOrvSLaQ2hXqy1TZncFrjn8hw@mail.gmail.com>
-References: <1414655193-16952-1-git-send-email-pramod.gurav@smartplayin.com>
-	<CAPDyKFqFOb9L6WyFhLbSY-dQy_75YVUhTzVsBku1BKcEMmgpBg@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 00/15] mmc: sdhci: Add 64-bit ADMA support
+Date: Thu, 30 Oct 2014 13:15:02 +0100
+Message-ID: <2048776.ZjHxKvTX0Z@wuerfel>
+References: <1413883585-16299-1-git-send-email-adrian.hunter@intel.com> <7275405.tTXMrp5n17@wuerfel> <54521813.9050308@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:59668 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759041AbaJ3Lpo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Oct 2014 07:45:44 -0400
-In-Reply-To: <CAPDyKFqFOb9L6WyFhLbSY-dQy_75YVUhTzVsBku1BKcEMmgpBg@mail.gmail.com>
+Received: from mout.kundenserver.de ([212.227.17.13]:55607 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759059AbaJ3MPJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Oct 2014 08:15:09 -0400
+In-Reply-To: <54521813.9050308@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Pramod Gurav <pramod.gurav@smartplayin.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-Thanks Ulf,
+On Thursday 30 October 2014 12:50:59 Adrian Hunter wrote:
+> On 30/10/14 12:00, Arnd Bergmann wrote:
+> > 
+> > You also said that the flag is defined to mean that 64-bit DMA
+> > is working and that you want to show the warning when the hardware
+> > and the firmware disagree about this.  If you have an (at least)
+> > 50% chance that the hardware is lying, you really shouldn't believe
+> > it.
+> 
+> Just because there are two options does not mean they are each equally
+> likely.
+> 
 
-On Thu, Oct 30, 2014 at 4:38 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 30 October 2014 08:46, Pramod Gurav <pramod.gurav@smartplayin.com> wrote:
->> The sequence of resource release in probe failure path in this
->> driver was wrong and needed fixes to cleanly unload the driver.
->> This changes does the same by switching to managed resources and
->> fixes return path to release resource in proper sequence.
->>
->> Cc: Chris Ball <chris@printf.net>
->> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->> Cc: linux-mmc@vger.kernel.org
->
-> Please remove these Ccs above from the commit message. It's not needed
-> when you anyway need to send the patches directly to these addresses.
-Will remove Cc.
+Yes, that's why I said "at least". Presumably when the hardware and
+firmware disagree about something, it's because the firmware developer
+found a problem with the hardware and wants to work around that.
 
->
->> Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
->> ---
-..
-
->>
->>         host = mmc_priv(mmc);
->>         host->mmc = mmc;        /* Important */
->> @@ -1275,15 +1273,16 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
->>                 host->txdma = r->start;
->>
->>         host->mem_res = mem;
->> -       host->base = ioremap(mem->start, mem_size);
->> -       if (!host->base)
->> -               goto out;
->> +       host->base = devm_ioremap(&pdev->dev, mem->start, mem_size);
->
-> I realized that you should use devm_ioremap_resource() instead. That
-> would simplify the code even more.
->
-Yes, we could have used devm_ioremap_resource() but this driver stores
-the return from devm_request_mem_region() in host->mem_res and uses
-the same in the other part of drivers. Is there a way to work this
-around?
-
-> [...]
->
-> Kind regards
-> Uffe
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
-
-
-
--- 
-Thanks and Regards
-Pramod
+	Arnd
