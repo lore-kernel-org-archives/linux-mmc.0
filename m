@@ -1,68 +1,39 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 3/4] mmc: sdhci: Clear also HS400 1.2V capability if 1.2V is not supported
-Date: Fri, 31 Oct 2014 14:22:50 +0200
-Message-ID: <1414758171-1244-4-git-send-email-adrian.hunter@intel.com>
-References: <1414758171-1244-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:64435 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1759226AbaJaMZC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 31 Oct 2014 08:25:02 -0400
-In-Reply-To: <1414758171-1244-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v2] mmc: dw_mmc: add support for the other bit of sdio interrupt
+Date: Fri, 31 Oct 2014 08:55:12 -0700
+Message-ID: <CAD=FV=Wmb0ZhB1WmK9SPg28LWB3zv9oNj0peTx3Ybt_KMSv7bw@mail.gmail.com>
+References: <1414666240-16782-1-git-send-email-addy.ke@rock-chips.com>
+	<1414727409-6765-1-git-send-email-addy.ke@rock-chips.com>
+	<54534C17.7050703@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <54534C17.7050703@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Addy Ke <addy.ke@rock-chips.com>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockc>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-1.2V HS200 mode capability is cleared if there is not a voltage
-regulator that supports 1.2V.  Do the same for 1.2V HS400 mode.
+Jaehoon,
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci.c | 13 +++++++------
- include/linux/mmc/host.h |  1 +
- 2 files changed, 8 insertions(+), 6 deletions(-)
+On Fri, Oct 31, 2014 at 1:45 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi, Addy.
+>
+> On 10/31/2014 12:50 PM, Addy Ke wrote:
+>> The bit of sdio interrupt is 16 in designware implementation,
+>> but it is 24 in RK3288. This patch add sdio_id0 for the number
+>> of slot0 in the SDIO interrupt registers, which can be set in
+>> platform DT table, such as:
+>> - rockchip,sdio-interrupt-slot0 = <8>;
+>
+> I have a question. (It's not important question)
+> You mentioned the sdio-irq bit used from 24 to 31, right?
+> Then what interrupts are used from 16 to 23 at RK3288? Just reserved?
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7736a2c..91e888c 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3110,16 +3110,17 @@ int sdhci_add_host(struct sdhci_host *host)
- 		/* SD3.0: SDR104 is supported so (for eMMC) the caps2
- 		 * field can be promoted to support HS200.
- 		 */
--		if (!(host->quirks2 & SDHCI_QUIRK2_BROKEN_HS200)) {
-+		if (!(host->quirks2 & SDHCI_QUIRK2_BROKEN_HS200))
- 			mmc->caps2 |= MMC_CAP2_HS200;
--			if (IS_ERR(mmc->supply.vqmmc) ||
--					!regulator_is_supported_voltage
--					(mmc->supply.vqmmc, 1100000, 1300000))
--				mmc->caps2 &= ~MMC_CAP2_HS200_1_2V_SDR;
--		}
- 	} else if (caps[1] & SDHCI_SUPPORT_SDR50)
- 		mmc->caps |= MMC_CAP_UHS_SDR50;
- 
-+	if ((mmc->caps2 & MMC_CAPS2_1_2V) &&
-+	    (IS_ERR(mmc->supply.vqmmc) ||
-+	     !regulator_is_supported_voltage(mmc->supply.vqmmc, 1100000,
-+					     1300000)))
-+		mmc->caps2 &= ~MMC_CAPS2_1_2V;
-+
- 	if ((caps[1] & SDHCI_SUPPORT_DDR50) &&
- 		!(host->quirks2 & SDHCI_QUIRK2_BROKEN_DDR50))
- 		mmc->caps |= MMC_CAP_UHS_DDR50;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index df0c153..e48c1bf 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -289,6 +289,7 @@ struct mmc_host {
- #define MMC_CAP2_HS400_1_2V	(1 << 16)	/* Can support HS400 1.2V */
- #define MMC_CAP2_HS400		(MMC_CAP2_HS400_1_8V | \
- 				 MMC_CAP2_HS400_1_2V)
-+#define MMC_CAPS2_1_2V		(MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS400_1_2V)
- #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
--- 
-1.9.1
+In my TRM 16 shows as "data_nobusy".  A quick search doesn't show any
+documentation for what this means.  17-23 and 25-31 are reserved.
 
+Note that (of course) there's no actual support for more than one slot
+on rk3288, so claiming that "24-31" is SDIO INT is a little silly, but
+I agree that it's probably is the best way to fit into the existing
+code until someone gets around to removing the whole multi-slot cruft.
