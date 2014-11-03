@@ -1,183 +1,46 @@
-From: addy ke <addy.ke@rock-chips.com>
-Subject: Re: [PATCH v3] mmc: dw_mmc: add support for the other bit of sdio
- interrupt
-Date: Mon, 03 Nov 2014 18:23:47 +0800
-Message-ID: <545757B3.30208@rock-chips.com>
-References: <1414666240-16782-1-git-send-email-addy.ke@rock-chips.com> <1414977633-3196-1-git-send-email-addy.ke@rock-chips.com> <5457440E.3070002@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 3/4] mmc: core: make hw_reset generic
+Date: Mon, 03 Nov 2014 12:56:04 +0200
+Message-ID: <54575F44.1000503@intel.com>
+References: <1414154790-20893-1-git-send-email-johanru@axis.com>	<1414154790-20893-4-git-send-email-johanru@axis.com>	<545748F7.8020707@intel.com> <CA+20K0A6qKkEb=pGgFUn=Z07_YmqW1ot=LjPswDx6MzBpwP9ZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <5457440E.3070002@samsung.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: jh80.chung@samsung.com, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org
-Cc: huangtao@rock-chips.com, devicetree@vger.kernel.org, hl@rock-chips.com, linux-doc@vger.kernel.org, yzq@rock-chips.com, zyw@rock-chips.com, zhangqing@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kever.yang@rock-chips.com, lintao@rock-chips.com, linux-rockchip@lists.infradead.org, xjq@rock-chips.com, zhenfu.fang@rock-chips.com, chenfen@rock-chips.com, cf@rock-chips.com, hj@rock-chips.com, linux-arm-kernel@lists.infradead.org, zyf@rock-chips.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:38663 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751864AbaKCK56 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 3 Nov 2014 05:57:58 -0500
+In-Reply-To: <CA+20K0A6qKkEb=pGgFUn=Z07_YmqW1ot=LjPswDx6MzBpwP9ZQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Johan Rudholm <johan.rudholm@axis.com>
+Cc: Johan Rudholm <johanru@axis.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?B?RGF2aWQgTGFuemVuZMO2cmZlcg==?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>
 
-Hi, Jaehoo
-
-On 2014/11/3 16:59, Jaehoon Chung wrote:
-> Hi, Addy.
-> 
-> On 11/03/2014 10:20 AM, Addy Ke wrote:
->> The bit of sdio interrupt is 16 in designware implementation,
->> but it is 24 on Rockchip SoCs.This patch add sdio_id0 for the
->> number of slot0 in the SDIO interrupt registers.
+On 03/11/14 12:19, Johan Rudholm wrote:
+> 2014-11-03 10:20 GMT+01:00 Adrian Hunter <adrian.hunter@intel.com>:
+>> On 24/10/14 15:46, Johan Rudholm wrote:
+>>> Move the (e)MMC specific hw_reset code from core.c into mmc.c and call
+>>> it from the new bus_ops member power_reset. This also lets us add code
 >>
->> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
->> ---
->> Changes in v2:
->> - rebase on http://git.linaro.org/git/people/ulf.hansson/mmc.git, next branch
->> Changes in v3:
->> - Remove dts for sdio_id0, just replace this with 8, suggested by Doug
->> - Change to support all Rockchip Socs, suggested by Heiko
+>> power_reset is not a good name because it does not necessarily have
+>> anything to do with power.  I am not sure why you don't stick with
+>> hw_reset.
 >>
->>  drivers/mmc/host/dw_mmc-rockchip.c | 10 ++++++++++
->>  drivers/mmc/host/dw_mmc.c          | 12 +++++++-----
->>  drivers/mmc/host/dw_mmc.h          |  2 ++
->>  include/linux/mmc/dw_mmc.h         |  3 +++
->>  4 files changed, 22 insertions(+), 5 deletions(-)
+>>> for reseting SD cards as well.
+>>>
+>>> Rename the mmc_hw_reset* functions into mmc_reset*, since what they
+>>> now actually do depends on the device type (and it may be something else
+>>> than doing a hw_reset).
 >>
->> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
->> index bbb4ec3..b997c8f 100644
->> --- a/drivers/mmc/host/dw_mmc-rockchip.c
->> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
->> @@ -68,14 +68,24 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->>  	}
->>  }
->>  
->> +static int dw_mci_rockchip_parse_dt(struct dw_mci *host)
->> +{
->> +	/* It is slot 8 on Rockchip SoCs */
->> +	host->sdio_id0 = 8;
->> +
->> +	return 0;
->> +}
+>> I don't follow your reasoning about the rename.  Cycling the power is
+>> a kind of hardware reset isn't it.
 > 
-> Well, function is "__parse_dt__", but this function don't parse anything.
-> If All rockchip soc is supported, i think that it can be located to other place.
-> 
-Can add it in "init" function? like this:
-int dw_mci_rockchip_init(struct dw_mci *host)
-{
-	/* It is slot 8 on Rockchip SoCs */
-	host->sdio_id0 = 8;
+> Since we finalize the reset by calling bus_ops->power_restore, I was
+> looking for something symmetrical. Ulf mentioned perhaps extending
+> bus_ops->power_save, but I couldn't find a reasonable way of doing
+> this. Do you propose simply calling it bus_ops->hw_reset ?
 
-	return 0;
-}
-static const struct dw_mci_drv_data xxxx {
-    ....
-    .init = dw_mci_rockchip_init,
-};
+Yes
 
-
-> Best Regards,
-> Jaehoon Chung
-> 
->> +
->>  static const struct dw_mci_drv_data rk2928_drv_data = {
->>  	.prepare_command        = dw_mci_rockchip_prepare_command,
->> +	.parse_dt	= dw_mci_rockchip_parse_dt,
->>  };
->>  
->>  static const struct dw_mci_drv_data rk3288_drv_data = {
->>  	.prepare_command        = dw_mci_rockchip_prepare_command,
->>  	.set_ios		= dw_mci_rk3288_set_ios,
->>  	.setup_clock    = dw_mci_rk3288_setup_clock,
->> +	.parse_dt	= dw_mci_rockchip_parse_dt,
->>  };
->>  
->>  static const struct of_device_id dw_mci_rockchip_match[] = {
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index bb46b1b..a633b58 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -823,7 +823,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->>  
->>  		/* enable clock; only low power if no SDIO */
->>  		clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
->> -		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->id)))
->> +		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->sdio_id)))
->>  			clk_en_a |= SDMMC_CLKEN_LOW_PWR << slot->id;
->>  		mci_writel(host, CLKENA, clk_en_a);
->>  
->> @@ -1184,10 +1184,10 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
->>  		dw_mci_disable_low_power(slot);
->>  
->>  		mci_writel(host, INTMASK,
->> -			   (int_mask | SDMMC_INT_SDIO(slot->id)));
->> +			   (int_mask | SDMMC_INT_SDIO(slot->sdio_id)));
->>  	} else {
->>  		mci_writel(host, INTMASK,
->> -			   (int_mask & ~SDMMC_INT_SDIO(slot->id)));
->> +			   (int_mask & ~SDMMC_INT_SDIO(slot->sdio_id)));
->>  	}
->>  }
->>  
->> @@ -2056,8 +2056,9 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->>  		/* Handle SDIO Interrupts */
->>  		for (i = 0; i < host->num_slots; i++) {
->>  			struct dw_mci_slot *slot = host->slot[i];
->> -			if (pending & SDMMC_INT_SDIO(i)) {
->> -				mci_writel(host, RINTSTS, SDMMC_INT_SDIO(i));
->> +			if (pending & SDMMC_INT_SDIO(slot->sdio_id)) {
->> +				mci_writel(host, RINTSTS,
->> +					   SDMMC_INT_SDIO(slot->sdio_id));
->>  				mmc_signal_sdio_irq(slot->mmc);
->>  			}
->>  		}
->> @@ -2145,6 +2146,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->>  
->>  	slot = mmc_priv(mmc);
->>  	slot->id = id;
->> +	slot->sdio_id = host->sdio_id0 + id;
->>  	slot->mmc = mmc;
->>  	slot->host = host;
->>  	host->slot[id] = slot;
->> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
->> index 71d4995..0562f10 100644
->> --- a/drivers/mmc/host/dw_mmc.h
->> +++ b/drivers/mmc/host/dw_mmc.h
->> @@ -214,6 +214,7 @@ extern int dw_mci_resume(struct dw_mci *host);
->>   *	with CONFIG_MMC_CLKGATE.
->>   * @flags: Random state bits associated with the slot.
->>   * @id: Number of this slot.
->> + * @sdio_id: Number of this slot in the SDIO interrupt registers.
->>   */
->>  struct dw_mci_slot {
->>  	struct mmc_host		*mmc;
->> @@ -233,6 +234,7 @@ struct dw_mci_slot {
->>  #define DW_MMC_CARD_PRESENT	0
->>  #define DW_MMC_CARD_NEED_INIT	1
->>  	int			id;
->> +	int			sdio_id;
->>  };
->>  
->>  struct dw_mci_tuning_data {
->> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
->> index 69d0814..72c319f 100644
->> --- a/include/linux/mmc/dw_mmc.h
->> +++ b/include/linux/mmc/dw_mmc.h
->> @@ -96,6 +96,7 @@ struct mmc_data;
->>   * @quirks: Set of quirks that apply to specific versions of the IP.
->>   * @irq_flags: The flags to be passed to request_irq.
->>   * @irq: The irq value to be passed to request_irq.
->> + * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
->>   *
->>   * Locking
->>   * =======
->> @@ -191,6 +192,8 @@ struct dw_mci {
->>  	bool			vqmmc_enabled;
->>  	unsigned long		irq_flags; /* IRQ flags */
->>  	int			irq;
->> +
->> +	int			sdio_id0;
->>  };
->>  
->>  /* DMA ops for Internal/External DMAC interface */
->>
-> 
-> 
-> 
-> 
 
