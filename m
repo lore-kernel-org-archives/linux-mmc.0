@@ -1,75 +1,163 @@
-From: Johan Rudholm <johan.rudholm@axis.com>
-Subject: Re: [PATCH 0/4] mmc: core: hw_reset changes
-Date: Mon, 3 Nov 2014 09:46:14 +0100
-Message-ID: <CA+20K0DgFFxsfyTu0U-8mq0cZSmNE6xAa0UyBBYdRKCViLjy6A@mail.gmail.com>
-References: <1414154790-20893-1-git-send-email-johanru@axis.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v3] mmc: dw_mmc: add support for the other bit of sdio
+ interrupt
+Date: Mon, 03 Nov 2014 17:59:58 +0900
+Message-ID: <5457440E.3070002@samsung.com>
+References: <1414666240-16782-1-git-send-email-addy.ke@rock-chips.com>
+ <1414977633-3196-1-git-send-email-addy.ke@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bastet.se.axis.com ([195.60.68.11]:33742 "EHLO
-	bastet.se.axis.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750824AbaKCIqT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Nov 2014 03:46:19 -0500
-Received: from localhost (localhost [127.0.0.1])
-	by bastet.se.axis.com (Postfix) with ESMTP id 068A61806C
-	for <linux-mmc@vger.kernel.org>; Mon,  3 Nov 2014 09:46:18 +0100 (CET)
-Received: from bastet.se.axis.com ([IPv6:::ffff:127.0.0.1])
-	by localhost (bastet.se.axis.com [::ffff:127.0.0.1]) (amavisd-new, port 10024)
-	with LMTP id DJ9841Ty7slZ for <linux-mmc@vger.kernel.org>;
-	Mon,  3 Nov 2014 09:46:16 +0100 (CET)
-Received: from boulder.se.axis.com (boulder.se.axis.com [10.0.2.104])
-	by bastet.se.axis.com (Postfix) with ESMTP id 756D01807C
-	for <linux-mmc@vger.kernel.org>; Mon,  3 Nov 2014 09:46:16 +0100 (CET)
-Received: from boulder.se.axis.com (localhost [127.0.0.1])
-	by postfix.imss71 (Postfix) with ESMTP id 5D830DA2
-	for <linux-mmc@vger.kernel.org>; Mon,  3 Nov 2014 09:46:16 +0100 (CET)
-Received: from thoth.se.axis.com (thoth.se.axis.com [10.0.2.173])
-	by boulder.se.axis.com (Postfix) with ESMTP id 50DCF607
-	for <linux-mmc@vger.kernel.org>; Mon,  3 Nov 2014 09:46:16 +0100 (CET)
-Received: from xmail2.se.axis.com (xmail2.se.axis.com [10.0.5.74])
-	by thoth.se.axis.com (Postfix) with ESMTP id 4DDC4342B9
-	for <linux-mmc@vger.kernel.org>; Mon,  3 Nov 2014 09:46:16 +0100 (CET)
-Received: by mail-qg0-f54.google.com with SMTP id q108so8239000qgd.41
-        for <linux-mmc@vger.kernel.org>; Mon, 03 Nov 2014 00:46:14 -0800 (PST)
-In-Reply-To: <1414154790-20893-1-git-send-email-johanru@axis.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-reply-to: <1414977633-3196-1-git-send-email-addy.ke@rock-chips.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Addy Ke <addy.ke@rock-chips.com>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org
+Cc: huangtao@rock-chips.com, devicetree@vger.kernel.org, hl@rock-chips.com, linux-doc@vger.kernel.org, yzq@rock-chips.com, zyw@rock-chips.com, zhangqing@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kever.yang@rock-chips.com, lintao@rock-chips.com, linux-rockchip@lists.infradead.org, xjq@rock-chips.com, zhenfu.fang@rock-chips.com, chenfen@rock-chips.com, cf@rock-chips.com, hj@rock-chips.com, linux-arm-kernel@lists.infradead.org, zyf@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <johanru@axis.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>
 
-Hi all,
+Hi, Addy.
 
-any comments on this patch set?
+On 11/03/2014 10:20 AM, Addy Ke wrote:
+> The bit of sdio interrupt is 16 in designware implementation,
+> but it is 24 on Rockchip SoCs.This patch add sdio_id0 for the
+> number of slot0 in the SDIO interrupt registers.
+> 
+> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+> ---
+> Changes in v2:
+> - rebase on http://git.linaro.org/git/people/ulf.hansson/mmc.git, next branch
+> Changes in v3:
+> - Remove dts for sdio_id0, just replace this with 8, suggested by Doug
+> - Change to support all Rockchip Socs, suggested by Heiko
+> 
+>  drivers/mmc/host/dw_mmc-rockchip.c | 10 ++++++++++
+>  drivers/mmc/host/dw_mmc.c          | 12 +++++++-----
+>  drivers/mmc/host/dw_mmc.h          |  2 ++
+>  include/linux/mmc/dw_mmc.h         |  3 +++
+>  4 files changed, 22 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> index bbb4ec3..b997c8f 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -68,14 +68,24 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>  	}
+>  }
+>  
+> +static int dw_mci_rockchip_parse_dt(struct dw_mci *host)
+> +{
+> +	/* It is slot 8 on Rockchip SoCs */
+> +	host->sdio_id0 = 8;
+> +
+> +	return 0;
+> +}
 
-//Johan
+Well, function is "__parse_dt__", but this function don't parse anything.
+If All rockchip soc is supported, i think that it can be located to other place.
 
-2014-10-24 14:46 GMT+02:00 Johan Rudholm <johan.rudholm@axis.com>:
-> Make the mmc_hw_reset routines more generic, so we can easily add a
-> power cycle of SD cards as well. Also simplify the (e)MMC specific
-> parts of the reset code.
->
-> As I don't have an eMMC device myself, much less one with a reset line,
-> I'd be very happy if someone could help me test the code with an eMMC?
->
-> Johan Rudholm (4):
->   mmc: core: use mmc_send_status to check hw_reset
->   mmc: core: use mmc_power_up in hw_reset
->   mmc: core: make hw_reset generic
->   mmc: sd: add power_reset callback
->
->  drivers/mmc/card/block.c    |    2 +-
->  drivers/mmc/card/mmc_test.c |    5 +--
->  drivers/mmc/core/core.c     |   73 ++++++++-----------------------------------
->  drivers/mmc/core/core.h     |    4 ++
->  drivers/mmc/core/mmc.c      |   40 +++++++++++++++++++++++
->  drivers/mmc/core/sd.c       |   16 +++++++++
->  include/linux/mmc/core.h    |    5 +--
->  7 files changed, 77 insertions(+), 68 deletions(-)
->
-> --
-> 1.7.2.5
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Best Regards,
+Jaehoon Chung
+
+> +
+>  static const struct dw_mci_drv_data rk2928_drv_data = {
+>  	.prepare_command        = dw_mci_rockchip_prepare_command,
+> +	.parse_dt	= dw_mci_rockchip_parse_dt,
+>  };
+>  
+>  static const struct dw_mci_drv_data rk3288_drv_data = {
+>  	.prepare_command        = dw_mci_rockchip_prepare_command,
+>  	.set_ios		= dw_mci_rk3288_set_ios,
+>  	.setup_clock    = dw_mci_rk3288_setup_clock,
+> +	.parse_dt	= dw_mci_rockchip_parse_dt,
+>  };
+>  
+>  static const struct of_device_id dw_mci_rockchip_match[] = {
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index bb46b1b..a633b58 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -823,7 +823,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>  
+>  		/* enable clock; only low power if no SDIO */
+>  		clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
+> -		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->id)))
+> +		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->sdio_id)))
+>  			clk_en_a |= SDMMC_CLKEN_LOW_PWR << slot->id;
+>  		mci_writel(host, CLKENA, clk_en_a);
+>  
+> @@ -1184,10 +1184,10 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>  		dw_mci_disable_low_power(slot);
+>  
+>  		mci_writel(host, INTMASK,
+> -			   (int_mask | SDMMC_INT_SDIO(slot->id)));
+> +			   (int_mask | SDMMC_INT_SDIO(slot->sdio_id)));
+>  	} else {
+>  		mci_writel(host, INTMASK,
+> -			   (int_mask & ~SDMMC_INT_SDIO(slot->id)));
+> +			   (int_mask & ~SDMMC_INT_SDIO(slot->sdio_id)));
+>  	}
+>  }
+>  
+> @@ -2056,8 +2056,9 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>  		/* Handle SDIO Interrupts */
+>  		for (i = 0; i < host->num_slots; i++) {
+>  			struct dw_mci_slot *slot = host->slot[i];
+> -			if (pending & SDMMC_INT_SDIO(i)) {
+> -				mci_writel(host, RINTSTS, SDMMC_INT_SDIO(i));
+> +			if (pending & SDMMC_INT_SDIO(slot->sdio_id)) {
+> +				mci_writel(host, RINTSTS,
+> +					   SDMMC_INT_SDIO(slot->sdio_id));
+>  				mmc_signal_sdio_irq(slot->mmc);
+>  			}
+>  		}
+> @@ -2145,6 +2146,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  
+>  	slot = mmc_priv(mmc);
+>  	slot->id = id;
+> +	slot->sdio_id = host->sdio_id0 + id;
+>  	slot->mmc = mmc;
+>  	slot->host = host;
+>  	host->slot[id] = slot;
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 71d4995..0562f10 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -214,6 +214,7 @@ extern int dw_mci_resume(struct dw_mci *host);
+>   *	with CONFIG_MMC_CLKGATE.
+>   * @flags: Random state bits associated with the slot.
+>   * @id: Number of this slot.
+> + * @sdio_id: Number of this slot in the SDIO interrupt registers.
+>   */
+>  struct dw_mci_slot {
+>  	struct mmc_host		*mmc;
+> @@ -233,6 +234,7 @@ struct dw_mci_slot {
+>  #define DW_MMC_CARD_PRESENT	0
+>  #define DW_MMC_CARD_NEED_INIT	1
+>  	int			id;
+> +	int			sdio_id;
+>  };
+>  
+>  struct dw_mci_tuning_data {
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index 69d0814..72c319f 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -96,6 +96,7 @@ struct mmc_data;
+>   * @quirks: Set of quirks that apply to specific versions of the IP.
+>   * @irq_flags: The flags to be passed to request_irq.
+>   * @irq: The irq value to be passed to request_irq.
+> + * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
+>   *
+>   * Locking
+>   * =======
+> @@ -191,6 +192,8 @@ struct dw_mci {
+>  	bool			vqmmc_enabled;
+>  	unsigned long		irq_flags; /* IRQ flags */
+>  	int			irq;
+> +
+> +	int			sdio_id0;
+>  };
+>  
+>  /* DMA ops for Internal/External DMAC interface */
+> 
+
