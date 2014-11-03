@@ -1,65 +1,69 @@
-From: Johan Rudholm <johan.rudholm@axis.com>
-Subject: Re: [PATCH 3/4] mmc: core: make hw_reset generic
-Date: Mon, 3 Nov 2014 11:19:15 +0100
-Message-ID: <CA+20K0A6qKkEb=pGgFUn=Z07_YmqW1ot=LjPswDx6MzBpwP9ZQ@mail.gmail.com>
-References: <1414154790-20893-1-git-send-email-johanru@axis.com>
-	<1414154790-20893-4-git-send-email-johanru@axis.com>
-	<545748F7.8020707@intel.com>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCH v3] mmc: dw_mmc: add support for the other bit of sdio interrupt
+Date: Mon, 03 Nov 2014 11:23:52 +0100
+Message-ID: <3540679.aQ4QUeBEJd@diego>
+References: <1414666240-16782-1-git-send-email-addy.ke@rock-chips.com> <1414977633-3196-1-git-send-email-addy.ke@rock-chips.com> <5457440E.3070002@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bastet.se.axis.com ([195.60.68.11]:39841 "EHLO
-	bastet.se.axis.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751169AbaKCKTW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Nov 2014 05:19:22 -0500
-Received: from localhost (localhost [127.0.0.1])
-	by bastet.se.axis.com (Postfix) with ESMTP id B9B2418078
-	for <linux-mmc@vger.kernel.org>; Mon,  3 Nov 2014 11:19:20 +0100 (CET)
-Received: from bastet.se.axis.com ([IPv6:::ffff:127.0.0.1])
-	by localhost (bastet.se.axis.com [::ffff:127.0.0.1]) (amavisd-new, port 10024)
-	with LMTP id O8e+9v1zq26Y for <linux-mmc@vger.kernel.org>;
-	Mon,  3 Nov 2014 11:19:18 +0100 (CET)
-Received: from boulder.se.axis.com (boulder.se.axis.com [10.0.2.104])
-	by bastet.se.axis.com (Postfix) with ESMTP id 1B7481808E
-	for <linux-mmc@vger.kernel.org>; Mon,  3 Nov 2014 11:19:18 +0100 (CET)
-Received: from boulder.se.axis.com (localhost [127.0.0.1])
-	by postfix.imss71 (Postfix) with ESMTP id EC23BE23
-	for <linux-mmc@vger.kernel.org>; Mon,  3 Nov 2014 11:19:17 +0100 (CET)
-Received: from thoth.se.axis.com (thoth.se.axis.com [10.0.2.173])
-	by boulder.se.axis.com (Postfix) with ESMTP id DF51357B
-	for <linux-mmc@vger.kernel.org>; Mon,  3 Nov 2014 11:19:17 +0100 (CET)
-Received: from xmail2.se.axis.com (xmail2.se.axis.com [10.0.5.74])
-	by thoth.se.axis.com (Postfix) with ESMTP id DCA73341B4
-	for <linux-mmc@vger.kernel.org>; Mon,  3 Nov 2014 11:19:17 +0100 (CET)
-Received: by mail-qa0-f50.google.com with SMTP id bm13so6389520qab.9
-        for <linux-mmc@vger.kernel.org>; Mon, 03 Nov 2014 02:19:15 -0800 (PST)
-In-Reply-To: <545748F7.8020707@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <5457440E.3070002@samsung.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Addy Ke <addy.ke@rock-chips.com>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org, huangtao@rock-chips.com, devicetree@vger.kernel.org, hl@rock-chips.com, linux-doc@vger.kernel.org, yzq@rock-chips.com, zyw@rock-chips.com, zhangqing@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kever.yang@rock-chips.com, lintao@rock-chips.com, linux-rockchip@lists.infradead.org, xjq@rock-chips.com, zhenfu.fang@rock-chips.com, chenfen@rock-chips.com, cf@rock-chips.com, hj@rock-chips.com, linux-arm-kernel@lists.infradead.org, zyf@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Johan Rudholm <johanru@axis.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>
 
-2014-11-03 10:20 GMT+01:00 Adrian Hunter <adrian.hunter@intel.com>:
-> On 24/10/14 15:46, Johan Rudholm wrote:
->> Move the (e)MMC specific hw_reset code from core.c into mmc.c and call
->> it from the new bus_ops member power_reset. This also lets us add code
->
-> power_reset is not a good name because it does not necessarily have
-> anything to do with power.  I am not sure why you don't stick with
-> hw_reset.
->
->> for reseting SD cards as well.
->>
->> Rename the mmc_hw_reset* functions into mmc_reset*, since what they
->> now actually do depends on the device type (and it may be something else
->> than doing a hw_reset).
->
-> I don't follow your reasoning about the rename.  Cycling the power is
-> a kind of hardware reset isn't it.
+Hi Jaehoon,
 
-Since we finalize the reset by calling bus_ops->power_restore, I was
-looking for something symmetrical. Ulf mentioned perhaps extending
-bus_ops->power_save, but I couldn't find a reasonable way of doing
-this. Do you propose simply calling it bus_ops->hw_reset ?
+Am Montag, 3. November 2014, 17:59:58 schrieb Jaehoon Chung:
+> Hi, Addy.
+> 
+> On 11/03/2014 10:20 AM, Addy Ke wrote:
+> > The bit of sdio interrupt is 16 in designware implementation,
+> > but it is 24 on Rockchip SoCs.This patch add sdio_id0 for the
+> > number of slot0 in the SDIO interrupt registers.
+> > 
+> > Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+> > ---
+> > Changes in v2:
+> > - rebase on http://git.linaro.org/git/people/ulf.hansson/mmc.git, next
+> > branch Changes in v3:
+> > - Remove dts for sdio_id0, just replace this with 8, suggested by Doug
+> > - Change to support all Rockchip Socs, suggested by Heiko
+> > 
+> >  drivers/mmc/host/dw_mmc-rockchip.c | 10 ++++++++++
+> >  drivers/mmc/host/dw_mmc.c          | 12 +++++++-----
+> >  drivers/mmc/host/dw_mmc.h          |  2 ++
+> >  include/linux/mmc/dw_mmc.h         |  3 +++
+> >  4 files changed, 22 insertions(+), 5 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/dw_mmc-rockchip.c
+> > b/drivers/mmc/host/dw_mmc-rockchip.c index bbb4ec3..b997c8f 100644
+> > --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> > +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> > @@ -68,14 +68,24 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host,
+> > struct mmc_ios *ios)> 
+> >  	}
+> >  
+> >  }
+> > 
+> > +static int dw_mci_rockchip_parse_dt(struct dw_mci *host)
+> > +{
+> > +	/* It is slot 8 on Rockchip SoCs */
+> > +	host->sdio_id0 = 8;
+> > +
+> > +	return 0;
+> > +}
+> 
+> Well, function is "__parse_dt__", but this function don't parse anything.
+> If All rockchip soc is supported, i think that it can be located to other
+> place.
 
-//Johan
+do you have a suggestion for a location?
+
+The only alternative I can see right now would be using the init-hook in 
+dw_mci_drv_data or adding a new field to it holding the slot-offset.
+[with using the init-hook being my personal preference of the two]
+
+
+Heiko
