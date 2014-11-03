@@ -1,95 +1,257 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: host: atmel-mci: Add support for non-removable slots
-Date: Mon, 3 Nov 2014 10:04:30 +0100
-Message-ID: <CAPDyKFpMGk4M=fjBKufxb9iMbV6FmRTEfE_ptXPmM=CHx3Q7iQ@mail.gmail.com>
-References: <1414147803-29202-1-git-send-email-timo.kokkonen@offcode.fi>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 3/4] mmc: core: make hw_reset generic
+Date: Mon, 03 Nov 2014 11:20:55 +0200
+Message-ID: <545748F7.8020707@intel.com>
+References: <1414154790-20893-1-git-send-email-johanru@axis.com> <1414154790-20893-4-git-send-email-johanru@axis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f47.google.com ([209.85.192.47]:39054 "EHLO
-	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751832AbaKCJEb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Nov 2014 04:04:31 -0500
-Received: by mail-qg0-f47.google.com with SMTP id j107so8364895qga.6
-        for <linux-mmc@vger.kernel.org>; Mon, 03 Nov 2014 01:04:31 -0800 (PST)
-In-Reply-To: <1414147803-29202-1-git-send-email-timo.kokkonen@offcode.fi>
+Received: from mga09.intel.com ([134.134.136.24]:64500 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750925AbaKCJW1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 3 Nov 2014 04:22:27 -0500
+In-Reply-To: <1414154790-20893-4-git-send-email-johanru@axis.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Timo Kokkonen <timo.kokkonen@offcode.fi>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>
+To: Johan Rudholm <johan.rudholm@axis.com>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?windows-1252?Q?David?= =?windows-1252?Q?_Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>, Johan Rudholm <johanru@axis.com>
 
-On 24 October 2014 12:50, Timo Kokkonen <timo.kokkonen@offcode.fi> wrote:
-> Add support for non-removable slots which have no card detection GPIO
-> and which should not be polled for a card change.
->
-> Signed-off-by: Timo Kokkonen <timo.kokkonen@offcode.fi>
+On 24/10/14 15:46, Johan Rudholm wrote:
+> Move the (e)MMC specific hw_reset code from core.c into mmc.c and call
+> it from the new bus_ops member power_reset. This also lets us add code
 
-Hi Timo,
+power_reset is not a good name because it does not necessarily have
+anything to do with power.  I am not sure why you don't stick with
+hw_reset.
 
-Please resend and include Ludovic Desroches on the "to-line".
+> for reseting SD cards as well.
+> 
+> Rename the mmc_hw_reset* functions into mmc_reset*, since what they
+> now actually do depends on the device type (and it may be something else
+> than doing a hw_reset).
 
-Kind regards
-Uffe
+I don't follow your reasoning about the rename.  Cycling the power is
+a kind of hardware reset isn't it.
 
+> 
+> Signed-off-by: Johan Rudholm <johanru@axis.com>
 > ---
->  drivers/mmc/host/atmel-mci.c | 11 +++++++++--
->  include/linux/atmel-mci.h    |  2 ++
->  2 files changed, 11 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 77250d4..4de1a31 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -560,6 +560,9 @@ atmci_of_init(struct platform_device *pdev)
->                 pdata->slot[slot_id].detect_is_active_high =
->                         of_property_read_bool(cnp, "cd-inverted");
->
-> +               pdata->slot[slot_id].non_removable =
-> +                       of_property_read_bool(cnp, "non-removable");
-> +
->                 pdata->slot[slot_id].wp_pin =
->                         of_get_named_gpio(cnp, "wp-gpios", 0);
->         }
-> @@ -2206,8 +2209,12 @@ static int __init atmci_init_slot(struct atmel_mci *host,
->                 }
->         }
->
-> -       if (!gpio_is_valid(slot->detect_pin))
-> -               mmc->caps |= MMC_CAP_NEEDS_POLL;
-> +       if (!gpio_is_valid(slot->detect_pin)) {
-> +               if (slot_data->non_removable)
-> +                       mmc->caps |= MMC_CAP_NONREMOVABLE;
-> +               else
-> +                       mmc->caps |= MMC_CAP_NEEDS_POLL;
-> +       }
->
->         if (gpio_is_valid(slot->wp_pin)) {
->                 if (devm_gpio_request(&host->pdev->dev, slot->wp_pin,
-> diff --git a/include/linux/atmel-mci.h b/include/linux/atmel-mci.h
-> index 91b77f8..9177947 100644
-> --- a/include/linux/atmel-mci.h
-> +++ b/include/linux/atmel-mci.h
-> @@ -11,6 +11,7 @@
->   * @detect_pin: GPIO pin wired to the card detect switch
->   * @wp_pin: GPIO pin wired to the write protect sensor
->   * @detect_is_active_high: The state of the detect pin when it is active
-> + * @non_removable: The slot is not removable, only detect once
->   *
->   * If a given slot is not present on the board, @bus_width should be
->   * set to 0. The other fields are ignored in this case.
-> @@ -26,6 +27,7 @@ struct mci_slot_pdata {
->         int                     detect_pin;
->         int                     wp_pin;
->         bool                    detect_is_active_high;
-> +       bool                    non_removable;
+>  drivers/mmc/card/block.c    |    2 +-
+>  drivers/mmc/card/mmc_test.c |    5 +---
+>  drivers/mmc/core/core.c     |   58 +++++++++---------------------------------
+>  drivers/mmc/core/core.h     |    4 +++
+>  drivers/mmc/core/mmc.c      |   40 +++++++++++++++++++++++++++++
+>  include/linux/mmc/core.h    |    5 +--
+>  6 files changed, 61 insertions(+), 53 deletions(-)
+> 
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 452782b..8c4fa46 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -1001,7 +1001,7 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+>  		return -EEXIST;
+>  
+>  	md->reset_done |= type;
+> -	err = mmc_hw_reset(host);
+> +	err = mmc_reset(host);
+>  	/* Ensure we switch back to the correct partition */
+>  	if (err != -EOPNOTSUPP) {
+>  		struct mmc_blk_data *main_md = mmc_get_drvdata(host->card);
+> diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+> index 0c0fc52..599c683 100644
+> --- a/drivers/mmc/card/mmc_test.c
+> +++ b/drivers/mmc/card/mmc_test.c
+> @@ -2339,7 +2339,7 @@ static int mmc_test_hw_reset(struct mmc_test_card *test)
+>  	struct mmc_host *host = card->host;
+>  	int err;
+>  
+> -	err = mmc_hw_reset_check(host);
+> +	err = mmc_reset_check(host);
+>  	if (!err)
+>  		return RESULT_OK;
+>  
+> @@ -2349,9 +2349,6 @@ static int mmc_test_hw_reset(struct mmc_test_card *test)
+>  	if (err != -EOPNOTSUPP)
+>  		return err;
+>  
+> -	if (!mmc_can_reset(card))
+> -		return RESULT_UNSUP_CARD;
+> -
+>  	return RESULT_UNSUP_HOST;
+>  }
+>  
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index d56e222..486cda8 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2232,65 +2232,33 @@ static void mmc_hw_reset_for_init(struct mmc_host *host)
+>  	mmc_host_clk_release(host);
+>  }
+>  
+> -int mmc_can_reset(struct mmc_card *card)
+> +/* Reset card in a bus-specific way */
+> +static int mmc_do_reset(struct mmc_host *host, int check)
+>  {
+> -	u8 rst_n_function;
+> -
+> -	if (!mmc_card_mmc(card))
+> -		return 0;
+> -	rst_n_function = card->ext_csd.rst_n_function;
+> -	if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
+> -		return 0;
+> -	return 1;
+> -}
+> -EXPORT_SYMBOL(mmc_can_reset);
+> -
+> -static int mmc_do_hw_reset(struct mmc_host *host, int check)
+> -{
+> -	struct mmc_card *card = host->card;
+> -
+> -	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
+> -		return -EOPNOTSUPP;
+> -
+> -	if (!card)
+> -		return -EINVAL;
+> +	int ret;
+>  
+> -	if (!mmc_can_reset(card))
+> +	if (!host->bus_ops || !host->bus_ops->power_reset ||
+> +			host->bus_ops->power_reset(host, MMC_POWER_RESET_TEST))
+>  		return -EOPNOTSUPP;
+>  
+> -	mmc_host_clk_hold(host);
+> -	mmc_set_clock(host, host->f_init);
+> -
+> -	host->ops->hw_reset(host);
+> -
+> -	/* If the reset has happened, then a status command will fail */
+> -	if (check) {
+> -		u32 status;
+> -
+> -		if (!mmc_send_status(card, &status)) {
+> -			mmc_host_clk_release(host);
+> -			return -ENOSYS;
+> -		}
+> -	}
+> -
+> -	mmc_power_up(host, card->ocr);
+> +	ret = host->bus_ops->power_reset(host, check);
+>  
+> -	mmc_host_clk_release(host);
+> +	pr_warning("%s: tried to reset card (%d)\n", mmc_hostname(host), ret);
+>  
+>  	return host->bus_ops->power_restore(host);
+>  }
+>  
+> -int mmc_hw_reset(struct mmc_host *host)
+> +int mmc_reset(struct mmc_host *host)
+>  {
+> -	return mmc_do_hw_reset(host, 0);
+> +	return mmc_do_reset(host, MMC_POWER_RESET_RESET);
+>  }
+> -EXPORT_SYMBOL(mmc_hw_reset);
+> +EXPORT_SYMBOL(mmc_reset);
+>  
+> -int mmc_hw_reset_check(struct mmc_host *host)
+> +int mmc_reset_check(struct mmc_host *host)
+>  {
+> -	return mmc_do_hw_reset(host, 1);
+> +	return mmc_do_reset(host, MMC_POWER_RESET_CHECK);
+>  }
+> -EXPORT_SYMBOL(mmc_hw_reset_check);
+> +EXPORT_SYMBOL(mmc_reset_check);
+>  
+>  static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+>  {
+> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+> index 443a584..6a0420b 100644
+> --- a/drivers/mmc/core/core.h
+> +++ b/drivers/mmc/core/core.h
+> @@ -25,6 +25,10 @@ struct mmc_bus_ops {
+>  	int (*runtime_resume)(struct mmc_host *);
+>  	int (*power_save)(struct mmc_host *);
+>  	int (*power_restore)(struct mmc_host *);
+> +	int (*power_reset)(struct mmc_host *, int);
+> +#define MMC_POWER_RESET_RESET	0
+> +#define MMC_POWER_RESET_TEST	1
+> +#define MMC_POWER_RESET_CHECK	2
+>  	int (*alive)(struct mmc_host *);
+>  	int (*shutdown)(struct mmc_host *);
 >  };
->
->  /**
-> --
-> 1.9.1
->
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 793c6f7..ac5192c 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1762,6 +1762,45 @@ static int mmc_runtime_resume(struct mmc_host *host)
+>  	return 0;
+>  }
+>  
+> +static int mmc_power_reset(struct mmc_host *host, int test)
+> +{
+> +	struct mmc_card *card = host->card;
+> +	u8 rst_n_function;
+> +
+> +	if (!card)
+> +		return -EINVAL;
+> +
+> +	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
+> +		return -EOPNOTSUPP;
+> +
+> +	rst_n_function = card->ext_csd.rst_n_function;
+> +	if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
+> +		return -EOPNOTSUPP;
+> +
+> +	if (test == MMC_POWER_RESET_TEST)
+> +		return 0;
+> +
+> +	mmc_host_clk_hold(host);
+> +	mmc_set_clock(host, host->f_init);
+> +
+> +	host->ops->hw_reset(host);
+> +
+> +	if (test == MMC_POWER_RESET_CHECK) {
+> +		u32 status;
+> +
+> +		if (!mmc_send_status(card, &status)) {
+> +			mmc_host_clk_release(host);
+> +			return -ENOSYS;
+> +		}
+> +	}
+> +
+> +	mmc_power_up(host, card->ocr);
+> +
+> +	mmc_host_clk_release(host);
+> +
+> +	return 0;
+> +}
+> +
+>  static int mmc_power_restore(struct mmc_host *host)
+>  {
+>  	int ret;
+> @@ -1781,6 +1820,7 @@ static const struct mmc_bus_ops mmc_ops = {
+>  	.runtime_suspend = mmc_runtime_suspend,
+>  	.runtime_resume = mmc_runtime_resume,
+>  	.power_restore = mmc_power_restore,
+> +	.power_reset = mmc_power_reset,
+>  	.alive = mmc_alive,
+>  	.shutdown = mmc_shutdown,
+>  };
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index f206e29..4f7a76e 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -180,9 +180,8 @@ extern unsigned int mmc_calc_max_discard(struct mmc_card *card);
+>  extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
+>  extern int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
+>  			      bool is_rel_write);
+> -extern int mmc_hw_reset(struct mmc_host *host);
+> -extern int mmc_hw_reset_check(struct mmc_host *host);
+> -extern int mmc_can_reset(struct mmc_card *card);
+> +extern int mmc_reset(struct mmc_host *host);
+> +extern int mmc_reset_check(struct mmc_host *host);
+>  
+>  extern void mmc_set_data_timeout(struct mmc_data *, const struct mmc_card *);
+>  extern unsigned int mmc_align_data_size(struct mmc_card *, unsigned int);
+> 
+
