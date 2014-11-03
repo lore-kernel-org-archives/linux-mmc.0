@@ -1,163 +1,95 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3] mmc: dw_mmc: add support for the other bit of sdio
- interrupt
-Date: Mon, 03 Nov 2014 17:59:58 +0900
-Message-ID: <5457440E.3070002@samsung.com>
-References: <1414666240-16782-1-git-send-email-addy.ke@rock-chips.com>
- <1414977633-3196-1-git-send-email-addy.ke@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: host: atmel-mci: Add support for non-removable slots
+Date: Mon, 3 Nov 2014 10:04:30 +0100
+Message-ID: <CAPDyKFpMGk4M=fjBKufxb9iMbV6FmRTEfE_ptXPmM=CHx3Q7iQ@mail.gmail.com>
+References: <1414147803-29202-1-git-send-email-timo.kokkonen@offcode.fi>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-reply-to: <1414977633-3196-1-git-send-email-addy.ke@rock-chips.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Addy Ke <addy.ke@rock-chips.com>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org
-Cc: huangtao@rock-chips.com, devicetree@vger.kernel.org, hl@rock-chips.com, linux-doc@vger.kernel.org, yzq@rock-chips.com, zyw@rock-chips.com, zhangqing@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kever.yang@rock-chips.com, lintao@rock-chips.com, linux-rockchip@lists.infradead.org, xjq@rock-chips.com, zhenfu.fang@rock-chips.com, chenfen@rock-chips.com, cf@rock-chips.com, hj@rock-chips.com, linux-arm-kernel@lists.infradead.org, zyf@rock-chips.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f47.google.com ([209.85.192.47]:39054 "EHLO
+	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751832AbaKCJEb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Nov 2014 04:04:31 -0500
+Received: by mail-qg0-f47.google.com with SMTP id j107so8364895qga.6
+        for <linux-mmc@vger.kernel.org>; Mon, 03 Nov 2014 01:04:31 -0800 (PST)
+In-Reply-To: <1414147803-29202-1-git-send-email-timo.kokkonen@offcode.fi>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Timo Kokkonen <timo.kokkonen@offcode.fi>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Hi, Addy.
+On 24 October 2014 12:50, Timo Kokkonen <timo.kokkonen@offcode.fi> wrote:
+> Add support for non-removable slots which have no card detection GPIO
+> and which should not be polled for a card change.
+>
+> Signed-off-by: Timo Kokkonen <timo.kokkonen@offcode.fi>
 
-On 11/03/2014 10:20 AM, Addy Ke wrote:
-> The bit of sdio interrupt is 16 in designware implementation,
-> but it is 24 on Rockchip SoCs.This patch add sdio_id0 for the
-> number of slot0 in the SDIO interrupt registers.
-> 
-> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+Hi Timo,
+
+Please resend and include Ludovic Desroches on the "to-line".
+
+Kind regards
+Uffe
+
 > ---
-> Changes in v2:
-> - rebase on http://git.linaro.org/git/people/ulf.hansson/mmc.git, next branch
-> Changes in v3:
-> - Remove dts for sdio_id0, just replace this with 8, suggested by Doug
-> - Change to support all Rockchip Socs, suggested by Heiko
-> 
->  drivers/mmc/host/dw_mmc-rockchip.c | 10 ++++++++++
->  drivers/mmc/host/dw_mmc.c          | 12 +++++++-----
->  drivers/mmc/host/dw_mmc.h          |  2 ++
->  include/linux/mmc/dw_mmc.h         |  3 +++
->  4 files changed, 22 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> index bbb4ec3..b997c8f 100644
-> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -68,14 +68,24 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->  	}
->  }
->  
-> +static int dw_mci_rockchip_parse_dt(struct dw_mci *host)
-> +{
-> +	/* It is slot 8 on Rockchip SoCs */
-> +	host->sdio_id0 = 8;
+>  drivers/mmc/host/atmel-mci.c | 11 +++++++++--
+>  include/linux/atmel-mci.h    |  2 ++
+>  2 files changed, 11 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index 77250d4..4de1a31 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -560,6 +560,9 @@ atmci_of_init(struct platform_device *pdev)
+>                 pdata->slot[slot_id].detect_is_active_high =
+>                         of_property_read_bool(cnp, "cd-inverted");
+>
+> +               pdata->slot[slot_id].non_removable =
+> +                       of_property_read_bool(cnp, "non-removable");
 > +
-> +	return 0;
-> +}
-
-Well, function is "__parse_dt__", but this function don't parse anything.
-If All rockchip soc is supported, i think that it can be located to other place.
-
-Best Regards,
-Jaehoon Chung
-
-> +
->  static const struct dw_mci_drv_data rk2928_drv_data = {
->  	.prepare_command        = dw_mci_rockchip_prepare_command,
-> +	.parse_dt	= dw_mci_rockchip_parse_dt,
->  };
->  
->  static const struct dw_mci_drv_data rk3288_drv_data = {
->  	.prepare_command        = dw_mci_rockchip_prepare_command,
->  	.set_ios		= dw_mci_rk3288_set_ios,
->  	.setup_clock    = dw_mci_rk3288_setup_clock,
-> +	.parse_dt	= dw_mci_rockchip_parse_dt,
->  };
->  
->  static const struct of_device_id dw_mci_rockchip_match[] = {
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index bb46b1b..a633b58 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -823,7 +823,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->  
->  		/* enable clock; only low power if no SDIO */
->  		clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
-> -		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->id)))
-> +		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->sdio_id)))
->  			clk_en_a |= SDMMC_CLKEN_LOW_PWR << slot->id;
->  		mci_writel(host, CLKENA, clk_en_a);
->  
-> @@ -1184,10 +1184,10 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
->  		dw_mci_disable_low_power(slot);
->  
->  		mci_writel(host, INTMASK,
-> -			   (int_mask | SDMMC_INT_SDIO(slot->id)));
-> +			   (int_mask | SDMMC_INT_SDIO(slot->sdio_id)));
->  	} else {
->  		mci_writel(host, INTMASK,
-> -			   (int_mask & ~SDMMC_INT_SDIO(slot->id)));
-> +			   (int_mask & ~SDMMC_INT_SDIO(slot->sdio_id)));
->  	}
->  }
->  
-> @@ -2056,8 +2056,9 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->  		/* Handle SDIO Interrupts */
->  		for (i = 0; i < host->num_slots; i++) {
->  			struct dw_mci_slot *slot = host->slot[i];
-> -			if (pending & SDMMC_INT_SDIO(i)) {
-> -				mci_writel(host, RINTSTS, SDMMC_INT_SDIO(i));
-> +			if (pending & SDMMC_INT_SDIO(slot->sdio_id)) {
-> +				mci_writel(host, RINTSTS,
-> +					   SDMMC_INT_SDIO(slot->sdio_id));
->  				mmc_signal_sdio_irq(slot->mmc);
->  			}
->  		}
-> @@ -2145,6 +2146,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->  
->  	slot = mmc_priv(mmc);
->  	slot->id = id;
-> +	slot->sdio_id = host->sdio_id0 + id;
->  	slot->mmc = mmc;
->  	slot->host = host;
->  	host->slot[id] = slot;
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 71d4995..0562f10 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -214,6 +214,7 @@ extern int dw_mci_resume(struct dw_mci *host);
->   *	with CONFIG_MMC_CLKGATE.
->   * @flags: Random state bits associated with the slot.
->   * @id: Number of this slot.
-> + * @sdio_id: Number of this slot in the SDIO interrupt registers.
->   */
->  struct dw_mci_slot {
->  	struct mmc_host		*mmc;
-> @@ -233,6 +234,7 @@ struct dw_mci_slot {
->  #define DW_MMC_CARD_PRESENT	0
->  #define DW_MMC_CARD_NEED_INIT	1
->  	int			id;
-> +	int			sdio_id;
->  };
->  
->  struct dw_mci_tuning_data {
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 69d0814..72c319f 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -96,6 +96,7 @@ struct mmc_data;
->   * @quirks: Set of quirks that apply to specific versions of the IP.
->   * @irq_flags: The flags to be passed to request_irq.
->   * @irq: The irq value to be passed to request_irq.
-> + * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
+>                 pdata->slot[slot_id].wp_pin =
+>                         of_get_named_gpio(cnp, "wp-gpios", 0);
+>         }
+> @@ -2206,8 +2209,12 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+>                 }
+>         }
+>
+> -       if (!gpio_is_valid(slot->detect_pin))
+> -               mmc->caps |= MMC_CAP_NEEDS_POLL;
+> +       if (!gpio_is_valid(slot->detect_pin)) {
+> +               if (slot_data->non_removable)
+> +                       mmc->caps |= MMC_CAP_NONREMOVABLE;
+> +               else
+> +                       mmc->caps |= MMC_CAP_NEEDS_POLL;
+> +       }
+>
+>         if (gpio_is_valid(slot->wp_pin)) {
+>                 if (devm_gpio_request(&host->pdev->dev, slot->wp_pin,
+> diff --git a/include/linux/atmel-mci.h b/include/linux/atmel-mci.h
+> index 91b77f8..9177947 100644
+> --- a/include/linux/atmel-mci.h
+> +++ b/include/linux/atmel-mci.h
+> @@ -11,6 +11,7 @@
+>   * @detect_pin: GPIO pin wired to the card detect switch
+>   * @wp_pin: GPIO pin wired to the write protect sensor
+>   * @detect_is_active_high: The state of the detect pin when it is active
+> + * @non_removable: The slot is not removable, only detect once
 >   *
->   * Locking
->   * =======
-> @@ -191,6 +192,8 @@ struct dw_mci {
->  	bool			vqmmc_enabled;
->  	unsigned long		irq_flags; /* IRQ flags */
->  	int			irq;
-> +
-> +	int			sdio_id0;
+>   * If a given slot is not present on the board, @bus_width should be
+>   * set to 0. The other fields are ignored in this case.
+> @@ -26,6 +27,7 @@ struct mci_slot_pdata {
+>         int                     detect_pin;
+>         int                     wp_pin;
+>         bool                    detect_is_active_high;
+> +       bool                    non_removable;
 >  };
->  
->  /* DMA ops for Internal/External DMAC interface */
-> 
-
+>
+>  /**
+> --
+> 1.9.1
+>
+>
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
