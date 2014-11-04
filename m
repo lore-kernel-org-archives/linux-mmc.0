@@ -1,293 +1,62 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: atmel-mci: add runtime pm support
-Date: Tue, 4 Nov 2014 11:05:56 +0100
-Message-ID: <CAPDyKFpVjoyNWpuZJ=k=nvcZkfarJtJ9oNAVjRBvmqZKuedxfA@mail.gmail.com>
-References: <1414641641-32691-1-git-send-email-wenyou.yang@atmel.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [Regression Resend] mmc: mx28: sd card detection broken since 3.18-rc1
+Date: Tue, 4 Nov 2014 11:30:59 +0100
+Message-ID: <CACRpkdZ9oYZ10btdvQSAnZhPaxYn_n6JbAUO4h8qadeAiuJq-Q@mail.gmail.com>
+References: <1747777414.897866.1414878004147.JavaMail.open-xchange@oxbsltgw09.schlund.de>
+	<5456B7B3.60401@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1414641641-32691-1-git-send-email-wenyou.yang@atmel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: Chris Ball <chris@printf.net>, Wenyou Yang <wenyou.yang@atmel.com>, Kevin Hilman <khilman@kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ie0-f182.google.com ([209.85.223.182]:42638 "EHLO
+	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751651AbaKDKbA convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 05:31:00 -0500
+Received: by mail-ie0-f182.google.com with SMTP id rd18so7308714iec.13
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Nov 2014 02:30:59 -0800 (PST)
+In-Reply-To: <5456B7B3.60401@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: =?UTF-8?Q?Kristina_Mart=C5=A1enko?= <kristina.martsenko@gmail.com>
+Cc: Stefan Wahren <stefan.wahren@i2se.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Fabio Estevam <festevam@gmail.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>
 
-On 30 October 2014 05:00, Wenyou Yang <wenyou.yang@atmel.com> wrote:
-> Add runtime pm support to atmel mci controller.
-> Use runtime pm APIs to enable/disable atmel mci's clock.
-> Use runtime autosuspend APIs to enable auto suspend delay.
->
-> Signed-off-by: Wenyou Yang <wenyou.yang@atmel.com>
+On Mon, Nov 3, 2014 at 12:01 AM, Kristina Mart=C5=A1enko
+<kristina.martsenko@gmail.com> wrote:
 
-Ludovic, any objections to this one?
+> I ran into this issue as well. Seems that a card-detect flag
+> (MMC_CAP2_CD_ACTIVE_HIGH) can currently be set based on an
+> uninitialized variable, which can lead to the card being reported as
+> not present. This patch fixes it for me:
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 03c53b72a2d6..f0e187682d3b 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -311,7 +311,7 @@ int mmc_of_parse(struct mmc_host *host)
+>         struct device_node *np;
+>         u32 bus_width;
+>         int len, ret;
+> -       bool cap_invert, gpio_invert;
+> +       bool cap_invert, gpio_invert =3D false;
+>
+>         if (!host->parent || !host->parent->of_node)
+>                 return 0;
+> @@ -401,6 +401,7 @@ int mmc_of_parse(struct mmc_host *host)
+>         else
+>                 cap_invert =3D false;
+>
+> +       gpio_invert =3D false;
+>         ret =3D mmc_gpiod_request_ro(host, "wp", 0, false, 0, &gpio_i=
+nvert);
+>         if (ret) {
+>                 if (ret =3D=3D -EPROBE_DEFER)
+>
+> Let me know if this also fixes it for you, and I'll send in a proper
+> patch.
 
-Kind regards
-Uffe
+Argh how could I make this stupid mistake :(
 
-> ---
-> Changes v1 -> v2:
-> * Adjust the APIs and invoking sequence to avoid clock unbalance issue during ->probe.
-> * Fix miss to invoke clk_disable_unprepare() in the error handling in ->probe.
-> * Remove atmci_suspend/resume and use pm_runtime_force_suspend/resume() to simplify code.
->
->  drivers/mmc/host/atmel-mci.c |   90 +++++++++++++++++++++++++++++++-----------
->  1 file changed, 67 insertions(+), 23 deletions(-)
->
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 0b9ddf8..f8f2bbe 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -37,6 +37,8 @@
->
->  #include <linux/atmel-mci.h>
->  #include <linux/atmel_pdc.h>
-> +#include <linux/pm.h>
-> +#include <linux/pm_runtime.h>
->
->  #include <asm/cacheflush.h>
->  #include <asm/io.h>
-> @@ -44,6 +46,8 @@
->
->  #include "atmel-mci-regs.h"
->
-> +#define AUTOSUSPEND_DELAY      50
-> +
->  #define ATMCI_DATA_ERROR_FLAGS (ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
->  #define ATMCI_DMA_THRESHOLD    16
->
-> @@ -386,20 +390,19 @@ static int atmci_regs_show(struct seq_file *s, void *v)
->         if (!buf)
->                 return -ENOMEM;
->
-> +       pm_runtime_get_sync(&host->pdev->dev);
-> +
->         /*
->          * Grab a more or less consistent snapshot. Note that we're
->          * not disabling interrupts, so IMR and SR may not be
->          * consistent.
->          */
-> -       ret = clk_prepare_enable(host->mck);
-> -       if (ret)
-> -               goto out;
-> -
->         spin_lock_bh(&host->lock);
->         memcpy_fromio(buf, host->regs, ATMCI_REGS_SIZE);
->         spin_unlock_bh(&host->lock);
->
-> -       clk_disable_unprepare(host->mck);
-> +       pm_runtime_mark_last_busy(&host->pdev->dev);
-> +       pm_runtime_put_autosuspend(&host->pdev->dev);
->
->         seq_printf(s, "MR:\t0x%08x%s%s ",
->                         buf[ATMCI_MR / 4],
-> @@ -449,7 +452,6 @@ static int atmci_regs_show(struct seq_file *s, void *v)
->                                 val & ATMCI_CFG_LSYNC ? " LSYNC" : "");
->         }
->
-> -out:
->         kfree(buf);
->
->         return ret;
-> @@ -1252,6 +1254,8 @@ static void atmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->         WARN_ON(slot->mrq);
->         dev_dbg(&host->pdev->dev, "MRQ: cmd %u\n", mrq->cmd->opcode);
->
-> +       pm_runtime_get_sync(&host->pdev->dev);
-> +
->         /*
->          * We may "know" the card is gone even though there's still an
->          * electrical connection. If so, we really need to communicate
-> @@ -1281,7 +1285,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->         struct atmel_mci_slot   *slot = mmc_priv(mmc);
->         struct atmel_mci        *host = slot->host;
->         unsigned int            i;
-> -       bool                    unprepare_clk;
-> +
-> +       pm_runtime_get_sync(&host->pdev->dev);
->
->         slot->sdc_reg &= ~ATMCI_SDCBUS_MASK;
->         switch (ios->bus_width) {
-> @@ -1297,13 +1302,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->                 unsigned int clock_min = ~0U;
->                 u32 clkdiv;
->
-> -               clk_prepare(host->mck);
-> -               unprepare_clk = true;
-> -
->                 spin_lock_bh(&host->lock);
->                 if (!host->mode_reg) {
-> -                       clk_enable(host->mck);
-> -                       unprepare_clk = false;
->                         atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
->                         atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIEN);
->                         if (host->caps.has_cfg_reg)
-> @@ -1371,8 +1371,6 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->         } else {
->                 bool any_slot_active = false;
->
-> -               unprepare_clk = false;
-> -
->                 spin_lock_bh(&host->lock);
->                 slot->clock = 0;
->                 for (i = 0; i < ATMCI_MAX_NR_SLOTS; i++) {
-> @@ -1385,17 +1383,12 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->                         atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
->                         if (host->mode_reg) {
->                                 atmci_readl(host, ATMCI_MR);
-> -                               clk_disable(host->mck);
-> -                               unprepare_clk = true;
->                         }
->                         host->mode_reg = 0;
->                 }
->                 spin_unlock_bh(&host->lock);
->         }
->
-> -       if (unprepare_clk)
-> -               clk_unprepare(host->mck);
-> -
->         switch (ios->power_mode) {
->         case MMC_POWER_OFF:
->                 if (!IS_ERR(mmc->supply.vmmc))
-> @@ -1421,6 +1414,9 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->                  */
->                 break;
->         }
-> +
-> +       pm_runtime_mark_last_busy(&host->pdev->dev);
-> +       pm_runtime_put_autosuspend(&host->pdev->dev);
->  }
->
->  static int atmci_get_ro(struct mmc_host *mmc)
-> @@ -1512,6 +1508,9 @@ static void atmci_request_end(struct atmel_mci *host, struct mmc_request *mrq)
->         spin_unlock(&host->lock);
->         mmc_request_done(prev_mmc, mrq);
->         spin_lock(&host->lock);
-> +
-> +       pm_runtime_mark_last_busy(&host->pdev->dev);
-> +       pm_runtime_put_autosuspend(&host->pdev->dev);
->  }
->
->  static void atmci_command_complete(struct atmel_mci *host,
-> @@ -2417,15 +2416,16 @@ static int __init atmci_probe(struct platform_device *pdev)
->
->         atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
->         host->bus_hz = clk_get_rate(host->mck);
-> -       clk_disable_unprepare(host->mck);
->
->         host->mapbase = regs->start;
->
->         tasklet_init(&host->tasklet, atmci_tasklet_func, (unsigned long)host);
->
->         ret = request_irq(irq, atmci_interrupt, 0, dev_name(&pdev->dev), host);
-> -       if (ret)
-> +       if (ret) {
-> +               clk_disable_unprepare(host->mck);
->                 return ret;
-> +       }
->
->         /* Get MCI capabilities and set operations according to it */
->         atmci_get_cap(host);
-> @@ -2449,6 +2449,12 @@ static int __init atmci_probe(struct platform_device *pdev)
->
->         setup_timer(&host->timer, atmci_timeout_timer, (unsigned long)host);
->
-> +       pm_runtime_get_noresume(&pdev->dev);
-> +       pm_runtime_set_active(&pdev->dev);
-> +       pm_runtime_set_autosuspend_delay(&pdev->dev, AUTOSUSPEND_DELAY);
-> +       pm_runtime_use_autosuspend(&pdev->dev);
-> +       pm_runtime_enable(&pdev->dev);
-> +
->         /* We need at least one slot to succeed */
->         nr_slots = 0;
->         ret = -ENODEV;
-> @@ -2491,6 +2497,9 @@ static int __init atmci_probe(struct platform_device *pdev)
->                         "Atmel MCI controller at 0x%08lx irq %d, %u slots\n",
->                         host->mapbase, irq, nr_slots);
->
-> +       pm_runtime_mark_last_busy(&host->pdev->dev);
-> +       pm_runtime_put_autosuspend(&pdev->dev);
-> +
->         return 0;
->
->  err_dma_alloc:
-> @@ -2499,6 +2508,11 @@ err_dma_alloc:
->                         atmci_cleanup_slot(host->slot[i], i);
->         }
->  err_init_slot:
-> +       clk_disable_unprepare(host->mck);
-> +
-> +       pm_runtime_disable(&pdev->dev);
-> +       pm_runtime_put_noidle(&pdev->dev);
-> +
->         del_timer_sync(&host->timer);
->         if (host->dma.chan)
->                 dma_release_channel(host->dma.chan);
-> @@ -2511,6 +2525,8 @@ static int __exit atmci_remove(struct platform_device *pdev)
->         struct atmel_mci        *host = platform_get_drvdata(pdev);
->         unsigned int            i;
->
-> +       pm_runtime_get_sync(&pdev->dev);
-> +
->         if (host->buffer)
->                 dma_free_coherent(&pdev->dev, host->buf_size,
->                                   host->buffer, host->buf_phys_addr);
-> @@ -2520,11 +2536,9 @@ static int __exit atmci_remove(struct platform_device *pdev)
->                         atmci_cleanup_slot(host->slot[i], i);
->         }
->
-> -       clk_prepare_enable(host->mck);
->         atmci_writel(host, ATMCI_IDR, ~0UL);
->         atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
->         atmci_readl(host, ATMCI_SR);
-> -       clk_disable_unprepare(host->mck);
->
->         del_timer_sync(&host->timer);
->         if (host->dma.chan)
-> @@ -2532,14 +2546,44 @@ static int __exit atmci_remove(struct platform_device *pdev)
->
->         free_irq(platform_get_irq(pdev, 0), host);
->
-> +       clk_disable_unprepare(host->mck);
-> +
-> +       pm_runtime_disable(&pdev->dev);
-> +       pm_runtime_put_noidle(&pdev->dev);
-> +
-> +       return 0;
-> +}
-> +
-> +#ifdef CONFIG_PM
-> +static int atmci_runtime_suspend(struct device *dev)
-> +{
-> +       struct atmel_mci *host = dev_get_drvdata(dev);
-> +
-> +       clk_disable_unprepare(host->mck);
-> +
->         return 0;
->  }
->
-> +static int atmci_runtime_resume(struct device *dev)
-> +{
-> +       struct atmel_mci *host = dev_get_drvdata(dev);
-> +
-> +       return clk_prepare_enable(host->mck);
-> +}
-> +
-> +static const struct dev_pm_ops atmci_dev_pm_ops = {
-> +       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> +                               pm_runtime_force_resume)
-> +       SET_PM_RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
-> +};
-> +#endif
-> +
->  static struct platform_driver atmci_driver = {
->         .remove         = __exit_p(atmci_remove),
->         .driver         = {
->                 .name           = "atmel_mci",
->                 .of_match_table = of_match_ptr(atmci_dt_ids),
-> +               .pm             = &atmci_dev_pm_ops,
->         },
->  };
->
-> --
-> 1.7.9.5
->
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+
+Yours,
+Linus Walleij
