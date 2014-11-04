@@ -1,135 +1,293 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: Add a quirk for AMD SDHC transfer mode register
- need to be cleared for cmd without data
-Date: Tue, 4 Nov 2014 10:41:15 +0100
-Message-ID: <CAPDyKFqWiJS3ckfY1Ap0VwAbss0qdJoeA+2BCw=DZStdq=h7bA@mail.gmail.com>
-References: <1415086357-4619-1-git-send-email-vincent.wan@amd.com>
+Subject: Re: [PATCH v2] mmc: atmel-mci: add runtime pm support
+Date: Tue, 4 Nov 2014 11:05:56 +0100
+Message-ID: <CAPDyKFpVjoyNWpuZJ=k=nvcZkfarJtJ9oNAVjRBvmqZKuedxfA@mail.gmail.com>
+References: <1414641641-32691-1-git-send-email-wenyou.yang@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f45.google.com ([209.85.216.45]:36840 "EHLO
-	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752561AbaKDJlQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 04:41:16 -0500
-Received: by mail-qa0-f45.google.com with SMTP id dc16so9465827qab.4
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Nov 2014 01:41:15 -0800 (PST)
-In-Reply-To: <1415086357-4619-1-git-send-email-vincent.wan@amd.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1414641641-32691-1-git-send-email-wenyou.yang@atmel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: Chris Ball <chris@printf.net>, Wenyou Yang <wenyou.yang@atmel.com>, Kevin Hilman <khilman@kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Vincent Wan <vincent.wan@amd.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Arindam Nath <arindam.nath@amd.com>, Huang Rui <ray.huang@amd.com>
 
-On 4 November 2014 08:32, Vincent Wan <vincent.wan@amd.com> wrote:
-> SDHC controller in AMD chipsets require SDHC transfer mode
-> register to be cleared for commands without data. The issue was
-> uncovered during testing eMMC cards on KB/ML based platforms.
+On 30 October 2014 05:00, Wenyou Yang <wenyou.yang@atmel.com> wrote:
+> Add runtime pm support to atmel mci controller.
+> Use runtime pm APIs to enable/disable atmel mci's clock.
+> Use runtime autosuspend APIs to enable auto suspend delay.
 >
-> Signed-off-by: Vincent Wan <vincent.wan@amd.com>
-> Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> Cc: Huang Rui <ray.huang@amd.com>
-> Tested-by: Vikram B <vikram.b@amd.com>
-> Tested-by: Raghavendra Swamy <raghavendra.swamy@amd.com>
+> Signed-off-by: Wenyou Yang <wenyou.yang@atmel.com>
 
-The patch needs to be rebased towwards my latest next branch, it had a
-minor conflict. I can normally handle such myself, but I decided since
-the rebase was needed anyway, let's me give you a few comments.
-
-> ---
->  drivers/mmc/host/sdhci-pci.c | 27 +++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci.c     | 11 ++++++++---
->  include/linux/mmc/sdhci.h    |  2 ++
->  3 files changed, 37 insertions(+), 3 deletions(-)
-
-This patch should be split into two parts.
-
-1) The sdhci core specific part. "mmc: sdhci:...."
-2) The sdhci-pci part. "mmc: sdhci-pci: ...."
+Ludovic, any objections to this one?
 
 Kind regards
 Uffe
 
+> ---
+> Changes v1 -> v2:
+> * Adjust the APIs and invoking sequence to avoid clock unbalance issue during ->probe.
+> * Fix miss to invoke clk_disable_unprepare() in the error handling in ->probe.
+> * Remove atmci_suspend/resume and use pm_runtime_force_suspend/resume() to simplify code.
 >
-> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-> index 6119297..8f5c998 100644
-> --- a/drivers/mmc/host/sdhci-pci.c
-> +++ b/drivers/mmc/host/sdhci-pci.c
-> @@ -645,6 +645,23 @@ static const struct sdhci_pci_fixes sdhci_rtsx = {
->         .probe_slot     = rtsx_probe_slot,
->  };
+>  drivers/mmc/host/atmel-mci.c |   90 +++++++++++++++++++++++++++++++-----------
+>  1 file changed, 67 insertions(+), 23 deletions(-)
 >
-> +static int amd_probe(struct sdhci_pci_chip *chip)
-> +{
-> +       struct pci_dev  *smbus_dev;
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index 0b9ddf8..f8f2bbe 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -37,6 +37,8 @@
+>
+>  #include <linux/atmel-mci.h>
+>  #include <linux/atmel_pdc.h>
+> +#include <linux/pm.h>
+> +#include <linux/pm_runtime.h>
+>
+>  #include <asm/cacheflush.h>
+>  #include <asm/io.h>
+> @@ -44,6 +46,8 @@
+>
+>  #include "atmel-mci-regs.h"
+>
+> +#define AUTOSUSPEND_DELAY      50
 > +
-> +       smbus_dev = pci_get_device(PCI_VENDOR_ID_AMD,
-> +                       PCI_DEVICE_ID_AMD_HUDSON2_SMBUS, NULL);
+>  #define ATMCI_DATA_ERROR_FLAGS (ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
+>  #define ATMCI_DMA_THRESHOLD    16
+>
+> @@ -386,20 +390,19 @@ static int atmci_regs_show(struct seq_file *s, void *v)
+>         if (!buf)
+>                 return -ENOMEM;
+>
+> +       pm_runtime_get_sync(&host->pdev->dev);
 > +
-> +       if (smbus_dev && (smbus_dev->revision < 0x51))
-> +               chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
+>         /*
+>          * Grab a more or less consistent snapshot. Note that we're
+>          * not disabling interrupts, so IMR and SR may not be
+>          * consistent.
+>          */
+> -       ret = clk_prepare_enable(host->mck);
+> -       if (ret)
+> -               goto out;
+> -
+>         spin_lock_bh(&host->lock);
+>         memcpy_fromio(buf, host->regs, ATMCI_REGS_SIZE);
+>         spin_unlock_bh(&host->lock);
+>
+> -       clk_disable_unprepare(host->mck);
+> +       pm_runtime_mark_last_busy(&host->pdev->dev);
+> +       pm_runtime_put_autosuspend(&host->pdev->dev);
+>
+>         seq_printf(s, "MR:\t0x%08x%s%s ",
+>                         buf[ATMCI_MR / 4],
+> @@ -449,7 +452,6 @@ static int atmci_regs_show(struct seq_file *s, void *v)
+>                                 val & ATMCI_CFG_LSYNC ? " LSYNC" : "");
+>         }
+>
+> -out:
+>         kfree(buf);
+>
+>         return ret;
+> @@ -1252,6 +1254,8 @@ static void atmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>         WARN_ON(slot->mrq);
+>         dev_dbg(&host->pdev->dev, "MRQ: cmd %u\n", mrq->cmd->opcode);
+>
+> +       pm_runtime_get_sync(&host->pdev->dev);
+> +
+>         /*
+>          * We may "know" the card is gone even though there's still an
+>          * electrical connection. If so, we really need to communicate
+> @@ -1281,7 +1285,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         struct atmel_mci_slot   *slot = mmc_priv(mmc);
+>         struct atmel_mci        *host = slot->host;
+>         unsigned int            i;
+> -       bool                    unprepare_clk;
+> +
+> +       pm_runtime_get_sync(&host->pdev->dev);
+>
+>         slot->sdc_reg &= ~ATMCI_SDCBUS_MASK;
+>         switch (ios->bus_width) {
+> @@ -1297,13 +1302,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>                 unsigned int clock_min = ~0U;
+>                 u32 clkdiv;
+>
+> -               clk_prepare(host->mck);
+> -               unprepare_clk = true;
+> -
+>                 spin_lock_bh(&host->lock);
+>                 if (!host->mode_reg) {
+> -                       clk_enable(host->mck);
+> -                       unprepare_clk = false;
+>                         atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
+>                         atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIEN);
+>                         if (host->caps.has_cfg_reg)
+> @@ -1371,8 +1371,6 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         } else {
+>                 bool any_slot_active = false;
+>
+> -               unprepare_clk = false;
+> -
+>                 spin_lock_bh(&host->lock);
+>                 slot->clock = 0;
+>                 for (i = 0; i < ATMCI_MAX_NR_SLOTS; i++) {
+> @@ -1385,17 +1383,12 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>                         atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
+>                         if (host->mode_reg) {
+>                                 atmci_readl(host, ATMCI_MR);
+> -                               clk_disable(host->mck);
+> -                               unprepare_clk = true;
+>                         }
+>                         host->mode_reg = 0;
+>                 }
+>                 spin_unlock_bh(&host->lock);
+>         }
+>
+> -       if (unprepare_clk)
+> -               clk_unprepare(host->mck);
+> -
+>         switch (ios->power_mode) {
+>         case MMC_POWER_OFF:
+>                 if (!IS_ERR(mmc->supply.vmmc))
+> @@ -1421,6 +1414,9 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>                  */
+>                 break;
+>         }
+> +
+> +       pm_runtime_mark_last_busy(&host->pdev->dev);
+> +       pm_runtime_put_autosuspend(&host->pdev->dev);
+>  }
+>
+>  static int atmci_get_ro(struct mmc_host *mmc)
+> @@ -1512,6 +1508,9 @@ static void atmci_request_end(struct atmel_mci *host, struct mmc_request *mrq)
+>         spin_unlock(&host->lock);
+>         mmc_request_done(prev_mmc, mrq);
+>         spin_lock(&host->lock);
+> +
+> +       pm_runtime_mark_last_busy(&host->pdev->dev);
+> +       pm_runtime_put_autosuspend(&host->pdev->dev);
+>  }
+>
+>  static void atmci_command_complete(struct atmel_mci *host,
+> @@ -2417,15 +2416,16 @@ static int __init atmci_probe(struct platform_device *pdev)
+>
+>         atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
+>         host->bus_hz = clk_get_rate(host->mck);
+> -       clk_disable_unprepare(host->mck);
+>
+>         host->mapbase = regs->start;
+>
+>         tasklet_init(&host->tasklet, atmci_tasklet_func, (unsigned long)host);
+>
+>         ret = request_irq(irq, atmci_interrupt, 0, dev_name(&pdev->dev), host);
+> -       if (ret)
+> +       if (ret) {
+> +               clk_disable_unprepare(host->mck);
+>                 return ret;
+> +       }
+>
+>         /* Get MCI capabilities and set operations according to it */
+>         atmci_get_cap(host);
+> @@ -2449,6 +2449,12 @@ static int __init atmci_probe(struct platform_device *pdev)
+>
+>         setup_timer(&host->timer, atmci_timeout_timer, (unsigned long)host);
+>
+> +       pm_runtime_get_noresume(&pdev->dev);
+> +       pm_runtime_set_active(&pdev->dev);
+> +       pm_runtime_set_autosuspend_delay(&pdev->dev, AUTOSUSPEND_DELAY);
+> +       pm_runtime_use_autosuspend(&pdev->dev);
+> +       pm_runtime_enable(&pdev->dev);
+> +
+>         /* We need at least one slot to succeed */
+>         nr_slots = 0;
+>         ret = -ENODEV;
+> @@ -2491,6 +2497,9 @@ static int __init atmci_probe(struct platform_device *pdev)
+>                         "Atmel MCI controller at 0x%08lx irq %d, %u slots\n",
+>                         host->mapbase, irq, nr_slots);
+>
+> +       pm_runtime_mark_last_busy(&host->pdev->dev);
+> +       pm_runtime_put_autosuspend(&pdev->dev);
+> +
+>         return 0;
+>
+>  err_dma_alloc:
+> @@ -2499,6 +2508,11 @@ err_dma_alloc:
+>                         atmci_cleanup_slot(host->slot[i], i);
+>         }
+>  err_init_slot:
+> +       clk_disable_unprepare(host->mck);
+> +
+> +       pm_runtime_disable(&pdev->dev);
+> +       pm_runtime_put_noidle(&pdev->dev);
+> +
+>         del_timer_sync(&host->timer);
+>         if (host->dma.chan)
+>                 dma_release_channel(host->dma.chan);
+> @@ -2511,6 +2525,8 @@ static int __exit atmci_remove(struct platform_device *pdev)
+>         struct atmel_mci        *host = platform_get_drvdata(pdev);
+>         unsigned int            i;
+>
+> +       pm_runtime_get_sync(&pdev->dev);
+> +
+>         if (host->buffer)
+>                 dma_free_coherent(&pdev->dev, host->buf_size,
+>                                   host->buffer, host->buf_phys_addr);
+> @@ -2520,11 +2536,9 @@ static int __exit atmci_remove(struct platform_device *pdev)
+>                         atmci_cleanup_slot(host->slot[i], i);
+>         }
+>
+> -       clk_prepare_enable(host->mck);
+>         atmci_writel(host, ATMCI_IDR, ~0UL);
+>         atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
+>         atmci_readl(host, ATMCI_SR);
+> -       clk_disable_unprepare(host->mck);
+>
+>         del_timer_sync(&host->timer);
+>         if (host->dma.chan)
+> @@ -2532,14 +2546,44 @@ static int __exit atmci_remove(struct platform_device *pdev)
+>
+>         free_irq(platform_get_irq(pdev, 0), host);
+>
+> +       clk_disable_unprepare(host->mck);
+> +
+> +       pm_runtime_disable(&pdev->dev);
+> +       pm_runtime_put_noidle(&pdev->dev);
 > +
 > +       return 0;
 > +}
 > +
-> +static const struct sdhci_pci_fixes sdhci_amd = {
-> +       .probe          = amd_probe,
+> +#ifdef CONFIG_PM
+> +static int atmci_runtime_suspend(struct device *dev)
+> +{
+> +       struct atmel_mci *host = dev_get_drvdata(dev);
+> +
+> +       clk_disable_unprepare(host->mck);
+> +
+>         return 0;
+>  }
+>
+> +static int atmci_runtime_resume(struct device *dev)
+> +{
+> +       struct atmel_mci *host = dev_get_drvdata(dev);
+> +
+> +       return clk_prepare_enable(host->mck);
+> +}
+> +
+> +static const struct dev_pm_ops atmci_dev_pm_ops = {
+> +       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+> +                               pm_runtime_force_resume)
+> +       SET_PM_RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
 > +};
+> +#endif
 > +
->  static const struct pci_device_id pci_ids[] = {
->         {
->                 .vendor         = PCI_VENDOR_ID_RICOH,
-> @@ -1045,6 +1062,16 @@ static const struct pci_device_id pci_ids[] = {
->                 .driver_data    = (kernel_ulong_t)&sdhci_o2,
+>  static struct platform_driver atmci_driver = {
+>         .remove         = __exit_p(atmci_remove),
+>         .driver         = {
+>                 .name           = "atmel_mci",
+>                 .of_match_table = of_match_ptr(atmci_dt_ids),
+> +               .pm             = &atmci_dev_pm_ops,
 >         },
+>  };
 >
-> +       {
-> +               .vendor         = PCI_VENDOR_ID_AMD,
-> +               .device         = PCI_ANY_ID,
-> +               .class          = PCI_CLASS_SYSTEM_SDHCI << 8,
-> +               .class_mask     = 0xFFFF00,
-> +               .subvendor      = PCI_ANY_ID,
-> +               .subdevice      = PCI_ANY_ID,
-> +               .driver_data    = (kernel_ulong_t)&sdhci_amd,
-> +       },
-> +
->         {       /* Generic SD host controller */
->                 PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
->         },
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index ada1a3e..8085f26 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -889,10 +889,15 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
->         struct mmc_data *data = cmd->data;
->
->         if (data == NULL) {
-> -               /* clear Auto CMD settings for no data CMDs */
-> -               mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
-> -               sdhci_writew(host, mode & ~(SDHCI_TRNS_AUTO_CMD12 |
-> +               if (host->quirks2 &
-> +                       SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD) {
-> +                       sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
-> +               } else {
-> +                       /* clear Auto CMD settings for no data CMDs */
-> +                       mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
-> +                       sdhci_writew(host, mode & ~(SDHCI_TRNS_AUTO_CMD12 |
->                                 SDHCI_TRNS_AUTO_CMD23), SDHCI_TRANSFER_MODE);
-> +               }
->                 return;
->         }
->
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index dba793e..0a287aa 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -100,6 +100,8 @@ struct sdhci_host {
->  #define SDHCI_QUIRK2_BROKEN_DDR50                      (1<<7)
->  /* Stop command (CMD12) can set Transfer Complete when not using MMC_RSP_BUSY */
->  #define SDHCI_QUIRK2_STOP_WITH_TC                      (1<<8)
-> +/* need clear transfer mode register before send cmd */
-> +#define SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD (1<<9)
->
->         int irq;                /* Device IRQ */
->         void __iomem *ioaddr;   /* Mapped address */
 > --
-> 1.8.1.2
+> 1.7.9.5
 >
