@@ -1,78 +1,54 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2 00/15] mmc: sdhci: Add 64-bit ADMA support
-Date: Tue, 4 Nov 2014 12:17:21 +0100
-Message-ID: <CAPDyKFqjiZo7vq9ueOZUcAnwCiND92g9XOvRMX5oVfy72uX4Jw@mail.gmail.com>
-References: <1415097769-19032-1-git-send-email-adrian.hunter@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Mark Brown <broonie@kernel.org>
+Subject: [PATCH] mmc: sdhci-s3c: Check if clk_set_rate() succeeds
+Date: Tue,  4 Nov 2014 12:26:42 +0000
+Message-ID: <1415104002-1580-1-git-send-email-broonie@kernel.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f43.google.com ([209.85.192.43]:43847 "EHLO
-	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751303AbaKDLRW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 06:17:22 -0500
-Received: by mail-qg0-f43.google.com with SMTP id f51so10405762qge.30
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Nov 2014 03:17:21 -0800 (PST)
-In-Reply-To: <1415097769-19032-1-git-send-email-adrian.hunter@intel.com>
+Received: from mezzanine.sirena.org.uk ([106.187.55.193]:37234 "EHLO
+	mezzanine.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752039AbaKDM2J (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 07:28:09 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Ben Dooks <ben-linux@fluff.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Mark Brown <broonie@linaro.org>
 
-On 4 November 2014 11:42, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Hi
->
-> Here is V2 of the patches to add 64-bit ADMA support
-> to the SDHCI driver.  V2 fixes the warning:
->
-> drivers/mmc/host/sdhci.c: In function 'sdhci_adma_show_error':
-> drivers/mmc/host/sdhci.c:2314:10: warning: dereferencing 'void *' pointer
->       attr = *desc;
->              ^
-> drivers/mmc/host/sdhci.c:2314:8: error: void value not ignored as it ought to be
->       attr = *desc;
->
-> that was found in:
->
->         mmc: sdhci: Use 'void *' for not 'u8 *' for ADMA data
->
-> And adjusts:
->
->         mmc: sdhci: Define ADMA descriptor structure
->
-> The result should be that the final tree is exactly the same.
->
->
-> Adrian Hunter (15):
->       mmc: sdhci: Fix incorrect ADMA2 descriptor table size
->       mmc: sdhci: Fix ADMA page boundary warnings
->       mmc: sdhci: Fix ADMA table size warning
->       mmc: sdhci: Rename two ADMA-related functions for consistency
->       mmc: sdhci: Rename adma_desc to adma_table
->       mmc: sdhci: Add sdhci_adma_mark_end()
->       mmc: sdhci: Use 'void *' for not 'u8 *' for ADMA data
->       mmc: sdhci: Parameterize ADMA sizes and alignment
->       mmc: sdhci: Define maximum segments
->       mmc: sdhci: Define ADMA constants
->       mmc: sdhci: Define ADMA descriptor structure
->       mmc: sdhci: Add 64-bit ADMA support
->       mmc: sdhci-acpi: Add 64-bit DMA support
->       mmc: sdhci-pci: Add 64-bit DMA support
->       mmc: mmc_test: Extend "Badly aligned" tests for 8-byte alignment
->
->  drivers/mmc/card/mmc_test.c   |  10 +-
->  drivers/mmc/host/sdhci-acpi.c |  41 +++++---
->  drivers/mmc/host/sdhci-pci.c  |  14 ++-
->  drivers/mmc/host/sdhci.c      | 226 +++++++++++++++++++++++++++---------------
->  drivers/mmc/host/sdhci.h      |  41 ++++++++
->  include/linux/mmc/sdhci.h     |  14 ++-
->  6 files changed, 241 insertions(+), 105 deletions(-)
+From: Mark Brown <broonie@linaro.org>
 
-Thanks! Applied for next.
+It is possible that we may fail to set the clock rate, if we do so then
+log the failure and don't bother reprogramming the IP.
 
-Kind regards
-Uffe
+Signed-off-by: Mark Brown <broonie@linaro.org>
+Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
->
->
-> Regards
-> Adrian
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 0ce6eb17deaf..4f7a63213b33 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -300,6 +300,7 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	struct device *dev = &ourhost->pdev->dev;
+ 	unsigned long timeout;
+ 	u16 clk = 0;
++	int ret;
+ 
+ 	host->mmc->actual_clock = 0;
+ 
+@@ -311,7 +312,12 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
+ 
+ 	sdhci_s3c_set_clock(host, clock);
+ 
+-	clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock);
++	ret = clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock);
++	if (ret != 0) {
++		dev_err(dev, "%s: failed to set clock rate %uHz\n",
++			mmc_hostname(host->mmc), clock);
++		return;
++	}
+ 
+ 	clk = SDHCI_CLOCK_INT_EN;
+ 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+-- 
+2.1.1
+
