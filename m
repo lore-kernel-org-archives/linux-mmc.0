@@ -1,151 +1,117 @@
-From: Vincent Wan <vincent.wan@amd.com>
-Subject: Re: [PATCH] mmc: Add a quirk for AMD SDHC transfer mode register
- need to be cleared for cmd without data
-Date: Tue, 4 Nov 2014 15:37:20 +0800
-Message-ID: <54588230.1080601@amd.com>
-References: <541A7F3D.70909@amd.com>	<5451B943.3060104@amd.com>
- <CAPDyKFoaN3WoYhsMoA1LRmOoyBpMdmX+ShzdD4ObKcFVTBbkFw@mail.gmail.com>
+From: Alexandre Courbot <acourbot@nvidia.com>
+Subject: Re: Possible regression with commit 52221610d
+Date: Tue, 4 Nov 2014 18:00:34 +0900
+Message-ID: <545895B2.2000101@nvidia.com>
+References: <54584260.8030602@nvidia.com> <CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoaN3WoYhsMoA1LRmOoyBpMdmX+ShzdD4ObKcFVTBbkFw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Huang, Ray" <Ray.Huang@amd.com>, Wan Zongshun <mcuos.com@gmail.com>, Arindam Nath <arindam.nath@amd.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from hqemgate15.nvidia.com ([216.228.121.64]:4430 "EHLO
+	hqemgate15.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751247AbaKDJAl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 04:00:41 -0500
+In-Reply-To: <CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tim Kryger <tim.kryger@gmail.com>
+Cc: Sachin Kamat <spk.linux@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
 
-On 2014=E5=B9=B411=E6=9C=8804=E6=97=A5 15:51, Ulf Hansson wrote:
-> On 30 October 2014 05:06, Vincent Wan <vincent.wan@amd.com> wrote:
->> SDHC controller in AMD chipsets require SDHC transfer mode
->> register to be cleared for commands without data. The issue was
->> uncovered during testing eMMC cards on KB/ML based platforms.
->>
->> Signed-off-by: Vincent Wan <vincent.wan@amd.com>
->> Signed-off-by: Arindam Nath <arindam.nath@amd.com>
->> Tested-by: Vikram B <vikram.b@amd.com>
->> Tested-by: Raghavendra Swamy <raghavendra.swamy@amd.com>
->
-> Hi Vincent,
->
-> This looks good to me, but the patch has checkpatch errors.
->
-> Could you check at your side and re-send?
->
-> Kind regards
-> Uffe
->
+Hi Tim, thanks for your reply!
 
-Hi Ulf,
+On 11/04/2014 02:28 PM, Tim Kryger wrote:
+> On Mon, Nov 3, 2014 at 7:05 PM, Alexandre Courbot <acourbot@nvidia.com> wrote:
+>> Hi guys,
+>>
+>> On the NVIDIA shield (tegra114-roth) platform, I have noticed that MMC
+>> stopped working completely on recent kernels. MMC devices will not show up
+>> and the message "mmc1: Controller never released inhibit bit(s)." shows up
+>> repeatedly in the console.
+>>
+>> After bisecting I tracked commit 52221610dd84dc3e9196554f0292ca9e8ab3541d
+>> ("mmc: sdhci: Improve external VDD regulator support") as the one that
+>> introduced this issue, which seems somehow surprising to me since it has
+>> been around for a while and nobody else complained about this AFAICT.
+>
+> I'm not too familiar with the Nvidia Shield so can you please confirm
+> the following?
+>
+> The controller in the Tegra114 is SDHCI compliant and as such
+> sdhci_tegra_probe calls sdhci_add_host.  External regulators are
+> sought in sdhci_add_host with a call to mmc_regulator_get_supply.
 
-My email tool causes this issue, so I have already sent patch v2 to you=
-=2E
+This is correct.
 
-Thanks!
-Vincent Wan.
+> Since no external regulators are specified in tegra114.dtsi or
+> tegra114-roth.dts, mmc->supply.vmmc and mmc->supply.vqmmc are set to
+> -ENODEV.
+
+Actually 2 of the MMC nodes in tegra114-roth.dts (for SD card and eMMC) 
+have a vmmc-supply property, so for two of them at least 
+mmc->supply.vmmc is a valid pointer.
+
+>
+>> The following diff solves the issue for me, however I don't know whether it
+>> also reverts the intended purpose of the initial patch:
 >>
->> ---
->>   drivers/mmc/host/sdhci-pci.c | 27 +++++++++++++++++++++++++++
->>   drivers/mmc/host/sdhci.c     | 11 ++++++++---
->>   include/linux/mmc/sdhci.h    |  2 ++
->>   3 files changed, 37 insertions(+), 3 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-p=
-ci.c
->> index 6119297..8f5c998 100644
->> --- a/drivers/mmc/host/sdhci-pci.c
->> +++ b/drivers/mmc/host/sdhci-pci.c
->> @@ -645,6 +645,23 @@ static const struct sdhci_pci_fixes sdhci_rtsx =
-=3D {
->>          .probe_slot     =3D rtsx_probe_slot,
->>   };
->>
->> +static int amd_probe(struct sdhci_pci_chip *chip)
->> +{
->> +       struct pci_dev  *smbus_dev;
->> +
->> +       smbus_dev =3D pci_get_device(PCI_VENDOR_ID_AMD,
->> +                       PCI_DEVICE_ID_AMD_HUDSON2_SMBUS, NULL);
->> +
->> +       if (smbus_dev && (smbus_dev->revision < 0x51))
->> +               chip->quirks2 |=3D
->> SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
->> +
->> +       return 0;
->> +}
->> +
->> +static const struct sdhci_pci_fixes sdhci_amd =3D {
->> +       .probe          =3D amd_probe,
->> +};
->> +
->>   static const struct pci_device_id pci_ids[] =3D {
->>          {
->>                  .vendor         =3D PCI_VENDOR_ID_RICOH,
->> @@ -1045,6 +1062,16 @@ static const struct pci_device_id pci_ids[] =3D=
- {
->>                  .driver_data    =3D (kernel_ulong_t)&sdhci_o2,
->>          },
->>
->> +       {
->> +               .vendor         =3D PCI_VENDOR_ID_AMD,
->> +               .device         =3D PCI_ANY_ID,
->> +               .class          =3D PCI_CLASS_SYSTEM_SDHCI << 8,
->> +               .class_mask     =3D 0xFFFF00,
->> +               .subvendor      =3D PCI_ANY_ID,
->> +               .subdevice      =3D PCI_ANY_ID,
->> +               .driver_data    =3D (kernel_ulong_t)&sdhci_amd,
->> +       },
->> +
->>          {       /* Generic SD host controller */
->>                  PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xF=
-=46FF00)
->>          },
 >> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index ada1a3e..8085f26 100644
+>> index ada1a3ea3a87..615701bb8ea3 100644
 >> --- a/drivers/mmc/host/sdhci.c
 >> +++ b/drivers/mmc/host/sdhci.c
->> @@ -889,10 +889,15 @@ static void sdhci_set_transfer_mode(struct sdh=
-ci_host
->> *host,
->>          struct mmc_data *data =3D cmd->data;
+>> @@ -1235,13 +1235,6 @@ static void sdhci_set_power(struct sdhci_host *host,
+>> unsigned char mode,
+>>          struct mmc_host *mmc = host->mmc;
+>>          u8 pwr = 0;
 >>
->>          if (data =3D=3D NULL) {
->> -               /* clear Auto CMD settings for no data CMDs */
->> -               mode =3D sdhci_readw(host, SDHCI_TRANSFER_MODE);
->> -               sdhci_writew(host, mode & ~(SDHCI_TRNS_AUTO_CMD12 |
->> +               if (host->quirks2 &
->> +                       SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_C=
-MD) {
->> +                       sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE)=
-;
->> +               } else {
->> +                       /* clear Auto CMD settings for no data CMDs =
-*/
->> +                       mode =3D sdhci_readw(host, SDHCI_TRANSFER_MO=
-DE);
->> +                       sdhci_writew(host, mode & ~(SDHCI_TRNS_AUTO_=
-CMD12 |
->>                                  SDHCI_TRNS_AUTO_CMD23),
->> SDHCI_TRANSFER_MODE);
->> +               }
->>                  return;
+>> -       if (!IS_ERR(mmc->supply.vmmc)) {
+>> -               spin_unlock_irq(&host->lock);
+>> -               mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+>> -               spin_lock_irq(&host->lock);
+>> -               return;
+>> -       }
+>> -
+>>          if (mode != MMC_POWER_OFF) {
+>>                  switch (1 << vdd) {
+>>                  case MMC_VDD_165_195:
+>> @@ -1300,6 +1293,12 @@ static void sdhci_set_power(struct sdhci_host *host,
+>> unsigned char mode,
+>>                  if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+>>                          mdelay(10);
 >>          }
+>> +
+>> +       if (!IS_ERR(mmc->supply.vmmc)) {
+>> +               spin_unlock_irq(&host->lock);
+>> +               mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+>> +               spin_lock_irq(&host->lock);
+>> +       }
+>>   }
 >>
->> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
->> index dba793e..0a287aa 100644
->> --- a/include/linux/mmc/sdhci.h
->> +++ b/include/linux/mmc/sdhci.h
->> @@ -100,6 +100,8 @@ struct sdhci_host {
->>   #define SDHCI_QUIRK2_BROKEN_DDR50                      (1<<7)
->>   /* Stop command (CMD12) can set Transfer Complete when not using
->> MMC_RSP_BUSY */
->>   #define SDHCI_QUIRK2_STOP_WITH_TC                      (1<<8)
->> +/* need clear transfer mode register before send cmd */
->> +#define SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD (1<<9)
->>
->>          int irq;                /* Device IRQ */
->>          void __iomem *ioaddr;   /* Mapped address */
->> --
->> 1.8.1.2
->>
+>> Does this look like the right approach? If not, would you have any
+>> suggestion as to how to solve this problem?
+>
+> The patch you proposed would break Exynos4210 so I don't think it is
+> appropriate.
+>
+> Do you understand why this code block is executed on your hardware?  I
+> wouldn't expect it.
+
+As explained above, vmmc is a valid pointer for 2 instances of the MMC 
+controller. Interestingly, if I just remove the "return" line in the 
+IS_ERR() block (without moving it around), the issue also seems to be fixed.
+
+>
+> Can you provide the relevant parts of the log before the problem occurs?
+
+There is not much unfortunately ; the only relevant log I have is this:
+
+[   12.246022] mmc2: Timeout waiting for hardware interrupt.
+[   12.264990] mmc2: Controller never released inhibit bit(s).
+
+Some hardware interrupt timed out. I don't know much about the MMC 
+subsystem. but could it be because initially the controller is not in a 
+powered-on state, and that return statement causes the function to leave 
+it unpowered?
+
+Thanks,
+Alex.
+
