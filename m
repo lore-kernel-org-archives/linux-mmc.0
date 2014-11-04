@@ -1,62 +1,66 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [Regression Resend] mmc: mx28: sd card detection broken since 3.18-rc1
-Date: Tue, 4 Nov 2014 11:30:59 +0100
-Message-ID: <CACRpkdZ9oYZ10btdvQSAnZhPaxYn_n6JbAUO4h8qadeAiuJq-Q@mail.gmail.com>
-References: <1747777414.897866.1414878004147.JavaMail.open-xchange@oxbsltgw09.schlund.de>
-	<5456B7B3.60401@gmail.com>
+From: Oleksij Rempel <linux@rempel-privat.de>
+Subject: Re: [PATCH v2] mmc: add new au6601 driver
+Date: Tue, 04 Nov 2014 11:37:57 +0100
+Message-ID: <5458AC85.5050807@rempel-privat.de>
+References: <CAPDyKFpZVKu-uHwNfXocVb7FbgEN3NxiLHCPR38bSh_zsA4w6Q@mail.gmail.com>	<1411801899-5236-1-git-send-email-linux@rempel-privat.de> <CAOyx1LpwJmWyrg07mc-UsDMZ=Mggs91SWq7e9GWb83H5k86Dwg@mail.gmail.com> <54420821.5000600@rempel-privat.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="gfDusIHPqEP19MOE4iVgQAfa4kiu2RfDH"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f182.google.com ([209.85.223.182]:42638 "EHLO
-	mail-ie0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751651AbaKDKbA convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 05:31:00 -0500
-Received: by mail-ie0-f182.google.com with SMTP id rd18so7308714iec.13
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Nov 2014 02:30:59 -0800 (PST)
-In-Reply-To: <5456B7B3.60401@gmail.com>
+Received: from mout.gmx.net ([212.227.15.19]:60264 "EHLO mout.gmx.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751303AbaKDKiG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 4 Nov 2014 05:38:06 -0500
+In-Reply-To: <54420821.5000600@rempel-privat.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?Q?Kristina_Mart=C5=A1enko?= <kristina.martsenko@gmail.com>
-Cc: Stefan Wahren <stefan.wahren@i2se.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Fabio Estevam <festevam@gmail.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>
+To: Venkatraman S <svenkatr@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, ulf.hansson@linaro.org
 
-On Mon, Nov 3, 2014 at 12:01 AM, Kristina Mart=C5=A1enko
-<kristina.martsenko@gmail.com> wrote:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--gfDusIHPqEP19MOE4iVgQAfa4kiu2RfDH
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-> I ran into this issue as well. Seems that a card-detect flag
-> (MMC_CAP2_CD_ACTIVE_HIGH) can currently be set based on an
-> uninitialized variable, which can lead to the card being reported as
-> not present. This patch fixes it for me:
->
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 03c53b72a2d6..f0e187682d3b 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -311,7 +311,7 @@ int mmc_of_parse(struct mmc_host *host)
->         struct device_node *np;
->         u32 bus_width;
->         int len, ret;
-> -       bool cap_invert, gpio_invert;
-> +       bool cap_invert, gpio_invert =3D false;
->
->         if (!host->parent || !host->parent->of_node)
->                 return 0;
-> @@ -401,6 +401,7 @@ int mmc_of_parse(struct mmc_host *host)
->         else
->                 cap_invert =3D false;
->
-> +       gpio_invert =3D false;
->         ret =3D mmc_gpiod_request_ro(host, "wp", 0, false, 0, &gpio_i=
-nvert);
->         if (ret) {
->                 if (ret =3D=3D -EPROBE_DEFER)
->
-> Let me know if this also fixes it for you, and I'll send in a proper
-> patch.
+Am 18.10.2014 um 08:26 schrieb Oleksij Rempel:
+> Am 17.10.2014 um 14:37 schrieb Venkatraman S:
+>> On Sat, Sep 27, 2014 at 12:41 PM, Oleksij Rempel <linux@rempel-privat.=
+de> wrote:
+>>>
+>>> This driver is based on documentation which was based on my RE-work a=
+nd
+>>> comparision with other MMC drivers.
+>>> It works in legacy mode and can provide 20MB/s R/W spead for most mod=
+ern
+>>> SD cards, even if at least 40MB/s should be possible on this hardware=
+=2E
+>>> It was not possible provide description for all register. But some of=
+ them
+>>> are important to make this hardware work in some unknown way.
+>>>
+>>> Biggest part of RE-work was done by emulating AU6601 in QEMU.
+>>>
+>>> Signed-off-by: Oleksij Rempel <linux@rempel-privat.de>
 
-Argh how could I make this stupid mistake :(
+Any updates here?
 
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+--=20
+Regards,
+Oleksij
 
-Yours,
-Linus Walleij
+
+--gfDusIHPqEP19MOE4iVgQAfa4kiu2RfDH
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iF4EAREIAAYFAlRYrIkACgkQHwImuRkmbWnp+AD/VPo+rCTA5RUTHatLeS8mgbXT
+L/BKeT6k88xrFX5CeyMA/RIZV2YDa8liaekJ6/5XVPyj+Ci3WWKMmHgfUJ4EkcQC
+=9l/M
+-----END PGP SIGNATURE-----
+
+--gfDusIHPqEP19MOE4iVgQAfa4kiu2RfDH--
