@@ -1,93 +1,136 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3] mmc: dw_mmc: add support for the other bit of sdio
- interrupt
-Date: Tue, 04 Nov 2014 11:15:54 +0900
-Message-ID: <545836DA.90905@samsung.com>
-References: <1414666240-16782-1-git-send-email-addy.ke@rock-chips.com>
- <1414977633-3196-1-git-send-email-addy.ke@rock-chips.com>
- <5457440E.3070002@samsung.com> <3540679.aQ4QUeBEJd@diego>
+From: Wan ZongShun <mcuos.com@gmail.com>
+Subject: Re: [PATCH] mmc: Add a quirk for AMD SDHC transfer mode register need
+ to be cleared for cmd without data
+Date: Tue, 4 Nov 2014 10:24:10 +0800
+Message-ID: <CAKT61h8T8Mzxux-YksncUO8c_GuE6jxgBUJ-kwKxAPOb1n26=g@mail.gmail.com>
+References: <541A7F3D.70909@amd.com> <5451B943.3060104@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:43822 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751079AbaKDCP5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Nov 2014 21:15:57 -0500
-In-reply-to: <3540679.aQ4QUeBEJd@diego>
+Received: from mail-pa0-f42.google.com ([209.85.220.42]:57007 "EHLO
+	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752073AbaKDCYc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Nov 2014 21:24:32 -0500
+In-Reply-To: <5451B943.3060104@amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?ISO-8859-1?Q?Heiko_St=FCbner?= <heiko@sntech.de>
-Cc: Addy Ke <addy.ke@rock-chips.com>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org, huangtao@rock-chips.com, devicetree@vger.kernel.org, hl@rock-chips.com, linux-doc@vger.kernel.org, yzq@rock-chips.com, zyw@rock-chips.com, zhangqing@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kever.yang@rock-chips.com, lintao@rock-chips.com, linux-rockchip@lists.infradead.org, xjq@rock-chips.com, zhenfu.fang@rock-chips.com, chenfen@rock-chips.com, cf@rock-chips.com, hj@rock-chips.com, linux-arm-kernel@lists.infradead.org, zyf@rock-chips.com
+To: Vincent Wan <vincent.wan@amd.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 
-Dear Heiko.
+Hi Ulf,
 
-On 11/03/2014 07:23 PM, Heiko St=FCbner wrote:
-> Hi Jaehoon,
->=20
-> Am Montag, 3. November 2014, 17:59:58 schrieb Jaehoon Chung:
->> Hi, Addy.
->>
->> On 11/03/2014 10:20 AM, Addy Ke wrote:
->>> The bit of sdio interrupt is 16 in designware implementation,
->>> but it is 24 on Rockchip SoCs.This patch add sdio_id0 for the
->>> number of slot0 in the SDIO interrupt registers.
->>>
->>> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
->>> ---
->>> Changes in v2:
->>> - rebase on http://git.linaro.org/git/people/ulf.hansson/mmc.git, n=
-ext
->>> branch Changes in v3:
->>> - Remove dts for sdio_id0, just replace this with 8, suggested by D=
-oug
->>> - Change to support all Rockchip Socs, suggested by Heiko
->>>
->>>  drivers/mmc/host/dw_mmc-rockchip.c | 10 ++++++++++
->>>  drivers/mmc/host/dw_mmc.c          | 12 +++++++-----
->>>  drivers/mmc/host/dw_mmc.h          |  2 ++
->>>  include/linux/mmc/dw_mmc.h         |  3 +++
->>>  4 files changed, 22 insertions(+), 5 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c
->>> b/drivers/mmc/host/dw_mmc-rockchip.c index bbb4ec3..b997c8f 100644
->>> --- a/drivers/mmc/host/dw_mmc-rockchip.c
->>> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
->>> @@ -68,14 +68,24 @@ static void dw_mci_rk3288_set_ios(struct dw_mci=
- *host,
->>> struct mmc_ios *ios)>=20
->>>  	}
->>> =20
->>>  }
->>>
->>> +static int dw_mci_rockchip_parse_dt(struct dw_mci *host)
->>> +{
->>> +	/* It is slot 8 on Rockchip SoCs */
->>> +	host->sdio_id0 =3D 8;
->>> +
->>> +	return 0;
->>> +}
->>
->> Well, function is "__parse_dt__", but this function don't parse anyt=
-hing.
->> If All rockchip soc is supported, i think that it can be located to =
-other
->> place.
->=20
-> do you have a suggestion for a location?
->=20
-> The only alternative I can see right now would be using the init-hook=
- in=20
-> dw_mci_drv_data or adding a new field to it holding the slot-offset.
-> [with using the init-hook being my personal preference of the two]
+How about this patch?
 
-init-hook can be used, then, in future, it can also included other spec=
-ific code for rock-chip.
+Thanks!
+Vincent Wan.
 
-Best Regards,
-Jaehoon Chung
->=20
->=20
-> Heiko
->=20
+2014-10-30 12:06 GMT+08:00 Vincent Wan <vincent.wan@amd.com>:
+> SDHC controller in AMD chipsets require SDHC transfer mode
+> register to be cleared for commands without data. The issue was
+> uncovered during testing eMMC cards on KB/ML based platforms.
+>
+> Signed-off-by: Vincent Wan <vincent.wan@amd.com>
+> Signed-off-by: Arindam Nath <arindam.nath@amd.com>
+> Tested-by: Vikram B <vikram.b@amd.com>
+> Tested-by: Raghavendra Swamy <raghavendra.swamy@amd.com>
+>
+> ---
+>  drivers/mmc/host/sdhci-pci.c | 27 +++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci.c     | 11 ++++++++---
+>  include/linux/mmc/sdhci.h    |  2 ++
+>  3 files changed, 37 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+> index 6119297..8f5c998 100644
+> --- a/drivers/mmc/host/sdhci-pci.c
+> +++ b/drivers/mmc/host/sdhci-pci.c
+> @@ -645,6 +645,23 @@ static const struct sdhci_pci_fixes sdhci_rtsx = {
+>         .probe_slot     = rtsx_probe_slot,
+>  };
+>
+> +static int amd_probe(struct sdhci_pci_chip *chip)
+> +{
+> +       struct pci_dev  *smbus_dev;
+> +
+> +       smbus_dev = pci_get_device(PCI_VENDOR_ID_AMD,
+> +                       PCI_DEVICE_ID_AMD_HUDSON2_SMBUS, NULL);
+> +
+> +       if (smbus_dev && (smbus_dev->revision < 0x51))
+> +               chip->quirks2 |=
+> SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
+> +
+> +       return 0;
+> +}
+> +
+> +static const struct sdhci_pci_fixes sdhci_amd = {
+> +       .probe          = amd_probe,
+> +};
+> +
+>  static const struct pci_device_id pci_ids[] = {
+>         {
+>                 .vendor         = PCI_VENDOR_ID_RICOH,
+> @@ -1045,6 +1062,16 @@ static const struct pci_device_id pci_ids[] = {
+>                 .driver_data    = (kernel_ulong_t)&sdhci_o2,
+>         },
+>
+> +       {
+> +               .vendor         = PCI_VENDOR_ID_AMD,
+> +               .device         = PCI_ANY_ID,
+> +               .class          = PCI_CLASS_SYSTEM_SDHCI << 8,
+> +               .class_mask     = 0xFFFF00,
+> +               .subvendor      = PCI_ANY_ID,
+> +               .subdevice      = PCI_ANY_ID,
+> +               .driver_data    = (kernel_ulong_t)&sdhci_amd,
+> +       },
+> +
+>         {       /* Generic SD host controller */
+>                 PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
+>         },
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ada1a3e..8085f26 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -889,10 +889,15 @@ static void sdhci_set_transfer_mode(struct sdhci_host
+> *host,
+>         struct mmc_data *data = cmd->data;
+>
+>         if (data == NULL) {
+> -               /* clear Auto CMD settings for no data CMDs */
+> -               mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
+> -               sdhci_writew(host, mode & ~(SDHCI_TRNS_AUTO_CMD12 |
+> +               if (host->quirks2 &
+> +                       SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD) {
+> +                       sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
+> +               } else {
+> +                       /* clear Auto CMD settings for no data CMDs */
+> +                       mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
+> +                       sdhci_writew(host, mode & ~(SDHCI_TRNS_AUTO_CMD12 |
+>                                 SDHCI_TRNS_AUTO_CMD23),
+> SDHCI_TRANSFER_MODE);
+> +               }
+>                 return;
+>         }
+>
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index dba793e..0a287aa 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -100,6 +100,8 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK2_BROKEN_DDR50                      (1<<7)
+>  /* Stop command (CMD12) can set Transfer Complete when not using
+> MMC_RSP_BUSY */
+>  #define SDHCI_QUIRK2_STOP_WITH_TC                      (1<<8)
+> +/* need clear transfer mode register before send cmd */
+> +#define SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD (1<<9)
+>
+>         int irq;                /* Device IRQ */
+>         void __iomem *ioaddr;   /* Mapped address */
+> --
+> 1.8.1.2
+>
 
+
+
+-- 
+Wan ZongShun.
+www.mcuos.com
