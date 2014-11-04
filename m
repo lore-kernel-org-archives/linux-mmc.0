@@ -1,130 +1,104 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: Add a quirk for AMD SDHC transfer mode register need
- to be cleared for cmd without data
-Date: Tue, 4 Nov 2014 08:51:28 +0100
-Message-ID: <CAPDyKFoaN3WoYhsMoA1LRmOoyBpMdmX+ShzdD4ObKcFVTBbkFw@mail.gmail.com>
-References: <541A7F3D.70909@amd.com>
-	<5451B943.3060104@amd.com>
+Subject: Re: [RFC PATCH] mmc: sdhci: switch from programmable clock mode to
+ divided one if needed
+Date: Tue, 4 Nov 2014 09:06:07 +0100
+Message-ID: <CAPDyKFozT4v4XogoCZ=dbZVgUTzFMb5zKSqjTdQj8mJEErE=TQ@mail.gmail.com>
+References: <1412669495-5629-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5451B943.3060104@amd.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Vincent Wan <vincent.wan@amd.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Huang, Ray" <Ray.Huang@amd.com>, Wan Zongshun <mcuos.com@gmail.com>, Arindam Nath <arindam.nath@amd.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f41.google.com ([209.85.216.41]:53520 "EHLO
+	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750926AbaKDIGI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 03:06:08 -0500
+Received: by mail-qa0-f41.google.com with SMTP id s7so1197548qap.28
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Nov 2014 00:06:08 -0800 (PST)
+In-Reply-To: <1412669495-5629-1-git-send-email-ludovic.desroches@atmel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Nicolas Ferre <nicolas.ferre@atmel.com>, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-On 30 October 2014 05:06, Vincent Wan <vincent.wan@amd.com> wrote:
-> SDHC controller in AMD chipsets require SDHC transfer mode
-> register to be cleared for commands without data. The issue was
-> uncovered during testing eMMC cards on KB/ML based platforms.
+On 7 October 2014 10:11, Ludovic Desroches <ludovic.desroches@atmel.com> wrote:
+> In programmable mode, if the clock frequency is too high, the divider
+> can be too small to meet the clock frequency requirement especially to
+> init the SD card. In this case, switch to the divided clock mode.
 >
-> Signed-off-by: Vincent Wan <vincent.wan@amd.com>
-> Signed-off-by: Arindam Nath <arindam.nath@amd.com>
-> Tested-by: Vikram B <vikram.b@amd.com>
-> Tested-by: Raghavendra Swamy <raghavendra.swamy@amd.com>
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> ---
+>
+> Hi all,
+>
+> I would like to know if this patch can be accepted. Use case, I have a base
+> clock at 12 MHz, M is 40. So in programmable mode, using the greater divider,
+> minimum clock frequency will be higher than 400 KHz so it could cause issues to
+> init the card.
+>
+> Thanks for your feedback.
+>
+> Ludovic
 
-Hi Vincent,
+It would be nice if some of the senior sdhci developers could help out
+review patches likes this.
 
-This looks good to me, but the patch has checkpatch errors.
+It touches the core of sdhci, thus affecting many of the sdhci drivers.
 
-Could you check at your side and re-send?
+Anybody?
 
 Kind regards
 Uffe
 
 >
-> ---
->  drivers/mmc/host/sdhci-pci.c | 27 +++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci.c     | 11 ++++++++---
->  include/linux/mmc/sdhci.h    |  2 ++
->  3 files changed, 37 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/sdhci.c | 29 ++++++++++++++++++++---------
+>  1 file changed, 20 insertions(+), 9 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-> index 6119297..8f5c998 100644
-> --- a/drivers/mmc/host/sdhci-pci.c
-> +++ b/drivers/mmc/host/sdhci-pci.c
-> @@ -645,6 +645,23 @@ static const struct sdhci_pci_fixes sdhci_rtsx = {
->         .probe_slot     = rtsx_probe_slot,
->  };
->
-> +static int amd_probe(struct sdhci_pci_chip *chip)
-> +{
-> +       struct pci_dev  *smbus_dev;
-> +
-> +       smbus_dev = pci_get_device(PCI_VENDOR_ID_AMD,
-> +                       PCI_DEVICE_ID_AMD_HUDSON2_SMBUS, NULL);
-> +
-> +       if (smbus_dev && (smbus_dev->revision < 0x51))
-> +               chip->quirks2 |=
-> SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
-> +
-> +       return 0;
-> +}
-> +
-> +static const struct sdhci_pci_fixes sdhci_amd = {
-> +       .probe          = amd_probe,
-> +};
-> +
->  static const struct pci_device_id pci_ids[] = {
->         {
->                 .vendor         = PCI_VENDOR_ID_RICOH,
-> @@ -1045,6 +1062,16 @@ static const struct pci_device_id pci_ids[] = {
->                 .driver_data    = (kernel_ulong_t)&sdhci_o2,
->         },
->
-> +       {
-> +               .vendor         = PCI_VENDOR_ID_AMD,
-> +               .device         = PCI_ANY_ID,
-> +               .class          = PCI_CLASS_SYSTEM_SDHCI << 8,
-> +               .class_mask     = 0xFFFF00,
-> +               .subvendor      = PCI_ANY_ID,
-> +               .subdevice      = PCI_ANY_ID,
-> +               .driver_data    = (kernel_ulong_t)&sdhci_amd,
-> +       },
-> +
->         {       /* Generic SD host controller */
->                 PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
->         },
 > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index ada1a3e..8085f26 100644
+> index df0e7e1..70d4c18 100644
 > --- a/drivers/mmc/host/sdhci.c
 > +++ b/drivers/mmc/host/sdhci.c
-> @@ -889,10 +889,15 @@ static void sdhci_set_transfer_mode(struct sdhci_host
-> *host,
->         struct mmc_data *data = cmd->data;
+> @@ -1126,6 +1126,7 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>         int real_div = div, clk_mul = 1;
+>         u16 clk = 0;
+>         unsigned long timeout;
+> +       bool switch_base_clk = false;
 >
->         if (data == NULL) {
-> -               /* clear Auto CMD settings for no data CMDs */
-> -               mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
-> -               sdhci_writew(host, mode & ~(SDHCI_TRNS_AUTO_CMD12 |
-> +               if (host->quirks2 &
-> +                       SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD) {
-> +                       sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
-> +               } else {
-> +                       /* clear Auto CMD settings for no data CMDs */
-> +                       mode = sdhci_readw(host, SDHCI_TRANSFER_MODE);
-> +                       sdhci_writew(host, mode & ~(SDHCI_TRNS_AUTO_CMD12 |
->                                 SDHCI_TRNS_AUTO_CMD23),
-> SDHCI_TRANSFER_MODE);
+>         host->mmc->actual_clock = 0;
+>
+> @@ -1163,15 +1164,25 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>                                         <= clock)
+>                                         break;
+>                         }
+> -                       /*
+> -                        * Set Programmable Clock Mode in the Clock
+> -                        * Control register.
+> -                        */
+> -                       clk = SDHCI_PROG_CLOCK_MODE;
+> -                       real_div = div;
+> -                       clk_mul = host->clk_mul;
+> -                       div--;
+> -               } else {
+> +                       if ((host->max_clk * host->clk_mul / div) <= clock) {
+> +                               /*
+> +                                * Set Programmable Clock Mode in the Clock
+> +                                * Control register.
+> +                                */
+> +                               clk = SDHCI_PROG_CLOCK_MODE;
+> +                               real_div = div;
+> +                               clk_mul = host->clk_mul;
+> +                               div--;
+> +                       } else {
+> +                               /*
+> +                                * Divisor can be too small to reach clock
+> +                                * speed requirement. Then use the base clock.
+> +                                */
+> +                               switch_base_clk = true;
+> +                       }
 > +               }
->                 return;
->         }
->
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index dba793e..0a287aa 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -100,6 +100,8 @@ struct sdhci_host {
->  #define SDHCI_QUIRK2_BROKEN_DDR50                      (1<<7)
->  /* Stop command (CMD12) can set Transfer Complete when not using
-> MMC_RSP_BUSY */
->  #define SDHCI_QUIRK2_STOP_WITH_TC                      (1<<8)
-> +/* need clear transfer mode register before send cmd */
-> +#define SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD (1<<9)
->
->         int irq;                /* Device IRQ */
->         void __iomem *ioaddr;   /* Mapped address */
+> +
+> +               if (!host->clk_mul || switch_base_clk) {
+>                         /* Version 3.00 divisors must be a multiple of 2. */
+>                         if (host->max_clk <= clock)
+>                                 div = 1;
 > --
-> 1.8.1.2
+> 2.0.3
 >
