@@ -1,310 +1,152 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH v2] mmc: atmel-mci: add runtime pm support
-Date: Tue, 4 Nov 2014 14:14:59 +0100
-Message-ID: <20141104131459.GR20550@ldesroches-Latitude-E6320>
-References: <1414641641-32691-1-git-send-email-wenyou.yang@atmel.com>
- <CAPDyKFpVjoyNWpuZJ=k=nvcZkfarJtJ9oNAVjRBvmqZKuedxfA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:49551 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751626AbaKDNOv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 08:14:51 -0500
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpVjoyNWpuZJ=k=nvcZkfarJtJ9oNAVjRBvmqZKuedxfA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Addy Ke <addy.ke@rock-chips.com>
+Subject: [PATCH v4] mmc: dw_mmc: add support for the other bit of sdio interrupt
+Date: Tue,  4 Nov 2014 22:03:09 +0800
+Message-ID: <1415109789-7046-1-git-send-email-addy.ke@rock-chips.com>
+References: <1414977633-3196-1-git-send-email-addy.ke@rock-chips.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1414977633-3196-1-git-send-email-addy.ke@rock-chips.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org
+Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com, Addy Ke <addy.ke@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <chris@printf.net>, Wenyou Yang <wenyou.yang@atmel.com>, Kevin Hilman <khilman@kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Tue, Nov 04, 2014 at 11:05:56AM +0100, Ulf Hansson wrote:
-> On 30 October 2014 05:00, Wenyou Yang <wenyou.yang@atmel.com> wrote:
-> > Add runtime pm support to atmel mci controller.
-> > Use runtime pm APIs to enable/disable atmel mci's clock.
-> > Use runtime autosuspend APIs to enable auto suspend delay.
-> >
-> > Signed-off-by: Wenyou Yang <wenyou.yang@atmel.com>
-> 
-Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+The bit of sdio interrupt is 16 in designware implementation,
+but it is 24 on Rockchip SoCs.This patch add sdio_id0 for the
+number of slot0 in the SDIO interrupt registers.
 
-> Ludovic, any objections to this one?
+Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+---
+Changes in v2:
+- rebase on http://git.linaro.org/git/people/ulf.hansson/mmc.git, next branch
+Changes in v3:
+- Remove dts for sdio_id0, just replace this with 8, suggested by Doug
+- Change to support all Rockchip Socs, suggested by Heiko
+Changes in v4:
+- use init-hook to set sdio_id0, suggested by Jaehoon
 
-I am not a PM runtime guru, since you have reviewed the first version,
-it is ok for me :)
+ drivers/mmc/host/dw_mmc-rockchip.c | 10 ++++++++++
+ drivers/mmc/host/dw_mmc.c          | 12 +++++++-----
+ drivers/mmc/host/dw_mmc.h          |  2 ++
+ include/linux/mmc/dw_mmc.h         |  3 +++
+ 4 files changed, 22 insertions(+), 5 deletions(-)
 
-Regards
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index bbb4ec3..5650ac4 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -68,14 +68,24 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ 	}
+ }
+ 
++static int dw_mci_rockchip_init(struct dw_mci *host)
++{
++	/* It is slot 8 on Rockchip SoCs */
++	host->sdio_id0 = 8;
++
++	return 0;
++}
++
+ static const struct dw_mci_drv_data rk2928_drv_data = {
+ 	.prepare_command        = dw_mci_rockchip_prepare_command,
++	.init			= dw_mci_rockchip_init,
+ };
+ 
+ static const struct dw_mci_drv_data rk3288_drv_data = {
+ 	.prepare_command        = dw_mci_rockchip_prepare_command,
+ 	.set_ios		= dw_mci_rk3288_set_ios,
+ 	.setup_clock    = dw_mci_rk3288_setup_clock,
++	.init			= dw_mci_rockchip_init,
+ };
+ 
+ static const struct of_device_id dw_mci_rockchip_match[] = {
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index bb46b1b..a633b58 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -823,7 +823,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+ 
+ 		/* enable clock; only low power if no SDIO */
+ 		clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
+-		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->id)))
++		if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->sdio_id)))
+ 			clk_en_a |= SDMMC_CLKEN_LOW_PWR << slot->id;
+ 		mci_writel(host, CLKENA, clk_en_a);
+ 
+@@ -1184,10 +1184,10 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+ 		dw_mci_disable_low_power(slot);
+ 
+ 		mci_writel(host, INTMASK,
+-			   (int_mask | SDMMC_INT_SDIO(slot->id)));
++			   (int_mask | SDMMC_INT_SDIO(slot->sdio_id)));
+ 	} else {
+ 		mci_writel(host, INTMASK,
+-			   (int_mask & ~SDMMC_INT_SDIO(slot->id)));
++			   (int_mask & ~SDMMC_INT_SDIO(slot->sdio_id)));
+ 	}
+ }
+ 
+@@ -2056,8 +2056,9 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 		/* Handle SDIO Interrupts */
+ 		for (i = 0; i < host->num_slots; i++) {
+ 			struct dw_mci_slot *slot = host->slot[i];
+-			if (pending & SDMMC_INT_SDIO(i)) {
+-				mci_writel(host, RINTSTS, SDMMC_INT_SDIO(i));
++			if (pending & SDMMC_INT_SDIO(slot->sdio_id)) {
++				mci_writel(host, RINTSTS,
++					   SDMMC_INT_SDIO(slot->sdio_id));
+ 				mmc_signal_sdio_irq(slot->mmc);
+ 			}
+ 		}
+@@ -2145,6 +2146,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 
+ 	slot = mmc_priv(mmc);
+ 	slot->id = id;
++	slot->sdio_id = host->sdio_id0 + id;
+ 	slot->mmc = mmc;
+ 	slot->host = host;
+ 	host->slot[id] = slot;
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 71d4995..0562f10 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -214,6 +214,7 @@ extern int dw_mci_resume(struct dw_mci *host);
+  *	with CONFIG_MMC_CLKGATE.
+  * @flags: Random state bits associated with the slot.
+  * @id: Number of this slot.
++ * @sdio_id: Number of this slot in the SDIO interrupt registers.
+  */
+ struct dw_mci_slot {
+ 	struct mmc_host		*mmc;
+@@ -233,6 +234,7 @@ struct dw_mci_slot {
+ #define DW_MMC_CARD_PRESENT	0
+ #define DW_MMC_CARD_NEED_INIT	1
+ 	int			id;
++	int			sdio_id;
+ };
+ 
+ struct dw_mci_tuning_data {
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 69d0814..72c319f 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -96,6 +96,7 @@ struct mmc_data;
+  * @quirks: Set of quirks that apply to specific versions of the IP.
+  * @irq_flags: The flags to be passed to request_irq.
+  * @irq: The irq value to be passed to request_irq.
++ * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
+  *
+  * Locking
+  * =======
+@@ -191,6 +192,8 @@ struct dw_mci {
+ 	bool			vqmmc_enabled;
+ 	unsigned long		irq_flags; /* IRQ flags */
+ 	int			irq;
++
++	int			sdio_id0;
+ };
+ 
+ /* DMA ops for Internal/External DMAC interface */
+-- 
+1.8.3.2
 
-Ludovic
 
-> 
-> Kind regards
-> Uffe
-> 
-> > ---
-> > Changes v1 -> v2:
-> > * Adjust the APIs and invoking sequence to avoid clock unbalance issue during ->probe.
-> > * Fix miss to invoke clk_disable_unprepare() in the error handling in ->probe.
-> > * Remove atmci_suspend/resume and use pm_runtime_force_suspend/resume() to simplify code.
-> >
-> >  drivers/mmc/host/atmel-mci.c |   90 +++++++++++++++++++++++++++++++-----------
-> >  1 file changed, 67 insertions(+), 23 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> > index 0b9ddf8..f8f2bbe 100644
-> > --- a/drivers/mmc/host/atmel-mci.c
-> > +++ b/drivers/mmc/host/atmel-mci.c
-> > @@ -37,6 +37,8 @@
-> >
-> >  #include <linux/atmel-mci.h>
-> >  #include <linux/atmel_pdc.h>
-> > +#include <linux/pm.h>
-> > +#include <linux/pm_runtime.h>
-> >
-> >  #include <asm/cacheflush.h>
-> >  #include <asm/io.h>
-> > @@ -44,6 +46,8 @@
-> >
-> >  #include "atmel-mci-regs.h"
-> >
-> > +#define AUTOSUSPEND_DELAY      50
-> > +
-> >  #define ATMCI_DATA_ERROR_FLAGS (ATMCI_DCRCE | ATMCI_DTOE | ATMCI_OVRE | ATMCI_UNRE)
-> >  #define ATMCI_DMA_THRESHOLD    16
-> >
-> > @@ -386,20 +390,19 @@ static int atmci_regs_show(struct seq_file *s, void *v)
-> >         if (!buf)
-> >                 return -ENOMEM;
-> >
-> > +       pm_runtime_get_sync(&host->pdev->dev);
-> > +
-> >         /*
-> >          * Grab a more or less consistent snapshot. Note that we're
-> >          * not disabling interrupts, so IMR and SR may not be
-> >          * consistent.
-> >          */
-> > -       ret = clk_prepare_enable(host->mck);
-> > -       if (ret)
-> > -               goto out;
-> > -
-> >         spin_lock_bh(&host->lock);
-> >         memcpy_fromio(buf, host->regs, ATMCI_REGS_SIZE);
-> >         spin_unlock_bh(&host->lock);
-> >
-> > -       clk_disable_unprepare(host->mck);
-> > +       pm_runtime_mark_last_busy(&host->pdev->dev);
-> > +       pm_runtime_put_autosuspend(&host->pdev->dev);
-> >
-> >         seq_printf(s, "MR:\t0x%08x%s%s ",
-> >                         buf[ATMCI_MR / 4],
-> > @@ -449,7 +452,6 @@ static int atmci_regs_show(struct seq_file *s, void *v)
-> >                                 val & ATMCI_CFG_LSYNC ? " LSYNC" : "");
-> >         }
-> >
-> > -out:
-> >         kfree(buf);
-> >
-> >         return ret;
-> > @@ -1252,6 +1254,8 @@ static void atmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> >         WARN_ON(slot->mrq);
-> >         dev_dbg(&host->pdev->dev, "MRQ: cmd %u\n", mrq->cmd->opcode);
-> >
-> > +       pm_runtime_get_sync(&host->pdev->dev);
-> > +
-> >         /*
-> >          * We may "know" the card is gone even though there's still an
-> >          * electrical connection. If so, we really need to communicate
-> > @@ -1281,7 +1285,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >         struct atmel_mci_slot   *slot = mmc_priv(mmc);
-> >         struct atmel_mci        *host = slot->host;
-> >         unsigned int            i;
-> > -       bool                    unprepare_clk;
-> > +
-> > +       pm_runtime_get_sync(&host->pdev->dev);
-> >
-> >         slot->sdc_reg &= ~ATMCI_SDCBUS_MASK;
-> >         switch (ios->bus_width) {
-> > @@ -1297,13 +1302,8 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >                 unsigned int clock_min = ~0U;
-> >                 u32 clkdiv;
-> >
-> > -               clk_prepare(host->mck);
-> > -               unprepare_clk = true;
-> > -
-> >                 spin_lock_bh(&host->lock);
-> >                 if (!host->mode_reg) {
-> > -                       clk_enable(host->mck);
-> > -                       unprepare_clk = false;
-> >                         atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
-> >                         atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIEN);
-> >                         if (host->caps.has_cfg_reg)
-> > @@ -1371,8 +1371,6 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >         } else {
-> >                 bool any_slot_active = false;
-> >
-> > -               unprepare_clk = false;
-> > -
-> >                 spin_lock_bh(&host->lock);
-> >                 slot->clock = 0;
-> >                 for (i = 0; i < ATMCI_MAX_NR_SLOTS; i++) {
-> > @@ -1385,17 +1383,12 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >                         atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
-> >                         if (host->mode_reg) {
-> >                                 atmci_readl(host, ATMCI_MR);
-> > -                               clk_disable(host->mck);
-> > -                               unprepare_clk = true;
-> >                         }
-> >                         host->mode_reg = 0;
-> >                 }
-> >                 spin_unlock_bh(&host->lock);
-> >         }
-> >
-> > -       if (unprepare_clk)
-> > -               clk_unprepare(host->mck);
-> > -
-> >         switch (ios->power_mode) {
-> >         case MMC_POWER_OFF:
-> >                 if (!IS_ERR(mmc->supply.vmmc))
-> > @@ -1421,6 +1414,9 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >                  */
-> >                 break;
-> >         }
-> > +
-> > +       pm_runtime_mark_last_busy(&host->pdev->dev);
-> > +       pm_runtime_put_autosuspend(&host->pdev->dev);
-> >  }
-> >
-> >  static int atmci_get_ro(struct mmc_host *mmc)
-> > @@ -1512,6 +1508,9 @@ static void atmci_request_end(struct atmel_mci *host, struct mmc_request *mrq)
-> >         spin_unlock(&host->lock);
-> >         mmc_request_done(prev_mmc, mrq);
-> >         spin_lock(&host->lock);
-> > +
-> > +       pm_runtime_mark_last_busy(&host->pdev->dev);
-> > +       pm_runtime_put_autosuspend(&host->pdev->dev);
-> >  }
-> >
-> >  static void atmci_command_complete(struct atmel_mci *host,
-> > @@ -2417,15 +2416,16 @@ static int __init atmci_probe(struct platform_device *pdev)
-> >
-> >         atmci_writel(host, ATMCI_CR, ATMCI_CR_SWRST);
-> >         host->bus_hz = clk_get_rate(host->mck);
-> > -       clk_disable_unprepare(host->mck);
-> >
-> >         host->mapbase = regs->start;
-> >
-> >         tasklet_init(&host->tasklet, atmci_tasklet_func, (unsigned long)host);
-> >
-> >         ret = request_irq(irq, atmci_interrupt, 0, dev_name(&pdev->dev), host);
-> > -       if (ret)
-> > +       if (ret) {
-> > +               clk_disable_unprepare(host->mck);
-> >                 return ret;
-> > +       }
-> >
-> >         /* Get MCI capabilities and set operations according to it */
-> >         atmci_get_cap(host);
-> > @@ -2449,6 +2449,12 @@ static int __init atmci_probe(struct platform_device *pdev)
-> >
-> >         setup_timer(&host->timer, atmci_timeout_timer, (unsigned long)host);
-> >
-> > +       pm_runtime_get_noresume(&pdev->dev);
-> > +       pm_runtime_set_active(&pdev->dev);
-> > +       pm_runtime_set_autosuspend_delay(&pdev->dev, AUTOSUSPEND_DELAY);
-> > +       pm_runtime_use_autosuspend(&pdev->dev);
-> > +       pm_runtime_enable(&pdev->dev);
-> > +
-> >         /* We need at least one slot to succeed */
-> >         nr_slots = 0;
-> >         ret = -ENODEV;
-> > @@ -2491,6 +2497,9 @@ static int __init atmci_probe(struct platform_device *pdev)
-> >                         "Atmel MCI controller at 0x%08lx irq %d, %u slots\n",
-> >                         host->mapbase, irq, nr_slots);
-> >
-> > +       pm_runtime_mark_last_busy(&host->pdev->dev);
-> > +       pm_runtime_put_autosuspend(&pdev->dev);
-> > +
-> >         return 0;
-> >
-> >  err_dma_alloc:
-> > @@ -2499,6 +2508,11 @@ err_dma_alloc:
-> >                         atmci_cleanup_slot(host->slot[i], i);
-> >         }
-> >  err_init_slot:
-> > +       clk_disable_unprepare(host->mck);
-> > +
-> > +       pm_runtime_disable(&pdev->dev);
-> > +       pm_runtime_put_noidle(&pdev->dev);
-> > +
-> >         del_timer_sync(&host->timer);
-> >         if (host->dma.chan)
-> >                 dma_release_channel(host->dma.chan);
-> > @@ -2511,6 +2525,8 @@ static int __exit atmci_remove(struct platform_device *pdev)
-> >         struct atmel_mci        *host = platform_get_drvdata(pdev);
-> >         unsigned int            i;
-> >
-> > +       pm_runtime_get_sync(&pdev->dev);
-> > +
-> >         if (host->buffer)
-> >                 dma_free_coherent(&pdev->dev, host->buf_size,
-> >                                   host->buffer, host->buf_phys_addr);
-> > @@ -2520,11 +2536,9 @@ static int __exit atmci_remove(struct platform_device *pdev)
-> >                         atmci_cleanup_slot(host->slot[i], i);
-> >         }
-> >
-> > -       clk_prepare_enable(host->mck);
-> >         atmci_writel(host, ATMCI_IDR, ~0UL);
-> >         atmci_writel(host, ATMCI_CR, ATMCI_CR_MCIDIS);
-> >         atmci_readl(host, ATMCI_SR);
-> > -       clk_disable_unprepare(host->mck);
-> >
-> >         del_timer_sync(&host->timer);
-> >         if (host->dma.chan)
-> > @@ -2532,14 +2546,44 @@ static int __exit atmci_remove(struct platform_device *pdev)
-> >
-> >         free_irq(platform_get_irq(pdev, 0), host);
-> >
-> > +       clk_disable_unprepare(host->mck);
-> > +
-> > +       pm_runtime_disable(&pdev->dev);
-> > +       pm_runtime_put_noidle(&pdev->dev);
-> > +
-> > +       return 0;
-> > +}
-> > +
-> > +#ifdef CONFIG_PM
-> > +static int atmci_runtime_suspend(struct device *dev)
-> > +{
-> > +       struct atmel_mci *host = dev_get_drvdata(dev);
-> > +
-> > +       clk_disable_unprepare(host->mck);
-> > +
-> >         return 0;
-> >  }
-> >
-> > +static int atmci_runtime_resume(struct device *dev)
-> > +{
-> > +       struct atmel_mci *host = dev_get_drvdata(dev);
-> > +
-> > +       return clk_prepare_enable(host->mck);
-> > +}
-> > +
-> > +static const struct dev_pm_ops atmci_dev_pm_ops = {
-> > +       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> > +                               pm_runtime_force_resume)
-> > +       SET_PM_RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
-> > +};
-> > +#endif
-> > +
-> >  static struct platform_driver atmci_driver = {
-> >         .remove         = __exit_p(atmci_remove),
-> >         .driver         = {
-> >                 .name           = "atmel_mci",
-> >                 .of_match_table = of_match_ptr(atmci_dt_ids),
-> > +               .pm             = &atmci_dev_pm_ops,
-> >         },
-> >  };
-> >
-> > --
-> > 1.7.9.5
-> >
