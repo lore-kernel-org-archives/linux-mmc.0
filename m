@@ -1,92 +1,42 @@
-From: Tim Kryger <tim.kryger@gmail.com>
-Subject: Re: Possible regression with commit 52221610d
-Date: Tue, 4 Nov 2014 07:31:34 -0800
-Message-ID: <CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
-References: <54584260.8030602@nvidia.com>
-	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
-	<545895B2.2000101@nvidia.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: atmel-mci: add runtime pm support
+Date: Tue, 4 Nov 2014 17:00:37 +0100
+Message-ID: <CAPDyKFqAZTT2mOUpKbM74ACtke=EPOCRDKj95X6YZikNxbTLvQ@mail.gmail.com>
+References: <1414641641-32691-1-git-send-email-wenyou.yang@atmel.com>
+	<CAPDyKFpVjoyNWpuZJ=k=nvcZkfarJtJ9oNAVjRBvmqZKuedxfA@mail.gmail.com>
+	<20141104131459.GR20550@ldesroches-Latitude-E6320>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f43.google.com ([209.85.218.43]:45738 "EHLO
-	mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753863AbaKDPbf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 10:31:35 -0500
-In-Reply-To: <545895B2.2000101@nvidia.com>
+Received: from mail-qg0-f49.google.com ([209.85.192.49]:63387 "EHLO
+	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751841AbaKDQAj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 11:00:39 -0500
+Received: by mail-qg0-f49.google.com with SMTP id z60so7709589qgd.8
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Nov 2014 08:00:38 -0800 (PST)
+In-Reply-To: <20141104131459.GR20550@ldesroches-Latitude-E6320>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexandre Courbot <acourbot@nvidia.com>
-Cc: Sachin Kamat <spk.linux@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
+To: Wenyou Yang <wenyou.yang@atmel.com>, Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Chris Ball <chris@printf.net>, Kevin Hilman <khilman@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On Tue, Nov 4, 2014 at 1:00 AM, Alexandre Courbot <acourbot@nvidia.com> wrote:
-> Hi Tim, thanks for your reply!
->
-> On 11/04/2014 02:28 PM, Tim Kryger wrote:
+On 4 November 2014 14:14, Ludovic Desroches <ludovic.desroches@atmel.com> wrote:
+> On Tue, Nov 04, 2014 at 11:05:56AM +0100, Ulf Hansson wrote:
+>> On 30 October 2014 05:00, Wenyou Yang <wenyou.yang@atmel.com> wrote:
+>> > Add runtime pm support to atmel mci controller.
+>> > Use runtime pm APIs to enable/disable atmel mci's clock.
+>> > Use runtime autosuspend APIs to enable auto suspend delay.
+>> >
+>> > Signed-off-by: Wenyou Yang <wenyou.yang@atmel.com>
 >>
->> On Mon, Nov 3, 2014 at 7:05 PM, Alexandre Courbot <acourbot@nvidia.com>
->> wrote:
->>>
->>> Hi guys,
->>>
->>> On the NVIDIA shield (tegra114-roth) platform, I have noticed that MMC
->>> stopped working completely on recent kernels. MMC devices will not show
->>> up
->>> and the message "mmc1: Controller never released inhibit bit(s)." shows
->>> up
->>> repeatedly in the console.
->>>
->>> After bisecting I tracked commit 52221610dd84dc3e9196554f0292ca9e8ab3541d
->>> ("mmc: sdhci: Improve external VDD regulator support") as the one that
->>> introduced this issue, which seems somehow surprising to me since it has
->>> been around for a while and nobody else complained about this AFAICT.
->>
->>
->> I'm not too familiar with the Nvidia Shield so can you please confirm
->> the following?
->>
->> The controller in the Tegra114 is SDHCI compliant and as such
->> sdhci_tegra_probe calls sdhci_add_host.  External regulators are
->> sought in sdhci_add_host with a call to mmc_regulator_get_supply.
+> Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 >
+>> Ludovic, any objections to this one?
 >
-> This is correct.
->
->> Since no external regulators are specified in tegra114.dtsi or
->> tegra114-roth.dts, mmc->supply.vmmc and mmc->supply.vqmmc are set to
->> -ENODEV.
->
->
-> Actually 2 of the MMC nodes in tegra114-roth.dts (for SD card and eMMC) have
-> a vmmc-supply property, so for two of them at least mmc->supply.vmmc is a
-> valid pointer.
->
+> I am not a PM runtime guru, since you have reviewed the first version,
+> it is ok for me :)
 
-I must have been looking at an old version of the file.  Thanks for
-clearing this up.
+Thanks! Applied for next.
 
-> As explained above, vmmc is a valid pointer for 2 instances of the MMC
-> controller. Interestingly, if I just remove the "return" line in the
-> IS_ERR() block (without moving it around), the issue also seems to be fixed.
->
->>
->> Can you provide the relevant parts of the log before the problem occurs?
->
->
-> There is not much unfortunately ; the only relevant log I have is this:
->
-> [   12.246022] mmc2: Timeout waiting for hardware interrupt.
-> [   12.264990] mmc2: Controller never released inhibit bit(s).
->
-> Some hardware interrupt timed out. I don't know much about the MMC
-> subsystem. but could it be because initially the controller is not in a
-> powered-on state, and that return statement causes the function to leave it
-> unpowered?
-
-In a nutshell, the issue here is that the SDHCI spec demands that VMMC
-be supplied by the controller itself with the specific voltage
-configured using the SDHCI_POWER_CONTROL register but almost nobody
-does this.  Many SoCs omit this capability from their controllers and
-instead rely upon external regulators.  In such cases there isn't
-normally any need to update the voltage bits of the power control
-register.  It sounds like you are saying this isn't true for the
-Tegra114.
+Kind regards
+Uffe
