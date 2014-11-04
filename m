@@ -1,67 +1,139 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-s3c: Check if clk_set_rate() succeeds
-Date: Tue, 4 Nov 2014 17:04:23 +0100
-Message-ID: <CAPDyKFpo0sMMuBNdzsOw8-6jxXH3S4mS1S3gcGMAc-m9evpKVQ@mail.gmail.com>
-References: <1415104002-1580-1-git-send-email-broonie@kernel.org>
+From: Ondrej Zary <linux@rainbow-software.org>
+Subject: Re: [PATCH v2] [RESEND] mmc: add Toshiba PCI SD controller driver
+Date: Tue, 4 Nov 2014 22:41:44 +0100
+Message-ID: <201411042241.45125.linux@rainbow-software.org>
+References: <1414965074-4784-1-git-send-email-linux@rainbow-software.org> <CAPDyKFrf+kHbyzyr1O906NRcPh2jr0TGkeoAxpd1aSK8a0bqRA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f48.google.com ([209.85.216.48]:36030 "EHLO
-	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754034AbaKDQEZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 11:04:25 -0500
-Received: by mail-qa0-f48.google.com with SMTP id x12so9868887qac.7
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Nov 2014 08:04:23 -0800 (PST)
-In-Reply-To: <1415104002-1580-1-git-send-email-broonie@kernel.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: Text/Plain;
+  charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrf+kHbyzyr1O906NRcPh2jr0TGkeoAxpd1aSK8a0bqRA@mail.gmail.com>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Kernel development list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>
-Cc: Ben Dooks <ben-linux@fluff.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Mark Brown <broonie@linaro.org>
 
-On 4 November 2014 13:26, Mark Brown <broonie@kernel.org> wrote:
-> From: Mark Brown <broonie@linaro.org>
->
-> It is possible that we may fail to set the clock rate, if we do so then
-> log the failure and don't bother reprogramming the IP.
->
-> Signed-off-by: Mark Brown <broonie@linaro.org>
-> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+On Tuesday 04 November 2014 12:09:44 Ulf Hansson wrote:
+> On 2 November 2014 22:51, Ondrej Zary <linux@rainbow-software.org> wrote:
+> > This patch resurrects an old never-finished driver for Toshiba PCI SD
+> > controllers found in some older Toshiba laptops (such as Portege R100):
+> >
+> > 02:0d.0 System peripheral [0880]: Toshiba America Info Systems SD TypA Controller [1179:0805] (rev 05)
+> >
+> > The code is fixed, cleaned up and successfully tested with SD, SDHC, SDXC and
+> > MMC cards on Portege R100. (MMC cards don't even work in Windows!)
+> > SDIO probably does not work (don't have any SDIO card).
+> >
+> > The hardware is slow (around 2 MB/s - same in Windows) because it does not
+> > support bus mastering (busmaster enable bit cannot be set in PCI control reg).
+> > Also the card clock is limited to 16MHz (33MHz PCI clock divided by 2).
+> >
+> > Signed-off-by: Ondrej Zary <linux@rainbow-software.org>
+> 
+> Hi Ondrej,
+> 
+> Sorry for a very very late reply.
+> 
 
-Thanks! Applied for next.
+...
 
-Kind regards
-Uffe
+> > +static void toshsd_init(struct toshsd_host *host);
+> > +static void toshsd_set_ios_unlocked(struct mmc_host *mmc, struct mmc_ios *ios);
+> 
+> I would implement these functions at the proper place instead of
+> having them defined here.
+> 
+> Moreover I think toshsd_set_ios_unlocked() could be renamed to
+> "__toshsd_set_ios()".
 
-> ---
->  drivers/mmc/host/sdhci-s3c.c | 8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 0ce6eb17deaf..4f7a63213b33 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -300,6 +300,7 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
->         struct device *dev = &ourhost->pdev->dev;
->         unsigned long timeout;
->         u16 clk = 0;
-> +       int ret;
->
->         host->mmc->actual_clock = 0;
->
-> @@ -311,7 +312,12 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
->
->         sdhci_s3c_set_clock(host, clock);
->
-> -       clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock);
-> +       ret = clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock);
-> +       if (ret != 0) {
-> +               dev_err(dev, "%s: failed to set clock rate %uHz\n",
-> +                       mmc_hostname(host->mmc), clock);
-> +               return;
-> +       }
->
->         clk = SDHCI_CLOCK_INT_EN;
->         sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> --
-> 2.1.1
->
+OK, will do.
+ 
+> > +
+> > +static inline u16 toshsd_readw(struct toshsd_host *host, u16 reg)
+> > +{
+> > +       return ioread16(host->ioaddr + reg);
+> > +}
+> > +
+> > +static inline u32 toshsd_readl(struct toshsd_host *host, u16 reg)
+> > +{
+> > +       return ioread32(host->ioaddr + reg);
+> > +}
+> > +
+> > +static inline void toshsd_writew(struct toshsd_host *host, u16 reg, u16 val)
+> > +{
+> > +       iowrite16(val, host->ioaddr + reg);
+> > +}
+> > +
+> > +static inline void toshsd_writel(struct toshsd_host *host, u16 reg, u32 val)
+> > +{
+> > +       iowrite32(val, host->ioaddr + reg);
+> > +}
+> > +
+> > +static inline void toshsd_readl_rep(struct toshsd_host *host, u16 reg,
+> > +                                   void *dst, unsigned long count)
+> > +{
+> > +       ioread32_rep(host->ioaddr + reg, dst, count);
+> > +}
+> > +
+> > +static inline void toshsd_writel_rep(struct toshsd_host *host, u16 reg,
+> > +                                    const void *src, unsigned long count)
+> > +{
+> > +       iowrite32_rep(host->ioaddr + reg, src, count);
+> > +}
+> 
+> To me, all these wrapper functions seems a bit ugly. How about
+> invoking io* functions directly instead?
+
+It's a matter of preference, some drivers use wrappers, some don't.
+I can remove them if they're not recommended in mmc subsystem.
+ 
+...
+
+> > +               tasklet_schedule(&host->data_read_tasklet);
+> 
+> Instead of using a tasklet, I would advise to use a threaded IRQ.
+ 
+Haven't used threaded IRQ yet, will try.
+
+...
+
+> > +#ifdef CONFIG_PM
+> 
+> This should be CONFIG_PM_SLEEP.
+> 
+> > +
+> > +static int toshsd_suspend(struct pci_dev *pdev, pm_message_t state)
+> 
+> This is the legacy version of system PM callbacks. You need to convert
+> to the modern ones instead.
+> 
+> > +{
+> > +       struct toshsd_host *host = pci_get_drvdata(pdev);
+> > +
+> > +       toshsd_powerdown(host);
+> > +
+> > +       pci_save_state(pdev);
+> > +       pci_enable_wake(pdev, pci_choose_state(pdev, state), 0);
+> > +       pci_disable_device(pdev);
+> > +       pci_set_power_state(pdev, pci_choose_state(pdev, state));
+> > +
+> > +       return 0;
+> > +}
+> > +
+> > +static int toshsd_resume(struct pci_dev *pdev)
+> 
+> This is the legacy version of system PM callbacks. You need to convert
+> to the modern ones instead.
+
+I just converted them and found that suspend does not work on current kernels
+when a SD card is inserted (even with unmodified toshsd driver):
+[  188.960862] dpm_run_callback(): mmc_bus_suspend+0x0/0x2c [mmc_core] returns -110
+[  188.960867] PM: Device mmc0:b368 failed to suspend: error -110
+[  188.960869] PM: Some devices failed to suspend, or early wake event detected
+
+Is it a kernel bug or the driver is missing something?
+
+-- 
+Ondrej Zary
