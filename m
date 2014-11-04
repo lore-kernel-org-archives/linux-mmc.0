@@ -1,89 +1,93 @@
-From: Tim Kryger <tim.kryger@gmail.com>
-Subject: Re: Possible regression with commit 52221610d
-Date: Mon, 3 Nov 2014 21:28:55 -0800
-Message-ID: <CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
-References: <54584260.8030602@nvidia.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: host: atmel-mci: Add support for non-removable slots
+Date: Tue, 4 Nov 2014 08:41:51 +0100
+Message-ID: <CAPDyKFpTVedeMOnL1FRYt8orzYy4YinYuosCH5pWT+tCZPN45g@mail.gmail.com>
+References: <CAPDyKFpMGk4M=fjBKufxb9iMbV6FmRTEfE_ptXPmM=CHx3Q7iQ@mail.gmail.com>
+	<1415013179-16823-1-git-send-email-timo.kokkonen@offcode.fi>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f41.google.com ([209.85.218.41]:51275 "EHLO
-	mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750729AbaKDF24 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 00:28:56 -0500
-In-Reply-To: <54584260.8030602@nvidia.com>
+Received: from mail-qa0-f43.google.com ([209.85.216.43]:45827 "EHLO
+	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751303AbaKDHlw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 02:41:52 -0500
+Received: by mail-qa0-f43.google.com with SMTP id j7so9660589qaq.30
+        for <linux-mmc@vger.kernel.org>; Mon, 03 Nov 2014 23:41:52 -0800 (PST)
+In-Reply-To: <1415013179-16823-1-git-send-email-timo.kokkonen@offcode.fi>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexandre Courbot <acourbot@nvidia.com>
-Cc: Sachin Kamat <spk.linux@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
+To: Timo Kokkonen <timo.kokkonen@offcode.fi>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-On Mon, Nov 3, 2014 at 7:05 PM, Alexandre Courbot <acourbot@nvidia.com> wrote:
-> Hi guys,
+On 3 November 2014 12:12, Timo Kokkonen <timo.kokkonen@offcode.fi> wrote:
+> Add support for non-removable slots which have no card detection GPIO
+> and which should not be polled for a card change.
 >
-> On the NVIDIA shield (tegra114-roth) platform, I have noticed that MMC
-> stopped working completely on recent kernels. MMC devices will not show up
-> and the message "mmc1: Controller never released inhibit bit(s)." shows up
-> repeatedly in the console.
->
-> After bisecting I tracked commit 52221610dd84dc3e9196554f0292ca9e8ab3541d
-> ("mmc: sdhci: Improve external VDD regulator support") as the one that
-> introduced this issue, which seems somehow surprising to me since it has
-> been around for a while and nobody else complained about this AFAICT.
+> Signed-off-by: Timo Kokkonen <timo.kokkonen@offcode.fi>
 
-I'm not too familiar with the Nvidia Shield so can you please confirm
-the following?
+Thanks! Applied for next.
 
-The controller in the Tegra114 is SDHCI compliant and as such
-sdhci_tegra_probe calls sdhci_add_host.  External regulators are
-sought in sdhci_add_host with a call to mmc_regulator_get_supply.
-Since no external regulators are specified in tegra114.dtsi or
-tegra114-roth.dts, mmc->supply.vmmc and mmc->supply.vqmmc are set to
--ENODEV.
+Kind regards
+Uffe
 
-> The following diff solves the issue for me, however I don't know whether it
-> also reverts the intended purpose of the initial patch:
+> ---
+>  drivers/mmc/host/atmel-mci.c | 11 +++++++++--
+>  include/linux/atmel-mci.h    |  2 ++
+>  2 files changed, 11 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index ada1a3ea3a87..615701bb8ea3 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1235,13 +1235,6 @@ static void sdhci_set_power(struct sdhci_host *host,
-> unsigned char mode,
->         struct mmc_host *mmc = host->mmc;
->         u8 pwr = 0;
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index 77250d4..4de1a31 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -560,6 +560,9 @@ atmci_of_init(struct platform_device *pdev)
+>                 pdata->slot[slot_id].detect_is_active_high =
+>                         of_property_read_bool(cnp, "cd-inverted");
 >
-> -       if (!IS_ERR(mmc->supply.vmmc)) {
-> -               spin_unlock_irq(&host->lock);
-> -               mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
-> -               spin_lock_irq(&host->lock);
-> -               return;
-> -       }
-> -
->         if (mode != MMC_POWER_OFF) {
->                 switch (1 << vdd) {
->                 case MMC_VDD_165_195:
-> @@ -1300,6 +1293,12 @@ static void sdhci_set_power(struct sdhci_host *host,
-> unsigned char mode,
->                 if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
->                         mdelay(10);
->         }
+> +               pdata->slot[slot_id].non_removable =
+> +                       of_property_read_bool(cnp, "non-removable");
 > +
-> +       if (!IS_ERR(mmc->supply.vmmc)) {
-> +               spin_unlock_irq(&host->lock);
-> +               mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
-> +               spin_lock_irq(&host->lock);
-> +       }
->  }
+>                 pdata->slot[slot_id].wp_pin =
+>                         of_get_named_gpio(cnp, "wp-gpios", 0);
+>         }
+> @@ -2206,8 +2209,12 @@ static int __init atmci_init_slot(struct atmel_mci *host,
+>                 }
+>         }
 >
-> Does this look like the right approach? If not, would you have any
-> suggestion as to how to solve this problem?
-
-The patch you proposed would break Exynos4210 so I don't think it is
-appropriate.
-
-Do you understand why this code block is executed on your hardware?  I
-wouldn't expect it.
-
-Can you provide the relevant parts of the log before the problem occurs?
-
-Thanks,
-Tim Kryger
+> -       if (!gpio_is_valid(slot->detect_pin))
+> -               mmc->caps |= MMC_CAP_NEEDS_POLL;
+> +       if (!gpio_is_valid(slot->detect_pin)) {
+> +               if (slot_data->non_removable)
+> +                       mmc->caps |= MMC_CAP_NONREMOVABLE;
+> +               else
+> +                       mmc->caps |= MMC_CAP_NEEDS_POLL;
+> +       }
+>
+>         if (gpio_is_valid(slot->wp_pin)) {
+>                 if (devm_gpio_request(&host->pdev->dev, slot->wp_pin,
+> diff --git a/include/linux/atmel-mci.h b/include/linux/atmel-mci.h
+> index 91b77f8..9177947 100644
+> --- a/include/linux/atmel-mci.h
+> +++ b/include/linux/atmel-mci.h
+> @@ -11,6 +11,7 @@
+>   * @detect_pin: GPIO pin wired to the card detect switch
+>   * @wp_pin: GPIO pin wired to the write protect sensor
+>   * @detect_is_active_high: The state of the detect pin when it is active
+> + * @non_removable: The slot is not removable, only detect once
+>   *
+>   * If a given slot is not present on the board, @bus_width should be
+>   * set to 0. The other fields are ignored in this case.
+> @@ -26,6 +27,7 @@ struct mci_slot_pdata {
+>         int                     detect_pin;
+>         int                     wp_pin;
+>         bool                    detect_is_active_high;
+> +       bool                    non_removable;
+>  };
+>
+>  /**
+> --
+> 1.9.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
