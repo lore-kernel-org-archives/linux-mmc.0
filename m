@@ -1,96 +1,78 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 04/15] mmc: sdhci: Rename two ADMA-related functions for consistency
-Date: Tue,  4 Nov 2014 12:42:38 +0200
-Message-ID: <1415097769-19032-5-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 15/15] mmc: mmc_test: Extend "Badly aligned" tests for 8-byte alignment
+Date: Tue,  4 Nov 2014 12:42:49 +0200
+Message-ID: <1415097769-19032-16-git-send-email-adrian.hunter@intel.com>
 References: <1415097769-19032-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:9170 "EHLO mga14.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:52220 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752681AbaKDKo1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 4 Nov 2014 05:44:27 -0500
+	id S1753071AbaKDKpO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 4 Nov 2014 05:45:14 -0500
 In-Reply-To: <1415097769-19032-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Rename sdhci_set_adma_desc to sdhci_adma_write_desc and
-sdhci_show_adma_error to sdhci_adma_show_error so that
-all ADMA functions start with sdhci_adma_.
+The "Badly aligned" tests, test reading/writing with alignments
+of 1,2 and 3.  SDHCI now has 64-bit ADMA which has 8-byte
+alignment, so extend the tests to test up to 7.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/sdhci.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+ drivers/mmc/card/mmc_test.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 4436f77..e40414a 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -454,7 +454,7 @@ static void sdhci_kunmap_atomic(void *buffer, unsigned long *flags)
- 	local_irq_restore(*flags);
- }
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index b064343..0a7430f 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -33,6 +33,8 @@
+ #define BUFFER_ORDER		2
+ #define BUFFER_SIZE		(PAGE_SIZE << BUFFER_ORDER)
  
--static void sdhci_set_adma_desc(u8 *desc, u32 addr, int len, unsigned cmd)
-+static void sdhci_adma_write_desc(u8 *desc, u32 addr, int len, unsigned cmd)
- {
- 	__le32 *dataddr = (__le32 __force *)(desc + 4);
- 	__le16 *cmdlen = (__le16 __force *)desc;
-@@ -532,7 +532,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 			}
++#define TEST_ALIGN_END		8
++
+ /*
+  * Limit the test area size to the maximum MMC HC erase group size.  Note that
+  * the maximum SD allocation unit size is just 4MiB.
+@@ -1175,7 +1177,7 @@ static int mmc_test_align_write(struct mmc_test_card *test)
+ 	int ret, i;
+ 	struct scatterlist sg;
  
- 			/* tran, valid */
--			sdhci_set_adma_desc(desc, align_addr, offset, 0x21);
-+			sdhci_adma_write_desc(desc, align_addr, offset, 0x21);
+-	for (i = 1;i < 4;i++) {
++	for (i = 1; i < TEST_ALIGN_END; i++) {
+ 		sg_init_one(&sg, test->buffer + i, 512);
+ 		ret = mmc_test_transfer(test, &sg, 1, 0, 1, 512, 1);
+ 		if (ret)
+@@ -1190,7 +1192,7 @@ static int mmc_test_align_read(struct mmc_test_card *test)
+ 	int ret, i;
+ 	struct scatterlist sg;
  
- 			BUG_ON(offset > 65536);
+-	for (i = 1;i < 4;i++) {
++	for (i = 1; i < TEST_ALIGN_END; i++) {
+ 		sg_init_one(&sg, test->buffer + i, 512);
+ 		ret = mmc_test_transfer(test, &sg, 1, 0, 1, 512, 0);
+ 		if (ret)
+@@ -1217,7 +1219,7 @@ static int mmc_test_align_multi_write(struct mmc_test_card *test)
+ 	if (size < 1024)
+ 		return RESULT_UNSUP_HOST;
  
-@@ -548,7 +548,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 		BUG_ON(len > 65536);
+-	for (i = 1;i < 4;i++) {
++	for (i = 1; i < TEST_ALIGN_END; i++) {
+ 		sg_init_one(&sg, test->buffer + i, size);
+ 		ret = mmc_test_transfer(test, &sg, 1, 0, size/512, 512, 1);
+ 		if (ret)
+@@ -1244,7 +1246,7 @@ static int mmc_test_align_multi_read(struct mmc_test_card *test)
+ 	if (size < 1024)
+ 		return RESULT_UNSUP_HOST;
  
- 		/* tran, valid */
--		sdhci_set_adma_desc(desc, addr, len, 0x21);
-+		sdhci_adma_write_desc(desc, addr, len, 0x21);
- 		desc += 8;
- 
- 		/*
-@@ -572,7 +572,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 		*/
- 
- 		/* nop, end, valid */
--		sdhci_set_adma_desc(desc, 0, 0, 0x3);
-+		sdhci_adma_write_desc(desc, 0, 0, 0x3);
- 	}
- 
- 	/*
-@@ -2291,7 +2291,7 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *mask)
- }
- 
- #ifdef CONFIG_MMC_DEBUG
--static void sdhci_show_adma_error(struct sdhci_host *host)
-+static void sdhci_adma_show_error(struct sdhci_host *host)
- {
- 	const char *name = mmc_hostname(host->mmc);
- 	u8 *desc = host->adma_desc;
-@@ -2316,7 +2316,7 @@ static void sdhci_show_adma_error(struct sdhci_host *host)
- 	}
- }
- #else
--static void sdhci_show_adma_error(struct sdhci_host *host) { }
-+static void sdhci_adma_show_error(struct sdhci_host *host) { }
- #endif
- 
- static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
-@@ -2379,7 +2379,7 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 		host->data->error = -EILSEQ;
- 	else if (intmask & SDHCI_INT_ADMA_ERROR) {
- 		pr_err("%s: ADMA error\n", mmc_hostname(host->mmc));
--		sdhci_show_adma_error(host);
-+		sdhci_adma_show_error(host);
- 		host->data->error = -EIO;
- 		if (host->ops->adma_workaround)
- 			host->ops->adma_workaround(host, intmask);
+-	for (i = 1;i < 4;i++) {
++	for (i = 1; i < TEST_ALIGN_END; i++) {
+ 		sg_init_one(&sg, test->buffer + i, size);
+ 		ret = mmc_test_transfer(test, &sg, 1, 0, size/512, 512, 0);
+ 		if (ret)
 -- 
 1.9.1
 
