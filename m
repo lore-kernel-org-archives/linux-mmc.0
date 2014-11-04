@@ -1,104 +1,50 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH] mmc: sdhci: switch from programmable clock mode to
- divided one if needed
-Date: Tue, 4 Nov 2014 09:06:07 +0100
-Message-ID: <CAPDyKFozT4v4XogoCZ=dbZVgUTzFMb5zKSqjTdQj8mJEErE=TQ@mail.gmail.com>
-References: <1412669495-5629-1-git-send-email-ludovic.desroches@atmel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: dw_mmc: add the message for deprecating supports-highspeed
+Date: Tue, 04 Nov 2014 17:30:55 +0900
+Message-ID: <1415089855-18366-1-git-send-email-jh80.chung@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f41.google.com ([209.85.216.41]:53520 "EHLO
-	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750926AbaKDIGI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 03:06:08 -0500
-Received: by mail-qa0-f41.google.com with SMTP id s7so1197548qap.28
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Nov 2014 00:06:08 -0800 (PST)
-In-Reply-To: <1412669495-5629-1-git-send-email-ludovic.desroches@atmel.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:12833 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750869AbaKDIbI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 03:31:08 -0500
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0NEI0027NABSPY40@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 04 Nov 2014 17:31:04 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Chris Ball <chris@printf.net>, Nicolas Ferre <nicolas.ferre@atmel.com>, Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 7 October 2014 10:11, Ludovic Desroches <ludovic.desroches@atmel.com> wrote:
-> In programmable mode, if the clock frequency is too high, the divider
-> can be too small to meet the clock frequency requirement especially to
-> init the SD card. In this case, switch to the divided clock mode.
->
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> ---
->
-> Hi all,
->
-> I would like to know if this patch can be accepted. Use case, I have a base
-> clock at 12 MHz, M is 40. So in programmable mode, using the greater divider,
-> minimum clock frequency will be higher than 400 KHz so it could cause issues to
-> init the card.
->
-> Thanks for your feedback.
->
-> Ludovic
+Recommend to use "mmc-cap-highspeed" or "sd-cap-highspeed" instead of
+"supports-highspeed".
+Although "supports-highspeed" supports, devloper can use
+"mmc-cap-highspeed" or "sd-cap-highspeed" through this message.
 
-It would be nice if some of the senior sdhci developers could help out
-review patches likes this.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c |    5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-It touches the core of sdhci, thus affecting many of the sdhci drivers.
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index bb46b1b..7075d33 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2434,8 +2434,11 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ 			return ERR_PTR(ret);
+ 	}
+ 
+-	if (of_find_property(np, "supports-highspeed", NULL))
++	if (of_find_property(np, "supports-highspeed", NULL)) {
++		dev_warn(dev, "supports-highspeed is deprecated. "
++				"Use cap-mmc-highspeed or cap-sd-highspeed.\n");
+ 		pdata->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
++	}
+ 
+ 	return pdata;
+ }
+-- 
+1.7.9.5
 
-Anybody?
-
-Kind regards
-Uffe
-
->
->  drivers/mmc/host/sdhci.c | 29 ++++++++++++++++++++---------
->  1 file changed, 20 insertions(+), 9 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index df0e7e1..70d4c18 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1126,6 +1126,7 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->         int real_div = div, clk_mul = 1;
->         u16 clk = 0;
->         unsigned long timeout;
-> +       bool switch_base_clk = false;
->
->         host->mmc->actual_clock = 0;
->
-> @@ -1163,15 +1164,25 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->                                         <= clock)
->                                         break;
->                         }
-> -                       /*
-> -                        * Set Programmable Clock Mode in the Clock
-> -                        * Control register.
-> -                        */
-> -                       clk = SDHCI_PROG_CLOCK_MODE;
-> -                       real_div = div;
-> -                       clk_mul = host->clk_mul;
-> -                       div--;
-> -               } else {
-> +                       if ((host->max_clk * host->clk_mul / div) <= clock) {
-> +                               /*
-> +                                * Set Programmable Clock Mode in the Clock
-> +                                * Control register.
-> +                                */
-> +                               clk = SDHCI_PROG_CLOCK_MODE;
-> +                               real_div = div;
-> +                               clk_mul = host->clk_mul;
-> +                               div--;
-> +                       } else {
-> +                               /*
-> +                                * Divisor can be too small to reach clock
-> +                                * speed requirement. Then use the base clock.
-> +                                */
-> +                               switch_base_clk = true;
-> +                       }
-> +               }
-> +
-> +               if (!host->clk_mul || switch_base_clk) {
->                         /* Version 3.00 divisors must be a multiple of 2. */
->                         if (host->max_clk <= clock)
->                                 div = 1;
-> --
-> 2.0.3
->
