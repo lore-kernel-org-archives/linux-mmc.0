@@ -1,64 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [ulf.hansson-mmc:next 72/74] drivers/mmc/host/atmel-mci.c:2593:
- error: 'atmci_dev_pm_ops' undeclared here (not in a function)
-Date: Wed, 5 Nov 2014 14:00:55 +0100
-Message-ID: <CAPDyKFr-yFHdJ3R3R-i0ZDF_cQbdhNQKpj-qFGo62tg+YOJ-GA@mail.gmail.com>
-References: <201411052016.dObHXcry%fengguang.wu@intel.com>
+Subject: Re: [PATCH] mmc: dw_mmc: add the message for deprecating supports-highspeed
+Date: Wed, 5 Nov 2014 14:06:59 +0100
+Message-ID: <CAPDyKFqjBr-MbZLJrxPbxYcKWyoeZ7-Nf0yRnGxYQ2awL8+mbQ@mail.gmail.com>
+References: <1415089855-18366-1-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f180.google.com ([209.85.216.180]:42925 "EHLO
-	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754066AbaKENA6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 08:00:58 -0500
-Received: by mail-qc0-f180.google.com with SMTP id o8so437229qcw.39
-        for <linux-mmc@vger.kernel.org>; Wed, 05 Nov 2014 05:00:58 -0800 (PST)
-In-Reply-To: <201411052016.dObHXcry%fengguang.wu@intel.com>
+Received: from mail-qc0-f179.google.com ([209.85.216.179]:64993 "EHLO
+	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751198AbaKENHA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 08:07:00 -0500
+Received: by mail-qc0-f179.google.com with SMTP id o8so470668qcw.10
+        for <linux-mmc@vger.kernel.org>; Wed, 05 Nov 2014 05:06:59 -0800 (PST)
+In-Reply-To: <1415089855-18366-1-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wenyou Yang <wenyou.yang@atmel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>
 
-On 5 November 2014 13:16, kbuild test robot <fengguang.wu@intel.com> wrote:
-> tree:   https://git.linaro.org/people/ulf.hansson/mmc next
-> head:   c78dfc314bb79d5a364b6764f07e1e7fd6229391
-> commit: 0ad8e93fc8ad5c815dc3b5a298ce05e2df6da0b8 [72/74] mmc: atmel-mci: add runtime pm support
-> config: avr32-atngw100_mrmt_defconfig (attached as .config)
-> reproduce:
->   wget https://git.kernel.org/cgit/linux/kernel/git/wfg/lkp-tests.git/plain/sbin/make.cross -O ~/bin/make.cross
->   chmod +x ~/bin/make.cross
->   git checkout 0ad8e93fc8ad5c815dc3b5a298ce05e2df6da0b8
->   # save the attached .config to linux build tree
->   make.cross ARCH=avr32
+On 4 November 2014 09:30, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Recommend to use "mmc-cap-highspeed" or "sd-cap-highspeed" instead of
+> "supports-highspeed".
+> Although "supports-highspeed" supports, devloper can use
+> "mmc-cap-highspeed" or "sd-cap-highspeed" through this message.
 >
-> All error/warnings:
->
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Hi Wenyou,
-
-No worries this time. I have updated your patch to the fix the compile error.
-
-I moved the declaration of the "atmci_dev_pm_ops" outside the
-CONFIG_PM. Please go ahead and have a look at my next branch.
+This one has checkpatch warnings. Please send an updated version.
 
 Kind regards
 Uffe
 
->>> drivers/mmc/host/atmel-mci.c:2593: error: 'atmci_dev_pm_ops' undeclared here (not in a function)
->
-> vim +/atmci_dev_pm_ops +2593 drivers/mmc/host/atmel-mci.c
->
->   2587
->   2588  static struct platform_driver atmci_driver = {
->   2589          .remove         = __exit_p(atmci_remove),
->   2590          .driver         = {
->   2591                  .name           = "atmel_mci",
->   2592                  .of_match_table = of_match_ptr(atmci_dt_ids),
->> 2593                  .pm             = &atmci_dev_pm_ops,
->   2594          },
->   2595  };
->   2596
->
 > ---
-> 0-DAY kernel test infrastructure                Open Source Technology Center
-> http://lists.01.org/mailman/listinfo/kbuild                 Intel Corporation
+>  drivers/mmc/host/dw_mmc.c |    5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index bb46b1b..7075d33 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2434,8 +2434,11 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>                         return ERR_PTR(ret);
+>         }
+>
+> -       if (of_find_property(np, "supports-highspeed", NULL))
+> +       if (of_find_property(np, "supports-highspeed", NULL)) {
+> +               dev_warn(dev, "supports-highspeed is deprecated. "
+> +                               "Use cap-mmc-highspeed or cap-sd-highspeed.\n");
+>                 pdata->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+> +       }
+>
+>         return pdata;
+>  }
+> --
+> 1.7.9.5
+>
