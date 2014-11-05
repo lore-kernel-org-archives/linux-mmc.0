@@ -1,55 +1,44 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: [PATCH] mmc: core: fix card detection regression
-Date: Tue, 4 Nov 2014 22:48:45 -0200
-Message-ID: <CAOMZO5CKB4aHTyYCvnT0UZCi4Pe+XyDa2-G1kpzyce1J3y3nfQ@mail.gmail.com>
-References: <1747777414.897866.1414878004147.JavaMail.open-xchange@oxbsltgw09.schlund.de>
-	<1415146961-25993-1-git-send-email-kristina.martsenko@gmail.com>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: [PATCHv2 4/5] mmc: shdci-bcm2835: add verify for 32-bit back-to-back
+ workaround
+Date: Tue, 04 Nov 2014 21:44:49 -0700
+Message-ID: <5459AB41.8080101@wwwdotorg.org>
+References: <Scott Branden <sbranden@broadcom.com> <1414651017-3545-1-git-send-email-sbranden@broadcom.com> <1414651017-3545-5-git-send-email-sbranden@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <1415146961-25993-1-git-send-email-kristina.martsenko@gmail.com>
-Sender: linux-gpio-owner@vger.kernel.org
-To: =?UTF-8?Q?Kristina_Mart=C5=A1enko?= <kristina.martsenko@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Linus Walleij <linus.walleij@linaro.org>, Stefan Wahren <stefan.wahren@i2se.com>, Michael Heimpold <mhei@heimpold.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-kernel <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:48686 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751129AbaKEEov (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Nov 2014 23:44:51 -0500
+In-Reply-To: <1414651017-3545-5-git-send-email-sbranden@broadcom.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Scott Branden <sbranden@broadcom.com>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Peter Griffin <peter.griffin@linaro.org>, Chris Ball <chris@printf.net>, Piotr Krol <pietrushnic@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Joe Perches <joe@perches.com>, linux-rpi-kernel@lists.infradead.org, Ray Jui <rjui@broadcom.com>, bcm-kernel-feedback-list@broadcom.com
 
-Hi Kristina,
+On 10/30/2014 12:36 AM, Scott Branden wrote:
+> Add a verify option to driver to print out an error message if a
+> potential back to back write could cause a clock domain issue.
 
-On Tue, Nov 4, 2014 at 10:22 PM, Kristina Mart=C5=A1enko
-<kristina.martsenko@gmail.com> wrote:
-> Since commit 89168b489915 ("mmc: core: restore detect line inversion
-> semantics"), the SD card on i.MX28 (and possibly other) devices isn't
-> detected and booting stops at:
->
-> [    4.120617] Waiting for root device /dev/mmcblk0p3...
->
-> This is caused by the MMC_CAP2_CD_ACTIVE_HIGH flag being set incorrec=
-tly
-> when the host controller doesn't use a GPIO for card detection (but
-> instead uses a dedicated pin). In this case mmc_gpiod_request_cd() wi=
-ll
-> return before assigning to the gpio_invert variable, leaving the
-> variable uninitialized. The variable then gets used to set the flag.
-> This patch fixes the issue by making sure gpio_invert is set to false
-> when a GPIO isn't used. After this patch, i.MX28 boots fine.
->
-> The MMC_CAP2_RO_ACTIVE_HIGH (write protect) flag is also set incorrec=
-tly
-> for the exact same reason (it uses the same uninitialized variable), =
-so
-> this patch fixes that too.
->
-> Fixes: 89168b489915 ("mmc: core: restore detect line inversion semant=
-ics")
-> Reported-by: Stefan Wahren <stefan.wahren@i2se.com>
-> Signed-off-by: Kristina Mart=C5=A1enko <kristina.martsenko@gmail.com>
+> diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
 
-This fixes mx28 card detection, thanks!
+>  static inline void bcm2835_sdhci_writel(struct sdhci_host *host,
+>  						u32 val, int reg)
+>  {
+> +#ifdef CONFIG_MMC_SDHCI_BCM2835_VERIFY_WORKAROUND
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct bcm2835_sdhci_host *bcm2835_host = pltfm_host->priv;
+> +
+> +	if (bcm2835_host->previous_reg == reg) {
+> +		if ((reg != SDHCI_HOST_CONTROL)
+> +			&& (reg != SDHCI_CLOCK_CONTROL)) {
+> +			dev_err(mmc_dev(host->mmc),
+> +			"back-to-back write to 0x%x\n", reg);
 
-Tested-by: Fabio Estevam <fabio.estevam@freescale.com>
---
-To unsubscribe from this list: send the line "unsubscribe linux-gpio" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This fires a *ton* on reg 0x20 and 0x30 on my rev 2 model B with the
+patches applied on top of next-20141031. Without the patches applied,
+everything works fine. As far as I can tell, SD card accesses no longer
+work (or perhaps there's just so much log spew over serial that it takes
+more than 1.5 minutes to get to the login prompt).
