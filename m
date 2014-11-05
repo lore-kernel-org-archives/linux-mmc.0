@@ -1,26 +1,158 @@
-From: Meng Wang <meng@tupleapes.com>
-Subject: userspace interface of emmc reliable write
-Date: Wed, 5 Nov 2014 17:51:21 -0500
-Message-ID: <CAP3VVE3ee_uuPV2gGCsafXZ-w0opn0Zt04MVjvNT5M5K8eLkhw@mail.gmail.com>
+From: Ondrej Zary <linux@rainbow-software.org>
+Subject: Re: [PATCH v2] [RESEND] mmc: add Toshiba PCI SD controller driver
+Date: Thu, 6 Nov 2014 00:02:24 +0100
+Message-ID: <201411060002.25257.linux@rainbow-software.org>
+References: <1414965074-4784-1-git-send-email-linux@rainbow-software.org> <CAPDyKFrf+kHbyzyr1O906NRcPh2jr0TGkeoAxpd1aSK8a0bqRA@mail.gmail.com> <201411042241.45125.linux@rainbow-software.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f175.google.com ([209.85.214.175]:56388 "EHLO
-	mail-ob0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750879AbaKEWvV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 17:51:21 -0500
-Received: by mail-ob0-f175.google.com with SMTP id gq1so1427359obb.34
-        for <linux-mmc@vger.kernel.org>; Wed, 05 Nov 2014 14:51:21 -0800 (PST)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: Text/Plain;
+  charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <201411042241.45125.linux@rainbow-software.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Kernel development list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-Hello everyone,
-I have an arndale board which equips with KLM4G1FE3B-B001 emmc chip.
-According to the datasheet, it's compatible with emmc 4.1 spec and
-support reliable write. I want to measure the reliable write
-performance but I didn't find the user space interface. Could anyone
-give me some suggestions? Thanks in advance.
+On Tuesday 04 November 2014 22:41:44 Ondrej Zary wrote:
+> On Tuesday 04 November 2014 12:09:44 Ulf Hansson wrote:
+> > On 2 November 2014 22:51, Ondrej Zary <linux@rainbow-software.org> wrote:
+> > > This patch resurrects an old never-finished driver for Toshiba PCI SD
+> > > controllers found in some older Toshiba laptops (such as Portege R100):
+> > >
+> > > 02:0d.0 System peripheral [0880]: Toshiba America Info Systems SD TypA Controller [1179:0805] (rev 05)
+> > >
+> > > The code is fixed, cleaned up and successfully tested with SD, SDHC, SDXC and
+> > > MMC cards on Portege R100. (MMC cards don't even work in Windows!)
+> > > SDIO probably does not work (don't have any SDIO card).
+> > >
+> > > The hardware is slow (around 2 MB/s - same in Windows) because it does not
+> > > support bus mastering (busmaster enable bit cannot be set in PCI control reg).
+> > > Also the card clock is limited to 16MHz (33MHz PCI clock divided by 2).
+> > >
+> > > Signed-off-by: Ondrej Zary <linux@rainbow-software.org>
+> > 
+> > Hi Ondrej,
+> > 
+> > Sorry for a very very late reply.
+> > 
+> 
+> ...
+> 
+> > > +static void toshsd_init(struct toshsd_host *host);
+> > > +static void toshsd_set_ios_unlocked(struct mmc_host *mmc, struct mmc_ios *ios);
+> > 
+> > I would implement these functions at the proper place instead of
+> > having them defined here.
+> > 
+> > Moreover I think toshsd_set_ios_unlocked() could be renamed to
+> > "__toshsd_set_ios()".
+> 
+> OK, will do.
+>  
+> > > +
+> > > +static inline u16 toshsd_readw(struct toshsd_host *host, u16 reg)
+> > > +{
+> > > +       return ioread16(host->ioaddr + reg);
+> > > +}
+> > > +
+> > > +static inline u32 toshsd_readl(struct toshsd_host *host, u16 reg)
+> > > +{
+> > > +       return ioread32(host->ioaddr + reg);
+> > > +}
+> > > +
+> > > +static inline void toshsd_writew(struct toshsd_host *host, u16 reg, u16 val)
+> > > +{
+> > > +       iowrite16(val, host->ioaddr + reg);
+> > > +}
+> > > +
+> > > +static inline void toshsd_writel(struct toshsd_host *host, u16 reg, u32 val)
+> > > +{
+> > > +       iowrite32(val, host->ioaddr + reg);
+> > > +}
+> > > +
+> > > +static inline void toshsd_readl_rep(struct toshsd_host *host, u16 reg,
+> > > +                                   void *dst, unsigned long count)
+> > > +{
+> > > +       ioread32_rep(host->ioaddr + reg, dst, count);
+> > > +}
+> > > +
+> > > +static inline void toshsd_writel_rep(struct toshsd_host *host, u16 reg,
+> > > +                                    const void *src, unsigned long count)
+> > > +{
+> > > +       iowrite32_rep(host->ioaddr + reg, src, count);
+> > > +}
+> > 
+> > To me, all these wrapper functions seems a bit ugly. How about
+> > invoking io* functions directly instead?
+> 
+> It's a matter of preference, some drivers use wrappers, some don't.
+> I can remove them if they're not recommended in mmc subsystem.
+>  
+> ...
+> 
+> > > +               tasklet_schedule(&host->data_read_tasklet);
+> > 
+> > Instead of using a tasklet, I would advise to use a threaded IRQ.
+>  
+> Haven't used threaded IRQ yet, will try.
+> 
+> ...
+> 
+> > > +#ifdef CONFIG_PM
+> > 
+> > This should be CONFIG_PM_SLEEP.
+> > 
+> > > +
+> > > +static int toshsd_suspend(struct pci_dev *pdev, pm_message_t state)
+> > 
+> > This is the legacy version of system PM callbacks. You need to convert
+> > to the modern ones instead.
+> > 
+> > > +{
+> > > +       struct toshsd_host *host = pci_get_drvdata(pdev);
+> > > +
+> > > +       toshsd_powerdown(host);
+> > > +
+> > > +       pci_save_state(pdev);
+> > > +       pci_enable_wake(pdev, pci_choose_state(pdev, state), 0);
+> > > +       pci_disable_device(pdev);
+> > > +       pci_set_power_state(pdev, pci_choose_state(pdev, state));
+> > > +
+> > > +       return 0;
+> > > +}
+> > > +
+> > > +static int toshsd_resume(struct pci_dev *pdev)
+> > 
+> > This is the legacy version of system PM callbacks. You need to convert
+> > to the modern ones instead.
+> 
+> I just converted them and found that suspend does not work on current kernels
+> when a SD card is inserted (even with unmodified toshsd driver):
+> [  188.960862] dpm_run_callback(): mmc_bus_suspend+0x0/0x2c [mmc_core] returns -110
+> [  188.960867] PM: Device mmc0:b368 failed to suspend: error -110
+> [  188.960869] PM: Some devices failed to suspend, or early wake event detected
+> 
+> Is it a kernel bug or the driver is missing something?
+> 
 
-Best Regards,
-WM
+The same kernel with sdhci-pci works fine (on another HW) so the problem is
+limited only to toshsd...
+Seems that the MMC core is trying to do something with the card and it fails
+with timeout:
+[  885.750001] PM: Entering mem sleep
+[  885.750023] Suspending console(s) (use no_console_suspend to debug)
+[  885.750281] Command opcode: 7
+[  885.750432] timeout!!!!!
+[  885.750453] Command opcode: 7
+[  885.750597] timeout!!!!!
+[  885.750615] Command opcode: 7
+[  885.750758] timeout!!!!!
+[  885.750776] Command opcode: 7
+[  885.750920] timeout!!!!!
+[  885.750956] dpm_run_callback(): mmc_bus_suspend+0x0/0x2c [mmc_core] returns -110
+[  885.750961] PM: Device mmc0:0007 failed to suspend: error -110
+
+-- 
+Ondrej Zary
