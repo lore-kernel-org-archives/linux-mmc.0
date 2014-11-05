@@ -1,68 +1,83 @@
-From: Vincent Wan <vincent.wan@amd.com>
-Subject: [PATCH v3 2/3] mmc:sdhci-pci: enable the clear transfer mode register quirk for AMD sdhci
-Date: Wed, 5 Nov 2014 14:09:14 +0800
-Message-ID: <1415167754-5801-1-git-send-email-vincent.wan@amd.com>
+From: Scott Branden <sbranden@broadcom.com>
+Subject: Re: [PATCHv2 3/5] mmc: shdci-bcm2835: add efficient back-to-back
+ write workaround
+Date: Tue, 4 Nov 2014 22:55:04 -0800
+Message-ID: <5459C9C8.9070800@broadcom.com>
+References: <Scott Branden <sbranden@broadcom.com> <1414651017-3545-1-git-send-email-sbranden@broadcom.com> <1414651017-3545-4-git-send-email-sbranden@broadcom.com> <5459AE2C.2050401@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Arindam Nath <arindam.nath@amd.com>, Huang Rui <ray.huang@amd.com>, Wan Zongshun <mcuos.com@gmail.com>, Vincent Wan <vincent.wan@amd.com>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:8137 "EHLO
+	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750861AbaKEGzJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 01:55:09 -0500
+In-Reply-To: <5459AE2C.2050401@wwwdotorg.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stephen Warren <swarren@wwwdotorg.org>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Peter Griffin <peter.griffin@linaro.org>, Chris Ball <chris@printf.net>, Piotr Krol <pietrushnic@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Joe Perches <joe@perches.com>, linux-rpi-kernel@lists.infradead.org, Ray Jui <rjui@broadcom.com>, bcm-kernel-feedback-list@broadcom.com
 
-This patch is to enable the quirk for AMD sdhci requiring transfer
-mode register need to be cleared for commands without data
+On 14-11-04 08:57 PM, Stephen Warren wrote:
+> On 10/30/2014 12:36 AM, Scott Branden wrote:
+>> The bcm2835 has clock domain issues when back to back writes to certain
+>> registers are written.  The existing driver works around this issue with
+>> udelay.  A more efficient method is to store the 8 and 16 bit writes
+>> to the registers affected and then write them as 32 bits at the appropriate
+>> time.
+>
+>> diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
+>
+>>   static void bcm2835_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
+>>   {
+>>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> -	struct bcm2835_sdhci *bcm2835_host = pltfm_host->priv;
+>> -	u32 oldval = (reg == SDHCI_COMMAND) ? bcm2835_host->shadow :
+>> -		bcm2835_sdhci_readl(host, reg & ~3);
+>> +	struct bcm2835_sdhci_host *bcm2835_host = pltfm_host->priv;
+>
+> Is that type change for bcm2835_host really correct?
+Yes - at the top of the patch the structure has been expanded and named 
+appropriately.
 
-Signed-off-by: Vincent Wan <vincent.wan@amd.com>
-Signed-off-by: Wan Zongshun <mcuos.com@gmail.com>
----
- drivers/mmc/host/sdhci-pci.c | 27 ++++++++++++++++++++++++++-
- 1 file changed, 26 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index c25639b..5a77f18 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -645,6 +645,23 @@ static const struct sdhci_pci_fixes sdhci_rtsx = {
- 	.probe_slot	= rtsx_probe_slot,
- };
- 
-+static int amd_probe(struct sdhci_pci_chip *chip)
-+{
-+	struct pci_dev	*smbus_dev;
-+
-+	smbus_dev = pci_get_device(PCI_VENDOR_ID_AMD,
-+			PCI_DEVICE_ID_AMD_HUDSON2_SMBUS, NULL);
-+
-+	if (smbus_dev && (smbus_dev->revision < 0x51))
-+		chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
-+
-+	return 0;
-+}
-+
-+static const struct sdhci_pci_fixes sdhci_amd = {
-+	.probe		= amd_probe,
-+};
-+
- static const struct pci_device_id pci_ids[] = {
- 	{
- 		.vendor		= PCI_VENDOR_ID_RICOH,
-@@ -1044,7 +1061,15 @@ static const struct pci_device_id pci_ids[] = {
- 		.subdevice	= PCI_ANY_ID,
- 		.driver_data	= (kernel_ulong_t)&sdhci_o2,
- 	},
--
-+	{
-+		.vendor		= PCI_VENDOR_ID_AMD,
-+		.device		= PCI_ANY_ID,
-+		.class		= PCI_CLASS_SYSTEM_SDHCI << 8,
-+		.class_mask	= 0xFFFF00,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_amd,
-+	},
- 	{	/* Generic SD host controller */
- 		PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
- 	},
--- 
-1.8.1.2
+-struct bcm2835_sdhci {
+-	u32 shadow;
++struct bcm2835_sdhci_host {
++	u32 shadow_cmd;
++	u32 shadow_blk;
+  };
+>
+>> +	} else {
+>> +		/* Read reg, all other registers are not shadowed */
+>> +		oldval = readl(host->ioaddr + (reg & ~3));
+>
+> Is there any reason to use readl() directly here rather than calling
+> bcm2835_readl()? ...
+Yes, bcm2835_readl does not need to be called in read-modify-write and 
+shadow register situations and just adds overhead.  All that needs to be 
+called is readl.  bcm2835_readl has some existing ugly code in it to 
+modify the capabilities register on a read function.  This info never 
+needs to be for write as you can't overwrite the capabilities register. 
+  I hope to get rid of the capabilities hack in a future patch as this 
+should never have been acceptable in upstreamed code to begin with.  The 
+capabilities override should have been passed in through a device tree 
+entry.
+>
+>>   static void bcm2835_sdhci_writeb(struct sdhci_host *host, u8 val, int reg)
+>>   {
+>> -	u32 oldval = bcm2835_sdhci_readl(host, reg & ~3);
+>> +	u32 oldval = readl(host->ioaddr + (reg & ~3));
+>
+> ... and here in particular, since this seems like an unrelated change?
+Same situation with bcm2835_readl above.  No need to call in 
+read-modify-write situations.
+>
+>>   static int bcm2835_sdhci_probe(struct platform_device *pdev)
+>>   {
+>>   	struct sdhci_host *host;
+>> -	struct bcm2835_sdhci *bcm2835_host;
+>> +	struct bcm2835_sdhci_host *bcm2835_host;
+>
+> Is that type change for bcm2835_host really correct?
+>
+yes - structure renamed above
