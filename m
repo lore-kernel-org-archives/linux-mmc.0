@@ -1,45 +1,68 @@
 From: Vincent Wan <vincent.wan@amd.com>
-Subject: [PATCH v3 3/3] mmc:sdhci-pci: enable sdhci doesn't support hs200 quirk for AMD sdhci
-Date: Wed, 5 Nov 2014 14:09:28 +0800
-Message-ID: <1415167768-5839-1-git-send-email-vincent.wan@amd.com>
+Subject: [PATCH v3 2/3] mmc:sdhci-pci: enable the clear transfer mode register quirk for AMD sdhci
+Date: Wed, 5 Nov 2014 14:09:14 +0800
+Message-ID: <1415167754-5801-1-git-send-email-vincent.wan@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0131.outbound.protection.outlook.com ([157.56.111.131]:28919
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751369AbaKEGJ6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 5 Nov 2014 01:09:58 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Arindam Nath <arindam.nath@amd.com>, Huang Rui <ray.huang@amd.com>, Wan Zongshun <mcuos.com@gmail.com>, Vincent Wan <vincent.wan@amd.com>
+List-Id: linux-mmc@vger.kernel.org
 
-AMD SD controller supports the SDR104 mode, but caps2 can not
-be promoted to support hs200 for eMMC.
+This patch is to enable the quirk for AMD sdhci requiring transfer
+mode register need to be cleared for commands without data
 
 Signed-off-by: Vincent Wan <vincent.wan@amd.com>
 Signed-off-by: Wan Zongshun <mcuos.com@gmail.com>
 ---
- drivers/mmc/host/sdhci-pci.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-pci.c | 27 ++++++++++++++++++++++++++-
+ 1 file changed, 26 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 5a77f18..c1ecd20 100644
+index c25639b..5a77f18 100644
 --- a/drivers/mmc/host/sdhci-pci.c
 +++ b/drivers/mmc/host/sdhci-pci.c
-@@ -652,8 +652,10 @@ static int amd_probe(struct sdhci_pci_chip *chip)
- 	smbus_dev = pci_get_device(PCI_VENDOR_ID_AMD,
- 			PCI_DEVICE_ID_AMD_HUDSON2_SMBUS, NULL);
+@@ -645,6 +645,23 @@ static const struct sdhci_pci_fixes sdhci_rtsx = {
+ 	.probe_slot	= rtsx_probe_slot,
+ };
  
--	if (smbus_dev && (smbus_dev->revision < 0x51))
-+	if (smbus_dev && (smbus_dev->revision < 0x51)) {
- 		chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
-+		chip->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
-+	}
- 
- 	return 0;
- }
++static int amd_probe(struct sdhci_pci_chip *chip)
++{
++	struct pci_dev	*smbus_dev;
++
++	smbus_dev = pci_get_device(PCI_VENDOR_ID_AMD,
++			PCI_DEVICE_ID_AMD_HUDSON2_SMBUS, NULL);
++
++	if (smbus_dev && (smbus_dev->revision < 0x51))
++		chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
++
++	return 0;
++}
++
++static const struct sdhci_pci_fixes sdhci_amd = {
++	.probe		= amd_probe,
++};
++
+ static const struct pci_device_id pci_ids[] = {
+ 	{
+ 		.vendor		= PCI_VENDOR_ID_RICOH,
+@@ -1044,7 +1061,15 @@ static const struct pci_device_id pci_ids[] = {
+ 		.subdevice	= PCI_ANY_ID,
+ 		.driver_data	= (kernel_ulong_t)&sdhci_o2,
+ 	},
+-
++	{
++		.vendor		= PCI_VENDOR_ID_AMD,
++		.device		= PCI_ANY_ID,
++		.class		= PCI_CLASS_SYSTEM_SDHCI << 8,
++		.class_mask	= 0xFFFF00,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_amd,
++	},
+ 	{	/* Generic SD host controller */
+ 		PCI_DEVICE_CLASS((PCI_CLASS_SYSTEM_SDHCI << 8), 0xFFFF00)
+ 	},
 -- 
 1.8.1.2
-
