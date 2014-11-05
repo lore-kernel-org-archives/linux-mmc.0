@@ -1,108 +1,49 @@
-From: Alexandre Courbot <acourbot@nvidia.com>
-Subject: Re: Possible regression with commit 52221610d
-Date: Wed, 5 Nov 2014 17:10:42 +0900
-Message-ID: <5459DB82.9080100@nvidia.com>
-References: <54584260.8030602@nvidia.com>	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>	<545895B2.2000101@nvidia.com> <CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
+From: Mickael Legrand <mle@netgem.com>
+Subject: Re: [PATCH 2/2] mmc-utils: add support to create gp partition
+Date: Wed, 5 Nov 2014 09:24:17 +0000 (UTC)
+Message-ID: <loom.20141105T102237-925@post.gmane.org>
+References: <1398336472-16679-1-git-send-email-balajitk@ti.com> <1398336472-16679-3-git-send-email-balajitk@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate16.nvidia.com ([216.228.121.65]:15801 "EHLO
-	hqemgate16.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751403AbaKEILH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 03:11:07 -0500
-In-Reply-To: <CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
+Received: from plane.gmane.org ([80.91.229.3]:49996 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751241AbaKEJaJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 5 Nov 2014 04:30:09 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1Xlwuj-0007Mb-7U
+	for linux-mmc@vger.kernel.org; Wed, 05 Nov 2014 10:30:05 +0100
+Received: from gw.netgem.com ([195.68.2.34])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Wed, 05 Nov 2014 10:30:05 +0100
+Received: from mle by gw.netgem.com with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Wed, 05 Nov 2014 10:30:05 +0100
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Kryger <tim.kryger@gmail.com>
-Cc: Sachin Kamat <spk.linux@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
+To: linux-mmc@vger.kernel.org
 
-On 11/05/2014 12:31 AM, Tim Kryger wrote:
-> On Tue, Nov 4, 2014 at 1:00 AM, Alexandre Courbot <acourbot@nvidia.com> wrote:
->> Hi Tim, thanks for your reply!
->>
->> On 11/04/2014 02:28 PM, Tim Kryger wrote:
->>>
->>> On Mon, Nov 3, 2014 at 7:05 PM, Alexandre Courbot <acourbot@nvidia.com>
->>> wrote:
->>>>
->>>> Hi guys,
->>>>
->>>> On the NVIDIA shield (tegra114-roth) platform, I have noticed that MMC
->>>> stopped working completely on recent kernels. MMC devices will not show
->>>> up
->>>> and the message "mmc1: Controller never released inhibit bit(s)." shows
->>>> up
->>>> repeatedly in the console.
->>>>
->>>> After bisecting I tracked commit 52221610dd84dc3e9196554f0292ca9e8ab3541d
->>>> ("mmc: sdhci: Improve external VDD regulator support") as the one that
->>>> introduced this issue, which seems somehow surprising to me since it has
->>>> been around for a while and nobody else complained about this AFAICT.
->>>
->>>
->>> I'm not too familiar with the Nvidia Shield so can you please confirm
->>> the following?
->>>
->>> The controller in the Tegra114 is SDHCI compliant and as such
->>> sdhci_tegra_probe calls sdhci_add_host.  External regulators are
->>> sought in sdhci_add_host with a call to mmc_regulator_get_supply.
->>
->>
->> This is correct.
->>
->>> Since no external regulators are specified in tegra114.dtsi or
->>> tegra114-roth.dts, mmc->supply.vmmc and mmc->supply.vqmmc are set to
->>> -ENODEV.
->>
->>
->> Actually 2 of the MMC nodes in tegra114-roth.dts (for SD card and eMMC) have
->> a vmmc-supply property, so for two of them at least mmc->supply.vmmc is a
->> valid pointer.
->>
->
-> I must have been looking at an old version of the file.  Thanks for
-> clearing this up.
->
->> As explained above, vmmc is a valid pointer for 2 instances of the MMC
->> controller. Interestingly, if I just remove the "return" line in the
->> IS_ERR() block (without moving it around), the issue also seems to be fixed.
->>
->>>
->>> Can you provide the relevant parts of the log before the problem occurs?
->>
->>
->> There is not much unfortunately ; the only relevant log I have is this:
->>
->> [   12.246022] mmc2: Timeout waiting for hardware interrupt.
->> [   12.264990] mmc2: Controller never released inhibit bit(s).
->>
->> Some hardware interrupt timed out. I don't know much about the MMC
->> subsystem. but could it be because initially the controller is not in a
->> powered-on state, and that return statement causes the function to leave it
->> unpowered?
->
-> In a nutshell, the issue here is that the SDHCI spec demands that VMMC
-> be supplied by the controller itself with the specific voltage
-> configured using the SDHCI_POWER_CONTROL register but almost nobody
-> does this.  Many SoCs omit this capability from their controllers and
-> instead rely upon external regulators.  In such cases there isn't
-> normally any need to update the voltage bits of the power control
-> register.  It sounds like you are saying this isn't true for the
-> Tegra114.
+Hi,
 
-Thanks for your explanation, it makes sense now.
+can I suggest to you this little fix:
+--- mmc-utils.ref/mmc_cmds.c	2014-11-05 09:38:49.567266375 +0100
++++ mmc-utils/mmc_cmds.c	2014-11-05 10:15:00.002010783 +0100
+@@ -618,7 +618,7 @@
+ 	ext_attr =3D strtol(argv[5], NULL, 10);
+ 	device =3D argv[6];
+=20
+-	if (partition < 0 || partition > 4) {
++	if (partition < 1 || partition > 4) {
+ 		 printf("Invalid gp parition number valid range [1-4]\n");
+ 		 exit(1);
+ 	}
 
-Looking at other Tegra boards .dts I noticed that SHIELD is the only one 
-using a vmmc-supply. Maybe this is the part that is wrong? I wrote this 
-DTS and cannot exclude I misread the schematics. Maybe that regulator is 
-used for some other (still sdmmc-related) purpose but the actual power 
-provider is the controller itself.
+regards,
+Micka=C3=ABl
 
-If you can confirm that the driver is performing as it should, I will 
-look in that direction and revise my DTS.
 
-Thanks!
-Alex.
 
 
