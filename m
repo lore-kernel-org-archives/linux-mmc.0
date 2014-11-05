@@ -1,76 +1,131 @@
-From: Johan Rudholm <johan.rudholm@axis.com>
-Subject: Re: [PATCH v2 3/4] mmc: core: turn hw_reset into a bus_ops
-Date: Wed, 5 Nov 2014 15:40:51 +0100
-Message-ID: <CA+20K0Czsb6PkqiicvxLN_UVe90u0-VOiOMw_n_xWkMQQg6_vg@mail.gmail.com>
-References: <1415113626-30187-1-git-send-email-johanru@axis.com>
-	<1415113626-30187-4-git-send-email-johanru@axis.com>
-	<545A13A7.1040301@intel.com>
+From: Tim Kryger <tim.kryger@gmail.com>
+Subject: Re: Possible regression with commit 52221610d
+Date: Wed, 5 Nov 2014 07:27:49 -0800
+Message-ID: <CAD7vxxJrsp096TXorWArg9FfpjmzM7+GtfSmzG1hqTA5MrzF3w@mail.gmail.com>
+References: <54584260.8030602@nvidia.com>
+	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
+	<545895B2.2000101@nvidia.com>
+	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
+	<5459DB82.9080100@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bastet.se.axis.com ([195.60.68.11]:53611 "EHLO
-	bastet.se.axis.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754112AbaKEOlA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 09:41:00 -0500
-Received: from localhost (localhost [127.0.0.1])
-	by bastet.se.axis.com (Postfix) with ESMTP id EF745180E4
-	for <linux-mmc@vger.kernel.org>; Wed,  5 Nov 2014 15:40:58 +0100 (CET)
-Received: from bastet.se.axis.com ([IPv6:::ffff:127.0.0.1])
-	by localhost (bastet.se.axis.com [::ffff:127.0.0.1]) (amavisd-new, port 10024)
-	with LMTP id zbGvc6ROUCZG for <linux-mmc@vger.kernel.org>;
-	Wed,  5 Nov 2014 15:40:54 +0100 (CET)
-Received: from boulder.se.axis.com (boulder.se.axis.com [10.0.2.104])
-	by bastet.se.axis.com (Postfix) with ESMTP id 0FA37180E0
-	for <linux-mmc@vger.kernel.org>; Wed,  5 Nov 2014 15:40:54 +0100 (CET)
-Received: from boulder.se.axis.com (localhost [127.0.0.1])
-	by postfix.imss71 (Postfix) with ESMTP id ED1A4AAD
-	for <linux-mmc@vger.kernel.org>; Wed,  5 Nov 2014 15:40:53 +0100 (CET)
-Received: from seth.se.axis.com (seth.se.axis.com [10.0.2.172])
-	by boulder.se.axis.com (Postfix) with ESMTP id DD4401205
-	for <linux-mmc@vger.kernel.org>; Wed,  5 Nov 2014 15:40:53 +0100 (CET)
-Received: from xmail2.se.axis.com (xmail2.se.axis.com [10.0.5.74])
-	by seth.se.axis.com (Postfix) with ESMTP id DA1D93E0DF
-	for <linux-mmc@vger.kernel.org>; Wed,  5 Nov 2014 15:40:53 +0100 (CET)
-Received: by mail-qc0-f176.google.com with SMTP id x3so622403qcv.35        for
- <linux-mmc@vger.kernel.org>; Wed, 05 Nov 2014 06:40:52 -0800 (PST)
-In-Reply-To: <545A13A7.1040301@intel.com>
+Received: from mail-oi0-f52.google.com ([209.85.218.52]:62733 "EHLO
+	mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753644AbaKEP1u (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 10:27:50 -0500
+In-Reply-To: <5459DB82.9080100@nvidia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Johan Rudholm <johanru@axis.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>
+To: Alexandre Courbot <acourbot@nvidia.com>
+Cc: Sachin Kamat <spk.linux@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
 
-Hi Adrian,
-
-2014-11-05 13:10 GMT+01:00 Adrian Hunter <adrian.hunter@intel.com>:
-> On 04/11/14 17:07, Johan Rudholm wrote:
->> Move the (e)MMC specific hw_reset code from core.c into mmc.c and call
->> it from the new bus_ops member hw_reset. This also lets us add code
->> for reseting SD cards as well.
+On Wed, Nov 5, 2014 at 12:10 AM, Alexandre Courbot <acourbot@nvidia.com> wrote:
+> On 11/05/2014 12:31 AM, Tim Kryger wrote:
 >>
->> Signed-off-by: Johan Rudholm <johanru@axis.com>
->> ---
->>  drivers/mmc/card/mmc_test.c |    3 --
->>  drivers/mmc/core/core.c     |   48 ++++++++----------------------------------
->>  drivers/mmc/core/core.h     |    4 +++
->>  drivers/mmc/core/mmc.c      |   37 +++++++++++++++++++++++++++++++++
->>  include/linux/mmc/core.h    |    1 -
->>  5 files changed, 50 insertions(+), 43 deletions(-)
+>> On Tue, Nov 4, 2014 at 1:00 AM, Alexandre Courbot <acourbot@nvidia.com>
+>> wrote:
+>>>
+>>> Hi Tim, thanks for your reply!
+>>>
+>>> On 11/04/2014 02:28 PM, Tim Kryger wrote:
+>>>>
+>>>>
+>>>> On Mon, Nov 3, 2014 at 7:05 PM, Alexandre Courbot <acourbot@nvidia.com>
+>>>> wrote:
+>>>>>
+>>>>>
+>>>>> Hi guys,
+>>>>>
+>>>>> On the NVIDIA shield (tegra114-roth) platform, I have noticed that MMC
+>>>>> stopped working completely on recent kernels. MMC devices will not show
+>>>>> up
+>>>>> and the message "mmc1: Controller never released inhibit bit(s)." shows
+>>>>> up
+>>>>> repeatedly in the console.
+>>>>>
+>>>>> After bisecting I tracked commit
+>>>>> 52221610dd84dc3e9196554f0292ca9e8ab3541d
+>>>>> ("mmc: sdhci: Improve external VDD regulator support") as the one that
+>>>>> introduced this issue, which seems somehow surprising to me since it
+>>>>> has
+>>>>> been around for a while and nobody else complained about this AFAICT.
+>>>>
+>>>>
+>>>>
+>>>> I'm not too familiar with the Nvidia Shield so can you please confirm
+>>>> the following?
+>>>>
+>>>> The controller in the Tegra114 is SDHCI compliant and as such
+>>>> sdhci_tegra_probe calls sdhci_add_host.  External regulators are
+>>>> sought in sdhci_add_host with a call to mmc_regulator_get_supply.
+>>>
+>>>
+>>>
+>>> This is correct.
+>>>
+>>>> Since no external regulators are specified in tegra114.dtsi or
+>>>> tegra114-roth.dts, mmc->supply.vmmc and mmc->supply.vqmmc are set to
+>>>> -ENODEV.
+>>>
+>>>
+>>>
+>>> Actually 2 of the MMC nodes in tegra114-roth.dts (for SD card and eMMC)
+>>> have
+>>> a vmmc-supply property, so for two of them at least mmc->supply.vmmc is a
+>>> valid pointer.
+>>>
 >>
->> diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
->> index 0c0fc52..2cd3385 100644
->> --- a/drivers/mmc/card/mmc_test.c
->> +++ b/drivers/mmc/card/mmc_test.c
->> @@ -2349,9 +2349,6 @@ static int mmc_test_hw_reset(struct mmc_test_card *test)
->>       if (err != -EOPNOTSUPP)
->>               return err;
+>> I must have been looking at an old version of the file.  Thanks for
+>> clearing this up.
 >>
->> -     if (!mmc_can_reset(card))
->> -             return RESULT_UNSUP_CARD;
->> -
+>>> As explained above, vmmc is a valid pointer for 2 instances of the MMC
+>>> controller. Interestingly, if I just remove the "return" line in the
+>>> IS_ERR() block (without moving it around), the issue also seems to be
+>>> fixed.
+>>>
+>>>>
+>>>> Can you provide the relevant parts of the log before the problem occurs?
+>>>
+>>>
+>>>
+>>> There is not much unfortunately ; the only relevant log I have is this:
+>>>
+>>> [   12.246022] mmc2: Timeout waiting for hardware interrupt.
+>>> [   12.264990] mmc2: Controller never released inhibit bit(s).
+>>>
+>>> Some hardware interrupt timed out. I don't know much about the MMC
+>>> subsystem. but could it be because initially the controller is not in a
+>>> powered-on state, and that return statement causes the function to leave
+>>> it
+>>> unpowered?
+>>
+>>
+>> In a nutshell, the issue here is that the SDHCI spec demands that VMMC
+>> be supplied by the controller itself with the specific voltage
+>> configured using the SDHCI_POWER_CONTROL register but almost nobody
+>> does this.  Many SoCs omit this capability from their controllers and
+>> instead rely upon external regulators.  In such cases there isn't
+>> normally any need to update the voltage bits of the power control
+>> register.  It sounds like you are saying this isn't true for the
+>> Tegra114.
 >
-> I would like to retain the ability for mmc_test to distinguish
-> RESULT_UNSUP_CARD from RESULT_UNSUP_HOST
+>
+> Thanks for your explanation, it makes sense now.
+>
+> Looking at other Tegra boards .dts I noticed that SHIELD is the only one
+> using a vmmc-supply. Maybe this is the part that is wrong? I wrote this DTS
+> and cannot exclude I misread the schematics. Maybe that regulator is used
+> for some other (still sdmmc-related) purpose but the actual power provider
+> is the controller itself.
+>
+> If you can confirm that the driver is performing as it should, I will look
+> in that direction and revise my DTS.
 
-Ok, coming up in v3, thanks.
+I believe it is working as intended.  Is the schematic publicly available?
 
-//Johan
+>
+> Thanks!
+> Alex.
+>
+>
