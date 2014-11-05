@@ -1,139 +1,123 @@
-From: Ondrej Zary <linux@rainbow-software.org>
-Subject: Re: [PATCH v2] [RESEND] mmc: add Toshiba PCI SD controller driver
-Date: Tue, 4 Nov 2014 22:41:44 +0100
-Message-ID: <201411042241.45125.linux@rainbow-software.org>
-References: <1414965074-4784-1-git-send-email-linux@rainbow-software.org> <CAPDyKFrf+kHbyzyr1O906NRcPh2jr0TGkeoAxpd1aSK8a0bqRA@mail.gmail.com>
+From: =?UTF-8?q?Kristina=20Mart=C5=A1enko?=
+	<kristina.martsenko@gmail.com>
+Subject: [PATCH] mmc: core: fix card detection regression
+Date: Wed,  5 Nov 2014 02:22:41 +0200
+Message-ID: <1415146961-25993-1-git-send-email-kristina.martsenko@gmail.com>
+References: <1747777414.897866.1414878004147.JavaMail.open-xchange@oxbsltgw09.schlund.de>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrf+kHbyzyr1O906NRcPh2jr0TGkeoAxpd1aSK8a0bqRA@mail.gmail.com>
-Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Kernel development list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <1747777414.897866.1414878004147.JavaMail.open-xchange@oxbsltgw09.schlund.de>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: Linus Walleij <linus.walleij@linaro.org>, Stefan Wahren <stefan.wahren@i2se.com>, Fabio Estevam <festevam@gmail.com>, Michael Heimpold <mhei@heimpold.de>, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, =?UTF-8?q?Kristina=20Mart=C5=A1enko?= <kristina.martsenko@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tuesday 04 November 2014 12:09:44 Ulf Hansson wrote:
-> On 2 November 2014 22:51, Ondrej Zary <linux@rainbow-software.org> wrote:
-> > This patch resurrects an old never-finished driver for Toshiba PCI SD
-> > controllers found in some older Toshiba laptops (such as Portege R100):
-> >
-> > 02:0d.0 System peripheral [0880]: Toshiba America Info Systems SD TypA Controller [1179:0805] (rev 05)
-> >
-> > The code is fixed, cleaned up and successfully tested with SD, SDHC, SDXC and
-> > MMC cards on Portege R100. (MMC cards don't even work in Windows!)
-> > SDIO probably does not work (don't have any SDIO card).
-> >
-> > The hardware is slow (around 2 MB/s - same in Windows) because it does not
-> > support bus mastering (busmaster enable bit cannot be set in PCI control reg).
-> > Also the card clock is limited to 16MHz (33MHz PCI clock divided by 2).
-> >
-> > Signed-off-by: Ondrej Zary <linux@rainbow-software.org>
-> 
-> Hi Ondrej,
-> 
-> Sorry for a very very late reply.
-> 
+Since commit 89168b489915 ("mmc: core: restore detect line inversion
+semantics"), the SD card on i.MX28 (and possibly other) devices isn't
+detected and booting stops at:
 
-...
+[    4.120617] Waiting for root device /dev/mmcblk0p3...
 
-> > +static void toshsd_init(struct toshsd_host *host);
-> > +static void toshsd_set_ios_unlocked(struct mmc_host *mmc, struct mmc_ios *ios);
-> 
-> I would implement these functions at the proper place instead of
-> having them defined here.
-> 
-> Moreover I think toshsd_set_ios_unlocked() could be renamed to
-> "__toshsd_set_ios()".
+This is caused by the MMC_CAP2_CD_ACTIVE_HIGH flag being set incorrectl=
+y
+when the host controller doesn't use a GPIO for card detection (but
+instead uses a dedicated pin). In this case mmc_gpiod_request_cd() will
+return before assigning to the gpio_invert variable, leaving the
+variable uninitialized. The variable then gets used to set the flag.
+This patch fixes the issue by making sure gpio_invert is set to false
+when a GPIO isn't used. After this patch, i.MX28 boots fine.
 
-OK, will do.
- 
-> > +
-> > +static inline u16 toshsd_readw(struct toshsd_host *host, u16 reg)
-> > +{
-> > +       return ioread16(host->ioaddr + reg);
-> > +}
-> > +
-> > +static inline u32 toshsd_readl(struct toshsd_host *host, u16 reg)
-> > +{
-> > +       return ioread32(host->ioaddr + reg);
-> > +}
-> > +
-> > +static inline void toshsd_writew(struct toshsd_host *host, u16 reg, u16 val)
-> > +{
-> > +       iowrite16(val, host->ioaddr + reg);
-> > +}
-> > +
-> > +static inline void toshsd_writel(struct toshsd_host *host, u16 reg, u32 val)
-> > +{
-> > +       iowrite32(val, host->ioaddr + reg);
-> > +}
-> > +
-> > +static inline void toshsd_readl_rep(struct toshsd_host *host, u16 reg,
-> > +                                   void *dst, unsigned long count)
-> > +{
-> > +       ioread32_rep(host->ioaddr + reg, dst, count);
-> > +}
-> > +
-> > +static inline void toshsd_writel_rep(struct toshsd_host *host, u16 reg,
-> > +                                    const void *src, unsigned long count)
-> > +{
-> > +       iowrite32_rep(host->ioaddr + reg, src, count);
-> > +}
-> 
-> To me, all these wrapper functions seems a bit ugly. How about
-> invoking io* functions directly instead?
+The MMC_CAP2_RO_ACTIVE_HIGH (write protect) flag is also set incorrectl=
+y
+for the exact same reason (it uses the same uninitialized variable), so
+this patch fixes that too.
 
-It's a matter of preference, some drivers use wrappers, some don't.
-I can remove them if they're not recommended in mmc subsystem.
- 
-...
+=46ixes: 89168b489915 ("mmc: core: restore detect line inversion semant=
+ics")
+Reported-by: Stefan Wahren <stefan.wahren@i2se.com>
+Signed-off-by: Kristina Mart=C5=A1enko <kristina.martsenko@gmail.com>
+---
+This is a different version of the previous patch [1], so I haven't
+included the Reviewed-by and Tested-by's. Would be nice if someone coul=
+d
+test this version as well.
 
-> > +               tasklet_schedule(&host->data_read_tasklet);
-> 
-> Instead of using a tasklet, I would advise to use a threaded IRQ.
- 
-Haven't used threaded IRQ yet, will try.
+[1] http://thread.gmane.org/gmane.linux.kernel.gpio/4609/focus=3D29576
 
-...
+ drivers/mmc/core/host.c | 21 ++++++++-------------
+ 1 file changed, 8 insertions(+), 13 deletions(-)
 
-> > +#ifdef CONFIG_PM
-> 
-> This should be CONFIG_PM_SLEEP.
-> 
-> > +
-> > +static int toshsd_suspend(struct pci_dev *pdev, pm_message_t state)
-> 
-> This is the legacy version of system PM callbacks. You need to convert
-> to the modern ones instead.
-> 
-> > +{
-> > +       struct toshsd_host *host = pci_get_drvdata(pdev);
-> > +
-> > +       toshsd_powerdown(host);
-> > +
-> > +       pci_save_state(pdev);
-> > +       pci_enable_wake(pdev, pci_choose_state(pdev, state), 0);
-> > +       pci_disable_device(pdev);
-> > +       pci_set_power_state(pdev, pci_choose_state(pdev, state));
-> > +
-> > +       return 0;
-> > +}
-> > +
-> > +static int toshsd_resume(struct pci_dev *pdev)
-> 
-> This is the legacy version of system PM callbacks. You need to convert
-> to the modern ones instead.
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 03c53b72a2d6..270d58a4c43d 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -311,7 +311,8 @@ int mmc_of_parse(struct mmc_host *host)
+ 	struct device_node *np;
+ 	u32 bus_width;
+ 	int len, ret;
+-	bool cap_invert, gpio_invert;
++	bool cd_cap_invert, cd_gpio_invert =3D false;
++	bool ro_cap_invert, ro_gpio_invert =3D false;
+=20
+ 	if (!host->parent || !host->parent->of_node)
+ 		return 0;
+@@ -359,16 +360,13 @@ int mmc_of_parse(struct mmc_host *host)
+ 	if (of_find_property(np, "non-removable", &len)) {
+ 		host->caps |=3D MMC_CAP_NONREMOVABLE;
+ 	} else {
+-		if (of_property_read_bool(np, "cd-inverted"))
+-			cap_invert =3D true;
+-		else
+-			cap_invert =3D false;
++		cd_cap_invert =3D of_property_read_bool(np, "cd-inverted");
+=20
+ 		if (of_find_property(np, "broken-cd", &len))
+ 			host->caps |=3D MMC_CAP_NEEDS_POLL;
+=20
+ 		ret =3D mmc_gpiod_request_cd(host, "cd", 0, true,
+-					   0, &gpio_invert);
++					   0, &cd_gpio_invert);
+ 		if (ret) {
+ 			if (ret =3D=3D -EPROBE_DEFER)
+ 				return ret;
+@@ -391,17 +389,14 @@ int mmc_of_parse(struct mmc_host *host)
+ 		 * both inverted, the end result is that the CD line is
+ 		 * not inverted.
+ 		 */
+-		if (cap_invert ^ gpio_invert)
++		if (cd_cap_invert ^ cd_gpio_invert)
+ 			host->caps2 |=3D MMC_CAP2_CD_ACTIVE_HIGH;
+ 	}
+=20
+ 	/* Parse Write Protection */
+-	if (of_property_read_bool(np, "wp-inverted"))
+-		cap_invert =3D true;
+-	else
+-		cap_invert =3D false;
++	ro_cap_invert =3D of_property_read_bool(np, "wp-inverted");
+=20
+-	ret =3D mmc_gpiod_request_ro(host, "wp", 0, false, 0, &gpio_invert);
++	ret =3D mmc_gpiod_request_ro(host, "wp", 0, false, 0, &ro_gpio_invert=
+);
+ 	if (ret) {
+ 		if (ret =3D=3D -EPROBE_DEFER)
+ 			goto out;
+@@ -414,7 +409,7 @@ int mmc_of_parse(struct mmc_host *host)
+ 		dev_info(host->parent, "Got WP GPIO\n");
+=20
+ 	/* See the comment on CD inversion above */
+-	if (cap_invert ^ gpio_invert)
++	if (ro_cap_invert ^ ro_gpio_invert)
+ 		host->caps2 |=3D MMC_CAP2_RO_ACTIVE_HIGH;
+=20
+ 	if (of_find_property(np, "cap-sd-highspeed", &len))
+--=20
+2.0.2
 
-I just converted them and found that suspend does not work on current kernels
-when a SD card is inserted (even with unmodified toshsd driver):
-[  188.960862] dpm_run_callback(): mmc_bus_suspend+0x0/0x2c [mmc_core] returns -110
-[  188.960867] PM: Device mmc0:b368 failed to suspend: error -110
-[  188.960869] PM: Some devices failed to suspend, or early wake event detected
-
-Is it a kernel bug or the driver is missing something?
-
--- 
-Ondrej Zary
+--
+To unsubscribe from this list: send the line "unsubscribe linux-gpio" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
