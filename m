@@ -1,49 +1,58 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: fix card detection regression
-Date: Wed, 5 Nov 2014 10:30:29 +0100
-Message-ID: <CAPDyKFqQsQrYJsedgkThJNJ5YZVim9nB=uhKf6BycCjvEXd_bg@mail.gmail.com>
-References: <1747777414.897866.1414878004147.JavaMail.open-xchange@oxbsltgw09.schlund.de>
-	<1415146961-25993-1-git-send-email-kristina.martsenko@gmail.com>
+Subject: Re: [PATCH v2 1/4] mmc: core: use mmc_send_status to check hw_reset
+Date: Wed, 5 Nov 2014 10:44:42 +0100
+Message-ID: <CAPDyKFoXO=RPuJ+VwfUVDqjaO232soOjBEUqq-SYMJTyY5qP3Q@mail.gmail.com>
+References: <1415113626-30187-1-git-send-email-johanru@axis.com>
+	<1415113626-30187-2-git-send-email-johanru@axis.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1415146961-25993-1-git-send-email-kristina.martsenko@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?Q?Kristina_Mart=C5=A1enko?= <kristina.martsenko@gmail.com>
-Cc: Chris Ball <chris@printf.net>, Linus Walleij <linus.walleij@linaro.org>, Stefan Wahren <stefan.wahren@i2se.com>, Fabio Estevam <festevam@gmail.com>, Michael Heimpold <mhei@heimpold.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:64529 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751188AbaKEJon (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 04:44:43 -0500
+Received: by mail-qa0-f46.google.com with SMTP id n8so205937qaq.33
+        for <linux-mmc@vger.kernel.org>; Wed, 05 Nov 2014 01:44:42 -0800 (PST)
+In-Reply-To: <1415113626-30187-2-git-send-email-johanru@axis.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Johan Rudholm <johan.rudholm@axis.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Adrian Hunter <adrian.hunter@intel.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>, Johan Rudholm <johanru@axis.com>
 
-On 5 November 2014 01:22, Kristina Mart=C5=A1enko
-<kristina.martsenko@gmail.com> wrote:
-> Since commit 89168b489915 ("mmc: core: restore detect line inversion
-> semantics"), the SD card on i.MX28 (and possibly other) devices isn't
-> detected and booting stops at:
->
-> [    4.120617] Waiting for root device /dev/mmcblk0p3...
->
-> This is caused by the MMC_CAP2_CD_ACTIVE_HIGH flag being set incorrec=
-tly
-> when the host controller doesn't use a GPIO for card detection (but
-> instead uses a dedicated pin). In this case mmc_gpiod_request_cd() wi=
-ll
-> return before assigning to the gpio_invert variable, leaving the
-> variable uninitialized. The variable then gets used to set the flag.
-> This patch fixes the issue by making sure gpio_invert is set to false
-> when a GPIO isn't used. After this patch, i.MX28 boots fine.
->
-> The MMC_CAP2_RO_ACTIVE_HIGH (write protect) flag is also set incorrec=
-tly
-> for the exact same reason (it uses the same uninitialized variable), =
-so
-> this patch fixes that too.
->
-> Fixes: 89168b489915 ("mmc: core: restore detect line inversion semant=
-ics")
-> Reported-by: Stefan Wahren <stefan.wahren@i2se.com>
-> Signed-off-by: Kristina Mart=C5=A1enko <kristina.martsenko@gmail.com>
+On 4 November 2014 16:07, Johan Rudholm <johan.rudholm@axis.com> wrote:
+> Signed-off-by: Johan Rudholm <johanru@axis.com>
 
-Thanks! Applied for fixes.
+Thanks! Applied for next.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/core/core.c |   10 ++--------
+>  1 files changed, 2 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 7dc0c85..5d215ee 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2265,15 +2265,9 @@ static int mmc_do_hw_reset(struct mmc_host *host, int check)
+>
+>         /* If the reset has happened, then a status command will fail */
+>         if (check) {
+> -               struct mmc_command cmd = {0};
+> -               int err;
+> +               u32 status;
+>
+> -               cmd.opcode = MMC_SEND_STATUS;
+> -               if (!mmc_host_is_spi(card->host))
+> -                       cmd.arg = card->rca << 16;
+> -               cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
+> -               err = mmc_wait_for_cmd(card->host, &cmd, 0);
+> -               if (!err) {
+> +               if (!mmc_send_status(card, &status)) {
+>                         mmc_host_clk_release(host);
+>                         return -ENOSYS;
+>                 }
+> --
+> 1.7.2.5
+>
