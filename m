@@ -1,58 +1,151 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 1/4] mmc: core: use mmc_send_status to check hw_reset
-Date: Wed, 5 Nov 2014 10:44:42 +0100
-Message-ID: <CAPDyKFoXO=RPuJ+VwfUVDqjaO232soOjBEUqq-SYMJTyY5qP3Q@mail.gmail.com>
+Subject: Re: [PATCH v2 2/4] mmc: core: group default initial state
+Date: Wed, 5 Nov 2014 11:13:32 +0100
+Message-ID: <CAPDyKFq+gvFpernvsskKEocSEx6Fb1va-CqMAPGyaLdOJ2oKFg@mail.gmail.com>
 References: <1415113626-30187-1-git-send-email-johanru@axis.com>
-	<1415113626-30187-2-git-send-email-johanru@axis.com>
+	<1415113626-30187-3-git-send-email-johanru@axis.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f46.google.com ([209.85.216.46]:64529 "EHLO
-	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751188AbaKEJon (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 04:44:43 -0500
-Received: by mail-qa0-f46.google.com with SMTP id n8so205937qaq.33
-        for <linux-mmc@vger.kernel.org>; Wed, 05 Nov 2014 01:44:42 -0800 (PST)
-In-Reply-To: <1415113626-30187-2-git-send-email-johanru@axis.com>
+Received: from mail-qa0-f54.google.com ([209.85.216.54]:33187 "EHLO
+	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753996AbaKEKNd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 05:13:33 -0500
+Received: by mail-qa0-f54.google.com with SMTP id u7so241593qaz.13
+        for <linux-mmc@vger.kernel.org>; Wed, 05 Nov 2014 02:13:33 -0800 (PST)
+In-Reply-To: <1415113626-30187-3-git-send-email-johanru@axis.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Johan Rudholm <johan.rudholm@axis.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Adrian Hunter <adrian.hunter@intel.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>, Johan Rudholm <johanru@axis.com>
 
 On 4 November 2014 16:07, Johan Rudholm <johan.rudholm@axis.com> wrote:
-> Signed-off-by: Johan Rudholm <johanru@axis.com>
+> mmc_do_hw_reset, mmc_power_up and mmc_power_off all set the same
+> group of initial values, simplify by sticking them together.
 
-Thanks! Applied for next.
+That's not entirely true. This patch will actually change the
+behaviour for the "ios.bus_mode", which isn't exactly what the commit
+message are telling us. See more below.
+
+I still think this patch is interesting, since apparently the value of
+"ios.bus_mode" hasn't been handled consistently. In principle I like
+the approach of this patch, but we need to make sure it's working and
+following the specs.
 
 Kind regards
 Uffe
 
+>
+> Signed-off-by: Johan Rudholm <johanru@axis.com>
 > ---
->  drivers/mmc/core/core.c |   10 ++--------
->  1 files changed, 2 insertions(+), 8 deletions(-)
+>  drivers/mmc/core/core.c |   49 +++++++++++++++++++++++------------------------
+>  drivers/mmc/core/core.h |    1 +
+>  2 files changed, 25 insertions(+), 25 deletions(-)
 >
 > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 7dc0c85..5d215ee 100644
+> index 5d215ee..2c39d26 100644
 > --- a/drivers/mmc/core/core.c
 > +++ b/drivers/mmc/core/core.c
-> @@ -2265,15 +2265,9 @@ static int mmc_do_hw_reset(struct mmc_host *host, int check)
+> @@ -1088,6 +1088,24 @@ void mmc_set_bus_width(struct mmc_host *host, unsigned int width)
+>         mmc_host_clk_release(host);
+>  }
 >
->         /* If the reset has happened, then a status command will fail */
->         if (check) {
-> -               struct mmc_command cmd = {0};
-> -               int err;
-> +               u32 status;
+> +/*
+> + * Set initial state after a power cycle or a hw_reset.
+> + */
+> +void mmc_set_initial_state(struct mmc_host *host)
+> +{
+> +       if (mmc_host_is_spi(host)) {
+> +               host->ios.chip_select = MMC_CS_HIGH;
+> +               host->ios.bus_mode = MMC_BUSMODE_PUSHPULL;
+> +       } else {
+> +               host->ios.chip_select = MMC_CS_DONTCARE;
+> +               host->ios.bus_mode = MMC_BUSMODE_OPENDRAIN;
+> +       }
+> +       host->ios.bus_width = MMC_BUS_WIDTH_1;
+> +       host->ios.timing = MMC_TIMING_LEGACY;
+> +
+> +       mmc_set_ios(host);
+> +}
+> +
+>  /**
+>   * mmc_vdd_to_ocrbitnum - Convert a voltage to the OCR bit number
+>   * @vdd:       voltage (mV)
+> @@ -1534,15 +1552,9 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
+>         mmc_host_clk_hold(host);
 >
-> -               cmd.opcode = MMC_SEND_STATUS;
-> -               if (!mmc_host_is_spi(card->host))
-> -                       cmd.arg = card->rca << 16;
-> -               cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
-> -               err = mmc_wait_for_cmd(card->host, &cmd, 0);
-> -               if (!err) {
-> +               if (!mmc_send_status(card, &status)) {
->                         mmc_host_clk_release(host);
->                         return -ENOSYS;
+>         host->ios.vdd = fls(ocr) - 1;
+> -       if (mmc_host_is_spi(host))
+> -               host->ios.chip_select = MMC_CS_HIGH;
+> -       else
+> -               host->ios.chip_select = MMC_CS_DONTCARE;
+> -       host->ios.bus_mode = MMC_BUSMODE_PUSHPULL;
+
+Earlier we used always used MMC_BUSMODE_PUSHPULL, now it will depend on "spi".
+
+>         host->ios.power_mode = MMC_POWER_UP;
+> -       host->ios.bus_width = MMC_BUS_WIDTH_1;
+> -       host->ios.timing = MMC_TIMING_LEGACY;
+> -       mmc_set_ios(host);
+> +       /* Set initial state and call mmc_set_ios */
+> +       mmc_set_initial_state(host);
+>
+>         /* Try to set signal voltage to 3.3V but fall back to 1.8v or 1.2v */
+>         if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330) == 0)
+> @@ -1582,14 +1594,9 @@ void mmc_power_off(struct mmc_host *host)
+>         host->ios.clock = 0;
+>         host->ios.vdd = 0;
+>
+> -       if (!mmc_host_is_spi(host)) {
+> -               host->ios.bus_mode = MMC_BUSMODE_OPENDRAIN;
+> -               host->ios.chip_select = MMC_CS_DONTCARE;
+
+So in here another change in behaviour, right!?
+
+> -       }
+>         host->ios.power_mode = MMC_POWER_OFF;
+> -       host->ios.bus_width = MMC_BUS_WIDTH_1;
+> -       host->ios.timing = MMC_TIMING_LEGACY;
+> -       mmc_set_ios(host);
+> +       /* Set initial state and call mmc_set_ios */
+> +       mmc_set_initial_state(host);
+>
+>         /*
+>          * Some configurations, such as the 802.11 SDIO card in the OLPC
+> @@ -2273,16 +2280,8 @@ static int mmc_do_hw_reset(struct mmc_host *host, int check)
 >                 }
+>         }
+>
+> -       if (mmc_host_is_spi(host)) {
+> -               host->ios.chip_select = MMC_CS_HIGH;
+> -               host->ios.bus_mode = MMC_BUSMODE_PUSHPULL;
+> -       } else {
+> -               host->ios.chip_select = MMC_CS_DONTCARE;
+> -               host->ios.bus_mode = MMC_BUSMODE_OPENDRAIN;
+> -       }
+> -       host->ios.bus_width = MMC_BUS_WIDTH_1;
+> -       host->ios.timing = MMC_TIMING_LEGACY;
+> -       mmc_set_ios(host);
+> +       /* Set initial state and call mmc_set_ios */
+> +       mmc_set_initial_state(host);
+>
+>         mmc_host_clk_release(host);
+>
+> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+> index 443a584..d76597c 100644
+> --- a/drivers/mmc/core/core.h
+> +++ b/drivers/mmc/core/core.h
+> @@ -49,6 +49,7 @@ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
+>  void mmc_power_up(struct mmc_host *host, u32 ocr);
+>  void mmc_power_off(struct mmc_host *host);
+>  void mmc_power_cycle(struct mmc_host *host, u32 ocr);
+> +void mmc_set_initial_state(struct mmc_host *host);
+>
+>  static inline void mmc_delay(unsigned int ms)
+>  {
 > --
 > 1.7.2.5
 >
+
+Kind regards
+Uffe
