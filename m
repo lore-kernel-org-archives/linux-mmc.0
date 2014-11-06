@@ -1,99 +1,89 @@
-From: Ben Hutchings <ben@decadent.org.uk>
-Subject: [PATCH] mmc_block: Increase max_devices
-Date: Thu, 06 Nov 2014 03:35:09 +0000
-Message-ID: <1415244909.3398.51.camel@decadent.org.uk>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: [PATCHv2 3/5] mmc: shdci-bcm2835: add efficient back-to-back
+ write workaround
+Date: Wed, 05 Nov 2014 21:48:49 -0700
+Message-ID: <545AFDB1.80008@wwwdotorg.org>
+References: <Scott Branden <sbranden@broadcom.com> <1414651017-3545-1-git-send-email-sbranden@broadcom.com> <1414651017-3545-4-git-send-email-sbranden@broadcom.com> <5459AE2C.2050401@wwwdotorg.org> <5459C9C8.9070800@broadcom.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha512";
-	protocol="application/pgp-signature"; boundary="=-7wXLpiNaJyPz0lR1y4B4"
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from shadbolt.e.decadent.org.uk ([88.96.1.126]:57067 "EHLO
-	shadbolt.e.decadent.org.uk" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750905AbaKFDfb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 22:35:31 -0500
+Received: from avon.wwwdotorg.org ([70.85.31.133]:58225 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751604AbaKFEsx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 23:48:53 -0500
+In-Reply-To: <5459C9C8.9070800@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
+To: Scott Branden <sbranden@broadcom.com>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Peter Griffin <peter.griffin@linaro.org>, Chris Ball <chris@printf.net>, Piotr Krol <pietrushnic@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Joe Perches <joe@perches.com>, linux-rpi-kernel@lists.infradead.org, Ray Jui <rjui@broadcom.com>, bcm-kernel-feedback-list@broadcom.com
 
+On 11/04/2014 11:55 PM, Scott Branden wrote:
+> On 14-11-04 08:57 PM, Stephen Warren wrote:
+>> On 10/30/2014 12:36 AM, Scott Branden wrote:
+>>> The bcm2835 has clock domain issues when back to back writes to certain
+>>> registers are written.  The existing driver works around this issue with
+>>> udelay.  A more efficient method is to store the 8 and 16 bit writes
+>>> to the registers affected and then write them as 32 bits at the
+>>> appropriate
+>>> time.
+>>
+>>> diff --git a/drivers/mmc/host/sdhci-bcm2835.c
+>>> b/drivers/mmc/host/sdhci-bcm2835.c
+>>
+>>>   static void bcm2835_sdhci_writew(struct sdhci_host *host, u16 val,
+>>> int reg)
+>>>   {
+>>>       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>> -    struct bcm2835_sdhci *bcm2835_host = pltfm_host->priv;
+>>> -    u32 oldval = (reg == SDHCI_COMMAND) ? bcm2835_host->shadow :
+>>> -        bcm2835_sdhci_readl(host, reg & ~3);
+>>> +    struct bcm2835_sdhci_host *bcm2835_host = pltfm_host->priv;
+>>
+>> Is that type change for bcm2835_host really correct?
+>
+> Yes - at the top of the patch the structure has been expanded and named
+> appropriately.
+> 
+> -struct bcm2835_sdhci {
+> -    u32 shadow;
+> +struct bcm2835_sdhci_host {
+> +    u32 shadow_cmd;
+> +    u32 shadow_blk;
+>  };
 
---=-7wXLpiNaJyPz0lR1y4B4
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Ah yes, sorry for missing that.
 
-Currently the driver imposes a limit of 256 total minor numbers,
-apparently based on the historic Unix/Linux limit.  This is quite
-restrictive, particularly if we raise the maximum number of
-partitions per card to 256 to match sd.
+>>> +    } else {
+>>> +        /* Read reg, all other registers are not shadowed */
+>>> +        oldval = readl(host->ioaddr + (reg & ~3));
+>>
+>> Is there any reason to use readl() directly here rather than calling
+>> bcm2835_readl()? ...
+>
+> Yes, bcm2835_readl does not need to be called in read-modify-write and
+> shadow register situations and just adds overhead.  All that needs to be
+> called is readl.  bcm2835_readl has some existing ugly code in it to
+> modify the capabilities register on a read function.  This info never
+> needs to be for write as you can't overwrite the capabilities register.
 
-In order to make the full minor number space available we would
-have to replace the static dev_use and name_use arrays with struct
-ida.  But we can at least allow use of 256 cards rather than just
-256 minors, with only a small change.
+To be honest, it seems better to do all the read/write through
+consistent functions. One advantage of bcm2835_readl() is that it
+consistently adds on the base address internally so you don't have to
+write it out every time manually. Still, the code ought to work fine
+after this change, so I guess it's OK.
 
-Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
----
- drivers/mmc/card/block.c | 13 ++++++++-----
- 1 file changed, 8 insertions(+), 5 deletions(-)
+> I hope to get rid of the capabilities hack in a future patch as this
+> should never have been acceptable in upstreamed code to begin with.  The
+> capabilities override should have been passed in through a device tree
+> entry.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1fa4c80..d9783da 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -78,13 +78,16 @@ static int perdev_minors =3D CONFIG_MMC_BLOCK_MINORS;
-=20
- /*
-  * We've only got one major, so number of mmcblk devices is
-- * limited to 256 / number of minors per device.
-+ * limited to (1 << 20) / number of minors per device.  It is also
-+ * currently limited by the size of the static bitmaps below.
-  */
- static int max_devices;
-=20
--/* 256 minors, so at most 256 separate devices */
--static DECLARE_BITMAP(dev_use, 256);
--static DECLARE_BITMAP(name_use, 256);
-+#define MAX_DEVICES 256
-+
-+/* TODO: Replace these with struct ida */
-+static DECLARE_BITMAP(dev_use, MAX_DEVICES);
-+static DECLARE_BITMAP(name_use, MAX_DEVICES);
-=20
- /*
-  * There is one mmc_blk_data per slot.
-@@ -2563,7 +2566,7 @@ static int __init mmc_blk_init(void)
- 	if (perdev_minors !=3D CONFIG_MMC_BLOCK_MINORS)
- 		pr_info("mmcblk: using %d minors per device\n", perdev_minors);
-=20
--	max_devices =3D 256 / perdev_minors;
-+	max_devices =3D min(MAX_DEVICES, (1 << MINORBITS) / perdev_minors);
-=20
- 	res =3D register_blkdev(MMC_BLOCK_MAJOR, "mmc");
- 	if (res)
-
---=20
-Ben Hutchings
-Beware of programmers who carry screwdrivers. - Leonard Brandwein
-
---=-7wXLpiNaJyPz0lR1y4B4
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQIVAwUAVFrseee/yOyVhhEJAQoDYg//Z8ipIXPo9t7d5uhG+AEVhEyNRlzvo+VX
-GUxCuBCHOb3Ui2bHoEXk5lQcNsD+//09SPn223mrrsZPVb3Z8mdpEAWlcQ8ecJbd
-oPXacL4ZsrsWg+zUCiDfvBAdvIdhXD8xenu7W1yjr/vH1jMxKwCOLla2SzlNYsL/
-YLLNvsTfubxst2Uaaw5OU6EpvIqlfBiDdEQNAqHVQERuiinvCTCTwe0cdofiP53E
-IIkPL+VQ9fN4CT3hCxvI7l2y4nbwh/8gMsO42mTmHgY2cwKW2p2JAxi7tZbIoYdP
-0T1xAlTxsjFyPB5BqteSwttAZIVMwC0JoGan0HPaerhpue8I1YH+YaZk6Ea0nckH
-U4n6kp4FHmlKxynvKpweQekGpHPxvHqM811ZAWzUO/fW1x1nuOaqSHSyZrRz0LXc
-H9h89/SjZhLwjlNsgdcTbWXggyEF17mu8qYdE4rXCec4ZBS0w5VwRXVsbqvesgOz
-hF9JPzqqBMWDKfP0K1TEdjJgMD5WFrgqb3uHo7bvtS+BWQuNskpqbEzUmomLqP3q
-1ep2GFUn8TyZSQCFoEPfMUC81b3vXMBUdE5m0v9IGW/qlmlyNmMsivG0Fs5EJZR4
-zHr1+PovNYafMA4chIfXIlLnEc+RpH3uWnp3bsbzYV1k+0WBEcvlTkC++AqqgoaJ
-b0rX662VbIk=
-=8Mhu
------END PGP SIGNATURE-----
-
---=-7wXLpiNaJyPz0lR1y4B4--
+It's a pretty common technique with precedent. I certainly don't agree
+that it should be configured by DT. Arguably, DT makes sense to describe
+board-to-board variations, but there's almost zero point putting data
+into DT that is SoC description rather than board description; just put
+it into the driver to avoid continually parsing the same data over and
+over from DT just to get back to the same data that could have been
+encoded into the driver. If the data varies between similar controllers,
+an of_match table can easily be used to parameterize it based on
+compatible value.
