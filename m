@@ -1,194 +1,141 @@
 From: Johan Rudholm <johan.rudholm@axis.com>
-Subject: [PATCH v3 2/3] mmc: core: turn hw_reset into a bus_ops
-Date: Thu,  6 Nov 2014 14:46:55 +0100
-Message-ID: <1415281616-24661-3-git-send-email-johanru@axis.com>
+Subject: [PATCH v3 1/3] mmc: core: consistent handling of initial values
+Date: Thu,  6 Nov 2014 14:46:54 +0100
+Message-ID: <1415281616-24661-2-git-send-email-johanru@axis.com>
 References: <1415281616-24661-1-git-send-email-johanru@axis.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bastet.se.axis.com ([195.60.68.11]:35083 "EHLO
-	bastet.se.axis.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751051AbaKFNrs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Nov 2014 08:47:48 -0500
+Received: from bes.se.axis.com ([195.60.68.10]:40254 "EHLO bes.se.axis.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751052AbaKFNrs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 6 Nov 2014 08:47:48 -0500
 In-Reply-To: <1415281616-24661-1-git-send-email-johanru@axis.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Adrian Hunter <adrian.hunter@intel.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>, Johan Rudholm <johanru@axis.com>
 
-Move the (e)MMC specific hw_reset code from core.c into mmc.c and call
-it from the new bus_ops member hw_reset. This also lets us add code
-for resetting SD cards as well.
+mmc_do_hw_reset(), mmc_power_up() and mmc_power_off() all set similar
+initial values for bus_mode, bus_width, chip_select and timing. Let's
+make this handling simpler and more consistent by sticking them
+together in a common function. This will introduce small changes in
+behavior in the following places:
+
+mmc_power_off():
+
+  For SPI hosts, explicitly set bus_mode = MMC_BUSMODE_PUSHPULL and
+  chip_select = MMC_CS_HIGH, before we left them as they were.
+
+  For non-SPI hosts, set bus_mode = MMC_BUSMODE_PUSHPULL instead of
+  MMC_BUSMODE_OPENDRAIN as before.
+
+  These two changes should not be a problem since the device will be
+  powered off anyway.
+
+mmc_do_hw_reset():
+
+  Always set bus_mode = MMC_BUSMODE_PUSHPULL, as required by SD/SDIO
+  cards. MMC cards require MMC_BUSMODE_OPENDRAIN, but this is taken
+  care of by mmc_init_card() and mmc_attach_mmc().
 
 Signed-off-by: Johan Rudholm <johanru@axis.com>
 ---
- drivers/mmc/core/core.c |   56 +++++++++++++++-------------------------------
- drivers/mmc/core/core.h |    5 ++++
- drivers/mmc/core/mmc.c  |   40 +++++++++++++++++++++++++++++++++
- 3 files changed, 63 insertions(+), 38 deletions(-)
+ drivers/mmc/core/core.c |   47 ++++++++++++++++++++++-------------------------
+ drivers/mmc/core/core.h |    1 +
+ 2 files changed, 23 insertions(+), 25 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 5bda29b..63ce146 100644
+index a32bea2..5bda29b 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -2242,67 +2242,47 @@ static void mmc_hw_reset_for_init(struct mmc_host *host)
+@@ -1099,6 +1099,22 @@ void mmc_set_bus_width(struct mmc_host *host, unsigned int width)
  	mmc_host_clk_release(host);
  }
  
--int mmc_can_reset(struct mmc_card *card)
--{
--	u8 rst_n_function;
--
--	if (!mmc_card_mmc(card))
--		return 0;
--	rst_n_function = card->ext_csd.rst_n_function;
--	if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
--		return 0;
--	return 1;
--}
--EXPORT_SYMBOL(mmc_can_reset);
--
-+/* Reset card in a bus-specific way */
- static int mmc_do_hw_reset(struct mmc_host *host, int check)
- {
--	struct mmc_card *card = host->card;
--
--	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
--		return -EOPNOTSUPP;
-+	int ret;
- 
--	if (!card)
-+	if (!host->card)
- 		return -EINVAL;
- 
--	if (!mmc_can_reset(card))
-+	if (!host->bus_ops || !host->bus_ops->hw_reset ||
-+			host->bus_ops->hw_reset(host, MMC_HW_RESET_TEST))
- 		return -EOPNOTSUPP;
- 
--	mmc_host_clk_hold(host);
--	mmc_set_clock(host, host->f_init);
-+	ret = host->bus_ops->hw_reset(host, check);
- 
--	host->ops->hw_reset(host);
--
--	/* If the reset has happened, then a status command will fail */
--	if (check) {
--		u32 status;
--
--		if (!mmc_send_status(card, &status)) {
--			mmc_host_clk_release(host);
--			return -ENOSYS;
--		}
--	}
--
--	/* Set initial state and call mmc_set_ios */
--	mmc_set_initial_state(host);
-+	if (check == MMC_HW_RESET_TEST_CARD)
-+		return ret;
- 
--	mmc_host_clk_release(host);
-+	pr_warn("%s: tried to reset card (status %d)\n",
-+						mmc_hostname(host), ret);
- 
- 	return host->bus_ops->power_restore(host);
- }
- 
- int mmc_hw_reset(struct mmc_host *host)
- {
--	return mmc_do_hw_reset(host, 0);
-+	return mmc_do_hw_reset(host, MMC_HW_RESET_RESET);
- }
- EXPORT_SYMBOL(mmc_hw_reset);
- 
- int mmc_hw_reset_check(struct mmc_host *host)
- {
--	return mmc_do_hw_reset(host, 1);
-+	return mmc_do_hw_reset(host, MMC_HW_RESET_CHECK);
- }
- EXPORT_SYMBOL(mmc_hw_reset_check);
- 
-+int mmc_can_reset(struct mmc_card *card)
++/*
++ * Set initial state after a power cycle or a hw_reset.
++ */
++void mmc_set_initial_state(struct mmc_host *host)
 +{
-+	return mmc_do_hw_reset(card->host, MMC_HW_RESET_TEST_CARD);
-+}
-+EXPORT_SYMBOL(mmc_can_reset);
++	if (mmc_host_is_spi(host))
++		host->ios.chip_select = MMC_CS_HIGH;
++	else
++		host->ios.chip_select = MMC_CS_DONTCARE;
++	host->ios.bus_mode = MMC_BUSMODE_PUSHPULL;
++	host->ios.bus_width = MMC_BUS_WIDTH_1;
++	host->ios.timing = MMC_TIMING_LEGACY;
 +
- static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
- {
- 	host->f_init = freq;
++	mmc_set_ios(host);
++}
++
+ /**
+  * mmc_vdd_to_ocrbitnum - Convert a voltage to the OCR bit number
+  * @vdd:	voltage (mV)
+@@ -1537,15 +1553,9 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
+ 	mmc_host_clk_hold(host);
+ 
+ 	host->ios.vdd = fls(ocr) - 1;
+-	if (mmc_host_is_spi(host))
+-		host->ios.chip_select = MMC_CS_HIGH;
+-	else
+-		host->ios.chip_select = MMC_CS_DONTCARE;
+-	host->ios.bus_mode = MMC_BUSMODE_PUSHPULL;
+ 	host->ios.power_mode = MMC_POWER_UP;
+-	host->ios.bus_width = MMC_BUS_WIDTH_1;
+-	host->ios.timing = MMC_TIMING_LEGACY;
+-	mmc_set_ios(host);
++	/* Set initial state and call mmc_set_ios */
++	mmc_set_initial_state(host);
+ 
+ 	/* Try to set signal voltage to 3.3V but fall back to 1.8v or 1.2v */
+ 	if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330) == 0)
+@@ -1585,14 +1595,9 @@ void mmc_power_off(struct mmc_host *host)
+ 	host->ios.clock = 0;
+ 	host->ios.vdd = 0;
+ 
+-	if (!mmc_host_is_spi(host)) {
+-		host->ios.bus_mode = MMC_BUSMODE_OPENDRAIN;
+-		host->ios.chip_select = MMC_CS_DONTCARE;
+-	}
+ 	host->ios.power_mode = MMC_POWER_OFF;
+-	host->ios.bus_width = MMC_BUS_WIDTH_1;
+-	host->ios.timing = MMC_TIMING_LEGACY;
+-	mmc_set_ios(host);
++	/* Set initial state and call mmc_set_ios */
++	mmc_set_initial_state(host);
+ 
+ 	/*
+ 	 * Some configurations, such as the 802.11 SDIO card in the OLPC
+@@ -2278,16 +2283,8 @@ static int mmc_do_hw_reset(struct mmc_host *host, int check)
+ 		}
+ 	}
+ 
+-	if (mmc_host_is_spi(host)) {
+-		host->ios.chip_select = MMC_CS_HIGH;
+-		host->ios.bus_mode = MMC_BUSMODE_PUSHPULL;
+-	} else {
+-		host->ios.chip_select = MMC_CS_DONTCARE;
+-		host->ios.bus_mode = MMC_BUSMODE_OPENDRAIN;
+-	}
+-	host->ios.bus_width = MMC_BUS_WIDTH_1;
+-	host->ios.timing = MMC_TIMING_LEGACY;
+-	mmc_set_ios(host);
++	/* Set initial state and call mmc_set_ios */
++	mmc_set_initial_state(host);
+ 
+ 	mmc_host_clk_release(host);
+ 
 diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index d76597c..f6e0a52 100644
+index 443a584..d76597c 100644
 --- a/drivers/mmc/core/core.h
 +++ b/drivers/mmc/core/core.h
-@@ -27,6 +27,11 @@ struct mmc_bus_ops {
- 	int (*power_restore)(struct mmc_host *);
- 	int (*alive)(struct mmc_host *);
- 	int (*shutdown)(struct mmc_host *);
-+	int (*hw_reset)(struct mmc_host *, int);
-+#define MMC_HW_RESET_RESET	0
-+#define MMC_HW_RESET_TEST	1
-+#define MMC_HW_RESET_CHECK	2
-+#define MMC_HW_RESET_TEST_CARD	3
- };
+@@ -49,6 +49,7 @@ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
+ void mmc_power_up(struct mmc_host *host, u32 ocr);
+ void mmc_power_off(struct mmc_host *host);
+ void mmc_power_cycle(struct mmc_host *host, u32 ocr);
++void mmc_set_initial_state(struct mmc_host *host);
  
- void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 02ad792..7ffa3f2 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1821,6 +1821,45 @@ static int mmc_power_restore(struct mmc_host *host)
- 	return ret;
- }
- 
-+static int mmc_mmc_hw_reset(struct mmc_host *host, int test)
-+{
-+	struct mmc_card *card = host->card;
-+	u8 rst_n_function;
-+
-+	rst_n_function = card->ext_csd.rst_n_function;
-+	if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
-+		return -EOPNOTSUPP;
-+
-+	if (test == MMC_HW_RESET_TEST_CARD)
-+		return 0;
-+
-+	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
-+		return -EOPNOTSUPP;
-+
-+	if (test == MMC_HW_RESET_TEST)
-+		return 0;
-+
-+	mmc_host_clk_hold(host);
-+	mmc_set_clock(host, host->f_init);
-+
-+	host->ops->hw_reset(host);
-+
-+	if (test == MMC_HW_RESET_CHECK) {
-+		u32 status;
-+
-+		if (!mmc_send_status(card, &status)) {
-+			mmc_host_clk_release(host);
-+			return -ENOSYS;
-+		}
-+	}
-+
-+	mmc_set_initial_state(host);
-+
-+	mmc_host_clk_release(host);
-+
-+	return 0;
-+}
-+
- static const struct mmc_bus_ops mmc_ops = {
- 	.remove = mmc_remove,
- 	.detect = mmc_detect,
-@@ -1831,6 +1870,7 @@ static const struct mmc_bus_ops mmc_ops = {
- 	.power_restore = mmc_power_restore,
- 	.alive = mmc_alive,
- 	.shutdown = mmc_shutdown,
-+	.hw_reset = mmc_mmc_hw_reset,
- };
- 
- /*
+ static inline void mmc_delay(unsigned int ms)
+ {
 -- 
 1.7.2.5
 
