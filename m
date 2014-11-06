@@ -1,60 +1,129 @@
-From: "Yang, Wenyou" <Wenyou.Yang@atmel.com>
-Subject: RE: [ulf.hansson-mmc:next 72/74] drivers/mmc/host/atmel-mci.c:2593:
- error: 'atmci_dev_pm_ops' undeclared here (not in a function)
-Date: Thu, 6 Nov 2014 00:47:43 +0000
-Message-ID: <B256D81BAE5131468A838E5D7A243641BF5AD4A9@penmbx01>
-References: <201411052016.dObHXcry%fengguang.wu@intel.com>
- <CAPDyKFr-yFHdJ3R3R-i0ZDF_cQbdhNQKpj-qFGo62tg+YOJ-GA@mail.gmail.com>
+From: Alexandre Courbot <acourbot@nvidia.com>
+Subject: Re: Possible regression with commit 52221610d
+Date: Thu, 6 Nov 2014 11:15:53 +0900
+Message-ID: <545AD9D9.1010105@nvidia.com>
+References: <54584260.8030602@nvidia.com>	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>	<545895B2.2000101@nvidia.com>	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>	<5459DB82.9080100@nvidia.com> <CAD7vxxJrsp096TXorWArg9FfpjmzM7+GtfSmzG1hqTA5MrzF3w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:63035 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751002AbaKFAsE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 19:48:04 -0500
-In-Reply-To: <CAPDyKFr-yFHdJ3R3R-i0ZDF_cQbdhNQKpj-qFGo62tg+YOJ-GA@mail.gmail.com>
-Content-Language: en-US
+Received: from hqemgate14.nvidia.com ([216.228.121.143]:6961 "EHLO
+	hqemgate14.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751121AbaKFCQJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 21:16:09 -0500
+In-Reply-To: <CAD7vxxJrsp096TXorWArg9FfpjmzM7+GtfSmzG1hqTA5MrzF3w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Tim Kryger <tim.kryger@gmail.com>
+Cc: Sachin Kamat <spk.linux@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
 
-VGhhbmsgeW91IHZlcnkgbXVjaCENCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBG
-cm9tOiBVbGYgSGFuc3NvbiBbbWFpbHRvOnVsZi5oYW5zc29uQGxpbmFyby5vcmddDQo+IFNlbnQ6
-IFdlZG5lc2RheSwgTm92ZW1iZXIgMDUsIDIwMTQgOTowMSBQTQ0KPiBUbzogWWFuZywgV2VueW91
-DQo+IENjOiBsaW51eC1tbWMNCj4gU3ViamVjdDogUmU6IFt1bGYuaGFuc3Nvbi1tbWM6bmV4dCA3
-Mi83NF0gZHJpdmVycy9tbWMvaG9zdC9hdG1lbC1tY2kuYzoyNTkzOg0KPiBlcnJvcjogJ2F0bWNp
-X2Rldl9wbV9vcHMnIHVuZGVjbGFyZWQgaGVyZSAobm90IGluIGEgZnVuY3Rpb24pDQo+IA0KPiBP
-biA1IE5vdmVtYmVyIDIwMTQgMTM6MTYsIGtidWlsZCB0ZXN0IHJvYm90IDxmZW5nZ3Vhbmcud3VA
-aW50ZWwuY29tPiB3cm90ZToNCj4gPiB0cmVlOiAgIGh0dHBzOi8vZ2l0LmxpbmFyby5vcmcvcGVv
-cGxlL3VsZi5oYW5zc29uL21tYyBuZXh0DQo+ID4gaGVhZDogICBjNzhkZmMzMTRiYjc5ZDVhMzY0
-YjY3NjRmMDdlMWU3ZmQ2MjI5MzkxDQo+ID4gY29tbWl0OiAwYWQ4ZTkzZmM4YWQ1YzgxNWRjM2I1
-YTI5OGNlMDVlMmRmNmRhMGI4IFs3Mi83NF0gbW1jOg0KPiA+IGF0bWVsLW1jaTogYWRkIHJ1bnRp
-bWUgcG0gc3VwcG9ydA0KPiA+IGNvbmZpZzogYXZyMzItYXRuZ3cxMDBfbXJtdF9kZWZjb25maWcg
-KGF0dGFjaGVkIGFzIC5jb25maWcpDQo+ID4gcmVwcm9kdWNlOg0KPiA+ICAgd2dldCBodHRwczov
-L2dpdC5rZXJuZWwub3JnL2NnaXQvbGludXgva2VybmVsL2dpdC93ZmcvbGtwLQ0KPiB0ZXN0cy5n
-aXQvcGxhaW4vc2Jpbi9tYWtlLmNyb3NzIC1PIH4vYmluL21ha2UuY3Jvc3MNCj4gPiAgIGNobW9k
-ICt4IH4vYmluL21ha2UuY3Jvc3MNCj4gPiAgIGdpdCBjaGVja291dCAwYWQ4ZTkzZmM4YWQ1Yzgx
-NWRjM2I1YTI5OGNlMDVlMmRmNmRhMGI4DQo+ID4gICAjIHNhdmUgdGhlIGF0dGFjaGVkIC5jb25m
-aWcgdG8gbGludXggYnVpbGQgdHJlZQ0KPiA+ICAgbWFrZS5jcm9zcyBBUkNIPWF2cjMyDQo+ID4N
-Cj4gPiBBbGwgZXJyb3Ivd2FybmluZ3M6DQo+ID4NCj4gDQo+IEhpIFdlbnlvdSwNCj4gDQo+IE5v
-IHdvcnJpZXMgdGhpcyB0aW1lLiBJIGhhdmUgdXBkYXRlZCB5b3VyIHBhdGNoIHRvIHRoZSBmaXgg
-dGhlIGNvbXBpbGUgZXJyb3IuDQo+IA0KPiBJIG1vdmVkIHRoZSBkZWNsYXJhdGlvbiBvZiB0aGUg
-ImF0bWNpX2Rldl9wbV9vcHMiIG91dHNpZGUgdGhlIENPTkZJR19QTS4NCj4gUGxlYXNlIGdvIGFo
-ZWFkIGFuZCBoYXZlIGEgbG9vayBhdCBteSBuZXh0IGJyYW5jaC4NCj4gDQo+IEtpbmQgcmVnYXJk
-cw0KPiBVZmZlDQo+IA0KPiA+Pj4gZHJpdmVycy9tbWMvaG9zdC9hdG1lbC1tY2kuYzoyNTkzOiBl
-cnJvcjogJ2F0bWNpX2Rldl9wbV9vcHMnDQo+ID4+PiB1bmRlY2xhcmVkIGhlcmUgKG5vdCBpbiBh
-IGZ1bmN0aW9uKQ0KPiA+DQo+ID4gdmltICsvYXRtY2lfZGV2X3BtX29wcyArMjU5MyBkcml2ZXJz
-L21tYy9ob3N0L2F0bWVsLW1jaS5jDQo+ID4NCj4gPiAgIDI1ODcNCj4gPiAgIDI1ODggIHN0YXRp
-YyBzdHJ1Y3QgcGxhdGZvcm1fZHJpdmVyIGF0bWNpX2RyaXZlciA9IHsNCj4gPiAgIDI1ODkgICAg
-ICAgICAgLnJlbW92ZSAgICAgICAgID0gX19leGl0X3AoYXRtY2lfcmVtb3ZlKSwNCj4gPiAgIDI1
-OTAgICAgICAgICAgLmRyaXZlciAgICAgICAgID0gew0KPiA+ICAgMjU5MSAgICAgICAgICAgICAg
-ICAgIC5uYW1lICAgICAgICAgICA9ICJhdG1lbF9tY2kiLA0KPiA+ICAgMjU5MiAgICAgICAgICAg
-ICAgICAgIC5vZl9tYXRjaF90YWJsZSA9IG9mX21hdGNoX3B0cihhdG1jaV9kdF9pZHMpLA0KPiA+
-PiAyNTkzICAgICAgICAgICAgICAgICAgLnBtICAgICAgICAgICAgID0gJmF0bWNpX2Rldl9wbV9v
-cHMsDQo+ID4gICAyNTk0ICAgICAgICAgIH0sDQo+ID4gICAyNTk1ICB9Ow0KPiA+ICAgMjU5Ng0K
-PiA+DQo+ID4gLS0tDQo+ID4gMC1EQVkga2VybmVsIHRlc3QgaW5mcmFzdHJ1Y3R1cmUgICAgICAg
-ICAgICAgICAgT3BlbiBTb3VyY2UgVGVjaG5vbG9neSBDZW50ZXINCj4gPiBodHRwOi8vbGlzdHMu
-MDEub3JnL21haWxtYW4vbGlzdGluZm8va2J1aWxkICAgICAgICAgICAgICAgICBJbnRlbCBDb3Jw
-b3JhdGlvbg0K
+On 11/06/2014 12:27 AM, Tim Kryger wrote:
+> On Wed, Nov 5, 2014 at 12:10 AM, Alexandre Courbot <acourbot@nvidia.com> wrote:
+>> On 11/05/2014 12:31 AM, Tim Kryger wrote:
+>>>
+>>> On Tue, Nov 4, 2014 at 1:00 AM, Alexandre Courbot <acourbot@nvidia.com>
+>>> wrote:
+>>>>
+>>>> Hi Tim, thanks for your reply!
+>>>>
+>>>> On 11/04/2014 02:28 PM, Tim Kryger wrote:
+>>>>>
+>>>>>
+>>>>> On Mon, Nov 3, 2014 at 7:05 PM, Alexandre Courbot <acourbot@nvidia.com>
+>>>>> wrote:
+>>>>>>
+>>>>>>
+>>>>>> Hi guys,
+>>>>>>
+>>>>>> On the NVIDIA shield (tegra114-roth) platform, I have noticed that MMC
+>>>>>> stopped working completely on recent kernels. MMC devices will not show
+>>>>>> up
+>>>>>> and the message "mmc1: Controller never released inhibit bit(s)." shows
+>>>>>> up
+>>>>>> repeatedly in the console.
+>>>>>>
+>>>>>> After bisecting I tracked commit
+>>>>>> 52221610dd84dc3e9196554f0292ca9e8ab3541d
+>>>>>> ("mmc: sdhci: Improve external VDD regulator support") as the one that
+>>>>>> introduced this issue, which seems somehow surprising to me since it
+>>>>>> has
+>>>>>> been around for a while and nobody else complained about this AFAICT.
+>>>>>
+>>>>>
+>>>>>
+>>>>> I'm not too familiar with the Nvidia Shield so can you please confirm
+>>>>> the following?
+>>>>>
+>>>>> The controller in the Tegra114 is SDHCI compliant and as such
+>>>>> sdhci_tegra_probe calls sdhci_add_host.  External regulators are
+>>>>> sought in sdhci_add_host with a call to mmc_regulator_get_supply.
+>>>>
+>>>>
+>>>>
+>>>> This is correct.
+>>>>
+>>>>> Since no external regulators are specified in tegra114.dtsi or
+>>>>> tegra114-roth.dts, mmc->supply.vmmc and mmc->supply.vqmmc are set to
+>>>>> -ENODEV.
+>>>>
+>>>>
+>>>>
+>>>> Actually 2 of the MMC nodes in tegra114-roth.dts (for SD card and eMMC)
+>>>> have
+>>>> a vmmc-supply property, so for two of them at least mmc->supply.vmmc is a
+>>>> valid pointer.
+>>>>
+>>>
+>>> I must have been looking at an old version of the file.  Thanks for
+>>> clearing this up.
+>>>
+>>>> As explained above, vmmc is a valid pointer for 2 instances of the MMC
+>>>> controller. Interestingly, if I just remove the "return" line in the
+>>>> IS_ERR() block (without moving it around), the issue also seems to be
+>>>> fixed.
+>>>>
+>>>>>
+>>>>> Can you provide the relevant parts of the log before the problem occurs?
+>>>>
+>>>>
+>>>>
+>>>> There is not much unfortunately ; the only relevant log I have is this:
+>>>>
+>>>> [   12.246022] mmc2: Timeout waiting for hardware interrupt.
+>>>> [   12.264990] mmc2: Controller never released inhibit bit(s).
+>>>>
+>>>> Some hardware interrupt timed out. I don't know much about the MMC
+>>>> subsystem. but could it be because initially the controller is not in a
+>>>> powered-on state, and that return statement causes the function to leave
+>>>> it
+>>>> unpowered?
+>>>
+>>>
+>>> In a nutshell, the issue here is that the SDHCI spec demands that VMMC
+>>> be supplied by the controller itself with the specific voltage
+>>> configured using the SDHCI_POWER_CONTROL register but almost nobody
+>>> does this.  Many SoCs omit this capability from their controllers and
+>>> instead rely upon external regulators.  In such cases there isn't
+>>> normally any need to update the voltage bits of the power control
+>>> register.  It sounds like you are saying this isn't true for the
+>>> Tegra114.
+>>
+>>
+>> Thanks for your explanation, it makes sense now.
+>>
+>> Looking at other Tegra boards .dts I noticed that SHIELD is the only one
+>> using a vmmc-supply. Maybe this is the part that is wrong? I wrote this DTS
+>> and cannot exclude I misread the schematics. Maybe that regulator is used
+>> for some other (still sdmmc-related) purpose but the actual power provider
+>> is the controller itself.
+>>
+>> If you can confirm that the driver is performing as it should, I will look
+>> in that direction and revise my DTS.
+>
+> I believe it is working as intended.  Is the schematic publicly available?
+
+Sadly, no. But it is built similarly to other T114 boards, so I have to 
+assume the error is mine here. I will come back to this thread if it 
+turns out it is not.
+
+Thanks for your help!
