@@ -1,58 +1,194 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V3 0/4] mmc: sdhci: Add HS400 support to SDHCI driver
-Date: Thu, 6 Nov 2014 14:33:56 +0100
-Message-ID: <CAPDyKFpx7N2m123s-H03Y1v3QWFgrgDRDE633qKZE=OV0_jj3A@mail.gmail.com>
-References: <1415279946-5054-1-git-send-email-adrian.hunter@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Johan Rudholm <johan.rudholm@axis.com>
+Subject: [PATCH v3 2/3] mmc: core: turn hw_reset into a bus_ops
+Date: Thu,  6 Nov 2014 14:46:55 +0100
+Message-ID: <1415281616-24661-3-git-send-email-johanru@axis.com>
+References: <1415281616-24661-1-git-send-email-johanru@axis.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f180.google.com ([209.85.216.180]:53289 "EHLO
-	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751077AbaKFNd6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Nov 2014 08:33:58 -0500
-Received: by mail-qc0-f180.google.com with SMTP id o8so736929qcw.11
-        for <linux-mmc@vger.kernel.org>; Thu, 06 Nov 2014 05:33:56 -0800 (PST)
-In-Reply-To: <1415279946-5054-1-git-send-email-adrian.hunter@intel.com>
+Received: from bastet.se.axis.com ([195.60.68.11]:35083 "EHLO
+	bastet.se.axis.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751051AbaKFNrs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Nov 2014 08:47:48 -0500
+In-Reply-To: <1415281616-24661-1-git-send-email-johanru@axis.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>, Johan Rudholm <johanru@axis.com>
 
-On 6 November 2014 14:19, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Hi
->
-> Here is version 3 of some patches for SDHCI to support HS400 mode.
->
-> Changes in V3:
->
->         mmc: sdhci: Clear also HS400 1.2V capability if 1.2V is not supported
->                 Rename MMC_CAPS2_HSX00_1_2V to MMC_CAP2_HSX00_1_2V
->
-> Changes in V2:
->
->         mmc: sdhci: Clear also HS400 1.2V capability if 1.2V is not supported
->                 Rename MMC_CAPS2_1_2V to MMC_CAPS2_HSX00_1_2V
->
->         mmc: sdhci: Add HS400 support to SDHCI driver
->                 Re-base on Ulf's current tree which required moving
->                 SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400 to the next free
->                 quirk2 bit
->
->
-> Adrian Hunter (4):
->       mmc: sdhci: Remove unused SDHCI_CTRL_HS_SDR200
->       mmc: sdhci: Fix vqmmc error setting
->       mmc: sdhci: Clear also HS400 1.2V capability if 1.2V is not supported
->       mmc: sdhci: Add HS400 support to SDHCI driver
->
->  drivers/mmc/host/sdhci.c  | 28 ++++++++++++++++++++--------
->  drivers/mmc/host/sdhci.h  |  4 +++-
->  include/linux/mmc/host.h  |  1 +
->  include/linux/mmc/sdhci.h |  2 ++
->  4 files changed, 26 insertions(+), 9 deletions(-)
->
+Move the (e)MMC specific hw_reset code from core.c into mmc.c and call
+it from the new bus_ops member hw_reset. This also lets us add code
+for resetting SD cards as well.
 
-Thanks! Applied for next.
+Signed-off-by: Johan Rudholm <johanru@axis.com>
+---
+ drivers/mmc/core/core.c |   56 +++++++++++++++-------------------------------
+ drivers/mmc/core/core.h |    5 ++++
+ drivers/mmc/core/mmc.c  |   40 +++++++++++++++++++++++++++++++++
+ 3 files changed, 63 insertions(+), 38 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 5bda29b..63ce146 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2242,67 +2242,47 @@ static void mmc_hw_reset_for_init(struct mmc_host *host)
+ 	mmc_host_clk_release(host);
+ }
+ 
+-int mmc_can_reset(struct mmc_card *card)
+-{
+-	u8 rst_n_function;
+-
+-	if (!mmc_card_mmc(card))
+-		return 0;
+-	rst_n_function = card->ext_csd.rst_n_function;
+-	if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
+-		return 0;
+-	return 1;
+-}
+-EXPORT_SYMBOL(mmc_can_reset);
+-
++/* Reset card in a bus-specific way */
+ static int mmc_do_hw_reset(struct mmc_host *host, int check)
+ {
+-	struct mmc_card *card = host->card;
+-
+-	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
+-		return -EOPNOTSUPP;
++	int ret;
+ 
+-	if (!card)
++	if (!host->card)
+ 		return -EINVAL;
+ 
+-	if (!mmc_can_reset(card))
++	if (!host->bus_ops || !host->bus_ops->hw_reset ||
++			host->bus_ops->hw_reset(host, MMC_HW_RESET_TEST))
+ 		return -EOPNOTSUPP;
+ 
+-	mmc_host_clk_hold(host);
+-	mmc_set_clock(host, host->f_init);
++	ret = host->bus_ops->hw_reset(host, check);
+ 
+-	host->ops->hw_reset(host);
+-
+-	/* If the reset has happened, then a status command will fail */
+-	if (check) {
+-		u32 status;
+-
+-		if (!mmc_send_status(card, &status)) {
+-			mmc_host_clk_release(host);
+-			return -ENOSYS;
+-		}
+-	}
+-
+-	/* Set initial state and call mmc_set_ios */
+-	mmc_set_initial_state(host);
++	if (check == MMC_HW_RESET_TEST_CARD)
++		return ret;
+ 
+-	mmc_host_clk_release(host);
++	pr_warn("%s: tried to reset card (status %d)\n",
++						mmc_hostname(host), ret);
+ 
+ 	return host->bus_ops->power_restore(host);
+ }
+ 
+ int mmc_hw_reset(struct mmc_host *host)
+ {
+-	return mmc_do_hw_reset(host, 0);
++	return mmc_do_hw_reset(host, MMC_HW_RESET_RESET);
+ }
+ EXPORT_SYMBOL(mmc_hw_reset);
+ 
+ int mmc_hw_reset_check(struct mmc_host *host)
+ {
+-	return mmc_do_hw_reset(host, 1);
++	return mmc_do_hw_reset(host, MMC_HW_RESET_CHECK);
+ }
+ EXPORT_SYMBOL(mmc_hw_reset_check);
+ 
++int mmc_can_reset(struct mmc_card *card)
++{
++	return mmc_do_hw_reset(card->host, MMC_HW_RESET_TEST_CARD);
++}
++EXPORT_SYMBOL(mmc_can_reset);
++
+ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+ {
+ 	host->f_init = freq;
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index d76597c..f6e0a52 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -27,6 +27,11 @@ struct mmc_bus_ops {
+ 	int (*power_restore)(struct mmc_host *);
+ 	int (*alive)(struct mmc_host *);
+ 	int (*shutdown)(struct mmc_host *);
++	int (*hw_reset)(struct mmc_host *, int);
++#define MMC_HW_RESET_RESET	0
++#define MMC_HW_RESET_TEST	1
++#define MMC_HW_RESET_CHECK	2
++#define MMC_HW_RESET_TEST_CARD	3
+ };
+ 
+ void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 02ad792..7ffa3f2 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1821,6 +1821,45 @@ static int mmc_power_restore(struct mmc_host *host)
+ 	return ret;
+ }
+ 
++static int mmc_mmc_hw_reset(struct mmc_host *host, int test)
++{
++	struct mmc_card *card = host->card;
++	u8 rst_n_function;
++
++	rst_n_function = card->ext_csd.rst_n_function;
++	if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
++		return -EOPNOTSUPP;
++
++	if (test == MMC_HW_RESET_TEST_CARD)
++		return 0;
++
++	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
++		return -EOPNOTSUPP;
++
++	if (test == MMC_HW_RESET_TEST)
++		return 0;
++
++	mmc_host_clk_hold(host);
++	mmc_set_clock(host, host->f_init);
++
++	host->ops->hw_reset(host);
++
++	if (test == MMC_HW_RESET_CHECK) {
++		u32 status;
++
++		if (!mmc_send_status(card, &status)) {
++			mmc_host_clk_release(host);
++			return -ENOSYS;
++		}
++	}
++
++	mmc_set_initial_state(host);
++
++	mmc_host_clk_release(host);
++
++	return 0;
++}
++
+ static const struct mmc_bus_ops mmc_ops = {
+ 	.remove = mmc_remove,
+ 	.detect = mmc_detect,
+@@ -1831,6 +1870,7 @@ static const struct mmc_bus_ops mmc_ops = {
+ 	.power_restore = mmc_power_restore,
+ 	.alive = mmc_alive,
+ 	.shutdown = mmc_shutdown,
++	.hw_reset = mmc_mmc_hw_reset,
+ };
+ 
+ /*
+-- 
+1.7.2.5
+
