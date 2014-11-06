@@ -1,129 +1,99 @@
-From: Alexandre Courbot <acourbot@nvidia.com>
-Subject: Re: Possible regression with commit 52221610d
-Date: Thu, 6 Nov 2014 11:15:53 +0900
-Message-ID: <545AD9D9.1010105@nvidia.com>
-References: <54584260.8030602@nvidia.com>	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>	<545895B2.2000101@nvidia.com>	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>	<5459DB82.9080100@nvidia.com> <CAD7vxxJrsp096TXorWArg9FfpjmzM7+GtfSmzG1hqTA5MrzF3w@mail.gmail.com>
+From: Ben Hutchings <ben@decadent.org.uk>
+Subject: [PATCH] mmc_block: Increase max_devices
+Date: Thu, 06 Nov 2014 03:35:09 +0000
+Message-ID: <1415244909.3398.51.camel@decadent.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg="pgp-sha512";
+	protocol="application/pgp-signature"; boundary="=-7wXLpiNaJyPz0lR1y4B4"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate14.nvidia.com ([216.228.121.143]:6961 "EHLO
-	hqemgate14.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751121AbaKFCQJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 21:16:09 -0500
-In-Reply-To: <CAD7vxxJrsp096TXorWArg9FfpjmzM7+GtfSmzG1hqTA5MrzF3w@mail.gmail.com>
+Received: from shadbolt.e.decadent.org.uk ([88.96.1.126]:57067 "EHLO
+	shadbolt.e.decadent.org.uk" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750905AbaKFDfb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Nov 2014 22:35:31 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Kryger <tim.kryger@gmail.com>
-Cc: Sachin Kamat <spk.linux@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
 
-On 11/06/2014 12:27 AM, Tim Kryger wrote:
-> On Wed, Nov 5, 2014 at 12:10 AM, Alexandre Courbot <acourbot@nvidia.com> wrote:
->> On 11/05/2014 12:31 AM, Tim Kryger wrote:
->>>
->>> On Tue, Nov 4, 2014 at 1:00 AM, Alexandre Courbot <acourbot@nvidia.com>
->>> wrote:
->>>>
->>>> Hi Tim, thanks for your reply!
->>>>
->>>> On 11/04/2014 02:28 PM, Tim Kryger wrote:
->>>>>
->>>>>
->>>>> On Mon, Nov 3, 2014 at 7:05 PM, Alexandre Courbot <acourbot@nvidia.com>
->>>>> wrote:
->>>>>>
->>>>>>
->>>>>> Hi guys,
->>>>>>
->>>>>> On the NVIDIA shield (tegra114-roth) platform, I have noticed that MMC
->>>>>> stopped working completely on recent kernels. MMC devices will not show
->>>>>> up
->>>>>> and the message "mmc1: Controller never released inhibit bit(s)." shows
->>>>>> up
->>>>>> repeatedly in the console.
->>>>>>
->>>>>> After bisecting I tracked commit
->>>>>> 52221610dd84dc3e9196554f0292ca9e8ab3541d
->>>>>> ("mmc: sdhci: Improve external VDD regulator support") as the one that
->>>>>> introduced this issue, which seems somehow surprising to me since it
->>>>>> has
->>>>>> been around for a while and nobody else complained about this AFAICT.
->>>>>
->>>>>
->>>>>
->>>>> I'm not too familiar with the Nvidia Shield so can you please confirm
->>>>> the following?
->>>>>
->>>>> The controller in the Tegra114 is SDHCI compliant and as such
->>>>> sdhci_tegra_probe calls sdhci_add_host.  External regulators are
->>>>> sought in sdhci_add_host with a call to mmc_regulator_get_supply.
->>>>
->>>>
->>>>
->>>> This is correct.
->>>>
->>>>> Since no external regulators are specified in tegra114.dtsi or
->>>>> tegra114-roth.dts, mmc->supply.vmmc and mmc->supply.vqmmc are set to
->>>>> -ENODEV.
->>>>
->>>>
->>>>
->>>> Actually 2 of the MMC nodes in tegra114-roth.dts (for SD card and eMMC)
->>>> have
->>>> a vmmc-supply property, so for two of them at least mmc->supply.vmmc is a
->>>> valid pointer.
->>>>
->>>
->>> I must have been looking at an old version of the file.  Thanks for
->>> clearing this up.
->>>
->>>> As explained above, vmmc is a valid pointer for 2 instances of the MMC
->>>> controller. Interestingly, if I just remove the "return" line in the
->>>> IS_ERR() block (without moving it around), the issue also seems to be
->>>> fixed.
->>>>
->>>>>
->>>>> Can you provide the relevant parts of the log before the problem occurs?
->>>>
->>>>
->>>>
->>>> There is not much unfortunately ; the only relevant log I have is this:
->>>>
->>>> [   12.246022] mmc2: Timeout waiting for hardware interrupt.
->>>> [   12.264990] mmc2: Controller never released inhibit bit(s).
->>>>
->>>> Some hardware interrupt timed out. I don't know much about the MMC
->>>> subsystem. but could it be because initially the controller is not in a
->>>> powered-on state, and that return statement causes the function to leave
->>>> it
->>>> unpowered?
->>>
->>>
->>> In a nutshell, the issue here is that the SDHCI spec demands that VMMC
->>> be supplied by the controller itself with the specific voltage
->>> configured using the SDHCI_POWER_CONTROL register but almost nobody
->>> does this.  Many SoCs omit this capability from their controllers and
->>> instead rely upon external regulators.  In such cases there isn't
->>> normally any need to update the voltage bits of the power control
->>> register.  It sounds like you are saying this isn't true for the
->>> Tegra114.
->>
->>
->> Thanks for your explanation, it makes sense now.
->>
->> Looking at other Tegra boards .dts I noticed that SHIELD is the only one
->> using a vmmc-supply. Maybe this is the part that is wrong? I wrote this DTS
->> and cannot exclude I misread the schematics. Maybe that regulator is used
->> for some other (still sdmmc-related) purpose but the actual power provider
->> is the controller itself.
->>
->> If you can confirm that the driver is performing as it should, I will look
->> in that direction and revise my DTS.
->
-> I believe it is working as intended.  Is the schematic publicly available?
 
-Sadly, no. But it is built similarly to other T114 boards, so I have to 
-assume the error is mine here. I will come back to this thread if it 
-turns out it is not.
+--=-7wXLpiNaJyPz0lR1y4B4
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Thanks for your help!
+Currently the driver imposes a limit of 256 total minor numbers,
+apparently based on the historic Unix/Linux limit.  This is quite
+restrictive, particularly if we raise the maximum number of
+partitions per card to 256 to match sd.
+
+In order to make the full minor number space available we would
+have to replace the static dev_use and name_use arrays with struct
+ida.  But we can at least allow use of 256 cards rather than just
+256 minors, with only a small change.
+
+Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
+---
+ drivers/mmc/card/block.c | 13 ++++++++-----
+ 1 file changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 1fa4c80..d9783da 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -78,13 +78,16 @@ static int perdev_minors =3D CONFIG_MMC_BLOCK_MINORS;
+=20
+ /*
+  * We've only got one major, so number of mmcblk devices is
+- * limited to 256 / number of minors per device.
++ * limited to (1 << 20) / number of minors per device.  It is also
++ * currently limited by the size of the static bitmaps below.
+  */
+ static int max_devices;
+=20
+-/* 256 minors, so at most 256 separate devices */
+-static DECLARE_BITMAP(dev_use, 256);
+-static DECLARE_BITMAP(name_use, 256);
++#define MAX_DEVICES 256
++
++/* TODO: Replace these with struct ida */
++static DECLARE_BITMAP(dev_use, MAX_DEVICES);
++static DECLARE_BITMAP(name_use, MAX_DEVICES);
+=20
+ /*
+  * There is one mmc_blk_data per slot.
+@@ -2563,7 +2566,7 @@ static int __init mmc_blk_init(void)
+ 	if (perdev_minors !=3D CONFIG_MMC_BLOCK_MINORS)
+ 		pr_info("mmcblk: using %d minors per device\n", perdev_minors);
+=20
+-	max_devices =3D 256 / perdev_minors;
++	max_devices =3D min(MAX_DEVICES, (1 << MINORBITS) / perdev_minors);
+=20
+ 	res =3D register_blkdev(MMC_BLOCK_MAJOR, "mmc");
+ 	if (res)
+
+--=20
+Ben Hutchings
+Beware of programmers who carry screwdrivers. - Leonard Brandwein
+
+--=-7wXLpiNaJyPz0lR1y4B4
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQIVAwUAVFrseee/yOyVhhEJAQoDYg//Z8ipIXPo9t7d5uhG+AEVhEyNRlzvo+VX
+GUxCuBCHOb3Ui2bHoEXk5lQcNsD+//09SPn223mrrsZPVb3Z8mdpEAWlcQ8ecJbd
+oPXacL4ZsrsWg+zUCiDfvBAdvIdhXD8xenu7W1yjr/vH1jMxKwCOLla2SzlNYsL/
+YLLNvsTfubxst2Uaaw5OU6EpvIqlfBiDdEQNAqHVQERuiinvCTCTwe0cdofiP53E
+IIkPL+VQ9fN4CT3hCxvI7l2y4nbwh/8gMsO42mTmHgY2cwKW2p2JAxi7tZbIoYdP
+0T1xAlTxsjFyPB5BqteSwttAZIVMwC0JoGan0HPaerhpue8I1YH+YaZk6Ea0nckH
+U4n6kp4FHmlKxynvKpweQekGpHPxvHqM811ZAWzUO/fW1x1nuOaqSHSyZrRz0LXc
+H9h89/SjZhLwjlNsgdcTbWXggyEF17mu8qYdE4rXCec4ZBS0w5VwRXVsbqvesgOz
+hF9JPzqqBMWDKfP0K1TEdjJgMD5WFrgqb3uHo7bvtS+BWQuNskpqbEzUmomLqP3q
+1ep2GFUn8TyZSQCFoEPfMUC81b3vXMBUdE5m0v9IGW/qlmlyNmMsivG0Fs5EJZR4
+zHr1+PovNYafMA4chIfXIlLnEc+RpH3uWnp3bsbzYV1k+0WBEcvlTkC++AqqgoaJ
+b0rX662VbIk=
+=8Mhu
+-----END PGP SIGNATURE-----
+
+--=-7wXLpiNaJyPz0lR1y4B4--
