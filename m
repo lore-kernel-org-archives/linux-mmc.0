@@ -1,77 +1,172 @@
-From: Derek Simkowiak <derek@webtuner.tv>
-Subject: Re: [PATCH 0/3]mmc: Support-FFU-for-eMMC-v5.0
-Date: Thu, 6 Nov 2014 11:12:03 -0800
-Message-ID: <545BC803.1040206@webtuner.tv>
-References: <FDD07FEB422EF948A392FDC201AEEAE64F6AFCDA@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Ondrej Zary <linux@rainbow-software.org>
+Subject: Re: [PATCH v2] [RESEND] mmc: add Toshiba PCI SD controller driver
+Date: Thu, 6 Nov 2014 22:25:56 +0100
+Message-ID: <201411062225.56556.linux@rainbow-software.org>
+References: <1414965074-4784-1-git-send-email-linux@rainbow-software.org> <201411042241.45125.linux@rainbow-software.org> <201411060002.25257.linux@rainbow-software.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Type: Text/Plain;
+  charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [207.46.100.71] ([207.46.100.71]:52420 "EHLO
-	na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751638AbaKFTnv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 6 Nov 2014 14:43:51 -0500
-In-Reply-To: <FDD07FEB422EF948A392FDC201AEEAE64F6AFCDA@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-1.atlantis.sk ([80.94.52.57]:40874 "EHLO
+	mail-1.atlantis.sk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750974AbaKFV02 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Nov 2014 16:26:28 -0500
+In-Reply-To: <201411060002.25257.linux@rainbow-software.org>
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "'cjb@laptop.org'" <cjb@laptop.org>
-Cc: Alex Lemberg <Alex.Lemberg@sandisk.com>, Gwendal Grignou <gwendal@google.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Kernel development list <linux-kernel@vger.kernel.org>
 
-Regarding v5.0: a while ago, Romain wrote a small eMMC 5.0 patch that 
-Ulf ack'd:
+On Thursday 06 November 2014 00:02:24 Ondrej Zary wrote:
+> On Tuesday 04 November 2014 22:41:44 Ondrej Zary wrote:
+> > On Tuesday 04 November 2014 12:09:44 Ulf Hansson wrote:
+> > > On 2 November 2014 22:51, Ondrej Zary <linux@rainbow-software.org> wrote:
+> > > > This patch resurrects an old never-finished driver for Toshiba PCI SD
+> > > > controllers found in some older Toshiba laptops (such as Portege R100):
+> > > >
+> > > > 02:0d.0 System peripheral [0880]: Toshiba America Info Systems SD TypA Controller [1179:0805] (rev 05)
+> > > >
+> > > > The code is fixed, cleaned up and successfully tested with SD, SDHC, SDXC and
+> > > > MMC cards on Portege R100. (MMC cards don't even work in Windows!)
+> > > > SDIO probably does not work (don't have any SDIO card).
+> > > >
+> > > > The hardware is slow (around 2 MB/s - same in Windows) because it does not
+> > > > support bus mastering (busmaster enable bit cannot be set in PCI control reg).
+> > > > Also the card clock is limited to 16MHz (33MHz PCI clock divided by 2).
+> > > >
+> > > > Signed-off-by: Ondrej Zary <linux@rainbow-software.org>
+> > > 
+> > > Hi Ondrej,
+> > > 
+> > > Sorry for a very very late reply.
+> > > 
+> > 
+> > ...
+> > 
+> > > > +static void toshsd_init(struct toshsd_host *host);
+> > > > +static void toshsd_set_ios_unlocked(struct mmc_host *mmc, struct mmc_ios *ios);
+> > > 
+> > > I would implement these functions at the proper place instead of
+> > > having them defined here.
+> > > 
+> > > Moreover I think toshsd_set_ios_unlocked() could be renamed to
+> > > "__toshsd_set_ios()".
+> > 
+> > OK, will do.
+> >  
+> > > > +
+> > > > +static inline u16 toshsd_readw(struct toshsd_host *host, u16 reg)
+> > > > +{
+> > > > +       return ioread16(host->ioaddr + reg);
+> > > > +}
+> > > > +
+> > > > +static inline u32 toshsd_readl(struct toshsd_host *host, u16 reg)
+> > > > +{
+> > > > +       return ioread32(host->ioaddr + reg);
+> > > > +}
+> > > > +
+> > > > +static inline void toshsd_writew(struct toshsd_host *host, u16 reg, u16 val)
+> > > > +{
+> > > > +       iowrite16(val, host->ioaddr + reg);
+> > > > +}
+> > > > +
+> > > > +static inline void toshsd_writel(struct toshsd_host *host, u16 reg, u32 val)
+> > > > +{
+> > > > +       iowrite32(val, host->ioaddr + reg);
+> > > > +}
+> > > > +
+> > > > +static inline void toshsd_readl_rep(struct toshsd_host *host, u16 reg,
+> > > > +                                   void *dst, unsigned long count)
+> > > > +{
+> > > > +       ioread32_rep(host->ioaddr + reg, dst, count);
+> > > > +}
+> > > > +
+> > > > +static inline void toshsd_writel_rep(struct toshsd_host *host, u16 reg,
+> > > > +                                    const void *src, unsigned long count)
+> > > > +{
+> > > > +       iowrite32_rep(host->ioaddr + reg, src, count);
+> > > > +}
+> > > 
+> > > To me, all these wrapper functions seems a bit ugly. How about
+> > > invoking io* functions directly instead?
+> > 
+> > It's a matter of preference, some drivers use wrappers, some don't.
+> > I can remove them if they're not recommended in mmc subsystem.
+> >  
+> > ...
+> > 
+> > > > +               tasklet_schedule(&host->data_read_tasklet);
+> > > 
+> > > Instead of using a tasklet, I would advise to use a threaded IRQ.
+> >  
+> > Haven't used threaded IRQ yet, will try.
+> > 
+> > ...
+> > 
+> > > > +#ifdef CONFIG_PM
+> > > 
+> > > This should be CONFIG_PM_SLEEP.
+> > > 
+> > > > +
+> > > > +static int toshsd_suspend(struct pci_dev *pdev, pm_message_t state)
+> > > 
+> > > This is the legacy version of system PM callbacks. You need to convert
+> > > to the modern ones instead.
+> > > 
+> > > > +{
+> > > > +       struct toshsd_host *host = pci_get_drvdata(pdev);
+> > > > +
+> > > > +       toshsd_powerdown(host);
+> > > > +
+> > > > +       pci_save_state(pdev);
+> > > > +       pci_enable_wake(pdev, pci_choose_state(pdev, state), 0);
+> > > > +       pci_disable_device(pdev);
+> > > > +       pci_set_power_state(pdev, pci_choose_state(pdev, state));
+> > > > +
+> > > > +       return 0;
+> > > > +}
+> > > > +
+> > > > +static int toshsd_resume(struct pci_dev *pdev)
+> > > 
+> > > This is the legacy version of system PM callbacks. You need to convert
+> > > to the modern ones instead.
+> > 
+> > I just converted them and found that suspend does not work on current kernels
+> > when a SD card is inserted (even with unmodified toshsd driver):
+> > [  188.960862] dpm_run_callback(): mmc_bus_suspend+0x0/0x2c [mmc_core] returns -110
+> > [  188.960867] PM: Device mmc0:b368 failed to suspend: error -110
+> > [  188.960869] PM: Some devices failed to suspend, or early wake event detected
+> > 
+> > Is it a kernel bug or the driver is missing something?
+> > 
+> 
+> The same kernel with sdhci-pci works fine (on another HW) so the problem is
+> limited only to toshsd...
+> Seems that the MMC core is trying to do something with the card and it fails
+> with timeout:
+> [  885.750001] PM: Entering mem sleep
+> [  885.750023] Suspending console(s) (use no_console_suspend to debug)
+> [  885.750281] Command opcode: 7
+> [  885.750432] timeout!!!!!
+> [  885.750453] Command opcode: 7
+> [  885.750597] timeout!!!!!
+> [  885.750615] Command opcode: 7
+> [  885.750758] timeout!!!!!
+> [  885.750776] Command opcode: 7
+> [  885.750920] timeout!!!!!
+> [  885.750956] dpm_run_callback(): mmc_bus_suspend+0x0/0x2c [mmc_core] returns -110
+> [  885.750961] PM: Device mmc0:0007 failed to suspend: error -110
+> 
 
-http://comments.gmane.org/gmane.linux.kernel.mmc/23795
+Found a bug in the header file, probably causing all no-response commands to fail:
+#define SD_CMD_RESP_TYPE_NORMAL                (0 << 8)
 
-But this patch got lost and was never merged.  I wanted to re-submit on 
-Romain's behalf but haven't been able to find the time.  Perhaps you 
-could take this task?
+Both the name and value were wrong, it should be:
+#define SD_CMD_RESP_TYPE_NONE          (3 << 8)
 
-I have verified that this patch is necessary for my Jedec 5.0 hardware.
+Older kernels were probably not sending MMC_SELECT_CARD on suspend.
 
-
-Thanks,
-Derek
-
-On 11/06/2014 07:41 AM, Avi Shchislowski wrote:
-> The Field Firmware Update (FFU) feature is new for eMMC 5.0 spec (Jedec:
->   JESD84-B50.pdf)
->     
->   http://www.jedec.org/standards-documents/technology-focus-areas/flash-
->   memory-ssds-ufs-emmc/e-mmc
->   
->   *New ioctl has been add:
->   * [Alex Lemberg] "MMC_FFU_INVOKE - transfer the new Firmware data from user spac[Alex Lemberg]space
->   	to the eMMC deivce and install the new image[Alex Lemberg] firmware.
-> * This solution allows to:
-> - Complete eMMC 5.0 FFU procedure as an atomic operation, without being interrupted by other IO requests
-> - Not limited Firmware data size. Using Multiple Write operations.
-> - Support of both EXT_CSD_MODE_OPERATION_CODES modes [Alex Lemberg]
-> * The solution is using "udev" device manager to transfer FW data from user space to eMMC driver [Alex Lemberg]
-> * Pre-existing functions from mmc_test were used in this solution.
->
-> Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
-> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
->
-> Avi Shchislowski (3):
->    mmc: add eMMC5.0 ffu ext_csd fields
->    mmc: Support FFU for eMMC v5.0 1/2
->    mmc: Support FFU for eMMC v5.0 2/2
->
->   drivers/mmc/card/Kconfig    |    8 +
->   drivers/mmc/card/block.c    |    5 +
->   drivers/mmc/card/mmc_test.c |   97 +--------
->   drivers/mmc/core/Makefile   |    1 +
->   drivers/mmc/core/core.c     |  128 ++++++++++++
->   drivers/mmc/core/mmc.c      |    9 +
->   drivers/mmc/core/mmc_ffu.c  |  487 +++++++++++++++++++++++++++++++++++++++++++
->   include/linux/mmc/card.h    |    2 +
->   include/linux/mmc/core.h    |   30 +++
->   include/linux/mmc/mmc.h     |    9 +
->   10 files changed, 690 insertions(+), 86 deletions(-)  create mode 100644 drivers/mmc/core/mmc_ffu.c
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
+-- 
+Ondrej Zary
