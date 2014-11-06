@@ -1,53 +1,41 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.3.18
-Date: Thu, 6 Nov 2014 13:52:06 +0100
-Message-ID: <CAPDyKFqmCaabAxS=KF8=9ZfinBtVpkb8=SNhXhY5gPtv1xOrQw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V3 2/4] mmc: sdhci: Fix vqmmc error setting
+Date: Thu,  6 Nov 2014 15:19:04 +0200
+Message-ID: <1415279946-5054-3-git-send-email-adrian.hunter@intel.com>
+References: <1415279946-5054-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:57179 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751133AbaKFNUl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 6 Nov 2014 08:20:41 -0500
+In-Reply-To: <1415279946-5054-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Linus,
+supply.vqmmc is used with the IS_ERR macro which means
+the value must be valid or an error code.  NULL is
+neither, so replace with ERR_PTR(-EINVAL).
 
-Here is one mmc fix for 3.18.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-MMC core:
-- Fix card detection regression.
-The MMC_CAP2_CD_ACTIVE_HIGH and MMC_CAP2_RO_ACTIVE_HIGH could under
-some circumstances be set incorrectly, causing the card detection to
-fail.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a743d52..c2f4754 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3096,7 +3096,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		if (ret) {
+ 			pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
+ 				mmc_hostname(mmc), ret);
+-			mmc->supply.vqmmc = NULL;
++			mmc->supply.vqmmc = ERR_PTR(-EINVAL);
+ 		}
+ 	}
+ 
+-- 
+1.9.1
 
-Information also collected in the signed tag. Please pull this in!
-
-Kind regards
-Ulf Hansson
-
-
-The following changes since commit 0df1f2487d2f0d04703f142813d53615d62a1da4:
-
-  Linux 3.18-rc3 (2014-11-02 15:01:51 -0800)
-
-are available in the git repository at:
-
-  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v3.18-2
-
-for you to fetch changes up to a31b0c6c19bf28c54999c3cd8cc3a7c8ba565a45:
-
-  mmc: core: fix card detection regression (2014-11-05 09:28:48 +0100)
-
-----------------------------------------------------------------
-MMC core:
- - Fix card detection regression.
-   The MMC_CAP2_CD_ACTIVE_HIGH and MMC_CAP2_RO_ACTIVE_HIGH could under
-   some circumstances be set incorrectly, causing the card detection to
-   fail.
-
-----------------------------------------------------------------
-Kristina Martsenko (1):
-      mmc: core: fix card detection regression
-
- drivers/mmc/core/host.c | 21 ++++++++-------------
- 1 file changed, 8 insertions(+), 13 deletions(-)
