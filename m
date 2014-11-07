@@ -1,172 +1,71 @@
-From: Ondrej Zary <linux@rainbow-software.org>
-Subject: Re: [PATCH v2] [RESEND] mmc: add Toshiba PCI SD controller driver
-Date: Thu, 6 Nov 2014 22:25:56 +0100
-Message-ID: <201411062225.56556.linux@rainbow-software.org>
-References: <1414965074-4784-1-git-send-email-linux@rainbow-software.org> <201411042241.45125.linux@rainbow-software.org> <201411060002.25257.linux@rainbow-software.org>
+From: Wenyou Yang <wenyou.yang@atmel.com>
+Subject: [PATCH v2] mmc: atmel-mci: adopt pinctrl support
+Date: Fri, 7 Nov 2014 08:48:13 +0800
+Message-ID: <1415321293-17521-1-git-send-email-wenyou.yang@atmel.com>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-1.atlantis.sk ([80.94.52.57]:40874 "EHLO
-	mail-1.atlantis.sk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750974AbaKFV02 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Nov 2014 16:26:28 -0500
-In-Reply-To: <201411060002.25257.linux@rainbow-software.org>
-Content-Disposition: inline
+Received: from nasmtp01.atmel.com ([192.199.1.245]:26934 "EHLO
+	DVREDG01.corp.atmel.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751121AbaKGAvm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Nov 2014 19:51:42 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Kernel development list <linux-kernel@vger.kernel.org>
+To: ulf.hansson@linaro.org, chris@printf.net
+Cc: khilman@kernel.org, nicolas.ferre@atmel.com, ludovic.desroches@atmel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, wenyou.yang@atmel.com
 
-On Thursday 06 November 2014 00:02:24 Ondrej Zary wrote:
-> On Tuesday 04 November 2014 22:41:44 Ondrej Zary wrote:
-> > On Tuesday 04 November 2014 12:09:44 Ulf Hansson wrote:
-> > > On 2 November 2014 22:51, Ondrej Zary <linux@rainbow-software.org> wrote:
-> > > > This patch resurrects an old never-finished driver for Toshiba PCI SD
-> > > > controllers found in some older Toshiba laptops (such as Portege R100):
-> > > >
-> > > > 02:0d.0 System peripheral [0880]: Toshiba America Info Systems SD TypA Controller [1179:0805] (rev 05)
-> > > >
-> > > > The code is fixed, cleaned up and successfully tested with SD, SDHC, SDXC and
-> > > > MMC cards on Portege R100. (MMC cards don't even work in Windows!)
-> > > > SDIO probably does not work (don't have any SDIO card).
-> > > >
-> > > > The hardware is slow (around 2 MB/s - same in Windows) because it does not
-> > > > support bus mastering (busmaster enable bit cannot be set in PCI control reg).
-> > > > Also the card clock is limited to 16MHz (33MHz PCI clock divided by 2).
-> > > >
-> > > > Signed-off-by: Ondrej Zary <linux@rainbow-software.org>
-> > > 
-> > > Hi Ondrej,
-> > > 
-> > > Sorry for a very very late reply.
-> > > 
-> > 
-> > ...
-> > 
-> > > > +static void toshsd_init(struct toshsd_host *host);
-> > > > +static void toshsd_set_ios_unlocked(struct mmc_host *mmc, struct mmc_ios *ios);
-> > > 
-> > > I would implement these functions at the proper place instead of
-> > > having them defined here.
-> > > 
-> > > Moreover I think toshsd_set_ios_unlocked() could be renamed to
-> > > "__toshsd_set_ios()".
-> > 
-> > OK, will do.
-> >  
-> > > > +
-> > > > +static inline u16 toshsd_readw(struct toshsd_host *host, u16 reg)
-> > > > +{
-> > > > +       return ioread16(host->ioaddr + reg);
-> > > > +}
-> > > > +
-> > > > +static inline u32 toshsd_readl(struct toshsd_host *host, u16 reg)
-> > > > +{
-> > > > +       return ioread32(host->ioaddr + reg);
-> > > > +}
-> > > > +
-> > > > +static inline void toshsd_writew(struct toshsd_host *host, u16 reg, u16 val)
-> > > > +{
-> > > > +       iowrite16(val, host->ioaddr + reg);
-> > > > +}
-> > > > +
-> > > > +static inline void toshsd_writel(struct toshsd_host *host, u16 reg, u32 val)
-> > > > +{
-> > > > +       iowrite32(val, host->ioaddr + reg);
-> > > > +}
-> > > > +
-> > > > +static inline void toshsd_readl_rep(struct toshsd_host *host, u16 reg,
-> > > > +                                   void *dst, unsigned long count)
-> > > > +{
-> > > > +       ioread32_rep(host->ioaddr + reg, dst, count);
-> > > > +}
-> > > > +
-> > > > +static inline void toshsd_writel_rep(struct toshsd_host *host, u16 reg,
-> > > > +                                    const void *src, unsigned long count)
-> > > > +{
-> > > > +       iowrite32_rep(host->ioaddr + reg, src, count);
-> > > > +}
-> > > 
-> > > To me, all these wrapper functions seems a bit ugly. How about
-> > > invoking io* functions directly instead?
-> > 
-> > It's a matter of preference, some drivers use wrappers, some don't.
-> > I can remove them if they're not recommended in mmc subsystem.
-> >  
-> > ...
-> > 
-> > > > +               tasklet_schedule(&host->data_read_tasklet);
-> > > 
-> > > Instead of using a tasklet, I would advise to use a threaded IRQ.
-> >  
-> > Haven't used threaded IRQ yet, will try.
-> > 
-> > ...
-> > 
-> > > > +#ifdef CONFIG_PM
-> > > 
-> > > This should be CONFIG_PM_SLEEP.
-> > > 
-> > > > +
-> > > > +static int toshsd_suspend(struct pci_dev *pdev, pm_message_t state)
-> > > 
-> > > This is the legacy version of system PM callbacks. You need to convert
-> > > to the modern ones instead.
-> > > 
-> > > > +{
-> > > > +       struct toshsd_host *host = pci_get_drvdata(pdev);
-> > > > +
-> > > > +       toshsd_powerdown(host);
-> > > > +
-> > > > +       pci_save_state(pdev);
-> > > > +       pci_enable_wake(pdev, pci_choose_state(pdev, state), 0);
-> > > > +       pci_disable_device(pdev);
-> > > > +       pci_set_power_state(pdev, pci_choose_state(pdev, state));
-> > > > +
-> > > > +       return 0;
-> > > > +}
-> > > > +
-> > > > +static int toshsd_resume(struct pci_dev *pdev)
-> > > 
-> > > This is the legacy version of system PM callbacks. You need to convert
-> > > to the modern ones instead.
-> > 
-> > I just converted them and found that suspend does not work on current kernels
-> > when a SD card is inserted (even with unmodified toshsd driver):
-> > [  188.960862] dpm_run_callback(): mmc_bus_suspend+0x0/0x2c [mmc_core] returns -110
-> > [  188.960867] PM: Device mmc0:b368 failed to suspend: error -110
-> > [  188.960869] PM: Some devices failed to suspend, or early wake event detected
-> > 
-> > Is it a kernel bug or the driver is missing something?
-> > 
-> 
-> The same kernel with sdhci-pci works fine (on another HW) so the problem is
-> limited only to toshsd...
-> Seems that the MMC core is trying to do something with the card and it fails
-> with timeout:
-> [  885.750001] PM: Entering mem sleep
-> [  885.750023] Suspending console(s) (use no_console_suspend to debug)
-> [  885.750281] Command opcode: 7
-> [  885.750432] timeout!!!!!
-> [  885.750453] Command opcode: 7
-> [  885.750597] timeout!!!!!
-> [  885.750615] Command opcode: 7
-> [  885.750758] timeout!!!!!
-> [  885.750776] Command opcode: 7
-> [  885.750920] timeout!!!!!
-> [  885.750956] dpm_run_callback(): mmc_bus_suspend+0x0/0x2c [mmc_core] returns -110
-> [  885.750961] PM: Device mmc0:0007 failed to suspend: error -110
-> 
+Amend the atmel mci pin controller to optionally take a pin control
+handle and set the state of the pins to:
+- "default" on boot, resume and before performing an transfer.
+- "sleep" on suspend().
 
-Found a bug in the header file, probably causing all no-response commands to fail:
-#define SD_CMD_RESP_TYPE_NORMAL                (0 << 8)
+This should make it possible to optimize energy usage for the pins
+both for the suspend/resume cycle.
 
-Both the name and value were wrong, it should be:
-#define SD_CMD_RESP_TYPE_NONE          (3 << 8)
+Signed-off-by: Wenyou Yang <wenyou.yang@atmel.com>
+---
+Hi Ulf,
 
-Older kernels were probably not sending MMC_SELECT_CARD on suspend.
+Thanks a lot.
 
+According to your advice, remove pinctrl_pm_select_default_state(&pdev->dev) from the _probe function.
+
+Best Regards,
+Wenyou Yang
+
+ drivers/mmc/host/atmel-mci.c |    5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 4df1599..a7b59ba 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -39,6 +39,7 @@
+ #include <linux/atmel_pdc.h>
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
++#include <linux/pinctrl/consumer.h>
+ 
+ #include <asm/cacheflush.h>
+ #include <asm/io.h>
+@@ -2568,6 +2569,8 @@ static int atmci_runtime_suspend(struct device *dev)
+ 
+ 	clk_disable_unprepare(host->mck);
+ 
++	pinctrl_pm_select_sleep_state(dev);
++
+ 	return 0;
+ }
+ 
+@@ -2575,6 +2578,8 @@ static int atmci_runtime_resume(struct device *dev)
+ {
+ 	struct atmel_mci *host = dev_get_drvdata(dev);
+ 
++	pinctrl_pm_select_default_state(dev);
++
+ 	return clk_prepare_enable(host->mck);
+ }
+ #endif
 -- 
-Ondrej Zary
+1.7.9.5
+
