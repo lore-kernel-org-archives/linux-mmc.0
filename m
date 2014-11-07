@@ -1,194 +1,259 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc:core: fix hs400 timing selection
-Date: Fri, 07 Nov 2014 12:18:01 +0200
-Message-ID: <545C9C59.8000802@intel.com>
-References: <1413946555-1266-1-git-send-email-chanho.min@lge.com> <544F98DD.6040605@intel.com> <00b501cff307$1de03fb0$59a0bf10$@lge.com> <5450B485.5050705@intel.com> <00cb01cff5a4$c746a090$55d3e1b0$@min@lge.com>
+From: vadivelan mani <vadivelan.mani@toshiba-tsip.com>
+Subject: eMMC write error in IMX6 Sabre AI board
+Date: Fri, 7 Nov 2014 11:35:51 +0000 (UTC)
+Message-ID: <loom.20141107T122543-102@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=euc-kr
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:11832 "EHLO mga03.intel.com"
+Received: from plane.gmane.org ([80.91.229.3]:59854 "EHLO plane.gmane.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751059AbaKGKTg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 7 Nov 2014 05:19:36 -0500
-In-Reply-To: <00cb01cff5a4$c746a090$55d3e1b0$@min@lge.com>
+	id S1751222AbaKGLkI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 7 Nov 2014 06:40:08 -0500
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1Xmhtc-0002qs-Mp
+	for linux-mmc@vger.kernel.org; Fri, 07 Nov 2014 12:40:04 +0100
+Received: from 202.56.254.194 ([202.56.254.194])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Nov 2014 12:40:04 +0100
+Received: from vadivelan.mani by 202.56.254.194 with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Nov 2014 12:40:04 +0100
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chanho Min <chanho.min@lge.com>, =?EUC-KR?B?J8Cvx9Gw5ic=?= <hankyung.yu@lge.com>
-Cc: 'Chris Ball' <chris@printf.net>, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Seungwon Jeon' <tgih.jun@samsung.com>, 'Jaehoon Chung' <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 'HyoJun Im' <hyojun.im@lge.com>, gunho.lee@lge.com
+To: linux-mmc@vger.kernel.org
 
-On 01/11/14 09:23, Chanho Min wrote:
->>> So change the operating mode and to lower the clock.
->>
->> I meant something different.
->>
->> With your patch I find that __mmc_switch() -> send_status() fails.
->>
->> So I suggest something like this:
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index 92247c2..195d48a 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1045,21 +1045,28 @@ static int mmc_select_hs400(struct mmc_card *card)
->>  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>  			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
->>  			   card->ext_csd.generic_cmd6_time,
->> -			   true, true, true);
->> +			   true, false, false);
->> +	if (!err) {
->> +		u32 status;
->> +
->> +		/*
->> +		 * According to JEDEC v5.01 spec (6.6.5), Clock frequency should
->> +		 * be set to a value not greater than 52MHz after the HS_TIMING
->> +		 * field is set to 0x1.
->> +		*/
->> +		mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
->> +		mmc_set_bus_speed(card);
->> +
->> +		err = __mmc_send_status(card, &status, false, 1);
-> 
-> Why was retry-count changed to 1?
-> Is there any reason not to use this?
-> +               err = mmc_send_status(card, &status);
+Dear all,
+     I'm facing this unique problem during emmc write operation. I'm using a
+Toshiba emmc device on Sabre AI board and linux kernel version 3.0.35.
 
-Error bits are cleared when read, so if the status command is not
-successful then error information may have been lost.  So it does
-not make sense to retry.
+The write operation is successful when i disable multi-block read/write.
+But when multi block read/write is enabled, the writes fail for data of size
+above 12KBytes. Please find the logs below for your reference. Any data
+write upto 12KB, there is no problem. The error message is a data crc error
+which i'm unable to figure why it is occuring.
 
-> 
-> 
->> +		if (!err)
->> +			err = mmc_check_switch_status(card->host, status);
->> +	}
->>  	if (err) {
->>  		pr_err("%s: switch to high-speed from hs200 failed, err:%d\n",
->>  			mmc_hostname(host), err);
->>  		return err;
->>  	}
->>
->> -	/*
->> -	 * According to JEDEC v5.01 spec (6.6.5), Clock frequency should
->> -	 * be set to a value not greater than 52MHz after the HS_TIMING
->> -	 * field is set to 0x1.
->> -	 */
->> -	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
->> -	mmc_set_bus_speed(card);
->> -
->>  	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>  			 EXT_CSD_BUS_WIDTH,
->>  			 EXT_CSD_DDR_BUS_WIDTH_8,
->> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
->> index 23aa3a3..f917527 100644
->> --- a/drivers/mmc/core/mmc_ops.c
->> +++ b/drivers/mmc/core/mmc_ops.c
->> @@ -23,15 +23,12 @@
->>
->>  #define MMC_OPS_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
->>
->> -static inline int __mmc_send_status(struct mmc_card *card, u32 *status,
->> -				    bool ignore_crc)
->> +int __mmc_send_status(struct mmc_card *card, u32 *status, bool ignore_crc,
->> +		      int retries)
->>  {
->>  	int err;
->>  	struct mmc_command cmd = {0};
->>
->> -	BUG_ON(!card);
->> -	BUG_ON(!card->host);
->> -
->>  	cmd.opcode = MMC_SEND_STATUS;
->>  	if (!mmc_host_is_spi(card->host))
->>  		cmd.arg = card->rca << 16;
->> @@ -39,7 +36,7 @@ static inline int __mmc_send_status(struct mmc_card *card, u32 *status,
->>  	if (ignore_crc)
->>  		cmd.flags &= ~MMC_RSP_CRC;
->>
->> -	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
->> +	err = mmc_wait_for_cmd(card->host, &cmd, retries);
->>  	if (err)
->>  		return err;
->>
->> @@ -54,7 +51,7 @@ static inline int __mmc_send_status(struct mmc_card *card, u32 *status,
->>
->>  int mmc_send_status(struct mmc_card *card, u32 *status)
->>  {
->> -	return __mmc_send_status(card, status, false);
->> +	return __mmc_send_status(card, status, false, MMC_CMD_RETRIES);
->>  }
->>
->>  static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
->> @@ -419,6 +416,21 @@ int mmc_spi_set_crc(struct mmc_host *host, int use_crc)
->>  	return err;
->>  }
->>
->> +int mmc_check_switch_status(struct mmc_host *host, u32 status)
->> +{
->> +	if (mmc_host_is_spi(host)) {
->> +		if (status & R1_SPI_ILLEGAL_COMMAND)
->> +			return -EBADMSG;
->> +	} else {
->> +		if (status & 0xFDFFA000)
->> +			pr_warn("%s: unexpected status %#x after switch\n",
->> +				mmc_hostname(host), status);
->> +		if (status & R1_SWITCH_ERROR)
->> +			return -EBADMSG;
->> +	}
->> +	return 0;
->> +}
->> +
->>  /**
->>   *	__mmc_switch - modify EXT_CSD register
->>   *	@card: the MMC card associated with the data transfer
->> @@ -497,7 +509,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->>  	timeout = jiffies + msecs_to_jiffies(timeout_ms);
->>  	do {
->>  		if (send_status) {
->> -			err = __mmc_send_status(card, &status, ignore_crc);
->> +			err = __mmc_send_status(card, &status, ignore_crc, 1);
->>  			if (err)
->>  				return err;
->>  		}
->> @@ -524,18 +536,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->>  		}
->>  	} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
->>
->> -	if (mmc_host_is_spi(host)) {
->> -		if (status & R1_SPI_ILLEGAL_COMMAND)
->> -			return -EBADMSG;
->> -	} else {
->> -		if (status & 0xFDFFA000)
->> -			pr_warn("%s: unexpected status %#x after switch\n",
->> -				mmc_hostname(host), status);
->> -		if (status & R1_SWITCH_ERROR)
->> -			return -EBADMSG;
->> -	}
->> -
->> -	return 0;
->> +	return mmc_check_switch_status(host, status);
->>  }
->>  EXPORT_SYMBOL_GPL(__mmc_switch);
->>
->> diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
->> index 6f4b00e..a59319c 100644
->> --- a/drivers/mmc/core/mmc_ops.h
->> +++ b/drivers/mmc/core/mmc_ops.h
->> @@ -20,7 +20,10 @@ int mmc_send_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
->>  int mmc_all_send_cid(struct mmc_host *host, u32 *cid);
->>  int mmc_set_relative_addr(struct mmc_card *card);
->>  int mmc_send_csd(struct mmc_card *card, u32 *csd);
->> +int __mmc_send_status(struct mmc_card *card, u32 *status, bool ignore_crc,
->> +		      int retries);
->>  int mmc_send_status(struct mmc_card *card, u32 *status);
->> +int mmc_check_switch_status(struct mmc_host *host, u32 status);
->>  int mmc_send_cid(struct mmc_host *host, u32 *cid);
->>  int mmc_spi_read_ocr(struct mmc_host *host, int highcap, u32 *ocrp);
->>  int mmc_spi_set_crc(struct mmc_host *host, int use_crc);
-> 
-> Thanks
-> Chanho
-> 
-> 
-> 
+===========================================================================
+Data size <= 12KB - SUCCESS
+-------------------
+===========================================================================
+root@freescale ~$ dd if=/file of=/dev/mmcblk0 bs=1024 count=12
+
+mmc0: starting CMD18 arg 00000000 flags 000000b5
+
+mmc0:     blksz 512 blocks 8 flags 00000200 tsac 50 ms nsac 0
+
+mmc0:     CMD12 arg 00000000 flags 0000049d
+
+===========host flags 0x5
+=============> flags 0x1a, cmd 23
+--------------- Not ACMD23
+ data Block size 0 512
+ Block count 8
+ Block size 29184
+ Block size 7
+=========> transfer_ mode 0x33
+=============> flags 0x3a, cmd 18
+ intmask 0xa
+
+ Address after failure 0x74f80000
+
+mmc0: starting CMD18 arg 00000008 flags 000000b5
+
+mmc0:     blksz 512 blocks 8 flags 00000200 tsac 50 ms nsac 0
+
+mmc0:     CMD12 arg 00000000 flags 0000049d
+
+===========host flags 0x5
+=============> flags 0x1a, cmd 23
+--------------- Not ACMD23
+ data Block size 0 512
+ Block count 8
+ Block size 29184
+ Block size 7
+=========> transfer_ mode 0x33
+=============> flags 0x3a, cmd 18
+ intmask 0xa
+
+ Address after failure 0x74f80000
+
+mmc0: starting CMD18 arg 00000010 flags 000000b5
+
+mmc0:     blksz 512 blocks 8 flags 00000200 tsac 50 ms nsac 0
+
+mmc0:     CMD12 arg 00000000 flags 0000049d
+
+===========host flags 0x5
+=============> flags 0x1a, cmd 23
+--------------- Not ACMD23
+ data Block size 0 512
+ Block count 8
+ Block size 29184
+ Block size 7
+=========> transfer_ mode 0x33
+=============> flags 0x3a, cmd 18
+ intmask 0xa
+
+ Address after failure 0x74f80000
+
+mmc0: starting CMD25 arg 00000000 flags 000000b5
+
+mmc0:     blksz 512 blocks 24 flags 00000100 tsac 800 ms nsac 0
+
+mmc0:     CMD12 arg 00000000 flags 0000049d
+
+===========host flags 0x5
+=============> flags 0x1a, cmd 23
+--------------- Not ACMD23
+ data Block size 0 512
+ Block count 24
+ Block size 29184
+ Block size 7
+=========> transfer_ mode 0x23
+=============> flags 0x3a, cmd 25
+ intmask 0x8
+
+ Address after failure 0x74f80000
+ intmask 0x2
+ Address after failure 0x74f80000
+
+mmc0: starting CMD13 arg 00010000 flags 00000195
+
+===========host flags 0x5
+--------------- ACMD23
+=============> flags 0x1a, cmd 13
+12+0 records in
+12+0 records out
+12288 bytes (12.0KB) copied, 0.178464 seconds, 67.2KB/s
+
+============================================================================
+Data size > 12KB - FAIL
+-----------------
+============================================================================
+
+root@freescale ~$ dd if=/file of=/dev/mmcblk0 bs=1024 count=15
+
+mmc0: starting CMD18 arg 00000000 flags 000000b5
+
+mmc0:     blksz 512 blocks 8 flags 00000200 tsac 50 ms nsac 0
+
+mmc0:     CMD12 arg 00000000 flags 0000049d
+
+===========host flags 0x5
+=============> flags 0x1a, cmd 23
+--------------- Not ACMD23
+ data Block size 0 512
+ Block count 8
+ Block size 29184
+ Block size 7
+=========> transfer_ mode 0x33
+=============> flags 0x3a, cmd 18
+ intmask 0xa
+
+ Address after failure 0x74f00000
+
+mmc0: starting CMD18 arg 00000008 flags 000000b5
+
+mmc0:     blksz 512 blocks 8 flags 00000200 tsac 50 ms nsac 0
+
+mmc0:     CMD12 arg 00000000 flags 0000049d
+
+===========host flags 0x5
+=============> flags 0x1a, cmd 23
+--------------- Not ACMD23
+ data Block size 0 512
+ Block count 8
+ Block size 29184
+ Block size 7
+=========> transfer_ mode 0x33
+=============> flags 0x3a, cmd 18
+ intmask 0xa
+
+ Address after failure 0x74f00000
+
+mmc0: starting CMD18 arg 00000010 flags 000000b5
+
+mmc0:     blksz 512 blocks 8 flags 00000200 tsac 50 ms nsac 0
+
+mmc0:     CMD12 arg 00000000 flags 0000049d
+
+===========host flags 0x5
+=============> flags 0x1a, cmd 23
+--------------- Not ACMD23
+ data Block size 0 512
+ Block count 8
+ Block size 29184
+ Block size 7
+=========> transfer_ mode 0x33
+=============> flags 0x3a, cmd 18
+ intmask 0xa
+
+ Address after failure 0x74f00000
+
+mmc0: starting CMD18 arg 00000018 flags 000000b5
+
+mmc0:     blksz 512 blocks 8 flags 00000200 tsac 50 ms nsac 0
+
+mmc0:     CMD12 arg 00000000 flags 0000049d
+
+===========host flags 0x5
+=============> flags 0x1a, cmd 23
+--------------- Not ACMD23
+ data Block size 0 512
+ Block count 8
+ Block size 29184
+ Block size 7
+=========> transfer_ mode 0x33
+=============> flags 0x3a, cmd 18
+ intmask 0xa
+
+ Address after failure 0x74f00000
+
+mmc0: starting CMD25 arg 00000000 flags 000000b5
+
+mmc0:     blksz 512 blocks 32 flags 00000100 tsac 800 ms nsac 0
+
+mmc0:     CMD12 arg 00000000 flags 0000049d
+
+===========host flags 0x5
+=============> flags 0x1a, cmd 23
+--------------- Not ACMD23
+ data Block size 0 512
+ Block count 32
+ Block size 29184
+ Block size 7
+=========> transfer_ mode 0x23
+=============> flags 0x3a, cmd 25
+ intmask 0x200002
+============> need to send cmd12
+=============> flags 0x1b, cmd 12
+ Address after failure 0x0
+
+mmc0: starting CMD13 arg 00010000 flags 00000195
+
+===========host flags 0x5
+--------------- ACMD23
+=============> flags 0x1a, cmd 13
+mmcblk0: error -84 transferring data, sector 0, nr 32, cmd response 0x900,
+card status 0xc00
+end_request: I/O error, dev mmcblk0, sector 0
+Buffer I/O error on device mmcblk0, logical block 0
+lost page write due to I/O error on mmcblk0
+end_request: I/O error, dev mmcblk0, sector 8
+Buffer I/O error on device mmcblk0, logical block 1
+lost page write due to I/O error on mmcblk0
+end_request: I/O error, dev mmcblk0, sector 16
+Buffer I/O error on device mmcblk0, logical block 2
+lost page write due to I/O error on mmcblk0
+end_request: I/O error, dev mmcblk0, sector 24
+Buffer I/O error on device mmcblk0, logical block 3
+lost page write due to I/O error on mmcblk0
+15+0 records in
+15+0 records out
+15360 bytes (15.0KB) copied, 0.277967 seconds, 54.0KB/s
+
+Please provide your valuable inputs for the same.
+
 
