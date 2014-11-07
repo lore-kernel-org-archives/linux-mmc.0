@@ -1,27 +1,95 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: eMMC write error in IMX6 Sabre AI board
-Date: Fri, 7 Nov 2014 10:12:12 -0200
-Message-ID: <CAOMZO5D1n7JutWCJAVafFSOKPZaS_HJjLPp26ROR-Gk12=b0yw@mail.gmail.com>
-References: <loom.20141107T122543-102@post.gmane.org>
+From: Scott Branden <sbranden@broadcom.com>
+Subject: Re: [PATCHv2 3/5] mmc: shdci-bcm2835: add efficient back-to-back
+ write workaround
+Date: Fri, 7 Nov 2014 10:29:39 -0800
+Message-ID: <545D0F93.9080007@broadcom.com>
+References: <Scott Branden <sbranden@broadcom.com> <1414651017-3545-1-git-send-email-sbranden@broadcom.com> <1414651017-3545-4-git-send-email-sbranden@broadcom.com> <5459AE2C.2050401@wwwdotorg.org> <5459C9C8.9070800@broadcom.com> <545AFDB1.80008@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:58928 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751564AbaKGMMO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Nov 2014 07:12:14 -0500
-Received: by mail-la0-f46.google.com with SMTP id gm9so4330456lab.33
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Nov 2014 04:12:12 -0800 (PST)
-In-Reply-To: <loom.20141107T122543-102@post.gmane.org>
+Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:63996 "EHLO
+	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752069AbaKGS3l (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Nov 2014 13:29:41 -0500
+In-Reply-To: <545AFDB1.80008@wwwdotorg.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: vadivelan mani <vadivelan.mani@toshiba-tsip.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Stephen Warren <swarren@wwwdotorg.org>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Peter Griffin <peter.griffin@linaro.org>, Chris Ball <chris@printf.net>, Piotr Krol <pietrushnic@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Joe Perches <joe@perches.com>, linux-rpi-kernel@lists.infradead.org, Ray Jui <rjui@broadcom.com>, bcm-kernel-feedback-list@broadcom.com
 
-On Fri, Nov 7, 2014 at 9:35 AM, vadivelan mani
-<vadivelan.mani@toshiba-tsip.com> wrote:
-> Dear all,
->      I'm facing this unique problem during emmc write operation. I'm using a
-> Toshiba emmc device on Sabre AI board and linux kernel version 3.0.35.
+On 14-11-05 08:48 PM, Stephen Warren wrote:
+> On 11/04/2014 11:55 PM, Scott Branden wrote:
+>> On 14-11-04 08:57 PM, Stephen Warren wrote:
+>>> On 10/30/2014 12:36 AM, Scott Branden wrote:
+>>>> The bcm2835 has clock domain issues when back to back writes to certain
+>>>> registers are written.  The existing driver works around this issue with
+>>>> udelay.  A more efficient method is to store the 8 and 16 bit writes
+>>>> to the registers affected and then write them as 32 bits at the
+>>>> appropriate
+>>>> time.
+>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-bcm2835.c
+>>>> b/drivers/mmc/host/sdhci-bcm2835.c
+>>>
+>>>>    static void bcm2835_sdhci_writew(struct sdhci_host *host, u16 val,
+>>>> int reg)
+>>>>    {
+>>>>        struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>>> -    struct bcm2835_sdhci *bcm2835_host = pltfm_host->priv;
+>>>> -    u32 oldval = (reg == SDHCI_COMMAND) ? bcm2835_host->shadow :
+>>>> -        bcm2835_sdhci_readl(host, reg & ~3);
+>>>> +    struct bcm2835_sdhci_host *bcm2835_host = pltfm_host->priv;
+>>>
+>>> Is that type change for bcm2835_host really correct?
+>>
+>> Yes - at the top of the patch the structure has been expanded and named
+>> appropriately.
+>>
+>> -struct bcm2835_sdhci {
+>> -    u32 shadow;
+>> +struct bcm2835_sdhci_host {
+>> +    u32 shadow_cmd;
+>> +    u32 shadow_blk;
+>>   };
+>
+> Ah yes, sorry for missing that.
+>
+>>>> +    } else {
+>>>> +        /* Read reg, all other registers are not shadowed */
+>>>> +        oldval = readl(host->ioaddr + (reg & ~3));
+>>>
+>>> Is there any reason to use readl() directly here rather than calling
+>>> bcm2835_readl()? ...
+>>
+>> Yes, bcm2835_readl does not need to be called in read-modify-write and
+>> shadow register situations and just adds overhead.  All that needs to be
+>> called is readl.  bcm2835_readl has some existing ugly code in it to
+>> modify the capabilities register on a read function.  This info never
+>> needs to be for write as you can't overwrite the capabilities register.
+>
+> To be honest, it seems better to do all the read/write through
+> consistent functions. One advantage of bcm2835_readl() is that it
+> consistently adds on the base address internally so you don't have to
+> write it out every time manually. Still, the code ought to work fine
+> after this change, so I guess it's OK.
+>
+>> I hope to get rid of the capabilities hack in a future patch as this
+>> should never have been acceptable in upstreamed code to begin with.  The
+>> capabilities override should have been passed in through a device tree
+>> entry.
+>
+> It's a pretty common technique with precedent. I certainly don't agree
+> that it should be configured by DT. Arguably, DT makes sense to describe
+> board-to-board variations, but there's almost zero point putting data
+> into DT that is SoC description rather than board description; just put
+> it into the driver to avoid continually parsing the same data over and
+> over from DT just to get back to the same data that could have been
+> encoded into the driver. If the data varies between similar controllers,
+> an of_match table can easily be used to parameterize it based on
+> compatible value.
+There is work to be done here or I will be unable to use this driver in 
+our chipsets.  Perhaps it will be easier having another driver 
+actually... as the DMA seems quite different on RPI.
+>
 
-Please try 3.18-rc3.
