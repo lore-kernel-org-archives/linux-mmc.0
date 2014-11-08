@@ -1,412 +1,101 @@
 From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH v4 10/10] omap_hsmmc: remove unused slot_id parameter
-Date: Sat,  8 Nov 2014 15:33:17 +0100
-Message-ID: <1415457197-14294-11-git-send-email-afenkart@gmail.com>
+Subject: [PATCH v4 08/10] omap_hsmmc: pass mmc_priv struct to gpio init / free
+Date: Sat,  8 Nov 2014 15:33:15 +0100
+Message-ID: <1415457197-14294-9-git-send-email-afenkart@gmail.com>
 References: <1415457197-14294-1-git-send-email-afenkart@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f50.google.com ([74.125.82.50]:46501 "EHLO
-	mail-wg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753716AbaKHOdy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Nov 2014 09:33:54 -0500
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:40900 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753783AbaKHOj4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Nov 2014 09:39:56 -0500
 In-Reply-To: <1415457197-14294-1-git-send-email-afenkart@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>, =?UTF-8?q?Beno=C3=AEt=20Cousson?= <bcousson@baylibre.com>, Ulf Hansson <ulf.hansson@linaro.org>, pascal.huerst@gmail.com, Andreas Fenkart <afenkart@gmail.com>
 
-omap_hsmmc only supports one slot. So slot id is always zero, and
-slot id was never used in the callbacks anyway
+this is needed when installing callbacks in the host struct and not
+in the platform data, e.g. cover detect irq should be stored in
+omap_hsmmc_host and not platform data
 
 Acked-by: Tony Lindgren <tony@atomide.com>
 Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 ---
- arch/arm/mach-omap2/board-rx51-peripherals.c |  2 +-
- arch/arm/mach-omap2/hsmmc.c                  | 21 ++++-----
- arch/arm/mach-omap2/hsmmc.h                  |  2 +-
- drivers/mmc/host/omap_hsmmc.c                | 65 +++++++++++-----------------
- include/linux/platform_data/hsmmc-omap.h     | 14 ++----
- 5 files changed, 40 insertions(+), 64 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c | 22 ++++++++++++----------
+ 1 file changed, 12 insertions(+), 10 deletions(-)
 
-diff --git a/arch/arm/mach-omap2/board-rx51-peripherals.c b/arch/arm/mach-omap2/board-rx51-peripherals.c
-index 0a8ac84..3d5040f 100644
---- a/arch/arm/mach-omap2/board-rx51-peripherals.c
-+++ b/arch/arm/mach-omap2/board-rx51-peripherals.c
-@@ -484,7 +484,7 @@ static struct omap_mux_partition *partition;
-  * Current flows to eMMC when eMMC is off and the data lines are pulled up,
-  * so pull them down. N.B. we pull 8 lines because we are using 8 lines.
-  */
--static void rx51_mmc2_remux(struct device *dev, int slot, int power_on)
-+static void rx51_mmc2_remux(struct device *dev, int power_on)
- {
- 	if (power_on)
- 		omap_mux_write_array(partition, rx51_mmc2_on_mux);
-diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-index 4e2896a..dc6e79c 100644
---- a/arch/arm/mach-omap2/hsmmc.c
-+++ b/arch/arm/mach-omap2/hsmmc.c
-@@ -33,14 +33,14 @@ static u16 control_devconf1_offset;
- 
- #define HSMMC_NAME_LEN	9
- 
--static void omap_hsmmc1_before_set_reg(struct device *dev, int slot,
--				  int power_on, int vdd)
-+static void omap_hsmmc1_before_set_reg(struct device *dev,
-+				       int power_on, int vdd)
- {
- 	u32 reg, prog_io;
- 	struct omap_hsmmc_platform_data *mmc = dev->platform_data;
- 
- 	if (mmc->remux)
--		mmc->remux(dev, slot, power_on);
-+		mmc->remux(dev, power_on);
- 
- 	/*
- 	 * Assume we power both OMAP VMMC1 (for CMD, CLK, DAT0..3) and the
-@@ -86,8 +86,7 @@ static void omap_hsmmc1_before_set_reg(struct device *dev, int slot,
- 	}
- }
- 
--static void omap_hsmmc1_after_set_reg(struct device *dev, int slot,
--				 int power_on, int vdd)
-+static void omap_hsmmc1_after_set_reg(struct device *dev, int power_on, int vdd)
- {
- 	u32 reg;
- 
-@@ -122,20 +121,18 @@ static void hsmmc2_select_input_clk_src(struct omap_hsmmc_platform_data *mmc)
- 	omap_ctrl_writel(reg, control_devconf1_offset);
- }
- 
--static void hsmmc2_before_set_reg(struct device *dev, int slot,
--				   int power_on, int vdd)
-+static void hsmmc2_before_set_reg(struct device *dev, int power_on, int vdd)
- {
- 	struct omap_hsmmc_platform_data *mmc = dev->platform_data;
- 
- 	if (mmc->remux)
--		mmc->remux(dev, slot, power_on);
-+		mmc->remux(dev, power_on);
- 
- 	if (power_on)
- 		hsmmc2_select_input_clk_src(mmc);
- }
- 
--static int am35x_hsmmc2_set_power(struct device *dev, int slot,
--				  int power_on, int vdd)
-+static int am35x_hsmmc2_set_power(struct device *dev, int power_on, int vdd)
- {
- 	struct omap_hsmmc_platform_data *mmc = dev->platform_data;
- 
-@@ -145,8 +142,7 @@ static int am35x_hsmmc2_set_power(struct device *dev, int slot,
- 	return 0;
- }
- 
--static int nop_mmc_set_power(struct device *dev, int slot, int power_on,
--							int vdd)
-+static int nop_mmc_set_power(struct device *dev, int power_on, int vdd)
- {
- 	return 0;
- }
-@@ -250,7 +246,6 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
- 		snprintf(hc_name, (HSMMC_NAME_LEN + 1), "mmc%islot%i",
- 								c->mmc, 1);
- 	mmc->name = hc_name;
--	mmc->nr_slots = 1;
- 	mmc->caps = c->caps;
- 	mmc->internal_clock = !c->ext_clock;
- 	mmc->reg_offset = 0;
-diff --git a/arch/arm/mach-omap2/hsmmc.h b/arch/arm/mach-omap2/hsmmc.h
-index 30c78c1..148cd9b 100644
---- a/arch/arm/mach-omap2/hsmmc.h
-+++ b/arch/arm/mach-omap2/hsmmc.h
-@@ -23,7 +23,7 @@ struct omap2_hsmmc_info {
- 	struct platform_device *pdev;	/* mmc controller instance */
- 	int	ocr_mask;	/* temporary HACK */
- 	/* Remux (pad configuration) when powering on/off */
--	void (*remux)(struct device *dev, int slot, int power_on);
-+	void (*remux)(struct device *dev, int power_on);
- 	/* init some special card */
- 	void (*init_card)(struct mmc_card *card);
- };
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index f4f1bcd..82b40b8 100644
+index 291b9e1..8a216c9 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -207,7 +207,6 @@ struct omap_hsmmc_host {
- 	int			use_dma, dma_ch;
- 	struct dma_chan		*tx_chan;
- 	struct dma_chan		*rx_chan;
--	int			slot_id;
- 	int			response_busy;
- 	int			context_loss;
- 	int			protect_card;
-@@ -223,8 +222,8 @@ struct omap_hsmmc_host {
- 	struct	omap_hsmmc_platform_data	*pdata;
+@@ -449,7 +449,8 @@ static inline int omap_hsmmc_have_reg(void)
  
- 	/* To handle board related suspend/resume functionality for MMC */
--	int (*suspend)(struct device *dev, int slot);
--	int (*resume)(struct device *dev, int slot);
-+	int (*suspend)(struct device *dev);
-+	int (*resume)(struct device *dev);
+ #endif
  
- 	/* return MMC cover switch state, can be NULL if not supported.
- 	 *
-@@ -232,13 +231,13 @@ struct omap_hsmmc_host {
- 	 *   0 - closed
- 	 *   1 - open
- 	 */
--	int (*get_cover_state)(struct device *dev, int slot);
-+	int (*get_cover_state)(struct device *dev);
- 
- 	/* Card detection IRQs */
- 	int card_detect_irq;
- 
--	int (*card_detect)(struct device *dev, int slot);
--	int (*get_ro)(struct device *dev, int slot);
-+	int (*card_detect)(struct device *dev);
-+	int (*get_ro)(struct device *dev);
- 
- };
- 
-@@ -249,7 +248,7 @@ struct omap_mmc_of_data {
- 
- static void omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host);
- 
--static int omap_hsmmc_card_detect(struct device *dev, int slot)
-+static int omap_hsmmc_card_detect(struct device *dev)
+-static int omap_hsmmc_gpio_init(struct omap_hsmmc_platform_data *pdata)
++static int omap_hsmmc_gpio_init(struct omap_hsmmc_host *host,
++				struct omap_hsmmc_platform_data *pdata)
  {
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
- 	struct omap_hsmmc_platform_data *mmc = host->pdata;
-@@ -258,7 +257,7 @@ static int omap_hsmmc_card_detect(struct device *dev, int slot)
- 	return !gpio_get_value_cansleep(mmc->switch_pin);
- }
+ 	int ret;
  
--static int omap_hsmmc_get_wp(struct device *dev, int slot)
-+static int omap_hsmmc_get_wp(struct device *dev)
- {
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
- 	struct omap_hsmmc_platform_data *mmc = host->pdata;
-@@ -267,7 +266,7 @@ static int omap_hsmmc_get_wp(struct device *dev, int slot)
- 	return gpio_get_value_cansleep(mmc->gpio_wp);
- }
- 
--static int omap_hsmmc_get_cover_state(struct device *dev, int slot)
-+static int omap_hsmmc_get_cover_state(struct device *dev)
- {
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
- 	struct omap_hsmmc_platform_data *mmc = host->pdata;
-@@ -278,7 +277,7 @@ static int omap_hsmmc_get_cover_state(struct device *dev, int slot)
- 
- #ifdef CONFIG_PM
- 
--static int omap_hsmmc_suspend_cdirq(struct device *dev, int slot)
-+static int omap_hsmmc_suspend_cdirq(struct device *dev)
- {
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
- 
-@@ -286,7 +285,7 @@ static int omap_hsmmc_suspend_cdirq(struct device *dev, int slot)
- 	return 0;
- }
- 
--static int omap_hsmmc_resume_cdirq(struct device *dev, int slot)
-+static int omap_hsmmc_resume_cdirq(struct device *dev)
- {
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
- 
-@@ -303,8 +302,7 @@ static int omap_hsmmc_resume_cdirq(struct device *dev, int slot)
- 
- #ifdef CONFIG_REGULATOR
- 
--static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
--				   int vdd)
-+static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
- {
- 	struct omap_hsmmc_host *host =
- 		platform_get_drvdata(to_platform_device(dev));
-@@ -318,7 +316,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 		return 0;
- 
- 	if (mmc_pdata(host)->before_set_reg)
--		mmc_pdata(host)->before_set_reg(dev, slot, power_on, vdd);
-+		mmc_pdata(host)->before_set_reg(dev, power_on, vdd);
- 
- 	if (host->pbias) {
- 		if (host->pbias_enabled == 1) {
-@@ -381,7 +379,7 @@ static int omap_hsmmc_set_power(struct device *dev, int slot, int power_on,
- 	}
- 
- 	if (mmc_pdata(host)->after_set_reg)
--		mmc_pdata(host)->after_set_reg(dev, slot, power_on, vdd);
-+		mmc_pdata(host)->after_set_reg(dev, power_on, vdd);
- 
- error_set_power:
+@@ -494,7 +495,8 @@ err_free_sp:
  	return ret;
-@@ -431,8 +429,8 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 	    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
- 		int vdd = ffs(mmc_pdata(host)->ocr_mask) - 1;
- 
--		mmc_pdata(host)->set_power(host->dev, host->slot_id, 1, vdd);
--		mmc_pdata(host)->set_power(host->dev, host->slot_id, 0, 0);
-+		mmc_pdata(host)->set_power(host->dev, 1, vdd);
-+		mmc_pdata(host)->set_power(host->dev, 0, 0);
- 	}
- 
- 	return 0;
-@@ -813,7 +811,7 @@ int omap_hsmmc_cover_is_closed(struct omap_hsmmc_host *host)
- 	int r = 1;
- 
- 	if (host->get_cover_state)
--		r = host->get_cover_state(host->dev, host->slot_id);
-+		r = host->get_cover_state(host->dev);
- 	return r;
  }
  
-@@ -1231,12 +1229,11 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
+-static void omap_hsmmc_gpio_free(struct omap_hsmmc_platform_data *pdata)
++static void omap_hsmmc_gpio_free(struct omap_hsmmc_host *host,
++				 struct omap_hsmmc_platform_data *pdata)
+ {
+ 	if (gpio_is_valid(pdata->gpio_wp))
+ 		gpio_free(pdata->gpio_wp);
+@@ -2064,14 +2066,10 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	if (IS_ERR(base))
+ 		return PTR_ERR(base);
+ 
+-	ret = omap_hsmmc_gpio_init(pdata);
+-	if (ret)
+-		goto err;
+-
+ 	mmc = mmc_alloc_host(sizeof(struct omap_hsmmc_host), &pdev->dev);
+ 	if (!mmc) {
+ 		ret = -ENOMEM;
+-		goto err_alloc;
++		goto err;
+ 	}
+ 
+ 	host		= mmc_priv(mmc);
+@@ -2088,6 +2086,10 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	host->next_data.cookie = 1;
+ 	host->pbias_enabled = 0;
+ 
++	ret = omap_hsmmc_gpio_init(host, pdata);
++	if (ret)
++		goto err_gpio;
++
+ 	platform_set_drvdata(pdev, host);
+ 
+ 	if (pdev->dev.of_node)
+@@ -2283,9 +2285,9 @@ err_irq:
+ 	if (host->dbclk)
+ 		clk_disable_unprepare(host->dbclk);
+ err1:
++	omap_hsmmc_gpio_free(host, pdata);
++err_gpio:
+ 	mmc_free_host(mmc);
+-err_alloc:
+-	omap_hsmmc_gpio_free(pdata);
+ err:
+ 	return ret;
+ }
+@@ -2309,7 +2311,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
+ 	if (host->dbclk)
  		clk_disable_unprepare(host->dbclk);
  
- 	/* Turn the power off */
--	ret = mmc_pdata(host)->set_power(host->dev, host->slot_id, 0, 0);
-+	ret = mmc_pdata(host)->set_power(host->dev, 0, 0);
- 
- 	/* Turn the power ON with given VDD 1.8 or 3.0v */
- 	if (!ret)
--		ret = mmc_pdata(host)->set_power(host->dev, host->slot_id, 1,
--						 vdd);
-+		ret = mmc_pdata(host)->set_power(host->dev, 1, vdd);
- 	pm_runtime_get_sync(host->dev);
- 	if (host->dbclk)
- 		clk_prepare_enable(host->dbclk);
-@@ -1284,7 +1281,7 @@ static void omap_hsmmc_protect_card(struct omap_hsmmc_host *host)
- 		return;
- 
- 	host->reqs_blocked = 0;
--	if (host->get_cover_state(host->dev, host->slot_id)) {
-+	if (host->get_cover_state(host->dev)) {
- 		if (host->protect_card) {
- 			dev_info(host->dev, "%s: cover is closed, "
- 					 "card is now accessible\n",
-@@ -1312,7 +1309,7 @@ static irqreturn_t omap_hsmmc_detect(int irq, void *dev_id)
- 	sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
- 
- 	if (host->card_detect)
--		carddetect = host->card_detect(host->dev, host->slot_id);
-+		carddetect = host->card_detect(host->dev);
- 	else {
- 		omap_hsmmc_protect_card(host);
- 		carddetect = -ENOSYS;
-@@ -1638,12 +1635,10 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	if (ios->power_mode != host->power_mode) {
- 		switch (ios->power_mode) {
- 		case MMC_POWER_OFF:
--			mmc_pdata(host)->set_power(host->dev, host->slot_id,
--						   0, 0);
-+			mmc_pdata(host)->set_power(host->dev, 0, 0);
- 			break;
- 		case MMC_POWER_UP:
--			mmc_pdata(host)->set_power(host->dev, host->slot_id,
--						   1, ios->vdd);
-+			mmc_pdata(host)->set_power(host->dev, 1, ios->vdd);
- 			break;
- 		case MMC_POWER_ON:
- 			do_send_init_stream = 1;
-@@ -1690,7 +1685,7 @@ static int omap_hsmmc_get_cd(struct mmc_host *mmc)
- 
- 	if (!host->card_detect)
- 		return -ENOSYS;
--	return host->card_detect(host->dev, host->slot_id);
-+	return host->card_detect(host->dev);
- }
- 
- static int omap_hsmmc_get_ro(struct mmc_host *mmc)
-@@ -1699,7 +1694,7 @@ static int omap_hsmmc_get_ro(struct mmc_host *mmc)
- 
- 	if (!host->get_ro)
- 		return -ENOSYS;
--	return host->get_ro(host->dev, 0);
-+	return host->get_ro(host->dev);
- }
- 
- static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
-@@ -1996,8 +1991,6 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
- 	if (of_find_property(np, "ti,dual-volt", NULL))
- 		pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
- 
--	/* This driver only supports 1 slot */
--	pdata->nr_slots = 1;
- 	pdata->switch_pin = cd_gpio;
- 	pdata->gpio_wp = wp_gpio;
- 
-@@ -2068,11 +2061,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 		return -ENXIO;
- 	}
- 
--	if (pdata->nr_slots == 0) {
--		dev_err(&pdev->dev, "No Slots\n");
--		return -ENXIO;
--	}
--
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	irq = platform_get_irq(pdev, 0);
- 	if (res == NULL || irq < 0)
-@@ -2095,7 +2083,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	host->use_dma	= 1;
- 	host->dma_ch	= -1;
- 	host->irq	= irq;
--	host->slot_id	= 0;
- 	host->mapbase	= res->start + pdata->reg_offset;
- 	host->base	= base + pdata->reg_offset;
- 	host->power_mode = MMC_POWER_OFF;
-@@ -2338,7 +2325,7 @@ static int omap_hsmmc_prepare(struct device *dev)
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
- 
- 	if (host->suspend)
--		return host->suspend(dev, host->slot_id);
-+		return host->suspend(dev);
+-	omap_hsmmc_gpio_free(host->pdata);
++	omap_hsmmc_gpio_free(host, host->pdata);
+ 	mmc_free_host(host->mmc);
  
  	return 0;
- }
-@@ -2348,7 +2335,7 @@ static void omap_hsmmc_complete(struct device *dev)
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
- 
- 	if (host->resume)
--		host->resume(dev, host->slot_id);
-+		host->resume(dev);
- 
- }
- 
-diff --git a/include/linux/platform_data/hsmmc-omap.h b/include/linux/platform_data/hsmmc-omap.h
-index 68ffec1..67bbcf0 100644
---- a/include/linux/platform_data/hsmmc-omap.h
-+++ b/include/linux/platform_data/hsmmc-omap.h
-@@ -38,9 +38,6 @@ struct omap_hsmmc_platform_data {
- 	/* back-link to device */
- 	struct device *dev;
- 
--	/* number of slots per controller */
--	unsigned nr_slots:2;
--
- 	/* set if your board has components or wiring that limits the
- 	 * maximum frequency on the MMC bus */
- 	unsigned int max_freq;
-@@ -79,15 +76,12 @@ struct omap_hsmmc_platform_data {
- 	int switch_pin;			/* gpio (card detect) */
- 	int gpio_wp;			/* gpio (write protect) */
- 
--	int (*set_power)(struct device *dev, int slot,
--			 int power_on, int vdd);
--	void (*remux)(struct device *dev, int slot, int power_on);
-+	int (*set_power)(struct device *dev, int power_on, int vdd);
-+	void (*remux)(struct device *dev, int power_on);
- 	/* Call back before enabling / disabling regulators */
--	void (*before_set_reg)(struct device *dev, int slot,
--			       int power_on, int vdd);
-+	void (*before_set_reg)(struct device *dev, int power_on, int vdd);
- 	/* Call back after enabling / disabling regulators */
--	void (*after_set_reg)(struct device *dev, int slot,
--			      int power_on, int vdd);
-+	void (*after_set_reg)(struct device *dev, int power_on, int vdd);
- 	/* if we have special card, init it using this callback */
- 	void (*init_card)(struct mmc_card *card);
- 
 -- 
 2.1.1
 
