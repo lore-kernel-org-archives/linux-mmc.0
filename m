@@ -1,101 +1,122 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH v4 08/10] omap_hsmmc: pass mmc_priv struct to gpio init / free
-Date: Sat,  8 Nov 2014 15:33:15 +0100
-Message-ID: <1415457197-14294-9-git-send-email-afenkart@gmail.com>
-References: <1415457197-14294-1-git-send-email-afenkart@gmail.com>
+From: Alexey Charkov <alchark@gmail.com>
+Subject: [PATCH] mmc: wmt-sdmmc: fix unmatched release_mem_region
+Date: Mon, 10 Nov 2014 00:12:51 +0300
+Message-ID: <1415567571-6144-1-git-send-email-alchark@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:40900 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753783AbaKHOj4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Nov 2014 09:39:56 -0500
-In-Reply-To: <1415457197-14294-1-git-send-email-afenkart@gmail.com>
+Received: from mail-la0-f47.google.com ([209.85.215.47]:64532 "EHLO
+	mail-la0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751221AbaKIVOv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Nov 2014 16:14:51 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>, =?UTF-8?q?Beno=C3=AEt=20Cousson?= <bcousson@baylibre.com>, Ulf Hansson <ulf.hansson@linaro.org>, pascal.huerst@gmail.com, Andreas Fenkart <afenkart@gmail.com>
+To: Tony Prisk <linux@prisktech.co.nz>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Helmut Stengele <lautriv@coldplug.net>, Alexey Charkov <alchark@gmail.com>
 
-this is needed when installing callbacks in the host struct and not
-in the platform data, e.g. cover detect irq should be stored in
-omap_hsmmc_host and not platform data
+From: Helmut Stengele <lautriv@coldplug.net>
 
-Acked-by: Tony Lindgren <tony@atomide.com>
-Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+Current code calls release_mem_region upon module unload
+without requesting the region first. This patch fixes it
+by moving to a devres-based ioremap implementation, which
+handles requesting and releasing memory region internally.
+
+This also makes the error/unload paths a bit simpler.
+
+Signed-off-by: Helmut Stengele <lautriv@coldplug.net>
+(edited commit message)
+Signed-off-by: Alexey Charkov <alchark@gmail.com>
 ---
- drivers/mmc/host/omap_hsmmc.c | 22 ++++++++++++----------
- 1 file changed, 12 insertions(+), 10 deletions(-)
+Dear Chris, Ulf,
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 291b9e1..8a216c9 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -449,7 +449,8 @@ static inline int omap_hsmmc_have_reg(void)
- 
- #endif
- 
--static int omap_hsmmc_gpio_init(struct omap_hsmmc_platform_data *pdata)
-+static int omap_hsmmc_gpio_init(struct omap_hsmmc_host *host,
-+				struct omap_hsmmc_platform_data *pdata)
- {
+This is a pretty trivial fix to a bug in wmt-sdmmc.c that is only
+visible upon module unload. Is there any chance to get it merged to
+the current fixes tree?
+
+I think I'd also like to convert other resource requests here to devres,
+but that would probably be a separate patch to go into -next. That's why
+we didn't rename the failX: labels, for example (as most of them could be
+dropped altogether if the respective requesting functions are converted to
+devres infrastructure).
+
+Thanks a lot,
+Alexey
+
+ drivers/mmc/host/wmt-sdmmc.c | 18 ++++++++----------
+ 1 file changed, 8 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+index 54181b4..02b5e6b 100644
+--- a/drivers/mmc/host/wmt-sdmmc.c
++++ b/drivers/mmc/host/wmt-sdmmc.c
+@@ -759,6 +759,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
+ 	const struct wmt_mci_caps *wmt_caps;
  	int ret;
+ 	int regular_irq, dma_irq;
++	struct resource *res;
  
-@@ -494,7 +495,8 @@ err_free_sp:
- 	return ret;
- }
- 
--static void omap_hsmmc_gpio_free(struct omap_hsmmc_platform_data *pdata)
-+static void omap_hsmmc_gpio_free(struct omap_hsmmc_host *host,
-+				 struct omap_hsmmc_platform_data *pdata)
- {
- 	if (gpio_is_valid(pdata->gpio_wp))
- 		gpio_free(pdata->gpio_wp);
-@@ -2064,14 +2066,10 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	if (IS_ERR(base))
- 		return PTR_ERR(base);
- 
--	ret = omap_hsmmc_gpio_init(pdata);
--	if (ret)
--		goto err;
--
- 	mmc = mmc_alloc_host(sizeof(struct omap_hsmmc_host), &pdev->dev);
- 	if (!mmc) {
- 		ret = -ENOMEM;
--		goto err_alloc;
-+		goto err;
+ 	if (!of_id || !of_id->data) {
+ 		dev_err(&pdev->dev, "Controller capabilities data missing\n");
+@@ -781,6 +782,11 @@ static int wmt_mci_probe(struct platform_device *pdev)
+ 		goto fail1;
  	}
  
- 	host		= mmc_priv(mmc);
-@@ -2088,6 +2086,10 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	host->next_data.cookie = 1;
- 	host->pbias_enabled = 0;
++	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	if (!res) {
++		ret = -ENODEV;
++		goto fail1;
++	}
+ 	mmc = mmc_alloc_host(sizeof(struct wmt_mci_priv), &pdev->dev);
+ 	if (!mmc) {
+ 		dev_err(&pdev->dev, "Failed to allocate mmc_host\n");
+@@ -813,7 +819,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
+ 	if (of_get_property(np, "cd-inverted", NULL))
+ 		priv->cd_inverted = 1;
  
-+	ret = omap_hsmmc_gpio_init(host, pdata);
-+	if (ret)
-+		goto err_gpio;
-+
- 	platform_set_drvdata(pdev, host);
+-	priv->sdmmc_base = of_iomap(np, 0);
++	priv->sdmmc_base = devm_ioremap_resource(&pdev->dev, res);
+ 	if (!priv->sdmmc_base) {
+ 		dev_err(&pdev->dev, "Failed to map IO space\n");
+ 		ret = -ENOMEM;
+@@ -826,7 +832,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
+ 	ret = request_irq(regular_irq, wmt_mci_regular_isr, 0, "sdmmc", priv);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "Register regular IRQ fail\n");
+-		goto fail3;
++		goto fail2;
+ 	}
  
- 	if (pdev->dev.of_node)
-@@ -2283,9 +2285,9 @@ err_irq:
- 	if (host->dbclk)
- 		clk_disable_unprepare(host->dbclk);
- err1:
-+	omap_hsmmc_gpio_free(host, pdata);
-+err_gpio:
+ 	ret = request_irq(dma_irq, wmt_mci_dma_isr, 0, "sdmmc", priv);
+@@ -869,8 +875,6 @@ fail5:
+ 	free_irq(dma_irq, priv);
+ fail4:
+ 	free_irq(regular_irq, priv);
+-fail3:
+-	iounmap(priv->sdmmc_base);
+ fail2:
  	mmc_free_host(mmc);
--err_alloc:
--	omap_hsmmc_gpio_free(pdata);
- err:
- 	return ret;
- }
-@@ -2309,7 +2311,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
- 	if (host->dbclk)
- 		clk_disable_unprepare(host->dbclk);
+ fail1:
+@@ -881,7 +885,6 @@ static int wmt_mci_remove(struct platform_device *pdev)
+ {
+ 	struct mmc_host *mmc;
+ 	struct wmt_mci_priv *priv;
+-	struct resource *res;
+ 	u32 reg_tmp;
  
--	omap_hsmmc_gpio_free(host->pdata);
-+	omap_hsmmc_gpio_free(host, host->pdata);
- 	mmc_free_host(host->mmc);
+ 	mmc = platform_get_drvdata(pdev);
+@@ -904,14 +907,9 @@ static int wmt_mci_remove(struct platform_device *pdev)
+ 	free_irq(priv->irq_regular, priv);
+ 	free_irq(priv->irq_dma, priv);
  
- 	return 0;
+-	iounmap(priv->sdmmc_base);
+-
+ 	clk_disable_unprepare(priv->clk_sdmmc);
+ 	clk_put(priv->clk_sdmmc);
+ 
+-	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	release_mem_region(res->start, resource_size(res));
+-
+ 	mmc_free_host(mmc);
+ 
+ 	dev_info(&pdev->dev, "WMT MCI device removed\n");
 -- 
-2.1.1
+2.1.0
 
