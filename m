@@ -1,67 +1,55 @@
-From: Alexey Charkov <alchark@gmail.com>
-Subject: Re: [PATCH] mmc: wmt-sdmmc: fix unmatched release_mem_region
-Date: Mon, 10 Nov 2014 08:15:21 +0300
-Message-ID: <CABjd4YxyUJi6RaGWicFeoJ7C27qhUFsAbq-nJTreACrt-voeYA@mail.gmail.com>
-References: <1415567571-6144-1-git-send-email-alchark@gmail.com>
-	<CAOMZO5C+O4h=f=vtLTdBZktnfVWzfeLjOQG-oecxh_c9u-QMqA@mail.gmail.com>
-	<545FE821.5060107@coldplug.net>
+From: Vadivelan M <Vadivelan.Mani@toshiba-tsip.com>
+Subject: RE: eMMC write error in IMX6 Sabre AI board
+Date: Mon, 10 Nov 2014 08:44:29 +0000
+Message-ID: <0CE86CAC7146084190A01E87F7DCD5E908A0CFA5@TOSBLRMBX01.TOSHIBA-TSIP.COM>
+References: <loom.20141107T122543-102@post.gmane.org>
+ <CAOMZO5D1n7JutWCJAVafFSOKPZaS_HJjLPp26ROR-Gk12=b0yw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f171.google.com ([209.85.223.171]:59208 "EHLO
-	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751762AbaKJFPW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Nov 2014 00:15:22 -0500
-In-Reply-To: <545FE821.5060107@coldplug.net>
+Received: from mail.soc-soft.com ([202.56.254.199]:55555 "EHLO
+	peak.toshiba-tesi.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750930AbaKJIxr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Nov 2014 03:53:47 -0500
+In-Reply-To: <CAOMZO5D1n7JutWCJAVafFSOKPZaS_HJjLPp26ROR-Gk12=b0yw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: lautriv <lautriv@coldplug.net>
-Cc: Fabio Estevam <festevam@gmail.com>, Tony Prisk <linux@prisktech.co.nz>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+To: 'Fabio Estevam' <festevam@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-2014-11-10 1:18 GMT+03:00 lautriv <lautriv@coldplug.net>:
-> On 11/09/2014 10:55 PM, Fabio Estevam wrote:
->>
->> On Sun, Nov 9, 2014 at 7:12 PM, Alexey Charkov <alchark@gmail.com> wrote:
->>
->>> +       res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->>> +       if (!res) {
->>> +               ret = -ENODEV;
->>> +               goto fail1;
->>
->> You could save this NULL check...
->>
->>> +       }
->>>          mmc = mmc_alloc_host(sizeof(struct wmt_mci_priv), &pdev->dev);
->>>          if (!mmc) {
->>>                  dev_err(&pdev->dev, "Failed to allocate mmc_host\n");
->>> @@ -813,7 +819,7 @@ static int wmt_mci_probe(struct platform_device
->>> *pdev)
->>>          if (of_get_property(np, "cd-inverted", NULL))
->>>                  priv->cd_inverted = 1;
->>>
->>> -       priv->sdmmc_base = of_iomap(np, 0);
->>
->> If you move ' res = platform_get_resource' right here as
->> devm_ioremap_resource() already does the NULL check.
->>
->>> +       priv->sdmmc_base = devm_ioremap_resource(&pdev->dev, res);
->>>          if (!priv->sdmmc_base) {
->>>                  dev_err(&pdev->dev, "Failed to map IO space\n");
->>>                  ret = -ENOMEM;
->
-> This was the original intention but it would fall between the failX jumps, i
-> discussed that with Alexey and we decided to change it with the cleanup to
-> hold this patch small.
+SGksDQogVGhhbmtzIGZvciB5b3VyIHN1Z2dlc3Rpb24uIEJ1dCBteSBrZXJuZWwgaXMgZml4ZWQg
+dG8gdmVyc2lvbiAzLjAuMzUgYW5kIGhlbmNlIHVuYWJsZSB0byB1c2UgYSBkaWZmZXJlbnQga2Vy
+bmVsLiBQbGVhc2UgdGVsbCB3aGF0IGlzIHRoZSBwcm9ibGVtIGluIHRoaXMga2VybmVsIHZlcnNp
+b24gaWYgeW91IGFscmVhZHkga25vdy4gVGhhdCB3b3VsZCBiZSB2ZXJ5IGhlbHBmdWwuDQoNCk5P
+VEU6IFRoZXJlIG1heSBiZSBzb21lIGNvcHlyaWdodCBtZXNzYWdlcyBiZWxvdyBteSBtYWlsIHdo
+aWNoIGdldHMgYWRkZWQgYXV0b21hdGljYWxseS4gS2luZGx5IGlnbm9yZSB0aG9zZSBtZXNzYWdl
+cy4NCg0KVGhhbmtzIGFuZCByZWdhcmRzLA0KVmFkaXZlbGFuLg0KDQotLS0tLU9yaWdpbmFsIE1l
+c3NhZ2UtLS0tLQ0KRnJvbTogRmFiaW8gRXN0ZXZhbSBbbWFpbHRvOmZlc3RldmFtQGdtYWlsLmNv
+bV0gDQpTZW50OiAwNyBOb3ZlbWJlciAyMDE0IDE3OjQyDQpUbzogVmFkaXZlbGFuIE0NCkNjOiBs
+aW51eC1tbWNAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0OiBSZTogZU1NQyB3cml0ZSBlcnJvciBp
+biBJTVg2IFNhYnJlIEFJIGJvYXJkDQoNCk9uIEZyaSwgTm92IDcsIDIwMTQgYXQgOTozNSBBTSwg
+dmFkaXZlbGFuIG1hbmkgPHZhZGl2ZWxhbi5tYW5pQHRvc2hpYmEtdHNpcC5jb20+IHdyb3RlOg0K
+PiBEZWFyIGFsbCwNCj4gICAgICBJJ20gZmFjaW5nIHRoaXMgdW5pcXVlIHByb2JsZW0gZHVyaW5n
+IGVtbWMgd3JpdGUgb3BlcmF0aW9uLiBJJ20gDQo+IHVzaW5nIGEgVG9zaGliYSBlbW1jIGRldmlj
+ZSBvbiBTYWJyZSBBSSBib2FyZCBhbmQgbGludXgga2VybmVsIHZlcnNpb24gMy4wLjM1Lg0KDQpQ
+bGVhc2UgdHJ5IDMuMTgtcmMzLg0KVGhlIGluZm9ybWF0aW9uIGNvbnRhaW5lZCBpbiB0aGlzIGUt
+bWFpbCBtZXNzYWdlIGFuZCBpbiBhbnkNCmF0dGFjaG1lbnRzL2FubmV4dXJlL2FwcGVuZGljZXMg
+aXMgY29uZmlkZW50aWFsIHRvIHRoZSANCnJlY2lwaWVudCBhbmQgbWF5IGNvbnRhaW4gcHJpdmls
+ZWdlZCBpbmZvcm1hdGlvbi4gDQpJZiB5b3UgYXJlIG5vdCB0aGUgaW50ZW5kZWQgcmVjaXBpZW50
+LCBwbGVhc2Ugbm90aWZ5IHRoZQ0Kc2VuZGVyIGFuZCBkZWxldGUgdGhlIG1lc3NhZ2UgYWxvbmcg
+d2l0aCBhbnkgDQphdHRhY2htZW50cy9hbm5leHVyZS9hcHBlbmRpY2VzLiBZb3Ugc2hvdWxkIG5v
+dCBkaXNjbG9zZSwNCmNvcHkgb3Igb3RoZXJ3aXNlIHVzZSB0aGUgaW5mb3JtYXRpb24gY29udGFp
+bmVkIGluIHRoZQ0KbWVzc2FnZSBvciBhbnkgYW5uZXh1cmUuIEFueSB2aWV3cyBleHByZXNzZWQg
+aW4gdGhpcyBlLW1haWwgDQphcmUgdGhvc2Ugb2YgdGhlIGluZGl2aWR1YWwgc2VuZGVyIGV4Y2Vw
+dCB3aGVyZSB0aGUgc2VuZGVyIA0Kc3BlY2lmaWNhbGx5IHN0YXRlcyB0aGVtIHRvIGJlIHRoZSB2
+aWV3cyBvZiANClRvc2hpYmEgU29mdHdhcmUgSW5kaWEgUHZ0LiBMdGQuIChUU0lQKSxCYW5nYWxv
+cmUuDQoNCkFsdGhvdWdoIHRoaXMgdHJhbnNtaXNzaW9uIGFuZCBhbnkgYXR0YWNobWVudHMgYXJl
+IGJlbGlldmVkIHRvIGJlDQpmcmVlIG9mIGFueSB2aXJ1cyBvciBvdGhlciBkZWZlY3QgdGhhdCBt
+aWdodCBhZmZlY3QgYW55IGNvbXB1dGVyIA0Kc3lzdGVtIGludG8gd2hpY2ggaXQgaXMgcmVjZWl2
+ZWQgYW5kIG9wZW5lZCwgaXQgaXMgdGhlIHJlc3BvbnNpYmlsaXR5DQpvZiB0aGUgcmVjaXBpZW50
+IHRvIGVuc3VyZSB0aGF0IGl0IGlzIHZpcnVzIGZyZWUgYW5kIG5vIHJlc3BvbnNpYmlsaXR5IA0K
+aXMgYWNjZXB0ZWQgYnkgVG9zaGliYSBFbWJlZGRlZCBTb2Z0d2FyZSBJbmRpYSBQdnQuIEx0ZCwg
+Zm9yIGFueSBsb3NzIG9yDQpkYW1hZ2UgYXJpc2luZyBpbiBhbnkgd2F5IGZyb20gaXRzIHVzZS4K
 
-I think Fabio means something slightly different than what we
-discussed. We haven't realized that the first thing
-devm_ioremap_resource does is exactly that (!res) check, so we can
-skip ours altogether.
-
-Looking at the function code a bit closer, we should also make the
-check look like "if (IS_ERR(priv->sdmmc_base)", kill the dev_err call
-(as it's also done internally), and then just do "ret =
-PTR_ERR(priv->sdmmc_base)" and jump to the label.
-
-Thanks a lot,
-Alexey
