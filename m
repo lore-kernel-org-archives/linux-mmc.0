@@ -1,109 +1,62 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 00/10] ARM: OMAP1/2+: MMC: separate platform data for
- mmc and mmc hs driver
-Date: Mon, 10 Nov 2014 13:07:36 +0100
-Message-ID: <CAPDyKFoTmB6JY9rkgOTbhvJ5_a=mpjqXL-Gy+jh4bXxfK+DPEg@mail.gmail.com>
-References: <1415457197-14294-1-git-send-email-afenkart@gmail.com>
+Subject: Re: [PATCH 2/2] mmc: core: reset sdio card properly on resume.
+Date: Mon, 10 Nov 2014 14:29:19 +0100
+Message-ID: <CAPDyKFrrOozTO5xR8RO=4L8xZ9hLGizH=2mxZE=5zvwMhhgD+w@mail.gmail.com>
+References: <20141108000919.5629.55381.stgit@notabene.brown>
+	<20141108001411.5629.55298.stgit@notabene.brown>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f49.google.com ([209.85.192.49]:63604 "EHLO
-	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752504AbaKJMHh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Nov 2014 07:07:37 -0500
-Received: by mail-qg0-f49.google.com with SMTP id z60so5230586qgd.8
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Nov 2014 04:07:36 -0800 (PST)
-In-Reply-To: <1415457197-14294-1-git-send-email-afenkart@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20141108001411.5629.55298.stgit@notabene.brown>
+Sender: linux-kernel-owner@vger.kernel.org
+To: NeilBrown <neilb@suse.de>
+Cc: Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, =?UTF-8?Q?Beno=C3=AEt_Cousson?= <bcousson@baylibre.com>, Pascal Huerst <pascal.huerst@gmail.com>
 
-On 8 November 2014 15:33, Andreas Fenkart <afenkart@gmail.com> wrote:
-> v4:
-> - rework patch descriptions
-> - dropped patch removing unused defines in mach-omap2/mmc.h
-> - rebase 3.18.0-rc3
-> - compile test omap1 and omap2
+On 8 November 2014 01:14, NeilBrown <neilb@suse.de> wrote:
+> mmc_sdio_power_restore calls
+>         mmc_send_if_cond(host, host->ocr_avail);
 >
-> compile tested
-> OMAP1:
-> CONFIG_MACH_OMAP_INNOVATOR=y
-> CONFIG_MACH_OMAP_H2=y
-> CONFIG_MACH_OMAP_H3=y
-> CONFIG_MACH_HERALD=y
-> CONFIG_MACH_OMAP_OSK=y
-> CONFIG_MACH_OMAP_PERSEUS2=y
-> CONFIG_MACH_OMAP_FSAMPLE=y
-> CONFIG_MACH_VOICEBLUE=y
-> CONFIG_MACH_OMAP_PALMTE=y
-> CONFIG_MACH_OMAP_PALMZ71=y
-> CONFIG_MACH_OMAP_PALMTT=y
-> CONFIG_MACH_SX1=y
-> CONFIG_MACH_NOKIA770=y
-> CONFIG_MACH_AMS_DELTA=y
-> CONFIG_MACH_OMAP_GENERIC=y
+>         ret = mmc_send_io_op_cond(host, 0, NULL);
 >
-> OMAP2:
-> CONFIG_MACH_OMAP2_TUSB6010=y
-> CONFIG_MACH_OMAP3_BEAGLE=y
-> CONFIG_MACH_DEVKIT8000=y
-> CONFIG_MACH_OMAP_LDP=y
-> CONFIG_MACH_OMAP3530_LV_SOM=y
-> CONFIG_MACH_OMAP3_TORPEDO=y
-> CONFIG_MACH_OVERO=y
-> CONFIG_MACH_OMAP3517EVM=y
-> CONFIG_MACH_CRANEBOARD=y
-> CONFIG_MACH_OMAP3_PANDORA=y
-> CONFIG_MACH_TOUCHBOOK=y
-> CONFIG_MACH_OMAP_3430SDP=y
-> CONFIG_MACH_NOKIA_N810=y
-> CONFIG_MACH_NOKIA_N810_WIMAX=y
-> CONFIG_MACH_NOKIA_N8X0=y
-> CONFIG_MACH_NOKIA_RX51=y
-> CONFIG_MACH_CM_T35=y
-> CONFIG_MACH_CM_T3517=y
-> CONFIG_MACH_CM_T3730=y
-> CONFIG_MACH_SBC3530=y
-> CONFIG_MACH_TI8168EVM=y
-> CONFIG_MACH_TI8148EVM=y
+> between mmc_go_idle() and  mmc_sdio_init_card().
+> mmc_sdio_resume needs to as well, else my libertas sdio wifi
+> device doesn't resume properly from suspend.
 >
-> Andreas Fenkart (10):
->   ARM: OMAP2: MMC: include mmc-omap platform header directly
->   ARM: OMAP1/2+: MMC: separate platform data for mmc and mmc hs driver
->   omap_hsmmc: remove unused fields in platform_data
->   omap_hsmmc: remove un-initialized callbacks from platform data
->   omap_hsmmc: remove never read power_saving field in omap2_hsmmc_info
->   omap_hsmmc: remove unused get_context_loss_count callback
->   omap_hsmmc: remove unnecessary omap_hsmmc_slot_data indirection
->   omap_hsmmc: pass mmc_priv struct to gpio init / free
->   omap_hsmmc: Remove unnecessary callbacks from platform data
->   omap_hsmmc: remove unused slot_id parameter
+> Signed-off-by: NeilBrown <neilb@suse.de>
+> ---
+>  drivers/mmc/core/sdio.c |    8 ++++++--
+>  1 file changed, 6 insertions(+), 2 deletions(-)
 >
->  arch/arm/mach-omap2/board-n8x0.c                   |   2 +
->  arch/arm/mach-omap2/board-rx51-peripherals.c       |   4 +-
->  arch/arm/mach-omap2/hsmmc.c                        | 158 +++++-------
->  arch/arm/mach-omap2/hsmmc.h                        |   9 +-
->  arch/arm/mach-omap2/mmc.h                          |  10 -
->  arch/arm/mach-omap2/omap4-common.c                 |   1 -
->  arch/arm/mach-omap2/omap_hwmod_2430_data.c         |   4 +-
->  .../mach-omap2/omap_hwmod_33xx_43xx_ipblock_data.c |   8 +-
->  arch/arm/mach-omap2/omap_hwmod_33xx_data.c         |   1 -
->  arch/arm/mach-omap2/omap_hwmod_3xxx_data.c         |   8 +-
->  arch/arm/mach-omap2/omap_hwmod_44xx_data.c         |   4 +-
->  arch/arm/mach-omap2/omap_hwmod_54xx_data.c         |   4 +-
->  arch/arm/mach-omap2/omap_hwmod_7xx_data.c          |   4 +-
->  drivers/mmc/host/omap_hsmmc.c                      | 282 ++++++++++-----------
->  include/linux/platform_data/hsmmc-omap.h           |  90 +++++++
->  include/linux/platform_data/mmc-omap.h             |  27 --
->  16 files changed, 312 insertions(+), 304 deletions(-)
->  create mode 100644 include/linux/platform_data/hsmmc-omap.h
->
-> --
-> 2.1.1
->
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index e636d9e99e4a..3f069a6f448f 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -981,8 +981,12 @@ static int mmc_sdio_resume(struct mmc_host *host)
+>         if (mmc_card_is_removable(host) || !mmc_card_keep_power(host)) {
+>                 sdio_reset(host);
+>                 mmc_go_idle(host);
+> -               err = mmc_sdio_init_card(host, host->card->ocr, host->card,
+> -                                       mmc_card_keep_power(host));
+> +               mmc_send_if_cond(host, host->ocr_avail);
 
-Thanks! Applied for next.
+/s /host->ocr_avail /host->card->ocr
+
+I would expect that to work. I do realize that "host->ocr_avail" is
+being used in the ->power_restore() callback, but I think that's wrong
+as well. Could you maybe verify that changing to host->card->ocr works
+in this path as well? That's would of course be a separate patch.
+
+> +               err = mmc_send_io_op_cond(host, 0, NULL);
+> +               if (!err)
+> +                       err = mmc_sdio_init_card(host, host->card->ocr,
+> +                                                host->card,
+> +                                                mmc_card_keep_power(host));
+>         } else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
+>                 /* We may have switched to 1-bit mode during suspend */
+>                 err = sdio_enable_4bit_bus(host->card);
+>
+>
 
 Kind regards
 Uffe
