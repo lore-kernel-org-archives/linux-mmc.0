@@ -1,76 +1,109 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: atmel-mci: adopt pinctrl support
-Date: Mon, 10 Nov 2014 12:43:29 +0100
-Message-ID: <CAPDyKFp6wXqP1x0uO12=mgrCsjvx4vfkr9cCJVAtjkFQ7s=q2A@mail.gmail.com>
-References: <1415321293-17521-1-git-send-email-wenyou.yang@atmel.com>
+Subject: Re: [PATCH v4 00/10] ARM: OMAP1/2+: MMC: separate platform data for
+ mmc and mmc hs driver
+Date: Mon, 10 Nov 2014 13:07:36 +0100
+Message-ID: <CAPDyKFoTmB6JY9rkgOTbhvJ5_a=mpjqXL-Gy+jh4bXxfK+DPEg@mail.gmail.com>
+References: <1415457197-14294-1-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1415321293-17521-1-git-send-email-wenyou.yang@atmel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Wenyou Yang <wenyou.yang@atmel.com>
-Cc: Chris Ball <chris@printf.net>, Kevin Hilman <khilman@kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f49.google.com ([209.85.192.49]:63604 "EHLO
+	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752504AbaKJMHh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Nov 2014 07:07:37 -0500
+Received: by mail-qg0-f49.google.com with SMTP id z60so5230586qgd.8
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Nov 2014 04:07:36 -0800 (PST)
+In-Reply-To: <1415457197-14294-1-git-send-email-afenkart@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, =?UTF-8?Q?Beno=C3=AEt_Cousson?= <bcousson@baylibre.com>, Pascal Huerst <pascal.huerst@gmail.com>
 
-On 7 November 2014 01:48, Wenyou Yang <wenyou.yang@atmel.com> wrote:
-> Amend the atmel mci pin controller to optionally take a pin control
-> handle and set the state of the pins to:
-> - "default" on boot, resume and before performing an transfer.
-> - "sleep" on suspend().
+On 8 November 2014 15:33, Andreas Fenkart <afenkart@gmail.com> wrote:
+> v4:
+> - rework patch descriptions
+> - dropped patch removing unused defines in mach-omap2/mmc.h
+> - rebase 3.18.0-rc3
+> - compile test omap1 and omap2
 >
-> This should make it possible to optimize energy usage for the pins
-> both for the suspend/resume cycle.
+> compile tested
+> OMAP1:
+> CONFIG_MACH_OMAP_INNOVATOR=y
+> CONFIG_MACH_OMAP_H2=y
+> CONFIG_MACH_OMAP_H3=y
+> CONFIG_MACH_HERALD=y
+> CONFIG_MACH_OMAP_OSK=y
+> CONFIG_MACH_OMAP_PERSEUS2=y
+> CONFIG_MACH_OMAP_FSAMPLE=y
+> CONFIG_MACH_VOICEBLUE=y
+> CONFIG_MACH_OMAP_PALMTE=y
+> CONFIG_MACH_OMAP_PALMZ71=y
+> CONFIG_MACH_OMAP_PALMTT=y
+> CONFIG_MACH_SX1=y
+> CONFIG_MACH_NOKIA770=y
+> CONFIG_MACH_AMS_DELTA=y
+> CONFIG_MACH_OMAP_GENERIC=y
 >
-> Signed-off-by: Wenyou Yang <wenyou.yang@atmel.com>
+> OMAP2:
+> CONFIG_MACH_OMAP2_TUSB6010=y
+> CONFIG_MACH_OMAP3_BEAGLE=y
+> CONFIG_MACH_DEVKIT8000=y
+> CONFIG_MACH_OMAP_LDP=y
+> CONFIG_MACH_OMAP3530_LV_SOM=y
+> CONFIG_MACH_OMAP3_TORPEDO=y
+> CONFIG_MACH_OVERO=y
+> CONFIG_MACH_OMAP3517EVM=y
+> CONFIG_MACH_CRANEBOARD=y
+> CONFIG_MACH_OMAP3_PANDORA=y
+> CONFIG_MACH_TOUCHBOOK=y
+> CONFIG_MACH_OMAP_3430SDP=y
+> CONFIG_MACH_NOKIA_N810=y
+> CONFIG_MACH_NOKIA_N810_WIMAX=y
+> CONFIG_MACH_NOKIA_N8X0=y
+> CONFIG_MACH_NOKIA_RX51=y
+> CONFIG_MACH_CM_T35=y
+> CONFIG_MACH_CM_T3517=y
+> CONFIG_MACH_CM_T3730=y
+> CONFIG_MACH_SBC3530=y
+> CONFIG_MACH_TI8168EVM=y
+> CONFIG_MACH_TI8148EVM=y
+>
+> Andreas Fenkart (10):
+>   ARM: OMAP2: MMC: include mmc-omap platform header directly
+>   ARM: OMAP1/2+: MMC: separate platform data for mmc and mmc hs driver
+>   omap_hsmmc: remove unused fields in platform_data
+>   omap_hsmmc: remove un-initialized callbacks from platform data
+>   omap_hsmmc: remove never read power_saving field in omap2_hsmmc_info
+>   omap_hsmmc: remove unused get_context_loss_count callback
+>   omap_hsmmc: remove unnecessary omap_hsmmc_slot_data indirection
+>   omap_hsmmc: pass mmc_priv struct to gpio init / free
+>   omap_hsmmc: Remove unnecessary callbacks from platform data
+>   omap_hsmmc: remove unused slot_id parameter
+>
+>  arch/arm/mach-omap2/board-n8x0.c                   |   2 +
+>  arch/arm/mach-omap2/board-rx51-peripherals.c       |   4 +-
+>  arch/arm/mach-omap2/hsmmc.c                        | 158 +++++-------
+>  arch/arm/mach-omap2/hsmmc.h                        |   9 +-
+>  arch/arm/mach-omap2/mmc.h                          |  10 -
+>  arch/arm/mach-omap2/omap4-common.c                 |   1 -
+>  arch/arm/mach-omap2/omap_hwmod_2430_data.c         |   4 +-
+>  .../mach-omap2/omap_hwmod_33xx_43xx_ipblock_data.c |   8 +-
+>  arch/arm/mach-omap2/omap_hwmod_33xx_data.c         |   1 -
+>  arch/arm/mach-omap2/omap_hwmod_3xxx_data.c         |   8 +-
+>  arch/arm/mach-omap2/omap_hwmod_44xx_data.c         |   4 +-
+>  arch/arm/mach-omap2/omap_hwmod_54xx_data.c         |   4 +-
+>  arch/arm/mach-omap2/omap_hwmod_7xx_data.c          |   4 +-
+>  drivers/mmc/host/omap_hsmmc.c                      | 282 ++++++++++-----------
+>  include/linux/platform_data/hsmmc-omap.h           |  90 +++++++
+>  include/linux/platform_data/mmc-omap.h             |  27 --
+>  16 files changed, 312 insertions(+), 304 deletions(-)
+>  create mode 100644 include/linux/platform_data/hsmmc-omap.h
+>
+> --
+> 2.1.1
+>
 
 Thanks! Applied for next.
 
 Kind regards
 Uffe
-
-> ---
-> Hi Ulf,
->
-> Thanks a lot.
->
-> According to your advice, remove pinctrl_pm_select_default_state(&pdev->dev) from the _probe function.
->
-> Best Regards,
-> Wenyou Yang
->
->  drivers/mmc/host/atmel-mci.c |    5 +++++
->  1 file changed, 5 insertions(+)
->
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 4df1599..a7b59ba 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -39,6 +39,7 @@
->  #include <linux/atmel_pdc.h>
->  #include <linux/pm.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/pinctrl/consumer.h>
->
->  #include <asm/cacheflush.h>
->  #include <asm/io.h>
-> @@ -2568,6 +2569,8 @@ static int atmci_runtime_suspend(struct device *dev)
->
->         clk_disable_unprepare(host->mck);
->
-> +       pinctrl_pm_select_sleep_state(dev);
-> +
->         return 0;
->  }
->
-> @@ -2575,6 +2578,8 @@ static int atmci_runtime_resume(struct device *dev)
->  {
->         struct atmel_mci *host = dev_get_drvdata(dev);
->
-> +       pinctrl_pm_select_default_state(dev);
-> +
->         return clk_prepare_enable(host->mck);
->  }
->  #endif
-> --
-> 1.7.9.5
->
