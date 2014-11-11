@@ -1,176 +1,117 @@
-From: lautriv <lautriv@coldplug.net>
-Subject: Re: [PATCH] mmc: wmt-sdmmc: fix unmatched release_mem_region
-Date: Mon, 10 Nov 2014 21:17:03 +0100
-Message-ID: <54611D3F.2010903@coldplug.net>
-References: <1415567571-6144-1-git-send-email-alchark@gmail.com>	<CAOMZO5C+O4h=f=vtLTdBZktnfVWzfeLjOQG-oecxh_c9u-QMqA@mail.gmail.com>	<545FE821.5060107@coldplug.net> <CABjd4YxyUJi6RaGWicFeoJ7C27qhUFsAbq-nJTreACrt-voeYA@mail.gmail.com>
+From: NeilBrown <neilb-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: [PATCH 2/2] mmc: core: reset sdio card properly on resume.
+Date: Tue, 11 Nov 2014 11:17:38 +1100
+Message-ID: <20141111111738.1e7856ce@notabene.brown>
+References: <20141108000919.5629.55381.stgit@notabene.brown>
+	<20141108001411.5629.55298.stgit@notabene.brown>
+	<CAPDyKFrrOozTO5xR8RO=4L8xZ9hLGizH=2mxZE=5zvwMhhgD+w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
- boundary="------------080106070506070707090806"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from coldplug.net ([109.75.184.172]:42451 "EHLO
-	external.coldplug.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751218AbaKJUQw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Nov 2014 15:16:52 -0500
-Received: from localhost (localhost [127.0.0.1])
-	by external.coldplug.net (Postfix) with ESMTP id F02113A547
-	for <linux-mmc@vger.kernel.org>; Mon, 10 Nov 2014 21:16:47 +0100 (CET)
-Received: from external.coldplug.net ([127.0.0.1])
-	by localhost (external.coldplug.net [127.0.0.1]) (amavisd-new, port 10024)
-	with ESMTP id lkPg4HJRXzZn for <linux-mmc@vger.kernel.org>;
-	Mon, 10 Nov 2014 21:16:47 +0100 (CET)
-In-Reply-To: <CABjd4YxyUJi6RaGWicFeoJ7C27qhUFsAbq-nJTreACrt-voeYA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ boundary="Sig_/oK0KWU+x9eVq04gI5x=.X9S"; protocol="application/pgp-signature"
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFrrOozTO5xR8RO=4L8xZ9hLGizH=2mxZE=5zvwMhhgD+w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, GTA04 owners <gta04-owner-xXXSsgcRVICgSpxsJD1C4w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Alexey Charkov <alchark@gmail.com>
-Cc: Fabio Estevam <festevam@gmail.com>, Tony Prisk <linux@prisktech.co.nz>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 
-This is a multi-part message in MIME format.
---------------080106070506070707090806
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+--Sig_/oK0KWU+x9eVq04gI5x=.X9S
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
-On 11/10/2014 06:15 AM, Alexey Charkov wrote:
-> 2014-11-10 1:18 GMT+03:00 lautriv <lautriv@coldplug.net>:
->> On 11/09/2014 10:55 PM, Fabio Estevam wrote:
->>> On Sun, Nov 9, 2014 at 7:12 PM, Alexey Charkov <alchark@gmail.com> wrote:
->>>
->>>> +       res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->>>> +       if (!res) {
->>>> +               ret = -ENODEV;
->>>> +               goto fail1;
->>> You could save this NULL check...
->>>
->>>> +       }
->>>>           mmc = mmc_alloc_host(sizeof(struct wmt_mci_priv), &pdev->dev);
->>>>           if (!mmc) {
->>>>                   dev_err(&pdev->dev, "Failed to allocate mmc_host\n");
->>>> @@ -813,7 +819,7 @@ static int wmt_mci_probe(struct platform_device
->>>> *pdev)
->>>>           if (of_get_property(np, "cd-inverted", NULL))
->>>>                   priv->cd_inverted = 1;
->>>>
->>>> -       priv->sdmmc_base = of_iomap(np, 0);
->>> If you move ' res = platform_get_resource' right here as
->>> devm_ioremap_resource() already does the NULL check.
->>>
->>>> +       priv->sdmmc_base = devm_ioremap_resource(&pdev->dev, res);
->>>>           if (!priv->sdmmc_base) {
->>>>                   dev_err(&pdev->dev, "Failed to map IO space\n");
->>>>                   ret = -ENOMEM;
->> This was the original intention but it would fall between the failX jumps, i
->> discussed that with Alexey and we decided to change it with the cleanup to
->> hold this patch small.
-> I think Fabio means something slightly different than what we
-> discussed. We haven't realized that the first thing
-> devm_ioremap_resource does is exactly that (!res) check, so we can
-> skip ours altogether.
->
-> Looking at the function code a bit closer, we should also make the
-> check look like "if (IS_ERR(priv->sdmmc_base)", kill the dev_err call
-> (as it's also done internally), and then just do "ret =
-> PTR_ERR(priv->sdmmc_base)" and jump to the label.
->
-> Thanks a lot,
-> Alexey
->
-Sorry for the delay, 8880's are used to crash a lot since
-we have not enought information ;)
-Attached a changed patch which will hopefully meet all needs.
+On Mon, 10 Nov 2014 14:29:19 +0100 Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wro=
+te:
+
+> On 8 November 2014 01:14, NeilBrown <neilb-l3A5Bk7waGM@public.gmane.org> wrote:
+> > mmc_sdio_power_restore calls
+> >         mmc_send_if_cond(host, host->ocr_avail);
+> >
+> >         ret =3D mmc_send_io_op_cond(host, 0, NULL);
+> >
+> > between mmc_go_idle() and  mmc_sdio_init_card().
+> > mmc_sdio_resume needs to as well, else my libertas sdio wifi
+> > device doesn't resume properly from suspend.
+> >
+> > Signed-off-by: NeilBrown <neilb-l3A5Bk7waGM@public.gmane.org>
+> > ---
+> >  drivers/mmc/core/sdio.c |    8 ++++++--
+> >  1 file changed, 6 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> > index e636d9e99e4a..3f069a6f448f 100644
+> > --- a/drivers/mmc/core/sdio.c
+> > +++ b/drivers/mmc/core/sdio.c
+> > @@ -981,8 +981,12 @@ static int mmc_sdio_resume(struct mmc_host *host)
+> >         if (mmc_card_is_removable(host) || !mmc_card_keep_power(host)) {
+> >                 sdio_reset(host);
+> >                 mmc_go_idle(host);
+> > -               err =3D mmc_sdio_init_card(host, host->card->ocr, host-=
+>card,
+> > -                                       mmc_card_keep_power(host));
+> > +               mmc_send_if_cond(host, host->ocr_avail);
+>=20
+> /s /host->ocr_avail /host->card->ocr
+>=20
+> I would expect that to work. I do realize that "host->ocr_avail" is
+> being used in the ->power_restore() callback, but I think that's wrong
+> as well. Could you maybe verify that changing to host->card->ocr works
+> in this path as well? That's would of course be a separate patch.
+
+Hi Ulf,
+ I made the substitution in mmc_sdio_resume and mmc_sdio_power_restore
+and my sdio device continues to work, including after resume.
+
+The  host->card->ocr value is 0x10000, the host->ocr_avail value is 0x18000.
+
+If you like I'll send the two patches formally, but it might be a day or so.
+
+Thanks,
+NeilBrown
 
 
---------------080106070506070707090806
-Content-Type: text/x-patch;
- name="0001-mmc-vt8500-change-resource-mapping-to-devm_.patch"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment;
- filename="0001-mmc-vt8500-change-resource-mapping-to-devm_.patch"
-
->From 7c8ebb55fde8786cd16d95659ff73675bedc287c Mon Sep 17 00:00:00 2001
-From: Helmut Stengele <lautriv@coldplug.net>
-Date: Mon, 10 Nov 2014 11:26:51 +0100
-Subject: [PATCH] mmc: vt8500: change resource-mapping to devm_*
-
-Current code calls release_mem_region upon module unload
-without requesting the region first. This patch fixes it
-by moving to a devres-based ioremap implementation, which
-handles requesting and releasing memory region internally.
-
-This also makes the error/unload paths a bit simpler.
-
-Signed-off-by: Helmut Stengele <lautriv@coldplug.net>
----
- drivers/mmc/host/wmt-sdmmc.c |   16 +++++-----------
- 1 file changed, 5 insertions(+), 11 deletions(-)
-
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index 54181b4..f874d36 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -759,6 +759,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 	const struct wmt_mci_caps *wmt_caps;
- 	int ret;
- 	int regular_irq, dma_irq;
-+	struct resource *res;
- 
- 	if (!of_id || !of_id->data) {
- 		dev_err(&pdev->dev, "Controller capabilities data missing\n");
-@@ -813,10 +814,11 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 	if (of_get_property(np, "cd-inverted", NULL))
- 		priv->cd_inverted = 1;
- 
--	priv->sdmmc_base = of_iomap(np, 0);
-+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	priv->sdmmc_base = devm_ioremap_resource(&pdev->dev, res);
- 	if (!priv->sdmmc_base) {
- 		dev_err(&pdev->dev, "Failed to map IO space\n");
--		ret = -ENOMEM;
-+		ret = PTR_ERR(priv->sdmmc_base);
- 		goto fail2;
- 	}
- 
-@@ -826,7 +828,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 	ret = request_irq(regular_irq, wmt_mci_regular_isr, 0, "sdmmc", priv);
- 	if (ret) {
- 		dev_err(&pdev->dev, "Register regular IRQ fail\n");
--		goto fail3;
-+		goto fail2;
- 	}
- 
- 	ret = request_irq(dma_irq, wmt_mci_dma_isr, 0, "sdmmc", priv);
-@@ -869,8 +871,6 @@ fail5:
- 	free_irq(dma_irq, priv);
- fail4:
- 	free_irq(regular_irq, priv);
--fail3:
--	iounmap(priv->sdmmc_base);
- fail2:
- 	mmc_free_host(mmc);
- fail1:
-@@ -881,7 +881,6 @@ static int wmt_mci_remove(struct platform_device *pdev)
- {
- 	struct mmc_host *mmc;
- 	struct wmt_mci_priv *priv;
--	struct resource *res;
- 	u32 reg_tmp;
- 
- 	mmc = platform_get_drvdata(pdev);
-@@ -904,14 +903,9 @@ static int wmt_mci_remove(struct platform_device *pdev)
- 	free_irq(priv->irq_regular, priv);
- 	free_irq(priv->irq_dma, priv);
- 
--	iounmap(priv->sdmmc_base);
--
- 	clk_disable_unprepare(priv->clk_sdmmc);
- 	clk_put(priv->clk_sdmmc);
- 
--	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	release_mem_region(res->start, resource_size(res));
--
- 	mmc_free_host(mmc);
- 
- 	dev_info(&pdev->dev, "WMT MCI device removed\n");
--- 
-1.7.10.4
+>=20
+> > +               err =3D mmc_send_io_op_cond(host, 0, NULL);
+> > +               if (!err)
+> > +                       err =3D mmc_sdio_init_card(host, host->card->oc=
+r,
+> > +                                                host->card,
+> > +                                                mmc_card_keep_power(ho=
+st));
+> >         } else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(=
+host)) {
+> >                 /* We may have switched to 1-bit mode during suspend */
+> >                 err =3D sdio_enable_4bit_bus(host->card);
+> >
+> >
+>=20
+> Kind regards
+> Uffe
 
 
---------------080106070506070707090806--
+--Sig_/oK0KWU+x9eVq04gI5x=.X9S
+Content-Type: application/pgp-signature
+Content-Description: OpenPGP digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQIVAwUBVGFVojnsnt1WYoG5AQKEhw/9GNEGBirwJzOzDMMGDazcF3qQC+g6fATM
+5OysuTkyzO+Ns5OxB8mYSX/jR0XpiIsJvPW5PPwON7AritpARMiUsGpZJSbk0c8a
+pVWCcb0VhokUe2GWMezsJ66n1f8vzUXmVC3Adi5AMqh4hhM007FWyCUAexVvBmru
+My3vrIh9JEUC6p3XX03ulvw8kjET6X006YzzgfUILaDQp3ZoGWFYRsGEdKqUE8wf
+ZN6jEqRngnlCo1mV9DDm3bjXqXcorQK1PHA+fy1y61ywOpe/meSdJ2uGrT23D9Xp
+mrCqvGmvTZuxtT3bjkBGLwrpKPxJ1JS9l56DUoiE9sI5+/P4uB0cK2QuZWMQRszC
+ZA0CqBT0xQum3PaXUVBNy96N5izTvKh78P0sA0Fj+VNiH576UwzE9wnWUdbwG+7c
+8+ZqDtQdvhx2V2MWocP2p0/QKX1G9xRAfZyirBM+WE6cPZtBBZeEu0qb5QWh9bFy
+FM7IvskbRTbXTXt3KYo8QL3kleXHp1Mhu4Z5neknMTYhGC/2e1/lqKh9VXWs1hU9
+TyEFsB0NzU/M9Kg7EpQSsnTlDmWnltr593C8T8BdSHKtijEudpuKgVUX80BnwNeD
+ieHQLABVR7YhlVkaF8A/og133o/A1J0vnOwnCQUYv9cOUB61EEN4Xsz/t+a6UF3B
+Ohwjk9Gpm2o=
+=aOyl
+-----END PGP SIGNATURE-----
+
+--Sig_/oK0KWU+x9eVq04gI5x=.X9S--
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
