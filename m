@@ -1,70 +1,78 @@
-From: Yoshihiro Kaneko <ykaneko0929@gmail.com>
-Subject: [PATCH/RFC] mmc: sh_mmcif: Increase MMCIF clock rate to 97.5MHz
-Date: Tue, 11 Nov 2014 15:42:22 +0900
-Message-ID: <1415688142-20023-1-git-send-email-ykaneko0929@gmail.com>
-Return-path: <linux-sh-owner@vger.kernel.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, linux-sh@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: core: reset sdio card properly on resume.
+Date: Tue, 11 Nov 2014 09:12:09 +0100
+Message-ID: <CAPDyKFohBBEAO2cAXYQ-GCyFbpau3UMHP7p_gJwiHeMo6_7s6A@mail.gmail.com>
+References: <20141108000919.5629.55381.stgit@notabene.brown>
+	<20141108001411.5629.55298.stgit@notabene.brown>
+	<CAPDyKFrrOozTO5xR8RO=4L8xZ9hLGizH=2mxZE=5zvwMhhgD+w@mail.gmail.com>
+	<20141111111738.1e7856ce@notabene.brown>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f45.google.com ([209.85.192.45]:62933 "EHLO
+	mail-qg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751956AbaKKIMK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Nov 2014 03:12:10 -0500
+Received: by mail-qg0-f45.google.com with SMTP id z107so6687241qgd.32
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2014 00:12:09 -0800 (PST)
+In-Reply-To: <20141111111738.1e7856ce@notabene.brown>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: NeilBrown <neilb@suse.de>
+Cc: Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>
 
-From: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
+On 11 November 2014 01:17, NeilBrown <neilb@suse.de> wrote:
+> On Mon, 10 Nov 2014 14:29:19 +0100 Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+>> On 8 November 2014 01:14, NeilBrown <neilb@suse.de> wrote:
+>> > mmc_sdio_power_restore calls
+>> >         mmc_send_if_cond(host, host->ocr_avail);
+>> >
+>> >         ret = mmc_send_io_op_cond(host, 0, NULL);
+>> >
+>> > between mmc_go_idle() and  mmc_sdio_init_card().
+>> > mmc_sdio_resume needs to as well, else my libertas sdio wifi
+>> > device doesn't resume properly from suspend.
+>> >
+>> > Signed-off-by: NeilBrown <neilb@suse.de>
+>> > ---
+>> >  drivers/mmc/core/sdio.c |    8 ++++++--
+>> >  1 file changed, 6 insertions(+), 2 deletions(-)
+>> >
+>> > diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+>> > index e636d9e99e4a..3f069a6f448f 100644
+>> > --- a/drivers/mmc/core/sdio.c
+>> > +++ b/drivers/mmc/core/sdio.c
+>> > @@ -981,8 +981,12 @@ static int mmc_sdio_resume(struct mmc_host *host)
+>> >         if (mmc_card_is_removable(host) || !mmc_card_keep_power(host)) {
+>> >                 sdio_reset(host);
+>> >                 mmc_go_idle(host);
+>> > -               err = mmc_sdio_init_card(host, host->card->ocr, host->card,
+>> > -                                       mmc_card_keep_power(host));
+>> > +               mmc_send_if_cond(host, host->ocr_avail);
+>>
+>> /s /host->ocr_avail /host->card->ocr
+>>
+>> I would expect that to work. I do realize that "host->ocr_avail" is
+>> being used in the ->power_restore() callback, but I think that's wrong
+>> as well. Could you maybe verify that changing to host->card->ocr works
+>> in this path as well? That's would of course be a separate patch.
+>
+> Hi Ulf,
+>  I made the substitution in mmc_sdio_resume and mmc_sdio_power_restore
+> and my sdio device continues to work, including after resume.
+>
+> The  host->card->ocr value is 0x10000, the host->ocr_avail value is 0x18000.
 
-Signed-off-by: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
-Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
----
+That makes sense.
 
-This patch is based on mmc-next branch of Chris Ball's mmc tree.
+The host->card->ocr mask has been negotiated at initialization between
+the host and the card.
 
- drivers/mmc/host/sh_mmcif.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+>
+> If you like I'll send the two patches formally, but it might be a day or so.
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 656fbba..fe9a8b7 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1,6 +1,7 @@
- /*
-  * MMCIF eMMC driver.
-  *
-+ * Copyright (C) 2014 Renesas Electronics Corporation
-  * Copyright (C) 2010 Renesas Solutions Corp.
-  * Yusuke Goda <yusuke.goda.sx@renesas.com>
-  *
-@@ -57,6 +58,7 @@
- #include <linux/mmc/slot-gpio.h>
- #include <linux/mod_devicetable.h>
- #include <linux/mutex.h>
-+#include <linux/of_device.h>
- #include <linux/pagemap.h>
- #include <linux/platform_device.h>
- #include <linux/pm_qos.h>
-@@ -1371,6 +1373,8 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 	struct resource *res;
- 	void __iomem *reg;
- 	const char *name;
-+	struct device_node *np = pdev->dev.of_node;
-+	int clk_rate;
- 
- 	irq[0] = platform_get_irq(pdev, 0);
- 	irq[1] = platform_get_irq(pdev, 1);
-@@ -1433,6 +1437,16 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 		dev_err(&pdev->dev, "cannot get clock: %d\n", ret);
- 		goto eclkget;
- 	}
-+
-+	if (np && !of_property_read_u32(np, "renesas,clk-rate", &clk_rate)) {
-+		if (clk_rate) {
-+			ret = clk_set_rate(host->hclk, clk_rate);
-+			if (ret < 0)
-+				dev_err(&pdev->dev,
-+					"cannot set clock rate: %d\n", ret);
-+		}
-+	}
-+
- 	ret = sh_mmcif_clk_update(host);
- 	if (ret < 0)
- 		goto eclkupdate;
--- 
-1.9.1
+Please do.
 
+Kind regards
+Uffe
