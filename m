@@ -1,157 +1,62 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 1/3] mmc: core: consistent handling of initial values
-Date: Tue, 11 Nov 2014 10:45:20 +0100
-Message-ID: <CAPDyKFpTFOnYXw4wBPj56dc4rt0CAaOWgq3mnM_a1XcEynizYg@mail.gmail.com>
-References: <1415281616-24661-1-git-send-email-johanru@axis.com>
-	<1415281616-24661-2-git-send-email-johanru@axis.com>
+From: Ondrej Zary <linux@rainbow-software.org>
+Subject: Re: [PATCH v4] mmc: add Toshiba PCI SD controller driver
+Date: Tue, 11 Nov 2014 12:30:30 +0100
+Message-ID: <201411111230.30686.linux@rainbow-software.org>
+References: <1415638712-18486-1-git-send-email-linux@rainbow-software.org> <CAPDyKFpUS6yG1Fq+dVFn_8AG7-_B-_moo2JCz4AQBKgvp-YaHQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f54.google.com ([209.85.216.54]:49119 "EHLO
-	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751333AbaKKJpV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Nov 2014 04:45:21 -0500
-Received: by mail-qa0-f54.google.com with SMTP id u7so6735014qaz.27
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2014 01:45:20 -0800 (PST)
-In-Reply-To: <1415281616-24661-2-git-send-email-johanru@axis.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: Text/Plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFpUS6yG1Fq+dVFn_8AG7-_B-_moo2JCz4AQBKgvp-YaHQ@mail.gmail.com>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Kernel development list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <johan.rudholm@axis.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Adrian Hunter <adrian.hunter@intel.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>, Johan Rudholm <johanru@axis.com>
 
-On 6 November 2014 14:46, Johan Rudholm <johan.rudholm@axis.com> wrote:
-> mmc_do_hw_reset(), mmc_power_up() and mmc_power_off() all set similar
-> initial values for bus_mode, bus_width, chip_select and timing. Let's
-> make this handling simpler and more consistent by sticking them
-> together in a common function. This will introduce small changes in
-> behavior in the following places:
+On Tuesday 11 November 2014, Ulf Hansson wrote:
+> On 10 November 2014 17:58, Ondrej Zary <linux@rainbow-software.org> w=
+rote:
+> > This patch resurrects an old never-finished driver for Toshiba PCI =
+SD
+> > controllers found in some older Toshiba laptops (such as Portege R1=
+00):
+> >
+> > 02:0d.0 System peripheral [0880]: Toshiba America Info Systems SD T=
+ypA
+> > Controller [1179:0805] (rev 05)
+> >
+> > The code is fixed, cleaned up and successfully tested with SD, SDHC=
+, SDXC
+> > and MMC cards on Portege R100. (MMC cards don't even work in Window=
+s!)
+> > SDIO probably does not work (don't have any SDIO card).
+> >
+> > The hardware is slow (around 2 MB/s - same in Windows) because it d=
+oes
+> > not support bus mastering (busmaster enable bit cannot be set in PC=
+I
+> > control reg). Also the card clock is limited to 16MHz (33MHz PCI cl=
+ock
+> > divided by 2).
+> >
+> > Signed-off-by: Ondrej Zary <linux@rainbow-software.org>
 >
-> mmc_power_off():
+> Hi Ondrej,
 >
->   For SPI hosts, explicitly set bus_mode = MMC_BUSMODE_PUSHPULL and
->   chip_select = MMC_CS_HIGH, before we left them as they were.
+> I get these compiler warning while building for x86. Can you please f=
+ix
+> them.
 >
->   For non-SPI hosts, set bus_mode = MMC_BUSMODE_PUSHPULL instead of
->   MMC_BUSMODE_OPENDRAIN as before.
->
->   These two changes should not be a problem since the device will be
->   powered off anyway.
->
-> mmc_do_hw_reset():
->
->   Always set bus_mode = MMC_BUSMODE_PUSHPULL, as required by SD/SDIO
->   cards. MMC cards require MMC_BUSMODE_OPENDRAIN, but this is taken
->   care of by mmc_init_card() and mmc_attach_mmc().
->
-> Signed-off-by: Johan Rudholm <johanru@axis.com>
+> ../drivers/mmc/host/toshsd.c: In function =E2=80=98toshsd_init=E2=80=99=
+:
+> ../drivers/mmc/host/toshsd.c:70:9: warning: large integer implicitly
+> truncated to unsigned type [-Woverflow]
+>          host->ioaddr + SD_INTMASKCARD);
+>          ^
 
-I decided to apply this one now for my next branch, thus we also get
-some testing of it in linux-next.
+Which GCC version did you use? I get no warnings with 4.7.2 (Debian Sta=
+ble).
 
-If it turns out that it's causing issues, we need to come back to it.
-For the rest of the patches I need some more time to review.
-
-Thanks and kind regards
-Uffe
-
-> ---
->  drivers/mmc/core/core.c |   47 ++++++++++++++++++++++-------------------------
->  drivers/mmc/core/core.h |    1 +
->  2 files changed, 23 insertions(+), 25 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index a32bea2..5bda29b 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1099,6 +1099,22 @@ void mmc_set_bus_width(struct mmc_host *host, unsigned int width)
->         mmc_host_clk_release(host);
->  }
->
-> +/*
-> + * Set initial state after a power cycle or a hw_reset.
-> + */
-> +void mmc_set_initial_state(struct mmc_host *host)
-> +{
-> +       if (mmc_host_is_spi(host))
-> +               host->ios.chip_select = MMC_CS_HIGH;
-> +       else
-> +               host->ios.chip_select = MMC_CS_DONTCARE;
-> +       host->ios.bus_mode = MMC_BUSMODE_PUSHPULL;
-> +       host->ios.bus_width = MMC_BUS_WIDTH_1;
-> +       host->ios.timing = MMC_TIMING_LEGACY;
-> +
-> +       mmc_set_ios(host);
-> +}
-> +
->  /**
->   * mmc_vdd_to_ocrbitnum - Convert a voltage to the OCR bit number
->   * @vdd:       voltage (mV)
-> @@ -1537,15 +1553,9 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
->         mmc_host_clk_hold(host);
->
->         host->ios.vdd = fls(ocr) - 1;
-> -       if (mmc_host_is_spi(host))
-> -               host->ios.chip_select = MMC_CS_HIGH;
-> -       else
-> -               host->ios.chip_select = MMC_CS_DONTCARE;
-> -       host->ios.bus_mode = MMC_BUSMODE_PUSHPULL;
->         host->ios.power_mode = MMC_POWER_UP;
-> -       host->ios.bus_width = MMC_BUS_WIDTH_1;
-> -       host->ios.timing = MMC_TIMING_LEGACY;
-> -       mmc_set_ios(host);
-> +       /* Set initial state and call mmc_set_ios */
-> +       mmc_set_initial_state(host);
->
->         /* Try to set signal voltage to 3.3V but fall back to 1.8v or 1.2v */
->         if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330) == 0)
-> @@ -1585,14 +1595,9 @@ void mmc_power_off(struct mmc_host *host)
->         host->ios.clock = 0;
->         host->ios.vdd = 0;
->
-> -       if (!mmc_host_is_spi(host)) {
-> -               host->ios.bus_mode = MMC_BUSMODE_OPENDRAIN;
-> -               host->ios.chip_select = MMC_CS_DONTCARE;
-> -       }
->         host->ios.power_mode = MMC_POWER_OFF;
-> -       host->ios.bus_width = MMC_BUS_WIDTH_1;
-> -       host->ios.timing = MMC_TIMING_LEGACY;
-> -       mmc_set_ios(host);
-> +       /* Set initial state and call mmc_set_ios */
-> +       mmc_set_initial_state(host);
->
->         /*
->          * Some configurations, such as the 802.11 SDIO card in the OLPC
-> @@ -2278,16 +2283,8 @@ static int mmc_do_hw_reset(struct mmc_host *host, int check)
->                 }
->         }
->
-> -       if (mmc_host_is_spi(host)) {
-> -               host->ios.chip_select = MMC_CS_HIGH;
-> -               host->ios.bus_mode = MMC_BUSMODE_PUSHPULL;
-> -       } else {
-> -               host->ios.chip_select = MMC_CS_DONTCARE;
-> -               host->ios.bus_mode = MMC_BUSMODE_OPENDRAIN;
-> -       }
-> -       host->ios.bus_width = MMC_BUS_WIDTH_1;
-> -       host->ios.timing = MMC_TIMING_LEGACY;
-> -       mmc_set_ios(host);
-> +       /* Set initial state and call mmc_set_ios */
-> +       mmc_set_initial_state(host);
->
->         mmc_host_clk_release(host);
->
-> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> index 443a584..d76597c 100644
-> --- a/drivers/mmc/core/core.h
-> +++ b/drivers/mmc/core/core.h
-> @@ -49,6 +49,7 @@ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
->  void mmc_power_up(struct mmc_host *host, u32 ocr);
->  void mmc_power_off(struct mmc_host *host);
->  void mmc_power_cycle(struct mmc_host *host, u32 ocr);
-> +void mmc_set_initial_state(struct mmc_host *host);
->
->  static inline void mmc_delay(unsigned int ms)
->  {
-> --
-> 1.7.2.5
->
+--=20
+Ondrej Zary
