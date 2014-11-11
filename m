@@ -1,78 +1,146 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: core: reset sdio card properly on resume.
-Date: Tue, 11 Nov 2014 09:12:09 +0100
-Message-ID: <CAPDyKFohBBEAO2cAXYQ-GCyFbpau3UMHP7p_gJwiHeMo6_7s6A@mail.gmail.com>
-References: <20141108000919.5629.55381.stgit@notabene.brown>
-	<20141108001411.5629.55298.stgit@notabene.brown>
-	<CAPDyKFrrOozTO5xR8RO=4L8xZ9hLGizH=2mxZE=5zvwMhhgD+w@mail.gmail.com>
-	<20141111111738.1e7856ce@notabene.brown>
+From: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
+Subject: RE: [PATCH 1/3] mmc: Support FFU for eMMC v5.0
+Date: Tue, 11 Nov 2014 08:44:27 +0000
+Message-ID: <FDD07FEB422EF948A392FDC201AEEAE64F6B6E48@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <n@samsung.com>
+ <1415639632-878-1-git-send-email-avi.shchislowski@sandisk.com>
+ <54617D8F.8060506@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f45.google.com ([209.85.192.45]:62933 "EHLO
-	mail-qg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751956AbaKKIMK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Nov 2014 03:12:10 -0500
-Received: by mail-qg0-f45.google.com with SMTP id z107so6687241qgd.32
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2014 00:12:09 -0800 (PST)
-In-Reply-To: <20141111111738.1e7856ce@notabene.brown>
+Received: from mail-bn1bn0100.outbound.protection.outlook.com ([157.56.110.100]:61376
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751707AbaKKIob convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Nov 2014 03:44:31 -0500
+In-Reply-To: <54617D8F.8060506@samsung.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: NeilBrown <neilb@suse.de>
-Cc: Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: 'Chris Ball' <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, "gwendal@google.com" <gwendal@google.com>, open list <linux-kernel@vger.kernel.org>, CPGS <cpgs@samsung.com>
 
-On 11 November 2014 01:17, NeilBrown <neilb@suse.de> wrote:
-> On Mon, 10 Nov 2014 14:29:19 +0100 Ulf Hansson <ulf.hansson@linaro.org> wrote:
+
+Hi 
+I used the "git send-email..."
+
+Thanks
+
+
+>-----Original Message-----
+>From: Jaehoon Chung [mailto:jh80.chung@samsung.com]
+>Sent: Tuesday, November 11, 2014 5:08 AM
+>To: Avi Shchislowski; ulf.hansson@linaro.org
+>Cc: 'Chris Ball'; linux-mmc@vger.kernel.org; Alex Lemberg;
+>gwendal@google.com; open list; CPGS
+>Subject: Re: [PATCH 1/3] mmc: Support FFU for eMMC v5.0
 >
->> On 8 November 2014 01:14, NeilBrown <neilb@suse.de> wrote:
->> > mmc_sdio_power_restore calls
->> >         mmc_send_if_cond(host, host->ocr_avail);
->> >
->> >         ret = mmc_send_io_op_cond(host, 0, NULL);
->> >
->> > between mmc_go_idle() and  mmc_sdio_init_card().
->> > mmc_sdio_resume needs to as well, else my libertas sdio wifi
->> > device doesn't resume properly from suspend.
->> >
->> > Signed-off-by: NeilBrown <neilb@suse.de>
->> > ---
->> >  drivers/mmc/core/sdio.c |    8 ++++++--
->> >  1 file changed, 6 insertions(+), 2 deletions(-)
->> >
->> > diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
->> > index e636d9e99e4a..3f069a6f448f 100644
->> > --- a/drivers/mmc/core/sdio.c
->> > +++ b/drivers/mmc/core/sdio.c
->> > @@ -981,8 +981,12 @@ static int mmc_sdio_resume(struct mmc_host *host)
->> >         if (mmc_card_is_removable(host) || !mmc_card_keep_power(host)) {
->> >                 sdio_reset(host);
->> >                 mmc_go_idle(host);
->> > -               err = mmc_sdio_init_card(host, host->card->ocr, host->card,
->> > -                                       mmc_card_keep_power(host));
->> > +               mmc_send_if_cond(host, host->ocr_avail);
+>Hi,
+>
+>how did you make the patch?
+>This patch didn't apply at Ulf's repository.
+>
+>
+>On 11/11/2014 02:13 AM, Avi Shchislowski wrote:
 >>
->> /s /host->ocr_avail /host->card->ocr
+>> Add eMMC5.0 ffu ext_csd fields
 >>
->> I would expect that to work. I do realize that "host->ocr_avail" is
->> being used in the ->power_restore() callback, but I think that's wrong
->> as well. Could you maybe verify that changing to host->card->ocr works
->> in this path as well? That's would of course be a separate patch.
+>> Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
+>> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+>>
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
+>> 1eda8dd..3b86ed3 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -603,6 +603,15 @@ static int mmc_read_ext_csd(struct mmc_card
+>*card, u8 *ext_csd)
+>>  		card->ext_csd.data_sector_size = 512;
+>>  	}
+>>
+>> +	/* eMMC v5 or later */
+>> +	if (card->ext_csd.rev >= 7) {
+>> +		card->ext_csd.ffu_capable =
+>> +			((ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) ==
+>0x1) &&
+>> +			((ext_csd[EXT_CSD_FW_CONFIG] & 0x1) == 0x0);
 >
-> Hi Ulf,
->  I made the substitution in mmc_sdio_resume and mmc_sdio_power_restore
-> and my sdio device continues to work, including after resume.
+>if (ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1)
+>&&  !(ext_csd[EXT_CSD_FW_CONFIG] & 0x1))
+>		card->ext_csd.ffu_capable = true;
 >
-> The  host->card->ocr value is 0x10000, the host->ocr_avail value is 0x18000.
-
-That makes sense.
-
-The host->card->ocr mask has been negotiated at initialization between
-the host and the card.
-
+>> +		card->ext_csd.ffu_mode_op =
+>ext_csd[EXT_CSD_FFU_FEATURES];
+>> +	} else {
+>> +		card->ext_csd.ffu_capable = false;
 >
-> If you like I'll send the two patches formally, but it might be a day or so.
+>Can be set to false by default before checking whether card is eMMC v5.0 or
+>not.
+>
+>card->ext_csd.ffu_capable = false;
+>
+>if (card->ext_csd.rev >= 7) {
+>	...
+>}
+>
+>Best Regards,
+>Jaehoon Chung
+>
+>> +	}
+>>  out:
+>>  	return err;
+>>  }
+>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h index
+>> d424b9d..dd01efe 100644
+>> --- a/include/linux/mmc/card.h
+>> +++ b/include/linux/mmc/card.h
+>> @@ -81,6 +81,8 @@ struct mmc_ext_csd {
+>>  	bool			hpi_en;			/* HPI
+>enablebit */
+>>  	bool			hpi;			/* HPI support bit */
+>>  	unsigned int		hpi_cmd;		/* cmd used as HPI */
+>> +	bool			ffu_capable;		/* FFU support */
+>> +	bool			ffu_mode_op;		/* FFU mode
+>operation */
+>>  	bool			bkops;		/* background support bit */
+>>  	bool			bkops_en;	/* background enable bit */
+>>  	unsigned int            data_sector_size;       /* 512 bytes or 4KB */
+>> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h index
+>> 64ec963..787787b 100644
+>> --- a/include/linux/mmc/mmc.h
+>> +++ b/include/linux/mmc/mmc.h
+>> @@ -272,6 +272,9 @@ struct _mmc_csd {
+>>   * EXT_CSD fields
+>>   */
+>>
+>> +#define EXT_CSD_FFU_STATUS		26	/* R */
+>> +#define EXT_CSD_MODE_OPERATION_CODES	29	/* W */
+>> +#define EXT_CSD_MODE_CONFIG		30	/* R/W */
+>>  #define EXT_CSD_FLUSH_CACHE		32      /* W */
+>>  #define EXT_CSD_CACHE_CTRL		33      /* R/W */
+>>  #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
+>> @@ -290,6 +293,7 @@ struct _mmc_csd {
+>>  #define EXT_CSD_SANITIZE_START		165     /* W */
+>>  #define EXT_CSD_WR_REL_PARAM		166	/* RO */
+>>  #define EXT_CSD_RPMB_MULT		168	/* RO */
+>> +#define EXT_CSD_FW_CONFIG		169	/* R/W */
+>>  #define EXT_CSD_BOOT_WP			173	/* R/W */
+>>  #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
+>>  #define EXT_CSD_PART_CONFIG		179	/* R/W */
+>> @@ -326,6 +330,11 @@ struct _mmc_csd {
+>>  #define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
+>>  #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
+>>  #define EXT_CSD_PWR_CL_DDR_200_360	253	/* RO */
+>> +#define EXT_CSD_NUM_OF_FW_SEC_PROG	302	/* RO, 4 bytes
+>*/
+>> +#define EXT_CSD_FFU_ARG			487	/* RO, 4 bytes
+>*/
+>> +#define EXT_CSD_OPERATION_CODE_TIMEOUT	491	/* RO */
+>> +#define EXT_CSD_FFU_FEATURES		492	/* RO */
+>> +#define EXT_CSD_SUPPORTED_MODE		493	/* RO */
+>>  #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
+>>  #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
+>>  #define EXT_CSD_MAX_PACKED_WRITES	500	/* RO */
+>>
 
-Please do.
-
-Kind regards
-Uffe
