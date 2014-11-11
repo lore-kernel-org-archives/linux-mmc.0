@@ -1,146 +1,95 @@
-From: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
-Subject: RE: [PATCH 1/3] mmc: Support FFU for eMMC v5.0
-Date: Tue, 11 Nov 2014 08:44:27 +0000
-Message-ID: <FDD07FEB422EF948A392FDC201AEEAE64F6B6E48@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <n@samsung.com>
- <1415639632-878-1-git-send-email-avi.shchislowski@sandisk.com>
- <54617D8F.8060506@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: dw_mmc: try pick the exact same voltage as vmmc for vqmmc
+Date: Tue, 11 Nov 2014 09:52:47 +0100
+Message-ID: <CAPDyKFqUoBjhsbz8rkLa9PY_dpgMxnimz3k7OoA5WVhi7MacPQ@mail.gmail.com>
+References: <1415109789-7046-1-git-send-email-addy.ke@rock-chips.com>
+	<1415678573-6093-1-git-send-email-addy.ke@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bn0100.outbound.protection.outlook.com ([157.56.110.100]:61376
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751707AbaKKIob convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Nov 2014 03:44:31 -0500
-In-Reply-To: <54617D8F.8060506@samsung.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1415678573-6093-1-git-send-email-addy.ke@rock-chips.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Addy Ke <addy.ke@rock-chips.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Doug Anderson <dianders@chromium.org>, Sonny Rao <sonnyrao@chromium.org>, amstan@chromium.org, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-rockchip@lists.infr
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: 'Chris Ball' <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, "gwendal@google.com" <gwendal@google.com>, open list <linux-kernel@vger.kernel.org>, CPGS <cpgs@samsung.com>
 
+On 11 November 2014 05:02, Addy Ke <addy.ke@rock-chips.com> wrote:
+> SD2.0 cards need vqmmc and vmmc to be the same.
 
-Hi 
-I used the "git send-email..."
+No, that's not correct.
 
-Thanks
+If I remember the spec correctly, the bus signal threshold is 0.75 * VDD.
 
+> But vqmmc call regulator_set_voltage to set min_uv(2.7v) as far as possible.
 
->-----Original Message-----
->From: Jaehoon Chung [mailto:jh80.chung@samsung.com]
->Sent: Tuesday, November 11, 2014 5:08 AM
->To: Avi Shchislowski; ulf.hansson@linaro.org
->Cc: 'Chris Ball'; linux-mmc@vger.kernel.org; Alex Lemberg;
->gwendal@google.com; open list; CPGS
->Subject: Re: [PATCH 1/3] mmc: Support FFU for eMMC v5.0
->
->Hi,
->
->how did you make the patch?
->This patch didn't apply at Ulf's repository.
->
->
->On 11/11/2014 02:13 AM, Avi Shchislowski wrote:
->>
->> Add eMMC5.0 ffu ext_csd fields
->>
->> Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
->> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
->>
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
->> 1eda8dd..3b86ed3 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -603,6 +603,15 @@ static int mmc_read_ext_csd(struct mmc_card
->*card, u8 *ext_csd)
->>  		card->ext_csd.data_sector_size = 512;
->>  	}
->>
->> +	/* eMMC v5 or later */
->> +	if (card->ext_csd.rev >= 7) {
->> +		card->ext_csd.ffu_capable =
->> +			((ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) ==
->0x1) &&
->> +			((ext_csd[EXT_CSD_FW_CONFIG] & 0x1) == 0x0);
->
->if (ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1)
->&&  !(ext_csd[EXT_CSD_FW_CONFIG] & 0x1))
->		card->ext_csd.ffu_capable = true;
->
->> +		card->ext_csd.ffu_mode_op =
->ext_csd[EXT_CSD_FFU_FEATURES];
->> +	} else {
->> +		card->ext_csd.ffu_capable = false;
->
->Can be set to false by default before checking whether card is eMMC v5.0 or
->not.
->
->card->ext_csd.ffu_capable = false;
->
->if (card->ext_csd.rev >= 7) {
->	...
->}
->
->Best Regards,
->Jaehoon Chung
->
->> +	}
->>  out:
->>  	return err;
->>  }
->> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h index
->> d424b9d..dd01efe 100644
->> --- a/include/linux/mmc/card.h
->> +++ b/include/linux/mmc/card.h
->> @@ -81,6 +81,8 @@ struct mmc_ext_csd {
->>  	bool			hpi_en;			/* HPI
->enablebit */
->>  	bool			hpi;			/* HPI support bit */
->>  	unsigned int		hpi_cmd;		/* cmd used as HPI */
->> +	bool			ffu_capable;		/* FFU support */
->> +	bool			ffu_mode_op;		/* FFU mode
->operation */
->>  	bool			bkops;		/* background support bit */
->>  	bool			bkops_en;	/* background enable bit */
->>  	unsigned int            data_sector_size;       /* 512 bytes or 4KB */
->> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h index
->> 64ec963..787787b 100644
->> --- a/include/linux/mmc/mmc.h
->> +++ b/include/linux/mmc/mmc.h
->> @@ -272,6 +272,9 @@ struct _mmc_csd {
->>   * EXT_CSD fields
->>   */
->>
->> +#define EXT_CSD_FFU_STATUS		26	/* R */
->> +#define EXT_CSD_MODE_OPERATION_CODES	29	/* W */
->> +#define EXT_CSD_MODE_CONFIG		30	/* R/W */
->>  #define EXT_CSD_FLUSH_CACHE		32      /* W */
->>  #define EXT_CSD_CACHE_CTRL		33      /* R/W */
->>  #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
->> @@ -290,6 +293,7 @@ struct _mmc_csd {
->>  #define EXT_CSD_SANITIZE_START		165     /* W */
->>  #define EXT_CSD_WR_REL_PARAM		166	/* RO */
->>  #define EXT_CSD_RPMB_MULT		168	/* RO */
->> +#define EXT_CSD_FW_CONFIG		169	/* R/W */
->>  #define EXT_CSD_BOOT_WP			173	/* R/W */
->>  #define EXT_CSD_ERASE_GROUP_DEF		175	/* R/W */
->>  #define EXT_CSD_PART_CONFIG		179	/* R/W */
->> @@ -326,6 +330,11 @@ struct _mmc_csd {
->>  #define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
->>  #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
->>  #define EXT_CSD_PWR_CL_DDR_200_360	253	/* RO */
->> +#define EXT_CSD_NUM_OF_FW_SEC_PROG	302	/* RO, 4 bytes
->*/
->> +#define EXT_CSD_FFU_ARG			487	/* RO, 4 bytes
->*/
->> +#define EXT_CSD_OPERATION_CODE_TIMEOUT	491	/* RO */
->> +#define EXT_CSD_FFU_FEATURES		492	/* RO */
->> +#define EXT_CSD_SUPPORTED_MODE		493	/* RO */
->>  #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
->>  #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
->>  #define EXT_CSD_MAX_PACKED_WRITES	500	/* RO */
->>
+I guess you want to do that to save as much power as possible.
 
+> So if we set vmmc 3.3V in dt table, we will get error information as follows:
+>
+> [   17.785398] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot req
+> 50000000Hz, actual 50000000HZ div = 0)
+> [   17.795175] mmc1: new high speed SDHC card at address e624
+> [   17.801283] mmcblk1: mmc1:e624 SU08G 7.40 GiB
+> [   17.816033]  mmcblk1: p1
+> [   17.839318] mmcblk1: error -110 sending status command, retrying
+> [   17.845363] mmcblk1: error -115 sending stop command, original cmd
+> response 0x900, card status 0x800b00
+> [   17.854758] mmcblk1: error -84 transferring data, sector 32, nr 24,
+> cmd response 0x900, card status 0xb00
+> [   17.864328] mmcblk1: retrying using single block read
+> [   17.873647] mmcblk1: error -110 sending status command, retrying
+> [   17.879660] mmcblk1: error -84 transferring data, sector 44, nr 12,
+> cmd response 0x900, card status 0x0
+> [   17.889051] end_request: I/O error, dev mmcblk1, sector 44
+> [   17.895594] Buffer I/O error on device mmcblk1, logical block 5
+> [   17.902484] mmcblk1: error -110 sending status command, retrying
+> [   17.908498] mmcblk1: error -84 transferring data, sector 50, nr 6,
+> cmd response 0x900, card status 0x0
+> [   17.917802] end_request: I/O error, dev mmcblk1, sector 50
+> [   17.924984] Buffer I/O error on device mmcblk1, logical block 6
+> [   18.431258] mmc_host mmc1: Timeout sending command (cmd 0x200000 arg
+> 0x0 status 0x80200000)
+>
+> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 10 ++++++++--
+>  1 file changed, 8 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index b4c3044..a8b70b5 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1163,8 +1163,14 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+>          */
+>         uhs = mci_readl(host, UHS_REG);
+>         if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
+> -               min_uv = 2700000;
+> -               max_uv = 3600000;
+> +               /* try pick the exact same voltage as vmmc for vqmmc */
+
+This seems like a generic SD protocol issue.
+
+Should we maybe provide some helper function from the mmc core, which
+in principle take the negotiated card->ocr into account while
+calculating the signal voltage level. Typically min_uv should be 0.75
+x (card->ocr), for these cases.
+
+Comments?
+
+> +               if (!IS_ERR(mmc->supply.vmmc)) {
+> +                       min_uv = regulator_get_voltage(mmc->supply.vmmc);
+> +                       max_uv = min_uv;
+> +               } else {
+> +                       min_uv = 2700000;
+> +                       max_uv = 3600000;
+> +               }
+>                 uhs &= ~v18;
+>         } else {
+>                 min_uv = 1700000;
+> --
+> 1.8.3.2
+>
+>
+
+Kind regards
+Uffe
