@@ -1,48 +1,54 @@
-From: NeilBrown <neilb@suse.de>
-Subject: [PATCH 2/2] mmc: core: reset sdio card properly on resume.
-Date: Wed, 12 Nov 2014 14:55:19 +1100
-Message-ID: <20141112035519.18267.37985.stgit@notabene.brown>
-References: <20141112035217.18267.43304.stgit@notabene.brown>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20141112035217.18267.43304.stgit@notabene.brown>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: GTA04 owners <gta04-owner@goldelico.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCHv2] mmc: dw_mmc: add the message for deprecating
+ supports-highspeed
+Date: Wed, 12 Nov 2014 14:49:42 +0900
+Message-ID: <1415771382-30831-1-git-send-email-jh80.chung@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:31333 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751626AbaKLFtq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Nov 2014 00:49:46 -0500
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0NEW00DP7W6VPH30@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 12 Nov 2014 14:49:43 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-mmc_sdio_power_restore() calls
-	mmc_send_if_cond(host, host->card->ocr);
+Recommend to use "mmc-cap-highspeed" or "sd-cap-highspeed" instead of
+"supports-highspeed".
+Although "supports-highspeed" supports, devloper can use
+"mmc-cap-highspeed" or "sd-cap-highspeed" through this message.
 
-	ret = mmc_send_io_op_cond(host, 0, NULL);
-
-between mmc_go_idle() and mmc_sdio_init_card().
-mmc_sdio_resume() needs to as well, else my libertas sdio wifi
-device doesn't resume properly from suspend.
-
-Signed-off-by: NeilBrown <neilb@suse.de>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/core/sdio.c |    8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+Changelog V2:
+	- Fixed Checkpatch warning
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 3c0f07961fab..da927c61bf47 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -981,8 +981,12 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 	if (mmc_card_is_removable(host) || !mmc_card_keep_power(host)) {
- 		sdio_reset(host);
- 		mmc_go_idle(host);
--		err = mmc_sdio_init_card(host, host->card->ocr, host->card,
--					mmc_card_keep_power(host));
-+		mmc_send_if_cond(host, host->card->ocr);
-+		err = mmc_send_io_op_cond(host, 0, NULL);
-+		if (!err)
-+			err = mmc_sdio_init_card(host, host->card->ocr,
-+						 host->card,
-+						 mmc_card_keep_power(host));
- 	} else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
- 		/* We may have switched to 1-bit mode during suspend */
- 		err = sdio_enable_4bit_bus(host->card);
+ drivers/mmc/host/dw_mmc.c |    5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index bb46b1b..d75dc26 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2434,8 +2434,11 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ 			return ERR_PTR(ret);
+ 	}
+ 
+-	if (of_find_property(np, "supports-highspeed", NULL))
++	if (of_find_property(np, "supports-highspeed", NULL)) {
++		dev_warn(dev, "supports-highspeed is deprecated. " \
++				"Use cap-mmc-highspeed or cap-sd-highspeed.\n");
+ 		pdata->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
++	}
+ 
+ 	return pdata;
+ }
+-- 
+1.7.9.5
+
