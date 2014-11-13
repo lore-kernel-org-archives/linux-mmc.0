@@ -1,13 +1,13 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
 Subject: [RFC PATCH 0/3] DRA72: MMC HS200 support
-Date: Thu, 13 Nov 2014 18:25:21 +0530
-Message-ID: <1415883324-19591-1-git-send-email-kishon@ti.com>
+Date: Thu, 13 Nov 2014 18:26:16 +0530
+Message-ID: <1415883379-19654-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: chris@printf.net, ulf.hansson@linaro.org, tony@atomide.com
-Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, afenkart@gmail.com, kishon@ti.com
+Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, afenkart@gmail.com, nsekhar@ti.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
 Added HS200 to improve EMMC throughput for dra72.
