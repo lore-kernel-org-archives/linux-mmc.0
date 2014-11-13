@@ -1,35 +1,59 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [RFC PATCH 3/3] ARM: dts: dra72-evm: Set the max-frequency to 192MHz
-Date: Thu, 13 Nov 2014 20:24:18 +0530
-Message-ID: <1415890458-20436-4-git-send-email-kishon@ti.com>
-References: <1415890458-20436-1-git-send-email-kishon@ti.com>
+Subject: [RFC PATCH 0/3] DRA72: MMC HS200 support
+Date: Thu, 13 Nov 2014 20:24:15 +0530
+Message-ID: <1415890458-20436-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1415890458-20436-1-git-send-email-kishon@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: chris@printf.net, ulf.hansson@linaro.org, tony@atomide.com
 Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, afenkart@gmail.com, nsekhar@ti.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-Set the maximum operating frequency of MMC2 to 192MHz.
+Added HS200 to improve EMMC throughput for dra72.
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
----
+With HS200
+==============
+Read throughput
+./dd if=/dev/mmcblk0 of=/dev/null bs=1M count=100 oflag=sync
+100+0 records in
+100+0 records out
+104857600 bytes (105 MB) copied, 1.46028 s, 71.8 MB/s
+
+Write throughput
+root@dra7xx-evm:/# ./dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=100 oflag=sync
+100+0 records in
+100+0 records out
+104857600 bytes (105 MB) copied, 9.34884 s, 11.2 MB/s
+
+
+WithOUT HS200
+==============
+Read throughput
+./dd if=/dev/mmcblk0 of=/dev/null bs=1M count=100 oflag=sync
+100+0 records in
+100+0 records out
+104857600 bytes (105 MB) copied, 2.6423 s, 39.7 MB/s
+
+Write throughput
+./dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=100 oflag=sync
+100+0 records in
+100+0 records out
+104857600 bytes (105 MB) copied, 9.3556 s, 11.2 MB/s
+
+Balaji T K (1):
+  mmc: omap_hsmmc: add tuning support
+
+Kishon Vijay Abraham I (1):
+  ARM: dts: dra72-evm: Set the max-frequency to 192MHz
+
+Viswanath Puttagunta (1):
+  mmc: omap_hsmmc: set host capabilities by reading MMCHS_CAPA2
+    register
+
  arch/arm/boot/dts/dra72-evm.dts |    1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/omap_hsmmc.c   |  342 ++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 341 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm/boot/dts/dra72-evm.dts b/arch/arm/boot/dts/dra72-evm.dts
-index abbaaa7..5cc1110 100644
---- a/arch/arm/boot/dts/dra72-evm.dts
-+++ b/arch/arm/boot/dts/dra72-evm.dts
-@@ -364,6 +364,7 @@
- 	vmmc-supply = <&evm_3v3>;
- 	bus-width = <8>;
- 	ti,non-removable;
-+	max-frequency = <192000000>;
- };
- 
- &dra7_pmx_core {
 -- 
 1.7.9.5
