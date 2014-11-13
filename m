@@ -1,97 +1,59 @@
-From: addy ke <addy.ke@rock-chips.com>
-Subject: Re: [PATCH] mmc: dw_mmc: try pick the exact same voltage as vmmc
- for vqmmc
-Date: Thu, 13 Nov 2014 10:19:26 +0800
-Message-ID: <5464152E.7040209@rock-chips.com>
-References: <1415109789-7046-1-git-send-email-addy.ke@rock-chips.com>	<1415678573-6093-1-git-send-email-addy.ke@rock-chips.com>	<CAPDyKFqUoBjhsbz8rkLa9PY_dpgMxnimz3k7OoA5WVhi7MacPQ@mail.gmail.com> <CAD=FV=VQHZ6YmcoeAb1OEVLYRrYBnc_dM5Kjt1TZX_CQJC=EfA@mail.gmail.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [RFC PATCH 0/3] DRA72: MMC HS200 support
+Date: Thu, 13 Nov 2014 18:25:21 +0530
+Message-ID: <1415883324-19591-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=VQHZ6YmcoeAb1OEVLYRrYBnc_dM5Kjt1TZX_CQJC=EfA@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: dianders@chromium.org, ulf.hansson@linaro.org
-Cc: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, sonnyrao@chromium.org, amstan@chromium.org, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: chris@printf.net, ulf.hansson@linaro.org, tony@atomide.com
+Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, afenkart@gmail.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 2014/11/13 02:04, Doug Anderson wrote:
-> Ulf,
-> 
-> On Tue, Nov 11, 2014 at 12:52 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> On 11 November 2014 05:02, Addy Ke <addy.ke@rock-chips.com> wrote:
->>> SD2.0 cards need vqmmc and vmmc to be the same.
->>
->> No, that's not correct.
->>
->> If I remember the spec correctly, the bus signal threshold is 0.75 * VDD.
-> 
-> As usual, I will first state my utter lack of knowledge of all things mmc.
-> 
-> Now that's out of the way, on two separate board with two separate
-> SoCs I've heard stories of cards that don't work when there's a big
-> gap between vmmc and vqmmc.
-> 
-> If my memory serves, previously I heard of problems with vmmc=3.3V and
-> vqmmc=2.8V.  That means there were problems with .85 * VDD.  Certainly
-> Addy seems to have a card that has problems with vmmc=3.3V and
-> vqmmc=2.7V (but worked with vmmc=3.3V and vqmmc=2.8V).  That is .82 *
-> VDD.
-> 
-> I have no idea if these old cards are "to spec", but they exist and it
-> would be nice to support them.
-> 
-> It seems like the absolute safest thing would be to try to keep vmmc
-> and vqmmc matching if possible, especially during card probe.  Once
-> voltage negotiation happened then the vqmmc could go down.
-> 
-> 
->>> But vqmmc call regulator_set_voltage to set min_uv(2.7v) as far as possible.
->>
->> I guess you want to do that to save as much power as possible.
-> 
-> I don't think it's Addy wanting it, I think it's the regulator framework.
-> 
-> If a regulator is current 1.8V and you request 2.7 - 3.3V, the
-> framework needs to pick one of those voltages.  I believe it will pick
-> 2.7V.
-> 
-> ...so I think we get into trouble only when the 2.0 card is plugged in
-> after a UHS card has negotiated down the voltage, but I could be
-> wrong.  Maybe Addy can clarify.
-> 
-Sure
-If the first card is sd2.0 since startup, dw_mci_switch_voltage will not be called,
-and card can be identified. But if UHS card is pulgged in first, the vqmmc will be down to 1.8v.
+Added HS200 to improve EMMC throughput for dra72.
 
-when sd2.0 card is pulgged in, mmc core will call dw_mci_switch_voltage to change vqmmc to 3.3v
-(MMC_SINGLE_VOTAGE_330). So vqmmc will be set 2.7v, if we request 2.7-3.6v.
+With HS200
+==============
+Read throughput
+./dd if=/dev/mmcblk0 of=/dev/null bs=1M count=100 oflag=sync
+100+0 records in
+100+0 records out
+104857600 bytes (105 MB) copied, 1.46028 s, 71.8 MB/s
 
-But vmmc is always 3.3v,becuase it be set min_volt = max_volt = 3.3v in dt tables.
+Write throughput
+root@dra7xx-evm:/# ./dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=100 oflag=sync
+100+0 records in
+100+0 records out
+104857600 bytes (105 MB) copied, 9.34884 s, 11.2 MB/s
 
-So the result:
-vmmc = 3.3v and vqmmc = 2.7v, and sd2.0 card is failed to identify in my test.
 
-> 
->>> @@ -1163,8 +1163,14 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
->>>          */
->>>         uhs = mci_readl(host, UHS_REG);
->>>         if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
->>> -               min_uv = 2700000;
->>> -               max_uv = 3600000;
->>> +               /* try pick the exact same voltage as vmmc for vqmmc */
->>
->> This seems like a generic SD protocol issue.
->>
->> Should we maybe provide some helper function from the mmc core, which
->> in principle take the negotiated card->ocr into account while
->> calculating the signal voltage level. Typically min_uv should be 0.75
->> x (card->ocr), for these cases.
-> 
-> Yes, if there are ways to make the solution more generic I would
-> certainly support that.
-> 
-> -Doug
-> 
-> 
-> 
+WithOUT HS200
+==============
+Read throughput
+./dd if=/dev/mmcblk0 of=/dev/null bs=1M count=100 oflag=sync
+100+0 records in
+100+0 records out
+104857600 bytes (105 MB) copied, 2.6423 s, 39.7 MB/s
 
+Write throughput
+./dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=100 oflag=sync
+100+0 records in
+100+0 records out
+104857600 bytes (105 MB) copied, 9.3556 s, 11.2 MB/s
+
+Balaji T K (1):
+  mmc: omap_hsmmc: add tuning support
+
+Kishon Vijay Abraham I (1):
+  ARM: dts: dra72-evm: Set the max-frequency to 192MHz
+
+Viswanath Puttagunta (1):
+  mmc: omap_hsmmc: set host capabilities by reading MMCHS_CAPA2
+    register
+
+ arch/arm/boot/dts/dra72-evm.dts |    1 +
+ drivers/mmc/host/omap_hsmmc.c   |  342 ++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 341 insertions(+), 2 deletions(-)
+
+-- 
+1.7.9.5
