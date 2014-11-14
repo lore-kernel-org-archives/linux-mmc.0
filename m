@@ -1,51 +1,65 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v4] mmc: dw_mmc: add support for the other bit of sdio
- interrupt
-Date: Fri, 14 Nov 2014 22:25:53 +0900
-Message-ID: <546602E1.3080800@samsung.com>
-References: <1414977633-3196-1-git-send-email-addy.ke@rock-chips.com>
- <1415109789-7046-1-git-send-email-addy.ke@rock-chips.com>
- <CAD=FV=XGjDZRBw7re8aRHdzNAq5cmtfpZ5RMdQ7o1CzbFMVXjw@mail.gmail.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [PATCH 1/2] mmc: atmel-mci: remove compat for non DT board when requesting dma chan
+Date: Fri, 14 Nov 2014 15:33:39 +0100
+Message-ID: <1415975620-30140-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-reply-to: <CAD=FV=XGjDZRBw7re8aRHdzNAq5cmtfpZ5RMdQ7o1CzbFMVXjw@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>, Addy Ke <addy.ke@rock-chips.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?B?SGVpa28gU3TDvGJuZXI=?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, zhenf
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eusmtp01.atmel.com ([212.144.249.242]:55038 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934535AbaKNOdo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Nov 2014 09:33:44 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc: =chris@printf.net, ulf.hansson@linaro.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-On 11/14/2014 03:58 AM, Doug Anderson wrote:
-> Addy,
-> 
-> On Tue, Nov 4, 2014 at 6:03 AM, Addy Ke <addy.ke@rock-chips.com> wrote:
->> The bit of sdio interrupt is 16 in designware implementation,
->> but it is 24 on Rockchip SoCs.This patch add sdio_id0 for the
->> number of slot0 in the SDIO interrupt registers.
->>
->> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
->> ---
->> Changes in v2:
->> - rebase on http://git.linaro.org/git/people/ulf.hansson/mmc.git, next branch
->> Changes in v3:
->> - Remove dts for sdio_id0, just replace this with 8, suggested by Doug
->> - Change to support all Rockchip Socs, suggested by Heiko
->> Changes in v4:
->> - use init-hook to set sdio_id0, suggested by Jaehoon
->>
->>  drivers/mmc/host/dw_mmc-rockchip.c | 10 ++++++++++
->>  drivers/mmc/host/dw_mmc.c          | 12 +++++++-----
->>  drivers/mmc/host/dw_mmc.h          |  2 ++
->>  include/linux/mmc/dw_mmc.h         |  3 +++
->>  4 files changed, 22 insertions(+), 5 deletions(-)
-> 
-> Reviewed-by: Doug Anderson <dianders@chromium.org>
-> 
+All boards with a dma controller have DT support so using
+dma_request_slave_channel_compat is no more needed.
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
+ drivers/mmc/host/atmel-mci.c | 20 +-------------------
+ 1 file changed, 1 insertion(+), 19 deletions(-)
 
-Best Regards,
-Jaehoon Chung
-
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index a7b59ba..de2287c 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -2272,23 +2272,6 @@ static void atmci_cleanup_slot(struct atmel_mci_slot *slot,
+ 	mmc_free_host(slot->mmc);
+ }
+ 
+-static bool atmci_filter(struct dma_chan *chan, void *pdata)
+-{
+-	struct mci_platform_data *sl_pdata = pdata;
+-	struct mci_dma_data *sl;
+-
+-	if (!sl_pdata)
+-		return false;
+-
+-	sl = sl_pdata->dma_slave;
+-	if (sl && find_slave_dev(sl) == chan->device->dev) {
+-		chan->private = slave_data_ptr(sl);
+-		return true;
+-	} else {
+-		return false;
+-	}
+-}
+-
+ static bool atmci_configure_dma(struct atmel_mci *host)
+ {
+ 	struct mci_platform_data	*pdata;
+@@ -2302,8 +2285,7 @@ static bool atmci_configure_dma(struct atmel_mci *host)
+ 	dma_cap_zero(mask);
+ 	dma_cap_set(DMA_SLAVE, mask);
+ 
+-	host->dma.chan = dma_request_slave_channel_compat(mask, atmci_filter, pdata,
+-							  &host->pdev->dev, "rxtx");
++	host->dma.chan = dma_request_slave_channel(&host->pdev->dev, "rxtx");
+ 	if (!host->dma.chan) {
+ 		dev_warn(&host->pdev->dev, "no DMA channel available\n");
+ 		return false;
+-- 
+2.0.3
 
