@@ -1,28 +1,31 @@
 From: Nicolas Ferre <nicolas.ferre@atmel.com>
-Subject: Re: [PATCH 2/2] mmc: atmel-mci: introduce probe deferring
-Date: Fri, 14 Nov 2014 15:53:10 +0100
-Message-ID: <54661756.20705@atmel.com>
-References: <1415975620-30140-1-git-send-email-ludovic.desroches@atmel.com> <1415975620-30140-2-git-send-email-ludovic.desroches@atmel.com>
+Subject: Re: [RESEND PATCH 2/2] mmc: atmel-mci: introduce probe deferring
+Date: Fri, 14 Nov 2014 15:55:13 +0100
+Message-ID: <546617D1.5060904@atmel.com>
+References: <1415975785-30303-1-git-send-email-ludovic.desroches@atmel.com> <1415975785-30303-2-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:57797 "EHLO
+Received: from eusmtp01.atmel.com ([212.144.249.243]:1110 "EHLO
 	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965504AbaKNOxQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Nov 2014 09:53:16 -0500
-In-Reply-To: <1415975620-30140-2-git-send-email-ludovic.desroches@atmel.com>
+	with ESMTP id S965012AbaKNOzT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Nov 2014 09:55:19 -0500
+In-Reply-To: <1415975785-30303-2-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: =chris@printf.net, ulf.hansson@linaro.org
+Cc: chris@printf.net, ulf.hansson@linaro.org
 
-On 14/11/2014 15:33, Ludovic Desroches :
+On 14/11/2014 15:36, Ludovic Desroches :
 > Return probe defer if requesting a dma channel without a dma controller
 > probed. Using late_initcall is no more needing.
 > 
 > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 > ---
+> 
+> Sorry for the noise, typo in cc list.
+> 
 >  drivers/mmc/host/atmel-mci.c | 52 +++++++++++++++++++++++++-------------------
 >  1 file changed, 30 insertions(+), 22 deletions(-)
 > 
@@ -136,7 +139,6 @@ On 14/11/2014 15:33, Ludovic Desroches :
 
 If deferring probe is activated, so I don't know why a special initcall
 function is still needed.
-
 
 >  module_exit(atmci_exit);
 >  
