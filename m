@@ -1,133 +1,136 @@
-From: Barry Song <21cnbao@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-sirf: add sirf tuning function (cmd 19)
-Date: Mon, 17 Nov 2014 17:30:45 +0800
-Message-ID: <CAGsJ_4yOCwt1YYd6UuAXjeO2iWhQB4XtouyriX1YsK7BnyNNLA@mail.gmail.com>
-References: <1415720864-3936-1-git-send-email-21cnbao@gmail.com> <CAPDyKFopdcLXVCuoifd7K8NaRY4UXDbDmNJvyFeUQZs62or9Ag@mail.gmail.com>
+From: Avi Shchislowski <avi.shchislowski@sandisk.com>
+Subject: =?UTF-8?q?=5BPATCH=201/1=5D=20Production=20State=20Awareness=20support=20in=20host=20side?=
+Date: Mon, 17 Nov 2014 14:52:06 +0200
+Message-ID: <1416228726-8514-1-git-send-email-avi.shchislowski@sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f169.google.com ([209.85.192.169]:42214 "EHLO
-	mail-pd0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751300AbaKQJbH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Nov 2014 04:31:07 -0500
-Received: by mail-pd0-f169.google.com with SMTP id fp1so3528581pdb.14
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2014 01:31:05 -0800 (PST)
-In-Reply-To: <CAPDyKFopdcLXVCuoifd7K8NaRY4UXDbDmNJvyFeUQZs62or9Ag@mail.gmail.com>
+Received: from mail-bl2on0090.outbound.protection.outlook.com ([65.55.169.90]:26016
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752556AbaKQMw2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 17 Nov 2014 07:52:28 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, chris@printf.net, Avi Shchislowski <avi.shchislowski@sandisk.com>, Alex Lemberg <alex.lemberg@sandisk.com>
 
-2014-11-12 17:35 GMT+08:00 Ulf Hansson <ulf.hansson@linaro.org>:
-> On 11 November 2014 16:47, Barry Song <21cnbao@gmail.com> wrote:
->> From: Minda Chen <Minda.Chen@csr.com>
->>
->> Add manual tuning function in CSR atlas7 SoC. It is mainly used
->> for the UHS-I SD card working SDR50 SDR104 mode.
->>
->> The tuning principle can be seen in SD spec part1 v3.01 4.2.4.5
->> (tuning command).
->>
->> SD host send the cmd19 and set the delay value(0-127).
->> and the sdcard return 64 bytes data. If the data is same with
->> the tuning data. The delay value is valid. Execute this commmand
->> 128 times. And calculate the longest window of the valid values.
->> The value in the middle of this window is the best value.
->>
->> Signed-off-by: Minda Chen <Minda.Chen@csr.com>
->> Signed-off-by: Barry Song <Baohua.Song@csr.com>
->> ---
->>  drivers/mmc/host/sdhci-sirf.c | 105 +++++++++++++++++++++++++++++++++++++++++-
->>  1 file changed, 104 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
->> index dd29d47..c71cf4e 100644
->> --- a/drivers/mmc/host/sdhci-sirf.c
->> +++ b/drivers/mmc/host/sdhci-sirf.c
->> @@ -8,14 +8,18 @@
->>
->>  #include <linux/delay.h>
->>  #include <linux/device.h>
->> -#include <linux/mmc/host.h>
->>  #include <linux/module.h>
->>  #include <linux/of.h>
->>  #include <linux/of_gpio.h>
->> +#include <linux/slab.h>
->> +#include <linux/mmc/host.h>
->> +#include <linux/mmc/mmc.h>
->>  #include <linux/mmc/slot-gpio.h>
->>  #include "sdhci-pltfm.h"
->>
->> +#define SDHCI_CLK_DELAY_SETTING 0x4C
->>  #define SDHCI_SIRF_8BITBUS BIT(3)
->> +#define SIRF_TUNING_COUNT 128
->>
->>  struct sdhci_sirf_priv {
->>         struct clk *clk;
->> @@ -49,7 +53,106 @@ static void sdhci_sirf_set_bus_width(struct sdhci_host *host, int width)
->>         sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->>  }
->>
->> +static int sdhci_sirf_execute_tuning(struct sdhci_host *host, u32 opcode)
->> +{
->> +       int tuning_seq_cnt = 3;
->> +       u8 phase, *data_buf, tuned_phases[SIRF_TUNING_COUNT];
->> +       u8 tuned_phase_cnt = 0;
->> +       const u8 *tuning_block_pattern = tuning_blk_pattern_4bit;
->> +       int size = sizeof(tuning_blk_pattern_4bit);
->> +       int rc, longest_range = 0;
->> +       int start = -1, end, tuning_value = -1, range = 0;
->> +       u16 clock_setting;
->> +       struct mmc_host *mmc = host->mmc;
->> +
->> +       data_buf = kmalloc(size, GFP_KERNEL);
->> +       if (!data_buf)
->> +               return -ENOMEM;
->> +
->> +       clock_setting = sdhci_readw(host, SDHCI_CLK_DELAY_SETTING);
->> +       clock_setting &= ~0x3fff;
->> +
->> +retry:
->> +       phase = 0;
->> +       do {
->> +               struct mmc_command cmd = { 0 };
->> +               struct mmc_data data = { 0 };
->> +               struct mmc_request mrq = {
->> +                       .cmd = &cmd,
->> +                       .data = &data
->> +               };
->> +               struct scatterlist sg;
->> +
->> +               sdhci_writel(host,
->> +                       clock_setting | phase | (phase << 7) | (phase << 16),
->> +                       SDHCI_CLK_DELAY_SETTING);
->> +
->> +               cmd.opcode = opcode;
->> +               cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
->> +
->> +               data.blksz = size;
->> +               data.blocks = 1;
->> +               data.flags = MMC_DATA_READ;
->> +               data.timeout_ns = NSEC_PER_SEC; /* 1 second */
->> +
->> +               data.sg = &sg;
->> +               data.sg_len = 1;
->> +               sg_init_one(&sg, data_buf, size);
->> +               memset(data_buf, 0, size);
->> +               mmc_wait_for_req(mmc, &mrq);
->
-> These piece of code, which sends the tuning command don't belong in
-> the host driver. Instead I would like this to be handled from a helper
-> function from the mmc core.
->
-> I realize that there already a few existing host drivers that
-> implemented similar code and I don't like it. We should convert them
-> to use a common helper function from the core instead.
-yes. that is fine.
+Adding support for PSA (Production State Awareness)
+feature for all eMMC devices with revision >=3D5.0
+In this patch the eMMC driver will check if device was completed
+its Production State mode, and will switch it to Normal (field) mode.
+Switching to normal mode signal the device to complete its work in prod=
+uction mode
+and start working in regular performance mode.
 
-our engineering is currently very busy and might have no time to
-handle this for this moment.
-do you think we can move your requirement to a new refine task of next
-window after you pick up this in this window?
+Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
 
--barry
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 02ad792..2d59722 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -605,6 +605,20 @@ static int mmc_read_ext_csd(struct mmc_card *card)
+ 				mmc_hostname(card->host));
+ 			err =3D 0;
+ 		}
++	/* eMMC v5.0 or later */
++	if (card->ext_csd.rev > 6) {
++		card->ext_csd.psa =3D
++			ext_csd[EXT_CSD_PSA];
++		if (ext_csd[EXT_CSD_PSA_TIMEOUT] > 0) {
++			card->ext_csd.psa_timeout =3D
++				100 *
++				(1 << ext_csd[EXT_CSD_PSA_TIMEOUT]);
++		} else {
++			card->ext_csd.psa_timeout =3D 0;
++			pr_warn("%s: EXT_CSD PSA Timeout is zero\n",
++					mmc_hostname(card->host));
++		}
++	}
+=20
+ 		return err;
+ 	}
+@@ -1330,6 +1344,25 @@ static int mmc_init_card(struct mmc_host *host, =
+u32 ocr,
+ 	if (card->csd.dsr_imp && host->dsr_req)
+ 		mmc_set_dsr(host);
+=20
++    /*
++     * eMMC v5.0 or later
++     * and Production State Awareness state is EXT_CSD_PSA_POST_SOLDER=
+ING_WRITES
++     * The host should set the device to NORMAL mode
++     */
++	if ((card->ext_csd.rev > 6)
++		&& (card->ext_csd.psa =3D=3D EXT_CSD_PSA_POST_SOLDERING_WRITES)) {
++		unsigned int timeout;
++		/*Zero value in PSA Timeout =E2=80=93 PSA is not defined*/
++		if (card->ext_csd.psa_timeout !=3D 0) {
++			timeout =3D DIV_ROUND_UP(card->ext_csd.psa_timeout, 1000);
++			card->ext_csd.psa =3D EXT_CSD_PSA_NORMAL;
++			err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++				EXT_CSD_PSA, card->ext_csd.psa, timeout);
++			if (err && err !=3D -EBADMSG)
++				goto free_card;
++		}
++	}
++
+ 	/*
+ 	 * Select card, as all following commands rely on that.
+ 	 */
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 4d69c00..09ac3b0 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -60,9 +60,11 @@ struct mmc_ext_csd {
+ 	u8			packed_event_en;
+ 	unsigned int		part_time;		/* Units: ms */
+ 	unsigned int		sa_timeout;		/* Units: 100ns */
++	unsigned int		psa_timeout;		/* Units: 100us */
+ 	unsigned int		generic_cmd6_time;	/* Units: 10ms */
+ 	unsigned int            power_off_longtime;     /* Units: ms */
+ 	u8			power_off_notification;	/* state */
++	u8			psa; /* production state awareness */
+ 	unsigned int		hs_max_dtr;
+ 	unsigned int		hs200_max_dtr;
+ #define MMC_HIGH_26_MAX_DTR	26000000
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 49ad7a9..eb170ff 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -285,6 +285,9 @@ struct _mmc_csd {
+ #define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
+ #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
+ #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
++#define EXT_CSD_QRDY_SUPPORT		96	/* RO */
++#define EXT_CSD_CMDQ_QRDY_FUNCTION	97	/* R/W */
++#define EXT_CSD_PSA			133	/* R/W/E */
+ #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
+ #define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
+ #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+@@ -315,6 +318,7 @@ struct _mmc_csd {
+ #define EXT_CSD_PWR_CL_26_360		203	/* RO */
+ #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
+ #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
++#define EXT_CSD_PSA_TIMEOUT		218	/* RO */
+ #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
+ #define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
+ #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
+@@ -433,6 +437,13 @@ struct _mmc_csd {
+ #define EXT_CSD_BKOPS_LEVEL_2		0x2
+=20
+ /*
++ * PRODUCTION STATE AWARENESS fields
++ */
++
++#define EXT_CSD_PSA_NORMAL				0x00
++#define EXT_CSD_PSA_POST_SOLDERING_WRITES	0x02
++
++/*
+  * MMC_SWITCH access modes
+  */
+=20
+--=20
+1.7.9.5
+
