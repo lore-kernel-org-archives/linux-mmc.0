@@ -1,93 +1,137 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH v2] mmc: dw_mmc: Turn the card clock off at suspend time
-Date: Wed, 19 Nov 2014 11:37:21 -0800
-Message-ID: <1416425841-12681-1-git-send-email-dianders@chromium.org>
+From: Alex Lemberg <alex.lemberg@sandisk.com>
+Subject: [PATCH] mmc: Add Production State Awareness Support
+Date: Wed, 19 Nov 2014 21:27:56 +0200
+Message-ID: <1416425276-4672-1-git-send-email-alex.lemberg@sandisk.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f175.google.com ([209.85.213.175]:63814 "EHLO
-	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755334AbaKSTh1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Nov 2014 14:37:27 -0500
-Received: by mail-ig0-f175.google.com with SMTP id h15so3536240igd.14
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2014 11:37:26 -0800 (PST)
+Received: from mail-by2on0062.outbound.protection.outlook.com ([207.46.100.62]:47488
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754598AbaKSTne (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 19 Nov 2014 14:43:34 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, Doug Anderson <dianders@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, chris@printf.net, Avi.Shchislowski@sandisk.com, Alex Lemberg <alex.lemberg@sandisk.com>
 
-Since the dw_mmc driver was first added to Linux it's had a TODO in it
-that we should turn off the card clock during suspend.  I have no idea
-for sure why it wasn't done originally, but if I had to guess I'd
-guess it was related to the lack of a common clock framework.  Let's
-do it now.
+In this patch driver should recognize if eMMC device (Rev >=5.0)
+was left in PRE_SOLDERING_POST_WRITES (0x02) state, and switch
+it to NORMAL (0x00).
+PRE_SOLDERING_POST_WRITES (0x02) state - represents a state
+where the device is in production process and the
+host (usually programmer) completed loading the content
+to the device.
+The host (usually programmer) sets the device to this state after
+loading the content and just before soldering.
+After soldering the device to the real host (not programmer),
+the device should be switched to NORMAL (0x00) mode.
+The NORMAL (0x00) mode of PSA register represents a state in
+which the device is running in the field and uses regular operations.
+Leaving device in PRE_SOLDERING_POST_WRITES (0x02) might cause
+unexpected behaviour of eMMC device.
 
-There is no reason for the card clock to be left on during suspend and
-most systems will eventually turn it off anyway (when whole clock
-trees are disabled).  However, it's good to be explicit that it's
-disabled at the time that the MMC subsystem is disabled.
+More details about PSA feature can be found in eMMC5.0 JEDEC spec (JESD84-B50.pdf):
+http://www.jedec.org/standards-documents/technology-focus-areas/flash-memory-ssds-ufs-emmc/e-mmc
 
-This actually fixes a bug on Rockchip rk3288 where an SDIO card wakes
-the system back up during suspend.
-
-Signed-off-by: Doug Anderson <dianders@chromium.org>
+Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
 ---
-Changes in v2:
-- Handle fact that ciu_clk is optional (abrestic)
-- Check for errors enabling ciu_clk (abrestic)
 
- drivers/mmc/host/dw_mmc.c | 21 +++++++++++++++++----
- 1 file changed, 17 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 5a37c33..49f4013 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2825,11 +2825,11 @@ EXPORT_SYMBOL(dw_mci_remove);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 02ad792..3923c90 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -571,6 +571,16 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		card->ext_csd.ffu_capable =
+ 			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
+ 			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
++		card->ext_csd.psa =
++			ext_csd[EXT_CSD_PSA];
++		if (ext_csd[EXT_CSD_PSA_TIMEOUT] > 0) {
++			card->ext_csd.psa_timeout =
++				100 *
++				(1 << ext_csd[EXT_CSD_PSA_TIMEOUT]);
++		} else {
++			pr_warn("%s: EXT_CSD PSA Timeout is zero\n",
++					mmc_hostname(card->host));
++		}format-patch
+ 	}
+ out:
+ 	return err;
+@@ -1331,6 +1341,24 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		mmc_set_dsr(host);
  
- 
- #ifdef CONFIG_PM_SLEEP
--/*
-- * TODO: we should probably disable the clock to the card in the suspend path.
-- */
- int dw_mci_suspend(struct dw_mci *host)
- {
-+	if (!IS_ERR(host->ciu_clk))
-+		clk_disable(host->ciu_clk);
+ 	/*
++	 * eMMC v5.0 or later
++	 * and Production State Awareness state is
++	 * EXT_CSD_PSA_POST_SOLDERING_WRITES (0x02)
++	 * The host should set the device to NORMAL mode
++	 */
++	if ((card->ext_csd.rev >= 7) &&
++		(card->ext_csd.psa == EXT_CSD_PSA_POST_SOLDERING_WRITES)) {
++		unsigned int timeout;
 +
- 	return 0;
- }
- EXPORT_SYMBOL(dw_mci_suspend);
-@@ -2838,9 +2838,15 @@ int dw_mci_resume(struct dw_mci *host)
- {
- 	int i, ret;
- 
-+	if (!IS_ERR(host->ciu_clk)) {
-+		ret = clk_enable(host->ciu_clk);
-+		if (ret)
-+			return ret;
++		timeout = DIV_ROUND_UP(card->ext_csd.psa_timeout, 1000);
++		card->ext_csd.psa = EXT_CSD_PSA_NORMAL;
++		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++			EXT_CSD_PSA, card->ext_csd.psa, timeout);
++		if (err && err != -EBADMSG)
++			goto free_card;
 +	}
 +
- 	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
- 		ret = -ENODEV;
--		return ret;
-+		goto exit_ciu_enabled;
- 	}
++	/*
+ 	 * Select card, as all following commands rely on that.
+ 	 */
+ 	if (!mmc_host_is_spi(host)) {
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 4d69c00..09ac3b0 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -60,9 +60,11 @@ struct mmc_ext_csd {
+ 	u8			packed_event_en;
+ 	unsigned int		part_time;		/* Units: ms */
+ 	unsigned int		sa_timeout;		/* Units: 100ns */
++	unsigned int		psa_timeout;		/* Units: 100us */
+ 	unsigned int		generic_cmd6_time;	/* Units: 10ms */
+ 	unsigned int            power_off_longtime;     /* Units: ms */
+ 	u8			power_off_notification;	/* state */
++	u8			psa; /* production state awareness */
+ 	unsigned int		hs_max_dtr;
+ 	unsigned int		hs200_max_dtr;
+ #define MMC_HIGH_26_MAX_DTR	26000000
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 49ad7a9..458814d 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -285,6 +285,7 @@ struct _mmc_csd {
+ #define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
+ #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
+ #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
++#define EXT_CSD_PSA			133	/* R/W/E */
+ #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
+ #define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
+ #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+@@ -315,6 +316,7 @@ struct _mmc_csd {
+ #define EXT_CSD_PWR_CL_26_360		203	/* RO */
+ #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
+ #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
++#define EXT_CSD_PSA_TIMEOUT		218	/* RO */
+ #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
+ #define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
+ #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
+@@ -433,6 +435,12 @@ struct _mmc_csd {
+ #define EXT_CSD_BKOPS_LEVEL_2		0x2
  
- 	if (host->use_dma && host->dma_ops->init)
-@@ -2871,7 +2877,14 @@ int dw_mci_resume(struct dw_mci *host)
- 			dw_mci_setup_bus(slot, true);
- 		}
- 	}
+ /*
++ * PRODUCTION STATE AWARENESS fields
++ */
++#define EXT_CSD_PSA_NORMAL		0x00
++#define EXT_CSD_PSA_POST_SOLDERING_WRITES	0x02
 +
- 	return 0;
-+
-+exit_ciu_enabled:
-+	if (!IS_ERR(host->ciu_clk))
-+		clk_disable(host->ciu_clk);
-+
-+	return ret;
- }
- EXPORT_SYMBOL(dw_mci_resume);
- #endif /* CONFIG_PM_SLEEP */
++/*
+  * MMC_SWITCH access modes
+  */
+ 
 -- 
-2.1.0.rc2.206.gedb03e5
+2.1.0
 
