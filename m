@@ -1,82 +1,163 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mvsdio: Work around broken TX DMA
-Date: Wed, 19 Nov 2014 11:31:13 +0100
-Message-ID: <CAPDyKFos__44CdPUxAT1R=+81ohuZWHAN83HCv6-BD6QWksF0w@mail.gmail.com>
-References: <1415830208-1888-1-git-send-email-andrew@lunn.ch>
+Subject: Re: [PATCH v4] mmc: dw_mmc: add support for the other bit of sdio interrupt
+Date: Wed, 19 Nov 2014 11:32:04 +0100
+Message-ID: <CAPDyKFqxpXiM-pgqWrVJv=OzVbzjj1yXkrx4BbCHb+n2Ky9T1g@mail.gmail.com>
+References: <1414977633-3196-1-git-send-email-addy.ke@rock-chips.com>
+	<1415109789-7046-1-git-send-email-addy.ke@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f45.google.com ([209.85.216.45]:42313 "EHLO
-	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754575AbaKSKbO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Nov 2014 05:31:14 -0500
-Received: by mail-qa0-f45.google.com with SMTP id x12so153397qac.32
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2014 02:31:13 -0800 (PST)
-In-Reply-To: <1415830208-1888-1-git-send-email-andrew@lunn.ch>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1415109789-7046-1-git-send-email-addy.ke@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Addy Ke <addy.ke@rock-chips.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Doug Anderson <dianders@chromium.org>, Sonny Rao <sonnyrao@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-rockchip@lists.infradead.org, zhenfu.f
 List-Id: linux-mmc@vger.kernel.org
-To: Andrew Lunn <andrew@lunn.ch>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, linux ARM <linux-arm-kernel@lists.infradead.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-On 12 November 2014 23:10, Andrew Lunn <andrew@lunn.ch> wrote:
-> In order to use the mvsdio driver for sdio, it has been necessary to
-> use a module parameter to disable DMA so to force PIO is used. It is
-> then possible to use wireless LAN devices like mwifiex found on
-> topkick and mirabox. However, accessing an MMC SD card does work with
-> DMA.
+On 4 November 2014 15:03, Addy Ke <addy.ke@rock-chips.com> wrote:
+> The bit of sdio interrupt is 16 in designware implementation,
+> but it is 24 on Rockchip SoCs.This patch add sdio_id0 for the
+> number of slot0 in the SDIO interrupt registers.
 >
-> Investigation has shown that MMC block device accesses are always
-> aligned to 64 byte boundaries, where as transfers from mwifiex are
-> rarely more than word aligned. It has also been determined that card
-> to host transfers work with DMA for SDIO devices, but host to card
-> transfers with DMA have problems.
->
-> This patch extends the current checks for buffers which are not word
-> aligned or multiple of words. All host to card transfers which are not
-> 64 byte aligned are now also performed via PIO. This should not affect
-> the performance of SD cards, but allow sdio devices to work out of the
-> box, and they are likely to be more efficient since DMA will be used
-> for card to host transfers.
->
-> Tested on mirabox for wifi via mwifiex
-> Tested on 370 RD for file systems on an SD card.
->
-> Signed-off-by: Andrew Lunn <andrew@lunn.ch>
+> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
 
 Thanks! Applied for next.
 
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/host/mvsdio.c | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
+> Changes in v2:
+> - rebase on http://git.linaro.org/git/people/ulf.hansson/mmc.git, next branch
+> Changes in v3:
+> - Remove dts for sdio_id0, just replace this with 8, suggested by Doug
+> - Change to support all Rockchip Socs, suggested by Heiko
+> Changes in v4:
+> - use init-hook to set sdio_id0, suggested by Jaehoon
 >
-> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-> index 6b4c5ad3b393..4f8618f4522d 100644
-> --- a/drivers/mmc/host/mvsdio.c
-> +++ b/drivers/mmc/host/mvsdio.c
-> @@ -111,10 +111,15 @@ static int mvsd_setup_data(struct mvsd_host *host, struct mmc_data *data)
->         mvsd_write(MVSD_BLK_COUNT, data->blocks);
->         mvsd_write(MVSD_BLK_SIZE, data->blksz);
+>  drivers/mmc/host/dw_mmc-rockchip.c | 10 ++++++++++
+>  drivers/mmc/host/dw_mmc.c          | 12 +++++++-----
+>  drivers/mmc/host/dw_mmc.h          |  2 ++
+>  include/linux/mmc/dw_mmc.h         |  3 +++
+>  4 files changed, 22 insertions(+), 5 deletions(-)
 >
-> -       if (nodma || (data->blksz | data->sg->offset) & 3) {
-> +       if (nodma || (data->blksz | data->sg->offset) & 3 ||
-> +           ((!(data->flags & MMC_DATA_READ) && data->sg->offset & 0x3f))) {
->                 /*
->                  * We cannot do DMA on a buffer which offset or size
->                  * is not aligned on a 4-byte boundary.
-> +                *
-> +                * It also appears the host to card DMA can corrupt
-> +                * data when the buffer is not aligned on a 64 byte
-> +                * boundary.
->                  */
->                 host->pio_size = data->blocks * data->blksz;
->                 host->pio_ptr = sg_virt(data->sg);
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> index bbb4ec3..5650ac4 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -68,14 +68,24 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>         }
+>  }
+>
+> +static int dw_mci_rockchip_init(struct dw_mci *host)
+> +{
+> +       /* It is slot 8 on Rockchip SoCs */
+> +       host->sdio_id0 = 8;
+> +
+> +       return 0;
+> +}
+> +
+>  static const struct dw_mci_drv_data rk2928_drv_data = {
+>         .prepare_command        = dw_mci_rockchip_prepare_command,
+> +       .init                   = dw_mci_rockchip_init,
+>  };
+>
+>  static const struct dw_mci_drv_data rk3288_drv_data = {
+>         .prepare_command        = dw_mci_rockchip_prepare_command,
+>         .set_ios                = dw_mci_rk3288_set_ios,
+>         .setup_clock    = dw_mci_rk3288_setup_clock,
+> +       .init                   = dw_mci_rockchip_init,
+>  };
+>
+>  static const struct of_device_id dw_mci_rockchip_match[] = {
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index bb46b1b..a633b58 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -823,7 +823,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>
+>                 /* enable clock; only low power if no SDIO */
+>                 clk_en_a = SDMMC_CLKEN_ENABLE << slot->id;
+> -               if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->id)))
+> +               if (!(mci_readl(host, INTMASK) & SDMMC_INT_SDIO(slot->sdio_id)))
+>                         clk_en_a |= SDMMC_CLKEN_LOW_PWR << slot->id;
+>                 mci_writel(host, CLKENA, clk_en_a);
+>
+> @@ -1184,10 +1184,10 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>                 dw_mci_disable_low_power(slot);
+>
+>                 mci_writel(host, INTMASK,
+> -                          (int_mask | SDMMC_INT_SDIO(slot->id)));
+> +                          (int_mask | SDMMC_INT_SDIO(slot->sdio_id)));
+>         } else {
+>                 mci_writel(host, INTMASK,
+> -                          (int_mask & ~SDMMC_INT_SDIO(slot->id)));
+> +                          (int_mask & ~SDMMC_INT_SDIO(slot->sdio_id)));
+>         }
+>  }
+>
+> @@ -2056,8 +2056,9 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>                 /* Handle SDIO Interrupts */
+>                 for (i = 0; i < host->num_slots; i++) {
+>                         struct dw_mci_slot *slot = host->slot[i];
+> -                       if (pending & SDMMC_INT_SDIO(i)) {
+> -                               mci_writel(host, RINTSTS, SDMMC_INT_SDIO(i));
+> +                       if (pending & SDMMC_INT_SDIO(slot->sdio_id)) {
+> +                               mci_writel(host, RINTSTS,
+> +                                          SDMMC_INT_SDIO(slot->sdio_id));
+>                                 mmc_signal_sdio_irq(slot->mmc);
+>                         }
+>                 }
+> @@ -2145,6 +2146,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>
+>         slot = mmc_priv(mmc);
+>         slot->id = id;
+> +       slot->sdio_id = host->sdio_id0 + id;
+>         slot->mmc = mmc;
+>         slot->host = host;
+>         host->slot[id] = slot;
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 71d4995..0562f10 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -214,6 +214,7 @@ extern int dw_mci_resume(struct dw_mci *host);
+>   *     with CONFIG_MMC_CLKGATE.
+>   * @flags: Random state bits associated with the slot.
+>   * @id: Number of this slot.
+> + * @sdio_id: Number of this slot in the SDIO interrupt registers.
+>   */
+>  struct dw_mci_slot {
+>         struct mmc_host         *mmc;
+> @@ -233,6 +234,7 @@ struct dw_mci_slot {
+>  #define DW_MMC_CARD_PRESENT    0
+>  #define DW_MMC_CARD_NEED_INIT  1
+>         int                     id;
+> +       int                     sdio_id;
+>  };
+>
+>  struct dw_mci_tuning_data {
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index 69d0814..72c319f 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -96,6 +96,7 @@ struct mmc_data;
+>   * @quirks: Set of quirks that apply to specific versions of the IP.
+>   * @irq_flags: The flags to be passed to request_irq.
+>   * @irq: The irq value to be passed to request_irq.
+> + * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
+>   *
+>   * Locking
+>   * =======
+> @@ -191,6 +192,8 @@ struct dw_mci {
+>         bool                    vqmmc_enabled;
+>         unsigned long           irq_flags; /* IRQ flags */
+>         int                     irq;
+> +
+> +       int                     sdio_id0;
+>  };
+>
+>  /* DMA ops for Internal/External DMAC interface */
 > --
-> 2.1.3
+> 1.8.3.2
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
