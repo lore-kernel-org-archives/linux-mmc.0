@@ -1,65 +1,69 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH] mmc: dw_mmc: Turn the card clock off at suspend time
-Date: Wed, 19 Nov 2014 10:51:13 -0800
-Message-ID: <1416423073-8105-1-git-send-email-dianders@chromium.org>
+From: Andrew Bresticker <abrestic@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Turn the card clock off at suspend time
+Date: Wed, 19 Nov 2014 11:03:43 -0800
+Message-ID: <CAL1qeaGkQVimrFNtGgfTJEHNemG_QUTecQwH4=nXu1_u1rWwhg@mail.gmail.com>
+References: <1416423073-8105-1-git-send-email-dianders@chromium.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f175.google.com ([209.85.223.175]:39536 "EHLO
-	mail-ie0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756168AbaKSSvg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Nov 2014 13:51:36 -0500
-Received: by mail-ie0-f175.google.com with SMTP id at20so1124634iec.34
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2014 10:51:35 -0800 (PST)
+Received: from mail-vc0-f174.google.com ([209.85.220.174]:50880 "EHLO
+	mail-vc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755958AbaKSTDo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Nov 2014 14:03:44 -0500
+Received: by mail-vc0-f174.google.com with SMTP id la4so633224vcb.19
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2014 11:03:43 -0800 (PST)
+In-Reply-To: <1416423073-8105-1-git-send-email-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, Doug Anderson <dianders@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Heiko Stuebner <heiko@sntech.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-rockchip@lists.infradead.org, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Since the dw_mmc driver was first added to Linux it's had a TODO in it
-that we should turn off the card clock during suspend.  I have no idea
-for sure why it wasn't done originally, but if I had to guess I'd
-guess it was related to the lack of a common clock framework.  Let's
-do it now.
+Doug,
 
-There is no reason for the card clock to be left on during suspend and
-most systems will eventually turn it off anyway (when whole clock
-trees are disabled).  However, it's good to be explicit that it's
-disabled at the time that the MMC subsystem is disabled.
+On Wed, Nov 19, 2014 at 10:51 AM, Doug Anderson <dianders@chromium.org> wrote:
+> Since the dw_mmc driver was first added to Linux it's had a TODO in it
+> that we should turn off the card clock during suspend.  I have no idea
+> for sure why it wasn't done originally, but if I had to guess I'd
+> guess it was related to the lack of a common clock framework.  Let's
+> do it now.
+>
+> There is no reason for the card clock to be left on during suspend and
+> most systems will eventually turn it off anyway (when whole clock
+> trees are disabled).  However, it's good to be explicit that it's
+> disabled at the time that the MMC subsystem is disabled.
 
-This actually fixes a bug on Rockchip rk3288 where an SDIO card wakes
-the system back up during suspend.
+Should the bus clock (biu) be disabled as well?
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
- drivers/mmc/host/dw_mmc.c | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+> This actually fixes a bug on Rockchip rk3288 where an SDIO card wakes
+> the system back up during suspend.
+>
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 7 ++++---
+>  1 file changed, 4 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 5a37c33..c448159 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2825,11 +2825,10 @@ EXPORT_SYMBOL(dw_mci_remove);
+>
+>
+>  #ifdef CONFIG_PM_SLEEP
+> -/*
+> - * TODO: we should probably disable the clock to the card in the suspend path.
+> - */
+>  int dw_mci_suspend(struct dw_mci *host)
+>  {
+> +       clk_disable(host->ciu_clk);
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 5a37c33..c448159 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2825,11 +2825,10 @@ EXPORT_SYMBOL(dw_mci_remove);
- 
- 
- #ifdef CONFIG_PM_SLEEP
--/*
-- * TODO: we should probably disable the clock to the card in the suspend path.
-- */
- int dw_mci_suspend(struct dw_mci *host)
- {
-+	clk_disable(host->ciu_clk);
-+
- 	return 0;
- }
- EXPORT_SYMBOL(dw_mci_suspend);
-@@ -2838,6 +2837,8 @@ int dw_mci_resume(struct dw_mci *host)
- {
- 	int i, ret;
- 
-+	clk_enable(host->ciu_clk);
-+
- 	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
- 		ret = -ENODEV;
- 		return ret;
--- 
-2.1.0.rc2.206.gedb03e5
+I think you need to check for IS_ERR(host->ciu_clk) since the clock is
+optional.  Also, maybe disable_unprepare instead of just disable?
 
+> @@ -2838,6 +2837,8 @@ int dw_mci_resume(struct dw_mci *host)
+>  {
+>         int i, ret;
+>
+> +       clk_enable(host->ciu_clk);
+
+Check return value?
