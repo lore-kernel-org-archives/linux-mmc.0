@@ -1,46 +1,65 @@
-From: Angelo Dureghello <angelo70@gmail.com>
-Subject: Re: davinci_mmc issues on kernel 3.17.0
-Date: Wed, 19 Nov 2014 16:31:30 +0100
-Message-ID: <546CB7D2.50903@gmail.com>
-References: <546CAA0D.3090107@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH] mmc: dw_mmc: Turn the card clock off at suspend time
+Date: Wed, 19 Nov 2014 10:51:13 -0800
+Message-ID: <1416423073-8105-1-git-send-email-dianders@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f176.google.com ([209.85.212.176]:43037 "EHLO
-	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753829AbaKSPbd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Nov 2014 10:31:33 -0500
-Received: by mail-wi0-f176.google.com with SMTP id ex7so5744319wid.9
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2014 07:31:32 -0800 (PST)
-Received: from [192.168.0.2] (host15-234-dynamic.54-79-r.retail.telecomitalia.it. [79.54.234.15])
-        by mx.google.com with ESMTPSA id w5sm101069wif.18.2014.11.19.07.31.30
-        for <linux-mmc@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Wed, 19 Nov 2014 07:31:31 -0800 (PST)
-In-Reply-To: <546CAA0D.3090107@gmail.com>
+Received: from mail-ie0-f175.google.com ([209.85.223.175]:39536 "EHLO
+	mail-ie0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756168AbaKSSvg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Nov 2014 13:51:36 -0500
+Received: by mail-ie0-f175.google.com with SMTP id at20so1124634iec.34
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2014 10:51:35 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, Doug Anderson <dianders@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi,
+Since the dw_mmc driver was first added to Linux it's had a TODO in it
+that we should turn off the card clock during suspend.  I have no idea
+for sure why it wasn't done originally, but if I had to guess I'd
+guess it was related to the lack of a common clock framework.  Let's
+do it now.
 
-did an additional test, that i hope can help:
+There is no reason for the card clock to be left on during suspend and
+most systems will eventually turn it off anyway (when whole clock
+trees are disabled).  However, it's good to be explicit that it's
+disabled at the time that the MMC subsystem is disabled.
 
-- prepared a 16K ASCI pattern of 0x30,0x31,0x30,0x31.. and so
-- written to mmc sd
+This actually fixes a bug on Rockchip rk3288 where an SDIO card wakes
+the system back up during suspend.
 
-[root@barix boot]# cat 16kpattern.hex > /dev/mmcblk0p1
-[root@barix boot]# Automount: /dev/mmcblk0p1 inserted
-Automount: DEVICE LOCK found quiting...
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+---
+ drivers/mmc/host/dw_mmc.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 5a37c33..c448159 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2825,11 +2825,10 @@ EXPORT_SYMBOL(dw_mci_remove);
+ 
+ 
+ #ifdef CONFIG_PM_SLEEP
+-/*
+- * TODO: we should probably disable the clock to the card in the suspend path.
+- */
+ int dw_mci_suspend(struct dw_mci *host)
+ {
++	clk_disable(host->ciu_clk);
++
+ 	return 0;
+ }
+ EXPORT_SYMBOL(dw_mci_suspend);
+@@ -2838,6 +2837,8 @@ int dw_mci_resume(struct dw_mci *host)
+ {
+ 	int i, ret;
+ 
++	clk_enable(host->ciu_clk);
++
+ 	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
+ 		ret = -ENODEV;
+ 		return ret;
+-- 
+2.1.0.rc2.206.gedb03e5
 
-[root@barix boot]# cat /dev/mmcblk0p1
-
-i could read out _only_ 8K of patterns bytes and then i see other fs 
-bytes just after.
-
-So seems i can't write 8K blocks, seems 4K are truncated.
-
-Regards
-angelo
