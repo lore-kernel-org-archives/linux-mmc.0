@@ -1,35 +1,47 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc_block: Increase max_devices
-Date: Wed, 19 Nov 2014 11:30:28 +0100
-Message-ID: <CAPDyKFqFOOa9BpXDyu_jcmV69BFxp+pR1b+FYRLv0t7_bfwmrQ@mail.gmail.com>
-References: <1415244909.3398.51.camel@decadent.org.uk>
+Subject: Re: [PATCH] mmc: mvsdio: Work around broken TX DMA
+Date: Wed, 19 Nov 2014 11:31:13 +0100
+Message-ID: <CAPDyKFos__44CdPUxAT1R=+81ohuZWHAN83HCv6-BD6QWksF0w@mail.gmail.com>
+References: <1415830208-1888-1-git-send-email-andrew@lunn.ch>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f178.google.com ([209.85.216.178]:36604 "EHLO
-	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754598AbaKSKa3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Nov 2014 05:30:29 -0500
-Received: by mail-qc0-f178.google.com with SMTP id b13so172102qcw.37
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2014 02:30:28 -0800 (PST)
-In-Reply-To: <1415244909.3398.51.camel@decadent.org.uk>
+Received: from mail-qa0-f45.google.com ([209.85.216.45]:42313 "EHLO
+	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754575AbaKSKbO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Nov 2014 05:31:14 -0500
+Received: by mail-qa0-f45.google.com with SMTP id x12so153397qac.32
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2014 02:31:13 -0800 (PST)
+In-Reply-To: <1415830208-1888-1-git-send-email-andrew@lunn.ch>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Hutchings <ben@decadent.org.uk>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Andrew Lunn <andrew@lunn.ch>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, linux ARM <linux-arm-kernel@lists.infradead.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-On 6 November 2014 04:35, Ben Hutchings <ben@decadent.org.uk> wrote:
-> Currently the driver imposes a limit of 256 total minor numbers,
-> apparently based on the historic Unix/Linux limit.  This is quite
-> restrictive, particularly if we raise the maximum number of
-> partitions per card to 256 to match sd.
+On 12 November 2014 23:10, Andrew Lunn <andrew@lunn.ch> wrote:
+> In order to use the mvsdio driver for sdio, it has been necessary to
+> use a module parameter to disable DMA so to force PIO is used. It is
+> then possible to use wireless LAN devices like mwifiex found on
+> topkick and mirabox. However, accessing an MMC SD card does work with
+> DMA.
 >
-> In order to make the full minor number space available we would
-> have to replace the static dev_use and name_use arrays with struct
-> ida.  But we can at least allow use of 256 cards rather than just
-> 256 minors, with only a small change.
+> Investigation has shown that MMC block device accesses are always
+> aligned to 64 byte boundaries, where as transfers from mwifiex are
+> rarely more than word aligned. It has also been determined that card
+> to host transfers work with DMA for SDIO devices, but host to card
+> transfers with DMA have problems.
 >
-> Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
+> This patch extends the current checks for buffers which are not word
+> aligned or multiple of words. All host to card transfers which are not
+> 64 byte aligned are now also performed via PIO. This should not affect
+> the performance of SD cards, but allow sdio devices to work out of the
+> box, and they are likely to be more efficient since DMA will be used
+> for card to host transfers.
+>
+> Tested on mirabox for wifi via mwifiex
+> Tested on 370 RD for file systems on an SD card.
+>
+> Signed-off-by: Andrew Lunn <andrew@lunn.ch>
 
 Thanks! Applied for next.
 
@@ -37,44 +49,34 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/card/block.c | 13 ++++++++-----
->  1 file changed, 8 insertions(+), 5 deletions(-)
+>  drivers/mmc/host/mvsdio.c | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 1fa4c80..d9783da 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -78,13 +78,16 @@ static int perdev_minors = CONFIG_MMC_BLOCK_MINORS;
+> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+> index 6b4c5ad3b393..4f8618f4522d 100644
+> --- a/drivers/mmc/host/mvsdio.c
+> +++ b/drivers/mmc/host/mvsdio.c
+> @@ -111,10 +111,15 @@ static int mvsd_setup_data(struct mvsd_host *host, struct mmc_data *data)
+>         mvsd_write(MVSD_BLK_COUNT, data->blocks);
+>         mvsd_write(MVSD_BLK_SIZE, data->blksz);
 >
->  /*
->   * We've only got one major, so number of mmcblk devices is
-> - * limited to 256 / number of minors per device.
-> + * limited to (1 << 20) / number of minors per device.  It is also
-> + * currently limited by the size of the static bitmaps below.
->   */
->  static int max_devices;
->
-> -/* 256 minors, so at most 256 separate devices */
-> -static DECLARE_BITMAP(dev_use, 256);
-> -static DECLARE_BITMAP(name_use, 256);
-> +#define MAX_DEVICES 256
-> +
-> +/* TODO: Replace these with struct ida */
-> +static DECLARE_BITMAP(dev_use, MAX_DEVICES);
-> +static DECLARE_BITMAP(name_use, MAX_DEVICES);
->
->  /*
->   * There is one mmc_blk_data per slot.
-> @@ -2563,7 +2566,7 @@ static int __init mmc_blk_init(void)
->         if (perdev_minors != CONFIG_MMC_BLOCK_MINORS)
->                 pr_info("mmcblk: using %d minors per device\n", perdev_minors);
->
-> -       max_devices = 256 / perdev_minors;
-> +       max_devices = min(MAX_DEVICES, (1 << MINORBITS) / perdev_minors);
->
->         res = register_blkdev(MMC_BLOCK_MAJOR, "mmc");
->         if (res)
+> -       if (nodma || (data->blksz | data->sg->offset) & 3) {
+> +       if (nodma || (data->blksz | data->sg->offset) & 3 ||
+> +           ((!(data->flags & MMC_DATA_READ) && data->sg->offset & 0x3f))) {
+>                 /*
+>                  * We cannot do DMA on a buffer which offset or size
+>                  * is not aligned on a 4-byte boundary.
+> +                *
+> +                * It also appears the host to card DMA can corrupt
+> +                * data when the buffer is not aligned on a 64 byte
+> +                * boundary.
+>                  */
+>                 host->pio_size = data->blocks * data->blksz;
+>                 host->pio_ptr = sg_virt(data->sg);
+> --
+> 2.1.3
 >
 > --
-> Ben Hutchings
-> Beware of programmers who carry screwdrivers. - Leonard Brandwein
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
