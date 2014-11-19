@@ -1,67 +1,83 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: avoid write to CDTHRCTL on older versions
-Date: Wed, 19 Nov 2014 11:53:55 +0100
-Message-ID: <CAPDyKFqC3kuHRV5Rt+0mgTeB6A5uQfbPg4CgOTHdfX9oTzNnMA@mail.gmail.com>
-References: <1416246545-14118-1-git-send-email-james.hogan@imgtec.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [PATCH 1/1] Production State Awareness support in host side
+Date: Wed, 19 Nov 2014 10:58:02 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333EC9F16C@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <1416228726-8514-1-git-send-email-avi.shchislowski@sandisk.com>
+	<CAPDyKFrCpoSsgECvC=gnMp6WDYAV+2os-uhzp03K-=E+Yv10AA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333EC9D394@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CAPDyKFrzmW5ADf86Q2t18X8cUUovGF-fuhDpQBUSCiPf9g4OUA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1416246545-14118-1-git-send-email-james.hogan@imgtec.com>
-Sender: stable-owner@vger.kernel.org
-To: James Hogan <james.hogan@imgtec.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, stable@vger.kernel.org, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1on0096.outbound.protection.outlook.com ([157.56.110.96]:13437
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755305AbaKSK6I (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 19 Nov 2014 05:58:08 -0500
+In-Reply-To: <CAPDyKFrzmW5ADf86Q2t18X8cUUovGF-fuhDpQBUSCiPf9g4OUA@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
 
-On 17 November 2014 18:49, James Hogan <james.hogan@imgtec.com> wrote:
-> Commit f1d2736c8156 (mmc: dw_mmc: control card read threshold) added
-> dw_mci_ctrl_rd_thld() with an unconditional write to the CDTHRCTL
-> register at offset 0x100. However before version 240a, the FIFO region
-> started at 0x100, so the write messes with the FIFO and completely
-> breaks the driver.
->
-> If the version id < 240A, return early from dw_mci_ctl_rd_thld() so as
-> not to hit this problem.
->
-> Fixes: f1d2736c8156 (mmc: dw_mmc: control card read threshold)
-> Signed-off-by: James Hogan <james.hogan@imgtec.com>
-> Cc: <stable@vger.kernel.org> # v3.13+
-> Cc: Seungwon Jeon <tgih.jun@samsung.com>
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> Cc: Chris Ball <chris@printf.net>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-
-Thanks! Applied for next and removing some of the Cc:s above,
-
-Kind regards
-Uffe
-
-
-> ---
-> Note I've completely guessed at 240A being the point where that register
-> was introduced since the FIFO region moved then.
-> ---
->  drivers/mmc/host/dw_mmc.c | 7 +++++++
->  1 file changed, 7 insertions(+)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 69f0cc68d5b2..f7c95abc8c11 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -626,6 +626,13 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
->
->         WARN_ON(!(data->flags & MMC_DATA_READ));
->
-> +       /*
-> +        * CDTHRCTL doesn't exist prior to 240A (in fact that register offset is
-> +        * in the FIFO region, so we really shouldn't access it).
-> +        */
-> +       if (host->verid < DW_MMC_240A)
-> +               return;
-> +
->         if (host->timing != MMC_TIMING_MMC_HS200 &&
->             host->timing != MMC_TIMING_UHS_SDR104)
->                 goto disable;
-> --
-> 2.0.4
->
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
+aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBXZWRuZXNkYXksIE5vdmVtYmVy
+IDE5LCAyMDE0IDExOjU5IEFNDQo+IFRvOiBBbGV4IExlbWJlcmcNCj4gQ2M6IGxpbnV4LW1tYzsg
+Q2hyaXMgQmFsbDsgQXZpIFNoY2hpc2xvd3NraQ0KPiBTdWJqZWN0OiBSZTogW1BBVENIIDEvMV0g
+UHJvZHVjdGlvbiBTdGF0ZSBBd2FyZW5lc3Mgc3VwcG9ydCBpbiBob3N0IHNpZGUNCj4gDQo+IE9u
+IDE4IE5vdmVtYmVyIDIwMTQgMTk6NDEsIEFsZXggTGVtYmVyZyA8QWxleC5MZW1iZXJnQHNhbmRp
+c2suY29tPg0KPiB3cm90ZToNCj4gPiBIaSBVbGYsDQo+ID4NCj4gPj4gLS0tLS1PcmlnaW5hbCBN
+ZXNzYWdlLS0tLS0NCj4gPj4gRnJvbTogVWxmIEhhbnNzb24gW21haWx0bzp1bGYuaGFuc3NvbkBs
+aW5hcm8ub3JnXQ0KPiA+PiBTZW50OiBNb25kYXksIE5vdmVtYmVyIDE3LCAyMDE0IDM6MzQgUE0N
+Cj4gPj4gVG86IEF2aSBTaGNoaXNsb3dza2kNCj4gPj4gQ2M6IGxpbnV4LW1tYzsgQ2hyaXMgQmFs
+bDsgQWxleCBMZW1iZXJnDQo+ID4+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMS8xXSBQcm9kdWN0aW9u
+IFN0YXRlIEF3YXJlbmVzcyBzdXBwb3J0IGluIGhvc3QNCj4gPj4gc2lkZQ0KPiA+Pg0KPiA+PiBP
+biAxNyBOb3ZlbWJlciAyMDE0IDEzOjUyLCBBdmkgU2hjaGlzbG93c2tpDQo+ID4+IDxhdmkuc2hj
+aGlzbG93c2tpQHNhbmRpc2suY29tPg0KPiA+PiB3cm90ZToNCj4gPj4gPiBBZGRpbmcgc3VwcG9y
+dCBmb3IgUFNBIChQcm9kdWN0aW9uIFN0YXRlIEF3YXJlbmVzcykgZmVhdHVyZSBmb3IgYWxsDQo+
+ID4+ID4gZU1NQyBkZXZpY2VzIHdpdGggcmV2aXNpb24gPj01LjAgSW4gdGhpcyBwYXRjaCB0aGUg
+ZU1NQyBkcml2ZXIgd2lsbA0KPiA+PiA+IGNoZWNrIGlmIGRldmljZSB3YXMgY29tcGxldGVkIGl0
+cyBQcm9kdWN0aW9uIFN0YXRlIG1vZGUsIGFuZCB3aWxsDQo+ID4+ID4gc3dpdGNoIGl0IHRvIE5v
+cm1hbCAoZmllbGQpIG1vZGUuDQo+ID4+ID4gU3dpdGNoaW5nIHRvIG5vcm1hbCBtb2RlIHNpZ25h
+bCB0aGUgZGV2aWNlIHRvIGNvbXBsZXRlIGl0cyB3b3JrIGluDQo+ID4+ID4gcHJvZHVjdGlvbiBt
+b2RlIGFuZCBzdGFydCB3b3JraW5nIGluIHJlZ3VsYXIgcGVyZm9ybWFuY2UgbW9kZS4NCj4gPj4N
+Cj4gPj4gUGxlYXNlIGFkZCBzb21lIGRldGFpbCB0byB3aGF0IHRoaXMgcGF0Y2ggZG9lcy4gQWRk
+aXRpb25hbGx5IHdoeSBpdCdzIG5lZWRlZC4NCj4gPg0KPiA+IEluIHRoaXMgcGF0Y2ggZHJpdmVy
+IHNob3VsZCByZWNvZ25pemUgaWYgZU1NQyBkZXZpY2UgKFJldiA+PTUuMCkgd2FzDQo+ID4gbm90
+IHN3aXRjaGVkIHRvIE5vcm1hbCAoMHgwMCkgUFNBIG1vZGUgYnkgc3RvcmFnZSB2ZW5kb3Igb3Ig
+UHJvZ3JhbW1lcg0KPiBob3VzZS4NCj4gPiBGb3IgdGhpcywgd2UgYXJlIGNoZWNraW5nIGlmIGRl
+dmljZSB3YXMgbGVhdmVkIGluDQo+ID4gUFJFX1NPTERFUklOR19QT1NUX1dSSVRFUyAoMHgwMikg
+c3RhdGUgLSByZXByZXNlbnRzIGEgc3RhdGUgaW4gd2hpY2gNCj4gPiB0aGUgZGV2aWNlIGlzIGlu
+IHByb2R1Y3Rpb24gYW5kIHRoZSBob3N0ICh1c3VhbGx5IHByb2dyYW1tZXIpIGNvbXBsZXRlZCB0
+bw0KPiBsb2FkIHRoZSBjb250ZW50IHRvIHRoZSBkZXZpY2UuDQo+ID4gVGhlIGhvc3QgKHVzdWFs
+bHkgcHJvZ3JhbW1lcikgc2V0cyB0aGUgZGV2aWNlIHRvIHRoaXMgc3RhdGUgYWZ0ZXINCj4gPiBj
+b250ZW50IHdhcyBsb2FkZWQgYW5kIGp1c3QgYmVmb3JlIHNvbGRlcmluZy4NCj4gPiBBZnRlciBz
+b2xkZXJpbmcgdGhlIGRldmljZSB0byByZWFsIGhvc3QgKG5vdCBwcm9ncmFtbWVyKSwgdGhlIGRl
+dmljZQ0KPiA+IHNob3VsZCBiZSBzd2l0Y2hlZCB0byBOb3JtYWwgKDB4MDApIG1vZGUuDQo+ID4g
+VGhlIE5vcm1hbCAoMHgwMCkgbW9kZSBvZiBQU0EgcmVnaXN0ZXIgcmVwcmVzZW50cyBhIHN0YXRl
+IGluIHdoaWNoIHRoZQ0KPiA+IGRldmljZSBpcyBydW5uaW5nIGluIHRoZSBmaWVsZCBhbmQgdXNl
+cyDigJxyZWd1bGFy4oCdIG9wZXJhdGlvbnMuDQo+ID4gTGVhdmluZyBkZXZpY2UgaW4gUFJFX1NP
+TERFUklOR19QT1NUX1dSSVRFUyAoMHgwMikgbWlnaHQgbm90IGFsbG93IHRvDQo+ID4gaG9zdCB3
+cml0ZSBjb250ZW50IHRvIHRoZSBkZXZpY2UuDQo+ID4NCj4gPiBNb3JlIGRldGFpbHMgYWJvdXQg
+UFNBIGZlYXR1cmUgY2FuIGJlIGZvdW5kIGluIGVNTUMgNS4wIHNwZWMgKEplZGVjOg0KPiA+ICBK
+RVNEODQtQjUwLnBkZikNCj4gPiBodHRwOi8vd3d3LmplZGVjLm9yZy9zdGFuZGFyZHMtZG9jdW1l
+bnRzL3RlY2hub2xvZ3ktZm9jdXMtYXJlYXMvZmxhc2gtDQo+ID4gbWVtb3J5LXNzZHMtdWZzLWVt
+bWMvZS1tbWMNCj4gPg0KPiA+IFBsZWFzZSBsZXQgdXMga25vdyBpZiBtb3JlIGRldGFpbHMgcmVx
+dWlyZWQuDQo+IA0KPiBPa2F5LCB0aGF0IHdhcyBmYXIgYmV0dGVyLg0KPiANCj4gSSBhbSBub3Qg
+c28gc3VyZSB3ZSBzaG91bGQgZmluYWxpemUgdGhlIHByb2R1Y3Rpb24gcGhhc2Ugd2hpbGUgaW5p
+dGlhbGl6aW5nIHRoZQ0KPiBlTU1DIGNhcmQgbGlrZSB0aGlzLg0KPiANCj4gQ2VydGFpbmx5IHdl
+IHNob3VsZCBjaGVjayB0aGUgUFNBIHN0YXRlLCBidXQgSSB0aGluayB3ZSBzaG91bGQgcmV0dXJu
+IGFuIGVycm9yIGlmDQo+IHdlIHRoaW5rIHRoZSBkZXZpY2UgaGFzbuKAmXQgY29tcGxldGVkIHBy
+b2R1Y3Rpb24uIEl0IHNob3VsZCBiZSB0aGUgcmVzcG9uc2liaWxpdHkNCj4gZm9yIHRoZSAicHJv
+Z3JhbW1pbmcgdG9vbHMiIHRvIGZpbmFsaXplIHRoZSBwcm9kdWN0aW9uLCByaWdodCE/DQoNCkFj
+Y29yZGluZyB0byBlTU1DIHNwZWMsIHRoZSBzd2l0Y2ggdG8gTk9STUFMIHNob3VsZCBiZSBkb25l
+IGFmdGVyIGRldmljZSBzb2xkZXJpbmcgdG8gZmluYWwgaG9zdCAobm90IHByb2dyYW1tZXIpLg0K
+UGxlYXNlIHJlZmVyIHRvICJGaWd1cmUgMzIg4oCUIFJlY29tbWVuZGVkIFNvbGRlcmluZyBwcm9j
+ZWR1cmUiIGluIGVNTUM1LjAgc3BlY2lmaWNhdGlvbiBkb2N1bWVudC4NCkFsc28sIHNpbmNlIHdl
+IGFyZSBkZWFsaW5nIHdpdGggb25seSAiZmllbGQiIGhvc3QgaGVyZSwgd2UgYXJlIG5vdCB0b3Vj
+aGluZy9zd2l0Y2hpbmcgYW55IG90aGVyIG1vZGVzIG9mIFBTQSwgYnV0IG9ubHkgTm9ybWFsIChm
+aWVsZCkuDQpUaGlzIGNvZGUgc2hvdWxkIHJ1biBvbmx5IG9uY2UgLSBpbiB0aGUgYmVnaW5uaW5n
+IG9mIGRldmljZSBsaWZlIGN5Y2xlLg0KDQpCZXN0IHJlZ2FyZHMsDQpBbGV4DQoNCj4gDQo+IEtp
+bmQgcmVnYXJkcw0KPiBVZmZlDQo=
