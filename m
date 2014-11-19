@@ -1,137 +1,57 @@
-From: Alex Lemberg <alex.lemberg@sandisk.com>
-Subject: [PATCH] mmc: Add Production State Awareness Support
-Date: Wed, 19 Nov 2014 21:27:56 +0200
-Message-ID: <1416425276-4672-1-git-send-email-alex.lemberg@sandisk.com>
+From: Andrew Bresticker <abrestic@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Turn the card clock off at suspend time
+Date: Wed, 19 Nov 2014 11:49:32 -0800
+Message-ID: <CAL1qeaFcdaxLYQu5y4pz-d29SdRA79TpkrRA9VjUYaMfnoSeVw@mail.gmail.com>
+References: <1416423073-8105-1-git-send-email-dianders@chromium.org>
+	<CAL1qeaGkQVimrFNtGgfTJEHNemG_QUTecQwH4=nXu1_u1rWwhg@mail.gmail.com>
+	<CAD=FV=UjvQ5Sgfv_-WzvZpOvofA=7Vpzh36LavCwqGV1-0_aHQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0062.outbound.protection.outlook.com ([207.46.100.62]:47488
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754598AbaKSTne (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 19 Nov 2014 14:43:34 -0500
+Received: from mail-vc0-f178.google.com ([209.85.220.178]:64938 "EHLO
+	mail-vc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755576AbaKSTtd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Nov 2014 14:49:33 -0500
+Received: by mail-vc0-f178.google.com with SMTP id hq11so120690vcb.9
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2014 11:49:32 -0800 (PST)
+In-Reply-To: <CAD=FV=UjvQ5Sgfv_-WzvZpOvofA=7Vpzh36LavCwqGV1-0_aHQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, chris@printf.net, Avi.Shchislowski@sandisk.com, Alex Lemberg <alex.lemberg@sandisk.com>
+To: Doug Anderson <dianders@chromium.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Heiko Stuebner <heiko@sntech.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-In this patch driver should recognize if eMMC device (Rev >=5.0)
-was left in PRE_SOLDERING_POST_WRITES (0x02) state, and switch
-it to NORMAL (0x00).
-PRE_SOLDERING_POST_WRITES (0x02) state - represents a state
-where the device is in production process and the
-host (usually programmer) completed loading the content
-to the device.
-The host (usually programmer) sets the device to this state after
-loading the content and just before soldering.
-After soldering the device to the real host (not programmer),
-the device should be switched to NORMAL (0x00) mode.
-The NORMAL (0x00) mode of PSA register represents a state in
-which the device is running in the field and uses regular operations.
-Leaving device in PRE_SOLDERING_POST_WRITES (0x02) might cause
-unexpected behaviour of eMMC device.
+Doug,
 
-More details about PSA feature can be found in eMMC5.0 JEDEC spec (JESD84-B50.pdf):
-http://www.jedec.org/standards-documents/technology-focus-areas/flash-memory-ssds-ufs-emmc/e-mmc
+On Wed, Nov 19, 2014 at 11:30 AM, Doug Anderson <dianders@chromium.org> wrote:
+> Andrew,
+>
+> On Wed, Nov 19, 2014 at 11:03 AM, Andrew Bresticker
+> <abrestic@chromium.org> wrote:
+>> Doug,
+>>
+>> On Wed, Nov 19, 2014 at 10:51 AM, Doug Anderson <dianders@chromium.org> wrote:
+>>> Since the dw_mmc driver was first added to Linux it's had a TODO in it
+>>> that we should turn off the card clock during suspend.  I have no idea
+>>> for sure why it wasn't done originally, but if I had to guess I'd
+>>> guess it was related to the lack of a common clock framework.  Let's
+>>> do it now.
+>>>
+>>> There is no reason for the card clock to be left on during suspend and
+>>> most systems will eventually turn it off anyway (when whole clock
+>>> trees are disabled).  However, it's good to be explicit that it's
+>>> disabled at the time that the MMC subsystem is disabled.
+>>
+>> Should the bus clock (biu) be disabled as well?
+>
+> Good question.  I'm slightly hesitant to turn biu_clk off in this
+> patch, though.  Specifically interrupts are still enabled at this
+> point in suspend.  I  guess most interrupts shouldn't be going off
+> right now (nobody is accessing storage, right?), but I could imagine
+> that a card detect or an SDIO interrupt at just the wrong time could
+> cause our ISR to go off _after_ this function is called.  The
+> interrupt handling function doesn't know to turn the BIU clock back on
+> so you'd get a hang.
 
-Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
----
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 02ad792..3923c90 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -571,6 +571,16 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		card->ext_csd.ffu_capable =
- 			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
- 			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
-+		card->ext_csd.psa =
-+			ext_csd[EXT_CSD_PSA];
-+		if (ext_csd[EXT_CSD_PSA_TIMEOUT] > 0) {
-+			card->ext_csd.psa_timeout =
-+				100 *
-+				(1 << ext_csd[EXT_CSD_PSA_TIMEOUT]);
-+		} else {
-+			pr_warn("%s: EXT_CSD PSA Timeout is zero\n",
-+					mmc_hostname(card->host));
-+		}format-patch
- 	}
- out:
- 	return err;
-@@ -1331,6 +1341,24 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 		mmc_set_dsr(host);
- 
- 	/*
-+	 * eMMC v5.0 or later
-+	 * and Production State Awareness state is
-+	 * EXT_CSD_PSA_POST_SOLDERING_WRITES (0x02)
-+	 * The host should set the device to NORMAL mode
-+	 */
-+	if ((card->ext_csd.rev >= 7) &&
-+		(card->ext_csd.psa == EXT_CSD_PSA_POST_SOLDERING_WRITES)) {
-+		unsigned int timeout;
-+
-+		timeout = DIV_ROUND_UP(card->ext_csd.psa_timeout, 1000);
-+		card->ext_csd.psa = EXT_CSD_PSA_NORMAL;
-+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			EXT_CSD_PSA, card->ext_csd.psa, timeout);
-+		if (err && err != -EBADMSG)
-+			goto free_card;
-+	}
-+
-+	/*
- 	 * Select card, as all following commands rely on that.
- 	 */
- 	if (!mmc_host_is_spi(host)) {
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 4d69c00..09ac3b0 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -60,9 +60,11 @@ struct mmc_ext_csd {
- 	u8			packed_event_en;
- 	unsigned int		part_time;		/* Units: ms */
- 	unsigned int		sa_timeout;		/* Units: 100ns */
-+	unsigned int		psa_timeout;		/* Units: 100us */
- 	unsigned int		generic_cmd6_time;	/* Units: 10ms */
- 	unsigned int            power_off_longtime;     /* Units: ms */
- 	u8			power_off_notification;	/* state */
-+	u8			psa; /* production state awareness */
- 	unsigned int		hs_max_dtr;
- 	unsigned int		hs200_max_dtr;
- #define MMC_HIGH_26_MAX_DTR	26000000
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 49ad7a9..458814d 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -285,6 +285,7 @@ struct _mmc_csd {
- #define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
- #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
- #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
-+#define EXT_CSD_PSA			133	/* R/W/E */
- #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
- #define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
- #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
-@@ -315,6 +316,7 @@ struct _mmc_csd {
- #define EXT_CSD_PWR_CL_26_360		203	/* RO */
- #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
- #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
-+#define EXT_CSD_PSA_TIMEOUT		218	/* RO */
- #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
- #define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
- #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
-@@ -433,6 +435,12 @@ struct _mmc_csd {
- #define EXT_CSD_BKOPS_LEVEL_2		0x2
- 
- /*
-+ * PRODUCTION STATE AWARENESS fields
-+ */
-+#define EXT_CSD_PSA_NORMAL		0x00
-+#define EXT_CSD_PSA_POST_SOLDERING_WRITES	0x02
-+
-+/*
-  * MMC_SWITCH access modes
-  */
- 
--- 
-2.1.0
-
+Perhaps interrupts should be disabled as well across suspend/resume,
+like the sdhci-based hosts do?  Would would happen if we tried to
+service an interrupt with the ciu clock disabled?
