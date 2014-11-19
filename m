@@ -1,85 +1,118 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Turn the card clock off at suspend time
-Date: Wed, 19 Nov 2014 13:14:24 -0800
-Message-ID: <CAD=FV=VrCRztQUb50b3JWyy6fuNvTfPZ5LKTte4O5ZDz5zdedg@mail.gmail.com>
-References: <1416423073-8105-1-git-send-email-dianders@chromium.org>
-	<CAL1qeaGkQVimrFNtGgfTJEHNemG_QUTecQwH4=nXu1_u1rWwhg@mail.gmail.com>
-	<CAD=FV=UjvQ5Sgfv_-WzvZpOvofA=7Vpzh36LavCwqGV1-0_aHQ@mail.gmail.com>
-	<CAL1qeaFcdaxLYQu5y4pz-d29SdRA79TpkrRA9VjUYaMfnoSeVw@mail.gmail.com>
+From: NeilBrown <neilb@suse.de>
+Subject: Re: [PATCH 0/3] mmc: omap_hsmmc: make more use of mmc library
+ functionality
+Date: Thu, 20 Nov 2014 08:44:31 +1100
+Message-ID: <20141120084431.7a2220bc@notabene.brown>
+References: <20141107234628.4923.60525.stgit@notabene.brown>
+	<CAPDyKFr=vjh5UOzkrbn7Fpm8j97sqf6xxD7tm+HydOKtyeYKoQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ boundary="Sig_/H=w4tjHKMTzb/RuIgp.QGOA"; protocol="application/pgp-signature"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAL1qeaFcdaxLYQu5y4pz-d29SdRA79TpkrRA9VjUYaMfnoSeVw@mail.gmail.com>
+In-Reply-To: <CAPDyKFr=vjh5UOzkrbn7Fpm8j97sqf6xxD7tm+HydOKtyeYKoQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Bresticker <abrestic@chromium.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Heiko Stuebner <heiko@sntech.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Balaji T K <balajitk@ti.com>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>, Venkatraman S <svenkatr@ti.com>, Felipe Balbi <balbi@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Andrew,
+--Sig_/H=w4tjHKMTzb/RuIgp.QGOA
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Nov 19, 2014 at 11:49 AM, Andrew Bresticker
-<abrestic@chromium.org> wrote:
-> Doug,
->
-> On Wed, Nov 19, 2014 at 11:30 AM, Doug Anderson <dianders@chromium.org> wrote:
->> Andrew,
->>
->> On Wed, Nov 19, 2014 at 11:03 AM, Andrew Bresticker
->> <abrestic@chromium.org> wrote:
->>> Doug,
->>>
->>> On Wed, Nov 19, 2014 at 10:51 AM, Doug Anderson <dianders@chromium.org> wrote:
->>>> Since the dw_mmc driver was first added to Linux it's had a TODO in it
->>>> that we should turn off the card clock during suspend.  I have no idea
->>>> for sure why it wasn't done originally, but if I had to guess I'd
->>>> guess it was related to the lack of a common clock framework.  Let's
->>>> do it now.
->>>>
->>>> There is no reason for the card clock to be left on during suspend and
->>>> most systems will eventually turn it off anyway (when whole clock
->>>> trees are disabled).  However, it's good to be explicit that it's
->>>> disabled at the time that the MMC subsystem is disabled.
->>>
->>> Should the bus clock (biu) be disabled as well?
->>
->> Good question.  I'm slightly hesitant to turn biu_clk off in this
->> patch, though.  Specifically interrupts are still enabled at this
->> point in suspend.  I  guess most interrupts shouldn't be going off
->> right now (nobody is accessing storage, right?), but I could imagine
->> that a card detect or an SDIO interrupt at just the wrong time could
->> cause our ISR to go off _after_ this function is called.  The
->> interrupt handling function doesn't know to turn the BIU clock back on
->> so you'd get a hang.
->
-> Perhaps interrupts should be disabled as well across suspend/resume,
-> like the sdhci-based hosts do?
+On Wed, 19 Nov 2014 11:14:24 +0100 Ulf Hansson <ulf.hansson@linaro.org> wro=
+te:
 
-Well, interrupts _are_ disabled across suspend/resume.  ...just not at
-the point this function runs.  You're right thought that I could do my
-work in the "no_irq" variant of the function.
+> On 8 November 2014 00:52, NeilBrown <neilb@suse.de> wrote:
+> > omap_hsmmc currently duplicates some work that can be done for
+> > it by common code, and consequently does not benefit from extra
+> > functionality in that common code.
+> >
+> > In particular, mmc_of_parse and the slot-gpio library are not used.
+> >
+> > This set of patches allows omap_hsmmc to use that common
+> > functionality, and benefit from any extra devicetree parsing
+> > that it performs.
+> >
+> > The one awkward part of this change is that omap_hsmmc has an
+> > interrupt handler for 'card detect' which does more than the
+> > common code.
+> > I see three options:
+> >  1 - move that functionality into common code
+> >  2 - discard that functionality
+> >  3 - allow the common code to be configured to use a device-specific
+> >      card detect interrupt.
+> >
+> > This series implements '3'.  I suspect a mix of '1' and '2' would
+> > be a better choice but I know no of the history or justification
+> > for those differences.
+> >
+> > My preference would be for this series to be applied (if there are
+> > no other issues) and if there are opinions about effecting '1' or '2',
+> > they can be done with subsequent patches.
+> >
+> > Thanks,
+> > NeilBrown
+> >
+>=20
+> I like the looks of this patchset, but it needs a rebase.
 
-> Would would happen if we tried to
-> service an interrupt with the ciu clock disabled?
+Thanks.  What should I rebase against?  Is 3.18-rc sufficient or is there
+some other tree I should work against?
 
-Hrm, good question.  I was thinking that all would be OK because the
-interrupt would kick off something to the MMC layer which would then
-realize that the system was suspended, but I that's actually not the
-case.
+Thanks,
+NeilBrown
 
-It turns out that the root cause of my problem was actually SDIO
-interrupts coming after suspend and causing problems.  It looks like
-this might not be a problem in mainline Linux but it was a problem in
-my old 3.14-based tree.  Once I fixed that I no longer need this
-patch.  Sorry for the noise.  :(  I've been trying to be in the habit
-of sending stuff upstream immediately (so I don't forget about stuff),
-but a bad side effect of that is some extra noise...  Sigh.
+>=20
+> Kind regards
+> Uffe
+>=20
+> >
+> > ---
+> >
+> > NeilBrown (3):
+> >       mmc: omap_hsmmc: remove prepare/complete system suspend support.
+> >       mmc: omap_hsmmc: use slot-gpio library for gpio support.
+> >       mmc: omap_hsmmc: use mmc_of_parse to parse common mmc configurati=
+on.
+> >
+> >
+> >  drivers/mmc/core/slot-gpio.c           |   21 ++++
+> >  drivers/mmc/host/omap_hsmmc.c          |  158 +++++-------------------=
+--------
+> >  include/linux/mmc/slot-gpio.h          |    2
+> >  include/linux/platform_data/mmc-omap.h |    4 -
+> >  4 files changed, 47 insertions(+), 138 deletions(-)
+> >
+> > --
+> > Signature
+> >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
 
 
-Anyway, I guess I'd say that we should consider this patch abandoned,
-though if someone would like me to submit something that turns off
-"ciu" and "biu" clock in the "noirq" suspend I'm happy to do it.  I
-don't have any strong need now though it would get rid of the TODO
-sitting in the code.  ...or we could just remove the TODO.
+--Sig_/H=w4tjHKMTzb/RuIgp.QGOA
+Content-Type: application/pgp-signature
+Content-Description: OpenPGP digital signature
 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
 
--Doug
+iQIVAwUBVG0PPznsnt1WYoG5AQL1CRAAiyq+USFIPgRFmSfmWsLBb+jUXWQw9WUL
+wj044A4rtK/deuEWqzQfodo23bZvi/3s64Q70VbgBMCsu20sAj0Vc2Of1gi6KSqk
+x5z3ic/HcWUNWlN5RnkoR0vR6Bj98dj4lMBOryw5gNW2FfZ8by1Wu8qcmwUHffsS
+Rvo5GPzzVW9kLdkJUVBb1lxB8KYv27Fh/3ca3Bts9TJAQh5HzBGgGl/4+XWLDTkB
+/YSiqxPEwbdw6bw6mOEcPvQ970jFjWbFrHWJXciK2Wv38x55arq4hKa5NcMRY+f/
+xH6o9n0LrGIYKYgpdgimMLG7vW8p9kzJ19v9jxMlzW1urXWsrOuKfky/hdeMq2jn
+QtkepdrajTn8K0E72TKiLCc3scXQcsqs+5JhSg5ILnSJMb2qTDNR1vNM3Z6b/mp+
+4a7P2ULI5kGETKXxrAgjwFdHW+jkLw/I5GT0PQrovfLuLoSu5HkaGmwoKRbPNE8S
+cBjeng79RhR9EBnbgeYgulGWQ5iYc7FIVT9Alie8FYkox+F/9ZHrQF7p81u5dIhp
++LsbWNUtScCm6e557V4mzgyQ8LA5Nlh9G6hYxgutslXDbDtaQJ/3Mo8uK79AFQ8n
+FK//Y6iMfTxCZLzk8KYCKLDFbeAdgfBp7DtO9mGtdmNv/KleFZ4iX+kgwpsOemO4
+0haZeQek7t4=
+=y1zT
+-----END PGP SIGNATURE-----
+
+--Sig_/H=w4tjHKMTzb/RuIgp.QGOA--
