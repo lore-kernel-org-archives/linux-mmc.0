@@ -1,137 +1,146 @@
-From: Angelo Dureghello <angelo70@gmail.com>
-Subject: davinci_mmc issues on kernel 3.17.0
-Date: Wed, 19 Nov 2014 15:32:45 +0100
-Message-ID: <546CAA0D.3090107@gmail.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [PATCH v2] mmc: atmel-mci: use probe deferring if dma controller is not ready yet
+Date: Wed, 19 Nov 2014 15:51:07 +0100
+Message-ID: <1416408667-4666-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f42.google.com ([74.125.82.42]:44281 "EHLO
-	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754929AbaKSOcs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Nov 2014 09:32:48 -0500
-Received: by mail-wg0-f42.google.com with SMTP id z12so1025995wgg.15
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2014 06:32:46 -0800 (PST)
-Received: from [192.168.0.2] (host15-234-dynamic.54-79-r.retail.telecomitalia.it. [79.54.234.15])
-        by mx.google.com with ESMTPSA id kn5sm2496542wjb.48.2014.11.19.06.32.45
-        for <linux-mmc@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Wed, 19 Nov 2014 06:32:46 -0800 (PST)
+Received: from eusmtp01.atmel.com ([212.144.249.242]:45135 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754644AbaKSOvL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Nov 2014 09:51:11 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc: chris@printf.net, ulf.hansson@linaro.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Dear all,
+Return probe defer if requesting a dma channel without a dma controller
+probed. Using late_initcall is no more needing.
 
-i am moving from a working 3.5.1 kernel to the 3.17.0.
-My system is am1808 (ti arm) based, and i access a 4 data
-wires microsd card.
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
 
-mmc access is not working properly anymore on kernel
-3.17.0
+patch based on
+mmc: atmel-mci: remove compat for non DT board when requesting dma chan
 
-For example, trying a simple mkfs.ext3 on the mmc card, verifying
-just after with fsck.ext3, i get several errors. Similarly, i get errors
-if i use ext2, ext4 or fa.
+v2 changes:
+- use module_platform_driver
+- remove warning message when asking for probe deferring
 
-See below:
+ drivers/mmc/host/atmel-mci.c | 61 ++++++++++++++++++++------------------------
+ 1 file changed, 28 insertions(+), 33 deletions(-)
 
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index ba38f94..72f6501 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -2265,37 +2265,39 @@ static void atmci_cleanup_slot(struct atmel_mci_slot *slot,
+ 	mmc_free_host(slot->mmc);
+ }
+ 
+-static bool atmci_configure_dma(struct atmel_mci *host)
++static int atmci_configure_dma(struct atmel_mci *host)
+ {
+ 	struct mci_platform_data	*pdata;
+ 	dma_cap_mask_t mask;
++	int ret = 0;
+ 
+ 	if (host == NULL)
+-		return false;
++		return -EINVAL;
+ 
+ 	pdata = host->pdev->dev.platform_data;
+ 
+ 	dma_cap_zero(mask);
+ 	dma_cap_set(DMA_SLAVE, mask);
+ 
+-	host->dma.chan = dma_request_slave_channel(&host->pdev->dev, "rxtx");
+-	if (!host->dma.chan) {
+-		dev_warn(&host->pdev->dev, "no DMA channel available\n");
+-		return false;
+-	} else {
+-		dev_info(&host->pdev->dev,
+-					"using %s for DMA transfers\n",
+-					dma_chan_name(host->dma.chan));
+-
+-		host->dma_conf.src_addr = host->mapbase + ATMCI_RDR;
+-		host->dma_conf.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+-		host->dma_conf.src_maxburst = 1;
+-		host->dma_conf.dst_addr = host->mapbase + ATMCI_TDR;
+-		host->dma_conf.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+-		host->dma_conf.dst_maxburst = 1;
+-		host->dma_conf.device_fc = false;
+-		return true;
++	host->dma.chan = dma_request_slave_channel_reason(&host->pdev->dev, "rxtx");
++	if (IS_ERR(host->dma.chan)) {
++		ret = PTR_ERR(host->dma.chan);
++		host->dma.chan = NULL;
++		return ret;
+ 	}
++
++	dev_info(&host->pdev->dev,
++			"using %s for DMA transfers\n",
++			dma_chan_name(host->dma.chan));
++
++	host->dma_conf.src_addr = host->mapbase + ATMCI_RDR;
++	host->dma_conf.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
++	host->dma_conf.src_maxburst = 1;
++	host->dma_conf.dst_addr = host->mapbase + ATMCI_TDR;
++	host->dma_conf.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
++	host->dma_conf.dst_maxburst = 1;
++	host->dma_conf.device_fc = false;
++	return ret;
+ }
+ 
+ /*
+@@ -2411,7 +2413,10 @@ static int __init atmci_probe(struct platform_device *pdev)
+ 
+ 	/* Get MCI capabilities and set operations according to it */
+ 	atmci_get_cap(host);
+-	if (atmci_configure_dma(host)) {
++	ret = atmci_configure_dma(host);
++	if (ret == -EPROBE_DEFER)
++		goto err_dma_probe_defer;
++	if (ret == 0) {
+ 		host->prepare_data = &atmci_prepare_data_dma;
+ 		host->submit_data = &atmci_submit_data_dma;
+ 		host->stop_transfer = &atmci_stop_transfer_dma;
+@@ -2484,6 +2489,7 @@ err_init_slot:
+ 	del_timer_sync(&host->timer);
+ 	if (host->dma.chan)
+ 		dma_release_channel(host->dma.chan);
++err_dma_probe_defer:
+ 	free_irq(irq, host);
+ 	return ret;
+ }
+@@ -2518,25 +2524,14 @@ static int __exit atmci_remove(struct platform_device *pdev)
+ }
+ 
+ static struct platform_driver atmci_driver = {
++	.probe		= atmci_probe,
+ 	.remove		= __exit_p(atmci_remove),
+ 	.driver		= {
+ 		.name		= "atmel_mci",
+ 		.of_match_table	= of_match_ptr(atmci_dt_ids),
+ 	},
+ };
+-
+-static int __init atmci_init(void)
+-{
+-	return platform_driver_probe(&atmci_driver, atmci_probe);
+-}
+-
+-static void __exit atmci_exit(void)
+-{
+-	platform_driver_unregister(&atmci_driver);
+-}
+-
+-late_initcall(atmci_init); /* try to load after dma driver when built-in */
+-module_exit(atmci_exit);
++module_platform_driver(atmci_driver);
+ 
+ MODULE_DESCRIPTION("Atmel Multimedia Card Interface driver");
+ MODULE_AUTHOR("Haavard Skinnemoen (Atmel)");
+-- 
+2.0.3
 
-
-|kernel 3.5.1
-
-|
-||
-|[root@barix ~]# mkfs.ext3 /dev/mmcblk0p1 |
-|mke2fs 1.42.4 (12-June-2012) |
-|Filesystem label= |
-|OS type: Linux |
-|Block size=4096 (||log||=2) |
-|Fragment size=4096 (||log||=2) |
-|Stride=0 blocks, Stripe width=0 blocks |
-|488640 inodes, 1952881 blocks |
-|97644 blocks (5.00%) reserved ||for| |the super user |
-|First data block=0 |
-|Maximum filesystem blocks=2000683008 |
-|60 block groups |
-|32768 blocks per group, 32768 fragments per group |
-|8144 inodes per group |
-|Superblock backups stored on blocks: |
-|||32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632 |
-||
-|Allocating group tables: done |
-|Writing inode tables: done |
-|Creating journal (32768 blocks): done |
-|Writing superblocks and filesystem accounting information: done
-
-** fsck now gives a clean state. **
-
-
-|
-||
-|kernel 3.17.0 |
-||
-|
-[root@barix ~]# mkfs.ext3 /dev/mmcblk0p1 |
-|mke2fs 1.42.4 (12-June-2012) |
-|Filesystem label= |
-|OS type: Linux |
-|Block size=4096 (||log||=2) |
-|Fragment size=4096 (||log||=2) |
-|Stride=0 blocks, Stripe width=0 blocks |
-|240000 inodes, 959232 blocks |
-|47961 blocks (5.00%) reserved ||for| |the super user |
-|First data block=0 |
-|Maximum filesystem blocks=985661440 |
-|30 block groups |
-|32768 blocks per group, 32768 fragments per group |
-|8000 inodes per group |
-|Superblock backups stored on blocks: |
-|||32768, 98304, 163840, 229376, 294912, 819200, 884736 |
-||
-|Allocating group tables: done |
-|Writing inode tables: done |
-|Creating journal (16384 blocks): done |
-|Writing superblocks and filesystem accounting information: done
-
-||
-[root@barix ~]# fsck.ext3 /dev/mmcblk0p1
-e2fsck 1.42.4 (12-June-2012)
-ext2fs_check_desc: Corrupt group descriptor: bad block for block bitmap
-fsck.ext3: Group descriptors look bad... trying backup blocks...
-Superblock has an invalid journal (inode 8).
-Clear<y>? Automount: /dev/mmcblk0p1 inserted
-Automount: DEVICE LOCK found quiting...
-yes
-*** ext3 journal has been deleted - filesystem is now ext2 only ***
-
-/dev/mmcblk0p1 was not cleanly unmounted, check forced.
-Resize inode not valid.  Recreate<y>? yes
-Pass 1: Checking inodes, blocks, and sizes
-The bad block inode looks invalid.  Clear<y>? yes
-Root inode is not a directory.  Clear<y>? yes
-Inode 5 has EXTENTS_FL flag set on filesystem without extents support.
-Clear<y>? yes
-Inode 6 has EXTENTS_FL flag set on filesystem without extents support.
-Clear<y>? yes
-Inode 8 has EXTENTS_FL flag set on filesystem without extents support.
-Clear<y>? yes
-Inode 9 has EXTENTS_FL flag set on filesystem without extents support.
-Clear<y>? yes
-Inode 10 has EXTENTS_FL flag set on filesystem without extents support.
-Clear<y>?
-.... (continue)
-
-
-I am suspecting of a mmc driver issue, or, something new to be set
-from my board.c.
-
-I also strangely see different inodes number, in kernel 3.5.1 are double.
-
-hope in some help,
-
-Regards,
-angelo
-
-
-|
