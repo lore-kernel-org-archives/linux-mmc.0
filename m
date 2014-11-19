@@ -1,57 +1,67 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [patch] mmc: toshsd: move dereference below check for NULL
-Date: Wed, 19 Nov 2014 11:51:05 +0100
-Message-ID: <CAPDyKFqhPS5JCk0asDV4-ts=PL1xbczXJq=aTnKBMAkuvSk0yQ@mail.gmail.com>
-References: <20141115185641.GA6530@mwanda>
+Subject: Re: [PATCH] mmc: dw_mmc: avoid write to CDTHRCTL on older versions
+Date: Wed, 19 Nov 2014 11:53:55 +0100
+Message-ID: <CAPDyKFqC3kuHRV5Rt+0mgTeB6A5uQfbPg4CgOTHdfX9oTzNnMA@mail.gmail.com>
+References: <1416246545-14118-1-git-send-email-james.hogan@imgtec.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f179.google.com ([209.85.216.179]:37696 "EHLO
-	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752065AbaKSKvG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Nov 2014 05:51:06 -0500
-Received: by mail-qc0-f179.google.com with SMTP id c9so191527qcz.10
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2014 02:51:05 -0800 (PST)
-In-Reply-To: <20141115185641.GA6530@mwanda>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1416246545-14118-1-git-send-email-james.hogan@imgtec.com>
+Sender: stable-owner@vger.kernel.org
+To: James Hogan <james.hogan@imgtec.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, stable@vger.kernel.org, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Chris Ball <chris@printf.net>, Ondrej Zary <linux@rainbow-software.org>, linux-mmc <linux-mmc@vger.kernel.org>, kernel-janitors@vger.kernel.org
 
-On 15 November 2014 19:56, Dan Carpenter <dan.carpenter@oracle.com> wrote:
-> We check for NULL pointers after dereferencing so it's too late.  Oddly
-> enough, Smatch misses this code but complains about the caller passing
-> NULL pointers to this function:
+On 17 November 2014 18:49, James Hogan <james.hogan@imgtec.com> wrote:
+> Commit f1d2736c8156 (mmc: dw_mmc: control card read threshold) added
+> dw_mci_ctrl_rd_thld() with an unconditional write to the CDTHRCTL
+> register at offset 0x100. However before version 240a, the FIFO region
+> started at 0x100, so the write messes with the FIFO and completely
+> breaks the driver.
 >
->         drivers/mmc/host/toshsd.c:389 toshsd_irq()
->         error: we previously assumed 'host->cmd' could be null (see line 349)
+> If the version id < 240A, return early from dw_mci_ctl_rd_thld() so as
+> not to hit this problem.
 >
-> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+> Fixes: f1d2736c8156 (mmc: dw_mmc: control card read threshold)
+> Signed-off-by: James Hogan <james.hogan@imgtec.com>
+> Cc: <stable@vger.kernel.org> # v3.13+
+> Cc: Seungwon Jeon <tgih.jun@samsung.com>
+> Cc: Jaehoon Chung <jh80.chung@samsung.com>
+> Cc: Chris Ball <chris@printf.net>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-mmc@vger.kernel.org
 
-Thanks! Applied for next.
+Thanks! Applied for next and removing some of the Cc:s above,
 
 Kind regards
 Uffe
 
+
+> ---
+> Note I've completely guessed at 240A being the point where that register
+> was introduced since the FIFO region moved then.
+> ---
+>  drivers/mmc/host/dw_mmc.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
 >
-> diff --git a/drivers/mmc/host/toshsd.c b/drivers/mmc/host/toshsd.c
-> index edb06d6..4666262 100644
-> --- a/drivers/mmc/host/toshsd.c
-> +++ b/drivers/mmc/host/toshsd.c
-> @@ -206,14 +206,14 @@ static irqreturn_t toshsd_thread_irq(int irq, void *dev_id)
->  static void toshsd_cmd_irq(struct toshsd_host *host)
->  {
->         struct mmc_command *cmd = host->cmd;
-> -       u8 *buf = (u8 *) cmd->resp;
-> +       u8 *buf;
->         u16 data;
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 69f0cc68d5b2..f7c95abc8c11 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -626,6 +626,13 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
 >
->         if (!host->cmd) {
->                 dev_warn(&host->pdev->dev, "Spurious CMD irq\n");
->                 return;
->         }
-> -
-> +       buf = (u8 *)cmd->resp;
->         host->cmd = NULL;
+>         WARN_ON(!(data->flags & MMC_DATA_READ));
 >
->         if (cmd->flags & MMC_RSP_PRESENT && cmd->flags & MMC_RSP_136) {
+> +       /*
+> +        * CDTHRCTL doesn't exist prior to 240A (in fact that register offset is
+> +        * in the FIFO region, so we really shouldn't access it).
+> +        */
+> +       if (host->verid < DW_MMC_240A)
+> +               return;
+> +
+>         if (host->timing != MMC_TIMING_MMC_HS200 &&
+>             host->timing != MMC_TIMING_UHS_SDR104)
+>                 goto disable;
+> --
+> 2.0.4
+>
