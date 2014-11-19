@@ -1,75 +1,80 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/3] mmc: omap_hsmmc: make more use of mmc library functionality
-Date: Wed, 19 Nov 2014 11:14:24 +0100
-Message-ID: <CAPDyKFr=vjh5UOzkrbn7Fpm8j97sqf6xxD7tm+HydOKtyeYKoQ@mail.gmail.com>
-References: <20141107234628.4923.60525.stgit@notabene.brown>
+Subject: Re: [PATCH] mmc_block: Increase max_devices
+Date: Wed, 19 Nov 2014 11:30:28 +0100
+Message-ID: <CAPDyKFqFOOa9BpXDyu_jcmV69BFxp+pR1b+FYRLv0t7_bfwmrQ@mail.gmail.com>
+References: <1415244909.3398.51.camel@decadent.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f43.google.com ([209.85.216.43]:51448 "EHLO
-	mail-qa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753748AbaKSKOY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Nov 2014 05:14:24 -0500
-Received: by mail-qa0-f43.google.com with SMTP id bm13so146642qab.2
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2014 02:14:24 -0800 (PST)
-In-Reply-To: <20141107234628.4923.60525.stgit@notabene.brown>
+Received: from mail-qc0-f178.google.com ([209.85.216.178]:36604 "EHLO
+	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754598AbaKSKa3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Nov 2014 05:30:29 -0500
+Received: by mail-qc0-f178.google.com with SMTP id b13so172102qcw.37
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2014 02:30:28 -0800 (PST)
+In-Reply-To: <1415244909.3398.51.camel@decadent.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: NeilBrown <neilb@suse.de>
-Cc: Chris Ball <chris@printf.net>, Balaji T K <balajitk@ti.com>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>, Venkatraman S <svenkatr@ti.com>, Felipe Balbi <balbi@ti.com>
+To: Ben Hutchings <ben@decadent.org.uk>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 8 November 2014 00:52, NeilBrown <neilb@suse.de> wrote:
-> omap_hsmmc currently duplicates some work that can be done for
-> it by common code, and consequently does not benefit from extra
-> functionality in that common code.
+On 6 November 2014 04:35, Ben Hutchings <ben@decadent.org.uk> wrote:
+> Currently the driver imposes a limit of 256 total minor numbers,
+> apparently based on the historic Unix/Linux limit.  This is quite
+> restrictive, particularly if we raise the maximum number of
+> partitions per card to 256 to match sd.
 >
-> In particular, mmc_of_parse and the slot-gpio library are not used.
+> In order to make the full minor number space available we would
+> have to replace the static dev_use and name_use arrays with struct
+> ida.  But we can at least allow use of 256 cards rather than just
+> 256 minors, with only a small change.
 >
-> This set of patches allows omap_hsmmc to use that common
-> functionality, and benefit from any extra devicetree parsing
-> that it performs.
->
-> The one awkward part of this change is that omap_hsmmc has an
-> interrupt handler for 'card detect' which does more than the
-> common code.
-> I see three options:
->  1 - move that functionality into common code
->  2 - discard that functionality
->  3 - allow the common code to be configured to use a device-specific
->      card detect interrupt.
->
-> This series implements '3'.  I suspect a mix of '1' and '2' would
-> be a better choice but I know no of the history or justification
-> for those differences.
->
-> My preference would be for this series to be applied (if there are
-> no other issues) and if there are opinions about effecting '1' or '2',
-> they can be done with subsequent patches.
->
-> Thanks,
-> NeilBrown
->
+> Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
 
-I like the looks of this patchset, but it needs a rebase.
+Thanks! Applied for next.
 
 Kind regards
 Uffe
 
->
 > ---
+>  drivers/mmc/card/block.c | 13 ++++++++-----
+>  1 file changed, 8 insertions(+), 5 deletions(-)
 >
-> NeilBrown (3):
->       mmc: omap_hsmmc: remove prepare/complete system suspend support.
->       mmc: omap_hsmmc: use slot-gpio library for gpio support.
->       mmc: omap_hsmmc: use mmc_of_parse to parse common mmc configuration.
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 1fa4c80..d9783da 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -78,13 +78,16 @@ static int perdev_minors = CONFIG_MMC_BLOCK_MINORS;
 >
+>  /*
+>   * We've only got one major, so number of mmcblk devices is
+> - * limited to 256 / number of minors per device.
+> + * limited to (1 << 20) / number of minors per device.  It is also
+> + * currently limited by the size of the static bitmaps below.
+>   */
+>  static int max_devices;
 >
->  drivers/mmc/core/slot-gpio.c           |   21 ++++
->  drivers/mmc/host/omap_hsmmc.c          |  158 +++++---------------------------
->  include/linux/mmc/slot-gpio.h          |    2
->  include/linux/platform_data/mmc-omap.h |    4 -
->  4 files changed, 47 insertions(+), 138 deletions(-)
+> -/* 256 minors, so at most 256 separate devices */
+> -static DECLARE_BITMAP(dev_use, 256);
+> -static DECLARE_BITMAP(name_use, 256);
+> +#define MAX_DEVICES 256
+> +
+> +/* TODO: Replace these with struct ida */
+> +static DECLARE_BITMAP(dev_use, MAX_DEVICES);
+> +static DECLARE_BITMAP(name_use, MAX_DEVICES);
+>
+>  /*
+>   * There is one mmc_blk_data per slot.
+> @@ -2563,7 +2566,7 @@ static int __init mmc_blk_init(void)
+>         if (perdev_minors != CONFIG_MMC_BLOCK_MINORS)
+>                 pr_info("mmcblk: using %d minors per device\n", perdev_minors);
+>
+> -       max_devices = 256 / perdev_minors;
+> +       max_devices = min(MAX_DEVICES, (1 << MINORBITS) / perdev_minors);
+>
+>         res = register_blkdev(MMC_BLOCK_MAJOR, "mmc");
+>         if (res)
 >
 > --
-> Signature
->
+> Ben Hutchings
+> Beware of programmers who carry screwdrivers. - Leonard Brandwein
