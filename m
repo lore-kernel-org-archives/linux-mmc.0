@@ -1,154 +1,257 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [PATCH 1/1] Production State Awareness support in host side
-Date: Tue, 18 Nov 2014 18:41:57 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333EC9D394@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <1416228726-8514-1-git-send-email-avi.shchislowski@sandisk.com>
- <CAPDyKFrCpoSsgECvC=gnMp6WDYAV+2os-uhzp03K-=E+Yv10AA@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: add quirk for data over interrupt timeout
+Date: Wed, 19 Nov 2014 10:22:26 +0900
+Message-ID: <546BF0D2.3000600@samsung.com>
+References: <1415970338-2637-1-git-send-email-addy.ke@rock-chips.com>
+ <54660120.50305@samsung.com> <546A93B0.1040506@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0055.outbound.protection.outlook.com ([207.46.100.55]:42304
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753867AbaKRUQ3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 18 Nov 2014 15:16:29 -0500
-In-Reply-To: <CAPDyKFrCpoSsgECvC=gnMp6WDYAV+2os-uhzp03K-=E+Yv10AA@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-reply-to: <546A93B0.1040506@rock-chips.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Addy <addy.ke@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org, amstan@chromium.org
+Cc: huangtao@rock-chips.com, devicetree@vger.kernel.org, hl@rock-chips.com, linux-doc@vger.kernel.org, yzq@rock-chips.com, zyw@rock-chips.com, zhangqing@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kever.yang@rock-chips.com, lintao@rock-chips.com, linux-rockchip@lists.infradead.org, xjq@rock-chips.com, zhenfu.fang@rock-chips.com, chenfen@rock-chips.com, cf@rock-chips.com, hj@rock-chips.com, linux-arm-kernel@lists.infradead.org, zyf@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
 
-SGkgVWxmLA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5z
-c29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogTW9uZGF5LCBOb3Zl
-bWJlciAxNywgMjAxNCAzOjM0IFBNDQo+IFRvOiBBdmkgU2hjaGlzbG93c2tpDQo+IENjOiBsaW51
-eC1tbWM7IENocmlzIEJhbGw7IEFsZXggTGVtYmVyZw0KPiBTdWJqZWN0OiBSZTogW1BBVENIIDEv
-MV0gUHJvZHVjdGlvbiBTdGF0ZSBBd2FyZW5lc3Mgc3VwcG9ydCBpbiBob3N0IHNpZGUNCj4gDQo+
-IE9uIDE3IE5vdmVtYmVyIDIwMTQgMTM6NTIsIEF2aSBTaGNoaXNsb3dza2kgPGF2aS5zaGNoaXNs
-b3dza2lAc2FuZGlzay5jb20+DQo+IHdyb3RlOg0KPiA+IEFkZGluZyBzdXBwb3J0IGZvciBQU0Eg
-KFByb2R1Y3Rpb24gU3RhdGUgQXdhcmVuZXNzKSBmZWF0dXJlIGZvciBhbGwNCj4gPiBlTU1DIGRl
-dmljZXMgd2l0aCByZXZpc2lvbiA+PTUuMCBJbiB0aGlzIHBhdGNoIHRoZSBlTU1DIGRyaXZlciB3
-aWxsDQo+ID4gY2hlY2sgaWYgZGV2aWNlIHdhcyBjb21wbGV0ZWQgaXRzIFByb2R1Y3Rpb24gU3Rh
-dGUgbW9kZSwgYW5kIHdpbGwNCj4gPiBzd2l0Y2ggaXQgdG8gTm9ybWFsIChmaWVsZCkgbW9kZS4N
-Cj4gPiBTd2l0Y2hpbmcgdG8gbm9ybWFsIG1vZGUgc2lnbmFsIHRoZSBkZXZpY2UgdG8gY29tcGxl
-dGUgaXRzIHdvcmsgaW4NCj4gPiBwcm9kdWN0aW9uIG1vZGUgYW5kIHN0YXJ0IHdvcmtpbmcgaW4g
-cmVndWxhciBwZXJmb3JtYW5jZSBtb2RlLg0KPiANCj4gUGxlYXNlIGFkZCBzb21lIGRldGFpbCB0
-byB3aGF0IHRoaXMgcGF0Y2ggZG9lcy4gQWRkaXRpb25hbGx5IHdoeSBpdCdzIG5lZWRlZC4NCg0K
-SW4gdGhpcyBwYXRjaCBkcml2ZXIgc2hvdWxkIHJlY29nbml6ZSBpZiBlTU1DIGRldmljZSAoUmV2
-ID49NS4wKSB3YXMgbm90IHN3aXRjaGVkIA0KdG8gTm9ybWFsICgweDAwKSBQU0EgbW9kZSBieSBz
-dG9yYWdlIHZlbmRvciBvciBQcm9ncmFtbWVyIGhvdXNlLg0KRm9yIHRoaXMsIHdlIGFyZSBjaGVj
-a2luZyBpZiBkZXZpY2Ugd2FzIGxlYXZlZCBpbiBQUkVfU09MREVSSU5HX1BPU1RfV1JJVEVTICgw
-eDAyKSANCnN0YXRlIC0gcmVwcmVzZW50cyBhIHN0YXRlIGluIHdoaWNoIHRoZSBkZXZpY2UgaXMg
-aW4gcHJvZHVjdGlvbiBhbmQgdGhlIGhvc3QgDQoodXN1YWxseSBwcm9ncmFtbWVyKSBjb21wbGV0
-ZWQgdG8gbG9hZCB0aGUgY29udGVudCB0byB0aGUgZGV2aWNlLiANClRoZSBob3N0ICh1c3VhbGx5
-IHByb2dyYW1tZXIpIHNldHMgdGhlIGRldmljZSB0byB0aGlzIHN0YXRlIGFmdGVyIGNvbnRlbnQg
-d2FzIGxvYWRlZCANCmFuZCBqdXN0IGJlZm9yZSBzb2xkZXJpbmcuDQpBZnRlciBzb2xkZXJpbmcg
-dGhlIGRldmljZSB0byByZWFsIGhvc3QgKG5vdCBwcm9ncmFtbWVyKSwgdGhlIGRldmljZSBzaG91
-bGQgYmUgc3dpdGNoZWQgdG8gDQpOb3JtYWwgKDB4MDApIG1vZGUuDQpUaGUgTm9ybWFsICgweDAw
-KSBtb2RlIG9mIFBTQSByZWdpc3RlciByZXByZXNlbnRzIGEgc3RhdGUgaW4gd2hpY2ggdGhlIGRl
-dmljZSBpcyBydW5uaW5nIA0KaW4gdGhlIGZpZWxkIGFuZCB1c2VzIOKAnHJlZ3VsYXLigJ0gb3Bl
-cmF0aW9ucy4NCkxlYXZpbmcgZGV2aWNlIGluIFBSRV9TT0xERVJJTkdfUE9TVF9XUklURVMgKDB4
-MDIpIG1pZ2h0IG5vdCBhbGxvdyB0byBob3N0IHdyaXRlIGNvbnRlbnQgDQp0byB0aGUgZGV2aWNl
-Lg0KDQpNb3JlIGRldGFpbHMgYWJvdXQgUFNBIGZlYXR1cmUgY2FuIGJlIGZvdW5kIGluIGVNTUMg
-NS4wIHNwZWMgKEplZGVjOg0KIEpFU0Q4NC1CNTAucGRmKQ0KaHR0cDovL3d3dy5qZWRlYy5vcmcv
-c3RhbmRhcmRzLWRvY3VtZW50cy90ZWNobm9sb2d5LWZvY3VzLWFyZWFzL2ZsYXNoLW1lbW9yeS1z
-c2RzLXVmcy1lbW1jL2UtbW1jDQoNClBsZWFzZSBsZXQgdXMga25vdyBpZiBtb3JlIGRldGFpbHMg
-cmVxdWlyZWQuDQoNCj4gDQo+IEFsc28sIG1ha2Ugc3VyZSB0byB1c2UgcHJvcGVyIHByZWZpeCBp
-biB0aGUgY29tbWl0IGhlYWRlci4NClN1cmUsIHdlIHdpbGwgc3VibWl0IHRoZSBwYXRjaCBhZ2Fp
-biB3aXRoIGNvcnJlY3QgcHJlZml4Li4uDQoNClRoYW5rcywNCkFsZXgNCg0KPiANCj4gPg0KPiA+
-IFNpZ25lZC1vZmYtYnk6IEFsZXggTGVtYmVyZyA8YWxleC5sZW1iZXJnQHNhbmRpc2suY29tPg0K
-PiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMgYi9kcml2ZXJzL21t
-Yy9jb3JlL21tYy5jIGluZGV4DQo+ID4gMDJhZDc5Mi4uMmQ1OTcyMiAxMDA2NDQNCj4gPiAtLS0g
-YS9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvY29yZS9tbWMu
-Yw0KPiA+IEBAIC02MDUsNiArNjA1LDIwIEBAIHN0YXRpYyBpbnQgbW1jX3JlYWRfZXh0X2NzZChz
-dHJ1Y3QgbW1jX2NhcmQNCj4gKmNhcmQpDQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICBtbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCkpOw0KPiA+ICAgICAgICAgICAgICAgICAgICAg
-ICAgIGVyciA9IDA7DQo+ID4gICAgICAgICAgICAgICAgIH0NCj4gPiArICAgICAgIC8qIGVNTUMg
-djUuMCBvciBsYXRlciAqLw0KPiA+ICsgICAgICAgaWYgKGNhcmQtPmV4dF9jc2QucmV2ID4gNikg
-ew0KPiA+ICsgICAgICAgICAgICAgICBjYXJkLT5leHRfY3NkLnBzYSA9DQo+ID4gKyAgICAgICAg
-ICAgICAgICAgICAgICAgZXh0X2NzZFtFWFRfQ1NEX1BTQV07DQo+ID4gKyAgICAgICAgICAgICAg
-IGlmIChleHRfY3NkW0VYVF9DU0RfUFNBX1RJTUVPVVRdID4gMCkgew0KPiA+ICsgICAgICAgICAg
-ICAgICAgICAgICAgIGNhcmQtPmV4dF9jc2QucHNhX3RpbWVvdXQgPQ0KPiA+ICsgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgMTAwICoNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICgxIDw8IGV4dF9jc2RbRVhUX0NTRF9QU0FfVElNRU9VVF0pOw0KPiA+ICsgICAgICAg
-ICAgICAgICB9IGVsc2Ugew0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGNhcmQtPmV4dF9j
-c2QucHNhX3RpbWVvdXQgPSAwOw0KPiANCj4gVGhpcyBhc3NpZ25tZW50IGlzbid0IG5lZWRlZC4g
-SXQncyAwIGFzIGRlZmF1bHQuDQo+IA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIHByX3dh
-cm4oIiVzOiBFWFRfQ1NEIFBTQSBUaW1lb3V0IGlzIHplcm9cbiIsDQo+ID4gKyAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgIG1tY19ob3N0bmFtZShjYXJkLT5ob3N0KSk7DQo+
-IA0KPiBTaG91bGRuJ3Qgd2UgdHJlYXQgdGhpcyBhcyBhbiBlcnJvcj8NCj4gDQo+ID4gKyAgICAg
-ICAgICAgICAgIH0NCj4gPiArICAgICAgIH0NCj4gPg0KPiA+ICAgICAgICAgICAgICAgICByZXR1
-cm4gZXJyOw0KPiA+ICAgICAgICAgfQ0KPiA+IEBAIC0xMzMwLDYgKzEzNDQsMjUgQEAgc3RhdGlj
-IGludCBtbWNfaW5pdF9jYXJkKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCwNCj4gdTMyIG9jciwNCj4g
-PiAgICAgICAgIGlmIChjYXJkLT5jc2QuZHNyX2ltcCAmJiBob3N0LT5kc3JfcmVxKQ0KPiA+ICAg
-ICAgICAgICAgICAgICBtbWNfc2V0X2Rzcihob3N0KTsNCj4gPg0KPiA+ICsgICAgLyoNCj4gPiAr
-ICAgICAqIGVNTUMgdjUuMCBvciBsYXRlcg0KPiA+ICsgICAgICogYW5kIFByb2R1Y3Rpb24gU3Rh
-dGUgQXdhcmVuZXNzIHN0YXRlIGlzDQo+IEVYVF9DU0RfUFNBX1BPU1RfU09MREVSSU5HX1dSSVRF
-Uw0KPiA+ICsgICAgICogVGhlIGhvc3Qgc2hvdWxkIHNldCB0aGUgZGV2aWNlIHRvIE5PUk1BTCBt
-b2RlDQo+ID4gKyAgICAgKi8NCj4gPiArICAgICAgIGlmICgoY2FyZC0+ZXh0X2NzZC5yZXYgPiA2
-KQ0KPiA+ICsgICAgICAgICAgICAgICAmJiAoY2FyZC0+ZXh0X2NzZC5wc2EgPT0NCj4gRVhUX0NT
-RF9QU0FfUE9TVF9TT0xERVJJTkdfV1JJVEVTKSkgew0KPiA+ICsgICAgICAgICAgICAgICB1bnNp
-Z25lZCBpbnQgdGltZW91dDsNCj4gPiArICAgICAgICAgICAgICAgLypaZXJvIHZhbHVlIGluIFBT
-QSBUaW1lb3V0IOKAkyBQU0EgaXMgbm90IGRlZmluZWQqLw0KPiA+ICsgICAgICAgICAgICAgICBp
-ZiAoY2FyZC0+ZXh0X2NzZC5wc2FfdGltZW91dCAhPSAwKSB7DQo+ID4gKyAgICAgICAgICAgICAg
-ICAgICAgICAgdGltZW91dCA9DQo+ID4gKyBESVZfUk9VTkRfVVAoY2FyZC0+ZXh0X2NzZC5wc2Ff
-dGltZW91dCwgMTAwMCk7DQo+IA0KPiBDYW4geW91IGdpdmUgYW4gZXhhbXBsZSBvZiBhIHR5cGlj
-YWwgdmFsdWUgZm9yIHRoZSB0aW1lb3V0Pw0KPiANCj4gPiArICAgICAgICAgICAgICAgICAgICAg
-ICBjYXJkLT5leHRfY3NkLnBzYSA9IEVYVF9DU0RfUFNBX05PUk1BTDsNCj4gPiArICAgICAgICAg
-ICAgICAgICAgICAgICBlcnIgPSBtbWNfc3dpdGNoKGNhcmQsIEVYVF9DU0RfQ01EX1NFVF9OT1JN
-QUwsDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBFWFRfQ1NEX1BTQSwgY2Fy
-ZC0+ZXh0X2NzZC5wc2EsIHRpbWVvdXQpOw0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGlm
-IChlcnIgJiYgZXJyICE9IC1FQkFETVNHKQ0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgZ290byBmcmVlX2NhcmQ7DQo+ID4gKyAgICAgICAgICAgICAgIH0NCj4gDQo+IFNvIGlm
-IHRoZXJlIGlzIG5vIHRpbWVvdXQgc3BlY2lmaWVkIHdoYXQgaGFwcGVucyB0aGVuPw0KPiANCj4g
-PiArICAgICAgIH0NCj4gPiArDQo+ID4gICAgICAgICAvKg0KPiA+ICAgICAgICAgICogU2VsZWN0
-IGNhcmQsIGFzIGFsbCBmb2xsb3dpbmcgY29tbWFuZHMgcmVseSBvbiB0aGF0Lg0KPiA+ICAgICAg
-ICAgICovDQo+ID4gZGlmZiAtLWdpdCBhL2luY2x1ZGUvbGludXgvbW1jL2NhcmQuaCBiL2luY2x1
-ZGUvbGludXgvbW1jL2NhcmQuaCBpbmRleA0KPiA+IDRkNjljMDAuLjA5YWMzYjAgMTAwNjQ0DQo+
-ID4gLS0tIGEvaW5jbHVkZS9saW51eC9tbWMvY2FyZC5oDQo+ID4gKysrIGIvaW5jbHVkZS9saW51
-eC9tbWMvY2FyZC5oDQo+ID4gQEAgLTYwLDkgKzYwLDExIEBAIHN0cnVjdCBtbWNfZXh0X2NzZCB7
-DQo+ID4gICAgICAgICB1OCAgICAgICAgICAgICAgICAgICAgICBwYWNrZWRfZXZlbnRfZW47DQo+
-ID4gICAgICAgICB1bnNpZ25lZCBpbnQgICAgICAgICAgICBwYXJ0X3RpbWU7ICAgICAgICAgICAg
-ICAvKiBVbml0czogbXMgKi8NCj4gPiAgICAgICAgIHVuc2lnbmVkIGludCAgICAgICAgICAgIHNh
-X3RpbWVvdXQ7ICAgICAgICAgICAgIC8qIFVuaXRzOiAxMDBucyAqLw0KPiA+ICsgICAgICAgdW5z
-aWduZWQgaW50ICAgICAgICAgICAgcHNhX3RpbWVvdXQ7ICAgICAgICAgICAgLyogVW5pdHM6IDEw
-MHVzICovDQo+ID4gICAgICAgICB1bnNpZ25lZCBpbnQgICAgICAgICAgICBnZW5lcmljX2NtZDZf
-dGltZTsgICAgICAvKiBVbml0czogMTBtcyAqLw0KPiA+ICAgICAgICAgdW5zaWduZWQgaW50ICAg
-ICAgICAgICAgcG93ZXJfb2ZmX2xvbmd0aW1lOyAgICAgLyogVW5pdHM6IG1zICovDQo+ID4gICAg
-ICAgICB1OCAgICAgICAgICAgICAgICAgICAgICBwb3dlcl9vZmZfbm90aWZpY2F0aW9uOyAvKiBz
-dGF0ZSAqLw0KPiA+ICsgICAgICAgdTggICAgICAgICAgICAgICAgICAgICAgcHNhOyAvKiBwcm9k
-dWN0aW9uIHN0YXRlIGF3YXJlbmVzcyAqLw0KPiA+ICAgICAgICAgdW5zaWduZWQgaW50ICAgICAg
-ICAgICAgaHNfbWF4X2R0cjsNCj4gPiAgICAgICAgIHVuc2lnbmVkIGludCAgICAgICAgICAgIGhz
-MjAwX21heF9kdHI7DQo+ID4gICNkZWZpbmUgTU1DX0hJR0hfMjZfTUFYX0RUUiAgICAyNjAwMDAw
-MA0KPiA+IGRpZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L21tYy9tbWMuaCBiL2luY2x1ZGUvbGlu
-dXgvbW1jL21tYy5oIGluZGV4DQo+ID4gNDlhZDdhOS4uZWIxNzBmZiAxMDA2NDQNCj4gPiAtLS0g
-YS9pbmNsdWRlL2xpbnV4L21tYy9tbWMuaA0KPiA+ICsrKyBiL2luY2x1ZGUvbGludXgvbW1jL21t
-Yy5oDQo+ID4gQEAgLTI4NSw2ICsyODUsOSBAQCBzdHJ1Y3QgX21tY19jc2Qgew0KPiA+ICAjZGVm
-aW5lIEVYVF9DU0RfRVhQX0VWRU5UU19TVEFUVVMgICAgICA1NCAgICAgIC8qIFJPLCAyIGJ5dGVz
-ICovDQo+ID4gICNkZWZpbmUgRVhUX0NTRF9FWFBfRVZFTlRTX0NUUkwgICAgICAgICAgICAgICAg
-NTYgICAgICAvKiBSL1csIDIgYnl0ZXMgKi8NCj4gPiAgI2RlZmluZSBFWFRfQ1NEX0RBVEFfU0VD
-VE9SX1NJWkUgICAgICAgNjEgICAgICAvKiBSICovDQo+ID4gKyNkZWZpbmUgRVhUX0NTRF9RUkRZ
-X1NVUFBPUlQgICAgICAgICAgIDk2ICAgICAgLyogUk8gKi8NCj4gPiArI2RlZmluZSBFWFRfQ1NE
-X0NNRFFfUVJEWV9GVU5DVElPTiAgICAgOTcgICAgICAvKiBSL1cgKi8NCj4gDQo+IFdoYXQncyB0
-aGVzZT8NCj4gDQo+ID4gKyNkZWZpbmUgRVhUX0NTRF9QU0EgICAgICAgICAgICAgICAgICAgIDEz
-MyAgICAgLyogUi9XL0UgKi8NCj4gPiAgI2RlZmluZSBFWFRfQ1NEX0dQX1NJWkVfTVVMVCAgICAg
-ICAgICAgMTQzICAgICAvKiBSL1cgKi8NCj4gPiAgI2RlZmluZSBFWFRfQ1NEX1BBUlRJVElPTl9T
-RVRUSU5HX0NPTVBMRVRFRCAxNTUgICAgICAgIC8qIFIvVyAqLw0KPiA+ICAjZGVmaW5lIEVYVF9D
-U0RfUEFSVElUSU9OX0FUVFJJQlVURSAgICAxNTYgICAgIC8qIFIvVyAqLw0KPiA+IEBAIC0zMTUs
-NiArMzE4LDcgQEAgc3RydWN0IF9tbWNfY3NkIHsNCj4gPiAgI2RlZmluZSBFWFRfQ1NEX1BXUl9D
-TF8yNl8zNjAgICAgICAgICAgMjAzICAgICAvKiBSTyAqLw0KPiA+ICAjZGVmaW5lIEVYVF9DU0Rf
-U0VDX0NOVCAgICAgICAgICAgICAgICAgICAgICAgIDIxMiAgICAgLyogUk8sIDQgYnl0ZXMgKi8N
-Cj4gPiAgI2RlZmluZSBFWFRfQ1NEX1NfQV9USU1FT1VUICAgICAgICAgICAgMjE3ICAgICAvKiBS
-TyAqLw0KPiA+ICsjZGVmaW5lIEVYVF9DU0RfUFNBX1RJTUVPVVQgICAgICAgICAgICAyMTggICAg
-IC8qIFJPICovDQo+ID4gICNkZWZpbmUgRVhUX0NTRF9SRUxfV1JfU0VDX0MgICAgICAgICAgIDIy
-MiAgICAgLyogUk8gKi8NCj4gPiAgI2RlZmluZSBFWFRfQ1NEX0hDX1dQX0dSUF9TSVpFICAgICAg
-ICAgMjIxICAgICAvKiBSTyAqLw0KPiA+ICAjZGVmaW5lIEVYVF9DU0RfRVJBU0VfVElNRU9VVF9N
-VUxUICAgICAyMjMgICAgIC8qIFJPICovDQo+ID4gQEAgLTQzMyw2ICs0MzcsMTMgQEAgc3RydWN0
-IF9tbWNfY3NkIHsNCj4gPiAgI2RlZmluZSBFWFRfQ1NEX0JLT1BTX0xFVkVMXzIgICAgICAgICAg
-MHgyDQo+ID4NCj4gPiAgLyoNCj4gPiArICogUFJPRFVDVElPTiBTVEFURSBBV0FSRU5FU1MgZmll
-bGRzDQo+ID4gKyAqLw0KPiA+ICsNCj4gPiArI2RlZmluZSBFWFRfQ1NEX1BTQV9OT1JNQUwgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgIDB4MDANCj4gPiArI2RlZmluZSBFWFRfQ1NEX1BTQV9Q
-T1NUX1NPTERFUklOR19XUklURVMgICAgICAweDAyDQo+ID4gKw0KPiA+ICsvKg0KPiA+ICAgKiBN
-TUNfU1dJVENIIGFjY2VzcyBtb2Rlcw0KPiA+ICAgKi8NCj4gPg0KPiA+IC0tDQo+ID4gMS43Ljku
-NQ0KPiA+DQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0K
+Hi, Addy.
+
+On 11/18/2014 09:32 AM, Addy wrote:
+>=20
+> On 2014=E5=B9=B411=E6=9C=8814=E6=97=A5 21:18, Jaehoon Chung wrote:
+>> Hi, Addy.
+>>
+>> Did you use the DW_MCI_QUIRK_IDMAC_DTO?
+>> I'm not sure, but i wonder if you get what result when you use above=
+ quirk.
+>=20
+> DW_MCI_QUIRK_IDMAC_DTO is only for version2.0 or below.
+>         /*
+>          * DTO fix - version 2.10a and below, and only if internal DM=
+A
+>          * is configured.
+>          */
+>         if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO) {
+>                 if (!pending &&
+>                     ((mci_readl(host, STATUS) >> 17) & 0x1fff))
+>                         pending |=3D SDMMC_INT_DATA_OVER;
+>         }
+>=20
+> It meams that if interrupt comes, but pending =3D 0 && FIFO_COUNT(bit=
+17-29) !=3D0,
+> then force to set SDMMC_INT_DATA_OVER.
+> But in our case, FIFO_COUNT =3D 0 (STATUS register value is 0xad06). =
+This is
+> because that the card does not send data to host. So there is no inte=
+rrupts come,
+> and interrupt handle function(dw_mci_interrupt) will not be called. S=
+o we need a
+> timer to handle this case.
+>=20
+> So I think  SDMMC_INT_DATA_OVER is not suitable for this case, and we=
+ need a new
+> quirk.
+>=20
+>>
+>> And i will check more this patch at next week.
+>>
+>> Thanks for your efforts.
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>> On 11/14/2014 10:05 PM, Addy Ke wrote:
+>>> From: Addy <addy.ke@rock-chips.com>
+>>>
+>>> This patch add a new quirk to notify the driver to teminate
+>>> current transfer and report a data timeout to the core,
+>>> if data over interrupt does NOT come within the given time.
+>>>
+>>> dw_mmc call mmc_request_done func to finish transfer depends on
+>>> data over interrupt. If data over interrupt does not come in
+>>> sending data state, the current transfer will be blocked.
+>>>
+>>> But this case really exists, when driver reads tuning data from
+>>> card on rk3288-pink2 board. I measured waveforms by oscilloscope
+>>> and found that card clock was always on and data lines were always
+>>> holded high level in sending data state. This is the cause that
+>>> card does NOT send data to host.
+>>>
+>>> According to synopsys designware databook, the timeout counter is
+>>> started only after the card clock is stopped.
+>>>
+>>> So if card clock is always on, data read timeout interrupt will NOT=
+ come,
+>>> and if data lines are always holded high level, all data-related
+>>> interrupt such as start-bit error, data crc error, data over interr=
+upt,
+>>> end-bit error, and so on, will NOT come too.
+>>>
+>>> So driver can't get the current state, it can do nothing but wait f=
+or.
+>>>
+>>> This patch is based on https://patchwork.kernel.org/patch/5227941/
+>>>
+>>> Signed-off-by: Addy <addy.ke@rock-chips.com>
+>>> ---
+>>>   drivers/mmc/host/dw_mmc.c  | 47 +++++++++++++++++++++++++++++++++=
+++++++++++++-
+>>>   include/linux/mmc/dw_mmc.h |  5 +++++
+>>>   2 files changed, 51 insertions(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index b4c3044..3960fc3 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -1448,6 +1448,17 @@ static int dw_mci_data_complete(struct dw_mc=
+i *host, struct mmc_data *data)
+>>>       return data->error;
+>>>   }
+>>>   +static inline void dw_mci_dto_start_monitor(struct dw_mci *host)
+>>> +{
+>>> +    unsigned int data_tmout_clks;
+>>> +    unsigned int data_tmout_ms;
+>>> +
+>>> +    data_tmout_clks =3D (mci_readl(host, TMOUT) >> 8);
+>>> +    data_tmout_ms =3D (data_tmout_clks * 1000 / host->bus_hz) + 25=
+0;
+
+What's 250? And how about using the DIV_ROUND_UP?=20
+
+>>> +
+>>> +    mod_timer(&host->dto_timer, jiffies + msecs_to_jiffies(data_tm=
+out_ms));
+>>> +}
+>>> +
+>>>   static void dw_mci_tasklet_func(unsigned long priv)
+>>>   {
+>>>       struct dw_mci *host =3D (struct dw_mci *)priv;
+>>> @@ -1522,8 +1533,11 @@ static void dw_mci_tasklet_func(unsigned lon=
+g priv)
+>>>               }
+>>>                 if (!test_and_clear_bit(EVENT_XFER_COMPLETE,
+>>> -                        &host->pending_events))
+>>> +                        &host->pending_events)) {
+>>> +                if (host->quirks & DW_MCI_QUIRK_DTO_TIMER)
+>>> +                    dw_mci_dto_start_monitor(host);
+
+if timer is starting at only here, dw_mci_dto_start_monitor() doesn't n=
+eed.
+
+>>>                   break;
+>>> +            }
+>>>                 set_bit(EVENT_XFER_COMPLETE, &host->completed_event=
+s);
+>>>   @@ -2115,6 +2129,9 @@ static irqreturn_t dw_mci_interrupt(int irq=
+, void *dev_id)
+>>>           }
+>>>             if (pending & SDMMC_INT_DATA_OVER) {
+>>> +            if (host->quirks & DW_MCI_QUIRK_DTO_TIMER)
+>>> +                del_timer(&host->dto_timer);
+>>> +
+>>>               mci_writel(host, RINTSTS, SDMMC_INT_DATA_OVER);
+>>>               if (!host->data_status)
+>>>                   host->data_status =3D pending;
+>>> @@ -2502,6 +2519,28 @@ ciu_out:
+>>>       return ret;
+>>>   }
+>>>   +static void dw_mci_dto_timer(unsigned long arg)
+>>> +{
+>>> +    struct dw_mci *host =3D (struct dw_mci *)arg;
+
+I prefer to use the "data" instead of "arg"
+
+>>> +
+>>> +    switch (host->state) {
+>>> +    case STATE_SENDING_DATA:
+>>> +    case STATE_DATA_BUSY:
+>>> +        /*
+>>> +        * If data over interrupt does NOT come in sending data sta=
+te,
+>>> +        * we should notify the driver to teminate current transfer
+teminate/terminate?
+
+>>> +        * and report a data timeout to the core.
+>>> +        */
+>>> +        host->data_status =3D SDMMC_INT_DRTO;
+>>> +        set_bit(EVENT_DATA_ERROR, &host->pending_events);
+>>> +        set_bit(EVENT_DATA_COMPLETE, &host->pending_events);
+
+Dose it need to set EVENT_DATA_COMPLETE?
+
+>>> +        tasklet_schedule(&host->tasklet);
+>>> +        break;
+>>> +    default:
+>>> +        break;
+>>> +    }
+>>> +}
+>>> +
+>>>   #ifdef CONFIG_OF
+>>>   static struct dw_mci_of_quirks {
+>>>       char *quirk;
+>>> @@ -2513,6 +2552,9 @@ static struct dw_mci_of_quirks {
+>>>       }, {
+>>>           .quirk    =3D "disable-wp",
+>>>           .id    =3D DW_MCI_QUIRK_NO_WRITE_PROTECT,
+>>> +    }, {
+>>> +        .quirk    =3D "dto-timer",
+>>> +        .id    =3D DW_MCI_QUIRK_DTO_TIMER,
+>>>       },
+
+Well, this is s/w timer, so i'm not sure this can be merged into dt-fil=
+e.
+If this is generic solution, we can add s/w timer by default. how about=
+?
+
+Best Regards,
+Jaehoon Chung
+
+>>>   };
+>>>   @@ -2654,6 +2696,9 @@ int dw_mci_probe(struct dw_mci *host)
+>>>         spin_lock_init(&host->lock);
+>>>       INIT_LIST_HEAD(&host->queue);
+>>> +    if (host->quirks & DW_MCI_QUIRK_DTO_TIMER)
+>>> +        setup_timer(&host->dto_timer,
+>>> +                dw_mci_dto_timer, (unsigned long)host);
+>>>         /*
+>>>        * Get the host data width - this assumes that HCON has been =
+set with
+>>> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.=
+h
+>>> index 42b724e..2477813 100644
+>>> --- a/include/linux/mmc/dw_mmc.h
+>>> +++ b/include/linux/mmc/dw_mmc.h
+>>> @@ -98,6 +98,7 @@ struct mmc_data;
+>>>    * @irq_flags: The flags to be passed to request_irq.
+>>>    * @irq: The irq value to be passed to request_irq.
+>>>    * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
+>>> + * @dto_timer: Timer for data over interrupt timeout.
+>>>    *
+>>>    * Locking
+>>>    * =3D=3D=3D=3D=3D=3D=3D
+>>> @@ -196,6 +197,8 @@ struct dw_mci {
+>>>       int            irq;
+>>>         int            sdio_id0;
+>>> +
+>>> +    struct timer_list    dto_timer;
+>>>   };
+>>>     /* DMA ops for Internal/External DMAC interface */
+>>> @@ -220,6 +223,8 @@ struct dw_mci_dma_ops {
+>>>   #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION    BIT(3)
+>>>   /* No write protect */
+>>>   #define DW_MCI_QUIRK_NO_WRITE_PROTECT        BIT(4)
+>>> +/* Timer for data over interrupt timeout */
+>>> +#define DW_MCI_QUIRK_DTO_TIMER            BIT(5)
+>>>     /* Slot level quirks */
+>>>   /* This slot has no write protect */
+>>>
+>>
+>>
+>>
+>=20
+>=20
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
