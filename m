@@ -1,90 +1,103 @@
 From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: [PATCH 2/3] mmc: atmel-mci: stop using specific initcall
-Date: Thu, 20 Nov 2014 11:07:54 +0100
-Message-ID: <1416478075-17059-2-git-send-email-ludovic.desroches@atmel.com>
+Subject: [PATCH 3/3] mmc: atmel-mci: use probe deferring if dma controller is not ready yet
+Date: Thu, 20 Nov 2014 11:07:55 +0100
+Message-ID: <1416478075-17059-3-git-send-email-ludovic.desroches@atmel.com>
 References: <1416478075-17059-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:45017 "EHLO
+Received: from eusmtp01.atmel.com ([212.144.249.242]:45093 "EHLO
 	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756170AbaKTKIW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Nov 2014 05:08:22 -0500
+	with ESMTP id S1756731AbaKTKIn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Nov 2014 05:08:43 -0500
 In-Reply-To: <1416478075-17059-1-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 Cc: chris@printf.net, ulf.hansson@linaro.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-No more use late initcall to manage probing order. Use probe deferring
-if needed. Then use module_platform_driver and clean init/exit
-attributes.
+Return probe defer if requesting a dma channel without a dma controller
+probed.
 
 Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 ---
- drivers/mmc/host/atmel-mci.c | 23 ++++++-----------------
- 1 file changed, 6 insertions(+), 17 deletions(-)
+ drivers/mmc/host/atmel-mci.c | 46 ++++++++++++++++++++++++--------------------
+ 1 file changed, 25 insertions(+), 21 deletions(-)
 
 diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index b9226b3..9b85c4e 100644
+index 9b85c4e..29bfd5e 100644
 --- a/drivers/mmc/host/atmel-mci.c
 +++ b/drivers/mmc/host/atmel-mci.c
-@@ -2137,7 +2137,7 @@ static irqreturn_t atmci_detect_interrupt(int irq, void *dev_id)
- 	return IRQ_HANDLED;
+@@ -2265,29 +2265,29 @@ static void atmci_cleanup_slot(struct atmel_mci_slot *slot,
+ 	mmc_free_host(slot->mmc);
  }
  
--static int __init atmci_init_slot(struct atmel_mci *host,
-+static int atmci_init_slot(struct atmel_mci *host,
- 		struct mci_slot_pdata *slot_data, unsigned int id,
- 		u32 sdc_reg, u32 sdio_irq)
+-static bool atmci_configure_dma(struct atmel_mci *host)
++static int atmci_configure_dma(struct atmel_mci *host)
  {
-@@ -2344,7 +2344,7 @@ static void __init atmci_get_cap(struct atmel_mci *host)
+-	if (host == NULL)
+-		return false;
++	int ret = 0;
+ 
+-	host->dma.chan = dma_request_slave_channel(&host->pdev->dev, "rxtx");
+-	if (!host->dma.chan) {
+-		dev_warn(&host->pdev->dev, "no DMA channel available\n");
+-		return false;
+-	} else {
+-		dev_info(&host->pdev->dev,
+-					"using %s for DMA transfers\n",
+-					dma_chan_name(host->dma.chan));
+-
+-		host->dma_conf.src_addr = host->mapbase + ATMCI_RDR;
+-		host->dma_conf.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+-		host->dma_conf.src_maxburst = 1;
+-		host->dma_conf.dst_addr = host->mapbase + ATMCI_TDR;
+-		host->dma_conf.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+-		host->dma_conf.dst_maxburst = 1;
+-		host->dma_conf.device_fc = false;
+-		return true;
++	host->dma.chan = dma_request_slave_channel_reason(&host->pdev->dev, "rxtx");
++	if (IS_ERR(host->dma.chan)) {
++		ret = PTR_ERR(host->dma.chan);
++		host->dma.chan = NULL;
++		return ret;
  	}
++
++	dev_info(&host->pdev->dev, "using %s for DMA transfers\n",
++		 dma_chan_name(host->dma.chan));
++
++	host->dma_conf.src_addr = host->mapbase + ATMCI_RDR;
++	host->dma_conf.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
++	host->dma_conf.src_maxburst = 1;
++	host->dma_conf.dst_addr = host->mapbase + ATMCI_TDR;
++	host->dma_conf.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
++	host->dma_conf.dst_maxburst = 1;
++	host->dma_conf.device_fc = false;
++
++	return ret;
  }
  
--static int __init atmci_probe(struct platform_device *pdev)
-+static int atmci_probe(struct platform_device *pdev)
- {
- 	struct mci_platform_data	*pdata;
- 	struct atmel_mci		*host;
-@@ -2480,7 +2480,7 @@ err_init_slot:
+ /*
+@@ -2403,7 +2403,10 @@ static int atmci_probe(struct platform_device *pdev)
+ 
+ 	/* Get MCI capabilities and set operations according to it */
+ 	atmci_get_cap(host);
+-	if (atmci_configure_dma(host)) {
++	ret = atmci_configure_dma(host);
++	if (ret == -EPROBE_DEFER)
++		goto err_dma_probe_defer;
++	if (ret == 0) {
+ 		host->prepare_data = &atmci_prepare_data_dma;
+ 		host->submit_data = &atmci_submit_data_dma;
+ 		host->stop_transfer = &atmci_stop_transfer_dma;
+@@ -2476,6 +2479,7 @@ err_init_slot:
+ 	del_timer_sync(&host->timer);
+ 	if (host->dma.chan)
+ 		dma_release_channel(host->dma.chan);
++err_dma_probe_defer:
+ 	free_irq(irq, host);
  	return ret;
  }
- 
--static int __exit atmci_remove(struct platform_device *pdev)
-+static int atmci_remove(struct platform_device *pdev)
- {
- 	struct atmel_mci	*host = platform_get_drvdata(pdev);
- 	unsigned int		i;
-@@ -2510,25 +2510,14 @@ static int __exit atmci_remove(struct platform_device *pdev)
- }
- 
- static struct platform_driver atmci_driver = {
--	.remove		= __exit_p(atmci_remove),
-+	.probe		= atmci_probe,
-+	.remove		= atmci_remove,
- 	.driver		= {
- 		.name		= "atmel_mci",
- 		.of_match_table	= of_match_ptr(atmci_dt_ids),
- 	},
- };
--
--static int __init atmci_init(void)
--{
--	return platform_driver_probe(&atmci_driver, atmci_probe);
--}
--
--static void __exit atmci_exit(void)
--{
--	platform_driver_unregister(&atmci_driver);
--}
--
--late_initcall(atmci_init); /* try to load after dma driver when built-in */
--module_exit(atmci_exit);
-+module_platform_driver(atmci_driver);
- 
- MODULE_DESCRIPTION("Atmel Multimedia Card Interface driver");
- MODULE_AUTHOR("Haavard Skinnemoen (Atmel)");
 -- 
 2.0.3
 
