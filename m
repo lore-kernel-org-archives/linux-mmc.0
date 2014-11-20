@@ -1,118 +1,158 @@
-From: NeilBrown <neilb@suse.de>
-Subject: Re: [PATCH 0/3] mmc: omap_hsmmc: make more use of mmc library
- functionality
-Date: Thu, 20 Nov 2014 08:44:31 +1100
-Message-ID: <20141120084431.7a2220bc@notabene.brown>
-References: <20141107234628.4923.60525.stgit@notabene.brown>
-	<CAPDyKFr=vjh5UOzkrbn7Fpm8j97sqf6xxD7tm+HydOKtyeYKoQ@mail.gmail.com>
+From: Barry Song <21cnbao@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-sirf: add sirf tuning function (cmd 19)
+Date: Thu, 20 Nov 2014 17:25:45 +0800
+Message-ID: <CAGsJ_4xzQJ-v7mM8_gD299EN=Hb9aShY5HcR6R8XyEwXB+Ofzg@mail.gmail.com>
+References: <1415720864-3936-1-git-send-email-21cnbao@gmail.com>
+ <CAPDyKFopdcLXVCuoifd7K8NaRY4UXDbDmNJvyFeUQZs62or9Ag@mail.gmail.com>
+ <CAGsJ_4yOCwt1YYd6UuAXjeO2iWhQB4XtouyriX1YsK7BnyNNLA@mail.gmail.com> <CAPDyKFprzeMS7Di7XUYTeZx-WE2UT+zmNKZM_8kHYhOLSoTfLQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- boundary="Sig_/H=w4tjHKMTzb/RuIgp.QGOA"; protocol="application/pgp-signature"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFr=vjh5UOzkrbn7Fpm8j97sqf6xxD7tm+HydOKtyeYKoQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Balaji T K <balajitk@ti.com>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>, Venkatraman S <svenkatr@ti.com>, Felipe Balbi <balbi@ti.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pd0-f181.google.com ([209.85.192.181]:62571 "EHLO
+	mail-pd0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755904AbaKTJ0J (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Nov 2014 04:26:09 -0500
+Received: by mail-pd0-f181.google.com with SMTP id z10so2740501pdj.12
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Nov 2014 01:26:08 -0800 (PST)
+In-Reply-To: <CAPDyKFprzeMS7Di7XUYTeZx-WE2UT+zmNKZM_8kHYhOLSoTfLQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
---Sig_/H=w4tjHKMTzb/RuIgp.QGOA
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
+>>> These piece of code, which sends the tuning command don't belong in
+>>> the host driver. Instead I would like this to be handled from a helper
+>>> function from the mmc core.
+>>>
+>>> I realize that there already a few existing host drivers that
+>>> implemented similar code and I don't like it. We should convert them
+>>> to use a common helper function from the core instead.
+>> yes. that is fine.
+>>
+>> our engineering is currently very busy and might have no time to
+>> handle this for this moment.
+>> do you think we can move your requirement to a new refine task of next
+>> window after you pick up this in this window?
+>
+> No.
+>
+> You don't have to adopt the other host drivers at this point, only to
+> fix yours accordingly. The rest we can take care of later.
+>
 
-On Wed, 19 Nov 2014 11:14:24 +0100 Ulf Hansson <ulf.hansson@linaro.org> wro=
-te:
+Uffe, how do you think about we provide a core-level function at first:
 
-> On 8 November 2014 00:52, NeilBrown <neilb@suse.de> wrote:
-> > omap_hsmmc currently duplicates some work that can be done for
-> > it by common code, and consequently does not benefit from extra
-> > functionality in that common code.
-> >
-> > In particular, mmc_of_parse and the slot-gpio library are not used.
-> >
-> > This set of patches allows omap_hsmmc to use that common
-> > functionality, and benefit from any extra devicetree parsing
-> > that it performs.
-> >
-> > The one awkward part of this change is that omap_hsmmc has an
-> > interrupt handler for 'card detect' which does more than the
-> > common code.
-> > I see three options:
-> >  1 - move that functionality into common code
-> >  2 - discard that functionality
-> >  3 - allow the common code to be configured to use a device-specific
-> >      card detect interrupt.
-> >
-> > This series implements '3'.  I suspect a mix of '1' and '2' would
-> > be a better choice but I know no of the history or justification
-> > for those differences.
-> >
-> > My preference would be for this series to be applied (if there are
-> > no other issues) and if there are opinions about effecting '1' or '2',
-> > they can be done with subsequent patches.
-> >
-> > Thanks,
-> > NeilBrown
-> >
->=20
-> I like the looks of this patchset, but it needs a rebase.
 
-Thanks.  What should I rebase against?  Is 3.18-rc sufficient or is there
-some other tree I should work against?
+>From 3f47dfd577ef3ff8c41dbb44d71d383a9e620ada Mon Sep 17 00:00:00 2001
+From: Minda Chen <Minda.Chen@csr.com>
+Date: Thu, 20 Nov 2014 10:42:41 +0800
+Subject: [PATCH] mmc: ops: Add mmc_send_tuning function
 
-Thanks,
-NeilBrown
+According to the SD card spec, Add a manual
+tuning command function for SDR104/HS200
+Sending command 19 or command 21 to read data
+and compare with the tunning block.
 
->=20
-> Kind regards
+Change-Id: Ic481b78b1e247c88942788ff0d10746779f672c0
+Signed-off-by: Minda Chen <Minda.Chen@csr.com>
+---
+ drivers/mmc/core/mmc_ops.c | 65 ++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/core.h   |  1 +
+ 2 files changed, 66 insertions(+)
+
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 7911e05..ecc7789 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -543,6 +543,71 @@ int mmc_switch(struct mmc_card *card, u8 set, u8
+index, u8 value,
+ }
+ EXPORT_SYMBOL_GPL(mmc_switch);
+
++int mmc_send_tuning(struct mmc_card *card, u32 opcode)
++{
++ struct mmc_request mrq = {NULL};
++ struct mmc_command cmd = {0};
++ struct mmc_data data = {0};
++ struct scatterlist sg;
++ struct mmc_host *mmc = card->host;
++ struct mmc_ios *ios = &mmc->ios;
++ const u8 *tuning_block_pattern;
++ int size, err = 0;
++ u8 *data_buf;
++
++ if (opcode == MMC_SEND_TUNING_BLOCK_HS200) {
++ if (ios->bus_width == MMC_BUS_WIDTH_8) {
++ tuning_block_pattern = tuning_blk_pattern_8bit;
++ size = sizeof(tuning_blk_pattern_8bit);
++ } else if (ios->bus_width == MMC_BUS_WIDTH_4) {
++ tuning_block_pattern = tuning_blk_pattern_4bit;
++ size = sizeof(tuning_blk_pattern_4bit);
++ } else
++ return -EINVAL;
++ } else if (opcode == MMC_SEND_TUNING_BLOCK) {
++ tuning_block_pattern = tuning_blk_pattern_4bit;
++ size = sizeof(tuning_blk_pattern_4bit);
++ } else
++ return -EINVAL;
++
++ data_buf = kmalloc(size, GFP_KERNEL);
++ if (!data_buf)
++ return -ENOMEM;
++
++ mrq.cmd = &cmd;
++ mrq.data = &data;
++
++ cmd.opcode = opcode;
++ cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
++
++ data.blksz = size;
++ data.blocks = 1;
++ data.flags = MMC_DATA_READ;
++
++ mmc_set_data_timeout(&data, card);
++ sg_init_one(&sg, data_buf, size);
++ memset(data_buf, 0, size);
++ mmc_wait_for_req(mmc, &mrq);
++
++ if (cmd.error) {
++ err = cmd.error;
++ goto out;
++ }
++
++ if (data.error) {
++ err = data.error;
++ goto out;
++ }
++
++ if (memcmp(data_buf, tuning_block_pattern, size))
++ err = -EIO;
++
++out:
++ kfree(data_buf);
++ return err;
++}
++EXPORT_SYMBOL_GPL(mmc_send_tuning);
++
+ static int
+ mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
+   u8 len)
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index f206e29..82a0119 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -154,6 +154,7 @@ extern void mmc_start_bkops(struct mmc_card *card,
+bool from_exception);
+ extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool,
+  bool, bool);
+ extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
++extern int mmc_send_tuning(struct mmc_card *, u32);
+ extern int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd);
+
+ #define MMC_ERASE_ARG 0x00000000
+-- 
+1.9.1
+
+
+> Br
 > Uffe
->=20
-> >
-> > ---
-> >
-> > NeilBrown (3):
-> >       mmc: omap_hsmmc: remove prepare/complete system suspend support.
-> >       mmc: omap_hsmmc: use slot-gpio library for gpio support.
-> >       mmc: omap_hsmmc: use mmc_of_parse to parse common mmc configurati=
-on.
-> >
-> >
-> >  drivers/mmc/core/slot-gpio.c           |   21 ++++
-> >  drivers/mmc/host/omap_hsmmc.c          |  158 +++++-------------------=
---------
-> >  include/linux/mmc/slot-gpio.h          |    2
-> >  include/linux/platform_data/mmc-omap.h |    4 -
-> >  4 files changed, 47 insertions(+), 138 deletions(-)
-> >
-> > --
-> > Signature
-> >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
-
-
---Sig_/H=w4tjHKMTzb/RuIgp.QGOA
-Content-Type: application/pgp-signature
-Content-Description: OpenPGP digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQIVAwUBVG0PPznsnt1WYoG5AQL1CRAAiyq+USFIPgRFmSfmWsLBb+jUXWQw9WUL
-wj044A4rtK/deuEWqzQfodo23bZvi/3s64Q70VbgBMCsu20sAj0Vc2Of1gi6KSqk
-x5z3ic/HcWUNWlN5RnkoR0vR6Bj98dj4lMBOryw5gNW2FfZ8by1Wu8qcmwUHffsS
-Rvo5GPzzVW9kLdkJUVBb1lxB8KYv27Fh/3ca3Bts9TJAQh5HzBGgGl/4+XWLDTkB
-/YSiqxPEwbdw6bw6mOEcPvQ970jFjWbFrHWJXciK2Wv38x55arq4hKa5NcMRY+f/
-xH6o9n0LrGIYKYgpdgimMLG7vW8p9kzJ19v9jxMlzW1urXWsrOuKfky/hdeMq2jn
-QtkepdrajTn8K0E72TKiLCc3scXQcsqs+5JhSg5ILnSJMb2qTDNR1vNM3Z6b/mp+
-4a7P2ULI5kGETKXxrAgjwFdHW+jkLw/I5GT0PQrovfLuLoSu5HkaGmwoKRbPNE8S
-cBjeng79RhR9EBnbgeYgulGWQ5iYc7FIVT9Alie8FYkox+F/9ZHrQF7p81u5dIhp
-+LsbWNUtScCm6e557V4mzgyQ8LA5Nlh9G6hYxgutslXDbDtaQJ/3Mo8uK79AFQ8n
-FK//Y6iMfTxCZLzk8KYCKLDFbeAdgfBp7DtO9mGtdmNv/KleFZ4iX+kgwpsOemO4
-0haZeQek7t4=
-=y1zT
------END PGP SIGNATURE-----
-
---Sig_/H=w4tjHKMTzb/RuIgp.QGOA--
