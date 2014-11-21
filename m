@@ -1,167 +1,102 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-sirf: add sirf tuning function (cmd 19)
-Date: Fri, 21 Nov 2014 12:17:00 +0100
-Message-ID: <CAPDyKFoE=7ZDcfwS7jofV5a+aXU5KjY6+5da0_maebTD+qtSJA@mail.gmail.com>
-References: <1415720864-3936-1-git-send-email-21cnbao@gmail.com>
-	<CAPDyKFopdcLXVCuoifd7K8NaRY4UXDbDmNJvyFeUQZs62or9Ag@mail.gmail.com>
-	<CAGsJ_4yOCwt1YYd6UuAXjeO2iWhQB4XtouyriX1YsK7BnyNNLA@mail.gmail.com>
-	<CAPDyKFprzeMS7Di7XUYTeZx-WE2UT+zmNKZM_8kHYhOLSoTfLQ@mail.gmail.com>
-	<CAGsJ_4xzQJ-v7mM8_gD299EN=Hb9aShY5HcR6R8XyEwXB+Ofzg@mail.gmail.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH] mmc: dw_mmc: fix card read threshold for PIO mode
+Date: Fri, 21 Nov 2014 19:48:16 +0800
+Message-ID: <20141121114813.GA11253@dragon>
+References: <1416551950-8277-1-git-send-email-shawn.guo@linaro.org>
+ <546F145A.9050900@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f45.google.com ([209.85.216.45]:55170 "EHLO
-	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755099AbaKULRC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Nov 2014 06:17:02 -0500
-Received: by mail-qa0-f45.google.com with SMTP id x12so3269739qac.18
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Nov 2014 03:17:00 -0800 (PST)
-In-Reply-To: <CAGsJ_4xzQJ-v7mM8_gD299EN=Hb9aShY5HcR6R8XyEwXB+Ofzg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <stable-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <546F145A.9050900@samsung.com>
+Sender: stable-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-kernel@lists.infradead.org, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Barry Song <21cnbao@gmail.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-On 20 November 2014 10:25, Barry Song <21cnbao@gmail.com> wrote:
->>>> These piece of code, which sends the tuning command don't belong in
->>>> the host driver. Instead I would like this to be handled from a helper
->>>> function from the mmc core.
->>>>
->>>> I realize that there already a few existing host drivers that
->>>> implemented similar code and I don't like it. We should convert them
->>>> to use a common helper function from the core instead.
->>> yes. that is fine.
->>>
->>> our engineering is currently very busy and might have no time to
->>> handle this for this moment.
->>> do you think we can move your requirement to a new refine task of next
->>> window after you pick up this in this window?
->>
->> No.
->>
->> You don't have to adopt the other host drivers at this point, only to
->> fix yours accordingly. The rest we can take care of later.
->>
->
-> Uffe, how do you think about we provide a core-level function at first:
+Hi Jaehoon,
 
-That's exactly what I had in mind. :-) Please resend as a separate patch.
+On Fri, Nov 21, 2014 at 07:30:50PM +0900, Jaehoon Chung wrote:
+> Hi, Shawn.
+> 
+> On 11/21/2014 03:39 PM, Shawn Guo wrote:
+> > Commit f1d2736c8156 ("mmc: dw_mmc: control card read threshold")
+> > introduces a regression for use case where PIO mode is used, i.e.
+> > CONFIG_MMC_DW_IDMAC is not disabled.  It stops kernel from booting
+> > like below.
+> > 
+> > dw_mmc 9408000.dwmmc: fifo-depth property not found, using value of FIFOTH register as default
+> > dw_mmc 9408000.dwmmc: Using PIO mode.
+> > dw_mmc 9408000.dwmmc: Version ID is 210a
+> > dw_mmc 9408000.dwmmc: DW MMC controller at irq 72, 32 bit host data width, 32 deep fifo
+> > dw_mmc 9408000.dwmmc: 1 slots initialized
+> > ...
+> > Waiting for root device /dev/mmcblk0p2...
+> > mmc_host mmc0: Bus speed (slot 0) = 52000000Hz (slot req 50000000Hz, actual 26000000HZ div = 1)
+> > mmc0: new high speed SDHC card at address b368
+> > mmcblk0: mmc0:b368 AF UD 3.84 GiB
+> 
+> Stopping at here? I didn't know what's difference before applied your patch.
+> Clearing Card-read threshold value at every time would be caused that stop kernel?
+> Just wonder it.
 
-Kind regards
-Uffe
+With my patch, the kernel will continue to mount the rootfs on SD card
+as below.
 
->
->
-> From 3f47dfd577ef3ff8c41dbb44d71d383a9e620ada Mon Sep 17 00:00:00 2001
-> From: Minda Chen <Minda.Chen@csr.com>
-> Date: Thu, 20 Nov 2014 10:42:41 +0800
-> Subject: [PATCH] mmc: ops: Add mmc_send_tuning function
->
-> According to the SD card spec, Add a manual
-> tuning command function for SDR104/HS200
-> Sending command 19 or command 21 to read data
-> and compare with the tunning block.
->
-> Change-Id: Ic481b78b1e247c88942788ff0d10746779f672c0
-> Signed-off-by: Minda Chen <Minda.Chen@csr.com>
-> ---
->  drivers/mmc/core/mmc_ops.c | 65 ++++++++++++++++++++++++++++++++++++++++++++++
->  include/linux/mmc/core.h   |  1 +
->  2 files changed, 66 insertions(+)
->
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 7911e05..ecc7789 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -543,6 +543,71 @@ int mmc_switch(struct mmc_card *card, u8 set, u8
-> index, u8 value,
->  }
->  EXPORT_SYMBOL_GPL(mmc_switch);
->
-> +int mmc_send_tuning(struct mmc_card *card, u32 opcode)
-> +{
-> + struct mmc_request mrq = {NULL};
-> + struct mmc_command cmd = {0};
-> + struct mmc_data data = {0};
-> + struct scatterlist sg;
-> + struct mmc_host *mmc = card->host;
-> + struct mmc_ios *ios = &mmc->ios;
-> + const u8 *tuning_block_pattern;
-> + int size, err = 0;
-> + u8 *data_buf;
-> +
-> + if (opcode == MMC_SEND_TUNING_BLOCK_HS200) {
-> + if (ios->bus_width == MMC_BUS_WIDTH_8) {
-> + tuning_block_pattern = tuning_blk_pattern_8bit;
-> + size = sizeof(tuning_blk_pattern_8bit);
-> + } else if (ios->bus_width == MMC_BUS_WIDTH_4) {
-> + tuning_block_pattern = tuning_blk_pattern_4bit;
-> + size = sizeof(tuning_blk_pattern_4bit);
-> + } else
-> + return -EINVAL;
-> + } else if (opcode == MMC_SEND_TUNING_BLOCK) {
-> + tuning_block_pattern = tuning_blk_pattern_4bit;
-> + size = sizeof(tuning_blk_pattern_4bit);
-> + } else
-> + return -EINVAL;
-> +
-> + data_buf = kmalloc(size, GFP_KERNEL);
-> + if (!data_buf)
-> + return -ENOMEM;
-> +
-> + mrq.cmd = &cmd;
-> + mrq.data = &data;
-> +
-> + cmd.opcode = opcode;
-> + cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-> +
-> + data.blksz = size;
-> + data.blocks = 1;
-> + data.flags = MMC_DATA_READ;
-> +
-> + mmc_set_data_timeout(&data, card);
-> + sg_init_one(&sg, data_buf, size);
-> + memset(data_buf, 0, size);
-> + mmc_wait_for_req(mmc, &mrq);
-> +
-> + if (cmd.error) {
-> + err = cmd.error;
-> + goto out;
-> + }
-> +
-> + if (data.error) {
-> + err = data.error;
-> + goto out;
-> + }
-> +
-> + if (memcmp(data_buf, tuning_block_pattern, size))
-> + err = -EIO;
-> +
-> +out:
-> + kfree(data_buf);
-> + return err;
-> +}
-> +EXPORT_SYMBOL_GPL(mmc_send_tuning);
-> +
->  static int
->  mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
->    u8 len)
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index f206e29..82a0119 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -154,6 +154,7 @@ extern void mmc_start_bkops(struct mmc_card *card,
-> bool from_exception);
->  extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool,
->   bool, bool);
->  extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
-> +extern int mmc_send_tuning(struct mmc_card *, u32);
->  extern int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd);
->
->  #define MMC_ERASE_ARG 0x00000000
-> --
-> 1.9.1
->
->
->> Br
->> Uffe
+mmcblk0: mmc0:b368 AF UD 3.84 GiB 
+ mmcblk0: p1 p2
+EXT4-fs (mmcblk0p2): couldn't mount as ext3 due to feature incompatibilities
+EXT4-fs (mmcblk0p2): couldn't mount as ext2 due to feature incompatibilities
+EXT4-fs (mmcblk0p2): INFO: recovery required on readonly filesystem
+EXT4-fs (mmcblk0p2): write access will be enabled during recovery
+random: nonblocking pool is initialized
+EXT4-fs (mmcblk0p2): recovery complete
+EXT4-fs (mmcblk0p2): mounted filesystem with ordered data mode. Opts: (null)
+VFS: Mounted root (ext4 filesystem) readonly on device 179:2.
+
+> 
+> > 
+> > Rather than clearing read threshold bits, the best thing that function
+> > dw_mci_ctrl_rd_thld() should do is leaving the bits untouched, in case
+> > that card read threshold setup is not needed.
+> > 
+> > The patch fixes the regression by changing dw_mci_ctrl_rd_thld() a bit
+> > to do nothing in case card read threshold bits setup is not needed.
+> > 
+> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+> > Fixes: f1d2736c8156 ("mmc: dw_mmc: control card read threshold")
+> > Cc: <stable@vger.kernel.org> # 3.13+
+> > ---
+> >  drivers/mmc/host/dw_mmc.c | 7 ++-----
+> >  1 file changed, 2 insertions(+), 5 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> > index 69f0cc68d5b2..52c04ba69970 100644
+> > --- a/drivers/mmc/host/dw_mmc.c
+> > +++ b/drivers/mmc/host/dw_mmc.c
+> > @@ -628,13 +628,13 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
+> >  
+> >  	if (host->timing != MMC_TIMING_MMC_HS200 &&
+> >  	    host->timing != MMC_TIMING_UHS_SDR104)
+> > -		goto disable;
+> > +		return;
+> >  
+> >  	blksz_depth = blksz / (1 << host->data_shift);
+> >  	fifo_depth = host->fifo_depth;
+> >  
+> >  	if (blksz_depth > fifo_depth)
+> > -		goto disable;
+> > +		return;
+> >  
+> >  	/*
+> >  	 * If (blksz_depth) >= (fifo_depth >> 1), should be 'thld_size <= blksz'
+> > @@ -644,9 +644,6 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
+> >  	thld_size = blksz;
+> >  	mci_writel(host, CDTHRCTL, SDMMC_SET_RD_THLD(thld_size, 1));
+> >  	return;
+> 
+> Then "return" could be also removed.
+
+You're right.  Will remove it in v2.
+
+Shawn
