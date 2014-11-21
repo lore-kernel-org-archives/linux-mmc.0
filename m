@@ -1,131 +1,123 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/1] Production State Awareness support in host side
-Date: Fri, 21 Nov 2014 14:16:18 +0100
-Message-ID: <CAPDyKFp8PCBMOtXr-SkUDSw6CZ4c-4AnY-btex5WpU+B9u4Ppw@mail.gmail.com>
-References: <1416228726-8514-1-git-send-email-avi.shchislowski@sandisk.com>
-	<CAPDyKFrCpoSsgECvC=gnMp6WDYAV+2os-uhzp03K-=E+Yv10AA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333EC9D394@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CAPDyKFrzmW5ADf86Q2t18X8cUUovGF-fuhDpQBUSCiPf9g4OUA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333EC9F16C@SACMBXIP02.sdcorp.global.sandisk.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Barry Song <21cnbao@gmail.com>
+Subject: [PATCH] mmc: core: add core-level function for sending tuning commands
+Date: Fri, 21 Nov 2014 22:46:41 +0800
+Message-ID: <1416581201-9851-1-git-send-email-21cnbao@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f171.google.com ([209.85.216.171]:64219 "EHLO
-	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750922AbaKUNQT convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Nov 2014 08:16:19 -0500
-Received: by mail-qc0-f171.google.com with SMTP id r5so3754332qcx.30
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Nov 2014 05:16:18 -0800 (PST)
-In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED5333EC9F16C@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:43068 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754269AbaKUOrL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Nov 2014 09:47:11 -0500
+Received: by mail-pa0-f46.google.com with SMTP id lj1so5016019pab.33
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Nov 2014 06:47:11 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
+To: ulf.hansson@linaro.org, chris@printf.net, linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, workgroup.linux@csr.com, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-On 19 November 2014 11:58, Alex Lemberg <Alex.Lemberg@sandisk.com> wrot=
-e:
->
->
->> -----Original Message-----
->> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
->> Sent: Wednesday, November 19, 2014 11:59 AM
->> To: Alex Lemberg
->> Cc: linux-mmc; Chris Ball; Avi Shchislowski
->> Subject: Re: [PATCH 1/1] Production State Awareness support in host =
-side
->>
->> On 18 November 2014 19:41, Alex Lemberg <Alex.Lemberg@sandisk.com>
->> wrote:
->> > Hi Ulf,
->> >
->> >> -----Original Message-----
->> >> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
->> >> Sent: Monday, November 17, 2014 3:34 PM
->> >> To: Avi Shchislowski
->> >> Cc: linux-mmc; Chris Ball; Alex Lemberg
->> >> Subject: Re: [PATCH 1/1] Production State Awareness support in ho=
-st
->> >> side
->> >>
->> >> On 17 November 2014 13:52, Avi Shchislowski
->> >> <avi.shchislowski@sandisk.com>
->> >> wrote:
->> >> > Adding support for PSA (Production State Awareness) feature for=
- all
->> >> > eMMC devices with revision >=3D5.0 In this patch the eMMC drive=
-r will
->> >> > check if device was completed its Production State mode, and wi=
-ll
->> >> > switch it to Normal (field) mode.
->> >> > Switching to normal mode signal the device to complete its work=
- in
->> >> > production mode and start working in regular performance mode.
->> >>
->> >> Please add some detail to what this patch does. Additionally why =
-it's needed.
->> >
->> > In this patch driver should recognize if eMMC device (Rev >=3D5.0)=
- was
->> > not switched to Normal (0x00) PSA mode by storage vendor or Progra=
-mmer
->> house.
->> > For this, we are checking if device was leaved in
->> > PRE_SOLDERING_POST_WRITES (0x02) state - represents a state in whi=
-ch
->> > the device is in production and the host (usually programmer) comp=
-leted to
->> load the content to the device.
->> > The host (usually programmer) sets the device to this state after
->> > content was loaded and just before soldering.
->> > After soldering the device to real host (not programmer), the devi=
-ce
->> > should be switched to Normal (0x00) mode.
->> > The Normal (0x00) mode of PSA register represents a state in which=
- the
->> > device is running in the field and uses =E2=80=9Cregular=E2=80=9D =
-operations.
->> > Leaving device in PRE_SOLDERING_POST_WRITES (0x02) might not allow=
- to
->> > host write content to the device.
->> >
->> > More details about PSA feature can be found in eMMC 5.0 spec (Jede=
-c:
->> >  JESD84-B50.pdf)
->> > http://www.jedec.org/standards-documents/technology-focus-areas/fl=
-ash-
->> > memory-ssds-ufs-emmc/e-mmc
->> >
->> > Please let us know if more details required.
->>
->> Okay, that was far better.
->>
->> I am not so sure we should finalize the production phase while initi=
-alizing the
->> eMMC card like this.
->>
->> Certainly we should check the PSA state, but I think we should retur=
-n an error if
->> we think the device hasn=E2=80=99t completed production. It should b=
-e the responsibility
->> for the "programming tools" to finalize the production, right!?
->
-> According to eMMC spec, the switch to NORMAL should be done after dev=
-ice soldering to final host (not programmer).
-> Please refer to "Figure 32 =E2=80=94 Recommended Soldering procedure"=
- in eMMC5.0 specification document.
-> Also, since we are dealing with only "field" host here, we are not to=
-uching/switching any other modes of PSA, but only Normal (field).
-> This code should run only once - in the beginning of device life cycl=
-e.
+From: Minda Chen <Minda.Chen@csr.com>
 
-I get your point, but I am not so sure.
+According to the SD card spec, Add a manual tuning command function
+for SDR104/HS200 by sending command 19 or command 21 to read data
+and compare with the tuning block pattern.
 
-To me, I wouldn't trust that the platform binaries has been
-successfully programmed to the device, unless the programmer tool
-takes care of switching the device to "normal".
+this patch will help to decrease some platform private codes in
+SDHCI platform_execute_tuning() callbacks.
 
-What does other people think?
+Signed-off-by: Minda Chen <Minda.Chen@csr.com>
+Signed-off-by: Barry Song <Baohua.Song@csr.com>
+---
+ drivers/mmc/core/mmc_ops.c | 65 ++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/core.h   |  1 +
+ 2 files changed, 66 insertions(+)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 7911e05..ecc7789 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -543,6 +543,71 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ }
+ EXPORT_SYMBOL_GPL(mmc_switch);
+ 
++int mmc_send_tuning(struct mmc_card *card, u32 opcode)
++{
++	struct mmc_request mrq = {NULL};
++	struct mmc_command cmd = {0};
++	struct mmc_data data = {0};
++	struct scatterlist sg;
++	struct mmc_host *mmc = card->host;
++	struct mmc_ios *ios = &mmc->ios;
++	const u8 *tuning_block_pattern;
++	int size, err = 0;
++	u8 *data_buf;
++
++	if (opcode == MMC_SEND_TUNING_BLOCK_HS200) {
++		if (ios->bus_width == MMC_BUS_WIDTH_8) {
++			tuning_block_pattern = tuning_blk_pattern_8bit;
++			size = sizeof(tuning_blk_pattern_8bit);
++		} else if (ios->bus_width == MMC_BUS_WIDTH_4) {
++			tuning_block_pattern = tuning_blk_pattern_4bit;
++			size = sizeof(tuning_blk_pattern_4bit);
++		} else
++			return -EINVAL;
++	} else if (opcode == MMC_SEND_TUNING_BLOCK) {
++		tuning_block_pattern = tuning_blk_pattern_4bit;
++		size = sizeof(tuning_blk_pattern_4bit);
++	} else
++		return -EINVAL;
++
++	data_buf = kmalloc(size, GFP_KERNEL);
++	if (!data_buf)
++		return -ENOMEM;
++
++	mrq.cmd = &cmd;
++	mrq.data = &data;
++
++	cmd.opcode = opcode;
++	cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
++
++	data.blksz = size;
++	data.blocks = 1;
++	data.flags = MMC_DATA_READ;
++
++	mmc_set_data_timeout(&data, card);
++	sg_init_one(&sg, data_buf, size);
++	memset(data_buf, 0, size);
++	mmc_wait_for_req(mmc, &mrq);
++
++	if (cmd.error) {
++		err = cmd.error;
++		goto out;
++	}
++
++	if (data.error) {
++		err = data.error;
++		goto out;
++	}
++
++	if (memcmp(data_buf, tuning_block_pattern, size))
++		err = -EIO;
++
++out:
++	kfree(data_buf);
++	return err;
++}
++EXPORT_SYMBOL_GPL(mmc_send_tuning);
++
+ static int
+ mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
+ 		  u8 len)
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index f206e29..82a0119 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -154,6 +154,7 @@ extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
+ extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool,
+ 			bool, bool);
+ extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
++extern int mmc_send_tuning(struct mmc_card *, u32);
+ extern int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd);
+ 
+ #define MMC_ERASE_ARG		0x00000000
+-- 
+2.1.1
+
