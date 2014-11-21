@@ -1,47 +1,46 @@
-From: Angelo Dureghello <angelo70@gmail.com>
-Subject: Re: davinci_mmc issues on kernel 3.17.0
-Date: Thu, 20 Nov 2014 19:32:06 +0100
-Message-ID: <546E33A6.3060502@gmail.com>
-References: <546DCF68.6040100@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Vincent Yang <vincent.yang.fujitsu@gmail.com>
+Subject: [PATCH 0/4] mmc: sdhci: adding support for a new Fujitsu sdhci IP
+Date: Fri, 21 Nov 2014 08:51:36 +0800
+Message-ID: <1416531100-26707-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:50471 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755887AbaKTScJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Nov 2014 13:32:09 -0500
-Received: by mail-wi0-f182.google.com with SMTP id h11so6329937wiw.9
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Nov 2014 10:32:08 -0800 (PST)
-Received: from [192.168.0.2] (host15-234-dynamic.54-79-r.retail.telecomitalia.it. [79.54.234.15])
-        by mx.google.com with ESMTPSA id u5sm5227075wiz.9.2014.11.20.10.32.07
-        for <linux-mmc@vger.kernel.org>
-        (version=TLSv1 cipher=ECDHE-RSA-RC4-SHA bits=128/128);
-        Thu, 20 Nov 2014 10:32:07 -0800 (PST)
-In-Reply-To: <546DCF68.6040100@gmail.com>
+Received: from mail-pa0-f54.google.com ([209.85.220.54]:48859 "EHLO
+	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756640AbaKUAwI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Nov 2014 19:52:08 -0500
+Received: by mail-pa0-f54.google.com with SMTP id fb1so3682743pad.13
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Nov 2014 16:52:07 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: linux@arm.linux.org.uk, chris@printf.net, ulf.hansson@linaro.org, andy.green@linaro.org, patches@linaro.org, jaswinder.singh@linaro.org, Vincent Yang <Vincent.Yang@tw.fujitsu.com>
 
-Hi,
+Hello,
 
-i fixed my mmc r/w issues.
+  Fujitsu have an sdhci IP which is implemented in a SoC we're 
+adding to mainline, the most recent series for that was sent 
+here: 
+http://lists.infradead.org/pipermail/linux-arm-kernel/2014-November/304522.html
 
-In PIO 4-bit mode the davinci mmc host driver passed all the
-mmc_test driver tests. But for some reason, in kernel 3.17,
-i still have issues when i "fsck" just after the mkfs.
-I still see errors.
+  These patches are against v3.18-rc5 mainline and tested on
+v3.18-rc5 integration tree.
 
-So i moved back to DMA 4-bit mode (DMA/TI EDMA engine enabled),
-as my board was working in kernel 3.5.1.
+  We welcome any comment and advice about how to make any
+improvements or better align them with upstream.
 
-In DMA mode, there was some conditions where the mmc access
-was blocking. This was due to the fact that the davinci mmc
-host driver was not able to get all the edma chan slots needed
-for the r/w operations. This because my board.c was reserving
-several chans / slots for the audio.
+Thanks.
 
-I reduced those reservations, and all is fine.
+Vincent Yang (4):
+  mmc: sdhci: add a voltage switch callback function
+  mmc: sdhci: add a quirk for tuning work around
+  mmc: sdhci: add a quirk for single block transactions
+  mmc: core: hold SD Clock before CMD11 during Signal
 
-Regards
-Angelo
+ drivers/mmc/core/core.c   | 13 ++++++++-----
+ drivers/mmc/host/sdhci.c  | 14 +++++++++++---
+ drivers/mmc/host/sdhci.h  |  1 +
+ include/linux/mmc/sdhci.h |  4 ++++
+ 4 files changed, 24 insertions(+), 8 deletions(-)
+
+-- 
+1.9.0
+
