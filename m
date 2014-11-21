@@ -1,93 +1,76 @@
 From: Vincent Yang <vincent.yang.fujitsu@gmail.com>
-Subject: [PATCH 4/4] mmc: core: hold SD Clock before CMD11 during Signal
-Date: Fri, 21 Nov 2014 08:51:40 +0800
-Message-ID: <1416531100-26707-5-git-send-email-Vincent.Yang@tw.fujitsu.com>
-References: <1416531100-26707-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
+Subject: Re: [PATCH 6/9] mmc: sdhci: host: add new f_sdh30
+Date: Fri, 21 Nov 2014 09:18:45 +0800
+Message-ID: <CAOEd-H097p4mQ-L0NxReFpNADG2ymqpvg5jgiWG4W5G+3H-vcw@mail.gmail.com>
+References: <1416486442-25200-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
+	<1416487081-25467-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
+	<CAL_JsqKDVgpBBW7j1skOU4moF0tvh1j6Fm6jaE5JoP04OU07uw@mail.gmail.com>
+	<CAOEd-H0_YGHobKu08pMr3A4EpqBdtpBcCZu5PoVY_SZ=GBg-3w@mail.gmail.com>
+	<CAL_JsqKe_NA_mQ1MVMntXMjFGP6nGvnpWb8gvBEzRZuZ+aMf1g@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f41.google.com ([209.85.220.41]:63959 "EHLO
-	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757055AbaKUAy0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Nov 2014 19:54:26 -0500
-Received: by mail-pa0-f41.google.com with SMTP id rd3so3670384pab.28
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Nov 2014 16:54:25 -0800 (PST)
-In-Reply-To: <1416531100-26707-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
+Received: from mail-lb0-f169.google.com ([209.85.217.169]:53367 "EHLO
+	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756487AbaKUBSr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Nov 2014 20:18:47 -0500
+In-Reply-To: <CAL_JsqKe_NA_mQ1MVMntXMjFGP6nGvnpWb8gvBEzRZuZ+aMf1g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: linux@arm.linux.org.uk, chris@printf.net, ulf.hansson@linaro.org, andy.green@linaro.org, patches@linaro.org, jaswinder.singh@linaro.org, Vincent Yang <Vincent.Yang@tw.fujitsu.com>
+To: Rob Herring <robherring2@gmail.com>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, "chris@printf.net" <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Andy Green <andy.green@linaro.org>, Linaro Patches <patches@linaro.org>, Jaswinder Singh <jaswinder.singh@linaro.org>, Vincent Yang <Vincent.Yang@tw.fujitsu.com>, Tetsuya Takinishi <t.takinishi@jp.fujitsu.com>
 
-Voltage Switch Procedure
+2014-11-21 2:18 GMT+08:00 Rob Herring <robherring2@gmail.com>:
+> On Thu, Nov 20, 2014 at 10:59 AM, Vincent Yang
+> <vincent.yang.fujitsu@gmail.com> wrote:
+>> 2014-11-20 23:22 GMT+08:00 Rob Herring <robherring2@gmail.com>:
+>>> On Thu, Nov 20, 2014 at 6:38 AM, Vincent Yang
+>>> <vincent.yang.fujitsu@gmail.com> wrote:
+>>>> This patch adds new host controller driver for
+>>>> Fujitsu SDHCI controller f_sdh30.
+>>>>
+>>>> Signed-off-by: Andy Green <andy.green@linaro.org>
+>>>> Signed-off-by: Vincent Yang <Vincent.Yang@tw.fujitsu.com>
+>>>> Signed-off-by: Tetsuya Takinishi <t.takinishi@jp.fujitsu.com>
+>>>> ---
+>>>>  .../devicetree/bindings/mmc/sdhci-fujitsu.txt      |  35 +++
+>>>>  drivers/mmc/host/Kconfig                           |   9 +
+>>>>  drivers/mmc/host/Makefile                          |   1 +
+>>>>  drivers/mmc/host/sdhci_f_sdh30.c                   | 319 +++++++++++++++++++++
+>>>>  4 files changed, 364 insertions(+)
+>>>>  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+>>>>  create mode 100644 drivers/mmc/host/sdhci_f_sdh30.c
+>>>>
+>>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+>>>> new file mode 100644
+>>>> index 0000000..a1e0b64
+>>>> --- /dev/null
+>>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+>>>> @@ -0,0 +1,35 @@
+>>>> +* Fujitsu SDHCI controller
+>>>> +
+>>>> +This file documents differences between the core properties in mmc.txt
+>>>> +and the properties used by the sdhci_f_sdh30 driver.
+>>>> +
+>>>> +Required properties:
+>>>> +- compatible: "fujitsu,mb86s70-sdh30"
+>>>
+>>> It would be nice to have sdhci in the name to indicate it is an SDHCI
+>>> controller.
+>>
+>> Yes, we will update it to "fujitsu,sdhci-f-sdh30"
+>> Thanks for your review!
+>
+> Not really what I had in mind as you are then dropping the chip name.
+> Perhaps "fujitsu,mb86s70-sdhci-3.0". Is 3.0 the SD spec version or IP
+> version? If the former, I think I'd drop it as IIRC that is available
+> in a register.
 
-This patch is to fix an issue found on mb86s7x platforms.
+We will update it to "fujitsu,mb86s70-sdhci-3.0" as you suggest
+because 3.0 is IP version
+Thanks for your review!
 
-[symptom]
-There are some UHS-1 SD memory cards sometimes cannot be detected correctly,
-e.g., Transcend 600x SDXC 64GB UHS-1 memory card.
-During Signal Voltage Switch Procedure, failure to switch is indicated
-by the card holding DAT[3:0] low.
+Vincent
 
-[analysis]
-According to SD Host Controller Simplified Specification Version 3.00
-chapter 3.6.1, the Signal Voltage Switch Procedure should be:
-(1) Check S18A; (2) Issue CMD11; (3) Check CMD 11 response;
-(4) Stop providing SD clock; (5) Check DAT[3:0] should be 0000b;
-(6) Set 1.8V Signal Enable; (7) Wait 5ms; (8) Check 1.8V Signal Enable;
-(9) Provide SD Clock; (10) Wait 1ms; (11) Check DAT[3:0] should be 1111b;
-(12) error handling
-
-With CONFIG_MMC_CLKGATE=y, sometimes there is one more gating/un-gating
-SD clock between (2) and (3). In this case, some UHS-1 SD cards will hold
-DAT[3:0] 0000b at (11) and thus fails Signal Voltage Switch Procedure.
-
-[solution]
-By mmc_host_clk_hold() before CMD11, the additional gating/un-gating
-SD clock between (2) and (3) can be prevented and thus no failure at (11).
-It has been verified with many UHS-1 SD cards on mb86s7x platforms and
-works correctly.
-
-Signed-off-by: Vincent Yang <Vincent.Yang@tw.fujitsu.com>
----
- drivers/mmc/core/core.c | 13 ++++++++-----
- 1 file changed, 8 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index f26a5f1..8b9e2cfd 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1420,18 +1420,20 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, u32 ocr)
- 		pr_warn("%s: cannot verify signal voltage switch\n",
- 			mmc_hostname(host));
- 
-+	mmc_host_clk_hold(host);
-+
- 	cmd.opcode = SD_SWITCH_VOLTAGE;
- 	cmd.arg = 0;
- 	cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
- 
- 	err = mmc_wait_for_cmd(host, &cmd, 0);
- 	if (err)
--		return err;
--
--	if (!mmc_host_is_spi(host) && (cmd.resp[0] & R1_ERROR))
--		return -EIO;
-+		goto err_command;
- 
--	mmc_host_clk_hold(host);
-+	if (!mmc_host_is_spi(host) && (cmd.resp[0] & R1_ERROR)) {
-+		err = -EIO;
-+		goto err_command;
-+	}
- 	/*
- 	 * The card should drive cmd and dat[0:3] low immediately
- 	 * after the response of cmd11, but wait 1 ms to be sure
-@@ -1480,6 +1482,7 @@ power_cycle:
- 		mmc_power_cycle(host, ocr);
- 	}
- 
-+err_command:
- 	mmc_host_clk_release(host);
- 
- 	return err;
--- 
-1.9.0
-
+>
+> Rob
