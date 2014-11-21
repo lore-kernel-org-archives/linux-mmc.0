@@ -1,102 +1,47 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: fix card read threshold for PIO mode
-Date: Fri, 21 Nov 2014 19:48:16 +0800
-Message-ID: <20141121114813.GA11253@dragon>
-References: <1416551950-8277-1-git-send-email-shawn.guo@linaro.org>
- <546F145A.9050900@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: dw_mmc: try pick the exact same voltage as vmmc for vqmmc
+Date: Fri, 21 Nov 2014 13:06:18 +0100
+Message-ID: <CAPDyKFrzGfDew0eLLEcA+_iS_mo-O2bFU58fjirfXXA8AJ9UYQ@mail.gmail.com>
+References: <1415109789-7046-1-git-send-email-addy.ke@rock-chips.com>
+	<1415678573-6093-1-git-send-email-addy.ke@rock-chips.com>
+	<CAPDyKFqUoBjhsbz8rkLa9PY_dpgMxnimz3k7OoA5WVhi7MacPQ@mail.gmail.com>
+	<CAD=FV=VQHZ6YmcoeAb1OEVLYRrYBnc_dM5Kjt1TZX_CQJC=EfA@mail.gmail.com>
+	<5464152E.7040209@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <546F145A.9050900@samsung.com>
-Sender: stable-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-kernel@lists.infradead.org, stable@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f46.google.com ([209.85.192.46]:51249 "EHLO
+	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755059AbaKUMGT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Nov 2014 07:06:19 -0500
+Received: by mail-qg0-f46.google.com with SMTP id z107so1991923qgd.33
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Nov 2014 04:06:18 -0800 (PST)
+In-Reply-To: <5464152E.7040209@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: addy ke <addy.ke@rock-chips.com>
+Cc: Doug Anderson <dianders@chromium.org>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Alexandru Stan <amstan@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>linux-
 
-Hi Jaehoon,
+[...]
 
-On Fri, Nov 21, 2014 at 07:30:50PM +0900, Jaehoon Chung wrote:
-> Hi, Shawn.
-> 
-> On 11/21/2014 03:39 PM, Shawn Guo wrote:
-> > Commit f1d2736c8156 ("mmc: dw_mmc: control card read threshold")
-> > introduces a regression for use case where PIO mode is used, i.e.
-> > CONFIG_MMC_DW_IDMAC is not disabled.  It stops kernel from booting
-> > like below.
-> > 
-> > dw_mmc 9408000.dwmmc: fifo-depth property not found, using value of FIFOTH register as default
-> > dw_mmc 9408000.dwmmc: Using PIO mode.
-> > dw_mmc 9408000.dwmmc: Version ID is 210a
-> > dw_mmc 9408000.dwmmc: DW MMC controller at irq 72, 32 bit host data width, 32 deep fifo
-> > dw_mmc 9408000.dwmmc: 1 slots initialized
-> > ...
-> > Waiting for root device /dev/mmcblk0p2...
-> > mmc_host mmc0: Bus speed (slot 0) = 52000000Hz (slot req 50000000Hz, actual 26000000HZ div = 1)
-> > mmc0: new high speed SDHC card at address b368
-> > mmcblk0: mmc0:b368 AF UD 3.84 GiB
-> 
-> Stopping at here? I didn't know what's difference before applied your patch.
-> Clearing Card-read threshold value at every time would be caused that stop kernel?
-> Just wonder it.
+> Sure
+> If the first card is sd2.0 since startup, dw_mci_switch_voltage will not be called,
 
-With my patch, the kernel will continue to mount the rootfs on SD card
-as below.
+That can't be right. mmc_power_up() should trigger
+dw_mci_switch_voltage() to be invoked.
 
-mmcblk0: mmc0:b368 AF UD 3.84 GiB 
- mmcblk0: p1 p2
-EXT4-fs (mmcblk0p2): couldn't mount as ext3 due to feature incompatibilities
-EXT4-fs (mmcblk0p2): couldn't mount as ext2 due to feature incompatibilities
-EXT4-fs (mmcblk0p2): INFO: recovery required on readonly filesystem
-EXT4-fs (mmcblk0p2): write access will be enabled during recovery
-random: nonblocking pool is initialized
-EXT4-fs (mmcblk0p2): recovery complete
-EXT4-fs (mmcblk0p2): mounted filesystem with ordered data mode. Opts: (null)
-VFS: Mounted root (ext4 filesystem) readonly on device 179:2.
+> and card can be identified. But if UHS card is pulgged in first, the vqmmc will be down to 1.8v.
+>
+> when sd2.0 card is pulgged in, mmc core will call dw_mci_switch_voltage to change vqmmc to 3.3v
+> (MMC_SINGLE_VOTAGE_330). So vqmmc will be set 2.7v, if we request 2.7-3.6v.
+>
+> But vmmc is always 3.3v,becuase it be set min_volt = max_volt = 3.3v in dt tables.
+>
+> So the result:
+> vmmc = 3.3v and vqmmc = 2.7v, and sd2.0 card is failed to identify in my test.
 
-> 
-> > 
-> > Rather than clearing read threshold bits, the best thing that function
-> > dw_mci_ctrl_rd_thld() should do is leaving the bits untouched, in case
-> > that card read threshold setup is not needed.
-> > 
-> > The patch fixes the regression by changing dw_mci_ctrl_rd_thld() a bit
-> > to do nothing in case card read threshold bits setup is not needed.
-> > 
-> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> > Fixes: f1d2736c8156 ("mmc: dw_mmc: control card read threshold")
-> > Cc: <stable@vger.kernel.org> # 3.13+
-> > ---
-> >  drivers/mmc/host/dw_mmc.c | 7 ++-----
-> >  1 file changed, 2 insertions(+), 5 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> > index 69f0cc68d5b2..52c04ba69970 100644
-> > --- a/drivers/mmc/host/dw_mmc.c
-> > +++ b/drivers/mmc/host/dw_mmc.c
-> > @@ -628,13 +628,13 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
-> >  
-> >  	if (host->timing != MMC_TIMING_MMC_HS200 &&
-> >  	    host->timing != MMC_TIMING_UHS_SDR104)
-> > -		goto disable;
-> > +		return;
-> >  
-> >  	blksz_depth = blksz / (1 << host->data_shift);
-> >  	fifo_depth = host->fifo_depth;
-> >  
-> >  	if (blksz_depth > fifo_depth)
-> > -		goto disable;
-> > +		return;
-> >  
-> >  	/*
-> >  	 * If (blksz_depth) >= (fifo_depth >> 1), should be 'thld_size <= blksz'
-> > @@ -644,9 +644,6 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
-> >  	thld_size = blksz;
-> >  	mci_writel(host, CDTHRCTL, SDMMC_SET_RD_THLD(thld_size, 1));
-> >  	return;
-> 
-> Then "return" could be also removed.
+Hmm. I wonder why it works the first time? Could it be that your
+regulator have voltage ramp up time that isn't properly considered?
 
-You're right.  Will remove it in v2.
-
-Shawn
+Kind regards
+Uffe
