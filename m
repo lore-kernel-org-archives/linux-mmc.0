@@ -1,103 +1,54 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: [PATCH v2 4/4] mmc: atmel-mci: use probe deferring if dma controller is not ready yet
-Date: Fri, 21 Nov 2014 16:33:38 +0100
-Message-ID: <1416584018-8561-5-git-send-email-ludovic.desroches@atmel.com>
-References: <1416584018-8561-1-git-send-email-ludovic.desroches@atmel.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: try pick the exact same voltage as vmmc for vqmmc
+Date: Fri, 21 Nov 2014 09:42:08 -0800
+Message-ID: <CAD=FV=Ve1TY4+8quq1=18A1YOFvOWuFGrBmHLwMCwdWBSqzxOw@mail.gmail.com>
+References: <1415109789-7046-1-git-send-email-addy.ke@rock-chips.com>
+	<1415678573-6093-1-git-send-email-addy.ke@rock-chips.com>
+	<CAPDyKFqUoBjhsbz8rkLa9PY_dpgMxnimz3k7OoA5WVhi7MacPQ@mail.gmail.com>
+	<CAD=FV=VQHZ6YmcoeAb1OEVLYRrYBnc_dM5Kjt1TZX_CQJC=EfA@mail.gmail.com>
+	<5464152E.7040209@rock-chips.com>
+	<CAPDyKFrzGfDew0eLLEcA+_iS_mo-O2bFU58fjirfXXA8AJ9UYQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:49141 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758399AbaKUPej (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Nov 2014 10:34:39 -0500
-In-Reply-To: <1416584018-8561-1-git-send-email-ludovic.desroches@atmel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrzGfDew0eLLEcA+_iS_mo-O2bFU58fjirfXXA8AJ9UYQ@mail.gmail.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: addy ke <addy.ke@rock-chips.com>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Alexandru Stan <amstan@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, open list:A
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: ulf.hansson@linaro.org, chris@printf.net, nicolas.ferre@atmel.com, arnd@arndb.de, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Return probe defer if requesting a dma channel without a dma controller
-probed.
+Ulf,
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
----
- drivers/mmc/host/atmel-mci.c | 46 ++++++++++++++++++++++++--------------------
- 1 file changed, 25 insertions(+), 21 deletions(-)
+On Fri, Nov 21, 2014 at 4:06 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> [...]
+>
+>> Sure
+>> If the first card is sd2.0 since startup, dw_mci_switch_voltage will not be called,
+>
+> That can't be right. mmc_power_up() should trigger
+> dw_mci_switch_voltage() to be invoked.
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 28546c3..d3c269e 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -2265,29 +2265,29 @@ static void atmci_cleanup_slot(struct atmel_mci_slot *slot,
- 	mmc_free_host(slot->mmc);
- }
- 
--static bool atmci_configure_dma(struct atmel_mci *host)
-+static int atmci_configure_dma(struct atmel_mci *host)
- {
--	if (host == NULL)
--		return false;
-+	int ret = 0;
- 
--	host->dma.chan = dma_request_slave_channel(&host->pdev->dev, "rxtx");
--	if (!host->dma.chan) {
--		dev_warn(&host->pdev->dev, "no DMA channel available\n");
--		return false;
--	} else {
--		dev_info(&host->pdev->dev,
--					"using %s for DMA transfers\n",
--					dma_chan_name(host->dma.chan));
--
--		host->dma_conf.src_addr = host->mapbase + ATMCI_RDR;
--		host->dma_conf.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
--		host->dma_conf.src_maxburst = 1;
--		host->dma_conf.dst_addr = host->mapbase + ATMCI_TDR;
--		host->dma_conf.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
--		host->dma_conf.dst_maxburst = 1;
--		host->dma_conf.device_fc = false;
--		return true;
-+	host->dma.chan = dma_request_slave_channel_reason(&host->pdev->dev, "rxtx");
-+	if (IS_ERR(host->dma.chan)) {
-+		ret = PTR_ERR(host->dma.chan);
-+		host->dma.chan = NULL;
-+		return ret;
- 	}
-+
-+	dev_info(&host->pdev->dev, "using %s for DMA transfers\n",
-+		 dma_chan_name(host->dma.chan));
-+
-+	host->dma_conf.src_addr = host->mapbase + ATMCI_RDR;
-+	host->dma_conf.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
-+	host->dma_conf.src_maxburst = 1;
-+	host->dma_conf.dst_addr = host->mapbase + ATMCI_TDR;
-+	host->dma_conf.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
-+	host->dma_conf.dst_maxburst = 1;
-+	host->dma_conf.device_fc = false;
-+
-+	return ret;
- }
- 
- /*
-@@ -2403,7 +2403,10 @@ static int atmci_probe(struct platform_device *pdev)
- 
- 	/* Get MCI capabilities and set operations according to it */
- 	atmci_get_cap(host);
--	if (atmci_configure_dma(host)) {
-+	ret = atmci_configure_dma(host);
-+	if (ret == -EPROBE_DEFER)
-+		goto err_dma_probe_defer;
-+	if (ret == 0) {
- 		host->prepare_data = &atmci_prepare_data_dma;
- 		host->submit_data = &atmci_submit_data_dma;
- 		host->stop_transfer = &atmci_stop_transfer_dma;
-@@ -2476,6 +2479,7 @@ err_init_slot:
- 	del_timer_sync(&host->timer);
- 	if (host->dma.chan)
- 		dma_release_channel(host->dma.chan);
-+err_dma_probe_defer:
- 	free_irq(irq, host);
- 	return ret;
- }
--- 
-2.0.3
+Hmmm, I think you're right.  Addy: can you double check if it's only
+the 2nd card for you?  I was thinking that if a regulator is currently
+3.3V and you request 2.7 - 3.3V the regulator framework will treat
+that as a noop.  ...but that definitely doesn't appear to be the case.
+When I boot up the first time even with no SD card plugged in, I see
+this at bootup:
 
+[    3.042234] vccio_sd: 1800 <--> 3300 mV at 3300 mV
+
+...showing that it started at 3.3V.  Then I see:
+
+$ grep "" /sys/class/regulator/regulator.16/{name,microvolts}
+/sys/class/regulator/regulator.16/name:vccio_sd
+/sys/class/regulator/regulator.16/microvolts:2700000
+
+...so it is certainly getting changed even with no card plugged in.
+
+
+BTW: I don't actually have one of these failing cards--all of mine
+work.  Addy, do you know the make and model of the card you have that
+fails?
+
+
+-Doug
