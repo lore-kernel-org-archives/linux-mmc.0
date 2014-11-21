@@ -1,87 +1,91 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: try pick the exact same voltage as vmmc for vqmmc
-Date: Fri, 21 Nov 2014 13:04:03 -0800
-Message-ID: <CAD=FV=UJT5zBkcj2a03Y_RWxad9+Pu83G_z79Xzzn74V=eRqww@mail.gmail.com>
-References: <1415109789-7046-1-git-send-email-addy.ke@rock-chips.com>
-	<1415678573-6093-1-git-send-email-addy.ke@rock-chips.com>
-	<CAPDyKFqUoBjhsbz8rkLa9PY_dpgMxnimz3k7OoA5WVhi7MacPQ@mail.gmail.com>
-	<CAD=FV=VQHZ6YmcoeAb1OEVLYRrYBnc_dM5Kjt1TZX_CQJC=EfA@mail.gmail.com>
-	<5464152E.7040209@rock-chips.com>
-	<CAPDyKFrzGfDew0eLLEcA+_iS_mo-O2bFU58fjirfXXA8AJ9UYQ@mail.gmail.com>
-	<CAD=FV=Ve1TY4+8quq1=18A1YOFvOWuFGrBmHLwMCwdWBSqzxOw@mail.gmail.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH] mmc: dw_mmc: fix card read threshold for PIO mode
+Date: Sat, 22 Nov 2014 07:31:56 +0800
+Message-ID: <20141121233155.GC11253@dragon>
+References: <1416551950-8277-1-git-send-email-shawn.guo@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f181.google.com ([209.85.220.181]:43241 "EHLO
-	mail-vc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752064AbaKUVEF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Nov 2014 16:04:05 -0500
-Received: by mail-vc0-f181.google.com with SMTP id le20so2770347vcb.12
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Nov 2014 13:04:03 -0800 (PST)
-In-Reply-To: <CAD=FV=Ve1TY4+8quq1=18A1YOFvOWuFGrBmHLwMCwdWBSqzxOw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <stable-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1416551950-8277-1-git-send-email-shawn.guo@linaro.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-kernel@lists.infradead.org, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: addy ke <addy.ke@rock-chips.com>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Alexandru Stan <amstan@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, open list:A
 
-Hi,
+Seungwon, Jaehoon,
 
-On Fri, Nov 21, 2014 at 9:42 AM, Doug Anderson <dianders@chromium.org> wrote:
-> Ulf,
->
-> On Fri, Nov 21, 2014 at 4:06 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> [...]
->>
->>> Sure
->>> If the first card is sd2.0 since startup, dw_mci_switch_voltage will not be called,
->>
->> That can't be right. mmc_power_up() should trigger
->> dw_mci_switch_voltage() to be invoked.
->
-> Hmmm, I think you're right.  Addy: can you double check if it's only
-> the 2nd card for you?  I was thinking that if a regulator is currently
-> 3.3V and you request 2.7 - 3.3V the regulator framework will treat
-> that as a noop.  ...but that definitely doesn't appear to be the case.
-> When I boot up the first time even with no SD card plugged in, I see
-> this at bootup:
->
-> [    3.042234] vccio_sd: 1800 <--> 3300 mV at 3300 mV
->
-> ...showing that it started at 3.3V.  Then I see:
->
-> $ grep "" /sys/class/regulator/regulator.16/{name,microvolts}
-> /sys/class/regulator/regulator.16/name:vccio_sd
-> /sys/class/regulator/regulator.16/microvolts:2700000
->
-> ...so it is certainly getting changed even with no card plugged in.
->
->
-> BTW: I don't actually have one of these failing cards--all of mine
-> work.  Addy, do you know the make and model of the card you have that
-> fails?
+On Fri, Nov 21, 2014 at 02:39:10PM +0800, Shawn Guo wrote:
+> Commit f1d2736c8156 ("mmc: dw_mmc: control card read threshold")
+> introduces a regression for use case where PIO mode is used, i.e.
+> CONFIG_MMC_DW_IDMAC is not disabled.  It stops kernel from booting
 
-Just as a bit of a followup, I did some more digging...
+s/not disabled/disabled
 
-1. It looks as if we now have a bit of "opposite" logic for vmmc vs.
-vqmmc.  In mmc_power_up() I see that it sets the initial voltage as:
+> like below.
 
-  host->ios.vdd = fls(ocr) - 1;
+For understanding the problem better, can you guys please to test the
+dw_mmc driver on Samsung platforms with CONFIG_MMC_DW_IDMAC disabled.
+I'm wondering this is a problem specific to my platform or a common one.
 
-That actually means that we're going to pick the maximum voltage for
-vmmc (of the supported voltages).  For vqmmc dw_mmc is using the
-regulator framework which (as described in my previous message) will
-pick the minimum.
+Shawn
 
-2. Several people I've talked to have expressed concerns that our
-minimum value is 2.7V.  Apparently that's really on the edge and makes
-EEs a little nervous.  The quick sample of cards sitting on my desk
-shows that they seem to claim 0x00ff8000, which doesn't include 2.7V.
-
-
-Both of the above make me feel like dw_mmc should try its best to pick
-a value for vqmmc that is closest to the value of vmmc (and >= 2.7V).
-That also happens to make us work exactly like hosts where vmmc and
-vqmmc are supplied by the same supply.
-
-
--Doug
+> 
+> dw_mmc 9408000.dwmmc: fifo-depth property not found, using value of FIFOTH register as default
+> dw_mmc 9408000.dwmmc: Using PIO mode.
+> dw_mmc 9408000.dwmmc: Version ID is 210a
+> dw_mmc 9408000.dwmmc: DW MMC controller at irq 72, 32 bit host data width, 32 deep fifo
+> dw_mmc 9408000.dwmmc: 1 slots initialized
+> ...
+> Waiting for root device /dev/mmcblk0p2...
+> mmc_host mmc0: Bus speed (slot 0) = 52000000Hz (slot req 50000000Hz, actual 26000000HZ div = 1)
+> mmc0: new high speed SDHC card at address b368
+> mmcblk0: mmc0:b368 AF UD 3.84 GiB
+> 
+> Rather than clearing read threshold bits, the best thing that function
+> dw_mci_ctrl_rd_thld() should do is leaving the bits untouched, in case
+> that card read threshold setup is not needed.
+> 
+> The patch fixes the regression by changing dw_mci_ctrl_rd_thld() a bit
+> to do nothing in case card read threshold bits setup is not needed.
+> 
+> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+> Fixes: f1d2736c8156 ("mmc: dw_mmc: control card read threshold")
+> Cc: <stable@vger.kernel.org> # 3.13+
+> ---
+>  drivers/mmc/host/dw_mmc.c | 7 ++-----
+>  1 file changed, 2 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 69f0cc68d5b2..52c04ba69970 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -628,13 +628,13 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
+>  
+>  	if (host->timing != MMC_TIMING_MMC_HS200 &&
+>  	    host->timing != MMC_TIMING_UHS_SDR104)
+> -		goto disable;
+> +		return;
+>  
+>  	blksz_depth = blksz / (1 << host->data_shift);
+>  	fifo_depth = host->fifo_depth;
+>  
+>  	if (blksz_depth > fifo_depth)
+> -		goto disable;
+> +		return;
+>  
+>  	/*
+>  	 * If (blksz_depth) >= (fifo_depth >> 1), should be 'thld_size <= blksz'
+> @@ -644,9 +644,6 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
+>  	thld_size = blksz;
+>  	mci_writel(host, CDTHRCTL, SDMMC_SET_RD_THLD(thld_size, 1));
+>  	return;
+> -
+> -disable:
+> -	mci_writel(host, CDTHRCTL, SDMMC_SET_RD_THLD(0, 0));
+>  }
+>  
+>  static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+> -- 
+> 1.9.1
+> 
