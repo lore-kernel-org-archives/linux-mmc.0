@@ -1,91 +1,61 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: fix card read threshold for PIO mode
-Date: Sat, 22 Nov 2014 07:31:56 +0800
-Message-ID: <20141121233155.GC11253@dragon>
-References: <1416551950-8277-1-git-send-email-shawn.guo@linaro.org>
+From: Angelo Dureghello <angelo@sysam.it>
+Subject: [PATCH] mmc: davinci_mmc: add warnings for edma failures
+Date: Sat, 22 Nov 2014 01:00:28 +0100
+Message-ID: <546FD21C.7010208@sysam.it>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1416551950-8277-1-git-send-email-shawn.guo@linaro.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-kernel@lists.infradead.org, stable@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sysam.it ([5.39.81.93]:36609 "EHLO mail.sysam.it"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752160AbaKVAKm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 21 Nov 2014 19:10:42 -0500
+Received: from localhost (localhost.localdomain [127.0.0.1])
+	by mail.sysam.it (Postfix) with ESMTP id F3E2141589
+	for <linux-mmc@vger.kernel.org>; Sat, 22 Nov 2014 01:01:46 +0100 (CET)
+Received: from mail.sysam.it ([127.0.0.1])
+	by localhost (sysam.it [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id 92M6lEN-eanj for <linux-mmc@vger.kernel.org>;
+	Sat, 22 Nov 2014 01:01:05 +0100 (CET)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-Seungwon, Jaehoon,
+Add warnings in case the edma engine driver fails to allocate slots or 
+channels requested from the davinci_mmc driver.
 
-On Fri, Nov 21, 2014 at 02:39:10PM +0800, Shawn Guo wrote:
-> Commit f1d2736c8156 ("mmc: dw_mmc: control card read threshold")
-> introduces a regression for use case where PIO mode is used, i.e.
-> CONFIG_MMC_DW_IDMAC is not disabled.  It stops kernel from booting
+Some ti-davinci based boards (i.e. board-da850-evm.c) are asking for
+some reserved chans / slots at board init stage. Later, the mmc driver
+results in a silent locked state.
 
-s/not disabled/disabled
+Signed-off-by: Angelo Dureghello <angelo <at> sysam.it>
 
-> like below.
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index 5d4c5e0..65d4990 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -439,8 +439,8 @@ static int mmc_davinci_send_dma_request(struct 
+mmc_davinci_host *host,
+                                 DMA_MEM_TO_DEV,
+                                 DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
+                 if (!desc) {
+-                       dev_dbg(mmc_dev(host->mmc),
+-                               "failed to allocate DMA TX descriptor");
++                       WARN(1, KERN_WARNING
++                               "failed to allocate DMA TX descriptor\n");
+                         ret = -1;
+                         goto out;
+                 }
+@@ -461,8 +461,8 @@ static int mmc_davinci_send_dma_request(struct 
+mmc_davinci_host *host,
+                                 DMA_DEV_TO_MEM,
+                                 DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
+                 if (!desc) {
+-                       dev_dbg(mmc_dev(host->mmc),
+-                               "failed to allocate DMA RX descriptor");
++                       WARN(1, KERN_WARNING
++                               "failed to allocate DMA RX descriptor\n");
+                         ret = -1;
+                         goto out;
+                 }
 
-For understanding the problem better, can you guys please to test the
-dw_mmc driver on Samsung platforms with CONFIG_MMC_DW_IDMAC disabled.
-I'm wondering this is a problem specific to my platform or a common one.
-
-Shawn
-
-> 
-> dw_mmc 9408000.dwmmc: fifo-depth property not found, using value of FIFOTH register as default
-> dw_mmc 9408000.dwmmc: Using PIO mode.
-> dw_mmc 9408000.dwmmc: Version ID is 210a
-> dw_mmc 9408000.dwmmc: DW MMC controller at irq 72, 32 bit host data width, 32 deep fifo
-> dw_mmc 9408000.dwmmc: 1 slots initialized
-> ...
-> Waiting for root device /dev/mmcblk0p2...
-> mmc_host mmc0: Bus speed (slot 0) = 52000000Hz (slot req 50000000Hz, actual 26000000HZ div = 1)
-> mmc0: new high speed SDHC card at address b368
-> mmcblk0: mmc0:b368 AF UD 3.84 GiB
-> 
-> Rather than clearing read threshold bits, the best thing that function
-> dw_mci_ctrl_rd_thld() should do is leaving the bits untouched, in case
-> that card read threshold setup is not needed.
-> 
-> The patch fixes the regression by changing dw_mci_ctrl_rd_thld() a bit
-> to do nothing in case card read threshold bits setup is not needed.
-> 
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
-> Fixes: f1d2736c8156 ("mmc: dw_mmc: control card read threshold")
-> Cc: <stable@vger.kernel.org> # 3.13+
-> ---
->  drivers/mmc/host/dw_mmc.c | 7 ++-----
->  1 file changed, 2 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 69f0cc68d5b2..52c04ba69970 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -628,13 +628,13 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
->  
->  	if (host->timing != MMC_TIMING_MMC_HS200 &&
->  	    host->timing != MMC_TIMING_UHS_SDR104)
-> -		goto disable;
-> +		return;
->  
->  	blksz_depth = blksz / (1 << host->data_shift);
->  	fifo_depth = host->fifo_depth;
->  
->  	if (blksz_depth > fifo_depth)
-> -		goto disable;
-> +		return;
->  
->  	/*
->  	 * If (blksz_depth) >= (fifo_depth >> 1), should be 'thld_size <= blksz'
-> @@ -644,9 +644,6 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
->  	thld_size = blksz;
->  	mci_writel(host, CDTHRCTL, SDMMC_SET_RD_THLD(thld_size, 1));
->  	return;
-> -
-> -disable:
-> -	mci_writel(host, CDTHRCTL, SDMMC_SET_RD_THLD(0, 0));
->  }
->  
->  static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
-> -- 
-> 1.9.1
-> 
