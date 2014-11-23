@@ -1,114 +1,107 @@
-From: Alim Akhtar <alim.akhtar@gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: fix card read threshold for PIO mode
-Date: Sat, 22 Nov 2014 18:56:46 +0530
-Message-ID: <CAGOxZ51DPL+6HTSG6yeCqqRxtq7XBuWki7gdB-ieamVUKixCDQ@mail.gmail.com>
-References: <1416551950-8277-1-git-send-email-shawn.guo@linaro.org> <20141121233155.GC11253@dragon>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [PATCH 1/1] Production State Awareness support in host side
+Date: Sun, 23 Nov 2014 09:01:13 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333ECADFBA@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <1416228726-8514-1-git-send-email-avi.shchislowski@sandisk.com>
+	<CAPDyKFrCpoSsgECvC=gnMp6WDYAV+2os-uhzp03K-=E+Yv10AA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333EC9D394@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CAPDyKFrzmW5ADf86Q2t18X8cUUovGF-fuhDpQBUSCiPf9g4OUA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333EC9F16C@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CAPDyKFp8PCBMOtXr-SkUDSw6CZ4c-4AnY-btex5WpU+B9u4Ppw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20141121233155.GC11253@dragon>
-Sender: stable-owner@vger.kernel.org
-To: Shawn Guo <shawn.guo@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, stable@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1on0073.outbound.protection.outlook.com ([157.56.110.73]:3328
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751364AbaKWJBT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 23 Nov 2014 04:01:19 -0500
+In-Reply-To: <CAPDyKFp8PCBMOtXr-SkUDSw6CZ4c-4AnY-btex5WpU+B9u4Ppw@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
 
-Hi Shawn,
-
-On Sat, Nov 22, 2014 at 5:01 AM, Shawn Guo <shawn.guo@linaro.org> wrote:
-> Seungwon, Jaehoon,
->
-> On Fri, Nov 21, 2014 at 02:39:10PM +0800, Shawn Guo wrote:
->> Commit f1d2736c8156 ("mmc: dw_mmc: control card read threshold")
->> introduces a regression for use case where PIO mode is used, i.e.
->> CONFIG_MMC_DW_IDMAC is not disabled.  It stops kernel from booting
->
-> s/not disabled/disabled
->
->> like below.
->
-> For understanding the problem better, can you guys please to test the
-> dw_mmc driver on Samsung platforms with CONFIG_MMC_DW_IDMAC disabled.
-> I'm wondering this is a problem specific to my platform or a common one.
->
-I tested PIO mode on exynos5800-peach-pi board with Ulf's -next
-branch, and it works fine.
-To confirm PIO mode works, I ran iozone and it gave  low performance
-number (as expected) then IDMA mode.
-
-One thing to note, is your controller version is 210a, so not sure if
-something more in missing from driver.
-Also from log its looks like you card clock is 26Mhz, did you tried
-running at 52Mhz?
-
-> Shawn
->
->>
->> dw_mmc 9408000.dwmmc: fifo-depth property not found, using value of FIFOTH register as default
->> dw_mmc 9408000.dwmmc: Using PIO mode.
->> dw_mmc 9408000.dwmmc: Version ID is 210a
->> dw_mmc 9408000.dwmmc: DW MMC controller at irq 72, 32 bit host data width, 32 deep fifo
->> dw_mmc 9408000.dwmmc: 1 slots initialized
->> ...
->> Waiting for root device /dev/mmcblk0p2...
->> mmc_host mmc0: Bus speed (slot 0) = 52000000Hz (slot req 50000000Hz, actual 26000000HZ div = 1)
->> mmc0: new high speed SDHC card at address b368
->> mmcblk0: mmc0:b368 AF UD 3.84 GiB
->>
->> Rather than clearing read threshold bits, the best thing that function
->> dw_mci_ctrl_rd_thld() should do is leaving the bits untouched, in case
->> that card read threshold setup is not needed.
->>
->> The patch fixes the regression by changing dw_mci_ctrl_rd_thld() a bit
->> to do nothing in case card read threshold bits setup is not needed.
->>
->> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
->> Fixes: f1d2736c8156 ("mmc: dw_mmc: control card read threshold")
->> Cc: <stable@vger.kernel.org> # 3.13+
->> ---
->>  drivers/mmc/host/dw_mmc.c | 7 ++-----
->>  1 file changed, 2 insertions(+), 5 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 69f0cc68d5b2..52c04ba69970 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -628,13 +628,13 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
->>
->>       if (host->timing != MMC_TIMING_MMC_HS200 &&
->>           host->timing != MMC_TIMING_UHS_SDR104)
->> -             goto disable;
->> +             return;
->>
->>       blksz_depth = blksz / (1 << host->data_shift);
->>       fifo_depth = host->fifo_depth;
->>
->>       if (blksz_depth > fifo_depth)
->> -             goto disable;
->> +             return;
->>
->>       /*
->>        * If (blksz_depth) >= (fifo_depth >> 1), should be 'thld_size <= blksz'
->> @@ -644,9 +644,6 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
->>       thld_size = blksz;
->>       mci_writel(host, CDTHRCTL, SDMMC_SET_RD_THLD(thld_size, 1));
->>       return;
->> -
->> -disable:
->> -     mci_writel(host, CDTHRCTL, SDMMC_SET_RD_THLD(0, 0));
->>  }
->>
->>  static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
->> --
->> 1.9.1
->>
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
-
-
--- 
-Regards,
-Alim
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
+aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBGcmlkYXksIE5vdmVtYmVyIDIx
+LCAyMDE0IDM6MTYgUE0NCj4gVG86IEFsZXggTGVtYmVyZw0KPiBDYzogbGludXgtbW1jOyBDaHJp
+cyBCYWxsOyBBdmkgU2hjaGlzbG93c2tpDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMS8xXSBQcm9k
+dWN0aW9uIFN0YXRlIEF3YXJlbmVzcyBzdXBwb3J0IGluIGhvc3Qgc2lkZQ0KPiANCj4gT24gMTkg
+Tm92ZW1iZXIgMjAxNCAxMTo1OCwgQWxleCBMZW1iZXJnIDxBbGV4LkxlbWJlcmdAc2FuZGlzay5j
+b20+DQo+IHdyb3RlOg0KPiA+DQo+ID4NCj4gPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
+Cj4gPj4gRnJvbTogVWxmIEhhbnNzb24gW21haWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0K
+PiA+PiBTZW50OiBXZWRuZXNkYXksIE5vdmVtYmVyIDE5LCAyMDE0IDExOjU5IEFNDQo+ID4+IFRv
+OiBBbGV4IExlbWJlcmcNCj4gPj4gQ2M6IGxpbnV4LW1tYzsgQ2hyaXMgQmFsbDsgQXZpIFNoY2hp
+c2xvd3NraQ0KPiA+PiBTdWJqZWN0OiBSZTogW1BBVENIIDEvMV0gUHJvZHVjdGlvbiBTdGF0ZSBB
+d2FyZW5lc3Mgc3VwcG9ydCBpbiBob3N0DQo+ID4+IHNpZGUNCj4gPj4NCj4gPj4gT24gMTggTm92
+ZW1iZXIgMjAxNCAxOTo0MSwgQWxleCBMZW1iZXJnIDxBbGV4LkxlbWJlcmdAc2FuZGlzay5jb20+
+DQo+ID4+IHdyb3RlOg0KPiA+PiA+IEhpIFVsZiwNCj4gPj4gPg0KPiA+PiA+PiAtLS0tLU9yaWdp
+bmFsIE1lc3NhZ2UtLS0tLQ0KPiA+PiA+PiBGcm9tOiBVbGYgSGFuc3NvbiBbbWFpbHRvOnVsZi5o
+YW5zc29uQGxpbmFyby5vcmddDQo+ID4+ID4+IFNlbnQ6IE1vbmRheSwgTm92ZW1iZXIgMTcsIDIw
+MTQgMzozNCBQTQ0KPiA+PiA+PiBUbzogQXZpIFNoY2hpc2xvd3NraQ0KPiA+PiA+PiBDYzogbGlu
+dXgtbW1jOyBDaHJpcyBCYWxsOyBBbGV4IExlbWJlcmcNCj4gPj4gPj4gU3ViamVjdDogUmU6IFtQ
+QVRDSCAxLzFdIFByb2R1Y3Rpb24gU3RhdGUgQXdhcmVuZXNzIHN1cHBvcnQgaW4NCj4gPj4gPj4g
+aG9zdCBzaWRlDQo+ID4+ID4+DQo+ID4+ID4+IE9uIDE3IE5vdmVtYmVyIDIwMTQgMTM6NTIsIEF2
+aSBTaGNoaXNsb3dza2kNCj4gPj4gPj4gPGF2aS5zaGNoaXNsb3dza2lAc2FuZGlzay5jb20+DQo+
+ID4+ID4+IHdyb3RlOg0KPiA+PiA+PiA+IEFkZGluZyBzdXBwb3J0IGZvciBQU0EgKFByb2R1Y3Rp
+b24gU3RhdGUgQXdhcmVuZXNzKSBmZWF0dXJlIGZvcg0KPiA+PiA+PiA+IGFsbCBlTU1DIGRldmlj
+ZXMgd2l0aCByZXZpc2lvbiA+PTUuMCBJbiB0aGlzIHBhdGNoIHRoZSBlTU1DDQo+ID4+ID4+ID4g
+ZHJpdmVyIHdpbGwgY2hlY2sgaWYgZGV2aWNlIHdhcyBjb21wbGV0ZWQgaXRzIFByb2R1Y3Rpb24g
+U3RhdGUNCj4gPj4gPj4gPiBtb2RlLCBhbmQgd2lsbCBzd2l0Y2ggaXQgdG8gTm9ybWFsIChmaWVs
+ZCkgbW9kZS4NCj4gPj4gPj4gPiBTd2l0Y2hpbmcgdG8gbm9ybWFsIG1vZGUgc2lnbmFsIHRoZSBk
+ZXZpY2UgdG8gY29tcGxldGUgaXRzIHdvcmsNCj4gPj4gPj4gPiBpbiBwcm9kdWN0aW9uIG1vZGUg
+YW5kIHN0YXJ0IHdvcmtpbmcgaW4gcmVndWxhciBwZXJmb3JtYW5jZSBtb2RlLg0KPiA+PiA+Pg0K
+PiA+PiA+PiBQbGVhc2UgYWRkIHNvbWUgZGV0YWlsIHRvIHdoYXQgdGhpcyBwYXRjaCBkb2VzLiBB
+ZGRpdGlvbmFsbHkgd2h5IGl0J3MNCj4gbmVlZGVkLg0KPiA+PiA+DQo+ID4+ID4gSW4gdGhpcyBw
+YXRjaCBkcml2ZXIgc2hvdWxkIHJlY29nbml6ZSBpZiBlTU1DIGRldmljZSAoUmV2ID49NS4wKQ0K
+PiA+PiA+IHdhcyBub3Qgc3dpdGNoZWQgdG8gTm9ybWFsICgweDAwKSBQU0EgbW9kZSBieSBzdG9y
+YWdlIHZlbmRvciBvcg0KPiA+PiA+IFByb2dyYW1tZXINCj4gPj4gaG91c2UuDQo+ID4+ID4gRm9y
+IHRoaXMsIHdlIGFyZSBjaGVja2luZyBpZiBkZXZpY2Ugd2FzIGxlYXZlZCBpbg0KPiA+PiA+IFBS
+RV9TT0xERVJJTkdfUE9TVF9XUklURVMgKDB4MDIpIHN0YXRlIC0gcmVwcmVzZW50cyBhIHN0YXRl
+IGluDQo+ID4+ID4gd2hpY2ggdGhlIGRldmljZSBpcyBpbiBwcm9kdWN0aW9uIGFuZCB0aGUgaG9z
+dCAodXN1YWxseSBwcm9ncmFtbWVyKQ0KPiA+PiA+IGNvbXBsZXRlZCB0bw0KPiA+PiBsb2FkIHRo
+ZSBjb250ZW50IHRvIHRoZSBkZXZpY2UuDQo+ID4+ID4gVGhlIGhvc3QgKHVzdWFsbHkgcHJvZ3Jh
+bW1lcikgc2V0cyB0aGUgZGV2aWNlIHRvIHRoaXMgc3RhdGUgYWZ0ZXINCj4gPj4gPiBjb250ZW50
+IHdhcyBsb2FkZWQgYW5kIGp1c3QgYmVmb3JlIHNvbGRlcmluZy4NCj4gPj4gPiBBZnRlciBzb2xk
+ZXJpbmcgdGhlIGRldmljZSB0byByZWFsIGhvc3QgKG5vdCBwcm9ncmFtbWVyKSwgdGhlDQo+ID4+
+ID4gZGV2aWNlIHNob3VsZCBiZSBzd2l0Y2hlZCB0byBOb3JtYWwgKDB4MDApIG1vZGUuDQo+ID4+
+ID4gVGhlIE5vcm1hbCAoMHgwMCkgbW9kZSBvZiBQU0EgcmVnaXN0ZXIgcmVwcmVzZW50cyBhIHN0
+YXRlIGluIHdoaWNoDQo+ID4+ID4gdGhlIGRldmljZSBpcyBydW5uaW5nIGluIHRoZSBmaWVsZCBh
+bmQgdXNlcyDigJxyZWd1bGFy4oCdIG9wZXJhdGlvbnMuDQo+ID4+ID4gTGVhdmluZyBkZXZpY2Ug
+aW4gUFJFX1NPTERFUklOR19QT1NUX1dSSVRFUyAoMHgwMikgbWlnaHQgbm90IGFsbG93DQo+ID4+
+ID4gdG8gaG9zdCB3cml0ZSBjb250ZW50IHRvIHRoZSBkZXZpY2UuDQo+ID4+ID4NCj4gPj4gPiBN
+b3JlIGRldGFpbHMgYWJvdXQgUFNBIGZlYXR1cmUgY2FuIGJlIGZvdW5kIGluIGVNTUMgNS4wIHNw
+ZWMgKEplZGVjOg0KPiA+PiA+ICBKRVNEODQtQjUwLnBkZikNCj4gPj4gPiBodHRwOi8vd3d3Lmpl
+ZGVjLm9yZy9zdGFuZGFyZHMtZG9jdW1lbnRzL3RlY2hub2xvZ3ktZm9jdXMtYXJlYXMvZmxhDQo+
+ID4+ID4gc2gtDQo+ID4+ID4gbWVtb3J5LXNzZHMtdWZzLWVtbWMvZS1tbWMNCj4gPj4gPg0KPiA+
+PiA+IFBsZWFzZSBsZXQgdXMga25vdyBpZiBtb3JlIGRldGFpbHMgcmVxdWlyZWQuDQo+ID4+DQo+
+ID4+IE9rYXksIHRoYXQgd2FzIGZhciBiZXR0ZXIuDQo+ID4+DQo+ID4+IEkgYW0gbm90IHNvIHN1
+cmUgd2Ugc2hvdWxkIGZpbmFsaXplIHRoZSBwcm9kdWN0aW9uIHBoYXNlIHdoaWxlDQo+ID4+IGlu
+aXRpYWxpemluZyB0aGUgZU1NQyBjYXJkIGxpa2UgdGhpcy4NCj4gPj4NCj4gPj4gQ2VydGFpbmx5
+IHdlIHNob3VsZCBjaGVjayB0aGUgUFNBIHN0YXRlLCBidXQgSSB0aGluayB3ZSBzaG91bGQgcmV0
+dXJuDQo+ID4+IGFuIGVycm9yIGlmIHdlIHRoaW5rIHRoZSBkZXZpY2UgaGFzbuKAmXQgY29tcGxl
+dGVkIHByb2R1Y3Rpb24uIEl0DQo+ID4+IHNob3VsZCBiZSB0aGUgcmVzcG9uc2liaWxpdHkgZm9y
+IHRoZSAicHJvZ3JhbW1pbmcgdG9vbHMiIHRvIGZpbmFsaXplIHRoZQ0KPiBwcm9kdWN0aW9uLCBy
+aWdodCE/DQo+ID4NCj4gPiBBY2NvcmRpbmcgdG8gZU1NQyBzcGVjLCB0aGUgc3dpdGNoIHRvIE5P
+Uk1BTCBzaG91bGQgYmUgZG9uZSBhZnRlciBkZXZpY2UNCj4gc29sZGVyaW5nIHRvIGZpbmFsIGhv
+c3QgKG5vdCBwcm9ncmFtbWVyKS4NCj4gPiBQbGVhc2UgcmVmZXIgdG8gIkZpZ3VyZSAzMiDigJQg
+UmVjb21tZW5kZWQgU29sZGVyaW5nIHByb2NlZHVyZSIgaW4NCj4gZU1NQzUuMCBzcGVjaWZpY2F0
+aW9uIGRvY3VtZW50Lg0KPiA+IEFsc28sIHNpbmNlIHdlIGFyZSBkZWFsaW5nIHdpdGggb25seSAi
+ZmllbGQiIGhvc3QgaGVyZSwgd2UgYXJlIG5vdA0KPiB0b3VjaGluZy9zd2l0Y2hpbmcgYW55IG90
+aGVyIG1vZGVzIG9mIFBTQSwgYnV0IG9ubHkgTm9ybWFsIChmaWVsZCkuDQo+ID4gVGhpcyBjb2Rl
+IHNob3VsZCBydW4gb25seSBvbmNlIC0gaW4gdGhlIGJlZ2lubmluZyBvZiBkZXZpY2UgbGlmZSBj
+eWNsZS4NCj4gDQo+IEkgZ2V0IHlvdXIgcG9pbnQsIGJ1dCBJIGFtIG5vdCBzbyBzdXJlLg0KPiAN
+Cj4gVG8gbWUsIEkgd291bGRuJ3QgdHJ1c3QgdGhhdCB0aGUgcGxhdGZvcm0gYmluYXJpZXMgaGFz
+IGJlZW4gc3VjY2Vzc2Z1bGx5DQo+IHByb2dyYW1tZWQgdG8gdGhlIGRldmljZSwgdW5sZXNzIHRo
+ZSBwcm9ncmFtbWVyIHRvb2wgdGFrZXMgY2FyZSBvZiBzd2l0Y2hpbmcNCj4gdGhlIGRldmljZSB0
+byAibm9ybWFsIi4NCj4gDQoNClRoYW5rcyBVbGYhDQpBbHNvLCBwbGVhc2Ugbm90ZSAtIFBTQSBQ
+UkVfU09MREVSSU5HX1BPU1RfV1JJVEVTIG1vZGUgaW50ZW50IHRvIHNhdmUgZGV2aWNlDQpwcmUt
+bG9hZGVkIGNvbnRlbnQgZHVyaW5nIHRoZSBzb2xkZXJpbmcgcHJvY2Vzcy4NCkZsYXNoIGRhdGEg
+Y2FuIGJlIGNvcnJ1cHRlZCBkdWUgdG8gc29sZGVyaW5nIHByb2NlZHVyZSBoaWdoIHRlbXBlcmF0
+dXJlLiBTbyBzd2l0Y2hpbmcNCnRvIE5vcm1hbCBjYW5ub3QgYmUgZG9uZSBieSBleHRlcm5hbCBw
+cm9ncmFtbWVyLg0KQlRXLCBJIGhhdmUgcmVzdWJtaXR0ZWQgdGhlIHBhdGNoIGFnYWluLCBub3cg
+d2l0aCBjb3JyZWN0IHN1YmplY3QgcHJlZml4LCBhbmQgc29tZQ0KYWRkaXRpb25hbCBmaXhlcy4N
+Cg0KPiBXaGF0IGRvZXMgb3RoZXIgcGVvcGxlIHRoaW5rPw0KPiANCj4gS2luZCByZWdhcmRzDQo+
+IFVmZmUNCg==
