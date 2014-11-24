@@ -1,117 +1,64 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: wmt-sdmmc: fix unmatched release_mem_region
-Date: Mon, 24 Nov 2014 09:34:54 +0100
-Message-ID: <CAPDyKFqNHQUStQiRJ3Bn7JnbMn-xJ=TUaWXijJcuO9z97xcmDw@mail.gmail.com>
-References: <1415567571-6144-1-git-send-email-alchark@gmail.com>
-	<CAOMZO5C+O4h=f=vtLTdBZktnfVWzfeLjOQG-oecxh_c9u-QMqA@mail.gmail.com>
-	<545FE821.5060107@coldplug.net>
-	<CABjd4YxyUJi6RaGWicFeoJ7C27qhUFsAbq-nJTreACrt-voeYA@mail.gmail.com>
-	<546DFE83.8060900@coldplug.net>
+Subject: Re: [PATCH 1/3] mmc: mxs-mmc: No need to do NULL check on 'iores'
+Date: Mon, 24 Nov 2014 09:36:09 +0100
+Message-ID: <CAPDyKFpXe9duttSAq3H3=e_gZOn+2q84ouMP+pF0zCpNw3Sdwg@mail.gmail.com>
+References: <1416403019-6353-1-git-send-email-fabio.estevam@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <546DFE83.8060900@coldplug.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: lautriv <lautriv@coldplug.net>
-Cc: Alexey Charkov <alchark@gmail.com>, Fabio Estevam <festevam@gmail.com>, Tony Prisk <linux@prisktech.co.nz>, Chris Ball <chris@printf.net>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f172.google.com ([209.85.216.172]:40731 "EHLO
+	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753212AbaKXIgK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Nov 2014 03:36:10 -0500
+Received: by mail-qc0-f172.google.com with SMTP id m20so6569645qcx.3
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Nov 2014 00:36:09 -0800 (PST)
+In-Reply-To: <1416403019-6353-1-git-send-email-fabio.estevam@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Fabio Estevam <fabio.estevam@freescale.com>
+Cc: Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 20 November 2014 at 15:45, lautriv <lautriv@coldplug.net> wrote:
-> From b0509e27e33326e6dccd67d8ebe67e2bdb0cfdde Mon Sep 17 00:00:00 2001
-> From: Helmut Stengele <lautriv@coldplug.net>
-> Date: Thu, 20 Nov 2014 15:27:40 +0100
-> Subject: [PATCH] mmc: wmt-sdmmc: fix unmatched release_mem_region
+On 19 November 2014 at 14:16, Fabio Estevam <fabio.estevam@freescale.com> wrote:
+> devm_ioremap_resource() already checks if 'iores' is NULL or not, so we can
+> skip this manual check.
 >
-> Current code calls release_mem_region upon module unload
-> without requesting the region first. This patch fixes it
-> by moving to a devres-based ioremap implementation, which
-> handles requesting and releasing memory region internally.
+> While at it, move platform_get_resource() closer to devm_ioremap_resource() for
+> better readability.
 >
-> This also makes the error/unload paths a bit simpler.
->
-> Signed-off-by: Helmut Stengele <lautriv@coldplug.net>
-> ---
->
-> This is a corrected patch based on the one Alexey sent for me.
-> I sent it already but since i'm not used to send something upstream
-> it was an attached file and obviously rejected.
-> Patch is tested on bare-metal ( wm8850 ) and works like suspected.
->
->  drivers/mmc/host/wmt-sdmmc.c | 14 +++++---------
->  1 file changed, 5 insertions(+), 9 deletions(-)
->
-> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-> index 54181b4..bcaa0cc 100644
-> --- a/drivers/mmc/host/wmt-sdmmc.c
-> +++ b/drivers/mmc/host/wmt-sdmmc.c
-> @@ -759,6 +759,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
->      const struct wmt_mci_caps *wmt_caps;
->      int ret;
->      int regular_irq, dma_irq;
-> +    struct resource *res;
->
->      if (!of_id || !of_id->data) {
->          dev_err(&pdev->dev, "Controller capabilities data missing\n");
-> @@ -813,10 +814,11 @@ static int wmt_mci_probe(struct platform_device *pdev)
->      if (of_get_property(np, "cd-inverted", NULL))
->          priv->cd_inverted = 1;
->
-> -    priv->sdmmc_base = of_iomap(np, 0);
-> +    res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +    priv->sdmmc_base = devm_ioremap_resource(&pdev->dev, res);
+> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
 
-You should check the return value from devm_ioremap_resource() with IS_ERR().
-
->      if (!priv->sdmmc_base) {
->          dev_err(&pdev->dev, "Failed to map IO space\n");
-
-This print can be removed, devm_ioremap_resource() handles that.
-
-> -        ret = -ENOMEM;
-> +        ret = PTR_ERR(priv->sdmmc_base);
->          goto fail2;
->      }
->
-> @@ -826,7 +828,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
->      ret = request_irq(regular_irq, wmt_mci_regular_isr, 0, "sdmmc", priv);
->      if (ret) {
->          dev_err(&pdev->dev, "Register regular IRQ fail\n");
-> -        goto fail3;
-> +        goto fail2;
->      }
->
->      ret = request_irq(dma_irq, wmt_mci_dma_isr, 0, "sdmmc", priv);
-> @@ -869,8 +871,6 @@ fail5:
->      free_irq(dma_irq, priv);
->  fail4:
->      free_irq(regular_irq, priv);
-> -fail3:
-> -    iounmap(priv->sdmmc_base);
->  fail2:
->      mmc_free_host(mmc);
->  fail1:
-> @@ -881,7 +881,6 @@ static int wmt_mci_remove(struct platform_device *pdev)
->  {
->      struct mmc_host *mmc;
->      struct wmt_mci_priv *priv;
-> -    struct resource *res;
->      u32 reg_tmp;
->
->      mmc = platform_get_drvdata(pdev);
-> @@ -909,9 +908,6 @@ static int wmt_mci_remove(struct platform_device *pdev)
->      clk_disable_unprepare(priv->clk_sdmmc);
->      clk_put(priv->clk_sdmmc);
->
-> -    res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> -    release_mem_region(res->start, resource_size(res));
-> -
->      mmc_free_host(mmc);
->
->      dev_info(&pdev->dev, "WMT MCI device removed\n");
-> --
-> 2.1.3
->
->
+Thanks! Applied for next.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/mxs-mmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index c049ac7..0d30730 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -581,9 +581,8 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>         struct regulator *reg_vmmc;
+>         struct mxs_ssp *ssp;
+>
+> -       iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>         irq_err = platform_get_irq(pdev, 0);
+> -       if (!iores || irq_err < 0)
+> +       if (irq_err < 0)
+>                 return -EINVAL;
+>
+>         mmc = mmc_alloc_host(sizeof(struct mxs_mmc_host), &pdev->dev);
+> @@ -593,6 +592,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>         host = mmc_priv(mmc);
+>         ssp = &host->ssp;
+>         ssp->dev = &pdev->dev;
+> +       iores = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>         ssp->base = devm_ioremap_resource(&pdev->dev, iores);
+>         if (IS_ERR(ssp->base)) {
+>                 ret = PTR_ERR(ssp->base);
+> --
+> 1.9.1
+>
