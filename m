@@ -1,37 +1,117 @@
-From: Shawn Guo <shawn.guo@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: fix card read threshold for PIO mode
-Date: Mon, 24 Nov 2014 08:25:09 +0800
-Message-ID: <20141124002508.GI11253@dragon>
-References: <1416551950-8277-1-git-send-email-shawn.guo@linaro.org>
- <20141121233155.GC11253@dragon>
- <CAGOxZ51DPL+6HTSG6yeCqqRxtq7XBuWki7gdB-ieamVUKixCDQ@mail.gmail.com>
- <20141123153012.GH11253@dragon>
- <CAGOxZ50+k3Z5gHrRasveM=7V+GS+1dRmcz0u5WSyo=XBE9iT3g@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: wmt-sdmmc: fix unmatched release_mem_region
+Date: Mon, 24 Nov 2014 09:34:54 +0100
+Message-ID: <CAPDyKFqNHQUStQiRJ3Bn7JnbMn-xJ=TUaWXijJcuO9z97xcmDw@mail.gmail.com>
+References: <1415567571-6144-1-git-send-email-alchark@gmail.com>
+	<CAOMZO5C+O4h=f=vtLTdBZktnfVWzfeLjOQG-oecxh_c9u-QMqA@mail.gmail.com>
+	<545FE821.5060107@coldplug.net>
+	<CABjd4YxyUJi6RaGWicFeoJ7C27qhUFsAbq-nJTreACrt-voeYA@mail.gmail.com>
+	<546DFE83.8060900@coldplug.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAGOxZ50+k3Z5gHrRasveM=7V+GS+1dRmcz0u5WSyo=XBE9iT3g@mail.gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, stable@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <546DFE83.8060900@coldplug.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: lautriv <lautriv@coldplug.net>
+Cc: Alexey Charkov <alchark@gmail.com>, Fabio Estevam <festevam@gmail.com>, Tony Prisk <linux@prisktech.co.nz>, Chris Ball <chris@printf.net>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Nov 24, 2014 at 03:36:13AM +0530, Alim Akhtar wrote:
-> Hi Shawn,
-> 
-> On Sun, Nov 23, 2014 at 9:00 PM, Shawn Guo <shawn.guo@linaro.org> wrote:
-> > One thing I need to check with hardware vendor is whether register
-> > CDTHRCTL is available on my dwmmc controller.  From my testing, even
-> > reading this register every time dw_mci_submit_data() is called causes
-> > problem for me.
-> >
-> yes, your guess is right, did you tested with ulf's -next branch?
-> Recently patch [1] is merged, that most likely to solve your platform
-> issue. Have a try.
-> 
-> [1] http://www.spinics.net/lists/stable/msg69884.html
+On 20 November 2014 at 15:45, lautriv <lautriv@coldplug.net> wrote:
+> From b0509e27e33326e6dccd67d8ebe67e2bdb0cfdde Mon Sep 17 00:00:00 2001
+> From: Helmut Stengele <lautriv@coldplug.net>
+> Date: Thu, 20 Nov 2014 15:27:40 +0100
+> Subject: [PATCH] mmc: wmt-sdmmc: fix unmatched release_mem_region
+>
+> Current code calls release_mem_region upon module unload
+> without requesting the region first. This patch fixes it
+> by moving to a devres-based ioremap implementation, which
+> handles requesting and releasing memory region internally.
+>
+> This also makes the error/unload paths a bit simpler.
+>
+> Signed-off-by: Helmut Stengele <lautriv@coldplug.net>
+> ---
+>
+> This is a corrected patch based on the one Alexey sent for me.
+> I sent it already but since i'm not used to send something upstream
+> it was an attached file and obviously rejected.
+> Patch is tested on bare-metal ( wm8850 ) and works like suspected.
+>
+>  drivers/mmc/host/wmt-sdmmc.c | 14 +++++---------
+>  1 file changed, 5 insertions(+), 9 deletions(-)
+>
+> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+> index 54181b4..bcaa0cc 100644
+> --- a/drivers/mmc/host/wmt-sdmmc.c
+> +++ b/drivers/mmc/host/wmt-sdmmc.c
+> @@ -759,6 +759,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
+>      const struct wmt_mci_caps *wmt_caps;
+>      int ret;
+>      int regular_irq, dma_irq;
+> +    struct resource *res;
+>
+>      if (!of_id || !of_id->data) {
+>          dev_err(&pdev->dev, "Controller capabilities data missing\n");
+> @@ -813,10 +814,11 @@ static int wmt_mci_probe(struct platform_device *pdev)
+>      if (of_get_property(np, "cd-inverted", NULL))
+>          priv->cd_inverted = 1;
+>
+> -    priv->sdmmc_base = of_iomap(np, 0);
+> +    res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> +    priv->sdmmc_base = devm_ioremap_resource(&pdev->dev, res);
 
-Yeah, the patch fixes my problem.  Thanks a lot for the pointer, Alim.
+You should check the return value from devm_ioremap_resource() with IS_ERR().
 
-Shawn
+>      if (!priv->sdmmc_base) {
+>          dev_err(&pdev->dev, "Failed to map IO space\n");
+
+This print can be removed, devm_ioremap_resource() handles that.
+
+> -        ret = -ENOMEM;
+> +        ret = PTR_ERR(priv->sdmmc_base);
+>          goto fail2;
+>      }
+>
+> @@ -826,7 +828,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
+>      ret = request_irq(regular_irq, wmt_mci_regular_isr, 0, "sdmmc", priv);
+>      if (ret) {
+>          dev_err(&pdev->dev, "Register regular IRQ fail\n");
+> -        goto fail3;
+> +        goto fail2;
+>      }
+>
+>      ret = request_irq(dma_irq, wmt_mci_dma_isr, 0, "sdmmc", priv);
+> @@ -869,8 +871,6 @@ fail5:
+>      free_irq(dma_irq, priv);
+>  fail4:
+>      free_irq(regular_irq, priv);
+> -fail3:
+> -    iounmap(priv->sdmmc_base);
+>  fail2:
+>      mmc_free_host(mmc);
+>  fail1:
+> @@ -881,7 +881,6 @@ static int wmt_mci_remove(struct platform_device *pdev)
+>  {
+>      struct mmc_host *mmc;
+>      struct wmt_mci_priv *priv;
+> -    struct resource *res;
+>      u32 reg_tmp;
+>
+>      mmc = platform_get_drvdata(pdev);
+> @@ -909,9 +908,6 @@ static int wmt_mci_remove(struct platform_device *pdev)
+>      clk_disable_unprepare(priv->clk_sdmmc);
+>      clk_put(priv->clk_sdmmc);
+>
+> -    res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> -    release_mem_region(res->start, resource_size(res));
+> -
+>      mmc_free_host(mmc);
+>
+>      dev_info(&pdev->dev, "WMT MCI device removed\n");
+> --
+> 2.1.3
+>
+>
+
+Kind regards
+Uffe
