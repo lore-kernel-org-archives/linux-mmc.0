@@ -1,151 +1,55 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: add core-level function for sending tuning commands
-Date: Mon, 24 Nov 2014 12:44:57 +0100
-Message-ID: <CAPDyKFp_BRyh_0VGQckkdo=brdYCcMN+hi=8puGD9qzG211SOg@mail.gmail.com>
-References: <1416581201-9851-1-git-send-email-21cnbao@gmail.com>
+Subject: Re: [PATCH 0/4] mmc: sdhci: adding support for a new Fujitsu sdhci IP
+Date: Mon, 24 Nov 2014 12:54:10 +0100
+Message-ID: <CAPDyKFruGDj5z5+i6FLT2YHhKPvY6wFE98dBQYsJroCNST_fyw@mail.gmail.com>
+References: <1416531100-26707-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
+ <CAPDyKFqZyUT+sARZQ2ncusttDWn31uQf_H2eTtHOSCs2c8yO4A@mail.gmail.com>
+ <CAOEd-H2qbWgaauX=phfFk8HQqHk9gff3m_uoZqc+4Gbc6LZ-Lg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f49.google.com ([209.85.216.49]:35272 "EHLO
-	mail-qa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750966AbaKXLo6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Nov 2014 06:44:58 -0500
-Received: by mail-qa0-f49.google.com with SMTP id s7so6060543qap.8
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Nov 2014 03:44:57 -0800 (PST)
-In-Reply-To: <1416581201-9851-1-git-send-email-21cnbao@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAOEd-H2qbWgaauX=phfFk8HQqHk9gff3m_uoZqc+4Gbc6LZ-Lg@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Vincent Yang <vincent.yang.fujitsu@gmail.com>
+Cc: Andy Green <andy.green@linaro.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Patch Tracking <patches@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Vincent Yang <Vincent.Yang@tw.fujitsu.com>, Jaswinder Singh <jaswinder.singh@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Barry Song <21cnbao@gmail.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-On 21 November 2014 at 15:46, Barry Song <21cnbao@gmail.com> wrote:
-> From: Minda Chen <Minda.Chen@csr.com>
+On 24 November 2014 at 11:45, Vincent Yang
+<vincent.yang.fujitsu@gmail.com> wrote:
+> 2014-11-24 17:54 GMT+08:00 Ulf Hansson <ulf.hansson@linaro.org>:
+>> On 21 November 2014 at 01:51, Vincent Yang
+>> <vincent.yang.fujitsu@gmail.com> wrote:
+>>> Hello,
+>>>
+>>>   Fujitsu have an sdhci IP which is implemented in a SoC we're
+>>> adding to mainline, the most recent series for that was sent
+>>> here:
+>>> http://lists.infradead.org/pipermail/linux-arm-kernel/2014-November/304522.html
+>>>
+>>>   These patches are against v3.18-rc5 mainline and tested on
+>>> v3.18-rc5 integration tree.
+>>>
+>>>   We welcome any comment and advice about how to make any
+>>> improvements or better align them with upstream.
+>>
+>> Apparently, there's a dependency between this patchset and the upper
+>> one you refereed to. That's a problem.
 >
-> According to the SD card spec, Add a manual tuning command function
-> for SDR104/HS200 by sending command 19 or command 21 to read data
-> and compare with the tuning block pattern.
->
-> this patch will help to decrease some platform private codes in
-> SDHCI platform_execute_tuning() callbacks.
->
-> Signed-off-by: Minda Chen <Minda.Chen@csr.com>
-> Signed-off-by: Barry Song <Baohua.Song@csr.com>
-> ---
->  drivers/mmc/core/mmc_ops.c | 65 ++++++++++++++++++++++++++++++++++++++++++++++
->  include/linux/mmc/core.h   |  1 +
->  2 files changed, 66 insertions(+)
->
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 7911e05..ecc7789 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -543,6 +543,71 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->  }
->  EXPORT_SYMBOL_GPL(mmc_switch);
->
-> +int mmc_send_tuning(struct mmc_card *card, u32 opcode)
-> +{
-> +       struct mmc_request mrq = {NULL};
-> +       struct mmc_command cmd = {0};
-> +       struct mmc_data data = {0};
-> +       struct scatterlist sg;
-> +       struct mmc_host *mmc = card->host;
-> +       struct mmc_ios *ios = &mmc->ios;
-> +       const u8 *tuning_block_pattern;
-> +       int size, err = 0;
-> +       u8 *data_buf;
-> +
-> +       if (opcode == MMC_SEND_TUNING_BLOCK_HS200) {
+> This patchset does not require anything from the upper one I refereed to.
 
-I don't think we need to care about the opcode. Let's just check the bus_width.
+No, but the upper depends on this patchset.
 
-> +               if (ios->bus_width == MMC_BUS_WIDTH_8) {
-> +                       tuning_block_pattern = tuning_blk_pattern_8bit;
-> +                       size = sizeof(tuning_blk_pattern_8bit);
-> +               } else if (ios->bus_width == MMC_BUS_WIDTH_4) {
-> +                       tuning_block_pattern = tuning_blk_pattern_4bit;
-> +                       size = sizeof(tuning_blk_pattern_4bit);
-> +               } else
-> +                       return -EINVAL;
-> +       } else if (opcode == MMC_SEND_TUNING_BLOCK) {
-> +               tuning_block_pattern = tuning_blk_pattern_4bit;
-> +               size = sizeof(tuning_blk_pattern_4bit);
-> +       } else
-> +               return -EINVAL;
-> +
-> +       data_buf = kmalloc(size, GFP_KERNEL);
-
-You should use kzalloc() to get the zeroed buffer you want.
-
-> +       if (!data_buf)
-> +               return -ENOMEM;
-> +
-> +       mrq.cmd = &cmd;
-> +       mrq.data = &data;
-> +
-> +       cmd.opcode = opcode;
-> +       cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-> +
-> +       data.blksz = size;
-> +       data.blocks = 1;
-> +       data.flags = MMC_DATA_READ;
-
-These needs to be assigned as well:
-
-data.sg = &sg;
-data.sg_len = 1;
-
-> +
-> +       mmc_set_data_timeout(&data, card);
-
-mmc_set_data_timeout() doesn't handle CMD21/19.
-
-The specs tells us about 40 commands should be executed within 150ms.
-I would pick a value of 150ms, just to be sure we are inside that
-range. Also, assign "data->timeout_ns" here, instead of relying on
-mmc_set_data_timeout().
-
-> +       sg_init_one(&sg, data_buf, size);
-> +       memset(data_buf, 0, size);
-> +       mmc_wait_for_req(mmc, &mrq);
-> +
-> +       if (cmd.error) {
-> +               err = cmd.error;
-> +               goto out;
-> +       }
-> +
-> +       if (data.error) {
-> +               err = data.error;
-> +               goto out;
-> +       }
-> +
-> +       if (memcmp(data_buf, tuning_block_pattern, size))
-> +               err = -EIO;
-> +
-> +out:
-> +       kfree(data_buf);
-> +       return err;
-> +}
-> +EXPORT_SYMBOL_GPL(mmc_send_tuning);
-> +
->  static int
->  mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
->                   u8 len)
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index f206e29..82a0119 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -154,6 +154,7 @@ extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
->  extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool,
->                         bool, bool);
->  extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
-> +extern int mmc_send_tuning(struct mmc_card *, u32);
->  extern int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd);
->
->  #define MMC_ERASE_ARG          0x00000000
-> --
-> 2.1.1
->
+Why can't you send the mmc patches separately in one patchset? That's
+would be easier to handle and review.
 
 Kind regards
 Uffe
