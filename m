@@ -1,172 +1,73 @@
-From: Addy Ke <addy.ke@rock-chips.com>
-Subject: [PATCH v2] mmc: dw_mmc: add quirk for broken data transfer over scheme
-Date: Tue, 25 Nov 2014 16:10:08 +0800
-Message-ID: <1416903008-4160-1-git-send-email-addy.ke@rock-chips.com>
-References: <1415970338-2637-1-git-send-email-addy.ke@rock-chips.com>
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1415970338-2637-1-git-send-email-addy.ke@rock-chips.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org, amstan@chromium.org
-Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com, Addy Ke <addy.ke@rock-chips.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [PATCH 1/1] Production State Awareness support in host side
+Date: Tue, 25 Nov 2014 09:17:14 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333ECB6DEC@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <1416228726-8514-1-git-send-email-avi.shchislowski@sandisk.com>
+	<CAPDyKFrCpoSsgECvC=gnMp6WDYAV+2os-uhzp03K-=E+Yv10AA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333EC9D394@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CAPDyKFrzmW5ADf86Q2t18X8cUUovGF-fuhDpQBUSCiPf9g4OUA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333EC9F16C@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CAPDyKFp8PCBMOtXr-SkUDSw6CZ4c-4AnY-btex5WpU+B9u4Ppw@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333ECADFBA@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CAPDyKFoajPtSbQGATd59Cu4tSEDxaWcBvp39ndm41O778B0uRQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bl2on0083.outbound.protection.outlook.com ([65.55.169.83]:28208
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750802AbaKYJbY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 25 Nov 2014 04:31:24 -0500
+In-Reply-To: <CAPDyKFoajPtSbQGATd59Cu4tSEDxaWcBvp39ndm41O778B0uRQ@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
 
-This patch add a new quirk to add a s/w timer to notify the driver
-to terminate current transfer and report a data timeout to the core,
-if DTO interrupt does NOT come within the given time.
-
-dw_mmc call mmc_request_done func to finish transfer depends on
-DTO interrupt. If DTO interrupt does not come in sending data state,
-the current transfer will be blocked.
-
-But this case really exists, when driver reads tuning data from
-card on RK3288-pink2 board. I measured waveforms by oscilloscope
-and found that card clock was always on and data lines were always
-holded high level in sending data state.
-
-We got the reply from synopsys:
-There are two counters but both use the same value of [31:8] bits.
-Data timeout counter doesn't wait for stop clock and you should get
-DRTO even when the clock is not stopped.
-Host Starvation timeout counter is triggered with stop clock condition.
-
-This means that host should get DRTO and DTO interrupt.
-
-But we really don't get any data-related interrupt in RK3X SoCs.
-And driver can't get data transfer state, it can do nothing but wait for.
-
-Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
----
-- fix some typo.
-- remove extra timeout value (250ms).
-- remove dw_mci_dto_start_monitor func.
-- use "broken-dto" for new quirk and change Subject for it.
-
- drivers/mmc/host/dw_mmc.c  | 44 +++++++++++++++++++++++++++++++++++++++++++-
- include/linux/mmc/dw_mmc.h |  5 +++++
- 2 files changed, 48 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index b4c3044..bc09f50 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1457,6 +1457,8 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 	enum dw_mci_state state;
- 	enum dw_mci_state prev_state;
- 	unsigned int err;
-+	unsigned int drto_clks;
-+	unsigned int drto_ms;
- 
- 	spin_lock(&host->lock);
- 
-@@ -1522,8 +1524,17 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 			}
- 
- 			if (!test_and_clear_bit(EVENT_XFER_COMPLETE,
--						&host->pending_events))
-+						&host->pending_events)) {
-+				if (host->quirks & DW_MCI_QUIRK_BROKEN_DTO) {
-+					drto_clks = mci_readl(host, TMOUT) >> 8;
-+					drto_ms = DIV_ROUND_UP(drto_clks * 1000,
-+							       host->bus_hz);
-+
-+					mod_timer(&host->dto_timer, jiffies +
-+						msecs_to_jiffies(drto_ms));
-+				}
- 				break;
-+			}
- 
- 			set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
- 
-@@ -2115,6 +2126,9 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 		}
- 
- 		if (pending & SDMMC_INT_DATA_OVER) {
-+			if (host->quirks & DW_MCI_QUIRK_BROKEN_DTO)
-+				del_timer(&host->dto_timer);
-+
- 			mci_writel(host, RINTSTS, SDMMC_INT_DATA_OVER);
- 			if (!host->data_status)
- 				host->data_status = pending;
-@@ -2502,6 +2516,28 @@ ciu_out:
- 	return ret;
- }
- 
-+static void dw_mci_dto_timer(unsigned long arg)
-+{
-+	struct dw_mci *host = (struct dw_mci *)arg;
-+
-+	switch (host->state) {
-+	case STATE_SENDING_DATA:
-+	case STATE_DATA_BUSY:
-+		/*
-+		* If DTO interrupt does NOT come in sending data state,
-+		* we should notify the driver to terminate current transfer
-+		* and report a data timeout to the core.
-+		*/
-+		host->data_status = SDMMC_INT_DRTO;
-+		set_bit(EVENT_DATA_ERROR, &host->pending_events);
-+		set_bit(EVENT_DATA_COMPLETE, &host->pending_events);
-+		tasklet_schedule(&host->tasklet);
-+		break;
-+	default:
-+		break;
-+	}
-+}
-+
- #ifdef CONFIG_OF
- static struct dw_mci_of_quirks {
- 	char *quirk;
-@@ -2513,6 +2549,9 @@ static struct dw_mci_of_quirks {
- 	}, {
- 		.quirk	= "disable-wp",
- 		.id	= DW_MCI_QUIRK_NO_WRITE_PROTECT,
-+	}, {
-+		.quirk	= "broken-dto",
-+		.id	= DW_MCI_QUIRK_BROKEN_DTO,
- 	},
- };
- 
-@@ -2654,6 +2693,9 @@ int dw_mci_probe(struct dw_mci *host)
- 
- 	spin_lock_init(&host->lock);
- 	INIT_LIST_HEAD(&host->queue);
-+	if (host->quirks & DW_MCI_QUIRK_BROKEN_DTO)
-+		setup_timer(&host->dto_timer,
-+			    dw_mci_dto_timer, (unsigned long)host);
- 
- 	/*
- 	 * Get the host data width - this assumes that HCON has been set with
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 42b724e..ff9bd1e 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -98,6 +98,7 @@ struct mmc_data;
-  * @irq_flags: The flags to be passed to request_irq.
-  * @irq: The irq value to be passed to request_irq.
-  * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
-+ * @dto_timer: Timer for broken data transfer over scheme.
-  *
-  * Locking
-  * =======
-@@ -196,6 +197,8 @@ struct dw_mci {
- 	int			irq;
- 
- 	int			sdio_id0;
-+
-+	struct timer_list	dto_timer;
- };
- 
- /* DMA ops for Internal/External DMAC interface */
-@@ -220,6 +223,8 @@ struct dw_mci_dma_ops {
- #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
- /* No write protect */
- #define DW_MCI_QUIRK_NO_WRITE_PROTECT		BIT(4)
-+/* Timer for broken data transfer over scheme */
-+#define DW_MCI_QUIRK_BROKEN_DTO			BIT(5)
- 
- /* Slot level quirks */
- /* This slot has no write protect */
--- 
-1.8.3.2
-
-
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
+aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBNb25kYXksIE5vdmVtYmVyIDI0
+LCAyMDE0IDI6MjQgUE0NCj4gVG86IEFsZXggTGVtYmVyZw0KPiBDYzogbGludXgtbW1jOyBDaHJp
+cyBCYWxsOyBBdmkgU2hjaGlzbG93c2tpDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggMS8xXSBQcm9k
+dWN0aW9uIFN0YXRlIEF3YXJlbmVzcyBzdXBwb3J0IGluIGhvc3Qgc2lkZQ0KPiANCj4gWy4uLl0N
+Cj4gDQo+ID4+ID4+DQo+ID4+ID4+IEkgYW0gbm90IHNvIHN1cmUgd2Ugc2hvdWxkIGZpbmFsaXpl
+IHRoZSBwcm9kdWN0aW9uIHBoYXNlIHdoaWxlDQo+ID4+ID4+IGluaXRpYWxpemluZyB0aGUgZU1N
+QyBjYXJkIGxpa2UgdGhpcy4NCj4gPj4gPj4NCj4gPj4gPj4gQ2VydGFpbmx5IHdlIHNob3VsZCBj
+aGVjayB0aGUgUFNBIHN0YXRlLCBidXQgSSB0aGluayB3ZSBzaG91bGQNCj4gPj4gPj4gcmV0dXJu
+IGFuIGVycm9yIGlmIHdlIHRoaW5rIHRoZSBkZXZpY2UgaGFzbuKAmXQgY29tcGxldGVkDQo+ID4+
+ID4+IHByb2R1Y3Rpb24uIEl0IHNob3VsZCBiZSB0aGUgcmVzcG9uc2liaWxpdHkgZm9yIHRoZSAi
+cHJvZ3JhbW1pbmcNCj4gPj4gPj4gdG9vbHMiIHRvIGZpbmFsaXplIHRoZQ0KPiA+PiBwcm9kdWN0
+aW9uLCByaWdodCE/DQo+ID4+ID4NCj4gPj4gPiBBY2NvcmRpbmcgdG8gZU1NQyBzcGVjLCB0aGUg
+c3dpdGNoIHRvIE5PUk1BTCBzaG91bGQgYmUgZG9uZSBhZnRlcg0KPiA+PiA+IGRldmljZQ0KPiA+
+PiBzb2xkZXJpbmcgdG8gZmluYWwgaG9zdCAobm90IHByb2dyYW1tZXIpLg0KPiA+PiA+IFBsZWFz
+ZSByZWZlciB0byAiRmlndXJlIDMyIOKAlCBSZWNvbW1lbmRlZCBTb2xkZXJpbmcgcHJvY2VkdXJl
+IiBpbg0KPiA+PiBlTU1DNS4wIHNwZWNpZmljYXRpb24gZG9jdW1lbnQuDQo+ID4+ID4gQWxzbywg
+c2luY2Ugd2UgYXJlIGRlYWxpbmcgd2l0aCBvbmx5ICJmaWVsZCIgaG9zdCBoZXJlLCB3ZSBhcmUg
+bm90DQo+ID4+IHRvdWNoaW5nL3N3aXRjaGluZyBhbnkgb3RoZXIgbW9kZXMgb2YgUFNBLCBidXQg
+b25seSBOb3JtYWwgKGZpZWxkKS4NCj4gPj4gPiBUaGlzIGNvZGUgc2hvdWxkIHJ1biBvbmx5IG9u
+Y2UgLSBpbiB0aGUgYmVnaW5uaW5nIG9mIGRldmljZSBsaWZlIGN5Y2xlLg0KPiA+Pg0KPiA+PiBJ
+IGdldCB5b3VyIHBvaW50LCBidXQgSSBhbSBub3Qgc28gc3VyZS4NCj4gPj4NCj4gPj4gVG8gbWUs
+IEkgd291bGRuJ3QgdHJ1c3QgdGhhdCB0aGUgcGxhdGZvcm0gYmluYXJpZXMgaGFzIGJlZW4NCj4g
+Pj4gc3VjY2Vzc2Z1bGx5IHByb2dyYW1tZWQgdG8gdGhlIGRldmljZSwgdW5sZXNzIHRoZSBwcm9n
+cmFtbWVyIHRvb2wNCj4gPj4gdGFrZXMgY2FyZSBvZiBzd2l0Y2hpbmcgdGhlIGRldmljZSB0byAi
+bm9ybWFsIi4NCj4gPj4NCj4gPg0KPiA+IFRoYW5rcyBVbGYhDQo+ID4gQWxzbywgcGxlYXNlIG5v
+dGUgLSBQU0EgUFJFX1NPTERFUklOR19QT1NUX1dSSVRFUyBtb2RlIGludGVudCB0byBzYXZlDQo+
+ID4gZGV2aWNlIHByZS1sb2FkZWQgY29udGVudCBkdXJpbmcgdGhlIHNvbGRlcmluZyBwcm9jZXNz
+Lg0KPiA+IEZsYXNoIGRhdGEgY2FuIGJlIGNvcnJ1cHRlZCBkdWUgdG8gc29sZGVyaW5nIHByb2Nl
+ZHVyZSBoaWdoDQo+ID4gdGVtcGVyYXR1cmUuIFNvIHN3aXRjaGluZyB0byBOb3JtYWwgY2Fubm90
+IGJlIGRvbmUgYnkgZXh0ZXJuYWwNCj4gcHJvZ3JhbW1lci4NCj4gDQo+IFNvLCBpZiBmbGFzaCBk
+YXRhIHdpbGwgYmUgY29ycnVwdGVkIGR1ZSB0byBmb3IgZXhhbXBsZSBoaWdoIHRlbXBlcmF0dXJl
+cyBkdXJpbmcNCj4gc29sZGVyaW5nLCBob3cgd2lsbCB0aGF0IGJlIGRldGVjdGVkIHdoZW4gdXNp
+bmcgdGhlICJtYW51YWwgbW9kZSI/DQo+IA0KPiBJZiB0aGF0J3MgdGhlIGpvYiBmb3IgdGhlIHBs
+YXRmb3JtIHNvZnR3YXJlIEkgZmFpbCB0byB1bmRlcnN0YW5kIHdoeSB0aGUNCj4gUFJFX1NPTERF
+UklOR19QT1NUX1dSSVRFUyBzdGF0ZSBuZWVkcyB0byBleGlzdHMgYXQgYWxsIT8NCg0KVGhlIGZs
+b3cgb2YgIk1hbnVhbCBNb2RlIiBpczoNCg0KW3NraXBwaW5nIGZldyBjb21tb24gc3RlcHNdDQou
+Li4NCkhvc3QgKFByb2dyYW1tZXIpIHNldHMgUFJPRFVDVElPTl9TVEFURV9BV0FSRU5FU1MNCnRv
+IDB4MSAoUFJFX1NPTERFUklOR19XUklURVMpDQoNCkhvc3QgKFByb2dyYW1tZXIpIHBlcmZvcm0g
+cHJlLXNvbGRlcmluZyBkYXRhIGxvYWRpbmcNCmFuZC9vciBkZXZpY2UgY29uZmlndXJhdGlvbg0K
+DQpIb3N0IChQcm9ncmFtbWVyKSBzZXRzIFBST0RVQ1RJT05fU1RBVEVfQVdBUkVORVNTDQpUbyAw
+eDIgKFBSRV9TT0xERVJJTkdfUE9TVF9XUklURVMpLg0KTm8gd3JpdGVzIHBhc3QgdGhpcyBwb2lu
+dA0KDQpEZXZpY2UgU29sZGVyaW5nDQoNCkhvc3QgKGZpZWxkKSBzZXRzIFBST0RVQ1RJT05fU1RB
+VEVfQVdBUkVORVNTDQp0byAweDAgKE5PUk1BTCkNCi4uLg0KDQpIb3BlIHRoaXMgd2lsbCBhbnN3
+ZXIuLi4NCg0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg==
