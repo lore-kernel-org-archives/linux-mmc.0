@@ -1,227 +1,53 @@
-From: Barry Song <21cnbao@gmail.com>
-Subject: Re: [PATCH] mmc: core: add core-level function for sending tuning commands
-Date: Tue, 25 Nov 2014 11:19:26 +0800
-Message-ID: <CAGsJ_4y2BhGrykY9jxwCiSdhkW0jDQ4yQ0OawHv=09W1RgZVCg@mail.gmail.com>
-References: <1416581201-9851-1-git-send-email-21cnbao@gmail.com> <CAPDyKFp_BRyh_0VGQckkdo=brdYCcMN+hi=8puGD9qzG211SOg@mail.gmail.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: try pick the exact same voltage as vmmc for vqmmc
+Date: Mon, 24 Nov 2014 21:29:28 -0800
+Message-ID: <CAD=FV=UZT91rp2rgPCh5mY5s+g8J3iOrDsHKjuXAgEqoye5goQ@mail.gmail.com>
+References: <1415109789-7046-1-git-send-email-addy.ke@rock-chips.com>
+	<1415678573-6093-1-git-send-email-addy.ke@rock-chips.com>
+	<CAPDyKFqUoBjhsbz8rkLa9PY_dpgMxnimz3k7OoA5WVhi7MacPQ@mail.gmail.com>
+	<CAD=FV=VQHZ6YmcoeAb1OEVLYRrYBnc_dM5Kjt1TZX_CQJC=EfA@mail.gmail.com>
+	<5464152E.7040209@rock-chips.com>
+	<CAPDyKFrzGfDew0eLLEcA+_iS_mo-O2bFU58fjirfXXA8AJ9UYQ@mail.gmail.com>
+	<CAD=FV=Ve1TY4+8quq1=18A1YOFvOWuFGrBmHLwMCwdWBSqzxOw@mail.gmail.com>
+	<CAD=FV=UJT5zBkcj2a03Y_RWxad9+Pu83G_z79Xzzn74V=eRqww@mail.gmail.com>
+	<CAPDyKFqt4rrwi940KAPyPONpjixK1730QmHEsN27V97jyHH+Qw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f170.google.com ([209.85.192.170]:56809 "EHLO
-	mail-pd0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750770AbaKYDTs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Nov 2014 22:19:48 -0500
-Received: by mail-pd0-f170.google.com with SMTP id fp1so11007610pdb.15
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Nov 2014 19:19:47 -0800 (PST)
-In-Reply-To: <CAPDyKFp_BRyh_0VGQckkdo=brdYCcMN+hi=8puGD9qzG211SOg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFqt4rrwi940KAPyPONpjixK1730QmHEsN27V97jyHH+Qw@mail.gmail.com>
+Sender: linux-doc-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
+Cc: addy ke <addy.ke@rock-chips.com>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Alexandru Stan <amstan@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, open list:A
+List-Id: linux-mmc@vger.kernel.org
 
-2014-11-24 19:44 GMT+08:00 Ulf Hansson <ulf.hansson@linaro.org>:
-> On 21 November 2014 at 15:46, Barry Song <21cnbao@gmail.com> wrote:
->> From: Minda Chen <Minda.Chen@csr.com>
->>
->> According to the SD card spec, Add a manual tuning command function
->> for SDR104/HS200 by sending command 19 or command 21 to read data
->> and compare with the tuning block pattern.
->>
->> this patch will help to decrease some platform private codes in
->> SDHCI platform_execute_tuning() callbacks.
->>
->> Signed-off-by: Minda Chen <Minda.Chen@csr.com>
->> Signed-off-by: Barry Song <Baohua.Song@csr.com>
->> ---
->>  drivers/mmc/core/mmc_ops.c | 65 ++++++++++++++++++++++++++++++++++++++++++++++
->>  include/linux/mmc/core.h   |  1 +
->>  2 files changed, 66 insertions(+)
->>
->> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
->> index 7911e05..ecc7789 100644
->> --- a/drivers/mmc/core/mmc_ops.c
->> +++ b/drivers/mmc/core/mmc_ops.c
->> @@ -543,6 +543,71 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
->>  }
->>  EXPORT_SYMBOL_GPL(mmc_switch);
->>
->> +int mmc_send_tuning(struct mmc_card *card, u32 opcode)
->> +{
->> +       struct mmc_request mrq = {NULL};
->> +       struct mmc_command cmd = {0};
->> +       struct mmc_data data = {0};
->> +       struct scatterlist sg;
->> +       struct mmc_host *mmc = card->host;
->> +       struct mmc_ios *ios = &mmc->ios;
->> +       const u8 *tuning_block_pattern;
->> +       int size, err = 0;
->> +       u8 *data_buf;
->> +
->> +       if (opcode == MMC_SEND_TUNING_BLOCK_HS200) {
->
-> I don't think we need to care about the opcode. Let's just check the bus_width.
->
->> +               if (ios->bus_width == MMC_BUS_WIDTH_8) {
->> +                       tuning_block_pattern = tuning_blk_pattern_8bit;
->> +                       size = sizeof(tuning_blk_pattern_8bit);
->> +               } else if (ios->bus_width == MMC_BUS_WIDTH_4) {
->> +                       tuning_block_pattern = tuning_blk_pattern_4bit;
->> +                       size = sizeof(tuning_blk_pattern_4bit);
->> +               } else
->> +                       return -EINVAL;
->> +       } else if (opcode == MMC_SEND_TUNING_BLOCK) {
->> +               tuning_block_pattern = tuning_blk_pattern_4bit;
->> +               size = sizeof(tuning_blk_pattern_4bit);
->> +       } else
->> +               return -EINVAL;
->> +
->> +       data_buf = kmalloc(size, GFP_KERNEL);
->
-> You should use kzalloc() to get the zeroed buffer you want.
->
->> +       if (!data_buf)
->> +               return -ENOMEM;
->> +
->> +       mrq.cmd = &cmd;
->> +       mrq.data = &data;
->> +
->> +       cmd.opcode = opcode;
->> +       cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
->> +
->> +       data.blksz = size;
->> +       data.blocks = 1;
->> +       data.flags = MMC_DATA_READ;
->
-> These needs to be assigned as well:
->
-> data.sg = &sg;
-> data.sg_len = 1;
->
->> +
->> +       mmc_set_data_timeout(&data, card);
->
-> mmc_set_data_timeout() doesn't handle CMD21/19.
->
-> The specs tells us about 40 commands should be executed within 150ms.
-> I would pick a value of 150ms, just to be sure we are inside that
-> range. Also, assign "data->timeout_ns" here, instead of relying on
-> mmc_set_data_timeout().
->
->> +       sg_init_one(&sg, data_buf, size);
->> +       memset(data_buf, 0, size);
->> +       mmc_wait_for_req(mmc, &mrq);
->> +
->> +       if (cmd.error) {
->> +               err = cmd.error;
->> +               goto out;
->> +       }
->> +
->> +       if (data.error) {
->> +               err = data.error;
->> +               goto out;
->> +       }
->> +
->> +       if (memcmp(data_buf, tuning_block_pattern, size))
->> +               err = -EIO;
->> +
->> +out:
->> +       kfree(data_buf);
->> +       return err;
->> +}
->> +EXPORT_SYMBOL_GPL(mmc_send_tuning);
->> +
->>  static int
->>  mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
->>                   u8 len)
->> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
->> index f206e29..82a0119 100644
->> --- a/include/linux/mmc/core.h
->> +++ b/include/linux/mmc/core.h
->> @@ -154,6 +154,7 @@ extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
->>  extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool,
->>                         bool, bool);
->>  extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
->> +extern int mmc_send_tuning(struct mmc_card *, u32);
->>  extern int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd);
->>
->>  #define MMC_ERASE_ARG          0x00000000
->> --
->> 2.1.1
->>
+Ulf,
 
-What about?
-
-546 int mmc_send_tuning(struct mmc_card *card)
-547 {
-548         struct mmc_request mrq = {NULL};
-549         struct mmc_command cmd = {0};
-550         struct mmc_data data = {0};
-551         struct scatterlist sg;
-552         struct mmc_host *mmc = card->host;
-553         struct mmc_ios *ios = &mmc->ios;
-554         const u8 *tuning_block_pattern;
-555         int size, err = 0;
-556         u8 *data_buf;
-557         u32 opcode;
-558
-559         if (ios->bus_width == MMC_BUS_WIDTH_8) {
-560                 tuning_block_pattern = tuning_blk_pattern_8bit;
-561                 size = sizeof(tuning_blk_pattern_8bit);
-562                 opcode = MMC_SEND_TUNING_BLOCK_HS200;
-563         } else if (ios->bus_width == MMC_BUS_WIDTH_4) {
-564                 tuning_block_pattern = tuning_blk_pattern_4bit;
-565                 size = sizeof(tuning_blk_pattern_4bit);
-566                 opcode = MMC_SEND_TUNING_BLOCK;
-567         } else
-568                 return -EINVAL;
-569
-570         data_buf = kzalloc(size, GFP_KERNEL);
-571         if (!data_buf)
-572                 return -ENOMEM;
-573
-574         mrq.cmd = &cmd;
-575         mrq.data = &data;
-576
-577         cmd.opcode = opcode;
-578         cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-579
-580         data.blksz = size;
-581         data.blocks = 1;
-582         data.flags = MMC_DATA_READ;
-583
-584         /*
-585          * According to the tuning specs, Tuning process
-586          * is normally shorter 40 executions of CMD19,
-587          * and timeout value should be shorter than 150 ms
-588          */
-589         data.timeout_ns = 150 * NSEC_PER_MSEC;
-590
-591         data.sg = &sg;
-592         data.sg_len = 1;
-593         sg_init_one(&sg, data_buf, size);
-594
-595         mmc_wait_for_req(mmc, &mrq);
-596
-597         if (cmd.error) {
-598                 err = cmd.error;
-599                 goto out;
-600         }
-601
-602         if (data.error) {
-603                 err = data.error;
-604                 goto out;
-605         }
-606
-607         if (memcmp(data_buf, tuning_block_pattern, size))
-608                 err = -EIO;
-609
-610 out:
-611         kfree(data_buf);
-612         return err;
-613 }
-614 EXPORT_SYMBOL_GPL(mmc_send_tuning);
-
+On Mon, Nov 24, 2014 at 5:29 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> 2. Several people I've talked to have expressed concerns that our
+>> minimum value is 2.7V.  Apparently that's really on the edge and makes
+>> EEs a little nervous.  The quick sample of cards sitting on my desk
+>> shows that they seem to claim 0x00ff8000, which doesn't include 2.7V.
 >
-> Kind regards
-> Uffe
+> 0x00ff8000 states what values of VDD levels the device supports. Not VIO.
 
--barry
+Yup, I was just pointing out that possibly others were trying to get a
+little bit of margin (not going all the way down to 2.7V) too.
+
+>> Both of the above make me feel like dw_mmc should try its best to pick
+>> a value for vqmmc that is closest to the value of vmmc (and >= 2.7V).
+>> That also happens to make us work exactly like hosts where vmmc and
+>> vqmmc are supplied by the same supply.
+>
+> I do see your point. And I agree that it would be nice to achieve
+> something like this.
+>
+> The question is how to do this. For sure, we need to involve the mmc
+> core to handle this correctly.
+
+You could add a function to the core that we could call from
+dw_mci_switch_voltage() and it would do all the work except trying to
+set the UHS register.  That would certainly make it easy.  That could
+try to set the highest voltage that is <= vmmc when we're at
+MMC_SIGNAL_VOLTAGE_330.
+
+-Doug
