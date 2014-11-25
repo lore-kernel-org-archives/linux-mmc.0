@@ -1,96 +1,144 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [PATCH 1/1] Production State Awareness support in host side
-Date: Tue, 25 Nov 2014 14:55:36 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333ECB8C7F@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <1416228726-8514-1-git-send-email-avi.shchislowski@sandisk.com>
-	<CAPDyKFrCpoSsgECvC=gnMp6WDYAV+2os-uhzp03K-=E+Yv10AA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333EC9D394@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CAPDyKFrzmW5ADf86Q2t18X8cUUovGF-fuhDpQBUSCiPf9g4OUA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333EC9F16C@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CAPDyKFp8PCBMOtXr-SkUDSw6CZ4c-4AnY-btex5WpU+B9u4Ppw@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333ECADFBA@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CAPDyKFoajPtSbQGATd59Cu4tSEDxaWcBvp39ndm41O778B0uRQ@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333ECB6DEC@SACMBXIP02.sdcorp.global.sandisk.com>
- <CAPDyKFq+fhJudMFhA1SAUgwBTbvFRu5F_F0UZjjPr5HU4SAhNg@mail.gmail.com>
+From: Alex Lemberg <alex.lemberg@sandisk.com>
+Subject: [PATCH v2] mmc: Add Production State Awareness Support
+Date: Tue, 25 Nov 2014 17:01:38 +0200
+Message-ID: <1416927698-5304-1-git-send-email-alex.lemberg@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1on0053.outbound.protection.outlook.com ([157.56.110.53]:22464
+Received: from mail-bn1on0088.outbound.protection.outlook.com ([157.56.110.88]:27296
 	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751209AbaKYOzo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 25 Nov 2014 09:55:44 -0500
-In-Reply-To: <CAPDyKFq+fhJudMFhA1SAUgwBTbvFRu5F_F0UZjjPr5HU4SAhNg@mail.gmail.com>
-Content-Language: en-US
+	id S1750875AbaKYPBt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 25 Nov 2014 10:01:49 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, chris@printf.net, avi.shchislowski@sandisk.com, Alex Lemberg <alex.lemberg@sandisk.com>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
-aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBUdWVzZGF5LCBOb3ZlbWJlciAy
-NSwgMjAxNCAxMjo1NyBQTQ0KPiBUbzogQWxleCBMZW1iZXJnDQo+IENjOiBsaW51eC1tbWM7IENo
-cmlzIEJhbGw7IEF2aSBTaGNoaXNsb3dza2kNCj4gU3ViamVjdDogUmU6IFtQQVRDSCAxLzFdIFBy
-b2R1Y3Rpb24gU3RhdGUgQXdhcmVuZXNzIHN1cHBvcnQgaW4gaG9zdCBzaWRlDQo+IA0KPiBPbiAy
-NSBOb3ZlbWJlciAyMDE0IGF0IDEwOjE3LCBBbGV4IExlbWJlcmcgPEFsZXguTGVtYmVyZ0BzYW5k
-aXNrLmNvbT4NCj4gd3JvdGU6DQo+ID4NCj4gPg0KPiA+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
-LS0tLQ0KPiA+PiBGcm9tOiBVbGYgSGFuc3NvbiBbbWFpbHRvOnVsZi5oYW5zc29uQGxpbmFyby5v
-cmddDQo+ID4+IFNlbnQ6IE1vbmRheSwgTm92ZW1iZXIgMjQsIDIwMTQgMjoyNCBQTQ0KPiA+PiBU
-bzogQWxleCBMZW1iZXJnDQo+ID4+IENjOiBsaW51eC1tbWM7IENocmlzIEJhbGw7IEF2aSBTaGNo
-aXNsb3dza2kNCj4gPj4gU3ViamVjdDogUmU6IFtQQVRDSCAxLzFdIFByb2R1Y3Rpb24gU3RhdGUg
-QXdhcmVuZXNzIHN1cHBvcnQgaW4gaG9zdA0KPiA+PiBzaWRlDQo+ID4+DQo+ID4+IFsuLi5dDQo+
-ID4+DQo+ID4+ID4+ID4+DQo+ID4+ID4+ID4+IEkgYW0gbm90IHNvIHN1cmUgd2Ugc2hvdWxkIGZp
-bmFsaXplIHRoZSBwcm9kdWN0aW9uIHBoYXNlIHdoaWxlDQo+ID4+ID4+ID4+IGluaXRpYWxpemlu
-ZyB0aGUgZU1NQyBjYXJkIGxpa2UgdGhpcy4NCj4gPj4gPj4gPj4NCj4gPj4gPj4gPj4gQ2VydGFp
-bmx5IHdlIHNob3VsZCBjaGVjayB0aGUgUFNBIHN0YXRlLCBidXQgSSB0aGluayB3ZSBzaG91bGQN
-Cj4gPj4gPj4gPj4gcmV0dXJuIGFuIGVycm9yIGlmIHdlIHRoaW5rIHRoZSBkZXZpY2UgaGFzbuKA
-mXQgY29tcGxldGVkDQo+ID4+ID4+ID4+IHByb2R1Y3Rpb24uIEl0IHNob3VsZCBiZSB0aGUgcmVz
-cG9uc2liaWxpdHkgZm9yIHRoZQ0KPiA+PiA+PiA+PiAicHJvZ3JhbW1pbmcgdG9vbHMiIHRvIGZp
-bmFsaXplIHRoZQ0KPiA+PiA+PiBwcm9kdWN0aW9uLCByaWdodCE/DQo+ID4+ID4+ID4NCj4gPj4g
-Pj4gPiBBY2NvcmRpbmcgdG8gZU1NQyBzcGVjLCB0aGUgc3dpdGNoIHRvIE5PUk1BTCBzaG91bGQg
-YmUgZG9uZQ0KPiA+PiA+PiA+IGFmdGVyIGRldmljZQ0KPiA+PiA+PiBzb2xkZXJpbmcgdG8gZmlu
-YWwgaG9zdCAobm90IHByb2dyYW1tZXIpLg0KPiA+PiA+PiA+IFBsZWFzZSByZWZlciB0byAiRmln
-dXJlIDMyIOKAlCBSZWNvbW1lbmRlZCBTb2xkZXJpbmcgcHJvY2VkdXJlIiBpbg0KPiA+PiA+PiBl
-TU1DNS4wIHNwZWNpZmljYXRpb24gZG9jdW1lbnQuDQo+ID4+ID4+ID4gQWxzbywgc2luY2Ugd2Ug
-YXJlIGRlYWxpbmcgd2l0aCBvbmx5ICJmaWVsZCIgaG9zdCBoZXJlLCB3ZSBhcmUNCj4gPj4gPj4g
-PiBub3QNCj4gPj4gPj4gdG91Y2hpbmcvc3dpdGNoaW5nIGFueSBvdGhlciBtb2RlcyBvZiBQU0Es
-IGJ1dCBvbmx5IE5vcm1hbCAoZmllbGQpLg0KPiA+PiA+PiA+IFRoaXMgY29kZSBzaG91bGQgcnVu
-IG9ubHkgb25jZSAtIGluIHRoZSBiZWdpbm5pbmcgb2YgZGV2aWNlIGxpZmUgY3ljbGUuDQo+ID4+
-ID4+DQo+ID4+ID4+IEkgZ2V0IHlvdXIgcG9pbnQsIGJ1dCBJIGFtIG5vdCBzbyBzdXJlLg0KPiA+
-PiA+Pg0KPiA+PiA+PiBUbyBtZSwgSSB3b3VsZG4ndCB0cnVzdCB0aGF0IHRoZSBwbGF0Zm9ybSBi
-aW5hcmllcyBoYXMgYmVlbg0KPiA+PiA+PiBzdWNjZXNzZnVsbHkgcHJvZ3JhbW1lZCB0byB0aGUg
-ZGV2aWNlLCB1bmxlc3MgdGhlIHByb2dyYW1tZXIgdG9vbA0KPiA+PiA+PiB0YWtlcyBjYXJlIG9m
-IHN3aXRjaGluZyB0aGUgZGV2aWNlIHRvICJub3JtYWwiLg0KPiA+PiA+Pg0KPiA+PiA+DQo+ID4+
-ID4gVGhhbmtzIFVsZiENCj4gPj4gPiBBbHNvLCBwbGVhc2Ugbm90ZSAtIFBTQSBQUkVfU09MREVS
-SU5HX1BPU1RfV1JJVEVTIG1vZGUgaW50ZW50IHRvDQo+ID4+ID4gc2F2ZSBkZXZpY2UgcHJlLWxv
-YWRlZCBjb250ZW50IGR1cmluZyB0aGUgc29sZGVyaW5nIHByb2Nlc3MuDQo+ID4+ID4gRmxhc2gg
-ZGF0YSBjYW4gYmUgY29ycnVwdGVkIGR1ZSB0byBzb2xkZXJpbmcgcHJvY2VkdXJlIGhpZ2gNCj4g
-Pj4gPiB0ZW1wZXJhdHVyZS4gU28gc3dpdGNoaW5nIHRvIE5vcm1hbCBjYW5ub3QgYmUgZG9uZSBi
-eSBleHRlcm5hbA0KPiA+PiBwcm9ncmFtbWVyLg0KPiA+Pg0KPiA+PiBTbywgaWYgZmxhc2ggZGF0
-YSB3aWxsIGJlIGNvcnJ1cHRlZCBkdWUgdG8gZm9yIGV4YW1wbGUgaGlnaA0KPiA+PiB0ZW1wZXJh
-dHVyZXMgZHVyaW5nIHNvbGRlcmluZywgaG93IHdpbGwgdGhhdCBiZSBkZXRlY3RlZCB3aGVuIHVz
-aW5nIHRoZQ0KPiAibWFudWFsIG1vZGUiPw0KPiA+Pg0KPiA+PiBJZiB0aGF0J3MgdGhlIGpvYiBm
-b3IgdGhlIHBsYXRmb3JtIHNvZnR3YXJlIEkgZmFpbCB0byB1bmRlcnN0YW5kIHdoeQ0KPiA+PiB0
-aGUgUFJFX1NPTERFUklOR19QT1NUX1dSSVRFUyBzdGF0ZSBuZWVkcyB0byBleGlzdHMgYXQgYWxs
-IT8NCj4gPg0KPiA+IFRoZSBmbG93IG9mICJNYW51YWwgTW9kZSIgaXM6DQo+IA0KPiBUaGFua3Mg
-Zm9yIGNsYXJpZnlpbmcuDQo+IA0KPiA+DQo+ID4gW3NraXBwaW5nIGZldyBjb21tb24gc3RlcHNd
-DQo+ID4gLi4uDQo+ID4gSG9zdCAoUHJvZ3JhbW1lcikgc2V0cyBQUk9EVUNUSU9OX1NUQVRFX0FX
-QVJFTkVTUyB0byAweDENCj4gPiAoUFJFX1NPTERFUklOR19XUklURVMpDQo+ID4NCj4gPiBIb3N0
-IChQcm9ncmFtbWVyKSBwZXJmb3JtIHByZS1zb2xkZXJpbmcgZGF0YSBsb2FkaW5nIGFuZC9vciBk
-ZXZpY2UNCj4gPiBjb25maWd1cmF0aW9uDQo+ID4NCj4gPiBIb3N0IChQcm9ncmFtbWVyKSBzZXRz
-IFBST0RVQ1RJT05fU1RBVEVfQVdBUkVORVNTIFRvIDB4Mg0KPiA+IChQUkVfU09MREVSSU5HX1BP
-U1RfV1JJVEVTKS4NCj4gPiBObyB3cml0ZXMgcGFzdCB0aGlzIHBvaW50DQo+IA0KPiBUbyByZXBl
-YXQgbXkgcXVlc3Rpb246DQo+IA0KPiBfVW5sZXNzXyB0aGVyZSBhcmUgbm8gdmFsaWRhdGlvbiBv
-ZiB0aGUgZGV2aWNlIHNvbGRlcmluZyBwZXJmb3JtZWQgYnkgdGhlDQo+ICJwcm9ncmFtbWVyIHRv
-b2wiIHBhc3QgdGhpcyBwb2ludCwgd2h5IGNvdWxkbid0IHRoZSBob3N0IHNldA0KPiBQUk9EVUNU
-SU9OX1NUQVRFX0FXQVJFTkVTUyB0byAweDAgKE5PUk1BTCkgYXQgdGhpcyBwb2ludCBpbnN0ZWFk
-Pw0KPg0KDQpJZiBwcm9ncmFtbWVyIHNldCB0byBOT1JNQUwgYXQgdGhpcyBwb2ludCwgdGhlIHBy
-b2dyYW1tZWQgZGF0YSBjYW4gYmUgDQpjb3JydXB0ZWQgZHVyaW5nIHRoZSBzb2xkZXJpbmcgcHJv
-Y2Vzcy4NCmVNTUMgZGV2aWNlIHdpbGwgcHJvdGVjdCBwcm9ncmFtbWVkIGRhdGEgZHVyaW5nIHRo
-ZSBzb2xkZXJpbmcgcHJvY2VzcyBpbiANClBSRV9TT0xERVJJTkdfUE9TVF9XUklURVMgKDB4Mikg
-IG1vZGUuDQpCVFcsIHdoZW4gSSBhbSBzYXlpbmcgIkhvc3QgKFByb2dyYW1tZXIpIiAtIEkgaW50
-ZW5kIGV4dGVybmFsIHByb2dyYW1taW5nIG1hY2hpbmUuDQoNCj4gPg0KPiA+IERldmljZSBTb2xk
-ZXJpbmcNCj4gPg0KPiA+IEhvc3QgKGZpZWxkKSBzZXRzIFBST0RVQ1RJT05fU1RBVEVfQVdBUkVO
-RVNTIHRvIDB4MCAoTk9STUFMKSAuLi4NCj4gPg0KPiA+IEhvcGUgdGhpcyB3aWxsIGFuc3dlci4u
-Lg0KPiA+DQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0K
+In this patch driver should recognize if eMMC device (Rev >=5.0)
+was left in PRE_SOLDERING_POST_WRITES (0x02) state, and switch
+it to NORMAL (0x00).
+PRE_SOLDERING_POST_WRITES (0x02) state - represents a state
+where the device is in production process and the
+host (usually programmer) completed loading the content
+to the device.
+The host (usually programmer) sets the device to this state after
+loading the content and just before soldering.
+After soldering the device to the real host (not programmer),
+the device should be switched to NORMAL (0x00) mode.
+The NORMAL (0x00) mode of PSA register represents a state in
+which the device is running in the field and uses regular operations.
+Leaving device in PRE_SOLDERING_POST_WRITES (0x02) might cause
+unexpected behaviour of eMMC device.
+
+More details about PSA feature can be found in eMMC5.0 JEDEC spec (JESD84-B50.pdf):
+http://www.jedec.org/standards-documents/technology-focus-areas/flash-memory-ssds-ufs-emmc/e-mmc
+
+Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+---
+Changes in v2:
+ - Remove typo in patch code
+---
+ drivers/mmc/core/mmc.c   | 28 ++++++++++++++++++++++++++++
+ include/linux/mmc/card.h |  2 ++
+ include/linux/mmc/mmc.h  |  8 ++++++++
+ 3 files changed, 38 insertions(+)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 02ad792..3923c90 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -571,6 +571,16 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		card->ext_csd.ffu_capable =
+ 			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
+ 			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
++		card->ext_csd.psa =
++			ext_csd[EXT_CSD_PSA];
++		if (ext_csd[EXT_CSD_PSA_TIMEOUT] > 0) {
++			card->ext_csd.psa_timeout =
++				100 *
++				(1 << ext_csd[EXT_CSD_PSA_TIMEOUT]);
++		} else {
++			pr_warn("%s: EXT_CSD PSA Timeout is zero\n",
++					mmc_hostname(card->host));
++		}
+ 	}
+ out:
+ 	return err;
+@@ -1331,6 +1341,24 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		mmc_set_dsr(host);
+ 
+ 	/*
++	 * eMMC v5.0 or later
++	 * and Production State Awareness state is
++	 * EXT_CSD_PSA_POST_SOLDERING_WRITES (0x02)
++	 * The host should set the device to NORMAL mode
++	 */
++	if ((card->ext_csd.rev >= 7) &&
++		(card->ext_csd.psa == EXT_CSD_PSA_POST_SOLDERING_WRITES)) {
++		unsigned int timeout;
++
++		timeout = DIV_ROUND_UP(card->ext_csd.psa_timeout, 1000);
++		card->ext_csd.psa = EXT_CSD_PSA_NORMAL;
++		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++			EXT_CSD_PSA, card->ext_csd.psa, timeout);
++		if (err && err != -EBADMSG)
++			goto free_card;
++	}
++
++	/*
+ 	 * Select card, as all following commands rely on that.
+ 	 */
+ 	if (!mmc_host_is_spi(host)) {
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 4d69c00..09ac3b0 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -60,9 +60,11 @@ struct mmc_ext_csd {
+ 	u8			packed_event_en;
+ 	unsigned int		part_time;		/* Units: ms */
+ 	unsigned int		sa_timeout;		/* Units: 100ns */
++	unsigned int		psa_timeout;		/* Units: 100us */
+ 	unsigned int		generic_cmd6_time;	/* Units: 10ms */
+ 	unsigned int            power_off_longtime;     /* Units: ms */
+ 	u8			power_off_notification;	/* state */
++	u8			psa; /* production state awareness */
+ 	unsigned int		hs_max_dtr;
+ 	unsigned int		hs200_max_dtr;
+ #define MMC_HIGH_26_MAX_DTR	26000000
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 49ad7a9..458814d 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -285,6 +285,7 @@ struct _mmc_csd {
+ #define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
+ #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
+ #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
++#define EXT_CSD_PSA			133	/* R/W/E */
+ #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
+ #define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
+ #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+@@ -315,6 +316,7 @@ struct _mmc_csd {
+ #define EXT_CSD_PWR_CL_26_360		203	/* RO */
+ #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
+ #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
++#define EXT_CSD_PSA_TIMEOUT		218	/* RO */
+ #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
+ #define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
+ #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
+@@ -433,6 +435,12 @@ struct _mmc_csd {
+ #define EXT_CSD_BKOPS_LEVEL_2		0x2
+ 
+ /*
++ * PRODUCTION STATE AWARENESS fields
++ */
++#define EXT_CSD_PSA_NORMAL		0x00
++#define EXT_CSD_PSA_POST_SOLDERING_WRITES	0x02
++
++/*
+  * MMC_SWITCH access modes
+  */
+ 
+-- 
+2.1.0
+
