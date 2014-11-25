@@ -1,127 +1,103 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/1] Production State Awareness support in host side
-Date: Tue, 25 Nov 2014 11:57:23 +0100
-Message-ID: <CAPDyKFq+fhJudMFhA1SAUgwBTbvFRu5F_F0UZjjPr5HU4SAhNg@mail.gmail.com>
-References: <1416228726-8514-1-git-send-email-avi.shchislowski@sandisk.com>
-	<CAPDyKFrCpoSsgECvC=gnMp6WDYAV+2os-uhzp03K-=E+Yv10AA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333EC9D394@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CAPDyKFrzmW5ADf86Q2t18X8cUUovGF-fuhDpQBUSCiPf9g4OUA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333EC9F16C@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CAPDyKFp8PCBMOtXr-SkUDSw6CZ4c-4AnY-btex5WpU+B9u4Ppw@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333ECADFBA@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CAPDyKFoajPtSbQGATd59Cu4tSEDxaWcBvp39ndm41O778B0uRQ@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333ECB6DEC@SACMBXIP02.sdcorp.global.sandisk.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f44.google.com ([209.85.216.44]:57850 "EHLO
-	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754010AbaKYK5Y convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Nov 2014 05:57:24 -0500
-Received: by mail-qa0-f44.google.com with SMTP id i13so191194qae.3
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2014 02:57:24 -0800 (PST)
-In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED5333ECB6DEC@SACMBXIP02.sdcorp.global.sandisk.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Subject: [PATCH] mmc: sdhci: Fix sleep in atomic after inserting SD card
+Date: Tue, 25 Nov 2014 12:36:20 +0100
+Message-ID: <1416915380-29291-1-git-send-email-k.kozlowski@samsung.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Krzysztof Kozlowski <k.kozlowski@samsung.com>, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
 
-On 25 November 2014 at 10:17, Alex Lemberg <Alex.Lemberg@sandisk.com> w=
-rote:
->
->
->> -----Original Message-----
->> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
->> Sent: Monday, November 24, 2014 2:24 PM
->> To: Alex Lemberg
->> Cc: linux-mmc; Chris Ball; Avi Shchislowski
->> Subject: Re: [PATCH 1/1] Production State Awareness support in host =
-side
->>
->> [...]
->>
->> >> >>
->> >> >> I am not so sure we should finalize the production phase while
->> >> >> initializing the eMMC card like this.
->> >> >>
->> >> >> Certainly we should check the PSA state, but I think we should
->> >> >> return an error if we think the device hasn=E2=80=99t complete=
-d
->> >> >> production. It should be the responsibility for the "programmi=
-ng
->> >> >> tools" to finalize the
->> >> production, right!?
->> >> >
->> >> > According to eMMC spec, the switch to NORMAL should be done aft=
-er
->> >> > device
->> >> soldering to final host (not programmer).
->> >> > Please refer to "Figure 32 =E2=80=94 Recommended Soldering proc=
-edure" in
->> >> eMMC5.0 specification document.
->> >> > Also, since we are dealing with only "field" host here, we are =
-not
->> >> touching/switching any other modes of PSA, but only Normal (field=
-).
->> >> > This code should run only once - in the beginning of device lif=
-e cycle.
->> >>
->> >> I get your point, but I am not so sure.
->> >>
->> >> To me, I wouldn't trust that the platform binaries has been
->> >> successfully programmed to the device, unless the programmer tool
->> >> takes care of switching the device to "normal".
->> >>
->> >
->> > Thanks Ulf!
->> > Also, please note - PSA PRE_SOLDERING_POST_WRITES mode intent to s=
-ave
->> > device pre-loaded content during the soldering process.
->> > Flash data can be corrupted due to soldering procedure high
->> > temperature. So switching to Normal cannot be done by external
->> programmer.
->>
->> So, if flash data will be corrupted due to for example high temperat=
-ures during
->> soldering, how will that be detected when using the "manual mode"?
->>
->> If that's the job for the platform software I fail to understand why=
- the
->> PRE_SOLDERING_POST_WRITES state needs to exists at all!?
->
-> The flow of "Manual Mode" is:
+Sleep in atomic context happened on Trats2 board after inserting or
+removing SD card because mmc_gpio_get_cd() was called under spin lock.
 
-Thanks for clarifying.
+Fix this by moving card detection earlier, before acquiring spin lock.
+The mmc_gpio_get_cd() call does not have to be protected by spin lock
+because it does not access any sdhci internal data.
+The sdhci_do_get_cd() call access host flags (SDHCI_DEVICE_DEAD). After
+moving it out side of spin lock it could theoretically race with driver
+removal but still there is no actual protection against manual card
+eject.
 
->
-> [skipping few common steps]
-> ...
-> Host (Programmer) sets PRODUCTION_STATE_AWARENESS
-> to 0x1 (PRE_SOLDERING_WRITES)
->
-> Host (Programmer) perform pre-soldering data loading
-> and/or device configuration
->
-> Host (Programmer) sets PRODUCTION_STATE_AWARENESS
-> To 0x2 (PRE_SOLDERING_POST_WRITES).
-> No writes past this point
+Dmesg:
+[   41.663414] BUG: sleeping function called from invalid context at drivers/gpio/gpiolib.c:1511
+[   41.670469] in_atomic(): 1, irqs_disabled(): 128, pid: 30, name: kworker/u8:1
+[   41.677580] INFO: lockdep is turned off.
+[   41.681486] irq event stamp: 61972
+[   41.684872] hardirqs last  enabled at (61971): [<c0490ee0>] _raw_spin_unlock_irq+0x24/0x5c
+[   41.693118] hardirqs last disabled at (61972): [<c04907ac>] _raw_spin_lock_irq+0x18/0x54
+[   41.701190] softirqs last  enabled at (61648): [<c0026fd4>] __do_softirq+0x234/0x2c8
+[   41.708914] softirqs last disabled at (61631): [<c00273a0>] irq_exit+0xd0/0x114
+[   41.716206] Preemption disabled at:[<  (null)>]   (null)
+[   41.721500]
+[   41.722985] CPU: 3 PID: 30 Comm: kworker/u8:1 Tainted: G        W      3.18.0-rc5-next-20141121 #883
+[   41.732111] Workqueue: kmmcd mmc_rescan
+[   41.735945] [<c0014d2c>] (unwind_backtrace) from [<c0011c80>] (show_stack+0x10/0x14)
+[   41.743661] [<c0011c80>] (show_stack) from [<c0489d14>] (dump_stack+0x70/0xbc)
+[   41.750867] [<c0489d14>] (dump_stack) from [<c0228b74>] (gpiod_get_raw_value_cansleep+0x18/0x30)
+[   41.759628] [<c0228b74>] (gpiod_get_raw_value_cansleep) from [<c03646e8>] (mmc_gpio_get_cd+0x38/0x58)
+[   41.768821] [<c03646e8>] (mmc_gpio_get_cd) from [<c036d378>] (sdhci_request+0x50/0x1a4)
+[   41.776808] [<c036d378>] (sdhci_request) from [<c0357934>] (mmc_start_request+0x138/0x268)
+[   41.785051] [<c0357934>] (mmc_start_request) from [<c0357cc8>] (mmc_wait_for_req+0x58/0x1a0)
+[   41.793469] [<c0357cc8>] (mmc_wait_for_req) from [<c0357e68>] (mmc_wait_for_cmd+0x58/0x78)
+[   41.801714] [<c0357e68>] (mmc_wait_for_cmd) from [<c0361c00>] (mmc_io_rw_direct_host+0x98/0x124)
+[   41.810480] [<c0361c00>] (mmc_io_rw_direct_host) from [<c03620f8>] (sdio_reset+0x2c/0x64)
+[   41.818641] [<c03620f8>] (sdio_reset) from [<c035a3d8>] (mmc_rescan+0x254/0x2e4)
+[   41.826028] [<c035a3d8>] (mmc_rescan) from [<c003a0e0>] (process_one_work+0x180/0x3f4)
+[   41.833920] [<c003a0e0>] (process_one_work) from [<c003a3bc>] (worker_thread+0x34/0x4b0)
+[   41.841991] [<c003a3bc>] (worker_thread) from [<c003fed8>] (kthread+0xe4/0x104)
+[   41.849285] [<c003fed8>] (kthread) from [<c000f268>] (ret_from_fork+0x14/0x2c)
+[   42.038276] mmc0: new high speed SDHC card at address 1234
+[   42.043663] mmcblk1: mmc0:1234 SA32G 29.3 GiB
+[   42.054667]  mmcblk1: p1 p2
 
-To repeat my question:
+Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Fixes: 94144a465dd0 ("mmc: sdhci: add get_cd() implementation")
+Cc: <stable@vger.kernel.org>
+---
+ drivers/mmc/host/sdhci.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-_Unless_ there are no validation of the device soldering performed by
-the "programmer tool" past this point, why couldn't the host set
-PRODUCTION_STATE_AWARENESS to 0x0 (NORMAL) at this point instead?
-
->
-> Device Soldering
->
-> Host (field) sets PRODUCTION_STATE_AWARENESS
-> to 0x0 (NORMAL)
-> ...
->
-> Hope this will answer...
->
-
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 73de62a58d70..8ac79d085869 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1353,6 +1353,8 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 
+ 	sdhci_runtime_pm_get(host);
+ 
++	present = mmc_gpio_get_cd(host->mmc);
++
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+ 	WARN_ON(host->mrq != NULL);
+@@ -1381,7 +1383,6 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	 *     zero: cd-gpio is used, and card is removed
+ 	 *     one: cd-gpio is used, and card is present
+ 	 */
+-	present = mmc_gpio_get_cd(host->mmc);
+ 	if (present < 0) {
+ 		/* If polling, assume that the card is always present. */
+ 		if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+@@ -2110,15 +2111,18 @@ static void sdhci_card_event(struct mmc_host *mmc)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+ 	unsigned long flags;
++	int present;
+ 
+ 	/* First check if client has provided their own card event */
+ 	if (host->ops->card_event)
+ 		host->ops->card_event(host);
+ 
++	present = sdhci_do_get_cd(host);
++
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+ 	/* Check host->mrq first in case we are runtime suspended */
+-	if (host->mrq && !sdhci_do_get_cd(host)) {
++	if (host->mrq && !present) {
+ 		pr_err("%s: Card removed during transfer!\n",
+ 			mmc_hostname(host->mmc));
+ 		pr_err("%s: Resetting controller.\n",
+-- 
+1.9.1
