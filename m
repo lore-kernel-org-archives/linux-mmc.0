@@ -1,103 +1,53 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: [PATCH] mmc: sdhci: Fix sleep in atomic after inserting SD card
-Date: Tue, 25 Nov 2014 12:36:20 +0100
-Message-ID: <1416915380-29291-1-git-send-email-k.kozlowski@samsung.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Krzysztof Kozlowski <k.kozlowski@samsung.com>, stable@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] mmc: omap_hsmmc: Fix UHS card with DDR50 support
+Date: Tue, 25 Nov 2014 13:22:20 +0100
+Message-ID: <1416918140-24385-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-la0-f52.google.com ([209.85.215.52]:40937 "EHLO
+	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753390AbaKYMW0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Nov 2014 07:22:26 -0500
+Received: by mail-la0-f52.google.com with SMTP id q1so395471lam.39
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2014 04:22:24 -0800 (PST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>
 
-Sleep in atomic context happened on Trats2 board after inserting or
-removing SD card because mmc_gpio_get_cd() was called under spin lock.
+The commit, mmc: omap: clarify DDR timing mode between SD-UHS and eMMC,
+switched omap_hsmmc to support MMC DDR mode instead of UHS DDR50 mode.
 
-Fix this by moving card detection earlier, before acquiring spin lock.
-The mmc_gpio_get_cd() call does not have to be protected by spin lock
-because it does not access any sdhci internal data.
-The sdhci_do_get_cd() call access host flags (SDHCI_DEVICE_DEAD). After
-moving it out side of spin lock it could theoretically race with driver
-removal but still there is no actual protection against manual card
-eject.
+Add UHS DDR50 mode again and this time let's also keep the MMC DDR mode.
 
-Dmesg:
-[   41.663414] BUG: sleeping function called from invalid context at drivers/gpio/gpiolib.c:1511
-[   41.670469] in_atomic(): 1, irqs_disabled(): 128, pid: 30, name: kworker/u8:1
-[   41.677580] INFO: lockdep is turned off.
-[   41.681486] irq event stamp: 61972
-[   41.684872] hardirqs last  enabled at (61971): [<c0490ee0>] _raw_spin_unlock_irq+0x24/0x5c
-[   41.693118] hardirqs last disabled at (61972): [<c04907ac>] _raw_spin_lock_irq+0x18/0x54
-[   41.701190] softirqs last  enabled at (61648): [<c0026fd4>] __do_softirq+0x234/0x2c8
-[   41.708914] softirqs last disabled at (61631): [<c00273a0>] irq_exit+0xd0/0x114
-[   41.716206] Preemption disabled at:[<  (null)>]   (null)
-[   41.721500]
-[   41.722985] CPU: 3 PID: 30 Comm: kworker/u8:1 Tainted: G        W      3.18.0-rc5-next-20141121 #883
-[   41.732111] Workqueue: kmmcd mmc_rescan
-[   41.735945] [<c0014d2c>] (unwind_backtrace) from [<c0011c80>] (show_stack+0x10/0x14)
-[   41.743661] [<c0011c80>] (show_stack) from [<c0489d14>] (dump_stack+0x70/0xbc)
-[   41.750867] [<c0489d14>] (dump_stack) from [<c0228b74>] (gpiod_get_raw_value_cansleep+0x18/0x30)
-[   41.759628] [<c0228b74>] (gpiod_get_raw_value_cansleep) from [<c03646e8>] (mmc_gpio_get_cd+0x38/0x58)
-[   41.768821] [<c03646e8>] (mmc_gpio_get_cd) from [<c036d378>] (sdhci_request+0x50/0x1a4)
-[   41.776808] [<c036d378>] (sdhci_request) from [<c0357934>] (mmc_start_request+0x138/0x268)
-[   41.785051] [<c0357934>] (mmc_start_request) from [<c0357cc8>] (mmc_wait_for_req+0x58/0x1a0)
-[   41.793469] [<c0357cc8>] (mmc_wait_for_req) from [<c0357e68>] (mmc_wait_for_cmd+0x58/0x78)
-[   41.801714] [<c0357e68>] (mmc_wait_for_cmd) from [<c0361c00>] (mmc_io_rw_direct_host+0x98/0x124)
-[   41.810480] [<c0361c00>] (mmc_io_rw_direct_host) from [<c03620f8>] (sdio_reset+0x2c/0x64)
-[   41.818641] [<c03620f8>] (sdio_reset) from [<c035a3d8>] (mmc_rescan+0x254/0x2e4)
-[   41.826028] [<c035a3d8>] (mmc_rescan) from [<c003a0e0>] (process_one_work+0x180/0x3f4)
-[   41.833920] [<c003a0e0>] (process_one_work) from [<c003a3bc>] (worker_thread+0x34/0x4b0)
-[   41.841991] [<c003a3bc>] (worker_thread) from [<c003fed8>] (kthread+0xe4/0x104)
-[   41.849285] [<c003fed8>] (kthread) from [<c000f268>] (ret_from_fork+0x14/0x2c)
-[   42.038276] mmc0: new high speed SDHC card at address 1234
-[   42.043663] mmcblk1: mmc0:1234 SA32G 29.3 GiB
-[   42.054667]  mmcblk1: p1 p2
-
-Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Fixes: 94144a465dd0 ("mmc: sdhci: add get_cd() implementation")
-Cc: <stable@vger.kernel.org>
+Fixes: 5438ad95a57c (mmc: omap: clarify DDR timing mode between SD-UHS and eMMC)
+Reported-by: Kishon Vijay Abraham I <kishon@ti.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/sdhci.c | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 73de62a58d70..8ac79d085869 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1353,6 +1353,8 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 	sdhci_runtime_pm_get(host);
- 
-+	present = mmc_gpio_get_cd(host->mmc);
-+
- 	spin_lock_irqsave(&host->lock, flags);
- 
- 	WARN_ON(host->mrq != NULL);
-@@ -1381,7 +1383,6 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	 *     zero: cd-gpio is used, and card is removed
- 	 *     one: cd-gpio is used, and card is present
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 82b40b8..7c71dcd 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -628,6 +628,7 @@ static void omap_hsmmc_set_clock(struct omap_hsmmc_host *host)
  	 */
--	present = mmc_gpio_get_cd(host->mmc);
- 	if (present < 0) {
- 		/* If polling, assume that the card is always present. */
- 		if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
-@@ -2110,15 +2111,18 @@ static void sdhci_card_event(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
- 	unsigned long flags;
-+	int present;
+ 	if ((mmc_pdata(host)->features & HSMMC_HAS_HSPE_SUPPORT) &&
+ 	    (ios->timing != MMC_TIMING_MMC_DDR52) &&
++	    (ios->timing != MMC_TIMING_UHS_DDR50) &&
+ 	    ((OMAP_HSMMC_READ(host->base, CAPA) & HSS) == HSS)) {
+ 		regval = OMAP_HSMMC_READ(host->base, HCTL);
+ 		if (clkdiv && (clk_get_rate(host->fclk)/clkdiv) > 25000000)
+@@ -647,7 +648,8 @@ static void omap_hsmmc_set_bus_width(struct omap_hsmmc_host *host)
+ 	u32 con;
  
- 	/* First check if client has provided their own card event */
- 	if (host->ops->card_event)
- 		host->ops->card_event(host);
- 
-+	present = sdhci_do_get_cd(host);
-+
- 	spin_lock_irqsave(&host->lock, flags);
- 
- 	/* Check host->mrq first in case we are runtime suspended */
--	if (host->mrq && !sdhci_do_get_cd(host)) {
-+	if (host->mrq && !present) {
- 		pr_err("%s: Card removed during transfer!\n",
- 			mmc_hostname(host->mmc));
- 		pr_err("%s: Resetting controller.\n",
+ 	con = OMAP_HSMMC_READ(host->base, CON);
+-	if (ios->timing == MMC_TIMING_MMC_DDR52)
++	if (ios->timing == MMC_TIMING_MMC_DDR52 ||
++	    ios->timing == MMC_TIMING_UHS_DDR50)
+ 		con |= DDR;	/* configure in DDR mode */
+ 	else
+ 		con &= ~DDR;
 -- 
 1.9.1
+
