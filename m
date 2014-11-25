@@ -1,119 +1,96 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: [PATCH] mmc: atmel-mci: use probe deferring if dma controller is not ready yet
-Date: Tue, 25 Nov 2014 15:25:41 +0100
-Message-ID: <1416925541-6857-1-git-send-email-ludovic.desroches@atmel.com>
-References: <CAPDyKFq-0EaGSf9Mn7aMa1s9CCP5hxqRCkKrZrAnSs-h5OFmxw@mail.gmail.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [PATCH 1/1] Production State Awareness support in host side
+Date: Tue, 25 Nov 2014 14:55:36 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333ECB8C7F@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <1416228726-8514-1-git-send-email-avi.shchislowski@sandisk.com>
+	<CAPDyKFrCpoSsgECvC=gnMp6WDYAV+2os-uhzp03K-=E+Yv10AA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333EC9D394@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CAPDyKFrzmW5ADf86Q2t18X8cUUovGF-fuhDpQBUSCiPf9g4OUA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333EC9F16C@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CAPDyKFp8PCBMOtXr-SkUDSw6CZ4c-4AnY-btex5WpU+B9u4Ppw@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333ECADFBA@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CAPDyKFoajPtSbQGATd59Cu4tSEDxaWcBvp39ndm41O778B0uRQ@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333ECB6DEC@SACMBXIP02.sdcorp.global.sandisk.com>
+ <CAPDyKFq+fhJudMFhA1SAUgwBTbvFRu5F_F0UZjjPr5HU4SAhNg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:8645 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751463AbaKYOZo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Nov 2014 09:25:44 -0500
-In-Reply-To: <CAPDyKFq-0EaGSf9Mn7aMa1s9CCP5hxqRCkKrZrAnSs-h5OFmxw@mail.gmail.com>
+Received: from mail-bn1on0053.outbound.protection.outlook.com ([157.56.110.53]:22464
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751209AbaKYOzo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 25 Nov 2014 09:55:44 -0500
+In-Reply-To: <CAPDyKFq+fhJudMFhA1SAUgwBTbvFRu5F_F0UZjjPr5HU4SAhNg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, chris@printf.net, nicolas.ferre@atmel.com, arnd@arndb.de, Ludovic Desroches <ludovic.desroches@atmel.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
 
-Return probe defer if requesting a dma channel without a dma controller
-probed.
-
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
----
-
-Hi Ulf,
-
-I didn't send the whole set of patches for this small change, tell me if you
-want a new series.
-
- drivers/mmc/host/atmel-mci.c | 49 ++++++++++++++++++++++----------------------
- 1 file changed, 25 insertions(+), 24 deletions(-)
-
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 28546c3..f4daef9 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -2265,29 +2265,26 @@ static void atmci_cleanup_slot(struct atmel_mci_slot *slot,
- 	mmc_free_host(slot->mmc);
- }
- 
--static bool atmci_configure_dma(struct atmel_mci *host)
-+static int atmci_configure_dma(struct atmel_mci *host)
- {
--	if (host == NULL)
--		return false;
-+	int ret = 0;
- 
--	host->dma.chan = dma_request_slave_channel(&host->pdev->dev, "rxtx");
--	if (!host->dma.chan) {
--		dev_warn(&host->pdev->dev, "no DMA channel available\n");
--		return false;
--	} else {
--		dev_info(&host->pdev->dev,
--					"using %s for DMA transfers\n",
--					dma_chan_name(host->dma.chan));
--
--		host->dma_conf.src_addr = host->mapbase + ATMCI_RDR;
--		host->dma_conf.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
--		host->dma_conf.src_maxburst = 1;
--		host->dma_conf.dst_addr = host->mapbase + ATMCI_TDR;
--		host->dma_conf.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
--		host->dma_conf.dst_maxburst = 1;
--		host->dma_conf.device_fc = false;
--		return true;
--	}
-+	host->dma.chan = dma_request_slave_channel_reason(&host->pdev->dev, "rxtx");
-+	if (IS_ERR(host->dma.chan))
-+		return PTR_ERR(host->dma.chan);
-+
-+	dev_info(&host->pdev->dev, "using %s for DMA transfers\n",
-+		 dma_chan_name(host->dma.chan));
-+
-+	host->dma_conf.src_addr = host->mapbase + ATMCI_RDR;
-+	host->dma_conf.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
-+	host->dma_conf.src_maxburst = 1;
-+	host->dma_conf.dst_addr = host->mapbase + ATMCI_TDR;
-+	host->dma_conf.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
-+	host->dma_conf.dst_maxburst = 1;
-+	host->dma_conf.device_fc = false;
-+
-+	return ret;
- }
- 
- /*
-@@ -2403,7 +2400,10 @@ static int atmci_probe(struct platform_device *pdev)
- 
- 	/* Get MCI capabilities and set operations according to it */
- 	atmci_get_cap(host);
--	if (atmci_configure_dma(host)) {
-+	ret = atmci_configure_dma(host);
-+	if (ret == -EPROBE_DEFER)
-+		goto err_dma_probe_defer;
-+	if (ret == 0) {
- 		host->prepare_data = &atmci_prepare_data_dma;
- 		host->submit_data = &atmci_submit_data_dma;
- 		host->stop_transfer = &atmci_stop_transfer_dma;
-@@ -2474,8 +2474,9 @@ err_dma_alloc:
- 	}
- err_init_slot:
- 	del_timer_sync(&host->timer);
--	if (host->dma.chan)
-+	if (!IS_ERR(host->dma.chan))
- 		dma_release_channel(host->dma.chan);
-+err_dma_probe_defer:
- 	free_irq(irq, host);
- 	return ret;
- }
-@@ -2501,7 +2502,7 @@ static int atmci_remove(struct platform_device *pdev)
- 	clk_disable_unprepare(host->mck);
- 
- 	del_timer_sync(&host->timer);
--	if (host->dma.chan)
-+	if (!IS_ERR(host->dma.chan))
- 		dma_release_channel(host->dma.chan);
- 
- 	free_irq(platform_get_irq(pdev, 0), host);
--- 
-2.0.3
-
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
+aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBUdWVzZGF5LCBOb3ZlbWJlciAy
+NSwgMjAxNCAxMjo1NyBQTQ0KPiBUbzogQWxleCBMZW1iZXJnDQo+IENjOiBsaW51eC1tbWM7IENo
+cmlzIEJhbGw7IEF2aSBTaGNoaXNsb3dza2kNCj4gU3ViamVjdDogUmU6IFtQQVRDSCAxLzFdIFBy
+b2R1Y3Rpb24gU3RhdGUgQXdhcmVuZXNzIHN1cHBvcnQgaW4gaG9zdCBzaWRlDQo+IA0KPiBPbiAy
+NSBOb3ZlbWJlciAyMDE0IGF0IDEwOjE3LCBBbGV4IExlbWJlcmcgPEFsZXguTGVtYmVyZ0BzYW5k
+aXNrLmNvbT4NCj4gd3JvdGU6DQo+ID4NCj4gPg0KPiA+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
+LS0tLQ0KPiA+PiBGcm9tOiBVbGYgSGFuc3NvbiBbbWFpbHRvOnVsZi5oYW5zc29uQGxpbmFyby5v
+cmddDQo+ID4+IFNlbnQ6IE1vbmRheSwgTm92ZW1iZXIgMjQsIDIwMTQgMjoyNCBQTQ0KPiA+PiBU
+bzogQWxleCBMZW1iZXJnDQo+ID4+IENjOiBsaW51eC1tbWM7IENocmlzIEJhbGw7IEF2aSBTaGNo
+aXNsb3dza2kNCj4gPj4gU3ViamVjdDogUmU6IFtQQVRDSCAxLzFdIFByb2R1Y3Rpb24gU3RhdGUg
+QXdhcmVuZXNzIHN1cHBvcnQgaW4gaG9zdA0KPiA+PiBzaWRlDQo+ID4+DQo+ID4+IFsuLi5dDQo+
+ID4+DQo+ID4+ID4+ID4+DQo+ID4+ID4+ID4+IEkgYW0gbm90IHNvIHN1cmUgd2Ugc2hvdWxkIGZp
+bmFsaXplIHRoZSBwcm9kdWN0aW9uIHBoYXNlIHdoaWxlDQo+ID4+ID4+ID4+IGluaXRpYWxpemlu
+ZyB0aGUgZU1NQyBjYXJkIGxpa2UgdGhpcy4NCj4gPj4gPj4gPj4NCj4gPj4gPj4gPj4gQ2VydGFp
+bmx5IHdlIHNob3VsZCBjaGVjayB0aGUgUFNBIHN0YXRlLCBidXQgSSB0aGluayB3ZSBzaG91bGQN
+Cj4gPj4gPj4gPj4gcmV0dXJuIGFuIGVycm9yIGlmIHdlIHRoaW5rIHRoZSBkZXZpY2UgaGFzbuKA
+mXQgY29tcGxldGVkDQo+ID4+ID4+ID4+IHByb2R1Y3Rpb24uIEl0IHNob3VsZCBiZSB0aGUgcmVz
+cG9uc2liaWxpdHkgZm9yIHRoZQ0KPiA+PiA+PiA+PiAicHJvZ3JhbW1pbmcgdG9vbHMiIHRvIGZp
+bmFsaXplIHRoZQ0KPiA+PiA+PiBwcm9kdWN0aW9uLCByaWdodCE/DQo+ID4+ID4+ID4NCj4gPj4g
+Pj4gPiBBY2NvcmRpbmcgdG8gZU1NQyBzcGVjLCB0aGUgc3dpdGNoIHRvIE5PUk1BTCBzaG91bGQg
+YmUgZG9uZQ0KPiA+PiA+PiA+IGFmdGVyIGRldmljZQ0KPiA+PiA+PiBzb2xkZXJpbmcgdG8gZmlu
+YWwgaG9zdCAobm90IHByb2dyYW1tZXIpLg0KPiA+PiA+PiA+IFBsZWFzZSByZWZlciB0byAiRmln
+dXJlIDMyIOKAlCBSZWNvbW1lbmRlZCBTb2xkZXJpbmcgcHJvY2VkdXJlIiBpbg0KPiA+PiA+PiBl
+TU1DNS4wIHNwZWNpZmljYXRpb24gZG9jdW1lbnQuDQo+ID4+ID4+ID4gQWxzbywgc2luY2Ugd2Ug
+YXJlIGRlYWxpbmcgd2l0aCBvbmx5ICJmaWVsZCIgaG9zdCBoZXJlLCB3ZSBhcmUNCj4gPj4gPj4g
+PiBub3QNCj4gPj4gPj4gdG91Y2hpbmcvc3dpdGNoaW5nIGFueSBvdGhlciBtb2RlcyBvZiBQU0Es
+IGJ1dCBvbmx5IE5vcm1hbCAoZmllbGQpLg0KPiA+PiA+PiA+IFRoaXMgY29kZSBzaG91bGQgcnVu
+IG9ubHkgb25jZSAtIGluIHRoZSBiZWdpbm5pbmcgb2YgZGV2aWNlIGxpZmUgY3ljbGUuDQo+ID4+
+ID4+DQo+ID4+ID4+IEkgZ2V0IHlvdXIgcG9pbnQsIGJ1dCBJIGFtIG5vdCBzbyBzdXJlLg0KPiA+
+PiA+Pg0KPiA+PiA+PiBUbyBtZSwgSSB3b3VsZG4ndCB0cnVzdCB0aGF0IHRoZSBwbGF0Zm9ybSBi
+aW5hcmllcyBoYXMgYmVlbg0KPiA+PiA+PiBzdWNjZXNzZnVsbHkgcHJvZ3JhbW1lZCB0byB0aGUg
+ZGV2aWNlLCB1bmxlc3MgdGhlIHByb2dyYW1tZXIgdG9vbA0KPiA+PiA+PiB0YWtlcyBjYXJlIG9m
+IHN3aXRjaGluZyB0aGUgZGV2aWNlIHRvICJub3JtYWwiLg0KPiA+PiA+Pg0KPiA+PiA+DQo+ID4+
+ID4gVGhhbmtzIFVsZiENCj4gPj4gPiBBbHNvLCBwbGVhc2Ugbm90ZSAtIFBTQSBQUkVfU09MREVS
+SU5HX1BPU1RfV1JJVEVTIG1vZGUgaW50ZW50IHRvDQo+ID4+ID4gc2F2ZSBkZXZpY2UgcHJlLWxv
+YWRlZCBjb250ZW50IGR1cmluZyB0aGUgc29sZGVyaW5nIHByb2Nlc3MuDQo+ID4+ID4gRmxhc2gg
+ZGF0YSBjYW4gYmUgY29ycnVwdGVkIGR1ZSB0byBzb2xkZXJpbmcgcHJvY2VkdXJlIGhpZ2gNCj4g
+Pj4gPiB0ZW1wZXJhdHVyZS4gU28gc3dpdGNoaW5nIHRvIE5vcm1hbCBjYW5ub3QgYmUgZG9uZSBi
+eSBleHRlcm5hbA0KPiA+PiBwcm9ncmFtbWVyLg0KPiA+Pg0KPiA+PiBTbywgaWYgZmxhc2ggZGF0
+YSB3aWxsIGJlIGNvcnJ1cHRlZCBkdWUgdG8gZm9yIGV4YW1wbGUgaGlnaA0KPiA+PiB0ZW1wZXJh
+dHVyZXMgZHVyaW5nIHNvbGRlcmluZywgaG93IHdpbGwgdGhhdCBiZSBkZXRlY3RlZCB3aGVuIHVz
+aW5nIHRoZQ0KPiAibWFudWFsIG1vZGUiPw0KPiA+Pg0KPiA+PiBJZiB0aGF0J3MgdGhlIGpvYiBm
+b3IgdGhlIHBsYXRmb3JtIHNvZnR3YXJlIEkgZmFpbCB0byB1bmRlcnN0YW5kIHdoeQ0KPiA+PiB0
+aGUgUFJFX1NPTERFUklOR19QT1NUX1dSSVRFUyBzdGF0ZSBuZWVkcyB0byBleGlzdHMgYXQgYWxs
+IT8NCj4gPg0KPiA+IFRoZSBmbG93IG9mICJNYW51YWwgTW9kZSIgaXM6DQo+IA0KPiBUaGFua3Mg
+Zm9yIGNsYXJpZnlpbmcuDQo+IA0KPiA+DQo+ID4gW3NraXBwaW5nIGZldyBjb21tb24gc3RlcHNd
+DQo+ID4gLi4uDQo+ID4gSG9zdCAoUHJvZ3JhbW1lcikgc2V0cyBQUk9EVUNUSU9OX1NUQVRFX0FX
+QVJFTkVTUyB0byAweDENCj4gPiAoUFJFX1NPTERFUklOR19XUklURVMpDQo+ID4NCj4gPiBIb3N0
+IChQcm9ncmFtbWVyKSBwZXJmb3JtIHByZS1zb2xkZXJpbmcgZGF0YSBsb2FkaW5nIGFuZC9vciBk
+ZXZpY2UNCj4gPiBjb25maWd1cmF0aW9uDQo+ID4NCj4gPiBIb3N0IChQcm9ncmFtbWVyKSBzZXRz
+IFBST0RVQ1RJT05fU1RBVEVfQVdBUkVORVNTIFRvIDB4Mg0KPiA+IChQUkVfU09MREVSSU5HX1BP
+U1RfV1JJVEVTKS4NCj4gPiBObyB3cml0ZXMgcGFzdCB0aGlzIHBvaW50DQo+IA0KPiBUbyByZXBl
+YXQgbXkgcXVlc3Rpb246DQo+IA0KPiBfVW5sZXNzXyB0aGVyZSBhcmUgbm8gdmFsaWRhdGlvbiBv
+ZiB0aGUgZGV2aWNlIHNvbGRlcmluZyBwZXJmb3JtZWQgYnkgdGhlDQo+ICJwcm9ncmFtbWVyIHRv
+b2wiIHBhc3QgdGhpcyBwb2ludCwgd2h5IGNvdWxkbid0IHRoZSBob3N0IHNldA0KPiBQUk9EVUNU
+SU9OX1NUQVRFX0FXQVJFTkVTUyB0byAweDAgKE5PUk1BTCkgYXQgdGhpcyBwb2ludCBpbnN0ZWFk
+Pw0KPg0KDQpJZiBwcm9ncmFtbWVyIHNldCB0byBOT1JNQUwgYXQgdGhpcyBwb2ludCwgdGhlIHBy
+b2dyYW1tZWQgZGF0YSBjYW4gYmUgDQpjb3JydXB0ZWQgZHVyaW5nIHRoZSBzb2xkZXJpbmcgcHJv
+Y2Vzcy4NCmVNTUMgZGV2aWNlIHdpbGwgcHJvdGVjdCBwcm9ncmFtbWVkIGRhdGEgZHVyaW5nIHRo
+ZSBzb2xkZXJpbmcgcHJvY2VzcyBpbiANClBSRV9TT0xERVJJTkdfUE9TVF9XUklURVMgKDB4Mikg
+IG1vZGUuDQpCVFcsIHdoZW4gSSBhbSBzYXlpbmcgIkhvc3QgKFByb2dyYW1tZXIpIiAtIEkgaW50
+ZW5kIGV4dGVybmFsIHByb2dyYW1taW5nIG1hY2hpbmUuDQoNCj4gPg0KPiA+IERldmljZSBTb2xk
+ZXJpbmcNCj4gPg0KPiA+IEhvc3QgKGZpZWxkKSBzZXRzIFBST0RVQ1RJT05fU1RBVEVfQVdBUkVO
+RVNTIHRvIDB4MCAoTk9STUFMKSAuLi4NCj4gPg0KPiA+IEhvcGUgdGhpcyB3aWxsIGFuc3dlci4u
+Lg0KPiA+DQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0K
