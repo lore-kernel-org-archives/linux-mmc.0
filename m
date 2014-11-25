@@ -1,223 +1,119 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 1/2] mmc: core: turn hw_reset into a bus_ops
-Date: Tue, 25 Nov 2014 14:48:37 +0100
-Message-ID: <CAPDyKFrQySfFkR1VMK19gBwpO=97=V_U-HfmWpVHFMfzaVLwgw@mail.gmail.com>
-References: <1416827198-29820-1-git-send-email-johanru@axis.com>
-	<1416827198-29820-2-git-send-email-johanru@axis.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [PATCH] mmc: atmel-mci: use probe deferring if dma controller is not ready yet
+Date: Tue, 25 Nov 2014 15:25:41 +0100
+Message-ID: <1416925541-6857-1-git-send-email-ludovic.desroches@atmel.com>
+References: <CAPDyKFq-0EaGSf9Mn7aMa1s9CCP5hxqRCkKrZrAnSs-h5OFmxw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f47.google.com ([209.85.216.47]:45778 "EHLO
-	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750888AbaKYNsi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Nov 2014 08:48:38 -0500
-Received: by mail-qa0-f47.google.com with SMTP id s7so373385qap.20
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2014 05:48:37 -0800 (PST)
-In-Reply-To: <1416827198-29820-2-git-send-email-johanru@axis.com>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:8645 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751463AbaKYOZo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Nov 2014 09:25:44 -0500
+In-Reply-To: <CAPDyKFq-0EaGSf9Mn7aMa1s9CCP5hxqRCkKrZrAnSs-h5OFmxw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <johan.rudholm@axis.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Adrian Hunter <adrian.hunter@intel.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>, Johan Rudholm <johanru@axis.com>
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, chris@printf.net, nicolas.ferre@atmel.com, arnd@arndb.de, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-On 24 November 2014 at 12:06, Johan Rudholm <johan.rudholm@axis.com> wrote:
-> Move the (e)MMC specific hw_reset code from core.c into mmc.c and call
-> it from the new bus_ops member hw_reset. This also lets us add code
-> for resetting SD cards as well.
->
-> Signed-off-by: Johan Rudholm <johanru@axis.com>
-> ---
->  drivers/mmc/core/core.c |   56 +++++++++++++++-------------------------------
->  drivers/mmc/core/core.h |    5 ++++
->  drivers/mmc/core/mmc.c  |   40 +++++++++++++++++++++++++++++++++
->  3 files changed, 63 insertions(+), 38 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 9584bff..492b3e5 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2245,67 +2245,47 @@ static void mmc_hw_reset_for_init(struct mmc_host *host)
->         mmc_host_clk_release(host);
->  }
->
-> -int mmc_can_reset(struct mmc_card *card)
-> -{
-> -       u8 rst_n_function;
-> -
-> -       if (!mmc_card_mmc(card))
-> -               return 0;
-> -       rst_n_function = card->ext_csd.rst_n_function;
-> -       if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
-> -               return 0;
-> -       return 1;
-> -}
-> -EXPORT_SYMBOL(mmc_can_reset);
+Return probe defer if requesting a dma channel without a dma controller
+probed.
 
-Isn't the mmc_can_reset() function used from mmc_test.c?
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
 
-> -
-> +/* Reset card in a bus-specific way */
->  static int mmc_do_hw_reset(struct mmc_host *host, int check)
->  {
-> -       struct mmc_card *card = host->card;
-> -
-> -       if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
-> -               return -EOPNOTSUPP;
-> +       int ret;
->
-> -       if (!card)
-> +       if (!host->card)
->                 return -EINVAL;
->
-> -       if (!mmc_can_reset(card))
+Hi Ulf,
 
-You need a mmc_bus_get() here before accessing the host->bus_ops callbacks.
+I didn't send the whole set of patches for this small change, tell me if you
+want a new series.
 
-Well, if you would executed this code with the host claimed and from
-the mmc block layer, you can be sure the bus_ops to exist. Now, since
-this is an exported function, I think you need to be more safe to also
-do the mmc_bus_get|put().
+ drivers/mmc/host/atmel-mci.c | 49 ++++++++++++++++++++++----------------------
+ 1 file changed, 25 insertions(+), 24 deletions(-)
 
-> +       if (!host->bus_ops || !host->bus_ops->hw_reset ||
-> +                       host->bus_ops->hw_reset(host, MMC_HW_RESET_TEST))
->                 return -EOPNOTSUPP;
->
-> -       mmc_host_clk_hold(host);
-> -       mmc_set_clock(host, host->f_init);
-> +       ret = host->bus_ops->hw_reset(host, check);
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 28546c3..f4daef9 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -2265,29 +2265,26 @@ static void atmci_cleanup_slot(struct atmel_mci_slot *slot,
+ 	mmc_free_host(slot->mmc);
+ }
+ 
+-static bool atmci_configure_dma(struct atmel_mci *host)
++static int atmci_configure_dma(struct atmel_mci *host)
+ {
+-	if (host == NULL)
+-		return false;
++	int ret = 0;
+ 
+-	host->dma.chan = dma_request_slave_channel(&host->pdev->dev, "rxtx");
+-	if (!host->dma.chan) {
+-		dev_warn(&host->pdev->dev, "no DMA channel available\n");
+-		return false;
+-	} else {
+-		dev_info(&host->pdev->dev,
+-					"using %s for DMA transfers\n",
+-					dma_chan_name(host->dma.chan));
+-
+-		host->dma_conf.src_addr = host->mapbase + ATMCI_RDR;
+-		host->dma_conf.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+-		host->dma_conf.src_maxburst = 1;
+-		host->dma_conf.dst_addr = host->mapbase + ATMCI_TDR;
+-		host->dma_conf.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+-		host->dma_conf.dst_maxburst = 1;
+-		host->dma_conf.device_fc = false;
+-		return true;
+-	}
++	host->dma.chan = dma_request_slave_channel_reason(&host->pdev->dev, "rxtx");
++	if (IS_ERR(host->dma.chan))
++		return PTR_ERR(host->dma.chan);
++
++	dev_info(&host->pdev->dev, "using %s for DMA transfers\n",
++		 dma_chan_name(host->dma.chan));
++
++	host->dma_conf.src_addr = host->mapbase + ATMCI_RDR;
++	host->dma_conf.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
++	host->dma_conf.src_maxburst = 1;
++	host->dma_conf.dst_addr = host->mapbase + ATMCI_TDR;
++	host->dma_conf.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
++	host->dma_conf.dst_maxburst = 1;
++	host->dma_conf.device_fc = false;
++
++	return ret;
+ }
+ 
+ /*
+@@ -2403,7 +2400,10 @@ static int atmci_probe(struct platform_device *pdev)
+ 
+ 	/* Get MCI capabilities and set operations according to it */
+ 	atmci_get_cap(host);
+-	if (atmci_configure_dma(host)) {
++	ret = atmci_configure_dma(host);
++	if (ret == -EPROBE_DEFER)
++		goto err_dma_probe_defer;
++	if (ret == 0) {
+ 		host->prepare_data = &atmci_prepare_data_dma;
+ 		host->submit_data = &atmci_submit_data_dma;
+ 		host->stop_transfer = &atmci_stop_transfer_dma;
+@@ -2474,8 +2474,9 @@ err_dma_alloc:
+ 	}
+ err_init_slot:
+ 	del_timer_sync(&host->timer);
+-	if (host->dma.chan)
++	if (!IS_ERR(host->dma.chan))
+ 		dma_release_channel(host->dma.chan);
++err_dma_probe_defer:
+ 	free_irq(irq, host);
+ 	return ret;
+ }
+@@ -2501,7 +2502,7 @@ static int atmci_remove(struct platform_device *pdev)
+ 	clk_disable_unprepare(host->mck);
+ 
+ 	del_timer_sync(&host->timer);
+-	if (host->dma.chan)
++	if (!IS_ERR(host->dma.chan))
+ 		dma_release_channel(host->dma.chan);
+ 
+ 	free_irq(platform_get_irq(pdev, 0), host);
+-- 
+2.0.3
 
-What's going on here? You are invoking the ->hw_reset() callback
-twice. That seems odd.
-
->
-> -       host->ops->hw_reset(host);
-> -
-> -       /* If the reset has happened, then a status command will fail */
-> -       if (check) {
-> -               u32 status;
-> -
-> -               if (!mmc_send_status(card, &status)) {
-> -                       mmc_host_clk_release(host);
-> -                       return -ENOSYS;
-> -               }
-> -       }
-> -
-> -       /* Set initial state and call mmc_set_ios */
-> -       mmc_set_initial_state(host);
-> +       if (check == MMC_HW_RESET_TEST_CARD)
-> +               return ret;
->
-> -       mmc_host_clk_release(host);
-> +       pr_warn("%s: tried to reset card (status %d)\n",
-> +                                               mmc_hostname(host), ret);
->
->         return host->bus_ops->power_restore(host);
->  }
->
->  int mmc_hw_reset(struct mmc_host *host)
->  {
-> -       return mmc_do_hw_reset(host, 0);
-> +       return mmc_do_hw_reset(host, MMC_HW_RESET_RESET);
->  }
->  EXPORT_SYMBOL(mmc_hw_reset);
->
->  int mmc_hw_reset_check(struct mmc_host *host)
->  {
-> -       return mmc_do_hw_reset(host, 1);
-> +       return mmc_do_hw_reset(host, MMC_HW_RESET_CHECK);
->  }
->  EXPORT_SYMBOL(mmc_hw_reset_check);
->
-> +int mmc_can_reset(struct mmc_card *card)
-> +{
-> +       return mmc_do_hw_reset(card->host, MMC_HW_RESET_TEST_CARD);
-> +}
-> +EXPORT_SYMBOL(mmc_can_reset);
-> +
->  static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
->  {
->         host->f_init = freq;
-> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> index d76597c..f6e0a52 100644
-> --- a/drivers/mmc/core/core.h
-> +++ b/drivers/mmc/core/core.h
-> @@ -27,6 +27,11 @@ struct mmc_bus_ops {
->         int (*power_restore)(struct mmc_host *);
->         int (*alive)(struct mmc_host *);
->         int (*shutdown)(struct mmc_host *);
-> +       int (*hw_reset)(struct mmc_host *, int);
-> +#define MMC_HW_RESET_RESET     0
-> +#define MMC_HW_RESET_TEST      1
-> +#define MMC_HW_RESET_CHECK     2
-> +#define MMC_HW_RESET_TEST_CARD 3
-
-Urgh. Is there a way to remove all this? I just don't like all these options.
-
-In fact, I would prefer to have none of them.
-
->  };
->
->  void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 02ad792..7ffa3f2 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1821,6 +1821,45 @@ static int mmc_power_restore(struct mmc_host *host)
->         return ret;
->  }
->
-> +static int mmc_mmc_hw_reset(struct mmc_host *host, int test)
-> +{
-> +       struct mmc_card *card = host->card;
-> +       u8 rst_n_function;
-> +
-> +       rst_n_function = card->ext_csd.rst_n_function;
-> +       if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
-> +               return -EOPNOTSUPP;
-> +
-> +       if (test == MMC_HW_RESET_TEST_CARD)
-> +               return 0;
-> +
-> +       if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
-> +               return -EOPNOTSUPP;
-> +
-> +       if (test == MMC_HW_RESET_TEST)
-> +               return 0;
-> +
-> +       mmc_host_clk_hold(host);
-> +       mmc_set_clock(host, host->f_init);
-> +
-> +       host->ops->hw_reset(host);
-> +
-> +       if (test == MMC_HW_RESET_CHECK) {
-> +               u32 status;
-> +
-> +               if (!mmc_send_status(card, &status)) {
-> +                       mmc_host_clk_release(host);
-> +                       return -ENOSYS;
-> +               }
-> +       }
-> +
-> +       mmc_set_initial_state(host);
-> +
-> +       mmc_host_clk_release(host);
-> +
-> +       return 0;
-> +}
-> +
->  static const struct mmc_bus_ops mmc_ops = {
->         .remove = mmc_remove,
->         .detect = mmc_detect,
-> @@ -1831,6 +1870,7 @@ static const struct mmc_bus_ops mmc_ops = {
->         .power_restore = mmc_power_restore,
->         .alive = mmc_alive,
->         .shutdown = mmc_shutdown,
-> +       .hw_reset = mmc_mmc_hw_reset,
->  };
->
->  /*
-> --
-> 1.7.2.5
->
-
-Kind regards
-Uffe
