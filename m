@@ -1,163 +1,129 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2] mmc: Add Production State Awareness Support
-Date: Wed, 26 Nov 2014 13:33:21 +0900
-Message-ID: <54755811.2030404@samsung.com>
-References: <1416927698-5304-1-git-send-email-alex.lemberg@sandisk.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Barry Song <21cnbao@gmail.com>
+Subject: [PATCH v2] mmc: core: add core-level function for sending tuning commands
+Date: Wed, 26 Nov 2014 13:05:33 +0800
+Message-ID: <1416978333-3086-1-git-send-email-21cnbao@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:49540 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751712AbaKZEd0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Nov 2014 23:33:26 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0NFM00LBYPZL37B0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 26 Nov 2014 13:33:21 +0900 (KST)
-In-reply-to: <1416927698-5304-1-git-send-email-alex.lemberg@sandisk.com>
+Received: from mail-pd0-f177.google.com ([209.85.192.177]:47492 "EHLO
+	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751020AbaKZFH2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Nov 2014 00:07:28 -0500
+Received: by mail-pd0-f177.google.com with SMTP id ft15so2025218pdb.36
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2014 21:07:27 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <alex.lemberg@sandisk.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, chris@printf.net, avi.shchislowski@sandisk.com
+To: ulf.hansson@linaro.org, chris@printf.net, linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, workgroup.linux@csr.com, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-Hi,
+From: Minda Chen <Minda.Chen@csr.com>
 
-On 11/26/2014 12:01 AM, Alex Lemberg wrote:
-> In this patch driver should recognize if eMMC device (Rev >=5.0)
-> was left in PRE_SOLDERING_POST_WRITES (0x02) state, and switch
-> it to NORMAL (0x00).
-> PRE_SOLDERING_POST_WRITES (0x02) state - represents a state
-> where the device is in production process and the
-> host (usually programmer) completed loading the content
-> to the device.
-> The host (usually programmer) sets the device to this state after
-> loading the content and just before soldering.
-> After soldering the device to the real host (not programmer),
-> the device should be switched to NORMAL (0x00) mode.
-> The NORMAL (0x00) mode of PSA register represents a state in
-> which the device is running in the field and uses regular operations.
-> Leaving device in PRE_SOLDERING_POST_WRITES (0x02) might cause
-> unexpected behaviour of eMMC device.
-> 
-> More details about PSA feature can be found in eMMC5.0 JEDEC spec (JESD84-B50.pdf):
-> http://www.jedec.org/standards-documents/technology-focus-areas/flash-memory-ssds-ufs-emmc/e-mmc
-> 
-> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
-> ---
-> Changes in v2:
->  - Remove typo in patch code
-> ---
->  drivers/mmc/core/mmc.c   | 28 ++++++++++++++++++++++++++++
->  include/linux/mmc/card.h |  2 ++
->  include/linux/mmc/mmc.h  |  8 ++++++++
->  3 files changed, 38 insertions(+)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 02ad792..3923c90 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -571,6 +571,16 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
->  		card->ext_csd.ffu_capable =
->  			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
->  			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
-> +		card->ext_csd.psa =
-> +			ext_csd[EXT_CSD_PSA];
-> +		if (ext_csd[EXT_CSD_PSA_TIMEOUT] > 0) {
-> +			card->ext_csd.psa_timeout =
-> +				100 *
-> +				(1 << ext_csd[EXT_CSD_PSA_TIMEOUT]);
-> +		} else {
-> +			pr_warn("%s: EXT_CSD PSA Timeout is zero\n",
-> +					mmc_hostname(card->host));
+According to the SD card spec, Add a manual tuning command function
+for SDR104/HS200.
+Sending command 19 or command 21 to read data and compare with the
+tunning block pattern.
 
-I remembered Ulf's previous comment. Did you check it?
+This patch will help to decrease some platform private codes in SDHCI
+platform_execute_tuning() callbacks.
 
-> +		}
->  	}
->  out:
->  	return err;
-> @@ -1331,6 +1341,24 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->  		mmc_set_dsr(host);
->  
->  	/*
-> +	 * eMMC v5.0 or later
-> +	 * and Production State Awareness state is
-> +	 * EXT_CSD_PSA_POST_SOLDERING_WRITES (0x02)
-> +	 * The host should set the device to NORMAL mode
-> +	 */
-> +	if ((card->ext_csd.rev >= 7) &&
-> +		(card->ext_csd.psa == EXT_CSD_PSA_POST_SOLDERING_WRITES)) {
+Signed-off-by: Minda Chen <Minda.Chen@csr.com>
+Signed-off-by: Barry Song <Baohua.Song@csr.com>
+---
+ drivers/mmc/core/mmc_ops.c | 70 ++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/core.h   |  1 +
+ 2 files changed, 71 insertions(+)
 
-Is it right? how did you get "revision"?
-
-> +		unsigned int timeout;
-> +
-> +		timeout = DIV_ROUND_UP(card->ext_csd.psa_timeout, 1000);
-> +		card->ext_csd.psa = EXT_CSD_PSA_NORMAL;
-
-Why did card->ext_csd.psa assign to EXT_CSD_PSA_NORMAL as hard-coding?
-
-> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +			EXT_CSD_PSA, card->ext_csd.psa, timeout);
-> +		if (err && err != -EBADMSG)
-> +			goto free_card;
-> +	}
-> +
-> +	/*
->  	 * Select card, as all following commands rely on that.
->  	 */
->  	if (!mmc_host_is_spi(host)) {
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 4d69c00..09ac3b0 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -60,9 +60,11 @@ struct mmc_ext_csd {
->  	u8			packed_event_en;
->  	unsigned int		part_time;		/* Units: ms */
->  	unsigned int		sa_timeout;		/* Units: 100ns */
-> +	unsigned int		psa_timeout;		/* Units: 100us */
->  	unsigned int		generic_cmd6_time;	/* Units: 10ms */
->  	unsigned int            power_off_longtime;     /* Units: ms */
->  	u8			power_off_notification;	/* state */
-> +	u8			psa; /* production state awareness */
->  	unsigned int		hs_max_dtr;
->  	unsigned int		hs200_max_dtr;
->  #define MMC_HIGH_26_MAX_DTR	26000000
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 49ad7a9..458814d 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -285,6 +285,7 @@ struct _mmc_csd {
->  #define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
->  #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
->  #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
-> +#define EXT_CSD_PSA			133	/* R/W/E */
->  #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
->  #define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
->  #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
-> @@ -315,6 +316,7 @@ struct _mmc_csd {
->  #define EXT_CSD_PWR_CL_26_360		203	/* RO */
->  #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
->  #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
-> +#define EXT_CSD_PSA_TIMEOUT		218	/* RO */
->  #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
->  #define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
->  #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
-> @@ -433,6 +435,12 @@ struct _mmc_csd {
->  #define EXT_CSD_BKOPS_LEVEL_2		0x2
->  
->  /*
-> + * PRODUCTION STATE AWARENESS fields
-> + */
-> +#define EXT_CSD_PSA_NORMAL		0x00
-> +#define EXT_CSD_PSA_POST_SOLDERING_WRITES	0x02
-> +
-> +/*
->   * MMC_SWITCH access modes
->   */
->  
-> 
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 7911e05..a897894 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -543,6 +543,76 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ }
+ EXPORT_SYMBOL_GPL(mmc_switch);
+ 
++int mmc_send_tuning(struct mmc_card *card)
++{
++	struct mmc_request mrq = {NULL};
++	struct mmc_command cmd = {0};
++	struct mmc_data data = {0};
++	struct scatterlist sg;
++	struct mmc_host *mmc = card->host;
++	struct mmc_ios *ios = &mmc->ios;
++	const u8 *tuning_block_pattern;
++	int size, err = 0;
++	u8 *data_buf;
++	u32 opcode;
++
++	if (ios->bus_width == MMC_BUS_WIDTH_8) {
++		tuning_block_pattern = tuning_blk_pattern_8bit;
++		size = sizeof(tuning_blk_pattern_8bit);
++		opcode = MMC_SEND_TUNING_BLOCK_HS200;
++	} else if (ios->bus_width == MMC_BUS_WIDTH_4) {
++		tuning_block_pattern = tuning_blk_pattern_4bit;
++		size = sizeof(tuning_blk_pattern_4bit);
++		opcode = MMC_SEND_TUNING_BLOCK;
++	} else
++		return -EINVAL;
++
++	data_buf = kzalloc(size, GFP_KERNEL);
++	if (!data_buf)
++		return -ENOMEM;
++
++	mrq.cmd = &cmd;
++	mrq.data = &data;
++
++	cmd.opcode = opcode;
++	cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
++
++	data.blksz = size;
++	data.blocks = 1;
++	data.flags = MMC_DATA_READ;
++
++	/*
++	 * According to the tuning specs, Tuning process
++	 * is normally shorter 40 executions of CMD19,
++	 * and timeout value should be shorter than 150 ms
++	 */
++	data.timeout_ns = 150 * NSEC_PER_MSEC;
++
++	data.sg = &sg;
++	data.sg_len = 1;
++	sg_init_one(&sg, data_buf, size);
++
++	mmc_wait_for_req(mmc, &mrq);
++
++	if (cmd.error) {
++		err = cmd.error;
++		goto out;
++	}
++
++	if (data.error) {
++		err = data.error;
++		goto out;
++	}
++
++	if (memcmp(data_buf, tuning_block_pattern, size))
++		err = -EIO;
++
++out:
++	kfree(data_buf);
++	return err;
++}
++EXPORT_SYMBOL_GPL(mmc_send_tuning);
++
+ static int
+ mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
+ 		  u8 len)
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index f206e29..b5c2763 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -154,6 +154,7 @@ extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
+ extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool,
+ 			bool, bool);
+ extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
++extern int mmc_send_tuning(struct mmc_card *);
+ extern int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd);
+ 
+ #define MMC_ERASE_ARG		0x00000000
+-- 
+2.1.3
 
