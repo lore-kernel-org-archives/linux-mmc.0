@@ -1,146 +1,169 @@
-From: Alex Lemberg <alex.lemberg@sandisk.com>
-Subject: [PATCH v3] mmc: Add Production State Awareness Support
-Date: Wed, 26 Nov 2014 18:44:29 +0200
-Message-ID: <1417020269-3993-1-git-send-email-alex.lemberg@sandisk.com>
+From: Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Subject: Re: [PATCH] mmc: new API for data write using scatter gather DMA
+Date: Wed, 26 Nov 2014 19:10:13 +0100
+Message-ID: <54761785.2070803@broadcom.com>
+References: <1417000056-16920-1-git-send-email-patila@marvell.com> <CAPDyKFr-iaPWKWWgk-5_XcJm9sag=y=uZjfJvo-DQiJFM8BVLw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0071.outbound.protection.outlook.com ([207.46.100.71]:14304
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751061AbaKZQok (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 26 Nov 2014 11:44:40 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFr-iaPWKWWgk-5_XcJm9sag=y=uZjfJvo-DQiJFM8BVLw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Avinash Patil <patila-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, cluo-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, yangyang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, bin9zha0-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Bing Zhao <bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, chris@printf.net, avi.shchislowski@sandisk.com, Alex Lemberg <alex.lemberg@sandisk.com>
 
-In this patch driver should recognize if eMMC device (Rev >=5.0)
-was left in PRE_SOLDERING_POST_WRITES (0x02) state, and switch
-it to NORMAL (0x00).
-PRE_SOLDERING_POST_WRITES (0x02) state - represents a state
-where the device is in production process and the
-host (usually programmer) completed loading the content
-to the device.
-The host (usually programmer) sets the device to this state after
-loading the content and just before soldering.
-After soldering the device to the real host (not programmer),
-the device should be switched to NORMAL (0x00) mode.
-The NORMAL (0x00) mode of PSA register represents a state in
-which the device is running in the field and uses regular operations.
-Leaving device in PRE_SOLDERING_POST_WRITES (0x02) might cause
-unexpected behaviour of eMMC device.
+On 11/26/14 14:43, Ulf Hansson wrote:
+> On 26 November 2014 at 12:07, Avinash Patil<patila-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>  wrote:
+>> From: Bing Zhao<bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+>>
+>> This patch adds new API to handle scatter gather aggregation.
+>
+> Why is this needed?
 
-More details about PSA feature can be found in eMMC5.0 JEDEC spec (JESD84-B50.pdf):
-http://www.jedec.org/standards-documents/technology-focus-areas/flash-memory-ssds-ufs-emmc/e-mmc
+One thing I can imagine is that the receiving device has specific 
+scatter-gather alignment requirements that are not covered in 
+mmc_io_rw_extended(). So the new API does not so much handle 
+scatter-gather, but leaves that up to the caller. Question is whether 
+mmc_io_rw_extended() could be changed to accommodate those requirements 
+instead of duplicating big part of it. Without knowing the exact 
+requirements that is difficult to answer.
 
-Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
----
-Changes in v2:
- - Remove typo in patch code
-Changes in v3:
- - Move ext_csd revision check
----
- drivers/mmc/core/mmc.c   | 28 ++++++++++++++++++++++++++++
- include/linux/mmc/card.h |  2 ++
- include/linux/mmc/mmc.h  |  8 ++++++++
- 3 files changed, 38 insertions(+)
+Regards,
+Arend
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 02ad792..2c523ca 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -571,6 +571,16 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		card->ext_csd.ffu_capable =
- 			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
- 			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
-+		card->ext_csd.psa =
-+			ext_csd[EXT_CSD_PSA];
-+		if (ext_csd[EXT_CSD_PSA_TIMEOUT] > 0) {
-+			card->ext_csd.psa_timeout =
-+				100 *
-+				(1 << ext_csd[EXT_CSD_PSA_TIMEOUT]);
-+		} else {
-+			pr_warn("%s: EXT_CSD PSA Timeout is zero\n",
-+					mmc_hostname(card->host));
-+		}
- 	}
- out:
- 	return err;
-@@ -1358,6 +1368,24 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	}
- 
- 	/*
-+	 * eMMC v5.0 or later
-+	 * and Production State Awareness state is
-+	 * EXT_CSD_PSA_POST_SOLDERING_WRITES (0x02)
-+	 * The host should set the device to NORMAL mode
-+	 */
-+	if ((card->ext_csd.rev >= 7) &&
-+		(card->ext_csd.psa == EXT_CSD_PSA_POST_SOLDERING_WRITES)) {
-+		unsigned int timeout;
-+
-+		timeout = DIV_ROUND_UP(card->ext_csd.psa_timeout, 1000);
-+		card->ext_csd.psa = EXT_CSD_PSA_NORMAL;
-+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			EXT_CSD_PSA, card->ext_csd.psa, timeout);
-+		if (err && err != -EBADMSG)
-+			goto free_card;
-+	}
-+
-+	/*
- 	 * If enhanced_area_en is TRUE, host needs to enable ERASE_GRP_DEF
- 	 * bit.  This bit will be lost every time after a reset or power off.
- 	 */
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 4d69c00..09ac3b0 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -60,9 +60,11 @@ struct mmc_ext_csd {
- 	u8			packed_event_en;
- 	unsigned int		part_time;		/* Units: ms */
- 	unsigned int		sa_timeout;		/* Units: 100ns */
-+	unsigned int		psa_timeout;		/* Units: 100us */
- 	unsigned int		generic_cmd6_time;	/* Units: 10ms */
- 	unsigned int            power_off_longtime;     /* Units: ms */
- 	u8			power_off_notification;	/* state */
-+	u8			psa; /* production state awareness */
- 	unsigned int		hs_max_dtr;
- 	unsigned int		hs200_max_dtr;
- #define MMC_HIGH_26_MAX_DTR	26000000
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 49ad7a9..458814d 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -285,6 +285,7 @@ struct _mmc_csd {
- #define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
- #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
- #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
-+#define EXT_CSD_PSA			133	/* R/W/E */
- #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
- #define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
- #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
-@@ -315,6 +316,7 @@ struct _mmc_csd {
- #define EXT_CSD_PWR_CL_26_360		203	/* RO */
- #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
- #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
-+#define EXT_CSD_PSA_TIMEOUT		218	/* RO */
- #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
- #define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
- #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
-@@ -433,6 +435,12 @@ struct _mmc_csd {
- #define EXT_CSD_BKOPS_LEVEL_2		0x2
- 
- /*
-+ * PRODUCTION STATE AWARENESS fields
-+ */
-+#define EXT_CSD_PSA_NORMAL		0x00
-+#define EXT_CSD_PSA_POST_SOLDERING_WRITES	0x02
-+
-+/*
-  * MMC_SWITCH access modes
-  */
- 
--- 
-2.1.0
+>
+>>
+>> Signed-off-by: Bing Zhao<bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+>> Signed-off-by: Avinash Patil<patila-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+>> Signed-off-by: Xinming Hu<huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+>> Signed-off-by: Cathy Luo<cluo-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+>> ---
+>>   drivers/mmc/core/sdio_ops.c   | 65 +++++++++++++++++++++++++++++++++++++++++++
+>>   include/linux/mmc/sdio_func.h |  5 ++++
+>>   2 files changed, 70 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
+>> index 62508b4..4c5e362 100644
+>> --- a/drivers/mmc/core/sdio_ops.c
+>> +++ b/drivers/mmc/core/sdio_ops.c
+>> @@ -15,6 +15,7 @@
+>>   #include<linux/mmc/card.h>
+>>   #include<linux/mmc/mmc.h>
+>>   #include<linux/mmc/sdio.h>
+>> +#include<linux/export.h>
+>>
+>>   #include "core.h"
+>>   #include "sdio_ops.h"
+>> @@ -204,6 +205,70 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+>>          return 0;
+>>   }
+>>
+>> +int mmc_io_rw_extended_sg(struct mmc_card *card, int write, unsigned fn,
+>> +                         unsigned addr, int incr_addr,
+>> +                         struct sg_table *sgt, unsigned blksz)
+>> +{
+>> +       struct mmc_request mrq = {NULL};
+>> +       struct mmc_command cmd = {0};
+>> +       struct mmc_data data = {0};
+>> +       struct scatterlist *sg_ptr;
+>> +       unsigned blocks = 0;
+>> +       int i;
+>> +
+>> +       BUG_ON(!card || !card->host);
+>> +       BUG_ON(fn>  7);
+>> +       BUG_ON(!blksz);
+>
+> No BUG_ON() here please. Better to return an error.
+>
+>> +       for_each_sg(sgt->sgl, sg_ptr, sgt->nents, i) {
+>> +               WARN_ON(sg_ptr->length>  card->host->max_seg_size);
+>> +               blocks += DIV_ROUND_UP(sg_ptr->length, blksz);
+>> +       }
+>> +
+>> +       /* sanity check */
+>> +       if (addr&  ~0x1FFFF)
+>> +               return -EINVAL;
+>> +
+>> +       mrq.cmd =&cmd;
+>> +       mrq.data =&data;
+>> +
+>> +       cmd.opcode = SD_IO_RW_EXTENDED;
+>> +       cmd.arg = write ? 0x80000000 : 0x00000000;
+>> +       cmd.arg |= fn<<  28;
+>> +       cmd.arg |= incr_addr ? 0x04000000 : 0x00000000;
+>> +       cmd.arg |= addr<<  9;
+>> +       cmd.arg |= 0x08000000 | blocks;
+>> +       cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
+>> +
+>> +       data.blksz = blksz;
+>> +       data.blocks = blocks;
+>> +       data.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
+>> +
+>> +       data.sg = sgt->sgl;
+>> +       data.sg_len = sgt->nents;
+>> +
+>> +       mmc_set_data_timeout(&data, card);
+>> +       mmc_wait_for_req(card->host,&mrq);
+>> +
+>> +       if (cmd.error)
+>> +               return cmd.error;
+>> +       if (data.error)
+>> +               return data.error;
+>> +
+>> +       if (mmc_host_is_spi(card->host)) {
+>> +               /* host driver already reported errors */
+>> +       } else {
+>> +               if (cmd.resp[0]&  R5_ERROR)
+>> +                       return -EIO;
+>> +               if (cmd.resp[0]&  R5_FUNCTION_NUMBER)
+>> +                       return -EINVAL;
+>> +               if (cmd.resp[0]&  R5_OUT_OF_RANGE)
+>> +                       return -ERANGE;
+>> +       }
+>> +
+>> +       return 0;
+>> +}
+>> +EXPORT_SYMBOL_GPL(mmc_io_rw_extended_sg);
+>> +
+>>   int sdio_reset(struct mmc_host *host)
+>>   {
+>>          int ret;
+>> diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
+>> index 50f0bc9..927ea8f 100644
+>> --- a/include/linux/mmc/sdio_func.h
+>> +++ b/include/linux/mmc/sdio_func.h
+>> @@ -14,6 +14,7 @@
+>>
+>>   #include<linux/device.h>
+>>   #include<linux/mod_devicetable.h>
+>> +#include<linux/scatterlist.h>
+>>
+>>   #include<linux/mmc/pm.h>
+>>
+>> @@ -153,6 +154,10 @@ extern int sdio_memcpy_toio(struct sdio_func *func, unsigned int addr,
+>>   extern int sdio_writesb(struct sdio_func *func, unsigned int addr,
+>>          void *src, int count);
+>>
+>> +int mmc_io_rw_extended_sg(struct mmc_card *card, int write, unsigned fn,
+>> +                         unsigned addr, int incr_addr,
+>> +                         struct sg_table *sgt, unsigned blksz);
+>> +
+>>   extern unsigned char sdio_f0_readb(struct sdio_func *func,
+>>          unsigned int addr, int *err_ret);
+>>   extern void sdio_f0_writeb(struct sdio_func *func, unsigned char b,
+>> --
+>> 1.8.1.4
+>>
+>
+> Kind regards
+> Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
