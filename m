@@ -1,144 +1,152 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: core: add core-level function for sending tuning commands
-Date: Wed, 26 Nov 2014 14:39:56 +0100
-Message-ID: <CAPDyKFp48LvM5E_vQ+T36T=aCQ+8P9ZicfG8fGtnke+tXj=qXQ@mail.gmail.com>
-References: <1416978333-3086-1-git-send-email-21cnbao@gmail.com>
+Subject: Re: [PATCH] mmc: new API for data write using scatter gather DMA
+Date: Wed, 26 Nov 2014 14:43:38 +0100
+Message-ID: <CAPDyKFr-iaPWKWWgk-5_XcJm9sag=y=uZjfJvo-DQiJFM8BVLw@mail.gmail.com>
+References: <1417000056-16920-1-git-send-email-patila@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f170.google.com ([209.85.216.170]:48272 "EHLO
-	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750973AbaKZNj5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Nov 2014 08:39:57 -0500
-Received: by mail-qc0-f170.google.com with SMTP id x3so2066286qcv.1
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Nov 2014 05:39:56 -0800 (PST)
-In-Reply-To: <1416978333-3086-1-git-send-email-21cnbao@gmail.com>
+Received: from mail-qa0-f46.google.com ([209.85.216.46]:62315 "EHLO
+	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750793AbaKZNnj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Nov 2014 08:43:39 -0500
+Received: by mail-qa0-f46.google.com with SMTP id u7so1894365qaz.33
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Nov 2014 05:43:38 -0800 (PST)
+In-Reply-To: <1417000056-16920-1-git-send-email-patila@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Barry Song <21cnbao@gmail.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
+To: Avinash Patil <patila@marvell.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, akarwar@marvell.com, cluo@marvell.com, yangyang@marvell.com, huxm@marvell.com, bin9zha0@gmail.com, Bing Zhao <bzhao@marvell.com>
 
-On 26 November 2014 at 06:05, Barry Song <21cnbao@gmail.com> wrote:
-> From: Minda Chen <Minda.Chen@csr.com>
+On 26 November 2014 at 12:07, Avinash Patil <patila@marvell.com> wrote:
+> From: Bing Zhao <bzhao@marvell.com>
 >
-> According to the SD card spec, Add a manual tuning command function
-> for SDR104/HS200.
-> Sending command 19 or command 21 to read data and compare with the
-> tunning block pattern.
+> This patch adds new API to handle scatter gather aggregation.
+
+Why is this needed?
+
 >
-> This patch will help to decrease some platform private codes in SDHCI
-> platform_execute_tuning() callbacks.
->
-> Signed-off-by: Minda Chen <Minda.Chen@csr.com>
-> Signed-off-by: Barry Song <Baohua.Song@csr.com>
-
-Thanks! Applied for next.
-
-Actually it didn't apply as is, but I managed to resolve the trivial
-conflict. In future, please use my mmc tree and the next branch to
-base your patches upon.
-
-Kind regards
-Uffe
-
+> Signed-off-by: Bing Zhao <bzhao@marvell.com>
+> Signed-off-by: Avinash Patil <patila@marvell.com>
+> Signed-off-by: Xinming Hu <huxm@marvell.com>
+> Signed-off-by: Cathy Luo <cluo@marvell.com>
 > ---
->  drivers/mmc/core/mmc_ops.c | 70 ++++++++++++++++++++++++++++++++++++++++++++++
->  include/linux/mmc/core.h   |  1 +
->  2 files changed, 71 insertions(+)
+>  drivers/mmc/core/sdio_ops.c   | 65 +++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/mmc/sdio_func.h |  5 ++++
+>  2 files changed, 70 insertions(+)
 >
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 7911e05..a897894 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -543,6 +543,76 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+> diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
+> index 62508b4..4c5e362 100644
+> --- a/drivers/mmc/core/sdio_ops.c
+> +++ b/drivers/mmc/core/sdio_ops.c
+> @@ -15,6 +15,7 @@
+>  #include <linux/mmc/card.h>
+>  #include <linux/mmc/mmc.h>
+>  #include <linux/mmc/sdio.h>
+> +#include <linux/export.h>
+>
+>  #include "core.h"
+>  #include "sdio_ops.h"
+> @@ -204,6 +205,70 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+>         return 0;
 >  }
->  EXPORT_SYMBOL_GPL(mmc_switch);
 >
-> +int mmc_send_tuning(struct mmc_card *card)
+> +int mmc_io_rw_extended_sg(struct mmc_card *card, int write, unsigned fn,
+> +                         unsigned addr, int incr_addr,
+> +                         struct sg_table *sgt, unsigned blksz)
 > +{
 > +       struct mmc_request mrq = {NULL};
 > +       struct mmc_command cmd = {0};
 > +       struct mmc_data data = {0};
-> +       struct scatterlist sg;
-> +       struct mmc_host *mmc = card->host;
-> +       struct mmc_ios *ios = &mmc->ios;
-> +       const u8 *tuning_block_pattern;
-> +       int size, err = 0;
-> +       u8 *data_buf;
-> +       u32 opcode;
+> +       struct scatterlist *sg_ptr;
+> +       unsigned blocks = 0;
+> +       int i;
 > +
-> +       if (ios->bus_width == MMC_BUS_WIDTH_8) {
-> +               tuning_block_pattern = tuning_blk_pattern_8bit;
-> +               size = sizeof(tuning_blk_pattern_8bit);
-> +               opcode = MMC_SEND_TUNING_BLOCK_HS200;
-> +       } else if (ios->bus_width == MMC_BUS_WIDTH_4) {
-> +               tuning_block_pattern = tuning_blk_pattern_4bit;
-> +               size = sizeof(tuning_blk_pattern_4bit);
-> +               opcode = MMC_SEND_TUNING_BLOCK;
-> +       } else
+> +       BUG_ON(!card || !card->host);
+> +       BUG_ON(fn > 7);
+> +       BUG_ON(!blksz);
+
+No BUG_ON() here please. Better to return an error.
+
+> +       for_each_sg(sgt->sgl, sg_ptr, sgt->nents, i) {
+> +               WARN_ON(sg_ptr->length > card->host->max_seg_size);
+> +               blocks += DIV_ROUND_UP(sg_ptr->length, blksz);
+> +       }
+> +
+> +       /* sanity check */
+> +       if (addr & ~0x1FFFF)
 > +               return -EINVAL;
-> +
-> +       data_buf = kzalloc(size, GFP_KERNEL);
-> +       if (!data_buf)
-> +               return -ENOMEM;
 > +
 > +       mrq.cmd = &cmd;
 > +       mrq.data = &data;
 > +
-> +       cmd.opcode = opcode;
-> +       cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+> +       cmd.opcode = SD_IO_RW_EXTENDED;
+> +       cmd.arg = write ? 0x80000000 : 0x00000000;
+> +       cmd.arg |= fn << 28;
+> +       cmd.arg |= incr_addr ? 0x04000000 : 0x00000000;
+> +       cmd.arg |= addr << 9;
+> +       cmd.arg |= 0x08000000 | blocks;
+> +       cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
 > +
-> +       data.blksz = size;
-> +       data.blocks = 1;
-> +       data.flags = MMC_DATA_READ;
+> +       data.blksz = blksz;
+> +       data.blocks = blocks;
+> +       data.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
 > +
-> +       /*
-> +        * According to the tuning specs, Tuning process
-> +        * is normally shorter 40 executions of CMD19,
-> +        * and timeout value should be shorter than 150 ms
-> +        */
-> +       data.timeout_ns = 150 * NSEC_PER_MSEC;
+> +       data.sg = sgt->sgl;
+> +       data.sg_len = sgt->nents;
 > +
-> +       data.sg = &sg;
-> +       data.sg_len = 1;
-> +       sg_init_one(&sg, data_buf, size);
+> +       mmc_set_data_timeout(&data, card);
+> +       mmc_wait_for_req(card->host, &mrq);
 > +
-> +       mmc_wait_for_req(mmc, &mrq);
+> +       if (cmd.error)
+> +               return cmd.error;
+> +       if (data.error)
+> +               return data.error;
 > +
-> +       if (cmd.error) {
-> +               err = cmd.error;
-> +               goto out;
+> +       if (mmc_host_is_spi(card->host)) {
+> +               /* host driver already reported errors */
+> +       } else {
+> +               if (cmd.resp[0] & R5_ERROR)
+> +                       return -EIO;
+> +               if (cmd.resp[0] & R5_FUNCTION_NUMBER)
+> +                       return -EINVAL;
+> +               if (cmd.resp[0] & R5_OUT_OF_RANGE)
+> +                       return -ERANGE;
 > +       }
 > +
-> +       if (data.error) {
-> +               err = data.error;
-> +               goto out;
-> +       }
-> +
-> +       if (memcmp(data_buf, tuning_block_pattern, size))
-> +               err = -EIO;
-> +
-> +out:
-> +       kfree(data_buf);
-> +       return err;
+> +       return 0;
 > +}
-> +EXPORT_SYMBOL_GPL(mmc_send_tuning);
+> +EXPORT_SYMBOL_GPL(mmc_io_rw_extended_sg);
 > +
->  static int
->  mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
->                   u8 len)
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index f206e29..b5c2763 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -154,6 +154,7 @@ extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
->  extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool,
->                         bool, bool);
->  extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
-> +extern int mmc_send_tuning(struct mmc_card *);
->  extern int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd);
+>  int sdio_reset(struct mmc_host *host)
+>  {
+>         int ret;
+> diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
+> index 50f0bc9..927ea8f 100644
+> --- a/include/linux/mmc/sdio_func.h
+> +++ b/include/linux/mmc/sdio_func.h
+> @@ -14,6 +14,7 @@
 >
->  #define MMC_ERASE_ARG          0x00000000
+>  #include <linux/device.h>
+>  #include <linux/mod_devicetable.h>
+> +#include <linux/scatterlist.h>
+>
+>  #include <linux/mmc/pm.h>
+>
+> @@ -153,6 +154,10 @@ extern int sdio_memcpy_toio(struct sdio_func *func, unsigned int addr,
+>  extern int sdio_writesb(struct sdio_func *func, unsigned int addr,
+>         void *src, int count);
+>
+> +int mmc_io_rw_extended_sg(struct mmc_card *card, int write, unsigned fn,
+> +                         unsigned addr, int incr_addr,
+> +                         struct sg_table *sgt, unsigned blksz);
+> +
+>  extern unsigned char sdio_f0_readb(struct sdio_func *func,
+>         unsigned int addr, int *err_ret);
+>  extern void sdio_f0_writeb(struct sdio_func *func, unsigned char b,
 > --
-> 2.1.3
+> 1.8.1.4
 >
+
+Kind regards
+Uffe
