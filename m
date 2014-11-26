@@ -1,169 +1,70 @@
-From: Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH] mmc: new API for data write using scatter gather DMA
-Date: Wed, 26 Nov 2014 19:10:13 +0100
-Message-ID: <54761785.2070803@broadcom.com>
-References: <1417000056-16920-1-git-send-email-patila@marvell.com> <CAPDyKFr-iaPWKWWgk-5_XcJm9sag=y=uZjfJvo-DQiJFM8BVLw@mail.gmail.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v2] mmc: dw_mmc: add quirk for broken data transfer over scheme
+Date: Wed, 26 Nov 2014 14:46:00 -0800
+Message-ID: <CAD=FV=UmG1okxJ5JV-1cuRRQJi7EEPXc7Q90sWjfMWBqb7VSMw@mail.gmail.com>
+References: <1415970338-2637-1-git-send-email-addy.ke@rock-chips.com>
+	<1416903008-4160-1-git-send-email-addy.ke@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFr-iaPWKWWgk-5_XcJm9sag=y=uZjfJvo-DQiJFM8BVLw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Avinash Patil <patila-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, cluo-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, yangyang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, bin9zha0-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Bing Zhao <bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1416903008-4160-1-git-send-email-addy.ke@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Addy Ke <addy.ke@rock-chips.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Alexandru Stan <amstan@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11/26/14 14:43, Ulf Hansson wrote:
-> On 26 November 2014 at 12:07, Avinash Patil<patila-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>  wrote:
->> From: Bing Zhao<bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
->>
->> This patch adds new API to handle scatter gather aggregation.
->
-> Why is this needed?
+Hi,
 
-One thing I can imagine is that the receiving device has specific 
-scatter-gather alignment requirements that are not covered in 
-mmc_io_rw_extended(). So the new API does not so much handle 
-scatter-gather, but leaves that up to the caller. Question is whether 
-mmc_io_rw_extended() could be changed to accommodate those requirements 
-instead of duplicating big part of it. Without knowing the exact 
-requirements that is difficult to answer.
+On Tue, Nov 25, 2014 at 12:10 AM, Addy Ke <addy.ke@rock-chips.com> wrote:
+> This patch add a new quirk to add a s/w timer to notify the driver
+> to terminate current transfer and report a data timeout to the core,
+> if DTO interrupt does NOT come within the given time.
+>
+> dw_mmc call mmc_request_done func to finish transfer depends on
+> DTO interrupt. If DTO interrupt does not come in sending data state,
+> the current transfer will be blocked.
+>
+> But this case really exists, when driver reads tuning data from
+> card on RK3288-pink2 board. I measured waveforms by oscilloscope
+> and found that card clock was always on and data lines were always
+> holded high level in sending data state.
+>
+> We got the reply from synopsys:
+> There are two counters but both use the same value of [31:8] bits.
+> Data timeout counter doesn't wait for stop clock and you should get
+> DRTO even when the clock is not stopped.
+> Host Starvation timeout counter is triggered with stop clock condition.
+>
+> This means that host should get DRTO and DTO interrupt.
+>
+> But we really don't get any data-related interrupt in RK3X SoCs.
+> And driver can't get data transfer state, it can do nothing but wait for.
 
-Regards,
-Arend
+Have you asked someone on your IC team to confirm this is an SoC
+errata on your SoC?  ...or is there something else we could be doing
+wrong (overclocking?  jitter in the clock?  bad dividers?) that could
+be causing this problem?
 
->
->>
->> Signed-off-by: Bing Zhao<bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
->> Signed-off-by: Avinash Patil<patila-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
->> Signed-off-by: Xinming Hu<huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
->> Signed-off-by: Cathy Luo<cluo-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
->> ---
->>   drivers/mmc/core/sdio_ops.c   | 65 +++++++++++++++++++++++++++++++++++++++++++
->>   include/linux/mmc/sdio_func.h |  5 ++++
->>   2 files changed, 70 insertions(+)
->>
->> diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
->> index 62508b4..4c5e362 100644
->> --- a/drivers/mmc/core/sdio_ops.c
->> +++ b/drivers/mmc/core/sdio_ops.c
->> @@ -15,6 +15,7 @@
->>   #include<linux/mmc/card.h>
->>   #include<linux/mmc/mmc.h>
->>   #include<linux/mmc/sdio.h>
->> +#include<linux/export.h>
->>
->>   #include "core.h"
->>   #include "sdio_ops.h"
->> @@ -204,6 +205,70 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
->>          return 0;
->>   }
->>
->> +int mmc_io_rw_extended_sg(struct mmc_card *card, int write, unsigned fn,
->> +                         unsigned addr, int incr_addr,
->> +                         struct sg_table *sgt, unsigned blksz)
->> +{
->> +       struct mmc_request mrq = {NULL};
->> +       struct mmc_command cmd = {0};
->> +       struct mmc_data data = {0};
->> +       struct scatterlist *sg_ptr;
->> +       unsigned blocks = 0;
->> +       int i;
->> +
->> +       BUG_ON(!card || !card->host);
->> +       BUG_ON(fn>  7);
->> +       BUG_ON(!blksz);
->
-> No BUG_ON() here please. Better to return an error.
->
->> +       for_each_sg(sgt->sgl, sg_ptr, sgt->nents, i) {
->> +               WARN_ON(sg_ptr->length>  card->host->max_seg_size);
->> +               blocks += DIV_ROUND_UP(sg_ptr->length, blksz);
->> +       }
->> +
->> +       /* sanity check */
->> +       if (addr&  ~0x1FFFF)
->> +               return -EINVAL;
->> +
->> +       mrq.cmd =&cmd;
->> +       mrq.data =&data;
->> +
->> +       cmd.opcode = SD_IO_RW_EXTENDED;
->> +       cmd.arg = write ? 0x80000000 : 0x00000000;
->> +       cmd.arg |= fn<<  28;
->> +       cmd.arg |= incr_addr ? 0x04000000 : 0x00000000;
->> +       cmd.arg |= addr<<  9;
->> +       cmd.arg |= 0x08000000 | blocks;
->> +       cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
->> +
->> +       data.blksz = blksz;
->> +       data.blocks = blocks;
->> +       data.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
->> +
->> +       data.sg = sgt->sgl;
->> +       data.sg_len = sgt->nents;
->> +
->> +       mmc_set_data_timeout(&data, card);
->> +       mmc_wait_for_req(card->host,&mrq);
->> +
->> +       if (cmd.error)
->> +               return cmd.error;
->> +       if (data.error)
->> +               return data.error;
->> +
->> +       if (mmc_host_is_spi(card->host)) {
->> +               /* host driver already reported errors */
->> +       } else {
->> +               if (cmd.resp[0]&  R5_ERROR)
->> +                       return -EIO;
->> +               if (cmd.resp[0]&  R5_FUNCTION_NUMBER)
->> +                       return -EINVAL;
->> +               if (cmd.resp[0]&  R5_OUT_OF_RANGE)
->> +                       return -ERANGE;
->> +       }
->> +
->> +       return 0;
->> +}
->> +EXPORT_SYMBOL_GPL(mmc_io_rw_extended_sg);
->> +
->>   int sdio_reset(struct mmc_host *host)
->>   {
->>          int ret;
->> diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
->> index 50f0bc9..927ea8f 100644
->> --- a/include/linux/mmc/sdio_func.h
->> +++ b/include/linux/mmc/sdio_func.h
->> @@ -14,6 +14,7 @@
->>
->>   #include<linux/device.h>
->>   #include<linux/mod_devicetable.h>
->> +#include<linux/scatterlist.h>
->>
->>   #include<linux/mmc/pm.h>
->>
->> @@ -153,6 +154,10 @@ extern int sdio_memcpy_toio(struct sdio_func *func, unsigned int addr,
->>   extern int sdio_writesb(struct sdio_func *func, unsigned int addr,
->>          void *src, int count);
->>
->> +int mmc_io_rw_extended_sg(struct mmc_card *card, int write, unsigned fn,
->> +                         unsigned addr, int incr_addr,
->> +                         struct sg_table *sgt, unsigned blksz);
->> +
->>   extern unsigned char sdio_f0_readb(struct sdio_func *func,
->>          unsigned int addr, int *err_ret);
->>   extern void sdio_f0_writeb(struct sdio_func *func, unsigned char b,
->> --
->> 1.8.1.4
->>
->
-> Kind regards
-> Uffe
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  #ifdef CONFIG_OF
+>  static struct dw_mci_of_quirks {
+>         char *quirk;
+> @@ -2513,6 +2549,9 @@ static struct dw_mci_of_quirks {
+>         }, {
+>                 .quirk  = "disable-wp",
+>                 .id     = DW_MCI_QUIRK_NO_WRITE_PROTECT,
+> +       }, {
+> +               .quirk  = "broken-dto",
+> +               .id     = DW_MCI_QUIRK_BROKEN_DTO,
+
+You're adding a device tree property without any binding.  If you need
+to add this please send a patch before this one modifying the device
+tree bindings.
+
+...but that brings up the question: do you _really_ need to add a
+property?  You already know that all rk3288 SoCs need this and you
+already know that you're an rk3288 SoC.  Just add this quirk in the
+rk3288 code always and be done with it.  ...and if this is also needed
+on other Rockchip parts, add it there too.
+
+-Doug
