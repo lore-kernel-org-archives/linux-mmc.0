@@ -1,71 +1,163 @@
-From: Vadivelan M <Vadivelan.Mani@toshiba-tsip.com>
-Subject: RE: eMMC write error in IMX6 Sabre AI board
-Date: Wed, 26 Nov 2014 03:21:47 +0000
-Message-ID: <0CE86CAC7146084190A01E87F7DCD5E908A19241@TOSBLRMBX01.TOSHIBA-TSIP.COM>
-References: <loom.20141107T122543-102@post.gmane.org>
- <CAOMZO5D1n7JutWCJAVafFSOKPZaS_HJjLPp26ROR-Gk12=b0yw@mail.gmail.com>
- <0CE86CAC7146084190A01E87F7DCD5E908A0CFA5@TOSBLRMBX01.TOSHIBA-TSIP.COM>
- <20141125210410.GG28355@pengutronix.de>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2] mmc: Add Production State Awareness Support
+Date: Wed, 26 Nov 2014 13:33:21 +0900
+Message-ID: <54755811.2030404@samsung.com>
+References: <1416927698-5304-1-git-send-email-alex.lemberg@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.soc-soft.com ([202.56.254.199]:8825 "EHLO
-	peak.toshiba-tesi.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751414AbaKZDZt convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Nov 2014 22:25:49 -0500
-In-Reply-To: <20141125210410.GG28355@pengutronix.de>
-Content-Language: en-US
+Received: from mailout4.samsung.com ([203.254.224.34]:49540 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751712AbaKZEd0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Nov 2014 23:33:26 -0500
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0NFM00LBYPZL37B0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 26 Nov 2014 13:33:21 +0900 (KST)
+In-reply-to: <1416927698-5304-1-git-send-email-alex.lemberg@sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Robert Schwebel' <r.schwebel@pengutronix.de>
-Cc: 'Fabio Estevam' <festevam@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Alex Lemberg <alex.lemberg@sandisk.com>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, chris@printf.net, avi.shchislowski@sandisk.com
 
-I understand. Ok then let me try to solve the issue by myself.
+Hi,
 
-Thanks,
-Vadivelan.
+On 11/26/2014 12:01 AM, Alex Lemberg wrote:
+> In this patch driver should recognize if eMMC device (Rev >=5.0)
+> was left in PRE_SOLDERING_POST_WRITES (0x02) state, and switch
+> it to NORMAL (0x00).
+> PRE_SOLDERING_POST_WRITES (0x02) state - represents a state
+> where the device is in production process and the
+> host (usually programmer) completed loading the content
+> to the device.
+> The host (usually programmer) sets the device to this state after
+> loading the content and just before soldering.
+> After soldering the device to the real host (not programmer),
+> the device should be switched to NORMAL (0x00) mode.
+> The NORMAL (0x00) mode of PSA register represents a state in
+> which the device is running in the field and uses regular operations.
+> Leaving device in PRE_SOLDERING_POST_WRITES (0x02) might cause
+> unexpected behaviour of eMMC device.
+> 
+> More details about PSA feature can be found in eMMC5.0 JEDEC spec (JESD84-B50.pdf):
+> http://www.jedec.org/standards-documents/technology-focus-areas/flash-memory-ssds-ufs-emmc/e-mmc
+> 
+> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+> ---
+> Changes in v2:
+>  - Remove typo in patch code
+> ---
+>  drivers/mmc/core/mmc.c   | 28 ++++++++++++++++++++++++++++
+>  include/linux/mmc/card.h |  2 ++
+>  include/linux/mmc/mmc.h  |  8 ++++++++
+>  3 files changed, 38 insertions(+)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 02ad792..3923c90 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -571,6 +571,16 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  		card->ext_csd.ffu_capable =
+>  			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
+>  			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
+> +		card->ext_csd.psa =
+> +			ext_csd[EXT_CSD_PSA];
+> +		if (ext_csd[EXT_CSD_PSA_TIMEOUT] > 0) {
+> +			card->ext_csd.psa_timeout =
+> +				100 *
+> +				(1 << ext_csd[EXT_CSD_PSA_TIMEOUT]);
+> +		} else {
+> +			pr_warn("%s: EXT_CSD PSA Timeout is zero\n",
+> +					mmc_hostname(card->host));
 
------Original Message-----
-From: Robert Schwebel [mailto:r.schwebel@pengutronix.de] 
-Sent: 26 November 2014 02:34
-To: Vadivelan M
-Cc: 'Fabio Estevam'; linux-mmc@vger.kernel.org
-Subject: Re: eMMC write error in IMX6 Sabre AI board
+I remembered Ulf's previous comment. Did you check it?
 
-On Mon, Nov 10, 2014 at 08:44:29AM +0000, Vadivelan M wrote:
-> Thanks for your suggestion. But my kernel is fixed to version 3.0.35 
-> and hence unable to use a different kernel. Please tell what is the 
-> problem in this kernel version if you already know. That would be very 
-> helpful.
+> +		}
+>  	}
+>  out:
+>  	return err;
+> @@ -1331,6 +1341,24 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>  		mmc_set_dsr(host);
+>  
+>  	/*
+> +	 * eMMC v5.0 or later
+> +	 * and Production State Awareness state is
+> +	 * EXT_CSD_PSA_POST_SOLDERING_WRITES (0x02)
+> +	 * The host should set the device to NORMAL mode
+> +	 */
+> +	if ((card->ext_csd.rev >= 7) &&
+> +		(card->ext_csd.psa == EXT_CSD_PSA_POST_SOLDERING_WRITES)) {
 
-If you use such an old kernel, you are basically on your own; community development & support takes place on top-of-tree.
+Is it right? how did you get "revision"?
 
-Note that 3.0.35 is 227048 patches behind 3.18-rc6, and this does not even take into account that you are probably using 3.0.35 plus thousands of vendor patches. You can't seriously expect anyone in the community to help you with issues which have long been solved.
+> +		unsigned int timeout;
+> +
+> +		timeout = DIV_ROUND_UP(card->ext_csd.psa_timeout, 1000);
+> +		card->ext_csd.psa = EXT_CSD_PSA_NORMAL;
 
-Regards,
-Robert
--- 
-Pengutronix e.K.                           |                             |
-Industrial Linux Solutions                 | http://www.pengutronix.de/  |
-Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
-The information contained in this e-mail message and in any
-attachments/annexure/appendices is confidential to the 
-recipient and may contain privileged information. 
-If you are not the intended recipient, please notify the
-sender and delete the message along with any 
-attachments/annexure/appendices. You should not disclose,
-copy or otherwise use the information contained in the
-message or any annexure. Any views expressed in this e-mail 
-are those of the individual sender except where the sender 
-specifically states them to be the views of 
-Toshiba Software India Pvt. Ltd. (TSIP),Bangalore.
+Why did card->ext_csd.psa assign to EXT_CSD_PSA_NORMAL as hard-coding?
 
-Although this transmission and any attachments are believed to be
-free of any virus or other defect that might affect any computer 
-system into which it is received and opened, it is the responsibility
-of the recipient to ensure that it is virus free and no responsibility 
-is accepted by Toshiba Embedded Software India Pvt. Ltd, for any loss or
-damage arising in any way from its use.
+> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +			EXT_CSD_PSA, card->ext_csd.psa, timeout);
+> +		if (err && err != -EBADMSG)
+> +			goto free_card;
+> +	}
+> +
+> +	/*
+>  	 * Select card, as all following commands rely on that.
+>  	 */
+>  	if (!mmc_host_is_spi(host)) {
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 4d69c00..09ac3b0 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -60,9 +60,11 @@ struct mmc_ext_csd {
+>  	u8			packed_event_en;
+>  	unsigned int		part_time;		/* Units: ms */
+>  	unsigned int		sa_timeout;		/* Units: 100ns */
+> +	unsigned int		psa_timeout;		/* Units: 100us */
+>  	unsigned int		generic_cmd6_time;	/* Units: 10ms */
+>  	unsigned int            power_off_longtime;     /* Units: ms */
+>  	u8			power_off_notification;	/* state */
+> +	u8			psa; /* production state awareness */
+>  	unsigned int		hs_max_dtr;
+>  	unsigned int		hs200_max_dtr;
+>  #define MMC_HIGH_26_MAX_DTR	26000000
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 49ad7a9..458814d 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -285,6 +285,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
+>  #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
+>  #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
+> +#define EXT_CSD_PSA			133	/* R/W/E */
+>  #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
+>  #define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
+>  #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
+> @@ -315,6 +316,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_PWR_CL_26_360		203	/* RO */
+>  #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
+>  #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
+> +#define EXT_CSD_PSA_TIMEOUT		218	/* RO */
+>  #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
+>  #define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
+>  #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
+> @@ -433,6 +435,12 @@ struct _mmc_csd {
+>  #define EXT_CSD_BKOPS_LEVEL_2		0x2
+>  
+>  /*
+> + * PRODUCTION STATE AWARENESS fields
+> + */
+> +#define EXT_CSD_PSA_NORMAL		0x00
+> +#define EXT_CSD_PSA_POST_SOLDERING_WRITES	0x02
+> +
+> +/*
+>   * MMC_SWITCH access modes
+>   */
+>  
+> 
 
