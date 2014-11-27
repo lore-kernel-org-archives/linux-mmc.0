@@ -1,59 +1,55 @@
-From: Angelo Dureghello <angelo@sysam.it>
-Subject: Re: [PATCH] mmc: davinci_mmc: add warnings for edma failures
-Date: Thu, 27 Nov 2014 11:18:48 +0100
-Message-ID: <5476FA88.6070105@sysam.it>
-References: <546FD21C.7010208@sysam.it> <CAPDyKFrBgv9OTzwNfiOSn58Ai7QTbrZm4pKgLrzrM1MgD4=zAA@mail.gmail.com>
+From: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Subject: [PATCH 0/3] ARM: edma: Correct header file usage
+Date: Thu, 27 Nov 2014 12:41:28 +0200
+Message-ID: <1417084891-17990-1-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sysam.it ([5.39.81.93]:38057 "EHLO mail.sysam.it"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753346AbaK0KTe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Nov 2014 05:19:34 -0500
-In-Reply-To: <CAPDyKFrBgv9OTzwNfiOSn58Ai7QTbrZm4pKgLrzrM1MgD4=zAA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <alsa-devel-bounces@alsa-project.org>
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Errors-To: alsa-devel-bounces@alsa-project.org
+Sender: alsa-devel-bounces@alsa-project.org
+To: Mark Brown <broonie@kernel.org>, linux@arm.linux.org.uk, nsekhar@ti.com, arnd@arndb.de, vinod.koul@intel.com, khilman@deeprootsystems.com
+Cc: alsa-devel@alsa-project.org, linux-omap@vger.kernel.org, Tony Lindgren <tony@atomide.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, chris@printf.net, Liam Girdwood <lgirdwood@gmail.com>, dmaengine@vger.kernel.org, ulf.hansson@linaro.org, linux-spi@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-Hi Uffe,
+Hi,
 
-many hanks for the reply,
+The linux/platform_data/edma.h file was used for API definition as well, which
+is not correct since the header should only contain platform data related
+structures, defines, etc.
 
- >> Add warnings in case the edma engine driver fails to allocate slots or
- >> channels requested from the davinci_mmc driver.
- >>
- >> Some ti-davinci based boards (i.e. board-da850-evm.c) are asking for
- >> some reserved chans / slots at board init stage. Later, the mmc driver
- >> results in a silent locked state.
- >
- > So why does davinci_acquire_dma_channels() succeed then? Isn't that
- > real problem you should be looking into?
-
-i explain with more details,
-
-my custom am1808 board initialization, based on 
-arch/arm/mach-davinci/board-da850-evm.c, reserves some dma chans / slots 
-for the audio at
-early boot.
-
-While on kernel 3.5.1 mmc was working properly, moving to kernel
-3.17.0, due to the dma-engine wrapper introduction (to be selected
-into menuconfig), the mmc host driver locks silently. System cannot
-even "reboot" after the failed attempt to reserve the dma slots.
-
-I hardly found out the reason due to missing of clear warnings.
-
-So there is nothing to fix in any other place. Simply, i am suggesting
-a more visible warning so the driver, instead of lock-up silently,
-throws a problem.
-
-Feel free to add or discard the patch, as you can see it is nothing 
-functional.
+Mark: I think this series can go via arm since it is just changing include stuff
+under ASoC.
 
 Regards,
-Angelo
+Peter
+---
+Peter Ujfalusi (3):
+  ASoC: davinci-evm: Do not include edma headers
+  ARM: edma: Rename header file for dmaengine filter function definition
+  ARM: edma: Split up header file to platform_data and API file
 
+ arch/arm/common/edma.c                     |   3 +-
+ arch/arm/mach-davinci/devices.c            |   1 +
+ arch/arm/mach-davinci/include/mach/da8xx.h |   1 +
+ drivers/dma/edma.c                         |   2 +-
+ drivers/mmc/host/davinci_mmc.c             |   3 +-
+ drivers/spi/spi-davinci.c                  |   2 +-
+ include/linux/edma-dmaengine.h             |  29 ++++++
+ include/linux/edma.h                       | 152 ++++++++++++++++++++++++++---
+ include/linux/platform_data/edma.h         | 148 ++--------------------------
+ sound/soc/davinci/davinci-evm.c            |   3 -
+ sound/soc/davinci/davinci-pcm.h            |   1 +
+ sound/soc/davinci/edma-pcm.c               |   2 +-
+ 12 files changed, 182 insertions(+), 165 deletions(-)
+ create mode 100644 include/linux/edma-dmaengine.h
 
-
+-- 
+2.1.3
