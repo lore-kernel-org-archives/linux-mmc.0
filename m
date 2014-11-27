@@ -1,70 +1,59 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v2] mmc: dw_mmc: add quirk for broken data transfer over scheme
-Date: Wed, 26 Nov 2014 14:46:00 -0800
-Message-ID: <CAD=FV=UmG1okxJ5JV-1cuRRQJi7EEPXc7Q90sWjfMWBqb7VSMw@mail.gmail.com>
-References: <1415970338-2637-1-git-send-email-addy.ke@rock-chips.com>
-	<1416903008-4160-1-git-send-email-addy.ke@rock-chips.com>
+From: <micky_ching@realsil.com.cn>
+Subject: [PATCH 1/2] mfd: rtsx: add func to split u32 into register
+Date: Thu, 27 Nov 2014 10:53:58 +0800
+Message-ID: <51dde5250305623c420e78fa555800ef8fef0a09.1417056337.git.micky_ching@realsil.com.cn>
+References: <cover.1417056337.git.micky_ching@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1416903008-4160-1-git-send-email-addy.ke@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Addy Ke <addy.ke@rock-chips.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Alexandru Stan <amstan@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <cover.1417056337.git.micky_ching@realsil.com.cn>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: sameo@linux.intel.com, lee.jones@linaro.org, chris@printf.net, ulf.hansson@linaro.org
+Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+From: Micky Ching <micky_ching@realsil.com.cn>
 
-On Tue, Nov 25, 2014 at 12:10 AM, Addy Ke <addy.ke@rock-chips.com> wrote:
-> This patch add a new quirk to add a s/w timer to notify the driver
-> to terminate current transfer and report a data timeout to the core,
-> if DTO interrupt does NOT come within the given time.
->
-> dw_mmc call mmc_request_done func to finish transfer depends on
-> DTO interrupt. If DTO interrupt does not come in sending data state,
-> the current transfer will be blocked.
->
-> But this case really exists, when driver reads tuning data from
-> card on RK3288-pink2 board. I measured waveforms by oscilloscope
-> and found that card clock was always on and data lines were always
-> holded high level in sending data state.
->
-> We got the reply from synopsys:
-> There are two counters but both use the same value of [31:8] bits.
-> Data timeout counter doesn't wait for stop clock and you should get
-> DRTO even when the clock is not stopped.
-> Host Starvation timeout counter is triggered with stop clock condition.
->
-> This means that host should get DRTO and DTO interrupt.
->
-> But we really don't get any data-related interrupt in RK3X SoCs.
-> And driver can't get data transfer state, it can do nothing but wait for.
+Add helper function to write u32 to registers, if we want to put u32
+value to 4 continuous register, this can help us reduce tedious work.
 
-Have you asked someone on your IC team to confirm this is an SoC
-errata on your SoC?  ...or is there something else we could be doing
-wrong (overclocking?  jitter in the clock?  bad dividers?) that could
-be causing this problem?
+Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+---
+ include/linux/mfd/rtsx_pci.h | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
 
-
->  #ifdef CONFIG_OF
->  static struct dw_mci_of_quirks {
->         char *quirk;
-> @@ -2513,6 +2549,9 @@ static struct dw_mci_of_quirks {
->         }, {
->                 .quirk  = "disable-wp",
->                 .id     = DW_MCI_QUIRK_NO_WRITE_PROTECT,
-> +       }, {
-> +               .quirk  = "broken-dto",
-> +               .id     = DW_MCI_QUIRK_BROKEN_DTO,
-
-You're adding a device tree property without any binding.  If you need
-to add this please send a patch before this one modifying the device
-tree bindings.
-
-...but that brings up the question: do you _really_ need to add a
-property?  You already know that all rk3288 SoCs need this and you
-already know that you're an rk3288 SoC.  Just add this quirk in the
-rk3288 code always and be done with it.  ...and if this is also needed
-on other Rockchip parts, add it there too.
-
--Doug
+diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx_pci.h
+index 74346d5..bf45ea2 100644
+--- a/include/linux/mfd/rtsx_pci.h
++++ b/include/linux/mfd/rtsx_pci.h
+@@ -967,4 +967,19 @@ static inline u8 *rtsx_pci_get_cmd_data(struct rtsx_pcr *pcr)
+ 	return (u8 *)(pcr->host_cmds_ptr);
+ }
+ 
++static inline void rtsx_pci_write_be32(struct rtsx_pcr *pcr, u16 reg, u32 val)
++{
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg,     0xFF, val >> 24);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 1, 0xFF, val >> 16);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 2, 0xFF, val >> 8);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 3, 0xFF, val);
++}
++
++static inline void rtsx_pci_write_le32(struct rtsx_pcr *pcr, u16 reg, u32 val)
++{
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg,     0xFF, val);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 1, 0xFF, val >> 8);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 2, 0xFF, val >> 16);
++	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 3, 0xFF, val >> 24);
++}
+ #endif
+-- 
+1.9.1
