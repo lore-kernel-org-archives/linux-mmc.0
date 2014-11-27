@@ -1,223 +1,188 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2] mmc: Add Production State Awareness Support
-Date: Thu, 27 Nov 2014 18:02:23 +0900
-Message-ID: <5476E89F.6020303@samsung.com>
-References: <282CEDFCBC30114F83C499CB8F2ED5333ECBDCE0@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Johan Rudholm <johan.rudholm@axis.com>
+Subject: Re: [PATCH v4 1/2] mmc: core: turn hw_reset into a bus_ops
+Date: Thu, 27 Nov 2014 10:05:17 +0100
+Message-ID: <CA+20K0Dfi5SfkG_88j6yC-xMLE-5zZhB1WijsnmnWf8TwyOssg@mail.gmail.com>
+References: <1416827198-29820-1-git-send-email-johanru@axis.com>
+	<1416827198-29820-2-git-send-email-johanru@axis.com>
+	<CAPDyKFrQySfFkR1VMK19gBwpO=97=V_U-HfmWpVHFMfzaVLwgw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:52056 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932109AbaK0JCb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Nov 2014 04:02:31 -0500
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0NFO00I43X3ZBY70@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 27 Nov 2014 18:02:24 +0900 (KST)
-In-reply-to: <282CEDFCBC30114F83C499CB8F2ED5333ECBDCE0@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from bastet.se.axis.com ([195.60.68.11]:43063 "EHLO
+	bastet.se.axis.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754738AbaK0JFZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Nov 2014 04:05:25 -0500
+Received: from localhost (localhost [127.0.0.1])
+	by bastet.se.axis.com (Postfix) with ESMTP id A66DC1806B
+	for <linux-mmc@vger.kernel.org>; Thu, 27 Nov 2014 10:05:23 +0100 (CET)
+Received: from bastet.se.axis.com ([IPv6:::ffff:127.0.0.1])
+	by localhost (bastet.se.axis.com [::ffff:127.0.0.1]) (amavisd-new, port 10024)
+	with LMTP id 12ZH+foFRf2O for <linux-mmc@vger.kernel.org>;
+	Thu, 27 Nov 2014 10:05:19 +0100 (CET)
+Received: from boulder.se.axis.com (boulder.se.axis.com [10.0.2.104])
+	by bastet.se.axis.com (Postfix) with ESMTP id 0B72218092
+	for <linux-mmc@vger.kernel.org>; Thu, 27 Nov 2014 10:05:19 +0100 (CET)
+Received: from boulder.se.axis.com (localhost [127.0.0.1])
+	by postfix.imss71 (Postfix) with ESMTP id E4928110E
+	for <linux-mmc@vger.kernel.org>; Thu, 27 Nov 2014 10:05:18 +0100 (CET)
+Received: from thoth.se.axis.com (thoth.se.axis.com [10.0.2.173])
+	by boulder.se.axis.com (Postfix) with ESMTP id D8AB31108
+	for <linux-mmc@vger.kernel.org>; Thu, 27 Nov 2014 10:05:18 +0100 (CET)
+Received: from xmail2.se.axis.com (xmail2.se.axis.com [10.0.5.74])
+	by thoth.se.axis.com (Postfix) with ESMTP id D55A93429B
+	for <linux-mmc@vger.kernel.org>; Thu, 27 Nov 2014 10:05:18 +0100 (CET)
+Received: by mail-qc0-f179.google.com with SMTP id c9so3341987qcz.10
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Nov 2014 01:05:17 -0800 (PST)
+In-Reply-To: <CAPDyKFrQySfFkR1VMK19gBwpO=97=V_U-HfmWpVHFMfzaVLwgw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Johan Rudholm <johanru@axis.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Adrian Hunter <adrian.hunter@intel.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>
 
-Hi, Alex.
+Hi Ulf,
 
-On 11/27/2014 01:38 AM, Alex Lemberg wrote:
-> Hi Jaehoon,
-> 
-> Thank you for reviewing the patch.
-> 
->> -----Original Message-----
->> From: Jaehoon Chung [mailto:jh80.chung@samsung.com]
->> Sent: Wednesday, November 26, 2014 6:33 AM
->> To: Alex Lemberg; ulf.hansson@linaro.org
->> Cc: linux-mmc@vger.kernel.org; chris@printf.net; Avi Shchislowski
->> Subject: Re: [PATCH v2] mmc: Add Production State Awareness Support
+2014-11-25 14:48 GMT+01:00 Ulf Hansson <ulf.hansson@linaro.org>:
+> On 24 November 2014 at 12:06, Johan Rudholm <johan.rudholm@axis.com> wrote:
+>> Move the (e)MMC specific hw_reset code from core.c into mmc.c and call
+>> it from the new bus_ops member hw_reset. This also lets us add code
+>> for resetting SD cards as well.
 >>
->> Hi,
+>> Signed-off-by: Johan Rudholm <johanru@axis.com>
+>> ---
+>>  drivers/mmc/core/core.c |   56 +++++++++++++++-------------------------------
+>>  drivers/mmc/core/core.h |    5 ++++
+>>  drivers/mmc/core/mmc.c  |   40 +++++++++++++++++++++++++++++++++
+>>  3 files changed, 63 insertions(+), 38 deletions(-)
 >>
->> On 11/26/2014 12:01 AM, Alex Lemberg wrote:
->>> In this patch driver should recognize if eMMC device (Rev >=5.0) was
->>> left in PRE_SOLDERING_POST_WRITES (0x02) state, and switch it to
->>> NORMAL (0x00).
->>> PRE_SOLDERING_POST_WRITES (0x02) state - represents a state where the
->>> device is in production process and the host (usually programmer)
->>> completed loading the content to the device.
->>> The host (usually programmer) sets the device to this state after
->>> loading the content and just before soldering.
->>> After soldering the device to the real host (not programmer), the
->>> device should be switched to NORMAL (0x00) mode.
->>> The NORMAL (0x00) mode of PSA register represents a state in which the
->>> device is running in the field and uses regular operations.
->>> Leaving device in PRE_SOLDERING_POST_WRITES (0x02) might cause
->>> unexpected behaviour of eMMC device.
->>>
->>> More details about PSA feature can be found in eMMC5.0 JEDEC spec
->> (JESD84-B50.pdf):
->>> http://www.jedec.org/standards-documents/technology-focus-areas/flash-
->>> memory-ssds-ufs-emmc/e-mmc
->>>
->>> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
->>> ---
->>> Changes in v2:
->>>  - Remove typo in patch code
->>> ---
->>>  drivers/mmc/core/mmc.c   | 28 ++++++++++++++++++++++++++++
->>>  include/linux/mmc/card.h |  2 ++
->>>  include/linux/mmc/mmc.h  |  8 ++++++++
->>>  3 files changed, 38 insertions(+)
->>>
->>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
->>> 02ad792..3923c90 100644
->>> --- a/drivers/mmc/core/mmc.c
->>> +++ b/drivers/mmc/core/mmc.c
->>> @@ -571,6 +571,16 @@ static int mmc_decode_ext_csd(struct mmc_card
->> *card, u8 *ext_csd)
->>>  		card->ext_csd.ffu_capable =
->>>  			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
->>>  			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
->>> +		card->ext_csd.psa =
->>> +			ext_csd[EXT_CSD_PSA];
->>> +		if (ext_csd[EXT_CSD_PSA_TIMEOUT] > 0) {
->>> +			card->ext_csd.psa_timeout =
->>> +				100 *
->>> +				(1 << ext_csd[EXT_CSD_PSA_TIMEOUT]);
->>> +		} else {
->>> +			pr_warn("%s: EXT_CSD PSA Timeout is zero\n",
->>> +					mmc_hostname(card->host));
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 9584bff..492b3e5 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -2245,67 +2245,47 @@ static void mmc_hw_reset_for_init(struct mmc_host *host)
+>>         mmc_host_clk_release(host);
+>>  }
 >>
->> I remembered Ulf's previous comment. Did you check it?
-> Are you referring to psa_timeout?
-> In case it is zero, we are printing warning, and let host controller 
-> to handle this.
-> Every switch command timeout setting in mmc driver done in this way. 
+>> -int mmc_can_reset(struct mmc_card *card)
+>> -{
+>> -       u8 rst_n_function;
+>> -
+>> -       if (!mmc_card_mmc(card))
+>> -               return 0;
+>> -       rst_n_function = card->ext_csd.rst_n_function;
+>> -       if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
+>> -               return 0;
+>> -       return 1;
+>> -}
+>> -EXPORT_SYMBOL(mmc_can_reset);
+>
+> Isn't the mmc_can_reset() function used from mmc_test.c?
 
-pr_warn() doesn't need.
+Yes. Maybe we should move this stuff to mmc_test instead. We could
+also move the code that checks if the reset worked or not to mmc_test,
+since this is the only place where the check is performed.
 
+>> -
+>> +/* Reset card in a bus-specific way */
+>>  static int mmc_do_hw_reset(struct mmc_host *host, int check)
+>>  {
+>> -       struct mmc_card *card = host->card;
+>> -
+>> -       if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
+>> -               return -EOPNOTSUPP;
+>> +       int ret;
 >>
->>> +		}
->>>  	}
->>>  out:
->>>  	return err;
->>> @@ -1331,6 +1341,24 @@ static int mmc_init_card(struct mmc_host *host,
->> u32 ocr,
->>>  		mmc_set_dsr(host);
->>>
->>>  	/*
->>> +	 * eMMC v5.0 or later
->>> +	 * and Production State Awareness state is
->>> +	 * EXT_CSD_PSA_POST_SOLDERING_WRITES (0x02)
->>> +	 * The host should set the device to NORMAL mode
->>> +	 */
->>> +	if ((card->ext_csd.rev >= 7) &&
->>> +		(card->ext_csd.psa ==
->> EXT_CSD_PSA_POST_SOLDERING_WRITES)) {
+>> -       if (!card)
+>> +       if (!host->card)
+>>                 return -EINVAL;
 >>
->> Is it right? how did you get "revision"?
-> 
-> In linux-next, the EXT_CSD revision set was moved
-> to mmc_decode_ext_csd() function.
-> Anyway, thanks for pointing me on this, I will move this check to 
-> the right place. 
-> 
+>> -       if (!mmc_can_reset(card))
+>
+> You need a mmc_bus_get() here before accessing the host->bus_ops callbacks.
+>
+> Well, if you would executed this code with the host claimed and from
+> the mmc block layer, you can be sure the bus_ops to exist. Now, since
+> this is an exported function, I think you need to be more safe to also
+> do the mmc_bus_get|put().
+
+Got it, thanks.
+
+>> +       if (!host->bus_ops || !host->bus_ops->hw_reset ||
+>> +                       host->bus_ops->hw_reset(host, MMC_HW_RESET_TEST))
+>>                 return -EOPNOTSUPP;
 >>
->>> +		unsigned int timeout;
->>> +
->>> +		timeout = DIV_ROUND_UP(card->ext_csd.psa_timeout, 1000);
->>> +		card->ext_csd.psa = EXT_CSD_PSA_NORMAL;
+>> -       mmc_host_clk_hold(host);
+>> -       mmc_set_clock(host, host->f_init);
+>> +       ret = host->bus_ops->hw_reset(host, check);
+>
+> What's going on here? You are invoking the ->hw_reset() callback
+> twice. That seems odd.
 >>
->> Why did card->ext_csd.psa assign to EXT_CSD_PSA_NORMAL as hard-coding?
+>> -       host->ops->hw_reset(host);
+>> -
+>> -       /* If the reset has happened, then a status command will fail */
+>> -       if (check) {
+>> -               u32 status;
+>> -
+>> -               if (!mmc_send_status(card, &status)) {
+>> -                       mmc_host_clk_release(host);
+>> -                       return -ENOSYS;
+>> -               }
+>> -       }
+>> -
+>> -       /* Set initial state and call mmc_set_ios */
+>> -       mmc_set_initial_state(host);
+>> +       if (check == MMC_HW_RESET_TEST_CARD)
+>> +               return ret;
 >>
-> I think this is a right way to set ext_csd structure in order to prevent additional read
-> from device ext_csd register, which was already read during the init.
+>> -       mmc_host_clk_release(host);
+>> +       pr_warn("%s: tried to reset card (status %d)\n",
+>> +                                               mmc_hostname(host), ret);
+>>
+>>         return host->bus_ops->power_restore(host);
+>>  }
+>>
+>>  int mmc_hw_reset(struct mmc_host *host)
+>>  {
+>> -       return mmc_do_hw_reset(host, 0);
+>> +       return mmc_do_hw_reset(host, MMC_HW_RESET_RESET);
+>>  }
+>>  EXPORT_SYMBOL(mmc_hw_reset);
+>>
+>>  int mmc_hw_reset_check(struct mmc_host *host)
+>>  {
+>> -       return mmc_do_hw_reset(host, 1);
+>> +       return mmc_do_hw_reset(host, MMC_HW_RESET_CHECK);
+>>  }
+>>  EXPORT_SYMBOL(mmc_hw_reset_check);
+>>
+>> +int mmc_can_reset(struct mmc_card *card)
+>> +{
+>> +       return mmc_do_hw_reset(card->host, MMC_HW_RESET_TEST_CARD);
+>> +}
+>> +EXPORT_SYMBOL(mmc_can_reset);
+>> +
+>>  static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+>>  {
+>>         host->f_init = freq;
+>> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+>> index d76597c..f6e0a52 100644
+>> --- a/drivers/mmc/core/core.h
+>> +++ b/drivers/mmc/core/core.h
+>> @@ -27,6 +27,11 @@ struct mmc_bus_ops {
+>>         int (*power_restore)(struct mmc_host *);
+>>         int (*alive)(struct mmc_host *);
+>>         int (*shutdown)(struct mmc_host *);
+>> +       int (*hw_reset)(struct mmc_host *, int);
+>> +#define MMC_HW_RESET_RESET     0
+>> +#define MMC_HW_RESET_TEST      1
+>> +#define MMC_HW_RESET_CHECK     2
+>> +#define MMC_HW_RESET_TEST_CARD 3
+>
+> Urgh. Is there a way to remove all this? I just don't like all these options.
+>
+> In fact, I would prefer to have none of them.
 
-I think you assume that card is already initialized.
+If we move the test and check functionality to mmc_test, I think we
+can avoid these. What do you think of this approach?
 
-In my understanding for your code.
-a) init time
-	card->ext_csd.psa assigned to EXT_CSD_PSA_NORMAL. (hard coding)
-	And switch to EXT_CSD_PSA_NORMAL.
-b) If oldcard doesn't present, try to read ext_csd register.
-	Then EXT_CSD_PSA was always set to EXT_CSD_PSA_NORMAL. isn't?
-	And card->ext_csd.psa is re-assigned to EXT_CSD_PSA register value.
-	(It's also EXT_CSD_PSA_NORMAL, because it's switched to EXT_CSD_PSA_NORMA at 'a)' )
-
-If i missed something, let me know.
-
-> 
-> 
->>> +		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>> +			EXT_CSD_PSA, card->ext_csd.psa, timeout);
-
-If you need to change,
-		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_PSA,
-			EXT_CSD_PSA_NORMAL, timeout);
-
-Anyway, this sequence is something strange.
-
-Best Regards,
-Jaehoon Chung
->>> +		if (err && err != -EBADMSG)
->>> +			goto free_card;
->>> +	}
->>> +
->>> +	/*
->>>  	 * Select card, as all following commands rely on that.
->>>  	 */
->>>  	if (!mmc_host_is_spi(host)) {
->>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h index
->>> 4d69c00..09ac3b0 100644
->>> --- a/include/linux/mmc/card.h
->>> +++ b/include/linux/mmc/card.h
->>> @@ -60,9 +60,11 @@ struct mmc_ext_csd {
->>>  	u8			packed_event_en;
->>>  	unsigned int		part_time;		/* Units: ms */
->>>  	unsigned int		sa_timeout;		/* Units: 100ns */
->>> +	unsigned int		psa_timeout;		/* Units: 100us */
->>>  	unsigned int		generic_cmd6_time;	/* Units: 10ms */
->>>  	unsigned int            power_off_longtime;     /* Units: ms */
->>>  	u8			power_off_notification;	/* state */
->>> +	u8			psa; /* production state awareness */
->>>  	unsigned int		hs_max_dtr;
->>>  	unsigned int		hs200_max_dtr;
->>>  #define MMC_HIGH_26_MAX_DTR	26000000
->>> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h index
->>> 49ad7a9..458814d 100644
->>> --- a/include/linux/mmc/mmc.h
->>> +++ b/include/linux/mmc/mmc.h
->>> @@ -285,6 +285,7 @@ struct _mmc_csd {
->>>  #define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
->>>  #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
->>>  #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
->>> +#define EXT_CSD_PSA			133	/* R/W/E */
->>>  #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
->>>  #define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
->>>  #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
->>> @@ -315,6 +316,7 @@ struct _mmc_csd {
->>>  #define EXT_CSD_PWR_CL_26_360		203	/* RO */
->>>  #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
->>>  #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
->>> +#define EXT_CSD_PSA_TIMEOUT		218	/* RO */
->>>  #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
->>>  #define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
->>>  #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
->>> @@ -433,6 +435,12 @@ struct _mmc_csd {
->>>  #define EXT_CSD_BKOPS_LEVEL_2		0x2
->>>
->>>  /*
->>> + * PRODUCTION STATE AWARENESS fields
->>> + */
->>> +#define EXT_CSD_PSA_NORMAL		0x00
->>> +#define EXT_CSD_PSA_POST_SOLDERING_WRITES	0x02
->>> +
->>> +/*
->>>   * MMC_SWITCH access modes
->>>   */
->>>
->>>
-> 
-> 
-
+//Johan
