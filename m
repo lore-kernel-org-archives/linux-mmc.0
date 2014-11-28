@@ -1,66 +1,38 @@
-From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: Re: [PATCH 2/3] ARM: edma: Rename header file for
- dmaengine filter function definition
-Date: Fri, 28 Nov 2014 09:16:24 +0200
-Message-ID: <54782148.6040108@ti.com>
-References: <1417084891-17990-1-git-send-email-peter.ujfalusi@ti.com>
- <3300340.ou8f7H2hIc@wuerfel> <54777174.4070203@ti.com>
- <4859328.eEV7jzKEaA@wuerfel>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: Re: [PATCH 1/2] mfd: rtsx: add func to split u32 into register
+Date: Fri, 28 Nov 2014 11:54:37 +0300
+Message-ID: <20141128085436.GF4911@mwanda>
+References: <cover.1417056337.git.micky_ching@realsil.com.cn>
+ <51dde5250305623c420e78fa555800ef8fef0a09.1417056337.git.micky_ching@realsil.com.cn>
+ <20141127152342.GA4860@mwanda> <5477D99C.3050903@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <alsa-devel-bounces@alsa-project.org>
-In-Reply-To: <4859328.eEV7jzKEaA@wuerfel>
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Errors-To: alsa-devel-bounces@alsa-project.org
-Sender: alsa-devel-bounces@alsa-project.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: alsa-devel@alsa-project.org, linux@arm.linux.org.uk, vinod.koul@intel.com, nsekhar@ti.com, linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org, Liam Girdwood <lgirdwood@gmail.com>, linux-kernel@vger.kernel.org, khilman@deeprootsystems.com, Tony Lindgren <tony@atomide.com>, Mark Brown <broonie@kernel.org>, chris@printf.net, dmaengine@vger.kernel.org, ulf.hansson@linaro.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Content-Disposition: inline
+In-Reply-To: <5477D99C.3050903@realsil.com.cn>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: =?utf-8?B?5pWs6ZSQ?= <micky_ching@realsil.com.cn>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "sameo@linux.intel.com" <sameo@linux.intel.com>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, =?utf-8?B?546L54Kc?= <wei_wang@realsil.com.cn>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "rogerable@realtek.com" <rogerable@realtek.com>, "lee.jones@linaro.org" <lee.jones@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11/27/2014 11:52 PM, Arnd Bergmann wrote:
-> On Thursday 27 November 2014 20:46:12 Peter Ujfalusi wrote:
->>
->> I see. With this series I did not planed to fix all edma related issues,=
- just
->> as a start clean up the related header files. I would rather not add fix=
-es to
->> mmc, spi, etc drivers since while you have valid point it is not in the =
-scope
->> of this series.
->> Can we do the changes you are suggesting in an incremental manner?
-> =
-
-> Sure, but I'd leave the existing filter function declaration alone then
-> and not move it, since we wouldn't want to keep it in the long run.
-
-but if you want to reference the filter function (which is in
-drivers/dma/edma.c) in arch/arm/mach-davinci/ directory, we will need it.
-Don't we?
-
-If I leave the header as it is, then how would we clean up the edma headers=
-? I
-would not put the API definitions for the arch code into the same file as we
-have the filter definition.
-
-
-> =
-
-> 	Arnd
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> =
-
-
-
--- =
-
-P=E9ter
+T24gRnJpLCBOb3YgMjgsIDIwMTQgYXQgMDI6MTA6MzZBTSArMDAwMCwg5pWs6ZSQIHdyb3RlOgo+
+IGVnLCBpbiBzZF9vcHMuYyB0aGUgY21kLmFyZyBpcyBjb25zdHJ1Y3RlZCBiaXQgYnkgYml0LCB3
+ZSBjYW4gcHV0IHRoZSByaWdodAo+IGJ5dGUgdG8gdGhlIHJpZ2h0IHJlZ2lzdGVyIGJ5IHNoaWZ0
+LCBzbyB0aGUgZW5kaWFuIGNoZWNrIGlzIG5vdCBuZWVkLgoKSSBsb29rZWQgYXQgZHJpdmVycy9t
+bWMvY29yZS9zZF9vcHMuYyBhbmQgY21kLmFyZyBzZWVtcyB0byBiZSBjcHUKZW5kaWFuLgoKVGhl
+IG5ldyBmdW5jdGlvbiBhc3N1bWVzIHRoYXQgdGhlIGNwdSBpcyBsaXR0bGUgZW5kaWFuIGFuZCBt
+YW51YWxseQpjb252ZXJ0cyBpdCB0byBsaXR0bGUgZW5kaWFuLiAgVGhpcyBpcyBhbiBlbmRpYW4g
+YnVnLiAgSSB0aGluayBteSBmaXggaXMKY29ycmVjdCBvciBzb21ldGhpbmcgc2ltaWxhci4KCnJl
+Z2FyZHMsCmRhbiBjYXJwZW50ZXIKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX18KZGV2ZWwgbWFpbGluZyBsaXN0CmRldmVsQGxpbnV4ZHJpdmVycHJvamVjdC5v
+cmcKaHR0cDovL2RyaXZlcmRldi5saW51eGRyaXZlcnByb2plY3Qub3JnL21haWxtYW4vbGlzdGlu
+Zm8vZHJpdmVyZGV2LWRldmVsCg==
