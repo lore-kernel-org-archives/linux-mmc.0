@@ -1,93 +1,113 @@
 From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: [PATCH v3 2/4] mmc: atmel-mci: remove __init/__exit attributes
-Date: Fri, 28 Nov 2014 15:08:04 +0100
-Message-ID: <1417183686-31481-3-git-send-email-ludovic.desroches@atmel.com>
+Subject: [PATCH v3 4/4] mmc: atmel-mci: use probe deferring if dma controller is not ready yet
+Date: Fri, 28 Nov 2014 15:08:06 +0100
+Message-ID: <1417183686-31481-5-git-send-email-ludovic.desroches@atmel.com>
 References: <1417183686-31481-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:48197 "EHLO
+Received: from eusmtp01.atmel.com ([212.144.249.242]:48357 "EHLO
 	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750976AbaK1OId (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Nov 2014 09:08:33 -0500
+	with ESMTP id S1750976AbaK1OI6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Nov 2014 09:08:58 -0500
 In-Reply-To: <1417183686-31481-1-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 Cc: ulf.hansson@linaro.org, nicolas.ferre@atmel.com, arnd@arndb.de, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Using __init/__exit attributes can cause several breakages so remove
-them.
+Return probe defer if requesting a dma channel without a dma controller
+probed.
 
 Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 ---
- drivers/mmc/host/atmel-mci.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+ drivers/mmc/host/atmel-mci.c | 49 ++++++++++++++++++++++----------------------
+ 1 file changed, 25 insertions(+), 24 deletions(-)
 
 diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index f187e75..064358d 100644
+index 00f6088..0a96819 100644
 --- a/drivers/mmc/host/atmel-mci.c
 +++ b/drivers/mmc/host/atmel-mci.c
-@@ -2140,7 +2140,7 @@ static irqreturn_t atmci_detect_interrupt(int irq, void *dev_id)
- 	return IRQ_HANDLED;
+@@ -2272,29 +2272,26 @@ static void atmci_cleanup_slot(struct atmel_mci_slot *slot,
+ 	mmc_free_host(slot->mmc);
  }
  
--static int __init atmci_init_slot(struct atmel_mci *host,
-+static int atmci_init_slot(struct atmel_mci *host,
- 		struct mci_slot_pdata *slot_data, unsigned int id,
- 		u32 sdc_reg, u32 sdio_irq)
+-static bool atmci_configure_dma(struct atmel_mci *host)
++static int atmci_configure_dma(struct atmel_mci *host)
  {
-@@ -2302,7 +2302,7 @@ static bool atmci_configure_dma(struct atmel_mci *host)
-  * HSMCI provides DMA support and a new config register but no more supports
-  * PDC.
-  */
--static void __init atmci_get_cap(struct atmel_mci *host)
-+static void atmci_get_cap(struct atmel_mci *host)
- {
- 	unsigned int version;
+-	if (host == NULL)
+-		return false;
++	int ret = 0;
  
-@@ -2351,7 +2351,7 @@ static void __init atmci_get_cap(struct atmel_mci *host)
- 	}
+-	host->dma.chan = dma_request_slave_channel(&host->pdev->dev, "rxtx");
+-	if (!host->dma.chan) {
+-		dev_warn(&host->pdev->dev, "no DMA channel available\n");
+-		return false;
+-	} else {
+-		dev_info(&host->pdev->dev,
+-					"using %s for DMA transfers\n",
+-					dma_chan_name(host->dma.chan));
+-
+-		host->dma_conf.src_addr = host->mapbase + ATMCI_RDR;
+-		host->dma_conf.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+-		host->dma_conf.src_maxburst = 1;
+-		host->dma_conf.dst_addr = host->mapbase + ATMCI_TDR;
+-		host->dma_conf.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+-		host->dma_conf.dst_maxburst = 1;
+-		host->dma_conf.device_fc = false;
+-		return true;
+-	}
++	host->dma.chan = dma_request_slave_channel_reason(&host->pdev->dev, "rxtx");
++	if (IS_ERR(host->dma.chan))
++		return PTR_ERR(host->dma.chan);
++
++	dev_info(&host->pdev->dev, "using %s for DMA transfers\n",
++		 dma_chan_name(host->dma.chan));
++
++	host->dma_conf.src_addr = host->mapbase + ATMCI_RDR;
++	host->dma_conf.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
++	host->dma_conf.src_maxburst = 1;
++	host->dma_conf.dst_addr = host->mapbase + ATMCI_TDR;
++	host->dma_conf.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
++	host->dma_conf.dst_maxburst = 1;
++	host->dma_conf.device_fc = false;
++
++	return ret;
  }
  
--static int __init atmci_probe(struct platform_device *pdev)
-+static int atmci_probe(struct platform_device *pdev)
- {
- 	struct mci_platform_data	*pdata;
- 	struct atmel_mci		*host;
-@@ -2502,7 +2502,7 @@ err_init_slot:
+ /*
+@@ -2411,7 +2408,10 @@ static int atmci_probe(struct platform_device *pdev)
+ 
+ 	/* Get MCI capabilities and set operations according to it */
+ 	atmci_get_cap(host);
+-	if (atmci_configure_dma(host)) {
++	ret = atmci_configure_dma(host);
++	if (ret == -EPROBE_DEFER)
++		goto err_dma_probe_defer;
++	if (ret == 0) {
+ 		host->prepare_data = &atmci_prepare_data_dma;
+ 		host->submit_data = &atmci_submit_data_dma;
+ 		host->stop_transfer = &atmci_stop_transfer_dma;
+@@ -2496,8 +2496,9 @@ err_init_slot:
+ 	pm_runtime_put_noidle(&pdev->dev);
+ 
+ 	del_timer_sync(&host->timer);
+-	if (host->dma.chan)
++	if (!IS_ERR(host->dma.chan))
+ 		dma_release_channel(host->dma.chan);
++err_dma_probe_defer:
+ 	free_irq(irq, host);
  	return ret;
  }
+@@ -2523,7 +2524,7 @@ static int atmci_remove(struct platform_device *pdev)
+ 	atmci_readl(host, ATMCI_SR);
  
--static int __exit atmci_remove(struct platform_device *pdev)
-+static int atmci_remove(struct platform_device *pdev)
- {
- 	struct atmel_mci	*host = platform_get_drvdata(pdev);
- 	unsigned int		i;
-@@ -2565,7 +2565,7 @@ static const struct dev_pm_ops atmci_dev_pm_ops = {
- };
+ 	del_timer_sync(&host->timer);
+-	if (host->dma.chan)
++	if (!IS_ERR(host->dma.chan))
+ 		dma_release_channel(host->dma.chan);
  
- static struct platform_driver atmci_driver = {
--	.remove		= __exit_p(atmci_remove),
-+	.remove		= atmci_remove,
- 	.driver		= {
- 		.name		= "atmel_mci",
- 		.of_match_table	= of_match_ptr(atmci_dt_ids),
-@@ -2573,12 +2573,12 @@ static struct platform_driver atmci_driver = {
- 	},
- };
- 
--static int __init atmci_init(void)
-+static int atmci_init(void)
- {
- 	return platform_driver_probe(&atmci_driver, atmci_probe);
- }
- 
--static void __exit atmci_exit(void)
-+static void atmci_exit(void)
- {
- 	platform_driver_unregister(&atmci_driver);
- }
+ 	free_irq(platform_get_irq(pdev, 0), host);
 -- 
 2.0.3
 
