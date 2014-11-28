@@ -1,83 +1,51 @@
-From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: Re: [PATCH 2/3] ARM: edma: Rename header file for
- dmaengine filter function definition
-Date: Fri, 28 Nov 2014 13:48:42 +0200
-Message-ID: <5478611A.5060404@ti.com>
-References: <1417084891-17990-1-git-send-email-peter.ujfalusi@ti.com>
- <4859328.eEV7jzKEaA@wuerfel> <54782148.6040108@ti.com>
- <6448422.mtUnef24Xp@wuerfel>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: core: allow a reset gpio to be configured.
+Date: Fri, 28 Nov 2014 12:56:33 +0100
+Message-ID: <CAPDyKFrx98NspRU1nV3uJ6XwTuA4tZQkrYTfDoeXGR+f5htODQ@mail.gmail.com>
+References: <20141108000919.5629.55381.stgit@notabene.brown>
+	<20141108001411.5629.25179.stgit@notabene.brown>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <alsa-devel-bounces@alsa-project.org>
-In-Reply-To: <6448422.mtUnef24Xp@wuerfel>
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Errors-To: alsa-devel-bounces@alsa-project.org
-Sender: alsa-devel-bounces@alsa-project.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: alsa-devel@alsa-project.org, linux@arm.linux.org.uk, vinod.koul@intel.com, nsekhar@ti.com, linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org, Liam Girdwood <lgirdwood@gmail.com>, linux-kernel@vger.kernel.org, khilman@deeprootsystems.com, Tony Lindgren <tony@atomide.com>, Mark Brown <broonie@kernel.org>, chris@printf.net, dmaengine@vger.kernel.org, ulf.hansson@linaro.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f42.google.com ([209.85.216.42]:48140 "EHLO
+	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751265AbaK1L4d (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Nov 2014 06:56:33 -0500
+Received: by mail-qa0-f42.google.com with SMTP id j7so4451066qaq.29
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Nov 2014 03:56:33 -0800 (PST)
+In-Reply-To: <20141108001411.5629.25179.stgit@notabene.brown>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: NeilBrown <neilb@suse.de>
+Cc: Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>
 
-On 11/28/2014 12:51 PM, Arnd Bergmann wrote:
-> On Friday 28 November 2014 09:16:24 Peter Ujfalusi wrote:
->> On 11/27/2014 11:52 PM, Arnd Bergmann wrote:
->>> On Thursday 27 November 2014 20:46:12 Peter Ujfalusi wrote:
->>>>
->>>> I see. With this series I did not planed to fix all edma related issue=
-s, just
->>>> as a start clean up the related header files. I would rather not add f=
-ixes to
->>>> mmc, spi, etc drivers since while you have valid point it is not in th=
-e scope
->>>> of this series.
->>>> Can we do the changes you are suggesting in an incremental manner?
->>>
->>> Sure, but I'd leave the existing filter function declaration alone then
->>> and not move it, since we wouldn't want to keep it in the long run.
->>
->> but if you want to reference the filter function (which is in
->> drivers/dma/edma.c) in arch/arm/mach-davinci/ directory, we will need it.
->> Don't we?
-> =
+On 8 November 2014 at 01:14, NeilBrown <neilb@suse.de> wrote:
+> If the regulator supplying an SDIO device is shared
+> with another device, the turning the regulator 'on' and 'off'
+> will not actually cycle power and so will not reset
+> the device.
+>
+> This is particularly a problem for some wi2si wireless modules which
+> have a BT module on chip and can share power lines.
+> Without the power-cycle, subsequent reset commands fail.
+>
+> So allow a 'reset' gpio to be specified.  If provided, the
+> line is asserted during power-up.
 
-> Yes, unless you move the definition of the filter function into
-> arch/arm/common/edma.c or arch/arm/mach-davinci/devices.c, but that
-> would require other changes.
+There have been several attempts to fix similar issues as this patch
+does. The latest one I posted a few month ago, which wasn't accepted.
+http://comments.gmane.org/gmane.linux.power-management.general/46635
 
-At the end the aim is to get rid of the edma code form arch/arm and have on=
-ly
-dmaengine API towards eDMA. The ASoC davinci-pcm is the only user of the
-legacy API AFAIK. It has a mode called ping-pong which is not possible with
-the dmaeingine at all. This is to overcome underflow situations on parts wh=
-ere
-the audio IP does not have FIFO.
-My edma-pcm (which is using dmaengine) should be able to handle this
-situation, but I need to verify it before I can remove the davinci-pcm and
-then we can get rid of the direct eDMA API and code.
+There has also been some off-list discussions on especially how we
+should describe this in DT and there were actually some consensus made
+around that. Still I haven't seen any patches on the mailing lists.
 
->> If I leave the header as it is, then how would we clean up the edma head=
-ers? I
->> would not put the API definitions for the arch code into the same file a=
-s we
->> have the filter definition.
-> =
+So to summarize, I am really concerned that we keep having these power
+sequence issues for SDIO devices and right now the discussion has been
+on hold. I am considering to hack on it myself, since I am tired of
+waiting. :-)
 
-> Ok, just go ahead with your current patch then, we can always follow up.
-> The most important cleanup for edma is elsewhere anyway, so once the asoc
-> drivers can use the dmaengine interface, this should be easier.
-> =
+Regarding this patch, I don't intent to apply it.
 
-> 	Arnd
-> =
-
-
-
--- =
-
-P=E9ter
+Kind regards
+Uffe
