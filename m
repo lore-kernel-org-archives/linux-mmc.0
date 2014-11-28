@@ -1,73 +1,49 @@
-From: =?gb2312?B?vrTI8Q==?= <micky_ching@realsil.com.cn>
-Subject: Re: [PATCH 1/2] mfd: rtsx: add func to split u32 into register
-Date: Fri, 28 Nov 2014 09:54:07 +0000
-Message-ID: <5478463F.9030101@realsil.com.cn>
-References: <cover.1417056337.git.micky_ching@realsil.com.cn>
- <51dde5250305623c420e78fa555800ef8fef0a09.1417056337.git.micky_ching@realsil.com.cn>
- <20141127152342.GA4860@mwanda>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 2/3] ARM: edma: Rename header file for dmaengine filter function definition
+Date: Fri, 28 Nov 2014 11:51:37 +0100
+Message-ID: <6448422.mtUnef24Xp@wuerfel>
+References: <1417084891-17990-1-git-send-email-peter.ujfalusi@ti.com> <4859328.eEV7jzKEaA@wuerfel> <54782148.6040108@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20141127152342.GA4860@mwanda>
-Content-Language: zh-CN
-Content-ID: <A3BD4FDE1930DE44B85B16E7A2BA8615@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "sameo@linux.intel.com" <sameo@linux.intel.com>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, =?gb2312?B?zfXsvw==?= <wei_wang@realsil.com.cn>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "rogerable@realtek.com" <rogerable@realtek.com>, "lee.jones@linaro.org" <lee.jones@linaro.org>
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.17.13]:53989 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751053AbaK1KwT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Nov 2014 05:52:19 -0500
+In-Reply-To: <54782148.6040108@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: linux-arm-kernel@lists.infradead.org, alsa-devel@alsa-project.org, linux-omap@vger.kernel.org, linux@arm.linux.org.uk, vinod.koul@intel.com, linux-mmc@vger.kernel.org, nsekhar@ti.com, Liam Girdwood <lgirdwood@gmail.com>, linux-kernel@vger.kernel.org, khilman@deeprootsystems.com, Tony Lindgren <tony@atomide.com>, Mark Brown <broonie@kernel.org>, chris@printf.net, dmaengine@vger.kernel.org, ulf.hansson@linaro.org, linux-spi@vger.kernel.org
 
-Let's take an example,
+On Friday 28 November 2014 09:16:24 Peter Ujfalusi wrote:
+> On 11/27/2014 11:52 PM, Arnd Bergmann wrote:
+> > On Thursday 27 November 2014 20:46:12 Peter Ujfalusi wrote:
+> >>
+> >> I see. With this series I did not planed to fix all edma related issues, just
+> >> as a start clean up the related header files. I would rather not add fixes to
+> >> mmc, spi, etc drivers since while you have valid point it is not in the scope
+> >> of this series.
+> >> Can we do the changes you are suggesting in an incremental manner?
+> > 
+> > Sure, but I'd leave the existing filter function declaration alone then
+> > and not move it, since we wouldn't want to keep it in the long run.
+> 
+> but if you want to reference the filter function (which is in
+> drivers/dma/edma.c) in arch/arm/mach-davinci/ directory, we will need it.
+> Don't we?
 
-cmd.arg = ((ocr & 0xFF8000) != 0) << 8 | test_pattern;
+Yes, unless you move the definition of the filter function into
+arch/arm/common/edma.c or arch/arm/mach-davinci/devices.c, but that
+would require other changes.
 
-using "TP" name test_pattern for simplication ,
-when we call: rtsx_pci_write_be32(pcr, SD_CMD1, cmd->arg);
-we should make sure TP write to SD_CMD4.
+> If I leave the header as it is, then how would we clean up the edma headers? I
+> would not put the API definitions for the arch code into the same file as we
+> have the filter definition.
 
-If on "be" platform, then cpu_to_be32() do nothing,
-and TP is write to SD_CMD1, in this case, it is wrong.
+Ok, just go ahead with your current patch then, we can always follow up.
+The most important cleanup for edma is elsewhere anyway, so once the asoc
+drivers can use the dmaengine interface, this should be easier.
 
-BR,
-micky.
-On 11/27/2014 11:23 PM, Dan Carpenter wrote:
-> On Thu, Nov 27, 2014 at 10:53:58AM +0800, micky_ching@realsil.com.cn wrote:
->> +static inline void rtsx_pci_write_be32(struct rtsx_pcr *pcr, u16 reg, u32 val)
->> +{
->> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg,     0xFF, val >> 24);
->> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 1, 0xFF, val >> 16);
->> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 2, 0xFF, val >> 8);
->> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 3, 0xFF, val);
-> This assumes the cpu is little endian.  First convert to big endian
-> using cpu_to_be32() and then write it out.
->
-> 	__be32 be_val = cpu_to_be32()
->
-> 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg,     0xFF, be_val);
-> 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 1, 0xFF, be_val >> 8);
-> 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 2, 0xFF, be_val >> 16);
-> 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 3, 0xFF, be_val >> 24);
->
-> (Written hurredly in my mail client.  May be wrong).
->
->> +}
->> +
->> +static inline void rtsx_pci_write_le32(struct rtsx_pcr *pcr, u16 reg, u32 val)
->> +{
->> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg,     0xFF, val);
->> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 1, 0xFF, val >> 8);
->> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 2, 0xFF, val >> 16);
->> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 3, 0xFF, val >> 24);
->> +}
-> We don't have a user for rtsx_pci_write_le32() so don't add it.
->
-> regards,
-> dan carpenter
+	Arnd
