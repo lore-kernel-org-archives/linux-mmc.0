@@ -1,62 +1,49 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: [PATCH v3 3/4] mmc: atmel-mci: stop using specific initcall
-Date: Fri, 28 Nov 2014 15:08:05 +0100
-Message-ID: <1417183686-31481-4-git-send-email-ludovic.desroches@atmel.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH v3 2/4] mmc: atmel-mci: remove __init/__exit attributes
+Date: Fri, 28 Nov 2014 14:16:51 +0000
+Message-ID: <20141128141651.GS3836@n2100.arm.linux.org.uk>
 References: <1417183686-31481-1-git-send-email-ludovic.desroches@atmel.com>
+ <1417183686-31481-3-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:48334 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750976AbaK1OIz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Nov 2014 09:08:55 -0500
-In-Reply-To: <1417183686-31481-1-git-send-email-ludovic.desroches@atmel.com>
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:39010 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751252AbaK1OTE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Nov 2014 09:19:04 -0500
+Content-Disposition: inline
+In-Reply-To: <1417183686-31481-3-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: ulf.hansson@linaro.org, nicolas.ferre@atmel.com, arnd@arndb.de, Ludovic Desroches <ludovic.desroches@atmel.com>
+To: Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ulf.hansson@linaro.org, nicolas.ferre@atmel.com, arnd@arndb.de
 
-No more use late initcall to manage probing order. Use probe deferring
-if needed.
+On Fri, Nov 28, 2014 at 03:08:04PM +0100, Ludovic Desroches wrote:
+> Using __init/__exit attributes can cause several breakages so remove
+> them.
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
----
- drivers/mmc/host/atmel-mci.c | 15 ++-------------
- 1 file changed, 2 insertions(+), 13 deletions(-)
+I've really no idea why people jump overboard with these things - it
+seems people go from one extreme to the other (adding lots of __init /
+__exit annotations everywhere to removing them all), but:
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 064358d..00f6088 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -2565,6 +2565,7 @@ static const struct dev_pm_ops atmci_dev_pm_ops = {
- };
- 
- static struct platform_driver atmci_driver = {
-+	.probe		= atmci_probe,
- 	.remove		= atmci_remove,
- 	.driver		= {
- 		.name		= "atmel_mci",
-@@ -2572,19 +2573,7 @@ static struct platform_driver atmci_driver = {
- 		.pm		= &atmci_dev_pm_ops,
- 	},
- };
--
--static int atmci_init(void)
--{
--	return platform_driver_probe(&atmci_driver, atmci_probe);
--}
--
--static void atmci_exit(void)
--{
--	platform_driver_unregister(&atmci_driver);
--}
--
--late_initcall(atmci_init); /* try to load after dma driver when built-in */
--module_exit(atmci_exit);
-+module_platform_driver(atmci_driver);
- 
- MODULE_DESCRIPTION("Atmel Multimedia Card Interface driver");
- MODULE_AUTHOR("Haavard Skinnemoen (Atmel)");
+> @@ -2573,12 +2573,12 @@ static struct platform_driver atmci_driver = {
+>  	},
+>  };
+>  
+> -static int __init atmci_init(void)
+> +static int atmci_init(void)
+>  {
+>  	return platform_driver_probe(&atmci_driver, atmci_probe);
+>  }
+>  
+> -static void __exit atmci_exit(void)
+> +static void atmci_exit(void)
+>  {
+>  	platform_driver_unregister(&atmci_driver);
+>  }
+
+These last two are totally fine to leave there.
+
 -- 
-2.0.3
-
+FTTC broadband for 0.8mile line: currently at 9.5Mbps down 400kbps up
+according to speedtest.net.
