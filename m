@@ -1,31 +1,36 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH 2/3] ARM: edma: Rename header file for dmaengine filter function definition
-Date: Thu, 27 Nov 2014 22:52:10 +0100
-Message-ID: <4859328.eEV7jzKEaA@wuerfel>
-References: <1417084891-17990-1-git-send-email-peter.ujfalusi@ti.com> <3300340.ou8f7H2hIc@wuerfel> <54777174.4070203@ti.com>
+From: =?gb2312?B?vrTI8Q==?= <micky_ching@realsil.com.cn>
+Subject: Re: [PATCH 2/2] mmc: rtsx: add support for sdio card
+Date: Fri, 28 Nov 2014 01:57:22 +0000
+Message-ID: <5477D682.30107@realsil.com.cn>
+References: <cover.1417056337.git.micky_ching@realsil.com.cn>
+ <671243677462065a8eb515d654c8a269ce73409c.1417056337.git.micky_ching@realsil.com.cn>
+ <20141127154332.GB4860@mwanda>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <54777174.4070203-l0cyMroinI0@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org, Liam Girdwood <lgirdwood-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, khilman-1D3HCaltpLuhEniVeURVKkEOCMrvLtNR@public.gmane.org, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <20141127154332.GB4860@mwanda>
+Content-Language: zh-CN
+Content-ID: <9950A8276D5FAC47AD7AD1D5DCB680C7@realsil.com.cn>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "sameo@linux.intel.com" <sameo@linux.intel.com>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, =?gb2312?B?zfXsvw==?= <wei_wang@realsil.com.cn>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "rogerable@realtek.com" <rogerable@realtek.com>, "lee.jones@linaro.org" <lee.jones@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thursday 27 November 2014 20:46:12 Peter Ujfalusi wrote:
-> 
-> I see. With this series I did not planed to fix all edma related issues, just
-> as a start clean up the related header files. I would rather not add fixes to
-> mmc, spi, etc drivers since while you have valid point it is not in the scope
-> of this series.
-> Can we do the changes you are suggesting in an incremental manner?
 
-Sure, but I'd leave the existing filter function declaration alone then
-and not move it, since we wouldn't want to keep it in the long run.
+On 11/27/2014 11:43 PM, Dan Carpenter wrote:
+>> +	int stat_idx = sd_status_index(rsp_type);
+> I have always hated this terrible pointer math.  5 is relative to
+> pcr->host_cmds_ptr + 1.  It's a mess...
+5 mean CRC7 offset of Response R1, see SD spec V3.01 Page 82.
+4.9.1 R1 (normal response command).
 
-	Arnd
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+And we have to +1 to skip unused/undefined data.
