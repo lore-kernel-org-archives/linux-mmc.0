@@ -1,58 +1,63 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH v3 4/4] mmc: atmel-mci: use probe deferring if dma
- controller is not ready yet
-Date: Fri, 28 Nov 2014 15:35:09 +0100
-Message-ID: <20141128143509.GJ2714@ldesroches-Latitude-E6320>
-References: <1417183686-31481-1-git-send-email-ludovic.desroches@atmel.com>
- <1417183686-31481-5-git-send-email-ludovic.desroches@atmel.com>
- <20141128141903.GT3836@n2100.arm.linux.org.uk>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH 1/2] mmc: core: allow a reset gpio to be configured.
+Date: Fri, 28 Nov 2014 14:45:58 +0000
+Message-ID: <20141128144558.GN7712@sirena.org.uk>
+References: <20141108000919.5629.55381.stgit@notabene.brown>
+ <20141108001411.5629.25179.stgit@notabene.brown>
+ <CAPDyKFrx98NspRU1nV3uJ6XwTuA4tZQkrYTfDoeXGR+f5htODQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:54875 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751142AbaK1Oep (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Nov 2014 09:34:45 -0500
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="h73OigHGubxJv9Jx"
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20141128141903.GT3836@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <CAPDyKFrx98NspRU1nV3uJ6XwTuA4tZQkrYTfDoeXGR+f5htODQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: NeilBrown <neilb@suse.de>, Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ulf.hansson@linaro.org, nicolas.ferre@atmel.com, arnd@arndb.de
 
-On Fri, Nov 28, 2014 at 02:19:03PM +0000, Russell King - ARM Linux wrote:
-> Let's look at the resulting code:
-> 
-> On Fri, Nov 28, 2014 at 03:08:06PM +0100, Ludovic Desroches wrote:
-> > +static int atmci_configure_dma(struct atmel_mci *host)
-> >  {
-> > +	int ret = 0;
-> >  
-> > +	host->dma.chan = dma_request_slave_channel_reason(&host->pdev->dev, "rxtx");
-> > +	if (IS_ERR(host->dma.chan))
-> > +		return PTR_ERR(host->dma.chan);
-> > +
-> > +	dev_info(&host->pdev->dev, "using %s for DMA transfers\n",
-> > +		 dma_chan_name(host->dma.chan));
-> > +
-> > +	host->dma_conf.src_addr = host->mapbase + ATMCI_RDR;
-> > +	host->dma_conf.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
-> > +	host->dma_conf.src_maxburst = 1;
-> > +	host->dma_conf.dst_addr = host->mapbase + ATMCI_TDR;
-> > +	host->dma_conf.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
-> > +	host->dma_conf.dst_maxburst = 1;
-> > +	host->dma_conf.device_fc = false;
-> > +
-> > +	return ret;
-> >  }
-> 
-> I think you can clean this up a little further - what do you notice
-> about the value of "ret" here?
 
-I think I see what you mean :) The fix I have merged for this patch
-makes ret useless.
+--h73OigHGubxJv9Jx
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> 
-> -- 
-> FTTC broadband for 0.8mile line: currently at 9.5Mbps down 400kbps up
-> according to speedtest.net.
+On Fri, Nov 28, 2014 at 12:56:33PM +0100, Ulf Hansson wrote:
+> On 8 November 2014 at 01:14, NeilBrown <neilb@suse.de> wrote:
+
+> > If the regulator supplying an SDIO device is shared
+> > with another device, the turning the regulator 'on' and 'off'
+> > will not actually cycle power and so will not reset
+> > the device.
+
+> > This is particularly a problem for some wi2si wireless modules which
+> > have a BT module on chip and can share power lines.
+> > Without the power-cycle, subsequent reset commands fail.
+
+> > So allow a 'reset' gpio to be specified.  If provided, the
+> > line is asserted during power-up.
+
+> There have been several attempts to fix similar issues as this patch
+> does. The latest one I posted a few month ago, which wasn't accepted.
+> http://comments.gmane.org/gmane.linux.power-management.general/46635
+
+Note also that if the issue is about needing to take different actions
+depending on if the power actually got pulled you can request
+notification from the regulator API when things actually happen.
+
+--h73OigHGubxJv9Jx
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBAgAGBQJUeIqlAAoJECTWi3JdVIfQPKcH/1dJqUWpSHTA5HKz0w05Y7GY
+WAlWW21PWs6zAQUY1NC3Aoa/z5R5KA1QB/FS0LKAxmnWOncn5N0+9Pp7tpllhNSt
+Nl8/kgFvx37OrWzfHoQy5J+zY87man/mwc8FKZAjLo7+yuQwMibZIO8JYpA/w5Aa
+iEE+JakEuU8Q1EQjji/jspzkxNuBXbPgE+mleh225zIaWDS/jjeVRoYyXtMizgwU
+U4qZ6gd2e2SOEeQVPaipDM1r3+4tnZtC2OX7oRqxphNUxDrbBa1tkKP1xdpA+urV
+YhL6DaNsm9S0dTDSGZZTld0dP8V3T4UWtpMnNo6sdVmrtfe4PrIJ0hGmt4jJFwY=
+=2Zhc
+-----END PGP SIGNATURE-----
+
+--h73OigHGubxJv9Jx--
