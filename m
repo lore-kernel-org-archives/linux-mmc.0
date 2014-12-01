@@ -1,15 +1,15 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 2/4] mmc: sdhci-msm: Convert to mmc_send_tuning()
-Date: Mon,  1 Dec 2014 17:02:08 +0100
-Message-ID: <1417449730-5880-3-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 3/4] mmc: dw_mmc: Convert to mmc_send_tuning()
+Date: Mon,  1 Dec 2014 17:02:09 +0100
+Message-ID: <1417449730-5880-4-git-send-email-ulf.hansson@linaro.org>
 References: <1417449730-5880-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f175.google.com ([209.85.217.175]:52558 "EHLO
-	mail-lb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753778AbaLAQCW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Dec 2014 11:02:22 -0500
-Received: by mail-lb0-f175.google.com with SMTP id u10so8992293lbd.34
-        for <linux-mmc@vger.kernel.org>; Mon, 01 Dec 2014 08:02:20 -0800 (PST)
+Received: from mail-lb0-f173.google.com ([209.85.217.173]:52991 "EHLO
+	mail-lb0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753778AbaLAQCf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Dec 2014 11:02:35 -0500
+Received: by mail-lb0-f173.google.com with SMTP id z12so8871885lbi.18
+        for <linux-mmc@vger.kernel.org>; Mon, 01 Dec 2014 08:02:33 -0800 (PST)
 In-Reply-To: <1417449730-5880-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,113 +18,160 @@ Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
 Instead of having a local hack taking care of sending the tuning
 command and as well to verify the response pattern, let's convert to
-the common mmc_send_tuning() API instead.
+the common mmc_send_tuning() API.
+
+This change affects the Exynos variant, since it's the only one which
+support the dw_mmc's ->execute_tuning() callback.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/sdhci-msm.c | 50 +++++++-------------------------------------
- 1 file changed, 7 insertions(+), 43 deletions(-)
+ drivers/mmc/host/dw_mmc-exynos.c | 49 ++++------------------------------------
+ drivers/mmc/host/dw_mmc.c        | 22 +-----------------
+ drivers/mmc/host/dw_mmc.h        |  8 +------
+ 3 files changed, 6 insertions(+), 73 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 3080438..592e0a1 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -339,9 +339,7 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
- {
- 	int tuning_seq_cnt = 3;
--	u8 phase, *data_buf, tuned_phases[16], tuned_phase_cnt = 0;
--	const u8 *tuning_block_pattern = tuning_blk_pattern_4bit;
--	int size = sizeof(tuning_blk_pattern_4bit);
-+	u8 phase, tuned_phases[16], tuned_phase_cnt = 0;
- 	int rc;
- 	struct mmc_host *mmc = host->mmc;
- 	struct mmc_ios ios = host->mmc->ios;
-@@ -355,53 +353,21 @@ static int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
- 	      (ios.timing == MMC_TIMING_UHS_SDR104)))
- 		return 0;
- 
--	if ((opcode == MMC_SEND_TUNING_BLOCK_HS200) &&
--	    (mmc->ios.bus_width == MMC_BUS_WIDTH_8)) {
--		tuning_block_pattern = tuning_blk_pattern_8bit;
--		size = sizeof(tuning_blk_pattern_8bit);
--	}
--
--	data_buf = kmalloc(size, GFP_KERNEL);
--	if (!data_buf)
--		return -ENOMEM;
--
- retry:
- 	/* First of all reset the tuning block */
- 	rc = msm_init_cm_dll(host);
- 	if (rc)
--		goto out;
-+		return rc;
- 
- 	phase = 0;
- 	do {
--		struct mmc_command cmd = { 0 };
--		struct mmc_data data = { 0 };
--		struct mmc_request mrq = {
--			.cmd = &cmd,
--			.data = &data
--		};
--		struct scatterlist sg;
--
- 		/* Set the phase in delay line hw block */
- 		rc = msm_config_cm_dll_phase(host, phase);
- 		if (rc)
--			goto out;
-+			return rc;
- 
--		cmd.opcode = opcode;
--		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
--
--		data.blksz = size;
--		data.blocks = 1;
--		data.flags = MMC_DATA_READ;
--		data.timeout_ns = NSEC_PER_SEC;	/* 1 second */
--
--		data.sg = &sg;
--		data.sg_len = 1;
--		sg_init_one(&sg, data_buf, size);
--		memset(data_buf, 0, size);
--		mmc_wait_for_req(mmc, &mrq);
--
--		if (!cmd.error && !data.error &&
--		    !memcmp(data_buf, tuning_block_pattern, size)) {
-+		rc = mmc_send_tuning(mmc->card);
-+		if (!rc) {
- 			/* Tuning is successful at this tuning point */
- 			tuned_phases[tuned_phase_cnt++] = phase;
- 			dev_dbg(mmc_dev(mmc), "%s: Found good phase = %d\n",
-@@ -413,7 +379,7 @@ retry:
- 		rc = msm_find_most_appropriate_phase(host, tuned_phases,
- 						     tuned_phase_cnt);
- 		if (rc < 0)
--			goto out;
-+			return rc;
- 		else
- 			phase = rc;
- 
-@@ -423,7 +389,7 @@ retry:
- 		 */
- 		rc = msm_config_cm_dll_phase(host, phase);
- 		if (rc)
--			goto out;
-+			return rc;
- 		dev_dbg(mmc_dev(mmc), "%s: Setting the tuning phase to %d\n",
- 			 mmc_hostname(mmc), phase);
- 	} else {
-@@ -435,8 +401,6 @@ retry:
- 		rc = -EIO;
- 	}
- 
--out:
--	kfree(data_buf);
- 	return rc;
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index 509365c..0a23edf 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -375,64 +375,24 @@ out:
+ 	return loc;
  }
  
+-static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
+-					struct dw_mci_tuning_data *tuning_data)
++static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot)
+ {
+ 	struct dw_mci *host = slot->host;
+ 	struct mmc_host *mmc = slot->mmc;
+-	const u8 *blk_pattern = tuning_data->blk_pattern;
+-	u8 *blk_test;
+-	unsigned int blksz = tuning_data->blksz;
+ 	u8 start_smpl, smpl, candiates = 0;
+ 	s8 found = -1;
+ 	int ret = 0;
+ 
+-	blk_test = kmalloc(blksz, GFP_KERNEL);
+-	if (!blk_test)
+-		return -ENOMEM;
+-
+ 	start_smpl = dw_mci_exynos_get_clksmpl(host);
+ 
+ 	do {
+-		struct mmc_request mrq = {NULL};
+-		struct mmc_command cmd = {0};
+-		struct mmc_command stop = {0};
+-		struct mmc_data data = {0};
+-		struct scatterlist sg;
+-
+-		cmd.opcode = opcode;
+-		cmd.arg = 0;
+-		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+-
+-		stop.opcode = MMC_STOP_TRANSMISSION;
+-		stop.arg = 0;
+-		stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
+-
+-		data.blksz = blksz;
+-		data.blocks = 1;
+-		data.flags = MMC_DATA_READ;
+-		data.sg = &sg;
+-		data.sg_len = 1;
+-
+-		sg_init_one(&sg, blk_test, blksz);
+-		mrq.cmd = &cmd;
+-		mrq.stop = &stop;
+-		mrq.data = &data;
+-		host->mrq = &mrq;
+-
+ 		mci_writel(host, TMOUT, ~0);
+ 		smpl = dw_mci_exynos_move_next_clksmpl(host);
+ 
+-		mmc_wait_for_req(mmc, &mrq);
++		ret = mmc_send_tuning(mmc->card);
++		if (!ret)
++			candiates |= (1 << smpl);
+ 
+-		if (!cmd.error && !data.error) {
+-			if (!memcmp(blk_pattern, blk_test, blksz))
+-				candiates |= (1 << smpl);
+-		} else {
+-			dev_dbg(host->dev,
+-				"Tuning error: cmd.error:%d, data.error:%d\n",
+-				cmd.error, data.error);
+-		}
+ 	} while (start_smpl != smpl);
+ 
+ 	found = dw_mci_exynos_get_best_clksmpl(candiates);
+@@ -441,7 +401,6 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
+ 	else
+ 		ret = -EIO;
+ 
+-	kfree(blk_test);
+ 	return ret;
+ }
+ 
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 67c0451..265bb28 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1299,30 +1299,10 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	struct dw_mci_slot *slot = mmc_priv(mmc);
+ 	struct dw_mci *host = slot->host;
+ 	const struct dw_mci_drv_data *drv_data = host->drv_data;
+-	struct dw_mci_tuning_data tuning_data;
+ 	int err = -ENOSYS;
+ 
+-	if (opcode == MMC_SEND_TUNING_BLOCK_HS200) {
+-		if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
+-			tuning_data.blk_pattern = tuning_blk_pattern_8bit;
+-			tuning_data.blksz = sizeof(tuning_blk_pattern_8bit);
+-		} else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4) {
+-			tuning_data.blk_pattern = tuning_blk_pattern_4bit;
+-			tuning_data.blksz = sizeof(tuning_blk_pattern_4bit);
+-		} else {
+-			return -EINVAL;
+-		}
+-	} else if (opcode == MMC_SEND_TUNING_BLOCK) {
+-		tuning_data.blk_pattern = tuning_blk_pattern_4bit;
+-		tuning_data.blksz = sizeof(tuning_blk_pattern_4bit);
+-	} else {
+-		dev_err(host->dev,
+-			"Undefined command(%d) for tuning\n", opcode);
+-		return -EINVAL;
+-	}
+-
+ 	if (drv_data && drv_data->execute_tuning)
+-		err = drv_data->execute_tuning(slot, opcode, &tuning_data);
++		err = drv_data->execute_tuning(slot);
+ 	return err;
+ }
+ 
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 0d0f7a2..c1f4557 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -248,11 +248,6 @@ struct dw_mci_slot {
+ 	int			sdio_id;
+ };
+ 
+-struct dw_mci_tuning_data {
+-	const u8 *blk_pattern;
+-	unsigned int blksz;
+-};
+-
+ /**
+  * dw_mci driver data - dw-mshc implementation specific driver data.
+  * @caps: mmc subsystem specified capabilities of the controller(s).
+@@ -274,7 +269,6 @@ struct dw_mci_drv_data {
+ 	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
+ 	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
+ 	int		(*parse_dt)(struct dw_mci *host);
+-	int		(*execute_tuning)(struct dw_mci_slot *slot, u32 opcode,
+-					struct dw_mci_tuning_data *tuning_data);
++	int		(*execute_tuning)(struct dw_mci_slot *slot);
+ };
+ #endif /* _DW_MMC_H_ */
 -- 
 1.9.1
 
