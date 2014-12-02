@@ -1,74 +1,84 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 3/3] mmc: sdhci: Disable re-tuning for HS400
-Date: Tue, 2 Dec 2014 15:06:18 +0100
-Message-ID: <CAPDyKFrAmQyO=eUL-WS=etLeuFh8Ncefk5mocJraq8LjR_Ci9Q@mail.gmail.com>
-References: <1417439766-5063-1-git-send-email-adrian.hunter@intel.com>
-	<1417439766-5063-4-git-send-email-adrian.hunter@intel.com>
-	<CAPDyKFq30Qkx8rW1ixavv=UdBjcQfsz6kDvcfmcTq4A4ziptUQ@mail.gmail.com>
-	<547D8FB2.1020400@intel.com>
-	<CAPDyKFq=TxzGmQws6RmtchfxN9FBqUryirA306AW0wANZzn0-g@mail.gmail.com>
-	<547DB054.80907@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f173.google.com ([209.85.216.173]:37499 "EHLO
-	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751330AbaLBOGT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Dec 2014 09:06:19 -0500
-Received: by mail-qc0-f173.google.com with SMTP id i17so9396419qcy.18
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Dec 2014 06:06:18 -0800 (PST)
-In-Reply-To: <547DB054.80907@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Stefan Agner <stefan@agner.ch>
+Subject: [PATCH 1/2] mmc: sdhci-pltfm: fix abort due to missing runtime PM
+Date: Tue,  2 Dec 2014 17:47:24 +0100
+Message-ID: <1417538845-10867-1-git-send-email-stefan@agner.ch>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: chris@printf.net, ulf.hansson@linaro.org, anton@enomsg.org
+Cc: rmk+kernel@arm.linux.org.uk, b29396@freescale.com, shawn.guo@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, stefan@agner.ch
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 2 December 2014 at 13:28, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 02/12/14 13:20, Ulf Hansson wrote:
->> On 2 December 2014 at 11:08, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> On 02/12/14 11:35, Ulf Hansson wrote:
->>>> On 1 December 2014 at 14:16, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>> Re-tuning for HS400 mode must be done in HS200
->>>>> mode. Currently there is no support for that.
->>>>> That needs to be reflected in the code.
->>>>> Specifically, if tuning is executed in HS400 mode
->>>>> then return an error, and if the re-tuning timer
->>>>> is running when switching to HS400 mode, then
->>>>> disable the timer.
->>>>>
->>>>> Note that periodic re-tuning is not expected
->>>>> to be needed for HS400 but re-tuning is still
->>>>> needed after the host controller has lost power.
->>>>
->>>> Why can't the old values be restored instead of trigger a re-tuning?
->>>
->>> The "values" (not sure what you mean by that) are not available to the
->>> driver. Even if they were the operating conditions may have changed, (i.e.
->>> temperature change) so the old "values" could still be wrong.
->>
->> The "values" I refer to is those which we "calculated" during the
->> tuning process.
->>
->> What I had in mind, was that we should save these values at runtime PM
->> suspend. And restore them at runtime PM resume. For some mmc
->> controllers the "values" are typically just a some bits in a
->> controller register, but that might not be true for all cases.
->>
->> Regarding the temperature change, etc. I think that is what the
->> periodic retuning should be taken care off.
->>
->> Could you elaborate on why the "values" is not available to the driver?
->
-> The "optimal sampling point" has no corresponding register or value
-> in SDHCI.
+When entering suspend while the device is in runtime PM, the
+sdhci_[suspend|resume]_host function are called without taking
+care of runtime PM. On Vybrid SoC this leads to external abort
+since during runtime suspend, the clocks for this peripheral
+are disabled.
 
-Is that really the case for all sdhci variants? For sure I am not an
-sdhci expert, but I just find it to be a very poor HW design.
+[   37.772967] Unhandled fault: imprecise external abort (0x1c06) at 0x76f5f000
+[   37.780304] Internal error: : 1c06 [#1] ARM
+[   37.784670] Modules linked in:
+[   37.787908] CPU: 0 PID: 428 Comm: sh Not tainted 3.18.0-rc5-00119-geefd097-dirty #1540
+[   37.796142] task: 8e246c00 ti: 8ca6c000 task.ti: 8ca6c000
+[   37.801785] PC is at esdhc_writel_le+0x40/0xec
+[   37.806431] LR is at sdhci_set_card_detection+0xe0/0xe4
+[   37.811877] pc : [<803f0584>]    lr : [<803eaaa0>]    psr: 400f0013
+[   37.811877] sp : 8ca6dd28  ip : 00000001  fp : 8ca6dd3c
+[   37.823766] r10: 807a233c  r9 : 00000000  r8 : 8e8b7210
+[   37.829194] r7 : 802d8a08  r6 : 8082e928  r5 : 00000000  r4 : 00000002
+[   37.835974] r3 : 8ea34e90  r2 : 00000038  r1 : 00000000  r0 : 8ea32ac0
+...
 
-Especially if the sdhci controller may lose power frequently, it will
-add a significant latency for each runtime PM resume cycle, right!?
+Signed-off-by: Stefan Agner <stefan@agner.ch>
+---
+Not really sure this is the right place to fix this. The function now
+ended up to be identically to the implementations in sdhci-pxav3.c...
 
-Anyway, thanks for sharing the information.
+ drivers/mmc/host/sdhci-pltfm.c | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index c5b01d6..0bc864e 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -31,6 +31,7 @@
+ #include <linux/err.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
++#include <linux/pm_runtime.h>
+ #ifdef CONFIG_PPC
+ #include <asm/machdep.h>
+ #endif
+@@ -237,17 +238,29 @@ EXPORT_SYMBOL_GPL(sdhci_pltfm_unregister);
+ #ifdef CONFIG_PM
+ int sdhci_pltfm_suspend(struct device *dev)
+ {
++	int ret;
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 
+-	return sdhci_suspend_host(host);
++	pm_runtime_get_sync(dev);
++	ret = sdhci_suspend_host(host);
++	pm_runtime_mark_last_busy(dev);
++	pm_runtime_put_autosuspend(dev);
++
++	return ret;
+ }
+ EXPORT_SYMBOL_GPL(sdhci_pltfm_suspend);
+ 
+ int sdhci_pltfm_resume(struct device *dev)
+ {
++	int ret;
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 
+-	return sdhci_resume_host(host);
++	pm_runtime_get_sync(dev);
++	ret = sdhci_resume_host(host);
++	pm_runtime_mark_last_busy(dev);
++	pm_runtime_put_autosuspend(dev);
++
++	return ret;
+ }
+ EXPORT_SYMBOL_GPL(sdhci_pltfm_resume);
+ 
+-- 
+2.1.3
