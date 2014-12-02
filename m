@@ -1,153 +1,104 @@
-From: "Dr. H. Nikolaus Schaller" <hns@goldelico.com>
-Subject: Re: [Gta04-owner] [PATCH 1/2] mmc: core: allow a reset gpio to be configured.
-Date: Tue, 2 Dec 2014 07:05:24 +0100
-Message-ID: <C98E0E67-23ED-4A4F-A90C-9BEEC6921544@goldelico.com>
-References: <20141108000919.5629.55381.stgit@notabene.brown> <20141108001411.5629.25179.stgit@notabene.brown> <CAPDyKFrx98NspRU1nV3uJ6XwTuA4tZQkrYTfDoeXGR+f5htODQ@mail.gmail.com> <20141202125539.42f22074@notabene.brown>
-Mime-Version: 1.0 (Mac OS X Mail 7.3 \(1878.6\))
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: addy ke <addy.ke@rock-chips.com>
+Subject: Re: [PATCH v2] mmc: dw_mmc: add quirk for broken data transfer over
+ scheme
+Date: Tue, 02 Dec 2014 15:50:14 +0800
+Message-ID: <547D6F36.50103@rock-chips.com>
+References: <1415970338-2637-1-git-send-email-addy.ke@rock-chips.com>	<1416903008-4160-1-git-send-email-addy.ke@rock-chips.com> <CAD=FV=UmG1okxJ5JV-1cuRRQJi7EEPXc7Q90sWjfMWBqb7VSMw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mo4-p00-ob.smtp.rzone.de ([81.169.146.216]:40512 "EHLO
-	mo4-p00-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932141AbaLBGFm convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Dec 2014 01:05:42 -0500
-In-Reply-To: <20141202125539.42f22074@notabene.brown>
+Received: from regular1.263xmail.com ([211.150.99.137]:59321 "EHLO
+	regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932908AbaLBHun (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Dec 2014 02:50:43 -0500
+In-Reply-To: <CAD=FV=UmG1okxJ5JV-1cuRRQJi7EEPXc7Q90sWjfMWBqb7VSMw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: List for communicating with real GTA04 owners <gta04-owner@goldelico.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, Chris Ball <chris@printf.net>, Mark Brown <broonie@kernel.org>, Olof Johansson <olof@lixom.net>
+To: dianders@chromium.org
+Cc: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, sonnyrao@chromium.org, amstan@chromium.org, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com
 
-Hi Neil,
+Hi,
+On 2014/11/27 06:46, Doug Anderson wrote:
+> Hi,
+> 
+> On Tue, Nov 25, 2014 at 12:10 AM, Addy Ke <addy.ke@rock-chips.com> wrote:
+>> This patch add a new quirk to add a s/w timer to notify the driver
+>> to terminate current transfer and report a data timeout to the core,
+>> if DTO interrupt does NOT come within the given time.
+>>
+>> dw_mmc call mmc_request_done func to finish transfer depends on
+>> DTO interrupt. If DTO interrupt does not come in sending data state,
+>> the current transfer will be blocked.
+>>
+>> But this case really exists, when driver reads tuning data from
+>> card on RK3288-pink2 board. I measured waveforms by oscilloscope
+>> and found that card clock was always on and data lines were always
+>> holded high level in sending data state.
+>>
+>> We got the reply from synopsys:
+>> There are two counters but both use the same value of [31:8] bits.
+>> Data timeout counter doesn't wait for stop clock and you should get
+>> DRTO even when the clock is not stopped.
+>> Host Starvation timeout counter is triggered with stop clock condition.
+>>
+>> This means that host should get DRTO and DTO interrupt.
+>>
+>> But we really don't get any data-related interrupt in RK3X SoCs.
+>> And driver can't get data transfer state, it can do nothing but wait for.
+> 
+> Have you asked someone on your IC team to confirm this is an SoC
+> errata on your SoC?  ...or is there something else we could be doing
+> wrong (overclocking?  jitter in the clock?  bad dividers?) that could
+> be causing this problem?
+> 
+> 
+>>  #ifdef CONFIG_OF
+>>  static struct dw_mci_of_quirks {
+>>         char *quirk;
+>> @@ -2513,6 +2549,9 @@ static struct dw_mci_of_quirks {
+>>         }, {
+>>                 .quirk  = "disable-wp",
+>>                 .id     = DW_MCI_QUIRK_NO_WRITE_PROTECT,
+>> +       }, {
+>> +               .quirk  = "broken-dto",
+>> +               .id     = DW_MCI_QUIRK_BROKEN_DTO,
+> 
+> You're adding a device tree property without any binding.  If you need
+> to add this please send a patch before this one modifying the device
+> tree bindings.
+> 
+> ...but that brings up the question: do you _really_ need to add a
+> property?  You already know that all rk3288 SoCs need this and you
+> already know that you're an rk3288 SoC.  Just add this quirk in the
+> rk3288 code always and be done with it.  ...and if this is also needed
+> on other Rockchip parts, add it there too.
+> 
+> -Doug
 
-Am 02.12.2014 um 02:55 schrieb NeilBrown <neilb@suse.de>:
+We don't know why we have this problem,
+but this problem is really exist, and we need patch to fix this problem now.
+I will post a follow up change when we find the root cause.
 
-> On Fri, 28 Nov 2014 12:56:33 +0100 Ulf Hansson <ulf.hansson@linaro.or=
-g> wrote:
->=20
->> On 8 November 2014 at 01:14, NeilBrown <neilb@suse.de> wrote:
->>> If the regulator supplying an SDIO device is shared
->>> with another device, the turning the regulator 'on' and 'off'
->>> will not actually cycle power and so will not reset
->>> the device.
->>>=20
->>> This is particularly a problem for some wi2si wireless modules whic=
-h
->>> have a BT module on chip and can share power lines.
->>> Without the power-cycle, subsequent reset commands fail.
->>>=20
->>> So allow a 'reset' gpio to be specified.  If provided, the
->>> line is asserted during power-up.
->>=20
->> There have been several attempts to fix similar issues as this patch
->> does. The latest one I posted a few month ago, which wasn't accepted=
-=2E
->> http://comments.gmane.org/gmane.linux.power-management.general/46635
->=20
-> Thanks for that link.
->=20
->>=20
->> There has also been some off-list discussions on especially how we
->> should describe this in DT and there were actually some consensus ma=
-de
->> around that. Still I haven't seen any patches on the mailing lists.
->=20
-> Wish I could have a link for those off-list discussions :-)
->=20
-> Based on what I read and my own thoughts about other devices that I'm=
- having
-> trouble managing I wonder if the right approach might be to admit tha=
-t these
-> buses are *not* 100% discoverable.
->=20
-> i.e. you can discover what is there once it is turned on, but you can=
-not
-> discover how to turn it on.
+And there is a little probability of this problem on RK SoC, such as RK3188, RK3066,
+when worse card inserted in.
+Maybe the other SoCs have the similar problem.
 
-Indeed.
+So I will add this quirk in rockchip code(dw_mmc-rockchip.c) as follows:
+static int dw_mci_rockchip_parse_dt(struct dw_mci *host)
+{
+	host->quirk |= DW_MCI_QUIRK_BROKEN_DTO;
 
->=20
-> So the *fix* is to allow attached devices to be explicitly listed.
-> In my case I would create a child node of the mmc1 node, which is
-> compatible=3D=93libertas,wifi" (or whatever the proper name is).
+	return 0;
+}
 
-Sounds like a good idea to me.
+......
+	.parse_dt = dw_mci_rockchip_parse_dt,
+......
 
->=20
-> Then when the mmc1 wants to power-up, it does:
->=20
->   device_for_each_child(mmc_dev, NULL, power_up)
->=20
-> where:
->=20
-> static int power_up(struct device *dev, void *data)
-> {
->       pm_runtime_get_sync(dev);
->       return 0;
-> }
->=20
-> Then I can put my reset-line management in the libertas driver instea=
-d of
-> trying to include some of it in the mmc driver.
->=20
-> This has the advantage of the devicetree actually describing the hard=
-ware
-> (there is a libertas wifi SDIO chip attached) rather than the behavio=
-ur
-> (please turn on this regulator and toggle this GPIO to initialise the=
- device).
->=20
-> I want to do a very similar thing for UARTs (so my GPS and Bluetooth =
-turn on
-> when /dev/ttyO? is opened), and I've been thinking about something si=
-milar
-> for USB - I have a USB attached GSM module, but it also has an Audio =
-link and
-> some reset/interrupt lines that need to be configured.
-> If I could say to device tree "This USB port has this device attached=
-", I
-> think it would be a step in the right direction.
+is right?
 
-Thinking a little further, it could either be the core driver of the de=
-vice/bus/protocol
-or a special driver that only does power management. Or audio.
-
-And we should consider using a list of strings in the compatible entry =
-so that
-several drivers can be loaded if the subsystem structure shows that thi=
-s is simpler.
-
-It could be one for power, one for audio. Or in the case of the liberta=
-s a separate
-power&reset driver for a specific chip that uses the libertas driver so=
- that chip
-specific reset management is not introduced into the libertas core but =
-separate.
-
-=46or the usb connected modem the subnode to be attached is likely the =
-PHY
-where the self-powered device is connected to.
-
->=20
->=20
->=20
->>=20
->> So to summarize, I am really concerned that we keep having these pow=
-er
->> sequence issues for SDIO devices and right now the discussion has be=
-en
->> on hold. I am considering to hack on it myself, since I am tired of
->> waiting. :-)
->=20
-> Please Cc me if you do.  Meanwhile I'll try to hack together code sup=
-porting
-> my latest idea and let you know if I get anywhere.
->=20
->>=20
->> Regarding this patch, I don't intent to apply it.
->=20
-> Fair enough, I=92m starting to not like it so much anyway.
->=20
-
-BR,
-Nikolaus
+> 
+> 
+> 
 
