@@ -1,95 +1,46 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 3/3] mmc: sdhci: Disable re-tuning for HS400
-Date: Tue, 2 Dec 2014 10:35:35 +0100
-Message-ID: <CAPDyKFq30Qkx8rW1ixavv=UdBjcQfsz6kDvcfmcTq4A4ziptUQ@mail.gmail.com>
-References: <1417439766-5063-1-git-send-email-adrian.hunter@intel.com>
-	<1417439766-5063-4-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH v4 0/4] mmc: atmel-mci: cleanup and probe deferring
+Date: Tue, 2 Dec 2014 11:10:53 +0100
+Message-ID: <CAPDyKFpuDOfw9BtYJhG0Fz6PsqUQP=gBg+4mWt9MRy_S6Yga5w@mail.gmail.com>
+References: <1417444509-15501-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f180.google.com ([209.85.216.180]:61843 "EHLO
-	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750998AbaLBJfg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Dec 2014 04:35:36 -0500
-Received: by mail-qc0-f180.google.com with SMTP id i8so8928227qcq.39
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Dec 2014 01:35:36 -0800 (PST)
-In-Reply-To: <1417439766-5063-4-git-send-email-adrian.hunter@intel.com>
+Received: from mail-qc0-f176.google.com ([209.85.216.176]:54512 "EHLO
+	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750964AbaLBKKy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Dec 2014 05:10:54 -0500
+Received: by mail-qc0-f176.google.com with SMTP id i17so9209962qcy.35
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Dec 2014 02:10:53 -0800 (PST)
+In-Reply-To: <1417444509-15501-1-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Arnd Bergmann <arnd@arndb.de>
 
-On 1 December 2014 at 14:16, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Re-tuning for HS400 mode must be done in HS200
-> mode. Currently there is no support for that.
-> That needs to be reflected in the code.
-> Specifically, if tuning is executed in HS400 mode
-> then return an error, and if the re-tuning timer
-> is running when switching to HS400 mode, then
-> disable the timer.
+On 1 December 2014 at 15:35, Ludovic Desroches
+<ludovic.desroches@atmel.com> wrote:
+> Hi Ulf,
 >
-> Note that periodic re-tuning is not expected
-> to be needed for HS400 but re-tuning is still
-> needed after the host controller has lost power.
-
-Why can't the old values be restored instead of trigger a re-tuning?
-
-> In the case of suspend/resume that is not necessary
-> because the card is fully re-initialised. That
-> just leaves runtime suspend/resume with no support
-> for HS400 re-tuning.
+> Same as previous series, based on your next branch, and no errors with
+> checkpatch so let me know if you still have troubles to apply my patches.
 >
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->  drivers/mmc/host/sdhci.c | 16 +++++++++++++++-
->  1 file changed, 15 insertions(+), 1 deletion(-)
+> Changes from v3:
+> - keep __init/__exit attributes for atmci_init/exit
+> - remove useless variable in atmci_configure_dma function
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 2efa7fe..a7c9e67 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1476,8 +1476,18 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
->         else if ((timing == MMC_TIMING_UHS_DDR50) ||
->                  (timing == MMC_TIMING_MMC_DDR52))
->                 ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
-> -       else if (timing == MMC_TIMING_MMC_HS400)
-> +       else if (timing == MMC_TIMING_MMC_HS400) {
->                 ctrl_2 |= SDHCI_CTRL_HS400; /* Non-standard */
-> +               /*
-> +                * Periodic re-tuning for HS400 is not expected to be needed, so
-> +                * disable it here.
-
-Urgh, I don't like that the periodic tuning is handled by the host. We
-should never had merged that.
-
-How about trying to move the periodic tuning to be handled by the mmc
-core instead?
-
-> +                */
-> +               if (host->flags & SDHCI_USING_RETUNING_TIMER) {
-> +                       host->flags &= ~SDHCI_USING_RETUNING_TIMER;
-> +                       del_timer_sync(&host->tuning_timer);
-> +                       host->flags &= ~SDHCI_NEEDS_RETUNING;
-> +               }
-> +       }
->         sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
->  }
->  EXPORT_SYMBOL_GPL(sdhci_set_uhs_signaling);
-> @@ -1897,7 +1907,11 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->          * tuning function has to be executed.
->          */
->         switch (host->timing) {
-> +       /* HS400 tuning is done in HS200 mode */
->         case MMC_TIMING_MMC_HS400:
-> +               err = -EINVAL;
-> +               goto out_unlock;
-> +
->         case MMC_TIMING_MMC_HS200:
->         case MMC_TIMING_UHS_SDR104:
->                 break;
-> --
-> 1.9.1
+> Ludovic Desroches (4):
+>   mmc: atmel-mci: remove useless DMA stuff for non-dt devices
+>   mmc: atmel-mci: remove __init/__exit attributes
+>   mmc: atmel-mci: stop using specific initcall
+>   mmc: atmel-mci: use probe deferring if dma controller is not ready yet
 >
+>  drivers/mmc/host/atmel-mci.c | 76 ++++++++++++++++----------------------------
+>  1 file changed, 28 insertions(+), 48 deletions(-)
+
+Thanks! Applied for next.
+
+Patch 4, did have a minor checkpatch warning. I fixed it.
 
 Kind regards
 Uffe
