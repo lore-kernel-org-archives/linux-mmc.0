@@ -1,8 +1,7 @@
 From: Asutosh Das <asutoshd@codeaurora.org>
-Subject: [PATCH 3/5] mmc: card: Add eMMC command queuing support in mmc block
- layer
-Date: Tue, 2 Dec 2014 17:28:21 +0530
-Message-ID: <20141202115821.GA27658@asutoshd-ics.in.qualcomm.com>
+Subject: [PATCH 4/5] mmc: cmdq: support for command queue enabled host
+Date: Tue, 2 Dec 2014 17:31:47 +0530
+Message-ID: <20141202120147.GA27669@asutoshd-ics.in.qualcomm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
@@ -12,1028 +11,904 @@ To: linux-mmc@vger.kernel.org
 Cc: linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Command queueing is defined in eMMC-5.1. It is designed for
-higher performance by ensuring upto 32 requests to be serviced
-at a time.
-All non-data commands are referred as DCMD commands and are handled
-differently than conventional eMMCs.
+This patch adds CMDQ support for command-queue compatible
+hosts.
 
-Adds support for:
-	- read/write
-	- DCMD support
+Command-queue is added in eMMC-5.1 specification. This
+enables the controller to process upto 32 requests at
+a time.
 
-Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
 Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
 Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
 ---
- drivers/mmc/card/block.c   | 375 ++++++++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/card/queue.c   |  95 +++++++++++-
- drivers/mmc/card/queue.h   |   3 +-
- drivers/mmc/core/core.c    |  87 +++++++++++
- drivers/mmc/core/mmc.c     |   6 +-
- drivers/mmc/core/mmc_ops.c |  45 ++++--
- include/linux/mmc/card.h   |   5 +-
- include/linux/mmc/core.h   |  14 ++
- include/linux/mmc/host.h   |  71 +++++++++
- include/linux/mmc/mmc.h    |   5 +-
- 10 files changed, 677 insertions(+), 29 deletions(-)
+ drivers/mmc/host/Kconfig     |  13 +
+ drivers/mmc/host/Makefile    |   1 +
+ drivers/mmc/host/cmdq_hci.c  | 663 +++++++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/cmdq_hci.h | 171 +++++++++++
+ 4 files changed, 848 insertions(+)
+ create mode 100644 drivers/mmc/host/cmdq_hci.c
+ create mode 100644 include/linux/mmc/cmdq_hci.h
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 452782b..d8826f2 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -35,6 +35,7 @@
- #include <linux/capability.h>
- #include <linux/compat.h>
- #include <linux/pm_runtime.h>
-+#include <linux/ioprio.h>
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 779368b..87c3c20 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -708,3 +708,16 @@ config MMC_SUNXI
+ 	help
+ 	  This selects support for the SD/MMC Host Controller on
+ 	  Allwinner sunxi SoCs.
++
++config MMC_CQ_HCI
++	tristate "Command Queue Support"
++	depends on HAS_DMA
++	help
++	  This selects the Command Queue Host Controller Interface (CQHCI)
++	  support present in host controllers of Qualcomm Technologies, Inc
++	  amongst others.
++	  This controller supports eMMC devices with command queue support.
++
++	  If you have a controller with this interface, say Y or M here.
++
++	  If unsure, say N.
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 61cbc24..5a23f9e 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -66,6 +66,7 @@ obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
+ obj-$(CONFIG_MMC_SDHCI_BCM_KONA)	+= sdhci-bcm-kona.o
+ obj-$(CONFIG_MMC_SDHCI_BCM2835)		+= sdhci-bcm2835.o
+ obj-$(CONFIG_MMC_SDHCI_MSM)		+= sdhci-msm.o
++obj-$(CONFIG_MMC_CQ_HCI)		+= cmdq_hci.o
  
- #include <linux/mmc/ioctl.h>
- #include <linux/mmc/card.h>
-@@ -99,6 +100,7 @@ struct mmc_blk_data {
- #define MMC_BLK_CMD23	(1 << 0)	/* Can do SET_BLOCK_COUNT for multiblock */
- #define MMC_BLK_REL_WR	(1 << 1)	/* MMC Reliable write support */
- #define MMC_BLK_PACKED_CMD	(1 << 2)	/* MMC packed command support */
-+#define MMC_BLK_CMD_QUEUE	(1 << 3) /* MMC command queue support */
- 
- 	unsigned int	usage;
- 	unsigned int	read_only;
-@@ -638,6 +640,66 @@ static const struct block_device_operations mmc_bdops = {
- #endif
- };
- 
-+static int mmc_blk_cmdq_switch(struct mmc_card *card,
-+			struct mmc_blk_data *md, bool enable)
+ ifeq ($(CONFIG_CB710_DEBUG),y)
+ 	CFLAGS-cb710-mmc	+= -DDEBUG
+diff --git a/drivers/mmc/host/cmdq_hci.c b/drivers/mmc/host/cmdq_hci.c
+new file mode 100644
+index 0000000..9de344a
+--- /dev/null
++++ b/drivers/mmc/host/cmdq_hci.c
+@@ -0,0 +1,663 @@
++/* Copyright (c) 2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include <linux/delay.h>
++#include <linux/highmem.h>
++#include <linux/io.h>
++#include <linux/module.h>
++#include <linux/dma-mapping.h>
++#include <linux/slab.h>
++#include <linux/scatterlist.h>
++#include <linux/leds.h>
++#include <linux/platform_device.h>
++
++#include <linux/mmc/mmc.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/card.h>
++#include <linux/mmc/slot-gpio.h>
++#include <linux/mmc/cmdq_hci.h>
++
++/* 1 sec FIXME: optimize it */
++#define HALT_TIMEOUT_MS 1000
++
++static inline u64 *get_desc(struct cmdq_host *cq_host, u8 tag)
 +{
-+	int ret = 0;
-+	bool cmdq_mode = !!mmc_card_cmdq(card);
-+	struct mmc_host *host = card->host;
++	return cq_host->desc_base + (tag * cq_host->slot_sz);
++}
 +
-+	if (!(card->host->caps2 & MMC_CAP2_CMD_QUEUE) ||
-+	    !card->ext_csd.cmdq_support ||
-+	    (enable && !(md->flags & MMC_BLK_CMD_QUEUE)) ||
-+	    (cmdq_mode == enable))
-+		return 0;
++static inline u64 *get_link_desc(struct cmdq_host *cq_host, u8 tag)
++{
++	u64 *desc = get_desc(cq_host, tag);
 +
-+	if (host->cmdq_ops) {
-+		if (enable) {
-+			ret = mmc_set_blocklen(card, MMC_CARD_CMDQ_BLK_SIZE);
-+			if (ret) {
-+				pr_err("%s: failed to set block-size to 512\n",
-+				       __func__);
-+				BUG();
-+			}
-+		}
++	return desc + cq_host->task_desc_len;
++}
 +
-+		ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+				 EXT_CSD_CMDQ, enable,
-+				 card->ext_csd.generic_cmd6_time);
-+		if (ret) {
-+			pr_err("%s: cmdq mode %sable failed %d\n",
-+			       md->disk->disk_name, enable ? "en" : "dis", ret);
-+			goto out;
-+		}
-+		/* enable host controller command queue engine */
-+		if (enable)
-+			ret = host->cmdq_ops->enable(card->host);
-+		else
-+			host->cmdq_ops->disable(card->host, true);
-+		if (ret) {
-+			pr_err("%s: failed to enable host controller cqe %d\n",
-+					md->disk->disk_name,
-+					ret);
++static inline dma_addr_t get_trans_desc_dma(struct cmdq_host *cq_host, u8 tag)
++{
++	u8 mul = sizeof(u64)/sizeof(dma_addr_t);
 +
-+			/* disable CQ mode in card */
-+			ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+					EXT_CSD_CMDQ, 0,
-+					card->ext_csd.generic_cmd6_time);
-+			goto out;
-+		}
++	return cq_host->trans_desc_dma_base +
++		(mul * cq_host->mmc->max_segs * tag *
++		 sizeof(*cq_host->trans_desc_base));
++}
++
++static inline u64 *get_trans_desc(struct cmdq_host *cq_host, u8 tag)
++{
++	u8 mul = sizeof(u64)/sizeof(dma_addr_t);
++
++	return cq_host->trans_desc_base +
++		(mul * cq_host->mmc->max_segs * tag *
++		 sizeof(*cq_host->trans_desc_base));
++}
++
++static void setup_trans_desc(struct cmdq_host *cq_host, u8 tag)
++{
++	u64 *link_temp;
++	dma_addr_t trans_temp;
++
++	link_temp = get_link_desc(cq_host, tag);
++	trans_temp = get_trans_desc_dma(cq_host, tag);
++
++	memset(link_temp, 0, sizeof(*link_temp));
++	if (cq_host->link_desc_len > 1)
++		*(link_temp + 1) &= 0;
++
++	*link_temp = VALID(1) | ACT(0x6) | END(0);
++
++	*link_temp |= DAT_ADDR_LO((u64)lower_32_bits(trans_temp));
++	if (cq_host->link_desc_len > 1)
++		*(link_temp + 1) |= DAT_ADDR_HI(upper_32_bits(trans_temp));
++}
++
++static void cmdq_clear_set_irqs(struct cmdq_host *cq_host, u32 clear, u32 set)
++{
++	u32 ier;
++
++	ier = cmdq_readl(cq_host, CQISTE);
++	ier &= ~clear;
++	ier |= set;
++	cmdq_writel(cq_host, ier, CQISTE);
++	cmdq_writel(cq_host, ier, CQISGE);
++	/* ensure the writes are done */
++	mb();
++}
++
++
++#define DRV_NAME "cmdq-host"
++
++static void cmdq_dumpregs(struct cmdq_host *cq_host)
++{
++	struct mmc_host *mmc = cq_host->mmc;
++
++	pr_debug(DRV_NAME ": ========== REGISTER DUMP (%s)==========\n",
++		mmc_hostname(mmc));
++
++	pr_debug(DRV_NAME ": Version: 0x%08x | Caps:  0x%08x\n",
++		cmdq_readl(cq_host, CQVER),
++		cmdq_readl(cq_host, CQCAP));
++	pr_debug(DRV_NAME ": Queing config: 0x%08x | Queue Ctrl:  0x%08x\n",
++		cmdq_readl(cq_host, CQCFG),
++		cmdq_readl(cq_host, CQCTL));
++	pr_debug(DRV_NAME ": Int stat: 0x%08x | Int enab:  0x%08x\n",
++		cmdq_readl(cq_host, CQIS),
++		cmdq_readl(cq_host, CQISTE));
++	pr_debug(DRV_NAME ": Int sig: 0x%08x | Int Coal:  0x%08x\n",
++		cmdq_readl(cq_host, CQISGE),
++		cmdq_readl(cq_host, CQIC));
++	pr_debug(DRV_NAME ": TDL base: 0x%08x | TDL up32:  0x%08x\n",
++		cmdq_readl(cq_host, CQTDLBA),
++		cmdq_readl(cq_host, CQTDLBAU));
++	pr_debug(DRV_NAME ": Doorbell: 0x%08x | Comp Notif:  0x%08x\n",
++		cmdq_readl(cq_host, CQTDBR),
++		cmdq_readl(cq_host, CQTCN));
++	pr_debug(DRV_NAME ": Dev queue: 0x%08x | Dev Pend:  0x%08x\n",
++		cmdq_readl(cq_host, CQDQS),
++		cmdq_readl(cq_host, CQDPT));
++	pr_debug(DRV_NAME ": Task clr: 0x%08x | Send stat 1:  0x%08x\n",
++		cmdq_readl(cq_host, CQTCLR),
++		cmdq_readl(cq_host, CQSSC1));
++	pr_debug(DRV_NAME ": Send stat 2: 0x%08x | DCMD resp:  0x%08x\n",
++		cmdq_readl(cq_host, CQSSC2),
++		cmdq_readl(cq_host, CQCRDCT));
++	pr_debug(DRV_NAME ": Resp err mask: 0x%08x | Task err:  0x%08x\n",
++		cmdq_readl(cq_host, CQRMEM),
++		cmdq_readl(cq_host, CQTERRI));
++	pr_debug(DRV_NAME ": Resp idx 0x%08x | Resp arg:  0x%08x\n",
++		cmdq_readl(cq_host, CQCRI),
++		cmdq_readl(cq_host, CQCRA));
++	pr_debug(DRV_NAME ": ===========================================\n");
++
++	if (cq_host->ops->dump_vendor_regs)
++		cq_host->ops->dump_vendor_regs(mmc);
++}
++
++/**
++ * The allocated descriptor table for task, link & transfer descritors
++ * looks like:
++ * |----------|
++ * |task desc |  |->|----------|
++ * |----------|  |  |trans desc|
++ * |link desc-|->|  |----------|
++ * |----------|          .
++ *      .                .
++ *  no. of slots      max-segs
++ *      .           |----------|
++ * |----------|
++ * The idea here is to create the [task+trans] table and mark & point the
++ * link desc to the transfer desc table on a per slot basis.
++ */
++static int cmdq_host_alloc_tdl(struct cmdq_host *cq_host)
++{
++
++	size_t desc_size;
++	size_t data_size;
++	int i = 0;
++
++	/* task descriptor can be 64/128 bit irrespective of arch */
++	if (cq_host->caps & CMDQ_TASK_DESC_SZ_128) {
++		cmdq_writel(cq_host, cmdq_readl(cq_host, CQCFG) |
++			       CQ_TASK_DESC_SZ, CQCFG);
++		cq_host->task_desc_len = 2;
 +	} else {
-+		pr_err("%s: No cmdq ops defined !!!\n", __func__);
-+		BUG();
++		cq_host->task_desc_len = 1;
 +	}
 +
-+	if (enable)
-+		mmc_card_set_cmdq(card);
++	/* transfer desc. is 64 bit for 32 bit arch and 128 bit for 64 bit */
++	if (cq_host->dma64)
++		cq_host->trans_desc_len = 2;
 +	else
-+		mmc_card_clr_cmdq(card);
-+out:
-+	return ret;
-+}
++		cq_host->trans_desc_len = 1;
 +
- static inline int mmc_blk_part_switch(struct mmc_card *card,
- 				      struct mmc_blk_data *md)
- {
-@@ -650,6 +712,13 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
- 	if (mmc_card_mmc(card)) {
- 		u8 part_config = card->ext_csd.part_config;
- 
-+		if (md->part_type) {
-+			/* disable CQ mode for non-user data partitions */
-+			ret = mmc_blk_cmdq_switch(card, md, false);
-+			if (ret)
-+				return ret;
-+		}
-+
- 		part_config &= ~EXT_CSD_PART_CONFIG_ACC_MASK;
- 		part_config |= md->part_type;
- 
-@@ -1813,6 +1882,254 @@ static void mmc_blk_revert_packed_req(struct mmc_queue *mq,
- 	mmc_blk_clear_packed(mq_rq);
- }
- 
-+static int mmc_blk_cmdq_start_req(struct mmc_host *host,
-+				   struct mmc_cmdq_req *cmdq_req)
-+{
-+	struct mmc_request *mrq = &cmdq_req->mrq;
-+
-+	mrq->done = mmc_blk_cmdq_req_done;
-+	return mmc_cmdq_start_req(host, cmdq_req);
-+}
-+
-+/* prepare for non-data commands */
-+static struct mmc_cmdq_req *mmc_cmdq_prep_dcmd(
-+		struct mmc_queue_req *mqrq, struct mmc_queue *mq)
-+{
-+	struct request *req = mqrq->req;
-+	struct mmc_cmdq_req *cmdq_req = &mqrq->mmc_cmdq_req;
-+
-+	memset(&mqrq->mmc_cmdq_req, 0, sizeof(struct mmc_cmdq_req));
-+
-+	cmdq_req->mrq.data = NULL;
-+	cmdq_req->cmd_flags = req->cmd_flags;
-+	cmdq_req->mrq.req = mqrq->req;
-+	req->special = mqrq;
-+	cmdq_req->cmdq_req_flags |= DCMD;
-+	cmdq_req->mrq.cmdq_req = cmdq_req;
-+
-+	return &mqrq->mmc_cmdq_req;
-+}
-+
-+
-+#define IS_RT_CLASS_REQ(x)     \
-+	(IOPRIO_PRIO_CLASS(req_get_ioprio(x)) == IOPRIO_CLASS_RT)
-+
-+static struct mmc_cmdq_req *mmc_blk_cmdq_rw_prep(
-+		struct mmc_queue_req *mqrq, struct mmc_queue *mq)
-+{
-+	struct mmc_card *card = mq->card;
-+	struct request *req = mqrq->req;
-+	struct mmc_blk_data *md = mq->data;
-+	bool do_rel_wr = mmc_req_rel_wr(req) && (md->flags & MMC_BLK_REL_WR);
-+	bool do_data_tag;
-+	bool read_dir = (rq_data_dir(req) == READ);
-+	bool prio = IS_RT_CLASS_REQ(req);
-+	struct mmc_cmdq_req *cmdq_rq = &mqrq->mmc_cmdq_req;
-+
-+	memset(&mqrq->mmc_cmdq_req, 0, sizeof(struct mmc_cmdq_req));
-+
-+	cmdq_rq->tag = req->tag;
-+	if (read_dir) {
-+		cmdq_rq->cmdq_req_flags |= DIR;
-+		cmdq_rq->data.flags = MMC_DATA_READ;
-+	} else {
-+		cmdq_rq->data.flags = MMC_DATA_WRITE;
-+	}
-+	if (prio)
-+		cmdq_rq->cmdq_req_flags |= PRIO;
-+
-+	if (do_rel_wr)
-+		cmdq_rq->cmdq_req_flags |= REL_WR;
-+
-+	cmdq_rq->data.blocks = blk_rq_sectors(req);
-+	cmdq_rq->blk_addr = blk_rq_pos(req);
-+	cmdq_rq->data.blksz = MMC_CARD_CMDQ_BLK_SIZE;
-+
-+	mmc_set_data_timeout(&cmdq_rq->data, card);
-+
-+	do_data_tag = (card->ext_csd.data_tag_unit_size) &&
-+		(req->cmd_flags & REQ_META) &&
-+		(rq_data_dir(req) == WRITE) &&
-+		((cmdq_rq->data.blocks * cmdq_rq->data.blksz) >=
-+		 card->ext_csd.data_tag_unit_size);
-+	if (do_data_tag)
-+		cmdq_rq->cmdq_req_flags |= DAT_TAG;
-+	cmdq_rq->data.sg = mqrq->sg;
-+	cmdq_rq->data.sg_len = mmc_queue_map_sg(mq, mqrq);
++	/* total size of a slot: 1 task & 1 transfer (link) */
++	cq_host->slot_sz = cq_host->task_desc_len + cq_host->link_desc_len;
 +
 +	/*
-+	 * Adjust the sg list so it is the same size as the
-+	 * request.
++	 * 96 bits length of transfer desc instead of 128 bits which means
++	 * ADMA would expect next valid descriptor at the 96th bit
++	 * or 128th bit
 +	 */
-+	if (cmdq_rq->data.blocks > card->host->max_blk_count)
-+		cmdq_rq->data.blocks = card->host->max_blk_count;
++	if (cq_host->dma64) {
++		if (cq_host->quirks & CMDQ_QUIRK_SHORT_TXFR_DESC_SZ)
++			cq_host->trans_desc_len = 12;
++		else
++			cq_host->trans_desc_len = 16;
++	}
++	desc_size = (sizeof(*cq_host->desc_base)) *
++		cq_host->slot_sz * cq_host->num_slots;
 +
-+	if (cmdq_rq->data.blocks != blk_rq_sectors(req)) {
-+		int i, data_size = cmdq_rq->data.blocks << 9;
-+		struct scatterlist *sg;
++	/* FIXME: consider allocating smaller chunks iteratively */
++	data_size = (sizeof(*cq_host->trans_desc_base)) *
++		cq_host->trans_desc_len * cq_host->mmc->max_segs *
++		(cq_host->num_slots - 1);
 +
-+		for_each_sg(cmdq_rq->data.sg, sg, cmdq_rq->data.sg_len, i) {
-+			data_size -= sg->length;
-+			if (data_size <= 0) {
-+				sg->length += data_size;
-+				i++;
-+				break;
-+			}
-+		}
-+		cmdq_rq->data.sg_len = i;
++	/*
++	 * allocate a dma-mapped chunk of memory for the descriptors
++	 * allocate a dma-mapped chunk of memory for link descriptors
++	 * setup each link-desc memory offset per slot-number to
++	 * the descriptor table.
++	 */
++	cq_host->desc_base = dmam_alloc_coherent(mmc_dev(cq_host->mmc),
++						 desc_size,
++						 &cq_host->desc_dma_base,
++						 GFP_KERNEL);
++	cq_host->trans_desc_base = dmam_alloc_coherent(mmc_dev(cq_host->mmc),
++					      data_size,
++					      &cq_host->trans_desc_dma_base,
++					      GFP_KERNEL);
++
++	if (!cq_host->desc_base || !cq_host->trans_desc_base)
++		return -ENOMEM;
++
++	for (; i < (cq_host->num_slots - 1); i++)
++		setup_trans_desc(cq_host, i);
++
++	return 0;
++}
++
++static int cmdq_enable(struct mmc_host *mmc)
++{
++	int err = 0;
++	u32 cqcfg;
++	bool dcmd_enable;
++	struct cmdq_host *cq_host = mmc_cmdq_private(mmc);
++
++	if (!cq_host || !mmc->card || !mmc_card_mmc(mmc->card) ||
++	    !mmc_card_cmdq(mmc->card)) {
++		err = -EINVAL;
++		goto out;
 +	}
 +
-+	mqrq->mmc_cmdq_req.cmd_flags = req->cmd_flags;
-+	mqrq->mmc_cmdq_req.mrq.req = mqrq->req;
-+	mqrq->mmc_cmdq_req.mrq.cmdq_req = &mqrq->mmc_cmdq_req;
-+	mqrq->mmc_cmdq_req.mrq.data = &mqrq->mmc_cmdq_req.data;
-+	mqrq->req->special = mqrq;
++	if (cq_host->enabled)
++		goto out;
 +
-+	pr_debug("%s: %s: mrq: 0x%p req: 0x%p mqrq: 0x%p bytes to xf: %d mmc_cmdq_req: 0x%p card-addr: 0x%08x dir(r-1/w-0): %d\n",
-+		 mmc_hostname(card->host), __func__, &mqrq->mmc_cmdq_req.mrq,
-+		 mqrq->req, mqrq, (cmdq_rq->data.blocks * cmdq_rq->data.blksz),
-+		 cmdq_rq, cmdq_rq->blk_addr,
-+		 (cmdq_rq->cmdq_req_flags & DIR) ? 1 : 0);
++	/* TODO: if the legacy MMC host controller is in idle state */
 +
-+	return &mqrq->mmc_cmdq_req;
-+}
++	cqcfg = cmdq_readl(cq_host, CQCFG);
++	if (cqcfg & 0x1) {
++		pr_info("%s: %s: cq_host is already enabled\n",
++				mmc_hostname(mmc), __func__);
++		WARN_ON(1);
++		goto out;
++	}
 +
-+static int mmc_blk_cmdq_issue_rw_rq(struct mmc_queue *mq, struct request *req)
-+{
-+	struct mmc_queue_req *active_mqrq;
-+	struct mmc_card *card = mq->card;
-+	struct mmc_host *host = card->host;
-+	struct mmc_cmdq_req *mc_rq;
-+	int ret = 0;
++	if (cq_host->quirks & CMDQ_QUIRK_NO_DCMD)
++		dcmd_enable = false;
++	else
++		dcmd_enable = true;
 +
-+	BUG_ON((req->tag < 0) || (req->tag > card->ext_csd.cmdq_depth));
-+	BUG_ON(test_and_set_bit(req->tag, &host->cmdq_ctx.active_reqs));
++	cqcfg = ((cq_host->dma64 ? CQ_TASK_DESC_SZ : 0) |
++			(dcmd_enable ? CQ_DCMD : 0));
 +
-+	active_mqrq = &mq->mqrq_cmdq[req->tag];
-+	active_mqrq->req = req;
++	cmdq_writel(cq_host, cqcfg, CQCFG);
 +
-+	mc_rq = mmc_blk_cmdq_rw_prep(active_mqrq, mq);
++	if (!cq_host->desc_base ||
++			!cq_host->trans_desc_base) {
++		err = cmdq_host_alloc_tdl(cq_host);
++		if (err)
++			goto out;
++		cmdq_writel(cq_host, lower_32_bits(cq_host->desc_dma_base),
++				CQTDLBA);
++		cmdq_writel(cq_host, upper_32_bits(cq_host->desc_dma_base),
++				CQTDLBAU);
++	}
 +
-+	ret = mmc_blk_cmdq_start_req(card->host, mc_rq);
-+	return ret;
-+}
++	/* leave send queue status timer configs to reset values */
 +
-+/*
-+ * FIXME: handle discard as a dcmd request as well
-+ */
-+int mmc_blk_cmdq_issue_discard_rq(struct mmc_queue *mq, struct request *req)
-+{
-+	struct mmc_card *card = mq->card;
-+	struct mmc_host *host = card->host;
++	/* configure interrupt coalescing */
++	/* mmc_cq_host_intr_aggr(host->cq_host, CQIC_DEFAULT_ICCTH,
++	   CQIC_DEFAULT_ICTOVAL); */
 +
-+	pr_debug("%s: %s: invoked ###\n", mmc_hostname(host), __func__);
++	/* leave CQRMEM to reset value */
 +
-+	return -ENOSYS;
-+}
-+EXPORT_SYMBOL(mmc_blk_cmdq_issue_discard_rq);
++	/*
++	 * disable all vendor interrupts
++	 * enable CMDQ interrupts
++	 * enable the vendor error interrupts
++	 */
++	if (cq_host->ops->clear_set_irqs)
++		cq_host->ops->clear_set_irqs(mmc, CQ_INT_ALL, CQ_INT_EN);
 +
-+/*
-+ * Issues a dcmd request
-+ * FIXME:
-+ *	Try to pull another request from queue and prepare it in the
-+ *	meantime. If its not a dcmd it can be issued as well.
-+ */
-+int mmc_blk_cmdq_issue_flush_rq(struct mmc_queue *mq, struct request *req)
-+{
-+	int err;
-+	struct mmc_queue_req *active_mqrq;
-+	struct mmc_card *card = mq->card;
-+	struct mmc_host *host;
-+	struct mmc_cmdq_req *cmdq_req;
-+	struct mmc_cmdq_context_info *ctx_info;
++	cmdq_clear_set_irqs(cq_host, 0x0, CQ_INT_ALL);
 +
-+	BUG_ON(!card);
-+	host = card->host;
-+	BUG_ON(!host);
-+	BUG_ON((req->tag < 0) || (req->tag > card->ext_csd.cmdq_depth));
-+	BUG_ON(test_and_set_bit(req->tag, &host->cmdq_ctx.active_reqs));
++	/* cq_host would use this rca to address the card */
++	cmdq_writel(cq_host, mmc->card->rca, CQSSC2);
 +
-+	ctx_info = &host->cmdq_ctx;
++	/* ensure the writes are done before enabling CQE */
++	mb();
 +
-+	spin_lock_bh(&ctx_info->cmdq_ctx_lock);
-+	ctx_info->active_dcmd = true;
-+	spin_unlock_bh(&ctx_info->cmdq_ctx_lock);
++	/* enable CQ_HOST */
++	cmdq_writel(cq_host, cmdq_readl(cq_host, CQCFG) | CQ_ENABLE,
++		    CQCFG);
 +
-+	active_mqrq = &mq->mqrq_cmdq[req->tag];
-+	active_mqrq->req = req;
-+
-+	cmdq_req = mmc_cmdq_prep_dcmd(active_mqrq, mq);
-+	cmdq_req->cmdq_req_flags |= QBR;
-+	cmdq_req->mrq.cmd = &cmdq_req->cmd;
-+	cmdq_req->tag = req->tag;
-+
-+	err = __mmc_switch_cmdq_mode(cmdq_req->mrq.cmd, EXT_CSD_CMD_SET_NORMAL,
-+					EXT_CSD_FLUSH_CACHE, 1,
-+				     MMC_FLUSH_REQ_TIMEOUT_MS, true, true);
-+	if (err)
-+		return err;
-+
-+	err = mmc_blk_cmdq_start_req(card->host, cmdq_req);
++	cq_host->enabled = true;
++out:
 +	return err;
 +}
-+EXPORT_SYMBOL(mmc_blk_cmdq_issue_flush_rq);
 +
-+/* invoked by block layer in softirq context */
-+void mmc_blk_cmdq_complete_rq(struct request *rq)
++static void cmdq_disable(struct mmc_host *mmc, bool soft)
 +{
-+	struct mmc_queue_req *mq_rq = rq->special;
-+	struct mmc_request *mrq = &mq_rq->mmc_cmdq_req.mrq;
-+	struct mmc_host *host = mrq->host;
-+	struct mmc_cmdq_context_info *ctx_info = &host->cmdq_ctx;
-+	struct mmc_cmdq_req *cmdq_req = &mq_rq->mmc_cmdq_req;
-+	int err = 0;
++	struct cmdq_host *cq_host = (struct cmdq_host *)mmc_cmdq_private(mmc);
 +
-+	spin_lock(&ctx_info->cmdq_ctx_lock);
-+	if (mrq->cmd && mrq->cmd->error)
-+		err = mrq->cmd->error;
-+	else if (mrq->data && mrq->data->error)
-+		err = mrq->data->error;
-+
-+	mmc_cmdq_post_req(host, mrq, err);
-+	if (err) {
-+		pr_err("%s: %s: txfr error: %d\n", mmc_hostname(mrq->host),
-+		       __func__, err);
-+
-+		if (mmc_cmdq_halt(host, true))
-+			BUG();
-+		ctx_info->curr_state |= CMDQ_STATE_ERR;
-+		/* TODO: wake-up kernel thread to handle error */
-+	}
-+
-+	BUG_ON(!test_and_clear_bit(cmdq_req->tag,
-+				   &ctx_info->active_reqs));
-+	if (cmdq_req->cmdq_req_flags & DCMD) {
-+		ctx_info->active_dcmd = false;
-+		spin_unlock(&ctx_info->cmdq_ctx_lock);
-+		blk_end_request_all(rq, 0);
-+		return;
-+	}
-+
-+	spin_unlock(&ctx_info->cmdq_ctx_lock);
-+
-+	blk_end_request(rq, 0, cmdq_req->data.bytes_xfered);
-+
-+	if (test_and_clear_bit(0, &ctx_info->req_starved))
-+		blk_run_queue(rq->q);
-+}
-+
-+/*
-+ * Complete reqs from block layer softirq context
-+ * Invoked in irq context
-+ */
-+void mmc_blk_cmdq_req_done(struct mmc_request *mrq)
-+{
-+	struct request *req = mrq->req;
-+
-+	blk_complete_request(req);
-+}
-+EXPORT_SYMBOL(mmc_blk_cmdq_req_done);
-+
- static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- {
- 	struct mmc_blk_data *md = mq->data;
-@@ -2001,6 +2318,52 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 	return 0;
- }
- 
-+static int mmc_blk_cmdq_issue_rq(struct mmc_queue *mq, struct request *req)
-+{
-+	int ret;
-+	struct mmc_blk_data *md = mq->data;
-+	struct mmc_card *card = md->queue.card;
-+	unsigned int cmd_flags = req->cmd_flags;
-+
-+#ifdef CONFIG_MMC_BLOCK_DEFERRED_RESUME
-+	if (mmc_bus_needs_resume(card->host))
-+		mmc_resume_bus(card->host);
-+#endif
-+	ret = mmc_blk_part_switch(card, md);
-+	if (ret) {
-+		pr_err("%s: %s: partition switch failed %d\n",
-+				md->disk->disk_name, __func__, ret);
-+		blk_end_request_all(req, ret);
-+		goto switch_failure;
-+	}
-+
-+	ret = mmc_blk_cmdq_switch(card, md, true);
-+	if (ret) {
-+		/* TODO: put a limit on the number of requeues if switch fails
-+		 * and if possible disable cmd queing for buggy cards.
-+		 */
-+		spin_lock_irq(mq->queue->queue_lock);
-+		blk_requeue_request(mq->queue, req);
-+		spin_unlock_irq(mq->queue->queue_lock);
-+		goto switch_failure;
-+	}
-+
-+	if (cmd_flags & REQ_DISCARD) {
-+		/* if (req->cmd_flags & REQ_SECURE && */
-+		/*	!(card->quirks & MMC_QUIRK_SEC_ERASE_TRIM_BROKEN)) */
-+		/*	ret = mmc_blk_issue_secdiscard_rq(mq, req); */
-+		/* else */
-+		ret = mmc_blk_cmdq_issue_discard_rq(mq, req);
-+	} else if (cmd_flags & REQ_FLUSH) {
-+		ret = mmc_blk_cmdq_issue_flush_rq(mq, req);
++	if (soft) {
++		cmdq_writel(cq_host, cmdq_readl(
++				    cq_host, CQCFG) & ~(CQ_ENABLE),
++			    CQCFG);
 +	} else {
-+		ret = mmc_blk_cmdq_issue_rw_rq(mq, req);
++		/* FIXME: free the allocated descriptors */
 +	}
-+
-+switch_failure:
-+	return ret;
++	cq_host->enabled = false;
 +}
 +
- static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- {
- 	int ret;
-@@ -2118,7 +2481,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 	INIT_LIST_HEAD(&md->part);
- 	md->usage = 1;
- 
--	ret = mmc_init_queue(&md->queue, card, &md->lock, subname);
-+	ret = mmc_init_queue(&md->queue, card, &md->lock, subname, area_type);
- 	if (ret)
- 		goto err_putdisk;
- 
-@@ -2173,7 +2536,13 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 		blk_queue_flush(md->queue.queue, REQ_FLUSH | REQ_FUA);
- 	}
- 
--	if (mmc_card_mmc(card) &&
-+	if (card->cmdq_init) {
-+		md->flags |= MMC_BLK_CMD_QUEUE;
-+		md->queue.cmdq_complete_fn = mmc_blk_cmdq_complete_rq;
-+		md->queue.cmdq_issue_fn = mmc_blk_cmdq_issue_rq;
-+	}
-+
-+	if (mmc_card_mmc(card) && !card->cmdq_init &&
- 	    (area_type == MMC_BLK_DATA_AREA_MAIN) &&
- 	    (md->flags & MMC_BLK_CMD23) &&
- 	    card->ext_csd.packed_event_en) {
-@@ -2284,6 +2653,8 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
- 		mmc_cleanup_queue(&md->queue);
- 		if (md->flags & MMC_BLK_PACKED_CMD)
- 			mmc_packed_clean(&md->queue);
-+		if (md->flags & MMC_BLK_CMD_QUEUE)
-+			mmc_cmdq_clean(&md->queue, card);
- 		if (md->disk->flags & GENHD_FL_UP) {
- 			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
- 			if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index c99e385..71b6717 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -104,6 +104,54 @@ static int mmc_queue_thread(void *d)
- 	return 0;
- }
- 
-+static inline bool mmc_cmdq_should_pull_reqs(struct mmc_host *host,
-+					struct mmc_cmdq_context_info *ctx)
++static void cmdq_prep_task_desc(struct mmc_request *mrq,
++					u64 *data, bool intr, bool qbr)
 +{
-+	spin_lock_bh(&ctx->cmdq_ctx_lock);
-+	if (ctx->active_dcmd || ctx->rpmb_in_wait) {
-+		if ((ctx->curr_state != CMDQ_STATE_HALT) ||
-+			(ctx->curr_state != CMDQ_STATE_ERR)) {
-+			pr_debug("%s: %s: skip pulling reqs: dcmd: %d rpmb: %d state: %d\n",
-+				 mmc_hostname(host), __func__, ctx->active_dcmd,
-+				 ctx->rpmb_in_wait, ctx->curr_state);
-+			spin_unlock_bh(&ctx->cmdq_ctx_lock);
-+			return false;
-+		}
-+	} else {
-+		spin_unlock_bh(&ctx->cmdq_ctx_lock);
-+		return true;
-+	}
++	struct mmc_cmdq_req *cmdq_req = mrq->cmdq_req;
++	u32 req_flags = cmdq_req->cmdq_req_flags;
++
++	pr_debug("%s: %s: data-tag: 0x%08x - dir: %d - prio: %d - cnt: 0x%08x -	addr: 0x%llx\n",
++		 mmc_hostname(mrq->host), __func__,
++		 !!(req_flags & DAT_TAG), !!(req_flags & DIR),
++		 !!(req_flags & PRIO), cmdq_req->data.blocks,
++		 (u64)mrq->cmdq_req->blk_addr);
++
++	*data = VALID(1) |
++		END(1) |
++		INT(intr) |
++		ACT(0x5) |
++		FORCED_PROG(!!(req_flags & FORCED_PRG)) |
++		CONTEXT(mrq->cmdq_req->ctx_id) |
++		DATA_TAG(!!(req_flags & DAT_TAG)) |
++		DATA_DIR(!!(req_flags & DIR)) |
++		PRIORITY(!!(req_flags & PRIO)) |
++		QBAR(qbr) |
++		REL_WRITE(!!(req_flags & REL_WR)) |
++		BLK_COUNT(mrq->cmdq_req->data.blocks) |
++		BLK_ADDR((u64)mrq->cmdq_req->blk_addr);
 +}
 +
-+static void mmc_cmdq_dispatch_req(struct request_queue *q)
++static int cmdq_dma_map(struct mmc_host *host, struct mmc_request *mrq)
 +{
-+	struct request *req;
-+	struct mmc_queue *mq = q->queuedata;
-+	struct mmc_card *card = mq->card;
-+	struct mmc_host *host = card->host;
-+	struct mmc_cmdq_context_info *ctx = &host->cmdq_ctx;
++	int sg_count;
++	struct mmc_data *data = mrq->data;
 +
-+	while (1) {
-+		if (!mmc_cmdq_should_pull_reqs(host, ctx)) {
-+			test_and_set_bit(0, &ctx->req_starved);
-+			return;
-+		}
++	if (!data)
++		return -EINVAL;
 +
-+		req = blk_peek_request(q);
-+		if (!req)
-+			return;
++	sg_count = dma_map_sg(mmc_dev(host), data->sg,
++			      data->sg_len,
++			      (data->flags & MMC_DATA_WRITE) ?
++			      DMA_TO_DEVICE : DMA_FROM_DEVICE);
++	if (!sg_count)
++		return -ENOMEM;
 +
-+		if (blk_queue_start_tag(q, req)) {
-+			test_and_set_bit(0, &ctx->req_starved);
-+			return;
-+		}
-+
-+		spin_unlock_irq(q->queue_lock);
-+		mq->cmdq_issue_fn(mq, req);
-+		spin_lock_irq(q->queue_lock);
-+	}
++	return sg_count;
 +}
 +
- /*
-  * Generic MMC request handler.  This is called for any queue on a
-  * particular host.  When the host is not busy, we look for a request
-@@ -179,6 +227,29 @@ static void mmc_queue_setup_discard(struct request_queue *q,
- }
- 
- /**
-+ * mmc_blk_cmdq_setup_queue
-+ * @mq: mmc queue
-+ * @card: card to attach to this queue
-+ *
-+ * Setup queue for CMDQ supporting MMC card
-+ */
-+void mmc_blk_cmdq_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
++static void cmdq_set_tran_desc(u8 *desc,
++				 dma_addr_t addr, int len, bool end)
 +{
-+	u64 limit = BLK_BOUNCE_HIGH;
-+	struct mmc_host *host = card->host;
++	__le32 *link = (__le32 __force *)desc;
++	__le64 *dataddr = (__le64 __force *)(desc + 4);
 +
-+	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
-+	if (mmc_can_erase(card))
-+		mmc_queue_setup_discard(mq->queue, card);
++	*link = (VALID(1) |
++		 END(end ? 1 : 0) |
++		 INT(0) |
++		 ACT(0x4) |
++		 DAT_LENGTH(len));
 +
-+	blk_queue_bounce_limit(mq->queue, limit);
-+	blk_queue_max_hw_sectors(mq->queue, min(host->max_blk_count,
-+						host->max_req_size / 512));
-+	blk_queue_max_segment_size(mq->queue, host->max_seg_size);
-+	blk_queue_max_segments(mq->queue, host->max_segs);
++	dataddr[0] = cpu_to_le64(addr);
 +}
 +
-+/**
-  * mmc_init_queue - initialise a queue structure.
-  * @mq: mmc queue
-  * @card: mmc card to attach this queue
-@@ -188,7 +259,7 @@ static void mmc_queue_setup_discard(struct request_queue *q,
-  * Initialise a MMC card request queue.
-  */
- int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
--		   spinlock_t *lock, const char *subname)
-+		   spinlock_t *lock, const char *subname, int area_type)
- {
- 	struct mmc_host *host = card->host;
- 	u64 limit = BLK_BOUNCE_HIGH;
-@@ -200,6 +271,23 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
- 
- 	mq->card = card;
-+	if (card->ext_csd.cmdq_support &&
-+	    (area_type == MMC_BLK_DATA_AREA_MAIN)) {
-+		mq->queue = blk_init_queue(mmc_cmdq_dispatch_req, lock);
-+		if (!mq->queue)
-+			return -ENOMEM;
-+		mmc_blk_cmdq_setup_queue(mq, card);
-+		ret = mmc_cmdq_init(mq, card);
-+		if (ret) {
-+			pr_err("%s: %d: cmdq: unable to set-up\n",
-+			       mmc_hostname(card->host), ret);
-+			blk_cleanup_queue(mq->queue);
-+		} else {
-+			mq->queue->queuedata = mq;
-+			return ret;
-+		}
++static int cmdq_prep_tran_desc(struct mmc_request *mrq,
++			       struct cmdq_host *cq_host, int tag)
++{
++	struct mmc_data *data = mrq->data;
++	int i, sg_count, len;
++	bool end = false;
++	u64 *trans_desc = NULL;
++	dma_addr_t addr;
++	u8 *desc;
++	struct scatterlist *sg;
++
++	sg_count = cmdq_dma_map(mrq->host, mrq);
++	if (sg_count < 0) {
++		pr_err("%s: %s: unable to map sg lists, %d\n",
++				mmc_hostname(mrq->host), __func__, sg_count);
++		return sg_count;
 +	}
 +
- 	mq->queue = blk_init_queue(mmc_request_fn, lock);
- 	if (!mq->queue)
- 		return -ENOMEM;
-@@ -417,10 +505,7 @@ int mmc_cmdq_init(struct mmc_queue *mq, struct mmc_card *card)
- 	int q_depth = card->ext_csd.cmdq_depth - 1;
- 
- 	card->cmdq_init = false;
--	if (!(card->host->caps2 & MMC_CAP2_CMD_QUEUE)) {
--		ret = -ENOTSUPP;
--		goto out;
--	}
-+	spin_lock_init(&card->host->cmdq_ctx.cmdq_ctx_lock);
- 
- 	mq->mqrq_cmdq = kzalloc(
- 			sizeof(struct mmc_queue_req) * q_depth, GFP_KERNEL);
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index 36a8d64..c971148 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -41,6 +41,7 @@ struct mmc_queue_req {
- 	struct mmc_async_req	mmc_active;
- 	enum mmc_packed_type	cmd_type;
- 	struct mmc_packed	*packed;
-+	struct mmc_cmdq_req	mmc_cmdq_req;
- };
- 
- struct mmc_queue {
-@@ -63,7 +64,7 @@ struct mmc_queue {
- };
- 
- extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
--			  const char *);
-+			  const char *, int);
- extern void mmc_cleanup_queue(struct mmc_queue *);
- extern void mmc_queue_suspend(struct mmc_queue *);
- extern void mmc_queue_resume(struct mmc_queue *);
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index acbc3f2..79f7f89 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -241,6 +241,36 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 	host->ops->request(host, mrq);
- }
- 
-+static void mmc_start_cmdq_request(struct mmc_host *host,
++	trans_desc = get_trans_desc(cq_host, tag);
++	desc = (u8 *)trans_desc;
++
++	memset(trans_desc, 0, sizeof(*trans_desc));
++
++	for_each_sg(data->sg, sg, sg_count, i) {
++		addr = sg_dma_address(sg);
++		len = sg_dma_len(sg);
++
++		if ((i+1) == sg_count)
++			end = true;
++		cmdq_set_tran_desc(desc, addr, len, end);
++		if (cq_host->dma64)
++			desc += cq_host->trans_desc_len;
++		else
++			desc += 8;
++	}
++
++	pr_debug("%s: req: 0x%p tag: %d calc-link_des: 0x%p sg-cnt: %d\n",
++		__func__, mrq->req, tag, trans_desc, sg_count);
++
++	return 0;
++}
++
++static void cmdq_prep_dcmd_desc(struct mmc_host *mmc,
 +				   struct mmc_request *mrq)
 +{
-+	if (mrq->data) {
-+		pr_debug("%s:     blksz %d blocks %d flags %08x tsac %lu ms nsac %d\n",
-+			mmc_hostname(host), mrq->data->blksz,
-+			mrq->data->blocks, mrq->data->flags,
-+			mrq->data->timeout_ns / NSEC_PER_MSEC,
-+			mrq->data->timeout_clks);
++	u64 *task_desc = NULL;
++	u64 data = 0;
++	u8 resp_type;
++	u8 *desc;
++	__le64 *dataddr;
++	struct cmdq_host *cq_host = mmc_cmdq_private(mmc);
++
++	if (!(mrq->cmd->flags & MMC_RSP_PRESENT)) {
++		resp_type = 0;
++	} else if (mrq->cmd->flags & (MMC_RSP_R1 | MMC_RSP_R4 | MMC_RSP_R5)) {
++		resp_type = 2;
++	} else if (mrq->cmd->flags & MMC_RSP_R1B) {
++		resp_type = 3;
++	} else {
++		pr_err("%s: weird response: 0x%x\n", mmc_hostname(mmc),
++			mrq->cmd->flags);
++		BUG_ON(1);
 +	}
 +
-+	mrq->cmd->error = 0;
-+	mrq->cmd->mrq = mrq;
-+	if (mrq->data) {
-+		BUG_ON(mrq->data->blksz > host->max_blk_size);
-+		BUG_ON(mrq->data->blocks > host->max_blk_count);
-+		BUG_ON(mrq->data->blocks * mrq->data->blksz >
-+			host->max_req_size);
++	task_desc = get_desc(cq_host, cq_host->dcmd_slot);
++	memset(task_desc, 0, sizeof(*task_desc));
++	data |= (VALID(1) |
++		 END(1) |
++		 INT(1) |
++		 QBAR(1) |
++		 ACT(0x5) |
++		 CMD_INDEX(mrq->cmd->opcode) |
++		 CMD_TIMING(0) | RESP_TYPE(resp_type));
++	*task_desc |= data;
++	desc = (u8 *)task_desc;
 +
-+		mrq->cmd->data = mrq->data;
-+		mrq->data->error = 0;
-+		mrq->data->mrq = mrq;
-+	}
++	dataddr = (__le64 __force *)(desc + 4);
++	dataddr[0] = cpu_to_le64((u64)mrq->cmd->arg);
 +
-+	mmc_host_clk_hold(host);
-+	led_trigger_event(host->led, LED_FULL);
-+
-+	host->cmdq_ops->request(host, mrq);
++	if (cq_host->ops->set_data_timeout)
++		cq_host->ops->set_data_timeout(mmc, 0xf);
 +}
 +
- /**
-  *	mmc_start_bkops - start BKOPS for supported cards
-  *	@card: MMC card to start BKOPS
-@@ -495,6 +525,63 @@ static void mmc_post_req(struct mmc_host *host, struct mmc_request *mrq,
- }
- 
- /**
-+ *	mmc_cmdq_post_req - post process of a completed request
-+ *	@host: host instance
-+ *	@mrq: the request to be processed
-+ *	@err: non-zero is error, success otherwise
-+ */
-+void mmc_cmdq_post_req(struct mmc_host *host, struct mmc_request *mrq, int err)
++static int cmdq_request(struct mmc_host *mmc, struct mmc_request *mrq)
 +{
-+	if (host->cmdq_ops->post_req)
-+		host->cmdq_ops->post_req(host, mrq, err);
-+}
-+EXPORT_SYMBOL(mmc_cmdq_post_req);
++	int err;
++	u64 data = 0;
++	u64 *task_desc = NULL;
++	u32 tag = mrq->cmdq_req->tag;
++	struct cmdq_host *cq_host = (struct cmdq_host *)mmc_cmdq_private(mmc);
++	unsigned long flags;
 +
-+/**
-+ *	mmc_cmdq_halt - halt/un-halt the command queue engine
-+ *	@host: host instance
-+ *	@halt: true - halt, un-halt otherwise
-+ *
-+ *	Host halts the command queue engine. It should complete
-+ *	the ongoing transfer and release the SD bus.
-+ *	All legacy SD commands can be sent upon successful
-+ *	completion of this function.
-+ *	Returns 0 on success, negative otherwise
-+ */
-+int mmc_cmdq_halt(struct mmc_host *host, bool halt)
++	if (!cq_host->enabled) {
++		err = -EINVAL;
++		goto out;
++	}
++
++	spin_lock_irqsave(&cq_host->cmdq_lock, flags);
++
++	if (mrq->cmdq_req->cmdq_req_flags & DCMD) {
++		cmdq_prep_dcmd_desc(mmc, mrq);
++		cq_host->mrq_slot[31] = mrq;
++		cmdq_writel(cq_host, 1 << 31, CQTDBR);
++		spin_unlock_irqrestore(&cq_host->cmdq_lock, flags);
++		return 0;
++	}
++
++	task_desc = get_desc(cq_host, tag);
++
++	cmdq_prep_task_desc(mrq, &data, 1,
++			    (mrq->cmdq_req->cmdq_req_flags & QBR));
++	*task_desc = cpu_to_le64(data);
++
++	err = cmdq_prep_tran_desc(mrq, cq_host, tag);
++	if (err) {
++		pr_err("%s: %s: failed to setup tx desc: %d\n",
++		       mmc_hostname(mmc), __func__, err);
++		BUG_ON(1);
++	}
++
++	BUG_ON(cmdq_readl(cq_host, CQTDBR) & (1 << tag));
++
++	cq_host->mrq_slot[tag] = mrq;
++	if (cq_host->ops->set_tranfer_params)
++		cq_host->ops->set_tranfer_params(mmc);
++
++	if (cq_host->ops->set_data_timeout)
++		cq_host->ops->set_data_timeout(mmc, 0xf);
++
++	cmdq_writel(cq_host, 1 << tag, CQTDBR);
++	spin_unlock_irqrestore(&cq_host->cmdq_lock, flags);
++
++out:
++	return err;
++}
++
++static void cmdq_finish_data(struct mmc_host *mmc, unsigned int tag)
++{
++	struct mmc_request *mrq;
++	struct cmdq_host *cq_host = (struct cmdq_host *)mmc_cmdq_private(mmc);
++
++	mrq = cq_host->mrq_slot[tag];
++	mrq->done(mrq);
++}
++
++irqreturn_t cmdq_irq(struct mmc_host *mmc, u32 intmask)
++{
++	u32 status;
++	unsigned long tag = 0, comp_status;
++	struct cmdq_host *cq_host = (struct cmdq_host *)mmc_cmdq_private(mmc);
++
++	spin_lock(&cq_host->cmdq_lock);
++
++	status = cmdq_readl(cq_host, CQIS);
++	cmdq_writel(cq_host, status, CQIS);
++
++	if (status & CQIS_HAC) {
++		/* halt is completed, wakeup waiting thread */
++		complete(&cq_host->halt_comp);
++	} else if (status & CQIS_TCC) {
++		/* read QCTCN and complete the request */
++		comp_status = cmdq_readl(cq_host, CQTCN);
++		if (!comp_status) {
++			pr_err("%s: bogus comp-stat\n", __func__);
++			cmdq_dumpregs(cq_host);
++			WARN_ON(1);
++		}
++		for_each_set_bit(tag, &comp_status, cq_host->num_slots) {
++			/* complete the corresponding mrq */
++			cmdq_finish_data(mmc, tag);
++			/* complete DCMD on tag 31 */
++		}
++		cmdq_writel(cq_host, comp_status, CQTCN);
++	} else if (status & CQIS_RED) {
++		/* task response has an error */
++		pr_err("%s: RED error %d !!!\n", mmc_hostname(mmc), status);
++		cmdq_dumpregs(cq_host);
++		BUG_ON(1);
++	} else if (status & CQIS_TCL) {
++		/* task is cleared, wakeup waiting thread */
++		;
++	}
++	spin_unlock(&cq_host->cmdq_lock);
++	return IRQ_HANDLED;
++}
++EXPORT_SYMBOL(cmdq_irq);
++
++/* May sleep */
++static int cmdq_halt(struct mmc_host *mmc, bool halt)
++{
++	struct cmdq_host *cq_host = (struct cmdq_host *)mmc_cmdq_private(mmc);
++	u32 val;
++
++	if (halt) {
++		cmdq_writel(cq_host, cmdq_readl(cq_host, CQCTL) | HALT,
++			    CQCTL);
++		val = wait_for_completion_timeout(&cq_host->halt_comp,
++					  msecs_to_jiffies(HALT_TIMEOUT_MS));
++		return val ? 0 : -ETIMEDOUT;
++	} else {
++		cmdq_writel(cq_host, cmdq_readl(cq_host, CQCTL) & ~HALT,
++			    CQCTL);
++	}
++
++	return 0;
++}
++
++static void cmdq_post_req(struct mmc_host *host, struct mmc_request *mrq,
++			  int err)
++{
++	struct mmc_data *data = mrq->data;
++
++	if (data) {
++		data->error = 0;
++		dma_unmap_sg(mmc_dev(host), data->sg, data->sg_len,
++			     (data->flags & MMC_DATA_READ) ?
++			     DMA_FROM_DEVICE : DMA_TO_DEVICE);
++	}
++}
++
++static const struct mmc_cmdq_host_ops cmdq_host_ops = {
++	.enable = cmdq_enable,
++	.disable = cmdq_disable,
++	.request = cmdq_request,
++	.halt = cmdq_halt,
++	.post_req = cmdq_post_req,
++};
++
++struct cmdq_host *cmdq_pltfm_init(struct platform_device *pdev)
++{
++	struct cmdq_host *cq_host;
++	struct resource *cmdq_memres = NULL;
++
++	/* check and setup CMDQ interface */
++	cmdq_memres = platform_get_resource_byname(pdev, IORESOURCE_MEM,
++						   "cmdq_mem");
++	if (!cmdq_memres) {
++		dev_dbg(&pdev->dev, "CMDQ not supported\n");
++		return ERR_PTR(-EINVAL);
++	}
++
++	cq_host = kzalloc(sizeof(*cq_host), GFP_KERNEL);
++	if (!cq_host) {
++		dev_err(&pdev->dev, "failed to allocate memory for CMDQ\n");
++		return ERR_PTR(-ENOMEM);
++	}
++	cq_host->mmio = devm_ioremap(&pdev->dev,
++				     cmdq_memres->start,
++				     resource_size(cmdq_memres));
++	if (!cq_host->mmio) {
++		dev_err(&pdev->dev, "failed to remap cmdq regs\n");
++		kfree(cq_host);
++		return ERR_PTR(-EBUSY);
++	}
++	dev_dbg(&pdev->dev, "CMDQ ioremap: done\n");
++
++	return cq_host;
++}
++EXPORT_SYMBOL(cmdq_pltfm_init);
++
++int cmdq_init(struct cmdq_host *cq_host, struct mmc_host *mmc,
++	      bool dma64)
 +{
 +	int err = 0;
 +
-+	if ((halt && (host->cmdq_ctx.curr_state & CMDQ_STATE_HALT)) ||
-+	    (!halt && !(host->cmdq_ctx.curr_state & CMDQ_STATE_HALT)))
-+		return 1;
++	cq_host->dma64 = dma64;
++	cq_host->mmc = mmc;
 +
-+	if (host->cmdq_ops->halt) {
-+		err = host->cmdq_ops->halt(host, halt);
-+		if (!err && halt)
-+			host->cmdq_ctx.curr_state |= CMDQ_STATE_HALT;
-+		else if (!err && !halt)
-+			host->cmdq_ctx.curr_state &= ~CMDQ_STATE_HALT;
-+	}
-+	return 0;
++	/* should be parsed */
++	cq_host->num_slots = 32;
++	cq_host->dcmd_slot = 31;
++
++	mmc->cmdq_ops = &cmdq_host_ops;
++
++	cq_host->mrq_slot = kzalloc(sizeof(cq_host->mrq_slot) *
++				    cq_host->num_slots, GFP_KERNEL);
++	if (!cq_host->mrq_slot)
++		return -ENOMEM;
++
++	spin_lock_init(&cq_host->cmdq_lock);
++	init_completion(&cq_host->halt_comp);
++	return err;
 +}
-+EXPORT_SYMBOL(mmc_cmdq_halt);
-+
-+int mmc_cmdq_start_req(struct mmc_host *host, struct mmc_cmdq_req *cmdq_req)
-+{
-+	struct mmc_request *mrq = &cmdq_req->mrq;
-+
-+	mrq->host = host;
-+	if (mmc_card_removed(host->card)) {
-+		mrq->cmd->error = -ENOMEDIUM;
-+		return -ENOMEDIUM;
-+	}
-+	mmc_start_cmdq_request(host, mrq);
-+	return 0;
-+}
-+EXPORT_SYMBOL(mmc_cmdq_start_req);
-+
-+/**
-  *	mmc_start_req - start a non-blocking request
-  *	@host: MMC host to start command
-  *	@areq: async request to start
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 0ef3af5..ec1bfcd 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -579,8 +579,12 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 
- 	if (card->ext_csd.rev >= 7) {
- 		card->ext_csd.cmdq_support = ext_csd[EXT_CSD_CMDQ_SUPPORT];
--		if (card->ext_csd.cmdq_support)
-+		if (card->ext_csd.cmdq_support) {
-+			pr_info("%s: %s: CMDQ supported: depth: %d\n",
-+				mmc_hostname(card->host), __func__,
-+				card->ext_csd.cmdq_depth);
- 			card->ext_csd.cmdq_depth = ext_csd[EXT_CSD_CMDQ_DEPTH];
-+		}
- 	} else {
- 		card->ext_csd.cmdq_support = 0;
- 		card->ext_csd.cmdq_depth = 0;
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index f51b5ba..554fb57 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -395,6 +395,33 @@ int mmc_spi_set_crc(struct mmc_host *host, int use_crc)
- 	return err;
- }
- 
-+
-+static inline void mmc_prepare_switch(struct mmc_command *cmd, u8 index,
-+				      u8 value, u8 set, unsigned int tout_ms,
-+				      bool use_busy_signal)
-+{
-+	cmd->opcode = MMC_SWITCH;
-+	cmd->arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
-+		  (index << 16) |
-+		  (value << 8) |
-+		  set;
-+	cmd->flags = MMC_CMD_AC;
-+	cmd->busy_timeout = tout_ms;
-+	if (use_busy_signal)
-+		cmd->flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
-+	else
-+		cmd->flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
-+}
-+
-+int __mmc_switch_cmdq_mode(struct mmc_command *cmd, u8 set, u8 index, u8 value,
-+			   unsigned int timeout_ms, bool use_busy_signal,
-+			   bool ignore_timeout)
-+{
-+	mmc_prepare_switch(cmd, index, value, set, timeout_ms, use_busy_signal);
-+	return 0;
-+}
-+EXPORT_SYMBOL(__mmc_switch_cmdq_mode);
-+
- /**
-  *	__mmc_switch - modify EXT_CSD register
-  *	@card: the MMC card associated with the data transfer
-@@ -430,22 +457,8 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 		(timeout_ms > host->max_busy_timeout))
- 		use_r1b_resp = false;
- 
--	cmd.opcode = MMC_SWITCH;
--	cmd.arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
--		  (index << 16) |
--		  (value << 8) |
--		  set;
--	cmd.flags = MMC_CMD_AC;
--	if (use_r1b_resp) {
--		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
--		/*
--		 * A busy_timeout of zero means the host can decide to use
--		 * whatever value it finds suitable.
--		 */
--		cmd.busy_timeout = timeout_ms;
--	} else {
--		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
--	}
-+	mmc_prepare_switch(&cmd, index, value, set, timeout_ms,
-+			   use_r1b_resp);
- 
- 	if (index == EXT_CSD_SANITIZE_START)
- 		cmd.sanitize_busy = true;
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 41f368d..4bd0ab2 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -14,6 +14,7 @@
- #include <linux/mmc/core.h>
- #include <linux/mod_devicetable.h>
- 
-+#define MMC_CARD_CMDQ_BLK_SIZE 512
- struct mmc_cid {
- 	unsigned int		manfid;
- 	char			prod_name[8];
-@@ -112,7 +113,7 @@ struct mmc_ext_csd {
- 	u8			raw_pwr_cl_ddr_52_360;	/* 239 */
- 	u8			raw_bkops_status;	/* 246 */
- 	u8			raw_sectors[4];		/* 212 - 4 bytes */
--	u8			cmdq_mode_en;		/* 15 */
-+	u8			cmdq_en;		/* 15 */
- 	u8			cmdq_depth;		/* 307 */
- 	u8			cmdq_support;		/* 308 */
- 
-@@ -545,6 +546,4 @@ extern void mmc_unregister_driver(struct mmc_driver *);
- 
- extern void mmc_fixup_device(struct mmc_card *card,
- 			     const struct mmc_fixup *table);
--
--extern void mmc_blk_cmdq_req_done(struct mmc_request *mrq);
- #endif /* LINUX_MMC_CARD_H */
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index f206e29..33403c3 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -131,19 +131,27 @@ struct mmc_request {
- 	struct mmc_command	*cmd;
- 	struct mmc_data		*data;
- 	struct mmc_command	*stop;
-+	struct mmc_command	*task_mgmt;
- 
- 	struct completion	completion;
- 	void			(*done)(struct mmc_request *);/* completion function */
- 	struct mmc_host		*host;
-+	struct mmc_cmdq_req	*cmdq_req;
-+	struct request		*req; /* associated block request */
- };
- 
- struct mmc_card;
- struct mmc_async_req;
-+struct mmc_cmdq_req;
- 
- extern int mmc_stop_bkops(struct mmc_card *);
- extern int mmc_read_bkops_status(struct mmc_card *);
- extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
- 					   struct mmc_async_req *, int *);
-+extern void mmc_wait_cmdq_empty(struct mmc_card *);
-+extern int mmc_cmdq_start_req(struct mmc_host *host,
-+			      struct mmc_cmdq_req *cmdq_req);
-+extern void mmc_blk_cmdq_req_done(struct mmc_request *mrq);
- extern int mmc_interrupt_hpi(struct mmc_card *);
- extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
- extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
-@@ -155,6 +163,12 @@ extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool,
- 			bool, bool);
- extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
- extern int mmc_send_ext_csd(struct mmc_card *card, u8 *ext_csd);
-+extern int __mmc_switch_cmdq_mode(struct mmc_command *cmd, u8 set, u8 index,
-+				  u8 value, unsigned int timeout_ms,
-+				  bool use_busy_signal, bool ignore_timeout);
-+extern int mmc_cmdq_halt(struct mmc_host *host, bool enable);
-+extern void mmc_cmdq_post_req(struct mmc_host *host, struct mmc_request *mrq,
-+			      int err);
- 
- #define MMC_ERASE_ARG		0x00000000
- #define MMC_SECURE_ERASE_ARG	0x80000000
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index f0edb36..1c51ecc 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -80,6 +80,15 @@ struct mmc_ios {
- #define MMC_SET_DRIVER_TYPE_D	3
- };
- 
-+struct mmc_cmdq_host_ops {
-+	int (*enable)(struct mmc_host *host);
-+	void (*disable)(struct mmc_host *host, bool soft);
-+	int (*request)(struct mmc_host *host, struct mmc_request *mrq);
-+	int (*halt)(struct mmc_host *host, bool halt);
-+	void (*post_req)(struct mmc_host *host, struct mmc_request *mrq,
-+			 int err);
-+};
-+
- struct mmc_host_ops {
- 	/*
- 	 * 'enable' is called when the host is claimed and 'disable' is called
-@@ -144,6 +153,26 @@ struct mmc_host_ops {
- struct mmc_card;
- struct device;
- 
-+struct mmc_cmdq_req {
-+	unsigned int cmd_flags;
-+	u32 blk_addr;
-+	/* active mmc request */
-+	struct mmc_request	mrq;
-+	struct mmc_command	task_mgmt;
-+	struct mmc_data		data;
-+	struct mmc_command	cmd;
-+#define DCMD	(1 << 0)
-+#define QBR	(1 << 1)
-+#define DIR	(1 << 2)
-+#define PRIO	(1 << 3)
-+#define REL_WR	(1 << 4)
-+#define DAT_TAG	(1 << 5)
-+#define FORCED_PRG (1 << 6)
-+	unsigned int		cmdq_req_flags;
-+	int			tag; /* used for command queuing */
-+	u8			ctx_id;
-+};
-+
- struct mmc_async_req {
- 	/* active mmc request */
- 	struct mmc_request	*mrq;
-@@ -188,6 +217,33 @@ struct mmc_context_info {
- 	spinlock_t		lock;
- };
- 
-+enum cmdq_states {
-+	CMDQ_STATE_HALT,
-+	CMDQ_STATE_ERR,
-+};
-+
-+/**
-+ * mmc_cmdq_context_info - describes the contexts of cmdq
-+ * @active_reqs		requests being processed
-+ * @active_dcmd		dcmd in progress, don't issue any
-+ *			more dcmd requests
-+ * @rpmb_in_wait	do not pull any more reqs till rpmb is handled
-+ * @cmdq_state		state of cmdq engine
-+ * @req_starved		completion should invoke the request_fn since
-+ *			no tags were available
-+ * @cmdq_ctx_lock	acquire this before accessing this structure
++EXPORT_SYMBOL(cmdq_init);
+diff --git a/include/linux/mmc/cmdq_hci.h b/include/linux/mmc/cmdq_hci.h
+new file mode 100644
+index 0000000..6c00e8e
+--- /dev/null
++++ b/include/linux/mmc/cmdq_hci.h
+@@ -0,0 +1,171 @@
++/* Copyright (c) 2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
 + */
-+struct mmc_cmdq_context_info {
-+	unsigned long	active_reqs; /* in-flight requests */
-+	bool		active_dcmd;
-+	bool		rpmb_in_wait;
-+	enum cmdq_states curr_state;
++#ifndef LINUX_MMC_CQ_HCI_H
++#define LINUX_MMC_CQ_HCI_H
++#include <linux/mmc/core.h>
 +
-+	/* no free tag available */
-+	unsigned long	req_starved;
-+	spinlock_t	cmdq_ctx_lock;
++/* registers */
++#define CQVER		0x00
++#define CQCAP		0x04
++
++#define CQCFG		0x08
++#define CQ_DCMD		0x00001000
++#define CQ_TASK_DESC_SZ 0x00000100
++#define CQ_ENABLE	0x00000001
++
++#define CQCTL		0x0C
++#define CLEAR_ALL_TASKS 0x00000100
++#define HALT		0x00000001
++
++
++#define CQIS		0x10
++#define CQISTE		0x14
++#define CQISGE		0x18
++#define CQIC		0x1C
++
++#define CQTDLBA		0x20
++#define CQTDLBAU	0x24
++#define CQTDBR		0x28
++#define CQTCN		0x2C
++
++#define CQDQS		0x30
++#define CQDPT		0x34
++#define CQTCLR		0x38
++
++#define CQSSC1		0x40
++#define CQSSC2		0x44
++#define CQCRDCT		0x48
++
++#define CQRMEM		0x50
++#define CQTERRI		0x54
++#define CQCRI		0x58
++#define CQCRA		0x5C
++
++#define CQIC_ENABLE	(1 << 31)
++#define CQIC_RESET	(1 << 16)
++#define CQIC_ICCTHWEN	(1 << 15)
++#define CQIC_ICCTH(x)	((x & 0x1F) << 8)
++#define CQIC_ICTOVALWEN (1 << 7)
++#define CQIC_ICTOVAL(x) (x & 0x7F)
++
++#define CQIS_HAC	(1 << 0)
++#define CQIS_TCC	(1 << 1)
++#define CQIS_RED	(1 << 2)
++#define CQIS_TCL	(1 << 3)
++
++#define CQ_INT_EN	(0x3 << 14)
++#define CQ_INT_ALL	0xF
++#define CQIC_DEFAULT_ICCTH 31
++#define CQIC_DEFAULT_ICTOVAL 1
++
++/* attribute fields */
++#define VALID(x)	((x & 1) << 0)
++#define END(x)		((x & 1) << 1)
++#define INT(x)		((x & 1) << 2)
++#define ACT(x)		((x & 0x7) << 3)
++
++/* data command task descriptor fields */
++#define FORCED_PROG(x)	((x & 1) << 6)
++#define CONTEXT(x)	((x & 0xF) << 7)
++#define DATA_TAG(x)	((x & 1) << 11)
++#define DATA_DIR(x)	((x & 1) << 12)
++#define PRIORITY(x)	((x & 1) << 13)
++#define QBAR(x)		((x & 1) << 14)
++#define REL_WRITE(x)	((x & 1) << 15)
++#define BLK_COUNT(x)	((x & 0xFFFF) << 16)
++#define BLK_ADDR(x)	((x & 0xFFFFFFFF) << 32)
++
++/* direct command task descriptor fields */
++#define CMD_INDEX(x)	((x & 0x3F) << 16)
++#define CMD_TIMING(x)	((x & 1) << 22)
++#define RESP_TYPE(x)	((x & 0x3) << 23)
++
++/* transfer descriptor fields */
++#define DAT_LENGTH(x)	((x & 0xFFFF) << 16)
++#define DAT_ADDR_LO(x)	((x & 0xFFFFFFFF) << 32)
++#define DAT_ADDR_HI(x)	((x & 0xFFFFFFFF) << 0)
++
++struct cmdq_host {
++	const struct cmdq_host_ops *ops;
++	void __iomem *mmio;
++	struct mmc_host *mmc;
++
++	/* 64 bit DMA */
++	bool dma64;
++	int num_slots;
++
++	u32 dcmd_slot;
++	u32 caps;
++#define CMDQ_TASK_DESC_SZ_128 0x1
++
++	u32 quirks;
++#define CMDQ_QUIRK_SHORT_TXFR_DESC_SZ 0x1
++#define CMDQ_QUIRK_NO_DCMD	0x2
++
++	bool enabled;
++	bool halted;
++	bool init_done;
++
++	u64 *desc_base;
++
++	/* total descriptor size */
++	u8 slot_sz;
++
++	/* 64/128 bit depends on CQCFG */
++	u8 task_desc_len;
++
++	/* 64 bit on 32-bit arch, 128 bit on 64-bit */
++	u8 link_desc_len;
++
++	u64 *trans_desc_base;
++	/* same length as transfer descriptor */
++	u8 trans_desc_len;
++
++	dma_addr_t desc_dma_base;
++	dma_addr_t trans_desc_dma_base;
++
++	struct completion halt_comp;
++	spinlock_t cmdq_lock;
++	struct mmc_request **mrq_slot;
++	void *private;
 +};
 +
- struct regulator;
- 
- struct mmc_supply {
-@@ -200,6 +256,7 @@ struct mmc_host {
- 	struct device		class_dev;
- 	int			index;
- 	const struct mmc_host_ops *ops;
-+	const struct mmc_cmdq_host_ops *cmdq_ops;
- 	unsigned int		f_min;
- 	unsigned int		f_max;
- 	unsigned int		f_init;
-@@ -359,6 +416,15 @@ struct mmc_host {
- 
- 	unsigned int		slotno;	/* used for sdio acpi binding */
- 
-+	unsigned int	cmdq_slots;
-+	struct mmc_cmdq_context_info	cmdq_ctx;
-+	/*
-+	 * several cmdq supporting host controllers are extensions
-+	 * of legacy controllers. This variable can be used to store
-+	 * a reference to the cmdq extension of the existing host
-+	 * controller.
-+	 */
-+	void *cmdq_private;
- 	unsigned long		private[0] ____cacheline_aligned;
- };
- 
-@@ -368,6 +434,11 @@ void mmc_remove_host(struct mmc_host *);
- void mmc_free_host(struct mmc_host *);
- int mmc_of_parse(struct mmc_host *host);
- 
-+static inline void *mmc_cmdq_private(struct mmc_host *host)
++struct cmdq_host_ops {
++	void (*set_tranfer_params)(struct mmc_host *mmc);
++	void (*set_data_timeout)(struct mmc_host *mmc, u32 val);
++	void (*clear_set_irqs)(struct mmc_host *mmc, u32 clear, u32 set);
++	void (*dump_vendor_regs)(struct mmc_host *mmc);
++	void (*write_l)(struct cmdq_host *host, u32 val, int reg);
++	u32 (*read_l)(struct cmdq_host *host, int reg);
++};
++
++static inline void cmdq_writel(struct cmdq_host *host, u32 val, int reg)
 +{
-+	return host->cmdq_private;
++	if (unlikely(host->ops->write_l))
++		host->ops->write_l(host, val, reg);
++	else
++		writel(val, host->mmio + reg);
 +}
 +
- static inline void *mmc_priv(struct mmc_host *host)
- {
- 	return (void *)host->private;
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index a893c84..1fb12e2 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -87,6 +87,9 @@
- /* MMC 5.1 - class 11: Command Queueing */
- #define MMC_CMDQ_TASK_MGMT        48  /* ac   [31:0] task ID     R1b */
- 
-+/* Flushing a large amount of cached data may take a long time. */
-+#define MMC_FLUSH_REQ_TIMEOUT_MS 90000 /* msec */
++static inline u32 cmdq_readl(struct cmdq_host *host, int reg)
++{
++	if (unlikely(host->ops->read_l))
++		return host->ops->read_l(host, reg);
++	else
++		return readl(host->mmio + reg);
++}
 +
- static inline bool mmc_op_multi(u32 opcode)
- {
- 	return opcode == MMC_WRITE_MULTIPLE_BLOCK ||
-@@ -275,7 +278,7 @@ struct _mmc_csd {
-  * EXT_CSD fields
-  */
- 
--#define EXT_CSD_CMDQ_MODE		15	/* R/W */
-+#define EXT_CSD_CMDQ			15	/* R/W */
- #define EXT_CSD_FLUSH_CACHE		32      /* W */
- #define EXT_CSD_CACHE_CTRL		33      /* R/W */
- #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
++extern irqreturn_t cmdq_irq(struct mmc_host *mmc, u32 intmask);
++extern int cmdq_init(struct cmdq_host *cq_host, struct mmc_host *mmc,
++		     bool dma64);
++extern struct cmdq_host *cmdq_pltfm_init(struct platform_device *pdev);
++#endif
 -- 
 1.8.2.1
 
