@@ -1,58 +1,54 @@
-From: Stefan Agner <stefan@agner.ch>
-Subject: [PATCH 2/2] mmc: sdhci-esdhc-imx: enable IPG clock for sdio interrupts
-Date: Tue,  2 Dec 2014 17:47:25 +0100
-Message-ID: <1417538845-10867-2-git-send-email-stefan@agner.ch>
-References: <1417538845-10867-1-git-send-email-stefan@agner.ch>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1417538845-10867-1-git-send-email-stefan@agner.ch>
-Sender: linux-kernel-owner@vger.kernel.org
-To: chris@printf.net, ulf.hansson@linaro.org, anton@enomsg.org
-Cc: rmk+kernel@arm.linux.org.uk, b29396@freescale.com, shawn.guo@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, stefan@agner.ch
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v2] mmc: dw_mmc: add quirk for broken data transfer over scheme
+Date: Tue, 2 Dec 2014 09:47:18 -0800
+Message-ID: <CAD=FV=V3BF8qv17n4_T5Lys1BnKsqE9NqOTB-6OwX0VOviWRrw@mail.gmail.com>
+References: <1415970338-2637-1-git-send-email-addy.ke@rock-chips.com>
+	<1416903008-4160-1-git-send-email-addy.ke@rock-chips.com>
+	<CAD=FV=UmG1okxJ5JV-1cuRRQJi7EEPXc7Q90sWjfMWBqb7VSMw@mail.gmail.com>
+	<547D6F36.50103@rock-chips.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f178.google.com ([209.85.220.178]:59941 "EHLO
+	mail-vc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754369AbaLBRrT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Dec 2014 12:47:19 -0500
+Received: by mail-vc0-f178.google.com with SMTP id hq11so5955759vcb.23
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Dec 2014 09:47:18 -0800 (PST)
+In-Reply-To: <547D6F36.50103@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: addy ke <addy.ke@rock-chips.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Alexandru Stan <amstan@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Enable IPG clock for sdio interrupts while runtime PM, since this
-clock is needed for register access. The need of this clock has been
-verified on Vybrid, but this is probably true for i.MX53 and maybe
-others. The need for bus access during runtime suspend has been
-introduced with be138554a792 ("mmc: sdhci: allow sdio interrupts
-while sdhci runtime suspended").
+Addy,
 
-Signed-off-by: Stefan Agner <stefan@agner.ch>
----
- drivers/mmc/host/sdhci-esdhc-imx.c | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+On Mon, Dec 1, 2014 at 11:50 PM, addy ke <addy.ke@rock-chips.com> wrote:
+> We don't know why we have this problem,
+> but this problem is really exist, and we need patch to fix this problem now.
+> I will post a follow up change when we find the root cause.
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 587ee0e..b7e9ad1 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1193,10 +1193,10 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
- 
- 	ret = sdhci_runtime_suspend_host(host);
- 
--	if (!sdhci_sdio_irq_enabled(host)) {
-+	if (!sdhci_sdio_irq_enabled(host))
- 		clk_disable_unprepare(imx_data->clk_per);
--		clk_disable_unprepare(imx_data->clk_ipg);
--	}
-+
-+	clk_disable_unprepare(imx_data->clk_ipg);
- 	clk_disable_unprepare(imx_data->clk_ahb);
- 
- 	return ret;
-@@ -1208,10 +1208,10 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
- 
--	if (!sdhci_sdio_irq_enabled(host)) {
-+	if (!sdhci_sdio_irq_enabled(host))
- 		clk_prepare_enable(imx_data->clk_per);
--		clk_prepare_enable(imx_data->clk_ipg);
--	}
-+
-+	clk_prepare_enable(imx_data->clk_ipg);
- 	clk_prepare_enable(imx_data->clk_ahb);
- 
- 	return sdhci_runtime_resume_host(host);
--- 
-2.1.3
+To me that seems reasonable.  Certainly I would prefer to have this
+patch while waiting for the root cause, but it's up to Ulf.
+
+
+> And there is a little probability of this problem on RK SoC, such as RK3188, RK3066,
+> when worse card inserted in.
+> Maybe the other SoCs have the similar problem.
+>
+> So I will add this quirk in rockchip code(dw_mmc-rockchip.c) as follows:
+> static int dw_mci_rockchip_parse_dt(struct dw_mci *host)
+> {
+>         host->quirk |= DW_MCI_QUIRK_BROKEN_DTO;
+>
+>         return 0;
+> }
+>
+> ......
+>         .parse_dt = dw_mci_rockchip_parse_dt,
+> ......
+>
+> is right?
+
+When you added "sdio_id0" you got feedback that you should use
+dw_mci_rockchip_init().  Why not do the same thing here?
