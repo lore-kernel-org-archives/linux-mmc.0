@@ -1,34 +1,82 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [Patch] Improve error handling in allocation of bounce buffers in mmc_init_queue
-Date: Tue, 2 Dec 2014 12:31:30 +0100
-Message-ID: <CAPDyKFpOio0soa6OnmAv2AKDJ65WOdFhrRrKQuzek=JstUzX-Q@mail.gmail.com>
-References: <547C41C0.9090000@mentor.com>
-	<CAPDyKFpdJCRCtJe8EHGtYHhSk+ont2pzkidx=GbAay1BT8=5eQ@mail.gmail.com>
-	<547C5787.3060205@mentor.com>
+From: Asutosh Das <asutoshd@codeaurora.org>
+Subject: [RFC PATCH 0/4] Command Queueing Support in eMMC
+Date: Tue, 2 Dec 2014 17:23:36 +0530
+Message-ID: <cover.1417519249.git.asutoshd@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f172.google.com ([209.85.216.172]:37678 "EHLO
-	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754512AbaLBLbb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Dec 2014 06:31:31 -0500
-Received: by mail-qc0-f172.google.com with SMTP id m20so9080044qcx.17
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Dec 2014 03:31:30 -0800 (PST)
-In-Reply-To: <547C5787.3060205@mentor.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bhuvanesh <bhuvanesh_surachari@mentor.com>
-Cc: Chris Ball <chris@printf.net>, Mike Snitzer <snitzer@redhat.com>, Jens Axboe <axboe@fb.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Joe Perches <joe@perches.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 1 December 2014 at 12:56, Bhuvanesh <bhuvanesh_surachari@mentor.com> wrote:
-> Hi,
->
->   Please find the patch inline.
+In this patch series, we propose a method to add support for
+Command Queueing(CQ) feature added to eMMC-5.1 specification.
+This feature includes new commands for issuing tasks to the
+device and orders the execution of tasks to the device. It
+also has task management functions.
 
-Apparently you didn't read /Documentation/SubmittingPatches.
+The initialization of CQ is decided based on the underlying
+driver capability and the capability advertised by the card
+through ext_csd. 
 
-If you want me to review, please follow that guide. For example, I
-expect you to run checkpatch.
+We have selectively adopted the scsi design of pulling in
+requests from kernel block layer.
 
-Kind regards
-Uffe
+In order to support queueing of multiple requests, we have
+added a new issue function to mmc-queue. This selectively
+pulls the requests and prepares and issues it to the underlying
+driver. We have used the inherent tagging mechanism of kernel
+block layer to keep track and map tags to the slots of underlying
+driver. The current design doesn't block for the request to
+complete. We have separated the issuing and completion path
+of the request and tracking is done using the tag assigned to
+the request.
+
+We have introduced a number of APIs to mmc block layer to
+facilitate servicing of requests.
+
+The completion of requests is handled in a softirq registered
+with the kernel block layer during initialization. The error
+handling however would be done using a workqueue and is under
+development.
+
+We have separated the legacy eMMC code from CQ code, so as to
+make it more manageable.
+
+A new layer has been introduced to serve the CQ compliant drivers.
+This layer (cq_hci) has all the standard functionality implemented.
+It also has necessary hooks for convenience of platform drivers.
+
+Asutosh Das (4):
+  mmc: queue: initialization of command-queue support
+  mmc: card: Add eMMC command queuing support in mmc block layer
+  mmc: cmdq: support for command queue enabled host
+  mmc: sdhci: add command queue support to sdhci
+
+Sujit Reddy Thumma (1):
+  mmc: core: Add support to read command queue parameters
+
+ drivers/mmc/card/block.c   | 378 ++++++++++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/card/queue.c   | 160 ++++++++++++++++++-
+ drivers/mmc/card/queue.h   |   9 +-
+ drivers/mmc/core/core.c    |  87 +++++++++++
+ drivers/mmc/core/mmc.c     |  19 +++
+ drivers/mmc/core/mmc_ops.c |  45 ++++--
+ drivers/mmc/host/Kconfig   |  12 ++
+ drivers/mmc/host/Makefile  |   1 +
+ drivers/mmc/host/sdhci.c   |  89 +++++++++++
+ drivers/mmc/host/sdhci.h   |   2 +
+ include/linux/mmc/card.h   |  10 +-
+ include/linux/mmc/core.h   |  14 ++
+ include/linux/mmc/host.h   |  72 +++++++++
+ include/linux/mmc/mmc.h    |   9 ++
+ include/linux/mmc/sdhci.h  |   1 +
+ 15 files changed, 887 insertions(+), 21 deletions(-)
+
+-- 
+1.8.2.1
+
+The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
