@@ -1,121 +1,119 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: core: allow a reset gpio to be configured.
-Date: Tue, 2 Dec 2014 13:11:42 +0100
-Message-ID: <CAPDyKFozQrbcYm9KdbhjwmO+j+MQcGS3bDhkvb2WPkd-T21zcA@mail.gmail.com>
-References: <20141108000919.5629.55381.stgit@notabene.brown>
-	<20141108001411.5629.25179.stgit@notabene.brown>
-	<CAPDyKFrx98NspRU1nV3uJ6XwTuA4tZQkrYTfDoeXGR+f5htODQ@mail.gmail.com>
-	<20141202125539.42f22074@notabene.brown>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 3/3] mmc: sdhci: Disable re-tuning for HS400
+Date: Tue, 02 Dec 2014 14:28:04 +0200
+Message-ID: <547DB054.80907@intel.com>
+References: <1417439766-5063-1-git-send-email-adrian.hunter@intel.com>	<1417439766-5063-4-git-send-email-adrian.hunter@intel.com>	<CAPDyKFq30Qkx8rW1ixavv=UdBjcQfsz6kDvcfmcTq4A4ziptUQ@mail.gmail.com>	<547D8FB2.1020400@intel.com> <CAPDyKFq=TxzGmQws6RmtchfxN9FBqUryirA306AW0wANZzn0-g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f43.google.com ([209.85.192.43]:45160 "EHLO
-	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754485AbaLBMLn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Dec 2014 07:11:43 -0500
-Received: by mail-qg0-f43.google.com with SMTP id q108so9231472qgd.30
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Dec 2014 04:11:42 -0800 (PST)
-In-Reply-To: <20141202125539.42f22074@notabene.brown>
+Received: from mga09.intel.com ([134.134.136.24]:32381 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751211AbaLBM3l (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 2 Dec 2014 07:29:41 -0500
+In-Reply-To: <CAPDyKFq=TxzGmQws6RmtchfxN9FBqUryirA306AW0wANZzn0-g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: NeilBrown <neilb@suse.de>
-Cc: Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 2 December 2014 at 02:55, NeilBrown <neilb@suse.de> wrote:
-> On Fri, 28 Nov 2014 12:56:33 +0100 Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
->> On 8 November 2014 at 01:14, NeilBrown <neilb@suse.de> wrote:
->> > If the regulator supplying an SDIO device is shared
->> > with another device, the turning the regulator 'on' and 'off'
->> > will not actually cycle power and so will not reset
->> > the device.
->> >
->> > This is particularly a problem for some wi2si wireless modules which
->> > have a BT module on chip and can share power lines.
->> > Without the power-cycle, subsequent reset commands fail.
->> >
->> > So allow a 'reset' gpio to be specified.  If provided, the
->> > line is asserted during power-up.
+On 02/12/14 13:20, Ulf Hansson wrote:
+> On 2 December 2014 at 11:08, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 02/12/14 11:35, Ulf Hansson wrote:
+>>> On 1 December 2014 at 14:16, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>> Re-tuning for HS400 mode must be done in HS200
+>>>> mode. Currently there is no support for that.
+>>>> That needs to be reflected in the code.
+>>>> Specifically, if tuning is executed in HS400 mode
+>>>> then return an error, and if the re-tuning timer
+>>>> is running when switching to HS400 mode, then
+>>>> disable the timer.
+>>>>
+>>>> Note that periodic re-tuning is not expected
+>>>> to be needed for HS400 but re-tuning is still
+>>>> needed after the host controller has lost power.
+>>>
+>>> Why can't the old values be restored instead of trigger a re-tuning?
 >>
->> There have been several attempts to fix similar issues as this patch
->> does. The latest one I posted a few month ago, which wasn't accepted.
->> http://comments.gmane.org/gmane.linux.power-management.general/46635
->
-> Thanks for that link.
->
+>> The "values" (not sure what you mean by that) are not available to the
+>> driver. Even if they were the operating conditions may have changed, (i.e.
+>> temperature change) so the old "values" could still be wrong.
+> 
+> The "values" I refer to is those which we "calculated" during the
+> tuning process.
+> 
+> What I had in mind, was that we should save these values at runtime PM
+> suspend. And restore them at runtime PM resume. For some mmc
+> controllers the "values" are typically just a some bits in a
+> controller register, but that might not be true for all cases.
+> 
+> Regarding the temperature change, etc. I think that is what the
+> periodic retuning should be taken care off.
+> 
+> Could you elaborate on why the "values" is not available to the driver?
+
+The "optimal sampling point" has no corresponding register or value
+in SDHCI.
+
+> 
 >>
->> There has also been some off-list discussions on especially how we
->> should describe this in DT and there were actually some consensus made
->> around that. Still I haven't seen any patches on the mailing lists.
->
-> Wish I could have a link for those off-list discussions :-)
->
-> Based on what I read and my own thoughts about other devices that I'm having
-> trouble managing I wonder if the right approach might be to admit that these
-> buses are *not* 100% discoverable.
->
-> i.e. you can discover what is there once it is turned on, but you cannot
-> discover how to turn it on.
->
-> So the *fix* is to allow attached devices to be explicitly listed.
-> In my case I would create a child node of the mmc1 node, which is
-> compatible="libertas,wifi" (or whatever the proper name is).
->
-> Then when the mmc1 wants to power-up, it does:
->
->    device_for_each_child(mmc_dev, NULL, power_up)
->
-> where:
->
-> static int power_up(struct device *dev, void *data)
-> {
->        pm_runtime_get_sync(dev);
-
-No. We must not rely on runtime PM to be able to power up the device.
-
->        return 0;
-> }
->
-> Then I can put my reset-line management in the libertas driver instead of
-> trying to include some of it in the mmc driver.
-
-Well, "somewhere" we need to handle the different power up scenarios.
-These scenarios should be considered as SOC specific, and if we could
-keep that as a separate piece of code, that would be the best.
-
-So, I agree that we shouldn't pollute mmc host drivers with such code,
-but I also think SDIO func drivers should be remained untouched.
-
-Instead, my plan is to let the mmc core handle it.
-
->
-> This has the advantage of the devicetree actually describing the hardware
-> (there is a libertas wifi SDIO chip attached) rather than the behaviour
-> (please turn on this regulator and toggle this GPIO to initialise the device).
-
-I think both ways are viable, since they are both describing the
-hardware and the characteristics of it.
-
->
-> I want to do a very similar thing for UARTs (so my GPS and Bluetooth turn on
-> when /dev/ttyO? is opened), and I've been thinking about something similar
-> for USB - I have a USB attached GSM module, but it also has an Audio link and
-> some reset/interrupt lines that need to be configured.
-> If I could say to device tree "This USB port has this device attached", I
-> think it would be a step in the right direction.
->
->
->
+>> Jedec spec. says:
 >>
->> So to summarize, I am really concerned that we keep having these power
->> sequence issues for SDIO devices and right now the discussion has been
->> on hold. I am considering to hack on it myself, since I am tired of
->> waiting. :-)
->
-> Please Cc me if you do.  Meanwhile I'll try to hack together code supporting
-> my latest idea and let you know if I get anywhere.
+>>         It is recommended to perform tuning procedure while Device wakes
+>>         up, after sleep.
+>>
+>> SDHCI spec. says:
+>>
+>>         If the Host System goes into power down mode, the Host Driver
+>>         should stop the re-tuning timer and set the expiration flag
+>>         to 1 when the Host System resumes from power down mode.
+> 
+> I am not sure how to interpret this. Is the context about system PM or
+> runtime PM?
 
-Sounds good. I have started hacking on it as well, let's see where we end up.
+I interpret it to mean any situation where the host controller loses power
+and therefore loses its tuning.
 
-Kind regards
-Uffe
+> 
+>>
+>>>
+>>>> In the case of suspend/resume that is not necessary
+>>>> because the card is fully re-initialised. That
+>>>> just leaves runtime suspend/resume with no support
+>>>> for HS400 re-tuning.
+>>>>
+>>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>>>> ---
+>>>>  drivers/mmc/host/sdhci.c | 16 +++++++++++++++-
+>>>>  1 file changed, 15 insertions(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>> index 2efa7fe..a7c9e67 100644
+>>>> --- a/drivers/mmc/host/sdhci.c
+>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>> @@ -1476,8 +1476,18 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
+>>>>         else if ((timing == MMC_TIMING_UHS_DDR50) ||
+>>>>                  (timing == MMC_TIMING_MMC_DDR52))
+>>>>                 ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
+>>>> -       else if (timing == MMC_TIMING_MMC_HS400)
+>>>> +       else if (timing == MMC_TIMING_MMC_HS400) {
+>>>>                 ctrl_2 |= SDHCI_CTRL_HS400; /* Non-standard */
+>>>> +               /*
+>>>> +                * Periodic re-tuning for HS400 is not expected to be needed, so
+>>>> +                * disable it here.
+>>>
+>>> Urgh, I don't like that the periodic tuning is handled by the host. We
+>>> should never had merged that.
+>>>
+>>> How about trying to move the periodic tuning to be handled by the mmc
+>>> core instead?
+>>
+>> I have patches for that. I hope to send them today.
+> 
+> Great! Looking forward to review them!
+> 
+> Kind regards
+> Uffe
+> 
+> 
+
