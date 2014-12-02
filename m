@@ -1,82 +1,131 @@
-From: Asutosh Das <asutoshd@codeaurora.org>
-Subject: [RFC PATCH 0/4] Command Queueing Support in eMMC
-Date: Tue, 2 Dec 2014 17:23:36 +0530
-Message-ID: <cover.1417519249.git.asutoshd@codeaurora.org>
+From: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Subject: [PATCH 1/5] mmc: core: Add support to read command queue parameters
+Date: Tue, 2 Dec 2014 17:26:29 +0530
+Message-ID: <20141202115629.GA27638@asutoshd-ics.in.qualcomm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from wolverine01.qualcomm.com ([199.106.114.254]:53069 "EHLO
+	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753796AbaLBL4g (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Dec 2014 06:56:36 -0500
 Content-Disposition: inline
-Sender: linux-arm-msm-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-arm-msm@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
 
-In this patch series, we propose a method to add support for
-Command Queueing(CQ) feature added to eMMC-5.1 specification.
-This feature includes new commands for issuing tasks to the
-device and orders the execution of tasks to the device. It
-also has task management functions.
+eMMC cards with EXT_CSD version >= 7, optionally support command
+queuing feature as defined by Jedec eMMC5.1. Add support for probing
+command queue feature for such type of cards.
 
-The initialization of CQ is decided based on the underlying
-driver capability and the capability advertised by the card
-through ext_csd. 
+Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+---
+ drivers/mmc/core/mmc.c   | 15 +++++++++++++++
+ include/linux/mmc/card.h |  7 +++++++
+ include/linux/mmc/mmc.h  |  6 ++++++
+ 3 files changed, 28 insertions(+)
 
-We have selectively adopted the scsi design of pulling in
-requests from kernel block layer.
-
-In order to support queueing of multiple requests, we have
-added a new issue function to mmc-queue. This selectively
-pulls the requests and prepares and issues it to the underlying
-driver. We have used the inherent tagging mechanism of kernel
-block layer to keep track and map tags to the slots of underlying
-driver. The current design doesn't block for the request to
-complete. We have separated the issuing and completion path
-of the request and tracking is done using the tag assigned to
-the request.
-
-We have introduced a number of APIs to mmc block layer to
-facilitate servicing of requests.
-
-The completion of requests is handled in a softirq registered
-with the kernel block layer during initialization. The error
-handling however would be done using a workqueue and is under
-development.
-
-We have separated the legacy eMMC code from CQ code, so as to
-make it more manageable.
-
-A new layer has been introduced to serve the CQ compliant drivers.
-This layer (cq_hci) has all the standard functionality implemented.
-It also has necessary hooks for convenience of platform drivers.
-
-Asutosh Das (4):
-  mmc: queue: initialization of command-queue support
-  mmc: card: Add eMMC command queuing support in mmc block layer
-  mmc: cmdq: support for command queue enabled host
-  mmc: sdhci: add command queue support to sdhci
-
-Sujit Reddy Thumma (1):
-  mmc: core: Add support to read command queue parameters
-
- drivers/mmc/card/block.c   | 378 ++++++++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/card/queue.c   | 160 ++++++++++++++++++-
- drivers/mmc/card/queue.h   |   9 +-
- drivers/mmc/core/core.c    |  87 +++++++++++
- drivers/mmc/core/mmc.c     |  19 +++
- drivers/mmc/core/mmc_ops.c |  45 ++++--
- drivers/mmc/host/Kconfig   |  12 ++
- drivers/mmc/host/Makefile  |   1 +
- drivers/mmc/host/sdhci.c   |  89 +++++++++++
- drivers/mmc/host/sdhci.h   |   2 +
- include/linux/mmc/card.h   |  10 +-
- include/linux/mmc/core.h   |  14 ++
- include/linux/mmc/host.h   |  72 +++++++++
- include/linux/mmc/mmc.h    |   9 ++
- include/linux/mmc/sdhci.h  |   1 +
- 15 files changed, 887 insertions(+), 21 deletions(-)
-
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 1ab5f3a..0ef3af5 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -571,6 +571,21 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		card->ext_csd.data_sector_size = 512;
+ 	}
+ 
++	if (card->ext_csd.rev >= 7) {
++		card->ext_csd.cmdq_support = ext_csd[EXT_CSD_CMDQ_SUPPORT];
++		if (card->ext_csd.cmdq_support)
++			card->ext_csd.cmdq_depth = ext_csd[EXT_CSD_CMDQ_DEPTH];
++	}
++
++	if (card->ext_csd.rev >= 7) {
++		card->ext_csd.cmdq_support = ext_csd[EXT_CSD_CMDQ_SUPPORT];
++		if (card->ext_csd.cmdq_support)
++			card->ext_csd.cmdq_depth = ext_csd[EXT_CSD_CMDQ_DEPTH];
++	} else {
++		card->ext_csd.cmdq_support = 0;
++		card->ext_csd.cmdq_depth = 0;
++	}
++
+ out:
+ 	return err;
+ }
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index b730272..b87a27c 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -112,6 +112,9 @@ struct mmc_ext_csd {
+ 	u8			raw_pwr_cl_ddr_52_360;	/* 239 */
+ 	u8			raw_bkops_status;	/* 246 */
+ 	u8			raw_sectors[4];		/* 212 - 4 bytes */
++	u8			cmdq_mode_en;		/* 15 */
++	u8			cmdq_depth;		/* 307 */
++	u8			cmdq_support;		/* 308 */
+ 
+ 	unsigned int            feature_support;
+ #define MMC_DISCARD_FEATURE	BIT(0)                  /* CMD38 feature */
+@@ -259,6 +262,7 @@ struct mmc_card {
+ #define MMC_STATE_HIGHSPEED_200	(1<<8)		/* card is in HS200 mode */
+ #define MMC_STATE_DOING_BKOPS	(1<<10)		/* card is doing BKOPS */
+ #define MMC_STATE_SUSPENDED	(1<<11)		/* card is suspended */
++#define MMC_STATE_CMDQ       (1<<12)         /* card is in cmd queue mode */
+ 	unsigned int		quirks; 	/* card quirks */
+ #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
+ #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
+@@ -427,6 +431,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+ #define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
+ #define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
+ #define mmc_card_suspended(c)	((c)->state & MMC_STATE_SUSPENDED)
++#define mmc_card_cmdq(c)   ((c)->state & MMC_STATE_CMDQ)
+ 
+ #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
+ #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
+@@ -441,6 +446,8 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+ #define mmc_card_clr_doing_bkops(c)	((c)->state &= ~MMC_STATE_DOING_BKOPS)
+ #define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
+ #define mmc_card_clr_suspended(c) ((c)->state &= ~MMC_STATE_SUSPENDED)
++#define mmc_card_set_cmdq(c)       ((c)->state |= MMC_STATE_CMDQ)
++#define mmc_card_clr_cmdq(c)       ((c)->state &= ~MMC_STATE_CMDQ)
+ 
+ /*
+  * Quirk add/remove for MMC products.
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 50bcde3..a893c84 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -84,6 +84,9 @@
+ #define MMC_APP_CMD              55   /* ac   [31:16] RCA        R1  */
+ #define MMC_GEN_CMD              56   /* adtc [0] RD/WR          R1  */
+ 
++/* MMC 5.1 - class 11: Command Queueing */
++#define MMC_CMDQ_TASK_MGMT        48  /* ac   [31:0] task ID     R1b */
++
+ static inline bool mmc_op_multi(u32 opcode)
+ {
+ 	return opcode == MMC_WRITE_MULTIPLE_BLOCK ||
+@@ -272,6 +275,7 @@ struct _mmc_csd {
+  * EXT_CSD fields
+  */
+ 
++#define EXT_CSD_CMDQ_MODE		15	/* R/W */
+ #define EXT_CSD_FLUSH_CACHE		32      /* W */
+ #define EXT_CSD_CACHE_CTRL		33      /* R/W */
+ #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
+@@ -325,6 +329,8 @@ struct _mmc_csd {
+ #define EXT_CSD_POWER_OFF_LONG_TIME	247	/* RO */
+ #define EXT_CSD_GENERIC_CMD6_TIME	248	/* RO */
+ #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
++#define EXT_CSD_CMDQ_DEPTH		307	/* RO */
++#define EXT_CSD_CMDQ_SUPPORT		308	/* RO */
+ #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
+ #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
+ #define EXT_CSD_MAX_PACKED_WRITES	500	/* RO */
 -- 
 1.8.2.1
 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
 a Linux Foundation Collaborative Project
+ 
