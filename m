@@ -1,54 +1,73 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v2] mmc: dw_mmc: add quirk for broken data transfer over scheme
-Date: Tue, 2 Dec 2014 09:47:18 -0800
-Message-ID: <CAD=FV=V3BF8qv17n4_T5Lys1BnKsqE9NqOTB-6OwX0VOviWRrw@mail.gmail.com>
-References: <1415970338-2637-1-git-send-email-addy.ke@rock-chips.com>
-	<1416903008-4160-1-git-send-email-addy.ke@rock-chips.com>
-	<CAD=FV=UmG1okxJ5JV-1cuRRQJi7EEPXc7Q90sWjfMWBqb7VSMw@mail.gmail.com>
-	<547D6F36.50103@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH v4 0/3] Fixes for SDIO interrupts for dw_mmc
+Date: Tue,  2 Dec 2014 12:49:54 -0800
+Message-ID: <1417553397-460-1-git-send-email-dianders@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f178.google.com ([209.85.220.178]:59941 "EHLO
-	mail-vc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754369AbaLBRrT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Dec 2014 12:47:19 -0500
-Received: by mail-vc0-f178.google.com with SMTP id hq11so5955759vcb.23
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Dec 2014 09:47:18 -0800 (PST)
-In-Reply-To: <547D6F36.50103@rock-chips.com>
+Received: from mail-ie0-f172.google.com ([209.85.223.172]:61072 "EHLO
+	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932692AbaLBUuX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Dec 2014 15:50:23 -0500
+Received: by mail-ie0-f172.google.com with SMTP id tr6so12486718ieb.17
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Dec 2014 12:50:22 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: addy ke <addy.ke@rock-chips.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Alexandru Stan <amstan@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Doug Anderson <dianders@chromium.org>, linux@arm.linux.org.uk, wsa@the-dreams.de, tony@atomide.com, linux-kernel@vger.kernel.org, s.hauer@pengutronix.de, linux-mmc@vger.kernel.org, chris@printf.net, gsoutade@neotion.com, joe@perches.com, axel.lin@ingics.com, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Addy,
+Bing Zhao at Marvell found a problem with dw_mmc where interrupts
+weren't firing sometimes.  He tracked it down to a read-modify-write
+problem with the INTMASK.  These three patches fix the problem.
 
-On Mon, Dec 1, 2014 at 11:50 PM, addy ke <addy.ke@rock-chips.com> wrote:
-> We don't know why we have this problem,
-> but this problem is really exist, and we need patch to fix this problem now.
-> I will post a follow up change when we find the root cause.
+Note: I've picked up a > 1-year old series here to make another
+attempt at landing it upstream.  These patches have been in shipping
+Chromebooks for the last year.  There are essentially no changes from
+the last v3 other than a rebase.
 
-To me that seems reasonable.  Certainly I would prefer to have this
-patch while waiting for the root cause, but it's up to Ulf.
+The first patch extends the "init_card()" mechanism of MMC core to
+actually be called for all card types, not just SDIO.  That could be
+applied any time and should fix at least one longstanding bug
+(untested).
 
+The second patch is a cleanup patch to use init_card() to move things
+around a bit so we don't need to handle SDIO cards in such a strange
+place.  On earlier versions of this patch Seungwon brought up a few
+points which I have _not_ addressed.  See
+<https://patchwork.kernel.org/patch/3049071/>.  Other than talk of
+cards with out of band interrupts maybe being able to gate their
+clocks, he wanted to use MMC_QUIRK_BROKEN_CLK_GATING.  I didn't do
+that because of the ordering of init_card() and when the quirks are
+set.  Some users of init_card() like pandora_wl1251_init_card() rely
+on it being called very early in the process.
+pandora_wl1251_init_card() hardcodes a vendor and device and thus need
+to be called super early.  On the other hand the code that adds quirks
+_reads_ the vendor and device.  It can't possibly move before
+init_card().  If folks are willing to take an additional host op of
+init_card_late() I can certainly go that way, though.
 
-> And there is a little probability of this problem on RK SoC, such as RK3188, RK3066,
-> when worse card inserted in.
-> Maybe the other SoCs have the similar problem.
->
-> So I will add this quirk in rockchip code(dw_mmc-rockchip.c) as follows:
-> static int dw_mci_rockchip_parse_dt(struct dw_mci *host)
-> {
->         host->quirk |= DW_MCI_QUIRK_BROKEN_DTO;
->
->         return 0;
-> }
->
-> ......
->         .parse_dt = dw_mci_rockchip_parse_dt,
-> ......
->
-> is right?
+The third patch is (I think) reviewed and ready to go assuming the
+other two land.
 
-When you added "sdio_id0" you got feedback that you should use
-dw_mci_rockchip_init().  Why not do the same thing here?
+Changes in v3:
+- Add fixup to pandora_wl1251_init_card().
+
+Changes in v2:
+- mmc core change new for this version.
+- Fixed "|" to "&".
+- intmask_lock renamed to irq_lock
+
+Doug Anderson (3):
+  mmc: core: Support the optional init_card() callback for MMC and SD
+  mmc: dw_mmc: Cleanup disable of low power mode w/ SDIO interrupts
+  mmc: dw_mmc: Protect read-modify-write of INTMASK with a lock
+
+ arch/arm/mach-omap2/board-omap3pandora.c | 14 +++---
+ drivers/mmc/core/mmc.c                   |  6 +++
+ drivers/mmc/core/sd.c                    |  7 ++-
+ drivers/mmc/host/dw_mmc.c                | 80 +++++++++++++++++++-------------
+ drivers/mmc/host/dw_mmc.h                |  1 +
+ include/linux/mmc/dw_mmc.h               |  6 +++
+ 6 files changed, 74 insertions(+), 40 deletions(-)
+
+-- 
+2.2.0.rc0.207.ga3a616c
+
