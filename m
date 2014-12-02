@@ -1,133 +1,53 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 4/4] mmc: core: Make tuning block patterns static
-Date: Mon,  1 Dec 2014 17:02:10 +0100
-Message-ID: <1417449730-5880-5-git-send-email-ulf.hansson@linaro.org>
-References: <1417449730-5880-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:46105 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753778AbaLAQC0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Dec 2014 11:02:26 -0500
-Received: by mail-la0-f46.google.com with SMTP id q1so4188220lam.33
-        for <linux-mmc@vger.kernel.org>; Mon, 01 Dec 2014 08:02:24 -0800 (PST)
-In-Reply-To: <1417449730-5880-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: <micky_ching@realsil.com.cn>
+Subject: [PATCH v2 0/2] mmc: rtsx: add support for sdio card
+Date: Tue, 2 Dec 2014 09:36:43 +0800
+Message-ID: <cover.1417484016.git.micky_ching@realsil.com.cn>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: sameo@linux.intel.com, lee.jones@linaro.org, chris@printf.net, ulf.hansson@linaro.org
+Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, Aisheng Dong <b29396@freescale.com>, Stephen Boyd <sboyd@codeaurora.org>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-Since previous patches removed the need for the tuning block patterns
-to be exported, let's move them close to the mmc_send_tuning() API.
+From: Micky Ching <micky_ching@realsil.com.cn>
 
-Those are now intended to be used only by the mmc core.
+v3:
+  rtsx_pci_sdmmc.c:
+    - dump_reg_range
+      - remove unused pointer check
+      - fix start index
+v2:
+  rtsx_pci.h:
+    - remove unused rtsx_pci_write_le32
+    - add SD_CMD_START
+  rtsx_pci_sdmmc.c:
+    - dump_reg_range
+      - alloc data on stack
+    - remove forward declaration
+    - use SD_CMD_START replace magic number 0x40
+    - move initialize assignment to error handling
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/mmc.c     | 32 --------------------------------
- drivers/mmc/core/mmc_ops.c | 30 ++++++++++++++++++++++++++++++
- include/linux/mmc/mmc.h    |  5 -----
- 3 files changed, 30 insertions(+), 37 deletions(-)
+This patch is used to change transfer mode for sdio card support
+by SD interface.
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 02ad792..ea96705 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1155,38 +1155,6 @@ bus_speed:
- 	return err;
- }
- 
--const u8 tuning_blk_pattern_4bit[MMC_TUNING_BLK_PATTERN_4BIT_SIZE] = {
--	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
--	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
--	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
--	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
--	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
--	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
--	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
--	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
--};
--EXPORT_SYMBOL(tuning_blk_pattern_4bit);
--
--const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE] = {
--	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
--	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
--	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
--	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
--	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
--	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
--	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
--	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
--	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
--	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
--	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
--	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
--	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
--	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
--	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
--	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
--};
--EXPORT_SYMBOL(tuning_blk_pattern_8bit);
--
- /*
-  * Execute tuning sequence to seek the proper bus operating
-  * conditions for HS200 and HS400, which sends CMD21 to the device.
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 12b2a32..baa526d 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -23,6 +23,36 @@
- 
- #define MMC_OPS_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
- 
-+static const u8 tuning_blk_pattern_4bit[] = {
-+	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
-+	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
-+	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
-+	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
-+	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
-+	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
-+	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
-+	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
-+};
-+
-+static const u8 tuning_blk_pattern_8bit[] = {
-+	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
-+	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
-+	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
-+	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
-+	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
-+	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
-+	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
-+	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
-+	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
-+	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
-+	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
-+	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
-+	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
-+	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
-+	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
-+	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
-+};
-+
- static inline int __mmc_send_status(struct mmc_card *card, u32 *status,
- 				    bool ignore_crc)
- {
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 49ad7a9..fb97b5c 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -53,11 +53,6 @@
- #define MMC_SEND_TUNING_BLOCK    19   /* adtc                    R1  */
- #define MMC_SEND_TUNING_BLOCK_HS200	21	/* adtc R1  */
- 
--#define MMC_TUNING_BLK_PATTERN_4BIT_SIZE	 64
--#define MMC_TUNING_BLK_PATTERN_8BIT_SIZE	128
--extern const u8 tuning_blk_pattern_4bit[MMC_TUNING_BLK_PATTERN_4BIT_SIZE];
--extern const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE];
--
-   /* class 3 */
- #define MMC_WRITE_DAT_UNTIL_STOP 20   /* adtc [31:0] data addr   R1  */
- 
+
+Micky Ching (2):
+  mfd: rtsx: add func to split u32 into register
+  mmc: rtsx: add support for sdio card
+
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 522 +++++++++++++++++++++-----------------
+ include/linux/mfd/rtsx_pci.h      |   9 +
+ 2 files changed, 296 insertions(+), 235 deletions(-)
+
 -- 
 1.9.1
-
