@@ -1,7 +1,7 @@
 From: Asutosh Das <asutoshd@codeaurora.org>
-Subject: [PATCH 4/5] mmc: cmdq: support for command queue enabled host
-Date: Tue, 2 Dec 2014 17:31:47 +0530
-Message-ID: <20141202120147.GA27669@asutoshd-ics.in.qualcomm.com>
+Subject: [PATCH 5/5] mmc: sdhci: add command queue support to sdhci
+Date: Tue, 2 Dec 2014 17:32:41 +0530
+Message-ID: <20141202120241.GA27704@asutoshd-ics.in.qualcomm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
@@ -11,904 +11,169 @@ To: linux-mmc@vger.kernel.org
 Cc: linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds CMDQ support for command-queue compatible
-hosts.
-
-Command-queue is added in eMMC-5.1 specification. This
-enables the controller to process upto 32 requests at
-a time.
+Adds command-queue support to SDHCi compliant drivers.
 
 Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
-Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
 Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
 ---
- drivers/mmc/host/Kconfig     |  13 +
- drivers/mmc/host/Makefile    |   1 +
- drivers/mmc/host/cmdq_hci.c  | 663 +++++++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/cmdq_hci.h | 171 +++++++++++
- 4 files changed, 848 insertions(+)
- create mode 100644 drivers/mmc/host/cmdq_hci.c
- create mode 100644 include/linux/mmc/cmdq_hci.h
+ drivers/mmc/host/sdhci.c  | 89 +++++++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.h  |  2 ++
+ include/linux/mmc/sdhci.h |  1 +
+ 3 files changed, 92 insertions(+)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 779368b..87c3c20 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -708,3 +708,16 @@ config MMC_SUNXI
- 	help
- 	  This selects support for the SD/MMC Host Controller on
- 	  Allwinner sunxi SoCs.
-+
-+config MMC_CQ_HCI
-+	tristate "Command Queue Support"
-+	depends on HAS_DMA
-+	help
-+	  This selects the Command Queue Host Controller Interface (CQHCI)
-+	  support present in host controllers of Qualcomm Technologies, Inc
-+	  amongst others.
-+	  This controller supports eMMC devices with command queue support.
-+
-+	  If you have a controller with this interface, say Y or M here.
-+
-+	  If unsure, say N.
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 61cbc24..5a23f9e 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -66,6 +66,7 @@ obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
- obj-$(CONFIG_MMC_SDHCI_BCM_KONA)	+= sdhci-bcm-kona.o
- obj-$(CONFIG_MMC_SDHCI_BCM2835)		+= sdhci-bcm2835.o
- obj-$(CONFIG_MMC_SDHCI_MSM)		+= sdhci-msm.o
-+obj-$(CONFIG_MMC_CQ_HCI)		+= cmdq_hci.o
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9a79fc4..66d537e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -25,6 +25,7 @@
  
- ifeq ($(CONFIG_CB710_DEBUG),y)
- 	CFLAGS-cb710-mmc	+= -DDEBUG
-diff --git a/drivers/mmc/host/cmdq_hci.c b/drivers/mmc/host/cmdq_hci.c
-new file mode 100644
-index 0000000..9de344a
---- /dev/null
-+++ b/drivers/mmc/host/cmdq_hci.c
-@@ -0,0 +1,663 @@
-+/* Copyright (c) 2014, The Linux Foundation. All rights reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 and
-+ * only version 2 as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ */
-+
-+#include <linux/delay.h>
-+#include <linux/highmem.h>
-+#include <linux/io.h>
-+#include <linux/module.h>
-+#include <linux/dma-mapping.h>
-+#include <linux/slab.h>
-+#include <linux/scatterlist.h>
-+#include <linux/leds.h>
-+#include <linux/platform_device.h>
-+
-+#include <linux/mmc/mmc.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/card.h>
-+#include <linux/mmc/slot-gpio.h>
+ #include <linux/leds.h>
+ 
 +#include <linux/mmc/cmdq_hci.h>
-+
-+/* 1 sec FIXME: optimize it */
-+#define HALT_TIMEOUT_MS 1000
-+
-+static inline u64 *get_desc(struct cmdq_host *cq_host, u8 tag)
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/card.h>
+@@ -2422,6 +2423,20 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 	}
+ }
+ 
++#ifdef CONFIG_MMC_CQ_HCI
++static irqreturn_t sdhci_cmdq_irq(struct mmc_host *mmc, u32 intmask)
 +{
-+	return cq_host->desc_base + (tag * cq_host->slot_sz);
++	return cmdq_irq(mmc, intmask);
 +}
 +
-+static inline u64 *get_link_desc(struct cmdq_host *cq_host, u8 tag)
++#else
++static irqreturn_t sdhci_cmdq_irq(struct mmc_host *mmc, u32 intmask)
 +{
-+	u64 *desc = get_desc(cq_host, tag);
-+
-+	return desc + cq_host->task_desc_len;
++	pr_err("%s: rxd cmdq-irq when disabled !!!!\n", mmc_hostname(mmc));
++	return IRQ_NONE;
 +}
-+
-+static inline dma_addr_t get_trans_desc_dma(struct cmdq_host *cq_host, u8 tag)
-+{
-+	u8 mul = sizeof(u64)/sizeof(dma_addr_t);
-+
-+	return cq_host->trans_desc_dma_base +
-+		(mul * cq_host->mmc->max_segs * tag *
-+		 sizeof(*cq_host->trans_desc_base));
-+}
-+
-+static inline u64 *get_trans_desc(struct cmdq_host *cq_host, u8 tag)
-+{
-+	u8 mul = sizeof(u64)/sizeof(dma_addr_t);
-+
-+	return cq_host->trans_desc_base +
-+		(mul * cq_host->mmc->max_segs * tag *
-+		 sizeof(*cq_host->trans_desc_base));
-+}
-+
-+static void setup_trans_desc(struct cmdq_host *cq_host, u8 tag)
-+{
-+	u64 *link_temp;
-+	dma_addr_t trans_temp;
-+
-+	link_temp = get_link_desc(cq_host, tag);
-+	trans_temp = get_trans_desc_dma(cq_host, tag);
-+
-+	memset(link_temp, 0, sizeof(*link_temp));
-+	if (cq_host->link_desc_len > 1)
-+		*(link_temp + 1) &= 0;
-+
-+	*link_temp = VALID(1) | ACT(0x6) | END(0);
-+
-+	*link_temp |= DAT_ADDR_LO((u64)lower_32_bits(trans_temp));
-+	if (cq_host->link_desc_len > 1)
-+		*(link_temp + 1) |= DAT_ADDR_HI(upper_32_bits(trans_temp));
-+}
-+
-+static void cmdq_clear_set_irqs(struct cmdq_host *cq_host, u32 clear, u32 set)
-+{
-+	u32 ier;
-+
-+	ier = cmdq_readl(cq_host, CQISTE);
-+	ier &= ~clear;
-+	ier |= set;
-+	cmdq_writel(cq_host, ier, CQISTE);
-+	cmdq_writel(cq_host, ier, CQISGE);
-+	/* ensure the writes are done */
-+	mb();
-+}
-+
-+
-+#define DRV_NAME "cmdq-host"
-+
-+static void cmdq_dumpregs(struct cmdq_host *cq_host)
-+{
-+	struct mmc_host *mmc = cq_host->mmc;
-+
-+	pr_debug(DRV_NAME ": ========== REGISTER DUMP (%s)==========\n",
-+		mmc_hostname(mmc));
-+
-+	pr_debug(DRV_NAME ": Version: 0x%08x | Caps:  0x%08x\n",
-+		cmdq_readl(cq_host, CQVER),
-+		cmdq_readl(cq_host, CQCAP));
-+	pr_debug(DRV_NAME ": Queing config: 0x%08x | Queue Ctrl:  0x%08x\n",
-+		cmdq_readl(cq_host, CQCFG),
-+		cmdq_readl(cq_host, CQCTL));
-+	pr_debug(DRV_NAME ": Int stat: 0x%08x | Int enab:  0x%08x\n",
-+		cmdq_readl(cq_host, CQIS),
-+		cmdq_readl(cq_host, CQISTE));
-+	pr_debug(DRV_NAME ": Int sig: 0x%08x | Int Coal:  0x%08x\n",
-+		cmdq_readl(cq_host, CQISGE),
-+		cmdq_readl(cq_host, CQIC));
-+	pr_debug(DRV_NAME ": TDL base: 0x%08x | TDL up32:  0x%08x\n",
-+		cmdq_readl(cq_host, CQTDLBA),
-+		cmdq_readl(cq_host, CQTDLBAU));
-+	pr_debug(DRV_NAME ": Doorbell: 0x%08x | Comp Notif:  0x%08x\n",
-+		cmdq_readl(cq_host, CQTDBR),
-+		cmdq_readl(cq_host, CQTCN));
-+	pr_debug(DRV_NAME ": Dev queue: 0x%08x | Dev Pend:  0x%08x\n",
-+		cmdq_readl(cq_host, CQDQS),
-+		cmdq_readl(cq_host, CQDPT));
-+	pr_debug(DRV_NAME ": Task clr: 0x%08x | Send stat 1:  0x%08x\n",
-+		cmdq_readl(cq_host, CQTCLR),
-+		cmdq_readl(cq_host, CQSSC1));
-+	pr_debug(DRV_NAME ": Send stat 2: 0x%08x | DCMD resp:  0x%08x\n",
-+		cmdq_readl(cq_host, CQSSC2),
-+		cmdq_readl(cq_host, CQCRDCT));
-+	pr_debug(DRV_NAME ": Resp err mask: 0x%08x | Task err:  0x%08x\n",
-+		cmdq_readl(cq_host, CQRMEM),
-+		cmdq_readl(cq_host, CQTERRI));
-+	pr_debug(DRV_NAME ": Resp idx 0x%08x | Resp arg:  0x%08x\n",
-+		cmdq_readl(cq_host, CQCRI),
-+		cmdq_readl(cq_host, CQCRA));
-+	pr_debug(DRV_NAME ": ===========================================\n");
-+
-+	if (cq_host->ops->dump_vendor_regs)
-+		cq_host->ops->dump_vendor_regs(mmc);
-+}
-+
-+/**
-+ * The allocated descriptor table for task, link & transfer descritors
-+ * looks like:
-+ * |----------|
-+ * |task desc |  |->|----------|
-+ * |----------|  |  |trans desc|
-+ * |link desc-|->|  |----------|
-+ * |----------|          .
-+ *      .                .
-+ *  no. of slots      max-segs
-+ *      .           |----------|
-+ * |----------|
-+ * The idea here is to create the [task+trans] table and mark & point the
-+ * link desc to the transfer desc table on a per slot basis.
-+ */
-+static int cmdq_host_alloc_tdl(struct cmdq_host *cq_host)
-+{
-+
-+	size_t desc_size;
-+	size_t data_size;
-+	int i = 0;
-+
-+	/* task descriptor can be 64/128 bit irrespective of arch */
-+	if (cq_host->caps & CMDQ_TASK_DESC_SZ_128) {
-+		cmdq_writel(cq_host, cmdq_readl(cq_host, CQCFG) |
-+			       CQ_TASK_DESC_SZ, CQCFG);
-+		cq_host->task_desc_len = 2;
-+	} else {
-+		cq_host->task_desc_len = 1;
-+	}
-+
-+	/* transfer desc. is 64 bit for 32 bit arch and 128 bit for 64 bit */
-+	if (cq_host->dma64)
-+		cq_host->trans_desc_len = 2;
-+	else
-+		cq_host->trans_desc_len = 1;
-+
-+	/* total size of a slot: 1 task & 1 transfer (link) */
-+	cq_host->slot_sz = cq_host->task_desc_len + cq_host->link_desc_len;
-+
-+	/*
-+	 * 96 bits length of transfer desc instead of 128 bits which means
-+	 * ADMA would expect next valid descriptor at the 96th bit
-+	 * or 128th bit
-+	 */
-+	if (cq_host->dma64) {
-+		if (cq_host->quirks & CMDQ_QUIRK_SHORT_TXFR_DESC_SZ)
-+			cq_host->trans_desc_len = 12;
-+		else
-+			cq_host->trans_desc_len = 16;
-+	}
-+	desc_size = (sizeof(*cq_host->desc_base)) *
-+		cq_host->slot_sz * cq_host->num_slots;
-+
-+	/* FIXME: consider allocating smaller chunks iteratively */
-+	data_size = (sizeof(*cq_host->trans_desc_base)) *
-+		cq_host->trans_desc_len * cq_host->mmc->max_segs *
-+		(cq_host->num_slots - 1);
-+
-+	/*
-+	 * allocate a dma-mapped chunk of memory for the descriptors
-+	 * allocate a dma-mapped chunk of memory for link descriptors
-+	 * setup each link-desc memory offset per slot-number to
-+	 * the descriptor table.
-+	 */
-+	cq_host->desc_base = dmam_alloc_coherent(mmc_dev(cq_host->mmc),
-+						 desc_size,
-+						 &cq_host->desc_dma_base,
-+						 GFP_KERNEL);
-+	cq_host->trans_desc_base = dmam_alloc_coherent(mmc_dev(cq_host->mmc),
-+					      data_size,
-+					      &cq_host->trans_desc_dma_base,
-+					      GFP_KERNEL);
-+
-+	if (!cq_host->desc_base || !cq_host->trans_desc_base)
-+		return -ENOMEM;
-+
-+	for (; i < (cq_host->num_slots - 1); i++)
-+		setup_trans_desc(cq_host, i);
-+
-+	return 0;
-+}
-+
-+static int cmdq_enable(struct mmc_host *mmc)
-+{
-+	int err = 0;
-+	u32 cqcfg;
-+	bool dcmd_enable;
-+	struct cmdq_host *cq_host = mmc_cmdq_private(mmc);
-+
-+	if (!cq_host || !mmc->card || !mmc_card_mmc(mmc->card) ||
-+	    !mmc_card_cmdq(mmc->card)) {
-+		err = -EINVAL;
-+		goto out;
-+	}
-+
-+	if (cq_host->enabled)
-+		goto out;
-+
-+	/* TODO: if the legacy MMC host controller is in idle state */
-+
-+	cqcfg = cmdq_readl(cq_host, CQCFG);
-+	if (cqcfg & 0x1) {
-+		pr_info("%s: %s: cq_host is already enabled\n",
-+				mmc_hostname(mmc), __func__);
-+		WARN_ON(1);
-+		goto out;
-+	}
-+
-+	if (cq_host->quirks & CMDQ_QUIRK_NO_DCMD)
-+		dcmd_enable = false;
-+	else
-+		dcmd_enable = true;
-+
-+	cqcfg = ((cq_host->dma64 ? CQ_TASK_DESC_SZ : 0) |
-+			(dcmd_enable ? CQ_DCMD : 0));
-+
-+	cmdq_writel(cq_host, cqcfg, CQCFG);
-+
-+	if (!cq_host->desc_base ||
-+			!cq_host->trans_desc_base) {
-+		err = cmdq_host_alloc_tdl(cq_host);
-+		if (err)
-+			goto out;
-+		cmdq_writel(cq_host, lower_32_bits(cq_host->desc_dma_base),
-+				CQTDLBA);
-+		cmdq_writel(cq_host, upper_32_bits(cq_host->desc_dma_base),
-+				CQTDLBAU);
-+	}
-+
-+	/* leave send queue status timer configs to reset values */
-+
-+	/* configure interrupt coalescing */
-+	/* mmc_cq_host_intr_aggr(host->cq_host, CQIC_DEFAULT_ICCTH,
-+	   CQIC_DEFAULT_ICTOVAL); */
-+
-+	/* leave CQRMEM to reset value */
-+
-+	/*
-+	 * disable all vendor interrupts
-+	 * enable CMDQ interrupts
-+	 * enable the vendor error interrupts
-+	 */
-+	if (cq_host->ops->clear_set_irqs)
-+		cq_host->ops->clear_set_irqs(mmc, CQ_INT_ALL, CQ_INT_EN);
-+
-+	cmdq_clear_set_irqs(cq_host, 0x0, CQ_INT_ALL);
-+
-+	/* cq_host would use this rca to address the card */
-+	cmdq_writel(cq_host, mmc->card->rca, CQSSC2);
-+
-+	/* ensure the writes are done before enabling CQE */
-+	mb();
-+
-+	/* enable CQ_HOST */
-+	cmdq_writel(cq_host, cmdq_readl(cq_host, CQCFG) | CQ_ENABLE,
-+		    CQCFG);
-+
-+	cq_host->enabled = true;
-+out:
-+	return err;
-+}
-+
-+static void cmdq_disable(struct mmc_host *mmc, bool soft)
-+{
-+	struct cmdq_host *cq_host = (struct cmdq_host *)mmc_cmdq_private(mmc);
-+
-+	if (soft) {
-+		cmdq_writel(cq_host, cmdq_readl(
-+				    cq_host, CQCFG) & ~(CQ_ENABLE),
-+			    CQCFG);
-+	} else {
-+		/* FIXME: free the allocated descriptors */
-+	}
-+	cq_host->enabled = false;
-+}
-+
-+static void cmdq_prep_task_desc(struct mmc_request *mrq,
-+					u64 *data, bool intr, bool qbr)
-+{
-+	struct mmc_cmdq_req *cmdq_req = mrq->cmdq_req;
-+	u32 req_flags = cmdq_req->cmdq_req_flags;
-+
-+	pr_debug("%s: %s: data-tag: 0x%08x - dir: %d - prio: %d - cnt: 0x%08x -	addr: 0x%llx\n",
-+		 mmc_hostname(mrq->host), __func__,
-+		 !!(req_flags & DAT_TAG), !!(req_flags & DIR),
-+		 !!(req_flags & PRIO), cmdq_req->data.blocks,
-+		 (u64)mrq->cmdq_req->blk_addr);
-+
-+	*data = VALID(1) |
-+		END(1) |
-+		INT(intr) |
-+		ACT(0x5) |
-+		FORCED_PROG(!!(req_flags & FORCED_PRG)) |
-+		CONTEXT(mrq->cmdq_req->ctx_id) |
-+		DATA_TAG(!!(req_flags & DAT_TAG)) |
-+		DATA_DIR(!!(req_flags & DIR)) |
-+		PRIORITY(!!(req_flags & PRIO)) |
-+		QBAR(qbr) |
-+		REL_WRITE(!!(req_flags & REL_WR)) |
-+		BLK_COUNT(mrq->cmdq_req->data.blocks) |
-+		BLK_ADDR((u64)mrq->cmdq_req->blk_addr);
-+}
-+
-+static int cmdq_dma_map(struct mmc_host *host, struct mmc_request *mrq)
-+{
-+	int sg_count;
-+	struct mmc_data *data = mrq->data;
-+
-+	if (!data)
-+		return -EINVAL;
-+
-+	sg_count = dma_map_sg(mmc_dev(host), data->sg,
-+			      data->sg_len,
-+			      (data->flags & MMC_DATA_WRITE) ?
-+			      DMA_TO_DEVICE : DMA_FROM_DEVICE);
-+	if (!sg_count)
-+		return -ENOMEM;
-+
-+	return sg_count;
-+}
-+
-+static void cmdq_set_tran_desc(u8 *desc,
-+				 dma_addr_t addr, int len, bool end)
-+{
-+	__le32 *link = (__le32 __force *)desc;
-+	__le64 *dataddr = (__le64 __force *)(desc + 4);
-+
-+	*link = (VALID(1) |
-+		 END(end ? 1 : 0) |
-+		 INT(0) |
-+		 ACT(0x4) |
-+		 DAT_LENGTH(len));
-+
-+	dataddr[0] = cpu_to_le64(addr);
-+}
-+
-+static int cmdq_prep_tran_desc(struct mmc_request *mrq,
-+			       struct cmdq_host *cq_host, int tag)
-+{
-+	struct mmc_data *data = mrq->data;
-+	int i, sg_count, len;
-+	bool end = false;
-+	u64 *trans_desc = NULL;
-+	dma_addr_t addr;
-+	u8 *desc;
-+	struct scatterlist *sg;
-+
-+	sg_count = cmdq_dma_map(mrq->host, mrq);
-+	if (sg_count < 0) {
-+		pr_err("%s: %s: unable to map sg lists, %d\n",
-+				mmc_hostname(mrq->host), __func__, sg_count);
-+		return sg_count;
-+	}
-+
-+	trans_desc = get_trans_desc(cq_host, tag);
-+	desc = (u8 *)trans_desc;
-+
-+	memset(trans_desc, 0, sizeof(*trans_desc));
-+
-+	for_each_sg(data->sg, sg, sg_count, i) {
-+		addr = sg_dma_address(sg);
-+		len = sg_dma_len(sg);
-+
-+		if ((i+1) == sg_count)
-+			end = true;
-+		cmdq_set_tran_desc(desc, addr, len, end);
-+		if (cq_host->dma64)
-+			desc += cq_host->trans_desc_len;
-+		else
-+			desc += 8;
-+	}
-+
-+	pr_debug("%s: req: 0x%p tag: %d calc-link_des: 0x%p sg-cnt: %d\n",
-+		__func__, mrq->req, tag, trans_desc, sg_count);
-+
-+	return 0;
-+}
-+
-+static void cmdq_prep_dcmd_desc(struct mmc_host *mmc,
-+				   struct mmc_request *mrq)
-+{
-+	u64 *task_desc = NULL;
-+	u64 data = 0;
-+	u8 resp_type;
-+	u8 *desc;
-+	__le64 *dataddr;
-+	struct cmdq_host *cq_host = mmc_cmdq_private(mmc);
-+
-+	if (!(mrq->cmd->flags & MMC_RSP_PRESENT)) {
-+		resp_type = 0;
-+	} else if (mrq->cmd->flags & (MMC_RSP_R1 | MMC_RSP_R4 | MMC_RSP_R5)) {
-+		resp_type = 2;
-+	} else if (mrq->cmd->flags & MMC_RSP_R1B) {
-+		resp_type = 3;
-+	} else {
-+		pr_err("%s: weird response: 0x%x\n", mmc_hostname(mmc),
-+			mrq->cmd->flags);
-+		BUG_ON(1);
-+	}
-+
-+	task_desc = get_desc(cq_host, cq_host->dcmd_slot);
-+	memset(task_desc, 0, sizeof(*task_desc));
-+	data |= (VALID(1) |
-+		 END(1) |
-+		 INT(1) |
-+		 QBAR(1) |
-+		 ACT(0x5) |
-+		 CMD_INDEX(mrq->cmd->opcode) |
-+		 CMD_TIMING(0) | RESP_TYPE(resp_type));
-+	*task_desc |= data;
-+	desc = (u8 *)task_desc;
-+
-+	dataddr = (__le64 __force *)(desc + 4);
-+	dataddr[0] = cpu_to_le64((u64)mrq->cmd->arg);
-+
-+	if (cq_host->ops->set_data_timeout)
-+		cq_host->ops->set_data_timeout(mmc, 0xf);
-+}
-+
-+static int cmdq_request(struct mmc_host *mmc, struct mmc_request *mrq)
-+{
-+	int err;
-+	u64 data = 0;
-+	u64 *task_desc = NULL;
-+	u32 tag = mrq->cmdq_req->tag;
-+	struct cmdq_host *cq_host = (struct cmdq_host *)mmc_cmdq_private(mmc);
-+	unsigned long flags;
-+
-+	if (!cq_host->enabled) {
-+		err = -EINVAL;
-+		goto out;
-+	}
-+
-+	spin_lock_irqsave(&cq_host->cmdq_lock, flags);
-+
-+	if (mrq->cmdq_req->cmdq_req_flags & DCMD) {
-+		cmdq_prep_dcmd_desc(mmc, mrq);
-+		cq_host->mrq_slot[31] = mrq;
-+		cmdq_writel(cq_host, 1 << 31, CQTDBR);
-+		spin_unlock_irqrestore(&cq_host->cmdq_lock, flags);
-+		return 0;
-+	}
-+
-+	task_desc = get_desc(cq_host, tag);
-+
-+	cmdq_prep_task_desc(mrq, &data, 1,
-+			    (mrq->cmdq_req->cmdq_req_flags & QBR));
-+	*task_desc = cpu_to_le64(data);
-+
-+	err = cmdq_prep_tran_desc(mrq, cq_host, tag);
-+	if (err) {
-+		pr_err("%s: %s: failed to setup tx desc: %d\n",
-+		       mmc_hostname(mmc), __func__, err);
-+		BUG_ON(1);
-+	}
-+
-+	BUG_ON(cmdq_readl(cq_host, CQTDBR) & (1 << tag));
-+
-+	cq_host->mrq_slot[tag] = mrq;
-+	if (cq_host->ops->set_tranfer_params)
-+		cq_host->ops->set_tranfer_params(mmc);
-+
-+	if (cq_host->ops->set_data_timeout)
-+		cq_host->ops->set_data_timeout(mmc, 0xf);
-+
-+	cmdq_writel(cq_host, 1 << tag, CQTDBR);
-+	spin_unlock_irqrestore(&cq_host->cmdq_lock, flags);
-+
-+out:
-+	return err;
-+}
-+
-+static void cmdq_finish_data(struct mmc_host *mmc, unsigned int tag)
-+{
-+	struct mmc_request *mrq;
-+	struct cmdq_host *cq_host = (struct cmdq_host *)mmc_cmdq_private(mmc);
-+
-+	mrq = cq_host->mrq_slot[tag];
-+	mrq->done(mrq);
-+}
-+
-+irqreturn_t cmdq_irq(struct mmc_host *mmc, u32 intmask)
-+{
-+	u32 status;
-+	unsigned long tag = 0, comp_status;
-+	struct cmdq_host *cq_host = (struct cmdq_host *)mmc_cmdq_private(mmc);
-+
-+	spin_lock(&cq_host->cmdq_lock);
-+
-+	status = cmdq_readl(cq_host, CQIS);
-+	cmdq_writel(cq_host, status, CQIS);
-+
-+	if (status & CQIS_HAC) {
-+		/* halt is completed, wakeup waiting thread */
-+		complete(&cq_host->halt_comp);
-+	} else if (status & CQIS_TCC) {
-+		/* read QCTCN and complete the request */
-+		comp_status = cmdq_readl(cq_host, CQTCN);
-+		if (!comp_status) {
-+			pr_err("%s: bogus comp-stat\n", __func__);
-+			cmdq_dumpregs(cq_host);
-+			WARN_ON(1);
-+		}
-+		for_each_set_bit(tag, &comp_status, cq_host->num_slots) {
-+			/* complete the corresponding mrq */
-+			cmdq_finish_data(mmc, tag);
-+			/* complete DCMD on tag 31 */
-+		}
-+		cmdq_writel(cq_host, comp_status, CQTCN);
-+	} else if (status & CQIS_RED) {
-+		/* task response has an error */
-+		pr_err("%s: RED error %d !!!\n", mmc_hostname(mmc), status);
-+		cmdq_dumpregs(cq_host);
-+		BUG_ON(1);
-+	} else if (status & CQIS_TCL) {
-+		/* task is cleared, wakeup waiting thread */
-+		;
-+	}
-+	spin_unlock(&cq_host->cmdq_lock);
-+	return IRQ_HANDLED;
-+}
-+EXPORT_SYMBOL(cmdq_irq);
-+
-+/* May sleep */
-+static int cmdq_halt(struct mmc_host *mmc, bool halt)
-+{
-+	struct cmdq_host *cq_host = (struct cmdq_host *)mmc_cmdq_private(mmc);
-+	u32 val;
-+
-+	if (halt) {
-+		cmdq_writel(cq_host, cmdq_readl(cq_host, CQCTL) | HALT,
-+			    CQCTL);
-+		val = wait_for_completion_timeout(&cq_host->halt_comp,
-+					  msecs_to_jiffies(HALT_TIMEOUT_MS));
-+		return val ? 0 : -ETIMEDOUT;
-+	} else {
-+		cmdq_writel(cq_host, cmdq_readl(cq_host, CQCTL) & ~HALT,
-+			    CQCTL);
-+	}
-+
-+	return 0;
-+}
-+
-+static void cmdq_post_req(struct mmc_host *host, struct mmc_request *mrq,
-+			  int err)
-+{
-+	struct mmc_data *data = mrq->data;
-+
-+	if (data) {
-+		data->error = 0;
-+		dma_unmap_sg(mmc_dev(host), data->sg, data->sg_len,
-+			     (data->flags & MMC_DATA_READ) ?
-+			     DMA_FROM_DEVICE : DMA_TO_DEVICE);
-+	}
-+}
-+
-+static const struct mmc_cmdq_host_ops cmdq_host_ops = {
-+	.enable = cmdq_enable,
-+	.disable = cmdq_disable,
-+	.request = cmdq_request,
-+	.halt = cmdq_halt,
-+	.post_req = cmdq_post_req,
-+};
-+
-+struct cmdq_host *cmdq_pltfm_init(struct platform_device *pdev)
-+{
-+	struct cmdq_host *cq_host;
-+	struct resource *cmdq_memres = NULL;
-+
-+	/* check and setup CMDQ interface */
-+	cmdq_memres = platform_get_resource_byname(pdev, IORESOURCE_MEM,
-+						   "cmdq_mem");
-+	if (!cmdq_memres) {
-+		dev_dbg(&pdev->dev, "CMDQ not supported\n");
-+		return ERR_PTR(-EINVAL);
-+	}
-+
-+	cq_host = kzalloc(sizeof(*cq_host), GFP_KERNEL);
-+	if (!cq_host) {
-+		dev_err(&pdev->dev, "failed to allocate memory for CMDQ\n");
-+		return ERR_PTR(-ENOMEM);
-+	}
-+	cq_host->mmio = devm_ioremap(&pdev->dev,
-+				     cmdq_memres->start,
-+				     resource_size(cmdq_memres));
-+	if (!cq_host->mmio) {
-+		dev_err(&pdev->dev, "failed to remap cmdq regs\n");
-+		kfree(cq_host);
-+		return ERR_PTR(-EBUSY);
-+	}
-+	dev_dbg(&pdev->dev, "CMDQ ioremap: done\n");
-+
-+	return cq_host;
-+}
-+EXPORT_SYMBOL(cmdq_pltfm_init);
-+
-+int cmdq_init(struct cmdq_host *cq_host, struct mmc_host *mmc,
-+	      bool dma64)
-+{
-+	int err = 0;
-+
-+	cq_host->dma64 = dma64;
-+	cq_host->mmc = mmc;
-+
-+	/* should be parsed */
-+	cq_host->num_slots = 32;
-+	cq_host->dcmd_slot = 31;
-+
-+	mmc->cmdq_ops = &cmdq_host_ops;
-+
-+	cq_host->mrq_slot = kzalloc(sizeof(cq_host->mrq_slot) *
-+				    cq_host->num_slots, GFP_KERNEL);
-+	if (!cq_host->mrq_slot)
-+		return -ENOMEM;
-+
-+	spin_lock_init(&cq_host->cmdq_lock);
-+	init_completion(&cq_host->halt_comp);
-+	return err;
-+}
-+EXPORT_SYMBOL(cmdq_init);
-diff --git a/include/linux/mmc/cmdq_hci.h b/include/linux/mmc/cmdq_hci.h
-new file mode 100644
-index 0000000..6c00e8e
---- /dev/null
-+++ b/include/linux/mmc/cmdq_hci.h
-@@ -0,0 +1,171 @@
-+/* Copyright (c) 2014, The Linux Foundation. All rights reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 and
-+ * only version 2 as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ */
-+#ifndef LINUX_MMC_CQ_HCI_H
-+#define LINUX_MMC_CQ_HCI_H
-+#include <linux/mmc/core.h>
-+
-+/* registers */
-+#define CQVER		0x00
-+#define CQCAP		0x04
-+
-+#define CQCFG		0x08
-+#define CQ_DCMD		0x00001000
-+#define CQ_TASK_DESC_SZ 0x00000100
-+#define CQ_ENABLE	0x00000001
-+
-+#define CQCTL		0x0C
-+#define CLEAR_ALL_TASKS 0x00000100
-+#define HALT		0x00000001
-+
-+
-+#define CQIS		0x10
-+#define CQISTE		0x14
-+#define CQISGE		0x18
-+#define CQIC		0x1C
-+
-+#define CQTDLBA		0x20
-+#define CQTDLBAU	0x24
-+#define CQTDBR		0x28
-+#define CQTCN		0x2C
-+
-+#define CQDQS		0x30
-+#define CQDPT		0x34
-+#define CQTCLR		0x38
-+
-+#define CQSSC1		0x40
-+#define CQSSC2		0x44
-+#define CQCRDCT		0x48
-+
-+#define CQRMEM		0x50
-+#define CQTERRI		0x54
-+#define CQCRI		0x58
-+#define CQCRA		0x5C
-+
-+#define CQIC_ENABLE	(1 << 31)
-+#define CQIC_RESET	(1 << 16)
-+#define CQIC_ICCTHWEN	(1 << 15)
-+#define CQIC_ICCTH(x)	((x & 0x1F) << 8)
-+#define CQIC_ICTOVALWEN (1 << 7)
-+#define CQIC_ICTOVAL(x) (x & 0x7F)
-+
-+#define CQIS_HAC	(1 << 0)
-+#define CQIS_TCC	(1 << 1)
-+#define CQIS_RED	(1 << 2)
-+#define CQIS_TCL	(1 << 3)
-+
-+#define CQ_INT_EN	(0x3 << 14)
-+#define CQ_INT_ALL	0xF
-+#define CQIC_DEFAULT_ICCTH 31
-+#define CQIC_DEFAULT_ICTOVAL 1
-+
-+/* attribute fields */
-+#define VALID(x)	((x & 1) << 0)
-+#define END(x)		((x & 1) << 1)
-+#define INT(x)		((x & 1) << 2)
-+#define ACT(x)		((x & 0x7) << 3)
-+
-+/* data command task descriptor fields */
-+#define FORCED_PROG(x)	((x & 1) << 6)
-+#define CONTEXT(x)	((x & 0xF) << 7)
-+#define DATA_TAG(x)	((x & 1) << 11)
-+#define DATA_DIR(x)	((x & 1) << 12)
-+#define PRIORITY(x)	((x & 1) << 13)
-+#define QBAR(x)		((x & 1) << 14)
-+#define REL_WRITE(x)	((x & 1) << 15)
-+#define BLK_COUNT(x)	((x & 0xFFFF) << 16)
-+#define BLK_ADDR(x)	((x & 0xFFFFFFFF) << 32)
-+
-+/* direct command task descriptor fields */
-+#define CMD_INDEX(x)	((x & 0x3F) << 16)
-+#define CMD_TIMING(x)	((x & 1) << 22)
-+#define RESP_TYPE(x)	((x & 0x3) << 23)
-+
-+/* transfer descriptor fields */
-+#define DAT_LENGTH(x)	((x & 0xFFFF) << 16)
-+#define DAT_ADDR_LO(x)	((x & 0xFFFFFFFF) << 32)
-+#define DAT_ADDR_HI(x)	((x & 0xFFFFFFFF) << 0)
-+
-+struct cmdq_host {
-+	const struct cmdq_host_ops *ops;
-+	void __iomem *mmio;
-+	struct mmc_host *mmc;
-+
-+	/* 64 bit DMA */
-+	bool dma64;
-+	int num_slots;
-+
-+	u32 dcmd_slot;
-+	u32 caps;
-+#define CMDQ_TASK_DESC_SZ_128 0x1
-+
-+	u32 quirks;
-+#define CMDQ_QUIRK_SHORT_TXFR_DESC_SZ 0x1
-+#define CMDQ_QUIRK_NO_DCMD	0x2
-+
-+	bool enabled;
-+	bool halted;
-+	bool init_done;
-+
-+	u64 *desc_base;
-+
-+	/* total descriptor size */
-+	u8 slot_sz;
-+
-+	/* 64/128 bit depends on CQCFG */
-+	u8 task_desc_len;
-+
-+	/* 64 bit on 32-bit arch, 128 bit on 64-bit */
-+	u8 link_desc_len;
-+
-+	u64 *trans_desc_base;
-+	/* same length as transfer descriptor */
-+	u8 trans_desc_len;
-+
-+	dma_addr_t desc_dma_base;
-+	dma_addr_t trans_desc_dma_base;
-+
-+	struct completion halt_comp;
-+	spinlock_t cmdq_lock;
-+	struct mmc_request **mrq_slot;
-+	void *private;
-+};
-+
-+struct cmdq_host_ops {
-+	void (*set_tranfer_params)(struct mmc_host *mmc);
-+	void (*set_data_timeout)(struct mmc_host *mmc, u32 val);
-+	void (*clear_set_irqs)(struct mmc_host *mmc, u32 clear, u32 set);
-+	void (*dump_vendor_regs)(struct mmc_host *mmc);
-+	void (*write_l)(struct cmdq_host *host, u32 val, int reg);
-+	u32 (*read_l)(struct cmdq_host *host, int reg);
-+};
-+
-+static inline void cmdq_writel(struct cmdq_host *host, u32 val, int reg)
-+{
-+	if (unlikely(host->ops->write_l))
-+		host->ops->write_l(host, val, reg);
-+	else
-+		writel(val, host->mmio + reg);
-+}
-+
-+static inline u32 cmdq_readl(struct cmdq_host *host, int reg)
-+{
-+	if (unlikely(host->ops->read_l))
-+		return host->ops->read_l(host, reg);
-+	else
-+		return readl(host->mmio + reg);
-+}
-+
-+extern irqreturn_t cmdq_irq(struct mmc_host *mmc, u32 intmask);
-+extern int cmdq_init(struct cmdq_host *cq_host, struct mmc_host *mmc,
-+		     bool dma64);
-+extern struct cmdq_host *cmdq_pltfm_init(struct platform_device *pdev);
 +#endif
++
+ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ {
+ 	irqreturn_t result;
+@@ -2443,6 +2458,12 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 		goto out;
+ 	}
+ 
++	if (host->mmc->card && mmc_card_cmdq(host->mmc->card)) {
++		pr_debug("*** %s: cmdq intr: 0x%08x\n", mmc_hostname(host->mmc),
++			 intmask);
++		result = sdhci_cmdq_irq(host->mmc, intmask);
++		goto out;
++	}
+ again:
+ 	DBG("*** %s got interrupt: 0x%08x\n",
+ 		mmc_hostname(host->mmc), intmask);
+@@ -2769,6 +2790,64 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+ 
+ EXPORT_SYMBOL_GPL(sdhci_alloc_host);
+ 
++#ifdef CONFIG_MMC_CQ_HCI
++static void sdhci_cmdq_clear_set_irqs(struct mmc_host *mmc, u32 clear, u32 set)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	sdhci_clear_set_irqs(host, SDHCI_INT_ALL_MASK,
++			     SDHCI_INT_CMDQ_EN | SDHCI_INT_ERROR_MASK);
++}
++
++static void sdhci_cmdq_set_data_timeout(struct mmc_host *mmc, u32 val)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	sdhci_writeb(host, val, SDHCI_TIMEOUT_CONTROL);
++}
++
++static void sdhci_cmdq_dump_vendor_regs(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	sdhci_dumpregs(host);
++}
++
++static int sdhci_cmdq_init(struct sdhci_host *host, struct mmc_host *mmc,
++			   bool dma64)
++{
++	return cmdq_init(host->cq_host, mmc, dma64);
++}
++#else
++static void sdhci_cmdq_clear_set_irqs(struct mmc_host *mmc, u32 clear, u32 set)
++{
++
++}
++
++static void sdhci_cmdq_set_data_timeout(struct mmc_host *mmc, u32 val)
++{
++
++}
++
++static void sdhci_cmdq_dump_vendor_regs(struct mmc_host *mmc)
++{
++
++}
++
++static int sdhci_cmdq_init(struct sdhci_host *host, struct mmc_host *mmc,
++			   bool dma64)
++{
++	return -ENOSYS;
++}
++
++#endif
++
++static const struct cmdq_host_ops sdhci_cmdq_ops = {
++	.clear_set_irqs = sdhci_cmdq_clear_set_irqs,
++	.set_data_timeout = sdhci_cmdq_set_data_timeout,
++	.dump_vendor_regs = sdhci_cmdq_dump_vendor_regs,
++};
++
+ int sdhci_add_host(struct sdhci_host *host)
+ {
+ 	struct mmc_host *mmc;
+@@ -3259,6 +3338,16 @@ int sdhci_add_host(struct sdhci_host *host)
+ #endif
+ 
+ 	mmiowb();
++	if (mmc->caps2 &  MMC_CAP2_CMD_QUEUE) {
++		bool dma64 = (host->flags & SDHCI_USE_ADMA_64BIT) ?
++			true : false;
++		ret = sdhci_cmdq_init(host, mmc, dma64);
++		if (ret)
++			pr_err("%s: CMDQ init: failed (%d)\n",
++			       mmc_hostname(host->mmc), ret);
++		else
++			host->cq_host->ops = &sdhci_cmdq_ops;
++	}
+ 
+ 	mmc_add_host(mmc);
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 0a3ed01..c1a9fa8 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -149,6 +149,8 @@
+ 		SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_DATA_CRC | \
+ 		SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR | \
+ 		SDHCI_INT_BLK_GAP)
++
++#define SDHCI_INT_CMDQ_EN	(0x1 << 14)
+ #define SDHCI_INT_ALL_MASK	((unsigned int)-1)
+ 
+ #define SDHCI_ACMD12_ERR	0x3C
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 7be12b8..dd9fe0d 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -184,6 +184,7 @@ struct sdhci_host {
+ 	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
+ #define SDHCI_TUNING_MODE_1	0
+ 	struct timer_list	tuning_timer;	/* Timer for tuning */
++	struct cmdq_host *cq_host;
+ 
+ 	unsigned long private[0] ____cacheline_aligned;
+ };
 -- 
 1.8.2.1
 
