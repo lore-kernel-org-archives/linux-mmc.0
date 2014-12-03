@@ -1,131 +1,182 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v5 3/4] mmc: dw_mmc: Cleanup disable of low power mode w/
- SDIO interrupts
-Date: Wed, 03 Dec 2014 10:19:06 +0900
-Message-ID: <547E650A.9050807@samsung.com>
-References: <1417563767-32181-1-git-send-email-dianders@chromium.org>
- <1417563767-32181-4-git-send-email-dianders@chromium.org>
- <547E569C.3080606@samsung.com>
- <CAD=FV=VU5804WD5SRwr8HAOXwvumkUY+yzjM81oNbPUwwv=nTQ@mail.gmail.com>
- <547E6201.1090804@samsung.com>
- <CAD=FV=W5vapWUcWur1my=AJg=wzcQ_n-tMYGVf2qXLatsXGAsA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:31862 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750952AbaLCBTJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Dec 2014 20:19:09 -0500
-In-reply-to: <CAD=FV=W5vapWUcWur1my=AJg=wzcQ_n-tMYGVf2qXLatsXGAsA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Addy Ke <addy.ke@rock-chips.com>
+Subject: [PATCH v3] mmc: dw_mmc: add quirk for broken data transfer over scheme
+Date: Wed,  3 Dec 2014 11:16:03 +0800
+Message-ID: <1417576563-5033-1-git-send-email-addy.ke@rock-chips.com>
+References: <1415970338-2637-1-git-send-email-addy.ke@rock-chips.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1415970338-2637-1-git-send-email-addy.ke@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org, amstan@chromium.org
+Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com, Addy Ke <addy.ke@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Doug.
+This patch add a new quirk to add a s/w timer to notify the driver
+to terminate current transfer and report a data timeout to the core,
+if DTO interrupt does NOT come within the given time.
 
-On 12/03/2014 10:12 AM, Doug Anderson wrote:
-> Jaehoon,
-> 
-> On Tue, Dec 2, 2014 at 5:06 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Hi Doug
->>
->> On 12/03/2014 09:36 AM, Doug Anderson wrote:
->>> Jaehoon,
->>>
->>> On Tue, Dec 2, 2014 at 4:17 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>>>> @@ -1245,27 +1246,37 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
->>>>>       return present;
->>>>>  }
->>>>>
->>>>> -/*
->>>>> - * Disable lower power mode.
->>>>> - *
->>>>> - * Low power mode will stop the card clock when idle.  According to the
->>>>> - * description of the CLKENA register we should disable low power mode
->>>>> - * for SDIO cards if we need SDIO interrupts to work.
->>>>> - *
->>>>> - * This function is fast if low power mode is already disabled.
->>>>> - */
->>>>> -static void dw_mci_disable_low_power(struct dw_mci_slot *slot)
->>>>> +static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
->>>>>  {
->>>>> +     struct dw_mci_slot *slot = mmc_priv(mmc);
->>>>>       struct dw_mci *host = slot->host;
->>>>> -     u32 clk_en_a;
->>>>> -     const u32 clken_low_pwr = SDMMC_CLKEN_LOW_PWR << slot->id;
->>>>>
->>>>> -     clk_en_a = mci_readl(host, CLKENA);
->>>>> +     /*
->>>>> +      * Low power mode will stop the card clock when idle.  According to the
->>>>> +      * description of the CLKENA register we should disable low power mode
->>>>> +      * for SDIO cards if we need SDIO interrupts to work.
->>>>> +      */
->>>>> +     if (mmc->caps & MMC_CAP_SDIO_IRQ) {
->>>>> +             const u32 clken_low_pwr = SDMMC_CLKEN_LOW_PWR << slot->id;
->>>>> +             u32 clk_en_a_old;
->>>>> +             u32 clk_en_a;
->>>>>
->>>>> -     if (clk_en_a & clken_low_pwr) {
->>>>> -             mci_writel(host, CLKENA, clk_en_a & ~clken_low_pwr);
->>>>> -             mci_send_cmd(slot, SDMMC_CMD_UPD_CLK |
->>>>> -                          SDMMC_CMD_PRV_DAT_WAIT, 0);
->>>>> +             clk_en_a_old = mci_readl(host, CLKENA);
->>>>> +
->>>>> +             if (card->type == MMC_TYPE_SDIO ||
->>>>> +                 card->type == MMC_TYPE_SD_COMBO) {
->>>>> +                     set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
->>>>> +                     clk_en_a = clk_en_a_old & ~clken_low_pwr;
->>>>> +             } else {
->>>>
->>>> I wonder this point. When entered at this point?
->>>>
->>>> MMC_CAP_SDIO_IRQ is sdio capability. and card->type is also related with SDIO, isn't?
->>>
->>> Right.  As I understand it:
->>>
->>> * You can certainly add MMC_CAP_SDIO_IRQ to an external card slot that
->>> might have an MMC card, and SD card, or an SDIO card.  You still want
->>> the LOW_PWR mode for MMC/SD cards but don't want it for SDIO cards in
->>> that case.
->>
->> Ok, I understood your purpose.
->> Your mean is MMC_CAP_SIDO_IRQ can be set to MMC or SD...not only SDIO card.
->> It's reasonable.
->> But i think it doesn't need to set LOW_PWR_mode for SD/eMMC at here. it should be already set to Low-power mode.
->> And SDIO case should not enter at here.
-> 
-> Are you sure?  What about if you plug in an SDIO card, then unplug it,
-> then plug in an SD card?
+dw_mmc call mmc_request_done func to finish transfer depends on
+DTO interrupt. If DTO interrupt does not come in sending data state,
+the current transfer will be blocked.
 
-Oh.. :) I missed this case. thank you for pointing out.
-I considered only non-removable case, it's stupid...
+But this case really exists, when driver reads tuning data from
+card on RK3288-pink2 board. I measured waveforms by oscilloscope
+and found that card clock was always on and data lines were always
+holded high level in sending data state.
 
-Best Regards,
-Jaehoon Chung
+We got the reply from synopsys:
+There are two counters but both use the same value of [31:8] bits.
+Data timeout counter doesn't wait for stop clock and you should get
+DRTO even when the clock is not stopped.
+Host Starvation timeout counter is triggered with stop clock condition.
 
-> 
->>> * If you don't set MMC_CAP_SDIO_IRQ then presumably you've got some
->>> problem where the SDIO interrupt is broken on your board.  That means
->>> you're using polling mode to find interrupts.  As I understand it that
->>> would allow you to use LOW_PWR since you don't need to detect SDIO
->>> interrupts.  I know on Marvell WiFi modules I tested this seemed to
->>> work OK, but I doubt anyone is really running a production device in
->>> this way.
->>
->> No, we needs to set MMC_CAP_SDIO_IRQ, if i didn't set to it, i will also see the problem.
->> Since I knew which slot is used as SDIO card, i thought MMC_CAP_SDIO_IRQ is set for only sdio card.
->> Then it would be check the twice whether card is SDIO or not.
->>
->> Actually, i didn't test WiFi module with this patch. but concept is not problem.
-> 
-> Yup, I think you were only thinking about the embedded case where you
-> know that an SDIO card will be plugged into the slot.  In the case
-> where you have an exposed slot it is certainly possible to expect
-> someone might plug in an SD card or an SDIO card.  ...or even a combo
-> card!
-> 
-> -Doug
-> 
+This means that host should get DRTO and DTO interrupt.
 
+But we really don't get any data-related interrupt in RK3X SoCs.
+And driver can't get data transfer state, it can do nothing but wait for.
+
+We don't know why we have this problem, but we need it to fix this problem now.
+And I will post a follow up change when we find the root cause.
+
+Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+---
+Changes in v2:
+- fix some typo.
+- remove extra timeout value (250ms).
+- remove dw_mci_dto_start_monitor func.
+- use "broken-dto" for new quirk and change Subject for it.
+
+Changes in v3:
+- Remove dts for broken-dto, just add this quirk in dw_mci_rockchip_init
+
+ drivers/mmc/host/dw_mmc-rockchip.c |  3 +++
+ drivers/mmc/host/dw_mmc.c          | 41 +++++++++++++++++++++++++++++++++++++-
+ include/linux/mmc/dw_mmc.h         |  5 +++++
+ 3 files changed, 48 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index 5650ac4..ba92ebd 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -73,6 +73,9 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
+ 	/* It is slot 8 on Rockchip SoCs */
+ 	host->sdio_id0 = 8;
+ 
++	/* It needs this quirk on all Rockchip SoCs */
++	host->pdata->quirks |= DW_MCI_QUIRK_BROKEN_DTO;
++
+ 	return 0;
+ }
+ 
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 67c0451..e222122 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1464,6 +1464,8 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 	enum dw_mci_state state;
+ 	enum dw_mci_state prev_state;
+ 	unsigned int err;
++	unsigned int drto_clks;
++	unsigned int drto_ms;
+ 
+ 	spin_lock(&host->lock);
+ 
+@@ -1529,8 +1531,17 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 			}
+ 
+ 			if (!test_and_clear_bit(EVENT_XFER_COMPLETE,
+-						&host->pending_events))
++						&host->pending_events)) {
++				if (host->quirks & DW_MCI_QUIRK_BROKEN_DTO) {
++					drto_clks = mci_readl(host, TMOUT) >> 8;
++					drto_ms = DIV_ROUND_UP(drto_clks * 1000,
++							       host->bus_hz);
++
++					mod_timer(&host->dto_timer, jiffies +
++						msecs_to_jiffies(drto_ms));
++				}
+ 				break;
++			}
+ 
+ 			set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
+ 
+@@ -2122,6 +2133,9 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 		}
+ 
+ 		if (pending & SDMMC_INT_DATA_OVER) {
++			if (host->quirks & DW_MCI_QUIRK_BROKEN_DTO)
++				del_timer(&host->dto_timer);
++
+ 			mci_writel(host, RINTSTS, SDMMC_INT_DATA_OVER);
+ 			if (!host->data_status)
+ 				host->data_status = pending;
+@@ -2509,6 +2523,28 @@ ciu_out:
+ 	return ret;
+ }
+ 
++static void dw_mci_dto_timer(unsigned long arg)
++{
++	struct dw_mci *host = (struct dw_mci *)arg;
++
++	switch (host->state) {
++	case STATE_SENDING_DATA:
++	case STATE_DATA_BUSY:
++		/*
++		* If DTO interrupt does NOT come in sending data state,
++		* we should notify the driver to terminate current transfer
++		* and report a data timeout to the core.
++		*/
++		host->data_status = SDMMC_INT_DRTO;
++		set_bit(EVENT_DATA_ERROR, &host->pending_events);
++		set_bit(EVENT_DATA_COMPLETE, &host->pending_events);
++		tasklet_schedule(&host->tasklet);
++		break;
++	default:
++		break;
++	}
++}
++
+ #ifdef CONFIG_OF
+ static struct dw_mci_of_quirks {
+ 	char *quirk;
+@@ -2661,6 +2697,9 @@ int dw_mci_probe(struct dw_mci *host)
+ 
+ 	spin_lock_init(&host->lock);
+ 	INIT_LIST_HEAD(&host->queue);
++	if (host->quirks & DW_MCI_QUIRK_BROKEN_DTO)
++		setup_timer(&host->dto_timer,
++			    dw_mci_dto_timer, (unsigned long)host);
+ 
+ 	/*
+ 	 * Get the host data width - this assumes that HCON has been set with
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 42b724e..ff9bd1e 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -98,6 +98,7 @@ struct mmc_data;
+  * @irq_flags: The flags to be passed to request_irq.
+  * @irq: The irq value to be passed to request_irq.
+  * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
++ * @dto_timer: Timer for broken data transfer over scheme.
+  *
+  * Locking
+  * =======
+@@ -196,6 +197,8 @@ struct dw_mci {
+ 	int			irq;
+ 
+ 	int			sdio_id0;
++
++	struct timer_list	dto_timer;
+ };
+ 
+ /* DMA ops for Internal/External DMAC interface */
+@@ -220,6 +223,8 @@ struct dw_mci_dma_ops {
+ #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
+ /* No write protect */
+ #define DW_MCI_QUIRK_NO_WRITE_PROTECT		BIT(4)
++/* Timer for broken data transfer over scheme */
++#define DW_MCI_QUIRK_BROKEN_DTO			BIT(5)
+ 
+ /* Slot level quirks */
+ /* This slot has no write protect */
+-- 
+1.8.3.2
