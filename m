@@ -1,92 +1,51 @@
-From: Bhuvanesh <bhuvanesh_surachari@mentor.com>
-Subject: Re: [Patch] Improve error handling in allocation of bounce buffers
- in mmc_init_queue
-Date: Wed, 3 Dec 2014 11:53:10 +0530
-Message-ID: <547EAC4E.1090902@mentor.com>
-References: <547C41C0.9090000@mentor.com>	<CAPDyKFpdJCRCtJe8EHGtYHhSk+ont2pzkidx=GbAay1BT8=5eQ@mail.gmail.com>	<547C5787.3060205@mentor.com> <CAPDyKFpOio0soa6OnmAv2AKDJ65WOdFhrRrKQuzek=JstUzX-Q@mail.gmail.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH v4 0/4] mmc: atmel-mci: cleanup and probe deferring
+Date: Wed, 3 Dec 2014 09:22:05 +0100
+Message-ID: <20141203082205.GW2714@ldesroches-Latitude-E6320>
+References: <1417444509-15501-1-git-send-email-ludovic.desroches@atmel.com>
+ <CAPDyKFpuDOfw9BtYJhG0Fz6PsqUQP=gBg+4mWt9MRy_S6Yga5w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relay1.mentorg.com ([192.94.38.131]:33669 "EHLO
-	relay1.mentorg.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750952AbaLCGXS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Dec 2014 01:23:18 -0500
-In-Reply-To: <CAPDyKFpOio0soa6OnmAv2AKDJ65WOdFhrRrKQuzek=JstUzX-Q@mail.gmail.com>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:7841 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751401AbaLCIVj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Dec 2014 03:21:39 -0500
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpuDOfw9BtYJhG0Fz6PsqUQP=gBg+4mWt9MRy_S6Yga5w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Mike Snitzer <snitzer@redhat.com>, Jens Axboe <axboe@fb.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Joe Perches <joe@perches.com>, harish_kandiga@mentor.com, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Arnd Bergmann <arnd@arndb.de>
 
-Hi,
-  
-  Thanks for guiding. I read through Documentation/SubmittingPatches.
-Fixed the warnings given by checkpatch. Kindly review the updated patch.
-
->From 7ea020e32e1fbe4d05d104e31815d908af92f2a5 Mon Sep 17 00:00:00 2001
-From: Bhuvanesh Surachari <bhuvanesh_surachari@mentor.com>
-Date: Mon, 1 Dec 2014 02:23:02 -0500
-Subject: [PATCH] mmc: queue:Improve error handling during allocation of
- bounce buffers.
-
-Allocation of previous bounce buffer in mmc_init_queue when the current
-bounce buffer allocation fails was leading to a crash later in
-__blk_segment_map_sg. Error handling is improved by allocating previous
-bounce buffer only if the current bounce buffer allocation succeeds.
-
-Signed-off-by: Bhuvanesh Surachari <bhuvanesh_surachari@mentor.com>
-Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
----
- drivers/mmc/card/queue.c |   16 +++++++++-------
- 1 file changed, 9 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index cfa6110..236d194 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -232,13 +232,15 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 			if (!mqrq_cur->bounce_buf) {
- 				pr_warn("%s: unable to allocate bounce cur buffer\n",
- 					mmc_card_name(card));
--			}
--			mqrq_prev->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
--			if (!mqrq_prev->bounce_buf) {
--				pr_warn("%s: unable to allocate bounce prev buffer\n",
--					mmc_card_name(card));
--				kfree(mqrq_cur->bounce_buf);
--				mqrq_cur->bounce_buf = NULL;
-+			} else {
-+				mqrq_prev->bounce_buf =
-+						kmalloc(bouncesz, GFP_KERNEL);
-+				if (!mqrq_prev->bounce_buf) {
-+					pr_warn("%s: unable to allocate bounce prev buffer\n",
-+						mmc_card_name(card));
-+					kfree(mqrq_cur->bounce_buf);
-+					mqrq_cur->bounce_buf = NULL;
-+				}
- 			}
- 		}
- 
--- 
-1.7.9.5
-
-
-
-Thank you,
-Regards,
-Bhuvanesh
-
-On 12/02/2014 05:01 PM, Ulf Hansson wrote:
-> On 1 December 2014 at 12:56, Bhuvanesh <bhuvanesh_surachari@mentor.com> wrote:
->> Hi,
->>
->>   Please find the patch inline.
+On Tue, Dec 02, 2014 at 11:10:53AM +0100, Ulf Hansson wrote:
+> On 1 December 2014 at 15:35, Ludovic Desroches
+> <ludovic.desroches@atmel.com> wrote:
+> > Hi Ulf,
+> >
+> > Same as previous series, based on your next branch, and no errors with
+> > checkpatch so let me know if you still have troubles to apply my patches.
+> >
+> > Changes from v3:
+> > - keep __init/__exit attributes for atmci_init/exit
+> > - remove useless variable in atmci_configure_dma function
+> >
+> > Ludovic Desroches (4):
+> >   mmc: atmel-mci: remove useless DMA stuff for non-dt devices
+> >   mmc: atmel-mci: remove __init/__exit attributes
+> >   mmc: atmel-mci: stop using specific initcall
+> >   mmc: atmel-mci: use probe deferring if dma controller is not ready yet
+> >
+> >  drivers/mmc/host/atmel-mci.c | 76 ++++++++++++++++----------------------------
+> >  1 file changed, 28 insertions(+), 48 deletions(-)
 > 
-> Apparently you didn't read /Documentation/SubmittingPatches.
+> Thanks! Applied for next.
 > 
-> If you want me to review, please follow that guide. For example, I
-> expect you to run checkpatch.
+> Patch 4, did have a minor checkpatch warning. I fixed it.
+
+Thanks, yes I see it but I feel it is a bit too constraining when you already
+have a function name doing 32 characters :p
+
 > 
 > Kind regards
 > Uffe
-> 
