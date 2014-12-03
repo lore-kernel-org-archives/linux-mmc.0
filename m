@@ -1,51 +1,87 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH v4 0/4] mmc: atmel-mci: cleanup and probe deferring
-Date: Wed, 3 Dec 2014 09:22:05 +0100
-Message-ID: <20141203082205.GW2714@ldesroches-Latitude-E6320>
-References: <1417444509-15501-1-git-send-email-ludovic.desroches@atmel.com>
- <CAPDyKFpuDOfw9BtYJhG0Fz6PsqUQP=gBg+4mWt9MRy_S6Yga5w@mail.gmail.com>
+From: Lucas Stach <l.stach@pengutronix.de>
+Subject: Re: [PATCH 2/2] mmc: sdhci-esdhc-imx: enable IPG clock for sdio
+ interrupts
+Date: Wed, 03 Dec 2014 10:25:13 +0100
+Message-ID: <1417598713.2419.1.camel@pengutronix.de>
+References: <1417538845-10867-1-git-send-email-stefan@agner.ch>
+	 <1417538845-10867-2-git-send-email-stefan@agner.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:7841 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751401AbaLCIVj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Dec 2014 03:21:39 -0500
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpuDOfw9BtYJhG0Fz6PsqUQP=gBg+4mWt9MRy_S6Yga5w@mail.gmail.com>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:56819 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750845AbaLCJZS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Dec 2014 04:25:18 -0500
+In-Reply-To: <1417538845-10867-2-git-send-email-stefan@agner.ch>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Arnd Bergmann <arnd@arndb.de>
+To: Stefan Agner <stefan@agner.ch>
+Cc: chris@printf.net, ulf.hansson@linaro.org, anton@enomsg.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, rmk+kernel@arm.linux.org.uk, shawn.guo@linaro.org, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
 
-On Tue, Dec 02, 2014 at 11:10:53AM +0100, Ulf Hansson wrote:
-> On 1 December 2014 at 15:35, Ludovic Desroches
-> <ludovic.desroches@atmel.com> wrote:
-> > Hi Ulf,
-> >
-> > Same as previous series, based on your next branch, and no errors with
-> > checkpatch so let me know if you still have troubles to apply my patches.
-> >
-> > Changes from v3:
-> > - keep __init/__exit attributes for atmci_init/exit
-> > - remove useless variable in atmci_configure_dma function
-> >
-> > Ludovic Desroches (4):
-> >   mmc: atmel-mci: remove useless DMA stuff for non-dt devices
-> >   mmc: atmel-mci: remove __init/__exit attributes
-> >   mmc: atmel-mci: stop using specific initcall
-> >   mmc: atmel-mci: use probe deferring if dma controller is not ready yet
-> >
-> >  drivers/mmc/host/atmel-mci.c | 76 ++++++++++++++++----------------------------
-> >  1 file changed, 28 insertions(+), 48 deletions(-)
+Am Dienstag, den 02.12.2014, 17:47 +0100 schrieb Stefan Agner:
+> Enable IPG clock for sdio interrupts while runtime PM, since this
+> clock is needed for register access. The need of this clock has been
+> verified on Vybrid, but this is probably true for i.MX53 and maybe
+> others. The need for bus access during runtime suspend has been
+> introduced with be138554a792 ("mmc: sdhci: allow sdio interrupts
+> while sdhci runtime suspended").
 > 
-> Thanks! Applied for next.
-> 
-> Patch 4, did have a minor checkpatch warning. I fixed it.
+Am I reading this wrong, or is this commit actually doing something
+different than what the commit message says?
 
-Thanks, yes I see it but I feel it is a bit too constraining when you already
-have a function name doing 32 characters :p
+This does _not_ enable the IPG clock during runtime PM, in fact it is
+disabling it while suspending even with SDIO ints enabled, which is
+wrong, as no SDIO interrupts will be delivered with this clock disabled.
 
+One thing that seems to be wrong with the current code is that the state
+of sdhci_sdio_irq_enabled could change between a runtime suspend and
+resume, so to keep the clocks balanced the driver has to remember if it
+disabled those two clocks in the suspend path and always enable them in
+that case in the resume path.
+
+Regards,
+Lucas
+
+> Signed-off-by: Stefan Agner <stefan@agner.ch>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 12 ++++++------
+>  1 file changed, 6 insertions(+), 6 deletions(-)
 > 
-> Kind regards
-> Uffe
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 587ee0e..b7e9ad1 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1193,10 +1193,10 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
+>  
+>  	ret = sdhci_runtime_suspend_host(host);
+>  
+> -	if (!sdhci_sdio_irq_enabled(host)) {
+> +	if (!sdhci_sdio_irq_enabled(host))
+>  		clk_disable_unprepare(imx_data->clk_per);
+> -		clk_disable_unprepare(imx_data->clk_ipg);
+> -	}
+> +
+> +	clk_disable_unprepare(imx_data->clk_ipg);
+>  	clk_disable_unprepare(imx_data->clk_ahb);
+>  
+>  	return ret;
+> @@ -1208,10 +1208,10 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+>  
+> -	if (!sdhci_sdio_irq_enabled(host)) {
+> +	if (!sdhci_sdio_irq_enabled(host))
+>  		clk_prepare_enable(imx_data->clk_per);
+> -		clk_prepare_enable(imx_data->clk_ipg);
+> -	}
+> +
+> +	clk_prepare_enable(imx_data->clk_ipg);
+>  	clk_prepare_enable(imx_data->clk_ahb);
+>  
+>  	return sdhci_runtime_resume_host(host);
+
+-- 
+Pengutronix e.K.             | Lucas Stach                 |
+Industrial Linux Solutions   | http://www.pengutronix.de/  |
+
