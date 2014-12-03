@@ -1,103 +1,98 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [Patch] Improve error handling in allocation of bounce buffers in mmc_init_queue
-Date: Wed, 3 Dec 2014 10:49:16 +0100
-Message-ID: <CAPDyKFrRTtL5qaywTh8o0sq80rEvSC2G7HLauDBqjP4OOYLsDg@mail.gmail.com>
-References: <547C41C0.9090000@mentor.com>
-	<CAPDyKFpdJCRCtJe8EHGtYHhSk+ont2pzkidx=GbAay1BT8=5eQ@mail.gmail.com>
-	<547C5787.3060205@mentor.com>
-	<CAPDyKFpOio0soa6OnmAv2AKDJ65WOdFhrRrKQuzek=JstUzX-Q@mail.gmail.com>
-	<547EAC4E.1090902@mentor.com>
+From: Stefan Agner <stefan@agner.ch>
+Subject: Re: [PATCH 2/2] mmc: sdhci-esdhc-imx: enable IPG clock for sdio
+ interrupts
+Date: Wed, 03 Dec 2014 10:57:10 +0100
+Message-ID: <6ff09082f3f43d4b358ec59d7ed8f216@agner.ch>
+References: <1417538845-10867-1-git-send-email-stefan@agner.ch>
+ <1417538845-10867-2-git-send-email-stefan@agner.ch>
+ <1417598713.2419.1.camel@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f49.google.com ([209.85.192.49]:35218 "EHLO
-	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750845AbaLCJtR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Dec 2014 04:49:17 -0500
-Received: by mail-qg0-f49.google.com with SMTP id a108so10570686qge.22
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Dec 2014 01:49:16 -0800 (PST)
-In-Reply-To: <547EAC4E.1090902@mentor.com>
+Received: from mail.kmu-office.ch ([178.209.48.109]:34185 "EHLO
+	mail.kmu-office.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750932AbaLCJzC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Dec 2014 04:55:02 -0500
+Received: from localhost (localhost [127.0.0.1])
+	by mail.kmu-office.ch (Postfix) with SMTP id 39A955E370B
+	for <linux-mmc@vger.kernel.org>; Wed,  3 Dec 2014 10:54:25 +0100 (CET)
+In-Reply-To: <1417598713.2419.1.camel@pengutronix.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bhuvanesh <bhuvanesh_surachari@mentor.com>
-Cc: Chris Ball <chris@printf.net>, Mike Snitzer <snitzer@redhat.com>, Jens Axboe <axboe@fb.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Joe Perches <joe@perches.com>, harish_kandiga@mentor.com, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Lucas Stach <l.stach@pengutronix.de>
+Cc: chris@printf.net, ulf.hansson@linaro.org, anton@enomsg.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, rmk+kernel@arm.linux.org.uk, shawn.guo@linaro.org, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
 
-On 3 December 2014 at 07:23, Bhuvanesh <bhuvanesh_surachari@mentor.com> wrote:
-> Hi,
->
->   Thanks for guiding. I read through Documentation/SubmittingPatches.
-> Fixed the warnings given by checkpatch. Kindly review the updated patch.
+On 2014-12-03 10:25, Lucas Stach wrote:
+> Am Dienstag, den 02.12.2014, 17:47 +0100 schrieb Stefan Agner:
+>> Enable IPG clock for sdio interrupts while runtime PM, since this
+>> clock is needed for register access. The need of this clock has been
+>> verified on Vybrid, but this is probably true for i.MX53 and maybe
+>> others. The need for bus access during runtime suspend has been
+>> introduced with be138554a792 ("mmc: sdhci: allow sdio interrupts
+>> while sdhci runtime suspended").
+>>
+> Am I reading this wrong, or is this commit actually doing something
+> different than what the commit message says?
+> 
+> This does _not_ enable the IPG clock during runtime PM, in fact it is
+> disabling it while suspending even with SDIO ints enabled, which is
+> wrong, as no SDIO interrupts will be delivered with this clock disabled.
 
-Could you also resend it as a separate patch, not replying to this email thread.
+You are completely right. What I wanted was what is written in the
+commit message, but I misinterpreted the code!
 
-Kind regards
-Uffe
+=> This patch is invalid.
 
->
-> From 7ea020e32e1fbe4d05d104e31815d908af92f2a5 Mon Sep 17 00:00:00 2001
-> From: Bhuvanesh Surachari <bhuvanesh_surachari@mentor.com>
-> Date: Mon, 1 Dec 2014 02:23:02 -0500
-> Subject: [PATCH] mmc: queue:Improve error handling during allocation of
->  bounce buffers.
->
-> Allocation of previous bounce buffer in mmc_init_queue when the current
-> bounce buffer allocation fails was leading to a crash later in
-> __blk_segment_map_sg. Error handling is improved by allocating previous
-> bounce buffer only if the current bounce buffer allocation succeeds.
->
-> Signed-off-by: Bhuvanesh Surachari <bhuvanesh_surachari@mentor.com>
-> Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
-> ---
->  drivers/mmc/card/queue.c |   16 +++++++++-------
->  1 file changed, 9 insertions(+), 7 deletions(-)
->
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index cfa6110..236d194 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -232,13 +232,15 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
->                         if (!mqrq_cur->bounce_buf) {
->                                 pr_warn("%s: unable to allocate bounce cur buffer\n",
->                                         mmc_card_name(card));
-> -                       }
-> -                       mqrq_prev->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
-> -                       if (!mqrq_prev->bounce_buf) {
-> -                               pr_warn("%s: unable to allocate bounce prev buffer\n",
-> -                                       mmc_card_name(card));
-> -                               kfree(mqrq_cur->bounce_buf);
-> -                               mqrq_cur->bounce_buf = NULL;
-> +                       } else {
-> +                               mqrq_prev->bounce_buf =
-> +                                               kmalloc(bouncesz, GFP_KERNEL);
-> +                               if (!mqrq_prev->bounce_buf) {
-> +                                       pr_warn("%s: unable to allocate bounce prev buffer\n",
-> +                                               mmc_card_name(card));
-> +                                       kfree(mqrq_cur->bounce_buf);
-> +                                       mqrq_cur->bounce_buf = NULL;
-> +                               }
->                         }
->                 }
->
-> --
-> 1.7.9.5
->
->
->
-> Thank you,
-> Regards,
-> Bhuvanesh
->
-> On 12/02/2014 05:01 PM, Ulf Hansson wrote:
->> On 1 December 2014 at 12:56, Bhuvanesh <bhuvanesh_surachari@mentor.com> wrote:
->>> Hi,
->>>
->>>   Please find the patch inline.
+> One thing that seems to be wrong with the current code is that the state
+> of sdhci_sdio_irq_enabled could change between a runtime suspend and
+> resume, so to keep the clocks balanced the driver has to remember if it
+> disabled those two clocks in the suspend path and always enable them in
+> that case in the resume path.
+
+As far as I can see, the only place where that flag changes is in
+sdhci_enable_sdio_irq. But this function makes sure runtime PM is off
+while changing that, so I guess it's ok....
+
+--
+Stefan
+
+> 
+>> Signed-off-by: Stefan Agner <stefan@agner.ch>
+>> ---
+>>  drivers/mmc/host/sdhci-esdhc-imx.c | 12 ++++++------
+>>  1 file changed, 6 insertions(+), 6 deletions(-)
 >>
->> Apparently you didn't read /Documentation/SubmittingPatches.
+>> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+>> index 587ee0e..b7e9ad1 100644
+>> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+>> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+>> @@ -1193,10 +1193,10 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
 >>
->> If you want me to review, please follow that guide. For example, I
->> expect you to run checkpatch.
+>>  	ret = sdhci_runtime_suspend_host(host);
 >>
->> Kind regards
->> Uffe
+>> -	if (!sdhci_sdio_irq_enabled(host)) {
+>> +	if (!sdhci_sdio_irq_enabled(host))
+>>  		clk_disable_unprepare(imx_data->clk_per);
+>> -		clk_disable_unprepare(imx_data->clk_ipg);
+>> -	}
+>> +
+>> +	clk_disable_unprepare(imx_data->clk_ipg);
+>>  	clk_disable_unprepare(imx_data->clk_ahb);
 >>
+>>  	return ret;
+>> @@ -1208,10 +1208,10 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
+>>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>  	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+>>
+>> -	if (!sdhci_sdio_irq_enabled(host)) {
+>> +	if (!sdhci_sdio_irq_enabled(host))
+>>  		clk_prepare_enable(imx_data->clk_per);
+>> -		clk_prepare_enable(imx_data->clk_ipg);
+>> -	}
+>> +
+>> +	clk_prepare_enable(imx_data->clk_ipg);
+>>  	clk_prepare_enable(imx_data->clk_ahb);
+>>
+>>  	return sdhci_runtime_resume_host(host);
+
