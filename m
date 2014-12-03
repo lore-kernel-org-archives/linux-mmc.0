@@ -1,7 +1,7 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [PATCH 1/1] Production State Awareness support in host side
-Date: Wed, 3 Dec 2014 11:39:43 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333ECD7931@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/1] Production State Awareness support in host side
+Date: Wed, 3 Dec 2014 13:29:11 +0100
+Message-ID: <CAPDyKFodibxe8aM5B25XZpSy3PFo1+8xzWGQZdSZ1jBv-KGJbA@mail.gmail.com>
 References: <1416228726-8514-1-git-send-email-avi.shchislowski@sandisk.com>
 	<CAPDyKFrCpoSsgECvC=gnMp6WDYAV+2os-uhzp03K-=E+Yv10AA@mail.gmail.com>
 	<282CEDFCBC30114F83C499CB8F2ED5333EC9D394@SACMBXIP02.sdcorp.global.sandisk.com>
@@ -13,101 +13,175 @@ References: <1416228726-8514-1-git-send-email-avi.shchislowski@sandisk.com>
 	<282CEDFCBC30114F83C499CB8F2ED5333ECB6DEC@SACMBXIP02.sdcorp.global.sandisk.com>
 	<CAPDyKFq+fhJudMFhA1SAUgwBTbvFRu5F_F0UZjjPr5HU4SAhNg@mail.gmail.com>
 	<282CEDFCBC30114F83C499CB8F2ED5333ECB8C7F@SACMBXIP02.sdcorp.global.sandisk.com>
- <CAPDyKFqS+QkBj+7b_ps0rQUDchYSJcZ89MqD50YL-K1d6f_N6g@mail.gmail.com>
+	<CAPDyKFqS+QkBj+7b_ps0rQUDchYSJcZ89MqD50YL-K1d6f_N6g@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333ECD7931@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bbn0100.outbound.protection.outlook.com ([157.56.111.100]:13600
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752568AbaLCLju (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 3 Dec 2014 06:39:50 -0500
-In-Reply-To: <CAPDyKFqS+QkBj+7b_ps0rQUDchYSJcZ89MqD50YL-K1d6f_N6g@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-qa0-f41.google.com ([209.85.216.41]:53881 "EHLO
+	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750855AbaLCM3N convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Dec 2014 07:29:13 -0500
+Received: by mail-qa0-f41.google.com with SMTP id f12so10315223qad.0
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Dec 2014 04:29:12 -0800 (PST)
+In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED5333ECD7931@SACMBXIP02.sdcorp.global.sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
 
-SGkgVWxmLA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5z
-c29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogVHVlc2RheSwgRGVj
-ZW1iZXIgMDIsIDIwMTQgMTE6MzEgQU0NCj4gVG86IEFsZXggTGVtYmVyZw0KPiBDYzogbGludXgt
-bW1jOyBDaHJpcyBCYWxsOyBBdmkgU2hjaGlzbG93c2tpDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0gg
-MS8xXSBQcm9kdWN0aW9uIFN0YXRlIEF3YXJlbmVzcyBzdXBwb3J0IGluIGhvc3Qgc2lkZQ0KPiAN
-Cj4gT24gMjUgTm92ZW1iZXIgMjAxNCBhdCAxNTo1NSwgQWxleCBMZW1iZXJnIDxBbGV4LkxlbWJl
-cmdAc2FuZGlzay5jb20+DQo+IHdyb3RlOg0KPiA+DQo+ID4NCj4gPj4gLS0tLS1PcmlnaW5hbCBN
-ZXNzYWdlLS0tLS0NCj4gPj4gRnJvbTogVWxmIEhhbnNzb24gW21haWx0bzp1bGYuaGFuc3NvbkBs
-aW5hcm8ub3JnXQ0KPiA+PiBTZW50OiBUdWVzZGF5LCBOb3ZlbWJlciAyNSwgMjAxNCAxMjo1NyBQ
-TQ0KPiA+PiBUbzogQWxleCBMZW1iZXJnDQo+ID4+IENjOiBsaW51eC1tbWM7IENocmlzIEJhbGw7
-IEF2aSBTaGNoaXNsb3dza2kNCj4gPj4gU3ViamVjdDogUmU6IFtQQVRDSCAxLzFdIFByb2R1Y3Rp
-b24gU3RhdGUgQXdhcmVuZXNzIHN1cHBvcnQgaW4gaG9zdA0KPiA+PiBzaWRlDQo+ID4+DQo+ID4+
-IE9uIDI1IE5vdmVtYmVyIDIwMTQgYXQgMTA6MTcsIEFsZXggTGVtYmVyZw0KPiA8QWxleC5MZW1i
-ZXJnQHNhbmRpc2suY29tPg0KPiA+PiB3cm90ZToNCj4gPj4gPg0KPiA+PiA+DQo+ID4+ID4+IC0t
-LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+ID4+IEZyb206IFVsZiBIYW5zc29uIFttYWls
-dG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gPj4gPj4gU2VudDogTW9uZGF5LCBOb3ZlbWJl
-ciAyNCwgMjAxNCAyOjI0IFBNDQo+ID4+ID4+IFRvOiBBbGV4IExlbWJlcmcNCj4gPj4gPj4gQ2M6
-IGxpbnV4LW1tYzsgQ2hyaXMgQmFsbDsgQXZpIFNoY2hpc2xvd3NraQ0KPiA+PiA+PiBTdWJqZWN0
-OiBSZTogW1BBVENIIDEvMV0gUHJvZHVjdGlvbiBTdGF0ZSBBd2FyZW5lc3Mgc3VwcG9ydCBpbg0K
-PiA+PiA+PiBob3N0IHNpZGUNCj4gPj4gPj4NCj4gPj4gPj4gWy4uLl0NCj4gPj4gPj4NCj4gPj4g
-Pj4gPj4gPj4NCj4gPj4gPj4gPj4gPj4gSSBhbSBub3Qgc28gc3VyZSB3ZSBzaG91bGQgZmluYWxp
-emUgdGhlIHByb2R1Y3Rpb24gcGhhc2UNCj4gPj4gPj4gPj4gPj4gd2hpbGUgaW5pdGlhbGl6aW5n
-IHRoZSBlTU1DIGNhcmQgbGlrZSB0aGlzLg0KPiA+PiA+PiA+PiA+Pg0KPiA+PiA+PiA+PiA+PiBD
-ZXJ0YWlubHkgd2Ugc2hvdWxkIGNoZWNrIHRoZSBQU0Egc3RhdGUsIGJ1dCBJIHRoaW5rIHdlDQo+
-ID4+ID4+ID4+ID4+IHNob3VsZCByZXR1cm4gYW4gZXJyb3IgaWYgd2UgdGhpbmsgdGhlIGRldmlj
-ZSBoYXNu4oCZdA0KPiA+PiA+PiA+PiA+PiBjb21wbGV0ZWQgcHJvZHVjdGlvbi4gSXQgc2hvdWxk
-IGJlIHRoZSByZXNwb25zaWJpbGl0eSBmb3INCj4gPj4gPj4gPj4gPj4gdGhlICJwcm9ncmFtbWlu
-ZyB0b29scyIgdG8gZmluYWxpemUgdGhlDQo+ID4+ID4+ID4+IHByb2R1Y3Rpb24sIHJpZ2h0IT8N
-Cj4gPj4gPj4gPj4gPg0KPiA+PiA+PiA+PiA+IEFjY29yZGluZyB0byBlTU1DIHNwZWMsIHRoZSBz
-d2l0Y2ggdG8gTk9STUFMIHNob3VsZCBiZSBkb25lDQo+ID4+ID4+ID4+ID4gYWZ0ZXIgZGV2aWNl
-DQo+ID4+ID4+ID4+IHNvbGRlcmluZyB0byBmaW5hbCBob3N0IChub3QgcHJvZ3JhbW1lcikuDQo+
-ID4+ID4+ID4+ID4gUGxlYXNlIHJlZmVyIHRvICJGaWd1cmUgMzIg4oCUIFJlY29tbWVuZGVkIFNv
-bGRlcmluZyBwcm9jZWR1cmUiDQo+ID4+ID4+ID4+ID4gaW4NCj4gPj4gPj4gPj4gZU1NQzUuMCBz
-cGVjaWZpY2F0aW9uIGRvY3VtZW50Lg0KPiA+PiA+PiA+PiA+IEFsc28sIHNpbmNlIHdlIGFyZSBk
-ZWFsaW5nIHdpdGggb25seSAiZmllbGQiIGhvc3QgaGVyZSwgd2UNCj4gPj4gPj4gPj4gPiBhcmUg
-bm90DQo+ID4+ID4+ID4+IHRvdWNoaW5nL3N3aXRjaGluZyBhbnkgb3RoZXIgbW9kZXMgb2YgUFNB
-LCBidXQgb25seSBOb3JtYWwgKGZpZWxkKS4NCj4gPj4gPj4gPj4gPiBUaGlzIGNvZGUgc2hvdWxk
-IHJ1biBvbmx5IG9uY2UgLSBpbiB0aGUgYmVnaW5uaW5nIG9mIGRldmljZSBsaWZlIGN5Y2xlLg0K
-PiA+PiA+PiA+Pg0KPiA+PiA+PiA+PiBJIGdldCB5b3VyIHBvaW50LCBidXQgSSBhbSBub3Qgc28g
-c3VyZS4NCj4gPj4gPj4gPj4NCj4gPj4gPj4gPj4gVG8gbWUsIEkgd291bGRuJ3QgdHJ1c3QgdGhh
-dCB0aGUgcGxhdGZvcm0gYmluYXJpZXMgaGFzIGJlZW4NCj4gPj4gPj4gPj4gc3VjY2Vzc2Z1bGx5
-IHByb2dyYW1tZWQgdG8gdGhlIGRldmljZSwgdW5sZXNzIHRoZSBwcm9ncmFtbWVyDQo+ID4+ID4+
-ID4+IHRvb2wgdGFrZXMgY2FyZSBvZiBzd2l0Y2hpbmcgdGhlIGRldmljZSB0byAibm9ybWFsIi4N
-Cj4gPj4gPj4gPj4NCj4gPj4gPj4gPg0KPiA+PiA+PiA+IFRoYW5rcyBVbGYhDQo+ID4+ID4+ID4g
-QWxzbywgcGxlYXNlIG5vdGUgLSBQU0EgUFJFX1NPTERFUklOR19QT1NUX1dSSVRFUyBtb2RlIGlu
-dGVudCB0bw0KPiA+PiA+PiA+IHNhdmUgZGV2aWNlIHByZS1sb2FkZWQgY29udGVudCBkdXJpbmcg
-dGhlIHNvbGRlcmluZyBwcm9jZXNzLg0KPiA+PiA+PiA+IEZsYXNoIGRhdGEgY2FuIGJlIGNvcnJ1
-cHRlZCBkdWUgdG8gc29sZGVyaW5nIHByb2NlZHVyZSBoaWdoDQo+ID4+ID4+ID4gdGVtcGVyYXR1
-cmUuIFNvIHN3aXRjaGluZyB0byBOb3JtYWwgY2Fubm90IGJlIGRvbmUgYnkgZXh0ZXJuYWwNCj4g
-Pj4gPj4gcHJvZ3JhbW1lci4NCj4gPj4gPj4NCj4gPj4gPj4gU28sIGlmIGZsYXNoIGRhdGEgd2ls
-bCBiZSBjb3JydXB0ZWQgZHVlIHRvIGZvciBleGFtcGxlIGhpZ2gNCj4gPj4gPj4gdGVtcGVyYXR1
-cmVzIGR1cmluZyBzb2xkZXJpbmcsIGhvdyB3aWxsIHRoYXQgYmUgZGV0ZWN0ZWQgd2hlbg0KPiA+
-PiA+PiB1c2luZyB0aGUNCj4gPj4gIm1hbnVhbCBtb2RlIj8NCj4gPj4gPj4NCj4gPj4gPj4gSWYg
-dGhhdCdzIHRoZSBqb2IgZm9yIHRoZSBwbGF0Zm9ybSBzb2Z0d2FyZSBJIGZhaWwgdG8gdW5kZXJz
-dGFuZA0KPiA+PiA+PiB3aHkgdGhlIFBSRV9TT0xERVJJTkdfUE9TVF9XUklURVMgc3RhdGUgbmVl
-ZHMgdG8gZXhpc3RzIGF0IGFsbCE/DQo+ID4+ID4NCj4gPj4gPiBUaGUgZmxvdyBvZiAiTWFudWFs
-IE1vZGUiIGlzOg0KPiA+Pg0KPiA+PiBUaGFua3MgZm9yIGNsYXJpZnlpbmcuDQo+ID4+DQo+ID4+
-ID4NCj4gPj4gPiBbc2tpcHBpbmcgZmV3IGNvbW1vbiBzdGVwc10NCj4gPj4gPiAuLi4NCj4gPj4g
-PiBIb3N0IChQcm9ncmFtbWVyKSBzZXRzIFBST0RVQ1RJT05fU1RBVEVfQVdBUkVORVNTIHRvIDB4
-MQ0KPiA+PiA+IChQUkVfU09MREVSSU5HX1dSSVRFUykNCj4gPj4gPg0KPiA+PiA+IEhvc3QgKFBy
-b2dyYW1tZXIpIHBlcmZvcm0gcHJlLXNvbGRlcmluZyBkYXRhIGxvYWRpbmcgYW5kL29yIGRldmlj
-ZQ0KPiA+PiA+IGNvbmZpZ3VyYXRpb24NCj4gPj4gPg0KPiA+PiA+IEhvc3QgKFByb2dyYW1tZXIp
-IHNldHMgUFJPRFVDVElPTl9TVEFURV9BV0FSRU5FU1MgVG8gMHgyDQo+ID4+ID4gKFBSRV9TT0xE
-RVJJTkdfUE9TVF9XUklURVMpLg0KPiA+PiA+IE5vIHdyaXRlcyBwYXN0IHRoaXMgcG9pbnQNCj4g
-Pj4NCj4gPj4gVG8gcmVwZWF0IG15IHF1ZXN0aW9uOg0KPiA+Pg0KPiA+PiBfVW5sZXNzXyB0aGVy
-ZSBhcmUgbm8gdmFsaWRhdGlvbiBvZiB0aGUgZGV2aWNlIHNvbGRlcmluZyBwZXJmb3JtZWQgYnkN
-Cj4gPj4gdGhlICJwcm9ncmFtbWVyIHRvb2wiIHBhc3QgdGhpcyBwb2ludCwgd2h5IGNvdWxkbid0
-IHRoZSBob3N0IHNldA0KPiA+PiBQUk9EVUNUSU9OX1NUQVRFX0FXQVJFTkVTUyB0byAweDAgKE5P
-Uk1BTCkgYXQgdGhpcyBwb2ludCBpbnN0ZWFkPw0KPiA+Pg0KPiA+DQo+ID4gSWYgcHJvZ3JhbW1l
-ciBzZXQgdG8gTk9STUFMIGF0IHRoaXMgcG9pbnQsIHRoZSBwcm9ncmFtbWVkIGRhdGEgY2FuIGJl
-DQo+ID4gY29ycnVwdGVkIGR1cmluZyB0aGUgc29sZGVyaW5nIHByb2Nlc3MuDQo+ID4gZU1NQyBk
-ZXZpY2Ugd2lsbCBwcm90ZWN0IHByb2dyYW1tZWQgZGF0YSBkdXJpbmcgdGhlIHNvbGRlcmluZyBw
-cm9jZXNzDQo+ID4gaW4gUFJFX1NPTERFUklOR19QT1NUX1dSSVRFUyAoMHgyKSAgbW9kZS4NCj4g
-DQo+IEV4YWN0bHkgaG93IHdpbGwgdGhhdCBiZSBkb25lPw0KPiANCj4gRHVyaW5nIHRoZSBzb2xk
-ZXJpbmcgcHJvY2VzcyB0aGUgZU1NQyBjYXJkIGlzbid0IHBvd2VyZWQuIFNvIGhvdyBjb3VsZCBp
-dA0KPiBwcm90ZWN0IGl0c2VsZiBiZXR0ZXIsIGp1c3QgYmVjYXVzZSB0aGUgc3RhdGUgaXMgUFJF
-X1NPTERFUklOR19QT1NUX1dSSVRFUz8NCg0KVGhlIGRldmljZSB3aWxsIHVzZSAic3BlY2lhbCIg
-aW50ZXJuYWwgb3BlcmF0aW9ucyBmb3Igc2F2aW5nIGNvbnRlbnQgcHJpb3IgdG8NCmRldmljZSBz
-b2xkZXJpbmcsIGFuZCB3aWxsIHN3aXRjaCB0byAicmVndWxhciIgYWZ0ZXIgdGhlIHNvbGRlcmlu
-ZyBhbmQgZ2V0dGluZyAiTk9STUFMIiBtb2RlLg0KDQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZm
-ZQ0K
+On 3 December 2014 at 12:39, Alex Lemberg <Alex.Lemberg@sandisk.com> wr=
+ote:
+> Hi Ulf,
+>
+>> -----Original Message-----
+>> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+>> Sent: Tuesday, December 02, 2014 11:31 AM
+>> To: Alex Lemberg
+>> Cc: linux-mmc; Chris Ball; Avi Shchislowski
+>> Subject: Re: [PATCH 1/1] Production State Awareness support in host =
+side
+>>
+>> On 25 November 2014 at 15:55, Alex Lemberg <Alex.Lemberg@sandisk.com=
+>
+>> wrote:
+>> >
+>> >
+>> >> -----Original Message-----
+>> >> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+>> >> Sent: Tuesday, November 25, 2014 12:57 PM
+>> >> To: Alex Lemberg
+>> >> Cc: linux-mmc; Chris Ball; Avi Shchislowski
+>> >> Subject: Re: [PATCH 1/1] Production State Awareness support in ho=
+st
+>> >> side
+>> >>
+>> >> On 25 November 2014 at 10:17, Alex Lemberg
+>> <Alex.Lemberg@sandisk.com>
+>> >> wrote:
+>> >> >
+>> >> >
+>> >> >> -----Original Message-----
+>> >> >> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+>> >> >> Sent: Monday, November 24, 2014 2:24 PM
+>> >> >> To: Alex Lemberg
+>> >> >> Cc: linux-mmc; Chris Ball; Avi Shchislowski
+>> >> >> Subject: Re: [PATCH 1/1] Production State Awareness support in
+>> >> >> host side
+>> >> >>
+>> >> >> [...]
+>> >> >>
+>> >> >> >> >>
+>> >> >> >> >> I am not so sure we should finalize the production phase
+>> >> >> >> >> while initializing the eMMC card like this.
+>> >> >> >> >>
+>> >> >> >> >> Certainly we should check the PSA state, but I think we
+>> >> >> >> >> should return an error if we think the device hasn=E2=80=
+=99t
+>> >> >> >> >> completed production. It should be the responsibility fo=
+r
+>> >> >> >> >> the "programming tools" to finalize the
+>> >> >> >> production, right!?
+>> >> >> >> >
+>> >> >> >> > According to eMMC spec, the switch to NORMAL should be do=
+ne
+>> >> >> >> > after device
+>> >> >> >> soldering to final host (not programmer).
+>> >> >> >> > Please refer to "Figure 32 =E2=80=94 Recommended Solderin=
+g procedure"
+>> >> >> >> > in
+>> >> >> >> eMMC5.0 specification document.
+>> >> >> >> > Also, since we are dealing with only "field" host here, w=
+e
+>> >> >> >> > are not
+>> >> >> >> touching/switching any other modes of PSA, but only Normal =
+(field).
+>> >> >> >> > This code should run only once - in the beginning of devi=
+ce life cycle.
+>> >> >> >>
+>> >> >> >> I get your point, but I am not so sure.
+>> >> >> >>
+>> >> >> >> To me, I wouldn't trust that the platform binaries has been
+>> >> >> >> successfully programmed to the device, unless the programme=
+r
+>> >> >> >> tool takes care of switching the device to "normal".
+>> >> >> >>
+>> >> >> >
+>> >> >> > Thanks Ulf!
+>> >> >> > Also, please note - PSA PRE_SOLDERING_POST_WRITES mode inten=
+t to
+>> >> >> > save device pre-loaded content during the soldering process.
+>> >> >> > Flash data can be corrupted due to soldering procedure high
+>> >> >> > temperature. So switching to Normal cannot be done by extern=
+al
+>> >> >> programmer.
+>> >> >>
+>> >> >> So, if flash data will be corrupted due to for example high
+>> >> >> temperatures during soldering, how will that be detected when
+>> >> >> using the
+>> >> "manual mode"?
+>> >> >>
+>> >> >> If that's the job for the platform software I fail to understa=
+nd
+>> >> >> why the PRE_SOLDERING_POST_WRITES state needs to exists at all=
+!?
+>> >> >
+>> >> > The flow of "Manual Mode" is:
+>> >>
+>> >> Thanks for clarifying.
+>> >>
+>> >> >
+>> >> > [skipping few common steps]
+>> >> > ...
+>> >> > Host (Programmer) sets PRODUCTION_STATE_AWARENESS to 0x1
+>> >> > (PRE_SOLDERING_WRITES)
+>> >> >
+>> >> > Host (Programmer) perform pre-soldering data loading and/or dev=
+ice
+>> >> > configuration
+>> >> >
+>> >> > Host (Programmer) sets PRODUCTION_STATE_AWARENESS To 0x2
+>> >> > (PRE_SOLDERING_POST_WRITES).
+>> >> > No writes past this point
+>> >>
+>> >> To repeat my question:
+>> >>
+>> >> _Unless_ there are no validation of the device soldering performe=
+d by
+>> >> the "programmer tool" past this point, why couldn't the host set
+>> >> PRODUCTION_STATE_AWARENESS to 0x0 (NORMAL) at this point instead?
+>> >>
+>> >
+>> > If programmer set to NORMAL at this point, the programmed data can=
+ be
+>> > corrupted during the soldering process.
+>> > eMMC device will protect programmed data during the soldering proc=
+ess
+>> > in PRE_SOLDERING_POST_WRITES (0x2)  mode.
+>>
+>> Exactly how will that be done?
+>>
+>> During the soldering process the eMMC card isn't powered. So how cou=
+ld it
+>> protect itself better, just because the state is PRE_SOLDERING_POST_=
+WRITES?
+>
+> The device will use "special" internal operations for saving content =
+prior to
+> device soldering, and will switch to "regular" after the soldering an=
+d getting "NORMAL" mode.
+
+Huh, this is a seriously hard question to get some answer to. I still
+don't get it.
+
+Are you saying the card are able to protect itself during the
+soldering phase? I assume soldiering is done without powering the
+card, thus I find it hard to understand that your statement can be
+true.
+
+Anyway, to convenience me, you need to give at least one example of
+what these protective operations could be during soldering.
+
+Kind regards
+Uffe
