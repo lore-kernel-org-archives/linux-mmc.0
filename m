@@ -1,67 +1,92 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v3] mmc: dw_mmc: add quirk for broken data transfer over scheme
-Date: Tue, 2 Dec 2014 21:08:57 -0800
-Message-ID: <CAD=FV=Vfe_UUT=fTdQESEyrE56Jy4p9NtKh80PkR+C4mDCHDxA@mail.gmail.com>
-References: <1415970338-2637-1-git-send-email-addy.ke@rock-chips.com>
-	<1417576563-5033-1-git-send-email-addy.ke@rock-chips.com>
+From: Bhuvanesh <bhuvanesh_surachari@mentor.com>
+Subject: Re: [Patch] Improve error handling in allocation of bounce buffers
+ in mmc_init_queue
+Date: Wed, 3 Dec 2014 11:53:10 +0530
+Message-ID: <547EAC4E.1090902@mentor.com>
+References: <547C41C0.9090000@mentor.com>	<CAPDyKFpdJCRCtJe8EHGtYHhSk+ont2pzkidx=GbAay1BT8=5eQ@mail.gmail.com>	<547C5787.3060205@mentor.com> <CAPDyKFpOio0soa6OnmAv2AKDJ65WOdFhrRrKQuzek=JstUzX-Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1417576563-5033-1-git-send-email-addy.ke@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Addy Ke <addy.ke@rock-chips.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Alexandru Stan <amstan@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from relay1.mentorg.com ([192.94.38.131]:33669 "EHLO
+	relay1.mentorg.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750952AbaLCGXS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Dec 2014 01:23:18 -0500
+In-Reply-To: <CAPDyKFpOio0soa6OnmAv2AKDJ65WOdFhrRrKQuzek=JstUzX-Q@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Mike Snitzer <snitzer@redhat.com>, Jens Axboe <axboe@fb.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Joe Perches <joe@perches.com>, harish_kandiga@mentor.com, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Addy,
+Hi,
+  
+  Thanks for guiding. I read through Documentation/SubmittingPatches.
+Fixed the warnings given by checkpatch. Kindly review the updated patch.
 
-On Tue, Dec 2, 2014 at 7:16 PM, Addy Ke <addy.ke@rock-chips.com> wrote:
-> This patch add a new quirk to add a s/w timer to notify the driver
-> to terminate current transfer and report a data timeout to the core,
-> if DTO interrupt does NOT come within the given time.
->
-> dw_mmc call mmc_request_done func to finish transfer depends on
-> DTO interrupt. If DTO interrupt does not come in sending data state,
-> the current transfer will be blocked.
->
-> But this case really exists, when driver reads tuning data from
-> card on RK3288-pink2 board. I measured waveforms by oscilloscope
-> and found that card clock was always on and data lines were always
-> holded high level in sending data state.
->
-> We got the reply from synopsys:
-> There are two counters but both use the same value of [31:8] bits.
-> Data timeout counter doesn't wait for stop clock and you should get
-> DRTO even when the clock is not stopped.
-> Host Starvation timeout counter is triggered with stop clock condition.
->
-> This means that host should get DRTO and DTO interrupt.
->
-> But we really don't get any data-related interrupt in RK3X SoCs.
-> And driver can't get data transfer state, it can do nothing but wait for.
->
-> We don't know why we have this problem, but we need it to fix this problem now.
-> And I will post a follow up change when we find the root cause.
->
-> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
-> ---
-> Changes in v2:
-> - fix some typo.
-> - remove extra timeout value (250ms).
-> - remove dw_mci_dto_start_monitor func.
-> - use "broken-dto" for new quirk and change Subject for it.
->
-> Changes in v3:
-> - Remove dts for broken-dto, just add this quirk in dw_mci_rockchip_init
->
->  drivers/mmc/host/dw_mmc-rockchip.c |  3 +++
->  drivers/mmc/host/dw_mmc.c          | 41 +++++++++++++++++++++++++++++++++++++-
->  include/linux/mmc/dw_mmc.h         |  5 +++++
->  3 files changed, 48 insertions(+), 1 deletion(-)
+>From 7ea020e32e1fbe4d05d104e31815d908af92f2a5 Mon Sep 17 00:00:00 2001
+From: Bhuvanesh Surachari <bhuvanesh_surachari@mentor.com>
+Date: Mon, 1 Dec 2014 02:23:02 -0500
+Subject: [PATCH] mmc: queue:Improve error handling during allocation of
+ bounce buffers.
 
-This seems reasonable to me.  I do hope that you can get to a root
-cause, but I don't think this is a terrible bit of code to carry.
-Obviously it's up to the folks who maintain dw_mmc and the mmc
-subsystem, but:
+Allocation of previous bounce buffer in mmc_init_queue when the current
+bounce buffer allocation fails was leading to a crash later in
+__blk_segment_map_sg. Error handling is improved by allocating previous
+bounce buffer only if the current bounce buffer allocation succeeds.
 
-Reviewed-by: Doug Anderson <dianders@chromium.org>
+Signed-off-by: Bhuvanesh Surachari <bhuvanesh_surachari@mentor.com>
+Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
+---
+ drivers/mmc/card/queue.c |   16 +++++++++-------
+ 1 file changed, 9 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index cfa6110..236d194 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -232,13 +232,15 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 			if (!mqrq_cur->bounce_buf) {
+ 				pr_warn("%s: unable to allocate bounce cur buffer\n",
+ 					mmc_card_name(card));
+-			}
+-			mqrq_prev->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
+-			if (!mqrq_prev->bounce_buf) {
+-				pr_warn("%s: unable to allocate bounce prev buffer\n",
+-					mmc_card_name(card));
+-				kfree(mqrq_cur->bounce_buf);
+-				mqrq_cur->bounce_buf = NULL;
++			} else {
++				mqrq_prev->bounce_buf =
++						kmalloc(bouncesz, GFP_KERNEL);
++				if (!mqrq_prev->bounce_buf) {
++					pr_warn("%s: unable to allocate bounce prev buffer\n",
++						mmc_card_name(card));
++					kfree(mqrq_cur->bounce_buf);
++					mqrq_cur->bounce_buf = NULL;
++				}
+ 			}
+ 		}
+ 
+-- 
+1.7.9.5
+
+
+
+Thank you,
+Regards,
+Bhuvanesh
+
+On 12/02/2014 05:01 PM, Ulf Hansson wrote:
+> On 1 December 2014 at 12:56, Bhuvanesh <bhuvanesh_surachari@mentor.com> wrote:
+>> Hi,
+>>
+>>   Please find the patch inline.
+> 
+> Apparently you didn't read /Documentation/SubmittingPatches.
+> 
+> If you want me to review, please follow that guide. For example, I
+> expect you to run checkpatch.
+> 
+> Kind regards
+> Uffe
+> 
