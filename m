@@ -1,146 +1,248 @@
-From: Bhuvanesh <bhuvanesh_surachari@mentor.com>
-Subject: [PATCH] mmc: queue:Improve error handling during allocation of bounce
- buffers.
-Date: Thu, 4 Dec 2014 15:35:38 +0530
-Message-ID: <548031F2.4030303@mentor.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] MMC / PM: Replace CONFIG_PM_RUNTIME with CONFIG_PM
+Date: Thu, 4 Dec 2014 11:12:14 +0100
+Message-ID: <CAPDyKFrkfg5mQR8GGVoSPdeuO=pjRxed=aVmtqiAE5=huHLGWg@mail.gmail.com>
+References: <14058791.TAS1lQ00cW@vostro.rjw.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: chris@printf.net, ulf.hansson@linaro.org, snitzer@redhat.com, axboe@fb.com, harish_kandiga@mentor.com, rmk+kernel@arm.linux.org.uk, joe@perches.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <14058791.TAS1lQ00cW@vostro.rjw.lan>
+Sender: linux-pm-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ben Dooks <ben-linux@fluff.org>, Mika Westerberg <mika.westerberg@linux.intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
->From 7ea020e32e1fbe4d05d104e31815d908af92f2a5 Mon Sep 17 00:00:00 2001
-From: Bhuvanesh Surachari <bhuvanesh_surachari@mentor.com>
-Date: Mon, 1 Dec 2014 02:23:02 -0500
-Subject: [PATCH] mmc: queue:Improve error handling during allocation of
- bounce buffers.
+On 4 December 2014 at 02:12, Rafael J. Wysocki <rjw@rjwysocki.net> wrote:
+> From: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+>
+> After commit b2b49ccbdd54 (PM: Kconfig: Set PM_RUNTIME if PM_SLEEP is
+> selected) PM_RUNTIME is always set if PM is set, so #ifdef blocks
+> depending on CONFIG_PM_RUNTIME may now be changed to depend on
+> CONFIG_PM.
+>
+> Replace CONFIG_PM_RUNTIME with CONFIG_PM everywhere under
+> drivers/misc/.
 
-Allocation of previous bounce buffer in mmc_init_queue when the current
-bounce buffer allocation fails was leading to a crash later in
-__blk_segment_map_sg. Error handling is improved by allocating previous
-bounce buffer only if the current bounce buffer allocation succeeds.
+drivers/mmc
 
-Signed-off-by: Bhuvanesh Surachari <bhuvanesh_surachari@mentor.com>
-Signed-off-by: Harish Jenny K N <harish_kandiga@mentor.com>
----
-During our rigorous testing of inserting and removing SD card we found
-exception in the kernel. Please find the backtrace as below:
+>
+> Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+> ---
+>
+> Note: This depends on commit b2b49ccbdd54 (PM: Kconfig: Set PM_RUNTIME if
+> PM_SLEEP is selected) which is only in linux-next at the moment (via the
+> linux-pm tree).
+>
+> Please let me know if it is OK to take this one into linux-pm.
 
-[ 1605.392278] Backtrace:
-[ 1605.395466] [<800117c4>] (dump_backtrace+0x0/0x100) from [<803f2cf4>] (dump_stack+0x18/0x1c)
-[ 1605.408679] [<803f2cdc>] (dump_stack+0x0/0x1c) from [<800b4038>] (warn_alloc_failed+0xec/0x10c)
-[ 1605.423194] [<800b3f4c>] (warn_alloc_failed+0x0/0x10c) from [<800b6d10>] (__alloc_pages_nodemask+0x764/0x890)
-[ 1605.439126] [<800b65ac>] (__alloc_pages_nodemask+0x0/0x890) from [<800b6e54>] (__get_free_pages+0x18/0x54)
-[ 1605.453885] [<800b6e3c>] (__get_free_pages+0x0/0x54) from [<800e4504>] (kmalloc_order_trace+0x2c/0xe8)
-[ 1605.470367] [<800e44d8>] (kmalloc_order_trace+0x0/0xe8) from [<800e5c4c>] (__kmalloc+0x38/0x1e4)
-[ 1605.482358] [<800e5c14>] (__kmalloc+0x0/0x1e4) from [<8026ac50>] (mmc_init_queue+0x198/0x444)
-[ 1605.494663] [<8026aab8>] (mmc_init_queue+0x0/0x444) from [<80268638>] (mmc_blk_alloc_req+0x184/0x354)
-[ 1605.513224] [<802684b4>] (mmc_blk_alloc_req+0x0/0x354) from [<80268f54>] (mmc_blk_probe+0x7c/0x28c)
-[ 1605.527459] [<80268ed8>] (mmc_blk_probe+0x0/0x28c) from [<8025e8f0>] (mmc_bus_probe+0x1c/0x20)
-[ 1605.543524] [<8025e8d4>] (mmc_bus_probe+0x0/0x20) from [<802a0d2c>] (driver_probe_device+0xb4/0x204)
-[ 1605.558819] [<802a0c78>] (driver_probe_device+0x0/0x204) from [<802a0eac>] (__device_attach+0x30/0x4c)
-[ 1605.571747] [<802a0e7c>] (__device_attach+0x0/0x4c) from [<8029f3b4>] (bus_for_each_drv+0x80/0x94)
-[ 1605.587027] [<8029f334>] (bus_for_each_drv+0x0/0x94) from [<802a0c2c>] (device_attach+0x70/0x94)
-[ 1605.601680] [<802a0bbc>] (device_attach+0x0/0x94) from [<802a01e0>] (bus_probe_device+0x30/0xa0)
-[ 1605.614128] [<802a01b0>] (bus_probe_device+0x0/0xa0) from [<8029e8bc>] (device_add+0x42c/0x570)
-[ 1605.626933] [<8029e490>] (device_add+0x0/0x570) from [<8025eda0>] (mmc_add_card+0x188/0x1e4)
-[ 1605.638880] [<8025ec18>] (mmc_add_card+0x0/0x1e4) from [<802637bc>] (mmc_attach_sd+0x188/0x210)
-[ 1605.651413] [<80263634>] (mmc_attach_sd+0x0/0x210) from [<8025e508>] (mmc_rescan+0x240/0x2ac)
-[ 1605.666968] [<8025e2c8>] (mmc_rescan+0x0/0x2ac) from [<8003cde0>] (process_one_work+0x2cc/0x460)
-[ 1605.682229] [<8003cb14>] (process_one_work+0x0/0x460) from [<8003d240>] (worker_thread+0x298/0x3ec)
-[ 1605.698223] [<8003cfa8>] (worker_thread+0x0/0x3ec) from [<80042490>] (kthread+0xb4/0xc0)
-[ 1605.707312] [<800423dc>] (kthread+0x0/0xc0) from [<8000d9b8>] (ret_from_fork+0x14/0x3c)
-[ 1605.846505] Unable to handle kernel NULL pointer dereference at virtual address 00000000
-[ 1605.859027] pgd = 80004000
-[ 1605.862280] [00000000] *pgd=00000000
-[ 1605.866415] Internal error: Oops: 17 [#1] PREEMPT SMP ARM
-[ 1605.949143] CPU: 0    Not tainted  (3.8.13.27-03391-g4e6f494 #1)
-[ 1605.955216] PC is at __blk_segment_map_sg+0xfc/0x140
-[ 1605.955216] PC is at __blk_segment_map_sg+0xfc/0x140
-[ 1605.960240] LR is at blk_rq_map_sg+0xa0/0x1d8
-[ 1605.964657] pc : [<802240fc>]    lr : [<802241e0>]    psr: 60000013
-[ 1605.964657] sp : 81fe5db8  ip : 81fe5df0  fp : 81fe5dec
-[ 1605.976191] r10: 81fe5e04  r9 : 00000000  r8 : 00000000
-[ 1605.981473] r7 : 81fe5e00  r6 : 00001000  r5 : 81fe5e04  r4 : ad1ea3c4
-[ 1605.988056] r3 : 00000000  r2 : 80667000  r1 : 00000000  r0 : ac2972a0
-[ 1605.994638] Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
-[ 1606.002001] Control: 10c5387d  Table: 3d09004a  DAC: 00000015
-[ 1606.007801] Process mmcqd/0 (pid: 13804, stack limit = 0x81fe4238)
-[ 1606.014034] Stack: (0x81fe5db8 to 0x81fe6000)
-[ 1606.018446] 5da0:                                                       ac274a38 00000000
-[ 1606.026681] 5dc0: 00000000 ac2972a0 ad1f4af8 ad1ea380 00000001 00000000 00000000 81fe5e04
-[ 1606.034917] 5de0: 81fe5e3c 81fe5df0 802241e0 8022400c 81fe5e04 81fe5e08 81fe5e0c 00000031
-[ 1606.043152] 5e00: 00000000 00000000 00000000 00000001 81fe5e54 8633a030 8633a800 ad1f4af8
-[ 1606.051386] 5e20: 00000008 8633a034 8633a008 8633a000 81fe5e5c 81fe5e40 8026b06c 8022414c
-[ 1606.059622] 5e40: 8633a030 8633a800 ad1f4af8 00000008 81fe5e94 81fe5e60 80268c14 8026b04c
-[ 1606.067857] 5e60: 803f90d8 00000000 81fe5e8c 8633a800 ad1f4af8 8633a008 ac07f000 ad1f4af8
-[ 1606.076091] 5e80: 8633a000 8633a034 81fe5edc 81fe5e98 802699a8 80268994 81fe5eb4 00000000
-[ 1606.084326] 5ea0: 00000000 00000000 00100100 00200200 803f7f98 ad1f4af8 8633a800 8633a008
-[ 1606.092562] 5ec0: ac07f000 8633a000 81fe4000 8633a000 81fe5f24 81fe5ee0 8026a210 80269920
-[ 1606.100798] 5ee0: 00000000 ad1f4af8 81fe5f0c 81fe5ef8 802204e0 120d0000 120d0000 8633a008
-[ 1606.109034] 5f00: ad1f4af8 8633a010 ac2972a0 81fe4028 81fe4000 00000001 81fe5f5c 81fe5f28
-[ 1606.117270] 5f20: 8026a89c 80269d4c 00000000 120d0000 8026a7bc ac23bc28 00000000 8633a008
-[ 1606.125506] 5f40: 8026a7bc 00000000 00000000 00000000 81fe5fac 81fe5f60 80042490 8026a7c8
-[ 1606.133742] 5f60: 803f9134 00000000 81fe5f94 8633a008 00000000 00000000 81fe5f78 81fe5f78
-[ 1606.141977] 5f80: 00000000 00000000 81fe5f88 81fe5f88 ac23bc28 800423dc 00000000 00000000
-[ 1606.150213] 5fa0: 00000000 81fe5fb0 8000d9b8 800423e8 00000000 00000000 00000000 00000000
-[ 1606.158448] 5fc0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
-[ 1606.166684] 5fe0: 00000000 00000000 00000000 00000000 00000013 00000000 1da1d629 0030d97d
-[ 1606.174914] Backtrace:
-[ 1606.177445] [<80224000>] (__blk_segment_map_sg+0x0/0x140) from [<802241e0>] (blk_rq_map_sg+0xa0/0x1d8)
-[ 1606.186822] [<80224140>] (blk_rq_map_sg+0x0/0x1d8) from [<8026b06c>] (mmc_queue_map_sg+0x2c/0x94)
-[ 1606.195759] [<8026b040>] (mmc_queue_map_sg+0x0/0x94) from [<80268c14>] (mmc_blk_rw_rq_prep+0x28c/0x300)
-[ 1606.210939] [<80268988>] (mmc_blk_rw_rq_prep+0x0/0x300) from [<802699a8>] (mmc_blk_issue_rw_rq+0x94/0x42c)
-[ 1606.220655] [<80269914>] (mmc_blk_issue_rw_rq+0x0/0x42c) from [<8026a210>] (mmc_blk_issue_rq+0x4d0/0x500)
-[ 1606.230284] [<80269d40>] (mmc_blk_issue_rq+0x0/0x500) from [<8026a89c>] (mmc_queue_thread+0xe0/0x17c)
-[ 1606.239571] [<8026a7bc>] (mmc_queue_thread+0x0/0x17c) from [<80042490>] (kthread+0xb4/0xc0)
-[ 1606.247989] [<800423dc>] (kthread+0x0/0xc0) from [<8000d9b8>] (ret_from_fork+0x14/0x3c)
-[ 1606.261771] Code: e5850000 e5953000 e5942000 e5941008 (e5930000)
-[ 1606.301708] Kernel panic - not syncing: Fatal exception
-[ 1606.307005] Rebooting in 1 seconds..
+Please go ahead! I have also tried to apply it on my next branch for
+my mmc tree, there are no conflicts.
 
-On analysis i found that error handling in mmc_init_queue during
-allocation of bounce buffers is incomplete. In the exception case the
-allocation of current bounce buffer fails and the previous bounce
-buffer allocation succeeds. This later leads to exception in,
-__blk_segment_map_sg while trying to access the bounce buffer.
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-The below patch improves the error handling during allocation of
-bounce buffers. The previous bounce buffer is allocated only if the
-allocation of current bounce buffer succeeds.
+Kind regards
+Uffe
 
----
- drivers/mmc/card/queue.c |   16 +++++++++-------
- 1 file changed, 9 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index cfa6110..236d194 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -232,13 +232,15 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 			if (!mqrq_cur->bounce_buf) {
- 				pr_warn("%s: unable to allocate bounce cur buffer\n",
- 					mmc_card_name(card));
--			}
--			mqrq_prev->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
--			if (!mqrq_prev->bounce_buf) {
--				pr_warn("%s: unable to allocate bounce prev buffer\n",
--					mmc_card_name(card));
--				kfree(mqrq_cur->bounce_buf);
--				mqrq_cur->bounce_buf = NULL;
-+			} else {
-+				mqrq_prev->bounce_buf =
-+						kmalloc(bouncesz, GFP_KERNEL);
-+				if (!mqrq_prev->bounce_buf) {
-+					pr_warn("%s: unable to allocate bounce prev buffer\n",
-+						mmc_card_name(card));
-+					kfree(mqrq_cur->bounce_buf);
-+					mqrq_cur->bounce_buf = NULL;
-+				}
- 			}
- 		}
- 
--- 
-1.7.9.5
+>
+> ---
+>  drivers/mmc/core/bus.c             |    4 ++--
+>  drivers/mmc/host/sdhci-acpi.c      |    2 +-
+>  drivers/mmc/host/sdhci-esdhc-imx.c |    4 ++--
+>  drivers/mmc/host/sdhci-pci.c       |   18 +++++++-----------
+>  drivers/mmc/host/sdhci-pxav3.c     |    2 +-
+>  drivers/mmc/host/sdhci-s3c.c       |    6 +++---
+>  drivers/mmc/host/sdhci.c           |    7 ++-----
+>  drivers/mmc/host/sdhci.h           |    3 ---
+>  8 files changed, 18 insertions(+), 28 deletions(-)
+>
+> Index: linux-pm/drivers/mmc/core/bus.c
+> ===================================================================
+> --- linux-pm.orig/drivers/mmc/core/bus.c
+> +++ linux-pm/drivers/mmc/core/bus.c
+> @@ -179,7 +179,7 @@ static int mmc_bus_resume(struct device
+>  }
+>  #endif
+>
+> -#ifdef CONFIG_PM_RUNTIME
+> +#ifdef CONFIG_PM
+>  static int mmc_runtime_suspend(struct device *dev)
+>  {
+>         struct mmc_card *card = mmc_dev_to_card(dev);
+> @@ -195,7 +195,7 @@ static int mmc_runtime_resume(struct dev
+>
+>         return host->bus_ops->runtime_resume(host);
+>  }
+> -#endif /* !CONFIG_PM_RUNTIME */
+> +#endif /* !CONFIG_PM */
+>
+>  static const struct dev_pm_ops mmc_bus_pm_ops = {
+>         SET_RUNTIME_PM_OPS(mmc_runtime_suspend, mmc_runtime_resume, NULL)
+> Index: linux-pm/drivers/mmc/host/sdhci-acpi.c
+> ===================================================================
+> --- linux-pm.orig/drivers/mmc/host/sdhci-acpi.c
+> +++ linux-pm/drivers/mmc/host/sdhci-acpi.c
+> @@ -416,7 +416,7 @@ static int sdhci_acpi_resume(struct devi
+>
+>  #endif
+>
+> -#ifdef CONFIG_PM_RUNTIME
+> +#ifdef CONFIG_PM
+>
+>  static int sdhci_acpi_runtime_suspend(struct device *dev)
+>  {
+> Index: linux-pm/drivers/mmc/host/sdhci-esdhc-imx.c
+> ===================================================================
+> --- linux-pm.orig/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ linux-pm/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1172,7 +1172,7 @@ static int sdhci_esdhc_imx_remove(struct
+>         pm_runtime_dont_use_autosuspend(&pdev->dev);
+>         pm_runtime_disable(&pdev->dev);
+>
+> -       if (!IS_ENABLED(CONFIG_PM_RUNTIME)) {
+> +       if (!IS_ENABLED(CONFIG_PM)) {
+>                 clk_disable_unprepare(imx_data->clk_per);
+>                 clk_disable_unprepare(imx_data->clk_ipg);
+>                 clk_disable_unprepare(imx_data->clk_ahb);
+> @@ -1183,7 +1183,7 @@ static int sdhci_esdhc_imx_remove(struct
+>         return 0;
+>  }
+>
+> -#ifdef CONFIG_PM_RUNTIME
+> +#ifdef CONFIG_PM
+>  static int sdhci_esdhc_runtime_suspend(struct device *dev)
+>  {
+>         struct sdhci_host *host = dev_get_drvdata(dev);
+> Index: linux-pm/drivers/mmc/host/sdhci-pci.c
+> ===================================================================
+> --- linux-pm.orig/drivers/mmc/host/sdhci-pci.c
+> +++ linux-pm/drivers/mmc/host/sdhci-pci.c
+> @@ -134,7 +134,7 @@ static int pch_hc_probe_slot(struct sdhc
+>         return 0;
+>  }
+>
+> -#ifdef CONFIG_PM_RUNTIME
+> +#ifdef CONFIG_PM
+>
+>  static irqreturn_t sdhci_pci_sd_cd(int irq, void *dev_id)
+>  {
+> @@ -1230,15 +1230,6 @@ static int sdhci_pci_resume(struct devic
+>         return 0;
+>  }
+>
+> -#else /* CONFIG_PM */
+> -
+> -#define sdhci_pci_suspend NULL
+> -#define sdhci_pci_resume NULL
+> -
+> -#endif /* CONFIG_PM */
+> -
+> -#ifdef CONFIG_PM_RUNTIME
+> -
+>  static int sdhci_pci_runtime_suspend(struct device *dev)
+>  {
+>         struct pci_dev *pdev = container_of(dev, struct pci_dev, dev);
+> @@ -1310,7 +1301,12 @@ static int sdhci_pci_runtime_idle(struct
+>         return 0;
+>  }
+>
+> -#endif
+> +#else /* CONFIG_PM */
+> +
+> +#define sdhci_pci_suspend NULL
+> +#define sdhci_pci_resume NULL
+> +
+> +#endif /* CONFIG_PM */
+>
+>  static const struct dev_pm_ops sdhci_pci_pm_ops = {
+>         .suspend = sdhci_pci_suspend,
+> Index: linux-pm/drivers/mmc/host/sdhci-pxav3.c
+> ===================================================================
+> --- linux-pm.orig/drivers/mmc/host/sdhci-pxav3.c
+> +++ linux-pm/drivers/mmc/host/sdhci-pxav3.c
+> @@ -436,7 +436,7 @@ static int sdhci_pxav3_resume(struct dev
+>  }
+>  #endif
+>
+> -#ifdef CONFIG_PM_RUNTIME
+> +#ifdef CONFIG_PM
+>  static int sdhci_pxav3_runtime_suspend(struct device *dev)
+>  {
+>         struct sdhci_host *host = dev_get_drvdata(dev);
+> Index: linux-pm/drivers/mmc/host/sdhci-s3c.c
+> ===================================================================
+> --- linux-pm.orig/drivers/mmc/host/sdhci-s3c.c
+> +++ linux-pm/drivers/mmc/host/sdhci-s3c.c
+> @@ -609,7 +609,7 @@ static int sdhci_s3c_probe(struct platfo
+>                 goto err_req_regs;
+>         }
+>
+> -#ifdef CONFIG_PM_RUNTIME
+> +#ifdef CONFIG_PM
+>         if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
+>                 clk_disable_unprepare(sc->clk_io);
+>  #endif
+> @@ -635,7 +635,7 @@ static int sdhci_s3c_remove(struct platf
+>         if (sc->ext_cd_irq)
+>                 free_irq(sc->ext_cd_irq, sc);
+>
+> -#ifdef CONFIG_PM_RUNTIME
+> +#ifdef CONFIG_PM
+>         if (sc->pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
+>                 clk_prepare_enable(sc->clk_io);
+>  #endif
+> @@ -667,7 +667,7 @@ static int sdhci_s3c_resume(struct devic
+>  }
+>  #endif
+>
+> -#ifdef CONFIG_PM_RUNTIME
+> +#ifdef CONFIG_PM
+>  static int sdhci_s3c_runtime_suspend(struct device *dev)
+>  {
+>         struct sdhci_host *host = dev_get_drvdata(dev);
+> Index: linux-pm/drivers/mmc/host/sdhci.c
+> ===================================================================
+> --- linux-pm.orig/drivers/mmc/host/sdhci.c
+> +++ linux-pm/drivers/mmc/host/sdhci.c
+> @@ -56,7 +56,7 @@ static int sdhci_execute_tuning(struct m
+>  static void sdhci_tuning_timer(unsigned long data);
+>  static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
+>
+> -#ifdef CONFIG_PM_RUNTIME
+> +#ifdef CONFIG_PM
+>  static int sdhci_runtime_pm_get(struct sdhci_host *host);
+>  static int sdhci_runtime_pm_put(struct sdhci_host *host);
+>  static void sdhci_runtime_pm_bus_on(struct sdhci_host *host);
+> @@ -2654,9 +2654,6 @@ int sdhci_resume_host(struct sdhci_host
+>  }
+>
+>  EXPORT_SYMBOL_GPL(sdhci_resume_host);
+> -#endif /* CONFIG_PM */
+> -
+> -#ifdef CONFIG_PM_RUNTIME
+>
+>  static int sdhci_runtime_pm_get(struct sdhci_host *host)
+>  {
+> @@ -2757,7 +2754,7 @@ int sdhci_runtime_resume_host(struct sdh
+>  }
+>  EXPORT_SYMBOL_GPL(sdhci_runtime_resume_host);
+>
+> -#endif
+> +#endif /* CONFIG_PM */
+>
+>  /*****************************************************************************\
+>   *                                                                           *
+> Index: linux-pm/drivers/mmc/host/sdhci.h
+> ===================================================================
+> --- linux-pm.orig/drivers/mmc/host/sdhci.h
+> +++ linux-pm/drivers/mmc/host/sdhci.h
+> @@ -411,9 +411,6 @@ void sdhci_set_uhs_signaling(struct sdhc
+>  extern int sdhci_suspend_host(struct sdhci_host *host);
+>  extern int sdhci_resume_host(struct sdhci_host *host);
+>  extern void sdhci_enable_irq_wakeups(struct sdhci_host *host);
+> -#endif
+> -
+> -#ifdef CONFIG_PM_RUNTIME
+>  extern int sdhci_runtime_suspend_host(struct sdhci_host *host);
+>  extern int sdhci_runtime_resume_host(struct sdhci_host *host);
+>  #endif
+>
