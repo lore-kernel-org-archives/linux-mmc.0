@@ -1,234 +1,128 @@
-From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Subject: [PATCH] MMC / PM: Replace CONFIG_PM_RUNTIME with CONFIG_PM
-Date: Thu, 04 Dec 2014 02:12:01 +0100
-Message-ID: <14058791.TAS1lQ00cW@vostro.rjw.lan>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: WARNING: at fs/fs-writeback.c when plug out SD card after system suspend/resume
+Date: Thu, 4 Dec 2014 11:46:31 +0800
+Message-ID: <CAA+hA=Tz4ExrbiMrL-6+GBQvPph=70h4OgNjaDNADurTQhE-UQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-pm-owner@vger.kernel.org>
-Sender: linux-pm-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Ben Dooks <ben-linux@fluff.org>, Mika Westerberg <mika.westerberg@linux.intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux PM list <linux-pm@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: tj@kernel.org, jack@suse.cz, viro@zeniv.linux.org.uk, linux-fsdevel@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Dong Aisheng-B29396 <b29396@freescale.com>, r64343@freescale.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+Hi ALL,
 
-After commit b2b49ccbdd54 (PM: Kconfig: Set PM_RUNTIME if PM_SLEEP is
-selected) PM_RUNTIME is always set if PM is set, so #ifdef blocks
-depending on CONFIG_PM_RUNTIME may now be changed to depend on
-CONFIG_PM.
+We met an filesystem issue when do stable kernel upgrade from 3.10.31 to
+3.10.53. And we found it's caused by the following commit bf0972039 which
+introduced in 3.10.53.
+After applying this patch, after system suspend/resume, plug out a SD card
+will cause the following WARNING if SD card has a filesystem mounted.
+If revert it, no such WARNING shows.
 
-Replace CONFIG_PM_RUNTIME with CONFIG_PM everywhere under
-drivers/misc/.
+I also tried the latest linux-next tree, it also has such issue.
 
-Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
----
+Looks the patch is used to fixing a potential system crashing.
+We're not sure whether this WARNING is as expected and reasonable
+or a BUG because there's no such WARNING before this patch.
 
-Note: This depends on commit b2b49ccbdd54 (PM: Kconfig: Set PM_RUNTIME if
-PM_SLEEP is selected) which is only in linux-next at the moment (via the
-linux-pm tree).
+Can someone explain about it?
 
-Please let me know if it is OK to take this one into linux-pm.
+Reproduce step is as follows:
+root@imx6qdlsolo:~# mmc2: mmc_rescan_try_freq: trying to init card at 400000 Hz
+mmc2: Problem setting current limit!
+mmc2: new ultra high speed DDR50 SDHC card at address aaaa
+mmcblk2: mmc2:aaaa SL32G 29.7 GiB
+ mmcblk2: p1 p2
+wm8962 3-001a: Failed to get supply 'DCVDD': -517
+wm8962 3-001a: Failed to request supplies: -517
+i2c 3-001a: Driver wm8962 requests probe deferral
+kjournald starting.  Commit interval 5 seconds
+EXT3-fs (mmcblk2p2): using internal journal
+EXT3-fs (mmcblk2p2): recovery complete
+EXT3-fs (mmcblk2p2): mounted filesystem with ordered data mode
+FAT-fs (mmcblk2p1): Volume was not properly unmounted. Some data may
+be corrupt. Please run fsck.
 
----
- drivers/mmc/core/bus.c             |    4 ++--
- drivers/mmc/host/sdhci-acpi.c      |    2 +-
- drivers/mmc/host/sdhci-esdhc-imx.c |    4 ++--
- drivers/mmc/host/sdhci-pci.c       |   18 +++++++-----------
- drivers/mmc/host/sdhci-pxav3.c     |    2 +-
- drivers/mmc/host/sdhci-s3c.c       |    6 +++---
- drivers/mmc/host/sdhci.c           |    7 ++-----
- drivers/mmc/host/sdhci.h           |    3 ---
- 8 files changed, 18 insertions(+), 28 deletions(-)
+root@imx6qdlsolo:~#
+root@imx6qdlsolo:~# echo mem > /sys/power/state
+PM: Syncing filesystems ... done.
+Freezing user space processes ... (elapsed 0.01 seconds) done.
+Freezing remaining freezable tasks ... (elapsed 0.01 seconds) done.
+Suspending console(s) (use no_console_suspend to debug)
+PM: suspend of devices complete after 45.436 msecs
+PM: suspend devices took 0.050 seconds
+PM: late suspend of devices complete after 0.599 msecs
+PM: noirq suspend of devices complete after 0.704 msecs
+Disabling non-boot CPUs ...
+Turn off M/F mix!
+PM: noirq resume of devices complete after 0.380 msecs
+PM: early resume of devices complete after 0.498 msecs
+imx-sdma 20ec000.sdma: loaded firmware 1.1
+mmc2: Problem setting current limit!
+PM: resume of devices complete after 409.704 msecs
+PM: resume devices took 0.410 seconds
+Restarting tasks ... done.
+root@imx6qdlsolo:~#
+root@imx6qdlsolo:~# libphy: 2188000.ethernet:01 - Link is Up - 100/Full
+mmc2: card aaaa removed
+------------[ cut here ]------------
+WARNING: at fs/fs-writeback.c:1196 __mark_inode_dirty+0x1d0/0x1d4()
+bdi-block not registered
+Modules linked in:
+CPU: 0 PID: 927 Comm: umount Not tainted 3.10.53-02602-g89aa41e #751
+[<80013b00>] (unwind_backtrace+0x0/0xf4) from [<80011524>]
+(show_stack+0x10/0x14)
+[<80011524>] (show_stack+0x10/0x14) from [<8002c290>]
+(warn_slowpath_common+0x54/0x6c)
+[<8002c290>] (warn_slowpath_common+0x54/0x6c) from [<8002c2d8>]
+(warn_slowpath_fmt+0x30/0x40)
+[<8002c2d8>] (warn_slowpath_fmt+0x30/0x40) from [<800e8bbc>]
+(__mark_inode_dirty+0x1d0/0x1d4)
+[<800e8bbc>] (__mark_inode_dirty+0x1d0/0x1d4) from [<80131ba8>]
+(ext3_put_super+0x20c/0x23c)
+[<80131ba8>] (ext3_put_super+0x20c/0x23c) from [<800c88e0>]
+(generic_shutdown_super+0x58/0xc4)
+[<800c88e0>] (generic_shutdown_super+0x58/0xc4) from [<800c8b14>]
+(kill_block_super+0x18/0x68)
+[<800c8b14>] (kill_block_super+0x18/0x68) from [<800c8e60>]
+(deactivate_locked_super+0x48/0x64)
+[<800c8e60>] (deactivate_locked_super+0x48/0x64) from [<800e271c>]
+(SyS_umount+0x94/0x38c)
+[<800e271c>] (SyS_umount+0x94/0x38c) from [<8000e080>]
+(ret_fast_syscall+0x0/0x30)
+---[ end trace a52c980ef229d9da ]---
+EXT3-fs (mmcblk2p2): I/O error while writing superblock
 
-Index: linux-pm/drivers/mmc/core/bus.c
-===================================================================
---- linux-pm.orig/drivers/mmc/core/bus.c
-+++ linux-pm/drivers/mmc/core/bus.c
-@@ -179,7 +179,7 @@ static int mmc_bus_resume(struct device
- }
- #endif
- 
--#ifdef CONFIG_PM_RUNTIME
-+#ifdef CONFIG_PM
- static int mmc_runtime_suspend(struct device *dev)
- {
- 	struct mmc_card *card = mmc_dev_to_card(dev);
-@@ -195,7 +195,7 @@ static int mmc_runtime_resume(struct dev
- 
- 	return host->bus_ops->runtime_resume(host);
- }
--#endif /* !CONFIG_PM_RUNTIME */
-+#endif /* !CONFIG_PM */
- 
- static const struct dev_pm_ops mmc_bus_pm_ops = {
- 	SET_RUNTIME_PM_OPS(mmc_runtime_suspend, mmc_runtime_resume, NULL)
-Index: linux-pm/drivers/mmc/host/sdhci-acpi.c
-===================================================================
---- linux-pm.orig/drivers/mmc/host/sdhci-acpi.c
-+++ linux-pm/drivers/mmc/host/sdhci-acpi.c
-@@ -416,7 +416,7 @@ static int sdhci_acpi_resume(struct devi
- 
- #endif
- 
--#ifdef CONFIG_PM_RUNTIME
-+#ifdef CONFIG_PM
- 
- static int sdhci_acpi_runtime_suspend(struct device *dev)
- {
-Index: linux-pm/drivers/mmc/host/sdhci-esdhc-imx.c
-===================================================================
---- linux-pm.orig/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ linux-pm/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1172,7 +1172,7 @@ static int sdhci_esdhc_imx_remove(struct
- 	pm_runtime_dont_use_autosuspend(&pdev->dev);
- 	pm_runtime_disable(&pdev->dev);
- 
--	if (!IS_ENABLED(CONFIG_PM_RUNTIME)) {
-+	if (!IS_ENABLED(CONFIG_PM)) {
- 		clk_disable_unprepare(imx_data->clk_per);
- 		clk_disable_unprepare(imx_data->clk_ipg);
- 		clk_disable_unprepare(imx_data->clk_ahb);
-@@ -1183,7 +1183,7 @@ static int sdhci_esdhc_imx_remove(struct
- 	return 0;
- }
- 
--#ifdef CONFIG_PM_RUNTIME
-+#ifdef CONFIG_PM
- static int sdhci_esdhc_runtime_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
-Index: linux-pm/drivers/mmc/host/sdhci-pci.c
-===================================================================
---- linux-pm.orig/drivers/mmc/host/sdhci-pci.c
-+++ linux-pm/drivers/mmc/host/sdhci-pci.c
-@@ -134,7 +134,7 @@ static int pch_hc_probe_slot(struct sdhc
- 	return 0;
- }
- 
--#ifdef CONFIG_PM_RUNTIME
-+#ifdef CONFIG_PM
- 
- static irqreturn_t sdhci_pci_sd_cd(int irq, void *dev_id)
- {
-@@ -1230,15 +1230,6 @@ static int sdhci_pci_resume(struct devic
- 	return 0;
- }
- 
--#else /* CONFIG_PM */
--
--#define sdhci_pci_suspend NULL
--#define sdhci_pci_resume NULL
--
--#endif /* CONFIG_PM */
--
--#ifdef CONFIG_PM_RUNTIME
--
- static int sdhci_pci_runtime_suspend(struct device *dev)
- {
- 	struct pci_dev *pdev = container_of(dev, struct pci_dev, dev);
-@@ -1310,7 +1301,12 @@ static int sdhci_pci_runtime_idle(struct
- 	return 0;
- }
- 
--#endif
-+#else /* CONFIG_PM */
-+
-+#define sdhci_pci_suspend NULL
-+#define sdhci_pci_resume NULL
-+
-+#endif /* CONFIG_PM */
- 
- static const struct dev_pm_ops sdhci_pci_pm_ops = {
- 	.suspend = sdhci_pci_suspend,
-Index: linux-pm/drivers/mmc/host/sdhci-pxav3.c
-===================================================================
---- linux-pm.orig/drivers/mmc/host/sdhci-pxav3.c
-+++ linux-pm/drivers/mmc/host/sdhci-pxav3.c
-@@ -436,7 +436,7 @@ static int sdhci_pxav3_resume(struct dev
- }
- #endif
- 
--#ifdef CONFIG_PM_RUNTIME
-+#ifdef CONFIG_PM
- static int sdhci_pxav3_runtime_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
-Index: linux-pm/drivers/mmc/host/sdhci-s3c.c
-===================================================================
---- linux-pm.orig/drivers/mmc/host/sdhci-s3c.c
-+++ linux-pm/drivers/mmc/host/sdhci-s3c.c
-@@ -609,7 +609,7 @@ static int sdhci_s3c_probe(struct platfo
- 		goto err_req_regs;
- 	}
- 
--#ifdef CONFIG_PM_RUNTIME
-+#ifdef CONFIG_PM
- 	if (pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
- 		clk_disable_unprepare(sc->clk_io);
- #endif
-@@ -635,7 +635,7 @@ static int sdhci_s3c_remove(struct platf
- 	if (sc->ext_cd_irq)
- 		free_irq(sc->ext_cd_irq, sc);
- 
--#ifdef CONFIG_PM_RUNTIME
-+#ifdef CONFIG_PM
- 	if (sc->pdata->cd_type != S3C_SDHCI_CD_INTERNAL)
- 		clk_prepare_enable(sc->clk_io);
- #endif
-@@ -667,7 +667,7 @@ static int sdhci_s3c_resume(struct devic
- }
- #endif
- 
--#ifdef CONFIG_PM_RUNTIME
-+#ifdef CONFIG_PM
- static int sdhci_s3c_runtime_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
-Index: linux-pm/drivers/mmc/host/sdhci.c
-===================================================================
---- linux-pm.orig/drivers/mmc/host/sdhci.c
-+++ linux-pm/drivers/mmc/host/sdhci.c
-@@ -56,7 +56,7 @@ static int sdhci_execute_tuning(struct m
- static void sdhci_tuning_timer(unsigned long data);
- static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
- 
--#ifdef CONFIG_PM_RUNTIME
-+#ifdef CONFIG_PM
- static int sdhci_runtime_pm_get(struct sdhci_host *host);
- static int sdhci_runtime_pm_put(struct sdhci_host *host);
- static void sdhci_runtime_pm_bus_on(struct sdhci_host *host);
-@@ -2654,9 +2654,6 @@ int sdhci_resume_host(struct sdhci_host
- }
- 
- EXPORT_SYMBOL_GPL(sdhci_resume_host);
--#endif /* CONFIG_PM */
--
--#ifdef CONFIG_PM_RUNTIME
- 
- static int sdhci_runtime_pm_get(struct sdhci_host *host)
- {
-@@ -2757,7 +2754,7 @@ int sdhci_runtime_resume_host(struct sdh
- }
- EXPORT_SYMBOL_GPL(sdhci_runtime_resume_host);
- 
--#endif
-+#endif /* CONFIG_PM */
- 
- /*****************************************************************************\
-  *                                                                           *
-Index: linux-pm/drivers/mmc/host/sdhci.h
-===================================================================
---- linux-pm.orig/drivers/mmc/host/sdhci.h
-+++ linux-pm/drivers/mmc/host/sdhci.h
-@@ -411,9 +411,6 @@ void sdhci_set_uhs_signaling(struct sdhc
- extern int sdhci_suspend_host(struct sdhci_host *host);
- extern int sdhci_resume_host(struct sdhci_host *host);
- extern void sdhci_enable_irq_wakeups(struct sdhci_host *host);
--#endif
--
--#ifdef CONFIG_PM_RUNTIME
- extern int sdhci_runtime_suspend_host(struct sdhci_host *host);
- extern int sdhci_runtime_resume_host(struct sdhci_host *host);
- #endif
+Caused by following commit:
+commit bf0972039ddc483a9cb79edae73076c635876568
+Author: Jan Kara <jack@suse.cz>
+Date:   Thu Apr 3 14:46:23 2014 -0700
 
+    bdi: avoid oops on device removal
+
+    commit 5acda9d12dcf1ad0d9a5a2a7c646de3472fa7555 upstream.
+
+    After commit 839a8e8660b6 ("writeback: replace custom worker pool
+    implementation with unbound workqueue") when device is removed while we
+    are writing to it we crash in bdi_writeback_workfn() ->
+    set_worker_desc() because bdi->dev is NULL.
+
+    This can happen because even though bdi_unregister() cancels all pending
+    flushing work, nothing really prevents new ones from being queued from
+    balance_dirty_pages() or other places.
+
+    Fix the problem by clearing BDI_registered bit in bdi_unregister() and
+    checking it before scheduling of any flushing work.
+
+    Fixes: 839a8e8660b6777e7fe4e80af1a048aebe2b5977
+
+    Reviewed-by: Tejun Heo <tj@kernel.org>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+    Cc: Derek Basehore <dbasehore@chromium.org>
+    Cc: Jens Axboe <axboe@kernel.dk>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+Regards
+Dong Aisheng
