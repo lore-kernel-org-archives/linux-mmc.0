@@ -1,76 +1,89 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH] mmc: atmel-mci: use SET_RUNTIME_PM_OPS() macro
-Date: Thu, 4 Dec 2014 11:33:39 +0100
-Message-ID: <20141204103339.GF2714@ldesroches-Latitude-E6320>
-References: <1417614194-28409-1-git-send-email-ludovic.desroches@atmel.com>
- <CAPDyKFp8mgT3T=OnPJHjAKo662yzoVDc6PgeaNHo_qKaOYRJBA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC PATCH 0/4] Command Queueing Support in eMMC
+Date: Thu, 4 Dec 2014 12:23:24 +0100
+Message-ID: <CAPDyKFowih_NUhAuPhjbe2x5F9ZtAocjgstTGtO1TDMKq3ytjA@mail.gmail.com>
+References: <cover.1417519249.git.asutoshd@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:56032 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753805AbaLDKdK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Dec 2014 05:33:10 -0500
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFp8mgT3T=OnPJHjAKo662yzoVDc6PgeaNHo_qKaOYRJBA@mail.gmail.com>
+Received: from mail-qa0-f44.google.com ([209.85.216.44]:46279 "EHLO
+	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753491AbaLDLXZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Dec 2014 06:23:25 -0500
+Received: by mail-qa0-f44.google.com with SMTP id i13so11574999qae.17
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Dec 2014 03:23:24 -0800 (PST)
+In-Reply-To: <cover.1417519249.git.asutoshd@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
+To: Asutosh Das <asutoshd@codeaurora.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 
-Hi Rafael,
+On 2 December 2014 at 12:53, Asutosh Das <asutoshd@codeaurora.org> wrote:
+> In this patch series, we propose a method to add support for
+> Command Queueing(CQ) feature added to eMMC-5.1 specification.
+> This feature includes new commands for issuing tasks to the
+> device and orders the execution of tasks to the device. It
+> also has task management functions.
+>
+> The initialization of CQ is decided based on the underlying
+> driver capability and the capability advertised by the card
+> through ext_csd.
+>
+> We have selectively adopted the scsi design of pulling in
+> requests from kernel block layer.
+>
+> In order to support queueing of multiple requests, we have
+> added a new issue function to mmc-queue. This selectively
+> pulls the requests and prepares and issues it to the underlying
+> driver. We have used the inherent tagging mechanism of kernel
+> block layer to keep track and map tags to the slots of underlying
+> driver. The current design doesn't block for the request to
+> complete. We have separated the issuing and completion path
+> of the request and tracking is done using the tag assigned to
+> the request.
+>
+> We have introduced a number of APIs to mmc block layer to
+> facilitate servicing of requests.
+>
+> The completion of requests is handled in a softirq registered
+> with the kernel block layer during initialization. The error
+> handling however would be done using a workqueue and is under
+> development.
+>
+> We have separated the legacy eMMC code from CQ code, so as to
+> make it more manageable.
+>
+> A new layer has been introduced to serve the CQ compliant drivers.
+> This layer (cq_hci) has all the standard functionality implemented.
+> It also has necessary hooks for convenience of platform drivers.
 
-Do you agree to take it in your tree?
+Hi Asutosh,
 
-Regards
+Thanks for posting this patchset! It's an interesting feature eMMC 5.1
+has adopted. I also hope to get some input from several other
+reviewers around this patchset.
 
-Ludovic
+Let me start by give some generic initial feedback:
 
-On Wed, Dec 03, 2014 at 03:23:12PM +0100, Ulf Hansson wrote:
-> +Rafael
-> 
-> On 3 December 2014 at 14:43, Ludovic Desroches
-> <ludovic.desroches@atmel.com> wrote:
-> > Use SET_RUNTIME_PM_OPS() since SET_PM_RUNTIME_PM_OPS() has been dropped.
-> >
-> > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> > ---
-> >
-> > Hi Ulf,
-> >
-> > Can you take this patch which fixes a compilation error that has appeared only
-> > on next-20141203.
-> 
-> I would prefer if the fix could be done through Rafael's tree, since
-> it's a commit from there that causes the build error.
-> 
-> I have already shared an immutable branch containing the mmc commit,
-> which is in conflict with the change in Rafael's linux-pm tree.
-> 
-> Kind regards
-> Uffe
-> 
-> >
-> > Thanks
-> >
-> > Regards
-> >
-> >  drivers/mmc/host/atmel-mci.c | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> > index 62aba9a..03d7c75 100644
-> > --- a/drivers/mmc/host/atmel-mci.c
-> > +++ b/drivers/mmc/host/atmel-mci.c
-> > @@ -2561,7 +2561,7 @@ static int atmci_runtime_resume(struct device *dev)
-> >  static const struct dev_pm_ops atmci_dev_pm_ops = {
-> >         SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> >                                 pm_runtime_force_resume)
-> > -       SET_PM_RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
-> > +       SET_RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
-> >  };
-> >
-> >  static struct platform_driver atmci_driver = {
-> > --
-> > 2.0.3
-> >
+1) I think we have earlier merged/reviewed code for new eMMC/SD
+features, without demanding excellent code quality. I will not let
+that happen again, just so you guys know. Nothing said about this
+patchset as such!
+
+2) Earlier we have accepted to add new features without these being
+properly validated on HW. The result is that we might have dead code,
+since it's hard to tell whether is actually used and thus working. I
+will demand all features to be tested on HW before I merge them. I
+guess that won't be an issue here, right?
+
+3) Adding new big features shall be thoroughly justified. In this
+case, showed by improved performance. Such performance statistics
+shall in this case have the reference from a host driver that supports
+the asynchronous request mechanism. So, if your host driver doesn't
+support that currently, that's the first thing you should be looking
+into.
+
+I will get back to review the actual patches as soon as I can.
+
+Kind regards
+Uffe
