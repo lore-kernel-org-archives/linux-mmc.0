@@ -1,68 +1,83 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [RFC PATCH 00/13] mmc: host: Add facility to support re-tuning
-Date: Fri,  5 Dec 2014 19:40:58 +0200
-Message-ID: <1417801271-15575-1-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 05/13] mmc: core: Add support for re-tuning before each request
+Date: Fri,  5 Dec 2014 19:41:03 +0200
+Message-ID: <1417801271-15575-6-git-send-email-adrian.hunter@intel.com>
+References: <1417801271-15575-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:60352 "EHLO mga02.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:60356 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751479AbaLERnQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 5 Dec 2014 12:43:16 -0500
+	id S1751734AbaLERnT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 5 Dec 2014 12:43:19 -0500
+In-Reply-To: <1417801271-15575-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-Hi
+At the start of each request, re-tune if needed and
+then hold off re-tuning again until the request is done.
 
-Here are some patches to move re-tuning support out of
-sdhci and into the core, and add support for HS400
-re-tuning.
+Note that though there is one function that starts
+requests (mmc_start_request) there are two that wait for
+the request to be done (mmc_wait_for_req_done and
+mmc_wait_for_data_req_done).  Also note that
+mmc_wait_for_data_req_done can return even when the
+request is not done (which allows the block driver
+to prepare a newly arrived request while still
+waiting for the previous request).
 
-Currently sdhci does re-tuning transparently by
-calling sdhci_execute_tuning() from its ->request()
-function.
+This patch ensures re-tuning is held for the duration
+of a request.  Subsequent patches will also hold
+re-tuning at other times when it might cause a
+conflict.
 
-The problem with HS400 re-tuning is that it must be
-done in HS200 mode. That means using switch commands
-and making ios changes. That means it potentially
-conflicts with other command sequences. The new
-re-tuning support accomodates that, however it is
-not strictly necessary because HS400 re-tuning
-should only be needed after runtime suspend when
-there would not be a conflict.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/core/core.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-Nevertheless, this approach has more structure
-and potentially more flexibility.
-
-
-Adrian Hunter (13):
-      mmc: core: Simplify by adding mmc_execute_tuning()
-      mmc: host: Add facility to support re-tuning
-      mmc: core: Disable re-tuning when card is no longer initialized
-      mmc: core: Move mmc_card_removed() into mmc_start_request()
-      mmc: core: Add support for re-tuning before each request
-      mmc: core: Check re-tuning before retrying
-      mmc: core: Hold re-tuning during switch commands
-      mmc: core: Hold re-tuning during erase commands
-      mmc: core: Hold re-tuning while bkops ongoing
-      mmc: mmc: Comment that callers need to hold re-tuning if the card is put to sleep
-      mmc: core: Add support for HS400 re-tuning
-      mmc: sdhci: Always init buf_ready_int
-      mmc: sdhci: Change to new way of doing re-tuning
-
- drivers/mmc/core/core.c    |  93 +++++++++++++++++++++++++++++++-----
- drivers/mmc/core/core.h    |   5 ++
- drivers/mmc/core/host.c    |  63 +++++++++++++++++++++++++
- drivers/mmc/core/mmc.c     |  58 ++++++++++++++++++-----
- drivers/mmc/core/mmc_ops.c |  31 ++++++++----
- drivers/mmc/core/sd.c      |  13 ++---
- drivers/mmc/core/sdio.c    |  14 ++----
- drivers/mmc/host/sdhci.c   | 115 ++++++---------------------------------------
- include/linux/mmc/host.h   |  58 +++++++++++++++++++++++
- include/linux/mmc/sdhci.h  |   3 --
- 10 files changed, 296 insertions(+), 157 deletions(-)
-
-
-Regards
-Adrian
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 884f35a..263b2d6 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -191,9 +191,15 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 	unsigned int i, sz;
+ 	struct scatterlist *sg;
+ #endif
++	int err;
++
+ 	if (mmc_card_removed(host->card))
+ 		return -ENOMEDIUM;
+ 
++	err = mmc_retune_and_hold(host);
++	if (err)
++		return err;
++
+ 	if (mrq->sbc) {
+ 		pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
+ 			 mmc_hostname(host), mrq->sbc->opcode,
+@@ -428,10 +434,12 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
+ 			context_info->is_new_req = false;
+ 			if (!next_req) {
+ 				err = MMC_BLK_NEW_REQUEST;
++				mmc_retune_hold(host);
+ 				break; /* return err */
+ 			}
+ 		}
+ 	}
++	mmc_retune_release(host);
+ 	return err;
+ }
+ 
+@@ -472,6 +480,8 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
+ 		cmd->error = 0;
+ 		host->ops->request(host, mrq);
+ 	}
++
++	mmc_retune_release(host);
+ }
+ 
+ /**
+-- 
+1.9.1
 
