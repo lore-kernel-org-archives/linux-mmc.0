@@ -1,61 +1,39 @@
-From: Scott Branden <sbranden@broadcom.com>
-Subject: [PATCH v2] mmc: sdhci: add quirk for ACMD23 broken
-Date: Thu, 4 Dec 2014 16:16:12 -0800
-Message-ID: <1417738572-10441-1-git-send-email-sbranden@broadcom.com>
-References: <Scott Branden <sbranden@broadcom.com>
+From: =?utf-8?B?5pWs6ZSQ?= <micky_ching@realsil.com.cn>
+Subject: Re: [PATCH v2 0/2] mmc: rtsx: add support for sdio card
+Date: Fri, 5 Dec 2014 05:48:52 +0000
+Message-ID: <54814744.3090503@realsil.com.cn>
+References: <cover.1417484016.git.micky_ching@realsil.com.cn>
+ <CAPDyKFr-Ov0UEGFJOa+kewzKYf+aAFQkuSuxJiyRNx7ETS9eEg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:65057 "EHLO
-	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933009AbaLEAQU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Dec 2014 19:16:20 -0500
-In-Reply-To: <Scott Branden <sbranden@broadcom.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <CAPDyKFr-Ov0UEGFJOa+kewzKYf+aAFQkuSuxJiyRNx7ETS9eEg@mail.gmail.com>
+Content-Language: zh-CN
+Content-ID: <C913D22874EECC4E9A24545EEC52362A@realsil.com.cn>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, =?utf-8?B?546L54Kc?= <wei_wang@realsil.com.cn>, Roger <rogerable@realtek.com>, "driverdev-devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ray Jui <rjui@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, Scott Branden <sbranden@broadcom.com>
 
-Add quirk to handle broken auto-CMD23.
-Some controllers do not respond after the first auto-CMD23 is issued.
 
-This allows CMD23 to still work (mandatory for the faster UHS-I mode)
-rather than disabling CMD23 entirely via SDHCI_QUIRK2_HOST_NO_CMD23.
-
-Signed-off by: Corneliu Doban <cdoban@broadcom.com>
-Signed-off-by: Scott Branden <sbranden@broadcom.com>
----
- drivers/mmc/host/sdhci.c  | 3 ++-
- include/linux/mmc/sdhci.h | 2 ++
- 2 files changed, 4 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ada1a3e..b37331f 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2985,7 +2985,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 	/* Auto-CMD23 stuff only works in ADMA or PIO. */
- 	if ((host->version >= SDHCI_SPEC_300) &&
- 	    ((host->flags & SDHCI_USE_ADMA) ||
--	     !(host->flags & SDHCI_USE_SDMA))) {
-+	     !(host->flags & SDHCI_USE_SDMA)) &&
-+	     !(host->quirks2 & SDHCI_QUIRK2_ACMD23_BROKEN)) {
- 		host->flags |= SDHCI_AUTO_CMD23;
- 		DBG("%s: Auto-CMD23 available\n", mmc_hostname(mmc));
- 	} else {
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index dba793e..d979cf9 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -100,6 +100,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
- /* Stop command (CMD12) can set Transfer Complete when not using MMC_RSP_BUSY */
- #define SDHCI_QUIRK2_STOP_WITH_TC			(1<<8)
-+/* Controller broken with using ACMD23 */
-+#define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<9)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
--- 
-2.2.0
-
+On 12/04/2014 09:52 PM, Ulf Hansson wrote:
+>> v3:
+>> >   rtsx_pci_sdmmc.c:
+>> >     - dump_reg_range
+>> >       - remove unused pointer check
+>> >       - fix start index
+> I can't find v3.
+>
+> Kind regards
+> Uffe
+>
+Sorry for mistake, This is v3, but subject is wrong.
