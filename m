@@ -1,104 +1,110 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 04/13] mmc: core: Move mmc_card_removed() into mmc_start_request()
-Date: Fri,  5 Dec 2014 19:41:02 +0200
-Message-ID: <1417801271-15575-5-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 07/13] mmc: core: Hold re-tuning during switch commands
+Date: Fri,  5 Dec 2014 19:41:05 +0200
+Message-ID: <1417801271-15575-8-git-send-email-adrian.hunter@intel.com>
 References: <1417801271-15575-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:60356 "EHLO mga02.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:60360 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751479AbaLERnT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 5 Dec 2014 12:43:19 -0500
+	id S1751734AbaLERnW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 5 Dec 2014 12:43:22 -0500
 In-Reply-To: <1417801271-15575-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-Both callers of mmc_start_request() call mmc_card_removed()
-so move that call into mmc_start_request().
-
-This patch is preparation for adding re-tuning support.
+Hold re-tuning during switch commands to prevent
+it from conflicting with the busy state or the CMD13
+verification.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c | 32 ++++++++++++++++++++------------
- 1 file changed, 20 insertions(+), 12 deletions(-)
+ drivers/mmc/core/mmc_ops.c | 31 +++++++++++++++++++++----------
+ 1 file changed, 21 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index fcde4da..884f35a 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -185,13 +185,14 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 3b044c5..772c585 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -444,6 +444,10 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 	u32 status = 0;
+ 	bool use_r1b_resp = use_busy_signal;
  
- EXPORT_SYMBOL(mmc_request_done);
- 
--static void
--mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
-+static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- {
- #ifdef CONFIG_MMC_DEBUG
- 	unsigned int i, sz;
- 	struct scatterlist *sg;
- #endif
-+	if (mmc_card_removed(host->card))
-+		return -ENOMEDIUM;
- 
- 	if (mrq->sbc) {
- 		pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
-@@ -251,6 +252,8 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 	mmc_host_clk_hold(host);
- 	led_trigger_event(host->led, LED_FULL);
- 	host->ops->request(host, mrq);
++	err = mmc_retune_and_hold(host);
++	if (err)
++		return err;
 +
-+	return 0;
- }
+ 	/*
+ 	 * If the cmd timeout and the max_busy_timeout of the host are both
+ 	 * specified, let's validate them. A failure means we need to prevent
+@@ -476,11 +480,11 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
  
- /**
-@@ -345,29 +348,34 @@ static void mmc_wait_done(struct mmc_request *mrq)
-  */
- static int __mmc_start_data_req(struct mmc_host *host, struct mmc_request *mrq)
- {
-+	int err;
-+
- 	mrq->done = mmc_wait_data_done;
- 	mrq->host = host;
--	if (mmc_card_removed(host->card)) {
--		mrq->cmd->error = -ENOMEDIUM;
-+
-+	err = mmc_start_request(host, mrq);
-+	if (err) {
-+		mrq->cmd->error = err;
- 		mmc_wait_data_done(mrq);
--		return -ENOMEDIUM;
+ 	err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
+ 	if (err)
+-		return err;
++		goto out;
+ 
+ 	/* No need to check card status in case of unblocking command */
+ 	if (!use_busy_signal)
+-		return 0;
++		goto out;
+ 
+ 	/*
+ 	 * CRC errors shall only be ignored in cases were CMD13 is used to poll
+@@ -499,7 +503,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		if (send_status) {
+ 			err = __mmc_send_status(card, &status, ignore_crc);
+ 			if (err)
+-				return err;
++				goto out;
+ 		}
+ 		if ((host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
+ 			break;
+@@ -513,29 +517,36 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		 */
+ 		if (!send_status) {
+ 			mmc_delay(timeout_ms);
+-			return 0;
++			goto out;
+ 		}
+ 
+ 		/* Timeout if the device never leaves the program state. */
+ 		if (time_after(jiffies, timeout)) {
+ 			pr_err("%s: Card stuck in programming state! %s\n",
+ 				mmc_hostname(host), __func__);
+-			return -ETIMEDOUT;
++			err = -ETIMEDOUT;
++			goto out;
+ 		}
+ 	} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+ 
+ 	if (mmc_host_is_spi(host)) {
+-		if (status & R1_SPI_ILLEGAL_COMMAND)
+-			return -EBADMSG;
++		if (status & R1_SPI_ILLEGAL_COMMAND) {
++			err = -EBADMSG;
++			goto out;
++		}
+ 	} else {
+ 		if (status & 0xFDFFA000)
+ 			pr_warn("%s: unexpected status %#x after switch\n",
+ 				mmc_hostname(host), status);
+-		if (status & R1_SWITCH_ERROR)
+-			return -EBADMSG;
++		if (status & R1_SWITCH_ERROR) {
++			err = -EBADMSG;
++			goto out;
++		}
  	}
--	mmc_start_request(host, mrq);
++out:
++	mmc_retune_release(host);
  
 -	return 0;
 +	return err;
  }
+ EXPORT_SYMBOL_GPL(__mmc_switch);
  
- static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
- {
-+	int err;
-+
- 	init_completion(&mrq->completion);
- 	mrq->done = mmc_wait_done;
--	if (mmc_card_removed(host->card)) {
--		mrq->cmd->error = -ENOMEDIUM;
-+
-+	err = mmc_start_request(host, mrq);
-+	if (err) {
-+		mrq->cmd->error = err;
- 		complete(&mrq->completion);
--		return -ENOMEDIUM;
- 	}
--	mmc_start_request(host, mrq);
--	return 0;
-+
-+	return err;
- }
- 
- /*
 -- 
 1.9.1
 
