@@ -1,113 +1,85 @@
-From: Alessio Igor Bogani <alessio.bogani@elettra.eu>
-Subject: [PATCH] mmc: sdhci: Fix FSL ESDHC reset handling quirk
-Date: Fri,  5 Dec 2014 10:58:53 +0100
-Message-ID: <1417773533-10052-1-git-send-email-alessio.bogani@elettra.eu>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: Re: [PATCH] mmc: core: Let mmc_send_tuning() to take struct
+ mmc_host* as parameter
+Date: Fri, 5 Dec 2014 19:03:26 +0800
+Message-ID: <20141205110325.GB21173@shlinux1.ap.freescale.net>
+References: <1417776083-13499-1-git-send-email-ulf.hansson@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from m2.elettra.trieste.it ([140.105.206.202]:37034 "EHLO elettra.eu"
+Received: from mail-bl2on0104.outbound.protection.outlook.com ([65.55.169.104]:19411
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751122AbaLEK7L (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 5 Dec 2014 05:59:11 -0500
+	id S1751325AbaLELgZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 5 Dec 2014 06:36:25 -0500
+Content-Disposition: inline
+In-Reply-To: <1417776083-13499-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: linux-mmc@vger.kernel.org, Alessio Igor Bogani <alessio.bogani@elettra.eu>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, Stephen Boyd <sboyd@codeaurora.org>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-The commit 0718e59ae259 ("mmc: sdhci: move FSL ESDHC reset handling quirk into
-esdhc code") states that Freescale esdhc is the only controller which needs
-the interrupt registers restored after a reset. So it moves
-SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET quirk handling code into the
-esdhc-imx driver only. Unfortunately the same controller is used in
-other boards which use the of-esdhc driver instead (like powerpc P2020).
+On Fri, Dec 05, 2014 at 11:41:23AM +0100, Ulf Hansson wrote:
+> To be able to use mmc_send_tuning() prior the struct mmc_card has been
+> allocated, let's convert it to take the struct mmc_host* as parameter
+> instead.
+> 
+> Suggested-by: Stephen Boyd <sboyd@codeaurora.org>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-This patch partially reverts the above mentioned commit and make
-SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET dependency explicit in both drivers.
+Acked-by: Dong Aisheng <b29396@freescale.com>
 
-Signed-off-by: Alessio Igor Bogani <alessio.bogani@elettra.eu>
----
- drivers/mmc/host/sdhci-esdhc-imx.c | 13 +++----------
- drivers/mmc/host/sdhci-of-esdhc.c  |  1 +
- drivers/mmc/host/sdhci.c           |  5 +++++
- include/linux/mmc/sdhci.h          |  2 ++
- 4 files changed, 11 insertions(+), 10 deletions(-)
+Regards
+Dong Aisheng
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 587ee0e..216e765 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -872,14 +872,6 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
- 	esdhc_change_pinstate(host, timing);
- }
- 
--static void esdhc_reset(struct sdhci_host *host, u8 mask)
--{
--	sdhci_reset(host, mask);
--
--	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
--	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
--}
--
- static unsigned int esdhc_get_max_timeout_count(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -912,14 +904,15 @@ static struct sdhci_ops sdhci_esdhc_ops = {
- 	.set_timeout = esdhc_set_timeout,
- 	.set_bus_width = esdhc_pltfm_set_bus_width,
- 	.set_uhs_signaling = esdhc_set_uhs_signaling,
--	.reset = esdhc_reset,
-+	.reset = sdhci_reset,
- };
- 
- static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
- 	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_NO_HISPD_BIT
- 			| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
- 			| SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC
--			| SDHCI_QUIRK_BROKEN_CARD_DETECTION,
-+			| SDHCI_QUIRK_BROKEN_CARD_DETECTION
-+			| SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET,
- 	.ops = &sdhci_esdhc_ops,
- };
- 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 8872c85..9121078 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -359,6 +359,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
- 		 * host control register
- 		 */
- 		host->quirks2 |= SDHCI_QUIRK2_BROKEN_HOST_CONTROL;
-+		host->quirks |= SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET;
- 	}
- 
- 	/* call to generic mmc_of_parse to support additional capabilities */
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ada1a3e..ac86775 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -205,6 +205,11 @@ static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
- 
- 	host->ops->reset(host, mask);
- 
-+	if (host->quirks & SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET) {
-+		sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-+		sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-+	}
-+
- 	if (mask & SDHCI_RESET_ALL) {
- 		if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
- 			if (host->ops->enable_dma)
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index dba793e..201978d 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -59,6 +59,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK_INVERTED_WRITE_PROTECT		(1<<16)
- /* Controller does not like fast PIO transfers */
- #define SDHCI_QUIRK_PIO_NEEDS_DELAY			(1<<18)
-+/* Controller losing signal/interrupt enable states after reset */
-+#define SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET		(1<<19)
- /* Controller has to be forced to use block size of 2048 bytes */
- #define SDHCI_QUIRK_FORCE_BLK_SZ_2048			(1<<20)
- /* Controller cannot do multi-block transfers */
--- 
-2.1.3
-
+> ---
+>  drivers/mmc/core/mmc_ops.c | 7 +++----
+>  include/linux/mmc/core.h   | 2 +-
+>  2 files changed, 4 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 12b2a32..3b044c5 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -547,14 +547,13 @@ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>  }
+>  EXPORT_SYMBOL_GPL(mmc_switch);
+>  
+> -int mmc_send_tuning(struct mmc_card *card)
+> +int mmc_send_tuning(struct mmc_host *host)
+>  {
+>  	struct mmc_request mrq = {NULL};
+>  	struct mmc_command cmd = {0};
+>  	struct mmc_data data = {0};
+>  	struct scatterlist sg;
+> -	struct mmc_host *mmc = card->host;
+> -	struct mmc_ios *ios = &mmc->ios;
+> +	struct mmc_ios *ios = &host->ios;
+>  	const u8 *tuning_block_pattern;
+>  	int size, err = 0;
+>  	u8 *data_buf;
+> @@ -596,7 +595,7 @@ int mmc_send_tuning(struct mmc_card *card)
+>  	data.sg_len = 1;
+>  	sg_init_one(&sg, data_buf, size);
+>  
+> -	mmc_wait_for_req(mmc, &mrq);
+> +	mmc_wait_for_req(host, &mrq);
+>  
+>  	if (cmd.error) {
+>  		err = cmd.error;
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index c4bdaa1..cb2b040 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -154,7 +154,7 @@ extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
+>  extern int __mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int, bool,
+>  			bool, bool);
+>  extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
+> -extern int mmc_send_tuning(struct mmc_card *card);
+> +extern int mmc_send_tuning(struct mmc_host *host);
+>  extern int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
+>  
+>  #define MMC_ERASE_ARG		0x00000000
+> -- 
+> 1.9.1
+> 
