@@ -1,55 +1,61 @@
-From: "Dorfman, Konstantin" <kdorfman@codeaurora.org>
-Subject: Re: [PATCH 1/5] mmc: core: Add support to read command queue parameters
-Date: Thu, 04 Dec 2014 14:27:01 -0800
-Message-ID: <5480DFB5.5000104@codeaurora.org>
-References: <20141202115629.GA27638@asutoshd-ics.in.qualcomm.com>
+From: Scott Branden <sbranden@broadcom.com>
+Subject: [PATCH] mmc: sdhci: add quirk for ACMD23 broken
+Date: Thu, 4 Dec 2014 16:11:24 -0800
+Message-ID: <1417738284-10074-1-git-send-email-sbranden@broadcom.com>
+References: <Scott Branden <sbranden@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.11.231]:59544 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751663AbaLDW1E (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Dec 2014 17:27:04 -0500
-In-Reply-To: <20141202115629.GA27638@asutoshd-ics.in.qualcomm.com>
+Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:48903 "EHLO
+	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933107AbaLEALa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Dec 2014 19:11:30 -0500
+In-Reply-To: <Scott Branden <sbranden@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sujit Reddy Thumma <sthumma@codeaurora.org>, linux-mmc@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ray Jui <rjui@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, Scott Branden <sbranden@broadcom.com>
 
+Add quick to handle broken auto-CMD23
+Some controllers do not respond after the first auto-CMD23 is issued.
 
-On 12/2/2014 3:56 AM, Sujit Reddy Thumma wrote:
-> eMMC cards with EXT_CSD version >= 7, optionally support command
-> queuing feature as defined by Jedec eMMC5.1. Add support for probing
-> command queue feature for such type of cards.
->
-> Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
-> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
-> ---
->   drivers/mmc/core/mmc.c   | 15 +++++++++++++++
->   include/linux/mmc/card.h |  7 +++++++
->   include/linux/mmc/mmc.h  |  6 ++++++
->   3 files changed, 28 insertions(+)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 1ab5f3a..0ef3af5 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -571,6 +571,21 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
->   		card->ext_csd.data_sector_size = 512;
->   	}
->   
-> +	if (card->ext_csd.rev >= 7) {
-> +		card->ext_csd.cmdq_support = ext_csd[EXT_CSD_CMDQ_SUPPORT];
-> +		if (card->ext_csd.cmdq_support)
-> +			card->ext_csd.cmdq_depth = ext_csd[EXT_CSD_CMDQ_DEPTH];
-> +	}
-Remove duplicated code.
-> +
-> +	if (card->ext_csd.rev >= 7) {
-> +		card->ext_csd.cmdq_support = ext_csd[EXT_CSD_CMDQ_SUPPORT];
-> +		if (card->ext_csd.cmdq_support)
-> +			card->ext_csd.cmdq_depth = ext_csd[EXT_CSD_CMDQ_DEPTH];
- From the spec (7.4.19 CMDQ_DEPTH [307]) [4:0]: N, a parameter used to 
-calculate the Queue Depth of task queue in the device. Queue Depth = N+1.
+This allows CMD23 to still work (mandatory for the faster UHS-I mode)
+rather than disabling CMD23 entirely via SDHCI_QUIRK2_HOST_NO_CMD23.
+
+Signed-off by: Corneliu Doban <cdoban@broadcom.com>
+Signed-off-by: Scott Branden <sbranden@broadcom.com>
+---
+ drivers/mmc/host/sdhci.c  | 3 ++-
+ include/linux/mmc/sdhci.h | 2 ++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index ada1a3e..b37331f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2985,7 +2985,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	/* Auto-CMD23 stuff only works in ADMA or PIO. */
+ 	if ((host->version >= SDHCI_SPEC_300) &&
+ 	    ((host->flags & SDHCI_USE_ADMA) ||
+-	     !(host->flags & SDHCI_USE_SDMA))) {
++	     !(host->flags & SDHCI_USE_SDMA)) &&
++	     !(host->quirks2 & SDHCI_QUIRK2_ACMD23_BROKEN)) {
+ 		host->flags |= SDHCI_AUTO_CMD23;
+ 		DBG("%s: Auto-CMD23 available\n", mmc_hostname(mmc));
+ 	} else {
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index dba793e..d979cf9 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -100,6 +100,8 @@ struct sdhci_host {
+ #define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
+ /* Stop command (CMD12) can set Transfer Complete when not using MMC_RSP_BUSY */
+ #define SDHCI_QUIRK2_STOP_WITH_TC			(1<<8)
++/* Controller broken with using ACMD23 */
++#define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<9)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
+-- 
+2.2.0
 
