@@ -1,22 +1,22 @@
 From: Scott Branden <sbranden@broadcom.com>
-Subject: [PATCH] mmc: sdhci: add quirk for ACMD23 broken
-Date: Thu, 4 Dec 2014 16:11:24 -0800
-Message-ID: <1417738284-10074-1-git-send-email-sbranden@broadcom.com>
+Subject: [PATCH v2] mmc: sdhci: add quirk for ACMD23 broken
+Date: Thu, 4 Dec 2014 16:16:12 -0800
+Message-ID: <1417738572-10441-1-git-send-email-sbranden@broadcom.com>
 References: <Scott Branden <sbranden@broadcom.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:48903 "EHLO
-	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933107AbaLEALa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Dec 2014 19:11:30 -0500
+Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:65057 "EHLO
+	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933009AbaLEAQU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Dec 2014 19:16:20 -0500
 In-Reply-To: <Scott Branden <sbranden@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ray Jui <rjui@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, Scott Branden <sbranden@broadcom.com>
 
-Add quick to handle broken auto-CMD23
+Add quirk to handle broken auto-CMD23.
 Some controllers do not respond after the first auto-CMD23 is issued.
 
 This allows CMD23 to still work (mandatory for the faster UHS-I mode)
