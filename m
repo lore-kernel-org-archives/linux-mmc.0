@@ -1,107 +1,206 @@
-From: Alexandru Stan <amstan@chromium.org>
-Subject: Re: [PATCH v3] mmc: dw_mmc: add quirk for broken data transfer over scheme
-Date: Fri, 5 Dec 2014 15:56:11 -0800
-Message-ID: <CAHNYxRxga=HQDBaw5Tp84TwH9BVe9B286Eh4rtwVdd=QTaE=0A@mail.gmail.com>
-References: <1415970338-2637-1-git-send-email-addy.ke@rock-chips.com>
- <1417576563-5033-1-git-send-email-addy.ke@rock-chips.com> <CAD=FV=Vfe_UUT=fTdQESEyrE56Jy4p9NtKh80PkR+C4mDCHDxA@mail.gmail.com>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH v2 3/4] mmc: dw_mmc: Convert to mmc_send_tuning()
+Date: Sat, 6 Dec 2014 18:13:02 +0530
+Message-ID: <CAGOxZ525JR9vTuKAZJJjDF6iq3R2-DuEcJFEOT9KkEMZGimUFw@mail.gmail.com>
+References: <1417780783-12939-1-git-send-email-ulf.hansson@linaro.org> <1417780783-12939-4-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=Vfe_UUT=fTdQESEyrE56Jy4p9NtKh80PkR+C4mDCHDxA@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Addy Ke <addy.ke@rock-chips.com>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, op
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yh0-f46.google.com ([209.85.213.46]:32999 "EHLO
+	mail-yh0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752481AbaLFMnn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 6 Dec 2014 07:43:43 -0500
+Received: by mail-yh0-f46.google.com with SMTP id t59so1114057yho.33
+        for <linux-mmc@vger.kernel.org>; Sat, 06 Dec 2014 04:43:42 -0800 (PST)
+In-Reply-To: <1417780783-12939-4-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, Aisheng Dong <b29396@freescale.com>, Stephen Boyd <sboyd@codeaurora.org>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-Seems like the BROKEN_DTO also affects EVENT_DATA_COMPLETE, sometimes we don't
-see that (but we do see EVENT_XFER_COMPLETE), leave the state machine and never
-come back to it to timeout. I have this happening on emmc specifically, haven't
-seen it on sdmmc yet.
+Hi Ulf,
 
-The fix is to also start the timer when we don't see a EVENT_DATA_COMPLETE.
-
-More details for how I debugged this can be found at:
-https://chromium-review.googlesource.com/#/c/233691/
-
-In ~100 reboot tests I haven't seen any hangs, whereas before it was
-hanging about 20% of the time.
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 50865e7..c678206 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1685,8 +1685,17 @@ static void dw_mci_tasklet_func(unsigned long priv)
-
-                case STATE_DATA_BUSY:
-                        if (!test_and_clear_bit(EVENT_DATA_COMPLETE,
--                                               &host->pending_events))
-+                                               &host->pending_events)) {
-+                               if (host->quirks & DW_MCI_QUIRK_BROKEN_DTO) {
-+                                       drto_clks = mci_readl(host, TMOUT) >> 8;
-+                                       drto_ms = DIV_ROUND_UP(drto_clks * 1000,
-+                                                              host->bus_hz);
-+
-+                                       mod_timer(&host->dto_timer, jiffies +
-+                                               msecs_to_jiffies(drto_ms));
-+                               }
-                                break;
-+                       }
-
-                        host->data = NULL;
-                        set_bit(EVENT_DATA_COMPLETE, &host->completed_events);
-Alexandru Stan (amstan)
-
-
-On Tue, Dec 2, 2014 at 9:08 PM, Doug Anderson <dianders@chromium.org> wrote:
-> Addy,
+On Fri, Dec 5, 2014 at 5:29 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> Instead of having a local hack taking care of sending the tuning
+> command and as well to verify the response pattern, let's convert to
+> the common mmc_send_tuning() API.
 >
-> On Tue, Dec 2, 2014 at 7:16 PM, Addy Ke <addy.ke@rock-chips.com> wrote:
->> This patch add a new quirk to add a s/w timer to notify the driver
->> to terminate current transfer and report a data timeout to the core,
->> if DTO interrupt does NOT come within the given time.
->>
->> dw_mmc call mmc_request_done func to finish transfer depends on
->> DTO interrupt. If DTO interrupt does not come in sending data state,
->> the current transfer will be blocked.
->>
->> But this case really exists, when driver reads tuning data from
->> card on RK3288-pink2 board. I measured waveforms by oscilloscope
->> and found that card clock was always on and data lines were always
->> holded high level in sending data state.
->>
->> We got the reply from synopsys:
->> There are two counters but both use the same value of [31:8] bits.
->> Data timeout counter doesn't wait for stop clock and you should get
->> DRTO even when the clock is not stopped.
->> Host Starvation timeout counter is triggered with stop clock condition.
->>
->> This means that host should get DRTO and DTO interrupt.
->>
->> But we really don't get any data-related interrupt in RK3X SoCs.
->> And driver can't get data transfer state, it can do nothing but wait for.
->>
->> We don't know why we have this problem, but we need it to fix this problem now.
->> And I will post a follow up change when we find the root cause.
->>
->> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
->> ---
->> Changes in v2:
->> - fix some typo.
->> - remove extra timeout value (250ms).
->> - remove dw_mci_dto_start_monitor func.
->> - use "broken-dto" for new quirk and change Subject for it.
->>
->> Changes in v3:
->> - Remove dts for broken-dto, just add this quirk in dw_mci_rockchip_init
->>
->>  drivers/mmc/host/dw_mmc-rockchip.c |  3 +++
->>  drivers/mmc/host/dw_mmc.c          | 41 +++++++++++++++++++++++++++++++++++++-
->>  include/linux/mmc/dw_mmc.h         |  5 +++++
->>  3 files changed, 48 insertions(+), 1 deletion(-)
+> This change affects the Exynos variant, since it's the only one which
+> support the dw_mmc's ->execute_tuning() callback.
 >
-> This seems reasonable to me.  I do hope that you can get to a root
-> cause, but I don't think this is a terrible bit of code to carry.
-> Obviously it's up to the folks who maintain dw_mmc and the mmc
-> subsystem, but:
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
 >
-> Reviewed-by: Doug Anderson <dianders@chromium.org>
+With this change HS200 mode does not work on exynos5800 peach-pi board.
+I got below error while testing this series:
+
+mmc0: tuning execution failed
+mmc0: error -5 whilst initialising MMC card
+
+Though, your's next branch with commit _a1d06b4_ works fine in HS200 mode.
+
+
+> Changes in v2:
+>         Rebased, to get latest version of the mmc_send_tuning() API.
+>
+> ---
+>  drivers/mmc/host/dw_mmc-exynos.c | 49 ++++------------------------------------
+>  drivers/mmc/host/dw_mmc.c        | 22 +-----------------
+>  drivers/mmc/host/dw_mmc.h        |  8 +------
+>  3 files changed, 6 insertions(+), 73 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 509365c..d0d7aec 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -375,64 +375,24 @@ out:
+>         return loc;
+>  }
+>
+> -static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
+> -                                       struct dw_mci_tuning_data *tuning_data)
+> +static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot)
+>  {
+>         struct dw_mci *host = slot->host;
+>         struct mmc_host *mmc = slot->mmc;
+> -       const u8 *blk_pattern = tuning_data->blk_pattern;
+> -       u8 *blk_test;
+> -       unsigned int blksz = tuning_data->blksz;
+>         u8 start_smpl, smpl, candiates = 0;
+>         s8 found = -1;
+>         int ret = 0;
+>
+> -       blk_test = kmalloc(blksz, GFP_KERNEL);
+> -       if (!blk_test)
+> -               return -ENOMEM;
+> -
+>         start_smpl = dw_mci_exynos_get_clksmpl(host);
+>
+>         do {
+> -               struct mmc_request mrq = {NULL};
+> -               struct mmc_command cmd = {0};
+> -               struct mmc_command stop = {0};
+> -               struct mmc_data data = {0};
+> -               struct scatterlist sg;
+> -
+> -               cmd.opcode = opcode;
+> -               cmd.arg = 0;
+> -               cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+> -
+> -               stop.opcode = MMC_STOP_TRANSMISSION;
+> -               stop.arg = 0;
+> -               stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
+> -
+> -               data.blksz = blksz;
+> -               data.blocks = 1;
+> -               data.flags = MMC_DATA_READ;
+> -               data.sg = &sg;
+> -               data.sg_len = 1;
+> -
+> -               sg_init_one(&sg, blk_test, blksz);
+> -               mrq.cmd = &cmd;
+> -               mrq.stop = &stop;
+> -               mrq.data = &data;
+> -               host->mrq = &mrq;
+> -
+>                 mci_writel(host, TMOUT, ~0);
+>                 smpl = dw_mci_exynos_move_next_clksmpl(host);
+>
+> -               mmc_wait_for_req(mmc, &mrq);
+> +               ret = mmc_send_tuning(mmc);
+> +               if (!ret)
+> +                       candiates |= (1 << smpl);
+>
+> -               if (!cmd.error && !data.error) {
+> -                       if (!memcmp(blk_pattern, blk_test, blksz))
+> -                               candiates |= (1 << smpl);
+> -               } else {
+> -                       dev_dbg(host->dev,
+> -                               "Tuning error: cmd.error:%d, data.error:%d\n",
+> -                               cmd.error, data.error);
+> -               }
+>         } while (start_smpl != smpl);
+>
+>         found = dw_mci_exynos_get_best_clksmpl(candiates);
+> @@ -441,7 +401,6 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
+>         else
+>                 ret = -EIO;
+>
+> -       kfree(blk_test);
+>         return ret;
+>  }
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 67c0451..265bb28 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1299,30 +1299,10 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>         struct dw_mci_slot *slot = mmc_priv(mmc);
+>         struct dw_mci *host = slot->host;
+>         const struct dw_mci_drv_data *drv_data = host->drv_data;
+> -       struct dw_mci_tuning_data tuning_data;
+>         int err = -ENOSYS;
+>
+> -       if (opcode == MMC_SEND_TUNING_BLOCK_HS200) {
+> -               if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
+> -                       tuning_data.blk_pattern = tuning_blk_pattern_8bit;
+> -                       tuning_data.blksz = sizeof(tuning_blk_pattern_8bit);
+> -               } else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4) {
+> -                       tuning_data.blk_pattern = tuning_blk_pattern_4bit;
+> -                       tuning_data.blksz = sizeof(tuning_blk_pattern_4bit);
+> -               } else {
+> -                       return -EINVAL;
+> -               }
+> -       } else if (opcode == MMC_SEND_TUNING_BLOCK) {
+> -               tuning_data.blk_pattern = tuning_blk_pattern_4bit;
+> -               tuning_data.blksz = sizeof(tuning_blk_pattern_4bit);
+> -       } else {
+> -               dev_err(host->dev,
+> -                       "Undefined command(%d) for tuning\n", opcode);
+> -               return -EINVAL;
+> -       }
+> -
+>         if (drv_data && drv_data->execute_tuning)
+> -               err = drv_data->execute_tuning(slot, opcode, &tuning_data);
+> +               err = drv_data->execute_tuning(slot);
+>         return err;
+>  }
+>
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 0d0f7a2..c1f4557 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -248,11 +248,6 @@ struct dw_mci_slot {
+>         int                     sdio_id;
+>  };
+>
+> -struct dw_mci_tuning_data {
+> -       const u8 *blk_pattern;
+> -       unsigned int blksz;
+> -};
+> -
+>  /**
+>   * dw_mci driver data - dw-mshc implementation specific driver data.
+>   * @caps: mmc subsystem specified capabilities of the controller(s).
+> @@ -274,7 +269,6 @@ struct dw_mci_drv_data {
+>         void            (*prepare_command)(struct dw_mci *host, u32 *cmdr);
+>         void            (*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
+>         int             (*parse_dt)(struct dw_mci *host);
+> -       int             (*execute_tuning)(struct dw_mci_slot *slot, u32 opcode,
+> -                                       struct dw_mci_tuning_data *tuning_data);
+> +       int             (*execute_tuning)(struct dw_mci_slot *slot);
+>  };
+>  #endif /* _DW_MMC_H_ */
+> --
+> 1.9.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+-- 
+Regards,
+Alim
