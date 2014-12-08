@@ -1,127 +1,76 @@
-From: Asutosh Das <das.asutosh@gmail.com>
-Subject: Re: [PATCH 3/5] mmc: card: Add eMMC command queuing support in mmc
- block layer
-Date: Mon, 8 Dec 2014 11:28:47 +0530
-Message-ID: <CAA=bF1QaKLJv2rXLhpBoGA52syNgXL31yV2fKoLaTn2MP_Jw3w@mail.gmail.com>
-References: <20141202115821.GA27658@asutoshd-ics.in.qualcomm.com> <loom.20141208T030638-232@post.gmane.org>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH v4 1/6] mfd: rtsx: add func to split u32 into register
+Date: Mon, 8 Dec 2014 08:49:41 +0000
+Message-ID: <20141208084941.GC3951@x1>
+References: <cover.1417758564.git.micky_ching@realsil.com.cn>
+ <17ba65f4bdf4707bdf038e407ecf5dc012bca281.1417758564.git.micky_ching@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <loom.20141208T030638-232@post.gmane.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Hu Ziji <huziji@marvell.com>
-Cc: linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f52.google.com ([209.85.192.52]:54493 "EHLO
+	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752051AbaLHIts (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Dec 2014 03:49:48 -0500
+Received: by mail-qg0-f52.google.com with SMTP id a108so3226838qge.11
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Dec 2014 00:49:47 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <17ba65f4bdf4707bdf038e407ecf5dc012bca281.1417758564.git.micky_ching@realsil.com.cn>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: micky_ching@realsil.com.cn
+Cc: sameo@linux.intel.com, chris@printf.net, ulf.hansson@linaro.org, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org, dan.carpenter@oracle.com, rogerable@realtek.com, wei_wang@realsil.com.cn
 
-Hi Ziji
-Thanks for your comments.
+On Fri, 05 Dec 2014, micky_ching@realsil.com.cn wrote:
 
-I'm adding linux-mmc to this as well.
+> From: Micky Ching <micky_ching@realsil.com.cn>
+>=20
+> Add helper function to write u32 to registers, if we want to put u32
+> value to 4 continuous register, this can help us reduce tedious work.
+>=20
+> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+> Acked-by: Lee Jones <lee.jones@linaro.org>
+> ---
+>  include/linux/mfd/rtsx_pci.h | 9 +++++++++
+>  1 file changed, 9 insertions(+)
+>=20
+> diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx_pc=
+i.h
+> index 74346d5..9234449 100644
+> --- a/include/linux/mfd/rtsx_pci.h
+> +++ b/include/linux/mfd/rtsx_pci.h
+> @@ -558,6 +558,7 @@
+>  #define SD_SAMPLE_POINT_CTL		0xFDA7
+>  #define SD_PUSH_POINT_CTL		0xFDA8
+>  #define SD_CMD0				0xFDA9
+> +#define   SD_CMD_START			0x40
 
-On 8 December 2014 at 07:47, Hu Ziji <huziji@marvell.com> wrote:
->
-> Asutosh Das <asutoshd <at> codeaurora.org> writes:
->
-> > +static inline bool mmc_cmdq_should_pull_reqs(struct mmc_host *host,
-> > +                                     struct mmc_cmdq_context_info *ctx)
-> > +{
-> > +     spin_lock_bh(&ctx->cmdq_ctx_lock);
-> > +     if (ctx->active_dcmd || ctx->rpmb_in_wait) {
-> > +             if ((ctx->curr_state != CMDQ_STATE_HALT) ||
-> > +                     (ctx->curr_state != CMDQ_STATE_ERR)) {
->
->                         Because CMDQ_STATE_HALT == 0 and CMDQ_STATE_ERR == 1, it is
-> impossible that condition ((ctx->curr_state == CMDQ_STATE_HALT) && (ctx-
-> >curr_state != CMDQ_STATE_ERR)) is satisfied. Thus the above if-condition will
-> always be true.
->
+This is a different format at the others in the group on two counts;
+firstly you have 3 whitespace characters after the #define and
+secondly all of the other hex digits in the set are 4 a breast.
+Please add the leading zeros to conform to this format.
 
-Agree.
+>  #define SD_CMD1				0xFDAA
+>  #define SD_CMD2				0xFDAB
+>  #define SD_CMD3				0xFDAC
+> @@ -967,4 +968,12 @@ static inline u8 *rtsx_pci_get_cmd_data(struct r=
+tsx_pcr *pcr)
+>  	return (u8 *)(pcr->host_cmds_ptr);
+>  }
+> =20
+> +static inline void rtsx_pci_write_be32(struct rtsx_pcr *pcr, u16 reg=
+, u32 val)
+> +{
+> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg,     0xFF, val >> 24);
+> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 1, 0xFF, val >> 16);
+> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 2, 0xFF, val >> 8);
+> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 3, 0xFF, val);
+> +}
+> +
+>  #endif
 
->
-> > +                     pr_debug("%s: %s: skip pulling reqs: dcmd: %d rpmb: %d state:
-> %d\n",
-> > +                              mmc_hostname(host), __func__, ctx->active_dcmd,
-> > +                              ctx->rpmb_in_wait, ctx->curr_state);
-> > +                     spin_unlock_bh(&ctx->cmdq_ctx_lock);
-> > +                     return false;
-> > +             }
-> > +     } else {
-> > +             spin_unlock_bh(&ctx->cmdq_ctx_lock);
-> > +             return true;
-> > +     }
-> > +}
->
-> > +/**
-> > + *   mmc_cmdq_halt - halt/un-halt the command queue engine
-> > + *    <at> host: host instance
-> > + *    <at> halt: true - halt, un-halt otherwise
-> > + *
-> > + *   Host halts the command queue engine. It should complete
-> > + *   the ongoing transfer and release the SD bus.
-> > + *   All legacy SD commands can be sent upon successful
-> > + *   completion of this function.
-> > + *   Returns 0 on success, negative otherwise
-> > + */
-> > +int mmc_cmdq_halt(struct mmc_host *host, bool halt)
-> > +{
-> > +     int err = 0;
-> > +
-> > +     if ((halt && (host->cmdq_ctx.curr_state & CMDQ_STATE_HALT)) ||
-> > +         (!halt && !(host->cmdq_ctx.curr_state & CMDQ_STATE_HALT)))
-> > +             return 1;
-> > +
-> > +     if (host->cmdq_ops->halt) {
-> > +             err = host->cmdq_ops->halt(host, halt);
-> > +             if (!err && halt)
-> > +                     host->cmdq_ctx.curr_state |= CMDQ_STATE_HALT;
-> > +             else if (!err && !halt)
-> > +                     host->cmdq_ctx.curr_state &= ~CMDQ_STATE_HALT;
->
->                 Since CMDQ_STATE_HALE == 0, ORed with CMDQ_STATE_HALT and
-> ANDed with ~CMDQ_STATE_HALT will neither modify the value of curr_state. Thus
-> CMDQ_STATE_HALT as 0 cannot indicate the halt state of cmd queue.
-
-Agree.
-
->
->
-> > +     }
-> > +     return 0;
-> > +}
-> > +EXPORT_SYMBOL(mmc_cmdq_halt);
->
-> > +enum cmdq_states {
-> > +     CMDQ_STATE_HALT,
-> > +     CMDQ_STATE_ERR,
-> > +};
->
->     According to above definition, CMDQ_STATE_HALT is 0x0 and
-> CMDQ_STATE_ERR is 0x1.
->
-
-I will address these comments in the next patch.
-
->
->
-> Hi Asutosh,
->
->     I think that the definition of CMDQ_STATE_HALT might fail to indicate halt status
-> correctly.
->     Could you check my comments please?
->     If I misunderstand your source code, please correct me.
->
-> Best regards,
-> Ziji
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-arm-msm" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
-
--- 
-Thanks & Regards
-~/Asutosh Das
+--=20
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
