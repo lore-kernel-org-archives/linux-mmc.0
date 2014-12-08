@@ -1,47 +1,89 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH 3/3] ARM: edma: Split up header file to platform_data and API file
-Date: Mon, 08 Dec 2014 14:16:59 +0100
-Message-ID: <5296454.gCL6SxI1xr@wuerfel>
-References: <1417084891-17990-1-git-send-email-peter.ujfalusi@ti.com> <1417084891-17990-4-git-send-email-peter.ujfalusi@ti.com> <20141208124917.GI16827@intel.com>
+From: Ziji Hu <huziji@marvell.com>
+Subject: RE: [PATCH 3/5] mmc: card: Add eMMC command queuing support in mmc
+ block layer
+Date: Mon, 8 Dec 2014 11:03:54 -0800
+Message-ID: <89813612683626448B837EE5A0B6A7CB47068B1E58@SC-VEXCH4.marvell.com>
+References: <20141202115821.GA27658@asutoshd-ics.in.qualcomm.com>
+ <loom.20141208T030638-232@post.gmane.org>
+ <CAA=bF1QaKLJv2rXLhpBoGA52syNgXL31yV2fKoLaTn2MP_Jw3w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20141208124917.GI16827-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org, khilman-1D3HCaltpLuhEniVeURVKkEOCMrvLtNR@public.gmane.org, Liam Girdwood <lgirdwood-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAA=bF1QaKLJv2rXLhpBoGA52syNgXL31yV2fKoLaTn2MP_Jw3w@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Asutosh Das <das.asutosh@gmail.com>
+Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Monday 08 December 2014 18:19:17 Vinod Koul wrote:
-> On Thu, Nov 27, 2014 at 12:41:31PM +0200, Peter Ujfalusi wrote:
-> > include/linux/platform_data/ is not a correct place to keep the API
-> > definitions for edma, it is meant to be only for the pdata for the device.
-> > Clean up this by moving the API to include/linux/edma.h
-> > 
-> > Signed-off-by: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>
-> > ---
-> >  arch/arm/common/edma.c                     |   3 +-
-> >  arch/arm/mach-davinci/devices.c            |   1 +
-> >  arch/arm/mach-davinci/include/mach/da8xx.h |   1 +
-> >  drivers/dma/edma.c                         |   2 +-
-> >  include/linux/edma.h                       | 153 +++++++++++++++++++++++++++++
-> >  include/linux/platform_data/edma.h         | 148 ++--------------------------
-> >  sound/soc/davinci/davinci-pcm.h            |   1 +
-> >  7 files changed, 165 insertions(+), 144 deletions(-)
-> >  create mode 100644 include/linux/edma.h
-> I was hoping that this will have delete for platform_data/edma.h, do we
-> still need that and why shouldn't we get rid of this 
-
-I think the platform_data/edma.h file is needed for as long as we have
-mach-davinci systems that are not converted to boot using DT. At the current
-pace of development in that area, I would expect that to take a few more
-years at least: da850 support is slowly proceeding (since 2012), da830 should
-be fairly straightforward to add once da850 is done, but I haven't seen
-anybody start working on the dm* socs for DT.
-
-	Arnd
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgQXN1dG9zaCwNCg0KICAgICAgICBNYXkgSSBhc2sgd2hldGhlciB5b3UgaGF2ZSB0ZXN0ZWQg
+dGhlIGNvZGUgb24gaGFyZHdhcmUgcGxhdGZvcm0/DQogICAgICAgIElmIHlvdSBoYXZlIG5vdCB0
+ZXN0ZWQgaXQgeWV0LCBkbyB5b3UgaGF2ZSBhIHNjaGVkdWxlIGZvciB0ZXN0aW5nPw0KDQotLS0t
+LU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogQXN1dG9zaCBEYXMgW21haWx0bzpkYXMuYXN1
+dG9zaEBnbWFpbC5jb21dDQpTZW50OiAyMDE0xOoxMtTCN8jVIDIxOjU5DQpUbzogWmlqaSBIdQ0K
+Q2M6IGxpbnV4LWFybS1tc21Admdlci5rZXJuZWwub3JnOyBsaW51eC1tbWNAdmdlci5rZXJuZWwu
+b3JnDQpTdWJqZWN0OiBSZTogW1BBVENIIDMvNV0gbW1jOiBjYXJkOiBBZGQgZU1NQyBjb21tYW5k
+IHF1ZXVpbmcgc3VwcG9ydCBpbiBtbWMgYmxvY2sgbGF5ZXINCg0KSGkgWmlqaQ0KVGhhbmtzIGZv
+ciB5b3VyIGNvbW1lbnRzLg0KDQpJJ20gYWRkaW5nIGxpbnV4LW1tYyB0byB0aGlzIGFzIHdlbGwu
+DQoNCk9uIDggRGVjZW1iZXIgMjAxNCBhdCAwNzo0NywgSHUgWmlqaSA8aHV6aWppQG1hcnZlbGwu
+Y29tPiB3cm90ZToNCj4NCj4gQXN1dG9zaCBEYXMgPGFzdXRvc2hkIDxhdD4gY29kZWF1cm9yYS5v
+cmc+IHdyaXRlczoNCj4NCj4gPiArc3RhdGljIGlubGluZSBib29sIG1tY19jbWRxX3Nob3VsZF9w
+dWxsX3JlcXMoc3RydWN0IG1tY19ob3N0ICpob3N0LA0KPiA+ICsgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgc3RydWN0IG1tY19jbWRxX2NvbnRleHRfaW5mbw0KPiA+ICsqY3R4
+KSB7DQo+ID4gKyAgICAgc3Bpbl9sb2NrX2JoKCZjdHgtPmNtZHFfY3R4X2xvY2spOw0KPiA+ICsg
+ICAgIGlmIChjdHgtPmFjdGl2ZV9kY21kIHx8IGN0eC0+cnBtYl9pbl93YWl0KSB7DQo+ID4gKyAg
+ICAgICAgICAgICBpZiAoKGN0eC0+Y3Vycl9zdGF0ZSAhPSBDTURRX1NUQVRFX0hBTFQpIHx8DQo+
+ID4gKyAgICAgICAgICAgICAgICAgICAgIChjdHgtPmN1cnJfc3RhdGUgIT0gQ01EUV9TVEFURV9F
+UlIpKSB7DQo+DQo+ICAgICAgICAgICAgICAgICAgICAgICAgIEJlY2F1c2UgQ01EUV9TVEFURV9I
+QUxUID09IDAgYW5kDQo+IENNRFFfU1RBVEVfRVJSID09IDEsIGl0IGlzIGltcG9zc2libGUgdGhh
+dCBjb25kaXRpb24gKChjdHgtPmN1cnJfc3RhdGUNCj4gPT0gQ01EUV9TVEFURV9IQUxUKSAmJiAo
+Y3R4LQ0KPiA+Y3Vycl9zdGF0ZSAhPSBDTURRX1NUQVRFX0VSUikpIGlzIHNhdGlzZmllZC4gVGh1
+cyB0aGUgYWJvdmUNCj4gPmlmLWNvbmRpdGlvbiB3aWxsDQo+IGFsd2F5cyBiZSB0cnVlLg0KPg0K
+DQpBZ3JlZS4NCg0KPg0KPiA+ICsgICAgICAgICAgICAgICAgICAgICBwcl9kZWJ1ZygiJXM6ICVz
+OiBza2lwIHB1bGxpbmcgcmVxczogZGNtZDogJWQgcnBtYjogJWQgc3RhdGU6DQo+ICVkXG4iLA0K
+PiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBtbWNfaG9zdG5hbWUoaG9zdCksIF9f
+ZnVuY19fLCBjdHgtPmFjdGl2ZV9kY21kLA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICBjdHgtPnJwbWJfaW5fd2FpdCwgY3R4LT5jdXJyX3N0YXRlKTsNCj4gPiArICAgICAgICAg
+ICAgICAgICAgICAgc3Bpbl91bmxvY2tfYmgoJmN0eC0+Y21kcV9jdHhfbG9jayk7DQo+ID4gKyAg
+ICAgICAgICAgICAgICAgICAgIHJldHVybiBmYWxzZTsNCj4gPiArICAgICAgICAgICAgIH0NCj4g
+PiArICAgICB9IGVsc2Ugew0KPiA+ICsgICAgICAgICAgICAgc3Bpbl91bmxvY2tfYmgoJmN0eC0+
+Y21kcV9jdHhfbG9jayk7DQo+ID4gKyAgICAgICAgICAgICByZXR1cm4gdHJ1ZTsNCj4gPiArICAg
+ICB9DQo+ID4gK30NCj4NCj4gPiArLyoqDQo+ID4gKyAqICAgbW1jX2NtZHFfaGFsdCAtIGhhbHQv
+dW4taGFsdCB0aGUgY29tbWFuZCBxdWV1ZSBlbmdpbmUNCj4gPiArICogICAgPGF0PiBob3N0OiBo
+b3N0IGluc3RhbmNlDQo+ID4gKyAqICAgIDxhdD4gaGFsdDogdHJ1ZSAtIGhhbHQsIHVuLWhhbHQg
+b3RoZXJ3aXNlDQo+ID4gKyAqDQo+ID4gKyAqICAgSG9zdCBoYWx0cyB0aGUgY29tbWFuZCBxdWV1
+ZSBlbmdpbmUuIEl0IHNob3VsZCBjb21wbGV0ZQ0KPiA+ICsgKiAgIHRoZSBvbmdvaW5nIHRyYW5z
+ZmVyIGFuZCByZWxlYXNlIHRoZSBTRCBidXMuDQo+ID4gKyAqICAgQWxsIGxlZ2FjeSBTRCBjb21t
+YW5kcyBjYW4gYmUgc2VudCB1cG9uIHN1Y2Nlc3NmdWwNCj4gPiArICogICBjb21wbGV0aW9uIG9m
+IHRoaXMgZnVuY3Rpb24uDQo+ID4gKyAqICAgUmV0dXJucyAwIG9uIHN1Y2Nlc3MsIG5lZ2F0aXZl
+IG90aGVyd2lzZQ0KPiA+ICsgKi8NCj4gPiAraW50IG1tY19jbWRxX2hhbHQoc3RydWN0IG1tY19o
+b3N0ICpob3N0LCBib29sIGhhbHQpIHsNCj4gPiArICAgICBpbnQgZXJyID0gMDsNCj4gPiArDQo+
+ID4gKyAgICAgaWYgKChoYWx0ICYmIChob3N0LT5jbWRxX2N0eC5jdXJyX3N0YXRlICYgQ01EUV9T
+VEFURV9IQUxUKSkgfHwNCj4gPiArICAgICAgICAgKCFoYWx0ICYmICEoaG9zdC0+Y21kcV9jdHgu
+Y3Vycl9zdGF0ZSAmIENNRFFfU1RBVEVfSEFMVCkpKQ0KPiA+ICsgICAgICAgICAgICAgcmV0dXJu
+IDE7DQo+ID4gKw0KPiA+ICsgICAgIGlmIChob3N0LT5jbWRxX29wcy0+aGFsdCkgew0KPiA+ICsg
+ICAgICAgICAgICAgZXJyID0gaG9zdC0+Y21kcV9vcHMtPmhhbHQoaG9zdCwgaGFsdCk7DQo+ID4g
+KyAgICAgICAgICAgICBpZiAoIWVyciAmJiBoYWx0KQ0KPiA+ICsgICAgICAgICAgICAgICAgICAg
+ICBob3N0LT5jbWRxX2N0eC5jdXJyX3N0YXRlIHw9IENNRFFfU1RBVEVfSEFMVDsNCj4gPiArICAg
+ICAgICAgICAgIGVsc2UgaWYgKCFlcnIgJiYgIWhhbHQpDQo+ID4gKyAgICAgICAgICAgICAgICAg
+ICAgIGhvc3QtPmNtZHFfY3R4LmN1cnJfc3RhdGUgJj0gfkNNRFFfU1RBVEVfSEFMVDsNCj4NCj4g
+ICAgICAgICAgICAgICAgIFNpbmNlIENNRFFfU1RBVEVfSEFMRSA9PSAwLCBPUmVkIHdpdGggQ01E
+UV9TVEFURV9IQUxUDQo+IGFuZCBBTkRlZCB3aXRoIH5DTURRX1NUQVRFX0hBTFQgd2lsbCBuZWl0
+aGVyIG1vZGlmeSB0aGUgdmFsdWUgb2YNCj4gY3Vycl9zdGF0ZS4gVGh1cyBDTURRX1NUQVRFX0hB
+TFQgYXMgMCBjYW5ub3QgaW5kaWNhdGUgdGhlIGhhbHQgc3RhdGUgb2YgY21kIHF1ZXVlLg0KDQpB
+Z3JlZS4NCg0KPg0KPg0KPiA+ICsgICAgIH0NCj4gPiArICAgICByZXR1cm4gMDsNCj4gPiArfQ0K
+PiA+ICtFWFBPUlRfU1lNQk9MKG1tY19jbWRxX2hhbHQpOw0KPg0KPiA+ICtlbnVtIGNtZHFfc3Rh
+dGVzIHsNCj4gPiArICAgICBDTURRX1NUQVRFX0hBTFQsDQo+ID4gKyAgICAgQ01EUV9TVEFURV9F
+UlIsDQo+ID4gK307DQo+DQo+ICAgICBBY2NvcmRpbmcgdG8gYWJvdmUgZGVmaW5pdGlvbiwgQ01E
+UV9TVEFURV9IQUxUIGlzIDB4MCBhbmQNCj4gQ01EUV9TVEFURV9FUlIgaXMgMHgxLg0KPg0KDQpJ
+IHdpbGwgYWRkcmVzcyB0aGVzZSBjb21tZW50cyBpbiB0aGUgbmV4dCBwYXRjaC4NCg0KPg0KPg0K
+PiBIaSBBc3V0b3NoLA0KPg0KPiAgICAgSSB0aGluayB0aGF0IHRoZSBkZWZpbml0aW9uIG9mIENN
+RFFfU1RBVEVfSEFMVCBtaWdodCBmYWlsIHRvDQo+IGluZGljYXRlIGhhbHQgc3RhdHVzIGNvcnJl
+Y3RseS4NCj4gICAgIENvdWxkIHlvdSBjaGVjayBteSBjb21tZW50cyBwbGVhc2U/DQo+ICAgICBJ
+ZiBJIG1pc3VuZGVyc3RhbmQgeW91ciBzb3VyY2UgY29kZSwgcGxlYXNlIGNvcnJlY3QgbWUuDQo+
+DQo+IEJlc3QgcmVnYXJkcywNCj4gWmlqaQ0KPg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9t
+IHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUNCj4gbGludXgtYXJtLW1zbSIg
+aW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4g
+TW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
+aW5mby5odG1sDQoNCg0KDQoNCi0tDQpUaGFua3MgJiBSZWdhcmRzDQp+L0FzdXRvc2ggRGFzDQo=
