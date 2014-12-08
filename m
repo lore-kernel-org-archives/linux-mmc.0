@@ -1,61 +1,110 @@
-From: =?utf-8?B?5pWs6ZSQ?= <micky_ching@realsil.com.cn>
-Subject: Re: [PATCH v4 1/6] mfd: rtsx: add func to split u32 into register
-Date: Mon, 8 Dec 2014 09:59:04 +0000
-Message-ID: <54857668.4040902@realsil.com.cn>
-References: <cover.1417758564.git.micky_ching@realsil.com.cn>
- <17ba65f4bdf4707bdf038e407ecf5dc012bca281.1417758564.git.micky_ching@realsil.com.cn>
- <20141208084941.GC3951@x1> <54857429.5060108@realsil.com.cn>
- <20141208095719.GF3951@x1>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 3/4] mmc: dw_mmc: Convert to mmc_send_tuning()
+Date: Mon, 8 Dec 2014 11:10:05 +0100
+Message-ID: <CAPDyKFpOvs_ML+1edoTzeTPctiMV0B8EeD8aE8daGwjeG7gwMQ@mail.gmail.com>
+References: <1417780783-12939-1-git-send-email-ulf.hansson@linaro.org>
+	<1417780783-12939-4-git-send-email-ulf.hansson@linaro.org>
+	<CAGOxZ525JR9vTuKAZJJjDF6iq3R2-DuEcJFEOT9KkEMZGimUFw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <20141208095719.GF3951@x1>
-Content-Language: zh-CN
-Content-ID: <42C28E244E978A46B8E5E4D4AF9914B0@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Lee Jones <lee.jones@linaro.org>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "sameo@linux.intel.com" <sameo@linux.intel.com>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, =?utf-8?B?546L54Kc?= <wei_wang@realsil.com.cn>, "rogerable@realtek.com" <rogerable@realtek.com>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "dan.carpenter@oracle.com" <dan.carpenter@oracle.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f171.google.com ([209.85.216.171]:42418 "EHLO
+	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752717AbaLHKKG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Dec 2014 05:10:06 -0500
+Received: by mail-qc0-f171.google.com with SMTP id r5so3242853qcx.2
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Dec 2014 02:10:05 -0800 (PST)
+In-Reply-To: <CAGOxZ525JR9vTuKAZJJjDF6iq3R2-DuEcJFEOT9KkEMZGimUFw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alim Akhtar <alim.akhtar@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, Aisheng Dong <b29396@freescale.com>, Stephen Boyd <sboyd@codeaurora.org>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-DQpPbiAxMi8wOC8yMDE0IDA1OjU3IFBNLCBMZWUgSm9uZXMgd3JvdGU6DQo+IE9uIE1vbiwgMDgg
-RGVjIDIwMTQsIOaVrOmUkCB3cm90ZToNCj4NCj4+IE9uIDEyLzA4LzIwMTQgMDQ6NDkgUE0sIExl
-ZSBKb25lcyB3cm90ZToNCj4+Pj4gZGlmZiAtLWdpdCBhL2luY2x1ZGUvbGludXgvbWZkL3J0c3hf
-cGNpLmggYi9pbmNsdWRlL2xpbnV4L21mZC9ydHN4X3BjaS5oDQo+Pj4+PiBpbmRleCA3NDM0NmQ1
-Li45MjM0NDQ5IDEwMDY0NA0KPj4+Pj4gLS0tIGEvaW5jbHVkZS9saW51eC9tZmQvcnRzeF9wY2ku
-aA0KPj4+Pj4gKysrIGIvaW5jbHVkZS9saW51eC9tZmQvcnRzeF9wY2kuaA0KPj4+Pj4gQEAgLTU1
-OCw2ICs1NTgsNyBAQA0KPj4+Pj4gICAjZGVmaW5lIFNEX1NBTVBMRV9QT0lOVF9DVEwJCTB4RkRB
-Nw0KPj4+Pj4gICAjZGVmaW5lIFNEX1BVU0hfUE9JTlRfQ1RMCQkweEZEQTgNCj4+Pj4+ICAgI2Rl
-ZmluZSBTRF9DTUQwCQkJCTB4RkRBOQ0KPj4+Pj4gKyNkZWZpbmUgICBTRF9DTURfU1RBUlQJCQkw
-eDQwDQo+Pj4gVGhpcyBpcyBhIGRpZmZlcmVudCBmb3JtYXQgYXQgdGhlIG90aGVycyBpbiB0aGUg
-Z3JvdXAgb24gdHdvIGNvdW50czsNCj4+PiBmaXJzdGx5IHlvdSBoYXZlIDMgd2hpdGVzcGFjZSBj
-aGFyYWN0ZXJzIGFmdGVyIHRoZSAjZGVmaW5lIGFuZA0KPj4+IHNlY29uZGx5IGFsbCBvZiB0aGUg
-b3RoZXIgaGV4IGRpZ2l0cyBpbiB0aGUgc2V0IGFyZSA0IGEgYnJlYXN0Lg0KPj4+IFBsZWFzZSBh
-ZGQgdGhlIGxlYWRpbmcgemVyb3MgdG8gY29uZm9ybSB0byB0aGlzIGZvcm1hdC4NCj4+Pg0KPj4g
-SGkgbGVlLA0KPj4NCj4+IFRoaXMgZm9ybWF0IGlzIG1vcmUgcmVhZGFibGUsIGFkZCAyIHNwYWNl
-IG1lYW5zIHRoaXMgdmFsdWUgaXMNCj4+IGluIGdyb3VwcyB1bmRlciByZWdpc3RlciBTRF9DTUQw
-LCBhbmQgZWFjaCByZWdpc3RlciB2YWx1ZSBpcyB1OCB0eXBlLA0KPj4gc28gdXNlIDIgaGV4IGRp
-Z2l0cyBpcyByaWdodC4NCj4+DQo+PiBUaGUgb3JpZ2luYWwgZmlsZSBtYWtlIHJlZ2lzdGVyIGFk
-ZHJlc3MgYW5kIGl0cyByZWxhdGVkIHZhbHVlIHNlcGFyYXRlZCwNCj4+IGFuZCBncm91cCByZWdp
-c3RlciB0b2dldGhlci4NCj4+DQo+PiBCdXQgSSBsaWtlIHRvIHdyaXRlIHJlZ2lzdGVyIGFkZHJl
-c3MgYW5kIHZhbHVlIHRvZ2V0aGVyLA0KPj4gYWRkIDIgc3BhY2UgZm9yIHZhbHVlIHRvIGluZGlj
-YXRlIHRoaXMgdmFsdWUgaXMgcmVsYXRlZCB0byBhYm92ZSByZWdpc3Rlci4NCj4+DQo+PiBJZiB3
-ZSBhZGQgbmV3IGFkZHJlc3MvdmFsdWUsIEkgcmVjb21tZW5kIHdyaXRlIHJlZ2lzdGVyIGRlZmlu
-ZSBmb3JtYXQgYXMNCj4+IGJlbG93Og0KPj4NCj4+ICNkZWZpbmUgUkVHSVNURVIgICAgICAgIGFk
-ZHINCj4+ICNkZWZpbmUgICBSRUdfVkFMMSAgICAgIHZhbDENCj4+ICNkZWZpbmUgICBSRUdfVkFM
-MiAgICAgIHZhbDINCj4gT2theSwgSSBzZWUgdGhhdCB0aGVyZSBhcmUgb3RoZXIgb2NjdXJyZW5j
-ZXMgdXNpbmcgdGhpcyBmb3JtYXQgaW4gdGhhdA0KPiBmaWxlLiAgUGxlYXNlIGNvbnNpZGVyIGNv
-bnZlcnRpbmcgdGhlIGVudGlyZSBmaWxlIGludG8gdGhpcyBmb3JtYXQuICBJDQo+IGRvbid0IG1p
-bmQgaXQgZWl0aGVyIHdheSwgYnV0IGl0IGxvb2tzIG9kZCBpZiB0aGV5IGFyZSBtaXhlZC4NCj4N
-CndlIHdpbGwgcmVmb3JtYXQgaXQgaW4gdGhlIG5lYXIgZnV0dXJlLg0KDQpyZWdhcmRzLg0KX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KZGV2ZWwgbWFpbGlu
-ZyBsaXN0CmRldmVsQGxpbnV4ZHJpdmVycHJvamVjdC5vcmcKaHR0cDovL2RyaXZlcmRldi5saW51
-eGRyaXZlcnByb2plY3Qub3JnL21haWxtYW4vbGlzdGluZm8vZHJpdmVyZGV2LWRldmVsCg==
+On 6 December 2014 at 13:43, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+> Hi Ulf,
+>
+> On Fri, Dec 5, 2014 at 5:29 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> Instead of having a local hack taking care of sending the tuning
+>> command and as well to verify the response pattern, let's convert to
+>> the common mmc_send_tuning() API.
+>>
+>> This change affects the Exynos variant, since it's the only one which
+>> support the dw_mmc's ->execute_tuning() callback.
+>>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> ---
+>>
+
+Alim, thanks for helping out testing!
+
+> With this change HS200 mode does not work on exynos5800 peach-pi board.
+> I got below error while testing this series:
+>
+> mmc0: tuning execution failed
+> mmc0: error -5 whilst initialising MMC card
+>
+> Though, your's next branch with commit _a1d06b4_ works fine in HS200 mode.
+
+I was looking into the details of what change my patchset introduces
+for dw_mmc-exynos. Apparently, dw_mmc-exynos was using the
+MMC_STOP_TRANSMISSION to end the tuning reqeust (CMD21/19). The new
+mmc_send_tuning() API doesn't, which also conforms to what the eMMC/SD
+specifications states.
+
+Do you have any idea of why dw_mmc-exynos was using
+MMC_STOP_TRANSMISSION for CMD19/21?
+
+To see if my theory is correct, could you try out the following patch
+on top of $subject patch?
+BTW, I have queued patch 1 and 2, from this patchset available on my
+next branch.
+
+
+>From e1ac35bb0e90254275ec7088f41e6e2d59e48367 Mon Sep 17 00:00:00 2001
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 8 Dec 2014 10:58:48 +0100
+Subject: [PATCH] mmc: core: End tuning request with stop command
+
+Not to be merged!
+
+This patch adds the MMC_STOP_TRANSMISSION command to end a tuning
+request. For some reason dw_mmc seems to need this to complete the
+tuning request without errors.
+
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/mmc_ops.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 3b044c5..aa79e0c 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -551,6 +551,7 @@ int mmc_send_tuning(struct mmc_host *host)
+ {
+        struct mmc_request mrq = {NULL};
+        struct mmc_command cmd = {0};
++       struct mmc_command stop = {0};
+        struct mmc_data data = {0};
+        struct scatterlist sg;
+        struct mmc_ios *ios = &host->ios;
+@@ -576,10 +577,14 @@ int mmc_send_tuning(struct mmc_host *host)
+
+        mrq.cmd = &cmd;
+        mrq.data = &data;
++       mrq.stop = &stop;
+
+        cmd.opcode = opcode;
+        cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+
++       stop.opcode = MMC_STOP_TRANSMISSION;
++       stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
++
+        data.blksz = size;
+        data.blocks = 1;
+        data.flags = MMC_DATA_READ;
+-- 
+1.9.1
+
+Kind regards
+Uffe
