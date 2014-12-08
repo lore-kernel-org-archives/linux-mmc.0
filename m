@@ -1,76 +1,56 @@
 From: Lee Jones <lee.jones@linaro.org>
 Subject: Re: [PATCH v4 1/6] mfd: rtsx: add func to split u32 into register
-Date: Mon, 8 Dec 2014 09:57:19 +0000
-Message-ID: <20141208095719.GF3951@x1>
+Date: Mon, 8 Dec 2014 09:57:46 +0000
+Message-ID: <20141208095746.GG3951@x1>
 References: <cover.1417758564.git.micky_ching@realsil.com.cn>
  <17ba65f4bdf4707bdf038e407ecf5dc012bca281.1417758564.git.micky_ching@realsil.com.cn>
- <20141208084941.GC3951@x1>
- <54857429.5060108@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f177.google.com ([209.85.216.177]:52509 "EHLO
-	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752144AbaLHJ5Z (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Dec 2014 04:57:25 -0500
-Received: by mail-qc0-f177.google.com with SMTP id x3so3246907qcv.36
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Dec 2014 01:57:25 -0800 (PST)
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
 Content-Disposition: inline
-In-Reply-To: <54857429.5060108@realsil.com.cn>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <17ba65f4bdf4707bdf038e407ecf5dc012bca281.1417758564.git.micky_ching@realsil.com.cn>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: micky_ching@realsil.com.cn
+Cc: ulf.hansson@linaro.org, sameo@linux.intel.com, gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, chris@printf.net, wei_wang@realsil.com.cn, rogerable@realtek.com, devel@linuxdriverproject.org, dan.carpenter@oracle.com
 List-Id: linux-mmc@vger.kernel.org
-To: =?utf-8?B?5pWs6ZSQ?= <micky_ching@realsil.com.cn>
-Cc: "sameo@linux.intel.com" <sameo@linux.intel.com>, "chris@printf.net" <chris@printf.net>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "dan.carpenter@oracle.com" <dan.carpenter@oracle.com>, "rogerable@realtek.com" <rogerable@realtek.com>, =?utf-8?B?546L54Kc?= <wei_wang@realsil.com.cn>
 
-On Mon, 08 Dec 2014, =E6=95=AC=E9=94=90 wrote:
-
->=20
-> On 12/08/2014 04:49 PM, Lee Jones wrote:
-> >> diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx=
-_pci.h
-> >> >index 74346d5..9234449 100644
-> >> >--- a/include/linux/mfd/rtsx_pci.h
-> >> >+++ b/include/linux/mfd/rtsx_pci.h
-> >> >@@ -558,6 +558,7 @@
-> >> >  #define SD_SAMPLE_POINT_CTL		0xFDA7
-> >> >  #define SD_PUSH_POINT_CTL		0xFDA8
-> >> >  #define SD_CMD0				0xFDA9
-> >> >+#define   SD_CMD_START			0x40
-> > This is a different format at the others in the group on two counts=
-;
-> > firstly you have 3 whitespace characters after the #define and
-> > secondly all of the other hex digits in the set are 4 a breast.
-> > Please add the leading zeros to conform to this format.
-> >
-> Hi lee,
->=20
-> This format is more readable, add 2 space means this value is
-> in groups under register SD_CMD0, and each register value is u8 type,
-> so use 2 hex digits is right.
->=20
-> The original file make register address and its related value separat=
-ed,
-> and group register together.
->=20
-> But I like to write register address and value together,
-> add 2 space for value to indicate this value is related to above regi=
-ster.
->=20
-> If we add new address/value, I recommend write register define format=
- as=20
-> below:
->=20
-> #define REGISTER        addr
-> #define   REG_VAL1      val1
-> #define   REG_VAL2      val2
-
-Okay, I see that there are other occurrences using this format in that
-file.  Please consider converting the entire file into this format.  I
-don't mind it either way, but it looks odd if they are mixed.
-
---=20
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
+T24gRnJpLCAwNSBEZWMgMjAxNCwgbWlja3lfY2hpbmdAcmVhbHNpbC5jb20uY24gd3JvdGU6Cj4g
+RnJvbTogTWlja3kgQ2hpbmcgPG1pY2t5X2NoaW5nQHJlYWxzaWwuY29tLmNuPgo+IAo+IEFkZCBo
+ZWxwZXIgZnVuY3Rpb24gdG8gd3JpdGUgdTMyIHRvIHJlZ2lzdGVycywgaWYgd2Ugd2FudCB0byBw
+dXQgdTMyCj4gdmFsdWUgdG8gNCBjb250aW51b3VzIHJlZ2lzdGVyLCB0aGlzIGNhbiBoZWxwIHVz
+IHJlZHVjZSB0ZWRpb3VzIHdvcmsuCj4gCj4gU2lnbmVkLW9mZi1ieTogTWlja3kgQ2hpbmcgPG1p
+Y2t5X2NoaW5nQHJlYWxzaWwuY29tLmNuPgo+IEFja2VkLWJ5OiBMZWUgSm9uZXMgPGxlZS5qb25l
+c0BsaW5hcm8ub3JnPgo+IC0tLQo+ICBpbmNsdWRlL2xpbnV4L21mZC9ydHN4X3BjaS5oIHwgOSAr
+KysrKysrKysKPiAgMSBmaWxlIGNoYW5nZWQsIDkgaW5zZXJ0aW9ucygrKQoKQXBwbGllZCwgdGhh
+bmtzLgoKPiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9tZmQvcnRzeF9wY2kuaCBiL2luY2x1
+ZGUvbGludXgvbWZkL3J0c3hfcGNpLmgKPiBpbmRleCA3NDM0NmQ1Li45MjM0NDQ5IDEwMDY0NAo+
+IC0tLSBhL2luY2x1ZGUvbGludXgvbWZkL3J0c3hfcGNpLmgKPiArKysgYi9pbmNsdWRlL2xpbnV4
+L21mZC9ydHN4X3BjaS5oCj4gQEAgLTU1OCw2ICs1NTgsNyBAQAo+ICAjZGVmaW5lIFNEX1NBTVBM
+RV9QT0lOVF9DVEwJCTB4RkRBNwo+ICAjZGVmaW5lIFNEX1BVU0hfUE9JTlRfQ1RMCQkweEZEQTgK
+PiAgI2RlZmluZSBTRF9DTUQwCQkJCTB4RkRBOQo+ICsjZGVmaW5lICAgU0RfQ01EX1NUQVJUCQkJ
+MHg0MAo+ICAjZGVmaW5lIFNEX0NNRDEJCQkJMHhGREFBCj4gICNkZWZpbmUgU0RfQ01EMgkJCQkw
+eEZEQUIKPiAgI2RlZmluZSBTRF9DTUQzCQkJCTB4RkRBQwo+IEBAIC05NjcsNCArOTY4LDEyIEBA
+IHN0YXRpYyBpbmxpbmUgdTggKnJ0c3hfcGNpX2dldF9jbWRfZGF0YShzdHJ1Y3QgcnRzeF9wY3Ig
+KnBjcikKPiAgCXJldHVybiAodTggKikocGNyLT5ob3N0X2NtZHNfcHRyKTsKPiAgfQo+ICAKPiAr
+c3RhdGljIGlubGluZSB2b2lkIHJ0c3hfcGNpX3dyaXRlX2JlMzIoc3RydWN0IHJ0c3hfcGNyICpw
+Y3IsIHUxNiByZWcsIHUzMiB2YWwpCj4gK3sKPiArCXJ0c3hfcGNpX2FkZF9jbWQocGNyLCBXUklU
+RV9SRUdfQ01ELCByZWcsICAgICAweEZGLCB2YWwgPj4gMjQpOwo+ICsJcnRzeF9wY2lfYWRkX2Nt
+ZChwY3IsIFdSSVRFX1JFR19DTUQsIHJlZyArIDEsIDB4RkYsIHZhbCA+PiAxNik7Cj4gKwlydHN4
+X3BjaV9hZGRfY21kKHBjciwgV1JJVEVfUkVHX0NNRCwgcmVnICsgMiwgMHhGRiwgdmFsID4+IDgp
+Owo+ICsJcnRzeF9wY2lfYWRkX2NtZChwY3IsIFdSSVRFX1JFR19DTUQsIHJlZyArIDMsIDB4RkYs
+IHZhbCk7Cj4gK30KPiArCj4gICNlbmRpZgoKLS0gCkxlZSBKb25lcwpMaW5hcm8gU1RNaWNyb2Vs
+ZWN0cm9uaWNzIExhbmRpbmcgVGVhbSBMZWFkCkxpbmFyby5vcmcg4pSCIE9wZW4gc291cmNlIHNv
+ZnR3YXJlIGZvciBBUk0gU29DcwpGb2xsb3cgTGluYXJvOiBGYWNlYm9vayB8IFR3aXR0ZXIgfCBC
+bG9nCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmRldmVs
+IG1haWxpbmcgbGlzdApkZXZlbEBsaW51eGRyaXZlcnByb2plY3Qub3JnCmh0dHA6Ly9kcml2ZXJk
+ZXYubGludXhkcml2ZXJwcm9qZWN0Lm9yZy9tYWlsbWFuL2xpc3RpbmZvL2RyaXZlcmRldi1kZXZl
+bAo=
