@@ -1,206 +1,127 @@
-From: Alim Akhtar <alim.akhtar@gmail.com>
-Subject: Re: [PATCH v2 3/4] mmc: dw_mmc: Convert to mmc_send_tuning()
-Date: Sat, 6 Dec 2014 18:13:02 +0530
-Message-ID: <CAGOxZ525JR9vTuKAZJJjDF6iq3R2-DuEcJFEOT9KkEMZGimUFw@mail.gmail.com>
-References: <1417780783-12939-1-git-send-email-ulf.hansson@linaro.org> <1417780783-12939-4-git-send-email-ulf.hansson@linaro.org>
+From: Asutosh Das <das.asutosh@gmail.com>
+Subject: Re: [PATCH 3/5] mmc: card: Add eMMC command queuing support in mmc
+ block layer
+Date: Mon, 8 Dec 2014 11:28:47 +0530
+Message-ID: <CAA=bF1QaKLJv2rXLhpBoGA52syNgXL31yV2fKoLaTn2MP_Jw3w@mail.gmail.com>
+References: <20141202115821.GA27658@asutoshd-ics.in.qualcomm.com> <loom.20141208T030638-232@post.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yh0-f46.google.com ([209.85.213.46]:32999 "EHLO
-	mail-yh0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752481AbaLFMnn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 6 Dec 2014 07:43:43 -0500
-Received: by mail-yh0-f46.google.com with SMTP id t59so1114057yho.33
-        for <linux-mmc@vger.kernel.org>; Sat, 06 Dec 2014 04:43:42 -0800 (PST)
-In-Reply-To: <1417780783-12939-4-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <loom.20141208T030638-232@post.gmane.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Hu Ziji <huziji@marvell.com>
+Cc: linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, Aisheng Dong <b29396@freescale.com>, Stephen Boyd <sboyd@codeaurora.org>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-Hi Ulf,
+Hi Ziji
+Thanks for your comments.
 
-On Fri, Dec 5, 2014 at 5:29 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> Instead of having a local hack taking care of sending the tuning
-> command and as well to verify the response pattern, let's convert to
-> the common mmc_send_tuning() API.
->
-> This change affects the Exynos variant, since it's the only one which
-> support the dw_mmc's ->execute_tuning() callback.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->
-With this change HS200 mode does not work on exynos5800 peach-pi board.
-I got below error while testing this series:
+I'm adding linux-mmc to this as well.
 
-mmc0: tuning execution failed
-mmc0: error -5 whilst initialising MMC card
+On 8 December 2014 at 07:47, Hu Ziji <huziji@marvell.com> wrote:
+>
+> Asutosh Das <asutoshd <at> codeaurora.org> writes:
+>
+> > +static inline bool mmc_cmdq_should_pull_reqs(struct mmc_host *host,
+> > +                                     struct mmc_cmdq_context_info *ctx)
+> > +{
+> > +     spin_lock_bh(&ctx->cmdq_ctx_lock);
+> > +     if (ctx->active_dcmd || ctx->rpmb_in_wait) {
+> > +             if ((ctx->curr_state != CMDQ_STATE_HALT) ||
+> > +                     (ctx->curr_state != CMDQ_STATE_ERR)) {
+>
+>                         Because CMDQ_STATE_HALT == 0 and CMDQ_STATE_ERR == 1, it is
+> impossible that condition ((ctx->curr_state == CMDQ_STATE_HALT) && (ctx-
+> >curr_state != CMDQ_STATE_ERR)) is satisfied. Thus the above if-condition will
+> always be true.
+>
 
-Though, your's next branch with commit _a1d06b4_ works fine in HS200 mode.
+Agree.
 
+>
+> > +                     pr_debug("%s: %s: skip pulling reqs: dcmd: %d rpmb: %d state:
+> %d\n",
+> > +                              mmc_hostname(host), __func__, ctx->active_dcmd,
+> > +                              ctx->rpmb_in_wait, ctx->curr_state);
+> > +                     spin_unlock_bh(&ctx->cmdq_ctx_lock);
+> > +                     return false;
+> > +             }
+> > +     } else {
+> > +             spin_unlock_bh(&ctx->cmdq_ctx_lock);
+> > +             return true;
+> > +     }
+> > +}
+>
+> > +/**
+> > + *   mmc_cmdq_halt - halt/un-halt the command queue engine
+> > + *    <at> host: host instance
+> > + *    <at> halt: true - halt, un-halt otherwise
+> > + *
+> > + *   Host halts the command queue engine. It should complete
+> > + *   the ongoing transfer and release the SD bus.
+> > + *   All legacy SD commands can be sent upon successful
+> > + *   completion of this function.
+> > + *   Returns 0 on success, negative otherwise
+> > + */
+> > +int mmc_cmdq_halt(struct mmc_host *host, bool halt)
+> > +{
+> > +     int err = 0;
+> > +
+> > +     if ((halt && (host->cmdq_ctx.curr_state & CMDQ_STATE_HALT)) ||
+> > +         (!halt && !(host->cmdq_ctx.curr_state & CMDQ_STATE_HALT)))
+> > +             return 1;
+> > +
+> > +     if (host->cmdq_ops->halt) {
+> > +             err = host->cmdq_ops->halt(host, halt);
+> > +             if (!err && halt)
+> > +                     host->cmdq_ctx.curr_state |= CMDQ_STATE_HALT;
+> > +             else if (!err && !halt)
+> > +                     host->cmdq_ctx.curr_state &= ~CMDQ_STATE_HALT;
+>
+>                 Since CMDQ_STATE_HALE == 0, ORed with CMDQ_STATE_HALT and
+> ANDed with ~CMDQ_STATE_HALT will neither modify the value of curr_state. Thus
+> CMDQ_STATE_HALT as 0 cannot indicate the halt state of cmd queue.
 
-> Changes in v2:
->         Rebased, to get latest version of the mmc_send_tuning() API.
+Agree.
+
 >
-> ---
->  drivers/mmc/host/dw_mmc-exynos.c | 49 ++++------------------------------------
->  drivers/mmc/host/dw_mmc.c        | 22 +-----------------
->  drivers/mmc/host/dw_mmc.h        |  8 +------
->  3 files changed, 6 insertions(+), 73 deletions(-)
 >
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index 509365c..d0d7aec 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -375,64 +375,24 @@ out:
->         return loc;
->  }
+> > +     }
+> > +     return 0;
+> > +}
+> > +EXPORT_SYMBOL(mmc_cmdq_halt);
 >
-> -static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
-> -                                       struct dw_mci_tuning_data *tuning_data)
-> +static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot)
->  {
->         struct dw_mci *host = slot->host;
->         struct mmc_host *mmc = slot->mmc;
-> -       const u8 *blk_pattern = tuning_data->blk_pattern;
-> -       u8 *blk_test;
-> -       unsigned int blksz = tuning_data->blksz;
->         u8 start_smpl, smpl, candiates = 0;
->         s8 found = -1;
->         int ret = 0;
+> > +enum cmdq_states {
+> > +     CMDQ_STATE_HALT,
+> > +     CMDQ_STATE_ERR,
+> > +};
 >
-> -       blk_test = kmalloc(blksz, GFP_KERNEL);
-> -       if (!blk_test)
-> -               return -ENOMEM;
-> -
->         start_smpl = dw_mci_exynos_get_clksmpl(host);
+>     According to above definition, CMDQ_STATE_HALT is 0x0 and
+> CMDQ_STATE_ERR is 0x1.
 >
->         do {
-> -               struct mmc_request mrq = {NULL};
-> -               struct mmc_command cmd = {0};
-> -               struct mmc_command stop = {0};
-> -               struct mmc_data data = {0};
-> -               struct scatterlist sg;
-> -
-> -               cmd.opcode = opcode;
-> -               cmd.arg = 0;
-> -               cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-> -
-> -               stop.opcode = MMC_STOP_TRANSMISSION;
-> -               stop.arg = 0;
-> -               stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
-> -
-> -               data.blksz = blksz;
-> -               data.blocks = 1;
-> -               data.flags = MMC_DATA_READ;
-> -               data.sg = &sg;
-> -               data.sg_len = 1;
-> -
-> -               sg_init_one(&sg, blk_test, blksz);
-> -               mrq.cmd = &cmd;
-> -               mrq.stop = &stop;
-> -               mrq.data = &data;
-> -               host->mrq = &mrq;
-> -
->                 mci_writel(host, TMOUT, ~0);
->                 smpl = dw_mci_exynos_move_next_clksmpl(host);
+
+I will address these comments in the next patch.
+
 >
-> -               mmc_wait_for_req(mmc, &mrq);
-> +               ret = mmc_send_tuning(mmc);
-> +               if (!ret)
-> +                       candiates |= (1 << smpl);
 >
-> -               if (!cmd.error && !data.error) {
-> -                       if (!memcmp(blk_pattern, blk_test, blksz))
-> -                               candiates |= (1 << smpl);
-> -               } else {
-> -                       dev_dbg(host->dev,
-> -                               "Tuning error: cmd.error:%d, data.error:%d\n",
-> -                               cmd.error, data.error);
-> -               }
->         } while (start_smpl != smpl);
+> Hi Asutosh,
 >
->         found = dw_mci_exynos_get_best_clksmpl(candiates);
-> @@ -441,7 +401,6 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
->         else
->                 ret = -EIO;
+>     I think that the definition of CMDQ_STATE_HALT might fail to indicate halt status
+> correctly.
+>     Could you check my comments please?
+>     If I misunderstand your source code, please correct me.
 >
-> -       kfree(blk_test);
->         return ret;
->  }
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 67c0451..265bb28 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1299,30 +1299,10 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->         struct dw_mci_slot *slot = mmc_priv(mmc);
->         struct dw_mci *host = slot->host;
->         const struct dw_mci_drv_data *drv_data = host->drv_data;
-> -       struct dw_mci_tuning_data tuning_data;
->         int err = -ENOSYS;
->
-> -       if (opcode == MMC_SEND_TUNING_BLOCK_HS200) {
-> -               if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
-> -                       tuning_data.blk_pattern = tuning_blk_pattern_8bit;
-> -                       tuning_data.blksz = sizeof(tuning_blk_pattern_8bit);
-> -               } else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4) {
-> -                       tuning_data.blk_pattern = tuning_blk_pattern_4bit;
-> -                       tuning_data.blksz = sizeof(tuning_blk_pattern_4bit);
-> -               } else {
-> -                       return -EINVAL;
-> -               }
-> -       } else if (opcode == MMC_SEND_TUNING_BLOCK) {
-> -               tuning_data.blk_pattern = tuning_blk_pattern_4bit;
-> -               tuning_data.blksz = sizeof(tuning_blk_pattern_4bit);
-> -       } else {
-> -               dev_err(host->dev,
-> -                       "Undefined command(%d) for tuning\n", opcode);
-> -               return -EINVAL;
-> -       }
-> -
->         if (drv_data && drv_data->execute_tuning)
-> -               err = drv_data->execute_tuning(slot, opcode, &tuning_data);
-> +               err = drv_data->execute_tuning(slot);
->         return err;
->  }
->
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 0d0f7a2..c1f4557 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -248,11 +248,6 @@ struct dw_mci_slot {
->         int                     sdio_id;
->  };
->
-> -struct dw_mci_tuning_data {
-> -       const u8 *blk_pattern;
-> -       unsigned int blksz;
-> -};
-> -
->  /**
->   * dw_mci driver data - dw-mshc implementation specific driver data.
->   * @caps: mmc subsystem specified capabilities of the controller(s).
-> @@ -274,7 +269,6 @@ struct dw_mci_drv_data {
->         void            (*prepare_command)(struct dw_mci *host, u32 *cmdr);
->         void            (*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
->         int             (*parse_dt)(struct dw_mci *host);
-> -       int             (*execute_tuning)(struct dw_mci_slot *slot, u32 opcode,
-> -                                       struct dw_mci_tuning_data *tuning_data);
-> +       int             (*execute_tuning)(struct dw_mci_slot *slot);
->  };
->  #endif /* _DW_MMC_H_ */
-> --
-> 1.9.1
+> Best regards,
+> Ziji
 >
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> To unsubscribe from this list: send the line "unsubscribe linux-arm-msm" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
 
+
 -- 
-Regards,
-Alim
+Thanks & Regards
+~/Asutosh Das
