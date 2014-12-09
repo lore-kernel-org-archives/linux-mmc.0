@@ -1,89 +1,51 @@
-From: Ziji Hu <huziji@marvell.com>
-Subject: RE: [PATCH 3/5] mmc: card: Add eMMC command queuing support in mmc
- block layer
-Date: Mon, 8 Dec 2014 11:03:54 -0800
-Message-ID: <89813612683626448B837EE5A0B6A7CB47068B1E58@SC-VEXCH4.marvell.com>
-References: <20141202115821.GA27658@asutoshd-ics.in.qualcomm.com>
- <loom.20141208T030638-232@post.gmane.org>
- <CAA=bF1QaKLJv2rXLhpBoGA52syNgXL31yV2fKoLaTn2MP_Jw3w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CAA=bF1QaKLJv2rXLhpBoGA52syNgXL31yV2fKoLaTn2MP_Jw3w@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Asutosh Das <das.asutosh@gmail.com>
-Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+From: weiyj_lk@163.com
+Subject: [PATCH -next] mmc: toshsd: use module_pci_driver to simplify the code
+Date: Tue,  9 Dec 2014 09:08:05 +0800
+Message-ID: <1418087285-14334-1-git-send-email-weiyj_lk@163.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from m12-17.163.com ([220.181.12.17]:50106 "EHLO m12-17.163.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752261AbaLIBI1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 8 Dec 2014 20:08:27 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>, Ondrej Zary <linux@rainbow-software.org>
+Cc: Wei Yongjun <yongjun_wei@trendmicro.com.cn>, linux-mmc@vger.kernel.org
 
-SGkgQXN1dG9zaCwNCg0KICAgICAgICBNYXkgSSBhc2sgd2hldGhlciB5b3UgaGF2ZSB0ZXN0ZWQg
-dGhlIGNvZGUgb24gaGFyZHdhcmUgcGxhdGZvcm0/DQogICAgICAgIElmIHlvdSBoYXZlIG5vdCB0
-ZXN0ZWQgaXQgeWV0LCBkbyB5b3UgaGF2ZSBhIHNjaGVkdWxlIGZvciB0ZXN0aW5nPw0KDQotLS0t
-LU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogQXN1dG9zaCBEYXMgW21haWx0bzpkYXMuYXN1
-dG9zaEBnbWFpbC5jb21dDQpTZW50OiAyMDE0xOoxMtTCN8jVIDIxOjU5DQpUbzogWmlqaSBIdQ0K
-Q2M6IGxpbnV4LWFybS1tc21Admdlci5rZXJuZWwub3JnOyBsaW51eC1tbWNAdmdlci5rZXJuZWwu
-b3JnDQpTdWJqZWN0OiBSZTogW1BBVENIIDMvNV0gbW1jOiBjYXJkOiBBZGQgZU1NQyBjb21tYW5k
-IHF1ZXVpbmcgc3VwcG9ydCBpbiBtbWMgYmxvY2sgbGF5ZXINCg0KSGkgWmlqaQ0KVGhhbmtzIGZv
-ciB5b3VyIGNvbW1lbnRzLg0KDQpJJ20gYWRkaW5nIGxpbnV4LW1tYyB0byB0aGlzIGFzIHdlbGwu
-DQoNCk9uIDggRGVjZW1iZXIgMjAxNCBhdCAwNzo0NywgSHUgWmlqaSA8aHV6aWppQG1hcnZlbGwu
-Y29tPiB3cm90ZToNCj4NCj4gQXN1dG9zaCBEYXMgPGFzdXRvc2hkIDxhdD4gY29kZWF1cm9yYS5v
-cmc+IHdyaXRlczoNCj4NCj4gPiArc3RhdGljIGlubGluZSBib29sIG1tY19jbWRxX3Nob3VsZF9w
-dWxsX3JlcXMoc3RydWN0IG1tY19ob3N0ICpob3N0LA0KPiA+ICsgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgc3RydWN0IG1tY19jbWRxX2NvbnRleHRfaW5mbw0KPiA+ICsqY3R4
-KSB7DQo+ID4gKyAgICAgc3Bpbl9sb2NrX2JoKCZjdHgtPmNtZHFfY3R4X2xvY2spOw0KPiA+ICsg
-ICAgIGlmIChjdHgtPmFjdGl2ZV9kY21kIHx8IGN0eC0+cnBtYl9pbl93YWl0KSB7DQo+ID4gKyAg
-ICAgICAgICAgICBpZiAoKGN0eC0+Y3Vycl9zdGF0ZSAhPSBDTURRX1NUQVRFX0hBTFQpIHx8DQo+
-ID4gKyAgICAgICAgICAgICAgICAgICAgIChjdHgtPmN1cnJfc3RhdGUgIT0gQ01EUV9TVEFURV9F
-UlIpKSB7DQo+DQo+ICAgICAgICAgICAgICAgICAgICAgICAgIEJlY2F1c2UgQ01EUV9TVEFURV9I
-QUxUID09IDAgYW5kDQo+IENNRFFfU1RBVEVfRVJSID09IDEsIGl0IGlzIGltcG9zc2libGUgdGhh
-dCBjb25kaXRpb24gKChjdHgtPmN1cnJfc3RhdGUNCj4gPT0gQ01EUV9TVEFURV9IQUxUKSAmJiAo
-Y3R4LQ0KPiA+Y3Vycl9zdGF0ZSAhPSBDTURRX1NUQVRFX0VSUikpIGlzIHNhdGlzZmllZC4gVGh1
-cyB0aGUgYWJvdmUNCj4gPmlmLWNvbmRpdGlvbiB3aWxsDQo+IGFsd2F5cyBiZSB0cnVlLg0KPg0K
-DQpBZ3JlZS4NCg0KPg0KPiA+ICsgICAgICAgICAgICAgICAgICAgICBwcl9kZWJ1ZygiJXM6ICVz
-OiBza2lwIHB1bGxpbmcgcmVxczogZGNtZDogJWQgcnBtYjogJWQgc3RhdGU6DQo+ICVkXG4iLA0K
-PiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBtbWNfaG9zdG5hbWUoaG9zdCksIF9f
-ZnVuY19fLCBjdHgtPmFjdGl2ZV9kY21kLA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICBjdHgtPnJwbWJfaW5fd2FpdCwgY3R4LT5jdXJyX3N0YXRlKTsNCj4gPiArICAgICAgICAg
-ICAgICAgICAgICAgc3Bpbl91bmxvY2tfYmgoJmN0eC0+Y21kcV9jdHhfbG9jayk7DQo+ID4gKyAg
-ICAgICAgICAgICAgICAgICAgIHJldHVybiBmYWxzZTsNCj4gPiArICAgICAgICAgICAgIH0NCj4g
-PiArICAgICB9IGVsc2Ugew0KPiA+ICsgICAgICAgICAgICAgc3Bpbl91bmxvY2tfYmgoJmN0eC0+
-Y21kcV9jdHhfbG9jayk7DQo+ID4gKyAgICAgICAgICAgICByZXR1cm4gdHJ1ZTsNCj4gPiArICAg
-ICB9DQo+ID4gK30NCj4NCj4gPiArLyoqDQo+ID4gKyAqICAgbW1jX2NtZHFfaGFsdCAtIGhhbHQv
-dW4taGFsdCB0aGUgY29tbWFuZCBxdWV1ZSBlbmdpbmUNCj4gPiArICogICAgPGF0PiBob3N0OiBo
-b3N0IGluc3RhbmNlDQo+ID4gKyAqICAgIDxhdD4gaGFsdDogdHJ1ZSAtIGhhbHQsIHVuLWhhbHQg
-b3RoZXJ3aXNlDQo+ID4gKyAqDQo+ID4gKyAqICAgSG9zdCBoYWx0cyB0aGUgY29tbWFuZCBxdWV1
-ZSBlbmdpbmUuIEl0IHNob3VsZCBjb21wbGV0ZQ0KPiA+ICsgKiAgIHRoZSBvbmdvaW5nIHRyYW5z
-ZmVyIGFuZCByZWxlYXNlIHRoZSBTRCBidXMuDQo+ID4gKyAqICAgQWxsIGxlZ2FjeSBTRCBjb21t
-YW5kcyBjYW4gYmUgc2VudCB1cG9uIHN1Y2Nlc3NmdWwNCj4gPiArICogICBjb21wbGV0aW9uIG9m
-IHRoaXMgZnVuY3Rpb24uDQo+ID4gKyAqICAgUmV0dXJucyAwIG9uIHN1Y2Nlc3MsIG5lZ2F0aXZl
-IG90aGVyd2lzZQ0KPiA+ICsgKi8NCj4gPiAraW50IG1tY19jbWRxX2hhbHQoc3RydWN0IG1tY19o
-b3N0ICpob3N0LCBib29sIGhhbHQpIHsNCj4gPiArICAgICBpbnQgZXJyID0gMDsNCj4gPiArDQo+
-ID4gKyAgICAgaWYgKChoYWx0ICYmIChob3N0LT5jbWRxX2N0eC5jdXJyX3N0YXRlICYgQ01EUV9T
-VEFURV9IQUxUKSkgfHwNCj4gPiArICAgICAgICAgKCFoYWx0ICYmICEoaG9zdC0+Y21kcV9jdHgu
-Y3Vycl9zdGF0ZSAmIENNRFFfU1RBVEVfSEFMVCkpKQ0KPiA+ICsgICAgICAgICAgICAgcmV0dXJu
-IDE7DQo+ID4gKw0KPiA+ICsgICAgIGlmIChob3N0LT5jbWRxX29wcy0+aGFsdCkgew0KPiA+ICsg
-ICAgICAgICAgICAgZXJyID0gaG9zdC0+Y21kcV9vcHMtPmhhbHQoaG9zdCwgaGFsdCk7DQo+ID4g
-KyAgICAgICAgICAgICBpZiAoIWVyciAmJiBoYWx0KQ0KPiA+ICsgICAgICAgICAgICAgICAgICAg
-ICBob3N0LT5jbWRxX2N0eC5jdXJyX3N0YXRlIHw9IENNRFFfU1RBVEVfSEFMVDsNCj4gPiArICAg
-ICAgICAgICAgIGVsc2UgaWYgKCFlcnIgJiYgIWhhbHQpDQo+ID4gKyAgICAgICAgICAgICAgICAg
-ICAgIGhvc3QtPmNtZHFfY3R4LmN1cnJfc3RhdGUgJj0gfkNNRFFfU1RBVEVfSEFMVDsNCj4NCj4g
-ICAgICAgICAgICAgICAgIFNpbmNlIENNRFFfU1RBVEVfSEFMRSA9PSAwLCBPUmVkIHdpdGggQ01E
-UV9TVEFURV9IQUxUDQo+IGFuZCBBTkRlZCB3aXRoIH5DTURRX1NUQVRFX0hBTFQgd2lsbCBuZWl0
-aGVyIG1vZGlmeSB0aGUgdmFsdWUgb2YNCj4gY3Vycl9zdGF0ZS4gVGh1cyBDTURRX1NUQVRFX0hB
-TFQgYXMgMCBjYW5ub3QgaW5kaWNhdGUgdGhlIGhhbHQgc3RhdGUgb2YgY21kIHF1ZXVlLg0KDQpB
-Z3JlZS4NCg0KPg0KPg0KPiA+ICsgICAgIH0NCj4gPiArICAgICByZXR1cm4gMDsNCj4gPiArfQ0K
-PiA+ICtFWFBPUlRfU1lNQk9MKG1tY19jbWRxX2hhbHQpOw0KPg0KPiA+ICtlbnVtIGNtZHFfc3Rh
-dGVzIHsNCj4gPiArICAgICBDTURRX1NUQVRFX0hBTFQsDQo+ID4gKyAgICAgQ01EUV9TVEFURV9F
-UlIsDQo+ID4gK307DQo+DQo+ICAgICBBY2NvcmRpbmcgdG8gYWJvdmUgZGVmaW5pdGlvbiwgQ01E
-UV9TVEFURV9IQUxUIGlzIDB4MCBhbmQNCj4gQ01EUV9TVEFURV9FUlIgaXMgMHgxLg0KPg0KDQpJ
-IHdpbGwgYWRkcmVzcyB0aGVzZSBjb21tZW50cyBpbiB0aGUgbmV4dCBwYXRjaC4NCg0KPg0KPg0K
-PiBIaSBBc3V0b3NoLA0KPg0KPiAgICAgSSB0aGluayB0aGF0IHRoZSBkZWZpbml0aW9uIG9mIENN
-RFFfU1RBVEVfSEFMVCBtaWdodCBmYWlsIHRvDQo+IGluZGljYXRlIGhhbHQgc3RhdHVzIGNvcnJl
-Y3RseS4NCj4gICAgIENvdWxkIHlvdSBjaGVjayBteSBjb21tZW50cyBwbGVhc2U/DQo+ICAgICBJ
-ZiBJIG1pc3VuZGVyc3RhbmQgeW91ciBzb3VyY2UgY29kZSwgcGxlYXNlIGNvcnJlY3QgbWUuDQo+
-DQo+IEJlc3QgcmVnYXJkcywNCj4gWmlqaQ0KPg0KPiAtLQ0KPiBUbyB1bnN1YnNjcmliZSBmcm9t
-IHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUNCj4gbGludXgtYXJtLW1zbSIg
-aW4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5vcmcNCj4g
-TW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8t
-aW5mby5odG1sDQoNCg0KDQoNCi0tDQpUaGFua3MgJiBSZWdhcmRzDQp+L0FzdXRvc2ggRGFzDQo=
+From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+
+Use the module_pci_driver() macro to make the code simpler
+by eliminating module_init and module_exit calls.
+
+Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+---
+ drivers/mmc/host/toshsd.c | 13 +------------
+ 1 file changed, 1 insertion(+), 12 deletions(-)
+
+diff --git a/drivers/mmc/host/toshsd.c b/drivers/mmc/host/toshsd.c
+index 4666262..e5d8dec 100644
+--- a/drivers/mmc/host/toshsd.c
++++ b/drivers/mmc/host/toshsd.c
+@@ -699,18 +699,7 @@ static struct pci_driver toshsd_driver = {
+ 	.driver.pm = &toshsd_pm_ops,
+ };
+ 
+-static int __init toshsd_drv_init(void)
+-{
+-	return pci_register_driver(&toshsd_driver);
+-}
+-
+-static void __exit toshsd_drv_exit(void)
+-{
+-	pci_unregister_driver(&toshsd_driver);
+-}
+-
+-module_init(toshsd_drv_init);
+-module_exit(toshsd_drv_exit);
++module_pci_driver(toshsd_driver);
+ 
+ MODULE_AUTHOR("Ondrej Zary, Richard Betts");
+ MODULE_DESCRIPTION("Toshiba PCI Secure Digital Host Controller Interface driver");
+
