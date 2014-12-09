@@ -1,51 +1,59 @@
-From: weiyj_lk@163.com
-Subject: [PATCH -next] mmc: toshsd: use module_pci_driver to simplify the code
-Date: Tue,  9 Dec 2014 09:08:05 +0800
-Message-ID: <1418087285-14334-1-git-send-email-weiyj_lk@163.com>
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Alessio Igor Bogani <alessio.bogani@elettra.eu>
+Subject: [PATCH] mmc: sdhci: Fix FSL ESDHC reset handling quirk
+Date: Tue,  9 Dec 2014 09:40:38 +0100
+Message-ID: <1418114438-17776-1-git-send-email-alessio.bogani@elettra.eu>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from m12-17.163.com ([220.181.12.17]:50106 "EHLO m12-17.163.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752261AbaLIBI1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 8 Dec 2014 20:08:27 -0500
+Received: from m2.elettra.trieste.it ([140.105.206.202]:46979 "EHLO elettra.eu"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751197AbaLIIk5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 9 Dec 2014 03:40:57 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>, Ondrej Zary <linux@rainbow-software.org>
-Cc: Wei Yongjun <yongjun_wei@trendmicro.com.cn>, linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Dong Aisheng <dongas86@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Alessio Igor Bogani <alessio.bogani@elettra.eu>
 
-From: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+The commit 0718e59ae259 ("mmc: sdhci: move FSL ESDHC reset handling quirk into
+esdhc code") states that Freescale esdhc is the only controller which needs
+the interrupt registers restored after a reset. So it moves
+SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET quirk handling code into the
+esdhc-imx driver only. Unfortunately the same controller is used in
+other boards which use the of-esdhc driver instead (like powerpc P2020).
 
-Use the module_pci_driver() macro to make the code simpler
-by eliminating module_init and module_exit calls.
+Restore interrupts after reset in the sdhci-of-esdhc driver also.
 
-Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Signed-off-by: Alessio Igor Bogani <alessio.bogani@elettra.eu>
 ---
- drivers/mmc/host/toshsd.c | 13 +------------
- 1 file changed, 1 insertion(+), 12 deletions(-)
+ drivers/mmc/host/sdhci-of-esdhc.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/toshsd.c b/drivers/mmc/host/toshsd.c
-index 4666262..e5d8dec 100644
---- a/drivers/mmc/host/toshsd.c
-+++ b/drivers/mmc/host/toshsd.c
-@@ -699,18 +699,7 @@ static struct pci_driver toshsd_driver = {
- 	.driver.pm = &toshsd_pm_ops,
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 8872c85..4a654d4 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -276,6 +276,14 @@ static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
+ 			ESDHC_CTRL_BUSWIDTH_MASK, ctrl);
+ }
+ 
++static void esdhc_reset(struct sdhci_host *host, u8 mask)
++{
++	sdhci_reset(host, mask);
++
++	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
++	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
++}
++
+ static const struct sdhci_ops sdhci_esdhc_ops = {
+ 	.read_l = esdhc_readl,
+ 	.read_w = esdhc_readw,
+@@ -290,7 +298,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
+ 	.platform_init = esdhc_of_platform_init,
+ 	.adma_workaround = esdhci_of_adma_workaround,
+ 	.set_bus_width = esdhc_pltfm_set_bus_width,
+-	.reset = sdhci_reset,
++	.reset = esdhc_reset,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
  };
  
--static int __init toshsd_drv_init(void)
--{
--	return pci_register_driver(&toshsd_driver);
--}
--
--static void __exit toshsd_drv_exit(void)
--{
--	pci_unregister_driver(&toshsd_driver);
--}
--
--module_init(toshsd_drv_init);
--module_exit(toshsd_drv_exit);
-+module_pci_driver(toshsd_driver);
- 
- MODULE_AUTHOR("Ondrej Zary, Richard Betts");
- MODULE_DESCRIPTION("Toshiba PCI Secure Digital Host Controller Interface driver");
+-- 
+2.1.3
 
