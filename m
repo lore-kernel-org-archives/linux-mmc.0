@@ -1,264 +1,127 @@
-From: Haibo Chen <haibo.chen@freescale.com>
-Subject: [PATCH] mmc: sdhci: use pipeline mmc requests to improve performance
-Date: Tue, 9 Dec 2014 17:04:05 +0800
-Message-ID: <1418115845-24541-1-git-send-email-haibo.chen@freescale.com>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH v2 3/4] mmc: dw_mmc: Convert to mmc_send_tuning()
+Date: Wed, 10 Dec 2014 03:00:00 +0530
+Message-ID: <CAGOxZ52RKUdrSegUZs31E19mJr3kaLbyoEStDWD1=bD5vHNLeg@mail.gmail.com>
+References: <1417780783-12939-1-git-send-email-ulf.hansson@linaro.org>
+ <1417780783-12939-4-git-send-email-ulf.hansson@linaro.org>
+ <CAGOxZ525JR9vTuKAZJJjDF6iq3R2-DuEcJFEOT9KkEMZGimUFw@mail.gmail.com> <CAPDyKFpOvs_ML+1edoTzeTPctiMV0B8EeD8aE8daGwjeG7gwMQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2on0124.outbound.protection.outlook.com ([65.55.169.124]:10800
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752001AbaLIJEl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 9 Dec 2014 04:04:41 -0500
+Received: from mail-yh0-f50.google.com ([209.85.213.50]:59287 "EHLO
+	mail-yh0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751209AbaLIVal (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Dec 2014 16:30:41 -0500
+Received: by mail-yh0-f50.google.com with SMTP id 29so750159yhl.9
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Dec 2014 13:30:41 -0800 (PST)
+In-Reply-To: <CAPDyKFpOvs_ML+1edoTzeTPctiMV0B8EeD8aE8daGwjeG7gwMQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: chris@printf.net, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, dongas86@gmail.com, haibo.chen@freescale.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, Aisheng Dong <b29396@freescale.com>, Stephen Boyd <sboyd@codeaurora.org>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-This patch is based on the patches by Per Forlin, Tony Lin and Ryan QIAN.
+Hi Ulf
 
-This patch complete the API 'post_req' and 'pre_req' in sdhci host side,
+On Mon, Dec 8, 2014 at 3:40 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 6 December 2014 at 13:43, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+>> Hi Ulf,
+>>
+>> On Fri, Dec 5, 2014 at 5:29 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>> Instead of having a local hack taking care of sending the tuning
+>>> command and as well to verify the response pattern, let's convert to
+>>> the common mmc_send_tuning() API.
+>>>
+>>> This change affects the Exynos variant, since it's the only one which
+>>> support the dw_mmc's ->execute_tuning() callback.
+>>>
+>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>> ---
+>>>
+>
+> Alim, thanks for helping out testing!
+>
+Sorry for the delay but currently I don't have access to my work station.
+And thanks for quick suggested patch, I will test this as soon asI go
+back to my work.
 
-Test Env:
-1. i.MX6Q-SABREAUTO board, CPU @ 996MHz, use ADMA in uSDHC controller.
-2. Test command:
-		$ echo 1 > /proc/sys/vm/drop_caches
-	write to sd card:
-		$ dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=2000 conv=fsync
-	read the sd card:
-		$ dd if=/dev/mmcblk0 of=/dev/null bs=1M count=2000
+Hi Jaehoon, can you test this and the original patch for hs200 on
+exynos? Just to confirm my board is not the special one.
+Thanks.
 
-3. TOSHIBA 16GB SD3.0 card, running at 4 bit, SDR104 @ 198MHZ
-	Performance with and without this patch:
-      -------------------------------------------------
-	  |                    | read speed | write speed |
-	  |------------------------------------------------
-	  | with this patch    | ~76.7 MB/s |  ~23.3 MB/s |
-	  |------------------------------------------------
-	  |without this patch  | ~60.5 MB/s |  ~22.5 MB/s |
-	  -------------------------------------------------
+>> With this change HS200 mode does not work on exynos5800 peach-pi board.
+>> I got below error while testing this series:
+>>
+>> mmc0: tuning execution failed
+>> mmc0: error -5 whilst initialising MMC card
+>>
+>> Though, your's next branch with commit _a1d06b4_ works fine in HS200 mode.
+>
+> I was looking into the details of what change my patchset introduces
+> for dw_mmc-exynos. Apparently, dw_mmc-exynos was using the
+> MMC_STOP_TRANSMISSION to end the tuning reqeust (CMD21/19). The new
+> mmc_send_tuning() API doesn't, which also conforms to what the eMMC/SD
+> specifications states.
+>
+> Do you have any idea of why dw_mmc-exynos was using
+> MMC_STOP_TRANSMISSION for CMD19/21?
+>
+> To see if my theory is correct, could you try out the following patch
+> on top of $subject patch?
+> BTW, I have queued patch 1 and 2, from this patchset available on my
+> next branch.
+>
+>
+> From e1ac35bb0e90254275ec7088f41e6e2d59e48367 Mon Sep 17 00:00:00 2001
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+> Date: Mon, 8 Dec 2014 10:58:48 +0100
+> Subject: [PATCH] mmc: core: End tuning request with stop command
+>
+> Not to be merged!
+>
+> This patch adds the MMC_STOP_TRANSMISSION command to end a tuning
+> request. For some reason dw_mmc seems to need this to complete the
+> tuning request without errors.
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/core/mmc_ops.c | 5 +++++
+>  1 file changed, 5 insertions(+)
+>
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 3b044c5..aa79e0c 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -551,6 +551,7 @@ int mmc_send_tuning(struct mmc_host *host)
+>  {
+>         struct mmc_request mrq = {NULL};
+>         struct mmc_command cmd = {0};
+> +       struct mmc_command stop = {0};
+>         struct mmc_data data = {0};
+>         struct scatterlist sg;
+>         struct mmc_ios *ios = &host->ios;
+> @@ -576,10 +577,14 @@ int mmc_send_tuning(struct mmc_host *host)
+>
+>         mrq.cmd = &cmd;
+>         mrq.data = &data;
+> +       mrq.stop = &stop;
+>
+>         cmd.opcode = opcode;
+>         cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+>
+> +       stop.opcode = MMC_STOP_TRANSMISSION;
+> +       stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
+> +
+>         data.blksz = size;
+>         data.blocks = 1;
+>         data.flags = MMC_DATA_READ;
+> --
+> 1.9.1
+>
+> Kind regards
+> Uffe
 
-4. SanDisk 8GB SD3.0 card, running at 4 bit, DDR50 @ 50MHZ
-	Performance with and without this patch:
-      -------------------------------------------------
-	  |                    | read speed | write speed |
-	  |------------------------------------------------
-	  | with this patch    | ~40.5 MB/s |  ~15.6 MB/s |
-	  |------------------------------------------------
-	  |without this patch  | ~36.1 MB/s |  ~14.1 MB/s |
-	  -------------------------------------------------
 
-5. Kingston 8GB SD2.0 card, running at 4 bit, High-speed @ 50MHZ
-	Performance with and without this patch:
-      -------------------------------------------------
-	  |                    | read speed | write speed |
-	  |------------------------------------------------
-	  | with this patch    | ~22.7 MB/s |  ~8.2 MB/s  |
-	  |------------------------------------------------
-	  |without this patch  | ~21.3 MB/s |  ~8.0 MB/s  |
-	  -------------------------------------------------
 
-6. About eMMC, Sandisk 8GB eMMC on i.MX6DL-sabresd board, CPU @ 792MHZ,
-   eMMC running at 8 bit, DDR52 @ 52MHZ.
-	Performance with and without this patch:
-      -------------------------------------------------
-	  |                    | read speed | write speed |
-	  |------------------------------------------------
-	  | with this patch    | ~37.3 MB/s |  ~10.5 MB/s |
-	  |------------------------------------------------
-	  |without this patch  | ~33.4 MB/s |  ~10.5 MB/s |
-	  -------------------------------------------------
-
-Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
----
- drivers/mmc/host/sdhci.c  | 100 ++++++++++++++++++++++++++++++++++++++++------
- include/linux/mmc/sdhci.h |   6 +++
- 2 files changed, 94 insertions(+), 12 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ada1a3e..50f8a4f 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -55,6 +55,9 @@ static void sdhci_finish_command(struct sdhci_host *);
- static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
- static void sdhci_tuning_timer(unsigned long data);
- static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
-+static int sdhci_pre_dma_transfer(struct sdhci_host *host,
-+				       struct mmc_data *data,
-+				       struct sdhci_host_next *next);
- 
- #ifdef CONFIG_PM_RUNTIME
- static int sdhci_runtime_pm_get(struct sdhci_host *host);
-@@ -494,9 +497,8 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 		goto fail;
- 	BUG_ON(host->align_addr & 0x3);
- 
--	host->sg_count = dma_map_sg(mmc_dev(host->mmc),
--		data->sg, data->sg_len, direction);
--	if (host->sg_count == 0)
-+	host->sg_count = sdhci_pre_dma_transfer(host, data, NULL);
-+	if (host->sg_count < 0)
- 		goto unmap_align;
- 
- 	desc = host->adma_desc;
-@@ -633,8 +635,9 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
- 		}
- 	}
- 
--	dma_unmap_sg(mmc_dev(host->mmc), data->sg,
--		data->sg_len, direction);
-+	if (!data->host_cookie)
-+		dma_unmap_sg(mmc_dev(host->mmc), data->sg,
-+			data->sg_len, direction);
- }
- 
- static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
-@@ -826,11 +829,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 		} else {
- 			int sg_cnt;
- 
--			sg_cnt = dma_map_sg(mmc_dev(host->mmc),
--					data->sg, data->sg_len,
--					(data->flags & MMC_DATA_READ) ?
--						DMA_FROM_DEVICE :
--						DMA_TO_DEVICE);
-+			sg_cnt = sdhci_pre_dma_transfer(host, data, NULL);
- 			if (sg_cnt == 0) {
- 				/*
- 				 * This only happens when someone fed
-@@ -934,8 +933,10 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 		if (host->flags & SDHCI_USE_ADMA)
- 			sdhci_adma_table_post(host, data);
- 		else {
--			dma_unmap_sg(mmc_dev(host->mmc), data->sg,
--				data->sg_len, (data->flags & MMC_DATA_READ) ?
-+			if (!data->host_cookie)
-+				dma_unmap_sg(mmc_dev(host->mmc),
-+					data->sg, data->sg_len,
-+					(data->flags & MMC_DATA_READ) ?
- 					DMA_FROM_DEVICE : DMA_TO_DEVICE);
- 		}
- 	}
-@@ -2068,6 +2069,78 @@ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
- 	}
- }
- 
-+static void sdhci_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
-+				int err)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct mmc_data *data = mrq->data;
-+
-+	if (host->flags & SDHCI_REQ_USE_DMA) {
-+		if (data->host_cookie)
-+			dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
-+					 data->flags & MMC_DATA_WRITE ?
-+					 DMA_TO_DEVICE : DMA_FROM_DEVICE);
-+		mrq->data->host_cookie = 0;
-+	}
-+}
-+
-+static int sdhci_pre_dma_transfer(struct sdhci_host *host,
-+				       struct mmc_data *data,
-+				       struct sdhci_host_next *next)
-+{
-+	int sg_count;
-+
-+	if (!next && data->host_cookie &&
-+	    data->host_cookie != host->next_data.cookie) {
-+		pr_debug(DRIVER_NAME "[%s] invalid cookie: data->host_cookie %d"
-+		     "  host->next_data.cookie %d\n",
-+		       __func__, data->host_cookie, host->next_data.cookie);
-+		data->host_cookie = 0;
-+	}
-+
-+	/* Check if next job is already prepared */
-+	if (next ||
-+	    (!next && data->host_cookie != host->next_data.cookie)) {
-+		sg_count = dma_map_sg(mmc_dev(host->mmc), data->sg,
-+				     data->sg_len,
-+				     data->flags & MMC_DATA_WRITE ?
-+				     DMA_TO_DEVICE : DMA_FROM_DEVICE);
-+
-+	} else {
-+		sg_count = host->next_data.sg_count;
-+		host->next_data.sg_count = 0;
-+	}
-+
-+
-+	if (sg_count == 0)
-+		return -EINVAL;
-+
-+	if (next) {
-+		next->sg_count = sg_count;
-+		data->host_cookie = ++next->cookie < 0 ? 1 : next->cookie;
-+	} else
-+		host->sg_count = sg_count;
-+
-+	return sg_count;
-+}
-+
-+static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
-+			       bool is_first_req)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+
-+	if (mrq->data->host_cookie) {
-+		mrq->data->host_cookie = 0;
-+		return;
-+	}
-+
-+	if (host->flags & SDHCI_REQ_USE_DMA)
-+		if (sdhci_pre_dma_transfer(host,
-+					mrq->data,
-+					&host->next_data) < 0)
-+			mrq->data->host_cookie = 0;
-+}
-+
- static void sdhci_card_event(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -2098,6 +2171,8 @@ static void sdhci_card_event(struct mmc_host *mmc)
- 
- static const struct mmc_host_ops sdhci_ops = {
- 	.request	= sdhci_request,
-+	.post_req	= sdhci_post_req,
-+	.pre_req	= sdhci_pre_req,
- 	.set_ios	= sdhci_set_ios,
- 	.get_cd		= sdhci_get_cd,
- 	.get_ro		= sdhci_get_ro,
-@@ -2919,6 +2994,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 		host->max_clk = host->ops->get_max_clock(host);
- 	}
- 
-+	host->next_data.cookie = 1;
- 	/*
- 	 * In case of Host Controller v3.00, find out whether clock
- 	 * multiplier is supported.
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index dba793e..47b5d82 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -17,6 +17,11 @@
- #include <linux/io.h>
- #include <linux/mmc/host.h>
- 
-+struct sdhci_host_next {
-+	unsigned int	sg_count;
-+	s32		cookie;
-+};
-+
- struct sdhci_host {
- 	/* Data set by hardware interface driver */
- 	const char *hw_name;	/* Hardware bus name */
-@@ -188,6 +193,7 @@ struct sdhci_host {
- #define SDHCI_TUNING_MODE_1	0
- 	struct timer_list	tuning_timer;	/* Timer for tuning */
- 
-+	struct sdhci_host_next	next_data;
- 	unsigned long private[0] ____cacheline_aligned;
- };
- #endif /* LINUX_MMC_SDHCI_H */
 -- 
-1.9.1
-
+Regards,
+Alim
