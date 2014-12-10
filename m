@@ -1,152 +1,90 @@
-From: Asutosh Das <asutoshd@codeaurora.org>
-Subject: Re: [PATCH 4/5] mmc: cmdq: support for command queue enabled host
-Date: Wed, 10 Dec 2014 12:16:04 +0530
-Message-ID: <5487EC2C.4040300@codeaurora.org>
+From: Ziji Hu <huziji@marvell.com>
+Subject: RE: [PATCH 4/5] mmc: cmdq: support for command queue enabled host
+Date: Tue, 9 Dec 2014 23:08:52 -0800
+Message-ID: <89813612683626448B837EE5A0B6A7CB47068B243A@SC-VEXCH4.marvell.com>
 References: <89813612683626448B837EE5A0B6A7CB47068B2289@SC-VEXCH4.marvell.com>
+ <5487EC2C.4040300@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <89813612683626448B837EE5A0B6A7CB47068B2289@SC-VEXCH4.marvell.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ziji Hu <huziji@marvell.com>
-Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:46848 "EHLO
+	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752924AbaLJHI4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Dec 2014 02:08:56 -0500
+In-Reply-To: <5487EC2C.4040300@codeaurora.org>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Asutosh Das <asutoshd@codeaurora.org>
+Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Ziji,
-Thanks for your comments.
-
-On 12/10/2014 4:37 AM, Ziji Hu wrote:
-> Hi Asutosh,
->
->           Could you check me comments please?
->
->      Please correct me if I misunderstand you.
->
->      Thank you.
->
-> +irqreturn_t cmdq_irq(struct mmc_host *mmc, u32 intmask)
->
-> +{
->
-> +       u32 status;
->
-> +       unsigned long tag = 0, comp_status;
->
-> +       struct cmdq_host *cq_host = (struct cmdq_host
-> *)mmc_cmdq_private(mmc);
->
-> +
->
-> +       spin_lock(&cq_host->cmdq_lock);
->
-> +
->
-> +       status = cmdq_readl(cq_host, CQIS);
->
-> +       cmdq_writel(cq_host, status, CQIS);
->
-> +
->
-> +       if (status & CQIS_HAC) {
->
-> +               /* halt is completed, wakeup waiting thread */
->
-> +               complete(&cq_host->halt_comp);
->
-> +       } else if (status & CQIS_TCC) {
->
-> +               /* read QCTCN and complete the request */
->
-> +               comp_status = cmdq_readl(cq_host, CQTCN);
->
-> +               if (!comp_status) {
->
-> +                       pr_err("%s: bogus comp-stat\n", __func__);
->
-> +                       cmdq_dumpregs(cq_host);
->
-> +                       WARN_ON(1);
->
-> +               }
->
-> +               for_each_set_bit(tag, &comp_status, cq_host->num_slots) {
->
-> +                       /* complete the corresponding mrq */
->
-> +                       cmdq_finish_data(mmc, tag);
->
-> According to eMMC 5.1 spec: CQE shall set bit n of this register (at the
-> same
->
-> time it clears bit n of CQTDBR) when a task execution is completed (with
-> success
->
-> or error).
->
->       Assume an error and an completion both occur at the same time,
-> then two bits
->
-> of CQTCN register will be set. One bit presents the completion. The
-> other indicates
->
-> the error slot.
->
->      Based on your current implementation, host will handle the error with
->
-> cmdq_finish_data. Later, mrq->data->error and mrq->cmd->error are used to
->
-Agree. I'm planning to change it to:
-1. read CQIS
-2. first check for errors on all the completed tasks, mark 
-success/failure appropriately to the respective mrq
-3. invoke cmdq_finish_data on all the completed tasks.
-
-Thoughts ?
-> check the error status. However, there is no cmdq source code to set
-> those two
-I'm working on the error handling part now. Will post the patch when done.
->
-> error flag. They are supposed to be setup in legacy eMMC irq handling,
-> which is
->
-> replace by your cmdq irq handling. Thus actually host will receive the
-> error request
->
-> with no error flag. As a result, host will treat the error request as a
-> successful
->
-> completion.
->
->      Thus there will no error handling. Or the error handling will be
-> executed after
->
-> the error request is finished as a successful one.
->
-> +                       /* complete DCMD on tag 31 */
->
-> +               }
->
-> +               cmdq_writel(cq_host, comp_status, CQTCN);
->
-> +       } else if (status & CQIS_RED) {
->
-> +               /* task response has an error */
->
-> +               pr_err("%s: RED error %d !!!\n", mmc_hostname(mmc), status);
->
-> +               cmdq_dumpregs(cq_host);
->
-> +               BUG_ON(1);
->
->           Thank you.
->
-> Best regards,
->
-> Hu Ziji
->
-
-
--- 
-Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
+SGkgQXN1dG9zaCwNCg0KICAgICAgICBUaGFua3MgZm9yIHlvdXIgY29tbWVudHMuIENvdWxkIHlv
+dSBjaGVjayBteSBjb21tZW50cyBwbGVhc2U/DQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
+DQpGcm9tOiBBc3V0b3NoIERhcyBbbWFpbHRvOmFzdXRvc2hkQGNvZGVhdXJvcmEub3JnXQ0KU2Vu
+dDogMjAxNMTqMTLUwjnI1SAyMjo0Ng0KVG86IFppamkgSHUNCkNjOiBsaW51eC1hcm0tbXNtQHZn
+ZXIua2VybmVsLm9yZzsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IFtQ
+QVRDSCA0LzVdIG1tYzogY21kcTogc3VwcG9ydCBmb3IgY29tbWFuZCBxdWV1ZSBlbmFibGVkIGhv
+c3QNCg0KSGkgWmlqaSwNClRoYW5rcyBmb3IgeW91ciBjb21tZW50cy4NCg0KT24gMTIvMTAvMjAx
+NCA0OjM3IEFNLCBaaWppIEh1IHdyb3RlOg0KPiBIaSBBc3V0b3NoLA0KPg0KPiAgICAgICAgICAg
+Q291bGQgeW91IGNoZWNrIG1lIGNvbW1lbnRzIHBsZWFzZT8NCj4NCj4gICAgICBQbGVhc2UgY29y
+cmVjdCBtZSBpZiBJIG1pc3VuZGVyc3RhbmQgeW91Lg0KPg0KPiAgICAgIFRoYW5rIHlvdS4NCj4N
+Cj4gK2lycXJldHVybl90IGNtZHFfaXJxKHN0cnVjdCBtbWNfaG9zdCAqbW1jLCB1MzIgaW50bWFz
+aykNCj4NCj4gK3sNCj4NCj4gKyAgICAgICB1MzIgc3RhdHVzOw0KPg0KPiArICAgICAgIHVuc2ln
+bmVkIGxvbmcgdGFnID0gMCwgY29tcF9zdGF0dXM7DQo+DQo+ICsgICAgICAgc3RydWN0IGNtZHFf
+aG9zdCAqY3FfaG9zdCA9IChzdHJ1Y3QgY21kcV9ob3N0DQo+ICopbW1jX2NtZHFfcHJpdmF0ZSht
+bWMpOw0KPg0KPiArDQo+DQo+ICsgICAgICAgc3Bpbl9sb2NrKCZjcV9ob3N0LT5jbWRxX2xvY2sp
+Ow0KPg0KPiArDQo+DQo+ICsgICAgICAgc3RhdHVzID0gY21kcV9yZWFkbChjcV9ob3N0LCBDUUlT
+KTsNCj4NCj4gKyAgICAgICBjbWRxX3dyaXRlbChjcV9ob3N0LCBzdGF0dXMsIENRSVMpOw0KPg0K
+PiArDQo+DQo+ICsgICAgICAgaWYgKHN0YXR1cyAmIENRSVNfSEFDKSB7DQo+DQo+ICsgICAgICAg
+ICAgICAgICAvKiBoYWx0IGlzIGNvbXBsZXRlZCwgd2FrZXVwIHdhaXRpbmcgdGhyZWFkICovDQo+
+DQo+ICsgICAgICAgICAgICAgICBjb21wbGV0ZSgmY3FfaG9zdC0+aGFsdF9jb21wKTsNCj4NCj4g
+KyAgICAgICB9IGVsc2UgaWYgKHN0YXR1cyAmIENRSVNfVENDKSB7DQo+DQo+ICsgICAgICAgICAg
+ICAgICAvKiByZWFkIFFDVENOIGFuZCBjb21wbGV0ZSB0aGUgcmVxdWVzdCAqLw0KPg0KPiArICAg
+ICAgICAgICAgICAgY29tcF9zdGF0dXMgPSBjbWRxX3JlYWRsKGNxX2hvc3QsIENRVENOKTsNCj4N
+Cj4gKyAgICAgICAgICAgICAgIGlmICghY29tcF9zdGF0dXMpIHsNCj4NCj4gKyAgICAgICAgICAg
+ICAgICAgICAgICAgcHJfZXJyKCIlczogYm9ndXMgY29tcC1zdGF0XG4iLCBfX2Z1bmNfXyk7DQo+
+DQo+ICsgICAgICAgICAgICAgICAgICAgICAgIGNtZHFfZHVtcHJlZ3MoY3FfaG9zdCk7DQo+DQo+
+ICsgICAgICAgICAgICAgICAgICAgICAgIFdBUk5fT04oMSk7DQo+DQo+ICsgICAgICAgICAgICAg
+ICB9DQo+DQo+ICsgICAgICAgICAgICAgICBmb3JfZWFjaF9zZXRfYml0KHRhZywgJmNvbXBfc3Rh
+dHVzLA0KPiArIGNxX2hvc3QtPm51bV9zbG90cykgew0KPg0KPiArICAgICAgICAgICAgICAgICAg
+ICAgICAvKiBjb21wbGV0ZSB0aGUgY29ycmVzcG9uZGluZyBtcnEgKi8NCj4NCj4gKyAgICAgICAg
+ICAgICAgICAgICAgICAgY21kcV9maW5pc2hfZGF0YShtbWMsIHRhZyk7DQo+DQo+IEFjY29yZGlu
+ZyB0byBlTU1DIDUuMSBzcGVjOiBDUUUgc2hhbGwgc2V0IGJpdCBuIG9mIHRoaXMgcmVnaXN0ZXIg
+KGF0DQo+IHRoZSBzYW1lIHRpbWUgaXQgY2xlYXJzIGJpdCBuIG9mIENRVERCUikgd2hlbiBhIHRh
+c2sgZXhlY3V0aW9uIGlzIGNvbXBsZXRlZA0KPiAod2l0aCBzdWNjZXNzIG9yIGVycm9yKS4NCj4N
+Cj4gICAgICAgQXNzdW1lIGFuIGVycm9yIGFuZCBhbiBjb21wbGV0aW9uIGJvdGggb2NjdXIgYXQg
+dGhlIHNhbWUgdGltZSwNCj4gdGhlbiB0d28gYml0cyBvZiBDUVRDTiByZWdpc3RlciB3aWxsIGJl
+IHNldC4gT25lIGJpdCBwcmVzZW50cyB0aGUgY29tcGxldGlvbi4gVGhlDQo+IG90aGVyIGluZGlj
+YXRlcyB0aGUgZXJyb3Igc2xvdC4NCj4NCj4gICAgICBCYXNlZCBvbiB5b3VyIGN1cnJlbnQgaW1w
+bGVtZW50YXRpb24sIGhvc3Qgd2lsbCBoYW5kbGUgdGhlIGVycm9yDQo+IHdpdGggY21kcV9maW5p
+c2hfZGF0YS4gTGF0ZXIsIG1ycS0+ZGF0YS0+ZXJyb3IgYW5kIG1ycS0+Y21kLT5lcnJvciBhcmUg
+dXNlZCB0bw0KPg0KQWdyZWUuIEknbSBwbGFubmluZyB0byBjaGFuZ2UgaXQgdG86DQoxLiByZWFk
+IENRSVMNCjIuIGZpcnN0IGNoZWNrIGZvciBlcnJvcnMgb24gYWxsIHRoZSBjb21wbGV0ZWQgdGFz
+a3MsIG1hcmsgc3VjY2Vzcy9mYWlsdXJlIGFwcHJvcHJpYXRlbHkgdG8gdGhlIHJlc3BlY3RpdmUg
+bXJxIDMuIGludm9rZSBjbWRxX2ZpbmlzaF9kYXRhIG9uIGFsbCB0aGUgY29tcGxldGVkIHRhc2tz
+Lg0KDQpUaG91Z2h0cyA/DQoNCltaaWppXTogVGhlIGFib3ZlIGNoYW5nZSBzZWVtcyB0byBiZSBh
+IHJlYXNvbmFibGUgb25lLiBBbmQgSSB0aGluayB0aGUgZXJyb3IgaW50ZXJydXB0IHJlZ2lzdGVy
+cyBpbiBsZWdhY3kgZU1NQyBzaG91bGQgYmUgYWxzbyBjaGVja2VkLCBhY2NvcmRpbmcgdG8gc3Bl
+Yy4NCg0KPiBjaGVjayB0aGUgZXJyb3Igc3RhdHVzLiBIb3dldmVyLCB0aGVyZSBpcyBubyBjbWRx
+IHNvdXJjZSBjb2RlIHRvIHNldA0KPiB0aG9zZSB0d28NCkknbSB3b3JraW5nIG9uIHRoZSBlcnJv
+ciBoYW5kbGluZyBwYXJ0IG5vdy4gV2lsbCBwb3N0IHRoZSBwYXRjaCB3aGVuIGRvbmUuDQo+DQo+
+IGVycm9yIGZsYWcuIFRoZXkgYXJlIHN1cHBvc2VkIHRvIGJlIHNldHVwIGluIGxlZ2FjeSBlTU1D
+IGlycSBoYW5kbGluZywNCj4gd2hpY2ggaXMgcmVwbGFjZSBieSB5b3VyIGNtZHEgaXJxIGhhbmRs
+aW5nLiBUaHVzIGFjdHVhbGx5IGhvc3Qgd2lsbCByZWNlaXZlIHRoZQ0KPiBlcnJvciByZXF1ZXN0
+IHdpdGggbm8gZXJyb3IgZmxhZy4gQXMgYSByZXN1bHQsIGhvc3Qgd2lsbCB0cmVhdCB0aGUgZXJy
+b3IgcmVxdWVzdCBhcw0KPiBhIHN1Y2Nlc3NmdWwgY29tcGxldGlvbi4NCj4NCj4gICAgICBUaHVz
+IHRoZXJlIHdpbGwgbm8gZXJyb3IgaGFuZGxpbmcuIE9yIHRoZSBlcnJvciBoYW5kbGluZyB3aWxs
+IGJlDQo+IGV4ZWN1dGVkIGFmdGVyIHRoZSBlcnJvciByZXF1ZXN0IGlzIGZpbmlzaGVkIGFzIGEg
+c3VjY2Vzc2Z1bCBvbmUuDQo+DQo+ICsgICAgICAgICAgICAgICAgICAgICAgIC8qIGNvbXBsZXRl
+IERDTUQgb24gdGFnIDMxICovDQo+DQo+ICsgICAgICAgICAgICAgICB9DQo+DQo+ICsgICAgICAg
+ICAgICAgICBjbWRxX3dyaXRlbChjcV9ob3N0LCBjb21wX3N0YXR1cywgQ1FUQ04pOw0KPg0KPiAr
+ICAgICAgIH0gZWxzZSBpZiAoc3RhdHVzICYgQ1FJU19SRUQpIHsNCj4NCj4gKyAgICAgICAgICAg
+ICAgIC8qIHRhc2sgcmVzcG9uc2UgaGFzIGFuIGVycm9yICovDQo+DQo+ICsgICAgICAgICAgICAg
+ICBwcl9lcnIoIiVzOiBSRUQgZXJyb3IgJWQgISEhXG4iLCBtbWNfaG9zdG5hbWUobW1jKSwNCj4g
+KyBzdGF0dXMpOw0KPg0KPiArICAgICAgICAgICAgICAgY21kcV9kdW1wcmVncyhjcV9ob3N0KTsN
+Cj4NCj4gKyAgICAgICAgICAgICAgIEJVR19PTigxKTsNCj4NCj4gICAgICAgICAgIFRoYW5rIHlv
+dS4NCj4NCj4gQmVzdCByZWdhcmRzLA0KPg0KPiBIdSBaaWppDQo+DQoNCg0KLS0NClNlbnQgYnkg
+YSBjb25zdWx0YW50IG9mIHRoZSBRdWFsY29tbSBJbm5vdmF0aW9uIENlbnRlciwgSW5jLg0KVGhl
+IFF1YWxjb21tIElubm92YXRpb24gQ2VudGVyLCBJbmMuIGlzIGEgbWVtYmVyIG9mIHRoZSBDb2Rl
+IEF1cm9yYSBGb3J1bS4NCg==
