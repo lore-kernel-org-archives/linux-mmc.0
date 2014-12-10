@@ -1,90 +1,130 @@
-From: Ziji Hu <huziji@marvell.com>
-Subject: RE: [PATCH 4/5] mmc: cmdq: support for command queue enabled host
-Date: Tue, 9 Dec 2014 23:08:52 -0800
-Message-ID: <89813612683626448B837EE5A0B6A7CB47068B243A@SC-VEXCH4.marvell.com>
-References: <89813612683626448B837EE5A0B6A7CB47068B2289@SC-VEXCH4.marvell.com>
- <5487EC2C.4040300@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:46848 "EHLO
-	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752924AbaLJHI4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Dec 2014 02:08:56 -0500
-In-Reply-To: <5487EC2C.4040300@codeaurora.org>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH 2/4] mmc: core: Add mmc_regulator_set_vqmmc()
+Date: Wed, 10 Dec 2014 12:58:03 -0800
+Message-ID: <1418245085-9754-2-git-send-email-dianders@chromium.org>
+References: <1418245085-9754-1-git-send-email-dianders@chromium.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1418245085-9754-1-git-send-email-dianders@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Mark Brown <broonie@kernel.org>, Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Alexandru Stan <amstan@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, linux-rockchip@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Doug Anderson <dianders@chromium.org>, chris@printf.net, johan.rudholm@axis.com, tim.kryger@gmail.com, adrian.hunter@intel.com, andrew_gabbasov@mentor.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Asutosh Das <asutoshd@codeaurora.org>
-Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-SGkgQXN1dG9zaCwNCg0KICAgICAgICBUaGFua3MgZm9yIHlvdXIgY29tbWVudHMuIENvdWxkIHlv
-dSBjaGVjayBteSBjb21tZW50cyBwbGVhc2U/DQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0t
-DQpGcm9tOiBBc3V0b3NoIERhcyBbbWFpbHRvOmFzdXRvc2hkQGNvZGVhdXJvcmEub3JnXQ0KU2Vu
-dDogMjAxNMTqMTLUwjnI1SAyMjo0Ng0KVG86IFppamkgSHUNCkNjOiBsaW51eC1hcm0tbXNtQHZn
-ZXIua2VybmVsLm9yZzsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZw0KU3ViamVjdDogUmU6IFtQ
-QVRDSCA0LzVdIG1tYzogY21kcTogc3VwcG9ydCBmb3IgY29tbWFuZCBxdWV1ZSBlbmFibGVkIGhv
-c3QNCg0KSGkgWmlqaSwNClRoYW5rcyBmb3IgeW91ciBjb21tZW50cy4NCg0KT24gMTIvMTAvMjAx
-NCA0OjM3IEFNLCBaaWppIEh1IHdyb3RlOg0KPiBIaSBBc3V0b3NoLA0KPg0KPiAgICAgICAgICAg
-Q291bGQgeW91IGNoZWNrIG1lIGNvbW1lbnRzIHBsZWFzZT8NCj4NCj4gICAgICBQbGVhc2UgY29y
-cmVjdCBtZSBpZiBJIG1pc3VuZGVyc3RhbmQgeW91Lg0KPg0KPiAgICAgIFRoYW5rIHlvdS4NCj4N
-Cj4gK2lycXJldHVybl90IGNtZHFfaXJxKHN0cnVjdCBtbWNfaG9zdCAqbW1jLCB1MzIgaW50bWFz
-aykNCj4NCj4gK3sNCj4NCj4gKyAgICAgICB1MzIgc3RhdHVzOw0KPg0KPiArICAgICAgIHVuc2ln
-bmVkIGxvbmcgdGFnID0gMCwgY29tcF9zdGF0dXM7DQo+DQo+ICsgICAgICAgc3RydWN0IGNtZHFf
-aG9zdCAqY3FfaG9zdCA9IChzdHJ1Y3QgY21kcV9ob3N0DQo+ICopbW1jX2NtZHFfcHJpdmF0ZSht
-bWMpOw0KPg0KPiArDQo+DQo+ICsgICAgICAgc3Bpbl9sb2NrKCZjcV9ob3N0LT5jbWRxX2xvY2sp
-Ow0KPg0KPiArDQo+DQo+ICsgICAgICAgc3RhdHVzID0gY21kcV9yZWFkbChjcV9ob3N0LCBDUUlT
-KTsNCj4NCj4gKyAgICAgICBjbWRxX3dyaXRlbChjcV9ob3N0LCBzdGF0dXMsIENRSVMpOw0KPg0K
-PiArDQo+DQo+ICsgICAgICAgaWYgKHN0YXR1cyAmIENRSVNfSEFDKSB7DQo+DQo+ICsgICAgICAg
-ICAgICAgICAvKiBoYWx0IGlzIGNvbXBsZXRlZCwgd2FrZXVwIHdhaXRpbmcgdGhyZWFkICovDQo+
-DQo+ICsgICAgICAgICAgICAgICBjb21wbGV0ZSgmY3FfaG9zdC0+aGFsdF9jb21wKTsNCj4NCj4g
-KyAgICAgICB9IGVsc2UgaWYgKHN0YXR1cyAmIENRSVNfVENDKSB7DQo+DQo+ICsgICAgICAgICAg
-ICAgICAvKiByZWFkIFFDVENOIGFuZCBjb21wbGV0ZSB0aGUgcmVxdWVzdCAqLw0KPg0KPiArICAg
-ICAgICAgICAgICAgY29tcF9zdGF0dXMgPSBjbWRxX3JlYWRsKGNxX2hvc3QsIENRVENOKTsNCj4N
-Cj4gKyAgICAgICAgICAgICAgIGlmICghY29tcF9zdGF0dXMpIHsNCj4NCj4gKyAgICAgICAgICAg
-ICAgICAgICAgICAgcHJfZXJyKCIlczogYm9ndXMgY29tcC1zdGF0XG4iLCBfX2Z1bmNfXyk7DQo+
-DQo+ICsgICAgICAgICAgICAgICAgICAgICAgIGNtZHFfZHVtcHJlZ3MoY3FfaG9zdCk7DQo+DQo+
-ICsgICAgICAgICAgICAgICAgICAgICAgIFdBUk5fT04oMSk7DQo+DQo+ICsgICAgICAgICAgICAg
-ICB9DQo+DQo+ICsgICAgICAgICAgICAgICBmb3JfZWFjaF9zZXRfYml0KHRhZywgJmNvbXBfc3Rh
-dHVzLA0KPiArIGNxX2hvc3QtPm51bV9zbG90cykgew0KPg0KPiArICAgICAgICAgICAgICAgICAg
-ICAgICAvKiBjb21wbGV0ZSB0aGUgY29ycmVzcG9uZGluZyBtcnEgKi8NCj4NCj4gKyAgICAgICAg
-ICAgICAgICAgICAgICAgY21kcV9maW5pc2hfZGF0YShtbWMsIHRhZyk7DQo+DQo+IEFjY29yZGlu
-ZyB0byBlTU1DIDUuMSBzcGVjOiBDUUUgc2hhbGwgc2V0IGJpdCBuIG9mIHRoaXMgcmVnaXN0ZXIg
-KGF0DQo+IHRoZSBzYW1lIHRpbWUgaXQgY2xlYXJzIGJpdCBuIG9mIENRVERCUikgd2hlbiBhIHRh
-c2sgZXhlY3V0aW9uIGlzIGNvbXBsZXRlZA0KPiAod2l0aCBzdWNjZXNzIG9yIGVycm9yKS4NCj4N
-Cj4gICAgICAgQXNzdW1lIGFuIGVycm9yIGFuZCBhbiBjb21wbGV0aW9uIGJvdGggb2NjdXIgYXQg
-dGhlIHNhbWUgdGltZSwNCj4gdGhlbiB0d28gYml0cyBvZiBDUVRDTiByZWdpc3RlciB3aWxsIGJl
-IHNldC4gT25lIGJpdCBwcmVzZW50cyB0aGUgY29tcGxldGlvbi4gVGhlDQo+IG90aGVyIGluZGlj
-YXRlcyB0aGUgZXJyb3Igc2xvdC4NCj4NCj4gICAgICBCYXNlZCBvbiB5b3VyIGN1cnJlbnQgaW1w
-bGVtZW50YXRpb24sIGhvc3Qgd2lsbCBoYW5kbGUgdGhlIGVycm9yDQo+IHdpdGggY21kcV9maW5p
-c2hfZGF0YS4gTGF0ZXIsIG1ycS0+ZGF0YS0+ZXJyb3IgYW5kIG1ycS0+Y21kLT5lcnJvciBhcmUg
-dXNlZCB0bw0KPg0KQWdyZWUuIEknbSBwbGFubmluZyB0byBjaGFuZ2UgaXQgdG86DQoxLiByZWFk
-IENRSVMNCjIuIGZpcnN0IGNoZWNrIGZvciBlcnJvcnMgb24gYWxsIHRoZSBjb21wbGV0ZWQgdGFz
-a3MsIG1hcmsgc3VjY2Vzcy9mYWlsdXJlIGFwcHJvcHJpYXRlbHkgdG8gdGhlIHJlc3BlY3RpdmUg
-bXJxIDMuIGludm9rZSBjbWRxX2ZpbmlzaF9kYXRhIG9uIGFsbCB0aGUgY29tcGxldGVkIHRhc2tz
-Lg0KDQpUaG91Z2h0cyA/DQoNCltaaWppXTogVGhlIGFib3ZlIGNoYW5nZSBzZWVtcyB0byBiZSBh
-IHJlYXNvbmFibGUgb25lLiBBbmQgSSB0aGluayB0aGUgZXJyb3IgaW50ZXJydXB0IHJlZ2lzdGVy
-cyBpbiBsZWdhY3kgZU1NQyBzaG91bGQgYmUgYWxzbyBjaGVja2VkLCBhY2NvcmRpbmcgdG8gc3Bl
-Yy4NCg0KPiBjaGVjayB0aGUgZXJyb3Igc3RhdHVzLiBIb3dldmVyLCB0aGVyZSBpcyBubyBjbWRx
-IHNvdXJjZSBjb2RlIHRvIHNldA0KPiB0aG9zZSB0d28NCkknbSB3b3JraW5nIG9uIHRoZSBlcnJv
-ciBoYW5kbGluZyBwYXJ0IG5vdy4gV2lsbCBwb3N0IHRoZSBwYXRjaCB3aGVuIGRvbmUuDQo+DQo+
-IGVycm9yIGZsYWcuIFRoZXkgYXJlIHN1cHBvc2VkIHRvIGJlIHNldHVwIGluIGxlZ2FjeSBlTU1D
-IGlycSBoYW5kbGluZywNCj4gd2hpY2ggaXMgcmVwbGFjZSBieSB5b3VyIGNtZHEgaXJxIGhhbmRs
-aW5nLiBUaHVzIGFjdHVhbGx5IGhvc3Qgd2lsbCByZWNlaXZlIHRoZQ0KPiBlcnJvciByZXF1ZXN0
-IHdpdGggbm8gZXJyb3IgZmxhZy4gQXMgYSByZXN1bHQsIGhvc3Qgd2lsbCB0cmVhdCB0aGUgZXJy
-b3IgcmVxdWVzdCBhcw0KPiBhIHN1Y2Nlc3NmdWwgY29tcGxldGlvbi4NCj4NCj4gICAgICBUaHVz
-IHRoZXJlIHdpbGwgbm8gZXJyb3IgaGFuZGxpbmcuIE9yIHRoZSBlcnJvciBoYW5kbGluZyB3aWxs
-IGJlDQo+IGV4ZWN1dGVkIGFmdGVyIHRoZSBlcnJvciByZXF1ZXN0IGlzIGZpbmlzaGVkIGFzIGEg
-c3VjY2Vzc2Z1bCBvbmUuDQo+DQo+ICsgICAgICAgICAgICAgICAgICAgICAgIC8qIGNvbXBsZXRl
-IERDTUQgb24gdGFnIDMxICovDQo+DQo+ICsgICAgICAgICAgICAgICB9DQo+DQo+ICsgICAgICAg
-ICAgICAgICBjbWRxX3dyaXRlbChjcV9ob3N0LCBjb21wX3N0YXR1cywgQ1FUQ04pOw0KPg0KPiAr
-ICAgICAgIH0gZWxzZSBpZiAoc3RhdHVzICYgQ1FJU19SRUQpIHsNCj4NCj4gKyAgICAgICAgICAg
-ICAgIC8qIHRhc2sgcmVzcG9uc2UgaGFzIGFuIGVycm9yICovDQo+DQo+ICsgICAgICAgICAgICAg
-ICBwcl9lcnIoIiVzOiBSRUQgZXJyb3IgJWQgISEhXG4iLCBtbWNfaG9zdG5hbWUobW1jKSwNCj4g
-KyBzdGF0dXMpOw0KPg0KPiArICAgICAgICAgICAgICAgY21kcV9kdW1wcmVncyhjcV9ob3N0KTsN
-Cj4NCj4gKyAgICAgICAgICAgICAgIEJVR19PTigxKTsNCj4NCj4gICAgICAgICAgIFRoYW5rIHlv
-dS4NCj4NCj4gQmVzdCByZWdhcmRzLA0KPg0KPiBIdSBaaWppDQo+DQoNCg0KLS0NClNlbnQgYnkg
-YSBjb25zdWx0YW50IG9mIHRoZSBRdWFsY29tbSBJbm5vdmF0aW9uIENlbnRlciwgSW5jLg0KVGhl
-IFF1YWxjb21tIElubm92YXRpb24gQ2VudGVyLCBJbmMuIGlzIGEgbWVtYmVyIG9mIHRoZSBDb2Rl
-IEF1cm9yYSBGb3J1bS4NCg==
+This adds logic to the MMC core to set VQMMC.  This is expected to be
+called by MMC drivers like dw_mmc as part of (or instead of) their
+start_signal_voltage_switch() callback.
+
+A few notes:
+
+* When setting the signal voltage to 3.3V we do our best to make VQMMC
+  and VMMC match.  It's been reported that this makes some old cards
+  happy since they were tested back in the day before UHS when VQMMC
+  and VMMC were provided by the same regulator.  A nice side effect of
+  this is that we don't end up on the hairy edge of VQMMC (2.7V),
+  which some EEs claim is a little too close to the minimum for
+  comfort.
+
+* When setting the signal voltage to 1.8V or 1.2V we aim for that
+  specific voltage instead of picking the lowest one in the range.
+
+* We very purposely don't print errors in mmc_regulator_set_vqmmc().
+  There are cases where the MMC core will try several different
+  voltages and we don't want to pollute the logs.
+
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+---
+ drivers/mmc/core/core.c  | 53 ++++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/host.h |  7 +++++++
+ 2 files changed, 60 insertions(+)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 9584bff..d0da480 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1333,6 +1333,59 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+ }
+ EXPORT_SYMBOL_GPL(mmc_regulator_set_ocr);
+ 
++static int mmc_regulator_set_voltage_if_supported(struct regulator *regulator,
++						  int min_uV, int ideal_uV,
++						  int max_uV)
++{
++	/*
++	 * Check if supported first to avoid errors since we may try several
++	 * signal levels during power up and don't want to show errors.
++	 */
++	if (!regulator_is_supported_voltage(regulator, min_uV, max_uV))
++		return -EINVAL;
++
++	return regulator_set_closest_voltage(regulator, min_uV, ideal_uV,
++					     max_uV);
++}
++
++/**
++ * mmc_regulator_set_vqmmc - Set VQMMC as per the ios
++ *
++ * For 3.3V signaling, we try to match vqmmc to vmmc as closely as possible.
++ * That will match the behavior of old boards where vqmmc and vmmc were supplied
++ * by the same supply.
++ *
++ * For 1.2V and 1.8V signaling we'll try to get as close as possible to the
++ * requested voltage.  This is definitely a good idea for UHS where there's a
++ * separate regulator on the card that's trying to make 1.8V and it's best if
++ * we match.
++ *
++ * This function is expected to be used by a controller's
++ * start_signal_voltage_switch() function.
++ */
++int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	/* If no vqmmc supply then we can't change the voltage */
++	if (IS_ERR(mmc->supply.vqmmc))
++		return -EINVAL;
++
++	switch (ios->signal_voltage) {
++	case MMC_SIGNAL_VOLTAGE_120:
++		return mmc_regulator_set_voltage_if_supported(
++			mmc->supply.vqmmc, 1100000, 1200000, 1300000);
++	case MMC_SIGNAL_VOLTAGE_180:
++		return mmc_regulator_set_voltage_if_supported(
++			mmc->supply.vqmmc, 1700000, 1800000, 1950000);
++	case MMC_SIGNAL_VOLTAGE_330:
++		return mmc_regulator_set_voltage_if_supported(
++			mmc->supply.vqmmc, 2700000,
++			regulator_get_voltage(mmc->supply.vmmc), 3600000);
++	default:
++		return -EINVAL;
++	}
++}
++EXPORT_SYMBOL_GPL(mmc_regulator_set_vqmmc);
++
+ #endif /* CONFIG_REGULATOR */
+ 
+ int mmc_regulator_get_supply(struct mmc_host *mmc)
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 9f32270..524d6fc 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -416,6 +416,7 @@ int mmc_regulator_get_ocrmask(struct regulator *supply);
+ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+ 			struct regulator *supply,
+ 			unsigned short vdd_bit);
++int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios);
+ #else
+ static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
+ {
+@@ -428,6 +429,12 @@ static inline int mmc_regulator_set_ocr(struct mmc_host *mmc,
+ {
+ 	return 0;
+ }
++
++static inline int mmc_regulator_set_vqmmc(struct mmc_host *mmc,
++					  struct mmc_ios *ios)
++{
++	return -EINVAL;
++}
+ #endif
+ 
+ int mmc_regulator_get_supply(struct mmc_host *mmc);
+-- 
+2.2.0.rc0.207.ga3a616c
