@@ -1,175 +1,152 @@
 From: Asutosh Das <asutoshd@codeaurora.org>
-Subject: Re: [PATCH 3/5] mmc: card: Add eMMC command queuing support in mmc
- block layer
-Date: Wed, 10 Dec 2014 10:08:03 +0530
-Message-ID: <5487CE2B.1080902@codeaurora.org>
-References: <20141202115821.GA27658@asutoshd-ics.in.qualcomm.com> <loom.20141208T030638-232@post.gmane.org> <CAA=bF1QaKLJv2rXLhpBoGA52syNgXL31yV2fKoLaTn2MP_Jw3w@mail.gmail.com> <89813612683626448B837EE5A0B6A7CB47068B1E58@SC-VEXCH4.marvell.com>
+Subject: Re: [PATCH 4/5] mmc: cmdq: support for command queue enabled host
+Date: Wed, 10 Dec 2014 12:16:04 +0530
+Message-ID: <5487EC2C.4040300@codeaurora.org>
+References: <89813612683626448B837EE5A0B6A7CB47068B2289@SC-VEXCH4.marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.11.231]:60873 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755265AbaLJEiJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Dec 2014 23:38:09 -0500
-In-Reply-To: <89813612683626448B837EE5A0B6A7CB47068B1E58@SC-VEXCH4.marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Ziji Hu <huziji@marvell.com>, Asutosh Das <das.asutosh@gmail.com>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <89813612683626448B837EE5A0B6A7CB47068B2289@SC-VEXCH4.marvell.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ziji Hu <huziji@marvell.com>
 Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
-Hi Ziji
-On 12/9/2014 12:33 AM, Ziji Hu wrote:
+Hi Ziji,
+Thanks for your comments.
+
+On 12/10/2014 4:37 AM, Ziji Hu wrote:
 > Hi Asutosh,
 >
->          May I ask whether you have tested the code on hardware platf=
-orm?
-I have done some basic testing on an emulation platform that using an=20
-earlier kernel version.
->          If you have not tested it yet, do you have a schedule for te=
-sting?
+>           Could you check me comments please?
 >
-> -----Original Message-----
-> From: Asutosh Das [mailto:das.asutosh@gmail.com]
-> Sent: 2014=C4=EA12=D4=C27=C8=D5 21:59
-> To: Ziji Hu
-> Cc: linux-arm-msm@vger.kernel.org; linux-mmc@vger.kernel.org
-> Subject: Re: [PATCH 3/5] mmc: card: Add eMMC command queuing support =
-in mmc block layer
+>      Please correct me if I misunderstand you.
 >
-> Hi Ziji
-> Thanks for your comments.
+>      Thank you.
 >
-> I'm adding linux-mmc to this as well.
+> +irqreturn_t cmdq_irq(struct mmc_host *mmc, u32 intmask)
 >
-> On 8 December 2014 at 07:47, Hu Ziji <huziji@marvell.com> wrote:
->>
->> Asutosh Das <asutoshd <at> codeaurora.org> writes:
->>
->>> +static inline bool mmc_cmdq_should_pull_reqs(struct mmc_host *host=
-,
->>> +                                     struct mmc_cmdq_context_info
->>> +*ctx) {
->>> +     spin_lock_bh(&ctx->cmdq_ctx_lock);
->>> +     if (ctx->active_dcmd || ctx->rpmb_in_wait) {
->>> +             if ((ctx->curr_state !=3D CMDQ_STATE_HALT) ||
->>> +                     (ctx->curr_state !=3D CMDQ_STATE_ERR)) {
->>
->>                          Because CMDQ_STATE_HALT =3D=3D 0 and
->> CMDQ_STATE_ERR =3D=3D 1, it is impossible that condition ((ctx->curr=
-_state
->> =3D=3D CMDQ_STATE_HALT) && (ctx-
->>> curr_state !=3D CMDQ_STATE_ERR)) is satisfied. Thus the above
->>> if-condition will
->> always be true.
->>
+> +{
 >
-> Agree.
+> +       u32 status;
 >
->>
->>> +                     pr_debug("%s: %s: skip pulling reqs: dcmd: %d=
- rpmb: %d state:
->> %d\n",
->>> +                              mmc_hostname(host), __func__, ctx->a=
-ctive_dcmd,
->>> +                              ctx->rpmb_in_wait, ctx->curr_state);
->>> +                     spin_unlock_bh(&ctx->cmdq_ctx_lock);
->>> +                     return false;
->>> +             }
->>> +     } else {
->>> +             spin_unlock_bh(&ctx->cmdq_ctx_lock);
->>> +             return true;
->>> +     }
->>> +}
->>
->>> +/**
->>> + *   mmc_cmdq_halt - halt/un-halt the command queue engine
->>> + *    <at> host: host instance
->>> + *    <at> halt: true - halt, un-halt otherwise
->>> + *
->>> + *   Host halts the command queue engine. It should complete
->>> + *   the ongoing transfer and release the SD bus.
->>> + *   All legacy SD commands can be sent upon successful
->>> + *   completion of this function.
->>> + *   Returns 0 on success, negative otherwise
->>> + */
->>> +int mmc_cmdq_halt(struct mmc_host *host, bool halt) {
->>> +     int err =3D 0;
->>> +
->>> +     if ((halt && (host->cmdq_ctx.curr_state & CMDQ_STATE_HALT)) |=
-|
->>> +         (!halt && !(host->cmdq_ctx.curr_state & CMDQ_STATE_HALT))=
-)
->>> +             return 1;
->>> +
->>> +     if (host->cmdq_ops->halt) {
->>> +             err =3D host->cmdq_ops->halt(host, halt);
->>> +             if (!err && halt)
->>> +                     host->cmdq_ctx.curr_state |=3D CMDQ_STATE_HAL=
-T;
->>> +             else if (!err && !halt)
->>> +                     host->cmdq_ctx.curr_state &=3D ~CMDQ_STATE_HA=
-LT;
->>
->>                  Since CMDQ_STATE_HALE =3D=3D 0, ORed with CMDQ_STAT=
-E_HALT
->> and ANDed with ~CMDQ_STATE_HALT will neither modify the value of
->> curr_state. Thus CMDQ_STATE_HALT as 0 cannot indicate the halt state=
- of cmd queue.
+> +       unsigned long tag = 0, comp_status;
 >
-> Agree.
+> +       struct cmdq_host *cq_host = (struct cmdq_host
+> *)mmc_cmdq_private(mmc);
 >
->>
->>
->>> +     }
->>> +     return 0;
->>> +}
->>> +EXPORT_SYMBOL(mmc_cmdq_halt);
->>
->>> +enum cmdq_states {
->>> +     CMDQ_STATE_HALT,
->>> +     CMDQ_STATE_ERR,
->>> +};
->>
->>      According to above definition, CMDQ_STATE_HALT is 0x0 and
->> CMDQ_STATE_ERR is 0x1.
->>
+> +
 >
-> I will address these comments in the next patch.
+> +       spin_lock(&cq_host->cmdq_lock);
 >
->>
->>
->> Hi Asutosh,
->>
->>      I think that the definition of CMDQ_STATE_HALT might fail to
->> indicate halt status correctly.
->>      Could you check my comments please?
->>      If I misunderstand your source code, please correct me.
->>
->> Best regards,
->> Ziji
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe
->> linux-arm-msm" in the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> +
 >
+> +       status = cmdq_readl(cq_host, CQIS);
 >
+> +       cmdq_writel(cq_host, status, CQIS);
 >
+> +
 >
-> --
-> Thanks & Regards
-> ~/Asutosh Das
-> N=8B=A7=B2=E6=ECr=B8=9By=FA=E8=9A=D8b=B2X=AC=B6=C7=A7v=D8^=81=7F)=DE=BA=
-{.n=81=7F+=89=B7=A5=8A{=B1=9Ag"=9E=D8^n=87r=A1=F6=A6z=81=7F=1A=81=EBh=99=
-=A8=E8=AD=81=7F&=A2=F8=1E=AEG=AB=9D=E9h=81=7F=03(=AD=E9=9A=8E=8A=DD=A2j=
-"=9D=FA=1A=81=7F=1Bm=81=7F=81=7F=EF=81=EA=E4z=B9=DE=96=8A=E0=FEf=A3=A2=B7=
-h=9A=88=A7~=88mml=3D=3D
+> +       if (status & CQIS_HAC) {
+>
+> +               /* halt is completed, wakeup waiting thread */
+>
+> +               complete(&cq_host->halt_comp);
+>
+> +       } else if (status & CQIS_TCC) {
+>
+> +               /* read QCTCN and complete the request */
+>
+> +               comp_status = cmdq_readl(cq_host, CQTCN);
+>
+> +               if (!comp_status) {
+>
+> +                       pr_err("%s: bogus comp-stat\n", __func__);
+>
+> +                       cmdq_dumpregs(cq_host);
+>
+> +                       WARN_ON(1);
+>
+> +               }
+>
+> +               for_each_set_bit(tag, &comp_status, cq_host->num_slots) {
+>
+> +                       /* complete the corresponding mrq */
+>
+> +                       cmdq_finish_data(mmc, tag);
+>
+> According to eMMC 5.1 spec: CQE shall set bit n of this register (at the
+> same
+>
+> time it clears bit n of CQTDBR) when a task execution is completed (with
+> success
+>
+> or error).
+>
+>       Assume an error and an completion both occur at the same time,
+> then two bits
+>
+> of CQTCN register will be set. One bit presents the completion. The
+> other indicates
+>
+> the error slot.
+>
+>      Based on your current implementation, host will handle the error with
+>
+> cmdq_finish_data. Later, mrq->data->error and mrq->cmd->error are used to
+>
+Agree. I'm planning to change it to:
+1. read CQIS
+2. first check for errors on all the completed tasks, mark 
+success/failure appropriately to the respective mrq
+3. invoke cmdq_finish_data on all the completed tasks.
+
+Thoughts ?
+> check the error status. However, there is no cmdq source code to set
+> those two
+I'm working on the error handling part now. Will post the patch when done.
+>
+> error flag. They are supposed to be setup in legacy eMMC irq handling,
+> which is
+>
+> replace by your cmdq irq handling. Thus actually host will receive the
+> error request
+>
+> with no error flag. As a result, host will treat the error request as a
+> successful
+>
+> completion.
+>
+>      Thus there will no error handling. Or the error handling will be
+> executed after
+>
+> the error request is finished as a successful one.
+>
+> +                       /* complete DCMD on tag 31 */
+>
+> +               }
+>
+> +               cmdq_writel(cq_host, comp_status, CQTCN);
+>
+> +       } else if (status & CQIS_RED) {
+>
+> +               /* task response has an error */
+>
+> +               pr_err("%s: RED error %d !!!\n", mmc_hostname(mmc), status);
+>
+> +               cmdq_dumpregs(cq_host);
+>
+> +               BUG_ON(1);
+>
+>           Thank you.
+>
+> Best regards,
+>
+> Hu Ziji
 >
 
 
---=20
+-- 
 Sent by a consultant of the Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora For=
-um.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum.
