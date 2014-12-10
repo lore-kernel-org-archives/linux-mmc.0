@@ -1,127 +1,175 @@
-From: Alim Akhtar <alim.akhtar@gmail.com>
-Subject: Re: [PATCH v2 3/4] mmc: dw_mmc: Convert to mmc_send_tuning()
-Date: Wed, 10 Dec 2014 03:00:00 +0530
-Message-ID: <CAGOxZ52RKUdrSegUZs31E19mJr3kaLbyoEStDWD1=bD5vHNLeg@mail.gmail.com>
-References: <1417780783-12939-1-git-send-email-ulf.hansson@linaro.org>
- <1417780783-12939-4-git-send-email-ulf.hansson@linaro.org>
- <CAGOxZ525JR9vTuKAZJJjDF6iq3R2-DuEcJFEOT9KkEMZGimUFw@mail.gmail.com> <CAPDyKFpOvs_ML+1edoTzeTPctiMV0B8EeD8aE8daGwjeG7gwMQ@mail.gmail.com>
+From: Asutosh Das <asutoshd@codeaurora.org>
+Subject: Re: [PATCH 3/5] mmc: card: Add eMMC command queuing support in mmc
+ block layer
+Date: Wed, 10 Dec 2014 10:08:03 +0530
+Message-ID: <5487CE2B.1080902@codeaurora.org>
+References: <20141202115821.GA27658@asutoshd-ics.in.qualcomm.com> <loom.20141208T030638-232@post.gmane.org> <CAA=bF1QaKLJv2rXLhpBoGA52syNgXL31yV2fKoLaTn2MP_Jw3w@mail.gmail.com> <89813612683626448B837EE5A0B6A7CB47068B1E58@SC-VEXCH4.marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=gbk;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yh0-f50.google.com ([209.85.213.50]:59287 "EHLO
-	mail-yh0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751209AbaLIVal (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Dec 2014 16:30:41 -0500
-Received: by mail-yh0-f50.google.com with SMTP id 29so750159yhl.9
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Dec 2014 13:30:41 -0800 (PST)
-In-Reply-To: <CAPDyKFpOvs_ML+1edoTzeTPctiMV0B8EeD8aE8daGwjeG7gwMQ@mail.gmail.com>
+Received: from smtp.codeaurora.org ([198.145.11.231]:60873 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755265AbaLJEiJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Dec 2014 23:38:09 -0500
+In-Reply-To: <89813612683626448B837EE5A0B6A7CB47068B1E58@SC-VEXCH4.marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, Aisheng Dong <b29396@freescale.com>, Stephen Boyd <sboyd@codeaurora.org>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
+To: Ziji Hu <huziji@marvell.com>, Asutosh Das <das.asutosh@gmail.com>
+Cc: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Ulf
-
-On Mon, Dec 8, 2014 at 3:40 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 6 December 2014 at 13:43, Alim Akhtar <alim.akhtar@gmail.com> wrote:
->> Hi Ulf,
+Hi Ziji
+On 12/9/2014 12:33 AM, Ziji Hu wrote:
+> Hi Asutosh,
+>
+>          May I ask whether you have tested the code on hardware platf=
+orm?
+I have done some basic testing on an emulation platform that using an=20
+earlier kernel version.
+>          If you have not tested it yet, do you have a schedule for te=
+sting?
+>
+> -----Original Message-----
+> From: Asutosh Das [mailto:das.asutosh@gmail.com]
+> Sent: 2014=C4=EA12=D4=C27=C8=D5 21:59
+> To: Ziji Hu
+> Cc: linux-arm-msm@vger.kernel.org; linux-mmc@vger.kernel.org
+> Subject: Re: [PATCH 3/5] mmc: card: Add eMMC command queuing support =
+in mmc block layer
+>
+> Hi Ziji
+> Thanks for your comments.
+>
+> I'm adding linux-mmc to this as well.
+>
+> On 8 December 2014 at 07:47, Hu Ziji <huziji@marvell.com> wrote:
 >>
->> On Fri, Dec 5, 2014 at 5:29 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> Instead of having a local hack taking care of sending the tuning
->>> command and as well to verify the response pattern, let's convert to
->>> the common mmc_send_tuning() API.
->>>
->>> This change affects the Exynos variant, since it's the only one which
->>> support the dw_mmc's ->execute_tuning() callback.
->>>
->>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>> ---
->>>
->
-> Alim, thanks for helping out testing!
->
-Sorry for the delay but currently I don't have access to my work station.
-And thanks for quick suggested patch, I will test this as soon asI go
-back to my work.
-
-Hi Jaehoon, can you test this and the original patch for hs200 on
-exynos? Just to confirm my board is not the special one.
-Thanks.
-
->> With this change HS200 mode does not work on exynos5800 peach-pi board.
->> I got below error while testing this series:
+>> Asutosh Das <asutoshd <at> codeaurora.org> writes:
 >>
->> mmc0: tuning execution failed
->> mmc0: error -5 whilst initialising MMC card
+>>> +static inline bool mmc_cmdq_should_pull_reqs(struct mmc_host *host=
+,
+>>> +                                     struct mmc_cmdq_context_info
+>>> +*ctx) {
+>>> +     spin_lock_bh(&ctx->cmdq_ctx_lock);
+>>> +     if (ctx->active_dcmd || ctx->rpmb_in_wait) {
+>>> +             if ((ctx->curr_state !=3D CMDQ_STATE_HALT) ||
+>>> +                     (ctx->curr_state !=3D CMDQ_STATE_ERR)) {
 >>
->> Though, your's next branch with commit _a1d06b4_ works fine in HS200 mode.
+>>                          Because CMDQ_STATE_HALT =3D=3D 0 and
+>> CMDQ_STATE_ERR =3D=3D 1, it is impossible that condition ((ctx->curr=
+_state
+>> =3D=3D CMDQ_STATE_HALT) && (ctx-
+>>> curr_state !=3D CMDQ_STATE_ERR)) is satisfied. Thus the above
+>>> if-condition will
+>> always be true.
+>>
 >
-> I was looking into the details of what change my patchset introduces
-> for dw_mmc-exynos. Apparently, dw_mmc-exynos was using the
-> MMC_STOP_TRANSMISSION to end the tuning reqeust (CMD21/19). The new
-> mmc_send_tuning() API doesn't, which also conforms to what the eMMC/SD
-> specifications states.
+> Agree.
 >
-> Do you have any idea of why dw_mmc-exynos was using
-> MMC_STOP_TRANSMISSION for CMD19/21?
+>>
+>>> +                     pr_debug("%s: %s: skip pulling reqs: dcmd: %d=
+ rpmb: %d state:
+>> %d\n",
+>>> +                              mmc_hostname(host), __func__, ctx->a=
+ctive_dcmd,
+>>> +                              ctx->rpmb_in_wait, ctx->curr_state);
+>>> +                     spin_unlock_bh(&ctx->cmdq_ctx_lock);
+>>> +                     return false;
+>>> +             }
+>>> +     } else {
+>>> +             spin_unlock_bh(&ctx->cmdq_ctx_lock);
+>>> +             return true;
+>>> +     }
+>>> +}
+>>
+>>> +/**
+>>> + *   mmc_cmdq_halt - halt/un-halt the command queue engine
+>>> + *    <at> host: host instance
+>>> + *    <at> halt: true - halt, un-halt otherwise
+>>> + *
+>>> + *   Host halts the command queue engine. It should complete
+>>> + *   the ongoing transfer and release the SD bus.
+>>> + *   All legacy SD commands can be sent upon successful
+>>> + *   completion of this function.
+>>> + *   Returns 0 on success, negative otherwise
+>>> + */
+>>> +int mmc_cmdq_halt(struct mmc_host *host, bool halt) {
+>>> +     int err =3D 0;
+>>> +
+>>> +     if ((halt && (host->cmdq_ctx.curr_state & CMDQ_STATE_HALT)) |=
+|
+>>> +         (!halt && !(host->cmdq_ctx.curr_state & CMDQ_STATE_HALT))=
+)
+>>> +             return 1;
+>>> +
+>>> +     if (host->cmdq_ops->halt) {
+>>> +             err =3D host->cmdq_ops->halt(host, halt);
+>>> +             if (!err && halt)
+>>> +                     host->cmdq_ctx.curr_state |=3D CMDQ_STATE_HAL=
+T;
+>>> +             else if (!err && !halt)
+>>> +                     host->cmdq_ctx.curr_state &=3D ~CMDQ_STATE_HA=
+LT;
+>>
+>>                  Since CMDQ_STATE_HALE =3D=3D 0, ORed with CMDQ_STAT=
+E_HALT
+>> and ANDed with ~CMDQ_STATE_HALT will neither modify the value of
+>> curr_state. Thus CMDQ_STATE_HALT as 0 cannot indicate the halt state=
+ of cmd queue.
 >
-> To see if my theory is correct, could you try out the following patch
-> on top of $subject patch?
-> BTW, I have queued patch 1 and 2, from this patchset available on my
-> next branch.
+> Agree.
+>
+>>
+>>
+>>> +     }
+>>> +     return 0;
+>>> +}
+>>> +EXPORT_SYMBOL(mmc_cmdq_halt);
+>>
+>>> +enum cmdq_states {
+>>> +     CMDQ_STATE_HALT,
+>>> +     CMDQ_STATE_ERR,
+>>> +};
+>>
+>>      According to above definition, CMDQ_STATE_HALT is 0x0 and
+>> CMDQ_STATE_ERR is 0x1.
+>>
+>
+> I will address these comments in the next patch.
+>
+>>
+>>
+>> Hi Asutosh,
+>>
+>>      I think that the definition of CMDQ_STATE_HALT might fail to
+>> indicate halt status correctly.
+>>      Could you check my comments please?
+>>      If I misunderstand your source code, please correct me.
+>>
+>> Best regards,
+>> Ziji
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe
+>> linux-arm-msm" in the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
 >
-> From e1ac35bb0e90254275ec7088f41e6e2d59e48367 Mon Sep 17 00:00:00 2001
-> From: Ulf Hansson <ulf.hansson@linaro.org>
-> Date: Mon, 8 Dec 2014 10:58:48 +0100
-> Subject: [PATCH] mmc: core: End tuning request with stop command
 >
-> Not to be merged!
 >
-> This patch adds the MMC_STOP_TRANSMISSION command to end a tuning
-> request. For some reason dw_mmc seems to need this to complete the
-> tuning request without errors.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/core/mmc_ops.c | 5 +++++
->  1 file changed, 5 insertions(+)
->
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 3b044c5..aa79e0c 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -551,6 +551,7 @@ int mmc_send_tuning(struct mmc_host *host)
->  {
->         struct mmc_request mrq = {NULL};
->         struct mmc_command cmd = {0};
-> +       struct mmc_command stop = {0};
->         struct mmc_data data = {0};
->         struct scatterlist sg;
->         struct mmc_ios *ios = &host->ios;
-> @@ -576,10 +577,14 @@ int mmc_send_tuning(struct mmc_host *host)
->
->         mrq.cmd = &cmd;
->         mrq.data = &data;
-> +       mrq.stop = &stop;
->
->         cmd.opcode = opcode;
->         cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
->
-> +       stop.opcode = MMC_STOP_TRANSMISSION;
-> +       stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
-> +
->         data.blksz = size;
->         data.blocks = 1;
->         data.flags = MMC_DATA_READ;
 > --
-> 1.9.1
+> Thanks & Regards
+> ~/Asutosh Das
+> N=8B=A7=B2=E6=ECr=B8=9By=FA=E8=9A=D8b=B2X=AC=B6=C7=A7v=D8^=81=7F)=DE=BA=
+{.n=81=7F+=89=B7=A5=8A{=B1=9Ag"=9E=D8^n=87r=A1=F6=A6z=81=7F=1A=81=EBh=99=
+=A8=E8=AD=81=7F&=A2=F8=1E=AEG=AB=9D=E9h=81=7F=03(=AD=E9=9A=8E=8A=DD=A2j=
+"=9D=FA=1A=81=7F=1Bm=81=7F=81=7F=EF=81=EA=E4z=B9=DE=96=8A=E0=FEf=A3=A2=B7=
+h=9A=88=A7~=88mml=3D=3D
 >
-> Kind regards
-> Uffe
 
 
-
--- 
-Regards,
-Alim
+--=20
+Sent by a consultant of the Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora For=
+um.
