@@ -1,41 +1,32 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 2/2] PM: Remove the SET_PM_RUNTIME_PM_OPS() macro
-Date: Thu, 11 Dec 2014 11:20:36 +0100
-Message-ID: <1418293236-28411-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-pm-owner@vger.kernel.org>
-Sender: linux-pm-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>
-Cc: linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, Ludovic Desroches <ludovic.desroches@atmel.com>
+From: Eliad Peller <eliad@wizery.com>
+Subject: SDIO device binding
+Date: Thu, 11 Dec 2014 15:32:51 +0200
+Message-ID: <CAB3XZEfX7oAmJe=86j+WC0w73kQxO4C=Ufdy6eMgtYYh8Swv2g@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ig0-f177.google.com ([209.85.213.177]:57738 "EHLO
+	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932159AbaLKNcw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Dec 2014 08:32:52 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, Sascha Hauer <s.hauer@pengutronix.de>
+Cc: Chris Ball <chris@printf.net>, Hans de Goede <hdegoede@redhat.com>
 
-There're now no users left of the SET_PM_RUNTIME_PM_OPS() macro, since
-all have converted to use the SET_RUNTIME_PM_OPS() macro instead, so
-let's remove it.
+hi,
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
+I'm looking for the proper way to pass SDIO device properties using devicetree.
 
-I suggest we takes this through my mmc tree, thus I request an ack from Rafael.
-Also, I intend to send this as a fix for 3.19 rc1, together with the mmc parts
-in Patch 1/2.
+There seems to be a patchset sent previously by Sascha Hauer to handle
+it, but for some reason it didn't get merged, and i can't find any
+further discussion regarding the patches.
 
----
- include/linux/pm.h | 2 --
- 1 file changed, 2 deletions(-)
+https://patchwork.ozlabs.org/patch/355235/
+http://lists.infradead.org/pipermail/linux-arm-kernel/2014-June/261575.html
 
-diff --git a/include/linux/pm.h b/include/linux/pm.h
-index 66a656e..8b59763 100644
---- a/include/linux/pm.h
-+++ b/include/linux/pm.h
-@@ -351,8 +351,6 @@ struct dev_pm_ops {
- #define SET_RUNTIME_PM_OPS(suspend_fn, resume_fn, idle_fn)
- #endif
- 
--#define SET_PM_RUNTIME_PM_OPS	SET_RUNTIME_PM_OPS
--
- /*
-  * Use this if you want to use the same suspend and resume callbacks for suspend
-  * to RAM and hibernation.
--- 
-1.9.1
+Was there any issue with the patches, or is there any other binding
+that should be used instead?
 
+thanks,
+Eliad.
