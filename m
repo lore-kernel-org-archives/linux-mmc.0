@@ -1,59 +1,40 @@
-From: Aaron Lu <aaron.lu@intel.com>
-Subject: Re: [PATCH V2 0/4] mmc: sdhci: Disable re-tuning for HS400
-Date: Thu, 11 Dec 2014 16:29:51 +0800
-Message-ID: <548955FF.7070903@intel.com>
-References: <1417800331-15248-1-git-send-email-adrian.hunter@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:41418 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932397AbaLKI36 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 11 Dec 2014 03:29:58 -0500
-In-Reply-To: <1417800331-15248-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 1/2] mmc: atmel-mci: use SET_RUNTIME_PM_OPS() macro
+Date: Thu, 11 Dec 2014 11:18:56 +0100
+Message-ID: <1418293136-28356-1-git-send-email-ulf.hansson@linaro.org>
+References: <patch_pm/0002-PM-Remove-the-SET_PM_RUNTIME_PM_OPS-macro.patch>
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <patch_pm/0002-PM-Remove-the-SET_PM_RUNTIME_PM_OPS-macro.patch>
+Sender: linux-pm-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>
+Cc: linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, Ludovic Desroches <ludovic.desroches@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-On 12/06/2014 01:25 AM, Adrian Hunter wrote:
-> Hi
-> 
-> Here is V2 of patches to disable re-tuning for HS400.
-> 
-> As described in patch 4, re-tuning for HS400 has to be done
-> in HS200 mode, but there is no support for that, so re-tuning
-> needs to be disabled until support is added.
-> 
-> Changes in V2:
-> 
-> 	Added "mmc: sdhci: Simplify use of tuning timer"
-> 	patch.
-> 
-> 	Changed "mmc: sdhci: Disable re-tuning for HS400"
-> 	so that the tuning timer is not started instead
-> 	of stopping it when HS400 mode is selected.
-> 
-> 
-> Adrian Hunter (4):
->       mmc: sdhci: Tuning should not change max_blk_count
->       mmc: sdhci: Add out_unlock to sdhci_execute_tuning
->       mmc: sdhci: Simplify use of tuning timer
->       mmc: sdhci: Disable re-tuning for HS400
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-For patch 1-3: Reviewed-by: Aaron Lu <aaron.lu@intel.com>
+The currently used SET_PM_RUNTIME_PM_OPS() macro is defined to the
+SET_RUNTIME_PM_OPS() macro. Convert to the later, since that's the
+proper one to use.
 
-Thanks,
-Aaron
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/atmel-mci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> 
->  drivers/mmc/host/sdhci.c  | 66 ++++++++++++++++++++++++++++++-----------------
->  include/linux/mmc/sdhci.h |  1 +
->  2 files changed, 43 insertions(+), 24 deletions(-)
-> 
-> 
-> Regards
-> Adrian
-> 
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 62aba9a..03d7c75 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -2561,7 +2561,7 @@ static int atmci_runtime_resume(struct device *dev)
+ static const struct dev_pm_ops atmci_dev_pm_ops = {
+ 	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+ 				pm_runtime_force_resume)
+-	SET_PM_RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
++	SET_RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
+ };
+ 
+ static struct platform_driver atmci_driver = {
+-- 
+1.9.1
 
