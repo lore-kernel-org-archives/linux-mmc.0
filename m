@@ -1,108 +1,64 @@
-From: NeilBrown <neilb@suse.de>
-Subject: [PATCH 3/3] mmc: omap_hsmmc: use mmc_of_parse to parse common mmc
- configuration.
-Date: Fri, 12 Dec 2014 08:43:08 +1100
-Message-ID: <20141211214308.3753.15675.stgit@notabene.brown>
-References: <20141211214023.3753.10652.stgit@notabene.brown>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH] gpio: pcf857x: restore the initial line state of all pcf lines
+Date: Fri, 12 Dec 2014 13:36:41 +0530
+Message-ID: <1418371601-22658-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20141211214023.3753.10652.stgit@notabene.brown>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: GTA04 owners <gta04-owner@goldelico.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Felipe Balbi <balbi@ti.com>
+Content-Type: text/plain
+Return-path: <linux-gpio-owner@vger.kernel.org>
+Sender: linux-gpio-owner@vger.kernel.org
+To: linus.walleij@linaro.org, gnurou@gmail.com, linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org, nsekhar@ti.com
+Cc: kishon@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-This ensures that all standard options are available to hsmmc,
-In particular, I need cap-power-off-card.
+The reset values for all the PCF lines are high and hence on shutdown
+we should drive all the lines high in order to bring it to the reset state.
 
-Signed-off-by: NeilBrown <neilb@suse.de>
+This is actually required since pcf doesn't have a reset line and even after
+warm reset (by invoking "reboot" in prompt) the pcf lines maintains it's
+previous programmed state. This becomes a problem if the boards are designed
+to work with the default initial state.
+
+DRA7XX_evm uses PCF8575 and one of the PCF output lines feeds to MMC/SD and
+this line should be driven high in order for the MMC/SD to be detected.
+This line is modelled as regulator and the hsmmc driver takes care of enabling
+and disabling it. In the case of 'reboot', during shutdown path as part of it's
+cleanup process the hsmmc driver disables this regulator. This makes MMC boot
+not functional.
+
+Fixed it by driving high all the pcf lines.
+
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   33 ++++++++-------------------------
- 1 file changed, 8 insertions(+), 25 deletions(-)
+ drivers/gpio/gpio-pcf857x.c |    9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 32514b648e3c..1bfacc59e3bf 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1931,13 +1931,6 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
- {
- 	struct omap_hsmmc_platform_data *pdata;
- 	struct device_node *np = dev->of_node;
--	u32 bus_width, max_freq;
--	int cd_gpio, wp_gpio;
--
--	cd_gpio = of_get_named_gpio(np, "cd-gpios", 0);
--	wp_gpio = of_get_named_gpio(np, "wp-gpios", 0);
--	if (cd_gpio == -EPROBE_DEFER || wp_gpio == -EPROBE_DEFER)
--		return ERR_PTR(-EPROBE_DEFER);
- 
- 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
- 	if (!pdata)
-@@ -1946,34 +1939,20 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
- 	if (of_find_property(np, "ti,dual-volt", NULL))
- 		pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
- 
--	pdata->switch_pin = cd_gpio;
--	pdata->gpio_wp = wp_gpio;
-+	pdata->switch_pin = -EINVAL;
-+	pdata->gpio_wp = -EINVAL;
- 
- 	if (of_find_property(np, "ti,non-removable", NULL)) {
- 		pdata->nonremovable = true;
- 		pdata->no_regulator_off_init = true;
- 	}
--	of_property_read_u32(np, "bus-width", &bus_width);
--	if (bus_width == 4)
--		pdata->caps |= MMC_CAP_4_BIT_DATA;
--	else if (bus_width == 8)
--		pdata->caps |= MMC_CAP_8_BIT_DATA;
- 
- 	if (of_find_property(np, "ti,needs-special-reset", NULL))
- 		pdata->features |= HSMMC_HAS_UPDATED_RESET;
- 
--	if (!of_property_read_u32(np, "max-frequency", &max_freq))
--		pdata->max_freq = max_freq;
--
- 	if (of_find_property(np, "ti,needs-special-hs-handling", NULL))
- 		pdata->features |= HSMMC_HAS_HSPE_SUPPORT;
- 
--	if (of_find_property(np, "keep-power-in-suspend", NULL))
--		pdata->pm_caps |= MMC_PM_KEEP_POWER;
--
--	if (of_find_property(np, "enable-sdio-wakeup", NULL))
--		pdata->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
--
- 	return pdata;
+diff --git a/drivers/gpio/gpio-pcf857x.c b/drivers/gpio/gpio-pcf857x.c
+index 236708a..00b15b2 100644
+--- a/drivers/gpio/gpio-pcf857x.c
++++ b/drivers/gpio/gpio-pcf857x.c
+@@ -448,6 +448,14 @@ static int pcf857x_remove(struct i2c_client *client)
+ 	return status;
  }
- #else
-@@ -2031,6 +2010,10 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 		goto err;
- 	}
  
-+	ret = mmc_of_parse(mmc);
-+	if (ret)
-+		goto err1;
++static void pcf857x_shutdown(struct i2c_client *client)
++{
++	struct pcf857x *gpio = i2c_get_clientdata(client);
 +
- 	host		= mmc_priv(mmc);
- 	host->mmc	= mmc;
- 	host->pdata	= pdata;
-@@ -2059,7 +2042,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
++	/* Drive all the I/O lines high */
++	gpio->write(gpio->client, BIT(gpio->chip.ngpio) - 1);
++}
++
+ static struct i2c_driver pcf857x_driver = {
+ 	.driver = {
+ 		.name	= "pcf857x",
+@@ -456,6 +464,7 @@ static struct i2c_driver pcf857x_driver = {
+ 	},
+ 	.probe	= pcf857x_probe,
+ 	.remove	= pcf857x_remove,
++	.shutdown = pcf857x_shutdown,
+ 	.id_table = pcf857x_id,
+ };
  
- 	if (pdata->max_freq > 0)
- 		mmc->f_max = pdata->max_freq;
--	else
-+	else if (mmc->f_max == 0)
- 		mmc->f_max = OMAP_MMC_MAX_CLOCK;
- 
- 	spin_lock_init(&host->irq_lock);
-@@ -2113,7 +2096,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	if (mmc_pdata(host)->nonremovable)
- 		mmc->caps |= MMC_CAP_NONREMOVABLE;
- 
--	mmc->pm_caps = mmc_pdata(host)->pm_caps;
-+	mmc->pm_caps |= mmc_pdata(host)->pm_caps;
- 
- 	omap_hsmmc_conf_bus_power(host);
- 
+-- 
+1.7.9.5
+
