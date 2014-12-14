@@ -1,58 +1,21 @@
-From: Bjorn Andersson <bjorn@kryo.se>
-Subject: Re: Possible regression with commit 52221610d
-Date: Sat, 13 Dec 2014 23:22:57 -0800
-Message-ID: <CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
-References: <54584260.8030602@nvidia.com>
-	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
-	<545895B2.2000101@nvidia.com>
-	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
+From: Tomas Winkler <tomasw@gmail.com>
+Subject: UFS RPMB
+Date: Sun, 14 Dec 2014 10:52:10 +0200
+Message-ID: <CA+i0qc5MF9_siN05VEOtOdPQfByt1UHEpbwVkYQ5+EObF6H4nQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f53.google.com ([209.85.215.53]:61026 "EHLO
-	mail-la0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750766AbaLNHW7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Dec 2014 02:22:59 -0500
-Received: by mail-la0-f53.google.com with SMTP id gm9so8182457lab.12
-        for <linux-mmc@vger.kernel.org>; Sat, 13 Dec 2014 23:22:58 -0800 (PST)
-In-Reply-To: <CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
+Received: from mail-wg0-f41.google.com ([74.125.82.41]:38297 "EHLO
+	mail-wg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751053AbaLNIwM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Dec 2014 03:52:12 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Kryger <tim.kryger@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
+To: Vinayak Holikatti <vinholikatti@gmail.com>, "James E.J. Bottomley" <JBottomley@parallels.com>, linux-scsi@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
 
-On Tue, Nov 4, 2014 at 7:31 AM, Tim Kryger <tim.kryger@gmail.com> wrote:
-> On Tue, Nov 4, 2014 at 1:00 AM, Alexandre Courbot <acourbot@nvidia.com> wrote:
->> Hi Tim, thanks for your reply!
->>
->> On 11/04/2014 02:28 PM, Tim Kryger wrote:
->>>
->>> On Mon, Nov 3, 2014 at 7:05 PM, Alexandre Courbot <acourbot@nvidia.com>
-[..]
->>>> After bisecting I tracked commit 52221610dd84dc3e9196554f0292ca9e8ab3541d
->>>> ("mmc: sdhci: Improve external VDD regulator support") as the one that
->>>> introduced this issue, which seems somehow surprising to me since it has
->>>> been around for a while and nobody else complained about this AFAICT.
+Hi, sorry fore a newbie question.
+What is the current interface for accessing rpmb LUN in a UFS devices.
+For emmc one need to issue a raw mmc ioctl command  MMC_IOC_CMD.
 
-After some hunting it seems like the recent Qualcomm platforms are
-suffering from this as well.
-
-[..]
-> In a nutshell, the issue here is that the SDHCI spec demands that VMMC
-> be supplied by the controller itself with the specific voltage
-> configured using the SDHCI_POWER_CONTROL register but almost nobody
-> does this.  Many SoCs omit this capability from their controllers and
-> instead rely upon external regulators.  In such cases there isn't
-> normally any need to update the voltage bits of the power control
-> register.  It sounds like you are saying this isn't true for the
-> Tegra114.
-
-Should one interpret your answer as that iff the SDHCI controller
-actually follows the specification (and provides the power control)
-then as of the introduction of 52221610dd vmmc should no longer be
-used for specifying the supply of power to the controller?
-
-Or simply; what is vmmc (in the code) supposed to represent?
-
-Regards,
-Bjorn
+Thanks
+Tomas
