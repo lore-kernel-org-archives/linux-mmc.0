@@ -1,82 +1,58 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: regression on rk3288 with - mmc: dw_mmc: Remove old card detect infrastructure
-Date: Fri, 12 Dec 2014 15:54:15 -0800
-Message-ID: <CAD=FV=VfnXHpZiTMh8+WHyEQ=N0cVNrDLLjmU+xC1ne-uYbuEQ@mail.gmail.com>
-References: <8867707.LK6gZlxufx@phil>
+From: Bjorn Andersson <bjorn@kryo.se>
+Subject: Re: Possible regression with commit 52221610d
+Date: Sat, 13 Dec 2014 23:22:57 -0800
+Message-ID: <CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
+References: <54584260.8030602@nvidia.com>
+	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
+	<545895B2.2000101@nvidia.com>
+	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vc0-f170.google.com ([209.85.220.170]:48858 "EHLO
-	mail-vc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751175AbaLLXyQ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Dec 2014 18:54:16 -0500
-Received: by mail-vc0-f170.google.com with SMTP id hy4so4098717vcb.29
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Dec 2014 15:54:15 -0800 (PST)
-In-Reply-To: <8867707.LK6gZlxufx@phil>
+Received: from mail-la0-f53.google.com ([209.85.215.53]:61026 "EHLO
+	mail-la0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750766AbaLNHW7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Dec 2014 02:22:59 -0500
+Received: by mail-la0-f53.google.com with SMTP id gm9so8182457lab.12
+        for <linux-mmc@vger.kernel.org>; Sat, 13 Dec 2014 23:22:58 -0800 (PST)
+In-Reply-To: <CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>
+To: Tim Kryger <tim.kryger@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
 
-Hi,
+On Tue, Nov 4, 2014 at 7:31 AM, Tim Kryger <tim.kryger@gmail.com> wrote:
+> On Tue, Nov 4, 2014 at 1:00 AM, Alexandre Courbot <acourbot@nvidia.com> wrote:
+>> Hi Tim, thanks for your reply!
+>>
+>> On 11/04/2014 02:28 PM, Tim Kryger wrote:
+>>>
+>>> On Mon, Nov 3, 2014 at 7:05 PM, Alexandre Courbot <acourbot@nvidia.com>
+[..]
+>>>> After bisecting I tracked commit 52221610dd84dc3e9196554f0292ca9e8ab3541d
+>>>> ("mmc: sdhci: Improve external VDD regulator support") as the one that
+>>>> introduced this issue, which seems somehow surprising to me since it has
+>>>> been around for a while and nobody else complained about this AFAICT.
 
-On Fri, Dec 12, 2014 at 12:22 PM, Heiko St=C3=BCbner <heiko@sntech.de> =
-wrote:
-> Hi,
->
-> when trying linux-next for 20141210 on my rk3288 eval board I got err=
-ors
-> when ejecting sd cards. Especially a timeout for a command and follow=
-ing
-> this an rcu stall which essentially stops everything [0].
->
-> My way to reproduce the issue is:
-> - boot into an initramfs
-> - insert card
-> - remove card
-> - boom
->
-> It happens 100% of the time on the first removal of the card.
->
->
-> Bisecting the issue brought me to
->
-> first bad commit
-> 6130e7a9c34d01afbd4e7e215846d1f2d70333bb
-> mmc: dw_mmc: Remove old card detect infrastructure
->
-> and indeed if I revert this one, card ejection works again - also mul=
-tiple
-> times in a row. Affected machine is a rk3288-evb-rk808 board which
-> currently uses the internal card-detect mechanism of the dw_mmc and
-> relevant git history (--oneline) is:
->
-> 864de9b Revert "mmc: dw_mmc: Remove old card detect infrastructure"
-> 5bd48e0 ARM: dts: Bump SD card pin drive strength up on rk3288-evb
-> 12fd072 Add linux-next specific files for 20141210
-> ...
->
->
-> I'll try to dig deeper, but if anybody has ideas beforehand I would a=
-lso
-> be very glad.
+After some hunting it seems like the recent Qualcomm platforms are
+suffering from this as well.
 
-I tried to reproduce this on the same board on 20141211.  I have a
-different bootloader, but I hope that doesn't matter?
+[..]
+> In a nutshell, the issue here is that the SDHCI spec demands that VMMC
+> be supplied by the controller itself with the specific voltage
+> configured using the SDHCI_POWER_CONTROL register but almost nobody
+> does this.  Many SoCs omit this capability from their controllers and
+> instead rely upon external regulators.  In such cases there isn't
+> normally any need to update the voltage bits of the power control
+> register.  It sounds like you are saying this isn't true for the
+> Tegra114.
 
-git describe
-next-20141211-1-gf8afbb8
+Should one interpret your answer as that iff the SDHCI controller
+actually follows the specification (and provides the power control)
+then as of the introduction of 52221610dd vmmc should no longer be
+used for specifying the supply of power to the controller?
 
-$ git log --oneline next-20141211~..
-f8afbb8 FROMLIST: ARM: dts: Bump SD card pin drive strength up on rk328=
-8-evb
-291ca61 Add linux-next specific files for 20141211
+Or simply; what is vmmc (in the code) supposed to represent?
 
-
-In inserted 3 different cards into the SD card slots (a micro UHS, an
-older micro one, and a full sized UHS).  I inserted / ejected each one
-several times.
-
-Could it be a different set of kernel config options?  That's about
-the best guess I can come up with...
+Regards,
+Bjorn
