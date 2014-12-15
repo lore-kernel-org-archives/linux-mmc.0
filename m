@@ -1,64 +1,164 @@
-From: Tim Kryger <tim.kryger@gmail.com>
-Subject: Re: Possible regression with commit 52221610d
-Date: Sun, 14 Dec 2014 20:48:12 -0800
-Message-ID: <CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
-References: <54584260.8030602@nvidia.com>
-	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
-	<545895B2.2000101@nvidia.com>
-	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
-	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2 3/4] mmc: dw_mmc: Convert to mmc_send_tuning()
+Date: Mon, 15 Dec 2014 13:48:29 +0900
+Message-ID: <548E681D.4010900@samsung.com>
+References: <1417780783-12939-1-git-send-email-ulf.hansson@linaro.org>
+ <1417780783-12939-4-git-send-email-ulf.hansson@linaro.org>
+ <CAGOxZ525JR9vTuKAZJJjDF6iq3R2-DuEcJFEOT9KkEMZGimUFw@mail.gmail.com>
+ <CAPDyKFpOvs_ML+1edoTzeTPctiMV0B8EeD8aE8daGwjeG7gwMQ@mail.gmail.com>
+ <CAGOxZ52RKUdrSegUZs31E19mJr3kaLbyoEStDWD1=bD5vHNLeg@mail.gmail.com>
+ <548B062A.8070608@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f180.google.com ([209.85.214.180]:56265 "EHLO
-	mail-ob0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750881AbaLOEsN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Dec 2014 23:48:13 -0500
-In-Reply-To: <CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:24658 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750704AbaLOEsc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Dec 2014 23:48:32 -0500
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0NGL000QHXCUVP50@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 15 Dec 2014 13:48:30 +0900 (KST)
+In-reply-to: <548B062A.8070608@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bjorn Andersson <bjorn@kryo.se>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Alim Akhtar <alim.akhtar@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, Aisheng Dong <b29396@freescale.com>, Stephen Boyd <sboyd@codeaurora.org>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-On Sat, Dec 13, 2014 at 11:22 PM, Bjorn Andersson <bjorn@kryo.se> wrote:
-> On Tue, Nov 4, 2014 at 7:31 AM, Tim Kryger <tim.kryger@gmail.com> wrote:
->> On Tue, Nov 4, 2014 at 1:00 AM, Alexandre Courbot <acourbot@nvidia.com> wrote:
->>> Hi Tim, thanks for your reply!
->>>
->>> On 11/04/2014 02:28 PM, Tim Kryger wrote:
+Hi, Alim.
+
+On 12/13/2014 12:13 AM, Jaehoon Chung wrote:
+> Hi.
+> 
+> On 12/10/2014 06:30 AM, Alim Akhtar wrote:
+>> Hi Ulf
+>>
+>> On Mon, Dec 8, 2014 at 3:40 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>> On 6 December 2014 at 13:43, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+>>>> Hi Ulf,
 >>>>
->>>> On Mon, Nov 3, 2014 at 7:05 PM, Alexandre Courbot <acourbot@nvidia.com>
-> [..]
->>>>> After bisecting I tracked commit 52221610dd84dc3e9196554f0292ca9e8ab3541d
->>>>> ("mmc: sdhci: Improve external VDD regulator support") as the one that
->>>>> introduced this issue, which seems somehow surprising to me since it has
->>>>> been around for a while and nobody else complained about this AFAICT.
->
-> After some hunting it seems like the recent Qualcomm platforms are
-> suffering from this as well.
->
-> [..]
->> In a nutshell, the issue here is that the SDHCI spec demands that VMMC
->> be supplied by the controller itself with the specific voltage
->> configured using the SDHCI_POWER_CONTROL register but almost nobody
->> does this.  Many SoCs omit this capability from their controllers and
->> instead rely upon external regulators.  In such cases there isn't
->> normally any need to update the voltage bits of the power control
->> register.  It sounds like you are saying this isn't true for the
->> Tegra114.
->
-> Should one interpret your answer as that iff the SDHCI controller
-> actually follows the specification (and provides the power control)
-> then as of the introduction of 52221610dd vmmc should no longer be
-> used for specifying the supply of power to the controller?
->
-> Or simply; what is vmmc (in the code) supposed to represent?
+>>>> On Fri, Dec 5, 2014 at 5:29 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>> Instead of having a local hack taking care of sending the tuning
+>>>>> command and as well to verify the response pattern, let's convert to
+>>>>> the common mmc_send_tuning() API.
+>>>>>
+>>>>> This change affects the Exynos variant, since it's the only one which
+>>>>> support the dw_mmc's ->execute_tuning() callback.
+>>>>>
+>>>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>>>> ---
+>>>>>
+>>>
+>>> Alim, thanks for helping out testing!
+>>>
+>> Sorry for the delay but currently I don't have access to my work station.
+>> And thanks for quick suggested patch, I will test this as soon asI go
+>> back to my work.
+>>
+>> Hi Jaehoon, can you test this and the original patch for hs200 on
+>> exynos? Just to confirm my board is not the special one.
+>> Thanks.
+> 
+> Does it need to send "stop command" at exynos5800?
+> Well, most SoC doesn't need to send stop command, also exynos.
+> But i will check other exynos boards..then i will share result.
+> 
+> Best Regards,
+> Jaehoon Chung
+> 
+>>
+>>>> With this change HS200 mode does not work on exynos5800 peach-pi board.
+>>>> I got below error while testing this series:
+>>>>
+>>>> mmc0: tuning execution failed
+>>>> mmc0: error -5 whilst initialising MMC card
 
-Hi Bjorn,
+Did you share the CLKSEL register value?
+I think exynos SoC didn't need to send stop command.
+(I didn't find the STOP command is completed when tuning sequence.)
+When i have tested, according to SELCLK_DRV value, tuning results were changed.
 
-VMMC is the supply that delivers power out to the SD card itself (aka VDD).
+if you got the above error, i recommend you can change the SELCLK_DRV value.
 
-It is not the internal power rail/power domain of the host controller
-within the SoC.
+Best Regards,
+Jaehoon Chung
 
--Tim
+>>>>
+>>>> Though, your's next branch with commit _a1d06b4_ works fine in HS200 mode.
+>>>
+>>> I was looking into the details of what change my patchset introduces
+>>> for dw_mmc-exynos. Apparently, dw_mmc-exynos was using the
+>>> MMC_STOP_TRANSMISSION to end the tuning reqeust (CMD21/19). The new
+>>> mmc_send_tuning() API doesn't, which also conforms to what the eMMC/SD
+>>> specifications states.
+>>>
+>>> Do you have any idea of why dw_mmc-exynos was using
+>>> MMC_STOP_TRANSMISSION for CMD19/21?
+>>>
+>>> To see if my theory is correct, could you try out the following patch
+>>> on top of $subject patch?
+>>> BTW, I have queued patch 1 and 2, from this patchset available on my
+>>> next branch.
+>>>
+>>>
+>>> From e1ac35bb0e90254275ec7088f41e6e2d59e48367 Mon Sep 17 00:00:00 2001
+>>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>> Date: Mon, 8 Dec 2014 10:58:48 +0100
+>>> Subject: [PATCH] mmc: core: End tuning request with stop command
+>>>
+>>> Not to be merged!
+>>>
+>>> This patch adds the MMC_STOP_TRANSMISSION command to end a tuning
+>>> request. For some reason dw_mmc seems to need this to complete the
+>>> tuning request without errors.
+>>>
+>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>> ---
+>>>  drivers/mmc/core/mmc_ops.c | 5 +++++
+>>>  1 file changed, 5 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>>> index 3b044c5..aa79e0c 100644
+>>> --- a/drivers/mmc/core/mmc_ops.c
+>>> +++ b/drivers/mmc/core/mmc_ops.c
+>>> @@ -551,6 +551,7 @@ int mmc_send_tuning(struct mmc_host *host)
+>>>  {
+>>>         struct mmc_request mrq = {NULL};
+>>>         struct mmc_command cmd = {0};
+>>> +       struct mmc_command stop = {0};
+>>>         struct mmc_data data = {0};
+>>>         struct scatterlist sg;
+>>>         struct mmc_ios *ios = &host->ios;
+>>> @@ -576,10 +577,14 @@ int mmc_send_tuning(struct mmc_host *host)
+>>>
+>>>         mrq.cmd = &cmd;
+>>>         mrq.data = &data;
+>>> +       mrq.stop = &stop;
+>>>
+>>>         cmd.opcode = opcode;
+>>>         cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+>>>
+>>> +       stop.opcode = MMC_STOP_TRANSMISSION;
+>>> +       stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
+>>> +
+>>>         data.blksz = size;
+>>>         data.blocks = 1;
+>>>         data.flags = MMC_DATA_READ;
+>>> --
+>>> 1.9.1
+>>>
+>>> Kind regards
+>>> Uffe
+>>
+>>
+>>
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
