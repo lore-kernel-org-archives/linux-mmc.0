@@ -1,73 +1,49 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH v2 2/3] mmc: dw_mmc: Use mmc_regulator_set_vqmmc in start_signal_voltage_switch
-Date: Mon, 15 Dec 2014 15:25:28 -0800
-Message-ID: <1418685929-13096-2-git-send-email-dianders@chromium.org>
+From: Andrew Bresticker <abrestic@chromium.org>
+Subject: Re: [PATCH v2 1/3] mmc: core: Add mmc_regulator_set_vqmmc()
+Date: Mon, 15 Dec 2014 15:42:23 -0800
+Message-ID: <CAL1qeaEGYwTCf0xasMZhGHEDWYhddLAS9jYjdgrccSwnFOc+7A@mail.gmail.com>
 References: <1418685929-13096-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f169.google.com ([209.85.220.169]:54154 "EHLO
+	mail-vc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750818AbaLOXmY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Dec 2014 18:42:24 -0500
+Received: by mail-vc0-f169.google.com with SMTP id hy10so6138829vcb.0
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Dec 2014 15:42:23 -0800 (PST)
 In-Reply-To: <1418685929-13096-1-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Mark Brown <broonie@kernel.org>, Alexandru Stan <amstan@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, linux-rockchip@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Doug Anderson <dianders@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Mark Brown <broonie@kernel.org>, Alexandru Stan <amstan@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, johan.rudholm@axis.com, tim.kryger@gmail.com, andrew_gabbasov@mentor.com, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-We've introduced a new helper in the MMC core:
-mmc_regulator_set_vqmmc().  Let's use this in dw_mmc.  Using this new
-helper has some advantages:
+Hi Doug,
 
-1. We get the mmc_regulator_set_vqmmc() behavior of trying to match
-   VQMMC and VMMC when the signal voltage is 3.3V.  This ensures max
-   compatibility.
+On Mon, Dec 15, 2014 at 3:25 PM, Doug Anderson <dianders@chromium.org> wrote:
+> This adds logic to the MMC core to set VQMMC.  This is expected to be
+> called by MMC drivers like dw_mmc as part of (or instead of) their
+> start_signal_voltage_switch() callback.
+>
+> A few notes:
+>
+> * When setting the signal voltage to 3.3V we do our best to make VQMMC
+>   and VMMC match.  It's been reported that this makes some old cards
+>   happy since they were tested back in the day before UHS when VQMMC
+>   and VMMC were provided by the same regulator.  A nice side effect of
+>   this is that we don't end up on the hairy edge of VQMMC (2.7V),
+>   which some EEs claim is a little too close to the minimum for
+>   comfort.
+>
+> * When setting the signal voltage to 1.8V or 1.2V we aim for that
+>   specific voltage instead of picking the lowest one in the range.
+>
+> * We very purposely don't print errors in mmc_regulator_set_vqmmc().
+>   There are cases where the MMC core will try several different
+>   voltages and we don't want to pollute the logs.
+>
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
 
-2. We get rid of a few more warnings when probing unsupported
-   voltages.
+Looks good to me.
 
-3. We get rid of some non-dw_mmc specific code in dw_mmc.
-
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
-Changes in v2: None
-
- drivers/mmc/host/dw_mmc.c | 17 +----------------
- 1 file changed, 1 insertion(+), 16 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 67c0451..4ae800c 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1160,8 +1160,6 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
- 	struct dw_mci *host = slot->host;
- 	u32 uhs;
- 	u32 v18 = SDMMC_UHS_18V << slot->id;
--	int min_uv, max_uv;
--	int ret;
- 
- 	/*
- 	 * Program the voltage.  Note that some instances of dw_mmc may use
-@@ -1170,24 +1168,11 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
- 	 */
- 	uhs = mci_readl(host, UHS_REG);
- 	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
--		min_uv = 2700000;
--		max_uv = 3600000;
- 		uhs &= ~v18;
- 	} else {
--		min_uv = 1700000;
--		max_uv = 1950000;
- 		uhs |= v18;
- 	}
--	if (!IS_ERR(mmc->supply.vqmmc)) {
--		ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
--
--		if (ret) {
--			dev_dbg(&mmc->class_dev,
--					 "Regulator set error %d: %d - %d\n",
--					 ret, min_uv, max_uv);
--			return ret;
--		}
--	}
-+	mmc_regulator_set_vqmmc(mmc, ios);
- 	mci_writel(host, UHS_REG, uhs);
- 
- 	return 0;
--- 
-2.2.0.rc0.207.ga3a616c
+Reviewed-by: Andrew Bresticker <abrestic@chromium.org>
