@@ -1,44 +1,51 @@
-From: Pramod Gurav <pramod.gurav@smartplayin.com>
-Subject: [PATCH] mmc: mmci: Get rid of unused variable and operations on it
-Date: Tue, 16 Dec 2014 19:21:34 +0530
-Message-ID: <1418737895-6404-1-git-send-email-pramod.gurav@smartplayin.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: linux@arm.linux.org.uk, chris@printf.net, ulf.hansson@linaro.org, Pramod Gurav <pramod.gurav@smartplayin.com>
+From: David =?utf-8?q?Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>
+Subject: [PATCH 0/4] mmc: sunxi: General fixup (v2)
+Date: Tue, 16 Dec 2014 15:10:54 +0100
+Message-ID: <20141216140921.3036.14668.stgit@dizzy-6.o2s.ch>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from c-82-192-226-27.customer.ggaweb.ch ([82.192.226.27]:35220 "EHLO
+	dizzy-6.o2s.ch" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751035AbaLPOK5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Dec 2014 09:10:57 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, Peter Griffin <peter.griffin@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, David =?utf-8?q?Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, =?utf-8?b?5p2O5oOz?= <lixiang@allwinnertech.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-arm-kernel@lists.infradead.org
 
-DMA configuration has been removed from function mmci_dma_setup but the
-local mask variable was not removed. This remains unused hence remove
-it from the function and operations on it
+Hello
+This patchset was inspired questions from =E6=9D=8E=E6=83=B3 of Allwinn=
+er and incorporates as
+well suggestions from Hans related to spin locks.
+=46or example have not all attributes of the shared host object been pr=
+otected
+by the spin lock, this has been changed.
+Also some register names and reset behavior have been fixed now.
+And a minor cleanup happened at the clock frequecy setting, since there=
+ has
+been a piece of left over code which has been there because it was in t=
+he Android
+driver and we just adapted it because we didn't have proper documentati=
+on about
+the timing of the module.
 
-Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
+Looking forward to your feedback
+Cheers David
+
 ---
- drivers/mmc/host/mmci.c |    5 -----
- 1 file changed, 5 deletions(-)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index f31d702..08bbeb0 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -435,7 +435,6 @@ static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
- static void mmci_dma_setup(struct mmci_host *host)
- {
- 	const char *rxname, *txname;
--	dma_cap_mask_t mask;
- 	struct variant_data *variant = host->variant;
- 
- 	host->dma_rx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "rx");
-@@ -444,10 +443,6 @@ static void mmci_dma_setup(struct mmci_host *host)
- 	/* initialize pre request cookie */
- 	host->next_data.cookie = 1;
- 
--	/* Try to acquire a generic DMA engine slave channel */
--	dma_cap_zero(mask);
--	dma_cap_set(DMA_SLAVE, mask);
--
- 	/*
- 	 * If only an RX channel is specified, the driver will
- 	 * attempt to use it bidirectionally, however if it is
--- 
-1.7.9.5
+David Lanzend=C3=B6rfer (3):
+      mmc: sunxi: Lock fix
+      mmc: sunxi: Correcting SDXC_HARDWARE_RESET bit
+      mmc: sunxi: Removing unused code
+
+Hans de Goede (1):
+      mmc: sunxi: Fix setup of last descriptor of dma transfer
+
+
+ drivers/mmc/host/sunxi-mmc.c |   29 +++++++++++++++++------------
+ 1 file changed, 17 insertions(+), 12 deletions(-)
+
+--
+Signature
