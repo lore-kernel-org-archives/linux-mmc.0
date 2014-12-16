@@ -1,50 +1,69 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: [PATCH 0/4] mmc: sunxi: General fixup (v2)
-Date: Tue, 16 Dec 2014 15:12:14 +0100
-Message-ID: <54903DBE.1090100@redhat.com>
-References: <20141216140921.3036.14668.stgit@dizzy-6.o2s.ch>
+From: Bjorn Andersson <bjorn@kryo.se>
+Subject: Re: Possible regression with commit 52221610d
+Date: Tue, 16 Dec 2014 10:18:59 -0800
+Message-ID: <CAJAp7OhWKoAoZfq+zWspLnqUkoJb3izMD41Vyfn0AW4Jni8HAQ@mail.gmail.com>
+References: <54584260.8030602@nvidia.com>
+	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
+	<545895B2.2000101@nvidia.com>
+	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
+	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
+	<CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
+	<CAJAp7Oh+ziadeEDWsus_k_2w33vPJxGGcGZyMNQkpLemf7SAhg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46723 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750832AbaLPONm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 16 Dec 2014 09:13:42 -0500
-In-Reply-To: <20141216140921.3036.14668.stgit@dizzy-6.o2s.ch>
+Received: from mail-lb0-f182.google.com ([209.85.217.182]:36134 "EHLO
+	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751023AbaLPSTB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Dec 2014 13:19:01 -0500
+Received: by mail-lb0-f182.google.com with SMTP id f15so12462693lbj.27
+        for <linux-mmc@vger.kernel.org>; Tue, 16 Dec 2014 10:18:59 -0800 (PST)
+In-Reply-To: <CAJAp7Oh+ziadeEDWsus_k_2w33vPJxGGcGZyMNQkpLemf7SAhg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?B?RGF2aWQgTGFuemVuZMO2cmZlcg==?= <david.lanzendoerfer@o2s.ch>, Ulf Hansson <ulf.hansson@linaro.org>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, Peter Griffin <peter.griffin@linaro.org>, Chen-Yu Tsai <wens@csie.org>, =?UTF-8?B?5p2O5oOz?= <lixiang@allwinnertech.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-arm-kernel@lists.infradead.org
+To: Tim Kryger <tim.kryger@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 
-Hi,
-
-On 16-12-14 15:10, David Lanzend=C3=B6rfer wrote:
-> Hello
-> This patchset was inspired questions from =E6=9D=8E=E6=83=B3 of Allwi=
-nner and incorporates as
-> well suggestions from Hans related to spin locks.
-> For example have not all attributes of the shared host object been pr=
-otected
-> by the spin lock, this has been changed.
-> Also some register names and reset behavior have been fixed now.
-> And a minor cleanup happened at the clock frequecy setting, since the=
-re has
-> been a piece of left over code which has been there because it was in=
- the Android
-> driver and we just adapted it because we didn't have proper documenta=
-tion about
-> the timing of the module.
+On Mon, Dec 15, 2014 at 10:27 PM, Bjorn Andersson <bjorn@kryo.se> wrote:
+> On Sun, Dec 14, 2014 at 8:48 PM, Tim Kryger <tim.kryger@gmail.com> wrote:
+>> On Sat, Dec 13, 2014 at 11:22 PM, Bjorn Andersson <bjorn@kryo.se> wrote:
+> [..]
+>>> Or simply; what is vmmc (in the code) supposed to represent?
+>>
+>> Hi Bjorn,
+>>
+>> VMMC is the supply that delivers power out to the SD card itself (aka VDD).
+>>
+>> It is not the internal power rail/power domain of the host controller
+>> within the SoC.
+>>
 >
-> Looking forward to your feedback
-> Cheers David
+> Thanks for you answer Tim, I'll write up a patch for the Qualcomm
+> driver that add the possibility of specifying an internal supply for
+> the devices where that uses that.
+>
+> My only concern is that for any standard compliant sdhci driver we're
+> supposed to have a info printout that vmmc was not found (but vqmmc is
+> there). But I guess that's a matter of proper documentation and hoping
+> people don't pay too much attention to it?
+>
 
-Thanks.
+Sorry, this is wrong.
 
-Series looks good and is:
+We are routing the regulators straight to vdd of the memory and should
+hence use vmmc to specify this. However unless I actually program 0x29
+in the Qualcomm sdhci block I get no responses from the card.
 
-Acked-by: Hans de Goede <hdegoede@redhat.com>
+Which I believe is correct behavior as the SDHC specification [1] says
+the following about BIT(0) of 0x29:
+
+"If this bit is cleared, the Host Controller shall immediately stop
+driving CMD and DAT[3:0] (tri-state) and drive SDCLK to low level".
+
+
+So I think 52221610d is indeed incorrect.
+
+[1] https://www.sdcard.org/downloads/pls/simplified_specs/archive/partA2_300.pdf
 
 Regards,
-
-Hans
+Bjorn
