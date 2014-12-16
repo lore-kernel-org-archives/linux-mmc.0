@@ -1,47 +1,84 @@
 From: David =?utf-8?q?Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>
-Subject: [PATCH 4/4] mmc: sunxi: Removing unused code
-Date: Tue, 16 Dec 2014 01:38:01 +0100
-Message-ID: <20141216003801.15488.82217.stgit@dizzy-6.o2s.ch>
+Subject: [PATCH 1/4] mmc: sunxi: Lock fix
+Date: Tue, 16 Dec 2014 01:37:45 +0100
+Message-ID: <20141216003745.15488.52305.stgit@dizzy-6.o2s.ch>
 References: <20141216003412.15488.54812.stgit@dizzy-6.o2s.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20141216003412.15488.54812.stgit@dizzy-6.o2s.ch>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, Peter Griffin <peter.griffin@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, David =?utf-8?q?Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, =?utf-8?b?5p2O5oOz?= <lixiang@allwinnertech.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-UmVtb3ZpbmcgYSByZWxpY3QgZnJvbSByZXZlcnNlIGVuZ2luZWVyaW5nIG9mIHRoZSBBbmRyb2lk
-IGRyaXZlciBjb2RlIGluCnN1bnhpX21tY19jbGtfc2V0X3JhdGUuCgpTaWduZWQtb2ZmLWJ5OiBE
-YXZpZCBMYW56ZW5kw7ZyZmVyIDxkYXZpZC5sYW56ZW5kb2VyZmVyQG8ycy5jaD4KUmVwb3J0ZWQt
-Ynk6IOadjuaDsyA8bGl4aWFuZ0BhbGx3aW5uZXJ0ZWNoLmNvbT4KLS0tCiBkcml2ZXJzL21tYy9o
-b3N0L3N1bnhpLW1tYy5jIHwgICAxMCArLS0tLS0tLS0tCiAxIGZpbGUgY2hhbmdlZCwgMSBpbnNl
-cnRpb24oKyksIDkgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9z
-dW54aS1tbWMuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc3VueGktbW1jLmMKaW5kZXggNTMzMWM4OC4u
-ZjczYTU2OSAxMDA2NDQKLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zdW54aS1tbWMuYworKysgYi9k
-cml2ZXJzL21tYy9ob3N0L3N1bnhpLW1tYy5jCkBAIC02MzUsNyArNjM1LDcgQEAgc3RhdGljIGlu
-dCBzdW54aV9tbWNfb2Nsa19vbm9mZihzdHJ1Y3Qgc3VueGlfbW1jX2hvc3QgKmhvc3QsIHUzMiBv
-Y2xrX2VuKQogc3RhdGljIGludCBzdW54aV9tbWNfY2xrX3NldF9yYXRlKHN0cnVjdCBzdW54aV9t
-bWNfaG9zdCAqaG9zdCwKIAkJCQkgIHN0cnVjdCBtbWNfaW9zICppb3MpCiB7Ci0JdTMyIHJhdGUs
-IG9jbGtfZGx5LCBydmFsLCBzY2xrX2RseSwgc3JjX2NsazsKKwl1MzIgcmF0ZSwgb2Nsa19kbHks
-IHJ2YWwsIHNjbGtfZGx5OwogCWludCByZXQ7CiAKIAlyYXRlID0gY2xrX3JvdW5kX3JhdGUoaG9z
-dC0+Y2xrX21tYywgaW9zLT5jbG9jayk7CkBAIC02ODAsMTQgKzY4MCw2IEBAIHN0YXRpYyBpbnQg
-c3VueGlfbW1jX2Nsa19zZXRfcmF0ZShzdHJ1Y3Qgc3VueGlfbW1jX2hvc3QgKmhvc3QsCiAJCXNj
-bGtfZGx5ID0gNDsKIAl9CiAKLQlzcmNfY2xrID0gY2xrX2dldF9yYXRlKGNsa19nZXRfcGFyZW50
-KGhvc3QtPmNsa19tbWMpKTsKLQlpZiAoc3JjX2NsayA+PSAzMDAwMDAwMDAgJiYgc3JjX2NsayA8
-PSA0MDAwMDAwMDApIHsKLQkJaWYgKG9jbGtfZGx5KQotCQkJb2Nsa19kbHktLTsKLQkJaWYgKHNj
-bGtfZGx5KQotCQkJc2Nsa19kbHktLTsKLQl9Ci0KIAljbGtfc3VueGlfbW1jX3BoYXNlX2NvbnRy
-b2woaG9zdC0+Y2xrX21tYywgc2Nsa19kbHksIG9jbGtfZGx5KTsKIAogCXJldHVybiBzdW54aV9t
-bWNfb2Nsa19vbm9mZihob3N0LCAxKTsKCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0t
-a2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFp
-bG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
+1)	Adding a comment in order to clarify the choice of the locks within
+	sunxi_mmc_handle_manual_stop
+
+2)	As =E6=9D=8E=E6=83=B3 has pointed out the wait_dma variable was not =
+accessed within the spin lock
+	block in sunxi_mmc_request and so (even if it should never happend) it=
+ would have
+	theoretically been possible that some other function would access the =
+variable
+	at the same time as the function.
+	This has been changed now and the function is using local variables ou=
+tside the lock
+	and copys the value over during the lock phase.
+
+Signed-off-by: David Lanzend=C3=B6rfer <david.lanzendoerfer@o2s.ch>
+Reported-by: =E6=9D=8E=E6=83=B3 <lixiang@allwinnertech.com>
+---
+ drivers/mmc/host/sunxi-mmc.c |   13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.=
+c
+index 15cb8b7..25ba321 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -570,6 +570,15 @@ static irqreturn_t sunxi_mmc_handle_manual_stop(in=
+t irq, void *dev_id)
+ 	}
+=20
+ 	dev_err(mmc_dev(host->mmc), "data error, sending stop command\n");
++
++	/*
++	 * We will never have more than one outstanding request,
++	 * and we do not complete the request until after
++	 * we've cleared host->manual_stop_mrq so we do not need to
++	 * spin lock this function.
++	 * Additionally we have wait states within this function
++	 * so having it in a lock is a very bad idea.
++	 */
+ 	sunxi_mmc_send_manual_stop(host, mrq);
+=20
+ 	spin_lock_irqsave(&host->lock, iflags);
+@@ -766,6 +775,7 @@ static void sunxi_mmc_request(struct mmc_host *mmc,=
+ struct mmc_request *mrq)
+ 	unsigned long iflags;
+ 	u32 imask =3D SDXC_INTERRUPT_ERROR_BIT;
+ 	u32 cmd_val =3D SDXC_START | (cmd->opcode & 0x3f);
++	bool wait_dma =3D host->wait_dma;
+ 	int ret;
+=20
+ 	/* Check for set_ios errors (should never happen) */
+@@ -816,7 +826,7 @@ static void sunxi_mmc_request(struct mmc_host *mmc,=
+ struct mmc_request *mrq)
+ 			if (cmd->data->flags & MMC_DATA_WRITE)
+ 				cmd_val |=3D SDXC_WRITE;
+ 			else
+-				host->wait_dma =3D true;
++				wait_dma =3D true;
+ 		} else {
+ 			imask |=3D SDXC_COMMAND_DONE;
+ 		}
+@@ -850,6 +860,7 @@ static void sunxi_mmc_request(struct mmc_host *mmc,=
+ struct mmc_request *mrq)
+ 	}
+=20
+ 	host->mrq =3D mrq;
++	host->wait_dma =3D wait_dma;
+ 	mmc_writel(host, REG_IMASK, host->sdio_imask | imask);
+ 	mmc_writel(host, REG_CARG, cmd->arg);
+ 	mmc_writel(host, REG_CMDR, cmd_val);
