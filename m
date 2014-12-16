@@ -1,40 +1,36 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: Possible regression with commit 52221610d
-Date: Tue, 16 Dec 2014 11:46:52 -0700
-Message-ID: <54907E1C.10300@wwwdotorg.org>
-References: <54584260.8030602@nvidia.com>	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>	<545895B2.2000101@nvidia.com>	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com> <CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: [patch] mmc: mxs-mmc: remove unneeded NULL check
+Date: Wed, 17 Dec 2014 02:57:50 +0300
+Message-ID: <20141216235749.GH31467@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:38369 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751030AbaLPSqs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Dec 2014 13:46:48 -0500
-In-Reply-To: <CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <kernel-janitors-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: kernel-janitors-owner@vger.kernel.org
+To: Chris Ball <chris@printf.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <robh+dt@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Fabio Estevam <fabio.estevam@freescale.com>, Roman Peniaev <r.peniaev@gmail.com>, Peter Griffin <peter.griffin@linaro.org>, Daniel Willmann <daniel@totalueberwachung.de>, linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Kryger <tim.kryger@gmail.com>, Bjorn Andersson <bjorn@kryo.se>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
 
-On 12/14/2014 09:48 PM, Tim Kryger wrote:
-> On Sat, Dec 13, 2014 at 11:22 PM, Bjorn Andersson <bjorn@kryo.se> wrote:
-...
->> Or simply; what is vmmc (in the code) supposed to represent?
->
-> Hi Bjorn,
->
-> VMMC is the supply that delivers power out to the SD card itself (aka VDD).
->
-> It is not the internal power rail/power domain of the host controller
-> within the SoC.
+Static checkers complain about the inconsistent NULL checking here:
 
-I've seen this question come up quite a few times.
+	drivers/mmc/host/mxs-mmc.c:680 mxs_mmc_probe()
+	warn: variable dereferenced before check 'ssp->dmach' (see line 660)
 
-Should Documentation/devicetree/bindings/mmc/mmc.txt document the 
-vmmc/vqmmc regulators? I assume they're considered shared across all 
-MMC/SDHCI controller bindings?
+The variable can't actually be NULL so we can remove the check.
 
-Since that only covers DT, it might be nice to document vmmc-vs-vqmmc 
-somewhere else too, such as right by the devm_regulator_get_optional() 
-calls in mmc_regulator_get_supply() in drivers/mmc/core/core.c.
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index 60c4ca9..a82411a 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -677,8 +677,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+ 	return 0;
+ 
+ out_free_dma:
+-	if (ssp->dmach)
+-		dma_release_channel(ssp->dmach);
++	dma_release_channel(ssp->dmach);
+ out_clk_disable:
+ 	clk_disable_unprepare(ssp->clk);
+ out_mmc_free:
