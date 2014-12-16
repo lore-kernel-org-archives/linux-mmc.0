@@ -1,78 +1,47 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH v3 2/3] mmc: dw_mmc: Use mmc_regulator_set_vqmmc in start_signal_voltage_switch
-Date: Mon, 15 Dec 2014 16:22:19 -0800
-Message-ID: <1418689340-29517-2-git-send-email-dianders@chromium.org>
-References: <1418689340-29517-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1418689340-29517-1-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Mark Brown <broonie@kernel.org>, Alexandru Stan <amstan@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, linux-rockchip@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Doug Anderson <dianders@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: David =?utf-8?q?Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>
+Subject: [PATCH 4/4] mmc: sunxi: Removing unused code
+Date: Tue, 16 Dec 2014 01:38:01 +0100
+Message-ID: <20141216003801.15488.82217.stgit@dizzy-6.o2s.ch>
+References: <20141216003412.15488.54812.stgit@dizzy-6.o2s.ch>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20141216003412.15488.54812.stgit@dizzy-6.o2s.ch>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, Peter Griffin <peter.griffin@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, David =?utf-8?q?Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, =?utf-8?b?5p2O5oOz?= <lixiang@allwinnertech.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-We've introduced a new helper in the MMC core:
-mmc_regulator_set_vqmmc().  Let's use this in dw_mmc.  Using this new
-helper has some advantages:
-
-1. We get the mmc_regulator_set_vqmmc() behavior of trying to match
-   VQMMC and VMMC when the signal voltage is 3.3V.  This ensures max
-   compatibility.
-
-2. We get rid of a few more warnings when probing unsupported
-   voltages.
-
-3. We get rid of some non-dw_mmc specific code in dw_mmc.
-
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
-Changes in v3:
-- Continue to check for errors if VQMMC is not an error as per Andrew.
-
-Changes in v2: None
-
- drivers/mmc/host/dw_mmc.c | 17 ++++++-----------
- 1 file changed, 6 insertions(+), 11 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 67c0451..b3993d4 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1160,7 +1160,6 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
- 	struct dw_mci *host = slot->host;
- 	u32 uhs;
- 	u32 v18 = SDMMC_UHS_18V << slot->id;
--	int min_uv, max_uv;
- 	int ret;
- 
- 	/*
-@@ -1169,22 +1168,18 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
- 	 * does no harm but you need to set the regulator directly.  Try both.
- 	 */
- 	uhs = mci_readl(host, UHS_REG);
--	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
--		min_uv = 2700000;
--		max_uv = 3600000;
-+	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
- 		uhs &= ~v18;
--	} else {
--		min_uv = 1700000;
--		max_uv = 1950000;
-+	else
- 		uhs |= v18;
--	}
-+
- 	if (!IS_ERR(mmc->supply.vqmmc)) {
--		ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
-+		ret = mmc_regulator_set_vqmmc(mmc, ios);
- 
- 		if (ret) {
- 			dev_dbg(&mmc->class_dev,
--					 "Regulator set error %d: %d - %d\n",
--					 ret, min_uv, max_uv);
-+					 "Regulator set error %d - %s V\n",
-+					 ret, uhs & v18 ? "1.8" : "3.3");
- 			return ret;
- 		}
- 	}
--- 
-2.2.0.rc0.207.ga3a616c
+UmVtb3ZpbmcgYSByZWxpY3QgZnJvbSByZXZlcnNlIGVuZ2luZWVyaW5nIG9mIHRoZSBBbmRyb2lk
+IGRyaXZlciBjb2RlIGluCnN1bnhpX21tY19jbGtfc2V0X3JhdGUuCgpTaWduZWQtb2ZmLWJ5OiBE
+YXZpZCBMYW56ZW5kw7ZyZmVyIDxkYXZpZC5sYW56ZW5kb2VyZmVyQG8ycy5jaD4KUmVwb3J0ZWQt
+Ynk6IOadjuaDsyA8bGl4aWFuZ0BhbGx3aW5uZXJ0ZWNoLmNvbT4KLS0tCiBkcml2ZXJzL21tYy9o
+b3N0L3N1bnhpLW1tYy5jIHwgICAxMCArLS0tLS0tLS0tCiAxIGZpbGUgY2hhbmdlZCwgMSBpbnNl
+cnRpb24oKyksIDkgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9z
+dW54aS1tbWMuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc3VueGktbW1jLmMKaW5kZXggNTMzMWM4OC4u
+ZjczYTU2OSAxMDA2NDQKLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zdW54aS1tbWMuYworKysgYi9k
+cml2ZXJzL21tYy9ob3N0L3N1bnhpLW1tYy5jCkBAIC02MzUsNyArNjM1LDcgQEAgc3RhdGljIGlu
+dCBzdW54aV9tbWNfb2Nsa19vbm9mZihzdHJ1Y3Qgc3VueGlfbW1jX2hvc3QgKmhvc3QsIHUzMiBv
+Y2xrX2VuKQogc3RhdGljIGludCBzdW54aV9tbWNfY2xrX3NldF9yYXRlKHN0cnVjdCBzdW54aV9t
+bWNfaG9zdCAqaG9zdCwKIAkJCQkgIHN0cnVjdCBtbWNfaW9zICppb3MpCiB7Ci0JdTMyIHJhdGUs
+IG9jbGtfZGx5LCBydmFsLCBzY2xrX2RseSwgc3JjX2NsazsKKwl1MzIgcmF0ZSwgb2Nsa19kbHks
+IHJ2YWwsIHNjbGtfZGx5OwogCWludCByZXQ7CiAKIAlyYXRlID0gY2xrX3JvdW5kX3JhdGUoaG9z
+dC0+Y2xrX21tYywgaW9zLT5jbG9jayk7CkBAIC02ODAsMTQgKzY4MCw2IEBAIHN0YXRpYyBpbnQg
+c3VueGlfbW1jX2Nsa19zZXRfcmF0ZShzdHJ1Y3Qgc3VueGlfbW1jX2hvc3QgKmhvc3QsCiAJCXNj
+bGtfZGx5ID0gNDsKIAl9CiAKLQlzcmNfY2xrID0gY2xrX2dldF9yYXRlKGNsa19nZXRfcGFyZW50
+KGhvc3QtPmNsa19tbWMpKTsKLQlpZiAoc3JjX2NsayA+PSAzMDAwMDAwMDAgJiYgc3JjX2NsayA8
+PSA0MDAwMDAwMDApIHsKLQkJaWYgKG9jbGtfZGx5KQotCQkJb2Nsa19kbHktLTsKLQkJaWYgKHNj
+bGtfZGx5KQotCQkJc2Nsa19kbHktLTsKLQl9Ci0KIAljbGtfc3VueGlfbW1jX3BoYXNlX2NvbnRy
+b2woaG9zdC0+Y2xrX21tYywgc2Nsa19kbHksIG9jbGtfZGx5KTsKIAogCXJldHVybiBzdW54aV9t
+bWNfb2Nsa19vbm9mZihob3N0LCAxKTsKCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0t
+a2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFp
+bG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
