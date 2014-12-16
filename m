@@ -1,46 +1,40 @@
-From: David =?utf-8?q?Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>
-Subject: [PATCH 0/4] mmc: sunxi: General fixup
-Date: Tue, 16 Dec 2014 01:37:40 +0100
-Message-ID: <20141216003412.15488.54812.stgit@dizzy-6.o2s.ch>
+From: Andrew Bresticker <abrestic@chromium.org>
+Subject: Re: [PATCH v3 2/3] mmc: dw_mmc: Use mmc_regulator_set_vqmmc in start_signal_voltage_switch
+Date: Mon, 15 Dec 2014 17:12:52 -0800
+Message-ID: <CAL1qeaHaNibn9pVdy4+2uWa+EC5FnoF5cuz9HdXD6CmiiBribg@mail.gmail.com>
+References: <1418689340-29517-1-git-send-email-dianders@chromium.org>
+	<1418689340-29517-2-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-kernel@vger.kernel.org, Peter Griffin <peter.griffin@linaro.org>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, David =?utf-8?q?Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, =?utf-8?b?5p2O5oOz?= <lixiang@allwinnertech.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vc0-f178.google.com ([209.85.220.178]:61942 "EHLO
+	mail-vc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750820AbaLPBMx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Dec 2014 20:12:53 -0500
+Received: by mail-vc0-f178.google.com with SMTP id hq11so6158748vcb.9
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Dec 2014 17:12:53 -0800 (PST)
+In-Reply-To: <1418689340-29517-2-git-send-email-dianders@chromium.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Mark Brown <broonie@kernel.org>, Alexandru Stan <amstan@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hello
-This patchset was inspired questions from =E6=9D=8E=E6=83=B3 of Allwinn=
-er and incorporates as
-well suggestions from Hans related to spin locks.
-=46or example have not all attributes of the shared host object been pr=
-otected
-by the spin lock, this has been changed.
-Also some register names and reset behavior have been fixed now.
-And a minor cleanup happened at the clock frequecy setting, since there=
- has
-been a piece of left over code which has been there because it was in t=
-he Android
-driver and we just adapted it because we didn't have proper documentati=
-on about
-the timing of the module.
+Doug,
 
-Looking forward to your feedback
-Cheers David
+On Mon, Dec 15, 2014 at 4:22 PM, Doug Anderson <dianders@chromium.org> wrote:
+> We've introduced a new helper in the MMC core:
+> mmc_regulator_set_vqmmc().  Let's use this in dw_mmc.  Using this new
+> helper has some advantages:
+>
+> 1. We get the mmc_regulator_set_vqmmc() behavior of trying to match
+>    VQMMC and VMMC when the signal voltage is 3.3V.  This ensures max
+>    compatibility.
+>
+> 2. We get rid of a few more warnings when probing unsupported
+>    voltages.
+>
+> 3. We get rid of some non-dw_mmc specific code in dw_mmc.
+>
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
 
----
-
-David Lanzend=C3=B6rfer (4):
-      mmc: sunxi: Lock fix
-      mmc: sunxi: Correcting SDXC_HARDWARE_RESET bit
-      mmc: sunxi: Reset behavior fix
-      mmc: sunxi: Removing unused code
-
-
- drivers/mmc/host/sunxi-mmc.c |   37 +++++++++++++++++++++++++---------=
----
- 1 file changed, 25 insertions(+), 12 deletions(-)
-
---
-Signature
+Reviewed-by: Andrew Bresticker <abrestic@chromium.org>
