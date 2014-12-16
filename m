@@ -1,51 +1,131 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v2 2/3] mmc: dw_mmc: Use mmc_regulator_set_vqmmc in start_signal_voltage_switch
-Date: Mon, 15 Dec 2014 16:09:05 -0800
-Message-ID: <CAD=FV=XigXJWg1PiFzA20xXz-6VY=OGnGefJfvoVOiajq5Aicg@mail.gmail.com>
-References: <1418685929-13096-1-git-send-email-dianders@chromium.org>
-	<1418685929-13096-2-git-send-email-dianders@chromium.org>
-	<CAL1qeaHfsq1xOOBMQc58uSvV4unuEWHjqVpiZrpu2bQD36LbXg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH v3 1/3] mmc: core: Add mmc_regulator_set_vqmmc()
+Date: Mon, 15 Dec 2014 16:22:18 -0800
+Message-ID: <1418689340-29517-1-git-send-email-dianders@chromium.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAL1qeaHfsq1xOOBMQc58uSvV4unuEWHjqVpiZrpu2bQD36LbXg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Bresticker <abrestic@chromium.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Mark Brown <broonie@kernel.org>, Alexandru Stan <amstan@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: Mark Brown <broonie@kernel.org>, Alexandru Stan <amstan@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, linux-rockchip@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Doug Anderson <dianders@chromium.org>, chris@printf.net, johan.rudholm@axis.com, tim.kryger@gmail.com, andrew_gabbasov@mentor.com, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Andrew,
+This adds logic to the MMC core to set VQMMC.  This is expected to be
+called by MMC drivers like dw_mmc as part of (or instead of) their
+start_signal_voltage_switch() callback.
 
-On Mon, Dec 15, 2014 at 3:44 PM, Andrew Bresticker
-<abrestic@chromium.org> wrote:
->> -       if (!IS_ERR(mmc->supply.vqmmc)) {
->> -               ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
->> -
->> -               if (ret) {
->> -                       dev_dbg(&mmc->class_dev,
->> -                                        "Regulator set error %d: %d - %d\n",
->> -                                        ret, min_uv, max_uv);
->> -                       return ret;
->> -               }
->> -       }
->> +       mmc_regulator_set_vqmmc(mmc, ios);
->
-> Shouldn't we check the return value here and bail out of the voltage
-> switch procedure if it fails?
+A few notes:
 
-My thought was to purposely _not_ check the return value.  The comment
-right above this says:
+* When setting the signal voltage to 3.3V we do our best to make VQMMC
+  and VMMC match.  It's been reported that this makes some old cards
+  happy since they were tested back in the day before UHS when VQMMC
+  and VMMC were provided by the same regulator.  A nice side effect of
+  this is that we don't end up on the hairy edge of VQMMC (2.7V),
+  which some EEs claim is a little too close to the minimum for
+  comfort.
 
-* Program the voltage.  Note that some instances of dw_mmc may use
-* the UHS_REG for this.  For other instances (like exynos) the UHS_REG
-* does no harm but you need to set the regulator directly.  Try both.
+* When setting the signal voltage to 1.8V or 1.2V we aim for that
+  specific voltage instead of picking the lowest one in the range.
 
-...I'm not 100% sure that I understand how the UHS_REG is supposed to
-be implemented since I've never seen a system that uses it.  I was
-assuming that if you have UHS_REG you don't need the regulator...
+* We very purposely don't print errors in mmc_regulator_set_vqmmc().
+  There are cases where the MMC core will try several different
+  voltages and we don't want to pollute the logs.
 
-...but probably a better solution is to return the error if "
-!IS_ERR(mmc->supply.vqmmc)".  Let me fix that up and repost.
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+Reviewed-by: Andrew Bresticker <abrestic@chromium.org>
+---
+Changes in v3: None
+Changes in v2:
+- Now use existing regulator_set_voltage_tol() function.
 
+ drivers/mmc/core/core.c  | 51 ++++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/host.h |  7 +++++++
+ 2 files changed, 58 insertions(+)
 
--Doug
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 9584bff..670dc65 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1333,6 +1333,57 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+ }
+ EXPORT_SYMBOL_GPL(mmc_regulator_set_ocr);
+ 
++static int mmc_regulator_set_voltage_if_supported(struct regulator *regulator,
++						  int new_uV, int tol_uV)
++{
++	/*
++	 * Check if supported first to avoid errors since we may try several
++	 * signal levels during power up and don't want to show errors.
++	 */
++	if (!regulator_is_supported_voltage_tol(regulator, new_uV, tol_uV))
++		return -EINVAL;
++
++	return regulator_set_voltage_tol(regulator, new_uV, tol_uV);
++}
++
++/**
++ * mmc_regulator_set_vqmmc - Set VQMMC as per the ios
++ *
++ * For 3.3V signaling, we try to match VQMMC to VMMC as closely as possible.
++ * That will match the behavior of old boards where VQMMC and VMMC were supplied
++ * by the same supply.  The Bus Operating conditions for 3.3V signaling in the
++ * SD card spec also define VQMMC in terms of VMMC.
++ *
++ * For 1.2V and 1.8V signaling we'll try to get as close as possible to the
++ * requested voltage.  This is definitely a good idea for UHS where there's a
++ * separate regulator on the card that's trying to make 1.8V and it's best if
++ * we match.
++ *
++ * This function is expected to be used by a controller's
++ * start_signal_voltage_switch() function.
++ */
++int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	/* If no vqmmc supply then we can't change the voltage */
++	if (IS_ERR(mmc->supply.vqmmc))
++		return -EINVAL;
++
++	switch (ios->signal_voltage) {
++	case MMC_SIGNAL_VOLTAGE_120:
++		return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
++			1200000, 100000);
++	case MMC_SIGNAL_VOLTAGE_180:
++		return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
++			1800000, 100000);
++	case MMC_SIGNAL_VOLTAGE_330:
++		return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
++			regulator_get_voltage(mmc->supply.vmmc), 300000);
++	default:
++		return -EINVAL;
++	}
++}
++EXPORT_SYMBOL_GPL(mmc_regulator_set_vqmmc);
++
+ #endif /* CONFIG_REGULATOR */
+ 
+ int mmc_regulator_get_supply(struct mmc_host *mmc)
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 9f32270..524d6fc 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -416,6 +416,7 @@ int mmc_regulator_get_ocrmask(struct regulator *supply);
+ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+ 			struct regulator *supply,
+ 			unsigned short vdd_bit);
++int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios);
+ #else
+ static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
+ {
+@@ -428,6 +429,12 @@ static inline int mmc_regulator_set_ocr(struct mmc_host *mmc,
+ {
+ 	return 0;
+ }
++
++static inline int mmc_regulator_set_vqmmc(struct mmc_host *mmc,
++					  struct mmc_ios *ios)
++{
++	return -EINVAL;
++}
+ #endif
+ 
+ int mmc_regulator_get_supply(struct mmc_host *mmc);
+-- 
+2.2.0.rc0.207.ga3a616c
