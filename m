@@ -1,69 +1,40 @@
-From: Bjorn Andersson <bjorn@kryo.se>
+From: Stephen Warren <swarren@wwwdotorg.org>
 Subject: Re: Possible regression with commit 52221610d
-Date: Tue, 16 Dec 2014 10:18:59 -0800
-Message-ID: <CAJAp7OhWKoAoZfq+zWspLnqUkoJb3izMD41Vyfn0AW4Jni8HAQ@mail.gmail.com>
-References: <54584260.8030602@nvidia.com>
-	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
-	<545895B2.2000101@nvidia.com>
-	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
-	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
-	<CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
-	<CAJAp7Oh+ziadeEDWsus_k_2w33vPJxGGcGZyMNQkpLemf7SAhg@mail.gmail.com>
+Date: Tue, 16 Dec 2014 11:46:52 -0700
+Message-ID: <54907E1C.10300@wwwdotorg.org>
+References: <54584260.8030602@nvidia.com>	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>	<545895B2.2000101@nvidia.com>	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com> <CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f182.google.com ([209.85.217.182]:36134 "EHLO
-	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751023AbaLPSTB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Dec 2014 13:19:01 -0500
-Received: by mail-lb0-f182.google.com with SMTP id f15so12462693lbj.27
-        for <linux-mmc@vger.kernel.org>; Tue, 16 Dec 2014 10:18:59 -0800 (PST)
-In-Reply-To: <CAJAp7Oh+ziadeEDWsus_k_2w33vPJxGGcGZyMNQkpLemf7SAhg@mail.gmail.com>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:38369 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751030AbaLPSqs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Dec 2014 13:46:48 -0500
+In-Reply-To: <CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tim Kryger <tim.kryger@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
+To: Tim Kryger <tim.kryger@gmail.com>, Bjorn Andersson <bjorn@kryo.se>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
 
-On Mon, Dec 15, 2014 at 10:27 PM, Bjorn Andersson <bjorn@kryo.se> wrote:
-> On Sun, Dec 14, 2014 at 8:48 PM, Tim Kryger <tim.kryger@gmail.com> wrote:
->> On Sat, Dec 13, 2014 at 11:22 PM, Bjorn Andersson <bjorn@kryo.se> wrote:
-> [..]
->>> Or simply; what is vmmc (in the code) supposed to represent?
->>
->> Hi Bjorn,
->>
->> VMMC is the supply that delivers power out to the SD card itself (aka VDD).
->>
->> It is not the internal power rail/power domain of the host controller
->> within the SoC.
->>
+On 12/14/2014 09:48 PM, Tim Kryger wrote:
+> On Sat, Dec 13, 2014 at 11:22 PM, Bjorn Andersson <bjorn@kryo.se> wrote:
+...
+>> Or simply; what is vmmc (in the code) supposed to represent?
 >
-> Thanks for you answer Tim, I'll write up a patch for the Qualcomm
-> driver that add the possibility of specifying an internal supply for
-> the devices where that uses that.
+> Hi Bjorn,
 >
-> My only concern is that for any standard compliant sdhci driver we're
-> supposed to have a info printout that vmmc was not found (but vqmmc is
-> there). But I guess that's a matter of proper documentation and hoping
-> people don't pay too much attention to it?
+> VMMC is the supply that delivers power out to the SD card itself (aka VDD).
 >
+> It is not the internal power rail/power domain of the host controller
+> within the SoC.
 
-Sorry, this is wrong.
+I've seen this question come up quite a few times.
 
-We are routing the regulators straight to vdd of the memory and should
-hence use vmmc to specify this. However unless I actually program 0x29
-in the Qualcomm sdhci block I get no responses from the card.
+Should Documentation/devicetree/bindings/mmc/mmc.txt document the 
+vmmc/vqmmc regulators? I assume they're considered shared across all 
+MMC/SDHCI controller bindings?
 
-Which I believe is correct behavior as the SDHC specification [1] says
-the following about BIT(0) of 0x29:
-
-"If this bit is cleared, the Host Controller shall immediately stop
-driving CMD and DAT[3:0] (tri-state) and drive SDCLK to low level".
-
-
-So I think 52221610d is indeed incorrect.
-
-[1] https://www.sdcard.org/downloads/pls/simplified_specs/archive/partA2_300.pdf
-
-Regards,
-Bjorn
+Since that only covers DT, it might be nice to document vmmc-vs-vqmmc 
+somewhere else too, such as right by the devm_regulator_get_optional() 
+calls in mmc_regulator_get_supply() in drivers/mmc/core/core.c.
