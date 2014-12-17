@@ -1,75 +1,75 @@
-From: Bjorn Andersson <bjorn@kryo.se>
-Subject: Re: Possible regression with commit 52221610d
-Date: Wed, 17 Dec 2014 11:57:33 -0800
-Message-ID: <CAJAp7OhAP-rDM2zyo0Yr0-7erUp4ewKJ+tC=vyU-YMP_MzXJbA@mail.gmail.com>
-References: <54584260.8030602@nvidia.com>
-	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
-	<545895B2.2000101@nvidia.com>
-	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
-	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
-	<CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
-	<CAJAp7Oh+ziadeEDWsus_k_2w33vPJxGGcGZyMNQkpLemf7SAhg@mail.gmail.com>
-	<CAJAp7OhWKoAoZfq+zWspLnqUkoJb3izMD41Vyfn0AW4Jni8HAQ@mail.gmail.com>
-	<CAD7vxxLe5COSrsnVZ2G_uhtUXfjFnDA45HSG2dNT1LrxcyFcQw@mail.gmail.com>
+From: Chris Ball <chris@printf.net>
+Subject: Re: [PATCH v2] mmc: sdhci: add quirk for ACMD23 broken
+Date: Wed, 17 Dec 2014 19:48:59 +0000
+Message-ID: <86oar2qcpg.fsf@void.printf.net>
+References: <sbranden@broadcom.com>
+	<1417738572-10441-1-git-send-email-sbranden@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CAD7vxxLe5COSrsnVZ2G_uhtUXfjFnDA45HSG2dNT1LrxcyFcQw@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Tim Kryger <tim.kryger@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([192.34.86.38]:34369 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751030AbaLQUc1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 17 Dec 2014 15:32:27 -0500
+In-Reply-To: <1417738572-10441-1-git-send-email-sbranden@broadcom.com> (Scott
+	Branden's message of "Thu, 4 Dec 2014 16:16:12 -0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Scott Branden <sbranden@broadcom.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ray Jui <rjui@broadcom.com>, bcm-kernel-feedback-list@broadcom.com
 
-On Tue, Dec 16, 2014 at 10:20 PM, Tim Kryger <tim.kryger@gmail.com> wrote:
-> On Tue, Dec 16, 2014 at 10:18 AM, Bjorn Andersson <bjorn@kryo.se> wrote:
+Hi Scott, sorry for the delay,
+
+On Fri, Dec 05 2014, Scott Branden wrote:
+> Add quirk to handle broken auto-CMD23.
+> Some controllers do not respond after the first auto-CMD23 is issued.
 >
->> We are routing the regulators straight to vdd of the memory and should
->> hence use vmmc to specify this. However unless I actually program 0x29
->> in the Qualcomm sdhci block I get no responses from the card.
->>
->> Which I believe is correct behavior as the SDHC specification [1] says
->> the following about BIT(0) of 0x29:
->>
->> "If this bit is cleared, the Host Controller shall immediately stop
->> driving CMD and DAT[3:0] (tri-state) and drive SDCLK to low level".
->>
->>
->> So I think 52221610d is indeed incorrect.
->>
->> [1] https://www.sdcard.org/downloads/pls/simplified_specs/archive/partA2_300.pdf
+> This allows CMD23 to still work (mandatory for the faster UHS-I mode)
+> rather than disabling CMD23 entirely via SDHCI_QUIRK2_HOST_NO_CMD23.
 >
-> Agreed.  Host controllers that fail to implement the required internal
-> regulator configured via bits 1-3 of the Power Control Register may
-> still follow the specification with regard to bit zero of that same
-> register.  The driver should be updated to configure bit zero
-> appropriately even when an external regulator is used.
+> Signed-off by: Corneliu Doban <cdoban@broadcom.com>
+> Signed-off-by: Scott Branden <sbranden@broadcom.com>
+> ---
+>  drivers/mmc/host/sdhci.c  | 3 ++-
+>  include/linux/mmc/sdhci.h | 2 ++
+>  2 files changed, 4 insertions(+), 1 deletion(-)
 >
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ada1a3e..b37331f 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2985,7 +2985,8 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	/* Auto-CMD23 stuff only works in ADMA or PIO. */
+>  	if ((host->version >= SDHCI_SPEC_300) &&
+>  	    ((host->flags & SDHCI_USE_ADMA) ||
+> -	     !(host->flags & SDHCI_USE_SDMA))) {
+> +	     !(host->flags & SDHCI_USE_SDMA)) &&
+> +	     !(host->quirks2 & SDHCI_QUIRK2_ACMD23_BROKEN)) {
+>  		host->flags |= SDHCI_AUTO_CMD23;
+>  		DBG("%s: Auto-CMD23 available\n", mmc_hostname(mmc));
+>  	} else {
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index dba793e..d979cf9 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -100,6 +100,8 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
+>  /* Stop command (CMD12) can set Transfer Complete when not using MMC_RSP_BUSY */
+>  #define SDHCI_QUIRK2_STOP_WITH_TC			(1<<8)
+> +/* Controller broken with using ACMD23 */
+> +#define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<9)
+>  
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
 
-I gave it a spin on one of our Qualcomm 8974 based devices and writing
-BIT(0) only seems to be enough.
+This patch doesn't apply the quirk to any chipsets, so the patch
+doesn't actually change any behavior when run on a mainline kernel.
+Do you have a patch to apply the quirk to your chipset too?  We don't
+typically accept patches that "don't do anything" for mainline users,
+so that's why we'd like to see the chipset patch too.
 
-> If you like, I can propose a patch or if you have one ready, I will be
-> happy to review yours.
->
+Thanks,
 
-I'm somewhat puzzled to what benefit 52221610d brings after bringing
-back the write of BIT(0). Is it just that we don't hit the BUG() on
-non-standard voltages?
-
-The full paragraph regarding BIT(0) reads:
-
-Before setting this bit, the SD Host Driver shall set SD Bus Voltage
-Select. If the
-Host Controller detects the No Card state, this bit shall be cleared.
-If this bit is cleared, the Host Controller shall immediately stop
-driving CMD and
-DAT[3:0] (tri-state) and drive SDCLK to low level (Refer to Section 2.2.14).
-
-So the Qualcomm HW engineers implemented the last "shall", but if
-someone else (what did nvidia do here?) also implemented the first
-"shall"s then we're back at needing a full revert of 52221610d.
-
-Non-the-less, feel free to propose a patch and I will give it a test.
-
-Regards,
-Bjorn
+- Chris.
+-- 
+Chris Ball   <http://printf.net/>
