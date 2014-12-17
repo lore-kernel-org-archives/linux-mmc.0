@@ -1,38 +1,71 @@
-From: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-Subject: [PATCH] mmc: core: stop trying to switch width when only one bit is supported
-Date: Wed, 17 Dec 2014 19:32:06 +0100
-Message-ID: <1418841126-13695-1-git-send-email-alexandre.belloni@free-electrons.com>
-Return-path: <stable-owner@vger.kernel.org>
-Sender: stable-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Alexandre Belloni <alexandre.belloni@free-electrons.com>, stable@vger.kernel.org
+From: Scott Branden <sbranden@broadcom.com>
+Subject: Re: [PATCH v2] mmc: sdhci: add quirk for ACMD23 broken
+Date: Wed, 17 Dec 2014 10:36:39 -0800
+Message-ID: <5491CD37.7090604@broadcom.com>
+References: <Scott Branden <sbranden@broadcom.com> <1417738572-10441-1-git-send-email-sbranden@broadcom.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:19880 "EHLO
+	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751225AbaLQShM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Dec 2014 13:37:12 -0500
+In-Reply-To: <1417738572-10441-1-git-send-email-sbranden@broadcom.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ray Jui <rjui@broadcom.com>, bcm-kernel-feedback-list@broadcom.com
 
-mmc_select_bus_width() will try to switch to MMC_BUS_WIDTH_4 even if
-MMC_CAP_4_BIT_DATA and MMC_CAP_8_BIT_DATA are not set in host->caps.
-Return as soon as possible when those flags are not set
+Hi Chris,
 
-Fixes: 577fb13199b11d8cd75609183649be4b5561243f (mmc: rework
-selection of bus speed mode)
+I have not received any feedback on this patch for the SDHCI controller. 
+  Anything I can do to help get this accepted into the codebase?
 
-Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-Cc: <stable@vger.kernel.org> # 3.17
----
- drivers/mmc/core/mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Thanks,
+  Scott
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 02ad79229f65..7466ce098e60 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -886,7 +886,7 @@ static int mmc_select_bus_width(struct mmc_card *card)
- 	unsigned idx, bus_width = 0;
- 	int err = 0;
- 
--	if (!mmc_can_ext_csd(card) &&
-+	if (!mmc_can_ext_csd(card) ||
- 	    !(host->caps & (MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA)))
- 		return 0;
- 
--- 
-2.1.0
+On 14-12-04 04:16 PM, Scott Branden wrote:
+> Add quirk to handle broken auto-CMD23.
+> Some controllers do not respond after the first auto-CMD23 is issued.
+>
+> This allows CMD23 to still work (mandatory for the faster UHS-I mode)
+> rather than disabling CMD23 entirely via SDHCI_QUIRK2_HOST_NO_CMD23.
+>
+> Signed-off by: Corneliu Doban <cdoban@broadcom.com>
+> Signed-off-by: Scott Branden <sbranden@broadcom.com>
+> ---
+>   drivers/mmc/host/sdhci.c  | 3 ++-
+>   include/linux/mmc/sdhci.h | 2 ++
+>   2 files changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ada1a3e..b37331f 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2985,7 +2985,8 @@ int sdhci_add_host(struct sdhci_host *host)
+>   	/* Auto-CMD23 stuff only works in ADMA or PIO. */
+>   	if ((host->version >= SDHCI_SPEC_300) &&
+>   	    ((host->flags & SDHCI_USE_ADMA) ||
+> -	     !(host->flags & SDHCI_USE_SDMA))) {
+> +	     !(host->flags & SDHCI_USE_SDMA)) &&
+> +	     !(host->quirks2 & SDHCI_QUIRK2_ACMD23_BROKEN)) {
+>   		host->flags |= SDHCI_AUTO_CMD23;
+>   		DBG("%s: Auto-CMD23 available\n", mmc_hostname(mmc));
+>   	} else {
+> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+> index dba793e..d979cf9 100644
+> --- a/include/linux/mmc/sdhci.h
+> +++ b/include/linux/mmc/sdhci.h
+> @@ -100,6 +100,8 @@ struct sdhci_host {
+>   #define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
+>   /* Stop command (CMD12) can set Transfer Complete when not using MMC_RSP_BUSY */
+>   #define SDHCI_QUIRK2_STOP_WITH_TC			(1<<8)
+> +/* Controller broken with using ACMD23 */
+> +#define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<9)
+>
+>   	int irq;		/* Device IRQ */
+>   	void __iomem *ioaddr;	/* Mapped address */
+>
+
+
