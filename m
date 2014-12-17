@@ -1,36 +1,49 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: [patch] mmc: mxs-mmc: remove unneeded NULL check
-Date: Wed, 17 Dec 2014 02:57:50 +0300
-Message-ID: <20141216235749.GH31467@mwanda>
+From: Tim Kryger <tim.kryger@gmail.com>
+Subject: Re: Possible regression with commit 52221610d
+Date: Tue, 16 Dec 2014 22:20:49 -0800
+Message-ID: <CAD7vxxLe5COSrsnVZ2G_uhtUXfjFnDA45HSG2dNT1LrxcyFcQw@mail.gmail.com>
+References: <54584260.8030602@nvidia.com>
+	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
+	<545895B2.2000101@nvidia.com>
+	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
+	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
+	<CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
+	<CAJAp7Oh+ziadeEDWsus_k_2w33vPJxGGcGZyMNQkpLemf7SAhg@mail.gmail.com>
+	<CAJAp7OhWKoAoZfq+zWspLnqUkoJb3izMD41Vyfn0AW4Jni8HAQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <kernel-janitors-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: kernel-janitors-owner@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <robh+dt@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Fabio Estevam <fabio.estevam@freescale.com>, Roman Peniaev <r.peniaev@gmail.com>, Peter Griffin <peter.griffin@linaro.org>, Daniel Willmann <daniel@totalueberwachung.de>, linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAJAp7OhWKoAoZfq+zWspLnqUkoJb3izMD41Vyfn0AW4Jni8HAQ@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Bjorn Andersson <bjorn@kryo.se>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Static checkers complain about the inconsistent NULL checking here:
+On Tue, Dec 16, 2014 at 10:18 AM, Bjorn Andersson <bjorn@kryo.se> wrote:
 
-	drivers/mmc/host/mxs-mmc.c:680 mxs_mmc_probe()
-	warn: variable dereferenced before check 'ssp->dmach' (see line 660)
+> We are routing the regulators straight to vdd of the memory and should
+> hence use vmmc to specify this. However unless I actually program 0x29
+> in the Qualcomm sdhci block I get no responses from the card.
+>
+> Which I believe is correct behavior as the SDHC specification [1] says
+> the following about BIT(0) of 0x29:
+>
+> "If this bit is cleared, the Host Controller shall immediately stop
+> driving CMD and DAT[3:0] (tri-state) and drive SDCLK to low level".
+>
+>
+> So I think 52221610d is indeed incorrect.
+>
+> [1] https://www.sdcard.org/downloads/pls/simplified_specs/archive/partA2_300.pdf
 
-The variable can't actually be NULL so we can remove the check.
+Agreed.  Host controllers that fail to implement the required internal
+regulator configured via bits 1-3 of the Power Control Register may
+still follow the specification with regard to bit zero of that same
+register.  The driver should be updated to configure bit zero
+appropriately even when an external regulator is used.
 
-Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+If you like, I can propose a patch or if you have one ready, I will be
+happy to review yours.
 
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 60c4ca9..a82411a 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -677,8 +677,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 	return 0;
- 
- out_free_dma:
--	if (ssp->dmach)
--		dma_release_channel(ssp->dmach);
-+	dma_release_channel(ssp->dmach);
- out_clk_disable:
- 	clk_disable_unprepare(ssp->clk);
- out_mmc_free:
+Thanks,
+Tim Kryger
