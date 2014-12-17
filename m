@@ -1,49 +1,38 @@
-From: Tim Kryger <tim.kryger@gmail.com>
-Subject: Re: Possible regression with commit 52221610d
-Date: Tue, 16 Dec 2014 22:20:49 -0800
-Message-ID: <CAD7vxxLe5COSrsnVZ2G_uhtUXfjFnDA45HSG2dNT1LrxcyFcQw@mail.gmail.com>
-References: <54584260.8030602@nvidia.com>
-	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
-	<545895B2.2000101@nvidia.com>
-	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
-	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
-	<CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
-	<CAJAp7Oh+ziadeEDWsus_k_2w33vPJxGGcGZyMNQkpLemf7SAhg@mail.gmail.com>
-	<CAJAp7OhWKoAoZfq+zWspLnqUkoJb3izMD41Vyfn0AW4Jni8HAQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CAJAp7OhWKoAoZfq+zWspLnqUkoJb3izMD41Vyfn0AW4Jni8HAQ@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Bjorn Andersson <bjorn@kryo.se>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
+From: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+Subject: [PATCH] mmc: core: stop trying to switch width when only one bit is supported
+Date: Wed, 17 Dec 2014 19:32:06 +0100
+Message-ID: <1418841126-13695-1-git-send-email-alexandre.belloni@free-electrons.com>
+Return-path: <stable-owner@vger.kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Alexandre Belloni <alexandre.belloni@free-electrons.com>, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Dec 16, 2014 at 10:18 AM, Bjorn Andersson <bjorn@kryo.se> wrote:
+mmc_select_bus_width() will try to switch to MMC_BUS_WIDTH_4 even if
+MMC_CAP_4_BIT_DATA and MMC_CAP_8_BIT_DATA are not set in host->caps.
+Return as soon as possible when those flags are not set
 
-> We are routing the regulators straight to vdd of the memory and should
-> hence use vmmc to specify this. However unless I actually program 0x29
-> in the Qualcomm sdhci block I get no responses from the card.
->
-> Which I believe is correct behavior as the SDHC specification [1] says
-> the following about BIT(0) of 0x29:
->
-> "If this bit is cleared, the Host Controller shall immediately stop
-> driving CMD and DAT[3:0] (tri-state) and drive SDCLK to low level".
->
->
-> So I think 52221610d is indeed incorrect.
->
-> [1] https://www.sdcard.org/downloads/pls/simplified_specs/archive/partA2_300.pdf
+Fixes: 577fb13199b11d8cd75609183649be4b5561243f (mmc: rework
+selection of bus speed mode)
 
-Agreed.  Host controllers that fail to implement the required internal
-regulator configured via bits 1-3 of the Power Control Register may
-still follow the specification with regard to bit zero of that same
-register.  The driver should be updated to configure bit zero
-appropriately even when an external regulator is used.
+Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+Cc: <stable@vger.kernel.org> # 3.17
+---
+ drivers/mmc/core/mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-If you like, I can propose a patch or if you have one ready, I will be
-happy to review yours.
-
-Thanks,
-Tim Kryger
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 02ad79229f65..7466ce098e60 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -886,7 +886,7 @@ static int mmc_select_bus_width(struct mmc_card *card)
+ 	unsigned idx, bus_width = 0;
+ 	int err = 0;
+ 
+-	if (!mmc_can_ext_csd(card) &&
++	if (!mmc_can_ext_csd(card) ||
+ 	    !(host->caps & (MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA)))
+ 		return 0;
+ 
+-- 
+2.1.0
