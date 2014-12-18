@@ -1,83 +1,97 @@
-From: Scott Branden <sbranden@broadcom.com>
-Subject: Re: [PATCH v2] mmc: sdhci: add quirk for ACMD23 broken
-Date: Wed, 17 Dec 2014 12:42:25 -0800
-Message-ID: <5491EAB1.4040903@broadcom.com>
-References: <sbranden@broadcom.com>	<1417738572-10441-1-git-send-email-sbranden@broadcom.com> <86oar2qcpg.fsf@void.printf.net>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH] gpio: pcf857x: restore the initial line state of all
+ pcf lines
+Date: Thu, 18 Dec 2014 11:48:17 +0530
+Message-ID: <549271A9.5040701@ti.com>
+References: <1418371601-22658-1-git-send-email-kishon@ti.com> <548F498F.7050202@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:28426 "EHLO
-	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750999AbaLQUmc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Dec 2014 15:42:32 -0500
-In-Reply-To: <86oar2qcpg.fsf@void.printf.net>
+Received: from comal.ext.ti.com ([198.47.26.152]:36072 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751113AbaLRGSW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 18 Dec 2014 01:18:22 -0500
+In-Reply-To: <548F498F.7050202@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ray Jui <rjui@broadcom.com>, bcm-kernel-feedback-list@broadcom.com
+To: Nishanth Menon <nm@ti.com>, linus.walleij@linaro.org, gnurou@gmail.com, linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org, nsekhar@ti.com
+Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, Benoit Parrot <bparrot@ti.com>
 
-Hi Chris,
 
-We'll finish off cleaning up our driver that uses this patch for review 
-then.
 
-Thanks,
-  Scott
-
-On 14-12-17 11:48 AM, Chris Ball wrote:
-> Hi Scott, sorry for the delay,
->
-> On Fri, Dec 05 2014, Scott Branden wrote:
->> Add quirk to handle broken auto-CMD23.
->> Some controllers do not respond after the first auto-CMD23 is issued.
+On Tuesday 16 December 2014 02:20 AM, Nishanth Menon wrote:
+> On 12/12/2014 02:06 AM, Kishon Vijay Abraham I wrote:
+>> The reset values for all the PCF lines are high and hence on shutdown
+>> we should drive all the lines high in order to bring it to the reset state.
 >>
->> This allows CMD23 to still work (mandatory for the faster UHS-I mode)
->> rather than disabling CMD23 entirely via SDHCI_QUIRK2_HOST_NO_CMD23.
+>> This is actually required since pcf doesn't have a reset line and even after
+>> warm reset (by invoking "reboot" in prompt) the pcf lines maintains it's
+>> previous programmed state. This becomes a problem if the boards are designed
+>> to work with the default initial state.
 >>
->> Signed-off by: Corneliu Doban <cdoban@broadcom.com>
->> Signed-off-by: Scott Branden <sbranden@broadcom.com>
+>> DRA7XX_evm uses PCF8575 and one of the PCF output lines feeds to MMC/SD and
+>> this line should be driven high in order for the MMC/SD to be detected.
+>> This line is modelled as regulator and the hsmmc driver takes care of enabling
+>> and disabling it. In the case of 'reboot', during shutdown path as part of it's
+>> cleanup process the hsmmc driver disables this regulator. This makes MMC boot
+>> not functional.
+>>
+>> Fixed it by driving high all the pcf lines.
+>>
+>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 >> ---
->>   drivers/mmc/host/sdhci.c  | 3 ++-
->>   include/linux/mmc/sdhci.h | 2 ++
->>   2 files changed, 4 insertions(+), 1 deletion(-)
+>>  drivers/gpio/gpio-pcf857x.c |    9 +++++++++
+>>  1 file changed, 9 insertions(+)
 >>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index ada1a3e..b37331f 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -2985,7 +2985,8 @@ int sdhci_add_host(struct sdhci_host *host)
->>   	/* Auto-CMD23 stuff only works in ADMA or PIO. */
->>   	if ((host->version >= SDHCI_SPEC_300) &&
->>   	    ((host->flags & SDHCI_USE_ADMA) ||
->> -	     !(host->flags & SDHCI_USE_SDMA))) {
->> +	     !(host->flags & SDHCI_USE_SDMA)) &&
->> +	     !(host->quirks2 & SDHCI_QUIRK2_ACMD23_BROKEN)) {
->>   		host->flags |= SDHCI_AUTO_CMD23;
->>   		DBG("%s: Auto-CMD23 available\n", mmc_hostname(mmc));
->>   	} else {
->> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
->> index dba793e..d979cf9 100644
->> --- a/include/linux/mmc/sdhci.h
->> +++ b/include/linux/mmc/sdhci.h
->> @@ -100,6 +100,8 @@ struct sdhci_host {
->>   #define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
->>   /* Stop command (CMD12) can set Transfer Complete when not using MMC_RSP_BUSY */
->>   #define SDHCI_QUIRK2_STOP_WITH_TC			(1<<8)
->> +/* Controller broken with using ACMD23 */
->> +#define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<9)
->>
->>   	int irq;		/* Device IRQ */
->>   	void __iomem *ioaddr;	/* Mapped address */
->
-> This patch doesn't apply the quirk to any chipsets, so the patch
-> doesn't actually change any behavior when run on a mainline kernel.
-> Do you have a patch to apply the quirk to your chipset too?  We don't
-> typically accept patches that "don't do anything" for mainline users,
-> so that's why we'd like to see the chipset patch too.
->
-> Thanks,
->
-> - Chris.
->
+>> diff --git a/drivers/gpio/gpio-pcf857x.c b/drivers/gpio/gpio-pcf857x.c
+>> index 236708a..00b15b2 100644
+>> --- a/drivers/gpio/gpio-pcf857x.c
+>> +++ b/drivers/gpio/gpio-pcf857x.c
+>> @@ -448,6 +448,14 @@ static int pcf857x_remove(struct i2c_client *client)
+>>  	return status;
+>>  }
+>>  
+>> +static void pcf857x_shutdown(struct i2c_client *client)
+>> +{
+>> +	struct pcf857x *gpio = i2c_get_clientdata(client);
+>> +
+>> +	/* Drive all the I/O lines high */
+>> +	gpio->write(gpio->client, BIT(gpio->chip.ngpio) - 1);
+> 
+> you might force a contention here - depending on System configuration.
+> example:
+> +-------+
+> |       |
+> |  U1   |         +------+      +-----------+
+> |       +--------->      |      |           |
+> +-------+         |      |      |           |
+>                   | Switch<-----+    SoC    |
+> +-------+         |      |      |           |
+> |       |         |      |      |           |
+> | U2    <---------+--^---+      +-----------+
+> |       |            |
+> |       |            |
+> +-------+            |
+>                   +--+--+
+>                   |     |
+>                   | PCF |
+>                   |     |
+>                   +-----+
+> 
+> At low, SoC pin is connected to U2 as drive. when reset to high, you
+> now have U1 driving to the same pin that SoC has, potentially
+> resulting in contention.
+> 
+> 
+> Unfortunately, at this level, you do not know what the state of the
+> system is, blindly forcing a pin level will potentially cause
+> contention risk depending on pin configuration.
 
+Assume we are doing a reset when the system is powered on, irrespective of the
+state of the system, we'll be forcing the pin level to the default state.
+
+The same thing happens here so I don't think this would be a problem.
+
+Thanks
+Kishon
