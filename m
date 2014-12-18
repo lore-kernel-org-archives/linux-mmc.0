@@ -1,232 +1,191 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 7/7] mmc: slot-gpio: Rework how to handle allocation of slot-gpio data
-Date: Thu, 18 Dec 2014 15:44:36 +0100
-Message-ID: <1418913876-13937-8-git-send-email-ulf.hansson@linaro.org>
-References: <1418913876-13937-1-git-send-email-ulf.hansson@linaro.org>
+From: Yuli Izrailov <yuli.izrailov@sandisk.com>
+Subject: [PATCH] Support sending vendor specific commands.
+Date: Thu, 18 Dec 2014 09:16:03 -0500
+Message-ID: <1418912163-27948-1-git-send-email-yuli.izrailov@sandisk.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:55778 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752513AbaLROo5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Dec 2014 09:44:57 -0500
-Received: by mail-wi0-f173.google.com with SMTP id r20so2019634wiv.6
-        for <linux-mmc@vger.kernel.org>; Thu, 18 Dec 2014 06:44:56 -0800 (PST)
-In-Reply-To: <1418913876-13937-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-bl2on0054.outbound.protection.outlook.com ([65.55.169.54]:23503
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751116AbaLRQFj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 18 Dec 2014 11:05:39 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+To: ulf.hansson@linaro.org
+Cc: chris@printf.net, linux-mmc@vger.kernel.org, alex.lemberg@sandisk.com, Yuli Izrailov <yuli.izrailov@sandisk.com>
 
-By moving the allocation of the slot-gpio data into mmc_alloc_host(),
-we can remove the slot-gpio internal calls to mmc_gpio_alloc().
+This change adds support to invoke eMMC
+vendor specific commands (CMD60...CMD63).
 
-This means mmc_gpio_alloc() has now only one caller left, which
-consequence allow us to simplify and remove some of the slot-gpio code.
+New command was added: "do_manufacturer".
 
-Additionally, this makes the slot-gpio mutex redundant, so let's remove
-it.
+Only AC command type is supported at this stage,
+ADTC command type is not.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+AC - addressed commands, no data transfer.
+ADTC - addressed data transfer commands.
+
+Example:
+mmc manufacturer 60 ac r1 0x40302010 /dev/block/mmcblk0
+
+Signed-off-by: Yuli Izrailov <yuli.izrailov@sandisk.com>
 ---
- drivers/mmc/core/host.c      | 20 +++++++-------
- drivers/mmc/core/slot-gpio.c | 62 ++++++++++----------------------------------
- include/linux/mmc/host.h     |  2 --
- 3 files changed, 23 insertions(+), 61 deletions(-)
+ mmc.c      |   10 +++++++
+ mmc.h      |    8 ++++++
+ mmc_cmds.c |   92 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ mmc_cmds.h |    1 +
+ 4 files changed, 111 insertions(+)
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index fcb7f06..0763644 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -29,6 +29,7 @@
- 
- #include "core.h"
- #include "host.h"
-+#include "slot-gpio.h"
- 
- #define cls_dev_to_mmc_host(d)	container_of(d, struct mmc_host, class_dev)
- 
-@@ -38,7 +39,6 @@ static DEFINE_SPINLOCK(mmc_host_lock);
- static void mmc_host_classdev_release(struct device *dev)
- {
- 	struct mmc_host *host = cls_dev_to_mmc_host(dev);
--	mutex_destroy(&host->slot.lock);
- 	spin_lock(&mmc_host_lock);
- 	idr_remove(&mmc_host_idr, host->index);
- 	spin_unlock(&mmc_host_lock);
-@@ -478,8 +478,10 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 		host->index = err;
- 	spin_unlock(&mmc_host_lock);
- 	idr_preload_end();
--	if (err < 0)
--		goto free;
-+	if (err < 0) {
-+		kfree(host);
-+		return NULL;
-+	}
- 
- 	dev_set_name(&host->class_dev, "mmc%d", host->index);
- 
-@@ -488,10 +490,12 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 	host->class_dev.class = &mmc_host_class;
- 	device_initialize(&host->class_dev);
- 
--	mmc_host_clk_init(host);
-+	if (mmc_gpio_alloc(host)) {
-+		put_device(&host->class_dev);
-+		return NULL;
-+	}
- 
--	mutex_init(&host->slot.lock);
--	host->slot.cd_irq = -EINVAL;
-+	mmc_host_clk_init(host);
- 
- 	spin_lock_init(&host->lock);
- 	init_waitqueue_head(&host->wq);
-@@ -512,10 +516,6 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 	host->max_blk_count = PAGE_CACHE_SIZE / 512;
- 
- 	return host;
--
--free:
--	kfree(host);
--	return NULL;
- }
- 
- EXPORT_SYMBOL(mmc_alloc_host);
-diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
-index ec918c2..1a3edbd 100644
---- a/drivers/mmc/core/slot-gpio.c
-+++ b/drivers/mmc/core/slot-gpio.c
-@@ -43,29 +43,17 @@ static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
- int mmc_gpio_alloc(struct mmc_host *host)
- {
- 	size_t len = strlen(dev_name(host->parent)) + 4;
--	struct mmc_gpio *ctx;
--
--	mutex_lock(&host->slot.lock);
--
--	ctx = host->slot.handler_priv;
--	if (!ctx) {
--		/*
--		 * devm_kzalloc() can be called after device_initialize(), even
--		 * before device_add(), i.e., between mmc_alloc_host() and
--		 * mmc_add_host()
--		 */
--		ctx = devm_kzalloc(host->parent, sizeof(*ctx) + 2 * len,
--				   GFP_KERNEL);
--		if (ctx) {
--			ctx->ro_label = ctx->cd_label + len;
--			snprintf(ctx->cd_label, len, "%s cd", dev_name(host->parent));
--			snprintf(ctx->ro_label, len, "%s ro", dev_name(host->parent));
--			host->slot.handler_priv = ctx;
--		}
-+	struct mmc_gpio *ctx = devm_kzalloc(host->parent,
-+				sizeof(*ctx) + 2 * len,	GFP_KERNEL);
-+
-+	if (ctx) {
-+		ctx->ro_label = ctx->cd_label + len;
-+		snprintf(ctx->cd_label, len, "%s cd", dev_name(host->parent));
-+		snprintf(ctx->ro_label, len, "%s ro", dev_name(host->parent));
-+		host->slot.handler_priv = ctx;
-+		host->slot.cd_irq = -EINVAL;
- 	}
- 
--	mutex_unlock(&host->slot.lock);
--
- 	return ctx ? 0 : -ENOMEM;
- }
- 
-@@ -111,18 +99,12 @@ EXPORT_SYMBOL(mmc_gpio_get_cd);
-  */
- int mmc_gpio_request_ro(struct mmc_host *host, unsigned int gpio)
- {
--	struct mmc_gpio *ctx;
-+	struct mmc_gpio *ctx = host->slot.handler_priv;
- 	int ret;
- 
- 	if (!gpio_is_valid(gpio))
- 		return -EINVAL;
- 
--	ret = mmc_gpio_alloc(host);
--	if (ret < 0)
--		return ret;
--
--	ctx = host->slot.handler_priv;
--
- 	ret = devm_gpio_request_one(host->parent, gpio, GPIOF_DIR_IN,
- 				    ctx->ro_label);
- 	if (ret < 0)
-@@ -187,15 +169,9 @@ EXPORT_SYMBOL(mmc_gpiod_request_cd_irq);
- int mmc_gpio_request_cd(struct mmc_host *host, unsigned int gpio,
- 			unsigned int debounce)
- {
--	struct mmc_gpio *ctx;
-+	struct mmc_gpio *ctx = host->slot.handler_priv;
- 	int ret;
- 
--	ret = mmc_gpio_alloc(host);
--	if (ret < 0)
--		return ret;
--
--	ctx = host->slot.handler_priv;
--
- 	ret = devm_gpio_request_one(host->parent, gpio, GPIOF_DIR_IN,
- 				    ctx->cd_label);
- 	if (ret < 0)
-@@ -239,16 +215,10 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
- 			 unsigned int idx, bool override_active_level,
- 			 unsigned int debounce, bool *gpio_invert)
- {
--	struct mmc_gpio *ctx;
-+	struct mmc_gpio *ctx = host->slot.handler_priv;
- 	struct gpio_desc *desc;
- 	int ret;
- 
--	ret = mmc_gpio_alloc(host);
--	if (ret < 0)
--		return ret;
--
--	ctx = host->slot.handler_priv;
--
- 	if (!con_id)
- 		con_id = ctx->cd_label;
- 
-@@ -291,16 +261,10 @@ int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
- 			 unsigned int idx, bool override_active_level,
- 			 unsigned int debounce, bool *gpio_invert)
- {
--	struct mmc_gpio *ctx;
-+	struct mmc_gpio *ctx = host->slot.handler_priv;
- 	struct gpio_desc *desc;
- 	int ret;
- 
--	ret = mmc_gpio_alloc(host);
--	if (ret < 0)
--		return ret;
--
--	ctx = host->slot.handler_priv;
--
- 	if (!con_id)
- 		con_id = ctx->ro_label;
- 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 9f32270..b6bf718 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -166,7 +166,6 @@ struct mmc_async_req {
-  * struct mmc_slot - MMC slot functions
-  *
-  * @cd_irq:		MMC/SD-card slot hotplug detection IRQ or -EINVAL
-- * @lock:		protect the @handler_priv pointer
-  * @handler_priv:	MMC/SD-card slot context
-  *
-  * Some MMC/SD host controllers implement slot-functions like card and
-@@ -176,7 +175,6 @@ struct mmc_async_req {
-  */
- struct mmc_slot {
- 	int cd_irq;
--	struct mutex lock;
- 	void *handler_priv;
+diff --git a/mmc.c b/mmc.c
+index aeaedf6..5fc34fa 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -150,6 +150,16 @@ static struct Command commands[] = {
+ 		  "    mmc rpmb write-block /dev/mmcblk0rpmb 0x02 - -",
+ 	  NULL
+ 	},
++	{ do_manufacturer, 5,
++	  "manufacturer", "<cmd number> " "<cmd type> "
++		"<response type> " "<argument> " "<device>\n"
++		"Send a manufacturer specific command to the <device>.\n"
++		"<cmd number>    - [60 - 63]\n"
++		"<cmd type>      - [ac] (adtc is not implemented)\n"
++		"<response type> - [r1, r1b]\n"
++		"<argument>      - 4 byte arbitrary argument in hex",
++	  NULL
++	},
+ 	{ 0, 0, 0, 0 }
  };
  
+diff --git a/mmc.h b/mmc.h
+index 5fe5fec..314b1b4 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -37,6 +37,14 @@
+ #define MMC_WRITE_MULTIPLE_BLOCK 25   /* adtc                    R1  */
+ 
+ /*
++ * MMC manufacturer specific command definitions
++ */
++#define MMC_SEND_MANUFACTURER_1		60
++#define MMC_SEND_MANUFACTURER_2		61
++#define MMC_SEND_MANUFACTURER_3		62
++#define MMC_SEND_MANUFACTURER_4		63
++
++/*
+  * EXT_CSD fields
+  */
+ #define EXT_CSD_S_CMD_SET		504
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index cea943f..7eeb6fc 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -1677,3 +1677,95 @@ int do_rpmb_write_block(int nargs, char **argv)
+ 
+ 	return ret;
+ }
++
++static int str_to_u32(const char *src, __u32 *dest, int base)
++{
++	char *endptr;
++	__u32 tmp;
++
++	tmp = strtoul(src, &endptr, base);
++	if (errno || *endptr)
++		return 1;
++
++	*dest = tmp;
++	return 0;
++}
++
++int do_manufacturer(int nargs, char **argv)
++{
++	int fd;
++	char *device;
++	unsigned int cmd_type;
++	unsigned int resp_type;
++	__u32 opcode;
++	__u32 arg;
++	struct mmc_ioc_cmd idata = {0};
++
++	/* Command number */
++	if (str_to_u32(argv[1], &opcode, 10) ||
++		(opcode != MMC_SEND_MANUFACTURER_1 &&
++		opcode  != MMC_SEND_MANUFACTURER_2 &&
++		opcode  != MMC_SEND_MANUFACTURER_3 &&
++		opcode  != MMC_SEND_MANUFACTURER_4)) {
++		fprintf(stderr, "%s: invalid argument '%s'\n",
++			argv[0], argv[1]);
++		exit(1);
++	}
++
++	/* Command type */
++	if (0 == strcasecmp("ac", argv[2])) {
++		cmd_type = MMC_CMD_AC;
++	}
++	else if (0 == strcasecmp("adtc", argv[2])) {
++		fprintf(stderr, "%s: 'adtc' is not implemented\n",
++			argv[0]);
++		exit(1);
++	}
++	else {
++		fprintf(stderr, "%s: invalid argument '%s'\n",
++			argv[0], argv[2]);
++		exit(1);
++	}
++
++	/* Response type */
++	if (0 == strcasecmp("r1b", argv[3])) {
++		resp_type = MMC_RSP_R1B;
++	}
++	else if (0 == strcasecmp("r1", argv[3])) {
++		resp_type = MMC_RSP_R1;
++	}
++	else {
++		fprintf(stderr, "%s: invalid argument '%s'\n",
++			argv[0], argv[3]);
++		exit(1);
++	}
++
++	/* Argument */
++	if (str_to_u32(argv[4], &arg, 16)) {
++		fprintf(stderr, "%s: invalid argument '%s'\n",
++			argv[0], argv[4]);
++		exit(1);
++	}
++
++	/* Device */
++	device = argv[5];
++	fd = open(device, O_RDWR);
++	if (fd < 0) {
++		perror("open device");
++		exit(1);
++	}
++
++	/* Fill ioctl & send */
++	idata.opcode = opcode;
++	idata.arg    = arg;
++	idata.flags  = (cmd_type | resp_type);
++
++	if (ioctl(fd, MMC_IOC_CMD, &idata)) {
++		perror("ioctl");
++		exit(1);
++	}
++
++	close(fd);
++
++	return 0;
++}
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index 9e625c9..de4ac7a 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -32,3 +32,4 @@ int do_rpmb_write_key(int nargs, char **argv);
+ int do_rpmb_read_counter(int nargs, char **argv);
+ int do_rpmb_read_block(int nargs, char **argv);
+ int do_rpmb_write_block(int nargs, char **argv);
++int do_manufacturer(int nargs, char **argv);
 -- 
-1.9.1
+1.7.9.5
 
