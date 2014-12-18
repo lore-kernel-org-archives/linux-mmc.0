@@ -1,52 +1,52 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 1/7] mmc: mvsdio: Remove redundant use of mmc_gpio_free_cd|ro()
-Date: Thu, 18 Dec 2014 15:44:30 +0100
-Message-ID: <1418913876-13937-2-git-send-email-ulf.hansson@linaro.org>
-References: <1418913876-13937-1-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 0/7] mmc: slot-gpio: Cleanup API and simplifications
+Date: Thu, 18 Dec 2014 15:44:29 +0100
+Message-ID: <1418913876-13937-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f52.google.com ([74.125.82.52]:35196 "EHLO
+Received: from mail-wg0-f52.google.com ([74.125.82.52]:43765 "EHLO
 	mail-wg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751355AbaLROos (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Dec 2014 09:44:48 -0500
-Received: by mail-wg0-f52.google.com with SMTP id x12so1805225wgg.25
-        for <linux-mmc@vger.kernel.org>; Thu, 18 Dec 2014 06:44:47 -0800 (PST)
-In-Reply-To: <1418913876-13937-1-git-send-email-ulf.hansson@linaro.org>
+	with ESMTP id S1751355AbaLROoq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Dec 2014 09:44:46 -0500
+Received: by mail-wg0-f52.google.com with SMTP id x12so1820154wgg.11
+        for <linux-mmc@vger.kernel.org>; Thu, 18 Dec 2014 06:44:45 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: Nicolas Pitre <nico@fluxnic.net>
 
-The MMC core makes use of the devm_* functions while requesting the
-CD/WP GPIOs, let's rely on that.
+Note, this patchset is based upon the following patchset:
+[PATCH 0/6] mmc: Fix error handling for mmc_of_parse()
+http://marc.info/?l=linux-mmc&m=141889571821080&w=2
 
-Cc: Nicolas Pitre <nico@fluxnic.net>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/host/mvsdio.c | 4 ----
- 1 file changed, 4 deletions(-)
+Patch 1 -> 2:
+Remove redundant calls from host drivers to the slot-gpio API for freeing
+requested CD/WP GPIOs.
 
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index 4f8618f..b6ec91f 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -828,8 +828,6 @@ static int mvsd_probe(struct platform_device *pdev)
- 
- out:
- 	if (mmc) {
--		mmc_gpio_free_cd(mmc);
--		mmc_gpio_free_ro(mmc);
- 		if (!IS_ERR(host->clk))
- 			clk_disable_unprepare(host->clk);
- 		mmc_free_host(mmc);
-@@ -844,8 +842,6 @@ static int mvsd_remove(struct platform_device *pdev)
- 
- 	struct mvsd_host *host = mmc_priv(mmc);
- 
--	mmc_gpio_free_cd(mmc);
--	mmc_gpio_free_ro(mmc);
- 	mmc_remove_host(mmc);
- 	del_timer_sync(&host->timer);
- 	mvsd_power_down(host);
+Patch 3:
+Remove redundant slot-gpio API for freeing requested CD/WP GPIOs. 
+
+Patch 4 -> 7:
+Rework how slot-gpio handles allocation of data.
+
+
+Ulf Hansson (7):
+  mmc: mvsdio: Remove redundant use of mmc_gpio_free_cd|ro()
+  mmc: sdhci-sirf: Remove redundant use of mmc_gpio_free_cd()
+  mmc: slot-gpio: Remove option to explicitly free requested CD/WP GPIOs
+  mmc: slot-gpio: Use the parent device while allocating data
+  mmc: slot-gpio: Make mmc_gpio_alloc() available for MMC core
+  mmc: core: Free all resources for the class device at ->dev_release()
+  mmc: slot-gpio: Rework how to handle allocation of slot-gpio data
+
+ drivers/mmc/core/host.c       |  33 +++++----
+ drivers/mmc/core/slot-gpio.c  | 164 ++++++------------------------------------
+ drivers/mmc/core/slot-gpio.h  |  13 ++++
+ drivers/mmc/host/mvsdio.c     |   4 --
+ drivers/mmc/host/sdhci-sirf.c |   3 -
+ include/linux/mmc/host.h      |   2 -
+ include/linux/mmc/slot-gpio.h |   3 -
+ 7 files changed, 52 insertions(+), 170 deletions(-)
+ create mode 100644 drivers/mmc/core/slot-gpio.h
+
 -- 
 1.9.1
 
