@@ -1,32 +1,70 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH] mmc: mmci: Use pm_runtime_put_noidle() during ->probe()
-Date: Fri, 19 Dec 2014 10:27:58 +0000
-Message-ID: <20141219102758.GD11285@n2100.arm.linux.org.uk>
-References: <1418982622-8118-1-git-send-email-ulf.hansson@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4 0/6] mmc: rtsx: add support for sdio card
+Date: Fri, 19 Dec 2014 11:36:46 +0100
+Message-ID: <CAPDyKFoGQBgpkYS1AatTSM9y3iaOOCtCGRgw2MOeQEWb_Ca-tw@mail.gmail.com>
+References: <cover.1417758564.git.micky_ching@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:40087 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751706AbaLSK2I (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 05:28:08 -0500
-Content-Disposition: inline
-In-Reply-To: <1418982622-8118-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <cover.1417758564.git.micky_ching@realsil.com.cn>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: micky <micky_ching@realsil.com.cn>
+Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Wei WANG <wei_wang@realsil.com.cn>, Roger <rogerable@realtek.com>, "driverdev-devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
 
-On Fri, Dec 19, 2014 at 10:50:22AM +0100, Ulf Hansson wrote:
-> Previously the pm_runtime_put() caused the device to be runtime PM
-> suspended, but then immediately being resumed when we add the host.
-> 
-> Prevent this unnecessary runtime PM suspend/resume cycle during
-> ->probe() by using the pm_runtime_put_noidle() variant instead.
+On 5 December 2014 at 06:54,  <micky_ching@realsil.com.cn> wrote:
+> From: Micky Ching <micky_ching@realsil.com.cn>
+>
+> v4:
+>   split patch in more detailed patches. no code changes diff v3.
+>
+> v3:
+>   rtsx_pci_sdmmc.c:
+>     - dump_reg_range
+>       - remove unused pointer check
+>       - fix start index
+> v2:
+>   rtsx_pci.h:
+>     - remove unused rtsx_pci_write_le32
+>     - add SD_CMD_START
+>   rtsx_pci_sdmmc.c:
+>     - dump_reg_range
+>       - alloc data on stack
+>     - remove forward declaration
+>     - use SD_CMD_START replace magic number 0x40
+>     - move initialize assignment to error handling
+>
+> This patch is used to change transfer mode for sdio card support
+> by SD interface.
+>
+>
+>
+> Micky Ching (6):
+>   mfd: rtsx: add func to split u32 into register
+>   mmc: rtsx: add dump_reg_range to simplify dump register
+>   mmc: rtsx: init cookie at probe/card_event
+>   mmc: rtsx: add helper function to simplify code
+>   mmc: rtsx: add support for sdio card
+>   mmc: rtsx: swap function position to avoid pre declaration
+>
+>  drivers/mmc/host/rtsx_pci_sdmmc.c | 522 +++++++++++++++++++++-----------------
+>  include/linux/mfd/rtsx_pci.h      |   9 +
+>  2 files changed, 296 insertions(+), 235 deletions(-)
+>
+> --
+> 1.9.1
+>
 
-Better would be to move it below mmc_add_host().  Then we're not depending
-on behaviour of other code.
+Thanks! Queued for 3.20.
 
--- 
-FTTC broadband for 0.8mile line: currently at 9.5Mbps down 400kbps up
-according to speedtest.net.
+Kind regards
+Uffe
