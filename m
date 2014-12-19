@@ -1,80 +1,43 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH 00/13] mmc: host: Add facility to support re-tuning
-Date: Fri, 19 Dec 2014 15:37:47 +0100
-Message-ID: <CAPDyKFr-JkQNYrhUQM6eZTxqjJWk5Q2ZSG8x0obUeOcOeTpsDg@mail.gmail.com>
-References: <1417801271-15575-1-git-send-email-adrian.hunter@intel.com>
-	<5494312C.9080004@intel.com>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: [PATCH 2/3] mmc: dw_mmc: Generic MMC tuning with the clock phase
+ framework
+Date: Fri, 19 Dec 2014 10:29:17 -0800
+Message-ID: <54946E7D.1010500@codeaurora.org>
+References: <1418943663-10012-1-git-send-email-amstan@chromium.org> <1418943663-10012-3-git-send-email-amstan@chromium.org> <CAD=FV=WhB84enspDCHwkc2TqEFeAr_qiY4m_xYvMYCArUAtPXw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f53.google.com ([209.85.192.53]:45015 "EHLO
-	mail-qg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752087AbaLSOhr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 09:37:47 -0500
-Received: by mail-qg0-f53.google.com with SMTP id l89so688361qgf.40
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 06:37:47 -0800 (PST)
-In-Reply-To: <5494312C.9080004@intel.com>
+Received: from smtp.codeaurora.org ([198.145.11.231]:57536 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751165AbaLSS3V (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 13:29:21 -0500
+In-Reply-To: <CAD=FV=WhB84enspDCHwkc2TqEFeAr_qiY4m_xYvMYCArUAtPXw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
+To: Doug Anderson <dianders@chromium.org>, Alexandru M Stan <amstan@chromium.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mike Turquette <mturquette@linaro.org>, Heiko Stuebner <heiko@sntech.de>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, addy ke <addy.ke@rock-chips.com>, Kever Yang <kever.yang@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Andrew Bresticker <abrestic@chromium.org>, Sonny Rao <sonnyrao@chromium.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 19 December 2014 at 15:07, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 05/12/14 19:40, Adrian Hunter wrote:
->> Hi
->>
->> Here are some patches to move re-tuning support out of
->> sdhci and into the core, and add support for HS400
->> re-tuning.
->>
->> Currently sdhci does re-tuning transparently by
->> calling sdhci_execute_tuning() from its ->request()
->> function.
->>
->> The problem with HS400 re-tuning is that it must be
->> done in HS200 mode. That means using switch commands
->> and making ios changes. That means it potentially
->> conflicts with other command sequences. The new
->> re-tuning support accomodates that, however it is
->> not strictly necessary because HS400 re-tuning
->> should only be needed after runtime suspend when
->> there would not be a conflict.
->>
->> Nevertheless, this approach has more structure
->> and potentially more flexibility.
->>
->>
->> Adrian Hunter (13):
->>       mmc: core: Simplify by adding mmc_execute_tuning()
->>       mmc: host: Add facility to support re-tuning
->>       mmc: core: Disable re-tuning when card is no longer initialized
->>       mmc: core: Move mmc_card_removed() into mmc_start_request()
->>       mmc: core: Add support for re-tuning before each request
->>       mmc: core: Check re-tuning before retrying
->>       mmc: core: Hold re-tuning during switch commands
->>       mmc: core: Hold re-tuning during erase commands
->>       mmc: core: Hold re-tuning while bkops ongoing
->>       mmc: mmc: Comment that callers need to hold re-tuning if the card is put to sleep
->>       mmc: core: Add support for HS400 re-tuning
->>       mmc: sdhci: Always init buf_ready_int
->>       mmc: sdhci: Change to new way of doing re-tuning
->>
->>  drivers/mmc/core/core.c    |  93 +++++++++++++++++++++++++++++++-----
->>  drivers/mmc/core/core.h    |   5 ++
->>  drivers/mmc/core/host.c    |  63 +++++++++++++++++++++++++
->>  drivers/mmc/core/mmc.c     |  58 ++++++++++++++++++-----
->>  drivers/mmc/core/mmc_ops.c |  31 ++++++++----
->>  drivers/mmc/core/sd.c      |  13 ++---
->>  drivers/mmc/core/sdio.c    |  14 ++----
->>  drivers/mmc/host/sdhci.c   | 115 ++++++---------------------------------------
->>  include/linux/mmc/host.h   |  58 +++++++++++++++++++++++
->>  include/linux/mmc/sdhci.h  |   3 --
->>  10 files changed, 296 insertions(+), 157 deletions(-)
+On 12/18/2014 04:20 PM, Doug Anderson wrote:
+> Alex,
 >
-> Ulf, do you have any comments?
+> On Thu, Dec 18, 2014 at 3:01 PM, Alexandru M Stan <amstan@chromium.org> wrote:
+>> +       blk_test = kmalloc(blksz, GFP_KERNEL);
+>> +       if (!blk_test)
+>> +               return -ENOMEM;
+>> +
+>> +       ranges = kmalloc(((NUM_PHASES / 2 + 1) * sizeof(ranges)), GFP_KERNEL);
+> sizeof(*ranges)
+>
+>
+> Other than that, this looks good to me and you can add my reviewed-by
+> when the above is fixed.
+>
 >
 
-I am going through them as soon as I can. It's been a busy time lately.
+Might want to use kmalloc_array() too.
 
-Kind regards
-Uffe
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
+
