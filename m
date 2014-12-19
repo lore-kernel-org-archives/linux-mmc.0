@@ -1,61 +1,68 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2] mmc: mmci: Use pm_runtime_put_noidle() during ->probe()
-Date: Fri, 19 Dec 2014 12:29:55 +0100
-Message-ID: <CAPDyKFq21+qScnfZmjE_h5BchTVM-LTe49a+qO+k2-+kdt-jXw@mail.gmail.com>
-References: <1418986459-13443-1-git-send-email-ulf.hansson@linaro.org>
-	<20141219105922.GF11285@n2100.arm.linux.org.uk>
+Subject: Re: [PATCH] mmc: dt: Add property for broken hs200 quirk
+Date: Fri, 19 Dec 2014 12:38:07 +0100
+Message-ID: <CAPDyKFrPC_MphsLHHZ=uFjcF8SsdkVmzez9R=gas7_ihn63Q5A@mail.gmail.com>
+References: <1418412516-10682-1-git-send-email-bjorn.andersson@sonymobile.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f48.google.com ([209.85.192.48]:59008 "EHLO
-	mail-qg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752444AbaLSL3z (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 06:29:55 -0500
-Received: by mail-qg0-f48.google.com with SMTP id f51so482377qge.21
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 03:29:55 -0800 (PST)
-In-Reply-To: <20141219105922.GF11285@n2100.arm.linux.org.uk>
+Received: from mail-qa0-f48.google.com ([209.85.216.48]:56413 "EHLO
+	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752137AbaLSLiI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 06:38:08 -0500
+Received: by mail-qa0-f48.google.com with SMTP id v10so479774qac.35
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 03:38:07 -0800 (PST)
+In-Reply-To: <1418412516-10682-1-git-send-email-bjorn.andersson@sonymobile.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
+To: Bjorn Andersson <bjorn.andersson@sonymobile.com>
+Cc: Anton Vorontsov <anton@enomsg.org>, Chris Ball <chris@printf.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Grant Likely <grant.likely@linaro.org>, "open list:OPEN FIRMWARE AND..." <devicetree@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>
 
-On 19 December 2014 at 11:59, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> On Fri, Dec 19, 2014 at 11:54:19AM +0100, Ulf Hansson wrote:
->> Previously the pm_runtime_put() caused the device to be runtime PM
->> suspended, but then immediately being resumed when we add the host.
->>
->> Prevent this unnecessary runtime PM suspend/resume cycle during
->> ->probe() by using the pm_runtime_put_noidle() variant instead.
->>
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->> ---
->>
->> Changes in v2:
->>       Move pm_runtime_put_noidle() after mmc_add_host().
->>
->> ---
->>  drivers/mmc/host/mmci.c | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
->> index 8232e9a..d2bbd25 100644
->> --- a/drivers/mmc/host/mmci.c
->> +++ b/drivers/mmc/host/mmci.c
->> @@ -1739,10 +1739,10 @@ static int mmci_probe(struct amba_device *dev,
->>
->>       pm_runtime_set_autosuspend_delay(&dev->dev, 50);
->>       pm_runtime_use_autosuspend(&dev->dev);
->> -     pm_runtime_put(&dev->dev);
->>
->>       mmc_add_host(mmc);
->>
->> +     pm_runtime_put_noidle(&dev->dev);
+On 12 December 2014 at 20:28, Bjorn Andersson
+<bjorn.andersson@sonymobile.com> wrote:
+
+Some more explanation to why this needed would be good.
+
+> Signed-off-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
+
+This file lists the generic mmc DT bindings, but you want to add a
+specific binding for sdhci?
+
+>  drivers/mmc/host/sdhci-pltfm.c                | 3 +++
+>  2 files changed, 5 insertions(+)
 >
-> I think you'd want this to be _put() in this case.
-
-It doesn't matter which variant of _put*(). The driver core will
-invoke pm_request_idle() after really_probe() is done.
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> index b52628b..04f80ef 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> @@ -22,6 +22,8 @@ Optional properties:
+>  - wp-inverted: when present, polarity on the WP line is inverted. See the note
+>    below for the case, when a GPIO is used for the WP line
+>  - max-frequency: maximum operating clock frequency
+> +- broken-hs200: when present, denotes that eMMC HS200 modes are not supported on
+> +  this system, even if the controller claims it is.
+>  - no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
+>    this system, even if the controller claims it is.
+>  - cap-sd-highspeed: SD high-speed timing is supported
+> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+> index c5b01d6..570837f 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -90,6 +90,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
+>                 if (of_get_property(np, "broken-cd", NULL))
+>                         host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+>
+> +               if (of_get_property(np, "broken-hs200", NULL))
+> +                       host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
+> +
+>                 if (of_get_property(np, "no-1-8-v", NULL))
+>                         host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+>
+> --
+> 1.8.2.2
+>
 
 Kind regards
 Uffe
