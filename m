@@ -1,51 +1,61 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH V2] mmc: mmci: Use pm_runtime_put_noidle() during ->probe()
-Date: Fri, 19 Dec 2014 11:54:19 +0100
-Message-ID: <1418986459-13443-1-git-send-email-ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: toshsd: Fix unbalanced locking
+Date: Fri, 19 Dec 2014 11:58:10 +0100
+Message-ID: <CAPDyKFpyakr0duaEdw2FzqMvwSZ+zbpWR9biA2cE-RKnB=DAgA@mail.gmail.com>
+References: <1418267444.21421.1.camel@phoenix>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f42.google.com ([209.85.215.42]:34784 "EHLO
-	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751821AbaLSKyZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 05:54:25 -0500
-Received: by mail-la0-f42.google.com with SMTP id gd6so623616lab.15
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 02:54:23 -0800 (PST)
+Received: from mail-qa0-f44.google.com ([209.85.216.44]:53766 "EHLO
+	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751230AbaLSK6M (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 05:58:12 -0500
+Received: by mail-qa0-f44.google.com with SMTP id bm13so443695qab.17
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 02:58:11 -0800 (PST)
+In-Reply-To: <1418267444.21421.1.camel@phoenix>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: Russell King <linux@arm.linux.org.uk>
+To: Axel Lin <axel.lin@ingics.com>
+Cc: Chris Ball <chris@printf.net>, Ondrej Zary <linux@rainbow-software.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Previously the pm_runtime_put() caused the device to be runtime PM
-suspended, but then immediately being resumed when we add the host.
+On 11 December 2014 at 04:10, Axel Lin <axel.lin@ingics.com> wrote:
+> Fix returning IRQ_HANDLED with spin_lock held.
+>
+> Signed-off-by: Axel Lin <axel.lin@ingics.com>
 
-Prevent this unnecessary runtime PM suspend/resume cycle during
-->probe() by using the pm_runtime_put_noidle() variant instead.
+Thanks! Queued for 3.20.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
+Kind regards
+Uffe
 
-Changes in v2:
-	Move pm_runtime_put_noidle() after mmc_add_host().
-
----
- drivers/mmc/host/mmci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 8232e9a..d2bbd25 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1739,10 +1739,10 @@ static int mmci_probe(struct amba_device *dev,
- 
- 	pm_runtime_set_autosuspend_delay(&dev->dev, 50);
- 	pm_runtime_use_autosuspend(&dev->dev);
--	pm_runtime_put(&dev->dev);
- 
- 	mmc_add_host(mmc);
- 
-+	pm_runtime_put_noidle(&dev->dev);
- 	return 0;
- 
-  clk_disable:
--- 
-1.9.1
-
+> ---
+>  drivers/mmc/host/toshsd.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/toshsd.c b/drivers/mmc/host/toshsd.c
+> index 4666262..a5aa539 100644
+> --- a/drivers/mmc/host/toshsd.c
+> +++ b/drivers/mmc/host/toshsd.c
+> @@ -176,7 +176,8 @@ static irqreturn_t toshsd_thread_irq(int irq, void *dev_id)
+>         spin_lock_irqsave(&host->lock, flags);
+>
+>         if (!sg_miter_next(sg_miter))
+> -               return IRQ_HANDLED;
+> +               goto done;
+> +
+>         buf = sg_miter->addr;
+>
+>         /* Ensure we dont read more than one block. The chip will interrupt us
+> @@ -198,6 +199,7 @@ static irqreturn_t toshsd_thread_irq(int irq, void *dev_id)
+>         sg_miter->consumed = count;
+>         sg_miter_stop(sg_miter);
+>
+> +done:
+>         spin_unlock_irqrestore(&host->lock, flags);
+>
+>         return IRQ_HANDLED;
+> --
+> 1.9.1
+>
+>
+>
