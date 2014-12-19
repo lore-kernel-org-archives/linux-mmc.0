@@ -1,70 +1,79 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 0/6] mmc: rtsx: add support for sdio card
-Date: Fri, 19 Dec 2014 11:36:46 +0100
-Message-ID: <CAPDyKFoGQBgpkYS1AatTSM9y3iaOOCtCGRgw2MOeQEWb_Ca-tw@mail.gmail.com>
-References: <cover.1417758564.git.micky_ching@realsil.com.cn>
+Subject: Re: [PATCH] mmc: sdhci: Fix FSL ESDHC reset handling quirk
+Date: Fri, 19 Dec 2014 11:44:34 +0100
+Message-ID: <CAPDyKFr-mAW6iUy3SA_5zXjSAF1t_0q-zs8-GSomaEVpzCJC=g@mail.gmail.com>
+References: <1418114438-17776-1-git-send-email-alessio.bogani@elettra.eu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <cover.1417758564.git.micky_ching@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: micky <micky_ching@realsil.com.cn>
-Cc: Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Wei WANG <wei_wang@realsil.com.cn>, Roger <rogerable@realtek.com>, "driverdev-devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, Lee Jones <lee.jones@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f41.google.com ([209.85.216.41]:39593 "EHLO
+	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751230AbaLSKoe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 05:44:34 -0500
+Received: by mail-qa0-f41.google.com with SMTP id s7so394468qap.14
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 02:44:34 -0800 (PST)
+In-Reply-To: <1418114438-17776-1-git-send-email-alessio.bogani@elettra.eu>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alessio Igor Bogani <alessio.bogani@elettra.eu>
+Cc: Chris Ball <chris@printf.net>, Dong Aisheng <dongas86@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 5 December 2014 at 06:54,  <micky_ching@realsil.com.cn> wrote:
-> From: Micky Ching <micky_ching@realsil.com.cn>
+On 9 December 2014 at 09:40, Alessio Igor Bogani
+<alessio.bogani@elettra.eu> wrote:
+> The commit 0718e59ae259 ("mmc: sdhci: move FSL ESDHC reset handling quirk into
+> esdhc code") states that Freescale esdhc is the only controller which needs
+> the interrupt registers restored after a reset. So it moves
+> SDHCI_QUIRK_RESTORE_IRQS_AFTER_RESET quirk handling code into the
+> esdhc-imx driver only. Unfortunately the same controller is used in
+> other boards which use the of-esdhc driver instead (like powerpc P2020).
 >
-> v4:
->   split patch in more detailed patches. no code changes diff v3.
+> Restore interrupts after reset in the sdhci-of-esdhc driver also.
 >
-> v3:
->   rtsx_pci_sdmmc.c:
->     - dump_reg_range
->       - remove unused pointer check
->       - fix start index
-> v2:
->   rtsx_pci.h:
->     - remove unused rtsx_pci_write_le32
->     - add SD_CMD_START
->   rtsx_pci_sdmmc.c:
->     - dump_reg_range
->       - alloc data on stack
->     - remove forward declaration
->     - use SD_CMD_START replace magic number 0x40
->     - move initialize assignment to error handling
->
-> This patch is used to change transfer mode for sdio card support
-> by SD interface.
->
->
->
-> Micky Ching (6):
->   mfd: rtsx: add func to split u32 into register
->   mmc: rtsx: add dump_reg_range to simplify dump register
->   mmc: rtsx: init cookie at probe/card_event
->   mmc: rtsx: add helper function to simplify code
->   mmc: rtsx: add support for sdio card
->   mmc: rtsx: swap function position to avoid pre declaration
->
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 522 +++++++++++++++++++++-----------------
->  include/linux/mfd/rtsx_pci.h      |   9 +
->  2 files changed, 296 insertions(+), 235 deletions(-)
->
-> --
-> 1.9.1
->
+> Signed-off-by: Alessio Igor Bogani <alessio.bogani@elettra.eu>
 
 Thanks! Queued for 3.20.
 
+Next time, please bump the version when sending an updated patch.
+
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c | 10 +++++++++-
+>  1 file changed, 9 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 8872c85..4a654d4 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -276,6 +276,14 @@ static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
+>                         ESDHC_CTRL_BUSWIDTH_MASK, ctrl);
+>  }
+>
+> +static void esdhc_reset(struct sdhci_host *host, u8 mask)
+> +{
+> +       sdhci_reset(host, mask);
+> +
+> +       sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+> +       sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+> +}
+> +
+>  static const struct sdhci_ops sdhci_esdhc_ops = {
+>         .read_l = esdhc_readl,
+>         .read_w = esdhc_readw,
+> @@ -290,7 +298,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
+>         .platform_init = esdhc_of_platform_init,
+>         .adma_workaround = esdhci_of_adma_workaround,
+>         .set_bus_width = esdhc_pltfm_set_bus_width,
+> -       .reset = sdhci_reset,
+> +       .reset = esdhc_reset,
+>         .set_uhs_signaling = sdhci_set_uhs_signaling,
+>  };
+>
+> --
+> 2.1.3
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
