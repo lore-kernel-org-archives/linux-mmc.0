@@ -1,63 +1,45 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 1/2] mmc: sdhci-esdhc-imx: Fixup ->remove()
-Date: Fri, 19 Dec 2014 10:45:43 +0100
-Message-ID: <1418982343-8023-1-git-send-email-ulf.hansson@linaro.org>
-References: <0002-mmc-sdhci-esdhc-imx-Fixup-runtime-PM-conditions-duri.patch>
+Subject: [PATCH 2/2] mmc: sdhci-esdhc-imx: Fixup runtime PM conditions during ->probe()
+Date: Fri, 19 Dec 2014 10:47:03 +0100
+Message-ID: <1418982423-8069-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f170.google.com ([209.85.217.170]:39854 "EHLO
-	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751243AbaLSJpu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 04:45:50 -0500
-Received: by mail-lb0-f170.google.com with SMTP id 10so505502lbg.29
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 01:45:48 -0800 (PST)
-In-Reply-To: <0002-mmc-sdhci-esdhc-imx-Fixup-runtime-PM-conditions-duri.patch>
+Received: from mail-la0-f45.google.com ([209.85.215.45]:38186 "EHLO
+	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751602AbaLSJrI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 04:47:08 -0500
+Received: by mail-la0-f45.google.com with SMTP id gq15so513564lab.32
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 01:47:07 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: Dong Aisheng <b29396@freescale.com>, Shawn Guo <shawn.guo@linaro.org>
 
-Since sdhci_remove_host() access the device, we need to make sure it's
-runtime PM resumed.
-
-To handle clock gating properly in remove, we first have to make sure
-the clocks are ungated.
-
-To fix both these issues, by invoking pm_runtime_get_sync() early in
-->remove() callback. Later once we disabled runtime PM, we can restore
-the usage count.
+By configure runtime PM prior we enable the use of it, we close the gap
+for strange and unhandled conditions. Moreover it makes us rely on the
+driver core, after finalized ->probe(), to request an inactive device
+to become runtime PM idle/suspended, which earlier potentially could
+happen already at pm_runtime_set_autosuspend_delay().
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 15 +++++++--------
- 1 file changed, 7 insertions(+), 8 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index af1f7c0..043866c 100644
+index 043866c..10ef824 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1103,16 +1103,15 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
- 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
- 	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
+@@ -1080,10 +1080,10 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		goto disable_clk;
  
--	sdhci_remove_host(host, dead);
--
--	pm_runtime_dont_use_autosuspend(&pdev->dev);
-+	pm_runtime_get_sync(&pdev->dev);
- 	pm_runtime_disable(&pdev->dev);
-+	pm_runtime_put_noidle(&pdev->dev);
+ 	pm_runtime_set_active(&pdev->dev);
+-	pm_runtime_enable(&pdev->dev);
+ 	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+ 	pm_runtime_use_autosuspend(&pdev->dev);
+ 	pm_suspend_ignore_children(&pdev->dev, 1);
++	pm_runtime_enable(&pdev->dev);
  
--	if (!IS_ENABLED(CONFIG_PM)) {
--		clk_disable_unprepare(imx_data->clk_per);
--		clk_disable_unprepare(imx_data->clk_ipg);
--		clk_disable_unprepare(imx_data->clk_ahb);
--	}
-+	sdhci_remove_host(host, dead);
-+
-+	clk_disable_unprepare(imx_data->clk_per);
-+	clk_disable_unprepare(imx_data->clk_ipg);
-+	clk_disable_unprepare(imx_data->clk_ahb);
- 
- 	sdhci_pltfm_free(pdev);
+ 	return 0;
  
 -- 
 1.9.1
