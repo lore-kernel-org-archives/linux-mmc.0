@@ -1,56 +1,265 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH V2] mmc: mmci: Use pm_runtime_put_noidle() during
- ->probe()
-Date: Fri, 19 Dec 2014 10:59:22 +0000
-Message-ID: <20141219105922.GF11285@n2100.arm.linux.org.uk>
-References: <1418986459-13443-1-git-send-email-ulf.hansson@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/3] mmc: omap_hsmmc: use slot-gpio library for gpio support.
+Date: Fri, 19 Dec 2014 12:22:03 +0100
+Message-ID: <CAPDyKFr+XqmzhSA83NOGw8Cn0LKta4hxeBsUN-vOhF+AoVSUXQ@mail.gmail.com>
+References: <20141211214023.3753.10652.stgit@notabene.brown>
+	<20141211214308.3753.25865.stgit@notabene.brown>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:40135 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752146AbaLSK73 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 05:59:29 -0500
-Content-Disposition: inline
-In-Reply-To: <1418986459-13443-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20141211214308.3753.25865.stgit@notabene.brown>
+Sender: linux-kernel-owner@vger.kernel.org
+To: NeilBrown <neilb@suse.de>
+Cc: Chris Ball <chris@printf.net>, GTA04 owners <gta04-owner@goldelico.com>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Felipe Balbi <balbi@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
 
-On Fri, Dec 19, 2014 at 11:54:19AM +0100, Ulf Hansson wrote:
-> Previously the pm_runtime_put() caused the device to be runtime PM
-> suspended, but then immediately being resumed when we add the host.
-> 
-> Prevent this unnecessary runtime PM suspend/resume cycle during
-> ->probe() by using the pm_runtime_put_noidle() variant instead.
-> 
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+On 11 December 2014 at 22:43, NeilBrown <neilb@suse.de> wrote:
+> Using the common code removes some code duplication, and
+> makes it easier to switch to using mmc_of_parse() which
+> will remove more duplication.
+>
+> As hsmmc has a slightly different interrupt service routine
+> for card-detect, enhance slot-gpio to allow an alternate
+> routine to be provided.
+>
+> Signed-off-by: NeilBrown <neilb@suse.de>
 > ---
-> 
-> Changes in v2:
-> 	Move pm_runtime_put_noidle() after mmc_add_host().
-> 
-> ---
->  drivers/mmc/host/mmci.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 8232e9a..d2bbd25 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -1739,10 +1739,10 @@ static int mmci_probe(struct amba_device *dev,
->  
->  	pm_runtime_set_autosuspend_delay(&dev->dev, 50);
->  	pm_runtime_use_autosuspend(&dev->dev);
-> -	pm_runtime_put(&dev->dev);
->  
->  	mmc_add_host(mmc);
->  
-> +	pm_runtime_put_noidle(&dev->dev);
+>  drivers/mmc/core/slot-gpio.c  |   24 ++++++++++++++-
+>  drivers/mmc/host/omap_hsmmc.c |   67 +++++++++--------------------------------
+>  include/linux/mmc/slot-gpio.h |    2 +
+>  3 files changed, 39 insertions(+), 54 deletions(-)
 
-I think you'd want this to be _put() in this case.
+I like the looks of this patch, still I want the mmc core parts to be
+separated into it's own patch. Can you please split this up.
 
--- 
-FTTC broadband for 0.8mile line: currently at 9.5Mbps down 400kbps up
-according to speedtest.net.
+Kind regards
+Uffe
+
+>
+> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+> index 69bbf2adb329..f56323f5a996 100644
+> --- a/drivers/mmc/core/slot-gpio.c
+> +++ b/drivers/mmc/core/slot-gpio.c
+> @@ -23,6 +23,7 @@ struct mmc_gpio {
+>         struct gpio_desc *cd_gpio;
+>         bool override_ro_active_level;
+>         bool override_cd_active_level;
+> +       irqreturn_t (*cd_gpio_isr)(int irq, void *dev_id);
+>         char *ro_label;
+>         char cd_label[0];
+>  };
+> @@ -156,8 +157,10 @@ void mmc_gpiod_request_cd_irq(struct mmc_host *host)
+>                 irq = -EINVAL;
+>
+>         if (irq >= 0) {
+> +               if (ctx->cd_gpio_isr == NULL)
+> +                       ctx->cd_gpio_isr = mmc_gpio_cd_irqt;
+>                 ret = devm_request_threaded_irq(&host->class_dev, irq,
+> -                       NULL, mmc_gpio_cd_irqt,
+> +                       NULL, ctx->cd_gpio_isr,
+>                         IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
+>                         ctx->cd_label, host);
+>                 if (ret < 0)
+> @@ -171,6 +174,25 @@ void mmc_gpiod_request_cd_irq(struct mmc_host *host)
+>  }
+>  EXPORT_SYMBOL(mmc_gpiod_request_cd_irq);
+>
+> +/* Register an alternate interrupt service routine for
+> + * the card-detect GPIO.
+> + */
+> +int mmc_gpio_request_cd_isr(struct mmc_host *host,
+> +                           irqreturn_t (*isr)(int irq, void *dev_id))
+> +{
+> +       struct mmc_gpio *ctx;
+> +       int ret;
+> +
+> +       ret = mmc_gpio_alloc(host);
+> +       if (ret < 0)
+> +               return ret;
+> +       ctx = host->slot.handler_priv;
+> +       if (ctx->cd_gpio_isr)
+> +               return -EBUSY;
+> +       ctx->cd_gpio_isr = isr;
+> +       return 0;
+> +}
+> +
+>  /**
+>   * mmc_gpio_request_cd - request a gpio for card-detection
+>   * @host: mmc host
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 537cba8f1de1..32514b648e3c 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -36,6 +36,7 @@
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/core.h>
+>  #include <linux/mmc/mmc.h>
+> +#include <linux/mmc/slot-gpio.h>
+>  #include <linux/io.h>
+>  #include <linux/irq.h>
+>  #include <linux/gpio.h>
+> @@ -251,28 +252,22 @@ static void omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host);
+>  static int omap_hsmmc_card_detect(struct device *dev)
+>  {
+>         struct omap_hsmmc_host *host = dev_get_drvdata(dev);
+> -       struct omap_hsmmc_platform_data *mmc = host->pdata;
+>
+> -       /* NOTE: assumes card detect signal is active-low */
+> -       return !gpio_get_value_cansleep(mmc->switch_pin);
+> +       return mmc_gpio_get_cd(host->mmc);
+>  }
+>
+>  static int omap_hsmmc_get_wp(struct device *dev)
+>  {
+>         struct omap_hsmmc_host *host = dev_get_drvdata(dev);
+> -       struct omap_hsmmc_platform_data *mmc = host->pdata;
+>
+> -       /* NOTE: assumes write protect signal is active-high */
+> -       return gpio_get_value_cansleep(mmc->gpio_wp);
+> +       return mmc_gpio_get_ro(host->mmc);
+>  }
+>
+>  static int omap_hsmmc_get_cover_state(struct device *dev)
+>  {
+>         struct omap_hsmmc_host *host = dev_get_drvdata(dev);
+> -       struct omap_hsmmc_platform_data *mmc = host->pdata;
+>
+> -       /* NOTE: assumes card detect signal is active-low */
+> -       return !gpio_get_value_cansleep(mmc->switch_pin);
+> +       return mmc_gpio_get_cd(host->mmc);
+>  }
+>
+>  #ifdef CONFIG_REGULATOR
+> @@ -439,7 +434,10 @@ static inline int omap_hsmmc_have_reg(void)
+>
+>  #endif
+>
+> -static int omap_hsmmc_gpio_init(struct omap_hsmmc_host *host,
+> +static irqreturn_t omap_hsmmc_detect(int irq, void *dev_id);
+> +
+> +static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
+> +                               struct omap_hsmmc_host *host,
+>                                 struct omap_hsmmc_platform_data *pdata)
+>  {
+>         int ret;
+> @@ -452,46 +450,26 @@ static int omap_hsmmc_gpio_init(struct omap_hsmmc_host *host,
+>                         host->card_detect = omap_hsmmc_card_detect;
+>                 host->card_detect_irq =
+>                                 gpio_to_irq(pdata->switch_pin);
+> -               ret = gpio_request(pdata->switch_pin, "mmc_cd");
+> +               ret = mmc_gpio_request_cd_isr(mmc, omap_hsmmc_detect);
+>                 if (ret)
+>                         return ret;
+> -               ret = gpio_direction_input(pdata->switch_pin);
+> +               ret = mmc_gpio_request_cd(mmc, pdata->switch_pin, 0);
+>                 if (ret)
+> -                       goto err_free_sp;
+> +                       return ret;
+>         } else {
+>                 pdata->switch_pin = -EINVAL;
+>         }
+>
+>         if (gpio_is_valid(pdata->gpio_wp)) {
+>                 host->get_ro = omap_hsmmc_get_wp;
+> -               ret = gpio_request(pdata->gpio_wp, "mmc_wp");
+> -               if (ret)
+> -                       goto err_free_cd;
+> -               ret = gpio_direction_input(pdata->gpio_wp);
+> +               ret = mmc_gpio_request_ro(mmc, pdata->gpio_wp);
+>                 if (ret)
+> -                       goto err_free_wp;
+> +                       return ret;
+>         } else {
+>                 pdata->gpio_wp = -EINVAL;
+>         }
+>
+>         return 0;
+> -
+> -err_free_wp:
+> -       gpio_free(pdata->gpio_wp);
+> -err_free_cd:
+> -       if (gpio_is_valid(pdata->switch_pin))
+> -err_free_sp:
+> -               gpio_free(pdata->switch_pin);
+> -       return ret;
+> -}
+> -
+> -static void omap_hsmmc_gpio_free(struct omap_hsmmc_host *host,
+> -                                struct omap_hsmmc_platform_data *pdata)
+> -{
+> -       if (gpio_is_valid(pdata->gpio_wp))
+> -               gpio_free(pdata->gpio_wp);
+> -       if (gpio_is_valid(pdata->switch_pin))
+> -               gpio_free(pdata->switch_pin);
+>  }
+>
+>  /*
+> @@ -2066,7 +2044,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>         host->next_data.cookie = 1;
+>         host->pbias_enabled = 0;
+>
+> -       ret = omap_hsmmc_gpio_init(host, pdata);
+> +       ret = omap_hsmmc_gpio_init(mmc, host, pdata);
+>         if (ret)
+>                 goto err_gpio;
+>
+> @@ -2197,20 +2175,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>
+>         mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
+>
+> -       /* Request IRQ for card detect */
+> -       if (host->card_detect_irq) {
+> -               ret = devm_request_threaded_irq(&pdev->dev,
+> -                                               host->card_detect_irq,
+> -                                               NULL, omap_hsmmc_detect,
+> -                                          IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
+> -                                          mmc_hostname(mmc), host);
+> -               if (ret) {
+> -                       dev_err(mmc_dev(host->mmc),
+> -                               "Unable to grab MMC CD IRQ\n");
+> -                       goto err_irq_cd;
+> -               }
+> -       }
+> -
+>         omap_hsmmc_disable_irq(host);
+>
+>         /*
+> @@ -2249,7 +2213,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>
+>  err_slot_name:
+>         mmc_remove_host(mmc);
+> -err_irq_cd:
+>         if (host->use_reg)
+>                 omap_hsmmc_reg_put(host);
+>  err_irq:
+> @@ -2262,7 +2225,6 @@ err_irq:
+>         if (host->dbclk)
+>                 clk_disable_unprepare(host->dbclk);
+>  err1:
+> -       omap_hsmmc_gpio_free(host, pdata);
+>  err_gpio:
+>         mmc_free_host(mmc);
+>  err:
+> @@ -2288,7 +2250,6 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
+>         if (host->dbclk)
+>                 clk_disable_unprepare(host->dbclk);
+>
+> -       omap_hsmmc_gpio_free(host, host->pdata);
+>         mmc_free_host(host->mmc);
+>
+>         return 0;
+> diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
+> index e56fa24c9322..9e55db60deb0 100644
+> --- a/include/linux/mmc/slot-gpio.h
+> +++ b/include/linux/mmc/slot-gpio.h
+> @@ -28,6 +28,8 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
+>  int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
+>                          unsigned int idx, bool override_active_level,
+>                          unsigned int debounce, bool *gpio_invert);
+> +int mmc_gpio_request_cd_isr(struct mmc_host *host,
+> +                           irqreturn_t (*isr)(int irq, void *dev_id));
+>  void mmc_gpiod_free_cd(struct mmc_host *host);
+>  void mmc_gpiod_request_cd_irq(struct mmc_host *host);
+>
+>
+>
