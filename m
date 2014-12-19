@@ -1,273 +1,310 @@
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [RFC PATCH 5/5] mmc: sdhci: add SW CMDQ support for CHT SDHCI host
-Date: Fri, 19 Dec 2014 16:06:02 +0800
-Message-ID: <20141219080602.GF3775@intel.com>
-Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/3] mmc: dw_mmc: Generic MMC tuning with the clock phase framework
+Date: Fri, 19 Dec 2014 09:51:49 +0100
+Message-ID: <CAPDyKFqx1CXyw4c=F6pZQESfD_6vkY10Cdmw3FA0DWQyU+b6eA@mail.gmail.com>
+References: <1418943663-10012-1-git-send-email-amstan@chromium.org>
+	<1418943663-10012-3-git-send-email-amstan@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:32252 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751821AbaLSIHL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 19 Dec 2014 03:07:11 -0500
-Content-Disposition: inline
+Received: from mail-qc0-f178.google.com ([209.85.216.178]:35222 "EHLO
+	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752087AbaLSIvu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 03:51:50 -0500
+Received: by mail-qc0-f178.google.com with SMTP id b13so394630qcw.37
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 00:51:49 -0800 (PST)
+In-Reply-To: <1418943663-10012-3-git-send-email-amstan@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Alexandru M Stan <amstan@chromium.org>
+Cc: "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Heiko Stuebner <heiko@sntech.de>, Doug Anderson <dianders@chromium.org>, addy ke <addy.ke@rock-chips.com>, Andrew Bresticker <abrestic@chromium.org>, Sonny Rao <sonnyrao@chromium.org>, Kever Yang <kever.yang@rock-chips.com>, Mike Turquette <mturquette@linaro.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
+On 19 December 2014 at 00:01, Alexandru M Stan <amstan@chromium.org> wrote:
+> This algorithm will try 5 degree increments, since there's no way to tell
+> what resolution the underlying phase code uses. As an added bonus, doing many
+> tunings yields better results since some tests are run more than once(ex: if the
+> underlying driver uses 45 degree increments, the tuning code will try the same
+> angle more than once).
+>
+> It will then construct a list of good phase ranges (even ranges that cross
+> 360/0), will pick the biggest range then it will set the sample_clk to the
+> middle of that range.
+>
+> We do not touch ciu_drive (and by extension define default-drive-phase). Drive
+> phase is mostly used to define minimum hold times, while one could write some
+> code to determine what phase meets the minimum hold time (ex 10 degrees) this
+> will not work with the current clock phase framework (which floors angles, so
+> we'll get 0 deg, and there's no way to know what resolution the floors happen
+> at). We assume that the default drive angles set by the hardware are good enough.
+>
+> If a device has device specific code (like exynos) then that will still take
+> precedence, otherwise this new code will execute. If the device wants to tune,
+> but has no sample_clk defined we'll return EIO with an error message.
+>
+> Signed-off-by: Alexandru M Stan <amstan@chromium.org>
+> Suggested-by: Heiko Stuebner <heiko@sntech.de>
+> Suggested-by: Doug Anderson <dianders@chromium.org>
+> ---
+>  drivers/mmc/host/dw_mmc.c  | 189 +++++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/mmc/dw_mmc.h |   3 +
+>  2 files changed, 192 insertions(+)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 69f0cc6..b59c221 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -984,6 +984,12 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         if (drv_data && drv_data->set_ios)
+>                 drv_data->set_ios(slot->host, ios);
+>
+> +       /* Make sure we use phases which we can enumerate with */
+> +       if (!IS_ERR(slot->host->sample_clk)) {
+> +               clk_set_phase(slot->host->sample_clk,
+> +                             slot->host->default_sample_phase);
+> +       }
+> +
+>         /* Slot specific timing and width adjustment */
+>         dw_mci_setup_bus(slot, false);
+>
+> @@ -1187,6 +1193,174 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>         }
+>  }
+>
+> +static int dw_mci_tuning_test(struct dw_mci_slot *slot, u32 opcode,
+> +                              struct dw_mci_tuning_data *tuning_data,
+> +                              u8 *blk_test)
+> +{
+> +       struct dw_mci *host = slot->host;
+> +       struct mmc_host *mmc = slot->mmc;
+> +       const u8 *blk_pattern = tuning_data->blk_pattern;
+> +       unsigned int blksz = tuning_data->blksz;
+> +       struct mmc_request mrq = { NULL };
+> +       struct mmc_command cmd = {0};
+> +       struct mmc_command stop = {0};
+> +       struct mmc_data data = {0};
+> +       struct scatterlist sg;
+> +
+> +       memset(blk_test, 0, blksz);
+> +
+> +       cmd.opcode = opcode;
+> +       cmd.arg = 0;
+> +       cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+> +
+> +       stop.opcode = MMC_STOP_TRANSMISSION;
+> +       stop.arg = 0;
+> +       stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
+> +
+> +       data.blksz = blksz;
+> +       data.blocks = 1;
+> +       data.flags = MMC_DATA_READ;
+> +       data.sg = &sg;
+> +       data.sg_len = 1;
+> +
+> +       sg_init_one(&sg, blk_test, blksz);
+> +       mrq.cmd = &cmd;
+> +       mrq.stop = &stop;
+> +       mrq.data = &data;
+> +       host->mrq = &mrq;
+> +
+> +       mci_writel(host, TMOUT, ~0);
+> +
+> +       mmc_wait_for_req(mmc, &mrq);
+> +
+> +       if (!cmd.error && !data.error) {
+> +               if (!memcmp(blk_pattern, blk_test, blksz))
+> +                       return 0;
+> +               return -EIO;
+> +       } else {
+> +               dev_dbg(host->dev,
+> +                       "Tuning error: cmd.error:%d, data.error:%d\n",
+> +                       cmd.error, data.error);
+> +               if (cmd.error)
+> +                       return cmd.error;
+> +               else
+> +                       return data.error;
+> +       }
 
-Add the CMDQ support to SDHCI host interface and CHT SDHCI
-host interface
+This function should be simplified using mmc_send_tuning().
 
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
----
- drivers/mmc/host/sdhci.c  |  121 +++++++++++++++++++++++++++++++++++++++------
- include/linux/mmc/sdhci.h |    1 +
- 2 files changed, 108 insertions(+), 14 deletions(-)
+Now, dw_mmc seems to have some issues that it needs the tuning command
+to have a stop command sent as well. That's not according to the eMMC
+spec.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index bac74ca..da94355 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -743,14 +743,14 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 	struct mmc_data *data = cmd->data;
- 	int ret;
- 
--	WARN_ON(host->data);
--
- 	if (data || (cmd->flags & MMC_RSP_BUSY))
- 		sdhci_set_timeout(host, cmd);
- 
- 	if (!data)
- 		return;
- 
-+	WARN_ON(host->data);
-+
- 	/* Sanity checks */
- 	BUG_ON(data->blksz * data->blocks > 524288);
- 	BUG_ON(data->blksz > host->mmc->max_blk_size);
-@@ -930,7 +930,9 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 	WARN_ON(!host->data);
- 
- 	mode = SDHCI_TRNS_BLK_CNT_EN;
--	if (mmc_op_multi(cmd->opcode) || data->blocks > 1) {
-+	if (mmc_op_cmdq_execute_task(cmd->opcode) && (data->blocks > 1))
-+		mode |= SDHCI_TRNS_MULTI;
-+	else if (mmc_op_multi(cmd->opcode) || (data->blocks > 1)) {
- 		mode |= SDHCI_TRNS_MULTI;
- 		/*
- 		 * If we are sending CMD23, CMD12 never gets sent
-@@ -1004,8 +1006,12 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 		}
- 
- 		sdhci_send_command(host, data->stop);
--	} else
--		tasklet_schedule(&host->finish_tasklet);
-+	} else {
-+		if (host->mmc->context_info.is_cmdq_busy)
-+			tasklet_schedule(&host->finish_async_data_tasklet);
-+		else
-+			tasklet_schedule(&host->finish_tasklet);
-+	}
- }
- 
- void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
-@@ -1084,6 +1090,12 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 	    cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
- 		flags |= SDHCI_CMD_DATA;
- 
-+	/* CMD46/47 doesn't wait for data */
-+	if (mmc_op_cmdq_execute_task(cmd->opcode)) {
-+		cmd->data = NULL;
-+		host->mrq->data = NULL;
-+	}
-+
- 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
- }
- EXPORT_SYMBOL_GPL(sdhci_send_command);
-@@ -1116,6 +1128,9 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 	if (host->cmd == host->mrq->precmd) {
- 		host->cmd = NULL;
- 		sdhci_send_command(host, host->mrq->cmd);
-+	} else if ((host->cmd == host->mrq->cmd) && host->mrq->cmd2) {
-+		host->cmd = NULL;
-+		sdhci_send_command(host, host->mrq->cmd2);
- 	} else {
- 
- 		/* Processed actual command. */
-@@ -1409,6 +1424,9 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ)) &&
- 		    (present_state & SDHCI_DATA_0_LVL_MASK)) {
- 			if (mmc->card) {
-+				/* don't do tuning when cmdq is not empty */
-+				if (mmc->context_info.is_cmdq_busy)
-+					goto end_tuning;
- 				/* eMMC uses cmd21 but sd and sdio use cmd19 */
- 				tuning_opcode =
- 					mmc->card->type == MMC_TYPE_MMC ?
-@@ -1430,9 +1448,17 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 			}
- 		}
- 
--		if (mrq->precmd && !(host->flags & SDHCI_AUTO_CMD23))
--			sdhci_send_command(host, mrq->precmd);
--		else
-+end_tuning:
-+
-+		if (mrq->precmd) {
-+			if (mrq->precmd->opcode == 23) {
-+				if (!(host->flags & SDHCI_AUTO_CMD23))
-+					sdhci_send_command(host, mrq->precmd);
-+				else
-+					sdhci_send_command(host, mrq->cmd);
-+			} else
-+				sdhci_send_command(host, mrq->precmd);
-+		} else
- 			sdhci_send_command(host, mrq->cmd);
- 	}
- 
-@@ -2155,7 +2181,7 @@ static const struct mmc_host_ops sdhci_ops = {
-  *                                                                           *
- \*****************************************************************************/
- 
--static void sdhci_tasklet_finish(unsigned long param)
-+static void sdhci_tasklet_finish_async_data(unsigned long param)
- {
- 	struct sdhci_host *host;
- 	unsigned long flags;
-@@ -2169,15 +2195,71 @@ static void sdhci_tasklet_finish(unsigned long param)
-          * If this tasklet gets rescheduled while running, it will
-          * be run again afterwards but without any active request.
-          */
--	if (!host->mrq) {
-+	if (!host->mmc->areq || !host->mmc->areq->mrq->data) {
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		return;
- 	}
- 
- 	del_timer(&host->timer);
- 
-+	mrq = host->mmc->areq->mrq;
-+
-+	/*
-+	 * The controller needs a reset of internal state machines
-+	 * upon error conditions.
-+	 */
-+	if (!(host->flags & SDHCI_DEVICE_DEAD) &&
-+	    ((mrq->data && mrq->data->error) ||
-+	     (host->quirks & SDHCI_QUIRK_RESET_AFTER_REQUEST))) {
-+
-+		/* Some controllers need this kick or reset won't work here */
-+		if (host->quirks & SDHCI_QUIRK_CLOCK_BEFORE_RESET)
-+			/* This is to force an update */
-+			host->ops->set_clock(host, host->clock);
-+
-+		sdhci_reset(host, SDHCI_RESET_DATA);
-+	}
-+
-+	host->data = NULL;
-+
-+#ifndef SDHCI_USE_LEDS_CLASS
-+	sdhci_deactivate_led(host);
-+#endif
-+	mmiowb();
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	mmc_request_done(host->mmc, mrq);
-+
-+	sdhci_runtime_pm_put(host);
-+}
-+
-+static void sdhci_tasklet_finish(unsigned long param)
-+{
-+	struct sdhci_host *host;
-+	unsigned long flags;
-+	struct mmc_request *mrq;
-+	int opcode;
-+
-+	host = (struct sdhci_host *)param;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	/*
-+	 * If this tasklet gets rescheduled while running, it will
-+	 * be run again afterwards but without any active request.
-+	 */
-+	if (!host->mrq) {
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		return;
-+	}
-+
- 	mrq = host->mrq;
-+	BUG_ON(!mrq->cmd);
-+	opcode = mrq->cmd->opcode;
- 
-+	/* for CMD46/47, doesn't delete timer */
-+	if (!mmc_op_cmdq_execute_task(opcode))
-+		del_timer(&host->timer);
- 	/*
- 	 * The controller needs a reset of internal state machines
- 	 * upon error conditions.
-@@ -2202,17 +2284,25 @@ static void sdhci_tasklet_finish(unsigned long param)
- 
- 	host->mrq = NULL;
- 	host->cmd = NULL;
--	host->data = NULL;
- 
-+	/* CMD46/47 sill have pending data */
-+	if (!mmc_op_cmdq_execute_task(opcode)) {
- #ifndef SDHCI_USE_LEDS_CLASS
--	sdhci_deactivate_led(host);
-+		sdhci_deactivate_led(host);
- #endif
-+	}
- 
- 	mmiowb();
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
- 	mmc_request_done(host->mmc, mrq);
--	sdhci_runtime_pm_put(host);
-+
-+	/*
-+	 * host will be put in D0i3 when pending data is done
-+	 * for CMD46/47
-+	 */
-+	if (!mmc_op_cmdq_execute_task(opcode))
-+		sdhci_runtime_pm_put(host);
- }
- 
- static void sdhci_timeout_timer(unsigned long data)
-@@ -2455,7 +2545,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 		}
- 
- 		if (intmask & SDHCI_INT_DATA_END) {
--			if (host->cmd) {
-+			if (!host->mmc->context_info.is_cmdq_busy &&
-+					host->cmd) {
- 				/*
- 				 * Data managed to finish before the
- 				 * command completed. Make sure we do
-@@ -3309,6 +3400,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 	 */
- 	tasklet_init(&host->finish_tasklet,
- 		sdhci_tasklet_finish, (unsigned long)host);
-+	tasklet_init(&host->finish_async_data_tasklet,
-+		sdhci_tasklet_finish_async_data, (unsigned long)host);
- 
- 	setup_timer(&host->timer, sdhci_timeout_timer, (unsigned long)host);
- 
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 375af80..af335d2 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -176,6 +176,7 @@ struct sdhci_host {
- 	unsigned int align_mask;	/* ADMA alignment mask */
- 
- 	struct tasklet_struct finish_tasklet;	/* Tasklet structures */
-+	struct tasklet_struct finish_async_data_tasklet;
- 
- 	struct timer_list timer;	/* Timer for timeouts */
- 
--- 
-1.7.10.4
+Please have a look at this patch:
+http://www.spinics.net/lists/linux-mmc/msg29807.html
 
+Kind regards
+Uffe
+
+> +}
+> +
+> +static int dw_mci_execute_generic_tuning(struct dw_mci_slot *slot, u32 opcode,
+> +                                        struct dw_mci_tuning_data *tuning_data)
+> +{
+> +       struct dw_mci *host = slot->host;
+> +       unsigned int blksz = tuning_data->blksz;
+> +       u8 *blk_test;
+> +       int ret = 0;
+> +       int i;
+> +       bool v, prev_v = 0, first_v;
+> +       struct range_t {
+> +               int start;
+> +               int end; /* inclusive */
+> +       };
+> +       struct range_t *ranges;
+> +       unsigned int range_count = 0;
+> +       int longest_range_len = -1;
+> +       int longest_range = -1;
+> +       int middle_phase;
+> +       const int PHASE_INCREMENT = 5;
+> +       const int NUM_PHASES = 360 / PHASE_INCREMENT;
+> +
+> +       if (IS_ERR(host->sample_clk)) {
+> +               dev_err(host->dev, "Tuning clock (sample_clk) not defined.\n");
+> +               return -EIO;
+> +       }
+> +
+> +       blk_test = kmalloc(blksz, GFP_KERNEL);
+> +       if (!blk_test)
+> +               return -ENOMEM;
+> +
+> +       ranges = kmalloc(((NUM_PHASES / 2 + 1) * sizeof(ranges)), GFP_KERNEL);
+> +       if (!blk_test) {
+> +               ret = -ENOMEM;
+> +               goto free_blk_test;
+> +       }
+> +
+> +       /* Try each phase and extract good ranges */
+> +       for (i = 0; i < NUM_PHASES; i++) {
+> +               clk_set_phase(host->sample_clk, i * PHASE_INCREMENT);
+> +
+> +               v = !dw_mci_tuning_test(slot, opcode, tuning_data, blk_test);
+> +
+> +               if ((!prev_v) && v) {
+> +                       range_count++;
+> +                       ranges[range_count-1].start = i;
+> +               }
+> +               if (v) {
+> +                       ranges[range_count-1].end = i;
+> +               }
+> +
+> +               if (i == 0)
+> +                       first_v = v;
+> +
+> +               prev_v = v;
+> +       }
+> +
+> +       if (range_count == 0) {
+> +               dev_info(host->dev, "All phases bad!");
+> +               ret = -EIO;
+> +               goto free;
+> +       }
+> +
+> +       /* wrap around case, merge the end points */
+> +       if ((range_count > 1) && first_v && v) {
+> +               ranges[0].start = ranges[range_count-1].start;
+> +               range_count--;
+> +       }
+> +
+> +       if ((ranges[0].start == 0) && (ranges[0].end == NUM_PHASES - 1)) {
+> +               clk_set_phase(host->sample_clk, host->default_sample_phase);
+> +               dev_info(host->dev, "All phases work, using default phase %d.",
+> +                       host->default_sample_phase);
+> +               goto free;
+> +       }
+> +
+> +       /* Find the longest range */
+> +       for (i = 0; i < range_count; i++) {
+> +               int len = (ranges[i].end - ranges[i].start + 1);
+> +               if (len < 0)
+> +                       len += NUM_PHASES;
+> +
+> +               if (longest_range_len < len) {
+> +                       longest_range_len = len;
+> +                       longest_range = i;
+> +               }
+> +
+> +               dev_dbg(host->dev, "Good phase range %d-%d (%d len)\n",
+> +                       ranges[i].start * PHASE_INCREMENT,
+> +                       ranges[i].end * PHASE_INCREMENT,
+> +                       len
+> +               );
+> +       }
+> +
+> +       dev_dbg(host->dev, "Best phase range %d-%d (%d len)\n",
+> +               ranges[longest_range].start * PHASE_INCREMENT,
+> +               ranges[longest_range].end * PHASE_INCREMENT,
+> +               longest_range_len
+> +       );
+> +
+> +       middle_phase = ranges[longest_range].start + longest_range_len / 2;
+> +       middle_phase %= NUM_PHASES;
+> +       dev_info(host->dev, "Successfully tuned phase to %d\n",
+> +               middle_phase * PHASE_INCREMENT);
+> +
+> +       clk_set_phase(host->sample_clk, middle_phase * PHASE_INCREMENT);
+> +
+> +free:
+> +       kfree(ranges);
+> +free_blk_test:
+> +       kfree(blk_test);
+> +       return ret;
+> +}
+> +
+>  static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  {
+>         struct dw_mci_slot *slot = mmc_priv(mmc);
+> @@ -1216,6 +1390,8 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>
+>         if (drv_data && drv_data->execute_tuning)
+>                 err = drv_data->execute_tuning(slot, opcode, &tuning_data);
+> +       else
+> +               err = dw_mci_execute_generic_tuning(slot, opcode, &tuning_data);
+>         return err;
+>  }
+>
+> @@ -2492,6 +2668,11 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>         if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
+>                 pdata->bus_hz = clock_frequency;
+>
+> +       if (of_property_read_u32(np, "default-sample-phase",
+> +                                       &host->default_sample_phase)) {
+> +               host->default_sample_phase = 0;
+> +       }
+> +
+>         if (drv_data && drv_data->parse_dt) {
+>                 ret = drv_data->parse_dt(host);
+>                 if (ret)
+> @@ -2564,6 +2745,14 @@ int dw_mci_probe(struct dw_mci *host)
+>                 host->bus_hz = clk_get_rate(host->ciu_clk);
+>         }
+>
+> +       host->drv_clk = devm_clk_get(host->dev, "ciu_drv");
+> +       if (IS_ERR(host->drv_clk))
+> +               dev_dbg(host->dev, "ciu_drv not available\n");
+> +
+> +       host->sample_clk = devm_clk_get(host->dev, "ciu_sample");
+> +       if (IS_ERR(host->sample_clk))
+> +               dev_dbg(host->dev, "ciu_sample not available\n");
+> +
+>         if (!host->bus_hz) {
+>                 dev_err(host->dev,
+>                         "Platform data must supply bus speed\n");
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index 0013669..335e2f3 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -172,7 +172,10 @@ struct dw_mci {
+>         void                    *priv;
+>         struct clk              *biu_clk;
+>         struct clk              *ciu_clk;
+> +       struct clk              *drv_clk;
+> +       struct clk              *sample_clk;
+>         struct dw_mci_slot      *slot[MAX_MCI_SLOTS];
+> +       int                     default_sample_phase;
+>
+>         /* FIFO push and pull */
+>         int                     fifo_depth;
+> --
+> 2.2.0.rc0.207.ga3a616c
+>
