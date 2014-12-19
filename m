@@ -1,415 +1,534 @@
 From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [RFC PATCH 1/5] mmc: replace sbc to precmd and add postcmd
-Date: Fri, 19 Dec 2014 16:05:01 +0800
-Message-ID: <20141219080501.GB3775@intel.com>
+Subject: [RFC PATCH 3/5] mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
+Date: Fri, 19 Dec 2014 16:05:44 +0800
+Message-ID: <20141219080544.GD3775@intel.com>
 Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:29701 "EHLO mga01.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:17710 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751894AbaLSIGa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 19 Dec 2014 03:06:30 -0500
+	id S1751821AbaLSIGy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 19 Dec 2014 03:06:54 -0500
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 
 
-right now we use sbc to present CMD23. If we want sbc to present
-other cmds, then it is not suitable. So change the name to precmd
-which means a cmd that needs to be sent before a cmd. So it can sent
-any command without misunderstanding
+Use qdepth for mmc request fetching. Currently the request fetching
+mechanism indicate the qdepth is only 2.
 
 Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 ---
- drivers/mmc/card/block.c      |   27 ++++++++++++++-------------
- drivers/mmc/card/queue.h      |    3 ++-
- drivers/mmc/core/core.c       |   22 +++++++++++-----------
- drivers/mmc/host/dw_mmc.c     |    8 ++++----
- drivers/mmc/host/mmci.c       |   14 +++++++-------
- drivers/mmc/host/omap_hsmmc.c |   18 +++++++++---------
- drivers/mmc/host/sdhci.c      |   20 +++++++++++---------
- include/linux/mmc/core.h      |    3 ++-
- 8 files changed, 60 insertions(+), 55 deletions(-)
+ drivers/mmc/card/block.c |   45 +++++++----
+ drivers/mmc/card/queue.c |  198 +++++++++++++++++++++-------------------------
+ drivers/mmc/card/queue.h |    8 +-
+ 3 files changed, 128 insertions(+), 123 deletions(-)
 
 diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 4409d79..3aeec41 100644
+index 3aeec41..91d2555 100644
 --- a/drivers/mmc/card/block.c
 +++ b/drivers/mmc/card/block.c
-@@ -966,8 +966,9 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
- 	}
- 
- 	/* Check for set block count errors */
--	if (brq->sbc.error)
--		return mmc_blk_cmd_error(req, "SET_BLOCK_COUNT", brq->sbc.error,
-+	if (brq->precmd.error)
-+		return mmc_blk_cmd_error(req, "SET_BLOCK_COUNT",
-+				brq->precmd.error,
- 				prev_cmd_status_valid, status);
- 
- 	/* Check for r/w command errors */
-@@ -1195,7 +1196,7 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 	int ecc_err = 0, gen_err = 0;
- 
- 	/*
--	 * sbc.error indicates a problem with the set block count
-+	 * precmd.error indicates a problem with the set block count
- 	 * command.  No data will have been transferred.
- 	 *
- 	 * cmd.error indicates a problem with the r/w command.  No
-@@ -1204,7 +1205,7 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 	 * stop.error indicates a problem with the stop command.  Data
- 	 * may have been transferred, or may still be transferring.
- 	 */
--	if (brq->sbc.error || brq->cmd.error || brq->stop.error ||
-+	if (brq->precmd.error || brq->cmd.error || brq->stop.error ||
- 	    brq->data.error) {
- 		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
- 		case ERR_RETRY:
-@@ -1454,7 +1455,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 	 * with Auto-CMD23 enhancements provided by some
- 	 * hosts, means that the complexity of dealing
- 	 * with this is best left to the host. If CMD23 is
--	 * supported by card and host, we'll fill sbc in and let
-+	 * supported by card and host, we'll fill precmd in and let
- 	 * the host deal with handling it correctly. This means
- 	 * that for hosts that don't expose MMC_CAP_CMD23, no
- 	 * change of behavior will be observed.
-@@ -1466,12 +1467,12 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 	if ((md->flags & MMC_BLK_CMD23) && mmc_op_multi(brq->cmd.opcode) &&
- 	    (do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO_CMD23) ||
- 	     do_data_tag)) {
--		brq->sbc.opcode = MMC_SET_BLOCK_COUNT;
--		brq->sbc.arg = brq->data.blocks |
-+		brq->precmd.opcode = MMC_SET_BLOCK_COUNT;
-+		brq->precmd.arg = brq->data.blocks |
- 			(do_rel_wr ? (1 << 31) : 0) |
- 			(do_data_tag ? (1 << 29) : 0);
--		brq->sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
--		brq->mrq.sbc = &brq->sbc;
-+		brq->precmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-+		brq->mrq.precmd = &brq->precmd;
- 	}
- 
- 	mmc_set_data_timeout(&brq->data, card);
-@@ -1680,12 +1681,12 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
- 	memset(brq, 0, sizeof(struct mmc_blk_request));
- 	brq->mrq.cmd = &brq->cmd;
- 	brq->mrq.data = &brq->data;
--	brq->mrq.sbc = &brq->sbc;
-+	brq->mrq.precmd = &brq->precmd;
- 	brq->mrq.stop = &brq->stop;
- 
--	brq->sbc.opcode = MMC_SET_BLOCK_COUNT;
--	brq->sbc.arg = MMC_CMD23_ARG_PACKED | (packed->blocks + hdr_blocks);
--	brq->sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
-+	brq->precmd.opcode = MMC_SET_BLOCK_COUNT;
-+	brq->precmd.arg = MMC_CMD23_ARG_PACKED | (packed->blocks + hdr_blocks);
-+	brq->precmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
- 
- 	brq->cmd.opcode = MMC_WRITE_MULTIPLE_BLOCK;
- 	brq->cmd.arg = blk_rq_pos(req);
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index 5752d50..b129ddc 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -8,8 +8,9 @@ struct task_struct;
- 
- struct mmc_blk_request {
- 	struct mmc_request	mrq;
--	struct mmc_command	sbc;
-+	struct mmc_command	precmd;
- 	struct mmc_command	cmd;
-+	struct mmc_command	postcmd;
- 	struct mmc_command	stop;
- 	struct mmc_data		data;
+@@ -122,6 +122,7 @@ struct mmc_blk_data {
+ 	struct device_attribute force_ro;
+ 	struct device_attribute power_ro_lock;
+ 	int	area_type;
++	struct mmc_queue	*mq_curr;
  };
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 9584bff..4c32606 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -149,12 +149,12 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
  
- 		led_trigger_event(host->led, LED_OFF);
+ static DEFINE_MUTEX(open_lock);
+@@ -138,6 +139,7 @@ MODULE_PARM_DESC(perdev_minors, "Minors numbers to allocate per device");
+ static inline int mmc_blk_part_switch(struct mmc_card *card,
+ 				      struct mmc_blk_data *md);
+ static int get_card_status(struct mmc_card *card, u32 *status, int retries);
++static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc);
  
--		if (mrq->sbc) {
-+		if (mrq->precmd) {
- 			pr_debug("%s: req done <CMD%u>: %d: %08x %08x %08x %08x\n",
--				mmc_hostname(host), mrq->sbc->opcode,
--				mrq->sbc->error,
--				mrq->sbc->resp[0], mrq->sbc->resp[1],
--				mrq->sbc->resp[2], mrq->sbc->resp[3]);
-+				mmc_hostname(host), mrq->precmd->opcode,
-+				mrq->precmd->error,
-+				mrq->precmd->resp[0], mrq->precmd->resp[1],
-+				mrq->precmd->resp[2], mrq->precmd->resp[3]);
- 		}
+ static inline void mmc_blk_clear_packed(struct mmc_queue_req *mqrq)
+ {
+@@ -653,6 +655,13 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
+ 	if (mmc_card_mmc(card)) {
+ 		u8 part_config = card->ext_csd.part_config;
  
- 		pr_debug("%s: req done (CMD%u): %d: %08x %08x %08x %08x\n",
-@@ -193,10 +193,10 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 	struct scatterlist *sg;
- #endif
++		/*
++		 * before switching partition, needs to make
++		 * sure there is no active transferring in previous
++		 * queue
++		 */
++		mmc_blk_issue_rw_rq(main_md->mq_curr, NULL);
++
+ 		part_config &= ~EXT_CSD_PART_CONFIG_ACC_MASK;
+ 		part_config |= md->part_type;
  
--	if (mrq->sbc) {
-+	if (mrq->precmd) {
- 		pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
--			 mmc_hostname(host), mrq->sbc->opcode,
--			 mrq->sbc->arg, mrq->sbc->flags);
-+			 mmc_hostname(host), mrq->precmd->opcode,
-+			 mrq->precmd->arg, mrq->precmd->flags);
+@@ -666,6 +675,7 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
  	}
  
- 	pr_debug("%s: starting CMD%u arg %08x flags %08x\n",
-@@ -222,9 +222,9 @@ mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 
- 	mrq->cmd->error = 0;
- 	mrq->cmd->mrq = mrq;
--	if (mrq->sbc) {
--		mrq->sbc->error = 0;
--		mrq->sbc->mrq = mrq;
-+	if (mrq->precmd) {
-+		mrq->precmd->error = 0;
-+		mrq->precmd->mrq = mrq;
- 	}
- 	if (mrq->data) {
- 		BUG_ON(mrq->data->blksz > host->max_blk_size);
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 67c0451..8d4a7b7 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -994,7 +994,7 @@ static void dw_mci_start_request(struct dw_mci *host,
- 	struct mmc_request *mrq = slot->mrq;
- 	struct mmc_command *cmd;
- 
--	cmd = mrq->sbc ? mrq->sbc : mrq->cmd;
-+	cmd = mrq->precmd ? mrq->precmd : mrq->cmd;
- 	__dw_mci_start_request(host, slot, cmd);
+ 	main_md->part_curr = md->part_type;
++	main_md->mq_curr = &md->queue;
+ 	return 0;
  }
  
-@@ -1489,7 +1489,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 			host->cmd = NULL;
- 			set_bit(EVENT_CMD_COMPLETE, &host->completed_events);
- 			err = dw_mci_command_complete(host, cmd);
--			if (cmd == mrq->sbc && !err) {
-+			if (cmd == mrq->precmd && !err) {
- 				prev_state = state = STATE_SENDING_CMD;
- 				__dw_mci_start_request(host, host->cur_slot,
- 						       mrq->cmd);
-@@ -1568,8 +1568,8 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 			err = dw_mci_data_complete(host, data);
+@@ -1068,6 +1078,7 @@ out:
+ 		goto retry;
+ 	if (!err)
+ 		mmc_blk_reset_success(md, type);
++
+ 	blk_end_request(req, err, blk_rq_bytes(req));
  
- 			if (!err) {
--				if (!data->stop || mrq->sbc) {
--					if (mrq->sbc && data->stop)
-+				if (!data->stop || mrq->precmd) {
-+					if (mrq->precmd && data->stop)
- 						data->stop->error = 0;
- 					dw_mci_request_end(host, mrq);
- 					goto unlock;
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 8232e9a..501a56c 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -973,7 +973,7 @@ mmci_data_irq(struct mmci_host *host, struct mmc_data *data,
- 			/* The error clause is handled above, success! */
- 			data->bytes_xfered = data->blksz * data->blocks;
+ 	return err ? 0 : 1;
+@@ -1827,11 +1838,13 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	const u8 packed_nr = 2;
+ 	u8 reqs = 0;
  
--		if (!data->stop || host->mrq->sbc) {
-+		if (!data->stop || host->mrq->precmd) {
- 			mmci_request_end(host, data->mrq);
+-	if (!rqc && !mq->mqrq_prev->req)
++	if (!rqc && !atomic_read(&mq->active_slots))
+ 		return 0;
+ 
+-	if (rqc)
++	if (rqc) {
+ 		reqs = mmc_blk_prep_packed_list(mq, rqc);
++		atomic_inc(&mq->active_slots);
++	}
+ 
+ 	do {
+ 		if (rqc) {
+@@ -1856,11 +1869,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 		} else
+ 			areq = NULL;
+ 		areq = mmc_start_req(card->host, areq, (int *) &status);
+-		if (!areq) {
+-			if (status == MMC_BLK_NEW_REQUEST)
+-				mq->flags |= MMC_QUEUE_NEW_REQUEST;
++		if (!areq)
+ 			return 0;
+-		}
+ 
+ 		mq_rq = container_of(areq, struct mmc_queue_req, mmc_active);
+ 		brq = &mq_rq->brq;
+@@ -1968,6 +1978,9 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 		}
+ 	} while (ret);
+ 
++	clear_bit_unlock(mq_rq->task_id, &mq->cmdqslot);
++	atomic_dec(&mq->active_slots);
++
+ 	return 1;
+ 
+  cmd_abort:
+@@ -1980,12 +1993,16 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 			ret = blk_end_request(req, -EIO,
+ 					blk_rq_cur_bytes(req));
+ 	}
++	clear_bit_unlock(mq_rq->task_id, &mq->cmdqslot);
++	atomic_dec(&mq->active_slots);
+ 
+  start_new_req:
+ 	if (rqc) {
+ 		if (mmc_card_removed(card)) {
+ 			rqc->cmd_flags |= REQ_QUIET;
+ 			blk_end_request_all(rqc, -EIO);
++			clear_bit_unlock(mq->mqrq_cur->task_id, &mq->cmdqslot);
++			atomic_dec(&mq->active_slots);
  		} else {
- 			mmci_start_command(host, data->stop, 0);
-@@ -986,12 +986,12 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	     unsigned int status)
- {
- 	void __iomem *base = host->base;
--	bool sbc, busy_resp;
-+	bool precmd, busy_resp;
+ 			/*
+ 			 * If current request is packed, it needs to put back.
+@@ -2011,7 +2028,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 	unsigned long flags;
+ 	unsigned int cmd_flags = req ? req->cmd_flags : 0;
  
- 	if (!cmd)
- 		return;
+-	if (req && !mq->mqrq_prev->req)
++	if (!atomic_read(&mq->active_slots))
+ 		/* claim host only for the first request */
+ 		mmc_get_card(card);
  
--	sbc = (cmd == host->mrq->sbc);
-+	precmd = (cmd == host->mrq->precmd);
- 	busy_resp = host->variant->busy_detect && (cmd->flags & MMC_RSP_BUSY);
- 
- 	if (!((status|host->busy_status) & (MCI_CMDCRCFAIL|MCI_CMDTIMEOUT|
-@@ -1032,7 +1032,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 		cmd->resp[3] = readl(base + MMCIRESPONSE3);
+@@ -2024,10 +2041,9 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 		goto out;
  	}
  
--	if ((!sbc && !cmd->data) || cmd->error) {
-+	if ((!precmd && !cmd->data) || cmd->error) {
- 		if (host->data) {
- 			/* Terminate the DMA transfer */
- 			if (dma_inprogress(host)) {
-@@ -1042,7 +1042,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 			mmci_stop_data(host);
- 		}
- 		mmci_request_end(host, host->mrq);
--	} else if (sbc) {
-+	} else if (precmd) {
- 		mmci_start_command(host, host->mrq->cmd, 0);
- 	} else if (!(cmd->data->flags & MMC_DATA_READ)) {
- 		mmci_start_data(host, cmd->data);
-@@ -1307,8 +1307,8 @@ static void mmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	if (mrq->data && mrq->data->flags & MMC_DATA_READ)
- 		mmci_start_data(host, mrq->data);
- 
--	if (mrq->sbc)
--		mmci_start_command(host, mrq->sbc, 0);
-+	if (mrq->precmd)
-+		mmci_start_command(host, mrq->precmd, 0);
- 	else
- 		mmci_start_command(host, mrq->cmd, 0);
- 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 7c71dcd..4970cb1 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -879,9 +879,9 @@ omap_hsmmc_start_command(struct omap_hsmmc_host *host, struct mmc_command *cmd,
- 	cmdreg = (cmd->opcode << 24) | (resptype << 16) | (cmdtype << 22);
- 
- 	if ((host->flags & AUTO_CMD23) && mmc_op_multi(cmd->opcode) &&
--	    host->mrq->sbc) {
-+	    host->mrq->precmd) {
- 		cmdreg |= ACEN_ACMD23;
--		OMAP_HSMMC_WRITE(host->base, SDMASA, host->mrq->sbc->arg);
-+		OMAP_HSMMC_WRITE(host->base, SDMASA, host->mrq->precmd->arg);
- 	}
- 	if (data) {
- 		cmdreg |= DP_SELECT | MSBS | BCE;
-@@ -960,7 +960,7 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, struct mmc_data *data)
- 	else
- 		data->bytes_xfered = 0;
- 
--	if (data->stop && (data->error || !host->mrq->sbc))
-+	if (data->stop && (data->error || !host->mrq->precmd))
- 		omap_hsmmc_start_command(host, data->stop, NULL);
- 	else
- 		omap_hsmmc_request_done(host, data->mrq);
-@@ -972,8 +972,8 @@ omap_hsmmc_xfer_done(struct omap_hsmmc_host *host, struct mmc_data *data)
- static void
- omap_hsmmc_cmd_done(struct omap_hsmmc_host *host, struct mmc_command *cmd)
- {
--	if (host->mrq->sbc && (host->cmd == host->mrq->sbc) &&
--	    !host->mrq->sbc->error && !(host->flags & AUTO_CMD23)) {
-+	if (host->mrq->precmd && (host->cmd == host->mrq->precmd) &&
-+	    !host->mrq->precmd->error && !(host->flags & AUTO_CMD23)) {
- 		host->cmd = NULL;
- 		omap_hsmmc_start_dma_transfer(host);
- 		omap_hsmmc_start_command(host, host->mrq->cmd,
-@@ -1137,13 +1137,13 @@ static void omap_hsmmc_do_irq(struct omap_hsmmc_host *host, int status)
- 		if (status & ACE_EN) {
- 			u32 ac12;
- 			ac12 = OMAP_HSMMC_READ(host->base, AC12);
--			if (!(ac12 & ACNE) && host->mrq->sbc) {
-+			if (!(ac12 & ACNE) && host->mrq->precmd) {
- 				end_cmd = 1;
- 				if (ac12 & ACTO)
- 					error =  -ETIMEDOUT;
- 				else if (ac12 & (ACCE | ACEB | ACIE))
- 					error = -EILSEQ;
--				host->mrq->sbc->error = error;
-+				host->mrq->precmd->error = error;
- 				hsmmc_command_incomplete(host, error, end_cmd);
- 			}
- 			dev_dbg(mmc_dev(host->mmc), "AC12 err: 0x%x\n", ac12);
-@@ -1617,8 +1617,8 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
- 		mmc_request_done(mmc, req);
- 		return;
- 	}
--	if (req->sbc && !(host->flags & AUTO_CMD23)) {
--		omap_hsmmc_start_command(host, req->sbc, NULL);
-+	if (req->precmd && !(host->flags & AUTO_CMD23)) {
-+		omap_hsmmc_start_command(host, req->precmd, NULL);
- 		return;
- 	}
- 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index cbb245b..bac74ca 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -936,11 +936,13 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 		 * If we are sending CMD23, CMD12 never gets sent
- 		 * on successful completion (so no Auto-CMD12).
- 		 */
--		if (!host->mrq->sbc && (host->flags & SDHCI_AUTO_CMD12))
-+		if (!host->mrq->precmd && (host->flags & SDHCI_AUTO_CMD12))
- 			mode |= SDHCI_TRNS_AUTO_CMD12;
--		else if (host->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
-+		else if (host->mrq->precmd && (host->flags &
-+					SDHCI_AUTO_CMD23)) {
- 			mode |= SDHCI_TRNS_AUTO_CMD23;
--			sdhci_writel(host, host->mrq->sbc->arg, SDHCI_ARGUMENT2);
-+			sdhci_writel(host, host->mrq->precmd->arg,
-+					SDHCI_ARGUMENT2);
- 		}
- 	}
- 
-@@ -990,7 +992,7 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 	 */
- 	if (data->stop &&
- 	    (data->error ||
--	     !host->mrq->sbc)) {
-+	     !host->mrq->precmd)) {
- 
- 		/*
- 		 * The controller needs a reset of internal state machines
-@@ -1111,7 +1113,7 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 	host->cmd->error = 0;
- 
- 	/* Finished CMD23, now send actual command. */
--	if (host->cmd == host->mrq->sbc) {
-+	if (host->cmd == host->mrq->precmd) {
- 		host->cmd = NULL;
- 		sdhci_send_command(host, host->mrq->cmd);
+-	mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
+ 	if (cmd_flags & REQ_DISCARD) {
+ 		/* complete ongoing async transfer before issuing discard */
+-		if (card->host->areq)
++		if (atomic_read(&mq->active_slots))
+ 			mmc_blk_issue_rw_rq(mq, NULL);
+ 		if (req->cmd_flags & REQ_SECURE)
+ 			ret = mmc_blk_issue_secdiscard_rq(mq, req);
+@@ -2035,11 +2051,11 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 			ret = mmc_blk_issue_discard_rq(mq, req);
+ 	} else if (cmd_flags & REQ_FLUSH) {
+ 		/* complete ongoing async transfer before issuing flush */
+-		if (card->host->areq)
++		if (atomic_read(&mq->active_slots))
+ 			mmc_blk_issue_rw_rq(mq, NULL);
+ 		ret = mmc_blk_issue_flush(mq, req);
  	} else {
-@@ -1365,7 +1367,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	 * Ensure we don't send the STOP for non-SET_BLOCK_COUNTED
- 	 * requests if Auto-CMD12 is enabled.
- 	 */
--	if (!mrq->sbc && (host->flags & SDHCI_AUTO_CMD12)) {
-+	if (!mrq->precmd && (host->flags & SDHCI_AUTO_CMD12)) {
- 		if (mrq->stop) {
- 			mrq->data->stop = NULL;
- 			mrq->stop = NULL;
-@@ -1428,8 +1430,8 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+-		if (!req && host->areq) {
++		if (!req && (atomic_read(&mq->active_slots) == 1)) {
+ 			spin_lock_irqsave(&host->context_info.lock, flags);
+ 			host->context_info.is_waiting_last_req = true;
+ 			spin_unlock_irqrestore(&host->context_info.lock, flags);
+@@ -2048,13 +2064,12 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 	}
+ 
+ out:
+-	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
+-	     (cmd_flags & MMC_REQ_SPECIAL_MASK))
++	if (!atomic_read(&mq->active_slots))
+ 		/*
+ 		 * Release host when there are no more requests
+ 		 * and after special request(discard, flush) is done.
+ 		 * In case sepecial request, there is no reentry to
+-		 * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
++		 * the 'mmc_blk_issue_rq'.
+ 		 */
+ 		mmc_put_card(card);
+ 	return ret;
+@@ -2212,6 +2227,8 @@ static struct mmc_blk_data *mmc_blk_alloc(struct mmc_card *card)
+ 
+ 	md = mmc_blk_alloc_req(card, &card->dev, size, false, NULL,
+ 					MMC_BLK_DATA_AREA_MAIN);
++	md->mq_curr = &md->queue;
++
+ 	return md;
+ }
+ 
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 236d194..1f7bb39 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -46,6 +46,27 @@ static int mmc_prep_request(struct request_queue *q, struct request *req)
+ 	return BLKPREP_OK;
+ }
+ 
++static bool mmc_queue_get_free_slot(struct mmc_queue *mq,
++		unsigned long *free_slot)
++{
++	unsigned long slot;
++	int i;
++
++	if (!mq || !free_slot)
++		return false;
++
++	do {
++		slot = find_first_zero_bit(&mq->cmdqslot, mq->qdepth);
++		if (slot >= mq->qdepth)
++			return false;
++
++		i = test_and_set_bit_lock(slot, &mq->cmdqslot);
++	} while (i);
++
++	*free_slot = slot;
++	return true;
++}
++
+ static int mmc_queue_thread(void *d)
+ {
+ 	struct mmc_queue *mq = d;
+@@ -56,39 +77,23 @@ static int mmc_queue_thread(void *d)
+ 	down(&mq->thread_sem);
+ 	do {
+ 		struct request *req = NULL;
+-		struct mmc_queue_req *tmp;
+-		unsigned int cmd_flags = 0;
++		unsigned long i;
+ 
+ 		spin_lock_irq(q->queue_lock);
+ 		set_current_state(TASK_INTERRUPTIBLE);
+ 		req = blk_fetch_request(q);
+-		mq->mqrq_cur->req = req;
+ 		spin_unlock_irq(q->queue_lock);
+ 
+-		if (req || mq->mqrq_prev->req) {
++		if (req && !(req->cmd_flags & (REQ_DISCARD | REQ_FLUSH))) {
++			while (!mmc_queue_get_free_slot(mq, &i))
++				mq->issue_fn(mq, NULL);
++			mq->mqrq_cur = &mq->mqrq[i];
++			mq->mqrq_cur->req = req;
++		}
++
++		if (req || atomic_read(&mq->active_slots)) {
+ 			set_current_state(TASK_RUNNING);
+-			cmd_flags = req ? req->cmd_flags : 0;
+ 			mq->issue_fn(mq, req);
+-			if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
+-				mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
+-				continue; /* fetch again */
+-			}
+-
+-			/*
+-			 * Current request becomes previous request
+-			 * and vice versa.
+-			 * In case of special requests, current request
+-			 * has been finished. Do not assign it to previous
+-			 * request.
+-			 */
+-			if (cmd_flags & MMC_REQ_SPECIAL_MASK)
+-				mq->mqrq_cur->req = NULL;
+-
+-			mq->mqrq_prev->brq.mrq.data = NULL;
+-			mq->mqrq_prev->req = NULL;
+-			tmp = mq->mqrq_prev;
+-			mq->mqrq_prev = mq->mqrq_cur;
+-			mq->mqrq_cur = tmp;
+ 		} else {
+ 			if (kthread_should_stop()) {
+ 				set_current_state(TASK_RUNNING);
+@@ -126,7 +131,7 @@ static void mmc_request_fn(struct request_queue *q)
+ 	}
+ 
+ 	cntx = &mq->card->host->context_info;
+-	if (!mq->mqrq_cur->req && mq->mqrq_prev->req) {
++	if (atomic_read(&mq->active_slots)) {
+ 		/*
+ 		 * New MMC request arrived when MMC thread may be
+ 		 * blocked on the previous request to be complete
+@@ -138,7 +143,7 @@ static void mmc_request_fn(struct request_queue *q)
+ 			wake_up_interruptible(&cntx->wait);
+ 		}
+ 		spin_unlock_irqrestore(&cntx->lock, flags);
+-	} else if (!mq->mqrq_cur->req && !mq->mqrq_prev->req)
++	} else
+ 		wake_up_process(mq->thread);
+ }
+ 
+@@ -192,9 +197,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ {
+ 	struct mmc_host *host = card->host;
+ 	u64 limit = BLK_BOUNCE_HIGH;
+-	int ret;
+-	struct mmc_queue_req *mqrq_cur = &mq->mqrq[0];
+-	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
++	int ret, i = 0;
++	struct mmc_queue_req *mqrq = mq->mqrq;
+ 
+ 	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
+ 		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+@@ -204,8 +208,16 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 	if (!mq->queue)
+ 		return -ENOMEM;
+ 
+-	mq->mqrq_cur = mqrq_cur;
+-	mq->mqrq_prev = mqrq_prev;
++	mq->qdepth = 2;
++	mq->mqrq = kzalloc(mq->qdepth * sizeof(struct mmc_queue_req),
++			GFP_KERNEL);
++	if (!mq->mqrq)
++		return -ENOMEM;
++
++	mqrq = mq->mqrq;
++	for (i = mq->qdepth; i > 0; i--)
++		mqrq[i - 1].task_id = i - 1;
++
+ 	mq->queue->queuedata = mq;
+ 
+ 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
+@@ -228,64 +240,50 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 			bouncesz = host->max_blk_count * 512;
+ 
+ 		if (bouncesz > 512) {
+-			mqrq_cur->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
+-			if (!mqrq_cur->bounce_buf) {
+-				pr_warn("%s: unable to allocate bounce cur buffer\n",
+-					mmc_card_name(card));
+-			} else {
+-				mqrq_prev->bounce_buf =
+-						kmalloc(bouncesz, GFP_KERNEL);
+-				if (!mqrq_prev->bounce_buf) {
+-					pr_warn("%s: unable to allocate bounce prev buffer\n",
+-						mmc_card_name(card));
+-					kfree(mqrq_cur->bounce_buf);
+-					mqrq_cur->bounce_buf = NULL;
+-				}
++			for (i = 0; i < mq->qdepth; i++) {
++				mqrq[i].bounce_buf =
++					kmalloc(bouncesz, GFP_KERNEL);
++				if (!mqrq[i].bounce_buf)
++					break;
  			}
  		}
  
--		if (mrq->sbc && !(host->flags & SDHCI_AUTO_CMD23))
--			sdhci_send_command(host, mrq->sbc);
-+		if (mrq->precmd && !(host->flags & SDHCI_AUTO_CMD23))
-+			sdhci_send_command(host, mrq->precmd);
- 		else
- 			sdhci_send_command(host, mrq->cmd);
+-		if (mqrq_cur->bounce_buf && mqrq_prev->bounce_buf) {
++		if (i != mq->qdepth) {
++			for (; i >= 0; i--) {
++				kfree(mqrq[i].bounce_buf);
++				mqrq[i].bounce_buf = NULL;
++			}
++		} else {
+ 			blk_queue_bounce_limit(mq->queue, BLK_BOUNCE_ANY);
+ 			blk_queue_max_hw_sectors(mq->queue, bouncesz / 512);
+ 			blk_queue_max_segments(mq->queue, bouncesz / 512);
+ 			blk_queue_max_segment_size(mq->queue, bouncesz);
+ 
+-			mqrq_cur->sg = mmc_alloc_sg(1, &ret);
+-			if (ret)
+-				goto cleanup_queue;
+-
+-			mqrq_cur->bounce_sg =
+-				mmc_alloc_sg(bouncesz / 512, &ret);
+-			if (ret)
+-				goto cleanup_queue;
+-
+-			mqrq_prev->sg = mmc_alloc_sg(1, &ret);
+-			if (ret)
+-				goto cleanup_queue;
+-
+-			mqrq_prev->bounce_sg =
+-				mmc_alloc_sg(bouncesz / 512, &ret);
+-			if (ret)
+-				goto cleanup_queue;
++			for (i = 0; i < mq->qdepth; i++) {
++				mqrq[i].sg = mmc_alloc_sg(1, &ret);
++				if (ret)
++					goto cleanup_queue;
++				mqrq[i].bounce_sg =
++					mmc_alloc_sg(bouncesz / 512, &ret);
++				if (ret)
++					goto cleanup_queue;
++			}
+ 		}
  	}
-@@ -2182,7 +2184,7 @@ static void sdhci_tasklet_finish(unsigned long param)
- 	 */
- 	if (!(host->flags & SDHCI_DEVICE_DEAD) &&
- 	    ((mrq->cmd && mrq->cmd->error) ||
--	     (mrq->sbc && mrq->sbc->error) ||
-+	     (mrq->precmd && mrq->precmd->error) ||
- 	     (mrq->data && ((mrq->data->error && !mrq->data->stop) ||
- 			    (mrq->data->stop && mrq->data->stop->error))) ||
- 	     (host->quirks & SDHCI_QUIRK_RESET_AFTER_REQUEST))) {
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index cb2b040..e406eac 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -127,8 +127,9 @@ struct mmc_data {
+ #endif
  
- struct mmc_host;
- struct mmc_request {
--	struct mmc_command	*sbc;		/* SET_BLOCK_COUNT for multiblock */
-+	struct mmc_command	*precmd;
- 	struct mmc_command	*cmd;
-+	struct mmc_command	*postcmd;
- 	struct mmc_data		*data;
- 	struct mmc_command	*stop;
+-	if (!mqrq_cur->bounce_buf && !mqrq_prev->bounce_buf) {
++	if (i == 0) {
+ 		blk_queue_bounce_limit(mq->queue, limit);
+ 		blk_queue_max_hw_sectors(mq->queue,
+ 			min(host->max_blk_count, host->max_req_size / 512));
+ 		blk_queue_max_segments(mq->queue, host->max_segs);
+ 		blk_queue_max_segment_size(mq->queue, host->max_seg_size);
  
+-		mqrq_cur->sg = mmc_alloc_sg(host->max_segs, &ret);
+-		if (ret)
+-			goto cleanup_queue;
+-
+-
+-		mqrq_prev->sg = mmc_alloc_sg(host->max_segs, &ret);
+-		if (ret)
+-			goto cleanup_queue;
++		for (i = 0; i < mq->qdepth; i++) {
++			mqrq[i].sg = mmc_alloc_sg(host->max_segs, &ret);
++			if (ret)
++				goto cleanup_queue;
++		}
+ 	}
+ 
+ 	sema_init(&mq->thread_sem, 1);
+@@ -300,21 +298,17 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 
+ 	return 0;
+  free_bounce_sg:
+-	kfree(mqrq_cur->bounce_sg);
+-	mqrq_cur->bounce_sg = NULL;
+-	kfree(mqrq_prev->bounce_sg);
+-	mqrq_prev->bounce_sg = NULL;
+-
++	for (i = 0; i < mq->qdepth; i++) {
++		kfree(mqrq[i].bounce_sg);
++		mqrq[i].bounce_sg = NULL;
++	}
+  cleanup_queue:
+-	kfree(mqrq_cur->sg);
+-	mqrq_cur->sg = NULL;
+-	kfree(mqrq_cur->bounce_buf);
+-	mqrq_cur->bounce_buf = NULL;
+-
+-	kfree(mqrq_prev->sg);
+-	mqrq_prev->sg = NULL;
+-	kfree(mqrq_prev->bounce_buf);
+-	mqrq_prev->bounce_buf = NULL;
++	for (i = 0; i < mq->qdepth; i++) {
++		kfree(mqrq[i].sg);
++		mqrq[i].sg = NULL;
++		kfree(mqrq[i].bounce_buf);
++		mqrq[i].bounce_buf = NULL;
++	}
+ 
+ 	blk_cleanup_queue(mq->queue);
+ 	return ret;
+@@ -324,8 +318,7 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
+ {
+ 	struct request_queue *q = mq->queue;
+ 	unsigned long flags;
+-	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
+-	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
++	int i;
+ 
+ 	/* Make sure the queue isn't suspended, as that will deadlock */
+ 	mmc_queue_resume(mq);
+@@ -339,23 +332,14 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
+ 	blk_start_queue(q);
+ 	spin_unlock_irqrestore(q->queue_lock, flags);
+ 
+-	kfree(mqrq_cur->bounce_sg);
+-	mqrq_cur->bounce_sg = NULL;
+-
+-	kfree(mqrq_cur->sg);
+-	mqrq_cur->sg = NULL;
+-
+-	kfree(mqrq_cur->bounce_buf);
+-	mqrq_cur->bounce_buf = NULL;
+-
+-	kfree(mqrq_prev->bounce_sg);
+-	mqrq_prev->bounce_sg = NULL;
+-
+-	kfree(mqrq_prev->sg);
+-	mqrq_prev->sg = NULL;
+-
+-	kfree(mqrq_prev->bounce_buf);
+-	mqrq_prev->bounce_buf = NULL;
++	for (i = 0; i < mq->qdepth; i++) {
++		kfree(mq->mqrq[i].bounce_sg);
++		mq->mqrq[i].bounce_sg = NULL;
++		kfree(mq->mqrq[i].sg);
++		mq->mqrq[i].sg = NULL;
++		kfree(mq->mqrq[i].bounce_buf);
++		mq->mqrq[i].bounce_buf = NULL;
++	}
+ 
+ 	mq->card = NULL;
+ }
+@@ -367,7 +351,9 @@ int mmc_packed_init(struct mmc_queue *mq, struct mmc_card *card)
+ 	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
+ 	int ret = 0;
+ 
+-
++	/*
++	 * the qdepth for PACK CMD is 2
++	 */
+ 	mqrq_cur->packed = kzalloc(sizeof(struct mmc_packed), GFP_KERNEL);
+ 	if (!mqrq_cur->packed) {
+ 		pr_warn("%s: unable to allocate packed cmd for mqrq_cur\n",
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index b129ddc..80d04a8 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -42,6 +42,7 @@ struct mmc_queue_req {
+ 	struct mmc_async_req	mmc_active;
+ 	enum mmc_packed_type	cmd_type;
+ 	struct mmc_packed	*packed;
++	int task_id;
+ };
+ 
+ struct mmc_queue {
+@@ -50,14 +51,15 @@ struct mmc_queue {
+ 	struct semaphore	thread_sem;
+ 	unsigned int		flags;
+ #define MMC_QUEUE_SUSPENDED	(1 << 0)
+-#define MMC_QUEUE_NEW_REQUEST	(1 << 1)
+ 
+ 	int			(*issue_fn)(struct mmc_queue *, struct request *);
+ 	void			*data;
+ 	struct request_queue	*queue;
+-	struct mmc_queue_req	mqrq[2];
++	struct mmc_queue_req	*mqrq;
+ 	struct mmc_queue_req	*mqrq_cur;
+-	struct mmc_queue_req	*mqrq_prev;
++	unsigned long		cmdqslot;
++	unsigned long		qdepth;
++	atomic_t		active_slots;
+ };
+ 
+ extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
 -- 
 1.7.10.4
 
