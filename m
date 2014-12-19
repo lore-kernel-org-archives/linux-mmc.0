@@ -1,68 +1,68 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dt: Add property for broken hs200 quirk
-Date: Fri, 19 Dec 2014 12:38:07 +0100
-Message-ID: <CAPDyKFrPC_MphsLHHZ=uFjcF8SsdkVmzez9R=gas7_ihn63Q5A@mail.gmail.com>
-References: <1418412516-10682-1-git-send-email-bjorn.andersson@sonymobile.com>
+Subject: Re: [PATCH 1/7] mmc: tmio: add .enable_dma
+Date: Fri, 19 Dec 2014 12:52:20 +0100
+Message-ID: <CAPDyKFqg99xDJHbY0U5YisYKdXUtMYxSJ-3+g24gvgA8qZ7VTw@mail.gmail.com>
+References: <87egs1ve96.wl%kuninori.morimoto.gx@renesas.com>
+	<87d27lve84.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f48.google.com ([209.85.216.48]:56413 "EHLO
-	mail-qa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752137AbaLSLiI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 06:38:08 -0500
-Received: by mail-qa0-f48.google.com with SMTP id v10so479774qac.35
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 03:38:07 -0800 (PST)
-In-Reply-To: <1418412516-10682-1-git-send-email-bjorn.andersson@sonymobile.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <87d27lve84.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Bjorn Andersson <bjorn.andersson@sonymobile.com>
-Cc: Anton Vorontsov <anton@enomsg.org>, Chris Ball <chris@printf.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Grant Likely <grant.likely@linaro.org>, "open list:OPEN FIRMWARE AND..." <devicetree@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>
 
-On 12 December 2014 at 20:28, Bjorn Andersson
-<bjorn.andersson@sonymobile.com> wrote:
-
-Some more explanation to why this needed would be good.
-
-> Signed-off-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
+On 15 December 2014 at 03:27, Kuninori Morimoto
+<kuninori.morimoto.gx@renesas.com> wrote:
+> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+>
+> Some controllers need DMA special register/setting.
+> This patch adds new .enable_dma callback for it.
+>
+> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 > ---
->  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
-
-This file lists the generic mmc DT bindings, but you want to add a
-specific binding for sdhci?
-
->  drivers/mmc/host/sdhci-pltfm.c                | 3 +++
->  2 files changed, 5 insertions(+)
+>  drivers/mmc/host/tmio_mmc_dma.c |    3 +++
+>  include/linux/mfd/tmio.h        |    4 ++--
+>  2 files changed, 5 insertions(+), 2 deletions(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-> index b52628b..04f80ef 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> @@ -22,6 +22,8 @@ Optional properties:
->  - wp-inverted: when present, polarity on the WP line is inverted. See the note
->    below for the case, when a GPIO is used for the WP line
->  - max-frequency: maximum operating clock frequency
-> +- broken-hs200: when present, denotes that eMMC HS200 modes are not supported on
-> +  this system, even if the controller claims it is.
->  - no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
->    this system, even if the controller claims it is.
->  - cap-sd-highspeed: SD high-speed timing is supported
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index c5b01d6..570837f 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -90,6 +90,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
->                 if (of_get_property(np, "broken-cd", NULL))
->                         host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+> index 7d07738..f0bf6df 100644
+> --- a/drivers/mmc/host/tmio_mmc_dma.c
+> +++ b/drivers/mmc/host/tmio_mmc_dma.c
+> @@ -30,6 +30,9 @@ void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
 >
-> +               if (of_get_property(np, "broken-hs200", NULL))
-> +                       host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
+>         if (host->pdata->flags & TMIO_MMC_HAVE_CTL_DMA_REG)
+>                 sd_ctrl_write16(host, CTL_DMA_ENABLE, enable ? 2 : 0);
 > +
->                 if (of_get_property(np, "no-1-8-v", NULL))
->                         host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+> +       if (host->pdata->dma->enable)
+> +               host->pdata->dma->enable(host, enable);
+>  }
 >
-> --
-> 1.8.2.2
+>  void tmio_mmc_abort_dma(struct tmio_mmc_host *host)
+> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+> index 5738817..6788f9b 100644
+> --- a/include/linux/mfd/tmio.h
+> +++ b/include/linux/mfd/tmio.h
+> @@ -111,6 +111,7 @@ void tmio_core_mmc_pwr(void __iomem *cnf, int shift, int state);
+>  void tmio_core_mmc_clk_div(void __iomem *cnf, int shift, int state);
 >
+>  struct dma_chan;
+> +struct tmio_mmc_host;
+>
+>  struct tmio_mmc_dma {
+>         void *chan_priv_tx;
+> @@ -120,10 +121,9 @@ struct tmio_mmc_dma {
+>         int alignment_shift;
+>         dma_addr_t dma_rx_offset;
+>         bool (*filter)(struct dma_chan *chan, void *arg);
+> +       void (*enable)(struct tmio_mmc_host *host, bool enable);
+
+Before we decide to add more callbacks to this struct, can we please
+try to move the mmc specific parts into the mmc tmio specific header?
+drivers/mmc/host/tmio_mmc.h.
+
+For example the tmio_mmc_dma can be moved there.
 
 Kind regards
 Uffe
