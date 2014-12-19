@@ -1,92 +1,86 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH 0/5]mmc: Soft Command queue implementation for eMMC5.1 device
-Date: Fri, 19 Dec 2014 10:02:11 +0100
-Message-ID: <CAPDyKFp+a+6suhommHuxJ1TnaV6tr9EdB8_Ut543FjHFwUYrLw@mail.gmail.com>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
+ eMMC5.1 device
+Date: Fri, 19 Dec 2014 09:08:35 +0000
+Message-ID: <17296D9F8FF2234F831FC3DF505A87A911BB2EFF@shsmsx102.ccr.corp.intel.com>
 References: <20141219080442.GA3775@intel.com>
+ <CAPDyKFp+a+6suhommHuxJ1TnaV6tr9EdB8_Ut543FjHFwUYrLw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f41.google.com ([209.85.216.41]:61440 "EHLO
-	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752378AbaLSJCM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 04:02:12 -0500
-Received: by mail-qa0-f41.google.com with SMTP id s7so310225qap.28
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 01:02:11 -0800 (PST)
-In-Reply-To: <20141219080442.GA3775@intel.com>
+Received: from mga01.intel.com ([192.55.52.88]:17031 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751821AbaLSJIk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 19 Dec 2014 04:08:40 -0500
+In-Reply-To: <CAPDyKFp+a+6suhommHuxJ1TnaV6tr9EdB8_Ut543FjHFwUYrLw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 19 December 2014 at 09:04, Chuanxiao Dong <chuanxiao.dong@intel.com> wrote:
-> Hello,
->
-> Seems community already have some implementation for the eMMC5.1 device command
-> queue feature, but that require the eMMC host controller to support CMDQ. In my
-> platform, I don't have this kind of eMMC host controller but I have a
-> Samsung eMMC5.1 device which can support the Command queue.
->
-> With this limitation, I have to let eMMC host controller to manually send the
-> CMD44/45/13/46/47. So in this way, more commands are needed for an I/O request,
-> more interrupts/schedule are needed in driver.
->
-> Even this way have some more software overhead, but it can still use the eMMC5.1
-> device Command queue feature. After test with the iozone command:
-> "iozone -zec -t 4 -i0 -i2 -F iozonefile1 iozonefile2 iozonefile3 iozonefile4 -+n
-> -I -r 4k -s 500m -O -R -+r -+D" to test random performance, I saw a performance
-> improvment for random read on my eMMC5.1 device:
->
->                 Random read
-> SW CMDQ:        5544.6
-> Normal Read:    3993.05
-
-Thanks for the patchset Chuanxiao! I will spend some time reviewing
-this in more detail as soon as I can.
-
-One important point though, before I start reviewing. I would like the
-"Normal read" to be performed for a host driver supporting the
-asynchronous mmc request feature. Currently sdhci don't support this,
-but there is patch suggesting to add this which you might want to
-use/review.
-https://www.marc.info/?l=linux-mmc&m=141811588607432&w=2
-
-Kind regards
-Uffe
-
->
-> So I want to send this serial patches as RFC patch for reviewing
->
->
-> Chuanxiao Dong (5):
->   mmc: replace sbc to precmd and add postcmd
->   mmc: host: add runtime PM for host class dev
->   mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
->   mmc: core: add support for CMDQ feature in MMC Core stack
->   mmc: sdhci: add SW CMDQ support for CHT SDHCI host
->
->  drivers/mmc/card/block.c      |  538 ++++++++++++++++++++++++++++++++++++++---
->  drivers/mmc/card/queue.c      |  213 ++++++++--------
->  drivers/mmc/card/queue.h      |   14 +-
->  drivers/mmc/core/core.c       |   78 +++++-
->  drivers/mmc/core/host.c       |   14 ++
->  drivers/mmc/core/mmc.c        |   43 +++-
->  drivers/mmc/host/dw_mmc.c     |    8 +-
->  drivers/mmc/host/mmci.c       |   14 +-
->  drivers/mmc/host/omap_hsmmc.c |   18 +-
->  drivers/mmc/host/sdhci-acpi.c |    1 -
->  drivers/mmc/host/sdhci-pci.c  |    1 -
->  drivers/mmc/host/sdhci.c      |  137 +++++++++--
->  include/linux/mmc/card.h      |    3 +
->  include/linux/mmc/core.h      |    5 +-
->  include/linux/mmc/host.h      |    5 +
->  include/linux/mmc/mmc.h       |   21 ++
->  include/linux/mmc/pm.h        |    1 +
->  include/linux/mmc/sdhci.h     |    1 +
->  18 files changed, 909 insertions(+), 206 deletions(-)
->
-> --
-> 1.7.10.4
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
+aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBGcmlkYXksIERlY2VtYmVyIDE5
+LCAyMDE0IDU6MDIgUE0NCj4gVG86IERvbmcsIENodWFueGlhbw0KPiBDYzogbGludXgtbW1jDQo+
+IFN1YmplY3Q6IFJlOiBbUkZDIFBBVENIIDAvNV1tbWM6IFNvZnQgQ29tbWFuZCBxdWV1ZSBpbXBs
+ZW1lbnRhdGlvbiBmb3INCj4gZU1NQzUuMSBkZXZpY2UNCj4gDQo+IE9uIDE5IERlY2VtYmVyIDIw
+MTQgYXQgMDk6MDQsIENodWFueGlhbyBEb25nIDxjaHVhbnhpYW8uZG9uZ0BpbnRlbC5jb20+DQo+
+IHdyb3RlOg0KPiA+IEhlbGxvLA0KPiA+DQo+ID4gU2VlbXMgY29tbXVuaXR5IGFscmVhZHkgaGF2
+ZSBzb21lIGltcGxlbWVudGF0aW9uIGZvciB0aGUgZU1NQzUuMQ0KPiA+IGRldmljZSBjb21tYW5k
+IHF1ZXVlIGZlYXR1cmUsIGJ1dCB0aGF0IHJlcXVpcmUgdGhlIGVNTUMgaG9zdA0KPiA+IGNvbnRy
+b2xsZXIgdG8gc3VwcG9ydCBDTURRLiBJbiBteSBwbGF0Zm9ybSwgSSBkb24ndCBoYXZlIHRoaXMg
+a2luZCBvZg0KPiA+IGVNTUMgaG9zdCBjb250cm9sbGVyIGJ1dCBJIGhhdmUgYSBTYW1zdW5nIGVN
+TUM1LjEgZGV2aWNlIHdoaWNoIGNhbg0KPiBzdXBwb3J0IHRoZSBDb21tYW5kIHF1ZXVlLg0KPiA+
+DQo+ID4gV2l0aCB0aGlzIGxpbWl0YXRpb24sIEkgaGF2ZSB0byBsZXQgZU1NQyBob3N0IGNvbnRy
+b2xsZXIgdG8gbWFudWFsbHkNCj4gPiBzZW5kIHRoZSBDTUQ0NC80NS8xMy80Ni80Ny4gU28gaW4g
+dGhpcyB3YXksIG1vcmUgY29tbWFuZHMgYXJlIG5lZWRlZA0KPiA+IGZvciBhbiBJL08gcmVxdWVz
+dCwgbW9yZSBpbnRlcnJ1cHRzL3NjaGVkdWxlIGFyZSBuZWVkZWQgaW4gZHJpdmVyLg0KPiA+DQo+
+ID4gRXZlbiB0aGlzIHdheSBoYXZlIHNvbWUgbW9yZSBzb2Z0d2FyZSBvdmVyaGVhZCwgYnV0IGl0
+IGNhbiBzdGlsbCB1c2UNCj4gPiB0aGUgZU1NQzUuMSBkZXZpY2UgQ29tbWFuZCBxdWV1ZSBmZWF0
+dXJlLiBBZnRlciB0ZXN0IHdpdGggdGhlIGlvem9uZQ0KPiBjb21tYW5kOg0KPiA+ICJpb3pvbmUg
+LXplYyAtdCA0IC1pMCAtaTIgLUYgaW96b25lZmlsZTEgaW96b25lZmlsZTIgaW96b25lZmlsZTMN
+Cj4gPiBpb3pvbmVmaWxlNCAtK24gLUkgLXIgNGsgLXMgNTAwbSAtTyAtUiAtK3IgLStEIiB0byB0
+ZXN0IHJhbmRvbQ0KPiA+IHBlcmZvcm1hbmNlLCBJIHNhdyBhIHBlcmZvcm1hbmNlIGltcHJvdm1l
+bnQgZm9yIHJhbmRvbSByZWFkIG9uIG15DQo+IGVNTUM1LjEgZGV2aWNlOg0KPiA+DQo+ID4gICAg
+ICAgICAgICAgICAgIFJhbmRvbSByZWFkDQo+ID4gU1cgQ01EUTogICAgICAgIDU1NDQuNg0KPiA+
+IE5vcm1hbCBSZWFkOiAgICAzOTkzLjA1DQo+IA0KPiBUaGFua3MgZm9yIHRoZSBwYXRjaHNldCBD
+aHVhbnhpYW8hIEkgd2lsbCBzcGVuZCBzb21lIHRpbWUgcmV2aWV3aW5nIHRoaXMgaW4NCj4gbW9y
+ZSBkZXRhaWwgYXMgc29vbiBhcyBJIGNhbi4NCj4gDQo+IE9uZSBpbXBvcnRhbnQgcG9pbnQgdGhv
+dWdoLCBiZWZvcmUgSSBzdGFydCByZXZpZXdpbmcuIEkgd291bGQgbGlrZSB0aGUgIk5vcm1hbA0K
+PiByZWFkIiB0byBiZSBwZXJmb3JtZWQgZm9yIGEgaG9zdCBkcml2ZXIgc3VwcG9ydGluZyB0aGUg
+YXN5bmNocm9ub3VzIG1tYw0KPiByZXF1ZXN0IGZlYXR1cmUuIEN1cnJlbnRseSBzZGhjaSBkb24n
+dCBzdXBwb3J0IHRoaXMsIGJ1dCB0aGVyZSBpcyBwYXRjaA0KPiBzdWdnZXN0aW5nIHRvIGFkZCB0
+aGlzIHdoaWNoIHlvdSBtaWdodCB3YW50IHRvIHVzZS9yZXZpZXcuDQo+IGh0dHBzOi8vd3d3Lm1h
+cmMuaW5mby8/bD1saW51eC1tbWMmbT0xNDE4MTE1ODg2MDc0MzImdz0yDQo+IA0KPiBLaW5kIHJl
+Z2FyZHMNCj4gVWZmZQ0KVGhhbmtzIFVmZmUgZm9yIHRoZSBzaGFyaW5nLiBJIHdpbGwgbG9vayBp
+bnRvIHRoaXMgcGF0Y2ggYW5kIHRyeSBvbiBteSBwbGF0Zm9ybS4NCg0KVGhhbmtzDQpDaHVhbnhp
+YW8NCg0KPiANCj4gPg0KPiA+IFNvIEkgd2FudCB0byBzZW5kIHRoaXMgc2VyaWFsIHBhdGNoZXMg
+YXMgUkZDIHBhdGNoIGZvciByZXZpZXdpbmcNCj4gPg0KPiA+DQo+ID4gQ2h1YW54aWFvIERvbmcg
+KDUpOg0KPiA+ICAgbW1jOiByZXBsYWNlIHNiYyB0byBwcmVjbWQgYW5kIGFkZCBwb3N0Y21kDQo+
+ID4gICBtbWM6IGhvc3Q6IGFkZCBydW50aW1lIFBNIGZvciBob3N0IGNsYXNzIGRldg0KPiA+ICAg
+bW1jOiBxdWV1ZTogY2hhbmdlIG1xcnFfY3VyIGFuZCBtcXJxX3ByZSB0byBtcSBxZGVwdGgNCj4g
+PiAgIG1tYzogY29yZTogYWRkIHN1cHBvcnQgZm9yIENNRFEgZmVhdHVyZSBpbiBNTUMgQ29yZSBz
+dGFjaw0KPiA+ICAgbW1jOiBzZGhjaTogYWRkIFNXIENNRFEgc3VwcG9ydCBmb3IgQ0hUIFNESENJ
+IGhvc3QNCj4gPg0KPiA+ICBkcml2ZXJzL21tYy9jYXJkL2Jsb2NrLmMgICAgICB8ICA1MzgNCj4g
+KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKystLS0NCj4gPiAgZHJpdmVycy9t
+bWMvY2FyZC9xdWV1ZS5jICAgICAgfCAgMjEzICsrKysrKysrLS0tLS0tLS0NCj4gPiAgZHJpdmVy
+cy9tbWMvY2FyZC9xdWV1ZS5oICAgICAgfCAgIDE0ICstDQo+ID4gIGRyaXZlcnMvbW1jL2NvcmUv
+Y29yZS5jICAgICAgIHwgICA3OCArKysrKy0NCj4gPiAgZHJpdmVycy9tbWMvY29yZS9ob3N0LmMg
+ICAgICAgfCAgIDE0ICsrDQo+ID4gIGRyaXZlcnMvbW1jL2NvcmUvbW1jLmMgICAgICAgIHwgICA0
+MyArKystDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMgICAgIHwgICAgOCArLQ0KPiA+
+ICBkcml2ZXJzL21tYy9ob3N0L21tY2kuYyAgICAgICB8ICAgMTQgKy0NCj4gPiAgZHJpdmVycy9t
+bWMvaG9zdC9vbWFwX2hzbW1jLmMgfCAgIDE4ICstDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3Qvc2Ro
+Y2ktYWNwaS5jIHwgICAgMSAtDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGNpLmMgIHwg
+ICAgMSAtDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyAgICAgIHwgIDEzNyArKysrKysr
+KystLQ0KPiA+ICBpbmNsdWRlL2xpbnV4L21tYy9jYXJkLmggICAgICB8ICAgIDMgKw0KPiA+ICBp
+bmNsdWRlL2xpbnV4L21tYy9jb3JlLmggICAgICB8ICAgIDUgKy0NCj4gPiAgaW5jbHVkZS9saW51
+eC9tbWMvaG9zdC5oICAgICAgfCAgICA1ICsNCj4gPiAgaW5jbHVkZS9saW51eC9tbWMvbW1jLmgg
+ICAgICAgfCAgIDIxICsrDQo+ID4gIGluY2x1ZGUvbGludXgvbW1jL3BtLmggICAgICAgIHwgICAg
+MSArDQo+ID4gIGluY2x1ZGUvbGludXgvbW1jL3NkaGNpLmggICAgIHwgICAgMSArDQo+ID4gIDE4
+IGZpbGVzIGNoYW5nZWQsIDkwOSBpbnNlcnRpb25zKCspLCAyMDYgZGVsZXRpb25zKC0pDQo+ID4N
+Cj4gPiAtLQ0KPiA+IDEuNy4xMC40DQo+ID4gLS0NCj4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
+aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIg0KPiA+IGluIHRo
+ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFq
+b3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
+by5odG1sDQo=
