@@ -1,310 +1,92 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/3] mmc: dw_mmc: Generic MMC tuning with the clock phase framework
-Date: Fri, 19 Dec 2014 09:51:49 +0100
-Message-ID: <CAPDyKFqx1CXyw4c=F6pZQESfD_6vkY10Cdmw3FA0DWQyU+b6eA@mail.gmail.com>
-References: <1418943663-10012-1-git-send-email-amstan@chromium.org>
-	<1418943663-10012-3-git-send-email-amstan@chromium.org>
+Subject: Re: [RFC PATCH 0/5]mmc: Soft Command queue implementation for eMMC5.1 device
+Date: Fri, 19 Dec 2014 10:02:11 +0100
+Message-ID: <CAPDyKFp+a+6suhommHuxJ1TnaV6tr9EdB8_Ut543FjHFwUYrLw@mail.gmail.com>
+References: <20141219080442.GA3775@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f178.google.com ([209.85.216.178]:35222 "EHLO
-	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752087AbaLSIvu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 03:51:50 -0500
-Received: by mail-qc0-f178.google.com with SMTP id b13so394630qcw.37
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 00:51:49 -0800 (PST)
-In-Reply-To: <1418943663-10012-3-git-send-email-amstan@chromium.org>
+Received: from mail-qa0-f41.google.com ([209.85.216.41]:61440 "EHLO
+	mail-qa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752378AbaLSJCM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 04:02:12 -0500
+Received: by mail-qa0-f41.google.com with SMTP id s7so310225qap.28
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 01:02:11 -0800 (PST)
+In-Reply-To: <20141219080442.GA3775@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexandru M Stan <amstan@chromium.org>
-Cc: "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Heiko Stuebner <heiko@sntech.de>, Doug Anderson <dianders@chromium.org>, addy ke <addy.ke@rock-chips.com>, Andrew Bresticker <abrestic@chromium.org>, Sonny Rao <sonnyrao@chromium.org>, Kever Yang <kever.yang@rock-chips.com>, Mike Turquette <mturquette@linaro.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 19 December 2014 at 00:01, Alexandru M Stan <amstan@chromium.org> wrote:
-> This algorithm will try 5 degree increments, since there's no way to tell
-> what resolution the underlying phase code uses. As an added bonus, doing many
-> tunings yields better results since some tests are run more than once(ex: if the
-> underlying driver uses 45 degree increments, the tuning code will try the same
-> angle more than once).
+On 19 December 2014 at 09:04, Chuanxiao Dong <chuanxiao.dong@intel.com> wrote:
+> Hello,
 >
-> It will then construct a list of good phase ranges (even ranges that cross
-> 360/0), will pick the biggest range then it will set the sample_clk to the
-> middle of that range.
+> Seems community already have some implementation for the eMMC5.1 device command
+> queue feature, but that require the eMMC host controller to support CMDQ. In my
+> platform, I don't have this kind of eMMC host controller but I have a
+> Samsung eMMC5.1 device which can support the Command queue.
 >
-> We do not touch ciu_drive (and by extension define default-drive-phase). Drive
-> phase is mostly used to define minimum hold times, while one could write some
-> code to determine what phase meets the minimum hold time (ex 10 degrees) this
-> will not work with the current clock phase framework (which floors angles, so
-> we'll get 0 deg, and there's no way to know what resolution the floors happen
-> at). We assume that the default drive angles set by the hardware are good enough.
+> With this limitation, I have to let eMMC host controller to manually send the
+> CMD44/45/13/46/47. So in this way, more commands are needed for an I/O request,
+> more interrupts/schedule are needed in driver.
 >
-> If a device has device specific code (like exynos) then that will still take
-> precedence, otherwise this new code will execute. If the device wants to tune,
-> but has no sample_clk defined we'll return EIO with an error message.
+> Even this way have some more software overhead, but it can still use the eMMC5.1
+> device Command queue feature. After test with the iozone command:
+> "iozone -zec -t 4 -i0 -i2 -F iozonefile1 iozonefile2 iozonefile3 iozonefile4 -+n
+> -I -r 4k -s 500m -O -R -+r -+D" to test random performance, I saw a performance
+> improvment for random read on my eMMC5.1 device:
 >
-> Signed-off-by: Alexandru M Stan <amstan@chromium.org>
-> Suggested-by: Heiko Stuebner <heiko@sntech.de>
-> Suggested-by: Doug Anderson <dianders@chromium.org>
-> ---
->  drivers/mmc/host/dw_mmc.c  | 189 +++++++++++++++++++++++++++++++++++++++++++++
->  include/linux/mmc/dw_mmc.h |   3 +
->  2 files changed, 192 insertions(+)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 69f0cc6..b59c221 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -984,6 +984,12 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->         if (drv_data && drv_data->set_ios)
->                 drv_data->set_ios(slot->host, ios);
->
-> +       /* Make sure we use phases which we can enumerate with */
-> +       if (!IS_ERR(slot->host->sample_clk)) {
-> +               clk_set_phase(slot->host->sample_clk,
-> +                             slot->host->default_sample_phase);
-> +       }
-> +
->         /* Slot specific timing and width adjustment */
->         dw_mci_setup_bus(slot, false);
->
-> @@ -1187,6 +1193,174 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
->         }
->  }
->
-> +static int dw_mci_tuning_test(struct dw_mci_slot *slot, u32 opcode,
-> +                              struct dw_mci_tuning_data *tuning_data,
-> +                              u8 *blk_test)
-> +{
-> +       struct dw_mci *host = slot->host;
-> +       struct mmc_host *mmc = slot->mmc;
-> +       const u8 *blk_pattern = tuning_data->blk_pattern;
-> +       unsigned int blksz = tuning_data->blksz;
-> +       struct mmc_request mrq = { NULL };
-> +       struct mmc_command cmd = {0};
-> +       struct mmc_command stop = {0};
-> +       struct mmc_data data = {0};
-> +       struct scatterlist sg;
-> +
-> +       memset(blk_test, 0, blksz);
-> +
-> +       cmd.opcode = opcode;
-> +       cmd.arg = 0;
-> +       cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-> +
-> +       stop.opcode = MMC_STOP_TRANSMISSION;
-> +       stop.arg = 0;
-> +       stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
-> +
-> +       data.blksz = blksz;
-> +       data.blocks = 1;
-> +       data.flags = MMC_DATA_READ;
-> +       data.sg = &sg;
-> +       data.sg_len = 1;
-> +
-> +       sg_init_one(&sg, blk_test, blksz);
-> +       mrq.cmd = &cmd;
-> +       mrq.stop = &stop;
-> +       mrq.data = &data;
-> +       host->mrq = &mrq;
-> +
-> +       mci_writel(host, TMOUT, ~0);
-> +
-> +       mmc_wait_for_req(mmc, &mrq);
-> +
-> +       if (!cmd.error && !data.error) {
-> +               if (!memcmp(blk_pattern, blk_test, blksz))
-> +                       return 0;
-> +               return -EIO;
-> +       } else {
-> +               dev_dbg(host->dev,
-> +                       "Tuning error: cmd.error:%d, data.error:%d\n",
-> +                       cmd.error, data.error);
-> +               if (cmd.error)
-> +                       return cmd.error;
-> +               else
-> +                       return data.error;
-> +       }
+>                 Random read
+> SW CMDQ:        5544.6
+> Normal Read:    3993.05
 
-This function should be simplified using mmc_send_tuning().
+Thanks for the patchset Chuanxiao! I will spend some time reviewing
+this in more detail as soon as I can.
 
-Now, dw_mmc seems to have some issues that it needs the tuning command
-to have a stop command sent as well. That's not according to the eMMC
-spec.
-
-Please have a look at this patch:
-http://www.spinics.net/lists/linux-mmc/msg29807.html
+One important point though, before I start reviewing. I would like the
+"Normal read" to be performed for a host driver supporting the
+asynchronous mmc request feature. Currently sdhci don't support this,
+but there is patch suggesting to add this which you might want to
+use/review.
+https://www.marc.info/?l=linux-mmc&m=141811588607432&w=2
 
 Kind regards
 Uffe
 
-> +}
-> +
-> +static int dw_mci_execute_generic_tuning(struct dw_mci_slot *slot, u32 opcode,
-> +                                        struct dw_mci_tuning_data *tuning_data)
-> +{
-> +       struct dw_mci *host = slot->host;
-> +       unsigned int blksz = tuning_data->blksz;
-> +       u8 *blk_test;
-> +       int ret = 0;
-> +       int i;
-> +       bool v, prev_v = 0, first_v;
-> +       struct range_t {
-> +               int start;
-> +               int end; /* inclusive */
-> +       };
-> +       struct range_t *ranges;
-> +       unsigned int range_count = 0;
-> +       int longest_range_len = -1;
-> +       int longest_range = -1;
-> +       int middle_phase;
-> +       const int PHASE_INCREMENT = 5;
-> +       const int NUM_PHASES = 360 / PHASE_INCREMENT;
-> +
-> +       if (IS_ERR(host->sample_clk)) {
-> +               dev_err(host->dev, "Tuning clock (sample_clk) not defined.\n");
-> +               return -EIO;
-> +       }
-> +
-> +       blk_test = kmalloc(blksz, GFP_KERNEL);
-> +       if (!blk_test)
-> +               return -ENOMEM;
-> +
-> +       ranges = kmalloc(((NUM_PHASES / 2 + 1) * sizeof(ranges)), GFP_KERNEL);
-> +       if (!blk_test) {
-> +               ret = -ENOMEM;
-> +               goto free_blk_test;
-> +       }
-> +
-> +       /* Try each phase and extract good ranges */
-> +       for (i = 0; i < NUM_PHASES; i++) {
-> +               clk_set_phase(host->sample_clk, i * PHASE_INCREMENT);
-> +
-> +               v = !dw_mci_tuning_test(slot, opcode, tuning_data, blk_test);
-> +
-> +               if ((!prev_v) && v) {
-> +                       range_count++;
-> +                       ranges[range_count-1].start = i;
-> +               }
-> +               if (v) {
-> +                       ranges[range_count-1].end = i;
-> +               }
-> +
-> +               if (i == 0)
-> +                       first_v = v;
-> +
-> +               prev_v = v;
-> +       }
-> +
-> +       if (range_count == 0) {
-> +               dev_info(host->dev, "All phases bad!");
-> +               ret = -EIO;
-> +               goto free;
-> +       }
-> +
-> +       /* wrap around case, merge the end points */
-> +       if ((range_count > 1) && first_v && v) {
-> +               ranges[0].start = ranges[range_count-1].start;
-> +               range_count--;
-> +       }
-> +
-> +       if ((ranges[0].start == 0) && (ranges[0].end == NUM_PHASES - 1)) {
-> +               clk_set_phase(host->sample_clk, host->default_sample_phase);
-> +               dev_info(host->dev, "All phases work, using default phase %d.",
-> +                       host->default_sample_phase);
-> +               goto free;
-> +       }
-> +
-> +       /* Find the longest range */
-> +       for (i = 0; i < range_count; i++) {
-> +               int len = (ranges[i].end - ranges[i].start + 1);
-> +               if (len < 0)
-> +                       len += NUM_PHASES;
-> +
-> +               if (longest_range_len < len) {
-> +                       longest_range_len = len;
-> +                       longest_range = i;
-> +               }
-> +
-> +               dev_dbg(host->dev, "Good phase range %d-%d (%d len)\n",
-> +                       ranges[i].start * PHASE_INCREMENT,
-> +                       ranges[i].end * PHASE_INCREMENT,
-> +                       len
-> +               );
-> +       }
-> +
-> +       dev_dbg(host->dev, "Best phase range %d-%d (%d len)\n",
-> +               ranges[longest_range].start * PHASE_INCREMENT,
-> +               ranges[longest_range].end * PHASE_INCREMENT,
-> +               longest_range_len
-> +       );
-> +
-> +       middle_phase = ranges[longest_range].start + longest_range_len / 2;
-> +       middle_phase %= NUM_PHASES;
-> +       dev_info(host->dev, "Successfully tuned phase to %d\n",
-> +               middle_phase * PHASE_INCREMENT);
-> +
-> +       clk_set_phase(host->sample_clk, middle_phase * PHASE_INCREMENT);
-> +
-> +free:
-> +       kfree(ranges);
-> +free_blk_test:
-> +       kfree(blk_test);
-> +       return ret;
-> +}
-> +
->  static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  {
->         struct dw_mci_slot *slot = mmc_priv(mmc);
-> @@ -1216,6 +1390,8 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
 >
->         if (drv_data && drv_data->execute_tuning)
->                 err = drv_data->execute_tuning(slot, opcode, &tuning_data);
-> +       else
-> +               err = dw_mci_execute_generic_tuning(slot, opcode, &tuning_data);
->         return err;
->  }
+> So I want to send this serial patches as RFC patch for reviewing
 >
-> @@ -2492,6 +2668,11 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->         if (!of_property_read_u32(np, "clock-frequency", &clock_frequency))
->                 pdata->bus_hz = clock_frequency;
 >
-> +       if (of_property_read_u32(np, "default-sample-phase",
-> +                                       &host->default_sample_phase)) {
-> +               host->default_sample_phase = 0;
-> +       }
-> +
->         if (drv_data && drv_data->parse_dt) {
->                 ret = drv_data->parse_dt(host);
->                 if (ret)
-> @@ -2564,6 +2745,14 @@ int dw_mci_probe(struct dw_mci *host)
->                 host->bus_hz = clk_get_rate(host->ciu_clk);
->         }
+> Chuanxiao Dong (5):
+>   mmc: replace sbc to precmd and add postcmd
+>   mmc: host: add runtime PM for host class dev
+>   mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
+>   mmc: core: add support for CMDQ feature in MMC Core stack
+>   mmc: sdhci: add SW CMDQ support for CHT SDHCI host
 >
-> +       host->drv_clk = devm_clk_get(host->dev, "ciu_drv");
-> +       if (IS_ERR(host->drv_clk))
-> +               dev_dbg(host->dev, "ciu_drv not available\n");
-> +
-> +       host->sample_clk = devm_clk_get(host->dev, "ciu_sample");
-> +       if (IS_ERR(host->sample_clk))
-> +               dev_dbg(host->dev, "ciu_sample not available\n");
-> +
->         if (!host->bus_hz) {
->                 dev_err(host->dev,
->                         "Platform data must supply bus speed\n");
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 0013669..335e2f3 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -172,7 +172,10 @@ struct dw_mci {
->         void                    *priv;
->         struct clk              *biu_clk;
->         struct clk              *ciu_clk;
-> +       struct clk              *drv_clk;
-> +       struct clk              *sample_clk;
->         struct dw_mci_slot      *slot[MAX_MCI_SLOTS];
-> +       int                     default_sample_phase;
+>  drivers/mmc/card/block.c      |  538 ++++++++++++++++++++++++++++++++++++++---
+>  drivers/mmc/card/queue.c      |  213 ++++++++--------
+>  drivers/mmc/card/queue.h      |   14 +-
+>  drivers/mmc/core/core.c       |   78 +++++-
+>  drivers/mmc/core/host.c       |   14 ++
+>  drivers/mmc/core/mmc.c        |   43 +++-
+>  drivers/mmc/host/dw_mmc.c     |    8 +-
+>  drivers/mmc/host/mmci.c       |   14 +-
+>  drivers/mmc/host/omap_hsmmc.c |   18 +-
+>  drivers/mmc/host/sdhci-acpi.c |    1 -
+>  drivers/mmc/host/sdhci-pci.c  |    1 -
+>  drivers/mmc/host/sdhci.c      |  137 +++++++++--
+>  include/linux/mmc/card.h      |    3 +
+>  include/linux/mmc/core.h      |    5 +-
+>  include/linux/mmc/host.h      |    5 +
+>  include/linux/mmc/mmc.h       |   21 ++
+>  include/linux/mmc/pm.h        |    1 +
+>  include/linux/mmc/sdhci.h     |    1 +
+>  18 files changed, 909 insertions(+), 206 deletions(-)
 >
->         /* FIFO push and pull */
->         int                     fifo_depth;
 > --
-> 2.2.0.rc0.207.ga3a616c
->
+> 1.7.10.4
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
