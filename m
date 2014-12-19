@@ -1,71 +1,103 @@
 From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [RFC PATCH 0/5]mmc: Soft Command queue implementation for eMMC5.1
- device
-Date: Fri, 19 Dec 2014 16:04:42 +0800
-Message-ID: <20141219080442.GA3775@intel.com>
+Subject: [RFC PATCH 2/5] mmc: host: add runtime PM for host class dev
+Date: Fri, 19 Dec 2014 16:05:16 +0800
+Message-ID: <20141219080516.GC3775@intel.com>
 Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:18886 "EHLO mga01.intel.com"
+Received: from mga03.intel.com ([134.134.136.65]:45437 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751913AbaLSIFv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 19 Dec 2014 03:05:51 -0500
+	id S1751894AbaLSIGZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 19 Dec 2014 03:06:25 -0500
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 
-Hello,
+mmc host has a class device which is parent of the card device, also
+a children of the low level host device. Right now we have runtime pm
+for card device and low level host device, but nothing for this host class
+device. So it is impossible to connect the card runtime pm to low level host
+runtime pm together.
 
-Seems community already have some implementation for the eMMC5.1 device command
-queue feature, but that require the eMMC host controller to support CMDQ. In my
-platform, I don't have this kind of eMMC host controller but I have a
-Samsung eMMC5.1 device which can support the Command queue.
+We implement runtime pm to mmc host class device, so that when the card device
+doesn't want to be ignored by the low level host runtime pm, card device driver
+can talk to class device, so class device can talk to his parent.
 
-With this limitation, I have to let eMMC host controller to manually send the
-CMD44/45/13/46/47. So in this way, more commands are needed for an I/O request,
-more interrupts/schedule are needed in driver.
-
-Even this way have some more software overhead, but it can still use the eMMC5.1
-device Command queue feature. After test with the iozone command:
-"iozone -zec -t 4 -i0 -i2 -F iozonefile1 iozonefile2 iozonefile3 iozonefile4 -+n
--I -r 4k -s 500m -O -R -+r -+D" to test random performance, I saw a performance
-improvment for random read on my eMMC5.1 device:
-
-		Random read
-SW CMDQ:	5544.6
-Normal Read:	3993.05
-
-So I want to send this serial patches as RFC patch for reviewing
-
-
-Chuanxiao Dong (5):
-  mmc: replace sbc to precmd and add postcmd
-  mmc: host: add runtime PM for host class dev
-  mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
-  mmc: core: add support for CMDQ feature in MMC Core stack
-  mmc: sdhci: add SW CMDQ support for CHT SDHCI host
-
- drivers/mmc/card/block.c      |  538 ++++++++++++++++++++++++++++++++++++++---
- drivers/mmc/card/queue.c      |  213 ++++++++--------
- drivers/mmc/card/queue.h      |   14 +-
- drivers/mmc/core/core.c       |   78 +++++-
- drivers/mmc/core/host.c       |   14 ++
- drivers/mmc/core/mmc.c        |   43 +++-
- drivers/mmc/host/dw_mmc.c     |    8 +-
- drivers/mmc/host/mmci.c       |   14 +-
- drivers/mmc/host/omap_hsmmc.c |   18 +-
+Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+---
+ drivers/mmc/core/host.c       |   14 ++++++++++++++
  drivers/mmc/host/sdhci-acpi.c |    1 -
  drivers/mmc/host/sdhci-pci.c  |    1 -
- drivers/mmc/host/sdhci.c      |  137 +++++++++--
- include/linux/mmc/card.h      |    3 +
- include/linux/mmc/core.h      |    5 +-
- include/linux/mmc/host.h      |    5 +
- include/linux/mmc/mmc.h       |   21 ++
- include/linux/mmc/pm.h        |    1 +
- include/linux/mmc/sdhci.h     |    1 +
- 18 files changed, 909 insertions(+), 206 deletions(-)
+ 3 files changed, 14 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 270d58a..a81ce09 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -22,6 +22,7 @@
+ #include <linux/leds.h>
+ #include <linux/slab.h>
+ #include <linux/suspend.h>
++#include <linux/pm_runtime.h>
+ 
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/card.h>
+@@ -39,9 +40,15 @@ static void mmc_host_classdev_release(struct device *dev)
+ 	kfree(host);
+ }
+ 
++static const struct dev_pm_ops mmc_host_class_pm_ops = {
++	SET_RUNTIME_PM_OPS(pm_generic_runtime_suspend,
++			pm_generic_runtime_resume, NULL)
++};
++
+ static struct class mmc_host_class = {
+ 	.name		= "mmc_host",
+ 	.dev_release	= mmc_host_classdev_release,
++	.pm		= &mmc_host_class_pm_ops,
+ };
+ 
+ int mmc_register_host_class(void)
+@@ -524,6 +531,13 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 	host->max_blk_size = 512;
+ 	host->max_blk_count = PAGE_CACHE_SIZE / 512;
+ 
++	pm_runtime_set_active(&host->class_dev);
++	pm_runtime_enable(&host->class_dev);
++	/*
++	 * ignore the children by default
++	 */
++	pm_suspend_ignore_children(&host->class_dev, true);
++
+ 	return host;
+ 
+ free:
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index e3e56d3..caefad6 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -372,7 +372,6 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 
+ 	if (c->use_runtime_pm) {
+ 		pm_runtime_set_active(dev);
+-		pm_suspend_ignore_children(dev, 1);
+ 		pm_runtime_set_autosuspend_delay(dev, 50);
+ 		pm_runtime_use_autosuspend(dev);
+ 		pm_runtime_enable(dev);
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 0342775..ed8b0e4 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -1548,7 +1548,6 @@ static void sdhci_pci_runtime_pm_allow(struct device *dev)
+ 	pm_runtime_allow(dev);
+ 	pm_runtime_set_autosuspend_delay(dev, 50);
+ 	pm_runtime_use_autosuspend(dev);
+-	pm_suspend_ignore_children(dev, 1);
+ }
+ 
+ static void sdhci_pci_runtime_pm_forbid(struct device *dev)
 -- 
 1.7.10.4
+
