@@ -1,86 +1,64 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
- eMMC5.1 device
-Date: Fri, 19 Dec 2014 09:08:35 +0000
-Message-ID: <17296D9F8FF2234F831FC3DF505A87A911BB2EFF@shsmsx102.ccr.corp.intel.com>
-References: <20141219080442.GA3775@intel.com>
- <CAPDyKFp+a+6suhommHuxJ1TnaV6tr9EdB8_Ut543FjHFwUYrLw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 1/2] mmc: sdhci-esdhc-imx: Fixup ->remove()
+Date: Fri, 19 Dec 2014 10:45:43 +0100
+Message-ID: <1418982343-8023-1-git-send-email-ulf.hansson@linaro.org>
+References: <0002-mmc-sdhci-esdhc-imx-Fixup-runtime-PM-conditions-duri.patch>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:17031 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751821AbaLSJIk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 19 Dec 2014 04:08:40 -0500
-In-Reply-To: <CAPDyKFp+a+6suhommHuxJ1TnaV6tr9EdB8_Ut543FjHFwUYrLw@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-lb0-f170.google.com ([209.85.217.170]:39854 "EHLO
+	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751243AbaLSJpu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 04:45:50 -0500
+Received: by mail-lb0-f170.google.com with SMTP id 10so505502lbg.29
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 01:45:48 -0800 (PST)
+In-Reply-To: <0002-mmc-sdhci-esdhc-imx-Fixup-runtime-PM-conditions-duri.patch>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: Dong Aisheng <b29396@freescale.com>, Shawn Guo <shawn.guo@linaro.org>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
-aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBGcmlkYXksIERlY2VtYmVyIDE5
-LCAyMDE0IDU6MDIgUE0NCj4gVG86IERvbmcsIENodWFueGlhbw0KPiBDYzogbGludXgtbW1jDQo+
-IFN1YmplY3Q6IFJlOiBbUkZDIFBBVENIIDAvNV1tbWM6IFNvZnQgQ29tbWFuZCBxdWV1ZSBpbXBs
-ZW1lbnRhdGlvbiBmb3INCj4gZU1NQzUuMSBkZXZpY2UNCj4gDQo+IE9uIDE5IERlY2VtYmVyIDIw
-MTQgYXQgMDk6MDQsIENodWFueGlhbyBEb25nIDxjaHVhbnhpYW8uZG9uZ0BpbnRlbC5jb20+DQo+
-IHdyb3RlOg0KPiA+IEhlbGxvLA0KPiA+DQo+ID4gU2VlbXMgY29tbXVuaXR5IGFscmVhZHkgaGF2
-ZSBzb21lIGltcGxlbWVudGF0aW9uIGZvciB0aGUgZU1NQzUuMQ0KPiA+IGRldmljZSBjb21tYW5k
-IHF1ZXVlIGZlYXR1cmUsIGJ1dCB0aGF0IHJlcXVpcmUgdGhlIGVNTUMgaG9zdA0KPiA+IGNvbnRy
-b2xsZXIgdG8gc3VwcG9ydCBDTURRLiBJbiBteSBwbGF0Zm9ybSwgSSBkb24ndCBoYXZlIHRoaXMg
-a2luZCBvZg0KPiA+IGVNTUMgaG9zdCBjb250cm9sbGVyIGJ1dCBJIGhhdmUgYSBTYW1zdW5nIGVN
-TUM1LjEgZGV2aWNlIHdoaWNoIGNhbg0KPiBzdXBwb3J0IHRoZSBDb21tYW5kIHF1ZXVlLg0KPiA+
-DQo+ID4gV2l0aCB0aGlzIGxpbWl0YXRpb24sIEkgaGF2ZSB0byBsZXQgZU1NQyBob3N0IGNvbnRy
-b2xsZXIgdG8gbWFudWFsbHkNCj4gPiBzZW5kIHRoZSBDTUQ0NC80NS8xMy80Ni80Ny4gU28gaW4g
-dGhpcyB3YXksIG1vcmUgY29tbWFuZHMgYXJlIG5lZWRlZA0KPiA+IGZvciBhbiBJL08gcmVxdWVz
-dCwgbW9yZSBpbnRlcnJ1cHRzL3NjaGVkdWxlIGFyZSBuZWVkZWQgaW4gZHJpdmVyLg0KPiA+DQo+
-ID4gRXZlbiB0aGlzIHdheSBoYXZlIHNvbWUgbW9yZSBzb2Z0d2FyZSBvdmVyaGVhZCwgYnV0IGl0
-IGNhbiBzdGlsbCB1c2UNCj4gPiB0aGUgZU1NQzUuMSBkZXZpY2UgQ29tbWFuZCBxdWV1ZSBmZWF0
-dXJlLiBBZnRlciB0ZXN0IHdpdGggdGhlIGlvem9uZQ0KPiBjb21tYW5kOg0KPiA+ICJpb3pvbmUg
-LXplYyAtdCA0IC1pMCAtaTIgLUYgaW96b25lZmlsZTEgaW96b25lZmlsZTIgaW96b25lZmlsZTMN
-Cj4gPiBpb3pvbmVmaWxlNCAtK24gLUkgLXIgNGsgLXMgNTAwbSAtTyAtUiAtK3IgLStEIiB0byB0
-ZXN0IHJhbmRvbQ0KPiA+IHBlcmZvcm1hbmNlLCBJIHNhdyBhIHBlcmZvcm1hbmNlIGltcHJvdm1l
-bnQgZm9yIHJhbmRvbSByZWFkIG9uIG15DQo+IGVNTUM1LjEgZGV2aWNlOg0KPiA+DQo+ID4gICAg
-ICAgICAgICAgICAgIFJhbmRvbSByZWFkDQo+ID4gU1cgQ01EUTogICAgICAgIDU1NDQuNg0KPiA+
-IE5vcm1hbCBSZWFkOiAgICAzOTkzLjA1DQo+IA0KPiBUaGFua3MgZm9yIHRoZSBwYXRjaHNldCBD
-aHVhbnhpYW8hIEkgd2lsbCBzcGVuZCBzb21lIHRpbWUgcmV2aWV3aW5nIHRoaXMgaW4NCj4gbW9y
-ZSBkZXRhaWwgYXMgc29vbiBhcyBJIGNhbi4NCj4gDQo+IE9uZSBpbXBvcnRhbnQgcG9pbnQgdGhv
-dWdoLCBiZWZvcmUgSSBzdGFydCByZXZpZXdpbmcuIEkgd291bGQgbGlrZSB0aGUgIk5vcm1hbA0K
-PiByZWFkIiB0byBiZSBwZXJmb3JtZWQgZm9yIGEgaG9zdCBkcml2ZXIgc3VwcG9ydGluZyB0aGUg
-YXN5bmNocm9ub3VzIG1tYw0KPiByZXF1ZXN0IGZlYXR1cmUuIEN1cnJlbnRseSBzZGhjaSBkb24n
-dCBzdXBwb3J0IHRoaXMsIGJ1dCB0aGVyZSBpcyBwYXRjaA0KPiBzdWdnZXN0aW5nIHRvIGFkZCB0
-aGlzIHdoaWNoIHlvdSBtaWdodCB3YW50IHRvIHVzZS9yZXZpZXcuDQo+IGh0dHBzOi8vd3d3Lm1h
-cmMuaW5mby8/bD1saW51eC1tbWMmbT0xNDE4MTE1ODg2MDc0MzImdz0yDQo+IA0KPiBLaW5kIHJl
-Z2FyZHMNCj4gVWZmZQ0KVGhhbmtzIFVmZmUgZm9yIHRoZSBzaGFyaW5nLiBJIHdpbGwgbG9vayBp
-bnRvIHRoaXMgcGF0Y2ggYW5kIHRyeSBvbiBteSBwbGF0Zm9ybS4NCg0KVGhhbmtzDQpDaHVhbnhp
-YW8NCg0KPiANCj4gPg0KPiA+IFNvIEkgd2FudCB0byBzZW5kIHRoaXMgc2VyaWFsIHBhdGNoZXMg
-YXMgUkZDIHBhdGNoIGZvciByZXZpZXdpbmcNCj4gPg0KPiA+DQo+ID4gQ2h1YW54aWFvIERvbmcg
-KDUpOg0KPiA+ICAgbW1jOiByZXBsYWNlIHNiYyB0byBwcmVjbWQgYW5kIGFkZCBwb3N0Y21kDQo+
-ID4gICBtbWM6IGhvc3Q6IGFkZCBydW50aW1lIFBNIGZvciBob3N0IGNsYXNzIGRldg0KPiA+ICAg
-bW1jOiBxdWV1ZTogY2hhbmdlIG1xcnFfY3VyIGFuZCBtcXJxX3ByZSB0byBtcSBxZGVwdGgNCj4g
-PiAgIG1tYzogY29yZTogYWRkIHN1cHBvcnQgZm9yIENNRFEgZmVhdHVyZSBpbiBNTUMgQ29yZSBz
-dGFjaw0KPiA+ICAgbW1jOiBzZGhjaTogYWRkIFNXIENNRFEgc3VwcG9ydCBmb3IgQ0hUIFNESENJ
-IGhvc3QNCj4gPg0KPiA+ICBkcml2ZXJzL21tYy9jYXJkL2Jsb2NrLmMgICAgICB8ICA1MzgNCj4g
-KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKystLS0NCj4gPiAgZHJpdmVycy9t
-bWMvY2FyZC9xdWV1ZS5jICAgICAgfCAgMjEzICsrKysrKysrLS0tLS0tLS0NCj4gPiAgZHJpdmVy
-cy9tbWMvY2FyZC9xdWV1ZS5oICAgICAgfCAgIDE0ICstDQo+ID4gIGRyaXZlcnMvbW1jL2NvcmUv
-Y29yZS5jICAgICAgIHwgICA3OCArKysrKy0NCj4gPiAgZHJpdmVycy9tbWMvY29yZS9ob3N0LmMg
-ICAgICAgfCAgIDE0ICsrDQo+ID4gIGRyaXZlcnMvbW1jL2NvcmUvbW1jLmMgICAgICAgIHwgICA0
-MyArKystDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMgICAgIHwgICAgOCArLQ0KPiA+
-ICBkcml2ZXJzL21tYy9ob3N0L21tY2kuYyAgICAgICB8ICAgMTQgKy0NCj4gPiAgZHJpdmVycy9t
-bWMvaG9zdC9vbWFwX2hzbW1jLmMgfCAgIDE4ICstDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3Qvc2Ro
-Y2ktYWNwaS5jIHwgICAgMSAtDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGNpLmMgIHwg
-ICAgMSAtDQo+ID4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyAgICAgIHwgIDEzNyArKysrKysr
-KystLQ0KPiA+ICBpbmNsdWRlL2xpbnV4L21tYy9jYXJkLmggICAgICB8ICAgIDMgKw0KPiA+ICBp
-bmNsdWRlL2xpbnV4L21tYy9jb3JlLmggICAgICB8ICAgIDUgKy0NCj4gPiAgaW5jbHVkZS9saW51
-eC9tbWMvaG9zdC5oICAgICAgfCAgICA1ICsNCj4gPiAgaW5jbHVkZS9saW51eC9tbWMvbW1jLmgg
-ICAgICAgfCAgIDIxICsrDQo+ID4gIGluY2x1ZGUvbGludXgvbW1jL3BtLmggICAgICAgIHwgICAg
-MSArDQo+ID4gIGluY2x1ZGUvbGludXgvbW1jL3NkaGNpLmggICAgIHwgICAgMSArDQo+ID4gIDE4
-IGZpbGVzIGNoYW5nZWQsIDkwOSBpbnNlcnRpb25zKCspLCAyMDYgZGVsZXRpb25zKC0pDQo+ID4N
-Cj4gPiAtLQ0KPiA+IDEuNy4xMC40DQo+ID4gLS0NCj4gPiBUbyB1bnN1YnNjcmliZSBmcm9tIHRo
-aXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtbW1jIg0KPiA+IGluIHRo
-ZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFq
-b3Jkb21vDQo+ID4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5m
-by5odG1sDQo=
+Since sdhci_remove_host() access the device, we need to make sure it's
+runtime PM resumed.
+
+To handle clock gating properly in remove, we first have to make sure
+the clocks are ungated.
+
+To fix both these issues, by invoking pm_runtime_get_sync() early in
+->remove() callback. Later once we disabled runtime PM, we can restore
+the usage count.
+
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 15 +++++++--------
+ 1 file changed, 7 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index af1f7c0..043866c 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1103,16 +1103,15 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
+ 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
+ 	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
+ 
+-	sdhci_remove_host(host, dead);
+-
+-	pm_runtime_dont_use_autosuspend(&pdev->dev);
++	pm_runtime_get_sync(&pdev->dev);
+ 	pm_runtime_disable(&pdev->dev);
++	pm_runtime_put_noidle(&pdev->dev);
+ 
+-	if (!IS_ENABLED(CONFIG_PM)) {
+-		clk_disable_unprepare(imx_data->clk_per);
+-		clk_disable_unprepare(imx_data->clk_ipg);
+-		clk_disable_unprepare(imx_data->clk_ahb);
+-	}
++	sdhci_remove_host(host, dead);
++
++	clk_disable_unprepare(imx_data->clk_per);
++	clk_disable_unprepare(imx_data->clk_ipg);
++	clk_disable_unprepare(imx_data->clk_ahb);
+ 
+ 	sdhci_pltfm_free(pdev);
+ 
+-- 
+1.9.1
+
