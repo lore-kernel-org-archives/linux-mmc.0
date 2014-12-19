@@ -1,1012 +1,273 @@
 From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [RFC PATCH 4/5] mmc: core: add support for CMDQ feature in MMC Core
- stack
-Date: Fri, 19 Dec 2014 16:05:52 +0800
-Message-ID: <20141219080552.GE3775@intel.com>
+Subject: [RFC PATCH 5/5] mmc: sdhci: add SW CMDQ support for CHT SDHCI host
+Date: Fri, 19 Dec 2014 16:06:02 +0800
+Message-ID: <20141219080602.GF3775@intel.com>
 Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:45668 "EHLO mga11.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:32252 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751821AbaLSIHE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 19 Dec 2014 03:07:04 -0500
+	id S1751821AbaLSIHL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 19 Dec 2014 03:07:11 -0500
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 
 
-CMDQ is a new feature introduced in eMMC5.1, which can be used
-for helpping improve the read performance.
-
-This patch add the support in mmc block layer and core layer.
-
-The CMDQ requires to send 4 CMDs and 5 interrupts, thus it has additional
-SW overhead. When CPU frequence is low, it may impact the random read
-performance. With ondemand CPU governor used in GMIN, it can improve
-the read performance a lot.
+Add the CMDQ support to SDHCI host interface and CHT SDHCI
+host interface
 
 Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 ---
- drivers/mmc/card/block.c |  476 ++++++++++++++++++++++++++++++++++++++++++++--
- drivers/mmc/card/queue.c |   23 ++-
- drivers/mmc/card/queue.h |    3 +-
- drivers/mmc/core/core.c  |   56 +++++-
- drivers/mmc/core/mmc.c   |   43 ++++-
- include/linux/mmc/card.h |    3 +
- include/linux/mmc/core.h |    2 +
- include/linux/mmc/host.h |    5 +
- include/linux/mmc/mmc.h  |   21 ++
- include/linux/mmc/pm.h   |    1 +
- 10 files changed, 610 insertions(+), 23 deletions(-)
+ drivers/mmc/host/sdhci.c  |  121 +++++++++++++++++++++++++++++++++++++++------
+ include/linux/mmc/sdhci.h |    1 +
+ 2 files changed, 108 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 91d2555..357d382 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -112,6 +112,7 @@ struct mmc_blk_data {
- #define MMC_BLK_WRITE		BIT(1)
- #define MMC_BLK_DISCARD		BIT(2)
- #define MMC_BLK_SECDISCARD	BIT(3)
-+#define MMC_BLK_CMDQ		BIT(4)
- 
- 	/*
- 	 * Only set in main mmc_blk_data associated
-@@ -139,7 +140,10 @@ MODULE_PARM_DESC(perdev_minors, "Minors numbers to allocate per device");
- static inline int mmc_blk_part_switch(struct mmc_card *card,
- 				      struct mmc_blk_data *md);
- static int get_card_status(struct mmc_card *card, u32 *status, int retries);
--static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc);
-+static int mmc_blk_issue_rw_rq(struct mmc_queue *mq,
-+		struct request *rqc, bool urgent);
-+static int mmc_blk_queue_cmdq_req(struct mmc_queue *mq,
-+		struct mmc_queue_req *mqrq, unsigned long *);
- 
- static inline void mmc_blk_clear_packed(struct mmc_queue_req *mqrq)
- {
-@@ -654,13 +658,49 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
- 
- 	if (mmc_card_mmc(card)) {
- 		u8 part_config = card->ext_csd.part_config;
-+		struct mmc_host *host = card->host;
- 
- 		/*
--		 * before switching partition, needs to make
--		 * sure there is no active transferring in previous
--		 * queue
-+		 * Before swithcing the partition, need to do following
-+		 * checks:
-+		 * 1. there is no on going request in previous queue
-+		 * 2. if switch to RPMB partition, CMDQ should be disabled
-+		 * 3. if switch to other partition, CMDQ should be back to
-+		 * previous status
- 		 */
--		mmc_blk_issue_rw_rq(main_md->mq_curr, NULL);
-+		mmc_blk_issue_rw_rq(main_md->mq_curr, NULL, false);
-+
-+		if ((md->part_type != EXT_CSD_PART_CONFIG_USER) &&
-+				card->ext_csd.cmdq_en) {
-+			/* disable CMDQ mode */
-+			ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+					EXT_CSD_CMDQ_MODE_EN,
-+					EXT_CSD_CMDQ_MODE_OFF,
-+					card->ext_csd.generic_cmd6_time);
-+			if (ret)
-+				return ret;
-+			card->ext_csd.cmdq_en = 0;
-+			pm_suspend_ignore_children(&host->class_dev, true);
-+		} else if ((md->part_type == EXT_CSD_PART_CONFIG_USER) &&
-+					card->ext_csd.cmdq_support &&
-+				!card->ext_csd.cmdq_en) {
-+			/* enable CMDQ mode */
-+			ret = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+					EXT_CSD_CMDQ_MODE_EN,
-+					EXT_CSD_CMDQ_MODE_ON,
-+					card->ext_csd.generic_cmd6_time);
-+			/*
-+			 * if err during turning on CMDQ mode, continue with
-+			 * CMDQ disabled mode
-+			 */
-+			if (!ret)
-+				card->ext_csd.cmdq_en = 1;
-+		}
-+
-+		if ((card->host->pm_caps & MMC_PM_TUNING_AFTER_RTRESUME) &&
-+				card->ext_csd.cmdq_en)
-+			pm_suspend_ignore_children(&card->host->class_dev,
-+					false);
- 
- 		part_config &= ~EXT_CSD_PART_CONFIG_ACC_MASK;
- 		part_config |= md->part_type;
-@@ -1374,6 +1414,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 			  (req->cmd_flags & REQ_META)) &&
- 		(rq_data_dir(req) == WRITE) &&
- 		(md->flags & MMC_BLK_REL_WR);
-+	bool cmdq_en  = card->ext_csd.cmdq_en ? true : false;
- 
- 	memset(brq, 0, sizeof(struct mmc_blk_request));
- 	brq->mrq.cmd = &brq->cmd;
-@@ -1382,11 +1423,14 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 	brq->cmd.arg = blk_rq_pos(req);
- 	if (!mmc_card_blockaddr(card))
- 		brq->cmd.arg <<= 9;
--	brq->cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
--	brq->data.blksz = 512;
-+	if (!cmdq_en)
-+		brq->cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-+	else
-+		brq->cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
- 	brq->stop.opcode = MMC_STOP_TRANSMISSION;
- 	brq->stop.arg = 0;
- 	brq->data.blocks = blk_rq_sectors(req);
-+	brq->data.blksz = 512;
- 
- 	/*
- 	 * The block layer doesn't support all sector count
-@@ -1416,7 +1460,11 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 						brq->data.blocks);
- 	}
- 
--	if (brq->data.blocks > 1 || do_rel_wr) {
-+	/* CMDQ doesn't require stop cmd, and use CMD45 for mrq.cmd */
-+	if (cmdq_en) {
-+		brq->mrq.stop = NULL;
-+		readcmd = writecmd = MMC_QUE_TASK_ADDR;
-+	} else if (brq->data.blocks > 1 || do_rel_wr) {
- 		/* SPI multiblock writes terminate using a special
- 		 * token, not a STOP_TRANSMISSION request.
- 		 */
-@@ -1474,8 +1522,35 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 	 * N.B: Some MMC cards experience perf degradation.
- 	 * We'll avoid using CMD23-bounded multiblock writes for
- 	 * these, while retaining features like reliable writes.
-+	 *
-+	 * If CMDQ is enabled, then we use CMD44 for precmd, and
-+	 * CMD46/47 for postcmd
- 	 */
--	if ((md->flags & MMC_BLK_CMD23) && mmc_op_multi(brq->cmd.opcode) &&
-+	if (cmdq_en) {
-+		brq->precmd.opcode = MMC_QUE_TASK_PARAMS;
-+		brq->precmd.arg = brq->data.blocks |
-+			(do_rel_wr ? (1 << 31) : 0) |
-+			((rq_data_dir(req) == READ) ? (1 << 30) : 0) |
-+			(do_data_tag ? (1 << 29) : 0) |
-+			mqrq->task_id << 16;
-+		brq->precmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-+		brq->mrq.precmd = &brq->precmd;
-+
-+		if (rq_data_dir(req) == READ)
-+			brq->postcmd.opcode = MMC_EXECUTE_READ_TASK;
-+		else
-+			brq->postcmd.opcode = MMC_EXECUTE_WRITE_TASK;
-+		brq->postcmd.arg = mqrq->task_id << 16;
-+		brq->postcmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-+		brq->mrq.postcmd = &brq->postcmd;
-+
-+		brq->cmd2.opcode = MMC_SEND_STATUS;
-+		if (!mmc_host_is_spi(card->host))
-+			brq->cmd2.arg = card->rca << 16 | 1 << 15;
-+		brq->cmd2.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
-+		brq->mrq.cmd2 = &brq->cmd2;
-+	} else if ((md->flags & MMC_BLK_CMD23) &&
-+			mmc_op_multi(brq->cmd.opcode) &&
- 	    (do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO_CMD23) ||
- 	     do_data_tag)) {
- 		brq->precmd.opcode = MMC_SET_BLOCK_COUNT;
-@@ -1825,7 +1900,7 @@ static void mmc_blk_revert_packed_req(struct mmc_queue *mq,
- 	mmc_blk_clear_packed(mq_rq);
- }
- 
--static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
-+static int mmc_blk_issue_normal_rw_rq(struct mmc_queue *mq, struct request *rqc)
- {
- 	struct mmc_blk_data *md = mq->data;
- 	struct mmc_card *card = md->queue.card;
-@@ -2019,7 +2094,376 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 	return 0;
- }
- 
--static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
-+static void mmc_blk_wait_cmdq_data(struct mmc_request *mrq)
-+{
-+	struct mmc_host		*host = mrq->host;
-+	struct mmc_queue_req	*mqrq;
-+	struct request		*req;
-+	int error, bytes;
-+	bool partial;
-+
-+	BUG_ON(!mrq->data);
-+	BUG_ON(!host->areq);
-+
-+	mqrq = container_of(host->areq, struct mmc_queue_req, mmc_active);
-+	req = mqrq->req;
-+	/* Not sure if this req is successfully transferred, let's check! */
-+	mqrq->mmc_active.success = false;
-+	/* when it is done, clear cmdqslot */
-+	mmc_queue_bounce_post(mqrq);
-+	error = mrq->data->error;
-+	bytes = mrq->data->bytes_xfered;
-+	partial = (blk_rq_bytes(req) != bytes) ? true : false;
-+	host->context_info.is_done_rcv = true;
-+	wake_up_interruptible(&mrq->host->context_info.wait);
-+	if (error) {
-+		pr_err("%s: data err %d for id %d\n",
-+				__func__, error, mqrq->task_id);
-+	} else if (!partial) {
-+		mqrq->mmc_active.success = true;
-+		blk_end_request(req, 0, bytes);
-+	}
-+}
-+
-+static int mmc_blk_cmdq_check(struct mmc_card *card, unsigned long *status)
-+{
-+	struct mmc_command cmd = {0};
-+	int err, retries = 3;
-+
-+	cmd.opcode = MMC_SEND_STATUS;
-+	if (!mmc_host_is_spi(card->host))
-+		cmd.arg = card->rca << 16 | 1 << 15;
-+	cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC;
-+	err = mmc_wait_for_cmd(card->host, &cmd, retries);
-+	if (err == 0)
-+		*status = (unsigned long)cmd.resp[0];
-+	else
-+		pr_err("%s: err %d\n", __func__, err);
-+
-+	return err;
-+}
-+
-+/*
-+ * return:
-+ * 0 for success;
-+ * MMC_BLK_NEW_REQUEST: interrupted for fetching new request;
-+ * negative lavue: failure
-+ */
-+static int mmc_blk_execute_cmdq(struct mmc_queue *mq,
-+		unsigned long slots)
-+{
-+	struct mmc_card *card = mq->card;
-+	struct mmc_blk_data *md = mq->data;
-+	struct mmc_host *host = card->host;
-+	struct mmc_async_req	*areq;
-+	struct mmc_queue_req	*prev_mqrq;
-+	int err, status = 0;
-+	unsigned long id;
-+	struct mmc_context_info *cntx;
-+	cntx = &host->context_info;
-+
-+	do {
-+		id = find_first_bit(&slots, mq->qdepth);
-+		if (id < mq->qdepth)
-+			areq = &mq->mqrq[id].mmc_active;
-+		else
-+			areq = NULL;
-+
-+		if (host->areq)
-+			prev_mqrq = container_of(host->areq,
-+					struct mmc_queue_req,
-+					mmc_active);
-+		else
-+			prev_mqrq = NULL;
-+
-+		err = mmc_execute_cmdq(host, areq, &status);
-+		if (prev_mqrq && (status == MMC_BLK_SUCCESS)) {
-+			clear_bit_unlock(prev_mqrq->task_id, &mq->cmdqslot);
-+			if (atomic_dec_and_test(&mq->active_slots))
-+				cntx->is_cmdq_busy = false;
-+		}
-+		if (err)
-+			return err;
-+
-+		if (host->areq && (host->areq == areq) &&
-+				(atomic_read(&mq->active_slots) == 1))
-+			cntx->is_last_cmdq = true;
-+
-+		switch (status) {
-+		case MMC_BLK_SUCCESS:
-+			mmc_blk_reset_success(md, MMC_BLK_CMDQ);
-+			break;
-+		case MMC_BLK_PARTIAL:
-+			mmc_blk_reset_success(md, MMC_BLK_CMDQ);
-+			/* re-queue */
-+			BUG_ON(!prev_mqrq);
-+			blk_end_request(prev_mqrq->req, 0,
-+					prev_mqrq->brq.data.bytes_xfered);
-+			err = mmc_blk_queue_cmdq_req(mq, prev_mqrq, NULL);
-+			if (err)
-+				return err;
-+			break;
-+		case MMC_BLK_NEW_REQUEST:
-+			cntx->is_pending_cmdq = true;
-+			return MMC_BLK_NEW_REQUEST;
-+		default:
-+			return -EIO;
-+		}
-+
-+		/* this is just a flush operation */
-+		if (!areq)
-+			return 0;
-+
-+		__clear_bit(id, &slots);
-+	} while (status);
-+
-+	return 0;
-+}
-+
-+static int mmc_blk_flush_cmdq(struct mmc_queue *mq, bool urgent)
-+{
-+	int err;
-+	unsigned long status;
-+	struct mmc_host *host = mq->card->host;
-+
-+	if (!mq)
-+		return 0;
-+
-+	if (host->context_info.is_pending_cmdq) {
-+		host->context_info.is_pending_cmdq = false;
-+		err = mmc_blk_execute_cmdq(mq, 0);
-+		if (err)
-+			return err;
-+	}
-+
-+	while (mq->cmdqslot) {
-+		/* last CMDQ data */
-+		if (mq->card->host->context_info.is_last_cmdq)
-+			return mmc_blk_execute_cmdq(mq, 0);
-+
-+		/*
-+		 * send CMD13 to check QSR
-+		 */
-+		status = 0;
-+		do {
-+			err = mmc_blk_cmdq_check(mq->card, &status);
-+			if (err)
-+				return err;
-+		} while (!status);
-+		err = mmc_blk_execute_cmdq(mq, status);
-+		if (err)
-+			return err;
-+
-+		if (urgent)
-+			return mmc_blk_execute_cmdq(mq, 0);
-+	};
-+
-+	return 0;
-+}
-+
-+static int mmc_blk_cmdq_data_err_check(struct mmc_card *card,
-+		struct mmc_async_req *areq)
-+{
-+	struct mmc_queue_req *mqrq = container_of(areq, struct mmc_queue_req,
-+						    mmc_active);
-+	struct mmc_blk_request *brq = &mqrq->brq;
-+	struct request *req = mqrq->req;
-+	int err, gen_err = 0;
-+
-+	/* check card status */
-+	if (brq->data.flags & MMC_DATA_WRITE) {
-+		err = card_busy_detect(card, MMC_BLK_TIMEOUT_MS, false, req,
-+					&gen_err);
-+		if (err || gen_err)
-+			return MMC_BLK_ABORT;
-+	}
-+
-+	if (areq->success)
-+		return MMC_BLK_SUCCESS;
-+
-+	if (brq->data.error)
-+		return MMC_BLK_ABORT;
-+
-+	if (blk_rq_bytes(mqrq->req) != brq->data.bytes_xfered)
-+		return MMC_BLK_PARTIAL;
-+
-+	return MMC_BLK_SUCCESS;
-+}
-+
-+static int mmc_blk_queue_cmdq_req(struct mmc_queue *mq,
-+		struct mmc_queue_req *mqrq, unsigned long *status)
-+{
-+	struct mmc_card *card;
-+	struct mmc_request mrq = {0};
-+	struct mmc_async_req *areq;
-+	int err;
-+
-+	if (!mq || !mqrq)
-+		return -EPERM;
-+
-+	card = mq->card;
-+	mmc_blk_rw_rq_prep(mqrq, card, 0, mq);
-+
-+	card->host->context_info.is_last_cmdq = false;
-+	areq = &mqrq->mmc_active;
-+	areq->mrq->host = card->host;
-+	areq->mrq->done = mmc_blk_wait_cmdq_data;
-+	areq->err_check = mmc_blk_cmdq_data_err_check;
-+
-+	mrq.precmd = areq->mrq->precmd;
-+	mrq.cmd = areq->mrq->cmd;
-+	if (status)
-+		mrq.cmd2 = areq->mrq->cmd2;
-+
-+	mmc_wait_for_req(card->host, &mrq);
-+	if (mrq.cmd->error) {
-+		pr_err("%s: error %d for cmd %d\n", __func__,
-+				mrq.cmd->error, mrq.cmd->opcode);
-+		return mrq.cmd->error;
-+	} else if (mrq.precmd->error) {
-+		pr_err("%s: error %d for precmd %d\n", __func__,
-+				mrq.cmd->error, mrq.cmd->opcode);
-+		return mrq.precmd->error;
-+	}
-+
-+	card->host->context_info.is_cmdq_busy = true;
-+
-+	if (card->host->context_info.is_pending_cmdq) {
-+		card->host->context_info.is_pending_cmdq = false;
-+		err = mmc_blk_execute_cmdq(mq, 0);
-+		if (err && (err != MMC_BLK_NEW_REQUEST)) {
-+			pr_err("%s: error %d when flushing pending data\n",
-+					__func__, err);
-+			return err;
-+		}
-+	}
-+
-+	if (status && mrq.cmd2)
-+		*status = (unsigned long)mrq.cmd2->resp[0];
-+
-+	return 0;
-+}
-+
-+static int mmc_blk_requeue_cmdq_reqs(struct mmc_host *host,
-+		struct mmc_queue *mq)
-+{
-+	int err;
-+	unsigned int slot;
-+	unsigned long cmdqslot;
-+
-+	cmdqslot = mq->cmdqslot;
-+
-+	while (cmdqslot) {
-+		slot = find_first_bit(&cmdqslot, mq->qdepth);
-+		err = mmc_blk_queue_cmdq_req(mq, &mq->mqrq[slot], NULL);
-+		if (err)
-+			return err;
-+		__clear_bit(slot, &cmdqslot);
-+	};
-+
-+	return 0;
-+}
-+
-+static void mmc_blk_discard_cmdq(struct mmc_card *card)
-+{
-+	struct mmc_command cmd = {0};
-+
-+	cmd.opcode = MMC_DISCARD_CMDQ;
-+	cmd.arg = 1;
-+	cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
-+
-+	mmc_wait_for_cmd(card->host, &cmd, 0);
-+}
-+
-+static int mmc_blk_issue_cmdq_rw_rq(struct mmc_queue *mq,
-+		struct request *rqc, bool urgent)
-+{
-+	struct mmc_card *card = mq->card;
-+	struct mmc_blk_data *md = mq->data;
-+	struct request *req;
-+	int err, type = MMC_BLK_CMDQ;
-+	unsigned long status = 0, i;
-+
-+flush:
-+	if (!rqc) {
-+		/* there are some CMDQ data pending, flush them */
-+		err = mmc_blk_flush_cmdq(mq, urgent);
-+		if (err && (err != MMC_BLK_NEW_REQUEST)) {
-+			pr_err("%s: error %d when flushing cmdq\n", __func__,
-+					err);
-+			goto requeue;
-+		}
-+		return 0;
-+	}
-+
-+	atomic_inc(&mq->active_slots);
-+
-+	if (mmc_blk_queue_cmdq_req(mq, mq->mqrq_cur, &status))
-+		goto requeue;
-+
-+	if (!status)
-+		return 0;
-+recheck:
-+	err = mmc_blk_execute_cmdq(mq, status);
-+	if (!err || (err == MMC_BLK_NEW_REQUEST))
-+		return 0;
-+requeue:
-+	/*
-+	 * error handling
-+	 */
-+	pr_warn("%s: requeue happens\n", __func__);
-+	if (card->host->areq)
-+		mmc_blk_execute_cmdq(mq, 0);
-+	BUG_ON(card->host->areq);
-+	/*
-+	 * discard the CMDQ
-+	 */
-+	mmc_blk_discard_cmdq(card);
-+
-+	if (!mmc_blk_reset(md, card->host, type)
-+			&& !mmc_blk_requeue_cmdq_reqs(card->host, mq)) {
-+		/* flush error handling */
-+		if (!rqc)
-+			goto flush;
-+		/* normal cmdq error handling */
-+		else {
-+			if (mmc_blk_cmdq_check(card, &status))
-+				goto requeue;
-+			if (!status)
-+				return 0;
-+			goto recheck;
-+		}
-+	}
-+
-+	pr_err("%s: failed to recover eMMC\n", __func__);
-+
-+	while (mq->cmdqslot) {
-+		i = find_first_bit(&mq->cmdqslot, mq->qdepth);
-+		req = mq->mqrq[i].req;
-+		blk_end_request(req, -EIO, blk_rq_bytes(req));
-+		clear_bit_unlock(i, &mq->cmdqslot);
-+		atomic_dec(&mq->active_slots);
-+	};
-+	BUG_ON(atomic_read(&mq->active_slots) != 0);
-+	card->host->context_info.is_cmdq_busy = false;
-+	card->host->context_info.is_last_cmdq = false;
-+	return 0;
-+}
-+
-+static int mmc_blk_issue_rw_rq(struct mmc_queue *mq,
-+		struct request *rqc, bool urgent)
-+{
-+	struct mmc_blk_data *md = mq->data;
-+	struct mmc_card *card = md->queue.card;
-+
-+	if (!card->ext_csd.cmdq_en)
-+		return mmc_blk_issue_normal_rw_rq(mq, rqc);
-+	else
-+		return mmc_blk_issue_cmdq_rw_rq(mq, rqc, urgent);
-+}
-+
-+static int mmc_blk_issue_rq(struct mmc_queue *mq,
-+		struct request *req, bool urgent)
- {
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index bac74ca..da94355 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -743,14 +743,14 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 	struct mmc_data *data = cmd->data;
  	int ret;
- 	struct mmc_blk_data *md = mq->data;
-@@ -2044,7 +2488,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	if (cmd_flags & REQ_DISCARD) {
- 		/* complete ongoing async transfer before issuing discard */
- 		if (atomic_read(&mq->active_slots))
--			mmc_blk_issue_rw_rq(mq, NULL);
-+			mmc_blk_issue_rw_rq(mq, NULL, urgent);
- 		if (req->cmd_flags & REQ_SECURE)
- 			ret = mmc_blk_issue_secdiscard_rq(mq, req);
- 		else
-@@ -2052,7 +2496,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	} else if (cmd_flags & REQ_FLUSH) {
- 		/* complete ongoing async transfer before issuing flush */
- 		if (atomic_read(&mq->active_slots))
--			mmc_blk_issue_rw_rq(mq, NULL);
-+			mmc_blk_issue_rw_rq(mq, NULL, urgent);
- 		ret = mmc_blk_issue_flush(mq, req);
- 	} else {
- 		if (!req && (atomic_read(&mq->active_slots) == 1)) {
-@@ -2060,7 +2504,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 			host->context_info.is_waiting_last_req = true;
- 			spin_unlock_irqrestore(&host->context_info.lock, flags);
- 		}
--		ret = mmc_blk_issue_rw_rq(mq, req);
-+		ret = mmc_blk_issue_rw_rq(mq, req, urgent);
- 	}
  
- out:
-@@ -2485,6 +2929,10 @@ static int mmc_blk_probe(struct device *dev)
- 	if (card->type != MMC_TYPE_SD_COMBO) {
- 		pm_runtime_set_active(&card->dev);
- 		pm_runtime_enable(&card->dev);
-+		if ((card->host->pm_caps & MMC_PM_TUNING_AFTER_RTRESUME) &&
-+				card->ext_csd.cmdq_en)
-+			pm_suspend_ignore_children(&card->host->class_dev,
-+					false);
- 	}
- 
- 	return 0;
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 1f7bb39..a5335ed 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -84,16 +84,21 @@ static int mmc_queue_thread(void *d)
- 		req = blk_fetch_request(q);
- 		spin_unlock_irq(q->queue_lock);
- 
-+		/*
-+		 * For the request which doesn't have data to transfer,
-+		 * we don't need to allocate a mqrq slot for it as it doesn't
-+		 * need the sg to map data
-+		 */
- 		if (req && !(req->cmd_flags & (REQ_DISCARD | REQ_FLUSH))) {
- 			while (!mmc_queue_get_free_slot(mq, &i))
--				mq->issue_fn(mq, NULL);
-+				mq->issue_fn(mq, NULL, true);
- 			mq->mqrq_cur = &mq->mqrq[i];
- 			mq->mqrq_cur->req = req;
- 		}
- 
- 		if (req || atomic_read(&mq->active_slots)) {
- 			set_current_state(TASK_RUNNING);
--			mq->issue_fn(mq, req);
-+			mq->issue_fn(mq, req, false);
- 		} else {
- 			if (kthread_should_stop()) {
- 				set_current_state(TASK_RUNNING);
-@@ -208,11 +213,17 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	if (!mq->queue)
- 		return -ENOMEM;
- 
--	mq->qdepth = 2;
-+	if (card->ext_csd.cmdq_en)
-+		mq->qdepth = card->ext_csd.cmdq_depth;
-+	else
-+		mq->qdepth = 2;
-+
- 	mq->mqrq = kzalloc(mq->qdepth * sizeof(struct mmc_queue_req),
- 			GFP_KERNEL);
--	if (!mq->mqrq)
--		return -ENOMEM;
-+	if (!mq->mqrq) {
-+		ret = -ENOMEM;
-+		goto out;
-+	}
- 
- 	mqrq = mq->mqrq;
- 	for (i = mq->qdepth; i > 0; i--)
-@@ -310,6 +321,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 		mqrq[i].bounce_buf = NULL;
- 	}
- 
-+	kfree(mq->mqrq);
-+out:
- 	blk_cleanup_queue(mq->queue);
- 	return ret;
- }
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index 80d04a8..d64f61f 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -10,6 +10,7 @@ struct mmc_blk_request {
- 	struct mmc_request	mrq;
- 	struct mmc_command	precmd;
- 	struct mmc_command	cmd;
-+	struct mmc_command	cmd2;
- 	struct mmc_command	postcmd;
- 	struct mmc_command	stop;
- 	struct mmc_data		data;
-@@ -52,7 +53,7 @@ struct mmc_queue {
- 	unsigned int		flags;
- #define MMC_QUEUE_SUSPENDED	(1 << 0)
- 
--	int			(*issue_fn)(struct mmc_queue *, struct request *);
-+	int	(*issue_fn)(struct mmc_queue *, struct request *, bool);
- 	void			*data;
- 	struct request_queue	*queue;
- 	struct mmc_queue_req	*mqrq;
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 4c32606..9667a78 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -147,8 +147,6 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
- 	} else {
- 		mmc_should_fail_request(host, mrq);
- 
--		led_trigger_event(host->led, LED_OFF);
+-	WARN_ON(host->data);
 -
- 		if (mrq->precmd) {
- 			pr_debug("%s: req done <CMD%u>: %d: %08x %08x %08x %08x\n",
- 				mmc_hostname(host), mrq->precmd->opcode,
-@@ -176,6 +174,14 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
- 				mrq->stop->resp[2], mrq->stop->resp[3]);
+ 	if (data || (cmd->flags & MMC_RSP_BUSY))
+ 		sdhci_set_timeout(host, cmd);
+ 
+ 	if (!data)
+ 		return;
+ 
++	WARN_ON(host->data);
++
+ 	/* Sanity checks */
+ 	BUG_ON(data->blksz * data->blocks > 524288);
+ 	BUG_ON(data->blksz > host->mmc->max_blk_size);
+@@ -930,7 +930,9 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+ 	WARN_ON(!host->data);
+ 
+ 	mode = SDHCI_TRNS_BLK_CNT_EN;
+-	if (mmc_op_multi(cmd->opcode) || data->blocks > 1) {
++	if (mmc_op_cmdq_execute_task(cmd->opcode) && (data->blocks > 1))
++		mode |= SDHCI_TRNS_MULTI;
++	else if (mmc_op_multi(cmd->opcode) || (data->blocks > 1)) {
+ 		mode |= SDHCI_TRNS_MULTI;
+ 		/*
+ 		 * If we are sending CMD23, CMD12 never gets sent
+@@ -1004,8 +1006,12 @@ static void sdhci_finish_data(struct sdhci_host *host)
  		}
  
-+		if (mmc_op_cmdq_execute_task(cmd->opcode) && !mrq->data) {
-+			if (mrq->done)
-+				mrq->done(mrq);
-+			return;
-+		}
-+
-+		led_trigger_event(host->led, LED_OFF);
-+
- 		if (mrq->done)
- 			mrq->done(mrq);
- 
-@@ -361,6 +367,7 @@ static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
- {
- 	init_completion(&mrq->completion);
- 	mrq->done = mmc_wait_done;
-+	mrq->host = host;
- 	if (mmc_card_removed(host->card)) {
- 		mrq->cmd->error = -ENOMEDIUM;
- 		complete(&mrq->completion);
-@@ -585,6 +592,51 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+ 		sdhci_send_command(host, data->stop);
+-	} else
+-		tasklet_schedule(&host->finish_tasklet);
++	} else {
++		if (host->mmc->context_info.is_cmdq_busy)
++			tasklet_schedule(&host->finish_async_data_tasklet);
++		else
++			tasklet_schedule(&host->finish_tasklet);
++	}
  }
- EXPORT_SYMBOL(mmc_start_req);
  
-+int mmc_execute_cmdq(struct mmc_host *host,
-+		struct mmc_async_req *areq,
-+		int *status)
-+{
-+	struct mmc_request mrq = {0};
-+	struct mmc_command cmd = {0};
-+
-+	*status = MMC_BLK_SUCCESS;
-+
-+	if (host->areq) {
-+		*status = mmc_wait_for_data_req_done(host,
-+				host->areq->mrq, areq);
-+		switch (*status) {
-+		case MMC_BLK_SUCCESS:
-+		case MMC_BLK_PARTIAL:
-+			host->areq = NULL;
-+			break;
-+		case MMC_BLK_NEW_REQUEST:
-+			return 0;
-+		default:
-+			host->areq = NULL;
-+			return -EIO;
-+		}
+ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+@@ -1084,6 +1090,12 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 	    cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
+ 		flags |= SDHCI_CMD_DATA;
+ 
++	/* CMD46/47 doesn't wait for data */
++	if (mmc_op_cmdq_execute_task(cmd->opcode)) {
++		cmd->data = NULL;
++		host->mrq->data = NULL;
 +	}
 +
-+	host->areq = areq;
-+	if (!host->areq)
-+		return 0;
-+	/*
-+	 * If previous request is success, update host->areq
-+	 */
-+	memcpy(&cmd, areq->mrq->postcmd, sizeof(cmd));
-+	mrq.cmd = &cmd;
-+	mrq.data = areq->mrq->data;
-+	/* CMD complete only */
-+	mmc_wait_for_req(host, &mrq);
-+	if (mrq.cmd->error) {
-+		host->areq = NULL;
-+		return mrq.cmd->error;
-+	}
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL(mmc_execute_cmdq);
-+
- /**
-  *	mmc_wait_for_req - start a request and wait for completion
-  *	@host: MMC host to start command
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 02ad792..0ffb219 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -572,6 +572,21 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
- 			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
- 	}
-+
-+	if (card->ext_csd.rev >= 8) {
-+		/* check CQ capability */
-+		if (ext_csd[EXT_CSD_CMDQ_SUPPORT] &&
-+				ext_csd[EXT_CSD_CMDQ_DEPTH]) {
-+			card->ext_csd.cmdq_support =
-+				ext_csd[EXT_CSD_CMDQ_SUPPORT];
-+			card->ext_csd.cmdq_depth = ext_csd[EXT_CSD_CMDQ_DEPTH];
-+			if (card->ext_csd.cmdq_depth <= 2) {
-+				card->ext_csd.cmdq_support = 0;
-+				card->ext_csd.cmdq_depth = 0;
-+			}
-+		}
-+	}
-+
- out:
- 	return err;
+ 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
  }
-@@ -706,6 +721,7 @@ MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
- MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
- MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
- MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
-+MMC_DEV_ATTR(cmdq_en, "%#x\n", card->ext_csd.cmdq_en);
+ EXPORT_SYMBOL_GPL(sdhci_send_command);
+@@ -1116,6 +1128,9 @@ static void sdhci_finish_command(struct sdhci_host *host)
+ 	if (host->cmd == host->mrq->precmd) {
+ 		host->cmd = NULL;
+ 		sdhci_send_command(host, host->mrq->cmd);
++	} else if ((host->cmd == host->mrq->cmd) && host->mrq->cmd2) {
++		host->cmd = NULL;
++		sdhci_send_command(host, host->mrq->cmd2);
+ 	} else {
  
- static ssize_t mmc_fwrev_show(struct device *dev,
- 			      struct device_attribute *attr,
-@@ -741,6 +757,7 @@ static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_enhanced_area_size.attr,
- 	&dev_attr_raw_rpmb_size_mult.attr,
- 	&dev_attr_rel_sectors.attr,
-+	&dev_attr_cmdq_en.attr,
- 	NULL,
- };
- ATTRIBUTE_GROUPS(mmc_std);
-@@ -1493,12 +1510,36 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	}
+ 		/* Processed actual command. */
+@@ -1409,6 +1424,9 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ)) &&
+ 		    (present_state & SDHCI_DATA_0_LVL_MASK)) {
+ 			if (mmc->card) {
++				/* don't do tuning when cmdq is not empty */
++				if (mmc->context_info.is_cmdq_busy)
++					goto end_tuning;
+ 				/* eMMC uses cmd21 but sd and sdio use cmd19 */
+ 				tuning_opcode =
+ 					mmc->card->type == MMC_TYPE_MMC ?
+@@ -1430,9 +1448,17 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 			}
+ 		}
  
- 	/*
-+	 * enable Command queue if supported
-+	 */
-+	if (card->ext_csd.cmdq_support &&
-+			(host->caps2 & MMC_CAP2_CAN_DO_CMDQ)) {
-+		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+				EXT_CSD_CMDQ_MODE_EN,
-+				EXT_CSD_CMDQ_MODE_ON,
-+				card->ext_csd.generic_cmd6_time);
-+		if (err && err != -EBADMSG)
-+			goto free_card;
-+		if (err) {
-+			pr_warn("%s: Enabling CMDQ failed\n",
-+				mmc_hostname(card->host));
-+			card->ext_csd.cmdq_en = 0;
-+			card->ext_csd.cmdq_depth = 0;
-+			err = 0;
+-		if (mrq->precmd && !(host->flags & SDHCI_AUTO_CMD23))
+-			sdhci_send_command(host, mrq->precmd);
+-		else
++end_tuning:
++
++		if (mrq->precmd) {
++			if (mrq->precmd->opcode == 23) {
++				if (!(host->flags & SDHCI_AUTO_CMD23))
++					sdhci_send_command(host, mrq->precmd);
++				else
++					sdhci_send_command(host, mrq->cmd);
++			} else
++				sdhci_send_command(host, mrq->precmd);
 +		} else
-+			card->ext_csd.cmdq_en = 1;
-+	}
+ 			sdhci_send_command(host, mrq->cmd);
+ 	}
+ 
+@@ -2155,7 +2181,7 @@ static const struct mmc_host_ops sdhci_ops = {
+  *                                                                           *
+ \*****************************************************************************/
+ 
+-static void sdhci_tasklet_finish(unsigned long param)
++static void sdhci_tasklet_finish_async_data(unsigned long param)
+ {
+ 	struct sdhci_host *host;
+ 	unsigned long flags;
+@@ -2169,15 +2195,71 @@ static void sdhci_tasklet_finish(unsigned long param)
+          * If this tasklet gets rescheduled while running, it will
+          * be run again afterwards but without any active request.
+          */
+-	if (!host->mrq) {
++	if (!host->mmc->areq || !host->mmc->areq->mrq->data) {
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 		return;
+ 	}
+ 
+ 	del_timer(&host->timer);
+ 
++	mrq = host->mmc->areq->mrq;
 +
 +	/*
- 	 * The mandatory minimum values are defined for packed command.
- 	 * read: 5, write: 3
-+	 * disable packed CMD feature if CMDQ is enabled
-+	 * CMDQ has better performance
- 	 */
- 	if (card->ext_csd.max_packed_writes >= 3 &&
- 	    card->ext_csd.max_packed_reads >= 5 &&
--	    host->caps2 & MMC_CAP2_PACKED_CMD) {
-+	    (host->caps2 & MMC_CAP2_PACKED_CMD) &&
-+	    !card->ext_csd.cmdq_en) {
- 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 				EXT_CSD_EXP_EVENTS_CTRL,
- 				EXT_CSD_PACKED_EVENT_EN,
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 4d69c00..b0b7d16 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -120,6 +120,9 @@ struct mmc_ext_csd {
- 
- 	unsigned int            feature_support;
- #define MMC_DISCARD_FEATURE	BIT(0)                  /* CMD38 feature */
-+	u8			cmdq_support;		/* 308 */
-+	bool			cmdq_en;
-+	u8			cmdq_depth;		/* 307 */
- };
- 
- struct sd_scr {
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index e406eac..aabc159 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -130,6 +130,7 @@ struct mmc_request {
- 	struct mmc_command	*precmd;
- 	struct mmc_command	*cmd;
- 	struct mmc_command	*postcmd;
-+	struct mmc_command	*cmd2;
- 	struct mmc_data		*data;
- 	struct mmc_command	*stop;
- 
-@@ -145,6 +146,7 @@ extern int mmc_stop_bkops(struct mmc_card *);
- extern int mmc_read_bkops_status(struct mmc_card *);
- extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
- 					   struct mmc_async_req *, int *);
-+extern int mmc_execute_cmdq(struct mmc_host *, struct mmc_async_req *, int *);
- extern int mmc_interrupt_hpi(struct mmc_card *);
- extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
- extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 9f32270..44240a8 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -155,6 +155,7 @@ struct device;
- struct mmc_async_req {
- 	/* active mmc request */
- 	struct mmc_request	*mrq;
-+	bool	success;
- 	/*
- 	 * Check error status of completed mmc request.
- 	 * Returns 0 if success otherwise non zero.
-@@ -192,6 +193,9 @@ struct mmc_context_info {
- 	bool			is_done_rcv;
- 	bool			is_new_req;
- 	bool			is_waiting_last_req;
-+	bool			is_last_cmdq;
-+	bool			is_cmdq_busy;
-+	bool			is_pending_cmdq;
- 	wait_queue_head_t	wait;
- 	spinlock_t		lock;
- };
-@@ -291,6 +295,7 @@ struct mmc_host {
- 				 MMC_CAP2_HS400_1_2V)
- #define MMC_CAP2_HSX00_1_2V	(MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS400_1_2V)
- #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
-+#define MMC_CAP2_CAN_DO_CMDQ	(1 << 18)
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 49ad7a9..e969a2b 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -89,12 +89,25 @@ extern const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE];
- #define MMC_APP_CMD              55   /* ac   [31:16] RCA        R1  */
- #define MMC_GEN_CMD              56   /* adtc [0] RD/WR          R1  */
- 
-+/* class 11 */
-+#define MMC_QUE_TASK_PARAMS	44	/* ac R1 */
-+#define MMC_QUE_TASK_ADDR	45	/* ac R1 */
-+#define MMC_EXECUTE_READ_TASK	46	/* adtc R1 */
-+#define MMC_EXECUTE_WRITE_TASK	47	/* adtc R1 */
-+#define MMC_DISCARD_CMDQ	48	/* ac R1B */
++	 * The controller needs a reset of internal state machines
++	 * upon error conditions.
++	 */
++	if (!(host->flags & SDHCI_DEVICE_DEAD) &&
++	    ((mrq->data && mrq->data->error) ||
++	     (host->quirks & SDHCI_QUIRK_RESET_AFTER_REQUEST))) {
 +
- static inline bool mmc_op_multi(u32 opcode)
- {
- 	return opcode == MMC_WRITE_MULTIPLE_BLOCK ||
- 	       opcode == MMC_READ_MULTIPLE_BLOCK;
- }
- 
-+static inline bool mmc_op_cmdq_execute_task(u32 opcode)
-+{
-+	return opcode == MMC_EXECUTE_READ_TASK ||
-+		opcode == MMC_EXECUTE_WRITE_TASK;
++		/* Some controllers need this kick or reset won't work here */
++		if (host->quirks & SDHCI_QUIRK_CLOCK_BEFORE_RESET)
++			/* This is to force an update */
++			host->ops->set_clock(host, host->clock);
++
++		sdhci_reset(host, SDHCI_RESET_DATA);
++	}
++
++	host->data = NULL;
++
++#ifndef SDHCI_USE_LEDS_CLASS
++	sdhci_deactivate_led(host);
++#endif
++	mmiowb();
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	mmc_request_done(host->mmc, mrq);
++
++	sdhci_runtime_pm_put(host);
 +}
 +
- /*
-  * MMC_SWITCH argument format:
-  *
-@@ -277,6 +290,7 @@ struct _mmc_csd {
-  * EXT_CSD fields
-  */
- 
-+#define EXT_CSD_CMDQ_MODE_EN		15	/* R/W/E_P */
- #define EXT_CSD_FLUSH_CACHE		32      /* W */
- #define EXT_CSD_CACHE_CTRL		33      /* R/W */
- #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
-@@ -334,6 +348,8 @@ struct _mmc_csd {
- #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
- #define EXT_CSD_PWR_CL_DDR_200_360	253	/* RO */
- #define EXT_CSD_FIRMWARE_VERSION	254	/* RO, 8 bytes */
-+#define EXT_CSD_CMDQ_SUPPORT		308	/* RO */
-+#define EXT_CSD_CMDQ_DEPTH		307	/* RO */
- #define EXT_CSD_SUPPORTED_MODE		493	/* RO */
- #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
- #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
-@@ -354,6 +370,7 @@ struct _mmc_csd {
- #define EXT_CSD_BOOT_WP_B_PWR_WP_EN	(0x01)
- 
- #define EXT_CSD_PART_CONFIG_ACC_MASK	(0x7)
-+#define EXT_CSD_PART_CONFIG_USER	(0x0)
- #define EXT_CSD_PART_CONFIG_ACC_BOOT0	(0x1)
- #define EXT_CSD_PART_CONFIG_ACC_RPMB	(0x3)
- #define EXT_CSD_PART_CONFIG_ACC_GP0	(0x4)
-@@ -432,6 +449,10 @@ struct _mmc_csd {
-  */
- #define EXT_CSD_BKOPS_LEVEL_2		0x2
- 
-+/* CMDQ enable level */
-+#define EXT_CSD_CMDQ_MODE_OFF		0
-+#define EXT_CSD_CMDQ_MODE_ON		1
++static void sdhci_tasklet_finish(unsigned long param)
++{
++	struct sdhci_host *host;
++	unsigned long flags;
++	struct mmc_request *mrq;
++	int opcode;
 +
- /*
-  * MMC_SWITCH access modes
-  */
-diff --git a/include/linux/mmc/pm.h b/include/linux/mmc/pm.h
-index 4a13920..d731495 100644
---- a/include/linux/mmc/pm.h
-+++ b/include/linux/mmc/pm.h
-@@ -26,5 +26,6 @@ typedef unsigned int mmc_pm_flag_t;
++	host = (struct sdhci_host *)param;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	/*
++	 * If this tasklet gets rescheduled while running, it will
++	 * be run again afterwards but without any active request.
++	 */
++	if (!host->mrq) {
++		spin_unlock_irqrestore(&host->lock, flags);
++		return;
++	}
++
+ 	mrq = host->mrq;
++	BUG_ON(!mrq->cmd);
++	opcode = mrq->cmd->opcode;
  
- #define MMC_PM_KEEP_POWER	(1 << 0)	/* preserve card power during suspend */
- #define MMC_PM_WAKE_SDIO_IRQ	(1 << 1)	/* wake up host system on SDIO IRQ assertion */
-+#define MMC_PM_TUNING_AFTER_RTRESUME	(1 << 3)
++	/* for CMD46/47, doesn't delete timer */
++	if (!mmc_op_cmdq_execute_task(opcode))
++		del_timer(&host->timer);
+ 	/*
+ 	 * The controller needs a reset of internal state machines
+ 	 * upon error conditions.
+@@ -2202,17 +2284,25 @@ static void sdhci_tasklet_finish(unsigned long param)
  
- #endif /* LINUX_MMC_PM_H */
+ 	host->mrq = NULL;
+ 	host->cmd = NULL;
+-	host->data = NULL;
+ 
++	/* CMD46/47 sill have pending data */
++	if (!mmc_op_cmdq_execute_task(opcode)) {
+ #ifndef SDHCI_USE_LEDS_CLASS
+-	sdhci_deactivate_led(host);
++		sdhci_deactivate_led(host);
+ #endif
++	}
+ 
+ 	mmiowb();
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+ 	mmc_request_done(host->mmc, mrq);
+-	sdhci_runtime_pm_put(host);
++
++	/*
++	 * host will be put in D0i3 when pending data is done
++	 * for CMD46/47
++	 */
++	if (!mmc_op_cmdq_execute_task(opcode))
++		sdhci_runtime_pm_put(host);
+ }
+ 
+ static void sdhci_timeout_timer(unsigned long data)
+@@ -2455,7 +2545,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 		}
+ 
+ 		if (intmask & SDHCI_INT_DATA_END) {
+-			if (host->cmd) {
++			if (!host->mmc->context_info.is_cmdq_busy &&
++					host->cmd) {
+ 				/*
+ 				 * Data managed to finish before the
+ 				 * command completed. Make sure we do
+@@ -3309,6 +3400,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	 */
+ 	tasklet_init(&host->finish_tasklet,
+ 		sdhci_tasklet_finish, (unsigned long)host);
++	tasklet_init(&host->finish_async_data_tasklet,
++		sdhci_tasklet_finish_async_data, (unsigned long)host);
+ 
+ 	setup_timer(&host->timer, sdhci_timeout_timer, (unsigned long)host);
+ 
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+index 375af80..af335d2 100644
+--- a/include/linux/mmc/sdhci.h
++++ b/include/linux/mmc/sdhci.h
+@@ -176,6 +176,7 @@ struct sdhci_host {
+ 	unsigned int align_mask;	/* ADMA alignment mask */
+ 
+ 	struct tasklet_struct finish_tasklet;	/* Tasklet structures */
++	struct tasklet_struct finish_async_data_tasklet;
+ 
+ 	struct timer_list timer;	/* Timer for timeouts */
+ 
 -- 
 1.7.10.4
 
