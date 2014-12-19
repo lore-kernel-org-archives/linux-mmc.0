@@ -1,61 +1,56 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: toshsd: Fix unbalanced locking
-Date: Fri, 19 Dec 2014 11:58:10 +0100
-Message-ID: <CAPDyKFpyakr0duaEdw2FzqMvwSZ+zbpWR9biA2cE-RKnB=DAgA@mail.gmail.com>
-References: <1418267444.21421.1.camel@phoenix>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH V2] mmc: mmci: Use pm_runtime_put_noidle() during
+ ->probe()
+Date: Fri, 19 Dec 2014 10:59:22 +0000
+Message-ID: <20141219105922.GF11285@n2100.arm.linux.org.uk>
+References: <1418986459-13443-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f44.google.com ([209.85.216.44]:53766 "EHLO
-	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751230AbaLSK6M (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 05:58:12 -0500
-Received: by mail-qa0-f44.google.com with SMTP id bm13so443695qab.17
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2014 02:58:11 -0800 (PST)
-In-Reply-To: <1418267444.21421.1.camel@phoenix>
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:40135 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752146AbaLSK73 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Dec 2014 05:59:29 -0500
+Content-Disposition: inline
+In-Reply-To: <1418986459-13443-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Axel Lin <axel.lin@ingics.com>
-Cc: Chris Ball <chris@printf.net>, Ondrej Zary <linux@rainbow-software.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
 
-On 11 December 2014 at 04:10, Axel Lin <axel.lin@ingics.com> wrote:
-> Fix returning IRQ_HANDLED with spin_lock held.
->
-> Signed-off-by: Axel Lin <axel.lin@ingics.com>
-
-Thanks! Queued for 3.20.
-
-Kind regards
-Uffe
-
+On Fri, Dec 19, 2014 at 11:54:19AM +0100, Ulf Hansson wrote:
+> Previously the pm_runtime_put() caused the device to be runtime PM
+> suspended, but then immediately being resumed when we add the host.
+> 
+> Prevent this unnecessary runtime PM suspend/resume cycle during
+> ->probe() by using the pm_runtime_put_noidle() variant instead.
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 > ---
->  drivers/mmc/host/toshsd.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/toshsd.c b/drivers/mmc/host/toshsd.c
-> index 4666262..a5aa539 100644
-> --- a/drivers/mmc/host/toshsd.c
-> +++ b/drivers/mmc/host/toshsd.c
-> @@ -176,7 +176,8 @@ static irqreturn_t toshsd_thread_irq(int irq, void *dev_id)
->         spin_lock_irqsave(&host->lock, flags);
->
->         if (!sg_miter_next(sg_miter))
-> -               return IRQ_HANDLED;
-> +               goto done;
-> +
->         buf = sg_miter->addr;
->
->         /* Ensure we dont read more than one block. The chip will interrupt us
-> @@ -198,6 +199,7 @@ static irqreturn_t toshsd_thread_irq(int irq, void *dev_id)
->         sg_miter->consumed = count;
->         sg_miter_stop(sg_miter);
->
-> +done:
->         spin_unlock_irqrestore(&host->lock, flags);
->
->         return IRQ_HANDLED;
-> --
-> 1.9.1
->
->
->
+> 
+> Changes in v2:
+> 	Move pm_runtime_put_noidle() after mmc_add_host().
+> 
+> ---
+>  drivers/mmc/host/mmci.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 8232e9a..d2bbd25 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -1739,10 +1739,10 @@ static int mmci_probe(struct amba_device *dev,
+>  
+>  	pm_runtime_set_autosuspend_delay(&dev->dev, 50);
+>  	pm_runtime_use_autosuspend(&dev->dev);
+> -	pm_runtime_put(&dev->dev);
+>  
+>  	mmc_add_host(mmc);
+>  
+> +	pm_runtime_put_noidle(&dev->dev);
+
+I think you'd want this to be _put() in this case.
+
+-- 
+FTTC broadband for 0.8mile line: currently at 9.5Mbps down 400kbps up
+according to speedtest.net.
