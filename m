@@ -1,189 +1,148 @@
-From: NeilBrown <neilb@suse.de>
-Subject: [PATCH 2b/3] mmc: omap_hsmmc: use slot-gpio library for gpio support.
-Date: Sat, 20 Dec 2014 10:07:38 +1100
-Message-ID: <20141219230738.7511.63649.stgit@notabene.brown>
-References: <20141219230732.7511.28103.stgit@notabene.brown>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH v2 3/4] mmc: dw_mmc: Convert to mmc_send_tuning()
+Date: Sat, 20 Dec 2014 18:48:55 +0530
+Message-ID: <CAGOxZ51O9_8YDU30st6uha6PkVhk0GJC6hdjgVu+Gi0XPiaz-A@mail.gmail.com>
+References: <1417780783-12939-1-git-send-email-ulf.hansson@linaro.org>
+ <1417780783-12939-4-git-send-email-ulf.hansson@linaro.org>
+ <CAGOxZ525JR9vTuKAZJJjDF6iq3R2-DuEcJFEOT9KkEMZGimUFw@mail.gmail.com> <CAPDyKFpOvs_ML+1edoTzeTPctiMV0B8EeD8aE8daGwjeG7gwMQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20141219230732.7511.28103.stgit@notabene.brown>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: GTA04 owners <gta04-owner@goldelico.com>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Felipe Balbi <balbi@ti.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f176.google.com ([209.85.160.176]:59919 "EHLO
+	mail-yk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752969AbaLTNTg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 20 Dec 2014 08:19:36 -0500
+Received: by mail-yk0-f176.google.com with SMTP id q200so1130763ykb.21
+        for <linux-mmc@vger.kernel.org>; Sat, 20 Dec 2014 05:19:35 -0800 (PST)
+In-Reply-To: <CAPDyKFpOvs_ML+1edoTzeTPctiMV0B8EeD8aE8daGwjeG7gwMQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, Aisheng Dong <b29396@freescale.com>, Stephen Boyd <sboyd@codeaurora.org>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-Using the common code removes some code duplication, and
-makes it easier to switch to using mmc_of_parse() which
-will remove more duplication.
+Hi Ulf,
 
-This uses the new mmc_gpio_request_cd_isr to provide a non-standard
-interrupt service routine for card-detect interrupts.
+On Mon, Dec 8, 2014 at 3:40 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 6 December 2014 at 13:43, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+>> Hi Ulf,
+>>
+>> On Fri, Dec 5, 2014 at 5:29 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>> Instead of having a local hack taking care of sending the tuning
+>>> command and as well to verify the response pattern, let's convert to
+>>> the common mmc_send_tuning() API.
+>>>
+>>> This change affects the Exynos variant, since it's the only one which
+>>> support the dw_mmc's ->execute_tuning() callback.
+>>>
+>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>> ---
+>>>
+>
+> Alim, thanks for helping out testing!
+>
+>> With this change HS200 mode does not work on exynos5800 peach-pi board.
+>> I got below error while testing this series:
+>>
+>> mmc0: tuning execution failed
+>> mmc0: error -5 whilst initialising MMC card
+>>
+>> Though, your's next branch with commit _a1d06b4_ works fine in HS200 mode.
+>
+> I was looking into the details of what change my patchset introduces
+> for dw_mmc-exynos. Apparently, dw_mmc-exynos was using the
+> MMC_STOP_TRANSMISSION to end the tuning reqeust (CMD21/19). The new
+> mmc_send_tuning() API doesn't, which also conforms to what the eMMC/SD
+> specifications states.
+>
+> Do you have any idea of why dw_mmc-exynos was using
+> MMC_STOP_TRANSMISSION for CMD19/21?
+>
+> To see if my theory is correct, could you try out the following patch
+> on top of $subject patch?
+> BTW, I have queued patch 1 and 2, from this patchset available on my
+> next branch.
+>
+>
+> From e1ac35bb0e90254275ec7088f41e6e2d59e48367 Mon Sep 17 00:00:00 2001
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+> Date: Mon, 8 Dec 2014 10:58:48 +0100
+> Subject: [PATCH] mmc: core: End tuning request with stop command
+>
+> Not to be merged!
+>
+> This patch adds the MMC_STOP_TRANSMISSION command to end a tuning
+> request. For some reason dw_mmc seems to need this to complete the
+> tuning request without errors.
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/core/mmc_ops.c | 5 +++++
+>  1 file changed, 5 insertions(+)
+>
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 3b044c5..aa79e0c 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -551,6 +551,7 @@ int mmc_send_tuning(struct mmc_host *host)
+>  {
+>         struct mmc_request mrq = {NULL};
+>         struct mmc_command cmd = {0};
+> +       struct mmc_command stop = {0};
+>         struct mmc_data data = {0};
+>         struct scatterlist sg;
+>         struct mmc_ios *ios = &host->ios;
+> @@ -576,10 +577,14 @@ int mmc_send_tuning(struct mmc_host *host)
+>
+>         mrq.cmd = &cmd;
+>         mrq.data = &data;
+> +       mrq.stop = &stop;
+>
+>         cmd.opcode = opcode;
+>         cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+>
+> +       stop.opcode = MMC_STOP_TRANSMISSION;
+> +       stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
+> +
+>         data.blksz = size;
+>         data.blocks = 1;
+>         data.flags = MMC_DATA_READ;
+> --
+> 1.9.1
+>
+Sorry for delay in testing this suggested patch, I would say this
+certainly helps, but still I need to change sample phase to make it
+work with generic tuning function.
+So with your's adding STOP_TRANSMISSION command and below change,
+HS200 works well on exynos5800
 
-Signed-off-by: NeilBrown <neilb@suse.de>
----
- drivers/mmc/host/omap_hsmmc.c |   67 +++++++++--------------------------------
- 1 file changed, 14 insertions(+), 53 deletions(-)
+diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts
+b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+index e8fdda8..e0f0337 100644
+--- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
++++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+@@ -555,7 +555,7 @@
+        card-detect-delay = <200>;
+        clock-frequency = <400000000>;
+        samsung,dw-mshc-ciu-div = <3>;
+-       samsung,dw-mshc-sdr-timing = <0 4>;
++       samsung,dw-mshc-sdr-timing = <2 4>;
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 537cba8f1de1..32514b648e3c 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -36,6 +36,7 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/core.h>
- #include <linux/mmc/mmc.h>
-+#include <linux/mmc/slot-gpio.h>
- #include <linux/io.h>
- #include <linux/irq.h>
- #include <linux/gpio.h>
-@@ -251,28 +252,22 @@ static void omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host);
- static int omap_hsmmc_card_detect(struct device *dev)
- {
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
--	struct omap_hsmmc_platform_data *mmc = host->pdata;
- 
--	/* NOTE: assumes card detect signal is active-low */
--	return !gpio_get_value_cansleep(mmc->switch_pin);
-+	return mmc_gpio_get_cd(host->mmc);
- }
- 
- static int omap_hsmmc_get_wp(struct device *dev)
- {
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
--	struct omap_hsmmc_platform_data *mmc = host->pdata;
- 
--	/* NOTE: assumes write protect signal is active-high */
--	return gpio_get_value_cansleep(mmc->gpio_wp);
-+	return mmc_gpio_get_ro(host->mmc);
- }
- 
- static int omap_hsmmc_get_cover_state(struct device *dev)
- {
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
--	struct omap_hsmmc_platform_data *mmc = host->pdata;
- 
--	/* NOTE: assumes card detect signal is active-low */
--	return !gpio_get_value_cansleep(mmc->switch_pin);
-+	return mmc_gpio_get_cd(host->mmc);
- }
- 
- #ifdef CONFIG_REGULATOR
-@@ -439,7 +434,10 @@ static inline int omap_hsmmc_have_reg(void)
- 
- #endif
- 
--static int omap_hsmmc_gpio_init(struct omap_hsmmc_host *host,
-+static irqreturn_t omap_hsmmc_detect(int irq, void *dev_id);
-+
-+static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
-+				struct omap_hsmmc_host *host,
- 				struct omap_hsmmc_platform_data *pdata)
- {
- 	int ret;
-@@ -452,46 +450,26 @@ static int omap_hsmmc_gpio_init(struct omap_hsmmc_host *host,
- 			host->card_detect = omap_hsmmc_card_detect;
- 		host->card_detect_irq =
- 				gpio_to_irq(pdata->switch_pin);
--		ret = gpio_request(pdata->switch_pin, "mmc_cd");
-+		ret = mmc_gpio_request_cd_isr(mmc, omap_hsmmc_detect);
- 		if (ret)
- 			return ret;
--		ret = gpio_direction_input(pdata->switch_pin);
-+		ret = mmc_gpio_request_cd(mmc, pdata->switch_pin, 0);
- 		if (ret)
--			goto err_free_sp;
-+			return ret;
- 	} else {
- 		pdata->switch_pin = -EINVAL;
- 	}
- 
- 	if (gpio_is_valid(pdata->gpio_wp)) {
- 		host->get_ro = omap_hsmmc_get_wp;
--		ret = gpio_request(pdata->gpio_wp, "mmc_wp");
--		if (ret)
--			goto err_free_cd;
--		ret = gpio_direction_input(pdata->gpio_wp);
-+		ret = mmc_gpio_request_ro(mmc, pdata->gpio_wp);
- 		if (ret)
--			goto err_free_wp;
-+			return ret;
- 	} else {
- 		pdata->gpio_wp = -EINVAL;
- 	}
- 
- 	return 0;
--
--err_free_wp:
--	gpio_free(pdata->gpio_wp);
--err_free_cd:
--	if (gpio_is_valid(pdata->switch_pin))
--err_free_sp:
--		gpio_free(pdata->switch_pin);
--	return ret;
--}
--
--static void omap_hsmmc_gpio_free(struct omap_hsmmc_host *host,
--				 struct omap_hsmmc_platform_data *pdata)
--{
--	if (gpio_is_valid(pdata->gpio_wp))
--		gpio_free(pdata->gpio_wp);
--	if (gpio_is_valid(pdata->switch_pin))
--		gpio_free(pdata->switch_pin);
- }
- 
- /*
-@@ -2066,7 +2044,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	host->next_data.cookie = 1;
- 	host->pbias_enabled = 0;
- 
--	ret = omap_hsmmc_gpio_init(host, pdata);
-+	ret = omap_hsmmc_gpio_init(mmc, host, pdata);
- 	if (ret)
- 		goto err_gpio;
- 
-@@ -2197,20 +2175,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 
- 	mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
- 
--	/* Request IRQ for card detect */
--	if (host->card_detect_irq) {
--		ret = devm_request_threaded_irq(&pdev->dev,
--						host->card_detect_irq,
--						NULL, omap_hsmmc_detect,
--					   IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
--					   mmc_hostname(mmc), host);
--		if (ret) {
--			dev_err(mmc_dev(host->mmc),
--				"Unable to grab MMC CD IRQ\n");
--			goto err_irq_cd;
--		}
--	}
--
- 	omap_hsmmc_disable_irq(host);
- 
- 	/*
-@@ -2249,7 +2213,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 
- err_slot_name:
- 	mmc_remove_host(mmc);
--err_irq_cd:
- 	if (host->use_reg)
- 		omap_hsmmc_reg_put(host);
- err_irq:
-@@ -2262,7 +2225,6 @@ err_irq:
- 	if (host->dbclk)
- 		clk_disable_unprepare(host->dbclk);
- err1:
--	omap_hsmmc_gpio_free(host, pdata);
- err_gpio:
- 	mmc_free_host(mmc);
- err:
-@@ -2288,7 +2250,6 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
- 	if (host->dbclk)
- 		clk_disable_unprepare(host->dbclk);
- 
--	omap_hsmmc_gpio_free(host, host->pdata);
- 	mmc_free_host(host->mmc);
- 
- 	return 0;
+This basically change the clock-sample phase with which the tuning
+process starts.
+
+I didn't find anything is exynos documentations which suggest
+STOP_TRANSMISSION is needed, may be Seungwon might be know as he wrote
+this.
+
+Are you ok to add STOP_TRANSMISSION in generic tuning code (probably
+with a quirk, so that other hosts are still happy)?
+If so, I can send the above DT change as a fix.
+
+> Kind regards
+> Uffe
+
+
+
+-- 
+Regards,
+Alim
