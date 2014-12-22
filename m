@@ -1,58 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: stop trying to switch width when only one bit
- is supported
-Date: Mon, 22 Dec 2014 10:58:23 +0100
-Message-ID: <CAPDyKFoxUbhXCHyDHaW5pcBt+aUgDB4SBLWBx7f7Nbcud==YhQ@mail.gmail.com>
-References: <1418841126-13695-1-git-send-email-alexandre.belloni@free-electrons.com>
+Subject: Re: [PATCH] mmc: dt: Add property for broken hs200 quirk
+Date: Mon, 22 Dec 2014 11:04:42 +0100
+Message-ID: <CAPDyKFoGN49usQg5Ezv_AaWcKf3mRmZ=VJ8Rc4HDYh62ukiwXQ@mail.gmail.com>
+References: <1418412516-10682-1-git-send-email-bjorn.andersson@sonymobile.com>
+	<CAPDyKFrPC_MphsLHHZ=uFjcF8SsdkVmzez9R=gas7_ihn63Q5A@mail.gmail.com>
+	<CAJAp7OhSZ7CZedXAsWPf0XYv8RESQxXe4L1LZjOmVW4nGpFiHw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f52.google.com ([209.85.192.52]:39340 "EHLO
-	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754044AbaLVJ6X (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Dec 2014 04:58:23 -0500
-Received: by mail-qg0-f52.google.com with SMTP id a108so3058734qge.39
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Dec 2014 01:58:23 -0800 (PST)
-In-Reply-To: <1418841126-13695-1-git-send-email-alexandre.belloni@free-electrons.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAJAp7OhSZ7CZedXAsWPf0XYv8RESQxXe4L1LZjOmVW4nGpFiHw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Bjorn Andersson <bjorn@kryo.se>
+Cc: Bjorn Andersson <bjorn.andersson@sonymobile.com>, Anton Vorontsov <anton@enomsg.org>, Chris Ball <chris@printf.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Grant Likely <grant.likely@linaro.org>, "open list:OPEN FIRMWARE AND..." <devicetree@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, stable@vger.kernel.org
 
-On 17 December 2014 at 19:32, Alexandre Belloni
-<alexandre.belloni@free-electrons.com> wrote:
-> mmc_select_bus_width() will try to switch to MMC_BUS_WIDTH_4 even if
-> MMC_CAP_4_BIT_DATA and MMC_CAP_8_BIT_DATA are not set in host->caps.
-> Return as soon as possible when those flags are not set
+On 19 December 2014 at 21:01, Bjorn Andersson <bjorn@kryo.se> wrote:
+> On Fri, Dec 19, 2014 at 3:38 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 12 December 2014 at 20:28, Bjorn Andersson
+>> <bjorn.andersson@sonymobile.com> wrote:
+>>
+>> Some more explanation to why this needed would be good.
+>>
 >
-> Fixes: 577fb13199b11d8cd75609183649be4b5561243f (mmc: rework
-> selection of bus speed mode)
->
-> Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
-> Cc: <stable@vger.kernel.org> # 3.17
+> Because (according to the git log) some of the memories that we
+> mounted in Xperia Z1 does not support HS200 even though they advertise
+> they are.
 
-Thanks! Applied for fixes.
+I see. How about using an mmc card quirk instead of a DT binding then?
 
 Kind regards
 Uffe
 
-> ---
->  drivers/mmc/core/mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 02ad79229f65..7466ce098e60 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -886,7 +886,7 @@ static int mmc_select_bus_width(struct mmc_card *card)
->         unsigned idx, bus_width = 0;
->         int err = 0;
+> I thought we needed for the device I'm testing with, but a couple of
+> regulator_set_optimum_mode() solved that - so I have to provide a
+> patch for that as well...
 >
-> -       if (!mmc_can_ext_csd(card) &&
-> +       if (!mmc_can_ext_csd(card) ||
->             !(host->caps & (MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA)))
->                 return 0;
+>>> Signed-off-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
+>>> ---
+>>>  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
+>>
+>> This file lists the generic mmc DT bindings, but you want to add a
+>> specific binding for sdhci?
+>>
 >
-> --
-> 2.1.0
+> Looking in sdhci_get_of_property() it's a mash of device specific
+> properties, sdhci specific properties documented in mmc.txt and
+> generic sdhci properties documented in device specific bindings.
 >
+> Would you like me to move it to a generic sdhci.txt binding and update
+> the individual sdhci-* to reference that instead of mmc.txt? Or should
+> I just add the property in the device specific bindings? Or maybe we
+> could keep it as a optional property in mmc.txt?
+>
+> Regards,
+> Bjorn
