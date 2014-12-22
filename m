@@ -1,57 +1,48 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dt: Add property for broken hs200 quirk
-Date: Mon, 22 Dec 2014 11:04:42 +0100
-Message-ID: <CAPDyKFoGN49usQg5Ezv_AaWcKf3mRmZ=VJ8Rc4HDYh62ukiwXQ@mail.gmail.com>
-References: <1418412516-10682-1-git-send-email-bjorn.andersson@sonymobile.com>
-	<CAPDyKFrPC_MphsLHHZ=uFjcF8SsdkVmzez9R=gas7_ihn63Q5A@mail.gmail.com>
-	<CAJAp7OhSZ7CZedXAsWPf0XYv8RESQxXe4L1LZjOmVW4nGpFiHw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAJAp7OhSZ7CZedXAsWPf0XYv8RESQxXe4L1LZjOmVW4nGpFiHw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Bjorn Andersson <bjorn@kryo.se>
-Cc: Bjorn Andersson <bjorn.andersson@sonymobile.com>, Anton Vorontsov <anton@enomsg.org>, Chris Ball <chris@printf.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Grant Likely <grant.likely@linaro.org>, "open list:OPEN FIRMWARE AND..." <devicetree@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>
+From: Alim Akhtar <alim.akhtar@samsung.com>
+Subject: [PATCH v3 0/3] mmc: dw_mmc: update host driver with minor fixes
+Date: Mon, 22 Dec 2014 17:42:01 +0530
+Message-ID: <1419250324-11743-1-git-send-email-alim.akhtar@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:15445 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754401AbaLVMTh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Dec 2014 07:19:37 -0500
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0NGZ0041AGWNUX10@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 22 Dec 2014 21:19:35 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: chris@printf.net, ulf.hansson@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, dianders@chromium.org, alim.akhtar@gmail.com, linux-arm-kernel@lists.infradead.org
 
-On 19 December 2014 at 21:01, Bjorn Andersson <bjorn@kryo.se> wrote:
-> On Fri, Dec 19, 2014 at 3:38 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> On 12 December 2014 at 20:28, Bjorn Andersson
->> <bjorn.andersson@sonymobile.com> wrote:
->>
->> Some more explanation to why this needed would be good.
->>
->
-> Because (according to the git log) some of the memories that we
-> mounted in Xperia Z1 does not support HS200 even though they advertise
-> they are.
+This series is part of [1] which are send by Seungwon jeon few months back.
+when he attempted to add HS400 support for exynos dw_mmc host controller.
+Since then these patches are just sitting idle.
+This is my attempt to land some of the changes which are generic, and performance
+booter on dw_mmc host controller.
 
-I see. How about using an mmc card quirk instead of a DT binding then?
+These patches are already ACKed by Jaehoon Chung.
 
-Kind regards
-Uffe
+[1] http://www.spinics.net/lists/linux-samsung-soc/msg27903.html
 
->
-> I thought we needed for the device I'm testing with, but a couple of
-> regulator_set_optimum_mode() solved that - so I have to provide a
-> patch for that as well...
->
->>> Signed-off-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
->>> ---
->>>  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
->>
->> This file lists the generic mmc DT bindings, but you want to add a
->> specific binding for sdhci?
->>
->
-> Looking in sdhci_get_of_property() it's a mash of device specific
-> properties, sdhci specific properties documented in mmc.txt and
-> generic sdhci properties documented in device specific bindings.
->
-> Would you like me to move it to a generic sdhci.txt binding and update
-> the individual sdhci-* to reference that instead of mmc.txt? Or should
-> I just add the property in the device specific bindings? Or maybe we
-> could keep it as a optional property in mmc.txt?
->
-> Regards,
-> Bjorn
+Changes in v3:
+      None, just a rebase on ulf's next branch.
+
+
+Seungwon Jeon (3):
+  mmc: dw_mmc: fix the max_blk_count in IDMAC
+  mmc: dw_mmc: exynos: don't use if clock isn't available
+  mmc: dw_mmc: exynos: move definitions to header file
+
+ drivers/mmc/host/dw_mmc-exynos.c |   59 +++++++++-----------------------------
+ drivers/mmc/host/dw_mmc-exynos.h |   56 ++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/dw_mmc.c        |    4 +--
+ 3 files changed, 71 insertions(+), 48 deletions(-)
+ create mode 100644 drivers/mmc/host/dw_mmc-exynos.h
+
+-- 
+1.7.9.5
+
