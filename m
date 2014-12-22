@@ -1,98 +1,196 @@
-From: Tim Kryger <tim.kryger@gmail.com>
-Subject: Re: Possible regression with commit 52221610d
-Date: Sun, 21 Dec 2014 19:01:30 -0800
-Message-ID: <CAD7vxxJy2sE1os+ipJZV7_GvEyhu8cE-0QLBS5SVHUqfjkYBwQ@mail.gmail.com>
-References: <54584260.8030602@nvidia.com>
-	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
-	<545895B2.2000101@nvidia.com>
-	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
-	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
-	<CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
-	<CAJAp7Oh+ziadeEDWsus_k_2w33vPJxGGcGZyMNQkpLemf7SAhg@mail.gmail.com>
-	<CAJAp7OhWKoAoZfq+zWspLnqUkoJb3izMD41Vyfn0AW4Jni8HAQ@mail.gmail.com>
-	<CAD7vxxLe5COSrsnVZ2G_uhtUXfjFnDA45HSG2dNT1LrxcyFcQw@mail.gmail.com>
-	<CAJAp7OhAP-rDM2zyo0Yr0-7erUp4ewKJ+tC=vyU-YMP_MzXJbA@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2 3/4] mmc: dw_mmc: Convert to mmc_send_tuning()
+Date: Mon, 22 Dec 2014 13:05:22 +0900
+Message-ID: <54979882.4080707@samsung.com>
+References: <1417780783-12939-1-git-send-email-ulf.hansson@linaro.org>
+ <1417780783-12939-4-git-send-email-ulf.hansson@linaro.org>
+ <CAGOxZ525JR9vTuKAZJJjDF6iq3R2-DuEcJFEOT9KkEMZGimUFw@mail.gmail.com>
+ <CAPDyKFpOvs_ML+1edoTzeTPctiMV0B8EeD8aE8daGwjeG7gwMQ@mail.gmail.com>
+ <CAGOxZ52RKUdrSegUZs31E19mJr3kaLbyoEStDWD1=bD5vHNLeg@mail.gmail.com>
+ <548B062A.8070608@samsung.com> <548E681D.4010900@samsung.com>
+ <CAGOxZ51NTd9nj-OiN7+dR2uqvxo7xuAGOtyetTFTkrZ4QDvaSA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <CAJAp7OhAP-rDM2zyo0Yr0-7erUp4ewKJ+tC=vyU-YMP_MzXJbA@mail.gmail.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Bjorn Andersson <bjorn@kryo.se>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:18003 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753764AbaLVEFZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 21 Dec 2014 23:05:25 -0500
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0NGY009E9U0Y6U00@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 22 Dec 2014 13:05:23 +0900 (KST)
+In-reply-to: <CAGOxZ51NTd9nj-OiN7+dR2uqvxo7xuAGOtyetTFTkrZ4QDvaSA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alim Akhtar <alim.akhtar@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, Aisheng Dong <b29396@freescale.com>, Stephen Boyd <sboyd@codeaurora.org>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-On Wed, Dec 17, 2014 at 11:57 AM, Bjorn Andersson <bjorn@kryo.se> wrote:
+Hi, Alim.
 
-> I'm somewhat puzzled to what benefit 52221610d brings after bringing
-> back the write of BIT(0). Is it just that we don't hit the BUG() on
-> non-standard voltages?
+On 12/20/2014 10:34 PM, Alim Akhtar wrote:
+> Hi Jaehoon
+> 
+> On Mon, Dec 15, 2014 at 10:18 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> Hi, Alim.
+>>
+>> On 12/13/2014 12:13 AM, Jaehoon Chung wrote:
+>>> Hi.
+>>>
+>>> On 12/10/2014 06:30 AM, Alim Akhtar wrote:
+>>>> Hi Ulf
+>>>>
+>>>> On Mon, Dec 8, 2014 at 3:40 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>> On 6 December 2014 at 13:43, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+>>>>>> Hi Ulf,
+>>>>>>
+>>>>>> On Fri, Dec 5, 2014 at 5:29 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>>>> Instead of having a local hack taking care of sending the tuning
+>>>>>>> command and as well to verify the response pattern, let's convert to
+>>>>>>> the common mmc_send_tuning() API.
+>>>>>>>
+>>>>>>> This change affects the Exynos variant, since it's the only one which
+>>>>>>> support the dw_mmc's ->execute_tuning() callback.
+>>>>>>>
+>>>>>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>>>>>> ---
+>>>>>>>
+>>>>>
+>>>>> Alim, thanks for helping out testing!
+>>>>>
+>>>> Sorry for the delay but currently I don't have access to my work station.
+>>>> And thanks for quick suggested patch, I will test this as soon asI go
+>>>> back to my work.
+>>>>
+>>>> Hi Jaehoon, can you test this and the original patch for hs200 on
+>>>> exynos? Just to confirm my board is not the special one.
+>>>> Thanks.
+>>>
+>>> Does it need to send "stop command" at exynos5800?
+>>> Well, most SoC doesn't need to send stop command, also exynos.
+>>> But i will check other exynos boards..then i will share result.
+>>>
+>>> Best Regards,
+>>> Jaehoon Chung
+>>>
+>>>>
+>>>>>> With this change HS200 mode does not work on exynos5800 peach-pi board.
+>>>>>> I got below error while testing this series:
+>>>>>>
+>>>>>> mmc0: tuning execution failed
+>>>>>> mmc0: error -5 whilst initialising MMC card
+>>
+>> Did you share the CLKSEL register value?
+> 
+> CLKSEL value remain same in failed and pass case (in my case it is
+> 0x0304000x, x is for sample phases)
 
-It is to allow the use of external regulators that are capable of
-supplying a standard SD/MMC voltage but none of the standard SDHCI
-voltages.
+Thanks for share the value. i will check it.
 
-> The full paragraph regarding BIT(0) reads:
->
-> Before setting this bit, the SD Host Driver shall set SD Bus Voltage
-> Select. If the
-> Host Controller detects the No Card state, this bit shall be cleared.
-> If this bit is cleared, the Host Controller shall immediately stop
-> driving CMD and
-> DAT[3:0] (tri-state) and drive SDCLK to low level (Refer to Section 2.2.14).
->
-> So the Qualcomm HW engineers implemented the last "shall", but if
-> someone else (what did nvidia do here?) also implemented the first
-> "shall"s then we're back at needing a full revert of 52221610d.
+> 
+>> I think exynos SoC didn't need to send stop command.
+>> (I didn't find the STOP command is completed when tuning sequence.)
+>> When i have tested, according to SELCLK_DRV value, tuning results were changed.
+>>
+> Did you tested on exynos5?
 
-It is difficult to predict how non-compliant host controllers will
-behave in the area where they have chosen to deviate from the
-standard.
+Sure, I have tested on exynos5. It's working well without stop command.
 
-Do controllers that lack internal regulators claim to support 1.8,
-3.0, or 3.3v in the host capabilities register?  Or will they set none
-of these bits?
+>> if you got the above error, i recommend you can change the SELCLK_DRV value.
+>>
+> I did tried changing that but didn't helped, but not tried all
+> combinations though, I can recheck this again.
 
-They lack the ability to influence the externally supplied VDD but
-will they place requirements on the values of the SD Bus Voltage
-Select field?
+Right. there is too many combinations..so i also didn't check all combinations.
+Did you enable the Debugging message for mmc?
 
-"If the Host Driver selects an unsupported voltage in the SD Bus
-Voltage Select field, the Host Controller may ignore writes to SD Bus
-Power and keep its value at zero."
+Best Regards,
+Jaehoon Chung
 
-I would hope that controllers that fail to implement the regulator
-would allow the SD Bus Voltage Select field to be set to any value.
+> 
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>>>>>>
+>>>>>> Though, your's next branch with commit _a1d06b4_ works fine in HS200 mode.
+>>>>>
+>>>>> I was looking into the details of what change my patchset introduces
+>>>>> for dw_mmc-exynos. Apparently, dw_mmc-exynos was using the
+>>>>> MMC_STOP_TRANSMISSION to end the tuning reqeust (CMD21/19). The new
+>>>>> mmc_send_tuning() API doesn't, which also conforms to what the eMMC/SD
+>>>>> specifications states.
+>>>>>
+>>>>> Do you have any idea of why dw_mmc-exynos was using
+>>>>> MMC_STOP_TRANSMISSION for CMD19/21?
+>>>>>
+>>>>> To see if my theory is correct, could you try out the following patch
+>>>>> on top of $subject patch?
+>>>>> BTW, I have queued patch 1 and 2, from this patchset available on my
+>>>>> next branch.
+>>>>>
+>>>>>
+>>>>> From e1ac35bb0e90254275ec7088f41e6e2d59e48367 Mon Sep 17 00:00:00 2001
+>>>>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>>>> Date: Mon, 8 Dec 2014 10:58:48 +0100
+>>>>> Subject: [PATCH] mmc: core: End tuning request with stop command
+>>>>>
+>>>>> Not to be merged!
+>>>>>
+>>>>> This patch adds the MMC_STOP_TRANSMISSION command to end a tuning
+>>>>> request. For some reason dw_mmc seems to need this to complete the
+>>>>> tuning request without errors.
+>>>>>
+>>>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>>>> ---
+>>>>>  drivers/mmc/core/mmc_ops.c | 5 +++++
+>>>>>  1 file changed, 5 insertions(+)
+>>>>>
+>>>>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>>>>> index 3b044c5..aa79e0c 100644
+>>>>> --- a/drivers/mmc/core/mmc_ops.c
+>>>>> +++ b/drivers/mmc/core/mmc_ops.c
+>>>>> @@ -551,6 +551,7 @@ int mmc_send_tuning(struct mmc_host *host)
+>>>>>  {
+>>>>>         struct mmc_request mrq = {NULL};
+>>>>>         struct mmc_command cmd = {0};
+>>>>> +       struct mmc_command stop = {0};
+>>>>>         struct mmc_data data = {0};
+>>>>>         struct scatterlist sg;
+>>>>>         struct mmc_ios *ios = &host->ios;
+>>>>> @@ -576,10 +577,14 @@ int mmc_send_tuning(struct mmc_host *host)
+>>>>>
+>>>>>         mrq.cmd = &cmd;
+>>>>>         mrq.data = &data;
+>>>>> +       mrq.stop = &stop;
+>>>>>
+>>>>>         cmd.opcode = opcode;
+>>>>>         cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+>>>>>
+>>>>> +       stop.opcode = MMC_STOP_TRANSMISSION;
+>>>>> +       stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
+>>>>> +
+>>>>>         data.blksz = size;
+>>>>>         data.blocks = 1;
+>>>>>         data.flags = MMC_DATA_READ;
+>>>>> --
+>>>>> 1.9.1
+>>>>>
+>>>>> Kind regards
+>>>>> Uffe
+>>>>
+>>>>
+>>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>
+> 
+> 
+> 
 
-We have established that it is okay to leave the Voltage Select as
-zero in the Broadcom, Qualcomm, and Samsung implementations.
-
-It would be nice to get confirmation that this is also the case for
-other implementations that rely on an external regulator.
-
-> Non-the-less, feel free to propose a patch and I will give it a test.
-
-Lets start with the simplest change first.  Please give this a try and
-let me know what you think.
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ada1a3e..59a328a 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1239,6 +1239,12 @@ static void sdhci_set_power(struct sdhci_host
-*host, unsigned char mode,
-                spin_unlock_irq(&host->lock);
-                mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
-                spin_lock_irq(&host->lock);
-+
-+               if (mode != MMC_POWER_OFF)
-+                       sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
-+               else
-+                       sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-+
-                return;
-        }
-
-
-Thanks again for your help in getting to the bottom of this.
-
--Tim
