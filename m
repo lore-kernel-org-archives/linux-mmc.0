@@ -1,50 +1,58 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [patch] mmc: mxs-mmc: remove unneeded NULL check
-Date: Mon, 22 Dec 2014 10:57:38 +0100
-Message-ID: <CAPDyKFopZTP9pegoKUJ70UPVJYp4b-BF0QTzcWGEv68J6hDxJw@mail.gmail.com>
-References: <20141216235749.GH31467@mwanda>
+Subject: Re: [PATCH] mmc: core: stop trying to switch width when only one bit
+ is supported
+Date: Mon, 22 Dec 2014 10:58:23 +0100
+Message-ID: <CAPDyKFoxUbhXCHyDHaW5pcBt+aUgDB4SBLWBx7f7Nbcud==YhQ@mail.gmail.com>
+References: <1418841126-13695-1-git-send-email-alexandre.belloni@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f51.google.com ([209.85.192.51]:40421 "EHLO
-	mail-qg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754124AbaLVJ5j (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Dec 2014 04:57:39 -0500
-Received: by mail-qg0-f51.google.com with SMTP id i50so3034149qgf.38
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Dec 2014 01:57:39 -0800 (PST)
-In-Reply-To: <20141216235749.GH31467@mwanda>
+Received: from mail-qg0-f52.google.com ([209.85.192.52]:39340 "EHLO
+	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754044AbaLVJ6X (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Dec 2014 04:58:23 -0500
+Received: by mail-qg0-f52.google.com with SMTP id a108so3058734qge.39
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Dec 2014 01:58:23 -0800 (PST)
+In-Reply-To: <1418841126-13695-1-git-send-email-alexandre.belloni@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Chris Ball <chris@printf.net>, Grant Likely <grant.likely@linaro.org>, Rob Herring <robh+dt@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Fabio Estevam <fabio.estevam@freescale.com>, Roman Peniaev <r.peniaev@gmail.com>, Peter Griffin <peter.griffin@linaro.org>, Daniel Willmann <daniel@totalueberwachung.de>, linux-mmc <linux-mmc@vger.kernel.org>, kernel-janitors@vger.kernel.org
+To: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+Cc: Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, stable@vger.kernel.org
 
-On 17 December 2014 at 00:57, Dan Carpenter <dan.carpenter@oracle.com> wrote:
-> Static checkers complain about the inconsistent NULL checking here:
+On 17 December 2014 at 19:32, Alexandre Belloni
+<alexandre.belloni@free-electrons.com> wrote:
+> mmc_select_bus_width() will try to switch to MMC_BUS_WIDTH_4 even if
+> MMC_CAP_4_BIT_DATA and MMC_CAP_8_BIT_DATA are not set in host->caps.
+> Return as soon as possible when those flags are not set
 >
->         drivers/mmc/host/mxs-mmc.c:680 mxs_mmc_probe()
->         warn: variable dereferenced before check 'ssp->dmach' (see line 660)
+> Fixes: 577fb13199b11d8cd75609183649be4b5561243f (mmc: rework
+> selection of bus speed mode)
 >
-> The variable can't actually be NULL so we can remove the check.
->
-> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+> Signed-off-by: Alexandre Belloni <alexandre.belloni@free-electrons.com>
+> Cc: <stable@vger.kernel.org> # 3.17
 
-Thanks! Applied for next.
+Thanks! Applied for fixes.
 
 Kind regards
 Uffe
 
+> ---
+>  drivers/mmc/core/mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index 60c4ca9..a82411a 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -677,8 +677,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
->         return 0;
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 02ad79229f65..7466ce098e60 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -886,7 +886,7 @@ static int mmc_select_bus_width(struct mmc_card *card)
+>         unsigned idx, bus_width = 0;
+>         int err = 0;
 >
->  out_free_dma:
-> -       if (ssp->dmach)
-> -               dma_release_channel(ssp->dmach);
-> +       dma_release_channel(ssp->dmach);
->  out_clk_disable:
->         clk_disable_unprepare(ssp->clk);
->  out_mmc_free:
+> -       if (!mmc_can_ext_csd(card) &&
+> +       if (!mmc_can_ext_csd(card) ||
+>             !(host->caps & (MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA)))
+>                 return 0;
+>
+> --
+> 2.1.0
+>
