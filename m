@@ -1,58 +1,98 @@
-From: Florian Fainelli <f.fainelli@gmail.com>
-Subject: Re: [PATCH 2/6] mmc: sdhci-bcm-kona: Handle error from mmc_of_parse()
-Date: Sun, 21 Dec 2014 01:43:21 -0800
-Message-ID: <CAGVrzcYd2PB7wF_ANiJstFr7iaedvaxuV_Cvitp6AUzuy5H9gg@mail.gmail.com>
-References: <1418895704-25908-1-git-send-email-ulf.hansson@linaro.org> <1418895704-25908-3-git-send-email-ulf.hansson@linaro.org>
+From: Tim Kryger <tim.kryger@gmail.com>
+Subject: Re: Possible regression with commit 52221610d
+Date: Sun, 21 Dec 2014 19:01:30 -0800
+Message-ID: <CAD7vxxJy2sE1os+ipJZV7_GvEyhu8cE-0QLBS5SVHUqfjkYBwQ@mail.gmail.com>
+References: <54584260.8030602@nvidia.com>
+	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
+	<545895B2.2000101@nvidia.com>
+	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
+	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
+	<CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
+	<CAJAp7Oh+ziadeEDWsus_k_2w33vPJxGGcGZyMNQkpLemf7SAhg@mail.gmail.com>
+	<CAJAp7OhWKoAoZfq+zWspLnqUkoJb3izMD41Vyfn0AW4Jni8HAQ@mail.gmail.com>
+	<CAD7vxxLe5COSrsnVZ2G_uhtUXfjFnDA45HSG2dNT1LrxcyFcQw@mail.gmail.com>
+	<CAJAp7OhAP-rDM2zyo0Yr0-7erUp4ewKJ+tC=vyU-YMP_MzXJbA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f179.google.com ([209.85.213.179]:42193 "EHLO
-	mail-ig0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751020AbaLUJoE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 21 Dec 2014 04:44:04 -0500
-Received: by mail-ig0-f179.google.com with SMTP id r2so2721074igi.0
-        for <linux-mmc@vger.kernel.org>; Sun, 21 Dec 2014 01:44:02 -0800 (PST)
-In-Reply-To: <1418895704-25908-3-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAJAp7OhAP-rDM2zyo0Yr0-7erUp4ewKJ+tC=vyU-YMP_MzXJbA@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Bjorn Andersson <bjorn@kryo.se>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Christian Daudt <bcm@fixthebug.org>, Matt Porter <mporter@linaro.org>
 
-2014-12-18 1:41 GMT-08:00 Ulf Hansson <ulf.hansson@linaro.org>:
-> Since mmc_of_parse() may fail, let's deal with it and thus do proper
-> error handling.
+On Wed, Dec 17, 2014 at 11:57 AM, Bjorn Andersson <bjorn@kryo.se> wrote:
+
+> I'm somewhat puzzled to what benefit 52221610d brings after bringing
+> back the write of BIT(0). Is it just that we don't hit the BUG() on
+> non-standard voltages?
+
+It is to allow the use of external regulators that are capable of
+supplying a standard SD/MMC voltage but none of the standard SDHCI
+voltages.
+
+> The full paragraph regarding BIT(0) reads:
 >
-> Cc: Christian Daudt <bcm@fixthebug.org>
-> Cc: Matt Porter <mporter@linaro.org>
-> Cc: Florian Fainelli <f.fainelli@gmail.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-Acked-by: Florian Fainelli <f.fainelli@gmail.com>
-
-> ---
->  drivers/mmc/host/sdhci-bcm-kona.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+> Before setting this bit, the SD Host Driver shall set SD Bus Voltage
+> Select. If the
+> Host Controller detects the No Card state, this bit shall be cleared.
+> If this bit is cleared, the Host Controller shall immediately stop
+> driving CMD and
+> DAT[3:0] (tri-state) and drive SDCLK to low level (Refer to Section 2.2.14).
 >
-> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-> index e7e4fbd..34bb8f9 100644
-> --- a/drivers/mmc/host/sdhci-bcm-kona.c
-> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-> @@ -254,7 +254,9 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
->         kona_dev = sdhci_pltfm_priv(pltfm_priv);
->         mutex_init(&kona_dev->write_lock);
->
-> -       mmc_of_parse(host->mmc);
-> +       ret = mmc_of_parse(host->mmc);
-> +       if (ret)
-> +               goto err_pltfm_free;
->
->         if (!host->mmc->f_max) {
->                 dev_err(&pdev->dev, "Missing max-freq for SDHCI cfg\n");
-> --
-> 1.9.1
->
+> So the Qualcomm HW engineers implemented the last "shall", but if
+> someone else (what did nvidia do here?) also implemented the first
+> "shall"s then we're back at needing a full revert of 52221610d.
+
+It is difficult to predict how non-compliant host controllers will
+behave in the area where they have chosen to deviate from the
+standard.
+
+Do controllers that lack internal regulators claim to support 1.8,
+3.0, or 3.3v in the host capabilities register?  Or will they set none
+of these bits?
+
+They lack the ability to influence the externally supplied VDD but
+will they place requirements on the values of the SD Bus Voltage
+Select field?
+
+"If the Host Driver selects an unsupported voltage in the SD Bus
+Voltage Select field, the Host Controller may ignore writes to SD Bus
+Power and keep its value at zero."
+
+I would hope that controllers that fail to implement the regulator
+would allow the SD Bus Voltage Select field to be set to any value.
+
+We have established that it is okay to leave the Voltage Select as
+zero in the Broadcom, Qualcomm, and Samsung implementations.
+
+It would be nice to get confirmation that this is also the case for
+other implementations that rely on an external regulator.
+
+> Non-the-less, feel free to propose a patch and I will give it a test.
+
+Lets start with the simplest change first.  Please give this a try and
+let me know what you think.
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index ada1a3e..59a328a 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1239,6 +1239,12 @@ static void sdhci_set_power(struct sdhci_host
+*host, unsigned char mode,
+                spin_unlock_irq(&host->lock);
+                mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+                spin_lock_irq(&host->lock);
++
++               if (mode != MMC_POWER_OFF)
++                       sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
++               else
++                       sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++
+                return;
+        }
 
 
+Thanks again for your help in getting to the bottom of this.
 
--- 
-Florian
+-Tim
