@@ -1,74 +1,66 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: remove unnecessary debug message
-Date: Tue, 23 Dec 2014 16:35:55 +0100
-Message-ID: <CAPDyKFrDAwfbEE+iox+BPidqe1Ar317ZPtFjsv-E+Y3HBWh9QQ@mail.gmail.com>
-References: <1419336453-6411-1-git-send-email-beomho.seo@samsung.com>
+Subject: Re: [PATCH 2/3] mmc: host: don't use devm_pinctrl_get_select_default()
+ in probe
+Date: Tue, 23 Dec 2014 16:37:52 +0100
+Message-ID: <CAPDyKFrroxHw4qm4GRE2C1iWgf5_-P4W3O9Mxf-7vgg7pXiGqA@mail.gmail.com>
+References: <1419286616-9893-1-git-send-email-wsa@the-dreams.de>
+	<1419286616-9893-2-git-send-email-wsa@the-dreams.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f172.google.com ([209.85.216.172]:52852 "EHLO
-	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756087AbaLWPf4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Dec 2014 10:35:56 -0500
-Received: by mail-qc0-f172.google.com with SMTP id m20so4796349qcx.31
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Dec 2014 07:35:55 -0800 (PST)
-In-Reply-To: <1419336453-6411-1-git-send-email-beomho.seo@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <1419286616-9893-2-git-send-email-wsa@the-dreams.de>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, Nicolas Pitre <nico@fluxnic.net>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Beomho Seo <beomho.seo@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 23 December 2014 at 13:07, Beomho Seo <beomho.seo@samsung.com> wrote:
-> This patch remove unnecessary 'out of memory' message on dw mmc driver.
+On 22 December 2014 at 23:16, Wolfram Sang <wsa@the-dreams.de> wrote:
+> Since commit ab78029ecc34 (drivers/pinctrl: grab default handles from device
+> core), we can rely on device core for setting the default pins.
 >
-> Signed-off-by: Beomho Seo <beomho.seo@samsung.com>
+> Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
 
-Thanks! Applied for next.
+Thanks! Applied for next, with an updated prefix of the commit header
+to "mmc: mvsdio:".
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/dw_mmc-exynos.c |    4 +---
->  drivers/mmc/host/dw_mmc.c        |    4 +---
->  2 files changed, 2 insertions(+), 6 deletions(-)
+>  drivers/mmc/host/mvsdio.c | 6 ------
+>  1 file changed, 6 deletions(-)
 >
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index f936704..74eb081 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -230,10 +230,8 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
->         int ret;
+> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+> index 4f8618f4522d..a2cb92851f1f 100644
+> --- a/drivers/mmc/host/mvsdio.c
+> +++ b/drivers/mmc/host/mvsdio.c
+> @@ -25,7 +25,6 @@
+>  #include <linux/of_irq.h>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/slot-gpio.h>
+> -#include <linux/pinctrl/consumer.h>
 >
->         priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
-> -       if (!priv) {
-> -               dev_err(host->dev, "mem alloc failed for private data\n");
-> +       if (!priv)
->                 return -ENOMEM;
-> -       }
+>  #include <asm/sizes.h>
+>  #include <asm/unaligned.h>
+> @@ -704,7 +703,6 @@ static int mvsd_probe(struct platform_device *pdev)
+>         const struct mbus_dram_target_info *dram;
+>         struct resource *r;
+>         int ret, irq;
+> -       struct pinctrl *pinctrl;
 >
->         for (idx = 0; idx < ARRAY_SIZE(exynos_compat); idx++) {
->                 if (of_device_is_compatible(np, exynos_compat[idx].compatible))
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index a1b80e5..6e4d864 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2546,10 +2546,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->         u32 clock_frequency;
+>         r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>         irq = platform_get_irq(pdev, 0);
+> @@ -721,10 +719,6 @@ static int mvsd_probe(struct platform_device *pdev)
+>         host->mmc = mmc;
+>         host->dev = &pdev->dev;
 >
->         pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
-> -       if (!pdata) {
-> -               dev_err(dev, "could not allocate memory for pdata\n");
-> +       if (!pdata)
->                 return ERR_PTR(-ENOMEM);
-> -       }
->
->         /* find out number of slots supported */
->         if (of_property_read_u32(dev->of_node, "num-slots",
+> -       pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
+> -       if (IS_ERR(pinctrl))
+> -               dev_warn(&pdev->dev, "no pins associated\n");
+> -
+>         /*
+>          * Some non-DT platforms do not pass a clock, and the clock
+>          * frequency is passed through platform_data. On DT platforms,
 > --
-> 1.7.9.5
+> 2.1.3
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
