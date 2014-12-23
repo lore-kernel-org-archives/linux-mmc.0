@@ -1,53 +1,62 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH 2/3] mmc: host: don't use devm_pinctrl_get_select_default() in probe
-Date: Mon, 22 Dec 2014 23:16:54 +0100
-Message-ID: <1419286616-9893-2-git-send-email-wsa@the-dreams.de>
-References: <1419286616-9893-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1419286616-9893-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: linux-gpio@vger.kernel.org, Wolfram Sang <wsa@the-dreams.de>, Nicolas Pitre <nico@fluxnic.net>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+From: <micky_ching@realsil.com.cn>
+Subject: [PATCH v5 0/6] mmc: rtsx: add support for sdio card
+Date: Tue, 23 Dec 2014 09:19:40 +0800
+Message-ID: <cover.1419297154.git.micky_ching@realsil.com.cn>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: chris@printf.net, ulf.hansson@linaro.org, sameo@linux.intel.com
+Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, devel@linuxdriverproject.org, rogerable@realtek.com, dan.carpenter@oracle.com
 List-Id: linux-mmc@vger.kernel.org
 
-Since commit ab78029ecc34 (drivers/pinctrl: grab default handles from device
-core), we can rely on device core for setting the default pins.
+From: Micky Ching <micky_ching@realsil.com.cn>
 
-Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
----
- drivers/mmc/host/mvsdio.c | 6 ------
- 1 file changed, 6 deletions(-)
+v5:
+  fix patch(5) building error, no code change diff v4.
 
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index 4f8618f4522d..a2cb92851f1f 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -25,7 +25,6 @@
- #include <linux/of_irq.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/slot-gpio.h>
--#include <linux/pinctrl/consumer.h>
- 
- #include <asm/sizes.h>
- #include <asm/unaligned.h>
-@@ -704,7 +703,6 @@ static int mvsd_probe(struct platform_device *pdev)
- 	const struct mbus_dram_target_info *dram;
- 	struct resource *r;
- 	int ret, irq;
--	struct pinctrl *pinctrl;
- 
- 	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	irq = platform_get_irq(pdev, 0);
-@@ -721,10 +719,6 @@ static int mvsd_probe(struct platform_device *pdev)
- 	host->mmc = mmc;
- 	host->dev = &pdev->dev;
- 
--	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
--	if (IS_ERR(pinctrl))
--		dev_warn(&pdev->dev, "no pins associated\n");
--
- 	/*
- 	 * Some non-DT platforms do not pass a clock, and the clock
- 	 * frequency is passed through platform_data. On DT platforms,
+v4:
+  split patch in more detailed patches. no code changes diff v3.
+
+v3:
+  rtsx_pci_sdmmc.c:
+    - dump_reg_range
+      - remove unused pointer check
+      - fix start index
+v2:
+  rtsx_pci.h:
+    - remove unused rtsx_pci_write_le32
+    - add SD_CMD_START
+  rtsx_pci_sdmmc.c:
+    - dump_reg_range
+      - alloc data on stack
+    - remove forward declaration
+    - use SD_CMD_START replace magic number 0x40
+    - move initialize assignment to error handling
+
+This patch is used to change transfer mode for sdio card support
+by SD interface.
+
+Micky Ching (6):
+  mfd: rtsx: add func to split u32 into register
+  mmc: rtsx: add dump_reg_range to simplify dump register
+  mmc: rtsx: init cookie at probe/card_event
+  mmc: rtsx: add helper function to simplify code
+  mmc: rtsx: add support for sdio card
+  mmc: rtsx: swap function position to avoid pre declaration
+
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 522 +++++++++++++++++++++-----------------
+ include/linux/mfd/rtsx_pci.h      |   9 +
+ 2 files changed, 296 insertions(+), 235 deletions(-)
+
 -- 
-2.1.3
+1.9.1
