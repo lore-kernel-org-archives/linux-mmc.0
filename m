@@ -1,438 +1,103 @@
-From: <micky_ching@realsil.com.cn>
-Subject: [PATCH v5 5/6] mmc: rtsx: add support for sdio card
-Date: Tue, 23 Dec 2014 09:19:45 +0800
-Message-ID: <0eab20e8b933201e01a7bbb8f97d36536c0eaae3.1419297154.git.micky_ching@realsil.com.cn>
-References: <cover.1419297154.git.micky_ching@realsil.com.cn>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
+ eMMC5.1 device
+Date: Tue, 23 Dec 2014 02:30:15 +0000
+Message-ID: <17296D9F8FF2234F831FC3DF505A87A911BB4398@shsmsx102.ccr.corp.intel.com>
+References: <20141219080442.GA3775@intel.com> <5497A44D.6030000@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <cover.1419297154.git.micky_ching@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: chris@printf.net, ulf.hansson@linaro.org, sameo@linux.intel.com
-Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, devel@linuxdriverproject.org, rogerable@realtek.com, dan.carpenter@oracle.com
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:51418 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751890AbaLWCan convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Dec 2014 21:30:43 -0500
+In-Reply-To: <5497A44D.6030000@samsung.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-From: Micky Ching <micky_ching@realsil.com.cn>
+Hi Jaehoon,
 
-Modify transfer mode for support sdio card,
-send cmd and data at the same time for read data transfer,
-but send data after cmd for write data transfer.
+It is in a draft eMMC5.1 spec. I believe the official eMMC5.1 spec will be released soon.
 
-Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c | 234 ++++++++++++++++++++++----------------
- 1 file changed, 138 insertions(+), 96 deletions(-)
+Thanks
+Chuanxiao
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index b96c9ed..0217db6 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -28,6 +28,7 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/sd.h>
-+#include <linux/mmc/sdio.h>
- #include <linux/mmc/card.h>
- #include <linux/mfd/rtsx_pci.h>
- #include <asm/unaligned.h>
-@@ -70,6 +71,9 @@ static inline void sd_clear_error(struct realtek_pci_sdmmc *host)
- 			SD_STOP | SD_CLR_ERR, SD_STOP | SD_CLR_ERR);
- }
- 
-+static void sd_send_cmd_get_rsp(struct realtek_pci_sdmmc *host,
-+	struct mmc_command *cmd);
-+
- #ifdef DEBUG
- static void dump_reg_range(struct realtek_pci_sdmmc *host, u16 start, u16 end)
- {
-@@ -214,34 +218,27 @@ static void sdmmc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
- 	data->host_cookie = 0;
- }
- 
--static int sd_read_data(struct realtek_pci_sdmmc *host, u8 *cmd, u16 byte_cnt,
--		u8 *buf, int buf_len, int timeout)
-+static int sd_read_data(struct realtek_pci_sdmmc *host, struct mmc_command *cmd,
-+	u16 byte_cnt, u8 *buf, int buf_len, int timeout)
- {
- 	struct rtsx_pcr *pcr = host->pcr;
--	int err, i;
-+	int err;
- 	u8 trans_mode;
- 
--	dev_dbg(sdmmc_dev(host), "%s: SD/MMC CMD%d\n", __func__, cmd[0] - 0x40);
-+	dev_dbg(sdmmc_dev(host), "%s: SD/MMC CMD %d, arg = 0x%08x\n",
-+		__func__, cmd->opcode, cmd->arg);
- 
- 	if (!buf)
- 		buf_len = 0;
- 
--	if ((cmd[0] & 0x3F) == MMC_SEND_TUNING_BLOCK)
-+	if (cmd->opcode == MMC_SEND_TUNING_BLOCK)
- 		trans_mode = SD_TM_AUTO_TUNING;
- 	else
- 		trans_mode = SD_TM_NORMAL_READ;
- 
- 	rtsx_pci_init_cmd(pcr);
--
--	for (i = 0; i < 5; i++)
--		rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_CMD0 + i, 0xFF, cmd[i]);
--
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_BYTE_CNT_L, 0xFF, (u8)byte_cnt);
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_BYTE_CNT_H,
--			0xFF, (u8)(byte_cnt >> 8));
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_BLOCK_CNT_L, 0xFF, 1);
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_BLOCK_CNT_H, 0xFF, 0);
--
-+	sd_cmd_set_sd_cmd(pcr, cmd);
-+	sd_cmd_set_data_len(pcr, 1, byte_cnt);
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_CFG2, 0xFF,
- 			SD_CALCULATE_CRC7 | SD_CHECK_CRC16 |
- 			SD_NO_WAIT_BUSY_END | SD_CHECK_CRC7 | SD_RSP_LEN_6);
-@@ -274,16 +271,23 @@ static int sd_read_data(struct realtek_pci_sdmmc *host, u8 *cmd, u16 byte_cnt,
- 	return 0;
- }
- 
--static int sd_write_data(struct realtek_pci_sdmmc *host, u8 *cmd, u16 byte_cnt,
--		u8 *buf, int buf_len, int timeout)
-+static int sd_write_data(struct realtek_pci_sdmmc *host,
-+	struct mmc_command *cmd, u16 byte_cnt, u8 *buf, int buf_len,
-+	int timeout)
- {
- 	struct rtsx_pcr *pcr = host->pcr;
--	int err, i;
--	u8 trans_mode;
-+	int err;
-+
-+	dev_dbg(sdmmc_dev(host), "%s: SD/MMC CMD %d, arg = 0x%08x\n",
-+		__func__, cmd->opcode, cmd->arg);
- 
- 	if (!buf)
- 		buf_len = 0;
- 
-+	sd_send_cmd_get_rsp(host, cmd);
-+	if (cmd->error)
-+		return cmd->error;
-+
- 	if (buf && buf_len) {
- 		err = rtsx_pci_write_ppbuf(pcr, buf, buf_len);
- 		if (err < 0) {
-@@ -293,30 +297,13 @@ static int sd_write_data(struct realtek_pci_sdmmc *host, u8 *cmd, u16 byte_cnt,
- 		}
- 	}
- 
--	trans_mode = cmd ? SD_TM_AUTO_WRITE_2 : SD_TM_AUTO_WRITE_3;
- 	rtsx_pci_init_cmd(pcr);
--
--	if (cmd) {
--		dev_dbg(sdmmc_dev(host), "%s: SD/MMC CMD %d\n", __func__,
--				cmd[0] - 0x40);
--
--		for (i = 0; i < 5; i++)
--			rtsx_pci_add_cmd(pcr, WRITE_REG_CMD,
--					SD_CMD0 + i, 0xFF, cmd[i]);
--	}
--
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_BYTE_CNT_L, 0xFF, (u8)byte_cnt);
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_BYTE_CNT_H,
--			0xFF, (u8)(byte_cnt >> 8));
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_BLOCK_CNT_L, 0xFF, 1);
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_BLOCK_CNT_H, 0xFF, 0);
--
-+	sd_cmd_set_data_len(pcr, 1, byte_cnt);
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_CFG2, 0xFF,
- 		SD_CALCULATE_CRC7 | SD_CHECK_CRC16 |
--		SD_NO_WAIT_BUSY_END | SD_CHECK_CRC7 | SD_RSP_LEN_6);
--
-+		SD_NO_WAIT_BUSY_END | SD_CHECK_CRC7 | SD_RSP_LEN_0);
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_TRANSFER, 0xFF,
--			trans_mode | SD_TRANSFER_START);
-+			SD_TRANSFER_START | SD_TM_AUTO_WRITE_3);
- 	rtsx_pci_add_cmd(pcr, CHECK_REG_CMD, SD_TRANSFER,
- 			SD_TRANSFER_END, SD_TRANSFER_END);
- 
-@@ -449,71 +436,113 @@ out:
- 				SD_CLK_TOGGLE_EN | SD_CLK_FORCE_STOP, 0);
- }
- 
--static int sd_rw_multi(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
-+static int sd_read_long_data(struct realtek_pci_sdmmc *host,
-+	struct mmc_request *mrq)
- {
- 	struct rtsx_pcr *pcr = host->pcr;
- 	struct mmc_host *mmc = host->mmc;
- 	struct mmc_card *card = mmc->card;
-+	struct mmc_command *cmd = mrq->cmd;
- 	struct mmc_data *data = mrq->data;
- 	int uhs = mmc_card_uhs(card);
--	int read = (data->flags & MMC_DATA_READ) ? 1 : 0;
--	u8 cfg2, trans_mode;
-+	u8 cfg2 = 0;
- 	int err;
-+	int resp_type;
- 	size_t data_len = data->blksz * data->blocks;
- 
--	if (read) {
--		cfg2 = SD_CALCULATE_CRC7 | SD_CHECK_CRC16 |
--			SD_NO_WAIT_BUSY_END | SD_CHECK_CRC7 | SD_RSP_LEN_0;
--		trans_mode = SD_TM_AUTO_READ_3;
--	} else {
--		cfg2 = SD_NO_CALCULATE_CRC7 | SD_CHECK_CRC16 |
--			SD_NO_WAIT_BUSY_END | SD_NO_CHECK_CRC7 | SD_RSP_LEN_0;
--		trans_mode = SD_TM_AUTO_WRITE_3;
--	}
-+	dev_dbg(sdmmc_dev(host), "%s: SD/MMC CMD %d, arg = 0x%08x\n",
-+		__func__, cmd->opcode, cmd->arg);
-+
-+	resp_type = sd_response_type(cmd);
-+	if (resp_type < 0)
-+		return resp_type;
- 
- 	if (!uhs)
- 		cfg2 |= SD_NO_CHECK_WAIT_CRC_TO;
- 
- 	rtsx_pci_init_cmd(pcr);
--
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_BYTE_CNT_L, 0xFF, 0x00);
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_BYTE_CNT_H, 0xFF, 0x02);
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_BLOCK_CNT_L,
--			0xFF, (u8)data->blocks);
--	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_BLOCK_CNT_H,
--			0xFF, (u8)(data->blocks >> 8));
--
-+	sd_cmd_set_sd_cmd(pcr, cmd);
-+	sd_cmd_set_data_len(pcr, data->blocks, data->blksz);
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, IRQSTAT0,
- 			DMA_DONE_INT, DMA_DONE_INT);
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC3,
--			0xFF, (u8)(data_len >> 24));
-+		0xFF, (u8)(data_len >> 24));
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC2,
--			0xFF, (u8)(data_len >> 16));
-+		0xFF, (u8)(data_len >> 16));
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC1,
--			0xFF, (u8)(data_len >> 8));
-+		0xFF, (u8)(data_len >> 8));
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC0, 0xFF, (u8)data_len);
--	if (read) {
--		rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMACTL,
--				0x03 | DMA_PACK_SIZE_MASK,
--				DMA_DIR_FROM_CARD | DMA_EN | DMA_512);
--	} else {
--		rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMACTL,
--				0x03 | DMA_PACK_SIZE_MASK,
--				DMA_DIR_TO_CARD | DMA_EN | DMA_512);
-+	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMACTL,
-+		0x03 | DMA_PACK_SIZE_MASK,
-+		DMA_DIR_FROM_CARD | DMA_EN | DMA_512);
-+	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_DATA_SOURCE,
-+			0x01, RING_BUFFER);
-+	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_CFG2, 0xFF, cfg2 | resp_type);
-+	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_TRANSFER, 0xFF,
-+			SD_TRANSFER_START | SD_TM_AUTO_READ_2);
-+	rtsx_pci_add_cmd(pcr, CHECK_REG_CMD, SD_TRANSFER,
-+			SD_TRANSFER_END, SD_TRANSFER_END);
-+	rtsx_pci_send_cmd_no_wait(pcr);
-+
-+	err = rtsx_pci_dma_transfer(pcr, data->sg, host->sg_count, 1, 10000);
-+	if (err < 0) {
-+		sd_print_debug_regs(host);
-+		sd_clear_error(host);
-+		return err;
- 	}
- 
-+	return 0;
-+}
-+
-+static int sd_write_long_data(struct realtek_pci_sdmmc *host,
-+	struct mmc_request *mrq)
-+{
-+	struct rtsx_pcr *pcr = host->pcr;
-+	struct mmc_host *mmc = host->mmc;
-+	struct mmc_card *card = mmc->card;
-+	struct mmc_command *cmd = mrq->cmd;
-+	struct mmc_data *data = mrq->data;
-+	int uhs = mmc_card_uhs(card);
-+	u8 cfg2;
-+	int err;
-+	size_t data_len = data->blksz * data->blocks;
-+
-+	sd_send_cmd_get_rsp(host, cmd);
-+	if (cmd->error)
-+		return cmd->error;
-+
-+	dev_dbg(sdmmc_dev(host), "%s: SD/MMC CMD %d, arg = 0x%08x\n",
-+		__func__, cmd->opcode, cmd->arg);
-+
-+	cfg2 = SD_NO_CALCULATE_CRC7 | SD_CHECK_CRC16 |
-+		SD_NO_WAIT_BUSY_END | SD_NO_CHECK_CRC7 | SD_RSP_LEN_0;
-+
-+	if (!uhs)
-+		cfg2 |= SD_NO_CHECK_WAIT_CRC_TO;
-+
-+	rtsx_pci_init_cmd(pcr);
-+	sd_cmd_set_data_len(pcr, data->blocks, data->blksz);
-+	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, IRQSTAT0,
-+			DMA_DONE_INT, DMA_DONE_INT);
-+	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC3,
-+		0xFF, (u8)(data_len >> 24));
-+	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC2,
-+		0xFF, (u8)(data_len >> 16));
-+	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC1,
-+		0xFF, (u8)(data_len >> 8));
-+	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC0, 0xFF, (u8)data_len);
-+	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMACTL,
-+		0x03 | DMA_PACK_SIZE_MASK,
-+		DMA_DIR_TO_CARD | DMA_EN | DMA_512);
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_DATA_SOURCE,
- 			0x01, RING_BUFFER);
--
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_CFG2, 0xFF, cfg2);
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_TRANSFER, 0xFF,
--			trans_mode | SD_TRANSFER_START);
-+			SD_TRANSFER_START | SD_TM_AUTO_WRITE_3);
- 	rtsx_pci_add_cmd(pcr, CHECK_REG_CMD, SD_TRANSFER,
- 			SD_TRANSFER_END, SD_TRANSFER_END);
--
- 	rtsx_pci_send_cmd_no_wait(pcr);
--
--	err = rtsx_pci_dma_transfer(pcr, data->sg, host->sg_count, read, 10000);
-+	err = rtsx_pci_dma_transfer(pcr, data->sg, host->sg_count, 0, 10000);
- 	if (err < 0) {
- 		sd_clear_error(host);
- 		return err;
-@@ -522,6 +551,16 @@ static int sd_rw_multi(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
- 	return 0;
- }
- 
-+static int sd_rw_multi(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
-+{
-+	struct mmc_data *data = mrq->data;
-+
-+	if (data->flags & MMC_DATA_READ)
-+		return sd_read_long_data(host, mrq);
-+
-+	return sd_write_long_data(host, mrq);
-+}
-+
- static inline void sd_enable_initial_mode(struct realtek_pci_sdmmc *host)
- {
- 	rtsx_pci_write_register(host->pcr, SD_CFG1,
-@@ -539,10 +578,7 @@ static void sd_normal_rw(struct realtek_pci_sdmmc *host,
- {
- 	struct mmc_command *cmd = mrq->cmd;
- 	struct mmc_data *data = mrq->data;
--	u8 _cmd[5], *buf;
--
--	_cmd[0] = 0x40 | (u8)cmd->opcode;
--	put_unaligned_be32(cmd->arg, (u32 *)(&_cmd[1]));
-+	u8 *buf;
- 
- 	buf = kzalloc(data->blksz, GFP_NOIO);
- 	if (!buf) {
-@@ -554,7 +590,7 @@ static void sd_normal_rw(struct realtek_pci_sdmmc *host,
- 		if (host->initial_mode)
- 			sd_disable_initial_mode(host);
- 
--		cmd->error = sd_read_data(host, _cmd, (u16)data->blksz, buf,
-+		cmd->error = sd_read_data(host, cmd, (u16)data->blksz, buf,
- 				data->blksz, 200);
- 
- 		if (host->initial_mode)
-@@ -564,7 +600,7 @@ static void sd_normal_rw(struct realtek_pci_sdmmc *host,
- 	} else {
- 		sg_copy_to_buffer(data->sg, data->sg_len, buf, data->blksz);
- 
--		cmd->error = sd_write_data(host, _cmd, (u16)data->blksz, buf,
-+		cmd->error = sd_write_data(host, cmd, (u16)data->blksz, buf,
- 				data->blksz, 200);
- 	}
- 
-@@ -664,14 +700,14 @@ static int sd_tuning_rx_cmd(struct realtek_pci_sdmmc *host,
- 		u8 opcode, u8 sample_point)
- {
- 	int err;
--	u8 cmd[5] = {0};
-+	struct mmc_command cmd = {0};
- 
- 	err = sd_change_phase(host, sample_point, true);
- 	if (err < 0)
- 		return err;
- 
--	cmd[0] = 0x40 | opcode;
--	err = sd_read_data(host, cmd, 0x40, NULL, 0, 100);
-+	cmd.opcode = opcode;
-+	err = sd_read_data(host, &cmd, 0x40, NULL, 0, 100);
- 	if (err < 0) {
- 		/* Wait till SD DATA IDLE */
- 		sd_wait_data_idle(host);
-@@ -738,6 +774,12 @@ static int sd_tuning_rx(struct realtek_pci_sdmmc *host, u8 opcode)
- 	return 0;
- }
- 
-+static inline int sdio_extblock_cmd(struct mmc_command *cmd,
-+	struct mmc_data *data)
-+{
-+	return (cmd->opcode == SD_IO_RW_EXTENDED) && (data->blksz == 512);
-+}
-+
- static inline int sd_rw_cmd(struct mmc_command *cmd)
- {
- 	return mmc_op_multi(cmd->opcode) ||
-@@ -787,17 +829,15 @@ static void sd_request(struct work_struct *work)
- 	if (mrq->data)
- 		data_size = data->blocks * data->blksz;
- 
--	if (!data_size || sd_rw_cmd(cmd)) {
-+	if (!data_size) {
- 		sd_send_cmd_get_rsp(host, cmd);
-+	} else if (sd_rw_cmd(cmd) || sdio_extblock_cmd(cmd, data)) {
-+		cmd->error = sd_rw_multi(host, mrq);
-+		if (!host->using_cookie)
-+			sdmmc_post_req(host->mmc, host->mrq, 0);
- 
--		if (!cmd->error && data_size) {
--			sd_rw_multi(host, mrq);
--			if (!host->using_cookie)
--				sdmmc_post_req(host->mmc, host->mrq, 0);
--
--			if (mmc_op_multi(cmd->opcode) && mrq->stop)
--				sd_send_cmd_get_rsp(host, mrq->stop);
--		}
-+		if (mmc_op_multi(cmd->opcode) && mrq->stop)
-+			sd_send_cmd_get_rsp(host, mrq->stop);
- 	} else {
- 		sd_normal_rw(host, mrq);
- 	}
-@@ -812,8 +852,10 @@ static void sd_request(struct work_struct *work)
- 	mutex_unlock(&pcr->pcr_mutex);
- 
- finish:
--	if (cmd->error)
--		dev_dbg(sdmmc_dev(host), "cmd->error = %d\n", cmd->error);
-+	if (cmd->error) {
-+		dev_dbg(sdmmc_dev(host), "CMD %d 0x%08x error(%d)\n",
-+			cmd->opcode, cmd->arg, cmd->error);
-+	}
- 
- 	mutex_lock(&host->host_mutex);
- 	host->mrq = NULL;
-@@ -831,7 +873,7 @@ static void sdmmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	host->mrq = mrq;
- 	mutex_unlock(&host->host_mutex);
- 
--	if (sd_rw_cmd(mrq->cmd))
-+	if (sd_rw_cmd(mrq->cmd) || sdio_extblock_cmd(mrq->cmd, data))
- 		host->using_cookie = sd_pre_dma_transfer(host, data, false);
- 
- 	queue_work(host->workq, &host->work);
--- 
-1.9.1
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org
+> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Jaehoon Chung
+> Sent: Monday, December 22, 2014 12:56 PM
+> To: Dong, Chuanxiao; linux-mmc@vger.kernel.org
+> Subject: Re: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
+> eMMC5.1 device
+> 
+> Hi, Chuanxiao.
+> 
+> Was it published for the eMMC5.1 spec?
+> 
+> Best Regards,
+> Jaehoon Chung
+> 
+> On 12/19/2014 05:04 PM, Chuanxiao Dong wrote:
+> > Hello,
+> >
+> > Seems community already have some implementation for the eMMC5.1
+> > device command queue feature, but that require the eMMC host
+> > controller to support CMDQ. In my platform, I don't have this kind of
+> > eMMC host controller but I have a Samsung eMMC5.1 device which can
+> support the Command queue.
+> >
+> > With this limitation, I have to let eMMC host controller to manually
+> > send the CMD44/45/13/46/47. So in this way, more commands are needed
+> > for an I/O request, more interrupts/schedule are needed in driver.
+> >
+> > Even this way have some more software overhead, but it can still use
+> > the eMMC5.1 device Command queue feature. After test with the iozone
+> command:
+> > "iozone -zec -t 4 -i0 -i2 -F iozonefile1 iozonefile2 iozonefile3
+> > iozonefile4 -+n -I -r 4k -s 500m -O -R -+r -+D" to test random
+> > performance, I saw a performance improvment for random read on my
+> eMMC5.1 device:
+> >
+> > 		Random read
+> > SW CMDQ:	5544.6
+> > Normal Read:	3993.05
+> >
+> > So I want to send this serial patches as RFC patch for reviewing
+> >
+> >
+> > Chuanxiao Dong (5):
+> >   mmc: replace sbc to precmd and add postcmd
+> >   mmc: host: add runtime PM for host class dev
+> >   mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
+> >   mmc: core: add support for CMDQ feature in MMC Core stack
+> >   mmc: sdhci: add SW CMDQ support for CHT SDHCI host
+> >
+> >  drivers/mmc/card/block.c      |  538
+> ++++++++++++++++++++++++++++++++++++++---
+> >  drivers/mmc/card/queue.c      |  213 ++++++++--------
+> >  drivers/mmc/card/queue.h      |   14 +-
+> >  drivers/mmc/core/core.c       |   78 +++++-
+> >  drivers/mmc/core/host.c       |   14 ++
+> >  drivers/mmc/core/mmc.c        |   43 +++-
+> >  drivers/mmc/host/dw_mmc.c     |    8 +-
+> >  drivers/mmc/host/mmci.c       |   14 +-
+> >  drivers/mmc/host/omap_hsmmc.c |   18 +-
+> >  drivers/mmc/host/sdhci-acpi.c |    1 -
+> >  drivers/mmc/host/sdhci-pci.c  |    1 -
+> >  drivers/mmc/host/sdhci.c      |  137 +++++++++--
+> >  include/linux/mmc/card.h      |    3 +
+> >  include/linux/mmc/core.h      |    5 +-
+> >  include/linux/mmc/host.h      |    5 +
+> >  include/linux/mmc/mmc.h       |   21 ++
+> >  include/linux/mmc/pm.h        |    1 +
+> >  include/linux/mmc/sdhci.h     |    1 +
+> >  18 files changed, 909 insertions(+), 206 deletions(-)
+> >
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the body
+> of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
