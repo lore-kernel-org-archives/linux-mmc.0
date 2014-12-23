@@ -1,158 +1,63 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2a/3] mmc: core: Allow host driver to provide isr for
- card-detect interrupts.
-Date: Tue, 23 Dec 2014 12:37:52 +0100
-Message-ID: <CAPDyKFqxYnB0t3Soo2nVGoN=+RfQPAN=3ykOnFcso5JKS5ZgKA@mail.gmail.com>
-References: <20141219230732.7511.28103.stgit@notabene.brown>
-	<CAPDyKFot3ZyeoVf5wWSizw==7bitLAb7btg3ngH6aMWHFdAekw@mail.gmail.com>
-	<20141223194809.57dd6f6e@notabene.brown>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Beomho Seo <beomho.seo@samsung.com>
+Subject: [PATCH] mmc: dw_mmc: remove unnecessary debug message
+Date: Tue, 23 Dec 2014 21:07:33 +0900
+Message-ID: <1419336453-6411-1-git-send-email-beomho.seo@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f180.google.com ([209.85.216.180]:51374 "EHLO
-	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755713AbaLWLhx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Dec 2014 06:37:53 -0500
-Received: by mail-qc0-f180.google.com with SMTP id i8so4430004qcq.39
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Dec 2014 03:37:52 -0800 (PST)
-In-Reply-To: <20141223194809.57dd6f6e@notabene.brown>
+Received: from mailout4.samsung.com ([203.254.224.34]:58789 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750806AbaLWMHg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Dec 2014 07:07:36 -0500
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0NH1006JJB0MYA70@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 23 Dec 2014 21:07:34 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: NeilBrown <neilb@suse.de>
-Cc: Chris Ball <chris@printf.net>, GTA04 owners <gta04-owner@goldelico.com>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: Beomho Seo <beomho.seo@samsung.com>
 
-On 23 December 2014 at 09:48, NeilBrown <neilb@suse.de> wrote:
-> On Mon, 22 Dec 2014 16:35:40 +0100 Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
->> On 20 December 2014 at 00:07, NeilBrown <neilb@suse.de> wrote:
->> > One of the reasons omap_hsmmc doesn't use the slot-gpio library
->> > is that it has some non-standard functionality in the card-detect
->> > interrupt service routine.
->> >
->> > To make it possible for omap_hsmmc (and maybe others) to be converted
->> > to use slot-gpio, add 'mmc_gpio_request_cd_isr' which provide an
->> > alternate isr to be register by the slot-gpio code.
->> >
->> > Signed-off-by: NeilBrown <neilb@suse.de>
->> > ---
->> >  drivers/mmc/core/slot-gpio.c  |   24 +++++++++++++++++++++++-
->> >  include/linux/mmc/slot-gpio.h |    2 ++
->> >  2 files changed, 25 insertions(+), 1 deletion(-)
->> >
->> > This and following are the result of splitting the previous
->> > '2/3' into to patches: core and omap_hsmmc as requested.
->> >
->> > NeilBrown
->> >
->> >
->> > diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
->> > index 69bbf2adb329..f56323f5a996 100644
->> > --- a/drivers/mmc/core/slot-gpio.c
->> > +++ b/drivers/mmc/core/slot-gpio.c
->> > @@ -23,6 +23,7 @@ struct mmc_gpio {
->> >         struct gpio_desc *cd_gpio;
->> >         bool override_ro_active_level;
->> >         bool override_cd_active_level;
->> > +       irqreturn_t (*cd_gpio_isr)(int irq, void *dev_id);
->> >         char *ro_label;
->> >         char cd_label[0];
->> >  };
->> > @@ -156,8 +157,10 @@ void mmc_gpiod_request_cd_irq(struct mmc_host *host)
->> >                 irq = -EINVAL;
->> >
->> >         if (irq >= 0) {
->> > +               if (ctx->cd_gpio_isr == NULL)
->>
->> Please change to:
->> if (!ctx->cd_gpio_isr)
->
-> will do (though I personally prefer the explicit "NULL" :-).
->
->>
->> > +                       ctx->cd_gpio_isr = mmc_gpio_cd_irqt;
->> >                 ret = devm_request_threaded_irq(&host->class_dev, irq,
->> > -                       NULL, mmc_gpio_cd_irqt,
->> > +                       NULL, ctx->cd_gpio_isr,
->> >                         IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_ONESHOT,
->> >                         ctx->cd_label, host);
->> >                 if (ret < 0)
->> > @@ -171,6 +174,25 @@ void mmc_gpiod_request_cd_irq(struct mmc_host *host)
->> >  }
->> >  EXPORT_SYMBOL(mmc_gpiod_request_cd_irq);
->> >
->> > +/* Register an alternate interrupt service routine for
->> > + * the card-detect GPIO.
->> > + */
->> > +int mmc_gpio_request_cd_isr(struct mmc_host *host,
->> > +                           irqreturn_t (*isr)(int irq, void *dev_id))
->> > +{
->> > +       struct mmc_gpio *ctx;
->> > +       int ret;
->> > +
->> > +       ret = mmc_gpio_alloc(host);
->> > +       if (ret < 0)
->> > +               return ret;
->> > +       ctx = host->slot.handler_priv;
->> > +       if (ctx->cd_gpio_isr)
->> > +               return -EBUSY;
->> > +       ctx->cd_gpio_isr = isr;
->> > +       return 0;
->> > +}
->>
->> I decided to queue those patchsets I recently posted which simplifies
->> the slot-gpio API. Please re-base this patch on top of my next branch.
->
-> OK.
->
->>
->> Moreover, I actually wonder whether we need to add this API at all.
->> After my changes, all you need to do from your host driver ->probe(),
->> is to assign your isr routine to ctx->cd_gpio_isr.
->
-> 'struct mmc_gpio' is local to slot-gpio.c, so code in other files cannot
-> access the members directly.
+This patch remove unnecessary 'out of memory' message on dw mmc driver.
 
-You are right. I don't think they should.
+Signed-off-by: Beomho Seo <beomho.seo@samsung.com>
+---
+ drivers/mmc/host/dw_mmc-exynos.c |    4 +---
+ drivers/mmc/host/dw_mmc.c        |    4 +---
+ 2 files changed, 2 insertions(+), 6 deletions(-)
 
-Let's add the API instead, but rename it to something like
-mmc_gpio_set_cd_isr().
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index f936704..74eb081 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -230,10 +230,8 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
+ 	int ret;
+ 
+ 	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
+-	if (!priv) {
+-		dev_err(host->dev, "mem alloc failed for private data\n");
++	if (!priv)
+ 		return -ENOMEM;
+-	}
+ 
+ 	for (idx = 0; idx < ARRAY_SIZE(exynos_compat); idx++) {
+ 		if (of_device_is_compatible(np, exynos_compat[idx].compatible))
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index a1b80e5..6e4d864 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2546,10 +2546,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ 	u32 clock_frequency;
+ 
+ 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+-	if (!pdata) {
+-		dev_err(dev, "could not allocate memory for pdata\n");
++	if (!pdata)
+ 		return ERR_PTR(-ENOMEM);
+-	}
+ 
+ 	/* find out number of slots supported */
+ 	if (of_property_read_u32(dev->of_node, "num-slots",
+-- 
+1.7.9.5
 
-Kind regards
-Uffe
-
->
-> If you want to move it to include/linux/mmc/host.h and change
->   void *handler_priv;
-> to
->   struct mmc_gpio *gpios;
->
-> or similar, then I'll happily update it directly.
-> What do you think?
->
-> NeilBrown
->
->
->>
->> > +
->> >  /**
->> >   * mmc_gpio_request_cd - request a gpio for card-detection
->> >   * @host: mmc host
->> > diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
->> > index e56fa24c9322..9e55db60deb0 100644
->> > --- a/include/linux/mmc/slot-gpio.h
->> > +++ b/include/linux/mmc/slot-gpio.h
->> > @@ -28,6 +28,8 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
->> >  int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
->> >                          unsigned int idx, bool override_active_level,
->> >                          unsigned int debounce, bool *gpio_invert);
->> > +int mmc_gpio_request_cd_isr(struct mmc_host *host,
->> > +                           irqreturn_t (*isr)(int irq, void *dev_id));
->> >  void mmc_gpiod_free_cd(struct mmc_host *host);
->> >  void mmc_gpiod_request_cd_irq(struct mmc_host *host);
->> >
->> >
->> >
->>
->> Kind regards
->> Uffe
->
