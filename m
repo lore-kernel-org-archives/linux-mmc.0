@@ -1,154 +1,203 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH V3 2/2] mmc: core: Make tuning block patterns static
-Date: Wed, 24 Dec 2014 10:45:31 +0900
-Message-ID: <549A1ABB.7090806@samsung.com>
-References: <1419350569-7238-1-git-send-email-ulf.hansson@linaro.org>
- <1419350569-7238-2-git-send-email-ulf.hansson@linaro.org>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH v2 3/4] mmc: dw_mmc: Convert to mmc_send_tuning()
+Date: Wed, 24 Dec 2014 19:37:15 +0530
+Message-ID: <CAGOxZ506yrOd6WHnJTuO0e6z=3qA+mqzPcOv3RFvkccuX+cb_g@mail.gmail.com>
+References: <1417780783-12939-1-git-send-email-ulf.hansson@linaro.org>
+ <1417780783-12939-4-git-send-email-ulf.hansson@linaro.org>
+ <CAGOxZ525JR9vTuKAZJJjDF6iq3R2-DuEcJFEOT9KkEMZGimUFw@mail.gmail.com>
+ <CAPDyKFpOvs_ML+1edoTzeTPctiMV0B8EeD8aE8daGwjeG7gwMQ@mail.gmail.com>
+ <CAGOxZ51O9_8YDU30st6uha6PkVhk0GJC6hdjgVu+Gi0XPiaz-A@mail.gmail.com> <CAPDyKFr56_8chuuva0dgA5uD3z-366R4wVoy9uvoim1CFiiRwA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:23215 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750896AbaLXBpe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Dec 2014 20:45:34 -0500
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0NH200ICWCVW2P30@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 24 Dec 2014 10:45:32 +0900 (KST)
-In-reply-to: <1419350569-7238-2-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-yh0-f47.google.com ([209.85.213.47]:45947 "EHLO
+	mail-yh0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751602AbaLXOH4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Dec 2014 09:07:56 -0500
+Received: by mail-yh0-f47.google.com with SMTP id f73so4033822yha.20
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Dec 2014 06:07:56 -0800 (PST)
+In-Reply-To: <CAPDyKFr56_8chuuva0dgA5uD3z-366R4wVoy9uvoim1CFiiRwA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, Stephen Boyd <sboyd@codeaurora.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, Aisheng Dong <b29396@freescale.com>, Stephen Boyd <sboyd@codeaurora.org>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-Hi, Ulf.
+Hi Ulf,
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-Best Regards,
-Jaehoon Chung
-
-On 12/24/2014 01:02 AM, Ulf Hansson wrote:
-> Since previous patches removed the need for the tuning block patterns
-> to be exported, let's move them close to the mmc_send_tuning() API.
-> 
-> Those are now intended to be used only by the mmc core.
-> 
+On Mon, Dec 22, 2014 at 8:11 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 20 December 2014 at 14:18, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+>> Hi Ulf,
+>>
+>> On Mon, Dec 8, 2014 at 3:40 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>> On 6 December 2014 at 13:43, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+>>>> Hi Ulf,
+>>>>
+>>>> On Fri, Dec 5, 2014 at 5:29 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>> Instead of having a local hack taking care of sending the tuning
+>>>>> command and as well to verify the response pattern, let's convert to
+>>>>> the common mmc_send_tuning() API.
+>>>>>
+>>>>> This change affects the Exynos variant, since it's the only one which
+>>>>> support the dw_mmc's ->execute_tuning() callback.
+>>>>>
+>>>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>>>> ---
+>>>>>
+>>>
+>>> Alim, thanks for helping out testing!
+>>>
+>>>> With this change HS200 mode does not work on exynos5800 peach-pi board.
+>>>> I got below error while testing this series:
+>>>>
+>>>> mmc0: tuning execution failed
+>>>> mmc0: error -5 whilst initialising MMC card
+>>>>
+>>>> Though, your's next branch with commit _a1d06b4_ works fine in HS200 mode.
+>>>
+>>> I was looking into the details of what change my patchset introduces
+>>> for dw_mmc-exynos. Apparently, dw_mmc-exynos was using the
+>>> MMC_STOP_TRANSMISSION to end the tuning reqeust (CMD21/19). The new
+>>> mmc_send_tuning() API doesn't, which also conforms to what the eMMC/SD
+>>> specifications states.
+>>>
+>>> Do you have any idea of why dw_mmc-exynos was using
+>>> MMC_STOP_TRANSMISSION for CMD19/21?
+>>>
+>>> To see if my theory is correct, could you try out the following patch
+>>> on top of $subject patch?
+>>> BTW, I have queued patch 1 and 2, from this patchset available on my
+>>> next branch.
+>>>
+>>>
+>>> From e1ac35bb0e90254275ec7088f41e6e2d59e48367 Mon Sep 17 00:00:00 2001
+>>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>> Date: Mon, 8 Dec 2014 10:58:48 +0100
+>>> Subject: [PATCH] mmc: core: End tuning request with stop command
+>>>
+>>> Not to be merged!
+>>>
+>>> This patch adds the MMC_STOP_TRANSMISSION command to end a tuning
+>>> request. For some reason dw_mmc seems to need this to complete the
+>>> tuning request without errors.
+>>>
+>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>> ---
+>>>  drivers/mmc/core/mmc_ops.c | 5 +++++
+>>>  1 file changed, 5 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>>> index 3b044c5..aa79e0c 100644
+>>> --- a/drivers/mmc/core/mmc_ops.c
+>>> +++ b/drivers/mmc/core/mmc_ops.c
+>>> @@ -551,6 +551,7 @@ int mmc_send_tuning(struct mmc_host *host)
+>>>  {
+>>>         struct mmc_request mrq = {NULL};
+>>>         struct mmc_command cmd = {0};
+>>> +       struct mmc_command stop = {0};
+>>>         struct mmc_data data = {0};
+>>>         struct scatterlist sg;
+>>>         struct mmc_ios *ios = &host->ios;
+>>> @@ -576,10 +577,14 @@ int mmc_send_tuning(struct mmc_host *host)
+>>>
+>>>         mrq.cmd = &cmd;
+>>>         mrq.data = &data;
+>>> +       mrq.stop = &stop;
+>>>
+>>>         cmd.opcode = opcode;
+>>>         cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+>>>
+>>> +       stop.opcode = MMC_STOP_TRANSMISSION;
+>>> +       stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
+>>> +
+>>>         data.blksz = size;
+>>>         data.blocks = 1;
+>>>         data.flags = MMC_DATA_READ;
+>>> --
+>>> 1.9.1
+>>>
+>> Sorry for delay in testing this suggested patch, I would say this
+>> certainly helps, but still I need to change sample phase to make it
+>> work with generic tuning function.
+>> So with your's adding STOP_TRANSMISSION command and below change,
+>> HS200 works well on exynos5800
+>>
+>> diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts
+>> b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+>> index e8fdda8..e0f0337 100644
+>> --- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
+>> +++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+>> @@ -555,7 +555,7 @@
+>>         card-detect-delay = <200>;
+>>         clock-frequency = <400000000>;
+>>         samsung,dw-mshc-ciu-div = <3>;
+>> -       samsung,dw-mshc-sdr-timing = <0 4>;
+>> +       samsung,dw-mshc-sdr-timing = <2 4>;
+>>
+>> This basically change the clock-sample phase with which the tuning
+>> process starts.
+>>
+>> I didn't find anything is exynos documentations which suggest
+>> STOP_TRANSMISSION is needed, may be Seungwon might be know as he wrote
+>> this.
+>>
+>> Are you ok to add STOP_TRANSMISSION in generic tuning code (probably
+>> with a quirk, so that other hosts are still happy)?
+>
+> No, I don't want that.
+>
+> If special treatment are needed for dw_mmc to handle a tuning request,
+> dw_mmc should be able to take care by itself. How about below patch,
+> do you think that could work?
+>
+> From c2e5783beaa322178f2336b4bff4bdf13da76f56 Mon Sep 17 00:00:00 2001
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+> Date: Mon, 22 Dec 2014 15:24:14 +0100
+> Subject: [PATCH] mmc: dw_mmc: Generate stop commands for failed tuning
+>  requests
+>
+> It's seems like dw_mmc internal logic expects failed data transfers to
+> be ended using a stop command. Let the tuning requests also fall into
+> this category, since there are data transfer involved.
+>
 > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Reviewed-by: Stephen Boyd <sboyd@codeaurora.org>
 > ---
-> 
-> Changes in v3:
-> 	Added reviewed by tag.
-> 
-> ---
->  drivers/mmc/core/mmc.c     | 32 --------------------------------
->  drivers/mmc/core/mmc_ops.c | 30 ++++++++++++++++++++++++++++++
->  include/linux/mmc/mmc.h    |  5 -----
->  3 files changed, 30 insertions(+), 37 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index d854bff..0b8ec87 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1155,38 +1155,6 @@ bus_speed:
->  	return err;
->  }
->  
-> -const u8 tuning_blk_pattern_4bit[MMC_TUNING_BLK_PATTERN_4BIT_SIZE] = {
-> -	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
-> -	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
-> -	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
-> -	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
-> -	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
-> -	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
-> -	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
-> -	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
-> -};
-> -EXPORT_SYMBOL(tuning_blk_pattern_4bit);
-> -
-> -const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE] = {
-> -	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
-> -	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
-> -	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
-> -	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
-> -	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
-> -	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
-> -	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
-> -	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
-> -	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
-> -	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
-> -	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
-> -	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
-> -	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
-> -	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
-> -	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
-> -	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
-> -};
-> -EXPORT_SYMBOL(tuning_blk_pattern_8bit);
-> -
->  /*
->   * Execute tuning sequence to seek the proper bus operating
->   * conditions for HS200 and HS400, which sends CMD21 to the device.
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 3b044c5..0ea042d 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -23,6 +23,36 @@
->  
->  #define MMC_OPS_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
->  
-> +static const u8 tuning_blk_pattern_4bit[] = {
-> +	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
-> +	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
-> +	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
-> +	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
-> +	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
-> +	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
-> +	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
-> +	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
-> +};
-> +
-> +static const u8 tuning_blk_pattern_8bit[] = {
-> +	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
-> +	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
-> +	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
-> +	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
-> +	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
-> +	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
-> +	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
-> +	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
-> +	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
-> +	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
-> +	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
-> +	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
-> +	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
-> +	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
-> +	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
-> +	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
-> +};
-> +
->  static inline int __mmc_send_status(struct mmc_card *card, u32 *status,
->  				    bool ignore_crc)
->  {
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 49ad7a9..fb97b5c 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -53,11 +53,6 @@
->  #define MMC_SEND_TUNING_BLOCK    19   /* adtc                    R1  */
->  #define MMC_SEND_TUNING_BLOCK_HS200	21	/* adtc R1  */
->  
-> -#define MMC_TUNING_BLK_PATTERN_4BIT_SIZE	 64
-> -#define MMC_TUNING_BLK_PATTERN_8BIT_SIZE	128
-> -extern const u8 tuning_blk_pattern_4bit[MMC_TUNING_BLK_PATTERN_4BIT_SIZE];
-> -extern const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE];
-> -
->    /* class 3 */
->  #define MMC_WRITE_DAT_UNTIL_STOP 20   /* adtc [31:0] data addr   R1  */
->  
-> 
+Yes, this works for me. So,
+Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
+Tested-by: Alim Akhtar <alim.akhtar@samsung.com>
 
+>  drivers/mmc/host/dw_mmc.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index a1b80e5..976382db 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -314,7 +314,9 @@ static u32 dw_mci_prep_stop_abort(struct dw_mci
+> *host, struct mmc_command *cmd)
+>         if (cmdr == MMC_READ_SINGLE_BLOCK ||
+>             cmdr == MMC_READ_MULTIPLE_BLOCK ||
+>             cmdr == MMC_WRITE_BLOCK ||
+> -           cmdr == MMC_WRITE_MULTIPLE_BLOCK) {
+> +           cmdr == MMC_WRITE_MULTIPLE_BLOCK ||
+> +           cmdr == MMC_SEND_TUNING_BLOCK ||
+> +           cmdr == MMC_SEND_TUNING_BLOCK_HS200) {
+>                 stop->opcode = MMC_STOP_TRANSMISSION;
+>                 stop->arg = 0;
+>                 stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
+> --
+> 1.9.1
+>
+>> If so, I can send the above DT change as a fix.
+>
+> Please do!
+>
+> Again, I appreciate all your efforts in helping out!
+>
+> Kind regards
+> Uffe
+
+
+
+-- 
+Regards,
+Alim
