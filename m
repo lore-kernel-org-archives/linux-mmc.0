@@ -1,200 +1,203 @@
 From: Alim Akhtar <alim.akhtar@gmail.com>
-Subject: Re: [PATCH v2 3/4] mmc: dw_mmc: Convert to mmc_send_tuning()
-Date: Wed, 24 Dec 2014 19:37:15 +0530
-Message-ID: <CAGOxZ506yrOd6WHnJTuO0e6z=3qA+mqzPcOv3RFvkccuX+cb_g@mail.gmail.com>
-References: <1417780783-12939-1-git-send-email-ulf.hansson@linaro.org>
- <1417780783-12939-4-git-send-email-ulf.hansson@linaro.org>
- <CAGOxZ525JR9vTuKAZJJjDF6iq3R2-DuEcJFEOT9KkEMZGimUFw@mail.gmail.com>
- <CAPDyKFpOvs_ML+1edoTzeTPctiMV0B8EeD8aE8daGwjeG7gwMQ@mail.gmail.com>
- <CAGOxZ51O9_8YDU30st6uha6PkVhk0GJC6hdjgVu+Gi0XPiaz-A@mail.gmail.com> <CAPDyKFr56_8chuuva0dgA5uD3z-366R4wVoy9uvoim1CFiiRwA@mail.gmail.com>
+Subject: Re: [PATCH V3 1/2] mmc: dw_mmc: Convert to mmc_send_tuning()
+Date: Wed, 24 Dec 2014 19:41:41 +0530
+Message-ID: <CAGOxZ52rsfgtDM=a6aHp24cDMWguB7ML+Hg3zvkby=W1pHTcUw@mail.gmail.com>
+References: <1419350569-7238-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yh0-f47.google.com ([209.85.213.47]:45947 "EHLO
-	mail-yh0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751602AbaLXOH4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Dec 2014 09:07:56 -0500
-Received: by mail-yh0-f47.google.com with SMTP id f73so4033822yha.20
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Dec 2014 06:07:56 -0800 (PST)
-In-Reply-To: <CAPDyKFr56_8chuuva0dgA5uD3z-366R4wVoy9uvoim1CFiiRwA@mail.gmail.com>
+Received: from mail-yk0-f181.google.com ([209.85.160.181]:45172 "EHLO
+	mail-yk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751602AbaLXOMW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Dec 2014 09:12:22 -0500
+Received: by mail-yk0-f181.google.com with SMTP id 142so3928099ykq.12
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Dec 2014 06:12:21 -0800 (PST)
+In-Reply-To: <1419350569-7238-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, Aisheng Dong <b29396@freescale.com>, Stephen Boyd <sboyd@codeaurora.org>, Minda Chen <Minda.Chen@csr.com>, Barry Song <Baohua.Song@csr.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Stephen Boyd <sboyd@codeaurora.org>
 
 Hi Ulf,
 
-On Mon, Dec 22, 2014 at 8:11 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 20 December 2014 at 14:18, Alim Akhtar <alim.akhtar@gmail.com> wrote:
->> Hi Ulf,
->>
->> On Mon, Dec 8, 2014 at 3:40 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> On 6 December 2014 at 13:43, Alim Akhtar <alim.akhtar@gmail.com> wrote:
->>>> Hi Ulf,
->>>>
->>>> On Fri, Dec 5, 2014 at 5:29 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>>>> Instead of having a local hack taking care of sending the tuning
->>>>> command and as well to verify the response pattern, let's convert to
->>>>> the common mmc_send_tuning() API.
->>>>>
->>>>> This change affects the Exynos variant, since it's the only one which
->>>>> support the dw_mmc's ->execute_tuning() callback.
->>>>>
->>>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>>>> ---
->>>>>
->>>
->>> Alim, thanks for helping out testing!
->>>
->>>> With this change HS200 mode does not work on exynos5800 peach-pi board.
->>>> I got below error while testing this series:
->>>>
->>>> mmc0: tuning execution failed
->>>> mmc0: error -5 whilst initialising MMC card
->>>>
->>>> Though, your's next branch with commit _a1d06b4_ works fine in HS200 mode.
->>>
->>> I was looking into the details of what change my patchset introduces
->>> for dw_mmc-exynos. Apparently, dw_mmc-exynos was using the
->>> MMC_STOP_TRANSMISSION to end the tuning reqeust (CMD21/19). The new
->>> mmc_send_tuning() API doesn't, which also conforms to what the eMMC/SD
->>> specifications states.
->>>
->>> Do you have any idea of why dw_mmc-exynos was using
->>> MMC_STOP_TRANSMISSION for CMD19/21?
->>>
->>> To see if my theory is correct, could you try out the following patch
->>> on top of $subject patch?
->>> BTW, I have queued patch 1 and 2, from this patchset available on my
->>> next branch.
->>>
->>>
->>> From e1ac35bb0e90254275ec7088f41e6e2d59e48367 Mon Sep 17 00:00:00 2001
->>> From: Ulf Hansson <ulf.hansson@linaro.org>
->>> Date: Mon, 8 Dec 2014 10:58:48 +0100
->>> Subject: [PATCH] mmc: core: End tuning request with stop command
->>>
->>> Not to be merged!
->>>
->>> This patch adds the MMC_STOP_TRANSMISSION command to end a tuning
->>> request. For some reason dw_mmc seems to need this to complete the
->>> tuning request without errors.
->>>
->>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>> ---
->>>  drivers/mmc/core/mmc_ops.c | 5 +++++
->>>  1 file changed, 5 insertions(+)
->>>
->>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
->>> index 3b044c5..aa79e0c 100644
->>> --- a/drivers/mmc/core/mmc_ops.c
->>> +++ b/drivers/mmc/core/mmc_ops.c
->>> @@ -551,6 +551,7 @@ int mmc_send_tuning(struct mmc_host *host)
->>>  {
->>>         struct mmc_request mrq = {NULL};
->>>         struct mmc_command cmd = {0};
->>> +       struct mmc_command stop = {0};
->>>         struct mmc_data data = {0};
->>>         struct scatterlist sg;
->>>         struct mmc_ios *ios = &host->ios;
->>> @@ -576,10 +577,14 @@ int mmc_send_tuning(struct mmc_host *host)
->>>
->>>         mrq.cmd = &cmd;
->>>         mrq.data = &data;
->>> +       mrq.stop = &stop;
->>>
->>>         cmd.opcode = opcode;
->>>         cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
->>>
->>> +       stop.opcode = MMC_STOP_TRANSMISSION;
->>> +       stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
->>> +
->>>         data.blksz = size;
->>>         data.blocks = 1;
->>>         data.flags = MMC_DATA_READ;
->>> --
->>> 1.9.1
->>>
->> Sorry for delay in testing this suggested patch, I would say this
->> certainly helps, but still I need to change sample phase to make it
->> work with generic tuning function.
->> So with your's adding STOP_TRANSMISSION command and below change,
->> HS200 works well on exynos5800
->>
->> diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts
->> b/arch/arm/boot/dts/exynos5800-peach-pi.dts
->> index e8fdda8..e0f0337 100644
->> --- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
->> +++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
->> @@ -555,7 +555,7 @@
->>         card-detect-delay = <200>;
->>         clock-frequency = <400000000>;
->>         samsung,dw-mshc-ciu-div = <3>;
->> -       samsung,dw-mshc-sdr-timing = <0 4>;
->> +       samsung,dw-mshc-sdr-timing = <2 4>;
->>
->> This basically change the clock-sample phase with which the tuning
->> process starts.
->>
->> I didn't find anything is exynos documentations which suggest
->> STOP_TRANSMISSION is needed, may be Seungwon might be know as he wrote
->> this.
->>
->> Are you ok to add STOP_TRANSMISSION in generic tuning code (probably
->> with a quirk, so that other hosts are still happy)?
+On Tue, Dec 23, 2014 at 9:32 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> Instead of having a local hack taking care of sending the tuning
+> command and as well to verify the response pattern, let's convert to
+> the common mmc_send_tuning() API.
 >
-> No, I don't want that.
->
-> If special treatment are needed for dw_mmc to handle a tuning request,
-> dw_mmc should be able to take care by itself. How about below patch,
-> do you think that could work?
->
-> From c2e5783beaa322178f2336b4bff4bdf13da76f56 Mon Sep 17 00:00:00 2001
-> From: Ulf Hansson <ulf.hansson@linaro.org>
-> Date: Mon, 22 Dec 2014 15:24:14 +0100
-> Subject: [PATCH] mmc: dw_mmc: Generate stop commands for failed tuning
->  requests
->
-> It's seems like dw_mmc internal logic expects failed data transfers to
-> be ended using a stop command. Let the tuning requests also fall into
-> this category, since there are data transfer involved.
+> This change affects the Exynos variant, since it's the only one which
+> support the dw_mmc's ->execute_tuning() callback.
 >
 > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 > ---
-Yes, this works for me. So,
+>
+yes, this works fine now, with the other patch which add STOP command,
+and I don't need to modify  DT timing values. So,
+
 Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
+
+Tested on exynos5800-peach-pi board, so
+
 Tested-by: Alim Akhtar <alim.akhtar@samsung.com>
 
->  drivers/mmc/host/dw_mmc.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+> Changes in v3:
+>         Fix return value from dw_mci_exynos_execute_tuning() according to
+>         comment from Jaehoon Chung.
+>
+> ---
+>  drivers/mmc/host/dw_mmc-exynos.c | 48 +++-------------------------------------
+>  drivers/mmc/host/dw_mmc.c        | 22 +-----------------
+>  drivers/mmc/host/dw_mmc.h        |  8 +------
+>  3 files changed, 5 insertions(+), 73 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 74eb081..12a5eaa 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -340,64 +340,23 @@ out:
+>         return loc;
+>  }
+>
+> -static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
+> -                                       struct dw_mci_tuning_data *tuning_data)
+> +static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot)
+>  {
+>         struct dw_mci *host = slot->host;
+>         struct mmc_host *mmc = slot->mmc;
+> -       const u8 *blk_pattern = tuning_data->blk_pattern;
+> -       u8 *blk_test;
+> -       unsigned int blksz = tuning_data->blksz;
+>         u8 start_smpl, smpl, candiates = 0;
+>         s8 found = -1;
+>         int ret = 0;
+>
+> -       blk_test = kmalloc(blksz, GFP_KERNEL);
+> -       if (!blk_test)
+> -               return -ENOMEM;
+> -
+>         start_smpl = dw_mci_exynos_get_clksmpl(host);
+>
+>         do {
+> -               struct mmc_request mrq = {NULL};
+> -               struct mmc_command cmd = {0};
+> -               struct mmc_command stop = {0};
+> -               struct mmc_data data = {0};
+> -               struct scatterlist sg;
+> -
+> -               cmd.opcode = opcode;
+> -               cmd.arg = 0;
+> -               cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+> -
+> -               stop.opcode = MMC_STOP_TRANSMISSION;
+> -               stop.arg = 0;
+> -               stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
+> -
+> -               data.blksz = blksz;
+> -               data.blocks = 1;
+> -               data.flags = MMC_DATA_READ;
+> -               data.sg = &sg;
+> -               data.sg_len = 1;
+> -
+> -               sg_init_one(&sg, blk_test, blksz);
+> -               mrq.cmd = &cmd;
+> -               mrq.stop = &stop;
+> -               mrq.data = &data;
+> -               host->mrq = &mrq;
+> -
+>                 mci_writel(host, TMOUT, ~0);
+>                 smpl = dw_mci_exynos_move_next_clksmpl(host);
+>
+> -               mmc_wait_for_req(mmc, &mrq);
+> +               if (!mmc_send_tuning(mmc))
+> +                       candiates |= (1 << smpl);
+>
+> -               if (!cmd.error && !data.error) {
+> -                       if (!memcmp(blk_pattern, blk_test, blksz))
+> -                               candiates |= (1 << smpl);
+> -               } else {
+> -                       dev_dbg(host->dev,
+> -                               "Tuning error: cmd.error:%d, data.error:%d\n",
+> -                               cmd.error, data.error);
+> -               }
+>         } while (start_smpl != smpl);
+>
+>         found = dw_mci_exynos_get_best_clksmpl(candiates);
+> @@ -406,7 +365,6 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
+>         else
+>                 ret = -EIO;
+>
+> -       kfree(blk_test);
+>         return ret;
+>  }
 >
 > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index a1b80e5..976382db 100644
+> index 6e4d864..88dc50f 100644
 > --- a/drivers/mmc/host/dw_mmc.c
 > +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -314,7 +314,9 @@ static u32 dw_mci_prep_stop_abort(struct dw_mci
-> *host, struct mmc_command *cmd)
->         if (cmdr == MMC_READ_SINGLE_BLOCK ||
->             cmdr == MMC_READ_MULTIPLE_BLOCK ||
->             cmdr == MMC_WRITE_BLOCK ||
-> -           cmdr == MMC_WRITE_MULTIPLE_BLOCK) {
-> +           cmdr == MMC_WRITE_MULTIPLE_BLOCK ||
-> +           cmdr == MMC_SEND_TUNING_BLOCK ||
-> +           cmdr == MMC_SEND_TUNING_BLOCK_HS200) {
->                 stop->opcode = MMC_STOP_TRANSMISSION;
->                 stop->arg = 0;
->                 stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
+> @@ -1312,30 +1312,10 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>         struct dw_mci_slot *slot = mmc_priv(mmc);
+>         struct dw_mci *host = slot->host;
+>         const struct dw_mci_drv_data *drv_data = host->drv_data;
+> -       struct dw_mci_tuning_data tuning_data;
+>         int err = -ENOSYS;
+>
+> -       if (opcode == MMC_SEND_TUNING_BLOCK_HS200) {
+> -               if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
+> -                       tuning_data.blk_pattern = tuning_blk_pattern_8bit;
+> -                       tuning_data.blksz = sizeof(tuning_blk_pattern_8bit);
+> -               } else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4) {
+> -                       tuning_data.blk_pattern = tuning_blk_pattern_4bit;
+> -                       tuning_data.blksz = sizeof(tuning_blk_pattern_4bit);
+> -               } else {
+> -                       return -EINVAL;
+> -               }
+> -       } else if (opcode == MMC_SEND_TUNING_BLOCK) {
+> -               tuning_data.blk_pattern = tuning_blk_pattern_4bit;
+> -               tuning_data.blksz = sizeof(tuning_blk_pattern_4bit);
+> -       } else {
+> -               dev_err(host->dev,
+> -                       "Undefined command(%d) for tuning\n", opcode);
+> -               return -EINVAL;
+> -       }
+> -
+>         if (drv_data && drv_data->execute_tuning)
+> -               err = drv_data->execute_tuning(slot, opcode, &tuning_data);
+> +               err = drv_data->execute_tuning(slot);
+>         return err;
+>  }
+>
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index d27d4c0..18c4afe 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -249,11 +249,6 @@ struct dw_mci_slot {
+>         int                     sdio_id;
+>  };
+>
+> -struct dw_mci_tuning_data {
+> -       const u8 *blk_pattern;
+> -       unsigned int blksz;
+> -};
+> -
+>  /**
+>   * dw_mci driver data - dw-mshc implementation specific driver data.
+>   * @caps: mmc subsystem specified capabilities of the controller(s).
+> @@ -275,7 +270,6 @@ struct dw_mci_drv_data {
+>         void            (*prepare_command)(struct dw_mci *host, u32 *cmdr);
+>         void            (*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
+>         int             (*parse_dt)(struct dw_mci *host);
+> -       int             (*execute_tuning)(struct dw_mci_slot *slot, u32 opcode,
+> -                                       struct dw_mci_tuning_data *tuning_data);
+> +       int             (*execute_tuning)(struct dw_mci_slot *slot);
+>  };
+>  #endif /* _DW_MMC_H_ */
 > --
 > 1.9.1
 >
->> If so, I can send the above DT change as a fix.
->
-> Please do!
->
-> Again, I appreciate all your efforts in helping out!
->
-> Kind regards
-> Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 
 
