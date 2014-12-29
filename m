@@ -1,203 +1,141 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH V4 1/2] mmc: dw_mmc: Convert to mmc_send_tuning()
-Date: Mon, 29 Dec 2014 12:04:05 +0100
-Message-ID: <1419851045-13751-1-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH V4 2/2] mmc: core: Make tuning block patterns static
+Date: Mon, 29 Dec 2014 12:04:27 +0100
+Message-ID: <1419851067-13792-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f49.google.com ([209.85.215.49]:40347 "EHLO
-	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751114AbaL2LEV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Dec 2014 06:04:21 -0500
-Received: by mail-la0-f49.google.com with SMTP id hs14so11148486lab.36
-        for <linux-mmc@vger.kernel.org>; Mon, 29 Dec 2014 03:04:20 -0800 (PST)
+Received: from mail-lb0-f172.google.com ([209.85.217.172]:47674 "EHLO
+	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751114AbaL2LEe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Dec 2014 06:04:34 -0500
+Received: by mail-lb0-f172.google.com with SMTP id z12so2900631lbi.3
+        for <linux-mmc@vger.kernel.org>; Mon, 29 Dec 2014 03:04:33 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Stephen Boyd <sboyd@codeaurora.org>
 
-Instead of having a local hack taking care of sending the tuning
-command and as well to verify the response pattern, let's convert to
-the common mmc_send_tuning() API.
+Since previous patches removed the need for the tuning block patterns
+to be exported, let's move them close to the mmc_send_tuning() API.
 
-This change affects the Exynos variant, since it's the only one which
-support the dw_mmc's ->execute_tuning() callback.
-
-It's seems like dw_mmc internal logic expects failed data transfers to
-be ended using a stop command. Let the tuning requests also fall into
-this category, since there are data transfer involved.
+Those are now intended to be used only by the mmc core.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Reviewed-by: Stephen Boyd <sboyd@codeaurora.org>
 Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
-Tested-by: Alim Akhtar <alim.akhtar@samsung.com>
 ---
 
 Changes in v4:
-	Squashed "[PATCH] mmc: dw_mmc: Generate stop commands for failed tuning
-	requests" into this one.
-	Add reviewed/tested/acked-by tags.
+	Added acked by tag.
 
 Changes in v3:
-	Fix return value from dw_mci_exynos_execute_tuning() according to
-	comment from Jaehoon Chung.
+	Added reviewed by tag.
 
 ---
- drivers/mmc/host/dw_mmc-exynos.c | 48 +++-------------------------------------
- drivers/mmc/host/dw_mmc.c        | 26 ++++------------------
- drivers/mmc/host/dw_mmc.h        |  8 +------
- 3 files changed, 8 insertions(+), 74 deletions(-)
+ drivers/mmc/core/mmc.c     | 32 --------------------------------
+ drivers/mmc/core/mmc_ops.c | 30 ++++++++++++++++++++++++++++++
+ include/linux/mmc/mmc.h    |  5 -----
+ 3 files changed, 30 insertions(+), 37 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 74eb081..12a5eaa 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -340,64 +340,23 @@ out:
- 	return loc;
- }
- 
--static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
--					struct dw_mci_tuning_data *tuning_data)
-+static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot)
- {
- 	struct dw_mci *host = slot->host;
- 	struct mmc_host *mmc = slot->mmc;
--	const u8 *blk_pattern = tuning_data->blk_pattern;
--	u8 *blk_test;
--	unsigned int blksz = tuning_data->blksz;
- 	u8 start_smpl, smpl, candiates = 0;
- 	s8 found = -1;
- 	int ret = 0;
- 
--	blk_test = kmalloc(blksz, GFP_KERNEL);
--	if (!blk_test)
--		return -ENOMEM;
--
- 	start_smpl = dw_mci_exynos_get_clksmpl(host);
- 
- 	do {
--		struct mmc_request mrq = {NULL};
--		struct mmc_command cmd = {0};
--		struct mmc_command stop = {0};
--		struct mmc_data data = {0};
--		struct scatterlist sg;
--
--		cmd.opcode = opcode;
--		cmd.arg = 0;
--		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
--
--		stop.opcode = MMC_STOP_TRANSMISSION;
--		stop.arg = 0;
--		stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
--
--		data.blksz = blksz;
--		data.blocks = 1;
--		data.flags = MMC_DATA_READ;
--		data.sg = &sg;
--		data.sg_len = 1;
--
--		sg_init_one(&sg, blk_test, blksz);
--		mrq.cmd = &cmd;
--		mrq.stop = &stop;
--		mrq.data = &data;
--		host->mrq = &mrq;
--
- 		mci_writel(host, TMOUT, ~0);
- 		smpl = dw_mci_exynos_move_next_clksmpl(host);
- 
--		mmc_wait_for_req(mmc, &mrq);
-+		if (!mmc_send_tuning(mmc))
-+			candiates |= (1 << smpl);
- 
--		if (!cmd.error && !data.error) {
--			if (!memcmp(blk_pattern, blk_test, blksz))
--				candiates |= (1 << smpl);
--		} else {
--			dev_dbg(host->dev,
--				"Tuning error: cmd.error:%d, data.error:%d\n",
--				cmd.error, data.error);
--		}
- 	} while (start_smpl != smpl);
- 
- 	found = dw_mci_exynos_get_best_clksmpl(candiates);
-@@ -406,7 +365,6 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode,
- 	else
- 		ret = -EIO;
- 
--	kfree(blk_test);
- 	return ret;
- }
- 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 6e4d864..2e8abc8 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -314,7 +314,9 @@ static u32 dw_mci_prep_stop_abort(struct dw_mci *host, struct mmc_command *cmd)
- 	if (cmdr == MMC_READ_SINGLE_BLOCK ||
- 	    cmdr == MMC_READ_MULTIPLE_BLOCK ||
- 	    cmdr == MMC_WRITE_BLOCK ||
--	    cmdr == MMC_WRITE_MULTIPLE_BLOCK) {
-+	    cmdr == MMC_WRITE_MULTIPLE_BLOCK ||
-+	    cmdr == MMC_SEND_TUNING_BLOCK ||
-+	    cmdr == MMC_SEND_TUNING_BLOCK_HS200) {
- 		stop->opcode = MMC_STOP_TRANSMISSION;
- 		stop->arg = 0;
- 		stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
-@@ -1312,30 +1314,10 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
- 	struct dw_mci *host = slot->host;
- 	const struct dw_mci_drv_data *drv_data = host->drv_data;
--	struct dw_mci_tuning_data tuning_data;
- 	int err = -ENOSYS;
- 
--	if (opcode == MMC_SEND_TUNING_BLOCK_HS200) {
--		if (mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
--			tuning_data.blk_pattern = tuning_blk_pattern_8bit;
--			tuning_data.blksz = sizeof(tuning_blk_pattern_8bit);
--		} else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4) {
--			tuning_data.blk_pattern = tuning_blk_pattern_4bit;
--			tuning_data.blksz = sizeof(tuning_blk_pattern_4bit);
--		} else {
--			return -EINVAL;
--		}
--	} else if (opcode == MMC_SEND_TUNING_BLOCK) {
--		tuning_data.blk_pattern = tuning_blk_pattern_4bit;
--		tuning_data.blksz = sizeof(tuning_blk_pattern_4bit);
--	} else {
--		dev_err(host->dev,
--			"Undefined command(%d) for tuning\n", opcode);
--		return -EINVAL;
--	}
--
- 	if (drv_data && drv_data->execute_tuning)
--		err = drv_data->execute_tuning(slot, opcode, &tuning_data);
-+		err = drv_data->execute_tuning(slot);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index d854bff..0b8ec87 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1155,38 +1155,6 @@ bus_speed:
  	return err;
  }
  
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index d27d4c0..18c4afe 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -249,11 +249,6 @@ struct dw_mci_slot {
- 	int			sdio_id;
- };
- 
--struct dw_mci_tuning_data {
--	const u8 *blk_pattern;
--	unsigned int blksz;
+-const u8 tuning_blk_pattern_4bit[MMC_TUNING_BLK_PATTERN_4BIT_SIZE] = {
+-	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
+-	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
+-	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
+-	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
+-	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
+-	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
+-	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
+-	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
 -};
+-EXPORT_SYMBOL(tuning_blk_pattern_4bit);
 -
- /**
-  * dw_mci driver data - dw-mshc implementation specific driver data.
-  * @caps: mmc subsystem specified capabilities of the controller(s).
-@@ -275,7 +270,6 @@ struct dw_mci_drv_data {
- 	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
- 	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
- 	int		(*parse_dt)(struct dw_mci *host);
--	int		(*execute_tuning)(struct dw_mci_slot *slot, u32 opcode,
--					struct dw_mci_tuning_data *tuning_data);
-+	int		(*execute_tuning)(struct dw_mci_slot *slot);
- };
- #endif /* _DW_MMC_H_ */
+-const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE] = {
+-	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
+-	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
+-	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
+-	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
+-	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
+-	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
+-	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
+-	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
+-	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
+-	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
+-	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
+-	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
+-	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
+-	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
+-	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
+-	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
+-};
+-EXPORT_SYMBOL(tuning_blk_pattern_8bit);
+-
+ /*
+  * Execute tuning sequence to seek the proper bus operating
+  * conditions for HS200 and HS400, which sends CMD21 to the device.
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 3b044c5..0ea042d 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -23,6 +23,36 @@
+ 
+ #define MMC_OPS_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
+ 
++static const u8 tuning_blk_pattern_4bit[] = {
++	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
++	0xc3, 0x3c, 0xcc, 0xff, 0xfe, 0xff, 0xfe, 0xef,
++	0xff, 0xdf, 0xff, 0xdd, 0xff, 0xfb, 0xff, 0xfb,
++	0xbf, 0xff, 0x7f, 0xff, 0x77, 0xf7, 0xbd, 0xef,
++	0xff, 0xf0, 0xff, 0xf0, 0x0f, 0xfc, 0xcc, 0x3c,
++	0xcc, 0x33, 0xcc, 0xcf, 0xff, 0xef, 0xff, 0xee,
++	0xff, 0xfd, 0xff, 0xfd, 0xdf, 0xff, 0xbf, 0xff,
++	0xbb, 0xff, 0xf7, 0xff, 0xf7, 0x7f, 0x7b, 0xde,
++};
++
++static const u8 tuning_blk_pattern_8bit[] = {
++	0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00,
++	0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc, 0xcc,
++	0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff, 0xff,
++	0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee, 0xff,
++	0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd, 0xdd,
++	0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff, 0xbb,
++	0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff, 0xff,
++	0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee, 0xff,
++	0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00,
++	0x00, 0xff, 0xff, 0xcc, 0xcc, 0xcc, 0x33, 0xcc,
++	0xcc, 0xcc, 0x33, 0x33, 0xcc, 0xcc, 0xcc, 0xff,
++	0xff, 0xff, 0xee, 0xff, 0xff, 0xff, 0xee, 0xee,
++	0xff, 0xff, 0xff, 0xdd, 0xff, 0xff, 0xff, 0xdd,
++	0xdd, 0xff, 0xff, 0xff, 0xbb, 0xff, 0xff, 0xff,
++	0xbb, 0xbb, 0xff, 0xff, 0xff, 0x77, 0xff, 0xff,
++	0xff, 0x77, 0x77, 0xff, 0x77, 0xbb, 0xdd, 0xee,
++};
++
+ static inline int __mmc_send_status(struct mmc_card *card, u32 *status,
+ 				    bool ignore_crc)
+ {
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 49ad7a9..fb97b5c 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -53,11 +53,6 @@
+ #define MMC_SEND_TUNING_BLOCK    19   /* adtc                    R1  */
+ #define MMC_SEND_TUNING_BLOCK_HS200	21	/* adtc R1  */
+ 
+-#define MMC_TUNING_BLK_PATTERN_4BIT_SIZE	 64
+-#define MMC_TUNING_BLK_PATTERN_8BIT_SIZE	128
+-extern const u8 tuning_blk_pattern_4bit[MMC_TUNING_BLK_PATTERN_4BIT_SIZE];
+-extern const u8 tuning_blk_pattern_8bit[MMC_TUNING_BLK_PATTERN_8BIT_SIZE];
+-
+   /* class 3 */
+ #define MMC_WRITE_DAT_UNTIL_STOP 20   /* adtc [31:0] data addr   R1  */
+ 
 -- 
 1.9.1
 
