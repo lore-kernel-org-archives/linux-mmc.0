@@ -1,50 +1,44 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.3.19
-Date: Mon, 29 Dec 2014 15:09:42 +0100
-Message-ID: <CAPDyKFo_xWz0sVdcn6FGLW=0GC_L+8Dhe9MXcEnZetfwNSD7Tw@mail.gmail.com>
+From: Bjorn Andersson <bjorn.andersson@sonymobile.com>
+Subject: Re: [PATCH] mmc: dt: Add property for broken hs200 quirk
+Date: Mon, 29 Dec 2014 14:37:39 -0800
+Message-ID: <20141229223739.GB25436@sonymobile.com>
+References: <1418412516-10682-1-git-send-email-bjorn.andersson@sonymobile.com>
+ <CAPDyKFrPC_MphsLHHZ=uFjcF8SsdkVmzez9R=gas7_ihn63Q5A@mail.gmail.com>
+ <CAJAp7OhSZ7CZedXAsWPf0XYv8RESQxXe4L1LZjOmVW4nGpFiHw@mail.gmail.com>
+ <CAPDyKFoGN49usQg5Ezv_AaWcKf3mRmZ=VJ8Rc4HDYh62ukiwXQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f45.google.com ([209.85.192.45]:35873 "EHLO
-	mail-qg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751206AbaL2OJn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Dec 2014 09:09:43 -0500
-Received: by mail-qg0-f45.google.com with SMTP id f51so9197791qge.4
-        for <linux-mmc@vger.kernel.org>; Mon, 29 Dec 2014 06:09:42 -0800 (PST)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFoGN49usQg5Ezv_AaWcKf3mRmZ=VJ8Rc4HDYh62ukiwXQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Bjorn Andersson <bjorn@kryo.se>, Anton Vorontsov <anton@enomsg.org>, Chris Ball <chris@printf.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Grant Likely <grant.likely@linaro.org>, "open list:OPEN FIRMWARE AND..." <devicetree@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-Hi Linus,
+On Mon 22 Dec 02:04 PST 2014, Ulf Hansson wrote:
 
-Here is one mmc fix for 3.19.
+> On 19 December 2014 at 21:01, Bjorn Andersson <bjorn@kryo.se> wrote:
+> > On Fri, Dec 19, 2014 at 3:38 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >> On 12 December 2014 at 20:28, Bjorn Andersson
+> >> <bjorn.andersson@sonymobile.com> wrote:
+> >>
+> >> Some more explanation to why this needed would be good.
+> >>
+> >
+> > Because (according to the git log) some of the memories that we
+> > mounted in Xperia Z1 does not support HS200 even though they advertise
+> > they are.
+> 
+> I see. How about using an mmc card quirk instead of a DT binding then?
+> 
 
-Details are as usual found in the signed tag. Please pull this in!
+I've missed the fact that you can have card specific quirks as well, that looks
+more sound than having to specify it separately in dt.
 
-Kind regards
-Ulf Hansson
+Let's drop this and I'll see if I can find some details about what memory this
+might have been so I can add such a quirk. If I can find the information I'll
+give it a try and send you a new patch.
 
-
-The following changes since commit 97bf6af1f928216fd6c5a66e8a57bfa95a659672:
-
-  Linux 3.19-rc1 (2014-12-20 17:08:50 -0800)
-
-are available in the git repository at:
-
-  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v3.19-2
-
-for you to fetch changes up to 1c2d26e379fc8d37d55befd8589c4c252186ee58:
-
-  mmc: core: stop trying to switch width when only one bit is
-supported (2014-12-29 14:49:28 +0100)
-
-----------------------------------------------------------------
-MMC core:
- - Fix selection of buswidth for mmc hosts supporting 1-bit only.
-
-----------------------------------------------------------------
-Alexandre Belloni (1):
-      mmc: core: stop trying to switch width when only one bit is supported
-
- drivers/mmc/core/mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Regards,
+Bjorn
