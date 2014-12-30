@@ -1,277 +1,55 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci: use pipeline mmc requests to improve performance
-Date: Tue, 30 Dec 2014 14:07:59 +0100
-Message-ID: <CAPDyKFo=jqWSdhYqcRWLvD-Z2um+oS=tezy69jUX65xCm=bZmg@mail.gmail.com>
-References: <1418115845-24541-1-git-send-email-haibo.chen@freescale.com>
+From: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Subject: Re: [PATCH 3/3] ARM: edma: Split up header file to
+ platform_data and API file
+Date: Tue, 30 Dec 2014 15:17:17 +0200
+Message-ID: <54A2A5DD.2030502@ti.com>
+References: <1417084891-17990-1-git-send-email-peter.ujfalusi@ti.com>
+ <1417084891-17990-4-git-send-email-peter.ujfalusi@ti.com>
+ <20141208124917.GI16827@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f45.google.com ([209.85.192.45]:45704 "EHLO
-	mail-qg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751683AbaL3NIA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Dec 2014 08:08:00 -0500
-Received: by mail-qg0-f45.google.com with SMTP id f51so10375478qge.18
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2014 05:08:00 -0800 (PST)
-In-Reply-To: <1418115845-24541-1-git-send-email-haibo.chen@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <alsa-devel-bounces@alsa-project.org>
+In-Reply-To: <20141208124917.GI16827@intel.com>
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Errors-To: alsa-devel-bounces@alsa-project.org
+Sender: alsa-devel-bounces@alsa-project.org
+To: Vinod Koul <vinod.koul@intel.com>
+Cc: alsa-devel@alsa-project.org, linux-omap@vger.kernel.org, linux@arm.linux.org.uk, arnd@arndb.de, khilman@deeprootsystems.com, linux-mmc@vger.kernel.org, nsekhar@ti.com, Liam Girdwood <lgirdwood@gmail.com>, linux-kernel@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Mark Brown <broonie@kernel.org>, chris@printf.net, dmaengine@vger.kernel.org, ulf.hansson@linaro.org, linux-spi@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haibo Chen <haibo.chen@freescale.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Dong Aisheng <dongas86@gmail.com>
 
-On 9 December 2014 at 10:04, Haibo Chen <haibo.chen@freescale.com> wrote:
-> This patch is based on the patches by Per Forlin, Tony Lin and Ryan QIAN.
->
-> This patch complete the API 'post_req' and 'pre_req' in sdhci host side,
->
-> Test Env:
-> 1. i.MX6Q-SABREAUTO board, CPU @ 996MHz, use ADMA in uSDHC controller.
-> 2. Test command:
->                 $ echo 1 > /proc/sys/vm/drop_caches
->         write to sd card:
->                 $ dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=2000 conv=fsync
->         read the sd card:
->                 $ dd if=/dev/mmcblk0 of=/dev/null bs=1M count=2000
->
-> 3. TOSHIBA 16GB SD3.0 card, running at 4 bit, SDR104 @ 198MHZ
->         Performance with and without this patch:
->       -------------------------------------------------
->           |                    | read speed | write speed |
->           |------------------------------------------------
->           | with this patch    | ~76.7 MB/s |  ~23.3 MB/s |
->           |------------------------------------------------
->           |without this patch  | ~60.5 MB/s |  ~22.5 MB/s |
->           -------------------------------------------------
->
-> 4. SanDisk 8GB SD3.0 card, running at 4 bit, DDR50 @ 50MHZ
->         Performance with and without this patch:
->       -------------------------------------------------
->           |                    | read speed | write speed |
->           |------------------------------------------------
->           | with this patch    | ~40.5 MB/s |  ~15.6 MB/s |
->           |------------------------------------------------
->           |without this patch  | ~36.1 MB/s |  ~14.1 MB/s |
->           -------------------------------------------------
->
-> 5. Kingston 8GB SD2.0 card, running at 4 bit, High-speed @ 50MHZ
->         Performance with and without this patch:
->       -------------------------------------------------
->           |                    | read speed | write speed |
->           |------------------------------------------------
->           | with this patch    | ~22.7 MB/s |  ~8.2 MB/s  |
->           |------------------------------------------------
->           |without this patch  | ~21.3 MB/s |  ~8.0 MB/s  |
->           -------------------------------------------------
->
-> 6. About eMMC, Sandisk 8GB eMMC on i.MX6DL-sabresd board, CPU @ 792MHZ,
->    eMMC running at 8 bit, DDR52 @ 52MHZ.
->         Performance with and without this patch:
->       -------------------------------------------------
->           |                    | read speed | write speed |
->           |------------------------------------------------
->           | with this patch    | ~37.3 MB/s |  ~10.5 MB/s |
->           |------------------------------------------------
->           |without this patch  | ~33.4 MB/s |  ~10.5 MB/s |
->           -------------------------------------------------
->
-> Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
+On 12/08/2014 02:49 PM, Vinod Koul wrote:
+> On Thu, Nov 27, 2014 at 12:41:31PM +0200, Peter Ujfalusi wrote:
+>> include/linux/platform_data/ is not a correct place to keep the API
+>> definitions for edma, it is meant to be only for the pdata for the devic=
+e.
+>> Clean up this by moving the API to include/linux/edma.h
+>>
+>> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+>> ---
+>>  arch/arm/common/edma.c                     |   3 +-
+>>  arch/arm/mach-davinci/devices.c            |   1 +
+>>  arch/arm/mach-davinci/include/mach/da8xx.h |   1 +
+>>  drivers/dma/edma.c                         |   2 +-
+>>  include/linux/edma.h                       | 153 ++++++++++++++++++++++=
++++++++
+>>  include/linux/platform_data/edma.h         | 148 ++--------------------=
+------
+>>  sound/soc/davinci/davinci-pcm.h            |   1 +
+>>  7 files changed, 165 insertions(+), 144 deletions(-)
+>>  create mode 100644 include/linux/edma.h
+> I was hoping that this will have delete for platform_data/edma.h, do we
+> still need that and why shouldn't we get rid of this :)
 
-Thanks! I have applied this for my next branch to get it tested in linux-next.
+We still need it for the legacy boot of davinci devices. We can boot some
+davinci SoC/boards with DT, but not all of them.
 
-There were some minor conflicts, which I managed to resolve. Moreover,
-I decided to fix a checkpatch warning.
+-- =
 
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/host/sdhci.c  | 100 ++++++++++++++++++++++++++++++++++++++++------
->  include/linux/mmc/sdhci.h |   6 +++
->  2 files changed, 94 insertions(+), 12 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index ada1a3e..50f8a4f 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -55,6 +55,9 @@ static void sdhci_finish_command(struct sdhci_host *);
->  static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
->  static void sdhci_tuning_timer(unsigned long data);
->  static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
-> +static int sdhci_pre_dma_transfer(struct sdhci_host *host,
-> +                                      struct mmc_data *data,
-> +                                      struct sdhci_host_next *next);
->
->  #ifdef CONFIG_PM_RUNTIME
->  static int sdhci_runtime_pm_get(struct sdhci_host *host);
-> @@ -494,9 +497,8 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
->                 goto fail;
->         BUG_ON(host->align_addr & 0x3);
->
-> -       host->sg_count = dma_map_sg(mmc_dev(host->mmc),
-> -               data->sg, data->sg_len, direction);
-> -       if (host->sg_count == 0)
-> +       host->sg_count = sdhci_pre_dma_transfer(host, data, NULL);
-> +       if (host->sg_count < 0)
->                 goto unmap_align;
->
->         desc = host->adma_desc;
-> @@ -633,8 +635,9 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
->                 }
->         }
->
-> -       dma_unmap_sg(mmc_dev(host->mmc), data->sg,
-> -               data->sg_len, direction);
-> +       if (!data->host_cookie)
-> +               dma_unmap_sg(mmc_dev(host->mmc), data->sg,
-> +                       data->sg_len, direction);
->  }
->
->  static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
-> @@ -826,11 +829,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->                 } else {
->                         int sg_cnt;
->
-> -                       sg_cnt = dma_map_sg(mmc_dev(host->mmc),
-> -                                       data->sg, data->sg_len,
-> -                                       (data->flags & MMC_DATA_READ) ?
-> -                                               DMA_FROM_DEVICE :
-> -                                               DMA_TO_DEVICE);
-> +                       sg_cnt = sdhci_pre_dma_transfer(host, data, NULL);
->                         if (sg_cnt == 0) {
->                                 /*
->                                  * This only happens when someone fed
-> @@ -934,8 +933,10 @@ static void sdhci_finish_data(struct sdhci_host *host)
->                 if (host->flags & SDHCI_USE_ADMA)
->                         sdhci_adma_table_post(host, data);
->                 else {
-> -                       dma_unmap_sg(mmc_dev(host->mmc), data->sg,
-> -                               data->sg_len, (data->flags & MMC_DATA_READ) ?
-> +                       if (!data->host_cookie)
-> +                               dma_unmap_sg(mmc_dev(host->mmc),
-> +                                       data->sg, data->sg_len,
-> +                                       (data->flags & MMC_DATA_READ) ?
->                                         DMA_FROM_DEVICE : DMA_TO_DEVICE);
->                 }
->         }
-> @@ -2068,6 +2069,78 @@ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
->         }
->  }
->
-> +static void sdhci_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
-> +                               int err)
-> +{
-> +       struct sdhci_host *host = mmc_priv(mmc);
-> +       struct mmc_data *data = mrq->data;
-> +
-> +       if (host->flags & SDHCI_REQ_USE_DMA) {
-> +               if (data->host_cookie)
-> +                       dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
-> +                                        data->flags & MMC_DATA_WRITE ?
-> +                                        DMA_TO_DEVICE : DMA_FROM_DEVICE);
-> +               mrq->data->host_cookie = 0;
-> +       }
-> +}
-> +
-> +static int sdhci_pre_dma_transfer(struct sdhci_host *host,
-> +                                      struct mmc_data *data,
-> +                                      struct sdhci_host_next *next)
-> +{
-> +       int sg_count;
-> +
-> +       if (!next && data->host_cookie &&
-> +           data->host_cookie != host->next_data.cookie) {
-> +               pr_debug(DRIVER_NAME "[%s] invalid cookie: data->host_cookie %d"
-> +                    "  host->next_data.cookie %d\n",
-> +                      __func__, data->host_cookie, host->next_data.cookie);
-> +               data->host_cookie = 0;
-> +       }
-> +
-> +       /* Check if next job is already prepared */
-> +       if (next ||
-> +           (!next && data->host_cookie != host->next_data.cookie)) {
-> +               sg_count = dma_map_sg(mmc_dev(host->mmc), data->sg,
-> +                                    data->sg_len,
-> +                                    data->flags & MMC_DATA_WRITE ?
-> +                                    DMA_TO_DEVICE : DMA_FROM_DEVICE);
-> +
-> +       } else {
-> +               sg_count = host->next_data.sg_count;
-> +               host->next_data.sg_count = 0;
-> +       }
-> +
-> +
-> +       if (sg_count == 0)
-> +               return -EINVAL;
-> +
-> +       if (next) {
-> +               next->sg_count = sg_count;
-> +               data->host_cookie = ++next->cookie < 0 ? 1 : next->cookie;
-> +       } else
-> +               host->sg_count = sg_count;
-> +
-> +       return sg_count;
-> +}
-> +
-> +static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
-> +                              bool is_first_req)
-> +{
-> +       struct sdhci_host *host = mmc_priv(mmc);
-> +
-> +       if (mrq->data->host_cookie) {
-> +               mrq->data->host_cookie = 0;
-> +               return;
-> +       }
-> +
-> +       if (host->flags & SDHCI_REQ_USE_DMA)
-> +               if (sdhci_pre_dma_transfer(host,
-> +                                       mrq->data,
-> +                                       &host->next_data) < 0)
-> +                       mrq->data->host_cookie = 0;
-> +}
-> +
->  static void sdhci_card_event(struct mmc_host *mmc)
->  {
->         struct sdhci_host *host = mmc_priv(mmc);
-> @@ -2098,6 +2171,8 @@ static void sdhci_card_event(struct mmc_host *mmc)
->
->  static const struct mmc_host_ops sdhci_ops = {
->         .request        = sdhci_request,
-> +       .post_req       = sdhci_post_req,
-> +       .pre_req        = sdhci_pre_req,
->         .set_ios        = sdhci_set_ios,
->         .get_cd         = sdhci_get_cd,
->         .get_ro         = sdhci_get_ro,
-> @@ -2919,6 +2994,7 @@ int sdhci_add_host(struct sdhci_host *host)
->                 host->max_clk = host->ops->get_max_clock(host);
->         }
->
-> +       host->next_data.cookie = 1;
->         /*
->          * In case of Host Controller v3.00, find out whether clock
->          * multiplier is supported.
-> diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-> index dba793e..47b5d82 100644
-> --- a/include/linux/mmc/sdhci.h
-> +++ b/include/linux/mmc/sdhci.h
-> @@ -17,6 +17,11 @@
->  #include <linux/io.h>
->  #include <linux/mmc/host.h>
->
-> +struct sdhci_host_next {
-> +       unsigned int    sg_count;
-> +       s32             cookie;
-> +};
-> +
->  struct sdhci_host {
->         /* Data set by hardware interface driver */
->         const char *hw_name;    /* Hardware bus name */
-> @@ -188,6 +193,7 @@ struct sdhci_host {
->  #define SDHCI_TUNING_MODE_1    0
->         struct timer_list       tuning_timer;   /* Timer for tuning */
->
-> +       struct sdhci_host_next  next_data;
->         unsigned long private[0] ____cacheline_aligned;
->  };
->  #endif /* LINUX_MMC_SDHCI_H */
-> --
-> 1.9.1
->
+P=E9ter
