@@ -1,57 +1,62 @@
 From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH resend v3 0/2] mmc: Add SDIO function
- devicetree subnode parsing
-Date: Fri, 2 Jan 2015 16:52:06 +0100
-Message-ID: <CAPDyKFrTcJw0aZ-V399jJzCmi-6nqduUFV02s-bN-oDAOwVA5Q@mail.gmail.com>
-References: <1404119245-5839-1-git-send-email-hdegoede@redhat.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBDF57NG2XIHRBJ75TKSQKGQE4SSPKPQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <1404119245-5839-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <http://groups.google.com/group/linux-sunxi/subscribe>
-To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Eliad Peller <eliad-Ix1uc/W3ht7QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 0/4] mmc: core: Add support for MMC power sequences
+Date: Fri,  2 Jan 2015 17:14:04 +0100
+Message-ID: <1420215248-20650-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, NeilBrown <neilb-l3A5Bk7waGM@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 30 June 2014 at 11:07, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> Hi All,
->
-> Here is a resend of 3 of my submission of Sascha Hauer's
-> "mmc: Add SDIO function devicetree subnode parsing" patch.
->
-> Can we please get some movement on these patches, either a review specifying
-> why this cannot go upstream, or else queuing it up for next / 3.17 ?
->
-> Changes since v1:
-> - Submit as a stand-alone patch-set, rather then as part of a larger oob irq
->   support patchset crossing multiple subsystems
-> - Add a patch to document the already existing practice of using slot subnodes
-> - Split of the dt bindings documentation for sdio-func child nodes into its
->   own patch
-> - Add a preparation patch, setting slot_no where relevant
-> - And finally the "Add SDIO function devicetree subnode parsing" patch itself
->   has been modified to look for the sdio function childnodes under a slot node
->   instead of directly under the host node
->
-> Changes since v2:
-> - Drop the slot subnodes again, and drop the 2 slot subnodes patches
->
-> Regards,
->
-> Hans
+This is yet another try to solve the issues of dealing with power sequences for
+the MMC subsystem. The latest attempt, see link below, took a generic approach
+by adding a new top level driver layer. That's was rejected by several reasons.
+http://lwn.net/Articles/602855/
 
-So after quite a delay (sorry about that!!), I decided to apply this
-patchset for my next branch.
+This time the approach is focused to fix the issues for MMC only.
 
-Only a minor trivial conflict showed up on patch2. Also I took the
-liberty to change the prefix of patch 1 into only "mmc".
+To give a short background, SOCs may specify a specific MMC power sequence. To
+successfully detect an (e)MMC/SD/SDIO card, that power sequence must be followed
+while initializing the card.
 
-Kind regards
-Uffe
+To be able to handle these SOC specific power sequences, we add a MMC power
+sequence interface, which helps the mmc core to deal with such.
+
+A MMC power sequence provider then implements a set of callbacks from the above
+mentioned interface. The provider has a corresponding DT compatibility string
+and relies on CONFIG_OF to be set to find it's various resourses, like for
+example a GPIO reset.
+
+The mmc core will from mmc_of_parse() try find a "mmc-pwrseq" DT node and then
+call the corresponding MMC power sequence provider's initialization function.
+
+
+Ulf Hansson (4):
+  mmc: core: Initial support for MMC power sequences
+  mmc: pwrseq: Document DT bindings for the simple MMC power sequence
+  mmc: pwrseq: Initial support for the simple MMC power sequence
+    provider
+  mmc: pwrseq_simple: Add support for a reset GPIO pin
+
+ .../devicetree/bindings/mmc/mmc,pwrseq-simple.txt  |  23 +++++
+ Documentation/devicetree/bindings/mmc/mmc.txt      |   5 +
+ drivers/mmc/core/Makefile                          |   2 +-
+ drivers/mmc/core/core.c                            |   7 ++
+ drivers/mmc/core/host.c                            |   4 +-
+ drivers/mmc/core/pwrseq.c                          | 109 +++++++++++++++++++++
+ drivers/mmc/core/pwrseq.h                          |  42 ++++++++
+ drivers/mmc/core/pwrseq_simple.c                   |  86 ++++++++++++++++
+ include/linux/mmc/host.h                           |   2 +
+ 9 files changed, 278 insertions(+), 2 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/mmc,pwrseq-simple.txt
+ create mode 100644 drivers/mmc/core/pwrseq.c
+ create mode 100644 drivers/mmc/core/pwrseq.h
+ create mode 100644 drivers/mmc/core/pwrseq_simple.c
+
+-- 
+1.9.1
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
