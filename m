@@ -1,100 +1,64 @@
-From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Subject: [PATCH] mmc: sdhci-pxav3: do the mbus window configuration after enabling clocks
-Date: Wed, 31 Dec 2014 11:54:10 +0100
-Message-ID: <1420023250-20671-1-git-send-email-thomas.petazzoni@free-electrons.com>
-Return-path: <stable-owner@vger.kernel.org>
-Sender: stable-owner@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory Clement <gregory.clement@free-electrons.com>, Tawfik Bayouk <tawfik@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Lior Amsalem <alior@marvell.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, stable@vger.kernel.org
+From: Javier Martinez Canillas <javier@dowhile0.org>
+Subject: Re: [PATCH v5 0/4] Fixes for SDIO interrupts for dw_mmc
+Date: Fri, 2 Jan 2015 11:28:48 +0100
+Message-ID: <CABxcv==1w1GAHNCaNnh+e-xaYo8xtuD8dywTseioosxT4GZOvg@mail.gmail.com>
+References: <1417563767-32181-1-git-send-email-dianders@chromium.org>
+	<CAPDyKFpxvE4x_-PV=KN0HKY5cNug-ss9m5KCjNdebR1LDOJi5w@mail.gmail.com>
+	<CAD=FV=UCyOXfMqu_MYbd5pKOpgXPB87LQ7hCegeeY9vzsy6QAg@mail.gmail.com>
+	<CAPDyKFqGW2NaN+5mUrpBWrhM5ZfUSx70-Yyk9qmNaC1ft_ibpw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:61391 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750803AbbABK2u (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jan 2015 05:28:50 -0500
+Received: by mail-wi0-f170.google.com with SMTP id bs8so430563wib.5
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Jan 2015 02:28:49 -0800 (PST)
+In-Reply-To: <CAPDyKFqGW2NaN+5mUrpBWrhM5ZfUSx70-Yyk9qmNaC1ft_ibpw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Doug Anderson <dianders@chromium.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Russell King - ARM Linux <linux@arm.linux.org.uk>, H Hartley Sweeten <hsweeten@visionengravers.com>, Tony Lindgren <tony@atomide.com>, Sascha Hauer <s.hauer@pengutronix.de>, Wolfram Sang <wsa@the-dreams.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>, Joe Perches <joe@perches.com>, Axel Lin <axel.lin@ingics.com>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-In commit 5491ce3f79ee ("mmc: sdhci-pxav3: add support for the Armada
-38x SDHCI controller"), the sdhci-pxav3 driver was extended to include
-support for the SDHCI controller found in the Armada 38x
-processor. This mainly involved adding some MBus window related
-configuration.
+Hello Ulf,
 
-However, this configuration is currently done too early in ->probe():
-it is done before clocks are enabled, while this configuration
-involves touching the registers of the controller, which will hang the
-SoC if the clock is disabled. It wasn't noticed until now because the
-bootloader typically leaves gatable clocks enabled, but in situations
-where we have a deferred probe (due to a CD GPIO that cannot be taken,
-for example), then the probe will be re-tried later, after a clock
-disable has been done in the exit path of the failed probe attempt of
-the device. This second probe() will hang the system due to the clock
-being disabled.
+On Tue, Dec 30, 2014 at 11:29 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 19 December 2014 at 20:02, Doug Anderson <dianders@chromium.org> wrote:
+>>
+>>> It was a bit hard to follow the
+>>> updated the revisions, please don't send patches "in-reply-to" for
+>>> future sets.
+>>
+>> Very strange.  I didn't send out anything in-reply-to other than what
+>> git-send-email usually does.  I believe I had:
+>>
+>> [0] - no in reply to.
+>>  [1] - in reply to [0]
+>>  [2] - in reply to [0]
+>>  [3] - in reply to [0]
+>>  [4] - in reply to [0]
+>
+> That's good. As long as there are no in-reply to previous versions of
+> patches/patchsets.
+>
+> I am using gmails web-based client so it could very well be that it
+> does some magic, which I am not yet aware of.
+>
 
-This can for example be produced on Armada 385 GP, which has a CD GPIO
-connected to an I2C PCA9555. If the driver for the PCA9555 is not
-compiled into the kernel, then we will have the following sequence of
-events:
+I think that you were confused because Gmail's "conversation view"
+groups emails in a thread not by the email subject but by the email
+body.
 
-  1. The SDHCI probes
-  2. It does the MBus configuration (which works, because the clock is
-     left enabled by the bootloader)
-  3. It enables the clock
-  4. It tries to get the CD GPIO, which fails due to the driver being
-     missing, so -EPROBE_DEFER is returned.
-  5. Before returning -EPROBE_DEFER, the driver cleans up what was
-     done, which includes disabling the clock.
-  6. Later on, the SDHCI probe is tried again.
-  7. It does the MBus configuration, which hangs because the clock is
-     no longer enabled.
+So if a new revision of a series is sent and a patch did not change
+from the previous version, Gmail will add it to the old patch thread
+since the body is basically the same even when a version is present in
+the subject (e.g: PATCH v2 foo).
 
-This commit does the obvious fix of doing the MBus configuration after
-the clock has been enabled by the driver.
+I found that annoying as well so I disabled conversation view going to
+Gmail's settings -> General -> Conversation view off
 
-Fixes: 5491ce3f79ee ("mmc: sdhci-pxav3: add support for the Armada 38x SDHCI controller")
-Cc: <stable@vger.kernel.org> # v3.15+
-Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
----
- drivers/mmc/host/sdhci-pxav3.c | 15 +++++++--------
- 1 file changed, 7 insertions(+), 8 deletions(-)
+Hope it helps.
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 4523887..ca3424e 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -300,13 +300,6 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
- 
--	if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
--		ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
--		if (ret < 0)
--			goto err_mbus_win;
--	}
--
--
- 	pltfm_host = sdhci_priv(host);
- 	pltfm_host->priv = pxa;
- 
-@@ -325,6 +318,12 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 	if (!IS_ERR(pxa->clk_core))
- 		clk_prepare_enable(pxa->clk_core);
- 
-+	if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
-+		ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
-+		if (ret < 0)
-+			goto err_mbus_win;
-+	}
-+
- 	/* enable 1/8V DDR capable */
- 	host->mmc->caps |= MMC_CAP_1_8V_DDR;
- 
-@@ -396,11 +395,11 @@ err_add_host:
- 	pm_runtime_disable(&pdev->dev);
- err_of_parse:
- err_cd_req:
-+err_mbus_win:
- 	clk_disable_unprepare(pxa->clk_io);
- 	if (!IS_ERR(pxa->clk_core))
- 		clk_disable_unprepare(pxa->clk_core);
- err_clk_get:
--err_mbus_win:
- 	sdhci_pltfm_free(pdev);
- 	return ret;
- }
--- 
-2.1.0
+Best regards,
+Javier
