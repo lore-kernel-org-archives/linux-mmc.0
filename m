@@ -1,253 +1,114 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 1/4] mmc: dw_mmc: exynos: incorporate ciu_div into
- timing property
-Date: Fri, 2 Jan 2015 11:30:44 +0100
-Message-ID: <CAPDyKFrXzU0DA0GrQxBNRY0hPm6t=Y9i5Fuc516ZHkUFZKEnjw@mail.gmail.com>
-References: <1420008185-24758-1-git-send-email-alim.akhtar@samsung.com>
-	<1420008185-24758-2-git-send-email-alim.akhtar@samsung.com>
+Subject: Re: [PATCH] mmc: sdhci-pxav3: do the mbus window configuration after
+ enabling clocks
+Date: Fri, 2 Jan 2015 11:52:16 +0100
+Message-ID: <CAPDyKFpXFT+X+Hu91w72cFkow5nnn0n401JVX8LB9dWC31gTbQ@mail.gmail.com>
+References: <1420023250-20671-1-git-send-email-thomas.petazzoni@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1420008185-24758-2-git-send-email-alim.akhtar@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Doug Anderson <dianders@chromium.org>, Alim Akhtar <alim.akhtar@gmail.com>, Kukjin Kim <kgene@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, ABHILASH KESAVAN <a.kesavan@samsung.com>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1420023250-20671-1-git-send-email-thomas.petazzoni@free-electrons.com>
+Sender: stable-owner@vger.kernel.org
+To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Cc: Chris Ball <chris@printf.net>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory Clement <gregory.clement@free-electrons.com>, Tawfik Bayouk <tawfik@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Lior Amsalem <alior@marvell.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 31 December 2014 at 07:43, Alim Akhtar <alim.akhtar@samsung.com> wrote:
-> From: Seungwon Jeon <tgih.jun@samsung.com>
+On 31 December 2014 at 11:54, Thomas Petazzoni
+<thomas.petazzoni@free-electrons.com> wrote:
+> In commit 5491ce3f79ee ("mmc: sdhci-pxav3: add support for the Armada
+> 38x SDHCI controller"), the sdhci-pxav3 driver was extended to include
+> support for the SDHCI controller found in the Armada 38x
+> processor. This mainly involved adding some MBus window related
+> configuration.
 >
-> ciu_div may not be common value for all speed mode.
-> So, it needs to be attached to CLKSEL timing.
-> This also introduce a new compatibale 'dw-mshc-hs200-timing'
-> for selecting hs200 timing value
+> However, this configuration is currently done too early in ->probe():
+> it is done before clocks are enabled, while this configuration
+> involves touching the registers of the controller, which will hang the
+> SoC if the clock is disabled. It wasn't noticed until now because the
+> bootloader typically leaves gatable clocks enabled, but in situations
+> where we have a deferred probe (due to a CD GPIO that cannot be taken,
+> for example), then the probe will be re-tried later, after a clock
+> disable has been done in the exit path of the failed probe attempt of
+> the device. This second probe() will hang the system due to the clock
+> being disabled.
+>
+> This can for example be produced on Armada 385 GP, which has a CD GPIO
+> connected to an I2C PCA9555. If the driver for the PCA9555 is not
+> compiled into the kernel, then we will have the following sequence of
+> events:
+>
+>   1. The SDHCI probes
+>   2. It does the MBus configuration (which works, because the clock is
+>      left enabled by the bootloader)
+>   3. It enables the clock
+>   4. It tries to get the CD GPIO, which fails due to the driver being
+>      missing, so -EPROBE_DEFER is returned.
+>   5. Before returning -EPROBE_DEFER, the driver cleans up what was
+>      done, which includes disabling the clock.
+>   6. Later on, the SDHCI probe is tried again.
+>   7. It does the MBus configuration, which hangs because the clock is
+>      no longer enabled.
+>
+> This commit does the obvious fix of doing the MBus configuration after
+> the clock has been enabled by the driver.
+>
+> Fixes: 5491ce3f79ee ("mmc: sdhci-pxav3: add support for the Armada 38x SDHCI controller")
+> Cc: <stable@vger.kernel.org> # v3.15+
+> Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 
-According to the patch you are adding a new DT property not a
-"compatible". Please update the commit message.
-
-The rest looks good to me.
+Thanks! Applied for fixes.
 
 Kind regards
 Uffe
 
->
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
 > ---
->  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   15 ++--
->  drivers/mmc/host/dw_mmc-exynos.c                   |   81 ++++++++++++++------
->  drivers/mmc/host/dw_mmc-exynos.h                   |    1 +
->  3 files changed, 67 insertions(+), 30 deletions(-)
+>  drivers/mmc/host/sdhci-pxav3.c | 15 +++++++--------
+>  1 file changed, 7 insertions(+), 8 deletions(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> index ee4fc05..06455de 100644
-> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> @@ -23,10 +23,6 @@ Required Properties:
->         - "samsung,exynos7-dw-mshc-smu": for controllers with Samsung Exynos7
->           specific extensions having an SMU.
+> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+> index 4523887..ca3424e 100644
+> --- a/drivers/mmc/host/sdhci-pxav3.c
+> +++ b/drivers/mmc/host/sdhci-pxav3.c
+> @@ -300,13 +300,6 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+>         if (IS_ERR(host))
+>                 return PTR_ERR(host);
 >
-> -* samsung,dw-mshc-ciu-div: Specifies the divider value for the card interface
-> -  unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
-> -  ignored for Exynos4 SoC's. The valid range of divider value is 0 to 7.
-> -
->  * samsung,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
->    in transmit mode and CIU clock phase shift value in receive mode for single
->    data rate mode operation. Refer notes below for the order of the cells and the
-> @@ -37,11 +33,16 @@ Required Properties:
->    data rate mode operation. Refer notes below for the order of the cells and the
->    valid values.
->
-> +* samsung,dw-mshc-hs200-timing: Similar with dw-mshc-sdr-timing.
-> +
->    Notes for the sdr-timing and ddr-timing values:
->
->      The order of the cells should be
->        - First Cell: CIU clock phase shift value for tx mode.
->        - Second Cell: CIU clock phase shift value for rx mode.
-> +      - Thrid Cell: Specifies the divider value for the card interface
-> +        unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
-> +        ignored for Exynos4 SoC's. The valid range of divider value is 0 to 7.
->
->      Valid values for SDR and DDR CIU clock timing for Exynos5250:
->        - valid value for tx phase shift and rx phase shift is 0 to 7.
-> @@ -79,8 +80,8 @@ Example:
->                 broken-cd;
->                 fifo-depth = <0x80>;
->                 card-detect-delay = <200>;
-> -               samsung,dw-mshc-ciu-div = <3>;
-> -               samsung,dw-mshc-sdr-timing = <2 3>;
-> -               samsung,dw-mshc-ddr-timing = <1 2>;
-> +               samsung,dw-mshc-sdr-timing = <2 3 3>;
-> +               samsung,dw-mshc-ddr-timing = <1 2 3>;
-> +               samsung,dw-mshc-hs200-timing = <0 2 3>;
->                 bus-width = <8>;
->         };
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index 12a5eaa..be6530e 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -40,6 +40,7 @@ struct dw_mci_exynos_priv_data {
->         u8                              ciu_div;
->         u32                             sdr_timing;
->         u32                             ddr_timing;
-> +       u32                             hs200_timing;
->         u32                             cur_speed;
->  };
->
-> @@ -71,6 +72,21 @@ static struct dw_mci_exynos_compatible {
->         },
->  };
->
-> +static inline u8 dw_mci_exynos_get_ciu_div(struct dw_mci *host)
-> +{
-> +       struct dw_mci_exynos_priv_data *priv = host->priv;
-> +
-> +       if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4412)
-> +               return EXYNOS4412_FIXED_CIU_CLK_DIV;
-> +       else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4210)
-> +               return EXYNOS4210_FIXED_CIU_CLK_DIV;
-> +       else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
-> +                       priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
-> +               return SDMMC_CLKSEL_GET_DIV(mci_readl(host, CLKSEL64)) + 1;
-> +       else
-> +               return SDMMC_CLKSEL_GET_DIV(mci_readl(host, CLKSEL)) + 1;
-> +}
-> +
->  static int dw_mci_exynos_priv_init(struct dw_mci *host)
->  {
->         struct dw_mci_exynos_priv_data *priv = host->priv;
-> @@ -85,6 +101,8 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
->                            SDMMC_MPSCTRL_NON_SECURE_WRITE_BIT);
->         }
->
-> +       priv->ciu_div = dw_mci_exynos_get_ciu_div(host);
-> +
->         return 0;
->  }
->
-> @@ -92,7 +110,7 @@ static int dw_mci_exynos_setup_clock(struct dw_mci *host)
->  {
->         struct dw_mci_exynos_priv_data *priv = host->priv;
->
-> -       host->bus_hz /= (priv->ciu_div + 1);
-> +       host->bus_hz /= priv->ciu_div;
->
->         return 0;
->  }
-> @@ -177,9 +195,14 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->         struct dw_mci_exynos_priv_data *priv = host->priv;
->         unsigned int wanted = ios->clock;
->         unsigned long actual;
-> -       u8 div = priv->ciu_div + 1;
->
-> -       if (ios->timing == MMC_TIMING_MMC_DDR52) {
-> +       if (ios->timing == MMC_TIMING_MMC_HS200) {
-> +               if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
-> +                       priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
-> +                       mci_writel(host, CLKSEL64, priv->hs200_timing);
-> +               else
-> +                       mci_writel(host, CLKSEL, priv->hs200_timing);
-> +       } else if (ios->timing == MMC_TIMING_MMC_DDR52) {
->                 if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
->                         priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU)
->                         mci_writel(host, CLKSEL64, priv->ddr_timing);
-> @@ -208,6 +231,7 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->                 wanted = EXYNOS_CCLKIN_MIN;
->
->         if (wanted != priv->cur_speed) {
-> +               u8 div = dw_mci_exynos_get_ciu_div(host);
->                 int ret = clk_set_rate(host->ciu_clk, wanted * div);
->                 if (ret)
->                         dev_warn(host->dev,
-> @@ -220,14 +244,34 @@ static void dw_mci_exynos_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->         }
->  }
->
-> +static int dw_mci_exynos_dt_populate_timing(struct dw_mci *host,
-> +                                           unsigned int ctrl_type,
-> +                                           const char *propname,
-> +                                           u32 *out_values)
-> +{
-> +       struct device_node *np = host->dev->of_node;
-> +       u32 timing[3];
-> +       int ret;
-> +
-> +       ret = of_property_read_u32_array(np, propname, timing, 3);
-> +       if (ret)
-> +               return ret;
-> +
-> +       if (ctrl_type == DW_MCI_TYPE_EXYNOS4412 ||
-> +           ctrl_type == DW_MCI_TYPE_EXYNOS4210)
-> +               timing[2] = 0;
-> +
-> +       *out_values = SDMMC_CLKSEL_TIMING(timing[0], timing[1], timing[2]);
-> +
-> +       return 0;
-> +}
-> +
-> +
->  static int dw_mci_exynos_parse_dt(struct dw_mci *host)
->  {
->         struct dw_mci_exynos_priv_data *priv;
->         struct device_node *np = host->dev->of_node;
-> -       u32 timing[2];
-> -       u32 div = 0;
-> -       int idx;
-> -       int ret;
-> +       int idx, ret;
->
->         priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
->         if (!priv)
-> @@ -238,29 +282,20 @@ static int dw_mci_exynos_parse_dt(struct dw_mci *host)
->                         priv->ctrl_type = exynos_compat[idx].ctrl_type;
->         }
->
-> -       if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4412)
-> -               priv->ciu_div = EXYNOS4412_FIXED_CIU_CLK_DIV - 1;
-> -       else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS4210)
-> -               priv->ciu_div = EXYNOS4210_FIXED_CIU_CLK_DIV - 1;
-> -       else {
-> -               of_property_read_u32(np, "samsung,dw-mshc-ciu-div", &div);
-> -               priv->ciu_div = div;
+> -       if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
+> -               ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
+> -               if (ret < 0)
+> -                       goto err_mbus_win;
 > -       }
 > -
-> -       ret = of_property_read_u32_array(np,
-> -                       "samsung,dw-mshc-sdr-timing", timing, 2);
-> +       ret = dw_mci_exynos_dt_populate_timing(host, priv->ctrl_type,
-> +                       "samsung,dw-mshc-sdr-timing", &priv->sdr_timing);
->         if (ret)
->                 return ret;
->
-> -       priv->sdr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
 > -
-> -       ret = of_property_read_u32_array(np,
-> -                       "samsung,dw-mshc-ddr-timing", timing, 2);
-> +       ret = dw_mci_exynos_dt_populate_timing(host, priv->ctrl_type,
-> +                       "samsung,dw-mshc-ddr-timing", &priv->ddr_timing);
->         if (ret)
->                 return ret;
+>         pltfm_host = sdhci_priv(host);
+>         pltfm_host->priv = pxa;
 >
-> -       priv->ddr_timing = SDMMC_CLKSEL_TIMING(timing[0], timing[1], div);
-> +       dw_mci_exynos_dt_populate_timing(host, priv->ctrl_type,
-> +               "samsung,dw-mshc-hs200-timing", &priv->hs200_timing);
->         host->priv = priv;
+> @@ -325,6 +318,12 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+>         if (!IS_ERR(pxa->clk_core))
+>                 clk_prepare_enable(pxa->clk_core);
+>
+> +       if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
+> +               ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
+> +               if (ret < 0)
+> +                       goto err_mbus_win;
+> +       }
 > +
->         return 0;
->  }
+>         /* enable 1/8V DDR capable */
+>         host->mmc->caps |= MMC_CAP_1_8V_DDR;
 >
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.h b/drivers/mmc/host/dw_mmc-exynos.h
-> index 7872ce5..c04ecef 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.h
-> +++ b/drivers/mmc/host/dw_mmc-exynos.h
-> @@ -21,6 +21,7 @@
->  #define SDMMC_CLKSEL_CCLK_DRIVE(x)     (((x) & 7) << 16)
->  #define SDMMC_CLKSEL_CCLK_DIVIDER(x)   (((x) & 7) << 24)
->  #define SDMMC_CLKSEL_GET_DRV_WD3(x)    (((x) >> 16) & 0x7)
-> +#define SDMMC_CLKSEL_GET_DIV(x)                (((x) >> 24) & 0x7)
->  #define SDMMC_CLKSEL_TIMING(x, y, z)   (SDMMC_CLKSEL_CCLK_SAMPLE(x) |  \
->                                          SDMMC_CLKSEL_CCLK_DRIVE(y) |   \
->                                          SDMMC_CLKSEL_CCLK_DIVIDER(z))
+> @@ -396,11 +395,11 @@ err_add_host:
+>         pm_runtime_disable(&pdev->dev);
+>  err_of_parse:
+>  err_cd_req:
+> +err_mbus_win:
+>         clk_disable_unprepare(pxa->clk_io);
+>         if (!IS_ERR(pxa->clk_core))
+>                 clk_disable_unprepare(pxa->clk_core);
+>  err_clk_get:
+> -err_mbus_win:
+>         sdhci_pltfm_free(pdev);
+>         return ret;
+>  }
 > --
-> 1.7.9.5
+> 2.1.0
 >
