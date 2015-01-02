@@ -1,114 +1,48 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-pxav3: do the mbus window configuration after
- enabling clocks
-Date: Fri, 2 Jan 2015 11:52:16 +0100
-Message-ID: <CAPDyKFpXFT+X+Hu91w72cFkow5nnn0n401JVX8LB9dWC31gTbQ@mail.gmail.com>
-References: <1420023250-20671-1-git-send-email-thomas.petazzoni@free-electrons.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1420023250-20671-1-git-send-email-thomas.petazzoni@free-electrons.com>
-Sender: stable-owner@vger.kernel.org
-To: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
-Cc: Chris Ball <chris@printf.net>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory Clement <gregory.clement@free-electrons.com>, Tawfik Bayouk <tawfik@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Lior Amsalem <alior@marvell.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, stable@vger.kernel.org
+Subject: [PATCH] mmc: sdhci-acpi: Remove redundant runtime PM idle callback
+Date: Fri,  2 Jan 2015 15:15:48 +0100
+Message-ID: <1420208148-28907-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:47019 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751950AbbABOP4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jan 2015 09:15:56 -0500
+Received: by mail-lb0-f181.google.com with SMTP id l4so14793088lbv.40
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Jan 2015 06:15:54 -0800 (PST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
 
-On 31 December 2014 at 11:54, Thomas Petazzoni
-<thomas.petazzoni@free-electrons.com> wrote:
-> In commit 5491ce3f79ee ("mmc: sdhci-pxav3: add support for the Armada
-> 38x SDHCI controller"), the sdhci-pxav3 driver was extended to include
-> support for the SDHCI controller found in the Armada 38x
-> processor. This mainly involved adding some MBus window related
-> configuration.
->
-> However, this configuration is currently done too early in ->probe():
-> it is done before clocks are enabled, while this configuration
-> involves touching the registers of the controller, which will hang the
-> SoC if the clock is disabled. It wasn't noticed until now because the
-> bootloader typically leaves gatable clocks enabled, but in situations
-> where we have a deferred probe (due to a CD GPIO that cannot be taken,
-> for example), then the probe will be re-tried later, after a clock
-> disable has been done in the exit path of the failed probe attempt of
-> the device. This second probe() will hang the system due to the clock
-> being disabled.
->
-> This can for example be produced on Armada 385 GP, which has a CD GPIO
-> connected to an I2C PCA9555. If the driver for the PCA9555 is not
-> compiled into the kernel, then we will have the following sequence of
-> events:
->
->   1. The SDHCI probes
->   2. It does the MBus configuration (which works, because the clock is
->      left enabled by the bootloader)
->   3. It enables the clock
->   4. It tries to get the CD GPIO, which fails due to the driver being
->      missing, so -EPROBE_DEFER is returned.
->   5. Before returning -EPROBE_DEFER, the driver cleans up what was
->      done, which includes disabling the clock.
->   6. Later on, the SDHCI probe is tried again.
->   7. It does the MBus configuration, which hangs because the clock is
->      no longer enabled.
->
-> This commit does the obvious fix of doing the MBus configuration after
-> the clock has been enabled by the driver.
->
-> Fixes: 5491ce3f79ee ("mmc: sdhci-pxav3: add support for the Armada 38x SDHCI controller")
-> Cc: <stable@vger.kernel.org> # v3.15+
-> Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/sdhci-acpi.c | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
 
-Thanks! Applied for fixes.
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index e3e56d3..8f6c228 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -446,18 +446,13 @@ static int sdhci_acpi_runtime_resume(struct device *dev)
+ 	return sdhci_runtime_resume_host(c->host);
+ }
+ 
+-static int sdhci_acpi_runtime_idle(struct device *dev)
+-{
+-	return 0;
+-}
+-
+ #endif
+ 
+ static const struct dev_pm_ops sdhci_acpi_pm_ops = {
+ 	.suspend		= sdhci_acpi_suspend,
+ 	.resume			= sdhci_acpi_resume,
+ 	SET_RUNTIME_PM_OPS(sdhci_acpi_runtime_suspend,
+-			sdhci_acpi_runtime_resume, sdhci_acpi_runtime_idle)
++			sdhci_acpi_runtime_resume, NULL)
+ };
+ 
+ static struct platform_driver sdhci_acpi_driver = {
+-- 
+1.9.1
 
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/host/sdhci-pxav3.c | 15 +++++++--------
->  1 file changed, 7 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> index 4523887..ca3424e 100644
-> --- a/drivers/mmc/host/sdhci-pxav3.c
-> +++ b/drivers/mmc/host/sdhci-pxav3.c
-> @@ -300,13 +300,6 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->         if (IS_ERR(host))
->                 return PTR_ERR(host);
->
-> -       if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
-> -               ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
-> -               if (ret < 0)
-> -                       goto err_mbus_win;
-> -       }
-> -
-> -
->         pltfm_host = sdhci_priv(host);
->         pltfm_host->priv = pxa;
->
-> @@ -325,6 +318,12 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->         if (!IS_ERR(pxa->clk_core))
->                 clk_prepare_enable(pxa->clk_core);
->
-> +       if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
-> +               ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
-> +               if (ret < 0)
-> +                       goto err_mbus_win;
-> +       }
-> +
->         /* enable 1/8V DDR capable */
->         host->mmc->caps |= MMC_CAP_1_8V_DDR;
->
-> @@ -396,11 +395,11 @@ err_add_host:
->         pm_runtime_disable(&pdev->dev);
->  err_of_parse:
->  err_cd_req:
-> +err_mbus_win:
->         clk_disable_unprepare(pxa->clk_io);
->         if (!IS_ERR(pxa->clk_core))
->                 clk_disable_unprepare(pxa->clk_core);
->  err_clk_get:
-> -err_mbus_win:
->         sdhci_pltfm_free(pdev);
->         return ret;
->  }
-> --
-> 2.1.0
->
