@@ -1,54 +1,63 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v5 0/4] Fixes for SDIO interrupts for dw_mmc
-Date: Fri, 2 Jan 2015 09:11:23 -0800
-Message-ID: <20150102171123.GC3298@atomide.com>
-References: <1417563767-32181-1-git-send-email-dianders@chromium.org>
- <CAPDyKFpxvE4x_-PV=KN0HKY5cNug-ss9m5KCjNdebR1LDOJi5w@mail.gmail.com>
- <CAD=FV=UCyOXfMqu_MYbd5pKOpgXPB87LQ7hCegeeY9vzsy6QAg@mail.gmail.com>
- <CAPDyKFqGW2NaN+5mUrpBWrhM5ZfUSx70-Yyk9qmNaC1ft_ibpw@mail.gmail.com>
- <CAD=FV=UzJo=KE7Snb2v=dNodmf_ky97o3xyUHUAZqb1Kq10d1A@mail.gmail.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH 0/4] mmc: core: Add support for MMC power sequences
+Date: Fri, 2 Jan 2015 18:14:24 +0000
+Message-ID: <20150102181423.GS11285@n2100.arm.linux.org.uk>
+References: <1420215248-20650-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mho-03-ewr.mailhop.org ([204.13.248.66]:61749 "EHLO
-	mho-01-ewr.mailhop.org" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750717AbbABRPN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jan 2015 12:15:13 -0500
+Received: from gw-1.arm.linux.org.uk ([78.32.30.217]:39071 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1751217AbbABSOj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jan 2015 13:14:39 -0500
 Content-Disposition: inline
-In-Reply-To: <CAD=FV=UzJo=KE7Snb2v=dNodmf_ky97o3xyUHUAZqb1Kq10d1A@mail.gmail.com>
+In-Reply-To: <1420215248-20650-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Russell King - ARM Linux <linux@arm.linux.org.uk>, H Hartley Sweeten <hsweeten@visionengravers.com>, Sascha Hauer <s.hauer@pengutronix.de>, Wolfram Sang <wsa@the-dreams.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, =?utf-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>, Joe Perches <joe@perches.com>, Axel Lin <axel.lin@ingics.com>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Alexandre Courbot <gnurou@gmail.com>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Olof Johansson <olof@lixom.net>, Hans de Goede <hdegoede@redhat.com>, Doug Anderson <dianders@chromium.org>, NeilBrown <neilb@suse.de>
 
-* Doug Anderson <dianders@chromium.org> [150102 09:09]:
-> Ulf,
-> 
-> On Tue, Dec 30, 2014 at 2:29 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >>> In v5, I don't find a patch 1/4. Anyway, I have taken patch 2->4.
-> >>
-> >> Ah, maybe because it wasn't sent to linux-mmc?  I messed that up and
-> >> will try to do better in the future.  Sorry.  :(  You were in the To
-> >> line, though.  You can see at
-> >> <https://patchwork.kernel.org/patch/5425241/>.
-> >>
-> >> Do you want me to repost it and CC linux-mmc with Tony's Ack?
-> >
-> > I suggest you have a look at my next branch and to verify that I
-> > haven't screwed things up. If so, either I should drop the patches and
-> > you make a resend or if it's possible to just send an incremental path
-> > on top?
-> 
-> The patches that landed look good to me, but I think you might break
-> omap3pandora's WiFi until you land patch #1 in the series.  It has
-> Tony's Ack so I think he intends for you to land it in your tree.
-> 
-> [v5,1/4] ARM: OMAP2+: Make sure pandora_wl1251_init_card() applies to SDIO only
+On Fri, Jan 02, 2015 at 05:14:04PM +0100, Ulf Hansson wrote:
+> To be able to handle these SOC specific power sequences, we add a MMC power
+> sequence interface, which helps the mmc core to deal with such.
 
-Yes please pick that one up too to avoid breakage. The changes to the
-mach-omap2/board-*.c files are only minimal fixes, so it should not
-conflict with anything I'll be applying.
+I think this should be done differently - part of that is with hind sight
+given that we now have a range of interface types.
 
-Regards,
+One of my early design mistakes with MMC was to incorporate the power up
+and initialisation protocol (the 74 clocks business) into the core code.
+This was wrong, because it is a detail which only applies to dumb host
+interfaces.  More inteligent interfaces do not need that complexity as
+they handle that in hardware.
 
-Tony
+Rather than MMC ending up with more layers and more infrastructure like
+this - turning it more into the turd which is sdhci - I would like to see
+some proper thought put into design, specifically addressing the above
+design issue.
+
+What should be done is to move away from the opaque "set_ios" method into
+something more appropriate - a set of callbacks which describe what we
+want to achieve.
+
+In the case of power up, there should be a single call into the host
+controller code which is responsible for initiating the power up
+sequence, and waits for the power up sequence to complete.  In other
+words, most of mmc_power_up() should be moved to a library function,
+which dumb host adapters hook into the "power up" method.  More
+inteligent adapters (eg, PXA, sdhci) can add their own hook which poke
+the hardware and return when the hardware has completed its power up
+sequence.
+
+That avoids the "mmc_delay(10)" for inteligent adapters where these
+delays are not required - which presumably also are not required if some
+special power up sequence for eMMC is required.
+
+The same thing goes for this "powerseq" stuff - all you're doing is
+propagating the same design mistake (with the POWER_UP/POWER_ON etc
+details) into it.  That shouldn't be the case - think about the dumb
+powerup method I described above vs the inteligent method - these are
+two separate powerup methods, and should be implemented as such.
+
+-- 
+FTTC broadband for 0.8mile line: currently at 9.5Mbps down 400kbps up
+according to speedtest.net.
