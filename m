@@ -1,73 +1,147 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: [PATCH 0/4] mmc: core: Add support for MMC power sequences
-Date: Sun, 04 Jan 2015 20:20:15 +0100
-Message-ID: <54A9926F.9090607@redhat.com>
-References: <1420215248-20650-1-git-send-email-ulf.hansson@linaro.org> <20150102181423.GS11285@n2100.arm.linux.org.uk>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH v3 1/4] mmc: dw_mmc: exynos: incorporate ciu_div into
+ timing property
+Date: Mon, 5 Jan 2015 04:13:33 +0530
+Message-ID: <CAGOxZ509kASim7keNkAGj5gAGO02=7vZM=VL-MRMObv3x+CzTg@mail.gmail.com>
+References: <1420008185-24758-1-git-send-email-alim.akhtar@samsung.com>
+ <1420008185-24758-2-git-send-email-alim.akhtar@samsung.com> <CAD=FV=WXzPt=VKxB=KHK+hC=RN6WbmdnQcLUT4zFQ0Ud7BFanQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51165 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752737AbbADTVQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 4 Jan 2015 14:21:16 -0500
-In-Reply-To: <20150102181423.GS11285@n2100.arm.linux.org.uk>
+Received: from mail-yh0-f50.google.com ([209.85.213.50]:40214 "EHLO
+	mail-yh0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752788AbbADWoP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Jan 2015 17:44:15 -0500
+In-Reply-To: <CAD=FV=WXzPt=VKxB=KHK+hC=RN6WbmdnQcLUT4zFQ0Ud7BFanQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Alexandre Courbot <gnurou@gmail.com>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Olof Johansson <olof@lixom.net>, Doug Anderson <dianders@chromium.org>, NeilBrown <neilb@suse.de>
+To: Doug Anderson <dianders@chromium.org>
+Cc: Alim Akhtar <alim.akhtar@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, kgene <kgene@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Abhilash Kesavan <a.kesavan@samsung.com>, Alexandru Stan <amstan@google.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>
 
-Hi Russell,
+Hi Doug,
+Thanks for looking into this series.
 
-On 02-01-15 19:14, Russell King - ARM Linux wrote:
-> On Fri, Jan 02, 2015 at 05:14:04PM +0100, Ulf Hansson wrote:
->> To be able to handle these SOC specific power sequences, we add a MMC power
->> sequence interface, which helps the mmc core to deal with such.
+On Fri, Jan 2, 2015 at 10:28 PM, Doug Anderson <dianders@chromium.org> wrote:
+> Alim,
 >
-> I think this should be done differently - part of that is with hind sight
-> given that we now have a range of interface types.
+> On Tue, Dec 30, 2014 at 10:43 PM, Alim Akhtar <alim.akhtar@samsung.com> wrote:
+>> From: Seungwon Jeon <tgih.jun@samsung.com>
+>>
+>> ciu_div may not be common value for all speed mode.
+>> So, it needs to be attached to CLKSEL timing.
 >
-> One of my early design mistakes with MMC was to incorporate the power up
-> and initialisation protocol (the 74 clocks business) into the core code.
-> This was wrong, because it is a detail which only applies to dumb host
-> interfaces.  More inteligent interfaces do not need that complexity as
-> they handle that in hardware.
+> The more time I've spent looking at all of this stuff the less I like
+> the exynos bindings.  Personally I'd prefer to see the exynos bindings
+> fixed rather than go further down the path of these bindings.
 >
-> Rather than MMC ending up with more layers and more infrastructure like
-> this - turning it more into the turd which is sdhci - I would like to see
-> some proper thought put into design, specifically addressing the above
-> design issue.
+> Specifically:
 >
-> What should be done is to move away from the opaque "set_ios" method into
-> something more appropriate - a set of callbacks which describe what we
-> want to achieve.
+> 1. The "drive" really should be specified quite differently.
+> According to the DesignWare docs, the "drive" phase is there to meet
+> hold time requirements.  Hold time requirements are different for
+> different SD/MMC modes and are specified in nanoseconds (SDR104 is
+> .8ns, ID mode is 5.0ns).  There is a per-SoC parameter needed that
+> indicates some built-in delay (in nanoseconds) and that shouldn't
+> change based on clock speed or card mode.
+>
+Yes, "drive" phase shift are there to meet hold time requirements. And
+that why we in general don't change it as those are fixed for a
+SoC/Board based on actual measurement of the same.
 
-I think you misunderstand what this patch-set tries to do, this patch-set
-is intended for use with on board sdio devices, which typically may need
-a number of resources initialized before the can be probed over the sd
-bus at all. E.g. a regulator enabled, a reset de-asserted, a clk configured
-and provided, etc. So this is about sequencing of events before even
-trying to talk to the device at the basic spi compatible layer.
+> 2. The ciu_div really ought to be automatic.  Start out at a divide by
+> 4.  If you end up with both drive and sample at phases of 0, 90, 180,
+> 270 then you can change to divide by 2.
+>
+> I still haven't looked at every last detail of these delays though, so
+> please correct me if I'm wrong.  I've added Alex who may have looked
+> at this more than I have.
+>
+Thanks, suggestions/comments are welcome.
+>
+> With all of the above, there's also the fact that (I think) we should
+> be moving towards working with the clock phase API since all of your
+> values are effectively specifying clock phases, just in a very arcane
+> way.
+>
+That is something nice to have, and should be done at some point.
+As you know exynos implements a custom register called CLKSEL, and it
+allows us to set the required "sample" phase shift. And exynos uses
+"variable delay tuning" as per DW databook to set "sample" phase shift
+based on tuning data.
+>
+>> This also introduce a new compatibale 'dw-mshc-hs200-timing'
+>> for selecting hs200 timing value
+>
+> As per above, I don't think this is needed.
+>
+>
+>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+>> ---
+>>  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |   15 ++--
+>>  drivers/mmc/host/dw_mmc-exynos.c                   |   81 ++++++++++++++------
+>>  drivers/mmc/host/dw_mmc-exynos.h                   |    1 +
+>>  3 files changed, 67 insertions(+), 30 deletions(-)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+>> index ee4fc05..06455de 100644
+>> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+>> @@ -23,10 +23,6 @@ Required Properties:
+>>         - "samsung,exynos7-dw-mshc-smu": for controllers with Samsung Exynos7
+>>           specific extensions having an SMU.
+>>
+>> -* samsung,dw-mshc-ciu-div: Specifies the divider value for the card interface
+>> -  unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
+>> -  ignored for Exynos4 SoC's. The valid range of divider value is 0 to 7.
+>> -
+>>  * samsung,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
+>>    in transmit mode and CIU clock phase shift value in receive mode for single
+>>    data rate mode operation. Refer notes below for the order of the cells and the
+>> @@ -37,11 +33,16 @@ Required Properties:
+>>    data rate mode operation. Refer notes below for the order of the cells and the
+>>    valid values.
+>>
+>> +* samsung,dw-mshc-hs200-timing: Similar with dw-mshc-sdr-timing.
+>> +
+>>    Notes for the sdr-timing and ddr-timing values:
+>>
+>>      The order of the cells should be
+>>        - First Cell: CIU clock phase shift value for tx mode.
+>>        - Second Cell: CIU clock phase shift value for rx mode.
+>> +      - Thrid Cell: Specifies the divider value for the card interface
+>> +        unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
+>> +        ignored for Exynos4 SoC's. The valid range of divider value is 0 to 7.
+>>
+>>      Valid values for SDR and DDR CIU clock timing for Exynos5250:
+>>        - valid value for tx phase shift and rx phase shift is 0 to 7.
+>> @@ -79,8 +80,8 @@ Example:
+>>                 broken-cd;
+>>                 fifo-depth = <0x80>;
+>>                 card-detect-delay = <200>;
+>> -               samsung,dw-mshc-ciu-div = <3>;
+>> -               samsung,dw-mshc-sdr-timing = <2 3>;
+>> -               samsung,dw-mshc-ddr-timing = <1 2>;
+>> +               samsung,dw-mshc-sdr-timing = <2 3 3>;
+>> +               samsung,dw-mshc-ddr-timing = <1 2 3>;
+>> +               samsung,dw-mshc-hs200-timing = <0 2 3>;
+>
+> You are breaking backward compatibility here.  If your change is
+> merged then all old boards will instantly break.  Since the "dts" and
+> code changes will likely be merged through different trees you'll end
+> up with a bunch of broken trees until everything is merged together.
+> Even if you don't subscribe to the stable bindings theory this is not
+> acceptable.
+>
+yes the major concern in this series is probably this, which breaks
+things unless everything merge in one go and via one tree. Thats why I
+re-based everything including dts change on mmc-tree for this case and
+added device-tree mailing list for more opinion etc.
 
-Your ideas seem like a good idea to improve the mmc subsys, but this
-is somewhat unrelated, in a way this could apply equally to say an usb
-attached device, or basically any discoverable bus, where some onboard
-devices may need some form of enabling (or power up) before they can be
-discovered.
+> -Doug
 
-Which is why the original patchset Ulf references in the cover letter was
-trying to be more generic, since the got nowhere Ulf now is trying with
-something mmc specific, since the direct need for this functionality is
-with sdio devices.
 
-Note that this is a real world problem which has been hacked around a lot
-in vendor kernels, so although getting the design right as always is
-important, it is also important to at some point come up with something
-workable, and if you look at previous threads on this topic, you will see
-that has already been discussed a lot, and always seems to get stuck on
-people trying to find the "perfect. 100% generic" solution, a typical
-example of perfect being the enemy of good.
 
+-- 
 Regards,
-
-Hans
+Alim
