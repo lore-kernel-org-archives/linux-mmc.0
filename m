@@ -1,66 +1,25 @@
 From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH next 1/2] mmc: sdhci-pxav3: fix unbalanced clock issues during probe
-Date: Sun, 4 Jan 2015 23:15:47 +0800
-Message-ID: <1420384548-7816-2-git-send-email-jszhang@marvell.com>
-References: <1420384548-7816-1-git-send-email-jszhang@marvell.com>
+Subject: [PATCH next 0/2] mmc: sdhci-pxav3: fix unbalanced pm and clock issues
+Date: Sun, 4 Jan 2015 23:15:46 +0800
+Message-ID: <1420384548-7816-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1420384548-7816-1-git-send-email-jszhang@marvell.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: chris@printf.net, ulf.hansson@linaro.org
-Cc: peter.griffin@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jisheng Zhang <jszhang@marvell.com>, stable@vger.kernel.org
+Cc: peter.griffin@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jisheng Zhang <jszhang@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Commit 0dcaa2499b7d ("sdhci-pxav3: Fix runtime PM initialization") tries
-to fix one hang issue caused by calling sdhci_add_host() on a suspended
-device. The fix enables the clock twice, once by clk_prepare_enable() and
-another by pm_runtime_get_sync(), meaning that the clock will never be
-gated at runtime PM suspend. I observed the power consumption regression on
-Marvell BG2Q SoCs.
+These two patches fix unbalanced pm and clock issues. The clock unbalance
+issue would cause power consumption regression because the clock will never
+be gated at runtime PM suspend.
 
-In fact, the fix is not correct. There still be a very small window
-during which a runtime suspend might somehow occur after pm_runtime_enable()
-but before pm_runtime_get_sync().
+Jisheng Zhang (2):
+  mmc: sdhci-pxav3: fix unbalanced clock issues during probe
+  mmc: sdhci-pxav3: fix pm unbalanced issue in -> remove()
 
-This patch fixes all of the two problems by just incrementing the usage
-counter before pm_runtime_enable(). It also adjust the order of disabling
-runtime pm and storing the usage count in the error path to handle clock
-gating properly.
+ drivers/mmc/host/sdhci-pxav3.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
 
-Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
-Cc: <stable@vger.kernel.org> # v3.11+
----
- drivers/mmc/host/sdhci-pxav3.c | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index ca3424e..1255dd2 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -365,10 +365,11 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 		}
- 	}
- 
--	pm_runtime_enable(&pdev->dev);
--	pm_runtime_get_sync(&pdev->dev);
-+	pm_runtime_get_noresume(&pdev->dev);
-+	pm_runtime_set_active(&pdev->dev);
- 	pm_runtime_set_autosuspend_delay(&pdev->dev, PXAV3_RPM_DELAY_MS);
- 	pm_runtime_use_autosuspend(&pdev->dev);
-+	pm_runtime_enable(&pdev->dev);
- 	pm_suspend_ignore_children(&pdev->dev, 1);
- 
- 	ret = sdhci_add_host(host);
-@@ -391,8 +392,8 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 	return 0;
- 
- err_add_host:
--	pm_runtime_put_sync(&pdev->dev);
- 	pm_runtime_disable(&pdev->dev);
-+	pm_runtime_put_noidle(&pdev->dev);
- err_of_parse:
- err_cd_req:
- err_mbus_win:
 -- 
 2.1.4
