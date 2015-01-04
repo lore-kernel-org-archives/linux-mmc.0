@@ -1,61 +1,107 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 0/4] Fixes for SDIO interrupts for dw_mmc
-Date: Sat, 3 Jan 2015 10:31:09 +0100
-Message-ID: <CAPDyKFo6eQ7P5XjSWDKGPMz0NAwwENPK=YAbnY5WY8HFbDK5mA@mail.gmail.com>
-References: <1417563767-32181-1-git-send-email-dianders@chromium.org>
-	<CAPDyKFpxvE4x_-PV=KN0HKY5cNug-ss9m5KCjNdebR1LDOJi5w@mail.gmail.com>
-	<CAD=FV=UCyOXfMqu_MYbd5pKOpgXPB87LQ7hCegeeY9vzsy6QAg@mail.gmail.com>
-	<CAPDyKFqGW2NaN+5mUrpBWrhM5ZfUSx70-Yyk9qmNaC1ft_ibpw@mail.gmail.com>
-	<CAD=FV=UzJo=KE7Snb2v=dNodmf_ky97o3xyUHUAZqb1Kq10d1A@mail.gmail.com>
-	<20150102171123.GC3298@atomide.com>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH v3 1/3] mmc: dw_mmc: fix the max_blk_count in IDMAC
+Date: Sun, 4 Jan 2015 06:21:41 +0530
+Message-ID: <CAGOxZ539VQ1fJbGpnJ-Awp0fQrU=-32zQYg4Tg8Vc67=8TnN+w@mail.gmail.com>
+References: <1419250324-11743-1-git-send-email-alim.akhtar@samsung.com>
+ <1419250324-11743-2-git-send-email-alim.akhtar@samsung.com> <CAD=FV=WQkkEM1aMPNX6oeKC4Bf2-D8z8uwf6z4btcdxiCpSvJw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20150102171123.GC3298@atomide.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, Doug Anderson <dianders@chromium.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Russell King - ARM Linux <linux@arm.linux.org.uk>, H Hartley Sweeten <hsweeten@visionengravers.com>, Sascha Hauer <s.hauer@pengutronix.de>, Wolfram Sang <wsa@the-dreams.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>, Joe Perches <joe@perches.com>, Axel Lin <axel.lin@ingics.com>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yh0-f50.google.com ([209.85.213.50]:43603 "EHLO
+	mail-yh0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751777AbbADAwX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 3 Jan 2015 19:52:23 -0500
+Received: by mail-yh0-f50.google.com with SMTP id 29so10501886yhl.9
+        for <linux-mmc@vger.kernel.org>; Sat, 03 Jan 2015 16:52:22 -0800 (PST)
+In-Reply-To: <CAD=FV=WQkkEM1aMPNX6oeKC4Bf2-D8z8uwf6z4btcdxiCpSvJw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Alim Akhtar <alim.akhtar@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Sonny Rao <sonnyrao@chromium.org>
 
-On 2 January 2015 at 18:11, Tony Lindgren <tony@atomide.com> wrote:
-> * Doug Anderson <dianders@chromium.org> [150102 09:09]:
->> Ulf,
->>
->> On Tue, Dec 30, 2014 at 2:29 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> >>> In v5, I don't find a patch 1/4. Anyway, I have taken patch 2->4.
->> >>
->> >> Ah, maybe because it wasn't sent to linux-mmc?  I messed that up and
->> >> will try to do better in the future.  Sorry.  :(  You were in the To
->> >> line, though.  You can see at
->> >> <https://patchwork.kernel.org/patch/5425241/>.
->> >>
->> >> Do you want me to repost it and CC linux-mmc with Tony's Ack?
->> >
->> > I suggest you have a look at my next branch and to verify that I
->> > haven't screwed things up. If so, either I should drop the patches and
->> > you make a resend or if it's possible to just send an incremental path
->> > on top?
->>
->> The patches that landed look good to me, but I think you might break
->> omap3pandora's WiFi until you land patch #1 in the series.  It has
->> Tony's Ack so I think he intends for you to land it in your tree.
->>
->> [v5,1/4] ARM: OMAP2+: Make sure pandora_wl1251_init_card() applies to SDIO only
+Hi Doug / Sonny
+New year greetings!!
+
+On Sat, Jan 3, 2015 at 4:37 AM, Doug Anderson <dianders@chromium.org> wrote:
+> Alim,
 >
-> Yes please pick that one up too to avoid breakage. The changes to the
-> mach-omap2/board-*.c files are only minimal fixes, so it should not
-> conflict with anything I'll be applying.
-
-Tony, Doug,
-
-I have picked it up from the arm patch tracker and applied it for my
-next branch. I have put it prior the following patch:
-"mmc: core: Support the optional init_card() callback for MMC and SD".
-
-Kind regards
-Uffe
-
+> On Mon, Dec 22, 2014 at 4:12 AM, Alim Akhtar <alim.akhtar@samsung.com> wrote:
+>> From: Seungwon Jeon <tgih.jun@samsung.com>
+>>
+>> Even though 1MB is reserved for descriptor table in IDMAC,
+>> the dw_mmc host driver is allowed to receive only maximum
+>> 128KB block length in one request. This is caused by setting
+>> improper max_blk_count. It needs to be e adjusted so that
+>> descriptor table is used fully. It is found that the performance
+>> is improved with the increased the max_blk_count.
+>>
+>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c |    4 ++--
+>>  1 file changed, 2 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 64ea042..a1b80e5 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -2332,9 +2332,9 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>  #ifdef CONFIG_MMC_DW_IDMAC
+>>                 mmc->max_segs = host->ring_size;
+>>                 mmc->max_blk_size = 65536;
+>> -               mmc->max_blk_count = host->ring_size;
+>>                 mmc->max_seg_size = 0x1000;
+>> -               mmc->max_req_size = mmc->max_seg_size * mmc->max_blk_count;
+>> +               mmc->max_req_size = mmc->max_seg_size * host->ring_size;
+>> +               mmc->max_blk_count = mmc->max_req_size / 512;
 >
-> Regards,
+> The numbers are a little different than the ones you and Sonny arrived
+> at about a year ago at
+> <https://chromium-review.googlesource.com/#/c/176488/>
 >
-> Tony
+> You end up with the same max_req_size I think, but it looks as if
+> max_blk_count is 0x800 in your series and ix 0xffff in the one from a
+> year ago.  Do you have any explanation for why it is max_req_size /
+> 512?
+>
+Before taking this patch, I went over all the discussions that had
+happened in past
+http://marc.info/?l=linux-mmc&m=133039478518090&w=2 (way back in 2012)
+http://www.spinics.net/lists/linux-mmc/msg25549.html
+and
+http://www.spinics.net/lists/linux-mmc/msg25797.html
+
+and the last one was having an ACK from maintainer.
+
+Having said that, I did check the performance number with current
+patch which has landed and with one which sets max_blk_count as
+0xFFFF.
+And both given exactly the same numbers on peach-pi (Write: ~52MB/s
+and Read: ~146MB/s (HS200) using iozone),
+
+I checked it a bit more and found that in both the case
+max_hw_sectors_kb is set to 1024 (max request size to block layer) and
+max_hw_sectors_kb is the one which actually affect the Performance
+numbers and max_hw_sectors_kb is set as
+
+blk_queue_max_hw_sectors(mq->queue, min(host->max_blk_count,
+host->max_req_size / 512));
+
+In case of 64bit IDMAC (one on exynos7) which given a different value
+for "ring_size", both the patches set the same max_hw_sectors_kb (512
+in this case)
+
+Do you see some performance degradation with some other variants of
+dw_mmc host controller with current ToT?
+
+Sonny,
+I ran iozone like: iozone -az -i0 -i1 -I -s 10M -f /home/test (on eMMC)
+
+> -Doug
+
+
+
+-- 
+Regards,
+Alim
