@@ -1,45 +1,65 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] mmc: Add support for Intel SPT
-Date: Mon, 5 Jan 2015 16:23:06 +0100
-Message-ID: <CAPDyKFpis7i_-0X1t75TqABYL=5xyRuJGK3j=cRd0Qc-F7sLmg@mail.gmail.com>
-References: <1420462078-28868-1-git-send-email-adrian.hunter@intel.com>
+From: Bjorn Andersson <bjorn@kryo.se>
+Subject: Re: Possible regression with commit 52221610d
+Date: Mon, 5 Jan 2015 11:52:25 -0800
+Message-ID: <CAJAp7Oi0AyLxy1KFpZ-Cz1-ts9Lh2UaxP3+e6n3EyQjVaEfoXg@mail.gmail.com>
+References: <54584260.8030602@nvidia.com>
+	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
+	<545895B2.2000101@nvidia.com>
+	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
+	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
+	<CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
+	<CAJAp7Oh+ziadeEDWsus_k_2w33vPJxGGcGZyMNQkpLemf7SAhg@mail.gmail.com>
+	<CAJAp7OhWKoAoZfq+zWspLnqUkoJb3izMD41Vyfn0AW4Jni8HAQ@mail.gmail.com>
+	<CAD7vxxLe5COSrsnVZ2G_uhtUXfjFnDA45HSG2dNT1LrxcyFcQw@mail.gmail.com>
+	<CAJAp7OhAP-rDM2zyo0Yr0-7erUp4ewKJ+tC=vyU-YMP_MzXJbA@mail.gmail.com>
+	<CAD7vxxJy2sE1os+ipJZV7_GvEyhu8cE-0QLBS5SVHUqfjkYBwQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f50.google.com ([209.85.192.50]:41510 "EHLO
-	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753130AbbAEPXH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jan 2015 10:23:07 -0500
-Received: by mail-qg0-f50.google.com with SMTP id z60so15644826qgd.9
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Jan 2015 07:23:06 -0800 (PST)
-In-Reply-To: <1420462078-28868-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-la0-f54.google.com ([209.85.215.54]:65038 "EHLO
+	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753447AbbAETw1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jan 2015 14:52:27 -0500
+Received: by mail-la0-f54.google.com with SMTP id pv20so18918265lab.13
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Jan 2015 11:52:25 -0800 (PST)
+In-Reply-To: <CAD7vxxJy2sE1os+ipJZV7_GvEyhu8cE-0QLBS5SVHUqfjkYBwQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Tim Kryger <tim.kryger@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 
-On 5 January 2015 at 13:47, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Hi
+On Sun, Dec 21, 2014 at 7:01 PM, Tim Kryger <tim.kryger@gmail.com> wrote:
+> On Wed, Dec 17, 2014 at 11:57 AM, Bjorn Andersson <bjorn@kryo.se> wrote:
+[..]
+>> Non-the-less, feel free to propose a patch and I will give it a test.
 >
-> Here are a couple of patches to add some IDs.
+> Lets start with the simplest change first.  Please give this a try and
+> let me know what you think.
 >
-> Please queue them as fixes.
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ada1a3e..59a328a 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1239,6 +1239,12 @@ static void sdhci_set_power(struct sdhci_host
+> *host, unsigned char mode,
+>                 spin_unlock_irq(&host->lock);
+>                 mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+>                 spin_lock_irq(&host->lock);
+> +
+> +               if (mode != MMC_POWER_OFF)
+> +                       sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
+> +               else
+> +                       sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+> +
+>                 return;
+>         }
 >
 >
-> Adrian Hunter (2):
->       mmc: sdhci-acpi: Add ACPI HID INT344D
->       mmc: sdhci-pci: Add support for Intel SPT
->
->  drivers/mmc/host/sdhci-acpi.c |  2 ++
->  drivers/mmc/host/sdhci-pci.c  | 25 +++++++++++++++++++++++++
->  drivers/mmc/host/sdhci-pci.h  |  3 +++
->  3 files changed, 30 insertions(+)
->
->
-> Regards
-> Adrian
+> Thanks again for your help in getting to the bottom of this.
 
-Thanks! Applied for fixes.
+Sorry for the delay, but
 
-Kind regards
-Uffe
+Tested-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
+
+Regards,
+Bjorn
