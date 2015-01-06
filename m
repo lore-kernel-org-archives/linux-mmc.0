@@ -1,68 +1,58 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 2/9] mmc: tmio: tmio_mmc_host has .dma
-Date: Tue, 06 Jan 2015 14:24:50 +0100
-Message-ID: <1850128.8f5cDzhtTH@wuerfel>
-References: <87zj9xogln.wl%kuninori.morimoto.gx@renesas.com> <7306460.62PqiTEhxi@wuerfel> <87vbkkvjw6.wl%kuninori.morimoto.gx@renesas.com>
+Subject: Re: [PATCH, RFC] MIPS: jz4740: use dma filter function
+Date: Tue, 06 Jan 2015 14:48:27 +0100
+Message-ID: <2633187.PyovTNc8DC@wuerfel>
+References: <22569458.nE7JkNNnz3@wuerfel> <54ABBCE6.8060904@metafoo.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7Bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <87vbkkvjw6.wl%kuninori.morimoto.gx@renesas.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <54ABBCE6.8060904@metafoo.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Lars-Peter Clausen <lars@metafoo.de>
+Cc: linux-kernel@vger.kernel.org, Ralf Baechle <ralf@linux-mips.org>, dmaengine@vger.kernel.org, alsa-devel@alsa-project.org, linux-mmc@vger.kernel.org, linux-mips@linux-mips.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tuesday 06 January 2015 00:20:59 Kuninori Morimoto wrote:
+On Tuesday 06 January 2015 11:45:58 Lars-Peter Clausen wrote:
+> On 01/05/2015 11:39 PM, Arnd Bergmann wrote:
+> > As discussed on the topic of shmobile DMA today, jz4740 is the only
+> > user of the slave_id field in dma_slave_config besides shmobile. This
+> > use is really incompatible with the way that other drivers use the
+> > dmaengine API, so we should get rid of it.
 > 
-> Hi Arnd, Ulf
+> Do you have a link to that discussion?
+
+http://www.spinics.net/lists/linux-mmc/msg30069.html
+
+> > This adds a trivial filter function that uses the filter param to
+> > pass the dma type, and uses that in both drivers.
 > 
-> Thank you for your feedback
-> 
-> > > > The slave_id/chan_priv values are now passed three times into the
-> > > > driver, and one should really be enough. I'd suggest removing the
-> > > > integer fields from both tmio_mmc_dma and tmio_mmc_data (added in
-> > > > patch 9), and instead pass it as a void* argument only to tmio_mmc_data.
-> > > 
-> > > Hmm. I guess this priv_?x and slave_id are based on filter ?
-> > 
-> > priv_?x needs to be in a format that matches the filter function,
-> > passing slave_id is basically always wrong, but dmaengine drivers
-> > generally just ignore it.
-> (snip)
-> > Maybe we can hide the slave_id field in dma_slave_config within
-> > '#if defined(CONFIG_ARCH_SH_MOBILE) && defined(CONFIG_ATAGS)' then?
-> > 
-> > I would really like to prevent other people from copying the mistake.
-> > Apparently it has already happened on MIPS jz4740, but that one seems
-> > easy enough to fix. Tegra used to use slave_id as well, but it's been
-> > converted to DT-only a while ago and that is just dead code for them.
-> > 
-> > I've had a closer look at the existing code now and came up with a
-> > patch that should work for all out-of-tree drivers you may be worried
-> > about.
-> 
-> I don't want to use #ifdef in driver :P
-> OK, I understand your opinion. I can try fix this DMAEngine issue
-> (without #ifdef :)
+> In my opinion that's just from bad to worse. Using filter functions isn't 
+> that great in the first place. And using them to pass data from the consumer 
+> to the DMA provider is just a horrible abuse of the API.
 
-Ok, thanks. I have also posted a patch now for the jz4740 platform
-that is the other user of slave_id.
+I agree that it is quite horrible, but it is currently the only portable
+way to use the API without DT. The solution to this is to use the
+dma_request_slave_channel API, which was intentionally done in a way to allow
+extending it in a nice way by passing just "rx" and "tx" (or whichever
+string you choose) into the API and get back a channel that was connected
+to the device by the platform. This already works with all DT based systems
+and (to a limited extent) with ACPI, but nobody so far has implemented it
+for devices that are instantiated through board files.
 
-> But, I want "step by step" for this cleanup.
-> So, can you please accept about current "header cleanup" patch-set as 1st step ?
+Anybody on ARM and PowerPC that is cleaning up their platform moves to DT,
+so there hasn't been a need for that so far. My patch is the simplest
+workaround, to make jz4740 work like all (legacy) ARM platforms. If you
+plan to use DT for jz4740 in the long run, that would solve it nicely,
+and as an alternative, one could implement the equivalent of
+clk_register_clkdevs/regulator_consumer_supplies/... and hook that
+up into dma_request_slave_channel_reason() as a third option.
 
-Fair enough.
+> The patch also adds a platform dependency, so the drivers won't built with 
+> COMPILE_TEST anymore.
 
-> Then, I want to try "dmaengine cleanup" patch-set as 2nd step if possible.
-> I guess [8/9] and [9/9] are not good for "header cleanup" (?) I don't know.
-> Arnd, Ulf, what is your opinion ?
-
-Patch 8 looks great to me.
-
-Patch 9 as I mentioned is a bit strange because it duplicates the some
-of the data between tmio_mmc_data and tmio_mmc_dma, which are both
-visible to the tmio_mmc_dma.c file. Simply folding tmio_mmc_dma into
-tmio_mmc_data seems like the simplest solution to that.
+That would be fixed by using proper platform_data to pass the filter and
+arguments, which I hinted in my patch description. This is how drivers
+are normally connected to a DMA engine.
 
 	Arnd
