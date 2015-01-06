@@ -1,56 +1,50 @@
-From: Lars-Peter Clausen <lars@metafoo.de>
-Subject: Re: [PATCH, RFC] MIPS: jz4740: use dma filter function
-Date: Tue, 06 Jan 2015 13:51:50 +0100
-Message-ID: <54ABDA66.7040002@metafoo.de>
-References: <22569458.nE7JkNNnz3@wuerfel> <54ABBCE6.8060904@metafoo.de> <yw1xtx04f54r.fsf@unicorn.mansr.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 2/9] mmc: tmio: tmio_mmc_host has .dma
+Date: Tue, 06 Jan 2015 14:19:19 +0100
+Message-ID: <1500078.pT8EpI6Sos@wuerfel>
+References: <87zj9xogln.wl%kuninori.morimoto.gx@renesas.com> <7306460.62PqiTEhxi@wuerfel> <87tx04vdi7.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-        format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mips-bounce@linux-mips.org>
-In-Reply-To: <yw1xtx04f54r.fsf@unicorn.mansr.com>
-Sender: linux-mips-bounce@linux-mips.org
-Errors-to: linux-mips-bounce@linux-mips.org
-List-help: <mailto:ecartis@linux-mips.org?Subject=help>
-List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
-List-software: Ecartis version 1.0.0
-List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
-List-owner: <mailto:ralf@linux-mips.org>
-List-post: <mailto:linux-mips@linux-mips.org>
-List-archive: <http://www.linux-mips.org/archives/linux-mips/>
-To: =?windows-1252?Q?M=E5ns_Rullg=E5rd?= <mans@mansr.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, Ralf Baechle <ralf@linux-mips.org>, dmaengine@vger.kernel.org, alsa-devel@alsa-project.org, linux-mmc@vger.kernel.org, linux-mips@linux-mips.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.126.131]:61209 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754820AbbAFNTg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jan 2015 08:19:36 -0500
+In-Reply-To: <87tx04vdi7.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 01/06/2015 01:47 PM, M=E5ns Rullg=E5rd wrote:
-> Lars-Peter Clausen <lars@metafoo.de> writes:
->
->> On 01/05/2015 11:39 PM, Arnd Bergmann wrote:
->>> As discussed on the topic of shmobile DMA today, jz4740 is the only
->>> user of the slave_id field in dma_slave_config besides shmobile. Th=
-is
->>> use is really incompatible with the way that other drivers use the
->>> dmaengine API, so we should get rid of it.
->>
->> Do you have a link to that discussion?
->>
->>>
->>> This adds a trivial filter function that uses the filter param to
->>> pass the dma type, and uses that in both drivers.
->>
->> In my opinion that's just from bad to worse. Using filter functions
->> isn't that great in the first place. And using them to pass data fro=
-m
->> the consumer to the DMA provider is just a horrible abuse of the API=
-=2E
->
-> It seems to me the only sane way to use the dmaengine API is in
-> conjunction with DT.
+On Tuesday 06 January 2015 02:38:53 Kuninori Morimoto wrote:
+> Hi Arnd again
+> 
+> > > > The alignment_shift and dma_rx_offset values seem to always be
+> > > > the same for all users (at least the remaining ones, possibly there
+> > > > were others originally), so you could hardcode those in tmio_mmc_dma.c
+> > > > and remove the tmio_mmc_dma structure entirely.
+> > > 
+> > > Unfortunately, alignment_shift and dma_rx_offset value are based on SoC.
+> > > we can't hardcode these.
+> > 
+> > Which SoCs use a different value here? Both of these look like
+> > implementation details of the tmio_mmc, not of the integration
+> > into the SoC, so they could just be keyed off the device identification.
+> 
+> About .alignment_shift, it is not implemented today, but our new SoC
+> want to use different value (= .alignment_shift = 5).
 
-At the moment yes. For non DT we need something like the gpiod lookup t=
-ables=20
-that allow you to specify the assignment of the DMA channel in the mach=
-ine=20
-driver.
+Ok, I see.
 
-- Lars
+> About .dma_rx_offset, please check this
+>   ${LINUX}/drivers/mmc/host/sh_mobile_sdhi.c :: of_rcar_gen1_compatible
+>   ${LINUX}/drivers/mmc/host/sh_mobile_sdhi.c :: of_rcar_gen2_compatible
+> or
+> 384b2cbd56a02efb16358ed7c0c039e4afca5ed0
+> (mmc: tmio: care about DMA tx/rx addr offset)
+
+Right. How about moving these two into tmio_mmc_data then along with
+the other members of tmio_mmc_dma?
+
+	Arnd
