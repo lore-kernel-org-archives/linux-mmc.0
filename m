@@ -1,70 +1,68 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 1/2] mmc: host: arasan: Add addition of-arasan quirks and add IOMMU support.
-Date: Tue, 06 Jan 2015 14:55:51 +0100
-Message-ID: <3924494.iNyoV2USme@wuerfel>
-References: <1418662867-9210-1-git-send-email-stripathi@apm.com> <3866536.C6OiUcuGCr@wuerfel> <CAOHikRCV7RaxJz-A_s6g++ueg3CDe9Jrqcog1Lc2_+KXR9QqnQ@mail.gmail.com>
+From: =?UTF-8?B?QWRyaWFuIFPDoW5kb3I=?= <aditsu@gmail.com>
+Subject: RTS5129 card reader fails to read SDXC card using the new kernel
+ drivers
+Date: Wed, 07 Jan 2015 00:15:05 +0800
+Message-ID: <54AC0A09.5020008@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.130]:62858 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755730AbbAFN4E (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jan 2015 08:56:04 -0500
-In-Reply-To: <CAOHikRCV7RaxJz-A_s6g++ueg3CDe9Jrqcog1Lc2_+KXR9QqnQ@mail.gmail.com>
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:48248 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752019AbbAFQPM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jan 2015 11:15:12 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: Suman Tripathi <stripathi@apm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Jon Masters <jcm@redhat.com>, anton@enomsg.org, linux-mmc@vger.kernel.org, chris@printf.net, patches@apm.com, Don Dutile <ddutile@redhat.com>, linuxppc-dev@lists.ozlabs.org
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Tuesday 06 January 2015 17:10:29 Suman Tripathi wrote:
-> Hi Arnd,
-> > On Monday 15 December 2014 22:31:06 Suman Tripathi wrote:
-> > > @@ -162,6 +206,16 @@ static int sdhci_arasan_probe(struct
-> > > platform_device *pdev)> > > 
-> > >                 goto clk_dis_ahb;
-> > >         
-> > >         }
-> > > 
-> > > +#if defined(CONFIG_IOMMU_SUPPORT)
-> > > +       sdhci_arasan->domain = iommu_domain_alloc(&amba_bustype);
-> > > +       if (!sdhci_arasan->domain) {
-> > > +               dev_err(&pdev->dev, "Unable to allocate iommu
-> > > domain\n");
-> > > +               return PTR_ERR(sdhci_arasan->domain);
-> > > +       }
-> > > +
-> > > +       iommu_attach_device(sdhci_arasan->domain, &pdev->dev);
-> > > +#endif
-> > > +
-> > 
-> > Device drivers should never care about the implementation details
-> > of the iommu. Please change the code to use the regular dma_map_*
-> > interfaces that will work both with and without IOMMU.
->
-> After refer to iommu binding , there is a service that allows "Remap
-> address space to allow devices to access physical memory ranges that
-> they otherwise wouldn't be capable of accessing." eg : 32-bit to 64
-> bit DMA .
-> 
-> So do we have any existing driver that uses this service ? Just asking
-> for suggestions.
+Hi, I have a Lenovo Yoga 13 laptop with a Realtek RTS5129 card reader 
+(0bda:0129)
+It used to work fine with the RTS5139 kernel driver, but apparently that 
+driver was removed since kernel 3.16 and replaced with MFD_RTSX_USB / 
+MMC_REALTEK_USB.
+I upgraded to kernel 3.18.1 and compiled those drivers, and now I'm 
+getting this kind of errors when I insert my SDXC card:
 
-The interface is completely transparent to device drivers, it is
-implemented as a separate 'struct dma_map_ops' that is normally
-architecture independent, and that handles all sorts of DMA remapping
-issues for the driver, including
+Jan  6 22:59:44 yoga kernel: [  812.978737] mmc0: error -22 whilst 
+initialising SD card
+Jan  6 22:59:45 yoga kernel: [  813.981192] mmc0: error -22 whilst 
+initialising SD card
+Jan  6 22:59:46 yoga kernel: [  815.053945] mmc0: new ultra high speed 
+SDR50 SDXC card at address 1234
+Jan  6 22:59:46 yoga kernel: [  815.054086] mmcblk0: mmc0:1234 SA64G 
+57.7 GiB
+Jan  6 22:59:46 yoga kernel: [  815.056112]  mmcblk0: unknown partition 
+table
+Jan  6 22:59:47 yoga kernel: [  815.662453] mmcblk0: error -110 sending 
+stop command, original cmd response 0x900, card status 0x900
+Jan  6 22:59:48 yoga kernel: [  816.265726] mmcblk0: error -110 sending 
+stop command, original cmd response 0x900, card status 0x900
+Jan  6 22:59:48 yoga kernel: [  816.872253] mmcblk0: error -110 sending 
+stop command, original cmd response 0x900, card status 0x80800b00
+Jan  6 22:59:49 yoga kernel: [  817.475467] mmcblk0: error -110 sending 
+stop command, original cmd response 0x900, card status 0x900
+Jan  6 22:59:49 yoga kernel: [  818.079672] mmcblk0: error -110 sending 
+stop command, original cmd response 0x900, card status 0x900
+Jan  6 22:59:50 yoga kernel: [  818.681950] mmcblk0: error -110 sending 
+stop command, original cmd response 0x900, card status 0x900
+Jan  6 22:59:51 yoga kernel: [  819.286227] mmcblk0: error -110 sending 
+stop command, original cmd response 0x900, card status 0x900
+Jan  6 22:59:52 yoga kernel: [  820.494652] mmcblk0: error -110 sending 
+status command, retrying
+Jan  6 22:59:52 yoga kernel: [  820.495144] mmcblk0: error -110 sending 
+stop command, original cmd response 0x900, card status 0xb00
+Jan  6 22:59:52 yoga kernel: [  821.100047] mmcblk0: error -110 sending 
+stop command, original cmd response 0x900, card status 0x900
+(etc)
 
-- address space limits
-- offsets between CPU and device addresses for the same memory
-- cache flushes
-- bus-level synchronization
+Sometimes I'm just getting the "error -22" messages.
+The card is a Toshiba 64GB SDXC class 10, UHS 1. It works fine with an 
+external USB card reader.
+Also, I tried another card, a Transcend 16GB SDHC class 10, and it works 
+fine in the laptop's card reader.
 
-On arm32, we currently support six sets of dma_map_ops including
-two for IOMMU (coherent and noncoherent). On arm64, we currently
-always use swiotlb, which solves your problem by copying memory to
-bounce buffers. This is rather inefficient, and a new implementation
-is being worked on, based on the arm32 implementation to support
-IOMMUs in a generic way.
+Please help investigate this problem and let me know if I should do 
+something on my side.
 
-	Arnd
+Thanks
+Adrian
