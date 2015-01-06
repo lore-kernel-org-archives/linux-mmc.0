@@ -1,58 +1,70 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH, RFC] MIPS: jz4740: use dma filter function
-Date: Tue, 06 Jan 2015 14:48:27 +0100
-Message-ID: <2633187.PyovTNc8DC@wuerfel>
-References: <22569458.nE7JkNNnz3@wuerfel> <54ABBCE6.8060904@metafoo.de>
+Subject: Re: [PATCH 1/2] mmc: host: arasan: Add addition of-arasan quirks and add IOMMU support.
+Date: Tue, 06 Jan 2015 14:55:51 +0100
+Message-ID: <3924494.iNyoV2USme@wuerfel>
+References: <1418662867-9210-1-git-send-email-stripathi@apm.com> <3866536.C6OiUcuGCr@wuerfel> <CAOHikRCV7RaxJz-A_s6g++ueg3CDe9Jrqcog1Lc2_+KXR9QqnQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7Bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <54ABBCE6.8060904@metafoo.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Lars-Peter Clausen <lars@metafoo.de>
-Cc: linux-kernel@vger.kernel.org, Ralf Baechle <ralf@linux-mips.org>, dmaengine@vger.kernel.org, alsa-devel@alsa-project.org, linux-mmc@vger.kernel.org, linux-mips@linux-mips.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.126.130]:62858 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755730AbbAFN4E (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jan 2015 08:56:04 -0500
+In-Reply-To: <CAOHikRCV7RaxJz-A_s6g++ueg3CDe9Jrqcog1Lc2_+KXR9QqnQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Suman Tripathi <stripathi@apm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Jon Masters <jcm@redhat.com>, anton@enomsg.org, linux-mmc@vger.kernel.org, chris@printf.net, patches@apm.com, Don Dutile <ddutile@redhat.com>, linuxppc-dev@lists.ozlabs.org
 
-On Tuesday 06 January 2015 11:45:58 Lars-Peter Clausen wrote:
-> On 01/05/2015 11:39 PM, Arnd Bergmann wrote:
-> > As discussed on the topic of shmobile DMA today, jz4740 is the only
-> > user of the slave_id field in dma_slave_config besides shmobile. This
-> > use is really incompatible with the way that other drivers use the
-> > dmaengine API, so we should get rid of it.
+On Tuesday 06 January 2015 17:10:29 Suman Tripathi wrote:
+> Hi Arnd,
+> > On Monday 15 December 2014 22:31:06 Suman Tripathi wrote:
+> > > @@ -162,6 +206,16 @@ static int sdhci_arasan_probe(struct
+> > > platform_device *pdev)> > > 
+> > >                 goto clk_dis_ahb;
+> > >         
+> > >         }
+> > > 
+> > > +#if defined(CONFIG_IOMMU_SUPPORT)
+> > > +       sdhci_arasan->domain = iommu_domain_alloc(&amba_bustype);
+> > > +       if (!sdhci_arasan->domain) {
+> > > +               dev_err(&pdev->dev, "Unable to allocate iommu
+> > > domain\n");
+> > > +               return PTR_ERR(sdhci_arasan->domain);
+> > > +       }
+> > > +
+> > > +       iommu_attach_device(sdhci_arasan->domain, &pdev->dev);
+> > > +#endif
+> > > +
+> > 
+> > Device drivers should never care about the implementation details
+> > of the iommu. Please change the code to use the regular dma_map_*
+> > interfaces that will work both with and without IOMMU.
+>
+> After refer to iommu binding , there is a service that allows "Remap
+> address space to allow devices to access physical memory ranges that
+> they otherwise wouldn't be capable of accessing." eg : 32-bit to 64
+> bit DMA .
 > 
-> Do you have a link to that discussion?
+> So do we have any existing driver that uses this service ? Just asking
+> for suggestions.
 
-http://www.spinics.net/lists/linux-mmc/msg30069.html
+The interface is completely transparent to device drivers, it is
+implemented as a separate 'struct dma_map_ops' that is normally
+architecture independent, and that handles all sorts of DMA remapping
+issues for the driver, including
 
-> > This adds a trivial filter function that uses the filter param to
-> > pass the dma type, and uses that in both drivers.
-> 
-> In my opinion that's just from bad to worse. Using filter functions isn't 
-> that great in the first place. And using them to pass data from the consumer 
-> to the DMA provider is just a horrible abuse of the API.
+- address space limits
+- offsets between CPU and device addresses for the same memory
+- cache flushes
+- bus-level synchronization
 
-I agree that it is quite horrible, but it is currently the only portable
-way to use the API without DT. The solution to this is to use the
-dma_request_slave_channel API, which was intentionally done in a way to allow
-extending it in a nice way by passing just "rx" and "tx" (or whichever
-string you choose) into the API and get back a channel that was connected
-to the device by the platform. This already works with all DT based systems
-and (to a limited extent) with ACPI, but nobody so far has implemented it
-for devices that are instantiated through board files.
-
-Anybody on ARM and PowerPC that is cleaning up their platform moves to DT,
-so there hasn't been a need for that so far. My patch is the simplest
-workaround, to make jz4740 work like all (legacy) ARM platforms. If you
-plan to use DT for jz4740 in the long run, that would solve it nicely,
-and as an alternative, one could implement the equivalent of
-clk_register_clkdevs/regulator_consumer_supplies/... and hook that
-up into dma_request_slave_channel_reason() as a third option.
-
-> The patch also adds a platform dependency, so the drivers won't built with 
-> COMPILE_TEST anymore.
-
-That would be fixed by using proper platform_data to pass the filter and
-arguments, which I hinted in my patch description. This is how drivers
-are normally connected to a DMA engine.
+On arm32, we currently support six sets of dma_map_ops including
+two for IOMMU (coherent and noncoherent). On arm64, we currently
+always use swiotlb, which solves your problem by copying memory to
+bounce buffers. This is rather inefficient, and a new implementation
+is being worked on, based on the arm32 implementation to support
+IOMMUs in a generic way.
 
 	Arnd
