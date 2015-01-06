@@ -1,51 +1,113 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH v3 1/4] mmc: dw_mmc: exynos: incorporate ciu_div into
- timing property
-Date: Mon, 5 Jan 2015 17:07:18 -0800
-Message-ID: <CAD=FV=U0U2ycmd4jyVyFiEq0+3ujSpdBeFg27iYYbMRxpRCmmQ@mail.gmail.com>
-References: <1420008185-24758-1-git-send-email-alim.akhtar@samsung.com>
-	<1420008185-24758-2-git-send-email-alim.akhtar@samsung.com>
-	<CAD=FV=WXzPt=VKxB=KHK+hC=RN6WbmdnQcLUT4zFQ0Ud7BFanQ@mail.gmail.com>
-	<CAGOxZ509kASim7keNkAGj5gAGO02=7vZM=VL-MRMObv3x+CzTg@mail.gmail.com>
+From: Sonny Rao <sonnyrao@chromium.org>
+Subject: Re: [PATCH v3 1/3] mmc: dw_mmc: fix the max_blk_count in IDMAC
+Date: Mon, 5 Jan 2015 18:27:24 -0800
+Message-ID: <CAPz6YkV=j-E=tE-2-p0ukbQ0+GJWNtkY5uwA=VrFQ5s1OPm_GA@mail.gmail.com>
+References: <1419250324-11743-1-git-send-email-alim.akhtar@samsung.com>
+ <1419250324-11743-2-git-send-email-alim.akhtar@samsung.com>
+ <CAD=FV=WQkkEM1aMPNX6oeKC4Bf2-D8z8uwf6z4btcdxiCpSvJw@mail.gmail.com> <CAGOxZ539VQ1fJbGpnJ-Awp0fQrU=-32zQYg4Tg8Vc67=8TnN+w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAGOxZ509kASim7keNkAGj5gAGO02=7vZM=VL-MRMObv3x+CzTg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alim Akhtar <alim.akhtar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Alim Akhtar <alim.akhtar-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, kgene <kgene-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-samsung-soc <linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Abhilash Kesavan <a.kesavan-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Alexandru Stan <amstan-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Javier Martinez Canillas <javier.martinez-ZGY8ohtN/8pPYcu2f3hruQ@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Kevin Hilman <khilman-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f170.google.com ([209.85.216.170]:59866 "EHLO
+	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754012AbbAFC1p (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Jan 2015 21:27:45 -0500
+Received: by mail-qc0-f170.google.com with SMTP id x3so16343099qcv.15
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Jan 2015 18:27:44 -0800 (PST)
+In-Reply-To: <CAGOxZ539VQ1fJbGpnJ-Awp0fQrU=-32zQYg4Tg8Vc67=8TnN+w@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alim Akhtar <alim.akhtar@gmail.com>
+Cc: Doug Anderson <dianders@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Alim,
-
-On Sun, Jan 4, 2015 at 2:43 PM, Alim Akhtar <alim.akhtar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->> You are breaking backward compatibility here.  If your change is
->> merged then all old boards will instantly break.  Since the "dts" and
->> code changes will likely be merged through different trees you'll end
->> up with a bunch of broken trees until everything is merged together.
->> Even if you don't subscribe to the stable bindings theory this is not
->> acceptable.
+On Sat, Jan 3, 2015 at 4:51 PM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+> Hi Doug / Sonny
+> New year greetings!!
+>
+> On Sat, Jan 3, 2015 at 4:37 AM, Doug Anderson <dianders@chromium.org> wrote:
+>> Alim,
 >>
-> yes the major concern in this series is probably this, which breaks
-> things unless everything merge in one go and via one tree. Thats why I
-> re-based everything including dts change on mmc-tree for this case and
-> added device-tree mailing list for more opinion etc.
+>> On Mon, Dec 22, 2014 at 4:12 AM, Alim Akhtar <alim.akhtar@samsung.com> wrote:
+>>> From: Seungwon Jeon <tgih.jun@samsung.com>
+>>>
+>>> Even though 1MB is reserved for descriptor table in IDMAC,
+>>> the dw_mmc host driver is allowed to receive only maximum
+>>> 128KB block length in one request. This is caused by setting
+>>> improper max_blk_count. It needs to be e adjusted so that
+>>> descriptor table is used fully. It is found that the performance
+>>> is improved with the increased the max_blk_count.
+>>>
+>>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>>> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+>>> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+>>> ---
+>>>  drivers/mmc/host/dw_mmc.c |    4 ++--
+>>>  1 file changed, 2 insertions(+), 2 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index 64ea042..a1b80e5 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -2332,9 +2332,9 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>>>  #ifdef CONFIG_MMC_DW_IDMAC
+>>>                 mmc->max_segs = host->ring_size;
+>>>                 mmc->max_blk_size = 65536;
+>>> -               mmc->max_blk_count = host->ring_size;
+>>>                 mmc->max_seg_size = 0x1000;
+>>> -               mmc->max_req_size = mmc->max_seg_size * mmc->max_blk_count;
+>>> +               mmc->max_req_size = mmc->max_seg_size * host->ring_size;
+>>> +               mmc->max_blk_count = mmc->max_req_size / 512;
+>>
+>> The numbers are a little different than the ones you and Sonny arrived
+>> at about a year ago at
+>> <https://chromium-review.googlesource.com/#/c/176488/>
+>>
+>> You end up with the same max_req_size I think, but it looks as if
+>> max_blk_count is 0x800 in your series and ix 0xffff in the one from a
+>> year ago.  Do you have any explanation for why it is max_req_size /
+>> 512?
+>>
+> Before taking this patch, I went over all the discussions that had
+> happened in past
+> http://marc.info/?l=linux-mmc&m=133039478518090&w=2 (way back in 2012)
+> http://www.spinics.net/lists/linux-mmc/msg25549.html
+> and
+> http://www.spinics.net/lists/linux-mmc/msg25797.html
+>
+> and the last one was having an ACK from maintainer.
+>
+> Having said that, I did check the performance number with current
+> patch which has landed and with one which sets max_blk_count as
+> 0xFFFF.
+> And both given exactly the same numbers on peach-pi (Write: ~52MB/s
+> and Read: ~146MB/s (HS200) using iozone),
+>
+> I checked it a bit more and found that in both the case
+> max_hw_sectors_kb is set to 1024 (max request size to block layer) and
+> max_hw_sectors_kb is the one which actually affect the Performance
+> numbers and max_hw_sectors_kb is set as
+>
+> blk_queue_max_hw_sectors(mq->queue, min(host->max_blk_count,
+> host->max_req_size / 512));
+>
+> In case of 64bit IDMAC (one on exynos7) which given a different value
+> for "ring_size", both the patches set the same max_hw_sectors_kb (512
+> in this case)
+>
+> Do you see some performance degradation with some other variants of
+> dw_mmc host controller with current ToT?
 
-Got it.  I doubt that folks will like this, but I could be wrong.  In
-order for this to work, you'd need all changes in the series to land
-in _both_ the ARMSoC tree and the MMC tree.  That's not unheard of,
-but it doesn't seem ideal.
+Looks like Doug test it and saw a performance improvement on rk3288
+Thanks!
 
-You also break bisect-ability here since without the code the DTS
-change will break things and without the DTS change the code will
-break things.
-
-If you add all the above to the fact that bindings are supposed to be
-stable (ish) I'm not convinced this will land.
-
-
--Doug
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> Sonny,
+> I ran iozone like: iozone -az -i0 -i1 -I -s 10M -f /home/test (on eMMC)
+>
+>> -Doug
+>
+>
+>
+> --
+> Regards,
+> Alim
