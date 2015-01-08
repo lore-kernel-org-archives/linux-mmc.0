@@ -1,60 +1,105 @@
-From: Pramod Gurav <pramod.gurav@smartplayin.com>
-Subject: Re: [PATCH] mmc: mmci: Get rid of unused variable and operations
- on it
-Date: Thu, 08 Jan 2015 14:43:30 +0530
-Message-ID: <54AE4A3A.1050806@smartplayin.com>
-References: <1418737895-6404-1-git-send-email-pramod.gurav@smartplayin.com>
+From: "Wang, Yalin" <Yalin.Wang@sonymobile.com>
+Subject: [RFC] mmc:change mmc_init workqueue into a freezable workqueue
+Date: Thu, 8 Jan 2015 18:06:32 +0800
+Message-ID: <35FD53F367049845BC99AC72306C23D103EDAF89E192@CNBJMBX05.corpusers.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp116.ord1c.emailsrvr.com ([108.166.43.116]:35113 "EHLO
-	smtp116.ord1c.emailsrvr.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750705AbbAHJNS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jan 2015 04:13:18 -0500
-In-Reply-To: <1418737895-6404-1-git-send-email-pramod.gurav@smartplayin.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: "'chris@printf.net'" <chris@printf.net>, "'ulf.hansson@linaro.org'" <ulf.hansson@linaro.org>, "'tim.kryger@gmail.com'" <tim.kryger@gmail.com>, "'tgih.jun@samsung.com'" <tgih.jun@samsung.com>, "'johan.rudholm@axis.com'" <johan.rudholm@axis.com>, "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "'linux-kernel@vger.kernel.org'" <linux-kernel@vger.kernel.org>, "'linux-arm-kernel@lists.infradead.org'" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux@arm.linux.org.uk, chris@printf.net
 
-Hi Ulf,
+This patch fix the mmc driver suspend/resume conflict problems,
+mmc workqueue will queue mmc_rescan(), and it will call some
+pm_runtime_* functions, this will conflict with suspend path sometimes,
+and will result in some strange behavior:
 
-Any comment on this change?
+Suspend path:
+	-000 |context_switch(inline)
+	-000 |__schedule()
+	-001 |schedule_preempt_disabled()
+	-002 |spin_lock(inline)
+	-002 |__mutex_lock_common(inline)
+	-002 |__mutex_lock_slowpath(lock_count = 0xEDCD0F48)
+	-003 |__mutex_fastpath_lock(inline)
+	-003 |mutex_lock(lock = 0xEDCD0F48)
+	-004 |sdhci_do_set_ios(host = 0xEDCD0CC0, ios = 0xEDCD0A70)
+	-005 |sdhci_set_ios(?, ios = 0xEDCD0A70)
+	-006 |mmc_set_ios(host = 0xEDCD0800)
+	-007 |mmc_delay(inline)
+	-007 |mmc_power_off(host = 0xEDCD0800)
+	-008 |mmc_suspend_host(inline)
+	-008 |mmc_suspend_host(host = 0xEDCD0800)
+	-009 |mmc_host_suspend(dev = 0xEDCD0808)
+	-010 |dpm_run_callback(cb = 0xC0627A88, dev = 0xEDCD0808, state = (event = 2), info = 0xC0B6EF9B)
+	-011 |__device_suspend(dev = 0xEDCD0808, state = (event = 2), ?)
+	-012 |device_suspend(inline)
+	-012 |dpm_suspend(state = (event = 2))
+	-013 |suspend_devices_and_enter(state = 3)
+	-014 |enter_state(inline)
+	-014 |pm_suspend(state = 3)
+	-015 |try_to_suspend(?)
+	-016 |static_key_false(inline)
+	-016 |trace_workqueue_execute_end(inline)
+	-016 |process_one_work(worker = 0xD5E87040, work = 0xC0E3FF54)
+	-017 |worker_thread(__worker = 0xD5E87040)
+	-018 |kthread(_create = 0xE9FFBF10)
+	-019 |kernel_thread_exit(asm)
+	 --- |end of frame
 
-Thanks
-Pramod
-On Tuesday 16 December 2014 07:21 PM, Pramod Gurav wrote:
-> DMA configuration has been removed from function mmci_dma_setup but the
-> local mask variable was not removed. This remains unused hence remove
-> it from the function and operations on it
-> 
-> Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
-> ---
->  drivers/mmc/host/mmci.c |    5 -----
->  1 file changed, 5 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index f31d702..08bbeb0 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -435,7 +435,6 @@ static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
->  static void mmci_dma_setup(struct mmci_host *host)
->  {
->  	const char *rxname, *txname;
-> -	dma_cap_mask_t mask;
->  	struct variant_data *variant = host->variant;
->  
->  	host->dma_rx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "rx");
-> @@ -444,10 +443,6 @@ static void mmci_dma_setup(struct mmci_host *host)
->  	/* initialize pre request cookie */
->  	host->next_data.cookie = 1;
->  
-> -	/* Try to acquire a generic DMA engine slave channel */
-> -	dma_cap_zero(mask);
-> -	dma_cap_set(DMA_SLAVE, mask);
-> -
->  	/*
->  	 * If only an RX channel is specified, the driver will
->  	 * attempt to use it bidirectionally, however if it is
-> 
+mmc_rescan() resume path:
+	 -000 |context_switch(inline)
+	 -000 |__schedule()
+	 -001 |do_undefinstr(regs = 0xD12242F0)
+	 -002 |__und_svc(asm)
+	  --> |exception
+	  -003 |sdhci_set_power(host = 0xEDCD0CC0, power = 0)
+	  -004 |sdhci_do_set_ios(host = 0xEDCD0CC0, ios = 0xEDCD0A70)
+	  -005 |sdhci_set_ios(?, ios = 0xEDCD0A70)
+	  -006 |mmc_set_ios(host = 0xEDCD0800)
+	  -007 |mmc_delay(inline)
+	  -007 |mmc_power_up(host = 0xEDCD0800)
+	  -008 |mmc_resume_bus(inline)
+	  -008 |mmc_resume_bus(host = 0xEDCD0800)
+	  -009 |mmc_rpm_hold(host = 0xEDCD0800, ?)
+	  -010 |mmc_rescan(work = 0xEDCD0AB0)
+	  -011 |static_key_false(inline)
+	  -011 |trace_workqueue_execute_end(inline)
+	  -011 |process_one_work(worker = 0xE5F0BBC0, work = 0xEDCD0AB0)
+	  -012 |worker_thread(__worker = 0xE5F0BBC0)
+	  -013 |kthread(_create = 0xD03A5F10)
+	  -014 |kernel_thread_exit(asm)
+	   --- |end of frame
+
+most mmc power callback function don't check this special case, and
+will cause problems, make sure the workqueue is stopped during suspend
+is more safe.
+---
+ drivers/mmc/core/core.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index a6c139d..ae8757f 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -3881,7 +3881,7 @@ static int __init mmc_init(void)
+ {
+ 	int ret;
+ 
+-	workqueue = alloc_ordered_workqueue("kmmcd", 0);
++	workqueue = alloc_ordered_workqueue("kmmcd", WQ_FREEZABLE);
+ 	if (!workqueue)
+ 		return -ENOMEM;
+ 
+-- 
+2.1.3
