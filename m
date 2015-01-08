@@ -1,81 +1,43 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [RFC] mmc:change mmc_init workqueue into a freezable workqueue
-Date: Thu, 8 Jan 2015 11:42:25 +0000
-Message-ID: <20150108114225.GR12302@n2100.arm.linux.org.uk>
-References: <35FD53F367049845BC99AC72306C23D103EDAF89E192@CNBJMBX05.corpusers.net>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 2/9] mmc: tmio: tmio_mmc_host has .dma
+Date: Thu, 08 Jan 2015 14:09:17 +0100
+Message-ID: <9752854.8NpfY0BrAf@wuerfel>
+References: <87zj9xogln.wl%kuninori.morimoto.gx@renesas.com> <87d26qt4oc.wl%kuninori.morimoto.gx@renesas.com> <87387lu3sv.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <35FD53F367049845BC99AC72306C23D103EDAF89E192@CNBJMBX05.corpusers.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Wang, Yalin" <Yalin.Wang@sonymobile.com>
-Cc: "'chris@printf.net'" <chris@printf.net>, "'ulf.hansson@linaro.org'" <ulf.hansson@linaro.org>, "'tim.kryger@gmail.com'" <tim.kryger@gmail.com>, "'tgih.jun@samsung.com'" <tgih.jun@samsung.com>, "'johan.rudholm@axis.com'" <johan.rudholm@axis.com>, "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "'linux-kernel@vger.kernel.org'" <linux-kernel@vger.kernel.org>, "'linux-arm-kernel@lists.infradead.org'" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <87387lu3sv.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jan 08, 2015 at 06:06:32PM +0800, Wang, Yalin wrote:
-> This patch fix the mmc driver suspend/resume conflict problems,
-> mmc workqueue will queue mmc_rescan(), and it will call some
-> pm_runtime_* functions, this will conflict with suspend path sometimes,
-> and will result in some strange behavior:
+On Thursday 08 January 2015 07:30:36 Kuninori Morimoto wrote:
 > 
-> Suspend path:
-> 	-000 |context_switch(inline)
-> 	-000 |__schedule()
-> 	-001 |schedule_preempt_disabled()
-> 	-002 |spin_lock(inline)
-> 	-002 |__mutex_lock_common(inline)
-> 	-002 |__mutex_lock_slowpath(lock_count = 0xEDCD0F48)
-> 	-003 |__mutex_fastpath_lock(inline)
-> 	-003 |mutex_lock(lock = 0xEDCD0F48)
-> 	-004 |sdhci_do_set_ios(host = 0xEDCD0CC0, ios = 0xEDCD0A70)
-> 	-005 |sdhci_set_ios(?, ios = 0xEDCD0A70)
-> 	-006 |mmc_set_ios(host = 0xEDCD0800)
-> 	-007 |mmc_delay(inline)
-> 	-007 |mmc_power_off(host = 0xEDCD0800)
-> 	-008 |mmc_suspend_host(inline)
-> 	-008 |mmc_suspend_host(host = 0xEDCD0800)
-> 	-009 |mmc_host_suspend(dev = 0xEDCD0808)
-> 	-010 |dpm_run_callback(cb = 0xC0627A88, dev = 0xEDCD0808, state = (event = 2), info = 0xC0B6EF9B)
-> 	-011 |__device_suspend(dev = 0xEDCD0808, state = (event = 2), ?)
-> 	-012 |device_suspend(inline)
+> Hmm... indeed Arnd's patch and my patch-set conflicts.
+> I have these patch / patch-set
+>  1) header cleanup for tmio
+>  2) slave_id cleanup for shdma
+>  3) add DMA feature for sh_mobile_sdhi
+> 
+> 1 ) and 2) conflicts here. one idea is like this
+>  1) header cleanup for tmio
+>  2) add DMA feature for sh_mobile_sdhi
+>  3) slave_id cleanup for shdma
+> 
+> 1) and 2) can be controled by Ulf with no-conflict.
+> if these are merged correctly, I can send 3) to DMAEngine ML.
+> Then, I can point the Ulf's branch as base branch.
+> 
+> Arnd, Ulf what do you think ?
+> 
 
-Suspend can't complete until device_suspend() returns.  Hence, mmc_power_off()
-must finish.
+Sounds good. You could also leave out the sh_mobile_sdhi part from
+3) patch to avoid the conflict, and add a comment in that place
+as part of 2), to say that the slave_id assignment can be removed
+once the other parts are done. That way, we know where we're at
+if we want to remove slave_id from dma_slave_config and it's still
+part of the sdhi driver.
 
-> mmc_rescan() resume path:
-> 	 -000 |context_switch(inline)
-> 	 -000 |__schedule()
-> 	 -001 |do_undefinstr(regs = 0xD12242F0)
-> 	 -002 |__und_svc(asm)
-> 	  --> |exception
-
-I assume this is what you mean by "strange behaviour" ?  If so, please
-give the full oops.  Have you fully diagnosed the failure?
-
-> most mmc power callback function don't check this special case, and
-> will cause problems, make sure the workqueue is stopped during suspend
-> is more safe.
-
-I think there's a bad side effect of this: if you have swap on a SD card,
-and you ask the system to hibernate, you don't want this thread to freeze.
-
-What you do need to do is to ensure that new requests can't be processed
-while the host is suspended.
-
-A hibernate works (approximately) as:
-
-- freeze all tasks
-- push as much out to swap as possible
-- suspend devices
-- create system snapshot
-- resume devices
-- write system snapshot to swap
-- power down
-
-If the MMC thread is frozen, and you have swap on SD, then it can't write
-the image to swap.
-
--- 
-FTTC broadband for 0.8mile line: currently at 9.5Mbps down 400kbps up
-according to speedtest.net.
+	Arnd
