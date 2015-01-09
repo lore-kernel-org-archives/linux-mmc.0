@@ -1,64 +1,63 @@
-From: Johan Rudholm <johan.rudholm@axis.com>
-Subject: [PATCH v6 0/2] mmc: core: hw_reset changes
-Date: Fri,  9 Jan 2015 12:08:17 +0100
-Message-ID: <1420801699-6274-1-git-send-email-johanru@axis.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bes.se.axis.com ([195.60.68.10]:34728 "EHLO bes.se.axis.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756612AbbAILI2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 9 Jan 2015 06:08:28 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Vincent Yang <vincent.yang.fujitsu@gmail.com>
+Subject: [PATCH v3 1/4] mmc: sdhci: add a voltage switch callback function
+Date: Fri,  9 Jan 2015 19:41:42 +0800
+Message-ID: <1420803705-4539-2-git-send-email-Vincent.Yang@tw.fujitsu.com>
+References: <1420803705-4539-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1420803705-4539-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: ulf.hansson@linaro.org, andy.green@linaro.org, linux@arm.linux.org.uk, patches@linaro.org, chris@printf.net, Vincent Yang <Vincent.Yang@tw.fujitsu.com>, jaswinder.singh@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>, Johan Rudholm <johanru@axis.com>
 
-Make the mmc_hw_reset routine more generic, by putting the (e)MMC-
-specific stuff in the new bus_ops->hw_reset in mmc.c. Add a
-bus_ops->hw_reset for SD cards, allowing them to be restarted when
-errors occur.
+This patch adds a callback function to do
+controller-specific actions when switching voltages.
+It is a preparation and will be used by Fujitsu
+SDHCI controller f_sdh30 driver.
 
-Always check if the reset was sucessful and propagate this to the
-caller.
+Signed-off-by: Vincent Yang <Vincent.Yang@tw.fujitsu.com>
+---
+ drivers/mmc/host/sdhci.c | 4 ++++
+ drivers/mmc/host/sdhci.h | 1 +
+ 2 files changed, 5 insertions(+)
 
-As I don't have an eMMC device myself, much less one with a reset line,
-I'd be very happy if someone could help me test the code with an eMMC?
-
-v6:
- - Always perform the mmc_send_status reset check, which allows us to
-   have only one interface to the card reset functions
- - Because of this, add the bus_ops->hw_reset to sd.c instead of
-   falling back to a power_cycle
-
-v5:
- - Move the mmc_test-specific code to mmc_test.c
- - Fall back to a power_cycle if the bus_ops->hw_reset is missing
- - Because of this, skip the bus_ops->hw_reset in sd.c
-
-v4:
- - Rebase onto next
-
-v3:
- - Keep mmc_can_reset
- - Always set bus_mode = MMC_BUSMODE_PUSHPULL in mmc_set_initial_state()
-
-v2:
- - Call the new bus_ops member hw_reset instead of power_reset
- - Create mmc_set_initial_state and call it from mmc_mmc_hw_reset
-   instead of mmc_power_up
- - Keep "mmc_hw_reset" naming
-
-Johan Rudholm (2):
-  mmc: core: refactor the hw_reset routines
-  mmc: sd: add hw_reset callback
-
- drivers/mmc/card/mmc_test.c |   18 ++++-------
- drivers/mmc/core/core.c     |   70 +++++++++++++++----------------------------
- drivers/mmc/core/core.h     |    1 +
- drivers/mmc/core/mmc.c      |   32 +++++++++++++++++++
- drivers/mmc/core/sd.c       |    7 ++++
- include/linux/mmc/core.h    |    1 -
- 6 files changed, 71 insertions(+), 58 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index cbb245b..cd1f311 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1827,6 +1827,10 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ 		ctrl |= SDHCI_CTRL_VDD_180;
+ 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 
++		/* Some controller need to do more when switching */
++		if (host->ops->voltage_switch)
++			host->ops->voltage_switch(host);
++
+ 		/* 1.8V regulator output should be stable within 5 ms */
+ 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 		if (ctrl & SDHCI_CTRL_VDD_180)
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 41a2c34..0315e18 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -339,6 +339,7 @@ struct sdhci_ops {
+ 	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
+ 	void	(*platform_init)(struct sdhci_host *host);
+ 	void    (*card_event)(struct sdhci_host *host);
++	void	(*voltage_switch)(struct sdhci_host *host);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 -- 
-1.7.2.5
-
+1.9.0
