@@ -1,64 +1,57 @@
-From: Vincent Yang <vincent.yang.fujitsu@gmail.com>
-Subject: [PATCH v3 2/4] mmc: sdhci: add a quirk for tuning work around
-Date: Fri,  9 Jan 2015 19:41:43 +0800
-Message-ID: <1420803705-4539-3-git-send-email-Vincent.Yang@tw.fujitsu.com>
-References: <1420803705-4539-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/9] mmc: tmio: tmio_mmc_host has .dma
+Date: Mon, 12 Jan 2015 10:05:28 +0100
+Message-ID: <CAPDyKFrR4MJNuZoYOLVaF_Kad6r5aumU+zF84LoYJH8KfdWDMQ@mail.gmail.com>
+References: <87zj9xogln.wl%kuninori.morimoto.gx@renesas.com>
+	<87d26qt4oc.wl%kuninori.morimoto.gx@renesas.com>
+	<87387lu3sv.wl%kuninori.morimoto.gx@renesas.com>
+	<9752854.8NpfY0BrAf@wuerfel>
+	<874ms0uw2n.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1420803705-4539-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: ulf.hansson@linaro.org, andy.green@linaro.org, linux@arm.linux.org.uk, patches@linaro.org, chris@printf.net, Vincent Yang <Vincent.Yang@tw.fujitsu.com>, jaswinder.singh@linaro.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <874ms0uw2n.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch defines a quirk for tuning work
-around for some sdhci host controller. It sets
-both SDHCI_CTRL_EXEC_TUNING and SDHCI_CTRL_TUNED_CLK
-for tuning.
-It is a preparation and will be used by Fujitsu
-SDHCI controller f_sdh30 driver.
+On 9 January 2015 at 10:44, Kuninori Morimoto
+<kuninori.morimoto.gx@renesas.com> wrote:
+>
+> Hi Arnd, Ulf
+>
+>> > Hmm... indeed Arnd's patch and my patch-set conflicts.
+>> > I have these patch / patch-set
+>> >  1) header cleanup for tmio
+>> >  2) slave_id cleanup for shdma
+>> >  3) add DMA feature for sh_mobile_sdhi
+>> >
+>> > 1 ) and 2) conflicts here. one idea is like this
+>> >  1) header cleanup for tmio
+>> >  2) add DMA feature for sh_mobile_sdhi
+>> >  3) slave_id cleanup for shdma
+>> >
+>> > 1) and 2) can be controled by Ulf with no-conflict.
+>> > if these are merged correctly, I can send 3) to DMAEngine ML.
+>> > Then, I can point the Ulf's branch as base branch.
+>> >
+>> > Arnd, Ulf what do you think ?
+>> >
+>>
+>> Sounds good. You could also leave out the sh_mobile_sdhi part from
+>> 3) patch to avoid the conflict, and add a comment in that place
+>> as part of 2), to say that the slave_id assignment can be removed
+>> once the other parts are done. That way, we know where we're at
+>> if we want to remove slave_id from dma_slave_config and it's still
+>> part of the sdhi driver.
+>
+> Thank you.
+> I wait Ulf's opinion
+>
 
-Signed-off-by: Vincent Yang <Vincent.Yang@tw.fujitsu.com>
----
- drivers/mmc/host/sdhci.c  | 2 ++
- include/linux/mmc/sdhci.h | 2 ++
- 2 files changed, 4 insertions(+)
+I am happy to share an immutable branch of needed. Please post a v2
+with patches for me to review/pick up for mmc.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index cd1f311..b319c10 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1929,6 +1929,8 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 
- 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 	ctrl |= SDHCI_CTRL_EXEC_TUNING;
-+	if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
-+		ctrl |= SDHCI_CTRL_TUNED_CLK;
- 	sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
- 
- 	/*
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index 375af80..dd2ba4b 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -106,6 +106,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD	(1<<10)
- /* Capability register bit-63 indicates HS400 support */
- #define SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400		(1<<11)
-+/* forced tuned clock */
-+#define SDHCI_QUIRK2_TUNING_WORK_AROUND			(1<<12)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
--- 
-1.9.0
+Kind regards
+Uffe
