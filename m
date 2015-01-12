@@ -1,127 +1,55 @@
-From: Johan Rudholm <johan.rudholm@axis.com>
-Subject: [PATCH v7 1/3] mmc: core: always check status after reset
-Date: Mon, 12 Jan 2015 15:38:04 +0100
-Message-ID: <1421073486-10903-2-git-send-email-johanru@axis.com>
-References: <1421073486-10903-1-git-send-email-johanru@axis.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/4] mmc: core: Add support for MMC power sequences
+Date: Mon, 12 Jan 2015 15:43:24 +0100
+Message-ID: <CAPDyKFoXxCT8uED3SxY9e1N6HhRyk1RGwpHOHRtzUY5vcBtcYA@mail.gmail.com>
+References: <1420215248-20650-1-git-send-email-ulf.hansson@linaro.org>
+	<CAAObsKDXTwmXQ_oviSv4jyvaVepgsw8g5VJNpt1X=JCzfpTYuw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bes.se.axis.com ([195.60.68.10]:59388 "EHLO bes.se.axis.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752975AbbALOiS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 12 Jan 2015 09:38:18 -0500
-In-Reply-To: <1421073486-10903-1-git-send-email-johanru@axis.com>
+Received: from mail-qc0-f170.google.com ([209.85.216.170]:52924 "EHLO
+	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751707AbbALOnZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jan 2015 09:43:25 -0500
+Received: by mail-qc0-f170.google.com with SMTP id x3so18178620qcv.1
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2015 06:43:25 -0800 (PST)
+In-Reply-To: <CAAObsKDXTwmXQ_oviSv4jyvaVepgsw8g5VJNpt1X=JCzfpTYuw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?q?David=20Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>, Johan Rudholm <johanru@axis.com>
+To: Tomeu Vizoso <tomeu.vizoso@collabora.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Hans de Goede <hdegoede@redhat.com>, Russell King <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Alexandre Courbot <gnurou@gmail.com>, NeilBrown <neilb@suse.de>, Linus Walleij <linus.walleij@linaro.org>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Mark Brown <broonie@kernel.org>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Always check if the card is alive after a successful reset. This allows
-us to remove mmc_hw_reset_check(), leaving mmc_hw_reset() as the only
-card reset interface.
+On 12 January 2015 at 15:26, Tomeu Vizoso <tomeu.vizoso@collabora.com> wrote:
+> On 2 January 2015 at 17:14, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> This is yet another try to solve the issues of dealing with power sequences for
+>> the MMC subsystem. The latest attempt, see link below, took a generic approach
+>> by adding a new top level driver layer. That's was rejected by several reasons.
+>> http://lwn.net/Articles/602855/
+>>
+>> This time the approach is focused to fix the issues for MMC only.
+>>
+>> To give a short background, SOCs may specify a specific MMC power sequence. To
+>> successfully detect an (e)MMC/SD/SDIO card, that power sequence must be followed
+>> while initializing the card.
+>
+> Hi Ulf,
+>
+> have used this to successfully init a mwifiex_sdio card but had to
+> also add a delay while the reset line is asserted. May make sense to
+> add a property to the pwrseq node to specify the minimum amount of
+> time that the reset GPIO needs to be asserted?
 
-Signed-off-by: Johan Rudholm <johanru@axis.com>
----
- drivers/mmc/card/mmc_test.c |   18 +++++++-----------
- drivers/mmc/core/core.c     |   24 +++++-------------------
- include/linux/mmc/core.h    |    1 -
- 3 files changed, 12 insertions(+), 31 deletions(-)
+To me that is description of the HW, so I would happily accept such a
+DT property. Can you please send a patch, based on top of this
+patchset?
 
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index 0a7430f..7dac469 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -2342,20 +2342,16 @@ static int mmc_test_hw_reset(struct mmc_test_card *test)
- 	struct mmc_host *host = card->host;
- 	int err;
- 
--	err = mmc_hw_reset_check(host);
-+	if (!mmc_card_mmc(card) || !mmc_can_reset(card))
-+		return RESULT_UNSUP_CARD;
-+
-+	err = mmc_hw_reset(host);
- 	if (!err)
- 		return RESULT_OK;
-+	else if (err == -EOPNOTSUPP)
-+		return RESULT_UNSUP_HOST;
- 
--	if (err == -ENOSYS)
--		return RESULT_FAIL;
--
--	if (err != -EOPNOTSUPP)
--		return err;
--
--	if (!mmc_can_reset(card))
--		return RESULT_UNSUP_CARD;
--
--	return RESULT_UNSUP_HOST;
-+	return RESULT_FAIL;
- }
- 
- static const struct mmc_test_case mmc_test_cases[] = {
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index d3bfbdf..9959997e 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2286,9 +2286,10 @@ int mmc_can_reset(struct mmc_card *card)
- }
- EXPORT_SYMBOL(mmc_can_reset);
- 
--static int mmc_do_hw_reset(struct mmc_host *host, int check)
-+static int mmc_hw_reset(struct mmc_host *host)
- {
- 	struct mmc_card *card = host->card;
-+	u32 status;
- 
- 	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
- 		return -EOPNOTSUPP;
-@@ -2305,13 +2306,9 @@ static int mmc_do_hw_reset(struct mmc_host *host, int check)
- 	host->ops->hw_reset(host);
- 
- 	/* If the reset has happened, then a status command will fail */
--	if (check) {
--		u32 status;
--
--		if (!mmc_send_status(card, &status)) {
--			mmc_host_clk_release(host);
--			return -ENOSYS;
--		}
-+	if (!mmc_send_status(card, &status)) {
-+		mmc_host_clk_release(host);
-+		return -ENOSYS;
- 	}
- 
- 	/* Set initial state and call mmc_set_ios */
-@@ -2321,19 +2318,8 @@ static int mmc_do_hw_reset(struct mmc_host *host, int check)
- 
- 	return host->bus_ops->power_restore(host);
- }
--
--int mmc_hw_reset(struct mmc_host *host)
--{
--	return mmc_do_hw_reset(host, 0);
--}
- EXPORT_SYMBOL(mmc_hw_reset);
- 
--int mmc_hw_reset_check(struct mmc_host *host)
--{
--	return mmc_do_hw_reset(host, 1);
--}
--EXPORT_SYMBOL(mmc_hw_reset_check);
--
- static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
- {
- 	host->f_init = freq;
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index cb2b040..160448f 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -182,7 +182,6 @@ extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
- extern int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
- 			      bool is_rel_write);
- extern int mmc_hw_reset(struct mmc_host *host);
--extern int mmc_hw_reset_check(struct mmc_host *host);
- extern int mmc_can_reset(struct mmc_card *card);
- 
- extern void mmc_set_data_timeout(struct mmc_data *, const struct mmc_card *);
--- 
-1.7.2.5
+BTW, I guess you only need the delay while the ->power_up() callback
+is invoked and not for ->power_off()?
 
+>
+> Tested-by: Tomeu Vizoso <tomeu.vizoso@collabora.com>
+
+Thanks for helping out testing!
+
+Kind regards
+Uffe
