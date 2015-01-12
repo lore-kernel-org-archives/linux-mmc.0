@@ -1,75 +1,68 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC PATCH 00/13] mmc: host: Add facility to support re-tuning
-Date: Mon, 12 Jan 2015 15:05:28 +0200
-Message-ID: <54B3C698.4030403@intel.com>
-References: <1417801271-15575-1-git-send-email-adrian.hunter@intel.com> <5494312C.9080004@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.3.19, take 2
+Date: Mon, 12 Jan 2015 14:23:20 +0100
+Message-ID: <CAPDyKFqLjy+kAWswigYXOC3WJvntt9qD9jzAeX1eOvXK2xWifg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:28559 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751131AbbALNHQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 12 Jan 2015 08:07:16 -0500
-In-Reply-To: <5494312C.9080004@intel.com>
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:37125 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753153AbbALNXV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jan 2015 08:23:21 -0500
+Received: by mail-qc0-f174.google.com with SMTP id c9so17927651qcz.5
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2015 05:23:20 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
+To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-On 19/12/14 16:07, Adrian Hunter wrote:
-> On 05/12/14 19:40, Adrian Hunter wrote:
->> Hi
->>
->> Here are some patches to move re-tuning support out of
->> sdhci and into the core, and add support for HS400
->> re-tuning.
->>
->> Currently sdhci does re-tuning transparently by
->> calling sdhci_execute_tuning() from its ->request()
->> function.
->>
->> The problem with HS400 re-tuning is that it must be
->> done in HS200 mode. That means using switch commands
->> and making ios changes. That means it potentially
->> conflicts with other command sequences. The new
->> re-tuning support accomodates that, however it is
->> not strictly necessary because HS400 re-tuning
->> should only be needed after runtime suspend when
->> there would not be a conflict.
->>
->> Nevertheless, this approach has more structure
->> and potentially more flexibility.
->>
->>
->> Adrian Hunter (13):
->>       mmc: core: Simplify by adding mmc_execute_tuning()
->>       mmc: host: Add facility to support re-tuning
->>       mmc: core: Disable re-tuning when card is no longer initialized
->>       mmc: core: Move mmc_card_removed() into mmc_start_request()
->>       mmc: core: Add support for re-tuning before each request
->>       mmc: core: Check re-tuning before retrying
->>       mmc: core: Hold re-tuning during switch commands
->>       mmc: core: Hold re-tuning during erase commands
->>       mmc: core: Hold re-tuning while bkops ongoing
->>       mmc: mmc: Comment that callers need to hold re-tuning if the card is put to sleep
->>       mmc: core: Add support for HS400 re-tuning
->>       mmc: sdhci: Always init buf_ready_int
->>       mmc: sdhci: Change to new way of doing re-tuning
->>
->>  drivers/mmc/core/core.c    |  93 +++++++++++++++++++++++++++++++-----
->>  drivers/mmc/core/core.h    |   5 ++
->>  drivers/mmc/core/host.c    |  63 +++++++++++++++++++++++++
->>  drivers/mmc/core/mmc.c     |  58 ++++++++++++++++++-----
->>  drivers/mmc/core/mmc_ops.c |  31 ++++++++----
->>  drivers/mmc/core/sd.c      |  13 ++---
->>  drivers/mmc/core/sdio.c    |  14 ++----
->>  drivers/mmc/host/sdhci.c   | 115 ++++++---------------------------------------
->>  include/linux/mmc/host.h   |  58 +++++++++++++++++++++++
->>  include/linux/mmc/sdhci.h  |   3 --
->>  10 files changed, 296 insertions(+), 157 deletions(-)
-> 
-> Ulf, do you have any comments?
+Hi Linus,
 
-Ping?
+Here is a few mmc fixes for 3.19, take 2.
 
+Details are as usual found in the signed tag. Please pull this in!
+
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit eaa27f34e91a14cdceed26ed6c6793ec1d186115:
+
+  linux 3.19-rc4 (2015-01-11 12:44:53 -0800)
+
+are available in the git repository at:
+
+  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v3.19-3
+
+for you to fetch changes up to 1f7f26528fb159e71f081df1d1050c218ff1d74d:
+
+  mmc: sdhci-pci: Add support for Intel SPT (2015-01-12 10:14:58 +0100)
+
+----------------------------------------------------------------
+MMC host:
+- sdhci-pci|acpi: Support some new IDs
+- sdhci: Fix sleep from atomic context
+- sdhci-pxav3: Prevent hang during ->probe()
+- sdhci: Disable re-tuning for HS400
+
+----------------------------------------------------------------
+Adrian Hunter (6):
+      mmc: sdhci: Tuning should not change max_blk_count
+      mmc: sdhci: Add out_unlock to sdhci_execute_tuning
+      mmc: sdhci: Simplify use of tuning timer
+      mmc: sdhci: Disable re-tuning for HS400
+      mmc: sdhci-acpi: Add ACPI HID INT344D
+      mmc: sdhci-pci: Add support for Intel SPT
+
+Krzysztof Kozlowski (1):
+      mmc: sdhci: Fix sleep in atomic after inserting SD card
+
+Thomas Petazzoni (1):
+      mmc: sdhci-pxav3: do the mbus window configuration after enabling clocks
+
+ drivers/mmc/host/sdhci-acpi.c  |  2 ++
+ drivers/mmc/host/sdhci-pci.c   | 25 ++++++++++++++
+ drivers/mmc/host/sdhci-pci.h   |  3 ++
+ drivers/mmc/host/sdhci-pxav3.c | 15 ++++-----
+ drivers/mmc/host/sdhci.c       | 74 +++++++++++++++++++++++++++---------------
+ include/linux/mmc/sdhci.h      |  1 +
+ 6 files changed, 86 insertions(+), 34 deletions(-)
