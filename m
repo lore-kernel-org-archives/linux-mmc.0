@@ -1,41 +1,65 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: [RFC 2/3] ARM: dts: Specify MSHC realistic clocks and use frequency
- scaling
-Date: Mon, 12 Jan 2015 10:23:04 +0100
-Message-ID: <1421054585-9032-3-git-send-email-k.kozlowski@samsung.com>
-References: <1421054585-9032-1-git-send-email-k.kozlowski@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: Possible regression with commit 52221610d
+Date: Mon, 12 Jan 2015 11:31:35 +0100
+Message-ID: <CAPDyKFpVo2+jRTXfWV9U+ejDc5-4G+O_b1mnLhA+WXtrRbFfeA@mail.gmail.com>
+References: <54584260.8030602@nvidia.com>
+	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
+	<545895B2.2000101@nvidia.com>
+	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
+	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
+	<CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
+	<CAJAp7Oh+ziadeEDWsus_k_2w33vPJxGGcGZyMNQkpLemf7SAhg@mail.gmail.com>
+	<CAJAp7OhWKoAoZfq+zWspLnqUkoJb3izMD41Vyfn0AW4Jni8HAQ@mail.gmail.com>
+	<CAD7vxxLe5COSrsnVZ2G_uhtUXfjFnDA45HSG2dNT1LrxcyFcQw@mail.gmail.com>
+	<CAJAp7OhAP-rDM2zyo0Yr0-7erUp4ewKJ+tC=vyU-YMP_MzXJbA@mail.gmail.com>
+	<CAD7vxxJy2sE1os+ipJZV7_GvEyhu8cE-0QLBS5SVHUqfjkYBwQ@mail.gmail.com>
+	<CAJAp7Oi0AyLxy1KFpZ-Cz1-ts9Lh2UaxP3+e6n3EyQjVaEfoXg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <1421054585-9032-1-git-send-email-k.kozlowski@samsung.com>
+In-Reply-To: <CAJAp7Oi0AyLxy1KFpZ-Cz1-ts9Lh2UaxP3+e6n3EyQjVaEfoXg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Kukjin Kim <kgene@kernel.org>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org
-Cc: Kyungmin Park <kyungmin.park@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Krzysztof Kozlowski <k.kozlowski@samsung.com>
+To: Bjorn Andersson <bjorn@kryo.se>, Tim Kryger <tim.kryger@gmail.com>
+Cc: Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Lower the dw_mmc host clock from 400 MHz to 100 MHz because there are a
-lot of MMC errors above 100 MHz.
+On 5 January 2015 at 20:52, Bjorn Andersson <bjorn@kryo.se> wrote:
+> On Sun, Dec 21, 2014 at 7:01 PM, Tim Kryger <tim.kryger@gmail.com> wrote:
+>> On Wed, Dec 17, 2014 at 11:57 AM, Bjorn Andersson <bjorn@kryo.se> wrote:
+> [..]
+>>> Non-the-less, feel free to propose a patch and I will give it a test.
+>>
+>> Lets start with the simplest change first.  Please give this a try and
+>> let me know what you think.
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index ada1a3e..59a328a 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1239,6 +1239,12 @@ static void sdhci_set_power(struct sdhci_host
+>> *host, unsigned char mode,
+>>                 spin_unlock_irq(&host->lock);
+>>                 mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+>>                 spin_lock_irq(&host->lock);
+>> +
+>> +               if (mode != MMC_POWER_OFF)
+>> +                       sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
+>> +               else
+>> +                       sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+>> +
+>>                 return;
+>>         }
+>>
+>>
+>> Thanks again for your help in getting to the bottom of this.
+>
+> Sorry for the delay, but
+>
+> Tested-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
+>
 
-Enable frequency scaling to reduce energy consumption. In idle this
-reduced energy consumption by 2.6% (from 119.5 mA to 116.4 mA).
+This looks an okay approach. Please send a proper patch for me to
+apply as a fix.
 
-Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
----
- arch/arm/boot/dts/exynos4412-trats2.dts | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
-
-diff --git a/arch/arm/boot/dts/exynos4412-trats2.dts b/arch/arm/boot/dts/exynos4412-trats2.dts
-index 29231b452643..21f1236ae979 100644
---- a/arch/arm/boot/dts/exynos4412-trats2.dts
-+++ b/arch/arm/boot/dts/exynos4412-trats2.dts
-@@ -558,7 +558,9 @@
- 		non-removable;
- 		card-detect-delay = <200>;
- 		vmmc-supply = <&vemmc_reg>;
--		clock-frequency = <400000000>;
-+		clock-frequency = <100000000>;
-+		clock-freq-min-max = <400000 100000000>;
-+		frequency-scaling;
- 		samsung,dw-mshc-ciu-div = <0>;
- 		samsung,dw-mshc-sdr-timing = <2 3>;
- 		samsung,dw-mshc-ddr-timing = <1 2>;
--- 
-1.9.1
+Kind regards
+Uffe
