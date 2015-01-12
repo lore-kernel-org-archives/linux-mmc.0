@@ -1,65 +1,264 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: Possible regression with commit 52221610d
-Date: Mon, 12 Jan 2015 11:31:35 +0100
-Message-ID: <CAPDyKFpVo2+jRTXfWV9U+ejDc5-4G+O_b1mnLhA+WXtrRbFfeA@mail.gmail.com>
-References: <54584260.8030602@nvidia.com>
-	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
-	<545895B2.2000101@nvidia.com>
-	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
-	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
-	<CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
-	<CAJAp7Oh+ziadeEDWsus_k_2w33vPJxGGcGZyMNQkpLemf7SAhg@mail.gmail.com>
-	<CAJAp7OhWKoAoZfq+zWspLnqUkoJb3izMD41Vyfn0AW4Jni8HAQ@mail.gmail.com>
-	<CAD7vxxLe5COSrsnVZ2G_uhtUXfjFnDA45HSG2dNT1LrxcyFcQw@mail.gmail.com>
-	<CAJAp7OhAP-rDM2zyo0Yr0-7erUp4ewKJ+tC=vyU-YMP_MzXJbA@mail.gmail.com>
-	<CAD7vxxJy2sE1os+ipJZV7_GvEyhu8cE-0QLBS5SVHUqfjkYBwQ@mail.gmail.com>
-	<CAJAp7Oi0AyLxy1KFpZ-Cz1-ts9Lh2UaxP3+e6n3EyQjVaEfoXg@mail.gmail.com>
+Subject: Re: [PATCH v6 1/2] mmc: core: refactor the hw_reset routines
+Date: Mon, 12 Jan 2015 13:55:50 +0100
+Message-ID: <CAPDyKFqUajxeSt9Mhv_Mif18SwmRHUY0CDWvb34mis3CnNY78Q@mail.gmail.com>
+References: <1420801699-6274-1-git-send-email-johanru@axis.com>
+	<1420801699-6274-2-git-send-email-johanru@axis.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAJAp7Oi0AyLxy1KFpZ-Cz1-ts9Lh2UaxP3+e6n3EyQjVaEfoXg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Bjorn Andersson <bjorn@kryo.se>, Tim Kryger <tim.kryger@gmail.com>
-Cc: Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f54.google.com ([209.85.216.54]:51103 "EHLO
+	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751220AbbALMzv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jan 2015 07:55:51 -0500
+Received: by mail-qa0-f54.google.com with SMTP id i13so15162181qae.13
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2015 04:55:50 -0800 (PST)
+In-Reply-To: <1420801699-6274-2-git-send-email-johanru@axis.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Johan Rudholm <johan.rudholm@axis.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Adrian Hunter <adrian.hunter@intel.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>, Johan Rudholm <johanru@axis.com>
 
-On 5 January 2015 at 20:52, Bjorn Andersson <bjorn@kryo.se> wrote:
-> On Sun, Dec 21, 2014 at 7:01 PM, Tim Kryger <tim.kryger@gmail.com> wrote:
->> On Wed, Dec 17, 2014 at 11:57 AM, Bjorn Andersson <bjorn@kryo.se> wrote:
-> [..]
->>> Non-the-less, feel free to propose a patch and I will give it a test.
->>
->> Lets start with the simplest change first.  Please give this a try and
->> let me know what you think.
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index ada1a3e..59a328a 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1239,6 +1239,12 @@ static void sdhci_set_power(struct sdhci_host
->> *host, unsigned char mode,
->>                 spin_unlock_irq(&host->lock);
->>                 mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
->>                 spin_lock_irq(&host->lock);
->> +
->> +               if (mode != MMC_POWER_OFF)
->> +                       sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
->> +               else
->> +                       sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
->> +
->>                 return;
->>         }
->>
->>
->> Thanks again for your help in getting to the bottom of this.
+On 9 January 2015 at 12:08, Johan Rudholm <johan.rudholm@axis.com> wrote:
+> Move the (e)MMC specific hw_reset code from core.c into mmc.c Call the
+> code from the new bus_ops member hw_reset. This also allows for adding
+> a SD card specific reset procedure.
 >
-> Sorry for the delay, but
+> Always check if the card is alive after a successful reset. This allows
+> us to remove mmc_hw_reset_check(), leaving mmc_hw_reset() as the only
+> card reset interface. This also informs any callers, for instance the
+> block layer, if a reset was sucessful or not.
 >
-> Tested-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
+> Signed-off-by: Johan Rudholm <johanru@axis.com>
+> ---
+>  drivers/mmc/card/mmc_test.c |   18 ++++-------
+>  drivers/mmc/core/core.c     |   70 +++++++++++++++----------------------------
+>  drivers/mmc/core/core.h     |    1 +
+>  drivers/mmc/core/mmc.c      |   32 +++++++++++++++++++
+>  include/linux/mmc/core.h    |    1 -
+>  5 files changed, 64 insertions(+), 58 deletions(-)
+>
+> diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+> index 0a7430f..7dac469 100644
+> --- a/drivers/mmc/card/mmc_test.c
+> +++ b/drivers/mmc/card/mmc_test.c
+> @@ -2342,20 +2342,16 @@ static int mmc_test_hw_reset(struct mmc_test_card *test)
+>         struct mmc_host *host = card->host;
+>         int err;
+>
+> -       err = mmc_hw_reset_check(host);
+> +       if (!mmc_card_mmc(card) || !mmc_can_reset(card))
+> +               return RESULT_UNSUP_CARD;
+> +
+> +       err = mmc_hw_reset(host);
+>         if (!err)
+>                 return RESULT_OK;
+> +       else if (err == -EOPNOTSUPP)
+> +               return RESULT_UNSUP_HOST;
+>
+> -       if (err == -ENOSYS)
+> -               return RESULT_FAIL;
+> -
+> -       if (err != -EOPNOTSUPP)
+> -               return err;
+> -
+> -       if (!mmc_can_reset(card))
+> -               return RESULT_UNSUP_CARD;
+> -
+> -       return RESULT_UNSUP_HOST;
+> +       return RESULT_FAIL;
+>  }
+>
+>  static const struct mmc_test_case mmc_test_cases[] = {
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index d3bfbdf..8598287 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2273,67 +2273,45 @@ static void mmc_hw_reset_for_init(struct mmc_host *host)
+>         mmc_host_clk_release(host);
+>  }
+>
+> -int mmc_can_reset(struct mmc_card *card)
+> -{
+> -       u8 rst_n_function;
+> -
+> -       if (!mmc_card_mmc(card))
+> -               return 0;
+> -       rst_n_function = card->ext_csd.rst_n_function;
+> -       if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
+> -               return 0;
+> -       return 1;
+> -}
+> -EXPORT_SYMBOL(mmc_can_reset);
+> -
+> -static int mmc_do_hw_reset(struct mmc_host *host, int check)
+> +int mmc_hw_reset(struct mmc_host *host)
+>  {
+> -       struct mmc_card *card = host->card;
+> -
+> -       if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
+> -               return -EOPNOTSUPP;
+> +       int ret = 0;
+> +       int card_alive = 0;
+> +       u32 status;
+>
+> -       if (!card)
+> +       if (!host->card)
+>                 return -EINVAL;
+>
+> -       if (!mmc_can_reset(card))
+> -               return -EOPNOTSUPP;
+> -
+> -       mmc_host_clk_hold(host);
+> -       mmc_set_clock(host, host->f_init);
+> +       mmc_bus_get(host);
+> +       if (!host->bus_ops || host->bus_dead || !host->bus_ops->hw_reset) {
+> +               ret = -EOPNOTSUPP;
+> +               goto out;
+> +       }
+>
+> -       host->ops->hw_reset(host);
+> +       ret = host->bus_ops->hw_reset(host);
+> +       if (ret)
+> +               goto out;
+>
+>         /* If the reset has happened, then a status command will fail */
+> -       if (check) {
+> -               u32 status;
+> +       if (!mmc_send_status(host->card, &status))
+> +               card_alive = 1;
+>
+> -               if (!mmc_send_status(card, &status)) {
+> -                       mmc_host_clk_release(host);
+> -                       return -ENOSYS;
+> -               }
+> -       }
+> +       pr_warn("%s: tried to reset card (%s)\n", mmc_hostname(host),
+> +                                       card_alive ? "failed" : "ok");
+>
+>         /* Set initial state and call mmc_set_ios */
+>         mmc_set_initial_state(host);
+> +       ret = host->bus_ops->power_restore(host);
+>
+> -       mmc_host_clk_release(host);
+> -
+> -       return host->bus_ops->power_restore(host);
+
+I would like you to move the mmc_send_status() and onwards code in
+this function, into the mmc specific ->hw_reset() callback.
+
+In that way, mmc/sd/sdio can separately decide if the
+mmc_send_status() is needed and we also can remove two users (sd/mmc)
+of the ->power_restore() callback.
+
+> -}
+> -
+> -int mmc_hw_reset(struct mmc_host *host)
+> -{
+> -       return mmc_do_hw_reset(host, 0);
+> +out:
+> +       mmc_bus_put(host);
+> +       if (card_alive)
+> +               return -ENOSYS;
+> +       else
+> +               return ret;
+>  }
+>  EXPORT_SYMBOL(mmc_hw_reset);
+>
+> -int mmc_hw_reset_check(struct mmc_host *host)
+> -{
+> -       return mmc_do_hw_reset(host, 1);
+> -}
+> -EXPORT_SYMBOL(mmc_hw_reset_check);
+> -
+>  static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+>  {
+>         host->f_init = freq;
+> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+> index b528c0e..4d1ee8a 100644
+> --- a/drivers/mmc/core/core.h
+> +++ b/drivers/mmc/core/core.h
+> @@ -27,6 +27,7 @@ struct mmc_bus_ops {
+>         int (*power_restore)(struct mmc_host *);
+>         int (*alive)(struct mmc_host *);
+>         int (*shutdown)(struct mmc_host *);
+> +       int (*hw_reset)(struct mmc_host *);
+
+->Please rename to reset()
+
+>  };
+>
+>  void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 0b8ec87..f64a53e 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1795,6 +1795,37 @@ static int mmc_power_restore(struct mmc_host *host)
+>         return ret;
+>  }
+>
+> +int mmc_can_reset(struct mmc_card *card)
+> +{
+> +       u8 rst_n_function;
+> +
+> +       rst_n_function = card->ext_csd.rst_n_function;
+> +       if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
+> +               return 0;
+> +       return 1;
+> +}
+> +EXPORT_SYMBOL(mmc_can_reset);
+> +
+> +static int mmc_mmc_hw_reset(struct mmc_host *host)
+
+Please rename to mmc_reset()
+
+> +{
+> +       struct mmc_card *card = host->card;
+> +
+> +       if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
+> +               return -EOPNOTSUPP;
+> +
+> +       if (!mmc_can_reset(card))
+> +               return -EOPNOTSUPP;
+> +
+> +       mmc_host_clk_hold(host);
+> +       mmc_set_clock(host, host->f_init);
+> +
+> +       host->ops->hw_reset(host);
+> +
+> +       mmc_host_clk_release(host);
+> +
+> +       return 0;
+> +}
+> +
+>  static const struct mmc_bus_ops mmc_ops = {
+>         .remove = mmc_remove,
+>         .detect = mmc_detect,
+> @@ -1805,6 +1836,7 @@ static const struct mmc_bus_ops mmc_ops = {
+>         .power_restore = mmc_power_restore,
+>         .alive = mmc_alive,
+>         .shutdown = mmc_shutdown,
+> +       .hw_reset = mmc_mmc_hw_reset,
+>  };
+>
+>  /*
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index cb2b040..160448f 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -182,7 +182,6 @@ extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
+>  extern int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
+>                               bool is_rel_write);
+>  extern int mmc_hw_reset(struct mmc_host *host);
+> -extern int mmc_hw_reset_check(struct mmc_host *host);
+>  extern int mmc_can_reset(struct mmc_card *card);
+>
+>  extern void mmc_set_data_timeout(struct mmc_data *, const struct mmc_card *);
+> --
+> 1.7.2.5
 >
 
-This looks an okay approach. Please send a proper patch for me to
-apply as a fix.
+I am overall very happy with this approach. Nice work Johan!
 
 Kind regards
 Uffe
