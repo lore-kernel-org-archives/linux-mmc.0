@@ -1,264 +1,75 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v6 1/2] mmc: core: refactor the hw_reset routines
-Date: Mon, 12 Jan 2015 13:55:50 +0100
-Message-ID: <CAPDyKFqUajxeSt9Mhv_Mif18SwmRHUY0CDWvb34mis3CnNY78Q@mail.gmail.com>
-References: <1420801699-6274-1-git-send-email-johanru@axis.com>
-	<1420801699-6274-2-git-send-email-johanru@axis.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC PATCH 00/13] mmc: host: Add facility to support re-tuning
+Date: Mon, 12 Jan 2015 15:05:28 +0200
+Message-ID: <54B3C698.4030403@intel.com>
+References: <1417801271-15575-1-git-send-email-adrian.hunter@intel.com> <5494312C.9080004@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f54.google.com ([209.85.216.54]:51103 "EHLO
-	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751220AbbALMzv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Jan 2015 07:55:51 -0500
-Received: by mail-qa0-f54.google.com with SMTP id i13so15162181qae.13
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2015 04:55:50 -0800 (PST)
-In-Reply-To: <1420801699-6274-2-git-send-email-johanru@axis.com>
+Received: from mga03.intel.com ([134.134.136.65]:28559 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751131AbbALNHQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 12 Jan 2015 08:07:16 -0500
+In-Reply-To: <5494312C.9080004@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Johan Rudholm <johan.rudholm@axis.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Adrian Hunter <adrian.hunter@intel.com>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Jesper Nilsson <jespern@axis.com>, Johan Rudholm <johanru@axis.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-On 9 January 2015 at 12:08, Johan Rudholm <johan.rudholm@axis.com> wrote:
-> Move the (e)MMC specific hw_reset code from core.c into mmc.c Call the
-> code from the new bus_ops member hw_reset. This also allows for adding
-> a SD card specific reset procedure.
->
-> Always check if the card is alive after a successful reset. This allows
-> us to remove mmc_hw_reset_check(), leaving mmc_hw_reset() as the only
-> card reset interface. This also informs any callers, for instance the
-> block layer, if a reset was sucessful or not.
->
-> Signed-off-by: Johan Rudholm <johanru@axis.com>
-> ---
->  drivers/mmc/card/mmc_test.c |   18 ++++-------
->  drivers/mmc/core/core.c     |   70 +++++++++++++++----------------------------
->  drivers/mmc/core/core.h     |    1 +
->  drivers/mmc/core/mmc.c      |   32 +++++++++++++++++++
->  include/linux/mmc/core.h    |    1 -
->  5 files changed, 64 insertions(+), 58 deletions(-)
->
-> diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-> index 0a7430f..7dac469 100644
-> --- a/drivers/mmc/card/mmc_test.c
-> +++ b/drivers/mmc/card/mmc_test.c
-> @@ -2342,20 +2342,16 @@ static int mmc_test_hw_reset(struct mmc_test_card *test)
->         struct mmc_host *host = card->host;
->         int err;
->
-> -       err = mmc_hw_reset_check(host);
-> +       if (!mmc_card_mmc(card) || !mmc_can_reset(card))
-> +               return RESULT_UNSUP_CARD;
-> +
-> +       err = mmc_hw_reset(host);
->         if (!err)
->                 return RESULT_OK;
-> +       else if (err == -EOPNOTSUPP)
-> +               return RESULT_UNSUP_HOST;
->
-> -       if (err == -ENOSYS)
-> -               return RESULT_FAIL;
-> -
-> -       if (err != -EOPNOTSUPP)
-> -               return err;
-> -
-> -       if (!mmc_can_reset(card))
-> -               return RESULT_UNSUP_CARD;
-> -
-> -       return RESULT_UNSUP_HOST;
-> +       return RESULT_FAIL;
->  }
->
->  static const struct mmc_test_case mmc_test_cases[] = {
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index d3bfbdf..8598287 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2273,67 +2273,45 @@ static void mmc_hw_reset_for_init(struct mmc_host *host)
->         mmc_host_clk_release(host);
->  }
->
-> -int mmc_can_reset(struct mmc_card *card)
-> -{
-> -       u8 rst_n_function;
-> -
-> -       if (!mmc_card_mmc(card))
-> -               return 0;
-> -       rst_n_function = card->ext_csd.rst_n_function;
-> -       if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
-> -               return 0;
-> -       return 1;
-> -}
-> -EXPORT_SYMBOL(mmc_can_reset);
-> -
-> -static int mmc_do_hw_reset(struct mmc_host *host, int check)
-> +int mmc_hw_reset(struct mmc_host *host)
->  {
-> -       struct mmc_card *card = host->card;
-> -
-> -       if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
-> -               return -EOPNOTSUPP;
-> +       int ret = 0;
-> +       int card_alive = 0;
-> +       u32 status;
->
-> -       if (!card)
-> +       if (!host->card)
->                 return -EINVAL;
->
-> -       if (!mmc_can_reset(card))
-> -               return -EOPNOTSUPP;
-> -
-> -       mmc_host_clk_hold(host);
-> -       mmc_set_clock(host, host->f_init);
-> +       mmc_bus_get(host);
-> +       if (!host->bus_ops || host->bus_dead || !host->bus_ops->hw_reset) {
-> +               ret = -EOPNOTSUPP;
-> +               goto out;
-> +       }
->
-> -       host->ops->hw_reset(host);
-> +       ret = host->bus_ops->hw_reset(host);
-> +       if (ret)
-> +               goto out;
->
->         /* If the reset has happened, then a status command will fail */
-> -       if (check) {
-> -               u32 status;
-> +       if (!mmc_send_status(host->card, &status))
-> +               card_alive = 1;
->
-> -               if (!mmc_send_status(card, &status)) {
-> -                       mmc_host_clk_release(host);
-> -                       return -ENOSYS;
-> -               }
-> -       }
-> +       pr_warn("%s: tried to reset card (%s)\n", mmc_hostname(host),
-> +                                       card_alive ? "failed" : "ok");
->
->         /* Set initial state and call mmc_set_ios */
->         mmc_set_initial_state(host);
-> +       ret = host->bus_ops->power_restore(host);
->
-> -       mmc_host_clk_release(host);
-> -
-> -       return host->bus_ops->power_restore(host);
+On 19/12/14 16:07, Adrian Hunter wrote:
+> On 05/12/14 19:40, Adrian Hunter wrote:
+>> Hi
+>>
+>> Here are some patches to move re-tuning support out of
+>> sdhci and into the core, and add support for HS400
+>> re-tuning.
+>>
+>> Currently sdhci does re-tuning transparently by
+>> calling sdhci_execute_tuning() from its ->request()
+>> function.
+>>
+>> The problem with HS400 re-tuning is that it must be
+>> done in HS200 mode. That means using switch commands
+>> and making ios changes. That means it potentially
+>> conflicts with other command sequences. The new
+>> re-tuning support accomodates that, however it is
+>> not strictly necessary because HS400 re-tuning
+>> should only be needed after runtime suspend when
+>> there would not be a conflict.
+>>
+>> Nevertheless, this approach has more structure
+>> and potentially more flexibility.
+>>
+>>
+>> Adrian Hunter (13):
+>>       mmc: core: Simplify by adding mmc_execute_tuning()
+>>       mmc: host: Add facility to support re-tuning
+>>       mmc: core: Disable re-tuning when card is no longer initialized
+>>       mmc: core: Move mmc_card_removed() into mmc_start_request()
+>>       mmc: core: Add support for re-tuning before each request
+>>       mmc: core: Check re-tuning before retrying
+>>       mmc: core: Hold re-tuning during switch commands
+>>       mmc: core: Hold re-tuning during erase commands
+>>       mmc: core: Hold re-tuning while bkops ongoing
+>>       mmc: mmc: Comment that callers need to hold re-tuning if the card is put to sleep
+>>       mmc: core: Add support for HS400 re-tuning
+>>       mmc: sdhci: Always init buf_ready_int
+>>       mmc: sdhci: Change to new way of doing re-tuning
+>>
+>>  drivers/mmc/core/core.c    |  93 +++++++++++++++++++++++++++++++-----
+>>  drivers/mmc/core/core.h    |   5 ++
+>>  drivers/mmc/core/host.c    |  63 +++++++++++++++++++++++++
+>>  drivers/mmc/core/mmc.c     |  58 ++++++++++++++++++-----
+>>  drivers/mmc/core/mmc_ops.c |  31 ++++++++----
+>>  drivers/mmc/core/sd.c      |  13 ++---
+>>  drivers/mmc/core/sdio.c    |  14 ++----
+>>  drivers/mmc/host/sdhci.c   | 115 ++++++---------------------------------------
+>>  include/linux/mmc/host.h   |  58 +++++++++++++++++++++++
+>>  include/linux/mmc/sdhci.h  |   3 --
+>>  10 files changed, 296 insertions(+), 157 deletions(-)
+> 
+> Ulf, do you have any comments?
 
-I would like you to move the mmc_send_status() and onwards code in
-this function, into the mmc specific ->hw_reset() callback.
+Ping?
 
-In that way, mmc/sd/sdio can separately decide if the
-mmc_send_status() is needed and we also can remove two users (sd/mmc)
-of the ->power_restore() callback.
-
-> -}
-> -
-> -int mmc_hw_reset(struct mmc_host *host)
-> -{
-> -       return mmc_do_hw_reset(host, 0);
-> +out:
-> +       mmc_bus_put(host);
-> +       if (card_alive)
-> +               return -ENOSYS;
-> +       else
-> +               return ret;
->  }
->  EXPORT_SYMBOL(mmc_hw_reset);
->
-> -int mmc_hw_reset_check(struct mmc_host *host)
-> -{
-> -       return mmc_do_hw_reset(host, 1);
-> -}
-> -EXPORT_SYMBOL(mmc_hw_reset_check);
-> -
->  static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
->  {
->         host->f_init = freq;
-> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> index b528c0e..4d1ee8a 100644
-> --- a/drivers/mmc/core/core.h
-> +++ b/drivers/mmc/core/core.h
-> @@ -27,6 +27,7 @@ struct mmc_bus_ops {
->         int (*power_restore)(struct mmc_host *);
->         int (*alive)(struct mmc_host *);
->         int (*shutdown)(struct mmc_host *);
-> +       int (*hw_reset)(struct mmc_host *);
-
-->Please rename to reset()
-
->  };
->
->  void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 0b8ec87..f64a53e 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1795,6 +1795,37 @@ static int mmc_power_restore(struct mmc_host *host)
->         return ret;
->  }
->
-> +int mmc_can_reset(struct mmc_card *card)
-> +{
-> +       u8 rst_n_function;
-> +
-> +       rst_n_function = card->ext_csd.rst_n_function;
-> +       if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
-> +               return 0;
-> +       return 1;
-> +}
-> +EXPORT_SYMBOL(mmc_can_reset);
-> +
-> +static int mmc_mmc_hw_reset(struct mmc_host *host)
-
-Please rename to mmc_reset()
-
-> +{
-> +       struct mmc_card *card = host->card;
-> +
-> +       if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
-> +               return -EOPNOTSUPP;
-> +
-> +       if (!mmc_can_reset(card))
-> +               return -EOPNOTSUPP;
-> +
-> +       mmc_host_clk_hold(host);
-> +       mmc_set_clock(host, host->f_init);
-> +
-> +       host->ops->hw_reset(host);
-> +
-> +       mmc_host_clk_release(host);
-> +
-> +       return 0;
-> +}
-> +
->  static const struct mmc_bus_ops mmc_ops = {
->         .remove = mmc_remove,
->         .detect = mmc_detect,
-> @@ -1805,6 +1836,7 @@ static const struct mmc_bus_ops mmc_ops = {
->         .power_restore = mmc_power_restore,
->         .alive = mmc_alive,
->         .shutdown = mmc_shutdown,
-> +       .hw_reset = mmc_mmc_hw_reset,
->  };
->
->  /*
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index cb2b040..160448f 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -182,7 +182,6 @@ extern int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
->  extern int mmc_set_blockcount(struct mmc_card *card, unsigned int blockcount,
->                               bool is_rel_write);
->  extern int mmc_hw_reset(struct mmc_host *host);
-> -extern int mmc_hw_reset_check(struct mmc_host *host);
->  extern int mmc_can_reset(struct mmc_card *card);
->
->  extern void mmc_set_data_timeout(struct mmc_data *, const struct mmc_card *);
-> --
-> 1.7.2.5
->
-
-I am overall very happy with this approach. Nice work Johan!
-
-Kind regards
-Uffe
