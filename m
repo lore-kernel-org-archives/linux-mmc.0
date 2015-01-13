@@ -1,7 +1,7 @@
 From: Tim Kryger <tim.kryger@gmail.com>
 Subject: Re: Possible regression with commit 52221610d
-Date: Tue, 13 Jan 2015 07:59:33 -0800
-Message-ID: <CAD7vxxKYAkAN3aQenEg+6=h2KTEgXxi3h1CAWR7Na7NAZiuM=A@mail.gmail.com>
+Date: Tue, 13 Jan 2015 08:00:06 -0800
+Message-ID: <CAD7vxxK9v=qjV-ec+145dKPn8orLqUXR6GfBwgFmLvo9njoT9A@mail.gmail.com>
 References: <54584260.8030602@nvidia.com>
 	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
 	<545895B2.2000101@nvidia.com>
@@ -14,52 +14,58 @@ References: <54584260.8030602@nvidia.com>
 	<CAJAp7OhAP-rDM2zyo0Yr0-7erUp4ewKJ+tC=vyU-YMP_MzXJbA@mail.gmail.com>
 	<CAD7vxxJy2sE1os+ipJZV7_GvEyhu8cE-0QLBS5SVHUqfjkYBwQ@mail.gmail.com>
 	<CAJAp7Oi0AyLxy1KFpZ-Cz1-ts9Lh2UaxP3+e6n3EyQjVaEfoXg@mail.gmail.com>
+	<CAPDyKFpVo2+jRTXfWV9U+ejDc5-4G+O_b1mnLhA+WXtrRbFfeA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAJAp7Oi0AyLxy1KFpZ-Cz1-ts9Lh2UaxP3+e6n3EyQjVaEfoXg@mail.gmail.com>
+In-Reply-To: <CAPDyKFpVo2+jRTXfWV9U+ejDc5-4G+O_b1mnLhA+WXtrRbFfeA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Bjorn Andersson <bjorn@kryo.se>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Bjorn Andersson <bjorn@kryo.se>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Jan 5, 2015 at 11:52 AM, Bjorn Andersson <bjorn@kryo.se> wrote:
-> On Sun, Dec 21, 2014 at 7:01 PM, Tim Kryger <tim.kryger@gmail.com> wrote:
->> On Wed, Dec 17, 2014 at 11:57 AM, Bjorn Andersson <bjorn@kryo.se> wrote:
-> [..]
->>> Non-the-less, feel free to propose a patch and I will give it a test.
+On Mon, Jan 12, 2015 at 2:31 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 5 January 2015 at 20:52, Bjorn Andersson <bjorn@kryo.se> wrote:
+>> On Sun, Dec 21, 2014 at 7:01 PM, Tim Kryger <tim.kryger@gmail.com> wrote:
+>>> On Wed, Dec 17, 2014 at 11:57 AM, Bjorn Andersson <bjorn@kryo.se> wrote:
+>> [..]
+>>>> Non-the-less, feel free to propose a patch and I will give it a test.
+>>>
+>>> Lets start with the simplest change first.  Please give this a try and
+>>> let me know what you think.
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index ada1a3e..59a328a 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -1239,6 +1239,12 @@ static void sdhci_set_power(struct sdhci_host
+>>> *host, unsigned char mode,
+>>>                 spin_unlock_irq(&host->lock);
+>>>                 mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+>>>                 spin_lock_irq(&host->lock);
+>>> +
+>>> +               if (mode != MMC_POWER_OFF)
+>>> +                       sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
+>>> +               else
+>>> +                       sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+>>> +
+>>>                 return;
+>>>         }
+>>>
+>>>
+>>> Thanks again for your help in getting to the bottom of this.
 >>
->> Lets start with the simplest change first.  Please give this a try and
->> let me know what you think.
+>> Sorry for the delay, but
 >>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index ada1a3e..59a328a 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1239,6 +1239,12 @@ static void sdhci_set_power(struct sdhci_host
->> *host, unsigned char mode,
->>                 spin_unlock_irq(&host->lock);
->>                 mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
->>                 spin_lock_irq(&host->lock);
->> +
->> +               if (mode != MMC_POWER_OFF)
->> +                       sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
->> +               else
->> +                       sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
->> +
->>                 return;
->>         }
+>> Tested-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
 >>
->>
->> Thanks again for your help in getting to the bottom of this.
 >
-> Sorry for the delay, but
+> This looks an okay approach. Please send a proper patch for me to
+> apply as a fix.
 >
-> Tested-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
->
-> Regards,
-> Bjorn
+> Kind regards
+> Uffe
 
-Thanks.  I really appreciate your help.
+Okay.  I'll try to send something out tonight.
 
 -Tim
