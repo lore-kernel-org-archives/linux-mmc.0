@@ -1,105 +1,64 @@
-From: Arend van Spriel <arend@broadcom.com>
-Subject: Re: [PATCH 02/13] mmc: host: Add facility to support re-tuning
-Date: Tue, 13 Jan 2015 17:02:15 +0100
-Message-ID: <54B54187.7080008@broadcom.com>
-References: <1417801271-15575-1-git-send-email-adrian.hunter@intel.com>	<1417801271-15575-3-git-send-email-adrian.hunter@intel.com>	<CAPDyKFo_51e=BERS9qX6x_LbK3tM5aijOicVkhQ5==39b+C93Q@mail.gmail.com>	<54B51C55.9060500@intel.com>	<CAPDyKFpN285zHUZr61R51AuGwwXAJJsoUS7hbnmiO_+bQ=OuKQ@mail.gmail.com>	<54B52D53.8080106@intel.com>	<CAPDyKFr-U+z3B5bhfP36Lxju5=zS6ZxFL8usm4XypodYLZ0_dw@mail.gmail.com>	<54B53592.9070303@broadcom.com> <CAPDyKFrs9SVt+8OSTHbkCFiY5ujdfXsqjg7E837CVZjEqz4EvA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH] mmc: dw_mmc: rockchip: Add DW_MCI_QUIRK_RETRY_DELAY
+Date: Tue, 13 Jan 2015 09:51:37 -0800
+Message-ID: <1421171497-9440-1-git-send-email-dianders@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:52256 "EHLO
-	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751393AbbAMQCY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jan 2015 11:02:24 -0500
-In-Reply-To: <CAPDyKFrs9SVt+8OSTHbkCFiY5ujdfXsqjg7E837CVZjEqz4EvA@mail.gmail.com>
+Received: from mail-ig0-f172.google.com ([209.85.213.172]:45430 "EHLO
+	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752228AbbAMRvx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jan 2015 12:51:53 -0500
+Received: by mail-ig0-f172.google.com with SMTP id l13so5242241iga.5
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Jan 2015 09:51:53 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Alexandru Stan <amstan@chromium.org>, addy.ke@rock-chips.com, Doug Anderson <dianders@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org
 
-On 01/13/15 16:41, Ulf Hansson wrote:
-> On 13 January 2015 at 16:11, Arend van Spriel<arend@broadcom.com>  wrote:
->> On 01/13/15 15:56, Ulf Hansson wrote:
->>>
->>> [...]
->>>
->>>>>> Thank you for looking at the patches.
->>>>>>
->>>>>> I am not sure I know what you mean. sdhci already has a re-tuning
->>>>>> timer, so
->>>>>> this is just moving it into core, where it won't be used by other
->>>>>> drivers
->>>>>> unless they enable it.
->>>>>
->>>>>
->>>>> I am kind of questioning the re-tuning timer in sdhci. What is it good
->>>>> for?
->>>>
->>>>
->>>> It is part of the SD Host Controller Standard Specification. The timer
->>>> ensures that re-tuning is done before temperature changes could affect
->>>> the
->>>> "sampling point". It is needed for re-tuning mode 1 for UHS-I modes like
->>>> SDR104.
->>>
->>>
->>> Does the spec say what value the timer should have?
->>
->>
->> It is read from the Capabilities register in the SD host controller, ie. in
->> field "Timer Count for Re-Tuning" (see below).
->>
->> Regards,
->> Arend
->>
->> Timer Count for Re-Tuning
->> This field indicates an initial value of the Re-Tuning Timer for Re-Tuning
->> Mode 1 to 3. Setting to 0 disables Re-Tuning Timer.
->> 0h      Re-Tuning Timer disabled
->> 1h      1 seconds
->> 2h      2 seconds
->> 3h      4 seconds
->> 4h      8 seconds
->> .....   ......................
->> n       2(n-1) seconds
->> .....   ......................
->> Bh      1024 seconds
->> Eh - Ch Reserved
->> Fh      Get information from other source
->
-> Thanks for sharing this information, but unfortunate I don't
-> understand much from it.
->
-> Is the host driver intended to read/poll this register to find a good value?
+We've seen at least one card that can get confused during all the
+errors generated during tuning on rk3288.  These errors seem to go
+away with DW_MCI_QUIRK_RETRY_DELAY.  That quirk is documented to be
+for 2.11a and on rk3288 I believe we have 2.70a, but it seems to be
+the same type of problem.
 
-You can download the spec (and others) here [1]. sdhci currently 
-implements retuning mode 1, which is decribed in the spec:
+Specifically it looks like in certain error conditions (I saw this
+with Response CRC errors) that data keeps showing up in the FIFO even
+after the error is reported and the CD (command done) bit is set.  If
+we don't wait for this data to finish transferring then it confuses
+the next transaction.  In the specific failure case I ran into I found
+that I could monitor the data_state_mc_busy bit and wait for it to
+clear, but in other failure cases this bit was stuck at busy when we
+saw an error.  Hence a generic big delay seems like the only option.
 
-Re-Tuning Timer Control Example for Re-Tuning Mode 1
-The initial value of re-tuning timer is provided by Timer Count for 
-Re-Tuning field in this register. The timer starts counting by loading 
-the initial value. When the timer expires, the Host Driver marks an 
-expiration flag. On receiving a command request, the Host driver checks 
-the expiration flag. If the expiration flag is set, then the Host Driver 
-should perform the re-tuning procedure before issuing a command. If the 
-expiration flag is not set, then the Host Driver issues a command 
-without performing the re-tuning procedure. Every time the re-tuning 
-procedure is performed, the timer loads the new initial value and the 
-expiration flag is cleared.
+I have seen this on rk3288, but adding it as a quirk for all Rockchip
+IP for now since most previous quirks have shown up on older IP as
+well.
 
-So the host controller could indeed update this register for subsequent 
-retuning.
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+---
+NOTES:
+* This is based atop Addy's patch (mmc: dw_mmc: add quirk for broken
+data transfer over scheme) at
+<https://patchwork.kernel.org/patch/5565431/>, but it would be trivial
+to apply this patch without that one if that were desirable.
+* If someone has a better solution to this problem, I'm all ears.
 
-Regards,
-Arend
+ drivers/mmc/host/dw_mmc-rockchip.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-[1] https://www.sdcard.org/downloads/pls/
-
-> Isn't heat one of the most important factor that could effect the need
-> for a re-tune? Does then the controller internally dynamically update
-> this register (since it keep track of heat or similar)?
-
->
-> Kind regards
-> Uffe
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index ba92ebd..b4caf1a 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -74,7 +74,8 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
+ 	host->sdio_id0 = 8;
+ 
+ 	/* It needs this quirk on all Rockchip SoCs */
+-	host->pdata->quirks |= DW_MCI_QUIRK_BROKEN_DTO;
++	host->pdata->quirks |= DW_MCI_QUIRK_BROKEN_DTO |
++		DW_MCI_QUIRK_RETRY_DELAY;
+ 
+ 	return 0;
+ }
+-- 
+2.2.0.rc0.207.ga3a616c
 
