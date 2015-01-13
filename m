@@ -1,71 +1,105 @@
-From: Tim Kryger <tim.kryger@gmail.com>
-Subject: Re: Possible regression with commit 52221610d
-Date: Tue, 13 Jan 2015 08:00:06 -0800
-Message-ID: <CAD7vxxK9v=qjV-ec+145dKPn8orLqUXR6GfBwgFmLvo9njoT9A@mail.gmail.com>
-References: <54584260.8030602@nvidia.com>
-	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
-	<545895B2.2000101@nvidia.com>
-	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
-	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
-	<CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
-	<CAJAp7Oh+ziadeEDWsus_k_2w33vPJxGGcGZyMNQkpLemf7SAhg@mail.gmail.com>
-	<CAJAp7OhWKoAoZfq+zWspLnqUkoJb3izMD41Vyfn0AW4Jni8HAQ@mail.gmail.com>
-	<CAD7vxxLe5COSrsnVZ2G_uhtUXfjFnDA45HSG2dNT1LrxcyFcQw@mail.gmail.com>
-	<CAJAp7OhAP-rDM2zyo0Yr0-7erUp4ewKJ+tC=vyU-YMP_MzXJbA@mail.gmail.com>
-	<CAD7vxxJy2sE1os+ipJZV7_GvEyhu8cE-0QLBS5SVHUqfjkYBwQ@mail.gmail.com>
-	<CAJAp7Oi0AyLxy1KFpZ-Cz1-ts9Lh2UaxP3+e6n3EyQjVaEfoXg@mail.gmail.com>
-	<CAPDyKFpVo2+jRTXfWV9U+ejDc5-4G+O_b1mnLhA+WXtrRbFfeA@mail.gmail.com>
+From: Arend van Spriel <arend@broadcom.com>
+Subject: Re: [PATCH 02/13] mmc: host: Add facility to support re-tuning
+Date: Tue, 13 Jan 2015 17:02:15 +0100
+Message-ID: <54B54187.7080008@broadcom.com>
+References: <1417801271-15575-1-git-send-email-adrian.hunter@intel.com>	<1417801271-15575-3-git-send-email-adrian.hunter@intel.com>	<CAPDyKFo_51e=BERS9qX6x_LbK3tM5aijOicVkhQ5==39b+C93Q@mail.gmail.com>	<54B51C55.9060500@intel.com>	<CAPDyKFpN285zHUZr61R51AuGwwXAJJsoUS7hbnmiO_+bQ=OuKQ@mail.gmail.com>	<54B52D53.8080106@intel.com>	<CAPDyKFr-U+z3B5bhfP36Lxju5=zS6ZxFL8usm4XypodYLZ0_dw@mail.gmail.com>	<54B53592.9070303@broadcom.com> <CAPDyKFrs9SVt+8OSTHbkCFiY5ujdfXsqjg7E837CVZjEqz4EvA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpVo2+jRTXfWV9U+ejDc5-4G+O_b1mnLhA+WXtrRbFfeA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Bjorn Andersson <bjorn@kryo.se>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:52256 "EHLO
+	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751393AbbAMQCY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jan 2015 11:02:24 -0500
+In-Reply-To: <CAPDyKFrs9SVt+8OSTHbkCFiY5ujdfXsqjg7E837CVZjEqz4EvA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>
 
-On Mon, Jan 12, 2015 at 2:31 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 5 January 2015 at 20:52, Bjorn Andersson <bjorn@kryo.se> wrote:
->> On Sun, Dec 21, 2014 at 7:01 PM, Tim Kryger <tim.kryger@gmail.com> wrote:
->>> On Wed, Dec 17, 2014 at 11:57 AM, Bjorn Andersson <bjorn@kryo.se> wrote:
->> [..]
->>>> Non-the-less, feel free to propose a patch and I will give it a test.
+On 01/13/15 16:41, Ulf Hansson wrote:
+> On 13 January 2015 at 16:11, Arend van Spriel<arend@broadcom.com>  wrote:
+>> On 01/13/15 15:56, Ulf Hansson wrote:
 >>>
->>> Lets start with the simplest change first.  Please give this a try and
->>> let me know what you think.
+>>> [...]
 >>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index ada1a3e..59a328a 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -1239,6 +1239,12 @@ static void sdhci_set_power(struct sdhci_host
->>> *host, unsigned char mode,
->>>                 spin_unlock_irq(&host->lock);
->>>                 mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
->>>                 spin_lock_irq(&host->lock);
->>> +
->>> +               if (mode != MMC_POWER_OFF)
->>> +                       sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
->>> +               else
->>> +                       sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
->>> +
->>>                 return;
->>>         }
+>>>>>> Thank you for looking at the patches.
+>>>>>>
+>>>>>> I am not sure I know what you mean. sdhci already has a re-tuning
+>>>>>> timer, so
+>>>>>> this is just moving it into core, where it won't be used by other
+>>>>>> drivers
+>>>>>> unless they enable it.
+>>>>>
+>>>>>
+>>>>> I am kind of questioning the re-tuning timer in sdhci. What is it good
+>>>>> for?
+>>>>
+>>>>
+>>>> It is part of the SD Host Controller Standard Specification. The timer
+>>>> ensures that re-tuning is done before temperature changes could affect
+>>>> the
+>>>> "sampling point". It is needed for re-tuning mode 1 for UHS-I modes like
+>>>> SDR104.
 >>>
 >>>
->>> Thanks again for your help in getting to the bottom of this.
+>>> Does the spec say what value the timer should have?
 >>
->> Sorry for the delay, but
 >>
->> Tested-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
+>> It is read from the Capabilities register in the SD host controller, ie. in
+>> field "Timer Count for Re-Tuning" (see below).
 >>
+>> Regards,
+>> Arend
+>>
+>> Timer Count for Re-Tuning
+>> This field indicates an initial value of the Re-Tuning Timer for Re-Tuning
+>> Mode 1 to 3. Setting to 0 disables Re-Tuning Timer.
+>> 0h      Re-Tuning Timer disabled
+>> 1h      1 seconds
+>> 2h      2 seconds
+>> 3h      4 seconds
+>> 4h      8 seconds
+>> .....   ......................
+>> n       2(n-1) seconds
+>> .....   ......................
+>> Bh      1024 seconds
+>> Eh - Ch Reserved
+>> Fh      Get information from other source
 >
-> This looks an okay approach. Please send a proper patch for me to
-> apply as a fix.
+> Thanks for sharing this information, but unfortunate I don't
+> understand much from it.
+>
+> Is the host driver intended to read/poll this register to find a good value?
+
+You can download the spec (and others) here [1]. sdhci currently 
+implements retuning mode 1, which is decribed in the spec:
+
+Re-Tuning Timer Control Example for Re-Tuning Mode 1
+The initial value of re-tuning timer is provided by Timer Count for 
+Re-Tuning field in this register. The timer starts counting by loading 
+the initial value. When the timer expires, the Host Driver marks an 
+expiration flag. On receiving a command request, the Host driver checks 
+the expiration flag. If the expiration flag is set, then the Host Driver 
+should perform the re-tuning procedure before issuing a command. If the 
+expiration flag is not set, then the Host Driver issues a command 
+without performing the re-tuning procedure. Every time the re-tuning 
+procedure is performed, the timer loads the new initial value and the 
+expiration flag is cleared.
+
+So the host controller could indeed update this register for subsequent 
+retuning.
+
+Regards,
+Arend
+
+[1] https://www.sdcard.org/downloads/pls/
+
+> Isn't heat one of the most important factor that could effect the need
+> for a re-tune? Does then the controller internally dynamically update
+> this register (since it keep track of heat or similar)?
+
 >
 > Kind regards
 > Uffe
 
-Okay.  I'll try to send something out tonight.
-
--Tim
