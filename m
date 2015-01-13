@@ -1,135 +1,94 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/4] mmc: core: Add support for MMC power sequences
-Date: Tue, 13 Jan 2015 15:34:27 +0100
-Message-ID: <CAPDyKFr3bLxH5cUx_GF0VonmiM_Qy_xuaOc43=TMmZUnaoxE5A@mail.gmail.com>
-References: <1420215248-20650-1-git-send-email-ulf.hansson@linaro.org>
-	<20150102181423.GS11285@n2100.arm.linux.org.uk>
-	<CAPDyKFpo=WpE3hDxqETVXOYX6pFsSmO7YybLJF=kJFyYFVcaoA@mail.gmail.com>
-	<20150112161820.GJ12302@n2100.arm.linux.org.uk>
-	<CAPDyKFrXEBxVRY+MVu1HnxeojmWENwTmX3vf8r5uSx0tdNLsvw@mail.gmail.com>
-	<20150113142322.GQ12302@n2100.arm.linux.org.uk>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 02/13] mmc: host: Add facility to support re-tuning
+Date: Tue, 13 Jan 2015 16:36:03 +0200
+Message-ID: <54B52D53.8080106@intel.com>
+References: <1417801271-15575-1-git-send-email-adrian.hunter@intel.com>	<1417801271-15575-3-git-send-email-adrian.hunter@intel.com>	<CAPDyKFo_51e=BERS9qX6x_LbK3tM5aijOicVkhQ5==39b+C93Q@mail.gmail.com>	<54B51C55.9060500@intel.com> <CAPDyKFpN285zHUZr61R51AuGwwXAJJsoUS7hbnmiO_+bQ=OuKQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f42.google.com ([209.85.216.42]:38613 "EHLO
-	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751190AbbAMOe2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jan 2015 09:34:28 -0500
-Received: by mail-qa0-f42.google.com with SMTP id dc16so2284441qab.1
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Jan 2015 06:34:27 -0800 (PST)
-In-Reply-To: <20150113142322.GQ12302@n2100.arm.linux.org.uk>
+Received: from mga14.intel.com ([192.55.52.115]:53211 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751257AbbAMOhv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 13 Jan 2015 09:37:51 -0500
+In-Reply-To: <CAPDyKFpN285zHUZr61R51AuGwwXAJJsoUS7hbnmiO_+bQ=OuKQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Alexandre Courbot <gnurou@gmail.com>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Olof Johansson <olof@lixom.net>, Hans de Goede <hdegoede@redhat.com>, Doug Anderson <dianders@chromium.org>, NeilBrown <neilb@suse.de>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-[...]
-
+On 13/01/15 16:22, Ulf Hansson wrote:
+> On 13 January 2015 at 14:23, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 13/01/15 13:25, Ulf Hansson wrote:
+>>> Hi Adrian,
+>>>
+>>> Thanks for working on this and apologize for my late reply!
+>>>
+>>> On 5 December 2014 at 18:41, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>> Currently, there is core support for tuning during
+>>>> initialization. There can also be a need to re-tune
+>>>> periodically (e.g. sdhci) or to re-tune after the
+>>>> host controller is powered off (e.g. after PM
+>>>> runtime suspend / resume) or to re-tune in response
+>>>> to CRC errors.
+>>>>
+>>>> The main requirements for re-tuning are:
+>>>>   - ability to enable /disable re-tuning
+>>>>   - ability to flag that re-tuning is needed
+>>>>   - ability to re-tune before any request
+>>>>   - ability to hold off re-tuning if the card is busy
+>>>>   - ability to hold off re-tuning if re-tuning is in
+>>>>   progress
+>>>>   - ability to run a re-tuning timer
+>>>
+>>> I suggest we skip the support for the re-tuning timer in this initial
+>>> step and thus remove the related functionality from this patchset. It
+>>> adds complexity, but more important it's not obvious that it actually
+>>> will help. I am more concerned that it randomly will cause a request
+>>> latency and thus decrease performance.
+>>>
+>>> The re-tuning period can't be selected "perfectly", so in this initial
+>>> step let's instead just rely on re-tune from the request retry path.
+>>>
+>>> If we do see a need for a doing re-tuning periodically, how about
+>>> using the runtime PM suspend path (of the mmc card device). In that
+>>> way, we should be able to minimize the impact on performance.
 >>
->> Thanks a lot for elaborating! I understand your concern now.
+>> Thank you for looking at the patches.
 >>
->> In this context, I believe it's important to state that I think these
->> host driver behaves badly! _All_ host drivers shall handle their
->> "power_up" things while they get MMC_POWER_UP through the ->set_ios()
->> callback. They shouldn't be taking short-cuts and ignore the
->> MMC_POWER_UP state, that also includes those host drivers which are
->> able to handle the power sequence by help from it's controller
->> hardware.
->
-> You can't solve this in this way.  Let's say that you decide to force
-> the inteligent controllers to power up and enable clocks in the
-> POWER_UP stage:
->
-> pwrseq          power sequence  host action
->
-> power_up                        no power applied
->                 POWER_UP        host applies power to the card, waits,
->                                 and applies the clock
->
-> power_on                        power and clock is applied
->                 POWER_ON        host does nothing
->
-> So now, you have a variability for the power_on() callback, where with
-> dumb hosts, the clock is not enabled, but for more inteligent hosts,
-> the clock has already enabled, and likely we have already waited the
-> 74 clocks necessary in the MMC protocol.
+>> I am not sure I know what you mean. sdhci already has a re-tuning timer, so
+>> this is just moving it into core, where it won't be used by other drivers
+>> unless they enable it.
+> 
+> I am kind of questioning the re-tuning timer in sdhci. What is it good for?
 
-I understand, so I was not thinking of fixing the actual problem but
-more to make the behaviour consistent.
+It is part of the SD Host Controller Standard Specification. The timer
+ensures that re-tuning is done before temperature changes could affect the
+"sampling point". It is needed for re-tuning mode 1 for UHS-I modes like SDR104.
 
->
->> I did quick research and found that the following host's ->set_ios()
->> callbacks need to be fixed in this regards.
->> au1xmmc_set_ios()
->> cb710_mmc_set_ios()
->> omap_hsmmc_set_ios()
->> sdricoh_set_ios()
->> __toshsd_set_ios()
->
-> Rather than fixing them, how about introducing a new method for host
-> controllers:
->
->         power_up()
->
-> which can be pointed to a library function which makes the ->set_ios
-> calls as the current mmc_power_up() function does for those dumb
-> controllers, but for the more inteligent controllers, just invokes
-> their power up sequence and returns when that is complete.
+> 
+> Can sdhci rely on that the mmc core performs a re-tune from the
+> request retry mechanism instead?
 
-Seems like a good idea!
+Not according to the standard.
 
->
->> > An alternative way to get consistency is to eliminate the pwrseq
->> > "power_on" callback altogether; the "power_up" callback will always
->> > be made before the host interface power sequence is started - and
->> > that is about the only thing we can guarantee given the variability
->> > in host interface designs.
+> 
 >>
->> Eliminating is likely not an option, since it would mean we will have
->> a hard time to cope with requirements for the pwrseq sequences.
+>> I am not sure what you want to leave in sdhci.c and what you want in core,
+>> if anything.
+> 
+> We need all the infrastructure code in the core. Much like what your
+> patchset does. Except that I would like you to remove the option of
+> having a timer and the corresponding complexity it adds.
+
+If we are going to follow the standard then that doesn't seem to be an option.
+
+> 
 >>
->> An option would be to move the call to the pwrseq ->power_on()
->> callback to the end of mmc_power_up(). That would make it as
->> consistent as we can from mmc core point of view. Right?
->
-> Yes, and you might as well call the pwrseq callbacks "->pre_power_on()"
-> and "->post_power_on()" - maybe even "->post_pwrclk_on()" to make it
-> clear that it happens after the power and clocks have been applied
-> according to the MMC/SD protocol.
->
-> What I'm envisioning mmc_power_up() becoming is something like this:
->
-> void mmc_power_up(struct mmc_host *host, u32 ocr)
-> {
->         if (host->ios.power_mode == MMC_POWER_ON)
->                 return;
->
->         mmc_host_clk_hold(host);
->
->         if (pwrseq)
->                 pwrseq->pre_power_on(host);
->
->         host->ios.vdd = fls(ocr) - 1;
->         host->ios.clock = host->f_init;
->         host->ios.power_mode = MMC_POWER_ON;
->         /* and set remainder of initial state of host->ios */
->
->         host->ops->power_up(host, &host->ios);
->
->         if (pwrseq)
->                 pwrseq->post_power_on(host);
->
->         mmc_host_clk_release(host);
-> }
->
-> The legacy power_up host method can save a copy host->ios, and manipulate
-> the saved copy to call mmc_set_ios() as we currently do, with all the
-> delays we have there.
->
+>> At a minimum I need sdhci to be able to switch from hs400 to hs200, re-tune,
+>> and switch back.
+> 
+> As stated, I am only questioning the timer, nothing else.
 
-Looks good!
+Ok so how should I proceed?
 
-I will rename the pwrseq callbacks to your proposal and send a v2.
-
-Kind regards
-Uffe
