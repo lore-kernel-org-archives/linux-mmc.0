@@ -1,64 +1,61 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH] mmc: dw_mmc: rockchip: Add DW_MCI_QUIRK_RETRY_DELAY
-Date: Tue, 13 Jan 2015 09:51:37 -0800
-Message-ID: <1421171497-9440-1-git-send-email-dianders@chromium.org>
+Subject: [PATCH] mmc: dw_mmc: Power on vqmmc in MMC_POWER_ON, not MMC_POWER_UP
+Date: Tue, 13 Jan 2015 15:58:44 -0800
+Message-ID: <1421193524-19967-1-git-send-email-dianders@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f172.google.com ([209.85.213.172]:45430 "EHLO
-	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752228AbbAMRvx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jan 2015 12:51:53 -0500
-Received: by mail-ig0-f172.google.com with SMTP id l13so5242241iga.5
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Jan 2015 09:51:53 -0800 (PST)
+Received: from mail-ig0-f175.google.com ([209.85.213.175]:60201 "EHLO
+	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751086AbbAMX7D (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jan 2015 18:59:03 -0500
+Received: by mail-ig0-f175.google.com with SMTP id h15so19868380igd.2
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Jan 2015 15:59:01 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Alexandru Stan <amstan@chromium.org>, addy.ke@rock-chips.com, Doug Anderson <dianders@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, amstan@chromium.org, addy.ke@rock-chips.com, yuvaraj.cd@gmail.com, Doug Anderson <dianders@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-We've seen at least one card that can get confused during all the
-errors generated during tuning on rk3288.  These errors seem to go
-away with DW_MCI_QUIRK_RETRY_DELAY.  That quirk is documented to be
-for 2.11a and on rk3288 I believe we have 2.70a, but it seems to be
-the same type of problem.
+If we power up vqmmc in MMC_POWER_ON then we end up turning it on
+before mmc_power_up() sets the signal voltage.  That's not so great
+since we might be powering it up at the wrong voltage.
 
-Specifically it looks like in certain error conditions (I saw this
-with Response CRC errors) that data keeps showing up in the FIFO even
-after the error is reported and the CD (command done) bit is set.  If
-we don't wait for this data to finish transferring then it confuses
-the next transaction.  In the specific failure case I ran into I found
-that I could monitor the data_state_mc_busy bit and wait for it to
-clear, but in other failure cases this bit was stuck at busy when we
-saw an error.  Hence a generic big delay seems like the only option.
+Note that this is how Yuvaraj originally coded things up in
+<https://patchwork.kernel.org/patch/4401231/> but he changed it on my
+suggestion.  Apparently I was wrong.
 
-I have seen this on rk3288, but adding it as a quirk for all Rockchip
-IP for now since most previous quirks have shown up on older IP as
-well.
-
+Reported-by: Alexandru M Stan <amstan@chromium.org>
 Signed-off-by: Doug Anderson <dianders@chromium.org>
 ---
-NOTES:
-* This is based atop Addy's patch (mmc: dw_mmc: add quirk for broken
-data transfer over scheme) at
-<https://patchwork.kernel.org/patch/5565431/>, but it would be trivial
-to apply this patch without that one if that were desirable.
-* If someone has a better solution to this problem, I'm all ears.
+ drivers/mmc/host/dw_mmc.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
 
- drivers/mmc/host/dw_mmc-rockchip.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index ba92ebd..b4caf1a 100644
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -74,7 +74,8 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
- 	host->sdio_id0 = 8;
- 
- 	/* It needs this quirk on all Rockchip SoCs */
--	host->pdata->quirks |= DW_MCI_QUIRK_BROKEN_DTO;
-+	host->pdata->quirks |= DW_MCI_QUIRK_BROKEN_DTO |
-+		DW_MCI_QUIRK_RETRY_DELAY;
- 
- 	return 0;
- }
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 2e8abc8..4d2e3c2 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1119,6 +1119,12 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 				return;
+ 			}
+ 		}
++		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
++		regs = mci_readl(slot->host, PWREN);
++		regs |= (1 << slot->id);
++		mci_writel(slot->host, PWREN, regs);
++		break;
++	case MMC_POWER_ON:
+ 		if (!IS_ERR(mmc->supply.vqmmc) && !slot->host->vqmmc_enabled) {
+ 			ret = regulator_enable(mmc->supply.vqmmc);
+ 			if (ret < 0)
+@@ -1127,10 +1133,6 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			else
+ 				slot->host->vqmmc_enabled = true;
+ 		}
+-		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+-		regs = mci_readl(slot->host, PWREN);
+-		regs |= (1 << slot->id);
+-		mci_writel(slot->host, PWREN, regs);
+ 		break;
+ 	case MMC_POWER_OFF:
+ 		if (!IS_ERR(mmc->supply.vmmc))
 -- 
 2.2.0.rc0.207.ga3a616c
 
