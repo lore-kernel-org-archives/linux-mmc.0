@@ -1,44 +1,61 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: tmio: add missing EXPORT_SYMBOL for tmio_mmc_host_alloc/free
-Date: Wed, 14 Jan 2015 09:30:35 +0100
-Message-ID: <CAPDyKFrNFr493FcN3A3k_tGo9J801ga91ooL=sZT6DS0vFwVoQ@mail.gmail.com>
-References: <201501131902.WqokttpY%fengguang.wu@intel.com>
-	<87twzvuvl1.wl%kuninori.morimoto.gx@renesas.com>
+Subject: Re: [PATCH] mmc: sdhci: Set SDHCI_POWER_ON with external vmmc
+Date: Wed, 14 Jan 2015 09:53:33 +0100
+Message-ID: <CAPDyKFpM_iqteu5pP03-iD2pji6ypeZJ1TA=LON1FVjJWrJk-g@mail.gmail.com>
+References: <1421216652-348-1-git-send-email-tim.kryger@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f175.google.com ([209.85.216.175]:38598 "EHLO
-	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753843AbbANIag (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jan 2015 03:30:36 -0500
-Received: by mail-qc0-f175.google.com with SMTP id p6so6195453qcv.6
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Jan 2015 00:30:35 -0800 (PST)
-In-Reply-To: <87twzvuvl1.wl%kuninori.morimoto.gx@renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1421216652-348-1-git-send-email-tim.kryger@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tim Kryger <tim.kryger@gmail.com>
+Cc: Chris Ball <chris@printf.net>, Alexandre Courbot <gnurou@gmail.com>, Sachin Kamat <spk.linux@gmail.com>, Linux MMC List <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "kbuild-all@01.org" <kbuild-all@01.org>
 
-On 14 January 2015 at 03:21, Kuninori Morimoto
-<kuninori.morimoto.gx@renesas.com> wrote:
-> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
->
-> tmio_mmc_host_alloc/free were added on tmio_mmc_pio.c,
-> but, it is missing EXPORT_SYMBOL for it.
-> Compile will be failed without this patch
->
->  ERROR: "tmio_mmc_host_free" [drivers/mmc/host/tmio_mmc.ko] undefined!
->  ERROR: "tmio_mmc_host_alloc" [drivers/mmc/host/tmio_mmc.ko] undefined!
->  ERROR: "tmio_mmc_host_free" [drivers/mmc/host/sh_mobile_sdhi.ko] undefined!
->  ERROR: "tmio_mmc_host_alloc" [drivers/mmc/host/sh_mobile_sdhi.ko] undefined!
->
-> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
++ linux-mmc
 
-Thanks!
+On 14 January 2015 at 07:24, Tim Kryger <tim.kryger@gmail.com> wrote:
+> Host controllers lacking the required internal vmmc regulator may still
+> follow the spec with regard to the LSB of SDHCI_POWER_CONTROL.  Set the
+> SDHCI_POWER_ON bit when vmmc is enabled to encourage the controller to
+> to drive CMD, DAT, SDCLK.
+>
+> This fixes a regression observed on some Qualcomm and Nvidia boards
+> caused by 5222161 mmc: sdhci: Improve external VDD regulator support.
+>
+> Signed-off-by: Tim Kryger <tim.kryger@gmail.com>
+> Tested-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
 
-I decided to squashed this change into patch "mmc: tmio: add
-tmio_mmc_host_alloc/free()", which was the one adding the related
-functions.
+Thanks! Applied for fixes.
+
+I noticed this wasn't posted to linux-mmc. I am anyway picking it up
+as this change has already been discussed and tested, see:
+https://lkml.org/lkml/2014/11/3/1029
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci.c | 6 ++++++
+>  1 file changed, 6 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ada1a3e..59a328a 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1239,6 +1239,12 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+>                 spin_unlock_irq(&host->lock);
+>                 mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+>                 spin_lock_irq(&host->lock);
+> +
+> +               if (mode != MMC_POWER_OFF)
+> +                       sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
+> +               else
+> +                       sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+> +
+>                 return;
+>         }
+>
+> --
+> 1.9.1
+>
