@@ -1,62 +1,50 @@
-From: Kukjin Kim <kgene@kernel.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [PATCH v4 0/2] mmc: dw_mmc: exynos: Add HS400 support
-Date: Thu, 15 Jan 2015 00:35:34 +0900
-Message-ID: <54B68CC6.1040907@kernel.org>
-References: <1421231446-4776-1-git-send-email-alim.akhtar@samsung.com> <54B67001.2090002@samsung.com>
+Date: Wed, 14 Jan 2015 16:56:46 +0100
+Message-ID: <CAPDyKFo0YB6UpjQXxQ9d9VhE6quur0mo=YNLdzB=xQoCE4J9xQ@mail.gmail.com>
+References: <1421231446-4776-1-git-send-email-alim.akhtar@samsung.com>
+	<54B67001.2090002@samsung.com>
+	<54B68CC6.1040907@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <54B67001.2090002@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Alim Akhtar <alim.akhtar@samsung.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-samsung-soc@vger.kernel.org, tgih.jun@samsung.com, chris@printf.net, dianders@chromium.org, kgene@kernel.org, a.kesavan@samsung.com, alim.akhtar@gmail.com, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f171.google.com ([209.85.216.171]:38217 "EHLO
+	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751280AbbANP4q (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jan 2015 10:56:46 -0500
+Received: by mail-qc0-f171.google.com with SMTP id b13so3787958qcw.2
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Jan 2015 07:56:46 -0800 (PST)
+In-Reply-To: <54B68CC6.1040907@kernel.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kukjin Kim <kgene@kernel.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, Doug Anderson <dianders@chromium.org>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Alim Akhtar <alim.akhtar@gmail.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 01/14/15 22:32, Jaehoon Chung wrote:
-> Hi, Alim.
-> 
-> On 01/14/2015 07:30 PM, Alim Akhtar wrote:
->> This adds HS400 mode support for exynos dw_mmc host controller.
+On 14 January 2015 at 16:35, Kukjin Kim <kgene@kernel.org> wrote:
+> On 01/14/15 22:32, Jaehoon Chung wrote:
+>> Hi, Alim.
 >>
->> Currently tested on Exynos5800-peach-pi platform for HS400 mode.
->> Tested HS200 mode with this series applied, HS200 still works.
+>> On 01/14/2015 07:30 PM, Alim Akhtar wrote:
+>>> This adds HS400 mode support for exynos dw_mmc host controller.
+>>>
+>>> Currently tested on Exynos5800-peach-pi platform for HS400 mode.
+>>> Tested HS200 mode with this series applied, HS200 still works.
+>>>
+>>> Appreciate testing on other exynos5/7 platform which supports emmc5.0
 >>
->> Appreciate testing on other exynos5/7 platform which supports emmc5.0
-> 
-> I will test this patch on exynos5/7 board.
-> 
+>> I will test this patch on exynos5/7 board.
+>>
+>
+> What's the result? :-) If it's OK, I'll take DT changes for exynos
+> stuff, I'm not sure about the driver changes though...
 
-What's the result? :-) If it's OK, I'll take DT changes for exynos
-stuff, I'm not sure about the driver changes though...
+Kukjin,
 
-Thanks,
-Kukjin
+As I understand it, there is a dependency between the patches, since
+driver adds supports for new DT bindings.
 
-> Best Regards,
-> Jaehoon Chung
->>
->> Changes in V4:
->> 	* drop the idea of changing existing binding for ciu_div as per [1]
->>         * addressed comments from Jaehoon Chung [2]
->>
->> [1] http://www.spinics.net/lists/linux-samsung-soc/msg40923.html
->> [2] http://www.spinics.net/lists/devicetree/msg64373.html
->>
->> Changes in V3:
->> 	rebased on ulf's next (commit: 607b448 mmc: core: Make tuning block patterns static)
->>
->> Seungwon Jeon (2):
->>   mmc: dw_mmc: exynos: Support eMMC's HS400 mode
->>   ARM: dts: Add HS400 support for exynos5420 and exynos5800
->>
->>  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    7 +
->>  arch/arm/boot/dts/exynos5420-peach-pit.dts         |    4 +-
->>  arch/arm/boot/dts/exynos5420-pinctrl.dtsi          |    7 +
->>  arch/arm/boot/dts/exynos5420-smdk5420.dts          |    4 +-
->>  arch/arm/boot/dts/exynos5800-peach-pi.dts          |    4 +-
->>  drivers/mmc/host/dw_mmc-exynos.c                   |  187 ++++++++++++++++----
->>  drivers/mmc/host/dw_mmc-exynos.h                   |   19 +-
->>  drivers/mmc/host/dw_mmc.c                          |   16 +-
->>  drivers/mmc/host/dw_mmc.h                          |    2 +
->>  9 files changed, 212 insertions(+), 38 deletions(-)
+So, unless I am mistaken I think it would be best to take this
+complete patchset through my mmc tree. With your ack of course.
+
+Kind regards
+Uffe
