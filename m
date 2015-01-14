@@ -1,7 +1,7 @@
 From: <micky_ching@realsil.com.cn>
-Subject: [PATCH 2/2] mmc: rtsx: check sg_count before long data xfer
-Date: Wed, 14 Jan 2015 11:09:12 +0800
-Message-ID: <55d9f11a9338acd70f820673d4548ac9939dabc6.1421204431.git.micky_ching@realsil.com.cn>
+Subject: [PATCH 1/2] mmc: rtsx: finish request if no card exist
+Date: Wed, 14 Jan 2015 11:09:11 +0800
+Message-ID: <c19c0517af26529df439333b556315a4bc88d815.1421204431.git.micky_ching@realsil.com.cn>
 References: <cover.1421204431.git.micky_ching@realsil.com.cn>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,44 +23,47 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Micky Ching <micky_ching@realsil.com.cn>
 
-Check sg_count before sending long data xfer.
-Because dma_map_sg() return int, and sg_count may be negative,
-so using int instead of unsigned.
+Return error-code directly if no card exist, this can
+make card remove faster.
 
 Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
 ---
- drivers/mmc/host/rtsx_pci_sdmmc.c | 11 +++++++++--
- 1 file changed, 9 insertions(+), 2 deletions(-)
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index b435806..1d3d6c4 100644
+index 26c6a7c..b435806 100644
 --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
 +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -54,9 +54,9 @@ struct realtek_pci_sdmmc {
- #define SDMMC_POWER_ON		1
- #define SDMMC_POWER_OFF		0
+@@ -100,6 +100,11 @@ static void sd_print_debug_regs(struct realtek_pci_sdmmc *host)
+ #define sd_print_debug_regs(host)
+ #endif /* DEBUG */
  
--	unsigned int		sg_count;
-+	int			sg_count;
- 	s32			cookie;
--	unsigned int		cookie_sg_count;
-+	int			cookie_sg_count;
- 	bool			using_cookie;
- };
- 
-@@ -557,6 +557,13 @@ static int sd_rw_multi(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
- {
- 	struct mmc_data *data = mrq->data;
- 
-+	if (host->sg_count < 0) {
-+		data->error = host->sg_count;
-+		dev_dbg(sdmmc_dev(host), "%s: sg_count = %d is invalid\n",
-+			__func__, host->sg_count);
-+		return data->error;
-+	}
++static inline int sd_get_cd_int(struct realtek_pci_sdmmc *host)
++{
++	return rtsx_pci_readl(host->pcr, RTSX_BIPR) & SD_EXIST;
++}
 +
- 	if (data->flags & MMC_DATA_READ)
- 		return sd_read_long_data(host, mrq);
+ static void sd_cmd_set_sd_cmd(struct rtsx_pcr *pcr, struct mmc_command *cmd)
+ {
+ 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_CMD0, 0xFF,
+@@ -798,7 +803,7 @@ static void sd_request(struct work_struct *work)
+ 	unsigned int data_size = 0;
+ 	int err;
+ 
+-	if (host->eject) {
++	if (host->eject || !sd_get_cd_int(host)) {
+ 		cmd->error = -ENOMEDIUM;
+ 		goto finish;
+ 	}
+@@ -1116,7 +1121,7 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
+ 	u32 val;
+ 
+ 	if (host->eject)
+-		return -ENOMEDIUM;
++		return cd;
+ 
+ 	mutex_lock(&pcr->pcr_mutex);
  
 -- 
 1.9.1
