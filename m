@@ -1,45 +1,49 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: host: sdhci: Added a space before (
-Date: Wed, 14 Jan 2015 11:21:57 +0100
-Message-ID: <CAPDyKFpP4a2DOprszdZtZ4q1=yQcE2UL8+t76YRdnROURLwRqw@mail.gmail.com>
-References: <1421162244-5980-1-git-send-email-md.jamalmohiuddin@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1421162244-5980-1-git-send-email-md.jamalmohiuddin@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mohammad Jamal <md.jamalmohiuddin@gmail.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+From: Alim Akhtar <alim.akhtar@samsung.com>
+Subject: [PATCH v4 0/2] mmc: dw_mmc: exynos: Add HS400 support
+Date: Wed, 14 Jan 2015 16:00:44 +0530
+Message-ID: <1421231446-4776-1-git-send-email-alim.akhtar@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:59856 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752396AbbANKjE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jan 2015 05:39:04 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: chris@printf.net, ulf.hansson@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, dianders@chromium.org, alim.akhtar@gmail.com, kgene@kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, a.kesavan@samsung.com
 
-On 13 January 2015 at 16:17, Mohammad Jamal <md.jamalmohiuddin@gmail.com> wrote:
-> This patch solves the coding style issue by adding a space
-> before (
->
-> Signed-off-by: Mohammad Jamal <md.jamalmohiuddin@gmail.com>
+This adds HS400 mode support for exynos dw_mmc host controller.
 
-Thanks! Applied for next.
+Currently tested on Exynos5800-peach-pi platform for HS400 mode.
+Tested HS200 mode with this series applied, HS200 still works.
 
-Kind regards
-Uffe
+Appreciate testing on other exynos5/7 platform which supports emmc5.0
 
-> ---
->  drivers/mmc/host/sdhci.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 1453cd1..910ee7b 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1624,7 +1624,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
->          * signalling timeout and CRC errors even on CMD0. Resetting
->          * it on each ios seems to solve the problem.
->          */
-> -       if(host->quirks & SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS)
-> +       if (host->quirks & SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS)
->                 sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
->
->         mmiowb();
-> --
-> 1.7.9.5
->
+Changes in V4:
+	* drop the idea of changing existing binding for ciu_div as per [1]
+        * addressed comments from Jaehoon Chung [2]
+
+[1] http://www.spinics.net/lists/linux-samsung-soc/msg40923.html
+[2] http://www.spinics.net/lists/devicetree/msg64373.html
+
+Changes in V3:
+	rebased on ulf's next (commit: 607b448 mmc: core: Make tuning block patterns static)
+
+Seungwon Jeon (2):
+  mmc: dw_mmc: exynos: Support eMMC's HS400 mode
+  ARM: dts: Add HS400 support for exynos5420 and exynos5800
+
+ .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    7 +
+ arch/arm/boot/dts/exynos5420-peach-pit.dts         |    4 +-
+ arch/arm/boot/dts/exynos5420-pinctrl.dtsi          |    7 +
+ arch/arm/boot/dts/exynos5420-smdk5420.dts          |    4 +-
+ arch/arm/boot/dts/exynos5800-peach-pi.dts          |    4 +-
+ drivers/mmc/host/dw_mmc-exynos.c                   |  187 ++++++++++++++++----
+ drivers/mmc/host/dw_mmc-exynos.h                   |   19 +-
+ drivers/mmc/host/dw_mmc.c                          |   16 +-
+ drivers/mmc/host/dw_mmc.h                          |    2 +
+ 9 files changed, 212 insertions(+), 38 deletions(-)
+
+-- 
+1.7.9.5
+
