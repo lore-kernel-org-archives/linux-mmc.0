@@ -1,69 +1,77 @@
-From: <micky_ching@realsil.com.cn>
-Subject: [PATCH 1/2] mmc: rtsx: finish request if no card exist
-Date: Wed, 14 Jan 2015 11:09:11 +0800
-Message-ID: <c19c0517af26529df439333b556315a4bc88d815.1421204431.git.micky_ching@realsil.com.cn>
-References: <cover.1421204431.git.micky_ching@realsil.com.cn>
+From: Tim Kryger <tim.kryger@gmail.com>
+Subject: Re: Possible regression with commit 52221610d
+Date: Tue, 13 Jan 2015 21:00:01 -0800
+Message-ID: <CAD7vxxJsrq2DQ=pDNn3yv=dMPK7vE=aoW9m36hBRdGypL2_i7g@mail.gmail.com>
+References: <54584260.8030602@nvidia.com>
+	<CAD7vxxKb668Y0hpYRhwMjQnNrDCQMzn=XGtLEU+ZAtY=OFjHLg@mail.gmail.com>
+	<545895B2.2000101@nvidia.com>
+	<CAD7vxxLmLsRpxrYqc30nV0m6atO7jyNgv1Wh4R8GCAy3+y-1dw@mail.gmail.com>
+	<CAJAp7OgmrEX1XQcwvwf4jzW3eK9TUgde2MQQOp7fOJzvmO=tCQ@mail.gmail.com>
+	<CAD7vxxJaCdKiG9h_32OUSUkQMQk6AAwi6d0v01KEnSVTF8cN1w@mail.gmail.com>
+	<CAJAp7Oh+ziadeEDWsus_k_2w33vPJxGGcGZyMNQkpLemf7SAhg@mail.gmail.com>
+	<CAJAp7OhWKoAoZfq+zWspLnqUkoJb3izMD41Vyfn0AW4Jni8HAQ@mail.gmail.com>
+	<CAD7vxxLe5COSrsnVZ2G_uhtUXfjFnDA45HSG2dNT1LrxcyFcQw@mail.gmail.com>
+	<CAJAp7OhAP-rDM2zyo0Yr0-7erUp4ewKJ+tC=vyU-YMP_MzXJbA@mail.gmail.com>
+	<CAD7vxxJy2sE1os+ipJZV7_GvEyhu8cE-0QLBS5SVHUqfjkYBwQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-In-Reply-To: <cover.1421204431.git.micky_ching@realsil.com.cn>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: chris@printf.net, ulf.hansson@linaro.org, sameo@linux.intel.com
-Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, devel@linuxdriverproject.org, rogerable@realtek.com, dan.carpenter@oracle.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAD7vxxJy2sE1os+ipJZV7_GvEyhu8cE-0QLBS5SVHUqfjkYBwQ@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Bjorn Andersson <bjorn@kryo.se>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>, Sachin Kamat <spk.linux@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Micky Ching <micky_ching@realsil.com.cn>
+On Sun, Dec 21, 2014 at 7:01 PM, Tim Kryger <tim.kryger@gmail.com> wrote:
+> On Wed, Dec 17, 2014 at 11:57 AM, Bjorn Andersson <bjorn@kryo.se> wrote:
+>
+>> I'm somewhat puzzled to what benefit 52221610d brings after bringing
+>> back the write of BIT(0). Is it just that we don't hit the BUG() on
+>> non-standard voltages?
+>
+> It is to allow the use of external regulators that are capable of
+> supplying a standard SD/MMC voltage but none of the standard SDHCI
+> voltages.
+>
+>> The full paragraph regarding BIT(0) reads:
+>>
+>> Before setting this bit, the SD Host Driver shall set SD Bus Voltage
+>> Select. If the
+>> Host Controller detects the No Card state, this bit shall be cleared.
+>> If this bit is cleared, the Host Controller shall immediately stop
+>> driving CMD and
+>> DAT[3:0] (tri-state) and drive SDCLK to low level (Refer to Section 2.2.14).
+>>
+>> So the Qualcomm HW engineers implemented the last "shall", but if
+>> someone else (what did nvidia do here?) also implemented the first
+>> "shall"s then we're back at needing a full revert of 52221610d.
+>
+> It is difficult to predict how non-compliant host controllers will
+> behave in the area where they have chosen to deviate from the
+> standard.
+>
+> Do controllers that lack internal regulators claim to support 1.8,
+> 3.0, or 3.3v in the host capabilities register?  Or will they set none
+> of these bits?
+>
+> They lack the ability to influence the externally supplied VDD but
+> will they place requirements on the values of the SD Bus Voltage
+> Select field?
+>
+> "If the Host Driver selects an unsupported voltage in the SD Bus
+> Voltage Select field, the Host Controller may ignore writes to SD Bus
+> Power and keep its value at zero."
+>
+> I would hope that controllers that fail to implement the regulator
+> would allow the SD Bus Voltage Select field to be set to any value.
+>
+> We have established that it is okay to leave the Voltage Select as
+> zero in the Broadcom, Qualcomm, and Samsung implementations.
+>
+> It would be nice to get confirmation that this is also the case for
+> other implementations that rely on an external regulator.
 
-Return error-code directly if no card exist, this can
-make card remove faster.
+I took a look at Nvidia's host controller in the Tegra124 SoC on a
+Jetson TK1 board.
 
-Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 26c6a7c..b435806 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -100,6 +100,11 @@ static void sd_print_debug_regs(struct realtek_pci_sdmmc *host)
- #define sd_print_debug_regs(host)
- #endif /* DEBUG */
- 
-+static inline int sd_get_cd_int(struct realtek_pci_sdmmc *host)
-+{
-+	return rtsx_pci_readl(host->pcr, RTSX_BIPR) & SD_EXIST;
-+}
-+
- static void sd_cmd_set_sd_cmd(struct rtsx_pcr *pcr, struct mmc_command *cmd)
- {
- 	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_CMD0, 0xFF,
-@@ -798,7 +803,7 @@ static void sd_request(struct work_struct *work)
- 	unsigned int data_size = 0;
- 	int err;
- 
--	if (host->eject) {
-+	if (host->eject || !sd_get_cd_int(host)) {
- 		cmd->error = -ENOMEDIUM;
- 		goto finish;
- 	}
-@@ -1116,7 +1121,7 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
- 	u32 val;
- 
- 	if (host->eject)
--		return -ENOMEDIUM;
-+		return cd;
- 
- 	mutex_lock(&pcr->pcr_mutex);
- 
--- 
-1.9.1
+Fortunately, it behaves like the Qualcomm chip and only requires the LSB be set.
