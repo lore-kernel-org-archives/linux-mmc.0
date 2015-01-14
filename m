@@ -1,124 +1,158 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] gpio: pcf857x: restore the initial line state of all pcf lines
-Date: Wed, 14 Jan 2015 12:58:24 +0100
-Message-ID: <CACRpkdago2vWJYFmywULna6nkrbtciPZFESuuKixF0r8rSB1Sw@mail.gmail.com>
-References: <1418371601-22658-1-git-send-email-kishon@ti.com>
-	<548F498F.7050202@ti.com>
-	<549271A9.5040701@ti.com>
-	<5492E09F.1000003@ti.com>
-	<54AA2EB1.8090501@ti.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 02/13] mmc: host: Add facility to support re-tuning
+Date: Wed, 14 Jan 2015 14:24:53 +0200
+Message-ID: <54B66015.1010507@intel.com>
+References: <1417801271-15575-1-git-send-email-adrian.hunter@intel.com>	<1417801271-15575-3-git-send-email-adrian.hunter@intel.com>	<CAPDyKFo_51e=BERS9qX6x_LbK3tM5aijOicVkhQ5==39b+C93Q@mail.gmail.com>	<54B51C55.9060500@intel.com>	<CAPDyKFpN285zHUZr61R51AuGwwXAJJsoUS7hbnmiO_+bQ=OuKQ@mail.gmail.com>	<54B52D53.8080106@intel.com>	<CAPDyKFr-U+z3B5bhfP36Lxju5=zS6ZxFL8usm4XypodYLZ0_dw@mail.gmail.com>	<54B53592.9070303@broadcom.com>	<CAPDyKFrs9SVt+8OSTHbkCFiY5ujdfXsqjg7E837CVZjEqz4EvA@mail.gmail.com>	<54B54187.7080008@broadcom.com>	<CAPDyKFqwQ+GPLv9T3fW3Y74hKhagKSOiXydvL9WoK8y3k0O6hQ@mail.gmail.com>	<54B63D94.2050602@intel.com> <CAPDyKFosO9D6sQagk1nPRZ5aTMDhYu2P7Y5jzFUdA8gAcTNJog@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <54AA2EB1.8090501@ti.com>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Nishanth Menon <nm@ti.com>, Alexandre Courbot <gnurou@gmail.com>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, Linux-OMAP <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Benoit Parrot <bparrot@ti.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:45905 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752886AbbANM0l (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 14 Jan 2015 07:26:41 -0500
+In-Reply-To: <CAPDyKFosO9D6sQagk1nPRZ5aTMDhYu2P7Y5jzFUdA8gAcTNJog@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Arend van Spriel <arend@broadcom.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>
 
-On Mon, Jan 5, 2015 at 7:26 AM, Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> On Thursday 18 December 2014 07:41 PM, Nishanth Menon wrote:
->> On 12/18/2014 12:18 AM, Kishon Vijay Abraham I wrote:
+On 14/01/15 12:13, Ulf Hansson wrote:
+> On 14 January 2015 at 10:57, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 14/01/15 11:47, Ulf Hansson wrote:
+>>> On 13 January 2015 at 17:02, Arend van Spriel <arend@broadcom.com> wrote:
+>>>> On 01/13/15 16:41, Ulf Hansson wrote:
+>>>>>
+>>>>> On 13 January 2015 at 16:11, Arend van Spriel<arend@broadcom.com>  wrote:
+>>>>>>
+>>>>>> On 01/13/15 15:56, Ulf Hansson wrote:
+>>>>>>>
+>>>>>>>
+>>>>>>> [...]
+>>>>>>>
+>>>>>>>>>> Thank you for looking at the patches.
+>>>>>>>>>>
+>>>>>>>>>> I am not sure I know what you mean. sdhci already has a re-tuning
+>>>>>>>>>> timer, so
+>>>>>>>>>> this is just moving it into core, where it won't be used by other
+>>>>>>>>>> drivers
+>>>>>>>>>> unless they enable it.
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>>
+>>>>>>>>> I am kind of questioning the re-tuning timer in sdhci. What is it good
+>>>>>>>>> for?
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> It is part of the SD Host Controller Standard Specification. The timer
+>>>>>>>> ensures that re-tuning is done before temperature changes could affect
+>>>>>>>> the
+>>>>>>>> "sampling point". It is needed for re-tuning mode 1 for UHS-I modes
+>>>>>>>> like
+>>>>>>>> SDR104.
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>> Does the spec say what value the timer should have?
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> It is read from the Capabilities register in the SD host controller, ie.
+>>>>>> in
+>>>>>> field "Timer Count for Re-Tuning" (see below).
+>>>>>>
+>>>>>> Regards,
+>>>>>> Arend
+>>>>>>
+>>>>>> Timer Count for Re-Tuning
+>>>>>> This field indicates an initial value of the Re-Tuning Timer for
+>>>>>> Re-Tuning
+>>>>>> Mode 1 to 3. Setting to 0 disables Re-Tuning Timer.
+>>>>>> 0h      Re-Tuning Timer disabled
+>>>>>> 1h      1 seconds
+>>>>>> 2h      2 seconds
+>>>>>> 3h      4 seconds
+>>>>>> 4h      8 seconds
+>>>>>> .....   ......................
+>>>>>> n       2(n-1) seconds
+>>>>>> .....   ......................
+>>>>>> Bh      1024 seconds
+>>>>>> Eh - Ch Reserved
+>>>>>> Fh      Get information from other source
+>>>>>
+>>>>>
+>>>>> Thanks for sharing this information, but unfortunate I don't
+>>>>> understand much from it.
+>>>>>
+>>>>> Is the host driver intended to read/poll this register to find a good
+>>>>> value?
+>>>>
+>>>>
+>>>> You can download the spec (and others) here [1]. sdhci currently implements
+>>>> retuning mode 1, which is decribed in the spec:
+>>>>
+>>>> Re-Tuning Timer Control Example for Re-Tuning Mode 1
+>>>> The initial value of re-tuning timer is provided by Timer Count for
+>>>> Re-Tuning field in this register. The timer starts counting by loading the
+>>>> initial value. When the timer expires, the Host Driver marks an expiration
+>>>> flag. On receiving a command request, the Host driver checks the expiration
+>>>> flag. If the expiration flag is set, then the Host Driver should perform the
+>>>> re-tuning procedure before issuing a command. If the expiration flag is not
+>>>> set, then the Host Driver issues a command without performing the re-tuning
+>>>> procedure. Every time the re-tuning procedure is performed, the timer loads
+>>>> the new initial value and the expiration flag is cleared.
+>>>>
+>>>> So the host controller could indeed update this register for subsequent
+>>>> retuning.
 >>>
+>>> Arend, thanks for the link and information. So, I decided to go for a
+>>> look in there.
 >>>
->>> On Tuesday 16 December 2014 02:20 AM, Nishanth Menon wrote:
->>>> On 12/12/2014 02:06 AM, Kishon Vijay Abraham I wrote:
->>>>> The reset values for all the PCF lines are high and hence on shutdown
->>>>> we should drive all the lines high in order to bring it to the reset state.
->>>>>
->>>>> This is actually required since pcf doesn't have a reset line and even after
->>>>> warm reset (by invoking "reboot" in prompt) the pcf lines maintains it's
->>>>> previous programmed state. This becomes a problem if the boards are designed
->>>>> to work with the default initial state.
->>>>>
->>>>> DRA7XX_evm uses PCF8575 and one of the PCF output lines feeds to MMC/SD and
->>>>> this line should be driven high in order for the MMC/SD to be detected.
->>>>> This line is modelled as regulator and the hsmmc driver takes care of enabling
->>>>> and disabling it. In the case of 'reboot', during shutdown path as part of it's
->>>>> cleanup process the hsmmc driver disables this regulator. This makes MMC boot
->>>>> not functional.
->>>>>
->>>>> Fixed it by driving high all the pcf lines.
->>>>>
->>>>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
->>>>> ---
->>>>>  drivers/gpio/gpio-pcf857x.c |    9 +++++++++
->>>>>  1 file changed, 9 insertions(+)
->>>>>
->>>>> diff --git a/drivers/gpio/gpio-pcf857x.c b/drivers/gpio/gpio-pcf857x.c
->>>>> index 236708a..00b15b2 100644
->>>>> --- a/drivers/gpio/gpio-pcf857x.c
->>>>> +++ b/drivers/gpio/gpio-pcf857x.c
->>>>> @@ -448,6 +448,14 @@ static int pcf857x_remove(struct i2c_client *client)
->>>>>    return status;
->>>>>  }
->>>>>
->>>>> +static void pcf857x_shutdown(struct i2c_client *client)
->>>>> +{
->>>>> +  struct pcf857x *gpio = i2c_get_clientdata(client);
->>>>> +
->>>>> +  /* Drive all the I/O lines high */
->>>>> +  gpio->write(gpio->client, BIT(gpio->chip.ngpio) - 1);
->>>>
->>>> you might force a contention here - depending on System configuration.
->>>> example:
->>>> +-------+
->>>> |       |
->>>> |  U1   |         +------+      +-----------+
->>>> |       +--------->      |      |           |
->>>> +-------+         |      |      |           |
->>>>                   | Switch<-----+    SoC    |
->>>> +-------+         |      |      |           |
->>>> |       |         |      |      |           |
->>>> | U2    <---------+--^---+      +-----------+
->>>> |       |            |
->>>> |       |            |
->>>> +-------+            |
->>>>                   +--+--+
->>>>                   |     |
->>>>                   | PCF |
->>>>                   |     |
->>>>                   +-----+
->>>>
->>>> At low, SoC pin is connected to U2 as drive. when reset to high, you
->>>> now have U1 driving to the same pin that SoC has, potentially
->>>> resulting in contention.
->>>>
->>>>
->>>> Unfortunately, at this level, you do not know what the state of the
->>>> system is, blindly forcing a pin level will potentially cause
->>>> contention risk depending on pin configuration.
+>>> >From the same section you quoted above:
+>>> ------
+>>> (1) Re-Tuning Mode 1
+>>> The host controller does not have any internal logic to detect when
+>>> the re-tuning needs to be performed. In this case, the Host Driver
+>>> should maintain all re-tuning timings by using a Re-Tuning Timer. To
+>>> enable inserting the re-tuning procedure during data transfers, the
+>>> data length per read/write command shall be limited up to 4MB.
+>>> ------
 >>>
->>> Assume we are doing a reset when the system is powered on, irrespective of the
->>> state of the system, we'll be forcing the pin level to the default state.
+>>> That means, we can't get _any_ help from the controller HW (in mode 1)
+>>> to find a good value for the timer.
 >>
->> Yes, I dont deny that system will be fine *after* reset sequence is
->> started or completed. However there is a duration between the pcf
->> shutdown handler is called and the final reset handler is invoked -
->> that is the duration when  the contention might cause device behavior.
->> Essentially ignoring the state various drivers have asked PCF to setup
->> the pins and doing a hands down configuration may have side effects we
->> cant properly expect.
->
-> The solution might be to invoke the shutdown handler of the various drivers
-> using the PCF before the shutdown handler of the PCF driver itself gets
-> invoked? But I'm not sure how can that be achieved in linux kernel :-(
+>> In fact the timer value *is* defined in the Capabilities Register (Offset
+>> 040h) bits 43-40 Timer Count for Re-Tuning
+>>
+>> It has been supported since 2011, see:
+>>
+>>         commit cf2b5eea1ea0ff9b3184bc6771bcb93a9fdcd1d9
+>>         "mmc: sdhci: add support for retuning mode 1"
+>>
+> 
+> The value from the register is also just randomly selected, only
+> difference is that it's the HW that has randomly set it.
 
-#include <linux/reboot.h>
+Presumably the value is chosen based on the maximum rate of temperature
+change and the corresponding effect that has on the signal.
 
-static int foo_reboot_handler(struct notifier_block *this,
-                                unsigned long code,
-                                void *unused)
-{
-        pr_crit("do some last minute stuff\n");
-        return NOTIFY_OK;
-}
+> 
+> Even if the above commit was merged, I don't think it was the correct
+> way of dealing with re-tuning.
+> 
+> First of all, re-tuning this is a mmc protocol specific thing should
+> be managed from the mmc core, like the approach you have taken in your
+> $subject patchset. Second I question whether the timer is useful at
+> all.
 
-static struct notifier_block foo_reboot_notifier = {
-        .notifier_call = foo_reboot_handler,
-};
+The SD Host Controller Specification does not document another way to do
+mode 1 re-tuning. The timer is it. Otherwise re-tuning is never done.
 
-register_reboot_notifier(&foo_reboot_notifier);
+In the patches I sent, the driver must call mmc_retune_needed() to set
+host->need_retune = 1 otherwise mmc_retune() does nothing.
 
-Yours,
-Linus Walleij
+I would like to extend the model to include transparently re-tuning and
+re-trying when there is a CRC error, but that is a separate issue, not
+documented in the spec but recommended by others.
+
