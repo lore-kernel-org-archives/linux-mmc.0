@@ -1,61 +1,43 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH] mmc: dw_mmc: Power on vqmmc in MMC_POWER_ON, not MMC_POWER_UP
-Date: Tue, 13 Jan 2015 15:58:44 -0800
-Message-ID: <1421193524-19967-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f175.google.com ([209.85.213.175]:60201 "EHLO
-	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751086AbbAMX7D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Jan 2015 18:59:03 -0500
-Received: by mail-ig0-f175.google.com with SMTP id h15so19868380igd.2
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Jan 2015 15:59:01 -0800 (PST)
-Sender: linux-mmc-owner@vger.kernel.org
+From: <micky_ching@realsil.com.cn>
+Subject: [PATCH 0/2] mmc: rtsx: add check before sending request
+Date: Wed, 14 Jan 2015 11:09:10 +0800
+Message-ID: <cover.1421204431.git.micky_ching@realsil.com.cn>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: chris@printf.net, ulf.hansson@linaro.org, sameo@linux.intel.com
+Cc: gregkh@linuxfoundation.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wei_wang@realsil.com.cn, devel@linuxdriverproject.org, rogerable@realtek.com, dan.carpenter@oracle.com
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, amstan@chromium.org, addy.ke@rock-chips.com, yuvaraj.cd@gmail.com, Doug Anderson <dianders@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-If we power up vqmmc in MMC_POWER_ON then we end up turning it on
-before mmc_power_up() sets the signal voltage.  That's not so great
-since we might be powering it up at the wrong voltage.
+From: Micky Ching <micky_ching@realsil.com.cn>
 
-Note that this is how Yuvaraj originally coded things up in
-<https://patchwork.kernel.org/patch/4401231/> but he changed it on my
-suggestion.  Apparently I was wrong.
+Add check before sending request can make request return faster.
+- finish request if no card exist
+  This can make request finish faster, especial for some sdio card,
+  when card removed, there still a lot of command pending,
+  if we check card exist and stop request, the card will disappear
+  faster in user space.
 
-Reported-by: Alexandru M Stan <amstan@chromium.org>
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
- drivers/mmc/host/dw_mmc.c | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
+- check sg_count before long data xfer
+  modify sg_count type unsigned -> int, because dma_map_sg() return
+  int, and this value can be negative to indicate some error occurs.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 2e8abc8..4d2e3c2 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1119,6 +1119,12 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 				return;
- 			}
- 		}
-+		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
-+		regs = mci_readl(slot->host, PWREN);
-+		regs |= (1 << slot->id);
-+		mci_writel(slot->host, PWREN, regs);
-+		break;
-+	case MMC_POWER_ON:
- 		if (!IS_ERR(mmc->supply.vqmmc) && !slot->host->vqmmc_enabled) {
- 			ret = regulator_enable(mmc->supply.vqmmc);
- 			if (ret < 0)
-@@ -1127,10 +1133,6 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			else
- 				slot->host->vqmmc_enabled = true;
- 		}
--		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
--		regs = mci_readl(slot->host, PWREN);
--		regs |= (1 << slot->id);
--		mci_writel(slot->host, PWREN, regs);
- 		break;
- 	case MMC_POWER_OFF:
- 		if (!IS_ERR(mmc->supply.vmmc))
+Micky Ching (2):
+  mmc: rtsx: finish request if no card exist
+  mmc: rtsx: check sg_count before long data xfer
+
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 20 ++++++++++++++++----
+ 1 file changed, 16 insertions(+), 4 deletions(-)
+
 -- 
-2.2.0.rc0.207.ga3a616c
-
+1.9.1
