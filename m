@@ -1,84 +1,78 @@
-From: Tomeu Vizoso <tomeu@tomeuvizoso.net>
-Subject: Re: [RFC 0/3] mmc: Add dynamic frequency scaling
-Date: Thu, 15 Jan 2015 16:25:19 +0100
-Message-ID: <CAAObsKCUed_-XndZC_-mn_MWt5f2h0OUff_FHC30W4+2VQxsQg@mail.gmail.com>
-References: <1421054585-9032-1-git-send-email-k.kozlowski@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f177.google.com ([209.85.216.177]:60597 "EHLO
-	mail-qc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753515AbbAOPZk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Jan 2015 10:25:40 -0500
-In-Reply-To: <1421054585-9032-1-git-send-email-k.kozlowski@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Tomeu Vizoso <tomeu.vizoso-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>
+Subject: [PATCH v2 08/11] mmc: pwrseq_simple: Add support for a delay
+Date: Thu, 15 Jan 2015 17:12:20 +0100
+Message-ID: <1421338359-27467-9-git-send-email-tomeu.vizoso@collabora.com>
+References: <1421338359-27467-1-git-send-email-tomeu.vizoso@collabora.com>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1421338359-27467-1-git-send-email-tomeu.vizoso-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Javier Martinez Canillas <javier.martinez-ZGY8ohtN/8pPYcu2f3hruQ@public.gmane.org>, Dylan Reid <dgreid-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Simon Glass <sjg-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tomeu Vizoso <tomeu.vizoso-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Kukjin Kim <kgene@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc@vger.kernel.org, Kyungmin Park <kyungmin.park@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>
 
-On 12 January 2015 at 10:23, Krzysztof Kozlowski
-<k.kozlowski@samsung.com> wrote:
-> Hi,
->
->
-> I would like to hear some comments about idea of scaling MMC clock
-> frequency. The basic idea is to lower the clock when device is
-> completely idle or not busy enough.
->
-> The patchset adds MMC card as a devfreq device and uses simple_ondemand
-> as governor. In idle this gave benefits (less energy consumed during
-> idle):
-> 1. Trats2 (Exynos4412): 2.6%
-> 2. Rinato (Exynos3250): 1%
->
-> but (especially on Rinato) it had impact on performance (probably
-> because ondemand triggering a little to late). What is interesting
-> manually changing the clock (without this patchset) gave slightly
-> bigger benefits. Maybe the devfreq introduces noticeable overhead?
+Signed-off-by: Tomeu Vizoso <tomeu.vizoso-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>
+---
+ Documentation/devicetree/bindings/mmc/mmc,pwrseq-simple.txt | 2 ++
+ drivers/mmc/core/pwrseq_simple.c                            | 8 ++++++++
+ 2 files changed, 10 insertions(+)
 
-Could it be because of the polling interval being too long thus it
-being too slow to ramp up?
-
-That's a problem with all polling devfreq drivers, it has been
-proposed before using pm_qos to to reduce the polling interval when
-some event indicates that the utilization may grow abruptly in the
-near future.
-
-I don't think pm_qos is the best mechanism for that, maybe something
-new needs to be devised.
-
-Regards,
-
-Tomeu
-
->
-> Comments are welcomed. Maybe on other platforms this has bigger impact?
->
-> Best regards,
-> Krzysztof
->
->
-> Krzysztof Kozlowski (3):
->   mmc: Add dynamic frequency scaling
->   ARM: dts: Specify MSHC realistic clocks and use frequency scaling
->   ARM: dts: Use frequency scaling for MSHC
->
->  Documentation/devicetree/bindings/mmc/mmc.txt |   2 +
->  arch/arm/boot/dts/exynos3250-rinato.dts       |   1 +
->  arch/arm/boot/dts/exynos4412-trats2.dts       |   4 +-
->  drivers/mmc/card/block.c                      | 247 ++++++++++++++++++++++++++
->  drivers/mmc/core/Kconfig                      |  16 ++
->  drivers/mmc/core/core.h                       |   1 -
->  drivers/mmc/core/host.c                       |   2 +
->  include/linux/mmc/card.h                      |   8 +
->  include/linux/mmc/host.h                      |   3 +
->  9 files changed, 282 insertions(+), 2 deletions(-)
->
-> --
-> 1.9.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
+diff --git a/Documentation/devicetree/bindings/mmc/mmc,pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc,pwrseq-simple.txt
+index 6fe0cd6..b353381 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc,pwrseq-simple.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc,pwrseq-simple.txt
+@@ -14,10 +14,12 @@ Required properties:
+ Optional properties:
+ - reset-gpios : contains a list of GPIO specifiers, though currently only one
+ 		specifier is supported.
++- delay : delay to wait after driving the reset gpio active [ms].
+ 
+ Example:
+ 
+ 	sdhci0_pwrseq {
+ 		compatible = "mmc,pwrseq-simple";
+ 		reset-gpios = <&gpio1 12 0>;
++		delay = <20>;
+ 	}
+diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+index 42d9836..3e521cc 100644
+--- a/drivers/mmc/core/pwrseq_simple.c
++++ b/drivers/mmc/core/pwrseq_simple.c
+@@ -12,14 +12,17 @@
+ #include <linux/device.h>
+ #include <linux/err.h>
+ #include <linux/gpio/consumer.h>
++#include <linux/of_platform.h>
+ 
+ #include <linux/mmc/host.h>
+ 
++#include "core.h"
+ #include "pwrseq.h"
+ 
+ struct mmc_pwrseq_simple {
+ 	struct mmc_pwrseq pwrseq;
+ 	struct gpio_desc *reset_gpio;
++	unsigned int delay_ms;
+ };
+ 
+ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+@@ -29,6 +32,9 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+ 
+ 	if (!IS_ERR(pwrseq->reset_gpio))
+ 		gpiod_set_value_cansleep(pwrseq->reset_gpio, 1);
++
++	if (pwrseq->delay_ms)
++		mmc_delay(pwrseq->delay_ms);
+ }
+ 
+ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
+@@ -76,6 +82,8 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
+ 		goto free;
+ 	}
+ 
++	of_property_read_u32(dev->of_node, "delay", &pwrseq->delay_ms);
++
+ 	pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
+ 	host->pwrseq = &pwrseq->pwrseq;
+ 
+-- 
+1.9.3
