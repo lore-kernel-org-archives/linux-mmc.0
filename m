@@ -1,140 +1,95 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/5] mmc: core: Add support to read command queue parameters
-Date: Thu, 15 Jan 2015 10:10:36 +0100
-Message-ID: <CAPDyKFqHzH4ocRXmvqr9z3KZOdegNak+Vqav0n-dwob4m3Dt1w@mail.gmail.com>
-References: <20141202115629.GA27638@asutoshd-ics.in.qualcomm.com>
+From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Subject: Re: [RFC 0/3] mmc: Add dynamic frequency scaling
+Date: Thu, 15 Jan 2015 10:20:26 +0100
+Message-ID: <1421313626.19448.8.camel@AMDC1943>
+References: <1421054585-9032-1-git-send-email-k.kozlowski@samsung.com>
+ <CAPDyKFpGiaDJ3zjCSSbcia6iLS2+FLBRjGAheQAzvFsAkJax+A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <20141202115629.GA27638@asutoshd-ics.in.qualcomm.com>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Sujit Reddy Thumma <sthumma@codeaurora.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <CAPDyKFpGiaDJ3zjCSSbcia6iLS2+FLBRjGAheQAzvFsAkJax+A@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Kukjin Kim <kgene@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Mike Turquette <mturquette@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2 December 2014 at 12:56, Sujit Reddy Thumma <sthumma@codeaurora.org> wrote:
-> eMMC cards with EXT_CSD version >= 7, optionally support command
-> queuing feature as defined by Jedec eMMC5.1. Add support for probing
-> command queue feature for such type of cards.
->
-> Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
-> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
-> ---
->  drivers/mmc/core/mmc.c   | 15 +++++++++++++++
->  include/linux/mmc/card.h |  7 +++++++
->  include/linux/mmc/mmc.h  |  6 ++++++
->  3 files changed, 28 insertions(+)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 1ab5f3a..0ef3af5 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -571,6 +571,21 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
->                 card->ext_csd.data_sector_size = 512;
->         }
->
-> +       if (card->ext_csd.rev >= 7) {
-> +               card->ext_csd.cmdq_support = ext_csd[EXT_CSD_CMDQ_SUPPORT];
-> +               if (card->ext_csd.cmdq_support)
-> +                       card->ext_csd.cmdq_depth = ext_csd[EXT_CSD_CMDQ_DEPTH];
-> +       }
-> +
-> +       if (card->ext_csd.rev >= 7) {
-> +               card->ext_csd.cmdq_support = ext_csd[EXT_CSD_CMDQ_SUPPORT];
-> +               if (card->ext_csd.cmdq_support)
-> +                       card->ext_csd.cmdq_depth = ext_csd[EXT_CSD_CMDQ_DEPTH];
-> +       } else {
-> +               card->ext_csd.cmdq_support = 0;
-> +               card->ext_csd.cmdq_depth = 0;
-> +       }
-> +
->  out:
->         return err;
->  }
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index b730272..b87a27c 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -112,6 +112,9 @@ struct mmc_ext_csd {
->         u8                      raw_pwr_cl_ddr_52_360;  /* 239 */
->         u8                      raw_bkops_status;       /* 246 */
->         u8                      raw_sectors[4];         /* 212 - 4 bytes */
-> +       u8                      cmdq_mode_en;           /* 15 */
+On czw, 2015-01-15 at 09:20 +0100, Ulf Hansson wrote:
+> + Mike, Stephen (Clock maintainers)
+> 
+> On 12 January 2015 at 10:23, Krzysztof Kozlowski
+> <k.kozlowski@samsung.com> wrote:
+> > Hi,
+> >
+> >
+> > I would like to hear some comments about idea of scaling MMC clock
+> > frequency. The basic idea is to lower the clock when device is
+> > completely idle or not busy enough.
+> 
+> We already have host drivers that implements runtime PM support.
+> Typically that would mean the clock will be gated once the device
+> becomes runtime PM suspended.
+> 
+> Why should we decrease the frequency of an already gated clock?
 
-Besides the comments from Konstantin, I also wonder about the above
-variable. I don't see it used anywhere in this patch.
+In case of idle state you're right that clkgate would be better. But
+what about finding a compromise between high performance (high
+frequency) and energy saving for different loads on MMC?
 
-Kind regards
-Uffe
+The frequency scaling could help in that case. Anyway I should prepare
+some more benchmarks for such conditions.
 
-> +       u8                      cmdq_depth;             /* 307 */
-> +       u8                      cmdq_support;           /* 308 */
->
->         unsigned int            feature_support;
->  #define MMC_DISCARD_FEATURE    BIT(0)                  /* CMD38 feature */
-> @@ -259,6 +262,7 @@ struct mmc_card {
->  #define MMC_STATE_HIGHSPEED_200        (1<<8)          /* card is in HS200 mode */
->  #define MMC_STATE_DOING_BKOPS  (1<<10)         /* card is doing BKOPS */
->  #define MMC_STATE_SUSPENDED    (1<<11)         /* card is suspended */
-> +#define MMC_STATE_CMDQ       (1<<12)         /* card is in cmd queue mode */
->         unsigned int            quirks;         /* card quirks */
->  #define MMC_QUIRK_LENIENT_FN0  (1<<0)          /* allow SDIO FN0 writes outside of the VS CCCR range */
->  #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)   /* use func->cur_blksize */
-> @@ -427,6 +431,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
->  #define mmc_card_removed(c)    ((c) && ((c)->state & MMC_CARD_REMOVED))
->  #define mmc_card_doing_bkops(c)        ((c)->state & MMC_STATE_DOING_BKOPS)
->  #define mmc_card_suspended(c)  ((c)->state & MMC_STATE_SUSPENDED)
-> +#define mmc_card_cmdq(c)   ((c)->state & MMC_STATE_CMDQ)
->
->  #define mmc_card_set_present(c)        ((c)->state |= MMC_STATE_PRESENT)
->  #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
-> @@ -441,6 +446,8 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
->  #define mmc_card_clr_doing_bkops(c)    ((c)->state &= ~MMC_STATE_DOING_BKOPS)
->  #define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
->  #define mmc_card_clr_suspended(c) ((c)->state &= ~MMC_STATE_SUSPENDED)
-> +#define mmc_card_set_cmdq(c)       ((c)->state |= MMC_STATE_CMDQ)
-> +#define mmc_card_clr_cmdq(c)       ((c)->state &= ~MMC_STATE_CMDQ)
->
->  /*
->   * Quirk add/remove for MMC products.
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 50bcde3..a893c84 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -84,6 +84,9 @@
->  #define MMC_APP_CMD              55   /* ac   [31:16] RCA        R1  */
->  #define MMC_GEN_CMD              56   /* adtc [0] RD/WR          R1  */
->
-> +/* MMC 5.1 - class 11: Command Queueing */
-> +#define MMC_CMDQ_TASK_MGMT        48  /* ac   [31:0] task ID     R1b */
-> +
->  static inline bool mmc_op_multi(u32 opcode)
->  {
->         return opcode == MMC_WRITE_MULTIPLE_BLOCK ||
-> @@ -272,6 +275,7 @@ struct _mmc_csd {
->   * EXT_CSD fields
->   */
->
-> +#define EXT_CSD_CMDQ_MODE              15      /* R/W */
->  #define EXT_CSD_FLUSH_CACHE            32      /* W */
->  #define EXT_CSD_CACHE_CTRL             33      /* R/W */
->  #define EXT_CSD_POWER_OFF_NOTIFICATION 34      /* R/W */
-> @@ -325,6 +329,8 @@ struct _mmc_csd {
->  #define EXT_CSD_POWER_OFF_LONG_TIME    247     /* RO */
->  #define EXT_CSD_GENERIC_CMD6_TIME      248     /* RO */
->  #define EXT_CSD_CACHE_SIZE             249     /* RO, 4 bytes */
-> +#define EXT_CSD_CMDQ_DEPTH             307     /* RO */
-> +#define EXT_CSD_CMDQ_SUPPORT           308     /* RO */
->  #define EXT_CSD_TAG_UNIT_SIZE          498     /* RO */
->  #define EXT_CSD_DATA_TAG_SUPPORT       499     /* RO */
->  #define EXT_CSD_MAX_PACKED_WRITES      500     /* RO */
-> --
-> 1.8.2.1
->
-> The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-> a Linux Foundation Collaborative Project
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Best regards,
+Krzysztof
+
+> I think this boils done to how DVFS transitions can be triggered from
+> the clock drivers, right?
+> 
+> Currently the clock framework supports this through clock rate change
+> notifiers. Should we have clock notifiers for clk_prepare|unprepare()
+> as well? I do remember that someone posted patches for that a while
+> ago, but those were rejected.
+> 
+> Mike, Stephen - comments?
+> 
+> Kind regards
+> Uffe
+> 
+> >
+> > The patchset adds MMC card as a devfreq device and uses simple_ondemand
+> > as governor. In idle this gave benefits (less energy consumed during
+> > idle):
+> > 1. Trats2 (Exynos4412): 2.6%
+> > 2. Rinato (Exynos3250): 1%
+> >
+> > but (especially on Rinato) it had impact on performance (probably
+> > because ondemand triggering a little to late). What is interesting
+> > manually changing the clock (without this patchset) gave slightly
+> > bigger benefits. Maybe the devfreq introduces noticeable overhead?
+> >
+> >
+> > Comments are welcomed. Maybe on other platforms this has bigger impact?
+> >
+> > Best regards,
+> > Krzysztof
+> >
+> >
+> > Krzysztof Kozlowski (3):
+> >   mmc: Add dynamic frequency scaling
+> >   ARM: dts: Specify MSHC realistic clocks and use frequency scaling
+> >   ARM: dts: Use frequency scaling for MSHC
+> >
+> >  Documentation/devicetree/bindings/mmc/mmc.txt |   2 +
+> >  arch/arm/boot/dts/exynos3250-rinato.dts       |   1 +
+> >  arch/arm/boot/dts/exynos4412-trats2.dts       |   4 +-
+> >  drivers/mmc/card/block.c                      | 247 ++++++++++++++++++++++++++
+> >  drivers/mmc/core/Kconfig                      |  16 ++
+> >  drivers/mmc/core/core.h                       |   1 -
+> >  drivers/mmc/core/host.c                       |   2 +
+> >  include/linux/mmc/card.h                      |   8 +
+> >  include/linux/mmc/host.h                      |   3 +
+> >  9 files changed, 282 insertions(+), 2 deletions(-)
+> >
+> > --
+> > 1.9.1
+> >
