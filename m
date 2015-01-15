@@ -1,84 +1,207 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 02/13] mmc: host: Add facility to support re-tuning
-Date: Thu, 15 Jan 2015 12:17:22 +0200
-Message-ID: <54B793B2.8090100@intel.com>
-References: <1417801271-15575-1-git-send-email-adrian.hunter@intel.com>	<1417801271-15575-3-git-send-email-adrian.hunter@intel.com>	<CAPDyKFo_51e=BERS9qX6x_LbK3tM5aijOicVkhQ5==39b+C93Q@mail.gmail.com>	<54B51C55.9060500@intel.com>	<CAPDyKFpN285zHUZr61R51AuGwwXAJJsoUS7hbnmiO_+bQ=OuKQ@mail.gmail.com>	<54B52D53.8080106@intel.com>	<CAPDyKFr-U+z3B5bhfP36Lxju5=zS6ZxFL8usm4XypodYLZ0_dw@mail.gmail.com>	<54B53592.9070303@broadcom.com>	<CAPDyKFrs9SVt+8OSTHbkCFiY5ujdfXsqjg7E837CVZjEqz4EvA@mail.gmail.com>	<54B54187.7080008@broadcom.com>	<CAPDyKFqwQ+GPLv9T3fW3Y74hKhagKSOiXydvL9WoK8y3k0O6hQ@mail.gmail.com>	<54B63D94.2050602@intel.com>	<CAPDyKFosO9D6sQagk1nPRZ5aTMDhYu2P7Y5jzFUdA8gAcTNJog@mail.gmail.com>	<54B66015.1010507@intel.com> <CAPDyKFrtByPeRvU-pSc62JjthRXQJyPkTR+PcNOSDeTPXwFEoA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/5] mmc: queue: initialization of command-queue support
+Date: Thu, 15 Jan 2015 11:37:22 +0100
+Message-ID: <CAPDyKFpDDBwWf=DBJxgcb5aFoR6=jXC_h4jqnUWXgNpJuUJcDg@mail.gmail.com>
+References: <20141202115728.GA27647@asutoshd-ics.in.qualcomm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:40689 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751470AbbAOKTK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 15 Jan 2015 05:19:10 -0500
-In-Reply-To: <CAPDyKFrtByPeRvU-pSc62JjthRXQJyPkTR+PcNOSDeTPXwFEoA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <20141202115728.GA27647@asutoshd-ics.in.qualcomm.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Asutosh Das <asutoshd@codeaurora.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Arend van Spriel <arend@broadcom.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, arindam.nath@amd.com, zhangfei.gao@marvell.com
 
-On 14/01/15 14:59, Ulf Hansson wrote:
-> [...]
-> 
->>>
->>> The value from the register is also just randomly selected, only
->>> difference is that it's the HW that has randomly set it.
->>
->> Presumably the value is chosen based on the maximum rate of temperature
->> change and the corresponding effect that has on the signal.
->>
->>>
->>> Even if the above commit was merged, I don't think it was the correct
->>> way of dealing with re-tuning.
->>>
->>> First of all, re-tuning this is a mmc protocol specific thing should
->>> be managed from the mmc core, like the approach you have taken in your
->>> $subject patchset. Second I question whether the timer is useful at
->>> all.
->>
->> The SD Host Controller Specification does not document another way to do
->> mode 1 re-tuning. The timer is it. Otherwise re-tuning is never done.
->>
->> In the patches I sent, the driver must call mmc_retune_needed() to set
->> host->need_retune = 1 otherwise mmc_retune() does nothing.
->>
->> I would like to extend the model to include transparently re-tuning and
->> re-trying when there is a CRC error, but that is a separate issue, not
->> documented in the spec but recommended by others.
->>
-> 
-> That perfect and in line from what I heard as recommendations from
-> memory vendors as well.
+On 2 December 2014 at 12:57, Asutosh Das <asutoshd@codeaurora.org> wrote:
+> Add command queue initialization support. This is
+> applicable for emmc devices supporting cmd-queueing.
+>
+> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+> Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
+> ---
+>  drivers/mmc/card/queue.c | 74 ++++++++++++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/card/queue.h |  6 ++++
+>  include/linux/mmc/card.h |  2 ++
+>  include/linux/mmc/host.h |  1 +
+>  4 files changed, 83 insertions(+)
+>
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index 3e049c1..c99e385 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -403,6 +403,80 @@ void mmc_packed_clean(struct mmc_queue *mq)
+>         mqrq_prev->packed = NULL;
+>  }
+>
+> +static void mmc_cmdq_softirq_done(struct request *rq)
+> +{
+> +       struct mmc_queue *mq = rq->q->queuedata;
+> +
+> +       mq->cmdq_complete_fn(rq);
+> +}
+> +
+> +int mmc_cmdq_init(struct mmc_queue *mq, struct mmc_card *card)
+> +{
+> +       int i, ret = 0;
+> +       /* one slot is reserved for dcmd requests */
+> +       int q_depth = card->ext_csd.cmdq_depth - 1;
+> +
+> +       card->cmdq_init = false;
+> +       if (!(card->host->caps2 & MMC_CAP2_CMD_QUEUE)) {
+> +               ret = -ENOTSUPP;
+> +               goto out;
+> +       }
 
-How would that work for SDIO? How do you know it is OK to retry SDIO operations?
+I think it's preferable to do above check outside of this function.
 
-> 
-> Now, can we stop arguing about the timer and try without it?
-> 
-> If we do see a need for a more frequent re-tuning to happen, due to
-> that we get lots of CRC errors to recover from, then I think we should
-> look into using runtime PM instead of the timer. And that's because I
-> want to minimize the impact on performance.
+> +
+> +       mq->mqrq_cmdq = kzalloc(
+> +                       sizeof(struct mmc_queue_req) * q_depth, GFP_KERNEL);
+> +       if (!mq->mqrq_cmdq) {
+> +               pr_warn("%s: unable to allocate mqrq's for q_depth %d\n",
+> +                       mmc_card_name(card), q_depth);
 
-The minimum timer value is 1 second. The maximum is 1024 seconds. The ASUS
-T100TA had a timer value of 128 seconds. The timer is not a performance issue.
+No need to print this, done from kzalloc();
 
-There is a performance question with runtime PM because that happens far
-more frequently (typical auto-suspend delay is 50ms) and we re-tune after
-that. In fact I generalized that a bit in patch 13.
+> +               ret = -ENOMEM;
+> +               goto out;
+> +       }
+> +
+> +       for (i = 0; i < q_depth; i++) {
+> +               /* TODO: reduce the sg allocation by delaying them */
 
-	[PATCH 13/13] mmc: sdhci: Change to new way of doing re-tuning
+As I stated in my earlier reply in the $subject patchset, I will only
+accept good quality code.
+Have TODO comments will be out of the question.
 
-	Make use of mmc core support for re-tuning instead
-	of doing it all in the sdhci driver.
+> +               mq->mqrq_cmdq[i].sg = mmc_alloc_sg(card->host->max_segs, &ret);
+> +               if (ret) {
+> +                       pr_warn("%s: unable to allocate cmdq sg of size %d\n",
+> +                               mmc_card_name(card),
+> +                               card->host->max_segs);
 
-	This patch also changes to flag the need for re-tuning
-	always after runtime suspend when tuning has been used
-	at initialization. Previously it was only done if
-	the re-tuning timer was in use.
+No need to print this, done from kzalloc();
 
-One option to reduce the impact of the latency would be to increase the
-auto-suspend delay.
+> +                       goto free_mqrq_sg;
+> +               }
 
-I have cc'ed the author of "mmc: sdhci: add support for retuning mode 1"
+Hmm, it seems like a lot of pre-allocating is done here, so I
+certainly think your TODO comment is valid. You just need to fix it.
+:-)
 
+> +       }
+> +
+> +       ret = blk_queue_init_tags(mq->queue, q_depth, NULL);
+> +       if (ret) {
+> +               pr_warn("%s: unable to allocate cmdq tags %d\n",
+> +                               mmc_card_name(card), q_depth);
+
+I don't think this print is needed. Likely it's already handled by
+blk_queue_init_tags().
+
+> +               goto free_mqrq_sg;
+> +       }
+> +
+> +       blk_queue_softirq_done(mq->queue, mmc_cmdq_softirq_done);
+> +       card->cmdq_init = true;
+> +       goto out;
+> +
+> +free_mqrq_sg:
+> +       for (i = 0; i < q_depth; i++)
+> +               kfree(mq->mqrq_cmdq[i].sg);
+> +       kfree(mq->mqrq_cmdq);
+> +       mq->mqrq_cmdq = NULL;
+> +out:
+> +       return ret;
+> +}
+> +
+> +void mmc_cmdq_clean(struct mmc_queue *mq, struct mmc_card *card)
+> +{
+> +       int i;
+> +       int q_depth = card->ext_csd.cmdq_depth - 1;
+> +
+> +       blk_free_tags(mq->queue->queue_tags);
+> +       mq->queue->queue_tags = NULL;
+> +       blk_queue_free_tags(mq->queue);
+> +
+> +       for (i = 0; i < q_depth; i++)
+> +               kfree(mq->mqrq_cmdq[i].sg);
+> +       kfree(mq->mqrq_cmdq);
+> +       mq->mqrq_cmdq = NULL;
+> +}
+> +
+>  /**
+>   * mmc_queue_suspend - suspend a MMC request queue
+>   * @mq: MMC queue to suspend
+> diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+> index 5752d50..36a8d64 100644
+> --- a/drivers/mmc/card/queue.h
+> +++ b/drivers/mmc/card/queue.h
+> @@ -52,11 +52,14 @@ struct mmc_queue {
+>  #define MMC_QUEUE_NEW_REQUEST  (1 << 1)
+>
+>         int                     (*issue_fn)(struct mmc_queue *, struct request *);
+> +       int (*cmdq_issue_fn)(struct mmc_queue *, struct request *);
+
+I don't find this callback being used in this patch.
+
+> +       void (*cmdq_complete_fn)(struct request *);
+>         void                    *data;
+>         struct request_queue    *queue;
+>         struct mmc_queue_req    mqrq[2];
+>         struct mmc_queue_req    *mqrq_cur;
+>         struct mmc_queue_req    *mqrq_prev;
+> +       struct mmc_queue_req    *mqrq_cmdq;
+>  };
+>
+>  extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
+> @@ -73,4 +76,7 @@ extern void mmc_queue_bounce_post(struct mmc_queue_req *);
+>  extern int mmc_packed_init(struct mmc_queue *, struct mmc_card *);
+>  extern void mmc_packed_clean(struct mmc_queue *);
+>
+> +extern int mmc_cmdq_init(struct mmc_queue *mq, struct mmc_card *card);
+> +extern void mmc_cmdq_clean(struct mmc_queue *mq, struct mmc_card *card);
+> +
+>  #endif
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index b87a27c..41f368d 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -309,6 +309,7 @@ struct mmc_card {
+>         struct dentry           *debugfs_root;
+>         struct mmc_part part[MMC_NUM_PHY_PARTITION]; /* physical partitions */
+>         unsigned int    nr_parts;
+> +       bool                    cmdq_init; /* cmdq init done */
+>  };
+>
+>  /*
+> @@ -545,4 +546,5 @@ extern void mmc_unregister_driver(struct mmc_driver *);
+>  extern void mmc_fixup_device(struct mmc_card *card,
+>                              const struct mmc_fixup *table);
+>
+> +extern void mmc_blk_cmdq_req_done(struct mmc_request *mrq);
+>  #endif /* LINUX_MMC_CARD_H */
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index cb61ea4..f0edb36 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -278,6 +278,7 @@ struct mmc_host {
+>  #define MMC_CAP2_PACKED_CMD    (MMC_CAP2_PACKED_RD | \
+>                                  MMC_CAP2_PACKED_WR)
+>  #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)  /* Don't power up before scan */
+> +#define MMC_CAP2_CMD_QUEUE     (1 << 15)       /* support eMMC command queue */
+>
+>         mmc_pm_flag_t           pm_caps;        /* supported pm features */
+>
+> --
+> 1.8.2.1
+>
+
+Please run checkpatch on all your patches. This one had warnings you
+shall resolve and the rest in the series has so as well.
+
+Moreover, I can't apply this patch on my next branch so it needs a
+rebase. Can you please do that so I am able to test it.
+
+Kind regards
+Uffe
