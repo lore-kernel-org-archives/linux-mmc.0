@@ -1,50 +1,82 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 0/2] mmc: dw_mmc: exynos: Add HS400 support
-Date: Wed, 14 Jan 2015 16:56:46 +0100
-Message-ID: <CAPDyKFo0YB6UpjQXxQ9d9VhE6quur0mo=YNLdzB=xQoCE4J9xQ@mail.gmail.com>
-References: <1421231446-4776-1-git-send-email-alim.akhtar@samsung.com>
-	<54B67001.2090002@samsung.com>
-	<54B68CC6.1040907@kernel.org>
+Subject: Re: [RFC 0/3] mmc: Add dynamic frequency scaling
+Date: Thu, 15 Jan 2015 09:20:05 +0100
+Message-ID: <CAPDyKFpGiaDJ3zjCSSbcia6iLS2+FLBRjGAheQAzvFsAkJax+A@mail.gmail.com>
+References: <1421054585-9032-1-git-send-email-k.kozlowski@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f171.google.com ([209.85.216.171]:38217 "EHLO
-	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751280AbbANP4q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jan 2015 10:56:46 -0500
-Received: by mail-qc0-f171.google.com with SMTP id b13so3787958qcw.2
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Jan 2015 07:56:46 -0800 (PST)
-In-Reply-To: <54B68CC6.1040907@kernel.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1421054585-9032-1-git-send-email-k.kozlowski@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Cc: Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Kukjin Kim <kgene@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Mike Turquette <mturquette@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Kukjin Kim <kgene@kernel.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, Doug Anderson <dianders@chromium.org>, ABHILASH KESAVAN <a.kesavan@samsung.com>, Alim Akhtar <alim.akhtar@gmail.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 14 January 2015 at 16:35, Kukjin Kim <kgene@kernel.org> wrote:
-> On 01/14/15 22:32, Jaehoon Chung wrote:
->> Hi, Alim.
->>
->> On 01/14/2015 07:30 PM, Alim Akhtar wrote:
->>> This adds HS400 mode support for exynos dw_mmc host controller.
->>>
->>> Currently tested on Exynos5800-peach-pi platform for HS400 mode.
->>> Tested HS200 mode with this series applied, HS200 still works.
->>>
->>> Appreciate testing on other exynos5/7 platform which supports emmc5.0
->>
->> I will test this patch on exynos5/7 board.
->>
++ Mike, Stephen (Clock maintainers)
+
+On 12 January 2015 at 10:23, Krzysztof Kozlowski
+<k.kozlowski@samsung.com> wrote:
+> Hi,
 >
-> What's the result? :-) If it's OK, I'll take DT changes for exynos
-> stuff, I'm not sure about the driver changes though...
+>
+> I would like to hear some comments about idea of scaling MMC clock
+> frequency. The basic idea is to lower the clock when device is
+> completely idle or not busy enough.
 
-Kukjin,
+We already have host drivers that implements runtime PM support.
+Typically that would mean the clock will be gated once the device
+becomes runtime PM suspended.
 
-As I understand it, there is a dependency between the patches, since
-driver adds supports for new DT bindings.
+Why should we decrease the frequency of an already gated clock?
 
-So, unless I am mistaken I think it would be best to take this
-complete patchset through my mmc tree. With your ack of course.
+I think this boils done to how DVFS transitions can be triggered from
+the clock drivers, right?
+
+Currently the clock framework supports this through clock rate change
+notifiers. Should we have clock notifiers for clk_prepare|unprepare()
+as well? I do remember that someone posted patches for that a while
+ago, but those were rejected.
+
+Mike, Stephen - comments?
 
 Kind regards
 Uffe
+
+>
+> The patchset adds MMC card as a devfreq device and uses simple_ondemand
+> as governor. In idle this gave benefits (less energy consumed during
+> idle):
+> 1. Trats2 (Exynos4412): 2.6%
+> 2. Rinato (Exynos3250): 1%
+>
+> but (especially on Rinato) it had impact on performance (probably
+> because ondemand triggering a little to late). What is interesting
+> manually changing the clock (without this patchset) gave slightly
+> bigger benefits. Maybe the devfreq introduces noticeable overhead?
+>
+>
+> Comments are welcomed. Maybe on other platforms this has bigger impact?
+>
+> Best regards,
+> Krzysztof
+>
+>
+> Krzysztof Kozlowski (3):
+>   mmc: Add dynamic frequency scaling
+>   ARM: dts: Specify MSHC realistic clocks and use frequency scaling
+>   ARM: dts: Use frequency scaling for MSHC
+>
+>  Documentation/devicetree/bindings/mmc/mmc.txt |   2 +
+>  arch/arm/boot/dts/exynos3250-rinato.dts       |   1 +
+>  arch/arm/boot/dts/exynos4412-trats2.dts       |   4 +-
+>  drivers/mmc/card/block.c                      | 247 ++++++++++++++++++++++++++
+>  drivers/mmc/core/Kconfig                      |  16 ++
+>  drivers/mmc/core/core.h                       |   1 -
+>  drivers/mmc/core/host.c                       |   2 +
+>  include/linux/mmc/card.h                      |   8 +
+>  include/linux/mmc/host.h                      |   3 +
+>  9 files changed, 282 insertions(+), 2 deletions(-)
+>
+> --
+> 1.9.1
+>
