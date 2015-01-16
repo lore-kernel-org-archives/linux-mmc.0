@@ -1,70 +1,101 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V3 4/4] mmc: pwrseq_simple: Add support for a reset GPIO pin
-Date: Fri, 16 Jan 2015 13:52:25 +0100
-Message-ID: <CAPDyKFr+7qWymd63TjgyPBnePbDpamOi_5DQkjonBAKBnEGHOw@mail.gmail.com>
-References: <1421405273-19117-1-git-send-email-ulf.hansson@linaro.org>
-	<1421405273-19117-5-git-send-email-ulf.hansson@linaro.org>
-	<CAAObsKDm1iPAWgJpQwed8KufkxKwqTAFa5espfqq+jY13r+Ymw@mail.gmail.com>
-	<CAPDyKFoLqmgTvJpFLrGZvxrfug+SyspsYaOYtf65CsZ7T991pA@mail.gmail.com>
-	<20150116124511.GG18220@pengutronix.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Paul Osmialowski <p.osmialowsk@samsung.com>
+Subject: [PATCH] mmc: sdhci-s3c: solve problem with sleeping in atomic context
+Date: Fri, 16 Jan 2015 15:30:05 +0100
+Message-ID: <1421418605-457-1-git-send-email-p.osmialowsk@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f169.google.com ([209.85.216.169]:56786 "EHLO
-	mail-qc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752421AbbAPMw0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jan 2015 07:52:26 -0500
-Received: by mail-qc0-f169.google.com with SMTP id w7so16687408qcr.0
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Jan 2015 04:52:25 -0800 (PST)
-In-Reply-To: <20150116124511.GG18220@pengutronix.de>
+Received: from mailout1.w1.samsung.com ([210.118.77.11]:50454 "EHLO
+	mailout1.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752090AbbAPObC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jan 2015 09:31:02 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: Tomeu Vizoso <tomeu.vizoso@collabora.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Hans de Goede <hdegoede@redhat.com>, Russell King <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, Alexandre Courbot <gnurou@gmail.com>, NeilBrown <neilb@suse.de>, Linus Walleij <linus.walleij@linaro.org>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Mark Brown <broonie@kernel.org>, Arend van Spriel <arend@broadcom.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Paul Osmialowski <p.osmialowsk@samsung.com>
 
-On 16 January 2015 at 13:45, Sascha Hauer <s.hauer@pengutronix.de> wrote:
-> On Fri, Jan 16, 2015 at 01:37:41PM +0100, Ulf Hansson wrote:
->> On 16 January 2015 at 12:34, Tomeu Vizoso <tomeu.vizoso@collabora.com> wrote:
->> > On 16 January 2015 at 11:47, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> >>
->> >>  int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
->> >>  {
->> >>         struct mmc_pwrseq_simple *pwrseq;
->> >> +       int ret = 0;
->> >>
->> >>         pwrseq = kzalloc(sizeof(struct mmc_pwrseq_simple), GFP_KERNEL);
->> >>         if (!pwrseq)
->> >>                 return -ENOMEM;
->> >>
->> >> +       pwrseq->reset_gpio = gpiod_get_index(dev, "reset", 0, GPIOD_OUT_HIGH);
->> >> +       if (IS_ERR(pwrseq->reset_gpio) &&
->> >> +               PTR_ERR(pwrseq->reset_gpio) != -ENOENT &&
->> >> +               PTR_ERR(pwrseq->reset_gpio) != -ENOSYS) {
->> >> +               ret = PTR_ERR(pwrseq->reset_gpio);
->> >> +               goto free;
->> >> +       }
->> >> +
->> >>         pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
->> >>         host->pwrseq = &pwrseq->pwrseq;
->> >>
->> >>         return 0;
->> >> +free:
->> >> +       kfree(&pwrseq);
->> >
->> > Hi Ulf,
->> >
->> > this kfree looks a bit fishy (there's one more instance of it in
->> > mmc_pwrseq_simple_free).
->>
->> This is the error path, which means I need to clean up data that I
->> have allocated.
->
-> I think Tomeu meant that the '&' must be removed.
->
+This change addresses following problem:
 
-Of course, thanks!
+[    2.560726] ------------[ cut here ]------------
+[    2.565341] WARNING: CPU: 0 PID: 1 at kernel/locking/lockdep.c:2744 lockdep_trace_alloc+0xec/0x118()
+[    2.574439] DEBUG_LOCKS_WARN_ON(irqs_disabled_flags(flags))
+[    2.579821] Modules linked in:
+[    2.583038] CPU: 0 PID: 1 Comm: swapper/0 Tainted: G        W      3.18.0-next-20141216-00002-g4ff197fc1902-dirty #1318
+[    2.593796] Hardware name: SAMSUNG EXYNOS (Flattened Device Tree)
+[    2.599892] [<c0014c44>] (unwind_backtrace) from [<c0011bbc>] (show_stack+0x10/0x14)
+[    2.607612] [<c0011bbc>] (show_stack) from [<c04953b8>] (dump_stack+0x70/0xbc)
+[    2.614822] [<c04953b8>] (dump_stack) from [<c0023444>] (warn_slowpath_common+0x74/0xb0)
+[    2.622885] [<c0023444>] (warn_slowpath_common) from [<c0023514>] (warn_slowpath_fmt+0x30/0x40)
+[    2.631569] [<c0023514>] (warn_slowpath_fmt) from [<c0063644>] (lockdep_trace_alloc+0xec/0x118)
+[    2.640246] [<c0063644>] (lockdep_trace_alloc) from [<c00df52c>] (__kmalloc+0x3c/0x1cc)
+[    2.648240] [<c00df52c>] (__kmalloc) from [<c0394970>] (clk_fetch_parent_index+0xb8/0xd4)
+[    2.656390] [<c0394970>] (clk_fetch_parent_index) from [<c0394a6c>] (clk_calc_new_rates+0xe0/0x1fc)
+[    2.665415] [<c0394a6c>] (clk_calc_new_rates) from [<c0394b40>] (clk_calc_new_rates+0x1b4/0x1fc)
+[    2.674181] [<c0394b40>] (clk_calc_new_rates) from [<c0395408>] (clk_set_rate+0x50/0xc8)
+[    2.682265] [<c0395408>] (clk_set_rate) from [<c0377708>] (sdhci_cmu_set_clock+0x68/0x16c)
+[    2.690503] [<c0377708>] (sdhci_cmu_set_clock) from [<c03735cc>] (sdhci_do_set_ios+0xf0/0x64c)
+[    2.699095] [<c03735cc>] (sdhci_do_set_ios) from [<c0373b48>] (sdhci_set_ios+0x20/0x2c)
+[    2.707080] [<c0373b48>] (sdhci_set_ios) from [<c035ddf0>] (mmc_power_up+0x118/0x1fc)
+[    2.714889] [<c035ddf0>] (mmc_power_up) from [<c035ecd0>] (mmc_start_host+0x44/0x6c)
+[    2.722615] [<c035ecd0>] (mmc_start_host) from [<c035fd60>] (mmc_add_host+0x58/0x7c)
+[    2.730341] [<c035fd60>] (mmc_add_host) from [<c037454c>] (sdhci_add_host+0x968/0xd94)
+[    2.738240] [<c037454c>] (sdhci_add_host) from [<c0377b60>] (sdhci_s3c_probe+0x354/0x52c)
+[    2.746406] [<c0377b60>] (sdhci_s3c_probe) from [<c0283b58>] (platform_drv_probe+0x48/0xa4)
+[    2.754733] [<c0283b58>] (platform_drv_probe) from [<c02824e8>] (driver_probe_device+0x13c/0x37c)
+[    2.763585] [<c02824e8>] (driver_probe_device) from [<c02827bc>] (__driver_attach+0x94/0x98)
+[    2.772003] [<c02827bc>] (__driver_attach) from [<c0280a60>] (bus_for_each_dev+0x54/0x88)
+[    2.780163] [<c0280a60>] (bus_for_each_dev) from [<c0281b48>] (bus_add_driver+0xe4/0x200)
+[    2.788322] [<c0281b48>] (bus_add_driver) from [<c0282dfc>] (driver_register+0x78/0xf4)
+[    2.796308] [<c0282dfc>] (driver_register) from [<c00089b0>] (do_one_initcall+0xac/0x1f0)
+[    2.804473] [<c00089b0>] (do_one_initcall) from [<c0673d94>] (kernel_init_freeable+0x10c/0x1d8)
+[    2.813153] [<c0673d94>] (kernel_init_freeable) from [<c0490058>] (kernel_init+0x28/0x108)
+[    2.821398] [<c0490058>] (kernel_init) from [<c000f268>] (ret_from_fork+0x14/0x2c)
+[    2.828939] ---[ end trace 03cc00e539849d1f ]---
 
-Unless I get some more comments I will fix it when I queue the patch.
+clk_set_rate() tries to take clk's prepare_lock mutex while being in atomic
+context entered in sdhci_do_set_ios().
+The solution is inspired by similar situation in sdhci_set_power() also called
+from sdhci_do_set_ios():
 
-Kind regards
-Uffe
+                spin_unlock_irq(&host->lock);
+                mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+                spin_lock_irq(&host->lock);
+
+Note that since sdhci_s3c_set_clock() sets SDHCI_CLOCK_CARD_EN, proposed change
+first resets this bit. It is reset anyway (by setting SDHCI_CLOCK_INT_EN bit
+only) after call to clk_set_rate() in order to wait for the clock to stabilize
+and is set again as soon as the clock becomes stable.
+
+Signed-off-by: Paul Osmialowski <p.osmialowsk@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index c45b893..115f556 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -12,6 +12,7 @@
+  * published by the Free Software Foundation.
+  */
+ 
++#include <linux/spinlock.h>
+ #include <linux/delay.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/platform_device.h>
+@@ -312,7 +313,14 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
+ 
+ 	sdhci_s3c_set_clock(host, clock);
+ 
++	/* Reset SD Clock Enable */
++	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++	clk &= ~SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++	spin_unlock_irq(&host->lock);
+ 	ret = clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock);
++	spin_lock_irq(&host->lock);
+ 	if (ret != 0) {
+ 		dev_err(dev, "%s: failed to set clock rate %uHz\n",
+ 			mmc_hostname(host->mmc), clock);
+-- 
+1.9.1
+
