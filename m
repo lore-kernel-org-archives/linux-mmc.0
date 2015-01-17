@@ -1,60 +1,86 @@
-From: Vincent Yang <vincent.yang.fujitsu@gmail.com>
-Subject: Re: [PATCH v3 4/4] mmc: sdhci: host: add new f_sdh30
-Date: Sat, 17 Jan 2015 01:09:54 +0800
-Message-ID: <CAOEd-H0+2eNgwXf9Hm9puKC=8J2zwvj5Ak9Y+isp0dPP74xxHQ@mail.gmail.com>
-References: <1420803705-4539-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
-	<1420803705-4539-5-git-send-email-Vincent.Yang@tw.fujitsu.com>
-	<CAPDyKFqHk5cqFziwsDRa+RttjdiWZ9fYx9UP5nQdWEAJS=Cstg@mail.gmail.com>
-	<CAOEd-H3eU=OJQp5+-yzP02ccpzZdoBJ1BUeFoZiu-DhLYDhGWA@mail.gmail.com>
-	<CAPDyKFp+sF5J2geen0K1SmU67O9vNDc_w8q92vq+ywZhv9snuw@mail.gmail.com>
+From: Mike Turquette <mturquette@linaro.org>
+Subject: Re: [RFC 0/3] mmc: Add dynamic frequency scaling
+Date: Sat, 17 Jan 2015 15:52:22 -0800
+Message-ID: <20150117235222.22722.904@quantum>
+References: <1421054585-9032-1-git-send-email-k.kozlowski@samsung.com>
+ <CAPDyKFpGiaDJ3zjCSSbcia6iLS2+FLBRjGAheQAzvFsAkJax+A@mail.gmail.com>
+ <1421313626.19448.8.camel@AMDC1943>
+ <CAPDyKFqe7UxSrQxuvGw7UWFQhvX0NZ83rvLrAEMZFpA4n0GcNg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f48.google.com ([209.85.215.48]:49650 "EHLO
-	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751738AbbAPRJ4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Jan 2015 12:09:56 -0500
-Received: by mail-la0-f48.google.com with SMTP id gf13so19994550lab.7
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Jan 2015 09:09:54 -0800 (PST)
-In-Reply-To: <CAPDyKFp+sF5J2geen0K1SmU67O9vNDc_w8q92vq+ywZhv9snuw@mail.gmail.com>
+Received: from mail-pa0-f47.google.com ([209.85.220.47]:34671 "EHLO
+	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750953AbbAQXwb convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Jan 2015 18:52:31 -0500
+Received: by mail-pa0-f47.google.com with SMTP id kq14so31266225pab.6
+        for <linux-mmc@vger.kernel.org>; Sat, 17 Jan 2015 15:52:31 -0800 (PST)
+In-Reply-To: <CAPDyKFqe7UxSrQxuvGw7UWFQhvX0NZ83rvLrAEMZFpA4n0GcNg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, Andy Green <andy.green@linaro.org>, Patch Tracking <patches@linaro.org>, Jaswinder Singh <jaswinder.singh@linaro.org>, Vincent Yang <Vincent.Yang@tw.fujitsu.com>, Tetsuya Takinishi <t.takinishi@jp.fujitsu.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Cc: Chris Ball <chris@printf.net>, Jaehoon Chung <jh80.chung@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Kukjin Kim <kgene@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Stephen Boyd <sboyd@codeaurora.org>
 
-2015-01-16 16:36 GMT+08:00 Ulf Hansson <ulf.hansson@linaro.org>:
-> [...]
->
->>>> +       pm_runtime_set_active(&pdev->dev);
->>>> +       pm_runtime_enable(&pdev->dev);
->>>> +       ret = pm_runtime_get_sync(&pdev->dev);
->>>> +       if (ret < 0)
->>>> +               dev_err(dev, "Failed to pm_runtime_get_sync: %d\n", ret);
->>>
->>> As I stated earlier I think this is a strange behaviour of how to
->>> implement runtime PM support. Could you elaborate one more time why
->>> this actually is needed?
->>
->> Thanks for pointing out this.
->> We studied again and realized that this runtime PM support was only there for
->> powerdomain management, but we have not yet upstreamed the powerdomain
->> support. Thus we would like to remove it in next version.
->
-> I am fine with you removing the runtime PM support in the next
-> version. I also hope you to upstream the power domain support later
-> on, that would be nice.
->
-> A small note:
-> From a driver perspective, you shall be able to implement runtime PM
-> support even if you haven't upstreamed the power domain support yet.
-> But, let's then deal with that as a separate patch later on.
+Quoting Ulf Hansson (2015-01-15 02:04:04)
+> On 15 January 2015 at 10:20, Krzysztof Kozlowski
+> <k.kozlowski@samsung.com> wrote:
+> > On czw, 2015-01-15 at 09:20 +0100, Ulf Hansson wrote:
+> >> + Mike, Stephen (Clock maintainers)
+> >>
+> >> On 12 January 2015 at 10:23, Krzysztof Kozlowski
+> >> <k.kozlowski@samsung.com> wrote:
+> >> > Hi,
+> >> >
+> >> >
+> >> > I would like to hear some comments about idea of scaling MMC clock
+> >> > frequency. The basic idea is to lower the clock when device is
+> >> > completely idle or not busy enough.
+> >>
+> >> We already have host drivers that implements runtime PM support.
+> >> Typically that would mean the clock will be gated once the device
+> >> becomes runtime PM suspended.
+> >>
+> >> Why should we decrease the frequency of an already gated clock?
+> >
+> > In case of idle state you're right that clkgate would be better. But
+> > what about finding a compromise between high performance (high
+> > frequency) and energy saving for different loads on MMC?
+> 
+> I guess a compromise could be beneficial for some SOC and use cases.
+> At least I remember, ST-Ericsson's UX500 SOC had such an out of tree
+> hack to track MMC load.
 
-Yes, I got it.
-Thanks a lot for your review and comments!
+It is very important to model when resources are not needed, since this
+has some system-wide effects. There are two main use-cases I have in
+mind:
 
-Kind regards
-Vincent
+1) MMC clk is a leaf clock of some complex hierarchy (e.g. a PLL at the
+top of a clock sub-tree). If MMC is always "locked" at some fast rate
+(e.g. 48MHz instead of 24MHz or 12MHz) then that constraint prevents
+the rest of the hierarchy from transitioning to a lower frequency. Even
+if the MMC clock is aggressively gating, maximum system-level power
+savings may not be achieved since the rest of the clock sub-tree
+(starting at the PLL) will be "stuck" at a higher frequency than
+necessary. Thus, aggressive clock gating might give good power savings
+for the MMC case, but may be a blocker for other system components.
 
->
+2) Wake-up latency constraints might make it impossible to clock gate,
+and thus the only power-saving option is to run at a lower frequency.
+This is not quite what is described above, but the point is that clock
+frequency scaling and clock gating are complementary power saving
+options, but we rely on the driver to model resource requirements
+accurately to get the best results.
+
+Regards,
+Mike
+
+> 
+> >
+> > The frequency scaling could help in that case. Anyway I should prepare
+> > some more benchmarks for such conditions.
+> 
+> Seems reasonable and please do!
+> 
 > Kind regards
 > Uffe
