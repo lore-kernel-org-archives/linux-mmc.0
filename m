@@ -1,368 +1,1647 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 4/4] mmc: sdhci: host: add new f_sdh30
-Date: Mon, 19 Jan 2015 13:34:26 +0100
-Message-ID: <CAPDyKFoiVm27d5=wMZ=RVps-70xfCgVpAQ7PPUanGG2s8Ssf3g@mail.gmail.com>
-References: <1421664509-1807-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
-	<1421664509-1807-5-git-send-email-Vincent.Yang@tw.fujitsu.com>
+From: Aleksey Makarov <aleksey.makarov-tx70/tkNEWbQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] mmc: OCTEON: Add host driver for OCTEON MMC controller
+Date: Mon, 19 Jan 2015 16:46:36 +0300
+Message-ID: <1421675198-30213-1-git-send-email-aleksey.makarov@auriga.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f41.google.com ([209.85.192.41]:63437 "EHLO
-	mail-qg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751859AbbASMe1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jan 2015 07:34:27 -0500
-Received: by mail-qg0-f41.google.com with SMTP id q108so6568546qgd.0
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Jan 2015 04:34:27 -0800 (PST)
-In-Reply-To: <1421664509-1807-5-git-send-email-Vincent.Yang@tw.fujitsu.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Aleksey Makarov <aleksey.makarov-tx70/tkNEWbQT0dZR+AlfA@public.gmane.org>, Leonid Rosenboim <lrosenboim-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Aaron Williams <aaron.williams-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Chandrakala Chavva <cchavva-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Peter Swain <pswain-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vincent Yang <vincent.yang.fujitsu@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, Andy Green <andy.green@linaro.org>, Patch Tracking <patches@linaro.org>, Jaswinder Singh <jaswinder.singh@linaro.org>, Vincent Yang <Vincent.Yang@tw.fujitsu.com>, Tetsuya Takinishi <t.takinishi@jp.fujitsu.com>
 
-On 19 January 2015 at 11:48, Vincent Yang
-<vincent.yang.fujitsu@gmail.com> wrote:
-> This patch adds new host controller driver for
-> Fujitsu SDHCI controller f_sdh30.
->
-> Signed-off-by: Vincent Yang <Vincent.Yang@tw.fujitsu.com>
-> Signed-off-by: Andy Green <andy.green@linaro.org>
-> Signed-off-by: Tetsuya Takinishi <t.takinishi@jp.fujitsu.com>
-> ---
->  .../devicetree/bindings/mmc/sdhci-fujitsu.txt      |  30 +++
->  drivers/mmc/host/Kconfig                           |   8 +
->  drivers/mmc/host/Makefile                          |   1 +
->  drivers/mmc/host/sdhci_f_sdh30.c                   | 236 +++++++++++++++++++++
->  4 files changed, 275 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
->  create mode 100644 drivers/mmc/host/sdhci_f_sdh30.c
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
-> new file mode 100644
-> index 0000000..de2c53c
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
-> @@ -0,0 +1,30 @@
-> +* Fujitsu SDHCI controller
-> +
-> +This file documents differences between the core properties in mmc.txt
-> +and the properties used by the sdhci_f_sdh30 driver.
-> +
-> +Required properties:
-> +- compatible: "fujitsu,mb86s70-sdhci-3.0"
-> +- clocks: Must contain an entry for each entry in clock-names. It is a
-> +  list of phandles and clock-specifier pairs.
-> +  See ../clocks/clock-bindings.txt for details.
-> +- clock-names: Should contain the following two entries:
-> +       "iface" - clock used for sdhci interface
-> +       "core"  - core clock for sdhci controller
-> +
-> +Optional properties:
-> +- vqmmc-supply: phandle to the regulator device tree node, mentioned
-> +  as the VCCQ/VDD_IO supply in the eMMC/SD specs.
-> +
-> +Example:
-> +
-> +       sdhci1: mmc@36600000 {
-> +               compatible = "fujitsu,mb86s70-sdhci-3.0";
-> +               reg = <0 0x36600000 0x1000>;
-> +               interrupts = <0 172 0x4>,
-> +                            <0 173 0x4>;
-> +               bus-width = <4>;
-> +               vqmmc-supply = <&vccq_sdhci1>;
-> +               clocks = <&clock 2 2 0>, <&clock 2 3 0>;
-> +               clock-names = "iface", "core";
-> +       };
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 2d6fbdd..288dcc3 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -290,6 +290,14 @@ config MMC_SDHCI_BCM2835
->           This selects the BCM2835 SD/MMC controller. If you have a BCM2835
->           platform with SD or MMC devices, say Y or M here.
->
-> +config MMC_SDHCI_F_SDH30
-> +       tristate "SDHCI support for Fujitsu Semiconductor F_SDH30"
-> +       depends on MMC_SDHCI_PLTFM
-> +       depends on OF
-> +       help
-> +         This selects the Secure Digital Host Controller Interface (SDHCI)
-> +         Needed by some Fujitsu SoC for MMC / SD / SDIO support.
-> +         If you have a controller with this interface, say Y or M here.
->           If unsure, say N.
+The OCTEON MMC controller is currently found on cn61XX and cnf71XX
+devices.  Device parameters are configured from device tree data.
 
-This looks strange. You shall add a line for the Fujitsu controller
-"If unsure, say N" and not "steal" from the upper BCM2835 section.
+Currenly supported are eMMC, MMC and SD devices.
 
->
->  config MMC_MOXART
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index f7b0a77..6a7cfe0 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -16,6 +16,7 @@ obj-$(CONFIG_MMC_SDHCI_PXAV3) += sdhci-pxav3.o
->  obj-$(CONFIG_MMC_SDHCI_PXAV2)  += sdhci-pxav2.o
->  obj-$(CONFIG_MMC_SDHCI_S3C)    += sdhci-s3c.o
->  obj-$(CONFIG_MMC_SDHCI_SIRF)           += sdhci-sirf.o
-> +obj-$(CONFIG_MMC_SDHCI_F_SDH30)        += sdhci_f_sdh30.o
->  obj-$(CONFIG_MMC_SDHCI_SPEAR)  += sdhci-spear.o
->  obj-$(CONFIG_MMC_WBSD)         += wbsd.o
->  obj-$(CONFIG_MMC_AU1X)         += au1xmmc.o
-> diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
-> new file mode 100644
-> index 0000000..1093857
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci_f_sdh30.c
-> @@ -0,0 +1,236 @@
-> +/*
-> + * linux/drivers/mmc/host/sdhci_f_sdh30.c
-> + *
-> + * Copyright (C) 2013 - 2015 Fujitsu Semiconductor, Ltd
-> + *              Vincent Yang <vincent.yang@tw.fujitsu.com>
-> + * Copyright (C) 2015 Linaro Ltd  Andy Green <andy.green@linaro.org>
-> + *
-> + * This program is free software: you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation, version 2 of the License.
-> + */
-> +
-> +#include <linux/err.h>
-> +#include <linux/delay.h>
-> +#include <linux/module.h>
-> +#include <linux/clk.h>
-> +
-> +#include "sdhci-pltfm.h"
-> +
-> +/* F_SDH30 extended Controller registers */
-> +#define F_SDH30_AHB_CONFIG             0x100
-> +#define  F_SDH30_AHB_BIGED             0x00000040
-> +#define  F_SDH30_BUSLOCK_DMA           0x00000020
-> +#define  F_SDH30_BUSLOCK_EN            0x00000010
-> +#define  F_SDH30_SIN                   0x00000008
-> +#define  F_SDH30_AHB_INCR_16           0x00000004
-> +#define  F_SDH30_AHB_INCR_8            0x00000002
-> +#define  F_SDH30_AHB_INCR_4            0x00000001
-> +
-> +#define F_SDH30_TUNING_SETTING         0x108
-> +#define  F_SDH30_CMD_CHK_DIS           0x00010000
-> +
-> +#define F_SDH30_IO_CONTROL2            0x114
-> +#define  F_SDH30_CRES_O_DN             0x00080000
-> +#define  F_SDH30_MSEL_O_1_8            0x00040000
-> +
-> +#define F_SDH30_ESD_CONTROL            0x124
-> +#define  F_SDH30_EMMC_RST              0x00000002
-> +#define  F_SDH30_EMMC_HS200            0x01000000
-> +
-> +#define F_SDH30_CMD_DAT_DELAY          0x200
-> +
-> +#define F_SDH30_MIN_CLOCK              400000
-> +
-> +struct f_sdhost_priv {
-> +       struct clk *clk_iface;
-> +       struct clk *clk;
-> +       u32 vendor_hs200;
-> +       struct device *dev;
-> +};
-> +
-> +void sdhci_f_sdh30_soft_voltage_switch(struct sdhci_host *host)
-> +{
-> +       struct f_sdhost_priv *priv = sdhci_priv(host);
-> +       u32 ctrl = 0;
-> +
-> +       usleep_range(2500, 3000);
-> +       ctrl = sdhci_readl(host, F_SDH30_IO_CONTROL2);
-> +       ctrl |= F_SDH30_CRES_O_DN;
-> +       sdhci_writel(host, ctrl, F_SDH30_IO_CONTROL2);
-> +       ctrl |= F_SDH30_MSEL_O_1_8;
-> +       sdhci_writel(host, ctrl, F_SDH30_IO_CONTROL2);
-> +
-> +       ctrl &= ~F_SDH30_CRES_O_DN;
-> +       sdhci_writel(host, ctrl, F_SDH30_IO_CONTROL2);
-> +       usleep_range(2500, 3000);
-> +
-> +       if (priv->vendor_hs200) {
-> +               dev_info(priv->dev, "%s: setting hs200\n", __func__);
-> +               ctrl = sdhci_readl(host, F_SDH30_ESD_CONTROL);
-> +               ctrl |= priv->vendor_hs200;
-> +               sdhci_writel(host, ctrl, F_SDH30_ESD_CONTROL);
-> +       }
-> +
-> +       ctrl = sdhci_readl(host, F_SDH30_TUNING_SETTING);
-> +       ctrl |= F_SDH30_CMD_CHK_DIS;
-> +       sdhci_writel(host, ctrl, F_SDH30_TUNING_SETTING);
-> +}
-> +
-> +unsigned int sdhci_f_sdh30_get_min_clock(struct sdhci_host *host)
-> +{
-> +       return F_SDH30_MIN_CLOCK;
-> +}
-> +
-> +void sdhci_f_sdh30_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +       if (sdhci_readw(host, SDHCI_CLOCK_CONTROL) == 0)
-> +               sdhci_writew(host, 0xBC01, SDHCI_CLOCK_CONTROL);
-> +
-> +       sdhci_reset(host, mask);
-> +}
-> +
-> +static const struct sdhci_ops sdhci_f_sdh30_ops = {
-> +       .voltage_switch = sdhci_f_sdh30_soft_voltage_switch,
-> +       .get_min_clock = sdhci_f_sdh30_get_min_clock,
-> +       .reset = sdhci_f_sdh30_reset,
-> +       .set_clock = sdhci_set_clock,
-> +       .set_bus_width = sdhci_set_bus_width,
-> +       .set_uhs_signaling = sdhci_set_uhs_signaling,
-> +};
-> +
-> +static int sdhci_f_sdh30_probe(struct platform_device *pdev)
-> +{
-> +       struct sdhci_host *host;
-> +       struct device *dev = &pdev->dev;
-> +       struct resource *res;
-> +       int irq, ctrl = 0, ret = 0;
-> +       struct f_sdhost_priv *priv;
-> +       u32 reg = 0;
-> +
-> +       irq = platform_get_irq(pdev, 0);
-> +       if (irq < 0) {
-> +               dev_err(dev, "%s: no irq specified\n", __func__);
-> +               return irq;
-> +       }
-> +
-> +       host = sdhci_alloc_host(dev, sizeof(struct sdhci_host) +
-> +                                               sizeof(struct f_sdhost_priv));
-> +       if (IS_ERR(host))
-> +               return PTR_ERR(host);
-> +
-> +       priv = sdhci_priv(host);
-> +       priv->dev = dev;
-> +
-> +       host->quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
-> +                      SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
-> +       host->quirks2 = SDHCI_QUIRK2_SUPPORT_SINGLE |
-> +                       SDHCI_QUIRK2_TUNING_WORK_AROUND;
-> +
-> +       ret = mmc_of_parse(host->mmc);
-> +       if (ret)
-> +               goto err;
-> +
-> +       platform_set_drvdata(pdev, host);
-> +
-> +       sdhci_get_of_property(pdev);
-> +       host->hw_name = "f_sdh30";
-> +       host->ops = &sdhci_f_sdh30_ops;
-> +       host->irq = irq;
-> +
-> +       res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +       host->ioaddr = devm_ioremap_resource(&pdev->dev, res);
-> +       if (IS_ERR(host->ioaddr)) {
-> +               ret = PTR_ERR(host);
-> +               goto err;
-> +       }
-> +
-> +       priv->clk_iface = devm_clk_get(&pdev->dev, "iface");
-> +       if (!IS_ERR(priv->clk_iface)) {
+Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Leonid Rosenboim <lrosenboim-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+Signed-off-by: Aaron Williams <aaron.williams-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Chandrakala Chavva <cchavva-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+Signed-off-by: Peter Swain <pswain-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+[aleksey.makarov-tx70/tkNEWbQT0dZR+AlfA@public.gmane.org: preparation for submission]
+Signed-off-by: Aleksey Makarov <aleksey.makarov-tx70/tkNEWbQT0dZR+AlfA@public.gmane.org>
+---
 
-You need to check if you managed to get the required clock. If not,
-you shall bail out and return the error code from devm_clk_get().
+This patch should be applied on top of the patchset
+"MIPS: OCTEON: flash: syncronize bootbus access"
+https://lkml.kernel.org/g/<1419337623-16101-1-git-send-email-aleksey.makarov-tx70/tkNEWbQT0dZR+AlfA@public.gmane.org>
 
-> +               ret = clk_prepare_enable(priv->clk_iface);
-> +               if (ret < 0) {
-> +                       dev_err(dev, "Failed to enable iface clock: %d\n", ret);
-> +                       goto err;
-> +               }
-> +       }
-> +       priv->clk = devm_clk_get(&pdev->dev, "core");
+ .../devicetree/bindings/mmc/octeon-mmc.txt         |   51 +
+ drivers/mmc/host/Kconfig                           |   10 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/octeon_mmc.c                      | 1506 ++++++++++++++++++++
+ 4 files changed, 1568 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/octeon-mmc.txt
+ create mode 100644 drivers/mmc/host/octeon_mmc.c
 
-You need to check if you managed to get the required clock. If not,
-you shall bail out and return the error code from devm_clk_get().
+diff --git a/Documentation/devicetree/bindings/mmc/octeon-mmc.txt b/Documentation/devicetree/bindings/mmc/octeon-mmc.txt
+new file mode 100644
+index 0000000..ce373cf
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/octeon-mmc.txt
+@@ -0,0 +1,51 @@
++* OCTEON SD/MMC Host Controller
++
++This controller is present on some members of the Cavium OCTEON SoC
++family, provide an interface for eMMC, MMC and SD devices.  There is a
++single controller that may have several "slots" connected.  These
++slots appear as children of the main controller node.
++
++Required properties:
++- compatible : Should be "cavium,octeon-6130-mmc" or "cavium,octeon-7890-mmc"
++- reg : Two entries:
++	1) The base address of the MMC controller register bank.
++	2) The base address of the MMC DMA engine register bank.
++- interrupts : Two entries:
++	1) The MMC controller interrupt line.
++	2) The MMC DMA engine interrupt line.
++- #address-cells : Must be <1>
++- #size-cells : Must be <0>
++
++Required properties of child nodes:
++- compatible : Should be "cavium,octeon-6130-mmc-slot".
++- reg : The slot number.
++- cavium,bus-max-width : The number of data lines present in the slot.
++- spi-max-frequency : The maximum operating frequency of the slot.
++
++Optional properties of child nodes:
++- cd-gpios : Specify GPIOs for card detection
++- wp-gpios : Specify GPIOs for write protection
++- power-gpios : Specify GPIOs for power control
++
++Example:
++	mmc@1180000002000 {
++		compatible = "cavium,octeon-6130-mmc";
++		reg = <0x11800 0x00002000 0x0 0x100>,
++		      <0x11800 0x00000168 0x0 0x20>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		/* EMM irq, DMA irq */
++		interrupts = <1 19>, <0 63>;
++
++		/* The board only has a single MMC slot */
++		mmc-slot@0 {
++			compatible = "cavium,octeon-6130-mmc-slot";
++			reg = <0>;
++			spi-max-frequency = <20000000>;
++			/* bus width can be 1, 4 or 8 */
++			cavium,bus-max-width = <8>;
++			cd-gpios = <&gpio 9 0>;
++			wp-gpios = <&gpio 10 0>;
++			power-gpios = <&gpio 8 0>;
++		};
++	};
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 2d6fbdd..5077dfa 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -292,6 +292,16 @@ config MMC_SDHCI_BCM2835
+ 
+ 	  If unsure, say N.
+ 
++config MMC_OCTEON
++	tristate "Cavium OCTEON Multimedia Card Interface support"
++	depends on CAVIUM_OCTEON_SOC
++	help
++	  This selects Cavium OCTEON Multimedia card Interface.
++	  If you have an OCTEON board with a Multimedia Card slot,
++	  say Y or M here.
++
++	  If unsure, say N.
++
+ config MMC_MOXART
+ 	tristate "MOXART SD/MMC Host Controller support"
+ 	depends on ARCH_MOXART && MMC
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index f7b0a77..448bbc9 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -19,6 +19,7 @@ obj-$(CONFIG_MMC_SDHCI_SIRF)   	+= sdhci-sirf.o
+ obj-$(CONFIG_MMC_SDHCI_SPEAR)	+= sdhci-spear.o
+ obj-$(CONFIG_MMC_WBSD)		+= wbsd.o
+ obj-$(CONFIG_MMC_AU1X)		+= au1xmmc.o
++obj-$(CONFIG_MMC_OCTEON)	+= octeon_mmc.o
+ obj-$(CONFIG_MMC_OMAP)		+= omap.o
+ obj-$(CONFIG_MMC_OMAP_HS)	+= omap_hsmmc.o
+ obj-$(CONFIG_MMC_ATMELMCI)	+= atmel-mci.o
+diff --git a/drivers/mmc/host/octeon_mmc.c b/drivers/mmc/host/octeon_mmc.c
+new file mode 100644
+index 0000000..b9fa28b
+--- /dev/null
++++ b/drivers/mmc/host/octeon_mmc.c
+@@ -0,0 +1,1506 @@
++/*
++ * Driver for MMC and SSD cards for Cavium OCTEON SOCs.
++ *
++ * This file is subject to the terms and conditions of the GNU General Public
++ * License.  See the file "COPYING" in the main directory of this archive
++ * for more details.
++ *
++ * Copyright (C) 2012-2014 Cavium Inc.
++ */
++
++#include <linux/platform_device.h>
++#include <linux/of_platform.h>
++#include <linux/scatterlist.h>
++#include <linux/interrupt.h>
++#include <linux/of_gpio.h>
++#include <linux/blkdev.h>
++#include <linux/device.h>
++#include <linux/module.h>
++#include <linux/delay.h>
++#include <linux/init.h>
++#include <linux/clk.h>
++#include <linux/err.h>
++#include <linux/io.h>
++#include <linux/of.h>
++
++#include <linux/mmc/card.h>
++#include <linux/mmc/host.h>
++#include <linux/mmc/mmc.h>
++#include <linux/mmc/sd.h>
++#include <net/irda/parameters.h>
++
++#include <asm/byteorder.h>
++#include <asm/octeon/octeon.h>
++#include <asm/octeon/cvmx-mio-defs.h>
++
++#define DRV_NAME	"octeon_mmc"
++
++#define OCTEON_MAX_MMC			4
++
++#define OCT_MIO_NDF_DMA_CFG		0x00
++#define OCT_MIO_EMM_DMA_ADR		0x08
++
++#define OCT_MIO_EMM_CFG			0x00
++#define OCT_MIO_EMM_SWITCH		0x48
++#define OCT_MIO_EMM_DMA			0x50
++#define OCT_MIO_EMM_CMD			0x58
++#define OCT_MIO_EMM_RSP_STS		0x60
++#define OCT_MIO_EMM_RSP_LO		0x68
++#define OCT_MIO_EMM_RSP_HI		0x70
++#define OCT_MIO_EMM_INT			0x78
++#define OCT_MIO_EMM_INT_EN		0x80
++#define OCT_MIO_EMM_WDOG		0x88
++#define OCT_MIO_EMM_SAMPLE		0x90
++#define OCT_MIO_EMM_STS_MASK		0x98
++#define OCT_MIO_EMM_RCA			0xa0
++#define OCT_MIO_EMM_BUF_IDX		0xe0
++#define OCT_MIO_EMM_BUF_DAT		0xe8
++
++#define CVMX_MIO_BOOT_CTL CVMX_ADD_IO_SEG(0x00011800000000D0ull)
++
++struct octeon_mmc_host {
++	u64	base;
++	u64	ndf_base;
++	u64	emm_cfg;
++	u64	n_minus_one;  /* OCTEON II workaround location */
++	int	last_slot;
++
++	struct semaphore mmc_serializer;
++	struct mmc_request	*current_req;
++	unsigned int		linear_buf_size;
++	void			*linear_buf;
++	struct sg_mapping_iter smi;
++	int sg_idx;
++	bool dma_active;
++
++	struct platform_device	*pdev;
++	int global_pwr_gpio;
++	bool global_pwr_gpio_low;
++	bool dma_err_pending;
++	bool need_bootbus_lock;
++	bool big_dma_addr;
++	bool need_irq_handler_lock;
++	spinlock_t irq_handler_lock;
++
++	struct octeon_mmc_slot	*slot[OCTEON_MAX_MMC];
++};
++
++struct octeon_mmc_slot {
++	struct mmc_host         *mmc;	/* slot-level mmc_core object */
++	struct octeon_mmc_host	*host;	/* common hw for all 4 slots */
++
++	unsigned int		clock;
++	unsigned int		sclock;
++
++	u64			cached_switch;
++	u64			cached_rca;
++
++	unsigned int		cmd_cnt; /* sample delay */
++	unsigned int		dat_cnt; /* sample delay */
++
++	int			bus_width;
++	int			bus_id;
++	int			ro_gpio;
++	int			cd_gpio;
++	int			pwr_gpio;
++	bool			cd_gpio_low;
++	bool			ro_gpio_low;
++	bool			pwr_gpio_low;
++};
++
++static int bb_size = 1 << 18;
++module_param(bb_size, int, S_IRUGO);
++MODULE_PARM_DESC(limit_max_blk,
++		 "Size of DMA linearizing buffer (max transfer size).");
++
++static int ddr = 2;
++module_param(ddr, int, S_IRUGO);
++MODULE_PARM_DESC(ddr,
++		 "enable DoubleDataRate clocking: 0=no, 1=always, 2=at spi-max-frequency/2");
++
++#if 0
++#define octeon_mmc_dbg trace_printk
++#else
++static inline void octeon_mmc_dbg(const char *s, ...) { }
++#endif
++
++static void octeon_mmc_acquire_bus(struct octeon_mmc_host *host)
++{
++	if (host->need_bootbus_lock) {
++		down(&octeon_bootbus_sem);
++		/* On cn70XX switch the mmc unit onto the bus. */
++		if (OCTEON_IS_MODEL(OCTEON_CN70XX))
++			cvmx_write_csr(CVMX_MIO_BOOT_CTL, 0);
++	} else {
++		down(&host->mmc_serializer);
++	}
++}
++
++static void octeon_mmc_release_bus(struct octeon_mmc_host *host)
++{
++	if (host->need_bootbus_lock)
++		up(&octeon_bootbus_sem);
++	else
++		up(&host->mmc_serializer);
++}
++
++struct octeon_mmc_cr_type {
++	u8 ctype;
++	u8 rtype;
++};
++
++/*
++ * The OCTEON MMC host hardware assumes that all commands have fixed
++ * command and response types.  These are correct if MMC devices are
++ * being used.  However, non-MMC devices like SD use command and
++ * response types that are unexpected by the host hardware.
++ *
++ * The command and response types can be overridden by supplying an
++ * XOR value that is applied to the type.  We calculate the XOR value
++ * from the values in this table and the flags passed from the MMC
++ * core.
++ */
++static struct octeon_mmc_cr_type octeon_mmc_cr_types[] = {
++	{0, 0},		/* CMD0 */
++	{0, 3},		/* CMD1 */
++	{0, 2},		/* CMD2 */
++	{0, 1},		/* CMD3 */
++	{0, 0},		/* CMD4 */
++	{0, 1},		/* CMD5 */
++	{0, 1},		/* CMD6 */
++	{0, 1},		/* CMD7 */
++	{1, 1},		/* CMD8 */
++	{0, 2},		/* CMD9 */
++	{0, 2},		/* CMD10 */
++	{1, 1},		/* CMD11 */
++	{0, 1},		/* CMD12 */
++	{0, 1},		/* CMD13 */
++	{1, 1},		/* CMD14 */
++	{0, 0},		/* CMD15 */
++	{0, 1},		/* CMD16 */
++	{1, 1},		/* CMD17 */
++	{1, 1},		/* CMD18 */
++	{3, 1},		/* CMD19 */
++	{2, 1},		/* CMD20 */
++	{0, 0},		/* CMD21 */
++	{0, 0},		/* CMD22 */
++	{0, 1},		/* CMD23 */
++	{2, 1},		/* CMD24 */
++	{2, 1},		/* CMD25 */
++	{2, 1},		/* CMD26 */
++	{2, 1},		/* CMD27 */
++	{0, 1},		/* CMD28 */
++	{0, 1},		/* CMD29 */
++	{1, 1},		/* CMD30 */
++	{1, 1},		/* CMD31 */
++	{0, 0},		/* CMD32 */
++	{0, 0},		/* CMD33 */
++	{0, 0},		/* CMD34 */
++	{0, 1},		/* CMD35 */
++	{0, 1},		/* CMD36 */
++	{0, 0},		/* CMD37 */
++	{0, 1},		/* CMD38 */
++	{0, 4},		/* CMD39 */
++	{0, 5},		/* CMD40 */
++	{0, 0},		/* CMD41 */
++	{2, 1},		/* CMD42 */
++	{0, 0},		/* CMD43 */
++	{0, 0},		/* CMD44 */
++	{0, 0},		/* CMD45 */
++	{0, 0},		/* CMD46 */
++	{0, 0},		/* CMD47 */
++	{0, 0},		/* CMD48 */
++	{0, 0},		/* CMD49 */
++	{0, 0},		/* CMD50 */
++	{0, 0},		/* CMD51 */
++	{0, 0},		/* CMD52 */
++	{0, 0},		/* CMD53 */
++	{0, 0},		/* CMD54 */
++	{0, 1},		/* CMD55 */
++	{0xff, 0xff},	/* CMD56 */
++	{0, 0},		/* CMD57 */
++	{0, 0},		/* CMD58 */
++	{0, 0},		/* CMD59 */
++	{0, 0},		/* CMD60 */
++	{0, 0},		/* CMD61 */
++	{0, 0},		/* CMD62 */
++	{0, 0}		/* CMD63 */
++};
++
++struct octeon_mmc_cr_mods {
++	u8 ctype_xor;
++	u8 rtype_xor;
++};
++
++static inline void *phys_to_ptr(u64 address)
++{
++	return (void *)(address | (1ull<<63)); /* XKPHYS */
++}
++
++/**
++ * Lock a single line into L2. The line is zeroed before locking
++ * to make sure no dram accesses are made.
++ *
++ * @addr   Physical address to lock
++ */
++static void l2c_lock_line(u64 addr)
++{
++	char *addr_ptr = phys_to_ptr(addr);
++
++	asm volatile (
++		"cache 31, %[line]"	/* Unlock the line */
++		:: [line] "m" (*addr_ptr));
++}
++
++/**
++ * Locks a memory region in the L2 cache
++ *
++ * @start - start address to begin locking
++ * @len - length in bytes to lock
++ */
++static void l2c_lock_mem_region(u64 start, u64 len)
++{
++	u64 end;
++
++	/* Round start/end to cache line boundaries */
++	end = ALIGN(start + len - 1, CVMX_CACHE_LINE_SIZE);
++	start = ALIGN(start, CVMX_CACHE_LINE_SIZE);
++
++	while (start <= end) {
++		l2c_lock_line(start);
++		start += CVMX_CACHE_LINE_SIZE;
++	}
++	asm volatile("sync");
++}
++
++/**
++ * Unlock a single line in the L2 cache.
++ *
++ * @addr	Physical address to unlock
++ *
++ * Return Zero on success
++ */
++static void l2c_unlock_line(u64 addr)
++{
++	char *addr_ptr = phys_to_ptr(addr);
++	asm volatile (
++		"cache 23, %[line]"	/* Unlock the line */
++		:: [line] "m" (*addr_ptr));
++}
++
++/**
++ * Unlock a memory region in the L2 cache
++ *
++ * @start - start address to unlock
++ * @len - length to unlock in bytes
++ */
++static void l2c_unlock_mem_region(u64 start, u64 len)
++{
++	u64 end;
++
++	/* Round start/end to cache line boundaries */
++	end = ALIGN(start + len - 1, CVMX_CACHE_LINE_SIZE);
++	start = ALIGN(start, CVMX_CACHE_LINE_SIZE);
++
++	while (start <= end) {
++		l2c_unlock_line(start);
++		start += CVMX_CACHE_LINE_SIZE;
++	}
++}
++
++static struct octeon_mmc_cr_mods octeon_mmc_get_cr_mods(struct mmc_command *cmd)
++{
++	struct octeon_mmc_cr_type *cr;
++	u8 desired_ctype, hardware_ctype;
++	u8 desired_rtype, hardware_rtype;
++	struct octeon_mmc_cr_mods r;
++
++	desired_ctype = desired_rtype = 0;
++
++	cr = octeon_mmc_cr_types + (cmd->opcode & 0x3f);
++	hardware_ctype = cr->ctype;
++	hardware_rtype = cr->rtype;
++	if (cmd->opcode == 56) { /* CMD56 GEN_CMD */
++		hardware_ctype = (cmd->arg & 1) ? 1 : 2;
++	}
++
++	switch (mmc_cmd_type(cmd)) {
++	case MMC_CMD_ADTC:
++		desired_ctype = (cmd->data->flags & MMC_DATA_WRITE) ? 2 : 1;
++		break;
++	case MMC_CMD_AC:
++	case MMC_CMD_BC:
++	case MMC_CMD_BCR:
++		desired_ctype = 0;
++		break;
++	}
++
++	switch (mmc_resp_type(cmd)) {
++	case MMC_RSP_NONE:
++		desired_rtype = 0;
++		break;
++	case MMC_RSP_R1:/* MMC_RSP_R5, MMC_RSP_R6, MMC_RSP_R7 */
++	case MMC_RSP_R1B:
++		desired_rtype = 1;
++		break;
++	case MMC_RSP_R2:
++		desired_rtype = 2;
++		break;
++	case MMC_RSP_R3: /* MMC_RSP_R4 */
++		desired_rtype = 3;
++		break;
++	}
++	r.ctype_xor = desired_ctype ^ hardware_ctype;
++	r.rtype_xor = desired_rtype ^ hardware_rtype;
++	return r;
++}
++
++static bool octeon_mmc_switch_val_changed(struct octeon_mmc_slot *slot,
++					  u64 new_val)
++{
++	/* Match BUS_ID, HS_TIMING, BUS_WIDTH, POWER_CLASS, CLK_HI, CLK_LO */
++	u64 m = 0x3001070fffffffffull;
++
++	return (slot->cached_switch & m) != (new_val & m);
++}
++
++static unsigned int octeon_mmc_timeout_to_wdog(struct octeon_mmc_slot *slot,
++					       unsigned int ns)
++{
++	u64 bt = (u64)slot->clock * (u64)ns;
++
++	return (unsigned int)(bt / 1000000000);
++}
++
++static irqreturn_t octeon_mmc_interrupt(int irq, void *dev_id)
++{
++	struct octeon_mmc_host *host = dev_id;
++	union cvmx_mio_emm_int emm_int;
++	struct mmc_request	*req;
++	bool host_done;
++	union cvmx_mio_emm_rsp_sts rsp_sts;
++	unsigned long flags = 0;
++
++	if (host->need_irq_handler_lock)
++		spin_lock_irqsave(&host->irq_handler_lock, flags);
++	emm_int.u64 = cvmx_read_csr(host->base + OCT_MIO_EMM_INT);
++	req = host->current_req;
++	cvmx_write_csr(host->base + OCT_MIO_EMM_INT, emm_int.u64);
++
++	octeon_mmc_dbg("Got interrupt: EMM_INT = 0x%llx\n", emm_int.u64);
++
++	if (!req)
++		goto out;
++
++	rsp_sts.u64 = cvmx_read_csr(host->base + OCT_MIO_EMM_RSP_STS);
++	octeon_mmc_dbg("octeon_mmc_interrupt  MIO_EMM_RSP_STS 0x%llx\n",
++		rsp_sts.u64);
++
++	if (host->dma_err_pending) {
++		host->current_req = NULL;
++		host->dma_err_pending = false;
++		req->done(req);
++		host_done = true;
++		goto no_req_done;
++	}
++
++	if (!host->dma_active && emm_int.s.buf_done && req->data) {
++		unsigned int type = (rsp_sts.u64 >> 7) & 3;
++
++		if (type == 1) {
++			/* Read */
++			int dbuf = rsp_sts.s.dbuf;
++			struct sg_mapping_iter *smi = &host->smi;
++			unsigned int data_len =
++				req->data->blksz * req->data->blocks;
++			unsigned int bytes_xfered;
++			u64 dat = 0;
++			int shift = -1;
++
++			/* Auto inc from offset zero */
++			cvmx_write_csr(host->base + OCT_MIO_EMM_BUF_IDX,
++				(u64)(0x10000 | (dbuf << 6)));
++
++			for (bytes_xfered = 0; bytes_xfered < data_len;) {
++				if (smi->consumed >= smi->length) {
++					if (!sg_miter_next(smi))
++						break;
++					smi->consumed = 0;
++				}
++				if (shift < 0) {
++					dat = cvmx_read_csr(host->base +
++						OCT_MIO_EMM_BUF_DAT);
++					shift = 56;
++				}
++
++				while (smi->consumed < smi->length &&
++					shift >= 0) {
++					((u8 *)(smi->addr))[smi->consumed] =
++						(dat >> shift) & 0xff;
++					bytes_xfered++;
++					smi->consumed++;
++					shift -= 8;
++				}
++			}
++			sg_miter_stop(smi);
++			req->data->bytes_xfered = bytes_xfered;
++			req->data->error = 0;
++		} else if (type == 2) {
++			/* write */
++			req->data->bytes_xfered = req->data->blksz *
++				req->data->blocks;
++			req->data->error = 0;
++		}
++	}
++	host_done = emm_int.s.cmd_done || emm_int.s.dma_done ||
++		emm_int.s.cmd_err || emm_int.s.dma_err;
++	if (host_done && req->done) {
++		if (rsp_sts.s.rsp_bad_sts ||
++		    rsp_sts.s.rsp_crc_err ||
++		    rsp_sts.s.rsp_timeout ||
++		    rsp_sts.s.blk_crc_err ||
++		    rsp_sts.s.blk_timeout ||
++		    rsp_sts.s.dbuf_err) {
++			req->cmd->error = -EILSEQ;
++		} else {
++			req->cmd->error = 0;
++		}
++
++		if (host->dma_active && req->data) {
++			req->data->error = 0;
++			req->data->bytes_xfered = req->data->blocks *
++				req->data->blksz;
++			if (!(req->data->flags & MMC_DATA_WRITE) &&
++				req->data->sg_len > 1) {
++				size_t r = sg_copy_from_buffer(req->data->sg,
++					req->data->sg_len, host->linear_buf,
++					req->data->bytes_xfered);
++				WARN_ON(r != req->data->bytes_xfered);
++			}
++		}
++		if (rsp_sts.s.rsp_val) {
++			u64 rsp_hi;
++			u64 rsp_lo = cvmx_read_csr(
++				host->base + OCT_MIO_EMM_RSP_LO);
++
++			switch (rsp_sts.s.rsp_type) {
++			case 1:
++			case 3:
++				req->cmd->resp[0] = (rsp_lo >> 8) & 0xffffffff;
++				req->cmd->resp[1] = 0;
++				req->cmd->resp[2] = 0;
++				req->cmd->resp[3] = 0;
++				break;
++			case 2:
++				req->cmd->resp[3] = rsp_lo & 0xffffffff;
++				req->cmd->resp[2] = (rsp_lo >> 32) & 0xffffffff;
++				rsp_hi = cvmx_read_csr(host->base +
++					OCT_MIO_EMM_RSP_HI);
++				req->cmd->resp[1] = rsp_hi & 0xffffffff;
++				req->cmd->resp[0] = (rsp_hi >> 32) & 0xffffffff;
++				break;
++			default:
++				octeon_mmc_dbg("octeon_mmc_interrupt unhandled rsp_val %d\n",
++					       rsp_sts.s.rsp_type);
++				break;
++			}
++			octeon_mmc_dbg("octeon_mmc_interrupt  resp %08x %08x %08x %08x\n",
++				       req->cmd->resp[0], req->cmd->resp[1],
++				       req->cmd->resp[2], req->cmd->resp[3]);
++		}
++		if (emm_int.s.dma_err && rsp_sts.s.dma_pend) {
++			/* Try to clean up failed DMA */
++			union cvmx_mio_emm_dma emm_dma;
++
++			emm_dma.u64 =
++				cvmx_read_csr(host->base + OCT_MIO_EMM_DMA);
++			emm_dma.s.dma_val = 1;
++			emm_dma.s.dat_null = 1;
++			emm_dma.s.bus_id = rsp_sts.s.bus_id;
++			cvmx_write_csr(host->base + OCT_MIO_EMM_DMA,
++				       emm_dma.u64);
++			host->dma_err_pending = true;
++			host_done = false;
++			goto no_req_done;
++		}
++
++		host->current_req = NULL;
++		req->done(req);
++	}
++no_req_done:
++	if (host->n_minus_one) {
++		l2c_unlock_mem_region(host->n_minus_one, 512);
++		host->n_minus_one = 0;
++	}
++	if (host_done)
++		octeon_mmc_release_bus(host);
++out:
++	if (host->need_irq_handler_lock)
++		spin_unlock_irqrestore(&host->irq_handler_lock, flags);
++	return IRQ_RETVAL(emm_int.u64 != 0);
++}
++
++static void octeon_mmc_switch_to(struct octeon_mmc_slot	*slot)
++{
++	struct octeon_mmc_host	*host = slot->host;
++	struct octeon_mmc_slot	*old_slot;
++	union cvmx_mio_emm_switch sw;
++	union cvmx_mio_emm_sample samp;
++
++	if (slot->bus_id == host->last_slot)
++		goto out;
++
++	if (host->last_slot >= 0) {
++		old_slot = host->slot[host->last_slot];
++		old_slot->cached_switch =
++			cvmx_read_csr(host->base + OCT_MIO_EMM_SWITCH);
++		old_slot->cached_rca =
++			cvmx_read_csr(host->base + OCT_MIO_EMM_RCA);
++	}
++	cvmx_write_csr(host->base + OCT_MIO_EMM_RCA, slot->cached_rca);
++	sw.u64 = slot->cached_switch;
++	sw.s.bus_id = 0;
++	cvmx_write_csr(host->base + OCT_MIO_EMM_SWITCH, sw.u64);
++	sw.s.bus_id = slot->bus_id;
++	cvmx_write_csr(host->base + OCT_MIO_EMM_SWITCH, sw.u64);
++
++	samp.u64 = 0;
++	samp.s.cmd_cnt = slot->cmd_cnt;
++	samp.s.dat_cnt = slot->dat_cnt;
++	cvmx_write_csr(host->base + OCT_MIO_EMM_SAMPLE, samp.u64);
++out:
++	host->last_slot = slot->bus_id;
++}
++
++static void octeon_mmc_dma_request(struct mmc_host *mmc,
++				   struct mmc_request *mrq)
++{
++	struct octeon_mmc_slot	*slot;
++	struct octeon_mmc_host	*host;
++	struct mmc_command *cmd;
++	struct mmc_data *data;
++	union cvmx_mio_emm_int emm_int;
++	union cvmx_mio_emm_dma emm_dma;
++	union cvmx_mio_ndf_dma_cfg dma_cfg;
++
++	cmd = mrq->cmd;
++	if (mrq->data == NULL || mrq->data->sg == NULL || !mrq->data->sg_len ||
++	    mrq->stop == NULL || mrq->stop->opcode != MMC_STOP_TRANSMISSION) {
++		dev_err(&mmc->card->dev,
++			"Error: octeon_mmc_dma_request no data\n");
++		cmd->error = -EINVAL;
++		if (mrq->done)
++			mrq->done(mrq);
++		return;
++	}
++
++	slot = mmc_priv(mmc);
++	host = slot->host;
++
++	/* Only a single user of the bootbus at a time. */
++	octeon_mmc_acquire_bus(host);
++
++	octeon_mmc_switch_to(slot);
++
++	data = mrq->data;
++
++	if (data->timeout_ns) {
++		cvmx_write_csr(host->base + OCT_MIO_EMM_WDOG,
++			octeon_mmc_timeout_to_wdog(slot, data->timeout_ns));
++		octeon_mmc_dbg("OCT_MIO_EMM_WDOG %llu\n",
++			cvmx_read_csr(host->base + OCT_MIO_EMM_WDOG));
++	}
++
++	WARN_ON(host->current_req);
++	host->current_req = mrq;
++
++	host->sg_idx = 0;
++
++	WARN_ON(data->blksz * data->blocks > host->linear_buf_size);
++
++	if ((data->flags & MMC_DATA_WRITE) && data->sg_len > 1) {
++		size_t r = sg_copy_to_buffer(data->sg, data->sg_len,
++			 host->linear_buf, data->blksz * data->blocks);
++		WARN_ON(data->blksz * data->blocks != r);
++	}
++
++	dma_cfg.u64 = 0;
++	dma_cfg.s.en = 1;
++	dma_cfg.s.rw = (data->flags & MMC_DATA_WRITE) ? 1 : 0;
++#ifdef __LITTLE_ENDIAN
++	dma_cfg.s.endian = 1;
++#endif
++	dma_cfg.s.size = ((data->blksz * data->blocks) / 8) - 1;
++	if (!host->big_dma_addr) {
++		if (data->sg_len > 1)
++			dma_cfg.s.adr = virt_to_phys(host->linear_buf);
++		else
++			dma_cfg.s.adr = sg_phys(data->sg);
++	}
++	cvmx_write_csr(host->ndf_base + OCT_MIO_NDF_DMA_CFG, dma_cfg.u64);
++	octeon_mmc_dbg("MIO_NDF_DMA_CFG: %016llx\n",
++		(unsigned long long)dma_cfg.u64);
++	if (host->big_dma_addr) {
++		u64 addr;
++
++		if (data->sg_len > 1)
++			addr = virt_to_phys(host->linear_buf);
++		else
++			addr = sg_phys(data->sg);
++		cvmx_write_csr(host->ndf_base + OCT_MIO_EMM_DMA_ADR, addr);
++		octeon_mmc_dbg("MIO_EMM_DMA_ADR: %016llx\n",
++			(unsigned long long)addr);
++	}
++
++	emm_dma.u64 = 0;
++	emm_dma.s.bus_id = slot->bus_id;
++	emm_dma.s.dma_val = 1;
++	emm_dma.s.sector = mmc_card_blockaddr(mmc->card) ? 1 : 0;
++	emm_dma.s.rw = (data->flags & MMC_DATA_WRITE) ? 1 : 0;
++	if (mmc_card_mmc(mmc->card) ||
++	    (mmc_card_sd(mmc->card) &&
++		(mmc->card->scr.cmds & SD_SCR_CMD23_SUPPORT)))
++		emm_dma.s.multi = 1;
++	emm_dma.s.block_cnt = data->blocks;
++	emm_dma.s.card_addr = cmd->arg;
++
++	emm_int.u64 = 0;
++	emm_int.s.dma_done = 1;
++	emm_int.s.cmd_err = 1;
++	emm_int.s.dma_err = 1;
++	/* Clear the bit. */
++	cvmx_write_csr(host->base + OCT_MIO_EMM_INT, emm_int.u64);
++	cvmx_write_csr(host->base + OCT_MIO_EMM_INT_EN, emm_int.u64);
++	host->dma_active = true;
++
++	if ((OCTEON_IS_MODEL(OCTEON_CN6XXX) ||
++		OCTEON_IS_MODEL(OCTEON_CNF7XXX)) &&
++	    cmd->opcode == MMC_WRITE_MULTIPLE_BLOCK &&
++	    (data->blksz * data->blocks) > 1024) {
++		host->n_minus_one = dma_cfg.s.adr +
++			(data->blksz * data->blocks) - 1024;
++		l2c_lock_mem_region(host->n_minus_one, 512);
++	}
++
++	if (mmc->card && mmc_card_sd(mmc->card))
++		cvmx_write_csr(host->base + OCT_MIO_EMM_STS_MASK,
++			0x00b00000ull);
++	else
++		cvmx_write_csr(host->base + OCT_MIO_EMM_STS_MASK,
++			0xe4f90080ull);
++	cvmx_write_csr(host->base + OCT_MIO_EMM_DMA, emm_dma.u64);
++	octeon_mmc_dbg("MIO_EMM_DMA: %llx\n", emm_dma.u64);
++}
++
++static void octeon_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
++{
++	struct octeon_mmc_slot	*slot;
++	struct octeon_mmc_host	*host;
++	struct mmc_command *cmd;
++	union cvmx_mio_emm_int emm_int;
++	union cvmx_mio_emm_cmd emm_cmd;
++	struct octeon_mmc_cr_mods mods;
++
++	cmd = mrq->cmd;
++
++	if (cmd->opcode == MMC_READ_MULTIPLE_BLOCK ||
++		cmd->opcode == MMC_WRITE_MULTIPLE_BLOCK) {
++		octeon_mmc_dma_request(mmc, mrq);
++		return;
++	}
++
++	mods = octeon_mmc_get_cr_mods(cmd);
++
++	slot = mmc_priv(mmc);
++	host = slot->host;
++
++	/* Only a single user of the bootbus at a time. */
++	octeon_mmc_acquire_bus(host);
++
++	octeon_mmc_switch_to(slot);
++
++	WARN_ON(host->current_req);
++	host->current_req = mrq;
++
++	emm_int.u64 = 0;
++	emm_int.s.cmd_done = 1;
++	emm_int.s.cmd_err = 1;
++	if (cmd->data) {
++		octeon_mmc_dbg("command has data\n");
++		if (cmd->data->flags & MMC_DATA_READ) {
++			sg_miter_start(&host->smi, mrq->data->sg,
++				       mrq->data->sg_len,
++				       SG_MITER_ATOMIC | SG_MITER_TO_SG);
++		} else {
++			struct sg_mapping_iter *smi = &host->smi;
++			unsigned int data_len =
++				mrq->data->blksz * mrq->data->blocks;
++			unsigned int bytes_xfered;
++			u64 dat = 0;
++			int shift = 56;
++			/*
++			 * Copy data to the xmit buffer before
++			 * issuing the command
++			 */
++			sg_miter_start(smi, mrq->data->sg,
++				       mrq->data->sg_len, SG_MITER_FROM_SG);
++			/* Auto inc from offset zero, dbuf zero */
++			cvmx_write_csr(host->base + OCT_MIO_EMM_BUF_IDX,
++					0x10000ull);
++
++			for (bytes_xfered = 0; bytes_xfered < data_len;) {
++				if (smi->consumed >= smi->length) {
++					if (!sg_miter_next(smi))
++						break;
++					smi->consumed = 0;
++				}
++
++				while (smi->consumed < smi->length &&
++					shift >= 0) {
++
++					dat |= (u64)(((u8 *)(smi->addr))
++						[smi->consumed]) << shift;
++					bytes_xfered++;
++					smi->consumed++;
++					shift -= 8;
++				}
++				if (shift < 0) {
++					cvmx_write_csr(host->base +
++						OCT_MIO_EMM_BUF_DAT, dat);
++					shift = 56;
++					dat = 0;
++				}
++			}
++			sg_miter_stop(smi);
++		}
++		if (cmd->data->timeout_ns) {
++			cvmx_write_csr(host->base + OCT_MIO_EMM_WDOG,
++				octeon_mmc_timeout_to_wdog(slot,
++					cmd->data->timeout_ns));
++			octeon_mmc_dbg("OCT_MIO_EMM_WDOG %llu\n",
++				       cvmx_read_csr(host->base +
++						OCT_MIO_EMM_WDOG));
++		}
++	} else {
++		cvmx_write_csr(host->base + OCT_MIO_EMM_WDOG,
++			       ((u64)slot->clock * 850ull) / 1000ull);
++		octeon_mmc_dbg("OCT_MIO_EMM_WDOG %llu\n",
++			       cvmx_read_csr(host->base + OCT_MIO_EMM_WDOG));
++	}
++	/* Clear the bit. */
++	cvmx_write_csr(host->base + OCT_MIO_EMM_INT, emm_int.u64);
++	cvmx_write_csr(host->base + OCT_MIO_EMM_INT_EN, emm_int.u64);
++	host->dma_active = false;
++
++	emm_cmd.u64 = 0;
++	emm_cmd.s.cmd_val = 1;
++	emm_cmd.s.ctype_xor = mods.ctype_xor;
++	emm_cmd.s.rtype_xor = mods.rtype_xor;
++	if (mmc_cmd_type(cmd) == MMC_CMD_ADTC)
++		emm_cmd.s.offset = 64 -
++			((cmd->data->blksz * cmd->data->blocks) / 8);
++	emm_cmd.s.bus_id = slot->bus_id;
++	emm_cmd.s.cmd_idx = cmd->opcode;
++	emm_cmd.s.arg = cmd->arg;
++	cvmx_write_csr(host->base + OCT_MIO_EMM_STS_MASK, 0);
++	cvmx_write_csr(host->base + OCT_MIO_EMM_CMD, emm_cmd.u64);
++	octeon_mmc_dbg("MIO_EMM_CMD: %llx\n", emm_cmd.u64);
++}
++
++static void octeon_mmc_reset_bus(struct octeon_mmc_slot *slot, int preserve)
++{
++	union cvmx_mio_emm_cfg emm_cfg;
++	union cvmx_mio_emm_switch emm_switch;
++	u64 wdog = 0;
++
++	emm_cfg.u64 = cvmx_read_csr(slot->host->base + OCT_MIO_EMM_CFG);
++	if (preserve) {
++		emm_switch.u64 = cvmx_read_csr(slot->host->base +
++			OCT_MIO_EMM_SWITCH);
++		wdog = cvmx_read_csr(slot->host->base + OCT_MIO_EMM_WDOG);
++	}
++
++	/* Restore switch settings */
++	if (preserve) {
++		emm_switch.s.switch_exe = 0;
++		emm_switch.s.switch_err0 = 0;
++		emm_switch.s.switch_err1 = 0;
++		emm_switch.s.switch_err2 = 0;
++		emm_switch.s.bus_id = 0;
++		cvmx_write_csr(slot->host->base + OCT_MIO_EMM_SWITCH,
++				emm_switch.u64);
++		emm_switch.s.bus_id = slot->bus_id;
++		cvmx_write_csr(slot->host->base + OCT_MIO_EMM_SWITCH,
++				emm_switch.u64);
++
++		slot->cached_switch = emm_switch.u64;
++
++		msleep(10);
++		cvmx_write_csr(slot->host->base + OCT_MIO_EMM_WDOG, wdog);
++	} else {
++		slot->cached_switch = 0;
++	}
++}
++
++static void octeon_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	struct octeon_mmc_slot	*slot;
++	struct octeon_mmc_host	*host;
++	int bus_width;
++	int clock;
++	bool ddr_clock;
++	int hs_timing;
++	int power_class = 10;
++	int clk_period;
++	int timeout = 2000;
++	union cvmx_mio_emm_switch emm_switch;
++	union cvmx_mio_emm_rsp_sts emm_sts;
++
++	slot = mmc_priv(mmc);
++	host = slot->host;
++
++	/* Only a single user of the bootbus at a time. */
++	octeon_mmc_acquire_bus(host);
++
++	octeon_mmc_switch_to(slot);
++
++	octeon_mmc_dbg("Calling set_ios: slot: clk = 0x%x, bus_width = %d\n",
++		       slot->clock, slot->bus_width);
++	octeon_mmc_dbg("Calling set_ios: ios: clk = 0x%x, vdd = %u, bus_width = %u, power_mode = %u, timing = %u\n",
++		       ios->clock, ios->vdd, ios->bus_width, ios->power_mode,
++		       ios->timing);
++	octeon_mmc_dbg("Calling set_ios: mmc: caps = 0x%x, bus_width = %d\n",
++		       mmc->caps, mmc->ios.bus_width);
++
++	/*
++	 * Reset the chip on each power off
++	 */
++	if (ios->power_mode == MMC_POWER_OFF) {
++		octeon_mmc_reset_bus(slot, 1);
++		if (slot->pwr_gpio >= 0)
++			gpio_set_value_cansleep(slot->pwr_gpio,
++						slot->pwr_gpio_low);
++	} else {
++		if (slot->pwr_gpio >= 0)
++			gpio_set_value_cansleep(slot->pwr_gpio,
++						!slot->pwr_gpio_low);
++	}
++
++	switch (ios->bus_width) {
++	case MMC_BUS_WIDTH_8:
++		bus_width = 2;
++		break;
++	case MMC_BUS_WIDTH_4:
++		bus_width = 1;
++		break;
++	case MMC_BUS_WIDTH_1:
++		bus_width = 0;
++		break;
++	default:
++		octeon_mmc_dbg("unknown bus width %d\n", ios->bus_width);
++		bus_width = 0;
++		break;
++	}
++
++	hs_timing = (ios->timing == MMC_TIMING_MMC_HS);
++	ddr_clock = (bus_width && ios->timing >= MMC_TIMING_UHS_DDR50);
++
++	if (ddr_clock)
++		bus_width |= 4;
++
++	if (ios->clock) {
++		slot->clock = ios->clock;
++		slot->bus_width = bus_width;
++
++		clock = slot->clock;
++
++		if (clock > 52000000)
++			clock = 52000000;
++
++		clk_period = (octeon_get_io_clock_rate() + clock - 1) /
++			(2 * clock);
++
++		/* until clock-renengotiate-on-CRC is in */
++		if (ddr_clock && ddr > 1)
++			clk_period *= 2;
++
++		emm_switch.u64 = 0;
++		emm_switch.s.hs_timing = hs_timing;
++		emm_switch.s.bus_width = bus_width;
++		emm_switch.s.power_class = power_class;
++		emm_switch.s.clk_hi = clk_period;
++		emm_switch.s.clk_lo = clk_period;
++
++		if (!octeon_mmc_switch_val_changed(slot, emm_switch.u64)) {
++			octeon_mmc_dbg("No change from 0x%llx mio_emm_switch, returning.\n",
++				       emm_switch.u64);
++			goto out;
++		}
++
++		octeon_mmc_dbg("Writing 0x%llx to mio_emm_wdog\n",
++			       ((u64)clock * 850ull) / 1000ull);
++		cvmx_write_csr(host->base + OCT_MIO_EMM_WDOG,
++			       ((u64)clock * 850ull) / 1000ull);
++		octeon_mmc_dbg("Writing 0x%llx to mio_emm_switch\n",
++				emm_switch.u64);
++
++		cvmx_write_csr(host->base + OCT_MIO_EMM_SWITCH, emm_switch.u64);
++		emm_switch.s.bus_id = slot->bus_id;
++		cvmx_write_csr(host->base + OCT_MIO_EMM_SWITCH, emm_switch.u64);
++		slot->cached_switch = emm_switch.u64;
++
++		do {
++			emm_sts.u64 =
++				cvmx_read_csr(host->base + OCT_MIO_EMM_RSP_STS);
++			if (!emm_sts.s.switch_val)
++				break;
++			udelay(100);
++		} while (timeout-- > 0);
++
++		if (timeout <= 0) {
++			octeon_mmc_dbg("switch command timed out, status=0x%llx\n",
++				       emm_sts.u64);
++			goto out;
++		}
++	}
++out:
++	octeon_mmc_release_bus(host);
++}
++
++static int octeon_mmc_get_ro(struct mmc_host *mmc)
++{
++	struct octeon_mmc_slot	*slot = mmc_priv(mmc);
++
++	if (slot->ro_gpio >= 0) {
++		int pin = gpio_get_value_cansleep(slot->ro_gpio);
++
++		if (pin < 0)
++			return pin;
++		if (slot->ro_gpio_low)
++			pin = !pin;
++		return pin;
++	} else {
++		return -ENOSYS;
++	}
++}
++
++static int octeon_mmc_get_cd(struct mmc_host *mmc)
++{
++	struct octeon_mmc_slot	*slot = mmc_priv(mmc);
++
++	if (slot->cd_gpio >= 0) {
++		int pin = gpio_get_value_cansleep(slot->cd_gpio);
++
++		if (pin < 0)
++			return pin;
++		if (slot->cd_gpio_low)
++			pin = !pin;
++		return pin;
++	} else {
++		return -ENOSYS;
++	}
++}
++
++static const struct mmc_host_ops octeon_mmc_ops = {
++	.request        = octeon_mmc_request,
++	.set_ios        = octeon_mmc_set_ios,
++	.get_ro		= octeon_mmc_get_ro,
++	.get_cd		= octeon_mmc_get_cd,
++};
++
++static void octeon_mmc_set_clock(struct octeon_mmc_slot *slot,
++				 unsigned int clock)
++{
++	struct mmc_host *mmc = slot->mmc;
++
++	clock = min(clock, mmc->f_max);
++	clock = max(clock, mmc->f_min);
++	slot->clock = clock;
++}
++
++static int octeon_mmc_initlowlevel(struct octeon_mmc_slot *slot,
++				   int bus_width)
++{
++	union cvmx_mio_emm_switch emm_switch;
++	struct octeon_mmc_host *host = slot->host;
++
++	host->emm_cfg |= 1ull << slot->bus_id;
++	cvmx_write_csr(slot->host->base + OCT_MIO_EMM_CFG, host->emm_cfg);
++	octeon_mmc_set_clock(slot, 400000);
++
++	/* Program initial clock speed and power */
++	emm_switch.u64 = 0;
++	emm_switch.s.power_class = 10;
++	emm_switch.s.clk_hi = (slot->sclock / slot->clock) / 2;
++	emm_switch.s.clk_lo = (slot->sclock / slot->clock) / 2;
++
++	cvmx_write_csr(host->base + OCT_MIO_EMM_SWITCH, emm_switch.u64);
++	emm_switch.s.bus_id = slot->bus_id;
++	cvmx_write_csr(host->base + OCT_MIO_EMM_SWITCH, emm_switch.u64);
++	slot->cached_switch = emm_switch.u64;
++
++	cvmx_write_csr(host->base + OCT_MIO_EMM_WDOG,
++		       ((u64)slot->clock * 850ull) / 1000ull);
++	cvmx_write_csr(host->base + OCT_MIO_EMM_STS_MASK, 0xe4f90080ull);
++	cvmx_write_csr(host->base + OCT_MIO_EMM_RCA, 1);
++	return 0;
++}
++
++static int __init octeon_init_slot(struct octeon_mmc_host *host, int id,
++				   int bus_width, int max_freq,
++				   int ro_gpio, int cd_gpio, int pwr_gpio,
++				   bool ro_low, bool cd_low, bool power_low,
++				   u32 cmd_skew, u32 dat_skew)
++{
++	struct mmc_host *mmc;
++	struct octeon_mmc_slot *slot;
++	u64 clock_period;
++	int ret;
++
++	/*
++	 * Allocate MMC structue
++	 */
++	mmc = mmc_alloc_host(sizeof(struct octeon_mmc_slot), &host->pdev->dev);
++	if (!mmc) {
++		dev_err(&host->pdev->dev, "alloc host failed\n");
++		return -ENOMEM;
++	}
++
++	slot = mmc_priv(mmc);
++	slot->mmc = mmc;
++	slot->host = host;
++	slot->ro_gpio = ro_gpio;
++	slot->cd_gpio = cd_gpio;
++	slot->pwr_gpio = pwr_gpio;
++	slot->ro_gpio_low = ro_low;
++	slot->cd_gpio_low = cd_low;
++	slot->pwr_gpio_low = power_low;
++
++	if (slot->ro_gpio >= 0) {
++		ret = gpio_request(slot->ro_gpio, "mmc_ro");
++		if (ret) {
++			dev_err(&host->pdev->dev,
++				"Could not request mmc_ro GPIO %d\n",
++				slot->ro_gpio);
++			return ret;
++		}
++		gpio_direction_input(slot->ro_gpio);
++	}
++	if (slot->cd_gpio >= 0) {
++		ret = gpio_request(slot->cd_gpio, "mmc_card_detect");
++		if (ret) {
++			if (slot->ro_gpio >= 0)
++				gpio_free(slot->ro_gpio);
++			dev_err(&host->pdev->dev, "Could not request mmc_card_detect GPIO %d\n",
++				slot->cd_gpio);
++			return ret;
++		}
++		gpio_direction_input(slot->cd_gpio);
++	}
++	if (slot->pwr_gpio >= 0) {
++		ret = gpio_request(slot->pwr_gpio, "mmc_power");
++		if (ret) {
++			dev_err(&host->pdev->dev,
++				"Could not request mmc_power GPIO %d\n",
++				slot->pwr_gpio);
++			if (slot->ro_gpio >= 0)
++				gpio_free(slot->ro_gpio);
++			if (slot->cd_gpio)
++				gpio_free(slot->cd_gpio);
++			return ret;
++		}
++		octeon_mmc_dbg("%s: Shutting off power to slot %d via gpio %d\n",
++			       DRV_NAME, slot->bus_id, slot->pwr_gpio);
++		gpio_direction_output(slot->pwr_gpio,
++				      slot->pwr_gpio_low);
++	}
++	/*
++	 * Set up host parameters.
++	 */
++	mmc->ops = &octeon_mmc_ops;
++	mmc->f_min = 400000;
++	mmc->f_max = max_freq;
++	mmc->caps = MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
++		    MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA |
++		    MMC_CAP_ERASE;
++	mmc->ocr_avail = MMC_VDD_27_28 | MMC_VDD_28_29 | MMC_VDD_29_30 |
++			 MMC_VDD_30_31 | MMC_VDD_31_32 | MMC_VDD_32_33 |
++			 MMC_VDD_33_34 | MMC_VDD_34_35 | MMC_VDD_35_36;
++
++	/* post-sdk23 caps */
++	mmc->caps |=
++		((mmc->f_max >= 12000000) * MMC_CAP_UHS_SDR12) |
++		((mmc->f_max >= 25000000) * MMC_CAP_UHS_SDR25) |
++		((mmc->f_max >= 50000000) * MMC_CAP_UHS_SDR50) |
++		MMC_CAP_CMD23;
++
++	if (host->global_pwr_gpio >= 0)
++		mmc->caps |= MMC_CAP_POWER_OFF_CARD;
++
++	/* "1.8v" capability is actually 1.8-or-3.3v */
++	if (ddr)
++		mmc->caps |= MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR;
++
++	mmc->max_segs = 64;
++	mmc->max_seg_size = host->linear_buf_size;
++	mmc->max_req_size = host->linear_buf_size;
++	mmc->max_blk_size = 512;
++	mmc->max_blk_count = mmc->max_req_size / 512;
++
++	slot->clock = mmc->f_min;
++	slot->sclock = octeon_get_io_clock_rate();
++
++	clock_period = 1000000000000ull / slot->sclock; /* period in pS */
++	slot->cmd_cnt = (cmd_skew + clock_period / 2) / clock_period;
++	slot->dat_cnt = (dat_skew + clock_period / 2) / clock_period;
++
++	slot->bus_width = bus_width;
++	slot->bus_id = id;
++	slot->cached_rca = 1;
++
++	/* Only a single user of the bootbus at a time. */
++	octeon_mmc_acquire_bus(host);
++	host->slot[id] = slot;
++
++	octeon_mmc_switch_to(slot);
++	/* Initialize MMC Block. */
++	octeon_mmc_initlowlevel(slot, bus_width);
++
++	octeon_mmc_release_bus(host);
++
++	ret = mmc_add_host(mmc);
++	octeon_mmc_dbg("mmc_add_host returned %d\n", ret);
++
++	return 0;
++}
++
++static int octeon_mmc_probe(struct platform_device *pdev)
++{
++	union cvmx_mio_emm_cfg emm_cfg;
++	struct octeon_mmc_host *host;
++	struct resource	*res;
++	void __iomem *base;
++	int mmc_irq[9];
++	int i;
++	int ret = 0;
++	struct device_node *node = pdev->dev.of_node;
++	int found = 0;
++	bool cn78xx_style;
++	u64 t;
++	enum of_gpio_flags f;
++
++	host = devm_kzalloc(&pdev->dev, sizeof(*host), GFP_KERNEL);
++	if (!host)
++		return -ENOMEM;
++
++	spin_lock_init(&host->irq_handler_lock);
++	sema_init(&host->mmc_serializer, 1);
++
++	cn78xx_style = of_device_is_compatible(node, "cavium,octeon-7890-mmc");
++	if (cn78xx_style) {
++		host->need_bootbus_lock = false;
++		host->big_dma_addr = true;
++		host->need_irq_handler_lock = true;
++		/*
++		 * First seven are the EMM_INT bits 0..6, then two for
++		 * the EMM_DMA_INT bits
++		 */
++		for (i = 0; i < 9; i++) {
++			mmc_irq[i] = platform_get_irq(pdev, i);
++			if (mmc_irq[i] < 0)
++				return mmc_irq[i];
++		}
++	} else {
++		host->need_bootbus_lock = true;
++		host->big_dma_addr = false;
++		host->need_irq_handler_lock = false;
++		/* First one is EMM second NDF_DMA */
++		for (i = 0; i < 2; i++) {
++			mmc_irq[i] = platform_get_irq(pdev, i);
++			if (mmc_irq[i] < 0)
++				return mmc_irq[i];
++		}
++	}
++	host->last_slot = -1;
++
++	if (bb_size < 512 || bb_size >= (1 << 24))
++		bb_size = 1 << 18;
++	host->linear_buf_size = bb_size;
++	host->linear_buf = devm_kzalloc(&pdev->dev, host->linear_buf_size,
++					GFP_KERNEL);
++
++	if (!host->linear_buf) {
++		dev_err(&pdev->dev, "devm_kzalloc failed\n");
++		return -ENOMEM;
++	}
++
++	host->pdev = pdev;
++
++	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	if (!res) {
++		dev_err(&pdev->dev, "Platform resource[0] is missing\n");
++		return -ENXIO;
++	}
++	base = devm_ioremap_resource(&pdev->dev, res);
++	if (IS_ERR(base))
++		return PTR_ERR(base);
++	host->base = (u64)base;
++
++	res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
++	if (!res) {
++		dev_err(&pdev->dev, "Platform resource[1] is missing\n");
++		ret = -EINVAL;
++		goto err;
++	}
++	base = devm_ioremap_resource(&pdev->dev, res);
++	if (IS_ERR(base)) {
++		ret = PTR_ERR(base);
++		goto err;
++	}
++	host->ndf_base = (u64)base;
++	/*
++	 * Clear out any pending interrupts that may be left over from
++	 * bootloader.
++	 */
++	t = cvmx_read_csr(host->base + OCT_MIO_EMM_INT);
++	cvmx_write_csr(host->base + OCT_MIO_EMM_INT, t);
++	if (cn78xx_style) {
++		/* Only CMD_DONE, DMA_DONE, CMD_ERR, DMA_ERR */
++		for (i = 1; i <= 4; i++) {
++			ret = devm_request_irq(&pdev->dev, mmc_irq[i],
++					       octeon_mmc_interrupt,
++					       0, DRV_NAME, host);
++			if (ret < 0) {
++				dev_err(&pdev->dev, "Error: devm_request_irq %d\n",
++					mmc_irq[i]);
++				goto err;
++			}
++		}
++	} else {
++		ret = devm_request_irq(&pdev->dev, mmc_irq[0],
++				       octeon_mmc_interrupt, 0, DRV_NAME, host);
++		if (ret < 0) {
++			dev_err(&pdev->dev, "Error: devm_request_irq %d\n",
++				mmc_irq[0]);
++			goto err;
++		}
++	}
++
++	ret = of_get_named_gpio_flags(node, "power-gpios", 0, &f);
++	if (ret == -EPROBE_DEFER)
++		goto err;
++
++	host->global_pwr_gpio = ret;
++	host->global_pwr_gpio_low =
++		(host->global_pwr_gpio >= 0 && f == OF_GPIO_ACTIVE_LOW);
++
++	if (host->global_pwr_gpio >= 0) {
++		ret = gpio_request(host->global_pwr_gpio, "mmc global power");
++		if (ret) {
++			dev_err(&pdev->dev,
++				"Could not request mmc global power gpio %d\n",
++				host->global_pwr_gpio);
++			goto err;
++		}
++		dev_dbg(&pdev->dev, "Global power on\n");
++		gpio_direction_output(host->global_pwr_gpio,
++				      !host->global_pwr_gpio_low);
++	}
++
++	platform_set_drvdata(pdev, host);
++
++	node = of_get_next_child(pdev->dev.of_node, NULL);
++	while (node) {
++		int r;
++		u32 slot;
++
++		found = 0;
++
++		r = of_property_read_u32(node, "reg", &slot);
++		if (!r) {
++			int ro_gpio, cd_gpio, pwr_gpio;
++			bool ro_low, cd_low, pwr_low;
++			u32 bus_width, max_freq, cmd_skew, dat_skew;
++
++			r = of_property_read_u32(node, "cavium,bus-max-width",
++						 &bus_width);
++			if (r) {
++				pr_info("Bus width not found for slot %d\n",
++					slot);
++				bus_width = 8;
++			} else {
++				switch (bus_width) {
++				case 1:
++				case 4:
++				case 8:
++					break;
++				default:
++					bus_width = 8;
++					break;
++				}
++			}
++
++			r = of_property_read_u32(node, "cavium,cmd-clk-skew",
++						 &cmd_skew);
++			if (r)
++				cmd_skew = 0;
++
++			r = of_property_read_u32(node, "cavium,dat-clk-skew",
++						 &dat_skew);
++			if (r)
++				dat_skew = 0;
++
++			r = of_property_read_u32(node, "spi-max-frequency",
++						 &max_freq);
++			if (r) {
++				max_freq = 52000000;
++				pr_info("no spi-max-frequency for slot %d, defautling to %d\n",
++					slot, max_freq);
++			}
++
++			ro_gpio = of_get_named_gpio_flags(node, "wp-gpios",
++							  0, &f);
++			ro_low = (ro_gpio >= 0 && f == OF_GPIO_ACTIVE_LOW);
++			cd_gpio = of_get_named_gpio_flags(node, "cd-gpios",
++							  0, &f);
++			cd_low = (cd_gpio >= 0 && f == OF_GPIO_ACTIVE_LOW);
++			pwr_gpio = of_get_named_gpio_flags(node, "power-gpios",
++							   0, &f);
++			pwr_low = (pwr_gpio >= 0 && f == OF_GPIO_ACTIVE_LOW);
++
++			ret = octeon_init_slot(host, slot, bus_width, max_freq,
++					       ro_gpio, cd_gpio, pwr_gpio,
++					       ro_low, cd_low, pwr_low,
++					       cmd_skew, dat_skew);
++			octeon_mmc_dbg("init slot %d, ret = %d\n", slot, ret);
++			if (ret)
++				goto err;
++		}
++		node = of_get_next_child(pdev->dev.of_node, node);
++	}
++
++	return ret;
++
++err:
++	/* Disable MMC controller */
++	emm_cfg.s.bus_ena = 0;
++	cvmx_write_csr(host->base + OCT_MIO_EMM_CFG, emm_cfg.u64);
++
++	if (host->global_pwr_gpio >= 0) {
++		dev_dbg(&pdev->dev, "Global power off\n");
++		gpio_set_value_cansleep(host->global_pwr_gpio,
++					host->global_pwr_gpio_low);
++		gpio_free(host->global_pwr_gpio);
++	}
++
++	return ret;
++}
++
++static int octeon_mmc_remove(struct platform_device *pdev)
++{
++	union cvmx_mio_ndf_dma_cfg ndf_dma_cfg;
++	struct octeon_mmc_host *host = platform_get_drvdata(pdev);
++	struct octeon_mmc_slot *slot;
++
++	platform_set_drvdata(pdev, NULL);
++
++	if (host) {
++		int i;
++
++		/* quench all users */
++		for (i = 0; i < OCTEON_MAX_MMC; i++) {
++			slot = host->slot[i];
++			if (slot)
++				mmc_remove_host(slot->mmc);
++		}
++
++		/* Reset bus_id */
++		ndf_dma_cfg.u64 =
++			cvmx_read_csr(host->ndf_base + OCT_MIO_NDF_DMA_CFG);
++		ndf_dma_cfg.s.en = 0;
++		cvmx_write_csr(host->ndf_base + OCT_MIO_NDF_DMA_CFG,
++			       ndf_dma_cfg.u64);
++
++		for (i = 0; i < OCTEON_MAX_MMC; i++) {
++			struct octeon_mmc_slot *slot;
++
++			slot = host->slot[i];
++			if (!slot)
++				continue;
++			/* Free the GPIOs */
++			if (slot->ro_gpio >= 0)
++				gpio_free(slot->ro_gpio);
++			if (slot->cd_gpio >= 0)
++				gpio_free(slot->cd_gpio);
++			if (slot->pwr_gpio >= 0) {
++				gpio_set_value_cansleep(slot->pwr_gpio,
++							slot->pwr_gpio_low);
++				gpio_free(slot->pwr_gpio);
++			}
++		}
++
++		if (host->global_pwr_gpio >= 0) {
++			dev_dbg(&pdev->dev, "Global power off\n");
++			gpio_set_value_cansleep(host->global_pwr_gpio,
++						host->global_pwr_gpio_low);
++			gpio_free(host->global_pwr_gpio);
++		}
++
++		for (i = 0; i < OCTEON_MAX_MMC; i++) {
++			slot = host->slot[i];
++			if (slot)
++				mmc_free_host(slot->mmc);
++		}
++
++	}
++	return 0;
++}
++
++static struct of_device_id octeon_mmc_match[] = {
++	{
++		.compatible = "cavium,octeon-6130-mmc",
++	},
++	{
++		.compatible = "cavium,octeon-7890-mmc",
++	},
++	{},
++};
++MODULE_DEVICE_TABLE(of, octeon_mmc_match);
++
++static struct platform_driver octeon_mmc_driver = {
++	.probe		= octeon_mmc_probe,
++	.remove		= octeon_mmc_remove,
++	.driver		= {
++		.name	= DRV_NAME,
++		.owner	= THIS_MODULE,
++		.of_match_table = octeon_mmc_match,
++	},
++};
++
++static int __init octeon_mmc_init(void)
++{
++	int ret;
++
++	octeon_mmc_dbg("calling octeon_mmc_init\n");
++
++	ret = platform_driver_register(&octeon_mmc_driver);
++	octeon_mmc_dbg("driver probe returned %d\n", ret);
++
++	if (ret)
++		pr_err("%s: Failed to register driver\n", DRV_NAME);
++
++	return ret;
++}
++
++static void __exit octeon_mmc_cleanup(void)
++{
++	/* Unregister MMC driver */
++	platform_driver_unregister(&octeon_mmc_driver);
++}
++
++module_init(octeon_mmc_init);
++module_exit(octeon_mmc_cleanup);
++
++MODULE_AUTHOR("Cavium Inc. <support-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>");
++MODULE_DESCRIPTION("low-level driver for Cavium OCTEON MMC/SSD card");
++MODULE_LICENSE("GPL");
+-- 
+2.2.2
 
-> +       if (!IS_ERR(priv->clk)) {
-> +               ret = clk_prepare_enable(priv->clk);
-> +               if (ret < 0) {
-> +                       dev_err(dev, "Failed to enable core clock: %d\n", ret);
-> +                       goto err_clk;
-> +               }
-> +       }
-> +
-> +       /* init vendor specific regs */
-> +       ctrl = sdhci_readw(host, F_SDH30_AHB_CONFIG);
-> +       ctrl |= F_SDH30_SIN | F_SDH30_AHB_INCR_16 | F_SDH30_AHB_INCR_8 |
-> +               F_SDH30_AHB_INCR_4;
-> +       ctrl &= ~(F_SDH30_AHB_BIGED | F_SDH30_BUSLOCK_EN);
-> +       sdhci_writew(host, ctrl, F_SDH30_AHB_CONFIG);
-> +
-> +       reg = sdhci_readl(host, F_SDH30_ESD_CONTROL);
-> +       sdhci_writel(host, reg & ~F_SDH30_EMMC_RST, F_SDH30_ESD_CONTROL);
-> +       msleep(20);
-> +       sdhci_writel(host, reg | F_SDH30_EMMC_RST, F_SDH30_ESD_CONTROL);
-> +
-> +       reg = sdhci_readl(host, SDHCI_CAPABILITIES);
-> +       if (reg & SDHCI_CAN_DO_8BIT)
-> +               priv->vendor_hs200 = F_SDH30_EMMC_HS200;
-> +       else
-
-You can remove this else. Data should already zeroed by kzalloc().
-
-> +               priv->vendor_hs200 = 0;
-> +
-> +       ret = sdhci_add_host(host);
-> +       if (ret)
-> +               goto err_add_host;
-> +
-> +       return 0;
-> +
-> +err_add_host:
-> +       clk_disable_unprepare(priv->clk);
-> +err_clk:
-> +       clk_disable_unprepare(priv->clk_iface);
-> +err:
-> +       sdhci_free_host(host);
-> +       return ret;
-> +}
-> +
-> +static int sdhci_f_sdh30_remove(struct platform_device *pdev)
-> +{
-> +       struct sdhci_host *host = platform_get_drvdata(pdev);
-> +       struct f_sdhost_priv *priv = sdhci_priv(host);
-> +
-> +       sdhci_remove_host(host, readl(host->ioaddr + SDHCI_INT_STATUS) ==
-> +                         0xffffffff);
-> +
-> +       clk_disable_unprepare(priv->clk_iface);
-> +       clk_disable_unprepare(priv->clk);
-> +
-> +       sdhci_free_host(host);
-> +       platform_set_drvdata(pdev, NULL);
-> +
-> +       return 0;
-> +}
-> +
-> +static const struct of_device_id f_sdh30_dt_ids[] = {
-> +       { .compatible = "fujitsu,mb86s70-sdhci-3.0" },
-> +       { /* sentinel */ }
-> +};
-> +MODULE_DEVICE_TABLE(of, f_sdh30_dt_ids);
-> +
-> +static struct platform_driver sdhci_f_sdh30_driver = {
-> +       .driver = {
-> +               .name = "f_sdh30",
-> +               .of_match_table = f_sdh30_dt_ids,
-> +               .pm     = SDHCI_PLTFM_PMOPS,
-> +       },
-> +       .probe  = sdhci_f_sdh30_probe,
-> +       .remove = sdhci_f_sdh30_remove,
-> +};
-> +
-> +module_platform_driver(sdhci_f_sdh30_driver);
-> +
-> +MODULE_DESCRIPTION("F_SDH30 SD Card Controller driver");
-> +MODULE_LICENSE("GPL v2");
-> +MODULE_AUTHOR("FUJITSU SEMICONDUCTOR LTD.");
-> +MODULE_ALIAS("platform:f_sdh30");
-> --
-> 1.9.0
->
-
-Kind regards
-Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
