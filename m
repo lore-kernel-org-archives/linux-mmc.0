@@ -1,381 +1,85 @@
-From: David Daney <ddaney.cavm@gmail.com>
-Subject: Re: [PATCH] mmc: OCTEON: Add host driver for OCTEON MMC controller
-Date: Mon, 19 Jan 2015 11:01:51 -0800
-Message-ID: <54BD549F.1060309@gmail.com>
-References: <1421675198-30213-1-git-send-email-aleksey.makarov@auriga.com> <20150119142805.GE21553@leverpostej>
+From: NeilBrown <neil@brown.name>
+Subject: Re: [PATCH V2 2/4] mmc: pwrseq: Document DT bindings for the simple
+ MMC power sequence
+Date: Tue, 20 Jan 2015 07:17:01 +1100
+Message-ID: <awcfw5ggbfn27usdy0rb72ph.1421698621396@email.android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f176.google.com ([209.85.223.176]:54296 "EHLO
-	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750824AbbASTBz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jan 2015 14:01:55 -0500
-In-Reply-To: <20150119142805.GE21553@leverpostej>
+Received: from cantor2.suse.de ([195.135.220.15]:34936 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751517AbbASURq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 19 Jan 2015 15:17:46 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>, Aleksey Makarov <aleksey.makarov@auriga.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-mips@linux-mips.org" <linux-mips@linux-mips.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, David Daney <david.daney@cavium.com>, Leonid Rosenboim <lrosenboim@caviumnetworks.com>, Aaron Williams <aaron.williams@cavium.com>, Chandrakala Chavva <cchavva@caviumnetworks.com>, Peter Swain <pswain@cavium.com>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <Pawel.Moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "grant.likely@linaro.org" <grant.likely@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Alexandre Courbot <gnurou@gmail.com>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Olof Johansson <olof@lixom.net>, Hans de Goede <hdegoede@redhat.com>, Doug Anderson <dianders@chromium.org>, Tomeu Vizoso <tomeu.vizoso@collabora.com>
 
-On 01/19/2015 06:28 AM, Mark Rutland wrote:
-> Hi,
->
-> On Mon, Jan 19, 2015 at 01:46:36PM +0000, Aleksey Makarov wrote:
->> The OCTEON MMC controller is currently found on cn61XX and cnf71XX
->> devices.  Device parameters are configured from device tree data.
->>
->> Currenly supported are eMMC, MMC and SD devices.
->
-> Does that mean there are other devices that this could support in
-> future, or that this supports everything it possibly can already?
-
-It is software, so obviously there are some changes that could be made 
-to support other devices.  However, the bus host hardware is designed 
-such that it can run only certain fixed sequences of the MMC and SD 
-protocols.  Therefore it is probable that support for some types of 
-devices would be impossible...
-
->
-> [...]
->
->> diff --git a/Documentation/devicetree/bindings/mmc/octeon-mmc.txt b/Documentation/devicetree/bindings/mmc/octeon-mmc.txt
->> new file mode 100644
->> index 0000000..ce373cf
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/mmc/octeon-mmc.txt
->> @@ -0,0 +1,51 @@
->> +* OCTEON SD/MMC Host Controller
->> +
->> +This controller is present on some members of the Cavium OCTEON SoC
->> +family, provide an interface for eMMC, MMC and SD devices.  There is a
->> +single controller that may have several "slots" connected.  These
->> +slots appear as children of the main controller node.
->> +
->> +Required properties:
->> +- compatible : Should be "cavium,octeon-6130-mmc" or "cavium,octeon-7890-mmc"
->> +- reg : Two entries:
->> +       1) The base address of the MMC controller register bank.
->> +       2) The base address of the MMC DMA engine register bank.
->> +- interrupts : Two entries:
->> +       1) The MMC controller interrupt line.
->> +       2) The MMC DMA engine interrupt line.
->
-> Is the DMA engine part of the MMC controller block, or is it a
-> separate/generic component that happens to be used in combination with
-> the MMC controller?
-
-The DMA engine is an integral part of the MMC bus controller block.
-
->
->> +- #address-cells : Must be <1>
->> +- #size-cells : Must be <0>
->> +
->> +Required properties of child nodes:
->> +- compatible : Should be "cavium,octeon-6130-mmc-slot".
->> +- reg : The slot number.
->> +- cavium,bus-max-width : The number of data lines present in the slot.
->> +- spi-max-frequency : The maximum operating frequency of the slot.
->> +
->> +Optional properties of child nodes:
->> +- cd-gpios : Specify GPIOs for card detection
->> +- wp-gpios : Specify GPIOs for write protection
->> +- power-gpios : Specify GPIOs for power control
->
-> No clocks in the DT?
-
-No.  The reference clock rates can be probed at runtime, so they are not 
-specified in the DT.
-
->
->> +
->> +Example:
->> +       mmc@1180000002000 {
->> +               compatible = "cavium,octeon-6130-mmc";
->> +               reg = <0x11800 0x00002000 0x0 0x100>,
->> +                     <0x11800 0x00000168 0x0 0x20>;
->> +               #address-cells = <1>;
->> +               #size-cells = <0>;
->> +               /* EMM irq, DMA irq */
->> +               interrupts = <1 19>, <0 63>;
->> +
->> +               /* The board only has a single MMC slot */
->> +               mmc-slot@0 {
->> +                       compatible = "cavium,octeon-6130-mmc-slot";
->> +                       reg = <0>;
->> +                       spi-max-frequency = <20000000>;
->> +                       /* bus width can be 1, 4 or 8 */
->> +                       cavium,bus-max-width = <8>;
->> +                       cd-gpios = <&gpio 9 0>;
->> +                       wp-gpios = <&gpio 10 0>;
->> +                       power-gpios = <&gpio 8 0>;
->> +               };
->> +       };
->
-[...]
->> +
->> +/**
->> + * Unlock a single line in the L2 cache.
->> + *
->> + * @addr       Physical address to unlock
->> + *
->> + * Return Zero on success
->> + */
->> +static void l2c_unlock_line(u64 addr)
->> +{
->> +       char *addr_ptr = phys_to_ptr(addr);
->> +       asm volatile (
->> +               "cache 23, %[line]"     /* Unlock the line */
->> +               :: [line] "m" (*addr_ptr));
->> +}
->> +
->> +/**
->> + * Unlock a memory region in the L2 cache
->> + *
->> + * @start - start address to unlock
->> + * @len - length to unlock in bytes
->> + */
->> +static void l2c_unlock_mem_region(u64 start, u64 len)
->> +{
->> +       u64 end;
->> +
->> +       /* Round start/end to cache line boundaries */
->> +       end = ALIGN(start + len - 1, CVMX_CACHE_LINE_SIZE);
->> +       start = ALIGN(start, CVMX_CACHE_LINE_SIZE);
->> +
->> +       while (start <= end) {
->> +               l2c_unlock_line(start);
->> +               start += CVMX_CACHE_LINE_SIZE;
->> +       }
->> +}
->
-> Why do you need to mess with the cache in this way within an MMC driver?
-
-Due to an imperfection in the design of the MMC bus hardware, The 2nd. 
-to last cache block of a DMA read must be locked into the L2 Cache. 
-Otherwise, data corruption may occur.  Please note that this MMC bus 
-hardware block is only ever encountered on SoCs where the L2 Cache is 
-resident on the same piece of silicon.
-
-> To me it seems somewhat surprising that you need to do that,
-
-Your surprise was shared by many.
-
-> and again
-> surprising that you have custom functions within the MMC driver.
->
-
-It is only used by this file, so we decided to put it here to keep 
-everything in one place.
-
-> [...]
->
->> +static int octeon_mmc_probe(struct platform_device *pdev)
->> +{
->> +       union cvmx_mio_emm_cfg emm_cfg;
->> +       struct octeon_mmc_host *host;
->> +       struct resource *res;
->> +       void __iomem *base;
->> +       int mmc_irq[9];
->> +       int i;
->> +       int ret = 0;
->> +       struct device_node *node = pdev->dev.of_node;
->> +       int found = 0;
->> +       bool cn78xx_style;
->> +       u64 t;
->> +       enum of_gpio_flags f;
->> +
->> +       host = devm_kzalloc(&pdev->dev, sizeof(*host), GFP_KERNEL);
->> +       if (!host)
->> +               return -ENOMEM;
->> +
->> +       spin_lock_init(&host->irq_handler_lock);
->> +       sema_init(&host->mmc_serializer, 1);
->> +
->> +       cn78xx_style = of_device_is_compatible(node, "cavium,octeon-7890-mmc");
->> +       if (cn78xx_style) {
->> +               host->need_bootbus_lock = false;
->> +               host->big_dma_addr = true;
->> +               host->need_irq_handler_lock = true;
->> +               /*
->> +                * First seven are the EMM_INT bits 0..6, then two for
->> +                * the EMM_DMA_INT bits
->> +                */
->> +               for (i = 0; i < 9; i++) {
->> +                       mmc_irq[i] = platform_get_irq(pdev, i);
->> +                       if (mmc_irq[i] < 0)
->> +                               return mmc_irq[i];
->
-> The documentation describes two interrupts,
-
-The documentation is incorrect for the case of cn78xx_style.  The 
-documentation should be (and will be) corrected to reflect what each of 
-these lines is used for.
-
-> yet here you try to acquire
-> nine. Please document which interrupts you expect (i.e. in what order
-> and what the logical function of each is), and when you expect them.
->
-> If some interrupts might not always be present, use interrupt-names.
->
-[...]
->> +       base = devm_ioremap_resource(&pdev->dev, res);
->> +       if (IS_ERR(base))
->> +               return PTR_ERR(base);
->> +       host->base = (u64)base;
->
-> I take it this can only be used on a 64-bit platform?
-
-Yes.
-
->
-[...]
->> +
->> +       platform_set_drvdata(pdev, host);
->> +
->> +       node = of_get_next_child(pdev->dev.of_node, NULL);
->> +       while (node) {
->
-> You should use for_each_child_of_node here.
->
-> Also, you'll want to skip nodes that aren't compatible with
-> "cavium,octeon-6130-mmc-slot", and you'll probably want to log a warning
-> in that case.
-
-OK, I think those functions did not exist when the code was originally 
-written.  We will try to improve it here.
-
-
->
->> +               int r;
->> +               u32 slot;
->> +
->> +               found = 0;
->> +
->> +               r = of_property_read_u32(node, "reg", &slot);
->> +               if (!r) {
->
-> If you use for_each_child_of_node, you can just skip ahead in this case,
-> rather than having 90% of this block conditional.
->
-> e.g.
->
-> for_each_child_of_node(pdev->dev.of_node, node) {
-> 	
-> 	if (!of_device_is_compatible(node, "cavium,octeon-6130-mmc-slot") {
-> 		pr_warn("sub node isn't slot: %s\n", of_node_full_name(node));
-> 		continue;
-> 	}
->
-> 	if (of_property_read_u32(node, "reg", &slot) != 0) {
-> 		pr_warn("Missing or invalid reg property on %s\n",
-> 			of_node_full_name(node));
-> 		continue;
-> 	}
->
-> 	other_stuff();
-> 	not_indented();
->
-> }
->
->> +                       int ro_gpio, cd_gpio, pwr_gpio;
->> +                       bool ro_low, cd_low, pwr_low;
->> +                       u32 bus_width, max_freq, cmd_skew, dat_skew;
->> +
->> +                       r = of_property_read_u32(node, "cavium,bus-max-width",
->> +                                                &bus_width);
->> +                       if (r) {
->> +                               pr_info("Bus width not found for slot %d\n",
->> +                                       slot);
->> +                               bus_width = 8;
->
-> If the default assumption is 8 lanes, document that in the binding.
-> Otherwise, make this mandatory and skip the slot if this is missing from
-> the DT.
->
->> +                       } else {
->> +                               switch (bus_width) {
->> +                               case 1:
->> +                               case 4:
->> +                               case 8:
->> +                                       break;
->> +                               default:
->> +                                       bus_width = 8;
->> +                                       break;
->> +                               }
->> +                       }
->
-> Silently modifying this value is not a good idea. If you get an invalid
-> value, warn and skip the node. If the DT was wrong then you have no
-> chance of guessing better anyway.
->
->> +
->> +                       r = of_property_read_u32(node, "cavium,cmd-clk-skew",
->> +                                                &cmd_skew);
->> +                       if (r)
->> +                               cmd_skew = 0;
->> +
->> +                       r = of_property_read_u32(node, "cavium,dat-clk-skew",
->> +                                                &dat_skew);
->> +                       if (r)
->> +                               dat_skew = 0;
->> +
->
-> These weren't in the binding. They need to be documented.
->
->
->> +                       r = of_property_read_u32(node, "spi-max-frequency",
->> +                                                &max_freq);
->> +                       if (r) {
->> +                               max_freq = 52000000;
->> +                               pr_info("no spi-max-frequency for slot %d, defautling to %d\n",
->
-> s/defautling/defaulting/
->
->> +                                       slot, max_freq);
->> +                       }
->> +
->> +                       ro_gpio = of_get_named_gpio_flags(node, "wp-gpios",
->> +                                                         0, &f);
->> +                       ro_low = (ro_gpio >= 0 && f == OF_GPIO_ACTIVE_LOW);
->> +                       cd_gpio = of_get_named_gpio_flags(node, "cd-gpios",
->> +                                                         0, &f);
->> +                       cd_low = (cd_gpio >= 0 && f == OF_GPIO_ACTIVE_LOW);
->> +                       pwr_gpio = of_get_named_gpio_flags(node, "power-gpios",
->> +                                                          0, &f);
->> +                       pwr_low = (pwr_gpio >= 0 && f == OF_GPIO_ACTIVE_LOW);
->> +
->> +                       ret = octeon_init_slot(host, slot, bus_width, max_freq,
->> +                                              ro_gpio, cd_gpio, pwr_gpio,
->> +                                              ro_low, cd_low, pwr_low,
->> +                                              cmd_skew, dat_skew);
->> +                       octeon_mmc_dbg("init slot %d, ret = %d\n", slot, ret);
->> +                       if (ret)
->> +                               goto err;
->> +               }
->> +               node = of_get_next_child(pdev->dev.of_node, node);
->> +       }
->> +
->> +       return ret;
->> +
->> +err:
->> +       /* Disable MMC controller */
->> +       emm_cfg.s.bus_ena = 0;
->> +       cvmx_write_csr(host->base + OCT_MIO_EMM_CFG, emm_cfg.u64);
->> +
->> +       if (host->global_pwr_gpio >= 0) {
->> +               dev_dbg(&pdev->dev, "Global power off\n");
->> +               gpio_set_value_cansleep(host->global_pwr_gpio,
->> +                                       host->global_pwr_gpio_low);
->> +               gpio_free(host->global_pwr_gpio);
->> +       }
->> +
->> +       return ret;
->> +}
->
-> It's probably worth having some logging in this error path.
->
-> Thanks,
-> Mark.
->
->
+CgpPbiBGcmksIDE2IEphbiAyMDE1IDExOjM2OjQ2ICswMDAwIFJ1c3NlbGwgS2luZyAtIEFSTSBM
+aW51eA0KPGxpbnV4QGFybS5saW51eC5vcmcudWs+IHdyb3RlOg0KDQo+IE9uIEZyaSwgSmFuIDE2
+LCAyMDE1IGF0IDA3OjUzOjA4QU0gKzEzMDAsIE5laWxCcm93biB3cm90ZToNCj4gPiBBbHNvLCBp
+dCBpc24ndCBjbGVhciB0byBtZSB3aGV0aGVyIHRoZSBuZWVkIGZvciBwb3dlci9yZXNldCBpcyBh
+IGZ1bmN0aW9uIG9mDQo+ID4gdGhlIG1tYy1ob3N0LCBvciBhIGZ1bmN0aW9uIG9mIHRoZSBkZXZp
+Y2UgYXR0YWNoZWQgdG8gdGhlIGhvc3QuICBJIHN1c3BlY3QNCj4gPiBzb21lIGFyZSBuZWVkZWQg
+Ynkgb25lLCBzb21lIGJ5IHRoZSBvdGhlci4gIEFueSBieSBib3RoPw0KPiANCj4gTmVpbCwNCj4g
+DQo+IFRoZXJlJ3MgYSBob3JyaWQgaXNzdWUgdGhlcmUuICBUaGUgc3RhbmRhcmQgbW9kZWwgb2Yg
+TU1DL1NEIGlzIHRoYXQgdGhlDQo+IGRldmljZSB3aWxsIGJlIHBvd2VyZWQgdXAgYnkgdGhlIGhv
+c3QsIGFuZCB3aWxsIHRoZW4gYmUgcHJvYmVkIHRvIGZpbmQNCj4gb3V0IHdoYXQgdGhlIGRldmlj
+ZSBpcy4gIFRoaXMgbm9ybWFsbHkgd29ya3MgZmluZSBhcyB0aGUgaG9zdCBpcw0KPiByZXNwb25z
+aWJsZSBmb3IgY29udHJvbGxpbmcgdGhlIHBvd2VyIHRvIHRoZSBzb2NrZXQgd2hpY2ggdGhlIGNh
+cmQgaXMNCj4gcGx1Z2dlZCBpbnRvLg0KPiANCj4gV2hlcmUgdGhpbmdzIGZhbGwgZG93biBpcyB3
+aGVuIHlvdSBoYXZlIGEgTU1DL1NEIGRldmljZSBlbWJlZGRlZCBvbnRvDQo+IGEgYm9hcmQsIGFu
+ZCB0aGV5IGRlY2lkZSB0aGF0IGl0J2xsIGJlIGdpdmVuIHNlcGFyYXRlIGNvbnRyb2xzIGZvcg0K
+PiBwb3dlciBhbmQgcmVzZXQgd2hpY2ggYXJlIG5vdCB1bmRlciB0aGUgY29udHJvbCBvZiB0aGUg
+aG9zdC4NCj4gDQo+IElmIHRoZSBNTUMvU0QgZGV2aWNlIGlzIG5vdCBwb3dlcmVkIHVwIGJlZm9y
+ZSB3ZSBwcm9iZSB0aGUgYnVzLCB0aGVuDQo+IHRoZSBkZXZpY2UgaXMgbm90IGRpc2NvdmVyYWJs
+ZSwgYW5kIHRoaXMgYnJlYWtzIHRoZSBzdGFuZGFyZCBtb2RlbDoNCj4gLSBJZiB3ZSBydW4gdGhl
+IHN0YW5kYXJkIE1NQy9TRCBkZXZpY2UgZGlzY292ZXJ5IGNvZGUgd2l0aCB0aGUgZGV2aWNlDQo+
+ICAgcG93ZXJlZCBkb3duLCBpdCB3aWxsIGZpbmQgbm8gZGV2aWNlIGF0dGFjaGVkLCBzbyBubyBk
+ZXZpY2Ugd2lsbCBiZQ0KPiAgIGNyZWF0ZWQuDQo+IA0KPiAtIElmIHdlIGNyZWF0ZSBhIGRldmlj
+ZSwgdGhlbiB0aGUgZGV2aWNlIGRyaXZlciB3aWxsIGJlIHByb2JlZA0KPiAgIGltbWVkaWF0ZWx5
+LiAgV2hpbGUgdGhlIGRldmljZSBkcml2ZXIgY2FuIHRoZW4gYmluZCwgZGlzY292ZXIgdGhlDQo+
+ICAgcG93ZXIgYW5kIHJlc2V0IGNvbnRyb2xzLCBhbmQgYWN0aXZhdGUgdGhlbSwgaXQgY2FuJ3Qg
+dGhlbiB0YWxrIHRvDQo+ICAgaXRzIGRldmljZSBiZWNhdXNlIHRoZSBNTUMgbGF5ZXIgaGFzbid0
+IGdvbmUgdGhyb3VnaCB0aGUgcmVxdWlyZWQNCj4gICBzdGFuZGFyZCBkZXZpY2UgZGlzY292ZXJ5
+IGFuZCBwcm9iZSBzZXF1ZW5jZS4gIElmIHdlIGNvdWxkIGRvIHRoYXQsDQo+ICAgd2Ugd291bGQg
+dGhlbiBuZWVkIHNvbWUgd2F5IHRvIHN0b3AgdGhhdCBtZWNoYW5pc20gY3JlYXRpbmcgYW5vdGhl
+cg0KPiAgIGRldmljZS4NCg0KSGkgUnVzc2VsbCwNCiB0aGFua3MgZm9yIHRoZSBvdmVydmlldyAt
+IHF1aXRlIGhlbHBmdWwuDQogSSB3b3VsZCBsaWtlIHRvIHBhcnRpY3VsYXJseSBmb2N1cyBvbiB0
+aGF0IGxhc3Qgc2VudGVuY2UgbWVudGlvbmluZw0KICJzb21lIHdheSB0byBzdG9wIFtzdGFuZGFy
+ZCBkZXZpY2UgZGlzY292ZXJ5XSBjcmVhdGluZyBhbm90aGVyIGRldmljZSIuDQoNCiBUaGF0IHdh
+eSBhbHJlYWR5IGV4aXN0cywgb3Igc29tZXRoaW5nIHZlcnkgc2ltaWxhciB0byBpdCwgaW4gdGhl
+IG1tYy9zZGlvDQogY29yZS4gSW4gcGFydGljdWxhciwgdGhlICdvbGRjYXJkJyBhcmd1bWVudCB0
+byBtbWNfc2Rpb19pbml0X2NhcmQoKS4NCg0KIFRoaXMgaXMgY2FsbGVkIGJvdGggd2hlbiBpbml0
+aWFsaXNpbmcgYSBjYXJkIGFuZCB3aGVuIHJlc3RvcmluZyBwb3dlciB0byBpdC4NCiBJZiAnb2xk
+Y2FyZCcgaXMgc2V0IGFuZCB0aGUgY2FyZCBmb3VuZCBtYXRjaGVzICdvbGRjYXJkJywgdGhlbiAn
+b2xkY2FyZCcgaXMNCiBsZWZ0IHVuY2hhbmdlZC4gIGkuZS4gYSBuZXcgZGV2aWNlIGlzIG5vdCBj
+cmVhdGVkLg0KDQogU3VwcG9zZSB0aGF0IGRldmljZXRyZWUgbGlzdGVkIGEgY2hpbGQgbm9kZSBm
+b3IgYW4gbW1jIGhvc3Qgd2l0aA0KICJub24tcmVtb3ZhYmxlIiBzZXQsIHRoZW4gd2UgY291bGQg
+ZG8gYSBwcmVsaW1pbmFyeSBwcm9iZSB3aGljaCBzZXRzDQogdXAgaG9zdC0+Y2FyZCBzbyB0aGF0
+IHN1YnNlcXVlbnQgInN0YW5kYXJkIiBwcm9iZXMgZmluZCB0aGUgcHJvcGVybHkNCiBtYXRjaGlu
+ZyBjYXJkIGFuZCBsZWF2ZSAnb2xkY2FyZCcgdW5jaGFuZ2VkLiAgVGhpcyBjYXJkIGNvdWxkIHNv
+bWVob3cNCiByZWdpc3RlciBpdHMgb3duIHBvd2VyLXVwIHNlcXVlbmNlLg0KDQogSW4gdGhlIGNh
+c2Ugb2YgJ25vbi1yZW1vdmFibGUnIGl0IG1pZ2h0IGJlIG5pY2UgdG8gYmUgbXVjaCBtb3JlIGNh
+dXRpb3VzDQogYWJvdXQgY2xlYXJpbmcgaG9zdC0+Y2FyZCB3aGVuIGEgcHJvYmUgZmFpbHMuICBP
+bmUgb2YgdGhlIChtYW55KSBwcm9ibGVtcyBJDQogaGF2ZSBvbiBteSBkZXZpY2UgaXMgdGhhdCBv
+Y2Nhc2lvbmFsbHkgdGhlIHByb2JlIG9mIHRoZSBtbWMvc2Rpby93aWZpIGNhcmQNCiBmYWlscyAo
+RUJVU1kgSSB0aGluaywgYnV0IEknbSBub3Qgc3VyZSBhbmQgSSBoYXZlIG5vIGlkZWEgd2h5KS4g
+IE9uY2UgdGhhdA0KIGhhcHBlbnMsIHRoZSB3aWZpIGJlY29tZXMgaW5hY2Nlc3NpYmxlIHVudGls
+IGEgcmVib290LiANCg0KIEFzIG1tY19yZXNjYW4gZW5zdXJlcyB0aGF0IGEgbm9uLXJlbW92YWJs
+ZSBjYXJkIGlzIG9ubHkgc2Nhbm5lZCBvbmNlLCBpdA0KIHdvdWxkIGJlIHJlYWxseSBnb29kIGlm
+IHdlIHdlcmUgZXh0cmEgY2FyZWZ1bCBuZXZlciB0byByZW1vdmUgYQ0KIG5vbi1yZW1vdmFibGUg
+Y2FyZCwgZXZlbiBpbiB0aGUgZmFjZSBvZiBlcnJvci4uLg0KDQoNCj4gDQo+IElmIHdlIGluc3Rl
+YWQgdGFrZSB0aGUgdmlldyB0aGF0IHRoZSBob3N0IGlzIHJlc3BvbnNpYmxlIGZvciBwb3dlcmlu
+Zw0KPiB1cCB0aGUgZGV2aWNlLCB0aGVuIHdlIGFyZSBtZXJlbHkga2VlcGluZyB3aXRoIHRoZSBz
+dGFuZGFyZCBNTUMvU0QNCj4gbW9kZWwsIGFuZCB3ZSBkb24ndCBoYXZlIHRvIGhhY2sgYXJvdW5k
+IGhpcy4NCj4gDQo+IEtlZXBpbmcgdG8gdGhlIHN0YW5kYXJkIG1vZGVsIG9mIGEgaG9zdCByZXNw
+b25zaWJsZSBmb3IgcG93ZXIgY29udHJvbA0KPiBvZiBpdHMgY2hpbGQgZGV2aWNlcyBpcyBqdXN0
+IGEgd2hvbGUgbG90IG5pY2VyLg0KPiANCg0KSSdtIG5vdCByZWFsbHkgYWdhaW5zdCB0aGUgcHJv
+cG9zZWQgcGF0Y2guICBJdCBzaG91bGQgcmVtb3ZlIGF0IGxlYXN0IG9uZSBvZg0KbXkgcHJvYmxl
+bXMsIGFuZCBJIGRvbid0IHRoaW5rIGl0IG1ha2VzIGFueSBvdGhlciBwcm9ibGVtcyBtb3JlIGRp
+ZmZpY3VsdC4NClNvIGlmIHRoZSBhYm92ZSBpZGVhcyBkb24ndCBhcHBlYWwgdG8gYW55b25lIGVs
+c2UsIEknbGwgcmFpc2Ugbm8gZnVydGhlcg0Kb2JqZWN0aW9ucy4NCg0KVGhhbmtzLA0KTmVpbEJy
+b3duDQoNCg0K
 
