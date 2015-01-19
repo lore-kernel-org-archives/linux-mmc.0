@@ -1,72 +1,345 @@
 From: Vincent Yang <vincent.yang.fujitsu@gmail.com>
-Subject: [PATCH v4 3/4] mmc: sdhci: add a quirk for single block transactions
-Date: Mon, 19 Jan 2015 18:48:28 +0800
-Message-ID: <1421664509-1807-4-git-send-email-Vincent.Yang@tw.fujitsu.com>
+Subject: [PATCH v4 4/4] mmc: sdhci: host: add new f_sdh30
+Date: Mon, 19 Jan 2015 18:48:29 +0800
+Message-ID: <1421664509-1807-5-git-send-email-Vincent.Yang@tw.fujitsu.com>
 References: <1421664509-1807-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f44.google.com ([209.85.220.44]:43780 "EHLO
-	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751029AbbASKuT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jan 2015 05:50:19 -0500
-Received: by mail-pa0-f44.google.com with SMTP id et14so38179251pad.3
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Jan 2015 02:50:18 -0800 (PST)
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:62070 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751468AbbASKud (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jan 2015 05:50:33 -0500
+Received: by mail-pa0-f43.google.com with SMTP id eu11so857732pac.2
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Jan 2015 02:50:33 -0800 (PST)
 In-Reply-To: <1421664509-1807-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: linux@arm.linux.org.uk, chris@printf.net, ulf.hansson@linaro.org, andy.green@linaro.org, patches@linaro.org, jaswinder.singh@linaro.org, Vincent Yang <Vincent.Yang@tw.fujitsu.com>
+Cc: linux@arm.linux.org.uk, chris@printf.net, ulf.hansson@linaro.org, andy.green@linaro.org, patches@linaro.org, jaswinder.singh@linaro.org, Vincent Yang <Vincent.Yang@tw.fujitsu.com>, Tetsuya Takinishi <t.takinishi@jp.fujitsu.com>
 
-This patch defines a quirk to disable the block count
-for single block transactions.
-It is a preparation and will be used by Fujitsu
-SDHCI controller f_sdh30 driver.
+This patch adds new host controller driver for
+Fujitsu SDHCI controller f_sdh30.
 
 Signed-off-by: Vincent Yang <Vincent.Yang@tw.fujitsu.com>
+Signed-off-by: Andy Green <andy.green@linaro.org>
+Signed-off-by: Tetsuya Takinishi <t.takinishi@jp.fujitsu.com>
 ---
- drivers/mmc/host/sdhci.c  | 8 +++++---
- include/linux/mmc/sdhci.h | 2 ++
- 2 files changed, 7 insertions(+), 3 deletions(-)
+ .../devicetree/bindings/mmc/sdhci-fujitsu.txt      |  30 +++
+ drivers/mmc/host/Kconfig                           |   8 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/sdhci_f_sdh30.c                   | 236 +++++++++++++++++++++
+ 4 files changed, 275 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+ create mode 100644 drivers/mmc/host/sdhci_f_sdh30.c
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ffe6340..e977ae0 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -909,7 +909,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 	struct mmc_command *cmd)
- {
--	u16 mode;
-+	u16 mode = 0;
- 	struct mmc_data *data = cmd->data;
- 
- 	if (data == NULL) {
-@@ -927,9 +927,11 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 
- 	WARN_ON(!host->data);
- 
--	mode = SDHCI_TRNS_BLK_CNT_EN;
-+	if (!(host->quirks2 & SDHCI_QUIRK2_SUPPORT_SINGLE))
-+		mode = SDHCI_TRNS_BLK_CNT_EN;
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+new file mode 100644
+index 0000000..de2c53c
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+@@ -0,0 +1,30 @@
++* Fujitsu SDHCI controller
 +
- 	if (mmc_op_multi(cmd->opcode) || data->blocks > 1) {
--		mode |= SDHCI_TRNS_MULTI;
-+		mode = SDHCI_TRNS_BLK_CNT_EN | SDHCI_TRNS_MULTI;
- 		/*
- 		 * If we are sending CMD23, CMD12 never gets sent
- 		 * on successful completion (so no Auto-CMD12).
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index bc973f7..0464b65 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -108,6 +108,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400		(1<<11)
- /* forced tuned clock */
- #define SDHCI_QUIRK2_TUNING_WORK_AROUND			(1<<12)
-+/* disable the block count for single block transactions */
-+#define SDHCI_QUIRK2_SUPPORT_SINGLE			(1<<13)
++This file documents differences between the core properties in mmc.txt
++and the properties used by the sdhci_f_sdh30 driver.
++
++Required properties:
++- compatible: "fujitsu,mb86s70-sdhci-3.0"
++- clocks: Must contain an entry for each entry in clock-names. It is a
++  list of phandles and clock-specifier pairs.
++  See ../clocks/clock-bindings.txt for details.
++- clock-names: Should contain the following two entries:
++	"iface" - clock used for sdhci interface
++	"core"  - core clock for sdhci controller
++
++Optional properties:
++- vqmmc-supply: phandle to the regulator device tree node, mentioned
++  as the VCCQ/VDD_IO supply in the eMMC/SD specs.
++
++Example:
++
++	sdhci1: mmc@36600000 {
++		compatible = "fujitsu,mb86s70-sdhci-3.0";
++		reg = <0 0x36600000 0x1000>;
++		interrupts = <0 172 0x4>,
++			     <0 173 0x4>;
++		bus-width = <4>;
++		vqmmc-supply = <&vccq_sdhci1>;
++		clocks = <&clock 2 2 0>, <&clock 2 3 0>;
++		clock-names = "iface", "core";
++	};
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 2d6fbdd..288dcc3 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -290,6 +290,14 @@ config MMC_SDHCI_BCM2835
+ 	  This selects the BCM2835 SD/MMC controller. If you have a BCM2835
+ 	  platform with SD or MMC devices, say Y or M here.
  
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
++config MMC_SDHCI_F_SDH30
++	tristate "SDHCI support for Fujitsu Semiconductor F_SDH30"
++	depends on MMC_SDHCI_PLTFM
++	depends on OF
++	help
++	  This selects the Secure Digital Host Controller Interface (SDHCI)
++	  Needed by some Fujitsu SoC for MMC / SD / SDIO support.
++	  If you have a controller with this interface, say Y or M here.
+ 	  If unsure, say N.
+ 
+ config MMC_MOXART
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index f7b0a77..6a7cfe0 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -16,6 +16,7 @@ obj-$(CONFIG_MMC_SDHCI_PXAV3)	+= sdhci-pxav3.o
+ obj-$(CONFIG_MMC_SDHCI_PXAV2)	+= sdhci-pxav2.o
+ obj-$(CONFIG_MMC_SDHCI_S3C)	+= sdhci-s3c.o
+ obj-$(CONFIG_MMC_SDHCI_SIRF)   	+= sdhci-sirf.o
++obj-$(CONFIG_MMC_SDHCI_F_SDH30)	+= sdhci_f_sdh30.o
+ obj-$(CONFIG_MMC_SDHCI_SPEAR)	+= sdhci-spear.o
+ obj-$(CONFIG_MMC_WBSD)		+= wbsd.o
+ obj-$(CONFIG_MMC_AU1X)		+= au1xmmc.o
+diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
+new file mode 100644
+index 0000000..1093857
+--- /dev/null
++++ b/drivers/mmc/host/sdhci_f_sdh30.c
+@@ -0,0 +1,236 @@
++/*
++ * linux/drivers/mmc/host/sdhci_f_sdh30.c
++ *
++ * Copyright (C) 2013 - 2015 Fujitsu Semiconductor, Ltd
++ *              Vincent Yang <vincent.yang@tw.fujitsu.com>
++ * Copyright (C) 2015 Linaro Ltd  Andy Green <andy.green@linaro.org>
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, version 2 of the License.
++ */
++
++#include <linux/err.h>
++#include <linux/delay.h>
++#include <linux/module.h>
++#include <linux/clk.h>
++
++#include "sdhci-pltfm.h"
++
++/* F_SDH30 extended Controller registers */
++#define F_SDH30_AHB_CONFIG		0x100
++#define  F_SDH30_AHB_BIGED		0x00000040
++#define  F_SDH30_BUSLOCK_DMA		0x00000020
++#define  F_SDH30_BUSLOCK_EN		0x00000010
++#define  F_SDH30_SIN			0x00000008
++#define  F_SDH30_AHB_INCR_16		0x00000004
++#define  F_SDH30_AHB_INCR_8		0x00000002
++#define  F_SDH30_AHB_INCR_4		0x00000001
++
++#define F_SDH30_TUNING_SETTING		0x108
++#define  F_SDH30_CMD_CHK_DIS		0x00010000
++
++#define F_SDH30_IO_CONTROL2		0x114
++#define  F_SDH30_CRES_O_DN		0x00080000
++#define  F_SDH30_MSEL_O_1_8		0x00040000
++
++#define F_SDH30_ESD_CONTROL		0x124
++#define  F_SDH30_EMMC_RST		0x00000002
++#define  F_SDH30_EMMC_HS200		0x01000000
++
++#define F_SDH30_CMD_DAT_DELAY		0x200
++
++#define F_SDH30_MIN_CLOCK		400000
++
++struct f_sdhost_priv {
++	struct clk *clk_iface;
++	struct clk *clk;
++	u32 vendor_hs200;
++	struct device *dev;
++};
++
++void sdhci_f_sdh30_soft_voltage_switch(struct sdhci_host *host)
++{
++	struct f_sdhost_priv *priv = sdhci_priv(host);
++	u32 ctrl = 0;
++
++	usleep_range(2500, 3000);
++	ctrl = sdhci_readl(host, F_SDH30_IO_CONTROL2);
++	ctrl |= F_SDH30_CRES_O_DN;
++	sdhci_writel(host, ctrl, F_SDH30_IO_CONTROL2);
++	ctrl |= F_SDH30_MSEL_O_1_8;
++	sdhci_writel(host, ctrl, F_SDH30_IO_CONTROL2);
++
++	ctrl &= ~F_SDH30_CRES_O_DN;
++	sdhci_writel(host, ctrl, F_SDH30_IO_CONTROL2);
++	usleep_range(2500, 3000);
++
++	if (priv->vendor_hs200) {
++		dev_info(priv->dev, "%s: setting hs200\n", __func__);
++		ctrl = sdhci_readl(host, F_SDH30_ESD_CONTROL);
++		ctrl |= priv->vendor_hs200;
++		sdhci_writel(host, ctrl, F_SDH30_ESD_CONTROL);
++	}
++
++	ctrl = sdhci_readl(host, F_SDH30_TUNING_SETTING);
++	ctrl |= F_SDH30_CMD_CHK_DIS;
++	sdhci_writel(host, ctrl, F_SDH30_TUNING_SETTING);
++}
++
++unsigned int sdhci_f_sdh30_get_min_clock(struct sdhci_host *host)
++{
++	return F_SDH30_MIN_CLOCK;
++}
++
++void sdhci_f_sdh30_reset(struct sdhci_host *host, u8 mask)
++{
++	if (sdhci_readw(host, SDHCI_CLOCK_CONTROL) == 0)
++		sdhci_writew(host, 0xBC01, SDHCI_CLOCK_CONTROL);
++
++	sdhci_reset(host, mask);
++}
++
++static const struct sdhci_ops sdhci_f_sdh30_ops = {
++	.voltage_switch = sdhci_f_sdh30_soft_voltage_switch,
++	.get_min_clock = sdhci_f_sdh30_get_min_clock,
++	.reset = sdhci_f_sdh30_reset,
++	.set_clock = sdhci_set_clock,
++	.set_bus_width = sdhci_set_bus_width,
++	.set_uhs_signaling = sdhci_set_uhs_signaling,
++};
++
++static int sdhci_f_sdh30_probe(struct platform_device *pdev)
++{
++	struct sdhci_host *host;
++	struct device *dev = &pdev->dev;
++	struct resource *res;
++	int irq, ctrl = 0, ret = 0;
++	struct f_sdhost_priv *priv;
++	u32 reg = 0;
++
++	irq = platform_get_irq(pdev, 0);
++	if (irq < 0) {
++		dev_err(dev, "%s: no irq specified\n", __func__);
++		return irq;
++	}
++
++	host = sdhci_alloc_host(dev, sizeof(struct sdhci_host) +
++						sizeof(struct f_sdhost_priv));
++	if (IS_ERR(host))
++		return PTR_ERR(host);
++
++	priv = sdhci_priv(host);
++	priv->dev = dev;
++
++	host->quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
++		       SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
++	host->quirks2 = SDHCI_QUIRK2_SUPPORT_SINGLE |
++			SDHCI_QUIRK2_TUNING_WORK_AROUND;
++
++	ret = mmc_of_parse(host->mmc);
++	if (ret)
++		goto err;
++
++	platform_set_drvdata(pdev, host);
++
++	sdhci_get_of_property(pdev);
++	host->hw_name = "f_sdh30";
++	host->ops = &sdhci_f_sdh30_ops;
++	host->irq = irq;
++
++	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	host->ioaddr = devm_ioremap_resource(&pdev->dev, res);
++	if (IS_ERR(host->ioaddr)) {
++		ret = PTR_ERR(host);
++		goto err;
++	}
++
++	priv->clk_iface = devm_clk_get(&pdev->dev, "iface");
++	if (!IS_ERR(priv->clk_iface)) {
++		ret = clk_prepare_enable(priv->clk_iface);
++		if (ret < 0) {
++			dev_err(dev, "Failed to enable iface clock: %d\n", ret);
++			goto err;
++		}
++	}
++	priv->clk = devm_clk_get(&pdev->dev, "core");
++	if (!IS_ERR(priv->clk)) {
++		ret = clk_prepare_enable(priv->clk);
++		if (ret < 0) {
++			dev_err(dev, "Failed to enable core clock: %d\n", ret);
++			goto err_clk;
++		}
++	}
++
++	/* init vendor specific regs */
++	ctrl = sdhci_readw(host, F_SDH30_AHB_CONFIG);
++	ctrl |= F_SDH30_SIN | F_SDH30_AHB_INCR_16 | F_SDH30_AHB_INCR_8 |
++		F_SDH30_AHB_INCR_4;
++	ctrl &= ~(F_SDH30_AHB_BIGED | F_SDH30_BUSLOCK_EN);
++	sdhci_writew(host, ctrl, F_SDH30_AHB_CONFIG);
++
++	reg = sdhci_readl(host, F_SDH30_ESD_CONTROL);
++	sdhci_writel(host, reg & ~F_SDH30_EMMC_RST, F_SDH30_ESD_CONTROL);
++	msleep(20);
++	sdhci_writel(host, reg | F_SDH30_EMMC_RST, F_SDH30_ESD_CONTROL);
++
++	reg = sdhci_readl(host, SDHCI_CAPABILITIES);
++	if (reg & SDHCI_CAN_DO_8BIT)
++		priv->vendor_hs200 = F_SDH30_EMMC_HS200;
++	else
++		priv->vendor_hs200 = 0;
++
++	ret = sdhci_add_host(host);
++	if (ret)
++		goto err_add_host;
++
++	return 0;
++
++err_add_host:
++	clk_disable_unprepare(priv->clk);
++err_clk:
++	clk_disable_unprepare(priv->clk_iface);
++err:
++	sdhci_free_host(host);
++	return ret;
++}
++
++static int sdhci_f_sdh30_remove(struct platform_device *pdev)
++{
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct f_sdhost_priv *priv = sdhci_priv(host);
++
++	sdhci_remove_host(host, readl(host->ioaddr + SDHCI_INT_STATUS) ==
++			  0xffffffff);
++
++	clk_disable_unprepare(priv->clk_iface);
++	clk_disable_unprepare(priv->clk);
++
++	sdhci_free_host(host);
++	platform_set_drvdata(pdev, NULL);
++
++	return 0;
++}
++
++static const struct of_device_id f_sdh30_dt_ids[] = {
++	{ .compatible = "fujitsu,mb86s70-sdhci-3.0" },
++	{ /* sentinel */ }
++};
++MODULE_DEVICE_TABLE(of, f_sdh30_dt_ids);
++
++static struct platform_driver sdhci_f_sdh30_driver = {
++	.driver = {
++		.name = "f_sdh30",
++		.of_match_table = f_sdh30_dt_ids,
++		.pm	= SDHCI_PLTFM_PMOPS,
++	},
++	.probe	= sdhci_f_sdh30_probe,
++	.remove	= sdhci_f_sdh30_remove,
++};
++
++module_platform_driver(sdhci_f_sdh30_driver);
++
++MODULE_DESCRIPTION("F_SDH30 SD Card Controller driver");
++MODULE_LICENSE("GPL v2");
++MODULE_AUTHOR("FUJITSU SEMICONDUCTOR LTD.");
++MODULE_ALIAS("platform:f_sdh30");
 -- 
 1.9.0
 
