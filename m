@@ -1,204 +1,121 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH V4 3/4] mmc: pwrseq: Initial support for the simple MMC power sequence provider
-Date: Mon, 19 Jan 2015 10:13:03 +0100
-Message-ID: <1421658784-11980-4-git-send-email-ulf.hansson@linaro.org>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH V4 4/4] mmc: pwrseq_simple: Add support for a reset GPIO pin
+Date: Mon, 19 Jan 2015 10:13:04 +0100
+Message-ID: <1421658784-11980-5-git-send-email-ulf.hansson@linaro.org>
 References: <1421658784-11980-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f48.google.com ([209.85.215.48]:54814 "EHLO
-	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751433AbbASJQU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jan 2015 04:16:20 -0500
-Received: by mail-la0-f48.google.com with SMTP id gf13so27549173lab.7
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Jan 2015 01:16:19 -0800 (PST)
-In-Reply-To: <1421658784-11980-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1421658784-11980-1-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, NeilBrown <neilb-l3A5Bk7waGM@public.gmane.org>, Tomeu Vizoso <tomeu.vizoso-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
-Cc: linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Alexandre Courbot <gnurou@gmail.com>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Olof Johansson <olof@lixom.net>, Russell King <linux@arm.linux.org.uk>, Hans de Goede <hdegoede@redhat.com>, Doug Anderson <dianders@chromium.org>, NeilBrown <neilb@suse.de>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-To add the core part for the MMC power sequence, let's start by adding
-initial support for the simple MMC power sequence provider.
+The need for reset GPIOs has several times been pointed out from
+erlier posted patchsets. Especially some WLAN chips which are
+attached to an SDIO interface may use a GPIO reset.
 
-In this initial step, the MMC power sequence node are fetched and the
-compatible string for the simple MMC power sequence provider are
-verified.
+The reset GPIO is asserted at initialization and prior we start the
+power up procedure. The GPIO will be de-asserted right after the power
+has been provided to the card, from the ->post_power_on() callback.
 
-At this point we don't parse the node for any properties, but instead
-that will be handled from following patches. Since there are no
-properties supported yet, let's just implement the ->alloc() and the
-->free() callbacks.
+Note, the reset GPIO is optional. Thus we don't return an error even if
+we can't find a GPIO for the consumer.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
 
 Changes in v4:
 	- Fixed call to kfree().
 
 ---
- drivers/mmc/core/Makefile        |  2 +-
- drivers/mmc/core/pwrseq.c        | 61 +++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/core/pwrseq.h        |  2 ++
- drivers/mmc/core/pwrseq_simple.c | 48 +++++++++++++++++++++++++++++++
- 4 files changed, 111 insertions(+), 2 deletions(-)
- create mode 100644 drivers/mmc/core/pwrseq_simple.c
+ drivers/mmc/core/pwrseq_simple.c | 38 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 38 insertions(+)
 
-diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-index ccdd35f..b39cbd2 100644
---- a/drivers/mmc/core/Makefile
-+++ b/drivers/mmc/core/Makefile
-@@ -8,5 +8,5 @@ mmc_core-y			:= core.o bus.o host.o \
- 				   sdio.o sdio_ops.o sdio_bus.o \
- 				   sdio_cis.o sdio_io.o sdio_irq.o \
- 				   quirks.o slot-gpio.o
--mmc_core-$(CONFIG_OF)		+= pwrseq.o
-+mmc_core-$(CONFIG_OF)		+= pwrseq.o pwrseq_simple.o
- mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
-diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
-index bd08772..2cea00e 100644
---- a/drivers/mmc/core/pwrseq.c
-+++ b/drivers/mmc/core/pwrseq.c
-@@ -7,14 +7,73 @@
-  *
-  *  MMC power sequence management
-  */
-+#include <linux/kernel.h>
-+#include <linux/platform_device.h>
-+#include <linux/err.h>
-+#include <linux/of.h>
-+#include <linux/of_platform.h>
-+
+diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+index 61c991e..0958c69 100644
+--- a/drivers/mmc/core/pwrseq_simple.c
++++ b/drivers/mmc/core/pwrseq_simple.c
+@@ -11,6 +11,7 @@
+ #include <linux/slab.h>
+ #include <linux/device.h>
+ #include <linux/err.h>
++#include <linux/gpio/consumer.h>
+ 
  #include <linux/mmc/host.h>
  
- #include "pwrseq.h"
+@@ -18,31 +19,68 @@
  
-+struct mmc_pwrseq_match {
-+	const char *compatible;
-+	int (*alloc)(struct mmc_host *host, struct device *dev);
-+};
-+
-+static struct mmc_pwrseq_match pwrseq_match[] = {
-+	{
-+		.compatible = "mmc-pwrseq-simple",
-+		.alloc = mmc_pwrseq_simple_alloc,
-+	},
-+};
-+
-+static struct mmc_pwrseq_match *mmc_pwrseq_find(struct device_node *np)
-+{
-+	struct mmc_pwrseq_match *match = ERR_PTR(-ENODEV);
-+	int i;
-+
-+	for (i = 0; i < ARRAY_SIZE(pwrseq_match); i++) {
-+		if (of_device_is_compatible(np,	pwrseq_match[i].compatible)) {
-+			match = &pwrseq_match[i];
-+			break;
-+		}
-+	}
-+
-+	return match;
-+}
+ struct mmc_pwrseq_simple {
+ 	struct mmc_pwrseq pwrseq;
++	struct gpio_desc *reset_gpio;
+ };
  
- int mmc_pwrseq_alloc(struct mmc_host *host)
- {
--	return 0;
-+	struct platform_device *pdev;
-+	struct device_node *np;
-+	struct mmc_pwrseq_match *match;
-+	int ret = 0;
-+
-+	np = of_parse_phandle(host->parent->of_node, "mmc-pwrseq", 0);
-+	if (!np)
-+		return 0;
-+
-+	pdev = of_find_device_by_node(np);
-+	if (!pdev) {
-+		ret = -ENODEV;
-+		goto err;
-+	}
-+
-+	match = mmc_pwrseq_find(np);
-+	if (IS_ERR(match)) {
-+		ret = PTR_ERR(match);
-+		goto err;
-+	}
-+
-+	ret = match->alloc(host, &pdev->dev);
-+	if (!ret)
-+		dev_info(host->parent, "allocated mmc-pwrseq\n");
-+
-+err:
-+	of_node_put(np);
-+	return ret;
- }
- 
- void mmc_pwrseq_pre_power_on(struct mmc_host *host)
-diff --git a/drivers/mmc/core/pwrseq.h b/drivers/mmc/core/pwrseq.h
-index 12aaf2b..bd860d8 100644
---- a/drivers/mmc/core/pwrseq.h
-+++ b/drivers/mmc/core/pwrseq.h
-@@ -27,6 +27,8 @@ void mmc_pwrseq_post_power_on(struct mmc_host *host);
- void mmc_pwrseq_power_off(struct mmc_host *host);
- void mmc_pwrseq_free(struct mmc_host *host);
- 
-+int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev);
-+
- #else
- 
- static inline int mmc_pwrseq_alloc(struct mmc_host *host) { return 0; }
-diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-new file mode 100644
-index 0000000..61c991e
---- /dev/null
-+++ b/drivers/mmc/core/pwrseq_simple.c
-@@ -0,0 +1,48 @@
-+/*
-+ *  Copyright (C) 2014 Linaro Ltd
-+ *
-+ * Author: Ulf Hansson <ulf.hansson@linaro.org>
-+ *
-+ * License terms: GNU General Public License (GPL) version 2
-+ *
-+ *  Simple MMC power sequence management
-+ */
-+#include <linux/kernel.h>
-+#include <linux/slab.h>
-+#include <linux/device.h>
-+#include <linux/err.h>
-+
-+#include <linux/mmc/host.h>
-+
-+#include "pwrseq.h"
-+
-+struct mmc_pwrseq_simple {
-+	struct mmc_pwrseq pwrseq;
-+};
-+
-+static void mmc_pwrseq_simple_free(struct mmc_host *host)
++static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
 +{
 +	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
 +					struct mmc_pwrseq_simple, pwrseq);
 +
-+	kfree(pwrseq);
-+	host->pwrseq = NULL;
++	if (!IS_ERR(pwrseq->reset_gpio))
++		gpiod_set_value_cansleep(pwrseq->reset_gpio, 1);
 +}
 +
-+static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
-+	.free = mmc_pwrseq_simple_free,
-+};
-+
-+int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
++static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
 +{
-+	struct mmc_pwrseq_simple *pwrseq;
++	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
++					struct mmc_pwrseq_simple, pwrseq);
 +
-+	pwrseq = kzalloc(sizeof(struct mmc_pwrseq_simple), GFP_KERNEL);
-+	if (!pwrseq)
-+		return -ENOMEM;
-+
-+	pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
-+	host->pwrseq = &pwrseq->pwrseq;
-+
-+	return 0;
++	if (!IS_ERR(pwrseq->reset_gpio))
++		gpiod_set_value_cansleep(pwrseq->reset_gpio, 0);
 +}
++
+ static void mmc_pwrseq_simple_free(struct mmc_host *host)
+ {
+ 	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+ 					struct mmc_pwrseq_simple, pwrseq);
+ 
++	if (!IS_ERR(pwrseq->reset_gpio))
++		gpiod_put(pwrseq->reset_gpio);
++
+ 	kfree(pwrseq);
+ 	host->pwrseq = NULL;
+ }
+ 
+ static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
++	.pre_power_on = mmc_pwrseq_simple_pre_power_on,
++	.post_power_on = mmc_pwrseq_simple_post_power_on,
++	.power_off = mmc_pwrseq_simple_pre_power_on,
+ 	.free = mmc_pwrseq_simple_free,
+ };
+ 
+ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
+ {
+ 	struct mmc_pwrseq_simple *pwrseq;
++	int ret = 0;
+ 
+ 	pwrseq = kzalloc(sizeof(struct mmc_pwrseq_simple), GFP_KERNEL);
+ 	if (!pwrseq)
+ 		return -ENOMEM;
+ 
++	pwrseq->reset_gpio = gpiod_get_index(dev, "reset", 0, GPIOD_OUT_HIGH);
++	if (IS_ERR(pwrseq->reset_gpio) &&
++		PTR_ERR(pwrseq->reset_gpio) != -ENOENT &&
++		PTR_ERR(pwrseq->reset_gpio) != -ENOSYS) {
++		ret = PTR_ERR(pwrseq->reset_gpio);
++		goto free;
++	}
++
+ 	pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
+ 	host->pwrseq = &pwrseq->pwrseq;
+ 
+ 	return 0;
++free:
++	kfree(pwrseq);
++	return ret;
+ }
 -- 
 1.9.1
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
