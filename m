@@ -1,85 +1,70 @@
-From: NeilBrown <neil@brown.name>
-Subject: Re: [PATCH V2 2/4] mmc: pwrseq: Document DT bindings for the simple
- MMC power sequence
-Date: Tue, 20 Jan 2015 07:17:01 +1100
-Message-ID: <awcfw5ggbfn27usdy0rb72ph.1421698621396@email.android.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: base64
+From: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+Subject: [PATCH] mmc: sdhci: Don't signal the sdio irq if it's not setup
+Date: Mon, 19 Jan 2015 23:07:09 +0100
+Message-ID: <1421705229-20260-1-git-send-email-sjoerd.simons@collabora.co.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:34936 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751517AbbASURq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 19 Jan 2015 15:17:46 -0500
+Received: from bhuna.collabora.co.uk ([93.93.135.160]:59958 "EHLO
+	bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751730AbbASWHN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jan 2015 17:07:13 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Alexandre Courbot <gnurou@gmail.com>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Olof Johansson <olof@lixom.net>, Hans de Goede <hdegoede@redhat.com>, Doug Anderson <dianders@chromium.org>, Tomeu Vizoso <tomeu.vizoso@collabora.com>
+To: stable@vger.kernel.org, Chris Ball <chris@printf.net>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Russell King <linux@arm.linux.org.uk>, Tyler Baker <tyler.baker@linaro.org>
 
-CgpPbiBGcmksIDE2IEphbiAyMDE1IDExOjM2OjQ2ICswMDAwIFJ1c3NlbGwgS2luZyAtIEFSTSBM
-aW51eA0KPGxpbnV4QGFybS5saW51eC5vcmcudWs+IHdyb3RlOg0KDQo+IE9uIEZyaSwgSmFuIDE2
-LCAyMDE1IGF0IDA3OjUzOjA4QU0gKzEzMDAsIE5laWxCcm93biB3cm90ZToNCj4gPiBBbHNvLCBp
-dCBpc24ndCBjbGVhciB0byBtZSB3aGV0aGVyIHRoZSBuZWVkIGZvciBwb3dlci9yZXNldCBpcyBh
-IGZ1bmN0aW9uIG9mDQo+ID4gdGhlIG1tYy1ob3N0LCBvciBhIGZ1bmN0aW9uIG9mIHRoZSBkZXZp
-Y2UgYXR0YWNoZWQgdG8gdGhlIGhvc3QuICBJIHN1c3BlY3QNCj4gPiBzb21lIGFyZSBuZWVkZWQg
-Ynkgb25lLCBzb21lIGJ5IHRoZSBvdGhlci4gIEFueSBieSBib3RoPw0KPiANCj4gTmVpbCwNCj4g
-DQo+IFRoZXJlJ3MgYSBob3JyaWQgaXNzdWUgdGhlcmUuICBUaGUgc3RhbmRhcmQgbW9kZWwgb2Yg
-TU1DL1NEIGlzIHRoYXQgdGhlDQo+IGRldmljZSB3aWxsIGJlIHBvd2VyZWQgdXAgYnkgdGhlIGhv
-c3QsIGFuZCB3aWxsIHRoZW4gYmUgcHJvYmVkIHRvIGZpbmQNCj4gb3V0IHdoYXQgdGhlIGRldmlj
-ZSBpcy4gIFRoaXMgbm9ybWFsbHkgd29ya3MgZmluZSBhcyB0aGUgaG9zdCBpcw0KPiByZXNwb25z
-aWJsZSBmb3IgY29udHJvbGxpbmcgdGhlIHBvd2VyIHRvIHRoZSBzb2NrZXQgd2hpY2ggdGhlIGNh
-cmQgaXMNCj4gcGx1Z2dlZCBpbnRvLg0KPiANCj4gV2hlcmUgdGhpbmdzIGZhbGwgZG93biBpcyB3
-aGVuIHlvdSBoYXZlIGEgTU1DL1NEIGRldmljZSBlbWJlZGRlZCBvbnRvDQo+IGEgYm9hcmQsIGFu
-ZCB0aGV5IGRlY2lkZSB0aGF0IGl0J2xsIGJlIGdpdmVuIHNlcGFyYXRlIGNvbnRyb2xzIGZvcg0K
-PiBwb3dlciBhbmQgcmVzZXQgd2hpY2ggYXJlIG5vdCB1bmRlciB0aGUgY29udHJvbCBvZiB0aGUg
-aG9zdC4NCj4gDQo+IElmIHRoZSBNTUMvU0QgZGV2aWNlIGlzIG5vdCBwb3dlcmVkIHVwIGJlZm9y
-ZSB3ZSBwcm9iZSB0aGUgYnVzLCB0aGVuDQo+IHRoZSBkZXZpY2UgaXMgbm90IGRpc2NvdmVyYWJs
-ZSwgYW5kIHRoaXMgYnJlYWtzIHRoZSBzdGFuZGFyZCBtb2RlbDoNCj4gLSBJZiB3ZSBydW4gdGhl
-IHN0YW5kYXJkIE1NQy9TRCBkZXZpY2UgZGlzY292ZXJ5IGNvZGUgd2l0aCB0aGUgZGV2aWNlDQo+
-ICAgcG93ZXJlZCBkb3duLCBpdCB3aWxsIGZpbmQgbm8gZGV2aWNlIGF0dGFjaGVkLCBzbyBubyBk
-ZXZpY2Ugd2lsbCBiZQ0KPiAgIGNyZWF0ZWQuDQo+IA0KPiAtIElmIHdlIGNyZWF0ZSBhIGRldmlj
-ZSwgdGhlbiB0aGUgZGV2aWNlIGRyaXZlciB3aWxsIGJlIHByb2JlZA0KPiAgIGltbWVkaWF0ZWx5
-LiAgV2hpbGUgdGhlIGRldmljZSBkcml2ZXIgY2FuIHRoZW4gYmluZCwgZGlzY292ZXIgdGhlDQo+
-ICAgcG93ZXIgYW5kIHJlc2V0IGNvbnRyb2xzLCBhbmQgYWN0aXZhdGUgdGhlbSwgaXQgY2FuJ3Qg
-dGhlbiB0YWxrIHRvDQo+ICAgaXRzIGRldmljZSBiZWNhdXNlIHRoZSBNTUMgbGF5ZXIgaGFzbid0
-IGdvbmUgdGhyb3VnaCB0aGUgcmVxdWlyZWQNCj4gICBzdGFuZGFyZCBkZXZpY2UgZGlzY292ZXJ5
-IGFuZCBwcm9iZSBzZXF1ZW5jZS4gIElmIHdlIGNvdWxkIGRvIHRoYXQsDQo+ICAgd2Ugd291bGQg
-dGhlbiBuZWVkIHNvbWUgd2F5IHRvIHN0b3AgdGhhdCBtZWNoYW5pc20gY3JlYXRpbmcgYW5vdGhl
-cg0KPiAgIGRldmljZS4NCg0KSGkgUnVzc2VsbCwNCiB0aGFua3MgZm9yIHRoZSBvdmVydmlldyAt
-IHF1aXRlIGhlbHBmdWwuDQogSSB3b3VsZCBsaWtlIHRvIHBhcnRpY3VsYXJseSBmb2N1cyBvbiB0
-aGF0IGxhc3Qgc2VudGVuY2UgbWVudGlvbmluZw0KICJzb21lIHdheSB0byBzdG9wIFtzdGFuZGFy
-ZCBkZXZpY2UgZGlzY292ZXJ5XSBjcmVhdGluZyBhbm90aGVyIGRldmljZSIuDQoNCiBUaGF0IHdh
-eSBhbHJlYWR5IGV4aXN0cywgb3Igc29tZXRoaW5nIHZlcnkgc2ltaWxhciB0byBpdCwgaW4gdGhl
-IG1tYy9zZGlvDQogY29yZS4gSW4gcGFydGljdWxhciwgdGhlICdvbGRjYXJkJyBhcmd1bWVudCB0
-byBtbWNfc2Rpb19pbml0X2NhcmQoKS4NCg0KIFRoaXMgaXMgY2FsbGVkIGJvdGggd2hlbiBpbml0
-aWFsaXNpbmcgYSBjYXJkIGFuZCB3aGVuIHJlc3RvcmluZyBwb3dlciB0byBpdC4NCiBJZiAnb2xk
-Y2FyZCcgaXMgc2V0IGFuZCB0aGUgY2FyZCBmb3VuZCBtYXRjaGVzICdvbGRjYXJkJywgdGhlbiAn
-b2xkY2FyZCcgaXMNCiBsZWZ0IHVuY2hhbmdlZC4gIGkuZS4gYSBuZXcgZGV2aWNlIGlzIG5vdCBj
-cmVhdGVkLg0KDQogU3VwcG9zZSB0aGF0IGRldmljZXRyZWUgbGlzdGVkIGEgY2hpbGQgbm9kZSBm
-b3IgYW4gbW1jIGhvc3Qgd2l0aA0KICJub24tcmVtb3ZhYmxlIiBzZXQsIHRoZW4gd2UgY291bGQg
-ZG8gYSBwcmVsaW1pbmFyeSBwcm9iZSB3aGljaCBzZXRzDQogdXAgaG9zdC0+Y2FyZCBzbyB0aGF0
-IHN1YnNlcXVlbnQgInN0YW5kYXJkIiBwcm9iZXMgZmluZCB0aGUgcHJvcGVybHkNCiBtYXRjaGlu
-ZyBjYXJkIGFuZCBsZWF2ZSAnb2xkY2FyZCcgdW5jaGFuZ2VkLiAgVGhpcyBjYXJkIGNvdWxkIHNv
-bWVob3cNCiByZWdpc3RlciBpdHMgb3duIHBvd2VyLXVwIHNlcXVlbmNlLg0KDQogSW4gdGhlIGNh
-c2Ugb2YgJ25vbi1yZW1vdmFibGUnIGl0IG1pZ2h0IGJlIG5pY2UgdG8gYmUgbXVjaCBtb3JlIGNh
-dXRpb3VzDQogYWJvdXQgY2xlYXJpbmcgaG9zdC0+Y2FyZCB3aGVuIGEgcHJvYmUgZmFpbHMuICBP
-bmUgb2YgdGhlIChtYW55KSBwcm9ibGVtcyBJDQogaGF2ZSBvbiBteSBkZXZpY2UgaXMgdGhhdCBv
-Y2Nhc2lvbmFsbHkgdGhlIHByb2JlIG9mIHRoZSBtbWMvc2Rpby93aWZpIGNhcmQNCiBmYWlscyAo
-RUJVU1kgSSB0aGluaywgYnV0IEknbSBub3Qgc3VyZSBhbmQgSSBoYXZlIG5vIGlkZWEgd2h5KS4g
-IE9uY2UgdGhhdA0KIGhhcHBlbnMsIHRoZSB3aWZpIGJlY29tZXMgaW5hY2Nlc3NpYmxlIHVudGls
-IGEgcmVib290LiANCg0KIEFzIG1tY19yZXNjYW4gZW5zdXJlcyB0aGF0IGEgbm9uLXJlbW92YWJs
-ZSBjYXJkIGlzIG9ubHkgc2Nhbm5lZCBvbmNlLCBpdA0KIHdvdWxkIGJlIHJlYWxseSBnb29kIGlm
-IHdlIHdlcmUgZXh0cmEgY2FyZWZ1bCBuZXZlciB0byByZW1vdmUgYQ0KIG5vbi1yZW1vdmFibGUg
-Y2FyZCwgZXZlbiBpbiB0aGUgZmFjZSBvZiBlcnJvci4uLg0KDQoNCj4gDQo+IElmIHdlIGluc3Rl
-YWQgdGFrZSB0aGUgdmlldyB0aGF0IHRoZSBob3N0IGlzIHJlc3BvbnNpYmxlIGZvciBwb3dlcmlu
-Zw0KPiB1cCB0aGUgZGV2aWNlLCB0aGVuIHdlIGFyZSBtZXJlbHkga2VlcGluZyB3aXRoIHRoZSBz
-dGFuZGFyZCBNTUMvU0QNCj4gbW9kZWwsIGFuZCB3ZSBkb24ndCBoYXZlIHRvIGhhY2sgYXJvdW5k
-IGhpcy4NCj4gDQo+IEtlZXBpbmcgdG8gdGhlIHN0YW5kYXJkIG1vZGVsIG9mIGEgaG9zdCByZXNw
-b25zaWJsZSBmb3IgcG93ZXIgY29udHJvbA0KPiBvZiBpdHMgY2hpbGQgZGV2aWNlcyBpcyBqdXN0
-IGEgd2hvbGUgbG90IG5pY2VyLg0KPiANCg0KSSdtIG5vdCByZWFsbHkgYWdhaW5zdCB0aGUgcHJv
-cG9zZWQgcGF0Y2guICBJdCBzaG91bGQgcmVtb3ZlIGF0IGxlYXN0IG9uZSBvZg0KbXkgcHJvYmxl
-bXMsIGFuZCBJIGRvbid0IHRoaW5rIGl0IG1ha2VzIGFueSBvdGhlciBwcm9ibGVtcyBtb3JlIGRp
-ZmZpY3VsdC4NClNvIGlmIHRoZSBhYm92ZSBpZGVhcyBkb24ndCBhcHBlYWwgdG8gYW55b25lIGVs
-c2UsIEknbGwgcmFpc2Ugbm8gZnVydGhlcg0Kb2JqZWN0aW9ucy4NCg0KVGhhbmtzLA0KTmVpbEJy
-b3duDQoNCg0K
+With 3.14.29 (and older kernels) some of my I.mx6 Sabrelite boards were
+crashing with the following oops:
+
+  sdhci: Secure Digital Host Controller Interface driver
+  sdhci: Copyright(c) Pierre Ossman
+  sdhci-pltfm: SDHCI platform and OF driver helper
+  sdhci-esdhc-imx 2198000.usdhc: could not get ultra high speed state, work on normal mode
+  mmc0: no vqmmc regulator found
+  mmc0: SDHCI controller on 2198000.usdhc [2198000.usdhc] using ADMA
+  Unable to handle kernel NULL pointer dereference at virtual address 00000000
+  pgd = c0004000
+  [00000000] *pgd=00000000
+  Internal error: Oops: 5 [#1] SMP ARM
+  Modules linked in:
+  CPU: 0 PID: 0 Comm: swapper/0 Not tainted 3.14.29 #1
+  task: c08a7120 ti: c089c000 task.ti: c089c000
+  PC is at wake_up_process+0x8/0x40
+  LR is at sdhci_irq+0x748/0x9c4
+
+Full boot log can be found at:
+  http://storage.kernelci.org/stable/v3.14.29/arm-multi_v7_defconfig/lab-collabora/boot-imx6q-sabrelite.html
+
+This happens if the sdhci interrupt status contains SDHCI_INT_CARD_INT,
+while the sdio irq was never setup.  This patch fixes that in a minimal
+way by checking if the sdio irq was setup.
+
+In more recent kernels this bug went away due to refactoring done by
+Russel King. So an alternative (potentially better?) fix for this patch
+is to cherrypick the following patches from a recent kernel:
+
+18258f7239a6 - genirq: Provide synchronize_hardirq()
+bf3b5ec66bd0 - mmc: sdio_irq: rework sdio irq handling
+41005003bcaf - mmc: sdhci: clean up interrupt handling
+781e989cf593 - mmc: sdhci: convert to new SDIO IRQ handling
+
+Signed-off-by: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
+---
+ drivers/mmc/host/sdhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 7e01763..881bf89 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2537,7 +2537,7 @@ out:
+ 	/*
+ 	 * We have to delay this as it calls back into the driver.
+ 	 */
+-	if (cardint)
++	if (cardint && host->mmc->sdio_irqs)
+ 		mmc_signal_sdio_irq(host->mmc);
+ 
+ 	return result;
+-- 
+2.1.4
 
