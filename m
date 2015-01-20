@@ -1,42 +1,98 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: tmio: add missing EXPORT_SYMBOL for tmio_mmc_host_alloc/free
-Date: Tue, 20 Jan 2015 10:15:23 +0100
-Message-ID: <CAPDyKFp57T5ZNUofS1TxDe=xV7zCukNov1j21WmrZ8tRS52PDQ@mail.gmail.com>
-References: <201501131902.WqokttpY%fengguang.wu@intel.com>
-	<87twzvuvl1.wl%kuninori.morimoto.gx@renesas.com>
-	<CAPDyKFrNFr493FcN3A3k_tGo9J801ga91ooL=sZT6DS0vFwVoQ@mail.gmail.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH 17/17] mmc: tmio: remove TMIO_MMC_HAVE_CTL_DMA_REG flag
+Date: Tue, 20 Jan 2015 09:33:15 +0000
+Message-ID: <20150120093315.GB5767@x1>
+References: <87twzvuvl1.wl%kuninori.morimoto.gx@renesas.com>
+ <8761cbuvdt.wl%kuninori.morimoto.gx@renesas.com>
+ <CAPDyKFp9NUs3FCHkOJe9dEdOdHzi1MiCB0RsD_V=7RiYL3OGzA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrNFr493FcN3A3k_tGo9J801ga91ooL=sZT6DS0vFwVoQ@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFp9NUs3FCHkOJe9dEdOdHzi1MiCB0RsD_V=7RiYL3OGzA@mail.gmail.com>
 Sender: linux-sh-owner@vger.kernel.org
-To: Lee Jones <lee.jones@linaro.org>
-Cc: Chris Ball <cjb@laptop.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "kbuild-all@01.org" <kbuild-all@01.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-+ MFD maintainer
+On Tue, 20 Jan 2015, Ulf Hansson wrote:
 
-On 14 January 2015 at 09:30, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 14 January 2015 at 03:21, Kuninori Morimoto
+> + MFD maintainer
+>=20
+> On 13 January 2015 at 06:00, Kuninori Morimoto
 > <kuninori.morimoto.gx@renesas.com> wrote:
->> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
->>
->> tmio_mmc_host_alloc/free were added on tmio_mmc_pio.c,
->> but, it is missing EXPORT_SYMBOL for it.
->> Compile will be failed without this patch
->>
->>  ERROR: "tmio_mmc_host_free" [drivers/mmc/host/tmio_mmc.ko] undefined!
->>  ERROR: "tmio_mmc_host_alloc" [drivers/mmc/host/tmio_mmc.ko] undefined!
->>  ERROR: "tmio_mmc_host_free" [drivers/mmc/host/sh_mobile_sdhi.ko] undefined!
->>  ERROR: "tmio_mmc_host_alloc" [drivers/mmc/host/sh_mobile_sdhi.ko] undefined!
->>
->> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
->
-> Thanks!
->
-> I decided to squashed this change into patch "mmc: tmio: add
-> tmio_mmc_host_alloc/free()", which was the one adding the related
-> functions.
->
-> Kind regards
-> Uffe
+> > From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+> >
+> > tmio_mmc_host has .enable_dma callback now.
+> > We don't need TMIO_MMC_HAVE_CTL_DMA_REG anymore.
+> > Let's remove it
+> >
+> > Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+> > ---
+> >  drivers/mmc/host/sh_mobile_sdhi.c |    5 -----
+> >  drivers/mmc/host/tmio_mmc_dma.c   |    3 ---
+> >  include/linux/mfd/tmio.h          |    5 -----
+> >  3 files changed, 13 deletions(-)
+
+Acked-by: Lee Jones <lee.jones@linaro.org>
+
+> > diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/s=
+h_mobile_sdhi.c
+> > index 7dbcb57..6906a90 100644
+> > --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> > +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> > @@ -291,11 +291,6 @@ static int sh_mobile_sdhi_probe(struct platfor=
+m_device *pdev)
+> >          */
+> >         mmc_data->flags |=3D TMIO_MMC_SDIO_STATUS_QUIRK;
+> >
+> > -       /*
+> > -        * All SDHI have DMA control register
+> > -        */
+> > -       mmc_data->flags |=3D TMIO_MMC_HAVE_CTL_DMA_REG;
+> > -
+> >         if (of_id && of_id->data) {
+> >                 const struct sh_mobile_sdhi_of_data *of_data =3D of=
+_id->data;
+> >                 mmc_data->flags |=3D of_data->tmio_flags;
+> > diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmi=
+o_mmc_dma.c
+> > index aa5f4b6..331bb61 100644
+> > --- a/drivers/mmc/host/tmio_mmc_dma.c
+> > +++ b/drivers/mmc/host/tmio_mmc_dma.c
+> > @@ -28,9 +28,6 @@ void tmio_mmc_enable_dma(struct tmio_mmc_host *ho=
+st, bool enable)
+> >         if (!host->chan_tx || !host->chan_rx)
+> >                 return;
+> >
+> > -       if (host->pdata->flags & TMIO_MMC_HAVE_CTL_DMA_REG)
+> > -               sd_ctrl_write16(host, CTL_DMA_ENABLE, enable ? 2 : =
+0);
+> > -
+> >         if (host->dma->enable)
+> >                 host->dma->enable(host, enable);
+> >  }
+> > diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+> > index 807ecfb..6058128 100644
+> > --- a/include/linux/mfd/tmio.h
+> > +++ b/include/linux/mfd/tmio.h
+> > @@ -96,11 +96,6 @@
+> >  #define TMIO_MMC_SDIO_STATUS_QUIRK     (1 << 8)
+> >
+> >  /*
+> > - * Some controllers have DMA enable/disable register
+> > - */
+> > -#define TMIO_MMC_HAVE_CTL_DMA_REG      (1 << 9)
+> > -
+> > -/*
+> >   * Some controllers allows to set SDx actual clock
+> >   */
+> >  #define TMIO_MMC_CLK_ACTUAL            (1 << 10)
+> >
+
+--=20
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
