@@ -1,122 +1,66 @@
-From: Vincent Yang <vincent.yang.fujitsu@gmail.com>
-Subject: Re: [PATCH v5 4/4] mmc: sdhci: host: add new f_sdh30
-Date: Tue, 20 Jan 2015 16:57:44 +0800
-Message-ID: <CAOEd-H2e+0DX024X+fAgSuV=DhWkDKMUNQWQiE3yd0zVa4jC+w@mail.gmail.com>
-References: <1421741118-18743-1-git-send-email-Vincent.Yang@tw.fujitsu.com>
-	<1421741118-18743-5-git-send-email-Vincent.Yang@tw.fujitsu.com>
-	<CAPDyKFr0a_tyP5UQXOxSZ-C+w7sXPZv6oNdTDvRMcfTimYtOPw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/17 v2] tmio: mmc: header cleanup / sh_mobile_cleanup
+Date: Tue, 20 Jan 2015 10:09:53 +0100
+Message-ID: <CAPDyKFpAgAJN6wnwzDA3p5u1L-+Wc44n1tmzpWMtt4PDfk3KCg@mail.gmail.com>
+References: <87twzvuvl1.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f47.google.com ([209.85.215.47]:51942 "EHLO
-	mail-la0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750727AbbATI5p (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jan 2015 03:57:45 -0500
-Received: by mail-la0-f47.google.com with SMTP id hv19so5582072lab.6
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Jan 2015 00:57:44 -0800 (PST)
-In-Reply-To: <CAPDyKFr0a_tyP5UQXOxSZ-C+w7sXPZv6oNdTDvRMcfTimYtOPw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <87twzvuvl1.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Lee Jones <lee.jones@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, Andy Green <andy.green@linaro.org>, Patch Tracking <patches@linaro.org>, Jaswinder Singh <jaswinder.singh@linaro.org>, Vincent Yang <Vincent.Yang@tw.fujitsu.com>, Tetsuya Takinishi <t.takinishi@jp.fujitsu.com>
 
-2015-01-20 16:43 GMT+08:00 Ulf Hansson <ulf.hansson@linaro.org>:
-> On 20 January 2015 at 09:05, Vincent Yang
-> <vincent.yang.fujitsu@gmail.com> wrote:
->> This patch adds new host controller driver for
->> Fujitsu SDHCI controller f_sdh30.
->>
->> Signed-off-by: Vincent Yang <Vincent.Yang@tw.fujitsu.com>
->> Signed-off-by: Andy Green <andy.green@linaro.org>
->> Signed-off-by: Tetsuya Takinishi <t.takinishi@jp.fujitsu.com>
->
-> Thanks! I have applied this patchset for next, with the below minor changes.
++ MFD maintainer
 
-Thanks a lot for your help and review!
-
-Kind regards
-Vincent
-
+On 13 January 2015 at 05:56, Kuninori Morimoto
+<kuninori.morimoto.gx@renesas.com> wrote:
 >
-> [...]
+> Hi Ulf
 >
->> +
->> +static int sdhci_f_sdh30_probe(struct platform_device *pdev)
->> +{
->> +       struct sdhci_host *host;
->> +       struct device *dev = &pdev->dev;
->> +       struct resource *res;
->> +       int irq, ctrl = 0, ret = 0;
->> +       struct f_sdhost_priv *priv;
->> +       u32 reg = 0;
->> +
->> +       irq = platform_get_irq(pdev, 0);
->> +       if (irq < 0) {
->> +               dev_err(dev, "%s: no irq specified\n", __func__);
->> +               return irq;
->> +       }
->> +
->> +       host = sdhci_alloc_host(dev, sizeof(struct sdhci_host) +
->> +                                               sizeof(struct f_sdhost_priv));
->> +       if (IS_ERR(host))
->> +               return PTR_ERR(host);
->> +
->> +       priv = sdhci_priv(host);
->> +       priv->dev = dev;
->> +
->> +       host->quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
->> +                      SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
->> +       host->quirks2 = SDHCI_QUIRK2_SUPPORT_SINGLE |
->> +                       SDHCI_QUIRK2_TUNING_WORK_AROUND;
->> +
->> +       ret = mmc_of_parse(host->mmc);
->> +       if (ret)
->> +               goto err;
->> +
->> +       platform_set_drvdata(pdev, host);
->> +
->> +       sdhci_get_of_property(pdev);
->> +       host->hw_name = "f_sdh30";
->> +       host->ops = &sdhci_f_sdh30_ops;
->> +       host->irq = irq;
->> +
->> +       res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->> +       host->ioaddr = devm_ioremap_resource(&pdev->dev, res);
->> +       if (IS_ERR(host->ioaddr)) {
->> +               ret = PTR_ERR(host);
->> +               goto err;
->> +       }
->> +
->> +       priv->clk_iface = devm_clk_get(&pdev->dev, "iface");
->> +       if (IS_ERR(priv->clk_iface)) {
->> +               ret = PTR_ERR(priv->clk_iface);
->> +               dev_err(&pdev->dev, "iface clk setup failed (%d)\n", ret);
+> These are v2 of tmio mmc / sh_mobile_sdhi cleanup patches.
+> v1 patch and in its discuss, we need 3 type of patch-set
+>  1. header cleanup
+>  2. sh_mobile_sdhi DMA
+>  3. DMAEngine cleanup
 >
-> No need to print this.
+> These are including 1. header cleanup, and one part of 2. sh_mobile_sdhi DMA.
+> If these are accepted, I will send 3. DMAEngine cleanup patch to DMAEngine ML,
+> and, left of 2. sh_mobile_sdhi DMA to MMC ML again.
 >
->> +               goto err;
->> +       }
->> +
->> +       ret = clk_prepare_enable(priv->clk_iface);
->> +       if (ret)
->> +               goto err;
->> +
->> +       priv->clk = devm_clk_get(&pdev->dev, "core");
->> +       if (IS_ERR(priv->clk)) {
->> +               ret = PTR_ERR(priv->clk);
->> +               dev_err(&pdev->dev, "core clk setup failed (%d)\n", ret);
+>  1) -  9) are header cleanup
+> 10) - 17) are one part of sh_mobile_sdhi DMA
 >
-> No need to print this.
+> Kuninori Morimoto (17):
+>        1) mmc: tmio: add tmio_mmc_host_alloc/free()
+>        2) mmc: tmio: tmio_mmc_host has .dma
+>        3) mmc: tmio: tmio_mmc_host has .write16_hook
+>        4) mmc: tmio: tmio_mmc_host has .clk_enable
+>        5) mmc: tmio: tmio_mmc_host has .clk_disable
+>        6) mmc: tmio: tmio_mmc_host has .multi_io_quirk
+>        7) mmc: tmio: tmio_mmc_host has .bus_shift
+>        8) mmc: tmio: tmio_mmc_data has .alignment_shift
+>        9) mmc: tmio: tmio_mmc_data has .dma_rx_offset
+>       10) mmc: tmio: add .enable_dma on tmio_mmc_data
+>       11) mmc: tmio: enable SoC specific DMA buswidth settings
+>       12) mmc: sh_mobile_sdhi: remove .init/.cleanup
+>       13) mmc: sh_mobile_sdhi: tidyup mmc_data->bus_shift for latest SoC
+>       14) mmc: sh_mobile_sdhi: add new macro for mmc_host to sh_mobile_sdhi
+>       15) mmc: sh_mobile_sdhi: use .enable_dma
+>       16) mmc: sh_mobile_sdhi: enable 32bit DMA access
+>       17) mmc: remove TMIO_MMC_HAVE_CTL_DMA_REG flag
 >
->> +               goto err_clk;
->> +       }
->> +
->> +       ret = clk_prepare_enable(priv->clk);
->> +       if (ret)
->> +               goto err_clk;
->> +
+>  drivers/mmc/host/sh_mobile_sdhi.c  |  117 ++++++++++++++++++++----------------
+>  drivers/mmc/host/tmio_mmc.c        |   15 +++--
+>  drivers/mmc/host/tmio_mmc.h        |   43 +++++++++----
+>  drivers/mmc/host/tmio_mmc_dma.c    |   38 ++++++------
+>  drivers/mmc/host/tmio_mmc_pio.c    |   59 ++++++++++--------
+>  include/linux/mfd/tmio.h           |   28 +--------
+>  include/linux/mmc/sh_mobile_sdhi.h |   15 -----
+>  7 files changed, 164 insertions(+), 151 deletions(-)
 >
-> [...]
 >
-> Kind regards
-> Uffe
+> Best regards
+> ---
+> Kuninori Morimoto
