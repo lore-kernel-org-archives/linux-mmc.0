@@ -1,72 +1,76 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH v5 1/6] mfd: rtsx: add func to split u32 into register
-Date: Tue, 20 Jan 2015 14:47:13 +0000
-Message-ID: <20150120144713.GV13701@x1>
-References: <cover.1419297154.git.micky_ching@realsil.com.cn>
- <17ba65f4bdf4707bdf038e407ecf5dc012bca281.1419297154.git.micky_ching@realsil.com.cn>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Peter Griffin <peter.griffin@linaro.org>
+Subject: [PATCH 0/4] Add sd/emmc support for stih407 family silicon
+Date: Tue, 20 Jan 2015 15:32:40 +0000
+Message-ID: <1421767964-8798-1-git-send-email-peter.griffin@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f179.google.com ([209.85.223.179]:50962 "EHLO
-	mail-ie0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752336AbbATOrU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jan 2015 09:47:20 -0500
-Received: by mail-ie0-f179.google.com with SMTP id x19so2935771ier.10
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Jan 2015 06:47:20 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <17ba65f4bdf4707bdf038e407ecf5dc012bca281.1419297154.git.micky_ching@realsil.com.cn>
+Received: from mail-wi0-f169.google.com ([209.85.212.169]:54009 "EHLO
+	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752954AbbATPcv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jan 2015 10:32:51 -0500
+Received: by mail-wi0-f169.google.com with SMTP id bs8so24957321wib.0
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Jan 2015 07:32:50 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: micky_ching@realsil.com.cn
-Cc: chris@printf.net, ulf.hansson@linaro.org, sameo@linux.intel.com, gregkh@linuxfoundation.org, dan.carpenter@oracle.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, rogerable@realtek.com, wei_wang@realsil.com.cn
+To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, mturquette@linaro.org, sboyd@codeaurora.org, chris@printf.net, ulf.hansson@linaro.org
+Cc: peter.griffin@linaro.org, lee.jones@linaro.org, peppe.cavallaro@st.com, olivier.bideau@st.com, gabriel.fernandez@st.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 
-On Tue, 23 Dec 2014, micky_ching@realsil.com.cn wrote:
+Hi,
 
-> From: Micky Ching <micky_ching@realsil.com.cn>
->=20
-> Add helper function to write u32 to registers, if we want to put u32
-> value to 4 continuous register, this can help us reduce tedious work.
->=20
-> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
-> Acked-by: Lee Jones <lee.jones@linaro.org>
-> ---
->  include/linux/mfd/rtsx_pci.h | 9 +++++++++
->  1 file changed, 9 insertions(+)
+This series adds sd/emmc support to the sdhci-st.c driver for stih407
+family silicon. The changes mainly involve congiguring some extra glue
+registers which configure the controller.
 
-Applied, thanks.
+This series also adds support for UHS modes for eMMC. To allow
+UHS HS200/SD104 modes to function correctly, due to the
+tight timing constriants and data tuning requirement, support
+for PVT independent delay management is also added. Two types
+of delay management are supported, static delay management and
+dynamic delay management (dynamic delay loop), this delay
+management is only available on eMMC pads on stih410 and later
+silicon.
 
-> diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx_pc=
-i.h
-> index 74346d5..9234449 100644
-> --- a/include/linux/mfd/rtsx_pci.h
-> +++ b/include/linux/mfd/rtsx_pci.h
-> @@ -558,6 +558,7 @@
->  #define SD_SAMPLE_POINT_CTL		0xFDA7
->  #define SD_PUSH_POINT_CTL		0xFDA8
->  #define SD_CMD0				0xFDA9
-> +#define   SD_CMD_START			0x40
->  #define SD_CMD1				0xFDAA
->  #define SD_CMD2				0xFDAB
->  #define SD_CMD3				0xFDAC
-> @@ -967,4 +968,12 @@ static inline u8 *rtsx_pci_get_cmd_data(struct r=
-tsx_pcr *pcr)
->  	return (u8 *)(pcr->host_cmds_ptr);
->  }
-> =20
-> +static inline void rtsx_pci_write_be32(struct rtsx_pcr *pcr, u16 reg=
-, u32 val)
-> +{
-> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg,     0xFF, val >> 24);
-> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 1, 0xFF, val >> 16);
-> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 2, 0xFF, val >> 8);
-> +	rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 3, 0xFF, val);
-> +}
-> +
->  #endif
+This has been tested with stih410-b2120 on eMMC and sd, at various
+clock speeds. As part of this testing a bug was also found in the
+upstream flexgen clock set_rate implementation.
 
---=20
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
+    max-frequency = 200Mhz
+    /dev/mmcblk0p1:
+     Timing buffered disk reads: 270 MB in  3.02 seconds =  89.54 MB/sec
+    
+    max-frequency = 100Mhz
+    root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
+    /dev/mmcblk0p1:
+     Timing buffered disk reads: 210 MB in  3.00 seconds =  70.00 MB/sec
+    
+    max-frequency = 50Mhz
+    root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
+    /dev/mmcblk0p1:
+     Timing buffered disk reads: 118 MB in  3.00 seconds =  39.28 MB/sec
+
+It has also been tested on stih416-b2020 to ensure we have caused no
+regressions. Finally the dt documentation has been updated to reflect
+the changes in the driver code. Intrestingly it seems we are the first
+upstream platform to be using some of the uhs bindings such as
+sd-uhs-sdr104.
+
+regards,
+
+Peter.
+
+Peter Griffin (4):
+  clk: st: STiH410: Fix pdiv and fdiv divisor when setting rate
+  sdhci-st: Add support for stih407 family silicon.
+  mmc: sdhci-st: Update ST SDHCI binding documentation.
+  ARM: STi: DT: STiH407: Add dt nodes for sdhci and emmc.
+
+ Documentation/devicetree/bindings/mmc/sdhci-st.txt | 100 +++++-
+ arch/arm/boot/dts/stih407-family.dtsi              |  30 ++
+ arch/arm/boot/dts/stih410-b2120.dts                |  10 +
+ arch/arm/boot/dts/stihxxx-b2120.dtsi               |   8 +
+ drivers/clk/st/clk-flexgen.c                       |  19 +-
+ drivers/mmc/host/sdhci-st.c                        | 351 ++++++++++++++++++++-
+ 6 files changed, 496 insertions(+), 22 deletions(-)
+
+-- 
+1.9.1
+
