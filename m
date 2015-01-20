@@ -1,23 +1,17 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 08/17] mmc: tmio: tmio_mmc_data has .alignment_shift
-Date: Tue, 20 Jan 2015 10:13:00 +0100
-Message-ID: <CAPDyKFoY1PdWSjFiUA3suehnB=e88OJX4Pn-o5MrT0PYjnZoqg@mail.gmail.com>
+Subject: Re: [PATCH 09/17] mmc: tmio: tmio_mmc_data has .dma_rx_offset
+Date: Tue, 20 Jan 2015 10:13:21 +0100
+Message-ID: <CAPDyKFpk-Zi_3ad4nDptkYC_hnjWoSWO-Qi4PzawW-8qyZu0jQ@mail.gmail.com>
 References: <87twzvuvl1.wl%kuninori.morimoto.gx@renesas.com>
-	<87iogbuvgx.wl%kuninori.morimoto.gx@renesas.com>
+	<87h9vvuvgo.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f46.google.com ([209.85.216.46]:54749 "EHLO
-	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751928AbbATJND (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jan 2015 04:13:03 -0500
-Received: by mail-qa0-f46.google.com with SMTP id j7so27129078qaq.5
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Jan 2015 01:13:01 -0800 (PST)
-In-Reply-To: <87iogbuvgx.wl%kuninori.morimoto.gx@renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <87h9vvuvgo.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-sh-owner@vger.kernel.org
 To: Lee Jones <lee.jones@linaro.org>
 Cc: Arnd Bergmann <arnd@arndb.de>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
 + MFD maintainer
 
@@ -25,77 +19,64 @@ On 13 January 2015 at 05:58, Kuninori Morimoto
 <kuninori.morimoto.gx@renesas.com> wrote:
 > From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 >
-> Current .alignment_shift is implemented under tmio_mmc_dma.
+> Current .dma_rx_offset is implemented under tmio_mmc_dma.
 > It goes to tmio_mmc_data by this patch.
 >
 > Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 > ---
->  drivers/mmc/host/sh_mobile_sdhi.c |    4 ++--
+>  drivers/mmc/host/sh_mobile_sdhi.c |    2 +-
 >  drivers/mmc/host/tmio_mmc.h       |    1 -
->  drivers/mmc/host/tmio_mmc_dma.c   |    4 ++--
+>  drivers/mmc/host/tmio_mmc_dma.c   |    2 +-
 >  include/linux/mfd/tmio.h          |    1 +
->  4 files changed, 5 insertions(+), 5 deletions(-)
+>  4 files changed, 3 insertions(+), 3 deletions(-)
 >
 > diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> index 0db2a0a..782d8cf 100644
+> index 782d8cf..c06e93b 100644
 > --- a/drivers/mmc/host/sh_mobile_sdhi.c
 > +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -241,10 +241,10 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
->                         dma_priv->slave_id_rx = p->dma_slave_rx;
->                 }
+> @@ -276,7 +276,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+>                 mmc_data->flags |= of_data->tmio_flags;
+>                 mmc_data->capabilities |= of_data->capabilities;
+>                 mmc_data->capabilities2 |= of_data->capabilities2;
+> -               dma_priv->dma_rx_offset = of_data->dma_rx_offset;
+> +               mmc_data->dma_rx_offset = of_data->dma_rx_offset;
 >         }
-> -
-> -       dma_priv->alignment_shift = 1; /* 2-byte alignment */
->         dma_priv->filter = shdma_chan_filter;
 >
-> +       mmc_data->alignment_shift = 1; /* 2-byte alignment */
-> +
->         /*
->          * All SDHI blocks support 2-byte and larger block sizes in 4-bit
->          * bus width mode.
+>         ret = tmio_mmc_host_probe(host, mmc_data);
 > diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-> index a5d30bf..9482abc 100644
+> index 9482abc..c9a8469 100644
 > --- a/drivers/mmc/host/tmio_mmc.h
 > +++ b/drivers/mmc/host/tmio_mmc.h
 > @@ -45,7 +45,6 @@ struct tmio_mmc_dma {
 >         void *chan_priv_rx;
 >         int slave_id_tx;
 >         int slave_id_rx;
-> -       int alignment_shift;
->         dma_addr_t dma_rx_offset;
+> -       dma_addr_t dma_rx_offset;
 >         bool (*filter)(struct dma_chan *chan, void *arg);
 >  };
+>
 > diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
-> index ee0131e..d2b02de 100644
+> index d2b02de..634b2700c 100644
 > --- a/drivers/mmc/host/tmio_mmc_dma.c
 > +++ b/drivers/mmc/host/tmio_mmc_dma.c
-> @@ -52,7 +52,7 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
->         dma_cookie_t cookie;
->         int ret, i;
->         bool aligned = true, multiple = true;
-> -       unsigned int align = (1 << host->dma->alignment_shift) - 1;
-> +       unsigned int align = (1 << host->pdata->alignment_shift) - 1;
->
->         for_each_sg(sg, sg_tmp, host->sg_len, i) {
->                 if (sg_tmp->offset & align)
-> @@ -128,7 +128,7 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
->         dma_cookie_t cookie;
->         int ret, i;
->         bool aligned = true, multiple = true;
-> -       unsigned int align = (1 << host->dma->alignment_shift) - 1;
-> +       unsigned int align = (1 << host->pdata->alignment_shift) - 1;
->
->         for_each_sg(sg, sg_tmp, host->sg_len, i) {
->                 if (sg_tmp->offset & align)
+> @@ -308,7 +308,7 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
+>                 if (host->dma->chan_priv_rx)
+>                         cfg.slave_id = host->dma->slave_id_rx;
+>                 cfg.direction = DMA_DEV_TO_MEM;
+> -               cfg.src_addr = cfg.dst_addr + host->dma->dma_rx_offset;
+> +               cfg.src_addr = cfg.dst_addr + host->pdata->dma_rx_offset;
+>                 cfg.src_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES;
+>                 cfg.dst_addr = 0;
+>                 ret = dmaengine_slave_config(host->chan_rx, &cfg);
 > diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-> index 7a5c279..28a12d1 100644
+> index 28a12d1..807ecfb 100644
 > --- a/include/linux/mfd/tmio.h
 > +++ b/include/linux/mfd/tmio.h
-> @@ -122,6 +122,7 @@ struct tmio_mmc_data {
->         unsigned long                   flags;
+> @@ -123,6 +123,7 @@ struct tmio_mmc_data {
 >         u32                             ocr_mask;       /* available voltages */
 >         unsigned int                    cd_gpio;
-> +       int                             alignment_shift;
+>         int                             alignment_shift;
+> +       dma_addr_t                      dma_rx_offset;
 >         void (*set_pwr)(struct platform_device *host, int state);
 >         void (*set_clk_div)(struct platform_device *host, int state);
 >  };
