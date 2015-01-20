@@ -1,76 +1,84 @@
-From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH 0/4] Add sd/emmc support for stih407 family silicon
-Date: Tue, 20 Jan 2015 15:32:40 +0000
-Message-ID: <1421767964-8798-1-git-send-email-peter.griffin@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f169.google.com ([209.85.212.169]:54009 "EHLO
-	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752954AbbATPcv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jan 2015 10:32:51 -0500
-Received: by mail-wi0-f169.google.com with SMTP id bs8so24957321wib.0
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Jan 2015 07:32:50 -0800 (PST)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 1/4] clk: st: STiH410: Fix pdiv and fdiv divisor when setting rate
+Date: Tue, 20 Jan 2015 15:32:41 +0000
+Message-ID: <1421767964-8798-2-git-send-email-peter.griffin@linaro.org>
+References: <1421767964-8798-1-git-send-email-peter.griffin@linaro.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1421767964-8798-1-git-send-email-peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peppe.cavallaro-qxv4g6HH51o@public.gmane.org, olivier.bideau-qxv4g6HH51o@public.gmane.org, gabriel.fernandez-qxv4g6HH51o@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, mturquette@linaro.org, sboyd@codeaurora.org, chris@printf.net, ulf.hansson@linaro.org
-Cc: peter.griffin@linaro.org, lee.jones@linaro.org, peppe.cavallaro@st.com, olivier.bideau@st.com, gabriel.fernandez@st.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 
-Hi,
+Debugging eMMC on upstream kernels it has been noticed that when the
+targetpack configures MMC0 clock to 200Mhz (required to switch to
+HS200) then everything works OK. However if the kernel sets the
+clock rate using clk_set_rate, then the eMMC card initialisation
+fails with timeouts. Lower clock speeds (the default being 50Mhz)
+work ok, but they we fail to get good eMMC transfer rates.
 
-This series adds sd/emmc support to the sdhci-st.c driver for stih407
-family silicon. The changes mainly involve congiguring some extra glue
-registers which configure the controller.
+Looking through the vendor kernel clock driver reveals Giuseppe
+had already fixed this issue, but the patch hasn't made its way
+upstream.
 
-This series also adds support for UHS modes for eMMC. To allow
-UHS HS200/SD104 modes to function correctly, due to the
-tight timing constriants and data tuning requirement, support
-for PVT independent delay management is also added. Two types
-of delay management are supported, static delay management and
-dynamic delay management (dynamic delay loop), this delay
-management is only available on eMMC pads on stih410 and later
-silicon.
+The issue is fixed by changing the logic to manage the pdiv and
+fdiv divisors used for setting the rate inside the flexgen driver code.
 
-This has been tested with stih410-b2120 on eMMC and sd, at various
-clock speeds. As part of this testing a bug was also found in the
-upstream flexgen clock set_rate implementation.
+Pdiv is mainly targeted for low freq results, while fdiv should be
+used for divs =< 64. The other way can lead to 'duty cycle'
+issues.
 
-    max-frequency = 200Mhz
-    /dev/mmcblk0p1:
-     Timing buffered disk reads: 270 MB in  3.02 seconds =  89.54 MB/sec
-    
-    max-frequency = 100Mhz
-    root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
-    /dev/mmcblk0p1:
-     Timing buffered disk reads: 210 MB in  3.00 seconds =  70.00 MB/sec
-    
-    max-frequency = 50Mhz
-    root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
-    /dev/mmcblk0p1:
-     Timing buffered disk reads: 118 MB in  3.00 seconds =  39.28 MB/sec
+I have changed the original patch to keep the original behaviour
+in cases where the div is >64 which matches the original comment
+and patch description more closely. Although no clocks appear to hit
+this case currently when booting an upstream kernel.
 
-It has also been tested on stih416-b2020 to ensure we have caused no
-regressions. Finally the dt documentation has been updated to reflect
-the changes in the driver code. Intrestingly it seems we are the first
-upstream platform to be using some of the uhs bindings such as
-sd-uhs-sdr104.
+Signed-off-by: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>
+---
+ drivers/clk/st/clk-flexgen.c | 19 +++++++++++++++----
+ 1 file changed, 15 insertions(+), 4 deletions(-)
 
-regards,
-
-Peter.
-
-Peter Griffin (4):
-  clk: st: STiH410: Fix pdiv and fdiv divisor when setting rate
-  sdhci-st: Add support for stih407 family silicon.
-  mmc: sdhci-st: Update ST SDHCI binding documentation.
-  ARM: STi: DT: STiH407: Add dt nodes for sdhci and emmc.
-
- Documentation/devicetree/bindings/mmc/sdhci-st.txt | 100 +++++-
- arch/arm/boot/dts/stih407-family.dtsi              |  30 ++
- arch/arm/boot/dts/stih410-b2120.dts                |  10 +
- arch/arm/boot/dts/stihxxx-b2120.dtsi               |   8 +
- drivers/clk/st/clk-flexgen.c                       |  19 +-
- drivers/mmc/host/sdhci-st.c                        | 351 ++++++++++++++++++++-
- 6 files changed, 496 insertions(+), 22 deletions(-)
-
+diff --git a/drivers/clk/st/clk-flexgen.c b/drivers/clk/st/clk-flexgen.c
+index 2282cef..3a484b3 100644
+--- a/drivers/clk/st/clk-flexgen.c
++++ b/drivers/clk/st/clk-flexgen.c
+@@ -138,16 +138,27 @@ static int flexgen_set_rate(struct clk_hw *hw, unsigned long rate,
+ 	struct flexgen *flexgen = to_flexgen(hw);
+ 	struct clk_hw *pdiv_hw = &flexgen->pdiv.hw;
+ 	struct clk_hw *fdiv_hw = &flexgen->fdiv.hw;
+-	unsigned long primary_div = 0;
++	unsigned long div = 0;
+ 	int ret = 0;
+ 
+ 	pdiv_hw->clk = hw->clk;
+ 	fdiv_hw->clk = hw->clk;
+ 
+-	primary_div = clk_best_div(parent_rate, rate);
++	div = clk_best_div(parent_rate, rate);
+ 
+-	clk_divider_ops.set_rate(fdiv_hw, parent_rate, parent_rate);
+-	ret = clk_divider_ops.set_rate(pdiv_hw, rate, rate * primary_div);
++	/*
++	* pdiv is mainly targeted for low freq results, while fdiv
++	* should be used for div <= 64. The other way round can
++	* lead to 'duty cycle' issues.
++	*/
++
++	if (div <= 64) {
++		clk_divider_ops.set_rate(pdiv_hw, parent_rate, parent_rate);
++		ret = clk_divider_ops.set_rate(fdiv_hw, rate, rate * div);
++	} else {
++		clk_divider_ops.set_rate(fdiv_hw, parent_rate, parent_rate);
++		ret = clk_divider_ops.set_rate(pdiv_hw, rate, rate * div);
++	}
+ 
+ 	return ret;
+ }
 -- 
 1.9.1
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
