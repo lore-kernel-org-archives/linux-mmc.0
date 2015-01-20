@@ -1,16 +1,16 @@
 From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH 02/17] mmc: tmio: tmio_mmc_host has .dma
-Date: Tue, 20 Jan 2015 09:37:59 +0000
-Message-ID: <20150120093759.GJ5767@x1>
+Subject: Re: [PATCH 01/17] mmc: tmio: add tmio_mmc_host_alloc/free()
+Date: Tue, 20 Jan 2015 09:38:42 +0000
+Message-ID: <20150120093842.GK5767@x1>
 References: <87twzvuvl1.wl%kuninori.morimoto.gx@renesas.com>
- <87r3uzuviy.wl%kuninori.morimoto.gx@renesas.com>
- <CAPDyKFqQ8+cDZjwgooDAVG++sBtg+58-hXHwpDNgbKDa9R7Ntg@mail.gmail.com>
+ <87siffuvj8.wl%kuninori.morimoto.gx@renesas.com>
+ <CAPDyKFpYQ5tHeWHiZMwS1zJpgrgP_qC8vbv3ExLkLTbn9X8MyQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFqQ8+cDZjwgooDAVG++sBtg+58-hXHwpDNgbKDa9R7Ntg@mail.gmail.com>
+In-Reply-To: <CAPDyKFpYQ5tHeWHiZMwS1zJpgrgP_qC8vbv3ExLkLTbn9X8MyQ@mail.gmail.com>
 Sender: linux-sh-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Arnd Bergmann <arnd@arndb.de>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Chris Ball <cjb@laptop.org>, Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
@@ -24,215 +24,243 @@ On Tue, 20 Jan 2015, Ulf Hansson wrote:
 > <kuninori.morimoto.gx@renesas.com> wrote:
 > > From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 > >
-> > Current .dma is implemented under tmio_mmc_data.
-> > It goes to tmio_mmc_host by this patch.
+> > Current tmio_mmc driver is using tmio_mmc_data for driver/platform
+> > specific data/callback, and it is needed for tmio_mmc_host_probe()
+> > function. Because of this style, include/linux/mfd/tmio.h header ha=
+s
+> > tmio driver/framework specific data which is not needed from platfo=
+rm.
+> >
+> > This patch adds new tmio_mmc_host_alloc/free() as cleanup preparati=
+on.
+> > tmio driver specific data/callback will be implemented in tmio_mmc_=
+host,
+> > and platform specific data/callback will be implemented in tmio_mmc=
+_data
+> > in this cleanup.
 > >
 > > Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 > > ---
-> >  drivers/mmc/host/sh_mobile_sdhi.c |    4 ++--
-> >  drivers/mmc/host/tmio_mmc.h       |   11 +++++++++++
-> >  drivers/mmc/host/tmio_mmc_dma.c   |   24 +++++++++++-------------
-> >  include/linux/mfd/tmio.h          |   11 -----------
+> >  drivers/mmc/host/sh_mobile_sdhi.c |   14 +++++++++---
+> >  drivers/mmc/host/tmio_mmc.c       |   10 +++++++--
+> >  drivers/mmc/host/tmio_mmc.h       |    5 +++--
+> >  drivers/mmc/host/tmio_mmc_pio.c   |   43 +++++++++++++++++++++++--=
+------------
+> >  include/linux/mfd/tmio.h          |    1 -
 
 Acked-by: Lee Jones <lee.jones@linaro.org>
 
-> >  4 files changed, 24 insertions(+), 26 deletions(-)
+> >  5 files changed, 49 insertions(+), 24 deletions(-)
 > >
 > > diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/s=
 h_mobile_sdhi.c
-> > index cf062c4..288e78d 100644
+> > index 00c8ebd..cf062c4 100644
 > > --- a/drivers/mmc/host/sh_mobile_sdhi.c
 > > +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> > @@ -213,6 +213,8 @@ static int sh_mobile_sdhi_probe(struct platform=
-_device *pdev)
-> >                 goto eprobe;
+> > @@ -113,7 +113,7 @@ static int sh_mobile_sdhi_wait_idle(struct tmio=
+_mmc_host *host)
+> >                 udelay(1);
+> >
+> >         if (!timeout) {
+> > -               dev_warn(host->pdata->dev, "timeout waiting for SD =
+bus idle\n");
+> > +               dev_warn(&host->pdev->dev, "timeout waiting for SD =
+bus idle\n");
+> >                 return -EBUSY;
 > >         }
 > >
-> > +       host->dma               =3D dma_priv;
+> > @@ -207,6 +207,12 @@ static int sh_mobile_sdhi_probe(struct platfor=
+m_device *pdev)
+> >                 goto eclkget;
+> >         }
+> >
+> > +       host =3D tmio_mmc_host_alloc(pdev);
+> > +       if (!host) {
+> > +               ret =3D -ENOMEM;
+> > +               goto eprobe;
+> > +       }
 > > +
 > >         mmc_data->clk_enable =3D sh_mobile_sdhi_clk_enable;
 > >         mmc_data->clk_disable =3D sh_mobile_sdhi_clk_disable;
 > >         mmc_data->capabilities =3D MMC_CAP_MMC_HIGHSPEED;
-> > @@ -241,8 +243,6 @@ static int sh_mobile_sdhi_probe(struct platform=
+> > @@ -274,9 +280,9 @@ static int sh_mobile_sdhi_probe(struct platform=
 _device *pdev)
-> >         dma_priv->alignment_shift =3D 1; /* 2-byte alignment */
-> >         dma_priv->filter =3D shdma_chan_filter;
+> >         /* SD control register space size is 0x100, 0x200 for bus_s=
+hift=3D1 */
+> >         mmc_data->bus_shift =3D resource_size(res) >> 9;
 > >
-> > -       mmc_data->dma =3D dma_priv;
-> > -
+> > -       ret =3D tmio_mmc_host_probe(&host, pdev, mmc_data);
+> > +       ret =3D tmio_mmc_host_probe(host, mmc_data);
+> >         if (ret < 0)
+> > -               goto eprobe;
+> > +               goto efree;
+> >
 > >         /*
-> >          * All SDHI blocks support 2-byte and larger block sizes in=
- 4-bit
-> >          * bus width mode.
+> >          * FIXME:
+> > @@ -351,6 +357,8 @@ static int sh_mobile_sdhi_probe(struct platform=
+_device *pdev)
+> >
+> >  eirq:
+> >         tmio_mmc_host_remove(host);
+> > +efree:
+> > +       tmio_mmc_host_free(host);
+> >  eprobe:
+> >  eclkget:
+> >         if (p && p->cleanup)
+> > diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mm=
+c.c
+> > index 2616fdf..f47ae08 100644
+> > --- a/drivers/mmc/host/tmio_mmc.c
+> > +++ b/drivers/mmc/host/tmio_mmc.c
+> > @@ -92,10 +92,14 @@ static int tmio_mmc_probe(struct platform_devic=
+e *pdev)
+> >         pdata->bus_shift =3D resource_size(res) >> 10;
+> >         pdata->flags |=3D TMIO_MMC_HAVE_HIGH_REG;
+> >
+> > -       ret =3D tmio_mmc_host_probe(&host, pdev, pdata);
+> > -       if (ret)
+> > +       host =3D tmio_mmc_host_alloc(pdev);
+> > +       if (!host)
+> >                 goto cell_disable;
+> >
+> > +       ret =3D tmio_mmc_host_probe(host, pdata);
+> > +       if (ret)
+> > +               goto host_free;
+> > +
+> >         ret =3D request_irq(irq, tmio_mmc_irq, IRQF_TRIGGER_FALLING=
+,
+> >                                 dev_name(&pdev->dev), host);
+> >         if (ret)
+> > @@ -108,6 +112,8 @@ static int tmio_mmc_probe(struct platform_devic=
+e *pdev)
+> >
+> >  host_remove:
+> >         tmio_mmc_host_remove(host);
+> > +host_free:
+> > +       tmio_mmc_host_free(host);
+> >  cell_disable:
+> >         if (cell->disable)
+> >                 cell->disable(pdev);
 > > diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mm=
 c.h
-> > index 60d6747..49a2559 100644
+> > index a34ecbe..60d6747 100644
 > > --- a/drivers/mmc/host/tmio_mmc.h
 > > +++ b/drivers/mmc/host/tmio_mmc.h
-> > @@ -40,6 +40,16 @@
+> > @@ -85,8 +85,9 @@ struct tmio_mmc_host {
+> >         bool                    sdio_irq_enabled;
+> >  };
 > >
-> >  struct tmio_mmc_data;
+> > -int tmio_mmc_host_probe(struct tmio_mmc_host **host,
+> > -                       struct platform_device *pdev,
+> > +struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *=
+pdev);
+> > +void tmio_mmc_host_free(struct tmio_mmc_host *host);
+> > +int tmio_mmc_host_probe(struct tmio_mmc_host *host,
+> >                         struct tmio_mmc_data *pdata);
+> >  void tmio_mmc_host_remove(struct tmio_mmc_host *host);
+> >  void tmio_mmc_do_data_irq(struct tmio_mmc_host *host);
+> > diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmi=
+o_mmc_pio.c
+> > index 250bf8c..1a9a13f 100644
+> > --- a/drivers/mmc/host/tmio_mmc_pio.c
+> > +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> > @@ -1054,12 +1054,35 @@ static void tmio_mmc_of_parse(struct platfo=
+rm_device *pdev,
+> >                 pdata->flags |=3D TMIO_MMC_WRPROTECT_DISABLE;
+> >  }
 > >
-> > +struct tmio_mmc_dma {
-> > +       void *chan_priv_tx;
-> > +       void *chan_priv_rx;
-> > +       int slave_id_tx;
-> > +       int slave_id_rx;
-> > +       int alignment_shift;
-> > +       dma_addr_t dma_rx_offset;
-> > +       bool (*filter)(struct dma_chan *chan, void *arg);
-> > +};
-> > +
-> >  struct tmio_mmc_host {
-> >         void __iomem *ctl;
-> >         struct mmc_command      *cmd;
-> > @@ -59,6 +69,7 @@ struct tmio_mmc_host {
-> >
-> >         struct platform_device *pdev;
-> >         struct tmio_mmc_data *pdata;
-> > +       struct tmio_mmc_dma     *dma;
-> >
-> >         /* DMA support */
-> >         bool                    force_pio;
-> > diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmi=
-o_mmc_dma.c
-> > index 7d07738..6c214d6 100644
-> > --- a/drivers/mmc/host/tmio_mmc_dma.c
-> > +++ b/drivers/mmc/host/tmio_mmc_dma.c
-> > @@ -49,11 +49,10 @@ static void tmio_mmc_start_dma_rx(struct tmio_m=
-mc_host *host)
-> >         struct scatterlist *sg =3D host->sg_ptr, *sg_tmp;
-> >         struct dma_async_tx_descriptor *desc =3D NULL;
-> >         struct dma_chan *chan =3D host->chan_rx;
-> > -       struct tmio_mmc_data *pdata =3D host->pdata;
-> >         dma_cookie_t cookie;
-> >         int ret, i;
-> >         bool aligned =3D true, multiple =3D true;
-> > -       unsigned int align =3D (1 << pdata->dma->alignment_shift) -=
- 1;
-> > +       unsigned int align =3D (1 << host->dma->alignment_shift) - =
-1;
-> >
-> >         for_each_sg(sg, sg_tmp, host->sg_len, i) {
-> >                 if (sg_tmp->offset & align)
-> > @@ -126,11 +125,10 @@ static void tmio_mmc_start_dma_tx(struct tmio=
-_mmc_host *host)
-> >         struct scatterlist *sg =3D host->sg_ptr, *sg_tmp;
-> >         struct dma_async_tx_descriptor *desc =3D NULL;
-> >         struct dma_chan *chan =3D host->chan_tx;
-> > -       struct tmio_mmc_data *pdata =3D host->pdata;
-> >         dma_cookie_t cookie;
-> >         int ret, i;
-> >         bool aligned =3D true, multiple =3D true;
-> > -       unsigned int align =3D (1 << pdata->dma->alignment_shift) -=
- 1;
-> > +       unsigned int align =3D (1 << host->dma->alignment_shift) - =
-1;
-> >
-> >         for_each_sg(sg, sg_tmp, host->sg_len, i) {
-> >                 if (sg_tmp->offset & align)
-> > @@ -262,8 +260,8 @@ out:
-> >  void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_=
-mmc_data *pdata)
+> > -int tmio_mmc_host_probe(struct tmio_mmc_host **host,
+> > -                                 struct platform_device *pdev,
+> > -                                 struct tmio_mmc_data *pdata)
+> > +struct tmio_mmc_host*
+> > +tmio_mmc_host_alloc(struct platform_device *pdev)
 > >  {
-> >         /* We can only either use DMA for both Tx and Rx or not use=
- it at all */
-> > -       if (!pdata->dma || (!host->pdev->dev.of_node &&
-> > -               (!pdata->dma->chan_priv_tx || !pdata->dma->chan_pri=
-v_rx)))
-> > +       if (!host->dma || (!host->pdev->dev.of_node &&
-> > +               (!host->dma->chan_priv_tx || !host->dma->chan_priv_=
-rx)))
-> >                 return;
+> > -       struct tmio_mmc_host *_host;
+> > +       struct tmio_mmc_host *host;
+> >         struct mmc_host *mmc;
+> > +
+> > +       mmc =3D mmc_alloc_host(sizeof(struct tmio_mmc_host), &pdev-=
+>dev);
+> > +       if (!mmc)
+> > +               return NULL;
+> > +
+> > +       host =3D mmc_priv(mmc);
+> > +       host->mmc =3D mmc;
+> > +       host->pdev =3D pdev;
+> > +
+> > +       return host;
+> > +}
+> > +
+> > +void tmio_mmc_host_free(struct tmio_mmc_host *host)
+> > +{
+> > +       mmc_free_host(host->mmc);
+> > +
+> > +       host->mmc =3D NULL;
+> > +}
+> > +
+> > +int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+> > +                       struct tmio_mmc_data *pdata)
+> > +{
+> > +       struct platform_device *pdev =3D _host->pdev;
+> > +       struct mmc_host *mmc =3D _host->mmc;
+> >         struct resource *res_ctl;
+> >         int ret;
+> >         u32 irq_mask =3D TMIO_MASK_CMD;
+> > @@ -1073,19 +1096,11 @@ int tmio_mmc_host_probe(struct tmio_mmc_hos=
+t **host,
+> >         if (!res_ctl)
+> >                 return -EINVAL;
 > >
-> >         if (!host->chan_tx && !host->chan_rx) {
-> > @@ -280,7 +278,7 @@ void tmio_mmc_request_dma(struct tmio_mmc_host =
-*host, struct tmio_mmc_data *pdat
-> >                 dma_cap_set(DMA_SLAVE, mask);
+> > -       mmc =3D mmc_alloc_host(sizeof(struct tmio_mmc_host), &pdev-=
+>dev);
+> > -       if (!mmc)
+> > -               return -ENOMEM;
+> > -
+> >         ret =3D mmc_of_parse(mmc);
+> >         if (ret < 0)
+> >                 goto host_free;
 > >
-> >                 host->chan_tx =3D dma_request_slave_channel_compat(=
-mask,
-> > -                                       pdata->dma->filter, pdata->=
-dma->chan_priv_tx,
-> > +                                       host->dma->filter, host->dm=
-a->chan_priv_tx,
-> >                                         &host->pdev->dev, "tx");
-> >                 dev_dbg(&host->pdev->dev, "%s: TX: got channel %p\n=
-", __func__,
-> >                         host->chan_tx);
-> > @@ -288,8 +286,8 @@ void tmio_mmc_request_dma(struct tmio_mmc_host =
-*host, struct tmio_mmc_data *pdat
-> >                 if (!host->chan_tx)
-> >                         return;
+> > -       pdata->dev =3D &pdev->dev;
+> > -       _host =3D mmc_priv(mmc);
+> >         _host->pdata =3D pdata;
+> > -       _host->mmc =3D mmc;
+> > -       _host->pdev =3D pdev;
+> >         platform_set_drvdata(pdev, mmc);
 > >
-> > -               if (pdata->dma->chan_priv_tx)
-> > -                       cfg.slave_id =3D pdata->dma->slave_id_tx;
-> > +               if (host->dma->chan_priv_tx)
-> > +                       cfg.slave_id =3D host->dma->slave_id_tx;
-> >                 cfg.direction =3D DMA_MEM_TO_DEV;
-> >                 cfg.dst_addr =3D res->start + (CTL_SD_DATA_PORT << =
-host->pdata->bus_shift);
-> >                 cfg.dst_addr_width =3D DMA_SLAVE_BUSWIDTH_2_BYTES;
-> > @@ -299,7 +297,7 @@ void tmio_mmc_request_dma(struct tmio_mmc_host =
-*host, struct tmio_mmc_data *pdat
-> >                         goto ecfgtx;
+> >         _host->set_pwr =3D pdata->set_pwr;
+> > @@ -1192,12 +1207,9 @@ int tmio_mmc_host_probe(struct tmio_mmc_host=
+ **host,
+> >                 mmc_gpiod_request_cd_irq(mmc);
+> >         }
 > >
-> >                 host->chan_rx =3D dma_request_slave_channel_compat(=
-mask,
-> > -                                       pdata->dma->filter, pdata->=
-dma->chan_priv_rx,
-> > +                                       host->dma->filter, host->dm=
-a->chan_priv_rx,
-> >                                         &host->pdev->dev, "rx");
-> >                 dev_dbg(&host->pdev->dev, "%s: RX: got channel %p\n=
-", __func__,
-> >                         host->chan_rx);
-> > @@ -307,10 +305,10 @@ void tmio_mmc_request_dma(struct tmio_mmc_hos=
-t *host, struct tmio_mmc_data *pdat
-> >                 if (!host->chan_rx)
-> >                         goto ereqrx;
+> > -       *host =3D _host;
+> > -
+> >         return 0;
 > >
-> > -               if (pdata->dma->chan_priv_rx)
-> > -                       cfg.slave_id =3D pdata->dma->slave_id_rx;
-> > +               if (host->dma->chan_priv_rx)
-> > +                       cfg.slave_id =3D host->dma->slave_id_rx;
-> >                 cfg.direction =3D DMA_DEV_TO_MEM;
-> > -               cfg.src_addr =3D cfg.dst_addr + pdata->dma->dma_rx_=
-offset;
-> > +               cfg.src_addr =3D cfg.dst_addr + host->dma->dma_rx_o=
-ffset;
-> >                 cfg.src_addr_width =3D DMA_SLAVE_BUSWIDTH_2_BYTES;
-> >                 cfg.dst_addr =3D 0;
-> >                 ret =3D dmaengine_slave_config(host->chan_rx, &cfg)=
-;
+> >  host_free:
+> > -       mmc_free_host(mmc);
+> >
+> >         return ret;
+> >  }
+> > @@ -1222,7 +1234,6 @@ void tmio_mmc_host_remove(struct tmio_mmc_hos=
+t *host)
+> >         pm_runtime_disable(&pdev->dev);
+> >
+> >         iounmap(host->ctl);
+> > -       mmc_free_host(mmc);
+> >  }
+> >  EXPORT_SYMBOL(tmio_mmc_host_remove);
+> >
 > > diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-> > index c7d9af0..8d708c7 100644
+> > index 5738817..c7d9af0 100644
 > > --- a/include/linux/mfd/tmio.h
 > > +++ b/include/linux/mfd/tmio.h
-> > @@ -112,16 +112,6 @@ void tmio_core_mmc_clk_div(void __iomem *cnf, =
-int shift, int state);
-> >
-> >  struct dma_chan;
-> >
-> > -struct tmio_mmc_dma {
-> > -       void *chan_priv_tx;
-> > -       void *chan_priv_rx;
-> > -       int slave_id_tx;
-> > -       int slave_id_rx;
-> > -       int alignment_shift;
-> > -       dma_addr_t dma_rx_offset;
-> > -       bool (*filter)(struct dma_chan *chan, void *arg);
-> > -};
-> > -
-> >  struct tmio_mmc_host;
-> >
-> >  /*
-> > @@ -134,7 +124,6 @@ struct tmio_mmc_data {
-> >         unsigned long                   flags;
+> > @@ -135,7 +135,6 @@ struct tmio_mmc_data {
 > >         unsigned long                   bus_shift;
 > >         u32                             ocr_mask;       /* availabl=
 e voltages */
-> > -       struct tmio_mmc_dma             *dma;
+> >         struct tmio_mmc_dma             *dma;
+> > -       struct device                   *dev;
 > >         unsigned int                    cd_gpio;
 > >         void (*set_pwr)(struct platform_device *host, int state);
 > >         void (*set_clk_div)(struct platform_device *host, int state=
