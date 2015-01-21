@@ -1,76 +1,59 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH next] mmc: sdhci-pxav3: Remove checks for optional core
- clock in error/remove path
-Date: Wed, 21 Jan 2015 14:21:21 +0100
-Message-ID: <CAPDyKFo=PDt4zsJ+odVkmCyws7HttAcUW4p6NbSqoR3S-c6iRA@mail.gmail.com>
-References: <1420444759-3812-1-git-send-email-jszhang@marvell.com>
+From: Tomeu Vizoso <tomeu.vizoso-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>
+Subject: Re: [PATCH v2 08/11] mmc: pwrseq_simple: Add support for a delay
+Date: Wed, 21 Jan 2015 14:54:06 +0100
+Message-ID: <54BFAF7E.1030703@collabora.com>
+References: <1421338359-27467-1-git-send-email-tomeu.vizoso@collabora.com>	<1421338359-27467-9-git-send-email-tomeu.vizoso@collabora.com>	<54B7F9FB.7030100@wwwdotorg.org> <CAPDyKFoO6evBoAbEE30XiZg51KsM-sD4viFMvqaDwGoHeVL-6w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f175.google.com ([209.85.216.175]:46383 "EHLO
-	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750754AbbAUNVV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jan 2015 08:21:21 -0500
-Received: by mail-qc0-f175.google.com with SMTP id c9so13377794qcz.6
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2015 05:21:21 -0800 (PST)
-In-Reply-To: <1420444759-3812-1-git-send-email-jszhang@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFoO6evBoAbEE30XiZg51KsM-sD4viFMvqaDwGoHeVL-6w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
+Cc: "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Javier Martinez Canillas <javier.martinez-ZGY8ohtN/8pPYcu2f3hruQ@public.gmane.org>, Dylan Reid <dgreid-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Simon Glass <sjg-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>
-Cc: Chris Ball <chris@printf.net>, Peter Griffin <peter.griffin@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 5 January 2015 at 08:59, Jisheng Zhang <jszhang@marvell.com> wrote:
-> Commit 63589e92c2d9 ("clk: Ignore error and NULL pointers passed to
-> clk_{unprepare, disable}()") allows NULL or error pointer to be passed
-> unconditionally.
->
-> This patch is to simplify probe error and remove code paths.
->
-> However, we reserve the core clock checks in runtime suspend/resume code
-> because we want a little smaller latency.
->
-> This patch can be applied after the sdhci-pxav3 unbalanced pm/clock issues
-> patches being merged.
-> http://lists.infradead.org/pipermail/linux-arm-kernel/2015-January/313103.html
+On 01/21/2015 11:44 AM, Ulf Hansson wrote:
+> On 15 January 2015 at 18:33, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> wrote:
+>> On 01/15/2015 09:12 AM, Tomeu Vizoso wrote:
+>>>
+>>> Signed-off-by: Tomeu Vizoso <tomeu.vizoso-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>
+>>
+>>
+>> Ah, having read the explanation in the next patch, I think ...
+>>
+>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc,pwrseq-simple.txt
+>>> b/Documentation/devicetree/bindings/mmc/mmc,pwrseq-simple.txt
+>>
+>>
+>>> +- delay : delay to wait after driving the reset gpio active [ms].
+>>
+>>
+>> ... delay is the wrong name. reset-pulse-width or reset-pulse-length would
+>> be better. delay sounds like a delay after resetting the device before it
+>> can be accessed.
+> 
+> I agree with Stephen's proposal.
 
-I remove these three lines from the commit msg.
+Cool.
 
->
-> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+> This patch needs to be rebased and retested on latest version the
+> mmc-pwrseq patches.
 
-Thanks! Applied for next.
+Sure.
 
-Kind regards
-Uffe
+> Moreover, if you think the patchset which $subject
+> patch is a part of is material for 3.20, I will need to share an
+> immutable branch with the mmc-pwrseq patches for ARM SOC to pull in,
+> tell me if you need that.
 
-> ---
->  drivers/mmc/host/sdhci-pxav3.c | 6 ++----
->  1 file changed, 2 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> index 4de39fb..63967b8 100644
-> --- a/drivers/mmc/host/sdhci-pxav3.c
-> +++ b/drivers/mmc/host/sdhci-pxav3.c
-> @@ -398,8 +398,7 @@ err_of_parse:
->  err_cd_req:
->  err_mbus_win:
->         clk_disable_unprepare(pxa->clk_io);
-> -       if (!IS_ERR(pxa->clk_core))
-> -               clk_disable_unprepare(pxa->clk_core);
-> +       clk_disable_unprepare(pxa->clk_core);
->  err_clk_get:
->         sdhci_pltfm_free(pdev);
->         return ret;
-> @@ -418,8 +417,7 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
->         sdhci_remove_host(host, 1);
->
->         clk_disable_unprepare(pxa->clk_io);
-> -       if (!IS_ERR(pxa->clk_core))
-> -               clk_disable_unprepare(pxa->clk_core);
-> +       clk_disable_unprepare(pxa->clk_core);
->
->         sdhci_pltfm_free(pdev);
->
-> --
-> 2.1.4
->
+I don't think this will make 3.20 as I have other series with higher
+priority and there's quite some work left to do on this one.
+
+Regards,
+
+Tomeu
+
+> Kind regards
+> Uffe
+> 
