@@ -1,52 +1,88 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: fix format string warning
-Date: Wed, 21 Jan 2015 09:44:22 +0100
-Message-ID: <CAPDyKFp+=nS-vWuRpiVjxF49Dz1WZSnwOVMgin0x_dr5etswJQ@mail.gmail.com>
-References: <20150120163335.GA5016@ubuntu>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Subject: [PATCH 0/7] Fixes and improvements for SDHCI on Armada 38x
+Date: Wed, 21 Jan 2015 10:31:59 +0100
+Message-ID: <1421832726-21656-1-git-send-email-gregory.clement@free-electrons.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f182.google.com ([209.85.216.182]:47755 "EHLO
-	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750888AbbAUIoX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jan 2015 03:44:23 -0500
-Received: by mail-qc0-f182.google.com with SMTP id l6so30839855qcy.13
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2015 00:44:23 -0800 (PST)
-In-Reply-To: <20150120163335.GA5016@ubuntu>
+Received: from down.free-electrons.com ([37.187.137.238]:34943 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751368AbbAUJc0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jan 2015 04:32:26 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Asaf Vertz <asaf.vertz@tandemg.com>
-Cc: Chris Ball <chris@printf.net>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Ben Hutchings <ben@decadent.org.uk>, Joe Perches <joe@perches.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Maxime Ripard <maxime.ripard@free-electrons.com>, Boris BREZILLON <boris.brezillon@free-electrons.com>, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org
 
-On 20 January 2015 at 17:33, Asaf Vertz <asaf.vertz@tandemg.com> wrote:
-> Fixed the following warning (reported by cppcheck):
-> [drivers/mmc/card/block.c:2149]: (warning) %d in format string (no. 1)
-> requires 'int' but the argument type is 'unsigned int'.
->
-> Signed-off-by: Asaf Vertz <asaf.vertz@tandemg.com>
+Hi,
 
-Thanks! Applied for next.
+this series brings fixes and improvements for the SDHCI controller of
+the Armada 38x SoCs.
 
-Kind regards
-Uffe
+The first two patches are fixes and should be also applied on the
+stable branch (I added stable in copy for this).
 
-> ---
->  drivers/mmc/card/block.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 4409d79..8e1a60e 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -2147,7 +2147,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->          */
->
->         snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
-> -                "mmcblk%d%s", md->name_idx, subname ? subname : "");
-> +                "mmcblk%u%s", md->name_idx, subname ? subname : "");
->
->         if (mmc_card_mmc(card))
->                 blk_queue_logical_block_size(md->queue.queue,
-> --
-> 1.7.0.4
->
+The first one removes the SDR50 and DDR50 mode timing from the
+capabilities of the controller because the current implementation
+doesn't support it.
+
+The second one fix controller's caps according to the limitation of
+the hardware.
+
+The third one extends the Device Tree binding of the Armada 38x. It
+allows using the SDIO3 configuration register.
+
+The forth patch adds the support of this new register in the
+driver. Thanks to this one, specific clock adjustments can be done in
+order to support the SDR50 and DDR50 modes timing.
+
+The fifth patch is device tree clean-up.
+
+The sixth patch update the SDHCI node on Armada 38x in order to use
+the new register and then to be able to support the SDR50 and DDR50
+modes timing.
+
+Finally, the seventh patch add the description of SDHCI for the Armada
+388 RD board which was missing.
+
+Patches 1 to 4 should be merged through the mmc tree and patches 5 to
+7 should be merged through mvebu and then arm-soc.
+
+Patch 4 depend on patch 2.
+Patch 2 depend on patch 1.
+And patch 1 depend on commit aa8165f91442 "mmc: sdhci-pxav3: do the
+mbus window configuration after enabling clocks" which have been
+merged.
+
+But as all this patch should be merged through the same tree it would
+not be a problem
+
+The patches 5 to 7 depend on the patches already merged in mvebu.
+
+As they are fixes, patches 1 and 2 should be merged in 3.18-rc or at
+least in 3.19 and then they will be part of 3.18.1. For the other
+patches it would be nice if they could be part of 3.19.
+
+Thanks,
+
+Gregory
+
+Gregory CLEMENT (7):
+  mmc: sdhci-pxav3: Fix SDR50 and DDR50 capabilities for the Armada 38x
+    flavor
+  mmc: sdhci-pxav3: Fix Armada 38x controller's caps according to
+    erratum ERR-7878951
+  mmc: sdhci-pxav3: Extend binding with SDIO3 conf reg for the Armada
+    38x
+  mmc: sdhci-pxav3: Modify clock settings for the SDR50 and DDR50 modes
+  ARM: mvebu: Use macros for interrupt flags on Armada 38x sdhci node
+  ARM: mvebu: Update the SDHCI node on Armada 38x
+  ARM: mvebu: Add Device Tree description of SDHCI for Armada 388 RD
+
+ .../devicetree/bindings/mmc/sdhci-pxa.txt          | 15 ++--
+ arch/arm/boot/dts/armada-388-rd.dts                | 10 +++
+ arch/arm/boot/dts/armada-38x.dtsi                  |  7 +-
+ drivers/mmc/host/sdhci-pxav3.c                     | 79 ++++++++++++++++++++++
+ 4 files changed, 105 insertions(+), 6 deletions(-)
+
+-- 
+1.9.1
+
