@@ -1,49 +1,76 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] mmc: rtsx: add check before sending request
-Date: Wed, 21 Jan 2015 13:59:46 +0100
-Message-ID: <CAPDyKFqH3HLccQhiLC9PSZLf1ZfbBnmtSUt-W2J7QO=Fw4JiRw@mail.gmail.com>
-References: <cover.1421204431.git.micky_ching@realsil.com.cn>
+Subject: Re: [PATCH next] mmc: sdhci-pxav3: Remove checks for optional core
+ clock in error/remove path
+Date: Wed, 21 Jan 2015 14:21:21 +0100
+Message-ID: <CAPDyKFo=PDt4zsJ+odVkmCyws7HttAcUW4p6NbSqoR3S-c6iRA@mail.gmail.com>
+References: <1420444759-3812-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f178.google.com ([209.85.216.178]:52493 "EHLO
-	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752382AbbAUM7r (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jan 2015 07:59:47 -0500
-Received: by mail-qc0-f178.google.com with SMTP id b13so13331814qcw.9
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2015 04:59:46 -0800 (PST)
-In-Reply-To: <cover.1421204431.git.micky_ching@realsil.com.cn>
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:46383 "EHLO
+	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750754AbbAUNVV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jan 2015 08:21:21 -0500
+Received: by mail-qc0-f175.google.com with SMTP id c9so13377794qcz.6
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2015 05:21:21 -0800 (PST)
+In-Reply-To: <1420444759-3812-1-git-send-email-jszhang@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: micky <micky_ching@realsil.com.cn>
-Cc: Chris Ball <chris@printf.net>, Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, "driverdev-devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Roger <rogerable@realtek.com>, Wei WANG <wei_wang@realsil.com.cn>
+To: Jisheng Zhang <jszhang@marvell.com>
+Cc: Chris Ball <chris@printf.net>, Peter Griffin <peter.griffin@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 14 January 2015 at 04:09,  <micky_ching@realsil.com.cn> wrote:
-> From: Micky Ching <micky_ching@realsil.com.cn>
+On 5 January 2015 at 08:59, Jisheng Zhang <jszhang@marvell.com> wrote:
+> Commit 63589e92c2d9 ("clk: Ignore error and NULL pointers passed to
+> clk_{unprepare, disable}()") allows NULL or error pointer to be passed
+> unconditionally.
 >
-> Add check before sending request can make request return faster.
-> - finish request if no card exist
->   This can make request finish faster, especial for some sdio card,
->   when card removed, there still a lot of command pending,
->   if we check card exist and stop request, the card will disappear
->   faster in user space.
+> This patch is to simplify probe error and remove code paths.
 >
-> - check sg_count before long data xfer
->   modify sg_count type unsigned -> int, because dma_map_sg() return
->   int, and this value can be negative to indicate some error occurs.
+> However, we reserve the core clock checks in runtime suspend/resume code
+> because we want a little smaller latency.
 >
-> Micky Ching (2):
->   mmc: rtsx: finish request if no card exist
->   mmc: rtsx: check sg_count before long data xfer
+> This patch can be applied after the sdhci-pxav3 unbalanced pm/clock issues
+> patches being merged.
+> http://lists.infradead.org/pipermail/linux-arm-kernel/2015-January/313103.html
+
+I remove these three lines from the commit msg.
+
 >
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 20 ++++++++++++++++----
->  1 file changed, 16 insertions(+), 4 deletions(-)
->
-> --
-> 1.9.1
->
+> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
 
 Thanks! Applied for next.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-pxav3.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+> index 4de39fb..63967b8 100644
+> --- a/drivers/mmc/host/sdhci-pxav3.c
+> +++ b/drivers/mmc/host/sdhci-pxav3.c
+> @@ -398,8 +398,7 @@ err_of_parse:
+>  err_cd_req:
+>  err_mbus_win:
+>         clk_disable_unprepare(pxa->clk_io);
+> -       if (!IS_ERR(pxa->clk_core))
+> -               clk_disable_unprepare(pxa->clk_core);
+> +       clk_disable_unprepare(pxa->clk_core);
+>  err_clk_get:
+>         sdhci_pltfm_free(pdev);
+>         return ret;
+> @@ -418,8 +417,7 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
+>         sdhci_remove_host(host, 1);
+>
+>         clk_disable_unprepare(pxa->clk_io);
+> -       if (!IS_ERR(pxa->clk_core))
+> -               clk_disable_unprepare(pxa->clk_core);
+> +       clk_disable_unprepare(pxa->clk_core);
+>
+>         sdhci_pltfm_free(pdev);
+>
+> --
+> 2.1.4
+>
