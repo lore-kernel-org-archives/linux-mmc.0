@@ -1,127 +1,68 @@
-From: Alim Akhtar <alim.akhtar@gmail.com>
-Subject: Re: [PATCH v4 2/2] ARM: dts: Add HS400 support for exynos5420 and exynos5800
-Date: Wed, 21 Jan 2015 19:42:29 +0530
-Message-ID: <CAGOxZ5186+9U-6eri6OSGw9awsmr0EPP-gdhu-__oCWP1Oyyxg@mail.gmail.com>
-References: <1421231446-4776-1-git-send-email-alim.akhtar@samsung.com>
- <1421231446-4776-3-git-send-email-alim.akhtar@samsung.com> <54BEDE9C.5060501@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 08/11] mmc: pwrseq_simple: Add support for a delay
+Date: Wed, 21 Jan 2015 15:15:09 +0100
+Message-ID: <CAPDyKFoYj3xBoYsn87mxjoqDDnCtopAugX5JbzYritxWn-7XaA@mail.gmail.com>
+References: <1421338359-27467-1-git-send-email-tomeu.vizoso@collabora.com>
+	<1421338359-27467-9-git-send-email-tomeu.vizoso@collabora.com>
+	<54B7F9FB.7030100@wwwdotorg.org>
+	<CAPDyKFoO6evBoAbEE30XiZg51KsM-sD4viFMvqaDwGoHeVL-6w@mail.gmail.com>
+	<54BFAF7E.1030703@collabora.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <54BEDE9C.5060501@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Alim Akhtar <alim.akhtar@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Douglas Anderson <dianders@chromium.org>, kgene <kgene@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Abhilash Kesavan <a.kesavan@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qa0-f47.google.com ([209.85.216.47]:61629 "EHLO
+	mail-qa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753482AbbAUOPK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jan 2015 09:15:10 -0500
+Received: by mail-qa0-f47.google.com with SMTP id n8so33120207qaq.6
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2015 06:15:09 -0800 (PST)
+In-Reply-To: <54BFAF7E.1030703@collabora.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tomeu Vizoso <tomeu.vizoso@collabora.com>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Dylan Reid <dgreid@chromium.org>, Simon Glass <sjg@chromium.org>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Chris Ball <chris@printf.net>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Jaehoon
-
-On Wed, Jan 21, 2015 at 4:32 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Hi,
+On 21 January 2015 at 14:54, Tomeu Vizoso <tomeu.vizoso@collabora.com> wrote:
+> On 01/21/2015 11:44 AM, Ulf Hansson wrote:
+>> On 15 January 2015 at 18:33, Stephen Warren <swarren@wwwdotorg.org> wrote:
+>>> On 01/15/2015 09:12 AM, Tomeu Vizoso wrote:
+>>>>
+>>>> Signed-off-by: Tomeu Vizoso <tomeu.vizoso@collabora.com>
+>>>
+>>>
+>>> Ah, having read the explanation in the next patch, I think ...
+>>>
+>>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc,pwrseq-simple.txt
+>>>> b/Documentation/devicetree/bindings/mmc/mmc,pwrseq-simple.txt
+>>>
+>>>
+>>>> +- delay : delay to wait after driving the reset gpio active [ms].
+>>>
+>>>
+>>> ... delay is the wrong name. reset-pulse-width or reset-pulse-length would
+>>> be better. delay sounds like a delay after resetting the device before it
+>>> can be accessed.
+>>
+>> I agree with Stephen's proposal.
 >
-> If you want to enable the hs400 mode, need to add "mmc-hs400-1_8v" or "mmc-hs400-1_2v".
-> But this patch didn't add them. do you have any other plan?
+> Cool.
 >
-Yes, right, plan is to send separate patch to enable hs400, as of now
-I am not sure if all the 5800-peach-pi boards are populated with
-emmc5.0 device or not. So I will enable HS400 after confirming this
-point.
-> On 01/14/2015 07:30 PM, Alim Akhtar wrote:
->> From: Seungwon Jeon <tgih.jun@samsung.com>
->>
->> HS400 timing values are added for SMDK5420, exynos5420-peach-pit
->> and exynos5800-peach-pi boards.
->> This also adds RCLK GPIO line, this gpio should be in pull-down
->> state.
->>
->> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
->> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
->> [Alim: addressed review comments]
->> ---
->>  arch/arm/boot/dts/exynos5420-peach-pit.dts |    4 +++-
->>  arch/arm/boot/dts/exynos5420-pinctrl.dtsi  |    7 +++++++
->>  arch/arm/boot/dts/exynos5420-smdk5420.dts  |    4 +++-
->>  arch/arm/boot/dts/exynos5800-peach-pi.dts  |    4 +++-
->>  4 files changed, 16 insertions(+), 3 deletions(-)
->>
->> diff --git a/arch/arm/boot/dts/exynos5420-peach-pit.dts b/arch/arm/boot/dts/exynos5420-peach-pit.dts
->> index 9a050e1..7ffaba8 100644
->> --- a/arch/arm/boot/dts/exynos5420-peach-pit.dts
->> +++ b/arch/arm/boot/dts/exynos5420-peach-pit.dts
->> @@ -569,8 +569,10 @@
->>       samsung,dw-mshc-ciu-div = <3>;
->>       samsung,dw-mshc-sdr-timing = <0 4>;
->>       samsung,dw-mshc-ddr-timing = <0 2>;
->> +     samsung,dw-mshc-hs400-timing = <0 2>;
->> +     read-strobe-delay = <90>;
->>       pinctrl-names = "default";
->> -     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
->> +     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
->>       bus-width = <8>;
->>  };
->>
->> diff --git a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
->> index ba686e4..8b15316 100644
->> --- a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
->> +++ b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
->> @@ -201,6 +201,13 @@
->>                       samsung,pin-drv = <3>;
->>               };
->>
->> +             sd0_rclk: sd0-rclk {
+>> This patch needs to be rebased and retested on latest version the
+>> mmc-pwrseq patches.
 >
-> I know it used to "sd0_rdqs", not "sd0_rclk".
-> Change name.
+> Sure.
 >
-Ok, I will change as per UM of 5800/5420,
-
-> Best Regards,
-> Jaehoon Chung
->> +                     samsung,pins = "gpc0-7";
->> +                     samsung,pin-function = <2>;
->> +                     samsung,pin-pud = <1>;
->> +                     samsung,pin-drv = <3>;
->> +             };
->> +
->>               sd1_cmd: sd1-cmd {
->>                       samsung,pins = "gpc1-1";
->>                       samsung,pin-function = <2>;
->> diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts b/arch/arm/boot/dts/exynos5420-smdk5420.dts
->> index 8be3d7b..5290e79 100644
->> --- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
->> +++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
->> @@ -80,8 +80,10 @@
->>               samsung,dw-mshc-ciu-div = <3>;
->>               samsung,dw-mshc-sdr-timing = <0 4>;
->>               samsung,dw-mshc-ddr-timing = <0 2>;
->> +             samsung,dw-mshc-hs400-timing = <0 2>;
->> +             read-strobe-delay = <90>;
->>               pinctrl-names = "default";
->> -             pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
->> +             pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
->>               bus-width = <8>;
->>               cap-mmc-highspeed;
->>       };
->> diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts b/arch/arm/boot/dts/exynos5800-peach-pi.dts
->> index e8fdda8..fa1c858 100644
->> --- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
->> +++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
->> @@ -557,8 +557,10 @@
->>       samsung,dw-mshc-ciu-div = <3>;
->>       samsung,dw-mshc-sdr-timing = <0 4>;
->>       samsung,dw-mshc-ddr-timing = <0 2>;
->> +     samsung,dw-mshc-hs400-timing = <0 2>;
->> +     read-strobe-delay = <90>;
->>       pinctrl-names = "default";
->> -     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
->> +     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
->>       bus-width = <8>;
->>  };
->>
->>
+>> Moreover, if you think the patchset which $subject
+>> patch is a part of is material for 3.20, I will need to share an
+>> immutable branch with the mmc-pwrseq patches for ARM SOC to pull in,
+>> tell me if you need that.
 >
+> I don't think this will make 3.20 as I have other series with higher
+> priority and there's quite some work left to do on this one.
 
+If that's the case, I might as well consider this patch separately and
+take it through my mmc tree. Of course, that means you anyway need to
+rebase/test it.
 
-
--- 
-Regards,
-Alim
+Kind regards
+Uffe
