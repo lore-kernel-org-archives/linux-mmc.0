@@ -1,7 +1,7 @@
 From: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: [PATCH 4/7] mmc: sdhci-pxav3: Modify clock settings for the SDR50 and DDR50 modes
-Date: Wed, 21 Jan 2015 10:32:03 +0100
-Message-ID: <1421832726-21656-5-git-send-email-gregory.clement@free-electrons.com>
+Subject: [PATCH 3/7] mmc: sdhci-pxav3: Extend binding with SDIO3 conf reg for the Armada 38x
+Date: Wed, 21 Jan 2015 10:32:02 +0100
+Message-ID: <1421832726-21656-4-git-send-email-gregory.clement@free-electrons.com>
 References: <1421832726-21656-1-git-send-email-gregory.clement@free-electrons.com>
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1421832726-21656-1-git-send-email-gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
@@ -10,121 +10,48 @@ To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf
 Cc: Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ezequiel Garcia <ezequiel.garcia-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Boris BREZILLON <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Lior Amsalem <alior-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Tawfik Bayouk <tawfik-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-According to erratum 'FE-2946959' both SDR50 and DDR50 modes require
-specific clock adjustments in SDIO3 Configuration register.
-
-This commit add the support of this register and for SDR50 or DDR50
-mode use it as suggested by the erratum:
-- Set the SDIO3 Clock Inv field in SDIO3 Configuration register to not
-inverted.
-- Set the Sample FeedBack Clock field to 0x1
+The SDHCI unit used on the Armada 38x needs using an extra register to
+do specific clock adjustments in order to support the SDR50 and DDR50
+modes. This patch extends the binding to allow using this register.
 
 Signed-off-by: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
 ---
- drivers/mmc/host/sdhci-pxav3.c | 60 ++++++++++++++++++++++++++++++++++++------
- 1 file changed, 52 insertions(+), 8 deletions(-)
+ Documentation/devicetree/bindings/mmc/sdhci-pxa.txt | 15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 4daa47a53a62..505326052333 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -62,6 +62,7 @@ struct sdhci_pxa {
- 	struct clk *clk_core;
- 	struct clk *clk_io;
- 	u8	power_mode;
-+	void __iomem *sdio3_conf_reg;
- };
- 
- /*
-@@ -72,6 +73,14 @@ struct sdhci_pxa {
- #define SDHCI_WINDOW_BASE(i)	(0x84 + ((i) << 3))
- #define SDHCI_MAX_WIN_NUM	8
- 
-+/*
-+ * Fields below belong to SDIO3 Configuration Register (third register
-+ * region for the Armada 38x flavor)
-+ */
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
+index 4dd6deb90719..3d1b449d6097 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
+@@ -9,9 +9,13 @@ Required properties:
+ - reg:
+   * for "mrvl,pxav2-mmc" and "mrvl,pxav3-mmc", one register area for
+     the SDHCI registers.
+-  * for "marvell,armada-380-sdhci", two register areas. The first one
+-    for the SDHCI registers themselves, and the second one for the
+-    AXI/Mbus bridge registers of the SDHCI unit.
 +
-+#define SDIO3_CONF_CLK_INV	BIT(0)
-+#define SDIO3_CONF_SD_FB_CLK	BIT(2)
-+
- static int mv_conf_mbus_windows(struct platform_device *pdev,
- 				const struct mbus_dram_target_info *dram)
- {
-@@ -122,16 +131,31 @@ static int armada_38x_quirks(struct platform_device *pdev,
- 			     struct sdhci_host *host)
- {
- 	struct device_node *np = pdev->dev.of_node;
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_pxa *pxa = pltfm_host->priv;
-+	struct resource *res;
++  * for "marvell,armada-380-sdhci", three register areas. The first
++    one for the SDHCI registers themselves, the second one for the
++    AXI/Mbus bridge registers of the SDHCI unit, the third one for the
++    SDIO3 Configuration register
++- reg names: should be "sdhci", "mbus", "conf-sdio3". only mandatory
++  for "marvell,armada-380-sdhci"
+ - clocks: Array of clocks required for SDHCI; requires at least one for
+     I/O clock.
+ - clock-names: Array of names corresponding to clocks property; shall be
+@@ -35,7 +39,10 @@ sdhci@d4280800 {
  
- 	host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
--	/*
--	 * According to erratum 'FE-2946959' both SDR50 and DDR50
--	 * modes require specific clock adjustments in SDIO3
--	 * Configuration register, if the adjustment is not done,
--	 * remove them from the capabilities.
--	 */
--	host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
--	host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
-+	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
-+					   "conf-sdio3");
-+	if (res) {
-+		pxa->sdio3_conf_reg = devm_ioremap_resource(&pdev->dev, res);
-+		if (IS_ERR(pxa->sdio3_conf_reg))
-+			return PTR_ERR(pxa->sdio3_conf_reg);
-+	} else {
-+		/*
-+		 * According to erratum 'FE-2946959' both SDR50 and DDR50
-+		 * modes require specific clock adjustments in SDIO3
-+		 * Configuration register, if the adjustment is not done,
-+		 * remove them from the capabilities.
-+		 */
-+		host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
-+		host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
-+
-+		dev_warn(&pdev->dev, "conf-sdio3 register not found\n");
-+		dev_warn(&pdev->dev, "disabling SDR50 and DDR50 modes\n");
-+		dev_warn(&pdev->dev, "consider updating your dtb\n");
-+	}
- 
- 	/*
- 	 * According to erratum 'ERR-7878951' Armada 38x SDHCI
-@@ -225,6 +249,8 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
- 
- static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
- {
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_pxa *pxa = pltfm_host->priv;
- 	u16 ctrl_2;
- 
- 	/*
-@@ -254,6 +280,24 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
- 		break;
- 	}
- 
-+	/*
-+	 * Update SDIO3 Configuration register according to erratum
-+	 * FE-2946959
-+	 */
-+	if (pxa->sdio3_conf_reg) {
-+		u8 reg_val  = readb(pxa->sdio3_conf_reg);
-+
-+		if (uhs == MMC_TIMING_UHS_SDR50 ||
-+		    uhs == MMC_TIMING_UHS_DDR50) {
-+			reg_val &= ~SDIO3_CONF_CLK_INV;
-+			reg_val |= SDIO3_CONF_SD_FB_CLK;
-+		} else {
-+			reg_val |= SDIO3_CONF_CLK_INV;
-+			reg_val &= ~SDIO3_CONF_SD_FB_CLK;
-+		}
-+		writeb(reg_val, pxa->sdio3_conf_reg);
-+	}
-+
- 	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
- 	dev_dbg(mmc_dev(host->mmc),
- 		"%s uhs = %d, ctrl_2 = %04X\n",
+ sdhci@d8000 {
+ 	compatible = "marvell,armada-380-sdhci";
+-	reg = <0xd8000 0x1000>, <0xdc000 0x100>;
++	reg-names = "sdhci", "mbus", "conf-sdio3";
++	reg = <0xd8000 0x1000>,
++		<0xdc000 0x100>;
++		<0x18454 0x4>;
+ 	interrupts = <0 25 0x4>;
+ 	clocks = <&gateclk 17>;
+ 	clock-names = "io";
 -- 
 1.9.1
 
