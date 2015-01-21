@@ -1,101 +1,76 @@
-From: Marcin Wojtas <mw@semihalf.com>
-Subject: Re: [PATCH 2/7] mmc: sdhci-pxav3: Fix Armada 38x controller's caps
- according to erratum ERR-7878951
-Date: Wed, 21 Jan 2015 15:52:40 +0100
-Message-ID: <CAPv3WKeCPRoZCMP+PJoUqi_Nq85s+-5YwWm5EovDio1OQ-d3zA@mail.gmail.com>
-References: <1421832726-21656-1-git-send-email-gregory.clement@free-electrons.com>
-	<1421832726-21656-3-git-send-email-gregory.clement@free-electrons.com>
+From: Tomeu Vizoso <tomeu.vizoso-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>
+Subject: Re: [PATCH v2 08/11] mmc: pwrseq_simple: Add support for a delay
+Date: Wed, 21 Jan 2015 15:55:18 +0100
+Message-ID: <CAAObsKBiMMNXMUPpOjNxLkrJ6NxdDgrVCVdCM4EPRtuysi1yOg@mail.gmail.com>
+References: <1421338359-27467-1-git-send-email-tomeu.vizoso@collabora.com>
+ <1421338359-27467-9-git-send-email-tomeu.vizoso@collabora.com>
+ <54B7F9FB.7030100@wwwdotorg.org> <CAPDyKFoO6evBoAbEE30XiZg51KsM-sD4viFMvqaDwGoHeVL-6w@mail.gmail.com>
+ <54BFAF7E.1030703@collabora.com> <CAPDyKFoYj3xBoYsn87mxjoqDDnCtopAugX5JbzYritxWn-7XaA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f53.google.com ([209.85.218.53]:61823 "EHLO
-	mail-oi0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750878AbbAUOwl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jan 2015 09:52:41 -0500
-Received: by mail-oi0-f53.google.com with SMTP id i138so7143796oig.12
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2015 06:52:40 -0800 (PST)
-In-Reply-To: <1421832726-21656-3-git-send-email-gregory.clement@free-electrons.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFoYj3xBoYsn87mxjoqDDnCtopAugX5JbzYritxWn-7XaA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Javier Martinez Canillas <javier.martinez-ZGY8ohtN/8pPYcu2f3hruQ@public.gmane.org>, Dylan Reid <dgreid-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Simon Glass <sjg-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Boris BREZILLON <boris.brezillon@free-electrons.com>, Tawfik Bayouk <tawfik@marvell.com>, devicetree@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, stable@vger.kernel.org, Nadav Haklai <nadavh@marvell.com>, Lior Amsalem <alior@marvell.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi Gregory,
+On 21 January 2015 at 15:15, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On 21 January 2015 at 14:54, Tomeu Vizoso <tomeu.vizoso-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org> wrote:
+>> On 01/21/2015 11:44 AM, Ulf Hansson wrote:
+>>> On 15 January 2015 at 18:33, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org> wrote:
+>>>> On 01/15/2015 09:12 AM, Tomeu Vizoso wrote:
+>>>>>
+>>>>> Signed-off-by: Tomeu Vizoso <tomeu.vizoso-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>
+>>>>
+>>>>
+>>>> Ah, having read the explanation in the next patch, I think ...
+>>>>
+>>>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc,pwrseq-simple.txt
+>>>>> b/Documentation/devicetree/bindings/mmc/mmc,pwrseq-simple.txt
+>>>>
+>>>>
+>>>>> +- delay : delay to wait after driving the reset gpio active [ms].
+>>>>
+>>>>
+>>>> ... delay is the wrong name. reset-pulse-width or reset-pulse-length would
+>>>> be better. delay sounds like a delay after resetting the device before it
+>>>> can be accessed.
+>>>
+>>> I agree with Stephen's proposal.
+>>
+>> Cool.
+>>
+>>> This patch needs to be rebased and retested on latest version the
+>>> mmc-pwrseq patches.
+>>
+>> Sure.
+>>
+>>> Moreover, if you think the patchset which $subject
+>>> patch is a part of is material for 3.20, I will need to share an
+>>> immutable branch with the mmc-pwrseq patches for ARM SOC to pull in,
+>>> tell me if you need that.
+>>
+>> I don't think this will make 3.20 as I have other series with higher
+>> priority and there's quite some work left to do on this one.
+>
+> If that's the case, I might as well consider this patch separately and
+> take it through my mmc tree. Of course, that means you anyway need to
+> rebase/test it.
 
-2015-01-21 10:32 GMT+01:00 Gregory CLEMENT <gregory.clement@free-electrons.com>:
-> According to erratum 'ERR-7878951' Armada 38x SDHCI controller has
-> different capabilities than the ones shown in its registers:
->
-> - it doesn't support the voltage switching: it can work either with
->   3.3V or 1.8V supply
-> - it doesn't support the SDR104 mode
-> - SDR50 mode doesn't need tuning
->
-> The SDHCI_QUIRK_MISSING_CAPS quirk is used for updating the
-> capabilities accordingly.
->
-> Fixes: 5491ce3f79ee ("mmc: sdhci-pxav3: add support for the Armada 38x SDHCI controller")
-> Cc: <stable@vger.kernel.org> # v3.15+
->
-> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
-> ---
->  drivers/mmc/host/sdhci-pxav3.c | 21 +++++++++++++++++++--
->  1 file changed, 19 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> index 7b07325b4fba..4daa47a53a62 100644
-> --- a/drivers/mmc/host/sdhci-pxav3.c
-> +++ b/drivers/mmc/host/sdhci-pxav3.c
-> @@ -118,8 +118,11 @@ static int mv_conf_mbus_windows(struct platform_device *pdev,
->         return 0;
->  }
->
-> -static int armada_38x_quirks(struct sdhci_host *host)
-> +static int armada_38x_quirks(struct platform_device *pdev,
-> +                            struct sdhci_host *host)
->  {
-> +       struct device_node *np = pdev->dev.of_node;
-> +
->         host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
->         /*
->          * According to erratum 'FE-2946959' both SDR50 and DDR50
-> @@ -129,6 +132,20 @@ static int armada_38x_quirks(struct sdhci_host *host)
->          */
->         host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
->         host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
-> +
-> +       /*
-> +        * According to erratum 'ERR-7878951' Armada 38x SDHCI
-> +        * controller has different capabilities than the ones shown
-> +        * in its registers
-> +        */
-> +       host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-> +       if (of_get_property(np, "no-1-8-v", NULL)) {
-> +               host->caps &= ~SDHCI_CAN_VDD_180;
-> +               host->mmc->caps &= ~MMC_CAP_1_8V_DDR;
-> +       } else
-> +               host->caps &= ~SDHCI_CAN_VDD_330;
-> +       host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_USE_SDR50_TUNING);
-> +
->         return 0;
->  }
->
-> @@ -333,7 +350,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->                 clk_prepare_enable(pxa->clk_core);
->
->         if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
-> -               ret = armada_38x_quirks(host);
-> +               ret = armada_38x_quirks(pdev, host);
->                 if (ret < 0)
->                         goto err_quirks;
->                 ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
+Sounds good, I expect to send a v3 tomorrow.
+
+Regards,
+
+Tomeu
+
+> Kind regards
+> Uffe
 > --
-
-Right here there are lines:
-/* enable 1/8V DDR capable */
-host->mmc->caps |= MMC_CAP_1_8V_DDR;
-
-Which make a possible opposite change from armada_38x_quirks cacelled.
-
-Best regards,
-Marcin
+> To unsubscribe from this list: send the line "unsubscribe linux-tegra" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
