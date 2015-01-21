@@ -1,72 +1,93 @@
-From: "Sun, Yi Y" <yi.y.sun@intel.com>
-Subject: RE: [RFC 0/2] mmc: UHS-II implementation
-Date: Wed, 21 Jan 2015 03:57:31 +0000
-Message-ID: <525EAED47491124EB5123A51BD2FC79101A30EE2@SHSMSX101.ccr.corp.intel.com>
-References: <1419672479-30852-1-git-send-email-yi.y.sun@intel.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH v5 1/6] mfd: rtsx: add func to split u32 into register
+Date: Wed, 21 Jan 2015 07:45:18 +0000
+Message-ID: <20150121074518.GB9258@x1>
+References: <cover.1419297154.git.micky_ching@realsil.com.cn>
+ <17ba65f4bdf4707bdf038e407ecf5dc012bca281.1419297154.git.micky_ching@realsil.com.cn>
+ <20150120144713.GV13701@x1>
+ <CAPDyKFo9BrfRay=HqY4cNJjmDJ+v_kzieoo7SrD+wxJp7BSG5Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:31937 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751823AbbAUD5s convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jan 2015 22:57:48 -0500
-In-Reply-To: <1419672479-30852-1-git-send-email-yi.y.sun@intel.com>
-Content-Language: en-US
+Received: from mail-ig0-f173.google.com ([209.85.213.173]:51138 "EHLO
+	mail-ig0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750814AbbAUHpY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jan 2015 02:45:24 -0500
+Received: by mail-ig0-f173.google.com with SMTP id a13so21213893igq.0
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Jan 2015 23:45:24 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFo9BrfRay=HqY4cNJjmDJ+v_kzieoo7SrD+wxJp7BSG5Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: micky <micky_ching@realsil.com.cn>, Chris Ball <chris@printf.net>, Samuel Ortiz <sameo@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Dan Carpenter <dan.carpenter@oracle.com>, "driverdev-devel@linuxdriverproject.org" <devel@linuxdriverproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Roger <rogerable@realtek.com>, Wei WANG <wei_wang@realsil.com.cn>
 
-Hi, all,
+On Tue, 20 Jan 2015, Ulf Hansson wrote:
 
-This patch has been submitted for several weeks. I hope to get suggestions from community to solve potential issues as early as possible. Any comment would be very appreciated.
+> On 20 January 2015 at 15:47, Lee Jones <lee.jones@linaro.org> wrote:
+> > On Tue, 23 Dec 2014, micky_ching@realsil.com.cn wrote:
+> >
+> >> From: Micky Ching <micky_ching@realsil.com.cn>
+> >>
+> >> Add helper function to write u32 to registers, if we want to put u=
+32
+> >> value to 4 continuous register, this can help us reduce tedious wo=
+rk.
+> >>
+> >> Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+> >> Acked-by: Lee Jones <lee.jones@linaro.org>
+> >> ---
+> >>  include/linux/mfd/rtsx_pci.h | 9 +++++++++
+> >>  1 file changed, 9 insertions(+)
+> >
+> > Applied, thanks.
+>=20
+> This one has already been queued by you, for 3.19, and it's in Linus =
+tree. :-)
+>=20
+> For your reference, I have queued the mmc patches which depends on
+> $subject patch for 3.20.
 
-Thanks,
-Sun Yi
+I discovered this myself when I attempted to apply it. :)
 
------Original Message-----
-From: Sun, Yi Y 
-Sent: Saturday, December 27, 2014 5:28 PM
-To: linux-mmc@vger.kernel.org; ulf.hansson@linaro.org
-Cc: Sun, Yi Y
-Subject: [RFC 0/2] mmc: UHS-II implementation
+Thanks for the heads-up though.
 
-Hello,
+> >> diff --git a/include/linux/mfd/rtsx_pci.h b/include/linux/mfd/rtsx=
+_pci.h
+> >> index 74346d5..9234449 100644
+> >> --- a/include/linux/mfd/rtsx_pci.h
+> >> +++ b/include/linux/mfd/rtsx_pci.h
+> >> @@ -558,6 +558,7 @@
+> >>  #define SD_SAMPLE_POINT_CTL          0xFDA7
+> >>  #define SD_PUSH_POINT_CTL            0xFDA8
+> >>  #define SD_CMD0                              0xFDA9
+> >> +#define   SD_CMD_START                       0x40
+> >>  #define SD_CMD1                              0xFDAA
+> >>  #define SD_CMD2                              0xFDAB
+> >>  #define SD_CMD3                              0xFDAC
+> >> @@ -967,4 +968,12 @@ static inline u8 *rtsx_pci_get_cmd_data(struc=
+t rtsx_pcr *pcr)
+> >>       return (u8 *)(pcr->host_cmds_ptr);
+> >>  }
+> >>
+> >> +static inline void rtsx_pci_write_be32(struct rtsx_pcr *pcr, u16 =
+reg, u32 val)
+> >> +{
+> >> +     rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg,     0xFF, val >> 2=
+4);
+> >> +     rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 1, 0xFF, val >> 1=
+6);
+> >> +     rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 2, 0xFF, val >> 8=
+);
+> >> +     rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, reg + 3, 0xFF, val);
+> >> +}
+> >> +
+> >>  #endif
+> >
 
-UHS-II spec has been published for some time but it seems community does not implement this feature. With this feature, read/write performance can be improved much.
-
-So, I submit these two patches which implement main functions of UHS-II for community review. Hope to get suggestions from community.
-
-As the UHS-II test environment is not available yet, some functions may be not completed. I add some "TODO" in codes for next steps and some concerns. In next steps, the codes will be finished completely and verified on board supporting UHS-II. Then, the formal patches will be submitted.
-
-The implementation bases on below specs:
-1. SD 4.2 PHY
-2. UHS-II Addendum 1.02
-3. SDHC Spec 4.1
-
-Yi Sun (2):
-  mmc: core: support UHS-II in core stack.
-  mmc: sdhci: support UHS-II in SDHCI host.
-
- drivers/mmc/core/Makefile     |    3 +-
- drivers/mmc/core/bus.c        |    5 +-
- drivers/mmc/core/core.c       |   89 +++-
- drivers/mmc/core/sd.c         |   15 +
- drivers/mmc/core/sd_ops.c     |   12 +
- drivers/mmc/core/uhs2.c       |  908 +++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/uhs2.h       |   26 ++
- drivers/mmc/host/Makefile     |    2 +-
- drivers/mmc/host/sdhci-pci.c  |    6 +
- drivers/mmc/host/sdhci-uhs2.c |  703 +++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-uhs2.h |   36 ++
- drivers/mmc/host/sdhci.c      |  259 ++++++++++--
- drivers/mmc/host/sdhci.h      |  313 +++++++++++++-
- include/linux/mmc/core.h      |    6 +
- include/linux/mmc/host.h      |   27 ++
- include/linux/mmc/sdhci.h     |    2 +
- include/linux/mmc/uhs2.h      |  274 +++++++++++++
- 17 files changed, 2625 insertions(+), 61 deletions(-)  create mode 100644 drivers/mmc/core/uhs2.c  create mode 100644 drivers/mmc/core/uhs2.h  create mode 100644 drivers/mmc/host/sdhci-uhs2.c  create mode 100644 drivers/mmc/host/sdhci-uhs2.h  create mode 100644 include/linux/mmc/uhs2.h
-
---
-1.7.9.5
-
+--=20
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
