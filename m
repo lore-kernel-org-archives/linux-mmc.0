@@ -1,45 +1,49 @@
-From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: [PATCH 6/7] ARM: mvebu: Update the SDHCI node on Armada 38x
-Date: Wed, 21 Jan 2015 10:32:05 +0100
-Message-ID: <1421832726-21656-7-git-send-email-gregory.clement@free-electrons.com>
-References: <1421832726-21656-1-git-send-email-gregory.clement@free-electrons.com>
+From: Pramod Gurav <pramod.gurav@smartplayin.com>
+Subject: [PATCH RESEND] mmc: mmci: Get rid of dead code in mmci_dma_setup
+Date: Wed, 21 Jan 2015 15:47:17 +0530
+Message-ID: <1421835437-26259-1-git-send-email-pramod.gurav@smartplayin.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from down.free-electrons.com ([37.187.137.238]:35003 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752321AbbAUJcc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jan 2015 04:32:32 -0500
-In-Reply-To: <1421832726-21656-1-git-send-email-gregory.clement@free-electrons.com>
+Received: from smtp116.ord1c.emailsrvr.com ([108.166.43.116]:55223 "EHLO
+	smtp116.ord1c.emailsrvr.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752059AbbAUKRN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jan 2015 05:17:13 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Maxime Ripard <maxime.ripard@free-electrons.com>, Boris BREZILLON <boris.brezillon@free-electrons.com>, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org
+To: Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Pramod Gurav <pramod.gurav@smartplayin.com>
 
-The binding of the armada-380-sdhci has been extended with a new
-register in order to be able to use the SDR50 and DDR50 mode. This
-commit add the resource associated to this new register for the
-Armada 38x.
+DMA configuration has been removed from function mmci_dma_setup but the
+local mask variable was not removed. This remains unused hence remove
+it from the function and operations on it
 
-Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
 ---
- arch/arm/boot/dts/armada-38x.dtsi | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ drivers/mmc/host/mmci.c |    5 -----
+ 1 file changed, 5 deletions(-)
 
-diff --git a/arch/arm/boot/dts/armada-38x.dtsi b/arch/arm/boot/dts/armada-38x.dtsi
-index 71d4eca5b497..474b2ebf4a82 100644
---- a/arch/arm/boot/dts/armada-38x.dtsi
-+++ b/arch/arm/boot/dts/armada-38x.dtsi
-@@ -515,7 +515,10 @@
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 47dcece..122a751 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -435,7 +435,6 @@ static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
+ static void mmci_dma_setup(struct mmci_host *host)
+ {
+ 	const char *rxname, *txname;
+-	dma_cap_mask_t mask;
+ 	struct variant_data *variant = host->variant;
  
- 			sdhci@d8000 {
- 				compatible = "marvell,armada-380-sdhci";
--				reg = <0xd8000 0x1000>, <0xdc000 0x100>;
-+				reg-names = "sdhci", "mbus", "conf-sdio3";
-+				reg = <0xd8000 0x1000>,
-+					<0xdc000 0x100>,
-+					<0x18454 0x4>;
- 				interrupts = <GIC_SPI 25 IRQ_TYPE_LEVEL_HIGH>;
- 				clocks = <&gateclk 17>;
- 				mrvl,clk-delay-cycles = <0x1F>;
+ 	host->dma_rx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "rx");
+@@ -444,10 +443,6 @@ static void mmci_dma_setup(struct mmci_host *host)
+ 	/* initialize pre request cookie */
+ 	host->next_data.cookie = 1;
+ 
+-	/* Try to acquire a generic DMA engine slave channel */
+-	dma_cap_zero(mask);
+-	dma_cap_set(DMA_SLAVE, mask);
+-
+ 	/*
+ 	 * If only an RX channel is specified, the driver will
+ 	 * attempt to use it bidirectionally, however if it is
 -- 
-1.9.1
+1.7.9.5
 
