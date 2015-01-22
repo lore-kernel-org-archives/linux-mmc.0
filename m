@@ -1,115 +1,142 @@
-From: Olof Johansson <olof@lixom.net>
-Subject: Re: [PATCH 3/3] ARM: edma: Split up header file to platform_data and
- API file
-Date: Wed, 21 Jan 2015 17:40:43 -0800
-Message-ID: <CAOesGMgdLB9WkOwCt__iRMnTYZ-tMNS==FL+b6s3CzHK4b0MYQ@mail.gmail.com>
-References: <1417084891-17990-1-git-send-email-peter.ujfalusi@ti.com>
-	<1417084891-17990-4-git-send-email-peter.ujfalusi@ti.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v4 2/2] ARM: dts: Add HS400 support for exynos5420 and
+ exynos5800
+Date: Thu, 22 Jan 2015 11:28:25 +0900
+Message-ID: <54C06049.5070106@samsung.com>
+References: <1421231446-4776-1-git-send-email-alim.akhtar@samsung.com>
+ <1421231446-4776-3-git-send-email-alim.akhtar@samsung.com>
+ <54BEDE9C.5060501@samsung.com>
+ <CAGOxZ5186+9U-6eri6OSGw9awsmr0EPP-gdhu-__oCWP1Oyyxg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1417084891-17990-4-git-send-email-peter.ujfalusi@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: Mark Brown <broonie@kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Sekhar Nori <nsekhar@ti.com>, Arnd Bergmann <arnd@arndb.de>, "Koul, Vinod" <vinod.koul@intel.com>, Kevin Hilman <khilman@deeprootsystems.com>, Liam Girdwood <lgirdwood@gmail.com>, "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-spi@vger.kernel.org, linux-omap <linux-omap@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, "dmaengine@vger.kernel.org" <dmaengine@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:33984 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753159AbbAVC22 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jan 2015 21:28:28 -0500
+In-reply-to: <CAGOxZ5186+9U-6eri6OSGw9awsmr0EPP-gdhu-__oCWP1Oyyxg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alim Akhtar <alim.akhtar@gmail.com>
+Cc: Alim Akhtar <alim.akhtar@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Douglas Anderson <dianders@chromium.org>, kgene <kgene@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Abhilash Kesavan <a.kesavan@samsung.com>
 
-Hi,
+Hi.
 
-On Thu, Nov 27, 2014 at 2:41 AM, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
-> include/linux/platform_data/ is not a correct place to keep the API
-> definitions for edma, it is meant to be only for the pdata for the device.
-> Clean up this by moving the API to include/linux/edma.h
+On 01/21/2015 11:12 PM, Alim Akhtar wrote:
+> Hi Jaehoon
+> 
+> On Wed, Jan 21, 2015 at 4:32 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> Hi,
+>>
+>> If you want to enable the hs400 mode, need to add "mmc-hs400-1_8v" or "mmc-hs400-1_2v".
+>> But this patch didn't add them. do you have any other plan?
+>>
+> Yes, right, plan is to send separate patch to enable hs400, as of now
+> I am not sure if all the 5800-peach-pi boards are populated with
+> emmc5.0 device or not. So I will enable HS400 after confirming this
+> point.
 
-It's a nice net improvement, but it moves some things that should be
-in _neither_ location to a new place where it doesn't belong either --
-and the new location is even more global. See below.
+I know if card is not support hs400, then it should be enabled to other bus mode.
 
-...
+Best Regards,
+Jaehoon Chung
 
-> diff --git a/include/linux/edma.h b/include/linux/edma.h
-> new file mode 100644
-> index 000000000000..9df92198c117
-> --- /dev/null
-> +++ b/include/linux/edma.h
-> @@ -0,0 +1,153 @@
-> +/*
-> + * TI EDMA definitions
-> + *
-> + * Copyright (C) 2006-2013 Texas Instruments.
-> + *
-> + * This program is free software; you can redistribute it and/or
-> + * modify it under the terms of the GNU General Public License as
-> + * published by the Free Software Foundation version 2.
-> + *
-> + * This program is distributed "as is" WITHOUT ANY WARRANTY of any
-> + * kind, whether express or implied; without even the implied warranty
-> + * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> + * GNU General Public License for more details.
-> + */
-> +
-> +/*
-> + * This EDMA3 programming framework exposes two basic kinds of resource:
-> + *
-> + *  Channel    Triggers transfers, usually from a hardware event but
-> + *             also manually or by "chaining" from DMA completions.
-> + *             Each channel is coupled to a Parameter RAM (PaRAM) slot.
-> + *
-> + *  Slot       Each PaRAM slot holds a DMA transfer descriptor (PaRAM
-> + *             "set"), source and destination addresses, a link to a
-> + *             next PaRAM slot (if any), options for the transfer, and
-> + *             instructions for updating those addresses.  There are
-> + *             more than twice as many slots as event channels.
-> + *
-> + * Each PaRAM set describes a sequence of transfers, either for one large
-> + * buffer or for several discontiguous smaller buffers.  An EDMA transfer
-> + * is driven only from a channel, which performs the transfers specified
-> + * in its PaRAM slot until there are no more transfers.  When that last
-> + * transfer completes, the "link" field may be used to reload the channel's
-> + * PaRAM slot with a new transfer descriptor.
-> + *
-> + * The EDMA Channel Controller (CC) maps requests from channels into physical
-> + * Transfer Controller (TC) requests when the channel triggers (by hardware
-> + * or software events, or by chaining).  The two physical DMA channels provided
-> + * by the TCs are thus shared by many logical channels.
-> + *
-> + * DaVinci hardware also has a "QDMA" mechanism which is not currently
-> + * supported through this interface.  (DSP firmware uses it though.)
-> + */
-> +
-> +#ifndef __LINUX_EDMA_H_
-> +#define __LINUX_EDMA_H_
-> +
-> +#include <linux/platform_data/edma.h>
-> +
-> +/* PaRAM slots are laid out like this */
-> +struct edmacc_param {
-> +       u32 opt;
-> +       u32 src;
-> +       u32 a_b_cnt;
-> +       u32 dst;
-> +       u32 src_dst_bidx;
-> +       u32 link_bcntrld;
-> +       u32 src_dst_cidx;
-> +       u32 ccnt;
-> +} __packed;
-> +
-> +/* fields in edmacc_param.opt */
-> +#define SAM            BIT(0)
-> +#define DAM            BIT(1)
-> +#define SYNCDIM                BIT(2)
-> +#define STATIC         BIT(3)
-> +#define EDMA_FWID      (0x07 << 8)
-> +#define TCCMODE                BIT(11)
-> +#define EDMA_TCC(t)    ((t) << 12)
-> +#define TCINTEN                BIT(20)
-> +#define ITCINTEN       BIT(21)
-> +#define TCCHEN         BIT(22)
-> +#define ITCCHEN                BIT(23)
+>> On 01/14/2015 07:30 PM, Alim Akhtar wrote:
+>>> From: Seungwon Jeon <tgih.jun@samsung.com>
+>>>
+>>> HS400 timing values are added for SMDK5420, exynos5420-peach-pit
+>>> and exynos5800-peach-pi boards.
+>>> This also adds RCLK GPIO line, this gpio should be in pull-down
+>>> state.
+>>>
+>>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>>> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+>>> [Alim: addressed review comments]
+>>> ---
+>>>  arch/arm/boot/dts/exynos5420-peach-pit.dts |    4 +++-
+>>>  arch/arm/boot/dts/exynos5420-pinctrl.dtsi  |    7 +++++++
+>>>  arch/arm/boot/dts/exynos5420-smdk5420.dts  |    4 +++-
+>>>  arch/arm/boot/dts/exynos5800-peach-pi.dts  |    4 +++-
+>>>  4 files changed, 16 insertions(+), 3 deletions(-)
+>>>
+>>> diff --git a/arch/arm/boot/dts/exynos5420-peach-pit.dts b/arch/arm/boot/dts/exynos5420-peach-pit.dts
+>>> index 9a050e1..7ffaba8 100644
+>>> --- a/arch/arm/boot/dts/exynos5420-peach-pit.dts
+>>> +++ b/arch/arm/boot/dts/exynos5420-peach-pit.dts
+>>> @@ -569,8 +569,10 @@
+>>>       samsung,dw-mshc-ciu-div = <3>;
+>>>       samsung,dw-mshc-sdr-timing = <0 4>;
+>>>       samsung,dw-mshc-ddr-timing = <0 2>;
+>>> +     samsung,dw-mshc-hs400-timing = <0 2>;
+>>> +     read-strobe-delay = <90>;
+>>>       pinctrl-names = "default";
+>>> -     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+>>> +     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
+>>>       bus-width = <8>;
+>>>  };
+>>>
+>>> diff --git a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+>>> index ba686e4..8b15316 100644
+>>> --- a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+>>> +++ b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+>>> @@ -201,6 +201,13 @@
+>>>                       samsung,pin-drv = <3>;
+>>>               };
+>>>
+>>> +             sd0_rclk: sd0-rclk {
+>>
+>> I know it used to "sd0_rdqs", not "sd0_rclk".
+>> Change name.
+>>
+> Ok, I will change as per UM of 5800/5420,
+> 
+>> Best Regards,
+>> Jaehoon Chung
+>>> +                     samsung,pins = "gpc0-7";
+>>> +                     samsung,pin-function = <2>;
+>>> +                     samsung,pin-pud = <1>;
+>>> +                     samsung,pin-drv = <3>;
+>>> +             };
+>>> +
+>>>               sd1_cmd: sd1-cmd {
+>>>                       samsung,pins = "gpc1-1";
+>>>                       samsung,pin-function = <2>;
+>>> diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+>>> index 8be3d7b..5290e79 100644
+>>> --- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
+>>> +++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+>>> @@ -80,8 +80,10 @@
+>>>               samsung,dw-mshc-ciu-div = <3>;
+>>>               samsung,dw-mshc-sdr-timing = <0 4>;
+>>>               samsung,dw-mshc-ddr-timing = <0 2>;
+>>> +             samsung,dw-mshc-hs400-timing = <0 2>;
+>>> +             read-strobe-delay = <90>;
+>>>               pinctrl-names = "default";
+>>> -             pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+>>> +             pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
+>>>               bus-width = <8>;
+>>>               cap-mmc-highspeed;
+>>>       };
+>>> diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+>>> index e8fdda8..fa1c858 100644
+>>> --- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
+>>> +++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+>>> @@ -557,8 +557,10 @@
+>>>       samsung,dw-mshc-ciu-div = <3>;
+>>>       samsung,dw-mshc-sdr-timing = <0 4>;
+>>>       samsung,dw-mshc-ddr-timing = <0 2>;
+>>> +     samsung,dw-mshc-hs400-timing = <0 2>;
+>>> +     read-strobe-delay = <90>;
+>>>       pinctrl-names = "default";
+>>> -     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+>>> +     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
+>>>       bus-width = <8>;
+>>>  };
+>>>
+>>>
+>>
+> 
+> 
+> 
 
-This seems like the kind of thing that should go with the edma driver
-instead of being globally exported to the kernel through a
-include/linux header file.
-
-
--Olof
