@@ -1,101 +1,134 @@
 From: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: [PATCH v3 0/7] Fixes and improvements for SDHCI on Armada 38x
-Date: Fri, 23 Jan 2015 17:46:20 +0100
-Message-ID: <1422031587-18212-1-git-send-email-gregory.clement@free-electrons.com>
+Subject: [PATCH v3 4/7] mmc: sdhci-pxav3: Modify clock settings for the SDR50 and DDR50 modes
+Date: Fri, 23 Jan 2015 17:46:24 +0100
+Message-ID: <1422031587-18212-5-git-send-email-gregory.clement@free-electrons.com>
+References: <1422031587-18212-1-git-send-email-gregory.clement@free-electrons.com>
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1422031587-18212-1-git-send-email-gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
 Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Cc: Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ezequiel Garcia <ezequiel.garcia-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Boris BREZILLON <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Lior Amsalem <alior-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Tawfik Bayouk <tawfik-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ezequiel Garcia <ezequiel.garcia-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Boris BREZILLON <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Lior Amsalem <alior-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Tawfik Bayouk <tawfik-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Marcin Wojtas <mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+From: Marcin Wojtas <mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>
 
-this series brings fixes and improvements for the SDHCI controller of
-the Armada 38x SoCs.
+According to erratum 'FE-2946959' both SDR50 and DDR50 modes require
+specific clock adjustments in SDIO3 Configuration register.
 
-The changes for this third version was done on the second patch, see
-the changelog for the details.
+This commit add the support of this register and for SDR50 or DDR50
+mode use it as suggested by the erratum:
+- Set the SDIO3 Clock Inv field in SDIO3 Configuration register to not
+inverted.
+- Set the Sample FeedBack Clock field to 0x1
 
-The first two patches are fixes and should be also applied on the
-stable branch (I added stable in copy for this).
+[gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org: port from 3.10]
 
-The first one removes the SDR50 and DDR50 mode timing from the
-capabilities of the controller because the current implementation
-doesn't support it.
+Signed-off-by: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+---
+ drivers/mmc/host/sdhci-pxav3.c | 60 ++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 52 insertions(+), 8 deletions(-)
 
-The second one fix controller's caps according to the limitation of
-the hardware.
-
-The third one extends the Device Tree binding of the Armada 38x. It
-allows using the SDIO3 configuration register.
-
-The forth patch adds the support of this new register in the
-driver. Thanks to this one, specific clock adjustments can be done in
-order to support the SDR50 and DDR50 modes timing.
-
-The fifth patch is device tree clean-up.
-
-The sixth patch update the SDHCI node on Armada 38x in order to use
-the new register and then to be able to support the SDR50 and DDR50
-modes timing.
-
-Finally, the seventh patch add the description of SDHCI for the Armada
-388 RD board which was missing.
-
-Patches 1 to 4 should be merged through the mmc tree and patches 5 to
-7 should be merged through mvebu and then arm-soc.
-
-Patch 4 depend on patch 2.
-Patch 2 depend on patch 1.
-And patch 1 depend on commit aa8165f91442 "mmc: sdhci-pxav3: do the
-mbus window configuration after enabling clocks" which have been
-merged.
-
-But as all this patch should be merged through the same tree it would
-not be a problem
-
-The patches 5 to 7 depend on the patches already merged in mvebu.
-
-As they are fixes, patches 1 and 2 should be merged in 3.18-rc or at
-least in 3.19 and then they will be part of 3.18.1. For the other
-patches it would be nice if they could be part of 3.19.
-
-Thanks,
-
-Gregory
-
-Changelog:
-
-v2 -> v3:
-- Use of_property_read_bool() instead of of_get_property
-- Brace the else case according to the Documentation/CodingStyle
-- Move the setting of MMC_CAP_1_8V_DDR before the armada_38x_quirks
-  calls
-
-v1 -> v2:
-- Put back Marcin as author of patch 2 and 3
-- Removed MMC_CAP_1_8V_DDR in the probe function
-
-Gregory CLEMENT (5):
-  mmc: sdhci-pxav3: Fix SDR50 and DDR50 capabilities for the Armada 38x
-    flavor
-  mmc: sdhci-pxav3: Extend binding with SDIO3 conf reg for the Armada
-    38x
-  ARM: mvebu: Use macros for interrupt flags on Armada 38x sdhci node
-  ARM: mvebu: Update the SDHCI node on Armada 38x
-  ARM: mvebu: Add Device Tree description of SDHCI for Armada 388 RD
-
-Marcin Wojtas (2):
-  mmc: sdhci-pxav3: Fix Armada 38x controller's caps according to
-    erratum ERR-7878951
-  mmc: sdhci-pxav3: Modify clock settings for the SDR50 and DDR50 modes
-
- .../devicetree/bindings/mmc/sdhci-pxa.txt          | 15 +++-
- arch/arm/boot/dts/armada-388-rd.dts                | 10 +++
- arch/arm/boot/dts/armada-38x.dtsi                  |  7 +-
- drivers/mmc/host/sdhci-pxav3.c                     | 86 +++++++++++++++++++++-
- 4 files changed, 109 insertions(+), 9 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index cf017fc39143..a3ebb4404849 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -62,6 +62,7 @@ struct sdhci_pxa {
+ 	struct clk *clk_core;
+ 	struct clk *clk_io;
+ 	u8	power_mode;
++	void __iomem *sdio3_conf_reg;
+ };
+ 
+ /*
+@@ -72,6 +73,14 @@ struct sdhci_pxa {
+ #define SDHCI_WINDOW_BASE(i)	(0x84 + ((i) << 3))
+ #define SDHCI_MAX_WIN_NUM	8
+ 
++/*
++ * Fields below belong to SDIO3 Configuration Register (third register
++ * region for the Armada 38x flavor)
++ */
++
++#define SDIO3_CONF_CLK_INV	BIT(0)
++#define SDIO3_CONF_SD_FB_CLK	BIT(2)
++
+ static int mv_conf_mbus_windows(struct platform_device *pdev,
+ 				const struct mbus_dram_target_info *dram)
+ {
+@@ -122,16 +131,31 @@ static int armada_38x_quirks(struct platform_device *pdev,
+ 			     struct sdhci_host *host)
+ {
+ 	struct device_node *np = pdev->dev.of_node;
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_pxa *pxa = pltfm_host->priv;
++	struct resource *res;
+ 
+ 	host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
+-	/*
+-	 * According to erratum 'FE-2946959' both SDR50 and DDR50
+-	 * modes require specific clock adjustments in SDIO3
+-	 * Configuration register, if the adjustment is not done,
+-	 * remove them from the capabilities.
+-	 */
+-	host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
+-	host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
++	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
++					   "conf-sdio3");
++	if (res) {
++		pxa->sdio3_conf_reg = devm_ioremap_resource(&pdev->dev, res);
++		if (IS_ERR(pxa->sdio3_conf_reg))
++			return PTR_ERR(pxa->sdio3_conf_reg);
++	} else {
++		/*
++		 * According to erratum 'FE-2946959' both SDR50 and DDR50
++		 * modes require specific clock adjustments in SDIO3
++		 * Configuration register, if the adjustment is not done,
++		 * remove them from the capabilities.
++		 */
++		host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
++		host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
++
++		dev_warn(&pdev->dev, "conf-sdio3 register not found\n");
++		dev_warn(&pdev->dev, "disabling SDR50 and DDR50 modes\n");
++		dev_warn(&pdev->dev, "consider updating your dtb\n");
++	}
+ 
+ 	/*
+ 	 * According to erratum 'ERR-7878951' Armada 38x SDHCI
+@@ -226,6 +250,8 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
+ 
+ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+ {
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_pxa *pxa = pltfm_host->priv;
+ 	u16 ctrl_2;
+ 
+ 	/*
+@@ -255,6 +281,24 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+ 		break;
+ 	}
+ 
++	/*
++	 * Update SDIO3 Configuration register according to erratum
++	 * FE-2946959
++	 */
++	if (pxa->sdio3_conf_reg) {
++		u8 reg_val  = readb(pxa->sdio3_conf_reg);
++
++		if (uhs == MMC_TIMING_UHS_SDR50 ||
++		    uhs == MMC_TIMING_UHS_DDR50) {
++			reg_val &= ~SDIO3_CONF_CLK_INV;
++			reg_val |= SDIO3_CONF_SD_FB_CLK;
++		} else {
++			reg_val |= SDIO3_CONF_CLK_INV;
++			reg_val &= ~SDIO3_CONF_SD_FB_CLK;
++		}
++		writeb(reg_val, pxa->sdio3_conf_reg);
++	}
++
+ 	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+ 	dev_dbg(mmc_dev(host->mmc),
+ 		"%s uhs = %d, ctrl_2 = %04X\n",
 -- 
 2.1.0
 
