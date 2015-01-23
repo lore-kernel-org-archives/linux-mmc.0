@@ -1,87 +1,92 @@
-From: Marcin Wojtas <mw@semihalf.com>
-Subject: Re: [PATCH v2 2/7] mmc: sdhci-pxav3: Fix Armada 38x controller's caps
- according to erratum ERR-7878951
-Date: Fri, 23 Jan 2015 12:33:00 +0100
-Message-ID: <CAPv3WKe3BNLv1ODA1ZZ2ALWeEr2LrO0vZxi=mG3G+ObxSakeSA@mail.gmail.com>
-References: <1422010594-1735-1-git-send-email-gregory.clement@free-electrons.com>
-	<1422010594-1735-3-git-send-email-gregory.clement@free-electrons.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: sdhci-pxav3: fix race between runtime pm and irq
+Date: Fri, 23 Jan 2015 12:55:00 +0100
+Message-ID: <CAPDyKFo=F3qvVQTJhHNKm78VUY++4JYfdBUeJDM_vthJuuQq0g@mail.gmail.com>
+References: <1422007701-7496-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1422010594-1735-3-git-send-email-gregory.clement@free-electrons.com>
-Sender: stable-owner@vger.kernel.org
-To: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Boris BREZILLON <boris.brezillon@free-electrons.com>, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1422007701-7496-1-git-send-email-jszhang@marvell.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jisheng Zhang <jszhang@marvell.com>
+Cc: Chris Ball <chris@printf.net>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Dear Gregory,
-
-
-> @@ -118,8 +118,11 @@ static int mv_conf_mbus_windows(struct platform_device *pdev,
->         return 0;
->  }
+On 23 January 2015 at 11:08, Jisheng Zhang <jszhang@marvell.com> wrote:
+> This patch is to fix a race condition that may cause an unhandled irq,
+> which results in big sdhci interrupt numbers and endless "mmc1: got irq
+> while runtime suspended" msgs before v3.15.
 >
-> -static int armada_38x_quirks(struct sdhci_host *host)
-> +static int armada_38x_quirks(struct platform_device *pdev,
-> +                            struct sdhci_host *host)
->  {
-> +       struct device_node *np = pdev->dev.of_node;
-> +
->         host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
->         /*
->          * According to erratum 'FE-2946959' both SDR50 and DDR50
-> @@ -129,6 +132,20 @@ static int armada_38x_quirks(struct sdhci_host *host)
->          */
->         host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
->         host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
-> +
-> +       /*
-> +        * According to erratum 'ERR-7878951' Armada 38x SDHCI
-> +        * controller has different capabilities than the ones shown
-> +        * in its registers
-> +        */
-> +       host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-> +       if (of_get_property(np, "no-1-8-v", NULL)) {
-> +               host->caps &= ~SDHCI_CAN_VDD_180;
-> +               host->mmc->caps &= ~MMC_CAP_1_8V_DDR;
-> +       } else
-> +               host->caps &= ~SDHCI_CAN_VDD_330;
-
-In this "else" there is one thing missing
-host->mmc->caps |= MMC_CAP_1_8V_DDR;
-because it's not set by default, however it's not a must - please see
-my remark below.
-
-> +       host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_USE_SDR50_TUNING);
-> +
->         return 0;
->  }
+> Consider following scenario:
 >
-> @@ -333,7 +350,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+>       CPU0                            CPU1
+>                               sdhci_pxav3_runtime_suspend()
+>                                spin_lock_irqsave(&host->lock, flags);
+>  sdhci_irq()
+>   spining on the &host->lock
+>                                host->runtime_suspended = true;
+>                                spin_unlock_irqrestore(&host->lock, flags);
+>   get the &host->lock
+>   runtime_suspended is true now
+>   return IRQ_NONE;
+>
+> Fix this race by using the core sdhci.c supplied sdhci_runtime_suspend_host()
+> in runtime suspend hook which will disable card interrupts. We also use the
+> sdhci_runtime_resume_host() in the runtime resume hook accordingly.
+>
+> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+> Cc: <stable@vger.kernel.org> # v3.9+
+
+Thanks! Applied for next.
+
+Kind regards
+Uffe
+
+> ---
+> Changes in v2:
+>  return ret once sdhci_runtime_suspend_host() gives an error
+>  drivers/mmc/host/sdhci-pxav3.c | 15 +++++----------
+>  1 file changed, 5 insertions(+), 10 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+> index 4de39fb..e2817cc 100644
+> --- a/drivers/mmc/host/sdhci-pxav3.c
+> +++ b/drivers/mmc/host/sdhci-pxav3.c
+> @@ -460,11 +460,11 @@ static int sdhci_pxav3_runtime_suspend(struct device *dev)
+>         struct sdhci_host *host = dev_get_drvdata(dev);
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_pxa *pxa = pltfm_host->priv;
+> -       unsigned long flags;
+> +       int ret;
+>
+> -       spin_lock_irqsave(&host->lock, flags);
+> -       host->runtime_suspended = true;
+> -       spin_unlock_irqrestore(&host->lock, flags);
+> +       ret = sdhci_runtime_suspend_host(host);
+> +       if (ret)
+> +               return ret;
+>
+>         clk_disable_unprepare(pxa->clk_io);
+>         if (!IS_ERR(pxa->clk_core))
+> @@ -478,17 +478,12 @@ static int sdhci_pxav3_runtime_resume(struct device *dev)
+>         struct sdhci_host *host = dev_get_drvdata(dev);
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_pxa *pxa = pltfm_host->priv;
+> -       unsigned long flags;
+>
+>         clk_prepare_enable(pxa->clk_io);
+>         if (!IS_ERR(pxa->clk_core))
 >                 clk_prepare_enable(pxa->clk_core);
 >
->         if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
-> -               ret = armada_38x_quirks(host);
-> +               ret = armada_38x_quirks(pdev, host);
->                 if (ret < 0)
->                         goto err_quirks;
->                 ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
-> @@ -341,9 +358,6 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->                         goto err_mbus_win;
->         }
->
-> -       /* enable 1/8V DDR capable */
-> -       host->mmc->caps |= MMC_CAP_1_8V_DDR;
+> -       spin_lock_irqsave(&host->lock, flags);
+> -       host->runtime_suspended = false;
+> -       spin_unlock_irqrestore(&host->lock, flags);
 > -
-
-Now, with this change MMC_CAP_1_8V_DDR is disabled for devices other
-than Armada 38x, that use sdhci-pxav3. There are two options:
-1. Move those lines above the place where armada_38x_quirks is called
-(IMO the easiest option - 'else' in this function would not need to be
-supplemented, as I pointed above)
-2. Leave it "as is" here, but a condition below is needed (+
-supplementation of 'else' in armada_38x_quirks)
- if (!of_device_is_compatible(np, "marvell,armada-380-sdhci"))
-
-Best regards,
-Marcin
+> -       return 0;
+> +       return sdhci_runtime_resume_host(host);
+>  }
+>  #endif
+>
+> --
+> 2.1.4
+>
