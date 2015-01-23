@@ -1,92 +1,56 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-pxav3: fix race between runtime pm and irq
-Date: Fri, 23 Jan 2015 12:55:00 +0100
-Message-ID: <CAPDyKFo=F3qvVQTJhHNKm78VUY++4JYfdBUeJDM_vthJuuQq0g@mail.gmail.com>
-References: <1422007701-7496-1-git-send-email-jszhang@marvell.com>
+Subject: Re: [PATCH RESEND] mmc: mmci: Get rid of dead code in mmci_dma_setup
+Date: Fri, 23 Jan 2015 13:08:10 +0100
+Message-ID: <CAPDyKFpUGj=nJ9vHPOeHX+-KsgSVZ8ngnPgnri9gYa6Dp2ML1A@mail.gmail.com>
+References: <1421835437-26259-1-git-send-email-pramod.gurav@smartplayin.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1422007701-7496-1-git-send-email-jszhang@marvell.com>
+In-Reply-To: <1421835437-26259-1-git-send-email-pramod.gurav@smartplayin.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>
-Cc: Chris Ball <chris@printf.net>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, stable@vger.kernel.org
+To: Pramod Gurav <pramod.gurav@smartplayin.com>
+Cc: Russell King <linux@arm.linux.org.uk>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 23 January 2015 at 11:08, Jisheng Zhang <jszhang@marvell.com> wrote:
-> This patch is to fix a race condition that may cause an unhandled irq,
-> which results in big sdhci interrupt numbers and endless "mmc1: got irq
-> while runtime suspended" msgs before v3.15.
+On 21 January 2015 at 11:17, Pramod Gurav <pramod.gurav@smartplayin.com> wrote:
+> DMA configuration has been removed from function mmci_dma_setup but the
+> local mask variable was not removed. This remains unused hence remove
+> it from the function and operations on it
 >
-> Consider following scenario:
->
->       CPU0                            CPU1
->                               sdhci_pxav3_runtime_suspend()
->                                spin_lock_irqsave(&host->lock, flags);
->  sdhci_irq()
->   spining on the &host->lock
->                                host->runtime_suspended = true;
->                                spin_unlock_irqrestore(&host->lock, flags);
->   get the &host->lock
->   runtime_suspended is true now
->   return IRQ_NONE;
->
-> Fix this race by using the core sdhci.c supplied sdhci_runtime_suspend_host()
-> in runtime suspend hook which will disable card interrupts. We also use the
-> sdhci_runtime_resume_host() in the runtime resume hook accordingly.
->
-> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
-> Cc: <stable@vger.kernel.org> # v3.9+
+> Signed-off-by: Pramod Gurav <pramod.gurav@smartplayin.com>
 
 Thanks! Applied for next.
 
-Kind regards
+Kind  regards
 Uffe
 
 > ---
-> Changes in v2:
->  return ret once sdhci_runtime_suspend_host() gives an error
->  drivers/mmc/host/sdhci-pxav3.c | 15 +++++----------
->  1 file changed, 5 insertions(+), 10 deletions(-)
+>  drivers/mmc/host/mmci.c |    5 -----
+>  1 file changed, 5 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> index 4de39fb..e2817cc 100644
-> --- a/drivers/mmc/host/sdhci-pxav3.c
-> +++ b/drivers/mmc/host/sdhci-pxav3.c
-> @@ -460,11 +460,11 @@ static int sdhci_pxav3_runtime_suspend(struct device *dev)
->         struct sdhci_host *host = dev_get_drvdata(dev);
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_pxa *pxa = pltfm_host->priv;
-> -       unsigned long flags;
-> +       int ret;
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 47dcece..122a751 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -435,7 +435,6 @@ static void mmci_init_sg(struct mmci_host *host, struct mmc_data *data)
+>  static void mmci_dma_setup(struct mmci_host *host)
+>  {
+>         const char *rxname, *txname;
+> -       dma_cap_mask_t mask;
+>         struct variant_data *variant = host->variant;
 >
-> -       spin_lock_irqsave(&host->lock, flags);
-> -       host->runtime_suspended = true;
-> -       spin_unlock_irqrestore(&host->lock, flags);
-> +       ret = sdhci_runtime_suspend_host(host);
-> +       if (ret)
-> +               return ret;
+>         host->dma_rx_channel = dma_request_slave_channel(mmc_dev(host->mmc), "rx");
+> @@ -444,10 +443,6 @@ static void mmci_dma_setup(struct mmci_host *host)
+>         /* initialize pre request cookie */
+>         host->next_data.cookie = 1;
 >
->         clk_disable_unprepare(pxa->clk_io);
->         if (!IS_ERR(pxa->clk_core))
-> @@ -478,17 +478,12 @@ static int sdhci_pxav3_runtime_resume(struct device *dev)
->         struct sdhci_host *host = dev_get_drvdata(dev);
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_pxa *pxa = pltfm_host->priv;
-> -       unsigned long flags;
->
->         clk_prepare_enable(pxa->clk_io);
->         if (!IS_ERR(pxa->clk_core))
->                 clk_prepare_enable(pxa->clk_core);
->
-> -       spin_lock_irqsave(&host->lock, flags);
-> -       host->runtime_suspended = false;
-> -       spin_unlock_irqrestore(&host->lock, flags);
+> -       /* Try to acquire a generic DMA engine slave channel */
+> -       dma_cap_zero(mask);
+> -       dma_cap_set(DMA_SLAVE, mask);
 > -
-> -       return 0;
-> +       return sdhci_runtime_resume_host(host);
->  }
->  #endif
->
+>         /*
+>          * If only an RX channel is specified, the driver will
+>          * attempt to use it bidirectionally, however if it is
 > --
-> 2.1.4
+> 1.7.9.5
 >
