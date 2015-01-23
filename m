@@ -1,45 +1,42 @@
-From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: [PATCH v2 6/7] ARM: mvebu: Update the SDHCI node on Armada 38x
-Date: Fri, 23 Jan 2015 11:56:33 +0100
-Message-ID: <1422010594-1735-7-git-send-email-gregory.clement@free-electrons.com>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH v2 2/7] mmc: sdhci-pxav3: Fix Armada 38x controller's
+ caps according to erratum ERR-7878951
+Date: Fri, 23 Jan 2015 11:03:03 +0000
+Message-ID: <20150123110303.GD23493@leverpostej>
 References: <1422010594-1735-1-git-send-email-gregory.clement@free-electrons.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from down.free-electrons.com ([37.187.137.238]:49679 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1755116AbbAWK5C (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Jan 2015 05:57:02 -0500
-In-Reply-To: <1422010594-1735-1-git-send-email-gregory.clement@free-electrons.com>
-Sender: linux-mmc-owner@vger.kernel.org
+ <1422010594-1735-3-git-send-email-gregory.clement@free-electrons.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <stable-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1422010594-1735-3-git-send-email-gregory.clement@free-electrons.com>
+Sender: stable-owner@vger.kernel.org
+To: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Boris BREZILLON <boris.brezillon@free-electrons.com>, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Nadav Haklai <nadavh@marvell.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Marcin Wojtas <mw@semihalf.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Maxime Ripard <maxime.ripard@free-electrons.com>, Boris BREZILLON <boris.brezillon@free-electrons.com>, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org
 
-The binding of the armada-380-sdhci has been extended with a new
-register in order to be able to use the SDR50 and DDR50 mode. This
-commit add the resource associated to this new register for the
-Armada 38x.
+[...]
 
-Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
----
- arch/arm/boot/dts/armada-38x.dtsi | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+> +	/*
+> +	 * According to erratum 'ERR-7878951' Armada 38x SDHCI
+> +	 * controller has different capabilities than the ones shown
+> +	 * in its registers
+> +	 */
+> +	host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+> +	if (of_get_property(np, "no-1-8-v", NULL)) {
 
-diff --git a/arch/arm/boot/dts/armada-38x.dtsi b/arch/arm/boot/dts/armada-38x.dtsi
-index 71d4eca5b497..474b2ebf4a82 100644
---- a/arch/arm/boot/dts/armada-38x.dtsi
-+++ b/arch/arm/boot/dts/armada-38x.dtsi
-@@ -515,7 +515,10 @@
- 
- 			sdhci@d8000 {
- 				compatible = "marvell,armada-380-sdhci";
--				reg = <0xd8000 0x1000>, <0xdc000 0x100>;
-+				reg-names = "sdhci", "mbus", "conf-sdio3";
-+				reg = <0xd8000 0x1000>,
-+					<0xdc000 0x100>,
-+					<0x18454 0x4>;
- 				interrupts = <GIC_SPI 25 IRQ_TYPE_LEVEL_HIGH>;
- 				clocks = <&gateclk 17>;
- 				mrvl,clk-delay-cycles = <0x1F>;
--- 
-2.1.0
+Please use of_property_read_bool(np, "no-1-8-v")
 
+> +		host->caps &= ~SDHCI_CAN_VDD_180;
+> +		host->mmc->caps &= ~MMC_CAP_1_8V_DDR;
+
+Is SDHCI_CAN_VDD_330 always set elsewhere in this case?
+
+> +	} else
+> +		host->caps &= ~SDHCI_CAN_VDD_330;
+
+If one branch in an if-else pair is braced, both sides should be (as
+Documentation/CodingStyle says). Please brace the else case.
+
+Thanks,
+Mark.
