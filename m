@@ -1,82 +1,79 @@
-From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH v2] mmc: sdhci-pxav3: fix race between runtime pm and irq
-Date: Fri, 23 Jan 2015 18:08:21 +0800
-Message-ID: <1422007701-7496-1-git-send-email-jszhang@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <stable-owner@vger.kernel.org>
-Sender: stable-owner@vger.kernel.org
-To: chris@printf.net, ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com
-Cc: thomas.petazzoni@free-electrons.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jisheng Zhang <jszhang@marvell.com>, stable@vger.kernel.org
+From: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: [PATCH v2 1/7] mmc: sdhci-pxav3: Fix SDR50 and DDR50 capabilities for the Armada 38x flavor
+Date: Fri, 23 Jan 2015 11:56:28 +0100
+Message-ID: <1422010594-1735-2-git-send-email-gregory.clement@free-electrons.com>
+References: <1422010594-1735-1-git-send-email-gregory.clement@free-electrons.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1422010594-1735-1-git-send-email-gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ezequiel Garcia <ezequiel.garcia-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Boris BREZILLON <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Lior Amsalem <alior-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Tawfik Bayouk <tawfik-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Marcin Wojtas <mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch is to fix a race condition that may cause an unhandled irq,
-which results in big sdhci interrupt numbers and endless "mmc1: got irq
-while runtime suspended" msgs before v3.15.
+According to erratum 'FE-2946959' both SDR50 and DDR50 modes require
+specific clock adjustments in SDIO3 Configuration register. However,
+this register was not part of the device tree binding. Even if the
+binding can (and will) be extended we still need handling the case
+where this register was not available. In this case we use the
+SDHCI_QUIRK_MISSING_CAPS quirk remove them from the capabilities.
 
-Consider following scenario:
+This commit is based on the work done by Marcin Wojtas<mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>
 
-      CPU0                            CPU1
-                              sdhci_pxav3_runtime_suspend()
-                               spin_lock_irqsave(&host->lock, flags);
- sdhci_irq()
-  spining on the &host->lock
-                               host->runtime_suspended = true;
-                               spin_unlock_irqrestore(&host->lock, flags);
-  get the &host->lock
-  runtime_suspended is true now
-  return IRQ_NONE;
-
-Fix this race by using the core sdhci.c supplied sdhci_runtime_suspend_host()
-in runtime suspend hook which will disable card interrupts. We also use the
-sdhci_runtime_resume_host() in the runtime resume hook accordingly.
-
-Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
-Cc: <stable@vger.kernel.org> # v3.9+
+Fixes: 5491ce3f79ee ("mmc: sdhci-pxav3: add support for the Armada 38x SDHCI controller")
+Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org> # v3.15+
+Signed-off-by: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Signed-off-by: Marcin Wojtas <mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>
 ---
-Changes in v2:
- return ret once sdhci_runtime_suspend_host() gives an error
- drivers/mmc/host/sdhci-pxav3.c | 15 +++++----------
- 1 file changed, 5 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sdhci-pxav3.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 4de39fb..e2817cc 100644
+index ca3424e7ef71..7b07325b4fba 100644
 --- a/drivers/mmc/host/sdhci-pxav3.c
 +++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -460,11 +460,11 @@ static int sdhci_pxav3_runtime_suspend(struct device *dev)
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_pxa *pxa = pltfm_host->priv;
--	unsigned long flags;
-+	int ret;
+@@ -118,6 +118,20 @@ static int mv_conf_mbus_windows(struct platform_device *pdev,
+ 	return 0;
+ }
  
--	spin_lock_irqsave(&host->lock, flags);
--	host->runtime_suspended = true;
--	spin_unlock_irqrestore(&host->lock, flags);
-+	ret = sdhci_runtime_suspend_host(host);
-+	if (ret)
-+		return ret;
- 
- 	clk_disable_unprepare(pxa->clk_io);
- 	if (!IS_ERR(pxa->clk_core))
-@@ -478,17 +478,12 @@ static int sdhci_pxav3_runtime_resume(struct device *dev)
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_pxa *pxa = pltfm_host->priv;
--	unsigned long flags;
- 
- 	clk_prepare_enable(pxa->clk_io);
- 	if (!IS_ERR(pxa->clk_core))
++static int armada_38x_quirks(struct sdhci_host *host)
++{
++	host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
++	/*
++	 * According to erratum 'FE-2946959' both SDR50 and DDR50
++	 * modes require specific clock adjustments in SDIO3
++	 * Configuration register, if the adjustment is not done,
++	 * remove them from the capabilities.
++	 */
++	host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
++	host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
++	return 0;
++}
++
+ static void pxav3_reset(struct sdhci_host *host, u8 mask)
+ {
+ 	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
+@@ -319,6 +333,9 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
  		clk_prepare_enable(pxa->clk_core);
  
--	spin_lock_irqsave(&host->lock, flags);
--	host->runtime_suspended = false;
--	spin_unlock_irqrestore(&host->lock, flags);
--
--	return 0;
-+	return sdhci_runtime_resume_host(host);
+ 	if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
++		ret = armada_38x_quirks(host);
++		if (ret < 0)
++			goto err_quirks;
+ 		ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
+ 		if (ret < 0)
+ 			goto err_mbus_win;
+@@ -400,6 +417,7 @@ err_mbus_win:
+ 	if (!IS_ERR(pxa->clk_core))
+ 		clk_disable_unprepare(pxa->clk_core);
+ err_clk_get:
++err_quirks:
+ 	sdhci_pltfm_free(pdev);
+ 	return ret;
  }
- #endif
- 
 -- 
-2.1.4
+2.1.0
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
