@@ -1,40 +1,26 @@
-From: Dmitry Torokhov <dmitry.torokhov@gmail.com>
-Subject: [PATCH] mmc: dw_mmc: exynos: remove incorrect __exit_p()
-Date: Fri, 23 Jan 2015 16:33:40 -0800
-Message-ID: <20150124003340.GA16286@dtor-ws>
+From: "Krause Arno" <oficina@la-oca.com>
+Subject: Darlehen Angebot
+Date: Sat, 24 Jan 2015 03:11:19 +0100
+Message-ID: <cae57c4fcb9d565050de7f1040bc9abc.squirrel__42801.9337975003$1422069072$gmane$org@la-oca.com>
+Reply-To: krause.arno@yahoo.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Kukjin Kim <kgene@kernel.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Beomho Seo <beomho.seo@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from vl22022.dns-privadas.es ([212.48.80.61]:49987 "EHLO
+	vl22022.dns-privadas.es" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750820AbbAXDKo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Jan 2015 22:10:44 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-dw_mci_pltfm_remove() is not (nor should it be) marked as __exit,
-so we should not be using __exit_p() wrapper with it.
-
-Signed-off-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
----
- drivers/mmc/host/dw_mmc-exynos.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 12a5eaa..fe32948 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -422,7 +422,7 @@ static const struct dev_pm_ops dw_mci_exynos_pmops = {
- 
- static struct platform_driver dw_mci_exynos_pltfm_driver = {
- 	.probe		= dw_mci_exynos_probe,
--	.remove		= __exit_p(dw_mci_pltfm_remove),
-+	.remove		= dw_mci_pltfm_remove,
- 	.driver		= {
- 		.name		= "dwmmc_exynos",
- 		.of_match_table	= dw_mci_exynos_match,
--- 
-2.2.0.rc0.207.ga3a616c
 
 
--- 
-Dmitry
+
+Guten Morgen
+Sind Sie in Darlehen interessiert?
+Der Preis ist niedrig
+=46=FCr weitere Informationen und Erkl=E4rungen
+Meine E-Mail: info.krause.arno@gmail.com
+Danke
+
