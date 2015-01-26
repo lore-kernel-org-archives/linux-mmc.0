@@ -1,47 +1,31 @@
-From: Jean Delvare <jdelvare@suse.de>
-Subject: [PATCH] mmc: Enable Ricoh MMC quirk by default
-Date: Mon, 26 Jan 2015 11:44:15 +0100
-Message-ID: <20150126114415.00369e32@endymion.delvare>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+From: Addy Ke <addy.ke@rock-chips.com>
+Subject: [PATCH 0/2] fix bug that cause tuning failure
+Date: Mon, 26 Jan 2015 19:19:33 +0800
+Message-ID: <1422271175-19445-1-git-send-email-addy.ke@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:47769 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754359AbbAZKoS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 26 Jan 2015 05:44:18 -0500
+Received: from regular1.263xmail.com ([211.150.99.132]:54732 "EHLO
+	regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753005AbbAZLVx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Jan 2015 06:21:53 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Philipl Langdale <philipl@overt.org>
+To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org, amstan@chromium.org
+Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com, Addy Ke <addy.ke@rock-chips.com>
 
-Config option MMC_RICOH_MMC's help text reads:
+Addy Ke (2):
+  mmc: core: use card pointer as the first parameter of execute_tuning()
+  mmc: dw_mmc: wait until card ready if tuning fails
 
-	  If unsure, say Y.
-
-However the option defaults to N. Set the default to Y to match the
-recommendation in the help text.
-
-Signed-off-by: Jean Delvare <jdelvare@suse.de>
-Cc: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Philipl Langdale <philipl@overt.org>
----
- drivers/mmc/host/Kconfig |    1 +
- 1 file changed, 1 insertion(+)
-
---- linux-3.19-rc6.orig/drivers/mmc/host/Kconfig	2015-01-26 11:39:05.048048277 +0100
-+++ linux-3.19-rc6/drivers/mmc/host/Kconfig	2015-01-26 11:39:27.121513084 +0100
-@@ -83,6 +83,7 @@ config MMC_SDHCI_PCI
- config MMC_RICOH_MMC
- 	bool "Ricoh MMC Controller Disabler"
- 	depends on MMC_SDHCI_PCI
-+	default y
- 	help
- 	  This adds a pci quirk to disable Ricoh MMC Controller. This
- 	  proprietary controller is unnecessary because the SDHCI driver
-
+ drivers/mmc/core/core.c           |  2 +-
+ drivers/mmc/core/mmc_ops.h        |  1 -
+ drivers/mmc/host/dw_mmc.c         | 51 +++++++++++++++++++++++++++++++++------
+ drivers/mmc/host/rtsx_pci_sdmmc.c |  3 ++-
+ drivers/mmc/host/rtsx_usb_sdmmc.c |  3 ++-
+ include/linux/mmc/card.h          |  2 ++
+ include/linux/mmc/host.h          |  2 +-
+ 7 files changed, 52 insertions(+), 12 deletions(-)
 
 -- 
-Jean Delvare
-SUSE L3 Support
+1.8.3.2
+
+
