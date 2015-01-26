@@ -1,112 +1,122 @@
-From: Marcin Wojtas <mw@semihalf.com>
-Subject: Re: [PATCH v3 2/7] mmc: sdhci-pxav3: Fix Armada 38x controller's caps
- according to erratum ERR-7878951
-Date: Mon, 26 Jan 2015 13:57:52 +0100
-Message-ID: <CAPv3WKcVAea-ePkeO32Z2mqPzfExg0iBy7DQh00vHKxfLDSFsQ@mail.gmail.com>
-References: <1422031587-18212-1-git-send-email-gregory.clement@free-electrons.com>
-	<1422031587-18212-3-git-send-email-gregory.clement@free-electrons.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 1/2] mmc: core: use card pointer as the first parameter of execute_tuning()
+Date: Mon, 26 Jan 2015 16:15:44 +0100
+Message-ID: <CAPDyKFp=5epMggHu0+u_LU7ETujcoeP2xOpB7iD6JF2bs8BnEA@mail.gmail.com>
+References: <1422271175-19445-1-git-send-email-addy.ke@rock-chips.com>
+	<1422271175-19445-2-git-send-email-addy.ke@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1422031587-18212-3-git-send-email-gregory.clement@free-electrons.com>
-Sender: stable-owner@vger.kernel.org
-To: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Boris BREZILLON <boris.brezillon@free-electrons.com>, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1422271175-19445-2-git-send-email-addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, =?UTF-8?Q?Pawe=C5=82_Moll?= <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org" <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Dinh Nguyen <dinguyen-EIB2kfCEclfQT0dZR+AlfA@public.gmane.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Sonny Rao <sonnyrao-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Alexandru Stan <amstan-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWPdpHbCvnp+Ag@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Gregory,
+On 26 January 2015 at 12:19, Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
+> We need to take the card pointer in execute_tuning() for mmc_send_status(),
 
-This patch looks alright to me now.
+mmc_send_status() is an mmc core function, not intended for host's to call.
 
-Thanks,
-Marcin
+> but mmc->card is NULL in tuning state. So we need change the first parameter
+> of execute_tuning() to card pointer(struct mmc_card * card).
 
-2015-01-23 17:46 GMT+01:00 Gregory CLEMENT <gregory.clement@free-electrons.com>:
-> From: Marcin Wojtas <mw@semihalf.com>
+So, why do we need this?
+
+Kind regards
+Uffe
+
 >
-> According to erratum 'ERR-7878951' Armada 38x SDHCI controller has
-> different capabilities than the ones shown in its registers:
->
-> - it doesn't support the voltage switching: it can work either with
->   3.3V or 1.8V supply
-> - it doesn't support the SDR104 mode
-> - SDR50 mode doesn't need tuning
->
-> The SDHCI_QUIRK_MISSING_CAPS quirk is used for updating the
-> capabilities accordingly.
->
-> [gregory.clement@free-electrons.com: port from 3.10]
->
-> Fixes: 5491ce3f79ee ("mmc: sdhci-pxav3: add support for the Armada 38x SDHCI controller")
-> Cc: <stable@vger.kernel.org> # v3.15+
->
-> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+> Signed-off-by: Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 > ---
->  drivers/mmc/host/sdhci-pxav3.c | 28 +++++++++++++++++++++++-----
->  1 file changed, 23 insertions(+), 5 deletions(-)
+>  drivers/mmc/core/core.c           | 2 +-
+>  drivers/mmc/host/dw_mmc.c         | 3 ++-
+>  drivers/mmc/host/rtsx_pci_sdmmc.c | 3 ++-
+>  drivers/mmc/host/rtsx_usb_sdmmc.c | 3 ++-
+>  include/linux/mmc/host.h          | 2 +-
+>  5 files changed, 8 insertions(+), 5 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> index 7b07325b4fba..cf017fc39143 100644
-> --- a/drivers/mmc/host/sdhci-pxav3.c
-> +++ b/drivers/mmc/host/sdhci-pxav3.c
-> @@ -118,8 +118,11 @@ static int mv_conf_mbus_windows(struct platform_device *pdev,
->         return 0;
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 1be7055..271f024 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1101,7 +1101,7 @@ int mmc_execute_tuning(struct mmc_card *card)
+>                 opcode = MMC_SEND_TUNING_BLOCK;
+>
+>         mmc_host_clk_hold(host);
+> -       err = host->ops->execute_tuning(host, opcode);
+> +       err = host->ops->execute_tuning(card, opcode);
+>         mmc_host_clk_release(host);
+>
+>         if (err)
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 4bd22af..e54e656 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1485,8 +1485,9 @@ free_blk_test:
+>         return ret;
 >  }
 >
-> -static int armada_38x_quirks(struct sdhci_host *host)
-> +static int armada_38x_quirks(struct platform_device *pdev,
-> +                            struct sdhci_host *host)
+> -static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> +static int dw_mci_execute_tuning(struct mmc_card *card, u32 opcode)
 >  {
-> +       struct device_node *np = pdev->dev.of_node;
-> +
->         host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
->         /*
->          * According to erratum 'FE-2946959' both SDR50 and DDR50
-> @@ -129,6 +132,21 @@ static int armada_38x_quirks(struct sdhci_host *host)
->          */
->         host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
->         host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
-> +
-> +       /*
-> +        * According to erratum 'ERR-7878951' Armada 38x SDHCI
-> +        * controller has different capabilities than the ones shown
-> +        * in its registers
-> +        */
-> +       host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-> +       if (of_property_read_bool(np, "no-1-8-v")) {
-> +               host->caps &= ~SDHCI_CAN_VDD_180;
-> +               host->mmc->caps &= ~MMC_CAP_1_8V_DDR;
-> +       } else {
-> +               host->caps &= ~SDHCI_CAN_VDD_330;
-> +       }
-> +       host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_USE_SDR50_TUNING);
-> +
->         return 0;
+> +       struct mmc_host *mmc = card->host;
+>         struct dw_mci_slot *slot = mmc_priv(mmc);
+>         struct dw_mci *host = slot->host;
+>         const struct dw_mci_drv_data *drv_data = host->drv_data;
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index 1d3d6c4..230bd2f 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -1270,8 +1270,9 @@ out:
+>         return err;
 >  }
 >
-> @@ -332,8 +350,11 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->         if (!IS_ERR(pxa->clk_core))
->                 clk_prepare_enable(pxa->clk_core);
+> -static int sdmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> +static int sdmmc_execute_tuning(struct mmc_card *card, u32 opcode)
+>  {
+> +       struct mmc_host *mmc = card->host;
+>         struct realtek_pci_sdmmc *host = mmc_priv(mmc);
+>         struct rtsx_pcr *pcr = host->pcr;
+>         int err = 0;
+> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> index 88af827..c494c06 100644
+> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> @@ -1265,8 +1265,9 @@ out:
+>                 return 0;
+>  }
 >
-> +       /* enable 1/8V DDR capable */
-> +       host->mmc->caps |= MMC_CAP_1_8V_DDR;
-> +
->         if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
-> -               ret = armada_38x_quirks(host);
-> +               ret = armada_38x_quirks(pdev, host);
->                 if (ret < 0)
->                         goto err_quirks;
->                 ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
-> @@ -341,9 +362,6 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->                         goto err_mbus_win;
->         }
+> -static int sdmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> +static int sdmmc_execute_tuning(struct mmc_card *card, u32 opcode)
+>  {
+> +       struct mmc_host *mmc = card->host;
+>         struct rtsx_usb_sdmmc *host = mmc_priv(mmc);
+>         struct rtsx_ucr *ucr = host->ucr;
+>         int err = 0;
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 0c8cbe5..ec4128e 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -133,7 +133,7 @@ struct mmc_host_ops {
+>         int     (*card_busy)(struct mmc_host *host);
 >
-> -       /* enable 1/8V DDR capable */
-> -       host->mmc->caps |= MMC_CAP_1_8V_DDR;
-> -
->         match = of_match_device(of_match_ptr(sdhci_pxav3_of_match), &pdev->dev);
->         if (match) {
->                 ret = mmc_of_parse(host->mmc);
+>         /* The tuning command opcode value is different for SD and eMMC cards */
+> -       int     (*execute_tuning)(struct mmc_host *host, u32 opcode);
+> +       int     (*execute_tuning)(struct mmc_card *card, u32 opcode);
+>
+>         /* Prepare HS400 target operating frequency depending host driver */
+>         int     (*prepare_hs400_tuning)(struct mmc_host *host, struct mmc_ios *ios);
 > --
-> 2.1.0
+> 1.8.3.2
 >
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
