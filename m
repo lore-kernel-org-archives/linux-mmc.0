@@ -1,85 +1,152 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH] mmc: sdhci: Don't signal the sdio irq if it's not setup
-Date: Sun, 25 Jan 2015 17:54:12 +0000
-Message-ID: <20150125175411.GG26493@n2100.arm.linux.org.uk>
-References: <1421705229-20260-1-git-send-email-sjoerd.simons@collabora.co.uk>
- <20150125174516.GC6467@kroah.com>
+From: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Subject: Re: [PATCH 3/3] ARM: edma: Split up header file to
+ platform_data and API file
+Date: Mon, 26 Jan 2015 09:29:56 +0200
+Message-ID: <54C5ECF4.10709@ti.com>
+References: <1417084891-17990-1-git-send-email-peter.ujfalusi@ti.com>	<1417084891-17990-4-git-send-email-peter.ujfalusi@ti.com>
+ <CAOesGMgdLB9WkOwCt__iRMnTYZ-tMNS==FL+b6s3CzHK4b0MYQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:53129 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753976AbbAYRye (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Jan 2015 12:54:34 -0500
-Content-Disposition: inline
-In-Reply-To: <20150125174516.GC6467@kroah.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <alsa-devel-bounces@alsa-project.org>
+In-Reply-To: <CAOesGMgdLB9WkOwCt__iRMnTYZ-tMNS==FL+b6s3CzHK4b0MYQ@mail.gmail.com>
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Errors-To: alsa-devel-bounces@alsa-project.org
+Sender: alsa-devel-bounces@alsa-project.org
+To: Olof Johansson <olof@lixom.net>
+Cc: "alsa-devel@alsa-project.org" <alsa-devel@alsa-project.org>, linux-omap <linux-omap@vger.kernel.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Arnd Bergmann <arnd@arndb.de>, "Koul, Vinod" <vinod.koul@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, Liam Girdwood <lgirdwood@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kevin Hilman <khilman@deeprootsystems.com>, Tony Lindgren <tony@atomide.com>, Mark Brown <broonie@kernel.org>, Chris Ball <chris@printf.net>, "dmaengine@vger.kernel.org" <dmaengine@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-spi@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Greg KH <greg@kroah.com>
-Cc: Sjoerd Simons <sjoerd.simons@collabora.co.uk>, stable@vger.kernel.org, Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Tyler Baker <tyler.baker@linaro.org>
 
-On Sun, Jan 25, 2015 at 09:45:16AM -0800, Greg KH wrote:
-> On Mon, Jan 19, 2015 at 11:07:09PM +0100, Sjoerd Simons wrote:
-> > With 3.14.29 (and older kernels) some of my I.mx6 Sabrelite boards were
-> > crashing with the following oops:
-> > 
-> >   sdhci: Secure Digital Host Controller Interface driver
-> >   sdhci: Copyright(c) Pierre Ossman
-> >   sdhci-pltfm: SDHCI platform and OF driver helper
-> >   sdhci-esdhc-imx 2198000.usdhc: could not get ultra high speed state, work on normal mode
-> >   mmc0: no vqmmc regulator found
-> >   mmc0: SDHCI controller on 2198000.usdhc [2198000.usdhc] using ADMA
-> >   Unable to handle kernel NULL pointer dereference at virtual address 00000000
-> >   pgd = c0004000
-> >   [00000000] *pgd=00000000
-> >   Internal error: Oops: 5 [#1] SMP ARM
-> >   Modules linked in:
-> >   CPU: 0 PID: 0 Comm: swapper/0 Not tainted 3.14.29 #1
-> >   task: c08a7120 ti: c089c000 task.ti: c089c000
-> >   PC is at wake_up_process+0x8/0x40
-> >   LR is at sdhci_irq+0x748/0x9c4
-> > 
-> > Full boot log can be found at:
-> >   http://storage.kernelci.org/stable/v3.14.29/arm-multi_v7_defconfig/lab-collabora/boot-imx6q-sabrelite.html
-> > 
-> > This happens if the sdhci interrupt status contains SDHCI_INT_CARD_INT,
-> > while the sdio irq was never setup.  This patch fixes that in a minimal
-> > way by checking if the sdio irq was setup.
-> > 
-> > In more recent kernels this bug went away due to refactoring done by
-> > Russel King. So an alternative (potentially better?) fix for this patch
-> > is to cherrypick the following patches from a recent kernel:
-> > 
-> > 18258f7239a6 - genirq: Provide synchronize_hardirq()
-> > bf3b5ec66bd0 - mmc: sdio_irq: rework sdio irq handling
-> > 41005003bcaf - mmc: sdhci: clean up interrupt handling
-> > 781e989cf593 - mmc: sdhci: convert to new SDIO IRQ handling
-> > 
-> > Signed-off-by: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
-> > ---
-> >  drivers/mmc/host/sdhci.c | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> I don't understand, either take 4 patches, or this single-line patches?
+Hi,
 
-The four patches are to do with making the driver more correct, and
-fixing quite a horrid pile of crap in the MMC core for SDIO interrupts.
-It's entirely possible that they also fix some other additional problems
-which a single line patch would also fix.
+On 01/22/2015 03:40 AM, Olof Johansson wrote:
+> Hi,
+> =
 
-The sdhci driver is a stinking shitpile which needs to be rewritten from
-scratch - it's had quirk after quirk added to it which makes it a total
-unmaintainable mess, and I've seen nothing recent which suggests that
-process is going to stop.  I think eventually, every single real line
-in the driver is going to depend on a quirk bit so that users of it can
-pick and choose which statements get executed.  Really, that's the
-direction it seems to be heading, and no one seems to be saying "stop,
-no, that's not a maintainable way forward."
+> On Thu, Nov 27, 2014 at 2:41 AM, Peter Ujfalusi <peter.ujfalusi@ti.com> w=
+rote:
+>> include/linux/platform_data/ is not a correct place to keep the API
+>> definitions for edma, it is meant to be only for the pdata for the devic=
+e.
+>> Clean up this by moving the API to include/linux/edma.h
+> =
 
-I seemed to be the only one who decided to put some effort in to try
-and reverse that trend with my mega patch set for it a few kernel
-cycles ago which included the above four patches.
+> It's a nice net improvement, but it moves some things that should be
+> in _neither_ location to a new place where it doesn't belong either --
+> and the new location is even more global. See below.
+> =
 
--- 
-FTTC broadband for 0.8mile line: currently at 10.5Mbps down 400kbps up
-according to speedtest.net.
+> ...
+> =
+
+>> diff --git a/include/linux/edma.h b/include/linux/edma.h
+>> new file mode 100644
+>> index 000000000000..9df92198c117
+>> --- /dev/null
+>> +++ b/include/linux/edma.h
+>> @@ -0,0 +1,153 @@
+>> +/*
+>> + * TI EDMA definitions
+>> + *
+>> + * Copyright (C) 2006-2013 Texas Instruments.
+>> + *
+>> + * This program is free software; you can redistribute it and/or
+>> + * modify it under the terms of the GNU General Public License as
+>> + * published by the Free Software Foundation version 2.
+>> + *
+>> + * This program is distributed "as is" WITHOUT ANY WARRANTY of any
+>> + * kind, whether express or implied; without even the implied warranty
+>> + * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> + * GNU General Public License for more details.
+>> + */
+>> +
+>> +/*
+>> + * This EDMA3 programming framework exposes two basic kinds of resource:
+>> + *
+>> + *  Channel    Triggers transfers, usually from a hardware event but
+>> + *             also manually or by "chaining" from DMA completions.
+>> + *             Each channel is coupled to a Parameter RAM (PaRAM) slot.
+>> + *
+>> + *  Slot       Each PaRAM slot holds a DMA transfer descriptor (PaRAM
+>> + *             "set"), source and destination addresses, a link to a
+>> + *             next PaRAM slot (if any), options for the transfer, and
+>> + *             instructions for updating those addresses.  There are
+>> + *             more than twice as many slots as event channels.
+>> + *
+>> + * Each PaRAM set describes a sequence of transfers, either for one lar=
+ge
+>> + * buffer or for several discontiguous smaller buffers.  An EDMA transf=
+er
+>> + * is driven only from a channel, which performs the transfers specified
+>> + * in its PaRAM slot until there are no more transfers.  When that last
+>> + * transfer completes, the "link" field may be used to reload the chann=
+el's
+>> + * PaRAM slot with a new transfer descriptor.
+>> + *
+>> + * The EDMA Channel Controller (CC) maps requests from channels into ph=
+ysical
+>> + * Transfer Controller (TC) requests when the channel triggers (by hard=
+ware
+>> + * or software events, or by chaining).  The two physical DMA channels =
+provided
+>> + * by the TCs are thus shared by many logical channels.
+>> + *
+>> + * DaVinci hardware also has a "QDMA" mechanism which is not currently
+>> + * supported through this interface.  (DSP firmware uses it though.)
+>> + */
+>> +
+>> +#ifndef __LINUX_EDMA_H_
+>> +#define __LINUX_EDMA_H_
+>> +
+>> +#include <linux/platform_data/edma.h>
+>> +
+>> +/* PaRAM slots are laid out like this */
+>> +struct edmacc_param {
+>> +       u32 opt;
+>> +       u32 src;
+>> +       u32 a_b_cnt;
+>> +       u32 dst;
+>> +       u32 src_dst_bidx;
+>> +       u32 link_bcntrld;
+>> +       u32 src_dst_cidx;
+>> +       u32 ccnt;
+>> +} __packed;
+>> +
+>> +/* fields in edmacc_param.opt */
+>> +#define SAM            BIT(0)
+>> +#define DAM            BIT(1)
+>> +#define SYNCDIM                BIT(2)
+>> +#define STATIC         BIT(3)
+>> +#define EDMA_FWID      (0x07 << 8)
+>> +#define TCCMODE                BIT(11)
+>> +#define EDMA_TCC(t)    ((t) << 12)
+>> +#define TCINTEN                BIT(20)
+>> +#define ITCINTEN       BIT(21)
+>> +#define TCCHEN         BIT(22)
+>> +#define ITCCHEN                BIT(23)
+> =
+
+> This seems like the kind of thing that should go with the edma driver
+> instead of being globally exported to the kernel through a
+> include/linux header file.
+
+Currently the edmacc_param struct is used by arch/arm/common/edma.c,
+drivers/dma/edma.c and the sound/soc/davinci/davinci-pcm.c
+
+For now this has to be in a global header file. Even with my local VIP bran=
+ch
+where I had removed the davinci-pcm already the two drivers for edma needs
+this in global header file.
+I can assure you, it will be gone (along with the arch/arm/common/edma.c) b=
+ut
+not right away.
+
+-- =
+
+P=E9ter
