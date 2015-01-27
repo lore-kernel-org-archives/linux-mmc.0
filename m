@@ -1,35 +1,45 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v1 2/2] arm64: dts: Add the arasan sdhc nodes in apm-storm.dtsi.
-Date: Tue, 27 Jan 2015 21:13:51 +0100
-Message-ID: <4747424.udeKOcy6tC@wuerfel>
-References: <1422379260-10139-1-git-send-email-stripathi@apm.com> <1422379260-10139-3-git-send-email-stripathi@apm.com>
+From: NeilBrown <neilb@suse.de>
+Subject: [PATCH-RFC 0/3] mmc: switch to 1-bit mode which stopping clocks.
+Date: Wed, 28 Jan 2015 10:35:24 +1100
+Message-ID: <20150127233118.32160.11899.stgit@notabene.brown>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.13]:50104 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753535AbbA0UOB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Jan 2015 15:14:01 -0500
-In-Reply-To: <1422379260-10139-3-git-send-email-stripathi@apm.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: GTA04 owners <gta04-owner@goldelico.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Suman Tripathi <stripathi@apm.com>
-Cc: chris@printf.net, anton@enomsg.org, linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ddutile@redhat.com, jcm@redhat.com, mlangsdo@redhat.com, patches@apm.com
 
-On Tuesday 27 January 2015 22:51:00 Suman Tripathi wrote:
-> 
-> +               sdhc0: sdhc@1c000000 {
-> +                       device_type = "sdhc";
-> +                       compatible = "arasan,sdhci-8.9a";
-> +                       reg = <0x0 0x1c000000 0x0 0x100>;
-> +                       interrupts = <0x0 0x49 0x4>;
-> +                       clock-names = "clk_xin", "clk_ahb";
-> +                       clocks = <&sdioclk 0>, <&ahbclk 0>;
-> +               };
-> +
+An mmc/sdio host which is expecting interrupts from an SDIO card
+should not turn off clocks unless the bus is configured to a width
+of 1-bit.  In 4-bit mode interrupts may not be generated without
+the clock.
 
-Here you don't provide an 'iommus' property, which means that the
-device is unable to use the iommu.
+This series fixes omap_hsmmc to set 1-bit mode when appropriate
+and so allows my wifi chip to work much better.
 
-	Arnd
+This is an RFC.  The code seems to work, but I feel it could be
+structured better (so that other drivers can share more of it), and
+I need to convince myself there is no room for races.
+
+Thanks,
+NeilBrown
+
+
+---
+
+NeilBrown (3):
+      mmc: core: allow non-blocking form of mmc_claim_host
+      mmc: core: export functions for setting bus width.
+      mmc: omap_hsmmc: switch to 1-bit before turning off clocks if interrupts expected.
+
+
+ drivers/mmc/core/core.c       |    4 ++-
+ drivers/mmc/core/sdio.c       |    8 +++---
+ drivers/mmc/host/omap_hsmmc.c |   55 ++++++++++++++++++++++++++++++++++++++++-
+ include/linux/mmc/host.h      |    4 +++
+ 4 files changed, 64 insertions(+), 7 deletions(-)
+
+--
+Signature
