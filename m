@@ -1,27 +1,43 @@
-From: Alexander Holler <holler@ahsoftware.de>
-Subject: Re: [PATCH] mmc: print message if a card supports secure erase/trim
-Date: Tue, 27 Jan 2015 20:14:33 +0100
-Message-ID: <54C7E399.4020009@ahsoftware.de>
-References: <1422359304-30321-1-git-send-email-holler@ahsoftware.de>	<CAFLxGvyuE8odPdNSD1PTccyBXFm=JO=ooikUOJfz41aFpsUAJg@mail.gmail.com>	<54C77E69.7050600@ahsoftware.de>	<20150127120855.GA9254@pd.tnic>	<54C7816A.8050800@ahsoftware.de>	<54C78524.3070901@nod.at>	<54C7881F.6020501@ahsoftware.de>	<20150127142120.GA3351@pd.tnic>	<54C7C2EC.7010605@ahsoftware.de>	<20150127172415.GC25043@home.goodmis.org>	<54C7CD1C.1060601@ahsoftware.de>	<20150127124817.608db508@gandalf.local.home>	<54C7D549.3070705@ahsoftware.de>	<20150127132148.365ef397@gandalf.local.home>	<54C7DA10.3040209@ahsoftware.de> <20150127134246.297aae46@gandalf.local.home>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v1 1/2] mmc: host: arasan: Add addition of-arasan quirks
+ and IOMMU support for arasan SDHCI driver.
+Date: Tue, 27 Jan 2015 21:12:39 +0100
+Message-ID: <2889598.XIWjCcRL7e@wuerfel>
+References: <1422379260-10139-1-git-send-email-stripathi@apm.com>
+ <1422379260-10139-2-git-send-email-stripathi@apm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from h1446028.stratoserver.net ([85.214.92.142]:44030 "EHLO
-	mail.ahsoftware.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758210AbbA0TOi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Jan 2015 14:14:38 -0500
-In-Reply-To: <20150127134246.297aae46@gandalf.local.home>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <1422379260-10139-2-git-send-email-stripathi@apm.com>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Suman Tripathi <stripathi@apm.com>
+Cc: devicetree@vger.kernel.org, mlangsdo@redhat.com, jcm@redhat.com, anton@enomsg.org, linux-mmc@vger.kernel.org, chris@printf.net, patches@apm.com, ddutile@redhat.com, linuxppc-dev@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Steven Rostedt <rostedt@goodmis.org>
-Cc: Borislav Petkov <bp@alien8.de>, Richard Weinberger <richard@nod.at>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Am 27.01.2015 um 19:42 schrieb Steven Rostedt:
-
-> Hey, if you end up doing it, it could help with your resume.
-
-Oh, young padovan, I'm writing SW since 30a and it just would make it 
-even longer, which already seems to be a problem for many HR people.
-
-Alexander Holer
+T24gVHVlc2RheSAyNyBKYW51YXJ5IDIwMTUgMjI6NTA6NTkgU3VtYW4gVHJpcGF0aGkgd3JvdGU6
+Cj4gQEAgLTE3NCw2ICsxNzYsMTMgQEAgc3RhdGljIGludCBzZGhjaV9hcmFzYW5fcHJvYmUoc3Ry
+dWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKPiAgICAgICAgIHBsdGZtX2hvc3QtPnByaXYgPSBz
+ZGhjaV9hcmFzYW47Cj4gICAgICAgICBwbHRmbV9ob3N0LT5jbGsgPSBjbGtfeGluOwo+IAo+ICsg
+ICAgICAgcmV0ID0geGdlbmVfYWhiY19pb21tdV9hdHRhY2hfZGV2aWNlKCZwZGV2LT5kZXYpOwo+
+ICsgICAgICAgaWYgKHJldCA8IDAgJiYgSVNfRU5BQkxFRChDT05GSUdfWEdFTkVfQUhCQ19JT01N
+VSkpIHsKPiArICAgICAgICAgICAgICAgZGV2X2VycigmcGRldi0+ZGV2LAo+ICsgICAgICAgICAg
+ICAgICAgICAgICAgICJ1bmFibGUgdG8gYXR0YWNoIGRldmljZSB0byBpb21tdSAleFxuIiwgcmV0
+KTsKPiArICAgICAgICAgICAgICAgZ290byBjbGtfZGlzYWJsZV9hbGw7Cj4gKyAgICAgICB9Cj4g
+Kwo+ICAgICAgICAgcmV0ID0gc2RoY2lfYWRkX2hvc3QoaG9zdCk7Cj4gICAgICAgICBpZiAocmV0
+KSB7Cj4gICAgICAgICAgICAgICAgIGRldl9lcnIoJnBkZXYtPmRldiwgInBsYXRmb3JtIHJlZ2lz
+dGVyIGZhaWxlZCAoJXUpXG4iLCByZXQpOwo+IAoKVGhpcyBsb29rcyB3cm9uZzogdGhlIGlvbW11
+IHNob3VsZCBiZSBhdXRvbWF0aWNhbGx5IGNvbmZpZ3VyZWQgZm9yIGRldmljZXMKdGhhdCBuZWVk
+IGl0LCB3aXRob3V0IGFueSBpbnRlcmFjdGlvbiBmcm9tIHRoZSBkcml2ZXIuCgoJQXJuZApfX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eHBwYy1kZXYg
+bWFpbGluZyBsaXN0CkxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnCmh0dHBzOi8vbGlzdHMu
+b3psYWJzLm9yZy9saXN0aW5mby9saW51eHBwYy1kZXY=
