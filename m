@@ -1,43 +1,35 @@
 From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v1 1/2] mmc: host: arasan: Add addition of-arasan quirks
- and IOMMU support for arasan SDHCI driver.
-Date: Tue, 27 Jan 2015 21:12:39 +0100
-Message-ID: <2889598.XIWjCcRL7e@wuerfel>
-References: <1422379260-10139-1-git-send-email-stripathi@apm.com>
- <1422379260-10139-2-git-send-email-stripathi@apm.com>
+Subject: Re: [PATCH v1 2/2] arm64: dts: Add the arasan sdhc nodes in apm-storm.dtsi.
+Date: Tue, 27 Jan 2015 21:13:51 +0100
+Message-ID: <4747424.udeKOcy6tC@wuerfel>
+References: <1422379260-10139-1-git-send-email-stripathi@apm.com> <1422379260-10139-3-git-send-email-stripathi@apm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <1422379260-10139-2-git-send-email-stripathi@apm.com>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Suman Tripathi <stripathi@apm.com>
-Cc: devicetree@vger.kernel.org, mlangsdo@redhat.com, jcm@redhat.com, anton@enomsg.org, linux-mmc@vger.kernel.org, chris@printf.net, patches@apm.com, ddutile@redhat.com, linuxppc-dev@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.17.13]:50104 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753535AbbA0UOB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Jan 2015 15:14:01 -0500
+In-Reply-To: <1422379260-10139-3-git-send-email-stripathi@apm.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Suman Tripathi <stripathi@apm.com>
+Cc: chris@printf.net, anton@enomsg.org, linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ddutile@redhat.com, jcm@redhat.com, mlangsdo@redhat.com, patches@apm.com
 
-T24gVHVlc2RheSAyNyBKYW51YXJ5IDIwMTUgMjI6NTA6NTkgU3VtYW4gVHJpcGF0aGkgd3JvdGU6
-Cj4gQEAgLTE3NCw2ICsxNzYsMTMgQEAgc3RhdGljIGludCBzZGhjaV9hcmFzYW5fcHJvYmUoc3Ry
-dWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKPiAgICAgICAgIHBsdGZtX2hvc3QtPnByaXYgPSBz
-ZGhjaV9hcmFzYW47Cj4gICAgICAgICBwbHRmbV9ob3N0LT5jbGsgPSBjbGtfeGluOwo+IAo+ICsg
-ICAgICAgcmV0ID0geGdlbmVfYWhiY19pb21tdV9hdHRhY2hfZGV2aWNlKCZwZGV2LT5kZXYpOwo+
-ICsgICAgICAgaWYgKHJldCA8IDAgJiYgSVNfRU5BQkxFRChDT05GSUdfWEdFTkVfQUhCQ19JT01N
-VSkpIHsKPiArICAgICAgICAgICAgICAgZGV2X2VycigmcGRldi0+ZGV2LAo+ICsgICAgICAgICAg
-ICAgICAgICAgICAgICJ1bmFibGUgdG8gYXR0YWNoIGRldmljZSB0byBpb21tdSAleFxuIiwgcmV0
-KTsKPiArICAgICAgICAgICAgICAgZ290byBjbGtfZGlzYWJsZV9hbGw7Cj4gKyAgICAgICB9Cj4g
-Kwo+ICAgICAgICAgcmV0ID0gc2RoY2lfYWRkX2hvc3QoaG9zdCk7Cj4gICAgICAgICBpZiAocmV0
-KSB7Cj4gICAgICAgICAgICAgICAgIGRldl9lcnIoJnBkZXYtPmRldiwgInBsYXRmb3JtIHJlZ2lz
-dGVyIGZhaWxlZCAoJXUpXG4iLCByZXQpOwo+IAoKVGhpcyBsb29rcyB3cm9uZzogdGhlIGlvbW11
-IHNob3VsZCBiZSBhdXRvbWF0aWNhbGx5IGNvbmZpZ3VyZWQgZm9yIGRldmljZXMKdGhhdCBuZWVk
-IGl0LCB3aXRob3V0IGFueSBpbnRlcmFjdGlvbiBmcm9tIHRoZSBkcml2ZXIuCgoJQXJuZApfX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eHBwYy1kZXYg
-bWFpbGluZyBsaXN0CkxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnCmh0dHBzOi8vbGlzdHMu
-b3psYWJzLm9yZy9saXN0aW5mby9saW51eHBwYy1kZXY=
+On Tuesday 27 January 2015 22:51:00 Suman Tripathi wrote:
+> 
+> +               sdhc0: sdhc@1c000000 {
+> +                       device_type = "sdhc";
+> +                       compatible = "arasan,sdhci-8.9a";
+> +                       reg = <0x0 0x1c000000 0x0 0x100>;
+> +                       interrupts = <0x0 0x49 0x4>;
+> +                       clock-names = "clk_xin", "clk_ahb";
+> +                       clocks = <&sdioclk 0>, <&ahbclk 0>;
+> +               };
+> +
+
+Here you don't provide an 'iommus' property, which means that the
+device is unable to use the iommu.
+
+	Arnd
