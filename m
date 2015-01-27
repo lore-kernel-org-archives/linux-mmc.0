@@ -1,47 +1,38 @@
-From: Richard Weinberger <richard@nod.at>
+From: Alexander Holler <holler@ahsoftware.de>
 Subject: Re: [PATCH] mmc: print message if a card supports secure erase/trim
-Date: Tue, 27 Jan 2015 13:31:32 +0100
-Message-ID: <54C78524.3070901@nod.at>
-References: <1422359304-30321-1-git-send-email-holler@ahsoftware.de> <CAFLxGvyuE8odPdNSD1PTccyBXFm=JO=ooikUOJfz41aFpsUAJg@mail.gmail.com> <54C77E69.7050600@ahsoftware.de> <20150127120855.GA9254@pd.tnic> <54C7816A.8050800@ahsoftware.de>
+Date: Tue, 27 Jan 2015 13:44:15 +0100
+Message-ID: <54C7881F.6020501@ahsoftware.de>
+References: <1422359304-30321-1-git-send-email-holler@ahsoftware.de> <CAFLxGvyuE8odPdNSD1PTccyBXFm=JO=ooikUOJfz41aFpsUAJg@mail.gmail.com> <54C77E69.7050600@ahsoftware.de> <20150127120855.GA9254@pd.tnic> <54C7816A.8050800@ahsoftware.de> <54C78524.3070901@nod.at>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <54C7816A.8050800@ahsoftware.de>
+In-Reply-To: <54C78524.3070901@nod.at>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Alexander Holler <holler@ahsoftware.de>, Borislav Petkov <bp@alien8.de>
+To: Richard Weinberger <richard@nod.at>, Borislav Petkov <bp@alien8.de>
 Cc: linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Am 27.01.2015 um 13:15 schrieb Alexander Holler:
-> Am 27.01.2015 um 13:08 schrieb Borislav Petkov:
->> On Tue, Jan 27, 2015 at 01:02:49PM +0100, Alexander Holler wrote:
->>> Look at the source at the message which is printed just before and decide
->>> which one you find more informational / useful.
+Am 27.01.2015 um 13:31 schrieb Richard Weinberger:
+
+>> Also it's unlikely I will send any further patch. There are still 21 from me where I've exposed sysfs attributes for NAND devices which are still not applied and most NAND devices
+>> still don't have a sysfs entry.
 >>
->> I find such a message absolutely useless. Also, if it flies off and
->> printk buffer gets overwritten, it serves you sh*t. IOW, listen to what
->> Richard tells you.
-> 
-> Ok. I shut/give up.
+>> So why should I waste my time again?
+>
+> If you give up after the first review round there is nothing I can do for you.
+> Postings like https://lkml.org/lkml/2014/5/30/162 are also not really beneficial
+> to get a patch merged.
 
-There is no need to be sulky.
+Yes. Sorry, but I had so many bad experiences with maintainers. They 
+told me that using functions means hiding stuff, that I should bisect 
+even when I was absolutely sure which patch was wrong (and everxyone 
+could see it by just reading the source and by reading my comments, I've 
+got blamed because I prefer a controlled BUG_ON() (which might even just 
+kill the involved tasks, depending on config settings) instead of a 
+desastrous memory corruption which (hard-) reseted the machine (and 
+might have done even more bad things) and so on.
 
-> Maybe you could be so nice to inform me where the similiar detail is exposed in sysfs for SSDs.
+Regards,
 
-If it is not already exposed and you can come up with a sane use case send a patch.
-
-> Also it's unlikely I will send any further patch. There are still 21 from me where I've exposed sysfs attributes for NAND devices which are still not applied and most NAND devices
-> still don't have a sysfs entry.
-> 
-> So why should I waste my time again?
-
-If you give up after the first review round there is nothing I can do for you.
-Postings like https://lkml.org/lkml/2014/5/30/162 are also not really beneficial
-to get a patch merged.
-
-Thanks,
-//richard
-
-P.s. If you see every not-merged patch as a waste of time, please stop developing software as
-it is obviously not an enjoyment for you.
+Alexander Holler
