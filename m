@@ -1,74 +1,36 @@
-From: Arend van Spriel <arend@broadcom.com>
+From: Alexander Holler <holler@ahsoftware.de>
 Subject: Re: [PATCH] mmc: print message if a card supports secure erase/trim
-Date: Tue, 27 Jan 2015 18:53:18 +0100
-Message-ID: <54C7D08E.8030309@broadcom.com>
-References: <1422359304-30321-1-git-send-email-holler@ahsoftware.de> <CAFLxGvyuE8odPdNSD1PTccyBXFm=JO=ooikUOJfz41aFpsUAJg@mail.gmail.com> <54C77E69.7050600@ahsoftware.de> <20150127120855.GA9254@pd.tnic> <54C7816A.8050800@ahsoftware.de> <54C78524.3070901@nod.at> <54C7881F.6020501@ahsoftware.de> <20150127142120.GA3351@pd.tnic> <54C7C2EC.7010605@ahsoftware.de> <20150127172415.GC25043@home.goodmis.org> <54C7CD1C.1060601@ahsoftware.de>
+Date: Tue, 27 Jan 2015 19:04:13 +0100
+Message-ID: <54C7D31D.6090109@ahsoftware.de>
+References: <1422359304-30321-1-git-send-email-holler@ahsoftware.de> <CAFLxGvyuE8odPdNSD1PTccyBXFm=JO=ooikUOJfz41aFpsUAJg@mail.gmail.com> <54C77E69.7050600@ahsoftware.de> <20150127120855.GA9254@pd.tnic> <54C7816A.8050800@ahsoftware.de> <54C78524.3070901@nod.at> <54C7881F.6020501@ahsoftware.de> <20150127142120.GA3351@pd.tnic> <54C7C2EC.7010605@ahsoftware.de> <20150127172415.GC25043@home.goodmis.org> <54C7CD1C.1060601@ahsoftware.de> <54C7D08E.8030309@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:30811 "EHLO
-	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753812AbbA0RxV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Jan 2015 12:53:21 -0500
-In-Reply-To: <54C7CD1C.1060601@ahsoftware.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Alexander Holler <holler@ahsoftware.de>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <54C7D08E.8030309@broadcom.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Arend van Spriel <arend@broadcom.com>
 Cc: Steven Rostedt <rostedt@goodmis.org>, Borislav Petkov <bp@alien8.de>, Richard Weinberger <richard@nod.at>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
-On 01/27/15 18:38, Alexander Holler wrote:
-> Am 27.01.2015 um 18:24 schrieb Steven Rostedt:
->
->> For most people a message in dmesg is not very useful. What you are
->> asking for
->> is to print a characteristic of a device. Something that someone might
->> want to
->> check much later in boot, where, as Boris stated, the dmesg could have
->> been
->> flushed (by systemd, which loves to write stuff to the kernel
->> buffers), and
->> there's no way to find out this information. The print message is long
->> gone.
->> Having a static location like sysfs is the proper place, because user
->> space
->> tools can always access it.
->>
->> Is this something a tool would like to find out? If so, parsing dmesg
->> is not
->> the way to go. Looking it up in sysfs is.
->
-> Oh, systemd.
->
-> Anyway, I like(d) Linux because it didn't had a splash screen and used
-> to spit out all types of information on the screen where it could be
-> easily seen or found (in contrast other OS which try to hide all
-> technical details from users).
+Am 27.01.2015 um 18:53 schrieb Arend van Spriel:
 
-What ends up in kernel log is still a fraction of what is going on in 
-the kernel.
+> Ever used rgrep or grep -R. Anyway, if this is you use-case what about
+> the gazillion other pieces of info in the kernel. When moving in that
+> direction you can be sure dmesg will flush out.
 
-> Of course, times are changing, including the amount of stuff printed on
-> screen. But I still find it much much easier to grep on the output of
-> dmesg than to search through thousands files in sysfs. Even if that can
-> be done with grep too (kind of). But it's much more complicated because
-> grep doesn't connect the file name with the content, so you need more
-> complicated stuff to combine both in order to search for and find
-> something in sysfs.
+Sorry, never heard about that -R and wasn't aware that the kernel does a 
+lot of things. ;)
 
-Ever used rgrep or grep -R. Anyway, if this is you use-case what about 
-the gazillion other pieces of info in the kernel. When moving in that 
-direction you can be sure dmesg will flush out.
+I don't want that ftrace stuff appears in dmesg, but I like to do
 
-Regards,
-Arend
+dmesg | grep -i mmc (or whatever is of interest)
 
-> Regards,
->
-> Alexander Holler
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at http://www.tux.org/lkml/
+instead of
 
+grep -Rsi mmc /sys/<a hundred tabs to search a matching direcory> or 
+something like
+
+find /sys -iname '*mmc*' -exec <more silly complications> \;
+
+Alexander Holler
