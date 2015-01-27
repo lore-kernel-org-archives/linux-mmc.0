@@ -1,7 +1,8 @@
 From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH 5/7] mmc: dt-bindings: add Mediatek MMC bindings
-Date: Tue, 27 Jan 2015 14:15:30 +0800
-Message-ID: <1422339332-27498-6-git-send-email-chaotian.jing@mediatek.com>
+Subject: [PATCH 3/7] ARM: mediatek: Add Mediatek MMC support in
+ multi_v7_defconfig
+Date: Tue, 27 Jan 2015 14:15:28 +0800
+Message-ID: <1422339332-27498-4-git-send-email-chaotian.jing@mediatek.com>
 References: <1422339332-27498-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,52 +22,24 @@ To: Rob Herring <robh+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>,
 Cc: Mark Rutland <mark.rutland@arm.com>, James Liao <jamesjj.liao@mediatek.com>, srv_heupstream@mediatek.com, Arnd Bergmann <arnd@arndb.de>, devicetree@vger.kernel.org, Hongzhou Yang <hongzhou.yang@mediatek.com>, Catalin Marinas <catalin.marinas@arm.com>, linux-mmc@vger.kernel.org, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, linux-gpio@vger.kernel.org, Chaotian Jing <chaotian.jing@mediatek.com>, Sascha Hauer <kernel@pengutronix.de>, "Joe.C" <yingjoe.chen@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, bin.zhang@mediatek.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Document the device-tree binding of Mediatek MMC host
+Add CONFIG_MMC_MTK=y in multi_v7_defconfig
 
 Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 ---
- Documentation/devicetree/bindings/mmc/mtk-sd.txt | 33 ++++++++++++++++++++++++
- 1 file changed, 33 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.txt
+ arch/arm/configs/multi_v7_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-new file mode 100644
-index 0000000..7667ec7
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-@@ -0,0 +1,33 @@
-+* MTK MMC controller
-+
-+The MTK  MSDC can act as a MMC controller
-+to support MMC, SD, and SDIO types of memory cards.
-+
-+This file documents differences between the core properties in mmc.txt
-+and the properties used by the msdc driver.
-+
-+Required properties:
-+- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc".
-+- interrupts: Should contain MSDC interrupt number
-+- core-power-supply: power to the Core
-+- clocks: MSDC source clock
-+- clock-names: "source"
-+- pinctrl-names: should be "default", "state_uhs"
-+- pinctrl-0: should contain default/high speed pin ctrl
-+- pinctrl-1: should contain uhs mode pin ctrl
-+
-+Optional properties:
-+- io-power-supply: power to the IO(for SD/SDIO)
-+
-+Examples:
-+mmc0: mmc@11230000 {
-+	compatible = "mediatek,mt8173-mmc","mediatek,mt8135-mmc";
-+	reg = <0 0x11230000 0 0x108>;
-+	interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
-+	core-power-supply = <&mt6397_vemc_3v3_reg>;
-+	clocks = <&pericfg PERI_MSDC20_1_CK>;
-+	clock-names = "source";
-+	pinctrl-names = "default", "state_uhs";
-+	pinctrl-0 = <&mmc0_pins_default>;
-+	pinctrl-1 = <&mmc0_pins_uhs>;
-+};
+diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
+index 19e58aa..7eea580 100644
+--- a/arch/arm/configs/multi_v7_defconfig
++++ b/arch/arm/configs/multi_v7_defconfig
+@@ -362,6 +362,7 @@ CONFIG_MMC_DW_IDMAC=y
+ CONFIG_MMC_DW_EXYNOS=y
+ CONFIG_MMC_DW_ROCKCHIP=y
+ CONFIG_MMC_SUNXI=y
++CONFIG_MMC_MTK=y
+ CONFIG_NEW_LEDS=y
+ CONFIG_LEDS_CLASS=y
+ CONFIG_LEDS_GPIO=y
 -- 
 1.8.1.1.dirty
