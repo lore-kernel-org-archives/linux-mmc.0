@@ -1,47 +1,42 @@
-From: Alexander Holler <holler@ahsoftware.de>
-Subject: Re: [PATCH] mmc: print message if a card supports secure erase/trim
-Date: Tue, 27 Jan 2015 17:55:08 +0100
-Message-ID: <54C7C2EC.7010605@ahsoftware.de>
-References: <1422359304-30321-1-git-send-email-holler@ahsoftware.de> <CAFLxGvyuE8odPdNSD1PTccyBXFm=JO=ooikUOJfz41aFpsUAJg@mail.gmail.com> <54C77E69.7050600@ahsoftware.de> <20150127120855.GA9254@pd.tnic> <54C7816A.8050800@ahsoftware.de> <54C78524.3070901@nod.at> <54C7881F.6020501@ahsoftware.de> <20150127142120.GA3351@pd.tnic>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150127142120.GA3351@pd.tnic>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Richard Weinberger <richard@nod.at>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+From: Suman Tripathi <stripathi@apm.com>
+Subject: [PATCH v1 0/2] Add SDHCI support for APM X-Gene SoC using ARASAN SDHCI controller.
+Date: Tue, 27 Jan 2015 22:50:58 +0530
+Message-ID: <1422379260-10139-1-git-send-email-stripathi@apm.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from denmail01-v4020.amcc.com ([192.195.68.30]:48566 "EHLO
+	denmail01.apm.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1755617AbbA0RWM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Jan 2015 12:22:12 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: chris@printf.net, anton@enomsg.org, arnd@arndb.de
+Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ddutile@redhat.com, jcm@redhat.com, mlangsdo@redhat.com, patches@apm.com, Suman Tripathi <stripathi@apm.com>
 
-Am 27.01.2015 um 15:21 schrieb Borislav Petkov:
-> On Tue, Jan 27, 2015 at 01:44:15PM +0100, Alexander Holler wrote:
->> Yes. Sorry, but I had so many bad experiences with maintainers.
->
-> Well, I can't comment on your experience for the simple reason that I
-> haven't followed those discussions. In their defence, though, you have
-> to know that those people get to review your code, apply it and then
-> deal with it long after you've gone on about doing other things.
->
-> So, even if you don't always agree with them, you need to realize that
-> those are the people responsible for that code and if they request a
-> reasonable change in your submission, you have to do it. It is that
-> simple.
+Due to the fact that the existing of-arasan driver works with 32-bit platforms.
+This patch tweaks existing of-arasan driver to work with 64-bit X-Gene
+platform using IOMMU translation.
 
-Totally wrong. I'm free to just stop discussion. That's the difference 
-between the old type of os communites and corporates where people do 
-what they've got instructed from above without discussion. I offered 
-something and wasn't paid to do something.
+v1 change:
+ * Use the CONFIG_ARM64_DMA_HAS_IOMMU for dma-mapping.
 
-It was worth a try but I don't have to build a framework to achieve 
-something simple just because a maintainer requests it.
+Signed-off-by: Suman Tripathi <stripathi@apm.com>
+---
 
->   [ Unless you have a good argument against it but that's a different
->     story and this is what is called the "review" process. ]
+Suman Tripathi (2):
+  mmc: host: arasan: Add addition of-arasan quirks and IOMMU support for
+    arasan SDHCI driver.
+  arm64: dts: Add the arasan sdhc nodes in apm-storm.dtsi.
 
-I want to see the mentionend information and want that it is seen and do 
-not want to hide it away deep in the sysfs where it actually must be 
-searched.
+ arch/arm64/boot/dts/apm-storm.dtsi  | 43 +++++++++++++++++++++++++++
+ drivers/mmc/host/Makefile           |  2 ++
+ drivers/mmc/host/sdhci-ahbc-xgene.c | 58 +++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-ahbc-xgene.h | 49 +++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-of-arasan.c  | 11 +++++++
+ drivers/mmc/host/sdhci-pltfm.c      | 12 ++++++++
+ 6 files changed, 175 insertions(+)
+ create mode 100644 drivers/mmc/host/sdhci-ahbc-xgene.c
+ create mode 100644 drivers/mmc/host/sdhci-ahbc-xgene.h
 
-Regards,
+--
+1.8.2.1
 
-Alexander Holler
