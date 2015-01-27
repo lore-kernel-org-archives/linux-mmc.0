@@ -1,32 +1,22 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: Fix menuconfig alignment of MMC_SDHCI_* options
-Date: Tue, 27 Jan 2015 14:57:13 +0100
-Message-ID: <CAPDyKFqQCy-g0ubFFfg+C0x==qQpdFY-JQAG0JDCYoSwy_xtCA@mail.gmail.com>
-References: <20150126113544.3f44e4a1@endymion.delvare>
+Subject: Re: [PATCH] mmc: dw_mmc: exynos: remove incorrect __exit_p()
+Date: Tue, 27 Jan 2015 14:59:01 +0100
+Message-ID: <CAPDyKFpk_SjBpT=+yCfNv8yGVVT64Z5GugjL+qoYubxjduxN3g@mail.gmail.com>
+References: <20150124003340.GA16286@dtor-ws>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f49.google.com ([209.85.192.49]:39150 "EHLO
-	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751737AbbA0N5O (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Jan 2015 08:57:14 -0500
-Received: by mail-qg0-f49.google.com with SMTP id i50so11696333qgf.8
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Jan 2015 05:57:13 -0800 (PST)
-In-Reply-To: <20150126113544.3f44e4a1@endymion.delvare>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <20150124003340.GA16286@dtor-ws>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Kukjin Kim <kgene@kernel.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, Beomho Seo <beomho.seo@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jean Delvare <jdelvare@suse.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Albert Herranz <albert_herranz@yahoo.es>
 
-On 26 January 2015 at 11:35, Jean Delvare <jdelvare@suse.de> wrote:
-> Let MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER depend on MMC_SDHCI. Not
-> only this is more correct, but this also avoids breaking the alignment
-> of all other MMC_SDHCI_* options in menuconfig.
+On 24 January 2015 at 01:33, Dmitry Torokhov <dmitry.torokhov@gmail.com> wrote:
+> dw_mci_pltfm_remove() is not (nor should it be) marked as __exit,
+> so we should not be using __exit_p() wrapper with it.
 >
-> Signed-off-by: Jean Delvare <jdelvare@suse.de>
-> Cc: Chris Ball <chris@printf.net>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Albert Herranz <albert_herranz@yahoo.es>
+> Signed-off-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
 
 Thanks! Applied for next.
 
@@ -35,21 +25,25 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/Kconfig |    1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/host/dw_mmc-exynos.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> --- linux-3.19-rc6.orig/drivers/mmc/host/Kconfig        2015-01-26 11:18:57.715667965 +0100
-> +++ linux-3.19-rc6/drivers/mmc/host/Kconfig     2015-01-26 11:26:31.986215716 +0100
-> @@ -57,6 +57,7 @@ config MMC_SDHCI_IO_ACCESSORS
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 12a5eaa..fe32948 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -422,7 +422,7 @@ static const struct dev_pm_ops dw_mci_exynos_pmops = {
 >
->  config MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
->         bool
-> +       depends on MMC_SDHCI
->         select MMC_SDHCI_IO_ACCESSORS
->         help
->           This option is selected by drivers running on big endian hosts
+>  static struct platform_driver dw_mci_exynos_pltfm_driver = {
+>         .probe          = dw_mci_exynos_probe,
+> -       .remove         = __exit_p(dw_mci_pltfm_remove),
+> +       .remove         = dw_mci_pltfm_remove,
+>         .driver         = {
+>                 .name           = "dwmmc_exynos",
+>                 .of_match_table = dw_mci_exynos_match,
+> --
+> 2.2.0.rc0.207.ga3a616c
 >
 >
 > --
-> Jean Delvare
-> SUSE L3 Support
+> Dmitry
