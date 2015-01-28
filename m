@@ -1,8 +1,7 @@
 From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Subject: [PATCH v2 6/6] ARM: dts: exynos5250-snow: Add cap-sdio-irq to wifi
- mmc node
-Date: Wed, 28 Jan 2015 19:15:53 +0100
-Message-ID: <1422468953-7594-7-git-send-email-javier.martinez@collabora.co.uk>
+Subject: [PATCH v2 5/6] ARM: dts: exynos5250-snow: Enable wifi power-on
+Date: Wed, 28 Jan 2015 19:15:52 +0100
+Message-ID: <1422468953-7594-6-git-send-email-javier.martinez@collabora.co.uk>
 References: <1422468953-7594-1-git-send-email-javier.martinez@collabora.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,28 +21,77 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-kernel@vger.kernel.org, Arend van Spriel <arend@broadcom.com>, Kukjin Kim <kgene@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Olof Johansson <olof@lixom.net>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Enabling SDIO IRQ signalling for the wifi MMC/SDIO slot
-doubles the transmission transfer rate.
+The Snow board has a MMC/SDIO wifi chip that is always powered but it
+needs a power sequence involving a reset (active low) and an enable
+(active high) pins. Both pins are marked as active low since the MMC
+simple power sequence driver asserts the pins prior to the card power
+up procedure and de-asserts the pins after the card has been powered.
+
+So the reset line will be left de-asserted and the enable pin will be
+left asserted.
+
+The chip also needs an external 32kHz reference clock to be operational
+that is by the MAX77686 PMIC clock.
+
+Add a simple MMC power sequence provider for the wifi MMC/SDIO slot.
 
 Signed-off-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
 ---
 
-Changes since v1: None, new patch.
+Changes since v1:
+ - Remove cap-sdio-irq from mmc3 dev node since is a separate change.
+   Suggested by Arend van Spriel.
 ---
- arch/arm/boot/dts/exynos5250-snow.dts | 1 +
- 1 file changed, 1 insertion(+)
+ arch/arm/boot/dts/exynos5250-snow.dts | 25 ++++++++++++++++++++++++-
+ 1 file changed, 24 insertions(+), 1 deletion(-)
 
 diff --git a/arch/arm/boot/dts/exynos5250-snow.dts b/arch/arm/boot/dts/exynos5250-snow.dts
-index b78712058903..909edc3448d3 100644
+index b9aeec430527..b78712058903 100644
 --- a/arch/arm/boot/dts/exynos5250-snow.dts
 +++ b/arch/arm/boot/dts/exynos5250-snow.dts
-@@ -539,6 +539,7 @@
- 	status = "okay";
- 	num-slots = <1>;
- 	broken-cd;
-+	cap-sdio-irq;
- 	card-detect-delay = <200>;
- 	samsung,dw-mshc-ciu-div = <3>;
+@@ -229,6 +229,14 @@
+ 		power-supply = <&fet6>;
+ 		backlight = <&backlight>;
+ 	};
++
++	mmc3_pwrseq: mmc3_pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		reset-gpios = <&gpx0 2 GPIO_ACTIVE_LOW>, /* WIFI_RSTn */
++			      <&gpx0 1 GPIO_ACTIVE_LOW>; /* WIFI_EN */
++		clocks = <&max77686 MAX77686_CLK_PMIC>;
++		clock-names = "ext_clock";
++	};
+ };
+ 
+ &dp {
+@@ -536,12 +544,27 @@
  	samsung,dw-mshc-sdr-timing = <2 3>;
+ 	samsung,dw-mshc-ddr-timing = <1 2>;
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&sd3_clk &sd3_cmd &sd3_bus4>;
++	pinctrl-0 = <&sd3_clk &sd3_cmd &sd3_bus4 &wifi_en &wifi_rst>;
+ 	bus-width = <4>;
+ 	cap-sd-highspeed;
++	mmc-pwrseq = <&mmc3_pwrseq>;
+ };
+ 
+ &pinctrl_0 {
++	wifi_en: wifi-en {
++		samsung,pins = "gpx0-1";
++		samsung,pin-function = <1>;
++		samsung,pin-pud = <0>;
++		samsung,pin-drv = <0>;
++	};
++
++	wifi_rst: wifi-rst {
++		samsung,pins = "gpx0-2";
++		samsung,pin-function = <1>;
++		samsung,pin-pud = <0>;
++		samsung,pin-drv = <0>;
++	};
++
+ 	power_key_irq: power-key-irq {
+ 		samsung,pins = "gpx1-3";
+ 		samsung,pin-function = <0xf>;
 -- 
 2.1.3
