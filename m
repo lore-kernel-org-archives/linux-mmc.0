@@ -1,51 +1,53 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: [PATCH 2/2] mmc: pwrseq: Update document with multiple gpios support
-Date: Wed, 28 Jan 2015 13:17:08 +0000
-Message-ID: <1422451028-9417-1-git-send-email-srinivas.kandagatla@linaro.org>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 0/2] mmc: pwrseq: Add support to multiple gpios in pwrseq simple
+Date: Wed, 28 Jan 2015 14:35:22 +0100
+Message-ID: <CAPDyKFquQgut1ZC9Jj=rbNwRKs3Qwr5LsUy_cmY7g2L8MG657Q@mail.gmail.com>
 References: <1422450981-9328-1-git-send-email-srinivas.kandagatla@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:47076 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756175AbbA1UaS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Jan 2015 15:30:18 -0500
-Received: by mail-wi0-f178.google.com with SMTP id bs8so6718067wib.5
-        for <linux-mmc@vger.kernel.org>; Wed, 28 Jan 2015 12:30:17 -0800 (PST)
-In-Reply-To: <1422450981-9328-1-git-send-email-srinivas.kandagatla@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1422450981-9328-1-git-send-email-srinivas.kandagatla-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Srinivas Kandagatla <srinivas.kandagatla-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, Kumar Gala <galak@codeaurora.org>, Rob Herring <robh+dt@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-This patch updates the text and examples the mmc pwrseq document with multiple
-gpios support. Typical example is WLAN and BT chips on SDIO bus.
+On 28 January 2015 at 14:16, Srinivas Kandagatla
+<srinivas.kandagatla-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> This patchset adds support to reset/powerup multiple gpio pins on a given
+> sdio bus. The use case is simple, on sdio we could have multiple devices
+> like WLAN, BT which are controlled by there own reset lines. So having
+> multiple reset is something more useful in such cases.
+>
+> Without this patch I could not get BT and WLAN working at same time on IFC6410.
+>
+> Thanks,
+> srini
+>
+> Srinivas Kandagatla (2):
+>   mmc: pwrseq: Add support to control multiple gpios in simple pwrseq
+>   mmc: pwrseq: Update document with multiple gpios support
+>
+>  .../devicetree/bindings/mmc/mmc-pwrseq-simple.txt  |  7 ++-
+>  drivers/mmc/core/pwrseq_simple.c                   | 64 +++++++++++++++-------
+>  2 files changed, 49 insertions(+), 22 deletions(-)
+>
+> --
+> 1.9.1
+>
 
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
----
- Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+Hi Srinivas,
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-index da333d9..1a86efa 100644
---- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-@@ -8,13 +8,14 @@ Required properties:
- - compatible : contains "mmc-pwrseq-simple".
- 
- Optional properties:
--- reset-gpios : contains a GPIO specifier. The reset GPIO is asserted at
--	initialization and prior we start the power up procedure of the card. It
-+- reset-gpios : contains list of GPIO specifiers. The reset GPIOs are asserted at
-+	initialization and prior we start the power up procedure of the card. They
- 	will be de-asserted right after the power has been provided to the card.
- 
- Example:
- 
- 	sdhci0_pwrseq {
- 		compatible = "mmc-pwrseq-simple";
--		reset-gpios = <&gpio1 12 0>;
-+		/* WLAN and BT reset */
-+		reset-gpios = <&gpio1 12 0>, <&gpio1 14 0>;
- 	}
--- 
-1.9.1
+I noticed that Javier a few hours ago posted a patchset which
+implement the same thing as yours, I guess this is a wanted feature.
+:-)
 
+I am going to review Javier's patchset, would be nice if you could
+have a look at it as well.
+
+Kind regards
+Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
