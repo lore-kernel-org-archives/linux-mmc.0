@@ -1,15 +1,15 @@
 From: Javier Martinez Canillas <javier@dowhile0.org>
-Subject: Re: [PATCH V4 2/4] mmc: pwrseq: Document DT bindings for the simple
- MMC power sequence
-Date: Wed, 28 Jan 2015 11:18:12 +0100
-Message-ID: <CABxcv=mCM63BobL+MP8LQhrh6HvtfromCouk2H6XdiFUm8ovmw@mail.gmail.com>
+Subject: Re: [PATCH V4 3/4] mmc: pwrseq: Initial support for the simple MMC
+ power sequence provider
+Date: Wed, 28 Jan 2015 11:19:12 +0100
+Message-ID: <CABxcv=nPja4=8i2g=-BotHcmTbympZFuLMmaXzorNHPQjw=N1Q@mail.gmail.com>
 References: <1421658784-11980-1-git-send-email-ulf.hansson@linaro.org>
- <1421658784-11980-3-git-send-email-ulf.hansson@linaro.org>
+ <1421658784-11980-4-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1421658784-11980-3-git-send-email-ulf.hansson@linaro.org>
+In-Reply-To: <1421658784-11980-4-git-send-email-ulf.hansson@linaro.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -26,24 +26,21 @@ List-Id: linux-mmc@vger.kernel.org
 Hello Ulf,
 
 On Mon, Jan 19, 2015 at 10:13 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> To support SOCs which specifies specific MMC power sequences, document
-> some MMC DT bindings to be able to describe these hardwares.
+> To add the core part for the MMC power sequence, let's start by adding
+> initial support for the simple MMC power sequence provider.
 >
-> Let's also document bindings for a simple MMC power sequence provider,
-> which purpose is to support a set of common properties between various
-> SOCs.
+> In this initial step, the MMC power sequence node are fetched and the
+> compatible string for the simple MMC power sequence provider are
+> verified.
 >
-> In this initial step, let's also document a top level description of
-> the MMC power sequence and describe the compatible string used for the
-> simple MMC power sequence provider.
->
-> The simple MMC power sequence provider will initially support a reset
-> GPIO. From several earlier posted patches, it's clear that such
-> hardware exists. Especially some WLAN chips which are attached to an
-> SDIO interface may use a GPIO reset.
+> At this point we don't parse the node for any properties, but instead
+> that will be handled from following patches. Since there are no
+> properties supported yet, let's just implement the ->alloc() and the
+> ->free() callbacks.
 >
 > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 > ---
+>
 
 Reviewed-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
 Tested-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
