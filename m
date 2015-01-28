@@ -1,95 +1,345 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [PATCH] mmc: Manual BKOPs enablement bug fix
-Date: Wed, 28 Jan 2015 12:12:11 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333EDA520F@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <1422367281-17546-1-git-send-email-alexey.skidanov@sandisk.com>
- <54C8BB89.5040309@samsung.com>
+From: Tobias Jakobi <liquid.acid@gmx.net>
+Subject: Re: [PATCH 1/4] mmc: core: add support for hardware reset gpio line
+Date: Wed, 28 Jan 2015 15:41:31 +0100
+Message-ID: <54C8F51B.2080706@gmx.net>
+References: <1422453595-21160-1-git-send-email-m.szyprowski@samsung.com>	<1422453595-21160-2-git-send-email-m.szyprowski@samsung.com> <CAPDyKFpowidghwadJS+gYP0EVo6gRUhAG8s14CMEbwatFadP2Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0089.outbound.protection.outlook.com ([157.56.111.89]:28792
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754274AbbA2DsY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 28 Jan 2015 22:48:24 -0500
-In-Reply-To: <54C8BB89.5040309@samsung.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFpowidghwadJS+gYP0EVo6gRUhAG8s14CMEbwatFadP2Q@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene@kernel.org>, Daniel Drake <drake@endlessm.com>, Sebastian Reichel <sre@kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Joonyoung Shim <jy0922.shim@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Alexey Skidanov <Alexey.Skidanov@sandisk.com>, "chris@printf.net" <chris@printf.net>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-SGkgSmFlaG9vbiwNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEph
-ZWhvb24gQ2h1bmcgW21haWx0bzpqaDgwLmNodW5nQHNhbXN1bmcuY29tXQ0KPiBTZW50OiBXZWRu
-ZXNkYXksIEphbnVhcnkgMjgsIDIwMTUgMTI6MzYgUE0NCj4gVG86IEFsZXhleSBTa2lkYW5vdjsg
-Y2hyaXNAcHJpbnRmLm5ldDsgdWxmLmhhbnNzb25AbGluYXJvLm9yZzsgbGludXgtDQo+IG1tY0B2
-Z2VyLmtlcm5lbC5vcmcNCj4gQ2M6IEFsZXggTGVtYmVyZw0KPiBTdWJqZWN0OiBSZTogW1BBVENI
-XSBtbWM6IE1hbnVhbCBCS09QcyBlbmFibGVtZW50IGJ1ZyBmaXgNCj4gDQo+IEhpLCBBbGV4ZXku
-DQo+IA0KPiBPbiAwMS8yNy8yMDE1IDExOjAxIFBNLCBBbGV4ZXkgU2tpZGFub3Ygd3JvdGU6DQo+
-ID4gVGhpcyBwYXRjaCBpcyBjb21pbmcgdG8gZml4IGNvbXBhdGliaWxpdHkgaXNzdWUgb2YgQktP
-UFNfRU4gIGZpZWxkIG9mIEVYVF9DU0QuDQo+ID4gSW4gZU1NQy01LjEsIEJLT1BTX0VOIHdhcyBj
-aGFuZ2VkLCBhbmQgbm93IGl0IGhhcyB0d28gb3BlcmF0aW9uYWwgYml0czoNCj4gPiBCaXQgMCAt
-IE1BTlVBTF9FTg0KPiA+IEJpdCAxIC0gQVVUT19FTg0KPiA+IEluIHByZXZpb3VzIGVNTUMgcmV2
-aXNpb25zLCBvbmx5IEJpdCAwIHdhcyBzdXBwb3J0ZWQuDQo+IA0KPiBXZWxsLCBpIGRvbid0IGhh
-dmUgZU1NQzUuMSBzcGVjLCBzbyBpIHdhbnQgdG8ga25vdyBtb3JlIGV4YWN0bHkgd2hhdCBpcw0K
-PiAiYXV0b19lbmFibGUiLg0KPiBJZiBBVVRPX0VOIGlzIHNldCwgd2hhdCBoYXBwZW4/DQoNCkFj
-Y29yZGluZyB0byB0aGUgc3BlYywgd2hlbiBBVVRPX0VOIGJpdCBpcyBzZXQsIGRldmljZSBtYXkg
-cGVyZm9ybSBiYWNrZ3JvdW5kIG9wZXJhdGlvbnMgd2hpbGUgbm90IHNlcnZpY2luZyB0aGUgaG9z
-dC4NCj4gDQo+IEkgY2FuJ3QgZmluZCB3aGVyZSBhdXRvX2Jrb3BzX2VuIGlzIHVzZWQuDQoNCmF1
-dG9fYmtvcHNfZW4gaXMgbm90IHVzZWQsIGJ1dCBvbmNlIHdlIG1ha2UgYSBkaWZmZXJlbnRpYXRp
-b24gYmV0d2VlbiB0d28gYml0cywgd2UgZm91bmQgaXQgYXMgbmVlZGVkIGZvciBmdXR1cmUgc3Vw
-cG9ydC4gDQoNClRoZSBtYWluIHB1cnBvc2Ugb2YgdGhpcyBwYXRjaCBpcyBwcm9wZXIgdXNhZ2Ug
-b2YgZXh0X2NzZFtFWFRfQ1NEX0JLT1BTX0VOXSBmaWVsZCBmb3IgYm90aCBlTU1DNS4wIGFuZCBl
-TU1DNS4xIGRldmljZXMuDQoNClRoYW5rcywNCkFsZXgNCg0KPiANCj4gDQo+IEJlc3QgUmVnYXJk
-cywNCj4gSmFlaG9vbiBDSHVuZw0KPiANCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IEFsZXhleSBT
-a2lkYW5vdiA8YWxleGV5LnNraWRhbm92QHNhbmRpc2suY29tPg0KPiA+IC0tLQ0KPiA+ICBkcml2
-ZXJzL21tYy9jb3JlL2NvcmUuYyAgfCAgICAyICstDQo+ID4gIGRyaXZlcnMvbW1jL2NvcmUvbW1j
-LmMgICB8ICAgIDYgKysrKy0tDQo+ID4gIGluY2x1ZGUvbGludXgvbW1jL2NhcmQuaCB8ICAgIDUg
-KysrKy0NCj4gPiAgaW5jbHVkZS9saW51eC9tbWMvbW1jLmggIHwgICAgNiArKysrKysNCj4gPiAg
-NCBmaWxlcyBjaGFuZ2VkLCAxNSBpbnNlcnRpb25zKCspLCA0IGRlbGV0aW9ucygtKQ0KPiA+DQo+
-ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jIGIvZHJpdmVycy9tbWMvY29y
-ZS9jb3JlLmMgaW5kZXgNCj4gPiAxYmU3MDU1Li4wZGM2NGU2IDEwMDY0NA0KPiA+IC0tLSBhL2Ry
-aXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMN
-Cj4gPiBAQCAtMjc1LDcgKzI3NSw3IEBAIHZvaWQgbW1jX3N0YXJ0X2Jrb3BzKHN0cnVjdCBtbWNf
-Y2FyZCAqY2FyZCwgYm9vbA0KPiA+IGZyb21fZXhjZXB0aW9uKQ0KPiA+DQo+ID4gIAlCVUdfT04o
-IWNhcmQpOw0KPiA+DQo+ID4gLQlpZiAoIWNhcmQtPmV4dF9jc2QuYmtvcHNfZW4gfHwgbW1jX2Nh
-cmRfZG9pbmdfYmtvcHMoY2FyZCkpDQo+ID4gKwlpZiAoIWNhcmQtPmV4dF9jc2QubWFuX2Jrb3Bz
-X2VuIHx8IG1tY19jYXJkX2RvaW5nX2Jrb3BzKGNhcmQpKQ0KPiA+ICAJCXJldHVybjsNCj4gPg0K
-PiA+ICAJZXJyID0gbW1jX3JlYWRfYmtvcHNfc3RhdHVzKGNhcmQpOw0KPiA+IGRpZmYgLS1naXQg
-YS9kcml2ZXJzL21tYy9jb3JlL21tYy5jIGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYyBpbmRleA0K
-PiA+IDFmYzQ4YTIuLmMzNWJmNmUgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9t
-bWMuYw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMNCj4gPiBAQCAtNDgzLDEwICs0
-ODMsMTIgQEAgc3RhdGljIGludCBtbWNfZGVjb2RlX2V4dF9jc2Qoc3RydWN0IG1tY19jYXJkDQo+
-ICpjYXJkLCB1OCAqZXh0X2NzZCkNCj4gPiAgCQkvKiBjaGVjayB3aGV0aGVyIHRoZSBlTU1DIGNh
-cmQgc3VwcG9ydHMgQktPUFMgKi8NCj4gPiAgCQlpZiAoZXh0X2NzZFtFWFRfQ1NEX0JLT1BTX1NV
-UFBPUlRdICYgMHgxKSB7DQo+ID4gIAkJCWNhcmQtPmV4dF9jc2QuYmtvcHMgPSAxOw0KPiA+IC0J
-CQljYXJkLT5leHRfY3NkLmJrb3BzX2VuID0NCj4gZXh0X2NzZFtFWFRfQ1NEX0JLT1BTX0VOXTsN
-Cj4gPiArCQkJY2FyZC0+ZXh0X2NzZC5tYW5fYmtvcHNfZW4gPQ0KPiA+ICsJCQkJCShleHRfY3Nk
-W0VYVF9DU0RfQktPUFNfRU5dICYNCj4gPiArDQo+IAlFWFRfQ1NEX01BTlVBTF9CS09QU19NQVNL
-KTsNCj4gPiAgCQkJY2FyZC0+ZXh0X2NzZC5yYXdfYmtvcHNfc3RhdHVzID0NCj4gPiAgCQkJCWV4
-dF9jc2RbRVhUX0NTRF9CS09QU19TVEFUVVNdOw0KPiA+IC0JCQlpZiAoIWNhcmQtPmV4dF9jc2Qu
-YmtvcHNfZW4pDQo+ID4gKwkJCWlmICghY2FyZC0+ZXh0X2NzZC5tYW5fYmtvcHNfZW4pDQo+ID4g
-IAkJCQlwcl9pbmZvKCIlczogQktPUFNfRU4gYml0IGlzIG5vdCBzZXRcbiIsDQo+ID4gIAkJCQkJ
-bW1jX2hvc3RuYW1lKGNhcmQtPmhvc3QpKTsNCj4gPiAgCQl9DQo+ID4gZGlmZiAtLWdpdCBhL2lu
-Y2x1ZGUvbGludXgvbW1jL2NhcmQuaCBiL2luY2x1ZGUvbGludXgvbW1jL2NhcmQuaCBpbmRleA0K
-PiA+IDRkNjljMDAuLjE1NzcyZDAgMTAwNjQ0DQo+ID4gLS0tIGEvaW5jbHVkZS9saW51eC9tbWMv
-Y2FyZC5oDQo+ID4gKysrIGIvaW5jbHVkZS9saW51eC9tbWMvY2FyZC5oDQo+ID4gQEAgLTgzLDcg
-KzgzLDEwIEBAIHN0cnVjdCBtbWNfZXh0X2NzZCB7DQo+ID4gIAlib29sCQkJaHBpOwkJCS8qIEhQ
-SSBzdXBwb3J0IGJpdCAqLw0KPiA+ICAJdW5zaWduZWQgaW50CQlocGlfY21kOwkJLyogY21kIHVz
-ZWQgYXMgSFBJICovDQo+ID4gIAlib29sCQkJYmtvcHM7CQkvKiBiYWNrZ3JvdW5kIHN1cHBvcnQg
-Yml0ICovDQo+ID4gLQlib29sCQkJYmtvcHNfZW47CS8qIGJhY2tncm91bmQgZW5hYmxlIGJpdCAq
-Lw0KPiA+ICsJYm9vbAkJCW1hbl9ia29wc19lbjsJLyogbWFudWFsIGJhY2tncm91bmQNCj4gPiAr
-CQkJCQkJZW5hYmxlIGJpdCAqLw0KPiA+ICsJYm9vbAkJCWF1dG9fYmtvcHNfZW47CS8qIGF1dG9t
-YXRpYyBiYWNrZ3JvdW5kDQo+ID4gKwkJCQkJCWVuYWJsZSBiaXQgKi8NCj4gPiAgCXVuc2lnbmVk
-IGludCAgICAgICAgICAgIGRhdGFfc2VjdG9yX3NpemU7ICAgICAgIC8qIDUxMiBieXRlcyBvciA0
-S0IgKi8NCj4gPiAgCXVuc2lnbmVkIGludCAgICAgICAgICAgIGRhdGFfdGFnX3VuaXRfc2l6ZTsg
-ICAgIC8qIERBVEEgVEFHIFVOSVQgc2l6ZSAqLw0KPiA+ICAJdW5zaWduZWQgaW50CQlib290X3Jv
-X2xvY2s7CQkvKiBybyBsb2NrIHN1cHBvcnQgKi8NCj4gPiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9s
-aW51eC9tbWMvbW1jLmggYi9pbmNsdWRlL2xpbnV4L21tYy9tbWMuaCBpbmRleA0KPiA+IGZiOTdi
-NWMuLmQzOWRiM2UgMTAwNjQ0DQo+ID4gLS0tIGEvaW5jbHVkZS9saW51eC9tbWMvbW1jLmgNCj4g
-PiArKysgYi9pbmNsdWRlL2xpbnV4L21tYy9tbWMuaA0KPiA+IEBAIC00MjgsNiArNDI4LDEyIEBA
-IHN0cnVjdCBfbW1jX2NzZCB7DQo+ID4gICNkZWZpbmUgRVhUX0NTRF9CS09QU19MRVZFTF8yCQkw
-eDINCj4gPg0KPiA+ICAvKg0KPiA+ICsgKiBCS09QUyBtb2Rlcw0KPiA+ICsgKi8NCj4gPiArI2Rl
-ZmluZSBFWFRfQ1NEX01BTlVBTF9CS09QU19NQVNLCTB4MDENCj4gPiArI2RlZmluZSBFWFRfQ1NE
-X0FVVE9NQVRJQ19CS09QU19NQVNLCTB4MDINCj4gPiArDQo+ID4gKy8qDQo+ID4gICAqIE1NQ19T
-V0lUQ0ggYWNjZXNzIG1vZGVzDQo+ID4gICAqLw0KPiA+DQo+ID4NCg0K
+Hello!
+
+Ulf Hansson wrote:
+> On 28 January 2015 at 14:59, Marek Szyprowski <m.szyprowski@samsung.com> wrote:
+>> There are boards (like Hardkernel's Odroid boards) on which eMMC card's
+>> reset line is connected to GPIO line instead of the hardware reset
+>> logic. In case of such boards, if first stage of bootloader is loaded
+>> from such eMMC card, before performing system reboot, additional reset
+>> of eMMC card is required to properly boot the whole system again. This
+>> patch adds code for handling reset gpio lines defined in device tree.
+> 
+> 
+> I don't follow the above sequence. Can you try to elaborate and
+> describe for what exact scenario we require the hardware reset to be
+> done?
+The Odroid board can either 'boot' from the eMMC or from a SD card. By
+'boot', I mean that the iROM in the SoC either sources the bootloader
+data (BL1, BL2, trustzone, etc.) from eMMC or SD card.
+Let's take a board that is configured to boot from eMMC. If we reboot
+that board without doing a hw reset to the eMMC, then the iROM won't be
+able to read the bootloader when the board comes up again. Hence the
+need to do this reset during the kernel reboot procedure. Doing this
+during kernel initialization is already too late.
+
+
+With best wishes,
+Tobias
+
+
+> Also, I wonder whether we could extend the mmc-pwrseq to cover your
+> case? Did you consider that as an option?
+> 
+> Kind regards
+> Uffe
+> 
+>> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+>> ---
+>>  Documentation/devicetree/bindings/mmc/mmc.txt |  35 +++++----
+>>  drivers/mmc/core/core.c                       |   2 +
+>>  drivers/mmc/core/host.c                       |  11 +++
+>>  drivers/mmc/core/slot-gpio.c                  | 101 +++++++++++++++++++++++++-
+>>  include/linux/mmc/slot-gpio.h                 |   7 ++
+>>  5 files changed, 139 insertions(+), 17 deletions(-)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+>> index 438899e8829b..c952cdea0201 100644
+>> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+>> @@ -21,6 +21,9 @@ Optional properties:
+>>    below for the case, when a GPIO is used for the CD line
+>>  - wp-inverted: when present, polarity on the WP line is inverted. See the note
+>>    below for the case, when a GPIO is used for the WP line
+>> +- reset-gpios: Specify GPIO for hardware reset of a card, see gpio binding
+>> +- reset-inverted: when present, polarity on the reset line is inverted. See
+>> +  the note below for the case, when a GPIO is used for the reset line
+>>  - max-frequency: maximum operating clock frequency
+>>  - no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
+>>    this system, even if the controller claims it is.
+>> @@ -43,22 +46,24 @@ Optional properties:
+>>  - dsr: Value the card's (optional) Driver Stage Register (DSR) should be
+>>    programmed with. Valid range: [0 .. 0xffff].
+>>
+>> -*NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+>> -polarity properties, we have to fix the meaning of the "normal" and "inverted"
+>> -line levels. We choose to follow the SDHCI standard, which specifies both those
+>> -lines as "active low." Therefore, using the "cd-inverted" property means, that
+>> -the CD line is active high, i.e. it is high, when a card is inserted. Similar
+>> -logic applies to the "wp-inverted" property.
+>> -
+>> -CD and WP lines can be implemented on the hardware in one of two ways: as GPIOs,
+>> -specified in cd-gpios and wp-gpios properties, or as dedicated pins. Polarity of
+>> -dedicated pins can be specified, using *-inverted properties. GPIO polarity can
+>> -also be specified using the OF_GPIO_ACTIVE_LOW flag. This creates an ambiguity
+>> -in the latter case. We choose to use the XOR logic for GPIO CD and WP lines.
+>> -This means, the two properties are "superimposed," for example leaving the
+>> +*NOTE* on CD, WP and RESET polarity. To use common for all SD/MMC host
+>> +controllers line polarity properties, we have to fix the meaning of the
+>> +"normal" and "inverted" line levels. We choose to follow the SDHCI
+>> +standard, which specifies both those lines as "active low." Therefore,
+>> +using the "cd-inverted" property means, that the CD line is active high,
+>> +i.e. it is high, when a card is inserted. Similar logic applies to the
+>> +"wp-inverted" and "reset-inverted" property.
+>> +
+>> +CD, WP and RESET lines can be implemented on the hardware in one of two
+>> +ways: as GPIOs, specified in cd-gpios and wp-gpios properties, or as
+>> +dedicated pins. Polarity of dedicated pins can be specified, using
+>> +*-inverted properties. GPIO polarity can also be specified using the
+>> +OF_GPIO_ACTIVE_LOW flag. This creates an ambiguity in the latter case.
+>> +We choose to use the XOR logic for GPIO CD and WP lines. This means, the
+>> +two properties are "superimposed," for example leaving the
+>>  OF_GPIO_ACTIVE_LOW flag clear and specifying the respective *-inverted
+>> -property results in a double-inversion and actually means the "normal" line
+>> -polarity is in effect.
+>> +property results in a double-inversion and actually means the "normal"
+>> +line polarity is in effect.
+>>
+>>  Optional SDIO properties:
+>>  - keep-power-in-suspend: Preserves card power during a suspend/resume cycle
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 1be7055548cb..b556c3b5d83d 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -2520,6 +2520,7 @@ void mmc_start_host(struct mmc_host *host)
+>>                 mmc_power_off(host);
+>>         else
+>>                 mmc_power_up(host, host->ocr_avail);
+>> +       mmc_gpiod_request_restart_handler(host);
+>>         mmc_gpiod_request_cd_irq(host);
+>>         _mmc_detect_change(host, 0, false);
+>>  }
+>> @@ -2557,6 +2558,7 @@ void mmc_stop_host(struct mmc_host *host)
+>>
+>>         BUG_ON(host->card);
+>>
+>> +       mmc_gpiod_free_restart_handler(host);
+>>         mmc_power_off(host);
+>>  }
+>>
+>> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+>> index 8be0df758e68..644d0f41b8f6 100644
+>> --- a/drivers/mmc/core/host.c
+>> +++ b/drivers/mmc/core/host.c
+>> @@ -317,6 +317,7 @@ int mmc_of_parse(struct mmc_host *host)
+>>         int len, ret;
+>>         bool cd_cap_invert, cd_gpio_invert = false;
+>>         bool ro_cap_invert, ro_gpio_invert = false;
+>> +       bool rst_cap_invert;
+>>
+>>         if (!host->parent || !host->parent->of_node)
+>>                 return 0;
+>> @@ -404,6 +405,16 @@ int mmc_of_parse(struct mmc_host *host)
+>>         if (ro_cap_invert ^ ro_gpio_invert)
+>>                 host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+>>
+>> +       /* Parse HW Reset */
+>> +       rst_cap_invert = of_property_read_bool(np, "reset-inverted");
+>> +
+>> +       ret = mmc_gpiod_request_rst(host, "reset", 0, rst_cap_invert);
+>> +       if (!ret) {
+>> +               dev_info(host->parent, "Got HW Reset GPIO\n");
+>> +               host->caps |= MMC_CAP_HW_RESET;
+>> +       } else if (ret != -ENOENT)
+>> +               return ret;
+>> +
+>>         if (of_find_property(np, "cap-sd-highspeed", &len))
+>>                 host->caps |= MMC_CAP_SD_HIGHSPEED;
+>>         if (of_find_property(np, "cap-mmc-highspeed", &len))
+>> diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+>> index 27117ba47073..5a2ca43e0e8d 100644
+>> --- a/drivers/mmc/core/slot-gpio.c
+>> +++ b/drivers/mmc/core/slot-gpio.c
+>> @@ -8,6 +8,7 @@
+>>   * published by the Free Software Foundation.
+>>   */
+>>
+>> +#include <linux/delay.h>
+>>  #include <linux/err.h>
+>>  #include <linux/gpio.h>
+>>  #include <linux/gpio/consumer.h>
+>> @@ -17,17 +18,22 @@
+>>  #include <linux/mmc/slot-gpio.h>
+>>  #include <linux/module.h>
+>>  #include <linux/slab.h>
+>> +#include <linux/reboot.h>
+>>
+>>  #include "slot-gpio.h"
+>>
+>>  struct mmc_gpio {
+>>         struct gpio_desc *ro_gpio;
+>>         struct gpio_desc *cd_gpio;
+>> +       struct gpio_desc *rst_gpio;
+>>         bool override_ro_active_level;
+>>         bool override_cd_active_level;
+>> +       bool rst_raw_active_level;
+>> +       struct notifier_block rst_nb;
+>>         irqreturn_t (*cd_gpio_isr)(int irq, void *dev_id);
+>>         char *ro_label;
+>> -       char cd_label[0];
+>> +       char *cd_label;
+>> +       char rst_label[0];
+>>  };
+>>
+>>  static irqreturn_t mmc_gpio_cd_irqt(int irq, void *dev_id)
+>> @@ -45,12 +51,14 @@ int mmc_gpio_alloc(struct mmc_host *host)
+>>  {
+>>         size_t len = strlen(dev_name(host->parent)) + 4;
+>>         struct mmc_gpio *ctx = devm_kzalloc(host->parent,
+>> -                               sizeof(*ctx) + 2 * len, GFP_KERNEL);
+>> +                               sizeof(*ctx) + 3 * len + 1, GFP_KERNEL);
+>>
+>>         if (ctx) {
+>> +               ctx->cd_label = ctx->rst_label + len + 1;
+>>                 ctx->ro_label = ctx->cd_label + len;
+>>                 snprintf(ctx->cd_label, len, "%s cd", dev_name(host->parent));
+>>                 snprintf(ctx->ro_label, len, "%s ro", dev_name(host->parent));
+>> +               snprintf(ctx->rst_label, len, "%s rst", dev_name(host->parent));
+>>                 host->slot.handler_priv = ctx;
+>>                 host->slot.cd_irq = -EINVAL;
+>>         }
+>> @@ -88,6 +96,21 @@ int mmc_gpio_get_cd(struct mmc_host *host)
+>>  }
+>>  EXPORT_SYMBOL(mmc_gpio_get_cd);
+>>
+>> +void mmc_gpio_do_hw_reset(struct mmc_host *host)
+>> +{
+>> +       struct mmc_gpio *ctx = host->slot.handler_priv;
+>> +       if (!ctx || !ctx->rst_gpio)
+>> +               return;
+>> +
+>> +       gpiod_set_raw_value_cansleep(ctx->rst_gpio, ctx->rst_raw_active_level);
+>> +       /* For eMMC, minimum is 1us but give it 10us for good measure */
+>> +       udelay(10);
+>> +       gpiod_set_raw_value_cansleep(ctx->rst_gpio, !ctx->rst_raw_active_level);
+>> +       /* For eMMC, minimum is 200us but give it 300us for good measure */
+>> +       usleep_range(300, 1000);
+>> +}
+>> +EXPORT_SYMBOL(mmc_gpio_do_hw_reset);
+>> +
+>>  /**
+>>   * mmc_gpio_request_ro - request a gpio for write-protection
+>>   * @host: mmc host
+>> @@ -167,6 +190,48 @@ void mmc_gpio_set_cd_isr(struct mmc_host *host,
+>>  }
+>>  EXPORT_SYMBOL(mmc_gpio_set_cd_isr);
+>>
+>> +static int mmc_gpio_rst_nb(struct notifier_block *this, unsigned long mode,
+>> +                          void *cmd)
+>> +{
+>> +       struct mmc_gpio *ctx = container_of(this, struct mmc_gpio, rst_nb);
+>> +
+>> +       gpiod_set_raw_value(ctx->rst_gpio, ctx->rst_raw_active_level);
+>> +       /* For eMMC, minimum is 1us but give it 10us for good measure */
+>> +       udelay(10);
+>> +       gpiod_set_raw_value(ctx->rst_gpio, !ctx->rst_raw_active_level);
+>> +       /* For eMMC, minimum is 200us but give it 300us for good measure */
+>> +       udelay(300);
+>> +
+>> +       return NOTIFY_DONE;
+>> +}
+>> +
+>> +void mmc_gpiod_request_restart_handler(struct mmc_host *host)
+>> +{
+>> +       struct mmc_gpio *ctx = host->slot.handler_priv;
+>> +
+>> +       if (!ctx || !ctx->rst_gpio)
+>> +               return;
+>> +
+>> +       ctx->rst_nb.notifier_call = mmc_gpio_rst_nb;
+>> +       ctx->rst_nb.priority = 255;
+>> +
+>> +       register_restart_handler(&ctx->rst_nb);
+>> +       return;
+>> +}
+>> +EXPORT_SYMBOL(mmc_gpiod_request_restart_handler);
+>> +
+>> +void mmc_gpiod_free_restart_handler(struct mmc_host *host)
+>> +{
+>> +       struct mmc_gpio *ctx = host->slot.handler_priv;
+>> +
+>> +       if (!ctx || !ctx->rst_gpio)
+>> +               return;
+>> +
+>> +       unregister_restart_handler(&ctx->rst_nb);
+>> +       return;
+>> +}
+>> +EXPORT_SYMBOL(mmc_gpiod_free_restart_handler);
+>> +
+>>  /**
+>>   * mmc_gpio_request_cd - request a gpio for card-detection
+>>   * @host: mmc host
+>> @@ -303,3 +368,35 @@ int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
+>>         return 0;
+>>  }
+>>  EXPORT_SYMBOL(mmc_gpiod_request_ro);
+>> +
+>> +/**
+>> + * mmc_gpiod_request_rst - request a gpio descriptor for hw reset
+>> + * @host: mmc host
+>> + * @con_id: function within the GPIO consumer
+>> + * @idx: index of the GPIO to obtain in the consumer
+>> + * @inverted: indicated the polarity of reset line should be inverted
+>> + * (xored with GPIO_ACTIVE_LOW flag of gpio descriptor)
+>> + *
+>> + * Returns zero on success, else an error.
+>> + */
+>> +int mmc_gpiod_request_rst(struct mmc_host *host, const char *con_id,
+>> +                         unsigned int idx, bool inverted)
+>> +{
+>> +       struct mmc_gpio *ctx = host->slot.handler_priv;
+>> +       struct gpio_desc *desc;
+>> +
+>> +       if (!con_id)
+>> +               con_id = ctx->rst_label;
+>> +
+>> +       desc = devm_gpiod_get_index(host->parent, con_id, idx);
+>> +       if (IS_ERR(desc))
+>> +               return PTR_ERR(desc);
+>> +
+>> +       ctx->rst_raw_active_level = !inverted ^ gpiod_is_active_low(desc);
+>> +       ctx->rst_gpio = desc;
+>> +
+>> +       gpiod_direction_output_raw(desc, !ctx->rst_raw_active_level);
+>> +
+>> +       return 0;
+>> +}
+>> +EXPORT_SYMBOL(mmc_gpiod_request_rst);
+>> diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
+>> index 3945a8c9d3cb..48f814e1bbeb 100644
+>> --- a/include/linux/mmc/slot-gpio.h
+>> +++ b/include/linux/mmc/slot-gpio.h
+>> @@ -26,8 +26,15 @@ int mmc_gpiod_request_cd(struct mmc_host *host, const char *con_id,
+>>  int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
+>>                          unsigned int idx, bool override_active_level,
+>>                          unsigned int debounce, bool *gpio_invert);
+>> +int mmc_gpiod_request_rst(struct mmc_host *host, const char *con_id,
+>> +                        unsigned int idx, bool inverted);
+>>  void mmc_gpio_set_cd_isr(struct mmc_host *host,
+>>                          irqreturn_t (*isr)(int irq, void *dev_id));
+>>  void mmc_gpiod_request_cd_irq(struct mmc_host *host);
+>>
+>> +void mmc_gpio_do_hw_reset(struct mmc_host *host);
+>> +void mmc_gpiod_request_restart_handler(struct mmc_host *host);
+>> +void mmc_gpiod_free_restart_handler(struct mmc_host *host);
+>> +
+>> +
+>>  #endif
+>> --
+>> 1.9.2
+>>
+> 
