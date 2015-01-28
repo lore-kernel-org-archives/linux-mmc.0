@@ -1,57 +1,62 @@
-From: Javier Martinez Canillas <javier@dowhile0.org>
-Subject: Re: [PATCH V4 1/4] mmc: core: Initial support for MMC power sequences
-Date: Wed, 28 Jan 2015 13:47:28 +0100
-Message-ID: <CABxcv==6AtUxbaXSmYm3fx4961x_UsN_oCLmWbTY9EZR_iZN9g@mail.gmail.com>
-References: <1421658784-11980-1-git-send-email-ulf.hansson@linaro.org>
- <1421658784-11980-2-git-send-email-ulf.hansson@linaro.org>
- <CABxcv==xBNsh+NrVb8PcBVtxQOKDL79YMkwK=wOL0gJZriEUjw@mail.gmail.com>
- <CAPDyKFoze-26fPm+C=D_o3tMSXWeTV4=2ZfOKaC3uLtxCrtjvg@mail.gmail.com>
+From: Suman Tripathi <stripathi@apm.com>
+Subject: Re: [PATCH v1 2/2] arm64: dts: Add the arasan sdhc nodes in
+ apm-storm.dtsi.
+Date: Wed, 28 Jan 2015 18:52:20 +0530
+Message-ID: <CAOHikRDb8aVbP+5yMxxE-d4qeO3gbz2wnZGmMB7b7+eoF+pm=g@mail.gmail.com>
+References: <1422379260-10139-1-git-send-email-stripathi@apm.com>
+ <CAOHikRB4tSkJsMccqHRS8XYULaP+dS7KujeSLh+ZpTxDDOF5xQ@mail.gmail.com>
+ <CAOHikRAOVMQiOy_VrXmJU1e+8KBwOFSfX1uSKvfdbVG=Br2ocg@mail.gmail.com>
+ <2323575.nqxsEzcHbG@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFoze-26fPm+C=D_o3tMSXWeTV4=2ZfOKaC3uLtxCrtjvg@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Hans de Goede <hdegoede@redhat.com>, Russell King <linux@arm.linux.org.uk>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, Arnd Bergmann <arnd@arndb.de>, Alexandre Courbot <gnurou@gmail.com>, NeilBrown <neilb@suse.de>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Mark Brown <broonie@kernel.org>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <2323575.nqxsEzcHbG@wuerfel>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Mark Langsdorf <mlangsdo@redhat.com>, Jon Masters <jcm@redhat.com>, anton@enomsg.org, linux-mmc@vger.kernel.org, chris@printf.net, patches <patches@apm.com>, Don Dutile <ddutile@redhat.com>, linuxppc-dev@lists.ozlabs.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hello Ulf,
-
-On Wed, Jan 28, 2015 at 12:36 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> ---
->>
->> Patch looks good to me and I could successfully get the SDIO wlan chip
->> in the Snow Chromebook after extending the pwrseq_simple driver so on
->> Exynos5250 Snow Chromebook:
->
-> By extending you mean?
->
-
-Sorry, I shoud had mentioned it. I meant the "Add multiple GPIO and
-external clock to MMC pwrseq_simple" series [0] I posted before.
-
->>
->> Tested-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
->> Reviewed-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
->>
->> Best regards,
->> Javier
->
-> Thanks for testing and reviewing! I have applied your tags to the patches.
->
-
-You are welcome, thanks a lot for working on this.
-
-Best regards,
-Javier
-
-[0]: http://www.spinics.net/lists/arm-kernel/msg395445.html
+T24gV2VkbmVzZGF5IDI4IEphbnVhcnkgMjAxNSAwOTo1MzoyNSBTdW1hbiBUcmlwYXRoaSB3cm90
+ZToKPgo+IEkgYWRkZWQgdGhlIGlvbW11cyBpbiB0aGUgSU9NTVUgQUhCQyBwYXRjaC4gQW55dGhp
+bmcgd3JvbmcgaW4gdGhhdCA/Cj4gSW4gdGhlIG5leHQgdmVyc2lvbiBBbHNvIEkgd2lsbCByZW1v
+dmUgdGhlIElPTU1VIGhhY2tzIGZyb20gYXJhc2FuCj4gZHJpdmVyCgpIbW0sIEkgZ3Vlc3MgeW91
+IGhhdmUgYSByZXF1aXJlZCBvcmRlcmluZyBiZXR3ZWVuIHRoZSBwYXRjaGVzIGVpdGhlcgp3YXks
+IHdoaWNoIG1ha2VzIGl0IGhhcmQgdG8gbWVyZ2UgaW4gYSB3YXkgdGhhdCBpcyBiaXNlY3RhYmxl
+LgoKWW91IGFyZSBjb3JyZWN0IHRoYXQgeW91IHNob3VsZCBub3QgbWVyZ2UgYSBwYXRjaCB3aXRo
+IHRoZSBpb21tdQpyZWZlcmVuY2UgYmVmb3JlIGFkZGluZyB0aGUgaW9tbXUgZGV2aWNlIG5vZGUs
+IGJlY2F1c2UgaXQgd291bGQKb3RoZXJ3aXNlIGJyZWFrIGJ1aWxkaW5nIHRoZSBtbWMgdHJlZS4K
+Ck9uZSBtb3JlIHBvaW50IGlzIHRoZSBiaW5kaW5nIGZvciBJT01NVSBuZWVkcyB0byBiZSBpbiB0
+aGUgc2FtZSBwYXRjaAppbiB3aGljaCB0aGUgSU9NTVUgc3VwcG9ydCBpcyBhZGRlZC4gU28gdG8g
+cHJvdmlkZSB0aGUgYmluZGluZyBpbmZvIG9mCnRoZSBtYXN0ZXIgbm9kZSB3ZSByZXF1aXJlIHRo
+ZSBzZGhjIG5vZGVzIHRvIGJlIG1lcmdlZCBmaXJzdC4KClVzdWFsbHksIHRoZSByaWdodCBhbnN3
+ZXIgaXMgdG8gbWVyZ2VkIHRoZSBkdHMgY2hhbmdlcyB0aHJvdWdoIHRoZQphcm0tc29jIHRyZWUs
+IGFuZCB0aGVuIHlvdSBjYW4ganVzdCBhZGQgdGhlIG5vZGUgZm9yIHRoZSBzZGhjIGRldmljZQph
+ZnRlciB0aGUgb25lIGZvciB0aGUgaW9tbXUgZGV2aWNlLgoKT24gV2VkLCBKYW4gMjgsIDIwMTUg
+YXQgNjoxNiBQTSwgQXJuZCBCZXJnbWFubiA8YXJuZEBhcm5kYi5kZT4gd3JvdGU6Cj4gT24gV2Vk
+bmVzZGF5IDI4IEphbnVhcnkgMjAxNSAwOTo1MzoyNSBTdW1hbiBUcmlwYXRoaSB3cm90ZToKPj4K
+Pj4gSSBhZGRlZCB0aGUgaW9tbXVzIGluIHRoZSBJT01NVSBBSEJDIHBhdGNoLiBBbnl0aGluZyB3
+cm9uZyBpbiB0aGF0ID8KPj4gSW4gdGhlIG5leHQgdmVyc2lvbiBBbHNvIEkgd2lsbCByZW1vdmUg
+dGhlIElPTU1VIGhhY2tzIGZyb20gYXJhc2FuCj4+IGRyaXZlcgo+Cj4gSG1tLCBJIGd1ZXNzIHlv
+dSBoYXZlIGEgcmVxdWlyZWQgb3JkZXJpbmcgYmV0d2VlbiB0aGUgcGF0Y2hlcyBlaXRoZXIKPiB3
+YXksIHdoaWNoIG1ha2VzIGl0IGhhcmQgdG8gbWVyZ2UgaW4gYSB3YXkgdGhhdCBpcyBiaXNlY3Rh
+YmxlLgo+Cj4gWW91IGFyZSBjb3JyZWN0IHRoYXQgeW91IHNob3VsZCBub3QgbWVyZ2UgYSBwYXRj
+aCB3aXRoIHRoZSBpb21tdQo+IHJlZmVyZW5jZSBiZWZvcmUgYWRkaW5nIHRoZSBpb21tdSBkZXZp
+Y2Ugbm9kZSwgYmVjYXVzZSBpdCB3b3VsZAo+IG90aGVyd2lzZSBicmVhayBidWlsZGluZyB0aGUg
+bW1jIHRyZWUuCj4KPiBVc3VhbGx5LCB0aGUgcmlnaHQgYW5zd2VyIGlzIHRvIG1lcmdlZCB0aGUg
+ZHRzIGNoYW5nZXMgdGhyb3VnaCB0aGUKPiBhcm0tc29jIHRyZWUsIGFuZCB0aGVuIHlvdSBjYW4g
+anVzdCBhZGQgdGhlIG5vZGUgZm9yIHRoZSBzZGhjIGRldmljZQo+IGFmdGVyIHRoZSBvbmUgZm9y
+IHRoZSBpb21tdSBkZXZpY2UuCj4KPiAgICAgICAgIEFybmQKCgoKLS0gClRoYW5rcywKd2l0aCBy
+ZWdhcmRzLApTdW1hbiBUcmlwYXRoaQpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fXwpMaW51eHBwYy1kZXYgbWFpbGluZyBsaXN0CkxpbnV4cHBjLWRldkBsaXN0
+cy5vemxhYnMub3JnCmh0dHBzOi8vbGlzdHMub3psYWJzLm9yZy9saXN0aW5mby9saW51eHBwYy1k
+ZXY=
