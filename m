@@ -1,51 +1,35 @@
-From: Martin Hicks <mort@bork.org>
-Subject: [PATCH] mmc: sdhci: Apply FSL ESDHC reset handling quirk to OF
-Date: Wed, 28 Jan 2015 14:52:36 -0500
-Message-ID: <20150128195236.GA31422@darwin.bork.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-Content-Disposition: inline
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: chris@printf.net, Anton Vorontsov <anton@enomsg.org>
-Cc: linuxppc-dev@lists.ozlabs.org, linux-mmc@vger.kernel.org
+From: Srinivas Kandagatla <srinivas.kandagatla-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 0/2] mmc: pwrseq: Add support to multiple gpios in pwrseq simple
+Date: Wed, 28 Jan 2015 13:16:21 +0000
+Message-ID: <1422450981-9328-1-git-send-email-srinivas.kandagatla@linaro.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Srinivas Kandagatla <srinivas.kandagatla-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-ClRoZSByZXNldCBjb2RlIHdhcyBwdXNoZWQgaW50byB0aGUgZXNkaGMtaW14IGRyaXZlciwgYnV0
-IG1pc3NlZCBiZWluZwpwdXNoZWQgaW50byB0aGUgRlNMIE9GIGRyaXZlciBhdCB0aGUgc2FtZSB0
-aW1lLiAgVGhlIGNvbW1pdCB0aGF0IGJyb2tlCnRoZSBPRiBFU0RIQyBkcml2ZXIgd2FzIDA3MThl
-NTlhZTI1OWY3YzQ4MTU1YjRlODUyZDhiMDYzMmQ1OTAyOGUKClNpZ25lZC1vZmYtYnk6IE1hcnRp
-biBIaWNrcyA8bW9ydEBib3JrLm9yZz4KLS0tCiBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVz
-ZGhjLmMgfCAgIDEwICsrKysrKysrKy0KIDEgZmlsZSBjaGFuZ2VkLCA5IGluc2VydGlvbnMoKyks
-IDEgZGVsZXRpb24oLSkKCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVz
-ZGhjLmMgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMKaW5kZXggODg3MmM4NS4u
-NGE2NTRkNCAxMDA2NDQKLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jCisr
-KyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYwpAQCAtMjc2LDYgKzI3NiwxNCBA
-QCBzdGF0aWMgdm9pZCBlc2RoY19wbHRmbV9zZXRfYnVzX3dpZHRoKHN0cnVjdCBzZGhjaV9ob3N0
-ICpob3N0LCBpbnQgd2lkdGgpCiAJCQlFU0RIQ19DVFJMX0JVU1dJRFRIX01BU0ssIGN0cmwpOwog
-fQogCitzdGF0aWMgdm9pZCBlc2RoY19yZXNldChzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwgdTgg
-bWFzaykKK3sKKwlzZGhjaV9yZXNldChob3N0LCBtYXNrKTsKKworCXNkaGNpX3dyaXRlbChob3N0
-LCBob3N0LT5pZXIsIFNESENJX0lOVF9FTkFCTEUpOworCXNkaGNpX3dyaXRlbChob3N0LCBob3N0
-LT5pZXIsIFNESENJX1NJR05BTF9FTkFCTEUpOworfQorCiBzdGF0aWMgY29uc3Qgc3RydWN0IHNk
-aGNpX29wcyBzZGhjaV9lc2RoY19vcHMgPSB7CiAJLnJlYWRfbCA9IGVzZGhjX3JlYWRsLAogCS5y
-ZWFkX3cgPSBlc2RoY19yZWFkdywKQEAgLTI5MCw3ICsyOTgsNyBAQCBzdGF0aWMgY29uc3Qgc3Ry
-dWN0IHNkaGNpX29wcyBzZGhjaV9lc2RoY19vcHMgPSB7CiAJLnBsYXRmb3JtX2luaXQgPSBlc2Ro
-Y19vZl9wbGF0Zm9ybV9pbml0LAogCS5hZG1hX3dvcmthcm91bmQgPSBlc2RoY2lfb2ZfYWRtYV93
-b3JrYXJvdW5kLAogCS5zZXRfYnVzX3dpZHRoID0gZXNkaGNfcGx0Zm1fc2V0X2J1c193aWR0aCwK
-LQkucmVzZXQgPSBzZGhjaV9yZXNldCwKKwkucmVzZXQgPSBlc2RoY19yZXNldCwKIAkuc2V0X3Vo
-c19zaWduYWxpbmcgPSBzZGhjaV9zZXRfdWhzX3NpZ25hbGluZywKIH07CiAKLS0gCjEuNy4xMC40
-CgoKLS0gCk1hcnRpbiBIaWNrcyBQLkVuZy4gICAgfCAgICAgIG1vcnRAYm9yay5vcmcKQm9yayBD
-b25zdWx0aW5nIEluYy4gICB8ICArMSAoNjEzKSAyNjYtMjI5NgpfX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eHBwYy1kZXYgbWFpbGluZyBsaXN0Ckxp
-bnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnCmh0dHBzOi8vbGlzdHMub3psYWJzLm9yZy9saXN0
-aW5mby9saW51eHBwYy1kZXY=
+This patchset adds support to reset/powerup multiple gpio pins on a given
+sdio bus. The use case is simple, on sdio we could have multiple devices
+like WLAN, BT which are controlled by there own reset lines. So having
+multiple reset is something more useful in such cases.
+
+Without this patch I could not get BT and WLAN working at same time on IFC6410.
+
+Thanks,
+srini
+
+Srinivas Kandagatla (2):
+  mmc: pwrseq: Add support to control multiple gpios in simple pwrseq
+  mmc: pwrseq: Update document with multiple gpios support
+
+ .../devicetree/bindings/mmc/mmc-pwrseq-simple.txt  |  7 ++-
+ drivers/mmc/core/pwrseq_simple.c                   | 64 +++++++++++++++-------
+ 2 files changed, 49 insertions(+), 22 deletions(-)
+
+-- 
+1.9.1
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
