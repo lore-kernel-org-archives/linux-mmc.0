@@ -1,244 +1,95 @@
-From: NeilBrown <neilb@suse.de>
-Subject: Re: [PATCH 3/3] mmc: omap_hsmmc: switch to 1-bit before turning off
- clocks if interrupts expected.
-Date: Thu, 29 Jan 2015 08:08:11 +1100
-Message-ID: <20150129080811.5df5349d@notabene.brown>
-References: <20150127233118.32160.11899.stgit@notabene.brown>
-	<20150127233524.32160.33438.stgit@notabene.brown>
-	<CAPDyKFoe6sVi-oKGwEsoXE3U1Ct=+Swc5g+EkV5V21tvvMqE5w@mail.gmail.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [PATCH] mmc: Manual BKOPs enablement bug fix
+Date: Wed, 28 Jan 2015 12:12:11 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333EDA520F@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <1422367281-17546-1-git-send-email-alexey.skidanov@sandisk.com>
+ <54C8BB89.5040309@samsung.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- boundary="Sig_/JEkfGl2vpBtMrYuNG4nFIB1"; protocol="application/pgp-signature"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoe6sVi-oKGwEsoXE3U1Ct=+Swc5g+EkV5V21tvvMqE5w@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Tony Lindgren <tony@atomide.com>, Andreas Fenkart <afenkart@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>, linux-omap <linux-omap@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1bon0089.outbound.protection.outlook.com ([157.56.111.89]:28792
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754274AbbA2DsY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 28 Jan 2015 22:48:24 -0500
+In-Reply-To: <54C8BB89.5040309@samsung.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Alexey Skidanov <Alexey.Skidanov@sandisk.com>, "chris@printf.net" <chris@printf.net>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
---Sig_/JEkfGl2vpBtMrYuNG4nFIB1
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
-
-On Wed, 28 Jan 2015 21:18:40 +0100 Ulf Hansson <ulf.hansson@linaro.org> wro=
-te:
-
-> On 28 January 2015 at 00:35, NeilBrown <neilb@suse.de> wrote:
-> > According to section 7.1.2 of
-> >
-> > http://www.sandisk.com/media/File/OEM/Manuals/SD_SDIO_specsv1.pdf
-> >
-> >     In the case where the interrupt mechanism is used to wake the host =
-while
-> >     the card is in a low power state (i.e. no clocks), Both the card an=
-d the
-> >     host shall be placed into the 1-bit SD mode prior to stopping the c=
-lock.
-> >
-> >
-> > This is particularly important for the Marvell "libertas" wifi chip
-> > in the GTA04.  While in 4-bit mode it will only signal an interrupt
-> > when the clock is running (which is why setting CLKEXTFREE is
-> > important).
-> > In 1-bit mode, the interrupt is asynchronous (explained in OMAP3
-> > TRM description of the CIRQ flag to MMCHS_STAT:
-> >
-> >   In 1-bit mode, interrupt source is asynchronous (can be a source of
-> >   asynchronous wakeup).
-> >   In 4-bit mode, interrupt source is sampled during the interrupt
-> >   cycle.
-> >
-> > )
-> >
-> > We cannot simply set 1-bit mode in omap_hsmmc_runtime_suspend
-> > as that is called under a spinlock, and setting 1-bit mode requires
-> > a sleeping call to the card.
-> >
-> > So:
-> >  - use a work_struct to schedule setting of 1-bit mode
-> >  - intro a 'force_narrow' state flag which transitions:
-> >      0 -> NARROW_PENDING -> NARROW_FORCED -> 0
-> >  - have omap_hsmmc_runtime_suspend fail if interrupts are expected
-> >    but bus is not in 1-bit mode.  When it fails it schedules
-> >    the work to change the width. and sets NARROW_PENDING
-> >  - when the host is claimed, if NARROW_FORCED is set, restore the
-> >    4-bit bus
-> >  - When the host is released (disable_fclk), if NARROW_FORCED,
-> >    then suspend immediately, no autosuspend.  If NARROW_PENDING,
-> >    clear that flag as the device has obviously just been used.
->=20
-> I can't give you more detailed comment about this patch(set) yet. Need
-> to think a bit more first.
->=20
-> Anyway, I have one concern, see comment below.
->=20
-> >
-> > This all allows a graceful and race-free switch to 1-bit mode
-> > before switching off the clocks, if interrupts are enabled.
-> >
-> > With this, I can use my libertas wifi with a 4-bit bus, with
-> > interrupts and runtime power-management enabled, and get around
-> > 14Mb/sec throughput (which is the best I've seen).
-> >
-> > Signed-off-by: NeilBrown <neil@brown.name>
-> > ---
-> >  drivers/mmc/host/omap_hsmmc.c |   55 +++++++++++++++++++++++++++++++++=
-+++++++-
-> >  1 file changed, 53 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmm=
-c.c
-> > index f84cfb01716d..91ddebbec8a3 100644
-> > --- a/drivers/mmc/host/omap_hsmmc.c
-> > +++ b/drivers/mmc/host/omap_hsmmc.c
-> > @@ -214,6 +214,10 @@ struct omap_hsmmc_host {
-> >         int                     reqs_blocked;
-> >         int                     use_reg;
-> >         int                     req_in_progress;
-> > +       int                     force_narrow;
-> > +#define NARROW_PENDING 1
-> > +#define NARROW_FORCED  2
-> > +       struct work_struct      width_work;
-> >         unsigned long           clk_rate;
-> >         unsigned int            flags;
-> >  #define AUTO_CMD23             (1 << 0)        /* Auto CMD23 support */
-> > @@ -1778,12 +1782,43 @@ static void omap_hsmmc_conf_bus_power(struct om=
-ap_hsmmc_host *host)
-> >         set_sd_bus_power(host);
-> >  }
-> >
-> > +static void omap_hsmmc_width_work(struct work_struct *work)
-> > +{
-> > +       struct omap_hsmmc_host *host =3D container_of(work,
-> > +                                                   struct omap_hsmmc_h=
-ost,
-> > +                                                   width_work);
-> > +       atomic_t noblock;
-> > +
-> > +       atomic_set(&noblock, 1);
-> > +       if (__mmc_claim_host(host->mmc, &noblock)) {
-> > +               /* Device active again */
-> > +               host->force_narrow =3D 0;
-> > +               return;
-> > +       }
-> > +       if (host->force_narrow !=3D NARROW_PENDING) {
-> > +               /* Someone claimed and released before we got here */
-> > +               mmc_release_host(host->mmc);
-> > +               return;
-> > +       }
-> > +       if (sdio_disable_wide(host->mmc->card) =3D=3D 0)
-> > +               host->force_narrow =3D NARROW_FORCED;
-> > +       else
-> > +               host->force_narrow =3D 0;
-> > +       mmc_release_host(host->mmc);
-> > +}
-> > +
-> >  static int omap_hsmmc_enable_fclk(struct mmc_host *mmc)
-> >  {
-> >         struct omap_hsmmc_host *host =3D mmc_priv(mmc);
-> >
-> >         pm_runtime_get_sync(host->dev);
-> >
-> > +       if (host->force_narrow =3D=3D NARROW_FORCED) {
-> > +               if (sdio_enable_4bit_bus(mmc->card) > 0)
-> > +                       mmc_set_bus_width(mmc, MMC_BUS_WIDTH_4);
-> > +               host->force_narrow =3D 0;
-> > +       }
-> > +
-> >         return 0;
-> >  }
-> >
-> > @@ -1791,8 +1826,13 @@ static int omap_hsmmc_disable_fclk(struct mmc_ho=
-st *mmc)
-> >  {
-> >         struct omap_hsmmc_host *host =3D mmc_priv(mmc);
-> >
-> > -       pm_runtime_mark_last_busy(host->dev);
-> > -       pm_runtime_put_autosuspend(host->dev);
-> > +       if (host->force_narrow =3D=3D NARROW_FORCED) {
-> > +               pm_runtime_put_sync(host->dev);
-> > +       } else {
-> > +               host->force_narrow =3D 0;
-> > +               pm_runtime_mark_last_busy(host->dev);
-> > +               pm_runtime_put_autosuspend(host->dev);
-> > +       }
-> >
-> >         return 0;
-> >  }
-> > @@ -2024,6 +2064,7 @@ static int omap_hsmmc_probe(struct platform_devic=
-e *pdev)
-> >         host->power_mode =3D MMC_POWER_OFF;
-> >         host->next_data.cookie =3D 1;
-> >         host->pbias_enabled =3D 0;
-> > +       INIT_WORK(&host->width_work, omap_hsmmc_width_work);
-> >
-> >         ret =3D omap_hsmmc_gpio_init(mmc, host, pdata);
-> >         if (ret)
-> > @@ -2311,6 +2352,16 @@ static int omap_hsmmc_runtime_suspend(struct dev=
-ice *dev)
-> >         spin_lock_irqsave(&host->irq_lock, flags);
-> >         if ((host->mmc->caps & MMC_CAP_SDIO_IRQ) &&
-> >             (host->flags & HSMMC_SDIO_IRQ_ENABLED)) {
-> > +               if (host->mmc->ios.bus_width !=3D MMC_BUS_WIDTH_1) {
-> > +                       /* In 4-bit mode the card need the clock
-> > +                        * to deliver interrupts, so it isn't safe
-> > +                        * to turn it off.
-> > +                        */
-> > +                       host->force_narrow =3D NARROW_PENDING;
-> > +                       schedule_work(&host->width_work);
-> > +                       ret =3D -EBUSY;
-> > +                       goto abort;
->=20
-> >From a host driver perspective, don't you think this a bit too much to
-> implement to cover this case!?
->=20
-> I would rather see the host driver to invoke _one_ API provided by the
-> mmc core, which takes care of the needed things and also tells the
-> host driver whether it's safe to enter runtime PM suspend state or
-> not. Could that work?
-
-Since posting the patch I've been thinking along those lines too.  I hadn't
-imagined making just a single call from the host driver, but now that I thi=
-nk
-about it I don't see why not.  It should definitely work.
-
-I'll re-spin them in the next day or two.
-
-Thanks,
-NeilBrown
-
->=20
-> > +               }
-> >                 /* disable sdio irq handling to prevent race */
-> >                 OMAP_HSMMC_WRITE(host->base, ISE, 0);
-> >                 OMAP_HSMMC_WRITE(host->base, IE, 0);
-> >
-> >
->=20
-> Kind regards
-> Uffe
-
-
---Sig_/JEkfGl2vpBtMrYuNG4nFIB1
-Content-Type: application/pgp-signature
-Content-Description: OpenPGP digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQIVAwUBVMlPuznsnt1WYoG5AQKQAQ/+PEzMC2qCk/1DxsejczSPdXQqeSE+Wvrg
-5DusLwuXZ28NlAvMdUSMbwmEK2CqS6LTKDY3xUvUG+TjsGC9LxLmeeMRyyVQWczR
-hQ+eNz0MVnoWRf+kxoDmt0VJZCNiJcH1a0sHbb/ewC4GuKYjYvZ15Uu9nNHV6VQc
-S+YiI4jVkrjeOmwm3x7WoprOZXQCE2koQ4ke9O63/HgEIH/Nh0bWKR+OdeEGXLV4
-tMCdkvGfn13TxRebO+VJT0Yk2NRu3QgC6xwqUnP1koorCnHFR2QpXMwLKvJohaf2
-NGZOYztfpAquW/TNAknhjvP8oqAaBREyKIGnxIHer3vHtKXI6SypbsTqjRj1tgPR
-CpV9OCnwVBMX0sVzVKv1ciaZN1796HO5YyWth1G0lhf25+3BZ6DXRyEerXZoIlWU
-8RwjaiHan0eKjQH8g+ZhGKn+nXsFcuvAWrpebkCrWutT1m6Q6IsT6/t0yTSl+53t
-1rAkCB3tKSa5g/HUADbMEZHO3Mj0O5PyNeS7aXCE8wDs+ZNZr5ueMo2ghhCFqV0D
-XpxHBKJ97gI0PbABrZwq6g/vM1U1d/VXEhpipl2gsTtMC14u3Hu79V1IP727uoW7
-1Ef/MXWZgu/peh44sXXNglLXpCNmLAAf46oi3ShUO4UqoguZq/W9hXD8mHV57T4G
-jLMbQs0ksKY=
-=atl9
------END PGP SIGNATURE-----
-
---Sig_/JEkfGl2vpBtMrYuNG4nFIB1--
+SGkgSmFlaG9vbiwNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEph
+ZWhvb24gQ2h1bmcgW21haWx0bzpqaDgwLmNodW5nQHNhbXN1bmcuY29tXQ0KPiBTZW50OiBXZWRu
+ZXNkYXksIEphbnVhcnkgMjgsIDIwMTUgMTI6MzYgUE0NCj4gVG86IEFsZXhleSBTa2lkYW5vdjsg
+Y2hyaXNAcHJpbnRmLm5ldDsgdWxmLmhhbnNzb25AbGluYXJvLm9yZzsgbGludXgtDQo+IG1tY0B2
+Z2VyLmtlcm5lbC5vcmcNCj4gQ2M6IEFsZXggTGVtYmVyZw0KPiBTdWJqZWN0OiBSZTogW1BBVENI
+XSBtbWM6IE1hbnVhbCBCS09QcyBlbmFibGVtZW50IGJ1ZyBmaXgNCj4gDQo+IEhpLCBBbGV4ZXku
+DQo+IA0KPiBPbiAwMS8yNy8yMDE1IDExOjAxIFBNLCBBbGV4ZXkgU2tpZGFub3Ygd3JvdGU6DQo+
+ID4gVGhpcyBwYXRjaCBpcyBjb21pbmcgdG8gZml4IGNvbXBhdGliaWxpdHkgaXNzdWUgb2YgQktP
+UFNfRU4gIGZpZWxkIG9mIEVYVF9DU0QuDQo+ID4gSW4gZU1NQy01LjEsIEJLT1BTX0VOIHdhcyBj
+aGFuZ2VkLCBhbmQgbm93IGl0IGhhcyB0d28gb3BlcmF0aW9uYWwgYml0czoNCj4gPiBCaXQgMCAt
+IE1BTlVBTF9FTg0KPiA+IEJpdCAxIC0gQVVUT19FTg0KPiA+IEluIHByZXZpb3VzIGVNTUMgcmV2
+aXNpb25zLCBvbmx5IEJpdCAwIHdhcyBzdXBwb3J0ZWQuDQo+IA0KPiBXZWxsLCBpIGRvbid0IGhh
+dmUgZU1NQzUuMSBzcGVjLCBzbyBpIHdhbnQgdG8ga25vdyBtb3JlIGV4YWN0bHkgd2hhdCBpcw0K
+PiAiYXV0b19lbmFibGUiLg0KPiBJZiBBVVRPX0VOIGlzIHNldCwgd2hhdCBoYXBwZW4/DQoNCkFj
+Y29yZGluZyB0byB0aGUgc3BlYywgd2hlbiBBVVRPX0VOIGJpdCBpcyBzZXQsIGRldmljZSBtYXkg
+cGVyZm9ybSBiYWNrZ3JvdW5kIG9wZXJhdGlvbnMgd2hpbGUgbm90IHNlcnZpY2luZyB0aGUgaG9z
+dC4NCj4gDQo+IEkgY2FuJ3QgZmluZCB3aGVyZSBhdXRvX2Jrb3BzX2VuIGlzIHVzZWQuDQoNCmF1
+dG9fYmtvcHNfZW4gaXMgbm90IHVzZWQsIGJ1dCBvbmNlIHdlIG1ha2UgYSBkaWZmZXJlbnRpYXRp
+b24gYmV0d2VlbiB0d28gYml0cywgd2UgZm91bmQgaXQgYXMgbmVlZGVkIGZvciBmdXR1cmUgc3Vw
+cG9ydC4gDQoNClRoZSBtYWluIHB1cnBvc2Ugb2YgdGhpcyBwYXRjaCBpcyBwcm9wZXIgdXNhZ2Ug
+b2YgZXh0X2NzZFtFWFRfQ1NEX0JLT1BTX0VOXSBmaWVsZCBmb3IgYm90aCBlTU1DNS4wIGFuZCBl
+TU1DNS4xIGRldmljZXMuDQoNClRoYW5rcywNCkFsZXgNCg0KPiANCj4gDQo+IEJlc3QgUmVnYXJk
+cywNCj4gSmFlaG9vbiBDSHVuZw0KPiANCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IEFsZXhleSBT
+a2lkYW5vdiA8YWxleGV5LnNraWRhbm92QHNhbmRpc2suY29tPg0KPiA+IC0tLQ0KPiA+ICBkcml2
+ZXJzL21tYy9jb3JlL2NvcmUuYyAgfCAgICAyICstDQo+ID4gIGRyaXZlcnMvbW1jL2NvcmUvbW1j
+LmMgICB8ICAgIDYgKysrKy0tDQo+ID4gIGluY2x1ZGUvbGludXgvbW1jL2NhcmQuaCB8ICAgIDUg
+KysrKy0NCj4gPiAgaW5jbHVkZS9saW51eC9tbWMvbW1jLmggIHwgICAgNiArKysrKysNCj4gPiAg
+NCBmaWxlcyBjaGFuZ2VkLCAxNSBpbnNlcnRpb25zKCspLCA0IGRlbGV0aW9ucygtKQ0KPiA+DQo+
+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jIGIvZHJpdmVycy9tbWMvY29y
+ZS9jb3JlLmMgaW5kZXgNCj4gPiAxYmU3MDU1Li4wZGM2NGU2IDEwMDY0NA0KPiA+IC0tLSBhL2Ry
+aXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvY29yZS9jb3JlLmMN
+Cj4gPiBAQCAtMjc1LDcgKzI3NSw3IEBAIHZvaWQgbW1jX3N0YXJ0X2Jrb3BzKHN0cnVjdCBtbWNf
+Y2FyZCAqY2FyZCwgYm9vbA0KPiA+IGZyb21fZXhjZXB0aW9uKQ0KPiA+DQo+ID4gIAlCVUdfT04o
+IWNhcmQpOw0KPiA+DQo+ID4gLQlpZiAoIWNhcmQtPmV4dF9jc2QuYmtvcHNfZW4gfHwgbW1jX2Nh
+cmRfZG9pbmdfYmtvcHMoY2FyZCkpDQo+ID4gKwlpZiAoIWNhcmQtPmV4dF9jc2QubWFuX2Jrb3Bz
+X2VuIHx8IG1tY19jYXJkX2RvaW5nX2Jrb3BzKGNhcmQpKQ0KPiA+ICAJCXJldHVybjsNCj4gPg0K
+PiA+ICAJZXJyID0gbW1jX3JlYWRfYmtvcHNfc3RhdHVzKGNhcmQpOw0KPiA+IGRpZmYgLS1naXQg
+YS9kcml2ZXJzL21tYy9jb3JlL21tYy5jIGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYyBpbmRleA0K
+PiA+IDFmYzQ4YTIuLmMzNWJmNmUgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9t
+bWMuYw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMNCj4gPiBAQCAtNDgzLDEwICs0
+ODMsMTIgQEAgc3RhdGljIGludCBtbWNfZGVjb2RlX2V4dF9jc2Qoc3RydWN0IG1tY19jYXJkDQo+
+ICpjYXJkLCB1OCAqZXh0X2NzZCkNCj4gPiAgCQkvKiBjaGVjayB3aGV0aGVyIHRoZSBlTU1DIGNh
+cmQgc3VwcG9ydHMgQktPUFMgKi8NCj4gPiAgCQlpZiAoZXh0X2NzZFtFWFRfQ1NEX0JLT1BTX1NV
+UFBPUlRdICYgMHgxKSB7DQo+ID4gIAkJCWNhcmQtPmV4dF9jc2QuYmtvcHMgPSAxOw0KPiA+IC0J
+CQljYXJkLT5leHRfY3NkLmJrb3BzX2VuID0NCj4gZXh0X2NzZFtFWFRfQ1NEX0JLT1BTX0VOXTsN
+Cj4gPiArCQkJY2FyZC0+ZXh0X2NzZC5tYW5fYmtvcHNfZW4gPQ0KPiA+ICsJCQkJCShleHRfY3Nk
+W0VYVF9DU0RfQktPUFNfRU5dICYNCj4gPiArDQo+IAlFWFRfQ1NEX01BTlVBTF9CS09QU19NQVNL
+KTsNCj4gPiAgCQkJY2FyZC0+ZXh0X2NzZC5yYXdfYmtvcHNfc3RhdHVzID0NCj4gPiAgCQkJCWV4
+dF9jc2RbRVhUX0NTRF9CS09QU19TVEFUVVNdOw0KPiA+IC0JCQlpZiAoIWNhcmQtPmV4dF9jc2Qu
+YmtvcHNfZW4pDQo+ID4gKwkJCWlmICghY2FyZC0+ZXh0X2NzZC5tYW5fYmtvcHNfZW4pDQo+ID4g
+IAkJCQlwcl9pbmZvKCIlczogQktPUFNfRU4gYml0IGlzIG5vdCBzZXRcbiIsDQo+ID4gIAkJCQkJ
+bW1jX2hvc3RuYW1lKGNhcmQtPmhvc3QpKTsNCj4gPiAgCQl9DQo+ID4gZGlmZiAtLWdpdCBhL2lu
+Y2x1ZGUvbGludXgvbW1jL2NhcmQuaCBiL2luY2x1ZGUvbGludXgvbW1jL2NhcmQuaCBpbmRleA0K
+PiA+IDRkNjljMDAuLjE1NzcyZDAgMTAwNjQ0DQo+ID4gLS0tIGEvaW5jbHVkZS9saW51eC9tbWMv
+Y2FyZC5oDQo+ID4gKysrIGIvaW5jbHVkZS9saW51eC9tbWMvY2FyZC5oDQo+ID4gQEAgLTgzLDcg
+KzgzLDEwIEBAIHN0cnVjdCBtbWNfZXh0X2NzZCB7DQo+ID4gIAlib29sCQkJaHBpOwkJCS8qIEhQ
+SSBzdXBwb3J0IGJpdCAqLw0KPiA+ICAJdW5zaWduZWQgaW50CQlocGlfY21kOwkJLyogY21kIHVz
+ZWQgYXMgSFBJICovDQo+ID4gIAlib29sCQkJYmtvcHM7CQkvKiBiYWNrZ3JvdW5kIHN1cHBvcnQg
+Yml0ICovDQo+ID4gLQlib29sCQkJYmtvcHNfZW47CS8qIGJhY2tncm91bmQgZW5hYmxlIGJpdCAq
+Lw0KPiA+ICsJYm9vbAkJCW1hbl9ia29wc19lbjsJLyogbWFudWFsIGJhY2tncm91bmQNCj4gPiAr
+CQkJCQkJZW5hYmxlIGJpdCAqLw0KPiA+ICsJYm9vbAkJCWF1dG9fYmtvcHNfZW47CS8qIGF1dG9t
+YXRpYyBiYWNrZ3JvdW5kDQo+ID4gKwkJCQkJCWVuYWJsZSBiaXQgKi8NCj4gPiAgCXVuc2lnbmVk
+IGludCAgICAgICAgICAgIGRhdGFfc2VjdG9yX3NpemU7ICAgICAgIC8qIDUxMiBieXRlcyBvciA0
+S0IgKi8NCj4gPiAgCXVuc2lnbmVkIGludCAgICAgICAgICAgIGRhdGFfdGFnX3VuaXRfc2l6ZTsg
+ICAgIC8qIERBVEEgVEFHIFVOSVQgc2l6ZSAqLw0KPiA+ICAJdW5zaWduZWQgaW50CQlib290X3Jv
+X2xvY2s7CQkvKiBybyBsb2NrIHN1cHBvcnQgKi8NCj4gPiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9s
+aW51eC9tbWMvbW1jLmggYi9pbmNsdWRlL2xpbnV4L21tYy9tbWMuaCBpbmRleA0KPiA+IGZiOTdi
+NWMuLmQzOWRiM2UgMTAwNjQ0DQo+ID4gLS0tIGEvaW5jbHVkZS9saW51eC9tbWMvbW1jLmgNCj4g
+PiArKysgYi9pbmNsdWRlL2xpbnV4L21tYy9tbWMuaA0KPiA+IEBAIC00MjgsNiArNDI4LDEyIEBA
+IHN0cnVjdCBfbW1jX2NzZCB7DQo+ID4gICNkZWZpbmUgRVhUX0NTRF9CS09QU19MRVZFTF8yCQkw
+eDINCj4gPg0KPiA+ICAvKg0KPiA+ICsgKiBCS09QUyBtb2Rlcw0KPiA+ICsgKi8NCj4gPiArI2Rl
+ZmluZSBFWFRfQ1NEX01BTlVBTF9CS09QU19NQVNLCTB4MDENCj4gPiArI2RlZmluZSBFWFRfQ1NE
+X0FVVE9NQVRJQ19CS09QU19NQVNLCTB4MDINCj4gPiArDQo+ID4gKy8qDQo+ID4gICAqIE1NQ19T
+V0lUQ0ggYWNjZXNzIG1vZGVzDQo+ID4gICAqLw0KPiA+DQo+ID4NCg0K
