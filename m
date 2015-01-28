@@ -1,97 +1,51 @@
-From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Subject: [PATCH v2 5/6] ARM: dts: exynos5250-snow: Enable wifi power-on
-Date: Wed, 28 Jan 2015 19:15:52 +0100
-Message-ID: <1422468953-7594-6-git-send-email-javier.martinez@collabora.co.uk>
-References: <1422468953-7594-1-git-send-email-javier.martinez@collabora.co.uk>
+From: Martin Hicks <mort@bork.org>
+Subject: [PATCH] mmc: sdhci: Apply FSL ESDHC reset handling quirk to OF
+Date: Wed, 28 Jan 2015 14:52:36 -0500
+Message-ID: <20150128195236.GA31422@darwin.bork.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1422468953-7594-1-git-send-email-javier.martinez@collabora.co.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-kernel@vger.kernel.org, Arend van Spriel <arend@broadcom.com>, Kukjin Kim <kgene@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Olof Johansson <olof@lixom.net>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+Content-Disposition: inline
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: chris@printf.net, Anton Vorontsov <anton@enomsg.org>
+Cc: linuxppc-dev@lists.ozlabs.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The Snow board has a MMC/SDIO wifi chip that is always powered but it
-needs a power sequence involving a reset (active low) and an enable
-(active high) pins. Both pins are marked as active low since the MMC
-simple power sequence driver asserts the pins prior to the card power
-up procedure and de-asserts the pins after the card has been powered.
-
-So the reset line will be left de-asserted and the enable pin will be
-left asserted.
-
-The chip also needs an external 32kHz reference clock to be operational
-that is by the MAX77686 PMIC clock.
-
-Add a simple MMC power sequence provider for the wifi MMC/SDIO slot.
-
-Signed-off-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
----
-
-Changes since v1:
- - Remove cap-sdio-irq from mmc3 dev node since is a separate change.
-   Suggested by Arend van Spriel.
----
- arch/arm/boot/dts/exynos5250-snow.dts | 25 ++++++++++++++++++++++++-
- 1 file changed, 24 insertions(+), 1 deletion(-)
-
-diff --git a/arch/arm/boot/dts/exynos5250-snow.dts b/arch/arm/boot/dts/exynos5250-snow.dts
-index b9aeec430527..b78712058903 100644
---- a/arch/arm/boot/dts/exynos5250-snow.dts
-+++ b/arch/arm/boot/dts/exynos5250-snow.dts
-@@ -229,6 +229,14 @@
- 		power-supply = <&fet6>;
- 		backlight = <&backlight>;
- 	};
-+
-+	mmc3_pwrseq: mmc3_pwrseq {
-+		compatible = "mmc-pwrseq-simple";
-+		reset-gpios = <&gpx0 2 GPIO_ACTIVE_LOW>, /* WIFI_RSTn */
-+			      <&gpx0 1 GPIO_ACTIVE_LOW>; /* WIFI_EN */
-+		clocks = <&max77686 MAX77686_CLK_PMIC>;
-+		clock-names = "ext_clock";
-+	};
- };
- 
- &dp {
-@@ -536,12 +544,27 @@
- 	samsung,dw-mshc-sdr-timing = <2 3>;
- 	samsung,dw-mshc-ddr-timing = <1 2>;
- 	pinctrl-names = "default";
--	pinctrl-0 = <&sd3_clk &sd3_cmd &sd3_bus4>;
-+	pinctrl-0 = <&sd3_clk &sd3_cmd &sd3_bus4 &wifi_en &wifi_rst>;
- 	bus-width = <4>;
- 	cap-sd-highspeed;
-+	mmc-pwrseq = <&mmc3_pwrseq>;
- };
- 
- &pinctrl_0 {
-+	wifi_en: wifi-en {
-+		samsung,pins = "gpx0-1";
-+		samsung,pin-function = <1>;
-+		samsung,pin-pud = <0>;
-+		samsung,pin-drv = <0>;
-+	};
-+
-+	wifi_rst: wifi-rst {
-+		samsung,pins = "gpx0-2";
-+		samsung,pin-function = <1>;
-+		samsung,pin-pud = <0>;
-+		samsung,pin-drv = <0>;
-+	};
-+
- 	power_key_irq: power-key-irq {
- 		samsung,pins = "gpx1-3";
- 		samsung,pin-function = <0xf>;
--- 
-2.1.3
+ClRoZSByZXNldCBjb2RlIHdhcyBwdXNoZWQgaW50byB0aGUgZXNkaGMtaW14IGRyaXZlciwgYnV0
+IG1pc3NlZCBiZWluZwpwdXNoZWQgaW50byB0aGUgRlNMIE9GIGRyaXZlciBhdCB0aGUgc2FtZSB0
+aW1lLiAgVGhlIGNvbW1pdCB0aGF0IGJyb2tlCnRoZSBPRiBFU0RIQyBkcml2ZXIgd2FzIDA3MThl
+NTlhZTI1OWY3YzQ4MTU1YjRlODUyZDhiMDYzMmQ1OTAyOGUKClNpZ25lZC1vZmYtYnk6IE1hcnRp
+biBIaWNrcyA8bW9ydEBib3JrLm9yZz4KLS0tCiBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVz
+ZGhjLmMgfCAgIDEwICsrKysrKysrKy0KIDEgZmlsZSBjaGFuZ2VkLCA5IGluc2VydGlvbnMoKyks
+IDEgZGVsZXRpb24oLSkKCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVz
+ZGhjLmMgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMKaW5kZXggODg3MmM4NS4u
+NGE2NTRkNCAxMDA2NDQKLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jCisr
+KyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYwpAQCAtMjc2LDYgKzI3NiwxNCBA
+QCBzdGF0aWMgdm9pZCBlc2RoY19wbHRmbV9zZXRfYnVzX3dpZHRoKHN0cnVjdCBzZGhjaV9ob3N0
+ICpob3N0LCBpbnQgd2lkdGgpCiAJCQlFU0RIQ19DVFJMX0JVU1dJRFRIX01BU0ssIGN0cmwpOwog
+fQogCitzdGF0aWMgdm9pZCBlc2RoY19yZXNldChzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwgdTgg
+bWFzaykKK3sKKwlzZGhjaV9yZXNldChob3N0LCBtYXNrKTsKKworCXNkaGNpX3dyaXRlbChob3N0
+LCBob3N0LT5pZXIsIFNESENJX0lOVF9FTkFCTEUpOworCXNkaGNpX3dyaXRlbChob3N0LCBob3N0
+LT5pZXIsIFNESENJX1NJR05BTF9FTkFCTEUpOworfQorCiBzdGF0aWMgY29uc3Qgc3RydWN0IHNk
+aGNpX29wcyBzZGhjaV9lc2RoY19vcHMgPSB7CiAJLnJlYWRfbCA9IGVzZGhjX3JlYWRsLAogCS5y
+ZWFkX3cgPSBlc2RoY19yZWFkdywKQEAgLTI5MCw3ICsyOTgsNyBAQCBzdGF0aWMgY29uc3Qgc3Ry
+dWN0IHNkaGNpX29wcyBzZGhjaV9lc2RoY19vcHMgPSB7CiAJLnBsYXRmb3JtX2luaXQgPSBlc2Ro
+Y19vZl9wbGF0Zm9ybV9pbml0LAogCS5hZG1hX3dvcmthcm91bmQgPSBlc2RoY2lfb2ZfYWRtYV93
+b3JrYXJvdW5kLAogCS5zZXRfYnVzX3dpZHRoID0gZXNkaGNfcGx0Zm1fc2V0X2J1c193aWR0aCwK
+LQkucmVzZXQgPSBzZGhjaV9yZXNldCwKKwkucmVzZXQgPSBlc2RoY19yZXNldCwKIAkuc2V0X3Vo
+c19zaWduYWxpbmcgPSBzZGhjaV9zZXRfdWhzX3NpZ25hbGluZywKIH07CiAKLS0gCjEuNy4xMC40
+CgoKLS0gCk1hcnRpbiBIaWNrcyBQLkVuZy4gICAgfCAgICAgIG1vcnRAYm9yay5vcmcKQm9yayBD
+b25zdWx0aW5nIEluYy4gICB8ICArMSAoNjEzKSAyNjYtMjI5NgpfX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eHBwYy1kZXYgbWFpbGluZyBsaXN0Ckxp
+bnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnCmh0dHBzOi8vbGlzdHMub3psYWJzLm9yZy9saXN0
+aW5mby9saW51eHBwYy1kZXY=
