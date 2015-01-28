@@ -1,13 +1,14 @@
-From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Subject: [PATCH 5/5] ARM: dts: exynos5250-snow: Enable wifi power-on
-Date: Wed, 28 Jan 2015 11:10:19 +0100
-Message-ID: <1422439819-29854-6-git-send-email-javier.martinez@collabora.co.uk>
-References: <1422439819-29854-1-git-send-email-javier.martinez@collabora.co.uk>
+From: Javier Martinez Canillas <javier@dowhile0.org>
+Subject: Re: [PATCH V4 1/4] mmc: core: Initial support for MMC power sequences
+Date: Wed, 28 Jan 2015 11:17:22 +0100
+Message-ID: <CABxcv==xBNsh+NrVb8PcBVtxQOKDL79YMkwK=wOL0gJZriEUjw@mail.gmail.com>
+References: <1421658784-11980-1-git-send-email-ulf.hansson@linaro.org>
+ <1421658784-11980-2-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1422439819-29854-1-git-send-email-javier.martinez@collabora.co.uk>
+In-Reply-To: <1421658784-11980-2-git-send-email-ulf.hansson@linaro.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -18,80 +19,47 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-kernel@vger.kernel.org, Kukjin Kim <kgene@kernel.org>, Olof Johansson <olof@lixom.net>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, linux-arm-kernel@lists.infradead.org
+Cc: Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Hans de Goede <hdegoede@redhat.com>, Russell King <linux@arm.linux.org.uk>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, Arnd Bergmann <arnd@arndb.de>, Alexandre Courbot <gnurou@gmail.com>, NeilBrown <neilb@suse.de>, Linus Walleij <linus.walleij@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Mark Brown <broonie@kernel.org>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The Snow board has a MMC/SDIO wifi chip that is always powered but it
-needs a power sequence involving a reset (active low) and an enable
-(active high) pins. Both pins are marked as active low since the MMC
-simple power sequence driver asserts the pins prior to the card power
-up procedure and de-asserts the pins after the card has been powered.
+Hello Ulf,
 
-So the reset line will be left de-asserted and the enable pin will be
-left asserted.
+On Mon, Jan 19, 2015 at 10:13 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> System on chip designs may specify a specific MMC power sequence. To
+> successfully detect an (e)MMC/SD/SDIO card, that power sequence must
+> be followed while initializing the card.
+>
+> To be able to handle these SOC specific power sequences, let's add a
+> MMC power sequence interface. It provides the following functions to
+> help the mmc core to deal with these power sequences.
+>
+> mmc_pwrseq_alloc() - Invoked from mmc_of_parse(), to initialize data.
+> mmc_pwrseq_pre_power_on()- Invoked in the beginning of mmc_power_up().
+> mmc_pwrseq_post_power_on()- Invoked at the end in mmc_power_up().
+> mmc_pwrseq_power_off()- Invoked from mmc_power_off().
+> mmc_pwrseq_free() - Invoked from mmc_free_host(), to free data.
+>
+> Each MMC power sequence provider will be responsible to implement a set
+> of callbacks. These callbacks mirrors the functions above.
+>
+> This patch adds the skeleton, following patches will extend the core of
+> the MMC power sequence and add support for a specific simple MMC power
+> sequence.
+>
+> Do note, since the mmc_pwrseq_alloc() is invoked from mmc_of_parse(),
+> host drivers needs to make use of this API to enable the support for
+> MMC power sequences. Moreover the MMC power sequence support depends on
+> CONFIG_OF.
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
 
-The chip also needs an external 32kHz reference clock to be operational
-that is by the MAX77686 PMIC clock.
+Patch looks good to me and I could successfully get the SDIO wlan chip
+in the Snow Chromebook after extending the pwrseq_simple driver so on
+Exynos5250 Snow Chromebook:
 
-Add a simple MMC power sequence provider for the wifi MMC/SDIO slot.
+Tested-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+Reviewed-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
 
-Signed-off-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
----
- arch/arm/boot/dts/exynos5250-snow.dts | 25 ++++++++++++++++++++++++-
- 1 file changed, 24 insertions(+), 1 deletion(-)
-
-diff --git a/arch/arm/boot/dts/exynos5250-snow.dts b/arch/arm/boot/dts/exynos5250-snow.dts
-index b9aeec430527..0f7971ba8238 100644
---- a/arch/arm/boot/dts/exynos5250-snow.dts
-+++ b/arch/arm/boot/dts/exynos5250-snow.dts
-@@ -229,6 +229,13 @@
- 		power-supply = <&fet6>;
- 		backlight = <&backlight>;
- 	};
-+
-+	mmc3_pwrseq: mmc3_pwrseq {
-+		reset-gpios = <&gpx0 2 GPIO_ACTIVE_LOW>, /* WIFI_RSTn */
-+			      <&gpx0 1 GPIO_ACTIVE_LOW>; /* WIFI_EN */
-+		clocks = <&max77686 MAX77686_CLK_PMIC>;
-+		clock-names = "ext_clock";
-+	};
- };
- 
- &dp {
-@@ -531,17 +538,33 @@
- 	status = "okay";
- 	num-slots = <1>;
- 	broken-cd;
-+	cap-sdio-irq;
- 	card-detect-delay = <200>;
- 	samsung,dw-mshc-ciu-div = <3>;
- 	samsung,dw-mshc-sdr-timing = <2 3>;
- 	samsung,dw-mshc-ddr-timing = <1 2>;
- 	pinctrl-names = "default";
--	pinctrl-0 = <&sd3_clk &sd3_cmd &sd3_bus4>;
-+	pinctrl-0 = <&sd3_clk &sd3_cmd &sd3_bus4 &wifi_en &wifi_rst>;
- 	bus-width = <4>;
- 	cap-sd-highspeed;
-+	mmc-pwrseq = <&mmc3_pwrseq>;
- };
- 
- &pinctrl_0 {
-+	wifi_en: wifi-en {
-+		samsung,pins = "gpx0-1";
-+		samsung,pin-function = <1>;
-+		samsung,pin-pud = <0>;
-+		samsung,pin-drv = <0>;
-+	};
-+
-+	wifi_rst: wifi-rst {
-+		samsung,pins = "gpx0-2";
-+		samsung,pin-function = <1>;
-+		samsung,pin-pud = <0>;
-+		samsung,pin-drv = <0>;
-+	};
-+
- 	power_key_irq: power-key-irq {
- 		samsung,pins = "gpx1-3";
- 		samsung,pin-function = <0xf>;
--- 
-2.1.3
+Best regards,
+Javier
