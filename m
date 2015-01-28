@@ -1,168 +1,87 @@
-From: NeilBrown <neilb@suse.de>
-Subject: [PATCH 3/3] mmc: omap_hsmmc: switch to 1-bit before turning off
- clocks if interrupts expected.
-Date: Wed, 28 Jan 2015 10:35:24 +1100
-Message-ID: <20150127233524.32160.33438.stgit@notabene.brown>
-References: <20150127233118.32160.11899.stgit@notabene.brown>
+From: Suman Tripathi <stripathi@apm.com>
+Subject: Re: [PATCH v1 2/2] arm64: dts: Add the arasan sdhc nodes in
+ apm-storm.dtsi.
+Date: Wed, 28 Jan 2015 09:53:25 +0530
+Message-ID: <CAOHikRAOVMQiOy_VrXmJU1e+8KBwOFSfX1uSKvfdbVG=Br2ocg@mail.gmail.com>
+References: <1422379260-10139-1-git-send-email-stripathi@apm.com>
+ <1422379260-10139-3-git-send-email-stripathi@apm.com>
+ <4747424.udeKOcy6tC@wuerfel>
+ <CAOHikRB4tSkJsMccqHRS8XYULaP+dS7KujeSLh+ZpTxDDOF5xQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150127233118.32160.11899.stgit@notabene.brown>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Andreas Fenkart <afenkart@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, GTA04 owners <gta04-owner@goldelico.com>, NeilBrown <neil@brown.name>, linux-omap@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAOHikRB4tSkJsMccqHRS8XYULaP+dS7KujeSLh+ZpTxDDOF5xQ@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Mark Langsdorf <mlangsdo@redhat.com>, Jon Masters <jcm@redhat.com>, anton@enomsg.org, linux-mmc@vger.kernel.org, chris@printf.net, patches <patches@apm.com>, Don Dutile <ddutile@redhat.com>, linuxppc-dev@lists.ozlabs.org, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-According to section 7.1.2 of
+Hi Arnd,
 
-http://www.sandisk.com/media/File/OEM/Manuals/SD_SDIO_specsv1.pdf
+I added the iommus in the IOMMU AHBC patch. Anything wrong in that ?
+In the next version Also I will remove the IOMMU hacks from arasan
+driver
 
-    In the case where the interrupt mechanism is used to wake the host while
-    the card is in a low power state (i.e. no clocks), Both the card and the
-    host shall be placed into the 1-bit SD mode prior to stopping the clock.
+On Wed, Jan 28, 2015 at 9:48 AM, Suman Tripathi <stripathi@apm.com> wrote:
+> Hi Arnd,
+>
+> On Tuesday 27 January 2015 22:51:00 Suman Tripathi wrote:
+>>
+>> +               sdhc0: sdhc@1c000000 {
+>> +                       device_type = "sdhc";
+>> +                       compatible = "arasan,sdhci-8.9a";
+>> +                       reg = <0x0 0x1c000000 0x0 0x100>;
+>> +                       interrupts = <0x0 0x49 0x4>;
+>> +                       clock-names = "clk_xin", "clk_ahb";
+>> +                       clocks = <&sdioclk 0>, <&ahbclk 0>;
+>> +               };
+>> +
+>
+> Here you don't provide an 'iommus' property, which means that the
+> device is unable to use the iommu.
+> I added the iommus in the IOMMU AHBC patch. Anything wrong in that ? In the
+> next version Also I will remove the IOMMU hacks from arasan driver
+>
+>
+> On Wed, Jan 28, 2015 at 1:43 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+>>
+>> On Tuesday 27 January 2015 22:51:00 Suman Tripathi wrote:
+>> >
+>> > +               sdhc0: sdhc@1c000000 {
+>> > +                       device_type = "sdhc";
+>> > +                       compatible = "arasan,sdhci-8.9a";
+>> > +                       reg = <0x0 0x1c000000 0x0 0x100>;
+>> > +                       interrupts = <0x0 0x49 0x4>;
+>> > +                       clock-names = "clk_xin", "clk_ahb";
+>> > +                       clocks = <&sdioclk 0>, <&ahbclk 0>;
+>> > +               };
+>> > +
+>>
+>> Here you don't provide an 'iommus' property, which means that the
+>> device is unable to use the iommu.
+>>
+>>         Arnd
+>
+>
+>
+>
+> --
+> Thanks,
+> with regards,
+> Suman Tripathi
 
 
-This is particularly important for the Marvell "libertas" wifi chip
-in the GTA04.  While in 4-bit mode it will only signal an interrupt
-when the clock is running (which is why setting CLKEXTFREE is
-important).
-In 1-bit mode, the interrupt is asynchronous (explained in OMAP3
-TRM description of the CIRQ flag to MMCHS_STAT:
 
-  In 1-bit mode, interrupt source is asynchronous (can be a source of
-  asynchronous wakeup).
-  In 4-bit mode, interrupt source is sampled during the interrupt
-  cycle.
-
-)
-
-We cannot simply set 1-bit mode in omap_hsmmc_runtime_suspend
-as that is called under a spinlock, and setting 1-bit mode requires
-a sleeping call to the card.
-
-So:
- - use a work_struct to schedule setting of 1-bit mode
- - intro a 'force_narrow' state flag which transitions:
-     0 -> NARROW_PENDING -> NARROW_FORCED -> 0
- - have omap_hsmmc_runtime_suspend fail if interrupts are expected
-   but bus is not in 1-bit mode.  When it fails it schedules
-   the work to change the width. and sets NARROW_PENDING
- - when the host is claimed, if NARROW_FORCED is set, restore the
-   4-bit bus
- - When the host is released (disable_fclk), if NARROW_FORCED,
-   then suspend immediately, no autosuspend.  If NARROW_PENDING,
-   clear that flag as the device has obviously just been used.
-
-This all allows a graceful and race-free switch to 1-bit mode
-before switching off the clocks, if interrupts are enabled.
-
-With this, I can use my libertas wifi with a 4-bit bus, with
-interrupts and runtime power-management enabled, and get around
-14Mb/sec throughput (which is the best I've seen).
-
-Signed-off-by: NeilBrown <neil@brown.name>
----
- drivers/mmc/host/omap_hsmmc.c |   55 ++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 53 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index f84cfb01716d..91ddebbec8a3 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -214,6 +214,10 @@ struct omap_hsmmc_host {
- 	int			reqs_blocked;
- 	int			use_reg;
- 	int			req_in_progress;
-+	int			force_narrow;
-+#define NARROW_PENDING	1
-+#define NARROW_FORCED	2
-+	struct work_struct	width_work;
- 	unsigned long		clk_rate;
- 	unsigned int		flags;
- #define AUTO_CMD23		(1 << 0)        /* Auto CMD23 support */
-@@ -1778,12 +1782,43 @@ static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
- 	set_sd_bus_power(host);
- }
- 
-+static void omap_hsmmc_width_work(struct work_struct *work)
-+{
-+	struct omap_hsmmc_host *host = container_of(work,
-+						    struct omap_hsmmc_host,
-+						    width_work);
-+	atomic_t noblock;
-+
-+	atomic_set(&noblock, 1);
-+	if (__mmc_claim_host(host->mmc, &noblock)) {
-+		/* Device active again */
-+		host->force_narrow = 0;
-+		return;
-+	}
-+	if (host->force_narrow != NARROW_PENDING) {
-+		/* Someone claimed and released before we got here */
-+		mmc_release_host(host->mmc);
-+		return;
-+	}
-+	if (sdio_disable_wide(host->mmc->card) == 0)
-+		host->force_narrow = NARROW_FORCED;
-+	else
-+		host->force_narrow = 0;
-+	mmc_release_host(host->mmc);
-+}
-+
- static int omap_hsmmc_enable_fclk(struct mmc_host *mmc)
- {
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
- 
- 	pm_runtime_get_sync(host->dev);
- 
-+	if (host->force_narrow == NARROW_FORCED) {
-+		if (sdio_enable_4bit_bus(mmc->card) > 0)
-+			mmc_set_bus_width(mmc, MMC_BUS_WIDTH_4);
-+		host->force_narrow = 0;
-+	}
-+
- 	return 0;
- }
- 
-@@ -1791,8 +1826,13 @@ static int omap_hsmmc_disable_fclk(struct mmc_host *mmc)
- {
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
- 
--	pm_runtime_mark_last_busy(host->dev);
--	pm_runtime_put_autosuspend(host->dev);
-+	if (host->force_narrow == NARROW_FORCED) {
-+		pm_runtime_put_sync(host->dev);
-+	} else {
-+		host->force_narrow = 0;
-+		pm_runtime_mark_last_busy(host->dev);
-+		pm_runtime_put_autosuspend(host->dev);
-+	}
- 
- 	return 0;
- }
-@@ -2024,6 +2064,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	host->power_mode = MMC_POWER_OFF;
- 	host->next_data.cookie = 1;
- 	host->pbias_enabled = 0;
-+	INIT_WORK(&host->width_work, omap_hsmmc_width_work);
- 
- 	ret = omap_hsmmc_gpio_init(mmc, host, pdata);
- 	if (ret)
-@@ -2311,6 +2352,16 @@ static int omap_hsmmc_runtime_suspend(struct device *dev)
- 	spin_lock_irqsave(&host->irq_lock, flags);
- 	if ((host->mmc->caps & MMC_CAP_SDIO_IRQ) &&
- 	    (host->flags & HSMMC_SDIO_IRQ_ENABLED)) {
-+		if (host->mmc->ios.bus_width != MMC_BUS_WIDTH_1) {
-+			/* In 4-bit mode the card need the clock
-+			 * to deliver interrupts, so it isn't safe
-+			 * to turn it off.
-+			 */
-+			host->force_narrow = NARROW_PENDING;
-+			schedule_work(&host->width_work);
-+			ret = -EBUSY;
-+			goto abort;
-+		}
- 		/* disable sdio irq handling to prevent race */
- 		OMAP_HSMMC_WRITE(host->base, ISE, 0);
- 		OMAP_HSMMC_WRITE(host->base, IE, 0);
+-- 
+Thanks,
+with regards,
+Suman Tripathi
