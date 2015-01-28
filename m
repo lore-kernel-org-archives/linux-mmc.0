@@ -1,8 +1,8 @@
 From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Subject: [PATCH 3/5] mmc: pwrseq: Document optional clock for the simple power
- sequence
-Date: Wed, 28 Jan 2015 11:10:17 +0100
-Message-ID: <1422439819-29854-4-git-send-email-javier.martinez@collabora.co.uk>
+Subject: [PATCH 1/5] mmc: pwrseq: Document that simple sequence support more
+ than one GPIO
+Date: Wed, 28 Jan 2015 11:10:15 +0100
+Message-ID: <1422439819-29854-2-git-send-email-javier.martinez@collabora.co.uk>
 References: <1422439819-29854-1-git-send-email-javier.martinez@collabora.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,27 +22,28 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-kernel@vger.kernel.org, Kukjin Kim <kgene@kernel.org>, Olof Johansson <olof@lixom.net>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Some WLAN chips attached to a SDIO interface, need an external clock
-to be operational. Since this is very common, extend the simple MMC
-power sequence DT binding to support an optional clock.
+Many SDIO/MMC attached WLAN chips need more than one ping for their reset
+sequence. Extend the pwrseq_simple binding to support more than one pin.
 
 Signed-off-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
 ---
- Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 4 ++++
- 1 file changed, 4 insertions(+)
+ Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-index 9a77deb164c7..6b5c10d1144c 100644
+index da333d9ed94c..9a77deb164c7 100644
 --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
 +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-@@ -11,6 +11,10 @@ Optional properties:
- - reset-gpios : contains a list of GPIO specifiers. The reset GPIOs are asserted
- 	at initialization and prior we start the power up procedure of the card.
- 	Will be de-asserted right after the power has been provided to the card.
-+- clocks : Must contain an entry for the entry in clock-names.
-+  See ../clocks/clock-bindings.txt for details.
-+- clock-names : Must include the following entry:
-+  "ext_clock" (External clock provided to the card).
+@@ -8,9 +8,9 @@ Required properties:
+ - compatible : contains "mmc-pwrseq-simple".
+ 
+ Optional properties:
+-- reset-gpios : contains a GPIO specifier. The reset GPIO is asserted at
+-	initialization and prior we start the power up procedure of the card. It
+-	will be de-asserted right after the power has been provided to the card.
++- reset-gpios : contains a list of GPIO specifiers. The reset GPIOs are asserted
++	at initialization and prior we start the power up procedure of the card.
++	Will be de-asserted right after the power has been provided to the card.
  
  Example:
  
