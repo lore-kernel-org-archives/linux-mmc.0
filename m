@@ -1,103 +1,93 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: core: use card pointer as the first parameter of execute_tuning()
-Date: Thu, 29 Jan 2015 10:16:15 +0100
-Message-ID: <CAPDyKFqjY-Sn2mNqjy1FH3RPFuJSfhTX_esQDao1Yb4qumHYcg@mail.gmail.com>
-References: <1422271175-19445-1-git-send-email-addy.ke@rock-chips.com>
-	<1422271175-19445-2-git-send-email-addy.ke@rock-chips.com>
-	<CAPDyKFp=5epMggHu0+u_LU7ETujcoeP2xOpB7iD6JF2bs8BnEA@mail.gmail.com>
-	<CAD=FV=X9x0gW5TyLi4ERm8nxixQB__Y=5bRAtOax-_w+T33rCg@mail.gmail.com>
-	<CAPDyKFqjG=yxDcwnk4jbXMZ05hMkWR2x37uVpRNd_11-eB4G7w@mail.gmail.com>
-	<CAD=FV=VQg+sQUpgbKw7Zz=-f+jPM=6O-+3gUpohWhj8JeSPu6Q@mail.gmail.com>
+Subject: Re: [PATCH v2 1/7] mmc: sdhci-pxav3: Fix SDR50 and DDR50 capabilities
+ for the Armada 38x flavor
+Date: Thu, 29 Jan 2015 10:31:02 +0100
+Message-ID: <CAPDyKFqXLb+BOrotBv9UKDeSCriK2k9qmxKoUrWTKK7uM2oLTw@mail.gmail.com>
+References: <1422010594-1735-1-git-send-email-gregory.clement@free-electrons.com>
+	<1422010594-1735-2-git-send-email-gregory.clement@free-electrons.com>
+	<CAPDyKFp=TxkL4BPMxVU+pMPoCQ1xPq0XZ+ZPpBFFaDnNtFjynw@mail.gmail.com>
+	<54C9EFC9.7090809@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f50.google.com ([209.85.192.50]:36912 "EHLO
-	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753650AbbA2JQQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jan 2015 04:16:16 -0500
-Received: by mail-qg0-f50.google.com with SMTP id f51so25489213qge.9
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Jan 2015 01:16:16 -0800 (PST)
-In-Reply-To: <CAD=FV=VQg+sQUpgbKw7Zz=-f+jPM=6O-+3gUpohWhj8JeSPu6Q@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <54C9EFC9.7090809@free-electrons.com>
+Sender: stable-owner@vger.kernel.org
+To: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Boris BREZILLON <boris.brezillon@free-electrons.com>, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, stable@vger.kernel.org, Marcin Wojtas <mw@semihalf.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Addy Ke <addy.ke@rock-chips.com>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
 
-- Drastically decreased cc-list.
+[...]
 
-On 29 January 2015 at 01:55, Doug Anderson <dianders@chromium.org> wrote:
-> Ulf,
+>> Seems like this function can be void instead of always returning 0.
 >
-> On Tue, Jan 27, 2015 at 7:18 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> I asked Addy to post upstream against mmc_send_tuning(), but I guess
->>> he didn't (he posted against Alex's NAKed patch instead).
+> In patch 4 "mmc: sdhci-pxav3: Modify clock settings for the SDR50 and
+> DDR50 modes", this function can return other values than 0.
+>
+> I could change the prototype in patch 4, but it would also imply
+> removing the test of the return value in this patch and adding in back
+> patch 4. By returning a value in this patch, it reduced the amount of
+> change over the patches.
+>
+> But if you still prefer than I this function return void in this
+> patch, I can do it.
+
+No worries, let's keep it as an int. But then I have a few other
+comments, see below.
+
+>
+>
+> Thanks,
+>
+> Gregory
+>
+>
+>>
+>>> +{
+>>> +       host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
+>>> +       /*
+>>> +        * According to erratum 'FE-2946959' both SDR50 and DDR50
+>>> +        * modes require specific clock adjustments in SDIO3
+>>> +        * Configuration register, if the adjustment is not done,
+>>> +        * remove them from the capabilities.
+>>> +        */
+>>> +       host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
+>>> +       host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
+>>> +       return 0;
+>>> +}
+>>> +
+>>>  static void pxav3_reset(struct sdhci_host *host, u8 mask)
+>>>  {
+>>>         struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
+>>> @@ -319,6 +333,9 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+>>>                 clk_prepare_enable(pxa->clk_core);
 >>>
->>> ...when I talked to him about it, Addy was asserting that when tuning
->>> fails it is important (at least on dw_mmc on rk3288) that we wait for
->>> the card to stop being busy and that the way to detect was using
->>> mmc_send_status().
->>
->> So, could that be due to the internal logic of the error handling in
->> dw_mmc driver? Or you think this is a generic issue?
->>
->> According to the specifications (eMMC and SD) both states that the
->> tuning command has an R1 response. So, there shouldn't be any busy
->> signalling involved - at least according to spec.
->
-> I did a bit of digging into this issue myself.  What I found was that
-> a "response CRC" and "end of transfer".  This was why I posted up
-> <https://patchwork.kernel.org/patch/5623071/>.  From that patch:
->
->> Specifically it looks like in certain error conditions (I saw this
->> with Response CRC errors) that data keeps showing up in the FIFO even
->> after the error is reported and the CD (command done) bit is set.  If
->> we don't wait for this data to finish transferring then it confuses
->> the next transaction.  In the specific failure case I ran into I found
->> that I could monitor the data_state_mc_busy bit and wait for it to
->> clear, but in other failure cases this bit was stuck at busy when we
->> saw an error.  Hence a generic big delay seems like the only option.
+>>>         if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
+>>> +               ret = armada_38x_quirks(host);
+>>> +               if (ret < 0)
 
-I haven't queued that patch, I was waiting for an ack from Seungwon or Jaehoon.
+Since in patch 4 you return a proper error code, let's also adopt to
+that here by changing to:
 
-Do you think it could solve this issue, we could give it a try!?
+"if (IS_ERR(ret))
 
->
-> ...Addy instead fixed the problem using mmc_send_status() to try to
-> detect when the transfer was all done and it apparently worked, but it
-> seemed odd to me.  My MMC "expertise" pretty much ends with looking
-> for simple logic errors in the MMC driver, so my hope was that one of
-> you guys would know this better...
->
->
->>> That would mean that against upstream you'd need to change
->>> mmc_send_tuning() to take in the card as well (or move the "host->card
->>> = card" assignment to before UHS init, which seems less desirable?)
+>>> +                       goto err_quirks;
+>>>                 ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
+>>>                 if (ret < 0)
+>>>                         goto err_mbus_win;
+>>> @@ -400,6 +417,7 @@ err_mbus_win:
+>>>         if (!IS_ERR(pxa->clk_core))
+>>>                 clk_disable_unprepare(pxa->clk_core);
+>>>  err_clk_get:
+>>> +err_quirks:
 
-I get your point now.
+You don't need the new label, you could use "err_clk_get".
 
-Changing mmc_send_tuning() to take "card" will work due to $subject
-patch changed the ->execute_tuning() callbacks to take "card" as well.
-
+>>>         sdhci_pltfm_free(pdev);
+>>>         return ret;
+>>>  }
+>>> --
+>>> 2.1.0
 >>>
->>> What do you think about that?  Is there a better solution?
->>
->> Why do we need to change mmc_send_tuning()? I thought the issue was
->> that mmc_send_status(), which currently takes "card" as a parameter.
->
-> Well, if mmc_send_tuning() needed to call mmc_send_status() then
-> mmc_send_tuning() would need the card parameter, right?
-
-Correct, got it now. :-)
-
-I didn't understand that you wanted mmc_send_tuning() to invoke
-mmc_send_status() while it got some errors. From Addy's patch2,
-mmc_send_status() is invoked from the host driver.
-
-Anyway, I think we should follow your suggestion to change the
-behaviour of mmc_send_tuning(). Though, I think it should use
-bus_ops->alive() callback instead (and that callback then also need to
-change to take "card" as a parameter), since that would be generic and
-the cover the SDIO case as well.
 
 Kind regards
 Uffe
