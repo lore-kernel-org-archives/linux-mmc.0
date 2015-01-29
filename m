@@ -1,92 +1,207 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 03/15] mmc: core: Add support for re-tuning before each request
-Date: Thu, 29 Jan 2015 11:00:18 +0200
-Message-ID: <1422522030-17793-4-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 01/15] mmc: host: Add facility to support re-tuning
+Date: Thu, 29 Jan 2015 11:00:16 +0200
+Message-ID: <1422522030-17793-2-git-send-email-adrian.hunter@intel.com>
 References: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:47307 "EHLO mga09.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:57059 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758273AbbA2JCh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 29 Jan 2015 04:02:37 -0500
+	id S1753180AbbA2JC1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 29 Jan 2015 04:02:27 -0500
 In-Reply-To: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-At the start of each request, re-tune if needed and
-then hold off re-tuning again until the request is done.
+Currently, there is core support for tuning during
+initialization. There can also be a need to re-tune
+periodically (e.g. sdhci) or to re-tune after the
+host controller is powered off (e.g. after PM
+runtime suspend / resume) or to re-tune in response
+to CRC errors.
 
-Note that though there is one function that starts
-requests (mmc_start_request) there are two that wait for
-the request to be done (mmc_wait_for_req_done and
-mmc_wait_for_data_req_done).  Also note that
-mmc_wait_for_data_req_done can return even when the
-request is not done (which allows the block driver
-to prepare a newly arrived request while still
-waiting for the previous request).
+The main requirements for re-tuning are:
+  - ability to enable /disable re-tuning
+  - ability to flag that re-tuning is needed
+  - ability to re-tune before any request
+  - ability to hold off re-tuning if the card is busy
+  - ability to hold off re-tuning if re-tuning is in
+  progress
+  - ability to run a re-tuning timer
 
-This patch ensures re-tuning is held for the duration
-of a request.  Subsequent patches will also hold
-re-tuning at other times when it might cause a
-conflict.
+To support those requirements 5 members are added to struct
+mmc_host:
+
+  unsigned int		can_retune:1;	/* re-tuning can be used */
+  unsigned int		doing_retune:1;	/* re-tuning in progress */
+  int			need_retune;	/* re-tuning is needed */
+  int			hold_retune;	/* hold off re-tuning */
+  struct timer_list	retune_timer;	/* for periodic re-tuning */
+
+need_retune is an integer so it can be set without needing
+synchronization. hold_retune is a integer to allow nesting.
+
+Various simple functions are provided to set / clear those
+variables.
+
+Subsequent patches take those functions into use.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c | 21 +++++++++++++++++----
- 1 file changed, 17 insertions(+), 4 deletions(-)
+ drivers/mmc/core/host.c  | 46 ++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/host.h | 58 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 104 insertions(+)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index e9ab5ff..6dad56d 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -192,9 +192,21 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 	unsigned int i, sz;
- 	struct scatterlist *sg;
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 8be0df7..221d46d 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -301,6 +301,51 @@ static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
+ 
  #endif
+ 
++void mmc_retune_enable(struct mmc_host *host, unsigned int period)
++{
++	host->can_retune = 1;
++	if (period)
++		mod_timer(&host->retune_timer, jiffies + period * HZ);
++}
++
++void mmc_retune_disable(struct mmc_host *host)
++{
++	host->can_retune = 0;
++	del_timer_sync(&host->retune_timer);
++	host->need_retune = 0;
++}
++
++void mmc_retune_timer_stop(struct mmc_host *host)
++{
++	del_timer_sync(&host->retune_timer);
++}
++
++int mmc_retune(struct mmc_host *host)
++{
 +	int err;
 +
++	if (!host->need_retune || host->doing_retune || host->hold_retune ||
++	    !host->card)
++		return 0;
++
++	host->need_retune = 0;
++
++	host->doing_retune = 1;
++
++	err = mmc_execute_tuning(host->card);
++
++	host->doing_retune = 0;
++
++	return err;
++}
++
++static void mmc_retune_timer(unsigned long data)
++{
++	struct mmc_host *host = (struct mmc_host *)data;
++
++	mmc_retune_needed(host);
++}
++
+ /**
+  *	mmc_of_parse() - parse host's device-tree node
+  *	@host: host whose node should be parsed.
+@@ -504,6 +549,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ #ifdef CONFIG_PM
+ 	host->pm_notify.notifier_call = mmc_pm_notify;
+ #endif
++	setup_timer(&host->retune_timer, mmc_retune_timer, (unsigned long)host);
+ 
+ 	/*
+ 	 * By default, hosts do not support SGIO or large requests.
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 0c8cbe5..e9a7470 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -12,6 +12,7 @@
+ 
+ #include <linux/leds.h>
+ #include <linux/mutex.h>
++#include <linux/timer.h>
+ #include <linux/sched.h>
+ #include <linux/device.h>
+ #include <linux/fault-inject.h>
+@@ -327,10 +328,16 @@ struct mmc_host {
+ #ifdef CONFIG_MMC_DEBUG
+ 	unsigned int		removed:1;	/* host is being removed */
+ #endif
++	unsigned int		can_retune:1;	/* re-tuning can be used */
++	unsigned int		doing_retune:1;	/* re-tuning in progress */
+ 
+ 	int			rescan_disable;	/* disable card detection */
+ 	int			rescan_entered;	/* used with nonremovable devices */
+ 
++	int			need_retune;	/* re-tuning is needed */
++	int			hold_retune;	/* hold off re-tuning */
++	struct timer_list	retune_timer;	/* for periodic re-tuning */
++
+ 	bool			trigger_card_event; /* card_event necessary */
+ 
+ 	struct mmc_card		*card;		/* device attached to this host */
+@@ -519,4 +526,55 @@ static inline bool mmc_card_hs400(struct mmc_card *card)
+ 	return card->host->ios.timing == MMC_TIMING_MMC_HS400;
+ }
+ 
++void mmc_retune_enable(struct mmc_host *host, unsigned int period);
++void mmc_retune_disable(struct mmc_host *host);
++void mmc_retune_timer_stop(struct mmc_host *host);
++int mmc_retune(struct mmc_host *host);
++
++static inline void mmc_retune_needed(struct mmc_host *host)
++{
++	if (host->can_retune)
++		host->need_retune = 1;
++}
++
++static inline void mmc_retune_not_needed(struct mmc_host *host)
++{
++	host->need_retune = 0;
++}
++
++static inline void mmc_retune_hold(struct mmc_host *host)
++{
++	host->hold_retune += 1;
++}
++
++static inline void mmc_retune_release(struct mmc_host *host)
++{
++	if (host->hold_retune)
++		host->hold_retune -= 1;
++	else
++		WARN_ON(1);
++}
++
++static inline int mmc_retune_and_hold(struct mmc_host *host)
++{
++	int err;
++
++	err = mmc_retune(host);
++	if (!err)
++		mmc_retune_hold(host);
++
++	return err;
++}
++
++static inline int mmc_retune_recheck(struct mmc_host *host)
++{
++	int err;
++
++	mmc_retune_release(host);
++	err = mmc_retune(host);
 +	mmc_retune_hold(host);
 +
- 	if (mmc_card_removed(host->card))
- 		return -ENOMEDIUM;
- 
-+	err = mmc_retune_recheck(host);
-+	if (err) {
-+		/* Retry path expects the clock to be held */
-+		if (mrq->cmd->retries)
-+			mmc_host_clk_hold(host);
-+		return err;
-+	}
++	return err;
++}
 +
- 	if (mrq->sbc) {
- 		pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
- 			 mmc_hostname(host), mrq->sbc->opcode,
-@@ -427,12 +439,11 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
- 			}
- 		} else if (context_info->is_new_req) {
- 			context_info->is_new_req = false;
--			if (!next_req) {
--				err = MMC_BLK_NEW_REQUEST;
--				break; /* return err */
--			}
-+			if (!next_req)
-+				return MMC_BLK_NEW_REQUEST;
- 		}
- 	}
-+	mmc_retune_release(host);
- 	return err;
- }
- 
-@@ -473,6 +484,8 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
- 		cmd->error = 0;
- 		host->ops->request(host, mrq);
- 	}
-+
-+	mmc_retune_release(host);
- }
- 
- /**
+ #endif /* LINUX_MMC_HOST_H */
 -- 
 1.9.1
 
