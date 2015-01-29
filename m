@@ -1,132 +1,80 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 0/7] Fixes and improvements for SDHCI on Armada 38x
-Date: Thu, 29 Jan 2015 13:09:37 +0100
-Message-ID: <CAPDyKFo0cQYE=oWr1+x+gZzE4refOhD3FJBQscJ4dwdzT3p=ww@mail.gmail.com>
-References: <1422531390-31038-1-git-send-email-gregory.clement@free-electrons.com>
+Subject: Re: [PATCH] mmc: sdhci: Apply FSL ESDHC reset handling quirk to OF
+Date: Thu, 29 Jan 2015 13:19:55 +0100
+Message-ID: <CAPDyKFqwieB6h9WXHea1J1QM3yHJgMMH2-b0ym4xUfZc1iHPQw@mail.gmail.com>
+References: <20150128195236.GA31422@darwin.bork.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f46.google.com ([209.85.192.46]:65008 "EHLO
-	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752583AbbA2MJi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jan 2015 07:09:38 -0500
-Received: by mail-qg0-f46.google.com with SMTP id i50so26882763qgf.5
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Jan 2015 04:09:37 -0800 (PST)
-In-Reply-To: <1422531390-31038-1-git-send-email-gregory.clement@free-electrons.com>
+Received: from mail-qg0-f50.google.com ([209.85.192.50]:45946 "EHLO
+	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754229AbbA2MT4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jan 2015 07:19:56 -0500
+Received: by mail-qg0-f50.google.com with SMTP id f51so27055262qge.9
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Jan 2015 04:19:55 -0800 (PST)
+In-Reply-To: <20150128195236.GA31422@darwin.bork.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Boris BREZILLON <boris.brezillon@free-electrons.com>, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+To: Martin Hicks <mort@bork.org>
+Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 
-On 29 January 2015 at 12:36, Gregory CLEMENT
-<gregory.clement@free-electrons.com> wrote:
-> Hi,
+On 28 January 2015 at 20:52, Martin Hicks <mort@bork.org> wrote:
 >
-> this series brings fixes and improvements for the SDHCI controller of
-> the Armada 38x SoCs.
+> The reset code was pushed into the esdhc-imx driver, but missed being
+> pushed into the FSL OF driver at the same time.  The commit that broke
+> the OF ESDHC driver was 0718e59ae259f7c48155b4e852d8b0632d59028e
 >
-> The changes for this forth version was done on the 1st and 4th
-> patches, see the changelog for the details.
->
-> The first two patches are fixes and should be also applied on the
-> stable branch (I added stable in copy for this).
->
-> The first one removes the SDR50 and DDR50 mode timing from the
-> capabilities of the controller because the current implementation
-> doesn't support it.
->
-> The second one fix controller's caps according to the limitation of
-> the hardware.
->
-> The third one extends the Device Tree binding of the Armada 38x. It
-> allows using the SDIO3 configuration register.
->
-> The forth patch adds the support of this new register in the
-> driver. Thanks to this one, specific clock adjustments can be done in
-> order to support the SDR50 and DDR50 modes timing.
->
-> The fifth patch is device tree clean-up.
->
-> The sixth patch update the SDHCI node on Armada 38x in order to use
-> the new register and then to be able to support the SDR50 and DDR50
-> modes timing.
->
-> Finally, the seventh patch add the description of SDHCI for the Armada
-> 388 RD board which was missing.
->
-> Patches 1 to 4 should be merged through the mmc tree and patches 5 to
-> 7 should be merged through mvebu and then arm-soc.
->
-> Patch 4 depend on patch 2.
-> Patch 2 depend on patch 1.
-> And patch 1 depend on commit aa8165f91442 "mmc: sdhci-pxav3: do the
-> mbus window configuration after enabling clocks" which have been
-> merged.
->
-> But as all this patch should be merged through the same tree it would
-> not be a problem
->
-> The patches 5 to 7 depend on the patches already merged in mvebu.
->
-> As they are fixes, patches 1 and 2 should be merged in 3.18-rc or at
-> least in 3.19 and then they will be part of 3.18.1. For the other
-> patches it would be nice if they could be part of 3.19.
->
-> Thanks,
->
-> Gregory
->
-> Changelog:
->
-> v3 -> v4:
-> - Merge the 3 dev_wanr message in a single one
-> - Remove err_quirks label
->
-> v2 -> v3:
-> - Use of_property_read_bool() instead of of_get_property
-> - Brace the else case according to the Documentation/CodingStyle
-> - Move the setting of MMC_CAP_1_8V_DDR before the armada_38x_quirks
->   calls
->
-> v1 -> v2:
-> - Put back Marcin as author of patch 2 and 3
-> - Removed MMC_CAP_1_8V_DDR in the probe function
->
-> Gregory CLEMENT (5):
->   mmc: sdhci-pxav3: Fix SDR50 and DDR50 capabilities for the Armada 38x
->     flavor
->   mmc: sdhci-pxav3: Extend binding with SDIO3 conf reg for the Armada
->     38x
->   ARM: mvebu: Use macros for interrupt flags on Armada 38x sdhci node
->   ARM: mvebu: Update the SDHCI node on Armada 38x
->   ARM: mvebu: Add Device Tree description of SDHCI for Armada 388 RD
->
->
-> Gregory CLEMENT (5):
->   mmc: sdhci-pxav3: Fix SDR50 and DDR50 capabilities for the Armada 38x
->     flavor
->   mmc: sdhci-pxav3: Extend binding with SDIO3 conf reg for the Armada
->     38x
->   ARM: mvebu: Use macros for interrupt flags on Armada 38x sdhci node
->   ARM: mvebu: Update the SDHCI node on Armada 38x
->   ARM: mvebu: Add Device Tree description of SDHCI for Armada 388 RD
->
-> Marcin Wojtas (2):
->   mmc: sdhci-pxav3: Fix Armada 38x controller's caps according to
->     erratum ERR-7878951
->   mmc: sdhci-pxav3: Modify clock settings for the SDR50 and DDR50 modes
->
->  .../devicetree/bindings/mmc/sdhci-pxa.txt          | 15 ++--
->  arch/arm/boot/dts/armada-388-rd.dts                | 10 +++
->  arch/arm/boot/dts/armada-38x.dtsi                  |  7 +-
->  drivers/mmc/host/sdhci-pxav3.c                     | 83 +++++++++++++++++++++-
->  4 files changed, 106 insertions(+), 9 deletions(-)
->
-> --
-> 2.1.0
->
+> Signed-off-by: Martin Hicks <mort@bork.org>
 
-Thanks! Applied patch 1 -> 4 for next.
+Martin, thanks for the patch. Though I have already queued a patch for
+this issue. It's available on my next branch.
+
+Alessio Igor Bogani <alessio.bogani@elettra.eu>
+mmc: sdhci: Fix FSL ESDHC reset handling quirk
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c |   10 +++++++++-
+>  1 file changed, 9 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 8872c85..4a654d4 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -276,6 +276,14 @@ static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
+>                         ESDHC_CTRL_BUSWIDTH_MASK, ctrl);
+>  }
+>
+> +static void esdhc_reset(struct sdhci_host *host, u8 mask)
+> +{
+> +       sdhci_reset(host, mask);
+> +
+> +       sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+> +       sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+> +}
+> +
+>  static const struct sdhci_ops sdhci_esdhc_ops = {
+>         .read_l = esdhc_readl,
+>         .read_w = esdhc_readw,
+> @@ -290,7 +298,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
+>         .platform_init = esdhc_of_platform_init,
+>         .adma_workaround = esdhci_of_adma_workaround,
+>         .set_bus_width = esdhc_pltfm_set_bus_width,
+> -       .reset = sdhci_reset,
+> +       .reset = esdhc_reset,
+>         .set_uhs_signaling = sdhci_set_uhs_signaling,
+>  };
+>
+> --
+> 1.7.10.4
+>
+>
+> --
+> Martin Hicks P.Eng.    |      mort@bork.org
+> Bork Consulting Inc.   |  +1 (613) 266-2296
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
