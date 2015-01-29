@@ -1,207 +1,124 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 01/15] mmc: host: Add facility to support re-tuning
-Date: Thu, 29 Jan 2015 11:00:16 +0200
-Message-ID: <1422522030-17793-2-git-send-email-adrian.hunter@intel.com>
-References: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 00/15] mmc: host: Add facility to support re-tuning
+Date: Thu, 29 Jan 2015 11:00:15 +0200
+Message-ID: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga09.intel.com ([134.134.136.24]:57059 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753180AbbA2JC1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 29 Jan 2015 04:02:27 -0500
-In-Reply-To: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
+	id S1758115AbbA2JCZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 29 Jan 2015 04:02:25 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-Currently, there is core support for tuning during
-initialization. There can also be a need to re-tune
-periodically (e.g. sdhci) or to re-tune after the
-host controller is powered off (e.g. after PM
-runtime suspend / resume) or to re-tune in response
-to CRC errors.
+Hi
 
-The main requirements for re-tuning are:
-  - ability to enable /disable re-tuning
-  - ability to flag that re-tuning is needed
-  - ability to re-tune before any request
-  - ability to hold off re-tuning if the card is busy
-  - ability to hold off re-tuning if re-tuning is in
-  progress
-  - ability to run a re-tuning timer
+Here is V2 of some patches to move re-tuning support
+out of sdhci and into the core, and add support for HS400
+re-tuning.
 
-To support those requirements 5 members are added to struct
-mmc_host:
+Currently sdhci does re-tuning transparently by
+calling sdhci_execute_tuning() from its ->request()
+function.
 
-  unsigned int		can_retune:1;	/* re-tuning can be used */
-  unsigned int		doing_retune:1;	/* re-tuning in progress */
-  int			need_retune;	/* re-tuning is needed */
-  int			hold_retune;	/* hold off re-tuning */
-  struct timer_list	retune_timer;	/* for periodic re-tuning */
+The problem with HS400 re-tuning is that it must be
+done in HS200 mode. That means using switch commands
+and making ios changes. That means it potentially
+conflicts with other command sequences. The new
+re-tuning support accomodates that, however it is
+not strictly necessary because HS400 re-tuning
+should only be needed after runtime suspend when
+there would not be a conflict.
 
-need_retune is an integer so it can be set without needing
-synchronization. hold_retune is a integer to allow nesting.
+Nevertheless, this approach has more structure
+and potentially more flexibility.
 
-Various simple functions are provided to set / clear those
-variables.
+Changes in V2:
 
-Subsequent patches take those functions into use.
+    Added support to the block driver for re-tuning
+    and retrying after a CRC error. The host driver
+    is left to decide when an error indicates re-tuning
+    is needed. The block driver will retry a data request
+    once if re-tuning is flagged as needed.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/core/host.c  | 46 ++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h | 58 ++++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 104 insertions(+)
+    SDIO drivers need not be aware of re-tuning because
+    retrying will anyway cause re-tuning when re-tuning
+    is flagged as needed. Nevertheless SDIO drivers could
+    use the need_retune flag to instigate a retry when
+    otherwise they might not have.
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 8be0df7..221d46d 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -301,6 +301,51 @@ static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
- 
- #endif
- 
-+void mmc_retune_enable(struct mmc_host *host, unsigned int period)
-+{
-+	host->can_retune = 1;
-+	if (period)
-+		mod_timer(&host->retune_timer, jiffies + period * HZ);
-+}
-+
-+void mmc_retune_disable(struct mmc_host *host)
-+{
-+	host->can_retune = 0;
-+	del_timer_sync(&host->retune_timer);
-+	host->need_retune = 0;
-+}
-+
-+void mmc_retune_timer_stop(struct mmc_host *host)
-+{
-+	del_timer_sync(&host->retune_timer);
-+}
-+
-+int mmc_retune(struct mmc_host *host)
-+{
-+	int err;
-+
-+	if (!host->need_retune || host->doing_retune || host->hold_retune ||
-+	    !host->card)
-+		return 0;
-+
-+	host->need_retune = 0;
-+
-+	host->doing_retune = 1;
-+
-+	err = mmc_execute_tuning(host->card);
-+
-+	host->doing_retune = 0;
-+
-+	return err;
-+}
-+
-+static void mmc_retune_timer(unsigned long data)
-+{
-+	struct mmc_host *host = (struct mmc_host *)data;
-+
-+	mmc_retune_needed(host);
-+}
-+
- /**
-  *	mmc_of_parse() - parse host's device-tree node
-  *	@host: host whose node should be parsed.
-@@ -504,6 +549,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- #ifdef CONFIG_PM
- 	host->pm_notify.notifier_call = mmc_pm_notify;
- #endif
-+	setup_timer(&host->retune_timer, mmc_retune_timer, (unsigned long)host);
- 
- 	/*
- 	 * By default, hosts do not support SGIO or large requests.
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 0c8cbe5..e9a7470 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -12,6 +12,7 @@
- 
- #include <linux/leds.h>
- #include <linux/mutex.h>
-+#include <linux/timer.h>
- #include <linux/sched.h>
- #include <linux/device.h>
- #include <linux/fault-inject.h>
-@@ -327,10 +328,16 @@ struct mmc_host {
- #ifdef CONFIG_MMC_DEBUG
- 	unsigned int		removed:1;	/* host is being removed */
- #endif
-+	unsigned int		can_retune:1;	/* re-tuning can be used */
-+	unsigned int		doing_retune:1;	/* re-tuning in progress */
- 
- 	int			rescan_disable;	/* disable card detection */
- 	int			rescan_entered;	/* used with nonremovable devices */
- 
-+	int			need_retune;	/* re-tuning is needed */
-+	int			hold_retune;	/* hold off re-tuning */
-+	struct timer_list	retune_timer;	/* for periodic re-tuning */
-+
- 	bool			trigger_card_event; /* card_event necessary */
- 
- 	struct mmc_card		*card;		/* device attached to this host */
-@@ -519,4 +526,55 @@ static inline bool mmc_card_hs400(struct mmc_card *card)
- 	return card->host->ios.timing == MMC_TIMING_MMC_HS400;
- }
- 
-+void mmc_retune_enable(struct mmc_host *host, unsigned int period);
-+void mmc_retune_disable(struct mmc_host *host);
-+void mmc_retune_timer_stop(struct mmc_host *host);
-+int mmc_retune(struct mmc_host *host);
-+
-+static inline void mmc_retune_needed(struct mmc_host *host)
-+{
-+	if (host->can_retune)
-+		host->need_retune = 1;
-+}
-+
-+static inline void mmc_retune_not_needed(struct mmc_host *host)
-+{
-+	host->need_retune = 0;
-+}
-+
-+static inline void mmc_retune_hold(struct mmc_host *host)
-+{
-+	host->hold_retune += 1;
-+}
-+
-+static inline void mmc_retune_release(struct mmc_host *host)
-+{
-+	if (host->hold_retune)
-+		host->hold_retune -= 1;
-+	else
-+		WARN_ON(1);
-+}
-+
-+static inline int mmc_retune_and_hold(struct mmc_host *host)
-+{
-+	int err;
-+
-+	err = mmc_retune(host);
-+	if (!err)
-+		mmc_retune_hold(host);
-+
-+	return err;
-+}
-+
-+static inline int mmc_retune_recheck(struct mmc_host *host)
-+{
-+	int err;
-+
-+	mmc_retune_release(host);
-+	err = mmc_retune(host);
-+	mmc_retune_hold(host);
-+
-+	return err;
-+}
-+
- #endif /* LINUX_MMC_HOST_H */
--- 
-1.9.1
+    mmc: core: Simplify by adding mmc_execute_tuning()
+        Dropped because it has been applied
+
+    mmc: host: Add facility to support re-tuning
+        Renamed mmc_retune_retry() to mmc_retune_recheck()
+        to better reflect what it does.
+
+    mmc: core: Move mmc_card_removed() into mmc_start_request()
+        Dropped because it has been applied
+
+    mmc: core: Add support for re-tuning before each request
+        Fixed un-balanced re-tune hold / release
+
+    mmc: sdhci: Always init buf_ready_int
+        Dropped because it has been applied
+
+    mmc: core: Separate out the mmc_switch status check so it can be re-used
+        New patch
+
+    mmc: core: Add support for HS400 re-tuning
+        It was found that that the original code was not reliable
+        after a CRC error. The problem was that the CMD13 after a
+        switch was faiing. So the code was changed to check the
+        switch status *after* changing the I/O state to match the
+        switch i.e. the new I/O state is the correct one to use
+        after a switch.
+
+    mmc: sdhci: Flag re-tuning is needed on CRC or End-Bit errors
+        New patch
+
+    mmc: block: Check re-tuning in the recovery path
+        New patch
+
+    mmc: block: Retry data requests when re-tuning is needed
+        New patch
+
+    mmc: core: Don't print reset warning if reset is not supported
+        New patch
+
+
+Adrian Hunter (15):
+      mmc: host: Add facility to support re-tuning
+      mmc: core: Disable re-tuning when card is no longer initialized
+      mmc: core: Add support for re-tuning before each request
+      mmc: core: Check re-tuning before retrying
+      mmc: core: Hold re-tuning during switch commands
+      mmc: core: Hold re-tuning during erase commands
+      mmc: core: Hold re-tuning while bkops ongoing
+      mmc: mmc: Comment that callers need to hold re-tuning if the card is put to sleep
+      mmc: core: Separate out the mmc_switch status check so it can be re-used
+      mmc: core: Add support for HS400 re-tuning
+      mmc: sdhci: Change to new way of doing re-tuning
+      mmc: sdhci: Flag re-tuning is needed on CRC or End-Bit errors
+      mmc: block: Check re-tuning in the recovery path
+      mmc: block: Retry data requests when re-tuning is needed
+      mmc: core: Don't print reset warning if reset is not supported
+
+ drivers/mmc/card/block.c   |  19 ++++++-
+ drivers/mmc/card/queue.h   |   1 +
+ drivers/mmc/core/core.c    |  51 ++++++++++++++++--
+ drivers/mmc/core/core.h    |   2 +
+ drivers/mmc/core/host.c    |  63 ++++++++++++++++++++++
+ drivers/mmc/core/mmc.c     |  87 +++++++++++++++++++++++++++++++
+ drivers/mmc/core/mmc_ops.c |  45 ++++++++++------
+ drivers/mmc/core/mmc_ops.h |   1 +
+ drivers/mmc/host/sdhci.c   | 127 ++++++++-------------------------------------
+ include/linux/mmc/host.h   |  58 +++++++++++++++++++++
+ include/linux/mmc/sdhci.h  |   3 --
+ 11 files changed, 328 insertions(+), 129 deletions(-)
+
+
+Regards
+Adrian
 
