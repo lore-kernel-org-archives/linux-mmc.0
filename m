@@ -1,80 +1,159 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci: Apply FSL ESDHC reset handling quirk to OF
-Date: Thu, 29 Jan 2015 13:19:55 +0100
-Message-ID: <CAPDyKFqwieB6h9WXHea1J1QM3yHJgMMH2-b0ym4xUfZc1iHPQw@mail.gmail.com>
-References: <20150128195236.GA31422@darwin.bork.org>
+Subject: Re: [PATCH v2 4/6] mmc: pwrseq_simple: Add optional reference clock support
+Date: Thu, 29 Jan 2015 14:05:41 +0100
+Message-ID: <CAPDyKFommNu7oscgmhwMpT-5KYN9b6d1xvt513_0qWE=HEGbow@mail.gmail.com>
+References: <1422468953-7594-1-git-send-email-javier.martinez@collabora.co.uk>
+	<1422468953-7594-5-git-send-email-javier.martinez@collabora.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f50.google.com ([209.85.192.50]:45946 "EHLO
-	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754229AbbA2MT4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jan 2015 07:19:56 -0500
-Received: by mail-qg0-f50.google.com with SMTP id f51so27055262qge.9
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Jan 2015 04:19:55 -0800 (PST)
-In-Reply-To: <20150128195236.GA31422@darwin.bork.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1422468953-7594-5-git-send-email-javier.martinez@collabora.co.uk>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+Cc: Kukjin Kim <kgene@kernel.org>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Arend van Spriel <arend@broadcom.com>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Martin Hicks <mort@bork.org>
-Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 
-On 28 January 2015 at 20:52, Martin Hicks <mort@bork.org> wrote:
+On 28 January 2015 at 19:15, Javier Martinez Canillas
+<javier.martinez@collabora.co.uk> wrote:
+> Some WLAN chips attached to a SDIO interface, need a reference clock.
 >
-> The reset code was pushed into the esdhc-imx driver, but missed being
-> pushed into the FSL OF driver at the same time.  The commit that broke
-> the OF ESDHC driver was 0718e59ae259f7c48155b4e852d8b0632d59028e
+> Since this is very common, extend the prseq_simple driver to support
+> an optional clock that is enabled prior the card power up procedure.
 >
-> Signed-off-by: Martin Hicks <mort@bork.org>
+> Note: the external clock is optional. Thus an error is not returned
+> if the clock is not found.
+>
+> Signed-off-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+> ---
+>
+> Changes since v1:
+>  - Rebase on top of latest changes.
+>  - Use IS_ERR() instead of checking for NULL to see if the clock exists.
+> ---
+>  drivers/mmc/core/pwrseq_simple.c | 34 ++++++++++++++++++++++++++++++++--
+>  1 file changed, 32 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+> index e53d3c7e059c..5e34c77efa5e 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -7,6 +7,7 @@
+>   *
+>   *  Simple MMC power sequence management
+>   */
+> +#include <linux/clk.h>
+>  #include <linux/kernel.h>
+>  #include <linux/slab.h>
+>  #include <linux/device.h>
+> @@ -20,6 +21,7 @@
+>
+>  struct mmc_pwrseq_simple {
+>         struct mmc_pwrseq pwrseq;
+> +       struct clk *ext_clk;
 
-Martin, thanks for the patch. Though I have already queued a patch for
-this issue. It's available on my next branch.
+You need to add a bool, maybe call it clk_enabled;  See why below.
 
-Alessio Igor Bogani <alessio.bogani@elettra.eu>
-mmc: sdhci: Fix FSL ESDHC reset handling quirk
+>         int nr_gpios;
+>         struct gpio_desc *reset_gpios[0];
+>  };
+> @@ -39,6 +41,9 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+>         struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+>                                         struct mmc_pwrseq_simple, pwrseq);
+>
+> +       if (!IS_ERR(pwrseq->ext_clk))
+> +               clk_prepare_enable(pwrseq->ext_clk);
+> +
+
+There are no guarantee that the ->mmc_pwrseq_simple_pre_power_on()
+will be invoked prior ->mmc_pwrseq_simple_power_off().
+
+That means you need to keep track of if you have gated/ungated the
+clock. In other words check pwrseq->clk_enabled. That will prevent
+potential clk unbalance issues.
+
+>         mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
+>  }
+>
+> @@ -50,6 +55,17 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
+>         mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
+>  }
+>
+> +static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
+> +{
+> +       struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+> +                                       struct mmc_pwrseq_simple, pwrseq);
+> +
+> +       mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
+> +
+> +       if (!IS_ERR(pwrseq->ext_clk))
+> +               clk_disable_unprepare(pwrseq->ext_clk);
+
+Same comment as above.
+
+> +}
+> +
+>  static void mmc_pwrseq_simple_free(struct mmc_host *host)
+>  {
+>         struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+> @@ -60,6 +76,9 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
+>                 if (!IS_ERR(pwrseq->reset_gpios[i]))
+>                         gpiod_put(pwrseq->reset_gpios[i]);
+>
+> +       if (!IS_ERR(pwrseq->ext_clk))
+> +               clk_put(pwrseq->ext_clk);
+> +
+>         kfree(pwrseq);
+>         host->pwrseq = NULL;
+>  }
+> @@ -67,7 +86,7 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
+>  static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
+>         .pre_power_on = mmc_pwrseq_simple_pre_power_on,
+>         .post_power_on = mmc_pwrseq_simple_post_power_on,
+> -       .power_off = mmc_pwrseq_simple_pre_power_on,
+> +       .power_off = mmc_pwrseq_simple_power_off,
+>         .free = mmc_pwrseq_simple_free,
+>  };
+>
+> @@ -85,6 +104,14 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
+>         if (!pwrseq)
+>                 return -ENOMEM;
+>
+> +       pwrseq->ext_clk = clk_get(dev, "ext_clock");
+> +       if (IS_ERR(pwrseq->ext_clk) &&
+> +           PTR_ERR(pwrseq->ext_clk) != -ENOENT &&
+> +           PTR_ERR(pwrseq->ext_clk) != -ENOSYS) {
+
+I don't think you can get -ENOSYS.
+
+> +               ret = PTR_ERR(pwrseq->ext_clk);
+> +               goto free;
+> +       }
+> +
+>         for (i = 0; i < nr_gpios; i++) {
+>                 pwrseq->reset_gpios[i] = gpiod_get_index(dev, "reset", i,
+>                                                          GPIOD_OUT_HIGH);
+> @@ -96,7 +123,7 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
+>                         while (--i)
+>                                 gpiod_put(pwrseq->reset_gpios[i]);
+>
+> -                       goto free;
+> +                       goto clk_put;
+>                 }
+>         }
+>
+> @@ -105,6 +132,9 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
+>         host->pwrseq = &pwrseq->pwrseq;
+>
+>         return 0;
+> +clk_put:
+> +       if (!IS_ERR(pwrseq->ext_clk))
+> +               clk_put(pwrseq->ext_clk);
+>  free:
+>         kfree(pwrseq);
+>         return ret;
+> --
+> 2.1.3
+>
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sdhci-of-esdhc.c |   10 +++++++++-
->  1 file changed, 9 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 8872c85..4a654d4 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -276,6 +276,14 @@ static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
->                         ESDHC_CTRL_BUSWIDTH_MASK, ctrl);
->  }
->
-> +static void esdhc_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +       sdhci_reset(host, mask);
-> +
-> +       sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-> +       sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-> +}
-> +
->  static const struct sdhci_ops sdhci_esdhc_ops = {
->         .read_l = esdhc_readl,
->         .read_w = esdhc_readw,
-> @@ -290,7 +298,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
->         .platform_init = esdhc_of_platform_init,
->         .adma_workaround = esdhci_of_adma_workaround,
->         .set_bus_width = esdhc_pltfm_set_bus_width,
-> -       .reset = sdhci_reset,
-> +       .reset = esdhc_reset,
->         .set_uhs_signaling = sdhci_set_uhs_signaling,
->  };
->
-> --
-> 1.7.10.4
->
->
-> --
-> Martin Hicks P.Eng.    |      mort@bork.org
-> Bork Consulting Inc.   |  +1 (613) 266-2296
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
