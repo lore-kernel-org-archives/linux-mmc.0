@@ -1,86 +1,119 @@
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: Re: [PATCH 1/4] mmc: core: add support for hardware reset gpio line
-Date: Thu, 29 Jan 2015 12:01:39 +0100
-Message-ID: <54CA1313.1090302@samsung.com>
-References: <1422453595-21160-1-git-send-email-m.szyprowski@samsung.com>
- <1422453595-21160-2-git-send-email-m.szyprowski@samsung.com>
- <CAPDyKFpowidghwadJS+gYP0EVo6gRUhAG8s14CMEbwatFadP2Q@mail.gmail.com>
- <54C9FA48.5050705@samsung.com>
- <CABxcv=nbTcuzcmhYHKnDom5XFd+gqUbKRF0THCKsN5tL8-cBGA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <CABxcv=nbTcuzcmhYHKnDom5XFd+gqUbKRF0THCKsN5tL8-cBGA@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Javier Martinez Canillas <javier@dowhile0.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene@kernel.org>, Tobias Jakobi <liquid.acid@gmx.net>, Daniel Drake <drake@endlessm.com>, Sebastian Reichel <sre@kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Joonyoung Shim <jy0922.shim@samsung.com>
+From: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Subject: [PATCH v4 0/7] Fixes and improvements for SDHCI on Armada 38x
+Date: Thu, 29 Jan 2015 12:36:23 +0100
+Message-ID: <1422531390-31038-1-git-send-email-gregory.clement@free-electrons.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from down.free-electrons.com ([37.187.137.238]:60316 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752745AbbA2Lgk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jan 2015 06:36:40 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Ezequiel Garcia <ezequiel.garcia@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Maxime Ripard <maxime.ripard@free-electrons.com>, Boris BREZILLON <boris.brezillon@free-electrons.com>, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Nadav Haklai <nadavh@marvell.com>, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org
 
-Hello,
+Hi,
 
-On 2015-01-29 11:56, Javier Martinez Canillas wrote:
-> On Thu, Jan 29, 2015 at 10:15 AM, Marek Szyprowski
-> <m.szyprowski@samsung.com> wrote:
->>> Also, I wonder whether we could extend the mmc-pwrseq to cover your
->>> case? Did you consider that as an option?
->> I didn't consider mmc-pwrseq yet. For me it looked straightforward to
-> I agree with Ulf that using mmc-pwrseq would be a good solution and in
-> fact I think the pwrseq_simple [0] driver will fit your use case since
-> it supports a reset GPIO pin which is what many WLAN chips attached to
-> a SDIO interface use.
->> implement
->> it just like card detect or write-protection gpio pins. I already noticed
->> that
->> there is code for some mmc host driver, which perform mmc hardware reset. If
->> you
->> think that extending pwrseq is the better approach, I will try to update my
->> patches. This will add reboot handler to mmc-pwrseq then. The only question
->> is
-> I don't think that adding a reboot handler to mmc-pwrseq is needed.
-> AFAICT the call chain is:
->
-> sys_reboot() -> kernel_restart() -> device_shutdown() ->
-> mmc_bus_shutdown() -> _mmc_suspend() -> mmc_power_off() ->
-> mmc_pwrseq_power_off() -> struct mmc_pwrseq_ops .power_off
->
-> So since the pwrseq_simple already asserts the reset GPIO in
-> .power_off, it should be enough to ensure the eMMC will be reset to
-> its default configuration for the iROM to work properly.
+this series brings fixes and improvements for the SDHCI controller of
+the Armada 38x SoCs.
 
-I think that I had to add reset handler, because device_shutdown() was not
-called if reset was triggered from magic sysrq, but I will check it again.
+The changes for this forth version was done on the 1st and 4th
+patches, see the changelog for the details.
 
-> It also asserts the GPIO pin in .pre_power_on and de-asserts in
-> .post_power_on which should be needed as well for the other case you
-> mentioned when a broken bootloader left the emmc card in some unknown
-> state.
->
->> weather to use it always when mmc-pwrseq has been enabled or only if some
->> additional property like 'reset-on-reboot' has been provided.
->>
-> Having a reset GPIO is optional AFAIK so I don't think there is a need
-> for an additional "reset-on-reboot" propery.
->
->> Best regards
->> --
->> Marek Szyprowski, PhD
->> Samsung R&D Institute Poland
->>
-> Best regards,
-> Javier
->
-> [0]:
-> FYI, these are the relevant commits in linux-next:
-> fe1922d5d4d0 mmc: pwrseq_simple: Add support for a reset GPIO pin
-> ec2017f2491f mmc: pwrseq: Initial support for the simple MMC power
-> sequence provider
-> fe1686658f9c mmc: pwrseq: Document DT bindings for the simple MMC power sequence
-> 1b745e8a4627 mmc: core: Initial support for MMC power sequences
+The first two patches are fixes and should be also applied on the
+stable branch (I added stable in copy for this).
 
-Ok, I will check it.
+The first one removes the SDR50 and DDR50 mode timing from the
+capabilities of the controller because the current implementation
+doesn't support it.
 
-Best regards
+The second one fix controller's caps according to the limitation of
+the hardware.
+
+The third one extends the Device Tree binding of the Armada 38x. It
+allows using the SDIO3 configuration register.
+
+The forth patch adds the support of this new register in the
+driver. Thanks to this one, specific clock adjustments can be done in
+order to support the SDR50 and DDR50 modes timing.
+
+The fifth patch is device tree clean-up.
+
+The sixth patch update the SDHCI node on Armada 38x in order to use
+the new register and then to be able to support the SDR50 and DDR50
+modes timing.
+
+Finally, the seventh patch add the description of SDHCI for the Armada
+388 RD board which was missing.
+
+Patches 1 to 4 should be merged through the mmc tree and patches 5 to
+7 should be merged through mvebu and then arm-soc.
+
+Patch 4 depend on patch 2.
+Patch 2 depend on patch 1.
+And patch 1 depend on commit aa8165f91442 "mmc: sdhci-pxav3: do the
+mbus window configuration after enabling clocks" which have been
+merged.
+
+But as all this patch should be merged through the same tree it would
+not be a problem
+
+The patches 5 to 7 depend on the patches already merged in mvebu.
+
+As they are fixes, patches 1 and 2 should be merged in 3.18-rc or at
+least in 3.19 and then they will be part of 3.18.1. For the other
+patches it would be nice if they could be part of 3.19.
+
+Thanks,
+
+Gregory
+
+Changelog:
+
+v3 -> v4:
+- Merge the 3 dev_wanr message in a single one
+- Remove err_quirks label
+
+v2 -> v3:
+- Use of_property_read_bool() instead of of_get_property
+- Brace the else case according to the Documentation/CodingStyle
+- Move the setting of MMC_CAP_1_8V_DDR before the armada_38x_quirks
+  calls
+
+v1 -> v2:
+- Put back Marcin as author of patch 2 and 3
+- Removed MMC_CAP_1_8V_DDR in the probe function
+
+Gregory CLEMENT (5):
+  mmc: sdhci-pxav3: Fix SDR50 and DDR50 capabilities for the Armada 38x
+    flavor
+  mmc: sdhci-pxav3: Extend binding with SDIO3 conf reg for the Armada
+    38x
+  ARM: mvebu: Use macros for interrupt flags on Armada 38x sdhci node
+  ARM: mvebu: Update the SDHCI node on Armada 38x
+  ARM: mvebu: Add Device Tree description of SDHCI for Armada 388 RD
+
+
+Gregory CLEMENT (5):
+  mmc: sdhci-pxav3: Fix SDR50 and DDR50 capabilities for the Armada 38x
+    flavor
+  mmc: sdhci-pxav3: Extend binding with SDIO3 conf reg for the Armada
+    38x
+  ARM: mvebu: Use macros for interrupt flags on Armada 38x sdhci node
+  ARM: mvebu: Update the SDHCI node on Armada 38x
+  ARM: mvebu: Add Device Tree description of SDHCI for Armada 388 RD
+
+Marcin Wojtas (2):
+  mmc: sdhci-pxav3: Fix Armada 38x controller's caps according to
+    erratum ERR-7878951
+  mmc: sdhci-pxav3: Modify clock settings for the SDR50 and DDR50 modes
+
+ .../devicetree/bindings/mmc/sdhci-pxa.txt          | 15 ++--
+ arch/arm/boot/dts/armada-388-rd.dts                | 10 +++
+ arch/arm/boot/dts/armada-38x.dtsi                  |  7 +-
+ drivers/mmc/host/sdhci-pxav3.c                     | 83 +++++++++++++++++++++-
+ 4 files changed, 106 insertions(+), 9 deletions(-)
+
 -- 
-Marek Szyprowski, PhD
-Samsung R&D Institute Poland
+2.1.0
+
