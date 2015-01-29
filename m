@@ -1,98 +1,89 @@
-From: Alexey Skidanov <alexey.skidanov@sandisk.com>
-Subject: [PATCH v2] mmc: Resolve BKOPS compatability issue
-Date: Thu, 29 Jan 2015 10:49:43 +0200
-Message-ID: <1422521383-11436-1-git-send-email-alexey.skidanov@sandisk.com>
+From: Karol Wrona <k.wrona@samsung.com>
+Subject: Re: [RFC PATCH 1/1] mmc: dw_mmc: Add runtime pm to dw_mmc
+Date: Thu, 29 Jan 2015 09:58:52 +0100
+Message-ID: <54C9F64C.10505@samsung.com>
+References: <1421858639-14737-1-git-send-email-k.wrona@samsung.com>
+ <1421858639-14737-2-git-send-email-k.wrona@samsung.com>
+ <CAPDyKFpTT3J-D6CqPcUdcTq4d=tMy7dDSn_ZZJGD12qeey4p9A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0098.outbound.protection.outlook.com ([207.46.100.98]:40087
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750790AbbA2IvS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 29 Jan 2015 03:51:18 -0500
+Received: from mailout2.w1.samsung.com ([210.118.77.12]:55917 "EHLO
+	mailout2.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751014AbbA2I6z (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jan 2015 03:58:55 -0500
+In-reply-to: <CAPDyKFpTT3J-D6CqPcUdcTq4d=tMy7dDSn_ZZJGD12qeey4p9A@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: alex.lemberg@sandisk.com, Alexey Skidanov <alexey.skidanov@sandisk.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Karol Wrona <wrona.vy@gmail.com>
 
-This patch is coming to fix compatibility issue of BKOPS_EN  field of EXT_CSD.
-In eMMC-5.1, BKOPS_EN was changed, and now it has two operational bits:
-Bit 0 - MANUAL_EN
-Bit 1 - AUTO_EN
-In previous eMMC revisions, only Bit 0 was supported.
+On 01/22/2015 10:02 AM, Ulf Hansson wrote:
+> On 21 January 2015 at 17:43, Karol Wrona <k.wrona@samsung.com> wrote:
+>> This patch adds runtime pm handling to dw_mmc and enables it for dw_mmc-exynos.
+>> It mainly uses mci_request/mci_request_end for mmc host state information.
+>>
+>> Signed-off-by: Karol Wrona <k.wrona@samsung.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc-exynos.c |   69 ++++++++++++++++++++++++++++++++++++--
+>>  drivers/mmc/host/dw_mmc.c        |   65 +++++++++++++++++++++++++++++++++--
+>>  2 files changed, 130 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+>> index 12a5eaa..7281c6f 100644
+>> --- a/drivers/mmc/host/dw_mmc-exynos.c
+>> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+>> @@ -17,12 +17,15 @@
+[...]
+>>
+>> +#define DWMMC_AUTOSUSPEND_DELAY 200
+> 
+> Normally we use 50 as default. Any reason to why you can't use that?
+> 
+Thanks for looking at that.
+No special reason. I will check lower delay value.
 
-Signed-off-by: Alexey Skidanov <alexey.skidanov@sandisk.com>
----
- drivers/mmc/core/core.c  |    2 +-
- drivers/mmc/core/mmc.c   |    8 +++++---
- include/linux/mmc/card.h |    3 ++-
- include/linux/mmc/mmc.h  |    5 +++++
- 4 files changed, 13 insertions(+), 5 deletions(-)
+> Hmm, maybe we should have such a default defined in a common mmc host
+> header file!?
+Will do.
+> 
+>> +
+>>  /* Variations in Exynos specific dw-mshc controller */
+>>  enum dw_mci_exynos_type {
+>>         DW_MCI_TYPE_EXYNOS4210,
+>> @@ -97,6 +100,30 @@ static int dw_mci_exynos_setup_clock(struct dw_mci *host)
+>>         return 0;
+>>  }
+>>
+>> +#ifdef CONFIG_PM
+>> +static int dw_mci_exynos_runtime_suspend(struct device *dev)
+>> +{
+>> +       struct dw_mci *host = dev_get_drvdata(dev);
+>> +
+>> +       /* empty for now */
+>> +
+>> +       return 0;
+>> +}
+>> +
+>> +static int dw_mci_exynos_runtime_resume(struct device *dev)
+>> +{
+>> +       struct dw_mci *host = dev_get_drvdata(dev);
+>> +
+>> +       /* empty for now */
+>> +
+>> +       return 0;
+>> +}
+>> +#else
+>> +#define dw_mci_exynos_runtime_suspend          NULL
+>> +#define dw_mci_exynos_runtime_resume           NULL
+>> +
+>> +#endif /* CONFIG_PM */
+> 
+> I would suggest you to remove all the above code from this patch. If
+> you want to add the callbacks, let's anyway do that from a separate
+> patch.
+Will do.
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 1be7055..0dc64e6 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -275,7 +275,7 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
- 
- 	BUG_ON(!card);
- 
--	if (!card->ext_csd.bkops_en || mmc_card_doing_bkops(card))
-+	if (!card->ext_csd.man_bkops_en || mmc_card_doing_bkops(card))
- 		return;
- 
- 	err = mmc_read_bkops_status(card);
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 1fc48a2..1d41e85 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -483,11 +483,13 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		/* check whether the eMMC card supports BKOPS */
- 		if (ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1) {
- 			card->ext_csd.bkops = 1;
--			card->ext_csd.bkops_en = ext_csd[EXT_CSD_BKOPS_EN];
-+			card->ext_csd.man_bkops_en =
-+					(ext_csd[EXT_CSD_BKOPS_EN] &
-+						EXT_CSD_MANUAL_BKOPS_MASK);
- 			card->ext_csd.raw_bkops_status =
- 				ext_csd[EXT_CSD_BKOPS_STATUS];
--			if (!card->ext_csd.bkops_en)
--				pr_info("%s: BKOPS_EN bit is not set\n",
-+			if (!card->ext_csd.man_bkops_en)
-+				pr_info("%s: MAN_BKOPS_EN bit is not set\n",
- 					mmc_hostname(card->host));
- 		}
- 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 4d69c00..17378cb 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -83,7 +83,8 @@ struct mmc_ext_csd {
- 	bool			hpi;			/* HPI support bit */
- 	unsigned int		hpi_cmd;		/* cmd used as HPI */
- 	bool			bkops;		/* background support bit */
--	bool			bkops_en;	/* background enable bit */
-+	bool			man_bkops_en;	/* manual background
-+						enable bit */
- 	unsigned int            data_sector_size;       /* 512 bytes or 4KB */
- 	unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
- 	unsigned int		boot_ro_lock;		/* ro lock support */
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index fb97b5c..124f562 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -428,6 +428,11 @@ struct _mmc_csd {
- #define EXT_CSD_BKOPS_LEVEL_2		0x2
- 
- /*
-+ * BKOPS modes
-+ */
-+#define EXT_CSD_MANUAL_BKOPS_MASK	0x01
-+
-+/*
-  * MMC_SWITCH access modes
-  */
- 
--- 
-1.7.9.5
-
+Thanks,
+Karol
