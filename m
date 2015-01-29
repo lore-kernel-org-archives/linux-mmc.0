@@ -1,50 +1,67 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 06/15] mmc: core: Hold re-tuning during erase commands
-Date: Thu, 29 Jan 2015 11:00:21 +0200
-Message-ID: <1422522030-17793-7-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 04/15] mmc: core: Check re-tuning before retrying
+Date: Thu, 29 Jan 2015 11:00:19 +0200
+Message-ID: <1422522030-17793-5-git-send-email-adrian.hunter@intel.com>
 References: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:47441 "EHLO mga09.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:47353 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758963AbbA2JDm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 29 Jan 2015 04:03:42 -0500
+	id S1754198AbbA2JDH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 29 Jan 2015 04:03:07 -0500
 In-Reply-To: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-Hold re-tuning during erase commands to prevent
-it from conflicting with the sequence of commands.
+Possibly a command is failing because re-tuning is needed.
+Use mmc_retune_recheck() to check re-tuning. At that point
+re-tuning is held, at least by the request, so
+mmc_retune_recheck() does a mmc_retune_release() and
+mmc_retune_hold().
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ drivers/mmc/core/core.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index f1d663e..91838ea 100644
+index 6dad56d..f1d663e 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -1994,6 +1994,10 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
- 	unsigned long timeout;
- 	int err;
+@@ -429,6 +429,11 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
+ 							    host->areq);
+ 				break; /* return err */
+ 			} else {
++				err = mmc_retune_recheck(host);
++				if (err) {
++					mmc_host_clk_release(host);
++					break;
++				}
+ 				pr_info("%s: req failed (CMD%u): %d, retrying...\n",
+ 					mmc_hostname(host),
+ 					cmd->opcode, cmd->error);
+@@ -451,6 +456,7 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
+ 				  struct mmc_request *mrq)
+ {
+ 	struct mmc_command *cmd;
++	int err;
  
-+	err = mmc_retune_and_hold(card->host);
-+	if (err)
-+		return err;
+ 	while (1) {
+ 		wait_for_completion(&mrq->completion);
+@@ -478,6 +484,12 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
+ 		    mmc_card_removed(host->card))
+ 			break;
+ 
++		err = mmc_retune_recheck(host);
++		if (err) {
++			mmc_host_clk_release(host);
++			break;
++		}
 +
- 	/*
- 	 * qty is used to calculate the erase timeout which depends on how many
- 	 * erase groups (or allocation units in SD terminology) are affected.
-@@ -2097,6 +2101,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
- 	} while (!(cmd.resp[0] & R1_READY_FOR_DATA) ||
- 		 (R1_CURRENT_STATE(cmd.resp[0]) == R1_STATE_PRG));
- out:
-+	mmc_retune_release(card->host);
- 	return err;
- }
- 
+ 		pr_debug("%s: req failed (CMD%u): %d, retrying...\n",
+ 			 mmc_hostname(host), cmd->opcode, cmd->error);
+ 		cmd->retries--;
 -- 
 1.9.1
 
