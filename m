@@ -1,47 +1,60 @@
-From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH] mmc: sdhci: switch voltage before sdhci_set_ios in runtime resume
-Date: Thu, 29 Jan 2015 17:42:12 +0800
-Message-ID: <1422524532-4275-1-git-send-email-jszhang@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V2 07/15] mmc: core: Hold re-tuning while bkops ongoing
+Date: Thu, 29 Jan 2015 11:00:22 +0200
+Message-ID: <1422522030-17793-8-git-send-email-adrian.hunter@intel.com>
+References: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:23851 "EHLO
-	mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753751AbbA2Jpe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jan 2015 04:45:34 -0500
+Received: from mga09.intel.com ([134.134.136.24]:47441 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1759191AbbA2JDo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 29 Jan 2015 04:03:44 -0500
+In-Reply-To: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: chris@printf.net, ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com
-Cc: thomas.petazzoni@free-electrons.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jisheng Zhang <jszhang@marvell.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-I observed the Host Control2 register isn't correctly restored
-after runtime resuming on BG2Q. For example, the register reads
-as 0x800c before runtime suspend, but it's set as 0x8004 after runtime
-resuming. This could results in a non working host.
+Hold re-tuning during bkops to prevent
+it from conflicting with the busy state.
 
-The reason is the Host Control2 is incorrectly reset when switching
-voltage. We fix this by following the same sequence during initialization.
-
-Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/core/core.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c9881ca..0ad412a 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2871,9 +2871,9 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
- 	/* Force clock and power re-program */
- 	host->pwr = 0;
- 	host->clock = 0;
-+	sdhci_do_start_signal_voltage_switch(host, &host->mmc->ios);
- 	sdhci_do_set_ios(host, &host->mmc->ios);
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 91838ea..392a150 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -311,6 +311,10 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
+ 	} else {
+ 		timeout = 0;
+ 		use_busy_signal = false;
++		/* Hold re-tuning for ongoing bkops */
++		err = mmc_retune_and_hold(card->host);
++		if (err)
++			goto out;
+ 	}
  
--	sdhci_do_start_signal_voltage_switch(host, &host->mmc->ios);
- 	if ((host_flags & SDHCI_PV_ENABLED) &&
- 		!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN)) {
- 		spin_lock_irqsave(&host->lock, flags);
+ 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+@@ -319,6 +323,9 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
+ 	if (err) {
+ 		pr_warn("%s: Error %d starting bkops\n",
+ 			mmc_hostname(card->host), err);
++		/* bkops not ongoing, so release re-tuning */
++		if (!use_busy_signal)
++			mmc_retune_release(card->host);
+ 		goto out;
+ 	}
+ 
+@@ -753,6 +760,7 @@ int mmc_stop_bkops(struct mmc_card *card)
+ 	 */
+ 	if (!err || (err == -EINVAL)) {
+ 		mmc_card_clr_doing_bkops(card);
++		mmc_retune_release(card->host);
+ 		err = 0;
+ 	}
+ 
 -- 
-2.1.4
+1.9.1
 
