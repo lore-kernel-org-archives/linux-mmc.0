@@ -1,124 +1,93 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 00/15] mmc: host: Add facility to support re-tuning
-Date: Thu, 29 Jan 2015 11:00:15 +0200
-Message-ID: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:57059 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758115AbbA2JCZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 29 Jan 2015 04:02:25 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 1/7] mmc: sdhci-pxav3: Fix SDR50 and DDR50 capabilities
+ for the Armada 38x flavor
+Date: Thu, 29 Jan 2015 11:01:44 +0100
+Message-ID: <CAPDyKFoq+Z_n0GHkA4tWJp6vV_T+Fo3zm=CBfmNS+KN70qqwZA@mail.gmail.com>
+References: <1422010594-1735-1-git-send-email-gregory.clement@free-electrons.com>
+	<1422010594-1735-2-git-send-email-gregory.clement@free-electrons.com>
+	<CAPDyKFp=TxkL4BPMxVU+pMPoCQ1xPq0XZ+ZPpBFFaDnNtFjynw@mail.gmail.com>
+	<54C9EFC9.7090809@free-electrons.com>
+	<CAPDyKFqXLb+BOrotBv9UKDeSCriK2k9qmxKoUrWTKK7uM2oLTw@mail.gmail.com>
+	<54CA006F.8060108@free-electrons.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <54CA006F.8060108-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ezequiel Garcia <ezequiel.garcia-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Boris BREZILLON <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Lior Amsalem <alior-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Tawfik Bayouk <tawfik-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Marcin Wojtas <mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-Hi
+On 29 January 2015 at 10:42, Gregory CLEMENT
+<gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
+> Hi Ulf,
+>
+> On 29/01/2015 10:31, Ulf Hansson wrote:
+>> [...]
+>>
+>>>> Seems like this function can be void instead of always returning 0.
+>>>
+>>> In patch 4 "mmc: sdhci-pxav3: Modify clock settings for the SDR50 and
+>>> DDR50 modes", this function can return other values than 0.
+>>>
+>>> I could change the prototype in patch 4, but it would also imply
+>>> removing the test of the return value in this patch and adding in back
+>>> patch 4. By returning a value in this patch, it reduced the amount of
+>>> change over the patches.
+>>>
+>>> But if you still prefer than I this function return void in this
+>>> patch, I can do it.
+>>
+>> No worries, let's keep it as an int. But then I have a few other
+>> comments, see below.
+>
+> OK
+>
+>>
+>>>
+>>>
+>>> Thanks,
+>>>
+>>> Gregory
+>>>
+>>>
+>>>>
+>>>>> +{
+>>>>> +       host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
+>>>>> +       /*
+>>>>> +        * According to erratum 'FE-2946959' both SDR50 and DDR50
+>>>>> +        * modes require specific clock adjustments in SDIO3
+>>>>> +        * Configuration register, if the adjustment is not done,
+>>>>> +        * remove them from the capabilities.
+>>>>> +        */
+>>>>> +       host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
+>>>>> +       host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
+>>>>> +       return 0;
+>>>>> +}
+>>>>> +
+>>>>>  static void pxav3_reset(struct sdhci_host *host, u8 mask)
+>>>>>  {
+>>>>>         struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
+>>>>> @@ -319,6 +333,9 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+>>>>>                 clk_prepare_enable(pxa->clk_core);
+>>>>>
+>>>>>         if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
+>>>>> +               ret = armada_38x_quirks(host);
+>>>>> +               if (ret < 0)
+>>
+>> Since in patch 4 you return a proper error code, let's also adopt to
+>> that here by changing to:
+>>
+>> "if (IS_ERR(ret))
+>
+> The function returns an int and IS_ERR expects a pointer. I am not sure
+> this macro would be appropriate here.
 
-Here is V2 of some patches to move re-tuning support
-out of sdhci and into the core, and add support for HS400
-re-tuning.
+You are right. Don't know what I was thinking. :-)
 
-Currently sdhci does re-tuning transparently by
-calling sdhci_execute_tuning() from its ->request()
-function.
-
-The problem with HS400 re-tuning is that it must be
-done in HS200 mode. That means using switch commands
-and making ios changes. That means it potentially
-conflicts with other command sequences. The new
-re-tuning support accomodates that, however it is
-not strictly necessary because HS400 re-tuning
-should only be needed after runtime suspend when
-there would not be a conflict.
-
-Nevertheless, this approach has more structure
-and potentially more flexibility.
-
-Changes in V2:
-
-    Added support to the block driver for re-tuning
-    and retrying after a CRC error. The host driver
-    is left to decide when an error indicates re-tuning
-    is needed. The block driver will retry a data request
-    once if re-tuning is flagged as needed.
-
-    SDIO drivers need not be aware of re-tuning because
-    retrying will anyway cause re-tuning when re-tuning
-    is flagged as needed. Nevertheless SDIO drivers could
-    use the need_retune flag to instigate a retry when
-    otherwise they might not have.
-
-    mmc: core: Simplify by adding mmc_execute_tuning()
-        Dropped because it has been applied
-
-    mmc: host: Add facility to support re-tuning
-        Renamed mmc_retune_retry() to mmc_retune_recheck()
-        to better reflect what it does.
-
-    mmc: core: Move mmc_card_removed() into mmc_start_request()
-        Dropped because it has been applied
-
-    mmc: core: Add support for re-tuning before each request
-        Fixed un-balanced re-tune hold / release
-
-    mmc: sdhci: Always init buf_ready_int
-        Dropped because it has been applied
-
-    mmc: core: Separate out the mmc_switch status check so it can be re-used
-        New patch
-
-    mmc: core: Add support for HS400 re-tuning
-        It was found that that the original code was not reliable
-        after a CRC error. The problem was that the CMD13 after a
-        switch was faiing. So the code was changed to check the
-        switch status *after* changing the I/O state to match the
-        switch i.e. the new I/O state is the correct one to use
-        after a switch.
-
-    mmc: sdhci: Flag re-tuning is needed on CRC or End-Bit errors
-        New patch
-
-    mmc: block: Check re-tuning in the recovery path
-        New patch
-
-    mmc: block: Retry data requests when re-tuning is needed
-        New patch
-
-    mmc: core: Don't print reset warning if reset is not supported
-        New patch
-
-
-Adrian Hunter (15):
-      mmc: host: Add facility to support re-tuning
-      mmc: core: Disable re-tuning when card is no longer initialized
-      mmc: core: Add support for re-tuning before each request
-      mmc: core: Check re-tuning before retrying
-      mmc: core: Hold re-tuning during switch commands
-      mmc: core: Hold re-tuning during erase commands
-      mmc: core: Hold re-tuning while bkops ongoing
-      mmc: mmc: Comment that callers need to hold re-tuning if the card is put to sleep
-      mmc: core: Separate out the mmc_switch status check so it can be re-used
-      mmc: core: Add support for HS400 re-tuning
-      mmc: sdhci: Change to new way of doing re-tuning
-      mmc: sdhci: Flag re-tuning is needed on CRC or End-Bit errors
-      mmc: block: Check re-tuning in the recovery path
-      mmc: block: Retry data requests when re-tuning is needed
-      mmc: core: Don't print reset warning if reset is not supported
-
- drivers/mmc/card/block.c   |  19 ++++++-
- drivers/mmc/card/queue.h   |   1 +
- drivers/mmc/core/core.c    |  51 ++++++++++++++++--
- drivers/mmc/core/core.h    |   2 +
- drivers/mmc/core/host.c    |  63 ++++++++++++++++++++++
- drivers/mmc/core/mmc.c     |  87 +++++++++++++++++++++++++++++++
- drivers/mmc/core/mmc_ops.c |  45 ++++++++++------
- drivers/mmc/core/mmc_ops.h |   1 +
- drivers/mmc/host/sdhci.c   | 127 ++++++++-------------------------------------
- include/linux/mmc/host.h   |  58 +++++++++++++++++++++
- include/linux/mmc/sdhci.h  |   3 --
- 11 files changed, 328 insertions(+), 129 deletions(-)
-
-
-Regards
-Adrian
-
+Kind regards
+Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
