@@ -1,41 +1,92 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 15/15] mmc: core: Don't print reset warning if reset is not supported
-Date: Thu, 29 Jan 2015 11:00:30 +0200
-Message-ID: <1422522030-17793-16-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 14/15] mmc: block: Retry data requests when re-tuning is needed
+Date: Thu, 29 Jan 2015 11:00:29 +0200
+Message-ID: <1422522030-17793-15-git-send-email-adrian.hunter@intel.com>
 References: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:24640 "EHLO mga11.intel.com"
+Received: from mga14.intel.com ([192.55.52.115]:48929 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752009AbbA2JDG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 29 Jan 2015 04:03:06 -0500
+	id S1758728AbbA2JDD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 29 Jan 2015 04:03:03 -0500
 In-Reply-To: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-Check the error code for EOPNOTSUPP and do not print
-reset warning in that case.
+Retry data requests when re-tuning is needed and
+add a flag to struct mmc_blk_request so that the retry
+is only done once.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/card/block.c | 12 +++++++++++-
+ drivers/mmc/card/queue.h |  1 +
+ 2 files changed, 12 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 392a150..d439bf0 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2368,7 +2368,8 @@ int mmc_hw_reset(struct mmc_host *host)
- 	ret = host->bus_ops->reset(host);
- 	mmc_bus_put(host);
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 293e938..6d873d6 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1195,6 +1195,7 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 						    mmc_active);
+ 	struct mmc_blk_request *brq = &mq_mrq->brq;
+ 	struct request *req = mq_mrq->req;
++	int need_retune = card->host->need_retune;
+ 	int ecc_err = 0, gen_err = 0;
  
--	pr_warn("%s: tried to reset card\n", mmc_hostname(host));
-+	if (ret != -EOPNOTSUPP)
-+		pr_warn("%s: tried to reset card\n", mmc_hostname(host));
+ 	/*
+@@ -1261,6 +1262,13 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 		return MMC_BLK_RETRY;
+ 	}
  
- 	return ret;
- }
++	if (need_retune && !brq->retune_retry_done) {
++		pr_info("%s: retrying because a re-tune was needed\n",
++			req->rq_disk->disk_name);
++		brq->retune_retry_done = 1;
++		return MMC_BLK_RETRY;
++	}
++
+ 	if (brq->data.error) {
+ 		pr_err("%s: error %d transferring data, sector %u, nr %u, cmd response %#x, card status %#x\n",
+ 		       req->rq_disk->disk_name, brq->data.error,
+@@ -1821,7 +1829,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	struct mmc_blk_data *md = mq->data;
+ 	struct mmc_card *card = md->queue.card;
+ 	struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
+-	int ret = 1, disable_multi = 0, retry = 0, type;
++	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
+ 	enum mmc_blk_status status;
+ 	struct mmc_queue_req *mq_rq;
+ 	struct request *req = rqc;
+@@ -1905,6 +1913,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 				break;
+ 			goto cmd_abort;
+ 		case MMC_BLK_RETRY:
++			retune_retry_done = brq->retune_retry_done;
+ 			if (retry++ < 5)
+ 				break;
+ 			/* Fall through */
+@@ -1967,6 +1976,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 				mmc_start_req(card->host,
+ 						&mq_rq->mmc_active, NULL);
+ 			}
++			mq_rq->brq.retune_retry_done = retune_retry_done;
+ 		}
+ 	} while (ret);
+ 
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index 5752d50..7e27915 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -12,6 +12,7 @@ struct mmc_blk_request {
+ 	struct mmc_command	cmd;
+ 	struct mmc_command	stop;
+ 	struct mmc_data		data;
++	int			retune_retry_done;
+ };
+ 
+ enum mmc_packed_type {
 -- 
 1.9.1
 
