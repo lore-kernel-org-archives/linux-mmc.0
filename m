@@ -1,93 +1,108 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 1/7] mmc: sdhci-pxav3: Fix SDR50 and DDR50 capabilities
- for the Armada 38x flavor
-Date: Thu, 29 Jan 2015 11:01:44 +0100
-Message-ID: <CAPDyKFoq+Z_n0GHkA4tWJp6vV_T+Fo3zm=CBfmNS+KN70qqwZA@mail.gmail.com>
-References: <1422010594-1735-1-git-send-email-gregory.clement@free-electrons.com>
-	<1422010594-1735-2-git-send-email-gregory.clement@free-electrons.com>
-	<CAPDyKFp=TxkL4BPMxVU+pMPoCQ1xPq0XZ+ZPpBFFaDnNtFjynw@mail.gmail.com>
-	<54C9EFC9.7090809@free-electrons.com>
-	<CAPDyKFqXLb+BOrotBv9UKDeSCriK2k9qmxKoUrWTKK7uM2oLTw@mail.gmail.com>
-	<54CA006F.8060108@free-electrons.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: tegra: Write xfer_mode, CMD regs in together
+Date: Thu, 29 Jan 2015 11:24:52 +0100
+Message-ID: <CAPDyKFrVLPEiVVzpseeUfLCFtS8UWCChkFPT_OftMbAyQLnGBQ@mail.gmail.com>
+References: <1422463516-19557-1-git-send-email-rklein@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <54CA006F.8060108-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ezequiel Garcia <ezequiel.garcia-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Boris BREZILLON <boris.brezillon-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Lior Amsalem <alior-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Tawfik Bayouk <tawfik-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Marcin Wojtas <mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1422463516-19557-1-git-send-email-rklein@nvidia.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Rhyland Klein <rklein@nvidia.com>
+Cc: Chris Ball <chris@printf.net>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, pkunapuli@nvidia.com, linux-mmc <linux-mmc@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 29 January 2015 at 10:42, Gregory CLEMENT
-<gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
-> Hi Ulf,
+On 28 January 2015 at 17:45, Rhyland Klein <rklein@nvidia.com> wrote:
+> From: Pavan Kunapuli <pkunapuli@nvidia.com>
 >
-> On 29/01/2015 10:31, Ulf Hansson wrote:
->> [...]
->>
->>>> Seems like this function can be void instead of always returning 0.
->>>
->>> In patch 4 "mmc: sdhci-pxav3: Modify clock settings for the SDR50 and
->>> DDR50 modes", this function can return other values than 0.
->>>
->>> I could change the prototype in patch 4, but it would also imply
->>> removing the test of the return value in this patch and adding in back
->>> patch 4. By returning a value in this patch, it reduced the amount of
->>> change over the patches.
->>>
->>> But if you still prefer than I this function return void in this
->>> patch, I can do it.
->>
->> No worries, let's keep it as an int. But then I have a few other
->> comments, see below.
+> If there is a gap between xfer mode and command register writes,
+> tegra SDMMC controller can sometimes issue a spurious command before
+> the CMD register is written. To avoid this, these two registers need
+> to be written together in a single write operation.
 >
-> OK
+> This is implemented as an NVQUIRK as it applies to T114, T124 and
+> T132.
 >
->>
->>>
->>>
->>> Thanks,
->>>
->>> Gregory
->>>
->>>
->>>>
->>>>> +{
->>>>> +       host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
->>>>> +       /*
->>>>> +        * According to erratum 'FE-2946959' both SDR50 and DDR50
->>>>> +        * modes require specific clock adjustments in SDIO3
->>>>> +        * Configuration register, if the adjustment is not done,
->>>>> +        * remove them from the capabilities.
->>>>> +        */
->>>>> +       host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
->>>>> +       host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
->>>>> +       return 0;
->>>>> +}
->>>>> +
->>>>>  static void pxav3_reset(struct sdhci_host *host, u8 mask)
->>>>>  {
->>>>>         struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
->>>>> @@ -319,6 +333,9 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->>>>>                 clk_prepare_enable(pxa->clk_core);
->>>>>
->>>>>         if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
->>>>> +               ret = armada_38x_quirks(host);
->>>>> +               if (ret < 0)
->>
->> Since in patch 4 you return a proper error code, let's also adopt to
->> that here by changing to:
->>
->> "if (IS_ERR(ret))
->
-> The function returns an int and IS_ERR expects a pointer. I am not sure
-> this macro would be appropriate here.
+> Signed-off-by: Pavan Kunapuli <pkunapuli@nvidia.com>
+> Signed-off-by: Rhyland Klein <rklein@nvidia.com>
 
-You are right. Don't know what I was thinking. :-)
+Thanks! Applied for next.
 
 Kind regards
 Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+> ---
+> v2:
+>  - Fixed quirk flag check  s/*/&
+>  - Removed line clearing xfer_mode_shadow
+>  - Added explicit mention of which platforms this applies to in
+>    description
+>
+>  drivers/mmc/host/sdhci-tegra.c |   30 +++++++++++++++++++++++++++++-
+>  1 file changed, 29 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 59797106af93..f3778d58d1cd 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -41,6 +41,7 @@
+>  #define NVQUIRK_DISABLE_SDR50          BIT(3)
+>  #define NVQUIRK_DISABLE_SDR104         BIT(4)
+>  #define NVQUIRK_DISABLE_DDR50          BIT(5)
+> +#define NVQUIRK_SHADOW_XFER_MODE_REG   BIT(6)
+>
+>  struct sdhci_tegra_soc_data {
+>         const struct sdhci_pltfm_data *pdata;
+> @@ -67,6 +68,31 @@ static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
+>         return readw(host->ioaddr + reg);
+>  }
+>
+> +static void tegra_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
+> +{
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_tegra *tegra_host = pltfm_host->priv;
+> +       const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+> +
+> +       if (soc_data->nvquirks & NVQUIRK_SHADOW_XFER_MODE_REG) {
+> +               switch (reg) {
+> +               case SDHCI_TRANSFER_MODE:
+> +                       /*
+> +                        * Postpone this write, we must do it together with a
+> +                        * command write that is down below.
+> +                        */
+> +                       pltfm_host->xfer_mode_shadow = val;
+> +                       return;
+> +               case SDHCI_COMMAND:
+> +                       writel((val << 16) | pltfm_host->xfer_mode_shadow,
+> +                               host->ioaddr + SDHCI_TRANSFER_MODE);
+> +                       return;
+> +               }
+> +       }
+> +
+> +       writew(val, host->ioaddr + reg);
+> +}
+> +
+>  static void tegra_sdhci_writel(struct sdhci_host *host, u32 val, int reg)
+>  {
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> @@ -147,6 +173,7 @@ static void tegra_sdhci_set_bus_width(struct sdhci_host *host, int bus_width)
+>  static const struct sdhci_ops tegra_sdhci_ops = {
+>         .get_ro     = tegra_sdhci_get_ro,
+>         .read_w     = tegra_sdhci_readw,
+> +       .write_w    = tegra_sdhci_writew,
+>         .write_l    = tegra_sdhci_writel,
+>         .set_clock  = sdhci_set_clock,
+>         .set_bus_width = tegra_sdhci_set_bus_width,
+> @@ -201,7 +228,8 @@ static struct sdhci_tegra_soc_data soc_data_tegra114 = {
+>         .pdata = &sdhci_tegra114_pdata,
+>         .nvquirks = NVQUIRK_DISABLE_SDR50 |
+>                     NVQUIRK_DISABLE_DDR50 |
+> -                   NVQUIRK_DISABLE_SDR104,
+> +                   NVQUIRK_DISABLE_SDR104 |
+> +                   NVQUIRK_SHADOW_XFER_MODE_REG,
+>  };
+>
+>  static const struct of_device_id sdhci_tegra_dt_match[] = {
+> --
+> 1.7.9.5
+>
