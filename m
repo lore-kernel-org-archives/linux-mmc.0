@@ -1,43 +1,88 @@
 From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Subject: [PATCH v3 3/6] mmc: pwrseq: Document optional clock for the simple power sequence
-Date: Thu, 29 Jan 2015 16:00:05 +0100
-Message-ID: <1422543608-24704-4-git-send-email-javier.martinez@collabora.co.uk>
+Subject: [PATCH v3 5/6] ARM: dts: exynos5250-snow: Enable wifi power-on
+Date: Thu, 29 Jan 2015 16:00:07 +0100
+Message-ID: <1422543608-24704-6-git-send-email-javier.martinez@collabora.co.uk>
 References: <1422543608-24704-1-git-send-email-javier.martinez@collabora.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
 In-Reply-To: <1422543608-24704-1-git-send-email-javier.martinez@collabora.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-samsung-soc-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Kukjin Kim <kgene@kernel.org>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Arend van Spriel <arend@broadcom.com>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-samsung-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Javier Martinez Canillas <javier.martinez@collabora.co.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-Some WLAN chips attached to a SDIO interface, need an external clock
-to be operational. Since this is very common, extend the simple MMC
-power sequence DT binding to support an optional clock.
+The Snow board has a MMC/SDIO wifi chip that is always powered but it
+needs a power sequence involving a reset (active low) and an enable
+(active high) pins. Both pins are marked as active low since the MMC
+simple power sequence driver asserts the pins prior to the card power
+up procedure and de-asserts the pins after the card has been powered.
+
+So the reset line will be left de-asserted and the enable pin will be
+left asserted.
+
+The chip also needs an external 32kHz reference clock to be operational
+that is by the MAX77686 PMIC clock.
+
+Add a simple MMC power sequence provider for the wifi MMC/SDIO slot.
 
 Signed-off-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
 ---
 
 Changes since v2: None.
 
-Changes since v1: None.
+Changes since v1:
+ - Remove cap-sdio-irq from mmc3 dev node since is a separate change.
+   Suggested by Arend van Spriel.
 ---
- Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 4 ++++
- 1 file changed, 4 insertions(+)
+ arch/arm/boot/dts/exynos5250-snow.dts | 25 ++++++++++++++++++++++++-
+ 1 file changed, 24 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-index eaae652213ae..a462c50f19a8 100644
---- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-@@ -12,6 +12,10 @@ Optional properties:
- 	at initialization and prior we start the power up procedure of the card.
- 	They will be de-asserted right after the power has been provided to the
- 	card.
-+- clocks : Must contain an entry for the entry in clock-names.
-+  See ../clocks/clock-bindings.txt for details.
-+- clock-names : Must include the following entry:
-+  "ext_clock" (External clock provided to the card).
+diff --git a/arch/arm/boot/dts/exynos5250-snow.dts b/arch/arm/boot/dts/exynos5250-snow.dts
+index b9aeec430527..b78712058903 100644
+--- a/arch/arm/boot/dts/exynos5250-snow.dts
++++ b/arch/arm/boot/dts/exynos5250-snow.dts
+@@ -229,6 +229,14 @@
+ 		power-supply = <&fet6>;
+ 		backlight = <&backlight>;
+ 	};
++
++	mmc3_pwrseq: mmc3_pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		reset-gpios = <&gpx0 2 GPIO_ACTIVE_LOW>, /* WIFI_RSTn */
++			      <&gpx0 1 GPIO_ACTIVE_LOW>; /* WIFI_EN */
++		clocks = <&max77686 MAX77686_CLK_PMIC>;
++		clock-names = "ext_clock";
++	};
+ };
  
- Example:
+ &dp {
+@@ -536,12 +544,27 @@
+ 	samsung,dw-mshc-sdr-timing = <2 3>;
+ 	samsung,dw-mshc-ddr-timing = <1 2>;
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&sd3_clk &sd3_cmd &sd3_bus4>;
++	pinctrl-0 = <&sd3_clk &sd3_cmd &sd3_bus4 &wifi_en &wifi_rst>;
+ 	bus-width = <4>;
+ 	cap-sd-highspeed;
++	mmc-pwrseq = <&mmc3_pwrseq>;
+ };
  
+ &pinctrl_0 {
++	wifi_en: wifi-en {
++		samsung,pins = "gpx0-1";
++		samsung,pin-function = <1>;
++		samsung,pin-pud = <0>;
++		samsung,pin-drv = <0>;
++	};
++
++	wifi_rst: wifi-rst {
++		samsung,pins = "gpx0-2";
++		samsung,pin-function = <1>;
++		samsung,pin-pud = <0>;
++		samsung,pin-drv = <0>;
++	};
++
+ 	power_key_irq: power-key-irq {
+ 		samsung,pins = "gpx1-3";
+ 		samsung,pin-function = <0xf>;
 -- 
 2.1.3
