@@ -1,72 +1,65 @@
-From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Subject: Re: [PATCH v2 4/6] mmc: pwrseq_simple: Add optional reference clock
- support
-Date: Thu, 29 Jan 2015 14:53:10 +0100
-Message-ID: <54CA3B46.20204@collabora.co.uk>
-References: <1422468953-7594-1-git-send-email-javier.martinez@collabora.co.uk>	<1422468953-7594-5-git-send-email-javier.martinez@collabora.co.uk> <CAPDyKFommNu7oscgmhwMpT-5KYN9b6d1xvt513_0qWE=HEGbow@mail.gmail.com>
+From: Jean Delvare <jdelvare@suse.de>
+Subject: Re: [PATCH] mmc: Add hardware dependencies for sdhci-pxav3 and
+ sdhci-pxav2
+Date: Thu, 29 Jan 2015 15:17:11 +0100
+Message-ID: <20150129151711.454100be@endymion.delvare>
+References: <20150126112328.318da5e7@endymion.delvare>
+	<CAPDyKFo363x7NGEctNwHkpn-6HkAu15qu-ZFtt73mJcWZrce4g@mail.gmail.com>
+	<1422369244.4499.187.camel@chaos.site>
+	<CAPDyKFqWa0uyZStNT1Wp21HpSqYpfJx3wU3TDJy25uMgG7qZaw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFommNu7oscgmhwMpT-5KYN9b6d1xvt513_0qWE=HEGbow@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Kukjin Kim <kgene@kernel.org>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Arend van Spriel <arend@broadcom.com>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from cantor2.suse.de ([195.135.220.15]:49916 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757351AbbA2ORP convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jan 2015 09:17:15 -0500
+In-Reply-To: <CAPDyKFqWa0uyZStNT1Wp21HpSqYpfJx3wU3TDJy25uMgG7qZaw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
 
-Hello Ulf,
+Hi Ulf,
 
-Thanks a lot for your feedback.
+On Wed, 28 Jan 2015 15:04:24 +0100, Ulf Hansson wrote:
+> On 27 January 2015 at 15:34, Jean Delvare <jdelvare@suse.de> wrote:
+> > Hi Ulf,
+> >
+> > Le Tuesday 27 January 2015 =C3=A0 15:06 +0100, Ulf Hansson a =C3=A9=
+crit :
+> >> On 26 January 2015 at 11:23, Jean Delvare <jdelvare@suse.de> wrote=
+:
+> >> > I seem to understand that the sdhci-pxav3 and sdhci-pxav2 driver=
+s are
+> >> > only needed on the MMP architecture. So add a hardware dependenc=
+y on
+> >> > ARCH_MMP, so that other users don't get to build useless drivers=
+=2E
+> >>
+> >> I would rather see the default option to be N.
+> >> Thus those configurations that needs this driver will have to sele=
+ct it.
+> >
+> > This is a different question. The purpose of my patch is that peopl=
+e
+> > configuring kernels for systems which just can't have these control=
+lers,
+> > are not asked about this driver at all. Changing the default to N w=
+ould
+> > not achieve that.
+>=20
+> For those SOC that want these drivers, they should be able to select
+> them from their defconfigs. So it will be an opt-in instead of opt-ou=
+t
+> policy, which I prefer. It also follows the other Kconfig options for
+> mmc drivers.
 
-On 01/29/2015 02:05 PM, Ulf Hansson wrote:
->>
->>  struct mmc_pwrseq_simple {
->>         struct mmc_pwrseq pwrseq;
->> +       struct clk *ext_clk;
-> 
-> You need to add a bool, maybe call it clk_enabled;  See why below.
->
+As you wish. But that change would be a separate patch going on top of
+mine, right? I'm not sure I understand what you expect from me at this
+point, please clarify.
 
-Ok
- 
->>         int nr_gpios;
->>         struct gpio_desc *reset_gpios[0];
->>  };
->> @@ -39,6 +41,9 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
->>         struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
->>                                         struct mmc_pwrseq_simple, pwrseq);
->>
->> +       if (!IS_ERR(pwrseq->ext_clk))
->> +               clk_prepare_enable(pwrseq->ext_clk);
->> +
-> 
-> There are no guarantee that the ->mmc_pwrseq_simple_pre_power_on()
-> will be invoked prior ->mmc_pwrseq_simple_power_off().
->
-
-Got it, I didn't know that mmc_pwrseq_simple_power_off() could be invoked.
-without mmc_pwrseq_simple_pre_power_on() not being called before.
-
-> That means you need to keep track of if you have gated/ungated the
-> clock. In other words check pwrseq->clk_enabled. That will prevent
-> potential clk unbalance issues.
-
-Yes, I'll change to check for the boolean in _simple_power_off() and
-_post_power_on() then.
-
->> @@ -85,6 +104,14 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
->>         if (!pwrseq)
->>                 return -ENOMEM;
->>
->> +       pwrseq->ext_clk = clk_get(dev, "ext_clock");
->> +       if (IS_ERR(pwrseq->ext_clk) &&
->> +           PTR_ERR(pwrseq->ext_clk) != -ENOENT &&
->> +           PTR_ERR(pwrseq->ext_clk) != -ENOSYS) {
-> 
-> I don't think you can get -ENOSYS.
-> 
-
-You are right, I'll remove that.
-
-Best regards,
-Javier
+--=20
+Jean Delvare
+SUSE L3 Support
