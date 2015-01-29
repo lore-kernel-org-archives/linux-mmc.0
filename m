@@ -1,156 +1,76 @@
-From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Subject: [PATCH v3 4/6] mmc: pwrseq_simple: Add optional reference clock
- support
-Date: Thu, 29 Jan 2015 16:00:06 +0100
-Message-ID: <1422543608-24704-5-git-send-email-javier.martinez@collabora.co.uk>
-References: <1422543608-24704-1-git-send-email-javier.martinez@collabora.co.uk>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: Add hardware dependencies for sdhci-pxav3 and sdhci-pxav2
+Date: Thu, 29 Jan 2015 16:01:48 +0100
+Message-ID: <CAPDyKFohbn3yG9iuj7WbV0mDY4H4jZe3SgihGSdOqPLKkTMdZQ@mail.gmail.com>
+References: <20150126112328.318da5e7@endymion.delvare>
+	<CAPDyKFo363x7NGEctNwHkpn-6HkAu15qu-ZFtt73mJcWZrce4g@mail.gmail.com>
+	<1422369244.4499.187.camel@chaos.site>
+	<CAPDyKFqWa0uyZStNT1Wp21HpSqYpfJx3wU3TDJy25uMgG7qZaw@mail.gmail.com>
+	<20150129151711.454100be@endymion.delvare>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1422543608-24704-1-git-send-email-javier.martinez@collabora.co.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-kernel@vger.kernel.org, Arend van Spriel <arend@broadcom.com>, Kukjin Kim <kgene@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Olof Johansson <olof@lixom.net>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20150129151711.454100be@endymion.delvare>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jean Delvare <jdelvare@suse.de>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Some WLAN chips attached to a SDIO interface, need a reference clock.
+On 29 January 2015 at 15:17, Jean Delvare <jdelvare@suse.de> wrote:
+> Hi Ulf,
+>
+> On Wed, 28 Jan 2015 15:04:24 +0100, Ulf Hansson wrote:
+>> On 27 January 2015 at 15:34, Jean Delvare <jdelvare@suse.de> wrote:
+>> > Hi Ulf,
+>> >
+>> > Le Tuesday 27 January 2015 =C3=A0 15:06 +0100, Ulf Hansson a =C3=A9=
+crit :
+>> >> On 26 January 2015 at 11:23, Jean Delvare <jdelvare@suse.de> wrot=
+e:
+>> >> > I seem to understand that the sdhci-pxav3 and sdhci-pxav2 drive=
+rs are
+>> >> > only needed on the MMP architecture. So add a hardware dependen=
+cy on
+>> >> > ARCH_MMP, so that other users don't get to build useless driver=
+s.
+>> >>
+>> >> I would rather see the default option to be N.
+>> >> Thus those configurations that needs this driver will have to sel=
+ect it.
+>> >
+>> > This is a different question. The purpose of my patch is that peop=
+le
+>> > configuring kernels for systems which just can't have these contro=
+llers,
+>> > are not asked about this driver at all. Changing the default to N =
+would
+>> > not achieve that.
+>>
+>> For those SOC that want these drivers, they should be able to select
+>> them from their defconfigs. So it will be an opt-in instead of opt-o=
+ut
+>> policy, which I prefer. It also follows the other Kconfig options fo=
+r
+>> mmc drivers.
+>
+> As you wish. But that change would be a separate patch going on top o=
+f
+> mine, right? I'm not sure I understand what you expect from me at thi=
+s
+> point, please clarify.
 
-Since this is very common, extend the prseq_simple driver to support
-an optional clock that is enabled prior the card power up procedure.
+Sorry for being unclear. I don't like $subject patch.
 
-Note: the external clock is optional. Thus an error is not returned
-if the clock is not found.
+Send a new one, removing the following lines:
+default CPU_MMP2
+default CPU_PXA910
 
-Signed-off-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
----
+Then you send another patch(es) to the respective SOC maintainer,
+updating the defonfig(s) selecting MMC_SDHCI_PXAV3|PXAV2, when
+appropriate.
 
-Changes since v2:
- - Add a clk_enabled bool to struct mmc_pwrseq_simple to track clock
-   gate/ungate since .power_off can be called prior to .pre_power_on.
-   Suggested by Ulf Hansson.
- - clk_get() does not return -ENOSYS so don't check for that.
-   Suggested by Ulf Hansson.
+Would that work?
 
-Changes since v1:
- - Rebase on top of latest changes.
- - Use IS_ERR() instead of checking for NULL to see if the clock exists.
----
- drivers/mmc/core/pwrseq_simple.c | 38 ++++++++++++++++++++++++++++++++++++--
- 1 file changed, 36 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-index e53d3c7e059c..50d09d920430 100644
---- a/drivers/mmc/core/pwrseq_simple.c
-+++ b/drivers/mmc/core/pwrseq_simple.c
-@@ -7,6 +7,7 @@
-  *
-  *  Simple MMC power sequence management
-  */
-+#include <linux/clk.h>
- #include <linux/kernel.h>
- #include <linux/slab.h>
- #include <linux/device.h>
-@@ -20,6 +21,8 @@
- 
- struct mmc_pwrseq_simple {
- 	struct mmc_pwrseq pwrseq;
-+	bool clk_enabled;
-+	struct clk *ext_clk;
- 	int nr_gpios;
- 	struct gpio_desc *reset_gpios[0];
- };
-@@ -39,6 +42,11 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
- 	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
- 					struct mmc_pwrseq_simple, pwrseq);
- 
-+	if (!IS_ERR(pwrseq->ext_clk)) {
-+		clk_prepare_enable(pwrseq->ext_clk);
-+		pwrseq->clk_enabled = true;
-+	}
-+
- 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
- }
- 
-@@ -50,6 +58,19 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
- 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
- }
- 
-+static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
-+{
-+	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
-+					struct mmc_pwrseq_simple, pwrseq);
-+
-+	mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
-+
-+	if (pwrseq->clk_enabled) {
-+		clk_disable_unprepare(pwrseq->ext_clk);
-+		pwrseq->clk_enabled = false;
-+	}
-+}
-+
- static void mmc_pwrseq_simple_free(struct mmc_host *host)
- {
- 	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
-@@ -60,6 +81,9 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
- 		if (!IS_ERR(pwrseq->reset_gpios[i]))
- 			gpiod_put(pwrseq->reset_gpios[i]);
- 
-+	if (!IS_ERR(pwrseq->ext_clk))
-+		clk_put(pwrseq->ext_clk);
-+
- 	kfree(pwrseq);
- 	host->pwrseq = NULL;
- }
-@@ -67,7 +91,7 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
- static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
- 	.pre_power_on = mmc_pwrseq_simple_pre_power_on,
- 	.post_power_on = mmc_pwrseq_simple_post_power_on,
--	.power_off = mmc_pwrseq_simple_pre_power_on,
-+	.power_off = mmc_pwrseq_simple_power_off,
- 	.free = mmc_pwrseq_simple_free,
- };
- 
-@@ -85,6 +109,13 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
- 	if (!pwrseq)
- 		return -ENOMEM;
- 
-+	pwrseq->ext_clk = clk_get(dev, "ext_clock");
-+	if (IS_ERR(pwrseq->ext_clk) &&
-+	    PTR_ERR(pwrseq->ext_clk) != -ENOENT) {
-+		ret = PTR_ERR(pwrseq->ext_clk);
-+		goto free;
-+	}
-+
- 	for (i = 0; i < nr_gpios; i++) {
- 		pwrseq->reset_gpios[i] = gpiod_get_index(dev, "reset", i,
- 							 GPIOD_OUT_HIGH);
-@@ -96,7 +127,7 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
- 			while (--i)
- 				gpiod_put(pwrseq->reset_gpios[i]);
- 
--			goto free;
-+			goto clk_put;
- 		}
- 	}
- 
-@@ -105,6 +136,9 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
- 	host->pwrseq = &pwrseq->pwrseq;
- 
- 	return 0;
-+clk_put:
-+	if (!IS_ERR(pwrseq->ext_clk))
-+		clk_put(pwrseq->ext_clk);
- free:
- 	kfree(pwrseq);
- 	return ret;
--- 
-2.1.3
+Kind regards
+Uffe
