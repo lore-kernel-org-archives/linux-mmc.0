@@ -1,151 +1,159 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH] mmc: moxart: fix probe logic
-Date: Thu, 29 Jan 2015 17:15:31 +0100
-Message-ID: <8340872.32GezMfzR1@wuerfel>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+From: Sheetal Tigadoli <sheetal.tigadoli@gmail.com>
+Subject: [PATCH] mmc: card: Fixing few coding style errors
+Date: Thu, 29 Jan 2015 21:49:00 +0530
+Message-ID: <1422548340-21186-1-git-send-email-sheetal.tigadoli@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.130]:52496 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751448AbbA2QP7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jan 2015 11:15:59 -0500
+Received: from mail-pa0-f53.google.com ([209.85.220.53]:40165 "EHLO
+	mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753263AbbA2QUV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jan 2015 11:20:21 -0500
+Received: by mail-pa0-f53.google.com with SMTP id kx10so40811099pab.12
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Jan 2015 08:20:20 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jonas Jensen <jonas.jensen@gmail.com>, linux-arm-kernel@lists.infradead.org
+To: joe@perches.com
+Cc: linux-mmc@vger.kernel.org, ben@decadent.org.uk, kuninori.morimoto.gx@renesas.com, ulf.hansson@linaro.org, chris@printf.net, Sheetal Tigadoli <sheetal.tigadoli@gmail.com>
 
-Jonas Jensen wanted to submit a patch for these, but apparently
-forgot about it. I stumbled over this symptom first:
+The patch fixes some of the following error/warnings from the file block.c
 
-drivers/built-in.o: In function `moxart_probe':
-:(.text+0x2af128): undefined reference to `of_dma_request_slave_channel'
+./scripts/checkpatch.pl  --file --terse drivers/mmc/card/block.c 
+drivers/mmc/card/block.c:45: WARNING: Use #include <linux/uaccess.h> instead of <asm/uaccess.h>
+drivers/mmc/card/block.c:102: WARNING: line over 80 characters
+drivers/mmc/card/block.c:186: WARNING: Missing a blank line after declarations
+drivers/mmc/card/block.c:238: WARNING: line over 80 characters
+drivers/mmc/card/block.c:251: WARNING: line over 80 characters
+drivers/mmc/card/block.c:279: WARNING: simple_strtoul is obsolete, use kstrtoul instead
+drivers/mmc/card/block.c:280: WARNING: Missing a blank line after declarations
+drivers/mmc/card/block.c:578: WARNING: line over 80 characters
+drivers/mmc/card/block.c:586: WARNING: line over 80 characters
+drivers/mmc/card/block.c:620: WARNING: Missing a blank line after declarations
+drivers/mmc/card/block.c:1209: WARNING: line over 80 characters
+drivers/mmc/card/block.c:1333: WARNING: quoted string split across lines
+drivers/mmc/card/block.c:1720: WARNING: Missing a blank line after declarations
+drivers/mmc/card/block.c:1734: WARNING: braces {} are not necessary for single statement blocks
+drivers/mmc/card/block.c:1881: WARNING: else is not generally useful after a break or return
+drivers/mmc/card/block.c:2019: WARNING: braces {} are not necessary for single statement blocks
+drivers/mmc/card/block.c:2226: WARNING: line over 80 characters
+drivers/mmc/card/block.c:2285: WARNING: line over 80 characters
+drivers/mmc/card/block.c:2362: ERROR: that open brace { should be on the previous line
+  total: 1 errors, 18 warnings, 2587 lines checked
 
-This is because of_dma_request_slave_channel is an internal helper
-and not exported to loadable module. I'm changing the driver to
-use dma_request_slave_channel_reason() instead.
-
-Further problems from inspection:
-
-* The remove function must not call kfree on the host pointer,
-  because it is allocated together with the mmc_host.
-
-* The clock is never released
-
-* The dma_cap_mask_t is completely unused and can be removed
-
-* deferred probing does not work if the dma driver is loaded
-  after the mmc driver.
-
-This patch should fix all of the above.
-
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Signed-off-by: Sheetal Tigadoli <sheetal.tigadoli@gmail.com>
 ---
-Jonas, can you check this patch and provide an Ack if it's ok?
+ drivers/mmc/card/block.c |   28 +++++++++++++++++-----------
+ 1 file changed, 17 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
-index d2a1ef61ec97..d9401a1cc589 100644
---- a/drivers/mmc/host/moxart-mmc.c
-+++ b/drivers/mmc/host/moxart-mmc.c
-@@ -17,6 +17,7 @@
- #include <linux/init.h>
- #include <linux/platform_device.h>
- #include <linux/delay.h>
-+#include <linux/errno.h>
- #include <linux/interrupt.h>
- #include <linux/blkdev.h>
- #include <linux/dma-mapping.h>
-@@ -131,6 +132,7 @@ struct moxart_host {
- 	struct mmc_host			*mmc;
- 	struct mmc_request		*mrq;
- 	struct scatterlist		*cur_sg;
-+	struct clk			*clk;
- 	struct completion		dma_complete;
- 	struct completion		pio_complete;
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index c69afb5..2489f71 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -183,6 +183,7 @@ static void mmc_blk_put(struct mmc_blk_data *md)
+ 	md->usage--;
+ 	if (md->usage == 0) {
+ 		int devidx = mmc_get_devidx(md->disk);
++
+ 		blk_cleanup_queue(md->queue.queue);
  
-@@ -560,9 +562,7 @@ static int moxart_probe(struct platform_device *pdev)
- 	struct mmc_host *mmc;
- 	struct moxart_host *host = NULL;
- 	struct dma_slave_config cfg;
--	struct clk *clk;
- 	void __iomem *reg_mmc;
--	dma_cap_mask_t mask;
- 	int irq, ret;
- 	u32 i;
- 
-@@ -586,10 +586,10 @@ static int moxart_probe(struct platform_device *pdev)
+ 		__clear_bit(devidx, dev_use);
+@@ -277,6 +278,7 @@ static ssize_t force_ro_store(struct device *dev, struct device_attribute *attr,
+ 	char *end;
+ 	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
+ 	unsigned long set = simple_strtoul(buf, &end, 0);
++
+ 	if (end == buf) {
+ 		ret = -EINVAL;
  		goto out;
- 	}
+@@ -575,7 +577,8 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 	 * issuing the command.
+ 	 */
+ 	if (idata->ic.postsleep_min_us)
+-		usleep_range(idata->ic.postsleep_min_us, idata->ic.postsleep_max_us);
++		usleep_range(idata->ic.postsleep_min_us,
++		    idata->ic.postsleep_max_us);
  
--	clk = of_clk_get(node, 0);
--	if (IS_ERR(clk)) {
-+	host->clk = of_clk_get(node, 0);
-+	if (IS_ERR(host->clk)) {
- 		dev_err(dev, "of_clk_get failed\n");
--		ret = PTR_ERR(clk);
-+		ret = PTR_ERR(host->clk);
- 		goto out;
- 	}
- 
-@@ -603,18 +603,15 @@ static int moxart_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto out;
- 
--	dma_cap_zero(mask);
--	dma_cap_set(DMA_SLAVE, mask);
--
- 	host = mmc_priv(mmc);
- 	host->mmc = mmc;
- 	host->base = reg_mmc;
- 	host->reg_phys = res_mmc.start;
- 	host->timeout = msecs_to_jiffies(1000);
--	host->sysclk = clk_get_rate(clk);
-+	host->sysclk = clk_get_rate(host->clk);
- 	host->fifo_width = readl(host->base + REG_FEATURE) << 2;
--	host->dma_chan_tx = of_dma_request_slave_channel(node, "tx");
--	host->dma_chan_rx = of_dma_request_slave_channel(node, "rx");
-+	host->dma_chan_tx = dma_request_slave_channel_reason(dev, "tx");
-+	host->dma_chan_rx = dma_request_slave_channel_reason(dev, "rx");
- 
- 	spin_lock_init(&host->lock);
- 
-@@ -624,6 +621,11 @@ static int moxart_probe(struct platform_device *pdev)
- 	mmc->ocr_avail = 0xffff00;	/* Support 2.0v - 3.6v power. */
- 
- 	if (IS_ERR(host->dma_chan_tx) || IS_ERR(host->dma_chan_rx)) {
-+		if (PTR_ERR(host->dma_chan_tx) == -EPROBE_DEFER ||
-+		    PTR_ERR(host->dma_chan_rx) == -EPROBE_DEFER) {
-+			ret = -EPROBE_DEFER;
-+			goto out;
-+		}
- 		dev_dbg(dev, "PIO mode transfer enabled\n");
- 		host->have_dma = false;
- 	} else {
-@@ -677,6 +679,8 @@ static int moxart_probe(struct platform_device *pdev)
- 	return 0;
- 
- out:
-+	if (host->clk)
-+		clk_put(host->clk);
- 	if (mmc)
- 		mmc_free_host(mmc);
+ 	if (copy_to_user(&(ic_ptr->response), cmd.resp, sizeof(cmd.resp))) {
+ 		err = -EFAULT;
+@@ -617,6 +620,7 @@ static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
+ 	unsigned int cmd, unsigned long arg)
+ {
+ 	int ret = -EINVAL;
++
+ 	if (cmd == MMC_IOC_CMD)
+ 		ret = mmc_blk_ioctl_cmd(bdev, (struct mmc_ioc_cmd __user *)arg);
  	return ret;
-@@ -694,6 +698,7 @@ static int moxart_remove(struct platform_device *pdev)
- 			dma_release_channel(host->dma_chan_tx);
- 		if (!IS_ERR(host->dma_chan_rx))
- 			dma_release_channel(host->dma_chan_rx);
-+		clk_put(host->clk);
- 		mmc_remove_host(mmc);
- 		mmc_free_host(mmc);
+@@ -1206,7 +1210,10 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 	 */
+ 	if (brq->sbc.error || brq->cmd.error || brq->stop.error ||
+ 	    brq->data.error) {
+-		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
++		int err = mmc_blk_cmd_recovery(card, req, brq, &ecc_err,
++				&gen_err);
++
++		switch (err) {
+ 		case ERR_RETRY:
+ 			return MMC_BLK_RETRY;
+ 		case ERR_ABORT:
+@@ -1717,6 +1724,7 @@ static int mmc_blk_cmd_err(struct mmc_blk_data *md, struct mmc_card *card,
+ 			   int ret)
+ {
+ 	struct mmc_queue_req *mq_rq;
++
+ 	mq_rq = container_of(brq, struct mmc_queue_req, brq);
  
-@@ -702,9 +707,6 @@ static int moxart_remove(struct platform_device *pdev)
- 		writel(readl(host->base + REG_CLOCK_CONTROL) | CLK_OFF,
- 		       host->base + REG_CLOCK_CONTROL);
+ 	/*
+@@ -1731,9 +1739,8 @@ static int mmc_blk_cmd_err(struct mmc_blk_data *md, struct mmc_card *card,
+ 		u32 blocks;
+ 
+ 		blocks = mmc_sd_num_wr_blocks(card);
+-		if (blocks != (u32)-1) {
++		if (blocks != (u32)-1)
+ 			ret = blk_end_request(req, 0, blocks << 9);
+-		}
+ 	} else {
+ 		if (!mmc_packed_cmd(mq_rq->cmd_type))
+ 			ret = blk_end_request(req, 0, brq->data.bytes_xfered);
+@@ -2016,9 +2023,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 
+ 	ret = mmc_blk_part_switch(card, md);
+ 	if (ret) {
+-		if (req) {
++		if (req)
+ 			blk_end_request_all(req, -EIO);
+-		}
+ 		ret = 0;
+ 		goto out;
  	}
--
--	kfree(host);
--
- 	return 0;
- }
+@@ -2223,8 +2229,8 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
+ 	char cap_str[10];
+ 	struct mmc_blk_data *part_md;
  
+-	part_md = mmc_blk_alloc_req(card, disk_to_dev(md->disk), size, default_ro,
+-				    subname, area_type);
++	part_md = mmc_blk_alloc_req(card, disk_to_dev(md->disk), size,
++				    default_ro, subname, area_type);
+ 	if (IS_ERR(part_md))
+ 		return PTR_ERR(part_md);
+ 	part_md->part_type = part_type;
+@@ -2282,7 +2288,8 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+ 		if (md->flags & MMC_BLK_PACKED_CMD)
+ 			mmc_packed_clean(&md->queue);
+ 		if (md->disk->flags & GENHD_FL_UP) {
+-			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
++			device_remove_file(disk_to_dev(md->disk),
++				&md->force_ro);
+ 			if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
+ 					card->ext_csd.boot_ro_lockable)
+ 				device_remove_file(disk_to_dev(md->disk),
+@@ -2358,8 +2365,7 @@ force_ro_fail:
+ #define CID_MANFID_MICRON	0x13
+ #define CID_MANFID_SAMSUNG	0x15
+ 
+-static const struct mmc_fixup blk_fixups[] =
+-{
++static const struct mmc_fixup blk_fixups[] = {
+ 	MMC_FIXUP("SEM02G", CID_MANFID_SANDISK, 0x100, add_quirk,
+ 		  MMC_QUIRK_INAND_CMD38),
+ 	MMC_FIXUP("SEM04G", CID_MANFID_SANDISK, 0x100, add_quirk,
+-- 
+1.7.9.5
 
