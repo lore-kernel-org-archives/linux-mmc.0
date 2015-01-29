@@ -1,53 +1,114 @@
 From: Alim Akhtar <alim.akhtar@samsung.com>
-Subject: [PATCH v5 0/2] mmc: dw_mmc: exynos: Add HS400 support
-Date: Thu, 29 Jan 2015 08:11:56 +0530
-Message-ID: <1422499318-13726-1-git-send-email-alim.akhtar@samsung.com>
+Subject: [PATCH V5 2/2] ARM: dts: Add HS400 support for exynos5420 and
+ exynos5800
+Date: Thu, 29 Jan 2015 08:11:58 +0530
+Message-ID: <1422499318-13726-3-git-send-email-alim.akhtar@samsung.com>
+References: <1422499318-13726-1-git-send-email-alim.akhtar@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:48261 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760561AbbA2CuT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Jan 2015 21:50:19 -0500
+Received: from mailout1.samsung.com ([203.254.224.24]:27372 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760620AbbA2Cu1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Jan 2015 21:50:27 -0500
+In-reply-to: <1422499318-13726-1-git-send-email-alim.akhtar@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: chris@printf.net, ulf.hansson@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, dianders@chromium.org, alim.akhtar@gmail.com, kgene@kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, a.kesavan@samsung.com, alim.akhtar@samsung.com
 
-This adds HS400 mode support for exynos dw_mmc host controller.
+From: Seungwon Jeon <tgih.jun@samsung.com>
 
-Currently tested on Exynos5800-peach-pi and Exyons7 platform for HS400 mode.
-Tested HS200 mode with this series applied, HS200 still works.
+HS400 timing values are added for SMDK5420, exynos5420-peach-pit
+and exynos5800-peach-pi boards.
+This also adds RCLK GPIO line, this gpio should be in pull-down
+state.
+This also enables HS400 on peach-pi and this updates the clock frequency
+to 800MHz to be set as input clock to controller.
 
-Appreciate testing on other exynos5/7 platform which supports emmc5.0
+Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+[Alim: addressed review comments]
+---
+ arch/arm/boot/dts/exynos5420-peach-pit.dts |    4 +++-
+ arch/arm/boot/dts/exynos5420-pinctrl.dtsi  |    7 +++++++
+ arch/arm/boot/dts/exynos5420-smdk5420.dts  |    4 +++-
+ arch/arm/boot/dts/exynos5800-peach-pi.dts  |    7 +++++--
+ 4 files changed, 18 insertions(+), 4 deletions(-)
 
-Changes in V5:
-	* Enable HS400 on Exynos5800-peach-pi boards
-	* Addressed other review comments from Jaehoon Chung
-
-Changes in V4:
-	* drop the idea of changing existing binding for ciu_div as per [1]
-        * addressed comments from Jaehoon Chung [2]
-
-[1] http://www.spinics.net/lists/linux-samsung-soc/msg40923.html
-[2] http://www.spinics.net/lists/devicetree/msg64373.html
-
-Changes in V3:
-	rebased on ulf's next (commit: 607b448 mmc: core: Make tuning block patterns static)
-
-Seungwon Jeon (2):
-  mmc: dw_mmc: exynos: Support eMMC's HS400 mode
-  ARM: dts: Add HS400 support for exynos5420 and exynos5800
-
- .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    7 +
- arch/arm/boot/dts/exynos5420-peach-pit.dts         |    4 +-
- arch/arm/boot/dts/exynos5420-pinctrl.dtsi          |    7 +
- arch/arm/boot/dts/exynos5420-smdk5420.dts          |    4 +-
- arch/arm/boot/dts/exynos5800-peach-pi.dts          |    7 +-
- drivers/mmc/host/dw_mmc-exynos.c                   |  185 ++++++++++++++++----
- drivers/mmc/host/dw_mmc-exynos.h                   |   19 +-
- drivers/mmc/host/dw_mmc.c                          |   16 +-
- drivers/mmc/host/dw_mmc.h                          |    2 +
- 9 files changed, 213 insertions(+), 38 deletions(-)
-
+diff --git a/arch/arm/boot/dts/exynos5420-peach-pit.dts b/arch/arm/boot/dts/exynos5420-peach-pit.dts
+index 9a050e1..f7a44a4 100644
+--- a/arch/arm/boot/dts/exynos5420-peach-pit.dts
++++ b/arch/arm/boot/dts/exynos5420-peach-pit.dts
+@@ -569,8 +569,10 @@
+ 	samsung,dw-mshc-ciu-div = <3>;
+ 	samsung,dw-mshc-sdr-timing = <0 4>;
+ 	samsung,dw-mshc-ddr-timing = <0 2>;
++	samsung,dw-mshc-hs400-timing = <0 2>;
++	samsung,read-strobe-delay = <90>;
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
++	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
+ 	bus-width = <8>;
+ };
+ 
+diff --git a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+index ba686e4..8b15316 100644
+--- a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
++++ b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+@@ -201,6 +201,13 @@
+ 			samsung,pin-drv = <3>;
+ 		};
+ 
++		sd0_rclk: sd0-rclk {
++			samsung,pins = "gpc0-7";
++			samsung,pin-function = <2>;
++			samsung,pin-pud = <1>;
++			samsung,pin-drv = <3>;
++		};
++
+ 		sd1_cmd: sd1-cmd {
+ 			samsung,pins = "gpc1-1";
+ 			samsung,pin-function = <2>;
+diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+index 8be3d7b..2078a1f 100644
+--- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
++++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+@@ -80,8 +80,10 @@
+ 		samsung,dw-mshc-ciu-div = <3>;
+ 		samsung,dw-mshc-sdr-timing = <0 4>;
+ 		samsung,dw-mshc-ddr-timing = <0 2>;
++		samsung,dw-mshc-hs400-timing = <0 2>;
++		samsung,read-strobe-delay = <90>;
+ 		pinctrl-names = "default";
+-		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
++		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
+ 		bus-width = <8>;
+ 		cap-mmc-highspeed;
+ 	};
+diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+index e8fdda8..96f0d61 100644
+--- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
++++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+@@ -550,15 +550,18 @@
+ 	num-slots = <1>;
+ 	broken-cd;
+ 	mmc-hs200-1_8v;
++	mmc-hs400-1_8v;
+ 	cap-mmc-highspeed;
+ 	non-removable;
+ 	card-detect-delay = <200>;
+-	clock-frequency = <400000000>;
++	clock-frequency = <800000000>;
+ 	samsung,dw-mshc-ciu-div = <3>;
+ 	samsung,dw-mshc-sdr-timing = <0 4>;
+ 	samsung,dw-mshc-ddr-timing = <0 2>;
++	samsung,dw-mshc-hs400-timing = <0 2>;
++	samsung,read-strobe-delay = <90>;
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
++	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
+ 	bus-width = <8>;
+ };
+ 
 -- 
 1.7.9.5
 
