@@ -1,7 +1,8 @@
 From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Subject: [PATCH v3 2/6] mmc: pwrseq_simple: Extend to support more pins
-Date: Thu, 29 Jan 2015 16:00:04 +0100
-Message-ID: <1422543608-24704-3-git-send-email-javier.martinez@collabora.co.uk>
+Subject: [PATCH v3 4/6] mmc: pwrseq_simple: Add optional reference clock
+ support
+Date: Thu, 29 Jan 2015 16:00:06 +0100
+Message-ID: <1422543608-24704-5-git-send-email-javier.martinez@collabora.co.uk>
 References: <1422543608-24704-1-git-send-email-javier.martinez@collabora.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,136 +22,135 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-kernel@vger.kernel.org, Arend van Spriel <arend@broadcom.com>, Kukjin Kim <kgene@kernel.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Olof Johansson <olof@lixom.net>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Many WLAN attached to a SDIO/MMC interface, needs more than one pin for
-their reset sequence. For example, is very common for chips to have two
-pins: one for reset and one for power enable.
+Some WLAN chips attached to a SDIO interface, need a reference clock.
 
-This patch adds support for more reset pins to the pwrseq_simple driver
-and instead hardcoding a fixed number, it uses the of_gpio_named_count()
-since the MMC power sequence is only built when CONFIG_OF is enabled.
+Since this is very common, extend the prseq_simple driver to support
+an optional clock that is enabled prior the card power up procedure.
+
+Note: the external clock is optional. Thus an error is not returned
+if the clock is not found.
 
 Signed-off-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 ---
 
-Changes since v2: None.
+Changes since v2:
+ - Add a clk_enabled bool to struct mmc_pwrseq_simple to track clock
+   gate/ungate since .power_off can be called prior to .pre_power_on.
+   Suggested by Ulf Hansson.
+ - clk_get() does not return -ENOSYS so don't check for that.
+   Suggested by Ulf Hansson.
 
 Changes since v1:
- - Many code cleanups suggested by Srinivas Kandagatla
-    * Rename reset_gpio array to reset_gpios.
-    * Use a zero length array for reset_gpios to avoid a kmalloc.
-    * Refactor GPIO assert and de-ssert logic into a common function.
-    * Simplify gpiod_put logic in case of gpiod_get error.
+ - Rebase on top of latest changes.
+ - Use IS_ERR() instead of checking for NULL to see if the clock exists.
 ---
- drivers/mmc/core/pwrseq_simple.c | 55 +++++++++++++++++++++++++++++-----------
- 1 file changed, 40 insertions(+), 15 deletions(-)
+ drivers/mmc/core/pwrseq_simple.c | 38 ++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 36 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-index 0958c696137f..e53d3c7e059c 100644
+index e53d3c7e059c..50d09d920430 100644
 --- a/drivers/mmc/core/pwrseq_simple.c
 +++ b/drivers/mmc/core/pwrseq_simple.c
-@@ -11,6 +11,7 @@
+@@ -7,6 +7,7 @@
+  *
+  *  Simple MMC power sequence management
+  */
++#include <linux/clk.h>
+ #include <linux/kernel.h>
  #include <linux/slab.h>
  #include <linux/device.h>
- #include <linux/err.h>
-+#include <linux/of_gpio.h>
- #include <linux/gpio/consumer.h>
- 
- #include <linux/mmc/host.h>
-@@ -19,16 +20,26 @@
+@@ -20,6 +21,8 @@
  
  struct mmc_pwrseq_simple {
  	struct mmc_pwrseq pwrseq;
--	struct gpio_desc *reset_gpio;
-+	int nr_gpios;
-+	struct gpio_desc *reset_gpios[0];
++	bool clk_enabled;
++	struct clk *ext_clk;
+ 	int nr_gpios;
+ 	struct gpio_desc *reset_gpios[0];
  };
+@@ -39,6 +42,11 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+ 	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+ 					struct mmc_pwrseq_simple, pwrseq);
  
-+static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
-+					      int value)
-+{
-+	int i;
++	if (!IS_ERR(pwrseq->ext_clk)) {
++		clk_prepare_enable(pwrseq->ext_clk);
++		pwrseq->clk_enabled = true;
++	}
 +
-+	for (i = 0; i < pwrseq->nr_gpios; i++)
-+		if (!IS_ERR(pwrseq->reset_gpios[i]))
-+			gpiod_set_value_cansleep(pwrseq->reset_gpios[i], value);
+ 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
+ }
+ 
+@@ -50,6 +58,19 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
+ 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
+ }
+ 
++static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
++{
++	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
++					struct mmc_pwrseq_simple, pwrseq);
++
++	mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
++
++	if (pwrseq->clk_enabled) {
++		clk_disable_unprepare(pwrseq->ext_clk);
++		pwrseq->clk_enabled = false;
++	}
 +}
 +
- static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
- {
- 	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
- 					struct mmc_pwrseq_simple, pwrseq);
- 
--	if (!IS_ERR(pwrseq->reset_gpio))
--		gpiod_set_value_cansleep(pwrseq->reset_gpio, 1);
-+	mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
- }
- 
- static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
-@@ -36,17 +47,18 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
- 	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
- 					struct mmc_pwrseq_simple, pwrseq);
- 
--	if (!IS_ERR(pwrseq->reset_gpio))
--		gpiod_set_value_cansleep(pwrseq->reset_gpio, 0);
-+	mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
- }
- 
  static void mmc_pwrseq_simple_free(struct mmc_host *host)
  {
  	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
- 					struct mmc_pwrseq_simple, pwrseq);
-+	int i;
+@@ -60,6 +81,9 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
+ 		if (!IS_ERR(pwrseq->reset_gpios[i]))
+ 			gpiod_put(pwrseq->reset_gpios[i]);
  
--	if (!IS_ERR(pwrseq->reset_gpio))
--		gpiod_put(pwrseq->reset_gpio);
-+	for (i = 0; i < pwrseq->nr_gpios; i++)
-+		if (!IS_ERR(pwrseq->reset_gpios[i]))
-+			gpiod_put(pwrseq->reset_gpios[i]);
- 
++	if (!IS_ERR(pwrseq->ext_clk))
++		clk_put(pwrseq->ext_clk);
++
  	kfree(pwrseq);
  	host->pwrseq = NULL;
-@@ -62,20 +74,33 @@ static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
- int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
- {
- 	struct mmc_pwrseq_simple *pwrseq;
--	int ret = 0;
-+	int i, nr_gpios, ret = 0;
+ }
+@@ -67,7 +91,7 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
+ static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
+ 	.pre_power_on = mmc_pwrseq_simple_pre_power_on,
+ 	.post_power_on = mmc_pwrseq_simple_post_power_on,
+-	.power_off = mmc_pwrseq_simple_pre_power_on,
++	.power_off = mmc_pwrseq_simple_power_off,
+ 	.free = mmc_pwrseq_simple_free,
+ };
  
--	pwrseq = kzalloc(sizeof(struct mmc_pwrseq_simple), GFP_KERNEL);
-+	nr_gpios = of_gpio_named_count(dev->of_node, "reset-gpios");
-+	if (nr_gpios < 0)
-+		nr_gpios = 0;
-+
-+	pwrseq = kzalloc(sizeof(struct mmc_pwrseq_simple) + nr_gpios *
-+			 sizeof(struct gpio_desc *), GFP_KERNEL);
+@@ -85,6 +109,13 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
  	if (!pwrseq)
  		return -ENOMEM;
  
--	pwrseq->reset_gpio = gpiod_get_index(dev, "reset", 0, GPIOD_OUT_HIGH);
--	if (IS_ERR(pwrseq->reset_gpio) &&
--		PTR_ERR(pwrseq->reset_gpio) != -ENOENT &&
--		PTR_ERR(pwrseq->reset_gpio) != -ENOSYS) {
--		ret = PTR_ERR(pwrseq->reset_gpio);
--		goto free;
-+	for (i = 0; i < nr_gpios; i++) {
-+		pwrseq->reset_gpios[i] = gpiod_get_index(dev, "reset", i,
-+							 GPIOD_OUT_HIGH);
-+		if (IS_ERR(pwrseq->reset_gpios[i]) &&
-+		    PTR_ERR(pwrseq->reset_gpios[i]) != -ENOENT &&
-+		    PTR_ERR(pwrseq->reset_gpios[i]) != -ENOSYS) {
-+			ret = PTR_ERR(pwrseq->reset_gpios[i]);
++	pwrseq->ext_clk = clk_get(dev, "ext_clock");
++	if (IS_ERR(pwrseq->ext_clk) &&
++	    PTR_ERR(pwrseq->ext_clk) != -ENOENT) {
++		ret = PTR_ERR(pwrseq->ext_clk);
++		goto free;
++	}
 +
-+			while (--i)
-+				gpiod_put(pwrseq->reset_gpios[i]);
-+
-+			goto free;
-+		}
+ 	for (i = 0; i < nr_gpios; i++) {
+ 		pwrseq->reset_gpios[i] = gpiod_get_index(dev, "reset", i,
+ 							 GPIOD_OUT_HIGH);
+@@ -96,7 +127,7 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
+ 			while (--i)
+ 				gpiod_put(pwrseq->reset_gpios[i]);
+ 
+-			goto free;
++			goto clk_put;
+ 		}
  	}
  
-+	pwrseq->nr_gpios = nr_gpios;
- 	pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
+@@ -105,6 +136,9 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
  	host->pwrseq = &pwrseq->pwrseq;
  
+ 	return 0;
++clk_put:
++	if (!IS_ERR(pwrseq->ext_clk))
++		clk_put(pwrseq->ext_clk);
+ free:
+ 	kfree(pwrseq);
+ 	return ret;
 -- 
 2.1.3
