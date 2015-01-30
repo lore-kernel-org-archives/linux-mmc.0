@@ -1,83 +1,55 @@
-From: Jean Delvare <jdelvare@suse.de>
-Subject: Re: [PATCH] mmc: Add hardware dependencies for sdhci-pxav3 and
- sdhci-pxav2
-Date: Fri, 30 Jan 2015 09:29:13 +0100
-Message-ID: <20150130092913.6256e517@endymion.delvare>
-References: <20150126112328.318da5e7@endymion.delvare>
-	<CAPDyKFo363x7NGEctNwHkpn-6HkAu15qu-ZFtt73mJcWZrce4g@mail.gmail.com>
-	<1422369244.4499.187.camel@chaos.site>
-	<CAPDyKFqWa0uyZStNT1Wp21HpSqYpfJx3wU3TDJy25uMgG7qZaw@mail.gmail.com>
-	<20150129151711.454100be@endymion.delvare>
-	<CAPDyKFohbn3yG9iuj7WbV0mDY4H4jZe3SgihGSdOqPLKkTMdZQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: Resolve BKOPS compatability issue
+Date: Fri, 30 Jan 2015 11:25:07 +0100
+Message-ID: <CAPDyKFrR2jne1C=R2phfesLMuZDhARiQgZxvkAcMHkMVrGXaiA@mail.gmail.com>
+References: <1422521383-11436-1-git-send-email-alexey.skidanov@sandisk.com>
+	<54CB3237.2050207@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:44399 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751761AbbA3I3R (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 30 Jan 2015 03:29:17 -0500
-In-Reply-To: <CAPDyKFohbn3yG9iuj7WbV0mDY4H4jZe3SgihGSdOqPLKkTMdZQ@mail.gmail.com>
+Received: from mail-qc0-f178.google.com ([209.85.216.178]:37115 "EHLO
+	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760298AbbA3KZI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Jan 2015 05:25:08 -0500
+Received: by mail-qc0-f178.google.com with SMTP id b13so19796292qcw.9
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Jan 2015 02:25:07 -0800 (PST)
+In-Reply-To: <54CB3237.2050207@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Alexey Skidanov <alexey.skidanov@sandisk.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>
 
-Hi Ulf,
+On 30 January 2015 at 08:26, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi, Alexey.
+>
+> On 01/29/2015 05:49 PM, Alexey Skidanov wrote:
+>> This patch is coming to fix compatibility issue of BKOPS_EN  field of EXT_CSD.
+>> In eMMC-5.1, BKOPS_EN was changed, and now it has two operational bits:
+>> Bit 0 - MANUAL_EN
+>> Bit 1 - AUTO_EN
+>> In previous eMMC revisions, only Bit 0 was supported.
+>
+> If "manual enable" is the same functionality with previous enable,
+> I think it doesn't need to change the name..
+> Just checking whether enable or not with Mask bit?
+>
+> If need to add the auto enable, only add the bkops_auto_en in future.
+> This is just my preference..and i don't read the spec since i don't have eMMC5.1 spec.
+>
+> If manual-enable is difference with previous enable, how about using bkops-manual-en?
 
-On Thu, 29 Jan 2015 16:01:48 +0100, Ulf Hansson wrote:
-> On 29 January 2015 at 15:17, Jean Delvare <jdelvare@suse.de> wrote:
-> > On Wed, 28 Jan 2015 15:04:24 +0100, Ulf Hansson wrote:
-> >> For those SOC that want these drivers, they should be able to select
-> >> them from their defconfigs. So it will be an opt-in instead of opt-out
-> >> policy, which I prefer. It also follows the other Kconfig options for
-> >> mmc drivers.
-> >
-> > As you wish. But that change would be a separate patch going on top of
-> > mine, right? I'm not sure I understand what you expect from me at this
-> > point, please clarify.
-> 
-> Sorry for being unclear. I don't like $subject patch.
-> 
-> Send a new one, removing the following lines:
-> default CPU_MMP2
-> default CPU_PXA910
-> 
-> Then you send another patch(es) to the respective SOC maintainer,
-> updating the defonfig(s) selecting MMC_SDHCI_PXAV3|PXAV2, when
-> appropriate.
-> 
-> Would that work?
+According to information I have got around the eMMC 5.1 spec, the old
+value of MAN_EN will remain. That also means that bit will remain as
+one time programmable.
 
-Not really, I'm afraid.
+The new AUTO_EN bit, will be multiple writeable with value kept after
+power failure. But more importantly, the card seems to expect the host
+to disable AUTO_EN before power failure. In other words we need to
+disable AUTO_EN (if set) before entering system PM state an cutting
+power to the card.
 
-My proposed change affects users of non-embedded systems, or more
-generally everyone not on ARCH_MMP. I want to make their life easier by
-hiding options which are not relevant to them. I have sent several
-dozen of such patches in the past for various drivers, see for example
-the latest ones:
-  http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=441fb7684782be3553c67dc04defcf304b999bba
-  http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c03842d89b769db44be5cb0b1ebb384ccfa25f7f
-  http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=84c3a8f6eadb2bedfba10f62da0328d8533c8f25
-Also note that the MMC subsystem already has examples of this, check
-MMC_OMAP_HS, MMC_SDHCI_MSM, MMC_SDHI, MMC_DW and MMC_SH_MMCIF in
-drivers/mmc/host/Kconfig. I'm just doing more of the same, nothing new.
+So, yes, we will have to deal with AUTO_EN sooner or later, thus I am
+kind of happy Alexey's patch, as is.
 
-The change you want, OTOH, would affect exclusively the ARCH_MMP users
-(of which I am not.) It is essentially unrelated with what I was
-originally talking about, except for the fact that it touches the same
-Kconfig entries. I have no idea if your proposal is a good idea, I am
-not dealing with embedded systems, and I have no idea who are the
-maintainers of the affected SOCs. This is simply not my area.
-
-So basically you are rejecting my proposal without a reason, and then
-you ask me to do an unrelated work instead. This is not fair, sorry.
-
-Don't get me wrong, I'm always ready to do some more work than I
-originally intended if that's what it takes to get my patches merged. I
-value code review and I welcome constructive criticism. But this time
-your request is not reasonable.
-
--- 
-Jean Delvare
-SUSE L3 Support
+Kind regards
+Uffe
