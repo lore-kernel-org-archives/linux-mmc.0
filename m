@@ -1,97 +1,86 @@
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: Re: [PATCH 1/4] mmc: core: add support for hardware reset gpio line
-Date: Fri, 30 Jan 2015 11:37:01 +0100
-Message-ID: <54CB5ECD.4090909@samsung.com>
-References: <1422453595-21160-1-git-send-email-m.szyprowski@samsung.com>
- <1422453595-21160-2-git-send-email-m.szyprowski@samsung.com>
- <CAPDyKFpowidghwadJS+gYP0EVo6gRUhAG8s14CMEbwatFadP2Q@mail.gmail.com>
- <54C9FA48.5050705@samsung.com>
- <CABxcv=nbTcuzcmhYHKnDom5XFd+gqUbKRF0THCKsN5tL8-cBGA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: Add hardware dependencies for sdhci-pxav3 and sdhci-pxav2
+Date: Fri, 30 Jan 2015 11:43:17 +0100
+Message-ID: <CAPDyKFq+Abjfyynnw+cQrEVUYKx1xwWtY9fr1mbKAMD502qjpw@mail.gmail.com>
+References: <20150126112328.318da5e7@endymion.delvare>
+	<CAPDyKFo363x7NGEctNwHkpn-6HkAu15qu-ZFtt73mJcWZrce4g@mail.gmail.com>
+	<1422369244.4499.187.camel@chaos.site>
+	<CAPDyKFqWa0uyZStNT1Wp21HpSqYpfJx3wU3TDJy25uMgG7qZaw@mail.gmail.com>
+	<20150129151711.454100be@endymion.delvare>
+	<CAPDyKFohbn3yG9iuj7WbV0mDY4H4jZe3SgihGSdOqPLKkTMdZQ@mail.gmail.com>
+	<20150130092913.6256e517@endymion.delvare>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.w1.samsung.com ([210.118.77.11]:43919 "EHLO
-	mailout1.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753771AbbA3KhN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Jan 2015 05:37:13 -0500
-In-reply-to: <CABxcv=nbTcuzcmhYHKnDom5XFd+gqUbKRF0THCKsN5tL8-cBGA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20150130092913.6256e517@endymion.delvare>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jean Delvare <jdelvare@suse.de>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Javier Martinez Canillas <javier@dowhile0.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene@kernel.org>, Tobias Jakobi <liquid.acid@gmx.net>, Daniel Drake <drake@endlessm.com>, Sebastian Reichel <sre@kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Joonyoung Shim <jy0922.shim@samsung.com>
 
-Hello,
-
-On 2015-01-29 11:56, Javier Martinez Canillas wrote:
-> On Thu, Jan 29, 2015 at 10:15 AM, Marek Szyprowski
-> <m.szyprowski@samsung.com> wrote:
->>> Also, I wonder whether we could extend the mmc-pwrseq to cover your
->>> case? Did you consider that as an option?
+On 30 January 2015 at 09:29, Jean Delvare <jdelvare@suse.de> wrote:
+> Hi Ulf,
+>
+> On Thu, 29 Jan 2015 16:01:48 +0100, Ulf Hansson wrote:
+>> On 29 January 2015 at 15:17, Jean Delvare <jdelvare@suse.de> wrote:
+>> > On Wed, 28 Jan 2015 15:04:24 +0100, Ulf Hansson wrote:
+>> >> For those SOC that want these drivers, they should be able to select
+>> >> them from their defconfigs. So it will be an opt-in instead of opt-out
+>> >> policy, which I prefer. It also follows the other Kconfig options for
+>> >> mmc drivers.
+>> >
+>> > As you wish. But that change would be a separate patch going on top of
+>> > mine, right? I'm not sure I understand what you expect from me at this
+>> > point, please clarify.
 >>
->> I didn't consider mmc-pwrseq yet. For me it looked straightforward to
-> I agree with Ulf that using mmc-pwrseq would be a good solution and in
-> fact I think the pwrseq_simple [0] driver will fit your use case since
-> it supports a reset GPIO pin which is what many WLAN chips attached to
-> a SDIO interface use.
-
-Ok, I've checked mmc-prwseq and mmc-pwrseq-simple. I also checked the
-hardware and it mmc-pwrseq-simple cannot be used directly.
-
-Although the signal is called RSTN (on Odroid U3 schema), the eMMC card
-gets resetted not on low line level, but during the rising edge. This RSTN
-line is also pulled up by the external resistor. However, the strangest
-thing is the fact that the default SoC configuration (which is applied
-during hw reset) for this GPIO line is input, pulled-down. The SoC
-internal pull-down is stronger than the external pull up, so in the end,
-during the SoC reboot the RSTN signal is set to zero. Later bootloader
-disables the internal pull-down.
-
-To sum up - to perform proper reboot on Odroid U3/XU3, one need to set
-RSTN to zero, wait a while and the set it back to 1.
-
-To achieve this with mmc-pwrseq-simple, I would need to modify the power_off
-callback to toggle reset line to zero and back to one. This however might
-not be desired to other sd/mmc cards used with mmc-pwrseq-simple.
-
-I can also provide separate mmc-pwrsrq-odroid driver, which will be very
-similar to mmc-pwrseq-simple.
-
-Ulf - which approach would you prefer?
-
-
+>> Sorry for being unclear. I don't like $subject patch.
+>>
+>> Send a new one, removing the following lines:
+>> default CPU_MMP2
+>> default CPU_PXA910
+>>
+>> Then you send another patch(es) to the respective SOC maintainer,
+>> updating the defonfig(s) selecting MMC_SDHCI_PXAV3|PXAV2, when
+>> appropriate.
+>>
+>> Would that work?
 >
->> implement
->> it just like card detect or write-protection gpio pins. I already noticed
->> that
->> there is code for some mmc host driver, which perform mmc hardware reset. If
->> you
->> think that extending pwrseq is the better approach, I will try to update my
->> patches. This will add reboot handler to mmc-pwrseq then. The only question
->> is
-> I don't think that adding a reboot handler to mmc-pwrseq is needed.
-> AFAICT the call chain is:
+> Not really, I'm afraid.
 >
-> sys_reboot() -> kernel_restart() -> device_shutdown() ->
-> mmc_bus_shutdown() -> _mmc_suspend() -> mmc_power_off() ->
-> mmc_pwrseq_power_off() -> struct mmc_pwrseq_ops .power_off
+> My proposed change affects users of non-embedded systems, or more
+> generally everyone not on ARCH_MMP. I want to make their life easier by
+> hiding options which are not relevant to them. I have sent several
+> dozen of such patches in the past for various drivers, see for example
+> the latest ones:
+>   http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=441fb7684782be3553c67dc04defcf304b999bba
+>   http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c03842d89b769db44be5cb0b1ebb384ccfa25f7f
+>   http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=84c3a8f6eadb2bedfba10f62da0328d8533c8f25
+> Also note that the MMC subsystem already has examples of this, check
+> MMC_OMAP_HS, MMC_SDHCI_MSM, MMC_SDHI, MMC_DW and MMC_SH_MMCIF in
+> drivers/mmc/host/Kconfig. I'm just doing more of the same, nothing new.
 >
-> So since the pwrseq_simple already asserts the reset GPIO in
-> .power_off, it should be enough to ensure the eMMC will be reset to
-> its default configuration for the iROM to work properly.
+> The change you want, OTOH, would affect exclusively the ARCH_MMP users
+> (of which I am not.) It is essentially unrelated with what I was
+> originally talking about, except for the fact that it touches the same
+> Kconfig entries. I have no idea if your proposal is a good idea, I am
+> not dealing with embedded systems, and I have no idea who are the
+> maintainers of the affected SOCs. This is simply not my area.
 >
-> It also asserts the GPIO pin in .pre_power_on and de-asserts in
-> .post_power_on which should be needed as well for the other case you
-> mentioned when a broken bootloader left the emmc card in some unknown
-> state.
+> So basically you are rejecting my proposal without a reason, and then
+> you ask me to do an unrelated work instead. This is not fair, sorry.
+>
+> Don't get me wrong, I'm always ready to do some more work than I
+> originally intended if that's what it takes to get my patches merged. I
+> value code review and I welcome constructive criticism. But this time
+> your request is not reasonable.
 
-emergency_restart() doesn't call device_shutdown(), so I think it still 
-makes
-sense to add real reset handler to mmc-pwrseq to ensure that power_off will
-be called even during emergency_restart().
+I did a little more of investigation of what's good practice/policy
+around your suggested patch. I have changed my mind, I am going to
+accept your patch as is.
 
-Best regards
--- 
-Marek Szyprowski, PhD
-Samsung R&D Institute Poland
+Sorry for all the noise and thanks for a good discussion.
 
+Applied for next. Thanks!
+
+Kind regards
+Uffe
