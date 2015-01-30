@@ -1,26 +1,37 @@
-From: addy ke <addy.ke@rock-chips.com>
-Subject: Re: [PATCH 1/2] mmc: core: use card pointer as the first parameter
- of execute_tuning()
-Date: Fri, 30 Jan 2015 09:08:31 +0800
-Message-ID: <54CAD98F.3070805@rock-chips.com>
-References: <1422271175-19445-1-git-send-email-addy.ke@rock-chips.com>	<1422271175-19445-2-git-send-email-addy.ke@rock-chips.com>	<CAPDyKFp=5epMggHu0+u_LU7ETujcoeP2xOpB7iD6JF2bs8BnEA@mail.gmail.com>	<CAD=FV=X9x0gW5TyLi4ERm8nxixQB__Y=5bRAtOax-_w+T33rCg@mail.gmail.com>	<CAPDyKFqjG=yxDcwnk4jbXMZ05hMkWR2x37uVpRNd_11-eB4G7w@mail.gmail.com>	<CAD=FV=VQg+sQUpgbKw7Zz=-f+jPM=6O-+3gUpohWhj8JeSPu6Q@mail.gmail.com>	<CAPDyKFqjY-Sn2mNqjy1FH3RPFuJSfhTX_esQDao1Yb4qumHYcg@mail.gmail.com> <CAD=FV=XCBebTzWpNPn9GaTRU3O1BMurhoTDWcXHYXBChBRnOjQ@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 1/2] mmc: core: use card pointer as the first parameter of
+ execute_tuning()
+Date: Fri, 30 Jan 2015 11:15:04 +0900
+Message-ID: <54CAE928.2000909@samsung.com>
+References: <1422271175-19445-1-git-send-email-addy.ke@rock-chips.com>
+ <1422271175-19445-2-git-send-email-addy.ke@rock-chips.com>
+ <CAPDyKFp=5epMggHu0+u_LU7ETujcoeP2xOpB7iD6JF2bs8BnEA@mail.gmail.com>
+ <CAD=FV=X9x0gW5TyLi4ERm8nxixQB__Y=5bRAtOax-_w+T33rCg@mail.gmail.com>
+ <CAPDyKFqjG=yxDcwnk4jbXMZ05hMkWR2x37uVpRNd_11-eB4G7w@mail.gmail.com>
+ <CAD=FV=VQg+sQUpgbKw7Zz=-f+jPM=6O-+3gUpohWhj8JeSPu6Q@mail.gmail.com>
+ <CAPDyKFqjY-Sn2mNqjy1FH3RPFuJSfhTX_esQDao1Yb4qumHYcg@mail.gmail.com>
+ <CAD=FV=XCBebTzWpNPn9GaTRU3O1BMurhoTDWcXHYXBChBRnOjQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from regular1.263xmail.com ([211.150.99.130]:47291 "EHLO
-	regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752424AbbA3BIq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jan 2015 20:08:46 -0500
-In-Reply-To: <CAD=FV=XCBebTzWpNPn9GaTRU3O1BMurhoTDWcXHYXBChBRnOjQ@mail.gmail.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:11710 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756696AbbA3CPG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jan 2015 21:15:06 -0500
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0NIY003KCWX43HD0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 30 Jan 2015 11:15:04 +0900 (KST)
+In-reply-to: <CAD=FV=XCBebTzWpNPn9GaTRU3O1BMurhoTDWcXHYXBChBRnOjQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dianders@chromium.org, ulf.hansson@linaro.org
-Cc: tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, linux-mmc@vger.kernel.org, linux-rockchip@lists.infradead.org
+To: Doug Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Addy Ke <addy.ke@rock-chips.com>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
 
-hi, Doug
-
-On 2015/1/30 08:13, Doug Anderson wrote:
+On 01/30/2015 09:13 AM, Doug Anderson wrote:
 > Ulf,
 > 
 > On Thu, Jan 29, 2015 at 1:16 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
@@ -59,6 +70,9 @@ On 2015/1/30 08:13, Doug Anderson wrote:
 >>>> saw an error.  Hence a generic big delay seems like the only option.
 >>
 >> I haven't queued that patch, I was waiting for an ack from Seungwon or Jaehoon.
+
+Sorry, which patch? i missed it.
+
 >>
 >> Do you think it could solve this issue, we could give it a try!?
 > 
@@ -79,6 +93,17 @@ On 2015/1/30 08:13, Doug Anderson wrote:
 > Overall it does sorta seem like this might just be a quirk with the
 > rk3288 dw_mmc.  It feels like the controller is in a wonky state and
 > maybe this extra send_status helps it get out?
+
+I think that dw-mmc controller seems to have the main problem for tuning sequence.
+In my knowledge, tuning sequence doesn't need to send the stop command.
+but the code of dw-mmc need to handle the stop command and it has implemented.
+Using Send_status() is good solution, but i think it's not main solution.
+
+I will work to clean up the code for dwmmc controller.
+And consider to handle the stop command..
+
+Best Regards,
+Jaehoon Chung
 > 
 > 
 >>> ...Addy instead fixed the problem using mmc_send_status() to try to
@@ -121,19 +146,7 @@ On 2015/1/30 08:13, Doug Anderson wrote:
 > That sounds reasonable to me.
 > 
 > Addy: you've been very quiet.  What do you think?
-Sorry for reply late.
-I am busy with some other important things, and can't confirm it by pink2 board.
-
-about bus_ops->alive, I think it can't use in tuning state.
-Because:
-bus_ops->alive() --> mmc_sd_alive(host) /* sd card */ -->mmc_send_status(host->card, NULL);
-But host->card == NULL in tuning state(mmc_sd_init_card->mmc_sd_init_uhs_card).
-
-Only if sd is initialized successfully, we can get card pointer by host->card.
-see: mmc_sd_init_card(drivers/mmc/core/sd.c), the end of this function: host->card = card
 > 
 > -Doug
-> 
-> 
 > 
 
