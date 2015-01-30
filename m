@@ -1,81 +1,55 @@
 From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Subject: Re: [PATCH v3 4/6] mmc: pwrseq_simple: Add optional reference clock
- support
-Date: Fri, 30 Jan 2015 14:03:33 +0100
-Message-ID: <54CB8125.7030107@collabora.co.uk>
-References: <1422543608-24704-1-git-send-email-javier.martinez@collabora.co.uk>	<1422543608-24704-5-git-send-email-javier.martinez@collabora.co.uk> <CAPDyKFp5tGogzjU27jTDcHviUUwnTSgq4EP484_OprV_nPBsOg@mail.gmail.com>
+Subject: Re: [PATCH v3 0/6] Add multiple GPIO and external clock to MMC pwrseq_simple
+Date: Fri, 30 Jan 2015 14:06:55 +0100
+Message-ID: <54CB81EF.8030603@collabora.co.uk>
+References: <1422543608-24704-1-git-send-email-javier.martinez@collabora.co.uk> <CAPDyKFqx-dhhVmtGnP2YpmR63Y20Ns=YyxnYrE2ewTuNXPA7Ag@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFp5tGogzjU27jTDcHviUUwnTSgq4EP484_OprV_nPBsOg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bhuna.collabora.co.uk ([93.93.135.160]:48666 "EHLO
+	bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753990AbbA3NHB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Jan 2015 08:07:01 -0500
+In-Reply-To: <CAPDyKFqx-dhhVmtGnP2YpmR63Y20Ns=YyxnYrE2ewTuNXPA7Ag@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Kukjin Kim <kgene@kernel.org>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Arend van Spriel <arend@broadcom.com>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-List-Id: linux-mmc@vger.kernel.org
 
 Hello Ulf,
 
-On 01/30/2015 12:17 PM, Ulf Hansson wrote:
->>  };
->> @@ -39,6 +42,11 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
->>         struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
->>                                         struct mmc_pwrseq_simple, pwrseq);
+On 01/30/2015 12:13 PM, Ulf Hansson wrote:
 >>
->> +       if (!IS_ERR(pwrseq->ext_clk)) {
+>> Patch #1 extends the simple MMC power sequence DT binding to support more
+>> than one GPIO and patch #2 adds the actual implementation.
+>>
+>> In the same way, patch #3 and #4 extend the simple MMC power sequence DT
+>> binding and pwrseq_simple driver to support an optional external clock.
+>>
+>> Finally as an example, patch #5 and patch #6 adds support for the wifi
+>> chip in the Exynos5250 Snow that needs all these resources. These two
+>> patches were added to the series only for completeness and should be
+>> picked by Kukjin through his linux-samsung tree.
+>>
+>> Best regards,
+>> Javier
 > 
-> This should be:
+> Thanks Javier! I have applied patch 1 -> 4 for my next branch.
 > 
-> if (!IS_ERR(pwrseq->ext_clk) && !pwrseq->clk_enabled) {
-> 
+> I made some minor fix to patch4, I send a separate response to that
+> patch so you know.
 >
 
-Oh, I thought that it was not possible to enter mmc_pwrseq_pre_power_on()
-twice without a prior call to mmc_pwrseq_power_off() but I guess I didn't
-read the MMC core code carefully...
+Great, thanks a lot!
+
+Kukjin,
+
+Could you please pick patches #5 and #6 then now that Ulf picked the others?
  
->> +               clk_prepare_enable(pwrseq->ext_clk);
->> +               pwrseq->clk_enabled = true;
->> +       }
->> +
->>         mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
->>  }
->>
->> @@ -50,6 +58,19 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
->>         mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
->>  }
->>
->> +static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
->> +{
->> +       struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
->> +                                       struct mmc_pwrseq_simple, pwrseq);
->> +
->> +       mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
->> +
->> +       if (pwrseq->clk_enabled) {
-> 
-> I changed this as well, but that was just to make code clearer.
-> 
-> if (!IS_ERR(pwrseq->ext_clk) && pwrseq->clk_enabled) {
-> 
->
-
-Yeah, if IS_ERR(pwrseq->ext_clk) then clk_enabled will always be false but I
-agree that the change makes the code to be more consistent.
-
->>
-> 
-> As I stated in the response to he coverletter for the patchset, this
-> patch is applied for next with above changes.
-> 
-> Thanks!
->
-
-Thanks a lot for your help and for fixing these things!
-
 > Kind regards
 > Uffe
->
+> 
 
 Best regards,
 Javier
