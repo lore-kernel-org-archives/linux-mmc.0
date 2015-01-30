@@ -1,154 +1,128 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: [PATCH v2] mmc: moxart: fix probe logic
-Date: Thu, 29 Jan 2015 23:06 +0100
-Message-ID: <1862200.Pj3heKAtuk@wuerfel>
-References: <8340872.32GezMfzR1@wuerfel> <20150129170104.GD26493@n2100.arm.linux.org.uk>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 1/2] mmc: core: use card pointer as the first parameter of execute_tuning()
+Date: Thu, 29 Jan 2015 16:13:34 -0800
+Message-ID: <CAD=FV=XCBebTzWpNPn9GaTRU3O1BMurhoTDWcXHYXBChBRnOjQ@mail.gmail.com>
+References: <1422271175-19445-1-git-send-email-addy.ke@rock-chips.com>
+	<1422271175-19445-2-git-send-email-addy.ke@rock-chips.com>
+	<CAPDyKFp=5epMggHu0+u_LU7ETujcoeP2xOpB7iD6JF2bs8BnEA@mail.gmail.com>
+	<CAD=FV=X9x0gW5TyLi4ERm8nxixQB__Y=5bRAtOax-_w+T33rCg@mail.gmail.com>
+	<CAPDyKFqjG=yxDcwnk4jbXMZ05hMkWR2x37uVpRNd_11-eB4G7w@mail.gmail.com>
+	<CAD=FV=VQg+sQUpgbKw7Zz=-f+jPM=6O-+3gUpohWhj8JeSPu6Q@mail.gmail.com>
+	<CAPDyKFqjY-Sn2mNqjy1FH3RPFuJSfhTX_esQDao1Yb4qumHYcg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.13]:62726 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752458AbbA2WGd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jan 2015 17:06:33 -0500
-In-Reply-To: <20150129170104.GD26493@n2100.arm.linux.org.uk>
+Received: from mail-ig0-f171.google.com ([209.85.213.171]:47663 "EHLO
+	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751156AbbA3ANf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jan 2015 19:13:35 -0500
+Received: by mail-ig0-f171.google.com with SMTP id r10so13855199igi.4
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Jan 2015 16:13:34 -0800 (PST)
+In-Reply-To: <CAPDyKFqjY-Sn2mNqjy1FH3RPFuJSfhTX_esQDao1Yb4qumHYcg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-kernel@lists.infradead.org, Jonas Jensen <jonas.jensen@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Addy Ke <addy.ke@rock-chips.com>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
 
-Jonas Jensen wanted to submit a patch for these, but apparently
-forgot about it. I stumbled over this symptom first:
+Ulf,
 
-drivers/built-in.o: In function `moxart_probe':
-:(.text+0x2af128): undefined reference to `of_dma_request_slave_channel'
+On Thu, Jan 29, 2015 at 1:16 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> - Drastically decreased cc-list.
+>
+> On 29 January 2015 at 01:55, Doug Anderson <dianders@chromium.org> wrote:
+>> Ulf,
+>>
+>> On Tue, Jan 27, 2015 at 7:18 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>> I asked Addy to post upstream against mmc_send_tuning(), but I guess
+>>>> he didn't (he posted against Alex's NAKed patch instead).
+>>>>
+>>>> ...when I talked to him about it, Addy was asserting that when tuning
+>>>> fails it is important (at least on dw_mmc on rk3288) that we wait for
+>>>> the card to stop being busy and that the way to detect was using
+>>>> mmc_send_status().
+>>>
+>>> So, could that be due to the internal logic of the error handling in
+>>> dw_mmc driver? Or you think this is a generic issue?
+>>>
+>>> According to the specifications (eMMC and SD) both states that the
+>>> tuning command has an R1 response. So, there shouldn't be any busy
+>>> signalling involved - at least according to spec.
+>>
+>> I did a bit of digging into this issue myself.  What I found was that
+>> a "response CRC" and "end of transfer".  This was why I posted up
+>> <https://patchwork.kernel.org/patch/5623071/>.  From that patch:
+>>
+>>> Specifically it looks like in certain error conditions (I saw this
+>>> with Response CRC errors) that data keeps showing up in the FIFO even
+>>> after the error is reported and the CD (command done) bit is set.  If
+>>> we don't wait for this data to finish transferring then it confuses
+>>> the next transaction.  In the specific failure case I ran into I found
+>>> that I could monitor the data_state_mc_busy bit and wait for it to
+>>> clear, but in other failure cases this bit was stuck at busy when we
+>>> saw an error.  Hence a generic big delay seems like the only option.
+>
+> I haven't queued that patch, I was waiting for an ack from Seungwon or Jaehoon.
+>
+> Do you think it could solve this issue, we could give it a try!?
 
-This is because of_dma_request_slave_channel is an internal helper
-and not exported to loadable module. I'm changing the driver to
-use dma_request_slave_channel_reason() instead.
+My big fat delay does seem to solve the issue, but it has the side
+effect of slowing down tuning quite a bit so I'd rather find a more
+proper fix.  We're talking several hundred extra milliseconds slower
+per slot that is tuned...
 
-Further problems from inspection:
+I still don't exactly have a warm fuzzy about using the send_status()
+command like this, but it seems to work (actually, I should verify
+that myself--I've been taking Addy's word that his solution works).  I
+do wish someone could tell me "oh right, yeah, we do need a
+send_status in that case".  ;)  Addy said that in the non-tuning case
+that the core will always do a send_status so that this fix is really
+only for tuning and doesn't need to be applied in general.  I also
+haven't validated that myself...
 
-* The remove function must not call kfree on the host pointer,
-  because it is allocated together with the mmc_host.
+Overall it does sorta seem like this might just be a quirk with the
+rk3288 dw_mmc.  It feels like the controller is in a wonky state and
+maybe this extra send_status helps it get out?
 
-* The clock is never released
 
-* The dma_cap_mask_t is completely unused and can be removed
+>> ...Addy instead fixed the problem using mmc_send_status() to try to
+>> detect when the transfer was all done and it apparently worked, but it
+>> seemed odd to me.  My MMC "expertise" pretty much ends with looking
+>> for simple logic errors in the MMC driver, so my hope was that one of
+>> you guys would know this better...
+>>
+>>
+>>>> That would mean that against upstream you'd need to change
+>>>> mmc_send_tuning() to take in the card as well (or move the "host->card
+>>>> = card" assignment to before UHS init, which seems less desirable?)
+>
+> I get your point now.
+>
+> Changing mmc_send_tuning() to take "card" will work due to $subject
+> patch changed the ->execute_tuning() callbacks to take "card" as well.
+>
+>>>>
+>>>> What do you think about that?  Is there a better solution?
+>>>
+>>> Why do we need to change mmc_send_tuning()? I thought the issue was
+>>> that mmc_send_status(), which currently takes "card" as a parameter.
+>>
+>> Well, if mmc_send_tuning() needed to call mmc_send_status() then
+>> mmc_send_tuning() would need the card parameter, right?
+>
+> Correct, got it now. :-)
+>
+> I didn't understand that you wanted mmc_send_tuning() to invoke
+> mmc_send_status() while it got some errors. From Addy's patch2,
+> mmc_send_status() is invoked from the host driver.
+>
+> Anyway, I think we should follow your suggestion to change the
+> behaviour of mmc_send_tuning(). Though, I think it should use
+> bus_ops->alive() callback instead (and that callback then also need to
+> change to take "card" as a parameter), since that would be generic and
+> the cover the SDIO case as well.
 
-* deferred probing does not work if the dma driver is loaded
-  after the mmc driver.
+That sounds reasonable to me.
 
-This patch should fix all of the above.
+Addy: you've been very quiet.  What do you think?
 
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
-v2:  do not call clk_put() on an error pointer
- 
-diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
-index d2a1ef61ec97..66af7ae1f926 100644
---- a/drivers/mmc/host/moxart-mmc.c
-+++ b/drivers/mmc/host/moxart-mmc.c
-@@ -17,6 +17,7 @@
- #include <linux/init.h>
- #include <linux/platform_device.h>
- #include <linux/delay.h>
-+#include <linux/errno.h>
- #include <linux/interrupt.h>
- #include <linux/blkdev.h>
- #include <linux/dma-mapping.h>
-@@ -131,6 +132,7 @@ struct moxart_host {
- 	struct mmc_host			*mmc;
- 	struct mmc_request		*mrq;
- 	struct scatterlist		*cur_sg;
-+	struct clk			*clk;
- 	struct completion		dma_complete;
- 	struct completion		pio_complete;
- 
-@@ -560,9 +562,7 @@ static int moxart_probe(struct platform_device *pdev)
- 	struct mmc_host *mmc;
- 	struct moxart_host *host = NULL;
- 	struct dma_slave_config cfg;
--	struct clk *clk;
- 	void __iomem *reg_mmc;
--	dma_cap_mask_t mask;
- 	int irq, ret;
- 	u32 i;
- 
-@@ -586,10 +586,11 @@ static int moxart_probe(struct platform_device *pdev)
- 		goto out;
- 	}
- 
--	clk = of_clk_get(node, 0);
--	if (IS_ERR(clk)) {
-+	host->clk = of_clk_get(node, 0);
-+	if (IS_ERR(host->clk)) {
- 		dev_err(dev, "of_clk_get failed\n");
--		ret = PTR_ERR(clk);
-+		ret = PTR_ERR(host->clk);
-+		host->clk = NULL;
- 		goto out;
- 	}
- 
-@@ -603,18 +604,15 @@ static int moxart_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto out;
- 
--	dma_cap_zero(mask);
--	dma_cap_set(DMA_SLAVE, mask);
--
- 	host = mmc_priv(mmc);
- 	host->mmc = mmc;
- 	host->base = reg_mmc;
- 	host->reg_phys = res_mmc.start;
- 	host->timeout = msecs_to_jiffies(1000);
--	host->sysclk = clk_get_rate(clk);
-+	host->sysclk = clk_get_rate(host->clk);
- 	host->fifo_width = readl(host->base + REG_FEATURE) << 2;
--	host->dma_chan_tx = of_dma_request_slave_channel(node, "tx");
--	host->dma_chan_rx = of_dma_request_slave_channel(node, "rx");
-+	host->dma_chan_tx = dma_request_slave_channel_reason(dev, "tx");
-+	host->dma_chan_rx = dma_request_slave_channel_reason(dev, "rx");
- 
- 	spin_lock_init(&host->lock);
- 
-@@ -624,6 +622,11 @@ static int moxart_probe(struct platform_device *pdev)
- 	mmc->ocr_avail = 0xffff00;	/* Support 2.0v - 3.6v power. */
- 
- 	if (IS_ERR(host->dma_chan_tx) || IS_ERR(host->dma_chan_rx)) {
-+		if (PTR_ERR(host->dma_chan_tx) == -EPROBE_DEFER ||
-+		    PTR_ERR(host->dma_chan_rx) == -EPROBE_DEFER) {
-+			ret = -EPROBE_DEFER;
-+			goto out;
-+		}
- 		dev_dbg(dev, "PIO mode transfer enabled\n");
- 		host->have_dma = false;
- 	} else {
-@@ -677,6 +680,8 @@ static int moxart_probe(struct platform_device *pdev)
- 	return 0;
- 
- out:
-+	if (host->clk)
-+		clk_put(host->clk);
- 	if (mmc)
- 		mmc_free_host(mmc);
- 	return ret;
-@@ -694,6 +699,7 @@ static int moxart_remove(struct platform_device *pdev)
- 			dma_release_channel(host->dma_chan_tx);
- 		if (!IS_ERR(host->dma_chan_rx))
- 			dma_release_channel(host->dma_chan_rx);
-+		clk_put(host->clk);
- 		mmc_remove_host(mmc);
- 		mmc_free_host(mmc);
- 
-@@ -702,9 +708,6 @@ static int moxart_remove(struct platform_device *pdev)
- 		writel(readl(host->base + REG_CLOCK_CONTROL) | CLK_OFF,
- 		       host->base + REG_CLOCK_CONTROL);
- 	}
--
--	kfree(host);
--
- 	return 0;
- }
- 
-
+-Doug
