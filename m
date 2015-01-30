@@ -1,170 +1,118 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 4/6] mmc: pwrseq_simple: Add optional reference clock support
-Date: Fri, 30 Jan 2015 12:17:44 +0100
-Message-ID: <CAPDyKFp5tGogzjU27jTDcHviUUwnTSgq4EP484_OprV_nPBsOg@mail.gmail.com>
-References: <1422543608-24704-1-git-send-email-javier.martinez@collabora.co.uk>
-	<1422543608-24704-5-git-send-email-javier.martinez@collabora.co.uk>
+Subject: Re: [PATCH 1/4] mmc: core: add support for hardware reset gpio line
+Date: Fri, 30 Jan 2015 12:33:35 +0100
+Message-ID: <CAPDyKFosDj80tnD1Hb+d1iYc6aZYjTLaQ8cYJxWOUygDm2VToQ@mail.gmail.com>
+References: <1422453595-21160-1-git-send-email-m.szyprowski@samsung.com>
+	<1422453595-21160-2-git-send-email-m.szyprowski@samsung.com>
+	<CAPDyKFpowidghwadJS+gYP0EVo6gRUhAG8s14CMEbwatFadP2Q@mail.gmail.com>
+	<54C9FA48.5050705@samsung.com>
+	<CABxcv=nbTcuzcmhYHKnDom5XFd+gqUbKRF0THCKsN5tL8-cBGA@mail.gmail.com>
+	<54CB5ECD.4090909@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1422543608-24704-5-git-send-email-javier.martinez@collabora.co.uk>
+In-Reply-To: <54CB5ECD.4090909@samsung.com>
 Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Cc: Kukjin Kim <kgene@kernel.org>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Arend van Spriel <arend@broadcom.com>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Marek Szyprowski <m.szyprowski@samsung.com>
+Cc: Javier Martinez Canillas <javier@dowhile0.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene@kernel.org>, Tobias Jakobi <liquid.acid@gmx.net>, Daniel Drake <drake@endlessm.com>, Sebastian Reichel <sre@kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Joonyoung Shim <jy0922.shim@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 29 January 2015 at 16:00, Javier Martinez Canillas
-<javier.martinez@collabora.co.uk> wrote:
-> Some WLAN chips attached to a SDIO interface, need a reference clock.
+On 30 January 2015 at 11:37, Marek Szyprowski <m.szyprowski@samsung.com> wrote:
+> Hello,
 >
-> Since this is very common, extend the prseq_simple driver to support
-> an optional clock that is enabled prior the card power up procedure.
+> On 2015-01-29 11:56, Javier Martinez Canillas wrote:
+>>
+>> On Thu, Jan 29, 2015 at 10:15 AM, Marek Szyprowski
+>> <m.szyprowski@samsung.com> wrote:
+>>>>
+>>>> Also, I wonder whether we could extend the mmc-pwrseq to cover your
+>>>> case? Did you consider that as an option?
+>>>
+>>>
+>>> I didn't consider mmc-pwrseq yet. For me it looked straightforward to
+>>
+>> I agree with Ulf that using mmc-pwrseq would be a good solution and in
+>> fact I think the pwrseq_simple [0] driver will fit your use case since
+>> it supports a reset GPIO pin which is what many WLAN chips attached to
+>> a SDIO interface use.
 >
-> Note: the external clock is optional. Thus an error is not returned
-> if the clock is not found.
 >
-> Signed-off-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-> ---
+> Ok, I've checked mmc-prwseq and mmc-pwrseq-simple. I also checked the
+> hardware and it mmc-pwrseq-simple cannot be used directly.
 >
-> Changes since v2:
->  - Add a clk_enabled bool to struct mmc_pwrseq_simple to track clock
->    gate/ungate since .power_off can be called prior to .pre_power_on.
->    Suggested by Ulf Hansson.
->  - clk_get() does not return -ENOSYS so don't check for that.
->    Suggested by Ulf Hansson.
+> Although the signal is called RSTN (on Odroid U3 schema), the eMMC card
+> gets resetted not on low line level, but during the rising edge. This RSTN
+> line is also pulled up by the external resistor. However, the strangest
+> thing is the fact that the default SoC configuration (which is applied
+> during hw reset) for this GPIO line is input, pulled-down. The SoC
+> internal pull-down is stronger than the external pull up, so in the end,
+> during the SoC reboot the RSTN signal is set to zero. Later bootloader
+> disables the internal pull-down.
 >
-> Changes since v1:
->  - Rebase on top of latest changes.
->  - Use IS_ERR() instead of checking for NULL to see if the clock exists.
-> ---
->  drivers/mmc/core/pwrseq_simple.c | 38 ++++++++++++++++++++++++++++++++++++--
->  1 file changed, 36 insertions(+), 2 deletions(-)
+> To sum up - to perform proper reboot on Odroid U3/XU3, one need to set
+> RSTN to zero, wait a while and the set it back to 1.
 >
-> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-> index e53d3c7e059c..50d09d920430 100644
-> --- a/drivers/mmc/core/pwrseq_simple.c
-> +++ b/drivers/mmc/core/pwrseq_simple.c
-> @@ -7,6 +7,7 @@
->   *
->   *  Simple MMC power sequence management
->   */
-> +#include <linux/clk.h>
->  #include <linux/kernel.h>
->  #include <linux/slab.h>
->  #include <linux/device.h>
-> @@ -20,6 +21,8 @@
+> To achieve this with mmc-pwrseq-simple, I would need to modify the power_off
+> callback to toggle reset line to zero and back to one. This however might
+> not be desired to other sd/mmc cards used with mmc-pwrseq-simple.
 >
->  struct mmc_pwrseq_simple {
->         struct mmc_pwrseq pwrseq;
-> +       bool clk_enabled;
-> +       struct clk *ext_clk;
->         int nr_gpios;
->         struct gpio_desc *reset_gpios[0];
->  };
-> @@ -39,6 +42,11 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
->         struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
->                                         struct mmc_pwrseq_simple, pwrseq);
+> I can also provide separate mmc-pwrsrq-odroid driver, which will be very
+> similar to mmc-pwrseq-simple.
 >
-> +       if (!IS_ERR(pwrseq->ext_clk)) {
+> Ulf - which approach would you prefer?
 
-This should be:
+To me this seems like a quite generic eMMC hw-reset thing, thus we
+should maybe add a new pwrseq "driver" for it.
 
-if (!IS_ERR(pwrseq->ext_clk) && !pwrseq->clk_enabled) {
+In principle you need to toogle a GPIO in the ->pre_power_on()
+callback, right? And you are also proposing to register a restart
+handler from the ->alloc() callback!?
 
-
-> +               clk_prepare_enable(pwrseq->ext_clk);
-> +               pwrseq->clk_enabled = true;
-> +       }
-> +
->         mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
->  }
->
-> @@ -50,6 +58,19 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
->         mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
->  }
->
-> +static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
-> +{
-> +       struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
-> +                                       struct mmc_pwrseq_simple, pwrseq);
-> +
-> +       mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
-> +
-> +       if (pwrseq->clk_enabled) {
-
-I changed this as well, but that was just to make code clearer.
-
-if (!IS_ERR(pwrseq->ext_clk) && pwrseq->clk_enabled) {
-
-
-> +               clk_disable_unprepare(pwrseq->ext_clk);
-> +               pwrseq->clk_enabled = false;
-> +       }
-> +}
-> +
->  static void mmc_pwrseq_simple_free(struct mmc_host *host)
->  {
->         struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
-> @@ -60,6 +81,9 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
->                 if (!IS_ERR(pwrseq->reset_gpios[i]))
->                         gpiod_put(pwrseq->reset_gpios[i]);
->
-> +       if (!IS_ERR(pwrseq->ext_clk))
-> +               clk_put(pwrseq->ext_clk);
-> +
->         kfree(pwrseq);
->         host->pwrseq = NULL;
->  }
-> @@ -67,7 +91,7 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
->  static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
->         .pre_power_on = mmc_pwrseq_simple_pre_power_on,
->         .post_power_on = mmc_pwrseq_simple_post_power_on,
-> -       .power_off = mmc_pwrseq_simple_pre_power_on,
-> +       .power_off = mmc_pwrseq_simple_power_off,
->         .free = mmc_pwrseq_simple_free,
->  };
->
-> @@ -85,6 +109,13 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
->         if (!pwrseq)
->                 return -ENOMEM;
->
-> +       pwrseq->ext_clk = clk_get(dev, "ext_clock");
-> +       if (IS_ERR(pwrseq->ext_clk) &&
-> +           PTR_ERR(pwrseq->ext_clk) != -ENOENT) {
-> +               ret = PTR_ERR(pwrseq->ext_clk);
-> +               goto free;
-> +       }
-> +
->         for (i = 0; i < nr_gpios; i++) {
->                 pwrseq->reset_gpios[i] = gpiod_get_index(dev, "reset", i,
->                                                          GPIOD_OUT_HIGH);
-> @@ -96,7 +127,7 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
->                         while (--i)
->                                 gpiod_put(pwrseq->reset_gpios[i]);
->
-> -                       goto free;
-> +                       goto clk_put;
->                 }
->         }
->
-> @@ -105,6 +136,9 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
->         host->pwrseq = &pwrseq->pwrseq;
->
->         return 0;
-> +clk_put:
-> +       if (!IS_ERR(pwrseq->ext_clk))
-> +               clk_put(pwrseq->ext_clk);
->  free:
->         kfree(pwrseq);
->         return ret;
-> --
-> 2.1.3
->
-
-As I stated in the response to he coverletter for the patchset, this
-patch is applied for next with above changes.
-
-Thanks!
+I suppose this should work nicely.
 
 Kind regards
 Uffe
+
+>
+>
+>>
+>>> implement
+>>> it just like card detect or write-protection gpio pins. I already noticed
+>>> that
+>>> there is code for some mmc host driver, which perform mmc hardware reset.
+>>> If
+>>> you
+>>> think that extending pwrseq is the better approach, I will try to update
+>>> my
+>>> patches. This will add reboot handler to mmc-pwrseq then. The only
+>>> question
+>>> is
+>>
+>> I don't think that adding a reboot handler to mmc-pwrseq is needed.
+>> AFAICT the call chain is:
+>>
+>> sys_reboot() -> kernel_restart() -> device_shutdown() ->
+>> mmc_bus_shutdown() -> _mmc_suspend() -> mmc_power_off() ->
+>> mmc_pwrseq_power_off() -> struct mmc_pwrseq_ops .power_off
+>>
+>> So since the pwrseq_simple already asserts the reset GPIO in
+>> .power_off, it should be enough to ensure the eMMC will be reset to
+>> its default configuration for the iROM to work properly.
+>>
+>> It also asserts the GPIO pin in .pre_power_on and de-asserts in
+>> .post_power_on which should be needed as well for the other case you
+>> mentioned when a broken bootloader left the emmc card in some unknown
+>> state.
+>
+>
+> emergency_restart() doesn't call device_shutdown(), so I think it still
+> makes
+> sense to add real reset handler to mmc-pwrseq to ensure that power_off will
+> be called even during emergency_restart().
+>
+>
+> Best regards
+> --
+> Marek Szyprowski, PhD
+> Samsung R&D Institute Poland
+>
