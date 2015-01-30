@@ -1,41 +1,81 @@
-From: Jean Delvare <jdelvare@suse.de>
-Subject: Re: [PATCH] mmc: Add hardware dependencies for sdhci-pxav3 and
- sdhci-pxav2
-Date: Fri, 30 Jan 2015 13:00:39 +0100
-Message-ID: <20150130130039.3bd47f84@endymion.delvare>
-References: <20150126112328.318da5e7@endymion.delvare>
-	<CAPDyKFo363x7NGEctNwHkpn-6HkAu15qu-ZFtt73mJcWZrce4g@mail.gmail.com>
-	<1422369244.4499.187.camel@chaos.site>
-	<CAPDyKFqWa0uyZStNT1Wp21HpSqYpfJx3wU3TDJy25uMgG7qZaw@mail.gmail.com>
-	<20150129151711.454100be@endymion.delvare>
-	<CAPDyKFohbn3yG9iuj7WbV0mDY4H4jZe3SgihGSdOqPLKkTMdZQ@mail.gmail.com>
-	<20150130092913.6256e517@endymion.delvare>
-	<CAPDyKFq+Abjfyynnw+cQrEVUYKx1xwWtY9fr1mbKAMD502qjpw@mail.gmail.com>
+From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+Subject: Re: [PATCH v3 4/6] mmc: pwrseq_simple: Add optional reference clock
+ support
+Date: Fri, 30 Jan 2015 14:03:33 +0100
+Message-ID: <54CB8125.7030107@collabora.co.uk>
+References: <1422543608-24704-1-git-send-email-javier.martinez@collabora.co.uk>	<1422543608-24704-5-git-send-email-javier.martinez@collabora.co.uk> <CAPDyKFp5tGogzjU27jTDcHviUUwnTSgq4EP484_OprV_nPBsOg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:56727 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752164AbbA3MAn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 30 Jan 2015 07:00:43 -0500
-In-Reply-To: <CAPDyKFq+Abjfyynnw+cQrEVUYKx1xwWtY9fr1mbKAMD502qjpw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFp5tGogzjU27jTDcHviUUwnTSgq4EP484_OprV_nPBsOg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>
+Cc: Kukjin Kim <kgene@kernel.org>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Arend van Spriel <arend@broadcom.com>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 30 Jan 2015 11:43:17 +0100, Ulf Hansson wrote:
-> I did a little more of investigation of what's good practice/policy
-> around your suggested patch. I have changed my mind, I am going to
-> accept your patch as is.
+Hello Ulf,
+
+On 01/30/2015 12:17 PM, Ulf Hansson wrote:
+>>  };
+>> @@ -39,6 +42,11 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+>>         struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+>>                                         struct mmc_pwrseq_simple, pwrseq);
+>>
+>> +       if (!IS_ERR(pwrseq->ext_clk)) {
 > 
-> Sorry for all the noise and thanks for a good discussion.
+> This should be:
 > 
-> Applied for next. Thanks!
+> if (!IS_ERR(pwrseq->ext_clk) && !pwrseq->clk_enabled) {
+> 
+>
 
-Great, thank you very much!
+Oh, I thought that it was not possible to enter mmc_pwrseq_pre_power_on()
+twice without a prior call to mmc_pwrseq_power_off() but I guess I didn't
+read the MMC core code carefully...
+ 
+>> +               clk_prepare_enable(pwrseq->ext_clk);
+>> +               pwrseq->clk_enabled = true;
+>> +       }
+>> +
+>>         mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
+>>  }
+>>
+>> @@ -50,6 +58,19 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
+>>         mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
+>>  }
+>>
+>> +static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
+>> +{
+>> +       struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+>> +                                       struct mmc_pwrseq_simple, pwrseq);
+>> +
+>> +       mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
+>> +
+>> +       if (pwrseq->clk_enabled) {
+> 
+> I changed this as well, but that was just to make code clearer.
+> 
+> if (!IS_ERR(pwrseq->ext_clk) && pwrseq->clk_enabled) {
+> 
+>
 
--- 
-Jean Delvare
-SUSE L3 Support
+Yeah, if IS_ERR(pwrseq->ext_clk) then clk_enabled will always be false but I
+agree that the change makes the code to be more consistent.
+
+>>
+> 
+> As I stated in the response to he coverletter for the patchset, this
+> patch is applied for next with above changes.
+> 
+> Thanks!
+>
+
+Thanks a lot for your help and for fixing these things!
+
+> Kind regards
+> Uffe
+>
+
+Best regards,
+Javier
