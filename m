@@ -1,65 +1,98 @@
 From: NeilBrown <neilb@suse.de>
-Subject: [PATCH-v2 0/4] mmc: switch to 1-bit mode which stopping clocks.
+Subject: [PATCH 1/4] mmc: core: fold mmc_set_bus_width calls into
+ sdio_enable_4bit_bus.
 Date: Sat, 31 Jan 2015 06:05:37 +1100
-Message-ID: <20150130185742.20910.52715.stgit@notabene.brown>
+Message-ID: <20150130190537.20910.4518.stgit@notabene.brown>
+References: <20150130185742.20910.52715.stgit@notabene.brown>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:38676 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752906AbbA3Wbp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 30 Jan 2015 17:31:45 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20150130185742.20910.52715.stgit@notabene.brown>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: GTA04 owners <gta04-owner@goldelico.com>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Andreas Fenkart <afenkart@gmail.com>
+Cc: Andreas Fenkart <afenkart@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, GTA04 owners <gta04-owner@goldelico.com>, NeilBrown <neil@brown.name>, linux-omap@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-This is a new version which moves most of the code into
-mmc/core so it is available to all drivers.
+Every call to sdio_enable_4bit_bus is followed (on success) but a call
+to mmc_set_bus_width().
 
-I was wrong about not being able to sleep in pm_runtime callbacks.
-There are spinlocks, but not the ones I thought they were...
+To simplify the code, include those calls directly in
+sdio_enable_4bit_bus().
 
-Anyway, I tried switching to 1-bit mode from within the
-runtime_suspend callback and hit a different problem.
-The sequence to switch to 1-bit involves calling set_ios
-which, for omap_hsmmc at least, calls pm_runtime_get_sync().
-
-Calling pm_runtime_get_sync from the runtime_suspend callback
-deadlocks.
-
-It would be possible to remove the pm_runtime_get_sync call
-from set_ios() functions, and instead call host->enable(),
-host->disable() around those mmc_set_ios() calls which don't
-have the host claimed.  However that seems a bit fragile to me.
-
-So for now I'm persisting with doing the width change from
-a work-queue.  This set of patches does that.
-
-If you think calling host->enable/disable around mmc_set_ios() calls
-does make sense, I can post my other patch for review.
-
-Thanks,
-NeilBrown
-
-
+Signed-off-by: NeilBrown <neil@brown.name>
 ---
+ drivers/mmc/core/sdio.c |   32 ++++++++++++--------------------
+ 1 file changed, 12 insertions(+), 20 deletions(-)
 
-NeilBrown (4):
-      mmc: core: fold mmc_set_bus_width calls into sdio_enable_4bit_bus.
-      mmc: core: allow non-blocking form of mmc_claim_host
-      mmc: sdio: support switching to 1-bit before turning off clocks
-      mmc: omap_hsmmc: switch to 1-bit before stopping clocks.
-
-
- drivers/mmc/core/core.c       |   21 +++++++++---
- drivers/mmc/core/sdio.c       |   74 +++++++++++++++++++++++++++++------------
- drivers/mmc/host/omap_hsmmc.c |   13 ++++++-
- include/linux/mmc/core.h      |    2 +
- include/linux/mmc/host.h      |    2 +
- 5 files changed, 83 insertions(+), 29 deletions(-)
-
---
-Signature
-
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index ce6cc47206b0..5bc6c7dbbd60 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -293,19 +293,22 @@ static int sdio_enable_4bit_bus(struct mmc_card *card)
+ 	int err;
+ 
+ 	if (card->type == MMC_TYPE_SDIO)
+-		return sdio_enable_wide(card);
+-
+-	if ((card->host->caps & MMC_CAP_4_BIT_DATA) &&
+-		(card->scr.bus_widths & SD_SCR_BUS_WIDTH_4)) {
++		err = sdio_enable_wide(card);
++	else if ((card->host->caps & MMC_CAP_4_BIT_DATA) &&
++		 (card->scr.bus_widths & SD_SCR_BUS_WIDTH_4)) {
+ 		err = mmc_app_set_bus_width(card, MMC_BUS_WIDTH_4);
+ 		if (err)
+ 			return err;
++		err = sdio_enable_wide(card);
++		if (err <= 0)
++			mmc_app_set_bus_width(card, MMC_BUS_WIDTH_1);
+ 	} else
+ 		return 0;
+ 
+-	err = sdio_enable_wide(card);
+-	if (err <= 0)
+-		mmc_app_set_bus_width(card, MMC_BUS_WIDTH_1);
++	if (err > 0) {
++		mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
++		err = 0;
++	}
+ 
+ 	return err;
+ }
+@@ -547,13 +550,8 @@ static int mmc_sdio_init_uhs_card(struct mmc_card *card)
+ 	/*
+ 	 * Switch to wider bus (if supported).
+ 	 */
+-	if (card->host->caps & MMC_CAP_4_BIT_DATA) {
++	if (card->host->caps & MMC_CAP_4_BIT_DATA)
+ 		err = sdio_enable_4bit_bus(card);
+-		if (err > 0) {
+-			mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
+-			err = 0;
+-		}
+-	}
+ 
+ 	/* Set the driver strength for the card */
+ 	sdio_select_driver_type(card);
+@@ -803,9 +801,7 @@ try_again:
+ 		 * Switch to wider bus (if supported).
+ 		 */
+ 		err = sdio_enable_4bit_bus(card);
+-		if (err > 0)
+-			mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
+-		else if (err)
++		if (err)
+ 			goto remove;
+ 	}
+ finish:
+@@ -983,10 +979,6 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 	} else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
+ 		/* We may have switched to 1-bit mode during suspend */
+ 		err = sdio_enable_4bit_bus(host->card);
+-		if (err > 0) {
+-			mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
+-			err = 0;
+-		}
+ 	}
+ 
+ 	if (!err && host->sdio_irqs) {
