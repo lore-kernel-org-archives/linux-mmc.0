@@ -1,62 +1,49 @@
-From: NeilBrown <neilb@suse.de>
-Subject: [PATCH 4/4] mmc: omap_hsmmc: switch to 1-bit before stopping clocks.
-Date: Sat, 31 Jan 2015 06:05:38 +1100
-Message-ID: <20150130190537.20910.16604.stgit@notabene.brown>
-References: <20150130185742.20910.52715.stgit@notabene.brown>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 1/2] mmc: core: use card pointer as the first parameter of execute_tuning()
+Date: Fri, 30 Jan 2015 17:08:36 -0800
+Message-ID: <CAD=FV=UUGzQm7rdzsTHaKSA=ywONz5VzVubEsT4bz7TPm0smfA@mail.gmail.com>
+References: <1422271175-19445-1-git-send-email-addy.ke@rock-chips.com>
+	<1422271175-19445-2-git-send-email-addy.ke@rock-chips.com>
+	<CAPDyKFp=5epMggHu0+u_LU7ETujcoeP2xOpB7iD6JF2bs8BnEA@mail.gmail.com>
+	<CAD=FV=X9x0gW5TyLi4ERm8nxixQB__Y=5bRAtOax-_w+T33rCg@mail.gmail.com>
+	<CAPDyKFqjG=yxDcwnk4jbXMZ05hMkWR2x37uVpRNd_11-eB4G7w@mail.gmail.com>
+	<CAD=FV=VQg+sQUpgbKw7Zz=-f+jPM=6O-+3gUpohWhj8JeSPu6Q@mail.gmail.com>
+	<CAPDyKFqjY-Sn2mNqjy1FH3RPFuJSfhTX_esQDao1Yb4qumHYcg@mail.gmail.com>
+	<CAD=FV=XCBebTzWpNPn9GaTRU3O1BMurhoTDWcXHYXBChBRnOjQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150130185742.20910.52715.stgit@notabene.brown>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Andreas Fenkart <afenkart@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, GTA04 owners <gta04-owner@goldelico.com>, NeilBrown <neil@brown.name>, linux-omap@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ie0-f181.google.com ([209.85.223.181]:42571 "EHLO
+	mail-ie0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757391AbbAaBIo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Jan 2015 20:08:44 -0500
+Received: by mail-ie0-f181.google.com with SMTP id rp18so7161113iec.12
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Jan 2015 17:08:43 -0800 (PST)
+In-Reply-To: <CAD=FV=XCBebTzWpNPn9GaTRU3O1BMurhoTDWcXHYXBChBRnOjQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Addy Ke <addy.ke@rock-chips.com>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
 
-Make use of the new mmc_sdio_want_no_clocks() call to avoid stopping
-clocks while SD Card interrupts are enabled and we aren't in
-1-bit mode.
+Hi,
 
-Also stop clocks immediately in omap_hsmmc_disable_fclk() if
-1-bit mode has been entered for this purpose.
+On Thu, Jan 29, 2015 at 4:13 PM, Doug Anderson <dianders@chromium.org> wrote:
+> I still don't exactly have a warm fuzzy about using the send_status()
+> command like this, but it seems to work (actually, I should verify
+> that myself--I've been taking Addy's word that his solution works).
 
-With this, I can use my libertas wifi with a 4-bit bus, with
-interrupts and runtime power-management enabled, and get around
-14Mb/sec throughput (which is the best I've seen).
+So I finally started up a stress test.  I picked Addy's patch and
+reverted my big fat delay.  Result was that Addy's patch doesn't seem
+to hurt but once I revert my big fat delay then I seem to start
+getting failures.  :(  I think it's actually on a different SD card
+than the one that was originally causing failures, FWIW.
 
-Signed-off-by: NeilBrown <neil@brown.name>
----
- drivers/mmc/host/omap_hsmmc.c |   13 ++++++++++---
- 1 file changed, 10 insertions(+), 3 deletions(-)
+As usual with these kinds of tests, I'd like to test this a whole lot
+more since it only reproduces sometimes, but unfortunately I'm going
+to be unavailable for a few weeks starting from today, so I'm not sure
+I'm not sure I can do more debugging / testing than what I've already
+done...
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index f84cfb01716d..14fce3b92633 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1791,9 +1791,12 @@ static int omap_hsmmc_disable_fclk(struct mmc_host *mmc)
- {
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
- 
--	pm_runtime_mark_last_busy(host->dev);
--	pm_runtime_put_autosuspend(host->dev);
--
-+	if (atomic_read(&mmc->sdio_narrowed) == 2)
-+		pm_runtime_put_sync(host->dev);
-+	else {
-+		pm_runtime_mark_last_busy(host->dev);
-+		pm_runtime_put_autosuspend(host->dev);
-+	}
- 	return 0;
- }
- 
-@@ -2311,6 +2314,10 @@ static int omap_hsmmc_runtime_suspend(struct device *dev)
- 	spin_lock_irqsave(&host->irq_lock, flags);
- 	if ((host->mmc->caps & MMC_CAP_SDIO_IRQ) &&
- 	    (host->flags & HSMMC_SDIO_IRQ_ENABLED)) {
-+		if (mmc_sdio_want_no_clocks(host->mmc) == 0) {
-+			ret = -EBUSY;
-+			goto abort;
-+		}
- 		/* disable sdio irq handling to prevent race */
- 		OMAP_HSMMC_WRITE(host->base, ISE, 0);
- 		OMAP_HSMMC_WRITE(host->base, IE, 0);
+...but unless using send_status allows us to remove the delay (or
+unless there's some other justification for it) then it seems like we
+should just drop this series...
