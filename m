@@ -1,38 +1,50 @@
 From: Sheetal Tigadoli <sheetal.tigadoli@gmail.com>
-Subject: [PATCH 0/5] drivers; mmc: card:
-Date: Mon,  2 Feb 2015 01:36:57 +0530
-Message-ID: <1422821222-24079-1-git-send-email-sheetal.tigadoli@gmail.com>
+Subject: [PATCH 1/5] drivers: mmc: card: Fix replaces simple_strtoul func call with kstrtoul
+Date: Mon,  2 Feb 2015 01:36:58 +0530
+Message-ID: <1422821222-24079-2-git-send-email-sheetal.tigadoli@gmail.com>
+References: <1422821222-24079-1-git-send-email-sheetal.tigadoli@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f169.google.com ([74.125.82.169]:33852 "EHLO
-	mail-we0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753683AbbBAUI3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 1 Feb 2015 15:08:29 -0500
+Received: from mail-wi0-f176.google.com ([209.85.212.176]:65371 "EHLO
+	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753892AbbBAUJd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 1 Feb 2015 15:09:33 -0500
+In-Reply-To: <1422821222-24079-1-git-send-email-sheetal.tigadoli@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: chris@printf.net
-Cc: joe@perches.com, linux-mmc@vger.kernel.org, ben@decadent.org.uk, kuninori.morimoto.gx@renesas.com, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org
+Cc: joe@perches.com, linux-mmc@vger.kernel.org, ben@decadent.org.uk, kuninori.morimoto.gx@renesas.com, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, Sheetal Tigadoli <sheetal.tigadoli@gmail.com>
 
-The patches, fix some coding style err/warnings from file block.c
+This patch fixes following coding style warning in file block.c
 
-./scripts/checkpatch.pl  --file --terse drivers/mmc/card/block.c
-drivers/mmc/card/block.c:45: WARNING: Use #include <linux/uaccess.h> instead of <asm/uaccess.h>
-drivers/mmc/card/block.c:102: WARNING: line over 80 characters
-drivers/mmc/card/block.c:186: WARNING: Missing a blank line after declarations
-drivers/mmc/card/block.c:238: WARNING: line over 80 characters
-drivers/mmc/card/block.c:251: WARNING: line over 80 characters
-drivers/mmc/card/block.c:279: WARNING: simple_strtoul is obsolete, use kstrtoul instead
-drivers/mmc/card/block.c:280: WARNING: Missing a blank line after declarations
-drivers/mmc/card/block.c:578: WARNING: line over 80 characters
-drivers/mmc/card/block.c:586: WARNING: line over 80 characters
-drivers/mmc/card/block.c:620: WARNING: Missing a blank line after declarations
-drivers/mmc/card/block.c:1209: WARNING: line over 80 characters
-drivers/mmc/card/block.c:1333: WARNING: quoted string split across lines
-drivers/mmc/card/block.c:1720: WARNING: Missing a blank line after declarations
-drivers/mmc/card/block.c:1734: WARNING: braces {} are not necessary for single statement blocks
-drivers/mmc/card/block.c:1881: WARNING: else is not generally useful after a break or return
-drivers/mmc/card/block.c:2019: WARNING: braces {} are not necessary for single statement blocks
-drivers/mmc/card/block.c:2226: WARNING: line over 80 characters
-drivers/mmc/card/block.c:2285: WARNING: line over 80 characters
-drivers/mmc/card/block.c:2362: ERROR: that open brace { should be on the previous line
-    total: 1 errors, 18 warnings, 2587 lines checked
+        drivers/mmc/card/block.c:279: WARNING: simple_strtoul is obsolete, use kstrtoul instead
+
+Signed-off-by: Sheetal Tigadoli <sheetal.tigadoli@gmail.com>
+---
+ drivers/mmc/card/block.c |    9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index c69afb5..80f7b4b 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -274,13 +274,12 @@ static ssize_t force_ro_store(struct device *dev, struct device_attribute *attr,
+ 			      const char *buf, size_t count)
+ {
+ 	int ret;
+-	char *end;
+ 	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
+-	unsigned long set = simple_strtoul(buf, &end, 0);
+-	if (end == buf) {
+-		ret = -EINVAL;
++	unsigned long set;
++
++	ret = kstrtoul(buf, 0, &set);
++	if ((ret == -EINVAL) || (ret == -ERANGE))
+ 		goto out;
+-	}
+ 
+ 	set_disk_ro(dev_to_disk(dev), set || md->read_only);
+ 	ret = count;
+-- 
+1.7.9.5
 
