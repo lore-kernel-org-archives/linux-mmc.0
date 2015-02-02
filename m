@@ -1,55 +1,44 @@
-From: Javier Martinez Canillas <javier@dowhile0.org>
-Subject: Re: [PATCH] mmc: core: Invoke mmc_pwrseq_post_power_on() prior
- MMC_POWER_ON state
-Date: Mon, 2 Feb 2015 20:00:41 +0100
-Message-ID: <CABxcv==yr9ssqZisOUL1MYNSjPQG=fLw+JwXtKgPLap9BmZudg@mail.gmail.com>
-References: <1422892854-3655-1-git-send-email-ulf.hansson@linaro.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v3] mmc: moxart: fix probe logic
+Date: Mon, 02 Feb 2015 21:03:02 +0100
+Message-ID: <6294882.EhDcdWGRYz@wuerfel>
+References: <4754899.RDUhFfxBSW@wuerfel> <1422891786-23071-1-git-send-email-jonas.jensen@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-we0-f172.google.com ([74.125.82.172]:35359 "EHLO
-	mail-we0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932891AbbBBTAo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Feb 2015 14:00:44 -0500
-Received: by mail-we0-f172.google.com with SMTP id q59so40796597wes.3
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Feb 2015 11:00:42 -0800 (PST)
-In-Reply-To: <1422892854-3655-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mout.kundenserver.de ([212.227.126.131]:54478 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754128AbbBBUDS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Feb 2015 15:03:18 -0500
+In-Reply-To: <1422891786-23071-1-git-send-email-jonas.jensen@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Olof Johansson <olof@lixom.net>, Russell King <linux@arm.linux.org.uk>, Hans de Goede <hdegoede@redhat.com>, Doug Anderson <dianders@chromium.org>, NeilBrown <neilb@suse.de>, Tomeu Vizoso <tomeu.vizoso@collabora.com>
+To: Jonas Jensen <jonas.jensen@gmail.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ulf.hansson@linaro.org, linux@arm.linux.org.uk
 
-Hello Ulf,
+On Monday 02 February 2015 16:43:06 Jonas Jensen wrote:
+> 
+> Notes:
+>     This is a forward (with a single line fix) of Arnd's v2 patch.
+>     
+>     v2:  do not call clk_put() on an error pointer
+>     v3:  fix NULL dereference on host->clk
+>     
+>     Applies to next-20150113
 
-On Mon, Feb 2, 2015 at 5:00 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> Host drivers have different ways to sends their "init stream" to the
-> card. Some need to do it as part of a request, some do it from the
-> ->set_ios() callback in the MMC_POWER_ON state and some don't send an
-> "init stream" at all.
->
-> To be able to use the reset GPIOs from the simple MMC power sequence
-> provider, the card need to be powered and the "init stream" must not
-> have been sent.
->
-> To cope with these requirements, invoke mmc_pwrseq_post_power_on()
-> prior we change the state to MMC_POWER_ON in mmc_power_up().
->
-> Host drivers shall perform power up operations in the MMC_POWER_UP
-> state. Unfortunate three hosts (au1xmmc, cb710-mmc and toshsd) don't
-> conform to this expectation. Instead those ignore the MMC_POWER_UP
-> state and delays their power up operations to the MMC_POWER_ON state.
->
-> Those hosts needs to change their behavior to enable proper support for
-> the simple MMC power sequence provider.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Thanks for forwarding the fixed version. I just realized that you
+probably haven't forwarded a lot of patches from other people, so you
+missed two things:
 
-The patch looks good to me and I tested that the WLAN chip attached to
-the SDIO interface in my Exynos5250 Snow Chromebook is reset / powered
-up correctly so:
+- to preserve patch ownership, the first line (before the rest of the
+description) should be 'From: Arnd Bergmann <arnd@arndb.de>'
 
-Reviewed-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Tested-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+- It is common to include the entire signoff chain, which in this case
+is my Signed-off-by on one line, followed by yours on the next line
+at the end of the description.
 
-Best regards,
-Javier
+Ulf can probably fix this up when he applies the patch, or you can
+send it again to be sure.
+
+	Arnd
