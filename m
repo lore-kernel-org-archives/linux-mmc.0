@@ -1,174 +1,71 @@
-From: Jonas Jensen <jonas.jensen@gmail.com>
-Subject: [PATCH v3] mmc: moxart: fix probe logic
-Date: Mon,  2 Feb 2015 16:43:06 +0100
-Message-ID: <1422891786-23071-1-git-send-email-jonas.jensen@gmail.com>
-References: <4754899.RDUhFfxBSW@wuerfel>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] mmc: core: Invoke mmc_pwrseq_post_power_on() prior MMC_POWER_ON state
+Date: Mon,  2 Feb 2015 17:00:54 +0100
+Message-ID: <1422892854-3655-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f44.google.com ([209.85.215.44]:35913 "EHLO
-	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754086AbbBBPoA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Feb 2015 10:44:00 -0500
-Received: by mail-la0-f44.google.com with SMTP id s18so42249160lam.3
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Feb 2015 07:43:58 -0800 (PST)
-In-Reply-To: <4754899.RDUhFfxBSW@wuerfel>
+Received: from mail-la0-f50.google.com ([209.85.215.50]:51111 "EHLO
+	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932456AbbBBQBF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Feb 2015 11:01:05 -0500
+Received: by mail-la0-f50.google.com with SMTP id hs14so42198695lab.9
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Feb 2015 08:01:03 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, arnd@arndb.de, ulf.hansson@linaro.org, linux@arm.linux.org.uk, Jonas Jensen <jonas.jensen@gmail.com>
+To: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>
+Cc: linux-arm-kernel@lists.infradead.org, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Olof Johansson <olof@lixom.net>, Russell King <linux@arm.linux.org.uk>, Hans de Goede <hdegoede@redhat.com>, Doug Anderson <dianders@chromium.org>, NeilBrown <neilb@suse.de>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, Javier Martinez Canillas <javier@dowhile0.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Jonas Jensen wanted to submit a patch for these, but apparently
-forgot about it. I stumbled over this symptom first:
+Host drivers have different ways to sends their "init stream" to the
+card. Some need to do it as part of a request, some do it from the
+->set_ios() callback in the MMC_POWER_ON state and some don't send an
+"init stream" at all.
 
-drivers/built-in.o: In function `moxart_probe':
-:(.text+0x2af128): undefined reference to `of_dma_request_slave_channel'
+To be able to use the reset GPIOs from the simple MMC power sequence
+provider, the card need to be powered and the "init stream" must not
+have been sent.
 
-This is because of_dma_request_slave_channel is an internal helper
-and not exported to loadable module. I'm changing the driver to
-use dma_request_slave_channel_reason() instead.
+To cope with these requirements, invoke mmc_pwrseq_post_power_on()
+prior we change the state to MMC_POWER_ON in mmc_power_up().
 
-Further problems from inspection:
+Host drivers shall perform power up operations in the MMC_POWER_UP
+state. Unfortunate three hosts (au1xmmc, cb710-mmc and toshsd) don't
+conform to this expectation. Instead those ignore the MMC_POWER_UP
+state and delays their power up operations to the MMC_POWER_ON state.
 
-* The remove function must not call kfree on the host pointer,
-  because it is allocated together with the mmc_host.
+Those hosts needs to change their behavior to enable proper support for
+the simple MMC power sequence provider.
 
-* The clock is never released
-
-* The dma_cap_mask_t is completely unused and can be removed
-
-* deferred probing does not work if the dma driver is loaded
-  after the mmc driver.
-
-This patch should fix all of the above.
-
-Signed-off-by: Jonas Jensen <jonas.jensen@gmail.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
 
-Notes:
-    This is a forward (with a single line fix) of Arnd's v2 patch.
-    
-    v2:  do not call clk_put() on an error pointer
-    v3:  fix NULL dereference on host->clk
-    
-    Applies to next-20150113
+Some background to this patch:
+http://marc.info/?t=142165904000001&r=1&w=2
 
- drivers/mmc/host/moxart-mmc.c | 34 +++++++++++++++++++---------------
- 1 file changed, 19 insertions(+), 15 deletions(-)
+---
+ drivers/mmc/core/core.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
-index d2a1ef6..6ab57d1e 100644
---- a/drivers/mmc/host/moxart-mmc.c
-+++ b/drivers/mmc/host/moxart-mmc.c
-@@ -17,6 +17,7 @@
- #include <linux/init.h>
- #include <linux/platform_device.h>
- #include <linux/delay.h>
-+#include <linux/errno.h>
- #include <linux/interrupt.h>
- #include <linux/blkdev.h>
- #include <linux/dma-mapping.h>
-@@ -131,6 +132,7 @@ struct moxart_host {
- 	struct mmc_host			*mmc;
- 	struct mmc_request		*mrq;
- 	struct scatterlist		*cur_sg;
-+	struct clk			*clk;
- 	struct completion		dma_complete;
- 	struct completion		pio_complete;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 0dc64e6..23f10f7 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1637,6 +1637,8 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
+ 	 */
+ 	mmc_delay(10);
  
-@@ -560,9 +562,7 @@ static int moxart_probe(struct platform_device *pdev)
- 	struct mmc_host *mmc;
- 	struct moxart_host *host = NULL;
- 	struct dma_slave_config cfg;
--	struct clk *clk;
- 	void __iomem *reg_mmc;
--	dma_cap_mask_t mask;
- 	int irq, ret;
- 	u32 i;
- 
-@@ -573,6 +573,8 @@ static int moxart_probe(struct platform_device *pdev)
- 		goto out;
- 	}
- 
-+	host = mmc_priv(mmc);
++	mmc_pwrseq_post_power_on(host);
 +
- 	ret = of_address_to_resource(node, 0, &res_mmc);
- 	if (ret) {
- 		dev_err(dev, "of_address_to_resource failed\n");
-@@ -586,10 +588,11 @@ static int moxart_probe(struct platform_device *pdev)
- 		goto out;
- 	}
+ 	host->ios.clock = host->f_init;
  
--	clk = of_clk_get(node, 0);
--	if (IS_ERR(clk)) {
-+	host->clk = of_clk_get(node, 0);
-+	if (IS_ERR(host->clk)) {
- 		dev_err(dev, "of_clk_get failed\n");
--		ret = PTR_ERR(clk);
-+		ret = PTR_ERR(host->clk);
-+		host->clk = NULL;
- 		goto out;
- 	}
+ 	host->ios.power_mode = MMC_POWER_ON;
+@@ -1648,8 +1650,6 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
+ 	 */
+ 	mmc_delay(10);
  
-@@ -603,18 +606,14 @@ static int moxart_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto out;
- 
--	dma_cap_zero(mask);
--	dma_cap_set(DMA_SLAVE, mask);
+-	mmc_pwrseq_post_power_on(host);
 -
--	host = mmc_priv(mmc);
- 	host->mmc = mmc;
- 	host->base = reg_mmc;
- 	host->reg_phys = res_mmc.start;
- 	host->timeout = msecs_to_jiffies(1000);
--	host->sysclk = clk_get_rate(clk);
-+	host->sysclk = clk_get_rate(host->clk);
- 	host->fifo_width = readl(host->base + REG_FEATURE) << 2;
--	host->dma_chan_tx = of_dma_request_slave_channel(node, "tx");
--	host->dma_chan_rx = of_dma_request_slave_channel(node, "rx");
-+	host->dma_chan_tx = dma_request_slave_channel_reason(dev, "tx");
-+	host->dma_chan_rx = dma_request_slave_channel_reason(dev, "rx");
- 
- 	spin_lock_init(&host->lock);
- 
-@@ -624,6 +623,11 @@ static int moxart_probe(struct platform_device *pdev)
- 	mmc->ocr_avail = 0xffff00;	/* Support 2.0v - 3.6v power. */
- 
- 	if (IS_ERR(host->dma_chan_tx) || IS_ERR(host->dma_chan_rx)) {
-+		if (PTR_ERR(host->dma_chan_tx) == -EPROBE_DEFER ||
-+		    PTR_ERR(host->dma_chan_rx) == -EPROBE_DEFER) {
-+			ret = -EPROBE_DEFER;
-+			goto out;
-+		}
- 		dev_dbg(dev, "PIO mode transfer enabled\n");
- 		host->have_dma = false;
- 	} else {
-@@ -677,6 +681,8 @@ static int moxart_probe(struct platform_device *pdev)
- 	return 0;
- 
- out:
-+	if (host->clk)
-+		clk_put(host->clk);
- 	if (mmc)
- 		mmc_free_host(mmc);
- 	return ret;
-@@ -694,6 +700,7 @@ static int moxart_remove(struct platform_device *pdev)
- 			dma_release_channel(host->dma_chan_tx);
- 		if (!IS_ERR(host->dma_chan_rx))
- 			dma_release_channel(host->dma_chan_rx);
-+		clk_put(host->clk);
- 		mmc_remove_host(mmc);
- 		mmc_free_host(mmc);
- 
-@@ -702,9 +709,6 @@ static int moxart_remove(struct platform_device *pdev)
- 		writel(readl(host->base + REG_CLOCK_CONTROL) | CLK_OFF,
- 		       host->base + REG_CLOCK_CONTROL);
- 	}
--
--	kfree(host);
--
- 	return 0;
+ 	mmc_host_clk_release(host);
  }
  
 -- 
-1.8.2.1
+1.9.1
 
