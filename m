@@ -1,78 +1,44 @@
-From: "Simon Raffeiner (SCC)" <simon.raffeiner@kit.edu>
+From: =?UTF-8?B?U8OpYmFzdGllbiBCb3VyZGVhdWR1Y3E=?= <sb@m-labs.hk>
 Subject: Re: "Timeout waiting for hardware interrupt" on Lenovo Thinkpad Tablet
  10
-Date: Mon, 2 Feb 2015 14:38:19 +0100
-Message-ID: <54CF7DCB.8070302@kit.edu>
+Date: Mon, 02 Feb 2015 22:06:55 +0800
+Message-ID: <54CF847F.3070800@m-labs.hk>
+References: <54CF7DCB.8070302@kit.edu>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from scc-mailout-kit-02.scc.kit.edu ([129.13.231.82]:39503 "EHLO
-	scc-mailout-kit-02.scc.kit.edu" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754325AbbBBN5H (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Feb 2015 08:57:07 -0500
+Received: from ssl.serverraum.org ([88.198.40.39]:49014 "EHLO
+	ssl.serverraum.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754632AbbBBOL6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Feb 2015 09:11:58 -0500
+In-Reply-To: <54CF7DCB.8070302@kit.edu>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: sb@m-labs.hk
+To: "Simon Raffeiner (SCC)" <simon.raffeiner@kit.edu>
 Cc: linux-mmc@vger.kernel.org
 
-Hello S=C3=A9bastien,
+On 02/02/2015 09:38 PM, Simon Raffeiner (SCC) wrote:
+> I am currently trying to install Ubuntu 15.04
 
-I own a Lenovo Thinkpad Tablet 8, which is quite similar to the Thinkpa=
-d
-Tablet 10, and we seem to run into the same issues with both devices.
+Another bug with the Ubuntu installer on this pesky computer is it
+attempts to access the rpmb partition, fails, and aborts the
+installation. For some reason, debug_quirks2=3D0xc0 also works around t=
+his
+problem.
 
-I am currently trying to install Ubuntu 15.04 using an USB stick, so my
-kernel version is 3.18.0-12-generic (which is based on the 3.18.3
-upstream stable kernel).
+> the tablet also crashes if the eMMC storage is not used as the
+> root filesystem, it also happens in the live environment booted off t=
+he
+> USB stick, e.g. when trying to do an mkfs on one of the eMMC partitio=
+ns.
 
-As you reported, the tablet reliably freezes after about 15 to 20
-minutes, regardless if "debug_quirks2=3D0xc0" is set or not. The last
-kernel message is "mmc0: Timeout waiting for hardware interrupt". But i=
-n
-my case, the tablet also crashes if the eMMC storage is not used as the
-root filesystem, it also happens in the live environment booted off the
-USB stick, e.g. when trying to do an mkfs on one of the eMMC partitions=
-=2E
+I also experienced freezes when booted from a Arch Linux USB stick
+(2015.01.01 with 3.17.6 kernel), and I gave up and went for Ubuntu wher=
+e
+strangely enough those crashes did not happen. I don't know if they are
+related to the eMMC as I was not able to get any kernel message (the
+machine simply stops responding completely).
 
-Thanks a lot for reporting this issue, I was already about to send the
-device back because I thought the eMMC was broken.
+S=C3=A9bastien
 
-regards,
-Simon
-
-
-
-
-S=C3=A9bastien Bourdeauducq wrote:
-
-> Hi,
->
-> Under Linux, the most annoying problem that the Lenovo Thinkpad Table=
-t
-> 10 has is the unreliable eMMC.
->
-> I intermittently get an error "mmc0: Timeout waiting for hardware
-> interrupt" followed by a crash of the machine (when the eMMC is used
-> as rootfs).
->
-> I have been able to work around this issue with kernel 3.13.0 by
-> passing the debug_quirks2=3D0xc0 option to the sdhci module, which
-> disables the HS200 and DDR50 transfer modes. The read data rate (as
-> measured by hdparm -t) drops from 119MB/s to 42MB/s, but at least the
-> computer no longer crashes every 20 minutes and my files are not
-> corrupted anymore.
->
-> Unfortunately, with more recent kernels such as 3.18.4, the sdhci
-> module (still with debug_quirks2=3D0xc0) appears to select another
-> problematic transfer mode. The read data rate jumps to 65MB/s and the
-> bug manifests itself again.
->
-> What changes in sdhci between 3.13.0 and 3.18.4 could cause that? I'd
-> like to be able to use the eMMC reliably at least at 42MB/s using
-> recent kernels, which hopefully will introduce fixes for the
-> gazillion other problems that this crippled machine has under Linux
-> (absolutely nothing works correctly except the CPU, display and USB).
->
-> Thanks,
-> S=C3=A9bastien
