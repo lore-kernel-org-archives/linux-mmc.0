@@ -1,110 +1,221 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V4 1/4] mmc: core: Initial support for MMC power sequences
-Date: Tue, 3 Feb 2015 13:39:13 +0100
-Message-ID: <CAPDyKFpv4joU54tnO6N7zWmVV_021KFjQsscfpHHLjdqCCe8Xw@mail.gmail.com>
-References: <1421658784-11980-1-git-send-email-ulf.hansson@linaro.org>
-	<1421658784-11980-2-git-send-email-ulf.hansson@linaro.org>
-	<CABxcv==xBNsh+NrVb8PcBVtxQOKDL79YMkwK=wOL0gJZriEUjw@mail.gmail.com>
-	<CAPDyKFoze-26fPm+C=D_o3tMSXWeTV4=2ZfOKaC3uLtxCrtjvg@mail.gmail.com>
-	<20150131092715.566fa33c@notabene.brown>
-	<CAPDyKFo6G+PpV7QpxBEOS_xUxXTQ14v=qVLGpBjT_z6T0vP85A@mail.gmail.com>
-	<20150202150537.GE8656@n2100.arm.linux.org.uk>
-	<CAPDyKFqjeg0d7r5XSK0d1EYfm2dvET3PQiHsDE_XchqFVYyC6g@mail.gmail.com>
-	<20150203091042.379c7948@notabene.brown>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f52.google.com ([209.85.192.52]:45541 "EHLO
-	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752017AbbBCMjN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Feb 2015 07:39:13 -0500
-Received: by mail-qg0-f52.google.com with SMTP id z107so52032887qgd.11
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Feb 2015 04:39:13 -0800 (PST)
-In-Reply-To: <20150203091042.379c7948@notabene.brown>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: [PATCH v4 1/3] mmc: pwrseq: add driver for emmc hardware reset
+Date: Tue, 03 Feb 2015 14:07:53 +0100
+Message-ID: <1422968873-15991-1-git-send-email-m.szyprowski@samsung.com>
+References: <CAPDyKFr0YxFXSvknUE=CPbDwge0uSN0JJMCM=aP+JrXAMnFHCA@mail.gmail.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <CAPDyKFr0YxFXSvknUE=CPbDwge0uSN0JJMCM=aP+JrXAMnFHCA@mail.gmail.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
+Cc: Marek Szyprowski <m.szyprowski@samsung.com>, Kukjin Kim <kgene@kernel.org>, Tobias Jakobi <liquid.acid@gmx.net>, Daniel Drake <drake@endlessm.com>, Sebastian Reichel <sre@kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Joonyoung Shim <jy0922.shim@samsung.com>, Javier Martinez Canillas <javier@dowhile0.org>
 List-Id: linux-mmc@vger.kernel.org
-To: NeilBrown <neilb@suse.de>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Javier Martinez Canillas <javier@dowhile0.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-arm-kernel@lists.infradead.org
-	<linux-arm-kernel@lists.infradead.org>," <mark.rutland@arm.com>
 
-On 2 February 2015 at 23:10, NeilBrown <neilb@suse.de> wrote:
-> On Mon, 2 Feb 2015 16:10:29 +0100 Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
->> On 2 February 2015 at 16:05, Russell King - ARM Linux
->> <linux@arm.linux.org.uk> wrote:
->> > On Mon, Feb 02, 2015 at 03:57:37PM +0100, Ulf Hansson wrote:
->> >> On 30 January 2015 at 23:27, NeilBrown <neilb@suse.de> wrote:
->> >> > Shortly before this call is
->> >> >
->> >> >         host->ios.power_mode = MMC_POWER_ON;
->> >> >         mmc_set_ios(host);
->> >> >
->> >> > and omap_hsmmc_set_ios() contains:
->> >> >
->> >> >                 switch (ios->power_mode) {
->> >> >                 ....
->> >> >                 case MMC_POWER_ON:
->> >> >                         do_send_init_stream = 1;
->> >> >                         break;
->> >> >
->> >> >
->> >> >         if (do_send_init_stream)
->> >> >                 send_init_stream(host);
->> >> >
->> >> > Which sends the "init stream" to the card.
->> >> > If the card is still being reset at this time, the stream may not
->> >> > be effective.
->> >> >
->> >> > I find that about 10%-20% of the time when I release the reset line
->> >> > *after* the sequence is sent, my card fails to initialised.  When I
->> >> > release *before* the sequence is sent, it never fails.
->> >>
->> >> Okay, thanks for providing these details.
->> >
->> > The right thing to do then is to pulse the reset line at the pre-power-up
->> > stage.
->>
->> I don't think that will work, since the card hasn't yet been powered
->> and will thus not respond properly to the reset.
->
-> My understanding, at least in the case of my hardware, is that the power-on
-> is sufficient to reset the device.
-> In my case, the one supply is shared between two devices (wifi and bluetooth)
-> so if the bluetooth is on, then the wifi cannot be power-cycled.  That is
-> when the reset is particularly needed.
->
-> I'll try to arrange some testing to confirm this is the case.  Of course,
-> this would not be general result, it would only be relevant for my hardware.
+This patch provides a simple mmc-pwrseq-emmc driver, which controls
+single gpio line. It perform standard eMMC hw reset procedure, as
+descibed by Jedec 4.4 specification. This procedure is performed just
+after MMC core enabled power to the given mmc host (to fix possible
+issues if bootloader has left eMMC card in initialized or unknown
+state), and before performing complete system reboot (also in case of
+emergency reboot call). The latter is needed on boards, which doesn't
+have hardware reset logic connected to emmc card and (limited or broken)
+ROM bootloaders are unable to read second stage from the emmc card if
+the card is left in unknown or already initialized state.
 
-I refreshed my memory for how the cw1200 WLAN device works on the
-ux500 SOC. I decided to post the complete information here, also for
-my own reference.
+Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+---
+Changelog:
+v4:
+- fixed minor issues reported by Ulf Hansson (comment adjustments,
+  removed .shutdown callback, reduced delay time)
 
-These resources need to be controlled during the power sequence of CW1200:
-There are two GPIOs (one reset and one for SPI/SDIO selection), one LP
-(low power) clock and a few power supplies.
+v3: http://www.spinics.net/lists/linux-samsung-soc/msg41956.html
+- removed optional support for reset-gpio, reported by Javier Martinez Canillas
 
-The sequence for power up that needs to be followed are:
-1. Keep reset GPIO asserted.
-2. Enable power supplies.
-3. Enable LP clock.
-4. Wait a few LP clock cycles to let power/clock stabilize.
-5. Make sure SPI/SDIO select pin is in SDIO mode. The value will be
-sampled by the WLAN device when reset GPIO is de-asserted.
-6. De-assert reset GPIO.
-7. Wait 30 ms for the WLAN device to power up.
+v2: http://www.spinics.net/lists/linux-mmc/msg30621.html
+---
+ .../devicetree/bindings/mmc/mmc-pwrseq-emmc.txt    |  25 +++++
+ drivers/mmc/core/Makefile                          |   2 +-
+ drivers/mmc/core/pwrseq.c                          |   3 +
+ drivers/mmc/core/pwrseq.h                          |   1 +
+ drivers/mmc/core/pwrseq_emmc.c                     | 101 +++++++++++++++++++++
+ 5 files changed, 131 insertions(+), 1 deletion(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt
+ create mode 100644 drivers/mmc/core/pwrseq_emmc.c
 
-The power supplies may also be shared with a bluetooth device. That
-also means the reset GPIO must be kept asserted in power off state, to
-prevent power up of the WLAN device.
-
->From the above, it's clear that toggling the reset GPIOs in the
-->pre_power_on() phase won't work for CW1200/UX500 case.  That in
-conjunction with the "init stream" issue tells me that we need to
-progress with the below patch:
-
-"mmc: core: Invoke mmc_pwrseq_post_power_on() prior MMC_POWER_ON state"
-http://www.spinics.net/lists/arm-kernel/msg396592.html
-
-Kind regards
-Uffe
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt
+new file mode 100644
+index 0000000..0cb827b
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt
+@@ -0,0 +1,25 @@
++* The simple eMMC hardware reset provider
++
++The purpose of this driver is to perform standard eMMC hw reset
++procedure, as descibed by Jedec 4.4 specification. This procedure is
++performed just after MMC core enabled power to the given mmc host (to
++fix possible issues if bootloader has left eMMC card in initialized or
++unknown state), and before performing complete system reboot (also in
++case of emergency reboot call). The latter is needed on boards, which
++doesn't have hardware reset logic connected to emmc card and (limited or
++broken) ROM bootloaders are unable to read second stage from the emmc
++card if the card is left in unknown or already initialized state.
++
++Required properties:
++- compatible : contains "mmc-pwrseq-emmc".
++- reset-gpios : contains a GPIO specifier. The reset GPIO is asserted
++	and then deasserted to perform eMMC card reset. To perform
++	reset procedure as described in Jedec 4.4 specification, the
++	gpio line should be defined as GPIO_ACTIVE_LOW.
++
++Example:
++
++	sdhci0_pwrseq {
++		compatible = "mmc-pwrseq-emmc";
++		reset-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
++	}
+diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+index b39cbd2..2c25138 100644
+--- a/drivers/mmc/core/Makefile
++++ b/drivers/mmc/core/Makefile
+@@ -8,5 +8,5 @@ mmc_core-y			:= core.o bus.o host.o \
+ 				   sdio.o sdio_ops.o sdio_bus.o \
+ 				   sdio_cis.o sdio_io.o sdio_irq.o \
+ 				   quirks.o slot-gpio.o
+-mmc_core-$(CONFIG_OF)		+= pwrseq.o pwrseq_simple.o
++mmc_core-$(CONFIG_OF)		+= pwrseq.o pwrseq_simple.o pwrseq_emmc.o
+ mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
+diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
+index 2cea00e..8623561 100644
+--- a/drivers/mmc/core/pwrseq.c
++++ b/drivers/mmc/core/pwrseq.c
+@@ -26,6 +26,9 @@ static struct mmc_pwrseq_match pwrseq_match[] = {
+ 	{
+ 		.compatible = "mmc-pwrseq-simple",
+ 		.alloc = mmc_pwrseq_simple_alloc,
++	}, {
++		.compatible = "mmc-pwrseq-emmc",
++		.alloc = mmc_pwrseq_emmc_alloc,
+ 	},
+ };
+ 
+diff --git a/drivers/mmc/core/pwrseq.h b/drivers/mmc/core/pwrseq.h
+index bd860d8..aba3409 100644
+--- a/drivers/mmc/core/pwrseq.h
++++ b/drivers/mmc/core/pwrseq.h
+@@ -28,6 +28,7 @@ void mmc_pwrseq_power_off(struct mmc_host *host);
+ void mmc_pwrseq_free(struct mmc_host *host);
+ 
+ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev);
++int mmc_pwrseq_emmc_alloc(struct mmc_host *host, struct device *dev);
+ 
+ #else
+ 
+diff --git a/drivers/mmc/core/pwrseq_emmc.c b/drivers/mmc/core/pwrseq_emmc.c
+new file mode 100644
+index 0000000..8a434d7
+--- /dev/null
++++ b/drivers/mmc/core/pwrseq_emmc.c
+@@ -0,0 +1,101 @@
++/*
++ * Copyright (C) 2015, Samsung Electronics Co., Ltd.
++ *
++ * Author: Marek Szyprowski <m.szyprowski@samsung.com>
++ *
++ * License terms: GNU General Public License (GPL) version 2
++ *
++ * Simple eMMC hardware reset provider
++ */
++#include <linux/delay.h>
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/device.h>
++#include <linux/err.h>
++#include <linux/gpio/consumer.h>
++#include <linux/reboot.h>
++
++#include <linux/mmc/host.h>
++
++#include "pwrseq.h"
++
++struct mmc_pwrseq_emmc {
++	struct mmc_pwrseq pwrseq;
++	struct notifier_block reset_nb;
++	struct gpio_desc *reset_gpio;
++};
++
++static void __mmc_pwrseq_emmc_reset(struct mmc_pwrseq_emmc *pwrseq)
++{
++	gpiod_set_value(pwrseq->reset_gpio, 1);
++	udelay(1);
++	gpiod_set_value(pwrseq->reset_gpio, 0);
++	udelay(200);
++}
++
++static void mmc_pwrseq_emmc_reset(struct mmc_host *host)
++{
++	struct mmc_pwrseq_emmc *pwrseq = container_of(host->pwrseq,
++					struct mmc_pwrseq_emmc, pwrseq);
++
++	__mmc_pwrseq_emmc_reset(pwrseq);
++}
++
++static void mmc_pwrseq_emmc_free(struct mmc_host *host)
++{
++	struct mmc_pwrseq_emmc *pwrseq = container_of(host->pwrseq,
++					struct mmc_pwrseq_emmc, pwrseq);
++
++	unregister_restart_handler(&pwrseq->reset_nb);
++	gpiod_put(pwrseq->reset_gpio);
++	kfree(pwrseq);
++	host->pwrseq = NULL;
++}
++
++static struct mmc_pwrseq_ops mmc_pwrseq_emmc_ops = {
++	.post_power_on = mmc_pwrseq_emmc_reset,
++	.free = mmc_pwrseq_emmc_free,
++};
++
++static int mmc_pwrseq_emmc_reset_nb(struct notifier_block *this,
++				    unsigned long mode, void *cmd)
++{
++	struct mmc_pwrseq_emmc *pwrseq;
++	pwrseq = container_of(this, struct mmc_pwrseq_emmc, reset_nb);
++
++	__mmc_pwrseq_emmc_reset(pwrseq);
++	return NOTIFY_DONE;
++}
++
++int mmc_pwrseq_emmc_alloc(struct mmc_host *host, struct device *dev)
++{
++	struct mmc_pwrseq_emmc *pwrseq;
++	int ret = 0;
++
++	pwrseq = kzalloc(sizeof(struct mmc_pwrseq_emmc), GFP_KERNEL);
++	if (!pwrseq)
++		return -ENOMEM;
++
++	pwrseq->reset_gpio = gpiod_get_index(dev, "reset", 0, GPIOD_OUT_LOW);
++	if (IS_ERR(pwrseq->reset_gpio)) {
++		ret = PTR_ERR(pwrseq->reset_gpio);
++		goto free;
++	}
++
++	/*
++	 * register reset handler to ensure emmc reset also from
++	 * emergency_reboot(), priority 129 schedules it just before
++	 * system reboot
++	 */
++	pwrseq->reset_nb.notifier_call = mmc_pwrseq_emmc_reset_nb;
++	pwrseq->reset_nb.priority = 129;
++	register_restart_handler(&pwrseq->reset_nb);
++
++	pwrseq->pwrseq.ops = &mmc_pwrseq_emmc_ops;
++	host->pwrseq = &pwrseq->pwrseq;
++
++	return 0;
++free:
++	kfree(pwrseq);
++	return ret;
++}
+-- 
+1.9.2
