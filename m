@@ -1,236 +1,103 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 1/3] mmc: pwrseq: add driver for emmc hardware reset
-Date: Wed, 4 Feb 2015 09:48:55 +0100
-Message-ID: <CAPDyKFrJOE8tf6Ch0AMj6SzSHDPs+6Ag7xb0Z-ZGYFY=upyVuw@mail.gmail.com>
-References: <CAPDyKFr0YxFXSvknUE=CPbDwge0uSN0JJMCM=aP+JrXAMnFHCA@mail.gmail.com>
-	<1422968873-15991-1-git-send-email-m.szyprowski@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1422968873-15991-1-git-send-email-m.szyprowski@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene@kernel.org>, Tobias Jakobi <liquid.acid@gmx.net>, Daniel Drake <drake@endlessm.com>, Sebastian Reichel <sre@kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Joonyoung Shim <jy0922.shim@samsung.com>, Javier Martinez Canillas <javier@dowhile0.org>
+From: Paul Osmialowski <p.osmialowsk@samsung.com>
+Subject: [PATCH RESEND] mmc: sdhci-s3c: solve problem with sleeping in atomic
+ context
+Date: Wed, 04 Feb 2015 10:16:59 +0100
+Message-ID: <1423041419-31522-1-git-send-email-p.osmialowsk@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.w1.samsung.com ([210.118.77.14]:62535 "EHLO
+	mailout4.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753786AbbBDJRP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Feb 2015 04:17:15 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ben Dooks <ben@simtec.co.uk>
+Cc: Paul Osmialowski <p.osmialowsk@samsung.com>
 
-On 3 February 2015 at 14:07, Marek Szyprowski <m.szyprowski@samsung.com> wrote:
-> This patch provides a simple mmc-pwrseq-emmc driver, which controls
-> single gpio line. It perform standard eMMC hw reset procedure, as
-> descibed by Jedec 4.4 specification. This procedure is performed just
-> after MMC core enabled power to the given mmc host (to fix possible
-> issues if bootloader has left eMMC card in initialized or unknown
-> state), and before performing complete system reboot (also in case of
-> emergency reboot call). The latter is needed on boards, which doesn't
-> have hardware reset logic connected to emmc card and (limited or broken)
-> ROM bootloaders are unable to read second stage from the emmc card if
-> the card is left in unknown or already initialized state.
->
-> Signed-off-by: Marek Szyprowski <m.szyprowski@samsung.com>
+This change addresses following problem:
 
-Thanks! Applied for next, with a minor fix for a checkpatch warning. See below.
+[    2.560726] ------------[ cut here ]------------
+[    2.565341] WARNING: CPU: 0 PID: 1 at kernel/locking/lockdep.c:2744 lockdep_trace_alloc+0xec/0x118()
+[    2.574439] DEBUG_LOCKS_WARN_ON(irqs_disabled_flags(flags))
+[    2.579821] Modules linked in:
+[    2.583038] CPU: 0 PID: 1 Comm: swapper/0 Tainted: G        W      3.18.0-next-20141216-00002-g4ff197fc1902-dirty #1318
+[    2.593796] Hardware name: SAMSUNG EXYNOS (Flattened Device Tree)
+[    2.599892] [<c0014c44>] (unwind_backtrace) from [<c0011bbc>] (show_stack+0x10/0x14)
+[    2.607612] [<c0011bbc>] (show_stack) from [<c04953b8>] (dump_stack+0x70/0xbc)
+[    2.614822] [<c04953b8>] (dump_stack) from [<c0023444>] (warn_slowpath_common+0x74/0xb0)
+[    2.622885] [<c0023444>] (warn_slowpath_common) from [<c0023514>] (warn_slowpath_fmt+0x30/0x40)
+[    2.631569] [<c0023514>] (warn_slowpath_fmt) from [<c0063644>] (lockdep_trace_alloc+0xec/0x118)
+[    2.640246] [<c0063644>] (lockdep_trace_alloc) from [<c00df52c>] (__kmalloc+0x3c/0x1cc)
+[    2.648240] [<c00df52c>] (__kmalloc) from [<c0394970>] (clk_fetch_parent_index+0xb8/0xd4)
+[    2.656390] [<c0394970>] (clk_fetch_parent_index) from [<c0394a6c>] (clk_calc_new_rates+0xe0/0x1fc)
+[    2.665415] [<c0394a6c>] (clk_calc_new_rates) from [<c0394b40>] (clk_calc_new_rates+0x1b4/0x1fc)
+[    2.674181] [<c0394b40>] (clk_calc_new_rates) from [<c0395408>] (clk_set_rate+0x50/0xc8)
+[    2.682265] [<c0395408>] (clk_set_rate) from [<c0377708>] (sdhci_cmu_set_clock+0x68/0x16c)
+[    2.690503] [<c0377708>] (sdhci_cmu_set_clock) from [<c03735cc>] (sdhci_do_set_ios+0xf0/0x64c)
+[    2.699095] [<c03735cc>] (sdhci_do_set_ios) from [<c0373b48>] (sdhci_set_ios+0x20/0x2c)
+[    2.707080] [<c0373b48>] (sdhci_set_ios) from [<c035ddf0>] (mmc_power_up+0x118/0x1fc)
+[    2.714889] [<c035ddf0>] (mmc_power_up) from [<c035ecd0>] (mmc_start_host+0x44/0x6c)
+[    2.722615] [<c035ecd0>] (mmc_start_host) from [<c035fd60>] (mmc_add_host+0x58/0x7c)
+[    2.730341] [<c035fd60>] (mmc_add_host) from [<c037454c>] (sdhci_add_host+0x968/0xd94)
+[    2.738240] [<c037454c>] (sdhci_add_host) from [<c0377b60>] (sdhci_s3c_probe+0x354/0x52c)
+[    2.746406] [<c0377b60>] (sdhci_s3c_probe) from [<c0283b58>] (platform_drv_probe+0x48/0xa4)
+[    2.754733] [<c0283b58>] (platform_drv_probe) from [<c02824e8>] (driver_probe_device+0x13c/0x37c)
+[    2.763585] [<c02824e8>] (driver_probe_device) from [<c02827bc>] (__driver_attach+0x94/0x98)
+[    2.772003] [<c02827bc>] (__driver_attach) from [<c0280a60>] (bus_for_each_dev+0x54/0x88)
+[    2.780163] [<c0280a60>] (bus_for_each_dev) from [<c0281b48>] (bus_add_driver+0xe4/0x200)
+[    2.788322] [<c0281b48>] (bus_add_driver) from [<c0282dfc>] (driver_register+0x78/0xf4)
+[    2.796308] [<c0282dfc>] (driver_register) from [<c00089b0>] (do_one_initcall+0xac/0x1f0)
+[    2.804473] [<c00089b0>] (do_one_initcall) from [<c0673d94>] (kernel_init_freeable+0x10c/0x1d8)
+[    2.813153] [<c0673d94>] (kernel_init_freeable) from [<c0490058>] (kernel_init+0x28/0x108)
+[    2.821398] [<c0490058>] (kernel_init) from [<c000f268>] (ret_from_fork+0x14/0x2c)
+[    2.828939] ---[ end trace 03cc00e539849d1f ]---
 
-Kind regards
-Uffe
+clk_set_rate() tries to take clk's prepare_lock mutex while being in atomic
+context entered in sdhci_do_set_ios().
 
-> ---
-> Changelog:
-> v4:
-> - fixed minor issues reported by Ulf Hansson (comment adjustments,
->   removed .shutdown callback, reduced delay time)
->
-> v3: http://www.spinics.net/lists/linux-samsung-soc/msg41956.html
-> - removed optional support for reset-gpio, reported by Javier Martinez Canillas
->
-> v2: http://www.spinics.net/lists/linux-mmc/msg30621.html
-> ---
->  .../devicetree/bindings/mmc/mmc-pwrseq-emmc.txt    |  25 +++++
->  drivers/mmc/core/Makefile                          |   2 +-
->  drivers/mmc/core/pwrseq.c                          |   3 +
->  drivers/mmc/core/pwrseq.h                          |   1 +
->  drivers/mmc/core/pwrseq_emmc.c                     | 101 +++++++++++++++++++++
->  5 files changed, 131 insertions(+), 1 deletion(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt
->  create mode 100644 drivers/mmc/core/pwrseq_emmc.c
->
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt
-> new file mode 100644
-> index 0000000..0cb827b
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt
-> @@ -0,0 +1,25 @@
-> +* The simple eMMC hardware reset provider
-> +
-> +The purpose of this driver is to perform standard eMMC hw reset
-> +procedure, as descibed by Jedec 4.4 specification. This procedure is
-> +performed just after MMC core enabled power to the given mmc host (to
-> +fix possible issues if bootloader has left eMMC card in initialized or
-> +unknown state), and before performing complete system reboot (also in
-> +case of emergency reboot call). The latter is needed on boards, which
-> +doesn't have hardware reset logic connected to emmc card and (limited or
-> +broken) ROM bootloaders are unable to read second stage from the emmc
-> +card if the card is left in unknown or already initialized state.
-> +
-> +Required properties:
-> +- compatible : contains "mmc-pwrseq-emmc".
-> +- reset-gpios : contains a GPIO specifier. The reset GPIO is asserted
-> +       and then deasserted to perform eMMC card reset. To perform
-> +       reset procedure as described in Jedec 4.4 specification, the
-> +       gpio line should be defined as GPIO_ACTIVE_LOW.
-> +
-> +Example:
-> +
-> +       sdhci0_pwrseq {
-> +               compatible = "mmc-pwrseq-emmc";
-> +               reset-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
-> +       }
-> diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-> index b39cbd2..2c25138 100644
-> --- a/drivers/mmc/core/Makefile
-> +++ b/drivers/mmc/core/Makefile
-> @@ -8,5 +8,5 @@ mmc_core-y                      := core.o bus.o host.o \
->                                    sdio.o sdio_ops.o sdio_bus.o \
->                                    sdio_cis.o sdio_io.o sdio_irq.o \
->                                    quirks.o slot-gpio.o
-> -mmc_core-$(CONFIG_OF)          += pwrseq.o pwrseq_simple.o
-> +mmc_core-$(CONFIG_OF)          += pwrseq.o pwrseq_simple.o pwrseq_emmc.o
->  mmc_core-$(CONFIG_DEBUG_FS)    += debugfs.o
-> diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
-> index 2cea00e..8623561 100644
-> --- a/drivers/mmc/core/pwrseq.c
-> +++ b/drivers/mmc/core/pwrseq.c
-> @@ -26,6 +26,9 @@ static struct mmc_pwrseq_match pwrseq_match[] = {
->         {
->                 .compatible = "mmc-pwrseq-simple",
->                 .alloc = mmc_pwrseq_simple_alloc,
-> +       }, {
-> +               .compatible = "mmc-pwrseq-emmc",
-> +               .alloc = mmc_pwrseq_emmc_alloc,
->         },
->  };
->
-> diff --git a/drivers/mmc/core/pwrseq.h b/drivers/mmc/core/pwrseq.h
-> index bd860d8..aba3409 100644
-> --- a/drivers/mmc/core/pwrseq.h
-> +++ b/drivers/mmc/core/pwrseq.h
-> @@ -28,6 +28,7 @@ void mmc_pwrseq_power_off(struct mmc_host *host);
->  void mmc_pwrseq_free(struct mmc_host *host);
->
->  int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev);
-> +int mmc_pwrseq_emmc_alloc(struct mmc_host *host, struct device *dev);
->
->  #else
->
-> diff --git a/drivers/mmc/core/pwrseq_emmc.c b/drivers/mmc/core/pwrseq_emmc.c
-> new file mode 100644
-> index 0000000..8a434d7
-> --- /dev/null
-> +++ b/drivers/mmc/core/pwrseq_emmc.c
-> @@ -0,0 +1,101 @@
-> +/*
-> + * Copyright (C) 2015, Samsung Electronics Co., Ltd.
-> + *
-> + * Author: Marek Szyprowski <m.szyprowski@samsung.com>
-> + *
-> + * License terms: GNU General Public License (GPL) version 2
-> + *
-> + * Simple eMMC hardware reset provider
-> + */
-> +#include <linux/delay.h>
-> +#include <linux/kernel.h>
-> +#include <linux/slab.h>
-> +#include <linux/device.h>
-> +#include <linux/err.h>
-> +#include <linux/gpio/consumer.h>
-> +#include <linux/reboot.h>
-> +
-> +#include <linux/mmc/host.h>
-> +
-> +#include "pwrseq.h"
-> +
-> +struct mmc_pwrseq_emmc {
-> +       struct mmc_pwrseq pwrseq;
-> +       struct notifier_block reset_nb;
-> +       struct gpio_desc *reset_gpio;
-> +};
-> +
-> +static void __mmc_pwrseq_emmc_reset(struct mmc_pwrseq_emmc *pwrseq)
-> +{
-> +       gpiod_set_value(pwrseq->reset_gpio, 1);
-> +       udelay(1);
-> +       gpiod_set_value(pwrseq->reset_gpio, 0);
-> +       udelay(200);
-> +}
-> +
-> +static void mmc_pwrseq_emmc_reset(struct mmc_host *host)
-> +{
-> +       struct mmc_pwrseq_emmc *pwrseq = container_of(host->pwrseq,
-> +                                       struct mmc_pwrseq_emmc, pwrseq);
-> +
-> +       __mmc_pwrseq_emmc_reset(pwrseq);
-> +}
-> +
-> +static void mmc_pwrseq_emmc_free(struct mmc_host *host)
-> +{
-> +       struct mmc_pwrseq_emmc *pwrseq = container_of(host->pwrseq,
-> +                                       struct mmc_pwrseq_emmc, pwrseq);
-> +
-> +       unregister_restart_handler(&pwrseq->reset_nb);
-> +       gpiod_put(pwrseq->reset_gpio);
-> +       kfree(pwrseq);
-> +       host->pwrseq = NULL;
-> +}
-> +
-> +static struct mmc_pwrseq_ops mmc_pwrseq_emmc_ops = {
-> +       .post_power_on = mmc_pwrseq_emmc_reset,
-> +       .free = mmc_pwrseq_emmc_free,
-> +};
-> +
-> +static int mmc_pwrseq_emmc_reset_nb(struct notifier_block *this,
-> +                                   unsigned long mode, void *cmd)
-> +{
-> +       struct mmc_pwrseq_emmc *pwrseq;
-> +       pwrseq = container_of(this, struct mmc_pwrseq_emmc, reset_nb);
+The solution is inspired by similar situation in sdhci_set_power() also called
+from sdhci_do_set_ios():
 
-Assign pwrseq while declaring it, will follow the looks from other
-functions and silence a checkpatch warning.
+                spin_unlock_irq(&host->lock);
+                mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+                spin_lock_irq(&host->lock);
 
-> +
-> +       __mmc_pwrseq_emmc_reset(pwrseq);
-> +       return NOTIFY_DONE;
-> +}
-> +
-> +int mmc_pwrseq_emmc_alloc(struct mmc_host *host, struct device *dev)
-> +{
-> +       struct mmc_pwrseq_emmc *pwrseq;
-> +       int ret = 0;
-> +
-> +       pwrseq = kzalloc(sizeof(struct mmc_pwrseq_emmc), GFP_KERNEL);
-> +       if (!pwrseq)
-> +               return -ENOMEM;
-> +
-> +       pwrseq->reset_gpio = gpiod_get_index(dev, "reset", 0, GPIOD_OUT_LOW);
-> +       if (IS_ERR(pwrseq->reset_gpio)) {
-> +               ret = PTR_ERR(pwrseq->reset_gpio);
-> +               goto free;
-> +       }
-> +
-> +       /*
-> +        * register reset handler to ensure emmc reset also from
-> +        * emergency_reboot(), priority 129 schedules it just before
-> +        * system reboot
-> +        */
-> +       pwrseq->reset_nb.notifier_call = mmc_pwrseq_emmc_reset_nb;
-> +       pwrseq->reset_nb.priority = 129;
-> +       register_restart_handler(&pwrseq->reset_nb);
-> +
-> +       pwrseq->pwrseq.ops = &mmc_pwrseq_emmc_ops;
-> +       host->pwrseq = &pwrseq->pwrseq;
-> +
-> +       return 0;
-> +free:
-> +       kfree(pwrseq);
-> +       return ret;
-> +}
-> --
-> 1.9.2
->
+Note that since sdhci_s3c_set_clock() sets SDHCI_CLOCK_CARD_EN, proposed change
+first resets this bit. It is reset anyway (by setting SDHCI_CLOCK_INT_EN bit
+only) after call to clk_set_rate() in order to wait for the clock to stabilize
+and is set again as soon as the clock becomes stable.
+
+Signed-off-by: Paul Osmialowski <p.osmialowsk@samsung.com>
+---
+ drivers/mmc/host/sdhci-s3c.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index c45b893..115f556 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -12,6 +12,7 @@
+  * published by the Free Software Foundation.
+  */
+ 
++#include <linux/spinlock.h>
+ #include <linux/delay.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/platform_device.h>
+@@ -312,7 +313,14 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
+ 
+ 	sdhci_s3c_set_clock(host, clock);
+ 
++	/* Reset SD Clock Enable */
++	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++	clk &= ~SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++	spin_unlock_irq(&host->lock);
+ 	ret = clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock);
++	spin_lock_irq(&host->lock);
+ 	if (ret != 0) {
+ 		dev_err(dev, "%s: failed to set clock rate %uHz\n",
+ 			mmc_hostname(host->mmc), clock);
+-- 
+1.9.1
+
