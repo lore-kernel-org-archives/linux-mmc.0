@@ -1,85 +1,186 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: core: use card pointer as the first parameter of execute_tuning()
-Date: Wed, 4 Feb 2015 13:54:01 +0100
-Message-ID: <CAPDyKFr-vjYP-hN7PvWx1NWaEh2Yi=fagkLJASkVemQXFXh6Zw@mail.gmail.com>
-References: <1422271175-19445-1-git-send-email-addy.ke@rock-chips.com>
-	<1422271175-19445-2-git-send-email-addy.ke@rock-chips.com>
-	<CAPDyKFp=5epMggHu0+u_LU7ETujcoeP2xOpB7iD6JF2bs8BnEA@mail.gmail.com>
-	<CAD=FV=X9x0gW5TyLi4ERm8nxixQB__Y=5bRAtOax-_w+T33rCg@mail.gmail.com>
-	<CAPDyKFqjG=yxDcwnk4jbXMZ05hMkWR2x37uVpRNd_11-eB4G7w@mail.gmail.com>
-	<CAD=FV=VQg+sQUpgbKw7Zz=-f+jPM=6O-+3gUpohWhj8JeSPu6Q@mail.gmail.com>
-	<CAPDyKFqjY-Sn2mNqjy1FH3RPFuJSfhTX_esQDao1Yb4qumHYcg@mail.gmail.com>
-	<CAD=FV=XCBebTzWpNPn9GaTRU3O1BMurhoTDWcXHYXBChBRnOjQ@mail.gmail.com>
-	<54CAD98F.3070805@rock-chips.com>
-	<54CF2966.2000105@rock-chips.com>
-	<CAPDyKFrZb0jYG7zFjGz6K2Ss=JG4JXMELpjrQi0SgazaEEnW4w@mail.gmail.com>
-	<CAPDyKFoRK1VfzR1JN8z3XYh5a1MEKMwsiSqzPh7OgT+C0SA25w@mail.gmail.com>
-	<54CF3D26.7020004@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V3 10/15] mmc: core: Add support for HS400 re-tuning
+Date: Wed,  4 Feb 2015 15:35:16 +0200
+Message-ID: <1423056916-22663-1-git-send-email-adrian.hunter@intel.com>
+References: <1422522030-17793-11-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f179.google.com ([209.85.216.179]:38012 "EHLO
-	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965729AbbBDMyD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Feb 2015 07:54:03 -0500
-Received: by mail-qc0-f179.google.com with SMTP id w7so949310qcr.10
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Feb 2015 04:54:01 -0800 (PST)
-In-Reply-To: <54CF3D26.7020004@rock-chips.com>
+Received: from mga09.intel.com ([134.134.136.24]:13005 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932734AbbBDNhI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 4 Feb 2015 08:37:08 -0500
+In-Reply-To: <1422522030-17793-11-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: addy ke <addy.ke@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Doug Anderson <dianders@chromium.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-On 2 February 2015 at 10:02, addy ke <addy.ke@rock-chips.com> wrote:
->
->
-> On 2015/2/2 16:17, Ulf Hansson wrote:
->> On 2 February 2015 at 09:16, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>>>>
->>>>> about bus_ops->alive, I think it can't use in tuning state.
->>>>> Because:
->>>>> bus_ops->alive() --> mmc_sd_alive(host) /* sd card */ -->mmc_send_status(host->card, NULL);
->>>>> But host->card == NULL in tuning state(mmc_sd_init_card->mmc_sd_init_uhs_card).
->>>>>
->>>>> Only if sd is initialized successfully, we can get card pointer by host->card.
->>>>> see: mmc_sd_init_card(drivers/mmc/core/sd.c), the end of this function: host->card = card
->>>> And bus_ops->alive only check whether mmc is alive or not, the second parameter(*status) is NULL,
->>>> We can not get the card status.
->>>> But in tuning state, we need wait until card is idle, if the previous tuning is failed.
->>>
->>> You are right that we can't use bus_ops->alive() in its current form.
->>> Changing it to take "card" and "status" as parameter should fix this
->>> for us. My point was more that we can't use mmc_send_status() since
->>> that doesn't work for SDIO.
->
-> For sdio, I think maybe we can use CMD7 to get sdio status.
->
-> And there are 3 file which need get card status at least:
-> 1. drivers/mmc/core/mmc_ops.c: mmc_send_status()
-> 2. drivers/mmc/card/block.c: get_card_status()
-> 3. drivers/mmc/card/mmc_test.c: mmc_test_wait_busy()
-> Maybe we need merge them and provide uniform interface for them.
->
->>>
->>> Anyway, it seems like we need to put this patchset on hold for a while.
->>>
->>> You I merge the below patch instead so we at least have something
->>
->> /s /You / Should
->>
->>> working for 3.20?
-> This patch can work, but it need delay 10ms each tuning.
-> It is too slow to initialize the card(tuning time >= (10 * tuning_count) ms)
+HS400 re-tuning must be done in HS200 mode. Add
+the ability to switch from HS400 mode to HS200
+mode before re-tuning and switch back to HS400
+after re-tuning.
 
-Yes, it seems like it's not the perfect solution, but what options do
-we have right now? Leave it as is or should I apply below patch?
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
 
-Jaehoon, what's your view on this?
 
->>>
->>> [PATCH] mmc: dw_mmc: rockchip: Add DW_MCI_QUIRK_RETRY_DELAY
->>> https://lkml.org/lkml/2015/1/13/562
->>>
+V3:
+	Remember to mmc_set_bus_speed(card) in mmc_hs400_to_hs200()
 
-Kind regards
-Uffe
+
+ drivers/mmc/core/core.h |  2 ++
+ drivers/mmc/core/host.c | 17 ++++++++++
+ drivers/mmc/core/mmc.c  | 88 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 107 insertions(+)
+
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index cfba3c0..e6f2de7 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -88,6 +88,8 @@ void mmc_remove_card_debugfs(struct mmc_card *card);
+ void mmc_init_context_info(struct mmc_host *host);
+ 
+ int mmc_execute_tuning(struct mmc_card *card);
++int mmc_hs200_to_hs400(struct mmc_card *card);
++int mmc_hs400_to_hs200(struct mmc_card *card);
+ 
+ #endif
+ 
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 221d46d..20354a5 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -322,6 +322,7 @@ void mmc_retune_timer_stop(struct mmc_host *host)
+ 
+ int mmc_retune(struct mmc_host *host)
+ {
++	bool return_to_hs400 = false;
+ 	int err;
+ 
+ 	if (!host->need_retune || host->doing_retune || host->hold_retune ||
+@@ -332,8 +333,24 @@ int mmc_retune(struct mmc_host *host)
+ 
+ 	host->doing_retune = 1;
+ 
++	if (host->ios.timing == MMC_TIMING_MMC_HS400) {
++		err = mmc_hs400_to_hs200(host->card);
++		if (err)
++			goto out;
++
++		return_to_hs400 = true;
++
++		if (host->ops->prepare_hs400_tuning)
++			host->ops->prepare_hs400_tuning(host, &host->ios);
++	}
++
+ 	err = mmc_execute_tuning(host->card);
++	if (err)
++		goto out;
+ 
++	if (return_to_hs400)
++		err = mmc_hs200_to_hs400(host->card);
++out:
+ 	host->doing_retune = 0;
+ 
+ 	return err;
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 813b02a..03577be 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1083,6 +1083,94 @@ static int mmc_select_hs400(struct mmc_card *card)
+ 	return 0;
+ }
+ 
++int mmc_hs200_to_hs400(struct mmc_card *card)
++{
++	return mmc_select_hs400(card);
++}
++
++/* Caller must hold re-tuning */
++static int mmc_switch_status(struct mmc_card *card)
++{
++	u32 status;
++	int err;
++
++	err = mmc_send_status(card, &status);
++	if (err)
++		return err;
++
++	return mmc_switch_status_error(card->host, status);
++}
++
++int mmc_hs400_to_hs200(struct mmc_card *card)
++{
++	struct mmc_host *host = card->host;
++	bool send_status = true;
++	unsigned int max_dtr;
++	int err;
++
++	if (host->caps & MMC_CAP_WAIT_WHILE_BUSY)
++		send_status = false;
++
++	/* Reduce frequency to HS */
++	max_dtr = card->ext_csd.hs_max_dtr;
++	mmc_set_clock(host, max_dtr);
++
++	/* Switch HS400 to HS DDR */
++	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
++			   EXT_CSD_TIMING_HS, card->ext_csd.generic_cmd6_time,
++			   true, send_status, true);
++	if (err)
++		goto out_err;
++
++	mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
++
++	if (!send_status) {
++		err = mmc_switch_status(card);
++		if (err)
++			goto out_err;
++	}
++
++	/* Switch HS DDR to HS */
++	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BUS_WIDTH,
++			   EXT_CSD_BUS_WIDTH_8, card->ext_csd.generic_cmd6_time,
++			   true, send_status, true);
++	if (err)
++		goto out_err;
++
++	mmc_set_timing(host, MMC_TIMING_MMC_HS);
++
++	if (!send_status) {
++		err = mmc_switch_status(card);
++		if (err)
++			goto out_err;
++	}
++
++	/* Switch HS to HS200 */
++	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
++			   EXT_CSD_TIMING_HS200,
++			   card->ext_csd.generic_cmd6_time, true, send_status,
++			   true);
++	if (err)
++		goto out_err;
++
++	mmc_set_timing(host, MMC_TIMING_MMC_HS200);
++
++	if (!send_status) {
++		err = mmc_switch_status(card);
++		if (err)
++			goto out_err;
++	}
++
++	mmc_set_bus_speed(card);
++
++	return 0;
++
++out_err:
++	pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
++	       __func__, err);
++	return err;
++}
++
+ /*
+  * For device supporting HS200 mode, the following sequence
+  * should be done before executing the tuning process.
+-- 
+1.9.1
+
