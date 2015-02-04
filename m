@@ -1,186 +1,61 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V3 10/15] mmc: core: Add support for HS400 re-tuning
-Date: Wed,  4 Feb 2015 15:35:16 +0200
-Message-ID: <1423056916-22663-1-git-send-email-adrian.hunter@intel.com>
-References: <1422522030-17793-11-git-send-email-adrian.hunter@intel.com>
+From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+Subject: Re: [PATCH v3 0/6] Add multiple GPIO and external clock to MMC pwrseq_simple
+Date: Wed, 04 Feb 2015 16:06:57 +0100
+Message-ID: <54D23591.7050208@collabora.co.uk>
+References: <1422543608-24704-1-git-send-email-javier.martinez@collabora.co.uk> <CAPDyKFqx-dhhVmtGnP2YpmR63Y20Ns=YyxnYrE2ewTuNXPA7Ag@mail.gmail.com> <54CB81EF.8030603@collabora.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:13005 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932734AbbBDNhI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 4 Feb 2015 08:37:08 -0500
-In-Reply-To: <1422522030-17793-11-git-send-email-adrian.hunter@intel.com>
+Received: from bhuna.collabora.co.uk ([93.93.135.160]:55560 "EHLO
+	bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755411AbbBDPHF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Feb 2015 10:07:05 -0500
+In-Reply-To: <54CB81EF.8030603@collabora.co.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
+To: Kukjin Kim <kgene@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Doug Anderson <dianders@chromium.org>, Olof Johansson <olof@lixom.net>, Arend van Spriel <arend@broadcom.com>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-HS400 re-tuning must be done in HS200 mode. Add
-the ability to switch from HS400 mode to HS200
-mode before re-tuning and switch back to HS400
-after re-tuning.
+Hello Kukjin,
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
+On 01/30/2015 02:06 PM, Javier Martinez Canillas wrote:
+> On 01/30/2015 12:13 PM, Ulf Hansson wrote:
+>>>
+>>> Patch #1 extends the simple MMC power sequence DT binding to support more
+>>> than one GPIO and patch #2 adds the actual implementation.
+>>>
+>>> In the same way, patch #3 and #4 extend the simple MMC power sequence DT
+>>> binding and pwrseq_simple driver to support an optional external clock.
+>>>
+>>> Finally as an example, patch #5 and patch #6 adds support for the wifi
+>>> chip in the Exynos5250 Snow that needs all these resources. These two
+>>> patches were added to the series only for completeness and should be
+>>> picked by Kukjin through his linux-samsung tree.
+>>>
+>>> Best regards,
+>>> Javier
+>> 
+>> Thanks Javier! I have applied patch 1 -> 4 for my next branch.
+>> 
+>> I made some minor fix to patch4, I send a separate response to that
+>> patch so you know.
+>>
+> 
+> Great, thanks a lot!
+> 
+> Kukjin,
+> 
+> Could you please pick patches #5 and #6 then now that Ulf picked the others?
+>
+
+I noticed that you are applying patches to your Samsung tree, do you want me to
+re-send patches #5 and #6 or is OK for you to pick them from from this series?
+
+Best regards,
+Javier
 
 
-V3:
-	Remember to mmc_set_bus_speed(card) in mmc_hs400_to_hs200()
 
 
- drivers/mmc/core/core.h |  2 ++
- drivers/mmc/core/host.c | 17 ++++++++++
- drivers/mmc/core/mmc.c  | 88 +++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 107 insertions(+)
-
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index cfba3c0..e6f2de7 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -88,6 +88,8 @@ void mmc_remove_card_debugfs(struct mmc_card *card);
- void mmc_init_context_info(struct mmc_host *host);
- 
- int mmc_execute_tuning(struct mmc_card *card);
-+int mmc_hs200_to_hs400(struct mmc_card *card);
-+int mmc_hs400_to_hs200(struct mmc_card *card);
- 
- #endif
- 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 221d46d..20354a5 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -322,6 +322,7 @@ void mmc_retune_timer_stop(struct mmc_host *host)
- 
- int mmc_retune(struct mmc_host *host)
- {
-+	bool return_to_hs400 = false;
- 	int err;
- 
- 	if (!host->need_retune || host->doing_retune || host->hold_retune ||
-@@ -332,8 +333,24 @@ int mmc_retune(struct mmc_host *host)
- 
- 	host->doing_retune = 1;
- 
-+	if (host->ios.timing == MMC_TIMING_MMC_HS400) {
-+		err = mmc_hs400_to_hs200(host->card);
-+		if (err)
-+			goto out;
-+
-+		return_to_hs400 = true;
-+
-+		if (host->ops->prepare_hs400_tuning)
-+			host->ops->prepare_hs400_tuning(host, &host->ios);
-+	}
-+
- 	err = mmc_execute_tuning(host->card);
-+	if (err)
-+		goto out;
- 
-+	if (return_to_hs400)
-+		err = mmc_hs200_to_hs400(host->card);
-+out:
- 	host->doing_retune = 0;
- 
- 	return err;
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 813b02a..03577be 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1083,6 +1083,94 @@ static int mmc_select_hs400(struct mmc_card *card)
- 	return 0;
- }
- 
-+int mmc_hs200_to_hs400(struct mmc_card *card)
-+{
-+	return mmc_select_hs400(card);
-+}
-+
-+/* Caller must hold re-tuning */
-+static int mmc_switch_status(struct mmc_card *card)
-+{
-+	u32 status;
-+	int err;
-+
-+	err = mmc_send_status(card, &status);
-+	if (err)
-+		return err;
-+
-+	return mmc_switch_status_error(card->host, status);
-+}
-+
-+int mmc_hs400_to_hs200(struct mmc_card *card)
-+{
-+	struct mmc_host *host = card->host;
-+	bool send_status = true;
-+	unsigned int max_dtr;
-+	int err;
-+
-+	if (host->caps & MMC_CAP_WAIT_WHILE_BUSY)
-+		send_status = false;
-+
-+	/* Reduce frequency to HS */
-+	max_dtr = card->ext_csd.hs_max_dtr;
-+	mmc_set_clock(host, max_dtr);
-+
-+	/* Switch HS400 to HS DDR */
-+	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
-+			   EXT_CSD_TIMING_HS, card->ext_csd.generic_cmd6_time,
-+			   true, send_status, true);
-+	if (err)
-+		goto out_err;
-+
-+	mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
-+
-+	if (!send_status) {
-+		err = mmc_switch_status(card);
-+		if (err)
-+			goto out_err;
-+	}
-+
-+	/* Switch HS DDR to HS */
-+	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BUS_WIDTH,
-+			   EXT_CSD_BUS_WIDTH_8, card->ext_csd.generic_cmd6_time,
-+			   true, send_status, true);
-+	if (err)
-+		goto out_err;
-+
-+	mmc_set_timing(host, MMC_TIMING_MMC_HS);
-+
-+	if (!send_status) {
-+		err = mmc_switch_status(card);
-+		if (err)
-+			goto out_err;
-+	}
-+
-+	/* Switch HS to HS200 */
-+	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
-+			   EXT_CSD_TIMING_HS200,
-+			   card->ext_csd.generic_cmd6_time, true, send_status,
-+			   true);
-+	if (err)
-+		goto out_err;
-+
-+	mmc_set_timing(host, MMC_TIMING_MMC_HS200);
-+
-+	if (!send_status) {
-+		err = mmc_switch_status(card);
-+		if (err)
-+			goto out_err;
-+	}
-+
-+	mmc_set_bus_speed(card);
-+
-+	return 0;
-+
-+out_err:
-+	pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
-+	       __func__, err);
-+	return err;
-+}
-+
- /*
-  * For device supporting HS200 mode, the following sequence
-  * should be done before executing the tuning process.
--- 
-1.9.1
 
