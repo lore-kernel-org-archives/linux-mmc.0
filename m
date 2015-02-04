@@ -1,116 +1,85 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RESEND] mmc: sdhci-s3c: solve problem with sleeping in
- atomic context
-Date: Wed, 4 Feb 2015 13:41:19 +0100
-Message-ID: <CAPDyKFrcBvX8tv2ENwouzGf79uxQd-5fED-mzgcDQXBrhJ=exQ@mail.gmail.com>
-References: <1423041419-31522-1-git-send-email-p.osmialowsk@samsung.com>
+Subject: Re: [PATCH 1/2] mmc: core: use card pointer as the first parameter of execute_tuning()
+Date: Wed, 4 Feb 2015 13:54:01 +0100
+Message-ID: <CAPDyKFr-vjYP-hN7PvWx1NWaEh2Yi=fagkLJASkVemQXFXh6Zw@mail.gmail.com>
+References: <1422271175-19445-1-git-send-email-addy.ke@rock-chips.com>
+	<1422271175-19445-2-git-send-email-addy.ke@rock-chips.com>
+	<CAPDyKFp=5epMggHu0+u_LU7ETujcoeP2xOpB7iD6JF2bs8BnEA@mail.gmail.com>
+	<CAD=FV=X9x0gW5TyLi4ERm8nxixQB__Y=5bRAtOax-_w+T33rCg@mail.gmail.com>
+	<CAPDyKFqjG=yxDcwnk4jbXMZ05hMkWR2x37uVpRNd_11-eB4G7w@mail.gmail.com>
+	<CAD=FV=VQg+sQUpgbKw7Zz=-f+jPM=6O-+3gUpohWhj8JeSPu6Q@mail.gmail.com>
+	<CAPDyKFqjY-Sn2mNqjy1FH3RPFuJSfhTX_esQDao1Yb4qumHYcg@mail.gmail.com>
+	<CAD=FV=XCBebTzWpNPn9GaTRU3O1BMurhoTDWcXHYXBChBRnOjQ@mail.gmail.com>
+	<54CAD98F.3070805@rock-chips.com>
+	<54CF2966.2000105@rock-chips.com>
+	<CAPDyKFrZb0jYG7zFjGz6K2Ss=JG4JXMELpjrQi0SgazaEEnW4w@mail.gmail.com>
+	<CAPDyKFoRK1VfzR1JN8z3XYh5a1MEKMwsiSqzPh7OgT+C0SA25w@mail.gmail.com>
+	<54CF3D26.7020004@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f53.google.com ([209.85.192.53]:55341 "EHLO
-	mail-qg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751062AbbBDMl3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Feb 2015 07:41:29 -0500
-Received: by mail-qg0-f53.google.com with SMTP id f51so875408qge.12
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Feb 2015 04:41:28 -0800 (PST)
-In-Reply-To: <1423041419-31522-1-git-send-email-p.osmialowsk@samsung.com>
+Received: from mail-qc0-f179.google.com ([209.85.216.179]:38012 "EHLO
+	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965729AbbBDMyD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Feb 2015 07:54:03 -0500
+Received: by mail-qc0-f179.google.com with SMTP id w7so949310qcr.10
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Feb 2015 04:54:01 -0800 (PST)
+In-Reply-To: <54CF3D26.7020004@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Paul Osmialowski <p.osmialowsk@samsung.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ben Dooks <ben@simtec.co.uk>
+To: addy ke <addy.ke@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Doug Anderson <dianders@chromium.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
 
-On 4 February 2015 at 10:16, Paul Osmialowski <p.osmialowsk@samsung.com> wrote:
-> This change addresses following problem:
+On 2 February 2015 at 10:02, addy ke <addy.ke@rock-chips.com> wrote:
 >
-> [    2.560726] ------------[ cut here ]------------
-> [    2.565341] WARNING: CPU: 0 PID: 1 at kernel/locking/lockdep.c:2744 lockdep_trace_alloc+0xec/0x118()
-> [    2.574439] DEBUG_LOCKS_WARN_ON(irqs_disabled_flags(flags))
-> [    2.579821] Modules linked in:
-> [    2.583038] CPU: 0 PID: 1 Comm: swapper/0 Tainted: G        W      3.18.0-next-20141216-00002-g4ff197fc1902-dirty #1318
-> [    2.593796] Hardware name: SAMSUNG EXYNOS (Flattened Device Tree)
-> [    2.599892] [<c0014c44>] (unwind_backtrace) from [<c0011bbc>] (show_stack+0x10/0x14)
-> [    2.607612] [<c0011bbc>] (show_stack) from [<c04953b8>] (dump_stack+0x70/0xbc)
-> [    2.614822] [<c04953b8>] (dump_stack) from [<c0023444>] (warn_slowpath_common+0x74/0xb0)
-> [    2.622885] [<c0023444>] (warn_slowpath_common) from [<c0023514>] (warn_slowpath_fmt+0x30/0x40)
-> [    2.631569] [<c0023514>] (warn_slowpath_fmt) from [<c0063644>] (lockdep_trace_alloc+0xec/0x118)
-> [    2.640246] [<c0063644>] (lockdep_trace_alloc) from [<c00df52c>] (__kmalloc+0x3c/0x1cc)
-> [    2.648240] [<c00df52c>] (__kmalloc) from [<c0394970>] (clk_fetch_parent_index+0xb8/0xd4)
-> [    2.656390] [<c0394970>] (clk_fetch_parent_index) from [<c0394a6c>] (clk_calc_new_rates+0xe0/0x1fc)
-> [    2.665415] [<c0394a6c>] (clk_calc_new_rates) from [<c0394b40>] (clk_calc_new_rates+0x1b4/0x1fc)
-> [    2.674181] [<c0394b40>] (clk_calc_new_rates) from [<c0395408>] (clk_set_rate+0x50/0xc8)
-> [    2.682265] [<c0395408>] (clk_set_rate) from [<c0377708>] (sdhci_cmu_set_clock+0x68/0x16c)
-> [    2.690503] [<c0377708>] (sdhci_cmu_set_clock) from [<c03735cc>] (sdhci_do_set_ios+0xf0/0x64c)
-> [    2.699095] [<c03735cc>] (sdhci_do_set_ios) from [<c0373b48>] (sdhci_set_ios+0x20/0x2c)
-> [    2.707080] [<c0373b48>] (sdhci_set_ios) from [<c035ddf0>] (mmc_power_up+0x118/0x1fc)
-> [    2.714889] [<c035ddf0>] (mmc_power_up) from [<c035ecd0>] (mmc_start_host+0x44/0x6c)
-> [    2.722615] [<c035ecd0>] (mmc_start_host) from [<c035fd60>] (mmc_add_host+0x58/0x7c)
-> [    2.730341] [<c035fd60>] (mmc_add_host) from [<c037454c>] (sdhci_add_host+0x968/0xd94)
-> [    2.738240] [<c037454c>] (sdhci_add_host) from [<c0377b60>] (sdhci_s3c_probe+0x354/0x52c)
-> [    2.746406] [<c0377b60>] (sdhci_s3c_probe) from [<c0283b58>] (platform_drv_probe+0x48/0xa4)
-> [    2.754733] [<c0283b58>] (platform_drv_probe) from [<c02824e8>] (driver_probe_device+0x13c/0x37c)
-> [    2.763585] [<c02824e8>] (driver_probe_device) from [<c02827bc>] (__driver_attach+0x94/0x98)
-> [    2.772003] [<c02827bc>] (__driver_attach) from [<c0280a60>] (bus_for_each_dev+0x54/0x88)
-> [    2.780163] [<c0280a60>] (bus_for_each_dev) from [<c0281b48>] (bus_add_driver+0xe4/0x200)
-> [    2.788322] [<c0281b48>] (bus_add_driver) from [<c0282dfc>] (driver_register+0x78/0xf4)
-> [    2.796308] [<c0282dfc>] (driver_register) from [<c00089b0>] (do_one_initcall+0xac/0x1f0)
-> [    2.804473] [<c00089b0>] (do_one_initcall) from [<c0673d94>] (kernel_init_freeable+0x10c/0x1d8)
-> [    2.813153] [<c0673d94>] (kernel_init_freeable) from [<c0490058>] (kernel_init+0x28/0x108)
-> [    2.821398] [<c0490058>] (kernel_init) from [<c000f268>] (ret_from_fork+0x14/0x2c)
-> [    2.828939] ---[ end trace 03cc00e539849d1f ]---
 >
-> clk_set_rate() tries to take clk's prepare_lock mutex while being in atomic
-> context entered in sdhci_do_set_ios().
+> On 2015/2/2 16:17, Ulf Hansson wrote:
+>> On 2 February 2015 at 09:16, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>>
+>>>>> about bus_ops->alive, I think it can't use in tuning state.
+>>>>> Because:
+>>>>> bus_ops->alive() --> mmc_sd_alive(host) /* sd card */ -->mmc_send_status(host->card, NULL);
+>>>>> But host->card == NULL in tuning state(mmc_sd_init_card->mmc_sd_init_uhs_card).
+>>>>>
+>>>>> Only if sd is initialized successfully, we can get card pointer by host->card.
+>>>>> see: mmc_sd_init_card(drivers/mmc/core/sd.c), the end of this function: host->card = card
+>>>> And bus_ops->alive only check whether mmc is alive or not, the second parameter(*status) is NULL,
+>>>> We can not get the card status.
+>>>> But in tuning state, we need wait until card is idle, if the previous tuning is failed.
+>>>
+>>> You are right that we can't use bus_ops->alive() in its current form.
+>>> Changing it to take "card" and "status" as parameter should fix this
+>>> for us. My point was more that we can't use mmc_send_status() since
+>>> that doesn't work for SDIO.
 >
-> The solution is inspired by similar situation in sdhci_set_power() also called
-> from sdhci_do_set_ios():
+> For sdio, I think maybe we can use CMD7 to get sdio status.
 >
->                 spin_unlock_irq(&host->lock);
->                 mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
->                 spin_lock_irq(&host->lock);
+> And there are 3 file which need get card status at least:
+> 1. drivers/mmc/core/mmc_ops.c: mmc_send_status()
+> 2. drivers/mmc/card/block.c: get_card_status()
+> 3. drivers/mmc/card/mmc_test.c: mmc_test_wait_busy()
+> Maybe we need merge them and provide uniform interface for them.
 >
-> Note that since sdhci_s3c_set_clock() sets SDHCI_CLOCK_CARD_EN, proposed change
-> first resets this bit. It is reset anyway (by setting SDHCI_CLOCK_INT_EN bit
-> only) after call to clk_set_rate() in order to wait for the clock to stabilize
-> and is set again as soon as the clock becomes stable.
->
-> Signed-off-by: Paul Osmialowski <p.osmialowsk@samsung.com>
+>>>
+>>> Anyway, it seems like we need to put this patchset on hold for a while.
+>>>
+>>> You I merge the below patch instead so we at least have something
+>>
+>> /s /You / Should
+>>
+>>> working for 3.20?
+> This patch can work, but it need delay 10ms each tuning.
+> It is too slow to initialize the card(tuning time >= (10 * tuning_count) ms)
 
-Thanks! Applied for next.
+Yes, it seems like it's not the perfect solution, but what options do
+we have right now? Leave it as is or should I apply below patch?
+
+Jaehoon, what's your view on this?
+
+>>>
+>>> [PATCH] mmc: dw_mmc: rockchip: Add DW_MCI_QUIRK_RETRY_DELAY
+>>> https://lkml.org/lkml/2015/1/13/562
+>>>
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sdhci-s3c.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index c45b893..115f556 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -12,6 +12,7 @@
->   * published by the Free Software Foundation.
->   */
->
-> +#include <linux/spinlock.h>
->  #include <linux/delay.h>
->  #include <linux/dma-mapping.h>
->  #include <linux/platform_device.h>
-> @@ -312,7 +313,14 @@ static void sdhci_cmu_set_clock(struct sdhci_host *host, unsigned int clock)
->
->         sdhci_s3c_set_clock(host, clock);
->
-> +       /* Reset SD Clock Enable */
-> +       clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +       clk &= ~SDHCI_CLOCK_CARD_EN;
-> +       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> +
-> +       spin_unlock_irq(&host->lock);
->         ret = clk_set_rate(ourhost->clk_bus[ourhost->cur_clk], clock);
-> +       spin_lock_irq(&host->lock);
->         if (ret != 0) {
->                 dev_err(dev, "%s: failed to set clock rate %uHz\n",
->                         mmc_hostname(host->mmc), clock);
-> --
-> 1.9.1
->
