@@ -1,107 +1,155 @@
-From: Kevin Hao <haokexin@gmail.com>
-Subject: [PATCH] mmc: sdhci-pltfm: remove the unneeded check of disabled device
-Date: Wed,  4 Feb 2015 14:33:53 +0800
-Message-ID: <1423031633-26915-1-git-send-email-haokexin@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4] mmc: moxart: fix probe logic
+Date: Wed, 4 Feb 2015 09:40:51 +0100
+Message-ID: <CAPDyKFr1ieNhcFDLxTNNAAi7sAjGVSCgYRZWHJh=TOZReTX53w@mail.gmail.com>
+References: <6294882.EhDcdWGRYz@wuerfel>
+	<1422978954-14547-1-git-send-email-jonas.jensen@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yh0-f49.google.com ([209.85.213.49]:54261 "EHLO
-	mail-yh0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751821AbbBDGe2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Feb 2015 01:34:28 -0500
-Received: by mail-yh0-f49.google.com with SMTP id v1so20491098yhn.8
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Feb 2015 22:34:27 -0800 (PST)
+Received: from mail-qg0-f43.google.com ([209.85.192.43]:35968 "EHLO
+	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933177AbbBDIkw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Feb 2015 03:40:52 -0500
+Received: by mail-qg0-f43.google.com with SMTP id e89so203299qgf.2
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Feb 2015 00:40:51 -0800 (PST)
+In-Reply-To: <1422978954-14547-1-git-send-email-jonas.jensen@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
-Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Jonas Jensen <jonas.jensen@gmail.com>, Arnd Bergmann <arnd@arndb.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>
 
-Since commit cd1e65044d44 ("of/device: Don't register disabled
-devices"), the disabled device will not be registered at all. So
-we don't need to do the check again in the platform device driver.
+On 3 February 2015 at 16:55, Jonas Jensen <jonas.jensen@gmail.com> wrote:
+> From: Arnd Bergmann <arnd@arndb.de>
+>
+> Jonas Jensen wanted to submit a patch for these, but apparently
+> forgot about it. I stumbled over this symptom first:
+>
+> drivers/built-in.o: In function `moxart_probe':
+> :(.text+0x2af128): undefined reference to `of_dma_request_slave_channel'
+>
+> This is because of_dma_request_slave_channel is an internal helper
+> and not exported to loadable module. I'm changing the driver to
+> use dma_request_slave_channel_reason() instead.
+>
+> Further problems from inspection:
+>
+> * The remove function must not call kfree on the host pointer,
+>   because it is allocated together with the mmc_host.
+>
+> * The clock is never released
+>
+> * The dma_cap_mask_t is completely unused and can be removed
+>
+> * deferred probing does not work if the dma driver is loaded
+>   after the mmc driver.
+>
+> This patch should fix all of the above.
+>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> Signed-off-by: Jonas Jensen <jonas.jensen@gmail.com>
 
-And the check in the current code is useless even if we really
-run into a disabled device. In this case, it just doesn't parse
-the dtb for the infos such as quirks or clock, but it will continue
-to try to init the disabled device after that check. So just remove it.
+Thanks! Applied for next, with minor fixes - see below.
 
-Signed-off-by: Kevin Hao <haokexin@gmail.com>
----
- drivers/mmc/host/sdhci-pltfm.c | 54 ++++++++++++++++++++----------------------
- 1 file changed, 26 insertions(+), 28 deletions(-)
+Kind regards
+Uffe
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index c5b01d6bb85d..b609c03a9ef8 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -75,43 +75,41 @@ void sdhci_get_of_property(struct platform_device *pdev)
- 	u32 bus_width;
- 	int size;
- 
--	if (of_device_is_available(np)) {
--		if (of_get_property(np, "sdhci,auto-cmd12", NULL))
--			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
-+	if (of_get_property(np, "sdhci,auto-cmd12", NULL))
-+		host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
- 
--		if (of_get_property(np, "sdhci,1-bit-only", NULL) ||
--		    (of_property_read_u32(np, "bus-width", &bus_width) == 0 &&
--		    bus_width == 1))
--			host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
-+	if (of_get_property(np, "sdhci,1-bit-only", NULL) ||
-+	    (of_property_read_u32(np, "bus-width", &bus_width) == 0 &&
-+	    bus_width == 1))
-+		host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
- 
--		if (sdhci_of_wp_inverted(np))
--			host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
-+	if (sdhci_of_wp_inverted(np))
-+		host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
- 
--		if (of_get_property(np, "broken-cd", NULL))
--			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-+	if (of_get_property(np, "broken-cd", NULL))
-+		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
- 
--		if (of_get_property(np, "no-1-8-v", NULL))
--			host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
-+	if (of_get_property(np, "no-1-8-v", NULL))
-+		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
- 
--		if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
--			host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
-+	if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
-+		host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
- 
--		if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
--		    of_device_is_compatible(np, "fsl,p1010-esdhc") ||
--		    of_device_is_compatible(np, "fsl,t4240-esdhc") ||
--		    of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
--			host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-+	if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
-+	    of_device_is_compatible(np, "fsl,p1010-esdhc") ||
-+	    of_device_is_compatible(np, "fsl,t4240-esdhc") ||
-+	    of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
-+		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
- 
--		clk = of_get_property(np, "clock-frequency", &size);
--		if (clk && size == sizeof(*clk) && *clk)
--			pltfm_host->clock = be32_to_cpup(clk);
-+	clk = of_get_property(np, "clock-frequency", &size);
-+	if (clk && size == sizeof(*clk) && *clk)
-+		pltfm_host->clock = be32_to_cpup(clk);
- 
--		if (of_find_property(np, "keep-power-in-suspend", NULL))
--			host->mmc->pm_caps |= MMC_PM_KEEP_POWER;
-+	if (of_find_property(np, "keep-power-in-suspend", NULL))
-+		host->mmc->pm_caps |= MMC_PM_KEEP_POWER;
- 
--		if (of_find_property(np, "enable-sdio-wakeup", NULL))
--			host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
--	}
-+	if (of_find_property(np, "enable-sdio-wakeup", NULL))
-+		host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
- }
- #else
- void sdhci_get_of_property(struct platform_device *pdev) {}
--- 
-1.9.3
+> ---
+>
+> Notes:
+>     This is a forward of Arnd's v2 patch.
+>
+>     v2:  do not call clk_put() on an error pointer
+>     v3:  fix NULL dereference on host->clk
+>     v4:  rework to use devm_clk_get()
+>
+>     Applies to next-20150113
+>
+>  drivers/mmc/host/moxart-mmc.c | 21 ++++++++++-----------
+>  1 file changed, 10 insertions(+), 11 deletions(-)
+>
+> diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+> index d2a1ef6..6cb4053 100644
+> --- a/drivers/mmc/host/moxart-mmc.c
+> +++ b/drivers/mmc/host/moxart-mmc.c
+> @@ -17,6 +17,7 @@
+>  #include <linux/init.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/delay.h>
+> +#include <linux/errno.h>
+>  #include <linux/interrupt.h>
+>  #include <linux/blkdev.h>
+>  #include <linux/dma-mapping.h>
+> @@ -562,7 +563,6 @@ static int moxart_probe(struct platform_device *pdev)
+>         struct dma_slave_config cfg;
+>         struct clk *clk;
+>         void __iomem *reg_mmc;
+> -       dma_cap_mask_t mask;
+>         int irq, ret;
+>         u32 i;
+>
+> @@ -586,9 +586,9 @@ static int moxart_probe(struct platform_device *pdev)
+>                 goto out;
+>         }
+>
+> -       clk = of_clk_get(node, 0);
+> +       clk = devm_clk_get(dev, 0);
 
+Changed to:
+clk = devm_clk_get(dev, NULL);
+
+>         if (IS_ERR(clk)) {
+> -               dev_err(dev, "of_clk_get failed\n");
+> +               dev_err(dev, "devm_clk_get failed\n");
+
+No need to print this, handled by clock framework.
+
+>                 ret = PTR_ERR(clk);
+>                 goto out;
+>         }
+> @@ -603,9 +603,6 @@ static int moxart_probe(struct platform_device *pdev)
+>         if (ret)
+>                 goto out;
+>
+> -       dma_cap_zero(mask);
+> -       dma_cap_set(DMA_SLAVE, mask);
+> -
+>         host = mmc_priv(mmc);
+>         host->mmc = mmc;
+>         host->base = reg_mmc;
+> @@ -613,8 +610,8 @@ static int moxart_probe(struct platform_device *pdev)
+>         host->timeout = msecs_to_jiffies(1000);
+>         host->sysclk = clk_get_rate(clk);
+>         host->fifo_width = readl(host->base + REG_FEATURE) << 2;
+> -       host->dma_chan_tx = of_dma_request_slave_channel(node, "tx");
+> -       host->dma_chan_rx = of_dma_request_slave_channel(node, "rx");
+> +       host->dma_chan_tx = dma_request_slave_channel_reason(dev, "tx");
+> +       host->dma_chan_rx = dma_request_slave_channel_reason(dev, "rx");
+>
+>         spin_lock_init(&host->lock);
+>
+> @@ -624,6 +621,11 @@ static int moxart_probe(struct platform_device *pdev)
+>         mmc->ocr_avail = 0xffff00;      /* Support 2.0v - 3.6v power. */
+>
+>         if (IS_ERR(host->dma_chan_tx) || IS_ERR(host->dma_chan_rx)) {
+> +               if (PTR_ERR(host->dma_chan_tx) == -EPROBE_DEFER ||
+> +                   PTR_ERR(host->dma_chan_rx) == -EPROBE_DEFER) {
+> +                       ret = -EPROBE_DEFER;
+> +                       goto out;
+> +               }
+>                 dev_dbg(dev, "PIO mode transfer enabled\n");
+>                 host->have_dma = false;
+>         } else {
+> @@ -702,9 +704,6 @@ static int moxart_remove(struct platform_device *pdev)
+>                 writel(readl(host->base + REG_CLOCK_CONTROL) | CLK_OFF,
+>                        host->base + REG_CLOCK_CONTROL);
+>         }
+> -
+> -       kfree(host);
+> -
+>         return 0;
+>  }
+>
+> --
+> 1.8.2.1
+>
