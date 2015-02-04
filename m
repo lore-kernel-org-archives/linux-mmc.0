@@ -1,60 +1,107 @@
-From: Mario <nutrinfnon@gmx.com>
-Subject: mmc0: error -84 whilst initialising SD card
-Date: Wed, 04 Feb 2015 06:37:59 +0100
-Message-ID: <54D1B037.6010909@gmx.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Kevin Hao <haokexin@gmail.com>
+Subject: [PATCH] mmc: sdhci-pltfm: remove the unneeded check of disabled device
+Date: Wed,  4 Feb 2015 14:33:53 +0800
+Message-ID: <1423031633-26915-1-git-send-email-haokexin@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relay1.tre.it ([62.13.171.13]:49444 "EHLO relay2.tre.it"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750977AbbBDGIX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 4 Feb 2015 01:08:23 -0500
-Received: from abox.gian.it (u559131.xgsnun6.imtp.tachikawa.mopera.net [1.72.59.131])
-	by relay2.tre.it  with ESMTP id t145c6Y1028906-t145c6Y3028906
-	(version=TLSv1.2 cipher=DHE-RSA-AES128-SHA bits=128 verify=NO)
-	for <linux-mmc@vger.kernel.org>; Wed, 4 Feb 2015 06:38:12 +0100
-Received: from localhost ([127.0.0.1])
-	by abox.gian.it with esmtp (Exim 4.80)
-	(envelope-from <nutrinfnon@gmx.com>)
-	id 1YIsf3-0008Gm-Ja
-	for linux-mmc@vger.kernel.org; Wed, 04 Feb 2015 06:38:01 +0100
+Received: from mail-yh0-f49.google.com ([209.85.213.49]:54261 "EHLO
+	mail-yh0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751821AbbBDGe2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Feb 2015 01:34:28 -0500
+Received: by mail-yh0-f49.google.com with SMTP id v1so20491098yhn.8
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Feb 2015 22:34:27 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
+Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Hi,
+Since commit cd1e65044d44 ("of/device: Don't register disabled
+devices"), the disabled device will not be registered at all. So
+we don't need to do the check again in the platform device driver.
 
+And the check in the current code is useless even if we really
+run into a disabled device. In this case, it just doesn't parse
+the dtb for the infos such as quirks or clock, but it will continue
+to try to init the disabled device after that check. So just remove it.
 
-  I wrote to Intel support without success. They answer me that I must 
-ask to tablet manufacturer, but I know it is impossible.
+Signed-off-by: Kevin Hao <haokexin@gmail.com>
+---
+ drivers/mmc/host/sdhci-pltfm.c | 54 ++++++++++++++++++++----------------------
+ 1 file changed, 26 insertions(+), 28 deletions(-)
 
-I try to ask here, with short question:
-
-Object:
-TABLET CHUWI VX8 3G Atom Z3735G
-
-Description:
-POWER OFF
--> SWITCH ON
-  -> BOOT Linux-3.19.0-rc6
-   -> ERROR "mmc0: error -84 whilst initialising SD card"
-    -> no sd device
-
-
-POWER OFF
--> SWITCH ON
-  -> BOOT Linux-3.10.20_from_original_android_installation
-   -> mmc initialized successfully
-    -> sd device works fine
-     -> REBOOT without switch off tablet
-      -> BOOT Linux-3.19.0-rc6 (ABOVE GOES IN ERROR)
-       -> mmc initialized successfully
-        -> sd device works fine with 3.19.0-rc6 too
-
-
-Thanks.
-
-
-I think it is possible ssh login to tablet trough IPv6 if it is necessary.
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index c5b01d6bb85d..b609c03a9ef8 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -75,43 +75,41 @@ void sdhci_get_of_property(struct platform_device *pdev)
+ 	u32 bus_width;
+ 	int size;
+ 
+-	if (of_device_is_available(np)) {
+-		if (of_get_property(np, "sdhci,auto-cmd12", NULL))
+-			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
++	if (of_get_property(np, "sdhci,auto-cmd12", NULL))
++		host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+ 
+-		if (of_get_property(np, "sdhci,1-bit-only", NULL) ||
+-		    (of_property_read_u32(np, "bus-width", &bus_width) == 0 &&
+-		    bus_width == 1))
+-			host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
++	if (of_get_property(np, "sdhci,1-bit-only", NULL) ||
++	    (of_property_read_u32(np, "bus-width", &bus_width) == 0 &&
++	    bus_width == 1))
++		host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
+ 
+-		if (sdhci_of_wp_inverted(np))
+-			host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
++	if (sdhci_of_wp_inverted(np))
++		host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
+ 
+-		if (of_get_property(np, "broken-cd", NULL))
+-			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
++	if (of_get_property(np, "broken-cd", NULL))
++		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+ 
+-		if (of_get_property(np, "no-1-8-v", NULL))
+-			host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
++	if (of_get_property(np, "no-1-8-v", NULL))
++		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+ 
+-		if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
+-			host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
++	if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
++		host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
+ 
+-		if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
+-		    of_device_is_compatible(np, "fsl,p1010-esdhc") ||
+-		    of_device_is_compatible(np, "fsl,t4240-esdhc") ||
+-		    of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
+-			host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
++	if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
++	    of_device_is_compatible(np, "fsl,p1010-esdhc") ||
++	    of_device_is_compatible(np, "fsl,t4240-esdhc") ||
++	    of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
++		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+ 
+-		clk = of_get_property(np, "clock-frequency", &size);
+-		if (clk && size == sizeof(*clk) && *clk)
+-			pltfm_host->clock = be32_to_cpup(clk);
++	clk = of_get_property(np, "clock-frequency", &size);
++	if (clk && size == sizeof(*clk) && *clk)
++		pltfm_host->clock = be32_to_cpup(clk);
+ 
+-		if (of_find_property(np, "keep-power-in-suspend", NULL))
+-			host->mmc->pm_caps |= MMC_PM_KEEP_POWER;
++	if (of_find_property(np, "keep-power-in-suspend", NULL))
++		host->mmc->pm_caps |= MMC_PM_KEEP_POWER;
+ 
+-		if (of_find_property(np, "enable-sdio-wakeup", NULL))
+-			host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+-	}
++	if (of_find_property(np, "enable-sdio-wakeup", NULL))
++		host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+ }
+ #else
+ void sdhci_get_of_property(struct platform_device *pdev) {}
+-- 
+1.9.3
 
