@@ -1,60 +1,50 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH] mmc: core: add runtime-resume caps to support resume at
- runtime_resume
-Date: Thu, 5 Feb 2015 11:27:01 +0000
-Message-ID: <20150205112701.GD11344@leverpostej>
+From: Addy Ke <addy.ke@rock-chips.com>
+Subject: [PATCH v2] mmc: core: add runtime-resume caps to support resume at runtime_resume
+Date: Thu,  5 Feb 2015 19:50:45 +0800
+Message-ID: <1423137045-23845-1-git-send-email-addy.ke@rock-chips.com>
 References: <1423134419-23109-1-git-send-email-addy.ke@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from foss-mx-na.foss.arm.com ([217.140.108.86]:41954 "EHLO
-	foss-mx-na.foss.arm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752436AbbBEL1c (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Feb 2015 06:27:32 -0500
-Content-Disposition: inline
+Return-path: <linux-doc-owner@vger.kernel.org>
 In-Reply-To: <1423134419-23109-1-git-send-email-addy.ke@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-doc-owner@vger.kernel.org
+To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org, amstan@chromium.org
+Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com, Addy Ke <addy.ke@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Addy Ke <addy.ke@rock-chips.com>
-Cc: "robh+dt@kernel.org" <robh+dt@kernel.org>, Pawel Moll <Pawel.Moll@arm.com>, "ijc+devicetree@hellion.org.uk" <ijc+devicetree@hellion.org.uk>, "galak@codeaurora.org" <galak@codeaurora.org>, "rdunlap@infradead.org" <rdunlap@infradead.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "chris@printf.net" <chris@printf.net>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "dinguyen@altera.com" <dinguyen@altera.com>, "heiko@sntech.de" <heiko@sntech.de>, "olof@lixom.net" <olof@lixom.net>, "dianders@chromium.org" <dianders@chromium.org>, "sonnyrao@chromium.org" <sonnyrao@chromium.org>, "amstan@chromium.org" <amstan@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc@vge
 
-On Thu, Feb 05, 2015 at 11:06:59AM +0000, Addy Ke wrote:
-> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
-> ---
->  Documentation/devicetree/bindings/mmc/mmc.txt | 11 +++++++++++
->  drivers/mmc/core/host.c                       |  2 ++
->  2 files changed, 13 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-> index 438899e..303b448 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> @@ -40,9 +40,20 @@ Optional properties:
->  - mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
->  - mmc-hs400-1_8v: eMMC HS400 mode(1.8V I/O) is supported
->  - mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
-> +- runtime-resume: resume at runtime_resume is supported
+Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+---
+Changes in v2:
+ - fix some typo 
 
-This reads like description of Linux internals (runtime_resume), which
-shouldn't be in the DT.
+ Documentation/devicetree/bindings/mmc/mmc.txt | 1 +
+ drivers/mmc/core/host.c                       | 2 ++
+ 2 files changed, 3 insertions(+)
 
-What does this mean at the HW level? I'm sure we can find a better name
-for this, or another way of describing this.
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index 438899e..a7b800e 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -40,6 +40,7 @@ Optional properties:
+ - mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
+ - mmc-hs400-1_8v: eMMC HS400 mode(1.8V I/O) is supported
+ - mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
++- runtime-resume: resume at runtime_resume is supported
+ - dsr: Value the card's (optional) Driver Stage Register (DSR) should be
+   programmed with. Valid range: [0 .. 0xffff].
+ 
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 8be0df7..cb44c85 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -422,6 +422,8 @@ int mmc_of_parse(struct mmc_host *host)
+ 		host->caps |= MMC_CAP_POWER_OFF_CARD;
+ 	if (of_find_property(np, "cap-sdio-irq", &len))
+ 		host->caps |= MMC_CAP_SDIO_IRQ;
++	if (of_find_property(np, "runtime-resume", &len))
++		host->caps |= MMC_CAP_RUNTIME_RESUME;
+ 	if (of_find_property(np, "full-pwr-cycle", &len))
+ 		host->caps2 |= MMC_CAP2_FULL_PWR_CYCLE;
+ 	if (of_find_property(np, "keep-power-in-suspend", &len))
+-- 
+1.8.3.2
 
->  - dsr: Value the card's (optional) Driver Stage Register (DSR) should be
->    programmed with. Valid range: [0 .. 0xffff].
->  
-> +Card power and reset control:
-> +The following properties can be specified for cases where the MMC
-> +peripheral needs additional reset, regulator and clock lines. It is for
-> +example common for WiFi/BT adapters to have these separate from the main
-> +MMC bus:
-> +  - card-reset-gpios: Specify GPIOs for card reset (reset active low)
-> +  - card-external-vcc-supply: Regulator to drive (independent) card VCC
-> +  - clock with name "card_ext_clock": External clock provided to the card
 
-Are these proeprties placed on the MMC controller node, or a sub-node
-representing the card/slot?
-
-Thanks,
-Mark.
