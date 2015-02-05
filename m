@@ -1,60 +1,58 @@
-From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [RFC] mmc: sdhci: implement light and heavy runtime pm resume
-Date: Thu, 5 Feb 2015 18:20:31 +0800
-Message-ID: <20150205182031.1a47d726@xhacker>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:3563 "EHLO
-	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757114AbbBEKXy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Feb 2015 05:23:54 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Addy Ke <addy.ke@rock-chips.com>
+Subject: [PATCH] mmc: core: add runtime-resume caps to support resume at runtime_resume
+Date: Thu,  5 Feb 2015 19:06:59 +0800
+Message-ID: <1423134419-23109-1-git-send-email-addy.ke@rock-chips.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org, amstan@chromium.org
+Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com, Addy Ke <addy.ke@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi all,
+Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+---
+ Documentation/devicetree/bindings/mmc/mmc.txt | 11 +++++++++++
+ drivers/mmc/core/host.c                       |  2 ++
+ 2 files changed, 13 insertions(+)
 
-Most sdhci_runtime_resume_host() users just gate their clocks in their runtime
-suspend implementation, so the sdhci_runtime_resume_host() is too heavy, we only
-need to restore interrupts registers.
-
-The change is something as following:
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 0ad412a..9d5bdde 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2856,7 +2856,7 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
- }
- EXPORT_SYMBOL_GPL(sdhci_runtime_suspend_host);
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index 438899e..303b448 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -40,9 +40,20 @@ Optional properties:
+ - mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
+ - mmc-hs400-1_8v: eMMC HS400 mode(1.8V I/O) is supported
+ - mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
++- runtime-resume: resume at runtime_resume is supported
+ - dsr: Value the card's (optional) Driver Stage Register (DSR) should be
+   programmed with. Valid range: [0 .. 0xffff].
  
--int sdhci_runtime_resume_host(struct sdhci_host *host)
-+static void sdhci_runtime_resume_reinit(struct sdhci_host *host)
- {
- 	unsigned long flags;
- 	int host_flags = host->flags;
-@@ -2880,6 +2880,15 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
- 		sdhci_enable_preset_value(host, true);
- 		spin_unlock_irqrestore(&host->lock, flags);
- 	}
-+}
++Card power and reset control:
++The following properties can be specified for cases where the MMC
++peripheral needs additional reset, regulator and clock lines. It is for
++example common for WiFi/BT adapters to have these separate from the main
++MMC bus:
++  - card-reset-gpios: Specify GPIOs for card reset (reset active low)
++  - card-external-vcc-supply: Regulator to drive (independent) card VCC
++  - clock with name "card_ext_clock": External clock provided to the card
++>>>>>>> 0064e63... FROMLIST: mmc: core: add runtime-resume caps to support resume at runtime_resume
 +
-+int sdhci_runtime_resume_host(struct sdhci_host *host, bool power_keeped)
-+{
-+	unsigned long flags;
-+	int host_flags = host->flags;
-+
-+	if (!power_keeped)
-+		sdhci_runtime_resume_reinit(host);
- 
- 	/* Set the re-tuning expiration flag */
- 	if (host->flags & SDHCI_USING_RETUNING_TIMER)
+ *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+ polarity properties, we have to fix the meaning of the "normal" and "inverted"
+ line levels. We choose to follow the SDHCI standard, which specifies both those
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 8be0df7..cb44c85 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -422,6 +422,8 @@ int mmc_of_parse(struct mmc_host *host)
+ 		host->caps |= MMC_CAP_POWER_OFF_CARD;
+ 	if (of_find_property(np, "cap-sdio-irq", &len))
+ 		host->caps |= MMC_CAP_SDIO_IRQ;
++	if (of_find_property(np, "runtime-resume", &len))
++		host->caps |= MMC_CAP_RUNTIME_RESUME;
+ 	if (of_find_property(np, "full-pwr-cycle", &len))
+ 		host->caps2 |= MMC_CAP2_FULL_PWR_CYCLE;
+ 	if (of_find_property(np, "keep-power-in-suspend", &len))
+-- 
+1.8.3.2
 
 
-It's ugly, but per my test on marvell BG2Q platforms, this change can improve
-the resume latency from 5500us to 11us. Is there any better solution?
-
-Thanks in advance,
-Jisheng
