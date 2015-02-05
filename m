@@ -1,50 +1,73 @@
-From: Addy Ke <addy.ke@rock-chips.com>
-Subject: [PATCH v2] mmc: core: add runtime-resume caps to support resume at runtime_resume
-Date: Thu,  5 Feb 2015 19:50:45 +0800
-Message-ID: <1423137045-23845-1-git-send-email-addy.ke@rock-chips.com>
-References: <1423134419-23109-1-git-send-email-addy.ke@rock-chips.com>
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1423134419-23109-1-git-send-email-addy.ke@rock-chips.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, jh80.chung@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org, amstan@chromium.org
-Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com, Addy Ke <addy.ke@rock-chips.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH 00/12] mmc: Add support for drive strength for eMMCs
+Date: Thu,  5 Feb 2015 15:13:37 +0200
+Message-ID: <1423142029-22521-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:58677 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752811AbbBENR5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 5 Feb 2015 08:17:57 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Philip Rakity <prakity@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
----
-Changes in v2:
- - fix some typo 
+Hi
 
- Documentation/devicetree/bindings/mmc/mmc.txt | 1 +
- drivers/mmc/core/host.c                       | 2 ++
- 2 files changed, 3 insertions(+)
+Here are some patches to enable a host controller to select
+driver strength for eMMCs using HS200 or HS400. These are based
+on top of the re-tuning series.
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index 438899e..a7b800e 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -40,6 +40,7 @@ Optional properties:
- - mmc-hs200-1_2v: eMMC HS200 mode(1.2V I/O) is supported
- - mmc-hs400-1_8v: eMMC HS400 mode(1.8V I/O) is supported
- - mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
-+- runtime-resume: resume at runtime_resume is supported
- - dsr: Value the card's (optional) Driver Stage Register (DSR) should be
-   programmed with. Valid range: [0 .. 0xffff].
- 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 8be0df7..cb44c85 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -422,6 +422,8 @@ int mmc_of_parse(struct mmc_host *host)
- 		host->caps |= MMC_CAP_POWER_OFF_CARD;
- 	if (of_find_property(np, "cap-sdio-irq", &len))
- 		host->caps |= MMC_CAP_SDIO_IRQ;
-+	if (of_find_property(np, "runtime-resume", &len))
-+		host->caps |= MMC_CAP_RUNTIME_RESUME;
- 	if (of_find_property(np, "full-pwr-cycle", &len))
- 		host->caps2 |= MMC_CAP2_FULL_PWR_CYCLE;
- 	if (of_find_property(np, "keep-power-in-suspend", &len))
--- 
-1.8.3.2
+There can be some confusion over the term "driver strength".
+SD calls it "drive strength" for the card but "driver type"
+for the host. Whereas JEDEC calls it both "driver strength"
+and "driver type". The values are the same for both SD
+and eMMC:
+
+  Value   Driver Type   Relative strength
+    0       B             x1	default and mandatory support
+    1       A             x1.5
+    2       C             x0.75
+    3       D             x0.5
+
+Except eMMC also defines value 4:
+
+  Value   Driver Type   Relative strength
+    4                     x1.2
 
 
+Adrian Hunter (12):
+      mmc: core: Reset driver type to default
+      mmc: core: Allow card drive strength to be different to host
+      mmc: core: Simplify card drive strength mask
+      mmc: core: Add 'card' to drive strength selection callback
+      mmc: core: Factor out common code in drive strength selection
+      mmc: core: Record card drive strength
+      mmc: mmc: Read card's valid driver strength mask
+      mmc: mmc: Add driver strength selection
+      mmc: core: Add function to read driver-strength device property
+      mmc: sdhci: Add a callback to select drive strength
+      mmc: sdhci-pci: Add support for drive strength selection for SPT
+      mmc: sdhci-pci: Enable HS400 for some Intel host controllers
+
+ Documentation/devicetree/bindings/mmc/mmc.txt |  4 ++
+ drivers/mmc/core/core.c                       | 39 ++++++++++++
+ drivers/mmc/core/core.h                       |  2 +
+ drivers/mmc/core/host.c                       | 21 ++++++
+ drivers/mmc/core/mmc.c                        | 46 ++++++++++++--
+ drivers/mmc/core/sd.c                         | 69 ++++++--------------
+ drivers/mmc/core/sdio.c                       | 77 +++++++---------------
+ drivers/mmc/host/sdhci-pci-data.c             |  3 +
+ drivers/mmc/host/sdhci-pci.c                  | 92 +++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci.h                  |  4 ++
+ drivers/mmc/host/sdhci.c                      | 13 ++++
+ drivers/mmc/host/sdhci.h                      |  4 ++
+ include/linux/mmc/card.h                      |  2 +
+ include/linux/mmc/host.h                      |  6 +-
+ include/linux/mmc/mmc.h                       |  4 ++
+ include/linux/mmc/sdhci-pci-data.h            |  2 +
+ 16 files changed, 275 insertions(+), 113 deletions(-)
+
+
+Regards
+Adrian
