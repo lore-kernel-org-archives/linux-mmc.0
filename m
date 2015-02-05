@@ -1,39 +1,103 @@
-From: Kukjin Kim <kgene@kernel.org>
-Subject: Re: [PATCH v2 0/3] Add support for hardware reset of eMMC card on
- reboot
-Date: Thu, 05 Feb 2015 00:39:16 +0900
-Message-ID: <54D23D24.7050808@kernel.org>
-References: <1422866028-27891-1-git-send-email-m.szyprowski@samsung.com> <CABxcv=m2UjyF3V_B0PZkfA_jFkUPpKL+ZAmgBxTzmUb7JSwLiQ@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 1/2] mmc: core: use card pointer as the first parameter of
+ execute_tuning()
+Date: Thu, 05 Feb 2015 10:49:05 +0900
+Message-ID: <54D2CC11.6010403@samsung.com>
+References: <1422271175-19445-1-git-send-email-addy.ke@rock-chips.com>
+ <1422271175-19445-2-git-send-email-addy.ke@rock-chips.com>
+ <CAPDyKFp=5epMggHu0+u_LU7ETujcoeP2xOpB7iD6JF2bs8BnEA@mail.gmail.com>
+ <CAD=FV=X9x0gW5TyLi4ERm8nxixQB__Y=5bRAtOax-_w+T33rCg@mail.gmail.com>
+ <CAPDyKFqjG=yxDcwnk4jbXMZ05hMkWR2x37uVpRNd_11-eB4G7w@mail.gmail.com>
+ <CAD=FV=VQg+sQUpgbKw7Zz=-f+jPM=6O-+3gUpohWhj8JeSPu6Q@mail.gmail.com>
+ <CAPDyKFqjY-Sn2mNqjy1FH3RPFuJSfhTX_esQDao1Yb4qumHYcg@mail.gmail.com>
+ <CAD=FV=XCBebTzWpNPn9GaTRU3O1BMurhoTDWcXHYXBChBRnOjQ@mail.gmail.com>
+ <54CAD98F.3070805@rock-chips.com> <54CF2966.2000105@rock-chips.com>
+ <CAPDyKFrZb0jYG7zFjGz6K2Ss=JG4JXMELpjrQi0SgazaEEnW4w@mail.gmail.com>
+ <CAPDyKFoRK1VfzR1JN8z3XYh5a1MEKMwsiSqzPh7OgT+C0SA25w@mail.gmail.com>
+ <54CF3D26.7020004@rock-chips.com>
+ <CAPDyKFr-vjYP-hN7PvWx1NWaEh2Yi=fagkLJASkVemQXFXh6Zw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CABxcv=m2UjyF3V_B0PZkfA_jFkUPpKL+ZAmgBxTzmUb7JSwLiQ@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Javier Martinez Canillas <javier@dowhile0.org>
-Cc: Marek Szyprowski <m.szyprowski@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene@kernel.org>, Tobias Jakobi <liquid.acid@gmx.net>, Daniel Drake <drake@endlessm.com>, Sebastian Reichel <sre@kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Joonyoung Shim <jy0922.shim@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:39083 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751131AbbBEBtI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Feb 2015 20:49:08 -0500
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0NJ9006D6ZPTKB10@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 05 Feb 2015 10:49:05 +0900 (KST)
+In-reply-to: <CAPDyKFr-vjYP-hN7PvWx1NWaEh2Yi=fagkLJASkVemQXFXh6Zw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, addy ke <addy.ke@rock-chips.com>
+Cc: Doug Anderson <dianders@chromium.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
 
-On 02/02/15 17:51, Javier Martinez Canillas wrote:
-> Hello Marek,
-> 
-Hi Marek,
-
-> On Mon, Feb 2, 2015 at 9:33 AM, Marek Szyprowski
-> <m.szyprowski@samsung.com> wrote:
->> Hello,
+On 02/04/2015 09:54 PM, Ulf Hansson wrote:
+> On 2 February 2015 at 10:02, addy ke <addy.ke@rock-chips.com> wrote:
 >>
->> This patchset adds new mmc power sequence driver, which performs eMMC
->> card hardware reset. Such power sequence, involving resetting emmc card,
->> is required on some boards to properly perform system reboot procedure.
 >>
+>> On 2015/2/2 16:17, Ulf Hansson wrote:
+>>> On 2 February 2015 at 09:16, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>>>
+>>>>>> about bus_ops->alive, I think it can't use in tuning state.
+>>>>>> Because:
+>>>>>> bus_ops->alive() --> mmc_sd_alive(host) /* sd card */ -->mmc_send_status(host->card, NULL);
+>>>>>> But host->card == NULL in tuning state(mmc_sd_init_card->mmc_sd_init_uhs_card).
+>>>>>>
+>>>>>> Only if sd is initialized successfully, we can get card pointer by host->card.
+>>>>>> see: mmc_sd_init_card(drivers/mmc/core/sd.c), the end of this function: host->card = card
+>>>>> And bus_ops->alive only check whether mmc is alive or not, the second parameter(*status) is NULL,
+>>>>> We can not get the card status.
+>>>>> But in tuning state, we need wait until card is idle, if the previous tuning is failed.
+>>>>
+>>>> You are right that we can't use bus_ops->alive() in its current form.
+>>>> Changing it to take "card" and "status" as parameter should fix this
+>>>> for us. My point was more that we can't use mmc_send_status() since
+>>>> that doesn't work for SDIO.
+>>
+>> For sdio, I think maybe we can use CMD7 to get sdio status.
+>>
+>> And there are 3 file which need get card status at least:
+>> 1. drivers/mmc/core/mmc_ops.c: mmc_send_status()
+>> 2. drivers/mmc/card/block.c: get_card_status()
+>> 3. drivers/mmc/card/mmc_test.c: mmc_test_wait_busy()
+>> Maybe we need merge them and provide uniform interface for them.
+>>
+>>>>
+>>>> Anyway, it seems like we need to put this patchset on hold for a while.
+>>>>
+>>>> You I merge the below patch instead so we at least have something
+>>>
+>>> /s /You / Should
+>>>
+>>>> working for 3.20?
+>> This patch can work, but it need delay 10ms each tuning.
+>> It is too slow to initialize the card(tuning time >= (10 * tuning_count) ms)
 > 
-> Patches looks good to me, I've only one comment on patch 1/3. Once
-> that is addressed, feel free to add for all the series:
+> Yes, it seems like it's not the perfect solution, but what options do
+> we have right now? Leave it as is or should I apply below patch?
 > 
-> Reviewed-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-> 
-Applied 2/3 and 3/3 DT updates.
+> Jaehoon, what's your view on this?
 
-Thanks,
-Kukjin
+It's not the best solution, but if needs to use this, we need to apply the other approach in future.
+Well, i'm working other job..I think i can start to work for dw-mmc on next-week.
+I think good that the below patch should be merged at first.
+Then try to find and discuss more generic solution, how about?
+
+Best Regards,
+Jaehoon Chung
+
+> 
+>>>>
+>>>> [PATCH] mmc: dw_mmc: rockchip: Add DW_MCI_QUIRK_RETRY_DELAY
+>>>> https://lkml.org/lkml/2015/1/13/562
+>>>>
+> 
+> Kind regards
+> Uffe
+> 
+
