@@ -1,50 +1,77 @@
 From: Kevin Hao <haokexin@gmail.com>
-Subject: [PATCH 0/7] mmc: sdhci: set .remove to sdhci_pltfm_unregister()
-Date: Fri,  6 Feb 2015 11:15:15 +0800
-Message-ID: <1423192522-6056-1-git-send-email-haokexin@gmail.com>
+Subject: [PATCH 3/7] mmc: tegra: use devm help functions to get the clk and gpio
+Date: Fri,  6 Feb 2015 11:15:18 +0800
+Message-ID: <1423192522-6056-4-git-send-email-haokexin@gmail.com>
+References: <1423192522-6056-1-git-send-email-haokexin@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yh0-f50.google.com ([209.85.213.50]:33506 "EHLO
-	mail-yh0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752156AbbBFDPf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Feb 2015 22:15:35 -0500
-Received: by mail-yh0-f50.google.com with SMTP id a41so785924yho.9
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Feb 2015 19:15:35 -0800 (PST)
+Received: from mail-yk0-f178.google.com ([209.85.160.178]:43329 "EHLO
+	mail-yk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754138AbbBFDPn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Feb 2015 22:15:43 -0500
+In-Reply-To: <1423192522-6056-1-git-send-email-haokexin@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-tegra@vger.kernel.org, Kevin Hao <haokexin@gmail.com>
 
-Hi,
+Simplify the error and remove path.
 
-In the current kernel, the specific .remove function in several sdhci platform
-drivers seem pretty similar. Actually we can just set all of them to
-sdhci_pltfm_unregister() with just a bit twist.
+Signed-off-by: Kevin Hao <haokexin@gmail.com>
+---
+ drivers/mmc/host/sdhci-tegra.c | 13 +++----------
+ 1 file changed, 3 insertions(+), 10 deletions(-)
 
-Only run test for sdhci-of-esdhc driver. All others just passed the build test.
-
-Kevin Hao (7):
-  mmc: sdhci-dove: remove the unneeded error check
-  mmc: sdhci-dove: kill the driver specific private struct
-  mmc: tegra: use devm help functions to get the clk and gpio
-  mmc: sdhci-sirf: kill the "clk" member in driver private struct
-  mmc: sdhci-bcm-kona: kill the "external_clk" member in driver private 
-       struct
-  mmc: sdhci: disable the clock in sdhci_pltfm_unregister()
-  mmc: sdhci: set the .remove to sdhci_pltfm_unregister()
-
- drivers/mmc/host/sdhci-bcm-kona.c  | 31 +++++++-----------------------
- drivers/mmc/host/sdhci-bcm2835.c   |  7 +------
- drivers/mmc/host/sdhci-cns3xxx.c   |  7 +------
- drivers/mmc/host/sdhci-dove.c      | 39 +++++---------------------------------
- drivers/mmc/host/sdhci-of-arasan.c |  1 -
- drivers/mmc/host/sdhci-of-esdhc.c  |  7 +------
- drivers/mmc/host/sdhci-of-hlwd.c   |  7 +------
- drivers/mmc/host/sdhci-pltfm.c     |  2 ++
- drivers/mmc/host/sdhci-sirf.c      | 30 +++++++----------------------
- drivers/mmc/host/sdhci-st.c        | 12 +-----------
- drivers/mmc/host/sdhci-tegra.c     | 30 ++++-------------------------
- 11 files changed, 30 insertions(+), 143 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index f3778d58d1cd..0643f66b4e14 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -286,7 +286,8 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+ 		goto err_parse_dt;
+ 
+ 	if (gpio_is_valid(tegra_host->power_gpio)) {
+-		rc = gpio_request(tegra_host->power_gpio, "sdhci_power");
++		rc = devm_gpio_request(&pdev->dev, tegra_host->power_gpio,
++				       "sdhci_power");
+ 		if (rc) {
+ 			dev_err(mmc_dev(host->mmc),
+ 				"failed to allocate power gpio\n");
+@@ -295,7 +296,7 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+ 		gpio_direction_output(tegra_host->power_gpio, 1);
+ 	}
+ 
+-	clk = clk_get(mmc_dev(host->mmc), NULL);
++	clk = devm_clk_get(mmc_dev(host->mmc), NULL);
+ 	if (IS_ERR(clk)) {
+ 		dev_err(mmc_dev(host->mmc), "clk err\n");
+ 		rc = PTR_ERR(clk);
+@@ -312,10 +313,7 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+ 
+ err_add_host:
+ 	clk_disable_unprepare(pltfm_host->clk);
+-	clk_put(pltfm_host->clk);
+ err_clk_get:
+-	if (gpio_is_valid(tegra_host->power_gpio))
+-		gpio_free(tegra_host->power_gpio);
+ err_power_req:
+ err_parse_dt:
+ err_alloc_tegra_host:
+@@ -327,16 +325,11 @@ static int sdhci_tegra_remove(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host = platform_get_drvdata(pdev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_tegra *tegra_host = pltfm_host->priv;
+ 	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
+ 
+ 	sdhci_remove_host(host, dead);
+ 
+-	if (gpio_is_valid(tegra_host->power_gpio))
+-		gpio_free(tegra_host->power_gpio);
+-
+ 	clk_disable_unprepare(pltfm_host->clk);
+-	clk_put(pltfm_host->clk);
+ 
+ 	sdhci_pltfm_free(pdev);
+ 
 -- 
 1.9.3
 
