@@ -1,12 +1,12 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 07/11] mmc: mmc: Read card's valid driver strength mask
-Date: Fri,  6 Feb 2015 14:12:57 +0200
-Message-ID: <1423224781-27076-8-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 09/11] mmc: sdhci: Add a callback to select drive strength
+Date: Fri,  6 Feb 2015 14:12:59 +0200
+Message-ID: <1423224781-27076-10-git-send-email-adrian.hunter@intel.com>
 References: <1423224781-27076-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:51343 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757412AbbBFMPK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	id S1757417AbbBFMPK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
 	Fri, 6 Feb 2015 07:15:10 -0500
 In-Reply-To: <1423224781-27076-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -14,55 +14,61 @@ List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Philip Rakity <prakity@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-In preparation for supporing drive strength selection
-for eMMC, read the card's valid driver strengths.
-
-Note that though the SD spec uses the term "drive strength",
-the JEDEC eMMC spec uses the term "driver strength".
+Add a callbak to let host drivers select drive
+strength.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/mmc.c   | 1 +
- include/linux/mmc/card.h | 1 +
- include/linux/mmc/mmc.h  | 1 +
- 3 files changed, 3 insertions(+)
+ drivers/mmc/host/sdhci.c | 13 +++++++++++++
+ drivers/mmc/host/sdhci.h |  4 ++++
+ 2 files changed, 17 insertions(+)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 03577be..3222d4a 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -426,6 +426,7 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 	card->ext_csd.raw_trim_mult =
- 		ext_csd[EXT_CSD_TRIM_MULT];
- 	card->ext_csd.raw_partition_support = ext_csd[EXT_CSD_PARTITION_SUPPORT];
-+	card->ext_csd.raw_driver_strength = ext_csd[EXT_CSD_DRIVER_STRENGTH];
- 	if (card->ext_csd.rev >= 4) {
- 		if (ext_csd[EXT_CSD_PARTITION_SETTING_COMPLETED] &
- 		    EXT_CSD_PART_SETTING_COMPLETED)
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index ad54861..ebfb3c9 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -97,6 +97,7 @@ struct mmc_ext_csd {
- 	u8			raw_erased_mem_count;	/* 181 */
- 	u8			raw_ext_csd_structure;	/* 194 */
- 	u8			raw_card_type;		/* 196 */
-+	u8			raw_driver_strength;	/* 197 */
- 	u8			out_of_int_time;	/* 198 */
- 	u8			raw_pwr_cl_52_195;	/* 200 */
- 	u8			raw_pwr_cl_26_195;	/* 201 */
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 124f562..4819cfb 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -302,6 +302,7 @@ struct _mmc_csd {
- #define EXT_CSD_REV			192	/* RO */
- #define EXT_CSD_STRUCTURE		194	/* RO */
- #define EXT_CSD_CARD_TYPE		196	/* RO */
-+#define EXT_CSD_DRIVER_STRENGTH		197	/* RO */
- #define EXT_CSD_OUT_OF_INTERRUPT_TIME	198	/* RO */
- #define EXT_CSD_PART_SWITCH_TIME        199     /* RO */
- #define EXT_CSD_PWR_CL_52_195		200	/* RO */
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 8848e06..fe1b00d 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2054,6 +2054,18 @@ out_unlock:
+ 	return err;
+ }
+ 
++static int sdhci_select_drive_strength(struct mmc_card *card,
++				       unsigned int max_dtr, int host_drv,
++				       int card_drv, int *drv_type)
++{
++	struct sdhci_host *host = mmc_priv(card->host);
++
++	if (!host->ops->select_drive_strength)
++		return 0;
++
++	return host->ops->select_drive_strength(host, card, max_dtr, host_drv,
++						card_drv, drv_type);
++}
+ 
+ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
+ {
+@@ -2198,6 +2210,7 @@ static const struct mmc_host_ops sdhci_ops = {
+ 	.start_signal_voltage_switch	= sdhci_start_signal_voltage_switch,
+ 	.prepare_hs400_tuning		= sdhci_prepare_hs400_tuning,
+ 	.execute_tuning			= sdhci_execute_tuning,
++	.select_drive_strength		= sdhci_select_drive_strength,
+ 	.card_event			= sdhci_card_event,
+ 	.card_busy	= sdhci_card_busy,
+ };
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 0315e18..57e7bad 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -340,6 +340,10 @@ struct sdhci_ops {
+ 	void	(*platform_init)(struct sdhci_host *host);
+ 	void    (*card_event)(struct sdhci_host *host);
+ 	void	(*voltage_switch)(struct sdhci_host *host);
++	int	(*select_drive_strength)(struct sdhci_host *host,
++					 struct mmc_card *card,
++					 unsigned int max_dtr, int host_drv,
++					 int card_drv, int *drv_type);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 -- 
 1.9.1
 
