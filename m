@@ -1,94 +1,177 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 03/11] mmc: core: Simplify card drive strength mask
-Date: Fri,  6 Feb 2015 14:12:53 +0200
-Message-ID: <1423224781-27076-4-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 05/11] mmc: core: Factor out common code in drive strength selection
+Date: Fri,  6 Feb 2015 14:12:55 +0200
+Message-ID: <1423224781-27076-6-git-send-email-adrian.hunter@intel.com>
 References: <1423224781-27076-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:39050 "EHLO mga01.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:51343 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757408AbbBFMPH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 6 Feb 2015 07:15:07 -0500
+	id S1756606AbbBFMPJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 6 Feb 2015 07:15:09 -0500
 In-Reply-To: <1423224781-27076-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Philip Rakity <prakity@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-Card drive strength selection uses a callback to
-which a mask of supported drive strengths is passed.
-Currently, the bits are checked against the values
-in the SD specifications. That is not necessary
-because the callback will anyway match the mask
-against a valid value. Simplify by taking the mask
-as is but still ensuring that the default mandatory
-value (type B) is always supported.
+Make a new function out of common code used for drive
+strength selection.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/sd.c   | 12 ++----------
- drivers/mmc/core/sdio.c | 12 ++----------
- 2 files changed, 4 insertions(+), 20 deletions(-)
+ drivers/mmc/core/core.c | 38 ++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/core.h |  2 ++
+ drivers/mmc/core/sd.c   | 27 +++------------------------
+ drivers/mmc/core/sdio.c | 25 +++----------------------
+ 4 files changed, 46 insertions(+), 46 deletions(-)
 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index dbc40c5..373a1cf 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1634,6 +1634,44 @@ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type)
+ 	mmc_host_clk_release(host);
+ }
+ 
++int mmc_select_drive_strength(struct mmc_card *card, unsigned int max_dtr,
++			      int card_drv_type, int *drv_type)
++{
++	struct mmc_host *host = card->host;
++	int host_drv_type = SD_DRIVER_TYPE_B;
++	int drive_strength;
++
++	*drv_type = 0;
++
++	if (!host->ops->select_drive_strength)
++		return 0;
++
++	/* Use SD definition of driver strength for hosts */
++	if (host->caps & MMC_CAP_DRIVER_TYPE_A)
++		host_drv_type |= SD_DRIVER_TYPE_A;
++
++	if (host->caps & MMC_CAP_DRIVER_TYPE_C)
++		host_drv_type |= SD_DRIVER_TYPE_C;
++
++	if (host->caps & MMC_CAP_DRIVER_TYPE_D)
++		host_drv_type |= SD_DRIVER_TYPE_D;
++
++	/*
++	 * The drive strength that the hardware can support
++	 * depends on the board design.  Pass the appropriate
++	 * information and let the hardware specific code
++	 * return what is possible given the options
++	 */
++	mmc_host_clk_hold(host);
++	drive_strength = host->ops->select_drive_strength(card, max_dtr,
++							  host_drv_type,
++							  card_drv_type,
++							  drv_type);
++	mmc_host_clk_release(host);
++
++	return drive_strength;
++}
++
+ /*
+  * Apply power to the MMC stack.  This is a two-stage process.
+  * First, we enable power to the card without the clock running.
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index e6f2de7..1a22a82 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -50,6 +50,8 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, u32 ocr);
+ int __mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage);
+ void mmc_set_timing(struct mmc_host *host, unsigned int timing);
+ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
++int mmc_select_drive_strength(struct mmc_card *card, unsigned int max_dtr,
++			      int card_drv_type, int *drv_type);
+ void mmc_power_up(struct mmc_host *host, u32 ocr);
+ void mmc_power_off(struct mmc_host *host);
+ void mmc_power_cycle(struct mmc_host *host, u32 ocr);
 diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index cbee29a..fab83e8 100644
+index dba1acf..e1a98b1 100644
 --- a/drivers/mmc/core/sd.c
 +++ b/drivers/mmc/core/sd.c
-@@ -387,8 +387,7 @@ out:
+@@ -386,35 +386,14 @@ out:
+ 
  static int sd_select_driver_type(struct mmc_card *card, u8 *status)
  {
- 	int host_drv_type = SD_DRIVER_TYPE_B;
--	int card_drv_type = SD_DRIVER_TYPE_B;
--	int drive_strength, drv_type;
-+	int card_drv_type, drive_strength, drv_type;
+-	int host_drv_type = SD_DRIVER_TYPE_B;
+ 	int card_drv_type, drive_strength, drv_type;
  	int err;
  
- 	if (!card->host->ops->select_drive_strength)
-@@ -403,14 +402,7 @@ static int sd_select_driver_type(struct mmc_card *card, u8 *status)
- 	if (card->host->caps & MMC_CAP_DRIVER_TYPE_D)
- 		host_drv_type |= SD_DRIVER_TYPE_D;
- 
--	if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_A)
--		card_drv_type |= SD_DRIVER_TYPE_A;
+-	if (!card->host->ops->select_drive_strength)
+-		return 0;
 -
--	if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_C)
--		card_drv_type |= SD_DRIVER_TYPE_C;
+-	if (card->host->caps & MMC_CAP_DRIVER_TYPE_A)
+-		host_drv_type |= SD_DRIVER_TYPE_A;
 -
--	if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_D)
--		card_drv_type |= SD_DRIVER_TYPE_D;
-+	card_drv_type = card->sw_caps.sd3_drv_type | SD_DRIVER_TYPE_B;
+-	if (card->host->caps & MMC_CAP_DRIVER_TYPE_C)
+-		host_drv_type |= SD_DRIVER_TYPE_C;
+-
+-	if (card->host->caps & MMC_CAP_DRIVER_TYPE_D)
+-		host_drv_type |= SD_DRIVER_TYPE_D;
+-
+ 	card_drv_type = card->sw_caps.sd3_drv_type | SD_DRIVER_TYPE_B;
  
- 	/*
- 	 * The drive strength that the hardware can support
+-	/*
+-	 * The drive strength that the hardware can support
+-	 * depends on the board design.  Pass the appropriate
+-	 * information and let the hardware specific code
+-	 * return what is possible given the options
+-	 */
+-	mmc_host_clk_hold(card->host);
+-	drive_strength = card->host->ops->select_drive_strength(card,
+-		card->sw_caps.uhs_max_dtr,
+-		host_drv_type, card_drv_type, &drv_type);
+-	mmc_host_clk_release(card->host);
++	drive_strength = mmc_select_drive_strength(card,
++						   card->sw_caps.uhs_max_dtr,
++						   card_drv_type, &drv_type);
+ 
+ 	if (drive_strength) {
+ 		err = mmc_sd_switch(card, 1, 2, drive_strength, status);
 diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index d7309ab..76e4dde 100644
+index de92ffe..8cc1793 100644
 --- a/drivers/mmc/core/sdio.c
 +++ b/drivers/mmc/core/sdio.c
-@@ -400,8 +400,7 @@ static unsigned char host_drive_to_sdio_drive(int host_strength)
+@@ -399,34 +399,15 @@ static unsigned char host_drive_to_sdio_drive(int host_strength)
+ 
  static void sdio_select_driver_type(struct mmc_card *card)
  {
- 	int host_drv_type = SD_DRIVER_TYPE_B;
--	int card_drv_type = SD_DRIVER_TYPE_B;
--	int drive_strength, drv_type;
-+	int card_drv_type, drive_strength, drv_type;
+-	int host_drv_type = SD_DRIVER_TYPE_B;
+ 	int card_drv_type, drive_strength, drv_type;
  	unsigned char card_strength;
  	int err;
  
-@@ -417,14 +416,7 @@ static void sdio_select_driver_type(struct mmc_card *card)
- 	if (card->host->caps & MMC_CAP_DRIVER_TYPE_D)
- 		host_drv_type |= SD_DRIVER_TYPE_D;
- 
--	if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_A)
--		card_drv_type |= SD_DRIVER_TYPE_A;
+-	if (!card->host->ops->select_drive_strength)
+-		return;
 -
--	if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_C)
--		card_drv_type |= SD_DRIVER_TYPE_C;
+-	if (card->host->caps & MMC_CAP_DRIVER_TYPE_A)
+-		host_drv_type |= SD_DRIVER_TYPE_A;
 -
--	if (card->sw_caps.sd3_drv_type & SD_DRIVER_TYPE_D)
--		card_drv_type |= SD_DRIVER_TYPE_D;
-+	card_drv_type = card->sw_caps.sd3_drv_type | SD_DRIVER_TYPE_B;
+-	if (card->host->caps & MMC_CAP_DRIVER_TYPE_C)
+-		host_drv_type |= SD_DRIVER_TYPE_C;
+-
+-	if (card->host->caps & MMC_CAP_DRIVER_TYPE_D)
+-		host_drv_type |= SD_DRIVER_TYPE_D;
+-
+ 	card_drv_type = card->sw_caps.sd3_drv_type | SD_DRIVER_TYPE_B;
  
- 	/*
- 	 * The drive strength that the hardware can support
+-	/*
+-	 * The drive strength that the hardware can support
+-	 * depends on the board design.  Pass the appropriate
+-	 * information and let the hardware specific code
+-	 * return what is possible given the options
+-	 */
+-	drive_strength = card->host->ops->select_drive_strength(card,
+-		card->sw_caps.uhs_max_dtr,
+-		host_drv_type, card_drv_type, &drv_type);
++	drive_strength = mmc_select_drive_strength(card,
++						   card->sw_caps.uhs_max_dtr,
++						   card_drv_type, &drv_type);
+ 
+ 	if (drive_strength) {
+ 		/* if error just use default for drive strength B */
 -- 
 1.9.1
 
