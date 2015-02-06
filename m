@@ -1,177 +1,189 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 05/11] mmc: core: Factor out common code in drive strength selection
-Date: Fri,  6 Feb 2015 14:12:55 +0200
-Message-ID: <1423224781-27076-6-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 10/11] mmc: sdhci-pci: Add support for drive strength selection for SPT
+Date: Fri,  6 Feb 2015 14:13:00 +0200
+Message-ID: <1423224781-27076-11-git-send-email-adrian.hunter@intel.com>
 References: <1423224781-27076-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:51343 "EHLO mga01.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:3058 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756606AbbBFMPJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 6 Feb 2015 07:15:09 -0500
+	id S1757428AbbBFMPL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 6 Feb 2015 07:15:11 -0500
 In-Reply-To: <1423224781-27076-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Philip Rakity <prakity@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-Make a new function out of common code used for drive
-strength selection.
+Implement the select_drive_strength callback to provide
+drive strength selection for Intel SPT.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c | 38 ++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/core.h |  2 ++
- drivers/mmc/core/sd.c   | 27 +++------------------------
- drivers/mmc/core/sdio.c | 25 +++----------------------
- 4 files changed, 46 insertions(+), 46 deletions(-)
+ drivers/mmc/host/sdhci-pci-data.c  |  3 ++
+ drivers/mmc/host/sdhci-pci.c       | 83 ++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci.h       |  4 ++
+ include/linux/mmc/sdhci-pci-data.h |  2 +
+ 4 files changed, 92 insertions(+)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index dbc40c5..373a1cf 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1634,6 +1634,44 @@ void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type)
- 	mmc_host_clk_release(host);
+diff --git a/drivers/mmc/host/sdhci-pci-data.c b/drivers/mmc/host/sdhci-pci-data.c
+index a611217..56fddc6 100644
+--- a/drivers/mmc/host/sdhci-pci-data.c
++++ b/drivers/mmc/host/sdhci-pci-data.c
+@@ -3,3 +3,6 @@
+ 
+ struct sdhci_pci_data *(*sdhci_pci_get_data)(struct pci_dev *pdev, int slotno);
+ EXPORT_SYMBOL_GPL(sdhci_pci_get_data);
++
++int sdhci_pci_spt_drive_strength;
++EXPORT_SYMBOL_GPL(sdhci_pci_spt_drive_strength);
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 29eaff7..d778a81 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -20,6 +20,7 @@
+ #include <linux/slab.h>
+ #include <linux/device.h>
+ #include <linux/mmc/host.h>
++#include <linux/mmc/mmc.h>
+ #include <linux/scatterlist.h>
+ #include <linux/io.h>
+ #include <linux/gpio.h>
+@@ -266,6 +267,69 @@ static void sdhci_pci_int_hw_reset(struct sdhci_host *host)
+ 	usleep_range(300, 1000);
  }
  
-+int mmc_select_drive_strength(struct mmc_card *card, unsigned int max_dtr,
-+			      int card_drv_type, int *drv_type)
++static int spt_select_drive_strength(struct sdhci_host *host,
++				     struct mmc_card *card,
++				     unsigned int max_dtr,
++				     int host_drv, int card_drv, int *drv_type)
 +{
-+	struct mmc_host *host = card->host;
-+	int host_drv_type = SD_DRIVER_TYPE_B;
 +	int drive_strength;
 +
-+	*drv_type = 0;
++	if (sdhci_pci_spt_drive_strength > 0)
++		drive_strength = sdhci_pci_spt_drive_strength & 0xf;
++	else
++		drive_strength = 1; /* 33-ohm */
 +
-+	if (!host->ops->select_drive_strength)
-+		return 0;
-+
-+	/* Use SD definition of driver strength for hosts */
-+	if (host->caps & MMC_CAP_DRIVER_TYPE_A)
-+		host_drv_type |= SD_DRIVER_TYPE_A;
-+
-+	if (host->caps & MMC_CAP_DRIVER_TYPE_C)
-+		host_drv_type |= SD_DRIVER_TYPE_C;
-+
-+	if (host->caps & MMC_CAP_DRIVER_TYPE_D)
-+		host_drv_type |= SD_DRIVER_TYPE_D;
-+
-+	/*
-+	 * The drive strength that the hardware can support
-+	 * depends on the board design.  Pass the appropriate
-+	 * information and let the hardware specific code
-+	 * return what is possible given the options
-+	 */
-+	mmc_host_clk_hold(host);
-+	drive_strength = host->ops->select_drive_strength(card, max_dtr,
-+							  host_drv_type,
-+							  card_drv_type,
-+							  drv_type);
-+	mmc_host_clk_release(host);
++	if ((mmc_driver_type_mask(drive_strength) & card_drv) == 0)
++		drive_strength = 0; /* Default 50-ohm */
 +
 +	return drive_strength;
 +}
 +
- /*
-  * Apply power to the MMC stack.  This is a two-stage process.
-  * First, we enable power to the card without the clock running.
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index e6f2de7..1a22a82 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -50,6 +50,8 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, u32 ocr);
- int __mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage);
- void mmc_set_timing(struct mmc_host *host, unsigned int timing);
- void mmc_set_driver_type(struct mmc_host *host, unsigned int drv_type);
-+int mmc_select_drive_strength(struct mmc_card *card, unsigned int max_dtr,
-+			      int card_drv_type, int *drv_type);
- void mmc_power_up(struct mmc_host *host, u32 ocr);
- void mmc_power_off(struct mmc_host *host);
- void mmc_power_cycle(struct mmc_host *host, u32 ocr);
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index dba1acf..e1a98b1 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -386,35 +386,14 @@ out:
- 
- static int sd_select_driver_type(struct mmc_card *card, u8 *status)
++/* Try to read the drive strength from the card */
++static void spt_read_drive_strength(struct sdhci_host *host)
++{
++	u32 val, i, t;
++	u16 m;
++
++	if (sdhci_pci_spt_drive_strength)
++		return;
++
++	sdhci_pci_spt_drive_strength = -1;
++
++	m = sdhci_readw(host, SDHCI_HOST_CONTROL2) & 0x7;
++	if (m != 3 && m != 5)
++		return;
++	val = sdhci_readl(host, SDHCI_PRESENT_STATE);
++	if (val & 0x3)
++		return;
++	sdhci_writel(host, 0x007f0023, SDHCI_INT_ENABLE);
++	sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
++	sdhci_writew(host, 0x10, SDHCI_TRANSFER_MODE);
++	sdhci_writeb(host, 0xe, SDHCI_TIMEOUT_CONTROL);
++	sdhci_writew(host, 512, SDHCI_BLOCK_SIZE);
++	sdhci_writew(host, 1, SDHCI_BLOCK_COUNT);
++	sdhci_writel(host, 0, SDHCI_ARGUMENT);
++	sdhci_writew(host, 0x83b, SDHCI_COMMAND);
++	for (i = 0; i < 1000; i++) {
++		val = sdhci_readl(host, SDHCI_INT_STATUS);
++		if (val & 0xffff8000)
++			return;
++		if (val & 0x20)
++			break;
++		udelay(1);
++	}
++	val = sdhci_readl(host, SDHCI_PRESENT_STATE);
++	if (!(val & 0x800))
++		return;
++	for (i = 0; i < 47; i++)
++		val = sdhci_readl(host, SDHCI_BUFFER);
++	t = val & 0xf00;
++	if (t != 0x200 && t != 0x300)
++		return;
++
++	sdhci_pci_spt_drive_strength = 0x10 | ((val >> 12) & 0xf);
++}
++
+ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
  {
--	int host_drv_type = SD_DRIVER_TYPE_B;
- 	int card_drv_type, drive_strength, drv_type;
- 	int err;
+ 	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
+@@ -276,6 +340,10 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
+ 	slot->hw_reset = sdhci_pci_int_hw_reset;
+ 	if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BSW_EMMC)
+ 		slot->host->timeout_clk = 1000; /* 1000 kHz i.e. 1 MHz */
++	if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_SPT_EMMC) {
++		spt_read_drive_strength(slot->host);
++		slot->select_drive_strength = spt_select_drive_strength;
++	}
+ 	return 0;
+ }
  
--	if (!card->host->ops->select_drive_strength)
--		return 0;
--
--	if (card->host->caps & MMC_CAP_DRIVER_TYPE_A)
--		host_drv_type |= SD_DRIVER_TYPE_A;
--
--	if (card->host->caps & MMC_CAP_DRIVER_TYPE_C)
--		host_drv_type |= SD_DRIVER_TYPE_C;
--
--	if (card->host->caps & MMC_CAP_DRIVER_TYPE_D)
--		host_drv_type |= SD_DRIVER_TYPE_D;
--
- 	card_drv_type = card->sw_caps.sd3_drv_type | SD_DRIVER_TYPE_B;
+@@ -1202,6 +1270,20 @@ static void sdhci_pci_hw_reset(struct sdhci_host *host)
+ 		slot->hw_reset(host);
+ }
  
--	/*
--	 * The drive strength that the hardware can support
--	 * depends on the board design.  Pass the appropriate
--	 * information and let the hardware specific code
--	 * return what is possible given the options
--	 */
--	mmc_host_clk_hold(card->host);
--	drive_strength = card->host->ops->select_drive_strength(card,
--		card->sw_caps.uhs_max_dtr,
--		host_drv_type, card_drv_type, &drv_type);
--	mmc_host_clk_release(card->host);
-+	drive_strength = mmc_select_drive_strength(card,
-+						   card->sw_caps.uhs_max_dtr,
-+						   card_drv_type, &drv_type);
++static int sdhci_pci_select_drive_strength(struct sdhci_host *host,
++					   struct mmc_card *card,
++					   unsigned int max_dtr, int host_drv,
++					   int card_drv, int *drv_type)
++{
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++
++	if (!slot->select_drive_strength)
++		return 0;
++
++	return slot->select_drive_strength(host, card, max_dtr, host_drv,
++					   card_drv, drv_type);
++}
++
+ static const struct sdhci_ops sdhci_pci_ops = {
+ 	.set_clock	= sdhci_set_clock,
+ 	.enable_dma	= sdhci_pci_enable_dma,
+@@ -1209,6 +1291,7 @@ static const struct sdhci_ops sdhci_pci_ops = {
+ 	.reset		= sdhci_reset,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ 	.hw_reset		= sdhci_pci_hw_reset,
++	.select_drive_strength	= sdhci_pci_select_drive_strength,
+ };
  
- 	if (drive_strength) {
- 		err = mmc_sd_switch(card, 1, 2, drive_strength, status);
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index de92ffe..8cc1793 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -399,34 +399,15 @@ static unsigned char host_drive_to_sdio_drive(int host_strength)
+ /*****************************************************************************\
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index 1ec684d..541f1ca 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -72,6 +72,10 @@ struct sdhci_pci_slot {
+ 	bool			cd_override_level;
  
- static void sdio_select_driver_type(struct mmc_card *card)
- {
--	int host_drv_type = SD_DRIVER_TYPE_B;
- 	int card_drv_type, drive_strength, drv_type;
- 	unsigned char card_strength;
- 	int err;
+ 	void (*hw_reset)(struct sdhci_host *host);
++	int (*select_drive_strength)(struct sdhci_host *host,
++				     struct mmc_card *card,
++				     unsigned int max_dtr, int host_drv,
++				     int card_drv, int *drv_type);
+ };
  
--	if (!card->host->ops->select_drive_strength)
--		return;
--
--	if (card->host->caps & MMC_CAP_DRIVER_TYPE_A)
--		host_drv_type |= SD_DRIVER_TYPE_A;
--
--	if (card->host->caps & MMC_CAP_DRIVER_TYPE_C)
--		host_drv_type |= SD_DRIVER_TYPE_C;
--
--	if (card->host->caps & MMC_CAP_DRIVER_TYPE_D)
--		host_drv_type |= SD_DRIVER_TYPE_D;
--
- 	card_drv_type = card->sw_caps.sd3_drv_type | SD_DRIVER_TYPE_B;
+ struct sdhci_pci_chip {
+diff --git a/include/linux/mmc/sdhci-pci-data.h b/include/linux/mmc/sdhci-pci-data.h
+index 8959604..fda15b6 100644
+--- a/include/linux/mmc/sdhci-pci-data.h
++++ b/include/linux/mmc/sdhci-pci-data.h
+@@ -15,4 +15,6 @@ struct sdhci_pci_data {
+ extern struct sdhci_pci_data *(*sdhci_pci_get_data)(struct pci_dev *pdev,
+ 				int slotno);
  
--	/*
--	 * The drive strength that the hardware can support
--	 * depends on the board design.  Pass the appropriate
--	 * information and let the hardware specific code
--	 * return what is possible given the options
--	 */
--	drive_strength = card->host->ops->select_drive_strength(card,
--		card->sw_caps.uhs_max_dtr,
--		host_drv_type, card_drv_type, &drv_type);
-+	drive_strength = mmc_select_drive_strength(card,
-+						   card->sw_caps.uhs_max_dtr,
-+						   card_drv_type, &drv_type);
- 
- 	if (drive_strength) {
- 		/* if error just use default for drive strength B */
++extern int sdhci_pci_spt_drive_strength;
++
+ #endif
 -- 
 1.9.1
 
