@@ -1,80 +1,68 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 00/11] mmc: Add support for drive strength for eMMCs
-Date: Fri,  6 Feb 2015 14:12:50 +0200
-Message-ID: <1423224781-27076-1-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 07/11] mmc: mmc: Read card's valid driver strength mask
+Date: Fri,  6 Feb 2015 14:12:57 +0200
+Message-ID: <1423224781-27076-8-git-send-email-adrian.hunter@intel.com>
+References: <1423224781-27076-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:39050 "EHLO mga01.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:51343 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753715AbbBFMPG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 6 Feb 2015 07:15:06 -0500
+	id S1757412AbbBFMPK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 6 Feb 2015 07:15:10 -0500
+In-Reply-To: <1423224781-27076-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Philip Rakity <prakity@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-Hi
+In preparation for supporing drive strength selection
+for eMMC, read the card's valid driver strengths.
 
-Here is V2 of some patches to enable a host controller to select
-driver strength for eMMCs using HS200 or HS400. These are based
-on top of the re-tuning series.
+Note that though the SD spec uses the term "drive strength",
+the JEDEC eMMC spec uses the term "driver strength".
 
-There can be some confusion over the term "driver strength".
-SD calls it "drive strength" for the card but "driver type"
-for the host. Whereas JEDEC calls it both "driver strength"
-and "driver type". The values are the same for both SD
-and eMMC:
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/core/mmc.c   | 1 +
+ include/linux/mmc/card.h | 1 +
+ include/linux/mmc/mmc.h  | 1 +
+ 3 files changed, 3 insertions(+)
 
-  Value   Driver Type   Relative strength
-    0       B             x1	default and mandatory support
-    1       A             x1.5
-    2       C             x0.75
-    3       D             x0.5
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 03577be..3222d4a 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -426,6 +426,7 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 	card->ext_csd.raw_trim_mult =
+ 		ext_csd[EXT_CSD_TRIM_MULT];
+ 	card->ext_csd.raw_partition_support = ext_csd[EXT_CSD_PARTITION_SUPPORT];
++	card->ext_csd.raw_driver_strength = ext_csd[EXT_CSD_DRIVER_STRENGTH];
+ 	if (card->ext_csd.rev >= 4) {
+ 		if (ext_csd[EXT_CSD_PARTITION_SETTING_COMPLETED] &
+ 		    EXT_CSD_PART_SETTING_COMPLETED)
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index ad54861..ebfb3c9 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -97,6 +97,7 @@ struct mmc_ext_csd {
+ 	u8			raw_erased_mem_count;	/* 181 */
+ 	u8			raw_ext_csd_structure;	/* 194 */
+ 	u8			raw_card_type;		/* 196 */
++	u8			raw_driver_strength;	/* 197 */
+ 	u8			out_of_int_time;	/* 198 */
+ 	u8			raw_pwr_cl_52_195;	/* 200 */
+ 	u8			raw_pwr_cl_26_195;	/* 201 */
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 124f562..4819cfb 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -302,6 +302,7 @@ struct _mmc_csd {
+ #define EXT_CSD_REV			192	/* RO */
+ #define EXT_CSD_STRUCTURE		194	/* RO */
+ #define EXT_CSD_CARD_TYPE		196	/* RO */
++#define EXT_CSD_DRIVER_STRENGTH		197	/* RO */
+ #define EXT_CSD_OUT_OF_INTERRUPT_TIME	198	/* RO */
+ #define EXT_CSD_PART_SWITCH_TIME        199     /* RO */
+ #define EXT_CSD_PWR_CL_52_195		200	/* RO */
+-- 
+1.9.1
 
-Except eMMC also defines value 4:
-
-  Value   Driver Type   Relative strength
-    4                     x1.2
-
-
-Changes in V2:
-
-    mmc: core: Add function to read driver-strength device property
-        Dropped because there are still questions over how to use
-        device properties.
-
-    mmc: sdhci-pci: Add support for drive strength selection for SPT
-        Amended to reflect the change above.
-
-
-Adrian Hunter (11):
-      mmc: core: Reset driver type to default
-      mmc: core: Allow card drive strength to be different to host
-      mmc: core: Simplify card drive strength mask
-      mmc: core: Add 'card' to drive strength selection callback
-      mmc: core: Factor out common code in drive strength selection
-      mmc: core: Record card drive strength
-      mmc: mmc: Read card's valid driver strength mask
-      mmc: mmc: Add driver strength selection
-      mmc: sdhci: Add a callback to select drive strength
-      mmc: sdhci-pci: Add support for drive strength selection for SPT
-      mmc: sdhci-pci: Enable HS400 for some Intel host controllers
-
- drivers/mmc/core/core.c            | 39 ++++++++++++++++++
- drivers/mmc/core/core.h            |  2 +
- drivers/mmc/core/mmc.c             | 46 +++++++++++++++++----
- drivers/mmc/core/sd.c              | 69 ++++++++-----------------------
- drivers/mmc/core/sdio.c            | 77 +++++++++++-----------------------
- drivers/mmc/host/sdhci-pci-data.c  |  3 ++
- drivers/mmc/host/sdhci-pci.c       | 84 ++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-pci.h       |  4 ++
- drivers/mmc/host/sdhci.c           | 13 ++++++
- drivers/mmc/host/sdhci.h           |  4 ++
- include/linux/mmc/card.h           |  2 +
- include/linux/mmc/host.h           |  4 +-
- include/linux/mmc/mmc.h            |  4 ++
- include/linux/mmc/sdhci-pci-data.h |  2 +
- 14 files changed, 240 insertions(+), 113 deletions(-)
-
-
-Regards
-Adrian
