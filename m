@@ -1,80 +1,80 @@
-From: Kevin Hao <haokexin@gmail.com>
-Subject: Re: [PATCH 5/7] mmc: sdhci-bcm-kona: kill the "external_clk" member
- in driver private struct
-Date: Fri, 6 Feb 2015 14:40:00 +0800
-Message-ID: <20150206064000.GH5965@pek-khao-d1.corp.ad.wrs.com>
-References: <1423192522-6056-1-git-send-email-haokexin@gmail.com>
- <1423192522-6056-6-git-send-email-haokexin@gmail.com>
- <54D45655.4030908@broadcom.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="tT3UgwmDxwvOMqfu"
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V2 00/11] mmc: Add support for drive strength for eMMCs
+Date: Fri,  6 Feb 2015 14:12:50 +0200
+Message-ID: <1423224781-27076-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f182.google.com ([209.85.216.182]:50948 "EHLO
-	mail-qc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750843AbbBFGkK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Feb 2015 01:40:10 -0500
-Received: by mail-qc0-f182.google.com with SMTP id l6so10351212qcy.13
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Feb 2015 22:40:09 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <54D45655.4030908@broadcom.com>
+Received: from mga01.intel.com ([192.55.52.88]:39050 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753715AbbBFMPG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 6 Feb 2015 07:15:06 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ray Jui <rjui@broadcom.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Christian Daudt <bcm@fixthebug.org>, Matt Porter <mporter@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, bcm-kernel-feedback-list@broadcom.com
+To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Philip Rakity <prakity@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>
+
+Hi
+
+Here is V2 of some patches to enable a host controller to select
+driver strength for eMMCs using HS200 or HS400. These are based
+on top of the re-tuning series.
+
+There can be some confusion over the term "driver strength".
+SD calls it "drive strength" for the card but "driver type"
+for the host. Whereas JEDEC calls it both "driver strength"
+and "driver type". The values are the same for both SD
+and eMMC:
+
+  Value   Driver Type   Relative strength
+    0       B             x1	default and mandatory support
+    1       A             x1.5
+    2       C             x0.75
+    3       D             x0.5
+
+Except eMMC also defines value 4:
+
+  Value   Driver Type   Relative strength
+    4                     x1.2
 
 
---tT3UgwmDxwvOMqfu
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Changes in V2:
 
-On Thu, Feb 05, 2015 at 09:51:17PM -0800, Ray Jui wrote:
-> > @@ -265,19 +264,19 @@ static int sdhci_bcm_kona_probe(struct platform_d=
-evice *pdev)
-> >  	}
-> > =20
-> >  	/* Get and enable the external clock */
->=20
-> Would you mind changing the above comment to "/* Get and enable the core
-> clock */?
+    mmc: core: Add function to read driver-strength device property
+        Dropped because there are still questions over how to use
+        device properties.
 
-Sure.
+    mmc: sdhci-pci: Add support for drive strength selection for SPT
+        Amended to reflect the change above.
 
->=20
-> > -	kona_dev->external_clk =3D devm_clk_get(dev, NULL);
-> > -	if (IS_ERR(kona_dev->external_clk)) {
-> > +	pltfm_priv->clk =3D devm_clk_get(dev, NULL);
-> > +	if (IS_ERR(pltfm_priv->clk)) {
-> >  		dev_err(dev, "Failed to get external clock\n");
->=20
-> Change to "Failed to get the core clock"
 
-OK, I will change all the references of "external clock" to "core clock".
+Adrian Hunter (11):
+      mmc: core: Reset driver type to default
+      mmc: core: Allow card drive strength to be different to host
+      mmc: core: Simplify card drive strength mask
+      mmc: core: Add 'card' to drive strength selection callback
+      mmc: core: Factor out common code in drive strength selection
+      mmc: core: Record card drive strength
+      mmc: mmc: Read card's valid driver strength mask
+      mmc: mmc: Add driver strength selection
+      mmc: sdhci: Add a callback to select drive strength
+      mmc: sdhci-pci: Add support for drive strength selection for SPT
+      mmc: sdhci-pci: Enable HS400 for some Intel host controllers
 
-> Not sure if this is relevant and should be done in the same patch. But
-> both callbacks get_max_clock and get_timeout_clock in this driver can be
-> set to sdhci_pltfm_clk_get_max_clock. That will help to get rid of two
-> redundant private functions in this driver.
+ drivers/mmc/core/core.c            | 39 ++++++++++++++++++
+ drivers/mmc/core/core.h            |  2 +
+ drivers/mmc/core/mmc.c             | 46 +++++++++++++++++----
+ drivers/mmc/core/sd.c              | 69 ++++++++-----------------------
+ drivers/mmc/core/sdio.c            | 77 +++++++++++-----------------------
+ drivers/mmc/host/sdhci-pci-data.c  |  3 ++
+ drivers/mmc/host/sdhci-pci.c       | 84 ++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci.h       |  4 ++
+ drivers/mmc/host/sdhci.c           | 13 ++++++
+ drivers/mmc/host/sdhci.h           |  4 ++
+ include/linux/mmc/card.h           |  2 +
+ include/linux/mmc/host.h           |  4 +-
+ include/linux/mmc/mmc.h            |  4 ++
+ include/linux/mmc/sdhci-pci-data.h |  2 +
+ 14 files changed, 240 insertions(+), 113 deletions(-)
 
-Sounds good. I will add this in the v2.
 
-Thanks,
-Kevin
-
---tT3UgwmDxwvOMqfu
-Content-Type: application/pgp-signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBAgAGBQJU1GHAAAoJEJNY7TDerrFxs90IAJSwDjsytEXB/esegR+mDvlh
-SDvGIpw/k7OeXnM3jhfVfIZ8ZTQg2cvA3sWzAgjtPNLf/VDeqZU1mqk1LYQ3HD+Z
-4uiGE6qrOYr8NEjsiL3U115vdYbK8IebnSgADb63nn3A/GE2JtIbcq6+tIBh9pg4
-6UlykBV/Vo9aowATvmDCAF+DY7ofhvx7aTcu4cRX2CpImkrSDtqnbVyqB42tDF0h
-6v5ypQhN6g96K+XaIy4W7et7K3SZEVxa49COBUIY8mF/QP/gzPZ+fixc5e23M5Eb
-KZgURef9iq6o7RMjJQqlGBQFzvWziyg6Q6QWYa1/NBnYvT2cNtIVUbZW8ftPbXM=
-=lRqM
------END PGP SIGNATURE-----
-
---tT3UgwmDxwvOMqfu--
+Regards
+Adrian
