@@ -1,88 +1,264 @@
 From: Kevin Hao <haokexin@gmail.com>
-Subject: [PATCH 5/7] mmc: sdhci-bcm-kona: kill the "external_clk" member in driver private struct
-Date: Fri,  6 Feb 2015 11:15:20 +0800
-Message-ID: <1423192522-6056-6-git-send-email-haokexin@gmail.com>
+Subject: [PATCH 7/7] mmc: sdhci: set the .remove to sdhci_pltfm_unregister()
+Date: Fri,  6 Feb 2015 11:15:22 +0800
+Message-ID: <1423192522-6056-8-git-send-email-haokexin@gmail.com>
 References: <1423192522-6056-1-git-send-email-haokexin@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f174.google.com ([209.85.160.174]:47795 "EHLO
-	mail-yk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754468AbbBFDPu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Feb 2015 22:15:50 -0500
-Received: by mail-yk0-f174.google.com with SMTP id 20so2237136yks.5
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Feb 2015 19:15:49 -0800 (PST)
+Received: from mail-yk0-f180.google.com ([209.85.160.180]:50266 "EHLO
+	mail-yk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754398AbbBFDPz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Feb 2015 22:15:55 -0500
+Received: by mail-yk0-f180.google.com with SMTP id 19so3317255ykq.11
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Feb 2015 19:15:54 -0800 (PST)
 In-Reply-To: <1423192522-6056-1-git-send-email-haokexin@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Christian Daudt <bcm@fixthebug.org>, Matt Porter <mporter@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, bcm-kernel-feedback-list@broadcom.com, Kevin Hao <haokexin@gmail.com>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hao <haokexin@gmail.com>
 
-Actually we can use the "clk" in the struct sdhci_pltfm_host.
+In these drivers, the driver specific .remove function just a simple
+wrapper of function sdhci_pltfm_unregister(). So remove these wrappers
+and just set .remove to sdhci_pltfm_unregister().
 
 Signed-off-by: Kevin Hao <haokexin@gmail.com>
 ---
- drivers/mmc/host/sdhci-bcm-kona.c | 16 +++++++---------
- 1 file changed, 7 insertions(+), 9 deletions(-)
+ drivers/mmc/host/sdhci-bcm-kona.c | 7 +------
+ drivers/mmc/host/sdhci-bcm2835.c  | 7 +------
+ drivers/mmc/host/sdhci-cns3xxx.c  | 7 +------
+ drivers/mmc/host/sdhci-dove.c     | 7 +------
+ drivers/mmc/host/sdhci-of-esdhc.c | 7 +------
+ drivers/mmc/host/sdhci-of-hlwd.c  | 7 +------
+ drivers/mmc/host/sdhci-sirf.c     | 9 +--------
+ drivers/mmc/host/sdhci-st.c       | 7 +------
+ drivers/mmc/host/sdhci-tegra.c    | 7 +------
+ 9 files changed, 9 insertions(+), 56 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-index 34bb8f92586e..01660344e414 100644
+index 9313bf63d9b6..a773ff8be598 100644
 --- a/drivers/mmc/host/sdhci-bcm-kona.c
 +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-@@ -54,7 +54,6 @@
+@@ -341,11 +341,6 @@ err_pltfm_free:
+ 	return ret;
+ }
  
- struct sdhci_bcm_kona_dev {
- 	struct mutex	write_lock; /* protect back to back writes */
--	struct clk	*external_clk;
+-static int sdhci_bcm_kona_remove(struct platform_device *pdev)
+-{
+-	return sdhci_pltfm_unregister(pdev);
+-}
+-
+ static struct platform_driver sdhci_bcm_kona_driver = {
+ 	.driver		= {
+ 		.name	= "sdhci-kona",
+@@ -353,7 +348,7 @@ static struct platform_driver sdhci_bcm_kona_driver = {
+ 		.of_match_table = sdhci_bcm_kona_of_match,
+ 	},
+ 	.probe		= sdhci_bcm_kona_probe,
+-	.remove		= sdhci_bcm_kona_remove,
++	.remove		= sdhci_pltfm_unregister,
+ };
+ module_platform_driver(sdhci_bcm_kona_driver);
+ 
+diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
+index 439d259fdf1d..0ef0343c603a 100644
+--- a/drivers/mmc/host/sdhci-bcm2835.c
++++ b/drivers/mmc/host/sdhci-bcm2835.c
+@@ -180,11 +180,6 @@ err:
+ 	return ret;
+ }
+ 
+-static int bcm2835_sdhci_remove(struct platform_device *pdev)
+-{
+-	return sdhci_pltfm_unregister(pdev);
+-}
+-
+ static const struct of_device_id bcm2835_sdhci_of_match[] = {
+ 	{ .compatible = "brcm,bcm2835-sdhci" },
+ 	{ }
+@@ -198,7 +193,7 @@ static struct platform_driver bcm2835_sdhci_driver = {
+ 		.pm = SDHCI_PLTFM_PMOPS,
+ 	},
+ 	.probe = bcm2835_sdhci_probe,
+-	.remove = bcm2835_sdhci_remove,
++	.remove = sdhci_pltfm_unregister,
+ };
+ module_platform_driver(bcm2835_sdhci_driver);
+ 
+diff --git a/drivers/mmc/host/sdhci-cns3xxx.c b/drivers/mmc/host/sdhci-cns3xxx.c
+index a7935a8d0922..59f2923f8054 100644
+--- a/drivers/mmc/host/sdhci-cns3xxx.c
++++ b/drivers/mmc/host/sdhci-cns3xxx.c
+@@ -98,18 +98,13 @@ static int sdhci_cns3xxx_probe(struct platform_device *pdev)
+ 	return sdhci_pltfm_register(pdev, &sdhci_cns3xxx_pdata, 0);
+ }
+ 
+-static int sdhci_cns3xxx_remove(struct platform_device *pdev)
+-{
+-	return sdhci_pltfm_unregister(pdev);
+-}
+-
+ static struct platform_driver sdhci_cns3xxx_driver = {
+ 	.driver		= {
+ 		.name	= "sdhci-cns3xxx",
+ 		.pm	= SDHCI_PLTFM_PMOPS,
+ 	},
+ 	.probe		= sdhci_cns3xxx_probe,
+-	.remove		= sdhci_cns3xxx_remove,
++	.remove		= sdhci_pltfm_unregister,
  };
  
+ module_platform_driver(sdhci_cns3xxx_driver);
+diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
+index 2314ff88d942..407c21f152b2 100644
+--- a/drivers/mmc/host/sdhci-dove.c
++++ b/drivers/mmc/host/sdhci-dove.c
+@@ -108,11 +108,6 @@ err_sdhci_add:
+ 	return ret;
+ }
  
-@@ -265,19 +264,19 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
- 	}
+-static int sdhci_dove_remove(struct platform_device *pdev)
+-{
+-	return sdhci_pltfm_unregister(pdev);
+-}
+-
+ static const struct of_device_id sdhci_dove_of_match_table[] = {
+ 	{ .compatible = "marvell,dove-sdhci", },
+ 	{}
+@@ -126,7 +121,7 @@ static struct platform_driver sdhci_dove_driver = {
+ 		.of_match_table = sdhci_dove_of_match_table,
+ 	},
+ 	.probe		= sdhci_dove_probe,
+-	.remove		= sdhci_dove_remove,
++	.remove		= sdhci_pltfm_unregister,
+ };
  
- 	/* Get and enable the external clock */
--	kona_dev->external_clk = devm_clk_get(dev, NULL);
--	if (IS_ERR(kona_dev->external_clk)) {
-+	pltfm_priv->clk = devm_clk_get(dev, NULL);
-+	if (IS_ERR(pltfm_priv->clk)) {
- 		dev_err(dev, "Failed to get external clock\n");
--		ret = PTR_ERR(kona_dev->external_clk);
-+		ret = PTR_ERR(pltfm_priv->clk);
- 		goto err_pltfm_free;
- 	}
+ module_platform_driver(sdhci_dove_driver);
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 17fe02ed6672..22e9111b11ff 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -386,11 +386,6 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+ 	return ret;
+ }
  
--	if (clk_set_rate(kona_dev->external_clk, host->mmc->f_max) != 0) {
-+	if (clk_set_rate(pltfm_priv->clk, host->mmc->f_max) != 0) {
- 		dev_err(dev, "Failed to set rate external clock\n");
- 		goto err_pltfm_free;
- 	}
+-static int sdhci_esdhc_remove(struct platform_device *pdev)
+-{
+-	return sdhci_pltfm_unregister(pdev);
+-}
+-
+ static const struct of_device_id sdhci_esdhc_of_match[] = {
+ 	{ .compatible = "fsl,mpc8379-esdhc" },
+ 	{ .compatible = "fsl,mpc8536-esdhc" },
+@@ -406,7 +401,7 @@ static struct platform_driver sdhci_esdhc_driver = {
+ 		.pm = ESDHC_PMOPS,
+ 	},
+ 	.probe = sdhci_esdhc_probe,
+-	.remove = sdhci_esdhc_remove,
++	.remove = sdhci_pltfm_unregister,
+ };
  
--	if (clk_prepare_enable(kona_dev->external_clk) != 0) {
-+	if (clk_prepare_enable(pltfm_priv->clk) != 0) {
- 		dev_err(dev, "Failed to enable external clock\n");
- 		goto err_pltfm_free;
- 	}
-@@ -333,7 +332,7 @@ err_reset:
- 	sdhci_bcm_kona_sd_reset(host);
+ module_platform_driver(sdhci_esdhc_driver);
+diff --git a/drivers/mmc/host/sdhci-of-hlwd.c b/drivers/mmc/host/sdhci-of-hlwd.c
+index be479279a1d5..4079a96ad37e 100644
+--- a/drivers/mmc/host/sdhci-of-hlwd.c
++++ b/drivers/mmc/host/sdhci-of-hlwd.c
+@@ -75,11 +75,6 @@ static int sdhci_hlwd_probe(struct platform_device *pdev)
+ 	return sdhci_pltfm_register(pdev, &sdhci_hlwd_pdata, 0);
+ }
  
- err_clk_disable:
--	clk_disable_unprepare(kona_dev->external_clk);
-+	clk_disable_unprepare(pltfm_priv->clk);
+-static int sdhci_hlwd_remove(struct platform_device *pdev)
+-{
+-	return sdhci_pltfm_unregister(pdev);
+-}
+-
+ static const struct of_device_id sdhci_hlwd_of_match[] = {
+ 	{ .compatible = "nintendo,hollywood-sdhci" },
+ 	{ }
+@@ -93,7 +88,7 @@ static struct platform_driver sdhci_hlwd_driver = {
+ 		.pm = SDHCI_PLTFM_PMOPS,
+ 	},
+ 	.probe = sdhci_hlwd_probe,
+-	.remove = sdhci_hlwd_remove,
++	.remove = sdhci_pltfm_unregister,
+ };
  
- err_pltfm_free:
- 	sdhci_pltfm_free(pdev);
-@@ -346,12 +345,11 @@ static int sdhci_bcm_kona_remove(struct platform_device *pdev)
+ module_platform_driver(sdhci_hlwd_driver);
+diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
+index 361952f958aa..e74e2fdcaeff 100644
+--- a/drivers/mmc/host/sdhci-sirf.c
++++ b/drivers/mmc/host/sdhci-sirf.c
+@@ -199,13 +199,6 @@ err_clk_prepare:
+ 	return ret;
+ }
+ 
+-static int sdhci_sirf_remove(struct platform_device *pdev)
+-{
+-	struct sdhci_host *host = platform_get_drvdata(pdev);
+-
+-	return sdhci_pltfm_unregister(pdev);
+-}
+-
+ #ifdef CONFIG_PM_SLEEP
+ static int sdhci_sirf_suspend(struct device *dev)
  {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_priv = sdhci_priv(host);
--	struct sdhci_bcm_kona_dev *kona_dev = sdhci_pltfm_priv(pltfm_priv);
- 	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
+@@ -255,7 +248,7 @@ static struct platform_driver sdhci_sirf_driver = {
+ #endif
+ 	},
+ 	.probe		= sdhci_sirf_probe,
+-	.remove		= sdhci_sirf_remove,
++	.remove		= sdhci_pltfm_unregister,
+ };
  
- 	sdhci_remove_host(host, dead);
+ module_platform_driver(sdhci_sirf_driver);
+diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+index 0019df452522..594a4ef3285b 100644
+--- a/drivers/mmc/host/sdhci-st.c
++++ b/drivers/mmc/host/sdhci-st.c
+@@ -113,11 +113,6 @@ err_of:
+ 	return ret;
+ }
  
--	clk_disable_unprepare(kona_dev->external_clk);
-+	clk_disable_unprepare(pltfm_priv->clk);
+-static int sdhci_st_remove(struct platform_device *pdev)
+-{
+-	return sdhci_pltfm_unregister(pdev);
+-}
+-
+ #ifdef CONFIG_PM_SLEEP
+ static int sdhci_st_suspend(struct device *dev)
+ {
+@@ -155,7 +150,7 @@ MODULE_DEVICE_TABLE(of, st_sdhci_match);
  
- 	sdhci_pltfm_free(pdev);
+ static struct platform_driver sdhci_st_driver = {
+ 	.probe = sdhci_st_probe,
+-	.remove = sdhci_st_remove,
++	.remove = sdhci_pltfm_unregister,
+ 	.driver = {
+ 		   .name = "sdhci-st",
+ 		   .pm = &sdhci_st_pmops,
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 12881e05ff30..2489bb753708 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -321,11 +321,6 @@ err_alloc_tegra_host:
+ 	return rc;
+ }
  
+-static int sdhci_tegra_remove(struct platform_device *pdev)
+-{
+-	return sdhci_pltfm_unregister(pdev);
+-}
+-
+ static struct platform_driver sdhci_tegra_driver = {
+ 	.driver		= {
+ 		.name	= "sdhci-tegra",
+@@ -333,7 +328,7 @@ static struct platform_driver sdhci_tegra_driver = {
+ 		.pm	= SDHCI_PLTFM_PMOPS,
+ 	},
+ 	.probe		= sdhci_tegra_probe,
+-	.remove		= sdhci_tegra_remove,
++	.remove		= sdhci_pltfm_unregister,
+ };
+ 
+ module_platform_driver(sdhci_tegra_driver);
 -- 
 1.9.3
 
