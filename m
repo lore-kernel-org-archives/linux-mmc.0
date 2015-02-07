@@ -1,326 +1,233 @@
-From: "Luca Porzio (lporzio)" <lporzio@micron.com>
-Subject: RE: [PATCH v3] mmc: Add Production State Awareness Support
-Date: Fri, 6 Feb 2015 13:57:44 +0000
-Message-ID: <26E7A31274623843B0E8CF86148BFE3201167C60EA@NTXBOIMBX08.micron.com>
-References: <1417020269-3993-1-git-send-email-alex.lemberg@sandisk.com>
+From: NeilBrown <neilb@suse.de>
+Subject: Re: [PATCH V4 1/4] mmc: core: Initial support for MMC power
+ sequences
+Date: Sat, 7 Feb 2015 12:07:23 +1100
+Message-ID: <20150207120723.7e968aec@notabene.brown>
+References: <1421658784-11980-1-git-send-email-ulf.hansson@linaro.org>
+	<1421658784-11980-2-git-send-email-ulf.hansson@linaro.org>
+	<CABxcv==xBNsh+NrVb8PcBVtxQOKDL79YMkwK=wOL0gJZriEUjw@mail.gmail.com>
+	<CAPDyKFoze-26fPm+C=D_o3tMSXWeTV4=2ZfOKaC3uLtxCrtjvg@mail.gmail.com>
+	<20150131092715.566fa33c@notabene.brown>
+	<CAPDyKFo6G+PpV7QpxBEOS_xUxXTQ14v=qVLGpBjT_z6T0vP85A@mail.gmail.com>
+	<20150202150537.GE8656@n2100.arm.linux.org.uk>
+	<CAPDyKFqjeg0d7r5XSK0d1EYfm2dvET3PQiHsDE_XchqFVYyC6g@mail.gmail.com>
+	<20150203091042.379c7948@notabene.brown>
+	<CAPDyKFpv4joU54tnO6N7zWmVV_021KFjQsscfpHHLjdqCCe8Xw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ boundary="Sig_/wv8uU=fq3K24hg4PL5BUmHs"; protocol="application/pgp-signature"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout.micron.com ([137.201.242.129]:34385 "EHLO
-	mailout.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751999AbbBFN56 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Feb 2015 08:57:58 -0500
-In-Reply-To: <1417020269-3993-1-git-send-email-alex.lemberg@sandisk.com>
-Content-Language: en-US
+Received: from cantor2.suse.de ([195.135.220.15]:59795 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751191AbbBGBHe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 6 Feb 2015 20:07:34 -0500
+In-Reply-To: <CAPDyKFpv4joU54tnO6N7zWmVV_021KFjQsscfpHHLjdqCCe8Xw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <alex.lemberg@sandisk.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, "avi.shchislowski@sandisk.com" <avi.shchislowski@sandisk.com>, "Bruce Ford (bford)" <bford@micron.com>, "Brett Hunter (bhunter)" <bhunter@micron.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Javier Martinez Canillas <javier@dowhile0.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-arm-kernel@lists.infradead.org
+	<linux-arm-kernel@lists.infradead.org>," <mark.rutland@arm.com>, GTA04 owners <gta04-owner@goldelico.com>
 
-Alex, Ulf,
+--Sig_/wv8uU=fq3K24hg4PL5BUmHs
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
-I am not sure about the status of this patch.
-Still I would like to give some feedback.
+On Tue, 3 Feb 2015 13:39:13 +0100 Ulf Hansson <ulf.hansson@linaro.org> wrot=
+e:
 
-The Jedec specification requires to check the=20
-PRODUCTION_STATE_AWARENESS_ENABLEMENT (ext_csd[17])=20
-register before issuing a PSA command.
-Actually in some devices the PSA register might be a=20
-"don't care" random value if the=20
-PRODUCTION_STATE_AWARENESS_ENABLEMENT shows that device=20
-is not supporting MANUAL mode.
+> On 2 February 2015 at 23:10, NeilBrown <neilb@suse.de> wrote:
+> > On Mon, 2 Feb 2015 16:10:29 +0100 Ulf Hansson <ulf.hansson@linaro.org> =
+wrote:
+> >
+> >> On 2 February 2015 at 16:05, Russell King - ARM Linux
+> >> <linux@arm.linux.org.uk> wrote:
+> >> > On Mon, Feb 02, 2015 at 03:57:37PM +0100, Ulf Hansson wrote:
+> >> >> On 30 January 2015 at 23:27, NeilBrown <neilb@suse.de> wrote:
+> >> >> > Shortly before this call is
+> >> >> >
+> >> >> >         host->ios.power_mode =3D MMC_POWER_ON;
+> >> >> >         mmc_set_ios(host);
+> >> >> >
+> >> >> > and omap_hsmmc_set_ios() contains:
+> >> >> >
+> >> >> >                 switch (ios->power_mode) {
+> >> >> >                 ....
+> >> >> >                 case MMC_POWER_ON:
+> >> >> >                         do_send_init_stream =3D 1;
+> >> >> >                         break;
+> >> >> >
+> >> >> >
+> >> >> >         if (do_send_init_stream)
+> >> >> >                 send_init_stream(host);
+> >> >> >
+> >> >> > Which sends the "init stream" to the card.
+> >> >> > If the card is still being reset at this time, the stream may not
+> >> >> > be effective.
+> >> >> >
+> >> >> > I find that about 10%-20% of the time when I release the reset li=
+ne
+> >> >> > *after* the sequence is sent, my card fails to initialised.  When=
+ I
+> >> >> > release *before* the sequence is sent, it never fails.
+> >> >>
+> >> >> Okay, thanks for providing these details.
+> >> >
+> >> > The right thing to do then is to pulse the reset line at the pre-pow=
+er-up
+> >> > stage.
+> >>
+> >> I don't think that will work, since the card hasn't yet been powered
+> >> and will thus not respond properly to the reset.
+> >
+> > My understanding, at least in the case of my hardware, is that the powe=
+r-on
+> > is sufficient to reset the device.
+> > In my case, the one supply is shared between two devices (wifi and blue=
+tooth)
+> > so if the bluetooth is on, then the wifi cannot be power-cycled.  That =
+is
+> > when the reset is particularly needed.
+> >
+> > I'll try to arrange some testing to confirm this is the case.  Of cours=
+e,
+> > this would not be general result, it would only be relevant for my hard=
+ware.
+>=20
+> I refreshed my memory for how the cw1200 WLAN device works on the
+> ux500 SOC. I decided to post the complete information here, also for
+> my own reference.
+>=20
+> These resources need to be controlled during the power sequence of CW1200:
+> There are two GPIOs (one reset and one for SPI/SDIO selection), one LP
+> (low power) clock and a few power supplies.
+>=20
+> The sequence for power up that needs to be followed are:
+> 1. Keep reset GPIO asserted.
+> 2. Enable power supplies.
+> 3. Enable LP clock.
+> 4. Wait a few LP clock cycles to let power/clock stabilize.
+> 5. Make sure SPI/SDIO select pin is in SDIO mode. The value will be
+> sampled by the WLAN device when reset GPIO is de-asserted.
+> 6. De-assert reset GPIO.
+> 7. Wait 30 ms for the WLAN device to power up.
+>=20
+> The power supplies may also be shared with a bluetooth device. That
+> also means the reset GPIO must be kept asserted in power off state, to
+> prevent power up of the WLAN device.
+>=20
+> >From the above, it's clear that toggling the reset GPIOs in the
+> ->pre_power_on() phase won't work for CW1200/UX500 case.  That in
+> conjunction with the "init stream" issue tells me that we need to
+> progress with the below patch:
+>=20
+> "mmc: core: Invoke mmc_pwrseq_post_power_on() prior MMC_POWER_ON state"
+> http://www.spinics.net/lists/arm-kernel/msg396592.html
+>=20
+> Kind regards
+> Uffe
 
-Thus we propose some changes to Alex patch=20
-in order to check the ext_csd[17] before actually=20
-taking any action.
-Even if the modified lines are few, I was not able to=20
-efficiently merge my proposals with Alex code.
-Please forgive me if I post a new patch which=20
-includes both my changes and Alex original=20
-patch.
++ gta04-owner.
 
-With these small changes, patch is fine for us.
+Thanks for those details.  They reminded me that I have seen something
+similar for the wifi chip I use, and I found it here:
 
-Cheers,
-  Luca
+ http://lists.goldelico.com/pipermail/gta04-owner/2012-March/001917.html
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 7466ce0..52c8cc9 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -571,6 +571,29 @@ static int mmc_decode_ext_csd(struct mmc_card *car=
-d, u8 *ext_csd)
- 		card->ext_csd.ffu_capable =3D
- 			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
- 			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
-+ 	=09
-+        /*=20
-+         * PSA ext_csd parsing
-+         * Note: Only Manual mode needs to be supported=20
-+         */
-+        card->ext_csd.psa_enablement =3D
-+            (ext_csd[EXT_CSD_PSA_ENABLEMENT] & 1);=20
-+        if (card->ext_csd.psa_enablement) {
-+            card->ext_csd.psa =3D
-+                ext_csd[EXT_CSD_PSA];
-+            if (ext_csd[EXT_CSD_PSA_TIMEOUT] > 0) {
-+                card->ext_csd.psa_timeout =3D
-+                    100 *
-+                    (1 << ext_csd[EXT_CSD_PSA_TIMEOUT]);
-+            } else {
-+                pr_warn("%s: EXT_CSD PSA Timeout is zero\n",=20
-+                mmc_hostname(card->host));
-+            }
-+        } else {
-+            card->ext_csd.psa =3D EXT_CSD_PSA_NORMAL;
-+            card->ext_csd.psa_timeout =3D 0;
-+        }
-+       =20
- 	}
- out:
- 	return err;
-@@ -1358,6 +1381,24 @@ static int mmc_init_card(struct mmc_host *host, =
-u32 ocr,
- 	}
-=20
- 	/*
-+ 	 * eMMC v5.0 or later
-+ 	 * and Production State Awareness state is
-+ 	 * EXT_CSD_PSA_POST_SOLDERING_WRITES (0x02)
-+ 	 * The host should set the device to NORMAL mode
-+ 	 */
-+ 	if ((card->ext_csd.rev >=3D 7) && (card->ext_csd.psa_enablement) &&
-+ 		(card->ext_csd.psa =3D=3D EXT_CSD_PSA_POST_SOLDERING_WRITES)) {
-+ 		unsigned int timeout;
-+=20
-+ 		timeout =3D DIV_ROUND_UP(card->ext_csd.psa_timeout, 1000);
-+ 		card->ext_csd.psa =3D EXT_CSD_PSA_NORMAL;
-+ 		err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+ 			EXT_CSD_PSA, card->ext_csd.psa, timeout);
-+ 		if (err && err !=3D -EBADMSG)
-+ 			goto free_card;
-+ 	}
-+=20
-+ 	/*
- 	 * If enhanced_area_en is TRUE, host needs to enable ERASE_GRP_DEF
- 	 * bit.  This bit will be lost every time after a reset or power off.
- 	 */
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 4d69c00..8dc1148 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -60,9 +60,12 @@ struct mmc_ext_csd {
- 	u8			packed_event_en;
- 	unsigned int		part_time;		/* Units: ms */
- 	unsigned int		sa_timeout;		/* Units: 100ns */
--	unsigned int		generic_cmd6_time;	/* Units: 10ms */
-+    unsigned int		psa_timeout;		/* Units: 100us */
-+    unsigned int		generic_cmd6_time;	/* Units: 10ms */
- 	unsigned int            power_off_longtime;     /* Units: ms */
- 	u8			power_off_notification;	/* state */
-+    u8			psa_enablement; /* production state awareness enablement*/
-+    u8			psa; /* production state awareness */
- 	unsigned int		hs_max_dtr;
- 	unsigned int		hs200_max_dtr;
- #define MMC_HIGH_26_MAX_DTR	26000000
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 49ad7a9..435e9ef 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -277,6 +277,7 @@ struct _mmc_csd {
-  * EXT_CSD fields
-  */
-=20
-+#define EXT_CSD_PSA_ENABLEMENT			17	/* RO */
- #define EXT_CSD_FLUSH_CACHE		32      /* W */
- #define EXT_CSD_CACHE_CTRL		33      /* R/W */
- #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
-@@ -285,6 +286,7 @@ struct _mmc_csd {
- #define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
- #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
- #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
-+#define EXT_CSD_PSA			133	/* R/W/E */
- #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
- #define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
- #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
-@@ -315,6 +317,7 @@ struct _mmc_csd {
- #define EXT_CSD_PWR_CL_26_360		203	/* RO */
- #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
- #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
-+#define EXT_CSD_PSA_TIMEOUT		218	/* RO */
- #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
- #define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
- #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
-@@ -428,6 +431,12 @@ struct _mmc_csd {
- #define EXT_CSD_PACKED_INDEXED_ERROR	BIT(1)
-=20
- /*
-+ * PRODUCTION STATE AWARENESS fields
-+ */
-+#define EXT_CSD_PSA_NORMAL		0x00
-+#define EXT_CSD_PSA_POST_SOLDERING_WRITES	0x02
-+=20
-+/*
-  * BKOPS status level
-  */
- #define EXT_CSD_BKOPS_LEVEL_2		0x2
+In particular:
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Alex Lemberg
-> Sent: mercoled=EC 26 novembre 2014 17:44
-> To: ulf.hansson@linaro.org
-> Cc: linux-mmc@vger.kernel.org; chris@printf.net;
-> avi.shchislowski@sandisk.com; Alex Lemberg
-> Subject: [PATCH v3] mmc: Add Production State Awareness Support
->=20
-> In this patch driver should recognize if eMMC device (Rev >=3D5.0) wa=
-s left
-> in PRE_SOLDERING_POST_WRITES (0x02) state, and switch it to NORMAL (0=
-x00).
-> PRE_SOLDERING_POST_WRITES (0x02) state - represents a state where the
-> device is in production process and the host (usually programmer)
-> completed loading the content to the device.
-> The host (usually programmer) sets the device to this state after loa=
-ding
-> the content and just before soldering.
-> After soldering the device to the real host (not programmer), the dev=
-ice
-> should be switched to NORMAL (0x00) mode.
-> The NORMAL (0x00) mode of PSA register represents a state in which th=
-e
-> device is running in the field and uses regular operations.
-> Leaving device in PRE_SOLDERING_POST_WRITES (0x02) might cause unexpe=
-cted
-> behaviour of eMMC device.
->=20
-> More details about PSA feature can be found in eMMC5.0 JEDEC spec (JE=
-SD84-
-> B50.pdf):
-> http://www.jedec.org/standards-documents/technology-focus-areas/flash=
--
-> memory-ssds-ufs-emmc/e-mmc
->=20
-> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
-> ---
-> Changes in v2:
->  - Remove typo in patch code
-> Changes in v3:
->  - Move ext_csd revision check
-> ---
->  drivers/mmc/core/mmc.c   | 28 ++++++++++++++++++++++++++++
->  include/linux/mmc/card.h |  2 ++
->  include/linux/mmc/mmc.h  |  8 ++++++++
->  3 files changed, 38 insertions(+)
->=20
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
-> 02ad792..2c523ca 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -571,6 +571,16 @@ static int mmc_decode_ext_csd(struct mmc_card *c=
-ard,
-> u8 *ext_csd)
->  		card->ext_csd.ffu_capable =3D
->  			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
->  			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
-> +		card->ext_csd.psa =3D
-> +			ext_csd[EXT_CSD_PSA];
-> +		if (ext_csd[EXT_CSD_PSA_TIMEOUT] > 0) {
-> +			card->ext_csd.psa_timeout =3D
-> +				100 *
-> +				(1 << ext_csd[EXT_CSD_PSA_TIMEOUT]);
-> +		} else {
-> +			pr_warn("%s: EXT_CSD PSA Timeout is zero\n",
-> +					mmc_hostname(card->host));
-> +		}
->  	}
->  out:
->  	return err;
-> @@ -1358,6 +1368,24 @@ static int mmc_init_card(struct mmc_host *host=
-, u32
-> ocr,
->  	}
->=20
->  	/*
-> +	 * eMMC v5.0 or later
-> +	 * and Production State Awareness state is
-> +	 * EXT_CSD_PSA_POST_SOLDERING_WRITES (0x02)
-> +	 * The host should set the device to NORMAL mode
-> +	 */
-> +	if ((card->ext_csd.rev >=3D 7) &&
-> +		(card->ext_csd.psa =3D=3D EXT_CSD_PSA_POST_SOLDERING_WRITES)) {
-> +		unsigned int timeout;
-> +
-> +		timeout =3D DIV_ROUND_UP(card->ext_csd.psa_timeout, 1000);
-> +		card->ext_csd.psa =3D EXT_CSD_PSA_NORMAL;
-> +		err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +			EXT_CSD_PSA, card->ext_csd.psa, timeout);
-> +		if (err && err !=3D -EBADMSG)
-> +			goto free_card;
-> +	}
-> +
-> +	/*
->  	 * If enhanced_area_en is TRUE, host needs to enable ERASE_GRP_DEF
->  	 * bit.  This bit will be lost every time after a reset or power
-> off.
->  	 */
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h inde=
-x
-> 4d69c00..09ac3b0 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -60,9 +60,11 @@ struct mmc_ext_csd {
->  	u8			packed_event_en;
->  	unsigned int		part_time;		/* Units: ms */
->  	unsigned int		sa_timeout;		/* Units: 100ns */
-> +	unsigned int		psa_timeout;		/* Units: 100us */
->  	unsigned int		generic_cmd6_time;	/* Units: 10ms */
->  	unsigned int            power_off_longtime;     /* Units: ms */
->  	u8			power_off_notification;	/* state */
-> +	u8			psa; /* production state awareness */
->  	unsigned int		hs_max_dtr;
->  	unsigned int		hs200_max_dtr;
->  #define MMC_HIGH_26_MAX_DTR	26000000
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h index
-> 49ad7a9..458814d 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -285,6 +285,7 @@ struct _mmc_csd {
->  #define EXT_CSD_EXP_EVENTS_STATUS	54	/* RO, 2 bytes */
->  #define EXT_CSD_EXP_EVENTS_CTRL		56	/* R/W, 2 bytes */
->  #define EXT_CSD_DATA_SECTOR_SIZE	61	/* R */
-> +#define EXT_CSD_PSA			133	/* R/W/E */
->  #define EXT_CSD_GP_SIZE_MULT		143	/* R/W */
->  #define EXT_CSD_PARTITION_SETTING_COMPLETED 155	/* R/W */
->  #define EXT_CSD_PARTITION_ATTRIBUTE	156	/* R/W */
-> @@ -315,6 +316,7 @@ struct _mmc_csd {
->  #define EXT_CSD_PWR_CL_26_360		203	/* RO */
->  #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
->  #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
-> +#define EXT_CSD_PSA_TIMEOUT		218	/* RO */
->  #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
->  #define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
->  #define EXT_CSD_ERASE_TIMEOUT_MULT	223	/* RO */
-> @@ -433,6 +435,12 @@ struct _mmc_csd {
->  #define EXT_CSD_BKOPS_LEVEL_2		0x2
->=20
->  /*
-> + * PRODUCTION STATE AWARENESS fields
-> + */
-> +#define EXT_CSD_PSA_NORMAL		0x00
-> +#define EXT_CSD_PSA_POST_SOLDERING_WRITES	0x02
-> +
-> +/*
->   * MMC_SWITCH access modes
->   */
->=20
-> --
-> 2.1.0
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org More majordomo inf=
-o at
-> http://vger.kernel.org/majordomo-info.html
+  After power-up the reset line should be active for >500us and then
+  go high. A short impulse (1-20 us) can later reset the WiFi part.
+
+Also, the wifi and bluetooth share both a power supply and a reset line.
+However:
+
+  BT also does not need a reset (unless you try to communicate
+  with wrong baudrate and the HCI protocol gets unsynchronized).
+
+  An impulse >5ms does a BT reset. Or a break condition on the
+  RX line.
+
+
+My experiments confirm that if the bluetooth is inactive so that the mmc ho=
+st
+is actually able to power-cycle the wifi, then the reset line isn't needed.
+However if the bluetooth is holding the power supply enabled, then we
+definitely need the reset to be pulsed low in mmc_power_up(), or the wifi
+doesn't initialise properly.
+
+Putting this all together, it seems like the ideal would be:
+ - if power supply is already on, pulse reset for 20us, else
+   pull reset low
+ - enable power supply
+ - wait 1ms
+ - raise reset line
+ - wait 30ms
+
+This should ensure that the BT doesn't get reset, but that the wifi does.
+
+However my further test results raise some questions.
+If I have  BT active and pulse the reset for 1ms (using mdelay(1)), the wifi
+doesn't initialise.  I get ETIMEDOUT from mmc_send_io_op_cond.
+I need to increase the delay to mdelay(10) before that error goes away.
+
+With that in place the wifi seems to work, but I get regular
+
+  Bluetooth: hci0 hardware error 0x37
+
+errors.  So I'm guessing that tying the two reset lines together might not
+have been such a good idea.  I don't know yet how that actually affect any
+active bluetooth session.
+
+Even with the 10ms delay I do sometimes get errors ... I think.  I only have
+concrete evidence when I was testing with "mmc_delay(1)" which in practice
+appears to often delay for 10ms or more, probably due to the cond_resched();
+
+However I sometimes got messages like:
+
+[ 5349.438903] mmc1: queuing unknown CIS tuple 0x36 (1 bytes)
+[ 5349.502868] mmc1: queuing unknown CIS tuple 0x0c (97 bytes)
+[ 5349.518737] mmc1: queuing unknown CIS tuple 0x01 (16 bytes)
+
+If I still get these with the more reliable mdelay(), I'm leaning towards s=
+imply trying
+sdio_init_card() within mmc_sdio_power_restore().  The errors occur less th=
+an 1% of the
+time, so this might be effective.
+
+With respect to the current patch, this all simply means that a 10ms down
+pulse on the reset is needed.  You currently have mmc_delay(10) in the and
+that should be sufficient.  mmc_delay() may take longer than the requested
+time, but should never take less time.
+
+I had thought that a strict upper limit on the pulse might be important for
+BT.  It seems that I cannot leave BT completely unaffected but, on my device
+at least, holding reset low whenever wifi is not enabled would not be good =
+as
+it would break BT.
+
+Thanks,
+NeilBrown
+
+--Sig_/wv8uU=fq3K24hg4PL5BUmHs
+Content-Type: application/pgp-signature
+Content-Description: OpenPGP digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQIVAwUBVNVlSznsnt1WYoG5AQKgBBAAjwD+T+6GWPTID8/aTNCf/O2/yb6eojkg
+SLYAbynyIzVvxGfdcesptF13OUvm8t8/o7cCf4Fg9tPFexDikCeCbhjScYEC7gOD
+uxDQFvnNOCzfEfoCJocB3Lwa0Arfijef1ZhsHBM8HJU49/Q64QwV7QdBUxJdIwP9
+QKw0VAEioC0avRdFqeNg/g9GhkFXy6gZEL4/NKiFHtd6KVuuJVusOZTTKDNwrpyK
+GQaERptC/UhXb660atNU5oydr9r8Q3egMDCJruvLM2gDv8F8rkrAVmY4Lc4fpl9f
+nvGz2H89Chjs2AzeofhW+vmjJT5WZhEUBts8EtOAjSL1dYEZZx9ZfRYlzaINrU63
+wtx7q254GhNQX93ifOU5PgHjo0+c1KC2pLp04vGz1vflo22I/uOXqdjJckw4kp40
+TnTskSSSAacLqW5y4wVXgrHhGMYNLC0J27KoDVxQFXb17ekndgpO2R7kEUiVNBr9
+wHHnQK61193uT9Pgh9IyvNV16T6COlizIhvShnP6SRDhcZXn4sXuSbuBvURN/PQs
+PBIluYwA4sUORKlHhV9JH6tc45W871S8Lg4Nz0qDg6bJEX7gYlSPUaZE+gnsxS3v
+/4etY6XxKN/3GnxEzphAKDix78fF5iTbY1fOoC26PoA+rGN8GmAeGy1DHEGWCp8a
+jwu5r16dxDM=
+=l3YJ
+-----END PGP SIGNATURE-----
+
+--Sig_/wv8uU=fq3K24hg4PL5BUmHs--
