@@ -1,51 +1,103 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V2 15/15] mmc: core: Don't print reset warning if reset
- is not supported
-Date: Mon, 09 Feb 2015 11:47:00 +0200
-Message-ID: <54D88214.5000204@intel.com>
-References: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com> <1422522030-17793-16-git-send-email-adrian.hunter@intel.com> <54D87EFC.9060404@broadcom.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2 1/2] mmc: dw_mmc: fix bug that cause 'Timeout sending
+ command'
+Date: Mon, 09 Feb 2015 19:01:04 +0900
+Message-ID: <54D88560.4050808@samsung.com>
+References: <1423134801-23219-1-git-send-email-addy.ke@rock-chips.com>
+ <1423466726-20833-1-git-send-email-addy.ke@rock-chips.com>
+ <1423466726-20833-2-git-send-email-addy.ke@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:31481 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1759979AbbBIJsx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 9 Feb 2015 04:48:53 -0500
-In-Reply-To: <54D87EFC.9060404@broadcom.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <1423466726-20833-2-git-send-email-addy.ke@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Addy Ke <addy.ke@rock-chips.com>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, tgih.jun@samsung.com, chris@printf.net, ulf.hansson@linaro.org, dinguyen@altera.com, heiko@sntech.de, olof@lixom.net, dianders@chromium.org, sonnyrao@chromium.org, amstan@chromium.org, djkurtz@chromium.org
+Cc: devicetree@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, zhenfu.fang@rock-chips.com, cf@rock-chips.com, lintao@rock-chips.com, chenfen@rock-chips.com, zyf@rock-chips.com, xjq@rock-chips.com, huangtao@rock-chips.com, zyw@rock-chips.com, yzq@rock-chips.com, hj@rock-chips.com, kever.yang@rock-chips.com, zhangqing@rock-chips.com, hl@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
-To: Arend van Spriel <arend@broadcom.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>
 
-On 09/02/15 11:33, Arend van Spriel wrote:
-> On 01/29/15 10:00, Adrian Hunter wrote:
->> Check the error code for EOPNOTSUPP and do not print
->> reset warning in that case.
->>
->> Signed-off-by: Adrian Hunter<adrian.hunter@intel.com>
->> ---
->>   drivers/mmc/core/core.c | 3 ++-
->>   1 file changed, 2 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index 392a150..d439bf0 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -2368,7 +2368,8 @@ int mmc_hw_reset(struct mmc_host *host)
->>       ret = host->bus_ops->reset(host);
->>       mmc_bus_put(host);
->>
->> -    pr_warn("%s: tried to reset card\n", mmc_hostname(host));
->> +    if (ret != -EOPNOTSUPP)
->> +        pr_warn("%s: tried to reset card\n", mmc_hostname(host));
+Hi, Addy.
+
+On 02/09/2015 04:25 PM, Addy Ke wrote:
+> Because of some uncertain factors, such as worse card or worse hardware,
+> DAT[3:0](the data lines) may be pulled down by card, and mmc controller
+> will be in busy state. This should not happend when mmc controller
+> send command to update card clocks. If this happends, mci_send_cmd will
+> be failed and we will get 'Timeout sending command', and then system will
+> be blocked. To avoid this, we need reset mmc controller.
 > 
-> Guess you don't want this message either if ret is zero.
+> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 28 ++++++++++++++++++++++++++++
+>  1 file changed, 28 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 4d2e3c2..b0b57e3 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -100,6 +100,7 @@ struct idmac_desc {
+>  };
+>  #endif /* CONFIG_MMC_DW_IDMAC */
+>  
+> +static int dw_mci_card_busy(struct mmc_host *mmc);
+>  static bool dw_mci_reset(struct dw_mci *host);
+>  static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
+>  
+> @@ -888,6 +889,31 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
+>  		cmd, arg, cmd_status);
+>  }
+>  
+> +static void dw_mci_wait_busy(struct dw_mci_slot *slot)
+> +{
+> +	struct dw_mci *host = slot->host;
+> +	unsigned long timeout = jiffies + msecs_to_jiffies(500);
+> +
+> +	do {
+> +		if (!dw_mci_card_busy(slot->mmc))
+> +			return;
+> +		cpu_relax();
+> +	} while (time_before(jiffies, timeout));
+> +
+> +	dev_err(host->dev, "Data busy (status %#x)\n",
+> +		mci_readl(slot->host, STATUS));
+> +
+> +	/*
+> +	 * Data busy, this should not happend when mmc controller send command
+> +	 * to update card clocks in non-volt-switch state. If it happends, we
+> +	 * should reset controller to avoid getting "Timeout sending command".
+> +	 */
+> +	dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS);
 
-Thanks for your comment.
+If reset is failed, then dw_mci_ctrl_reset should return "false".
 
-I assumed the original author wants to see the message whenever reset is
-attempted, which is OK by me because it is on the recovery path i.e.
-hopefully rare. The EOPNOTSUPP case is consistent with the code further up
-which returns EOPNOTSUPP when there is no ->reset() callback.
+	ret = dw_mci_ctrl_reset();
 
+	WARN_ON(!ret || dw_mci_card_busy(slot->mmc));
+
+Is it right?
+
+In my experiment, if reset is failed or card is busy, eMMC can't work anymore..right?
+I think this patch is reasonable to prevent blocking issue.
+
+Best Regards,
+Jaehoon Chung
+
+
+> +
+> +	/* Fail to reset controller or still data busy, WARN_ON! */
+> +	WARN_ON(dw_mci_card_busy(slot->mmc));
+> +}
+> +
+>  static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>  {
+>  	struct dw_mci *host = slot->host;
+> @@ -899,6 +925,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>  	/* We must continue to set bit 28 in CMD until the change is complete */
+>  	if (host->state == STATE_WAITING_CMD11_DONE)
+>  		sdmmc_cmd_bits |= SDMMC_CMD_VOLT_SWITCH;
+> +	else
+> +		dw_mci_wait_busy(slot);
+>  
+>  	if (!clock) {
+>  		mci_writel(host, CLKENA, 0);
+> 
