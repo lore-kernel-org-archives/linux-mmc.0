@@ -1,55 +1,61 @@
-From: "Simon Raffeiner (SCC)" <simon.raffeiner@kit.edu>
-Subject: Re: "Timeout waiting for hardware interrupt" on Lenovo Thinkpad Tablet
- 10
-Date: Sun, 8 Feb 2015 12:54:12 +0100
-Message-ID: <54D74E64.2090809@kit.edu>
-References: <54CF7DCB.8070302@kit.edu> <54CF847F.3070800@m-labs.hk>
+From: Barry Song <21cnbao@gmail.com>
+Subject: [RFC] MMC: CMD52 During Data Transfer support
+Date: Mon, 9 Feb 2015 11:14:48 +0800
+Message-ID: <CAGsJ_4xeWOXtav4HhpB_4XhkXHqS4+V81tSw4LGT3Yvtq79qxQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from scc-mailout-kit-02.scc.kit.edu ([129.13.231.82]:50253 "EHLO
-	scc-mailout-kit-02.scc.kit.edu" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753755AbbBHLyV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Feb 2015 06:54:21 -0500
-In-Reply-To: <54CF847F.3070800@m-labs.hk>
+Received: from mail-pd0-f177.google.com ([209.85.192.177]:43123 "EHLO
+	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759272AbbBIDPI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Feb 2015 22:15:08 -0500
+Received: by pdev10 with SMTP id v10so5429157pde.10
+        for <linux-mmc@vger.kernel.org>; Sun, 08 Feb 2015 19:15:08 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?B?U8OpYmFzdGllbiBCb3VyZGVhdWR1Y3E=?= <sb@m-labs.hk>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: Yonghui.Zhang@csr.com, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, yongsheng.liu@csr.com
 
-Hello everybody,
+hi Chris, Ulf,
+According to https://www.sdcard.org/downloads/pls/simplified_specs/archive/partE1_200.pdf
+(section CMD52 During Data Transfer ),
+A card may accept CMD52 during data transfer if it supports Direct
+Commands (see SDC, Table 6-3). For both SD and SPI modes, if an error
+occurs during data transfer the SDIO card shall accept CMD52 to allow
+I/O abort and reset regardless of this bit value of the value of SDC.
 
-is there a "safe" combination of parameters for sdhci.debug_quirks and
-sdhci.debug_quirks2 which should work in all cases, sacrificing perform=
-ance?
+But drivers/mmc/host/sdhci.c doesn't support this mode if i didn't
+miss something:-) we need it now to improve he throughput of a high
+speed Software Digital Radio SDIO card. so we'd like to add support
+for it.
 
-regards,
-Simon
+a simple idea is
 
+1. we need to drop this WARN_ON:
 
-Am 02.02.2015 um 15:06 schrieb S=C3=A9bastien Bourdeauducq:
-> On 02/02/2015 09:38 PM, Simon Raffeiner (SCC) wrote:
->> I am currently trying to install Ubuntu 15.04
->=20
-> Another bug with the Ubuntu installer on this pesky computer is it
-> attempts to access the rpmb partition, fails, and aborts the
-> installation. For some reason, debug_quirks2=3D0xc0 also works around=
- this
-> problem.
->=20
->> the tablet also crashes if the eMMC storage is not used as the
->> root filesystem, it also happens in the live environment booted off =
-the
->> USB stick, e.g. when trying to do an mkfs on one of the eMMC partiti=
-ons.
->=20
-> I also experienced freezes when booted from a Arch Linux USB stick
-> (2015.01.01 with 3.17.6 kernel), and I gave up and went for Ubuntu wh=
-ere
-> strangely enough those crashes did not happen. I don't know if they a=
-re
-> related to the eMMC as I was not able to get any kernel message (the
-> machine simply stops responding completely).
->=20
-> S=C3=A9bastien
+1343 static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+1344 {
+1345         struct sdhci_host *host;
+1346         int present;
+1347         unsigned long flags;
+1348         u32 tuning_opcode;
+1349
+1350         host = mmc_priv(mmc);
+1351
+1352         sdhci_runtime_pm_get(host);
+1353
+1354         present = mmc_gpio_get_cd(host->mmc);
+1355
+1356         spin_lock_irqsave(&host->lock, flags);
+1357
+1358         WARN_ON(host->mrq != NULL);
+
+2. we need to permit a new command to execute even when host->mrq is
+not NULL and a CMD53 is ongoing.
+this means we might add a new cmd52 request field in host struct to
+buffer CMD52 request. and after the cmd52 finishes, we still need the
+capability to wake up the blocking thread.
+
+I'd like to know your suggestions on this feature.
+
+-barry
