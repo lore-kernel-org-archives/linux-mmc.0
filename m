@@ -1,131 +1,112 @@
-From: Alexandre Courbot <gnurou@gmail.com>
-Subject: Re: [PATCH V4 4/4] mmc: pwrseq_simple: Add support for a reset GPIO pin
-Date: Tue, 10 Feb 2015 18:12:51 +0900
-Message-ID: <CAAVeFuJjU-fsknYdMZ1c+aOEmc2rFy=z35S584DfHBLvUm=OAQ@mail.gmail.com>
-References: <1421658784-11980-1-git-send-email-ulf.hansson@linaro.org> <1421658784-11980-5-git-send-email-ulf.hansson@linaro.org>
+From: Yingjoe Chen <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: Re: [PATCH 1/7] pinctrl: mediatek: emulate GPIO interrupt on
+ both-edges
+Date: Tue, 10 Feb 2015 17:22:41 +0800
+Message-ID: <1423560161.24705.15.camel@mtksdaap41>
+References: <1422339332-27498-1-git-send-email-chaotian.jing@mediatek.com>
+	 <1422339332-27498-2-git-send-email-chaotian.jing@mediatek.com>
+	 <20150210084021.GM10842@pengutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f176.google.com ([209.85.223.176]:44307 "EHLO
-	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752755AbbBJJNM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Feb 2015 04:13:12 -0500
-In-Reply-To: <1421658784-11980-5-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20150210084021.GM10842-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Uwe =?ISO-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Cc: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rojhalat Ibrahim <imr@rtschenk.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Olof Johansson <olof@lixom.net>, Russell King <linux@arm.linux.org.uk>, Hans de Goede <hdegoede@redhat.com>, Doug Anderson <dianders@chromium.org>, NeilBrown <neilb@suse.de>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, Mark Rutland <mark.rutland@arm.com>
 
-On Mon, Jan 19, 2015 at 6:13 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> The need for reset GPIOs has several times been pointed out from
-> erlier posted patchsets. Especially some WLAN chips which are
-> attached to an SDIO interface may use a GPIO reset.
->
-> The reset GPIO is asserted at initialization and prior we start the
-> power up procedure. The GPIO will be de-asserted right after the power
-> has been provided to the card, from the ->post_power_on() callback.
->
-> Note, the reset GPIO is optional. Thus we don't return an error even if
-> we can't find a GPIO for the consumer.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+On Tue, 2015-02-10 at 09:40 +0100, Uwe Kleine-K=C3=B6nig wrote:
+> Hello,
+>=20
+> On Tue, Jan 27, 2015 at 02:15:26PM +0800, Chaotian Jing wrote:
+> > From: Yingjoe Chen <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+> >=20
+> > MTK EINT does not support generating interrupt on both edges.
+> > Emulate this by changing edge polarity while enable irq,
+> > set types and interrupt handling. This follows an example of
+> > drivers/gpio/gpio-mxc.c.
+<...>
+> > +static int mtk_eint_flip_edge(struct mtk_pinctrl *pctl, int hwirq)
+> > +{
+> > +	int start_level, curr_level;
+> > +	unsigned int reg_offset;
+> > +	const struct mtk_eint_offsets *eint_offsets =3D &(pctl->devdata->=
+eint_offsets);
+> > +	u32 mask =3D 1 << (hwirq & 0x1f);
+> > +	u32 port =3D (hwirq >> 5) & eint_offsets->port_mask;
+> > +	void __iomem *reg =3D pctl->eint_reg_base + (port << 2);
+> > +	const struct mtk_desc_pin *pin;
+> > +
+> > +	pin =3D mtk_find_pin_by_eint_num(pctl, hwirq);
+> > +	curr_level =3D mtk_gpio_get(pctl->chip, pin->pin.number);
+> > +	do {
+> > +		start_level =3D curr_level;
+> > +		if (start_level)
+> > +			reg_offset =3D eint_offsets->pol_clr;
+> > +		else
+> > +			reg_offset =3D eint_offsets->pol_set;
+> > +		writel(mask, reg + reg_offset);
+> > +
+> > +		curr_level =3D mtk_gpio_get(pctl->chip, pin->pin.number);
+> > +	} while (start_level !=3D curr_level);
+> > +
+> > +	return start_level;
+> > +}
+> > +
+> >  static void mtk_eint_mask(struct irq_data *d)
+> >  {
+> >  	struct mtk_pinctrl *pctl =3D irq_data_get_irq_chip_data(d);
+> > @@ -814,6 +840,9 @@ static void mtk_eint_unmask(struct irq_data *d)
+> >  			eint_offsets->mask_clr);
+> > =20
+> >  	writel(mask, reg);
+> > +
+> > +	if (pctl->eint_dual_edges[d->hwirq])
+> > +		mtk_eint_flip_edge(pctl, d->hwirq);
+> >  }
+> From looking at the code it seems to me that there is a bug. Consider
+> the following to happen:
+>=20
+> 	pin changes level, say high to low, triggers irq
+>=20
+> 	irq is masked by writel(mask, reg) in mtk_eint_mask
+>=20
+> 	mtk_eint_flip_edge gets curr_level =3D low
+>=20
+> 	pin goes up
+>=20
+> 	writel(mask, reg + eint_offsets->pol_set);
+>=20
+> 	oh, pin is high, so: writel(mask, reg + eint_offsets->pol_clr
+>=20
+> So now you trigger the irq the next time when the pin goes down again=
+=2E
+> But that means to missed to trigger on the "pin goes up" in the above
+> list, right?
 
-Excellent, with this I can probe the wifi chip on NVIDIA SHIELD which
-requires a GPIO to be high for reset to be de-asserted.
+Hi Uwe,
 
-The series:
+Yes, this could be a problem when irq happen. So I fix/workaround this
+in mtk_eint_irq_handler() using soft-irq. When this bit is set, eint
+will trigger the same interrupt again.
+=20
++			if (dual_edges) {
++				curr_level =3D mtk_eint_flip_edge(pctl, index);
++
++				/* If level changed, we might lost one edge
++				   interrupt, raised it through soft-irq */
++				if (start_level !=3D curr_level)
++					writel(BIT(offset), reg -
++						eint_offsets->stat +
++						eint_offsets->soft_set);
++			}
 
-Tested-by: Alexandre Courbot <acourbot@nvidia.com>
+Joe.C
 
-> ---
->
-> Changes in v4:
->         - Fixed call to kfree().
->
-> ---
->  drivers/mmc/core/pwrseq_simple.c | 38 ++++++++++++++++++++++++++++++++++++++
->  1 file changed, 38 insertions(+)
->
-> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-> index 61c991e..0958c69 100644
-> --- a/drivers/mmc/core/pwrseq_simple.c
-> +++ b/drivers/mmc/core/pwrseq_simple.c
-> @@ -11,6 +11,7 @@
->  #include <linux/slab.h>
->  #include <linux/device.h>
->  #include <linux/err.h>
-> +#include <linux/gpio/consumer.h>
->
->  #include <linux/mmc/host.h>
->
-> @@ -18,31 +19,68 @@
->
->  struct mmc_pwrseq_simple {
->         struct mmc_pwrseq pwrseq;
-> +       struct gpio_desc *reset_gpio;
->  };
->
-> +static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
-> +{
-> +       struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
-> +                                       struct mmc_pwrseq_simple, pwrseq);
-> +
-> +       if (!IS_ERR(pwrseq->reset_gpio))
-> +               gpiod_set_value_cansleep(pwrseq->reset_gpio, 1);
-> +}
-> +
-> +static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
-> +{
-> +       struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
-> +                                       struct mmc_pwrseq_simple, pwrseq);
-> +
-> +       if (!IS_ERR(pwrseq->reset_gpio))
-> +               gpiod_set_value_cansleep(pwrseq->reset_gpio, 0);
-> +}
-> +
->  static void mmc_pwrseq_simple_free(struct mmc_host *host)
->  {
->         struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
->                                         struct mmc_pwrseq_simple, pwrseq);
->
-> +       if (!IS_ERR(pwrseq->reset_gpio))
-> +               gpiod_put(pwrseq->reset_gpio);
-> +
->         kfree(pwrseq);
->         host->pwrseq = NULL;
->  }
->
->  static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
-> +       .pre_power_on = mmc_pwrseq_simple_pre_power_on,
-> +       .post_power_on = mmc_pwrseq_simple_post_power_on,
-> +       .power_off = mmc_pwrseq_simple_pre_power_on,
->         .free = mmc_pwrseq_simple_free,
->  };
->
->  int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
->  {
->         struct mmc_pwrseq_simple *pwrseq;
-> +       int ret = 0;
->
->         pwrseq = kzalloc(sizeof(struct mmc_pwrseq_simple), GFP_KERNEL);
->         if (!pwrseq)
->                 return -ENOMEM;
->
-> +       pwrseq->reset_gpio = gpiod_get_index(dev, "reset", 0, GPIOD_OUT_HIGH);
 
-gpiod_get() will translate to exactly the same, with less characters.
-
-Actually I see that the version in -next has support for multiple
-GPIOs. You will probably want to look at Rojhalat's latest work on
-GPIO arrays:
-
-http://permalink.gmane.org/gmane.linux.kernel.gpio/6126
-
-This code would be a great candidate to use this GPIO array API, but
-since it is not in -next yet (should happen soon though) you might
-want to consider doing it later.
-
-Btw, I wasted a considerable amount of time on one of the defunct
-previous attempts at power sequences, so I'm interested in reviewing
-future versions of this patchset if you don't mind adding me to the CC
-list. :)
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" i=
+n
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
