@@ -1,114 +1,105 @@
 From: Alim Akhtar <alim.akhtar@gmail.com>
-Subject: Re: [RFC PATCH] mmc: dw_mmc: add status check before clock update
-Date: Tue, 10 Feb 2015 20:24:07 +0530
-Message-ID: <CAGOxZ52E2ymA4WUrqLS28uPmF=3DGExkoFvw=HezC70xs=8dvA@mail.gmail.com>
-References: <1423572711-13787-1-git-send-email-a.hajda@samsung.com> <1423578559-27947-1-git-send-email-a.hajda@samsung.com>
+Subject: Re: [PATCH v2 1/2] mmc: dw_mmc: fix bug that cause 'Timeout sending command'
+Date: Tue, 10 Feb 2015 20:52:47 +0530
+Message-ID: <CAGOxZ51wgw9iXF3xX39vnB0M5ZPb+zHWoCtTvvKdyo9bSOCVgw@mail.gmail.com>
+References: <1423134801-23219-1-git-send-email-addy.ke@rock-chips.com>
+ <1423466726-20833-1-git-send-email-addy.ke@rock-chips.com> <1423466726-20833-2-git-send-email-addy.ke@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f54.google.com ([209.85.216.54]:60979 "EHLO
-	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753156AbbBJOyt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Feb 2015 09:54:49 -0500
-Received: by mail-qa0-f54.google.com with SMTP id x12so835673qac.13
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2015 06:54:48 -0800 (PST)
-In-Reply-To: <1423578559-27947-1-git-send-email-a.hajda@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1423466726-20833-2-git-send-email-addy.ke@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Addy Ke <addy.ke@rock-chips.com>
+Cc: robh+dt <robh+dt@kernel.org>, pawel.moll@arm.com, Mark Rutland <mark.rutland@arm.com>, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, dinguyen@altera.com, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Douglas Anderson <dianders@chromium.org>, Sonny Rao <sonnyrao@chromium.org>, amstan@chromium.org, djkurtz@chromium.org, huangtao@rock-chips.com, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, hl@rock-chips.com, linux-doc@vger.kernel.org, yzq@rock-chips.com, zyw@rock-chips.com, zhangqing@rock-chips.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kever.yang@rock-chips.com
 List-Id: linux-mmc@vger.kernel.org
-To: Andrzej Hajda <a.hajda@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi Andrzej,
+Hi Addy,
 
-On Tue, Feb 10, 2015 at 7:59 PM, Andrzej Hajda <a.hajda@samsung.com> wrote:
-> According to specs for version 250A, status register should be
-> tested before clock update. Otherwise in case MMC card is missing
-> mci_send_cmd timeouts and subsequent CTYPE registry write causes system hang.
-> This behavior has been observed on Exynos5422/Odroid-XU3.
+On Mon, Feb 9, 2015 at 12:55 PM, Addy Ke <addy.ke@rock-chips.com> wrote:
+> Because of some uncertain factors, such as worse card or worse hardware,
+> DAT[3:0](the data lines) may be pulled down by card, and mmc controller
+> will be in busy state. This should not happend when mmc controller
+> send command to update card clocks. If this happends, mci_send_cmd will
+> be failed and we will get 'Timeout sending command', and then system will
+> be blocked. To avoid this, we need reset mmc controller.
 >
-A similar patch was posted recently[1], did you check that?
-[1] http://www.spinics.net/lists/linux-doc/msg28092.html
-
-> Signed-off-by: Andrzej Hajda <a.hajda@samsung.com>
+> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
 > ---
-> Hi,
->
-> This version corrects usleep to usleep_range function call.
->
-> Regards
-> Andrzej
-> ---
->  drivers/mmc/host/dw_mmc.c | 26 ++++++++++++++++++++++++--
->  drivers/mmc/host/dw_mmc.h |  1 +
->  2 files changed, 25 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/dw_mmc.c | 28 ++++++++++++++++++++++++++++
+>  1 file changed, 28 insertions(+)
 >
 > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 67c0451..6619c8a 100644
+> index 4d2e3c2..b0b57e3 100644
 > --- a/drivers/mmc/host/dw_mmc.c
 > +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -878,6 +878,25 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
+> @@ -100,6 +100,7 @@ struct idmac_desc {
+>  };
+>  #endif /* CONFIG_MMC_DW_IDMAC */
+>
+> +static int dw_mci_card_busy(struct mmc_host *mmc);
+>  static bool dw_mci_reset(struct dw_mci *host);
+>  static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
+>
+> @@ -888,6 +889,31 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
 >                 cmd, arg, cmd_status);
 >  }
 >
-> +static bool dw_mci_wait_busy(struct dw_mci *host)
+> +static void dw_mci_wait_busy(struct dw_mci_slot *slot)
 > +{
-> +       unsigned long timeout;
+> +       struct dw_mci *host = slot->host;
+> +       unsigned long timeout = jiffies + msecs_to_jiffies(500);
 > +
-> +       if (host->verid < DW_MMC_250A)
-> +               return true;
-> +
-I wonder this might be true for 240A as well.
+Why 500 msec?
 
-> +       timeout = jiffies + msecs_to_jiffies(500);
-> +       while (time_before(jiffies, timeout)) {
-> +               if (!(mci_readl(host, STATUS) & SDMMC_STATUS_BUSY))
-> +                       return true;
+> +       do {
+> +               if (!dw_mci_card_busy(slot->mmc))
+> +                       return;
+> +               cpu_relax();
+> +       } while (time_before(jiffies, timeout));
 > +
-> +               usleep_range(1000, 2000);
-> +       }
-> +       dev_err(host->dev, "Busy timeout\n");
-Probably you need a controller reset here to bring back controller is
-original state.
+> +       dev_err(host->dev, "Data busy (status %#x)\n",
+> +               mci_readl(slot->host, STATUS));
 > +
-> +       return false;
+> +       /*
+> +        * Data busy, this should not happend when mmc controller send command
+> +        * to update card clocks in non-volt-switch state. If it happends, we
+> +        * should reset controller to avoid getting "Timeout sending command".
+> +        */
+> +       dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS);
+> +
+Why you need to reset all blocks? may be CTRL_RESET is good enough here.
+
+> +       /* Fail to reset controller or still data busy, WARN_ON! */
+> +       WARN_ON(dw_mci_card_busy(slot->mmc));
 > +}
 > +
 >  static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
 >  {
 >         struct dw_mci *host = slot->host;
-> @@ -891,8 +910,11 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+> @@ -899,6 +925,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>         /* We must continue to set bit 28 in CMD until the change is complete */
+>         if (host->state == STATE_WAITING_CMD11_DONE)
 >                 sdmmc_cmd_bits |= SDMMC_CMD_VOLT_SWITCH;
+> +       else
+> +               dw_mci_wait_busy(slot);
 >
+hmm...I would suggest you to call dw_mci_wait_busy() from inside
+mci_send_cmd(), seems like dw_mmc hangs while sending update clock cmd
+in multiple cases.see [1]
+
+[1]: http://permalink.gmane.org/gmane.linux.kernel.mmc/31140
+
 >         if (!clock) {
-> -               mci_writel(host, CLKENA, 0);
-> -               mci_send_cmd(slot, sdmmc_cmd_bits, 0);
-> +               if (dw_mci_wait_busy(host)) {
-> +                       mci_writel(host, CLKENA, 0);
-> +                       mci_send_cmd(slot, sdmmc_cmd_bits, 0);
-> +               } else
-> +                       return;
->         } else if (clock != host->current_speed || force_clkinit) {
->                 div = host->bus_hz / clock;
->                 if (host->bus_hz % clock && host->bus_hz > clock)
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 0d0f7a27..ea6d4d1 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -15,6 +15,7 @@
->  #define _DW_MMC_H_
->
->  #define DW_MMC_240A            0x240a
-> +#define DW_MMC_250A            0x250a
->
->  #define SDMMC_CTRL             0x000
->  #define SDMMC_PWREN            0x004
+>                 mci_writel(host, CLKENA, 0);
 > --
-> 1.9.1
+> 1.8.3.2
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 
 
 
