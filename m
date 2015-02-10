@@ -1,17 +1,19 @@
 From: Andrzej Hajda <a.hajda@samsung.com>
-Subject: [PATCH] mmc: dw_mmc: add status check before clock update
-Date: Tue, 10 Feb 2015 13:51:51 +0100
-Message-ID: <1423572711-13787-1-git-send-email-a.hajda@samsung.com>
+Subject: [RFC PATCH] mmc: dw_mmc: add status check before clock update
+Date: Tue, 10 Feb 2015 15:29:19 +0100
+Message-ID: <1423578559-27947-1-git-send-email-a.hajda@samsung.com>
+References: <1423572711-13787-1-git-send-email-a.hajda@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.w1.samsung.com ([210.118.77.12]:38115 "EHLO
-	mailout2.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755304AbbBJMwa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Feb 2015 07:52:30 -0500
-Received: from eucpsbgm2.samsung.com (unknown [203.254.199.245])
- by mailout2.w1.samsung.com
+Received: from mailout4.w1.samsung.com ([210.118.77.14]:37814 "EHLO
+	mailout4.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756307AbbBJO3b (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Feb 2015 09:29:31 -0500
+Received: from eucpsbgm1.samsung.com (unknown [203.254.199.244])
+ by mailout4.w1.samsung.com
  (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
- 17 2011)) with ESMTP id <0NJK00K3S3Y6SD90@mailout2.w1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 10 Feb 2015 12:56:30 +0000 (GMT)
+ 17 2011)) with ESMTP id <0NJK00KL38FTN1B0@mailout4.w1.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 10 Feb 2015 14:33:29 +0000 (GMT)
+In-reply-to: <1423572711-13787-1-git-send-email-a.hajda@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
@@ -24,12 +26,19 @@ This behavior has been observed on Exynos5422/Odroid-XU3.
 
 Signed-off-by: Andrzej Hajda <a.hajda@samsung.com>
 ---
+Hi,
+
+This version corrects usleep to usleep_range function call.
+
+Regards
+Andrzej
+---
  drivers/mmc/host/dw_mmc.c | 26 ++++++++++++++++++++++++--
  drivers/mmc/host/dw_mmc.h |  1 +
  2 files changed, 25 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 67c0451..5852067 100644
+index 67c0451..6619c8a 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
 @@ -878,6 +878,25 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
@@ -48,7 +57,7 @@ index 67c0451..5852067 100644
 +		if (!(mci_readl(host, STATUS) & SDMMC_STATUS_BUSY))
 +			return true;
 +
-+		usleep(1000, 2000);
++		usleep_range(1000, 2000);
 +	}
 +	dev_err(host->dev, "Busy timeout\n");
 +
