@@ -1,62 +1,318 @@
-From: Johan Rudholm <jrudholm@gmail.com>
-Subject: Re: [PATCH V2 15/15] mmc: core: Don't print reset warning if reset is
- not supported
-Date: Mon, 9 Feb 2015 17:05:10 +0100
-Message-ID: <CA+20K0D6peyZ46b_P2Zydah9xoXLSvsznbiCt58pGRhLBYEuLg@mail.gmail.com>
-References: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
-	<1422522030-17793-16-git-send-email-adrian.hunter@intel.com>
-	<54D87EFC.9060404@broadcom.com>
-	<54D88214.5000204@intel.com>
+From: Scott Branden <sbranden@broadcom.com>
+Subject: [PATCH 3/4] mmc: sdhci-iproc: add IPROC SDHCI driver
+Date: Mon, 9 Feb 2015 16:06:30 -0800
+Message-ID: <1423526791-29453-4-git-send-email-sbranden@broadcom.com>
+References: <Scott Branden <sbranden@broadcom.com>
+ <1423526791-29453-1-git-send-email-sbranden@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f44.google.com ([209.85.192.44]:60296 "EHLO
-	mail-qg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760712AbbBIQFL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Feb 2015 11:05:11 -0500
-Received: by mail-qg0-f44.google.com with SMTP id j5so6758230qga.3
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Feb 2015 08:05:10 -0800 (PST)
-In-Reply-To: <54D88214.5000204@intel.com>
+Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:59057 "EHLO
+	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755701AbbBJAHU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Feb 2015 19:07:20 -0500
+In-Reply-To: <1423526791-29453-1-git-send-email-sbranden@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Arend van Spriel <arend@broadcom.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>
+To: bcm-kernel-feedback-list@broadcom.com, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Grant Likely <grant.likely@linaro.org>
+Cc: Ray Jui <rjui@broadcom.com>, Jonathan Richardson <jonathar@broadcom.com>, Corneliu Doban <cdoban@broadcom.com>, Dmitry Torokhov <dtor@google.com>, Anatol Pomazao <anatol@google.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Scott Branden <sbranden@broadcom.com>
 
-Hi Adrian and Arend,
+Add IPROC SDHCI driver for IPROC family of Broadcom devices.
 
-2015-02-09 10:47 GMT+01:00 Adrian Hunter <adrian.hunter@intel.com>:
-> On 09/02/15 11:33, Arend van Spriel wrote:
->> On 01/29/15 10:00, Adrian Hunter wrote:
->>> Check the error code for EOPNOTSUPP and do not print
->>> reset warning in that case.
->>>
->>> Signed-off-by: Adrian Hunter<adrian.hunter@intel.com>
->>> ---
->>>   drivers/mmc/core/core.c | 3 ++-
->>>   1 file changed, 2 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>> index 392a150..d439bf0 100644
->>> --- a/drivers/mmc/core/core.c
->>> +++ b/drivers/mmc/core/core.c
->>> @@ -2368,7 +2368,8 @@ int mmc_hw_reset(struct mmc_host *host)
->>>       ret = host->bus_ops->reset(host);
->>>       mmc_bus_put(host);
->>>
->>> -    pr_warn("%s: tried to reset card\n", mmc_hostname(host));
->>> +    if (ret != -EOPNOTSUPP)
->>> +        pr_warn("%s: tried to reset card\n", mmc_hostname(host));
->>
->> Guess you don't want this message either if ret is zero.
->
-> Thanks for your comment.
->
-> I assumed the original author wants to see the message whenever reset is
-> attempted, which is OK by me because it is on the recovery path i.e.
-> hopefully rare. The EOPNOTSUPP case is consistent with the code further up
-> which returns EOPNOTSUPP when there is no ->reset() callback.
+Acked-by: Ray Jui <rjui@broadcom.com>
+Signed-off-by: Corneliu Doban <cdoban@broadcom.com>
+Signed-off-by: Scott Branden <sbranden@broadcom.com>
+---
+ drivers/mmc/host/Kconfig       |  14 +++
+ drivers/mmc/host/Makefile      |   1 +
+ drivers/mmc/host/sdhci-iproc.c | 241 +++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 256 insertions(+)
+ create mode 100644 drivers/mmc/host/sdhci-iproc.c
 
-Speaking as the original author, yes, this was the idea. Thank you for
-this patch.
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 2d6fbdd..d6a2ff1 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -292,6 +292,20 @@ config MMC_SDHCI_BCM2835
+ 
+ 	  If unsure, say N.
+ 
++config MMC_SDHCI_IPROC
++	tristate "SDHCI platform support for the iProc SD/MMC Controller"
++	depends on ARCH_BCM_IPROC || COMPILE_TEST
++	depends on MMC_SDHCI_PLTFM
++	default ARCH_BCM_IPROC
++	select MMC_SDHCI_IO_ACCESSORS
++	help
++	  This selects the iProc SD/MMC controller.
++
++	  If you have an IPROC platform with SD or MMC devices,
++	  say Y or M here.
++
++	  If unsure, say N.
++
+ config MMC_MOXART
+ 	tristate "MOXART SD/MMC Host Controller support"
+ 	depends on ARCH_MOXART && MMC
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index f7b0a77..32f24bd 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -70,6 +70,7 @@ obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
+ obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
+ obj-$(CONFIG_MMC_SDHCI_BCM_KONA)	+= sdhci-bcm-kona.o
+ obj-$(CONFIG_MMC_SDHCI_BCM2835)		+= sdhci-bcm2835.o
++obj-$(CONFIG_MMC_SDHCI_IPROC)		+= sdhci-iproc.o
+ obj-$(CONFIG_MMC_SDHCI_MSM)		+= sdhci-msm.o
+ obj-$(CONFIG_MMC_SDHCI_ST)		+= sdhci-st.o
+ 
+diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+new file mode 100644
+index 0000000..4139d34
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-iproc.c
+@@ -0,0 +1,241 @@
++/*
++ * Copyright (C) 2014 Broadcom Corporation
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License as
++ * published by the Free Software Foundation version 2.
++ *
++ * This program is distributed "as is" WITHOUT ANY WARRANTY of any
++ * kind, whether express or implied; without even the implied warranty
++ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++/*
++ * iProc SDHCI platform driver
++ */
++
++#include <linux/delay.h>
++#include <linux/module.h>
++#include <linux/mmc/host.h>
++#include <linux/of.h>
++#include <linux/of_device.h>
++#include "sdhci-pltfm.h"
++
++struct sdhci_iproc_data {
++	const struct sdhci_pltfm_data *pdata;
++	u32 caps;
++	u32 caps1;
++};
++
++struct sdhci_iproc_host {
++	const struct sdhci_iproc_data *data;
++	u32 shadow_cmd;
++	u32 shadow_blk;
++};
++
++#define REG_OFFSET_IN_BITS(reg) ((reg) << 3 & 0x18)
++
++static inline u32 sdhci_iproc_readl(struct sdhci_host *host, int reg)
++{
++	u32 val = readl(host->ioaddr + reg);
++
++	pr_debug("%s: readl [0x%02x] 0x%08x\n",
++		 mmc_hostname(host->mmc), reg, val);
++	return val;
++}
++
++static u16 sdhci_iproc_readw(struct sdhci_host *host, int reg)
++{
++	u32 val = sdhci_iproc_readl(host, (reg & ~3));
++	u16 word = val >> REG_OFFSET_IN_BITS(reg) & 0xffff;
++	return word;
++}
++
++static u8 sdhci_iproc_readb(struct sdhci_host *host, int reg)
++{
++	u32 val = sdhci_iproc_readl(host, (reg & ~3));
++	u8 byte = val >> REG_OFFSET_IN_BITS(reg) & 0xff;
++	return byte;
++}
++
++static inline void sdhci_iproc_writel(struct sdhci_host *host, u32 val, int reg)
++{
++	pr_debug("%s: writel [0x%02x] 0x%08x\n",
++		 mmc_hostname(host->mmc), reg, val);
++
++	writel(val, host->ioaddr + reg);
++
++	if (host->clock <= 400000) {
++		/* Round up to micro-second four SD clock delay */
++		if (host->clock)
++			udelay((4 * 1000000 + host->clock - 1) / host->clock);
++		else
++			udelay(10);
++	}
++}
++
++/*
++ * The Arasan has a bugette whereby it may lose the content of successive
++ * writes to the same register that are within two SD-card clock cycles of
++ * each other (a clock domain crossing problem). The data
++ * register does not have this problem, which is just as well - otherwise we'd
++ * have to nobble the DMA engine too.
++ *
++ * This wouldn't be a problem with the code except that we can only write the
++ * controller with 32-bit writes.  So two different 16-bit registers are
++ * written back to back creates the problem.
++ *
++ * In reality, this only happens when SDHCI_BLOCK_SIZE and SDHCI_BLOCK_COUNT
++ * are written followed by SDHCI_TRANSFER_MODE and SDHCI_COMMAND.
++ * The BLOCK_SIZE and BLOCK_COUNT are meaningless until a command issued so
++ * the work around can be further optimized. We can keep shadow values of
++ * BLOCK_SIZE, BLOCK_COUNT, and TRANSFER_MODE until a COMMAND is issued.
++ * Then, write the BLOCK_SIZE+BLOCK_COUNT in a single 32-bit write followed
++ * by the TRANSFER+COMMAND in another 32-bit write.
++ */
++static void sdhci_iproc_writew(struct sdhci_host *host, u16 val, int reg)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_iproc_host *iproc_host = pltfm_host->priv;
++	u32 word_shift = REG_OFFSET_IN_BITS(reg);
++	u32 mask = 0xffff << word_shift;
++	u32 oldval, newval;
++
++	if (reg == SDHCI_COMMAND) {
++		/* Write the block now as we are issuing a command */
++		if (iproc_host->shadow_blk != 0) {
++			sdhci_iproc_writel(host, iproc_host->shadow_blk,
++				SDHCI_BLOCK_SIZE);
++			iproc_host->shadow_blk = 0;
++		}
++		oldval = iproc_host->shadow_cmd;
++	} else if (reg == SDHCI_BLOCK_SIZE || reg == SDHCI_BLOCK_COUNT) {
++		/* Block size and count are stored in shadow reg */
++		oldval = iproc_host->shadow_blk;
++	} else {
++		/* Read reg, all other registers are not shadowed */
++		oldval = sdhci_iproc_readl(host, (reg & ~3));
++	}
++	newval = (oldval & ~mask) | (val << word_shift);
++
++	if (reg == SDHCI_TRANSFER_MODE) {
++		/* Save the transfer mode until the command is issued */
++		iproc_host->shadow_cmd = newval;
++	} else if (reg == SDHCI_BLOCK_SIZE || reg == SDHCI_BLOCK_COUNT) {
++		/* Save the block info until the command is issued */
++		iproc_host->shadow_blk = newval;
++	} else {
++		/* Command or other regular 32-bit write */
++		sdhci_iproc_writel(host, newval, reg & ~3);
++	}
++}
++
++static void sdhci_iproc_writeb(struct sdhci_host *host, u8 val, int reg)
++{
++	u32 oldval = sdhci_iproc_readl(host, (reg & ~3));
++	u32 byte_shift = REG_OFFSET_IN_BITS(reg);
++	u32 mask = 0xff << byte_shift;
++	u32 newval = (oldval & ~mask) | (val << byte_shift);
++
++	sdhci_iproc_writel(host, newval, reg & ~3);
++}
++
++static const struct sdhci_ops sdhci_iproc_ops = {
++	.read_l = sdhci_iproc_readl,
++	.read_w = sdhci_iproc_readw,
++	.read_b = sdhci_iproc_readb,
++	.write_l = sdhci_iproc_writel,
++	.write_w = sdhci_iproc_writew,
++	.write_b = sdhci_iproc_writeb,
++	.set_clock = sdhci_set_clock,
++	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
++	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
++	.set_uhs_signaling = sdhci_set_uhs_signaling,
++};
++
++static const struct sdhci_pltfm_data sdhci_iproc_pltfm_data = {
++	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
++	.quirks2 = SDHCI_QUIRK2_ACMD23_BROKEN,
++	.ops = &sdhci_iproc_ops,
++};
++
++static const struct sdhci_iproc_data iproc_data = {
++	.pdata = &sdhci_iproc_pltfm_data,
++	.caps = 0x05E90000,
++	.caps1 = 0x00000064,
++};
++
++static const struct of_device_id sdhci_iproc_of_match[] = {
++	{ .compatible = "brcm,sdhci-iproc-cygnus", .data = &iproc_data },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, sdhci_iproc_of_match);
++
++static int sdhci_iproc_probe(struct platform_device *pdev)
++{
++	const struct of_device_id *match;
++	const struct sdhci_iproc_data *iproc_data;
++	struct sdhci_host *host;
++	struct sdhci_iproc_host *iproc_host;
++	struct sdhci_pltfm_host *pltfm_host;
++	int ret;
++
++	match = of_match_device(sdhci_iproc_of_match, &pdev->dev);
++	if (!match)
++		return -EINVAL;
++	iproc_data = match->data;
++
++	host = sdhci_pltfm_init(pdev, iproc_data->pdata, sizeof(*iproc_host));
++	if (IS_ERR(host))
++		return PTR_ERR(host);
++
++	pltfm_host = sdhci_priv(host);
++	iproc_host = sdhci_pltfm_priv(pltfm_host);
++
++	iproc_host->data = iproc_data;
++
++	mmc_of_parse(host->mmc);
++	sdhci_get_of_property(pdev);
++
++	/* Enable EMMC 1/8V DDR capable */
++	host->mmc->caps |= MMC_CAP_1_8V_DDR;
++
++	pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
++	if (IS_ERR(pltfm_host->clk)) {
++		ret = PTR_ERR(pltfm_host->clk);
++		goto err;
++	}
++
++	if (iproc_host->data->pdata->quirks & SDHCI_QUIRK_MISSING_CAPS) {
++		host->caps = iproc_host->data->caps;
++		host->caps1 = iproc_host->data->caps1;
++	}
++
++	return sdhci_add_host(host);
++
++err:
++	sdhci_pltfm_free(pdev);
++	return ret;
++}
++
++static int sdhci_iproc_remove(struct platform_device *pdev)
++{
++	return sdhci_pltfm_unregister(pdev);
++}
++
++static struct platform_driver sdhci_iproc_driver = {
++	.driver = {
++		.name = "sdhci-iproc",
++		.of_match_table = sdhci_iproc_of_match,
++		.pm = SDHCI_PLTFM_PMOPS,
++	},
++	.probe = sdhci_iproc_probe,
++	.remove = sdhci_iproc_remove,
++};
++module_platform_driver(sdhci_iproc_driver);
++
++MODULE_AUTHOR("Broadcom");
++MODULE_DESCRIPTION("IPROC SDHCI driver");
++MODULE_LICENSE("GPL v2");
+-- 
+2.2.2
 
-BR, Johan
