@@ -1,42 +1,131 @@
 From: Alexandre Courbot <gnurou@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci: Set SDHCI_POWER_ON with external vmmc
-Date: Tue, 10 Feb 2015 17:53:29 +0900
-Message-ID: <CAAVeFu+Qnwyrz+_xn4E3c4TBrct_7+5cGsijRqOb+BAmd+FQrQ@mail.gmail.com>
-References: <1421216652-348-1-git-send-email-tim.kryger@gmail.com> <CAPDyKFpM_iqteu5pP03-iD2pji6ypeZJ1TA=LON1FVjJWrJk-g@mail.gmail.com>
+Subject: Re: [PATCH V4 4/4] mmc: pwrseq_simple: Add support for a reset GPIO pin
+Date: Tue, 10 Feb 2015 18:12:51 +0900
+Message-ID: <CAAVeFuJjU-fsknYdMZ1c+aOEmc2rFy=z35S584DfHBLvUm=OAQ@mail.gmail.com>
+References: <1421658784-11980-1-git-send-email-ulf.hansson@linaro.org> <1421658784-11980-5-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f170.google.com ([209.85.213.170]:48618 "EHLO
-	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753096AbbBJIxu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Feb 2015 03:53:50 -0500
-In-Reply-To: <CAPDyKFpM_iqteu5pP03-iD2pji6ypeZJ1TA=LON1FVjJWrJk-g@mail.gmail.com>
+Received: from mail-ie0-f176.google.com ([209.85.223.176]:44307 "EHLO
+	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752755AbbBJJNM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Feb 2015 04:13:12 -0500
+In-Reply-To: <1421658784-11980-5-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Tim Kryger <tim.kryger@gmail.com>, Chris Ball <chris@printf.net>, Sachin Kamat <spk.linux@gmail.com>, Linux MMC List <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rojhalat Ibrahim <imr@rtschenk.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Mark Brown <broonie@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, Olof Johansson <olof@lixom.net>, Russell King <linux@arm.linux.org.uk>, Hans de Goede <hdegoede@redhat.com>, Doug Anderson <dianders@chromium.org>, NeilBrown <neilb@suse.de>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, Mark Rutland <mark.rutland@arm.com>
 
-On Wed, Jan 14, 2015 at 5:53 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> + linux-mmc
+On Mon, Jan 19, 2015 at 6:13 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> The need for reset GPIOs has several times been pointed out from
+> erlier posted patchsets. Especially some WLAN chips which are
+> attached to an SDIO interface may use a GPIO reset.
 >
-> On 14 January 2015 at 07:24, Tim Kryger <tim.kryger@gmail.com> wrote:
->> Host controllers lacking the required internal vmmc regulator may still
->> follow the spec with regard to the LSB of SDHCI_POWER_CONTROL.  Set the
->> SDHCI_POWER_ON bit when vmmc is enabled to encourage the controller to
->> to drive CMD, DAT, SDCLK.
->>
->> This fixes a regression observed on some Qualcomm and Nvidia boards
->> caused by 5222161 mmc: sdhci: Improve external VDD regulator support.
->>
->> Signed-off-by: Tim Kryger <tim.kryger@gmail.com>
->> Tested-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
+> The reset GPIO is asserted at initialization and prior we start the
+> power up procedure. The GPIO will be de-asserted right after the power
+> has been provided to the card, from the ->post_power_on() callback.
 >
-> Thanks! Applied for fixes.
+> Note, the reset GPIO is optional. Thus we don't return an error even if
+> we can't find a GPIO for the consumer.
 >
-> I noticed this wasn't posted to linux-mmc. I am anyway picking it up
-> as this change has already been discussed and tested, see:
-> https://lkml.org/lkml/2014/11/3/1029
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-The party is probably over for this patch, but FWIW:
+Excellent, with this I can probe the wifi chip on NVIDIA SHIELD which
+requires a GPIO to be high for reset to be de-asserted.
+
+The series:
 
 Tested-by: Alexandre Courbot <acourbot@nvidia.com>
+
+> ---
+>
+> Changes in v4:
+>         - Fixed call to kfree().
+>
+> ---
+>  drivers/mmc/core/pwrseq_simple.c | 38 ++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 38 insertions(+)
+>
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+> index 61c991e..0958c69 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -11,6 +11,7 @@
+>  #include <linux/slab.h>
+>  #include <linux/device.h>
+>  #include <linux/err.h>
+> +#include <linux/gpio/consumer.h>
+>
+>  #include <linux/mmc/host.h>
+>
+> @@ -18,31 +19,68 @@
+>
+>  struct mmc_pwrseq_simple {
+>         struct mmc_pwrseq pwrseq;
+> +       struct gpio_desc *reset_gpio;
+>  };
+>
+> +static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+> +{
+> +       struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+> +                                       struct mmc_pwrseq_simple, pwrseq);
+> +
+> +       if (!IS_ERR(pwrseq->reset_gpio))
+> +               gpiod_set_value_cansleep(pwrseq->reset_gpio, 1);
+> +}
+> +
+> +static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
+> +{
+> +       struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+> +                                       struct mmc_pwrseq_simple, pwrseq);
+> +
+> +       if (!IS_ERR(pwrseq->reset_gpio))
+> +               gpiod_set_value_cansleep(pwrseq->reset_gpio, 0);
+> +}
+> +
+>  static void mmc_pwrseq_simple_free(struct mmc_host *host)
+>  {
+>         struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+>                                         struct mmc_pwrseq_simple, pwrseq);
+>
+> +       if (!IS_ERR(pwrseq->reset_gpio))
+> +               gpiod_put(pwrseq->reset_gpio);
+> +
+>         kfree(pwrseq);
+>         host->pwrseq = NULL;
+>  }
+>
+>  static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
+> +       .pre_power_on = mmc_pwrseq_simple_pre_power_on,
+> +       .post_power_on = mmc_pwrseq_simple_post_power_on,
+> +       .power_off = mmc_pwrseq_simple_pre_power_on,
+>         .free = mmc_pwrseq_simple_free,
+>  };
+>
+>  int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
+>  {
+>         struct mmc_pwrseq_simple *pwrseq;
+> +       int ret = 0;
+>
+>         pwrseq = kzalloc(sizeof(struct mmc_pwrseq_simple), GFP_KERNEL);
+>         if (!pwrseq)
+>                 return -ENOMEM;
+>
+> +       pwrseq->reset_gpio = gpiod_get_index(dev, "reset", 0, GPIOD_OUT_HIGH);
+
+gpiod_get() will translate to exactly the same, with less characters.
+
+Actually I see that the version in -next has support for multiple
+GPIOs. You will probably want to look at Rojhalat's latest work on
+GPIO arrays:
+
+http://permalink.gmane.org/gmane.linux.kernel.gpio/6126
+
+This code would be a great candidate to use this GPIO array API, but
+since it is not in -next yet (should happen soon though) you might
+want to consider doing it later.
+
+Btw, I wasted a considerable amount of time on one of the defunct
+previous attempts at power sequences, so I'm interested in reviewing
+future versions of this patchset if you don't mind adding me to the CC
+list. :)
