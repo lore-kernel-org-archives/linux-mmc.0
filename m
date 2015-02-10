@@ -1,59 +1,60 @@
 From: Scott Branden <sbranden@broadcom.com>
-Subject: [PATCH 1/4] mmc: sdhci: add quirk for ACMD23 broken
-Date: Mon, 9 Feb 2015 16:06:28 -0800
-Message-ID: <1423526791-29453-2-git-send-email-sbranden@broadcom.com>
+Subject: [PATCH 2/4] mmc: sdhci: do not set AUTO_CMD12 for multi-block CMD53
+Date: Mon, 9 Feb 2015 16:06:29 -0800
+Message-ID: <1423526791-29453-3-git-send-email-sbranden@broadcom.com>
 References: <Scott Branden <sbranden@broadcom.com>
  <1423526791-29453-1-git-send-email-sbranden@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1423526791-29453-1-git-send-email-sbranden@broadcom.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: bcm-kernel-feedback-list@broadcom.com, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Grant Likely <grant.likely@linaro.org>
-Cc: Ray Jui <rjui@broadcom.com>, Jonathan Richardson <jonathar@broadcom.com>, Corneliu Doban <cdoban@broadcom.com>, Dmitry Torokhov <dtor@google.com>, Anatol Pomazao <anatol@google.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Scott Branden <sbranden@broadcom.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: bcm-kernel-feedback-list@broadcom.com, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar
+ Gala <galak@codeaurora.org>, Grant Likely <grant.likely@linaro.org>
+Cc: devicetree@vger.kernel.org, Scott Branden <sbranden@broadcom.com>, Corneliu Doban <cdoban@broadcom.com>, Ray Jui <rjui@broadcom.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jonathan Richardson <jonathar@broadcom.com>, Anatol Pomazao <anatol@google.com>, linux-arm-kernel@lists.infradead.org, Dmitry Torokhov <dtor@google.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add quirk to handle broken auto-CMD23.
-Some controllers do not respond after the first auto-CMD23 is issued.
+From: Corneliu Doban <cdoban@broadcom.com>
 
-This allows CMD23 to still work (mandatory for the faster UHS-I mode)
-rather than disabling CMD23 entirely via SDHCI_QUIRK2_HOST_NO_CMD23.
+For CMD53 in block mode, the host does not need to stop the transfer,
+as it stops when the block count (present in CMD53) is reached.
 
-Signed-off by: Corneliu Doban <cdoban@broadcom.com>
-Signed-off-by: Scott Branden <sbranden@broadcom.com>
-
+Signed-off-by: Corneliu Doban <cdoban@broadcom.com>
 Signed-off-by: Scott Branden <sbranden@broadcom.com>
 ---
- drivers/mmc/host/sdhci.c  | 3 ++-
- include/linux/mmc/sdhci.h | 2 ++
- 2 files changed, 4 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index f1a488e..fcf78ab 100644
+index fcf78ab..f35d413 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -3085,7 +3085,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 	/* Auto-CMD23 stuff only works in ADMA or PIO. */
- 	if ((host->version >= SDHCI_SPEC_300) &&
- 	    ((host->flags & SDHCI_USE_ADMA) ||
--	     !(host->flags & SDHCI_USE_SDMA))) {
-+	     !(host->flags & SDHCI_USE_SDMA)) &&
-+	     !(host->quirks2 & SDHCI_QUIRK2_ACMD23_BROKEN)) {
- 		host->flags |= SDHCI_AUTO_CMD23;
- 		DBG("%s: Auto-CMD23 available\n", mmc_hostname(mmc));
- 	} else {
-diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
-index f767a0d..a29e9bb 100644
---- a/include/linux/mmc/sdhci.h
-+++ b/include/linux/mmc/sdhci.h
-@@ -106,6 +106,8 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD	(1<<10)
- /* Capability register bit-63 indicates HS400 support */
- #define SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400		(1<<11)
-+/* Controller broken with using ACMD23 */
-+#define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<12)
+@@ -28,6 +28,7 @@
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/card.h>
++#include <linux/mmc/sdio.h>
+ #include <linux/mmc/slot-gpio.h>
  
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
+ #include "sdhci.h"
+@@ -934,7 +935,8 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+ 		 * If we are sending CMD23, CMD12 never gets sent
+ 		 * on successful completion (so no Auto-CMD12).
+ 		 */
+-		if (!host->mrq->sbc && (host->flags & SDHCI_AUTO_CMD12))
++		if (!host->mrq->sbc && (host->flags & SDHCI_AUTO_CMD12) &&
++		    (cmd->opcode != SD_IO_RW_EXTENDED))
+ 			mode |= SDHCI_TRNS_AUTO_CMD12;
+ 		else if (host->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
+ 			mode |= SDHCI_TRNS_AUTO_CMD23;
 -- 
 2.2.2
