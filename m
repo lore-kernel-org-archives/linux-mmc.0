@@ -1,109 +1,107 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
- eMMC5.1 device
-Date: Wed, 11 Feb 2015 14:00:33 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333EDFA356@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <20141219080442.GA3775@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Subject: [RFC] mmc: Do no export the rpmb as a partition
+Date: Wed, 11 Feb 2015 17:30:20 +0100
+Message-ID: <1423672220-13744-1-git-send-email-bigeasy@linutronix.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1on0089.outbound.protection.outlook.com ([157.56.110.89]:29088
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752185AbbBKOOr convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Feb 2015 09:14:47 -0500
-In-Reply-To: <20141219080442.GA3775@intel.com>
-Content-Language: en-US
+Received: from www.linutronix.de ([62.245.132.108]:52701 "EHLO
+	Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753594AbbBKQa3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Feb 2015 11:30:29 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Sebastian Andrzej Siewior <bigeasy@linutronix.de>
 
-Hi Chuanxiao,
+I have here a SK-Hynix eMMC media which is eMMC 5.0 compatible (according to
+the manual). I read / write the media and haven't noticed anything odd.
+Then I tried to boot using systemd :)
+Systemd needs to touch everything and so it tried to read from the rpmb
+partition. The results were not good.
+The MMC core sends first CMD18 which ends with -110 after a few secs. CMD17
+ends with the same error "immediately".
+Looking into the "JEDEC STANDARD Embedded Multi-Media Card (eMMC) Electrical
+Standard (5.01)" / JESD84-B50.1" I read the following in "6.2.2 Command
+restrictions":
+|RPMB Partition
+|o  Only commands of classes Class0, Class2 and Class4 are admitted. Still usage of any
+|   other command than CMD0, CMD6, CMD8, CMD12, CMD13, CMD15 or commands
+|   defined in 6.6.25 shall be considered as illegal one.
 
-I have a question from the review of your SW CMDQ driver code.
+CMD17 + CMD18 are part of Class 2 (and therefore legal) however the later
+enumeration commands excludes CMD17 + 18 from beeing legal.
 
->From the eMMC5.1 spec, the  "ready for execution" for each task should be cleared by the device only when the last data block has been fully transferred over the eMMC bus. 
+So my question is basically, is it okay to read from this partition?
 
-However, from the code, I can recognize the following suspected case:
+Here is output of "dd if=/dev/mmcblk0rpmb of=/dev/null count=1"
+Single read only:
+[  625.881087] mmc0: starting CMD6 arg 03b30301 flags 0000049d
+[  625.888813] mmc0: req done (CMD6): 0: 00000900 00000000 00000000 00000000
+[  625.895659] mmc0: starting CMD13 arg 00010000 flags 00000195
+[  625.901360] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
+[  625.908255] mmc0: starting CMD17 arg 00000000 flags 000000b5
+[  625.913934] mmc0:     blksz 512 blocks 1 flags 00000200 tsac 150 ms nsac 1000
+[  625.921114] mmc0: req done (CMD17): -110: 00000000 00000000 00000000 00000000
+[  625.928253] mmc0:     0 bytes transferred: 0
+[  625.932547] mmc0: starting CMD13 arg 00010000 flags 00000195
+[  625.938228] mmc0: req done (CMD13): 0: 00400900 00000000 00000000 00000000
+[  625.945129] mmcblk0rpmb: timed out sending r/w cmd command, card status 0x400900
 
-1. Host sends CMD44/45 commands for TID#0
-2. Host sends CMD13 (QSR)  -> returned TID#0 ready for execution
-3. Host sends CMD46 for TID#0
-4. During the data transfer, host may send CMD13 (QSR)  -> returned TID#0 ready for execution (which is true since data is still in transfer)
-5. Host sends CMD46 for TID#0 (same as sent in bullet#3) - which is a problem.
+Multi read:
+[   14.257869] mmc0: starting CMD6 arg 03b30301 flags 0000049d
+[   14.265570] mmc0: req done (CMD6): 0: 00000900 00000000 00000000 00000000
+[   14.272398] mmc0: starting CMD13 arg 00010000 flags 00000195
+[   14.278083] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
+[   14.284997] <mmc0: starting CMD23 arg 00000020 flags 00000015>
+[   14.290846] mmc0: starting CMD18 arg 00000000 flags 000000b5
+[   14.296508] mmc0:     blksz 512 blocks 32 flags 00000200 tsac 150 ms nsac 1000
+[   14.303742] mmc0:     CMD12 arg 00000000 flags 00000095
+[   19.737209] mmc0: req done <CMD23>: 0: 00000000 00000000 00000000 00000000
+[   19.744089] mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
+[   19.750964] mmc0:     0 bytes transferred: -110
+[   19.755495] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
+[   19.761963] mmc0: starting CMD13 arg 00010000 flags 00000195
+[   19.767646] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
+[   19.774558] mmcblk0rpmb: error -110 transferring data, sector 0, nr 32, cmd response 0x900, card status 0xb00
 
-Please advise if my assumption above is correct.
+and then, there is this dead mode:
+[   44.055345] mmc0: starting CMD6 arg 03b30301 flags 0000049d
+[   44.063039] mmc0: req done (CMD6): 0: 00000900 00000000 00000000 00000000
+[   44.069849] mmc0: starting CMD13 arg 00010000 flags 00000195
+[   44.075559] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
+[   44.082460] mmc0: Card stuck in programming state! __mmc_switch
+[   44.088386] blk_update_request: I/O error, dev mmcblk0rpmb, sector 0
 
-Thanks,
-Alex
+mostly the same thing as above except that it dies within CMD13. After that it
+does not boot from eMMC and the eMMC looks dead if I boot differently. A few
+minutes powerless and everything is back to normal.
+At this point I am not sure if access to the rpmb is a problem or a problem at
+surface and I should be chasing something else.
 
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+---
+ drivers/mmc/core/mmc.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Chuanxiao Dong
-> Sent: Friday, December 19, 2014 10:05 AM
-> To: linux-mmc@vger.kernel.org
-> Subject: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
-> eMMC5.1 device
-> 
-> Hello,
-> 
-> Seems community already have some implementation for the eMMC5.1 device
-> command queue feature, but that require the eMMC host controller to support
-> CMDQ. In my platform, I don't have this kind of eMMC host controller but I
-> have a Samsung eMMC5.1 device which can support the Command queue.
-> 
-> With this limitation, I have to let eMMC host controller to manually send the
-> CMD44/45/13/46/47. So in this way, more commands are needed for an I/O
-> request, more interrupts/schedule are needed in driver.
-> 
-> Even this way have some more software overhead, but it can still use the
-> eMMC5.1 device Command queue feature. After test with the iozone
-> command:
-> "iozone -zec -t 4 -i0 -i2 -F iozonefile1 iozonefile2 iozonefile3 iozonefile4 -+n -I -r
-> 4k -s 500m -O -R -+r -+D" to test random performance, I saw a performance
-> improvment for random read on my eMMC5.1 device:
-> 
-> 		Random read
-> SW CMDQ:	5544.6
-> Normal Read:	3993.05
-> 
-> So I want to send this serial patches as RFC patch for reviewing
-> 
-> 
-> Chuanxiao Dong (5):
->   mmc: replace sbc to precmd and add postcmd
->   mmc: host: add runtime PM for host class dev
->   mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
->   mmc: core: add support for CMDQ feature in MMC Core stack
->   mmc: sdhci: add SW CMDQ support for CHT SDHCI host
-> 
->  drivers/mmc/card/block.c      |  538
-> ++++++++++++++++++++++++++++++++++++++---
->  drivers/mmc/card/queue.c      |  213 ++++++++--------
->  drivers/mmc/card/queue.h      |   14 +-
->  drivers/mmc/core/core.c       |   78 +++++-
->  drivers/mmc/core/host.c       |   14 ++
->  drivers/mmc/core/mmc.c        |   43 +++-
->  drivers/mmc/host/dw_mmc.c     |    8 +-
->  drivers/mmc/host/mmci.c       |   14 +-
->  drivers/mmc/host/omap_hsmmc.c |   18 +-
->  drivers/mmc/host/sdhci-acpi.c |    1 -
->  drivers/mmc/host/sdhci-pci.c  |    1 -
->  drivers/mmc/host/sdhci.c      |  137 +++++++++--
->  include/linux/mmc/card.h      |    3 +
->  include/linux/mmc/core.h      |    5 +-
->  include/linux/mmc/host.h      |    5 +
->  include/linux/mmc/mmc.h       |   21 ++
->  include/linux/mmc/pm.h        |    1 +
->  include/linux/mmc/sdhci.h     |    1 +
->  18 files changed, 909 insertions(+), 206 deletions(-)
-> 
-> --
-> 1.7.10.4
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the body
-> of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 7466ce098e60..52faf8f4f45f 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -512,6 +512,7 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		/*
+ 		 * RPMB regions are defined in multiples of 128K.
+ 		 */
++#if 0
+ 		card->ext_csd.raw_rpmb_size_mult = ext_csd[EXT_CSD_RPMB_MULT];
+ 		if (ext_csd[EXT_CSD_RPMB_MULT] && mmc_host_cmd23(card->host)) {
+ 			mmc_part_add(card, ext_csd[EXT_CSD_RPMB_MULT] << 17,
+@@ -519,6 +520,7 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 				"rpmb", 0, false,
+ 				MMC_BLK_DATA_AREA_RPMB);
+ 		}
++#endif
+ 	}
+ 
+ 	card->ext_csd.raw_erased_mem_count = ext_csd[EXT_CSD_ERASED_MEM_CONT];
+-- 
+2.1.4
+
