@@ -1,185 +1,109 @@
-From: Andrzej Hajda <a.hajda@samsung.com>
-Subject: Re: [PATCH v2 1/2] mmc: dw_mmc: fix bug that cause 'Timeout sending
- command'
-Date: Wed, 11 Feb 2015 12:58:26 +0100
-Message-ID: <54DB43E2.70203@samsung.com>
-References: <1423134801-23219-1-git-send-email-addy.ke@rock-chips.com>
- <1423466726-20833-1-git-send-email-addy.ke@rock-chips.com>
- <1423466726-20833-2-git-send-email-addy.ke@rock-chips.com>
- <CAGOxZ51wgw9iXF3xX39vnB0M5ZPb+zHWoCtTvvKdyo9bSOCVgw@mail.gmail.com>
- <54DAC534.4020708@rock-chips.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
+ eMMC5.1 device
+Date: Wed, 11 Feb 2015 14:00:33 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333EDFA356@SACMBXIP02.sdcorp.global.sandisk.com>
+References: <20141219080442.GA3775@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-reply-to: <54DAC534.4020708@rock-chips.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Addy <addy.ke@rock-chips.com>, Alim Akhtar <alim.akhtar@gmail.com>
-Cc: robh+dt <robh+dt@kernel.org>, pawel.moll@arm.com, Mark Rutland <mark.rutland@arm.com>, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, dinguyen@altera.com, =?UTF-8?B?SGVpa28gU3TDvGJuZXI=?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Douglas Anderson <dianders@chromium.org>, Sonny Rao <sonnyrao@chromium.org>, amstan@chromium.org, djkurtz@chromium.org, huangtao@rock-chips.com, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, hl@rock-chips.com, linux-doc@vger.kernel.org, yzq@rock-chips.com, zyw@rock-chips.com, zhangqing@rock-chips.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kever.yang@rock-chips.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1on0089.outbound.protection.outlook.com ([157.56.110.89]:29088
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752185AbbBKOOr convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Feb 2015 09:14:47 -0500
+In-Reply-To: <20141219080442.GA3775@intel.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>
 
-Hi Alim,
+Hi Chuanxiao,
 
-On 02/11/2015 03:57 AM, Addy wrote:
+I have a question from the review of your SW CMDQ driver code.
+
+>From the eMMC5.1 spec, the  "ready for execution" for each task should be cleared by the device only when the last data block has been fully transferred over the eMMC bus. 
+
+However, from the code, I can recognize the following suspected case:
+
+1. Host sends CMD44/45 commands for TID#0
+2. Host sends CMD13 (QSR)  -> returned TID#0 ready for execution
+3. Host sends CMD46 for TID#0
+4. During the data transfer, host may send CMD13 (QSR)  -> returned TID#0 ready for execution (which is true since data is still in transfer)
+5. Host sends CMD46 for TID#0 (same as sent in bullet#3) - which is a problem.
+
+Please advise if my assumption above is correct.
+
+Thanks,
+Alex
+
+
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Chuanxiao Dong
+> Sent: Friday, December 19, 2014 10:05 AM
+> To: linux-mmc@vger.kernel.org
+> Subject: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
+> eMMC5.1 device
 > 
-> On 2015/02/10 23:22, Alim Akhtar wrote:
->> Hi Addy,
->>
->> On Mon, Feb 9, 2015 at 12:55 PM, Addy Ke <addy.ke@rock-chips.com> wrote:
->>> Because of some uncertain factors, such as worse card or worse hardware,
->>> DAT[3:0](the data lines) may be pulled down by card, and mmc controller
->>> will be in busy state. This should not happend when mmc controller
->>> send command to update card clocks. If this happends, mci_send_cmd will
->>> be failed and we will get 'Timeout sending command', and then system will
->>> be blocked. To avoid this, we need reset mmc controller.
->>>
->>> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
->>> ---
->>>   drivers/mmc/host/dw_mmc.c | 28 ++++++++++++++++++++++++++++
->>>   1 file changed, 28 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>> index 4d2e3c2..b0b57e3 100644
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -100,6 +100,7 @@ struct idmac_desc {
->>>   };
->>>   #endif /* CONFIG_MMC_DW_IDMAC */
->>>
->>> +static int dw_mci_card_busy(struct mmc_host *mmc);
->>>   static bool dw_mci_reset(struct dw_mci *host);
->>>   static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
->>>
->>> @@ -888,6 +889,31 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
->>>                  cmd, arg, cmd_status);
->>>   }
->>>
->>> +static void dw_mci_wait_busy(struct dw_mci_slot *slot)
->>> +{
->>> +       struct dw_mci *host = slot->host;
->>> +       unsigned long timeout = jiffies + msecs_to_jiffies(500);
->>> +
->> Why 500 msec?
-> This timeout value is the same as  mci_send_cmd:
-> static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
-> {
->          struct dw_mci *host = slot->host;
->          unsigned long timeout = jiffies + msecs_to_jiffies(500);
->          ....
-> }
+> Hello,
 > 
-> I have not clear that which is suitable.
-> Do you have any suggestion on it?
->>
->>> +       do {
->>> +               if (!dw_mci_card_busy(slot->mmc))
->>> +                       return;
->>> +               cpu_relax();
->>> +       } while (time_before(jiffies, timeout));
->>> +
->>> +       dev_err(host->dev, "Data busy (status %#x)\n",
->>> +               mci_readl(slot->host, STATUS));
->>> +
->>> +       /*
->>> +        * Data busy, this should not happend when mmc controller send command
->>> +        * to update card clocks in non-volt-switch state. If it happends, we
->>> +        * should reset controller to avoid getting "Timeout sending command".
->>> +        */
->>> +       dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS);
->>> +
->> Why you need to reset all blocks? may be CTRL_RESET is good enough here.
-> I have tested on rk3288, if only reset ctroller, data busy bit will not 
-> be cleaned,and we will still get
+> Seems community already have some implementation for the eMMC5.1 device
+> command queue feature, but that require the eMMC host controller to support
+> CMDQ. In my platform, I don't have this kind of eMMC host controller but I
+> have a Samsung eMMC5.1 device which can support the Command queue.
 > 
-> "Timeout sending command".
+> With this limitation, I have to let eMMC host controller to manually send the
+> CMD44/45/13/46/47. So in this way, more commands are needed for an I/O
+> request, more interrupts/schedule are needed in driver.
 > 
->>
->>> +       /* Fail to reset controller or still data busy, WARN_ON! */
->>> +       WARN_ON(dw_mci_card_busy(slot->mmc));
->>> +}
->>> +
->>>   static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->>>   {
->>>          struct dw_mci *host = slot->host;
->>> @@ -899,6 +925,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->>>          /* We must continue to set bit 28 in CMD until the change is complete */
->>>          if (host->state == STATE_WAITING_CMD11_DONE)
->>>                  sdmmc_cmd_bits |= SDMMC_CMD_VOLT_SWITCH;
->>> +       else
->>> +               dw_mci_wait_busy(slot);
->>>
->> hmm...I would suggest you to call dw_mci_wait_busy() from inside
->> mci_send_cmd(), seems like dw_mmc hangs while sending update clock cmd
->> in multiple cases.see [1]
->>
->> [1]: http://permalink.gmane.org/gmane.linux.kernel.mmc/31140
-> I think this patch is more reasonable.
-> So I will resend patches based on this patch.
-> thank you!
-
-I have tested your patches instead [1] above and they do not solve my issue:
-Board: odroid-xu3/exynos5422/dw_mmc_250a.
-MMC card: absent, broken-cd quirk
-SD card: present
-
-System hangs during boot after few minutes kernel spits:
-[  242.188098] INFO: task kworker/u16:1:50 blocked for more than 120
-seconds.
-[  242.193524]       Not tainted
-3.19.0-next-20150210-00002-gf96831b-dirty #3834
-[  242.200622] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs"
-disables this message.
-[  242.208422] kworker/u16:1   D c04766ac     0    50      2 0x00000000
-[  242.214756] Workqueue: kmmcd mmc_rescan
-[  242.218553] [<c04766ac>] (__schedule) from [<c0476a58>]
-(schedule+0x34/0x98)
-[  242.225591] [<c0476a58>] (schedule) from [<c047a4dc>]
-(schedule_timeout+0x110/0x164)
-[  242.233302] [<c047a4dc>] (schedule_timeout) from [<c04774f0>]
-(wait_for_common+0xb8/0x14c)
-[  242.241539] [<c04774f0>] (wait_for_common) from [<c0362138>]
-(mmc_wait_for_req+0x68/0x17c)
-[  242.249861] [<c0362138>] (mmc_wait_for_req) from [<c03622cc>]
-(mmc_wait_for_cmd+0x80/0xa0)
-[  242.258002] [<c03622cc>] (mmc_wait_for_cmd) from [<c0367e50>]
-(mmc_go_idle+0x78/0xf8)
-[  242.265796] [<c0367e50>] (mmc_go_idle) from [<c0363e2c>]
-(mmc_rescan+0x280/0x314)
-[  242.273253] [<c0363e2c>] (mmc_rescan) from [<c0034764>]
-(process_one_work+0x120/0x324)
-[  242.281135] [<c0034764>] (process_one_work) from [<c00349cc>]
-(worker_thread+0x30/0x42c)
-[  242.289194] [<c00349cc>] (worker_thread) from [<c003926c>]
-(kthread+0xd8/0xf4)
-[  242.296389] [<c003926c>] (kthread) from [<c000e7c0>]
-(ret_from_fork+0x14/0x34)
-
-Just for record, Exynos4412/dw_mmc_240a with the same configuration
-(no MMC card, broken-cd) works OK without patches.
-
-
-Regards
-Andrzej
-
->>
->>>          if (!clock) {
->>>                  mci_writel(host, CLKENA, 0);
->>> --
->>> 1.8.3.2
->>>
->>>
->>>
->>> _______________________________________________
->>> linux-arm-kernel mailing list
->>> linux-arm-kernel@lists.infradead.org
->>> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
->>
->>
+> Even this way have some more software overhead, but it can still use the
+> eMMC5.1 device Command queue feature. After test with the iozone
+> command:
+> "iozone -zec -t 4 -i0 -i2 -F iozonefile1 iozonefile2 iozonefile3 iozonefile4 -+n -I -r
+> 4k -s 500m -O -R -+r -+D" to test random performance, I saw a performance
+> improvment for random read on my eMMC5.1 device:
 > 
+> 		Random read
+> SW CMDQ:	5544.6
+> Normal Read:	3993.05
+> 
+> So I want to send this serial patches as RFC patch for reviewing
+> 
+> 
+> Chuanxiao Dong (5):
+>   mmc: replace sbc to precmd and add postcmd
+>   mmc: host: add runtime PM for host class dev
+>   mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
+>   mmc: core: add support for CMDQ feature in MMC Core stack
+>   mmc: sdhci: add SW CMDQ support for CHT SDHCI host
+> 
+>  drivers/mmc/card/block.c      |  538
+> ++++++++++++++++++++++++++++++++++++++---
+>  drivers/mmc/card/queue.c      |  213 ++++++++--------
+>  drivers/mmc/card/queue.h      |   14 +-
+>  drivers/mmc/core/core.c       |   78 +++++-
+>  drivers/mmc/core/host.c       |   14 ++
+>  drivers/mmc/core/mmc.c        |   43 +++-
+>  drivers/mmc/host/dw_mmc.c     |    8 +-
+>  drivers/mmc/host/mmci.c       |   14 +-
+>  drivers/mmc/host/omap_hsmmc.c |   18 +-
+>  drivers/mmc/host/sdhci-acpi.c |    1 -
+>  drivers/mmc/host/sdhci-pci.c  |    1 -
+>  drivers/mmc/host/sdhci.c      |  137 +++++++++--
+>  include/linux/mmc/card.h      |    3 +
+>  include/linux/mmc/core.h      |    5 +-
+>  include/linux/mmc/host.h      |    5 +
+>  include/linux/mmc/mmc.h       |   21 ++
+>  include/linux/mmc/pm.h        |    1 +
+>  include/linux/mmc/sdhci.h     |    1 +
+>  18 files changed, 909 insertions(+), 206 deletions(-)
 > 
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-doc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+> 1.7.10.4
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the body
+> of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
