@@ -1,126 +1,53 @@
 From: Addy <addy.ke@rock-chips.com>
-Subject: Re: [PATCH v2 1/2] mmc: dw_mmc: fix bug that cause 'Timeout sending
- command'
-Date: Wed, 11 Feb 2015 10:57:56 +0800
-Message-ID: <54DAC534.4020708@rock-chips.com>
-References: <1423134801-23219-1-git-send-email-addy.ke@rock-chips.com> <1423466726-20833-1-git-send-email-addy.ke@rock-chips.com> <1423466726-20833-2-git-send-email-addy.ke@rock-chips.com> <CAGOxZ51wgw9iXF3xX39vnB0M5ZPb+zHWoCtTvvKdyo9bSOCVgw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: fix bug that cause mmc_test failture
+Date: Wed, 11 Feb 2015 11:03:11 +0800
+Message-ID: <54DAC66F.60301@rock-chips.com>
+References: <1422273849-29773-1-git-send-email-addy.ke@rock-chips.com> <CAOesGMiWBjhfzWVXah2XO7=JQhriwdVgf0jmm1UjNQjB9PeGMQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <CAGOxZ51wgw9iXF3xX39vnB0M5ZPb+zHWoCtTvvKdyo9bSOCVgw@mail.gmail.com>
+In-Reply-To: <CAOesGMiWBjhfzWVXah2XO7=JQhriwdVgf0jmm1UjNQjB9PeGMQ@mail.gmail.com>
 Sender: linux-doc-owner@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@gmail.com>
-Cc: robh+dt <robh+dt@kernel.org>, pawel.moll@arm.com, Mark Rutland <mark.rutland@arm.com>, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, rdunlap@infradead.org, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, dinguyen@altera.com, =?UTF-8?B?SGVpa28gU3TDvGJuZXI=?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Douglas Anderson <dianders@chromium.org>, Sonny Rao <sonnyrao@chromium.org>, amstan@chromium.org, djkurtz@chromium.org, huangtao@rock-chips.com, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, hl@rock-chips.com, linux-doc@vger.kernel.org, yzq@rock-chips.com, zyw@rock-chips.com, zhangqing@rock-chips.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kever.yang@rock-chips.com
+To: Olof Johansson <olof@lixom.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?B?SGVpa28gU3TDvGJuZXI=?= <heiko@sntech.de>, Doug Anderson <dianders@chromium.org>, Sonny Rao <sonnyrao@chromium.org>, amstan@chromium.org, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-rockchip@lists.infradead.org, zhenfu.fang@
 List-Id: linux-mmc@vger.kernel.org
 
 
-On 2015/02/10 23:22, Alim Akhtar wrote:
+On 2015/02=E6=9C=8810=E6=97=A5 17:34, Olof Johansson wrote:
 > Hi Addy,
 >
-> On Mon, Feb 9, 2015 at 12:55 PM, Addy Ke <addy.ke@rock-chips.com> wrote:
->> Because of some uncertain factors, such as worse card or worse hardware,
->> DAT[3:0](the data lines) may be pulled down by card, and mmc controller
->> will be in busy state. This should not happend when mmc controller
->> send command to update card clocks. If this happends, mci_send_cmd will
->> be failed and we will get 'Timeout sending command', and then system will
->> be blocked. To avoid this, we need reset mmc controller.
+> On Mon, Jan 26, 2015 at 4:04 AM, Addy Ke <addy.ke@rock-chips.com> wro=
+te:
+>> The STOP command can terminate a data transfer between a memory card=
+ and
+>> mmc controller.
+>>
+>> As show in Synopsys DesignWare Cores Mobile Stroage Host Databook:
+>> Data timeout and Data end-bit error will terminate further data tran=
+sfer
+>> by mmc controller. So we should not send abort command to terminate =
+a
+>> data transfer again if we got DRTO and EBE interrupt.
+>>
+>> After this patch, all mmc_test cases can pass on RK3288-Pink2 board.
 >>
 >> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
->> ---
->>   drivers/mmc/host/dw_mmc.c | 28 ++++++++++++++++++++++++++++
->>   1 file changed, 28 insertions(+)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 4d2e3c2..b0b57e3 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -100,6 +100,7 @@ struct idmac_desc {
->>   };
->>   #endif /* CONFIG_MMC_DW_IDMAC */
->>
->> +static int dw_mci_card_busy(struct mmc_host *mmc);
->>   static bool dw_mci_reset(struct dw_mci *host);
->>   static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
->>
->> @@ -888,6 +889,31 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
->>                  cmd, arg, cmd_status);
->>   }
->>
->> +static void dw_mci_wait_busy(struct dw_mci_slot *slot)
->> +{
->> +       struct dw_mci *host = slot->host;
->> +       unsigned long timeout = jiffies + msecs_to_jiffies(500);
->> +
-> Why 500 msec?
-This timeout value is the same as  mci_send_cmd:
-static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
-{
-         struct dw_mci *host = slot->host;
-         unsigned long timeout = jiffies + msecs_to_jiffies(500);
-         ....
-}
-
-I have not clear that which is suitable.
-Do you have any suggestion on it?
+> The drawback of having so many people on your to: list on a patch is
+> that it's unclear who you want to review and merge it. Sometimes less
+> is more.
+I will remove some unnecessary mail address from list in the following=20
+patch.
+Thank you.
 >
->> +       do {
->> +               if (!dw_mci_card_busy(slot->mmc))
->> +                       return;
->> +               cpu_relax();
->> +       } while (time_before(jiffies, timeout));
->> +
->> +       dev_err(host->dev, "Data busy (status %#x)\n",
->> +               mci_readl(slot->host, STATUS));
->> +
->> +       /*
->> +        * Data busy, this should not happend when mmc controller send command
->> +        * to update card clocks in non-volt-switch state. If it happends, we
->> +        * should reset controller to avoid getting "Timeout sending command".
->> +        */
->> +       dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS);
->> +
-> Why you need to reset all blocks? may be CTRL_RESET is good enough here.
-I have tested on rk3288, if only reset ctroller, data busy bit will not 
-be cleaned,and we will still get
-
-"Timeout sending command".
-
+> In this case, it seems appropriate to have Ulf do so. Ulf, ping? This
+> seems like a reasonable patch for 3.20 given that it fixes undesired
+> behavior.
 >
->> +       /* Fail to reset controller or still data busy, WARN_ON! */
->> +       WARN_ON(dw_mci_card_busy(slot->mmc));
->> +}
->> +
->>   static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->>   {
->>          struct dw_mci *host = slot->host;
->> @@ -899,6 +925,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->>          /* We must continue to set bit 28 in CMD until the change is complete */
->>          if (host->state == STATE_WAITING_CMD11_DONE)
->>                  sdmmc_cmd_bits |= SDMMC_CMD_VOLT_SWITCH;
->> +       else
->> +               dw_mci_wait_busy(slot);
->>
-> hmm...I would suggest you to call dw_mci_wait_busy() from inside
-> mci_send_cmd(), seems like dw_mmc hangs while sending update clock cmd
-> in multiple cases.see [1]
 >
-> [1]: http://permalink.gmane.org/gmane.linux.kernel.mmc/31140
-I think this patch is more reasonable.
-So I will resend patches based on this patch.
-thank you!
+> -Olof
 >
->>          if (!clock) {
->>                  mci_writel(host, CLKENA, 0);
->> --
->> 1.8.3.2
->>
->>
->>
->> _______________________________________________
->> linux-arm-kernel mailing list
->> linux-arm-kernel@lists.infradead.org
->> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 >
 >
 
