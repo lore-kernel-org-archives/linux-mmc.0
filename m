@@ -1,56 +1,168 @@
-From: Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH V4 3/4] mmc: pwrseq: Initial support for the simple MMC
- power sequence provider
-Date: Wed, 11 Feb 2015 13:34:26 +0900
-Message-ID: <CAAVeFuLQkNz6x21w8xCM==nwyt0QbYL_uPC9+TdRCj2w+FVu1A@mail.gmail.com>
-References: <1421658784-11980-1-git-send-email-ulf.hansson@linaro.org>
- <1421658784-11980-4-git-send-email-ulf.hansson@linaro.org>
- <CAAVeFu+ubZZGQd=zPPYm--PVCO9q-A3503Y5g50+sU4ztxU+iA@mail.gmail.com> <CAPDyKFrdpknrMa62Vz4dfKaFMTdF-uXaAz3pkw_3qwNvHy49SQ@mail.gmail.com>
+From: Andrzej Hajda <a.hajda@samsung.com>
+Subject: Re: [RFC PATCH] mmc: dw_mmc: add status check before clock update
+Date: Wed, 11 Feb 2015 08:51:06 +0100
+Message-ID: <54DB09EA.30602@samsung.com>
+References: <1423572711-13787-1-git-send-email-a.hajda@samsung.com>
+ <1423578559-27947-1-git-send-email-a.hajda@samsung.com>
+ <CAGOxZ52E2ymA4WUrqLS28uPmF=3DGExkoFvw=HezC70xs=8dvA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFrdpknrMa62Vz4dfKaFMTdF-uXaAz3pkw_3qwNvHy49SQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, NeilBrown <neilb-l3A5Bk7waGM@public.gmane.org>, Tomeu Vizoso <tomeu.vizoso-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.w1.samsung.com ([210.118.77.14]:56849 "EHLO
+	mailout4.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750823AbbBKHvM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Feb 2015 02:51:12 -0500
+Received: from eucpsbgm1.samsung.com (unknown [203.254.199.244])
+ by mailout4.w1.samsung.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Nov
+ 17 2011)) with ESMTP id <0NJL00D5FKNX1U90@mailout4.w1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 11 Feb 2015 07:55:09 +0000 (GMT)
+In-reply-to: <CAGOxZ52E2ymA4WUrqLS28uPmF=3DGExkoFvw=HezC70xs=8dvA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alim Akhtar <alim.akhtar@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-On Wed, Feb 11, 2015 at 1:28 PM, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> [...]
->
->>> +int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
->>> +{
->>> +       struct mmc_pwrseq_simple *pwrseq;
->>> +
->>> +       pwrseq = kzalloc(sizeof(struct mmc_pwrseq_simple), GFP_KERNEL);
->>> +       if (!pwrseq)
->>> +               return -ENOMEM;
->>> +
->>> +       pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
->>> +       host->pwrseq = &pwrseq->pwrseq;
->>
->> How about making this function return a struct mmc_pwrseq * so this
->> last line can be moved to mmc_pwrseq_alloc() instead of requiring all
->> power sequences to do it?
->>
->> The same applies to
->>
->>     host->pwrseq = NULL;
->>
->> in mmc_pwrseq_simple_free(), which could be done in mmc_pwrseq_free() it seems.
->
-> Thanks for reviewing!
->
-> I like you suggestion, though $subject patch is already part of the PR for 3.20.
->
-> Feel free to send a patch, I would happily apply it.
+Hi,
 
-Damn, why am I always so late to review patches...
+Thanks for comments.
 
-I will send a fixup patch - better to have this done early.
+On 02/10/2015 03:54 PM, Alim Akhtar wrote:
+> Hi Andrzej,
+>
+> On Tue, Feb 10, 2015 at 7:59 PM, Andrzej Hajda <a.hajda@samsung.com> wrote:
+>> According to specs for version 250A, status register should be
+>> tested before clock update. Otherwise in case MMC card is missing
+>> mci_send_cmd timeouts and subsequent CTYPE registry write causes system hang.
+>> This behavior has been observed on Exynos5422/Odroid-XU3.
+>>
+> A similar patch was posted recently[1], did you check that?
+> [1] http://www.spinics.net/lists/linux-doc/msg28092.html
 
-Thanks!
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+No, thanks for pointing it. I will look at it closer.
+
+>
+>> Signed-off-by: Andrzej Hajda <a.hajda@samsung.com>
+>> ---
+>> Hi,
+>>
+>> This version corrects usleep to usleep_range function call.
+>>
+>> Regards
+>> Andrzej
+>> ---
+>>  drivers/mmc/host/dw_mmc.c | 26 ++++++++++++++++++++++++--
+>>  drivers/mmc/host/dw_mmc.h |  1 +
+>>  2 files changed, 25 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 67c0451..6619c8a 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -878,6 +878,25 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
+>>                 cmd, arg, cmd_status);
+>>  }
+>>
+>> +static bool dw_mci_wait_busy(struct dw_mci *host)
+>> +{
+>> +       unsigned long timeout;
+>> +
+>> +       if (host->verid < DW_MMC_250A)
+>> +               return true;
+>> +
+> I wonder this might be true for 240A as well.
+
+Odroid-U3 board with Exynos4412 and MMC 240A does not have this problem.
+On the other side busy check does not hurt it anyway.
+
+Relevant part of dmesg for Exynos4412/mmc_240a:
+...
+[    2.193967] mmc1: req done (CMD55): -110: 00000000 00000000 00000000
+00000000
+[    2.194000] mmc1: clock 400000Hz busmode 1 powermode 2 cs 0 Vdd 7
+width 0 timing 0
+[    2.194010] mmc1: starting CMD1 arg 00000000 flags 000000e1
+[    2.194821] mmc1: req done (CMD1): -110: 00000000 00000000 00000000
+00000000
+[    2.194854] mmc1: clock 0Hz busmode 2 powermode 0 cs 0 Vdd 0 width 0
+timing 0
+[    3.195404] mmc1: clock 0Hz busmode 2 powermode 1 cs 0 Vdd 7 width 0
+timing 0
+...
+and for Exynos5422/mmc_250a:
+[    3.530672] mmc0: req done (CMD55): -5: 00000000 00000000 00000000
+00000000
+[    3.530707] mmc0: clock 400000Hz busmode 1 powermode 2 cs 0 Vdd 21
+width 0 timing 0
+[    3.530716] mmc0: starting CMD1 arg 00000000 flags 000000e1
+[    3.531004] mmc0: req done (CMD1): -5: 00000000 00000000 00000000
+00000000
+[    3.531039] mmc0: clock 0Hz busmode 2 powermode 0 cs 0 Vdd 0 width 0
+timing 0
+[    4.031304] mmc_host mmc0: Busy timeout (cmd 0x202000 arg 0x0)
+[    5.031323] mmc0: clock 0Hz busmode 2 powermode 1 cs 0 Vdd 21 width 0
+timing 0
+[    5.536385] mmc_host mmc0: Busy timeout (cmd 0x202000 arg 0x0)
+
+>
+>> +       timeout = jiffies + msecs_to_jiffies(500);
+>> +       while (time_before(jiffies, timeout)) {
+>> +               if (!(mci_readl(host, STATUS) & SDMMC_STATUS_BUSY))
+>> +                       return true;
+>> +
+>> +               usleep_range(1000, 2000);
+>> +       }
+>> +       dev_err(host->dev, "Busy timeout\n");
+> Probably you need a controller reset here to bring back controller is
+> original state.
+
+OK.
+
+Regards
+Andrzej
+
+
+>> +
+>> +       return false;
+>> +}
+>> +
+>>  static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>>  {
+>>         struct dw_mci *host = slot->host;
+>> @@ -891,8 +910,11 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>>                 sdmmc_cmd_bits |= SDMMC_CMD_VOLT_SWITCH;
+>>
+>>         if (!clock) {
+>> -               mci_writel(host, CLKENA, 0);
+>> -               mci_send_cmd(slot, sdmmc_cmd_bits, 0);
+>> +               if (dw_mci_wait_busy(host)) {
+>> +                       mci_writel(host, CLKENA, 0);
+>> +                       mci_send_cmd(slot, sdmmc_cmd_bits, 0);
+>> +               } else
+>> +                       return;
+>>         } else if (clock != host->current_speed || force_clkinit) {
+>>                 div = host->bus_hz / clock;
+>>                 if (host->bus_hz % clock && host->bus_hz > clock)
+>> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+>> index 0d0f7a27..ea6d4d1 100644
+>> --- a/drivers/mmc/host/dw_mmc.h
+>> +++ b/drivers/mmc/host/dw_mmc.h
+>> @@ -15,6 +15,7 @@
+>>  #define _DW_MMC_H_
+>>
+>>  #define DW_MMC_240A            0x240a
+>> +#define DW_MMC_250A            0x250a
+>>
+>>  #define SDMMC_CTRL             0x000
+>>  #define SDMMC_PWREN            0x004
+>> --
+>> 1.9.1
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+
