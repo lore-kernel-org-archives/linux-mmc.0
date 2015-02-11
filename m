@@ -1,35 +1,41 @@
-From: Sheetal <sheetal.tigadoli@gmail.com>
-Subject: Doubt on mmc erase command
-Date: Tue, 10 Feb 2015 22:00:43 +0530
-Message-ID: <54DA3233.2090701@gmail.com>
+From: John Tobias <john.tobias.ph@gmail.com>
+Subject: iMX6 SDR12 support
+Date: Tue, 10 Feb 2015 17:10:46 -0800
+Message-ID: <CACUGKYNtUJpNdNaXdTpG5pSnxR3xYhE-VXg9R7Oremw+k_kVMw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f44.google.com ([209.85.220.44]:41920 "EHLO
-	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750934AbbBJQax (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Feb 2015 11:30:53 -0500
-Received: by mail-pa0-f44.google.com with SMTP id kq14so13623036pab.3
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2015 08:30:52 -0800 (PST)
-Received: from [192.168.0.101] ([103.16.70.21])
-        by mx.google.com with ESMTPSA id q4sm19822325pdm.88.2015.02.10.08.30.50
-        for <linux-mmc@vger.kernel.org>
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 10 Feb 2015 08:30:51 -0800 (PST)
+Received: from mail-lb0-f179.google.com ([209.85.217.179]:57356 "EHLO
+	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750808AbbBKBKr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Feb 2015 20:10:47 -0500
+Received: by mail-lb0-f179.google.com with SMTP id w7so406905lbi.10
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2015 17:10:46 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Aisheng Dong <Aisheng.Dong@freescale.com>
 
-Hello,
+Hello All,
 
-I'm trying to send ERASE Command to the emmc by deleting a file on one 
-of the emmc partitions and then doing a sync, But I'm noticing that even 
-this will not issue the erase command to emmc.
+I have a new iMX6SL custom board with WiLink8 chipset. The chipset has
+some features  of SDIO 3.0 support and the I/O is 1.8v. I used the
+mainline kernel 3.13 and 3.19, both of them detected it. But, the
+problem is the voltage signaling is 3.3v and it should be 1.8v.
 
-I did trace the code on, from where this erase command is issued, but my 
-trace ended at an ioctl call "do_vfs_ioctl()" more specific 
-"SYSCALL_DEFINE3(ioctl, unsigned int, fd, unsigned int, cmd, unsigned 
-long, arg)" system call definition does a call to do_vfs_ioctl.
+clock:          50000000 Hz
+actual clock:   49500000 Hz
+vdd:            7 (1.65 - 1.95 V)
+bus mode:       2 (push-pull)
+chip select:    0 (don't care)
+power mode:     2 (on)
+bus width:      2 (4 bits)
+timing spec:    2 (sd high-speed)
+--->>> signal voltage: 0 (3.30 V)  <---> it should be 1.8v
 
-Please help me understand how to initiate this from userspace.
+
+I would like to know if there's any available patches out there that I
+could use in order support SDR25?.
+
+Regards,
+
+John Tobias
