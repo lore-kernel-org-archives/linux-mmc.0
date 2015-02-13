@@ -1,110 +1,63 @@
-From: keita kobayashi <keita.kobayashi.ym@renesas.com>
-Subject: [RFC/PATCH] mmc: tmio: Fix PIO mode with CONFIG_HIGHMEM
-Date: Fri, 13 Feb 2015 14:55:47 +0900
-Message-ID: <54DD91E3.3070903@renesas.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-2022-JP"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org
+From: Addy Ke <addy.ke@rock-chips.com>
+Subject: [PATCH] mmc: dw_mmc: rockchip: add support MMC_CAP_RUNTIME_RESUME capability
+Date: Fri, 13 Feb 2015 15:22:20 +0800
+Message-ID: <1423812140-24196-1-git-send-email-addy.ke@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from regular1.263xmail.com ([211.150.99.135]:33671 "EHLO
+	regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751535AbbBMHYt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Feb 2015 02:24:49 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: jh80.chung@samsung.com, ulf.hansson@linaro.org, olof@lixom.net, dianders@chromium.org
+Cc: heiko@sntech.de, cf@rock-chips.com, lintao@rock-chips.com, huangtao@rock-chips.com, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, Addy Ke <addy.ke@rock-chips.com>
 
-Current PIO mode occurred kernel panic with CONFIG_HIGHMEM.
-This patch fixes the kernel panic by converting the driver
-to the sg_miter API.
+To support HS200 and UHS mode, mmc core will call init_card() to
+execute tuning:
+- sdio: init_card can be executed at runtime resume.
+- sd and mmc: init_card can be executed at resume or runtime resume,
+  which depends on MMC_CAP_RUNTIME_RESUME capability.
 
-Reported-by: Cao Minh Hiep <cm-hiep@jinso.co.jp>
-Signed-off-by: Keita Kobayashi <keita.kobayashi.ym@renesas.com>
+On rk3288 SoC, host will get DRTO interrupt when host send command
+to read tuning data. This will spend more than 111ms:
+drto_ms = drto_clks * 1000 / bus_hz = 111ms.
+
+And the total tuning time will be more than 400ms.
+
+So we should add MMC_CAP_RUNTIME_RESUME capability to execute tuning
+at runtime resume. Only if we do so, can we pass resume test.
+
+Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
 ---
-This patch is based on renesas.git / renesas-devel-20150211-v3.19 tag.
+ drivers/mmc/host/dw_mmc-rockchip.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
- drivers/mmc/host/tmio_mmc.h     |    1 +
- drivers/mmc/host/tmio_mmc_pio.c |   35 ++++++++++++++++-------------------
- 2 files changed, 17 insertions(+), 19 deletions(-)
-
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index a34ecbe..3092219 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -56,6 +56,7 @@ struct tmio_mmc_host {
- 	struct scatterlist      *sg_orig;
- 	unsigned int            sg_len;
- 	unsigned int            sg_off;
-+	struct sg_mapping_iter	sg_miter;
-
- 	struct platform_device *pdev;
- 	struct tmio_mmc_data *pdata;
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 250bf8c..6d8f363 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -70,17 +70,14 @@ static void tmio_mmc_ack_mmc_irqs(struct tmio_mmc_host *host, u32 i)
-
- static void tmio_mmc_init_sg(struct tmio_mmc_host *host, struct mmc_data *data)
- {
--	host->sg_len = data->sg_len;
--	host->sg_ptr = data->sg;
--	host->sg_orig = data->sg;
--	host->sg_off = 0;
--}
-+	unsigned int flags = SG_MITER_ATOMIC;
-
--static int tmio_mmc_next_sg(struct tmio_mmc_host *host)
--{
--	host->sg_ptr = sg_next(host->sg_ptr);
--	host->sg_off = 0;
--	return --host->sg_len;
-+	if (data->flags & MMC_DATA_READ)
-+		flags |= SG_MITER_TO_SG;
-+	else
-+		flags |= SG_MITER_FROM_SG;
-+
-+	sg_miter_start(&host->sg_miter, data->sg, data->sg_len, flags);
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index e2a726a..e5f57b5 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -76,12 +76,20 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
+ 	return 0;
  }
-
- #ifdef CONFIG_MMC_DEBUG
-@@ -418,7 +415,7 @@ static void tmio_mmc_transfer_data(struct tmio_mmc_host *host,
- static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
- {
- 	struct mmc_data *data = host->data;
--	void *sg_virt;
-+	struct sg_mapping_iter *sg_miter = &host->sg_miter;
- 	unsigned short *buf;
- 	unsigned int count;
- 	unsigned long flags;
-@@ -431,10 +428,12 @@ static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
- 		return;
- 	}
-
--	sg_virt = tmio_mmc_kmap_atomic(host->sg_ptr, &flags);
--	buf = (unsigned short *)(sg_virt + host->sg_off);
-+	local_irq_save(flags);
-
--	count = host->sg_ptr->length - host->sg_off;
-+	if (!sg_miter_next(sg_miter))
-+		return;
-+	buf = sg_miter->addr;
-+	count = sg_miter->length;
- 	if (count > data->blksz)
- 		count = data->blksz;
-
-@@ -444,12 +443,10 @@ static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
- 	/* Transfer the data */
- 	tmio_mmc_transfer_data(host, buf, count);
-
--	host->sg_off += count;
--
--	tmio_mmc_kunmap_atomic(host->sg_ptr, &flags, sg_virt);
-+	sg_miter->consumed = count;
-+	sg_miter_stop(sg_miter);
-
--	if (host->sg_off == host->sg_ptr->length)
--		tmio_mmc_next_sg(host);
-+	local_irq_restore(flags);
-
- 	return;
- }
+ 
++/* Common capabilities of RK3288 SoC */
++static unsigned long dw_mci_rk3288_dwmmc_caps[4] = {
++	MMC_CAP_RUNTIME_RESUME, /* emmc */
++	MMC_CAP_RUNTIME_RESUME, /* sdmmc */
++	0, /* sdio0 */
++	0, /* sdio1 */
++};
+ static const struct dw_mci_drv_data rk2928_drv_data = {
+ 	.prepare_command        = dw_mci_rockchip_prepare_command,
+ 	.init			= dw_mci_rockchip_init,
+ };
+ 
+ static const struct dw_mci_drv_data rk3288_drv_data = {
++	.caps			= dw_mci_rk3288_dwmmc_caps,
+ 	.prepare_command        = dw_mci_rockchip_prepare_command,
+ 	.set_ios		= dw_mci_rk3288_set_ios,
+ 	.setup_clock    = dw_mci_rk3288_setup_clock,
 -- 
-1.7.9.5
+1.8.3.2
+
+
