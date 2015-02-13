@@ -1,134 +1,59 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [RFC PATCH] mmc: dw_mmc: add status check before clock update
-Date: Fri, 13 Feb 2015 16:30:45 +0900
-Message-ID: <54DDA825.1080509@samsung.com>
-References: <1423572711-13787-1-git-send-email-a.hajda@samsung.com>
- <1423578559-27947-1-git-send-email-a.hajda@samsung.com>
- <CAGOxZ52E2ymA4WUrqLS28uPmF=3DGExkoFvw=HezC70xs=8dvA@mail.gmail.com>
- <54DB09EA.30602@samsung.com> <54DB13A7.8090101@samsung.com>
- <54DB1B78.1010709@samsung.com>
- <CABxcv=nXuKpGJdBiO2NwUhkYUi7SyuhO1HeEoSUoAESVmEq4XQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:37316 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751655AbbBMHas (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Feb 2015 02:30:48 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
- (7.0.4.24.0) 64bit (built Nov 17 2011))
- with ESMTP id <0NJP00HZE8V9NPD0@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 13 Feb 2015 16:30:45 +0900 (KST)
-In-reply-to: <CABxcv=nXuKpGJdBiO2NwUhkYUi7SyuhO1HeEoSUoAESVmEq4XQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Andrzej Hajda <a.hajda@samsung.com>
+Subject: [PATCH RESEND] ARM: dts: exynos5422-odroidxu3: add mmc detect gpio
+Date: Fri, 13 Feb 2015 08:48:54 +0100
+Message-ID: <1423813734-20664-1-git-send-email-a.hajda@samsung.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Andrzej Hajda <a.hajda@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, linux-samsung-soc@vger.kernel.org, kgene@kernel.org, javier@dowhile0.org
 List-Id: linux-mmc@vger.kernel.org
-To: Javier Martinez Canillas <javier@dowhile0.org>, Andrzej Hajda <a.hajda@samsung.com>
-Cc: Alim Akhtar <alim.akhtar@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Marek Szyprowski <m.szyprowski@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>
 
-Hi, Andrzej.
+The patch adds gpio for detecting presence of MMC card.
+It fixes issue with kernel hang due when MMC card is missing.
 
-On 02/13/2015 01:53 AM, Javier Martinez Canillas wrote:
-> Hello Andrzej,
-> 
-> On Wed, Feb 11, 2015 at 10:06 AM, Andrzej Hajda <a.hajda@samsung.com> wrote:
->> On 02/11/2015 09:32 AM, Jaehoon Chung wrote:
->>> On 02/11/2015 04:51 PM, Andrzej Hajda wrote:
->>>> Hi,
->>>>
->>>> Thanks for comments.
->>>>
->>>> On 02/10/2015 03:54 PM, Alim Akhtar wrote:
->>>>> Hi Andrzej,
->>>>>
->>>>> On Tue, Feb 10, 2015 at 7:59 PM, Andrzej Hajda <a.hajda@samsung.com> wrote:
->>>>>> According to specs for version 250A, status register should be
->>>>>> tested before clock update. Otherwise in case MMC card is missing
->>>>>> mci_send_cmd timeouts and subsequent CTYPE registry write causes system hang.
->>>>>> This behavior has been observed on Exynos5422/Odroid-XU3.
-> 
-> I've also observed the same behavior (mmc command send timing out and
-> system hang) on an Exynos5420 Peach Pit Chromebook and an Exynos5800
-> Peach Pi Chromebok which both have the same dw_mmc 250A IP version.
-> 
-> Unfortunately $subject doesn't seem to be enough since even with that
-> applied I got:
-> 
-> [    4.264418] mmc_host mmc1: Timeout sending command (cmd 0x202000
-> arg 0x0 status 0x80202000)
-> [    4.283988] random: nonblocking pool is initialized
-> [   28.054406] INFO: rcu_sched detected stalls on CPUs/tasks:
-> [   28.058412] 0: (5 ticks this GP) idle=65f/140000000000001/0
-> softirq=215/216 fqs=39
-> [   28.066129] (detected by 1, t=4765 jiffies, g=-294, c=-295, q=2)
-> [   28.072202] Task dump for CPU 0:
-> [   28.075412] kworker/u16:0   R running      0     6      2 0x00000002
-> [   28.081749] Workqueue: kmmcd mmc_rescan
-> [   28.085570] [<c04c2698>] (__schedule) from [<00000000>] (  (null))
-> [   28.091724] rcu_sched kthread starved for 796 jiffies!
-> 
->>>>>>
->>>>>> +static bool dw_mci_wait_busy(struct dw_mci *host)
->>>>>> +{
->>>>>> +       unsigned long timeout;
->>>>>> +
->>>>>> +       if (host->verid < DW_MMC_250A)
->>>>>> +               return true;
->>>>>> +
->>>>> I wonder this might be true for 240A as well.
->>>> Odroid-U3 board with Exynos4412 and MMC 240A does not have this problem.
->>>> On the other side busy check does not hurt it anyway.
-> 
-> This problem also does not happen on an Exynos5250 Snow Chromebook
-> which has a dw_mmc IP version 241A.
-> 
->>> Which kernel version do you use?
->>> I also have the exynos5422 board, but i didn't find the below error yet.
->>> It doesn't relate with IP version.
->>> If you share your environment, i can check with exynos5422 board.
->>
->> linux-next on odroid-xu3. With MMC card removed, booting from sdcard.
->> Please also note that broken-cd quirk is on in dts.
+Signed-off-by: Andrzej Hajda <a.hajda@samsung.com>
+---
+Hi,
 
-I can't find this problem on exynos5422 board.(Odroix-xu3)
-Could you share the properties into dts file?
+This is just resend of the patch with added mmc ML and dw-mmc maintainers.
 
+Javier, I have no access to peach-pi(t) schematics, so I do not know if they
+have mmc-cd line connected to gpc0-2 gpio, but I guess it could be the case.
+You could check if similar patches will fix the issue for them.
 
-Best Regards,
-Jaehoon Chung
+Regards
+Andrzej
 
->>
-> 
-> I tested by trying to add wifi support to the Peach Pit/Pi Chromebooks
-> which have an SDIO wifi chip attached to mmc@12210000. This [0] is the
-> patch I've on top of linux-next fwiw.
-> 
->>>
->>> I'm not sure but this patch could be dropped.
->>> Because this patch is just only checking whether card is busy or not.
->>>
->>> this patch(mmc:dw_mmc: fix bug that case 'timeout sending command') can cover your patch.
->>
->> I will test it.
->>
-> 
-> I tested it and although the mentioned patch does fix the mmc commands
-> send timing out, now card detection seems to not be working since the
-> kernel keeps waiting for aiting for root device /dev/mmcblk1p4...
-> 
-> and the this error is shown:
-> 
-> [    4.249434] dwmmc_exynos 12210000.mmc: Data busy (status 0x306)
-> 
-> So I tried the other patch from Addy's series "mmc: dw_mmc: Don't
-> start command while data busy" but it did not have an effect. I still
-> see the data busy error and the uSD card is not detected.
-> 
-> Best regards,
-> Javier
-> 
-> [0]: http://paste.debian.net/plain/145877
-> 
+ arch/arm/boot/dts/exynos5422-odroidxu3.dts | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
+diff --git a/arch/arm/boot/dts/exynos5422-odroidxu3.dts b/arch/arm/boot/dts/exynos5422-odroidxu3.dts
+index 47ec9bf..a563811 100644
+--- a/arch/arm/boot/dts/exynos5422-odroidxu3.dts
++++ b/arch/arm/boot/dts/exynos5422-odroidxu3.dts
+@@ -11,6 +11,7 @@
+ */
+ 
+ /dts-v1/;
++#include <dt-bindings/gpio/gpio.h>
+ #include "exynos5800.dtsi"
+ 
+ / {
+@@ -355,13 +356,13 @@
+ 
+ &mmc_0 {
+ 	status = "okay";
+-	broken-cd;
++	cd-gpios = <&gpc0 2 GPIO_ACTIVE_LOW>;
+ 	card-detect-delay = <200>;
+ 	samsung,dw-mshc-ciu-div = <3>;
+ 	samsung,dw-mshc-sdr-timing = <0 4>;
+ 	samsung,dw-mshc-ddr-timing = <0 2>;
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
++	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_cd>;
+ 	bus-width = <8>;
+ 	cap-mmc-highspeed;
+ };
+-- 
+1.9.1
