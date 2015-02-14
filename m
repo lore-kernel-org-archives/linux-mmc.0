@@ -1,89 +1,46 @@
-From: Addy Ke <addy.ke@rock-chips.com>
-Subject: [PATCH v4 2/3] mmc: dw_mmc: fix bug that cause 'Timeout sending command'
-Date: Sat, 14 Feb 2015 14:17:47 +0800
-Message-ID: <1423894668-8886-3-git-send-email-addy.ke@rock-chips.com>
-References: <1423828368-18456-1-git-send-email-addy.ke@rock-chips.com>
- <1423894668-8886-1-git-send-email-addy.ke@rock-chips.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1423894668-8886-1-git-send-email-addy.ke@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: jh80.chung@samsung.com, ulf.hansson@linaro.org, olof@lixom.net, alim.akhtar@gmail.com, a.hajda@samsung.com, dianders@chromium.org
-Cc: heiko@sntech.de, cf@rock-chips.com, lintao@rock-chips.com, huangtao@rock-chips.com, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, Addy Ke <addy.ke@rock-chips.com>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: Kernel 3.19 on iMX6SL
+Date: Sat, 14 Feb 2015 16:28:12 -0200
+Message-ID: <CAOMZO5DBEifsCQBL2_S2tb9Ci1WN3pQzz2R7kYgP0H459rs7wQ@mail.gmail.com>
+References: <CACUGKYMC-_F9fwXgM7jz4J3vabF6Sq-sh3=WdqO_doj1+rvmDA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f178.google.com ([209.85.217.178]:51110 "EHLO
+	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754091AbbBNS2N (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 14 Feb 2015 13:28:13 -0500
+Received: by mail-lb0-f178.google.com with SMTP id w7so20825002lbi.9
+        for <linux-mmc@vger.kernel.org>; Sat, 14 Feb 2015 10:28:12 -0800 (PST)
+In-Reply-To: <CACUGKYMC-_F9fwXgM7jz4J3vabF6Sq-sh3=WdqO_doj1+rvmDA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: John Tobias <john.tobias.ph@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Aisheng Dong <Aisheng.Dong@freescale.com>, Shawn Guo <shawn.guo@linaro.org>, Dong Aisheng <dongas86@gmail.com>
 
-Because of some uncertain factors, such as worse card or worse hardware,
-DAT[3:0](the data lines) may be pulled down by card, and mmc controller
-will be in busy state. This should not happend when mmc controller
-send command to update card clocks. If this happends, mci_send_cmd will
-be failed and we will get 'Timeout sending command', and then system will
-be blocked. To avoid this, we need reset mmc controller.
+Hi John,
 
-Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
-Changes in v4:
-- Retry to wait and reset all blocks until data unbusy.
-  I have a sd card, which need retry 2 times to change to unbusy state.
+On Fri, Feb 13, 2015 at 11:10 PM, John Tobias <john.tobias.ph@gmail.com> wrote:
+> Hello Guys,
+>
+> I tried to use kernel 3.19 on my iMX6SL custom board and my eMMC is
+> running DDR50 mode.
+>
+> Any available patch for this?.
 
----
- drivers/mmc/host/dw_mmc.c | 33 +++++++++++++++++++++++++++++++++
- 1 file changed, 33 insertions(+)
+Dong's series that added mx6sl DDR50 support has been applied already:
+http://lists.infradead.org/pipermail/linux-arm-kernel/2013-October/205933.html
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 3472f9b..ac21863 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -100,6 +100,7 @@ struct idmac_desc {
- };
- #endif /* CONFIG_MMC_DW_IDMAC */
- 
-+static int dw_mci_card_busy(struct mmc_host *mmc);
- static bool dw_mci_reset(struct dw_mci *host);
- static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
- 
-@@ -888,6 +889,36 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
- 		cmd, arg, cmd_status);
- }
- 
-+static void dw_mci_wait_busy(struct dw_mci_slot *slot)
-+{
-+	bool ret = true;
-+	struct dw_mci *host = slot->host;
-+	unsigned long timeout = jiffies + msecs_to_jiffies(500);
-+
-+	if (host->state == STATE_WAITING_CMD11_DONE)
-+		return;
-+
-+	do {
-+		do {
-+			if (!dw_mci_card_busy(slot->mmc))
-+				return;
-+			usleep_range(50, 100);
-+		} while (time_before(jiffies, timeout));
-+
-+		dev_err(host->dev, "Data busy (status %#x)\n",
-+			mci_readl(slot->host, STATUS));
-+
-+		/*
-+		 * Data busy, this should not happend when mmc controller
-+		 * send command to update card clocks in non-volt-switch state.
-+		 * If it happends, we should reset controller to avoid getting
-+		 * "Timeout sending command".
-+		 */
-+		ret = dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS);
-+
-+	} while (!ret || dw_mci_card_busy(slot->mmc));
-+}
-+
- static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
- {
- 	struct dw_mci *host = slot->host;
-@@ -896,6 +927,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
- 	u32 clk_en_a;
- 	u32 sdmmc_cmd_bits = SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT;
- 
-+	dw_mci_wait_busy(slot);
-+
- 	/* We must continue to set bit 28 in CMD until the change is complete */
- 	if (host->state == STATE_WAITING_CMD11_DONE)
- 		sdmmc_cmd_bits |= SDMMC_CMD_VOLT_SWITCH;
--- 
-1.8.3.2
+Make sure you have the 100 and 200MHz sdhc pinctrl entries in your dts
+like it was done in this commit:
+
+commit fa87dfd6d0b067bd962ab83754cf1991ee512c0c
+Author: Dong Aisheng <b29396@freescale.com>
+Date:   Wed Oct 9 19:20:07 2013 +0800
+
+    ARM: dts: imx6sl: add pinctrl uhs states for usdhc
+
+    This is needed for SD3.0 cards working on UHS mode.
+
+    Signed-off-by: Dong Aisheng <b29396@freescale.com>
+    Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
