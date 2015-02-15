@@ -1,55 +1,59 @@
 From: John Tobias <john.tobias.ph@gmail.com>
-Subject: Re: SDIO - High Speed - iMX6
-Date: Sat, 14 Feb 2015 22:54:10 -0800
-Message-ID: <CACUGKYMJm7qTLHBJwH=58mhpcJBePPgOKt96cw1XECX2ozPwuQ@mail.gmail.com>
-References: <CACUGKYNPE1zAHt4Hx4c5ufuHNchVXnUOC1znCa7dT9povD_CWQ@mail.gmail.com>
-	<CAOMZO5DR2nnoChgC2PbXkrDCAfF0WG_Vf+iXR3UsfFGxQxagmA@mail.gmail.com>
+Subject: Re: Kernel 3.19 on iMX6SL
+Date: Sat, 14 Feb 2015 23:00:01 -0800
+Message-ID: <CACUGKYOKz_FG=1=pXZTsWroDdXOKamCsCwg5gOM9D4h4URb8Ew@mail.gmail.com>
+References: <CACUGKYMC-_F9fwXgM7jz4J3vabF6Sq-sh3=WdqO_doj1+rvmDA@mail.gmail.com>
+	<CAOMZO5DBEifsCQBL2_S2tb9Ci1WN3pQzz2R7kYgP0H459rs7wQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f48.google.com ([209.85.215.48]:35298 "EHLO
-	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750930AbbBOGyL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Feb 2015 01:54:11 -0500
-Received: by labgm9 with SMTP id gm9so23325015lab.2
-        for <linux-mmc@vger.kernel.org>; Sat, 14 Feb 2015 22:54:10 -0800 (PST)
-In-Reply-To: <CAOMZO5DR2nnoChgC2PbXkrDCAfF0WG_Vf+iXR3UsfFGxQxagmA@mail.gmail.com>
+Received: from mail-la0-f46.google.com ([209.85.215.46]:35744 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750954AbbBOHAD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Feb 2015 02:00:03 -0500
+Received: by labgm9 with SMTP id gm9so23334641lab.2
+        for <linux-mmc@vger.kernel.org>; Sat, 14 Feb 2015 23:00:01 -0800 (PST)
+In-Reply-To: <CAOMZO5DBEifsCQBL2_S2tb9Ci1WN3pQzz2R7kYgP0H459rs7wQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Fabio Estevam <festevam@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Aisheng Dong <Aisheng.Dong@freescale.com>, Shawn Guo <shawn.guo@linaro.org>, Dong Aisheng <dongas86@gmail.com>
 
 Hi Fabio,
 
-I was able to work it.
+If I used kernel 3.13, it works fine. But, in kernel 3.19, it detect
+and configured my eMMC in DDR50 mode. Sometimes, it boots okay and
+able to login, but after few minutes it crashes.
+Also, it happened during boot time.
 
 Regards,
 
 John
 
-On Sat, Feb 14, 2015 at 10:48 AM, Fabio Estevam <festevam@gmail.com> wrote:
+On Sat, Feb 14, 2015 at 10:28 AM, Fabio Estevam <festevam@gmail.com> wrote:
 > Hi John,
 >
-> On Wed, Feb 11, 2015 at 10:24 PM, John Tobias <john.tobias.ph@gmail.com> wrote:
->> Hello All,
+> On Fri, Feb 13, 2015 at 11:10 PM, John Tobias <john.tobias.ph@gmail.com> wrote:
+>> Hello Guys,
 >>
->> We interface the WiLink8 (http://www.ti.com/lit/gpn/wl1807mod) in iMX6
->> custom board. The VIO is 1.8v and the kernel detect the chip in high
->> speed mode with a signal voltage of 3.3v.
+>> I tried to use kernel 3.19 on my iMX6SL custom board and my eMMC is
+>> running DDR50 mode.
 >>
->> Is there a way to force the kernel to use a 1.8v signal voltage?.
+>> Any available patch for this?.
 >
-> In drivers/mmc/core/sdio.c, function mmc_sdio_init_card() has:
+> Dong's series that added mx6sl DDR50 support has been applied already:
+> http://lists.infradead.org/pipermail/linux-arm-kernel/2013-October/205933.html
 >
->     /*
->      * If the host and card support UHS-I mode request the card
->      * to switch to 1.8V signaling level.  No 1.8v signalling if
->      * UHS mode is not enabled to maintain compatibility and some
->      * systems that claim 1.8v signalling in fact do not support
->      * it.
->      */
->     if (!powered_resume && (rocr & ocr & R4_18V_PRESENT)) {
->         err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180,
->                     ocr);
+> Make sure you have the 100 and 200MHz sdhc pinctrl entries in your dts
+> like it was done in this commit:
 >
-> Can you add a printk to check if mmc_set_signal_voltage() is getting called?
+> commit fa87dfd6d0b067bd962ab83754cf1991ee512c0c
+> Author: Dong Aisheng <b29396@freescale.com>
+> Date:   Wed Oct 9 19:20:07 2013 +0800
+>
+>     ARM: dts: imx6sl: add pinctrl uhs states for usdhc
+>
+>     This is needed for SD3.0 cards working on UHS mode.
+>
+>     Signed-off-by: Dong Aisheng <b29396@freescale.com>
+>     Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
