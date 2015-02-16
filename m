@@ -1,185 +1,53 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
- eMMC5.1 device
-Date: Mon, 16 Feb 2015 09:04:05 +0000
-Message-ID: <17296D9F8FF2234F831FC3DF505A87A911C015EB@shsmsx102.ccr.corp.intel.com>
-References: <282CEDFCBC30114F83C499CB8F2ED5333EE09702@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Javier Martinez Canillas <javier@dowhile0.org>
+Subject: Re: [PATCH v4 0/3] about data busy
+Date: Mon, 16 Feb 2015 12:09:43 +0100
+Message-ID: <CABxcv=mHAJLviM1ACJKW3cH2JgtuCVp6-54bORaWY=dw4hP-oA@mail.gmail.com>
+References: <1423828368-18456-1-git-send-email-addy.ke@rock-chips.com>
+	<1423894668-8886-1-git-send-email-addy.ke@rock-chips.com>
+	<CABxcv==G_sKsvWHX6rJP7EUv8jE=01k-JeGGXgiwiCN53pxdmQ@mail.gmail.com>
+	<54E184B6.90808@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:30541 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752213AbbBPJEL convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Feb 2015 04:04:11 -0500
-In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED5333EE09702@SACMBXIP02.sdcorp.global.sandisk.com>
-Content-Language: en-US
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:43847 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755513AbbBPLJo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Feb 2015 06:09:44 -0500
+Received: by mail-wi0-f171.google.com with SMTP id hi2so25187407wib.4
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Feb 2015 03:09:43 -0800 (PST)
+In-Reply-To: <54E184B6.90808@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Addy Ke <addy.ke@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, Olof Johansson <olof@lixom.net>, Alim Akhtar <alim.akhtar@gmail.com>, Andrzej Hajda <a.hajda@samsung.com>, Douglas Anderson <dianders@chromium.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, cf@rock-chips.com, lintao@rock-chips.com, huangtao@rock-chips.com, Linux Kernel <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-rockchip@lists.infradead.org
 
+Hello Jaehoon,
 
-> -----Original Message-----
-> From: Alex Lemberg [mailto:Alex.Lemberg@sandisk.com]
-> Sent: Monday, February 16, 2015 4:55 PM
-> To: Dong, Chuanxiao
-> Cc: linux-mmc@vger.kernel.org; Yuliy Izrailov
-> Subject: RE: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
-> eMMC5.1 device
-> 
-> Hi Chuanxiao,
-> 
-> > -----Original Message-----
-> > From: Dong, Chuanxiao [mailto:chuanxiao.dong@intel.com]
-> > Sent: Friday, February 13, 2015 2:33 AM
-> > To: Alex Lemberg
-> > Cc: linux-mmc@vger.kernel.org; Yuliy Izrailov
-> > Subject: RE: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
-> > eMMC5.1 device
-> >
-> > Hi Alex,
-> >
-> > Can you please point me to the 5.1 spec which has the description of
-> > "" ready for execution" for each task should be cleared by the device
-> > only when the last data block has been fully transferred over the eMMC
-> > bus."? From my side, I have a draft version which I didn't find the similar
-> description.
-> 
-> We also use a draft version of the spec.
-> Since March 2014, all drafts contain that "ready for execution" description,
-> including the last draft that was approved.
-> For CMD46: "When the last data block has been fully transferred over the
-> e*MMC bus, the device should clear "ready for execution" for the task."
-> For CMD47: "When the busy signal following the last data block is released, the
-> device should clear "ready for execution" for the task."
+On Mon, Feb 16, 2015 at 6:48 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> On 02/15/2015 08:41 PM, Javier Martinez Canillas wrote:
+>> I modified [1] your patch #2 to do what Alim suggested and only with
+>> that patch on top of linux-next I have neither the the "Timeout
+>> sending command" error nor the uSD not getting detected errors. Linux
+>> mounts the rootfs from the uSD and the wifi SDIO device is enumerated
+>> and listed in /sys/bus/sdio/devices/
+>
+> it needs to check when clock value only update.
+> As Javier and Alim are mentioned, if check whether card is busy or not in setup_bus(),
+> should be processed unnecessary checking.
+> (According to TRM, before disabling clock, check whether card is busy or not.)
+> if my thinking is right, chekcing is located more exactly before mci_writel(host, CLKENA, 0).
+>
+> And i recommend if CLK_GATE is enabled, clkgate_delay sets to the bigger value than 3.
+> I'm not sure Javier's issue is same thing..I will check more this.
+>
 
-I see. My draft doesn't have these two sentences in the CMD46/47 session. I will follow up with latest version to update my source code.
+Thanks for checking, do you have access to a Peach Pit or Pi
+Chromebook to reproduce the issue I reported? Please let me know if
+you need any help from me.
 
-BTW, why eMMC device cannot clear the "ready for execution" until CMD46/47 completed totally? Any restriction of this implementation?
+> Best Regards,
+> Jaehoon Chung
+>
 
-Thanks
-Chuanxiao
-
-> 
-> >
-> > The current logical in driver is after receiving the command complete
-> > interrupt of CMD46/47, driver will send another CMD13 to check the
-> > ready for execution task without waiting for any data transfer
-> > complete interrupt. If it is as you mentioned, the ready for execution
-> > bit won't be cleared until the data transfer complete interrupt is received,
-> right?
-> 
-> Right.
-> 
-> >
-> > So far with the Samsung eMMC which is the only one I have, I didn't
-> > see issue with this logical.
-> >
-> > Thanks
-> > Chuanxiao
-> >
-> > > -----Original Message-----
-> > > From: Alex Lemberg [mailto:Alex.Lemberg@sandisk.com]
-> > > Sent: Wednesday, February 11, 2015 10:01 PM
-> > > To: Dong, Chuanxiao
-> > > Cc: linux-mmc@vger.kernel.org; Yuliy Izrailov
-> > > Subject: RE: [RFC PATCH 0/5]mmc: Soft Command queue implementation
-> > > for
-> > > eMMC5.1 device
-> > >
-> > > Hi Chuanxiao,
-> > >
-> > > I have a question from the review of your SW CMDQ driver code.
-> > >
-> > > From the eMMC5.1 spec, the  "ready for execution" for each task
-> > > should be cleared by the device only when the last data block has
-> > > been fully transferred over the eMMC bus.
-> > >
-> > > However, from the code, I can recognize the following suspected case:
-> > >
-> > > 1. Host sends CMD44/45 commands for TID#0 2. Host sends CMD13 (QSR)
-> > > -> returned TID#0 ready for execution 3. Host sends CMD46 for TID#0 4.
-> > > During the data transfer, host may send CMD13 (QSR)  -> returned
-> > > TID#0 ready for execution (which is true since data is still in transfer) 5.
-> > > Host sends CMD46 for
-> > > TID#0 (same as sent in bullet#3) - which is a problem.
-> > >
-> > > Please advise if my assumption above is correct.
-> > >
-> > > Thanks,
-> > > Alex
-> > >
-> > >
-> > > > -----Original Message-----
-> > > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > > > owner@vger.kernel.org] On Behalf Of Chuanxiao Dong
-> > > > Sent: Friday, December 19, 2014 10:05 AM
-> > > > To: linux-mmc@vger.kernel.org
-> > > > Subject: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
-> > > > eMMC5.1 device
-> > > >
-> > > > Hello,
-> > > >
-> > > > Seems community already have some implementation for the eMMC5.1
-> > > > device command queue feature, but that require the eMMC host
-> > > > controller to support CMDQ. In my platform, I don't have this kind
-> > > > of eMMC host controller but I have a Samsung eMMC5.1 device which
-> > > > can
-> > > support the Command queue.
-> > > >
-> > > > With this limitation, I have to let eMMC host controller to
-> > > > manually send the CMD44/45/13/46/47. So in this way, more commands
-> > > > are needed for an I/O request, more interrupts/schedule are needed in
-> driver.
-> > > >
-> > > > Even this way have some more software overhead, but it can still
-> > > > use the
-> > > > eMMC5.1 device Command queue feature. After test with the iozone
-> > > > command:
-> > > > "iozone -zec -t 4 -i0 -i2 -F iozonefile1 iozonefile2 iozonefile3
-> > > > iozonefile4 -+n -I -r 4k -s 500m -O -R -+r -+D" to test random
-> > > > performance, I saw a performance improvment for random read on my
-> > > eMMC5.1 device:
-> > > >
-> > > > 		Random read
-> > > > SW CMDQ:	5544.6
-> > > > Normal Read:	3993.05
-> > > >
-> > > > So I want to send this serial patches as RFC patch for reviewing
-> > > >
-> > > >
-> > > > Chuanxiao Dong (5):
-> > > >   mmc: replace sbc to precmd and add postcmd
-> > > >   mmc: host: add runtime PM for host class dev
-> > > >   mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
-> > > >   mmc: core: add support for CMDQ feature in MMC Core stack
-> > > >   mmc: sdhci: add SW CMDQ support for CHT SDHCI host
-> > > >
-> > > >  drivers/mmc/card/block.c      |  538
-> > > > ++++++++++++++++++++++++++++++++++++++---
-> > > >  drivers/mmc/card/queue.c      |  213 ++++++++--------
-> > > >  drivers/mmc/card/queue.h      |   14 +-
-> > > >  drivers/mmc/core/core.c       |   78 +++++-
-> > > >  drivers/mmc/core/host.c       |   14 ++
-> > > >  drivers/mmc/core/mmc.c        |   43 +++-
-> > > >  drivers/mmc/host/dw_mmc.c     |    8 +-
-> > > >  drivers/mmc/host/mmci.c       |   14 +-
-> > > >  drivers/mmc/host/omap_hsmmc.c |   18 +-
-> > > >  drivers/mmc/host/sdhci-acpi.c |    1 -
-> > > >  drivers/mmc/host/sdhci-pci.c  |    1 -
-> > > >  drivers/mmc/host/sdhci.c      |  137 +++++++++--
-> > > >  include/linux/mmc/card.h      |    3 +
-> > > >  include/linux/mmc/core.h      |    5 +-
-> > > >  include/linux/mmc/host.h      |    5 +
-> > > >  include/linux/mmc/mmc.h       |   21 ++
-> > > >  include/linux/mmc/pm.h        |    1 +
-> > > >  include/linux/mmc/sdhci.h     |    1 +
-> > > >  18 files changed, 909 insertions(+), 206 deletions(-)
-> > > >
-> > > > --
-> > > > 1.7.10.4
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> > > > in the body of a message to majordomo@vger.kernel.org More
-> > > > majordomo info at http://vger.kernel.org/majordomo-info.html
+Best regards,
+Javier
