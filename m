@@ -1,214 +1,306 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
- eMMC5.1 device
-Date: Mon, 16 Feb 2015 12:04:34 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333EE0A4FC@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <282CEDFCBC30114F83C499CB8F2ED5333EE09702@SACMBXIP02.sdcorp.global.sandisk.com>
- <17296D9F8FF2234F831FC3DF505A87A911C015EB@shsmsx102.ccr.corp.intel.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: mmc: Driver Strength Device Property
+Date: Mon, 16 Feb 2015 16:25:54 +0200
+Message-ID: <54E1FDF2.3050104@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0055.outbound.protection.outlook.com ([157.56.111.55]:21080
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752130AbbBPMTl convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Feb 2015 07:19:41 -0500
-In-Reply-To: <17296D9F8FF2234F831FC3DF505A87A911C015EB@shsmsx102.ccr.corp.intel.com>
-Content-Language: en-US
+Received: from mga11.intel.com ([192.55.52.93]:9974 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752517AbbBPO16 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 16 Feb 2015 09:27:58 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: "rafael.j.wysocki@intel.com >> Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, mika.westerberg@intel.com, dvhart@linux.intel.com, grant.likely@linaro.org, arnd@arndb.de, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, chris@printf.net, Jaehoon Chung <jh80.chung@samsung.com>, Philip Rakity <prakity@nvidia.com>, Seungwon Jeon <tgih.jun@samsung.com>, Alex Lemberg <alex.lemberg@sandisk.com>, Yuliy.Izrailov@sandisk.com, Alexandre Courbot <acourbot@nvidia.com>, s.hauer@pengutronix.de, Markus.Niebel@tq-group.com, u.kleine-koenig@pengutronix.de
 
-Hi Chuanxiao,
+I am in the process of adding an ACPI Device Property to specify
+the driver strength (aka drive strength, driver type) for use
+with eMMC/SD/SDIO cards, however the ACPI Specification Workgroup
+requires that Device Properties be sufficiently generic. This
+raises several questions as to what is sufficiently generic. That
+is covered in a Questions section below and is followed by a draft
+ACPI Device Property Definition. Any comments would be greatly
+appreciated.
 
-> -----Original Message-----
-> From: Dong, Chuanxiao [mailto:chuanxiao.dong@intel.com]
-> Sent: Monday, February 16, 2015 11:04 AM
-> To: Alex Lemberg
-> Cc: linux-mmc@vger.kernel.org; Yuliy Izrailov
-> Subject: RE: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
-> eMMC5.1 device
-> 
-> 
-> > -----Original Message-----
-> > From: Alex Lemberg [mailto:Alex.Lemberg@sandisk.com]
-> > Sent: Monday, February 16, 2015 4:55 PM
-> > To: Dong, Chuanxiao
-> > Cc: linux-mmc@vger.kernel.org; Yuliy Izrailov
-> > Subject: RE: [RFC PATCH 0/5]mmc: Soft Command queue implementation for
-> > eMMC5.1 device
-> >
-> > Hi Chuanxiao,
-> >
-> > > -----Original Message-----
-> > > From: Dong, Chuanxiao [mailto:chuanxiao.dong@intel.com]
-> > > Sent: Friday, February 13, 2015 2:33 AM
-> > > To: Alex Lemberg
-> > > Cc: linux-mmc@vger.kernel.org; Yuliy Izrailov
-> > > Subject: RE: [RFC PATCH 0/5]mmc: Soft Command queue implementation
-> > > for
-> > > eMMC5.1 device
-> > >
-> > > Hi Alex,
-> > >
-> > > Can you please point me to the 5.1 spec which has the description of
-> > > "" ready for execution" for each task should be cleared by the
-> > > device only when the last data block has been fully transferred over
-> > > the eMMC bus."? From my side, I have a draft version which I didn't
-> > > find the similar
-> > description.
-> >
-> > We also use a draft version of the spec.
-> > Since March 2014, all drafts contain that "ready for execution"
-> > description, including the last draft that was approved.
-> > For CMD46: "When the last data block has been fully transferred over
-> > the e*MMC bus, the device should clear "ready for execution" for the task."
-> > For CMD47: "When the busy signal following the last data block is
-> > released, the device should clear "ready for execution" for the task."
-> 
-> I see. My draft doesn't have these two sentences in the CMD46/47 session. I
-> will follow up with latest version to update my source code.
+First some background:
 
-Thank you!
+What are ACPI Device Properties and how do they relate to Device Tree
+---------------------------------------------------------------------
 
-> 
-> BTW, why eMMC device cannot clear the "ready for execution" until
-> CMD46/47 completed totally? Any restriction of this implementation?
+ACPI Device Properties are key / value pairs that can be recorded
+in the ACPI DSDT using a _DSD object with a specific UUID. Refer:
+	The ACPI specification and
+	http://www.uefi.org/sites/default/files/resources/_DSD-device-properties-UUID.pdf
+	http://www.uefi.org/sites/default/files/resources/web-page-v2.pdf
 
-This is how the spec is defining this feature. 
-I believe it was done to prevent host from sending new command with same TaskID
-while that TaskID executed.
+Linux provides a common API to read ACPI Device Properties and
+Device Tree properties. Refer:
+	https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/drivers/base/property.c
+	http://marc.info/?l=linux-kernel&m=141354745011569&w=4
 
-> 
-> Thanks
-> Chuanxiao
-> 
-> >
-> > >
-> > > The current logical in driver is after receiving the command
-> > > complete interrupt of CMD46/47, driver will send another CMD13 to
-> > > check the ready for execution task without waiting for any data
-> > > transfer complete interrupt. If it is as you mentioned, the ready
-> > > for execution bit won't be cleared until the data transfer complete
-> > > interrupt is received,
-> > right?
-> >
-> > Right.
-> >
-> > >
-> > > So far with the Samsung eMMC which is the only one I have, I didn't
-> > > see issue with this logical.
-> > >
-> > > Thanks
-> > > Chuanxiao
-> > >
-> > > > -----Original Message-----
-> > > > From: Alex Lemberg [mailto:Alex.Lemberg@sandisk.com]
-> > > > Sent: Wednesday, February 11, 2015 10:01 PM
-> > > > To: Dong, Chuanxiao
-> > > > Cc: linux-mmc@vger.kernel.org; Yuliy Izrailov
-> > > > Subject: RE: [RFC PATCH 0/5]mmc: Soft Command queue implementation
-> > > > for
-> > > > eMMC5.1 device
-> > > >
-> > > > Hi Chuanxiao,
-> > > >
-> > > > I have a question from the review of your SW CMDQ driver code.
-> > > >
-> > > > From the eMMC5.1 spec, the  "ready for execution" for each task
-> > > > should be cleared by the device only when the last data block has
-> > > > been fully transferred over the eMMC bus.
-> > > >
-> > > > However, from the code, I can recognize the following suspected case:
-> > > >
-> > > > 1. Host sends CMD44/45 commands for TID#0 2. Host sends CMD13
-> > > > (QSR)
-> > > > -> returned TID#0 ready for execution 3. Host sends CMD46 for TID#0 4.
-> > > > During the data transfer, host may send CMD13 (QSR)  -> returned
-> > > > TID#0 ready for execution (which is true since data is still in transfer) 5.
-> > > > Host sends CMD46 for
-> > > > TID#0 (same as sent in bullet#3) - which is a problem.
-> > > >
-> > > > Please advise if my assumption above is correct.
-> > > >
-> > > > Thanks,
-> > > > Alex
-> > > >
-> > > >
-> > > > > -----Original Message-----
-> > > > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > > > > owner@vger.kernel.org] On Behalf Of Chuanxiao Dong
-> > > > > Sent: Friday, December 19, 2014 10:05 AM
-> > > > > To: linux-mmc@vger.kernel.org
-> > > > > Subject: [RFC PATCH 0/5]mmc: Soft Command queue implementation
-> > > > > for
-> > > > > eMMC5.1 device
-> > > > >
-> > > > > Hello,
-> > > > >
-> > > > > Seems community already have some implementation for the eMMC5.1
-> > > > > device command queue feature, but that require the eMMC host
-> > > > > controller to support CMDQ. In my platform, I don't have this
-> > > > > kind of eMMC host controller but I have a Samsung eMMC5.1 device
-> > > > > which can
-> > > > support the Command queue.
-> > > > >
-> > > > > With this limitation, I have to let eMMC host controller to
-> > > > > manually send the CMD44/45/13/46/47. So in this way, more
-> > > > > commands are needed for an I/O request, more interrupts/schedule
-> > > > > are needed in
-> > driver.
-> > > > >
-> > > > > Even this way have some more software overhead, but it can still
-> > > > > use the
-> > > > > eMMC5.1 device Command queue feature. After test with the iozone
-> > > > > command:
-> > > > > "iozone -zec -t 4 -i0 -i2 -F iozonefile1 iozonefile2 iozonefile3
-> > > > > iozonefile4 -+n -I -r 4k -s 500m -O -R -+r -+D" to test random
-> > > > > performance, I saw a performance improvment for random read on
-> > > > > my
-> > > > eMMC5.1 device:
-> > > > >
-> > > > > 		Random read
-> > > > > SW CMDQ:	5544.6
-> > > > > Normal Read:	3993.05
-> > > > >
-> > > > > So I want to send this serial patches as RFC patch for reviewing
-> > > > >
-> > > > >
-> > > > > Chuanxiao Dong (5):
-> > > > >   mmc: replace sbc to precmd and add postcmd
-> > > > >   mmc: host: add runtime PM for host class dev
-> > > > >   mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
-> > > > >   mmc: core: add support for CMDQ feature in MMC Core stack
-> > > > >   mmc: sdhci: add SW CMDQ support for CHT SDHCI host
-> > > > >
-> > > > >  drivers/mmc/card/block.c      |  538
-> > > > > ++++++++++++++++++++++++++++++++++++++---
-> > > > >  drivers/mmc/card/queue.c      |  213 ++++++++--------
-> > > > >  drivers/mmc/card/queue.h      |   14 +-
-> > > > >  drivers/mmc/core/core.c       |   78 +++++-
-> > > > >  drivers/mmc/core/host.c       |   14 ++
-> > > > >  drivers/mmc/core/mmc.c        |   43 +++-
-> > > > >  drivers/mmc/host/dw_mmc.c     |    8 +-
-> > > > >  drivers/mmc/host/mmci.c       |   14 +-
-> > > > >  drivers/mmc/host/omap_hsmmc.c |   18 +-
-> > > > >  drivers/mmc/host/sdhci-acpi.c |    1 -
-> > > > >  drivers/mmc/host/sdhci-pci.c  |    1 -
-> > > > >  drivers/mmc/host/sdhci.c      |  137 +++++++++--
-> > > > >  include/linux/mmc/card.h      |    3 +
-> > > > >  include/linux/mmc/core.h      |    5 +-
-> > > > >  include/linux/mmc/host.h      |    5 +
-> > > > >  include/linux/mmc/mmc.h       |   21 ++
-> > > > >  include/linux/mmc/pm.h        |    1 +
-> > > > >  include/linux/mmc/sdhci.h     |    1 +
-> > > > >  18 files changed, 909 insertions(+), 206 deletions(-)
-> > > > >
-> > > > > --
-> > > > > 1.7.10.4
-> > > > > --
-> > > > > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> > > > > in the body of a message to majordomo@vger.kernel.org More
-> > > > > majordomo info at http://vger.kernel.org/majordomo-info.html
+Obviously, the common API only works when the same property name
+is not defined differently for the same device or class
+of devices.
+
+What is Driver Strength
+-----------------------
+
+Both the JEDEC eMMC Specification and the SD Association Physical
+Layer Specification define Driver Strength. The specifications
+also use the terms Drive Strength and Driver Type for the same
+thing. While the specifications deal with cards, the Host
+Controller can also have a Driver Strength value, for example as
+specified in the SD Host Controller Specification.
+
+For eMMC, Driver Strength is an optional setting for the HS200 and
+HS400 transfer modes.
+
+Currently JEDEC defines:
+
+	Value		Nominal Impedance	Approx.	capability
+						relative to type 0
+
+	0		50 ohm			x1
+	1		33 ohm			x1.5
+	2		66 ohm			x0.75
+	3		100 ohm			x0.5
+	4		40 ohm			x1.2
+
+For SD/SDIO, Driver Strength is an optional setting for the
+UHS-I transfer modes.
+
+The SD Association defines:
+
+Driver	Value		Nominal Impedance	Approx.	capability
+Type						relative to type 0
+
+A	1		33 ohm			x1.5
+B	0		50 ohm			x1
+C	2		66 ohm			x0.75
+D	3		100 ohm			x0.5
+
+So the values are the same with the exception that eMMCs have the
+additional value 4 (40 ohm). It is assumed that the values will
+anyway not conflict because eMMC is not removable.
+
+The specifications state that support for Driver Strength 0
+(Driver Type B) is both mandatory and the default value.
+In addition, cards supply a mask of supported Driver Strength
+values. Therefore the Driver Strength value is validated against
+the supported values.
+
+Questions
+---------
+
+Question 1. Should there be separate Driver Strength values for
+cards and host controllers?
+
+There is no indication from the specifications that cards and
+host controllers need have the same value for Driver Strength.
+That suggests that separate properties for the card and host
+controller should be provided for.
+
+Originally, I was just proposing "driver-strength" for the
+Driver Strength of the card, but now will separate this into
+"card-driver-strength" and "host-driver-strength".
+
+Question 2. To what devices should the Driver Strength properties
+bind?
+
+A Driver Strength property for the host controller obviously
+binds to the host controller device.
+
+Additionally it can be assumed that Driver Strength is a property
+of the board (e.g. a stronger Driver Strength needed because the
+eMMC is located further from the host controller), consequently
+even the Driver Strength property for the card should bind against
+the host controller.
+
+Question 3. Should there be separate Driver Strength values for
+different transfer modes?
+
+Different transfer modes can have different timing requirements
+which implies that there can be different Driver Strength values
+for each transfer mode. To support that, there would need to be
+either separate properties for each mode, or more simply two
+properties that list associated transfer modes and Driver
+Strengths. Transfer modes are not codified but have standard
+names that could be used e.g. "HS400" or "SDR104"
+
+Question 4. Should there be separate Driver Strength values for
+different frequencies?
+
+To be generic, another property would be needed to specify the
+frequency from which the Driver Strength is needed.
+
+Question 5. Should there be separate Driver Strength values for
+different voltages?
+
+UHS-I modes all have the same signal voltage (1.8V) however HS200
+and HS400 support both 1.2V and 1.8V.
+That could be handled by having having different mode strings for
+the variants. i.e. "HS200", "HS200-1.2V", "HS200-1.8V", "HS400",
+"HS400-1.2V", 'HS400-1.8V"
+
+Question 6. Should there be separate Driver Strength values for
+different slots?
+
+In order to support multiple slots, the slot number can be appended
+to the property names to define a separate set of properties for
+each slot.
+
+Question 7. Should the possibility of multiple cards in the same
+slot be supported?
+
+Linux does not support having multiple cards in the same slot.
+Presumably, the Driver Strength for each card would bind to the
+card device, which would require defining how card devices are
+identified. That might be possible, but it is out of scope.
+
+ACPI Device Property definitions:
+---------------------------------
+
+Based on my answers to the questions, the ACPI Device Property
+definitions would look like this:
+
+The following Device Properties are for general use with
+any eMMC, SD card, or SDIO host controller.
+
+---------------------------------------------------------------------------
+Property:	card-driver-strength-0
+Value:		Package of Integers
+Description:
+     If present, defines a list of the driver strength values
+     for a card in slot 0. The driver strength is an optional
+     setting defined by the JEDEC eMMC specification or the
+     SD Association Physical Layer specification, for use with
+     HS200/HS400 or UHS-I transfer modes. In absence of this
+     property, the default value of 0 is used.
+
+     Example values:
+
+	Value		Nominal Impedance	Approx.	capability
+						relative to type 0
+
+	0		50 ohm			x1
+	1		33 ohm			x1.5
+	2		66 ohm			x0.75
+	3		100 ohm			x0.5
+	4		40 ohm			x1.2
+
+     The driver strength values associate one-to-one
+     with the values of properties card-driver-strength-mode-0 and
+     card-driver-strength-freq-0. Transfer modes or frequencies not
+     specified will have the default driver strength of 0.
+     Neither card-driver-strength-mode-0 nor card-driver-strength-freq-0
+     need be present in which case there must be only one driver
+     strength value which will be used with all relevant transfer
+     modes and frequencies.
+
+     For host controllers that define multiple slots,
+     the value applies to the first slot (slot 0), and
+     each subsequent slot requires another property of
+     the form card-driver-strength-n when n is the slot
+     number (e.g. for the 2nd slot card-driver-strength-1)
+
+Example for a single slot host controller with a single value:
+     Package (2) { "card-driver-strength-0",
+                   Package (1) { 1 }
+     }
+
+Example for a multiple slot host controller with 3 slots all with
+a single value:
+     Package (2) { "card-driver-strength-0",
+                   Package (1) { 1 }
+     }
+     Package (2) { "card-driver-strength-1",
+                   Package (1) { 3 }
+     }
+     Package (2) { "card-driver-strength-2",
+                   Package (1) { 0 }
+     }
+
+---------------------------------------------------------------------------
+Property:	card-driver-strength-mode-0
+Value:		Package of Strings
+Description:
+    If present, defines the transfer modes to which the values
+    of card-driver-strength-0 apply. The transfer modes are
+    identified by name and where necessary voltage. i.e.
+
+    eMMC transfer modes:
+
+        "HS200",
+        "HS200-1.2V",
+        "HS200-1.8V",
+        "HS400",
+        "HS400-1.2V",
+        "HS400-1.8V",
+
+    UHS-I transfer modes:
+
+        "SDR12",
+        "SDR25",
+        "SDR50",
+        "SDR104",
+        "DDR50",
+
+    The empty string ("") can be used to mean all modes not
+    otherwise specified. The names of new modes should be
+    inferred from the relevant specifications.
+
+Example for a single slot host controller with a single value for
+HS400 mode:
+     Package (2) { "card-driver-strength-0",
+                   Package (1) { 1 }
+     }
+     Package (2) { "card-driver-strength-mode-0",
+                   Package (1) { "HS400" }
+     }
+
+---------------------------------------------------------------------------
+Property:	card-driver-strength-freq-0
+Value:		Package of Integers
+Description:
+    If present, defines the starting frequencies to which the values
+    of card-driver-strength-0 apply. The frequency is in Hz.
+
+Example for a single slot host controller with Driver Strength 4
+for HS400 starting at 50MHz changing to Driver Strength 1 at 100MHz.
+     Package (2) { "card-driver-strength-0",
+                   Package (1) { 4, 1 }
+     }
+     Package (2) { "card-driver-strength-mode-0",
+                   Package (1) { "HS400", "HS400" }
+     }
+     Package (2) { "card-driver-strength-freq-0",
+                   Package (1) { 50000000, 100000000 }
+     }
+
+---------------------------------------------------------------------------
+Property:	host-driver-strength-0
+Value:		Package of Integers
+Description:
+    Same as card-driver-strength-0 but values are used for the
+    host controller not the card.
+
+---------------------------------------------------------------------------
+Property:	host-driver-strength-mode-0
+Value:		Package of Strings
+Description:
+    Same as card-driver-strength-mode-0 but values are used for the
+    host controller not the card.
+
+---------------------------------------------------------------------------
+Property:	host-driver-strength-freq-0
+Value:		Package of Integers
+    Same as card-driver-strength-freq-0 but values are used for the
+    host controller not the card.
+
+
+
+Regards
+Adrian
+
