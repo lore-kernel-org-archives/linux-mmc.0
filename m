@@ -1,93 +1,124 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: fix bug that cause mmc_test failture
-Date: Thu, 19 Feb 2015 14:39:53 -0800
-Message-ID: <CAD=FV=Xxoo=HGhLad4pr=TKN7sWQ5Pzai=dGGvUUZe173DhLOA@mail.gmail.com>
-References: <1422273849-29773-1-git-send-email-addy.ke@rock-chips.com>
+Subject: Re: [PATCH v4 1/3] mmc: dw_mmc: update clock after host reach a
+ stable voltage
+Date: Thu, 19 Feb 2015 15:49:46 -0800
+Message-ID: <CAD=FV=V9aK-78GJ_eWkpZZdVT_5Zu8ehxg_o3NtnpD2wyRuh7Q@mail.gmail.com>
+References: <1423828368-18456-1-git-send-email-addy.ke@rock-chips.com>
+	<1423894668-8886-1-git-send-email-addy.ke@rock-chips.com>
+	<1423894668-8886-2-git-send-email-addy.ke@rock-chips.com>
+	<CAGOxZ53ndi_hYDGBGhY-7q8aOrFid1=D=_5KEbUvzTsnybJQ3Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f178.google.com ([209.85.223.178]:35052 "EHLO
-	mail-ie0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753217AbbBSWjz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Feb 2015 17:39:55 -0500
-Received: by iecrl12 with SMTP id rl12so3849864iec.2
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Feb 2015 14:39:54 -0800 (PST)
-In-Reply-To: <1422273849-29773-1-git-send-email-addy.ke@rock-chips.com>
+Received: from mail-ig0-f172.google.com ([209.85.213.172]:40972 "EHLO
+	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753537AbbBSXtr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Feb 2015 18:49:47 -0500
+Received: by mail-ig0-f172.google.com with SMTP id l13so47968877iga.5
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Feb 2015 15:49:47 -0800 (PST)
+In-Reply-To: <CAGOxZ53ndi_hYDGBGhY-7q8aOrFid1=D=_5KEbUvzTsnybJQ3Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Addy Ke <addy.ke@rock-chips.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Randy Dunlap <rdunlap@infradead.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Dinh Nguyen <dinguyen@altera.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Olof Johansson <olof@lixom.net>, Sonny Rao <sonnyrao@chromium.org>, Alexandru Stan <amstan@chromium.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Alim Akhtar <alim.akhtar@gmail.com>, Addy Ke <addy.ke@rock-chips.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Olof Johansson <olof@lixom.net>, Andrzej Hajda <a.hajda@samsung.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Eddie Cai <cf@rock-chips.com>, lintao <lintao@rock-chips.com>, Tao Huang <huangtao@rock-chips.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>
 
-Addy,
+Alim and Addy,
 
-Your subject needs work.  It should at least touch on what the bug
-was.  Please use a subject more like:
-  mmc: dw_mmc: fix mmc_test by not sending abort for DRTO / EBE errors
-
-On Mon, Jan 26, 2015 at 4:04 AM, Addy Ke <addy.ke@rock-chips.com> wrote:
-> The STOP command can terminate a data transfer between a memory card and
-> mmc controller.
+On Sun, Feb 15, 2015 at 3:28 PM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+> Hi Addy,
 >
-> As show in Synopsys DesignWare Cores Mobile Stroage Host Databook:
-> Data timeout and Data end-bit error will terminate further data transfer
-> by mmc controller. So we should not send abort command to terminate a
-> data transfer again if we got DRTO and EBE interrupt.
+> On Sat, Feb 14, 2015 at 11:47 AM, Addy Ke <addy.ke@rock-chips.com> wrote:
+>> As show in mmc_power_up(), in MMC_POWER_UP state, the voltage isn't
+>> stable and we may get 'data busy' which can't be cleaned by resetting
+>> all blocks. So we should not send command to update clock in this state.
+>>
+>> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c | 3 ++-
+>>  1 file changed, 2 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 4d2e3c2..3472f9b 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -1102,7 +1102,8 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>                 drv_data->set_ios(slot->host, ios);
+>>
+>>         /* Slot specific timing and width adjustment */
+>> -       dw_mci_setup_bus(slot, false);
+>> +       if (ios->power_mode != MMC_POWER_UP)
+>> +               dw_mci_setup_bus(slot, false);
+>>
+> This looks a HACK to me.
+> If stabilizing host voltage regulator is the problem, can you try out
+> below patch, and see if this resolve your issue?
 
-OK, I see this in the section "Error Detection".
+Actually, IMHO Alim's patch is more of a hack than Addy's.  There's
+already a 10ms delay between "power up" and "power on" in the MMC core
+in mmc_power_up() state.  That delay is commented as:
 
-Looking at the section titled "Error Handling" in the version of the
-databook I see it suggesting "STOP or ABORT" in the case of Data
-Errors which might include "end bit not found".  In another section
-(the Card Interface Unit (CIU) section) it talks about the data end
-bit error and suggests issuing the stop/abort command.
+  /*
+   * This delay should be sufficient to allow the power supply
+   * to reach the minimum voltage.
+   */
+  mmc_delay(10);
 
-...that being said, it does appear that you're right that we don't
-want to send an abort in the EBE case since it appears necessary to
-fully fix mmc_test...
-
-> After this patch, all mmc_test cases can pass on RK3288-Pink2 board.
-
-I didn't find this to be the case.  I asked Alexandru to
-double-confirm for me and he agrees, it doesn't fix mmc_test.
-Probably because your code is broken.  See below.
+That means that assuming that the voltage is stable in MMC_POWER_UP is
+not valid anyway.
 
 
-> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+Addy's patch certainly needs more comments.  In another context Olof suggested:
+
+/*
+ * Skip bus setup while voltage is still stabilizing. Instead,
+ * bus setup will be done at MMC_POWER_ON.
+ */
+
+
+...thinking about this more, though: really the voltage should be
+stabilized when the regulator call returns (see my comments below).
+In actuality the "right" fix might be to just rearrange this function
+a little not to turn the clock on _before_ we even try to turn the
+voltage on.
+
+I've got that coded up but I'm still testing it...  If you want to try
+it too, you can find it at
+<https://chromium-review.googlesource.com/251341>.
+
+Note that without my patch I find that I _really_ need Addy's patch to
+make sure that the card isn't busy in setup_bus.  With my patch Addy's
+code catches the card busy less often.  I'm still trying to see if
+there's a way to totally remove the need for his setup_bus and still
+trying to grok all the patches flying around...
+
+
+> ===========
+> [PATCH] mmc: dw_mmc: Wait for host voltage regulator to be stable
+>
+> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
 > ---
->  drivers/mmc/host/dw_mmc.c | 10 ++++++++--
->  1 file changed, 8 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/dw_mmc.c | 3 +++
+>  1 file changed, 3 insertions(+)
 >
 > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 4d2e3c2..4bd7df1 100644
+> index 4d2e3c2..dc10fbb 100644
 > --- a/drivers/mmc/host/dw_mmc.c
 > +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1520,7 +1520,10 @@ static void dw_mci_tasklet_func(unsigned long priv)
->                         if (test_and_clear_bit(EVENT_DATA_ERROR,
->                                                &host->pending_events)) {
->                                 dw_mci_stop_dma(host);
-> -                               send_stop_abort(host, data);
-> +                               if (data->stop ||
-> +                                   !(host->data_status & SDMMC_INT_DRTO) ||
-> +                                   !(host->data_status & SDMMC_INT_EBE))
-> +                                       send_stop_abort(host, data);
+> @@ -1202,6 +1202,9 @@ static int dw_mci_switch_voltage(struct mmc_host
+> *mmc, struct mmc_ios *ios)
+>   }
+>   mci_writel(host, UHS_REG, uhs);
+>
+> + /* wait for 5ms so that host voltage regulator is stable */
+> + usleep_range(5000, 5500);
+> +
 
-Your concept appears right, but your code is totally wrong.  Let's
-imagine that data->stop is NULL so your check matters.  Now:
-
-DRTO is set, EBE is set: you won't send stop abort
-DRTO is set, EBE is _not_ set: you _will_ send stop aborft
-DRTO is _not_ set, EBE is set: you _will_ send stop aborft
-
-I can fix this with:
-
--                                   !(host->data_status & SDMMC_INT_DRTO) ||
--                                   !(host->data_status & SDMMC_INT_EBE))
-+                                   !(host->data_status & (SDMMC_INT_DRTO |
-+                                                          SDMMC_INT_EBE)))
-
-When I do that then mmc_test is working much better.  Note that is
-appears that both EBE and DRTO are necessary here.  Can you please
-respin?  Please make sure to include Addy and Javier on your patch as
-they may be able to do some extra testing.
+Alim: if you have some other instance where you actually need VQMMC to
+stabilize it should probably be done in a different way.  If I
+understand correctly it is the regulator core's job to make sure that
+voltage is stable before returning.  If you have a gpio-regulator you
+may be able to use "startup-delay-us" to specify how long the
+regulator takes to come up.  You could also look at
+'regulator-enable-ramp-delay'
 
 -Doug
