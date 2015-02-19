@@ -1,77 +1,99 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Help needed: Enabling HPI causes some eMMC devices to stop working
-Date: Wed, 18 Feb 2015 20:15:11 +0100
-Message-ID: <54E4E4BF.3090507@redhat.com>
+From: addy ke <addy.ke@rock-chips.com>
+Subject: Re: [PATCH v4 1/3] mmc: dw_mmc: update clock after host reach a stable
+ voltage
+Date: Thu, 19 Feb 2015 18:30:35 +0800
+Message-ID: <54E5BB4B.8090405@rock-chips.com>
+References: <1423828368-18456-1-git-send-email-addy.ke@rock-chips.com> <1423894668-8886-1-git-send-email-addy.ke@rock-chips.com> <1423894668-8886-2-git-send-email-addy.ke@rock-chips.com> <CAGOxZ53ndi_hYDGBGhY-7q8aOrFid1=D=_5KEbUvzTsnybJQ3Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:53789 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752120AbbBRTPQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 18 Feb 2015 14:15:16 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAGOxZ53ndi_hYDGBGhY-7q8aOrFid1=D=_5KEbUvzTsnybJQ3Q@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: alim.akhtar@gmail.com
+Cc: jh80.chung@samsung.com, ulf.hansson@linaro.org, olof@lixom.net, a.hajda@samsung.com, dianders@chromium.org, heiko@sntech.de, cf@rock-chips.com, lintao@rock-chips.com, huangtao@rock-chips.com, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi,
+Hi, Alim
 
-As part of the Linux Allwinner SoC support work I do in my
-spare time, I'm working on getting stock Linux running on
-the Utoo P66 Allwinner A13 based tablet.
+Sorry for late reply.
 
-This tablet is interesting because it uses an eMMC rather then
-raw nand as is typically seen on Allwinner tablets.
+On 2015/2/16 07:28, Alim Akhtar wrote:
+> Hi Addy,
+> 
+> On Sat, Feb 14, 2015 at 11:47 AM, Addy Ke <addy.ke@rock-chips.com> wrote:
+>> As show in mmc_power_up(), in MMC_POWER_UP state, the voltage isn't
+>> stable and we may get 'data busy' which can't be cleaned by resetting
+>> all blocks. So we should not send command to update clock in this state.
+>>
+>> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c | 3 ++-
+>>  1 file changed, 2 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 4d2e3c2..3472f9b 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -1102,7 +1102,8 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>                 drv_data->set_ios(slot->host, ios);
+>>
+>>         /* Slot specific timing and width adjustment */
+>> -       dw_mci_setup_bus(slot, false);
+>> +       if (ios->power_mode != MMC_POWER_UP)
+>> +               dw_mci_setup_bus(slot, false);
+>>
+> This looks a HACK to me.
+> If stabilizing host voltage regulator is the problem, can you try out
+> below patch, and see if this resolve your issue?
 
-It has taken me a while to get the kernel to talk to the eMMC,
-in the end the following hack does the trick:
+I have test by:
+cd /sys/bus/platform/drivers/dwmmc_rockchip
+for i in $(seq 1 10000); do
+  echo "========================" $i
+  echo ff0c0000.dwmmc > unbind
+  sleep .5
+  echo ff0c0000.dwmmc > bind
+  sleep 2
+done
 
+There is no error.
+I think this patch can resolve my issue, thank you.
 
-From: Hans de Goede <hdegoede@redhat.com>
-Date: Wed, 18 Feb 2015 20:04:03 +0100
-Subject: [PATCH] mmc: HACK: disable HPI
+Do you send this patch upstream, or can I put it in my patch list?
 
-HACK: trying to enable HPI breaks EMMC access on the Utoo P66 tablet I'm
-trying to get supported, so disable it. FIXME: come up with a proper fix.
-
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
----
-  drivers/mmc/core/mmc.c | 2 +-
-  1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 1d41e85..b343587 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1418,7 +1418,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
-         /*
-          * Enable HPI feature (if supported)
-          */
--       if (card->ext_csd.hpi) {
-+       if (0 && card->ext_csd.hpi) {
-                 err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-                                 EXT_CSD_HPI_MGMT, 1,
-                                 card->ext_csd.generic_cmd6_time);
-
-This patch has one good thing going for it, which it is that it makes
-the eMMC work, without this talking to the eMMC fails as soon as the
-kernel tries to read the partition table, with response-timeout errors
-when doing a mmc command 18 to read sector 0.
-
-So this is as far as I've come, and beyond this my mmc knowledge is simply
-not good enough. Could this be a controller specific problem ? IOW do
-we need a controller flag to not enable HPi, like we've
-MMC_CAP2_BOOTPART_NOACC ? Or is this likely more something specific to the eMMC
-used.
-
-Assuming for now it is something specific to the eMMC used, how do we fix this?
-
-Is there maybe some way to figure out that enabling HPI is not a good idea on
-this eMMC?
-
-Or do we need a quirk for this in devicetree? Now a days we can tie info to an sdio
-slave device in devicetree, so that is an option too.
-
-Thanks & Regards,
-
-Hans
+> 
+> ===========
+> [PATCH] mmc: dw_mmc: Wait for host voltage regulator to be stable
+> 
+> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 4d2e3c2..dc10fbb 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1202,6 +1202,9 @@ static int dw_mci_switch_voltage(struct mmc_host
+> *mmc, struct mmc_ios *ios)
+>   }
+>   mci_writel(host, UHS_REG, uhs);
+> 
+> + /* wait for 5ms so that host voltage regulator is stable */
+> + usleep_range(5000, 5500);
+> +
+>   return 0;
+>  }
+> 
+> ===============
+> 
+>>         if (slot->host->state == STATE_WAITING_CMD11_DONE && ios->clock != 0)
+>>                 slot->host->state = STATE_IDLE;
+>> --
+>> 1.8.3.2
+>>
+>>
+> 
+> 
+> 
