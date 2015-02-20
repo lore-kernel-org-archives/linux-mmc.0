@@ -1,50 +1,69 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v4 1/3] mmc: dw_mmc: update clock after host reach a
- stable voltage
-Date: Thu, 19 Feb 2015 17:04:50 -0800
-Message-ID: <CAD=FV=VSYQs8p9m_+dmXmkMmxgqzDA6EGZ9Vfy3wsby5k5NitQ@mail.gmail.com>
-References: <1423828368-18456-1-git-send-email-addy.ke@rock-chips.com>
-	<1423894668-8886-1-git-send-email-addy.ke@rock-chips.com>
-	<1423894668-8886-2-git-send-email-addy.ke@rock-chips.com>
-	<CAGOxZ53ndi_hYDGBGhY-7q8aOrFid1=D=_5KEbUvzTsnybJQ3Q@mail.gmail.com>
-	<CAD=FV=V9aK-78GJ_eWkpZZdVT_5Zu8ehxg_o3NtnpD2wyRuh7Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Addy Ke <addy.ke@rock-chips.com>
+Subject: [PATCH v2] mmc: dw_mmc: rockchip: add support MMC_CAP_RUNTIME_RESUME capability
+Date: Fri, 20 Feb 2015 10:37:40 +0800
+Message-ID: <1424399860-3394-1-git-send-email-addy.ke@rock-chips.com>
+References: <1423812140-24196-1-git-send-email-addy.ke@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f177.google.com ([209.85.213.177]:45552 "EHLO
-	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753921AbbBTBEv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Feb 2015 20:04:51 -0500
-Received: by mail-ig0-f177.google.com with SMTP id z20so13679154igj.4
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Feb 2015 17:04:50 -0800 (PST)
-In-Reply-To: <CAD=FV=V9aK-78GJ_eWkpZZdVT_5Zu8ehxg_o3NtnpD2wyRuh7Q@mail.gmail.com>
+Received: from regular1.263xmail.com ([211.150.99.138]:37415 "EHLO
+	regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753017AbbBTCiT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Feb 2015 21:38:19 -0500
+In-Reply-To: <1423812140-24196-1-git-send-email-addy.ke@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@gmail.com>, Addy Ke <addy.ke@rock-chips.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Olof Johansson <olof@lixom.net>, Andrzej Hajda <a.hajda@samsung.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Eddie Cai <cf@rock-chips.com>, lintao <lintao@rock-chips.com>, Tao Huang <huangtao@rock-chips.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+To: ulf.hansson@linaro.org, jh80.chung@samsung.com, olof@lixom.net, heiko@sntech.de
+Cc: huangtao@rock-chips.com, lintao@rock-chips.com, cf@rock-chips.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Addy Ke <addy.ke@rock-chips.com>
 
-Hi,
+To support HS200 and UHS mode, mmc core will call init_card() to
+execute tuning:
+- sdio: init_card can be executed at runtime resume.
+- sd and mmc: init_card can be executed at resume or runtime resume,
+  which depends on MMC_CAP_RUNTIME_RESUME capability.
 
-On Thu, Feb 19, 2015 at 3:49 PM, Doug Anderson <dianders@chromium.org> wrote:
-> I've got that coded up but I'm still testing it...  If you want to try
-> it too, you can find it at
-> <https://chromium-review.googlesource.com/251341>.
->
-> Note that without my patch I find that I _really_ need Addy's patch to
-> make sure that the card isn't busy in setup_bus.  With my patch Addy's
-> code catches the card busy less often.  I'm still trying to see if
-> there's a way to totally remove the need for his setup_bus and still
-> trying to grok all the patches flying around...
+On rk3288 SoC, host will get DRTO interrupt when host send command
+to read tuning data. This will spend more than 111ms:
+drto_ms = drto_clks * 1000 / bus_hz = 111ms.
 
-Ah, this might be the magic needed:
+And the total tuning time will be more than 400ms.
 
-https://chromium-review.googlesource.com/251344
+So we should add MMC_CAP_RUNTIME_RESUME capability to execute tuning
+at runtime resume. Only if we do so, can we pass resume test.
+
+Reviewed-by: Doug Anderson <dianders@chromium.org>
+Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+---
+Changes in v2:
+- add this capability for all 4 slots, suggested by Doug Anderson.
+
+ drivers/mmc/host/dw_mmc-rockchip.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index e2a726a..dbf166f 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -76,12 +76,20 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
+ 	return 0;
+ }
+ 
++/* Common capabilities of RK3288 SoC */
++static unsigned long dw_mci_rk3288_dwmmc_caps[4] = {
++	MMC_CAP_RUNTIME_RESUME, /* emmc */
++	MMC_CAP_RUNTIME_RESUME, /* sdmmc */
++	MMC_CAP_RUNTIME_RESUME, /* sdio0 */
++	MMC_CAP_RUNTIME_RESUME, /* sdio1 */
++};
+ static const struct dw_mci_drv_data rk2928_drv_data = {
+ 	.prepare_command        = dw_mci_rockchip_prepare_command,
+ 	.init			= dw_mci_rockchip_init,
+ };
+ 
+ static const struct dw_mci_drv_data rk3288_drv_data = {
++	.caps			= dw_mci_rk3288_dwmmc_caps,
+ 	.prepare_command        = dw_mci_rockchip_prepare_command,
+ 	.set_ios		= dw_mci_rk3288_set_ios,
+ 	.setup_clock    = dw_mci_rk3288_setup_clock,
+-- 
+1.8.3.2
 
 
-I think that together with the previous patch things are happy for me
-without any of Addy's patches, though it's the end of my work day and
-I haven't given this nearly as much testing as I'd like.
-
-I'll continue testing tomorrow and then post both patches together upstream.
-
--Doug
