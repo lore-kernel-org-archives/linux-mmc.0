@@ -1,70 +1,52 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v4 1/3] mmc: dw_mmc: update clock after host reach a
- stable voltage
-Date: Fri, 20 Feb 2015 11:05:26 -0800
-Message-ID: <CAD=FV=VgvwRvTZrbpMB8EKNNDzUvcCsQKs_uC_RMuc83swu_yA@mail.gmail.com>
-References: <1423828368-18456-1-git-send-email-addy.ke@rock-chips.com>
-	<1423894668-8886-1-git-send-email-addy.ke@rock-chips.com>
-	<1423894668-8886-2-git-send-email-addy.ke@rock-chips.com>
-	<CAGOxZ53ndi_hYDGBGhY-7q8aOrFid1=D=_5KEbUvzTsnybJQ3Q@mail.gmail.com>
-	<CAD=FV=V9aK-78GJ_eWkpZZdVT_5Zu8ehxg_o3NtnpD2wyRuh7Q@mail.gmail.com>
-	<CAD=FV=VSYQs8p9m_+dmXmkMmxgqzDA6EGZ9Vfy3wsby5k5NitQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Don't start commands while busy
+Date: Fri, 20 Feb 2015 12:31:14 -0800
+Message-ID: <CAD=FV=UyKg1AWq3=tnD=cd438c0xcE7iZCHv6uSjABfJdN-eEQ@mail.gmail.com>
+References: <1424458179-5456-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=VSYQs8p9m_+dmXmkMmxgqzDA6EGZ9Vfy3wsby5k5NitQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@gmail.com>, Addy Ke <addy.ke@rock-chips.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Olof Johansson <olof@lixom.net>, Andrzej Hajda <a.hajda@samsung.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Eddie Cai <cf@rock-chips.com>, lintao <lintao@rock-chips.com>, Tao Huang <huangtao@rock-chips.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ie0-f171.google.com ([209.85.223.171]:43927 "EHLO
+	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753152AbbBTUbP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Feb 2015 15:31:15 -0500
+Received: by iebtr6 with SMTP id tr6so10612833ieb.10
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Feb 2015 12:31:15 -0800 (PST)
+In-Reply-To: <1424458179-5456-1-git-send-email-dianders@chromium.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Doug Anderson <dianders@chromium.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
 Hi,
 
-On Thu, Feb 19, 2015 at 5:04 PM, Doug Anderson <dianders@chromium.org> wrote:
-> Hi,
+On Fri, Feb 20, 2015 at 10:49 AM, Doug Anderson <dianders@chromium.org> wrote:
+> We've seen problems on some WiFi modules where we seem to send a CMD53
+> (which requires the data lines) while the module is asserting busy.
+> We shouldn't do that.
 >
-> On Thu, Feb 19, 2015 at 3:49 PM, Doug Anderson <dianders@chromium.org> wrote:
->> I've got that coded up but I'm still testing it...  If you want to try
->> it too, you can find it at
->> <https://chromium-review.googlesource.com/251341>.
->>
->> Note that without my patch I find that I _really_ need Addy's patch to
->> make sure that the card isn't busy in setup_bus.  With my patch Addy's
->> code catches the card busy less often.  I'm still trying to see if
->> there's a way to totally remove the need for his setup_bus and still
->> trying to grok all the patches flying around...
+> The Designware Databook says that before issuing a new data transfer
+> command we should check for busy, so that's what we'll do.
 >
-> Ah, this might be the magic needed:
+> We'll leverage the existing dw_mmc knowledge about whether it should
+> wait for the previous command to finish to know whether we should
+> check for busy before sending the command.  This means we won't end up
+> incorrectly waiting for things like CMD52 (SDIO) or CMD13 (SD) which
+> don't use the data line.
 >
-> https://chromium-review.googlesource.com/251344
->
->
-> I think that together with the previous patch things are happy for me
-> without any of Addy's patches, though it's the end of my work day and
-> I haven't given this nearly as much testing as I'd like.
->
-> I'll continue testing tomorrow and then post both patches together upstream.
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 22 ++++++++++++++++++++++
+>  1 file changed, 22 insertions(+)
 
-OK, posted three patches upstream...
+Sorry for the quick spin.  After I posted this I re-read all the
+messages and it looks like Addy has an actual SD card (not SDIO) that
+is also asserting busy.  He's seeing it assert busy around the clock
+update.
 
-A little hard to follow all the patches flying around (so I'll
-probably reply a few different places with the same info), but I
-believe that all of Addy's patches (with the exception of the one
-intended to fix mmc_test which needs to be spun by him for a bugfix)
-can be replaced with:
-
-* mmc: dw_mmc: Don't start commands while busy
-  https://patchwork.kernel.org/patch/5858221/
-
-* mmc: dw_mmc: Make sure we only adjust the clock when power is on
-  https://patchwork.kernel.org/patch/5858261/
-
-* mmc: dw_mmc: Give a good reset after we give power
-  https://patchwork.kernel.org/patch/5858281/
-
-
-In order to avoid further spreading info out among several patches,
-I'd request that you don't respond here but instead respond to my
-posted patches.  Thanks!
+I believe his bug can be fixed by also adding the busy check to
+mci_send_cmd(), so I'll shortly post V2 of this patch.  Hopefully Addy
+will be able to test all 3 of my patches together and his card will be
+totally happy.
 
 -Doug
