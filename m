@@ -1,72 +1,65 @@
 From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH 2/2] mmc: dw_mmc: Give a good reset after we give power
-Date: Fri, 20 Feb 2015 10:57:19 -0800
-Message-ID: <1424458639-23330-2-git-send-email-dianders@chromium.org>
-References: <1424458639-23330-1-git-send-email-dianders@chromium.org>
+Subject: Re: [PATCH v4 0/3] about data busy
+Date: Fri, 20 Feb 2015 11:03:56 -0800
+Message-ID: <CAD=FV=U6T23wsJGCb2VoE7bQ=D2FdPgPGa+Fnp6aUBPXgiO5Zg@mail.gmail.com>
+References: <1423828368-18456-1-git-send-email-addy.ke@rock-chips.com>
+	<1423894668-8886-1-git-send-email-addy.ke@rock-chips.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1424458639-23330-1-git-send-email-dianders@chromium.org>
+In-Reply-To: <1423894668-8886-1-git-send-email-addy.ke@rock-chips.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, javier.martinez@collabora.co.uk, Doug Anderson <dianders@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Addy Ke <addy.ke@rock-chips.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Olof Johansson <olof@lixom.net>, Alim Akhtar <alim.akhtar@gmail.com>, Andrzej Hajda <a.hajda@samsung.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Eddie Cai <cf@rock-chips.com>, lintao <lintao@rock-chips.com>, Tao Huang <huangtao@rock-chips.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-We should give dw_mmc a good reset after we apply power.  On some
-boards vqmmc may actually be connected to the IP block in the SoC so
-it's good to reset after power comes in.
+Hi,
 
-Without this we sometimes see failures enumerating cards on rk3288.
+On Fri, Feb 13, 2015 at 10:17 PM, Addy Ke <addy.ke@rock-chips.com> wrote:
+> patch 1: This patch can fix bug that controller is still data busy after
+>          reset all blocks. After this patch, I still get data busy in
+>          set_ios().
+>
+> patch 2: This patch fix bug 'Timeout sending command'. After patch1 and
+>          patch2, there is no mmc errors after:
+>          cd /sys/bus/platform/drivers/dwmmc_rockchip
+>          for i in $(seq 1 10000); do
+>                 echo "========================" $i
+>                 echo ff0c0000.dwmmc > unbind
+>                 sleep .5
+>                 echo ff0c0000.dwmmc > bind
+>                 sleep 2
+>         done
+>
+> patch3: This patch fix bug that there is data busy before sdio send CMD53.
+>         But This patch is necessary for sd and mmc too.
+>
+> Addy Ke (3):
+>   mmc: dw_mmc: update clock after host reach a stable voltage
+>   mmc: dw_mmc: fix bug that cause 'Timeout sending command'
+>   mmc: dw_mmc: Don't start command while data busy
+>
+>  drivers/mmc/host/dw_mmc.c | 41 ++++++++++++++++++++++++++++++++++++++++-
+>  1 file changed, 40 insertions(+), 1 deletion(-)
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
- drivers/mmc/host/dw_mmc.c | 27 ++++++++++++++++++---------
- 1 file changed, 18 insertions(+), 9 deletions(-)
+A little hard to follow all the patches flying around (so I'll
+probably reply a few different places with the same info), but I
+believe that all of Addy's patches (with the exception of the one
+intended to fix mmc_test which needs to be spun by him for a bugfix)
+can be replaced with:
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 43fcae1..6a712ae 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1119,13 +1119,23 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		mci_writel(slot->host, PWREN, regs);
- 		break;
- 	case MMC_POWER_ON:
--		if (!IS_ERR(mmc->supply.vqmmc) && !slot->host->vqmmc_enabled) {
--			ret = regulator_enable(mmc->supply.vqmmc);
--			if (ret < 0)
--				dev_err(slot->host->dev,
--					"failed to enable vqmmc regulator\n");
--			else
-+		if (!slot->host->vqmmc_enabled) {
-+			if (!IS_ERR(mmc->supply.vqmmc)) {
-+				ret = regulator_enable(mmc->supply.vqmmc);
-+				if (ret < 0)
-+					dev_err(slot->host->dev,
-+						"failed to enable vqmmc\n");
-+				else
-+					slot->host->vqmmc_enabled = true;
-+
-+			} else {
-+				/* Keep track so we don't reset again */
- 				slot->host->vqmmc_enabled = true;
-+			}
-+
-+			/* Reset our state machine after powering on */
-+			dw_mci_ctrl_reset(slot->host,
-+					  SDMMC_CTRL_ALL_RESET_FLAGS);
- 		}
- 
- 		/* Adjust clock / bus width after power is up */
-@@ -1139,10 +1149,9 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		if (!IS_ERR(mmc->supply.vmmc))
- 			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
- 
--		if (!IS_ERR(mmc->supply.vqmmc) && slot->host->vqmmc_enabled) {
-+		if (!IS_ERR(mmc->supply.vqmmc) && slot->host->vqmmc_enabled)
- 			regulator_disable(mmc->supply.vqmmc);
--			slot->host->vqmmc_enabled = false;
--		}
-+		slot->host->vqmmc_enabled = false;
- 
- 		regs = mci_readl(slot->host, PWREN);
- 		regs &= ~(1 << slot->id);
--- 
-2.2.0.rc0.207.ga3a616c
+* mmc: dw_mmc: Don't start commands while busy
+  https://patchwork.kernel.org/patch/5858221/
+
+* mmc: dw_mmc: Make sure we only adjust the clock when power is on
+  https://patchwork.kernel.org/patch/5858261/
+
+* mmc: dw_mmc: Give a good reset after we give power
+  https://patchwork.kernel.org/patch/5858281/
+
+
+In order to avoid further spreading info out among several patches,
+I'd request that you don't respond here but instead respond to my
+posted patches.  Thanks!
+
+-Doug
