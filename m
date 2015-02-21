@@ -1,134 +1,73 @@
-From: addy ke <addy.ke@rock-chips.com>
-Subject: Re: [PATCH v2] mmc: dw_mmc: Don't start commands while busy
-Date: Sat, 21 Feb 2015 11:33:53 +0800
-Message-ID: <54E7FCA1.2040502@rock-chips.com>
-References: <1424464316-4397-1-git-send-email-dianders@chromium.org>
+From: NeilBrown <neilb@suse.de>
+Subject: [PATCH] mmc: pwrseq_simple: fix error path in
+ mmc_pwrseq_simple_alloc.
+Date: Sat, 21 Feb 2015 15:15:16 +1100
+Message-ID: <20150221151516.1b3bc8ae@notabene.brown>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ boundary="Sig_/L0CKNDdns+zjMICPqJAq2Xl"; protocol="application/pgp-signature"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from regular2.263xmail.com ([211.157.152.4]:60232 "EHLO
-	regular2.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754990AbbBUDe1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Feb 2015 22:34:27 -0500
-In-Reply-To: <1424464316-4397-1-git-send-email-dianders@chromium.org>
+Received: from cantor2.suse.de ([195.135.220.15]:46070 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755011AbbBUEP1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 20 Feb 2015 23:15:27 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: dianders@chromium.org, jh80.chung@samsung.com, tgih.jun@samsung.com, ulf.hansson@linaro.org
-Cc: alim.akhtar@samsung.com, sonnyrao@chromium.org, abrestic@chromium.org, heiko@sntech.de, amstan@chromium.org, javier.martinez@collabora.co.uk, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Javier Martinez Canillas <javier.martinez@collabora.co.uk>, linux-mmc@vger.kernel.org
 
-Hi, Doug
-
-I have two cards which are easy to get "Timeout sending command":
-one is ADATA uhs-1 SDR50, another is Kingston uhs-1 SDR104.
-After merge three patches:
---
-* mmc: dw_mmc: Don't start commands while busy
-  https://patchwork.kernel.org/patch/5858221/
-
-* mmc: dw_mmc: Make sure we only adjust the clock when power is on
-  https://patchwork.kernel.org/patch/5858261/
-
-* mmc: dw_mmc: Give a good reset after we give power
-  https://patchwork.kernel.org/patch/5858281/
--
-Both of them can pass bind/unbind test, thank you.
-
-test script:
-    cd /sys/bus/platform/drivers/dwmmc_rockchip
-    for i in $(seq 1 5000); do
-      echo "========================" $i
-      echo ff0c0000.dwmmc > unbind
-      sleep .5
-      echo ff0c0000.dwmmc > bind
-      sleep 2
-    done
+--Sig_/L0CKNDdns+zjMICPqJAq2Xl
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
 
-On 2015/2/21 04:31, Doug Anderson wrote:
-> We've seen problems on some WiFi modules where we seem to send a CMD53
-> (which requires the data lines) while the module is asserting busy.
-> We shouldn't do that.
-> 
-> The Designware Databook says that before issuing a new data transfer
-> command we should check for busy, so that's what we'll do.
-> 
-> We'll leverage the existing dw_mmc knowledge about whether it should
-> wait for the previous command to finish to know whether we should
-> check for busy before sending the command.  This means we won't end up
-> incorrectly waiting for things like CMD52 (SDIO) or CMD13 (SD) which
-> don't use the data line.
-> 
-> Note that this also has the advantage of making sure that we don't
-> change the clock while the card is busy, too.
-> 
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> ---
-> Changes in v2:
-> - Also check for busy in in mci_send_cmd()
-> 
->  drivers/mmc/host/dw_mmc.c | 28 ++++++++++++++++++++++++++++
->  1 file changed, 28 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 4d2e3c2..7733c5c 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -102,6 +102,7 @@ struct idmac_desc {
->  
->  static bool dw_mci_reset(struct dw_mci *host);
->  static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
-> +static int dw_mci_card_busy(struct mmc_host *mmc);
->  
->  #if defined(CONFIG_DEBUG_FS)
->  static int dw_mci_req_show(struct seq_file *s, void *v)
-> @@ -335,6 +336,31 @@ static u32 dw_mci_prep_stop_abort(struct dw_mci *host, struct mmc_command *cmd)
->  	return cmdr;
->  }
->  
-> +static void dw_mci_wait_while_busy(struct dw_mci *host, u32 cmd_flags)
-> +{
-> +	unsigned long timeout = jiffies + msecs_to_jiffies(500);
-> +
-> +	/*
-> +	 * Databook says that before issuing a new data transfer command
-> +	 * we need to check to see if the card is busy.  Data transfer commands
-> +	 * all have SDMMC_CMD_PRV_DAT_WAIT set, so we'll key off that.
-> +	 *
-> +	 * ...also allow sending for SDMMC_CMD_VOLT_SWITCH where busy is
-> +	 * expected.
-> +	 */
-> +	if ((cmd_flags & SDMMC_CMD_PRV_DAT_WAIT) &&
-> +	    !(cmd_flags & SDMMC_CMD_VOLT_SWITCH)) {
-> +		while (mci_readl(host, STATUS) & SDMMC_STATUS_BUSY) {
-> +			if (time_after(jiffies, timeout)) {
-> +				/* Command will fail; we'll pass error then */
-> +				dev_err(host->dev, "Busy; trying anyway\n");
-> +				break;
-> +			}
-> +			udelay(10);
-> +		}
-> +	}
-> +}
-> +
->  static void dw_mci_start_command(struct dw_mci *host,
->  				 struct mmc_command *cmd, u32 cmd_flags)
->  {
-> @@ -345,6 +371,7 @@ static void dw_mci_start_command(struct dw_mci *host,
->  
->  	mci_writel(host, CMDARG, cmd->arg);
->  	wmb();
-> +	dw_mci_wait_while_busy(host, cmd_flags);
->  
->  	mci_writel(host, CMD, cmd_flags | SDMMC_CMD_START);
->  }
-> @@ -876,6 +903,7 @@ static void mci_send_cmd(struct dw_mci_slot *slot, u32 cmd, u32 arg)
->  
->  	mci_writel(host, CMDARG, arg);
->  	wmb();
-> +	dw_mci_wait_while_busy(host, cmd);
->  	mci_writel(host, CMD, SDMMC_CMD_START | cmd);
->  
->  	while (time_before(jiffies, timeout)) {
-> 
+From: NeilBrown <neil@brown.name>
 
+The current error-path code (when gpiod_get_index() reports
+an error) can never free pwrseq->reset_gpios[0], but might
+try to tree pwrseq->reset_gpios[-1], which has unfortunate
+consequences.
+
+Signed-off-by: NeilBrown <neil@brown.name>
+Fixes: 934f1f48330ed695927a51fa068dc5d673f2da19
+
+
+diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_sim=
+ple.c
+index e9f1d8d84613..c53f14a7ce54 100644
+--- a/drivers/mmc/core/pwrseq_simple.c
++++ b/drivers/mmc/core/pwrseq_simple.c
+@@ -124,7 +124,7 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, stru=
+ct device *dev)
+ 		    PTR_ERR(pwrseq->reset_gpios[i]) !=3D -ENOSYS) {
+ 			ret =3D PTR_ERR(pwrseq->reset_gpios[i]);
+=20
+-			while (--i)
++			while (i--)
+ 				gpiod_put(pwrseq->reset_gpios[i]);
+=20
+ 			goto clk_put;
+
+--Sig_/L0CKNDdns+zjMICPqJAq2Xl
+Content-Type: application/pgp-signature
+Content-Description: OpenPGP digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQIVAwUBVOgGVDnsnt1WYoG5AQI4zRAAvsuQR5VYywiBLuJBxLnCNxHrKdMM+iWs
+AbO7z8rbTW/1ZT/JcesYNzMBiUoGncOdTmZwjP+aF+6rE5Ss19vI6rriQoUqD1CX
+xHeMXHORmoUFjm8kH8ZPA1NB4RP3VH8kWKh02Th35dhz2R7U/q19mNEvDmMR61Jr
+xbziesekOajjIYase65k2SQLP6Xn7dIbl4thLNy0VBVY/OiW0JViMa4Lo03wT1nQ
+lC6MfSOWRjW2CKAxaur0jenCMzQpSJc5UhmfbKcvSjPEqd4og01njgRB+l/nH4AP
+6/yxcrU0NaHGOhUM05anVHdFUx3qyDhCgNHFhuEglBn4lSKKf8Iyj9OZaNIlY/HJ
+vm/9VjJ+PU1WQjE6rrl2kqQxti3b3gACvDWe4PJGNqMWhkHTpEOJ5gceGtytCiYC
+UmKbqFrLCphdVvdycsN4ENuEECmqoTdY4JesgU8Jazl9/p4M5DuDAtLeuRXp7qr6
+6VLAPaHvXKe88jP2XoUI11Q9pxWefsxmx29RbZpc3xS/onwKrKPUUypYvJiF0E/y
+HsaLAcbD6d6sLJq1ihFTVuMpW/Uoa4e70NyKEtHtezdHMjyRH2wJAjx9kncpLmbI
+x91yVRJdwOpHs10R6icpRm0wo4+hixDkAd/C3rUSDi/Nim7iEel2p5nuDLB8BVhQ
+TXUXVYA63Yk=
+=FWP6
+-----END PGP SIGNATURE-----
+
+--Sig_/L0CKNDdns+zjMICPqJAq2Xl--
