@@ -1,7 +1,8 @@
 From: NeilBrown <neilb@suse.de>
-Subject: [PATCH 4/4] mmc: omap_hsmmc: switch to 1-bit before stopping clocks.
-Date: Tue, 24 Feb 2015 13:42:24 +1100
-Message-ID: <20150224024223.22719.5177.stgit@notabene.brown>
+Subject: [PATCH 1/4] mmc: core: fold mmc_set_bus_width calls into
+ sdio_enable_4bit_bus.
+Date: Tue, 24 Feb 2015 13:42:23 +1100
+Message-ID: <20150224024223.22719.90256.stgit@notabene.brown>
 References: <20150224024023.22719.32436.stgit@notabene.brown>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -13,50 +14,85 @@ To: Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Andreas Fenkart <afenkart@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>, NeilBrown <neil@brown.name>, linux-omap <linux-omap@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Make use of the new mmc_sdio_want_no_clocks() call to avoid stopping
-clocks while SD Card interrupts are enabled and we aren't in
-1-bit mode.
+Every call to sdio_enable_4bit_bus is followed (on success) but a call
+to mmc_set_bus_width().
 
-Also stop clocks immediately in omap_hsmmc_disable_fclk() if
-1-bit mode has been entered for this purpose.
-
-With this, I can use my libertas wifi with a 4-bit bus, with
-interrupts and runtime power-management enabled, and get around
-14Mb/sec throughput (which is the best I've seen).
+To simplify the code, include those calls directly in
+sdio_enable_4bit_bus().
 
 Signed-off-by: NeilBrown <neil@brown.name>
 ---
- drivers/mmc/host/omap_hsmmc.c |   13 ++++++++++---
- 1 file changed, 10 insertions(+), 3 deletions(-)
+ drivers/mmc/core/sdio.c |   32 ++++++++++++--------------------
+ 1 file changed, 12 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index f84cfb01716d..14fce3b92633 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1791,9 +1791,12 @@ static int omap_hsmmc_disable_fclk(struct mmc_host *mmc)
- {
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index ce6cc47206b0..5bc6c7dbbd60 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -293,19 +293,22 @@ static int sdio_enable_4bit_bus(struct mmc_card *card)
+ 	int err;
  
--	pm_runtime_mark_last_busy(host->dev);
--	pm_runtime_put_autosuspend(host->dev);
+ 	if (card->type == MMC_TYPE_SDIO)
+-		return sdio_enable_wide(card);
 -
-+	if (atomic_read(&mmc->sdio_narrowed) == 2)
-+		pm_runtime_put_sync(host->dev);
-+	else {
-+		pm_runtime_mark_last_busy(host->dev);
-+		pm_runtime_put_autosuspend(host->dev);
-+	}
- 	return 0;
- }
+-	if ((card->host->caps & MMC_CAP_4_BIT_DATA) &&
+-		(card->scr.bus_widths & SD_SCR_BUS_WIDTH_4)) {
++		err = sdio_enable_wide(card);
++	else if ((card->host->caps & MMC_CAP_4_BIT_DATA) &&
++		 (card->scr.bus_widths & SD_SCR_BUS_WIDTH_4)) {
+ 		err = mmc_app_set_bus_width(card, MMC_BUS_WIDTH_4);
+ 		if (err)
+ 			return err;
++		err = sdio_enable_wide(card);
++		if (err <= 0)
++			mmc_app_set_bus_width(card, MMC_BUS_WIDTH_1);
+ 	} else
+ 		return 0;
  
-@@ -2311,6 +2314,10 @@ static int omap_hsmmc_runtime_suspend(struct device *dev)
- 	spin_lock_irqsave(&host->irq_lock, flags);
- 	if ((host->mmc->caps & MMC_CAP_SDIO_IRQ) &&
- 	    (host->flags & HSMMC_SDIO_IRQ_ENABLED)) {
-+		if (mmc_sdio_want_no_clocks(host->mmc) == 0) {
-+			ret = -EBUSY;
-+			goto abort;
-+		}
- 		/* disable sdio irq handling to prevent race */
- 		OMAP_HSMMC_WRITE(host->base, ISE, 0);
- 		OMAP_HSMMC_WRITE(host->base, IE, 0);
+-	err = sdio_enable_wide(card);
+-	if (err <= 0)
+-		mmc_app_set_bus_width(card, MMC_BUS_WIDTH_1);
++	if (err > 0) {
++		mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
++		err = 0;
++	}
+ 
+ 	return err;
+ }
+@@ -547,13 +550,8 @@ static int mmc_sdio_init_uhs_card(struct mmc_card *card)
+ 	/*
+ 	 * Switch to wider bus (if supported).
+ 	 */
+-	if (card->host->caps & MMC_CAP_4_BIT_DATA) {
++	if (card->host->caps & MMC_CAP_4_BIT_DATA)
+ 		err = sdio_enable_4bit_bus(card);
+-		if (err > 0) {
+-			mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
+-			err = 0;
+-		}
+-	}
+ 
+ 	/* Set the driver strength for the card */
+ 	sdio_select_driver_type(card);
+@@ -803,9 +801,7 @@ try_again:
+ 		 * Switch to wider bus (if supported).
+ 		 */
+ 		err = sdio_enable_4bit_bus(card);
+-		if (err > 0)
+-			mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
+-		else if (err)
++		if (err)
+ 			goto remove;
+ 	}
+ finish:
+@@ -983,10 +979,6 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 	} else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
+ 		/* We may have switched to 1-bit mode during suspend */
+ 		err = sdio_enable_4bit_bus(host->card);
+-		if (err > 0) {
+-			mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
+-			err = 0;
+-		}
+ 	}
+ 
+ 	if (!err && host->sdio_irqs) {
