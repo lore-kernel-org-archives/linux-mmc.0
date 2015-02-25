@@ -1,125 +1,139 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH V5 2/2] ARM: dts: Add HS400 support for exynos5420 and
- exynos5800
-Date: Wed, 25 Feb 2015 15:35:16 +0900
-Message-ID: <54ED6D24.4000703@samsung.com>
-References: <1422499318-13726-1-git-send-email-alim.akhtar@samsung.com>
- <1422499318-13726-3-git-send-email-alim.akhtar@samsung.com>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH v4 1/3] mmc: dw_mmc: update clock after host reach a
+ stable voltage
+Date: Wed, 25 Feb 2015 13:22:36 +0530
+Message-ID: <CAGOxZ53vcz96mFbb9ez3GAjZBqEQqiss_TmU1y7EQeRGTVLQdg@mail.gmail.com>
+References: <1423828368-18456-1-git-send-email-addy.ke@rock-chips.com>
+ <1423894668-8886-1-git-send-email-addy.ke@rock-chips.com> <1423894668-8886-2-git-send-email-addy.ke@rock-chips.com>
+ <CAGOxZ53ndi_hYDGBGhY-7q8aOrFid1=D=_5KEbUvzTsnybJQ3Q@mail.gmail.com> <CAD=FV=V9aK-78GJ_eWkpZZdVT_5Zu8ehxg_o3NtnpD2wyRuh7Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:41040 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750764AbbBYGfS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Feb 2015 01:35:18 -0500
-In-reply-to: <1422499318-13726-3-git-send-email-alim.akhtar@samsung.com>
+Received: from mail-qa0-f42.google.com ([209.85.216.42]:41586 "EHLO
+	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751229AbbBYHxR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Feb 2015 02:53:17 -0500
+In-Reply-To: <CAD=FV=V9aK-78GJ_eWkpZZdVT_5Zu8ehxg_o3NtnpD2wyRuh7Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@samsung.com>, linux-mmc@vger.kernel.org
-Cc: chris@printf.net, ulf.hansson@linaro.org, tgih.jun@samsung.com, dianders@chromium.org, alim.akhtar@gmail.com, kgene@kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, a.kesavan@samsung.com
+To: Doug Anderson <dianders@chromium.org>
+Cc: Addy Ke <addy.ke@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Olof Johansson <olof@lixom.net>, Andrzej Hajda <a.hajda@samsung.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Eddie Cai <cf@rock-chips.com>, lintao <lintao@rock-chips.com>, Tao Huang <huangtao@rock-chips.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>
 
-Hi, Alim.
+Hi Doug,
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Best Regards,
-Jaehoon Chung
+On Fri, Feb 20, 2015 at 5:19 AM, Doug Anderson <dianders@chromium.org> wrote:
+> Alim and Addy,
+>
+> On Sun, Feb 15, 2015 at 3:28 PM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
+>> Hi Addy,
+>>
+>> On Sat, Feb 14, 2015 at 11:47 AM, Addy Ke <addy.ke@rock-chips.com> wrote:
+>>> As show in mmc_power_up(), in MMC_POWER_UP state, the voltage isn't
+>>> stable and we may get 'data busy' which can't be cleaned by resetting
+>>> all blocks. So we should not send command to update clock in this state.
+>>>
+>>> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
+>>> ---
+>>>  drivers/mmc/host/dw_mmc.c | 3 ++-
+>>>  1 file changed, 2 insertions(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index 4d2e3c2..3472f9b 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -1102,7 +1102,8 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>                 drv_data->set_ios(slot->host, ios);
+>>>
+>>>         /* Slot specific timing and width adjustment */
+>>> -       dw_mci_setup_bus(slot, false);
+>>> +       if (ios->power_mode != MMC_POWER_UP)
+>>> +               dw_mci_setup_bus(slot, false);
+>>>
+>> This looks a HACK to me.
+>> If stabilizing host voltage regulator is the problem, can you try out
+>> below patch, and see if this resolve your issue?
+>
+> Actually, IMHO Alim's patch is more of a hack than Addy's.  There's
+> already a 10ms delay between "power up" and "power on" in the MMC core
+> in mmc_power_up() state.  That delay is commented as:
+>
+Well, my suggestion (adding 5ms in switch_volatge) was based on DW_MMC
+databook (V2.41a) section "7.4.1.2 Voltage switch Normal Scenario"
+step #7 which says:" After the 5ms timer expires, the host voltage
+regulator is stable".
 
-On 01/29/2015 11:41 AM, Alim Akhtar wrote:
-> From: Seungwon Jeon <tgih.jun@samsung.com>
-> 
-> HS400 timing values are added for SMDK5420, exynos5420-peach-pit
-> and exynos5800-peach-pi boards.
-> This also adds RCLK GPIO line, this gpio should be in pull-down
-> state.
-> This also enables HS400 on peach-pi and this updates the clock frequency
-> to 800MHz to be set as input clock to controller.
-> 
-> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
-> [Alim: addressed review comments]
-> ---
->  arch/arm/boot/dts/exynos5420-peach-pit.dts |    4 +++-
->  arch/arm/boot/dts/exynos5420-pinctrl.dtsi  |    7 +++++++
->  arch/arm/boot/dts/exynos5420-smdk5420.dts  |    4 +++-
->  arch/arm/boot/dts/exynos5800-peach-pi.dts  |    7 +++++--
->  4 files changed, 18 insertions(+), 4 deletions(-)
-> 
-> diff --git a/arch/arm/boot/dts/exynos5420-peach-pit.dts b/arch/arm/boot/dts/exynos5420-peach-pit.dts
-> index 9a050e1..f7a44a4 100644
-> --- a/arch/arm/boot/dts/exynos5420-peach-pit.dts
-> +++ b/arch/arm/boot/dts/exynos5420-peach-pit.dts
-> @@ -569,8 +569,10 @@
->  	samsung,dw-mshc-ciu-div = <3>;
->  	samsung,dw-mshc-sdr-timing = <0 4>;
->  	samsung,dw-mshc-ddr-timing = <0 2>;
-> +	samsung,dw-mshc-hs400-timing = <0 2>;
-> +	samsung,read-strobe-delay = <90>;
->  	pinctrl-names = "default";
-> -	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
-> +	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
->  	bus-width = <8>;
->  };
->  
-> diff --git a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
-> index ba686e4..8b15316 100644
-> --- a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
-> +++ b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
-> @@ -201,6 +201,13 @@
->  			samsung,pin-drv = <3>;
->  		};
->  
-> +		sd0_rclk: sd0-rclk {
-> +			samsung,pins = "gpc0-7";
-> +			samsung,pin-function = <2>;
-> +			samsung,pin-pud = <1>;
-> +			samsung,pin-drv = <3>;
-> +		};
-> +
->  		sd1_cmd: sd1-cmd {
->  			samsung,pins = "gpc1-1";
->  			samsung,pin-function = <2>;
-> diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts b/arch/arm/boot/dts/exynos5420-smdk5420.dts
-> index 8be3d7b..2078a1f 100644
-> --- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
-> +++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
-> @@ -80,8 +80,10 @@
->  		samsung,dw-mshc-ciu-div = <3>;
->  		samsung,dw-mshc-sdr-timing = <0 4>;
->  		samsung,dw-mshc-ddr-timing = <0 2>;
-> +		samsung,dw-mshc-hs400-timing = <0 2>;
-> +		samsung,read-strobe-delay = <90>;
->  		pinctrl-names = "default";
-> -		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
-> +		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
->  		bus-width = <8>;
->  		cap-mmc-highspeed;
->  	};
-> diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts b/arch/arm/boot/dts/exynos5800-peach-pi.dts
-> index e8fdda8..96f0d61 100644
-> --- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
-> +++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
-> @@ -550,15 +550,18 @@
->  	num-slots = <1>;
->  	broken-cd;
->  	mmc-hs200-1_8v;
-> +	mmc-hs400-1_8v;
->  	cap-mmc-highspeed;
->  	non-removable;
->  	card-detect-delay = <200>;
-> -	clock-frequency = <400000000>;
-> +	clock-frequency = <800000000>;
->  	samsung,dw-mshc-ciu-div = <3>;
->  	samsung,dw-mshc-sdr-timing = <0 4>;
->  	samsung,dw-mshc-ddr-timing = <0 2>;
-> +	samsung,dw-mshc-hs400-timing = <0 2>;
-> +	samsung,read-strobe-delay = <90>;
->  	pinctrl-names = "default";
-> -	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
-> +	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
->  	bus-width = <8>;
->  };
->  
-> 
+PS: I have limited to no access of my mails and workstation until
+March 9th, so replies will be slow.
 
+>   /*
+>    * This delay should be sufficient to allow the power supply
+>    * to reach the minimum voltage.
+>    */
+>   mmc_delay(10);
+>
+> That means that assuming that the voltage is stable in MMC_POWER_UP is
+> not valid anyway.
+>
+>
+> Addy's patch certainly needs more comments.  In another context Olof suggested:
+>
+> /*
+>  * Skip bus setup while voltage is still stabilizing. Instead,
+>  * bus setup will be done at MMC_POWER_ON.
+>  */
+>
+>
+> ...thinking about this more, though: really the voltage should be
+> stabilized when the regulator call returns (see my comments below).
+> In actuality the "right" fix might be to just rearrange this function
+> a little not to turn the clock on _before_ we even try to turn the
+> voltage on.
+>
+> I've got that coded up but I'm still testing it...  If you want to try
+> it too, you can find it at
+> <https://chromium-review.googlesource.com/251341>.
+>
+> Note that without my patch I find that I _really_ need Addy's patch to
+> make sure that the card isn't busy in setup_bus.  With my patch Addy's
+> code catches the card busy less often.  I'm still trying to see if
+> there's a way to totally remove the need for his setup_bus and still
+> trying to grok all the patches flying around...
+>
+>
+>> ===========
+>> [PATCH] mmc: dw_mmc: Wait for host voltage regulator to be stable
+>>
+>> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc.c | 3 +++
+>>  1 file changed, 3 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 4d2e3c2..dc10fbb 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -1202,6 +1202,9 @@ static int dw_mci_switch_voltage(struct mmc_host
+>> *mmc, struct mmc_ios *ios)
+>>   }
+>>   mci_writel(host, UHS_REG, uhs);
+>>
+>> + /* wait for 5ms so that host voltage regulator is stable */
+>> + usleep_range(5000, 5500);
+>> +
+>
+> Alim: if you have some other instance where you actually need VQMMC to
+> stabilize it should probably be done in a different way.  If I
+> understand correctly it is the regulator core's job to make sure that
+> voltage is stable before returning.  If you have a gpio-regulator you
+> may be able to use "startup-delay-us" to specify how long the
+> regulator takes to come up.  You could also look at
+> 'regulator-enable-ramp-delay'
+>
+> -Doug
+
+
+
+-- 
+Regards,
+Alim
