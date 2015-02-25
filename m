@@ -1,153 +1,113 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v4 1/3] mmc: dw_mmc: update clock after host reach a stable
- voltage
-Date: Wed, 25 Feb 2015 18:56:02 +0900
-Message-ID: <54ED9C32.60004@samsung.com>
-References: <1423828368-18456-1-git-send-email-addy.ke@rock-chips.com>
- <1423894668-8886-1-git-send-email-addy.ke@rock-chips.com>
- <1423894668-8886-2-git-send-email-addy.ke@rock-chips.com>
- <CAGOxZ53ndi_hYDGBGhY-7q8aOrFid1=D=_5KEbUvzTsnybJQ3Q@mail.gmail.com>
- <CAD=FV=V9aK-78GJ_eWkpZZdVT_5Zu8ehxg_o3NtnpD2wyRuh7Q@mail.gmail.com>
- <CAGOxZ53vcz96mFbb9ez3GAjZBqEQqiss_TmU1y7EQeRGTVLQdg@mail.gmail.com>
+From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+Subject: Re: [PATCH v2] mmc: dw_mmc: Don't start commands while busy
+Date: Wed, 25 Feb 2015 11:02:43 +0100
+Message-ID: <54ED9DC3.4070601@collabora.co.uk>
+References: <1424464316-4397-1-git-send-email-dianders@chromium.org>	<54EB5658.6080004@collabora.co.uk>	<CAD=FV=Uc+x=qAEmUwJ=ifq0n=5TqDuwmOAnFQ30gkz2GOdVcUQ@mail.gmail.com>	<54EC5E70.40300@collabora.co.uk> <CAD=FV=WqbOWQtFCXe+2wOpHOB1puu0p01jbVBpwufg_9M65Crw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:44049 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751959AbbBYJ4G (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Feb 2015 04:56:06 -0500
-In-reply-to: <CAGOxZ53vcz96mFbb9ez3GAjZBqEQqiss_TmU1y7EQeRGTVLQdg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=WqbOWQtFCXe+2wOpHOB1puu0p01jbVBpwufg_9M65Crw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@gmail.com>, Doug Anderson <dianders@chromium.org>
-Cc: Addy Ke <addy.ke@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Olof Johansson <olof@lixom.net>, Andrzej Hajda <a.hajda@samsung.com>, =?UTF-8?B?SGVpa28gU3TDvGJuZXI=?= <heiko@sntech.de>, Eddie Cai <cf@rock-chips.com>, lintao <lintao@rock-chips.com>, Tao Huang <huangtao@rock-chips.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>
 
-Hi,
+Hello Doug,
 
-On 02/25/2015 04:52 PM, Alim Akhtar wrote:
-> Hi Doug,
+On 02/25/2015 06:43 AM, Doug Anderson wrote:
+> 
+> OK, so looking through things I _think_ I found another difference
+> that _might_ matter...
+>
+
+Yes it does! when adding the "sd1_bus1" the slot pinctrl I do have
+the WiFi module working, thanks a lot for your help!
+ 
+> Upstream (arch/arm/boot/dts/exynos5420-pinctrl.dtsi):
+>                 sd1_bus1: sd1-bus-width1 {
+>                         samsung,pins = "gpc1-3";
+>                         ...
+>                 };
+> 
+>                 sd1_bus4: sd1-bus-width4 {
+>                         samsung,pins = "gpc1-4", "gpc1-5", "gpc1-6";
+>                         ...
+>                };
+> 
+>                 sd1_bus8: sd1-bus-width8 {
+>                         samsung,pins = "gpd1-4", "gpd1-5", "gpd1-6", "gpd1-7";
+>                         ...
+>                };
+> 
+> Upsttream (arch/arm/boot/dts/exynos5420-peach-pit.dts) -- your patch:
+>        pinctrl-0 = <&sd1_clk>, <&sd1_cmd>, <&sd1_int>, <&sd1_bus4>,
+>                    <&sd1_bus8>, <&wifi_en>, <&wifi_rst>;
+> 
+> Downstream (arch/arm/boot/dts/exynos542x-pinctrl.dtsi):
+>                 sd1_bus1: sd1-bus-width1 {
+>                         samsung,pins = "gpc1-3";
+>                         ...
+>                };
+> 
+>                 sd1_bus4: sd1-bus-width4 {
+>                         samsung,pins = "gpc1-3", "gpc1-4", "gpc1-5", "gpc1-6";
+>                         ...
+>                };
+> 
+>                 sd1_bus8: sd1-bus-width8 {
+>                         samsung,pins = "gpd1-4", "gpd1-5", "gpd1-6", "gpd1-7";
+>                         ...
+>                };
+> 
+> Downstream (arch/arm/boot/dts/exynos542x-peach.dtsi):
+>                 pinctrl-0 = <&sd1_clk &sd1_cmd &sd1_int &sd1_bus4 &sd1_bus8>;
 > 
 > 
-> On Fri, Feb 20, 2015 at 5:19 AM, Doug Anderson <dianders@chromium.org> wrote:
->> Alim and Addy,
->>
->> On Sun, Feb 15, 2015 at 3:28 PM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
->>> Hi Addy,
->>>
->>> On Sat, Feb 14, 2015 at 11:47 AM, Addy Ke <addy.ke@rock-chips.com> wrote:
->>>> As show in mmc_power_up(), in MMC_POWER_UP state, the voltage isn't
->>>> stable and we may get 'data busy' which can't be cleaned by resetting
->>>> all blocks. So we should not send command to update clock in this state.
->>>>
->>>> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
->>>> ---
->>>>  drivers/mmc/host/dw_mmc.c | 3 ++-
->>>>  1 file changed, 2 insertions(+), 1 deletion(-)
->>>>
->>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>> index 4d2e3c2..3472f9b 100644
->>>> --- a/drivers/mmc/host/dw_mmc.c
->>>> +++ b/drivers/mmc/host/dw_mmc.c
->>>> @@ -1102,7 +1102,8 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>>>                 drv_data->set_ios(slot->host, ios);
->>>>
->>>>         /* Slot specific timing and width adjustment */
->>>> -       dw_mci_setup_bus(slot, false);
->>>> +       if (ios->power_mode != MMC_POWER_UP)
->>>> +               dw_mci_setup_bus(slot, false);
->>>>
->>> This looks a HACK to me.
->>> If stabilizing host voltage regulator is the problem, can you try out
->>> below patch, and see if this resolve your issue?
->>
->> Actually, IMHO Alim's patch is more of a hack than Addy's.  There's
->> already a 10ms delay between "power up" and "power on" in the MMC core
->> in mmc_power_up() state.  That delay is commented as:
->>
-> Well, my suggestion (adding 5ms in switch_volatge) was based on DW_MMC
-> databook (V2.41a) section "7.4.1.2 Voltage switch Normal Scenario"
-> step #7 which says:" After the 5ms timer expires, the host voltage
-> regulator is stable".
+> Notice the difference?  You need to add "sd1_bus1" to the pinctrl for
+> upstream.  The upstream DTS makes more sense.  I think I remember
+> discussing this in the past (finding the conversation on the lists is
+> left as an exercise to the reader) and you can in fact see that the
+> upstream 5250 pinctrl file is like the downstream 5420 pinctrl...
+>
 
-if you want to stable power, How about using SDMMC_CMD_INIT flag?
+Yeah, I didn't notice that there was an inconsistency in the pinctrl
+defines in mainline around the different SoCs. So for 5250 you need:
 
-It waits for 80-clock before sending command.(To stable power)
-- You can refer to CMD register description.
+* only sd1_bus1 for bus-width = <1>
+* only sd1_bus4 for bus-width = <4>
+* sd1_bus4 + sd1_bus8 for bus-width = <8>
 
-Best Regards,
-Jaehoon Chung
+and for 5440 you need:
+
+* only sd1_bus1 for bus-width = <1>
+* only sd1_bus1 + sd1_bus4 for bus-width = <4>
+* sd1_bus1 + sd1_bus4 + sd1_bus8 for bus-width = <8>
+
+Is true that 5440 is at least more consistent in the sense that you
+have to add all the pins but IMHO this approach is very error prone.
+
+I would preferred if sd1_busN included all pins needed for width N
+so you only had to define a single pinctrl group but for now I'll
+include "sd1_bus1" to fix the SDIO WiFi issue.
+
+> I think the same bug is present in eMMC and SD but possibly the
+> bootloader inits the pinctrl properly there?
+>
+
+Correct, I'll fix those too so the kernel does not rely on the boot
+loader to setup those pins.
 
 > 
-> PS: I have limited to no access of my mails and workstation until
-> March 9th, so replies will be slow.
-> 
->>   /*
->>    * This delay should be sufficient to allow the power supply
->>    * to reach the minimum voltage.
->>    */
->>   mmc_delay(10);
->>
->> That means that assuming that the voltage is stable in MMC_POWER_UP is
->> not valid anyway.
->>
->>
->> Addy's patch certainly needs more comments.  In another context Olof suggested:
->>
->> /*
->>  * Skip bus setup while voltage is still stabilizing. Instead,
->>  * bus setup will be done at MMC_POWER_ON.
->>  */
->>
->>
->> ...thinking about this more, though: really the voltage should be
->> stabilized when the regulator call returns (see my comments below).
->> In actuality the "right" fix might be to just rearrange this function
->> a little not to turn the clock on _before_ we even try to turn the
->> voltage on.
->>
->> I've got that coded up but I'm still testing it...  If you want to try
->> it too, you can find it at
->> <https://chromium-review.googlesource.com/251341>.
->>
->> Note that without my patch I find that I _really_ need Addy's patch to
->> make sure that the card isn't busy in setup_bus.  With my patch Addy's
->> code catches the card busy less often.  I'm still trying to see if
->> there's a way to totally remove the need for his setup_bus and still
->> trying to grok all the patches flying around...
->>
->>
->>> ===========
->>> [PATCH] mmc: dw_mmc: Wait for host voltage regulator to be stable
->>>
->>> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
->>> ---
->>>  drivers/mmc/host/dw_mmc.c | 3 +++
->>>  1 file changed, 3 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>> index 4d2e3c2..dc10fbb 100644
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -1202,6 +1202,9 @@ static int dw_mci_switch_voltage(struct mmc_host
->>> *mmc, struct mmc_ios *ios)
->>>   }
->>>   mci_writel(host, UHS_REG, uhs);
->>>
->>> + /* wait for 5ms so that host voltage regulator is stable */
->>> + usleep_range(5000, 5500);
->>> +
->>
->> Alim: if you have some other instance where you actually need VQMMC to
->> stabilize it should probably be done in a different way.  If I
->> understand correctly it is the regulator core's job to make sure that
->> voltage is stable before returning.  If you have a gpio-regulator you
->> may be able to use "startup-delay-us" to specify how long the
->> regulator takes to come up.  You could also look at
->> 'regulator-enable-ramp-delay'
->>
->> -Doug
-> 
-> 
-> 
+> Crossing my fingers that's your bug, but I can't say for sure why
+> adding a tons of resets would somehow make it better?
+>
 
+It is, thanks a lot again for finding this issue. I feel very dumb for
+not realizing there was a difference in the included pinctrl definition.
+
+> -Doug
+>
+
+Best regards,
+Javier
