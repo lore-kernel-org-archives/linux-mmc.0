@@ -1,77 +1,104 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2] mmc: dw_mmc: rockchip: add support
- MMC_CAP_RUNTIME_RESUME capability
-Date: Wed, 25 Feb 2015 19:37:37 +0900
-Message-ID: <54EDA5F1.2060203@samsung.com>
-References: <1423812140-24196-1-git-send-email-addy.ke@rock-chips.com>
- <1424399860-3394-1-git-send-email-addy.ke@rock-chips.com>
+Subject: Re: Help needed: Enabling HPI causes some eMMC devices to stop working
+Date: Wed, 25 Feb 2015 20:44:56 +0900
+Message-ID: <54EDB5B8.2020800@samsung.com>
+References: <54E4E4BF.3090507@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <1424399860-3394-1-git-send-email-addy.ke@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Addy Ke <addy.ke@rock-chips.com>, ulf.hansson@linaro.org, olof@lixom.net, heiko@sntech.de
-Cc: huangtao@rock-chips.com, lintao@rock-chips.com, cf@rock-chips.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:47132 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751641AbbBYLo6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Feb 2015 06:44:58 -0500
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0NKB0014QSMXZX90@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 25 Feb 2015 20:44:57 +0900 (KST)
+In-reply-to: <54E4E4BF.3090507@redhat.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi, Addy.
+Hi.
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+On 02/19/2015 04:15 AM, Hans de Goede wrote:
+> Hi,
+> 
+> As part of the Linux Allwinner SoC support work I do in my
+> spare time, I'm working on getting stock Linux running on
+> the Utoo P66 Allwinner A13 based tablet.
+> 
+> This tablet is interesting because it uses an eMMC rather then
+> raw nand as is typically seen on Allwinner tablets.
+> 
+> It has taken me a while to get the kernel to talk to the eMMC,
+> in the end the following hack does the trick:
+> 
+> 
+> From: Hans de Goede <hdegoede@redhat.com>
+> Date: Wed, 18 Feb 2015 20:04:03 +0100
+> Subject: [PATCH] mmc: HACK: disable HPI
+> 
+> HACK: trying to enable HPI breaks EMMC access on the Utoo P66 tablet I'm
+> trying to get supported, so disable it. FIXME: come up with a proper fix.
+> 
+> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+> ---
+>  drivers/mmc/core/mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 1d41e85..b343587 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1418,7 +1418,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>         /*
+>          * Enable HPI feature (if supported)
+>          */
+> -       if (card->ext_csd.hpi) {
+> +       if (0 && card->ext_csd.hpi) {
+>                 err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>                                 EXT_CSD_HPI_MGMT, 1,
+>                                 card->ext_csd.generic_cmd6_time);
+> 
+> This patch has one good thing going for it, which it is that it makes
+> the eMMC work, without this talking to the eMMC fails as soon as the
+> kernel tries to read the partition table, with response-timeout errors
+> when doing a mmc command 18 to read sector 0.
 
-Thanks!
+I don't understand what response-timeout error related with HPI?
+
+> 
+> So this is as far as I've come, and beyond this my mmc knowledge is simply
+> not good enough. Could this be a controller specific problem ? IOW do
+> we need a controller flag to not enable HPi, like we've
+> MMC_CAP2_BOOTPART_NOACC ? Or is this likely more something specific to the eMMC
+> used.
+> 
+> Assuming for now it is something specific to the eMMC used, how do we fix this?
+> 
+> Is there maybe some way to figure out that enabling HPI is not a good idea on
+> this eMMC?
+
+According to eMMC spec, HPI feature is mandatory. And it only needs to consider how the feature use.
+Do you use the BKOPS or other use-case?
 
 Best Regards,
 Jaehoon Chung
 
-On 02/20/2015 11:37 AM, Addy Ke wrote:
-> To support HS200 and UHS mode, mmc core will call init_card() to
-> execute tuning:
-> - sdio: init_card can be executed at runtime resume.
-> - sd and mmc: init_card can be executed at resume or runtime resume,
->   which depends on MMC_CAP_RUNTIME_RESUME capability.
 > 
-> On rk3288 SoC, host will get DRTO interrupt when host send command
-> to read tuning data. This will spend more than 111ms:
-> drto_ms = drto_clks * 1000 / bus_hz = 111ms.
+> Or do we need a quirk for this in devicetree? Now a days we can tie info to an sdio
+> slave device in devicetree, so that is an option too.
 > 
-> And the total tuning time will be more than 400ms.
+> Thanks & Regards,
 > 
-> So we should add MMC_CAP_RUNTIME_RESUME capability to execute tuning
-> at runtime resume. Only if we do so, can we pass resume test.
+> Hans
+> -- 
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> Reviewed-by: Doug Anderson <dianders@chromium.org>
-> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
-> ---
-> Changes in v2:
-> - add this capability for all 4 slots, suggested by Doug Anderson.
-> 
->  drivers/mmc/host/dw_mmc-rockchip.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> index e2a726a..dbf166f 100644
-> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -76,12 +76,20 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
->  	return 0;
->  }
->  
-> +/* Common capabilities of RK3288 SoC */
-> +static unsigned long dw_mci_rk3288_dwmmc_caps[4] = {
-> +	MMC_CAP_RUNTIME_RESUME, /* emmc */
-> +	MMC_CAP_RUNTIME_RESUME, /* sdmmc */
-> +	MMC_CAP_RUNTIME_RESUME, /* sdio0 */
-> +	MMC_CAP_RUNTIME_RESUME, /* sdio1 */
-> +};
->  static const struct dw_mci_drv_data rk2928_drv_data = {
->  	.prepare_command        = dw_mci_rockchip_prepare_command,
->  	.init			= dw_mci_rockchip_init,
->  };
->  
->  static const struct dw_mci_drv_data rk3288_drv_data = {
-> +	.caps			= dw_mci_rk3288_dwmmc_caps,
->  	.prepare_command        = dw_mci_rockchip_prepare_command,
->  	.set_ios		= dw_mci_rk3288_set_ios,
->  	.setup_clock    = dw_mci_rk3288_setup_clock,
-> 
+
