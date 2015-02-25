@@ -1,46 +1,75 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v4 1/3] mmc: dw_mmc: update clock after host reach a
- stable voltage
-Date: Wed, 25 Feb 2015 13:05:13 -0800
-Message-ID: <CAD=FV=WxjQXQpRDNj8pOrcQdAgiQKrJSM1Upf=npjNEpbBLcPg@mail.gmail.com>
-References: <1423828368-18456-1-git-send-email-addy.ke@rock-chips.com>
-	<1423894668-8886-1-git-send-email-addy.ke@rock-chips.com>
-	<1423894668-8886-2-git-send-email-addy.ke@rock-chips.com>
-	<CAGOxZ53ndi_hYDGBGhY-7q8aOrFid1=D=_5KEbUvzTsnybJQ3Q@mail.gmail.com>
-	<CAD=FV=V9aK-78GJ_eWkpZZdVT_5Zu8ehxg_o3NtnpD2wyRuh7Q@mail.gmail.com>
-	<CAGOxZ53vcz96mFbb9ez3GAjZBqEQqiss_TmU1y7EQeRGTVLQdg@mail.gmail.com>
+From: Al Cooper <alcooperx@gmail.com>
+Subject: [PATCH] mmc: mkfs takes hours on some combinations of eMMC device and host controller
+Date: Wed, 25 Feb 2015 16:55:59 -0500
+Message-ID: <1424901359-6309-1-git-send-email-alcooperx@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAGOxZ53vcz96mFbb9ez3GAjZBqEQqiss_TmU1y7EQeRGTVLQdg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@gmail.com>
-Cc: Addy Ke <addy.ke@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Olof Johansson <olof@lixom.net>, Andrzej Hajda <a.hajda@samsung.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Eddie Cai <cf@rock-chips.com>, lintao <lintao@rock-chips.com>, Tao Huang <huangtao@rock-chips.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:3629 "EHLO
+	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753683AbbBYWBO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Feb 2015 17:01:14 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: chris@printf.net, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: Al Cooper <alcooperx@gmail.com>
 
-Alim,
+mkfs.ext4 will erase the entire partition on the eMMC device before
+writing the actual filesystem. The number of blocks erased on each
+erase eMMC command is determined at run time based on the max erase
+or trim time specified by the EXT_CSD in the eMMC device and the max eMMC
+command timeout supported by the host controller. The routine in the
+kernel that calculates the max number of blocks specified per command
+returns 1 with some combinations of host controllers with a short max
+command timeout and eMMC devices with long max erase or trim time.
+This will end up requiring over 8 million erase sequences on a 4GB
+eMMC partition and will take many hours.
 
-On Tue, Feb 24, 2015 at 11:52 PM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
->>> This looks a HACK to me.
->>> If stabilizing host voltage regulator is the problem, can you try out
->>> below patch, and see if this resolve your issue?
->>
->> Actually, IMHO Alim's patch is more of a hack than Addy's.  There's
->> already a 10ms delay between "power up" and "power on" in the MMC core
->> in mmc_power_up() state.  That delay is commented as:
->>
-> Well, my suggestion (adding 5ms in switch_volatge) was based on DW_MMC
-> databook (V2.41a) section "7.4.1.2 Voltage switch Normal Scenario"
-> step #7 which says:" After the 5ms timer expires, the host voltage
-> regulator is stable".
+For example, on a host controller with a 50MHz timeout clock
+specified in the Host CAPS register and an eMMC device
+with a TRIM Multiplier of 6 specified in the EXT_CSD we get
+2^27/50000000=2.68 secs for a max command timeout and 6*.300=1.8 secs
+for a trim operation which only allows 1 per trim command. The problem
+seems to be in mmc_do_calc_max_discard() which does it's calculations
+based on erase blocks but converts to and returns write blocks
+(2MB blocks to 512 bytes blocks for a typical eMMC device) unless
+the value is 1 in which case it just returns the 1. The routine also
+subtracts 1 from the max calculation before converting from erase to
+write blocks which should not be needed.
 
-So all of that should be handled by the core.  Just reading the DW_MMC
-databook can be confusing because they don't differentiate between
-what's in the SDMMC spec and what's DW_MMC specific.
+This change will convert all non-zero max calculations from erase
+to write blocks and will no longer subtract 1 from the erase block
+max before converting to write blocks. This allow mkfs.ext4 to run
+in 30 secs instead of >10 hours.
 
-Check out mmc_set_signal_voltage(), specifically:
+Signed-off-by: Al Cooper <alcooperx@gmail.com>
+---
+ drivers/mmc/core/core.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
 
-* During a signal voltage level switch, the clock must be gated
-* for 5 ms according to the SD spec
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 23f10f7..1b61ac0 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2231,16 +2231,13 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
+ 	if (!qty)
+ 		return 0;
+ 
+-	if (qty == 1)
+-		return 1;
+-
+ 	/* Convert qty to sectors */
+ 	if (card->erase_shift)
+-		max_discard = --qty << card->erase_shift;
++		max_discard = qty << card->erase_shift;
+ 	else if (mmc_card_sd(card))
+ 		max_discard = qty;
+ 	else
+-		max_discard = --qty * card->erase_size;
++		max_discard = qty * card->erase_size;
+ 
+ 	return max_discard;
+ }
+-- 
+1.9.0.138.g2de3478
 
--Doug
