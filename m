@@ -1,113 +1,198 @@
-From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Subject: Re: [PATCH v2] mmc: dw_mmc: Don't start commands while busy
-Date: Wed, 25 Feb 2015 11:02:43 +0100
-Message-ID: <54ED9DC3.4070601@collabora.co.uk>
-References: <1424464316-4397-1-git-send-email-dianders@chromium.org>	<54EB5658.6080004@collabora.co.uk>	<CAD=FV=Uc+x=qAEmUwJ=ifq0n=5TqDuwmOAnFQ30gkz2GOdVcUQ@mail.gmail.com>	<54EC5E70.40300@collabora.co.uk> <CAD=FV=WqbOWQtFCXe+2wOpHOB1puu0p01jbVBpwufg_9M65Crw@mail.gmail.com>
+From: Alexandre Courbot <gnurou@gmail.com>
+Subject: Re: [PATCH] mmc: pwrseq: simplify alloc/free hooks
+Date: Wed, 25 Feb 2015 19:20:34 +0900
+Message-ID: <CAAVeFuKSB8aHe3ESVL2CryhLX7YbyZU5i-yaGO-4Ft_VB7FWhw@mail.gmail.com>
+References: <1423715771-20498-1-git-send-email-acourbot@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=WqbOWQtFCXe+2wOpHOB1puu0p01jbVBpwufg_9M65Crw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ig0-f172.google.com ([209.85.213.172]:58945 "EHLO
+	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753041AbbBYKUz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Feb 2015 05:20:55 -0500
+In-Reply-To: <1423715771-20498-1-git-send-email-acourbot@nvidia.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alexandre Courbot <acourbot@nvidia.com>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Marek Szyprowski <m.szyprowski@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Hello Doug,
+Chris, Ulf, gentle ping?
 
-On 02/25/2015 06:43 AM, Doug Anderson wrote:
-> 
-> OK, so looking through things I _think_ I found another difference
-> that _might_ matter...
+On Thu, Feb 12, 2015 at 1:36 PM, Alexandre Courbot <acourbot@nvidia.com> wrote:
+> The alloc() and free() hooks required each pwrseq implementation to set
+> host->pwrseq themselves. This is error-prone and could be done at a
+> higher level if alloc() was changed to return a pointer to a struct
+> mmc_pwrseq instead of an error code.
 >
-
-Yes it does! when adding the "sd1_bus1" the slot pinctrl I do have
-the WiFi module working, thanks a lot for your help!
- 
-> Upstream (arch/arm/boot/dts/exynos5420-pinctrl.dtsi):
->                 sd1_bus1: sd1-bus-width1 {
->                         samsung,pins = "gpc1-3";
->                         ...
->                 };
-> 
->                 sd1_bus4: sd1-bus-width4 {
->                         samsung,pins = "gpc1-4", "gpc1-5", "gpc1-6";
->                         ...
->                };
-> 
->                 sd1_bus8: sd1-bus-width8 {
->                         samsung,pins = "gpd1-4", "gpd1-5", "gpd1-6", "gpd1-7";
->                         ...
->                };
-> 
-> Upsttream (arch/arm/boot/dts/exynos5420-peach-pit.dts) -- your patch:
->        pinctrl-0 = <&sd1_clk>, <&sd1_cmd>, <&sd1_int>, <&sd1_bus4>,
->                    <&sd1_bus8>, <&wifi_en>, <&wifi_rst>;
-> 
-> Downstream (arch/arm/boot/dts/exynos542x-pinctrl.dtsi):
->                 sd1_bus1: sd1-bus-width1 {
->                         samsung,pins = "gpc1-3";
->                         ...
->                };
-> 
->                 sd1_bus4: sd1-bus-width4 {
->                         samsung,pins = "gpc1-3", "gpc1-4", "gpc1-5", "gpc1-6";
->                         ...
->                };
-> 
->                 sd1_bus8: sd1-bus-width8 {
->                         samsung,pins = "gpd1-4", "gpd1-5", "gpd1-6", "gpd1-7";
->                         ...
->                };
-> 
-> Downstream (arch/arm/boot/dts/exynos542x-peach.dtsi):
->                 pinctrl-0 = <&sd1_clk &sd1_cmd &sd1_int &sd1_bus4 &sd1_bus8>;
-> 
-> 
-> Notice the difference?  You need to add "sd1_bus1" to the pinctrl for
-> upstream.  The upstream DTS makes more sense.  I think I remember
-> discussing this in the past (finding the conversation on the lists is
-> left as an exercise to the reader) and you can in fact see that the
-> upstream 5250 pinctrl file is like the downstream 5420 pinctrl...
+> This patch performs this change and moves the burden of maintaining
+> host->pwrseq from the power sequence hooks to the pwrseq code.
 >
-
-Yeah, I didn't notice that there was an inconsistency in the pinctrl
-defines in mainline around the different SoCs. So for 5250 you need:
-
-* only sd1_bus1 for bus-width = <1>
-* only sd1_bus4 for bus-width = <4>
-* sd1_bus4 + sd1_bus8 for bus-width = <8>
-
-and for 5440 you need:
-
-* only sd1_bus1 for bus-width = <1>
-* only sd1_bus1 + sd1_bus4 for bus-width = <4>
-* sd1_bus1 + sd1_bus4 + sd1_bus8 for bus-width = <8>
-
-Is true that 5440 is at least more consistent in the sense that you
-have to add all the pins but IMHO this approach is very error prone.
-
-I would preferred if sd1_busN included all pins needed for width N
-so you only had to define a single pinctrl group but for now I'll
-include "sd1_bus1" to fix the SDIO WiFi issue.
-
-> I think the same bug is present in eMMC and SD but possibly the
-> bootloader inits the pinctrl properly there?
+> Signed-off-by: Alexandre Courbot <acourbot@nvidia.com>
+> ---
+> It occured to me that after this change, none of the alloc()
+> implementations ever uses the host parameter. I have kept it in case
+> it could be useful for other purposes, but can remove it in a v2 if
+> this is deemed better by the MMC maintainers.
 >
-
-Correct, I'll fix those too so the kernel does not rely on the boot
-loader to setup those pins.
-
-> 
-> Crossing my fingers that's your bug, but I can't say for sure why
-> adding a tons of resets would somehow make it better?
+>  drivers/mmc/core/pwrseq.c        | 16 ++++++++++++----
+>  drivers/mmc/core/pwrseq.h        |  6 ++++--
+>  drivers/mmc/core/pwrseq_emmc.c   | 11 +++++------
+>  drivers/mmc/core/pwrseq_simple.c | 11 +++++------
+>  4 files changed, 26 insertions(+), 18 deletions(-)
 >
-
-It is, thanks a lot again for finding this issue. I feel very dumb for
-not realizing there was a difference in the included pinctrl definition.
-
-> -Doug
+> diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
+> index 862356123d78..ab2129781161 100644
+> --- a/drivers/mmc/core/pwrseq.c
+> +++ b/drivers/mmc/core/pwrseq.c
+> @@ -19,7 +19,7 @@
 >
-
-Best regards,
-Javier
+>  struct mmc_pwrseq_match {
+>         const char *compatible;
+> -       int (*alloc)(struct mmc_host *host, struct device *dev);
+> +       struct mmc_pwrseq *(*alloc)(struct mmc_host *host, struct device *dev);
+>  };
+>
+>  static struct mmc_pwrseq_match pwrseq_match[] = {
+> @@ -52,6 +52,7 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
+>         struct platform_device *pdev;
+>         struct device_node *np;
+>         struct mmc_pwrseq_match *match;
+> +       struct mmc_pwrseq *pwrseq;
+>         int ret = 0;
+>
+>         np = of_parse_phandle(host->parent->of_node, "mmc-pwrseq", 0);
+> @@ -70,9 +71,14 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
+>                 goto err;
+>         }
+>
+> -       ret = match->alloc(host, &pdev->dev);
+> -       if (!ret)
+> -               dev_info(host->parent, "allocated mmc-pwrseq\n");
+> +       pwrseq = match->alloc(host, &pdev->dev);
+> +       if (IS_ERR(pwrseq)) {
+> +               ret = PTR_ERR(host->pwrseq);
+> +               goto err;
+> +       }
+> +
+> +       host->pwrseq = pwrseq;
+> +       dev_info(host->parent, "allocated mmc-pwrseq\n");
+>
+>  err:
+>         of_node_put(np);
+> @@ -109,4 +115,6 @@ void mmc_pwrseq_free(struct mmc_host *host)
+>
+>         if (pwrseq && pwrseq->ops && pwrseq->ops->free)
+>                 pwrseq->ops->free(host);
+> +
+> +       host->pwrseq = NULL;
+>  }
+> diff --git a/drivers/mmc/core/pwrseq.h b/drivers/mmc/core/pwrseq.h
+> index aba3409e8d6e..096da48c6a7e 100644
+> --- a/drivers/mmc/core/pwrseq.h
+> +++ b/drivers/mmc/core/pwrseq.h
+> @@ -27,8 +27,10 @@ void mmc_pwrseq_post_power_on(struct mmc_host *host);
+>  void mmc_pwrseq_power_off(struct mmc_host *host);
+>  void mmc_pwrseq_free(struct mmc_host *host);
+>
+> -int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev);
+> -int mmc_pwrseq_emmc_alloc(struct mmc_host *host, struct device *dev);
+> +struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
+> +                                          struct device *dev);
+> +struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
+> +                                        struct device *dev);
+>
+>  #else
+>
+> diff --git a/drivers/mmc/core/pwrseq_emmc.c b/drivers/mmc/core/pwrseq_emmc.c
+> index a2d545904fbf..9d6d2fb21796 100644
+> --- a/drivers/mmc/core/pwrseq_emmc.c
+> +++ b/drivers/mmc/core/pwrseq_emmc.c
+> @@ -49,7 +49,6 @@ static void mmc_pwrseq_emmc_free(struct mmc_host *host)
+>         unregister_restart_handler(&pwrseq->reset_nb);
+>         gpiod_put(pwrseq->reset_gpio);
+>         kfree(pwrseq);
+> -       host->pwrseq = NULL;
+>  }
+>
+>  static struct mmc_pwrseq_ops mmc_pwrseq_emmc_ops = {
+> @@ -67,14 +66,15 @@ static int mmc_pwrseq_emmc_reset_nb(struct notifier_block *this,
+>         return NOTIFY_DONE;
+>  }
+>
+> -int mmc_pwrseq_emmc_alloc(struct mmc_host *host, struct device *dev)
+> +struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
+> +                                        struct device *dev)
+>  {
+>         struct mmc_pwrseq_emmc *pwrseq;
+>         int ret = 0;
+>
+>         pwrseq = kzalloc(sizeof(struct mmc_pwrseq_emmc), GFP_KERNEL);
+>         if (!pwrseq)
+> -               return -ENOMEM;
+> +               return ERR_PTR(-ENOMEM);
+>
+>         pwrseq->reset_gpio = gpiod_get_index(dev, "reset", 0, GPIOD_OUT_LOW);
+>         if (IS_ERR(pwrseq->reset_gpio)) {
+> @@ -92,10 +92,9 @@ int mmc_pwrseq_emmc_alloc(struct mmc_host *host, struct device *dev)
+>         register_restart_handler(&pwrseq->reset_nb);
+>
+>         pwrseq->pwrseq.ops = &mmc_pwrseq_emmc_ops;
+> -       host->pwrseq = &pwrseq->pwrseq;
+>
+> -       return 0;
+> +       return &pwrseq->pwrseq;
+>  free:
+>         kfree(pwrseq);
+> -       return ret;
+> +       return ERR_PTR(ret);
+>  }
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+> index e9f1d8d84613..5c0667af8dd6 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -85,7 +85,6 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
+>                 clk_put(pwrseq->ext_clk);
+>
+>         kfree(pwrseq);
+> -       host->pwrseq = NULL;
+>  }
+>
+>  static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
+> @@ -95,7 +94,8 @@ static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
+>         .free = mmc_pwrseq_simple_free,
+>  };
+>
+> -int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
+> +struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
+> +                                          struct device *dev)
+>  {
+>         struct mmc_pwrseq_simple *pwrseq;
+>         int i, nr_gpios, ret = 0;
+> @@ -107,7 +107,7 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
+>         pwrseq = kzalloc(sizeof(struct mmc_pwrseq_simple) + nr_gpios *
+>                          sizeof(struct gpio_desc *), GFP_KERNEL);
+>         if (!pwrseq)
+> -               return -ENOMEM;
+> +               return ERR_PTR(-ENOMEM);
+>
+>         pwrseq->ext_clk = clk_get(dev, "ext_clock");
+>         if (IS_ERR(pwrseq->ext_clk) &&
+> @@ -133,13 +133,12 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
+>
+>         pwrseq->nr_gpios = nr_gpios;
+>         pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
+> -       host->pwrseq = &pwrseq->pwrseq;
+>
+> -       return 0;
+> +       return &pwrseq->pwrseq;
+>  clk_put:
+>         if (!IS_ERR(pwrseq->ext_clk))
+>                 clk_put(pwrseq->ext_clk);
+>  free:
+>         kfree(pwrseq);
+> -       return ret;
+> +       return ERR_PTR(ret);
+>  }
+> --
+> 2.3.0
+>
