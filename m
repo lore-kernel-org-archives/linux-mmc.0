@@ -1,79 +1,45 @@
-From: Yoshihiro Kaneko <ykaneko0929@gmail.com>
-Subject: Re: [PATCH/RFC] mmc: sh_mmcif: Add exclusion between cmd and interrupt
-Date: Wed, 25 Feb 2015 22:21:54 +0900
-Message-ID: <CAH1o70K0O7kcQEzNqsHqKzUhuhxLnVsf7vgVjW-2rhY-7xhjkg@mail.gmail.com>
-References: <1424011607-3682-1-git-send-email-ykaneko0929@gmail.com>
-	<54E0C2FF.3040401@cogentembedded.com>
+From: Rob Herring <robherring2@gmail.com>
+Subject: Re: [PATCH V5 1/2] mmc: dw_mmc: exynos: Support eMMC's HS400 mode
+Date: Wed, 25 Feb 2015 08:38:42 -0600
+Message-ID: <CAL_Jsq+Mr=WOoCjWRnHnUqo8+UmqxxHbMG3M8+kLNgfhPASteA@mail.gmail.com>
+References: <1422499318-13726-1-git-send-email-alim.akhtar@samsung.com> <1422499318-13726-2-git-send-email-alim.akhtar@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f181.google.com ([209.85.213.181]:64172 "EHLO
-	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750712AbbBYNVz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Feb 2015 08:21:55 -0500
-In-Reply-To: <54E0C2FF.3040401@cogentembedded.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1422499318-13726-2-git-send-email-alim.akhtar@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Alim Akhtar <alim.akhtar@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, "chris@printf.net" <chris@printf.net>, Doug Anderson <dianders@chromium.org>, Jaehoon Chung <jh80.chung@samsung.com>, "kgene@kernel.org" <kgene@kernel.org>, a.kesavan@samsung.com, alim.akhtar@gmail.com, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Cc: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-sh list <linux-sh@vger.kernel.org>
 
-Hello Sergei,
+On Wed, Jan 28, 2015 at 8:41 PM, Alim Akhtar <alim.akhtar@samsung.com> wrote:
+> From: Seungwon Jeon <tgih.jun@samsung.com>
+>
+> Implements HS400 mode support for exynos host driver.
+> This also include some updates as new mode is added.
+>
+> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+> [Alim: addressed review comments]
+> ---
+>  .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    7 +
+>  drivers/mmc/host/dw_mmc-exynos.c                   |  185 ++++++++++++++++----
+>  drivers/mmc/host/dw_mmc-exynos.h                   |   19 +-
+>  drivers/mmc/host/dw_mmc.c                          |   16 +-
+>  drivers/mmc/host/dw_mmc.h                          |    2 +
+>  5 files changed, 195 insertions(+), 34 deletions(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> index ee4fc05..aad9844 100644
+> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> @@ -36,6 +36,8 @@ Required Properties:
+>    in transmit mode and CIU clock phase shift value in receive mode for double
+>    data rate mode operation. Refer notes below for the order of the cells and the
+>    valid values.
+> +* samsung,dw-mshc-hs400-timing: Specifies the value of CIU TX and RX clock phase
+> +  shift value for hs400 mode operation.
 
-2015-02-16 1:02 GMT+09:00 Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>:
-> Hello.
->
-> On 02/15/2015 05:46 PM, Yoshihiro Kaneko wrote:
->
->> From: Kouichi Tomita <kouichi.tomita.yn@renesas.com>
->
->
->> A command end interrupt should not be processed between command issue
->> and setting of wait_for flag. It expects already the flag to be set.
->> Therefore the exclusive control was added.
->
->
->> Signed-off-by: Kouichi Tomita <kouichi.tomita.yn@renesas.com>
->> Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
->> ---
->
->
->> This patch is based on next branch of Chris Ball's mmc tree.
->
->
->>   drivers/mmc/host/sh_mmcif.c | 11 ++++++++++-
->>   1 file changed, 10 insertions(+), 1 deletion(-)
->
->
->> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
->> index 7d9d6a3..e5d0b42 100644
->> --- a/drivers/mmc/host/sh_mmcif.c
->> +++ b/drivers/mmc/host/sh_mmcif.c
->
-> [...]
->>
->> @@ -1171,6 +1174,12 @@ static irqreturn_t sh_mmcif_irqt(int irq, void
->> *dev_id)
->>         struct sh_mmcif_host *host = dev_id;
->>         struct mmc_request *mrq;
->>         bool wait = false;
->> +       unsigned long flags;
->> +       int wait_work;
->> +
->> +       spin_lock_irqsave(&host->lock, flags);
->> +       wait_work = host->wait_for;
->> +       spin_unlock_irqrestore(&host->lock, flags);
->
->
->    Locking don't seem to have much sense here, as the read is already
-> atomic.
+What are the units?
 
-Thank you for your review.
-I agree with you and I will remove this locking.
-
-
-Thanks,
-Kaneko
-
->
-> WBR, Sergei
->
+Rob
