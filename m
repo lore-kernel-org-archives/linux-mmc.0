@@ -1,14 +1,13 @@
 From: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: Make sure we only adjust the clock when
- power is on
-Date: Wed, 25 Feb 2015 19:25:22 +0100
-Message-ID: <54EE1392.1020705@collabora.co.uk>
-References: <1424458639-23330-1-git-send-email-dianders@chromium.org>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: Give a good reset after we give power
+Date: Wed, 25 Feb 2015 19:26:19 +0100
+Message-ID: <54EE13CB.5040401@collabora.co.uk>
+References: <1424458639-23330-1-git-send-email-dianders@chromium.org> <1424458639-23330-2-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1424458639-23330-1-git-send-email-dianders@chromium.org>
+In-Reply-To: <1424458639-23330-2-git-send-email-dianders@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Doug Anderson <dianders@chromium.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
@@ -17,10 +16,11 @@ List-Id: linux-mmc@vger.kernel.org
 Hello Doug,
 
 On 02/20/2015 07:57 PM, Doug Anderson wrote:
-> It appears that we can confuse things if we try to turn on the MMC
-> clock when the power is off.  Adjust is so that we turn the clock on
-> (using dw_mci_setup_bus) after power is all the way on and we turn the
-> clock off before the power goes off.
+> We should give dw_mmc a good reset after we apply power.  On some
+> boards vqmmc may actually be connected to the IP block in the SoC so
+> it's good to reset after power comes in.
+> 
+> Without this we sometimes see failures enumerating cards on rk3288.
 > 
 > Signed-off-by: Doug Anderson <dianders@chromium.org>
 
