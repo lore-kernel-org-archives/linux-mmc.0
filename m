@@ -1,7 +1,7 @@
 From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v2 7/8] mmc: sdhci-st: Update ST SDHCI binding documentation.
-Date: Thu, 26 Feb 2015 13:10:26 +0000
-Message-ID: <1424956227-18258-8-git-send-email-peter.griffin@linaro.org>
+Subject: [PATCH v2 4/8] mmc: sdhci-st: Add st_mmcss_cconfig function to configure mmcss glue registers.
+Date: Thu, 26 Feb 2015 13:10:23 +0000
+Message-ID: <1424956227-18258-5-git-send-email-peter.griffin@linaro.org>
 References: <1424956227-18258-1-git-send-email-peter.griffin@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1424956227-18258-1-git-send-email-peter.griffin@linaro.org>
@@ -10,140 +10,141 @@ To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, maxime.c
 Cc: peter.griffin@linaro.org, lee.jones@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, peppe.cavallaro@st.com
 List-Id: linux-mmc@vger.kernel.org
 
-This patch updates the binding information to reflect the
-extra dt options which are now supported by the sdhci-st.c
-driver which enable support for stih407 family silicon.
-
-Stih410 SoC and later support UHS modes for eMMC, so the
-driver now makes use of these common bindings. Examples
-are provided for both eMMC (which has additional bindings)
-and also sd slot for stih407.
+STiH407 family SoC's have glue registers in the flashSS subsystem which
+are used to configure the Arasan HC. This patch configures these glue
+registers according to what has been specified in the DT.
 
 Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
 ---
- Documentation/devicetree/bindings/mmc/sdhci-st.txt | 100 ++++++++++++++++++---
- 1 file changed, 90 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sdhci-st.c | 88 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 88 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-st.txt b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
-index 7527db4..18d950d 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-st.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
-@@ -5,20 +5,62 @@ Documentation/devicetree/bindings/mmc/mmc.txt and the properties
- used by the sdhci-st driver.
+diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+index 3443cc0..11cf4e2 100644
+--- a/drivers/mmc/host/sdhci-st.c
++++ b/drivers/mmc/host/sdhci-st.c
+@@ -137,6 +137,87 @@ static inline void st_mmcss_set_static_delay(void __iomem *ioaddr)
+ 	}
+ }
  
- Required properties:
--- compatible :  Must be "st,sdhci"
--- clock-names : Should be "mmc"
--                See: Documentation/devicetree/bindings/resource-names.txt
--- clocks :      Phandle of the clock used by the sdhci controler
--                See: Documentation/devicetree/bindings/clock/clock-bindings.txt
-+- compatible:		Must be "st,sdhci" and it can be compatible to "st,sdhci-stih407"
-+			to set the internal glue logic used for configuring the MMC
-+			subsystem (mmcss) inside the FlashSS (available in STiH407 SoC
-+			family).
++/**
++ * st_mmcss_cconfig: configure the Arasan HC inside the flashSS.
++ * @np: dt device node.
++ * @host: sdhci host
++ * Description: this function is to configure the Arasan host controller.
++ * On some ST SoCs, i.e. STiH407 family, the MMC devices inside a dedicated
++ * flashSS sub-system which needs to be configured to be compliant to eMMC 4.5
++ * or eMMC4.3.  This has to be done before registering the sdhci host.
++ */
++static void st_mmcss_cconfig(struct device_node *np, struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct mmc_host *mhost = host->mmc;
++	u32 cconf2, cconf3, cconf4, cconf5;
 +
-+- clock-names:		Should be "mmc".
-+			See: Documentation/devicetree/bindings/resource-names.txt
-+- clocks:		Phandle to the clock.
-+			See: Documentation/devicetree/bindings/clock/clock-bindings.txt
++	if (!of_device_is_compatible(np, "st,sdhci-stih407"))
++		return;
 +
-+- interrupts:		One mmc interrupt should be described here.
-+- interrupt-names:	Should be "mmcirq".
++	cconf2 = ST_MMC_CCONFIG_2_DEFAULT;
++	cconf3 = ST_MMC_CCONFIG_3_DEFAULT;
++	cconf4 = ST_MMC_CCONFIG_4_DEFAULT;
++	cconf5 = ST_MMC_CCONFIG_5_DEFAULT;
 +
-+- pinctrl-names:	A pinctrl state names "default" must be defined.
-+- pinctrl-0:		Phandle referencing pin configuration of the sd/emmc controller.
-+			See: Documentation/devicetree/bindings/pinctrl/pinctrl-binding.txt
++	writel_relaxed(ST_MMC_CCONFIG_1_DEFAULT,
++			host->ioaddr + ST_MMC_CCONFIG_REG_1);
 +
-+- reg:			This must provide the host controller base address and it can also
-+			contain the FlashSS Top register for TX/RX delay used by the driver
-+			to configure DLL inside the flashSS, if so reg-names must also be
-+			specified.
++	/* Set clock frequency, default to 50MHz if max-frequency is not
++	 * provided */
++
++	switch (mhost->f_max) {
++	case 200000000:
++		clk_set_rate(pltfm_host->clk, mhost->f_max);
++		cconf2 |= BASE_CLK_FREQ_200;
++		break;
++	case 100000000:
++		clk_set_rate(pltfm_host->clk, mhost->f_max);
++		cconf2 |= BASE_CLK_FREQ_100;
++		break;
++	default:
++		clk_set_rate(pltfm_host->clk, 50000000);
++		cconf2 |= BASE_CLK_FREQ_50;
++	}
++
++	writel_relaxed(cconf2, host->ioaddr + ST_MMC_CCONFIG_REG_2);
++
++	if (mhost->caps & MMC_CAP_NONREMOVABLE)
++		cconf3 |= ST_MMC_CCONFIG_EMMC_SLOT_TYPE;
++	else
++		/* CARD _D ET_CTRL */
++		writel_relaxed(ST_MMC_GP_OUTPUT_CD,
++				host->ioaddr + ST_MMC_GP_OUTPUT);
++
++	if (mhost->caps & MMC_CAP_UHS_SDR50) {
++		/* use 1.8V */
++		cconf3 |= ST_MMC_CCONFIG_1P8_VOLT;
++		cconf4 |= ST_MMC_CCONFIG_SDR50;
++		/* Use tuning */
++		cconf5 |= ST_MMC_CCONFIG_TUNING_FOR_SDR50;
++		/* Max timeout for retuning */
++		cconf5 |= RETUNING_TIMER_CNT_MAX;
++	}
++
++	if (mhost->caps & MMC_CAP_UHS_SDR104) {
++		/*
++		 * SDR104 implies the HC can support HS200 mode, so
++		 * it's mandatory to use 1.8V
++		 */
++		cconf3 |= ST_MMC_CCONFIG_1P8_VOLT;
++		cconf4 |= ST_MMC_CCONFIG_SDR104;
++		/* Max timeout for retuning */
++		cconf5 |= RETUNING_TIMER_CNT_MAX;
++	}
++
++	if (mhost->caps & MMC_CAP_UHS_DDR50)
++		cconf4 |= ST_MMC_CCONFIG_DDR50;
++
++	writel_relaxed(cconf3, host->ioaddr + ST_MMC_CCONFIG_REG_3);
++	writel_relaxed(cconf4, host->ioaddr + ST_MMC_CCONFIG_REG_4);
++	writel_relaxed(cconf5, host->ioaddr + ST_MMC_CCONFIG_REG_5);
++}
++
+ static inline void st_mmcss_set_dll(void __iomem *ioaddr)
+ {
+ 	if (ioaddr) {
+@@ -213,6 +294,7 @@ static const struct sdhci_pltfm_data sdhci_st_pdata = {
  
- Optional properties:
--- non-removable: non-removable slot
--                 See: Documentation/devicetree/bindings/mmc/mmc.txt
--- bus-width: Number of data lines
--                 See: Documentation/devicetree/bindings/mmc/mmc.txt
-+- reg-names:		Should be "mmc" and "top-mmc-delay". "top-mmc-delay" is optional
-+			for eMMC on stih407 family silicon to configure DLL inside FlashSS.
-+
-+- non-removable:	Non-removable slot. Also used for configuring mmcss in STiH407 SoC
-+			family.
-+			See:  Documentation/devicetree/bindings/mmc/mmc.txt.
-+
-+- bus-width:		Number of data lines.
-+			See:  Documentation/devicetree/bindings/mmc/mmc.txt.
-+
-+- max-frequency: 	Can be 200MHz, 100Mz or 50MHz (default) and used for
-+			configuring the CCONFIG3 in the mmcss.
-+			See:  Documentation/devicetree/bindings/mmc/mmc.txt.
-+
-+- resets:		Phandle and reset specifier pair to softreset line of HC IP.
-+			See: Documentation/devicetree/bindings/reset/reset.txt
-+
-+- vqmmc-supply:		Phandle to the regulator dt node, mentioned as the vcc/vdd
-+			supply in eMMC/SD specs.
-+
-+- sd-uhs--sdr50:	To enable the SDR50 in the mmcss.
-+			See:  Documentation/devicetree/bindings/mmc/mmc.txt.
-+
-+- sd-uhs-sdr104:	To enable the SDR104 in the mmcss.
-+			See:  Documentation/devicetree/bindings/mmc/mmc.txt.
-+
-+- sd-uhs-ddr50:		To enable the DDR50 in the mmcss.
-+			See:  Documentation/devicetree/bindings/mmc/mmc.txt.
+ static int sdhci_st_probe(struct platform_device *pdev)
+ {
++	struct device_node *np = pdev->dev.of_node;
+ 	struct sdhci_host *host;
+ 	struct st_mmc_platform_data *pdata;
+ 	struct sdhci_pltfm_host *pltfm_host;
+@@ -265,6 +347,9 @@ static int sdhci_st_probe(struct platform_device *pdev)
+ 	pltfm_host->priv = pdata;
+ 	pltfm_host->clk = clk;
  
- Example:
++	/* Configure the Arasan HC inside the flashSS */
++	st_mmcss_cconfig(np, host);
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "Failed sdhci_add_host\n");
+@@ -334,12 +419,15 @@ static int sdhci_st_resume(struct device *dev)
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct st_mmc_platform_data *pdata = pltfm_host->priv;
++	struct device_node *np = dev->of_node;
  
-+/* Example stih416e eMMC configuration */
+ 	clk_prepare_enable(pltfm_host->clk);
+ 
+ 	if (pdata->rstc)
+ 		reset_control_deassert(pdata->rstc);
+ 
++	st_mmcss_cconfig(np, host);
 +
- mmc0: sdhci@fe81e000 {
- 	compatible	= "st,sdhci";
- 	status		= "disabled";
-@@ -29,5 +71,43 @@ mmc0: sdhci@fe81e000 {
- 	pinctrl-0	= <&pinctrl_mmc0>;
- 	clock-names	= "mmc";
- 	clocks		= <&clk_s_a1_ls 1>;
--	bus-width       = <8>
-+	bus-width	= <8>
-+
-+/* Example SD stih407 family configuration */
-+
-+mmc1: sdhci@09080000 {
-+	compatible	= "st,sdhci-stih407", "st,sdhci";
-+	status		= "disabled";
-+	reg		= <0x09080000 0x7ff>;
-+	reg-names	= "mmc";
-+	interrupts	= <GIC_SPI 90 IRQ_TYPE_NONE>;
-+	interrupt-names	= "mmcirq";
-+	pinctrl-names	= "default";
-+	pinctrl-0	= <&pinctrl_sd1>;
-+	clock-names	= "mmc";
-+	clocks		= <&clk_s_c0_flexgen CLK_MMC_1>;
-+	resets		= <&softreset STIH407_MMC1_SOFTRESET>;
-+	bus-width	= <4>;
-+};
-+
-+/* Example eMMC stih407 family configuration */
-+
-+mmc0: sdhci@09060000 {
-+	compatible	= "st,sdhci-stih407", "st,sdhci";
-+	status		= "disabled";
-+	reg		= <0x09060000 0x7ff>, <0x9061008 0x20>;
-+	reg-names	= "mmc", "top-mmc-delay";
-+	interrupts	= <GIC_SPI 92 IRQ_TYPE_NONE>;
-+	interrupt-names	= "mmcirq";
-+	pinctrl-names	= "default";
-+	pinctrl-0	= <&pinctrl_mmc0>;
-+	clock-names	= "mmc";
-+	clocks		= <&clk_s_c0_flexgen CLK_MMC_0>;
-+	vqmmc-supply	= <&vmmc_reg>;
-+	max-frequency	= <200000000>;
-+	bus-width	= <8>;
-+	non-removable;
-+	sd-uhs-sdr50;
-+	sd-uhs-sdr104;
-+	sd-uhs-ddr50;
- };
+ 	return sdhci_resume_host(host);
+ }
+ #endif
 -- 
 1.9.1
