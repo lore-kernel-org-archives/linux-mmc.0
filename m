@@ -1,80 +1,77 @@
-From: Michael Shigorin <mike@altlinux.org>
-Subject: Re: [PATCH] mmc: card: not access RPMB partition for normal read and write
-Date: Thu, 26 Feb 2015 15:23:05 +0300
-Message-ID: <20150226122305.GO1186@imap.altlinux.org>
-References: <1407816090-7671-1-git-send-email-yunpeng.gao@intel.com> <20141001135330.GB15863@imap.altlinux.org>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="NMuMz9nt05w80d4+"
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pegasus3.altlinux.org ([194.107.17.103]:51758 "EHLO
-	pegasus3.altlinux.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932092AbbBZMcY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Feb 2015 07:32:24 -0500
-Content-Disposition: inline
-In-Reply-To: <20141001135330.GB15863@imap.altlinux.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Peter Griffin <peter.griffin@linaro.org>
+Subject: [PATCH v2 0/8] Add sd/emmc support for stih407 family silicon
+Date: Thu, 26 Feb 2015 13:10:19 +0000
+Message-ID: <1424956227-18258-1-git-send-email-peter.griffin@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, chris@printf.net, ulf.hansson@linaro.org
+Cc: peter.griffin@linaro.org, lee.jones@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, peppe.cavallaro@st.com
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 759656@bugs.debian.org, Nell Hardcastle <nell@dev-nell.com>
 
+Hi,
 
---NMuMz9nt05w80d4+
-Content-Type: text/plain; charset=koi8-r
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
+This series adds sd/emmc support to the sdhci-st.c driver for stih407
+family silicon. The changes mainly involve congiguring some extra glue
+registers in the flashSS which configure the Arasan controller.
 
-On Wed, Oct 01, 2014 at 05:53:30PM +0400, I wrote:
-> what is the status of this patch to cope with MMC RPMB?
-> http://permalink.gmane.org/gmane.linux.kernel.mmc/28281
+This series also adds support for UHS modes for eMMC. To allow
+UHS HS200/SD104 modes to function correctly, due to the
+tight timing constriants, support for delay management is also added.
+Two types of delay management are supported, static delay management and
+dynamic delay management, this delay management is only available
+on eMMC pads on stih410 and later silicon.
 
-Just in case, it's now also
+This series has been tested with stih410-b2120 on eMMC and sd, at various
+clock speeds. As part of this testing a bug was also found in the
+upstream flexgen clock set_rate implementation (now fixed upstream).
 
-Tested-by: Michael Shigorin <mike@altlinux.org>
+    max-frequency = 200Mhz
+    /dev/mmcblk0p1:
+     Timing buffered disk reads: 270 MB in  3.02 seconds =  89.54 MB/sec
+    
+    max-frequency = 100Mhz
+    root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
+    /dev/mmcblk0p1:
+     Timing buffered disk reads: 210 MB in  3.00 seconds =  70.00 MB/sec
+    
+    max-frequency = 50Mhz
+    root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
+    /dev/mmcblk0p1:
+     Timing buffered disk reads: 118 MB in  3.00 seconds =  39.28 MB/sec
 
-Hope to see this merged!
+It has also been tested on stih416-b2020 to ensure we have caused no
+regressions. Finally the dt documentation has been updated to reflect
+the changes in the driver code. Intrestingly it seems we are the first
+upstream platform to be using some of the uhs bindings such as
+sd-uhs-sdr104.
 
-2 debian: please note that udev rules fixup is required, see also
-https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/1333140
--- it's been fixed in 219 or see the patch in 218-10ubuntu1 package.
+Changes since v1:
+ - Partition the changes into smaller patches to aid review process (Ulf)
+
+regards,
+
+Peter.
+
+Peter Griffin (8):
+  mmc: sdhci-st: Add macros for register offsets and bitfields for mmcss
+    glue regs
+  mmc: sdhci-st: Add support for de-asserting reset signal and top regs
+    resource
+  mmc: sdhci-st: Add delay management functions for top registers
+    (eMMC).
+  mmc: sdhci-st: Add st_mmcss_cconfig function to configure mmcss glue
+    registers.
+  mmc: sdhci-st: Add sdhci_st_set_uhs_signaling function.
+  mmc: sdhci-st: Update the quirks for this controller.
+  mmc: sdhci-st: Update ST SDHCI binding documentation.
+  ARM: STi: DT: STiH407: Add dt nodes for sdhci and emmc.
+
+ Documentation/devicetree/bindings/mmc/sdhci-st.txt | 100 +++++-
+ arch/arm/boot/dts/stih407-family.dtsi              |  30 ++
+ arch/arm/boot/dts/stih410-b2120.dts                |  10 +
+ arch/arm/boot/dts/stihxxx-b2120.dtsi               |   8 +
+ drivers/mmc/host/sdhci-st.c                        | 344 ++++++++++++++++++++-
+ 5 files changed, 478 insertions(+), 14 deletions(-)
 
 -- 
-š---- WBR, Michael Shigorin / http://altlinux.org
-šš------ http://opennet.ru / http://anna-news.info
-
---NMuMz9nt05w80d4+
-Content-Type: text/x-patch; charset=us-ascii
-Content-Disposition: attachment; filename="rules-Fix-by-path-of-mmc-RPMB-partitions-and-don-t-b.patch"
-
-From: Martin Pitt <martin.pitt@ubuntu.com>
-Date: Wed, 11 Feb 2015 15:26:52 +0100
-Subject: rules: Fix by-path of mmc RPMB partitions and don't blkid them
-
-Linux 3.10+ exposes RPMB (Replay Protected Memory Block) partitions of MMC
-devices [1] ; trying to read them with blkid or other unspecific means will
-cause kernel buffer I/O errors and timeouts.
-
-Blacklist those to prevent creating wrong by-path links and
-blkid'ing those.
-
-[1] http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=090d25fe224c0
-
-https://launchpad.net/bugs/1333140
----
- rules/60-persistent-storage.rules | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/rules/60-persistent-storage.rules b/rules/60-persistent-storage.rules
-index 475b151..25b44a5 100644
---- a/rules/60-persistent-storage.rules
-+++ b/rules/60-persistent-storage.rules
-@@ -14,7 +14,7 @@ ACTION=="add", SUBSYSTEM=="module", KERNEL=="block", ATTR{parameters/events_dfl_
- SUBSYSTEM!="block", GOTO="persistent_storage_end"
- 
- # skip rules for inappropriate block devices
--KERNEL=="fd*|mtd*|nbd*|gnbd*|btibm*|dm-*|md*|zram*", GOTO="persistent_storage_end"
-+KERNEL=="fd*|mtd*|nbd*|gnbd*|btibm*|dm-*|md*|zram*|mmcblk[0-9]*rpmb", GOTO="persistent_storage_end"
- 
- # ignore partitions that span the entire disk
- TEST=="whole_disk", GOTO="persistent_storage_end"
-
---NMuMz9nt05w80d4+--
+1.9.1
