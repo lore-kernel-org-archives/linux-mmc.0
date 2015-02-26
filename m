@@ -1,65 +1,56 @@
 From: Kevin Hao <haokexin@gmail.com>
-Subject: [PATCH v2 00/11] powerpc: kill PPC_OF
-Date: Thu, 26 Feb 2015 20:08:12 +0800
-Message-ID: <1424952503-8247-1-git-send-email-haokexin@gmail.com>
+Subject: [PATCH v2 09/11] mmc: kconfig: replace PPC_OF with PPC
+Date: Thu, 26 Feb 2015 20:08:21 +0800
+Message-ID: <1424952503-8247-10-git-send-email-haokexin@gmail.com>
+References: <1424952503-8247-1-git-send-email-haokexin@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yh0-f42.google.com ([209.85.213.42]:35420 "EHLO
-	mail-yh0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752696AbbBZMJN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Feb 2015 07:09:13 -0500
+Received: from mail-yk0-f170.google.com ([209.85.160.170]:35027 "EHLO
+	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753184AbbBZMJv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Feb 2015 07:09:51 -0500
+Received: by ykbq200 with SMTP id q200so3840015ykb.2
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Feb 2015 04:09:51 -0800 (PST)
+In-Reply-To: <1424952503-8247-1-git-send-email-haokexin@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Michael Ellerman <mpe@ellerman.id.au>
-Cc: linuxppc-dev@lists.ozlabs.org, linux-fbdev@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org
+Cc: linuxppc-dev@lists.ozlabs.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-Hi,
+The PPC_OF is a ppc specific option which is used to mean that the
+firmware device tree access functions are available. Since all the
+ppc platforms have a device tree, it is aways set to 'y' for ppc.
+So it makes no sense to keep a such option in the current kernel.
+Replace it with PPC.
 
-v2:
-   - Drop the following patches which were already merged.
-	be802bf955a1 ("mtd: kconfig: replace PPC_OF with PPC")
-	0a4a3529df40 ("gpio: kconfig: replace PPC_OF with PPC")
-	c31316cb6c5a ("usb: kconfig: replace PPC_OF with PPC")
-	f0b66a2cf68e ("PCI: Add pci_device_to_OF_node() stub for !CONFIG_OF")
-   - Add the ack in v1 cycle.
-   - Resolve the comments in v1 cycle.
+Signed-off-by: Kevin Hao <haokexin@gmail.com>
+---
+v2: No change.
 
-We plan to merge this patch series via the powerpc tree in 4.1 cycle. So please
-ack the corresponding patches if you are OK with these changes.
+ drivers/mmc/host/Kconfig | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Kevin Hao (11):
-  sata_svw: remove the dependency on PPC_OF
-  fbdev: aty128fb: replace PPC_OF with PPC
-  fbdev: radeon: replace PPC_OF with PPC
-  fbdev: imsttfb: remove the dependency on PPC_OF
-  fbdev: nvidia: remove the dependency on PPC_OF
-  fbdev: riva: remove the dependency on PPC_OF
-  fbdev: remove the unnecessary includes of ppc specific header files
-  fbdev: kconfig: replace PPC_OF with PPC
-  mmc: kconfig: replace PPC_OF with PPC
-  tty: kconfig: remove the superfluous dependency on PPC_OF
-  powerpc: kill PPC_OF
-
- arch/powerpc/Kconfig                     |  3 ---
- arch/powerpc/Kconfig.debug               |  2 +-
- arch/powerpc/kernel/Makefile             |  4 ++--
- drivers/ata/sata_svw.c                   | 11 +----------
- drivers/mmc/host/Kconfig                 |  4 ++--
- drivers/tty/serial/Kconfig               |  4 ++--
- drivers/video/fbdev/Kconfig              |  4 ++--
- drivers/video/fbdev/aty/aty128fb.c       |  4 ++--
- drivers/video/fbdev/aty/radeon_base.c    | 24 ++++++++++++------------
- drivers/video/fbdev/aty/radeon_monitor.c | 20 ++++++++++----------
- drivers/video/fbdev/aty/radeon_pm.c      | 16 ++++++++--------
- drivers/video/fbdev/aty/radeonfb.h       |  4 ++--
- drivers/video/fbdev/core/fbmon.c         |  4 ----
- drivers/video/fbdev/imsttfb.c            |  6 +-----
- drivers/video/fbdev/nvidia/Makefile      |  3 +--
- drivers/video/fbdev/nvidia/nv_of.c       |  3 ---
- drivers/video/fbdev/nvidia/nv_proto.h    |  8 --------
- drivers/video/fbdev/nvidia/nvidia.c      |  4 ----
- drivers/video/fbdev/riva/fbdev.c         | 17 +++++++----------
- 19 files changed, 53 insertions(+), 92 deletions(-)
-
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 61ac63a3776a..7858d7a52818 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -132,7 +132,7 @@ config MMC_SDHCI_OF_ARASAN
+ config MMC_SDHCI_OF_ESDHC
+ 	tristate "SDHCI OF support for the Freescale eSDHC controller"
+ 	depends on MMC_SDHCI_PLTFM
+-	depends on PPC_OF
++	depends on PPC
+ 	select MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
+ 	help
+ 	  This selects the Freescale eSDHC controller support.
+@@ -144,7 +144,7 @@ config MMC_SDHCI_OF_ESDHC
+ config MMC_SDHCI_OF_HLWD
+ 	tristate "SDHCI OF support for the Nintendo Wii SDHCI controllers"
+ 	depends on MMC_SDHCI_PLTFM
+-	depends on PPC_OF
++	depends on PPC
+ 	select MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
+ 	help
+ 	  This selects the Secure Digital Host Controller Interface (SDHCI)
 -- 
 1.9.3
 
