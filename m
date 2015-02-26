@@ -1,171 +1,51 @@
-From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v2 2/8] mmc: sdhci-st: Add support for de-asserting reset
- signal and top regs resource
-Date: Thu, 26 Feb 2015 13:10:21 +0000
-Message-ID: <1424956227-18258-3-git-send-email-peter.griffin@linaro.org>
-References: <1424956227-18258-1-git-send-email-peter.griffin@linaro.org>
+From: Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Subject: Re: [PATCH 0/4] Add support for IPROC SDHCI controller
+Date: Thu, 26 Feb 2015 09:28:06 -0800
+Message-ID: <54EF57A6.8070607@broadcom.com>
+References: <Scott Branden <sbranden@broadcom.com> <1423526791-29453-1-git-send-email-sbranden@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="windows-1252"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1424956227-18258-1-git-send-email-peter.griffin@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, chris@printf.net, ulf.hansson@linaro.org
-Cc: peter.griffin@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, lee.jones@linaro.org, peppe.cavallaro@st.com
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1423526791-29453-1-git-send-email-sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Ray Jui <rjui-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Jonathan Richardson <jonathar-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Corneliu Doban <cdoban-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Dmitry Torokhov <dtor-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Anatol Pomazao <anatol-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-STiH407 family SoC's can have a reset signal for the controller which needs to
-be managed. Also the eMMC controller has some additional 'top' memory mapped
-registers which are used to manage the dynamic and static delay required for
-UHS modes. This patch adds support for creating the mapping, which will be used
-by subsequent patches.
+Hi Chris,
 
-Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
-Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
----
- drivers/mmc/host/sdhci-st.c | 52 ++++++++++++++++++++++++++++++++++++++++++---
- 1 file changed, 49 insertions(+), 3 deletions(-)
+I have not heard any more feedback on this patchset.  Is it in your 
+queue to review or merge into your tree?
 
-diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-index a3bc3c3..0101ae9 100644
---- a/drivers/mmc/host/sdhci-st.c
-+++ b/drivers/mmc/host/sdhci-st.c
-@@ -23,9 +23,14 @@
- #include <linux/module.h>
- #include <linux/err.h>
- #include <linux/mmc/host.h>
--
-+#include <linux/reset.h>
- #include "sdhci-pltfm.h"
- 
-+struct st_mmc_platform_data {
-+	struct  reset_control *rstc;
-+	void __iomem *top_ioaddr;
-+};
-+
- /* MMCSS glue logic to setup the HC on some ST SoCs (e.g. STiH407 family) */
- 
- #define	ST_MMC_CCONFIG_REG_1		0x400
-@@ -151,10 +156,16 @@ static const struct sdhci_pltfm_data sdhci_st_pdata = {
- static int sdhci_st_probe(struct platform_device *pdev)
- {
- 	struct sdhci_host *host;
-+	struct st_mmc_platform_data *pdata;
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct clk *clk;
- 	int ret = 0;
- 	u16 host_version;
-+	struct resource *res;
-+
-+	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
-+	if (!pdata)
-+		return -ENOMEM;
- 
- 	clk =  devm_clk_get(&pdev->dev, "mmc");
- 	if (IS_ERR(clk)) {
-@@ -162,10 +173,17 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 		return PTR_ERR(clk);
- 	}
- 
-+	pdata->rstc = devm_reset_control_get(&pdev->dev, NULL);
-+	if (IS_ERR(pdata->rstc))
-+		pdata->rstc = NULL;
-+	else
-+		reset_control_deassert(pdata->rstc);
-+
- 	host = sdhci_pltfm_init(pdev, &sdhci_st_pdata, 0);
- 	if (IS_ERR(host)) {
- 		dev_err(&pdev->dev, "Failed sdhci_pltfm_init\n");
--		return PTR_ERR(host);
-+		ret = PTR_ERR(host);
-+		goto err_pltfm_init;
- 	}
- 
- 	ret = mmc_of_parse(host->mmc);
-@@ -176,7 +194,17 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 
- 	clk_prepare_enable(clk);
- 
-+	/* Configure the FlashSS Top registers for setting eMMC TX/RX delay */
-+	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
-+					   "top-mmc-delay");
-+	pdata->top_ioaddr = devm_ioremap_resource(&pdev->dev, res);
-+	if (IS_ERR(pdata->top_ioaddr)) {
-+		dev_warn(&pdev->dev, "FlashSS Top Dly registers not available");
-+		pdata->top_ioaddr = NULL;
-+	}
-+
- 	pltfm_host = sdhci_priv(host);
-+	pltfm_host->priv = pdata;
- 	pltfm_host->clk = clk;
- 
- 	ret = sdhci_add_host(host);
-@@ -200,6 +228,9 @@ err_out:
- 	clk_disable_unprepare(clk);
- err_of:
- 	sdhci_pltfm_free(pdev);
-+err_pltfm_init:
-+	if (pdata->rstc)
-+		reset_control_assert(pdata->rstc);
- 
- 	return ret;
- }
-@@ -208,10 +239,17 @@ static int sdhci_st_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	int ret;
- 
- 	clk_disable_unprepare(pltfm_host->clk);
- 
--	return sdhci_pltfm_unregister(pdev);
-+	ret = sdhci_pltfm_unregister(pdev);
-+
-+	if (pdata->rstc)
-+		reset_control_assert(pdata->rstc);
-+
-+	return ret;
- }
- 
- #ifdef CONFIG_PM_SLEEP
-@@ -219,11 +257,15 @@ static int sdhci_st_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct st_mmc_platform_data *pdata = pltfm_host->priv;
- 	int ret = sdhci_suspend_host(host);
- 
- 	if (ret)
- 		goto out;
- 
-+	if (pdata->rstc)
-+		reset_control_assert(pdata->rstc);
-+
- 	clk_disable_unprepare(pltfm_host->clk);
- out:
- 	return ret;
-@@ -233,9 +275,13 @@ static int sdhci_st_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct st_mmc_platform_data *pdata = pltfm_host->priv;
- 
- 	clk_prepare_enable(pltfm_host->clk);
- 
-+	if (pdata->rstc)
-+		reset_control_deassert(pdata->rstc);
-+
- 	return sdhci_resume_host(host);
- }
- #endif
--- 
-1.9.1
+Thanks,
+  Scott
+
+On 15-02-09 04:06 PM, Scott Branden wrote:
+> This series of patchsets contains the IPROC SDHCI driver used
+> in a series of Broadcom SoCs
+> Quirks are also added to support this controller.
+>
+> Corneliu Doban (1):
+>    mmc: sdhci: do not set AUTO_CMD12 for multi-block CMD53
+>
+> Scott Branden (3):
+>    mmc: sdhci: add quirk for ACMD23 broken
+>    mmc: sdhci-iproc: add IPROC SDHCI driver
+>    mmc: sdhci-iproc: add device tree bindings
+>
+>   .../devicetree/bindings/mmc/brcm,sdhci-iproc.txt   |  23 ++
+>   drivers/mmc/host/Kconfig                           |  14 ++
+>   drivers/mmc/host/Makefile                          |   1 +
+>   drivers/mmc/host/sdhci-iproc.c                     | 241 +++++++++++++++++++++
+>   drivers/mmc/host/sdhci.c                           |   7 +-
+>   include/linux/mmc/sdhci.h                          |   2 +
+>   6 files changed, 286 insertions(+), 2 deletions(-)
+>   create mode 100644 Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
+>   create mode 100644 drivers/mmc/host/sdhci-iproc.c
+>
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
