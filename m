@@ -1,56 +1,80 @@
-From: Kevin Hao <haokexin@gmail.com>
-Subject: [PATCH v2 09/11] mmc: kconfig: replace PPC_OF with PPC
-Date: Thu, 26 Feb 2015 20:08:21 +0800
-Message-ID: <1424952503-8247-10-git-send-email-haokexin@gmail.com>
-References: <1424952503-8247-1-git-send-email-haokexin@gmail.com>
+From: Michael Shigorin <mike@altlinux.org>
+Subject: Re: [PATCH] mmc: card: not access RPMB partition for normal read and write
+Date: Thu, 26 Feb 2015 15:23:05 +0300
+Message-ID: <20150226122305.GO1186@imap.altlinux.org>
+References: <1407816090-7671-1-git-send-email-yunpeng.gao@intel.com> <20141001135330.GB15863@imap.altlinux.org>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="NMuMz9nt05w80d4+"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f170.google.com ([209.85.160.170]:35027 "EHLO
-	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753184AbbBZMJv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Feb 2015 07:09:51 -0500
-Received: by ykbq200 with SMTP id q200so3840015ykb.2
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Feb 2015 04:09:51 -0800 (PST)
-In-Reply-To: <1424952503-8247-1-git-send-email-haokexin@gmail.com>
+Received: from pegasus3.altlinux.org ([194.107.17.103]:51758 "EHLO
+	pegasus3.altlinux.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932092AbbBZMcY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Feb 2015 07:32:24 -0500
+Content-Disposition: inline
+In-Reply-To: <20141001135330.GB15863@imap.altlinux.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Michael Ellerman <mpe@ellerman.id.au>
-Cc: linuxppc-dev@lists.ozlabs.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 759656@bugs.debian.org, Nell Hardcastle <nell@dev-nell.com>
 
-The PPC_OF is a ppc specific option which is used to mean that the
-firmware device tree access functions are available. Since all the
-ppc platforms have a device tree, it is aways set to 'y' for ppc.
-So it makes no sense to keep a such option in the current kernel.
-Replace it with PPC.
 
-Signed-off-by: Kevin Hao <haokexin@gmail.com>
----
-v2: No change.
+--NMuMz9nt05w80d4+
+Content-Type: text/plain; charset=koi8-r
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 
- drivers/mmc/host/Kconfig | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+On Wed, Oct 01, 2014 at 05:53:30PM +0400, I wrote:
+> what is the status of this patch to cope with MMC RPMB?
+> http://permalink.gmane.org/gmane.linux.kernel.mmc/28281
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 61ac63a3776a..7858d7a52818 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -132,7 +132,7 @@ config MMC_SDHCI_OF_ARASAN
- config MMC_SDHCI_OF_ESDHC
- 	tristate "SDHCI OF support for the Freescale eSDHC controller"
- 	depends on MMC_SDHCI_PLTFM
--	depends on PPC_OF
-+	depends on PPC
- 	select MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
- 	help
- 	  This selects the Freescale eSDHC controller support.
-@@ -144,7 +144,7 @@ config MMC_SDHCI_OF_ESDHC
- config MMC_SDHCI_OF_HLWD
- 	tristate "SDHCI OF support for the Nintendo Wii SDHCI controllers"
- 	depends on MMC_SDHCI_PLTFM
--	depends on PPC_OF
-+	depends on PPC
- 	select MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
+Just in case, it's now also
+
+Tested-by: Michael Shigorin <mike@altlinux.org>
+
+Hope to see this merged!
+
+2 debian: please note that udev rules fixup is required, see also
+https://bugs.launchpad.net/ubuntu/+source/systemd/+bug/1333140
+-- it's been fixed in 219 or see the patch in 218-10ubuntu1 package.
+
 -- 
-1.9.3
+š---- WBR, Michael Shigorin / http://altlinux.org
+šš------ http://opennet.ru / http://anna-news.info
 
+--NMuMz9nt05w80d4+
+Content-Type: text/x-patch; charset=us-ascii
+Content-Disposition: attachment; filename="rules-Fix-by-path-of-mmc-RPMB-partitions-and-don-t-b.patch"
+
+From: Martin Pitt <martin.pitt@ubuntu.com>
+Date: Wed, 11 Feb 2015 15:26:52 +0100
+Subject: rules: Fix by-path of mmc RPMB partitions and don't blkid them
+
+Linux 3.10+ exposes RPMB (Replay Protected Memory Block) partitions of MMC
+devices [1] ; trying to read them with blkid or other unspecific means will
+cause kernel buffer I/O errors and timeouts.
+
+Blacklist those to prevent creating wrong by-path links and
+blkid'ing those.
+
+[1] http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=090d25fe224c0
+
+https://launchpad.net/bugs/1333140
+---
+ rules/60-persistent-storage.rules | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/rules/60-persistent-storage.rules b/rules/60-persistent-storage.rules
+index 475b151..25b44a5 100644
+--- a/rules/60-persistent-storage.rules
++++ b/rules/60-persistent-storage.rules
+@@ -14,7 +14,7 @@ ACTION=="add", SUBSYSTEM=="module", KERNEL=="block", ATTR{parameters/events_dfl_
+ SUBSYSTEM!="block", GOTO="persistent_storage_end"
+ 
+ # skip rules for inappropriate block devices
+-KERNEL=="fd*|mtd*|nbd*|gnbd*|btibm*|dm-*|md*|zram*", GOTO="persistent_storage_end"
++KERNEL=="fd*|mtd*|nbd*|gnbd*|btibm*|dm-*|md*|zram*|mmcblk[0-9]*rpmb", GOTO="persistent_storage_end"
+ 
+ # ignore partitions that span the entire disk
+ TEST=="whole_disk", GOTO="persistent_storage_end"
+
+--NMuMz9nt05w80d4+--
