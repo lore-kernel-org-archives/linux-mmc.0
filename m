@@ -1,129 +1,136 @@
 From: Kevin Hao <haokexin@gmail.com>
-Subject: [PATCH v2 4/7] mmc: sdhci-sirf: kill the "clk" member in driver private struct
-Date: Fri, 27 Feb 2015 15:47:28 +0800
-Message-ID: <1425023251-4544-5-git-send-email-haokexin@gmail.com>
+Subject: [PATCH v2 5/7] mmc: sdhci-bcm-kona: kill the "external_clk" member in driver private struct
+Date: Fri, 27 Feb 2015 15:47:29 +0800
+Message-ID: <1425023251-4544-6-git-send-email-haokexin@gmail.com>
 References: <1425023251-4544-1-git-send-email-haokexin@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f173.google.com ([209.85.160.173]:44399 "EHLO
-	mail-yk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753502AbbB0HsJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Feb 2015 02:48:09 -0500
-Received: by ykp131 with SMTP id 131so6487305ykp.11
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Feb 2015 23:48:08 -0800 (PST)
+Received: from mail-yk0-f176.google.com ([209.85.160.176]:38291 "EHLO
+	mail-yk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753860AbbB0HsO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Feb 2015 02:48:14 -0500
+Received: by ykp9 with SMTP id 9so6503396ykp.5
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Feb 2015 23:48:13 -0800 (PST)
 In-Reply-To: <1425023251-4544-1-git-send-email-haokexin@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Barry Song <baohua@kernel.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Christian Daudt <bcm@fixthebug.org>, Matt Porter <mporter@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, bcm-kernel-feedback-list@broadcom.com
 
-Actually we can use the "clk" in the struct sdhci_pltfm_host.
-With this change we can also kill the private function for get
-max clock in this driver.
+Actually we can use the "clk" in the struct sdhci_pltfm_host. Also
+change the "external clock" to "core clock" and kill two redundant
+private functions in this driver as suggested by Ray Jui.
 
 Signed-off-by: Kevin Hao <haokexin@gmail.com>
 ---
-v2: Also kill the private sdhci_sirf_get_max_clk().
+v2:
+  - s/external clock/core clock/
+  - kill the private functions sdhci_bcm_kona_get_max_clk() and sdhci_bcm_kona_get_timeout_clock()
 
- drivers/mmc/host/sdhci-sirf.c | 26 +++++++-------------------
- 1 file changed, 7 insertions(+), 19 deletions(-)
+ drivers/mmc/host/sdhci-bcm-kona.c | 46 +++++++++++----------------------------
+ 1 file changed, 13 insertions(+), 33 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
-index f6f82ec3618d..c30d6f3dd9aa 100644
---- a/drivers/mmc/host/sdhci-sirf.c
-+++ b/drivers/mmc/host/sdhci-sirf.c
-@@ -20,17 +20,9 @@
- #define SIRF_TUNING_COUNT 128
+diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+index 34bb8f92586e..5bc263b447b2 100644
+--- a/drivers/mmc/host/sdhci-bcm-kona.c
++++ b/drivers/mmc/host/sdhci-bcm-kona.c
+@@ -54,7 +54,6 @@
  
- struct sdhci_sirf_priv {
--	struct clk *clk;
- 	int gpio_cd;
+ struct sdhci_bcm_kona_dev {
+ 	struct mutex	write_lock; /* protect back to back writes */
+-	struct clk	*external_clk;
  };
  
--static unsigned int sdhci_sirf_get_max_clk(struct sdhci_host *host)
+ 
+@@ -175,24 +174,6 @@ static void sdhci_bcm_kona_card_event(struct sdhci_host *host)
+ 	}
+ }
+ 
+-/*
+- * Get the base clock. Use central clock source for now. Not sure if different
+- * clock speed to each dev is allowed
+- */
+-static unsigned int sdhci_bcm_kona_get_max_clk(struct sdhci_host *host)
 -{
--	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_sirf_priv *priv = sdhci_pltfm_priv(pltfm_host);
--	return clk_get_rate(priv->clk);
+-	struct sdhci_bcm_kona_dev *kona_dev;
+-	struct sdhci_pltfm_host *pltfm_priv = sdhci_priv(host);
+-	kona_dev = sdhci_pltfm_priv(pltfm_priv);
+-
+-	return host->mmc->f_max;
 -}
 -
- static void sdhci_sirf_set_bus_width(struct sdhci_host *host, int width)
+-static unsigned int sdhci_bcm_kona_get_timeout_clock(struct sdhci_host *host)
+-{
+-	return sdhci_bcm_kona_get_max_clk(host);
+-}
+-
+ static void sdhci_bcm_kona_init_74_clocks(struct sdhci_host *host,
+ 				u8 power_mode)
  {
- 	u8 ctrl;
-@@ -122,7 +114,7 @@ retry:
- static struct sdhci_ops sdhci_sirf_ops = {
- 	.platform_execute_tuning = sdhci_sirf_execute_tuning,
+@@ -207,8 +188,8 @@ static void sdhci_bcm_kona_init_74_clocks(struct sdhci_host *host,
+ 
+ static struct sdhci_ops sdhci_bcm_kona_ops = {
  	.set_clock = sdhci_set_clock,
--	.get_max_clock	= sdhci_sirf_get_max_clk,
-+	.get_max_clock	= sdhci_pltfm_clk_get_max_clock,
- 	.set_bus_width = sdhci_sirf_set_bus_width,
+-	.get_max_clock = sdhci_bcm_kona_get_max_clk,
+-	.get_timeout_clock = sdhci_bcm_kona_get_timeout_clock,
++	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
++	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.platform_send_init_74_clocks = sdhci_bcm_kona_init_74_clocks,
+ 	.set_bus_width = sdhci_set_bus_width,
  	.reset = sdhci_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
-@@ -162,13 +154,13 @@ static int sdhci_sirf_probe(struct platform_device *pdev)
- 		return PTR_ERR(host);
+@@ -264,21 +245,21 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+ 		goto err_pltfm_free;
+ 	}
  
- 	pltfm_host = sdhci_priv(host);
-+	pltfm_host->clk = clk;
- 	priv = sdhci_pltfm_priv(pltfm_host);
--	priv->clk = clk;
- 	priv->gpio_cd = gpio_cd;
+-	/* Get and enable the external clock */
+-	kona_dev->external_clk = devm_clk_get(dev, NULL);
+-	if (IS_ERR(kona_dev->external_clk)) {
+-		dev_err(dev, "Failed to get external clock\n");
+-		ret = PTR_ERR(kona_dev->external_clk);
++	/* Get and enable the core clock */
++	pltfm_priv->clk = devm_clk_get(dev, NULL);
++	if (IS_ERR(pltfm_priv->clk)) {
++		dev_err(dev, "Failed to get core clock\n");
++		ret = PTR_ERR(pltfm_priv->clk);
+ 		goto err_pltfm_free;
+ 	}
  
- 	sdhci_get_of_property(pdev);
+-	if (clk_set_rate(kona_dev->external_clk, host->mmc->f_max) != 0) {
+-		dev_err(dev, "Failed to set rate external clock\n");
++	if (clk_set_rate(pltfm_priv->clk, host->mmc->f_max) != 0) {
++		dev_err(dev, "Failed to set rate core clock\n");
+ 		goto err_pltfm_free;
+ 	}
  
--	ret = clk_prepare_enable(priv->clk);
-+	ret = clk_prepare_enable(pltfm_host->clk);
- 	if (ret)
- 		goto err_clk_prepare;
+-	if (clk_prepare_enable(kona_dev->external_clk) != 0) {
+-		dev_err(dev, "Failed to enable external clock\n");
++	if (clk_prepare_enable(pltfm_priv->clk) != 0) {
++		dev_err(dev, "Failed to enable core clock\n");
+ 		goto err_pltfm_free;
+ 	}
  
-@@ -195,7 +187,7 @@ static int sdhci_sirf_probe(struct platform_device *pdev)
- err_request_cd:
- 	sdhci_remove_host(host, 0);
- err_sdhci_add:
--	clk_disable_unprepare(priv->clk);
-+	clk_disable_unprepare(pltfm_host->clk);
- err_clk_prepare:
+@@ -333,7 +314,7 @@ err_reset:
+ 	sdhci_bcm_kona_sd_reset(host);
+ 
+ err_clk_disable:
+-	clk_disable_unprepare(kona_dev->external_clk);
++	clk_disable_unprepare(pltfm_priv->clk);
+ 
+ err_pltfm_free:
  	sdhci_pltfm_free(pdev);
- 	return ret;
-@@ -205,11 +197,9 @@ static int sdhci_sirf_remove(struct platform_device *pdev)
+@@ -346,12 +327,11 @@ static int sdhci_bcm_kona_remove(struct platform_device *pdev)
  {
  	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_sirf_priv *priv = sdhci_pltfm_priv(pltfm_host);
+ 	struct sdhci_pltfm_host *pltfm_priv = sdhci_priv(host);
+-	struct sdhci_bcm_kona_dev *kona_dev = sdhci_pltfm_priv(pltfm_priv);
+ 	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
  
-+	clk_disable_unprepare(pltfm_host->clk);
- 	sdhci_pltfm_unregister(pdev);
--
--	clk_disable_unprepare(priv->clk);
- 	return 0;
- }
+ 	sdhci_remove_host(host, dead);
  
-@@ -218,14 +208,13 @@ static int sdhci_sirf_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_sirf_priv *priv = sdhci_pltfm_priv(pltfm_host);
- 	int ret;
+-	clk_disable_unprepare(kona_dev->external_clk);
++	clk_disable_unprepare(pltfm_priv->clk);
  
- 	ret = sdhci_suspend_host(host);
- 	if (ret)
- 		return ret;
+ 	sdhci_pltfm_free(pdev);
  
--	clk_disable(priv->clk);
-+	clk_disable(pltfm_host->clk);
- 
- 	return 0;
- }
-@@ -234,10 +223,9 @@ static int sdhci_sirf_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_sirf_priv *priv = sdhci_pltfm_priv(pltfm_host);
- 	int ret;
- 
--	ret = clk_enable(priv->clk);
-+	ret = clk_enable(pltfm_host->clk);
- 	if (ret) {
- 		dev_dbg(dev, "Resume: Error enabling clock\n");
- 		return ret;
 -- 
 1.9.3
 
