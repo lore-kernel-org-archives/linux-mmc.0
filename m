@@ -1,52 +1,55 @@
-From: Dong Aisheng <b29396@freescale.com>
-Subject: Re: [patch] mmc: sdhci-esdhc-imx: silence a false curly braces
- warning
-Date: Fri, 27 Feb 2015 15:14:13 +0800
-Message-ID: <20150227071410.GA18208@shlinux1.ap.freescale.net>
-References: <20150226203755.GD6820@mwanda>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Kevin Hao <haokexin@gmail.com>
+Subject: [PATCH v2 0/7] mmc: sdhci: set .remove to sdhci_pltfm_unregister()
+Date: Fri, 27 Feb 2015 15:47:24 +0800
+Message-ID: <1425023251-4544-1-git-send-email-haokexin@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0132.outbound.protection.outlook.com ([157.56.111.132]:30048
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750804AbbB0HS5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Feb 2015 02:18:57 -0500
-Content-Disposition: inline
-In-Reply-To: <20150226203755.GD6820@mwanda>
+Received: from mail-yh0-f54.google.com ([209.85.213.54]:45700 "EHLO
+	mail-yh0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750875AbbB0Hrx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Feb 2015 02:47:53 -0500
+Received: by yhai57 with SMTP id i57so7212757yha.12
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Feb 2015 23:47:52 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Shawn Guo <shawn.guo@linaro.org>, Dirk Behme <dirk.behme@de.bosch.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On Thu, Feb 26, 2015 at 11:37:55PM +0300, Dan Carpenter wrote:
-> Static checkers suggest that probably we intended to put curly braces
-> around the writel() to make it part of the else path.  But, I think
-> actually the indenting is off and the code works fine as is.
-> 
-> The stray tab was introduced in 0322191e6298 ('mmc: sdhci-esdhc-imx: add
-> sd3.0 SDR clock tuning support')
-> 
-> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
-> 
+Hi,
 
-Yes, that's a mistake.
-Thanks for the finding.
-Acked-by: Dong Aisheng <b29396@freescale.com>
+v2:
+  - Update the sdhci-bcm-kona as suggested by Ray Jui.
+  - Also kill the private get_max_clock function in sdhci-sirf.
 
-Regards
-Dong Aisheng
+v1:
+In the current kernel, the specific .remove function in several sdhci platform
+drivers seem pretty similar. Actually we can just set all of them to
+sdhci_pltfm_unregister() with just a bit twist.
 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 10ef824..9cce5cf 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -416,7 +416,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
->  			new_val |= ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
->  		else
->  			new_val &= ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
-> -			writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
-> +		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
->  		return;
->  	case SDHCI_HOST_CONTROL2:
->  		new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+Only run test for sdhci-of-esdhc driver. All others just passed the build test.
+
+Kevin Hao (7):
+  mmc: sdhci-dove: remove the unneeded error check
+  mmc: sdhci-dove: kill the driver specific private struct
+  mmc: tegra: use devm help functions to get the clk and gpio
+  mmc: sdhci-sirf: kill the "clk" member in driver private struct
+  mmc: sdhci-bcm-kona: kill the "external_clk" member in driver private 
+       struct
+  mmc: sdhci: disable the clock in sdhci_pltfm_unregister()
+  mmc: sdhci: set the .remove to sdhci_pltfm_unregister()
+
+ drivers/mmc/host/sdhci-bcm-kona.c  | 61 ++++++++------------------------------
+ drivers/mmc/host/sdhci-bcm2835.c   |  7 +----
+ drivers/mmc/host/sdhci-cns3xxx.c   |  7 +----
+ drivers/mmc/host/sdhci-dove.c      | 39 ++++--------------------
+ drivers/mmc/host/sdhci-of-arasan.c |  1 -
+ drivers/mmc/host/sdhci-of-esdhc.c  |  7 +----
+ drivers/mmc/host/sdhci-of-hlwd.c   |  7 +----
+ drivers/mmc/host/sdhci-pltfm.c     |  2 ++
+ drivers/mmc/host/sdhci-sirf.c      | 36 +++++-----------------
+ drivers/mmc/host/sdhci-st.c        | 12 +-------
+ drivers/mmc/host/sdhci-tegra.c     | 30 +++----------------
+ 11 files changed, 36 insertions(+), 173 deletions(-)
+
+-- 
+1.9.3
+
