@@ -1,72 +1,52 @@
-From: <grygorii.strashko@linaro.org>
-Subject: [PATCH] mmc: omap_hsmmc: add hibernation support
-Date: Fri, 27 Feb 2015 13:24:34 +0200
-Message-ID: <1425036274-9017-1-git-send-email-grygorii.strashko@linaro.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [RFC PATCH] mmc: mmc_oops: support mmc_oops feature
+Date: Fri, 27 Feb 2015 12:36:34 +0100
+Message-ID: <3372849.Dqaz8KMKAB@wuerfel>
+References: <1425015219-19849-1-git-send-email-jh80.chung@samsung.com> <41342138.MjUK31a4Mt@wuerfel> <54F03C05.7040009@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f182.google.com ([209.85.217.182]:34709 "EHLO
-	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750757AbbB0LYm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Feb 2015 06:24:42 -0500
-Received: by lbdu14 with SMTP id u14so16576558lbd.1
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Feb 2015 03:24:41 -0800 (PST)
+Received: from mout.kundenserver.de ([212.227.17.10]:60307 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751105AbbB0Lgv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Feb 2015 06:36:51 -0500
+In-Reply-To: <54F03C05.7040009@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Felipe Balbi <balbi@ti.com>
-Cc: nm@ti.com, sumit.semwal@linaro.org, NeilBrown <neilb@suse.de>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, Russ Dill <Russ.Dill@ti.com>, Grygorii Strashko <grygorii.strashko@linaro.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>
 
-From: Russ Dill <Russ.Dill@ti.com>
+On Friday 27 February 2015 18:42:29 Jaehoon Chung wrote:
+> Dear, Arnd.
+> 
+> On 02/27/2015 05:31 PM, Arnd Bergmann wrote:
+> > On Friday 27 February 2015 14:33:39 Jaehoon Chung wrote:
+> >> --- a/drivers/mmc/card/Kconfig
+> >> +++ b/drivers/mmc/card/Kconfig
+> >> @@ -68,3 +68,11 @@ config MMC_TEST
+> >>  
+> >>           This driver is only of interest to those developing or
+> >>           testing a host driver. Most people should say N here.
+> >> +
+> >> +config MMC_OOPS
+> >> +       tristate "Log panic/oops to a MMC buffer"
+> >> +       depends on OF
+> >> +       help
+> >> +         This enables panic and oops messages to be logged to a circular
+> >> +         buffer in a MMC sectors where it can be read back at some
+> >> +         later point.
+> >>
+> > 
+> > This sounds a lot like the implementation should be using
+> > the fs/pstore infrastructure like we do for ramoops, chromeos
+> > and the EFI runtime services logger.
+> 
+> I refer to it, so you can sound so. It's my wrong.
+> I will rewrite the comment for MMC_OOPS config.
+> Thanks for point out.
 
-Setting a dev_pm_ops suspend/resume pair but not a set of
-hibernation functions means those pm functions will not be
-called upon hibernation.
-Fix this by using SET_SYSTEM_SLEEP_PM_OPS, which appropriately
-assigns the suspend and hibernation handlers and move
-omap_hsmmc_x callbacks under CONFIG_PM_SLEEP to avoid build warnings.
+I don't exactly understand what you mean here, but I meant rewriting
+the patch, not just the comment.
 
-Signed-off-by: Russ Dill <Russ.Dill@ti.com>
-[Grygorii.Strashko@linaro.org: rebased on top of K4.0]
-Signed-off-by: Grygorii Strashko <grygorii.strashko@linaro.org>
----
-
-original patch: https://github.com/russdill/linux/commit/2ea98def0717f0918426c2004122c63d52cff1b4
-
- drivers/mmc/host/omap_hsmmc.c | 9 ++-------
- 1 file changed, 2 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index f84cfb0..9cc1ea3 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -2236,7 +2236,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
--#ifdef CONFIG_PM
-+#ifdef CONFIG_PM_SLEEP
- static int omap_hsmmc_suspend(struct device *dev)
- {
- 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
-@@ -2292,10 +2292,6 @@ static int omap_hsmmc_resume(struct device *dev)
- 	pm_runtime_put_autosuspend(host->dev);
- 	return 0;
- }
--
--#else
--#define omap_hsmmc_suspend	NULL
--#define omap_hsmmc_resume	NULL
- #endif
- 
- static int omap_hsmmc_runtime_suspend(struct device *dev)
-@@ -2376,8 +2372,7 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
- }
- 
- static struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
--	.suspend	= omap_hsmmc_suspend,
--	.resume		= omap_hsmmc_resume,
-+	SET_SYSTEM_SLEEP_PM_OPS(omap_hsmmc_suspend, omap_hsmmc_resume)
- 	.runtime_suspend = omap_hsmmc_runtime_suspend,
- 	.runtime_resume = omap_hsmmc_runtime_resume,
- };
--- 
-1.9.1
-
+	Arnd
