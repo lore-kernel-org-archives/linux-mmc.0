@@ -1,56 +1,52 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2] mmc: dw_mmc: fix bug that cause mmc_test failture
-Date: Fri, 27 Feb 2015 16:11:10 +0900
-Message-ID: <54F0188E.9040609@samsung.com>
-References: <1422273849-29773-1-git-send-email-addy.ke@rock-chips.com>
- <1424400925-3867-1-git-send-email-addy.ke@rock-chips.com>
- <54EE11D1.7050608@collabora.co.uk>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: Re: [patch] mmc: sdhci-esdhc-imx: silence a false curly braces
+ warning
+Date: Fri, 27 Feb 2015 15:14:13 +0800
+Message-ID: <20150227071410.GA18208@shlinux1.ap.freescale.net>
+References: <20150226203755.GD6820@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <54EE11D1.7050608@collabora.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Addy Ke <addy.ke@rock-chips.com>, ulf.hansson@linaro.org, olof@lixom.net, heiko@sntech.de
-Cc: huangtao@rock-chips.com, lintao@rock-chips.com, cf@rock-chips.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1bon0132.outbound.protection.outlook.com ([157.56.111.132]:30048
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750804AbbB0HS5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Feb 2015 02:18:57 -0500
+Content-Disposition: inline
+In-Reply-To: <20150226203755.GD6820@mwanda>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Shawn Guo <shawn.guo@linaro.org>, Dirk Behme <dirk.behme@de.bosch.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org
 
-Hi,
+On Thu, Feb 26, 2015 at 11:37:55PM +0300, Dan Carpenter wrote:
+> Static checkers suggest that probably we intended to put curly braces
+> around the writel() to make it part of the else path.  But, I think
+> actually the indenting is off and the code works fine as is.
+> 
+> The stray tab was introduced in 0322191e6298 ('mmc: sdhci-esdhc-imx: add
+> sd3.0 SDR clock tuning support')
+> 
+> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+> 
 
-I will apply into my-tree after change the subject and fix typo.
+Yes, that's a mistake.
+Thanks for the finding.
+Acked-by: Dong Aisheng <b29396@freescale.com>
 
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Regards
+Dong Aisheng
 
-Best Regards,
-Jaehoon Chung
-
-On 02/26/2015 03:17 AM, Javier Martinez Canillas wrote:
-> Hello Addy,
-> 
-> On 02/20/2015 03:55 AM, Addy Ke wrote:
->> The STOP command can terminate a data transfer between a memory card and
->> mmc controller.
->>
->> As show in Synopsys DesignWare Cores Mobile Stroage Host Databook:
-> 
-> s/Stroage/Storage but maybe Ulf can amend the typo when applying?
-> 
->> Data timeout and Data end-bit error will terminate further data transfer
->> by mmc controller. So we should not send abort command to terminate a
->> data transfer again if we got DRTO and EBE interrupt.
->>
->> After this patch, all mmc_test cases can pass on RK3288-Pink2 board.
->>
->> Signed-off-by: Addy Ke <addy.ke@rock-chips.com>
-> 
-> I did not run all the tests listed in /sys/kernel/debug/mmc*/*/testlist
-> because some of them will overwrite the data in my card but at least
-> the read ones completed successfully and $subject does not cause a
-> regression in the Exynos5250 Snow, Exynos5420 Peach Pit and Exynos5800
-> Peach Pi Chromebooks where I tested it.
-> 
-> Tested-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-> 
-> Best regards,
-> Javier
-> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 10ef824..9cce5cf 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -416,7 +416,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+>  			new_val |= ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
+>  		else
+>  			new_val &= ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON;
+> -			writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+> +		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+>  		return;
+>  	case SDHCI_HOST_CONTROL2:
+>  		new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
