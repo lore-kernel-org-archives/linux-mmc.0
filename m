@@ -1,86 +1,143 @@
-From: Alan Cooper <alcooperx@gmail.com>
-Subject: Re: [PATCH] mmc: mkfs takes hours on some combinations of eMMC device
- and host controller
-Date: Fri, 27 Feb 2015 10:39:53 -0500
-Message-ID: <CAOGqxeX5d77cA4eaxgMGwauRrgKz8yw3sn_yrGduLS3+3KVQ6Q@mail.gmail.com>
-References: <1424901359-6309-1-git-send-email-alcooperx@gmail.com>
+From: Ray Jui <rjui@broadcom.com>
+Subject: Re: [PATCH v2 5/7] mmc: sdhci-bcm-kona: kill the "external_clk" member
+ in driver private struct
+Date: Fri, 27 Feb 2015 09:12:05 -0800
+Message-ID: <54F0A565.2050702@broadcom.com>
+References: <1425023251-4544-1-git-send-email-haokexin@gmail.com> <1425023251-4544-6-git-send-email-haokexin@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f48.google.com ([209.85.215.48]:40686 "EHLO
-	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752814AbbB0Pjz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Feb 2015 10:39:55 -0500
-Received: by labgd6 with SMTP id gd6so18363189lab.7
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Feb 2015 07:39:53 -0800 (PST)
-In-Reply-To: <1424901359-6309-1-git-send-email-alcooperx@gmail.com>
+Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:55275 "EHLO
+	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752280AbbB0RMP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Feb 2015 12:12:15 -0500
+In-Reply-To: <1425023251-4544-6-git-send-email-haokexin@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: chris@printf.net, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Al Cooper <alcooperx@gmail.com>
+To: Kevin Hao <haokexin@gmail.com>, linux-mmc@vger.kernel.org
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Christian Daudt <bcm@fixthebug.org>, Matt Porter <mporter@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, bcm-kernel-feedback-list@broadcom.com
 
-I understand. For an API that accepts sectors that are not erase block
-aligned the correct answer really is 1 sector for this eMMC/Host
-controller combination. Unfortunately this hangs mkfs.ext4 for about
-10 hours. Have there been any other suggested solutions?
+Hi Kevin,
 
-On Wed, Feb 25, 2015 at 4:55 PM, Al Cooper <alcooperx@gmail.com> wrote:
-> mkfs.ext4 will erase the entire partition on the eMMC device before
-> writing the actual filesystem. The number of blocks erased on each
-> erase eMMC command is determined at run time based on the max erase
-> or trim time specified by the EXT_CSD in the eMMC device and the max eMMC
-> command timeout supported by the host controller. The routine in the
-> kernel that calculates the max number of blocks specified per command
-> returns 1 with some combinations of host controllers with a short max
-> command timeout and eMMC devices with long max erase or trim time.
-> This will end up requiring over 8 million erase sequences on a 4GB
-> eMMC partition and will take many hours.
->
-> For example, on a host controller with a 50MHz timeout clock
-> specified in the Host CAPS register and an eMMC device
-> with a TRIM Multiplier of 6 specified in the EXT_CSD we get
-> 2^27/50000000=2.68 secs for a max command timeout and 6*.300=1.8 secs
-> for a trim operation which only allows 1 per trim command. The problem
-> seems to be in mmc_do_calc_max_discard() which does it's calculations
-> based on erase blocks but converts to and returns write blocks
-> (2MB blocks to 512 bytes blocks for a typical eMMC device) unless
-> the value is 1 in which case it just returns the 1. The routine also
-> subtracts 1 from the max calculation before converting from erase to
-> write blocks which should not be needed.
->
-> This change will convert all non-zero max calculations from erase
-> to write blocks and will no longer subtract 1 from the erase block
-> max before converting to write blocks. This allow mkfs.ext4 to run
-> in 30 secs instead of >10 hours.
->
-> Signed-off-by: Al Cooper <alcooperx@gmail.com>
+On 2/26/2015 11:47 PM, Kevin Hao wrote:
+> Actually we can use the "clk" in the struct sdhci_pltfm_host. Also
+> change the "external clock" to "core clock" and kill two redundant
+> private functions in this driver as suggested by Ray Jui.
+> 
+> Signed-off-by: Kevin Hao <haokexin@gmail.com>
 > ---
->  drivers/mmc/core/core.c | 7 ++-----
->  1 file changed, 2 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 23f10f7..1b61ac0 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2231,16 +2231,13 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
->         if (!qty)
->                 return 0;
->
-> -       if (qty == 1)
-> -               return 1;
-> -
->         /* Convert qty to sectors */
->         if (card->erase_shift)
-> -               max_discard = --qty << card->erase_shift;
-> +               max_discard = qty << card->erase_shift;
->         else if (mmc_card_sd(card))
->                 max_discard = qty;
->         else
-> -               max_discard = --qty * card->erase_size;
-> +               max_discard = qty * card->erase_size;
->
->         return max_discard;
+> v2:
+>   - s/external clock/core clock/
+>   - kill the private functions sdhci_bcm_kona_get_max_clk() and sdhci_bcm_kona_get_timeout_clock()
+> 
+>  drivers/mmc/host/sdhci-bcm-kona.c | 46 +++++++++++----------------------------
+>  1 file changed, 13 insertions(+), 33 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+> index 34bb8f92586e..5bc263b447b2 100644
+> --- a/drivers/mmc/host/sdhci-bcm-kona.c
+> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
+> @@ -54,7 +54,6 @@
+>  
+>  struct sdhci_bcm_kona_dev {
+>  	struct mutex	write_lock; /* protect back to back writes */
+> -	struct clk	*external_clk;
+>  };
+>  
+>  
+> @@ -175,24 +174,6 @@ static void sdhci_bcm_kona_card_event(struct sdhci_host *host)
+>  	}
 >  }
-> --
-> 1.9.0.138.g2de3478
->
+>  
+> -/*
+> - * Get the base clock. Use central clock source for now. Not sure if different
+> - * clock speed to each dev is allowed
+> - */
+> -static unsigned int sdhci_bcm_kona_get_max_clk(struct sdhci_host *host)
+> -{
+> -	struct sdhci_bcm_kona_dev *kona_dev;
+> -	struct sdhci_pltfm_host *pltfm_priv = sdhci_priv(host);
+> -	kona_dev = sdhci_pltfm_priv(pltfm_priv);
+> -
+> -	return host->mmc->f_max;
+> -}
+> -
+> -static unsigned int sdhci_bcm_kona_get_timeout_clock(struct sdhci_host *host)
+> -{
+> -	return sdhci_bcm_kona_get_max_clk(host);
+> -}
+> -
+>  static void sdhci_bcm_kona_init_74_clocks(struct sdhci_host *host,
+>  				u8 power_mode)
+>  {
+> @@ -207,8 +188,8 @@ static void sdhci_bcm_kona_init_74_clocks(struct sdhci_host *host,
+>  
+>  static struct sdhci_ops sdhci_bcm_kona_ops = {
+>  	.set_clock = sdhci_set_clock,
+> -	.get_max_clock = sdhci_bcm_kona_get_max_clk,
+> -	.get_timeout_clock = sdhci_bcm_kona_get_timeout_clock,
+> +	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> +	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+>  	.platform_send_init_74_clocks = sdhci_bcm_kona_init_74_clocks,
+>  	.set_bus_width = sdhci_set_bus_width,
+>  	.reset = sdhci_reset,
+> @@ -264,21 +245,21 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+>  		goto err_pltfm_free;
+>  	}
+>  
+> -	/* Get and enable the external clock */
+> -	kona_dev->external_clk = devm_clk_get(dev, NULL);
+> -	if (IS_ERR(kona_dev->external_clk)) {
+> -		dev_err(dev, "Failed to get external clock\n");
+> -		ret = PTR_ERR(kona_dev->external_clk);
+> +	/* Get and enable the core clock */
+> +	pltfm_priv->clk = devm_clk_get(dev, NULL);
+> +	if (IS_ERR(pltfm_priv->clk)) {
+> +		dev_err(dev, "Failed to get core clock\n");
+> +		ret = PTR_ERR(pltfm_priv->clk);
+>  		goto err_pltfm_free;
+>  	}
+>  
+> -	if (clk_set_rate(kona_dev->external_clk, host->mmc->f_max) != 0) {
+> -		dev_err(dev, "Failed to set rate external clock\n");
+> +	if (clk_set_rate(pltfm_priv->clk, host->mmc->f_max) != 0) {
+> +		dev_err(dev, "Failed to set rate core clock\n");
+>  		goto err_pltfm_free;
+>  	}
+>  
+> -	if (clk_prepare_enable(kona_dev->external_clk) != 0) {
+> -		dev_err(dev, "Failed to enable external clock\n");
+> +	if (clk_prepare_enable(pltfm_priv->clk) != 0) {
+> +		dev_err(dev, "Failed to enable core clock\n");
+>  		goto err_pltfm_free;
+>  	}
+>  
+> @@ -333,7 +314,7 @@ err_reset:
+>  	sdhci_bcm_kona_sd_reset(host);
+>  
+>  err_clk_disable:
+> -	clk_disable_unprepare(kona_dev->external_clk);
+> +	clk_disable_unprepare(pltfm_priv->clk);
+>  
+>  err_pltfm_free:
+>  	sdhci_pltfm_free(pdev);
+> @@ -346,12 +327,11 @@ static int sdhci_bcm_kona_remove(struct platform_device *pdev)
+>  {
+>  	struct sdhci_host *host = platform_get_drvdata(pdev);
+>  	struct sdhci_pltfm_host *pltfm_priv = sdhci_priv(host);
+> -	struct sdhci_bcm_kona_dev *kona_dev = sdhci_pltfm_priv(pltfm_priv);
+>  	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
+>  
+>  	sdhci_remove_host(host, dead);
+>  
+> -	clk_disable_unprepare(kona_dev->external_clk);
+> +	clk_disable_unprepare(pltfm_priv->clk);
+>  
+>  	sdhci_pltfm_free(pdev);
+>  
+> 
+
+The change looks good to me. Thanks!
+
+Reviewed-by: Ray Jui <rjui@broadcom.com>
