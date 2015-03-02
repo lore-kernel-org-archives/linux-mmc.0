@@ -1,143 +1,102 @@
-From: Ray Jui <rjui@broadcom.com>
-Subject: Re: [PATCH v2 5/7] mmc: sdhci-bcm-kona: kill the "external_clk" member
- in driver private struct
-Date: Fri, 27 Feb 2015 09:12:05 -0800
-Message-ID: <54F0A565.2050702@broadcom.com>
-References: <1425023251-4544-1-git-send-email-haokexin@gmail.com> <1425023251-4544-6-git-send-email-haokexin@gmail.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH/RFC] mmc: sh_mmcif: Add exclusion between cmd and
+ interrupt
+Date: Mon, 2 Mar 2015 09:22:05 +0900
+Message-ID: <20150302002204.GD30671@verge.net.au>
+References: <1424011607-3682-1-git-send-email-ykaneko0929@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:55275 "EHLO
-	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752280AbbB0RMP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Feb 2015 12:12:15 -0500
-In-Reply-To: <1425023251-4544-6-git-send-email-haokexin@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1424011607-3682-1-git-send-email-ykaneko0929@gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Yoshihiro Kaneko <ykaneko0929@gmail.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Cc: linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Hao <haokexin@gmail.com>, linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Christian Daudt <bcm@fixthebug.org>, Matt Porter <mporter@linaro.org>, Florian Fainelli <f.fainelli@gmail.com>, bcm-kernel-feedback-list@broadcom.com
 
-Hi Kevin,
+Hi all and in particular Sergei,
 
-On 2/26/2015 11:47 PM, Kevin Hao wrote:
-> Actually we can use the "clk" in the struct sdhci_pltfm_host. Also
-> change the "external clock" to "core clock" and kill two redundant
-> private functions in this driver as suggested by Ray Jui.
+elsewhere in this thread Sergei indicated that he felt that
+the spin lock around reading host->wait_for in sh_mmcif_irqt() doesn't
+"seem to have much sense here, as the read is already atomic."
+
+My initial reaction was that remark was correct. However, Kaneko-san
+has done some further analysis which I would now like to share. My
+apologies if in advance if I have misinterpreted that analysis.
+
+On Sun, Feb 15, 2015 at 11:46:46PM +0900, Yoshihiro Kaneko wrote:
+> From: Kouichi Tomita <kouichi.tomita.yn@renesas.com>
 > 
-> Signed-off-by: Kevin Hao <haokexin@gmail.com>
+> A command end interrupt should not be processed between command issue
+> and setting of wait_for flag. It expects already the flag to be set.
+> Therefore the exclusive control was added.
+> 
+> Signed-off-by: Kouichi Tomita <kouichi.tomita.yn@renesas.com>
+> Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
 > ---
-> v2:
->   - s/external clock/core clock/
->   - kill the private functions sdhci_bcm_kona_get_max_clk() and sdhci_bcm_kona_get_timeout_clock()
 > 
->  drivers/mmc/host/sdhci-bcm-kona.c | 46 +++++++++++----------------------------
->  1 file changed, 13 insertions(+), 33 deletions(-)
+> This patch is based on next branch of Chris Ball's mmc tree.
 > 
-> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-> index 34bb8f92586e..5bc263b447b2 100644
-> --- a/drivers/mmc/host/sdhci-bcm-kona.c
-> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-> @@ -54,7 +54,6 @@
+>  drivers/mmc/host/sh_mmcif.c | 11 ++++++++++-
+>  1 file changed, 10 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 7d9d6a3..e5d0b42 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -875,6 +875,7 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
+>  	struct mmc_command *cmd = mrq->cmd;
+>  	u32 opc = cmd->opcode;
+>  	u32 mask;
+> +	unsigned long flags;
 >  
->  struct sdhci_bcm_kona_dev {
->  	struct mutex	write_lock; /* protect back to back writes */
-> -	struct clk	*external_clk;
->  };
+>  	switch (opc) {
+>  	/* response busy check */
+> @@ -909,10 +910,12 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
+>  	/* set arg */
+>  	sh_mmcif_writel(host->addr, MMCIF_CE_ARG, cmd->arg);
+>  	/* set cmd */
+
+We could get an interrupt here.
+
+> +	spin_lock_irqsave(&host->lock, flags);
+>  	sh_mmcif_writel(host->addr, MMCIF_CE_CMD_SET, opc);
 >  
->  
-> @@ -175,24 +174,6 @@ static void sdhci_bcm_kona_card_event(struct sdhci_host *host)
->  	}
+>  	host->wait_for = MMCIF_WAIT_FOR_CMD;
+>  	schedule_delayed_work(&host->timeout_work, host->timeout);
+> +	spin_unlock_irqrestore(&host->lock, flags);
 >  }
 >  
-> -/*
-> - * Get the base clock. Use central clock source for now. Not sure if different
-> - * clock speed to each dev is allowed
-> - */
-> -static unsigned int sdhci_bcm_kona_get_max_clk(struct sdhci_host *host)
-> -{
-> -	struct sdhci_bcm_kona_dev *kona_dev;
-> -	struct sdhci_pltfm_host *pltfm_priv = sdhci_priv(host);
-> -	kona_dev = sdhci_pltfm_priv(pltfm_priv);
-> -
-> -	return host->mmc->f_max;
-> -}
-> -
-> -static unsigned int sdhci_bcm_kona_get_timeout_clock(struct sdhci_host *host)
-> -{
-> -	return sdhci_bcm_kona_get_max_clk(host);
-> -}
-> -
->  static void sdhci_bcm_kona_init_74_clocks(struct sdhci_host *host,
->  				u8 power_mode)
->  {
-> @@ -207,8 +188,8 @@ static void sdhci_bcm_kona_init_74_clocks(struct sdhci_host *host,
+>  static void sh_mmcif_stop_cmd(struct sh_mmcif_host *host,
+> @@ -1171,6 +1174,12 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+>  	struct sh_mmcif_host *host = dev_id;
+>  	struct mmc_request *mrq;
+>  	bool wait = false;
+> +	unsigned long flags;
+> +	int wait_work;
+> +
+> +	spin_lock_irqsave(&host->lock, flags);
+> +	wait_work = host->wait_for;
+> +	spin_unlock_irqrestore(&host->lock, flags);
 >  
->  static struct sdhci_ops sdhci_bcm_kona_ops = {
->  	.set_clock = sdhci_set_clock,
-> -	.get_max_clock = sdhci_bcm_kona_get_max_clk,
-> -	.get_timeout_clock = sdhci_bcm_kona_get_timeout_clock,
-> +	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-> +	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
->  	.platform_send_init_74_clocks = sdhci_bcm_kona_init_74_clocks,
->  	.set_bus_width = sdhci_set_bus_width,
->  	.reset = sdhci_reset,
-> @@ -264,21 +245,21 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
->  		goto err_pltfm_free;
->  	}
->  
-> -	/* Get and enable the external clock */
-> -	kona_dev->external_clk = devm_clk_get(dev, NULL);
-> -	if (IS_ERR(kona_dev->external_clk)) {
-> -		dev_err(dev, "Failed to get external clock\n");
-> -		ret = PTR_ERR(kona_dev->external_clk);
-> +	/* Get and enable the core clock */
-> +	pltfm_priv->clk = devm_clk_get(dev, NULL);
-> +	if (IS_ERR(pltfm_priv->clk)) {
-> +		dev_err(dev, "Failed to get core clock\n");
-> +		ret = PTR_ERR(pltfm_priv->clk);
->  		goto err_pltfm_free;
->  	}
->  
-> -	if (clk_set_rate(kona_dev->external_clk, host->mmc->f_max) != 0) {
-> -		dev_err(dev, "Failed to set rate external clock\n");
-> +	if (clk_set_rate(pltfm_priv->clk, host->mmc->f_max) != 0) {
-> +		dev_err(dev, "Failed to set rate core clock\n");
->  		goto err_pltfm_free;
->  	}
->  
-> -	if (clk_prepare_enable(kona_dev->external_clk) != 0) {
-> -		dev_err(dev, "Failed to enable external clock\n");
-> +	if (clk_prepare_enable(pltfm_priv->clk) != 0) {
-> +		dev_err(dev, "Failed to enable core clock\n");
->  		goto err_pltfm_free;
->  	}
->  
-> @@ -333,7 +314,7 @@ err_reset:
->  	sdhci_bcm_kona_sd_reset(host);
->  
->  err_clk_disable:
-> -	clk_disable_unprepare(kona_dev->external_clk);
-> +	clk_disable_unprepare(pltfm_priv->clk);
->  
->  err_pltfm_free:
->  	sdhci_pltfm_free(pdev);
-> @@ -346,12 +327,11 @@ static int sdhci_bcm_kona_remove(struct platform_device *pdev)
->  {
->  	struct sdhci_host *host = platform_get_drvdata(pdev);
->  	struct sdhci_pltfm_host *pltfm_priv = sdhci_priv(host);
-> -	struct sdhci_bcm_kona_dev *kona_dev = sdhci_pltfm_priv(pltfm_priv);
->  	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
->  
->  	sdhci_remove_host(host, dead);
->  
-> -	clk_disable_unprepare(kona_dev->external_clk);
-> +	clk_disable_unprepare(pltfm_priv->clk);
->  
->  	sdhci_pltfm_free(pdev);
->  
-> 
+>  	cancel_delayed_work_sync(&host->timeout_work);
 
-The change looks good to me. Thanks!
+And without the locking that this patch proposes if an interrupt did occur
+at the point noted above then we may cancel work that has not yet been
+scheduled. And furthermore the work will subsequently be scheduled and
+never canceled.
 
-Reviewed-by: Ray Jui <rjui@broadcom.com>
+> @@ -1188,7 +1197,7 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
+>  	 * All handlers return true, if processing continues, and false, if the
+>  	 * request has to be completed - successfully or not
+>  	 */
+> -	switch (host->wait_for) {
+> +	switch (wait_work) {
+
+And without the locking proposed by this patch if an interrupt occurred
+at the point annotated above then host->wait_for may be read before it
+is set by sh_mmcif_start_cmd().
+
+>  	case MMCIF_WAIT_FOR_REQUEST:
+>  		/* We're too late, the timeout has already kicked in */
+>  		mutex_unlock(&host->thread_lock);
