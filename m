@@ -1,36 +1,129 @@
 From: Maxime Coquelin <maxime.coquelin@st.com>
-Subject: Re: [PATCH v2 2/8] mmc: sdhci-st: Add support for de-asserting reset
- signal and top regs resource
-Date: Tue, 3 Mar 2015 11:34:15 +0100
-Message-ID: <54F58E27.10401@st.com>
-References: <1424956227-18258-1-git-send-email-peter.griffin@linaro.org> <1424956227-18258-3-git-send-email-peter.griffin@linaro.org>
+Subject: Re: [PATCH v2 3/8] mmc: sdhci-st: Add delay management functions
+ for top registers (eMMC).
+Date: Tue, 3 Mar 2015 11:47:56 +0100
+Message-ID: <54F5915C.6090707@st.com>
+References: <1424956227-18258-1-git-send-email-peter.griffin@linaro.org> <1424956227-18258-4-git-send-email-peter.griffin@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="windows-1252"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1424956227-18258-3-git-send-email-peter.griffin@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx07-00178001.pphosted.com ([62.209.51.94]:58223 "EHLO
+	mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751625AbbCCKtA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Mar 2015 05:49:00 -0500
+In-Reply-To: <1424956227-18258-4-git-send-email-peter.griffin@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Peter Griffin <peter.griffin@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, chris@printf.net, ulf.hansson@linaro.org
 Cc: lee.jones@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, peppe.cavallaro@st.com
-List-Id: linux-mmc@vger.kernel.org
 
-Hi Peter,
 
 On 02/26/2015 02:10 PM, Peter Griffin wrote:
-> STiH407 family SoC's can have a reset signal for the controller which needs to
-> be managed. Also the eMMC controller has some additional 'top' memory mapped
-> registers which are used to manage the dynamic and static delay required for
-> UHS modes. This patch adds support for creating the mapping, which will be used
-> by subsequent patches.
+> Due to the tight timing constriants in some UHS modes, it is required to have
+s/constriant/constraints/
+> some delay management in the design. Two types of delay management are supported
+> in the HW: -
+>
+> 1) Static delay management
+> 2) Dynamic delay management
+>
+> NB: The delay management is only there when eMMC interface is selected.
+>
+> 1: Static delay management: is used to provide PVT dependent static delay on the
+> clock/data lines to manage setup/hold requirements of the interface. The maximum
+> delay possible is 3.25ns. These delays are PVT dependent, and thus delay values
+> applied are not accurate and vary across provcess voltage and temperature range.
+> Due to this these delays must not be used on the very time critical paths.
+>
+> 2. Dynamic delay locked loop (DLL): is used to provide dynamic delay management.
+> The advantage of DLL is that it provides accurate & PVT indepedent delay.
+>
+> The DLL is used to provide delay on the loopback clock on "Read Path" to capture
+> read data reliably. On TX path the clock on which output data is transmitted is
+> delayed, resulting in delay of TX data.
 >
 > Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
 > Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
 > ---
->   drivers/mmc/host/sdhci-st.c | 52 ++++++++++++++++++++++++++++++++++++++++++---
->   1 file changed, 49 insertions(+), 3 deletions(-)
+>   drivers/mmc/host/sdhci-st.c | 58 +++++++++++++++++++++++++++++++++++++++++++++
+>   1 file changed, 58 insertions(+)
 >
+> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+> index 0101ae9..3443cc0 100644
+> --- a/drivers/mmc/host/sdhci-st.c
+> +++ b/drivers/mmc/host/sdhci-st.c
+> @@ -122,6 +122,64 @@ struct st_mmc_platform_data {
+>   		 ST_TOP_MMC_DLY_CTRL_ATUNE_NOT_CFG_DLY | \
+>   		 ST_TOP_MMC_START_DLL_LOCK)
+>   
+> +/*
+> + * For clock speeds greater than 90MHz, we need to check that the
+> + * DLL procedure has finished before switching to ultra-speed modes.
+> + */
+> +#define	CLK_TO_CHECK_DLL_LOCK	90000000
+> +
+> +static inline void st_mmcss_set_static_delay(void __iomem *ioaddr)
+> +{
+> +	if (ioaddr) {
+Maybe you could do:
+     if (!ioaddr)
+         return;
 
-Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
+     writel_relaxed....
+> +		writel_relaxed(0x0, ioaddr + ST_TOP_MMC_DLY_CTRL);
+> +		writel_relaxed(ST_TOP_MMC_DLY_MAX,
+> +				ioaddr + ST_TOP_MMC_TX_CLK_DLY);
+> +	}
+> +}
+> +
+> +static inline void st_mmcss_set_dll(void __iomem *ioaddr)
+> +{
+> +	if (ioaddr) {
+Ditto
 
-Thanks,
-Maxime
+
+> +		writel_relaxed(ST_TOP_MMC_DYN_DLY_CONF,
+> +			ioaddr + ST_TOP_MMC_DLY_CTRL);
+> +		writel_relaxed(ST_TOP_MMC_TX_DLL_STEP_DLY_VALID,
+> +			ioaddr + ST_TOP_MMC_TX_DLL_STEP_DLY);
+> +	}
+> +}
+> +
+> +static int st_mmcss_lock_dll(void __iomem *ioaddr)
+> +{
+> +	unsigned long curr, value;
+> +	unsigned long finish = jiffies + HZ;
+> +
+> +	/* Checks if the DLL procedure is finished */
+> +	do {
+> +		curr = jiffies;
+> +		value = readl(ioaddr + ST_MMC_STATUS_R);
+> +		if (value & 0x1)
+> +			return 0;
+> +
+> +		cpu_relax();
+> +	} while (!time_after_eq(curr, finish));
+> +
+> +	return -EBUSY;
+> +}
+> +
+> +static int sdhci_st_set_dll_for_clock(struct sdhci_host *host)
+> +{
+> +	int ret = 0;
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct st_mmc_platform_data *pdata = pltfm_host->priv;
+> +
+> +	if (host->clock > CLK_TO_CHECK_DLL_LOCK) {
+> +		st_mmcss_set_dll(pdata->top_ioaddr);
+> +		ret = st_mmcss_lock_dll(host->ioaddr);
+> +	}
+> +
+> +	return ret;
+> +}
+> +
+> +
+>   static u32 sdhci_st_readl(struct sdhci_host *host, int reg)
+>   {
+>   	u32 ret;
+
