@@ -1,7 +1,7 @@
 From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH 1/6] mmc: omap_hsmmc: remove unused fields from struct omap_hsmmc_host
-Date: Tue,  3 Mar 2015 13:28:13 +0100
-Message-ID: <1425385698-6588-2-git-send-email-afenkart@gmail.com>
+Subject: [PATCH 2/6] mmc: omap_hsmmc: use slot-gpio functions to manage read-only pin directly
+Date: Tue,  3 Mar 2015 13:28:14 +0100
+Message-ID: <1425385698-6588-3-git-send-email-afenkart@gmail.com>
 References: <1425385698-6588-1-git-send-email-afenkart@gmail.com>
 Return-path: <linux-omap-owner@vger.kernel.org>
 In-Reply-To: <1425385698-6588-1-git-send-email-afenkart@gmail.com>
@@ -10,29 +10,82 @@ To: linux-mmc@vger.kernel.org
 Cc: linux-omap@vger.kernel.org, NeilBrown <neilb@suse.de>, Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-addon to: 09108968b7b72b6083a3bfc8f8259a74ed57255e
-    mmc: omap_hsmmc: remove prepare/complete system suspend support
+The indirection via omap_hsmmc_get_ro and omap_hsmmc_get_wp is
+redundant. Also dropped setting gpio_wp to EINVAL since platform date
+is read-only
+Untested: no device with ro pin was available, but change is fairly
+simple
 
 Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 ---
- drivers/mmc/host/omap_hsmmc.c | 4 ----
- 1 file changed, 4 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c | 23 +----------------------
+ 1 file changed, 1 insertion(+), 22 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 8d87e08..2276d58 100644
+index 2276d58..77ad471 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -222,10 +222,6 @@ struct omap_hsmmc_host {
- 	struct omap_hsmmc_next	next_data;
- 	struct	omap_hsmmc_platform_data	*pdata;
+@@ -234,8 +234,6 @@ struct omap_hsmmc_host {
+ 	int card_detect_irq;
  
--	/* To handle board related suspend/resume functionality for MMC */
--	int (*suspend)(struct device *dev);
--	int (*resume)(struct device *dev);
+ 	int (*card_detect)(struct device *dev);
+-	int (*get_ro)(struct device *dev);
 -
- 	/* return MMC cover switch state, can be NULL if not supported.
- 	 *
- 	 * possible return values:
+ };
+ 
+ struct omap_mmc_of_data {
+@@ -252,13 +250,6 @@ static int omap_hsmmc_card_detect(struct device *dev)
+ 	return mmc_gpio_get_cd(host->mmc);
+ }
+ 
+-static int omap_hsmmc_get_wp(struct device *dev)
+-{
+-	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
+-
+-	return mmc_gpio_get_ro(host->mmc);
+-}
+-
+ static int omap_hsmmc_get_cover_state(struct device *dev)
+ {
+ 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
+@@ -455,12 +446,9 @@ static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
+ 	}
+ 
+ 	if (gpio_is_valid(pdata->gpio_wp)) {
+-		host->get_ro = omap_hsmmc_get_wp;
+ 		ret = mmc_gpio_request_ro(mmc, pdata->gpio_wp);
+ 		if (ret)
+ 			return ret;
+-	} else {
+-		pdata->gpio_wp = -EINVAL;
+ 	}
+ 
+ 	return 0;
+@@ -1637,15 +1625,6 @@ static int omap_hsmmc_get_cd(struct mmc_host *mmc)
+ 	return host->card_detect(host->dev);
+ }
+ 
+-static int omap_hsmmc_get_ro(struct mmc_host *mmc)
+-{
+-	struct omap_hsmmc_host *host = mmc_priv(mmc);
+-
+-	if (!host->get_ro)
+-		return -ENOSYS;
+-	return host->get_ro(host->dev);
+-}
+-
+ static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
+ {
+ 	struct omap_hsmmc_host *host = mmc_priv(mmc);
+@@ -1811,7 +1790,7 @@ static struct mmc_host_ops omap_hsmmc_ops = {
+ 	.request = omap_hsmmc_request,
+ 	.set_ios = omap_hsmmc_set_ios,
+ 	.get_cd = omap_hsmmc_get_cd,
+-	.get_ro = omap_hsmmc_get_ro,
++	.get_ro = mmc_gpio_get_ro,
+ 	.init_card = omap_hsmmc_init_card,
+ 	.enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
+ };
 -- 
 2.1.4
 
