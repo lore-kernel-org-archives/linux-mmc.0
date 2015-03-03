@@ -1,84 +1,106 @@
-From: David =?ISO-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>
-Subject: Re: [PATCH] mmc: sunxi: Use devm_reset_control_get_optional() for reset control
-Date: Tue, 03 Mar 2015 11:06:24 +0100
-Message-ID: <1772084.aQtZdtMheX@dizzy-6.o2s.ch>
-References: <1425347080-1789-1-git-send-email-wens@csie.org>
+From: Maxime Coquelin <maxime.coquelin@st.com>
+Subject: Re: [PATCH v2 1/8] mmc: sdhci-st: Add macros for register offsets
+ and bitfields for mmcss glue regs
+Date: Tue, 3 Mar 2015 11:24:45 +0100
+Message-ID: <54F58BED.4020900@st.com>
+References: <1424956227-18258-1-git-send-email-peter.griffin@linaro.org> <1424956227-18258-2-git-send-email-peter.griffin@linaro.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="nextPart7754619.W0O9WZNYlK"; micalg="pgp-sha1"; protocol="application/pgp-signature"
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kolab.o2s.ch ([77.109.136.180]:36688 "EHLO kolab.o2s.ch"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755806AbbCCKGn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 3 Mar 2015 05:06:43 -0500
-In-Reply-To: <1425347080-1789-1-git-send-email-wens@csie.org>
+Received: from mx08-00178001.pphosted.com ([91.207.212.93]:43714 "EHLO
+	mx08-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751468AbbCCKZV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Mar 2015 05:25:21 -0500
+In-Reply-To: <1424956227-18258-2-git-send-email-peter.griffin@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: Chen-Yu Tsai <wens@csie.org>, Hans de Goede <hdegoede@redhat.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, stable@vger.kernel.org, linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>
+To: Peter Griffin <peter.griffin@linaro.org>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, chris@printf.net, ulf.hansson@linaro.org
+Cc: lee.jones@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, peppe.cavallaro@st.com
 
+Hi Peter,
 
---nextPart7754619.W0O9WZNYlK
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="iso-8859-1"
-
-Acked-by: David Lanzend=F6rfer <david.lanzendoerfer@o2s.ch>
-
-> The reset control for the sunxi mmc controller is optional. Some
-> newer platforms (sun6i, sun8i, sun9i) have it, while older ones
-> (sun4i, sun5i, sun7i) don't.
->=20
-> Use the properly stubbed _optional version so the driver does not
-> fail to compile when RESET_CONTROLLER=3Dn.
->=20
-> This patch also adds a check for deferred probing on the reset
-> control.
->=20
-> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
-> Cc: <stable@vger.kernel.org> # 3.16+
+On 02/26/2015 02:10 PM, Peter Griffin wrote:
+> The stih407 family SoC's have additional glue registers in the flashSS which
+> are used to configure the Arasan controller.
+>
+> This patch adds macros for the register offsets and bitfields which will be used by
+> subsequent patches to support stih407 family SoC's.
+>
+> Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+> Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
 > ---
->=20
-> Arnd had some proposals about the reset control API.
-> Not sure if the sunxi-mmc driver was on that list.
->=20
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
->=20
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mm=
-c.c
-> index e8a4218b5726..459ed1b601db 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -930,7 +930,9 @@ static int sunxi_mmc_resource_request(struct
-> sunxi_mmc_host *host, return PTR_ERR(host->clk_sample);
->  =09}
->=20
-> -=09host->reset =3D devm_reset_control_get(&pdev->dev, "ahb");
-> +=09host->reset =3D devm_reset_control_get_optional(&pdev->dev, "ahb"=
-);
-> +=09if (PTR_ERR(host->reset) =3D=3D -EPROBE_DEFER)
-> +=09=09return PTR_ERR(host->reset);
->=20
->  =09ret =3D clk_prepare_enable(host->clk_ahb);
->  =09if (ret) {
+>   drivers/mmc/host/sdhci-st.c | 91 +++++++++++++++++++++++++++++++++++++++++++++
+>   1 file changed, 91 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+> index 882b07e..a3bc3c3 100644
+> --- a/drivers/mmc/host/sdhci-st.c
+> +++ b/drivers/mmc/host/sdhci-st.c
+> @@ -26,6 +26,97 @@
+>   
+>   #include "sdhci-pltfm.h"
+>   
+> +/* MMCSS glue logic to setup the HC on some ST SoCs (e.g. STiH407 family) */
+> +
+> +#define	ST_MMC_CCONFIG_REG_1		0x400
+Maybe my mail client, but I see a tab instead of a space after #define.
+> +#define ST_MMC_CCONFIG_TIMEOUT_CLK_UNIT	BIT(24)
+> +#define ST_MMC_CCONFIG_TIMEOUT_CLK_FREQ	BIT(12)
+> +#define ST_MMC_CCONFIG_TUNING_COUNT_DEFAULT	BIT(8)
+> +#define ST_MMC_CCONFIG_ASYNC_WAKEUP	BIT(0)
+> +#define ST_MMC_CCONFIG_1_DEFAULT	\
+> +				((ST_MMC_CCONFIG_TIMEOUT_CLK_UNIT) | \
+> +				 (ST_MMC_CCONFIG_TIMEOUT_CLK_FREQ) | \
+> +				 (ST_MMC_CCONFIG_TUNING_COUNT_DEFAULT))
+> +
+> +#define ST_MMC_CCONFIG_REG_2		0x404
+> +#define ST_MMC_CCONFIG_HIGH_SPEED	BIT(28)
+> +#define ST_MMC_CCONFIG_ADMA2		BIT(24)
+> +#define ST_MMC_CCONFIG_8BIT		BIT(20)
+> +#define ST_MMC_CCONFIG_MAX_BLK_LEN	16
+> +#define  MAX_BLK_LEN_1024		1
+> +#define  MAX_BLK_LEN_2048		2
+> +#define BASE_CLK_FREQ_200		0xc8
+> +#define BASE_CLK_FREQ_100		0x64
+> +#define BASE_CLK_FREQ_50		0x32
+> +#define ST_MMC_CCONFIG_2_DEFAULT \
+> +	(ST_MMC_CCONFIG_HIGH_SPEED | ST_MMC_CCONFIG_ADMA2 | \
+> +	 ST_MMC_CCONFIG_8BIT | \
+> +	 (MAX_BLK_LEN_1024 << ST_MMC_CCONFIG_MAX_BLK_LEN))
+> +
+> +#define ST_MMC_CCONFIG_REG_3			0x408
+> +#define ST_MMC_CCONFIG_EMMC_SLOT_TYPE		BIT(28)
+> +#define ST_MMC_CCONFIG_64BIT			BIT(24)
+> +#define ST_MMC_CCONFIG_ASYNCH_INTR_SUPPORT	BIT(20)
+> +#define ST_MMC_CCONFIG_1P8_VOLT			BIT(16)
+> +#define ST_MMC_CCONFIG_3P0_VOLT			BIT(12)
+> +#define ST_MMC_CCONFIG_3P3_VOLT			BIT(8)
+> +#define ST_MMC_CCONFIG_SUSP_RES_SUPPORT		BIT(4)
+> +#define ST_MMC_CCONFIG_SDMA			BIT(0)
+> +#define ST_MMC_CCONFIG_3_DEFAULT	\
+> +			 (ST_MMC_CCONFIG_ASYNCH_INTR_SUPPORT	| \
+> +			  ST_MMC_CCONFIG_3P3_VOLT		| \
+> +			  ST_MMC_CCONFIG_SUSP_RES_SUPPORT	| \
+> +			  ST_MMC_CCONFIG_SDMA)
+> +
+> +#define ST_MMC_CCONFIG_REG_4	0x40c
+> +#define ST_MMC_CCONFIG_D_DRIVER	BIT(20)
+> +#define ST_MMC_CCONFIG_C_DRIVER	BIT(16)
+> +#define ST_MMC_CCONFIG_A_DRIVER	BIT(12)
+> +#define ST_MMC_CCONFIG_DDR50	BIT(8)
+> +#define ST_MMC_CCONFIG_SDR104	BIT(4)
+> +#define ST_MMC_CCONFIG_SDR50	BIT(0)
+> +#define ST_MMC_CCONFIG_4_DEFAULT	0
+> +
+> +#define ST_MMC_CCONFIG_REG_5		0x410
+> +#define ST_MMC_CCONFIG_TUNING_FOR_SDR50	BIT(8)
+> +#define RETUNING_TIMER_CNT_MAX		0xf
+> +#define ST_MMC_CCONFIG_5_DEFAULT	0
+> +
+> +/* I/O configuration for Arasan IP */
+> +#define	ST_MMC_GP_OUTPUT	0x450
+Same Here.
 
-=2D-=20
-David Lanzend=F6rfer
-OpenSourceSupport GmbH
-System engineer and supporter
-http://www.o2s.ch/
---nextPart7754619.W0O9WZNYlK
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part.
-Content-Transfer-Encoding: 7Bit
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iEYEABECAAYFAlT1h60ACgkQAeZw77btGjpSpQCdEFUqlvq9Gf/aMYS03hS0SYSD
-/0sAoK0FHcsMnLIgyNno1w7rJ3jMizBl
-=4S+J
------END PGP SIGNATURE-----
-
---nextPart7754619.W0O9WZNYlK--
-
+Best regards,
+Maxime
