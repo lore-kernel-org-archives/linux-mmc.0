@@ -1,67 +1,84 @@
-From: Arseny Solokha <asolokha@kb.kras.ru>
-Subject: Re: "Driver 'mmcblk' needs updating - please use bus_type methods"
-Date: Tue, 03 Mar 2015 10:25:15 +0700
-Message-ID: <87sidmsqxw.fsf@KB00016249.iskra.kb>
-References: <1424275938.27541.113.camel@intel.com>
+From: David =?ISO-8859-1?Q?Lanzend=F6rfer?= <david.lanzendoerfer@o2s.ch>
+Subject: Re: [PATCH] mmc: sunxi: Use devm_reset_control_get_optional() for reset control
+Date: Tue, 03 Mar 2015 11:06:24 +0100
+Message-ID: <1772084.aQtZdtMheX@dizzy-6.o2s.ch>
+References: <1425347080-1789-1-git-send-email-wens@csie.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: multipart/signed; boundary="nextPart7754619.W0O9WZNYlK"; micalg="pgp-sha1"; protocol="application/pgp-signature"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ispman.iskranet.ru ([62.213.33.10]:39400 "EHLO
-	ispman.iskranet.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756404AbbCCDbM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Mar 2015 22:31:12 -0500
-In-Reply-To: <1424275938.27541.113.camel@intel.com>
+Received: from kolab.o2s.ch ([77.109.136.180]:36688 "EHLO kolab.o2s.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755806AbbCCKGn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 3 Mar 2015 05:06:43 -0500
+In-Reply-To: <1425347080-1789-1-git-send-email-wens@csie.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Minchev, Todor" <todor.minchev@intel.com>
-Cc: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Chen-Yu Tsai <wens@csie.org>, Hans de Goede <hdegoede@redhat.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, stable@vger.kernel.org, linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>
 
-> This has probably been reported already.
-> 
-> In 3.19 this started showing up in the dmesg log when the mmcblk driver
-> gets loaded:
-> 
-> "Driver 'mmcblk' needs updating - please use bus_type methods"
-> 
-> Looks like it is caused by the re-factoring needed after the removal of
-> struct mmc_driver. Both the mmc bus and the block driver register a
-> shutdown and the two fail the driver_register sanity check resulting in
-> the warning above.
 
-I've also run into this recently and failed to come up with any elegant
-solution. Of course the warning could be safely ignored, but it doesn't seem
-right in the long run.
+--nextPart7754619.W0O9WZNYlK
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="iso-8859-1"
 
-Something similar to removed mmc_driver really seems to be the best solution
-here. Otherwise, the following workaround is probably the simplest one, but as
-for me it is too ugly to submit it seriously.
+Acked-by: David Lanzend=F6rfer <david.lanzendoerfer@o2s.ch>
 
----
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index c69afb5..6355df1 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -2546,7 +2546,6 @@ static struct device_driver mmc_driver = {
- 	.pm		= &mmc_blk_pm_ops,
- 	.probe		= mmc_blk_probe,
- 	.remove		= mmc_blk_remove,
--	.shutdown	= mmc_blk_shutdown,
- };
- 
- static int __init mmc_blk_init(void)
-@@ -2566,6 +2565,15 @@ static int __init mmc_blk_init(void)
- 	if (res)
- 		goto out2;
- 
-+	/*
-+	 * device_shutdown() calls bus_ops ->shutdown() if it's present
-+	 * and falls back to device_driver ->shutdown() if it's not. This
-+	 * motivates existence of a sanity check in driver_register() against
-+	 * both ops being set at the same time. Work around this check
-+	 * with deferred setting of device_driver ->shutdown().
-+	 */
-+	mmc_driver.shutdown = mmc_blk_shutdown;
-+
- 	return 0;
-  out2:
- 	unregister_blkdev(MMC_BLOCK_MAJOR, "mmc");
+> The reset control for the sunxi mmc controller is optional. Some
+> newer platforms (sun6i, sun8i, sun9i) have it, while older ones
+> (sun4i, sun5i, sun7i) don't.
+>=20
+> Use the properly stubbed _optional version so the driver does not
+> fail to compile when RESET_CONTROLLER=3Dn.
+>=20
+> This patch also adds a check for deferred probing on the reset
+> control.
+>=20
+> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+> Cc: <stable@vger.kernel.org> # 3.16+
+> ---
+>=20
+> Arnd had some proposals about the reset control API.
+> Not sure if the sunxi-mmc driver was on that list.
+>=20
+> ---
+>  drivers/mmc/host/sunxi-mmc.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+>=20
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mm=
+c.c
+> index e8a4218b5726..459ed1b601db 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -930,7 +930,9 @@ static int sunxi_mmc_resource_request(struct
+> sunxi_mmc_host *host, return PTR_ERR(host->clk_sample);
+>  =09}
+>=20
+> -=09host->reset =3D devm_reset_control_get(&pdev->dev, "ahb");
+> +=09host->reset =3D devm_reset_control_get_optional(&pdev->dev, "ahb"=
+);
+> +=09if (PTR_ERR(host->reset) =3D=3D -EPROBE_DEFER)
+> +=09=09return PTR_ERR(host->reset);
+>=20
+>  =09ret =3D clk_prepare_enable(host->clk_ahb);
+>  =09if (ret) {
+
+=2D-=20
+David Lanzend=F6rfer
+OpenSourceSupport GmbH
+System engineer and supporter
+http://www.o2s.ch/
+--nextPart7754619.W0O9WZNYlK
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part.
+Content-Transfer-Encoding: 7Bit
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iEYEABECAAYFAlT1h60ACgkQAeZw77btGjpSpQCdEFUqlvq9Gf/aMYS03hS0SYSD
+/0sAoK0FHcsMnLIgyNno1w7rJ3jMizBl
+=4S+J
+-----END PGP SIGNATURE-----
+
+--nextPart7754619.W0O9WZNYlK--
+
