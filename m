@@ -1,47 +1,68 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: Re: [PATCH 0/6] mmc: omap_hsmmc: simplify cover/card detect logic
-Date: Wed, 4 Mar 2015 09:06:55 +0100
-Message-ID: <CALtMJEBpCLLOcT20P=7G-PmetfYKoyqo9+NSX77W0VF=UVO5_A@mail.gmail.com>
-References: <1425385698-6588-1-git-send-email-afenkart@gmail.com>
-	<20150304163108.7b0902c8@notabene.brown>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 3/4] mmc: sdio: support switching to 1-bit before turning
+ off clocks
+Date: Wed, 4 Mar 2015 07:08:27 -0800
+Message-ID: <20150304150827.GA13520@atomide.com>
+References: <20150224024023.22719.32436.stgit@notabene.brown>
+ <20150224024223.22719.91536.stgit@notabene.brown>
+ <20150303225355.GE3756@atomide.com>
+ <20150304162848.2d33914d@notabene.brown>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20150304163108.7b0902c8@notabene.brown>
-Sender: linux-omap-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20150304162848.2d33914d@notabene.brown>
+Sender: linux-kernel-owner@vger.kernel.org
 To: NeilBrown <neilb@suse.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Andreas Fenkart <afenkart@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>, NeilBrown <neil@brown.name>, linux-omap <linux-omap@vger.kernel.org>, Florian Vaussard <florian.vaussard@epfl.ch>, Ash Charles <ash@gumstix.com>
 List-Id: linux-mmc@vger.kernel.org
 
-2015-03-04 6:31 GMT+01:00 NeilBrown <neilb@suse.de>:
-> On Tue,  3 Mar 2015 13:28:12 +0100 Andreas Fenkart <afenkart@gmail.com> wrote:
->> While cover detect is only used by one platform (rx51), it
->> complicates the card detect logic. By separating the code
->> paths they both become easier to understand and maintain
->>
->> Patches have been tested by reverting: 95bebb5696ab
->> 'mmc: omap_hsmmc: use mmc_of_parse to parse common mmc configuration'
->> otherwise gpio detection is handled by mmc_of_parse
->
-> Wouldn't it make more sense to put this core  in mmc/core rather than in just
-> one host controller?
-Yes, I would very welcome that, since it would free the omap_hsmmc of the
-'protection' mechanism that makes the driver clumsy. But as an initial step
-separating cover from card detect already seems enough for this series.
-Another thought was, that since only one platform is using it, the prospect of
-getting it merged into the core was minimal.
+* NeilBrown <neilb@suse.de> [150303 21:29]:
+> On Tue, 3 Mar 2015 14:53:55 -0800 Tony Lindgren <tony@atomide.com> wrote:
+> > 
+> > --- a/arch/arm/boot/dts/omap3-gta04.dtsi
+> > +++ b/arch/arm/boot/dts/omap3-gta04.dtsi
+> > @@ -367,6 +367,7 @@
+> >  };
+> >  
+> >  &mmc2 {
+> > +	interrupts-extended = <&intc 86 &omap3_pmx_core 0x12e>;
+> >  	vmmc-supply = <&vaux4>;
+> >  	bus-width = <4>;
+> >  	ti,non-removable;
+> 
+> I had 
+> 
+> +       interrupts-extended = <&intc 86 &gpio5 5 0>; /* GPIO_133 */
+> +       pinctrl-names = "default", "idle";
+> +       pinctrl-0 = <&mmc2_pins>;
+> +       pinctrl-1 = <&mmc2_cirq_pin>;
+> 
+> together with
+> 
+> +       mmc2_cirq_pin: pinmux_cirq_pin {
+> +               pinctrl-single,pins = <
+> +                       OMAP3_CORE1_IOPAD(0x215e, PIN_INPUT_PULLUP | MUX_MODE4) 
+> +               >;
+> +       };
+> +
+> 
+> 
+> and a longer definition for mmc2_pins.
+> 
+> Is that one line reconfigure the pin on demand?  How does that work?
 
-> That way it would be available to all hosts, and you
-> wouldn't need to revert that patch.
-Oh sorry, seems I was unclear. I definitely do not want to revert that patch
-permanently, the opposite is true, I very much welcome it. Thanks for your work
-by the way.
-I only reverted it temporarily so I could test that the card detect
-logic still works
-with legacy board files, non-device-tree platforms. But since mmc_of_parse is
-setting the card detect pin, my changes could not be tested with my
-device-tree platform (bbone). So I reverted the above patch only for testing,
-afterwards I rebased the patches on top of it, before submitting
+Well the remuxing of the mmc2 dat1 pin is not needed on omap3/4/5.
+These SoCs have the iochain wake-up events.
 
+Remuxing is needed on SoCs with no iochain wake-up events, such as
+am355x, am437x and dra7 variants.
 
-Andreas
+Not sure if we actually have the gpio5 bank wake-up the system
+properly currently from off-idle. It could be that only gpio1 bank
+is currently capable of wake-up from off-idle without needing
+to use the iochain wake-up also for GPIO lines.
+
+Regards,
+
+Tony
