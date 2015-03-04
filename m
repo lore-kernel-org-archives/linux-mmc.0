@@ -1,68 +1,32 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 3/4] mmc: sdio: support switching to 1-bit before turning
- off clocks
-Date: Wed, 4 Mar 2015 07:08:27 -0800
-Message-ID: <20150304150827.GA13520@atomide.com>
-References: <20150224024023.22719.32436.stgit@notabene.brown>
- <20150224024223.22719.91536.stgit@notabene.brown>
- <20150303225355.GE3756@atomide.com>
- <20150304162848.2d33914d@notabene.brown>
+From: Scott Branden <sbranden@broadcom.com>
+Subject: Re: [PATCH 4/4] mmc: sdhci-iproc: add device tree bindings
+Date: Wed, 4 Mar 2015 15:14:48 -0800
+Message-ID: <54F791E8.9020405@broadcom.com>
+References: <Scott Branden <sbranden@broadcom.com> <1423526791-29453-1-git-send-email-sbranden@broadcom.com> <1423526791-29453-5-git-send-email-sbranden@broadcom.com> <54F4F74A.7050909@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20150304162848.2d33914d@notabene.brown>
-Sender: linux-kernel-owner@vger.kernel.org
-To: NeilBrown <neilb@suse.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Andreas Fenkart <afenkart@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>, NeilBrown <neil@brown.name>, linux-omap <linux-omap@vger.kernel.org>, Florian Vaussard <florian.vaussard@epfl.ch>, Ash Charles <ash@gumstix.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:12670 "EHLO
+	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750752AbbCDXPK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Mar 2015 18:15:10 -0500
+In-Reply-To: <54F4F74A.7050909@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Florian Fainelli <f.fainelli@gmail.com>, bcm-kernel-feedback-list@broadcom.com, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Grant Likely <grant.likely@linaro.org>
+Cc: devicetree@vger.kernel.org, Corneliu Doban <cdoban@broadcom.com>, Ray Jui <rjui@broadcom.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jonathan Richardson <jonathar@broadcom.com>, Anatol Pomazao <anatol@google.com>, linux-arm-kernel@lists.infradead.org, Dmitry Torokhov <dtor@google.com>
 
-* NeilBrown <neilb@suse.de> [150303 21:29]:
-> On Tue, 3 Mar 2015 14:53:55 -0800 Tony Lindgren <tony@atomide.com> wrote:
-> > 
-> > --- a/arch/arm/boot/dts/omap3-gta04.dtsi
-> > +++ b/arch/arm/boot/dts/omap3-gta04.dtsi
-> > @@ -367,6 +367,7 @@
-> >  };
-> >  
-> >  &mmc2 {
-> > +	interrupts-extended = <&intc 86 &omap3_pmx_core 0x12e>;
-> >  	vmmc-supply = <&vaux4>;
-> >  	bus-width = <4>;
-> >  	ti,non-removable;
-> 
-> I had 
-> 
-> +       interrupts-extended = <&intc 86 &gpio5 5 0>; /* GPIO_133 */
-> +       pinctrl-names = "default", "idle";
-> +       pinctrl-0 = <&mmc2_pins>;
-> +       pinctrl-1 = <&mmc2_cirq_pin>;
-> 
-> together with
-> 
-> +       mmc2_cirq_pin: pinmux_cirq_pin {
-> +               pinctrl-single,pins = <
-> +                       OMAP3_CORE1_IOPAD(0x215e, PIN_INPUT_PULLUP | MUX_MODE4) 
-> +               >;
-> +       };
-> +
-> 
-> 
-> and a longer definition for mmc2_pins.
-> 
-> Is that one line reconfigure the pin on demand?  How does that work?
+Hi Florian,
 
-Well the remuxing of the mmc2 dat1 pin is not needed on omap3/4/5.
-These SoCs have the iochain wake-up events.
+On 15-03-02 03:50 PM, Florian Fainelli wrote:
+>
+> Unless there is a re-spin, I will fix this myself while applying this
+> patch to devicetree/next.
+>
+> Thanks
+>
+Yes, you can patch the formatting if the driver is being integrated. 
+But I have had no response or feedback on the sdhci driver.  It has been 
+sitting for 1 month.
 
-Remuxing is needed on SoCs with no iochain wake-up events, such as
-am355x, am437x and dra7 variants.
-
-Not sure if we actually have the gpio5 bank wake-up the system
-properly currently from off-idle. It could be that only gpio1 bank
-is currently capable of wake-up from off-idle without needing
-to use the iochain wake-up also for GPIO lines.
-
-Regards,
-
-Tony
