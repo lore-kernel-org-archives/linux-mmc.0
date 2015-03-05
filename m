@@ -1,118 +1,491 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-pltfm: remove the unneeded check of disabled device
-Date: Thu, 5 Mar 2015 16:03:48 +0100
-Message-ID: <CAPDyKFrwP+whb0c50u1fHhZCuMqjMcb62+ygRQ=r+vXs-0P3fw@mail.gmail.com>
-References: <1423031633-26915-1-git-send-email-haokexin@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH] mmc: sdhci: Remove the sdhci exported header file
+Date: Thu,  5 Mar 2015 16:27:43 +0100
+Message-ID: <1425569263-20245-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f180.google.com ([209.85.216.180]:40476 "EHLO
-	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751670AbbCEPDt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 10:03:49 -0500
-Received: by qcvs11 with SMTP id s11so9317363qcv.7
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2015 07:03:48 -0800 (PST)
-In-Reply-To: <1423031633-26915-1-git-send-email-haokexin@gmail.com>
+Received: from mail-lb0-f171.google.com ([209.85.217.171]:44398 "EHLO
+	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932797AbbCEP1z (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 10:27:55 -0500
+Received: by lbiv13 with SMTP id v13so33289411lbi.11
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2015 07:27:53 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kevin Hao <haokexin@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
 
-On 4 February 2015 at 07:33, Kevin Hao <haokexin@gmail.com> wrote:
-> Since commit cd1e65044d44 ("of/device: Don't register disabled
-> devices"), the disabled device will not be registered at all. So
-> we don't need to do the check again in the platform device driver.
->
-> And the check in the current code is useless even if we really
-> run into a disabled device. In this case, it just doesn't parse
-> the dtb for the infos such as quirks or clock, but it will continue
-> to try to init the disabled device after that check. So just remove it.
->
-> Signed-off-by: Kevin Hao <haokexin@gmail.com>
+Since there no users of the struct sdhci_host, but the shdci host
+drivers themselves, let's move the definition of it to the local sdhci
+header.
 
-Applied, thanks!
+The exported sdhci header then becomes empty, so let's remove it.
 
-Kind regards
-Uffe
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/sdhci-acpi.c |   1 -
+ drivers/mmc/host/sdhci.h      | 203 +++++++++++++++++++++++++++++++++++++-
+ include/linux/mmc/sdhci.h     | 220 ------------------------------------------
+ 3 files changed, 202 insertions(+), 222 deletions(-)
+ delete mode 100644 include/linux/mmc/sdhci.h
 
-> ---
->  drivers/mmc/host/sdhci-pltfm.c | 54 ++++++++++++++++++++----------------------
->  1 file changed, 26 insertions(+), 28 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index c5b01d6bb85d..b609c03a9ef8 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -75,43 +75,41 @@ void sdhci_get_of_property(struct platform_device *pdev)
->         u32 bus_width;
->         int size;
->
-> -       if (of_device_is_available(np)) {
-> -               if (of_get_property(np, "sdhci,auto-cmd12", NULL))
-> -                       host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
-> +       if (of_get_property(np, "sdhci,auto-cmd12", NULL))
-> +               host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
->
-> -               if (of_get_property(np, "sdhci,1-bit-only", NULL) ||
-> -                   (of_property_read_u32(np, "bus-width", &bus_width) == 0 &&
-> -                   bus_width == 1))
-> -                       host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
-> +       if (of_get_property(np, "sdhci,1-bit-only", NULL) ||
-> +           (of_property_read_u32(np, "bus-width", &bus_width) == 0 &&
-> +           bus_width == 1))
-> +               host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
->
-> -               if (sdhci_of_wp_inverted(np))
-> -                       host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
-> +       if (sdhci_of_wp_inverted(np))
-> +               host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
->
-> -               if (of_get_property(np, "broken-cd", NULL))
-> -                       host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-> +       if (of_get_property(np, "broken-cd", NULL))
-> +               host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
->
-> -               if (of_get_property(np, "no-1-8-v", NULL))
-> -                       host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
-> +       if (of_get_property(np, "no-1-8-v", NULL))
-> +               host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
->
-> -               if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
-> -                       host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
-> +       if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
-> +               host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
->
-> -               if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
-> -                   of_device_is_compatible(np, "fsl,p1010-esdhc") ||
-> -                   of_device_is_compatible(np, "fsl,t4240-esdhc") ||
-> -                   of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
-> -                       host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-> +       if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
-> +           of_device_is_compatible(np, "fsl,p1010-esdhc") ||
-> +           of_device_is_compatible(np, "fsl,t4240-esdhc") ||
-> +           of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
-> +               host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
->
-> -               clk = of_get_property(np, "clock-frequency", &size);
-> -               if (clk && size == sizeof(*clk) && *clk)
-> -                       pltfm_host->clock = be32_to_cpup(clk);
-> +       clk = of_get_property(np, "clock-frequency", &size);
-> +       if (clk && size == sizeof(*clk) && *clk)
-> +               pltfm_host->clock = be32_to_cpup(clk);
->
-> -               if (of_find_property(np, "keep-power-in-suspend", NULL))
-> -                       host->mmc->pm_caps |= MMC_PM_KEEP_POWER;
-> +       if (of_find_property(np, "keep-power-in-suspend", NULL))
-> +               host->mmc->pm_caps |= MMC_PM_KEEP_POWER;
->
-> -               if (of_find_property(np, "enable-sdio-wakeup", NULL))
-> -                       host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
-> -       }
-> +       if (of_find_property(np, "enable-sdio-wakeup", NULL))
-> +               host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
->  }
->  #else
->  void sdhci_get_of_property(struct platform_device *pdev) {}
-> --
-> 1.9.3
->
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index a45ed39..22d929f 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -40,7 +40,6 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/pm.h>
+ #include <linux/mmc/slot-gpio.h>
+-#include <linux/mmc/sdhci.h>
+ 
+ #include "sdhci.h"
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 0315e18..e639b7f 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -18,7 +18,7 @@
+ #include <linux/types.h>
+ #include <linux/io.h>
+ 
+-#include <linux/mmc/sdhci.h>
++#include <linux/mmc/host.h>
+ 
+ /*
+  * Controller registers
+@@ -309,6 +309,207 @@ struct sdhci_adma2_64_desc {
+  */
+ #define SDHCI_MAX_SEGS		128
+ 
++struct sdhci_host_next {
++	unsigned int	sg_count;
++	s32		cookie;
++};
++
++struct sdhci_host {
++	/* Data set by hardware interface driver */
++	const char *hw_name;	/* Hardware bus name */
++
++	unsigned int quirks;	/* Deviations from spec. */
++
++/* Controller doesn't honor resets unless we touch the clock register */
++#define SDHCI_QUIRK_CLOCK_BEFORE_RESET			(1<<0)
++/* Controller has bad caps bits, but really supports DMA */
++#define SDHCI_QUIRK_FORCE_DMA				(1<<1)
++/* Controller doesn't like to be reset when there is no card inserted. */
++#define SDHCI_QUIRK_NO_CARD_NO_RESET			(1<<2)
++/* Controller doesn't like clearing the power reg before a change */
++#define SDHCI_QUIRK_SINGLE_POWER_WRITE			(1<<3)
++/* Controller has flaky internal state so reset it on each ios change */
++#define SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS		(1<<4)
++/* Controller has an unusable DMA engine */
++#define SDHCI_QUIRK_BROKEN_DMA				(1<<5)
++/* Controller has an unusable ADMA engine */
++#define SDHCI_QUIRK_BROKEN_ADMA				(1<<6)
++/* Controller can only DMA from 32-bit aligned addresses */
++#define SDHCI_QUIRK_32BIT_DMA_ADDR			(1<<7)
++/* Controller can only DMA chunk sizes that are a multiple of 32 bits */
++#define SDHCI_QUIRK_32BIT_DMA_SIZE			(1<<8)
++/* Controller can only ADMA chunks that are a multiple of 32 bits */
++#define SDHCI_QUIRK_32BIT_ADMA_SIZE			(1<<9)
++/* Controller needs to be reset after each request to stay stable */
++#define SDHCI_QUIRK_RESET_AFTER_REQUEST			(1<<10)
++/* Controller needs voltage and power writes to happen separately */
++#define SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER		(1<<11)
++/* Controller provides an incorrect timeout value for transfers */
++#define SDHCI_QUIRK_BROKEN_TIMEOUT_VAL			(1<<12)
++/* Controller has an issue with buffer bits for small transfers */
++#define SDHCI_QUIRK_BROKEN_SMALL_PIO			(1<<13)
++/* Controller does not provide transfer-complete interrupt when not busy */
++#define SDHCI_QUIRK_NO_BUSY_IRQ				(1<<14)
++/* Controller has unreliable card detection */
++#define SDHCI_QUIRK_BROKEN_CARD_DETECTION		(1<<15)
++/* Controller reports inverted write-protect state */
++#define SDHCI_QUIRK_INVERTED_WRITE_PROTECT		(1<<16)
++/* Controller does not like fast PIO transfers */
++#define SDHCI_QUIRK_PIO_NEEDS_DELAY			(1<<18)
++/* Controller has to be forced to use block size of 2048 bytes */
++#define SDHCI_QUIRK_FORCE_BLK_SZ_2048			(1<<20)
++/* Controller cannot do multi-block transfers */
++#define SDHCI_QUIRK_NO_MULTIBLOCK			(1<<21)
++/* Controller can only handle 1-bit data transfers */
++#define SDHCI_QUIRK_FORCE_1_BIT_DATA			(1<<22)
++/* Controller needs 10ms delay between applying power and clock */
++#define SDHCI_QUIRK_DELAY_AFTER_POWER			(1<<23)
++/* Controller uses SDCLK instead of TMCLK for data timeouts */
++#define SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK		(1<<24)
++/* Controller reports wrong base clock capability */
++#define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
++/* Controller cannot support End Attribute in NOP ADMA descriptor */
++#define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
++/* Controller is missing device caps. Use caps provided by host */
++#define SDHCI_QUIRK_MISSING_CAPS			(1<<27)
++/* Controller uses Auto CMD12 command to stop the transfer */
++#define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12		(1<<28)
++/* Controller doesn't have HISPD bit field in HI-SPEED SD card */
++#define SDHCI_QUIRK_NO_HISPD_BIT			(1<<29)
++/* Controller treats ADMA descriptors with length 0000h incorrectly */
++#define SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC		(1<<30)
++/* The read-only detection via SDHCI_PRESENT_STATE register is unstable */
++#define SDHCI_QUIRK_UNSTABLE_RO_DETECT			(1<<31)
++
++	unsigned int quirks2;	/* More deviations from spec. */
++
++#define SDHCI_QUIRK2_HOST_OFF_CARD_ON			(1<<0)
++#define SDHCI_QUIRK2_HOST_NO_CMD23			(1<<1)
++/* The system physically doesn't support 1.8v, even if the host does */
++#define SDHCI_QUIRK2_NO_1_8_V				(1<<2)
++#define SDHCI_QUIRK2_PRESET_VALUE_BROKEN		(1<<3)
++#define SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON		(1<<4)
++/* Controller has a non-standard host control register */
++#define SDHCI_QUIRK2_BROKEN_HOST_CONTROL		(1<<5)
++/* Controller does not support HS200 */
++#define SDHCI_QUIRK2_BROKEN_HS200			(1<<6)
++/* Controller does not support DDR50 */
++#define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
++/* Stop command (CMD12) can set Transfer Complete when not using MMC_RSP_BUSY */
++#define SDHCI_QUIRK2_STOP_WITH_TC			(1<<8)
++/* Controller does not support 64-bit DMA */
++#define SDHCI_QUIRK2_BROKEN_64_BIT_DMA			(1<<9)
++/* need clear transfer mode register before send cmd */
++#define SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD	(1<<10)
++/* Capability register bit-63 indicates HS400 support */
++#define SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400		(1<<11)
++/* forced tuned clock */
++#define SDHCI_QUIRK2_TUNING_WORK_AROUND			(1<<12)
++/* disable the block count for single block transactions */
++#define SDHCI_QUIRK2_SUPPORT_SINGLE			(1<<13)
++/* Controller broken with using ACMD23 */
++#define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<14)
++
++	int irq;		/* Device IRQ */
++	void __iomem *ioaddr;	/* Mapped address */
++
++	const struct sdhci_ops *ops;	/* Low level hw interface */
++
++	/* Internal data */
++	struct mmc_host *mmc;	/* MMC structure */
++	u64 dma_mask;		/* custom DMA mask */
++
++#if defined(CONFIG_LEDS_CLASS) || defined(CONFIG_LEDS_CLASS_MODULE)
++	struct led_classdev led;	/* LED control */
++	char led_name[32];
++#endif
++
++	spinlock_t lock;	/* Mutex */
++
++	int flags;		/* Host attributes */
++#define SDHCI_USE_SDMA		(1<<0)	/* Host is SDMA capable */
++#define SDHCI_USE_ADMA		(1<<1)	/* Host is ADMA capable */
++#define SDHCI_REQ_USE_DMA	(1<<2)	/* Use DMA for this req. */
++#define SDHCI_DEVICE_DEAD	(1<<3)	/* Device unresponsive */
++#define SDHCI_SDR50_NEEDS_TUNING (1<<4)	/* SDR50 needs tuning */
++#define SDHCI_NEEDS_RETUNING	(1<<5)	/* Host needs retuning */
++#define SDHCI_AUTO_CMD12	(1<<6)	/* Auto CMD12 support */
++#define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
++#define SDHCI_PV_ENABLED	(1<<8)	/* Preset value enabled */
++#define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
++#define SDHCI_SDR104_NEEDS_TUNING (1<<10)	/* SDR104/HS200 needs tuning */
++#define SDHCI_USING_RETUNING_TIMER (1<<11)	/* Host is using a retuning timer for the card */
++#define SDHCI_USE_64_BIT_DMA	(1<<12)	/* Use 64-bit DMA */
++#define SDHCI_HS400_TUNING	(1<<13)	/* Tuning for HS400 */
++
++	unsigned int version;	/* SDHCI spec. version */
++
++	unsigned int max_clk;	/* Max possible freq (MHz) */
++	unsigned int timeout_clk;	/* Timeout freq (KHz) */
++	unsigned int clk_mul;	/* Clock Muliplier value */
++
++	unsigned int clock;	/* Current clock (MHz) */
++	u8 pwr;			/* Current voltage */
++
++	bool runtime_suspended;	/* Host is runtime suspended */
++	bool bus_on;		/* Bus power prevents runtime suspend */
++	bool preset_enabled;	/* Preset is enabled */
++
++	struct mmc_request *mrq;	/* Current request */
++	struct mmc_command *cmd;	/* Current command */
++	struct mmc_data *data;	/* Current data request */
++	unsigned int data_early:1;	/* Data finished before cmd */
++	unsigned int busy_handle:1;	/* Handling the order of Busy-end */
++
++	struct sg_mapping_iter sg_miter;	/* SG state for PIO */
++	unsigned int blocks;	/* remaining PIO blocks */
++
++	int sg_count;		/* Mapped sg entries */
++
++	void *adma_table;	/* ADMA descriptor table */
++	void *align_buffer;	/* Bounce buffer */
++
++	size_t adma_table_sz;	/* ADMA descriptor table size */
++	size_t align_buffer_sz;	/* Bounce buffer size */
++
++	dma_addr_t adma_addr;	/* Mapped ADMA descr. table */
++	dma_addr_t align_addr;	/* Mapped bounce buffer */
++
++	unsigned int desc_sz;	/* ADMA descriptor size */
++	unsigned int align_sz;	/* ADMA alignment */
++	unsigned int align_mask;	/* ADMA alignment mask */
++
++	struct tasklet_struct finish_tasklet;	/* Tasklet structures */
++
++	struct timer_list timer;	/* Timer for timeouts */
++
++	u32 caps;		/* Alternative CAPABILITY_0 */
++	u32 caps1;		/* Alternative CAPABILITY_1 */
++
++	unsigned int            ocr_avail_sdio;	/* OCR bit masks */
++	unsigned int            ocr_avail_sd;
++	unsigned int            ocr_avail_mmc;
++	u32 ocr_mask;		/* available voltages */
++
++	unsigned		timing;		/* Current timing */
++
++	u32			thread_isr;
++
++	/* cached registers */
++	u32			ier;
++
++	wait_queue_head_t	buf_ready_int;	/* Waitqueue for Buffer Read Ready interrupt */
++	unsigned int		tuning_done;	/* Condition flag set when CMD19 succeeds */
++
++	unsigned int		tuning_count;	/* Timer count for re-tuning */
++	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
++#define SDHCI_TUNING_MODE_1	0
++	struct timer_list	tuning_timer;	/* Timer for tuning */
++
++	struct sdhci_host_next	next_data;
++	unsigned long private[0] ____cacheline_aligned;
++};
++
+ struct sdhci_ops {
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+ 	u32		(*read_l)(struct sdhci_host *host, int reg);
+diff --git a/include/linux/mmc/sdhci.h b/include/linux/mmc/sdhci.h
+deleted file mode 100644
+index 1bafb1e..0000000
+--- a/include/linux/mmc/sdhci.h
++++ /dev/null
+@@ -1,220 +0,0 @@
+-/*
+- *  linux/include/linux/mmc/sdhci.h - Secure Digital Host Controller Interface
+- *
+- *  Copyright (C) 2005-2008 Pierre Ossman, All Rights Reserved.
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation; either version 2 of the License, or (at
+- * your option) any later version.
+- */
+-#ifndef LINUX_MMC_SDHCI_H
+-#define LINUX_MMC_SDHCI_H
+-
+-#include <linux/scatterlist.h>
+-#include <linux/compiler.h>
+-#include <linux/types.h>
+-#include <linux/io.h>
+-#include <linux/mmc/host.h>
+-
+-struct sdhci_host_next {
+-	unsigned int	sg_count;
+-	s32		cookie;
+-};
+-
+-struct sdhci_host {
+-	/* Data set by hardware interface driver */
+-	const char *hw_name;	/* Hardware bus name */
+-
+-	unsigned int quirks;	/* Deviations from spec. */
+-
+-/* Controller doesn't honor resets unless we touch the clock register */
+-#define SDHCI_QUIRK_CLOCK_BEFORE_RESET			(1<<0)
+-/* Controller has bad caps bits, but really supports DMA */
+-#define SDHCI_QUIRK_FORCE_DMA				(1<<1)
+-/* Controller doesn't like to be reset when there is no card inserted. */
+-#define SDHCI_QUIRK_NO_CARD_NO_RESET			(1<<2)
+-/* Controller doesn't like clearing the power reg before a change */
+-#define SDHCI_QUIRK_SINGLE_POWER_WRITE			(1<<3)
+-/* Controller has flaky internal state so reset it on each ios change */
+-#define SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS		(1<<4)
+-/* Controller has an unusable DMA engine */
+-#define SDHCI_QUIRK_BROKEN_DMA				(1<<5)
+-/* Controller has an unusable ADMA engine */
+-#define SDHCI_QUIRK_BROKEN_ADMA				(1<<6)
+-/* Controller can only DMA from 32-bit aligned addresses */
+-#define SDHCI_QUIRK_32BIT_DMA_ADDR			(1<<7)
+-/* Controller can only DMA chunk sizes that are a multiple of 32 bits */
+-#define SDHCI_QUIRK_32BIT_DMA_SIZE			(1<<8)
+-/* Controller can only ADMA chunks that are a multiple of 32 bits */
+-#define SDHCI_QUIRK_32BIT_ADMA_SIZE			(1<<9)
+-/* Controller needs to be reset after each request to stay stable */
+-#define SDHCI_QUIRK_RESET_AFTER_REQUEST			(1<<10)
+-/* Controller needs voltage and power writes to happen separately */
+-#define SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER		(1<<11)
+-/* Controller provides an incorrect timeout value for transfers */
+-#define SDHCI_QUIRK_BROKEN_TIMEOUT_VAL			(1<<12)
+-/* Controller has an issue with buffer bits for small transfers */
+-#define SDHCI_QUIRK_BROKEN_SMALL_PIO			(1<<13)
+-/* Controller does not provide transfer-complete interrupt when not busy */
+-#define SDHCI_QUIRK_NO_BUSY_IRQ				(1<<14)
+-/* Controller has unreliable card detection */
+-#define SDHCI_QUIRK_BROKEN_CARD_DETECTION		(1<<15)
+-/* Controller reports inverted write-protect state */
+-#define SDHCI_QUIRK_INVERTED_WRITE_PROTECT		(1<<16)
+-/* Controller does not like fast PIO transfers */
+-#define SDHCI_QUIRK_PIO_NEEDS_DELAY			(1<<18)
+-/* Controller has to be forced to use block size of 2048 bytes */
+-#define SDHCI_QUIRK_FORCE_BLK_SZ_2048			(1<<20)
+-/* Controller cannot do multi-block transfers */
+-#define SDHCI_QUIRK_NO_MULTIBLOCK			(1<<21)
+-/* Controller can only handle 1-bit data transfers */
+-#define SDHCI_QUIRK_FORCE_1_BIT_DATA			(1<<22)
+-/* Controller needs 10ms delay between applying power and clock */
+-#define SDHCI_QUIRK_DELAY_AFTER_POWER			(1<<23)
+-/* Controller uses SDCLK instead of TMCLK for data timeouts */
+-#define SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK		(1<<24)
+-/* Controller reports wrong base clock capability */
+-#define SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN		(1<<25)
+-/* Controller cannot support End Attribute in NOP ADMA descriptor */
+-#define SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC		(1<<26)
+-/* Controller is missing device caps. Use caps provided by host */
+-#define SDHCI_QUIRK_MISSING_CAPS			(1<<27)
+-/* Controller uses Auto CMD12 command to stop the transfer */
+-#define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12		(1<<28)
+-/* Controller doesn't have HISPD bit field in HI-SPEED SD card */
+-#define SDHCI_QUIRK_NO_HISPD_BIT			(1<<29)
+-/* Controller treats ADMA descriptors with length 0000h incorrectly */
+-#define SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC		(1<<30)
+-/* The read-only detection via SDHCI_PRESENT_STATE register is unstable */
+-#define SDHCI_QUIRK_UNSTABLE_RO_DETECT			(1<<31)
+-
+-	unsigned int quirks2;	/* More deviations from spec. */
+-
+-#define SDHCI_QUIRK2_HOST_OFF_CARD_ON			(1<<0)
+-#define SDHCI_QUIRK2_HOST_NO_CMD23			(1<<1)
+-/* The system physically doesn't support 1.8v, even if the host does */
+-#define SDHCI_QUIRK2_NO_1_8_V				(1<<2)
+-#define SDHCI_QUIRK2_PRESET_VALUE_BROKEN		(1<<3)
+-#define SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON		(1<<4)
+-/* Controller has a non-standard host control register */
+-#define SDHCI_QUIRK2_BROKEN_HOST_CONTROL		(1<<5)
+-/* Controller does not support HS200 */
+-#define SDHCI_QUIRK2_BROKEN_HS200			(1<<6)
+-/* Controller does not support DDR50 */
+-#define SDHCI_QUIRK2_BROKEN_DDR50			(1<<7)
+-/* Stop command (CMD12) can set Transfer Complete when not using MMC_RSP_BUSY */
+-#define SDHCI_QUIRK2_STOP_WITH_TC			(1<<8)
+-/* Controller does not support 64-bit DMA */
+-#define SDHCI_QUIRK2_BROKEN_64_BIT_DMA			(1<<9)
+-/* need clear transfer mode register before send cmd */
+-#define SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD	(1<<10)
+-/* Capability register bit-63 indicates HS400 support */
+-#define SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400		(1<<11)
+-/* forced tuned clock */
+-#define SDHCI_QUIRK2_TUNING_WORK_AROUND			(1<<12)
+-/* disable the block count for single block transactions */
+-#define SDHCI_QUIRK2_SUPPORT_SINGLE			(1<<13)
+-/* Controller broken with using ACMD23 */
+-#define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<14)
+-
+-	int irq;		/* Device IRQ */
+-	void __iomem *ioaddr;	/* Mapped address */
+-
+-	const struct sdhci_ops *ops;	/* Low level hw interface */
+-
+-	/* Internal data */
+-	struct mmc_host *mmc;	/* MMC structure */
+-	u64 dma_mask;		/* custom DMA mask */
+-
+-#if defined(CONFIG_LEDS_CLASS) || defined(CONFIG_LEDS_CLASS_MODULE)
+-	struct led_classdev led;	/* LED control */
+-	char led_name[32];
+-#endif
+-
+-	spinlock_t lock;	/* Mutex */
+-
+-	int flags;		/* Host attributes */
+-#define SDHCI_USE_SDMA		(1<<0)	/* Host is SDMA capable */
+-#define SDHCI_USE_ADMA		(1<<1)	/* Host is ADMA capable */
+-#define SDHCI_REQ_USE_DMA	(1<<2)	/* Use DMA for this req. */
+-#define SDHCI_DEVICE_DEAD	(1<<3)	/* Device unresponsive */
+-#define SDHCI_SDR50_NEEDS_TUNING (1<<4)	/* SDR50 needs tuning */
+-#define SDHCI_NEEDS_RETUNING	(1<<5)	/* Host needs retuning */
+-#define SDHCI_AUTO_CMD12	(1<<6)	/* Auto CMD12 support */
+-#define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
+-#define SDHCI_PV_ENABLED	(1<<8)	/* Preset value enabled */
+-#define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
+-#define SDHCI_SDR104_NEEDS_TUNING (1<<10)	/* SDR104/HS200 needs tuning */
+-#define SDHCI_USING_RETUNING_TIMER (1<<11)	/* Host is using a retuning timer for the card */
+-#define SDHCI_USE_64_BIT_DMA	(1<<12)	/* Use 64-bit DMA */
+-#define SDHCI_HS400_TUNING	(1<<13)	/* Tuning for HS400 */
+-
+-	unsigned int version;	/* SDHCI spec. version */
+-
+-	unsigned int max_clk;	/* Max possible freq (MHz) */
+-	unsigned int timeout_clk;	/* Timeout freq (KHz) */
+-	unsigned int clk_mul;	/* Clock Muliplier value */
+-
+-	unsigned int clock;	/* Current clock (MHz) */
+-	u8 pwr;			/* Current voltage */
+-
+-	bool runtime_suspended;	/* Host is runtime suspended */
+-	bool bus_on;		/* Bus power prevents runtime suspend */
+-	bool preset_enabled;	/* Preset is enabled */
+-
+-	struct mmc_request *mrq;	/* Current request */
+-	struct mmc_command *cmd;	/* Current command */
+-	struct mmc_data *data;	/* Current data request */
+-	unsigned int data_early:1;	/* Data finished before cmd */
+-	unsigned int busy_handle:1;	/* Handling the order of Busy-end */
+-
+-	struct sg_mapping_iter sg_miter;	/* SG state for PIO */
+-	unsigned int blocks;	/* remaining PIO blocks */
+-
+-	int sg_count;		/* Mapped sg entries */
+-
+-	void *adma_table;	/* ADMA descriptor table */
+-	void *align_buffer;	/* Bounce buffer */
+-
+-	size_t adma_table_sz;	/* ADMA descriptor table size */
+-	size_t align_buffer_sz;	/* Bounce buffer size */
+-
+-	dma_addr_t adma_addr;	/* Mapped ADMA descr. table */
+-	dma_addr_t align_addr;	/* Mapped bounce buffer */
+-
+-	unsigned int desc_sz;	/* ADMA descriptor size */
+-	unsigned int align_sz;	/* ADMA alignment */
+-	unsigned int align_mask;	/* ADMA alignment mask */
+-
+-	struct tasklet_struct finish_tasklet;	/* Tasklet structures */
+-
+-	struct timer_list timer;	/* Timer for timeouts */
+-
+-	u32 caps;		/* Alternative CAPABILITY_0 */
+-	u32 caps1;		/* Alternative CAPABILITY_1 */
+-
+-	unsigned int            ocr_avail_sdio;	/* OCR bit masks */
+-	unsigned int            ocr_avail_sd;
+-	unsigned int            ocr_avail_mmc;
+-	u32 ocr_mask;		/* available voltages */
+-
+-	unsigned		timing;		/* Current timing */
+-
+-	u32			thread_isr;
+-
+-	/* cached registers */
+-	u32			ier;
+-
+-	wait_queue_head_t	buf_ready_int;	/* Waitqueue for Buffer Read Ready interrupt */
+-	unsigned int		tuning_done;	/* Condition flag set when CMD19 succeeds */
+-
+-	unsigned int		tuning_count;	/* Timer count for re-tuning */
+-	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
+-#define SDHCI_TUNING_MODE_1	0
+-	struct timer_list	tuning_timer;	/* Timer for tuning */
+-
+-	struct sdhci_host_next	next_data;
+-	unsigned long private[0] ____cacheline_aligned;
+-};
+-#endif /* LINUX_MMC_SDHCI_H */
+-- 
+1.9.1
+
