@@ -1,131 +1,67 @@
-From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-Subject: [PATCH 3/3] cmds/read_extcsd: add a few new mmc 5.0 fields
-Date: Thu,  5 Mar 2015 14:19:25 +0100
-Message-ID: <1425561565-24806-4-git-send-email-bigeasy@linutronix.de>
-References: <1425561565-24806-1-git-send-email-bigeasy@linutronix.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: tmio: Remove bogus un-initialization in tmio_mmc_host_free()
+Date: Thu, 5 Mar 2015 14:41:13 +0100
+Message-ID: <CAPDyKFpEOo3Wx3nKiiULNy0aX-zX-UJw0h3uDihtmDkQmUQMOg@mail.gmail.com>
+References: <1424277299-24964-1-git-send-email-geert+renesas@glider.be>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from www.linutronix.de ([62.245.132.108]:49814 "EHLO
-	Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753041AbbCENTk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 08:19:40 -0500
-In-Reply-To: <1425561565-24806-1-git-send-email-bigeasy@linutronix.de>
+Received: from mail-qg0-f46.google.com ([209.85.192.46]:42686 "EHLO
+	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754740AbbCENlO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 08:41:14 -0500
+Received: by qgfi50 with SMTP id i50so5103351qgf.9
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2015 05:41:14 -0800 (PST)
+In-Reply-To: <1424277299-24964-1-git-send-email-geert+renesas@glider.be>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+To: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Ian Molton <ian.molton@codethink.co.uk>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-The output then starts with:
+On 18 February 2015 at 17:34, Geert Uytterhoeven
+<geert+renesas@glider.be> wrote:
+> If CONFIG_DEBUG_SLAB=y:
+>
+>     sh_mobile_sdhi ee100000.sd: Got CD GPIO
+>     sh_mobile_sdhi ee100000.sd: Got WP GPIO
+>     platform ee100000.sd: Driver sh_mobile_sdhi requests probe deferral
+>     ...
+>     Slab corruption (Not tainted): kmalloc-1024 start=ed8b3c00, len=1024
+>     2d0: 00 00 00 00 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b  ....kkkkkkkkkkkk
+>     Prev obj: start=ed8b3800, len=1024
+>     000: 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b  kkkkkkkkkkkkkkkk
+>     010: 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b  kkkkkkkkkkkkkkkk
+>
+> Struct tmio_mmc_host is embedded inside struct mmc_host, and thus is
+> freed by the call to mmc_free_host(). Hence it must not be written to
+> afterwards, as that will corrupt freed (and perhaps already reused)
+> memory.
+>
+> Fixes: 94b110aff8679b14 ("mmc: tmio: add tmio_mmc_host_alloc/free()")
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-|=============================================
-|  Extended CSD rev 1.7 (MMC 5.0)
-|=============================================
-|
-|Card Supported Command sets [S_CMD_SET: 0x01]
-|HPI Features [HPI_FEATURE: 0x01]: implementation based on CMD13
-|Background operations support [BKOPS_SUPPORT: 0x01]
-|Extended Security Commands Error [EXT_SECURITY_ERR: 0x00]
-|Device life time estimation type B [DEVICE_LIFE_TIME_EST_TYP_B: 01]
-| i.e. 0% - 10% device life time used
-|Device life time estimation type A [DEVICE_LIFE_TIME_EST_TYP_A: 01]
-| i.e. 0% - 10% device life time used
-|Pre EOL information [PRE_EOL_INFO: 01]
-| i.e. normal
-|Device version [DEVICE_VERSION: 38 05]
-|Firmware version [FIRMWARE_VERSION: 00 00 00 00 00 00 00 03
-| i.e.
+Applied, thanks!
 
-Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
----
- mmc_cmds.c | 69 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 69 insertions(+)
+Kind regards
+Uffe
 
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 8addd35046d7..195506b7b7ab 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -698,6 +698,28 @@ int do_write_reliability_set(int nargs, char **argv)
- 	return 0;
- }
- 
-+static const char *ext_csd_get_lifetime(unsigned int val)
-+{
-+	static char lifetime[80];
-+	switch (val) {
-+	case 1 ... 0xa:
-+		snprintf(lifetime, sizeof(lifetime),
-+			 "%u%% - %u%% device life time used",
-+			 (val - 1) * 10,
-+			 (val - 0) * 10);
-+		break;
-+	case 0xb:
-+		strncpy(lifetime, "Exceeded its maximum estimated "
-+			"device life time", sizeof(lifetime));
-+		break;
-+	case 0:
-+	default:
-+		strncpy(lifetime, "Not defined", sizeof(lifetime));
-+		break;
-+	}
-+	return lifetime;
-+}
-+
- int do_read_extcsd(int nargs, char **argv)
- {
- 	__u8 ext_csd[512], ext_csd_rev, reg;
-@@ -778,6 +800,53 @@ int do_read_extcsd(int nargs, char **argv)
- 	printf("Background operations support [BKOPS_SUPPORT: 0x%02x]\n",
- 		ext_csd[502]);
- 
-+	if (ext_csd_rev >= 7) {
-+		const char *str;
-+
-+		printf("Extended Security Commands Error "
-+		       "[EXT_SECURITY_ERR: 0x%02x]\n", ext_csd[505]);
-+
-+		printf("Device life time estimation type B "
-+		       "[DEVICE_LIFE_TIME_EST_TYP_B: %02x]\n", ext_csd[269]);
-+		printf(" i.e. %s\n", ext_csd_get_lifetime(ext_csd[269]));
-+		printf("Device life time estimation type A "
-+		       "[DEVICE_LIFE_TIME_EST_TYP_A: %02x]\n", ext_csd[268]);
-+		printf(" i.e. %s\n", ext_csd_get_lifetime(ext_csd[268]));
-+
-+		printf("Pre EOL information [PRE_EOL_INFO: %02x]\n",
-+		       ext_csd[267]);
-+		switch (ext_csd[267]) {
-+		case 1: str = "normal";
-+			break;
-+		case 2: str = "warning, consumed 80% of reserved block";
-+			break;
-+		case 3: str = "urgend";
-+			break;
-+		case 0:
-+		default:
-+			str = "Not defined";
-+			break;
-+		}
-+		printf(" i.e. %s\n", str);
-+		/* optimal read, write, trim size */
-+
-+		printf("Device version [DEVICE_VERSION: %02x %02x]\n",
-+		       ext_csd[263], ext_csd[262]);
-+		printf("Firmware version [FIRMWARE_VERSION: "
-+		       "%02x %02x %02x %02x %02x %02x %02x %02x \n",
-+		       ext_csd[261], ext_csd[260], ext_csd[259], ext_csd[258],
-+		       ext_csd[257], ext_csd[256], ext_csd[255], ext_csd[254]);
-+		printf(" i.e. %c%c%c%c%c%c%c%c\n",
-+		       isprint(ext_csd[261]) ? ext_csd[261] : ' ',
-+		       isprint(ext_csd[260]) ? ext_csd[260] : ' ',
-+		       isprint(ext_csd[259]) ? ext_csd[259] : ' ',
-+		       isprint(ext_csd[258]) ? ext_csd[258] : ' ',
-+		       isprint(ext_csd[257]) ? ext_csd[257] : ' ',
-+		       isprint(ext_csd[256]) ? ext_csd[256] : ' ',
-+		       isprint(ext_csd[255]) ? ext_csd[255] : ' ',
-+		       isprint(ext_csd[254]) ? ext_csd[254] : ' ');
-+	}
-+
- 	if (ext_csd_rev >= 6) {
- 		printf("Max Packet Read Cmd [MAX_PACKED_READS: 0x%02x]\n",
- 			ext_csd[501]);
--- 
-2.1.4
-
+> ---
+>  drivers/mmc/host/tmio_mmc_pio.c | 2 --
+>  1 file changed, 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index a31c3573d386f8c6..dba7e1c19dd758e7 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -1073,8 +1073,6 @@ EXPORT_SYMBOL(tmio_mmc_host_alloc);
+>  void tmio_mmc_host_free(struct tmio_mmc_host *host)
+>  {
+>         mmc_free_host(host->mmc);
+> -
+> -       host->mmc = NULL;
+>  }
+>  EXPORT_SYMBOL(tmio_mmc_host_free);
+>
+> --
+> 1.9.1
+>
