@@ -1,80 +1,86 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sirf: update sdhci_sirf_execute_tuning procedure
-Date: Thu, 5 Mar 2015 14:41:46 +0100
-Message-ID: <CAPDyKFqaagDGvHKOWjCpRpFPtTJZiU=73c9d9qN24cw0DCeKyg@mail.gmail.com>
-References: <1424015031-24676-1-git-send-email-21cnbao@gmail.com>
+Subject: Re: [PATCH 0/6] mmc: omap_hsmmc: simplify cover/card detect logic
+Date: Thu, 5 Mar 2015 14:43:48 +0100
+Message-ID: <CAPDyKFoepEcJsW16zry9tNsyXx8=GMk8SfjwkTbw+ySHTVg7+g@mail.gmail.com>
+References: <1425385698-6588-1-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f48.google.com ([209.85.192.48]:45366 "EHLO
-	mail-qg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932616AbbCENlq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 08:41:46 -0500
-Received: by qgaj5 with SMTP id j5so5104163qga.12
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2015 05:41:46 -0800 (PST)
-In-Reply-To: <1424015031-24676-1-git-send-email-21cnbao@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1425385698-6588-1-git-send-email-afenkart@gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, NeilBrown <neilb@suse.de>, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Barry Song <21cnbao@gmail.com>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, weijun yang <york.yang@csr.com>, Barry Song <baohua.song@csr.com>
 
-On 15 February 2015 at 16:43, Barry Song <21cnbao@gmail.com> wrote:
-> From: weijun yang <york.yang@csr.com>
+On 3 March 2015 at 13:28, Andreas Fenkart <afenkart@gmail.com> wrote:
+> These patches are trying to clean up the cover/card detect logic.
 >
-> For the original tuning code, delay value is set to SD Bus Clock Delay
-> Register (SD_CLK_DELAY_SETTING) as (val | (Val << 7) | (val << 16)),
-> which means CLK_DELAY_IN1, CLK_DELAY_IN2 and CLK_DELAY_OUT are the
-> same and with 128 steps. This is doubtful. In CSR design specification
-> documents CS-304575-DR-3H, this issue is clarified, the delay[13:0] in
-> SD_CLK_DELAY_SETTING is simplied to the concatenation of {CLK_DELAY_IN2,
-> CLK_DELAY_IN1}.
-> Besides, for CMD19 tuning, no need to set CLK_DELAY_OUT([22,16]
-> of SD_CLK_DELAY_SETTING).
+>   Mobile phones (some) have no card detect pin, but
+>   can detect if the cover is removed. The purpose is the
+>   same; detect if card is being added/removed, but the
+>   details differ.
+>   When the cover is removed, it does not mean the card is
+>   gone. But it might, since it is accessible now. It's like
+>   a warning. All the driver does is to limit write access to
+>   the card, see protect_card flag. In contrast, card detect
+>   notifies us after the fact, e.g. card is gone, card is
+>   inserted.
 >
-> Signed-off-by: weijun yang <york.yang@csr.com>
-> Signed-off-by: Barry Song <baohua.song@csr.com>
+> While cover detect is only used by one platform (rx51), it
+> complicates the card detect logic. By separating the code
+> paths they both become easier to understand and maintain
+>
+> Patches have been tested by reverting: 95bebb5696ab
+> 'mmc: omap_hsmmc: use mmc_of_parse to parse common mmc configuration'
+> otherwise gpio detection is handled by mmc_of_parse
+>
+> compile tested
+> OMAP2:
+> CONFIG_MACH_OMAP2_TUSB6010=y
+> CONFIG_MACH_OMAP3_BEAGLE=y
+> CONFIG_MACH_DEVKIT8000=y
+> CONFIG_MACH_OMAP_LDP=y
+> CONFIG_MACH_OMAP3530_LV_SOM=y
+> CONFIG_MACH_OMAP3_TORPEDO=y
+> CONFIG_MACH_OVERO=y
+> CONFIG_MACH_OMAP3517EVM=y
+> CONFIG_MACH_CRANEBOARD=y
+> CONFIG_MACH_OMAP3_PANDORA=y
+> CONFIG_MACH_TOUCHBOOK=y
+> CONFIG_MACH_OMAP_3430SDP=y
+> CONFIG_MACH_NOKIA_N810=y
+> CONFIG_MACH_NOKIA_N810_WIMAX=y
+> CONFIG_MACH_NOKIA_N8X0=y
+> CONFIG_MACH_NOKIA_RX51=y
+> CONFIG_MACH_CM_T35=y
+> CONFIG_MACH_CM_T3517=y
+> CONFIG_MACH_CM_T3730=y
+> CONFIG_MACH_SBC3530=y
+> CONFIG_MACH_TI8168EVM=y
+> CONFIG_MACH_TI8148EVM=y
+>
+> Andreas Fenkart (6):
+>   mmc: omap_hsmmc: remove unused fields from struct omap_hsmmc_host
+>   mmc: omap_hsmmc: use slot-gpio functions to manage read-only pin
+>     directly
+>   mmc: omap_hsmmc: use distinctive code paths for cover / card detect
+>     logic
+>   ARM: OMAP2: HSMMC: platform_data: explicit gpio_cover / gpio_cd fields
+>   mmc: omap_hsmmc: simplify card/cover detect isr
+>   mmc: omap_hsmmc: use generic slot-gpio isr to manage card detect pin
+>
+>  arch/arm/mach-omap2/hsmmc.c              | 33 +++++++++----
+>  drivers/mmc/host/omap_hsmmc.c            | 80 +++++++++-----------------------
+>  include/linux/platform_data/hsmmc-omap.h |  6 +--
+>  3 files changed, 48 insertions(+), 71 deletions(-)
+>
+> --
+> 2.1.4
+>
 
-Applied, thanks!
+Applied patch 1->3, thanks!
+
+If I get an ack for patch 4 (ARM) and can take them all through my tree.
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/sdhci-sirf.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
-> index f6f82ec..4331409 100644
-> --- a/drivers/mmc/host/sdhci-sirf.c
-> +++ b/drivers/mmc/host/sdhci-sirf.c
-> @@ -56,7 +56,7 @@ static int sdhci_sirf_execute_tuning(struct sdhci_host *host, u32 opcode)
->         int tuning_seq_cnt = 3;
->         u8 phase, tuned_phases[SIRF_TUNING_COUNT];
->         u8 tuned_phase_cnt = 0;
-> -       int rc, longest_range = 0;
-> +       int rc = 0, longest_range = 0;
->         int start = -1, end = 0, tuning_value = -1, range = 0;
->         u16 clock_setting;
->         struct mmc_host *mmc = host->mmc;
-> @@ -68,7 +68,7 @@ retry:
->         phase = 0;
->         do {
->                 sdhci_writel(host,
-> -                       clock_setting | phase | (phase << 7) | (phase << 16),
-> +                       clock_setting | phase,
->                         SDHCI_CLK_DELAY_SETTING);
->
->                 if (!mmc_send_tuning(mmc)) {
-> @@ -102,7 +102,7 @@ retry:
->                  */
->                 phase = tuning_value;
->                 sdhci_writel(host,
-> -                       clock_setting | phase | (phase << 7) | (phase << 16),
-> +                       clock_setting | phase,
->                         SDHCI_CLK_DELAY_SETTING);
->
->                 dev_dbg(mmc_dev(mmc), "%s: Setting the tuning phase to %d\n",
-> --
-> 1.9.1
->
