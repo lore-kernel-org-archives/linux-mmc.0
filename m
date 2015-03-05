@@ -1,124 +1,130 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC/PATCH] mmc: tmio: Fix PIO mode with CONFIG_HIGHMEM
-Date: Thu, 5 Mar 2015 15:57:52 +0100
-Message-ID: <CAPDyKFp4+g0aOC=O6bGmRcfBY69fY16+aoN+upLNcEAkhYMrUw@mail.gmail.com>
-References: <54DD91E3.3070903@renesas.com>
+Subject: Re: [PATCH] mmc: tegra: Optimize write_w path for tegra114 and later
+Date: Thu, 5 Mar 2015 15:59:38 +0100
+Message-ID: <CAPDyKForXhWDVf5T9qU9kw8Zs4F5uZfr4LhH7uQHhMwf9n1Brw@mail.gmail.com>
+References: <1423677351-31635-1-git-send-email-rklein@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <54DD91E3.3070903@renesas.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: keita kobayashi <keita.kobayashi.ym@renesas.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1423677351-31635-1-git-send-email-rklein@nvidia.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Rhyland Klein <rklein@nvidia.com>
+Cc: Chris Ball <chris@printf.net>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Alexandre Courbot <gnurou@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 13 February 2015 at 06:55, keita kobayashi
-<keita.kobayashi.ym@renesas.com> wrote:
-> Current PIO mode occurred kernel panic with CONFIG_HIGHMEM.
-> This patch fixes the kernel panic by converting the driver
-> to the sg_miter API.
+On 11 February 2015 at 18:55, Rhyland Klein <rklein@nvidia.com> wrote:
+> Setup a different set of sdhci_ops for tegra114 and later so that
+> the write_w callback is only used on tegra114. This allows us to
+> remove the NVQUIRK_SHADOW_XFER_MODE_REG and simply the logic
+> in tegra_sdhci_writew.
 >
-> Reported-by: Cao Minh Hiep <cm-hiep@jinso.co.jp>
-> Signed-off-by: Keita Kobayashi <keita.kobayashi.ym@renesas.com>
+> This was suggested by Alexandre Courbot.
+>
+> Signed-off-by: Rhyland Klein <rklein@nvidia.com>
 
-Applied, thanks!
+Applied, with some changes, thanks!
+
+1. Added the suggested-by tag.
+2. Remove some unused variables causing compiler warnings.
 
 Kind regards
 Uffe
 
 
 > ---
-> This patch is based on renesas.git / renesas-devel-20150211-v3.19 tag.
+>  drivers/mmc/host/sdhci-tegra.c |   45 +++++++++++++++++++++++-----------------
+>  1 file changed, 26 insertions(+), 19 deletions(-)
 >
->  drivers/mmc/host/tmio_mmc.h     |    1 +
->  drivers/mmc/host/tmio_mmc_pio.c |   35 ++++++++++++++++-------------------
->  2 files changed, 17 insertions(+), 19 deletions(-)
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index f3778d58d1cd..180062498c35 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -41,7 +41,6 @@
+>  #define NVQUIRK_DISABLE_SDR50          BIT(3)
+>  #define NVQUIRK_DISABLE_SDR104         BIT(4)
+>  #define NVQUIRK_DISABLE_DDR50          BIT(5)
+> -#define NVQUIRK_SHADOW_XFER_MODE_REG   BIT(6)
 >
-> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-> index a34ecbe..3092219 100644
-> --- a/drivers/mmc/host/tmio_mmc.h
-> +++ b/drivers/mmc/host/tmio_mmc.h
-> @@ -56,6 +56,7 @@ struct tmio_mmc_host {
->         struct scatterlist      *sg_orig;
->         unsigned int            sg_len;
->         unsigned int            sg_off;
-> +       struct sg_mapping_iter  sg_miter;
+>  struct sdhci_tegra_soc_data {
+>         const struct sdhci_pltfm_data *pdata;
+> @@ -74,20 +73,18 @@ static void tegra_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
+>         struct sdhci_tegra *tegra_host = pltfm_host->priv;
+>         const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
 >
->         struct platform_device *pdev;
->         struct tmio_mmc_data *pdata;
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index 250bf8c..6d8f363 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -70,17 +70,14 @@ static void tmio_mmc_ack_mmc_irqs(struct tmio_mmc_host *host, u32 i)
->
->  static void tmio_mmc_init_sg(struct tmio_mmc_host *host, struct mmc_data *data)
->  {
-> -       host->sg_len = data->sg_len;
-> -       host->sg_ptr = data->sg;
-> -       host->sg_orig = data->sg;
-> -       host->sg_off = 0;
-> -}
-> +       unsigned int flags = SG_MITER_ATOMIC;
->
-> -static int tmio_mmc_next_sg(struct tmio_mmc_host *host)
-> -{
-> -       host->sg_ptr = sg_next(host->sg_ptr);
-> -       host->sg_off = 0;
-> -       return --host->sg_len;
-> +       if (data->flags & MMC_DATA_READ)
-> +               flags |= SG_MITER_TO_SG;
-> +       else
-> +               flags |= SG_MITER_FROM_SG;
-> +
-> +       sg_miter_start(&host->sg_miter, data->sg, data->sg_len, flags);
->  }
->
->  #ifdef CONFIG_MMC_DEBUG
-> @@ -418,7 +415,7 @@ static void tmio_mmc_transfer_data(struct tmio_mmc_host *host,
->  static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
->  {
->         struct mmc_data *data = host->data;
-> -       void *sg_virt;
-> +       struct sg_mapping_iter *sg_miter = &host->sg_miter;
->         unsigned short *buf;
->         unsigned int count;
->         unsigned long flags;
-> @@ -431,10 +428,12 @@ static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
->                 return;
+> -       if (soc_data->nvquirks & NVQUIRK_SHADOW_XFER_MODE_REG) {
+> -               switch (reg) {
+> -               case SDHCI_TRANSFER_MODE:
+> -                       /*
+> -                        * Postpone this write, we must do it together with a
+> -                        * command write that is down below.
+> -                        */
+> -                       pltfm_host->xfer_mode_shadow = val;
+> -                       return;
+> -               case SDHCI_COMMAND:
+> -                       writel((val << 16) | pltfm_host->xfer_mode_shadow,
+> -                               host->ioaddr + SDHCI_TRANSFER_MODE);
+> -                       return;
+> -               }
+> +       switch (reg) {
+> +       case SDHCI_TRANSFER_MODE:
+> +               /*
+> +                * Postpone this write, we must do it together with a
+> +                * command write that is down below.
+> +                */
+> +               pltfm_host->xfer_mode_shadow = val;
+> +               return;
+> +       case SDHCI_COMMAND:
+> +               writel((val << 16) | pltfm_host->xfer_mode_shadow,
+> +                       host->ioaddr + SDHCI_TRANSFER_MODE);
+> +               return;
 >         }
 >
-> -       sg_virt = tmio_mmc_kmap_atomic(host->sg_ptr, &flags);
-> -       buf = (unsigned short *)(sg_virt + host->sg_off);
-> +       local_irq_save(flags);
+>         writew(val, host->ioaddr + reg);
+> @@ -173,7 +170,6 @@ static void tegra_sdhci_set_bus_width(struct sdhci_host *host, int bus_width)
+>  static const struct sdhci_ops tegra_sdhci_ops = {
+>         .get_ro     = tegra_sdhci_get_ro,
+>         .read_w     = tegra_sdhci_readw,
+> -       .write_w    = tegra_sdhci_writew,
+>         .write_l    = tegra_sdhci_writel,
+>         .set_clock  = sdhci_set_clock,
+>         .set_bus_width = tegra_sdhci_set_bus_width,
+> @@ -214,6 +210,18 @@ static struct sdhci_tegra_soc_data soc_data_tegra30 = {
+>                     NVQUIRK_DISABLE_SDR104,
+>  };
 >
-> -       count = host->sg_ptr->length - host->sg_off;
-> +       if (!sg_miter_next(sg_miter))
-> +               return;
-> +       buf = sg_miter->addr;
-> +       count = sg_miter->length;
->         if (count > data->blksz)
->                 count = data->blksz;
+> +static const struct sdhci_ops tegra114_sdhci_ops = {
+> +       .get_ro     = tegra_sdhci_get_ro,
+> +       .read_w     = tegra_sdhci_readw,
+> +       .write_w    = tegra_sdhci_writew,
+> +       .write_l    = tegra_sdhci_writel,
+> +       .set_clock  = sdhci_set_clock,
+> +       .set_bus_width = tegra_sdhci_set_bus_width,
+> +       .reset      = tegra_sdhci_reset,
+> +       .set_uhs_signaling = sdhci_set_uhs_signaling,
+> +       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> +};
+> +
+>  static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+>         .quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+>                   SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+> @@ -221,15 +229,14 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+>                   SDHCI_QUIRK_NO_HISPD_BIT |
+>                   SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
+>                   SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> -       .ops  = &tegra_sdhci_ops,
+> +       .ops  = &tegra114_sdhci_ops,
+>  };
 >
-> @@ -444,12 +443,10 @@ static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
->         /* Transfer the data */
->         tmio_mmc_transfer_data(host, buf, count);
+>  static struct sdhci_tegra_soc_data soc_data_tegra114 = {
+>         .pdata = &sdhci_tegra114_pdata,
+>         .nvquirks = NVQUIRK_DISABLE_SDR50 |
+>                     NVQUIRK_DISABLE_DDR50 |
+> -                   NVQUIRK_DISABLE_SDR104 |
+> -                   NVQUIRK_SHADOW_XFER_MODE_REG,
+> +                   NVQUIRK_DISABLE_SDR104,
+>  };
 >
-> -       host->sg_off += count;
-> -
-> -       tmio_mmc_kunmap_atomic(host->sg_ptr, &flags, sg_virt);
-> +       sg_miter->consumed = count;
-> +       sg_miter_stop(sg_miter);
->
-> -       if (host->sg_off == host->sg_ptr->length)
-> -               tmio_mmc_next_sg(host);
-> +       local_irq_restore(flags);
->
->         return;
->  }
+>  static const struct of_device_id sdhci_tegra_dt_match[] = {
 > --
 > 1.7.9.5
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
