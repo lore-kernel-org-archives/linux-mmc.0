@@ -1,67 +1,80 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: tmio: Remove bogus un-initialization in tmio_mmc_host_free()
-Date: Thu, 5 Mar 2015 14:41:13 +0100
-Message-ID: <CAPDyKFpEOo3Wx3nKiiULNy0aX-zX-UJw0h3uDihtmDkQmUQMOg@mail.gmail.com>
-References: <1424277299-24964-1-git-send-email-geert+renesas@glider.be>
+Subject: Re: [PATCH] mmc: sirf: update sdhci_sirf_execute_tuning procedure
+Date: Thu, 5 Mar 2015 14:41:46 +0100
+Message-ID: <CAPDyKFqaagDGvHKOWjCpRpFPtTJZiU=73c9d9qN24cw0DCeKyg@mail.gmail.com>
+References: <1424015031-24676-1-git-send-email-21cnbao@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f46.google.com ([209.85.192.46]:42686 "EHLO
-	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754740AbbCENlO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 08:41:14 -0500
-Received: by qgfi50 with SMTP id i50so5103351qgf.9
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2015 05:41:14 -0800 (PST)
-In-Reply-To: <1424277299-24964-1-git-send-email-geert+renesas@glider.be>
+Received: from mail-qg0-f48.google.com ([209.85.192.48]:45366 "EHLO
+	mail-qg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932616AbbCENlq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 08:41:46 -0500
+Received: by qgaj5 with SMTP id j5so5104163qga.12
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2015 05:41:46 -0800 (PST)
+In-Reply-To: <1424015031-24676-1-git-send-email-21cnbao@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Ian Molton <ian.molton@codethink.co.uk>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Barry Song <21cnbao@gmail.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, weijun yang <york.yang@csr.com>, Barry Song <baohua.song@csr.com>
 
-On 18 February 2015 at 17:34, Geert Uytterhoeven
-<geert+renesas@glider.be> wrote:
-> If CONFIG_DEBUG_SLAB=y:
+On 15 February 2015 at 16:43, Barry Song <21cnbao@gmail.com> wrote:
+> From: weijun yang <york.yang@csr.com>
 >
->     sh_mobile_sdhi ee100000.sd: Got CD GPIO
->     sh_mobile_sdhi ee100000.sd: Got WP GPIO
->     platform ee100000.sd: Driver sh_mobile_sdhi requests probe deferral
->     ...
->     Slab corruption (Not tainted): kmalloc-1024 start=ed8b3c00, len=1024
->     2d0: 00 00 00 00 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b  ....kkkkkkkkkkkk
->     Prev obj: start=ed8b3800, len=1024
->     000: 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b  kkkkkkkkkkkkkkkk
->     010: 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b  kkkkkkkkkkkkkkkk
+> For the original tuning code, delay value is set to SD Bus Clock Delay
+> Register (SD_CLK_DELAY_SETTING) as (val | (Val << 7) | (val << 16)),
+> which means CLK_DELAY_IN1, CLK_DELAY_IN2 and CLK_DELAY_OUT are the
+> same and with 128 steps. This is doubtful. In CSR design specification
+> documents CS-304575-DR-3H, this issue is clarified, the delay[13:0] in
+> SD_CLK_DELAY_SETTING is simplied to the concatenation of {CLK_DELAY_IN2,
+> CLK_DELAY_IN1}.
+> Besides, for CMD19 tuning, no need to set CLK_DELAY_OUT([22,16]
+> of SD_CLK_DELAY_SETTING).
 >
-> Struct tmio_mmc_host is embedded inside struct mmc_host, and thus is
-> freed by the call to mmc_free_host(). Hence it must not be written to
-> afterwards, as that will corrupt freed (and perhaps already reused)
-> memory.
->
-> Fixes: 94b110aff8679b14 ("mmc: tmio: add tmio_mmc_host_alloc/free()")
-> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Signed-off-by: weijun yang <york.yang@csr.com>
+> Signed-off-by: Barry Song <baohua.song@csr.com>
 
 Applied, thanks!
 
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/host/tmio_mmc_pio.c | 2 --
->  1 file changed, 2 deletions(-)
+>  drivers/mmc/host/sdhci-sirf.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index a31c3573d386f8c6..dba7e1c19dd758e7 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -1073,8 +1073,6 @@ EXPORT_SYMBOL(tmio_mmc_host_alloc);
->  void tmio_mmc_host_free(struct tmio_mmc_host *host)
->  {
->         mmc_free_host(host->mmc);
-> -
-> -       host->mmc = NULL;
->  }
->  EXPORT_SYMBOL(tmio_mmc_host_free);
+> diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
+> index f6f82ec..4331409 100644
+> --- a/drivers/mmc/host/sdhci-sirf.c
+> +++ b/drivers/mmc/host/sdhci-sirf.c
+> @@ -56,7 +56,7 @@ static int sdhci_sirf_execute_tuning(struct sdhci_host *host, u32 opcode)
+>         int tuning_seq_cnt = 3;
+>         u8 phase, tuned_phases[SIRF_TUNING_COUNT];
+>         u8 tuned_phase_cnt = 0;
+> -       int rc, longest_range = 0;
+> +       int rc = 0, longest_range = 0;
+>         int start = -1, end = 0, tuning_value = -1, range = 0;
+>         u16 clock_setting;
+>         struct mmc_host *mmc = host->mmc;
+> @@ -68,7 +68,7 @@ retry:
+>         phase = 0;
+>         do {
+>                 sdhci_writel(host,
+> -                       clock_setting | phase | (phase << 7) | (phase << 16),
+> +                       clock_setting | phase,
+>                         SDHCI_CLK_DELAY_SETTING);
 >
+>                 if (!mmc_send_tuning(mmc)) {
+> @@ -102,7 +102,7 @@ retry:
+>                  */
+>                 phase = tuning_value;
+>                 sdhci_writel(host,
+> -                       clock_setting | phase | (phase << 7) | (phase << 16),
+> +                       clock_setting | phase,
+>                         SDHCI_CLK_DELAY_SETTING);
+>
+>                 dev_dbg(mmc_dev(mmc), "%s: Setting the tuning phase to %d\n",
 > --
 > 1.9.1
 >
