@@ -1,73 +1,60 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] tmio: mmc: replace sh_mobile_sdhi_info to tmio_mmc_data
-Date: Thu, 5 Mar 2015 11:03:52 +0100
-Message-ID: <CAPDyKFrww8=HKYwyD4EQSS-=J=c=5HRA=g9YCiSC=L0+_uCMOQ@mail.gmail.com>
-References: <878ufo12qq.wl%kuninori.morimoto.gx@renesas.com>
-	<20150224162312.GG5208@intel.com>
-	<87wq2vc40g.wl%kuninori.morimoto.gx@renesas.com>
-	<CAPDyKFqJ7bbfaQgYnhHerFbre9mPzj7i6QGPQZo54ukuHaD32g@mail.gmail.com>
-	<20150305083630.GZ2613@intel.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH] mmc: tmio: Remove bogus un-initialization in tmio_mmc_host_free()
+Date: Thu, 5 Mar 2015 11:08:58 +0100
+Message-ID: <CAMuHMdVwiS1J_a4oV1F_VQGSF4gH+ZCwsVLPisn7+bJEksE=0A@mail.gmail.com>
+References: <1424277299-24964-1-git-send-email-geert+renesas@glider.be>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f44.google.com ([209.85.216.44]:61256 "EHLO
-	mail-qa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932129AbbCEKDw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 05:03:52 -0500
-Received: by mail-qa0-f44.google.com with SMTP id n8so38111942qaq.3
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2015 02:03:52 -0800 (PST)
-In-Reply-To: <20150305083630.GZ2613@intel.com>
+Received: from mail-ob0-f179.google.com ([209.85.214.179]:33854 "EHLO
+	mail-ob0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753486AbbCEKI7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 05:08:59 -0500
+In-Reply-To: <1424277299-24964-1-git-send-email-geert+renesas@glider.be>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vinod Koul <vinod.koul@intel.com>
-Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Simon <horms@verge.net.au>, Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Ian Molton <ian.molton@codethink.co.uk>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 5 March 2015 at 09:36, Vinod Koul <vinod.koul@intel.com> wrote:
-> On Thu, Mar 05, 2015 at 09:33:10AM +0100, Ulf Hansson wrote:
->> On 5 March 2015 at 08:11, Kuninori Morimoto
->> <kuninori.morimoto.gx@renesas.com> wrote:
->> >
->> > Hi Ulf
->> >
->> >> > Hi Ulf, Vinod, Simon
->> >> >
->> >> > DMAEngine cleanup patches are accepted in v4.0-rc1
->> >> >
->> >> > As I mentioned in
->> >> > http://thread.gmane.org/gmane.linux.ports.sh.devel/42669
->> >> > these are last of sh_mobile_sdhi DMA patches.
->> >> >
->> >> > These patches uses tmio_mmc_data on platform,
->> >> > and remove sh_mobile_sdhi
->> >> >
->> >> > These are based on
->> >> >  - linus's v4.0-rc1
->> >> >  - Vinod's dma/next (git://git.infradead.org/users/vkoul/slave-dma.git :: next)
->> >> >
->> >> > Vinod
->> >> >
->> >> > please let us know if it has stable tag or branch
-> No my next is not stable, I will rebase that.
-> I think you want to pick topic/sh, that is an immutable branch
-> Can you check that has all the patches you need for this?
+Ping?
+
+On Wed, Feb 18, 2015 at 5:34 PM, Geert Uytterhoeven
+<geert+renesas@glider.be> wrote:
+> If CONFIG_DEBUG_SLAB=y:
 >
->> >> Please use topic/sh. I will not rebase that, my next would be rebased
->> >> frequently...
->> >
->> > Please let me know if you want me to re-send these patches
->>
->> I have no issues with the patches as such. Though, I wonder about the
->> dependency here.
->>
->> Does these patches depend on an immutable branch hosted from Vinod's tree?
->>
->>
->> Do you want me to take the patches through my mmc tree or just request
->> an ack so Vinod can carry this?
-> Either ways is okay with me..
-
-I just provided my ack for both patches, so please go ahead and take
-them through your tree.
-
-Kind regards
-Uffe
+>     sh_mobile_sdhi ee100000.sd: Got CD GPIO
+>     sh_mobile_sdhi ee100000.sd: Got WP GPIO
+>     platform ee100000.sd: Driver sh_mobile_sdhi requests probe deferral
+>     ...
+>     Slab corruption (Not tainted): kmalloc-1024 start=ed8b3c00, len=1024
+>     2d0: 00 00 00 00 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b  ....kkkkkkkkkkkk
+>     Prev obj: start=ed8b3800, len=1024
+>     000: 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b  kkkkkkkkkkkkkkkk
+>     010: 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b  kkkkkkkkkkkkkkkk
+>
+> Struct tmio_mmc_host is embedded inside struct mmc_host, and thus is
+> freed by the call to mmc_free_host(). Hence it must not be written to
+> afterwards, as that will corrupt freed (and perhaps already reused)
+> memory.
+>
+> Fixes: 94b110aff8679b14 ("mmc: tmio: add tmio_mmc_host_alloc/free()")
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> ---
+>  drivers/mmc/host/tmio_mmc_pio.c | 2 --
+>  1 file changed, 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index a31c3573d386f8c6..dba7e1c19dd758e7 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -1073,8 +1073,6 @@ EXPORT_SYMBOL(tmio_mmc_host_alloc);
+>  void tmio_mmc_host_free(struct tmio_mmc_host *host)
+>  {
+>         mmc_free_host(host->mmc);
+> -
+> -       host->mmc = NULL;
+>  }
+>  EXPORT_SYMBOL(tmio_mmc_host_free);
+>
+> --
+> 1.9.1
