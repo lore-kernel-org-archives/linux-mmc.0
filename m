@@ -1,76 +1,67 @@
-From: Barry Song <21cnbao@gmail.com>
-Subject: Re: [PATCH] mmc: sirf: update sdhci_sirf_execute_tuning procedure
-Date: Thu, 5 Mar 2015 13:54:15 +0800
-Message-ID: <CAGsJ_4x8HVAOFr95hxT47aoadm6xyvdBCt+ZU05Lamfjz2xFPg@mail.gmail.com>
-References: <1424015031-24676-1-git-send-email-21cnbao@gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [GIT PULL] Update codes relevant to dw-mmc controller
+Date: Thu, 05 Mar 2015 14:59:09 +0900
+Message-ID: <54F7F0AD.5080903@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f48.google.com ([209.85.220.48]:46977 "EHLO
-	mail-pa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752083AbbCEFyg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 00:54:36 -0500
-Received: by pabli10 with SMTP id li10so39798152pab.13
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2015 21:54:36 -0800 (PST)
-In-Reply-To: <1424015031-24676-1-git-send-email-21cnbao@gmail.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:13624 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753045AbbCEF7L (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 00:59:11 -0500
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0NKQ001WF5YMSH30@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 05 Mar 2015 14:59:10 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, weijun yang <york.yang@csr.com>, Barry Song <baohua.song@csr.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Doug Anderson <dianders@chromium.org>, addy ke <addy.ke@rock-chips.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Alim Akhtar <alim.akhtar@samsung.com>
 
-ping Ulf....
+Dear, Ulf.
 
+I didn't find that your-tree is rebased to v4.0-rc2.
+This pull-request is based on your next branch(v4.0-rc1).
+If i have to rebase this work for v4.0-rc2, let me know, plz.
 
-2015-02-15 23:43 GMT+08:00 Barry Song <21cnbao@gmail.com>:
-> From: weijun yang <york.yang@csr.com>
->
-> For the original tuning code, delay value is set to SD Bus Clock Delay
-> Register (SD_CLK_DELAY_SETTING) as (val | (Val << 7) | (val << 16)),
-> which means CLK_DELAY_IN1, CLK_DELAY_IN2 and CLK_DELAY_OUT are the
-> same and with 128 steps. This is doubtful. In CSR design specification
-> documents CS-304575-DR-3H, this issue is clarified, the delay[13:0] in
-> SD_CLK_DELAY_SETTING is simplied to the concatenation of {CLK_DELAY_IN2,
-> CLK_DELAY_IN1}.
-> Besides, for CMD19 tuning, no need to set CLK_DELAY_OUT([22,16]
-> of SD_CLK_DELAY_SETTING).
->
-> Signed-off-by: weijun yang <york.yang@csr.com>
-> Signed-off-by: Barry Song <baohua.song@csr.com>
-> ---
->  drivers/mmc/host/sdhci-sirf.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
-> index f6f82ec..4331409 100644
-> --- a/drivers/mmc/host/sdhci-sirf.c
-> +++ b/drivers/mmc/host/sdhci-sirf.c
-> @@ -56,7 +56,7 @@ static int sdhci_sirf_execute_tuning(struct sdhci_host *host, u32 opcode)
->         int tuning_seq_cnt = 3;
->         u8 phase, tuned_phases[SIRF_TUNING_COUNT];
->         u8 tuned_phase_cnt = 0;
-> -       int rc, longest_range = 0;
-> +       int rc = 0, longest_range = 0;
->         int start = -1, end = 0, tuning_value = -1, range = 0;
->         u16 clock_setting;
->         struct mmc_host *mmc = host->mmc;
-> @@ -68,7 +68,7 @@ retry:
->         phase = 0;
->         do {
->                 sdhci_writel(host,
-> -                       clock_setting | phase | (phase << 7) | (phase << 16),
-> +                       clock_setting | phase,
->                         SDHCI_CLK_DELAY_SETTING);
->
->                 if (!mmc_send_tuning(mmc)) {
-> @@ -102,7 +102,7 @@ retry:
->                  */
->                 phase = tuning_value;
->                 sdhci_writel(host,
-> -                       clock_setting | phase | (phase << 7) | (phase << 16),
-> +                       clock_setting | phase,
->                         SDHCI_CLK_DELAY_SETTING);
->
->                 dev_dbg(mmc_dev(mmc), "%s: Setting the tuning phase to %d\n",
-> --
-> 1.9.1
->
+The following changes since commit c517d838eb7d07bbe9507871fab3931deccff539:
+
+  Linux 4.0-rc1 (2015-02-22 18:21:14 -0800)
+
+are available in the git repository at:
+
+  https://github.com/jh80chung/dw-mmc.git tags/v4.0-2-for-ulf
+
+for you to fetch changes up to 7aa3dc1a9ed5f38fa491016cff8cbec383bac805:
+
+  mmc: dw_mmc: Don't crash if we get an interrupt before slot has initted (2015-03-04 23:39:23 +0900)
+
+----------------------------------------------------------------
+Main feature:
+- Support HS400 mode for designware controller.
+
+----------------------------------------------------------------
+Doug Anderson (5):
+      mmc: dw_mmc: Make sure we only adjust the clock when power is on
+      mmc: dw_mmc: Give a good reset after we give power
+      mmc: dw_mmc: Don't start commands while busy
+      mmc: dw_mmc: Only enable CD after setup and only if needed
+      mmc: dw_mmc: Don't crash if we get an interrupt before slot has initted
+
+Seungwon Jeon (1):
+      mmc: dw_mmc: exynos: Support eMMC's HS400 mode
+
+addy ke (2):
+      mmc: dw_mmc: rockchip: add support MMC_CAP_RUNTIME_RESUME capability
+      mmc: dw_mmc: fix mmc_test by not sending abort for DRTO/EBE errors
+
+ .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |    7 +
+ drivers/mmc/host/dw_mmc-exynos.c                   |  185 ++++++++++++++++----
+ drivers/mmc/host/dw_mmc-exynos.h                   |   19 +-
+ drivers/mmc/host/dw_mmc-rockchip.c                 |    8 +
+ drivers/mmc/host/dw_mmc.c                          |  142 ++++++++++++---
+ drivers/mmc/host/dw_mmc.h                          |    2 +
+ 6 files changed, 309 insertions(+), 54 deletions(-)
