@@ -1,27 +1,25 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH/RFC] mmc: sh_mmcif: Move dev_err() of mmcif_timeout_work()
-Date: Thu, 5 Mar 2015 15:57:21 +0100
-Message-ID: <CAPDyKFo2hNP==FCLONp5qaYTQQd7=LxdAVD45wxddTkP4CV+nA@mail.gmail.com>
-References: <1424011607-3682-2-git-send-email-ykaneko0929@gmail.com>
+Subject: Re: [RFC/PATCH] mmc: tmio: Fix PIO mode with CONFIG_HIGHMEM
+Date: Thu, 5 Mar 2015 15:57:52 +0100
+Message-ID: <CAPDyKFp4+g0aOC=O6bGmRcfBY69fY16+aoN+upLNcEAkhYMrUw@mail.gmail.com>
+References: <54DD91E3.3070903@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1424011607-3682-2-git-send-email-ykaneko0929@gmail.com>
+In-Reply-To: <54DD91E3.3070903@renesas.com>
 Sender: linux-sh-owner@vger.kernel.org
-To: Yoshihiro Kaneko <ykaneko0929@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-sh list <linux-sh@vger.kernel.org>
+To: keita kobayashi <keita.kobayashi.ym@renesas.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 15 February 2015 at 15:46, Yoshihiro Kaneko <ykaneko0929@gmail.com> wrote:
-> From: Kouichi Tomita <kouichi.tomita.yn@renesas.com>
+On 13 February 2015 at 06:55, keita kobayashi
+<keita.kobayashi.ym@renesas.com> wrote:
+> Current PIO mode occurred kernel panic with CONFIG_HIGHMEM.
+> This patch fixes the kernel panic by converting the driver
+> to the sg_miter API.
 >
-> If interruption of command already occurred, mrq pointer in dev_err()
-> would refer to NULL, because the host-state is changed to STATE_IDLE
-> and mrq pointer is changed to NULL by interrupt handler.
-> Therefore dev_err is moved after checking STATE_IDLE.
->
-> Signed-off-by: Kouichi Tomita <kouichi.tomita.yn@renesas.com>
-> Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
+> Reported-by: Cao Minh Hiep <cm-hiep@jinso.co.jp>
+> Signed-off-by: Keita Kobayashi <keita.kobayashi.ym@renesas.com>
 
 Applied, thanks!
 
@@ -30,35 +28,97 @@ Uffe
 
 
 > ---
+> This patch is based on renesas.git / renesas-devel-20150211-v3.19 tag.
 >
-> This patch is based on next branch of Chris Ball's mmc tree.
+>  drivers/mmc/host/tmio_mmc.h     |    1 +
+>  drivers/mmc/host/tmio_mmc_pio.c |   35 ++++++++++++++++-------------------
+>  2 files changed, 17 insertions(+), 19 deletions(-)
 >
->  drivers/mmc/host/sh_mmcif.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> index a34ecbe..3092219 100644
+> --- a/drivers/mmc/host/tmio_mmc.h
+> +++ b/drivers/mmc/host/tmio_mmc.h
+> @@ -56,6 +56,7 @@ struct tmio_mmc_host {
+>         struct scatterlist      *sg_orig;
+>         unsigned int            sg_len;
+>         unsigned int            sg_off;
+> +       struct sg_mapping_iter  sg_miter;
 >
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 7d9d6a3..e075804 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -1312,15 +1312,15 @@ static void mmcif_timeout_work(struct work_struct *work)
->                 /* Don't run after mmc_remove_host() */
->                 return;
+>         struct platform_device *pdev;
+>         struct tmio_mmc_data *pdata;
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index 250bf8c..6d8f363 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -70,17 +70,14 @@ static void tmio_mmc_ack_mmc_irqs(struct tmio_mmc_host *host, u32 i)
 >
-> -       dev_err(&host->pd->dev, "Timeout waiting for %u on CMD%u\n",
-> -               host->wait_for, mrq->cmd->opcode);
-> -
->         spin_lock_irqsave(&host->lock, flags);
->         if (host->state == STATE_IDLE) {
->                 spin_unlock_irqrestore(&host->lock, flags);
+>  static void tmio_mmc_init_sg(struct tmio_mmc_host *host, struct mmc_data *data)
+>  {
+> -       host->sg_len = data->sg_len;
+> -       host->sg_ptr = data->sg;
+> -       host->sg_orig = data->sg;
+> -       host->sg_off = 0;
+> -}
+> +       unsigned int flags = SG_MITER_ATOMIC;
+>
+> -static int tmio_mmc_next_sg(struct tmio_mmc_host *host)
+> -{
+> -       host->sg_ptr = sg_next(host->sg_ptr);
+> -       host->sg_off = 0;
+> -       return --host->sg_len;
+> +       if (data->flags & MMC_DATA_READ)
+> +               flags |= SG_MITER_TO_SG;
+> +       else
+> +               flags |= SG_MITER_FROM_SG;
+> +
+> +       sg_miter_start(&host->sg_miter, data->sg, data->sg_len, flags);
+>  }
+>
+>  #ifdef CONFIG_MMC_DEBUG
+> @@ -418,7 +415,7 @@ static void tmio_mmc_transfer_data(struct tmio_mmc_host *host,
+>  static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
+>  {
+>         struct mmc_data *data = host->data;
+> -       void *sg_virt;
+> +       struct sg_mapping_iter *sg_miter = &host->sg_miter;
+>         unsigned short *buf;
+>         unsigned int count;
+>         unsigned long flags;
+> @@ -431,10 +428,12 @@ static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
 >                 return;
 >         }
 >
-> +       dev_err(&host->pd->dev, "Timeout waiting for %u on CMD%u\n",
-> +               host->wait_for, mrq->cmd->opcode);
-> +
->         host->state = STATE_TIMEOUT;
->         spin_unlock_irqrestore(&host->lock, flags);
+> -       sg_virt = tmio_mmc_kmap_atomic(host->sg_ptr, &flags);
+> -       buf = (unsigned short *)(sg_virt + host->sg_off);
+> +       local_irq_save(flags);
 >
+> -       count = host->sg_ptr->length - host->sg_off;
+> +       if (!sg_miter_next(sg_miter))
+> +               return;
+> +       buf = sg_miter->addr;
+> +       count = sg_miter->length;
+>         if (count > data->blksz)
+>                 count = data->blksz;
+>
+> @@ -444,12 +443,10 @@ static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
+>         /* Transfer the data */
+>         tmio_mmc_transfer_data(host, buf, count);
+>
+> -       host->sg_off += count;
+> -
+> -       tmio_mmc_kunmap_atomic(host->sg_ptr, &flags, sg_virt);
+> +       sg_miter->consumed = count;
+> +       sg_miter_stop(sg_miter);
+>
+> -       if (host->sg_off == host->sg_ptr->length)
+> -               tmio_mmc_next_sg(host);
+> +       local_irq_restore(flags);
+>
+>         return;
+>  }
 > --
-> 1.9.1
->
+> 1.7.9.5
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
