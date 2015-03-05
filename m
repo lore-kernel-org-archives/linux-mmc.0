@@ -1,60 +1,43 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH ulf.hansson-mmc] mmc: dw_mmc: exynos:
- dw_mci_exynos_prepare_hs400_tuning() can be static
-Date: Thu, 05 Mar 2015 19:13:12 +0900
-Message-ID: <54F82C38.9090401@samsung.com>
-References: <201503051843.EsoMldBU%fengguang.wu@intel.com>
- <20150305100254.GA66299@lkp-sb04.lkp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <20150305100254.GA66299@lkp-sb04.lkp.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: kbuild test robot <fengguang.wu@intel.com>, Seungwon Jeon <tgih.jun@samsung.com>
-Cc: kbuild-all@01.org, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Chris Ball <chris@printf.net>, Kukjin Kim <kgene@kernel.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: dw_mmc: enable card read threshold when mode is HS400
+Date: Thu, 05 Mar 2015 19:45:21 +0900
+Message-ID: <1425552321-24787-1-git-send-email-jh80.chung@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:21732 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751009AbbCEKp0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 05:45:26 -0500
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7u4-24.01
+ (7.0.4.24.0) 64bit (built Nov 17 2011))
+ with ESMTP id <0NKQ00M55J7OV860@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 05 Mar 2015 19:45:24 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, tgih.jun@samsung.com, alim.akhtar@samsung.com, dianders@chromium.org, Jaehoon Chung <jh80.chung@samsung.com>
 
-Hi,
+Enable card-read-threshold, when eMMC mode is HS400.
+Refer to f1d2736c8156 (mmc: dw_mmc: control card read threshold)
 
-Sorry for missing warning, and Thanks for pointing out.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c |    1 +
+ 1 file changed, 1 insertion(+)
 
-Best Regards,
-Jaehoon Chung
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index b46b825..d0b123e 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -764,6 +764,7 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
+ 		return;
+ 
+ 	if (host->timing != MMC_TIMING_MMC_HS200 &&
++	    host->timing != MMC_TIMING_MMC_HS400 &&
+ 	    host->timing != MMC_TIMING_UHS_SDR104)
+ 		goto disable;
+ 
+-- 
+1.7.9.5
 
-
-On 03/05/2015 07:02 PM, kbuild test robot wrote:
-> 
-> Signed-off-by: Fengguang Wu <fengguang.wu@intel.com>
-> ---
->  dw_mmc-exynos.c |    2 +-
->  dw_mmc.c        |    2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index 0a56d766..e761eb1 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -477,7 +477,7 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot)
->  	return ret;
->  }
->  
-> -int dw_mci_exynos_prepare_hs400_tuning(struct dw_mci *host,
-> +static int dw_mci_exynos_prepare_hs400_tuning(struct dw_mci *host,
->  					struct mmc_ios *ios)
->  {
->  	struct dw_mci_exynos_priv_data *priv = host->priv;
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index f30ef69..a99fa1b 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1324,7 +1324,7 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  	return err;
->  }
->  
-> -int dw_mci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
-> +static int dw_mci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
->  {
->  	struct dw_mci_slot *slot = mmc_priv(mmc);
->  	struct dw_mci *host = slot->host;
-> 
