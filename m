@@ -1,86 +1,204 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH/RFC] mmc: sh_mmcif: Add exclusion between cmd and interrupt
-Date: Thu, 5 Mar 2015 15:54:30 +0100
-Message-ID: <CAPDyKFr9vmEkcRKfMFYpXcV_aJayYuiNbq0JzBarb6KKwgcHFQ@mail.gmail.com>
-References: <1424011607-3682-1-git-send-email-ykaneko0929@gmail.com>
+Subject: Re: [PATCH] mmc: pwrseq: simplify alloc/free hooks
+Date: Thu, 5 Mar 2015 15:55:34 +0100
+Message-ID: <CAPDyKFq+rvRQdjJN=M1rK+Ynj58Gw-o21kZP2bYeHj3Z-Phs8A@mail.gmail.com>
+References: <1423715771-20498-1-git-send-email-acourbot@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1424011607-3682-1-git-send-email-ykaneko0929@gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Yoshihiro Kaneko <ykaneko0929@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-sh list <linux-sh@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f170.google.com ([209.85.216.170]:44950 "EHLO
+	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756125AbbCEOzf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 09:55:35 -0500
+Received: by qcxn11 with SMTP id n11so15274253qcx.11
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2015 06:55:34 -0800 (PST)
+In-Reply-To: <1423715771-20498-1-git-send-email-acourbot@nvidia.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alexandre Courbot <acourbot@nvidia.com>
+Cc: Chris Ball <chris@printf.net>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Marek Szyprowski <m.szyprowski@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alexandre Courbot <gnurou@gmail.com>
 
-On 15 February 2015 at 15:46, Yoshihiro Kaneko <ykaneko0929@gmail.com> wrote:
-> From: Kouichi Tomita <kouichi.tomita.yn@renesas.com>
+On 12 February 2015 at 05:36, Alexandre Courbot <acourbot@nvidia.com> wrote:
+> The alloc() and free() hooks required each pwrseq implementation to set
+> host->pwrseq themselves. This is error-prone and could be done at a
+> higher level if alloc() was changed to return a pointer to a struct
+> mmc_pwrseq instead of an error code.
 >
-> A command end interrupt should not be processed between command issue
-> and setting of wait_for flag. It expects already the flag to be set.
-> Therefore the exclusive control was added.
+> This patch performs this change and moves the burden of maintaining
+> host->pwrseq from the power sequence hooks to the pwrseq code.
 >
-> Signed-off-by: Kouichi Tomita <kouichi.tomita.yn@renesas.com>
-> Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
+> Signed-off-by: Alexandre Courbot <acourbot@nvidia.com>
 
-I followed the discussion for this patch, I decided to apply it as is, thanks!
+Applied, thanks!
 
 Kind regards
 Uffe
 
 > ---
+> It occured to me that after this change, none of the alloc()
+> implementations ever uses the host parameter. I have kept it in case
+> it could be useful for other purposes, but can remove it in a v2 if
+> this is deemed better by the MMC maintainers.
 >
-> This patch is based on next branch of Chris Ball's mmc tree.
+>  drivers/mmc/core/pwrseq.c        | 16 ++++++++++++----
+>  drivers/mmc/core/pwrseq.h        |  6 ++++--
+>  drivers/mmc/core/pwrseq_emmc.c   | 11 +++++------
+>  drivers/mmc/core/pwrseq_simple.c | 11 +++++------
+>  4 files changed, 26 insertions(+), 18 deletions(-)
 >
->  drivers/mmc/host/sh_mmcif.c | 11 ++++++++++-
->  1 file changed, 10 insertions(+), 1 deletion(-)
+> diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
+> index 862356123d78..ab2129781161 100644
+> --- a/drivers/mmc/core/pwrseq.c
+> +++ b/drivers/mmc/core/pwrseq.c
+> @@ -19,7 +19,7 @@
 >
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 7d9d6a3..e5d0b42 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -875,6 +875,7 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
->         struct mmc_command *cmd = mrq->cmd;
->         u32 opc = cmd->opcode;
->         u32 mask;
-> +       unsigned long flags;
+>  struct mmc_pwrseq_match {
+>         const char *compatible;
+> -       int (*alloc)(struct mmc_host *host, struct device *dev);
+> +       struct mmc_pwrseq *(*alloc)(struct mmc_host *host, struct device *dev);
+>  };
 >
->         switch (opc) {
->         /* response busy check */
-> @@ -909,10 +910,12 @@ static void sh_mmcif_start_cmd(struct sh_mmcif_host *host,
->         /* set arg */
->         sh_mmcif_writel(host->addr, MMCIF_CE_ARG, cmd->arg);
->         /* set cmd */
-> +       spin_lock_irqsave(&host->lock, flags);
->         sh_mmcif_writel(host->addr, MMCIF_CE_CMD_SET, opc);
+>  static struct mmc_pwrseq_match pwrseq_match[] = {
+> @@ -52,6 +52,7 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
+>         struct platform_device *pdev;
+>         struct device_node *np;
+>         struct mmc_pwrseq_match *match;
+> +       struct mmc_pwrseq *pwrseq;
+>         int ret = 0;
 >
->         host->wait_for = MMCIF_WAIT_FOR_CMD;
->         schedule_delayed_work(&host->timeout_work, host->timeout);
-> +       spin_unlock_irqrestore(&host->lock, flags);
+>         np = of_parse_phandle(host->parent->of_node, "mmc-pwrseq", 0);
+> @@ -70,9 +71,14 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
+>                 goto err;
+>         }
+>
+> -       ret = match->alloc(host, &pdev->dev);
+> -       if (!ret)
+> -               dev_info(host->parent, "allocated mmc-pwrseq\n");
+> +       pwrseq = match->alloc(host, &pdev->dev);
+> +       if (IS_ERR(pwrseq)) {
+> +               ret = PTR_ERR(host->pwrseq);
+> +               goto err;
+> +       }
+> +
+> +       host->pwrseq = pwrseq;
+> +       dev_info(host->parent, "allocated mmc-pwrseq\n");
+>
+>  err:
+>         of_node_put(np);
+> @@ -109,4 +115,6 @@ void mmc_pwrseq_free(struct mmc_host *host)
+>
+>         if (pwrseq && pwrseq->ops && pwrseq->ops->free)
+>                 pwrseq->ops->free(host);
+> +
+> +       host->pwrseq = NULL;
+>  }
+> diff --git a/drivers/mmc/core/pwrseq.h b/drivers/mmc/core/pwrseq.h
+> index aba3409e8d6e..096da48c6a7e 100644
+> --- a/drivers/mmc/core/pwrseq.h
+> +++ b/drivers/mmc/core/pwrseq.h
+> @@ -27,8 +27,10 @@ void mmc_pwrseq_post_power_on(struct mmc_host *host);
+>  void mmc_pwrseq_power_off(struct mmc_host *host);
+>  void mmc_pwrseq_free(struct mmc_host *host);
+>
+> -int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev);
+> -int mmc_pwrseq_emmc_alloc(struct mmc_host *host, struct device *dev);
+> +struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
+> +                                          struct device *dev);
+> +struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
+> +                                        struct device *dev);
+>
+>  #else
+>
+> diff --git a/drivers/mmc/core/pwrseq_emmc.c b/drivers/mmc/core/pwrseq_emmc.c
+> index a2d545904fbf..9d6d2fb21796 100644
+> --- a/drivers/mmc/core/pwrseq_emmc.c
+> +++ b/drivers/mmc/core/pwrseq_emmc.c
+> @@ -49,7 +49,6 @@ static void mmc_pwrseq_emmc_free(struct mmc_host *host)
+>         unregister_restart_handler(&pwrseq->reset_nb);
+>         gpiod_put(pwrseq->reset_gpio);
+>         kfree(pwrseq);
+> -       host->pwrseq = NULL;
 >  }
 >
->  static void sh_mmcif_stop_cmd(struct sh_mmcif_host *host,
-> @@ -1171,6 +1174,12 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
->         struct sh_mmcif_host *host = dev_id;
->         struct mmc_request *mrq;
->         bool wait = false;
-> +       unsigned long flags;
-> +       int wait_work;
-> +
-> +       spin_lock_irqsave(&host->lock, flags);
-> +       wait_work = host->wait_for;
-> +       spin_unlock_irqrestore(&host->lock, flags);
+>  static struct mmc_pwrseq_ops mmc_pwrseq_emmc_ops = {
+> @@ -67,14 +66,15 @@ static int mmc_pwrseq_emmc_reset_nb(struct notifier_block *this,
+>         return NOTIFY_DONE;
+>  }
 >
->         cancel_delayed_work_sync(&host->timeout_work);
+> -int mmc_pwrseq_emmc_alloc(struct mmc_host *host, struct device *dev)
+> +struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
+> +                                        struct device *dev)
+>  {
+>         struct mmc_pwrseq_emmc *pwrseq;
+>         int ret = 0;
 >
-> @@ -1188,7 +1197,7 @@ static irqreturn_t sh_mmcif_irqt(int irq, void *dev_id)
->          * All handlers return true, if processing continues, and false, if the
->          * request has to be completed - successfully or not
->          */
-> -       switch (host->wait_for) {
-> +       switch (wait_work) {
->         case MMCIF_WAIT_FOR_REQUEST:
->                 /* We're too late, the timeout has already kicked in */
->                 mutex_unlock(&host->thread_lock);
+>         pwrseq = kzalloc(sizeof(struct mmc_pwrseq_emmc), GFP_KERNEL);
+>         if (!pwrseq)
+> -               return -ENOMEM;
+> +               return ERR_PTR(-ENOMEM);
+>
+>         pwrseq->reset_gpio = gpiod_get_index(dev, "reset", 0, GPIOD_OUT_LOW);
+>         if (IS_ERR(pwrseq->reset_gpio)) {
+> @@ -92,10 +92,9 @@ int mmc_pwrseq_emmc_alloc(struct mmc_host *host, struct device *dev)
+>         register_restart_handler(&pwrseq->reset_nb);
+>
+>         pwrseq->pwrseq.ops = &mmc_pwrseq_emmc_ops;
+> -       host->pwrseq = &pwrseq->pwrseq;
+>
+> -       return 0;
+> +       return &pwrseq->pwrseq;
+>  free:
+>         kfree(pwrseq);
+> -       return ret;
+> +       return ERR_PTR(ret);
+>  }
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+> index e9f1d8d84613..5c0667af8dd6 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -85,7 +85,6 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
+>                 clk_put(pwrseq->ext_clk);
+>
+>         kfree(pwrseq);
+> -       host->pwrseq = NULL;
+>  }
+>
+>  static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
+> @@ -95,7 +94,8 @@ static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
+>         .free = mmc_pwrseq_simple_free,
+>  };
+>
+> -int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
+> +struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
+> +                                          struct device *dev)
+>  {
+>         struct mmc_pwrseq_simple *pwrseq;
+>         int i, nr_gpios, ret = 0;
+> @@ -107,7 +107,7 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
+>         pwrseq = kzalloc(sizeof(struct mmc_pwrseq_simple) + nr_gpios *
+>                          sizeof(struct gpio_desc *), GFP_KERNEL);
+>         if (!pwrseq)
+> -               return -ENOMEM;
+> +               return ERR_PTR(-ENOMEM);
+>
+>         pwrseq->ext_clk = clk_get(dev, "ext_clock");
+>         if (IS_ERR(pwrseq->ext_clk) &&
+> @@ -133,13 +133,12 @@ int mmc_pwrseq_simple_alloc(struct mmc_host *host, struct device *dev)
+>
+>         pwrseq->nr_gpios = nr_gpios;
+>         pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
+> -       host->pwrseq = &pwrseq->pwrseq;
+>
+> -       return 0;
+> +       return &pwrseq->pwrseq;
+>  clk_put:
+>         if (!IS_ERR(pwrseq->ext_clk))
+>                 clk_put(pwrseq->ext_clk);
+>  free:
+>         kfree(pwrseq);
+> -       return ret;
+> +       return ERR_PTR(ret);
+>  }
 > --
-> 1.9.1
+> 2.3.0
 >
