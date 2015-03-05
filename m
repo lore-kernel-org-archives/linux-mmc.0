@@ -1,42 +1,51 @@
-From: Vinod Koul <vinod.koul@intel.com>
-Subject: Re: [PATCH 0/2] tmio: mmc: replace sh_mobile_sdhi_info to
- tmio_mmc_data
-Date: Thu, 5 Mar 2015 21:55:08 +0530
-Message-ID: <20150305162508.GL2613@intel.com>
-References: <878ufo12qq.wl%kuninori.morimoto.gx@renesas.com>
+From: Florian Fainelli <f.fainelli@gmail.com>
+Subject: Re: [PATCH RESEND 0/4] Add support for IPROC SDHCI controller
+Date: Thu, 05 Mar 2015 11:57:52 -0800
+Message-ID: <54F8B540.6000301@gmail.com>
+References: <sbranden@broadcom.com>	<1425571148-5876-1-git-send-email-sbranden@broadcom.com> <CAPDyKFpH=dYzku9KNVFPtqc73+TptLFGZHNkFZ3Q4=suLOwFfQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:64483 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754476AbbCEQ2h (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 5 Mar 2015 11:28:37 -0500
-Content-Disposition: inline
-In-Reply-To: <878ufo12qq.wl%kuninori.morimoto.gx@renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFpH=dYzku9KNVFPtqc73+TptLFGZHNkFZ3Q4=suLOwFfQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Scott Branden <sbranden@broadcom.com>
+Cc: bcm-kernel-feedback-list@broadcom.com, Chris Ball <chris@printf.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Grant Likely <grant.likely@linaro.org>, Ray Jui <rjui@broadcom.com>, Jonathan Richardson <jonathar@broadcom.com>, Corneliu Doban <cdoban@broadcom.com>, Dmitry Torokhov <dtor@google.com>, Anatol Pomazao <anatol@google.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Simon <horms@verge.net.au>, Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Tue, Feb 24, 2015 at 11:07:25AM +0900, Kuninori Morimoto wrote:
+On 05/03/15 08:16, Ulf Hansson wrote:
+> On 5 March 2015 at 16:59, Scott Branden <sbranden@broadcom.com> wrote:
+>> This series of patchsets contains the IPROC SDHCI driver used
+>> in a series of Broadcom SoCs
+>> Quirks are also added to support this controller.
+>>
+>> Corneliu Doban (1):
+>>   mmc: sdhci: do not set AUTO_CMD12 for multi-block CMD53
+>>
+>> Scott Branden (3):
+>>   mmc: sdhci: add quirk for ACMD23 broken
+>>   mmc: sdhci-iproc: add IPROC SDHCI driver
+>>   mmc: sdhci-iproc: add device tree bindings
+>>
+>>  .../devicetree/bindings/mmc/brcm,sdhci-iproc.txt   |  23 ++
+>>  drivers/mmc/host/Kconfig                           |  14 ++
+>>  drivers/mmc/host/Makefile                          |   1 +
+>>  drivers/mmc/host/sdhci-iproc.c                     | 241 +++++++++++++++++++++
+>>  drivers/mmc/host/sdhci.c                           |   7 +-
+>>  include/linux/mmc/sdhci.h                          |   2 +
+>>  6 files changed, 286 insertions(+), 2 deletions(-)
+>>  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
+>>  create mode 100644 drivers/mmc/host/sdhci-iproc.c
+>>
+>> --
+>> 2.2.2
+>>
 > 
-> Hi Ulf, Vinod, Simon
+> Applied, thanks!
 > 
-> DMAEngine cleanup patches are accepted in v4.0-rc1
-> 
-> As I mentioned in
-> http://thread.gmane.org/gmane.linux.ports.sh.devel/42669
-> these are last of sh_mobile_sdhi DMA patches.
-> 
-> These patches uses tmio_mmc_data on platform,
-> and remove sh_mobile_sdhi
-> 
-> These are based on
->  - linus's v4.0-rc1
->  - Vinod's dma/next (git://git.infradead.org/users/vkoul/slave-dma.git :: next)
-Applied both to topic/sh
+> Actually, I needed to re-solve some conflicts and I switched to order
+> of patch3 and patch4, to avoid checkpatch warnings. Just so you know.
 
-Thanks
+Thanks, patch 4 dropped from devicetree/next.
 -- 
-~Vinod
-
+Florian
