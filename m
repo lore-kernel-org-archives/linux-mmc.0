@@ -1,457 +1,174 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: sh_mobile_sdhi: remove sh_mobile_sdhi_info
-Date: Thu, 5 Mar 2015 10:59:30 +0100
-Message-ID: <CAPDyKFrBh=QNmB_2p-3VoTSw_GnH1GUNDYXjZbO=6jw5AYRxZQ@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: tmio: mmc: tmio: tmio_mmc_data has .chan_priv_?x
+Date: Thu, 5 Mar 2015 11:02:27 +0100
+Message-ID: <CAPDyKFoHYiNieRpZQGieEj+j4O9xgjJ5mJBDJHtvPW2VVuPnyA@mail.gmail.com>
 References: <878ufo12qq.wl%kuninori.morimoto.gx@renesas.com>
-	<8761as12ox.wl%kuninori.morimoto.gx@renesas.com>
+	<877fv812pm.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qa0-f42.google.com ([209.85.216.42]:59216 "EHLO
-	mail-qa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932108AbbCEJ7b (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 04:59:31 -0500
-Received: by mail-qa0-f42.google.com with SMTP id w8so38073393qac.1
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2015 01:59:30 -0800 (PST)
-In-Reply-To: <8761as12ox.wl%kuninori.morimoto.gx@renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <877fv812pm.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Lee Jones <lee.jones@linaro.org>
 Cc: Vinod Koul <vinod.koul@intel.com>, Simon <horms@verge.net.au>, Arnd Bergmann <arnd@arndb.de>, Chris Ball <cjb@laptop.org>, Linux-SH <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
-On 24 February 2015 at 03:07, Kuninori Morimoto
++ Lee Jones.
+
+On 24 February 2015 at 03:06, Kuninori Morimoto
 <kuninori.morimoto.gx@renesas.com> wrote:
 > From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 >
-> Current sh_mobile_sdhi's platform data is set via sh_mobile_sdhi_info
-> and it is just copied to tmio_mmc_data.
-> Now, tmio mmc platform data is specified via tmio_mmc_data.
-> This patch replace sh_mobile_sdhi_info to tmio_mmc_data
->
-> struct sh_mobile_sdhi_info {      -> struct tmio_mmc_data {
->         int dma_slave_tx;         ->    void            *chan_priv_tx;
->         int dma_slave_rx;         ->    void            *chan_priv_rx;
->         unsigned long tmio_flags; ->    unsigned long   flags;
->         unsigned long tmio_caps;  ->    unsigned long   capabilities;
->         unsigned long tmio_caps2; ->    unsigned long   capabilities2;
->         u32 tmio_ocr_mask;        ->    u32             ocr_mask;
->         unsigned int cd_gpio;     ->    unsigned int    cd_gpio;
-> };                                      unsigned int    hclk;
->                                         void (*set_pwr)(...);
->                                         void (*set_clk_div)(...);
->                                       };
+> dma_request_slave_channel_compat() in tmio_mmc_dma
+> needs .chan_priv_tx/.chan_priv_rx. But these are copied from
+> sh_mobile_sdhi only, and sh_mobile_sdhi_info is now almost
+> same as tmio_mmc_data except .chan_priv_?x.
+> sh_mobile_sdhi_info can be replaced to tmio_mmc_data, but it is
+> used from ${LINUX}/arch/arm/mach-shmobile, ${LINUX}/arch/sh.
+> So, this patch adds .chan_priv_?x into tmio_mmc_data as 1st step,
+> and sh_mobile_sdhi driver has dummy operation for now.
+> It will be replaced/removed together with platform data replace.
 >
 > Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 
-For the mmc parts,
-
 Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
+Note, since this touches mfd, you need an ack from Lee as well.
+
+Kind regards
+Uffe
+
 > ---
->  arch/arm/mach-shmobile/board-armadillo800eva.c |   20 ++++++++---------
->  arch/arm/mach-shmobile/board-bockw.c           |   14 ++++++------
->  arch/arm/mach-shmobile/board-kzm9g.c           |   20 ++++++++---------
->  arch/arm/mach-shmobile/board-marzen.c          |   10 ++++-----
->  arch/sh/boards/board-sh7757lcr.c               |    9 ++++----
->  arch/sh/boards/mach-ap325rxa/setup.c           |    9 ++++----
->  arch/sh/boards/mach-ecovec24/setup.c           |   20 ++++++++---------
->  arch/sh/boards/mach-kfr2r09/setup.c            |   10 ++++-----
->  arch/sh/boards/mach-migor/setup.c              |    9 ++++----
->  arch/sh/boards/mach-se/7724/setup.c            |   17 +++++++-------
->  drivers/mmc/host/sh_mobile_sdhi.c              |   28 ++----------------------
->  include/linux/mmc/sh_mobile_sdhi.h             |   10 ---------
->  12 files changed, 73 insertions(+), 103 deletions(-)
+>  drivers/mmc/host/sh_mobile_sdhi.c |   44 +++++++++++++++++++++++--------------
+>  drivers/mmc/host/tmio_mmc.h       |    2 --
+>  drivers/mmc/host/tmio_mmc_dma.c   |    6 ++---
+>  include/linux/mfd/tmio.h          |    2 ++
+>  4 files changed, 32 insertions(+), 22 deletions(-)
 >
-> diff --git a/arch/arm/mach-shmobile/board-armadillo800eva.c b/arch/arm/mach-shmobile/board-armadillo800eva.c
-> index 6d949f1..7eac846 100644
-> --- a/arch/arm/mach-shmobile/board-armadillo800eva.c
-> +++ b/arch/arm/mach-shmobile/board-armadillo800eva.c
-> @@ -754,12 +754,12 @@ static struct platform_device vcc_sdhi1 = {
->  };
->
->  /* SDHI0 */
-> -static struct sh_mobile_sdhi_info sdhi0_info = {
-> -       .dma_slave_tx   = SHDMA_SLAVE_SDHI0_TX,
-> -       .dma_slave_rx   = SHDMA_SLAVE_SDHI0_RX,
-> -       .tmio_caps      = MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
-> +static struct tmio_mmc_data sdhi0_info = {
-> +       .chan_priv_tx   = (void *)SHDMA_SLAVE_SDHI0_TX,
-> +       .chan_priv_rx   = (void *)SHDMA_SLAVE_SDHI0_RX,
-> +       .capabilities   = MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
->                           MMC_CAP_POWER_OFF_CARD,
-> -       .tmio_flags     = TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_USE_GPIO_CD,
-> +       .flags          = TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_USE_GPIO_CD,
->         .cd_gpio        = 167,
->  };
->
-> @@ -796,12 +796,12 @@ static struct platform_device sdhi0_device = {
->  };
->
->  /* SDHI1 */
-> -static struct sh_mobile_sdhi_info sdhi1_info = {
-> -       .dma_slave_tx   = SHDMA_SLAVE_SDHI1_TX,
-> -       .dma_slave_rx   = SHDMA_SLAVE_SDHI1_RX,
-> -       .tmio_caps      = MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
-> +static struct tmio_mmc_data sdhi1_info = {
-> +       .chan_priv_tx   = (void *)SHDMA_SLAVE_SDHI1_TX,
-> +       .chan_priv_rx   = (void *)SHDMA_SLAVE_SDHI1_RX,
-> +       .capabilities   = MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
->                           MMC_CAP_POWER_OFF_CARD,
-> -       .tmio_flags     = TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_USE_GPIO_CD,
-> +       .flags          = TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_USE_GPIO_CD,
->         /* Port72 cannot generate IRQs, will be used in polling mode. */
->         .cd_gpio        = 72,
->  };
-> diff --git a/arch/arm/mach-shmobile/board-bockw.c b/arch/arm/mach-shmobile/board-bockw.c
-> index f27b5a8..25558d1 100644
-> --- a/arch/arm/mach-shmobile/board-bockw.c
-> +++ b/arch/arm/mach-shmobile/board-bockw.c
-> @@ -201,12 +201,12 @@ static struct rcar_phy_platform_data usb_phy_platform_data __initdata =
->
->
->  /* SDHI */
-> -static struct sh_mobile_sdhi_info sdhi0_info __initdata = {
-> -       .dma_slave_tx   = HPBDMA_SLAVE_SDHI0_TX,
-> -       .dma_slave_rx   = HPBDMA_SLAVE_SDHI0_RX,
-> -       .tmio_caps      = MMC_CAP_SD_HIGHSPEED,
-> -       .tmio_ocr_mask  = MMC_VDD_165_195 | MMC_VDD_32_33 | MMC_VDD_33_34,
-> -       .tmio_flags     = TMIO_MMC_HAS_IDLE_WAIT,
-> +static struct tmio_mmc_data sdhi0_info __initdata = {
-> +       .chan_priv_tx   = (void *)HPBDMA_SLAVE_SDHI0_TX,
-> +       .chan_priv_rx   = (void *)HPBDMA_SLAVE_SDHI0_RX,
-> +       .capabilities   = MMC_CAP_SD_HIGHSPEED,
-> +       .ocr_mask       = MMC_VDD_165_195 | MMC_VDD_32_33 | MMC_VDD_33_34,
-> +       .flags          = TMIO_MMC_HAS_IDLE_WAIT,
->  };
->
->  static struct resource sdhi0_resources[] __initdata = {
-> @@ -683,7 +683,7 @@ static void __init bockw_init(void)
->                 platform_device_register_resndata(
->                         NULL, "sh_mobile_sdhi", 0,
->                         sdhi0_resources, ARRAY_SIZE(sdhi0_resources),
-> -                       &sdhi0_info, sizeof(struct sh_mobile_sdhi_info));
-> +                       &sdhi0_info, sizeof(struct tmio_mmc_data));
->         }
->
->         /* for Audio */
-> diff --git a/arch/arm/mach-shmobile/board-kzm9g.c b/arch/arm/mach-shmobile/board-kzm9g.c
-> index 7c9b63b..260d831 100644
-> --- a/arch/arm/mach-shmobile/board-kzm9g.c
-> +++ b/arch/arm/mach-shmobile/board-kzm9g.c
-> @@ -442,11 +442,11 @@ static struct platform_device vcc_sdhi2 = {
->  };
->
->  /* SDHI */
-> -static struct sh_mobile_sdhi_info sdhi0_info = {
-> -       .dma_slave_tx   = SHDMA_SLAVE_SDHI0_TX,
-> -       .dma_slave_rx   = SHDMA_SLAVE_SDHI0_RX,
-> -       .tmio_flags     = TMIO_MMC_HAS_IDLE_WAIT,
-> -       .tmio_caps      = MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
-> +static struct tmio_mmc_data sdhi0_info = {
-> +       .chan_priv_tx   = (void *)SHDMA_SLAVE_SDHI0_TX,
-> +       .chan_priv_rx   = (void *)SHDMA_SLAVE_SDHI0_RX,
-> +       .flags          = TMIO_MMC_HAS_IDLE_WAIT,
-> +       .capabilities   = MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
->                           MMC_CAP_POWER_OFF_CARD,
->  };
->
-> @@ -484,13 +484,13 @@ static struct platform_device sdhi0_device = {
->  };
->
->  /* Micro SD */
-> -static struct sh_mobile_sdhi_info sdhi2_info = {
-> -       .dma_slave_tx   = SHDMA_SLAVE_SDHI2_TX,
-> -       .dma_slave_rx   = SHDMA_SLAVE_SDHI2_RX,
-> -       .tmio_flags     = TMIO_MMC_HAS_IDLE_WAIT |
-> +static struct tmio_mmc_data sdhi2_info = {
-> +       .chan_priv_tx   = (void *)SHDMA_SLAVE_SDHI2_TX,
-> +       .chan_priv_rx   = (void *)SHDMA_SLAVE_SDHI2_RX,
-> +       .flags          = TMIO_MMC_HAS_IDLE_WAIT |
->                           TMIO_MMC_USE_GPIO_CD |
->                           TMIO_MMC_WRPROTECT_DISABLE,
-> -       .tmio_caps      = MMC_CAP_SD_HIGHSPEED | MMC_CAP_POWER_OFF_CARD,
-> +       .capabilities   = MMC_CAP_SD_HIGHSPEED | MMC_CAP_POWER_OFF_CARD,
->         .cd_gpio        = 13,
->  };
->
-> diff --git a/arch/arm/mach-shmobile/board-marzen.c b/arch/arm/mach-shmobile/board-marzen.c
-> index 598f704..51db288 100644
-> --- a/arch/arm/mach-shmobile/board-marzen.c
-> +++ b/arch/arm/mach-shmobile/board-marzen.c
-> @@ -122,11 +122,11 @@ static struct resource sdhi0_resources[] = {
->         },
->  };
->
-> -static struct sh_mobile_sdhi_info sdhi0_platform_data = {
-> -       .dma_slave_tx = HPBDMA_SLAVE_SDHI0_TX,
-> -       .dma_slave_rx = HPBDMA_SLAVE_SDHI0_RX,
-> -       .tmio_flags = TMIO_MMC_WRPROTECT_DISABLE | TMIO_MMC_HAS_IDLE_WAIT,
-> -       .tmio_caps = MMC_CAP_SD_HIGHSPEED,
-> +static struct tmio_mmc_data sdhi0_platform_data = {
-> +       .chan_priv_tx = (void *)HPBDMA_SLAVE_SDHI0_TX,
-> +       .chan_priv_rx = (void *)HPBDMA_SLAVE_SDHI0_RX,
-> +       .flags        = TMIO_MMC_WRPROTECT_DISABLE | TMIO_MMC_HAS_IDLE_WAIT,
-> +       .capabilities = MMC_CAP_SD_HIGHSPEED,
->  };
->
->  static struct platform_device sdhi0_device = {
-> diff --git a/arch/sh/boards/board-sh7757lcr.c b/arch/sh/boards/board-sh7757lcr.c
-> index 669df51..324599b 100644
-> --- a/arch/sh/boards/board-sh7757lcr.c
-> +++ b/arch/sh/boards/board-sh7757lcr.c
-> @@ -17,6 +17,7 @@
->  #include <linux/spi/spi.h>
->  #include <linux/spi/flash.h>
->  #include <linux/io.h>
-> +#include <linux/mfd/tmio.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/sh_mmcif.h>
->  #include <linux/mmc/sh_mobile_sdhi.h>
-> @@ -243,10 +244,10 @@ static struct platform_device sh_mmcif_device = {
->  };
->
->  /* SDHI0 */
-> -static struct sh_mobile_sdhi_info sdhi_info = {
-> -       .dma_slave_tx   = SHDMA_SLAVE_SDHI_TX,
-> -       .dma_slave_rx   = SHDMA_SLAVE_SDHI_RX,
-> -       .tmio_caps      = MMC_CAP_SD_HIGHSPEED,
-> +static struct tmio_mmc_data sdhi_info = {
-> +       .chan_priv_tx   = (void *)SHDMA_SLAVE_SDHI_TX,
-> +       .chan_priv_rx   = (void *)SHDMA_SLAVE_SDHI_RX,
-> +       .capabilities   = MMC_CAP_SD_HIGHSPEED,
->  };
->
->  static struct resource sdhi_resources[] = {
-> diff --git a/arch/sh/boards/mach-ap325rxa/setup.c b/arch/sh/boards/mach-ap325rxa/setup.c
-> index d4b01d4c..cbd2a9f 100644
-> --- a/arch/sh/boards/mach-ap325rxa/setup.c
-> +++ b/arch/sh/boards/mach-ap325rxa/setup.c
-> @@ -18,6 +18,7 @@
->  #include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/mtd/physmap.h>
->  #include <linux/mtd/sh_flctl.h>
-> +#include <linux/mfd/tmio.h>
->  #include <linux/delay.h>
->  #include <linux/i2c.h>
->  #include <linux/regulator/fixed.h>
-> @@ -447,8 +448,8 @@ static struct resource sdhi0_cn3_resources[] = {
->         },
->  };
->
-> -static struct sh_mobile_sdhi_info sdhi0_cn3_data = {
-> -       .tmio_caps      = MMC_CAP_SDIO_IRQ,
-> +static struct tmio_mmc_data sdhi0_cn3_data = {
-> +       .capabilities   = MMC_CAP_SDIO_IRQ,
->  };
->
->  static struct platform_device sdhi0_cn3_device = {
-> @@ -474,8 +475,8 @@ static struct resource sdhi1_cn7_resources[] = {
->         },
->  };
->
-> -static struct sh_mobile_sdhi_info sdhi1_cn7_data = {
-> -       .tmio_caps      = MMC_CAP_SDIO_IRQ,
-> +static struct tmio_mmc_data sdhi1_cn7_data = {
-> +       .capabilities   = MMC_CAP_SDIO_IRQ,
->  };
->
->  static struct platform_device sdhi1_cn7_device = {
-> diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
-> index 0d30492..d531791 100644
-> --- a/arch/sh/boards/mach-ecovec24/setup.c
-> +++ b/arch/sh/boards/mach-ecovec24/setup.c
-> @@ -601,12 +601,12 @@ static struct platform_device sdhi0_power = {
->         },
->  };
->
-> -static struct sh_mobile_sdhi_info sdhi0_info = {
-> -       .dma_slave_tx   = SHDMA_SLAVE_SDHI0_TX,
-> -       .dma_slave_rx   = SHDMA_SLAVE_SDHI0_RX,
-> -       .tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD |
-> +static struct tmio_mmc_data sdhi0_info = {
-> +       .chan_priv_tx   = (void *)SHDMA_SLAVE_SDHI0_TX,
-> +       .chan_priv_rx   = (void *)SHDMA_SLAVE_SDHI0_RX,
-> +       .capabilities   = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD |
->                           MMC_CAP_NEEDS_POLL,
-> -       .tmio_flags     = TMIO_MMC_USE_GPIO_CD,
-> +       .flags          = TMIO_MMC_USE_GPIO_CD,
->         .cd_gpio        = GPIO_PTY7,
->  };
->
-> @@ -635,12 +635,12 @@ static struct platform_device sdhi0_device = {
->
->  #if !defined(CONFIG_MMC_SH_MMCIF) && !defined(CONFIG_MMC_SH_MMCIF_MODULE)
->  /* SDHI1 */
-> -static struct sh_mobile_sdhi_info sdhi1_info = {
-> -       .dma_slave_tx   = SHDMA_SLAVE_SDHI1_TX,
-> -       .dma_slave_rx   = SHDMA_SLAVE_SDHI1_RX,
-> -       .tmio_caps      = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD |
-> +static struct tmio_mmc_data sdhi1_info = {
-> +       .chan_priv_tx   = (void *)SHDMA_SLAVE_SDHI1_TX,
-> +       .chan_priv_rx   = (void *)SHDMA_SLAVE_SDHI1_RX,
-> +       .capabilities   = MMC_CAP_SDIO_IRQ | MMC_CAP_POWER_OFF_CARD |
->                           MMC_CAP_NEEDS_POLL,
-> -       .tmio_flags     = TMIO_MMC_USE_GPIO_CD,
-> +       .flags          = TMIO_MMC_USE_GPIO_CD,
->         .cd_gpio        = GPIO_PTW7,
->  };
->
-> diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
-> index 1df4398..7d997ce 100644
-> --- a/arch/sh/boards/mach-kfr2r09/setup.c
-> +++ b/arch/sh/boards/mach-kfr2r09/setup.c
-> @@ -373,11 +373,11 @@ static struct resource kfr2r09_sh_sdhi0_resources[] = {
->         },
->  };
->
-> -static struct sh_mobile_sdhi_info sh7724_sdhi0_data = {
-> -       .dma_slave_tx   = SHDMA_SLAVE_SDHI0_TX,
-> -       .dma_slave_rx   = SHDMA_SLAVE_SDHI0_RX,
-> -       .tmio_flags     = TMIO_MMC_WRPROTECT_DISABLE,
-> -       .tmio_caps      = MMC_CAP_SDIO_IRQ,
-> +static struct tmio_mmc_data sh7724_sdhi0_data = {
-> +       .chan_priv_tx   = (void *)SHDMA_SLAVE_SDHI0_TX,
-> +       .chan_priv_rx   = (void *)SHDMA_SLAVE_SDHI0_RX,
-> +       .flags          = TMIO_MMC_WRPROTECT_DISABLE,
-> +       .capabilities   = MMC_CAP_SDIO_IRQ,
->  };
->
->  static struct platform_device kfr2r09_sh_sdhi0_device = {
-> diff --git a/arch/sh/boards/mach-migor/setup.c b/arch/sh/boards/mach-migor/setup.c
-> index 8b73194..29b7c0d 100644
-> --- a/arch/sh/boards/mach-migor/setup.c
-> +++ b/arch/sh/boards/mach-migor/setup.c
-> @@ -15,6 +15,7 @@
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/mtd/physmap.h>
-> +#include <linux/mfd/tmio.h>
->  #include <linux/mtd/nand.h>
->  #include <linux/i2c.h>
->  #include <linux/regulator/fixed.h>
-> @@ -408,10 +409,10 @@ static struct resource sdhi_cn9_resources[] = {
->         },
->  };
->
-> -static struct sh_mobile_sdhi_info sh7724_sdhi_data = {
-> -       .dma_slave_tx   = SHDMA_SLAVE_SDHI0_TX,
-> -       .dma_slave_rx   = SHDMA_SLAVE_SDHI0_RX,
-> -       .tmio_caps      = MMC_CAP_SDIO_IRQ,
-> +static struct tmio_mmc_data sh7724_sdhi_data = {
-> +       .chan_priv_tx   = (void *)SHDMA_SLAVE_SDHI0_TX,
-> +       .chan_priv_rx   = (void *)SHDMA_SLAVE_SDHI0_RX,
-> +       .capabilities   = MMC_CAP_SDIO_IRQ,
->  };
->
->  static struct platform_device sdhi_cn9_device = {
-> diff --git a/arch/sh/boards/mach-se/7724/setup.c b/arch/sh/boards/mach-se/7724/setup.c
-> index 1162bc6..4f6635a 100644
-> --- a/arch/sh/boards/mach-se/7724/setup.c
-> +++ b/arch/sh/boards/mach-se/7724/setup.c
-> @@ -16,6 +16,7 @@
->  #include <linux/platform_device.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/sh_mobile_sdhi.h>
-> +#include <linux/mfd/tmio.h>
->  #include <linux/mtd/physmap.h>
->  #include <linux/delay.h>
->  #include <linux/regulator/fixed.h>
-> @@ -468,10 +469,10 @@ static struct resource sdhi0_cn7_resources[] = {
->         },
->  };
->
-> -static struct sh_mobile_sdhi_info sh7724_sdhi0_data = {
-> -       .dma_slave_tx   = SHDMA_SLAVE_SDHI0_TX,
-> -       .dma_slave_rx   = SHDMA_SLAVE_SDHI0_RX,
-> -       .tmio_caps      = MMC_CAP_SDIO_IRQ,
-> +static struct tmio_mmc_data sh7724_sdhi0_data = {
-> +       .chan_priv_tx   = (void *)SHDMA_SLAVE_SDHI0_TX,
-> +       .chan_priv_rx   = (void *)SHDMA_SLAVE_SDHI0_RX,
-> +       .capabilities   = MMC_CAP_SDIO_IRQ,
->  };
->
->  static struct platform_device sdhi0_cn7_device = {
-> @@ -497,10 +498,10 @@ static struct resource sdhi1_cn8_resources[] = {
->         },
->  };
->
-> -static struct sh_mobile_sdhi_info sh7724_sdhi1_data = {
-> -       .dma_slave_tx   = SHDMA_SLAVE_SDHI1_TX,
-> -       .dma_slave_rx   = SHDMA_SLAVE_SDHI1_RX,
-> -       .tmio_caps      = MMC_CAP_SDIO_IRQ,
-> +static struct tmio_mmc_data sh7724_sdhi1_data = {
-> +       .chan_priv_tx   = (void *)SHDMA_SLAVE_SDHI1_TX,
-> +       .chan_priv_rx   = (void *)SHDMA_SLAVE_SDHI1_RX,
-> +       .capabilities   = MMC_CAP_SDIO_IRQ,
->  };
->
->  static struct platform_device sdhi1_cn8_device = {
 > diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> index 3137e29..354f4f3 100644
+> index 11991f5..3137e29 100644
 > --- a/drivers/mmc/host/sh_mobile_sdhi.c
 > +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -202,7 +202,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+> @@ -201,6 +201,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+>                 of_match_device(sh_mobile_sdhi_of_match, &pdev->dev);
 >         struct sh_mobile_sdhi *priv;
 >         struct tmio_mmc_data *mmc_data;
->         struct tmio_mmc_data *mmd = pdev->dev.platform_data;
-> -       struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
+> +       struct tmio_mmc_data *mmd = pdev->dev.platform_data;
+>         struct sh_mobile_sdhi_info *p = pdev->dev.platform_data;
 >         struct tmio_mmc_host *host;
 >         struct resource *res;
->         int irq, ret, i = 0;
-> @@ -246,32 +245,9 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+> @@ -245,28 +246,37 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
 >         else
 >                 host->bus_shift = 0;
 >
-> -       if (mmd) {
-> -               /*
-> -                * FIXME
-> -                *
-> -                * sh_mobile_sdhi_info will be replaced to tmio_mmc_data soon.
-> -                * But, sh_mobile_sdhi_info is used under
-> -                * ${LINUX}/arch/arm/mach-shmobile/
-> -                * ${LINUX}/arch/sh/
-> -                * To separate large patch into "tmio_mmc_data has .chan_priv_?x"
-> -                * and "replace sh_mobile_sdhi_info in tmio_mmc_data",
-> -                * here has dummy method.
-> -                * These should be removed.
-> -                */
-> -               struct tmio_mmc_data m;
+> -       mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
+> -       if (p) {
+> -               mmc_data->flags = p->tmio_flags;
+> -               mmc_data->ocr_mask = p->tmio_ocr_mask;
+> -               mmc_data->capabilities |= p->tmio_caps;
+> -               mmc_data->capabilities2 |= p->tmio_caps2;
+> -               mmc_data->cd_gpio = p->cd_gpio;
 > -
-> -               mmd = &m;
-> -               m.flags         = p->tmio_flags;
-> -               m.ocr_mask      = p->tmio_ocr_mask;
-> -               m.capabilities  = p->tmio_caps;
-> -               m.capabilities2 = p->tmio_caps2;
-> -               m.cd_gpio       = p->cd_gpio;
-> -               m.chan_priv_tx  = (void *)p->dma_slave_tx;
-> -               m.chan_priv_rx  = (void *)p->dma_slave_rx;
-> -
-> +       if (mmd)
->                 *mmc_data = *mmd;
-> -       }
+> -               if (p->dma_slave_tx > 0 && p->dma_slave_rx > 0) {
+> -                       /*
+> -                        * Yes, we have to provide slave IDs twice to TMIO:
+> -                        * once as a filter parameter and once for channel
+> -                        * configuration as an explicit slave ID
+> -                        */
+> -                       dma_priv->chan_priv_tx = (void *)p->dma_slave_tx;
+> -                       dma_priv->chan_priv_rx = (void *)p->dma_slave_rx;
+> -               }
+> +       if (mmd) {
+> +               /*
+> +                * FIXME
+> +                *
+> +                * sh_mobile_sdhi_info will be replaced to tmio_mmc_data soon.
+> +                * But, sh_mobile_sdhi_info is used under
+> +                * ${LINUX}/arch/arm/mach-shmobile/
+> +                * ${LINUX}/arch/sh/
+> +                * To separate large patch into "tmio_mmc_data has .chan_priv_?x"
+> +                * and "replace sh_mobile_sdhi_info in tmio_mmc_data",
+> +                * here has dummy method.
+> +                * These should be removed.
+> +                */
+> +               struct tmio_mmc_data m;
 > +
+> +               mmd = &m;
+> +               m.flags         = p->tmio_flags;
+> +               m.ocr_mask      = p->tmio_ocr_mask;
+> +               m.capabilities  = p->tmio_caps;
+> +               m.capabilities2 = p->tmio_caps2;
+> +               m.cd_gpio       = p->cd_gpio;
+> +               m.chan_priv_tx  = (void *)p->dma_slave_tx;
+> +               m.chan_priv_rx  = (void *)p->dma_slave_rx;
+> +
+> +               *mmc_data = *mmd;
+>         }
 >         dma_priv->filter = shdma_chan_filter;
 >         dma_priv->enable = sh_mobile_sdhi_enable_dma;
 >
-> diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-> index da77e5e20..95d6f03 100644
-> --- a/include/linux/mmc/sh_mobile_sdhi.h
-> +++ b/include/linux/mmc/sh_mobile_sdhi.h
-> @@ -7,14 +7,4 @@
->  #define SH_MOBILE_SDHI_IRQ_SDCARD      "sdcard"
->  #define SH_MOBILE_SDHI_IRQ_SDIO                "sdio"
+>         mmc_data->alignment_shift = 1; /* 2-byte alignment */
+> +       mmc_data->capabilities |= MMC_CAP_MMC_HIGHSPEED;
 >
-> -struct sh_mobile_sdhi_info {
-> -       int dma_slave_tx;
-> -       int dma_slave_rx;
-> -       unsigned long tmio_flags;
-> -       unsigned long tmio_caps;
-> -       unsigned long tmio_caps2;
-> -       u32 tmio_ocr_mask;      /* available MMC voltages */
-> -       unsigned int cd_gpio;
-> -};
-> -
->  #endif /* LINUX_MMC_SH_MOBILE_SDHI_H */
+>         /*
+>          * All SDHI blocks support 2-byte and larger block sizes in 4-bit
+> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> index 1aea5c6..4a597f5a 100644
+> --- a/drivers/mmc/host/tmio_mmc.h
+> +++ b/drivers/mmc/host/tmio_mmc.h
+> @@ -43,8 +43,6 @@ struct tmio_mmc_data;
+>  struct tmio_mmc_host;
+>
+>  struct tmio_mmc_dma {
+> -       void *chan_priv_tx;
+> -       void *chan_priv_rx;
+>         enum dma_slave_buswidth dma_buswidth;
+>         bool (*filter)(struct dma_chan *chan, void *arg);
+>         void (*enable)(struct tmio_mmc_host *host, bool enable);
+> diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+> index 8dbd785..e4b05db 100644
+> --- a/drivers/mmc/host/tmio_mmc_dma.c
+> +++ b/drivers/mmc/host/tmio_mmc_dma.c
+> @@ -261,7 +261,7 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
+>  {
+>         /* We can only either use DMA for both Tx and Rx or not use it at all */
+>         if (!host->dma || (!host->pdev->dev.of_node &&
+> -               (!host->dma->chan_priv_tx || !host->dma->chan_priv_rx)))
+> +               (!pdata->chan_priv_tx || !pdata->chan_priv_rx)))
+>                 return;
+>
+>         if (!host->chan_tx && !host->chan_rx) {
+> @@ -278,7 +278,7 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
+>                 dma_cap_set(DMA_SLAVE, mask);
+>
+>                 host->chan_tx = dma_request_slave_channel_compat(mask,
+> -                                       host->dma->filter, host->dma->chan_priv_tx,
+> +                                       host->dma->filter, pdata->chan_priv_tx,
+>                                         &host->pdev->dev, "tx");
+>                 dev_dbg(&host->pdev->dev, "%s: TX: got channel %p\n", __func__,
+>                         host->chan_tx);
+> @@ -297,7 +297,7 @@ void tmio_mmc_request_dma(struct tmio_mmc_host *host, struct tmio_mmc_data *pdat
+>                         goto ecfgtx;
+>
+>                 host->chan_rx = dma_request_slave_channel_compat(mask,
+> -                                       host->dma->filter, host->dma->chan_priv_rx,
+> +                                       host->dma->filter, pdata->chan_priv_rx,
+>                                         &host->pdev->dev, "rx");
+>                 dev_dbg(&host->pdev->dev, "%s: RX: got channel %p\n", __func__,
+>                         host->chan_rx);
+> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+> index 6058128..24b86d5 100644
+> --- a/include/linux/mfd/tmio.h
+> +++ b/include/linux/mfd/tmio.h
+> @@ -111,6 +111,8 @@ struct dma_chan;
+>   * data for the MMC controller
+>   */
+>  struct tmio_mmc_data {
+> +       void                            *chan_priv_tx;
+> +       void                            *chan_priv_rx;
+>         unsigned int                    hclk;
+>         unsigned long                   capabilities;
+>         unsigned long                   capabilities2;
 > --
 > 1.7.9.5
 >
