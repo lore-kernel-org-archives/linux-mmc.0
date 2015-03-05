@@ -1,130 +1,118 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: tegra: Optimize write_w path for tegra114 and later
-Date: Thu, 5 Mar 2015 15:59:38 +0100
-Message-ID: <CAPDyKForXhWDVf5T9qU9kw8Zs4F5uZfr4LhH7uQHhMwf9n1Brw@mail.gmail.com>
-References: <1423677351-31635-1-git-send-email-rklein@nvidia.com>
+Subject: Re: [PATCH] mmc: sdhci-pltfm: remove the unneeded check of disabled device
+Date: Thu, 5 Mar 2015 16:03:48 +0100
+Message-ID: <CAPDyKFrwP+whb0c50u1fHhZCuMqjMcb62+ygRQ=r+vXs-0P3fw@mail.gmail.com>
+References: <1423031633-26915-1-git-send-email-haokexin@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1423677351-31635-1-git-send-email-rklein@nvidia.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Rhyland Klein <rklein@nvidia.com>
-Cc: Chris Ball <chris@printf.net>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Alexandre Courbot <gnurou@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f180.google.com ([209.85.216.180]:40476 "EHLO
+	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751670AbbCEPDt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 10:03:49 -0500
+Received: by qcvs11 with SMTP id s11so9317363qcv.7
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2015 07:03:48 -0800 (PST)
+In-Reply-To: <1423031633-26915-1-git-send-email-haokexin@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kevin Hao <haokexin@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>
 
-On 11 February 2015 at 18:55, Rhyland Klein <rklein@nvidia.com> wrote:
-> Setup a different set of sdhci_ops for tegra114 and later so that
-> the write_w callback is only used on tegra114. This allows us to
-> remove the NVQUIRK_SHADOW_XFER_MODE_REG and simply the logic
-> in tegra_sdhci_writew.
+On 4 February 2015 at 07:33, Kevin Hao <haokexin@gmail.com> wrote:
+> Since commit cd1e65044d44 ("of/device: Don't register disabled
+> devices"), the disabled device will not be registered at all. So
+> we don't need to do the check again in the platform device driver.
 >
-> This was suggested by Alexandre Courbot.
+> And the check in the current code is useless even if we really
+> run into a disabled device. In this case, it just doesn't parse
+> the dtb for the infos such as quirks or clock, but it will continue
+> to try to init the disabled device after that check. So just remove it.
 >
-> Signed-off-by: Rhyland Klein <rklein@nvidia.com>
+> Signed-off-by: Kevin Hao <haokexin@gmail.com>
 
-Applied, with some changes, thanks!
-
-1. Added the suggested-by tag.
-2. Remove some unused variables causing compiler warnings.
+Applied, thanks!
 
 Kind regards
 Uffe
 
-
 > ---
->  drivers/mmc/host/sdhci-tegra.c |   45 +++++++++++++++++++++++-----------------
->  1 file changed, 26 insertions(+), 19 deletions(-)
+>  drivers/mmc/host/sdhci-pltfm.c | 54 ++++++++++++++++++++----------------------
+>  1 file changed, 26 insertions(+), 28 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index f3778d58d1cd..180062498c35 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -41,7 +41,6 @@
->  #define NVQUIRK_DISABLE_SDR50          BIT(3)
->  #define NVQUIRK_DISABLE_SDR104         BIT(4)
->  #define NVQUIRK_DISABLE_DDR50          BIT(5)
-> -#define NVQUIRK_SHADOW_XFER_MODE_REG   BIT(6)
+> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+> index c5b01d6bb85d..b609c03a9ef8 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -75,43 +75,41 @@ void sdhci_get_of_property(struct platform_device *pdev)
+>         u32 bus_width;
+>         int size;
 >
->  struct sdhci_tegra_soc_data {
->         const struct sdhci_pltfm_data *pdata;
-> @@ -74,20 +73,18 @@ static void tegra_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
->         struct sdhci_tegra *tegra_host = pltfm_host->priv;
->         const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+> -       if (of_device_is_available(np)) {
+> -               if (of_get_property(np, "sdhci,auto-cmd12", NULL))
+> -                       host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+> +       if (of_get_property(np, "sdhci,auto-cmd12", NULL))
+> +               host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
 >
-> -       if (soc_data->nvquirks & NVQUIRK_SHADOW_XFER_MODE_REG) {
-> -               switch (reg) {
-> -               case SDHCI_TRANSFER_MODE:
-> -                       /*
-> -                        * Postpone this write, we must do it together with a
-> -                        * command write that is down below.
-> -                        */
-> -                       pltfm_host->xfer_mode_shadow = val;
-> -                       return;
-> -               case SDHCI_COMMAND:
-> -                       writel((val << 16) | pltfm_host->xfer_mode_shadow,
-> -                               host->ioaddr + SDHCI_TRANSFER_MODE);
-> -                       return;
-> -               }
-> +       switch (reg) {
-> +       case SDHCI_TRANSFER_MODE:
-> +               /*
-> +                * Postpone this write, we must do it together with a
-> +                * command write that is down below.
-> +                */
-> +               pltfm_host->xfer_mode_shadow = val;
-> +               return;
-> +       case SDHCI_COMMAND:
-> +               writel((val << 16) | pltfm_host->xfer_mode_shadow,
-> +                       host->ioaddr + SDHCI_TRANSFER_MODE);
-> +               return;
->         }
+> -               if (of_get_property(np, "sdhci,1-bit-only", NULL) ||
+> -                   (of_property_read_u32(np, "bus-width", &bus_width) == 0 &&
+> -                   bus_width == 1))
+> -                       host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
+> +       if (of_get_property(np, "sdhci,1-bit-only", NULL) ||
+> +           (of_property_read_u32(np, "bus-width", &bus_width) == 0 &&
+> +           bus_width == 1))
+> +               host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
 >
->         writew(val, host->ioaddr + reg);
-> @@ -173,7 +170,6 @@ static void tegra_sdhci_set_bus_width(struct sdhci_host *host, int bus_width)
->  static const struct sdhci_ops tegra_sdhci_ops = {
->         .get_ro     = tegra_sdhci_get_ro,
->         .read_w     = tegra_sdhci_readw,
-> -       .write_w    = tegra_sdhci_writew,
->         .write_l    = tegra_sdhci_writel,
->         .set_clock  = sdhci_set_clock,
->         .set_bus_width = tegra_sdhci_set_bus_width,
-> @@ -214,6 +210,18 @@ static struct sdhci_tegra_soc_data soc_data_tegra30 = {
->                     NVQUIRK_DISABLE_SDR104,
->  };
+> -               if (sdhci_of_wp_inverted(np))
+> -                       host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
+> +       if (sdhci_of_wp_inverted(np))
+> +               host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
 >
-> +static const struct sdhci_ops tegra114_sdhci_ops = {
-> +       .get_ro     = tegra_sdhci_get_ro,
-> +       .read_w     = tegra_sdhci_readw,
-> +       .write_w    = tegra_sdhci_writew,
-> +       .write_l    = tegra_sdhci_writel,
-> +       .set_clock  = sdhci_set_clock,
-> +       .set_bus_width = tegra_sdhci_set_bus_width,
-> +       .reset      = tegra_sdhci_reset,
-> +       .set_uhs_signaling = sdhci_set_uhs_signaling,
-> +       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
-> +};
-> +
->  static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
->         .quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
->                   SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-> @@ -221,15 +229,14 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
->                   SDHCI_QUIRK_NO_HISPD_BIT |
->                   SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
->                   SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> -       .ops  = &tegra_sdhci_ops,
-> +       .ops  = &tegra114_sdhci_ops,
->  };
+> -               if (of_get_property(np, "broken-cd", NULL))
+> -                       host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> +       if (of_get_property(np, "broken-cd", NULL))
+> +               host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
 >
->  static struct sdhci_tegra_soc_data soc_data_tegra114 = {
->         .pdata = &sdhci_tegra114_pdata,
->         .nvquirks = NVQUIRK_DISABLE_SDR50 |
->                     NVQUIRK_DISABLE_DDR50 |
-> -                   NVQUIRK_DISABLE_SDR104 |
-> -                   NVQUIRK_SHADOW_XFER_MODE_REG,
-> +                   NVQUIRK_DISABLE_SDR104,
->  };
+> -               if (of_get_property(np, "no-1-8-v", NULL))
+> -                       host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+> +       if (of_get_property(np, "no-1-8-v", NULL))
+> +               host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
 >
->  static const struct of_device_id sdhci_tegra_dt_match[] = {
+> -               if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
+> -                       host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
+> +       if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
+> +               host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
+>
+> -               if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
+> -                   of_device_is_compatible(np, "fsl,p1010-esdhc") ||
+> -                   of_device_is_compatible(np, "fsl,t4240-esdhc") ||
+> -                   of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
+> -                       host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+> +       if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
+> +           of_device_is_compatible(np, "fsl,p1010-esdhc") ||
+> +           of_device_is_compatible(np, "fsl,t4240-esdhc") ||
+> +           of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
+> +               host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+>
+> -               clk = of_get_property(np, "clock-frequency", &size);
+> -               if (clk && size == sizeof(*clk) && *clk)
+> -                       pltfm_host->clock = be32_to_cpup(clk);
+> +       clk = of_get_property(np, "clock-frequency", &size);
+> +       if (clk && size == sizeof(*clk) && *clk)
+> +               pltfm_host->clock = be32_to_cpup(clk);
+>
+> -               if (of_find_property(np, "keep-power-in-suspend", NULL))
+> -                       host->mmc->pm_caps |= MMC_PM_KEEP_POWER;
+> +       if (of_find_property(np, "keep-power-in-suspend", NULL))
+> +               host->mmc->pm_caps |= MMC_PM_KEEP_POWER;
+>
+> -               if (of_find_property(np, "enable-sdio-wakeup", NULL))
+> -                       host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+> -       }
+> +       if (of_find_property(np, "enable-sdio-wakeup", NULL))
+> +               host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+>  }
+>  #else
+>  void sdhci_get_of_property(struct platform_device *pdev) {}
 > --
-> 1.7.9.5
+> 1.9.3
 >
