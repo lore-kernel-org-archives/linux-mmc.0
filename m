@@ -1,32 +1,76 @@
-From: Scott Branden <sbranden@broadcom.com>
-Subject: Re: [PATCH 4/4] mmc: sdhci-iproc: add device tree bindings
-Date: Wed, 4 Mar 2015 15:14:48 -0800
-Message-ID: <54F791E8.9020405@broadcom.com>
-References: <Scott Branden <sbranden@broadcom.com> <1423526791-29453-1-git-send-email-sbranden@broadcom.com> <1423526791-29453-5-git-send-email-sbranden@broadcom.com> <54F4F74A.7050909@gmail.com>
+From: Barry Song <21cnbao@gmail.com>
+Subject: Re: [PATCH] mmc: sirf: update sdhci_sirf_execute_tuning procedure
+Date: Thu, 5 Mar 2015 13:54:15 +0800
+Message-ID: <CAGsJ_4x8HVAOFr95hxT47aoadm6xyvdBCt+ZU05Lamfjz2xFPg@mail.gmail.com>
+References: <1424015031-24676-1-git-send-email-21cnbao@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:12670 "EHLO
-	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750752AbbCDXPK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Mar 2015 18:15:10 -0500
-In-Reply-To: <54F4F74A.7050909@gmail.com>
+Received: from mail-pa0-f48.google.com ([209.85.220.48]:46977 "EHLO
+	mail-pa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752083AbbCEFyg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 00:54:36 -0500
+Received: by pabli10 with SMTP id li10so39798152pab.13
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2015 21:54:36 -0800 (PST)
+In-Reply-To: <1424015031-24676-1-git-send-email-21cnbao@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Florian Fainelli <f.fainelli@gmail.com>, bcm-kernel-feedback-list@broadcom.com, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Grant Likely <grant.likely@linaro.org>
-Cc: devicetree@vger.kernel.org, Corneliu Doban <cdoban@broadcom.com>, Ray Jui <rjui@broadcom.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jonathan Richardson <jonathar@broadcom.com>, Anatol Pomazao <anatol@google.com>, linux-arm-kernel@lists.infradead.org, Dmitry Torokhov <dtor@google.com>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, weijun yang <york.yang@csr.com>, Barry Song <baohua.song@csr.com>
 
-Hi Florian,
+ping Ulf....
 
-On 15-03-02 03:50 PM, Florian Fainelli wrote:
->
-> Unless there is a re-spin, I will fix this myself while applying this
-> patch to devicetree/next.
->
-> Thanks
->
-Yes, you can patch the formatting if the driver is being integrated. 
-But I have had no response or feedback on the sdhci driver.  It has been 
-sitting for 1 month.
 
+2015-02-15 23:43 GMT+08:00 Barry Song <21cnbao@gmail.com>:
+> From: weijun yang <york.yang@csr.com>
+>
+> For the original tuning code, delay value is set to SD Bus Clock Delay
+> Register (SD_CLK_DELAY_SETTING) as (val | (Val << 7) | (val << 16)),
+> which means CLK_DELAY_IN1, CLK_DELAY_IN2 and CLK_DELAY_OUT are the
+> same and with 128 steps. This is doubtful. In CSR design specification
+> documents CS-304575-DR-3H, this issue is clarified, the delay[13:0] in
+> SD_CLK_DELAY_SETTING is simplied to the concatenation of {CLK_DELAY_IN2,
+> CLK_DELAY_IN1}.
+> Besides, for CMD19 tuning, no need to set CLK_DELAY_OUT([22,16]
+> of SD_CLK_DELAY_SETTING).
+>
+> Signed-off-by: weijun yang <york.yang@csr.com>
+> Signed-off-by: Barry Song <baohua.song@csr.com>
+> ---
+>  drivers/mmc/host/sdhci-sirf.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
+> index f6f82ec..4331409 100644
+> --- a/drivers/mmc/host/sdhci-sirf.c
+> +++ b/drivers/mmc/host/sdhci-sirf.c
+> @@ -56,7 +56,7 @@ static int sdhci_sirf_execute_tuning(struct sdhci_host *host, u32 opcode)
+>         int tuning_seq_cnt = 3;
+>         u8 phase, tuned_phases[SIRF_TUNING_COUNT];
+>         u8 tuned_phase_cnt = 0;
+> -       int rc, longest_range = 0;
+> +       int rc = 0, longest_range = 0;
+>         int start = -1, end = 0, tuning_value = -1, range = 0;
+>         u16 clock_setting;
+>         struct mmc_host *mmc = host->mmc;
+> @@ -68,7 +68,7 @@ retry:
+>         phase = 0;
+>         do {
+>                 sdhci_writel(host,
+> -                       clock_setting | phase | (phase << 7) | (phase << 16),
+> +                       clock_setting | phase,
+>                         SDHCI_CLK_DELAY_SETTING);
+>
+>                 if (!mmc_send_tuning(mmc)) {
+> @@ -102,7 +102,7 @@ retry:
+>                  */
+>                 phase = tuning_value;
+>                 sdhci_writel(host,
+> -                       clock_setting | phase | (phase << 7) | (phase << 16),
+> +                       clock_setting | phase,
+>                         SDHCI_CLK_DELAY_SETTING);
+>
+>                 dev_dbg(mmc_dev(mmc), "%s: Setting the tuning phase to %d\n",
+> --
+> 1.9.1
+>
