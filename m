@@ -1,60 +1,60 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH] mmc: tmio: Remove bogus un-initialization in tmio_mmc_host_free()
-Date: Thu, 5 Mar 2015 11:08:58 +0100
-Message-ID: <CAMuHMdVwiS1J_a4oV1F_VQGSF4gH+ZCwsVLPisn7+bJEksE=0A@mail.gmail.com>
-References: <1424277299-24964-1-git-send-email-geert+renesas@glider.be>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH ulf.hansson-mmc] mmc: dw_mmc: exynos:
+ dw_mci_exynos_prepare_hs400_tuning() can be static
+Date: Thu, 05 Mar 2015 19:13:12 +0900
+Message-ID: <54F82C38.9090401@samsung.com>
+References: <201503051843.EsoMldBU%fengguang.wu@intel.com>
+ <20150305100254.GA66299@lkp-sb04.lkp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f179.google.com ([209.85.214.179]:33854 "EHLO
-	mail-ob0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753486AbbCEKI7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Mar 2015 05:08:59 -0500
-In-Reply-To: <1424277299-24964-1-git-send-email-geert+renesas@glider.be>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <20150305100254.GA66299@lkp-sb04.lkp.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: kbuild test robot <fengguang.wu@intel.com>, Seungwon Jeon <tgih.jun@samsung.com>
+Cc: kbuild-all@01.org, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Chris Ball <chris@printf.net>, Kukjin Kim <kgene@kernel.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Ian Molton <ian.molton@codethink.co.uk>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Ping?
+Hi,
 
-On Wed, Feb 18, 2015 at 5:34 PM, Geert Uytterhoeven
-<geert+renesas@glider.be> wrote:
-> If CONFIG_DEBUG_SLAB=y:
->
->     sh_mobile_sdhi ee100000.sd: Got CD GPIO
->     sh_mobile_sdhi ee100000.sd: Got WP GPIO
->     platform ee100000.sd: Driver sh_mobile_sdhi requests probe deferral
->     ...
->     Slab corruption (Not tainted): kmalloc-1024 start=ed8b3c00, len=1024
->     2d0: 00 00 00 00 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b  ....kkkkkkkkkkkk
->     Prev obj: start=ed8b3800, len=1024
->     000: 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b  kkkkkkkkkkkkkkkk
->     010: 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b  kkkkkkkkkkkkkkkk
->
-> Struct tmio_mmc_host is embedded inside struct mmc_host, and thus is
-> freed by the call to mmc_free_host(). Hence it must not be written to
-> afterwards, as that will corrupt freed (and perhaps already reused)
-> memory.
->
-> Fixes: 94b110aff8679b14 ("mmc: tmio: add tmio_mmc_host_alloc/free()")
-> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Sorry for missing warning, and Thanks for pointing out.
+
+Best Regards,
+Jaehoon Chung
+
+
+On 03/05/2015 07:02 PM, kbuild test robot wrote:
+> 
+> Signed-off-by: Fengguang Wu <fengguang.wu@intel.com>
 > ---
->  drivers/mmc/host/tmio_mmc_pio.c | 2 --
->  1 file changed, 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index a31c3573d386f8c6..dba7e1c19dd758e7 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -1073,8 +1073,6 @@ EXPORT_SYMBOL(tmio_mmc_host_alloc);
->  void tmio_mmc_host_free(struct tmio_mmc_host *host)
->  {
->         mmc_free_host(host->mmc);
-> -
-> -       host->mmc = NULL;
+>  dw_mmc-exynos.c |    2 +-
+>  dw_mmc.c        |    2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 0a56d766..e761eb1 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -477,7 +477,7 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot)
+>  	return ret;
 >  }
->  EXPORT_SYMBOL(tmio_mmc_host_free);
->
-> --
-> 1.9.1
+>  
+> -int dw_mci_exynos_prepare_hs400_tuning(struct dw_mci *host,
+> +static int dw_mci_exynos_prepare_hs400_tuning(struct dw_mci *host,
+>  					struct mmc_ios *ios)
+>  {
+>  	struct dw_mci_exynos_priv_data *priv = host->priv;
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index f30ef69..a99fa1b 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1324,7 +1324,7 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	return err;
+>  }
+>  
+> -int dw_mci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
+> +static int dw_mci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
+>  {
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+>  	struct dw_mci *host = slot->host;
+> 
