@@ -1,51 +1,237 @@
-From: Florian Fainelli <f.fainelli@gmail.com>
-Subject: Re: [PATCH RESEND 0/4] Add support for IPROC SDHCI controller
-Date: Thu, 05 Mar 2015 11:57:52 -0800
-Message-ID: <54F8B540.6000301@gmail.com>
-References: <sbranden@broadcom.com>	<1425571148-5876-1-git-send-email-sbranden@broadcom.com> <CAPDyKFpH=dYzku9KNVFPtqc73+TptLFGZHNkFZ3Q4=suLOwFfQ@mail.gmail.com>
+From: James Bottomley <James.Bottomley@HansenPartnership.com>
+Subject: [PATCH] sd, mmc, virtio_blk, string_helpers: fix block size units
+Date: Thu, 05 Mar 2015 18:47:01 -0800
+Message-ID: <1425610021.2169.86.camel@HansenPartnership.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpH=dYzku9KNVFPtqc73+TptLFGZHNkFZ3Q4=suLOwFfQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Scott Branden <sbranden@broadcom.com>
-Cc: bcm-kernel-feedback-list@broadcom.com, Chris Ball <chris@printf.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Grant Likely <grant.likely@linaro.org>, Ray Jui <rjui@broadcom.com>, Jonathan Richardson <jonathar@broadcom.com>, Corneliu Doban <cdoban@broadcom.com>, Dmitry Torokhov <dtor@google.com>, Anatol Pomazao <anatol@google.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-scsi-owner@vger.kernel.org>
+Sender: linux-scsi-owner@vger.kernel.org
+To: linux-scsi <linux-scsi@vger.kernel.org>
+Cc: Andrew Morton <akpm@linux-foundation.org>, linux-mmc@vger.kernel.org, virtualization@lists.linux-foundation.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 05/03/15 08:16, Ulf Hansson wrote:
-> On 5 March 2015 at 16:59, Scott Branden <sbranden@broadcom.com> wrote:
->> This series of patchsets contains the IPROC SDHCI driver used
->> in a series of Broadcom SoCs
->> Quirks are also added to support this controller.
->>
->> Corneliu Doban (1):
->>   mmc: sdhci: do not set AUTO_CMD12 for multi-block CMD53
->>
->> Scott Branden (3):
->>   mmc: sdhci: add quirk for ACMD23 broken
->>   mmc: sdhci-iproc: add IPROC SDHCI driver
->>   mmc: sdhci-iproc: add device tree bindings
->>
->>  .../devicetree/bindings/mmc/brcm,sdhci-iproc.txt   |  23 ++
->>  drivers/mmc/host/Kconfig                           |  14 ++
->>  drivers/mmc/host/Makefile                          |   1 +
->>  drivers/mmc/host/sdhci-iproc.c                     | 241 +++++++++++++++++++++
->>  drivers/mmc/host/sdhci.c                           |   7 +-
->>  include/linux/mmc/sdhci.h                          |   2 +
->>  6 files changed, 286 insertions(+), 2 deletions(-)
->>  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
->>  create mode 100644 drivers/mmc/host/sdhci-iproc.c
->>
->> --
->> 2.2.2
->>
-> 
-> Applied, thanks!
-> 
-> Actually, I needed to re-solve some conflicts and I switched to order
-> of patch3 and patch4, to avoid checkpatch warnings. Just so you know.
+From: James Bottomley <JBottomley@Parallels.com>
 
-Thanks, patch 4 dropped from devicetree/next.
--- 
-Florian
+The current string_get_size() overflows when the device size goes over
+2^64 bytes because the string helper routine computes the suffix from
+the size in bytes.  However, the entirety of Linux thinks in terms of
+blocks, not bytes, so this will artificially induce an overflow on very
+large devices.  Fix this by making the function string_get_size() take
+blocks and the block size instead of bytes.  This should allow us to
+keep working until the current SCSI standard overflows.
+
+Also fix virtio_blk and mmc (both of which were also artificially
+multiplying by the block size to pass a byte side to string_get_size()).
+
+The mathematics of this is pretty simple:  we're taking a product of
+size in blocks (S) and block size (B) and trying to re-express this in
+exponential form: S*B = R*N^E (where N, the exponent is either 1000 or
+1024) and R < N.  Mathematically, S = RS*N^ES and B=RB*N^EB, so if RS*RB
+< N it's easy to see that S*B = RS*RB*N^(ES+EB).  However, if RS*BS > N,
+we can see that this can be re-expressed as RS*BS = R*N (where R =
+RS*BS/N < N) so the whole exponent becomes R*N^(ES+EB+1)
+
+Signed-off-by: James Bottomley <JBottomley@Parallels.com>
+
+---
+
+diff --git a/drivers/block/virtio_blk.c b/drivers/block/virtio_blk.c
+index cdfbd21..26d2440 100644
+--- a/drivers/block/virtio_blk.c
++++ b/drivers/block/virtio_blk.c
+@@ -344,7 +344,7 @@ static void virtblk_config_changed_work(struct work_struct *work)
+ 	struct request_queue *q = vblk->disk->queue;
+ 	char cap_str_2[10], cap_str_10[10];
+ 	char *envp[] = { "RESIZE=1", NULL };
+-	u64 capacity, size;
++	u64 capacity;
+ 
+ 	/* Host must always specify the capacity. */
+ 	virtio_cread(vdev, struct virtio_blk_config, capacity, &capacity);
+@@ -356,9 +356,10 @@ static void virtblk_config_changed_work(struct work_struct *work)
+ 		capacity = (sector_t)-1;
+ 	}
+ 
+-	size = capacity * queue_logical_block_size(q);
+-	string_get_size(size, STRING_UNITS_2, cap_str_2, sizeof(cap_str_2));
+-	string_get_size(size, STRING_UNITS_10, cap_str_10, sizeof(cap_str_10));
++	string_get_size(capacity, queue_logical_block_size(q),
++			STRING_UNITS_2, cap_str_2, sizeof(cap_str_2));
++	string_get_size(capacity, queue_logical_block_size(q),
++			STRING_UNITS_10, cap_str_10, sizeof(cap_str_10));
+ 
+ 	dev_notice(&vdev->dev,
+ 		  "new size: %llu %d-byte logical blocks (%s/%s)\n",
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index c69afb5..2fc4269 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2230,7 +2230,7 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
+ 	part_md->part_type = part_type;
+ 	list_add(&part_md->part, &md->part);
+ 
+-	string_get_size((u64)get_capacity(part_md->disk) << 9, STRING_UNITS_2,
++	string_get_size((u64)get_capacity(part_md->disk), 512, STRING_UNITS_2,
+ 			cap_str, sizeof(cap_str));
+ 	pr_info("%s: %s %s partition %u %s\n",
+ 	       part_md->disk->disk_name, mmc_card_id(card),
+@@ -2436,7 +2436,7 @@ static int mmc_blk_probe(struct device *dev)
+ 	if (IS_ERR(md))
+ 		return PTR_ERR(md);
+ 
+-	string_get_size((u64)get_capacity(md->disk) << 9, STRING_UNITS_2,
++	string_get_size((u64)get_capacity(md->disk), 512, STRING_UNITS_2,
+ 			cap_str, sizeof(cap_str));
+ 	pr_info("%s: %s %s %s %s\n",
+ 		md->disk->disk_name, mmc_card_id(card), mmc_card_name(card),
+diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
+index 6b78476..3c7fe4e 100644
+--- a/drivers/scsi/sd.c
++++ b/drivers/scsi/sd.c
+@@ -2235,11 +2235,11 @@ got_data:
+ 
+ 	{
+ 		char cap_str_2[10], cap_str_10[10];
+-		u64 sz = (u64)sdkp->capacity << ilog2(sector_size);
+ 
+-		string_get_size(sz, STRING_UNITS_2, cap_str_2,
+-				sizeof(cap_str_2));
+-		string_get_size(sz, STRING_UNITS_10, cap_str_10,
++		string_get_size(sdkp->capacity, sector_size,
++				STRING_UNITS_2, cap_str_2, sizeof(cap_str_2));
++		string_get_size(sdkp->capacity, sector_size,
++				STRING_UNITS_10, cap_str_10,
+ 				sizeof(cap_str_10));
+ 
+ 		if (sdkp->first_scan || old_capacity != sdkp->capacity) {
+diff --git a/include/linux/string_helpers.h b/include/linux/string_helpers.h
+index 6575718..2633280 100644
+--- a/include/linux/string_helpers.h
++++ b/include/linux/string_helpers.h
+@@ -10,7 +10,7 @@ enum string_size_units {
+ 	STRING_UNITS_2,		/* use binary powers of 2^10 */
+ };
+ 
+-void string_get_size(u64 size, enum string_size_units units,
++void string_get_size(u64 size, u64 blk_size, enum string_size_units units,
+ 		     char *buf, int len);
+ 
+ #define UNESCAPE_SPACE		0x01
+diff --git a/lib/string_helpers.c b/lib/string_helpers.c
+index 8f8c441..6ac8d5a 100644
+--- a/lib/string_helpers.c
++++ b/lib/string_helpers.c
+@@ -4,6 +4,7 @@
+  * Copyright 31 August 2008 James Bottomley
+  * Copyright (C) 2013, Intel Corporation
+  */
++#include <linux/bug.h>
+ #include <linux/kernel.h>
+ #include <linux/math64.h>
+ #include <linux/export.h>
+@@ -14,7 +15,8 @@
+ 
+ /**
+  * string_get_size - get the size in the specified units
+- * @size:	The size to be converted
++ * @size:	The size to be converted in blocks
++ * @blk_size:	Size of the block (use 1 for size in bytes)
+  * @units:	units to use (powers of 1000 or 1024)
+  * @buf:	buffer to format to
+  * @len:	length of buffer
+@@ -24,14 +26,14 @@
+  * at least 9 bytes and will always be zero terminated.
+  *
+  */
+-void string_get_size(u64 size, const enum string_size_units units,
++void string_get_size(u64 size, u64 blk_size, const enum string_size_units units,
+ 		     char *buf, int len)
+ {
+ 	static const char *const units_10[] = {
+-		"B", "kB", "MB", "GB", "TB", "PB", "EB"
++		"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"
+ 	};
+ 	static const char *const units_2[] = {
+-		"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"
++		"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"
+ 	};
+ 	static const char *const *const units_str[] = {
+ 		[STRING_UNITS_10] = units_10,
+@@ -42,31 +44,58 @@ void string_get_size(u64 size, const enum string_size_units units,
+ 		[STRING_UNITS_2] = 1024,
+ 	};
+ 	int i, j;
+-	u32 remainder = 0, sf_cap;
++	u32 remainder = 0, sf_cap, exp;
+ 	char tmp[8];
++	const char *unit;
+ 
+ 	tmp[0] = '\0';
+ 	i = 0;
+-	if (size >= divisor[units]) {
+-		while (size >= divisor[units]) {
+-			remainder = do_div(size, divisor[units]);
+-			i++;
+-		}
++	if (!size)
++		goto out;
+ 
+-		sf_cap = size;
+-		for (j = 0; sf_cap*10 < 1000; j++)
+-			sf_cap *= 10;
++	while (blk_size >= divisor[units]) {
++		remainder = do_div(blk_size, divisor[units]);
++		i++;
++	}
+ 
+-		if (j) {
+-			remainder *= 1000;
+-			remainder /= divisor[units];
+-			snprintf(tmp, sizeof(tmp), ".%03u", remainder);
+-			tmp[j+1] = '\0';
+-		}
++	exp = divisor[units];
++	do_div(exp, blk_size);
++	if (size >= exp) {
++		remainder = do_div(size, divisor[units]);
++		remainder *= blk_size;
++		i++;
++	} else {
++		remainder *= size;
++	}
++
++	size *= blk_size;
++	size += (remainder/divisor[units]);
++	remainder %= divisor[units];
++
++	while (size >= divisor[units]) {
++		remainder = do_div(size, divisor[units]);
++		i++;
+ 	}
+ 
++	sf_cap = size;
++	for (j = 0; sf_cap*10 < 1000; j++)
++		sf_cap *= 10;
++
++	if (j) {
++		remainder *= 1000;
++		remainder /= divisor[units];
++		snprintf(tmp, sizeof(tmp), ".%03u", remainder);
++		tmp[j+1] = '\0';
++	}
++
++ out:
++	if (i >= ARRAY_SIZE(units_2))
++		unit = "UNK";
++	else
++		unit = units_str[units][i];
++
+ 	snprintf(buf, len, "%u%s %s", (u32)size,
+-		 tmp, units_str[units][i]);
++		 tmp, unit);
+ }
+ EXPORT_SYMBOL(string_get_size);
+ 
+
+
