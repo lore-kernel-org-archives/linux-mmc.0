@@ -1,378 +1,227 @@
-From: Karol Wrona <k.wrona@samsung.com>
-Subject: Re: [PATCH v2 1/1] mmc: dw_mmc: Add runtime pm to dw_mmc
-Date: Mon, 09 Mar 2015 09:33:10 +0100
-Message-ID: <54FD5AC6.3050406@samsung.com>
-References: <1425648573-1896-1-git-send-email-k.wrona@samsung.com>
- <1425648573-1896-2-git-send-email-k.wrona@samsung.com>
- <54FD2E4E.9020806@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V2 11/15] mmc: sdhci: Change to new way of doing re-tuning
+Date: Mon, 09 Mar 2015 10:37:49 +0200
+Message-ID: <54FD5BDD.9060004@intel.com>
+References: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>	<1422522030-17793-12-git-send-email-adrian.hunter@intel.com> <CAPDyKFpTuttvhP91qNF_g_2sWV3NZmYMCnqFVGYEnb1L8kXVeg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.w1.samsung.com ([210.118.77.12]:50626 "EHLO
-	mailout2.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752404AbbCIIdP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Mar 2015 04:33:15 -0400
-In-reply-to: <54FD2E4E.9020806@samsung.com>
+Received: from mga01.intel.com ([192.55.52.88]:27425 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751652AbbCIIjs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 9 Mar 2015 04:39:48 -0400
+In-Reply-To: <CAPDyKFpTuttvhP91qNF_g_2sWV3NZmYMCnqFVGYEnb1L8kXVeg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Karol Wrona <wrona.vy@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-On 03/09/2015 06:23 AM, Jaehoon Chung wrote:
-> Hi, Karol.
-> 
-> This patch can't apply. You need to rebase on latest mmc-next.
-> Then i will check this patch.
-
-Ok, no problem. Sorry for that.
-> 
-> Best Regards,
-> Jaehoon Chung
-> 
-> On 03/06/2015 10:29 PM, Karol Wrona wrote:
->> This patch adds runtime pm handling to dw_mmc.
->> It mainly uses mci_request/mci_request_end for mmc host state information.
->> The goal of the runtime pm in dw_mmc host is mainly for giving an information
->> for containing it power domain about its activity.
+On 06/03/15 14:51, Ulf Hansson wrote:
+> On 29 January 2015 at 10:00, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> Make use of mmc core support for re-tuning instead
+>> of doing it all in the sdhci driver.
 >>
->> Signed-off-by: Karol Wrona <k.wrona@samsung.com>
->> Acked-by: Kyungmin Park <kyungmin.park@samsung.com>
+>> This patch also changes to flag the need for re-tuning
+>> always after runtime suspend when tuning has been used
+>> at initialization. Previously it was only done if
+>> the re-tuning timer was in use.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 >> ---
->>  drivers/mmc/host/dw_mmc.c |   99 ++++++++++++++++++++++++++++++++++++++++++---
->>  drivers/mmc/host/dw_mmc.h |    2 +
->>  2 files changed, 95 insertions(+), 6 deletions(-)
+>>  drivers/mmc/host/sdhci.c  | 113 ++++++----------------------------------------
+>>  include/linux/mmc/sdhci.h |   3 --
+>>  2 files changed, 14 insertions(+), 102 deletions(-)
 >>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 4d2e3c2..ad8b71e 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -38,6 +38,7 @@
->>  #include <linux/of.h>
->>  #include <linux/of_gpio.h>
->>  #include <linux/mmc/slot-gpio.h>
->> +#include <linux/pm_runtime.h>
->>  
->>  #include "dw_mmc.h"
->>  
->> @@ -112,6 +113,8 @@ static int dw_mci_req_show(struct seq_file *s, void *v)
->>  	struct mmc_command *stop;
->>  	struct mmc_data	*data;
->>  
->> +	pm_runtime_get_sync(slot->host->dev);
->> +
->>  	/* Make sure we get a consistent snapshot */
->>  	spin_lock_bh(&slot->host->lock);
->>  	mrq = slot->mrq;
->> @@ -141,6 +144,9 @@ static int dw_mci_req_show(struct seq_file *s, void *v)
->>  
->>  	spin_unlock_bh(&slot->host->lock);
->>  
->> +	pm_runtime_mark_last_busy(slot->host->dev);
->> +	pm_runtime_put_autosuspend(slot->host->dev);
->> +
->>  	return 0;
->>  }
->>  
->> @@ -1043,6 +1049,8 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>  
->>  	WARN_ON(slot->mrq);
->>  
->> +	pm_runtime_get_sync(host->dev);
->> +
->>  	/*
->>  	 * The check for card presence and queueing of the request must be
->>  	 * atomic, otherwise the card could be removed in between and the
->> @@ -1054,6 +1062,9 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>  		spin_unlock_bh(&host->lock);
->>  		mrq->cmd->error = -ENOMEDIUM;
->>  		mmc_request_done(mmc, mrq);
->> +
->> +		pm_runtime_mark_last_busy(host->dev);
->> +		pm_runtime_put_autosuspend(host->dev);
->>  		return;
->>  	}
->>  
->> @@ -1081,6 +1092,8 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>  		slot->ctype = SDMMC_CTYPE_1BIT;
->>  	}
->>  
->> +	pm_runtime_get_sync(slot->host->dev);
->> +
->>  	regs = mci_readl(slot->host, UHS_REG);
->>  
->>  	/* DDR mode set */
->> @@ -1116,7 +1129,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>  				dev_err(slot->host->dev,
->>  					"failed to enable vmmc regulator\n");
->>  				/*return, if failed turn on vmmc*/
->> -				return;
->> +				goto _end;
->>  			}
->>  		}
->>  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
->> @@ -1150,6 +1163,10 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>  	default:
->>  		break;
->>  	}
->> +
->> +_end:
->> +	pm_runtime_mark_last_busy(slot->host->dev);
->> +	pm_runtime_put_autosuspend(slot->host->dev);
->>  }
->>  
->>  static int dw_mci_card_busy(struct mmc_host *mmc)
->> @@ -1157,12 +1174,17 @@ static int dw_mci_card_busy(struct mmc_host *mmc)
->>  	struct dw_mci_slot *slot = mmc_priv(mmc);
->>  	u32 status;
->>  
->> +	pm_runtime_get_sync(slot->host->dev);
->> +
->>  	/*
->>  	 * Check the busy bit which is low when DAT[3:0]
->>  	 * (the data lines) are 0000
->>  	 */
->>  	status = mci_readl(slot->host, STATUS);
->>  
->> +	pm_runtime_mark_last_busy(slot->host->dev);
->> +	pm_runtime_put_autosuspend(slot->host->dev);
->> +
->>  	return !!(status & SDMMC_STATUS_BUSY);
->>  }
->>  
->> @@ -1175,6 +1197,8 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
->>  	int min_uv, max_uv;
->>  	int ret;
->>  
->> +	pm_runtime_get_sync(host->dev);
->> +
->>  	/*
->>  	 * Program the voltage.  Note that some instances of dw_mmc may use
->>  	 * the UHS_REG for this.  For other instances (like exynos) the UHS_REG
->> @@ -1197,11 +1221,17 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
->>  			dev_dbg(&mmc->class_dev,
->>  					 "Regulator set error %d: %d - %d\n",
->>  					 ret, min_uv, max_uv);
->> +
->> +			pm_runtime_mark_last_busy(host->dev);
->> +			pm_runtime_put_autosuspend(host->dev);
->>  			return ret;
->>  		}
->>  	}
->>  	mci_writel(host, UHS_REG, uhs);
->>  
->> +	pm_runtime_mark_last_busy(host->dev);
->> +	pm_runtime_put_autosuspend(host->dev);
->> +
->>  	return 0;
->>  }
->>  
->> @@ -1211,6 +1241,8 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
->>  	struct dw_mci_slot *slot = mmc_priv(mmc);
->>  	int gpio_ro = mmc_gpio_get_ro(mmc);
->>  
->> +	pm_runtime_get_sync(slot->host->dev);
->> +
->>  	/* Use platform get_ro function, else try on board write protect */
->>  	if ((slot->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT) ||
->>  			(slot->host->quirks & DW_MCI_QUIRK_NO_WRITE_PROTECT))
->> @@ -1221,6 +1253,9 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
->>  		read_only =
->>  			mci_readl(slot->host, WRTPRT) & (1 << slot->id) ? 1 : 0;
->>  
->> +	pm_runtime_mark_last_busy(slot->host->dev);
->> +	pm_runtime_put_autosuspend(slot->host->dev);
->> +
->>  	dev_dbg(&mmc->class_dev, "card is %s\n",
->>  		read_only ? "read-only" : "read-write");
->>  
->> @@ -1235,6 +1270,8 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
->>  	struct dw_mci *host = slot->host;
->>  	int gpio_cd = mmc_gpio_get_cd(mmc);
->>  
->> +	pm_runtime_get_sync(host->dev);
->> +
->>  	/* Use platform get_cd function, else try onboard card detect */
->>  	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
->>  		present = 1;
->> @@ -1254,6 +1291,9 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
->>  	}
->>  	spin_unlock_bh(&host->lock);
->>  
->> +	pm_runtime_mark_last_busy(host->dev);
->> +	pm_runtime_put_autosuspend(host->dev);
->> +
->>  	return present;
->>  }
->>  
->> @@ -1262,6 +1302,8 @@ static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
->>  	struct dw_mci_slot *slot = mmc_priv(mmc);
->>  	struct dw_mci *host = slot->host;
->>  
->> +	pm_runtime_get_sync(host->dev);
->> +
->>  	/*
->>  	 * Low power mode will stop the card clock when idle.  According to the
->>  	 * description of the CLKENA register we should disable low power mode
->> @@ -1289,6 +1331,9 @@ static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
->>  				     SDMMC_CMD_PRV_DAT_WAIT, 0);
->>  		}
->>  	}
->> +
->> +	pm_runtime_mark_last_busy(host->dev);
->> +	pm_runtime_put_autosuspend(host->dev);
->>  }
->>  
->>  static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
->> @@ -1298,6 +1343,9 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
->>  	unsigned long irqflags;
->>  	u32 int_mask;
->>  
->> +	if (enb)
->> +		pm_runtime_get_sync(slot->host->dev);
->> +
->>  	spin_lock_irqsave(&host->irq_lock, irqflags);
->>  
->>  	/* Enable/disable Slot Specific SDIO interrupt */
->> @@ -1309,6 +1357,12 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
->>  	mci_writel(host, INTMASK, int_mask);
->>  
->>  	spin_unlock_irqrestore(&host->irq_lock, irqflags);
->> +
->> +	/* If interrupt is enabled leave device active. */
->> +	if (!enb) {
->> +		pm_runtime_mark_last_busy(slot->host->dev);
->> +		pm_runtime_put_autosuspend(slot->host->dev);
->> +	}
->>  }
->>  
->>  static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->> @@ -1318,8 +1372,14 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->>  	const struct dw_mci_drv_data *drv_data = host->drv_data;
->>  	int err = -ENOSYS;
->>  
->> +	pm_runtime_get_sync(host->dev);
->> +
->>  	if (drv_data && drv_data->execute_tuning)
->>  		err = drv_data->execute_tuning(slot);
->> +
->> +	pm_runtime_mark_last_busy(host->dev);
->> +	pm_runtime_put_autosuspend(host->dev);
->> +
->>  	return err;
->>  }
->>  
->> @@ -1359,10 +1419,14 @@ static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
->>  	} else {
->>  		dev_vdbg(host->dev, "list empty\n");
->>  
->> -		if (host->state == STATE_SENDING_CMD11)
->> +		if (host->state == STATE_SENDING_CMD11) {
->>  			host->state = STATE_WAITING_CMD11_DONE;
->> -		else
->> +		} else {
->> +			pm_runtime_mark_last_busy(host->dev);
->> +			pm_runtime_put_autosuspend(host->dev);
->> +
->>  			host->state = STATE_IDLE;
->> +		}
->>  	}
->>  
->>  	spin_unlock(&host->lock);
->> @@ -2595,6 +2659,11 @@ int dw_mci_probe(struct dw_mci *host)
->>  		return -ENODEV;
->>  	}
->>  
->> +	pm_runtime_enable(host->dev);
->> +	pm_runtime_get_sync(host->dev);
->> +	pm_runtime_set_autosuspend_delay(host->dev, DWMMC_AUTOSUSPEND_DELAY);
->> +	pm_runtime_use_autosuspend(host->dev);
->> +
->>  	host->biu_clk = devm_clk_get(host->dev, "biu");
->>  	if (IS_ERR(host->biu_clk)) {
->>  		dev_dbg(host->dev, "biu clock not available\n");
->> @@ -2781,6 +2850,9 @@ int dw_mci_probe(struct dw_mci *host)
->>  	if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO)
->>  		dev_info(host->dev, "Internal DMAC interrupt fix enabled.\n");
->>  
->> +	pm_runtime_mark_last_busy(host->dev);
->> +	pm_runtime_put_autosuspend(host->dev);
->> +
->>  	return 0;
->>  
->>  err_dmaunmap:
->> @@ -2795,6 +2867,9 @@ err_clk_biu:
->>  	if (!IS_ERR(host->biu_clk))
->>  		clk_disable_unprepare(host->biu_clk);
->>  
->> +	pm_runtime_put_sync(host->dev);
->> +	pm_runtime_disable(host->dev);
->> +
->>  	return ret;
->>  }
->>  EXPORT_SYMBOL(dw_mci_probe);
->> @@ -2803,6 +2878,8 @@ void dw_mci_remove(struct dw_mci *host)
->>  {
->>  	int i;
->>  
->> +	pm_runtime_get_sync(host->dev);
->> +
->>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
->>  	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
->>  
->> @@ -2819,6 +2896,9 @@ void dw_mci_remove(struct dw_mci *host)
->>  	if (host->use_dma && host->dma_ops->exit)
->>  		host->dma_ops->exit(host);
->>  
->> +	pm_runtime_put_sync(host->dev);
->> +	pm_runtime_disable(host->dev);
->> +
->>  	if (!IS_ERR(host->ciu_clk))
->>  		clk_disable_unprepare(host->ciu_clk);
->>  
->> @@ -2841,11 +2921,14 @@ EXPORT_SYMBOL(dw_mci_suspend);
->>  
->>  int dw_mci_resume(struct dw_mci *host)
->>  {
->> -	int i, ret;
->> +	int i;
->> +
->> +	pm_runtime_get_sync(host->dev);
->>  
->>  	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
->> -		ret = -ENODEV;
->> -		return ret;
->> +		pm_runtime_mark_last_busy(host->dev);
->> +		pm_runtime_put_autosuspend(host->dev);
->> +		return -ENODEV;
->>  	}
->>  
->>  	if (host->use_dma && host->dma_ops->init)
->> @@ -2876,6 +2959,10 @@ int dw_mci_resume(struct dw_mci *host)
->>  			dw_mci_setup_bus(slot, true);
->>  		}
->>  	}
->> +
->> +	pm_runtime_mark_last_busy(host->dev);
->> +	pm_runtime_put_autosuspend(host->dev);
->> +
->>  	return 0;
->>  }
->>  EXPORT_SYMBOL(dw_mci_resume);
->> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
->> index 18c4afe..6a364f4f 100644
->> --- a/drivers/mmc/host/dw_mmc.h
->> +++ b/drivers/mmc/host/dw_mmc.h
->> @@ -209,6 +209,8 @@ extern int dw_mci_suspend(struct dw_mci *host);
->>  extern int dw_mci_resume(struct dw_mci *host);
->>  #endif
->>  
->> +#define DWMMC_AUTOSUSPEND_DELAY 50
->> +
->>  /**
->>   * struct dw_mci_slot - MMC slot state
->>   * @mmc: The mmc_host representing this slot.
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index c9881ca..dd0be76 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -51,7 +51,6 @@ static void sdhci_finish_data(struct sdhci_host *);
 >>
+>>  static void sdhci_finish_command(struct sdhci_host *);
+>>  static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
+>> -static void sdhci_tuning_timer(unsigned long data);
+>>  static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
+>>  static int sdhci_pre_dma_transfer(struct sdhci_host *host,
+>>                                         struct mmc_data *data,
+>> @@ -252,17 +251,6 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+>>  static void sdhci_reinit(struct sdhci_host *host)
+>>  {
+>>         sdhci_init(host, 0);
+>> -       /*
+>> -        * Retuning stuffs are affected by different cards inserted and only
+>> -        * applicable to UHS-I cards. So reset these fields to their initial
+>> -        * value when card is removed.
+>> -        */
+>> -       if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+>> -               host->flags &= ~SDHCI_USING_RETUNING_TIMER;
+>> -
+>> -               del_timer_sync(&host->tuning_timer);
+>> -               host->flags &= ~SDHCI_NEEDS_RETUNING;
+>> -       }
+>>         sdhci_enable_card_detection(host);
+>>  }
+>>
+>> @@ -1350,7 +1338,6 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>         struct sdhci_host *host;
+>>         int present;
+>>         unsigned long flags;
+>> -       u32 tuning_opcode;
+>>
+>>         host = mmc_priv(mmc);
+>>
+>> @@ -1399,39 +1386,6 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>                 host->mrq->cmd->error = -ENOMEDIUM;
+>>                 tasklet_schedule(&host->finish_tasklet);
+>>         } else {
+>> -               u32 present_state;
+>> -
+>> -               present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
+>> -               /*
+>> -                * Check if the re-tuning timer has already expired and there
+>> -                * is no on-going data transfer and DAT0 is not busy. If so,
+>> -                * we need to execute tuning procedure before sending command.
+>> -                */
+>> -               if ((host->flags & SDHCI_NEEDS_RETUNING) &&
+>> -                   !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ)) &&
+>> -                   (present_state & SDHCI_DATA_0_LVL_MASK)) {
+>> -                       if (mmc->card) {
+>> -                               /* eMMC uses cmd21 but sd and sdio use cmd19 */
+>> -                               tuning_opcode =
+>> -                                       mmc->card->type == MMC_TYPE_MMC ?
+>> -                                       MMC_SEND_TUNING_BLOCK_HS200 :
+>> -                                       MMC_SEND_TUNING_BLOCK;
+>> -
+>> -                               /* Here we need to set the host->mrq to NULL,
+>> -                                * in case the pending finish_tasklet
+>> -                                * finishes it incorrectly.
+>> -                                */
+>> -                               host->mrq = NULL;
+>> -
+>> -                               spin_unlock_irqrestore(&host->lock, flags);
+>> -                               sdhci_execute_tuning(mmc, tuning_opcode);
+>> -                               spin_lock_irqsave(&host->lock, flags);
+>> -
+>> -                               /* Restore original mmc_request structure */
+>> -                               host->mrq = mrq;
+>> -                       }
+>> -               }
+>> -
+>>                 if (mrq->sbc && !(host->flags & SDHCI_AUTO_CMD23))
+>>                         sdhci_send_command(host, mrq->sbc);
+>>                 else
+>> @@ -2077,23 +2031,19 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>>         }
+>>
+>>  out:
+>> -       host->flags &= ~SDHCI_NEEDS_RETUNING;
+>> -
+>>         if (tuning_count) {
+>> -               host->flags |= SDHCI_USING_RETUNING_TIMER;
+>> -               mod_timer(&host->tuning_timer, jiffies + tuning_count * HZ);
+>> +               /*
+>> +                * In case tuning fails, host controllers which support
+>> +                * re-tuning can try tuning again at a later time, when the
+>> +                * re-tuning timer expires.  So for these controllers, we
+>> +                * return 0. Since there might be other controllers who do not
+>> +                * have this capability, we return error for them.
+>> +                */
+>> +               err = 0;
+>>         }
+>>
+>> -       /*
+>> -        * In case tuning fails, host controllers which support re-tuning can
+>> -        * try tuning again at a later time, when the re-tuning timer expires.
+>> -        * So for these controllers, we return 0. Since there might be other
+>> -        * controllers who do not have this capability, we return error for
+>> -        * them. SDHCI_USING_RETUNING_TIMER means the host is currently using
+>> -        * a retuning timer to do the retuning for the card.
+>> -        */
+>> -       if (err && (host->flags & SDHCI_USING_RETUNING_TIMER))
+>> -               err = 0;
+>> +       if (!err)
+>> +               mmc_retune_enable(host->mmc, tuning_count);
+>>
+>>         sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+>>         sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+>> @@ -2349,20 +2299,6 @@ static void sdhci_timeout_timer(unsigned long data)
+>>         spin_unlock_irqrestore(&host->lock, flags);
+>>  }
+>>
+>> -static void sdhci_tuning_timer(unsigned long data)
+>> -{
+>> -       struct sdhci_host *host;
+>> -       unsigned long flags;
+>> -
+>> -       host = (struct sdhci_host *)data;
+>> -
+>> -       spin_lock_irqsave(&host->lock, flags);
+>> -
+>> -       host->flags |= SDHCI_NEEDS_RETUNING;
+>> -
+>> -       spin_unlock_irqrestore(&host->lock, flags);
+>> -}
+>> -
+>>  /*****************************************************************************\
+>>   *                                                                           *
+>>   * Interrupt handling                                                        *
+>> @@ -2740,11 +2676,8 @@ int sdhci_suspend_host(struct sdhci_host *host)
+>>  {
+>>         sdhci_disable_card_detection(host);
+>>
+>> -       /* Disable tuning since we are suspending */
+>> -       if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+>> -               del_timer_sync(&host->tuning_timer);
+>> -               host->flags &= ~SDHCI_NEEDS_RETUNING;
+>> -       }
+>> +       mmc_retune_timer_stop(host->mmc);
+>> +       mmc_retune_needed(host->mmc);
+>>
+>>         if (!device_may_wakeup(mmc_dev(host->mmc))) {
+>>                 host->ier = 0;
+>> @@ -2794,10 +2727,6 @@ int sdhci_resume_host(struct sdhci_host *host)
+>>
+>>         sdhci_enable_card_detection(host);
+>>
+>> -       /* Set the re-tuning expiration flag */
+>> -       if (host->flags & SDHCI_USING_RETUNING_TIMER)
+>> -               host->flags |= SDHCI_NEEDS_RETUNING;
+>> -
+>>         return ret;
+>>  }
+>>
+>> @@ -2834,11 +2763,8 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
+>>  {
+>>         unsigned long flags;
+>>
+>> -       /* Disable tuning since we are suspending */
+>> -       if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+>> -               del_timer_sync(&host->tuning_timer);
+>> -               host->flags &= ~SDHCI_NEEDS_RETUNING;
+>> -       }
+>> +       mmc_retune_timer_stop(host->mmc);
 > 
+> I think this could give a deadlock.
 > 
+> What if the retuning is just about to start and thus sdhci's
+> ->execute_tuning() callback has been invoked, which is waiting for the
+> pm_runtime_get_sync() to return.
+
+The re-tune timer is mmc_retune_timer() and it does not take any locks
+so it can't deadlock.
+
+> 
+>> +       mmc_retune_needed(host->mmc);
+> 
+> This seems racy.
+> 
+> What if a new request has already been started from the mmc core
+> (waiting for sdhci's ->request() callback to return). That would mean
+> the mmc core won't detect that a retune was needed.
+
+That is a good point. The host controller must not runtime suspend after
+re-tuning until retuning is released. I can think of a couple of options:
+	- move the retuning call into the ->request function
+	- add extra host ops for the host to runtime resume/suspend
 
