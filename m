@@ -1,221 +1,372 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Possible regression in next-20150306 due to "mmc: tmio: Fix PIO mode
- with CONFIG_HIGHMEM"
-Date: Sat, 7 Mar 2015 15:09:20 +0900
-Message-ID: <20150307060915.GA24323@verge.net.au>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2 1/1] mmc: dw_mmc: Add runtime pm to dw_mmc
+Date: Mon, 09 Mar 2015 14:23:26 +0900
+Message-ID: <54FD2E4E.9020806@samsung.com>
+References: <1425648573-1896-1-git-send-email-k.wrona@samsung.com>
+ <1425648573-1896-2-git-send-email-k.wrona@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-Sender: linux-sh-owner@vger.kernel.org
-To: keita kobayashi <keita.kobayashi.ym@renesas.com>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Cao Minh Hiep <cm-hiep@jinso.co.jp>, Magnus Damm <magnus.damm@gmail.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:12189 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751024AbbCIFX3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Mar 2015 01:23:29 -0400
+In-reply-to: <1425648573-1896-2-git-send-email-k.wrona@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Karol Wrona <k.wrona@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Karol Wrona <wrona.vy@gmail.com>
 
-Hi Kobayashi-san, Hi All,
+Hi, Karol.
 
-I have noticed what appears to be a regression in next-20150306.  Using
-shmobile_defconfig I am unable to boot the koelsch or lager boards to
-user-space. However, if I revert be7de0b8a90a0b06d ("mmc: tmio: Fix PIO
-mode with CONFIG_HIGHMEM") then all seems well.
+This patch can't apply. You need to rebase on latest mmc-next.
+Then i will check this patch.
 
-The log that I see from a koelsch boot is as follows:
+Best Regards,
+Jaehoon Chung
 
-Unable to handle kernel NULL pointer dereference at virtual address 00000008
-pgd = c0004000
-[00000008] *pgd=00000000
-Internal error: Oops: 5 [#1] SMP ARM
-CPU: 0 PID: 577 Comm: kworker/u4:2 Tainted: G        W       4.0.0-rc2-next-20150306 #1529
-Hardware name: Generic R8A7791 (Flattened Device Tree)
-Workqueue: kmmcd mmc_rescan
-task: eea91580 ti: ee100000 task.ti: ee100000
-PC is at tmio_mmc_start_dma+0xbc/0x43c
-LR is at tmio_mmc_request+0x1e4/0x498
-pc : [<c035f8f0>]    lr : [<c035e538>]    psr: 20000113
-sp : ee101cc0  ip : ee101d00  fp : ee101cfc
-r10: 00000000  r9 : 00000088  r8 : 00000001
-r7 : ee9a42b8  r6 : 00000001  r5 : 00000000  r4 : ee0bb6c0
-r3 : 00000001  r2 : 00000000  r1 : ee101da0  r0 : 00000000
-Flags: nzCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
-Control: 10c5307d  Table: 4000406a  DAC: 00000015
-Process kworker/u4:2 (pid: 577, stack limit = 0xee100210)
-Stack: (0xee101cc0 to 0xee102000)
-1cc0: 00000004 60000113 00000088 ee249b40 ee101cfc ee0bb400 ee101da0 ee101dd0
-1ce0: ee0bb6c0 00000001 00000088 ee249b40 ee101d24 ee101d00 c035e538 c035f840
-1d00: ee101dd0 ee0bb400 ee101de0 00000008 ee101da0 ee249b40 ee101d3c ee101d28
-1d20: c034c98c c035e360 ee0bb400 ee101dd0 ee101d64 ee101d40 c034d06c c034c888
-1d40: 00000001 ee2191b4 00000000 ee219000 00000008 ee101da0 ee101e2c ee101d68
-1d60: c035500c c034d034 ee101dc8 00000033 00000000 00000000 00000000 00000000
-1d80: 00000000 000000b5 00000000 00000000 00000000 00000000 ee101da0 ee101dd0
-1da0: 05f5e100 00000000 00000008 00000001 00000000 00000200 00000000 00000000
-1dc0: ee101dd0 00000001 ee101df8 00000000 00000000 ee101d6c ee101da0 00000000
-1de0: 00000000 00000000 ee101de8 ee101de8 c034c9d0 00000000 ef5bd922 00000b40
-1e00: 00000008 00000000 ee219000 ee0bb400 00000000 00000000 00000000 00200000
-1e20: ee101e5c ee101e30 c0353ec4 c0354f10 00000000 ee101db8 ee219000 ee0bb400
-1e40: 00000000 ee101e6c 00000000 00200000 ee101eac ee101e60 c03543bc c0353ea4
-1e60: 00000000 00ff8000 000001aa 134b4753 44303847 10210076 0400ca00 c0ff8000
-1e80: ee101eac ee0bb400 00000000 c050da08 c050da18 ee0bb610 00000088 00000000
-1ea0: ee101ecc ee101eb0 c0354a6c c0354248 c050da18 00ff8000 ee0bb610 ee0bb400
-1ec0: ee101eec ee101ed0 c034ee68 c03549c0 eea7c600 ee830400 ee837b00 00000000
-1ee0: ee101f2c ee101ef0 c0037d04 c034ebe8 00000000 eea7c600 ee830400 00000000
-1f00: ee830414 eea7c600 ee830400 eea7c618 ee830414 ee830400 00000088 00000000
-1f20: ee101f5c ee101f30 c0038190 c0037b24 eea91580 eea07940 00000000 eea7c600
-1f40: c0037e70 00000000 00000000 00000000 ee101fac ee101f60 c003cb48 c0037e7c
-1f60: ee101f5c 00000000 ffffffff eea7c600 00000000 00000000 ee101f78 ee101f78
-1f80: 00000000 00000000 ee101f88 ee101f88 eea07940 c003ca58 00000000 00000000
-1fa0: 00000000 ee101fb0 c000ec00 c003ca64 00000000 00000000 00000000 00000000
-1fc0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
-1fe0: 00000000 00000000 00000000 00000000 00000013 00000000 f763e3f6 17bf7af2
-Backtrace: 
-[<c035f834>] (tmio_mmc_start_dma) from [<c035e538>] (tmio_mmc_request+0x1e4/0x498)
- r10:ee249b40 r9:00000088 r8:00000001 r7:ee0bb6c0 r6:ee101dd0 r5:ee101da0
- r4:ee0bb400
-[<c035e354>] (tmio_mmc_request) from [<c034c98c>] (mmc_start_request+0x110/0x124)
- r10:ee249b40 r8:ee101da0 r7:00000008 r6:ee101de0 r5:ee0bb400 r4:ee101dd0
-[<c034c87c>] (mmc_start_request) from [<c034d06c>] (mmc_wait_for_req+0x44/0x13c)
- r5:ee101dd0 r4:ee0bb400
-[<c034d028>] (mmc_wait_for_req) from [<c035500c>] (mmc_app_send_scr+0x108/0x168)
- r8:ee101da0 r7:00000008 r6:ee219000 r5:00000000 r4:ee2191b4 r3:00000001
-[<c0354f04>] (mmc_app_send_scr) from [<c0353ec4>] (mmc_sd_setup_card+0x2c/0x378)
- r10:00200000 r8:00000000 r7:00000000 r6:00000000 r5:ee0bb400 r4:ee219000
-[<c0353e98>] (mmc_sd_setup_card) from [<c03543bc>] (mmc_sd_init_card+0x180/0x5e0)
- r10:00200000 r8:00000000 r7:ee101e6c r6:00000000 r5:ee0bb400 r4:ee219000
-[<c035423c>] (mmc_sd_init_card) from [<c0354a6c>] (mmc_attach_sd+0xb8/0x148)
- r10:00000000 r9:00000088 r8:ee0bb610 r7:c050da18 r6:c050da08 r5:00000000
- r4:ee0bb400
-[<c03549b4>] (mmc_attach_sd) from [<c034ee68>] (mmc_rescan+0x28c/0x2fc)
- r5:ee0bb400 r4:ee0bb610
-[<c034ebdc>] (mmc_rescan) from [<c0037d04>] (process_one_work+0x1ec/0x324)
- r7:00000000 r6:ee837b00 r5:ee830400 r4:eea7c600
-[<c0037b18>] (process_one_work) from [<c0038190>] (worker_thread+0x320/0x43c)
- r10:00000000 r9:00000088 r8:ee830400 r7:ee830414 r6:eea7c618 r5:ee830400
- r4:eea7c600
-[<c0037e70>] (worker_thread) from [<c003cb48>] (kthread+0xf0/0x104)
- r10:00000000 r9:00000000 r8:00000000 r7:c0037e70 r6:eea7c600 r5:00000000
- r4:eea07940 r3:eea91580
-[<c003ca58>] (kthread) from [<c000ec00>] (ret_from_fork+0x14/0x34)
- r7:00000000 r6:00000000 r5:c003ca58 r4:eea07940
-Code: e3580000 1a000041 e3530000 0a00003f (e5953008) 
----[ end trace 73e31bceec8a1115 ]---
-Unable to handle kernel paging request at virtual address ffffffec
-pgd = c0004000
-[ffffffec] *pgd=6f7fd821, *pte=00000000, *ppte=00000000
-Internal error: Oops: 17 [#2] SMP ARM
-CPU: 0 PID: 577 Comm: kworker/u4:2 Tainted: G      D W       4.0.0-rc2-next-20150306 #1529
-Hardware name: Generic R8A7791 (Flattened Device Tree)
-task: eea91580 ti: ee100000 task.ti: ee100000
-PC is at kthread_data+0x10/0x18
-LR is at wq_worker_sleeping+0x14/0xe0
-pc : [<c003cd2c>]    lr : [<c0037864>]    psr: 20000193
-sp : ee101a20  ip : ee101a30  fp : ee101a2c
-r10: 2e99d000  r9 : 00000008  r8 : c062d440
-r7 : eea91814  r6 : 00000000  r5 : eefca440  r4 : 00000000
-r3 : 00000000  r2 : 723eb270  r1 : 00000000  r0 : eea91580
-Flags: nzCv  IRQs off  FIQs on  Mode SVC_32  ISA ARM  Segment user
-Control: 10c5307d  Table: 4000406a  DAC: 00000015
-Process kworker/u4:2 (pid: 577, stack limit = 0xee100210)
-Stack: (0xee101a20 to 0xee102000)
-1a20: ee101a44 ee101a30 c0037864 c003cd28 0420806c eea91580 ee101a8c ee101a48
-1a40: c049ed94 c003785c c0065254 c0065008 ee101a9c ee101a60 c00262b0 c0065248
-1a60: ee101b12 eea91580 ee101878 ee101aa4 ee101b12 eea91790 00000008 00000001
-1a80: ee101a9c ee101a90 c049f274 c049ec9c ee101ac4 ee101aa0 c00279a4 c049f1ec
-1aa0: c035f8f2 ee101aa4 ee101aa4 ee101ab8 c00252c0 ee101b12 ee101b44 ee101ac8
-1ac0: c0011dc0 c0027138 ee100210 0000000b 00000005 c05936fe 60000113 00000000
-1ae0: 6505a8cc 30383533 20303030 30306131 31343030 35336520 30303033 61302030
-1b00: 30303030 28206633 35393565 38303033 c0002029 c049d420 c0593988 00000008
-1b20: 00000005 00000000 ee101c78 00000001 00000005 00000000 ee101b5c ee101b48
-1b40: c049cbac c0011a1c ee101c78 ee101c78 ee101bac ee101b60 c001a63c c049cb5c
-1b60: 00000002 00000000 ee101b9c ee101b78 c003da7c c000a330 ffffffff c062e01c
-1b80: eea91580 00000005 c063496c 00000008 ee101c78 00000001 00000088 00000000
-1ba0: ee101bcc ee101bb0 c001a704 c001a358 00000005 c063496c 00000008 ee101c78
-1bc0: ee101c74 ee101bd0 c0009248 c001a6ec c0067a48 7fffffff 7fffffff 00000002
-1be0: ee101ce4 00000000 00000088 00000000 ee101c0c ee101c00 c049f274 c049ec9c
-1c00: ee101c54 ee101c10 c04a1a38 c049f1ec c00375c0 c0067b78 000000c8 60000113
-1c20: ee82a4c0 00000008 ee0bb770 000000c8 ee101c64 ee101ce0 7fffffff 00000002
-1c40: ee101ce4 00000000 ee101c94 ee101c58 c049fd74 c04a25e8 c035f8f0 20000113
-1c60: ffffffff ee101cac ee101cfc ee101c78 c0012558 c0009218 00000000 ee101da0
-1c80: 00000000 00000001 ee0bb6c0 00000000 00000001 ee9a42b8 00000001 00000088
-1ca0: 00000000 ee101cfc ee101d00 ee101cc0 c035e538 c035f8f0 20000113 ffffffff
-1cc0: 00000004 60000113 00000088 ee249b40 ee101cfc ee0bb400 ee101da0 ee101dd0
-1ce0: ee0bb6c0 00000001 00000088 ee249b40 ee101d24 ee101d00 c035e538 c035f840
-1d00: ee101dd0 ee0bb400 ee101de0 00000008 ee101da0 ee249b40 ee101d3c ee101d28
-1d20: c034c98c c035e360 ee0bb400 ee101dd0 ee101d64 ee101d40 c034d06c c034c888
-1d40: 00000001 ee2191b4 00000000 ee219000 00000008 ee101da0 ee101e2c ee101d68
-1d60: c035500c c034d034 ee101dc8 00000033 00000000 00000000 00000000 00000000
-1d80: 00000000 000000b5 00000000 00000000 00000000 00000000 ee101da0 ee101dd0
-1da0: 05f5e100 00000000 00000008 00000001 00000000 00000200 00000000 00000000
-1dc0: ee101dd0 00000001 ee101df8 00000000 00000000 ee101d6c ee101da0 00000000
-1de0: 00000000 00000000 ee101de8 ee101de8 c034c9d0 00000000 ef5bd922 00000b40
-1e00: 00000008 00000000 ee219000 ee0bb400 00000000 00000000 00000000 00200000
-1e20: ee101e5c ee101e30 c0353ec4 c0354f10 00000000 ee101db8 ee219000 ee0bb400
-1e40: 00000000 ee101e6c 00000000 00200000 ee101eac ee101e60 c03543bc c0353ea4
-1e60: 00000000 00ff8000 000001aa 134b4753 44303847 10210076 0400ca00 c0ff8000
-1e80: ee101eac ee0bb400 00000000 c050da08 c050da18 ee0bb610 00000088 00000000
-1ea0: ee101ecc ee101eb0 c0354a6c c0354248 c050da18 00ff8000 ee0bb610 ee0bb400
-1ec0: ee101eec ee101ed0 c034ee68 c03549c0 eea7c600 ee830400 ee837b00 00000000
-1ee0: ee101f2c ee101ef0 c0037d04 c034ebe8 00000000 eea7c600 ee830400 00000000
-1f00: ee830414 eea7c600 ee830400 eea7c618 ee830414 ee830400 00000088 00000000
-1f20: ee101f5c ee101f30 c0038190 c0037b24 eea91580 eea07940 00000000 eea7c600
-1f40: c0037e70 00000000 00000000 00000000 ee101fac ee101f60 c003cb48 c0037e7c
-1f60: ee101f5c 00000000 ffffffff eea7c600 00000000 00000000 ee101f78 ee101f78
-1f80: 00000001 00010001 ee101f88 ee101f88 eea07940 c003ca58 00000000 00000000
-1fa0: 00000000 ee101fb0 c000ec00 c003ca64 00000000 00000000 00000000 00000000
-1fc0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
-1fe0: 00000000 00000000 00000000 00000000 00000013 00000000 f763e3f6 17bf7af2
-Backtrace: 
-[<c003cd1c>] (kthread_data) from [<c0037864>] (wq_worker_sleeping+0x14/0xe0)
-[<c0037850>] (wq_worker_sleeping) from [<c049ed94>] (__schedule+0x104/0x500)
- r4:eea91580 r3:0420806c
-[<c049ec90>] (__schedule) from [<c049f274>] (schedule+0x94/0xb0)
- r10:00000001 r9:00000008 r8:eea91790 r7:ee101b12 r6:ee101aa4 r5:ee101878
- r4:eea91580
-[<c049f1e0>] (schedule) from [<c00279a4>] (do_exit+0x878/0x8ac)
-[<c002712c>] (do_exit) from [<c0011dc0>] (die+0x3b0/0x400)
- r7:ee101b12
-[<c0011a10>] (die) from [<c049cbac>] (__do_kernel_fault.part.8+0x5c/0x7c)
- r10:00000000 r9:00000005 r8:00000001 r7:ee101c78 r6:00000000 r5:00000005
- r4:00000008
-[<c049cb50>] (__do_kernel_fault.part.8) from [<c001a63c>] (do_page_fault+0x2f0/0x30c)
- r7:ee101c78 r3:ee101c78
-[<c001a34c>] (do_page_fault) from [<c001a704>] (do_translation_fault+0x24/0xb8)
- r10:00000000 r9:00000088 r8:00000001 r7:ee101c78 r6:00000008 r5:c063496c
- r4:00000005
-[<c001a6e0>] (do_translation_fault) from [<c0009248>] (do_DataAbort+0x3c/0xa0)
- r7:ee101c78 r6:00000008 r5:c063496c r4:00000005
-[<c000920c>] (do_DataAbort) from [<c0012558>] (__dabt_svc+0x38/0x60)
-Exception stack(0xee101c78 to 0xee101cc0)
-1c60:                                                       00000000 ee101da0
-1c80: 00000000 00000001 ee0bb6c0 00000000 00000001 ee9a42b8 00000001 00000088
-1ca0: 00000000 ee101cfc ee101d00 ee101cc0 c035e538 c035f8f0 20000113 ffffffff
- r7:ee101cac r6:ffffffff r5:20000113 r4:c035f8f0
-[<c035f834>] (tmio_mmc_start_dma) from [<c035e538>] (tmio_mmc_request+0x1e4/0x498)
- r10:ee249b40 r9:00000088 r8:00000001 r7:ee0bb6c0 r6:ee101dd0 r5:ee101da0
- r4:ee0bb400
-[<c035e354>] (tmio_mmc_request) from [<c034c98c>] (mmc_start_request+0x110/0x124)
- r10:ee249b40 r8:ee101da0 r7:00000008 r6:ee101de0 r5:ee0bb400 r4:ee101dd0
-[<c034c87c>] (mmc_start_request) from [<c034d06c>] (mmc_wait_for_req+0x44/0x13c)
- r5:ee101dd0 r4:ee0bb400
-[<c034d028>] (mmc_wait_for_req) from [<c035500c>] (mmc_app_send_scr+0x108/0x168)
- r8:ee101da0 r7:00000008 r6:ee219000 r5:00000000 r4:ee2191b4 r3:00000001
-[<c0354f04>] (mmc_app_send_scr) from [<c0353ec4>] (mmc_sd_setup_card+0x2c/0x378)
- r10:00200000 r8:00000000 r7:00000000 r6:00000000 r5:ee0bb400 r4:ee219000
-[<c0353e98>] (mmc_sd_setup_card) from [<c03543bc>] (mmc_sd_init_card+0x180/0x5e0)
- r10:00200000 r8:00000000 r7:ee101e6c r6:00000000 r5:ee0bb400 r4:ee219000
-[<c035423c>] (mmc_sd_init_card) from [<c0354a6c>] (mmc_attach_sd+0xb8/0x148)
- r10:00000000 r9:00000088 r8:ee0bb610 r7:c050da18 r6:c050da08 r5:00000000
- r4:ee0bb400
-[<c03549b4>] (mmc_attach_sd) from [<c034ee68>] (mmc_rescan+0x28c/0x2fc)
- r5:ee0bb400 r4:ee0bb610
-[<c034ebdc>] (mmc_rescan) from [<c0037d04>] (process_one_work+0x1ec/0x324)
- r7:00000000 r6:ee837b00 r5:ee830400 r4:eea7c600
-[<c0037b18>] (process_one_work) from [<c0038190>] (worker_thread+0x320/0x43c)
- r10:00000000 r9:00000088 r8:ee830400 r7:ee830414 r6:eea7c618 r5:ee830400
- r4:eea7c600
-[<c0037e70>] (worker_thread) from [<c003cb48>] (kthread+0xf0/0x104)
- r10:00000000 r9:00000000 r8:00000000 r7:c0037e70 r6:eea7c600 r5:00000000
- r4:eea07940 r3:eea91580
-[<c003ca58>] (kthread) from [<c000ec00>] (ret_from_fork+0x14/0x34)
- r7:00000000 r6:00000000 r5:c003ca58 r4:eea07940
-Code: e1a0c00d e92dd800 e24cb004 e5903268 (e5130014) 
----[ end trace 73e31bceec8a1116 ]---
-Fixing recursive fault but reboot is needed!
+On 03/06/2015 10:29 PM, Karol Wrona wrote:
+> This patch adds runtime pm handling to dw_mmc.
+> It mainly uses mci_request/mci_request_end for mmc host state information.
+> The goal of the runtime pm in dw_mmc host is mainly for giving an information
+> for containing it power domain about its activity.
+> 
+> Signed-off-by: Karol Wrona <k.wrona@samsung.com>
+> Acked-by: Kyungmin Park <kyungmin.park@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c |   99 ++++++++++++++++++++++++++++++++++++++++++---
+>  drivers/mmc/host/dw_mmc.h |    2 +
+>  2 files changed, 95 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 4d2e3c2..ad8b71e 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -38,6 +38,7 @@
+>  #include <linux/of.h>
+>  #include <linux/of_gpio.h>
+>  #include <linux/mmc/slot-gpio.h>
+> +#include <linux/pm_runtime.h>
+>  
+>  #include "dw_mmc.h"
+>  
+> @@ -112,6 +113,8 @@ static int dw_mci_req_show(struct seq_file *s, void *v)
+>  	struct mmc_command *stop;
+>  	struct mmc_data	*data;
+>  
+> +	pm_runtime_get_sync(slot->host->dev);
+> +
+>  	/* Make sure we get a consistent snapshot */
+>  	spin_lock_bh(&slot->host->lock);
+>  	mrq = slot->mrq;
+> @@ -141,6 +144,9 @@ static int dw_mci_req_show(struct seq_file *s, void *v)
+>  
+>  	spin_unlock_bh(&slot->host->lock);
+>  
+> +	pm_runtime_mark_last_busy(slot->host->dev);
+> +	pm_runtime_put_autosuspend(slot->host->dev);
+> +
+>  	return 0;
+>  }
+>  
+> @@ -1043,6 +1049,8 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  
+>  	WARN_ON(slot->mrq);
+>  
+> +	pm_runtime_get_sync(host->dev);
+> +
+>  	/*
+>  	 * The check for card presence and queueing of the request must be
+>  	 * atomic, otherwise the card could be removed in between and the
+> @@ -1054,6 +1062,9 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  		spin_unlock_bh(&host->lock);
+>  		mrq->cmd->error = -ENOMEDIUM;
+>  		mmc_request_done(mmc, mrq);
+> +
+> +		pm_runtime_mark_last_busy(host->dev);
+> +		pm_runtime_put_autosuspend(host->dev);
+>  		return;
+>  	}
+>  
+> @@ -1081,6 +1092,8 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  		slot->ctype = SDMMC_CTYPE_1BIT;
+>  	}
+>  
+> +	pm_runtime_get_sync(slot->host->dev);
+> +
+>  	regs = mci_readl(slot->host, UHS_REG);
+>  
+>  	/* DDR mode set */
+> @@ -1116,7 +1129,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  				dev_err(slot->host->dev,
+>  					"failed to enable vmmc regulator\n");
+>  				/*return, if failed turn on vmmc*/
+> -				return;
+> +				goto _end;
+>  			}
+>  		}
+>  		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
+> @@ -1150,6 +1163,10 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	default:
+>  		break;
+>  	}
+> +
+> +_end:
+> +	pm_runtime_mark_last_busy(slot->host->dev);
+> +	pm_runtime_put_autosuspend(slot->host->dev);
+>  }
+>  
+>  static int dw_mci_card_busy(struct mmc_host *mmc)
+> @@ -1157,12 +1174,17 @@ static int dw_mci_card_busy(struct mmc_host *mmc)
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+>  	u32 status;
+>  
+> +	pm_runtime_get_sync(slot->host->dev);
+> +
+>  	/*
+>  	 * Check the busy bit which is low when DAT[3:0]
+>  	 * (the data lines) are 0000
+>  	 */
+>  	status = mci_readl(slot->host, STATUS);
+>  
+> +	pm_runtime_mark_last_busy(slot->host->dev);
+> +	pm_runtime_put_autosuspend(slot->host->dev);
+> +
+>  	return !!(status & SDMMC_STATUS_BUSY);
+>  }
+>  
+> @@ -1175,6 +1197,8 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	int min_uv, max_uv;
+>  	int ret;
+>  
+> +	pm_runtime_get_sync(host->dev);
+> +
+>  	/*
+>  	 * Program the voltage.  Note that some instances of dw_mmc may use
+>  	 * the UHS_REG for this.  For other instances (like exynos) the UHS_REG
+> @@ -1197,11 +1221,17 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+>  			dev_dbg(&mmc->class_dev,
+>  					 "Regulator set error %d: %d - %d\n",
+>  					 ret, min_uv, max_uv);
+> +
+> +			pm_runtime_mark_last_busy(host->dev);
+> +			pm_runtime_put_autosuspend(host->dev);
+>  			return ret;
+>  		}
+>  	}
+>  	mci_writel(host, UHS_REG, uhs);
+>  
+> +	pm_runtime_mark_last_busy(host->dev);
+> +	pm_runtime_put_autosuspend(host->dev);
+> +
+>  	return 0;
+>  }
+>  
+> @@ -1211,6 +1241,8 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+>  	int gpio_ro = mmc_gpio_get_ro(mmc);
+>  
+> +	pm_runtime_get_sync(slot->host->dev);
+> +
+>  	/* Use platform get_ro function, else try on board write protect */
+>  	if ((slot->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT) ||
+>  			(slot->host->quirks & DW_MCI_QUIRK_NO_WRITE_PROTECT))
+> @@ -1221,6 +1253,9 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
+>  		read_only =
+>  			mci_readl(slot->host, WRTPRT) & (1 << slot->id) ? 1 : 0;
+>  
+> +	pm_runtime_mark_last_busy(slot->host->dev);
+> +	pm_runtime_put_autosuspend(slot->host->dev);
+> +
+>  	dev_dbg(&mmc->class_dev, "card is %s\n",
+>  		read_only ? "read-only" : "read-write");
+>  
+> @@ -1235,6 +1270,8 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>  	struct dw_mci *host = slot->host;
+>  	int gpio_cd = mmc_gpio_get_cd(mmc);
+>  
+> +	pm_runtime_get_sync(host->dev);
+> +
+>  	/* Use platform get_cd function, else try onboard card detect */
+>  	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+>  		present = 1;
+> @@ -1254,6 +1291,9 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>  	}
+>  	spin_unlock_bh(&host->lock);
+>  
+> +	pm_runtime_mark_last_busy(host->dev);
+> +	pm_runtime_put_autosuspend(host->dev);
+> +
+>  	return present;
+>  }
+>  
+> @@ -1262,6 +1302,8 @@ static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+>  	struct dw_mci *host = slot->host;
+>  
+> +	pm_runtime_get_sync(host->dev);
+> +
+>  	/*
+>  	 * Low power mode will stop the card clock when idle.  According to the
+>  	 * description of the CLKENA register we should disable low power mode
+> @@ -1289,6 +1331,9 @@ static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
+>  				     SDMMC_CMD_PRV_DAT_WAIT, 0);
+>  		}
+>  	}
+> +
+> +	pm_runtime_mark_last_busy(host->dev);
+> +	pm_runtime_put_autosuspend(host->dev);
+>  }
+>  
+>  static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+> @@ -1298,6 +1343,9 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>  	unsigned long irqflags;
+>  	u32 int_mask;
+>  
+> +	if (enb)
+> +		pm_runtime_get_sync(slot->host->dev);
+> +
+>  	spin_lock_irqsave(&host->irq_lock, irqflags);
+>  
+>  	/* Enable/disable Slot Specific SDIO interrupt */
+> @@ -1309,6 +1357,12 @@ static void dw_mci_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>  	mci_writel(host, INTMASK, int_mask);
+>  
+>  	spin_unlock_irqrestore(&host->irq_lock, irqflags);
+> +
+> +	/* If interrupt is enabled leave device active. */
+> +	if (!enb) {
+> +		pm_runtime_mark_last_busy(slot->host->dev);
+> +		pm_runtime_put_autosuspend(slot->host->dev);
+> +	}
+>  }
+>  
+>  static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> @@ -1318,8 +1372,14 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	const struct dw_mci_drv_data *drv_data = host->drv_data;
+>  	int err = -ENOSYS;
+>  
+> +	pm_runtime_get_sync(host->dev);
+> +
+>  	if (drv_data && drv_data->execute_tuning)
+>  		err = drv_data->execute_tuning(slot);
+> +
+> +	pm_runtime_mark_last_busy(host->dev);
+> +	pm_runtime_put_autosuspend(host->dev);
+> +
+>  	return err;
+>  }
+>  
+> @@ -1359,10 +1419,14 @@ static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
+>  	} else {
+>  		dev_vdbg(host->dev, "list empty\n");
+>  
+> -		if (host->state == STATE_SENDING_CMD11)
+> +		if (host->state == STATE_SENDING_CMD11) {
+>  			host->state = STATE_WAITING_CMD11_DONE;
+> -		else
+> +		} else {
+> +			pm_runtime_mark_last_busy(host->dev);
+> +			pm_runtime_put_autosuspend(host->dev);
+> +
+>  			host->state = STATE_IDLE;
+> +		}
+>  	}
+>  
+>  	spin_unlock(&host->lock);
+> @@ -2595,6 +2659,11 @@ int dw_mci_probe(struct dw_mci *host)
+>  		return -ENODEV;
+>  	}
+>  
+> +	pm_runtime_enable(host->dev);
+> +	pm_runtime_get_sync(host->dev);
+> +	pm_runtime_set_autosuspend_delay(host->dev, DWMMC_AUTOSUSPEND_DELAY);
+> +	pm_runtime_use_autosuspend(host->dev);
+> +
+>  	host->biu_clk = devm_clk_get(host->dev, "biu");
+>  	if (IS_ERR(host->biu_clk)) {
+>  		dev_dbg(host->dev, "biu clock not available\n");
+> @@ -2781,6 +2850,9 @@ int dw_mci_probe(struct dw_mci *host)
+>  	if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO)
+>  		dev_info(host->dev, "Internal DMAC interrupt fix enabled.\n");
+>  
+> +	pm_runtime_mark_last_busy(host->dev);
+> +	pm_runtime_put_autosuspend(host->dev);
+> +
+>  	return 0;
+>  
+>  err_dmaunmap:
+> @@ -2795,6 +2867,9 @@ err_clk_biu:
+>  	if (!IS_ERR(host->biu_clk))
+>  		clk_disable_unprepare(host->biu_clk);
+>  
+> +	pm_runtime_put_sync(host->dev);
+> +	pm_runtime_disable(host->dev);
+> +
+>  	return ret;
+>  }
+>  EXPORT_SYMBOL(dw_mci_probe);
+> @@ -2803,6 +2878,8 @@ void dw_mci_remove(struct dw_mci *host)
+>  {
+>  	int i;
+>  
+> +	pm_runtime_get_sync(host->dev);
+> +
+>  	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+>  	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
+>  
+> @@ -2819,6 +2896,9 @@ void dw_mci_remove(struct dw_mci *host)
+>  	if (host->use_dma && host->dma_ops->exit)
+>  		host->dma_ops->exit(host);
+>  
+> +	pm_runtime_put_sync(host->dev);
+> +	pm_runtime_disable(host->dev);
+> +
+>  	if (!IS_ERR(host->ciu_clk))
+>  		clk_disable_unprepare(host->ciu_clk);
+>  
+> @@ -2841,11 +2921,14 @@ EXPORT_SYMBOL(dw_mci_suspend);
+>  
+>  int dw_mci_resume(struct dw_mci *host)
+>  {
+> -	int i, ret;
+> +	int i;
+> +
+> +	pm_runtime_get_sync(host->dev);
+>  
+>  	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
+> -		ret = -ENODEV;
+> -		return ret;
+> +		pm_runtime_mark_last_busy(host->dev);
+> +		pm_runtime_put_autosuspend(host->dev);
+> +		return -ENODEV;
+>  	}
+>  
+>  	if (host->use_dma && host->dma_ops->init)
+> @@ -2876,6 +2959,10 @@ int dw_mci_resume(struct dw_mci *host)
+>  			dw_mci_setup_bus(slot, true);
+>  		}
+>  	}
+> +
+> +	pm_runtime_mark_last_busy(host->dev);
+> +	pm_runtime_put_autosuspend(host->dev);
+> +
+>  	return 0;
+>  }
+>  EXPORT_SYMBOL(dw_mci_resume);
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 18c4afe..6a364f4f 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -209,6 +209,8 @@ extern int dw_mci_suspend(struct dw_mci *host);
+>  extern int dw_mci_resume(struct dw_mci *host);
+>  #endif
+>  
+> +#define DWMMC_AUTOSUSPEND_DELAY 50
+> +
+>  /**
+>   * struct dw_mci_slot - MMC slot state
+>   * @mmc: The mmc_host representing this slot.
+> 
+
