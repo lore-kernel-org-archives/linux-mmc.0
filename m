@@ -1,96 +1,57 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V2 11/15] mmc: sdhci: Change to new way of doing re-tuning
-Date: Tue, 10 Mar 2015 16:20:32 +0200
-Message-ID: <54FEFDB0.5050104@intel.com>
-References: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>	<1422522030-17793-12-git-send-email-adrian.hunter@intel.com>	<CAPDyKFpTuttvhP91qNF_g_2sWV3NZmYMCnqFVGYEnb1L8kXVeg@mail.gmail.com>	<54FD5BDD.9060004@intel.com> <CAPDyKFr9bpE3FXu0339q4ndOm_KSNpATBODecTWkkrLifvSing@mail.gmail.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [PATCH] mmc: sleep notification
+Date: Tue, 10 Mar 2015 14:32:50 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
+ <CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:19679 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753034AbbCJOWd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 Mar 2015 10:22:33 -0400
-In-Reply-To: <CAPDyKFr9bpE3FXu0339q4ndOm_KSNpATBODecTWkkrLifvSing@mail.gmail.com>
+Received: from mail-by2on0056.outbound.protection.outlook.com ([207.46.100.56]:26259
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751173AbbCJOsA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 Mar 2015 10:48:00 -0400
+In-Reply-To: <CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Neil Brown <neilb@suse.de>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-On 10/03/15 15:55, Ulf Hansson wrote:
-> [...]
-> 
->>>> @@ -2834,11 +2763,8 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
->>>>  {
->>>>         unsigned long flags;
->>>>
->>>> -       /* Disable tuning since we are suspending */
->>>> -       if (host->flags & SDHCI_USING_RETUNING_TIMER) {
->>>> -               del_timer_sync(&host->tuning_timer);
->>>> -               host->flags &= ~SDHCI_NEEDS_RETUNING;
->>>> -       }
->>>> +       mmc_retune_timer_stop(host->mmc);
->>>
->>> I think this could give a deadlock.
->>>
->>> What if the retuning is just about to start and thus sdhci's
->>> ->execute_tuning() callback has been invoked, which is waiting for the
->>> pm_runtime_get_sync() to return.
->>
->> The re-tune timer is mmc_retune_timer() and it does not take any locks
->> so it can't deadlock.
->>
-> 
-> You missed my point. The problem is related to runtime PM.
-> 
-> Here the sequence I think will cause the deadlock.
-> mmc_retune_timer_stop()
->   ->del_timer_sync()
-> ...
-> Wait for timer-handler to finish.
-> 
-> If the timer-handler is running, it has invoked the ->execute_tuning()
-
-No, the timer handler does not invoke anything. It just sets a flag.
-
-> callback and is thus waiting for a pm_runtime_get_sync() to return.
-> 
-> Now, waiting for a pm_runtime_get_sync() to return from a runtime PM
-> suspend callback will deadlock!
-> 
->>>
->>>> +       mmc_retune_needed(host->mmc);
->>>
->>> This seems racy.
->>>
->>> What if a new request has already been started from the mmc core
->>> (waiting for sdhci's ->request() callback to return). That would mean
->>> the mmc core won't detect that a retune was needed.
->>
->> That is a good point. The host controller must not runtime suspend after
->> re-tuning until retuning is released. I can think of a couple of options:
->>         - move the retuning call into the ->request function
->>         - add extra host ops for the host to runtime resume/suspend
->>
-> 
-> I am not sure which approach I prefer yet. Need some more time to think.
-> 
-> For your information, Neil Brown is having a similar issue which he is
-> trying to address [1].
-
-It is a bit different. Re-tuning is about doing something before a
-request, rather than before a suspend.
-
-> I think we need an generic approach to deal with the runtime PM
-> synchronization issue described above. More precisely in those
-> scenarios when mmc hosts needs to notify the mmc core to take some
-> specific actions, from a mmc host's runtime PM callback.
-
-For the re-tune case I did not want to assume what the host driver
-needed to do, so I added ->hold_tuning() and ->release_tuning()
-host operations.
-
-Please see V3 of the patches I sent earlier today.
-
-Thanks very much for looking at the patches by the way! :-)
-
+SGkgVWxmLA0KDQpUaGFua3MgZm9yIHlvdXIgcmV2aWV3IGFuZCBjb21tZW50cyENCg0KPiAtLS0t
+LU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFuc3NvbiBbbWFpbHRvOnVsZi5o
+YW5zc29uQGxpbmFyby5vcmddDQo+IFNlbnQ6IFR1ZXNkYXksIE1hcmNoIDEwLCAyMDE1IDU6MDgg
+QU0NCj4gVG86IEF2aSBTaGNoaXNsb3dza2kNCj4gQ2M6IGxpbnV4LW1tYzsgQ2hyaXMgQmFsbDsg
+QWxleCBMZW1iZXJnDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0hdIG1tYzogc2xlZXAgbm90aWZpY2F0
+aW9uDQo+IA0KPiBPbiAxMCBNYXJjaCAyMDE1IGF0IDEwOjM2LCBBdmkgU2hjaGlzbG93c2tpIDxh
+dmkuc2hjaGlzbG93c2tpQHNhbmRpc2suY29tPg0KPiB3cm90ZToNCj4gPiBUaGlzIHBhdGNoIGlz
+IGltcGxlbWVudHMgdGhlIG5ldyBhZGRpdGlvbmFsIHN0YXRlIG9mDQo+ID4gUG93ZXJfT2ZmX05v
+dGlmaWNhdGlvbiDigJMgU0xFRVBfTk9USUZJQ0FUSU9OLg0KPiA+IFVudGlsIG5vdywgdGhlIGlt
+cGxlbWVudGF0aW9uIG9mIFBvd2VyX09mZl9Ob3RpZmljYXRpb24gc3VwcG9ydGVkIG9ubHkNCj4g
+PiB0aHJlZSBtb2RlcyDigJMgUE9XRVJFRF9PTiAoMHgwMSksIFBPV0VSX09GRl9TSE9SVCAoMHgw
+MikgYW5kDQo+ID4gUE9XRVJfT0ZGX0xPTkcgKDB4MDMpLg0KPiA+DQo+ID4gQXMgcGFydCBvZiBl
+TU1DNS4wIGJlZm9yZSBtb3ZpbmcgdG8gU2xlZXAgc3RhdGUgaG9zdHMgbWF5IHNldCB0aGUNCj4g
+PiBQT1dFUl9PRkZfTk9USUZJQ0FUSU9OIGJ5dGUgdG8gU0xFRVBfTk9USUZJQ0FUSU9OICgweDA0
+KS4NCj4gPiBBZnRlciBzZXR0aW5nIFNMRUVQX05PVElGSUNBVElPTiwgaG9zdCBzaG91bGQgd2Fp
+dCBmb3IgdGhlIGJ1c3kgbGluZQ0KPiA+IHRvIGJlIGRlLWFzc2VydGVkLg0KPiA+IFRoZSBtYXgg
+dGltZW91dCBhbGxvd2VkIGZvciBidXN5IGxpbmUgZGUtYXNzZXJ0aW9uIGRlZmluZWQgaW4NCj4g
+PiBTTEVFUF9OT1RJRklDQVRJT05fVElNRSBieXRlIGluIEVYVF9DU0QgWzIxNl0uDQo+ID4gSFBJ
+IG1heSBpbnRlcnJ1cHQgdGhlIFNMRUVQX05PVElGSUNBVElPTiBvcGVyYXRpb24uDQo+ID4gSW4g
+dGhhdCBjYXNlIFBPV0VSX09GRl9OT1RJRklDQVRJT04gYnl0ZSB3aWxsIHJlc3RvcmUgdG8gUE9X
+RVJFRF9PTi4NCj4gDQo+IE9oLCBqdXN0IGdyZWF0ISBKRURFQyBoYXMgaW52ZW50ZWQgeWV0IGFu
+b3RoZXIgd2F5IG9mIGhvdyB0byBzZW5kIGEgZGV2aWNlIHRvDQo+IHNsZWVwIHN0YXRlLiBJIHdv
+bmRlciB3aGF0IHdhcyB3cm9uZyB3aXRoIHRoZSBDTUQ1IG9wdGlvbi4NCg0KSSB0aGluayBiZWZv
+cmUgYWRkaW5nIHNsZWVwX25vdGlmaWNhdGlvbiwgaG9zdCBoYXMgbm8gd2F5IHRvIG5vdGlmeSBk
+ZXZpY2UgYmVmb3JlIHNlbmRpbmcNCnNsZWVwIGNvbW1hbmQuIE5vdyBkZXZpY2UgY2FuIGJldHRl
+ciBwcmVwYXJlIGl0c2VsZiBmb3IgbW92aW5nIGludG8gdGhlIHNsZWVwIHN0YXRlLg0KDQpBbHNv
+LCBJIHRoaW5rIHdlIG5lZWQgdG8gY2xhcmlmeSBvbmUgbW9yZSBwb2ludCBmb3IgdGhpcyBwYXRj
+aDoNCkFzIHdhcyBtZW50aW9uZWQgaW4gY29tbWl0IG1lc3NhZ2UgLSBTbGVlcF9Ob3RpZmljYXRp
+b24gY2FuIGJlIGludGVycnVwdGVkIGJ5IEhQSS4NClRoaXMgYWxsb3dzIG5vdCBibG9ja2luZyB0
+aGUgaG9zdCBkdXJpbmcgdGhlIFNsZWVwX05vdGlmaWNhdGlvbiBidXN5IHRpbWUgYW5kIGFsbG93
+cyBhY2NlcHRpbmcgDQpyZXF1ZXN0cyBjb21pbmcgZHVyaW5nIHRoaXMgc3RhZ2UuIFRodXMsIHdp
+dGhvdXQgaGF2aW5nIEhQSSBzdXBwb3J0ZWQsIHN1c3BlbmQvcmVzdW1lIHByb2Nlc3MNCm1pZ2h0
+IGJlIGluZmx1ZW5jZWQgYnkgU2xlZXBfTm90aWZpY2F0aW9uIGJ1c3kgdGltZSwgYW5kIHRoaXMg
+c2hvdWxkIG5vdCBoYXBwZW4gLSBzdXNwZW5kL3Jlc3VtZQ0Kc2hvdWxkIGJlIGRvbmUgaW4gdmVy
+eSBmYXN0IGFuZCBub3QgYmxvY2tpbmcgbWFubmVyLg0KDQoNClRoYW5rcywNCkFsZXgNCg0KDQo=
