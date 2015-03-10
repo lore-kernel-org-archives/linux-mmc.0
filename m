@@ -1,41 +1,90 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sleep notification
-Date: Tue, 10 Mar 2015 15:36:14 +0200
-Message-ID: <54FEF34E.20205@intel.com>
-References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V2 11/15] mmc: sdhci: Change to new way of doing re-tuning
+Date: Tue, 10 Mar 2015 14:55:22 +0100
+Message-ID: <CAPDyKFr9bpE3FXu0339q4ndOm_KSNpATBODecTWkkrLifvSing@mail.gmail.com>
+References: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
+	<1422522030-17793-12-git-send-email-adrian.hunter@intel.com>
+	<CAPDyKFpTuttvhP91qNF_g_2sWV3NZmYMCnqFVGYEnb1L8kXVeg@mail.gmail.com>
+	<54FD5BDD.9060004@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:64948 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751376AbbCJNiM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 Mar 2015 09:38:12 -0400
-In-Reply-To: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
+Received: from mail-qc0-f169.google.com ([209.85.216.169]:33641 "EHLO
+	mail-qc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752528AbbCJNzX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Mar 2015 09:55:23 -0400
+Received: by qcvx3 with SMTP id x3so1951818qcv.0
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Mar 2015 06:55:23 -0700 (PDT)
+In-Reply-To: <54FD5BDD.9060004@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Avi Shchislowski <avi.shchislowski@sandisk.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, chris@printf.net, Alex.Lemberg@sandisk.com
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Neil Brown <neilb@suse.de>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-On 10/03/15 11:36, Avi Shchislowski wrote:
-> This patch is implements the new additional state of
-> Power_Off_Notification =96 SLEEP_NOTIFICATION.
-> Until now, the implementation of Power_Off_Notification
-> supported only three modes =96 POWERED_ON (0x01),
-> POWER_OFF_SHORT (0x02) and POWER_OFF_LONG (0x03).
->=20
-> As part of eMMC5.0 before moving to Sleep state hosts may set the
-> POWER_OFF_NOTIFICATION byte to SLEEP_NOTIFICATION (0x04).
-> After setting SLEEP_NOTIFICATION, host should wait for
-> the busy line to be de-asserted.
-> The max timeout allowed for busy line de-assertion defined
-> in SLEEP_NOTIFICATION_TIME byte in EXT_CSD [216].
-> HPI may interrupt the SLEEP_NOTIFICATION operation.
-> In that case POWER_OFF_NOTIFICATION byte will restore to POWERED_ON.
+[...]
 
-Is it so that the point of SLEEP_NOTIFICATION is to notify that
-VCC will be powered off after the device is put to sleep by CMD5?
+>>> @@ -2834,11 +2763,8 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
+>>>  {
+>>>         unsigned long flags;
+>>>
+>>> -       /* Disable tuning since we are suspending */
+>>> -       if (host->flags & SDHCI_USING_RETUNING_TIMER) {
+>>> -               del_timer_sync(&host->tuning_timer);
+>>> -               host->flags &= ~SDHCI_NEEDS_RETUNING;
+>>> -       }
+>>> +       mmc_retune_timer_stop(host->mmc);
+>>
+>> I think this could give a deadlock.
+>>
+>> What if the retuning is just about to start and thus sdhci's
+>> ->execute_tuning() callback has been invoked, which is waiting for the
+>> pm_runtime_get_sync() to return.
+>
+> The re-tune timer is mmc_retune_timer() and it does not take any locks
+> so it can't deadlock.
+>
 
-At the moment, the card does not get put to sleep if there is
-support for power-off-notification?
+You missed my point. The problem is related to runtime PM.
 
+Here the sequence I think will cause the deadlock.
+mmc_retune_timer_stop()
+  ->del_timer_sync()
+...
+Wait for timer-handler to finish.
+
+If the timer-handler is running, it has invoked the ->execute_tuning()
+callback and is thus waiting for a pm_runtime_get_sync() to return.
+
+Now, waiting for a pm_runtime_get_sync() to return from a runtime PM
+suspend callback will deadlock!
+
+>>
+>>> +       mmc_retune_needed(host->mmc);
+>>
+>> This seems racy.
+>>
+>> What if a new request has already been started from the mmc core
+>> (waiting for sdhci's ->request() callback to return). That would mean
+>> the mmc core won't detect that a retune was needed.
+>
+> That is a good point. The host controller must not runtime suspend after
+> re-tuning until retuning is released. I can think of a couple of options:
+>         - move the retuning call into the ->request function
+>         - add extra host ops for the host to runtime resume/suspend
+>
+
+I am not sure which approach I prefer yet. Need some more time to think.
+
+For your information, Neil Brown is having a similar issue which he is
+trying to address [1].
+
+I think we need an generic approach to deal with the runtime PM
+synchronization issue described above. More precisely in those
+scenarios when mmc hosts needs to notify the mmc core to take some
+specific actions, from a mmc host's runtime PM callback.
+
+Kind regards
+Uffe
+
+[1]
+https://lkml.org/lkml/2015/2/23/721
