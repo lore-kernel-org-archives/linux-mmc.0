@@ -1,75 +1,71 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sleep notification
-Date: Tue, 10 Mar 2015 18:22:11 +0100
-Message-ID: <CAPDyKFrZi1WqkYvOfDsMLh=xYxhYrVJMnjzStGut3YOYCG+mVA@mail.gmail.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [PATCH] mmc: sleep notification
+Date: Tue, 10 Mar 2015 18:01:34 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333FA00B30@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
 	<54FEF34E.20205@intel.com>
 	<282CEDFCBC30114F83C499CB8F2ED5333FA00476@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAPDyKFrZi1WqkYvOfDsMLh=xYxhYrVJMnjzStGut3YOYCG+mVA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f181.google.com ([209.85.216.181]:46813 "EHLO
-	mail-qc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752780AbbCJRWL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Mar 2015 13:22:11 -0400
-Received: by qcyl6 with SMTP id l6so3602227qcy.13
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Mar 2015 10:22:11 -0700 (PDT)
-In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED5333FA00476@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-bl2on0065.outbound.protection.outlook.com ([65.55.169.65]:47776
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750976AbbCJSBm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 Mar 2015 14:01:42 -0400
+In-Reply-To: <CAPDyKFrZi1WqkYvOfDsMLh=xYxhYrVJMnjzStGut3YOYCG+mVA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Adrian Hunter <adrian.hunter@intel.com>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>
 
-On 10 March 2015 at 17:32, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
-> Hi Adrian,
->
->> -----Original Message-----
->> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
->> Sent: Tuesday, March 10, 2015 6:36 AM
->> To: Avi Shchislowski; ulf.hansson@linaro.org
->> Cc: linux-mmc@vger.kernel.org; chris@printf.net; Alex Lemberg
->> Subject: Re: [PATCH] mmc: sleep notification
->>
->> On 10/03/15 11:36, Avi Shchislowski wrote:
->> > This patch is implements the new additional state of
->> > Power_Off_Notification - SLEEP_NOTIFICATION.
->> > Until now, the implementation of Power_Off_Notification supported only
->> > three modes - POWERED_ON (0x01), POWER_OFF_SHORT (0x02) and
->> > POWER_OFF_LONG (0x03).
->> >
->> > As part of eMMC5.0 before moving to Sleep state hosts may set the
->> > POWER_OFF_NOTIFICATION byte to SLEEP_NOTIFICATION (0x04).
->> > After setting SLEEP_NOTIFICATION, host should wait for the busy line
->> > to be de-asserted.
->> > The max timeout allowed for busy line de-assertion defined in
->> > SLEEP_NOTIFICATION_TIME byte in EXT_CSD [216].
->> > HPI may interrupt the SLEEP_NOTIFICATION operation.
->> > In that case POWER_OFF_NOTIFICATION byte will restore to POWERED_ON.
->>
->> Is it so that the point of SLEEP_NOTIFICATION is to notify that VCC will be
->> powered off after the device is put to sleep by CMD5?
->
-> From the spec:
->
-> the host should issue a power off notification (POWER_OFF_LONG, POWER_OFF_SHORT )
-> if it intends to turn off both VCC and VCCQ power supplies or it may use
-> to a power off notification (SLEEP_NOTIFICATION ) if it intends to turn-off VCC
-> after moving the device to Sleep state.
-
-Ah, so CMD5 will still need to be issued. Thanks for clarifying.
-
->
->>
->> At the moment, the card does not get put to sleep if there is support for power-
->> off-notification?
->
-> Driver will send Sleep only if PON is not supported...
-
-Nope, that's not entirely correct.
-
-The MMC core requires PON to be supported by the card and the host to
-have MMC_CAP2_FULL_PWR_CYCLE set. Else it will send sleep (CMD5)
-instead.
-
-Kind regards
-Uffe
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
+aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBUdWVzZGF5LCBNYXJjaCAxMCwg
+MjAxNSAxMDoyMiBBTQ0KPiBUbzogQWxleCBMZW1iZXJnDQo+IENjOiBBZHJpYW4gSHVudGVyOyBB
+dmkgU2hjaGlzbG93c2tpOyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOw0KPiBjaHJpc0Bwcmlu
+dGYubmV0DQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0hdIG1tYzogc2xlZXAgbm90aWZpY2F0aW9uDQo+
+IA0KPiBPbiAxMCBNYXJjaCAyMDE1IGF0IDE3OjMyLCBBbGV4IExlbWJlcmcgPEFsZXguTGVtYmVy
+Z0BzYW5kaXNrLmNvbT4NCj4gd3JvdGU6DQo+ID4gSGkgQWRyaWFuLA0KPiA+DQo+ID4+IC0tLS0t
+T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IEFkcmlhbiBIdW50ZXIgW21haWx0bzph
+ZHJpYW4uaHVudGVyQGludGVsLmNvbV0NCj4gPj4gU2VudDogVHVlc2RheSwgTWFyY2ggMTAsIDIw
+MTUgNjozNiBBTQ0KPiA+PiBUbzogQXZpIFNoY2hpc2xvd3NraTsgdWxmLmhhbnNzb25AbGluYXJv
+Lm9yZw0KPiA+PiBDYzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgY2hyaXNAcHJpbnRmLm5l
+dDsgQWxleCBMZW1iZXJnDQo+ID4+IFN1YmplY3Q6IFJlOiBbUEFUQ0hdIG1tYzogc2xlZXAgbm90
+aWZpY2F0aW9uDQo+ID4+DQo+ID4+IE9uIDEwLzAzLzE1IDExOjM2LCBBdmkgU2hjaGlzbG93c2tp
+IHdyb3RlOg0KPiA+PiA+IFRoaXMgcGF0Y2ggaXMgaW1wbGVtZW50cyB0aGUgbmV3IGFkZGl0aW9u
+YWwgc3RhdGUgb2YNCj4gPj4gPiBQb3dlcl9PZmZfTm90aWZpY2F0aW9uIC0gU0xFRVBfTk9USUZJ
+Q0FUSU9OLg0KPiA+PiA+IFVudGlsIG5vdywgdGhlIGltcGxlbWVudGF0aW9uIG9mIFBvd2VyX09m
+Zl9Ob3RpZmljYXRpb24gc3VwcG9ydGVkDQo+ID4+ID4gb25seSB0aHJlZSBtb2RlcyAtIFBPV0VS
+RURfT04gKDB4MDEpLCBQT1dFUl9PRkZfU0hPUlQgKDB4MDIpIGFuZA0KPiA+PiA+IFBPV0VSX09G
+Rl9MT05HICgweDAzKS4NCj4gPj4gPg0KPiA+PiA+IEFzIHBhcnQgb2YgZU1NQzUuMCBiZWZvcmUg
+bW92aW5nIHRvIFNsZWVwIHN0YXRlIGhvc3RzIG1heSBzZXQgdGhlDQo+ID4+ID4gUE9XRVJfT0ZG
+X05PVElGSUNBVElPTiBieXRlIHRvIFNMRUVQX05PVElGSUNBVElPTiAoMHgwNCkuDQo+ID4+ID4g
+QWZ0ZXIgc2V0dGluZyBTTEVFUF9OT1RJRklDQVRJT04sIGhvc3Qgc2hvdWxkIHdhaXQgZm9yIHRo
+ZSBidXN5DQo+ID4+ID4gbGluZSB0byBiZSBkZS1hc3NlcnRlZC4NCj4gPj4gPiBUaGUgbWF4IHRp
+bWVvdXQgYWxsb3dlZCBmb3IgYnVzeSBsaW5lIGRlLWFzc2VydGlvbiBkZWZpbmVkIGluDQo+ID4+
+ID4gU0xFRVBfTk9USUZJQ0FUSU9OX1RJTUUgYnl0ZSBpbiBFWFRfQ1NEIFsyMTZdLg0KPiA+PiA+
+IEhQSSBtYXkgaW50ZXJydXB0IHRoZSBTTEVFUF9OT1RJRklDQVRJT04gb3BlcmF0aW9uLg0KPiA+
+PiA+IEluIHRoYXQgY2FzZSBQT1dFUl9PRkZfTk9USUZJQ0FUSU9OIGJ5dGUgd2lsbCByZXN0b3Jl
+IHRvDQo+IFBPV0VSRURfT04uDQo+ID4+DQo+ID4+IElzIGl0IHNvIHRoYXQgdGhlIHBvaW50IG9m
+IFNMRUVQX05PVElGSUNBVElPTiBpcyB0byBub3RpZnkgdGhhdCBWQ0MNCj4gPj4gd2lsbCBiZSBw
+b3dlcmVkIG9mZiBhZnRlciB0aGUgZGV2aWNlIGlzIHB1dCB0byBzbGVlcCBieSBDTUQ1Pw0KPiA+
+DQo+ID4gRnJvbSB0aGUgc3BlYzoNCj4gPg0KPiA+IHRoZSBob3N0IHNob3VsZCBpc3N1ZSBhIHBv
+d2VyIG9mZiBub3RpZmljYXRpb24gKFBPV0VSX09GRl9MT05HLA0KPiA+IFBPV0VSX09GRl9TSE9S
+VCApIGlmIGl0IGludGVuZHMgdG8gdHVybiBvZmYgYm90aCBWQ0MgYW5kIFZDQ1EgcG93ZXINCj4g
+PiBzdXBwbGllcyBvciBpdCBtYXkgdXNlIHRvIGEgcG93ZXIgb2ZmIG5vdGlmaWNhdGlvbiAoU0xF
+RVBfTk9USUZJQ0FUSU9ODQo+ID4gKSBpZiBpdCBpbnRlbmRzIHRvIHR1cm4tb2ZmIFZDQyBhZnRl
+ciBtb3ZpbmcgdGhlIGRldmljZSB0byBTbGVlcCBzdGF0ZS4NCj4gDQo+IEFoLCBzbyBDTUQ1IHdp
+bGwgc3RpbGwgbmVlZCB0byBiZSBpc3N1ZWQuIFRoYW5rcyBmb3IgY2xhcmlmeWluZy4NCj4gDQo+
+ID4NCj4gPj4NCj4gPj4gQXQgdGhlIG1vbWVudCwgdGhlIGNhcmQgZG9lcyBub3QgZ2V0IHB1dCB0
+byBzbGVlcCBpZiB0aGVyZSBpcyBzdXBwb3J0DQo+ID4+IGZvciBwb3dlci0gb2ZmLW5vdGlmaWNh
+dGlvbj8NCj4gPg0KPiA+IERyaXZlciB3aWxsIHNlbmQgU2xlZXAgb25seSBpZiBQT04gaXMgbm90
+IHN1cHBvcnRlZC4uLg0KPiANCj4gTm9wZSwgdGhhdCdzIG5vdCBlbnRpcmVseSBjb3JyZWN0Lg0K
+PiANCj4gVGhlIE1NQyBjb3JlIHJlcXVpcmVzIFBPTiB0byBiZSBzdXBwb3J0ZWQgYnkgdGhlIGNh
+cmQgYW5kIHRoZSBob3N0IHRvIGhhdmUNCj4gTU1DX0NBUDJfRlVMTF9QV1JfQ1lDTEUgc2V0LiBF
+bHNlIGl0IHdpbGwgc2VuZCBzbGVlcCAoQ01ENSkgaW5zdGVhZC4NCj4NCg0KWW91IGFyZSByaWdo
+dCAtIGl0IHJlcXVpcmVzIGJvdGggUE9OIGFuZCBNTUNfQ0FQMl9GVUxMX1BXUl9DWUNMRSB0byBi
+ZSBzZXQuLi4NClRoYW5rcyBmb3IgbWVudGlvbmluZyB0aGlzLg0KDQogDQo+IEtpbmQgcmVnYXJk
+cw0KPiBVZmZlDQo=
