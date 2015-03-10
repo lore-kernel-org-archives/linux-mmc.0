@@ -1,59 +1,65 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH] mmc: dw_mmc: Consider HLE errors to be data and command errors
-Date: Tue, 10 Mar 2015 08:48:10 -0700
-Message-ID: <1426002490-2014-1-git-send-email-dianders@chromium.org>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [PATCH] mmc: sleep notification
+Date: Tue, 10 Mar 2015 16:32:19 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333FA00476@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
+ <54FEF34E.20205@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f170.google.com ([209.85.223.170]:33564 "EHLO
-	mail-ie0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750937AbbCJPsV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Mar 2015 11:48:21 -0400
-Received: by iecvj10 with SMTP id vj10so19739924iec.0
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Mar 2015 08:48:20 -0700 (PDT)
+Received: from mail-by2on0054.outbound.protection.outlook.com ([207.46.100.54]:36392
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752472AbbCJQq0 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Mar 2015 12:46:26 -0400
+In-Reply-To: <54FEF34E.20205@intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, javier.martinez@collabora.co.uk, linux-rockchip@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Doug Anderson <dianders@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>
 
-The dw_mmc driver enables HLE errors as part of DW_MCI_ERROR_FLAGS but
-nothing in the interrupt handler actually handles them and ACKs them.
-That means that if we ever get an HLE error we'll just keep getting
-interrupts and we'll wedge things.
+Hi Adrian,
 
-We really don't expect HLE errors but if we ever get them we shouldn't
-silently ignore them.
+> -----Original Message-----
+> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
+> Sent: Tuesday, March 10, 2015 6:36 AM
+> To: Avi Shchislowski; ulf.hansson@linaro.org
+> Cc: linux-mmc@vger.kernel.org; chris@printf.net; Alex Lemberg
+> Subject: Re: [PATCH] mmc: sleep notification
+> 
+> On 10/03/15 11:36, Avi Shchislowski wrote:
+> > This patch is implements the new additional state of
+> > Power_Off_Notification - SLEEP_NOTIFICATION.
+> > Until now, the implementation of Power_Off_Notification supported only
+> > three modes - POWERED_ON (0x01), POWER_OFF_SHORT (0x02) and
+> > POWER_OFF_LONG (0x03).
+> >
+> > As part of eMMC5.0 before moving to Sleep state hosts may set the
+> > POWER_OFF_NOTIFICATION byte to SLEEP_NOTIFICATION (0x04).
+> > After setting SLEEP_NOTIFICATION, host should wait for the busy line
+> > to be de-asserted.
+> > The max timeout allowed for busy line de-assertion defined in
+> > SLEEP_NOTIFICATION_TIME byte in EXT_CSD [216].
+> > HPI may interrupt the SLEEP_NOTIFICATION operation.
+> > In that case POWER_OFF_NOTIFICATION byte will restore to POWERED_ON.
+> 
+> Is it so that the point of SLEEP_NOTIFICATION is to notify that VCC will be
+> powered off after the device is put to sleep by CMD5?
 
-Note that I have seen HLE errors while constantly ejecting and
-inserting cards (ejecting while inserting, etc).
+>From the spec: 
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
-Note that this works together with the patch I sent up yesterday (the
-CMD 11 timer).  I would have sent the two together except that I had
-local printouts (and ACKing of HLE) and didn't realize that this was
-also required for a full solution.
+the host should issue a power off notification (POWER_OFF_LONG, POWER_OFF_SHORT )
+if it intends to turn off both VCC and VCCQ power supplies or it may use 
+to a power off notification (SLEEP_NOTIFICATION ) if it intends to turn-off VCC
+after moving the device to Sleep state.
 
- drivers/mmc/host/dw_mmc.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+> 
+> At the moment, the card does not get put to sleep if there is support for power-
+> off-notification?
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 47dfd0e..294edc9c 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -44,11 +44,11 @@
- /* Common flag combinations */
- #define DW_MCI_DATA_ERROR_FLAGS	(SDMMC_INT_DRTO | SDMMC_INT_DCRC | \
- 				 SDMMC_INT_HTO | SDMMC_INT_SBE  | \
--				 SDMMC_INT_EBE)
-+				 SDMMC_INT_EBE | SDMMC_INT_HLE)
- #define DW_MCI_CMD_ERROR_FLAGS	(SDMMC_INT_RTO | SDMMC_INT_RCRC | \
--				 SDMMC_INT_RESP_ERR)
-+				 SDMMC_INT_RESP_ERR | SDMMC_INT_HLE)
- #define DW_MCI_ERROR_FLAGS	(DW_MCI_DATA_ERROR_FLAGS | \
--				 DW_MCI_CMD_ERROR_FLAGS  | SDMMC_INT_HLE)
-+				 DW_MCI_CMD_ERROR_FLAGS)
- #define DW_MCI_SEND_STATUS	1
- #define DW_MCI_RECV_STATUS	2
- #define DW_MCI_DMA_THRESHOLD	16
--- 
-2.2.0.rc0.207.ga3a616c
+Driver will send Sleep only if PON is not supported...
 
+Thanks,
+Alex
