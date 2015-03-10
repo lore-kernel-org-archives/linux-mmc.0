@@ -1,57 +1,43 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [PATCH] mmc: sleep notification
-Date: Tue, 10 Mar 2015 14:32:50 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
- <CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: [PATCH] mmc: sunxi: add MMC_CAP_SDIO_IRQ capability
+Date: Tue, 10 Mar 2015 16:36:36 +0100
+Message-ID: <1426001796-19231-1-git-send-email-hdegoede@redhat.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0056.outbound.protection.outlook.com ([207.46.100.56]:26259
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751173AbbCJOsA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 Mar 2015 10:48:00 -0400
-In-Reply-To: <CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
-Content-Language: en-US
+Received: from mx1.redhat.com ([209.132.183.28]:42420 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753564AbbCJPgu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 Mar 2015 11:36:50 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>
 
-SGkgVWxmLA0KDQpUaGFua3MgZm9yIHlvdXIgcmV2aWV3IGFuZCBjb21tZW50cyENCg0KPiAtLS0t
-LU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFuc3NvbiBbbWFpbHRvOnVsZi5o
-YW5zc29uQGxpbmFyby5vcmddDQo+IFNlbnQ6IFR1ZXNkYXksIE1hcmNoIDEwLCAyMDE1IDU6MDgg
-QU0NCj4gVG86IEF2aSBTaGNoaXNsb3dza2kNCj4gQ2M6IGxpbnV4LW1tYzsgQ2hyaXMgQmFsbDsg
-QWxleCBMZW1iZXJnDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0hdIG1tYzogc2xlZXAgbm90aWZpY2F0
-aW9uDQo+IA0KPiBPbiAxMCBNYXJjaCAyMDE1IGF0IDEwOjM2LCBBdmkgU2hjaGlzbG93c2tpIDxh
-dmkuc2hjaGlzbG93c2tpQHNhbmRpc2suY29tPg0KPiB3cm90ZToNCj4gPiBUaGlzIHBhdGNoIGlz
-IGltcGxlbWVudHMgdGhlIG5ldyBhZGRpdGlvbmFsIHN0YXRlIG9mDQo+ID4gUG93ZXJfT2ZmX05v
-dGlmaWNhdGlvbiDigJMgU0xFRVBfTk9USUZJQ0FUSU9OLg0KPiA+IFVudGlsIG5vdywgdGhlIGlt
-cGxlbWVudGF0aW9uIG9mIFBvd2VyX09mZl9Ob3RpZmljYXRpb24gc3VwcG9ydGVkIG9ubHkNCj4g
-PiB0aHJlZSBtb2RlcyDigJMgUE9XRVJFRF9PTiAoMHgwMSksIFBPV0VSX09GRl9TSE9SVCAoMHgw
-MikgYW5kDQo+ID4gUE9XRVJfT0ZGX0xPTkcgKDB4MDMpLg0KPiA+DQo+ID4gQXMgcGFydCBvZiBl
-TU1DNS4wIGJlZm9yZSBtb3ZpbmcgdG8gU2xlZXAgc3RhdGUgaG9zdHMgbWF5IHNldCB0aGUNCj4g
-PiBQT1dFUl9PRkZfTk9USUZJQ0FUSU9OIGJ5dGUgdG8gU0xFRVBfTk9USUZJQ0FUSU9OICgweDA0
-KS4NCj4gPiBBZnRlciBzZXR0aW5nIFNMRUVQX05PVElGSUNBVElPTiwgaG9zdCBzaG91bGQgd2Fp
-dCBmb3IgdGhlIGJ1c3kgbGluZQ0KPiA+IHRvIGJlIGRlLWFzc2VydGVkLg0KPiA+IFRoZSBtYXgg
-dGltZW91dCBhbGxvd2VkIGZvciBidXN5IGxpbmUgZGUtYXNzZXJ0aW9uIGRlZmluZWQgaW4NCj4g
-PiBTTEVFUF9OT1RJRklDQVRJT05fVElNRSBieXRlIGluIEVYVF9DU0QgWzIxNl0uDQo+ID4gSFBJ
-IG1heSBpbnRlcnJ1cHQgdGhlIFNMRUVQX05PVElGSUNBVElPTiBvcGVyYXRpb24uDQo+ID4gSW4g
-dGhhdCBjYXNlIFBPV0VSX09GRl9OT1RJRklDQVRJT04gYnl0ZSB3aWxsIHJlc3RvcmUgdG8gUE9X
-RVJFRF9PTi4NCj4gDQo+IE9oLCBqdXN0IGdyZWF0ISBKRURFQyBoYXMgaW52ZW50ZWQgeWV0IGFu
-b3RoZXIgd2F5IG9mIGhvdyB0byBzZW5kIGEgZGV2aWNlIHRvDQo+IHNsZWVwIHN0YXRlLiBJIHdv
-bmRlciB3aGF0IHdhcyB3cm9uZyB3aXRoIHRoZSBDTUQ1IG9wdGlvbi4NCg0KSSB0aGluayBiZWZv
-cmUgYWRkaW5nIHNsZWVwX25vdGlmaWNhdGlvbiwgaG9zdCBoYXMgbm8gd2F5IHRvIG5vdGlmeSBk
-ZXZpY2UgYmVmb3JlIHNlbmRpbmcNCnNsZWVwIGNvbW1hbmQuIE5vdyBkZXZpY2UgY2FuIGJldHRl
-ciBwcmVwYXJlIGl0c2VsZiBmb3IgbW92aW5nIGludG8gdGhlIHNsZWVwIHN0YXRlLg0KDQpBbHNv
-LCBJIHRoaW5rIHdlIG5lZWQgdG8gY2xhcmlmeSBvbmUgbW9yZSBwb2ludCBmb3IgdGhpcyBwYXRj
-aDoNCkFzIHdhcyBtZW50aW9uZWQgaW4gY29tbWl0IG1lc3NhZ2UgLSBTbGVlcF9Ob3RpZmljYXRp
-b24gY2FuIGJlIGludGVycnVwdGVkIGJ5IEhQSS4NClRoaXMgYWxsb3dzIG5vdCBibG9ja2luZyB0
-aGUgaG9zdCBkdXJpbmcgdGhlIFNsZWVwX05vdGlmaWNhdGlvbiBidXN5IHRpbWUgYW5kIGFsbG93
-cyBhY2NlcHRpbmcgDQpyZXF1ZXN0cyBjb21pbmcgZHVyaW5nIHRoaXMgc3RhZ2UuIFRodXMsIHdp
-dGhvdXQgaGF2aW5nIEhQSSBzdXBwb3J0ZWQsIHN1c3BlbmQvcmVzdW1lIHByb2Nlc3MNCm1pZ2h0
-IGJlIGluZmx1ZW5jZWQgYnkgU2xlZXBfTm90aWZpY2F0aW9uIGJ1c3kgdGltZSwgYW5kIHRoaXMg
-c2hvdWxkIG5vdCBoYXBwZW4gLSBzdXNwZW5kL3Jlc3VtZQ0Kc2hvdWxkIGJlIGRvbmUgaW4gdmVy
-eSBmYXN0IGFuZCBub3QgYmxvY2tpbmcgbWFubmVyLg0KDQoNClRoYW5rcywNCkFsZXgNCg0KDQo=
+When the sunxi mmc-controller code was initially merged MMC_CAP_SDIO_IRQ was
+not added to the host caps because of issues with some sdio wifi modules.
+
+It turns out that these issues have nothing to do with using sdio-irq support,
+they also happen with oob interrupts. Since the hardware supports sdio-irq
+everywhere, and since the one reason to not claim the capability is gone,
+add MMC_CAP_SDIO_IRQ to the default host caps.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ drivers/mmc/host/sunxi-mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index e8a4218..94eee54 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -1028,7 +1028,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+ 	mmc->f_min		=   400000;
+ 	mmc->f_max		= 50000000;
+ 	mmc->caps	       |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+-				  MMC_CAP_ERASE;
++				  MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
+ 
+ 	ret = mmc_of_parse(mmc);
+ 	if (ret)
+-- 
+2.3.1
+
