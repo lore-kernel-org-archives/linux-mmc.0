@@ -1,233 +1,425 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: Possible regression in next-20150306 due to "mmc: tmio: Fix PIO
- mode with CONFIG_HIGHMEM"
-Date: Tue, 10 Mar 2015 16:29:45 +0900
-Message-ID: <20150310072944.GA22869@verge.net.au>
-References: <20150307060915.GA24323@verge.net.au>
+From: Avi Shchislowski <avi.shchislowski@sandisk.com>
+Subject: [PATCH] mmc: sleep notification
+Date: Tue, 10 Mar 2015 11:36:37 +0200
+Message-ID: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20150307060915.GA24323@verge.net.au>
-Sender: linux-sh-owner@vger.kernel.org
-To: keita kobayashi <keita.kobayashi.ym@renesas.com>
-Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Cao Minh Hiep <cm-hiep@jinso.co.jp>, Magnus Damm <magnus.damm@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1bon0070.outbound.protection.outlook.com ([157.56.111.70]:7641
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751503AbbCJKKM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 Mar 2015 06:10:12 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, chris@printf.net, Alex.Lemberg@sandisk.com, Alex Lemberg <alex.lemberg@sandisk.com>, Avi Shchislowski <avi.shchislowski@sandisk.com>
 
-On Sat, Mar 07, 2015 at 03:09:20PM +0900, Simon Horman wrote:
-> Hi Kobayashi-san, Hi All,
-> 
-> I have noticed what appears to be a regression in next-20150306.  Using
-> shmobile_defconfig I am unable to boot the koelsch or lager boards to
-> user-space. However, if I revert be7de0b8a90a0b06d ("mmc: tmio: Fix PIO
-> mode with CONFIG_HIGHMEM") then all seems well.
+This patch is implements the new additional state of
+Power_Off_Notification =E2=80=93 SLEEP_NOTIFICATION.
+Until now, the implementation of Power_Off_Notification
+supported only three modes =E2=80=93 POWERED_ON (0x01),
+POWER_OFF_SHORT (0x02) and POWER_OFF_LONG (0x03).
 
-Apologies, I seem to have messed up the commit id.
-It should be 5da0e63e268dc5120
+As part of eMMC5.0 before moving to Sleep state hosts may set the
+POWER_OFF_NOTIFICATION byte to SLEEP_NOTIFICATION (0x04).
+After setting SLEEP_NOTIFICATION, host should wait for
+the busy line to be de-asserted.
+The max timeout allowed for busy line de-assertion defined
+in SLEEP_NOTIFICATION_TIME byte in EXT_CSD [216].
+HPI may interrupt the SLEEP_NOTIFICATION operation.
+In that case POWER_OFF_NOTIFICATION byte will restore to POWERED_ON.
 
-> 
-> The log that I see from a koelsch boot is as follows:
-> 
-> Unable to handle kernel NULL pointer dereference at virtual address 00000008
-> pgd = c0004000
-> [00000008] *pgd=00000000
-> Internal error: Oops: 5 [#1] SMP ARM
-> CPU: 0 PID: 577 Comm: kworker/u4:2 Tainted: G        W       4.0.0-rc2-next-20150306 #1529
-> Hardware name: Generic R8A7791 (Flattened Device Tree)
-> Workqueue: kmmcd mmc_rescan
-> task: eea91580 ti: ee100000 task.ti: ee100000
-> PC is at tmio_mmc_start_dma+0xbc/0x43c
-> LR is at tmio_mmc_request+0x1e4/0x498
-> pc : [<c035f8f0>]    lr : [<c035e538>]    psr: 20000113
-> sp : ee101cc0  ip : ee101d00  fp : ee101cfc
-> r10: 00000000  r9 : 00000088  r8 : 00000001
-> r7 : ee9a42b8  r6 : 00000001  r5 : 00000000  r4 : ee0bb6c0
-> r3 : 00000001  r2 : 00000000  r1 : ee101da0  r0 : 00000000
-> Flags: nzCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
-> Control: 10c5307d  Table: 4000406a  DAC: 00000015
-> Process kworker/u4:2 (pid: 577, stack limit = 0xee100210)
-> Stack: (0xee101cc0 to 0xee102000)
-> 1cc0: 00000004 60000113 00000088 ee249b40 ee101cfc ee0bb400 ee101da0 ee101dd0
-> 1ce0: ee0bb6c0 00000001 00000088 ee249b40 ee101d24 ee101d00 c035e538 c035f840
-> 1d00: ee101dd0 ee0bb400 ee101de0 00000008 ee101da0 ee249b40 ee101d3c ee101d28
-> 1d20: c034c98c c035e360 ee0bb400 ee101dd0 ee101d64 ee101d40 c034d06c c034c888
-> 1d40: 00000001 ee2191b4 00000000 ee219000 00000008 ee101da0 ee101e2c ee101d68
-> 1d60: c035500c c034d034 ee101dc8 00000033 00000000 00000000 00000000 00000000
-> 1d80: 00000000 000000b5 00000000 00000000 00000000 00000000 ee101da0 ee101dd0
-> 1da0: 05f5e100 00000000 00000008 00000001 00000000 00000200 00000000 00000000
-> 1dc0: ee101dd0 00000001 ee101df8 00000000 00000000 ee101d6c ee101da0 00000000
-> 1de0: 00000000 00000000 ee101de8 ee101de8 c034c9d0 00000000 ef5bd922 00000b40
-> 1e00: 00000008 00000000 ee219000 ee0bb400 00000000 00000000 00000000 00200000
-> 1e20: ee101e5c ee101e30 c0353ec4 c0354f10 00000000 ee101db8 ee219000 ee0bb400
-> 1e40: 00000000 ee101e6c 00000000 00200000 ee101eac ee101e60 c03543bc c0353ea4
-> 1e60: 00000000 00ff8000 000001aa 134b4753 44303847 10210076 0400ca00 c0ff8000
-> 1e80: ee101eac ee0bb400 00000000 c050da08 c050da18 ee0bb610 00000088 00000000
-> 1ea0: ee101ecc ee101eb0 c0354a6c c0354248 c050da18 00ff8000 ee0bb610 ee0bb400
-> 1ec0: ee101eec ee101ed0 c034ee68 c03549c0 eea7c600 ee830400 ee837b00 00000000
-> 1ee0: ee101f2c ee101ef0 c0037d04 c034ebe8 00000000 eea7c600 ee830400 00000000
-> 1f00: ee830414 eea7c600 ee830400 eea7c618 ee830414 ee830400 00000088 00000000
-> 1f20: ee101f5c ee101f30 c0038190 c0037b24 eea91580 eea07940 00000000 eea7c600
-> 1f40: c0037e70 00000000 00000000 00000000 ee101fac ee101f60 c003cb48 c0037e7c
-> 1f60: ee101f5c 00000000 ffffffff eea7c600 00000000 00000000 ee101f78 ee101f78
-> 1f80: 00000000 00000000 ee101f88 ee101f88 eea07940 c003ca58 00000000 00000000
-> 1fa0: 00000000 ee101fb0 c000ec00 c003ca64 00000000 00000000 00000000 00000000
-> 1fc0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
-> 1fe0: 00000000 00000000 00000000 00000000 00000013 00000000 f763e3f6 17bf7af2
-> Backtrace: 
-> [<c035f834>] (tmio_mmc_start_dma) from [<c035e538>] (tmio_mmc_request+0x1e4/0x498)
->  r10:ee249b40 r9:00000088 r8:00000001 r7:ee0bb6c0 r6:ee101dd0 r5:ee101da0
->  r4:ee0bb400
-> [<c035e354>] (tmio_mmc_request) from [<c034c98c>] (mmc_start_request+0x110/0x124)
->  r10:ee249b40 r8:ee101da0 r7:00000008 r6:ee101de0 r5:ee0bb400 r4:ee101dd0
-> [<c034c87c>] (mmc_start_request) from [<c034d06c>] (mmc_wait_for_req+0x44/0x13c)
->  r5:ee101dd0 r4:ee0bb400
-> [<c034d028>] (mmc_wait_for_req) from [<c035500c>] (mmc_app_send_scr+0x108/0x168)
->  r8:ee101da0 r7:00000008 r6:ee219000 r5:00000000 r4:ee2191b4 r3:00000001
-> [<c0354f04>] (mmc_app_send_scr) from [<c0353ec4>] (mmc_sd_setup_card+0x2c/0x378)
->  r10:00200000 r8:00000000 r7:00000000 r6:00000000 r5:ee0bb400 r4:ee219000
-> [<c0353e98>] (mmc_sd_setup_card) from [<c03543bc>] (mmc_sd_init_card+0x180/0x5e0)
->  r10:00200000 r8:00000000 r7:ee101e6c r6:00000000 r5:ee0bb400 r4:ee219000
-> [<c035423c>] (mmc_sd_init_card) from [<c0354a6c>] (mmc_attach_sd+0xb8/0x148)
->  r10:00000000 r9:00000088 r8:ee0bb610 r7:c050da18 r6:c050da08 r5:00000000
->  r4:ee0bb400
-> [<c03549b4>] (mmc_attach_sd) from [<c034ee68>] (mmc_rescan+0x28c/0x2fc)
->  r5:ee0bb400 r4:ee0bb610
-> [<c034ebdc>] (mmc_rescan) from [<c0037d04>] (process_one_work+0x1ec/0x324)
->  r7:00000000 r6:ee837b00 r5:ee830400 r4:eea7c600
-> [<c0037b18>] (process_one_work) from [<c0038190>] (worker_thread+0x320/0x43c)
->  r10:00000000 r9:00000088 r8:ee830400 r7:ee830414 r6:eea7c618 r5:ee830400
->  r4:eea7c600
-> [<c0037e70>] (worker_thread) from [<c003cb48>] (kthread+0xf0/0x104)
->  r10:00000000 r9:00000000 r8:00000000 r7:c0037e70 r6:eea7c600 r5:00000000
->  r4:eea07940 r3:eea91580
-> [<c003ca58>] (kthread) from [<c000ec00>] (ret_from_fork+0x14/0x34)
->  r7:00000000 r6:00000000 r5:c003ca58 r4:eea07940
-> Code: e3580000 1a000041 e3530000 0a00003f (e5953008) 
-> ---[ end trace 73e31bceec8a1115 ]---
-> Unable to handle kernel paging request at virtual address ffffffec
-> pgd = c0004000
-> [ffffffec] *pgd=6f7fd821, *pte=00000000, *ppte=00000000
-> Internal error: Oops: 17 [#2] SMP ARM
-> CPU: 0 PID: 577 Comm: kworker/u4:2 Tainted: G      D W       4.0.0-rc2-next-20150306 #1529
-> Hardware name: Generic R8A7791 (Flattened Device Tree)
-> task: eea91580 ti: ee100000 task.ti: ee100000
-> PC is at kthread_data+0x10/0x18
-> LR is at wq_worker_sleeping+0x14/0xe0
-> pc : [<c003cd2c>]    lr : [<c0037864>]    psr: 20000193
-> sp : ee101a20  ip : ee101a30  fp : ee101a2c
-> r10: 2e99d000  r9 : 00000008  r8 : c062d440
-> r7 : eea91814  r6 : 00000000  r5 : eefca440  r4 : 00000000
-> r3 : 00000000  r2 : 723eb270  r1 : 00000000  r0 : eea91580
-> Flags: nzCv  IRQs off  FIQs on  Mode SVC_32  ISA ARM  Segment user
-> Control: 10c5307d  Table: 4000406a  DAC: 00000015
-> Process kworker/u4:2 (pid: 577, stack limit = 0xee100210)
-> Stack: (0xee101a20 to 0xee102000)
-> 1a20: ee101a44 ee101a30 c0037864 c003cd28 0420806c eea91580 ee101a8c ee101a48
-> 1a40: c049ed94 c003785c c0065254 c0065008 ee101a9c ee101a60 c00262b0 c0065248
-> 1a60: ee101b12 eea91580 ee101878 ee101aa4 ee101b12 eea91790 00000008 00000001
-> 1a80: ee101a9c ee101a90 c049f274 c049ec9c ee101ac4 ee101aa0 c00279a4 c049f1ec
-> 1aa0: c035f8f2 ee101aa4 ee101aa4 ee101ab8 c00252c0 ee101b12 ee101b44 ee101ac8
-> 1ac0: c0011dc0 c0027138 ee100210 0000000b 00000005 c05936fe 60000113 00000000
-> 1ae0: 6505a8cc 30383533 20303030 30306131 31343030 35336520 30303033 61302030
-> 1b00: 30303030 28206633 35393565 38303033 c0002029 c049d420 c0593988 00000008
-> 1b20: 00000005 00000000 ee101c78 00000001 00000005 00000000 ee101b5c ee101b48
-> 1b40: c049cbac c0011a1c ee101c78 ee101c78 ee101bac ee101b60 c001a63c c049cb5c
-> 1b60: 00000002 00000000 ee101b9c ee101b78 c003da7c c000a330 ffffffff c062e01c
-> 1b80: eea91580 00000005 c063496c 00000008 ee101c78 00000001 00000088 00000000
-> 1ba0: ee101bcc ee101bb0 c001a704 c001a358 00000005 c063496c 00000008 ee101c78
-> 1bc0: ee101c74 ee101bd0 c0009248 c001a6ec c0067a48 7fffffff 7fffffff 00000002
-> 1be0: ee101ce4 00000000 00000088 00000000 ee101c0c ee101c00 c049f274 c049ec9c
-> 1c00: ee101c54 ee101c10 c04a1a38 c049f1ec c00375c0 c0067b78 000000c8 60000113
-> 1c20: ee82a4c0 00000008 ee0bb770 000000c8 ee101c64 ee101ce0 7fffffff 00000002
-> 1c40: ee101ce4 00000000 ee101c94 ee101c58 c049fd74 c04a25e8 c035f8f0 20000113
-> 1c60: ffffffff ee101cac ee101cfc ee101c78 c0012558 c0009218 00000000 ee101da0
-> 1c80: 00000000 00000001 ee0bb6c0 00000000 00000001 ee9a42b8 00000001 00000088
-> 1ca0: 00000000 ee101cfc ee101d00 ee101cc0 c035e538 c035f8f0 20000113 ffffffff
-> 1cc0: 00000004 60000113 00000088 ee249b40 ee101cfc ee0bb400 ee101da0 ee101dd0
-> 1ce0: ee0bb6c0 00000001 00000088 ee249b40 ee101d24 ee101d00 c035e538 c035f840
-> 1d00: ee101dd0 ee0bb400 ee101de0 00000008 ee101da0 ee249b40 ee101d3c ee101d28
-> 1d20: c034c98c c035e360 ee0bb400 ee101dd0 ee101d64 ee101d40 c034d06c c034c888
-> 1d40: 00000001 ee2191b4 00000000 ee219000 00000008 ee101da0 ee101e2c ee101d68
-> 1d60: c035500c c034d034 ee101dc8 00000033 00000000 00000000 00000000 00000000
-> 1d80: 00000000 000000b5 00000000 00000000 00000000 00000000 ee101da0 ee101dd0
-> 1da0: 05f5e100 00000000 00000008 00000001 00000000 00000200 00000000 00000000
-> 1dc0: ee101dd0 00000001 ee101df8 00000000 00000000 ee101d6c ee101da0 00000000
-> 1de0: 00000000 00000000 ee101de8 ee101de8 c034c9d0 00000000 ef5bd922 00000b40
-> 1e00: 00000008 00000000 ee219000 ee0bb400 00000000 00000000 00000000 00200000
-> 1e20: ee101e5c ee101e30 c0353ec4 c0354f10 00000000 ee101db8 ee219000 ee0bb400
-> 1e40: 00000000 ee101e6c 00000000 00200000 ee101eac ee101e60 c03543bc c0353ea4
-> 1e60: 00000000 00ff8000 000001aa 134b4753 44303847 10210076 0400ca00 c0ff8000
-> 1e80: ee101eac ee0bb400 00000000 c050da08 c050da18 ee0bb610 00000088 00000000
-> 1ea0: ee101ecc ee101eb0 c0354a6c c0354248 c050da18 00ff8000 ee0bb610 ee0bb400
-> 1ec0: ee101eec ee101ed0 c034ee68 c03549c0 eea7c600 ee830400 ee837b00 00000000
-> 1ee0: ee101f2c ee101ef0 c0037d04 c034ebe8 00000000 eea7c600 ee830400 00000000
-> 1f00: ee830414 eea7c600 ee830400 eea7c618 ee830414 ee830400 00000088 00000000
-> 1f20: ee101f5c ee101f30 c0038190 c0037b24 eea91580 eea07940 00000000 eea7c600
-> 1f40: c0037e70 00000000 00000000 00000000 ee101fac ee101f60 c003cb48 c0037e7c
-> 1f60: ee101f5c 00000000 ffffffff eea7c600 00000000 00000000 ee101f78 ee101f78
-> 1f80: 00000001 00010001 ee101f88 ee101f88 eea07940 c003ca58 00000000 00000000
-> 1fa0: 00000000 ee101fb0 c000ec00 c003ca64 00000000 00000000 00000000 00000000
-> 1fc0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
-> 1fe0: 00000000 00000000 00000000 00000000 00000013 00000000 f763e3f6 17bf7af2
-> Backtrace: 
-> [<c003cd1c>] (kthread_data) from [<c0037864>] (wq_worker_sleeping+0x14/0xe0)
-> [<c0037850>] (wq_worker_sleeping) from [<c049ed94>] (__schedule+0x104/0x500)
->  r4:eea91580 r3:0420806c
-> [<c049ec90>] (__schedule) from [<c049f274>] (schedule+0x94/0xb0)
->  r10:00000001 r9:00000008 r8:eea91790 r7:ee101b12 r6:ee101aa4 r5:ee101878
->  r4:eea91580
-> [<c049f1e0>] (schedule) from [<c00279a4>] (do_exit+0x878/0x8ac)
-> [<c002712c>] (do_exit) from [<c0011dc0>] (die+0x3b0/0x400)
->  r7:ee101b12
-> [<c0011a10>] (die) from [<c049cbac>] (__do_kernel_fault.part.8+0x5c/0x7c)
->  r10:00000000 r9:00000005 r8:00000001 r7:ee101c78 r6:00000000 r5:00000005
->  r4:00000008
-> [<c049cb50>] (__do_kernel_fault.part.8) from [<c001a63c>] (do_page_fault+0x2f0/0x30c)
->  r7:ee101c78 r3:ee101c78
-> [<c001a34c>] (do_page_fault) from [<c001a704>] (do_translation_fault+0x24/0xb8)
->  r10:00000000 r9:00000088 r8:00000001 r7:ee101c78 r6:00000008 r5:c063496c
->  r4:00000005
-> [<c001a6e0>] (do_translation_fault) from [<c0009248>] (do_DataAbort+0x3c/0xa0)
->  r7:ee101c78 r6:00000008 r5:c063496c r4:00000005
-> [<c000920c>] (do_DataAbort) from [<c0012558>] (__dabt_svc+0x38/0x60)
-> Exception stack(0xee101c78 to 0xee101cc0)
-> 1c60:                                                       00000000 ee101da0
-> 1c80: 00000000 00000001 ee0bb6c0 00000000 00000001 ee9a42b8 00000001 00000088
-> 1ca0: 00000000 ee101cfc ee101d00 ee101cc0 c035e538 c035f8f0 20000113 ffffffff
->  r7:ee101cac r6:ffffffff r5:20000113 r4:c035f8f0
-> [<c035f834>] (tmio_mmc_start_dma) from [<c035e538>] (tmio_mmc_request+0x1e4/0x498)
->  r10:ee249b40 r9:00000088 r8:00000001 r7:ee0bb6c0 r6:ee101dd0 r5:ee101da0
->  r4:ee0bb400
-> [<c035e354>] (tmio_mmc_request) from [<c034c98c>] (mmc_start_request+0x110/0x124)
->  r10:ee249b40 r8:ee101da0 r7:00000008 r6:ee101de0 r5:ee0bb400 r4:ee101dd0
-> [<c034c87c>] (mmc_start_request) from [<c034d06c>] (mmc_wait_for_req+0x44/0x13c)
->  r5:ee101dd0 r4:ee0bb400
-> [<c034d028>] (mmc_wait_for_req) from [<c035500c>] (mmc_app_send_scr+0x108/0x168)
->  r8:ee101da0 r7:00000008 r6:ee219000 r5:00000000 r4:ee2191b4 r3:00000001
-> [<c0354f04>] (mmc_app_send_scr) from [<c0353ec4>] (mmc_sd_setup_card+0x2c/0x378)
->  r10:00200000 r8:00000000 r7:00000000 r6:00000000 r5:ee0bb400 r4:ee219000
-> [<c0353e98>] (mmc_sd_setup_card) from [<c03543bc>] (mmc_sd_init_card+0x180/0x5e0)
->  r10:00200000 r8:00000000 r7:ee101e6c r6:00000000 r5:ee0bb400 r4:ee219000
-> [<c035423c>] (mmc_sd_init_card) from [<c0354a6c>] (mmc_attach_sd+0xb8/0x148)
->  r10:00000000 r9:00000088 r8:ee0bb610 r7:c050da18 r6:c050da08 r5:00000000
->  r4:ee0bb400
-> [<c03549b4>] (mmc_attach_sd) from [<c034ee68>] (mmc_rescan+0x28c/0x2fc)
->  r5:ee0bb400 r4:ee0bb610
-> [<c034ebdc>] (mmc_rescan) from [<c0037d04>] (process_one_work+0x1ec/0x324)
->  r7:00000000 r6:ee837b00 r5:ee830400 r4:eea7c600
-> [<c0037b18>] (process_one_work) from [<c0038190>] (worker_thread+0x320/0x43c)
->  r10:00000000 r9:00000088 r8:ee830400 r7:ee830414 r6:eea7c618 r5:ee830400
->  r4:eea7c600
-> [<c0037e70>] (worker_thread) from [<c003cb48>] (kthread+0xf0/0x104)
->  r10:00000000 r9:00000000 r8:00000000 r7:c0037e70 r6:eea7c600 r5:00000000
->  r4:eea07940 r3:eea91580
-> [<c003ca58>] (kthread) from [<c000ec00>] (ret_from_fork+0x14/0x34)
->  r7:00000000 r6:00000000 r5:c003ca58 r4:eea07940
-> Code: e1a0c00d e92dd800 e24cb004 e5903268 (e5130014) 
-> ---[ end trace 73e31bceec8a1116 ]---
-> Fixing recursive fault but reboot is needed!
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sh" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
+---
+ drivers/mmc/card/block.c |   19 +++++-
+ drivers/mmc/core/core.c  |   16 +++++-
+ drivers/mmc/core/core.h  |    2 +
+ drivers/mmc/core/mmc.c   |  143 ++++++++++++++++++++++++++++++++++++++=
++++++---
+ include/linux/mmc/card.h |    6 ++
+ include/linux/mmc/host.h |    1 +
+ include/linux/mmc/mmc.h  |    2 +
+ 7 files changed, 180 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 4409d79..f511ecc3 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2010,9 +2010,26 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq=
+, struct request *req)
+ 	unsigned long flags;
+ 	unsigned int cmd_flags =3D req ? req->cmd_flags : 0;
+=20
+-	if (req && !mq->mqrq_prev->req)
++	if (unlikely(req && mmc_card_mmc(card) &&
++		(card->ext_csd.power_off_notification =3D=3D
++		EXT_CSD_SLEEP_NOTIFICATION))) {
++		/* restoring the power_off_notification
++		 * field's state to as it was before so
++		 * that the sleep notification will be
++		 * able to resume later
++		 */
++		card->ext_csd.power_off_notification =3D EXT_CSD_POWER_ON;
++	}
++
++	if (req && !mq->mqrq_prev->req) {
+ 		/* claim host only for the first request */
+ 		mmc_get_card(card);
++		if (unlikely(req &&
++			mmc_card_doing_sleep_notify(card))) {
++			mmc_interrupt_hpi(card);
++			mmc_card_clr_sleep_notify(card);
++		}
++	}
+=20
+ 	ret =3D mmc_blk_part_switch(card, md);
+ 	if (ret) {
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 5bda29b..a090593 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -271,7 +271,8 @@ void mmc_start_bkops(struct mmc_card *card, bool fr=
+om_exception)
+=20
+ 	BUG_ON(!card);
+=20
+-	if (!card->ext_csd.bkops_en || mmc_card_doing_bkops(card))
++	if (!card->ext_csd.bkops_en || mmc_card_doing_bkops(card) ||
++		mmc_card_doing_sleep_notify(card))
+ 		return;
+=20
+ 	err =3D mmc_read_bkops_status(card);
+@@ -2630,6 +2631,19 @@ int mmc_pm_notify(struct notifier_block *notify_=
+block,
+ 			err =3D host->bus_ops->pre_suspend(host);
+ 		if (!err)
+ 			break;
++		if (host->card && host->bus_ops->suspend) {
++			err =3D mmc_sleep_notify(host->card);
++			/* We assume that HPI was sent
++			 * in case of -ETIMEDOUT error,
++			 * so suspend flow can be continued
++			 */
++			if (err && err !=3D -ETIMEDOUT) {
++				pr_err("%s:sleep notify err=3D%d\n",
++					__func__, err);
++				return -EBUSY;
++			}
++			break;
++		}
+=20
+ 		/* Calling bus_ops->remove() with a claimed host can deadlock */
+ 		host->bus_ops->remove(host);
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index d76597c..b6b4431 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -14,6 +14,7 @@
+ #include <linux/delay.h>
+=20
+ #define MMC_CMD_RETRIES        3
++#define MMC_SLEEP_NOTIFY_MAX_TIME	0x17
+=20
+ struct mmc_bus_ops {
+ 	void (*remove)(struct mmc_host *);
+@@ -33,6 +34,7 @@ void mmc_attach_bus(struct mmc_host *host, const stru=
+ct mmc_bus_ops *ops);
+ void mmc_detach_bus(struct mmc_host *host);
+=20
+ void mmc_init_erase(struct mmc_card *card);
++int mmc_sleep_notify(struct mmc_card *card);
+=20
+ void mmc_set_chip_select(struct mmc_host *host, int mode);
+ void mmc_set_clock(struct mmc_host *host, unsigned int hz);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 02ad792..1d97d24 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -57,6 +57,11 @@ static const unsigned int tacc_mant[] =3D {
+ 		__res & __mask;						\
+ 	})
+=20
++#define GET_SLEEP_NOTIFY_TIME(value) \
++	(10 * (1 << (unsigned int)(value)))
++#define GET_SLEEP_NOTIFY_TIME_MSEC(value) \
++	(DIV_ROUND_UP(GET_SLEEP_NOTIFY_TIME(value), 1000))
++
+ /*
+  * Given the decoded CSD structure, decode the raw CID to our CID stru=
+cture.
+  */
+@@ -571,6 +576,8 @@ static int mmc_decode_ext_csd(struct mmc_card *card=
+, u8 *ext_csd)
+ 		card->ext_csd.ffu_capable =3D
+ 			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
+ 			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
++		card->ext_csd.sleep_notify_time =3D
++			ext_csd[EXT_CSD_SLEEP_NOTIFICATION_TIME];
+ 	}
+ out:
+ 	return err;
+@@ -1468,6 +1475,15 @@ static int mmc_init_card(struct mmc_host *host, =
+u32 ocr,
+ 			card->ext_csd.hpi_en =3D 1;
+ 	}
+=20
++	/* sleep notify enable/disable for eMMC 5.0 and above */
++	if ((card->ext_csd.rev >=3D 7) &&  card->ext_csd.hpi_en &&
++			(card->host->caps2 & MMC_CAP2_SLEEP_NOTIFY) &&
++			card->ext_csd.sleep_notify_time > 0 &&
++			card->ext_csd.sleep_notify_time <=3D
++				MMC_SLEEP_NOTIFY_MAX_TIME) {
++		card->can_sleep_notify =3D 1;
++	}
++
+ 	/*
+ 	 * If cache size is higher than 0, this indicates
+ 	 * the existence of cache and it can be turned on.
+@@ -1576,6 +1592,33 @@ static int mmc_sleep(struct mmc_host *host)
+ 	return err;
+ }
+=20
++/*
++ * check if device is in program state (busy)
++ */
++static bool mmc_device_prg_state(struct mmc_card *card)
++{
++	int rc;
++	u32 status;
++	bool state;
++
++	mmc_get_card(card);
++	rc =3D mmc_send_status(card, &status);
++	if (rc) {
++		pr_err("%s: Get card status fail. rc=3D%d\n",
++			mmc_hostname(card->host), rc);
++		state =3D false;
++		goto out;
++	}
++
++	if (R1_CURRENT_STATE(status) =3D=3D R1_STATE_PRG)
++		state =3D  true;
++	else
++		state =3D  false;
++out:
++	mmc_put_card(card);
++	return state;
++}
++
+ static int mmc_can_poweroff_notify(const struct mmc_card *card)
+ {
+ 	return card &&
+@@ -1585,22 +1628,108 @@ static int mmc_can_poweroff_notify(const struc=
+t mmc_card *card)
+=20
+ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int not=
+ify_type)
+ {
+-	unsigned int timeout =3D card->ext_csd.generic_cmd6_time;
++	unsigned int timeout_ms =3D card->ext_csd.generic_cmd6_time;
+ 	int err;
++	bool use_busy_signal;
+=20
+ 	/* Use EXT_CSD_POWER_OFF_SHORT as default notification type. */
+ 	if (notify_type =3D=3D EXT_CSD_POWER_OFF_LONG)
+-		timeout =3D card->ext_csd.power_off_longtime;
++		timeout_ms =3D card->ext_csd.power_off_longtime;
++	else if (notify_type =3D=3D EXT_CSD_SLEEP_NOTIFICATION) {
++		/* calculate the maximum timeout for the
++		 * switch command when notifying the device
++		 * that it is about to move to sleep */
++		timeout_ms =3D GET_SLEEP_NOTIFY_TIME_MSEC(
++			card->ext_csd.sleep_notify_time);
++	}
+=20
++	/* do not wait on busy signal in case of
++	 * Sleep Notification - to let host get
++	 * another requests
++	 */
++	use_busy_signal =3D (notify_type =3D=3D EXT_CSD_SLEEP_NOTIFICATION) ?
++			false : true;
+ 	err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 			EXT_CSD_POWER_OFF_NOTIFICATION,
+-			notify_type, timeout, true, false, false);
+-	if (err)
++			notify_type, timeout_ms,
++			use_busy_signal, false, false);
++	if (!err) {
++		card->ext_csd.power_off_notification =3D notify_type;
++	} else {
+ 		pr_err("%s: Power Off Notification timed out, %u\n",
+-		       mmc_hostname(card->host), timeout);
++			mmc_hostname(card->host), timeout_ms);
++	}
++
++	return err;
++}
+=20
+-	/* Disable the power off notification after the switch operation. */
+-	card->ext_csd.power_off_notification =3D EXT_CSD_NO_POWER_NOTIFICATIO=
+N;
++int mmc_sleep_notify(struct mmc_card *card)
++{
++	int err =3D 0;
++	bool is_busy =3D 0;
++	unsigned long prg_wait =3D 0;
++
++	if (!card->can_sleep_notify || !mmc_can_poweroff_notify(card))
++		return 0;
++
++	if (!mmc_card_doing_sleep_notify(card)) {
++		mmc_get_card(card);
++		mmc_card_set_sleep_notify(card);
++		err =3D mmc_poweroff_notify(card,
++			EXT_CSD_SLEEP_NOTIFICATION);
++		mmc_put_card(card);
++		if (err) {
++			pr_err("%s: mmc_poweroff_notify failed with %d\n",
++			       __func__, err);
++			goto out;
++		}
++
++		prg_wait =3D jiffies +
++			msecs_to_jiffies(GET_SLEEP_NOTIFY_TIME_MSEC(
++			card->ext_csd.sleep_notify_time));
++		}
++
++	/*
++	 * Loop will run until:
++	 * 1. Device is no more in Busy state
++	 * 2. Sleep notification is not interrupted by HPI & IO request
++	 */
++	do {
++		/* added some delay to avoid sending card status too often */
++		msleep(20);
++		err =3D 0;
++		/* Stop polling in case sleep notification was HPIed already */
++		if (!mmc_card_doing_sleep_notify(card)) {
++			is_busy =3D mmc_device_prg_state(card);
++			if (is_busy)
++				err =3D -EBUSY;
++			break;
++		}
++		is_busy =3D mmc_device_prg_state(card);
++		if (is_busy && time_after(jiffies, prg_wait)) {
++			/*
++			 * making sure we are still in busy before
++			 * sending HPI due to timeout error
++			 */
++			is_busy =3D mmc_device_prg_state(card);
++			if (is_busy) {
++				if (mmc_card_doing_sleep_notify(card)) {
++					card->ext_csd.power_off_notification =3D
++						EXT_CSD_POWER_ON;
++					mmc_interrupt_hpi(card);
++				}
++				err =3D -ETIMEDOUT;
++				break;
++			}
++		}
++	} while (is_busy);
++
++out:
++	mmc_card_clr_sleep_notify(card);
++	if (err) {
++		pr_err("%s: mmc_poweroff_notify for sleep failed with %d\n",
++		       mmc_hostname(card->host), err);
++	}
+=20
+ 	return err;
+ }
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 4d69c00..6998344 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -62,6 +62,7 @@ struct mmc_ext_csd {
+ 	unsigned int		sa_timeout;		/* Units: 100ns */
+ 	unsigned int		generic_cmd6_time;	/* Units: 10ms */
+ 	unsigned int            power_off_longtime;     /* Units: ms */
++	unsigned int		sleep_notify_time;	/* Units: us */
+ 	u8			power_off_notification;	/* state */
+ 	unsigned int		hs_max_dtr;
+ 	unsigned int		hs200_max_dtr;
+@@ -262,6 +263,7 @@ struct mmc_card {
+ #define MMC_CARD_REMOVED	(1<<4)		/* card has been removed */
+ #define MMC_STATE_DOING_BKOPS	(1<<5)		/* card is doing BKOPS */
+ #define MMC_STATE_SUSPENDED	(1<<6)		/* card is suspended */
++#define MMC_STATE_SLEEP_NOTIFY (1<<7)		/* card in sleep notify */
+ 	unsigned int		quirks; 	/* card quirks */
+ #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside=
+ of the VS CCCR range */
+ #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize =
+*/
+@@ -309,6 +311,7 @@ struct mmc_card {
+ 	struct dentry		*debugfs_root;
+ 	struct mmc_part	part[MMC_NUM_PHY_PARTITION]; /* physical partitions *=
+/
+ 	unsigned int    nr_parts;
++	u8 can_sleep_notify;	/* sleep_notify on/off */
+ };
+=20
+ /*
+@@ -427,6 +430,7 @@ static inline void __maybe_unused remove_quirk(stru=
+ct mmc_card *card, int data)
+ #define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
+ #define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
+ #define mmc_card_suspended(c)	((c)->state & MMC_STATE_SUSPENDED)
++#define mmc_card_doing_sleep_notify(c) ((c)->state & MMC_STATE_SLEEP_N=
+OTIFY)
+=20
+ #define mmc_card_set_present(c)	((c)->state |=3D MMC_STATE_PRESENT)
+ #define mmc_card_set_readonly(c) ((c)->state |=3D MMC_STATE_READONLY)
+@@ -437,6 +441,8 @@ static inline void __maybe_unused remove_quirk(stru=
+ct mmc_card *card, int data)
+ #define mmc_card_clr_doing_bkops(c)	((c)->state &=3D ~MMC_STATE_DOING_=
+BKOPS)
+ #define mmc_card_set_suspended(c) ((c)->state |=3D MMC_STATE_SUSPENDED=
+)
+ #define mmc_card_clr_suspended(c) ((c)->state &=3D ~MMC_STATE_SUSPENDE=
+D)
++#define mmc_card_set_sleep_notify(c)	((c)->state |=3D MMC_STATE_SLEEP_=
+NOTIFY)
++#define mmc_card_clr_sleep_notify(c)	((c)->state &=3D ~MMC_STATE_SLEEP=
+_NOTIFY)
+=20
+ /*
+  * Quirk add/remove for MMC products.
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 9f32270..4c0542a 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -291,6 +291,7 @@ struct mmc_host {
+ 				 MMC_CAP2_HS400_1_2V)
+ #define MMC_CAP2_HSX00_1_2V	(MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS400_=
+1_2V)
+ #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
++#define MMC_CAP2_SLEEP_NOTIFY	(1 << 18)	/* sleep notify supported */
+=20
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+=20
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 49ad7a9..69bda9a 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -314,6 +314,7 @@ struct _mmc_csd {
+ #define EXT_CSD_PWR_CL_52_360		202	/* RO */
+ #define EXT_CSD_PWR_CL_26_360		203	/* RO */
+ #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
++#define EXT_CSD_SLEEP_NOTIFICATION_TIME	216	/* RO */
+ #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
+ #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
+ #define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
+@@ -408,6 +409,7 @@ struct _mmc_csd {
+ #define EXT_CSD_POWER_ON		1
+ #define EXT_CSD_POWER_OFF_SHORT		2
+ #define EXT_CSD_POWER_OFF_LONG		3
++#define EXT_CSD_SLEEP_NOTIFICATION	4
+=20
+ #define EXT_CSD_PWR_CL_8BIT_MASK	0xF0	/* 8 bit PWR CLS */
+ #define EXT_CSD_PWR_CL_4BIT_MASK	0x0F	/* 8 bit PWR CLS */
+--=20
+1.7.9.5
+
