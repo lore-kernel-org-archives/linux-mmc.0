@@ -1,71 +1,79 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [PATCH] mmc: sleep notification
-Date: Tue, 10 Mar 2015 18:01:34 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333FA00B30@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
-	<54FEF34E.20205@intel.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA00476@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAPDyKFrZi1WqkYvOfDsMLh=xYxhYrVJMnjzStGut3YOYCG+mVA@mail.gmail.com>
+From: Scott Branden <sbranden@broadcom.com>
+Subject: [PATCH] mmc: sdhci: fix card presence logic in sdhci_request function
+Date: Tue, 10 Mar 2015 11:35:10 -0700
+Message-ID: <1426012510-15890-1-git-send-email-sbranden@broadcom.com>
+References: <Scott Branden <sbranden@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2on0065.outbound.protection.outlook.com ([65.55.169.65]:47776
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750976AbbCJSBm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 Mar 2015 14:01:42 -0400
-In-Reply-To: <CAPDyKFrZi1WqkYvOfDsMLh=xYxhYrVJMnjzStGut3YOYCG+mVA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:10783 "EHLO
+	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752825AbbCJSfW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Mar 2015 14:35:22 -0400
+In-Reply-To: <Scott Branden <sbranden@broadcom.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>
+To: bcm-kernel-feedback-list@broadcom.com, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
+Cc: Ray Jui <rjui@broadcom.com>, Jonathan Richardson <jonathar@broadcom.com>, Corneliu Doban <cdoban@broadcom.com>, Dmitry Torokhov <dtor@google.com>, Anatol Pomazao <anatol@google.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Scott Branden <sbranden@broadcom.com>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
-aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBUdWVzZGF5LCBNYXJjaCAxMCwg
-MjAxNSAxMDoyMiBBTQ0KPiBUbzogQWxleCBMZW1iZXJnDQo+IENjOiBBZHJpYW4gSHVudGVyOyBB
-dmkgU2hjaGlzbG93c2tpOyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOw0KPiBjaHJpc0Bwcmlu
-dGYubmV0DQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0hdIG1tYzogc2xlZXAgbm90aWZpY2F0aW9uDQo+
-IA0KPiBPbiAxMCBNYXJjaCAyMDE1IGF0IDE3OjMyLCBBbGV4IExlbWJlcmcgPEFsZXguTGVtYmVy
-Z0BzYW5kaXNrLmNvbT4NCj4gd3JvdGU6DQo+ID4gSGkgQWRyaWFuLA0KPiA+DQo+ID4+IC0tLS0t
-T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IEFkcmlhbiBIdW50ZXIgW21haWx0bzph
-ZHJpYW4uaHVudGVyQGludGVsLmNvbV0NCj4gPj4gU2VudDogVHVlc2RheSwgTWFyY2ggMTAsIDIw
-MTUgNjozNiBBTQ0KPiA+PiBUbzogQXZpIFNoY2hpc2xvd3NraTsgdWxmLmhhbnNzb25AbGluYXJv
-Lm9yZw0KPiA+PiBDYzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgY2hyaXNAcHJpbnRmLm5l
-dDsgQWxleCBMZW1iZXJnDQo+ID4+IFN1YmplY3Q6IFJlOiBbUEFUQ0hdIG1tYzogc2xlZXAgbm90
-aWZpY2F0aW9uDQo+ID4+DQo+ID4+IE9uIDEwLzAzLzE1IDExOjM2LCBBdmkgU2hjaGlzbG93c2tp
-IHdyb3RlOg0KPiA+PiA+IFRoaXMgcGF0Y2ggaXMgaW1wbGVtZW50cyB0aGUgbmV3IGFkZGl0aW9u
-YWwgc3RhdGUgb2YNCj4gPj4gPiBQb3dlcl9PZmZfTm90aWZpY2F0aW9uIC0gU0xFRVBfTk9USUZJ
-Q0FUSU9OLg0KPiA+PiA+IFVudGlsIG5vdywgdGhlIGltcGxlbWVudGF0aW9uIG9mIFBvd2VyX09m
-Zl9Ob3RpZmljYXRpb24gc3VwcG9ydGVkDQo+ID4+ID4gb25seSB0aHJlZSBtb2RlcyAtIFBPV0VS
-RURfT04gKDB4MDEpLCBQT1dFUl9PRkZfU0hPUlQgKDB4MDIpIGFuZA0KPiA+PiA+IFBPV0VSX09G
-Rl9MT05HICgweDAzKS4NCj4gPj4gPg0KPiA+PiA+IEFzIHBhcnQgb2YgZU1NQzUuMCBiZWZvcmUg
-bW92aW5nIHRvIFNsZWVwIHN0YXRlIGhvc3RzIG1heSBzZXQgdGhlDQo+ID4+ID4gUE9XRVJfT0ZG
-X05PVElGSUNBVElPTiBieXRlIHRvIFNMRUVQX05PVElGSUNBVElPTiAoMHgwNCkuDQo+ID4+ID4g
-QWZ0ZXIgc2V0dGluZyBTTEVFUF9OT1RJRklDQVRJT04sIGhvc3Qgc2hvdWxkIHdhaXQgZm9yIHRo
-ZSBidXN5DQo+ID4+ID4gbGluZSB0byBiZSBkZS1hc3NlcnRlZC4NCj4gPj4gPiBUaGUgbWF4IHRp
-bWVvdXQgYWxsb3dlZCBmb3IgYnVzeSBsaW5lIGRlLWFzc2VydGlvbiBkZWZpbmVkIGluDQo+ID4+
-ID4gU0xFRVBfTk9USUZJQ0FUSU9OX1RJTUUgYnl0ZSBpbiBFWFRfQ1NEIFsyMTZdLg0KPiA+PiA+
-IEhQSSBtYXkgaW50ZXJydXB0IHRoZSBTTEVFUF9OT1RJRklDQVRJT04gb3BlcmF0aW9uLg0KPiA+
-PiA+IEluIHRoYXQgY2FzZSBQT1dFUl9PRkZfTk9USUZJQ0FUSU9OIGJ5dGUgd2lsbCByZXN0b3Jl
-IHRvDQo+IFBPV0VSRURfT04uDQo+ID4+DQo+ID4+IElzIGl0IHNvIHRoYXQgdGhlIHBvaW50IG9m
-IFNMRUVQX05PVElGSUNBVElPTiBpcyB0byBub3RpZnkgdGhhdCBWQ0MNCj4gPj4gd2lsbCBiZSBw
-b3dlcmVkIG9mZiBhZnRlciB0aGUgZGV2aWNlIGlzIHB1dCB0byBzbGVlcCBieSBDTUQ1Pw0KPiA+
-DQo+ID4gRnJvbSB0aGUgc3BlYzoNCj4gPg0KPiA+IHRoZSBob3N0IHNob3VsZCBpc3N1ZSBhIHBv
-d2VyIG9mZiBub3RpZmljYXRpb24gKFBPV0VSX09GRl9MT05HLA0KPiA+IFBPV0VSX09GRl9TSE9S
-VCApIGlmIGl0IGludGVuZHMgdG8gdHVybiBvZmYgYm90aCBWQ0MgYW5kIFZDQ1EgcG93ZXINCj4g
-PiBzdXBwbGllcyBvciBpdCBtYXkgdXNlIHRvIGEgcG93ZXIgb2ZmIG5vdGlmaWNhdGlvbiAoU0xF
-RVBfTk9USUZJQ0FUSU9ODQo+ID4gKSBpZiBpdCBpbnRlbmRzIHRvIHR1cm4tb2ZmIFZDQyBhZnRl
-ciBtb3ZpbmcgdGhlIGRldmljZSB0byBTbGVlcCBzdGF0ZS4NCj4gDQo+IEFoLCBzbyBDTUQ1IHdp
-bGwgc3RpbGwgbmVlZCB0byBiZSBpc3N1ZWQuIFRoYW5rcyBmb3IgY2xhcmlmeWluZy4NCj4gDQo+
-ID4NCj4gPj4NCj4gPj4gQXQgdGhlIG1vbWVudCwgdGhlIGNhcmQgZG9lcyBub3QgZ2V0IHB1dCB0
-byBzbGVlcCBpZiB0aGVyZSBpcyBzdXBwb3J0DQo+ID4+IGZvciBwb3dlci0gb2ZmLW5vdGlmaWNh
-dGlvbj8NCj4gPg0KPiA+IERyaXZlciB3aWxsIHNlbmQgU2xlZXAgb25seSBpZiBQT04gaXMgbm90
-IHN1cHBvcnRlZC4uLg0KPiANCj4gTm9wZSwgdGhhdCdzIG5vdCBlbnRpcmVseSBjb3JyZWN0Lg0K
-PiANCj4gVGhlIE1NQyBjb3JlIHJlcXVpcmVzIFBPTiB0byBiZSBzdXBwb3J0ZWQgYnkgdGhlIGNh
-cmQgYW5kIHRoZSBob3N0IHRvIGhhdmUNCj4gTU1DX0NBUDJfRlVMTF9QV1JfQ1lDTEUgc2V0LiBF
-bHNlIGl0IHdpbGwgc2VuZCBzbGVlcCAoQ01ENSkgaW5zdGVhZC4NCj4NCg0KWW91IGFyZSByaWdo
-dCAtIGl0IHJlcXVpcmVzIGJvdGggUE9OIGFuZCBNTUNfQ0FQMl9GVUxMX1BXUl9DWUNMRSB0byBi
-ZSBzZXQuLi4NClRoYW5rcyBmb3IgbWVudGlvbmluZyB0aGlzLg0KDQogDQo+IEtpbmQgcmVnYXJk
-cw0KPiBVZmZlDQo=
+The sdhci_request function should consider a non-removable device
+always present.
+Call the correct logic already available in sdhci_do_get_cd function.
+
+This fixes some logic paths where MMC requests are being made to
+non-removable devices that do not have the card detect pin connected
+on the hardware as it is non-removable.
+
+Signed-off-by: Scott Branden <sbranden@broadcom.com>
+---
+ drivers/mmc/host/sdhci.c | 20 +++-----------------
+ 1 file changed, 3 insertions(+), 17 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 0ad412a..bafc7ac 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -56,6 +56,7 @@ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
+ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
+ 					struct mmc_data *data,
+ 					struct sdhci_host_next *next);
++static int sdhci_do_get_cd(struct sdhci_host *host);
+ 
+ #ifdef CONFIG_PM
+ static int sdhci_runtime_pm_get(struct sdhci_host *host);
+@@ -1356,7 +1357,8 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 
+ 	sdhci_runtime_pm_get(host);
+ 
+-	present = mmc_gpio_get_cd(host->mmc);
++	/* Firstly check card presence */
++	present = sdhci_do_get_cd(host);
+ 
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+@@ -1379,22 +1381,6 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 
+ 	host->mrq = mrq;
+ 
+-	/*
+-	 * Firstly check card presence from cd-gpio.  The return could
+-	 * be one of the following possibilities:
+-	 *     negative: cd-gpio is not available
+-	 *     zero: cd-gpio is used, and card is removed
+-	 *     one: cd-gpio is used, and card is present
+-	 */
+-	if (present < 0) {
+-		/* If polling, assume that the card is always present. */
+-		if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+-			present = 1;
+-		else
+-			present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+-					SDHCI_CARD_PRESENT;
+-	}
+-
+ 	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
+ 		host->mrq->cmd->error = -ENOMEDIUM;
+ 		tasklet_schedule(&host->finish_tasklet);
+-- 
+2.3.0
+
