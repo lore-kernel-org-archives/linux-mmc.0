@@ -1,43 +1,59 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH] mmc: sunxi: add MMC_CAP_SDIO_IRQ capability
-Date: Tue, 10 Mar 2015 16:36:36 +0100
-Message-ID: <1426001796-19231-1-git-send-email-hdegoede@redhat.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH] mmc: dw_mmc: Consider HLE errors to be data and command errors
+Date: Tue, 10 Mar 2015 08:48:10 -0700
+Message-ID: <1426002490-2014-1-git-send-email-dianders@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42420 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753564AbbCJPgu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 Mar 2015 11:36:50 -0400
+Received: from mail-ie0-f170.google.com ([209.85.223.170]:33564 "EHLO
+	mail-ie0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750937AbbCJPsV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Mar 2015 11:48:21 -0400
+Received: by iecvj10 with SMTP id vj10so19739924iec.0
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Mar 2015 08:48:20 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, javier.martinez@collabora.co.uk, linux-rockchip@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Doug Anderson <dianders@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-When the sunxi mmc-controller code was initially merged MMC_CAP_SDIO_IRQ was
-not added to the host caps because of issues with some sdio wifi modules.
+The dw_mmc driver enables HLE errors as part of DW_MCI_ERROR_FLAGS but
+nothing in the interrupt handler actually handles them and ACKs them.
+That means that if we ever get an HLE error we'll just keep getting
+interrupts and we'll wedge things.
 
-It turns out that these issues have nothing to do with using sdio-irq support,
-they also happen with oob interrupts. Since the hardware supports sdio-irq
-everywhere, and since the one reason to not claim the capability is gone,
-add MMC_CAP_SDIO_IRQ to the default host caps.
+We really don't expect HLE errors but if we ever get them we shouldn't
+silently ignore them.
 
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Note that I have seen HLE errors while constantly ejecting and
+inserting cards (ejecting while inserting, etc).
+
+Signed-off-by: Doug Anderson <dianders@chromium.org>
 ---
- drivers/mmc/host/sunxi-mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Note that this works together with the patch I sent up yesterday (the
+CMD 11 timer).  I would have sent the two together except that I had
+local printouts (and ACKing of HLE) and didn't realize that this was
+also required for a full solution.
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index e8a4218..94eee54 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1028,7 +1028,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
- 	mmc->f_min		=   400000;
- 	mmc->f_max		= 50000000;
- 	mmc->caps	       |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
--				  MMC_CAP_ERASE;
-+				  MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
- 
- 	ret = mmc_of_parse(mmc);
- 	if (ret)
+ drivers/mmc/host/dw_mmc.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 47dfd0e..294edc9c 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -44,11 +44,11 @@
+ /* Common flag combinations */
+ #define DW_MCI_DATA_ERROR_FLAGS	(SDMMC_INT_DRTO | SDMMC_INT_DCRC | \
+ 				 SDMMC_INT_HTO | SDMMC_INT_SBE  | \
+-				 SDMMC_INT_EBE)
++				 SDMMC_INT_EBE | SDMMC_INT_HLE)
+ #define DW_MCI_CMD_ERROR_FLAGS	(SDMMC_INT_RTO | SDMMC_INT_RCRC | \
+-				 SDMMC_INT_RESP_ERR)
++				 SDMMC_INT_RESP_ERR | SDMMC_INT_HLE)
+ #define DW_MCI_ERROR_FLAGS	(DW_MCI_DATA_ERROR_FLAGS | \
+-				 DW_MCI_CMD_ERROR_FLAGS  | SDMMC_INT_HLE)
++				 DW_MCI_CMD_ERROR_FLAGS)
+ #define DW_MCI_SEND_STATUS	1
+ #define DW_MCI_RECV_STATUS	2
+ #define DW_MCI_DMA_THRESHOLD	16
 -- 
-2.3.1
+2.2.0.rc0.207.ga3a616c
 
