@@ -1,86 +1,74 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sleep notification
-Date: Wed, 11 Mar 2015 12:50:26 +0100
-Message-ID: <CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [PATCH] mmc: sleep notification
+Date: Wed, 11 Mar 2015 18:38:47 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
 References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
 	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
 	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f53.google.com ([209.85.192.53]:46240 "EHLO
-	mail-qg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750774AbbCKLu1 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Mar 2015 07:50:27 -0400
-Received: by qgfh3 with SMTP id h3so9066969qgf.13
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Mar 2015 04:50:27 -0700 (PDT)
-In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-bl2on0077.outbound.protection.outlook.com ([65.55.169.77]:60899
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750769AbbCKSiy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 11 Mar 2015 14:38:54 -0400
+In-Reply-To: <CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-On 10 March 2015 at 15:32, Alex Lemberg <Alex.Lemberg@sandisk.com> wrot=
-e:
-> Hi Ulf,
->
-> Thanks for your review and comments!
->
->> -----Original Message-----
->> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
->> Sent: Tuesday, March 10, 2015 5:08 AM
->> To: Avi Shchislowski
->> Cc: linux-mmc; Chris Ball; Alex Lemberg
->> Subject: Re: [PATCH] mmc: sleep notification
->>
->> On 10 March 2015 at 10:36, Avi Shchislowski <avi.shchislowski@sandis=
-k.com>
->> wrote:
->> > This patch is implements the new additional state of
->> > Power_Off_Notification =E2=80=93 SLEEP_NOTIFICATION.
->> > Until now, the implementation of Power_Off_Notification supported =
-only
->> > three modes =E2=80=93 POWERED_ON (0x01), POWER_OFF_SHORT (0x02) an=
-d
->> > POWER_OFF_LONG (0x03).
->> >
->> > As part of eMMC5.0 before moving to Sleep state hosts may set the
->> > POWER_OFF_NOTIFICATION byte to SLEEP_NOTIFICATION (0x04).
->> > After setting SLEEP_NOTIFICATION, host should wait for the busy li=
-ne
->> > to be de-asserted.
->> > The max timeout allowed for busy line de-assertion defined in
->> > SLEEP_NOTIFICATION_TIME byte in EXT_CSD [216].
->> > HPI may interrupt the SLEEP_NOTIFICATION operation.
->> > In that case POWER_OFF_NOTIFICATION byte will restore to POWERED_O=
-N.
->>
->> Oh, just great! JEDEC has invented yet another way of how to send a =
-device to
->> sleep state. I wonder what was wrong with the CMD5 option.
->
-> I think before adding sleep_notification, host has no way to notify d=
-evice before sending
-> sleep command. Now device can better prepare itself for moving into t=
-he sleep state.
->
-> Also, I think we need to clarify one more point for this patch:
-> As was mentioned in commit message - Sleep_Notification can be interr=
-upted by HPI.
-> This allows not blocking the host during the Sleep_Notification busy =
-time and allows accepting
-> requests coming during this stage. Thus, without having HPI supported=
-, suspend/resume process
-> might be influenced by Sleep_Notification busy time, and this should =
-not happen - suspend/resume
-> should be done in very fast and not blocking manner.
-
-I fail to understand your comment here.
-
-Please tell me at what point(s) your think it make sense to issue the
-SLEEP_NOTIFICATION? If that is during the suspend phase, then a HPI
-request can't be triggered.
-
-Kind regards
-Uffe
+SGkgVWxmLA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5z
+c29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogV2VkbmVzZGF5LCBN
+YXJjaCAxMSwgMjAxNSA0OjUwIEFNDQo+IFRvOiBBbGV4IExlbWJlcmcNCj4gQ2M6IEF2aSBTaGNo
+aXNsb3dza2k7IGxpbnV4LW1tYzsgQ2hyaXMgQmFsbA0KPiBTdWJqZWN0OiBSZTogW1BBVENIXSBt
+bWM6IHNsZWVwIG5vdGlmaWNhdGlvbg0KPiANCj4gT24gMTAgTWFyY2ggMjAxNSBhdCAxNTozMiwg
+QWxleCBMZW1iZXJnIDxBbGV4LkxlbWJlcmdAc2FuZGlzay5jb20+DQo+IHdyb3RlOg0KPiA+IEhp
+IFVsZiwNCj4gPg0KPiA+IFRoYW5rcyBmb3IgeW91ciByZXZpZXcgYW5kIGNvbW1lbnRzIQ0KPiA+
+DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IFVsZiBIYW5zc29u
+IFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gPj4gU2VudDogVHVlc2RheSwgTWFy
+Y2ggMTAsIDIwMTUgNTowOCBBTQ0KPiA+PiBUbzogQXZpIFNoY2hpc2xvd3NraQ0KPiA+PiBDYzog
+bGludXgtbW1jOyBDaHJpcyBCYWxsOyBBbGV4IExlbWJlcmcNCj4gPj4gU3ViamVjdDogUmU6IFtQ
+QVRDSF0gbW1jOiBzbGVlcCBub3RpZmljYXRpb24NCj4gPj4NCj4gPj4gT24gMTAgTWFyY2ggMjAx
+NSBhdCAxMDozNiwgQXZpIFNoY2hpc2xvd3NraQ0KPiA+PiA8YXZpLnNoY2hpc2xvd3NraUBzYW5k
+aXNrLmNvbT4NCj4gPj4gd3JvdGU6DQo+ID4+ID4gVGhpcyBwYXRjaCBpcyBpbXBsZW1lbnRzIHRo
+ZSBuZXcgYWRkaXRpb25hbCBzdGF0ZSBvZg0KPiA+PiA+IFBvd2VyX09mZl9Ob3RpZmljYXRpb24g
+4oCTIFNMRUVQX05PVElGSUNBVElPTi4NCj4gPj4gPiBVbnRpbCBub3csIHRoZSBpbXBsZW1lbnRh
+dGlvbiBvZiBQb3dlcl9PZmZfTm90aWZpY2F0aW9uIHN1cHBvcnRlZA0KPiA+PiA+IG9ubHkgdGhy
+ZWUgbW9kZXMg4oCTIFBPV0VSRURfT04gKDB4MDEpLCBQT1dFUl9PRkZfU0hPUlQgKDB4MDIpDQo+
+IGFuZA0KPiA+PiA+IFBPV0VSX09GRl9MT05HICgweDAzKS4NCj4gPj4gPg0KPiA+PiA+IEFzIHBh
+cnQgb2YgZU1NQzUuMCBiZWZvcmUgbW92aW5nIHRvIFNsZWVwIHN0YXRlIGhvc3RzIG1heSBzZXQg
+dGhlDQo+ID4+ID4gUE9XRVJfT0ZGX05PVElGSUNBVElPTiBieXRlIHRvIFNMRUVQX05PVElGSUNB
+VElPTiAoMHgwNCkuDQo+ID4+ID4gQWZ0ZXIgc2V0dGluZyBTTEVFUF9OT1RJRklDQVRJT04sIGhv
+c3Qgc2hvdWxkIHdhaXQgZm9yIHRoZSBidXN5DQo+ID4+ID4gbGluZSB0byBiZSBkZS1hc3NlcnRl
+ZC4NCj4gPj4gPiBUaGUgbWF4IHRpbWVvdXQgYWxsb3dlZCBmb3IgYnVzeSBsaW5lIGRlLWFzc2Vy
+dGlvbiBkZWZpbmVkIGluDQo+ID4+ID4gU0xFRVBfTk9USUZJQ0FUSU9OX1RJTUUgYnl0ZSBpbiBF
+WFRfQ1NEIFsyMTZdLg0KPiA+PiA+IEhQSSBtYXkgaW50ZXJydXB0IHRoZSBTTEVFUF9OT1RJRklD
+QVRJT04gb3BlcmF0aW9uLg0KPiA+PiA+IEluIHRoYXQgY2FzZSBQT1dFUl9PRkZfTk9USUZJQ0FU
+SU9OIGJ5dGUgd2lsbCByZXN0b3JlIHRvDQo+IFBPV0VSRURfT04uDQo+ID4+DQo+ID4+IE9oLCBq
+dXN0IGdyZWF0ISBKRURFQyBoYXMgaW52ZW50ZWQgeWV0IGFub3RoZXIgd2F5IG9mIGhvdyB0byBz
+ZW5kIGENCj4gPj4gZGV2aWNlIHRvIHNsZWVwIHN0YXRlLiBJIHdvbmRlciB3aGF0IHdhcyB3cm9u
+ZyB3aXRoIHRoZSBDTUQ1IG9wdGlvbi4NCj4gPg0KPiA+IEkgdGhpbmsgYmVmb3JlIGFkZGluZyBz
+bGVlcF9ub3RpZmljYXRpb24sIGhvc3QgaGFzIG5vIHdheSB0byBub3RpZnkNCj4gPiBkZXZpY2Ug
+YmVmb3JlIHNlbmRpbmcgc2xlZXAgY29tbWFuZC4gTm93IGRldmljZSBjYW4gYmV0dGVyIHByZXBh
+cmUgaXRzZWxmDQo+IGZvciBtb3ZpbmcgaW50byB0aGUgc2xlZXAgc3RhdGUuDQo+ID4NCj4gPiBB
+bHNvLCBJIHRoaW5rIHdlIG5lZWQgdG8gY2xhcmlmeSBvbmUgbW9yZSBwb2ludCBmb3IgdGhpcyBw
+YXRjaDoNCj4gPiBBcyB3YXMgbWVudGlvbmVkIGluIGNvbW1pdCBtZXNzYWdlIC0gU2xlZXBfTm90
+aWZpY2F0aW9uIGNhbiBiZSBpbnRlcnJ1cHRlZA0KPiBieSBIUEkuDQo+ID4gVGhpcyBhbGxvd3Mg
+bm90IGJsb2NraW5nIHRoZSBob3N0IGR1cmluZyB0aGUgU2xlZXBfTm90aWZpY2F0aW9uIGJ1c3kN
+Cj4gPiB0aW1lIGFuZCBhbGxvd3MgYWNjZXB0aW5nIHJlcXVlc3RzIGNvbWluZyBkdXJpbmcgdGhp
+cyBzdGFnZS4gVGh1cywNCj4gPiB3aXRob3V0IGhhdmluZyBIUEkgc3VwcG9ydGVkLCBzdXNwZW5k
+L3Jlc3VtZSBwcm9jZXNzIG1pZ2h0IGJlDQo+ID4gaW5mbHVlbmNlZCBieSBTbGVlcF9Ob3RpZmlj
+YXRpb24gYnVzeSB0aW1lLCBhbmQgdGhpcyBzaG91bGQgbm90IGhhcHBlbiAtDQo+IHN1c3BlbmQv
+cmVzdW1lIHNob3VsZCBiZSBkb25lIGluIHZlcnkgZmFzdCBhbmQgbm90IGJsb2NraW5nIG1hbm5l
+ci4NCj4gDQo+IEkgZmFpbCB0byB1bmRlcnN0YW5kIHlvdXIgY29tbWVudCBoZXJlLg0KPiANCj4g
+UGxlYXNlIHRlbGwgbWUgYXQgd2hhdCBwb2ludChzKSB5b3VyIHRoaW5rIGl0IG1ha2Ugc2Vuc2Ug
+dG8gaXNzdWUgdGhlDQo+IFNMRUVQX05PVElGSUNBVElPTj8gSWYgdGhhdCBpcyBkdXJpbmcgdGhl
+IHN1c3BlbmQgcGhhc2UsIHRoZW4gYSBIUEkgcmVxdWVzdA0KPiBjYW4ndCBiZSB0cmlnZ2VyZWQu
+DQoNCkkgdGhpbmsgU0xFRVBfTk9USUZJQ0FUSU9OIHNob3VsZCBiZSBpc3N1ZWQgb24gbW1jX3Bt
+X25vdGlmeSgpIGNhbGwsDQpvbiBQTV9TVVNQRU5EX1BSRVBBUkUgY2FzZS4NCiANCg0KPiBLaW5k
+IHJlZ2FyZHMNCj4gVWZmZQ0K
