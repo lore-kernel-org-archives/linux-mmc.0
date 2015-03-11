@@ -1,79 +1,75 @@
-From: Scott Branden <sbranden@broadcom.com>
-Subject: [PATCH] mmc: sdhci: fix card presence logic in sdhci_request function
-Date: Tue, 10 Mar 2015 11:35:10 -0700
-Message-ID: <1426012510-15890-1-git-send-email-sbranden@broadcom.com>
-References: <Scott Branden <sbranden@broadcom.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: Possible regression in next-20150306 due to "mmc: tmio: Fix PIO
+ mode with CONFIG_HIGHMEM"
+Date: Wed, 11 Mar 2015 09:34:20 +0900
+Message-ID: <20150311003419.GC6958@verge.net.au>
+References: <20150307060915.GA24323@verge.net.au>
+ <20150310072944.GA22869@verge.net.au>
+ <CAMuHMdXGnCM_R0bg6+YUNynctqHpAgFqUdj2_visRU4pCLQ-6g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:10783 "EHLO
-	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752825AbbCJSfW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Mar 2015 14:35:22 -0400
-In-Reply-To: <Scott Branden <sbranden@broadcom.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdXGnCM_R0bg6+YUNynctqHpAgFqUdj2_visRU4pCLQ-6g@mail.gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: keita kobayashi <keita.kobayashi.ym@renesas.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Cao Minh Hiep <cm-hiep@jinso.co.jp>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: bcm-kernel-feedback-list@broadcom.com, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: Ray Jui <rjui@broadcom.com>, Jonathan Richardson <jonathar@broadcom.com>, Corneliu Doban <cdoban@broadcom.com>, Dmitry Torokhov <dtor@google.com>, Anatol Pomazao <anatol@google.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Scott Branden <sbranden@broadcom.com>
 
-The sdhci_request function should consider a non-removable device
-always present.
-Call the correct logic already available in sdhci_do_get_cd function.
+On Tue, Mar 10, 2015 at 11:27:29AM +0100, Geert Uytterhoeven wrote:
+> Hi Simon,
+> 
+> On Tue, Mar 10, 2015 at 8:29 AM, Simon Horman <horms@verge.net.au> wrote:
+> > On Sat, Mar 07, 2015 at 03:09:20PM +0900, Simon Horman wrote:
+> >> I have noticed what appears to be a regression in next-20150306.  Using
+> >> shmobile_defconfig I am unable to boot the koelsch or lager boards to
+> >> user-space. However, if I revert be7de0b8a90a0b06d ("mmc: tmio: Fix PIO
+> 
+> What happens exactly?
 
-This fixes some logic paths where MMC requests are being made to
-non-removable devices that do not have the card detect pin connected
-on the hardware as it is non-removable.
+I am seeing a NULL pointer dereference which seems to be coming from
+tmio_mmc_start_dma.
 
-Signed-off-by: Scott Branden <sbranden@broadcom.com>
----
- drivers/mmc/host/sdhci.c | 20 +++-----------------
- 1 file changed, 3 insertions(+), 17 deletions(-)
+http://permalink.gmane.org/gmane.linux.ports.sh.devel/44533
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 0ad412a..bafc7ac 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -56,6 +56,7 @@ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
- static int sdhci_pre_dma_transfer(struct sdhci_host *host,
- 					struct mmc_data *data,
- 					struct sdhci_host_next *next);
-+static int sdhci_do_get_cd(struct sdhci_host *host);
- 
- #ifdef CONFIG_PM
- static int sdhci_runtime_pm_get(struct sdhci_host *host);
-@@ -1356,7 +1357,8 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 	sdhci_runtime_pm_get(host);
- 
--	present = mmc_gpio_get_cd(host->mmc);
-+	/* Firstly check card presence */
-+	present = sdhci_do_get_cd(host);
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -1379,22 +1381,6 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 	host->mrq = mrq;
- 
--	/*
--	 * Firstly check card presence from cd-gpio.  The return could
--	 * be one of the following possibilities:
--	 *     negative: cd-gpio is not available
--	 *     zero: cd-gpio is used, and card is removed
--	 *     one: cd-gpio is used, and card is present
--	 */
--	if (present < 0) {
--		/* If polling, assume that the card is always present. */
--		if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
--			present = 1;
--		else
--			present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
--					SDHCI_CARD_PRESENT;
--	}
--
- 	if (!present || host->flags & SDHCI_DEVICE_DEAD) {
- 		host->mrq->cmd->error = -ENOMEDIUM;
- 		tasklet_schedule(&host->finish_tasklet);
--- 
-2.3.0
+Digging a little further it seems the problem is occurring at or around the
+following code, where according to my calculations 1333c is the address
+reported in the boot log:
 
+static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
+{
+        struct scatterlist *sg = host->sg_ptr, *sg_tmp;
+   13338:       e590501c        ldr     r5, [r0, #28]
+        dma_cookie_t cookie;
+        int ret, i;
+        bool aligned = true, multiple = true;
+        unsigned int align = (1 << host->pdata->alignment_shift) - 1;
+
+        for_each_sg(sg, sg_tmp, host->sg_len, i) {
+   1333c:       e3a0a000        mov     sl, #0
+        struct dma_async_tx_descriptor *desc = NULL;
+        struct dma_chan *chan = host->chan_rx;
+        dma_cookie_t cookie;
+        int ret, i;
+        bool aligned = true, multiple = true;
+        unsigned int align = (1 << host->pdata->alignment_shift) - 1;
+   13340:       e5938020        ldr     r8, [r3, #32]
+
+
+I wonder if host->sg_ptr is NULL.
+
+The patch in question updates tmio_mmc_init_sg() and tmio_mmc_next_sg()
+such that host->sg_ptr is no longer assigned by those functions. Perhaps
+some further updates are required to handle the DMA case?
+
+> >> mode with CONFIG_HIGHMEM") then all seems well.
+> >
+> > Apologies, I seem to have messed up the commit id.
+> > It should be 5da0e63e268dc5120
+> 
+> I can't seem to reproduce this on koelsch. I tried next-20150306,
+> renesas-drivers-2015-03-09-v4.0-rc3, and my local tree based on the latter.
+
+After reading the above I noticed that I had a micro SD card present in
+the relevant slot on my koelsch board. I have now checked that without that
+card present the problem does not seem to manifiest.
