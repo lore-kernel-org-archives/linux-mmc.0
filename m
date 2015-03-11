@@ -1,74 +1,32 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [PATCH] mmc: sleep notification
-Date: Wed, 11 Mar 2015 18:38:47 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
-	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
+From: Nikita Yushchenko <nikita.yoush@yandex.ru>
+Subject: mmc idle time bkops?
+Date: Wed, 11 Mar 2015 22:34:38 +0300
+Message-ID: <550098CE.1010407@yandex.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2on0077.outbound.protection.outlook.com ([65.55.169.77]:60899
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750769AbbCKSiy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 11 Mar 2015 14:38:54 -0400
-In-Reply-To: <CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
-Content-Language: en-US
+Received: from forward2m.mail.yandex.net ([37.140.138.2]:56824 "EHLO
+	forward2m.mail.yandex.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751050AbbCKTen (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Mar 2015 15:34:43 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
+To: Maya Erez <merez@codeaurora.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-SGkgVWxmLA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5z
-c29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogV2VkbmVzZGF5LCBN
-YXJjaCAxMSwgMjAxNSA0OjUwIEFNDQo+IFRvOiBBbGV4IExlbWJlcmcNCj4gQ2M6IEF2aSBTaGNo
-aXNsb3dza2k7IGxpbnV4LW1tYzsgQ2hyaXMgQmFsbA0KPiBTdWJqZWN0OiBSZTogW1BBVENIXSBt
-bWM6IHNsZWVwIG5vdGlmaWNhdGlvbg0KPiANCj4gT24gMTAgTWFyY2ggMjAxNSBhdCAxNTozMiwg
-QWxleCBMZW1iZXJnIDxBbGV4LkxlbWJlcmdAc2FuZGlzay5jb20+DQo+IHdyb3RlOg0KPiA+IEhp
-IFVsZiwNCj4gPg0KPiA+IFRoYW5rcyBmb3IgeW91ciByZXZpZXcgYW5kIGNvbW1lbnRzIQ0KPiA+
-DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IFVsZiBIYW5zc29u
-IFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gPj4gU2VudDogVHVlc2RheSwgTWFy
-Y2ggMTAsIDIwMTUgNTowOCBBTQ0KPiA+PiBUbzogQXZpIFNoY2hpc2xvd3NraQ0KPiA+PiBDYzog
-bGludXgtbW1jOyBDaHJpcyBCYWxsOyBBbGV4IExlbWJlcmcNCj4gPj4gU3ViamVjdDogUmU6IFtQ
-QVRDSF0gbW1jOiBzbGVlcCBub3RpZmljYXRpb24NCj4gPj4NCj4gPj4gT24gMTAgTWFyY2ggMjAx
-NSBhdCAxMDozNiwgQXZpIFNoY2hpc2xvd3NraQ0KPiA+PiA8YXZpLnNoY2hpc2xvd3NraUBzYW5k
-aXNrLmNvbT4NCj4gPj4gd3JvdGU6DQo+ID4+ID4gVGhpcyBwYXRjaCBpcyBpbXBsZW1lbnRzIHRo
-ZSBuZXcgYWRkaXRpb25hbCBzdGF0ZSBvZg0KPiA+PiA+IFBvd2VyX09mZl9Ob3RpZmljYXRpb24g
-4oCTIFNMRUVQX05PVElGSUNBVElPTi4NCj4gPj4gPiBVbnRpbCBub3csIHRoZSBpbXBsZW1lbnRh
-dGlvbiBvZiBQb3dlcl9PZmZfTm90aWZpY2F0aW9uIHN1cHBvcnRlZA0KPiA+PiA+IG9ubHkgdGhy
-ZWUgbW9kZXMg4oCTIFBPV0VSRURfT04gKDB4MDEpLCBQT1dFUl9PRkZfU0hPUlQgKDB4MDIpDQo+
-IGFuZA0KPiA+PiA+IFBPV0VSX09GRl9MT05HICgweDAzKS4NCj4gPj4gPg0KPiA+PiA+IEFzIHBh
-cnQgb2YgZU1NQzUuMCBiZWZvcmUgbW92aW5nIHRvIFNsZWVwIHN0YXRlIGhvc3RzIG1heSBzZXQg
-dGhlDQo+ID4+ID4gUE9XRVJfT0ZGX05PVElGSUNBVElPTiBieXRlIHRvIFNMRUVQX05PVElGSUNB
-VElPTiAoMHgwNCkuDQo+ID4+ID4gQWZ0ZXIgc2V0dGluZyBTTEVFUF9OT1RJRklDQVRJT04sIGhv
-c3Qgc2hvdWxkIHdhaXQgZm9yIHRoZSBidXN5DQo+ID4+ID4gbGluZSB0byBiZSBkZS1hc3NlcnRl
-ZC4NCj4gPj4gPiBUaGUgbWF4IHRpbWVvdXQgYWxsb3dlZCBmb3IgYnVzeSBsaW5lIGRlLWFzc2Vy
-dGlvbiBkZWZpbmVkIGluDQo+ID4+ID4gU0xFRVBfTk9USUZJQ0FUSU9OX1RJTUUgYnl0ZSBpbiBF
-WFRfQ1NEIFsyMTZdLg0KPiA+PiA+IEhQSSBtYXkgaW50ZXJydXB0IHRoZSBTTEVFUF9OT1RJRklD
-QVRJT04gb3BlcmF0aW9uLg0KPiA+PiA+IEluIHRoYXQgY2FzZSBQT1dFUl9PRkZfTk9USUZJQ0FU
-SU9OIGJ5dGUgd2lsbCByZXN0b3JlIHRvDQo+IFBPV0VSRURfT04uDQo+ID4+DQo+ID4+IE9oLCBq
-dXN0IGdyZWF0ISBKRURFQyBoYXMgaW52ZW50ZWQgeWV0IGFub3RoZXIgd2F5IG9mIGhvdyB0byBz
-ZW5kIGENCj4gPj4gZGV2aWNlIHRvIHNsZWVwIHN0YXRlLiBJIHdvbmRlciB3aGF0IHdhcyB3cm9u
-ZyB3aXRoIHRoZSBDTUQ1IG9wdGlvbi4NCj4gPg0KPiA+IEkgdGhpbmsgYmVmb3JlIGFkZGluZyBz
-bGVlcF9ub3RpZmljYXRpb24sIGhvc3QgaGFzIG5vIHdheSB0byBub3RpZnkNCj4gPiBkZXZpY2Ug
-YmVmb3JlIHNlbmRpbmcgc2xlZXAgY29tbWFuZC4gTm93IGRldmljZSBjYW4gYmV0dGVyIHByZXBh
-cmUgaXRzZWxmDQo+IGZvciBtb3ZpbmcgaW50byB0aGUgc2xlZXAgc3RhdGUuDQo+ID4NCj4gPiBB
-bHNvLCBJIHRoaW5rIHdlIG5lZWQgdG8gY2xhcmlmeSBvbmUgbW9yZSBwb2ludCBmb3IgdGhpcyBw
-YXRjaDoNCj4gPiBBcyB3YXMgbWVudGlvbmVkIGluIGNvbW1pdCBtZXNzYWdlIC0gU2xlZXBfTm90
-aWZpY2F0aW9uIGNhbiBiZSBpbnRlcnJ1cHRlZA0KPiBieSBIUEkuDQo+ID4gVGhpcyBhbGxvd3Mg
-bm90IGJsb2NraW5nIHRoZSBob3N0IGR1cmluZyB0aGUgU2xlZXBfTm90aWZpY2F0aW9uIGJ1c3kN
-Cj4gPiB0aW1lIGFuZCBhbGxvd3MgYWNjZXB0aW5nIHJlcXVlc3RzIGNvbWluZyBkdXJpbmcgdGhp
-cyBzdGFnZS4gVGh1cywNCj4gPiB3aXRob3V0IGhhdmluZyBIUEkgc3VwcG9ydGVkLCBzdXNwZW5k
-L3Jlc3VtZSBwcm9jZXNzIG1pZ2h0IGJlDQo+ID4gaW5mbHVlbmNlZCBieSBTbGVlcF9Ob3RpZmlj
-YXRpb24gYnVzeSB0aW1lLCBhbmQgdGhpcyBzaG91bGQgbm90IGhhcHBlbiAtDQo+IHN1c3BlbmQv
-cmVzdW1lIHNob3VsZCBiZSBkb25lIGluIHZlcnkgZmFzdCBhbmQgbm90IGJsb2NraW5nIG1hbm5l
-ci4NCj4gDQo+IEkgZmFpbCB0byB1bmRlcnN0YW5kIHlvdXIgY29tbWVudCBoZXJlLg0KPiANCj4g
-UGxlYXNlIHRlbGwgbWUgYXQgd2hhdCBwb2ludChzKSB5b3VyIHRoaW5rIGl0IG1ha2Ugc2Vuc2Ug
-dG8gaXNzdWUgdGhlDQo+IFNMRUVQX05PVElGSUNBVElPTj8gSWYgdGhhdCBpcyBkdXJpbmcgdGhl
-IHN1c3BlbmQgcGhhc2UsIHRoZW4gYSBIUEkgcmVxdWVzdA0KPiBjYW4ndCBiZSB0cmlnZ2VyZWQu
-DQoNCkkgdGhpbmsgU0xFRVBfTk9USUZJQ0FUSU9OIHNob3VsZCBiZSBpc3N1ZWQgb24gbW1jX3Bt
-X25vdGlmeSgpIGNhbGwsDQpvbiBQTV9TVVNQRU5EX1BSRVBBUkUgY2FzZS4NCiANCg0KPiBLaW5k
-IHJlZ2FyZHMNCj4gVWZmZQ0K
+Hi
+
+Some months ago, you've been working on "idle time bkops" feature. The
+latest (v6) sign of this work I could found is [1]
+
+[1] https://lkml.org/lkml/2013/4/14/29
+
+However this did not land in mainline, also no replies, and no sign of
+any follow-up...  Complete mystery what has happened to this effort :(
+
+What is the latest status of "idle time bkops" functionality?
+Is any working implementation available?
+
+TIA,
+Nikita Yushchenko
