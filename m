@@ -1,49 +1,52 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sleep notification
-Date: Thu, 12 Mar 2015 10:09:49 +0100
-Message-ID: <CAPDyKFqLUBYUx9XrhnMeUtf8HU_=4PH_4Vf7m8mM-CT63jG24Q@mail.gmail.com>
-References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
-	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Fabio Estevam <festevam@gmail.com>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: Call mmc_of_parse()
+Date: Thu, 12 Mar 2015 19:15:35 -0300
+Message-ID: <1426198535-21312-1-git-send-email-festevam@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f48.google.com ([209.85.192.48]:35130 "EHLO
-	mail-qg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750726AbbCLJJu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Mar 2015 05:09:50 -0400
-Received: by qgfh3 with SMTP id h3so16439505qgf.2
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Mar 2015 02:09:50 -0700 (PDT)
-In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-qc0-f176.google.com ([209.85.216.176]:43162 "EHLO
+	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752467AbbCLWPx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Mar 2015 18:15:53 -0400
+Received: by qcyl6 with SMTP id l6so22362349qcy.10
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Mar 2015 15:15:52 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
+To: ulf.hansson@linaro.org
+Cc: shawn.guo@linaro.org, linux@arm.linux.org.uk, kernel@pengutronix.de, otavio@ossystems.com.br, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
 
-[...]
+From: Fabio Estevam <fabio.estevam@freescale.com>
 
->> > Also, I think we need to clarify one more point for this patch:
->> > As was mentioned in commit message - Sleep_Notification can be interrupted
->> by HPI.
->> > This allows not blocking the host during the Sleep_Notification busy
->> > time and allows accepting requests coming during this stage. Thus,
->> > without having HPI supported, suspend/resume process might be
->> > influenced by Sleep_Notification busy time, and this should not happen -
->> suspend/resume should be done in very fast and not blocking manner.
->>
->> I fail to understand your comment here.
->>
->> Please tell me at what point(s) your think it make sense to issue the
->> SLEEP_NOTIFICATION? If that is during the suspend phase, then a HPI request
->> can't be triggered.
->
-> I think SLEEP_NOTIFICATION should be issued on mmc_pm_notify() call,
-> on PM_SUSPEND_PREPARE case.
+Currently it is not possible to use 'mmc-pwrseq-simple' property with this
+driver because mmc_of_parse() is never called.
 
-So, exactly why is that to prefer, comparing doing it in system PM
-->suspend() callback?
+mmc_of_parse() calls mmc_pwrseq_alloc() that manages MMC power sequence.
 
-Kind regards
-Uffe
+Call the generic mmc_of_parse() so that we can use 'mmc-pwrseq-simple' to 
+provide reset GPIO to the Wifi/BT chip.
+
+Tested on a imx6sl-warp board.
+
+Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 9cce5cf..d714d8f 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1075,6 +1075,11 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+ 	}
+ 
++	/* call to generic mmc_of_parse to support additional capabilities */
++	err = mmc_of_parse(host->mmc);
++	if (err)
++		goto disable_clk;
++
+ 	err = sdhci_add_host(host);
+ 	if (err)
+ 		goto disable_clk;
+-- 
+1.9.1
+
