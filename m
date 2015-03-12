@@ -1,87 +1,44 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH v4 3/4] mmc: dw_mmc: Use mmc_regulator_set_vqmmc in start_signal_voltage_switch
-Date: Wed, 11 Mar 2015 15:15:16 -0700
-Message-ID: <1426112117-18220-3-git-send-email-dianders@chromium.org>
-References: <1426112117-18220-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f176.google.com ([209.85.223.176]:35791 "EHLO
-	mail-ie0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752055AbbCKWQD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Mar 2015 18:16:03 -0400
-Received: by ieclw3 with SMTP id lw3so2382119iec.2
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Mar 2015 15:16:02 -0700 (PDT)
-In-Reply-To: <1426112117-18220-1-git-send-email-dianders@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: keita kobayashi <keita.kobayashi.ym@renesas.com>
+Subject: Re: Possible regression in next-20150306 due to "mmc: tmio: Fix PIO
+ mode with CONFIG_HIGHMEM"
+Date: Thu, 12 Mar 2015 09:41:17 +0900
+Message-ID: <5500E0AD.2000008@renesas.com>
+References: <20150307060915.GA24323@verge.net.au> <CAPDyKFqb9__nFZ9i0qDP5j0J67MCh2CFeo7p-X=i57Lqx+LBng@mail.gmail.com> <20150311003454.GD6958@verge.net.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <20150311003454.GD6958@verge.net.au>
+Sender: linux-sh-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, Cao Minh Hiep <cm-hiep@jinso.co.jp>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
-Cc: Mark Brown <broonie@kernel.org>, Alexandru Stan <amstan@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Addy Ke <addy.ke@rock-chips.com>, javier.martinez@collabora.co.uk, linux-rockchip@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Doug Anderson <dianders@chromium.org>, chris@printf.net, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-We've introduced a new helper in the MMC core:
-mmc_regulator_set_vqmmc().  Let's use this in dw_mmc.  Using this new
-helper has some advantages:
+Hi Ulf, Simon
 
-1. We get the mmc_regulator_set_vqmmc() behavior of trying to match
-   VQMMC and VMMC when the signal voltage is 3.3V.  This ensures max
-   compatibility.
+Sorry for my late reply.
 
-2. We get rid of a few more warnings when probing unsupported
-   voltages.
+(2015/03/11 9:34), Simon Horman wrote:
 
-3. We get rid of some non-dw_mmc specific code in dw_mmc.
+> On Tue, Mar 10, 2015 at 11:13:38AM +0100, Ulf Hansson wrote:
+>> On 7 March 2015 at 07:09, Simon Horman <horms@verge.net.au> wrote:
+>>> Hi Kobayashi-san, Hi All,
+>>>
+>>> I have noticed what appears to be a regression in next-20150306.  Using
+>>> shmobile_defconfig I am unable to boot the koelsch or lager boards to
+>>> user-space. However, if I revert be7de0b8a90a0b06d ("mmc: tmio: Fix PIO
+>>> mode with CONFIG_HIGHMEM") then all seems well.
+>>
+>> Simon, thanks for testing and reporting!
+>>
+>> I decided to drop the above commit from my next branch. Let's see if
+>> Kobayashi-san comes back with an updated patch, later on.
+> 
+> Thanks, I appreciate it.
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
-Reviewed-by: Andrew Bresticker <abrestic@chromium.org>
----
-Changes in v4: None
-Changes in v3:
-- Continue to check for errors if VQMMC is not an error as per Andrew.
 
-Changes in v2: None
+Sorry for the lack of confirmation.
+I'll have a think about it.
 
- drivers/mmc/host/dw_mmc.c | 17 ++++++-----------
- 1 file changed, 6 insertions(+), 11 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index e2811cf..615d1d9 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1214,7 +1214,6 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
- 	struct dw_mci *host = slot->host;
- 	u32 uhs;
- 	u32 v18 = SDMMC_UHS_18V << slot->id;
--	int min_uv, max_uv;
- 	int ret;
- 
- 	/*
-@@ -1223,22 +1222,18 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
- 	 * does no harm but you need to set the regulator directly.  Try both.
- 	 */
- 	uhs = mci_readl(host, UHS_REG);
--	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
--		min_uv = 2700000;
--		max_uv = 3600000;
-+	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
- 		uhs &= ~v18;
--	} else {
--		min_uv = 1700000;
--		max_uv = 1950000;
-+	else
- 		uhs |= v18;
--	}
-+
- 	if (!IS_ERR(mmc->supply.vqmmc)) {
--		ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
-+		ret = mmc_regulator_set_vqmmc(mmc, ios);
- 
- 		if (ret) {
- 			dev_dbg(&mmc->class_dev,
--					 "Regulator set error %d: %d - %d\n",
--					 ret, min_uv, max_uv);
-+					 "Regulator set error %d - %s V\n",
-+					 ret, uhs & v18 ? "1.8" : "3.3");
- 			return ret;
- 		}
- 	}
--- 
-2.2.0.rc0.207.ga3a616c
-
+Regards.
+Keita Kobayashi
