@@ -1,42 +1,51 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 2/3] MAINTAINERS: mmc: Remove the SDHCI-OF section
-Date: Fri, 13 Mar 2015 13:51:48 +0100
-Message-ID: <1426251108-10926-1-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 3/3] MAINTAINERS: mmc: Cleanup MMC/SD/SDIO section and SDHCI driver section
+Date: Fri, 13 Mar 2015 13:52:00 +0100
+Message-ID: <1426251120-10966-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: linux-kernel@vger.kernel.org, Anton Vorontsov <anton@enomsg.org>
+Cc: linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Anton told me that he isn't maintaing the SDHCI-OF parts anymore, so
-let's remove him from this section to avoid confusion.
+As Chris Ball has moved on to other assignments, he's no longer able to
+help me maintain MMC. Let's remove him from the MMC sections.
 
-Morover, since the SDHCI-OF section overlaps with the SDHCI DRIVER
-section, let's just remove it completely.
+This also affects the SDHCI DRIVER section, since its state now becomes
+orphan.
 
-Cc: Anton Vorontsov <anton@enomsg.org>
+Cc: Chris Ball <chris@printf.net>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- MAINTAINERS | 7 -------
- 1 file changed, 7 deletions(-)
+ MAINTAINERS | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 78a22aa..582b4b4 100644
+index 582b4b4..50479c8 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -8669,13 +8669,6 @@ F:	include/linux/seccomp.h
- K:	\bsecure_computing
- K:	\bTIF_SECCOMP\b
+@@ -6547,10 +6547,8 @@ F:	drivers/mfd/
+ F:	include/linux/mfd/
  
--SECURE DIGITAL HOST CONTROLLER INTERFACE, OPEN FIRMWARE BINDINGS (SDHCI-OF)
--M:	Anton Vorontsov <anton@enomsg.org>
--L:	linuxppc-dev@lists.ozlabs.org
--L:	linux-mmc@vger.kernel.org
--S:	Maintained
--F:	drivers/mmc/host/sdhci-pltfm.[ch]
--
- SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) SAMSUNG DRIVER
- M:	Ben Dooks <ben-linux@fluff.org>
+ MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND SDIO SUBSYSTEM
+-M:	Chris Ball <chris@printf.net>
+ M:	Ulf Hansson <ulf.hansson@linaro.org>
  L:	linux-mmc@vger.kernel.org
+-T:	git git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
+ T:	git git://git.linaro.org/people/ulf.hansson/mmc.git
+ S:	Maintained
+ F:	drivers/mmc/
+@@ -8650,10 +8648,8 @@ S:	Maintained
+ F:	drivers/mmc/host/sdricoh_cs.c
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) DRIVER
+-M:	Chris Ball <chris@printf.net>
+ L:	linux-mmc@vger.kernel.org
+-T:	git git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
+-S:	Maintained
++S:	Orphan
+ F:	drivers/mmc/host/sdhci.*
+ F:	drivers/mmc/host/sdhci-pltfm.[ch]
+ 
 -- 
 1.9.1
