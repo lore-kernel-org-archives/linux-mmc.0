@@ -1,75 +1,68 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH V2 3/3] MAINTAINERS: mmc: Cleanup MMC/SD/SDIO section and SDHCI driver section
-Date: Fri, 13 Mar 2015 15:48:35 +0100
-Message-ID: <1426258115-11801-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f179.google.com ([209.85.217.179]:41057 "EHLO
-	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753568AbbCMOsl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Mar 2015 10:48:41 -0400
-Received: by lbvp9 with SMTP id p9so23281761lbv.8
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Mar 2015 07:48:40 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: Re: [RFC 1/2] mmc: read mmc alias from device tree
+Date: Fri, 13 Mar 2015 13:08:55 -0700
+Message-ID: <CAD=FV=VF55LhuALjRSGT7KuzEACnAM0A6ThuPjXBkxEcyWij5A@mail.gmail.com>
+References: <cover.1396384101.git.stefan@agner.ch>
+	<5570bdf5ebb3aaae5a376634ecfbac9c2fd7b9f4.1396384101.git.stefan@agner.ch>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <5570bdf5ebb3aaae5a376634ecfbac9c2fd7b9f4.1396384101.git.stefan-XLVq0VzYD2Y@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: stefan-XLVq0VzYD2Y@public.gmane.org
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Dmitry Torokhov <dmitry.torokhov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>
-Cc: linux-kernel@vger.kernel.org, Joe Perches <joe@perches.com>
 
-As Chris Ball has moved on to other assignments, he's no longer able to
-help me maintain MMC. Let's remove him from the MMC sections in
-MAINTAINERS and add him to CREDIT file.
+Hi,
 
-This also affects the SDHCI DRIVER section, since its state now becomes
-orphan.
+On Tue, Apr 1, 2014 at 1:35 PM,  <stefan-XLVq0VzYD2Y@public.gmane.org> wrote:
+> From: Stefan Agner <stefan-XLVq0VzYD2Y@public.gmane.org>
+>
+> To get the SD/MMC host device ID, read the alias from the device
+> tree.
+>
+> This is useful in case a SoC has multipe SD/MMC host controllers while
+> the second controller should logically be the first device (e.g. if
+> the second controller is connected to an internal eMMC). Combined
+> with block device numbering using MMC/SD host device ID, this
+> results in predictable name assignment of the internal eMMC block
+> device.
+>
+> Signed-off-by: Stefan Agner <stefan-XLVq0VzYD2Y@public.gmane.org>
+> ---
+>  drivers/mmc/core/host.c | 24 +++++++++++++++++++-----
+>  1 file changed, 19 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 49bc403..29f44cf 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -448,8 +448,8 @@ EXPORT_SYMBOL(mmc_of_parse);
+>   */
+>  struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+>  {
+> -       int err;
+>         struct mmc_host *host;
+> +       int of_id = -1, id = -1;
+>
+>         host = kzalloc(sizeof(struct mmc_host) + extra, GFP_KERNEL);
+>         if (!host)
+> @@ -459,12 +459,26 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+>         host->rescan_disable = 1;
+>         idr_preload(GFP_KERNEL);
+>         spin_lock(&mmc_host_lock);
+> -       err = idr_alloc(&mmc_host_idr, host, 0, 0, GFP_NOWAIT);
+> -       if (err >= 0)
+> -               host->index = err;
+> +
+> +       if (dev->of_node)
+> +               of_id = of_alias_get_id(dev->of_node, "mmc");
 
-Cc: Chris Ball <chris@printf.net>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- CREDITS     | 4 ++++
- MAINTAINERS | 6 +-----
- 2 files changed, 5 insertions(+), 5 deletions(-)
+Not that there's much chance of such an old patch landing, but just in
+case anyone finds this Dmitry points out that this causes a
+"scheduling while atomic".  A fix is to move the "of_alias_get_id" up
+above the spin_lock():
 
-diff --git a/CREDITS b/CREDITS
-index 96935df..843e176 100644
---- a/CREDITS
-+++ b/CREDITS
-@@ -187,6 +187,10 @@ N: Krishna Balasubramanian
- E: balasub@cis.ohio-state.edu
- D: Wrote SYS V IPC (part of standard kernel since 0.99.10)
- 
-+N: Chris Ball
-+E: chris@printf.net
-+D: Former maintainer of the MMC/SD/SDIO subsystem.
-+
- N: Dario Ballabio
- E: ballabio_dario@emc.com
- E: dario.ballabio@tiscalinet.it
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 582b4b4..50479c8 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -6547,10 +6547,8 @@ F:	drivers/mfd/
- F:	include/linux/mfd/
- 
- MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND SDIO SUBSYSTEM
--M:	Chris Ball <chris@printf.net>
- M:	Ulf Hansson <ulf.hansson@linaro.org>
- L:	linux-mmc@vger.kernel.org
--T:	git git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
- T:	git git://git.linaro.org/people/ulf.hansson/mmc.git
- S:	Maintained
- F:	drivers/mmc/
-@@ -8650,10 +8648,8 @@ S:	Maintained
- F:	drivers/mmc/host/sdricoh_cs.c
- 
- SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) DRIVER
--M:	Chris Ball <chris@printf.net>
- L:	linux-mmc@vger.kernel.org
--T:	git git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
--S:	Maintained
-+S:	Orphan
- F:	drivers/mmc/host/sdhci.*
- F:	drivers/mmc/host/sdhci-pltfm.[ch]
- 
--- 
-1.9.1
+https://chromium-review.googlesource.com/#/c/259916/
 
+-Doug
