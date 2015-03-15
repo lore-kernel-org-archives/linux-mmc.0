@@ -1,59 +1,132 @@
-From: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
-Subject: RE: [PATCH] mmc: sleep notification
-Date: Sun, 15 Mar 2015 09:04:06 +0000
-Message-ID: <FDD07FEB422EF948A392FDC201AEEAE64F79CC06@SACMBXIP02.sdcorp.global.sandisk.com>
-References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
- <54FEF34E.20205@intel.com>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH V5 2/2] ARM: dts: Add HS400 support for exynos5420 and exynos5800
+Date: Sun, 15 Mar 2015 16:58:13 +0530
+Message-ID: <CAGOxZ53_TGay2ooTW22ZGPZ+yneqoXH6JEPZ=mMSYr1cpOhXWg@mail.gmail.com>
+References: <1422499318-13726-1-git-send-email-alim.akhtar@samsung.com>
+ <1422499318-13726-3-git-send-email-alim.akhtar@samsung.com> <54ED6D24.4000703@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0062.outbound.protection.outlook.com ([157.56.111.62]:21088
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751437AbbCOJEM convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Mar 2015 05:04:12 -0400
-In-Reply-To: <54FEF34E.20205@intel.com>
-Content-Language: en-US
+Received: from mail-qc0-f170.google.com ([209.85.216.170]:32895 "EHLO
+	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751327AbbCOL2y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Mar 2015 07:28:54 -0400
+In-Reply-To: <54ED6D24.4000703@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, Alex Lemberg <Alex.Lemberg@sandisk.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Alim Akhtar <alim.akhtar@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Seungwon Jeon <tgih.jun@samsung.com>, Douglas Anderson <dianders@chromium.org>, kgene <kgene@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Abhilash Kesavan <a.kesavan@samsung.com>
 
+Ping?
 
-
-
->-----Original Message-----
->From: Adrian Hunter [mailto:adrian.hunter@intel.com]
->Sent: Tuesday, March 10, 2015 3:36 PM
->To: Avi Shchislowski; ulf.hansson@linaro.org
->Cc: linux-mmc@vger.kernel.org; chris@printf.net; Alex Lemberg
->Subject: Re: [PATCH] mmc: sleep notification
+On Wed, Feb 25, 2015 at 12:05 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi, Alim.
 >
->On 10/03/15 11:36, Avi Shchislowski wrote:
->> This patch is implements the new additional state of
->> Power_Off_Notification - SLEEP_NOTIFICATION.
->> Until now, the implementation of Power_Off_Notification supported only
->> three modes - POWERED_ON (0x01), POWER_OFF_SHORT (0x02) and
->> POWER_OFF_LONG (0x03).
+> Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+>
+> Best Regards,
+> Jaehoon Chung
+>
+> On 01/29/2015 11:41 AM, Alim Akhtar wrote:
+>> From: Seungwon Jeon <tgih.jun@samsung.com>
 >>
->> As part of eMMC5.0 before moving to Sleep state hosts may set the
->> POWER_OFF_NOTIFICATION byte to SLEEP_NOTIFICATION (0x04).
->> After setting SLEEP_NOTIFICATION, host should wait for the busy line
->> to be de-asserted.
->> The max timeout allowed for busy line de-assertion defined in
->> SLEEP_NOTIFICATION_TIME byte in EXT_CSD [216].
->> HPI may interrupt the SLEEP_NOTIFICATION operation.
->> In that case POWER_OFF_NOTIFICATION byte will restore to POWERED_ON.
+>> HS400 timing values are added for SMDK5420, exynos5420-peach-pit
+>> and exynos5800-peach-pi boards.
+>> This also adds RCLK GPIO line, this gpio should be in pull-down
+>> state.
+>> This also enables HS400 on peach-pi and this updates the clock frequency
+>> to 800MHz to be set as input clock to controller.
+>>
+>> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+>> [Alim: addressed review comments]
+>> ---
+>>  arch/arm/boot/dts/exynos5420-peach-pit.dts |    4 +++-
+>>  arch/arm/boot/dts/exynos5420-pinctrl.dtsi  |    7 +++++++
+>>  arch/arm/boot/dts/exynos5420-smdk5420.dts  |    4 +++-
+>>  arch/arm/boot/dts/exynos5800-peach-pi.dts  |    7 +++++--
+>>  4 files changed, 18 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/arch/arm/boot/dts/exynos5420-peach-pit.dts b/arch/arm/boot/dts/exynos5420-peach-pit.dts
+>> index 9a050e1..f7a44a4 100644
+>> --- a/arch/arm/boot/dts/exynos5420-peach-pit.dts
+>> +++ b/arch/arm/boot/dts/exynos5420-peach-pit.dts
+>> @@ -569,8 +569,10 @@
+>>       samsung,dw-mshc-ciu-div = <3>;
+>>       samsung,dw-mshc-sdr-timing = <0 4>;
+>>       samsung,dw-mshc-ddr-timing = <0 2>;
+>> +     samsung,dw-mshc-hs400-timing = <0 2>;
+>> +     samsung,read-strobe-delay = <90>;
+>>       pinctrl-names = "default";
+>> -     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+>> +     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
+>>       bus-width = <8>;
+>>  };
+>>
+>> diff --git a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+>> index ba686e4..8b15316 100644
+>> --- a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+>> +++ b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+>> @@ -201,6 +201,13 @@
+>>                       samsung,pin-drv = <3>;
+>>               };
+>>
+>> +             sd0_rclk: sd0-rclk {
+>> +                     samsung,pins = "gpc0-7";
+>> +                     samsung,pin-function = <2>;
+>> +                     samsung,pin-pud = <1>;
+>> +                     samsung,pin-drv = <3>;
+>> +             };
+>> +
+>>               sd1_cmd: sd1-cmd {
+>>                       samsung,pins = "gpc1-1";
+>>                       samsung,pin-function = <2>;
+>> diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+>> index 8be3d7b..2078a1f 100644
+>> --- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
+>> +++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+>> @@ -80,8 +80,10 @@
+>>               samsung,dw-mshc-ciu-div = <3>;
+>>               samsung,dw-mshc-sdr-timing = <0 4>;
+>>               samsung,dw-mshc-ddr-timing = <0 2>;
+>> +             samsung,dw-mshc-hs400-timing = <0 2>;
+>> +             samsung,read-strobe-delay = <90>;
+>>               pinctrl-names = "default";
+>> -             pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+>> +             pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
+>>               bus-width = <8>;
+>>               cap-mmc-highspeed;
+>>       };
+>> diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+>> index e8fdda8..96f0d61 100644
+>> --- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
+>> +++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+>> @@ -550,15 +550,18 @@
+>>       num-slots = <1>;
+>>       broken-cd;
+>>       mmc-hs200-1_8v;
+>> +     mmc-hs400-1_8v;
+>>       cap-mmc-highspeed;
+>>       non-removable;
+>>       card-detect-delay = <200>;
+>> -     clock-frequency = <400000000>;
+>> +     clock-frequency = <800000000>;
+>>       samsung,dw-mshc-ciu-div = <3>;
+>>       samsung,dw-mshc-sdr-timing = <0 4>;
+>>       samsung,dw-mshc-ddr-timing = <0 2>;
+>> +     samsung,dw-mshc-hs400-timing = <0 2>;
+>> +     samsung,read-strobe-delay = <90>;
+>>       pinctrl-names = "default";
+>> -     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+>> +     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
+>>       bus-width = <8>;
+>>  };
+>>
+>>
 >
->Is it so that the point of SLEEP_NOTIFICATION is to notify that VCC will be
->powered off after the device is put to sleep by CMD5?
-The purpose of SLEEP_NOTIFICATION is to give the eMMC enough time to prepare itself before powered off.
-Before the SLEEP_NOTIFICATION fetcher the eMMC did not know he will get into sleep but only when the sleep was issued
-With this solution the device start to prepare itself during the sleep preparation
 
->
->At the moment, the card does not get put to sleep if there is support for
->power-off-notification?
- No, it will enter to sleep after the device will finish its "internal work"
 
+
+-- 
+Regards,
+Alim
