@@ -1,64 +1,38 @@
-From: Vinod Koul <vinod.koul@intel.com>
-Subject: Re: [next:master 2655/4763]
- arch/arm/mach-shmobile/board-ape6evm.c:177:2: error: unknown field
- 'tmio_flags' specified in initializer
-Date: Mon, 16 Mar 2015 21:58:46 +0530
-Message-ID: <20150316162846.GP32683@intel.com>
-References: <201503141650.GfUoPRK3%fengguang.wu@intel.com>
- <87ioe1kcp8.wl%kuninori.morimoto.gx@renesas.com>
- <20150316075105.GA21372@verge.net.au>
- <87lhixiat4.wl%kuninori.morimoto.gx@renesas.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] mmc: sh_mobile_sdhi: remove sh_mobile_sdhi_info v2
+Date: Mon, 16 Mar 2015 17:34:50 +0100
+Message-ID: <45205978.mSO6RfbDSy@wuerfel>
+References: <201503141650.GfUoPRK3%fengguang.wu@intel.com> <87lhixiat4.wl%kuninori.morimoto.gx@renesas.com> <87k2yhiaro.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <87lhixiat4.wl%kuninori.morimoto.gx@renesas.com>
+In-Reply-To: <87k2yhiaro.wl%kuninori.morimoto.gx@renesas.com>
 Sender: linux-sh-owner@vger.kernel.org
 To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, arm@kernel.org, kbuild-all@01.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Vinod Koul <vinod.koul@intel.com>, Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, arm@kernel.org, kbuild-all@01.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Mar 16, 2015 at 05:52:23PM +0900, Kuninori Morimoto wrote:
+On Monday 16 March 2015 08:53:40 Kuninori Morimoto wrote:
+> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 > 
-> Hi Vinod
+> 84f11d5b1f2abc0e22895b7e12e037f0ec03caeb
+> (mmc: sh_mobile_sdhi: remove sh_mobile_sdhi_info)
+> replaced sh_mobile_sdhi_info to tmio_mmc_data, but it was missing
+> to replace board-ape6evm / board-mackerel.
+> Kernel build will be failed without this patch.
 > 
-> Kuninori Morimoto (1):
->       mmc: sh_mobile_sdhi: remove sh_mobile_sdhi_info v2
+>         >> arch/arm/mach-shmobile/board-ape6evm.c:176:21: error: \
+>                 variable 'sdhi0_pdata' has initializer but incomplete type
+>         static const struct sh_mobile_sdhi_info sdhi0_pdata __initconst = {
+>                             ^
+>         >> arch/arm/mach-shmobile/board-ape6evm.c:177:2: error: \
+>                 unknown field 'tmio_flags' specified in initializer
+>         .tmio_flags = TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE,
+>         ^
+>         ...
 > 
->  arch/arm/mach-shmobile/board-ape6evm.c  | 12 ++++++------
->  arch/arm/mach-shmobile/board-mackerel.c | 30 +++++++++++++++---------------
->  2 files changed, 21 insertions(+), 21 deletions(-)
+> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 > 
-> This patch is related to SH-ARM and MMC, but is based on DMAEngine.
-> So, you accepted my previous patch in
-> 
-> 	http://thread.gmane.org/gmane.linux.ports.sh.devel/44068
-> 
-> But,
-> 
-> arch/arm/mach-shmobile/board-ape6evm.c
-> arch/arm/mach-shmobile/board-mackerel.c
-> 
-> will be removed if it includes Simon's/next branch, but your branch
-> doesn't include it, and my previous patch didn't care about thesse.
-> So compile error happen in your branch.
-> And I got error report from kbuild system.
-> 
-> 	git://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git :: next
-> 
-> > > > commit: 84f11d5b1f2abc0e22895b7e12e037f0ec03caeb [2655/4763] mmc: sh_mobile_sdhi: remove sh_mobile_sdhi_info
-> > > > config: arm-ape6evm_defconfig (attached as .config)
-> > > > reproduce:
-> > > >   wget https://git.kernel.org/cgit/linux/kernel/git/wfg/lkp-tests.git/plain/sbin/make.cross -O ~/bin/make.cross
-> > > >   chmod +x ~/bin/make.cross
-> > > >   git checkout 84f11d5b1f2abc0e22895b7e12e037f0ec03caeb
-> > > >   # save the attached .config to linux build tree
-> > > >   make.cross ARCH=arm 
-> 
-> This issue can be solved my next fixup patch, but conflict will happen
-> when merge timing.
-Looks okay, I will wait a day for any acks and apply it
 
--- 
-~Vinod
-
+Acked-by: Arnd Bergmann <arnd@arndb.de>
