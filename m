@@ -1,85 +1,48 @@
-From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH V2 3/3] MAINTAINERS: mmc: Cleanup MMC/SD/SDIO section and SDHCI driver section
-Date: Sun, 15 Mar 2015 21:15:13 +0000
-Message-ID: <86k2yiq7xa.fsf@void.printf.net>
-References: <1426258115-11801-1-git-send-email-ulf.hansson@linaro.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v4 1/4] mmc: dw_mmc: Don't try to enable the CD until we're
+ sure we're not deferring
+Date: Mon, 16 Mar 2015 11:09:38 +0900
+Message-ID: <55063B62.2050109@samsung.com>
+References: <1426112117-18220-1-git-send-email-dianders@chromium.org>
+ <5502CADB.4040204@samsung.com> <5801798.REbCKAj1a1@phil>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1426258115-11801-1-git-send-email-ulf.hansson@linaro.org> (Ulf
-	Hansson's message of "Fri, 13 Mar 2015 15:48:35 +0100")
+In-reply-to: <5801798.REbCKAj1a1@phil>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Joe Perches <joe@perches.com>
+To: Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alexandru Stan <amstan@chromium.org>, linux-rockchip@lists.infradead.org, Seungwon Jeon <tgih.jun@samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, chris@printf.net, Andrew Bresticker <abrestic@chromium.org>, Mark Brown <broonie@kernel.org>, Addy Ke <addy.ke@rock-chips.com>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, javier.martinez@collabora.co.uk, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Hi, Heiko.
 
-On Fri, Mar 13 2015, Ulf Hansson wrote:
-> As Chris Ball has moved on to other assignments, he's no longer able to
-> help me maintain MMC. Let's remove him from the MMC sections in
-> MAINTAINERS and add him to CREDIT file.
->
-> This also affects the SDHCI DRIVER section, since its state now becomes
-> orphan.
->
-> Cc: Chris Ball <chris@printf.net>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  CREDITS     | 4 ++++
->  MAINTAINERS | 6 +-----
->  2 files changed, 5 insertions(+), 5 deletions(-)
->
-> diff --git a/CREDITS b/CREDITS
-> index 96935df..843e176 100644
-> --- a/CREDITS
-> +++ b/CREDITS
-> @@ -187,6 +187,10 @@ N: Krishna Balasubramanian
->  E: balasub@cis.ohio-state.edu
->  D: Wrote SYS V IPC (part of standard kernel since 0.99.10)
->  
-> +N: Chris Ball
-> +E: chris@printf.net
-> +D: Former maintainer of the MMC/SD/SDIO subsystem.
-> +
->  N: Dario Ballabio
->  E: ballabio_dario@emc.com
->  E: dario.ballabio@tiscalinet.it
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 582b4b4..50479c8 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -6547,10 +6547,8 @@ F:	drivers/mfd/
->  F:	include/linux/mfd/
->  
->  MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND SDIO SUBSYSTEM
-> -M:	Chris Ball <chris@printf.net>
->  M:	Ulf Hansson <ulf.hansson@linaro.org>
->  L:	linux-mmc@vger.kernel.org
-> -T:	git git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
->  T:	git git://git.linaro.org/people/ulf.hansson/mmc.git
->  S:	Maintained
->  F:	drivers/mmc/
-> @@ -8650,10 +8648,8 @@ S:	Maintained
->  F:	drivers/mmc/host/sdricoh_cs.c
->  
->  SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) DRIVER
-> -M:	Chris Ball <chris@printf.net>
->  L:	linux-mmc@vger.kernel.org
-> -T:	git git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
-> -S:	Maintained
-> +S:	Orphan
->  F:	drivers/mmc/host/sdhci.*
->  F:	drivers/mmc/host/sdhci-pltfm.[ch]
 
-Thanks Ulf:
+On 03/13/2015 09:10 PM, Heiko Stuebner wrote:
+> Hi,
+>=20
+> Am Freitag, 13. M=E4rz 2015, 20:32:43 schrieb Jaehoon Chung:
+>> Hi Doug,
+>>
+>> Will apply. Thanks!
+>=20
+> just to make sure, you'll take patches 1-3 and I'll take the dts chan=
+ge from=20
+> patch 4, right?
 
-Acked-by: Chris Ball <chris@printf.net>
+Right. I will check on today and request pull to ulf on tomorrow.
+Will CC'd your email when PR.
 
-I wonder what we should do about mmc-utils.  I could continue applying
-patches since they're infrequent.  But perhaps few people would know
-to send them to me -- any ideas?
+Best Regards,
+Jaehoon Chung
 
-- Chris.
--- 
-Chris Ball   <http://printf.net/>
+>=20
+>=20
+> Thanks
+> Heiko
+>=20
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+>=20
