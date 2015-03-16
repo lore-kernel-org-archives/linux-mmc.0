@@ -1,66 +1,50 @@
-From: Nikita Yushchenko <nikita.yoush@yandex.ru>
-Subject: Re: mmc idle time bkops?
-Date: Mon, 16 Mar 2015 22:46:16 +0300
-Message-ID: <55073308.7090501@yandex.ru>
-References: <550098CE.1010407@yandex.ru> <bdb5de1e1c2c1cfacdf02ba8f44025a3.squirrel@www.codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from forward3h.cmail.yandex.net ([87.250.230.18]:51637 "EHLO
-	forward3h.cmail.yandex.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S933789AbbCPTzk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Mar 2015 15:55:40 -0400
-In-Reply-To: <bdb5de1e1c2c1cfacdf02ba8f44025a3.squirrel@www.codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Fabian Frederick <fabf@skynet.be>
+Subject: [PATCH 33/35 linux-next] mmc: constify of_device_id array
+Date: Mon, 16 Mar 2015 20:59:07 +0100
+Message-ID: <1426535949-26107-2-git-send-email-fabf@skynet.be>
+References: <1426533469-25458-1-git-send-email-fabf@skynet.be>
+ <1426535949-26107-1-git-send-email-fabf@skynet.be>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1426535949-26107-1-git-send-email-fabf@skynet.be>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Fabian Frederick <fabf@skynet.be>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Prisk <linux@prisktech.co.nz>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: merez@codeaurora.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Maya.
+of_device_id is always used as const.
+(See driver.of_match_table and open firmware functions)
 
-Thanks for the information.
+Signed-off-by: Fabian Frederick <fabf@skynet.be>
+---
+ drivers/mmc/host/mmc_spi.c   | 2 +-
+ drivers/mmc/host/wmt-sdmmc.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-There are thoughts that missing support for "non-urgent" bkops request
-could be reason of unexpected slowdowns of eMMC i/o that customer is
-observing. Thus the interest on the current status.
-
-However, no particular projects or needs yet.
-
-Nikita
-
-> Hi Nikita,
-> 
-> The patch got stuck for a while as there was a request to use the runtime
-> PM framework for implementing the idle time BKOPs and I didn't have the
-> ability to test it back then.
-> We plan to re-implement and test in the upcoming few months (aim to July).
-> Do you have a need for this feature in an earlier date or it can wait for
-> july?
-> 
-> Thanks,
-> Maya
-> 
->> Hi
->>
->> Some months ago, you've been working on "idle time bkops" feature. The
->> latest (v6) sign of this work I could found is [1]
->>
->> [1] https://lkml.org/lkml/2013/4/14/29
->>
->> However this did not land in mainline, also no replies, and no sign of
->> any follow-up...  Complete mystery what has happened to this effort :(
->>
->> What is the latest status of "idle time bkops" functionality?
->> Is any working implementation available?
->>
->> TIA,
->> Nikita Yushchenko
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-> 
-> 
-
+diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+index e4a0754..ae19d83 100644
+--- a/drivers/mmc/host/mmc_spi.c
++++ b/drivers/mmc/host/mmc_spi.c
+@@ -1507,7 +1507,7 @@ static int mmc_spi_remove(struct spi_device *spi)
+ 	return 0;
+ }
+ 
+-static struct of_device_id mmc_spi_of_match_table[] = {
++static const struct of_device_id mmc_spi_of_match_table[] = {
+ 	{ .compatible = "mmc-spi-slot", },
+ 	{},
+ };
+diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+index dd2e1aa..5af0055 100644
+--- a/drivers/mmc/host/wmt-sdmmc.c
++++ b/drivers/mmc/host/wmt-sdmmc.c
+@@ -744,7 +744,7 @@ static struct wmt_mci_caps wm8505_caps = {
+ 	.max_blk_size = 2048,
+ };
+ 
+-static struct of_device_id wmt_mci_dt_ids[] = {
++static const struct of_device_id wmt_mci_dt_ids[] = {
+ 	{ .compatible = "wm,wm8505-sdhc", .data = &wm8505_caps },
+ 	{ /* Sentinel */ },
+ };
+-- 
+2.1.0
