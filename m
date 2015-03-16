@@ -1,53 +1,99 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [PATCH] mmc: sleep notification
-Date: Mon, 16 Mar 2015 11:37:29 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333FA1245B@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
-	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAPDyKFqLUBYUx9XrhnMeUtf8HU_=4PH_4Vf7m8mM-CT63jG24Q@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V2 3/3] MAINTAINERS: mmc: Cleanup MMC/SD/SDIO section and
+ SDHCI driver section
+Date: Mon, 16 Mar 2015 14:15:00 +0100
+Message-ID: <CAPDyKFr=trW8oRASLpQfF+7o5b-yd++8iKch4g42mQjCi1qhfQ@mail.gmail.com>
+References: <1426258115-11801-1-git-send-email-ulf.hansson@linaro.org>
+	<86k2yiq7xa.fsf@void.printf.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0076.outbound.protection.outlook.com ([207.46.100.76]:23969
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754110AbbCPLhe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 16 Mar 2015 07:37:34 -0400
-In-Reply-To: <CAPDyKFqLUBYUx9XrhnMeUtf8HU_=4PH_4Vf7m8mM-CT63jG24Q@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:36389 "EHLO
+	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752244AbbCPNPB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Mar 2015 09:15:01 -0400
+Received: by qcto4 with SMTP id o4so42678860qct.3
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2015 06:15:00 -0700 (PDT)
+In-Reply-To: <86k2yiq7xa.fsf@void.printf.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
+To: Chris Ball <chris@printf.net>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Joe Perches <joe@perches.com>
 
-SGkgVWxmLA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5z
-c29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogVGh1cnNkYXksIE1h
-cmNoIDEyLCAyMDE1IDExOjEwIEFNDQo+IFRvOiBBbGV4IExlbWJlcmcNCj4gQ2M6IEF2aSBTaGNo
-aXNsb3dza2k7IGxpbnV4LW1tYzsgQ2hyaXMgQmFsbA0KPiBTdWJqZWN0OiBSZTogW1BBVENIXSBt
-bWM6IHNsZWVwIG5vdGlmaWNhdGlvbg0KPiANCj4gWy4uLl0NCj4gDQo+ID4+ID4gQWxzbywgSSB0
-aGluayB3ZSBuZWVkIHRvIGNsYXJpZnkgb25lIG1vcmUgcG9pbnQgZm9yIHRoaXMgcGF0Y2g6DQo+
-ID4+ID4gQXMgd2FzIG1lbnRpb25lZCBpbiBjb21taXQgbWVzc2FnZSAtIFNsZWVwX05vdGlmaWNh
-dGlvbiBjYW4gYmUNCj4gPj4gPiBpbnRlcnJ1cHRlZA0KPiA+PiBieSBIUEkuDQo+ID4+ID4gVGhp
-cyBhbGxvd3Mgbm90IGJsb2NraW5nIHRoZSBob3N0IGR1cmluZyB0aGUgU2xlZXBfTm90aWZpY2F0
-aW9uDQo+ID4+ID4gYnVzeSB0aW1lIGFuZCBhbGxvd3MgYWNjZXB0aW5nIHJlcXVlc3RzIGNvbWlu
-ZyBkdXJpbmcgdGhpcyBzdGFnZS4NCj4gPj4gPiBUaHVzLCB3aXRob3V0IGhhdmluZyBIUEkgc3Vw
-cG9ydGVkLCBzdXNwZW5kL3Jlc3VtZSBwcm9jZXNzIG1pZ2h0IGJlDQo+ID4+ID4gaW5mbHVlbmNl
-ZCBieSBTbGVlcF9Ob3RpZmljYXRpb24gYnVzeSB0aW1lLCBhbmQgdGhpcyBzaG91bGQgbm90DQo+
-ID4+ID4gaGFwcGVuIC0NCj4gPj4gc3VzcGVuZC9yZXN1bWUgc2hvdWxkIGJlIGRvbmUgaW4gdmVy
-eSBmYXN0IGFuZCBub3QgYmxvY2tpbmcgbWFubmVyLg0KPiA+Pg0KPiA+PiBJIGZhaWwgdG8gdW5k
-ZXJzdGFuZCB5b3VyIGNvbW1lbnQgaGVyZS4NCj4gPj4NCj4gPj4gUGxlYXNlIHRlbGwgbWUgYXQg
-d2hhdCBwb2ludChzKSB5b3VyIHRoaW5rIGl0IG1ha2Ugc2Vuc2UgdG8gaXNzdWUgdGhlDQo+ID4+
-IFNMRUVQX05PVElGSUNBVElPTj8gSWYgdGhhdCBpcyBkdXJpbmcgdGhlIHN1c3BlbmQgcGhhc2Us
-IHRoZW4gYSBIUEkNCj4gPj4gcmVxdWVzdCBjYW4ndCBiZSB0cmlnZ2VyZWQuDQo+ID4NCj4gPiBJ
-IHRoaW5rIFNMRUVQX05PVElGSUNBVElPTiBzaG91bGQgYmUgaXNzdWVkIG9uIG1tY19wbV9ub3Rp
-ZnkoKSBjYWxsLA0KPiA+IG9uIFBNX1NVU1BFTkRfUFJFUEFSRSBjYXNlLg0KPiANCj4gU28sIGV4
-YWN0bHkgd2h5IGlzIHRoYXQgdG8gcHJlZmVyLCBjb21wYXJpbmcgZG9pbmcgaXQgaW4gc3lzdGVt
-IFBNDQo+IC0+c3VzcGVuZCgpIGNhbGxiYWNrPw0KDQpBc3N1bWluZyB0aGF0IFNMRUVQX05PVElG
-SUNBVElPTiBtYXkgdGFrZSB0aW1lDQooZGVmaW5lZCBpbiBTTEVFUF9OT1RJRklDQVRJT05fVElN
-RSBieXRlIGluIEVYVF9DU0QgWzIxNl0pLA0KSSB0aGluayBpdCBpcyBiZXR0ZXIgdG8gc2VuZCBp
-dCBmcm9tIHBtIG5vdGlmaWVyIC0gbW1jX3BtX25vdGlmeSgpLg0KDQo+IA0KPiBLaW5kIHJlZ2Fy
-ZHMNCj4gVWZmZQ0K
+On 15 March 2015 at 22:15, Chris Ball <chris@printf.net> wrote:
+> Hi,
+>
+> On Fri, Mar 13 2015, Ulf Hansson wrote:
+>> As Chris Ball has moved on to other assignments, he's no longer able to
+>> help me maintain MMC. Let's remove him from the MMC sections in
+>> MAINTAINERS and add him to CREDIT file.
+>>
+>> This also affects the SDHCI DRIVER section, since its state now becomes
+>> orphan.
+>>
+>> Cc: Chris Ball <chris@printf.net>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> ---
+>>  CREDITS     | 4 ++++
+>>  MAINTAINERS | 6 +-----
+>>  2 files changed, 5 insertions(+), 5 deletions(-)
+>>
+>> diff --git a/CREDITS b/CREDITS
+>> index 96935df..843e176 100644
+>> --- a/CREDITS
+>> +++ b/CREDITS
+>> @@ -187,6 +187,10 @@ N: Krishna Balasubramanian
+>>  E: balasub@cis.ohio-state.edu
+>>  D: Wrote SYS V IPC (part of standard kernel since 0.99.10)
+>>
+>> +N: Chris Ball
+>> +E: chris@printf.net
+>> +D: Former maintainer of the MMC/SD/SDIO subsystem.
+>> +
+>>  N: Dario Ballabio
+>>  E: ballabio_dario@emc.com
+>>  E: dario.ballabio@tiscalinet.it
+>> diff --git a/MAINTAINERS b/MAINTAINERS
+>> index 582b4b4..50479c8 100644
+>> --- a/MAINTAINERS
+>> +++ b/MAINTAINERS
+>> @@ -6547,10 +6547,8 @@ F:     drivers/mfd/
+>>  F:   include/linux/mfd/
+>>
+>>  MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND SDIO SUBSYSTEM
+>> -M:   Chris Ball <chris@printf.net>
+>>  M:   Ulf Hansson <ulf.hansson@linaro.org>
+>>  L:   linux-mmc@vger.kernel.org
+>> -T:   git git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
+>>  T:   git git://git.linaro.org/people/ulf.hansson/mmc.git
+>>  S:   Maintained
+>>  F:   drivers/mmc/
+>> @@ -8650,10 +8648,8 @@ S:     Maintained
+>>  F:   drivers/mmc/host/sdricoh_cs.c
+>>
+>>  SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) DRIVER
+>> -M:   Chris Ball <chris@printf.net>
+>>  L:   linux-mmc@vger.kernel.org
+>> -T:   git git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
+>> -S:   Maintained
+>> +S:   Orphan
+>>  F:   drivers/mmc/host/sdhci.*
+>>  F:   drivers/mmc/host/sdhci-pltfm.[ch]
+>
+> Thanks Ulf:
+>
+> Acked-by: Chris Ball <chris@printf.net>
+>
+> I wonder what we should do about mmc-utils.  I could continue applying
+> patches since they're infrequent.  But perhaps few people would know
+> to send them to me -- any ideas?
+
+It's great news!
+
+I think we have two options.
+1. Add a new file under the mmc documentation in the kernel and
+describe the mmc utils git in there.
+2. Move the code from mmc-utils into /tools directory in the kernel.
+
+Kind regards
+Uffe
