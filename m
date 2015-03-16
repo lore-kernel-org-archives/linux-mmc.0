@@ -1,96 +1,133 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Consider HLE errors to be data and command
- errors
-Date: Mon, 16 Mar 2015 14:56:13 +0900
-Message-ID: <5506707D.40708@samsung.com>
-References: <1426002490-2014-1-git-send-email-dianders@chromium.org>
- <5502CA4E.9060401@samsung.com>
- <CAD=FV=VX3ix-j4y95W1q8b-aVuVEN+4xsd8WLx2xcE7KPNJwRw@mail.gmail.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH] gpio: pcf857x: restore the initial line state of all
+ pcf lines
+Date: Mon, 16 Mar 2015 14:16:52 +0530
+Message-ID: <5506987C.3060601@ti.com>
+References: <1418371601-22658-1-git-send-email-kishon@ti.com>	<548F498F.7050202@ti.com>	<549271A9.5040701@ti.com>	<5492E09F.1000003@ti.com>	<54AA2EB1.8090501@ti.com> <CACRpkdago2vWJYFmywULna6nkrbtciPZFESuuKixF0r8rSB1Sw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <CAD=FV=VX3ix-j4y95W1q8b-aVuVEN+4xsd8WLx2xcE7KPNJwRw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bear.ext.ti.com ([192.94.94.41]:41170 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751753AbbCPIq6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 16 Mar 2015 04:46:58 -0400
+In-Reply-To: <CACRpkdago2vWJYFmywULna6nkrbtciPZFESuuKixF0r8rSB1Sw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Nishanth Menon <nm@ti.com>, Alexandre Courbot <gnurou@gmail.com>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, Linux-OMAP <linux-omap@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Benoit Parrot <bparrot@ti.com>
 
-Hi, Doug.
+Hi,
 
-On 03/14/2015 05:27 AM, Doug Anderson wrote:
-> Hi,
-> 
-> On Fri, Mar 13, 2015 at 4:30 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> Hi, Doug.
->>
->> On 03/11/2015 12:48 AM, Doug Anderson wrote:
->>> The dw_mmc driver enables HLE errors as part of DW_MCI_ERROR_FLAGS but
->>> nothing in the interrupt handler actually handles them and ACKs them.
->>> That means that if we ever get an HLE error we'll just keep getting
->>> interrupts and we'll wedge things.
+On Wednesday 14 January 2015 05:28 PM, Linus Walleij wrote:
+> On Mon, Jan 5, 2015 at 7:26 AM, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>> On Thursday 18 December 2014 07:41 PM, Nishanth Menon wrote:
+>>> On 12/18/2014 12:18 AM, Kishon Vijay Abraham I wrote:
+>>>>
+>>>>
+>>>> On Tuesday 16 December 2014 02:20 AM, Nishanth Menon wrote:
+>>>>> On 12/12/2014 02:06 AM, Kishon Vijay Abraham I wrote:
+>>>>>> The reset values for all the PCF lines are high and hence on shutdown
+>>>>>> we should drive all the lines high in order to bring it to the reset state.
+>>>>>>
+>>>>>> This is actually required since pcf doesn't have a reset line and even after
+>>>>>> warm reset (by invoking "reboot" in prompt) the pcf lines maintains it's
+>>>>>> previous programmed state. This becomes a problem if the boards are designed
+>>>>>> to work with the default initial state.
+>>>>>>
+>>>>>> DRA7XX_evm uses PCF8575 and one of the PCF output lines feeds to MMC/SD and
+>>>>>> this line should be driven high in order for the MMC/SD to be detected.
+>>>>>> This line is modelled as regulator and the hsmmc driver takes care of enabling
+>>>>>> and disabling it. In the case of 'reboot', during shutdown path as part of it's
+>>>>>> cleanup process the hsmmc driver disables this regulator. This makes MMC boot
+>>>>>> not functional.
+>>>>>>
+>>>>>> Fixed it by driving high all the pcf lines.
+>>>>>>
+>>>>>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+>>>>>> ---
+>>>>>>   drivers/gpio/gpio-pcf857x.c |    9 +++++++++
+>>>>>>   1 file changed, 9 insertions(+)
+>>>>>>
+>>>>>> diff --git a/drivers/gpio/gpio-pcf857x.c b/drivers/gpio/gpio-pcf857x.c
+>>>>>> index 236708a..00b15b2 100644
+>>>>>> --- a/drivers/gpio/gpio-pcf857x.c
+>>>>>> +++ b/drivers/gpio/gpio-pcf857x.c
+>>>>>> @@ -448,6 +448,14 @@ static int pcf857x_remove(struct i2c_client *client)
+>>>>>>     return status;
+>>>>>>   }
+>>>>>>
+>>>>>> +static void pcf857x_shutdown(struct i2c_client *client)
+>>>>>> +{
+>>>>>> +  struct pcf857x *gpio = i2c_get_clientdata(client);
+>>>>>> +
+>>>>>> +  /* Drive all the I/O lines high */
+>>>>>> +  gpio->write(gpio->client, BIT(gpio->chip.ngpio) - 1);
+>>>>>
+>>>>> you might force a contention here - depending on System configuration.
+>>>>> example:
+>>>>> +-------+
+>>>>> |       |
+>>>>> |  U1   |         +------+      +-----------+
+>>>>> |       +--------->      |      |           |
+>>>>> +-------+         |      |      |           |
+>>>>>                    | Switch<-----+    SoC    |
+>>>>> +-------+         |      |      |           |
+>>>>> |       |         |      |      |           |
+>>>>> | U2    <---------+--^---+      +-----------+
+>>>>> |       |            |
+>>>>> |       |            |
+>>>>> +-------+            |
+>>>>>                    +--+--+
+>>>>>                    |     |
+>>>>>                    | PCF |
+>>>>>                    |     |
+>>>>>                    +-----+
+>>>>>
+>>>>> At low, SoC pin is connected to U2 as drive. when reset to high, you
+>>>>> now have U1 driving to the same pin that SoC has, potentially
+>>>>> resulting in contention.
+>>>>>
+>>>>>
+>>>>> Unfortunately, at this level, you do not know what the state of the
+>>>>> system is, blindly forcing a pin level will potentially cause
+>>>>> contention risk depending on pin configuration.
+>>>>
+>>>> Assume we are doing a reset when the system is powered on, irrespective of the
+>>>> state of the system, we'll be forcing the pin level to the default state.
 >>>
->>> We really don't expect HLE errors but if we ever get them we shouldn't
->>> silently ignore them.
->>>
->>> Note that I have seen HLE errors while constantly ejecting and
->>> inserting cards (ejecting while inserting, etc).
+>>> Yes, I dont deny that system will be fine *after* reset sequence is
+>>> started or completed. However there is a duration between the pcf
+>>> shutdown handler is called and the final reset handler is invoked -
+>>> that is the duration when  the contention might cause device behavior.
+>>> Essentially ignoring the state various drivers have asked PCF to setup
+>>> the pins and doing a hands down configuration may have side effects we
+>>> cant properly expect.
 >>
->> Right, It is occurred when card inserting/ejecting.(This case is the case of removable card.)
->> Did you test with eMMC? We needs to consider how control HLE error.
-> 
-> I'm running it on systems with eMMC, SD Cards, and SDIO WiFi.  HLE
-> doesn't show up in normal circumstances, only in ejecting the SD card
-> at the wrong time.  ...since you can't eject eMMC, I didn't see
-> problems there.
+>> The solution might be to invoke the shutdown handler of the various drivers
+>> using the PCF before the shutdown handler of the PCF driver itself gets
+>> invoked? But I'm not sure how can that be achieved in linux kernel :-(
+>
+> #include <linux/reboot.h>
+>
+> static int foo_reboot_handler(struct notifier_block *this,
+>                                  unsigned long code,
+>                                  void *unused)
+> {
+>          pr_crit("do some last minute stuff\n");
+>          return NOTIFY_OK;
+> }
+>
+> static struct notifier_block foo_reboot_notifier = {
+>          .notifier_call = foo_reboot_handler,
+> };
+>
+> register_reboot_notifier(&foo_reboot_notifier);
 
-When card is inserting/removing, HLE is often occurred.
-Since there is some request into queue when card is removed.(in my understanding.)
-It's also related with controlling clock.
+Added debug prints and found the reboot notifier gets invoked before the
+shutdown handler which means some stuff can be done after this reboot
+notifier:-(
 
-> 
->> But I think this patch can't solve all of HLE problem.
-> 
-> Agreed.  HLE means that the controller is pretty wedged and (as I
-> understand it) means that there's something else we're doing wrong
-> elsewhere in the dw_mmc driver (like writing more data to an already
-> busy controller).  We should probably track down and find those cases,
-> too.
-> 
-> I agree also that this code probably won't fix the controller in all
-> cases of HLE errors.  ...but I'm not 100% certain of the best way to
-> really do that, do you know?
-> 
-> ...but in any case the absolute worst thing to do is what the driver
-> is already doing: unmask the HLE interrupt but never handle it
-> anywhere...  My patch is at least better than that...
-
-Agreed, your patch should be at least better than now.
-But if pending is set HLE error bit,
-it should hit the cases of DW_MCI_DATA_ERROR_FLAGS & DW_MCI_CMD_ERROR_FLAGS.
-and i think send_stop_abort() can't run, doesn't?
-(If HLE is occurred at non-removable card, controller can't do anything.)
-
-If i can reproduce HLE error, i can check more detailedly.(Trying to reproduce it.)
-I don't find fully solution yet. But finding the solution is my or our(?) part/role in future.
-Actually, i'm using the ctrl reset at my local tree, when HLE error is occurred.
-(Also it's not solution..)
-According to TRM, "HLE is raised, software then has to reload the command."
-We needs to consider how reload the command without lost previous request.
-
-> 
-> If you have another suggested way to make HLE error handling better
-> (or avoid them to begin with) I'm happy to test!  :)
-
-I will try to find HLE error handling..if you also have other opinion, let me know, plz.
-I needs to listen other opinion, it's great helpful to me.. :)
-
-Thank you a lot!
-
-Best Regards,
-Jaehoon Chung
-
-> 
-> 
-> -Doug
-> 
+Thanks
+Kishon
