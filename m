@@ -1,50 +1,45 @@
-From: Fabian Frederick <fabf@skynet.be>
-Subject: [PATCH 33/35 linux-next] mmc: constify of_device_id array
-Date: Mon, 16 Mar 2015 20:59:07 +0100
-Message-ID: <1426535949-26107-2-git-send-email-fabf@skynet.be>
-References: <1426533469-25458-1-git-send-email-fabf@skynet.be>
- <1426535949-26107-1-git-send-email-fabf@skynet.be>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1426535949-26107-1-git-send-email-fabf@skynet.be>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Fabian Frederick <fabf@skynet.be>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Tony Prisk <linux@prisktech.co.nz>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH] mmc: sh_mobile_sdhi: remove sh_mobile_sdhi_info v2
+Date: Tue, 17 Mar 2015 06:34:20 +0900
+Message-ID: <20150316213420.GA1086@verge.net.au>
+References: <201503141650.GfUoPRK3%fengguang.wu@intel.com>
+ <87lhixiat4.wl%kuninori.morimoto.gx@renesas.com>
+ <87k2yhiaro.wl%kuninori.morimoto.gx@renesas.com>
+ <45205978.mSO6RfbDSy@wuerfel>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <45205978.mSO6RfbDSy@wuerfel>
+Sender: linux-sh-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Vinod Koul <vinod.koul@intel.com>, Linux-SH <linux-sh@vger.kernel.org>, arm@kernel.org, kbuild-all@01.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-of_device_id is always used as const.
-(See driver.of_match_table and open firmware functions)
+On Mon, Mar 16, 2015 at 05:34:50PM +0100, Arnd Bergmann wrote:
+> On Monday 16 March 2015 08:53:40 Kuninori Morimoto wrote:
+> > From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+> > 
+> > 84f11d5b1f2abc0e22895b7e12e037f0ec03caeb
+> > (mmc: sh_mobile_sdhi: remove sh_mobile_sdhi_info)
+> > replaced sh_mobile_sdhi_info to tmio_mmc_data, but it was missing
+> > to replace board-ape6evm / board-mackerel.
+> > Kernel build will be failed without this patch.
+> > 
+> >         >> arch/arm/mach-shmobile/board-ape6evm.c:176:21: error: \
+> >                 variable 'sdhi0_pdata' has initializer but incomplete type
+> >         static const struct sh_mobile_sdhi_info sdhi0_pdata __initconst = {
+> >                             ^
+> >         >> arch/arm/mach-shmobile/board-ape6evm.c:177:2: error: \
+> >                 unknown field 'tmio_flags' specified in initializer
+> >         .tmio_flags = TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE,
+> >         ^
+> >         ...
+> > 
+> > Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+> > 
+> 
+> Acked-by: Arnd Bergmann <arnd@arndb.de>
 
-Signed-off-by: Fabian Frederick <fabf@skynet.be>
----
- drivers/mmc/host/mmc_spi.c   | 2 +-
- drivers/mmc/host/wmt-sdmmc.c | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+Acked-by: Simon Horman <horms+renesas@verge.net.au>
 
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index e4a0754..ae19d83 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -1507,7 +1507,7 @@ static int mmc_spi_remove(struct spi_device *spi)
- 	return 0;
- }
- 
--static struct of_device_id mmc_spi_of_match_table[] = {
-+static const struct of_device_id mmc_spi_of_match_table[] = {
- 	{ .compatible = "mmc-spi-slot", },
- 	{},
- };
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index dd2e1aa..5af0055 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -744,7 +744,7 @@ static struct wmt_mci_caps wm8505_caps = {
- 	.max_blk_size = 2048,
- };
- 
--static struct of_device_id wmt_mci_dt_ids[] = {
-+static const struct of_device_id wmt_mci_dt_ids[] = {
- 	{ .compatible = "wm,wm8505-sdhc", .data = &wm8505_caps },
- 	{ /* Sentinel */ },
- };
--- 
-2.1.0
