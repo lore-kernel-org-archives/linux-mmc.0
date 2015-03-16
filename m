@@ -1,74 +1,64 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH v4 2/4] mmc: core: Add mmc_regulator_set_vqmmc()
-Date: Mon, 16 Mar 2015 08:12:43 -0700
-Message-ID: <CAD=FV=U-YnT5jF5MFC==hANXGPqVpV3iLMPu85TrQ4dNDsWeCA@mail.gmail.com>
-References: <1426112117-18220-1-git-send-email-dianders@chromium.org>
-	<1426112117-18220-2-git-send-email-dianders@chromium.org>
-	<CAPDyKFq_WMJfqNGuxwN7xPmhv2X6-+G1zXpdD6zYDkDe7-Jo2A@mail.gmail.com>
+From: Vinod Koul <vinod.koul@intel.com>
+Subject: Re: [next:master 2655/4763]
+ arch/arm/mach-shmobile/board-ape6evm.c:177:2: error: unknown field
+ 'tmio_flags' specified in initializer
+Date: Mon, 16 Mar 2015 21:58:46 +0530
+Message-ID: <20150316162846.GP32683@intel.com>
+References: <201503141650.GfUoPRK3%fengguang.wu@intel.com>
+ <87ioe1kcp8.wl%kuninori.morimoto.gx@renesas.com>
+ <20150316075105.GA21372@verge.net.au>
+ <87lhixiat4.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFq_WMJfqNGuxwN7xPmhv2X6-+G1zXpdD6zYDkDe7-Jo2A@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Mark Brown <broonie@kernel.org>, Alexandru Stan <amstan@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Addy Ke <addy.ke@rock-chips.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, Johan Rudholm <johan.rudholm@axis.com>, Adrian Hunter <adrian.hunter@intel.com>, Tim Kryger <tim.kryger@gmail.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <87lhixiat4.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, arm@kernel.org, kbuild-all@01.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Ulf,
+On Mon, Mar 16, 2015 at 05:52:23PM +0900, Kuninori Morimoto wrote:
+> 
+> Hi Vinod
+> 
+> Kuninori Morimoto (1):
+>       mmc: sh_mobile_sdhi: remove sh_mobile_sdhi_info v2
+> 
+>  arch/arm/mach-shmobile/board-ape6evm.c  | 12 ++++++------
+>  arch/arm/mach-shmobile/board-mackerel.c | 30 +++++++++++++++---------------
+>  2 files changed, 21 insertions(+), 21 deletions(-)
+> 
+> This patch is related to SH-ARM and MMC, but is based on DMAEngine.
+> So, you accepted my previous patch in
+> 
+> 	http://thread.gmane.org/gmane.linux.ports.sh.devel/44068
+> 
+> But,
+> 
+> arch/arm/mach-shmobile/board-ape6evm.c
+> arch/arm/mach-shmobile/board-mackerel.c
+> 
+> will be removed if it includes Simon's/next branch, but your branch
+> doesn't include it, and my previous patch didn't care about thesse.
+> So compile error happen in your branch.
+> And I got error report from kbuild system.
+> 
+> 	git://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git :: next
+> 
+> > > > commit: 84f11d5b1f2abc0e22895b7e12e037f0ec03caeb [2655/4763] mmc: sh_mobile_sdhi: remove sh_mobile_sdhi_info
+> > > > config: arm-ape6evm_defconfig (attached as .config)
+> > > > reproduce:
+> > > >   wget https://git.kernel.org/cgit/linux/kernel/git/wfg/lkp-tests.git/plain/sbin/make.cross -O ~/bin/make.cross
+> > > >   chmod +x ~/bin/make.cross
+> > > >   git checkout 84f11d5b1f2abc0e22895b7e12e037f0ec03caeb
+> > > >   # save the attached .config to linux build tree
+> > > >   make.cross ARCH=arm 
+> 
+> This issue can be solved my next fixup patch, but conflict will happen
+> when merge timing.
+Looks okay, I will wait a day for any acks and apply it
 
-On Mon, Mar 16, 2015 at 7:05 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> +       switch (ios->signal_voltage) {
->> +       case MMC_SIGNAL_VOLTAGE_120:
->> +               return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
->> +                       1200000, 100000);
->
-> Is 1V the lowest possible value? How did you get to that?
+-- 
+~Vinod
 
-I think you've added a zero in your mind and not realized that I'm
-calling regulator_set_voltage_tol() here and in other calls.  Please
-read the above as:
-
-* Try to set the voltage to exactly 1,200,000 uV (1.2V).
-* If you can't get 1.2V exactly, a tolerance ("tol") of 100,000 uV
-(.1V) is OK.
-* In other words, 1.1V - 1.3V are OK, but aim for 1.2V
-
-
->> +       case MMC_SIGNAL_VOLTAGE_180:
->> +               return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
->> +                       1800000, 100000);
->
-> Is 1V the lowest possible value? How did you get to that?
-
-Again, check my zeros.  This should be 1.7 - 1.9V, aiming for 1.8V.
-
-
->> +       case MMC_SIGNAL_VOLTAGE_330:
->> +               return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
->> +                       regulator_get_voltage(mmc->supply.vmmc), 300000);
->
-> Why 3V? Shouldn't it be 2.7V? How will else those SoC that for example
-> supports 2.9V only work?
-
-This will get us within .3V of whatever vmmc is.  If vmmc is 3.3V, it
-will allow vqmmc of 3.0V - 3.6V.
-
-This _seems_ sane to me and given any sane system design we should be
-fine here, I think.  I can't see someone designing a system where
-vqmmc was not within .3V of vmmc, can you?  If we think someone will
-actually build a system where vmmc is 3.3V and vqmmc can't go higher
-than 2.7V then we'll either need to increase the tolerance here or add
-a new asymmetric system call like my original patches did.
-
->>  int mmc_regulator_get_supply(struct mmc_host *mmc);
->
-> One more thought,s as for the vmmc regulator we have a
-> "regulator_enabled" member in the mmc_host. Should we add a similar
-> member for vqmmc? That would prevent host drivers from keeping track
-> of this state themselves.
-
-Yeah, that does sound nice.  Are you suggesting that I modify this
-patch or submit a new one.  Let me know.
-
-
--Doug
