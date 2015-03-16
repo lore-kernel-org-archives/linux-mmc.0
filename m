@@ -1,99 +1,83 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2 3/3] MAINTAINERS: mmc: Cleanup MMC/SD/SDIO section and
- SDHCI driver section
-Date: Mon, 16 Mar 2015 14:15:00 +0100
-Message-ID: <CAPDyKFr=trW8oRASLpQfF+7o5b-yd++8iKch4g42mQjCi1qhfQ@mail.gmail.com>
-References: <1426258115-11801-1-git-send-email-ulf.hansson@linaro.org>
-	<86k2yiq7xa.fsf@void.printf.net>
+Subject: Re: [PATCH] mmc: sleep notification
+Date: Mon, 16 Mar 2015 14:34:59 +0100
+Message-ID: <CAPDyKFrhfPZG4ZnqNTSEgbnpukw342gaeyi22OqAt6PA==E8ug@mail.gmail.com>
+References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
+	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFqLUBYUx9XrhnMeUtf8HU_=4PH_4Vf7m8mM-CT63jG24Q@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA1245B@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f175.google.com ([209.85.216.175]:36389 "EHLO
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:34886 "EHLO
 	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752244AbbCPNPB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Mar 2015 09:15:01 -0400
-Received: by qcto4 with SMTP id o4so42678860qct.3
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2015 06:15:00 -0700 (PDT)
-In-Reply-To: <86k2yiq7xa.fsf@void.printf.net>
+	with ESMTP id S1751793AbbCPNfA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Mar 2015 09:35:00 -0400
+Received: by qcbkw5 with SMTP id kw5so43270838qcb.2
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2015 06:34:59 -0700 (PDT)
+In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED5333FA1245B@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Joe Perches <joe@perches.com>
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-On 15 March 2015 at 22:15, Chris Ball <chris@printf.net> wrote:
-> Hi,
+On 16 March 2015 at 12:37, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
+> Hi Ulf,
 >
-> On Fri, Mar 13 2015, Ulf Hansson wrote:
->> As Chris Ball has moved on to other assignments, he's no longer able to
->> help me maintain MMC. Let's remove him from the MMC sections in
->> MAINTAINERS and add him to CREDIT file.
+>> -----Original Message-----
+>> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+>> Sent: Thursday, March 12, 2015 11:10 AM
+>> To: Alex Lemberg
+>> Cc: Avi Shchislowski; linux-mmc; Chris Ball
+>> Subject: Re: [PATCH] mmc: sleep notification
 >>
->> This also affects the SDHCI DRIVER section, since its state now becomes
->> orphan.
+>> [...]
 >>
->> Cc: Chris Ball <chris@printf.net>
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->> ---
->>  CREDITS     | 4 ++++
->>  MAINTAINERS | 6 +-----
->>  2 files changed, 5 insertions(+), 5 deletions(-)
+>> >> > Also, I think we need to clarify one more point for this patch:
+>> >> > As was mentioned in commit message - Sleep_Notification can be
+>> >> > interrupted
+>> >> by HPI.
+>> >> > This allows not blocking the host during the Sleep_Notification
+>> >> > busy time and allows accepting requests coming during this stage.
+>> >> > Thus, without having HPI supported, suspend/resume process might be
+>> >> > influenced by Sleep_Notification busy time, and this should not
+>> >> > happen -
+>> >> suspend/resume should be done in very fast and not blocking manner.
+>> >>
+>> >> I fail to understand your comment here.
+>> >>
+>> >> Please tell me at what point(s) your think it make sense to issue the
+>> >> SLEEP_NOTIFICATION? If that is during the suspend phase, then a HPI
+>> >> request can't be triggered.
+>> >
+>> > I think SLEEP_NOTIFICATION should be issued on mmc_pm_notify() call,
+>> > on PM_SUSPEND_PREPARE case.
 >>
->> diff --git a/CREDITS b/CREDITS
->> index 96935df..843e176 100644
->> --- a/CREDITS
->> +++ b/CREDITS
->> @@ -187,6 +187,10 @@ N: Krishna Balasubramanian
->>  E: balasub@cis.ohio-state.edu
->>  D: Wrote SYS V IPC (part of standard kernel since 0.99.10)
->>
->> +N: Chris Ball
->> +E: chris@printf.net
->> +D: Former maintainer of the MMC/SD/SDIO subsystem.
->> +
->>  N: Dario Ballabio
->>  E: ballabio_dario@emc.com
->>  E: dario.ballabio@tiscalinet.it
->> diff --git a/MAINTAINERS b/MAINTAINERS
->> index 582b4b4..50479c8 100644
->> --- a/MAINTAINERS
->> +++ b/MAINTAINERS
->> @@ -6547,10 +6547,8 @@ F:     drivers/mfd/
->>  F:   include/linux/mfd/
->>
->>  MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND SDIO SUBSYSTEM
->> -M:   Chris Ball <chris@printf.net>
->>  M:   Ulf Hansson <ulf.hansson@linaro.org>
->>  L:   linux-mmc@vger.kernel.org
->> -T:   git git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
->>  T:   git git://git.linaro.org/people/ulf.hansson/mmc.git
->>  S:   Maintained
->>  F:   drivers/mmc/
->> @@ -8650,10 +8648,8 @@ S:     Maintained
->>  F:   drivers/mmc/host/sdricoh_cs.c
->>
->>  SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) DRIVER
->> -M:   Chris Ball <chris@printf.net>
->>  L:   linux-mmc@vger.kernel.org
->> -T:   git git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc.git
->> -S:   Maintained
->> +S:   Orphan
->>  F:   drivers/mmc/host/sdhci.*
->>  F:   drivers/mmc/host/sdhci-pltfm.[ch]
+>> So, exactly why is that to prefer, comparing doing it in system PM
+>> ->suspend() callback?
 >
-> Thanks Ulf:
->
-> Acked-by: Chris Ball <chris@printf.net>
->
-> I wonder what we should do about mmc-utils.  I could continue applying
-> patches since they're infrequent.  But perhaps few people would know
-> to send them to me -- any ideas?
+> Assuming that SLEEP_NOTIFICATION may take time
+> (defined in SLEEP_NOTIFICATION_TIME byte in EXT_CSD [216]),
+> I think it is better to send it from pm notifier - mmc_pm_notify().
 
-It's great news!
+I assume you think that you will "earn" some milliseconds doing it in
+this phase, but I am not so sure.
 
-I think we have two options.
-1. Add a new file under the mmc documentation in the kernel and
-describe the mmc utils git in there.
-2. Move the code from mmc-utils into /tools directory in the kernel.
+After the PM_SUSPEND_PREPARE notifier, we still have the mmc block
+queue open and are ready to serve requests. Therefore I would expect
+the SLEEP_NOTIFICATION to potentially be interrupted by using HPI.
+
+Then we end up with the following sequence during the system PM sleep phase.
+1. Issue SLEEP_NOTIFICATION.
+2. Interrupt SLEEP_NOTIFICATION, using HPI.
+3. Serve blk request
+4. Issue SLEEP_NOTIFICATION.
+5. Issue SLEEP (CMD5).
+
+That seems like a bad idea to me.
 
 Kind regards
 Uffe
