@@ -1,38 +1,80 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: sh_mobile_sdhi: remove sh_mobile_sdhi_info v2
-Date: Mon, 16 Mar 2015 17:34:50 +0100
-Message-ID: <45205978.mSO6RfbDSy@wuerfel>
-References: <201503141650.GfUoPRK3%fengguang.wu@intel.com> <87lhixiat4.wl%kuninori.morimoto.gx@renesas.com> <87k2yhiaro.wl%kuninori.morimoto.gx@renesas.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [PATCH] mmc: sleep notification
+Date: Mon, 16 Mar 2015 16:58:38 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333FA14148@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
+	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFqLUBYUx9XrhnMeUtf8HU_=4PH_4Vf7m8mM-CT63jG24Q@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA1245B@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAPDyKFrhfPZG4ZnqNTSEgbnpukw342gaeyi22OqAt6PA==E8ug@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <87k2yhiaro.wl%kuninori.morimoto.gx@renesas.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: Vinod Koul <vinod.koul@intel.com>, Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, arm@kernel.org, kbuild-all@01.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-by2on0079.outbound.protection.outlook.com ([207.46.100.79]:39088
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753748AbbCPQ6m (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 16 Mar 2015 12:58:42 -0400
+In-Reply-To: <CAPDyKFrhfPZG4ZnqNTSEgbnpukw342gaeyi22OqAt6PA==E8ug@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-On Monday 16 March 2015 08:53:40 Kuninori Morimoto wrote:
-> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-> 
-> 84f11d5b1f2abc0e22895b7e12e037f0ec03caeb
-> (mmc: sh_mobile_sdhi: remove sh_mobile_sdhi_info)
-> replaced sh_mobile_sdhi_info to tmio_mmc_data, but it was missing
-> to replace board-ape6evm / board-mackerel.
-> Kernel build will be failed without this patch.
-> 
->         >> arch/arm/mach-shmobile/board-ape6evm.c:176:21: error: \
->                 variable 'sdhi0_pdata' has initializer but incomplete type
->         static const struct sh_mobile_sdhi_info sdhi0_pdata __initconst = {
->                             ^
->         >> arch/arm/mach-shmobile/board-ape6evm.c:177:2: error: \
->                 unknown field 'tmio_flags' specified in initializer
->         .tmio_flags = TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE,
->         ^
->         ...
-> 
-> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-> 
-
-Acked-by: Arnd Bergmann <arnd@arndb.de>
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21h
+aWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBNb25kYXksIE1hcmNoIDE2LCAy
+MDE1IDM6MzUgUE0NCj4gVG86IEFsZXggTGVtYmVyZw0KPiBDYzogQXZpIFNoY2hpc2xvd3NraTsg
+bGludXgtbW1jOyBDaHJpcyBCYWxsDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0hdIG1tYzogc2xlZXAg
+bm90aWZpY2F0aW9uDQo+IA0KPiBPbiAxNiBNYXJjaCAyMDE1IGF0IDEyOjM3LCBBbGV4IExlbWJl
+cmcgPEFsZXguTGVtYmVyZ0BzYW5kaXNrLmNvbT4NCj4gd3JvdGU6DQo+ID4gSGkgVWxmLA0KPiA+
+DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IFVsZiBIYW5zc29u
+IFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gPj4gU2VudDogVGh1cnNkYXksIE1h
+cmNoIDEyLCAyMDE1IDExOjEwIEFNDQo+ID4+IFRvOiBBbGV4IExlbWJlcmcNCj4gPj4gQ2M6IEF2
+aSBTaGNoaXNsb3dza2k7IGxpbnV4LW1tYzsgQ2hyaXMgQmFsbA0KPiA+PiBTdWJqZWN0OiBSZTog
+W1BBVENIXSBtbWM6IHNsZWVwIG5vdGlmaWNhdGlvbg0KPiA+Pg0KPiA+PiBbLi4uXQ0KPiA+Pg0K
+PiA+PiA+PiA+IEFsc28sIEkgdGhpbmsgd2UgbmVlZCB0byBjbGFyaWZ5IG9uZSBtb3JlIHBvaW50
+IGZvciB0aGlzIHBhdGNoOg0KPiA+PiA+PiA+IEFzIHdhcyBtZW50aW9uZWQgaW4gY29tbWl0IG1l
+c3NhZ2UgLSBTbGVlcF9Ob3RpZmljYXRpb24gY2FuIGJlDQo+ID4+ID4+ID4gaW50ZXJydXB0ZWQN
+Cj4gPj4gPj4gYnkgSFBJLg0KPiA+PiA+PiA+IFRoaXMgYWxsb3dzIG5vdCBibG9ja2luZyB0aGUg
+aG9zdCBkdXJpbmcgdGhlIFNsZWVwX05vdGlmaWNhdGlvbg0KPiA+PiA+PiA+IGJ1c3kgdGltZSBh
+bmQgYWxsb3dzIGFjY2VwdGluZyByZXF1ZXN0cyBjb21pbmcgZHVyaW5nIHRoaXMgc3RhZ2UuDQo+
+ID4+ID4+ID4gVGh1cywgd2l0aG91dCBoYXZpbmcgSFBJIHN1cHBvcnRlZCwgc3VzcGVuZC9yZXN1
+bWUgcHJvY2VzcyBtaWdodA0KPiA+PiA+PiA+IGJlIGluZmx1ZW5jZWQgYnkgU2xlZXBfTm90aWZp
+Y2F0aW9uIGJ1c3kgdGltZSwgYW5kIHRoaXMgc2hvdWxkDQo+ID4+ID4+ID4gbm90IGhhcHBlbiAt
+DQo+ID4+ID4+IHN1c3BlbmQvcmVzdW1lIHNob3VsZCBiZSBkb25lIGluIHZlcnkgZmFzdCBhbmQg
+bm90IGJsb2NraW5nIG1hbm5lci4NCj4gPj4gPj4NCj4gPj4gPj4gSSBmYWlsIHRvIHVuZGVyc3Rh
+bmQgeW91ciBjb21tZW50IGhlcmUuDQo+ID4+ID4+DQo+ID4+ID4+IFBsZWFzZSB0ZWxsIG1lIGF0
+IHdoYXQgcG9pbnQocykgeW91ciB0aGluayBpdCBtYWtlIHNlbnNlIHRvIGlzc3VlDQo+ID4+ID4+
+IHRoZSBTTEVFUF9OT1RJRklDQVRJT04/IElmIHRoYXQgaXMgZHVyaW5nIHRoZSBzdXNwZW5kIHBo
+YXNlLCB0aGVuDQo+ID4+ID4+IGEgSFBJIHJlcXVlc3QgY2FuJ3QgYmUgdHJpZ2dlcmVkLg0KPiA+
+PiA+DQo+ID4+ID4gSSB0aGluayBTTEVFUF9OT1RJRklDQVRJT04gc2hvdWxkIGJlIGlzc3VlZCBv
+biBtbWNfcG1fbm90aWZ5KCkNCj4gPj4gPiBjYWxsLCBvbiBQTV9TVVNQRU5EX1BSRVBBUkUgY2Fz
+ZS4NCj4gPj4NCj4gPj4gU28sIGV4YWN0bHkgd2h5IGlzIHRoYXQgdG8gcHJlZmVyLCBjb21wYXJp
+bmcgZG9pbmcgaXQgaW4gc3lzdGVtIFBNDQo+ID4+IC0+c3VzcGVuZCgpIGNhbGxiYWNrPw0KPiA+
+DQo+ID4gQXNzdW1pbmcgdGhhdCBTTEVFUF9OT1RJRklDQVRJT04gbWF5IHRha2UgdGltZSAoZGVm
+aW5lZCBpbg0KPiA+IFNMRUVQX05PVElGSUNBVElPTl9USU1FIGJ5dGUgaW4gRVhUX0NTRCBbMjE2
+XSksIEkgdGhpbmsgaXQgaXMgYmV0dGVyDQo+ID4gdG8gc2VuZCBpdCBmcm9tIHBtIG5vdGlmaWVy
+IC0gbW1jX3BtX25vdGlmeSgpLg0KPiANCj4gSSBhc3N1bWUgeW91IHRoaW5rIHRoYXQgeW91IHdp
+bGwgImVhcm4iIHNvbWUgbWlsbGlzZWNvbmRzIGRvaW5nIGl0IGluIHRoaXMgcGhhc2UsDQo+IGJ1
+dCBJIGFtIG5vdCBzbyBzdXJlLg0KDQpJIHdhcyB0aGlua2luZyBtYWlubHkgYWJvdXQgaG93IHRv
+IHByZXZlbnQgImJsb2NraW5nIiBkdXJpbmcgU2xlZXBfTm90aWZpY2F0aW9uIHByb2Nlc3MuDQoN
+Cj4gDQo+IEFmdGVyIHRoZSBQTV9TVVNQRU5EX1BSRVBBUkUgbm90aWZpZXIsIHdlIHN0aWxsIGhh
+dmUgdGhlIG1tYyBibG9jayBxdWV1ZQ0KPiBvcGVuIGFuZCBhcmUgcmVhZHkgdG8gc2VydmUgcmVx
+dWVzdHMuIFRoZXJlZm9yZSBJIHdvdWxkIGV4cGVjdCB0aGUNCj4gU0xFRVBfTk9USUZJQ0FUSU9O
+IHRvIHBvdGVudGlhbGx5IGJlIGludGVycnVwdGVkIGJ5IHVzaW5nIEhQSS4NCg0KUmlnaHQsIGFu
+ZCB0aGlzIHdhcyBhIHJlYXNvbiBmb3IgYWRkaW5nIEhQSSBzdXBwb3J0IGR1cmluZyB0aGUgU2xl
+ZXBfTm90aWZpY2F0aW9uLg0KDQo+IA0KPiBUaGVuIHdlIGVuZCB1cCB3aXRoIHRoZSBmb2xsb3dp
+bmcgc2VxdWVuY2UgZHVyaW5nIHRoZSBzeXN0ZW0gUE0gc2xlZXAgcGhhc2UuDQo+IDEuIElzc3Vl
+IFNMRUVQX05PVElGSUNBVElPTi4NCj4gMi4gSW50ZXJydXB0IFNMRUVQX05PVElGSUNBVElPTiwg
+dXNpbmcgSFBJLg0KPiAzLiBTZXJ2ZSBibGsgcmVxdWVzdA0KPiA0LiBJc3N1ZSBTTEVFUF9OT1RJ
+RklDQVRJT04uDQo+IDUuIElzc3VlIFNMRUVQIChDTUQ1KS4NCg0KQ29ycmVjdCwgdGhpcyBpcyBh
+IHNlcXVlbmNlIHRoYXQgd2Ugc2VlIGFmdGVyIGFkZGluZyB0aGUgcGF0Y2guDQoNCj4gVGhhdCBz
+ZWVtcyBsaWtlIGEgYmFkIGlkZWEgdG8gbWUuDQoNCkNvdWxkIHlvdSBwbGVhc2UgZXhwbGFpbiB3
+aHk/DQpXb3VsZCB5b3Ugc3VnZ2VzdCB0byBjYWxsIFNsZWVwX05vdGlmaWNhdGlvbiBmcm9tIFN1
+c3BlbmQgb25seT8NCldoYXQgaWYgU2xlZXBfTm90aWZpY2F0aW9uIHdpbGwgdGFrZSBzZXZlcmFs
+IHNlY29uZHM/DQoNCj4gDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo=
