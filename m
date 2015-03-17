@@ -1,44 +1,58 @@
-From: Vinod Koul <vinod.koul@intel.com>
-Subject: Re: [PATCH] mmc: sh_mobile_sdhi: remove sh_mobile_sdhi_info v2
-Date: Tue, 17 Mar 2015 10:47:32 +0530
-Message-ID: <20150317051732.GY32683@intel.com>
-References: <201503141650.GfUoPRK3%fengguang.wu@intel.com>
- <87ioe1kcp8.wl%kuninori.morimoto.gx@renesas.com>
- <20150316075105.GA21372@verge.net.au>
- <87lhixiat4.wl%kuninori.morimoto.gx@renesas.com>
- <87k2yhiaro.wl%kuninori.morimoto.gx@renesas.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 33/35 linux-next] mmc: constify of_device_id array
+Date: Tue, 17 Mar 2015 10:49:05 +0100
+Message-ID: <CAPDyKFodW1zgrQ-sd5TPO_rCa_-tm95JkwCWiGX4BCUSFqPHdg@mail.gmail.com>
+References: <1426533469-25458-1-git-send-email-fabf@skynet.be>
+	<1426535949-26107-1-git-send-email-fabf@skynet.be>
+	<1426535949-26107-2-git-send-email-fabf@skynet.be>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <87k2yhiaro.wl%kuninori.morimoto.gx@renesas.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: Simon <horms@verge.net.au>, Linux-SH <linux-sh@vger.kernel.org>, arm@kernel.org, kbuild-all@01.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1426535949-26107-2-git-send-email-fabf@skynet.be>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Fabian Frederick <fabf@skynet.be>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Chris Ball <chris@printf.net>, Tony Prisk <linux@prisktech.co.nz>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Mar 16, 2015 at 08:53:40AM +0000, Kuninori Morimoto wrote:
-> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-> 
-> 84f11d5b1f2abc0e22895b7e12e037f0ec03caeb
-> (mmc: sh_mobile_sdhi: remove sh_mobile_sdhi_info)
-> replaced sh_mobile_sdhi_info to tmio_mmc_data, but it was missing
-> to replace board-ape6evm / board-mackerel.
-> Kernel build will be failed without this patch.
-> 
-> 	>> arch/arm/mach-shmobile/board-ape6evm.c:176:21: error: \
-> 		variable 'sdhi0_pdata' has initializer but incomplete type
-> 	static const struct sh_mobile_sdhi_info sdhi0_pdata __initconst = {
-> 	                    ^
-> 	>> arch/arm/mach-shmobile/board-ape6evm.c:177:2: error: \
-> 		unknown field 'tmio_flags' specified in initializer
-> 	.tmio_flags = TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE,
-> 	^
-> 	...
+On 16 March 2015 at 20:59, Fabian Frederick <fabf@skynet.be> wrote:
+> of_device_id is always used as const.
+> (See driver.of_match_table and open firmware functions)
 >
-Applied, to topic/sh. So feel free to merge in your trees if you need this.
+> Signed-off-by: Fabian Frederick <fabf@skynet.be>
 
-Thanks
--- 
-~Vinod
- 
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+> ---
+>  drivers/mmc/host/mmc_spi.c   | 2 +-
+>  drivers/mmc/host/wmt-sdmmc.c | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+> index e4a0754..ae19d83 100644
+> --- a/drivers/mmc/host/mmc_spi.c
+> +++ b/drivers/mmc/host/mmc_spi.c
+> @@ -1507,7 +1507,7 @@ static int mmc_spi_remove(struct spi_device *spi)
+>         return 0;
+>  }
+>
+> -static struct of_device_id mmc_spi_of_match_table[] = {
+> +static const struct of_device_id mmc_spi_of_match_table[] = {
+>         { .compatible = "mmc-spi-slot", },
+>         {},
+>  };
+> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+> index dd2e1aa..5af0055 100644
+> --- a/drivers/mmc/host/wmt-sdmmc.c
+> +++ b/drivers/mmc/host/wmt-sdmmc.c
+> @@ -744,7 +744,7 @@ static struct wmt_mci_caps wm8505_caps = {
+>         .max_blk_size = 2048,
+>  };
+>
+> -static struct of_device_id wmt_mci_dt_ids[] = {
+> +static const struct of_device_id wmt_mci_dt_ids[] = {
+>         { .compatible = "wm,wm8505-sdhc", .data = &wm8505_caps },
+>         { /* Sentinel */ },
+>  };
+> --
+> 2.1.0
+>
