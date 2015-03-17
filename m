@@ -1,102 +1,61 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Mark Brown <broonie@kernel.org>
 Subject: Re: [PATCH v4 2/4] mmc: core: Add mmc_regulator_set_vqmmc()
-Date: Tue, 17 Mar 2015 11:23:33 +0100
-Message-ID: <CAPDyKFpG=q88QEkuAgoLqkZU40Kx7dB7PmnXHqEt0EtbYvR_Cg@mail.gmail.com>
+Date: Tue, 17 Mar 2015 10:38:29 +0000
+Message-ID: <20150317103829.GA28806@sirena.org.uk>
 References: <1426112117-18220-1-git-send-email-dianders@chromium.org>
-	<1426112117-18220-2-git-send-email-dianders@chromium.org>
-	<CAPDyKFq_WMJfqNGuxwN7xPmhv2X6-+G1zXpdD6zYDkDe7-Jo2A@mail.gmail.com>
-	<CAD=FV=U-YnT5jF5MFC==hANXGPqVpV3iLMPu85TrQ4dNDsWeCA@mail.gmail.com>
+ <1426112117-18220-2-git-send-email-dianders@chromium.org>
+ <CAPDyKFq_WMJfqNGuxwN7xPmhv2X6-+G1zXpdD6zYDkDe7-Jo2A@mail.gmail.com>
+ <CAD=FV=U-YnT5jF5MFC==hANXGPqVpV3iLMPu85TrQ4dNDsWeCA@mail.gmail.com>
+ <CAPDyKFpG=q88QEkuAgoLqkZU40Kx7dB7PmnXHqEt0EtbYvR_Cg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="Eo6Jsvut/kxSJJ94"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAD=FV=U-YnT5jF5MFC==hANXGPqVpV3iLMPu85TrQ4dNDsWeCA@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpG=q88QEkuAgoLqkZU40Kx7dB7PmnXHqEt0EtbYvR_Cg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>, Mark Brown <broonie@kernel.org>
-Cc: Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Alexandru Stan <amstan@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Addy Ke <addy.ke@rock-chips.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, Johan Rudholm <johan.rudholm@axis.com>, Adrian Hunter <adrian.hunter@intel.com>, Tim Kryger <tim.kryger@gmail.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Alexandru Stan <amstan@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Addy Ke <addy.ke@rock-chips.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, Johan Rudholm <johan.rudholm@axis.com>, Adrian Hunter <adrian.hunter@intel.com>, Tim Kryger <tim.kryger@gmail.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kerne>
 List-Id: linux-mmc@vger.kernel.org
 
-On 16 March 2015 at 16:12, Doug Anderson <dianders@chromium.org> wrote:
-> Ulf,
->
-> On Mon, Mar 16, 2015 at 7:05 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> +       switch (ios->signal_voltage) {
->>> +       case MMC_SIGNAL_VOLTAGE_120:
->>> +               return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
->>> +                       1200000, 100000);
->>
->> Is 1V the lowest possible value? How did you get to that?
->
-> I think you've added a zero in your mind and not realized that I'm
-> calling regulator_set_voltage_tol() here and in other calls.  Please
-> read the above as:
 
-Hehe, you are absolutely right.
+--Eo6Jsvut/kxSJJ94
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
->
-> * Try to set the voltage to exactly 1,200,000 uV (1.2V).
-> * If you can't get 1.2V exactly, a tolerance ("tol") of 100,000 uV
-> (.1V) is OK.
-> * In other words, 1.1V - 1.3V are OK, but aim for 1.2V
+On Tue, Mar 17, 2015 at 11:23:33AM +0100, Ulf Hansson wrote:
+> On 16 March 2015 at 16:12, Doug Anderson <dianders@chromium.org> wrote:
 
-So what happens in the case when 1.3V and 1.1V, but not 1.2V. Which
-value will be used? Is that algorithm defined by the regulator core or
-does it depend per regulator implementation?
+> > * Try to set the voltage to exactly 1,200,000 uV (1.2V).
+> > * If you can't get 1.2V exactly, a tolerance ("tol") of 100,000 uV
+> > (.1V) is OK.
+> > * In other words, 1.1V - 1.3V are OK, but aim for 1.2V
 
->
->
->>> +       case MMC_SIGNAL_VOLTAGE_180:
->>> +               return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
->>> +                       1800000, 100000);
->>
->> Is 1V the lowest possible value? How did you get to that?
->
-> Again, check my zeros.  This should be 1.7 - 1.9V, aiming for 1.8V.
->
->
->>> +       case MMC_SIGNAL_VOLTAGE_330:
->>> +               return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
->>> +                       regulator_get_voltage(mmc->supply.vmmc), 300000);
->>
->> Why 3V? Shouldn't it be 2.7V? How will else those SoC that for example
->> supports 2.9V only work?
->
-> This will get us within .3V of whatever vmmc is.  If vmmc is 3.3V, it
-> will allow vqmmc of 3.0V - 3.6V.
->
-> This _seems_ sane to me and given any sane system design we should be
-> fine here, I think.  I can't see someone designing a system where
-> vqmmc was not within .3V of vmmc, can you?  If we think someone will
-> actually build a system where vmmc is 3.3V and vqmmc can't go higher
-> than 2.7V then we'll either need to increase the tolerance here or add
-> a new asymmetric system call like my original patches did.
+> So what happens in the case when 1.3V and 1.1V, but not 1.2V. Which
+> value will be used? Is that algorithm defined by the regulator core or
+> does it depend per regulator implementation?
 
-I know about SoC that supports 3.4V vmmc and 2.9V vqmmc.
+It's done in the core.  It first tries to hit the target voltage to the
+maximum (picking the lowest voltage in that range) then tries to pick
+the lowest voltage to the target, though that's an implementation detail
+and we really should be trying to get as close as possible to the
+target.  We don't do that yet because it can be expensive to work out so
+we do the current thing which is cheap and mostly good enough.
 
-What I think we need is the option to have a policy here. We need to
-allow voltage levels stated by the spec and at the same time try chose
-the one best suited. That's not being accomplished here.
+--Eo6Jsvut/kxSJJ94
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
-Moreover, I wonder whether it's okay (from spec perspective) to have
-vqmmc at a higher voltage level than vmmc. I don't think that's
-allowed, but I might be wrong.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
 
->
->>>  int mmc_regulator_get_supply(struct mmc_host *mmc);
->>
->> One more thought,s as for the vmmc regulator we have a
->> "regulator_enabled" member in the mmc_host. Should we add a similar
->> member for vqmmc? That would prevent host drivers from keeping track
->> of this state themselves.
->
-> Yeah, that does sound nice.  Are you suggesting that I modify this
-> patch or submit a new one.  Let me know.
+iQEcBAEBCAAGBQJVCAQlAAoJECTWi3JdVIfQ0VYH/iZeQc/hihsEyP2+K+a9Gs7R
+JSVKhWCEk+XDG5aQELFL0ZrWGqlYqA/2ChT2vuWowjKNB8F7ygAMQffeJSozoH25
+G2H0OU3vV4xPQCe8NWPLAbRjrj/wbJ7b96okb7twTIZ41qk3Wi6wXzrTdwKmrxqH
++IxpL2EfJQDoaJcLrC3wcDCfRMFq6wzFwswf7fB+Z3tlLVQB8MFH/5YmAOvL6/dj
+s3c9/KErYeBe9Zy0AJhzuJbwAoLKfsIAHLOMs8tdGdZFEWIjhin7MumA2RY57SCm
+wTnvtBM8XH39SAnRyIugSriSGstNpvIZAcuVEBWwwGoEhzCSqB805RdshtuHFYM=
+=9NOH
+-----END PGP SIGNATURE-----
 
-Yes, please add the option as well. It's seems like it will belongs to
-this code.
-
->
->
-> -Doug
-
-Kind regards
-Uffe
+--Eo6Jsvut/kxSJJ94--
