@@ -1,275 +1,51 @@
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Subject: [PATCH 5/5] mmc: sdhci: add SW CMDQ support for CHT SDHCI host
-Date: Tue, 17 Mar 2015 19:11:49 +0800
-Message-ID: <20150317111149.GF17141@intel.com>
-Reply-To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4 2/4] mmc: core: Add mmc_regulator_set_vqmmc()
+Date: Tue, 17 Mar 2015 12:28:34 +0100
+Message-ID: <CAPDyKFqGYqNCbGGzw7orXLT+pkxK5LMUDTYWju405tqynPMyCQ@mail.gmail.com>
+References: <1426112117-18220-1-git-send-email-dianders@chromium.org>
+	<1426112117-18220-2-git-send-email-dianders@chromium.org>
+	<CAPDyKFq_WMJfqNGuxwN7xPmhv2X6-+G1zXpdD6zYDkDe7-Jo2A@mail.gmail.com>
+	<CAD=FV=U-YnT5jF5MFC==hANXGPqVpV3iLMPu85TrQ4dNDsWeCA@mail.gmail.com>
+	<CAPDyKFpG=q88QEkuAgoLqkZU40Kx7dB7PmnXHqEt0EtbYvR_Cg@mail.gmail.com>
+	<20150317103829.GA28806@sirena.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:63170 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751307AbbCQLNr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 17 Mar 2015 07:13:47 -0400
-Content-Disposition: inline
+Received: from mail-qg0-f49.google.com ([209.85.192.49]:33488 "EHLO
+	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753233AbbCQL2f (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Mar 2015 07:28:35 -0400
+Received: by qgfa8 with SMTP id a8so4699047qgf.0
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Mar 2015 04:28:34 -0700 (PDT)
+In-Reply-To: <20150317103829.GA28806@sirena.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Mark Brown <broonie@kernel.org>
+Cc: Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Alexandru Stan <amstan@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Addy Ke <addy.ke@rock-chips.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, Johan Rudholm <johan.rudholm@axis.com>, Adrian Hunter <adrian.hunter@intel.com>, Tim Kryger <tim.kryger@gmail.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kerne>
 
-Add the CMDQ support to SDHCI host interface and CHT SDHCI
-host interface
+On 17 March 2015 at 11:38, Mark Brown <broonie@kernel.org> wrote:
+> On Tue, Mar 17, 2015 at 11:23:33AM +0100, Ulf Hansson wrote:
+>> On 16 March 2015 at 16:12, Doug Anderson <dianders@chromium.org> wrote:
+>
+>> > * Try to set the voltage to exactly 1,200,000 uV (1.2V).
+>> > * If you can't get 1.2V exactly, a tolerance ("tol") of 100,000 uV
+>> > (.1V) is OK.
+>> > * In other words, 1.1V - 1.3V are OK, but aim for 1.2V
+>
+>> So what happens in the case when 1.3V and 1.1V, but not 1.2V. Which
+>> value will be used? Is that algorithm defined by the regulator core or
+>> does it depend per regulator implementation?
+>
+> It's done in the core.  It first tries to hit the target voltage to the
+> maximum (picking the lowest voltage in that range) then tries to pick
+> the lowest voltage to the target, though that's an implementation detail
+> and we really should be trying to get as close as possible to the
+> target.  We don't do that yet because it can be expensive to work out so
+> we do the current thing which is cheap and mostly good enough.
 
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
----
- drivers/mmc/host/sdhci.c |  121 ++++++++++++++++++++++++++++++++++++++++------
- drivers/mmc/host/sdhci.h |    1 +
- 2 files changed, 108 insertions(+), 14 deletions(-)
+Okay, so that seems to work well for our 1.1V->1.3V case.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index aad89d2..3f4bfeb 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -742,14 +742,14 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 	struct mmc_data *data = cmd->data;
- 	int ret;
- 
--	WARN_ON(host->data);
--
- 	if (data || (cmd->flags & MMC_RSP_BUSY))
- 		sdhci_set_timeout(host, cmd);
- 
- 	if (!data)
- 		return;
- 
-+	WARN_ON(host->data);
-+
- 	/* Sanity checks */
- 	BUG_ON(data->blksz * data->blocks > 524288);
- 	BUG_ON(data->blksz > host->mmc->max_blk_size);
-@@ -927,7 +927,9 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
- 	if (!(host->quirks2 & SDHCI_QUIRK2_SUPPORT_SINGLE))
- 		mode = SDHCI_TRNS_BLK_CNT_EN;
- 
--	if (mmc_op_multi(cmd->opcode) || data->blocks > 1) {
-+	if (mmc_op_cmdq_execute_task(cmd->opcode) && (data->blocks > 1))
-+		mode |= SDHCI_TRNS_MULTI;
-+	else if (mmc_op_multi(cmd->opcode) || (data->blocks > 1)) {
- 		mode = SDHCI_TRNS_BLK_CNT_EN | SDHCI_TRNS_MULTI;
- 		/*
- 		 * If we are sending CMD23, CMD12 never gets sent
-@@ -1004,8 +1006,12 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 		}
- 
- 		sdhci_send_command(host, data->stop);
--	} else
--		tasklet_schedule(&host->finish_tasklet);
-+	} else {
-+		if (host->mmc->context_info.is_cmdq_busy)
-+			tasklet_schedule(&host->finish_async_data_tasklet);
-+		else
-+			tasklet_schedule(&host->finish_tasklet);
-+	}
- }
- 
- void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
-@@ -1084,6 +1090,12 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 	    cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
- 		flags |= SDHCI_CMD_DATA;
- 
-+	/* CMD46/47 doesn't wait for data */
-+	if (mmc_op_cmdq_execute_task(cmd->opcode)) {
-+		cmd->data = NULL;
-+		host->mrq->data = NULL;
-+	}
-+
- 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
- }
- EXPORT_SYMBOL_GPL(sdhci_send_command);
-@@ -1116,6 +1128,9 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 	if (host->cmd == host->mrq->precmd) {
- 		host->cmd = NULL;
- 		sdhci_send_command(host, host->mrq->cmd);
-+	} else if ((host->cmd == host->mrq->cmd) && host->mrq->cmd2) {
-+		host->cmd = NULL;
-+		sdhci_send_command(host, host->mrq->cmd2);
- 	} else {
- 
- 		/* Processed actual command. */
-@@ -1401,6 +1416,9 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ)) &&
- 		    (present_state & SDHCI_DATA_0_LVL_MASK)) {
- 			if (mmc->card) {
-+				/* don't do tuning when cmdq is not empty */
-+				if (mmc->context_info.is_cmdq_busy)
-+					goto end_tuning;
- 				/* eMMC uses cmd21 but sd and sdio use cmd19 */
- 				tuning_opcode =
- 					mmc->card->type == MMC_TYPE_MMC ?
-@@ -1422,9 +1440,16 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 			}
- 		}
- 
--		if (mrq->precmd && !(host->flags & SDHCI_AUTO_CMD23))
--			sdhci_send_command(host, mrq->precmd);
--		else
-+end_tuning:
-+		if (mrq->precmd) {
-+			if (mrq->precmd->opcode == 23) {
-+				if (!(host->flags & SDHCI_AUTO_CMD23))
-+					sdhci_send_command(host, mrq->precmd);
-+				else
-+					sdhci_send_command(host, mrq->cmd);
-+			} else
-+				sdhci_send_command(host, mrq->precmd);
-+		} else
- 			sdhci_send_command(host, mrq->cmd);
- 	}
- 
-@@ -2248,7 +2273,7 @@ static const struct mmc_host_ops sdhci_ops = {
-  *                                                                           *
- \*****************************************************************************/
- 
--static void sdhci_tasklet_finish(unsigned long param)
-+static void sdhci_tasklet_finish_async_data(unsigned long param)
- {
- 	struct sdhci_host *host;
- 	unsigned long flags;
-@@ -2262,14 +2287,71 @@ static void sdhci_tasklet_finish(unsigned long param)
-          * If this tasklet gets rescheduled while running, it will
-          * be run again afterwards but without any active request.
-          */
--	if (!host->mrq) {
-+	if (!host->mmc->areq || !host->mmc->areq->mrq->data) {
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		return;
- 	}
- 
- 	del_timer(&host->timer);
- 
-+	mrq = host->mmc->areq->mrq;
-+
-+	/*
-+	 * The controller needs a reset of internal state machines
-+	 * upon error conditions.
-+	 */
-+	if (!(host->flags & SDHCI_DEVICE_DEAD) &&
-+	    ((mrq->data && mrq->data->error) ||
-+	     (host->quirks & SDHCI_QUIRK_RESET_AFTER_REQUEST))) {
-+
-+		/* Some controllers need this kick or reset won't work here */
-+		if (host->quirks & SDHCI_QUIRK_CLOCK_BEFORE_RESET)
-+			/* This is to force an update */
-+			host->ops->set_clock(host, host->clock);
-+
-+		sdhci_reset(host, SDHCI_RESET_DATA);
-+	}
-+
-+	host->data = NULL;
-+
-+#ifndef SDHCI_USE_LEDS_CLASS
-+	sdhci_deactivate_led(host);
-+#endif
-+	mmiowb();
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	mmc_request_done(host->mmc, mrq);
-+
-+	sdhci_runtime_pm_put(host);
-+}
-+
-+static void sdhci_tasklet_finish(unsigned long param)
-+{
-+	struct sdhci_host *host;
-+	unsigned long flags;
-+	struct mmc_request *mrq;
-+	int opcode;
-+
-+	host = (struct sdhci_host *)param;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	/*
-+	 * If this tasklet gets rescheduled while running, it will
-+	 * be run again afterwards but without any active request.
-+	 */
-+	if (!host->mrq) {
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		return;
-+	}
-+
- 	mrq = host->mrq;
-+	BUG_ON(!mrq->cmd);
-+	opcode = mrq->cmd->opcode;
-+
-+	/* for CMD46/47, doesn't delete timer */
-+	if (!mmc_op_cmdq_execute_task(opcode))
-+		del_timer(&host->timer);
- 
- 	/*
- 	 * The controller needs a reset of internal state machines
-@@ -2291,21 +2373,29 @@ static void sdhci_tasklet_finish(unsigned long param)
- 		   controllers do not like that. */
- 		sdhci_do_reset(host, SDHCI_RESET_CMD);
- 		sdhci_do_reset(host, SDHCI_RESET_DATA);
-+		host->data = NULL;
- 	}
- 
- 	host->mrq = NULL;
- 	host->cmd = NULL;
--	host->data = NULL;
- 
-+	/* CMD46/47 sill have pending data */
-+	if (!mmc_op_cmdq_execute_task(opcode)) {
- #ifndef SDHCI_USE_LEDS_CLASS
--	sdhci_deactivate_led(host);
-+		sdhci_deactivate_led(host);
- #endif
-+	}
- 
- 	mmiowb();
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
- 	mmc_request_done(host->mmc, mrq);
--	sdhci_runtime_pm_put(host);
-+	/*
-+	 * host will be put in D0i3 when pending data is done
-+	 * for CMD46/47
-+	 */
-+	if (!mmc_op_cmdq_execute_task(opcode))
-+		sdhci_runtime_pm_put(host);
- }
- 
- static void sdhci_timeout_timer(unsigned long data)
-@@ -2548,7 +2638,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 		}
- 
- 		if (intmask & SDHCI_INT_DATA_END) {
--			if (host->cmd) {
-+			if (!host->mmc->context_info.is_cmdq_busy &&
-+					host->cmd) {
- 				/*
- 				 * Data managed to finish before the
- 				 * command completed. Make sure we do
-@@ -3405,6 +3496,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 	 */
- 	tasklet_init(&host->finish_tasklet,
- 		sdhci_tasklet_finish, (unsigned long)host);
-+	tasklet_init(&host->finish_async_data_tasklet,
-+		sdhci_tasklet_finish_async_data, (unsigned long)host);
- 
- 	setup_timer(&host->timer, sdhci_timeout_timer, (unsigned long)host);
- 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index e639b7f..7cfac3e 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -480,6 +480,7 @@ struct sdhci_host {
- 	unsigned int align_mask;	/* ADMA alignment mask */
- 
- 	struct tasklet_struct finish_tasklet;	/* Tasklet structures */
-+	struct tasklet_struct finish_async_data_tasklet;
- 
- 	struct timer_list timer;	/* Timer for timeouts */
- 
--- 
-1.7.10.4
+Thanks!
 
+Kind regards
+Uffe
