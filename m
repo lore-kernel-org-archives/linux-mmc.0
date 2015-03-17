@@ -1,51 +1,147 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 2/4] mmc: core: Add mmc_regulator_set_vqmmc()
-Date: Tue, 17 Mar 2015 12:28:34 +0100
-Message-ID: <CAPDyKFqGYqNCbGGzw7orXLT+pkxK5LMUDTYWju405tqynPMyCQ@mail.gmail.com>
-References: <1426112117-18220-1-git-send-email-dianders@chromium.org>
-	<1426112117-18220-2-git-send-email-dianders@chromium.org>
-	<CAPDyKFq_WMJfqNGuxwN7xPmhv2X6-+G1zXpdD6zYDkDe7-Jo2A@mail.gmail.com>
-	<CAD=FV=U-YnT5jF5MFC==hANXGPqVpV3iLMPu85TrQ4dNDsWeCA@mail.gmail.com>
-	<CAPDyKFpG=q88QEkuAgoLqkZU40Kx7dB7PmnXHqEt0EtbYvR_Cg@mail.gmail.com>
-	<20150317103829.GA28806@sirena.org.uk>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH V5 2/2] ARM: dts: Add HS400 support for exynos5420 and exynos5800
+Date: Wed, 18 Mar 2015 04:56:28 +0530
+Message-ID: <CAGOxZ53OgKKZVS2qKsMw4cDxdkwG-8OER=8oPxTo9g-+qKHimQ@mail.gmail.com>
+References: <1422499318-13726-1-git-send-email-alim.akhtar@samsung.com>
+ <1422499318-13726-3-git-send-email-alim.akhtar@samsung.com>
+ <54ED6D24.4000703@samsung.com> <CAGOxZ53_TGay2ooTW22ZGPZ+yneqoXH6JEPZ=mMSYr1cpOhXWg@mail.gmail.com>
+ <07b501d06057$d9d7bc80$8d873580$@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f49.google.com ([209.85.192.49]:33488 "EHLO
-	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753233AbbCQL2f (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Mar 2015 07:28:35 -0400
-Received: by qgfa8 with SMTP id a8so4699047qgf.0
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Mar 2015 04:28:34 -0700 (PDT)
-In-Reply-To: <20150317103829.GA28806@sirena.org.uk>
+Received: from mail-qc0-f180.google.com ([209.85.216.180]:35675 "EHLO
+	mail-qc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932388AbbCQX1J (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Mar 2015 19:27:09 -0400
+In-Reply-To: <07b501d06057$d9d7bc80$8d873580$@kernel.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>
-Cc: Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Alexandru Stan <amstan@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Addy Ke <addy.ke@rock-chips.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, Johan Rudholm <johan.rudholm@axis.com>, Adrian Hunter <adrian.hunter@intel.com>, Tim Kryger <tim.kryger@gmail.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kerne>
+To: Kukjin Kim <kgene@kernel.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Douglas Anderson <dianders@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Abhilash Kesavan <a.kesavan@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 17 March 2015 at 11:38, Mark Brown <broonie@kernel.org> wrote:
-> On Tue, Mar 17, 2015 at 11:23:33AM +0100, Ulf Hansson wrote:
->> On 16 March 2015 at 16:12, Doug Anderson <dianders@chromium.org> wrote:
+Thanks Kukjin for looking into this.
+I will rebase on top of your for-next and send again.
+
+On Tue, Mar 17, 2015 at 7:42 AM, Kukjin Kim <kgene@kernel.org> wrote:
+> Alim Akhtar wrote:
+>>
+>> Ping?
+>>
+> Alim,
 >
->> > * Try to set the voltage to exactly 1,200,000 uV (1.2V).
->> > * If you can't get 1.2V exactly, a tolerance ("tol") of 100,000 uV
->> > (.1V) is OK.
->> > * In other words, 1.1V - 1.3V are OK, but aim for 1.2V
+> Can you please re-send it based on latest my tree?
+> It would be helpful for me ;)
 >
->> So what happens in the case when 1.3V and 1.1V, but not 1.2V. Which
->> value will be used? Is that algorithm defined by the regulator core or
->> does it depend per regulator implementation?
+> Thanks,
+> Kukjin
 >
-> It's done in the core.  It first tries to hit the target voltage to the
-> maximum (picking the lowest voltage in that range) then tries to pick
-> the lowest voltage to the target, though that's an implementation detail
-> and we really should be trying to get as close as possible to the
-> target.  We don't do that yet because it can be expensive to work out so
-> we do the current thing which is cheap and mostly good enough.
+>> On Wed, Feb 25, 2015 at 12:05 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> > Hi, Alim.
+>> >
+>> > Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> >
+>> > Best Regards,
+>> > Jaehoon Chung
+>> >
+>> > On 01/29/2015 11:41 AM, Alim Akhtar wrote:
+>> >> From: Seungwon Jeon <tgih.jun@samsung.com>
+>> >>
+>> >> HS400 timing values are added for SMDK5420, exynos5420-peach-pit
+>> >> and exynos5800-peach-pi boards.
+>> >> This also adds RCLK GPIO line, this gpio should be in pull-down
+>> >> state.
+>> >> This also enables HS400 on peach-pi and this updates the clock frequency
+>> >> to 800MHz to be set as input clock to controller.
+>> >>
+>> >> Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+>> >> Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+>> >> [Alim: addressed review comments]
+>> >> ---
+>> >>  arch/arm/boot/dts/exynos5420-peach-pit.dts |    4 +++-
+>> >>  arch/arm/boot/dts/exynos5420-pinctrl.dtsi  |    7 +++++++
+>> >>  arch/arm/boot/dts/exynos5420-smdk5420.dts  |    4 +++-
+>> >>  arch/arm/boot/dts/exynos5800-peach-pi.dts  |    7 +++++--
+>> >>  4 files changed, 18 insertions(+), 4 deletions(-)
+>> >>
+>> >> diff --git a/arch/arm/boot/dts/exynos5420-peach-pit.dts b/arch/arm/boot/dts/exynos5420-peach-
+>> pit.dts
+>> >> index 9a050e1..f7a44a4 100644
+>> >> --- a/arch/arm/boot/dts/exynos5420-peach-pit.dts
+>> >> +++ b/arch/arm/boot/dts/exynos5420-peach-pit.dts
+>> >> @@ -569,8 +569,10 @@
+>> >>       samsung,dw-mshc-ciu-div = <3>;
+>> >>       samsung,dw-mshc-sdr-timing = <0 4>;
+>> >>       samsung,dw-mshc-ddr-timing = <0 2>;
+>> >> +     samsung,dw-mshc-hs400-timing = <0 2>;
+>> >> +     samsung,read-strobe-delay = <90>;
+>> >>       pinctrl-names = "default";
+>> >> -     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+>> >> +     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
+>> >>       bus-width = <8>;
+>> >>  };
+>> >>
+>> >> diff --git a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+>> >> index ba686e4..8b15316 100644
+>> >> --- a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+>> >> +++ b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+>> >> @@ -201,6 +201,13 @@
+>> >>                       samsung,pin-drv = <3>;
+>> >>               };
+>> >>
+>> >> +             sd0_rclk: sd0-rclk {
+>> >> +                     samsung,pins = "gpc0-7";
+>> >> +                     samsung,pin-function = <2>;
+>> >> +                     samsung,pin-pud = <1>;
+>> >> +                     samsung,pin-drv = <3>;
+>> >> +             };
+>> >> +
+>> >>               sd1_cmd: sd1-cmd {
+>> >>                       samsung,pins = "gpc1-1";
+>> >>                       samsung,pin-function = <2>;
+>> >> diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+>> >> index 8be3d7b..2078a1f 100644
+>> >> --- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
+>> >> +++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+>> >> @@ -80,8 +80,10 @@
+>> >>               samsung,dw-mshc-ciu-div = <3>;
+>> >>               samsung,dw-mshc-sdr-timing = <0 4>;
+>> >>               samsung,dw-mshc-ddr-timing = <0 2>;
+>> >> +             samsung,dw-mshc-hs400-timing = <0 2>;
+>> >> +             samsung,read-strobe-delay = <90>;
+>> >>               pinctrl-names = "default";
+>> >> -             pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+>> >> +             pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
+>> >>               bus-width = <8>;
+>> >>               cap-mmc-highspeed;
+>> >>       };
+>> >> diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+>> >> index e8fdda8..96f0d61 100644
+>> >> --- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
+>> >> +++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+>> >> @@ -550,15 +550,18 @@
+>> >>       num-slots = <1>;
+>> >>       broken-cd;
+>> >>       mmc-hs200-1_8v;
+>> >> +     mmc-hs400-1_8v;
+>> >>       cap-mmc-highspeed;
+>> >>       non-removable;
+>> >>       card-detect-delay = <200>;
+>> >> -     clock-frequency = <400000000>;
+>> >> +     clock-frequency = <800000000>;
+>> >>       samsung,dw-mshc-ciu-div = <3>;
+>> >>       samsung,dw-mshc-sdr-timing = <0 4>;
+>> >>       samsung,dw-mshc-ddr-timing = <0 2>;
+>> >> +     samsung,dw-mshc-hs400-timing = <0 2>;
+>> >> +     samsung,read-strobe-delay = <90>;
+>> >>       pinctrl-names = "default";
+>> >> -     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+>> >> +     pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
+>> >>       bus-width = <8>;
+>> >>  };
+>
 
-Okay, so that seems to work well for our 1.1V->1.3V case.
 
-Thanks!
 
-Kind regards
-Uffe
+-- 
+Regards,
+Alim
