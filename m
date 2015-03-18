@@ -1,113 +1,40 @@
-From: Alim Akhtar <alim.akhtar@samsung.com>
-Subject: [PATCH v6] ARM: dts: Add HS400 support for exynos5420 and exynos5800
-Date: Wed, 18 Mar 2015 08:38:38 +0530
-Message-ID: <1426648118-20790-1-git-send-email-alim.akhtar@samsung.com>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: kgene@kernel.org
-Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, jh80.chung@samsung.com, tgih.jun@samsung.com, dianders@chromium.org, alim.akhtar@gmail.com, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, a.kesavan@samsung.com, alim.akhtar@samsung.com
+From: Yaniv Gardi <ygardi@codeaurora.org>
+Subject: [PATCH v1] qcom: opensource: mmc-utils: fix building errors
+Date: Wed, 18 Mar 2015 11:35:51 +0200
+Message-ID: <1426671352-5529-1-git-send-email-ygardi@codeaurora.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: chris@printf.net, linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Yaniv Gardi <ygardi@codeaurora.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Seungwon Jeon <tgih.jun@samsung.com>
+3rd party HMAC SHA256 implementation has been added to the driver,
+and since driver common code (mmc_cmds.c) includes calling to
+routines and data structures that reside in these 3rd party files
+(under 3rdparty\hmac_sha) these files should be compiled as well
+in Android.mk makefile.
 
-HS400 timing values are added for SMDK5420, exynos5420-peach-pit
-and exynos5800-peach-pi boards.
-This also adds RCLK GPIO line, this gpio should be in pull-down
-state.
-This also enables HS400 on peach-pi and this updates the clock frequency
-to 800MHz to be set as input clock to controller.
-
-Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
-Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
-[Alim: addressed review comments]
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+Change-Id: Ica1ea5e4c7b8efecfba07c35f87ea6bb6716b668
+Signed-off-by: Yaniv Gardi <ygardi@codeaurora.org>
 ---
-Changes in V6:
-	Rebased on kukjin's for-next branch[0] 
-	(commit: 77105c8 Merge branch 'v4.0-samsung-fixes-2' into for-next)
+ Android.mk | 1 +
+ 1 file changed, 1 insertion(+)
 
-[0]: git://git.kernel.org/pub/scm/linux/kernel/git/kgene/linux-samsung.git
-
- arch/arm/boot/dts/exynos5420-peach-pit.dts | 4 +++-
- arch/arm/boot/dts/exynos5420-pinctrl.dtsi  | 7 +++++++
- arch/arm/boot/dts/exynos5420-smdk5420.dts  | 4 +++-
- arch/arm/boot/dts/exynos5800-peach-pi.dts  | 7 +++++--
- 4 files changed, 18 insertions(+), 4 deletions(-)
-
-diff --git a/arch/arm/boot/dts/exynos5420-peach-pit.dts b/arch/arm/boot/dts/exynos5420-peach-pit.dts
-index d0ee55f..e158861 100644
---- a/arch/arm/boot/dts/exynos5420-peach-pit.dts
-+++ b/arch/arm/boot/dts/exynos5420-peach-pit.dts
-@@ -695,8 +695,10 @@
- 	samsung,dw-mshc-ciu-div = <3>;
- 	samsung,dw-mshc-sdr-timing = <0 4>;
- 	samsung,dw-mshc-ddr-timing = <0 2>;
-+	samsung,dw-mshc-hs400-timing = <0 2>;
-+	samsung,read-strobe-delay = <90>;
- 	pinctrl-names = "default";
--	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8>;
-+	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
- 	bus-width = <8>;
- };
- 
-diff --git a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
-index ba686e4..8b15316 100644
---- a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
-+++ b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
-@@ -201,6 +201,13 @@
- 			samsung,pin-drv = <3>;
- 		};
- 
-+		sd0_rclk: sd0-rclk {
-+			samsung,pins = "gpc0-7";
-+			samsung,pin-function = <2>;
-+			samsung,pin-pud = <1>;
-+			samsung,pin-drv = <3>;
-+		};
-+
- 		sd1_cmd: sd1-cmd {
- 			samsung,pins = "gpc1-1";
- 			samsung,pin-function = <2>;
-diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts b/arch/arm/boot/dts/exynos5420-smdk5420.dts
-index 7a56852..de5e41e 100644
---- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
-+++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
-@@ -80,8 +80,10 @@
- 		samsung,dw-mshc-ciu-div = <3>;
- 		samsung,dw-mshc-sdr-timing = <0 4>;
- 		samsung,dw-mshc-ddr-timing = <0 2>;
-+		samsung,dw-mshc-hs400-timing = <0 2>;
-+		samsung,read-strobe-delay = <90>;
- 		pinctrl-names = "default";
--		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8>;
-+		pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
- 		bus-width = <8>;
- 		cap-mmc-highspeed;
- 	};
-diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts b/arch/arm/boot/dts/exynos5800-peach-pi.dts
-index 7ea1d66..2e84613 100644
---- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
-+++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
-@@ -650,15 +650,18 @@
- 	num-slots = <1>;
- 	broken-cd;
- 	mmc-hs200-1_8v;
-+	mmc-hs400-1_8v;
- 	cap-mmc-highspeed;
- 	non-removable;
- 	card-detect-delay = <200>;
--	clock-frequency = <400000000>;
-+	clock-frequency = <800000000>;
- 	samsung,dw-mshc-ciu-div = <3>;
- 	samsung,dw-mshc-sdr-timing = <0 4>;
- 	samsung,dw-mshc-ddr-timing = <0 2>;
-+	samsung,dw-mshc-hs400-timing = <0 2>;
-+	samsung,read-strobe-delay = <90>;
- 	pinctrl-names = "default";
--	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8>;
-+	pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_rclk>;
- 	bus-width = <8>;
- };
- 
+diff --git a/Android.mk b/Android.mk
+index 7c8cce4..4b7afb1 100644
+--- a/Android.mk
++++ b/Android.mk
+@@ -3,6 +3,7 @@ LOCAL_PATH:= $(call my-dir)
+ include $(CLEAR_VARS)
+ LOCAL_MODULE_TAGS := optional
+ LOCAL_SRC_FILES:= mmc.c mmc_cmds.c
++LOCAL_SRC_FILES += 3rdparty/hmac_sha/sha2.c 3rdparty/hmac_sha/hmac_sha2.c
+ LOCAL_MODULE := mmc_utils
+ LOCAL_SHARED_LIBRARIES := libcutils libc
+ LOCAL_C_INCLUDES+= $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
 -- 
-1.9.1
+1.8.5.2
+
+-- 
+The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
