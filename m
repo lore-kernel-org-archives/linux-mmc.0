@@ -1,75 +1,45 @@
-From: Georgi Djakov <georgi.djakov@linaro.org>
-Subject: [PATCH] mmc: sdhci-msm: Add support for vendor capabilities registers
-Date: Thu, 19 Mar 2015 14:55:20 +0200
-Message-ID: <1426769720-18657-1-git-send-email-georgi.djakov@linaro.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+From: Karol Wrona <k.wrona@samsung.com>
+Subject: [PATCH v4 0/1] mmc: dw_mmc: Add runtime pm to dw_mmc
+Date: Thu, 19 Mar 2015 14:44:20 +0100
+Message-ID: <1426772661-25506-1-git-send-email-k.wrona@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.w1.samsung.com ([210.118.77.11]:37687 "EHLO
+	mailout1.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751794AbbCSNoe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Mar 2015 09:44:34 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, Karol Wrona <wrona.vy@gmail.com>, Karol Wrona <k.wrona@samsung.com>
 
-Some versions of this controller do not advertise their 3.0v and
-8bit bus-width support capabilities. It is required to explicitly
-set these capabilities for the specific controller versions.
+Hello,
 
-Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
----
-Tested on msm8916-mtp board.
+This patch adds runtime pm for dw_mmc.  There is no runtime pm callbacks for
+exynos dw_mmc because the host hardware gates interface clock itself and it is
+done separately.  The reason for runtime is mainly get an info about host state
+for now.
 
- drivers/mmc/host/sdhci-msm.c |   29 ++++++++++++++++++++++++++++-
- 1 file changed, 28 insertions(+), 1 deletion(-)
+>From v1:
+	- move all pm_runtime functions to dw_mmc.c
+	- change runtime autosuspend timeout
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 3d32ce896b09..80d9ca7cb1e6 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -41,6 +41,15 @@
- #define CORE_VENDOR_SPEC	0x10c
- #define CORE_CLK_PWRSAVE	BIT(1)
- 
-+#define CORE_MCI_VERSION		0x050
-+#define CORE_VERSION_MAJOR_SHIFT	28
-+#define CORE_VERSION_MAJOR_MASK		(0xf << CORE_VERSION_MAJOR_SHIFT)
-+#define CORE_VERSION_MINOR_MASK		0xff
-+
-+#define CORE_VENDOR_SPEC_CAPABILITIES0	0x11c
-+#define CORE_8_BIT_SUPPORT		BIT(18)
-+#define CORE_3_0V_SUPPORT		BIT(25)
-+
- #define CDR_SELEXT_SHIFT	20
- #define CDR_SELEXT_MASK		(0xf << CDR_SELEXT_SHIFT)
- #define CMUX_SHIFT_PHASE_SHIFT	24
-@@ -426,7 +435,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	struct sdhci_msm_host *msm_host;
- 	struct resource *core_memres;
- 	int ret;
--	u16 host_version;
-+	u16 host_version, core_minor;
-+	u32 core_version;
-+	u8 core_major;
- 
- 	msm_host = devm_kzalloc(&pdev->dev, sizeof(*msm_host), GFP_KERNEL);
- 	if (!msm_host)
-@@ -516,6 +527,22 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 		host_version, ((host_version & SDHCI_VENDOR_VER_MASK) >>
- 			       SDHCI_VENDOR_VER_SHIFT));
- 
-+	core_version = readl_relaxed(msm_host->core_mem + CORE_MCI_VERSION);
-+	core_major = (core_version & CORE_VERSION_MAJOR_MASK) >>
-+		      CORE_VERSION_MAJOR_SHIFT;
-+	core_minor = core_version & CORE_VERSION_MINOR_MASK;
-+	dev_dbg(&pdev->dev, "MCI Version: 0x%08x, major: 0x%04x, minor: 0x%02x\n",
-+		core_version, core_major, core_minor);
-+
-+	/*
-+	 * Support for 3v and 8bit bus-width is not advertised by some
-+	 * controller versions and must be explicitly enabled.
-+	 */
-+	if (core_major >= 1 && core_minor != 0x11 && core_minor != 0x12)
-+		writel_relaxed(readl_relaxed(host->ioaddr + SDHCI_CAPABILITIES)
-+			       | CORE_3_0V_SUPPORT | CORE_8_BIT_SUPPORT,
-+			       host->ioaddr + CORE_VENDOR_SPEC_CAPABILITIES0);
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto clk_disable;
+>From v2:
+	- rebase on next-20150306
+
+>From v3:
+	- add wrappers for pm_runtime put and get - bare ones are used only in
+	probe/remove
+
+Thanks,
+Karol
+
+Karol Wrona (1):
+  mmc: dw_mmc: Add runtime pm to dw_mmc
+
+ drivers/mmc/host/dw_mmc.c |  117 +++++++++++++++++++++++++++++++++++++++++----
+ drivers/mmc/host/dw_mmc.h |    2 +
+ 2 files changed, 110 insertions(+), 9 deletions(-)
+
+-- 
+1.7.9.5
+
