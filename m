@@ -1,80 +1,47 @@
-From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: Re: [Linux-kernel] [PATCH 12/13] mmc: atmel-mci: use endian
- agnostic IO
-Date: Thu, 19 Mar 2015 14:22:46 +0000
-Message-ID: <1426774966.22122.47.camel@xylophone.i.decadent.org.uk>
-References: <1426693992-31163-1-git-send-email-ben.dooks@codethink.co.uk>
-	 <1426693992-31163-13-git-send-email-ben.dooks@codethink.co.uk>
+From: Bjorn Andersson <bjorn@kryo.se>
+Subject: Re: [PATCH] mmc: sdhci-msm: Add support for vendor capabilities registers
+Date: Thu, 19 Mar 2015 08:36:28 -0700
+Message-ID: <CAJAp7Oj9XMHcbsMGfTCUWoi5tGi=eR2AxG_0Bkn4tzAiks89xg@mail.gmail.com>
+References: <1426769720-18657-1-git-send-email-georgi.djakov@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:36652 "EHLO
-	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756118AbbCSOWx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Mar 2015 10:22:53 -0400
-In-Reply-To: <1426693992-31163-13-git-send-email-ben.dooks@codethink.co.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1426769720-18657-1-git-send-email-georgi.djakov@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Georgi Djakov <georgi.djakov@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Dooks <ben.dooks@codethink.co.uk>
-Cc: linux-kernel@lists.codethink.co.uk, linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-On Wed, 2015-03-18 at 15:53 +0000, Ben Dooks wrote:
-> Change the __raw IO functions to endian agnostic relaxed ones to allow
-> the driver to function on big endian ARM systems.
-> 
-> Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
-> --
-> CC: Ludovic Desroches <ludovic.desroches@atmel.com>
-> CC: Chris Ball <chris@printf.net>
-> CC: Ulf Hansson <ulf.hansson@linaro.org>
-> CC: linux-mmc@vger.kernel.org
-> ---
->  drivers/mmc/host/atmel-mci-regs.h | 9 ++++++++-
->  1 file changed, 8 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/atmel-mci-regs.h b/drivers/mmc/host/atmel-mci-regs.h
-> index c97001e..711bb53 100644
-> --- a/drivers/mmc/host/atmel-mci-regs.h
-> +++ b/drivers/mmc/host/atmel-mci-regs.h
-> @@ -135,10 +135,17 @@
->  #define ATMCI_REGS_SIZE		0x100
->  
->  /* Register access macros */
-> -#define atmci_readl(port,reg)				\
-> +#ifdef CONFIG_AVR32
-> +#define atmci_readl(port,reg)			\
->  	__raw_readl((port)->regs + reg)
->  #define atmci_writel(port,reg,value)			\
->  	__raw_writel((value), (port)->regs + reg)
-> +#else
-> +#define atmci_readl(port,reg)			\
-> +	readl_relaxed((port)->regs + reg)
-> +#define atmci_writel(port,reg,value)			\
-> +	writel_relaxed((value), (port)->regs + reg)
-> +#endif
+On Thu, Mar 19, 2015 at 5:55 AM, Georgi Djakov <georgi.djakov@linaro.org> wrote:
+[..]
 
-This pattern is repeated in a lot of drivers; is it worth defining
-atmel_{read,write}l_relaxed() in a common header?
+> @@ -516,6 +527,22 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>                 host_version, ((host_version & SDHCI_VENDOR_VER_MASK) >>
+>                                SDHCI_VENDOR_VER_SHIFT));
+>
+> +       core_version = readl_relaxed(msm_host->core_mem + CORE_MCI_VERSION);
+> +       core_major = (core_version & CORE_VERSION_MAJOR_MASK) >>
+> +                     CORE_VERSION_MAJOR_SHIFT;
+> +       core_minor = core_version & CORE_VERSION_MINOR_MASK;
+> +       dev_dbg(&pdev->dev, "MCI Version: 0x%08x, major: 0x%04x, minor: 0x%02x\n",
+> +               core_version, core_major, core_minor);
+> +
+> +       /*
+> +        * Support for 3v and 8bit bus-width is not advertised by some
+> +        * controller versions and must be explicitly enabled.
+> +        */
+> +       if (core_major >= 1 && core_minor != 0x11 && core_minor != 0x12)
+> +               writel_relaxed(readl_relaxed(host->ioaddr + SDHCI_CAPABILITIES)
+> +                              | CORE_3_0V_SUPPORT | CORE_8_BIT_SUPPORT,
+> +                              host->ioaddr + CORE_VENDOR_SPEC_CAPABILITIES0);
 
-#ifdef CONFIG_AVR32
+Please split this into read, modify, write statements and put braces around it.
 
-/* CPU and peripherals are both big-endian, so don't byte-swap */
-#define atmel_readl_relaxed(addr)		__raw_readl(addr)
-#define atmel_writel_relaxed(value, addr)	__raw_writel(value, addr)
+> +
 
-#else
+Does the 8916 board you have work without bumping the
+regulator_set_load() (previously regulator_set_optimum_mode())? None
+of my 8974 boards work reliably without it.
 
-/* Peripherals are little-endian, so byte-swap if CPU isn't */
-#define atmel_readl_relaxed(addr)		readl_relaxed(addr)
-#define atmel_writel_relaxed(value, addr)	writel_relaxed(value, addr)
-
-#endif
-
-Ben.
-
->  /* On AVR chips the Peripheral DMA Controller is not connected to MCI. */
->  #ifdef CONFIG_AVR32
-
-
-
+Regards,
+Bjorn
