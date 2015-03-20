@@ -1,112 +1,155 @@
-From: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v4 2/4] mmc: core: Add mmc_regulator_set_vqmmc()
-Date: Fri, 20 Mar 2015 11:28:28 +0000
-Message-ID: <20150320112828.GF2869@sirena.org.uk>
-References: <1426112117-18220-1-git-send-email-dianders@chromium.org>
- <1426112117-18220-2-git-send-email-dianders@chromium.org>
- <CAPDyKFq_WMJfqNGuxwN7xPmhv2X6-+G1zXpdD6zYDkDe7-Jo2A@mail.gmail.com>
- <CAD=FV=U-YnT5jF5MFC==hANXGPqVpV3iLMPu85TrQ4dNDsWeCA@mail.gmail.com>
- <CAPDyKFpG=q88QEkuAgoLqkZU40Kx7dB7PmnXHqEt0EtbYvR_Cg@mail.gmail.com>
- <CAD=FV=X=1=AnXCGgWWkJDcHLO-MfVqsSB2aJxi3WOgWJhD_ggA@mail.gmail.com>
- <CAPDyKFrkznbW7k_=BDo99jJhWzDbUgbeU+MXWB_E_UWXh=56Eg@mail.gmail.com>
- <20150319113646.GQ2869@sirena.org.uk>
- <CAPDyKFroe9N3j9oMWKknH5huv7j8fkrBr5UKjjp190hkqNsNRg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============7828116290016607737=="
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <CAPDyKFroe9N3j9oMWKknH5huv7j8fkrBr5UKjjp190hkqNsNRg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Addy Ke <addy.ke-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Andrew Gabbasov <andrew_gabbasov-nmGgyN9QBj3QT0dZR+AlfA@public.gmane.org>, Alexandru Stan <amstan-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Andrew Bresticker <abrestic-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Tim Kryger <tim.kryger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alim Akhtar <alim.akhtar-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Johan Rudholm <johan.rudholm-VrBV9hrLPhE@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Sonny Rao <sonnyrao-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Javier Martinez Canillas <javier.martinez-ZGY8ohtN/8pPYcu2f3hruQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: [PATCH] ARM: OMAP2: HSMMC: explicit fields to declare cover/card detect pin
+Date: Fri, 20 Mar 2015 15:53:54 +0100
+Message-ID: <1426863234-28409-1-git-send-email-afenkart@gmail.com>
+Return-path: <linux-omap-owner@vger.kernel.org>
+Sender: linux-omap-owner@vger.kernel.org
+To: linux-omap@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
+board-rx51 has no card detect pin in the mmc slot, but can detect that
+the (cell-phone) cover has been removed and the card is accessible.
+The semantics between cover/card detect differ, the gpio on the slot
+informs you after the card has been removed, cover removal does not
+necessarily mean that the card has been removed.
+This means different code paths are necessary. To complete this we
+also want different fields in the platform data for cover and card
+detect. This separation is not pushed all the way down into struct
+omap2_hsmmc_info which is used to initialize the platform data.
+If we did that we had to go over all board files and set the new
+gpio_cod pin to -EINVAL. If we forget one board or some out-of-tree
+archicture forgets that the default '0' is used which is a valid pin
+number.
 
---===============7828116290016607737==
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="4fo3mGi7Q6pk/+I3"
-Content-Disposition: inline
+Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+---
+ arch/arm/mach-omap2/hsmmc.c              | 33 ++++++++++++++++++++++++--------
+ drivers/mmc/host/omap_hsmmc.c            | 11 ++++++-----
+ include/linux/platform_data/hsmmc-omap.h |  6 ++----
+ 3 files changed, 33 insertions(+), 17 deletions(-)
 
+diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+index dc6e79c..9a8611a 100644
+--- a/arch/arm/mach-omap2/hsmmc.c
++++ b/arch/arm/mach-omap2/hsmmc.c
+@@ -150,9 +150,13 @@ static int nop_mmc_set_power(struct device *dev, int power_on, int vdd)
+ static inline void omap_hsmmc_mux(struct omap_hsmmc_platform_data
+ 				  *mmc_controller, int controller_nr)
+ {
+-	if (gpio_is_valid(mmc_controller->switch_pin) &&
+-	    (mmc_controller->switch_pin < OMAP_MAX_GPIO_LINES))
+-		omap_mux_init_gpio(mmc_controller->switch_pin,
++	if (gpio_is_valid(mmc_controller->gpio_cd) &&
++	    (mmc_controller->gpio_cd < OMAP_MAX_GPIO_LINES))
++		omap_mux_init_gpio(mmc_controller->gpio_cd,
++				   OMAP_PIN_INPUT_PULLUP);
++	if (gpio_is_valid(mmc_controller->gpio_cod) &&
++	    (mmc_controller->gpio_cod < OMAP_MAX_GPIO_LINES))
++		omap_mux_init_gpio(mmc_controller->gpio_cod,
+ 				   OMAP_PIN_INPUT_PULLUP);
+ 	if (gpio_is_valid(mmc_controller->gpio_wp) &&
+ 	    (mmc_controller->gpio_wp < OMAP_MAX_GPIO_LINES))
+@@ -250,15 +254,20 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
+ 	mmc->internal_clock = !c->ext_clock;
+ 	mmc->reg_offset = 0;
+ 
+-	mmc->switch_pin = c->gpio_cd;
++	if (c->cover_only) {
++		/* detect if mobile phone cover removed */
++		mmc->gpio_cd = -EINVAL;
++		mmc->gpio_cod = c->gpio_cd;
++	} else {
++		/* card detect pin on the mmc socket itself */
++		mmc->gpio_cd = c->gpio_cd;
++		mmc->gpio_cod = -EINVAL;
++	}
+ 	mmc->gpio_wp = c->gpio_wp;
+ 
+ 	mmc->remux = c->remux;
+ 	mmc->init_card = c->init_card;
+ 
+-	if (c->cover_only)
+-		mmc->cover = 1;
+-
+ 	if (c->nonremovable)
+ 		mmc->nonremovable = 1;
+ 
+@@ -358,7 +367,15 @@ void omap_hsmmc_late_init(struct omap2_hsmmc_info *c)
+ 		if (!mmc_pdata)
+ 			continue;
+ 
+-		mmc_pdata->switch_pin = c->gpio_cd;
++		if (c->cover_only) {
++			/* detect if mobile phone cover removed */
++			mmc_pdata->gpio_cd = -EINVAL;
++			mmc_pdata->gpio_cod = c->gpio_cd;
++		} else {
++			/* card detect pin on the mmc socket itself */
++			mmc_pdata->gpio_cd = c->gpio_cd;
++			mmc_pdata->gpio_cod = -EINVAL;
++		}
+ 		mmc_pdata->gpio_wp = c->gpio_wp;
+ 
+ 		res = omap_device_register(pdev);
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 053cd38..265391f 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -427,15 +427,15 @@ static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
+ {
+ 	int ret;
+ 
+-	if (pdata->cover && gpio_is_valid(pdata->switch_pin)) {
+-		ret = mmc_gpio_request_cd(mmc, pdata->switch_pin, 0);
++	if (gpio_is_valid(pdata->gpio_cod)) {
++		ret = mmc_gpio_request_cd(mmc, pdata->gpio_cod, 0);
+ 		if (ret)
+ 			return ret;
+ 
+ 		host->get_cover_state = omap_hsmmc_get_cover_state;
+ 		mmc_gpio_set_cd_isr(mmc, omap_hsmmc_cover_irq);
+-	} else if (!pdata->cover && gpio_is_valid(pdata->switch_pin)) {
+-		ret = mmc_gpio_request_cd(mmc, pdata->switch_pin, 0);
++	} else if (gpio_is_valid(pdata->gpio_cd)) {
++		ret = mmc_gpio_request_cd(mmc, pdata->gpio_cd, 0);
+ 		if (ret)
+ 			return ret;
+ 
+@@ -1932,7 +1932,8 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+ 	if (of_find_property(np, "ti,dual-volt", NULL))
+ 		pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
+ 
+-	pdata->switch_pin = -EINVAL;
++	pdata->gpio_cd = -EINVAL;
++	pdata->gpio_cod = -EINVAL;
+ 	pdata->gpio_wp = -EINVAL;
+ 
+ 	if (of_find_property(np, "ti,non-removable", NULL)) {
+diff --git a/include/linux/platform_data/hsmmc-omap.h b/include/linux/platform_data/hsmmc-omap.h
+index 67bbcf0..8e981be 100644
+--- a/include/linux/platform_data/hsmmc-omap.h
++++ b/include/linux/platform_data/hsmmc-omap.h
+@@ -55,9 +55,6 @@ struct omap_hsmmc_platform_data {
+ 	u32 caps;	/* Used for the MMC driver on 2430 and later */
+ 	u32 pm_caps;	/* PM capabilities of the mmc */
+ 
+-	/* switch pin can be for card detect (default) or card cover */
+-	unsigned cover:1;
+-
+ 	/* use the internal clock */
+ 	unsigned internal_clock:1;
+ 
+@@ -73,7 +70,8 @@ struct omap_hsmmc_platform_data {
+ #define HSMMC_HAS_HSPE_SUPPORT	(1 << 2)
+ 	unsigned features;
+ 
+-	int switch_pin;			/* gpio (card detect) */
++	int gpio_cd;			/* gpio (card detect) */
++	int gpio_cod;			/* gpio (cover detect) */
+ 	int gpio_wp;			/* gpio (write protect) */
+ 
+ 	int (*set_power)(struct device *dev, int power_on, int vdd);
+-- 
+2.1.4
 
---4fo3mGi7Q6pk/+I3
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-
-On Fri, Mar 20, 2015 at 11:55:50AM +0100, Ulf Hansson wrote:
-> On 19 March 2015 at 12:36, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-
-> > The implementation *should* do that anyway, it's just not trivial to
-> > implement in an efficient fashion with the current information we have
-> > from drivers.
-
-> The APIs regulator_count_voltages() and regulator_list_voltage(), are
-> currently used from the mmc core to find out which voltages that is
-> supported (with 0.1V granularity). Then that information can be used
-> when trying to set a new voltage.
-
-> But I guess such a wrapper API is out of the question?
-
-> Anyway, I get the feeling that we will need to do the same for this case.
-
-As previously discussed the problem is that there can be a *lot* of
-voltages on a modern regulator with fine grained voltage steps and
-tolerances are also used for things like cpufreq where we care about
-performance.  We need something that doesn't require a linear scan of
-possible values.
-
-> >> would be good to allow both upper and lower limits to be zero.
-
-> > The lower limit can be zero already though it isn't clear to me that
-> > this is useful.  Setting an upper limit of zero seems nonsensical, an
-> > upper limit that is lower than the lower limit isn't terribly obvious
-> > and removing the upper limit isn't safe - it means that we'll happily
-> > oversupply things which is a road to physical damage.
-
-> I am not sure I follow here. In the regulator_set_voltage_tol() you
-> can only specifiy one limit (tolerance?). What Dough proposed was to
-> add a new API which can have both a low tolerance value and a high
-> tolerance value.
-
-Tolerances are not limits - when you say "limit" that sounds like a hard
-value.  I can't see any reason why the code would prevent anyone setting
-a tolerance of zero, though it should be rare that this is actually the
-best thing to do.
-
---4fo3mGi7Q6pk/+I3
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJVDARbAAoJECTWi3JdVIfQiPQH+wVECwfALfzRrxDM2hMMzyoO
-EdpJfak+mGZrowaxAyb4AcfS1qxEETng0G2bK67QM2cX38ZvWnPZTRd3fG/huIZ4
-VIlW63RyR5KGOUYa4QNplp4XdYt41d3fuc1Zee3iqEkCDfngoacWgdoYYh61h7F0
-acEcg7nN1IjCLMp5c+aRAKsKKwpfJyYaQn3tSyS31sBKtk35tqZyGNO5Fl4k+vAg
-ZJnAzzIpeEPJ+xiqt6WTb+Qr9R6+QIp/sxsfzbuYzbT5noAYBvj1Vknc4x+q/51E
-93eHG+dcRrfqfx+FrfKtId9ObsYRfBQhHz+gogkQPSix75SPGUcKioc5eDj9hKY=
-=pyen
------END PGP SIGNATURE-----
-
---4fo3mGi7Q6pk/+I3--
-
-
---===============7828116290016607737==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-Linux-rockchip mailing list
-Linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-http://lists.infradead.org/mailman/listinfo/linux-rockchip
-
---===============7828116290016607737==--
