@@ -1,73 +1,48 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 33/35 linux-next] mmc: constify of_device_id array
-Date: Fri, 20 Mar 2015 09:56:50 +0100
-Message-ID: <CAPDyKFoWoQhSat9vAfTGy_exdubcknySMPjoSXp5ox_YB+M6ZQ@mail.gmail.com>
-References: <1426533469-25458-1-git-send-email-fabf@skynet.be>
-	<1426535949-26107-1-git-send-email-fabf@skynet.be>
-	<1426535949-26107-2-git-send-email-fabf@skynet.be>
-	<CAPDyKFodW1zgrQ-sd5TPO_rCa_-tm95JkwCWiGX4BCUSFqPHdg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH] MAINTAINERS: mmc: Add Jaehoon as co-maintainer for SDHCI SAMSUNG DRIVER
+Date: Fri, 20 Mar 2015 10:15:29 +0100
+Message-ID: <1426842929-3810-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f170.google.com ([209.85.216.170]:35469 "EHLO
-	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751557AbbCTI4v (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Mar 2015 04:56:51 -0400
-Received: by qcbkw5 with SMTP id kw5so87956611qcb.2
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Mar 2015 01:56:50 -0700 (PDT)
-In-Reply-To: <CAPDyKFodW1zgrQ-sd5TPO_rCa_-tm95JkwCWiGX4BCUSFqPHdg@mail.gmail.com>
+Received: from mail-lb0-f171.google.com ([209.85.217.171]:35271 "EHLO
+	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751258AbbCTJPe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Mar 2015 05:15:34 -0400
+Received: by lbcgn8 with SMTP id gn8so70779704lbc.2
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Mar 2015 02:15:33 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabian Frederick <fabf@skynet.be>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Chris Ball <chris@printf.net>, Tony Prisk <linux@prisktech.co.nz>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-kernel@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 17 March 2015 at 10:49, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 16 March 2015 at 20:59, Fabian Frederick <fabf@skynet.be> wrote:
->> of_device_id is always used as const.
->> (See driver.of_match_table and open firmware functions)
->>
->> Signed-off-by: Fabian Frederick <fabf@skynet.be>
->
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Jaehoon has volunteered in maintaining the SDHCI SAMSUNG DRIVER so
+add him.
 
-I realized that you might wanted me to pick this up and queue it
-through my mmc tree? Just tell me if that's what you want.
+Since we are updating this section let's also correct file path to
+cover all files for sdhci-s3c.
 
-Kind regards
-Uffe
+Cc: Ben Dooks <ben-linux@fluff.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ MAINTAINERS | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
->
->> ---
->>  drivers/mmc/host/mmc_spi.c   | 2 +-
->>  drivers/mmc/host/wmt-sdmmc.c | 2 +-
->>  2 files changed, 2 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
->> index e4a0754..ae19d83 100644
->> --- a/drivers/mmc/host/mmc_spi.c
->> +++ b/drivers/mmc/host/mmc_spi.c
->> @@ -1507,7 +1507,7 @@ static int mmc_spi_remove(struct spi_device *spi)
->>         return 0;
->>  }
->>
->> -static struct of_device_id mmc_spi_of_match_table[] = {
->> +static const struct of_device_id mmc_spi_of_match_table[] = {
->>         { .compatible = "mmc-spi-slot", },
->>         {},
->>  };
->> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
->> index dd2e1aa..5af0055 100644
->> --- a/drivers/mmc/host/wmt-sdmmc.c
->> +++ b/drivers/mmc/host/wmt-sdmmc.c
->> @@ -744,7 +744,7 @@ static struct wmt_mci_caps wm8505_caps = {
->>         .max_blk_size = 2048,
->>  };
->>
->> -static struct of_device_id wmt_mci_dt_ids[] = {
->> +static const struct of_device_id wmt_mci_dt_ids[] = {
->>         { .compatible = "wm,wm8505-sdhc", .data = &wm8505_caps },
->>         { /* Sentinel */ },
->>  };
->> --
->> 2.1.0
->>
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 0e1abe8..b7b7267 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -8689,9 +8689,10 @@ F:	drivers/mmc/host/sdhci-pltfm.[ch]
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) SAMSUNG DRIVER
+ M:	Ben Dooks <ben-linux@fluff.org>
++M:	Jaehoon Chung <jh80.chung@samsung.com>
+ L:	linux-mmc@vger.kernel.org
+ S:	Maintained
+-F:	drivers/mmc/host/sdhci-s3c.c
++F:	drivers/mmc/host/sdhci-s3c*
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) ST SPEAR DRIVER
+ M:	Viresh Kumar <viresh.linux@gmail.com>
+-- 
+1.9.1
+
