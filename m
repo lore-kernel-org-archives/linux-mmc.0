@@ -1,155 +1,46 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH] ARM: OMAP2: HSMMC: explicit fields to declare cover/card detect pin
-Date: Fri, 20 Mar 2015 15:53:54 +0100
-Message-ID: <1426863234-28409-1-git-send-email-afenkart@gmail.com>
-Return-path: <linux-omap-owner@vger.kernel.org>
-Sender: linux-omap-owner@vger.kernel.org
-To: linux-omap@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>, Andreas Fenkart <afenkart@gmail.com>
+From: Georgi Djakov <georgi.djakov@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-msm: Add support for vendor capabilities registers
+Date: Fri, 20 Mar 2015 17:23:59 +0200
+Message-ID: <550C3B8F.50802@linaro.org>
+References: <1426769720-18657-1-git-send-email-georgi.djakov@linaro.org>	<CAJAp7Oj9XMHcbsMGfTCUWoi5tGi=eR2AxG_0Bkn4tzAiks89xg@mail.gmail.com>	<550AF78B.6020800@linaro.org> <CAJAp7Og=56Zk5EfFwQXhU7rCdUCM4OXV9mhiuRFVthNUhR+3Mg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAJAp7Og=56Zk5EfFwQXhU7rCdUCM4OXV9mhiuRFVthNUhR+3Mg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Bjorn Andersson <bjorn@kryo.se>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-board-rx51 has no card detect pin in the mmc slot, but can detect that
-the (cell-phone) cover has been removed and the card is accessible.
-The semantics between cover/card detect differ, the gpio on the slot
-informs you after the card has been removed, cover removal does not
-necessarily mean that the card has been removed.
-This means different code paths are necessary. To complete this we
-also want different fields in the platform data for cover and card
-detect. This separation is not pushed all the way down into struct
-omap2_hsmmc_info which is used to initialize the platform data.
-If we did that we had to go over all board files and set the new
-gpio_cod pin to -EINVAL. If we forget one board or some out-of-tree
-archicture forgets that the default '0' is used which is a valid pin
-number.
+On 03/19/2015 07:55 PM, Bjorn Andersson wrote:
+> On Thu, Mar 19, 2015 at 9:21 AM, Georgi Djakov <georgi.djakov@linaro.org> wrote:
+> [..]
+>>> Does the 8916 board you have work without bumping the
+>>> regulator_set_load() (previously regulator_set_optimum_mode())? None
+>>> of my 8974 boards work reliably without it.
+>>
+>> My 8916 board seems to be working fine with this, at least when doing basic tests
+>> like mounting filesystems and file transfers. I'm not calling any regulator_set_load()
+>> functions. Is your board a dragonboard or something else? If you are doing any
+>> specific tests maybe i can try the same on my board?
+>>
+> 
+> My test setup is Xperia Z1, where I get issues when running with
+> hs200. On Xperia Z3 i can't even read out the partition table during
+> boot. I'm not sure what causes the difference to the dragonboard -
+> perhaps just different memories.
+> 
 
-Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
----
- arch/arm/mach-omap2/hsmmc.c              | 33 ++++++++++++++++++++++++--------
- drivers/mmc/host/omap_hsmmc.c            | 11 ++++++-----
- include/linux/platform_data/hsmmc-omap.h |  6 ++----
- 3 files changed, 33 insertions(+), 17 deletions(-)
+Thanks for the information. Currently i do not notice such issues, but
+however i will do some more testing.
 
-diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-index dc6e79c..9a8611a 100644
---- a/arch/arm/mach-omap2/hsmmc.c
-+++ b/arch/arm/mach-omap2/hsmmc.c
-@@ -150,9 +150,13 @@ static int nop_mmc_set_power(struct device *dev, int power_on, int vdd)
- static inline void omap_hsmmc_mux(struct omap_hsmmc_platform_data
- 				  *mmc_controller, int controller_nr)
- {
--	if (gpio_is_valid(mmc_controller->switch_pin) &&
--	    (mmc_controller->switch_pin < OMAP_MAX_GPIO_LINES))
--		omap_mux_init_gpio(mmc_controller->switch_pin,
-+	if (gpio_is_valid(mmc_controller->gpio_cd) &&
-+	    (mmc_controller->gpio_cd < OMAP_MAX_GPIO_LINES))
-+		omap_mux_init_gpio(mmc_controller->gpio_cd,
-+				   OMAP_PIN_INPUT_PULLUP);
-+	if (gpio_is_valid(mmc_controller->gpio_cod) &&
-+	    (mmc_controller->gpio_cod < OMAP_MAX_GPIO_LINES))
-+		omap_mux_init_gpio(mmc_controller->gpio_cod,
- 				   OMAP_PIN_INPUT_PULLUP);
- 	if (gpio_is_valid(mmc_controller->gpio_wp) &&
- 	    (mmc_controller->gpio_wp < OMAP_MAX_GPIO_LINES))
-@@ -250,15 +254,20 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
- 	mmc->internal_clock = !c->ext_clock;
- 	mmc->reg_offset = 0;
- 
--	mmc->switch_pin = c->gpio_cd;
-+	if (c->cover_only) {
-+		/* detect if mobile phone cover removed */
-+		mmc->gpio_cd = -EINVAL;
-+		mmc->gpio_cod = c->gpio_cd;
-+	} else {
-+		/* card detect pin on the mmc socket itself */
-+		mmc->gpio_cd = c->gpio_cd;
-+		mmc->gpio_cod = -EINVAL;
-+	}
- 	mmc->gpio_wp = c->gpio_wp;
- 
- 	mmc->remux = c->remux;
- 	mmc->init_card = c->init_card;
- 
--	if (c->cover_only)
--		mmc->cover = 1;
--
- 	if (c->nonremovable)
- 		mmc->nonremovable = 1;
- 
-@@ -358,7 +367,15 @@ void omap_hsmmc_late_init(struct omap2_hsmmc_info *c)
- 		if (!mmc_pdata)
- 			continue;
- 
--		mmc_pdata->switch_pin = c->gpio_cd;
-+		if (c->cover_only) {
-+			/* detect if mobile phone cover removed */
-+			mmc_pdata->gpio_cd = -EINVAL;
-+			mmc_pdata->gpio_cod = c->gpio_cd;
-+		} else {
-+			/* card detect pin on the mmc socket itself */
-+			mmc_pdata->gpio_cd = c->gpio_cd;
-+			mmc_pdata->gpio_cod = -EINVAL;
-+		}
- 		mmc_pdata->gpio_wp = c->gpio_wp;
- 
- 		res = omap_device_register(pdev);
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 053cd38..265391f 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -427,15 +427,15 @@ static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
- {
- 	int ret;
- 
--	if (pdata->cover && gpio_is_valid(pdata->switch_pin)) {
--		ret = mmc_gpio_request_cd(mmc, pdata->switch_pin, 0);
-+	if (gpio_is_valid(pdata->gpio_cod)) {
-+		ret = mmc_gpio_request_cd(mmc, pdata->gpio_cod, 0);
- 		if (ret)
- 			return ret;
- 
- 		host->get_cover_state = omap_hsmmc_get_cover_state;
- 		mmc_gpio_set_cd_isr(mmc, omap_hsmmc_cover_irq);
--	} else if (!pdata->cover && gpio_is_valid(pdata->switch_pin)) {
--		ret = mmc_gpio_request_cd(mmc, pdata->switch_pin, 0);
-+	} else if (gpio_is_valid(pdata->gpio_cd)) {
-+		ret = mmc_gpio_request_cd(mmc, pdata->gpio_cd, 0);
- 		if (ret)
- 			return ret;
- 
-@@ -1932,7 +1932,8 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
- 	if (of_find_property(np, "ti,dual-volt", NULL))
- 		pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
- 
--	pdata->switch_pin = -EINVAL;
-+	pdata->gpio_cd = -EINVAL;
-+	pdata->gpio_cod = -EINVAL;
- 	pdata->gpio_wp = -EINVAL;
- 
- 	if (of_find_property(np, "ti,non-removable", NULL)) {
-diff --git a/include/linux/platform_data/hsmmc-omap.h b/include/linux/platform_data/hsmmc-omap.h
-index 67bbcf0..8e981be 100644
---- a/include/linux/platform_data/hsmmc-omap.h
-+++ b/include/linux/platform_data/hsmmc-omap.h
-@@ -55,9 +55,6 @@ struct omap_hsmmc_platform_data {
- 	u32 caps;	/* Used for the MMC driver on 2430 and later */
- 	u32 pm_caps;	/* PM capabilities of the mmc */
- 
--	/* switch pin can be for card detect (default) or card cover */
--	unsigned cover:1;
--
- 	/* use the internal clock */
- 	unsigned internal_clock:1;
- 
-@@ -73,7 +70,8 @@ struct omap_hsmmc_platform_data {
- #define HSMMC_HAS_HSPE_SUPPORT	(1 << 2)
- 	unsigned features;
- 
--	int switch_pin;			/* gpio (card detect) */
-+	int gpio_cd;			/* gpio (card detect) */
-+	int gpio_cod;			/* gpio (cover detect) */
- 	int gpio_wp;			/* gpio (write protect) */
- 
- 	int (*set_power)(struct device *dev, int power_on, int vdd);
--- 
-2.1.4
+> So I have a patch where I hook up the mmc framework with some calls to
+> regulator_set_load(), but it need some more love before I can send it
+> out. I postponed it due to the rework of regulator_set_optimum_mode()
+> that I did.
 
+Ok, sounds good. I can test it on a few boards that i have.
+
+Thanks,
+Georgi
