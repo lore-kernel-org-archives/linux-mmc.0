@@ -1,68 +1,91 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/4] mmc: core: allow non-blocking form of mmc_claim_host
-Date: Mon, 23 Mar 2015 16:19:57 +0100
-Message-ID: <CAPDyKFr5g4cqei+DnQvUY2qaR0faAg4-2_p-S_ZYPaAhJuAK-Q@mail.gmail.com>
-References: <20150224024023.22719.32436.stgit@notabene.brown>
-	<20150224024223.22719.95786.stgit@notabene.brown>
-	<CAPDyKFrY=DEH0dZvObgXriMoTz9fBbBhOhU3+ZXATUkj=vrpnA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f44.google.com ([209.85.192.44]:34589 "EHLO
-	mail-qg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752317AbbCWPUK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Mar 2015 11:20:10 -0400
-Received: by qgep97 with SMTP id p97so18571374qge.1
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2015 08:20:09 -0700 (PDT)
-In-Reply-To: <CAPDyKFrY=DEH0dZvObgXriMoTz9fBbBhOhU3+ZXATUkj=vrpnA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Georgi Djakov <georgi.djakov@linaro.org>
+Subject: [PATCH v3] mmc: sdhci-msm: Add support for vendor capabilities registers
+Date: Mon, 23 Mar 2015 18:47:29 +0200
+Message-ID: <1427129249-3259-1-git-send-email-georgi.djakov@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: NeilBrown <neilb@suse.de>
-Cc: Tony Lindgren <tony@atomide.com>, Andreas Fenkart <afenkart@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>, NeilBrown <neil@brown.name>, linux-omap <linux-omap@vger.kernel.org>
 
-On 23 March 2015 at 10:58, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 24 February 2015 at 03:42, NeilBrown <neilb@suse.de> wrote:
->> Change the handling for the 'abort' flag so that if
->> it is set, but we can claim the host, then do the claim,
->> rather than aborting.
->>
->> When the abort is async this just means that a race between aborting
->> an allowing a claim is resolved slightly differently.  Any
->> code must already be able to handle 'abort' being set just as the host
->> is claimed.
->>
->> This allows extra functionality.  If __mmc_claim_host() is called
->> with an 'abort' pointer which is initialized to '1', it will effect a
->> non-blocking 'claim'.
->>
->> Signed-off-by: NeilBrown <neil@brown.name>
->> ---
->>  drivers/mmc/core/core.c |    3 ++-
->>  1 file changed, 2 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index 23f10f72e5f3..541c8903dc6b 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -912,10 +912,11 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
->>                 spin_lock_irqsave(&host->lock, flags);
->>         }
->>         set_current_state(TASK_RUNNING);
->> -       if (!stop) {
->> +       if (!host->claimed || host->claimer == current) {
->
-> This seems risky in that regards that it will change the behaviour for
-> the sdio_irq_thread(). Did you check that?
->
-> I guess we could change the sdio_irq_thread() to read it's
-> sdio_irq_thread_abort value before trying to claim the host?
+Some versions of this controller do not advertise their 3.0v and
+8bit bus-width support capabilities. It is required to explicitly
+set these capabilities for the specific controller versions.
 
-Ah, that won't work. Since we may be spinning to claim the host and
-the abort value may change dynamically during this time.
+Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
+---
 
-Another option would be to re-invent mmc_try_claim_host(). Which we
-removed in commit:
-b83e867026ca (mmc: core: remove dead function mmc_try_claim_host)
+Changes since v2:
+ * Use the generic sdhci bitfield defines, as the bits are matching.
+   Thanks Bjorn for noticing this.
 
-Kind regards
-Uffe
+Changes since v1:
+ * Converted to separate read, modify, write statements.
+ * Slightly updated comment text.
+
+ Tested on msm8916-mtp board.
+
+ drivers/mmc/host/sdhci-msm.c |   29 ++++++++++++++++++++++++++++-
+ 1 file changed, 28 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 3d32ce896b09..4a09f7608c66 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -22,6 +22,11 @@
+ 
+ #include "sdhci-pltfm.h"
+ 
++#define CORE_MCI_VERSION		0x50
++#define CORE_VERSION_MAJOR_SHIFT	28
++#define CORE_VERSION_MAJOR_MASK		(0xf << CORE_VERSION_MAJOR_SHIFT)
++#define CORE_VERSION_MINOR_MASK		0xff
++
+ #define CORE_HC_MODE		0x78
+ #define HC_MODE_EN		0x1
+ #define CORE_POWER		0x0
+@@ -41,6 +46,8 @@
+ #define CORE_VENDOR_SPEC	0x10c
+ #define CORE_CLK_PWRSAVE	BIT(1)
+ 
++#define CORE_VENDOR_SPEC_CAPABILITIES0	0x11c
++
+ #define CDR_SELEXT_SHIFT	20
+ #define CDR_SELEXT_MASK		(0xf << CDR_SELEXT_SHIFT)
+ #define CMUX_SHIFT_PHASE_SHIFT	24
+@@ -426,7 +433,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	struct sdhci_msm_host *msm_host;
+ 	struct resource *core_memres;
+ 	int ret;
+-	u16 host_version;
++	u16 host_version, core_minor;
++	u32 core_version, caps;
++	u8 core_major;
+ 
+ 	msm_host = devm_kzalloc(&pdev->dev, sizeof(*msm_host), GFP_KERNEL);
+ 	if (!msm_host)
+@@ -516,6 +525,24 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 		host_version, ((host_version & SDHCI_VENDOR_VER_MASK) >>
+ 			       SDHCI_VENDOR_VER_SHIFT));
+ 
++	core_version = readl_relaxed(msm_host->core_mem + CORE_MCI_VERSION);
++	core_major = (core_version & CORE_VERSION_MAJOR_MASK) >>
++		      CORE_VERSION_MAJOR_SHIFT;
++	core_minor = core_version & CORE_VERSION_MINOR_MASK;
++	dev_dbg(&pdev->dev, "MCI Version: 0x%08x, major: 0x%04x, minor: 0x%02x\n",
++		core_version, core_major, core_minor);
++
++	/*
++	 * Support for some capabilities is not advertised by newer
++	 * controller versions and must be explicitly enabled.
++	 */
++	if (core_major >= 1 && core_minor != 0x11 && core_minor != 0x12) {
++		caps = readl_relaxed(host->ioaddr + SDHCI_CAPABILITIES);
++		caps |= SDHCI_CAN_VDD_300 | SDHCI_CAN_DO_8BIT;
++		writel_relaxed(caps, host->ioaddr +
++			       CORE_VENDOR_SPEC_CAPABILITIES0);
++	}
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+ 		goto clk_disable;
