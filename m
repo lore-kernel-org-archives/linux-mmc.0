@@ -1,46 +1,42 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Don't send clock off command if power is off
-Date: Sun, 22 Mar 2015 14:59:27 -0700
-Message-ID: <CAD=FV=VUG54vk9xD9zEnaP_rQcL4cWLOHuy76aMRta0OOsLn1g@mail.gmail.com>
-References: <1426874420-25103-1-git-send-email-dianders@chromium.org>
-	<CAGOxZ52OWucMh_HjWnZnhN=c7C3TXeQ4aV-GAe5XXtRbu0r2Kg@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V3 00/15] mmc: host: Add facility to support re-tuning
+Date: Mon, 23 Mar 2015 10:06:06 +0200
+Message-ID: <550FC96E.4080706@intel.com>
+References: <1425991390-4983-1-git-send-email-adrian.hunter@intel.com> <5506E20B.4090706@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f173.google.com ([209.85.223.173]:35406 "EHLO
-	mail-ie0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751889AbbCVV72 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 22 Mar 2015 17:59:28 -0400
-Received: by ieclw3 with SMTP id lw3so23551516iec.2
-        for <linux-mmc@vger.kernel.org>; Sun, 22 Mar 2015 14:59:27 -0700 (PDT)
-In-Reply-To: <CAGOxZ52OWucMh_HjWnZnhN=c7C3TXeQ4aV-GAe5XXtRbu0r2Kg@mail.gmail.com>
+Received: from mga01.intel.com ([192.55.52.88]:36245 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752097AbbCWIII (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 23 Mar 2015 04:08:08 -0400
+In-Reply-To: <5506E20B.4090706@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-Alim,
-
-On Sun, Mar 22, 2015 at 5:16 AM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
->>         case MMC_POWER_OFF:
->> -               /* Turn clock off before power goes down */
->> -               dw_mci_setup_bus(slot, false);
->> +               /* Turn clock off before power goes down; only if powered */
->> +               if (slot->host->vqmmc_enabled)
->> +                       dw_mci_setup_bus(slot, false);
+On 16/03/15 16:00, Adrian Hunter wrote:
+> On 10/03/15 14:42, Adrian Hunter wrote:
+>> Hi
 >>
-> vqmmc_enabled is always _true_ when entering MMC_POWER_OFF case..right?
-> Is this done for extra protection? Or do you have a case where vqmmc
-> is OFF and driver still calls dw_mci_setup_bus from here?
+>> Here is V3 of some patches to move re-tuning support
+>> out of sdhci and into the core, and add support for HS400
+>> re-tuning.
+>>
+>> Currently sdhci does re-tuning transparently by
+>> calling sdhci_execute_tuning() from its ->request()
+>> function.
+>>
+>> The problem with HS400 re-tuning is that it must be
+>> done in HS200 mode. That means using switch commands
+>> and making ios changes. That means it potentially
+>> conflicts with other command sequences. The new
+>> re-tuning support accomodates that.
+> 
+> Ulf, ping?
 
-Hmm.  I know I got it into the debugger in at least one reboot case
-where it was failing to turn the clock off.  I thought I confirmed it
-was the core trying to call MMC_POWER_OFF when the power was already
-off, but now I'm less certain.  I looked back at my debug session and
-I don't see where I got that evidence.  :-/  Certainly if I put a
-printout here right now I can't see my code making a difference.
+Ping
 
-Unfortunately the crash was a very rare one, so I may have to go back
-to the drawing board here...
 
--Doug
