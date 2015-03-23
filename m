@@ -1,63 +1,94 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/4] mmc: core: allow non-blocking form of mmc_claim_host
-Date: Mon, 23 Mar 2015 10:58:24 +0100
-Message-ID: <CAPDyKFrY=DEH0dZvObgXriMoTz9fBbBhOhU3+ZXATUkj=vrpnA@mail.gmail.com>
-References: <20150224024023.22719.32436.stgit@notabene.brown>
-	<20150224024223.22719.95786.stgit@notabene.brown>
+Subject: Re: [PATCH 33/35 linux-next] mmc: constify of_device_id array
+Date: Mon, 23 Mar 2015 11:06:57 +0100
+Message-ID: <CAPDyKFqJf-iYeMWEJL0v6SQngOWJBpNc03NU59seyOLuh61KoA@mail.gmail.com>
+References: <1426533469-25458-1-git-send-email-fabf@skynet.be>
+	<1426535949-26107-1-git-send-email-fabf@skynet.be>
+	<1426535949-26107-2-git-send-email-fabf@skynet.be>
+	<CAPDyKFodW1zgrQ-sd5TPO_rCa_-tm95JkwCWiGX4BCUSFqPHdg@mail.gmail.com>
+	<CAPDyKFoWoQhSat9vAfTGy_exdubcknySMPjoSXp5ox_YB+M6ZQ@mail.gmail.com>
+	<1374583183.180918.1426968545752.open-xchange@webmail.nmp.proximus.be>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <20150224024223.22719.95786.stgit@notabene.brown>
-Sender: linux-omap-owner@vger.kernel.org
-To: NeilBrown <neilb@suse.de>
-Cc: Tony Lindgren <tony@atomide.com>, Andreas Fenkart <afenkart@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, GTA04 owners <gta04-owner@goldelico.com>, NeilBrown <neil@brown.name>, linux-omap <linux-omap@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f170.google.com ([209.85.216.170]:35324 "EHLO
+	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752235AbbCWKG6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Mar 2015 06:06:58 -0400
+Received: by qcbkw5 with SMTP id kw5so140522548qcb.2
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2015 03:06:57 -0700 (PDT)
+In-Reply-To: <1374583183.180918.1426968545752.open-xchange@webmail.nmp.proximus.be>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Fabian Frederick <fabf@skynet.be>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, Tony Prisk <linux@prisktech.co.nz>
 
-On 24 February 2015 at 03:42, NeilBrown <neilb@suse.de> wrote:
-> Change the handling for the 'abort' flag so that if
-> it is set, but we can claim the host, then do the claim,
-> rather than aborting.
+On 21 March 2015 at 21:09, Fabian Frederick <fabf@skynet.be> wrote:
 >
-> When the abort is async this just means that a race between aborting
-> an allowing a claim is resolved slightly differently.  Any
-> code must already be able to handle 'abort' being set just as the host
-> is claimed.
 >
-> This allows extra functionality.  If __mmc_claim_host() is called
-> with an 'abort' pointer which is initialized to '1', it will effect a
-> non-blocking 'claim'.
+>> On 20 March 2015 at 09:56 Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>
+>>
+>> On 17 March 2015 at 10:49, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> > On 16 March 2015 at 20:59, Fabian Frederick <fabf@skynet.be> wrote:
+>> >> of_device_id is always used as const.
+>> >> (See driver.of_match_table and open firmware functions)
+>> >>
+>> >> Signed-off-by: Fabian Frederick <fabf@skynet.be>
+>> >
+>> > Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>
+>> I realized that you might wanted me to pick this up and queue it
+>> through my mmc tree? Just tell me if that's what you want.
+>>
+>> Kind regards
+>> Uffe
 >
-> Signed-off-by: NeilBrown <neil@brown.name>
-> ---
->  drivers/mmc/core/core.c |    3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+> Hi Ulf,
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 23f10f72e5f3..541c8903dc6b 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -912,10 +912,11 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
->                 spin_lock_irqsave(&host->lock, flags);
->         }
->         set_current_state(TASK_RUNNING);
-> -       if (!stop) {
-> +       if (!host->claimed || host->claimer == current) {
+>         Yes of course :) (it has not been added to linux-next yet).
 
-This seems risky in that regards that it will change the behaviour for
-the sdio_irq_thread(). Did you check that?
-
-I guess we could change the sdio_irq_thread() to read it's
-sdio_irq_thread_abort value before trying to claim the host?
-
->                 host->claimed = 1;
->                 host->claimer = current;
->                 host->claim_cnt += 1;
-> +               stop = 0;
->         } else
->                 wake_up(&host->wq);
->         spin_unlock_irqrestore(&host->lock, flags);
->
->
+Thanks! Applied.
 
 Kind regards
 Uffe
+
+>
+> Thanks,
+> Fabian
+>>
+>> >
+>> >> ---
+>> >>  drivers/mmc/host/mmc_spi.c   | 2 +-
+>> >>  drivers/mmc/host/wmt-sdmmc.c | 2 +-
+>> >>  2 files changed, 2 insertions(+), 2 deletions(-)
+>> >>
+>> >> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+>> >> index e4a0754..ae19d83 100644
+>> >> --- a/drivers/mmc/host/mmc_spi.c
+>> >> +++ b/drivers/mmc/host/mmc_spi.c
+>> >> @@ -1507,7 +1507,7 @@ static int mmc_spi_remove(struct spi_device *spi)
+>> >>         return 0;
+>> >>  }
+>> >>
+>> >> -static struct of_device_id mmc_spi_of_match_table[] = {
+>> >> +static const struct of_device_id mmc_spi_of_match_table[] = {
+>> >>         { .compatible = "mmc-spi-slot", },
+>> >>         {},
+>> >>  };
+>> >> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+>> >> index dd2e1aa..5af0055 100644
+>> >> --- a/drivers/mmc/host/wmt-sdmmc.c
+>> >> +++ b/drivers/mmc/host/wmt-sdmmc.c
+>> >> @@ -744,7 +744,7 @@ static struct wmt_mci_caps wm8505_caps = {
+>> >>         .max_blk_size = 2048,
+>> >>  };
+>> >>
+>> >> -static struct of_device_id wmt_mci_dt_ids[] = {
+>> >> +static const struct of_device_id wmt_mci_dt_ids[] = {
+>> >>         { .compatible = "wm,wm8505-sdhc", .data = &wm8505_caps },
+>> >>         { /* Sentinel */ },
+>> >>  };
+>> >> --
+>> >> 2.1.0
+>> >>
