@@ -1,102 +1,125 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2 11/15] mmc: sdhci: Change to new way of doing re-tuning
-Date: Tue, 24 Mar 2015 10:40:25 +0100
-Message-ID: <CAPDyKFpM8S3kvMfF+e=tb6bL3ObTc1_g=O+wnVeGgZYn8iVOSQ@mail.gmail.com>
-References: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>
-	<1422522030-17793-12-git-send-email-adrian.hunter@intel.com>
-	<CAPDyKFpTuttvhP91qNF_g_2sWV3NZmYMCnqFVGYEnb1L8kXVeg@mail.gmail.com>
-	<54FD5BDD.9060004@intel.com>
-	<CAPDyKFr9bpE3FXu0339q4ndOm_KSNpATBODecTWkkrLifvSing@mail.gmail.com>
-	<54FEFDB0.5050104@intel.com>
-	<CAPDyKFpvCz9kTaX=632hWGsWfLKC2aFJomFc1xECnNvQpNVU2A@mail.gmail.com>
-	<5510227F.70605@intel.com>
-	<20150324134922.63130696@notabene.brown>
+From: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v6 00/12] Improvements to Tegra-based Chromebook support
+Date: Tue, 24 Mar 2015 11:28:53 +0100
+Message-ID: <20150324102852.GD18115@ulmo.nvidia.com>
+References: <1426672363-30667-1-git-send-email-tomeu.vizoso@collabora.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f54.google.com ([209.85.192.54]:33962 "EHLO
-	mail-qg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752135AbbCXJk0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Mar 2015 05:40:26 -0400
-Received: by qgep97 with SMTP id p97so57840082qge.1
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2015 02:40:25 -0700 (PDT)
-In-Reply-To: <20150324134922.63130696@notabene.brown>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="UfEAyuTBtIjiZzX6"
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1426672363-30667-1-git-send-email-tomeu.vizoso-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tomeu Vizoso <tomeu.vizoso-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>
+Cc: linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Asaf Vertz <asaf.vertz-CtGflUZwD1xBDgjK7y7TUQ@public.gmane.org>, Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, David Airlie <airlied-cv59FeDIM0c@public.gmane.org>, David Riley <davidriley-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Johan Rudholm <johan.rudholm-VrBV9hrLPhE@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Kuninori Morimoto <kuninori.morimoto.gx-zM6kxYcvzFBBDgjK7y7TUQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Lukas Czerner <lczerner-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Mikko Perttunen <mperttunen-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Paul Walmsley <paul-DWxLp4Yu+b8AvxtiuMwx3w@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Peter De Schrijver <pdeschrijver-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Ste
 List-Id: linux-mmc@vger.kernel.org
-To: NeilBrown <neilb@suse.de>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-On 24 March 2015 at 03:49, NeilBrown <neilb@suse.de> wrote:
-> On Mon, 23 Mar 2015 16:26:07 +0200 Adrian Hunter <adrian.hunter@intel.com>
-> wrote:
->
->> For Neil's problem I would do something quiet different:
->>
->> 1. The host driver already knows the bus width so can easily "get/put"
->> runtime pm to prevent suspend when the bus width does not permit it.
->>
->> 2. The need to do things when the card is idle comes up a lot (e.g. bkops,
->> sleep notification, cache flush etc etc). In Neil's case he wants to switch
->> to 1-bit mode, but that just seems another of these "idle" operations. So I
->> would investigate the requirements of supporting idle operations in general.
->>
->
-> Hi,
->  I agree that what I want to achieve could be characterised as an "idle"
->  operation.
->  I also happen to think that runtime PM is designed to support "idle"
->  operations - it can track when a device goes 'idle' and "do the right thing".
->  It handles all the needed ref counting and races with resume etc.  So I
->  think it should be used to manage these "idle" operations.
->
->  The difficulty is that in the naive approach, we want to do something in the
->  "runtime_suspend" operation which actually uses the device.  So it has to be
->  non-idle in order to go idle.  I agree that this can appear clumsy.
->
->  What we effectively have here is two levels of "idle".  First the "host"
->  goes idle in that no new commands are arriving and no interrupts have
->  happened.  In response to this the host sends a few final commands to the
->  controller and then the controller goes idle.
->
->  This two-stage process should be able to be modelled with the two levels of
->  device: the mmc_host class device and the platform device which controls the
->  hardware.  e.g. mmc1 and omap_hsmmc.1 on my board.
->
->  So this is (roughly) what I would do if I wanted to implement fully general
->  "idle" operations for mmc cards.
->
->  1/ enable runtime_pm on the host device - in mmc_add_host.
->    I think pm_suspend_ignore_children() would be needed so that the host
->    can go to sleep while the card is still active.
->  2/ Use pm_runtime_get / pm_runtime_put_autosuspend in mmc_claim_host
->     and mmc_release_host.
->  3/ Remove the ->enable and  ->disable calls from mmc_{claim,release}_host.
->     I think they only affect omap_hsmmc and it only uses them for runtime
->     PM, which now will happen automatically.
->  4/ In the 'runtime_suspend' method for mmc_host, take a runtime_pm reference
->     on the platform device and schedule a work item to run the "idle"
->     operations
->
->
->  When the "idle" operations complete, the runtime_pm reference will be
->  dropped and then - having no active children or references - the
->  platform device will go to sleep (stop its clocks or whatever).
->  When something then calls mmc_claim_host(), the "idle" operations can be
->  undone, either directly or via the runtime_resume operation.
 
-I don't think this will work.
+--UfEAyuTBtIjiZzX6
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-The problem is that the scheduled work which performs the idle
-operations will invoke mmc_claim|release_host() when it's about to
-execute the  "idle commands/requests".
+On Wed, Mar 18, 2015 at 10:52:15AM +0100, Tomeu Vizoso wrote:
+> v6:	* Added Acked-by and Reviewed-By tags
+> 	* Rebased on top of 4.0-rc1
+> 	* Added patch that marks the WiFi card as powered during suspend
+>=20
+> v5:	* Moved to use gpio-restart for reboots, had to make tegra_pmc_restart
+> 	a notification handler
+>=20
+> v4:	* Added support for the system reset GPIO, for proper reboots
+> 	* Moved out changes to ASOC to their own series, as requested by Mark
+> 	Brown
+> 	* Added patch to reset the SOR, to make sure it's in a known state
+> 	* Changed nvidia,model property of the sound nodes to GoogleNyanBig
+> 	and GoogleNyanBlaze so they can be told apart in userspace
+>=20
+> v3:	* Added bindings for the LTN140AT29 panel
+> 	* Removed the delay in pwrseq, as what was actually needed was to add
+> 	a dependency on the power supplies of the host
+> 	* Uses the pinmux for the Blaze as generated by tegra-pinmux-scripts
+> 	* Uses the pinmux for the Big as in the last patch from Simon Glass
+>=20
+> Hello,
+>=20
+> this series adds support for the Tegra-based HP Chromebook 14 (aka nyan
+> blaze), which is very similar to the Acer Chromebook 13 (aka nyan big).
+> Because they both include tegra124-nyan.dtsi, some improvements to Blaze
+> support have also benefitted the Big. I have tested that USB2, the panels,
+> HDMI, the trackpad, Wifi and sound work on both.
+>=20
+> The leaf DTs contain the whole pinmux configuration as generated by
+> tegra-pinmux-scripts. I chose to not put the common configuration in the
+> common dtsi so we can paste the output as is and be sure that the kernel
+> doesn't diverge from the canonical data.
+>=20
+> These patches are based on top of 4.0-rc1.
+>=20
+> http://cgit.collabora.com/git/user/tomeu/linux.git/log/?h=3Dnyan-v6
+>=20
+> Regards,
+>=20
+> Tomeu
+>=20
+> David Riley (1):
+>   soc/tegra: pmc: move to using a restart handler
+>=20
+> St=C3=A9phane Marchesin (1):
+>   drm/panel: add support for Samsung LTN140AT29 panel
+>=20
+> Tomeu Vizoso (10):
+>   ARM: tegra: Change model of sound card in Nyan Big
+>   ARM: tegra: Move out nyan-generic parts out from the nyan-big DT
+>   ARM: tegra: Add DTS for the nyan-blaze board
+>   ARM: tegra: Add node for trackpad in Nyan boards
+>   ARM: tegra: Use pwrseq-simple for the wifi in Nyan
+>   ARM: tegra: Use the generated pinmux data
+>   ARM: tegra: Set spi-max-frequency property to flash node
+>   drm/tegra: Reset the SOR on probe
+>   ARM: tegra: Add gpio-restart node
+>   ARM: tegra: The WiFi card is kept powered during suspend
+>=20
+>  .../bindings/panel/samsung,ltn140at29-301.txt      |    7 +
+>  arch/arm/boot/dts/Makefile                         |    1 +
+>  arch/arm/boot/dts/tegra124-nyan-big.dts            | 2119 +++++++++++---=
+------
+>  arch/arm/boot/dts/tegra124-nyan-blaze.dts          | 1332 ++++++++++++
+>  arch/arm/boot/dts/tegra124-nyan.dtsi               |  695 +++++++
+>  arch/arm/mach-tegra/tegra.c                        |    1 -
+>  drivers/gpu/drm/panel/panel-simple.c               |   26 +
+>  drivers/gpu/drm/tegra/sor.c                        |   14 +
+>  drivers/soc/tegra/pmc.c                            |   31 +-
+>  9 files changed, 3254 insertions(+), 972 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/panel/samsung,ltn14=
+0at29-301.txt
+>  create mode 100644 arch/arm/boot/dts/tegra124-nyan-blaze.dts
+>  create mode 100644 arch/arm/boot/dts/tegra124-nyan.dtsi
 
->
-> This would be a fairly intrusive change.  I'm happy to try to find time to
-> write bits of it if there is general agreement, but I cannot test anything
-> other than omap_hsmmc, and I don't know any details about any other possible
-> "idle" operations so I would need input from someone who does.
->
-> NeilBrown
+Patches 1, 2, 4-8, 11 and 12 applied to the for-4.1/dt branch.
 
-Kind regards
-Uffe
+Thanks,
+Thierry
+
+--UfEAyuTBtIjiZzX6
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQIcBAABCAAGBQJVETxkAAoJEN0jrNd/PrOhMLEP/09WJ5ziVHEESZeKFUcK2zeC
+YJPB7svtNK1vdd1cxmFEw0nEY4FNvL/13GksgJeetrYDQFzNTxQvKsf4tgOSkA8A
+K8Cyyh1sXLOOwIRCHTpJRQZAyTFkp1qEiX8d8CshiWeKGerPIUbFcUc44dKExtM/
+X9Gv5pUDmEyXbKgPJTL/10OMLi7pCSmB4+ZRUtI9a37TLoy/+4L42C5BYbkVTPYD
+XbekpDVwOQc+siVUCAVulvjpFGPgUccX5NDJv2weldfy+q9+lfQNyfJpOHzsjEdh
+WhCNeZo9h2o+xj/1WhuHHVNtOClHmVyz8y43tLpZ27lOrvlnJEiwCKfxqefFIFvi
+X9LRu64cqwC7lx/bTD5n+QLVMStXAlPCLG3ghLYrWeJTUZhbUHDRG5tc96UKVrpk
+fDQD09zqiGXjPNvkdxCZy4V79jA0KexJtyY1SYZn3SYzbBltItAnZdRjNkwEAtEE
+cEsnSvZgVs8tp58jHO/HT5Mf7fb/iZNZ8InIH3Gd6XQQsYMuPhszEDaMZUnoHyAJ
+t4fnYPYps3cW2r/vbRdR+g5Gn443KBBChDAj4iMubN/aceERPYqOt2pUWrc+hL2y
+sbosMFKSTgsz7x1LCXxY9PTVXaE3m3lywSi3Vo7ArNwd6HLRPxe6rZZJqKqli0bM
+v4M0RLX1Ic6+TonhNCna
+=ACIG
+-----END PGP SIGNATURE-----
+
+--UfEAyuTBtIjiZzX6--
