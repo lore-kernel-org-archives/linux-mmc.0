@@ -1,7 +1,7 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [RFC PATCH 3/4] mmc: sdhci-acpi: Fix device hang on Intel BayTrail
-Date: Tue, 24 Mar 2015 15:40:39 +0200
-Message-ID: <1427204440-3533-4-git-send-email-adrian.hunter@intel.com>
+Subject: [RFC PATCH 4/4] mmc: sdhci-pci: Fix device hang on Intel BayTrail
+Date: Tue, 24 Mar 2015 15:40:40 +0200
+Message-ID: <1427204440-3533-5-git-send-email-adrian.hunter@intel.com>
 References: <1427204440-3533-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1427204440-3533-1-git-send-email-adrian.hunter@intel.com>
@@ -15,84 +15,55 @@ if host controllers are using DMA while deep C-states
 are used. Workaround that by specifying a maximum
 DMA latency that will prevent deep C-states.
 
-Unfortunately, host controller ACPI HIDs are not unique
-to Baytrail, so the CPU must be identified.
-
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-acpi.c | 32 ++++++++++++++++++++++++++++++++
- 1 file changed, 32 insertions(+)
+ drivers/mmc/host/sdhci-pci.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 22d929f..eaff09f 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -43,6 +43,24 @@
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 5a5b5e9..bba2956 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -330,6 +330,12 @@ static void spt_read_drive_strength(struct sdhci_host *host)
+ 	sdhci_pci_spt_drive_strength = 0x10 | ((val >> 12) & 0xf);
+ }
  
- #include "sdhci.h"
- 
-+#ifdef CONFIG_X86
-+#include <asm/cpu_device_id.h>
-+static bool sdhci_acpi_on_byt(void)
++static void byt_set_dma_latency(struct sdhci_host *host)
 +{
-+	static const struct x86_cpu_id byt[] = {
-+		{ X86_VENDOR_INTEL, 6, 0x37 },
-+		{}
-+	};
-+
-+	return x86_match_cpu(byt);
-+}
-+#else
-+static bool sdhci_acpi_on_byt(void)
-+{
-+	return false;
-+}
-+#endif
-+
- enum {
- 	SDHCI_ACPI_SD_CD		= BIT(0),
- 	SDHCI_ACPI_RUNTIME_PM		= BIT(1),
-@@ -146,6 +164,14 @@ static const struct sdhci_acpi_chip sdhci_acpi_chip_int = {
- 	.ops = &sdhci_acpi_ops_int,
- };
- 
-+static void sdhci_acpi_int_dma_latency(struct sdhci_host *host)
-+{
-+	if (sdhci_acpi_on_byt()) {
-+		host->dma_latency = 20;
-+		host->lat_cancel_delay = 275;
-+	}
++	host->dma_latency = 20;
++	host->lat_cancel_delay = 275;
 +}
 +
- static int sdhci_acpi_emmc_probe_slot(struct platform_device *pdev,
- 				      const char *hid, const char *uid)
+ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
  {
-@@ -164,6 +190,8 @@ static int sdhci_acpi_emmc_probe_slot(struct platform_device *pdev,
- 	    sdhci_readl(host, SDHCI_CAPABILITIES_1) == 0x00000807)
- 		host->timeout_clk = 1000; /* 1000 kHz i.e. 1 MHz */
- 
-+	sdhci_acpi_int_dma_latency(host);
-+
+ 	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
+@@ -338,6 +344,9 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
+ 				 MMC_CAP_WAIT_WHILE_BUSY;
+ 	slot->host->mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ;
+ 	slot->hw_reset = sdhci_pci_int_hw_reset;
++	if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BYT_EMMC ||
++	    slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BYT_EMMC2)
++		byt_set_dma_latency(slot->host);
+ 	if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BSW_EMMC)
+ 		slot->host->timeout_clk = 1000; /* 1000 kHz i.e. 1 MHz */
+ 	if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_SPT_EMMC) {
+@@ -352,6 +361,8 @@ static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+ 	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
+ 				 MMC_CAP_BUS_WIDTH_TEST |
+ 				 MMC_CAP_WAIT_WHILE_BUSY;
++	if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BYT_SDIO)
++		byt_set_dma_latency(slot->host);
  	return 0;
  }
  
-@@ -178,6 +206,8 @@ static int sdhci_acpi_sdio_probe_slot(struct platform_device *pdev,
- 
- 	host = c->host;
- 
-+	sdhci_acpi_int_dma_latency(host);
-+
- 	/* Platform specific code during sdio probe slot goes here */
- 
+@@ -362,6 +373,8 @@ static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
+ 	slot->cd_con_id = NULL;
+ 	slot->cd_idx = 0;
+ 	slot->cd_override_level = true;
++	if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BYT_SD)
++		byt_set_dma_latency(slot->host);
  	return 0;
-@@ -194,6 +224,8 @@ static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev,
+ }
  
- 	host = c->host;
- 
-+	sdhci_acpi_int_dma_latency(host);
-+
- 	/* Platform specific code during sd probe slot goes here */
- 
- 	return 0;
 -- 
 1.9.1
