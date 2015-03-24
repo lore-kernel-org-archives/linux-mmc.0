@@ -1,138 +1,62 @@
-From: Alim Akhtar <alim.akhtar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v7] ARM: dts: Add HS400 support for exynos5420 and exynos5800
-Date: Tue, 24 Mar 2015 19:54:16 +0530
-Message-ID: <CAGOxZ50mcg+ASah5-cm8jY+O+RLJDS8cEJvFPAkMasuq-vcVbw@mail.gmail.com>
-References: <1426677623-30532-1-git-send-email-alim.akhtar@samsung.com>
+From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Subject: Re: [RFC PATCH 0/4] mmc: sdhci: Support maximum DMA latency request via PM QoS
+Date: Tue, 24 Mar 2015 21:13:01 +0100
+Message-ID: <4768637.QcvINVrrJ9@vostro.rjw.lan>
+References: <1427204440-3533-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1426677623-30532-1-git-send-email-alim.akhtar-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alim Akhtar <alim.akhtar-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: kgene <kgene-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Abhilash Kesavan <a.kesavan-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, javier-0uQlZySMnqxg9hUCZPvPmw@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from v094114.home.net.pl ([79.96.170.134]:64452 "HELO
+	v094114.home.net.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1752897AbbCXTs6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Mar 2015 15:48:58 -0400
+In-Reply-To: <1427204440-3533-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Kevin Hilman <khilman@linaro.org>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Gentle Ping !!
+On Tuesday, March 24, 2015 03:40:36 PM Adrian Hunter wrote:
+> Hi
+> 
+> Here are some patches to address an issue with SDHCI
+> in Intel Baytrail. Intel Baytrail has been observed
+> sometimes to hang if host controllers are using DMA
+> while deep C-states are used. Workaround that by
+> specifying a maximum DMA latency that will prevent
+> deep C-states.
+> 
+> The first patch adds a new PM QOS function so that
+> the SDHCI driver can do a "lazy" cancel of the QoS
+> request from within its "finish" tasklet.
+> 
+> The second patch adds support to SDHCI for specifying a
+> maximum DMA latency.
+> 
+> The third and fourth patches take that facility into
+> use for Baytrail.
+> 
+> Ad hoc testing with Lenovo Thinkpad 10 showed a stress
+> test could run for at least 24 hours with the patches,
+> compared to less than an hour without.
+> 
+> These patches are on top of my driver strength patches
+> which are on top of my re-tuning patches.
+> 
+> 
+> Adrian Hunter (4):
+>       PM / QoS: Add pm_qos_cancel_request_lazy() that doesn't sleep
+>       mmc: sdhci: Support maximum DMA latency request via PM QOS
+>       mmc: sdhci-acpi: Fix device hang on Intel BayTrail
+>       mmc: sdhci-pci: Fix device hang on Intel BayTrail
 
+I'm a bit concerned about the CPUID-based blacklisting of things and
+whether or not the SDHCI driver is the right place for doing that.
 
-On Wed, Mar 18, 2015 at 4:50 PM, Alim Akhtar <alim.akhtar-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org> wrote:
-> From: Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
->
-> HS400 timing values are added for SMDK5420, exynos5420-peach-pit
-> and exynos5800-peach-pi boards.
-> This also adds RCLK GPIO line, this gpio should be in pull-down
-> state.
-> This also enables HS400 on peach-pi and this updates the clock frequency
-> to 800MHz to be set as input clock to controller.
->
-> Signed-off-by: Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-> Signed-off-by: Alim Akhtar <alim.akhtar-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-> [Alim: addressed review comments]
-> Acked-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-> ---
-> Changes in V7:
->          Add back bus1 pin, which was removed during rebase in v6
->          as rightly pointed out by Javier[1].
->
-> Changes in V6:
->         Rebased on kukjin's for-next branch[0]
->         (commit: 77105c8 Merge branch 'v4.0-samsung-fixes-2' into for-next)
->
-> [0]: git://git.kernel.org/pub/scm/linux/kernel/git/kgene/linux-samsung.git
-> [1]: http://www.spinics.net/lists/arm-kernel/msg406618.html
->
->  arch/arm/boot/dts/exynos5420-peach-pit.dts | 4 +++-
->  arch/arm/boot/dts/exynos5420-pinctrl.dtsi  | 7 +++++++
->  arch/arm/boot/dts/exynos5420-smdk5420.dts  | 5 ++++-
->  arch/arm/boot/dts/exynos5800-peach-pi.dts  | 7 +++++--
->  4 files changed, 19 insertions(+), 4 deletions(-)
->
-> diff --git a/arch/arm/boot/dts/exynos5420-peach-pit.dts b/arch/arm/boot/dts/exynos5420-peach-pit.dts
-> index 3f4e2fe..0788d08 100644
-> --- a/arch/arm/boot/dts/exynos5420-peach-pit.dts
-> +++ b/arch/arm/boot/dts/exynos5420-peach-pit.dts
-> @@ -699,8 +699,10 @@
->         samsung,dw-mshc-ciu-div = <3>;
->         samsung,dw-mshc-sdr-timing = <0 4>;
->         samsung,dw-mshc-ddr-timing = <0 2>;
-> +       samsung,dw-mshc-hs400-timing = <0 2>;
-> +       samsung,read-strobe-delay = <90>;
->         pinctrl-names = "default";
-> -       pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8>;
-> +       pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8 &sd0_rclk>;
->         bus-width = <8>;
->  };
->
-> diff --git a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
-> index ba686e4..8b15316 100644
-> --- a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
-> +++ b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
-> @@ -201,6 +201,13 @@
->                         samsung,pin-drv = <3>;
->                 };
->
-> +               sd0_rclk: sd0-rclk {
-> +                       samsung,pins = "gpc0-7";
-> +                       samsung,pin-function = <2>;
-> +                       samsung,pin-pud = <1>;
-> +                       samsung,pin-drv = <3>;
-> +               };
-> +
->                 sd1_cmd: sd1-cmd {
->                         samsung,pins = "gpc1-1";
->                         samsung,pin-function = <2>;
-> diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts b/arch/arm/boot/dts/exynos5420-smdk5420.dts
-> index 7a56852..9103f23 100644
-> --- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
-> +++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
-> @@ -80,8 +80,11 @@
->                 samsung,dw-mshc-ciu-div = <3>;
->                 samsung,dw-mshc-sdr-timing = <0 4>;
->                 samsung,dw-mshc-ddr-timing = <0 2>;
-> +               samsung,dw-mshc-hs400-timing = <0 2>;
-> +               samsung,read-strobe-delay = <90>;
->                 pinctrl-names = "default";
-> -               pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8>;
-> +               pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8
-> +                            &sd0_rclk>;
->                 bus-width = <8>;
->                 cap-mmc-highspeed;
->         };
-> diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts b/arch/arm/boot/dts/exynos5800-peach-pi.dts
-> index c833bac..412f41d 100644
-> --- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
-> +++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
-> @@ -654,15 +654,18 @@
->         num-slots = <1>;
->         broken-cd;
->         mmc-hs200-1_8v;
-> +       mmc-hs400-1_8v;
->         cap-mmc-highspeed;
->         non-removable;
->         card-detect-delay = <200>;
-> -       clock-frequency = <400000000>;
-> +       clock-frequency = <800000000>;
->         samsung,dw-mshc-ciu-div = <3>;
->         samsung,dw-mshc-sdr-timing = <0 4>;
->         samsung,dw-mshc-ddr-timing = <0 2>;
-> +       samsung,dw-mshc-hs400-timing = <0 2>;
-> +       samsung,read-strobe-delay = <90>;
->         pinctrl-names = "default";
-> -       pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8>;
-> +       pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8 &sd0_rclk>;
->         bus-width = <8>;
->  };
->
-> --
-> 1.9.1
->
-
+Maybe we should do it from within the LPSS driver instead?
 
 
 -- 
-Regards,
-Alim
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I speak only for myself.
+Rafael J. Wysocki, Intel Open Source Technology Center.
