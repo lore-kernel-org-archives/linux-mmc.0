@@ -1,58 +1,67 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [RFC PATCH 0/4] mmc: sdhci: Support maximum DMA latency request via PM QoS
-Date: Tue, 24 Mar 2015 15:40:36 +0200
-Message-ID: <1427204440-3533-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:32710 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752130AbbCXNmo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 24 Mar 2015 09:42:44 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [RFC PATCH 1/4] PM / QoS: Add pm_qos_cancel_request_lazy() that doesn't sleep
+Date: Tue, 24 Mar 2015 15:40:37 +0200
+Message-ID: <1427204440-3533-2-git-send-email-adrian.hunter@intel.com>
+References: <1427204440-3533-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1427204440-3533-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Kevin Hilman <khilman@linaro.org>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-Hi
+Add pm_qos_cancel_request_lazy() which is convenient for
+contexts that may not sleep.
 
-Here are some patches to address an issue with SDHCI
-in Intel Baytrail. Intel Baytrail has been observed
-sometimes to hang if host controllers are using DMA
-while deep C-states are used. Workaround that by
-specifying a maximum DMA latency that will prevent
-deep C-states.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ include/linux/pm_qos.h |  2 ++
+ kernel/power/qos.c     | 20 ++++++++++++++++++++
+ 2 files changed, 22 insertions(+)
 
-The first patch adds a new PM QOS function so that
-the SDHCI driver can do a "lazy" cancel of the QoS
-request from within its "finish" tasklet.
-
-The second patch adds support to SDHCI for specifying a
-maximum DMA latency.
-
-The third and fourth patches take that facility into
-use for Baytrail.
-
-Ad hoc testing with Lenovo Thinkpad 10 showed a stress
-test could run for at least 24 hours with the patches,
-compared to less than an hour without.
-
-These patches are on top of my driver strength patches
-which are on top of my re-tuning patches.
-
-
-Adrian Hunter (4):
-      PM / QoS: Add pm_qos_cancel_request_lazy() that doesn't sleep
-      mmc: sdhci: Support maximum DMA latency request via PM QOS
-      mmc: sdhci-acpi: Fix device hang on Intel BayTrail
-      mmc: sdhci-pci: Fix device hang on Intel BayTrail
-
- drivers/mmc/host/sdhci-acpi.c | 32 ++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-pci.c  | 13 +++++++++++
- drivers/mmc/host/sdhci.c      | 52 +++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.h      |  7 ++++++
- include/linux/pm_qos.h        |  2 ++
- kernel/power/qos.c            | 20 +++++++++++++++++
- 6 files changed, 126 insertions(+)
-
-
-Regards
-Adrian
+diff --git a/include/linux/pm_qos.h b/include/linux/pm_qos.h
+index 7b3ae0c..f44d353 100644
+--- a/include/linux/pm_qos.h
++++ b/include/linux/pm_qos.h
+@@ -126,6 +126,8 @@ void pm_qos_update_request(struct pm_qos_request *req,
+ 			   s32 new_value);
+ void pm_qos_update_request_timeout(struct pm_qos_request *req,
+ 				   s32 new_value, unsigned long timeout_us);
++void pm_qos_cancel_request_lazy(struct pm_qos_request *req,
++				unsigned int timeout_us);
+ void pm_qos_remove_request(struct pm_qos_request *req);
+ 
+ int pm_qos_request(int pm_qos_class);
+diff --git a/kernel/power/qos.c b/kernel/power/qos.c
+index 97b0df7..ac131cb 100644
+--- a/kernel/power/qos.c
++++ b/kernel/power/qos.c
+@@ -517,6 +517,26 @@ void pm_qos_update_request_timeout(struct pm_qos_request *req, s32 new_value,
+ }
+ 
+ /**
++ * pm_qos_cancel_request_lazy - cancels an existing qos request lazily.
++ * @req : handle to list element holding a pm_qos request to use
++ * @timeout_us: the delay before cancelling this qos request in usecs.
++ *
++ * After timeout_us, this qos request is cancelled.
++ */
++void pm_qos_cancel_request_lazy(struct pm_qos_request *req,
++				unsigned int timeout_us)
++{
++	if (!req)
++		return;
++	if (WARN(!pm_qos_request_active(req),
++		 "%s called for unknown object.", __func__))
++		return;
++
++	schedule_delayed_work(&req->work, usecs_to_jiffies(timeout_us));
++}
++EXPORT_SYMBOL_GPL(pm_qos_cancel_request_lazy);
++
++/**
+  * pm_qos_remove_request - modifies an existing qos request
+  * @req: handle to request list element
+  *
+-- 
+1.9.1
