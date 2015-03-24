@@ -1,7 +1,7 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [RFC PATCH 1/4] PM / QoS: Add pm_qos_cancel_request_lazy() that doesn't sleep
-Date: Tue, 24 Mar 2015 15:40:37 +0200
-Message-ID: <1427204440-3533-2-git-send-email-adrian.hunter@intel.com>
+Subject: [RFC PATCH 3/4] mmc: sdhci-acpi: Fix device hang on Intel BayTrail
+Date: Tue, 24 Mar 2015 15:40:39 +0200
+Message-ID: <1427204440-3533-4-git-send-email-adrian.hunter@intel.com>
 References: <1427204440-3533-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1427204440-3533-1-git-send-email-adrian.hunter@intel.com>
@@ -10,58 +10,89 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Kevin Hilman <khilman@linaro.org>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add pm_qos_cancel_request_lazy() which is convenient for
-contexts that may not sleep.
+Intel Baytrail has been observed sometimes to hang
+if host controllers are using DMA while deep C-states
+are used. Workaround that by specifying a maximum
+DMA latency that will prevent deep C-states.
+
+Unfortunately, host controller ACPI HIDs are not unique
+to Baytrail, so the CPU must be identified.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- include/linux/pm_qos.h |  2 ++
- kernel/power/qos.c     | 20 ++++++++++++++++++++
- 2 files changed, 22 insertions(+)
+ drivers/mmc/host/sdhci-acpi.c | 32 ++++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
 
-diff --git a/include/linux/pm_qos.h b/include/linux/pm_qos.h
-index 7b3ae0c..f44d353 100644
---- a/include/linux/pm_qos.h
-+++ b/include/linux/pm_qos.h
-@@ -126,6 +126,8 @@ void pm_qos_update_request(struct pm_qos_request *req,
- 			   s32 new_value);
- void pm_qos_update_request_timeout(struct pm_qos_request *req,
- 				   s32 new_value, unsigned long timeout_us);
-+void pm_qos_cancel_request_lazy(struct pm_qos_request *req,
-+				unsigned int timeout_us);
- void pm_qos_remove_request(struct pm_qos_request *req);
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 22d929f..eaff09f 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -43,6 +43,24 @@
  
- int pm_qos_request(int pm_qos_class);
-diff --git a/kernel/power/qos.c b/kernel/power/qos.c
-index 97b0df7..ac131cb 100644
---- a/kernel/power/qos.c
-+++ b/kernel/power/qos.c
-@@ -517,6 +517,26 @@ void pm_qos_update_request_timeout(struct pm_qos_request *req, s32 new_value,
+ #include "sdhci.h"
+ 
++#ifdef CONFIG_X86
++#include <asm/cpu_device_id.h>
++static bool sdhci_acpi_on_byt(void)
++{
++	static const struct x86_cpu_id byt[] = {
++		{ X86_VENDOR_INTEL, 6, 0x37 },
++		{}
++	};
++
++	return x86_match_cpu(byt);
++}
++#else
++static bool sdhci_acpi_on_byt(void)
++{
++	return false;
++}
++#endif
++
+ enum {
+ 	SDHCI_ACPI_SD_CD		= BIT(0),
+ 	SDHCI_ACPI_RUNTIME_PM		= BIT(1),
+@@ -146,6 +164,14 @@ static const struct sdhci_acpi_chip sdhci_acpi_chip_int = {
+ 	.ops = &sdhci_acpi_ops_int,
+ };
+ 
++static void sdhci_acpi_int_dma_latency(struct sdhci_host *host)
++{
++	if (sdhci_acpi_on_byt()) {
++		host->dma_latency = 20;
++		host->lat_cancel_delay = 275;
++	}
++}
++
+ static int sdhci_acpi_emmc_probe_slot(struct platform_device *pdev,
+ 				      const char *hid, const char *uid)
+ {
+@@ -164,6 +190,8 @@ static int sdhci_acpi_emmc_probe_slot(struct platform_device *pdev,
+ 	    sdhci_readl(host, SDHCI_CAPABILITIES_1) == 0x00000807)
+ 		host->timeout_clk = 1000; /* 1000 kHz i.e. 1 MHz */
+ 
++	sdhci_acpi_int_dma_latency(host);
++
+ 	return 0;
  }
  
- /**
-+ * pm_qos_cancel_request_lazy - cancels an existing qos request lazily.
-+ * @req : handle to list element holding a pm_qos request to use
-+ * @timeout_us: the delay before cancelling this qos request in usecs.
-+ *
-+ * After timeout_us, this qos request is cancelled.
-+ */
-+void pm_qos_cancel_request_lazy(struct pm_qos_request *req,
-+				unsigned int timeout_us)
-+{
-+	if (!req)
-+		return;
-+	if (WARN(!pm_qos_request_active(req),
-+		 "%s called for unknown object.", __func__))
-+		return;
+@@ -178,6 +206,8 @@ static int sdhci_acpi_sdio_probe_slot(struct platform_device *pdev,
+ 
+ 	host = c->host;
+ 
++	sdhci_acpi_int_dma_latency(host);
 +
-+	schedule_delayed_work(&req->work, usecs_to_jiffies(timeout_us));
-+}
-+EXPORT_SYMBOL_GPL(pm_qos_cancel_request_lazy);
+ 	/* Platform specific code during sdio probe slot goes here */
+ 
+ 	return 0;
+@@ -194,6 +224,8 @@ static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev,
+ 
+ 	host = c->host;
+ 
++	sdhci_acpi_int_dma_latency(host);
 +
-+/**
-  * pm_qos_remove_request - modifies an existing qos request
-  * @req: handle to request list element
-  *
+ 	/* Platform specific code during sd probe slot goes here */
+ 
+ 	return 0;
 -- 
 1.9.1
