@@ -1,169 +1,102 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] ARM: OMAP2: HSMMC: explicit fields to declare cover/card
- detect pin
-Date: Wed, 25 Mar 2015 09:32:20 +0100
-Message-ID: <CAPDyKFq3nYPRLC-fKtBQs3g1qJjVA2YKUGP86ZS9fHAmmNkxEQ@mail.gmail.com>
-References: <1426863234-28409-1-git-send-email-afenkart@gmail.com>
+Subject: Re: [PATCH v3] mmc: sdhci-msm: Add support for vendor capabilities registers
+Date: Wed, 25 Mar 2015 09:51:17 +0100
+Message-ID: <CAPDyKFoF+xwX4F7ZXeA6fyL3Gbi93Ag6E9dfjzEdH-GsDTSspg@mail.gmail.com>
+References: <1427129249-3259-1-git-send-email-georgi.djakov@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1426863234-28409-1-git-send-email-afenkart@gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Andreas Fenkart <afenkart@gmail.com>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1427129249-3259-1-git-send-email-georgi.djakov@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Georgi Djakov <georgi.djakov@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 20 March 2015 at 15:53, Andreas Fenkart <afenkart@gmail.com> wrote:
-> board-rx51 has no card detect pin in the mmc slot, but can detect that
-> the (cell-phone) cover has been removed and the card is accessible.
-> The semantics between cover/card detect differ, the gpio on the slot
-> informs you after the card has been removed, cover removal does not
-> necessarily mean that the card has been removed.
-> This means different code paths are necessary. To complete this we
-> also want different fields in the platform data for cover and card
-> detect. This separation is not pushed all the way down into struct
-> omap2_hsmmc_info which is used to initialize the platform data.
-> If we did that we had to go over all board files and set the new
-> gpio_cod pin to -EINVAL. If we forget one board or some out-of-tree
-> archicture forgets that the default '0' is used which is a valid pin
-> number.
+On 23 March 2015 at 17:47, Georgi Djakov <georgi.djakov@linaro.org> wrote:
+> Some versions of this controller do not advertise their 3.0v and
+> 8bit bus-width support capabilities. It is required to explicitly
+> set these capabilities for the specific controller versions.
 >
-> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+> Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
 
-Tony, are you fine with this change? I believe I should take it
-through my mmc tree due to that I have other omap_hsmmc patches
-already queued.
+Thanks! Applied.
 
 Kind regards
 Uffe
 
 > ---
->  arch/arm/mach-omap2/hsmmc.c              | 33 ++++++++++++++++++++++++--------
->  drivers/mmc/host/omap_hsmmc.c            | 11 ++++++-----
->  include/linux/platform_data/hsmmc-omap.h |  6 ++----
->  3 files changed, 33 insertions(+), 17 deletions(-)
 >
-> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
-> index dc6e79c..9a8611a 100644
-> --- a/arch/arm/mach-omap2/hsmmc.c
-> +++ b/arch/arm/mach-omap2/hsmmc.c
-> @@ -150,9 +150,13 @@ static int nop_mmc_set_power(struct device *dev, int power_on, int vdd)
->  static inline void omap_hsmmc_mux(struct omap_hsmmc_platform_data
->                                   *mmc_controller, int controller_nr)
->  {
-> -       if (gpio_is_valid(mmc_controller->switch_pin) &&
-> -           (mmc_controller->switch_pin < OMAP_MAX_GPIO_LINES))
-> -               omap_mux_init_gpio(mmc_controller->switch_pin,
-> +       if (gpio_is_valid(mmc_controller->gpio_cd) &&
-> +           (mmc_controller->gpio_cd < OMAP_MAX_GPIO_LINES))
-> +               omap_mux_init_gpio(mmc_controller->gpio_cd,
-> +                                  OMAP_PIN_INPUT_PULLUP);
-> +       if (gpio_is_valid(mmc_controller->gpio_cod) &&
-> +           (mmc_controller->gpio_cod < OMAP_MAX_GPIO_LINES))
-> +               omap_mux_init_gpio(mmc_controller->gpio_cod,
->                                    OMAP_PIN_INPUT_PULLUP);
->         if (gpio_is_valid(mmc_controller->gpio_wp) &&
->             (mmc_controller->gpio_wp < OMAP_MAX_GPIO_LINES))
-> @@ -250,15 +254,20 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
->         mmc->internal_clock = !c->ext_clock;
->         mmc->reg_offset = 0;
+> Changes since v2:
+>  * Use the generic sdhci bitfield defines, as the bits are matching.
+>    Thanks Bjorn for noticing this.
 >
-> -       mmc->switch_pin = c->gpio_cd;
-> +       if (c->cover_only) {
-> +               /* detect if mobile phone cover removed */
-> +               mmc->gpio_cd = -EINVAL;
-> +               mmc->gpio_cod = c->gpio_cd;
-> +       } else {
-> +               /* card detect pin on the mmc socket itself */
-> +               mmc->gpio_cd = c->gpio_cd;
-> +               mmc->gpio_cod = -EINVAL;
-> +       }
->         mmc->gpio_wp = c->gpio_wp;
+> Changes since v1:
+>  * Converted to separate read, modify, write statements.
+>  * Slightly updated comment text.
 >
->         mmc->remux = c->remux;
->         mmc->init_card = c->init_card;
+>  Tested on msm8916-mtp board.
 >
-> -       if (c->cover_only)
-> -               mmc->cover = 1;
-> -
->         if (c->nonremovable)
->                 mmc->nonremovable = 1;
+>  drivers/mmc/host/sdhci-msm.c |   29 ++++++++++++++++++++++++++++-
+>  1 file changed, 28 insertions(+), 1 deletion(-)
 >
-> @@ -358,7 +367,15 @@ void omap_hsmmc_late_init(struct omap2_hsmmc_info *c)
->                 if (!mmc_pdata)
->                         continue;
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 3d32ce896b09..4a09f7608c66 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -22,6 +22,11 @@
 >
-> -               mmc_pdata->switch_pin = c->gpio_cd;
-> +               if (c->cover_only) {
-> +                       /* detect if mobile phone cover removed */
-> +                       mmc_pdata->gpio_cd = -EINVAL;
-> +                       mmc_pdata->gpio_cod = c->gpio_cd;
-> +               } else {
-> +                       /* card detect pin on the mmc socket itself */
-> +                       mmc_pdata->gpio_cd = c->gpio_cd;
-> +                       mmc_pdata->gpio_cod = -EINVAL;
-> +               }
->                 mmc_pdata->gpio_wp = c->gpio_wp;
+>  #include "sdhci-pltfm.h"
 >
->                 res = omap_device_register(pdev);
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 053cd38..265391f 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -427,15 +427,15 @@ static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
->  {
+> +#define CORE_MCI_VERSION               0x50
+> +#define CORE_VERSION_MAJOR_SHIFT       28
+> +#define CORE_VERSION_MAJOR_MASK                (0xf << CORE_VERSION_MAJOR_SHIFT)
+> +#define CORE_VERSION_MINOR_MASK                0xff
+> +
+>  #define CORE_HC_MODE           0x78
+>  #define HC_MODE_EN             0x1
+>  #define CORE_POWER             0x0
+> @@ -41,6 +46,8 @@
+>  #define CORE_VENDOR_SPEC       0x10c
+>  #define CORE_CLK_PWRSAVE       BIT(1)
+>
+> +#define CORE_VENDOR_SPEC_CAPABILITIES0 0x11c
+> +
+>  #define CDR_SELEXT_SHIFT       20
+>  #define CDR_SELEXT_MASK                (0xf << CDR_SELEXT_SHIFT)
+>  #define CMUX_SHIFT_PHASE_SHIFT 24
+> @@ -426,7 +433,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>         struct sdhci_msm_host *msm_host;
+>         struct resource *core_memres;
 >         int ret;
+> -       u16 host_version;
+> +       u16 host_version, core_minor;
+> +       u32 core_version, caps;
+> +       u8 core_major;
 >
-> -       if (pdata->cover && gpio_is_valid(pdata->switch_pin)) {
-> -               ret = mmc_gpio_request_cd(mmc, pdata->switch_pin, 0);
-> +       if (gpio_is_valid(pdata->gpio_cod)) {
-> +               ret = mmc_gpio_request_cd(mmc, pdata->gpio_cod, 0);
->                 if (ret)
->                         return ret;
+>         msm_host = devm_kzalloc(&pdev->dev, sizeof(*msm_host), GFP_KERNEL);
+>         if (!msm_host)
+> @@ -516,6 +525,24 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>                 host_version, ((host_version & SDHCI_VENDOR_VER_MASK) >>
+>                                SDHCI_VENDOR_VER_SHIFT));
 >
->                 host->get_cover_state = omap_hsmmc_get_cover_state;
->                 mmc_gpio_set_cd_isr(mmc, omap_hsmmc_cover_irq);
-> -       } else if (!pdata->cover && gpio_is_valid(pdata->switch_pin)) {
-> -               ret = mmc_gpio_request_cd(mmc, pdata->switch_pin, 0);
-> +       } else if (gpio_is_valid(pdata->gpio_cd)) {
-> +               ret = mmc_gpio_request_cd(mmc, pdata->gpio_cd, 0);
->                 if (ret)
->                         return ret;
->
-> @@ -1932,7 +1932,8 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
->         if (of_find_property(np, "ti,dual-volt", NULL))
->                 pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
->
-> -       pdata->switch_pin = -EINVAL;
-> +       pdata->gpio_cd = -EINVAL;
-> +       pdata->gpio_cod = -EINVAL;
->         pdata->gpio_wp = -EINVAL;
->
->         if (of_find_property(np, "ti,non-removable", NULL)) {
-> diff --git a/include/linux/platform_data/hsmmc-omap.h b/include/linux/platform_data/hsmmc-omap.h
-> index 67bbcf0..8e981be 100644
-> --- a/include/linux/platform_data/hsmmc-omap.h
-> +++ b/include/linux/platform_data/hsmmc-omap.h
-> @@ -55,9 +55,6 @@ struct omap_hsmmc_platform_data {
->         u32 caps;       /* Used for the MMC driver on 2430 and later */
->         u32 pm_caps;    /* PM capabilities of the mmc */
->
-> -       /* switch pin can be for card detect (default) or card cover */
-> -       unsigned cover:1;
-> -
->         /* use the internal clock */
->         unsigned internal_clock:1;
->
-> @@ -73,7 +70,8 @@ struct omap_hsmmc_platform_data {
->  #define HSMMC_HAS_HSPE_SUPPORT (1 << 2)
->         unsigned features;
->
-> -       int switch_pin;                 /* gpio (card detect) */
-> +       int gpio_cd;                    /* gpio (card detect) */
-> +       int gpio_cod;                   /* gpio (cover detect) */
->         int gpio_wp;                    /* gpio (write protect) */
->
->         int (*set_power)(struct device *dev, int power_on, int vdd);
-> --
-> 2.1.4
->
+> +       core_version = readl_relaxed(msm_host->core_mem + CORE_MCI_VERSION);
+> +       core_major = (core_version & CORE_VERSION_MAJOR_MASK) >>
+> +                     CORE_VERSION_MAJOR_SHIFT;
+> +       core_minor = core_version & CORE_VERSION_MINOR_MASK;
+> +       dev_dbg(&pdev->dev, "MCI Version: 0x%08x, major: 0x%04x, minor: 0x%02x\n",
+> +               core_version, core_major, core_minor);
+> +
+> +       /*
+> +        * Support for some capabilities is not advertised by newer
+> +        * controller versions and must be explicitly enabled.
+> +        */
+> +       if (core_major >= 1 && core_minor != 0x11 && core_minor != 0x12) {
+> +               caps = readl_relaxed(host->ioaddr + SDHCI_CAPABILITIES);
+> +               caps |= SDHCI_CAN_VDD_300 | SDHCI_CAN_DO_8BIT;
+> +               writel_relaxed(caps, host->ioaddr +
+> +                              CORE_VENDOR_SPEC_CAPABILITIES0);
+> +       }
+> +
+>         ret = sdhci_add_host(host);
+>         if (ret)
+>                 goto clk_disable;
