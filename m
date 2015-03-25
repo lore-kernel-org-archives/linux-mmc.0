@@ -1,115 +1,137 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/4] mmc: core: fold mmc_set_bus_width calls into sdio_enable_4bit_bus.
-Date: Tue, 24 Mar 2015 22:18:31 +0100
-Message-ID: <CAPDyKFoeD_=5SV3q4WRfK64hHdxdenfK5Cft=s=T98Yr+WEWvw@mail.gmail.com>
-References: <20150324205316.20572.30538.stgit@notabene.brown>
-	<20150324205610.20572.86108.stgit@notabene.brown>
+From: Kukjin Kim <kgene@kernel.org>
+Subject: RE: [PATCH v7] ARM: dts: Add HS400 support for exynos5420 and
+ exynos5800
+Date: Wed, 25 Mar 2015 10:01:07 +0900
+Message-ID: <04be01d06697$2cf8ebb0$86eac310$@kernel.org>
+References: <1426677623-30532-1-git-send-email-alim.akhtar@samsung.com>
+ <CAGOxZ50mcg+ASah5-cm8jY+O+RLJDS8cEJvFPAkMasuq-vcVbw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f43.google.com ([209.85.192.43]:35800 "EHLO
-	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751830AbbCXVSc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Mar 2015 17:18:32 -0400
-Received: by qgh3 with SMTP id 3so970252qgh.2
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2015 14:18:32 -0700 (PDT)
-In-Reply-To: <20150324205610.20572.86108.stgit@notabene.brown>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <CAGOxZ50mcg+ASah5-cm8jY+O+RLJDS8cEJvFPAkMasuq-vcVbw@mail.gmail.com>
+Content-language: ko
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: 'Alim Akhtar' <alim.akhtar@gmail.com>, 'Alim Akhtar' <alim.akhtar@samsung.com>
+Cc: 'kgene' <kgene@kernel.org>, linux-mmc@vger.kernel.org, 'Ulf Hansson' <ulf.hansson@linaro.org>, 'Jaehoon Chung' <jh80.chung@samsung.com>, 'Seungwon Jeon' <tgih.jun@samsung.com>, 'Douglas Anderson' <dianders@chromium.org>, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-samsung-soc@vger.kernel.org, 'Abhilash Kesavan' <a.kesavan@samsung.com>, javier@dowhile0.org
 List-Id: linux-mmc@vger.kernel.org
-To: NeilBrown <neil@brown.name>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Tony Lindgren <tony@atomide.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 24 March 2015 at 21:56, NeilBrown <neil@brown.name> wrote:
-> From: NeilBrown <neilb@suse.de>
->
-> Every call to sdio_enable_4bit_bus is followed (on success) but a call
-> to mmc_set_bus_width().
->
-> To simplify the code, include those calls directly in
-> sdio_enable_4bit_bus().
->
-> Tested-by: Tony Lindgren <tony@atomide.com>
-> Signed-off-by: NeilBrown <neil@brown.name>
+Alim Akhtar wrote:
+> 
+> Gentle Ping !!
+> 
+Thanks ;-)
+> 
+> On Wed, Mar 18, 2015 at 4:50 PM, Alim Akhtar <alim.akhtar@samsung.com> wrote:
+> > From: Seungwon Jeon <tgih.jun@samsung.com>
+> >
+> > HS400 timing values are added for SMDK5420, exynos5420-peach-pit
+> > and exynos5800-peach-pi boards.
+> > This also adds RCLK GPIO line, this gpio should be in pull-down
+> > state.
+> > This also enables HS400 on peach-pi and this updates the clock frequency
+> > to 800MHz to be set as input clock to controller.
+> >
+> > Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+> > Signed-off-by: Alim Akhtar <alim.akhtar@samsung.com>
+> > [Alim: addressed review comments]
+> > Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
+> > ---
+> > Changes in V7:
+> >          Add back bus1 pin, which was removed during rebase in v6
+> >          as rightly pointed out by Javier[1].
+> >
+> > Changes in V6:
+> >         Rebased on kukjin's for-next branch[0]
+> >         (commit: 77105c8 Merge branch 'v4.0-samsung-fixes-2' into for-next)
+> >
+> > [0]: git://git.kernel.org/pub/scm/linux/kernel/git/kgene/linux-samsung.git
+> > [1]: http://www.spinics.net/lists/arm-kernel/msg406618.html
+> >
+> >  arch/arm/boot/dts/exynos5420-peach-pit.dts | 4 +++-
+> >  arch/arm/boot/dts/exynos5420-pinctrl.dtsi  | 7 +++++++
+> >  arch/arm/boot/dts/exynos5420-smdk5420.dts  | 5 ++++-
+> >  arch/arm/boot/dts/exynos5800-peach-pi.dts  | 7 +++++--
+> >  4 files changed, 19 insertions(+), 4 deletions(-)
+> >
+> > diff --git a/arch/arm/boot/dts/exynos5420-peach-pit.dts b/arch/arm/boot/dts/exynos5420-peach-pit.dts
+> > index 3f4e2fe..0788d08 100644
+> > --- a/arch/arm/boot/dts/exynos5420-peach-pit.dts
+> > +++ b/arch/arm/boot/dts/exynos5420-peach-pit.dts
+> > @@ -699,8 +699,10 @@
+> >         samsung,dw-mshc-ciu-div = <3>;
+> >         samsung,dw-mshc-sdr-timing = <0 4>;
+> >         samsung,dw-mshc-ddr-timing = <0 2>;
+> > +       samsung,dw-mshc-hs400-timing = <0 2>;
+> > +       samsung,read-strobe-delay = <90>;
+> >         pinctrl-names = "default";
+> > -       pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8>;
+> > +       pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8 &sd0_rclk>;
+> >         bus-width = <8>;
+> >  };
+> >
+> > diff --git a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+> > index ba686e4..8b15316 100644
+> > --- a/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+> > +++ b/arch/arm/boot/dts/exynos5420-pinctrl.dtsi
+> > @@ -201,6 +201,13 @@
+> >                         samsung,pin-drv = <3>;
+> >                 };
+> >
+> > +               sd0_rclk: sd0-rclk {
+> > +                       samsung,pins = "gpc0-7";
+> > +                       samsung,pin-function = <2>;
+> > +                       samsung,pin-pud = <1>;
+> > +                       samsung,pin-drv = <3>;
+> > +               };
+> > +
+> >                 sd1_cmd: sd1-cmd {
+> >                         samsung,pins = "gpc1-1";
+> >                         samsung,pin-function = <2>;
+> > diff --git a/arch/arm/boot/dts/exynos5420-smdk5420.dts b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+> > index 7a56852..9103f23 100644
+> > --- a/arch/arm/boot/dts/exynos5420-smdk5420.dts
+> > +++ b/arch/arm/boot/dts/exynos5420-smdk5420.dts
+> > @@ -80,8 +80,11 @@
+> >                 samsung,dw-mshc-ciu-div = <3>;
+> >                 samsung,dw-mshc-sdr-timing = <0 4>;
+> >                 samsung,dw-mshc-ddr-timing = <0 2>;
+> > +               samsung,dw-mshc-hs400-timing = <0 2>;
+> > +               samsung,read-strobe-delay = <90>;
+> >                 pinctrl-names = "default";
+> > -               pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8>;
+> > +               pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8
+> > +                            &sd0_rclk>;
+> >                 bus-width = <8>;
+> >                 cap-mmc-highspeed;
+> >         };
+> > diff --git a/arch/arm/boot/dts/exynos5800-peach-pi.dts b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+> > index c833bac..412f41d 100644
+> > --- a/arch/arm/boot/dts/exynos5800-peach-pi.dts
+> > +++ b/arch/arm/boot/dts/exynos5800-peach-pi.dts
+> > @@ -654,15 +654,18 @@
+> >         num-slots = <1>;
+> >         broken-cd;
+> >         mmc-hs200-1_8v;
+> > +       mmc-hs400-1_8v;
+> >         cap-mmc-highspeed;
+> >         non-removable;
+> >         card-detect-delay = <200>;
+> > -       clock-frequency = <400000000>;
+> > +       clock-frequency = <800000000>;
+> >         samsung,dw-mshc-ciu-div = <3>;
+> >         samsung,dw-mshc-sdr-timing = <0 4>;
+> >         samsung,dw-mshc-ddr-timing = <0 2>;
+> > +       samsung,dw-mshc-hs400-timing = <0 2>;
+> > +       samsung,read-strobe-delay = <90>;
+> >         pinctrl-names = "default";
+> > -       pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8>;
+> > +       pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8 &sd0_rclk>;
+> >         bus-width = <8>;
+> >  };
+> >
+> > --
 
-This one is already applied. Thanks!
+Applied.
 
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/core/sdio.c |   32 ++++++++++++--------------------
->  1 file changed, 12 insertions(+), 20 deletions(-)
->
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index ce6cc47206b0..5bc6c7dbbd60 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -293,19 +293,22 @@ static int sdio_enable_4bit_bus(struct mmc_card *card)
->         int err;
->
->         if (card->type == MMC_TYPE_SDIO)
-> -               return sdio_enable_wide(card);
-> -
-> -       if ((card->host->caps & MMC_CAP_4_BIT_DATA) &&
-> -               (card->scr.bus_widths & SD_SCR_BUS_WIDTH_4)) {
-> +               err = sdio_enable_wide(card);
-> +       else if ((card->host->caps & MMC_CAP_4_BIT_DATA) &&
-> +                (card->scr.bus_widths & SD_SCR_BUS_WIDTH_4)) {
->                 err = mmc_app_set_bus_width(card, MMC_BUS_WIDTH_4);
->                 if (err)
->                         return err;
-> +               err = sdio_enable_wide(card);
-> +               if (err <= 0)
-> +                       mmc_app_set_bus_width(card, MMC_BUS_WIDTH_1);
->         } else
->                 return 0;
->
-> -       err = sdio_enable_wide(card);
-> -       if (err <= 0)
-> -               mmc_app_set_bus_width(card, MMC_BUS_WIDTH_1);
-> +       if (err > 0) {
-> +               mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
-> +               err = 0;
-> +       }
->
->         return err;
->  }
-> @@ -547,13 +550,8 @@ static int mmc_sdio_init_uhs_card(struct mmc_card *card)
->         /*
->          * Switch to wider bus (if supported).
->          */
-> -       if (card->host->caps & MMC_CAP_4_BIT_DATA) {
-> +       if (card->host->caps & MMC_CAP_4_BIT_DATA)
->                 err = sdio_enable_4bit_bus(card);
-> -               if (err > 0) {
-> -                       mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
-> -                       err = 0;
-> -               }
-> -       }
->
->         /* Set the driver strength for the card */
->         sdio_select_driver_type(card);
-> @@ -803,9 +801,7 @@ try_again:
->                  * Switch to wider bus (if supported).
->                  */
->                 err = sdio_enable_4bit_bus(card);
-> -               if (err > 0)
-> -                       mmc_set_bus_width(card->host, MMC_BUS_WIDTH_4);
-> -               else if (err)
-> +               if (err)
->                         goto remove;
->         }
->  finish:
-> @@ -983,10 +979,6 @@ static int mmc_sdio_resume(struct mmc_host *host)
->         } else if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
->                 /* We may have switched to 1-bit mode during suspend */
->                 err = sdio_enable_4bit_bus(host->card);
-> -               if (err > 0) {
-> -                       mmc_set_bus_width(host, MMC_BUS_WIDTH_4);
-> -                       err = 0;
-> -               }
->         }
->
->         if (!err && host->sdio_irqs) {
->
->
+- Kukjin
