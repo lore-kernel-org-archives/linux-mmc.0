@@ -1,7 +1,7 @@
 From: NeilBrown <neil@brown.name>
-Subject: [PATCH 1/2] mmc: omap_hsmmc: stop using .enable and .disable method.
+Subject: [PATCH 2/2] mmc: remove enable/disable methods.
 Date: Thu, 26 Mar 2015 08:43:37 +1100
-Message-ID: <20150325214337.11463.93489.stgit@notabene.brown>
+Message-ID: <20150325214337.11463.16571.stgit@notabene.brown>
 References: <20150325213419.11463.33321.stgit@notabene.brown>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -13,72 +13,53 @@ To: Tony Lindgren <tony@atomide.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adri
 Cc: linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-enable and disable are only used to get and put
-runtime pm references.  .set_ios already does this
-itself, and other drivers just do it in set_ios
-and .request without using enable/disable.
-
-So add pm_runtime get/put to omap_hsmmc_request(),
-and discard the enable/disable methods.
+The 'enable' and 'disable' methods are "deprecated"
+according to host.h, and are no longer used.  So
+discard them.
 
 Signed-off-by: NeilBrown <neil@brown.name>
 ---
- drivers/mmc/host/omap_hsmmc.c |   24 +++---------------------
- 1 file changed, 3 insertions(+), 21 deletions(-)
+ drivers/mmc/core/core.c  |    5 -----
+ include/linux/mmc/host.h |    6 ------
+ 2 files changed, 11 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index f84cfb01716d..092bcecd73e6 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -882,6 +882,8 @@ static void omap_hsmmc_request_done(struct omap_hsmmc_host *host, struct mmc_req
- 		return;
- 	host->mrq = NULL;
- 	mmc_request_done(host->mmc, mrq);
-+	pm_runtime_mark_last_busy(host->dev);
-+	pm_runtime_put_autosuspend(host->dev);
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 23f10f72e5f3..709ada9f26b5 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -920,8 +920,6 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
+ 		wake_up(&host->wq);
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 	remove_wait_queue(&host->wq, &wait);
+-	if (host->ops->enable && !stop && host->claim_cnt == 1)
+-		host->ops->enable(host);
+ 	return stop;
  }
  
- /*
-@@ -1537,6 +1539,7 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
+@@ -940,9 +938,6 @@ void mmc_release_host(struct mmc_host *host)
  
- 	BUG_ON(host->req_in_progress);
- 	BUG_ON(host->dma_ch != -1);
-+	pm_runtime_get_sync(host->dev);
- 	if (host->protect_card) {
- 		if (host->reqs_blocked < 3) {
- 			/*
-@@ -1778,25 +1781,6 @@ static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
- 	set_sd_bus_power(host);
- }
+ 	WARN_ON(!host->claimed);
  
--static int omap_hsmmc_enable_fclk(struct mmc_host *mmc)
--{
--	struct omap_hsmmc_host *host = mmc_priv(mmc);
+-	if (host->ops->disable && host->claim_cnt == 1)
+-		host->ops->disable(host);
 -
--	pm_runtime_get_sync(host->dev);
--
--	return 0;
--}
--
--static int omap_hsmmc_disable_fclk(struct mmc_host *mmc)
--{
--	struct omap_hsmmc_host *host = mmc_priv(mmc);
--
--	pm_runtime_mark_last_busy(host->dev);
--	pm_runtime_put_autosuspend(host->dev);
--
--	return 0;
--}
--
- static int omap_hsmmc_multi_io_quirk(struct mmc_card *card,
- 				     unsigned int direction, int blk_size)
- {
-@@ -1808,8 +1792,6 @@ static int omap_hsmmc_multi_io_quirk(struct mmc_card *card,
- }
+ 	spin_lock_irqsave(&host->lock, flags);
+ 	if (--host->claim_cnt) {
+ 		/* Release for nested claim */
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 0c8cbe5d1550..b5bedaec6223 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -80,12 +80,6 @@ struct mmc_ios {
  
- static struct mmc_host_ops omap_hsmmc_ops = {
--	.enable = omap_hsmmc_enable_fclk,
--	.disable = omap_hsmmc_disable_fclk,
- 	.post_req = omap_hsmmc_post_req,
- 	.pre_req = omap_hsmmc_pre_req,
- 	.request = omap_hsmmc_request,
+ struct mmc_host_ops {
+ 	/*
+-	 * 'enable' is called when the host is claimed and 'disable' is called
+-	 * when the host is released. 'enable' and 'disable' are deprecated.
+-	 */
+-	int (*enable)(struct mmc_host *host);
+-	int (*disable)(struct mmc_host *host);
+-	/*
+ 	 * It is optional for the host to implement pre_req and post_req in
+ 	 * order to support double buffering of requests (prepare one
+ 	 * request while another request is active).
