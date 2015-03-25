@@ -1,18 +1,18 @@
 From: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: [PATCH 5/7] mmc: host: dw_mmc make IO accessors endian agnostic
-Date: Wed, 25 Mar 2015 11:23:28 +0000
-Message-ID: <1427282610-10350-6-git-send-email-ben.dooks@codethink.co.uk>
-References: <1427282610-10350-1-git-send-email-ben.dooks@codethink.co.uk>
+Subject: [PATCH RESEND 5/7] mmc: host: dw_mmc make IO accessors endian agnostic
+Date: Wed, 25 Mar 2015 11:27:50 +0000
+Message-ID: <1427282872-10563-6-git-send-email-ben.dooks@codethink.co.uk>
+References: <1427282872-10563-1-git-send-email-ben.dooks@codethink.co.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:52155 "EHLO
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:52425 "EHLO
 	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751633AbbCYLXk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Mar 2015 07:23:40 -0400
-In-Reply-To: <1427282610-10350-1-git-send-email-ben.dooks@codethink.co.uk>
+	with ESMTP id S1750884AbbCYL2A (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Mar 2015 07:28:00 -0400
+In-Reply-To: <1427282872-10563-1-git-send-email-ben.dooks@codethink.co.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.arm.linux.org.uk
-Cc: linux-kernel@lists.codethink.co.uk, marc.dunford@codethink.co.uk, sam.bishop@codethink.co.uk, Dinh Nguyen <dinguyen@opensource.altera.com>, Ben Dooks <ben.dooks@codethink.co.uk>, Linux MMC <linux-mmc@vger.kernel.org>, Linux ARM Kernel <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
+To: linux-arm-kernel@lists.infradead.org
+Cc: linux-kernel@lists.codethink.co.uk, marc.dunford@codethink.co.uk, sam.bishop@codethink.co.uk, Dinh Nguyen <dinguyen@opensource.altera.com>, Ben Dooks <ben.dooks@codethink.co.uk>, Linux MMC <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>
 
 The dw_mmc driver does not use endian agnostic IO accessors, so fix
 the use of __raw reads and writes to be the relaxed versions.
