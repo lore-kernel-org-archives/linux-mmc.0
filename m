@@ -1,93 +1,169 @@
-From: Hans-Christian Egtvedt <egtvedt@samfundet.no>
-Subject: Re: [Linux-kernel] [PATCH 12/13] mmc: atmel-mci: use endian agnostic
- IO
-Date: Wed, 25 Mar 2015 07:14:45 +0100
-Message-ID: <20150325061445.GB3771@samfundet.no>
-References: <1426693992-31163-1-git-send-email-ben.dooks@codethink.co.uk>
- <1426693992-31163-13-git-send-email-ben.dooks@codethink.co.uk>
- <1426774966.22122.47.camel@xylophone.i.decadent.org.uk>
- <55115E55.4090409@codethink.co.uk>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] ARM: OMAP2: HSMMC: explicit fields to declare cover/card
+ detect pin
+Date: Wed, 25 Mar 2015 09:32:20 +0100
+Message-ID: <CAPDyKFq3nYPRLC-fKtBQs3g1qJjVA2YKUGP86ZS9fHAmmNkxEQ@mail.gmail.com>
+References: <1426863234-28409-1-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cassarossa.samfundet.no ([193.35.52.29]:46700 "EHLO
-	cassarossa.samfundet.no" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750738AbbCYGPH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Mar 2015 02:15:07 -0400
-Content-Disposition: inline
-In-Reply-To: <55115E55.4090409@codethink.co.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1426863234-28409-1-git-send-email-afenkart@gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Andreas Fenkart <afenkart@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Dooks <ben.dooks@codethink.co.uk>
-Cc: Ben Hutchings <ben.hutchings@codethink.co.uk>, linux-kernel@lists.codethink.co.uk, linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chris Ball <chris@printf.net>, Ludovic Desroches <ludovic.desroches@atmel.com>, Haavard Skinnemoen <hskinnemoen@gmail.com>
 
-Around Tue 24 Mar 2015 12:53:41 +0000 or thereabout, Ben Dooks wrote:
-> On 19/03/15 14:22, Ben Hutchings wrote:
->> On Wed, 2015-03-18 at 15:53 +0000, Ben Dooks wrote:
->>> Change the __raw IO functions to endian agnostic relaxed ones to allow
->>> the driver to function on big endian ARM systems.
->>>
->>> Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
->>> --
->>> CC: Ludovic Desroches <ludovic.desroches@atmel.com>
->>> CC: Chris Ball <chris@printf.net>
->>> CC: Ulf Hansson <ulf.hansson@linaro.org>
->>> CC: linux-mmc@vger.kernel.org
->>> ---
->>>  drivers/mmc/host/atmel-mci-regs.h | 9 ++++++++-
->>>  1 file changed, 8 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/atmel-mci-regs.h b/drivers/mmc/host/atmel-mci-regs.h
->>> index c97001e..711bb53 100644
->>> --- a/drivers/mmc/host/atmel-mci-regs.h
->>> +++ b/drivers/mmc/host/atmel-mci-regs.h
->>> @@ -135,10 +135,17 @@
->>>  #define ATMCI_REGS_SIZE		0x100
->>>  
->>>  /* Register access macros */
->>> -#define atmci_readl(port,reg)				\
->>> +#ifdef CONFIG_AVR32
->>> +#define atmci_readl(port,reg)			\
->>>  	__raw_readl((port)->regs + reg)
->>>  #define atmci_writel(port,reg,value)			\
->>>  	__raw_writel((value), (port)->regs + reg)
->>> +#else
->>> +#define atmci_readl(port,reg)			\
->>> +	readl_relaxed((port)->regs + reg)
->>> +#define atmci_writel(port,reg,value)			\
->>> +	writel_relaxed((value), (port)->regs + reg)
->>> +#endif
->> 
->> This pattern is repeated in a lot of drivers; is it worth defining
->> atmel_{read,write}l_relaxed() in a common header?
->> 
->> #ifdef CONFIG_AVR32
->> 
->> /* CPU and peripherals are both big-endian, so don't byte-swap */
->> #define atmel_readl_relaxed(addr)		__raw_readl(addr)
->> #define atmel_writel_relaxed(value, addr)	__raw_writel(value, addr)
->> 
->> #else
->> 
->> /* Peripherals are little-endian, so byte-swap if CPU isn't */
->> #define atmel_readl_relaxed(addr)		readl_relaxed(addr)
->> #define atmel_writel_relaxed(value, addr)	writel_relaxed(value, addr)
->> 
->> #endif
->> 
->> Ben.
-> 
-> Hi, I think it will probably be a good idea to have an avr32/at91
-> read/write functions however I will put this forward as a separate
-> series as it will require both avr32 and at91 maintainers as well
-> as driver updates.
-> 
-> how about:
-> 	atmel_readl_onchip{b,w,l}
-> 	atmel_writel_onchip{b,w,l}
+On 20 March 2015 at 15:53, Andreas Fenkart <afenkart@gmail.com> wrote:
+> board-rx51 has no card detect pin in the mmc slot, but can detect that
+> the (cell-phone) cover has been removed and the card is accessible.
+> The semantics between cover/card detect differ, the gpio on the slot
+> informs you after the card has been removed, cover removal does not
+> necessarily mean that the card has been removed.
+> This means different code paths are necessary. To complete this we
+> also want different fields in the platform data for cover and card
+> detect. This separation is not pushed all the way down into struct
+> omap2_hsmmc_info which is used to initialize the platform data.
+> If we did that we had to go over all board files and set the new
+> gpio_cod pin to -EINVAL. If we forget one board or some out-of-tree
+> archicture forgets that the default '0' is used which is a valid pin
+> number.
+>
+> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 
-Common is good, will make it easier for developers to understand why it is
-like this as well.
+Tony, are you fine with this change? I believe I should take it
+through my mmc tree due to that I have other omap_hsmmc patches
+already queued.
 
--- 
-Hans-Christian Egtvedt
+Kind regards
+Uffe
+
+> ---
+>  arch/arm/mach-omap2/hsmmc.c              | 33 ++++++++++++++++++++++++--------
+>  drivers/mmc/host/omap_hsmmc.c            | 11 ++++++-----
+>  include/linux/platform_data/hsmmc-omap.h |  6 ++----
+>  3 files changed, 33 insertions(+), 17 deletions(-)
+>
+> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+> index dc6e79c..9a8611a 100644
+> --- a/arch/arm/mach-omap2/hsmmc.c
+> +++ b/arch/arm/mach-omap2/hsmmc.c
+> @@ -150,9 +150,13 @@ static int nop_mmc_set_power(struct device *dev, int power_on, int vdd)
+>  static inline void omap_hsmmc_mux(struct omap_hsmmc_platform_data
+>                                   *mmc_controller, int controller_nr)
+>  {
+> -       if (gpio_is_valid(mmc_controller->switch_pin) &&
+> -           (mmc_controller->switch_pin < OMAP_MAX_GPIO_LINES))
+> -               omap_mux_init_gpio(mmc_controller->switch_pin,
+> +       if (gpio_is_valid(mmc_controller->gpio_cd) &&
+> +           (mmc_controller->gpio_cd < OMAP_MAX_GPIO_LINES))
+> +               omap_mux_init_gpio(mmc_controller->gpio_cd,
+> +                                  OMAP_PIN_INPUT_PULLUP);
+> +       if (gpio_is_valid(mmc_controller->gpio_cod) &&
+> +           (mmc_controller->gpio_cod < OMAP_MAX_GPIO_LINES))
+> +               omap_mux_init_gpio(mmc_controller->gpio_cod,
+>                                    OMAP_PIN_INPUT_PULLUP);
+>         if (gpio_is_valid(mmc_controller->gpio_wp) &&
+>             (mmc_controller->gpio_wp < OMAP_MAX_GPIO_LINES))
+> @@ -250,15 +254,20 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
+>         mmc->internal_clock = !c->ext_clock;
+>         mmc->reg_offset = 0;
+>
+> -       mmc->switch_pin = c->gpio_cd;
+> +       if (c->cover_only) {
+> +               /* detect if mobile phone cover removed */
+> +               mmc->gpio_cd = -EINVAL;
+> +               mmc->gpio_cod = c->gpio_cd;
+> +       } else {
+> +               /* card detect pin on the mmc socket itself */
+> +               mmc->gpio_cd = c->gpio_cd;
+> +               mmc->gpio_cod = -EINVAL;
+> +       }
+>         mmc->gpio_wp = c->gpio_wp;
+>
+>         mmc->remux = c->remux;
+>         mmc->init_card = c->init_card;
+>
+> -       if (c->cover_only)
+> -               mmc->cover = 1;
+> -
+>         if (c->nonremovable)
+>                 mmc->nonremovable = 1;
+>
+> @@ -358,7 +367,15 @@ void omap_hsmmc_late_init(struct omap2_hsmmc_info *c)
+>                 if (!mmc_pdata)
+>                         continue;
+>
+> -               mmc_pdata->switch_pin = c->gpio_cd;
+> +               if (c->cover_only) {
+> +                       /* detect if mobile phone cover removed */
+> +                       mmc_pdata->gpio_cd = -EINVAL;
+> +                       mmc_pdata->gpio_cod = c->gpio_cd;
+> +               } else {
+> +                       /* card detect pin on the mmc socket itself */
+> +                       mmc_pdata->gpio_cd = c->gpio_cd;
+> +                       mmc_pdata->gpio_cod = -EINVAL;
+> +               }
+>                 mmc_pdata->gpio_wp = c->gpio_wp;
+>
+>                 res = omap_device_register(pdev);
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 053cd38..265391f 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -427,15 +427,15 @@ static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
+>  {
+>         int ret;
+>
+> -       if (pdata->cover && gpio_is_valid(pdata->switch_pin)) {
+> -               ret = mmc_gpio_request_cd(mmc, pdata->switch_pin, 0);
+> +       if (gpio_is_valid(pdata->gpio_cod)) {
+> +               ret = mmc_gpio_request_cd(mmc, pdata->gpio_cod, 0);
+>                 if (ret)
+>                         return ret;
+>
+>                 host->get_cover_state = omap_hsmmc_get_cover_state;
+>                 mmc_gpio_set_cd_isr(mmc, omap_hsmmc_cover_irq);
+> -       } else if (!pdata->cover && gpio_is_valid(pdata->switch_pin)) {
+> -               ret = mmc_gpio_request_cd(mmc, pdata->switch_pin, 0);
+> +       } else if (gpio_is_valid(pdata->gpio_cd)) {
+> +               ret = mmc_gpio_request_cd(mmc, pdata->gpio_cd, 0);
+>                 if (ret)
+>                         return ret;
+>
+> @@ -1932,7 +1932,8 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+>         if (of_find_property(np, "ti,dual-volt", NULL))
+>                 pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
+>
+> -       pdata->switch_pin = -EINVAL;
+> +       pdata->gpio_cd = -EINVAL;
+> +       pdata->gpio_cod = -EINVAL;
+>         pdata->gpio_wp = -EINVAL;
+>
+>         if (of_find_property(np, "ti,non-removable", NULL)) {
+> diff --git a/include/linux/platform_data/hsmmc-omap.h b/include/linux/platform_data/hsmmc-omap.h
+> index 67bbcf0..8e981be 100644
+> --- a/include/linux/platform_data/hsmmc-omap.h
+> +++ b/include/linux/platform_data/hsmmc-omap.h
+> @@ -55,9 +55,6 @@ struct omap_hsmmc_platform_data {
+>         u32 caps;       /* Used for the MMC driver on 2430 and later */
+>         u32 pm_caps;    /* PM capabilities of the mmc */
+>
+> -       /* switch pin can be for card detect (default) or card cover */
+> -       unsigned cover:1;
+> -
+>         /* use the internal clock */
+>         unsigned internal_clock:1;
+>
+> @@ -73,7 +70,8 @@ struct omap_hsmmc_platform_data {
+>  #define HSMMC_HAS_HSPE_SUPPORT (1 << 2)
+>         unsigned features;
+>
+> -       int switch_pin;                 /* gpio (card detect) */
+> +       int gpio_cd;                    /* gpio (card detect) */
+> +       int gpio_cod;                   /* gpio (cover detect) */
+>         int gpio_wp;                    /* gpio (write protect) */
+>
+>         int (*set_power)(struct device *dev, int power_on, int vdd);
+> --
+> 2.1.4
+>
