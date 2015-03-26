@@ -1,43 +1,69 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [RFC PATCH 0/4] mmc: sdhci: Support maximum DMA latency request
- via PM QoS
-Date: Thu, 26 Mar 2015 10:51:17 +0100
-Message-ID: <20150326095117.GA637@amd>
-References: <1427204440-3533-1-git-send-email-adrian.hunter@intel.com>
- <20150325194259.GB381@amd>
- <5513C352.2080208@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ben Dooks <ben.dooks@codethink.co.uk>
+Subject: [RFC 6/6] mmc: atmel-mci: use atmel_io.h to provide on-chip IO
+Date: Thu, 26 Mar 2015 11:45:54 +0000
+Message-ID: <1427370354-21247-7-git-send-email-ben.dooks@codethink.co.uk>
+References: <1427370354-21247-1-git-send-email-ben.dooks@codethink.co.uk>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:47739 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751184AbbCZJvU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Mar 2015 05:51:20 -0400
-Content-Disposition: inline
-In-Reply-To: <5513C352.2080208@intel.com>
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:59319 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752251AbbCZLqJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Mar 2015 07:46:09 -0400
+In-Reply-To: <1427370354-21247-1-git-send-email-ben.dooks@codethink.co.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Len Brown <len.brown@intel.com>, Kevin Hilman <khilman@linaro.org>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux-kernel@lists.codethink.co.uk
+Cc: hskinnemoen@gmail.com, egtvedt@samfundet.no, linux@maxim.org.za, nicolas.ferre@atmel.com, linux-arm-kernel@lists.infradead.org, Ben Dooks <ben.dooks@codethink.co.uk>, Ludovic Desroches <ludovic.desroches@atmel.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-On Thu 2015-03-26 10:29:06, Adrian Hunter wrote:
-> On 25/03/15 21:43, Pavel Machek wrote:
-> > Hi!
-> > 
-> >> Here are some patches to address an issue with SDHCI
-> >> in Intel Baytrail. Intel Baytrail has been observed
-> >> sometimes to hang if host controllers are using DMA
-> >> while deep C-states are used. Workaround that by
-> > 
-> > I wonder if there is more information on this one? I see your address
-> > is "@intel". For example which C states are affected, and if there's
-> 
-> The problem starts at C6 - I will add that to the commit message.
+Use <linux/atmel_io.h> to provide IO accessors which work on both
+AVR32 and ARM for on-chip peripherals.
 
-Better find a place for a comment in code, too...
+Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
+--
+CC: Ludovic Desroches <ludovic.desroches@atmel.com>
+CC: Chris Ball <chris@printf.net>
+CC: Ulf Hansson <ulf.hansson@linaro.org>
+CC: linux-mmc@vger.kernel.org
+---
+ drivers/mmc/host/atmel-mci-regs.h | 11 ++---------
+ drivers/mmc/host/atmel-mci.c      |  1 +
+ 2 files changed, 3 insertions(+), 9 deletions(-)
 
-Thanks,
-									Pavel
+diff --git a/drivers/mmc/host/atmel-mci-regs.h b/drivers/mmc/host/atmel-mci-regs.h
+index 711bb53..2293f2c 100644
+--- a/drivers/mmc/host/atmel-mci-regs.h
++++ b/drivers/mmc/host/atmel-mci-regs.h
+@@ -135,17 +135,10 @@
+ #define ATMCI_REGS_SIZE		0x100
+ 
+ /* Register access macros */
+-#ifdef CONFIG_AVR32
+ #define atmci_readl(port,reg)			\
+-	__raw_readl((port)->regs + reg)
++	atmel_oc_readl((port)->regs + reg)
+ #define atmci_writel(port,reg,value)			\
+-	__raw_writel((value), (port)->regs + reg)
+-#else
+-#define atmci_readl(port,reg)			\
+-	readl_relaxed((port)->regs + reg)
+-#define atmci_writel(port,reg,value)			\
+-	writel_relaxed((value), (port)->regs + reg)
+-#endif
++	atmel_oc_writel((value), (port)->regs + reg)
+ 
+ /* On AVR chips the Peripheral DMA Controller is not connected to MCI. */
+ #ifdef CONFIG_AVR32
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 03d7c75..49de0d7 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -37,6 +37,7 @@
+ 
+ #include <linux/atmel-mci.h>
+ #include <linux/atmel_pdc.h>
++#include <linux/atmel_io.h>
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/pinctrl/consumer.h>
 -- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+2.1.4
+
