@@ -1,88 +1,167 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH] mmc: core: Enable runtime PM management of host devices
-Date: Fri, 27 Mar 2015 12:15:15 +0100
-Message-ID: <1427454915-12893-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f54.google.com ([209.85.215.54]:35897 "EHLO
-	mail-la0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752240AbbC0LPU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Mar 2015 07:15:20 -0400
-Received: by labe2 with SMTP id e2so67548891lab.3
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Mar 2015 04:15:19 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: Re: [PATCH] ARM: OMAP2: HSMMC: explicit fields to declare cover/card
+ detect pin
+Date: Fri, 27 Mar 2015 12:24:32 +0100
+Message-ID: <CAPDyKFp_K2Q88NMoY-B4xU5wX0QxLQ5Ryfwycs1Y4Axbh6Lo8A@mail.gmail.com>
+References: <1426863234-28409-1-git-send-email-afenkart@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1426863234-28409-1-git-send-email-afenkart@gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: NeilBrown <neil@brown.name>, Adrian Hunter <adrian.hunter@intel.com>
 
-Currently those host drivers which have deployed runtime PM, deals with
-the runtime PM reference counting entirely by themselves.
+On 20 March 2015 at 15:53, Andreas Fenkart <afenkart@gmail.com> wrote:
+> board-rx51 has no card detect pin in the mmc slot, but can detect that
+> the (cell-phone) cover has been removed and the card is accessible.
+> The semantics between cover/card detect differ, the gpio on the slot
+> informs you after the card has been removed, cover removal does not
+> necessarily mean that the card has been removed.
+> This means different code paths are necessary. To complete this we
+> also want different fields in the platform data for cover and card
+> detect. This separation is not pushed all the way down into struct
+> omap2_hsmmc_info which is used to initialize the platform data.
+> If we did that we had to go over all board files and set the new
+> gpio_cod pin to -EINVAL. If we forget one board or some out-of-tree
+> archicture forgets that the default '0' is used which is a valid pin
+> number.
+>
+> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 
-Since host drivers don't know when the core will send the next request
-through some of the host_ops callbacks, they need to handle runtime PM
-get/put between each an every request.
+Thanks! Applied.
 
-In quite many cases this has some negative effects, since it leads to a
-high frequency of scheduled runtime PM suspend operations. That due to
-the runtime PM reference count will normally reach zero in-between
-every request.
+Kind regards
+Uffe
 
-We can decrease that frequency, by enabling the core to deal with
-runtime PM reference counting of the host device. Since the core often
-knows that it will send a seqeunce of requests, it makes sense for it
-to keep a runtime PM reference count during these periods.
-
-More exactly, let's increase the runtime PM reference count by invoking
-pm_runtime_get_sync() from __mmc_claim_host(). Restore that action by
-invoking pm_runtime_mark_last_busy() and pm_runtime_put_autosuspend()
-in mmc_release_host(). In this way a runtime PM reference count will be
-kept during the complete cycle of a claim -> release host.
-
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/core.c | 10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 709ada9..c296bc0 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -897,6 +897,7 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
- 	DECLARE_WAITQUEUE(wait, current);
- 	unsigned long flags;
- 	int stop;
-+	bool pm = false;
- 
- 	might_sleep();
- 
-@@ -916,13 +917,18 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
- 		host->claimed = 1;
- 		host->claimer = current;
- 		host->claim_cnt += 1;
-+		if (host->claim_cnt == 1)
-+			pm = true;
- 	} else
- 		wake_up(&host->wq);
- 	spin_unlock_irqrestore(&host->lock, flags);
- 	remove_wait_queue(&host->wq, &wait);
-+
-+	if (pm)
-+		pm_runtime_get_sync(mmc_dev(host));
-+
- 	return stop;
- }
--
- EXPORT_SYMBOL(__mmc_claim_host);
- 
- /**
-@@ -947,6 +953,8 @@ void mmc_release_host(struct mmc_host *host)
- 		host->claimer = NULL;
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		wake_up(&host->wq);
-+		pm_runtime_mark_last_busy(mmc_dev(host));
-+		pm_runtime_put_autosuspend(mmc_dev(host));
- 	}
- }
- EXPORT_SYMBOL(mmc_release_host);
--- 
-1.9.1
-
+> ---
+>  arch/arm/mach-omap2/hsmmc.c              | 33 ++++++++++++++++++++++++--------
+>  drivers/mmc/host/omap_hsmmc.c            | 11 ++++++-----
+>  include/linux/platform_data/hsmmc-omap.h |  6 ++----
+>  3 files changed, 33 insertions(+), 17 deletions(-)
+>
+> diff --git a/arch/arm/mach-omap2/hsmmc.c b/arch/arm/mach-omap2/hsmmc.c
+> index dc6e79c..9a8611a 100644
+> --- a/arch/arm/mach-omap2/hsmmc.c
+> +++ b/arch/arm/mach-omap2/hsmmc.c
+> @@ -150,9 +150,13 @@ static int nop_mmc_set_power(struct device *dev, int power_on, int vdd)
+>  static inline void omap_hsmmc_mux(struct omap_hsmmc_platform_data
+>                                   *mmc_controller, int controller_nr)
+>  {
+> -       if (gpio_is_valid(mmc_controller->switch_pin) &&
+> -           (mmc_controller->switch_pin < OMAP_MAX_GPIO_LINES))
+> -               omap_mux_init_gpio(mmc_controller->switch_pin,
+> +       if (gpio_is_valid(mmc_controller->gpio_cd) &&
+> +           (mmc_controller->gpio_cd < OMAP_MAX_GPIO_LINES))
+> +               omap_mux_init_gpio(mmc_controller->gpio_cd,
+> +                                  OMAP_PIN_INPUT_PULLUP);
+> +       if (gpio_is_valid(mmc_controller->gpio_cod) &&
+> +           (mmc_controller->gpio_cod < OMAP_MAX_GPIO_LINES))
+> +               omap_mux_init_gpio(mmc_controller->gpio_cod,
+>                                    OMAP_PIN_INPUT_PULLUP);
+>         if (gpio_is_valid(mmc_controller->gpio_wp) &&
+>             (mmc_controller->gpio_wp < OMAP_MAX_GPIO_LINES))
+> @@ -250,15 +254,20 @@ static int __init omap_hsmmc_pdata_init(struct omap2_hsmmc_info *c,
+>         mmc->internal_clock = !c->ext_clock;
+>         mmc->reg_offset = 0;
+>
+> -       mmc->switch_pin = c->gpio_cd;
+> +       if (c->cover_only) {
+> +               /* detect if mobile phone cover removed */
+> +               mmc->gpio_cd = -EINVAL;
+> +               mmc->gpio_cod = c->gpio_cd;
+> +       } else {
+> +               /* card detect pin on the mmc socket itself */
+> +               mmc->gpio_cd = c->gpio_cd;
+> +               mmc->gpio_cod = -EINVAL;
+> +       }
+>         mmc->gpio_wp = c->gpio_wp;
+>
+>         mmc->remux = c->remux;
+>         mmc->init_card = c->init_card;
+>
+> -       if (c->cover_only)
+> -               mmc->cover = 1;
+> -
+>         if (c->nonremovable)
+>                 mmc->nonremovable = 1;
+>
+> @@ -358,7 +367,15 @@ void omap_hsmmc_late_init(struct omap2_hsmmc_info *c)
+>                 if (!mmc_pdata)
+>                         continue;
+>
+> -               mmc_pdata->switch_pin = c->gpio_cd;
+> +               if (c->cover_only) {
+> +                       /* detect if mobile phone cover removed */
+> +                       mmc_pdata->gpio_cd = -EINVAL;
+> +                       mmc_pdata->gpio_cod = c->gpio_cd;
+> +               } else {
+> +                       /* card detect pin on the mmc socket itself */
+> +                       mmc_pdata->gpio_cd = c->gpio_cd;
+> +                       mmc_pdata->gpio_cod = -EINVAL;
+> +               }
+>                 mmc_pdata->gpio_wp = c->gpio_wp;
+>
+>                 res = omap_device_register(pdev);
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 053cd38..265391f 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -427,15 +427,15 @@ static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
+>  {
+>         int ret;
+>
+> -       if (pdata->cover && gpio_is_valid(pdata->switch_pin)) {
+> -               ret = mmc_gpio_request_cd(mmc, pdata->switch_pin, 0);
+> +       if (gpio_is_valid(pdata->gpio_cod)) {
+> +               ret = mmc_gpio_request_cd(mmc, pdata->gpio_cod, 0);
+>                 if (ret)
+>                         return ret;
+>
+>                 host->get_cover_state = omap_hsmmc_get_cover_state;
+>                 mmc_gpio_set_cd_isr(mmc, omap_hsmmc_cover_irq);
+> -       } else if (!pdata->cover && gpio_is_valid(pdata->switch_pin)) {
+> -               ret = mmc_gpio_request_cd(mmc, pdata->switch_pin, 0);
+> +       } else if (gpio_is_valid(pdata->gpio_cd)) {
+> +               ret = mmc_gpio_request_cd(mmc, pdata->gpio_cd, 0);
+>                 if (ret)
+>                         return ret;
+>
+> @@ -1932,7 +1932,8 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+>         if (of_find_property(np, "ti,dual-volt", NULL))
+>                 pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
+>
+> -       pdata->switch_pin = -EINVAL;
+> +       pdata->gpio_cd = -EINVAL;
+> +       pdata->gpio_cod = -EINVAL;
+>         pdata->gpio_wp = -EINVAL;
+>
+>         if (of_find_property(np, "ti,non-removable", NULL)) {
+> diff --git a/include/linux/platform_data/hsmmc-omap.h b/include/linux/platform_data/hsmmc-omap.h
+> index 67bbcf0..8e981be 100644
+> --- a/include/linux/platform_data/hsmmc-omap.h
+> +++ b/include/linux/platform_data/hsmmc-omap.h
+> @@ -55,9 +55,6 @@ struct omap_hsmmc_platform_data {
+>         u32 caps;       /* Used for the MMC driver on 2430 and later */
+>         u32 pm_caps;    /* PM capabilities of the mmc */
+>
+> -       /* switch pin can be for card detect (default) or card cover */
+> -       unsigned cover:1;
+> -
+>         /* use the internal clock */
+>         unsigned internal_clock:1;
+>
+> @@ -73,7 +70,8 @@ struct omap_hsmmc_platform_data {
+>  #define HSMMC_HAS_HSPE_SUPPORT (1 << 2)
+>         unsigned features;
+>
+> -       int switch_pin;                 /* gpio (card detect) */
+> +       int gpio_cd;                    /* gpio (card detect) */
+> +       int gpio_cod;                   /* gpio (cover detect) */
+>         int gpio_wp;                    /* gpio (write protect) */
+>
+>         int (*set_power)(struct device *dev, int power_on, int vdd);
+> --
+> 2.1.4
+>
