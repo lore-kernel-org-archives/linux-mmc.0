@@ -1,41 +1,89 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V4 13/15] mmc: block: Check re-tuning in the recovery path
-Date: Fri, 27 Mar 2015 22:57:41 +0200
-Message-ID: <1427489863-9050-14-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V4 09/15] mmc: core: Separate out the mmc_switch status check so it can be re-used
+Date: Fri, 27 Mar 2015 22:57:37 +0200
+Message-ID: <1427489863-9050-10-git-send-email-adrian.hunter@intel.com>
 References: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:45500 "EHLO mga09.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:24700 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752330AbbC0VAT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Mar 2015 17:00:19 -0400
+	id S1752455AbbC0VAG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Mar 2015 17:00:06 -0400
 In-Reply-To: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-If re-tuning is needed, do it in the recovery path to
-give recovery commands a better chance of success.
+Make a separate function to do the mmc_switch status check
+so it can be re-used. This is preparation for adding support
+for HS400 re-tuning.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/block.c | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/core/mmc_ops.c | 30 ++++++++++++++++--------------
+ drivers/mmc/core/mmc_ops.h |  1 +
+ 2 files changed, 17 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index c69afb5..293e938 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -913,6 +913,9 @@ static int mmc_blk_cmd_recovery(struct mmc_card *card, struct request *req,
- 		if (!err)
- 			break;
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index f67b0fd..02be77e 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -449,6 +449,21 @@ int mmc_spi_set_crc(struct mmc_host *host, int use_crc)
+ 	return err;
+ }
  
-+		/* Re-tune if needed */
-+		mmc_retune_recheck(card->host);
++int mmc_switch_status_error(struct mmc_host *host, u32 status)
++{
++	if (mmc_host_is_spi(host)) {
++		if (status & R1_SPI_ILLEGAL_COMMAND)
++			return -EBADMSG;
++	} else {
++		if (status & 0xFDFFA000)
++			pr_warn("%s: unexpected status %#x after switch\n",
++				mmc_hostname(host), status);
++		if (status & R1_SWITCH_ERROR)
++			return -EBADMSG;
++	}
++	return 0;
++}
 +
- 		prev_cmd_status_valid = false;
- 		pr_err("%s: error %d sending status command, %sing\n",
- 		       req->rq_disk->disk_name, err, retry ? "retry" : "abort");
+ /**
+  *	__mmc_switch - modify EXT_CSD register
+  *	@card: the MMC card associated with the data transfer
+@@ -557,20 +572,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		}
+ 	} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+ 
+-	if (mmc_host_is_spi(host)) {
+-		if (status & R1_SPI_ILLEGAL_COMMAND) {
+-			err = -EBADMSG;
+-			goto out;
+-		}
+-	} else {
+-		if (status & 0xFDFFA000)
+-			pr_warn("%s: unexpected status %#x after switch\n",
+-				mmc_hostname(host), status);
+-		if (status & R1_SWITCH_ERROR) {
+-			err = -EBADMSG;
+-			goto out;
+-		}
+-	}
++	err = mmc_switch_status_error(host, status);
+ out:
+ 	mmc_retune_release(host);
+ 
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index 6f4b00e..f498f9a 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -27,6 +27,7 @@ int mmc_spi_set_crc(struct mmc_host *host, int use_crc);
+ int mmc_bus_test(struct mmc_card *card, u8 bus_width);
+ int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status);
+ int mmc_can_ext_csd(struct mmc_card *card);
++int mmc_switch_status_error(struct mmc_host *host, u32 status);
+ 
+ #endif
+ 
 -- 
 1.9.1
 
