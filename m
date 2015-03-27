@@ -1,68 +1,28 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sleep notification
-Date: Fri, 27 Mar 2015 13:57:22 +0100
-Message-ID: <CAPDyKFroXQ8CThExfbn3F+wMX6=6+-OgLawx2+RA8WC-Y-EKrw@mail.gmail.com>
-References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
-	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFqLUBYUx9XrhnMeUtf8HU_=4PH_4Vf7m8mM-CT63jG24Q@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA1245B@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFrhfPZG4ZnqNTSEgbnpukw342gaeyi22OqAt6PA==E8ug@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA14148@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFrRAMRDNRX+zW-Odh+-ouZO7b0S4RvKQka+90D63uqBDQ@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA3FA3A@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v4 1/4] mmc: dw_mmc: Don't try to enable the CD until
+ we're sure we're not deferring
+Date: Fri, 27 Mar 2015 08:46:57 -0700
+Message-ID: <CAD=FV=XFjTGkzwgySAFKUtpgNLZEe_ovAR+CnjLB6k8U_GMc6g@mail.gmail.com>
+References: <1426112117-18220-1-git-send-email-dianders@chromium.org>
+	<5514F0C5.7080509@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f47.google.com ([209.85.192.47]:32897 "EHLO
-	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752725AbbC0M5X convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Mar 2015 08:57:23 -0400
-Received: by qgfa8 with SMTP id a8so125070725qgf.0
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Mar 2015 05:57:22 -0700 (PDT)
-In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED5333FA3FA3A@SACMBXIP01.sdcorp.global.sandisk.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <5514F0C5.7080509@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, Seungwon Jeon <tgih.jun@samsung.com>, Mark Brown <broonie@kernel.org>, Alexandru Stan <amstan@chromium.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Addy Ke <addy.ke@rock-chips.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-[...]
+Jaehoon,
 
->> > What if Sleep_Notification will take several seconds?
->>
->> Yes, that horrible! You should tell your colleagues designing FTLs t=
-o make sure
->> that _never_ happens.
+On Thu, Mar 26, 2015 at 10:55 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi, Doug.
 >
-> Agree, but we need to consider and take care of all such cases in the=
- driver side.
-> Device might be busy with its internal garbage collection, and as spe=
-c allows, it
-> will complete it in a great manner after host sends PON command.
->
+> This patch is not related with [patch 2/4~4/4].
+> "[PATCH v4 2/4] mmc: core: Add mmc_regulator_set_vqmmc()" is discussing..
+> So i think if you're ok, i will pick this one [PATCH v4 1/4]. how about?
 
-Okay, so to me, I think the SLEEP notification needs to be sent as a
-part of the system PM suspend phase. And more exactly from the
-bus_ops->suspend() callback.
-
-In addition to that, we should be able improve the situation by also
-sending the SLEEP notification as part of an "idle operation". With
-"idle operation" I mean the mmc block layer hasn=E2=80=99t received any=
- new
-request for a while (the framework for this is already implemented by
-using runtime PM).
-
-So if the SLEEP notification was sent during the "idle operation" and
-no new request was needed during the system PM suspend phase we
-wouldn't have to wake up the card again using HPI, but instead just
-leave it "sleeping" and send CMD5.
-
-Still, there would be no guarantees that "idle operations" is executed
-before a system PM suspend phase starts. So there are no way we can
-improve the worst case scenario.
-
-Kind regards
-Uffe
+Please take it and send it to Ulf as soon as you can.  It is only
+related in that the later patches in this series suddenly make the
+rk3288-evb start deferring and that causes a crash without this patch.
