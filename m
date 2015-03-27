@@ -1,106 +1,52 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [PATCH] mmc: sleep notification
-Date: Fri, 27 Mar 2015 12:13:28 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333FA3FA3A@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
-	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFqLUBYUx9XrhnMeUtf8HU_=4PH_4Vf7m8mM-CT63jG24Q@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA1245B@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFrhfPZG4ZnqNTSEgbnpukw342gaeyi22OqAt6PA==E8ug@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA14148@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAPDyKFrRAMRDNRX+zW-Odh+-ouZO7b0S4RvKQka+90D63uqBDQ@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: core: Enable runtime PM management of host devices
+Date: Fri, 27 Mar 2015 14:41:42 +0200
+Message-ID: <55155006.5080305@intel.com>
+References: <1427454915-12893-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0071.outbound.protection.outlook.com ([207.46.100.71]:26031
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752475AbbC0MNb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Mar 2015 08:13:31 -0400
-In-Reply-To: <CAPDyKFrRAMRDNRX+zW-Odh+-ouZO7b0S4RvKQka+90D63uqBDQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mga01.intel.com ([192.55.52.88]:10609 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752481AbbC0Mnq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Mar 2015 08:43:46 -0400
+In-Reply-To: <1427454915-12893-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
+Cc: linux-mmc@vger.kernel.org, NeilBrown <neil@brown.name>
 
-SGkgVWxmLA0KDQpTb3JyeSBmb3IgdGhlIGRlbGF5IGluIHJlc3BvbnNlLi4uDQoNCj4gLS0tLS1P
-cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21haWx0bzp1bGYuaGFu
-c3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBUdWVzZGF5LCBNYXJjaCAxNywgMjAxNSAxMjo0NCBQ
-TQ0KPiBUbzogQWxleCBMZW1iZXJnDQo+IENjOiBBdmkgU2hjaGlzbG93c2tpOyBsaW51eC1tbWM7
-IENocmlzIEJhbGwNCj4gU3ViamVjdDogUmU6IFtQQVRDSF0gbW1jOiBzbGVlcCBub3RpZmljYXRp
-b24NCj4gDQo+IE9uIDE2IE1hcmNoIDIwMTUgYXQgMTc6NTgsIEFsZXggTGVtYmVyZyA8QWxleC5M
-ZW1iZXJnQHNhbmRpc2suY29tPg0KPiB3cm90ZToNCj4gPg0KPiA+DQo+ID4+IC0tLS0tT3JpZ2lu
-YWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IFVsZiBIYW5zc29uIFttYWlsdG86dWxmLmhhbnNz
-b25AbGluYXJvLm9yZ10NCj4gPj4gU2VudDogTW9uZGF5LCBNYXJjaCAxNiwgMjAxNSAzOjM1IFBN
-DQo+ID4+IFRvOiBBbGV4IExlbWJlcmcNCj4gPj4gQ2M6IEF2aSBTaGNoaXNsb3dza2k7IGxpbnV4
-LW1tYzsgQ2hyaXMgQmFsbA0KPiA+PiBTdWJqZWN0OiBSZTogW1BBVENIXSBtbWM6IHNsZWVwIG5v
-dGlmaWNhdGlvbg0KPiA+Pg0KPiA+PiBPbiAxNiBNYXJjaCAyMDE1IGF0IDEyOjM3LCBBbGV4IExl
-bWJlcmcgPEFsZXguTGVtYmVyZ0BzYW5kaXNrLmNvbT4NCj4gPj4gd3JvdGU6DQo+ID4+ID4gSGkg
-VWxmLA0KPiA+PiA+DQo+ID4+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+ID4+
-IEZyb206IFVsZiBIYW5zc29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gPj4g
-Pj4gU2VudDogVGh1cnNkYXksIE1hcmNoIDEyLCAyMDE1IDExOjEwIEFNDQo+ID4+ID4+IFRvOiBB
-bGV4IExlbWJlcmcNCj4gPj4gPj4gQ2M6IEF2aSBTaGNoaXNsb3dza2k7IGxpbnV4LW1tYzsgQ2hy
-aXMgQmFsbA0KPiA+PiA+PiBTdWJqZWN0OiBSZTogW1BBVENIXSBtbWM6IHNsZWVwIG5vdGlmaWNh
-dGlvbg0KPiA+PiA+Pg0KPiA+PiA+PiBbLi4uXQ0KPiA+PiA+Pg0KPiA+PiA+PiA+PiA+IEFsc28s
-IEkgdGhpbmsgd2UgbmVlZCB0byBjbGFyaWZ5IG9uZSBtb3JlIHBvaW50IGZvciB0aGlzIHBhdGNo
-Og0KPiA+PiA+PiA+PiA+IEFzIHdhcyBtZW50aW9uZWQgaW4gY29tbWl0IG1lc3NhZ2UgLSBTbGVl
-cF9Ob3RpZmljYXRpb24gY2FuDQo+ID4+ID4+ID4+ID4gYmUgaW50ZXJydXB0ZWQNCj4gPj4gPj4g
-Pj4gYnkgSFBJLg0KPiA+PiA+PiA+PiA+IFRoaXMgYWxsb3dzIG5vdCBibG9ja2luZyB0aGUgaG9z
-dCBkdXJpbmcgdGhlDQo+ID4+ID4+ID4+ID4gU2xlZXBfTm90aWZpY2F0aW9uIGJ1c3kgdGltZSBh
-bmQgYWxsb3dzIGFjY2VwdGluZyByZXF1ZXN0cyBjb21pbmcNCj4gZHVyaW5nIHRoaXMgc3RhZ2Uu
-DQo+ID4+ID4+ID4+ID4gVGh1cywgd2l0aG91dCBoYXZpbmcgSFBJIHN1cHBvcnRlZCwgc3VzcGVu
-ZC9yZXN1bWUgcHJvY2Vzcw0KPiA+PiA+PiA+PiA+IG1pZ2h0IGJlIGluZmx1ZW5jZWQgYnkgU2xl
-ZXBfTm90aWZpY2F0aW9uIGJ1c3kgdGltZSwgYW5kIHRoaXMNCj4gPj4gPj4gPj4gPiBzaG91bGQg
-bm90IGhhcHBlbiAtDQo+ID4+ID4+ID4+IHN1c3BlbmQvcmVzdW1lIHNob3VsZCBiZSBkb25lIGlu
-IHZlcnkgZmFzdCBhbmQgbm90IGJsb2NraW5nIG1hbm5lci4NCj4gPj4gPj4gPj4NCj4gPj4gPj4g
-Pj4gSSBmYWlsIHRvIHVuZGVyc3RhbmQgeW91ciBjb21tZW50IGhlcmUuDQo+ID4+ID4+ID4+DQo+
-ID4+ID4+ID4+IFBsZWFzZSB0ZWxsIG1lIGF0IHdoYXQgcG9pbnQocykgeW91ciB0aGluayBpdCBt
-YWtlIHNlbnNlIHRvDQo+ID4+ID4+ID4+IGlzc3VlIHRoZSBTTEVFUF9OT1RJRklDQVRJT04/IElm
-IHRoYXQgaXMgZHVyaW5nIHRoZSBzdXNwZW5kDQo+ID4+ID4+ID4+IHBoYXNlLCB0aGVuIGEgSFBJ
-IHJlcXVlc3QgY2FuJ3QgYmUgdHJpZ2dlcmVkLg0KPiA+PiA+PiA+DQo+ID4+ID4+ID4gSSB0aGlu
-ayBTTEVFUF9OT1RJRklDQVRJT04gc2hvdWxkIGJlIGlzc3VlZCBvbiBtbWNfcG1fbm90aWZ5KCkN
-Cj4gPj4gPj4gPiBjYWxsLCBvbiBQTV9TVVNQRU5EX1BSRVBBUkUgY2FzZS4NCj4gPj4gPj4NCj4g
-Pj4gPj4gU28sIGV4YWN0bHkgd2h5IGlzIHRoYXQgdG8gcHJlZmVyLCBjb21wYXJpbmcgZG9pbmcg
-aXQgaW4gc3lzdGVtIFBNDQo+ID4+ID4+IC0+c3VzcGVuZCgpIGNhbGxiYWNrPw0KPiA+PiA+DQo+
-ID4+ID4gQXNzdW1pbmcgdGhhdCBTTEVFUF9OT1RJRklDQVRJT04gbWF5IHRha2UgdGltZSAoZGVm
-aW5lZCBpbg0KPiA+PiA+IFNMRUVQX05PVElGSUNBVElPTl9USU1FIGJ5dGUgaW4gRVhUX0NTRCBb
-MjE2XSksIEkgdGhpbmsgaXQgaXMNCj4gPj4gPiBiZXR0ZXIgdG8gc2VuZCBpdCBmcm9tIHBtIG5v
-dGlmaWVyIC0gbW1jX3BtX25vdGlmeSgpLg0KPiA+Pg0KPiA+PiBJIGFzc3VtZSB5b3UgdGhpbmsg
-dGhhdCB5b3Ugd2lsbCAiZWFybiIgc29tZSBtaWxsaXNlY29uZHMgZG9pbmcgaXQgaW4NCj4gPj4g
-dGhpcyBwaGFzZSwgYnV0IEkgYW0gbm90IHNvIHN1cmUuDQo+ID4NCj4gPiBJIHdhcyB0aGlua2lu
-ZyBtYWlubHkgYWJvdXQgaG93IHRvIHByZXZlbnQgImJsb2NraW5nIiBkdXJpbmcNCj4gU2xlZXBf
-Tm90aWZpY2F0aW9uIHByb2Nlc3MuDQo+ID4NCj4gPj4NCj4gPj4gQWZ0ZXIgdGhlIFBNX1NVU1BF
-TkRfUFJFUEFSRSBub3RpZmllciwgd2Ugc3RpbGwgaGF2ZSB0aGUgbW1jIGJsb2NrDQo+ID4+IHF1
-ZXVlIG9wZW4gYW5kIGFyZSByZWFkeSB0byBzZXJ2ZSByZXF1ZXN0cy4gVGhlcmVmb3JlIEkgd291
-bGQgZXhwZWN0DQo+ID4+IHRoZSBTTEVFUF9OT1RJRklDQVRJT04gdG8gcG90ZW50aWFsbHkgYmUg
-aW50ZXJydXB0ZWQgYnkgdXNpbmcgSFBJLg0KPiA+DQo+ID4gUmlnaHQsIGFuZCB0aGlzIHdhcyBh
-IHJlYXNvbiBmb3IgYWRkaW5nIEhQSSBzdXBwb3J0IGR1cmluZyB0aGUNCj4gU2xlZXBfTm90aWZp
-Y2F0aW9uLg0KPiA+DQo+ID4+DQo+ID4+IFRoZW4gd2UgZW5kIHVwIHdpdGggdGhlIGZvbGxvd2lu
-ZyBzZXF1ZW5jZSBkdXJpbmcgdGhlIHN5c3RlbSBQTSBzbGVlcA0KPiBwaGFzZS4NCj4gPj4gMS4g
-SXNzdWUgU0xFRVBfTk9USUZJQ0FUSU9OLg0KPiA+PiAyLiBJbnRlcnJ1cHQgU0xFRVBfTk9USUZJ
-Q0FUSU9OLCB1c2luZyBIUEkuDQo+ID4+IDMuIFNlcnZlIGJsayByZXF1ZXN0DQo+ID4+IDQuIElz
-c3VlIFNMRUVQX05PVElGSUNBVElPTi4NCj4gPj4gNS4gSXNzdWUgU0xFRVAgKENNRDUpLg0KPiA+
-DQo+ID4gQ29ycmVjdCwgdGhpcyBpcyBhIHNlcXVlbmNlIHRoYXQgd2Ugc2VlIGFmdGVyIGFkZGlu
-ZyB0aGUgcGF0Y2guDQo+ID4NCj4gPj4gVGhhdCBzZWVtcyBsaWtlIGEgYmFkIGlkZWEgdG8gbWUu
-DQo+ID4NCj4gPiBDb3VsZCB5b3UgcGxlYXNlIGV4cGxhaW4gd2h5Pw0KPiA+IFdvdWxkIHlvdSBz
-dWdnZXN0IHRvIGNhbGwgU2xlZXBfTm90aWZpY2F0aW9uIGZyb20gU3VzcGVuZCBvbmx5Pw0KPiAN
-Cj4gU2luY2Ugb3RoZXJ3aXNlIHdlIG1heSBlbmQgdXAgaXNzdWluZyBTTEVFUF9OT1RJRklDQVRJ
-T04gbm90IG9ubHkgb25jZSwgYnV0DQo+IHR3aWNlIGR1cmluZyBhIHN5c3RlbSBQTSBzbGVlcCBz
-ZXF1ZW5jZS4gU28gdGhlbiB3ZSBhY3R1YWxseSBnZXQgYW4gaW5jcmVhc2VkDQo+IHN5c3RlbSBQ
-TSBzdXNwZW5kIHRpbWUuDQo+IA0KPiA+IFdoYXQgaWYgU2xlZXBfTm90aWZpY2F0aW9uIHdpbGwg
-dGFrZSBzZXZlcmFsIHNlY29uZHM/DQo+IA0KPiBZZXMsIHRoYXQgaG9ycmlibGUhIFlvdSBzaG91
-bGQgdGVsbCB5b3VyIGNvbGxlYWd1ZXMgZGVzaWduaW5nIEZUTHMgdG8gbWFrZSBzdXJlDQo+IHRo
-YXQgX25ldmVyXyBoYXBwZW5zLg0KDQpBZ3JlZSwgYnV0IHdlIG5lZWQgdG8gY29uc2lkZXIgYW5k
-IHRha2UgY2FyZSBvZiBhbGwgc3VjaCBjYXNlcyBpbiB0aGUgZHJpdmVyIHNpZGUuIA0KRGV2aWNl
-IG1pZ2h0IGJlIGJ1c3kgd2l0aCBpdHMgaW50ZXJuYWwgZ2FyYmFnZSBjb2xsZWN0aW9uLCBhbmQg
-YXMgc3BlYyBhbGxvd3MsIGl0DQp3aWxsIGNvbXBsZXRlIGl0IGluIGEgZ3JlYXQgbWFubmVyIGFm
-dGVyIGhvc3Qgc2VuZHMgUE9OIGNvbW1hbmQuDQogDQo+IA0KPiBBbHNvLCB0aGlzIG1ha2VzIG1l
-IHdvbmRlciBob3cgdGhpcyBraW5kIG9mIGZlYXR1cmUgZXZlciBjb3VsZCBtYWtlIGl0IGludG8g
-dGhlDQo+IEpFREVDIHNwZWNpZmljYXRpb24uDQo+IA0KPiBXaGF0IHdlIGhhZCBlYXJsaWVyIHdp
-dGggIkNNRDUgb25seSIgc2hvdWxkIG5ldmVyIGhhdmUgYmVlbiBjaGFuZ2VkLg0KPiANCj4gS2lu
-ZCByZWdhcmRzDQo+IFVmZmUNCg==
+On 27/03/15 13:15, Ulf Hansson wrote:
+> Currently those host drivers which have deployed runtime PM, deals with
+> the runtime PM reference counting entirely by themselves.
+> 
+> Since host drivers don't know when the core will send the next request
+> through some of the host_ops callbacks, they need to handle runtime PM
+> get/put between each an every request.
+> 
+> In quite many cases this has some negative effects, since it leads to a
+> high frequency of scheduled runtime PM suspend operations. That due to
+> the runtime PM reference count will normally reach zero in-between
+> every request.
+> 
+> We can decrease that frequency, by enabling the core to deal with
+> runtime PM reference counting of the host device. Since the core often
+> knows that it will send a seqeunce of requests, it makes sense for it
+> to keep a runtime PM reference count during these periods.
+> 
+> More exactly, let's increase the runtime PM reference count by invoking
+> pm_runtime_get_sync() from __mmc_claim_host(). Restore that action by
+> invoking pm_runtime_mark_last_busy() and pm_runtime_put_autosuspend()
+> in mmc_release_host(). In this way a runtime PM reference count will be
+> kept during the complete cycle of a claim -> release host.
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+The downside is that it precludes the possibility of a host driver using
+runtime pm for very aggressive pm. However there is anyway MMC_CLKGATE for
+that, and otherwise all host drivers are either using autosuspend_delay or
+staying active while the card has power. So:
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
