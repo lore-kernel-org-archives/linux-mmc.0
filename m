@@ -1,91 +1,139 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V4 14/15] mmc: block: Retry errored data requests when re-tuning is needed
-Date: Fri, 27 Mar 2015 22:57:42 +0200
-Message-ID: <1427489863-9050-15-git-send-email-adrian.hunter@intel.com>
-References: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>
+From: NeilBrown <neilb@suse.de>
+Subject: Re: [PATCH] mmc: core: Enable runtime PM management of host devices
+Date: Sat, 28 Mar 2015 08:52:42 +1100
+Message-ID: <20150328085242.5e1e1acc@notabene.brown>
+References: <1427454915-12893-1-git-send-email-ulf.hansson@linaro.org>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ boundary="Sig_/5_yc_eL0_HeWzJZ5AvPenlP"; protocol="application/pgp-signature"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:45500 "EHLO mga09.intel.com"
+Received: from cantor2.suse.de ([195.135.220.15]:32876 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752599AbbC0VAT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Mar 2015 17:00:19 -0400
-In-Reply-To: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>
+	id S1753069AbbC0VxA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Mar 2015 17:53:00 -0400
+In-Reply-To: <1427454915-12893-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
+Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>
 
-Retry errored data requests when re-tuning is needed and
-add a flag to struct mmc_blk_request so that the retry
-is only done once.
+--Sig_/5_yc_eL0_HeWzJZ5AvPenlP
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/card/block.c | 11 ++++++++++-
- drivers/mmc/card/queue.h |  1 +
- 2 files changed, 11 insertions(+), 1 deletion(-)
+On Fri, 27 Mar 2015 12:15:15 +0100 Ulf Hansson <ulf.hansson@linaro.org> wro=
+te:
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 293e938..3baf7ea 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1195,6 +1195,7 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 						    mmc_active);
- 	struct mmc_blk_request *brq = &mq_mrq->brq;
- 	struct request *req = mq_mrq->req;
-+	int need_retune = card->host->need_retune;
- 	int ecc_err = 0, gen_err = 0;
- 
- 	/*
-@@ -1262,6 +1263,12 @@ static int mmc_blk_err_check(struct mmc_card *card,
- 	}
- 
- 	if (brq->data.error) {
-+		if (need_retune && !brq->retune_retry_done) {
-+			pr_info("%s: retrying because a re-tune was needed\n",
-+				req->rq_disk->disk_name);
-+			brq->retune_retry_done = 1;
-+			return MMC_BLK_RETRY;
-+		}
- 		pr_err("%s: error %d transferring data, sector %u, nr %u, cmd response %#x, card status %#x\n",
- 		       req->rq_disk->disk_name, brq->data.error,
- 		       (unsigned)blk_rq_pos(req),
-@@ -1821,7 +1828,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 	struct mmc_blk_data *md = mq->data;
- 	struct mmc_card *card = md->queue.card;
- 	struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
--	int ret = 1, disable_multi = 0, retry = 0, type;
-+	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
- 	enum mmc_blk_status status;
- 	struct mmc_queue_req *mq_rq;
- 	struct request *req = rqc;
-@@ -1905,6 +1912,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 				break;
- 			goto cmd_abort;
- 		case MMC_BLK_RETRY:
-+			retune_retry_done = brq->retune_retry_done;
- 			if (retry++ < 5)
- 				break;
- 			/* Fall through */
-@@ -1967,6 +1975,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 				mmc_start_req(card->host,
- 						&mq_rq->mmc_active, NULL);
- 			}
-+			mq_rq->brq.retune_retry_done = retune_retry_done;
- 		}
- 	} while (ret);
- 
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index 5752d50..7e27915 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -12,6 +12,7 @@ struct mmc_blk_request {
- 	struct mmc_command	cmd;
- 	struct mmc_command	stop;
- 	struct mmc_data		data;
-+	int			retune_retry_done;
- };
- 
- enum mmc_packed_type {
--- 
-1.9.1
+> Currently those host drivers which have deployed runtime PM, deals with
+> the runtime PM reference counting entirely by themselves.
+>=20
+> Since host drivers don't know when the core will send the next request
+> through some of the host_ops callbacks, they need to handle runtime PM
+> get/put between each an every request.
+>=20
+> In quite many cases this has some negative effects, since it leads to a
+> high frequency of scheduled runtime PM suspend operations. That due to
+> the runtime PM reference count will normally reach zero in-between
+> every request.
 
+I don't understand why this is a problem.
+All the drivers use put_autosuspend, so the suspend doesn't happen for
+(typically) 50ms, so the actually suspend won't happen if there is a sequen=
+ce
+of requests.
+
+Is it just the scheduling of a suspend - even without the suspend happening=
+ -
+that is causing problems?  If so, maybe the runtime_pm code needs optimisin=
+g?
+
+Thanks,
+
+NeilBrown
+
+
+>=20
+> We can decrease that frequency, by enabling the core to deal with
+> runtime PM reference counting of the host device. Since the core often
+> knows that it will send a seqeunce of requests, it makes sense for it
+> to keep a runtime PM reference count during these periods.
+>=20
+> More exactly, let's increase the runtime PM reference count by invoking
+> pm_runtime_get_sync() from __mmc_claim_host(). Restore that action by
+> invoking pm_runtime_mark_last_busy() and pm_runtime_put_autosuspend()
+> in mmc_release_host(). In this way a runtime PM reference count will be
+> kept during the complete cycle of a claim -> release host.
+>=20
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/core/core.c | 10 +++++++++-
+>  1 file changed, 9 insertions(+), 1 deletion(-)
+>=20
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 709ada9..c296bc0 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -897,6 +897,7 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t =
+*abort)
+>  	DECLARE_WAITQUEUE(wait, current);
+>  	unsigned long flags;
+>  	int stop;
+> +	bool pm =3D false;
+> =20
+>  	might_sleep();
+> =20
+> @@ -916,13 +917,18 @@ int __mmc_claim_host(struct mmc_host *host, atomic_=
+t *abort)
+>  		host->claimed =3D 1;
+>  		host->claimer =3D current;
+>  		host->claim_cnt +=3D 1;
+> +		if (host->claim_cnt =3D=3D 1)
+> +			pm =3D true;
+>  	} else
+>  		wake_up(&host->wq);
+>  	spin_unlock_irqrestore(&host->lock, flags);
+>  	remove_wait_queue(&host->wq, &wait);
+> +
+> +	if (pm)
+> +		pm_runtime_get_sync(mmc_dev(host));
+> +
+>  	return stop;
+>  }
+> -
+>  EXPORT_SYMBOL(__mmc_claim_host);
+> =20
+>  /**
+> @@ -947,6 +953,8 @@ void mmc_release_host(struct mmc_host *host)
+>  		host->claimer =3D NULL;
+>  		spin_unlock_irqrestore(&host->lock, flags);
+>  		wake_up(&host->wq);
+> +		pm_runtime_mark_last_busy(mmc_dev(host));
+> +		pm_runtime_put_autosuspend(mmc_dev(host));
+>  	}
+>  }
+>  EXPORT_SYMBOL(mmc_release_host);
+
+
+--Sig_/5_yc_eL0_HeWzJZ5AvPenlP
+Content-Type: application/pgp-signature
+Content-Description: OpenPGP digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQIVAwUBVRXRKjnsnt1WYoG5AQLZLw/+MbRNNcDCh9VRAo4Ivp0/HZyezWDPoHPQ
+rDO7Sx/YVCxOFTgN3kS7/uwkH3HLd+EI+v9Pxm2OI4U2tpA5QNwGsFcxtHaDx0m8
+Se03d5VbR+Y/VP/uOpt4JIItMbLPwWBnX3XstYmwgSnD5Y0QL5p5mrpGIQWyjtZ6
+dGJnCL44vX3VF14ulZRPtHUfx9N+n+FNqLPvay+VUWQAWB9gHeftylmUIiaSERTa
+NJn5NvlCL6DE56X3J2hbgvUXkJlwJAeVSt1hu1JM1lBYBLWaAphy1uQHxKVEYNyr
+QNfwPTMvCHGApZU6S5541qg1pTPTOB9dXzHg8QmQx+M53i+/ix0D9gKng5ZkGvjb
+Du08EiRE96SUxrcEXNG2Gp0DzDBvQZMcA/4FUxw0Qek9XZNix4OQnS70AkjxrjCN
+JRSyVdvCNwZyw2snJs13wyP/RRRzOmiidnW4BRjl5emkmJYQRMkK0DTFzhSoTYwX
+HeNZeVkYBw1YLosaiUBky6be8tBcsbFOOVS1W2nH0HNP2UrYPGT8IcK2CdsYeiO4
+ZRGDcIW20MlABEk0NdIoKXq7Dufm8op5kU68fn0OLk/KjRBzYdIS2lRdOyv4hLvn
+fGPqqJmQhf7QjP3Ll1RYoImTSnIiBdCz7nFJ/940ACswfTGJbvYf2wifESeC8VS/
+dCpXyLlSTMU=
+=eD53
+-----END PGP SIGNATURE-----
+
+--Sig_/5_yc_eL0_HeWzJZ5AvPenlP--
