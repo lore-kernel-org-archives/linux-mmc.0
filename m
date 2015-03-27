@@ -1,220 +1,106 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V2 11/15] mmc: sdhci: Change to new way of doing re-tuning
-Date: Fri, 27 Mar 2015 14:04:20 +0200
-Message-ID: <55154744.3000101@intel.com>
-References: <1422522030-17793-1-git-send-email-adrian.hunter@intel.com>	<1422522030-17793-12-git-send-email-adrian.hunter@intel.com>	<CAPDyKFpTuttvhP91qNF_g_2sWV3NZmYMCnqFVGYEnb1L8kXVeg@mail.gmail.com>	<54FD5BDD.9060004@intel.com>	<CAPDyKFr9bpE3FXu0339q4ndOm_KSNpATBODecTWkkrLifvSing@mail.gmail.com>	<54FEFDB0.5050104@intel.com>	<CAPDyKFpvCz9kTaX=632hWGsWfLKC2aFJomFc1xECnNvQpNVU2A@mail.gmail.com>	<5510227F.70605@intel.com>	<CAPDyKFqJ3ahAPXec6LRmMtzucS3N=b5wOYGQcd0ELHZByeudJA@mail.gmail.com>	<5510817D.2080807@intel.com>	<CAPDyKFqnqxiFrrg3S9=w_xqJha1=+fre5w4puEGw7Z=LJZ-T3w@mail.gmail.com>	<5512BCBA.3010905@intel.com> <CAPDyKFpzz6xUZM0p55eEE-EDNLDbxk9THTn0J5aOdw+Q+sZLBg@mail.gmail.com> <551528DD.4000101@intel.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [PATCH] mmc: sleep notification
+Date: Fri, 27 Mar 2015 12:13:28 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333FA3FA3A@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
+	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFqLUBYUx9XrhnMeUtf8HU_=4PH_4Vf7m8mM-CT63jG24Q@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA1245B@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFrhfPZG4ZnqNTSEgbnpukw342gaeyi22OqAt6PA==E8ug@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA14148@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAPDyKFrRAMRDNRX+zW-Odh+-ouZO7b0S4RvKQka+90D63uqBDQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:10586 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752264AbbC0MGY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Mar 2015 08:06:24 -0400
-In-Reply-To: <551528DD.4000101@intel.com>
+Received: from mail-by2on0071.outbound.protection.outlook.com ([207.46.100.71]:26031
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752475AbbC0MNb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 27 Mar 2015 08:13:31 -0400
+In-Reply-To: <CAPDyKFrRAMRDNRX+zW-Odh+-ouZO7b0S4RvKQka+90D63uqBDQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Neil Brown <neilb@suse.de>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Girish K S <girish.shivananjappa@linaro.org>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
+Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-On 27/03/15 11:54, Adrian Hunter wrote:
-> On 26/03/15 18:06, Ulf Hansson wrote:
->> On 25 March 2015 at 14:48, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>
->>> On 24/03/15 23:12, Ulf Hansson wrote:
->>>> On 23 March 2015 at 22:11, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>> On 23/03/2015 5:02 p.m., Ulf Hansson wrote:
->>>>>>
->>>>>> [...]
->>>>>>
->>>>>>>
->>>>>>> I have no locking issues, so I am not sure what you mean here.
->>>>>>
->>>>>>
->>>>>> Okay, I should have stated race conditions.
->>>>>
->>>>>
->>>>> Which I resolved using runtime get / put calls.
->>>>
->>>> Yes, I noticed that and it works! Though, I would rather avoid to add
->>>> yet another pair of host ops callbacks for this.
->>>>
->>>> What do you think if these options instead?
->>>> 1) Do runtime PM get/put from the host ops ->enable|disable()
->>>> callbacks. As omap_hsmmc does.
->>>> 2) Or even better, do runtime PM get/put directly of the host device
->>>> from mmc_claim|release_host().
->>>
->>> Claiming the host is not directly related to host controller runtime pm. It
->>> is possible to imagine cases for claiming the host for synchronization
->>> reasons that do not need the host controller powered up. And card drivers
->>> could reasonably assume that they can claim the host for long periods
->>> without affecting the runtime pm of the host controller.
->>
->>
->> Yes, it _may_ power up the host controller sometimes when not needed.
->> I don't think this will be an issue, mostly because it should be rare
->> and not happening frequently - if ever.
->>
->> The only users of mmc_claim_host() for SD/MMC is the core itself, so I
->> don't see any issue with misbehaving "card drivers" here.
->>
->> SDIO is again different, since it's up to the SDIO func drivers to
->> behave - as you stated. But, if they don't they anyway need to be
->> fixed, right!?
-> 
-> Be aware that that links the holding of re-tuning with claiming the host.
-> It will then not be allowed for re-tuning to be held when the host is
-> released. Will we have to add to mmc_release_host():
-> 
-> 	WARN_ON(host->hold_count);
-> 
-> That could be a problem. Say you wanted to start bkops and then release the
-> host so that a different context could issue an HPI. That wouldn't be
-> allowed anymore.
-
-On the other hand, we would need to prevent the host controller runtime
-suspending in that case anyway.
-
-> 
-> Generally it is impossible to see all ends, which begs the question: why
-> link things if you don't have to?
-
-So I correct myself. Any time we would need to hold re-tuning but release
-the host would anyway require preventing runtime suspend of the host
-controller. So the requirement:	"don't allow the host controller to runtime
-suspend while re-tuning is held" is covered by the requirement "don't allow
-the host controller to runtime suspend when it is doing something".
-
-> 
->>
->>>
->>> Currently we have that the host controller driver is the exclusive owner of
->>> runtime pm for the host controller. So the first thing is to decide if we
->>> want to keep that or let the core be involved as well. I would argue for
->>> sticking with the status quo. Let the host controller driver know what is
->>> going on and leave it to do the right thing with its own power management.
->>
->> The problem I see with the current solution, is that we will be
->> scheduling a runtime PM suspend for each an every request towards the
->> host.
->>
->> It's ineffective, due to that we will unnecessary involve the runtime
->> PM core, thus increasing CPU utilization - when we actually don't need
->> to.
->>
->> I will send a patch for this tomorrow, let's discuss it separately.
-> 
-> Yes please let's keep that separate.
-> 
->>
->> [...]
->>
->>>>
->>>> I have thought more about this since yesterday and I somewhat agree
->>>> with your suggestion. Especially in that sense that I think we should
->>>> consider Neil's issue as an "idle operation" for SDIO.
->>>>
->>>> For "idle operations" for MMC/SD cards, runtime PM is already
->>>> deployed. So, I think it's just a matter of extending that support to
->>>> cover more "idle operations" besides the MMC_CAP_AGGRESSIVE_PM thing.
->>>>
->>>> What we need to figure out is how to make this work for SDIO - and
->>>> that's when it becomes more complex. I really would like us to avoid
->>>> exporting new SDIO APIs, unless really needed.
->>>>
->>>> Today runtime PM is deployed by the following SDIO func drivers:
->>>> drivers/net/wireless/libertas/if_sdio.c
->>>> drivers/net/wireless/ti/wl1251/sdio.c
->>>> drivers/net/wireless/ti/wlcore/sdio.c
->>>>
->>>> We _could_ consider to convert above drivers to use something else
->>>> than runtime PM to control the power to the card. I think that would
->>>> be the ideal solution, since then we can deploy runtime PM for SDIO
->>>> fairly similar to how MMC/SDIO is done. That means doing runtime PM
->>>> get/put of the device for the struct mmc_card, inside the mmc core
->>>> while handling SDIO requests.
->>>>
->>>> The above requires some work, both in the mmc core and in the SDIO
->>>> func drivers. The nice thing is that we don't need to export new APIs
->>>> to the SDIO func drivers and we can keep the complexity of dealing
->>>> with "idle operations" inside the mmc core.
->>>>
->>>> Thoughts?
->>>
->>> There isn't necessarily any link between "idle operations" and runtime pm.
->>
->> I think this is exactly what runtime PM is designed for so I don't
->> want us to re-invent something that is specific for mmc.
-> 
-> Need to remember that PM can theoretically be configured out, which makes
-> using it for bkops seem inappropriate.
-> 
->>
->>>
->>> For example for eMMC background operations I would expect to see:
->>>
->>> - queue is empty so block driver enables "idle operations".
->>> - core waits (delayed work?) a few milliseconds and then starts bkops.
->>> - a new I/O request arrives, block driver wakes up and tells the core to
->>> stop "idle operations" ASAP, and waits until it does.
->>> - or, the core notifies (callback perhaps) the block driver that "idle
->>> operations" are finished, so the block driver can runtime-put the card
->>>
->>> Also need to stop "idle operations" for system suspend, maybe other places.
->>
->> Conceptual wise, I fully agree. Though, I want to make use of runtime PM.
-> 
-> So long as it is power management. I am not sure bkops falls into that category.
-> 
->>
->> For the eMMC/SD case, the runtime PM suspend callbacks (specified per
->> bus_ops) should be able to act as the "trigger" point to kick off
->> "idle operations".
->>
->> Now, the thing to figure out, is how to execute "idle operations" and
->> at the same time being able to interrupt/abort them from another
->> context. An option for how to deal with this, could be to schedule a
->> "delayed work" from the runtime PM suspend callback. But if we can
->> avoid it, I think we should.
-> 
-> Whatever the context that runs the idle operations, for the case where a
-> driver wants to stop the idle operations ASAP, it would be nice if it could
-> simply take over control - particularly if the idle operation is anyway
-> waiting for something. So the HPI or whatever is done in the driver context
-> directly and the idle operation context (if there even is one at that stage)
-> just exits.
-> 
->>
->>>
->>> Now in Neil's case there is a relation to runtime pm in that it would be
->>> nice if the switch to 1-bit mode was delayed by the host controllers
->>> autosuspend_delay. But potentially the host controller driver could
->>> routinely set the delay so that it matches the autosuspend_delay anyway.
->>>
->>> Currently the SDIO function drivers all use sdio_claim_host(). So for Neil's
->>> case I would see:
->>>
->>> - host controller driver sees the switch to 4-bit mode and does a runtime
->>> "get" to prevent runtime suspend
->>> - sdio_release_host enables "idle operations"
->>> - the core sees that someone has requested a switch to 1-bit mode after a
->>> certain delay, so it waits that delay (delayed work?) and does the switch
->>> - host controller driver sees the switch to 1-bit mode and runtime suspends
->>> via a pm_runtime_put
->>> - sdio_claim_host tells the core to stop "idle operations" ASAP and waits
->>> until it has
->>> - host controller driver sees the switch to 4-bit mode and does a runtime
->>> "get" to prevent runtime suspend
->>
->> That seems like a way forward!
->>
->> Still I rather would like the above mentioned SDIO func drivers to use
->> something else than runtime PM to control the power to the cards, as I
->> suggested. But that might be too much to fix!?
-> 
-> Let's keep that a separate issue.
-> 
-> 
-> 
-
+SGkgVWxmLA0KDQpTb3JyeSBmb3IgdGhlIGRlbGF5IGluIHJlc3BvbnNlLi4uDQoNCj4gLS0tLS1P
+cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gW21haWx0bzp1bGYuaGFu
+c3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBUdWVzZGF5LCBNYXJjaCAxNywgMjAxNSAxMjo0NCBQ
+TQ0KPiBUbzogQWxleCBMZW1iZXJnDQo+IENjOiBBdmkgU2hjaGlzbG93c2tpOyBsaW51eC1tbWM7
+IENocmlzIEJhbGwNCj4gU3ViamVjdDogUmU6IFtQQVRDSF0gbW1jOiBzbGVlcCBub3RpZmljYXRp
+b24NCj4gDQo+IE9uIDE2IE1hcmNoIDIwMTUgYXQgMTc6NTgsIEFsZXggTGVtYmVyZyA8QWxleC5M
+ZW1iZXJnQHNhbmRpc2suY29tPg0KPiB3cm90ZToNCj4gPg0KPiA+DQo+ID4+IC0tLS0tT3JpZ2lu
+YWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IFVsZiBIYW5zc29uIFttYWlsdG86dWxmLmhhbnNz
+b25AbGluYXJvLm9yZ10NCj4gPj4gU2VudDogTW9uZGF5LCBNYXJjaCAxNiwgMjAxNSAzOjM1IFBN
+DQo+ID4+IFRvOiBBbGV4IExlbWJlcmcNCj4gPj4gQ2M6IEF2aSBTaGNoaXNsb3dza2k7IGxpbnV4
+LW1tYzsgQ2hyaXMgQmFsbA0KPiA+PiBTdWJqZWN0OiBSZTogW1BBVENIXSBtbWM6IHNsZWVwIG5v
+dGlmaWNhdGlvbg0KPiA+Pg0KPiA+PiBPbiAxNiBNYXJjaCAyMDE1IGF0IDEyOjM3LCBBbGV4IExl
+bWJlcmcgPEFsZXguTGVtYmVyZ0BzYW5kaXNrLmNvbT4NCj4gPj4gd3JvdGU6DQo+ID4+ID4gSGkg
+VWxmLA0KPiA+PiA+DQo+ID4+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+ID4+
+IEZyb206IFVsZiBIYW5zc29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gPj4g
+Pj4gU2VudDogVGh1cnNkYXksIE1hcmNoIDEyLCAyMDE1IDExOjEwIEFNDQo+ID4+ID4+IFRvOiBB
+bGV4IExlbWJlcmcNCj4gPj4gPj4gQ2M6IEF2aSBTaGNoaXNsb3dza2k7IGxpbnV4LW1tYzsgQ2hy
+aXMgQmFsbA0KPiA+PiA+PiBTdWJqZWN0OiBSZTogW1BBVENIXSBtbWM6IHNsZWVwIG5vdGlmaWNh
+dGlvbg0KPiA+PiA+Pg0KPiA+PiA+PiBbLi4uXQ0KPiA+PiA+Pg0KPiA+PiA+PiA+PiA+IEFsc28s
+IEkgdGhpbmsgd2UgbmVlZCB0byBjbGFyaWZ5IG9uZSBtb3JlIHBvaW50IGZvciB0aGlzIHBhdGNo
+Og0KPiA+PiA+PiA+PiA+IEFzIHdhcyBtZW50aW9uZWQgaW4gY29tbWl0IG1lc3NhZ2UgLSBTbGVl
+cF9Ob3RpZmljYXRpb24gY2FuDQo+ID4+ID4+ID4+ID4gYmUgaW50ZXJydXB0ZWQNCj4gPj4gPj4g
+Pj4gYnkgSFBJLg0KPiA+PiA+PiA+PiA+IFRoaXMgYWxsb3dzIG5vdCBibG9ja2luZyB0aGUgaG9z
+dCBkdXJpbmcgdGhlDQo+ID4+ID4+ID4+ID4gU2xlZXBfTm90aWZpY2F0aW9uIGJ1c3kgdGltZSBh
+bmQgYWxsb3dzIGFjY2VwdGluZyByZXF1ZXN0cyBjb21pbmcNCj4gZHVyaW5nIHRoaXMgc3RhZ2Uu
+DQo+ID4+ID4+ID4+ID4gVGh1cywgd2l0aG91dCBoYXZpbmcgSFBJIHN1cHBvcnRlZCwgc3VzcGVu
+ZC9yZXN1bWUgcHJvY2Vzcw0KPiA+PiA+PiA+PiA+IG1pZ2h0IGJlIGluZmx1ZW5jZWQgYnkgU2xl
+ZXBfTm90aWZpY2F0aW9uIGJ1c3kgdGltZSwgYW5kIHRoaXMNCj4gPj4gPj4gPj4gPiBzaG91bGQg
+bm90IGhhcHBlbiAtDQo+ID4+ID4+ID4+IHN1c3BlbmQvcmVzdW1lIHNob3VsZCBiZSBkb25lIGlu
+IHZlcnkgZmFzdCBhbmQgbm90IGJsb2NraW5nIG1hbm5lci4NCj4gPj4gPj4gPj4NCj4gPj4gPj4g
+Pj4gSSBmYWlsIHRvIHVuZGVyc3RhbmQgeW91ciBjb21tZW50IGhlcmUuDQo+ID4+ID4+ID4+DQo+
+ID4+ID4+ID4+IFBsZWFzZSB0ZWxsIG1lIGF0IHdoYXQgcG9pbnQocykgeW91ciB0aGluayBpdCBt
+YWtlIHNlbnNlIHRvDQo+ID4+ID4+ID4+IGlzc3VlIHRoZSBTTEVFUF9OT1RJRklDQVRJT04/IElm
+IHRoYXQgaXMgZHVyaW5nIHRoZSBzdXNwZW5kDQo+ID4+ID4+ID4+IHBoYXNlLCB0aGVuIGEgSFBJ
+IHJlcXVlc3QgY2FuJ3QgYmUgdHJpZ2dlcmVkLg0KPiA+PiA+PiA+DQo+ID4+ID4+ID4gSSB0aGlu
+ayBTTEVFUF9OT1RJRklDQVRJT04gc2hvdWxkIGJlIGlzc3VlZCBvbiBtbWNfcG1fbm90aWZ5KCkN
+Cj4gPj4gPj4gPiBjYWxsLCBvbiBQTV9TVVNQRU5EX1BSRVBBUkUgY2FzZS4NCj4gPj4gPj4NCj4g
+Pj4gPj4gU28sIGV4YWN0bHkgd2h5IGlzIHRoYXQgdG8gcHJlZmVyLCBjb21wYXJpbmcgZG9pbmcg
+aXQgaW4gc3lzdGVtIFBNDQo+ID4+ID4+IC0+c3VzcGVuZCgpIGNhbGxiYWNrPw0KPiA+PiA+DQo+
+ID4+ID4gQXNzdW1pbmcgdGhhdCBTTEVFUF9OT1RJRklDQVRJT04gbWF5IHRha2UgdGltZSAoZGVm
+aW5lZCBpbg0KPiA+PiA+IFNMRUVQX05PVElGSUNBVElPTl9USU1FIGJ5dGUgaW4gRVhUX0NTRCBb
+MjE2XSksIEkgdGhpbmsgaXQgaXMNCj4gPj4gPiBiZXR0ZXIgdG8gc2VuZCBpdCBmcm9tIHBtIG5v
+dGlmaWVyIC0gbW1jX3BtX25vdGlmeSgpLg0KPiA+Pg0KPiA+PiBJIGFzc3VtZSB5b3UgdGhpbmsg
+dGhhdCB5b3Ugd2lsbCAiZWFybiIgc29tZSBtaWxsaXNlY29uZHMgZG9pbmcgaXQgaW4NCj4gPj4g
+dGhpcyBwaGFzZSwgYnV0IEkgYW0gbm90IHNvIHN1cmUuDQo+ID4NCj4gPiBJIHdhcyB0aGlua2lu
+ZyBtYWlubHkgYWJvdXQgaG93IHRvIHByZXZlbnQgImJsb2NraW5nIiBkdXJpbmcNCj4gU2xlZXBf
+Tm90aWZpY2F0aW9uIHByb2Nlc3MuDQo+ID4NCj4gPj4NCj4gPj4gQWZ0ZXIgdGhlIFBNX1NVU1BF
+TkRfUFJFUEFSRSBub3RpZmllciwgd2Ugc3RpbGwgaGF2ZSB0aGUgbW1jIGJsb2NrDQo+ID4+IHF1
+ZXVlIG9wZW4gYW5kIGFyZSByZWFkeSB0byBzZXJ2ZSByZXF1ZXN0cy4gVGhlcmVmb3JlIEkgd291
+bGQgZXhwZWN0DQo+ID4+IHRoZSBTTEVFUF9OT1RJRklDQVRJT04gdG8gcG90ZW50aWFsbHkgYmUg
+aW50ZXJydXB0ZWQgYnkgdXNpbmcgSFBJLg0KPiA+DQo+ID4gUmlnaHQsIGFuZCB0aGlzIHdhcyBh
+IHJlYXNvbiBmb3IgYWRkaW5nIEhQSSBzdXBwb3J0IGR1cmluZyB0aGUNCj4gU2xlZXBfTm90aWZp
+Y2F0aW9uLg0KPiA+DQo+ID4+DQo+ID4+IFRoZW4gd2UgZW5kIHVwIHdpdGggdGhlIGZvbGxvd2lu
+ZyBzZXF1ZW5jZSBkdXJpbmcgdGhlIHN5c3RlbSBQTSBzbGVlcA0KPiBwaGFzZS4NCj4gPj4gMS4g
+SXNzdWUgU0xFRVBfTk9USUZJQ0FUSU9OLg0KPiA+PiAyLiBJbnRlcnJ1cHQgU0xFRVBfTk9USUZJ
+Q0FUSU9OLCB1c2luZyBIUEkuDQo+ID4+IDMuIFNlcnZlIGJsayByZXF1ZXN0DQo+ID4+IDQuIElz
+c3VlIFNMRUVQX05PVElGSUNBVElPTi4NCj4gPj4gNS4gSXNzdWUgU0xFRVAgKENNRDUpLg0KPiA+
+DQo+ID4gQ29ycmVjdCwgdGhpcyBpcyBhIHNlcXVlbmNlIHRoYXQgd2Ugc2VlIGFmdGVyIGFkZGlu
+ZyB0aGUgcGF0Y2guDQo+ID4NCj4gPj4gVGhhdCBzZWVtcyBsaWtlIGEgYmFkIGlkZWEgdG8gbWUu
+DQo+ID4NCj4gPiBDb3VsZCB5b3UgcGxlYXNlIGV4cGxhaW4gd2h5Pw0KPiA+IFdvdWxkIHlvdSBz
+dWdnZXN0IHRvIGNhbGwgU2xlZXBfTm90aWZpY2F0aW9uIGZyb20gU3VzcGVuZCBvbmx5Pw0KPiAN
+Cj4gU2luY2Ugb3RoZXJ3aXNlIHdlIG1heSBlbmQgdXAgaXNzdWluZyBTTEVFUF9OT1RJRklDQVRJ
+T04gbm90IG9ubHkgb25jZSwgYnV0DQo+IHR3aWNlIGR1cmluZyBhIHN5c3RlbSBQTSBzbGVlcCBz
+ZXF1ZW5jZS4gU28gdGhlbiB3ZSBhY3R1YWxseSBnZXQgYW4gaW5jcmVhc2VkDQo+IHN5c3RlbSBQ
+TSBzdXNwZW5kIHRpbWUuDQo+IA0KPiA+IFdoYXQgaWYgU2xlZXBfTm90aWZpY2F0aW9uIHdpbGwg
+dGFrZSBzZXZlcmFsIHNlY29uZHM/DQo+IA0KPiBZZXMsIHRoYXQgaG9ycmlibGUhIFlvdSBzaG91
+bGQgdGVsbCB5b3VyIGNvbGxlYWd1ZXMgZGVzaWduaW5nIEZUTHMgdG8gbWFrZSBzdXJlDQo+IHRo
+YXQgX25ldmVyXyBoYXBwZW5zLg0KDQpBZ3JlZSwgYnV0IHdlIG5lZWQgdG8gY29uc2lkZXIgYW5k
+IHRha2UgY2FyZSBvZiBhbGwgc3VjaCBjYXNlcyBpbiB0aGUgZHJpdmVyIHNpZGUuIA0KRGV2aWNl
+IG1pZ2h0IGJlIGJ1c3kgd2l0aCBpdHMgaW50ZXJuYWwgZ2FyYmFnZSBjb2xsZWN0aW9uLCBhbmQg
+YXMgc3BlYyBhbGxvd3MsIGl0DQp3aWxsIGNvbXBsZXRlIGl0IGluIGEgZ3JlYXQgbWFubmVyIGFm
+dGVyIGhvc3Qgc2VuZHMgUE9OIGNvbW1hbmQuDQogDQo+IA0KPiBBbHNvLCB0aGlzIG1ha2VzIG1l
+IHdvbmRlciBob3cgdGhpcyBraW5kIG9mIGZlYXR1cmUgZXZlciBjb3VsZCBtYWtlIGl0IGludG8g
+dGhlDQo+IEpFREVDIHNwZWNpZmljYXRpb24uDQo+IA0KPiBXaGF0IHdlIGhhZCBlYXJsaWVyIHdp
+dGggIkNNRDUgb25seSIgc2hvdWxkIG5ldmVyIGhhdmUgYmVlbiBjaGFuZ2VkLg0KPiANCj4gS2lu
+ZCByZWdhcmRzDQo+IFVmZmUNCg==
