@@ -1,89 +1,69 @@
-From: Suman Tripathi <stripathi@apm.com>
-Subject: [PATCH v2 1/2] arm64: dts: Add the arasan sdhc nodes in apm-storm.dtsi.
-Date: Mon, 30 Mar 2015 20:16:07 +0530
-Message-ID: <1427726768-17233-2-git-send-email-stripathi@apm.com>
-References: <1427726768-17233-1-git-send-email-stripathi@apm.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: Cleanup unused OF nodes while parsing for
+ child nodes
+Date: Mon, 30 Mar 2015 17:09:40 +0200
+Message-ID: <CAPDyKFrwzp5eXO3BwuguaNFpaZ09ZSMtA8_rKEGYn9xEPEpWUg@mail.gmail.com>
+References: <1427707141-3152-1-git-send-email-ulf.hansson@linaro.org>
+	<551951B0.7090704@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from denmail01-v4020.amcc.com ([192.195.68.30]:53885 "EHLO
-	denmail01.apm.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752839AbbC3Ork (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Mar 2015 10:47:40 -0400
-In-Reply-To: <1427726768-17233-1-git-send-email-stripathi@apm.com>
+Received: from mail-qg0-f50.google.com ([209.85.192.50]:36078 "EHLO
+	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752931AbbC3PJl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Mar 2015 11:09:41 -0400
+Received: by qgf60 with SMTP id 60so172694166qgf.3
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Mar 2015 08:09:40 -0700 (PDT)
+In-Reply-To: <551951B0.7090704@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: chris@printf.net, anton@enomsg.org, arnd@arndb.de
-Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ddutile@redhat.com, jcm@redhat.com, mlangsdo@redhat.com, patches@apm.com, Suman Tripathi <stripathi@apm.com>
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-This patch adds the arasan sdhc nodes to reuse the of-arasan
-driver for APM X-Gene SoC.
+On 30 March 2015 at 15:37, Hans de Goede <hdegoede@redhat.com> wrote:
+> Hi,
+>
+>
+> On 30-03-15 11:19, Ulf Hansson wrote:
+>>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> ---
+>>   drivers/mmc/core/core.c | 2 ++
+>>   1 file changed, 2 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index c296bc0..e6b0bdb 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1291,6 +1291,8 @@ struct device_node *mmc_of_find_child_device(struct
+>> mmc_host *host,
+>>         for_each_child_of_node(host->parent->of_node, node) {
+>>                 if (mmc_of_get_func_num(node) == func_num)
+>>                         return node;
+>> +               else
+>> +                       of_node_put(node);
+>>         }
+>>
+>>         return NULL;
+>>
+>
+> I don't think this is right, non of the other users of
+> for_each_child_of_node
+> do this, I think that rather then doing this we should be changing the
+> callers
 
-Signed-off-by: Suman Tripathi <stripathi@apm.com>
----
- arch/arm64/boot/dts/apm-storm.dtsi | 44 ++++++++++++++++++++++++++++++++++++++
- 1 file changed, 44 insertions(+)
+So, everybody don't follow the API. Cool. :-)
 
-diff --git a/arch/arm64/boot/dts/apm-storm.dtsi b/arch/arm64/boot/dts/apm-storm.dtsi
-index c5f0a47..fd1c142 100644
---- a/arch/arm64/boot/dts/apm-storm.dtsi
-+++ b/arch/arm64/boot/dts/apm-storm.dtsi
-@@ -144,6 +144,40 @@
- 				clock-output-names = "socplldiv2";
- 			};
- 
-+			ahbclk: ahbclk@1f2ac000 {
-+				compatible = "apm,xgene-device-clock";
-+				#clock-cells = <1>;
-+				clocks = <&socplldiv2 0>;
-+				reg = <0x0 0x1f2ac000 0x0 0x1000
-+					0x0 0x17000000 0x0 0x2000>;
-+				reg-names = "csr-reg", "div-reg";
-+				csr-offset = <0x0>;
-+				csr-mask = <0x1>;
-+				enable-offset = <0x8>;
-+				enable-mask = <0x1>;
-+				divider-offset = <0x164>;
-+				divider-width = <0x5>;
-+				divider-shift = <0x0>;
-+				clock-output-names = "ahbclk";
-+			};
-+
-+			sdioclk: sdioclk@1f2ac000 {
-+				compatible = "apm,xgene-device-clock";
-+				#clock-cells = <1>;
-+				clocks = <&socplldiv2 0>;
-+				reg = <0x0 0x1f2ac000 0x0 0x1000
-+					0x0 0x17000000 0x0 0x2000>;
-+				reg-names = "csr-reg", "div-reg";
-+				csr-offset = <0x0>;
-+				csr-mask = <0x2>;
-+				enable-offset = <0x8>;
-+				enable-mask = <0x2>;
-+				divider-offset = <0x178>;
-+				divider-width = <0x8>;
-+				divider-shift = <0x0>;
-+				clock-output-names = "sdioclk";
-+			};
-+
- 			qmlclk: qmlclk {
- 				compatible = "apm,xgene-device-clock";
- 				#clock-cells = <1>;
-@@ -282,6 +316,16 @@
- 			interrupts = <0x0 0x4c 0x4>;
- 		};
- 
-+		sdhc0: sdhc@1c000000 {
-+			device_type = "sdhc";
-+			compatible = "arasan,sdhci-8.9a";
-+			reg = <0x0 0x1c000000 0x0 0x100>;
-+			interrupts = <0x0 0x49 0x4>;
-+			dma-coherent;
-+			clock-names = "clk_xin", "clk_ahb";
-+			clocks = <&sdioclk 0>, <&ahbclk 0>;
-+		};
-+
- 		phy1: phy@1f21a000 {
- 			compatible = "apm,xgene-phy";
- 			reg = <0x0 0x1f21a000 0x0 0x100>;
--- 
-1.8.2.1
+> of mmc_of_find_child_device to do: of_node_get(), except for the call which
+> my "mmc: Add support for marking hpi as broken through devicetree" patch
+> adds,
+> as that is intended to only take a temporary reference.
+>
 
+In principle you are saying that the implementation of
+for_each_child_of_node() API needs to be adopted for how users
+actually use it, which means leave the of_node_get|put() to be done
+entirely by the caller, right?
+
+Kind regards
+Uffe
