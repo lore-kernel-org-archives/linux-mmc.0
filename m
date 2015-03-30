@@ -1,50 +1,57 @@
-From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 2/2] ARM: dts: sun5i: Add broken-hpi property
- for Utoo-P66 eMMC
-Date: Sun, 29 Mar 2015 20:09:35 +0200
-Message-ID: <1427652575-12642-2-git-send-email-hdegoede@redhat.com>
-References: <1427652575-12642-1-git-send-email-hdegoede@redhat.com>
-Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [GIT PULL] Update codes relevant to dw-mmc controller
+Date: Mon, 30 Mar 2015 09:44:44 +0900
+Message-ID: <55189C7C.50201@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBDRZXY4CYYORB2H74CUAKGQEBVIVM2I-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <1427652575-12642-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <http://groups.google.com/group/linux-sunxi/subscribe>
-To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:59215 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752558AbbC3ApC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Mar 2015 20:45:02 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0NM000A6X22LR0C0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 30 Mar 2015 09:44:45 +0900 (KST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Doug Anderson <dianders@chromium.org>, 'Chris Ball' <chris@printf.net>
 
-The eMMC on the A13 based Utoo-P66 tablet does not properly support hpi,
-and trying to enable it results in the eMMC not working, so add a child-node
-describing the eMMC, and set the broken-hpi property on it.
+Dear, Ulf.
 
-Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- arch/arm/boot/dts/sun5i-a13-utoo-p66.dts | 6 ++++++
- 1 file changed, 6 insertions(+)
+Sorry for updating too late..
+ASAP, I will request pull for patches of dw-mmc controller at next time.
+If needs anything, let me know, plz.
 
-diff --git a/arch/arm/boot/dts/sun5i-a13-utoo-p66.dts b/arch/arm/boot/dts/sun5i-a13-utoo-p66.dts
-index 6c9f5f3..5b572fa 100644
---- a/arch/arm/boot/dts/sun5i-a13-utoo-p66.dts
-+++ b/arch/arm/boot/dts/sun5i-a13-utoo-p66.dts
-@@ -150,6 +150,12 @@
- 	bus-width = <8>;
- 	non-removable;
- 	status = "okay";
-+
-+	mmmcard: mmccard@0 {
-+		reg = <0>;
-+		compatible = "mmc-card";
-+		broken-hpi;
-+	};
- };
- 
- &pio {
--- 
-2.3.4
+The following changes since commit 40de191e55585db80793e1c01d051fb539042d15:
+
+  mmc: core: Enable runtime PM management of host devices (2015-03-27 14:57:50 +0100)
+
+are available in the git repository at:
+
+  https://github.com/jh80chung/dw-mmc.git tags/dw_mmc-for-ulf
+
+for you to fetch changes up to 21db9218155ad2cb75cf0111b07da6cce7452d30:
+
+  mmc: dw_mmc: Don't try to enable the CD until we're sure we're not deferring (2015-03-30 01:29:23 +0900)
+
+----------------------------------------------------------------
+Main update:
+- Add the cmd11 timer to detect a timeout.
+- Fixes: bcafaf5470f0 ("mmc: dw_mmc: Only enable CD after setup and only if needed"
+
+----------------------------------------------------------------
+Doug Anderson (2):
+      mmc: dw_mmc: Add a timeout for sending CMD11
+      mmc: dw_mmc: Don't try to enable the CD until we're sure we're not deferring
+
+Jaehoon Chung (1):
+      mmc: dw_mmc: enable card read threshold when mode is HS400
+
+ drivers/mmc/host/dw_mmc.c  |   33 ++++++++++++++++++++++++++++++---
+ include/linux/mmc/dw_mmc.h |    2 ++
+ 2 files changed, 32 insertions(+), 3 deletions(-)
