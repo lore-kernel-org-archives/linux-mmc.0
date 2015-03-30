@@ -1,61 +1,83 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [GIT PULL] Update codes relevant to dw-mmc controller
-Date: Mon, 30 Mar 2015 11:25:31 +0200
-Message-ID: <CAPDyKFo9PeKaa+R32098F-9B71rXxZsznAJMUPVOjpgZGMbN2A@mail.gmail.com>
-References: <55189C7C.50201@samsung.com>
+Subject: Re: [PATCH 5/6] mmc: omap_hsmmc: simplify card/cover detect isr
+Date: Mon, 30 Mar 2015 11:34:31 +0200
+Message-ID: <CAPDyKFqsw9f+UKdQMyMZ3qDocC6YbwwjA8chJfWTH7+5+Gm=YQ@mail.gmail.com>
+References: <1425385698-6588-1-git-send-email-afenkart@gmail.com>
+	<1425385698-6588-6-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f49.google.com ([209.85.192.49]:34429 "EHLO
-	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751086AbbC3JZc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Mar 2015 05:25:32 -0400
-Received: by qgep97 with SMTP id p97so182243953qge.1
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Mar 2015 02:25:32 -0700 (PDT)
-In-Reply-To: <55189C7C.50201@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-omap-owner@vger.kernel.org>
+In-Reply-To: <1425385698-6588-6-git-send-email-afenkart@gmail.com>
+Sender: linux-omap-owner@vger.kernel.org
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, NeilBrown <neilb@suse.de>, Tony Lindgren <tony@atomide.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, Chris Ball <chris@printf.net>
 
-On 30 March 2015 at 02:44, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Dear, Ulf.
+On 3 March 2015 at 13:28, Andreas Fenkart <afenkart@gmail.com> wrote:
+> strip the card dectet logic from cover detect isr and vice versa
+> the generic mmc_gpio_cd_irqt isr, uses 200ms on removal/insertion,
+> hence that should be fine here as well
 >
-> Sorry for updating too late..
-> ASAP, I will request pull for patches of dw-mmc controller at next time.
-> If needs anything, let me know, plz.
+> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 
-Thanks Jaehoon! Pulled into my next branch.
+Thanks! Applied.
 
 Kind regards
 Uffe
 
+> ---
+>  drivers/mmc/host/omap_hsmmc.c | 27 +++------------------------
+>  1 file changed, 3 insertions(+), 24 deletions(-)
 >
-> The following changes since commit 40de191e55585db80793e1c01d051fb539042d15:
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index ed68e55..4f6fbe5 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1239,21 +1239,11 @@ static void omap_hsmmc_protect_card(struct omap_hsmmc_host *host)
+>  static irqreturn_t omap_hsmmc_cover_irq(int irq, void *dev_id)
+>  {
+>         struct omap_hsmmc_host *host = dev_id;
+> -       int carddetect;
 >
->   mmc: core: Enable runtime PM management of host devices (2015-03-27 14:57:50 +0100)
+>         sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
 >
-> are available in the git repository at:
+> -       if (host->card_detect) {
+> -               carddetect = host->card_detect(host->dev);
+> -       } else {
+> -               omap_hsmmc_protect_card(host);
+> -               carddetect = -ENOSYS;
+> -       }
+> -
+> -       if (carddetect)
+> -               mmc_detect_change(host->mmc, (HZ * 200) / 1000);
+> -       else
+> -               mmc_detect_change(host->mmc, (HZ * 50) / 1000);
+> +       omap_hsmmc_protect_card(host);
+> +       mmc_detect_change(host->mmc, (HZ * 200) / 1000);
+>         return IRQ_HANDLED;
+>  }
 >
->   https://github.com/jh80chung/dw-mmc.git tags/dw_mmc-for-ulf
+> @@ -1263,19 +1253,8 @@ static irqreturn_t omap_hsmmc_cover_irq(int irq, void *dev_id)
+>  static irqreturn_t omap_hsmmc_detect(int irq, void *dev_id)
+>  {
+>         struct omap_hsmmc_host *host = dev_id;
+> -       int carddetect;
+> -
+> -       if (host->card_detect)
+> -               carddetect = host->card_detect(host->dev);
+> -       else {
+> -               omap_hsmmc_protect_card(host);
+> -               carddetect = -ENOSYS;
+> -       }
 >
-> for you to fetch changes up to 21db9218155ad2cb75cf0111b07da6cce7452d30:
+> -       if (carddetect)
+> -               mmc_detect_change(host->mmc, (HZ * 200) / 1000);
+> -       else
+> -               mmc_detect_change(host->mmc, (HZ * 50) / 1000);
+> +       mmc_detect_change(host->mmc, (HZ * 200) / 1000);
+>         return IRQ_HANDLED;
+>  }
 >
->   mmc: dw_mmc: Don't try to enable the CD until we're sure we're not deferring (2015-03-30 01:29:23 +0900)
+> --
+> 2.1.4
 >
-> ----------------------------------------------------------------
-> Main update:
-> - Add the cmd11 timer to detect a timeout.
-> - Fixes: bcafaf5470f0 ("mmc: dw_mmc: Only enable CD after setup and only if needed"
->
-> ----------------------------------------------------------------
-> Doug Anderson (2):
->       mmc: dw_mmc: Add a timeout for sending CMD11
->       mmc: dw_mmc: Don't try to enable the CD until we're sure we're not deferring
->
-> Jaehoon Chung (1):
->       mmc: dw_mmc: enable card read threshold when mode is HS400
->
->  drivers/mmc/host/dw_mmc.c  |   33 ++++++++++++++++++++++++++++++---
->  include/linux/mmc/dw_mmc.h |    2 ++
->  2 files changed, 32 insertions(+), 3 deletions(-)
