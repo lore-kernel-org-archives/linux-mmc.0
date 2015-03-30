@@ -1,105 +1,59 @@
-From: Stefan Agner <stefan@agner.ch>
-Subject: [PATCH v2] mmc: sdhci-esdhc-imx: fix abort due to missing runtime PM
-Date: Mon, 30 Mar 2015 13:37:14 +0200
-Message-ID: <1427715434-20881-1-git-send-email-stefan@agner.ch>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH v2 8/8] ARM: STi: DT: STiH407: Add dt nodes for sdhci and
+ emmc.
+Date: Mon, 30 Mar 2015 12:37:51 +0100
+Message-ID: <20150330113751.GE9447@x1>
+References: <1424956227-18258-1-git-send-email-peter.griffin@linaro.org>
+ <1424956227-18258-9-git-send-email-peter.griffin@linaro.org>
+ <54F594F8.50306@st.com>
+ <20150330112357.GE21893@griffinp-ThinkPad-X1-Carbon-2nd>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.kmu-office.ch ([178.209.48.109]:55836 "EHLO
-	mail.kmu-office.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751659AbbC3LhU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Mar 2015 07:37:20 -0400
+Received: from mail-wg0-f45.google.com ([74.125.82.45]:35392 "EHLO
+	mail-wg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752241AbbC3Lh4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Mar 2015 07:37:56 -0400
+Received: by wgdm6 with SMTP id m6so171108814wgd.2
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Mar 2015 04:37:55 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <20150330112357.GE21893@griffinp-ThinkPad-X1-Carbon-2nd>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: chris@printf.net, ulf.hansson@linaro.org, anton@enomsg.org
-Cc: rmk+kernel@arm.linux.org.uk, b29396@freescale.com, shawn.guo@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, stefan@agner.ch
+To: Peter Griffin <peter.griffin@linaro.org>
+Cc: Maxime Coquelin <maxime.coquelin@st.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, chris@printf.net, ulf.hansson@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, peppe.cavallaro@st.com
 
-When entering suspend while the device is in runtime PM, the
-sdhci_(suspend|resume)_host function are called with disabled clocks.
-Since this functions access the SDHC host registers, this leads to an
-external abort on Vybrid SoC:
+On Mon, 30 Mar 2015, Peter Griffin wrote:
 
-[   37.772967] Unhandled fault: imprecise external abort (0x1c06) at 0x76f5f000
-[   37.780304] Internal error: : 1c06 [#1] ARM
-[   37.784670] Modules linked in:
-[   37.787908] CPU: 0 PID: 428 Comm: sh Not tainted 3.18.0-rc5-00119-geefd097-dirty #1540
-[   37.796142] task: 8e246c00 ti: 8ca6c000 task.ti: 8ca6c000
-[   37.801785] PC is at esdhc_writel_le+0x40/0xec
-[   37.806431] LR is at sdhci_set_card_detection+0xe0/0xe4
-[   37.811877] pc : [<803f0584>]    lr : [<803eaaa0>]    psr: 400f0013
-[   37.811877] sp : 8ca6dd28  ip : 00000001  fp : 8ca6dd3c
-[   37.823766] r10: 807a233c  r9 : 00000000  r8 : 8e8b7210
-[   37.829194] r7 : 802d8a08  r6 : 8082e928  r5 : 00000000  r4 : 00000002
-[   37.835974] r3 : 8ea34e90  r2 : 00000038  r1 : 00000000  r0 : 8ea32ac0
-...
+> Hi Maxime,
+>=20
+> On Tue, 03 Mar 2015, Maxime Coquelin wrote:
+>=20
+> >=20
+> > On 02/26/2015 02:10 PM, Peter Griffin wrote:
+> > >The nodes have been split to allow as much commonality as possible=
+=2E
+> > >The stih407 has a silicon bug with eMMC UHS modes (with top regs)
+> > >and as such doesn't have any of the uhs dt properties.
+> > >
+> > >Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+> > >---
+> > >  arch/arm/boot/dts/stih407-family.dtsi | 30 +++++++++++++++++++++=
++++++++++
+> > >  arch/arm/boot/dts/stih410-b2120.dts   | 10 ++++++++++
+> > >  arch/arm/boot/dts/stihxxx-b2120.dtsi  |  8 ++++++++
+> > >  3 files changed, 48 insertions(+)
+> > >
+> > >
+> > Maybe you could also add SD/eMMC support to the b2199 too?
+>=20
+> Yes ok, I will add support for stih418-b2199 in v3.
 
-Clocks need to be enabled to access the registers. Fix the issue by
-add driver specific implementation of suspend/resume functions which
-take care of clocks using runtime PM API.
+Is there any reason why this can't be actioned in a subsequent patch?
 
-Signed-off-by: Stefan Agner <stefan@agner.ch>
----
-The first version of this patch was part of a patchset sent back in
-december. While the second patch of the patchset back then is invalid,
-this fix is required to avoid the abort when switching into suspend
-mode on Vybrid SoC.
-
-During review of this patch I realized that my proposed solution to
-fix this in the suspend/resume functions in sdhci-pltfm.c is not a
-good idea since a lot of drivers use this functions without using the
-runtime PM APIs.
-
-Changes since v1:
-- Create new sdhci_esdhc_(suspend|resume) functions in favor of adding a
-  hard requirement for runtime PM on SDHC platform implementations
-
- drivers/mmc/host/sdhci-esdhc-imx.c | 28 +++++++++++++++++++++++++++-
- 1 file changed, 27 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 10ef824..84b3365 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1119,6 +1119,32 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
- }
- 
- #ifdef CONFIG_PM
-+static int sdhci_esdhc_suspend(struct device *dev)
-+{
-+	int ret;
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+
-+	pm_runtime_get_sync(dev);
-+	ret = sdhci_suspend_host(host);
-+	pm_runtime_mark_last_busy(dev);
-+	pm_runtime_put_autosuspend(dev);
-+
-+	return ret;
-+}
-+
-+static int sdhci_esdhc_resume(struct device *dev)
-+{
-+	int ret;
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+
-+	pm_runtime_get_sync(dev);
-+	ret = sdhci_resume_host(host);
-+	pm_runtime_mark_last_busy(dev);
-+	pm_runtime_put_autosuspend(dev);
-+
-+	return ret;
-+}
-+
- static int sdhci_esdhc_runtime_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
-@@ -1154,7 +1180,7 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
- #endif
- 
- static const struct dev_pm_ops sdhci_esdhc_pmops = {
--	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_suspend, sdhci_pltfm_resume)
-+	SET_SYSTEM_SLEEP_PM_OPS(sdhci_esdhc_suspend, sdhci_esdhc_resume)
- 	SET_RUNTIME_PM_OPS(sdhci_esdhc_runtime_suspend,
- 				sdhci_esdhc_runtime_resume, NULL)
- };
--- 
-2.3.3
-
+--=20
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
