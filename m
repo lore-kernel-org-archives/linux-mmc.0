@@ -1,96 +1,52 @@
-From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v3 5/9] mmc: sdhci-st: Add sdhci_st_set_uhs_signaling function.
-Date: Mon, 30 Mar 2015 15:39:58 +0100
-Message-ID: <1427726402-7513-6-git-send-email-peter.griffin@linaro.org>
-References: <1427726402-7513-1-git-send-email-peter.griffin@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1427726402-7513-1-git-send-email-peter.griffin@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, chris@printf.net, ulf.hansson@linaro.org
-Cc: peter.griffin@linaro.org, lee.jones@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, peppe.cavallaro@st.com
+From: Suman Tripathi <stripathi@apm.com>
+Subject: [PATCH v2 2/2] mmc: host: Add some quirks to be read from fdt in sdhci-pltm.c
+Date: Mon, 30 Mar 2015 20:16:08 +0530
+Message-ID: <1427726768-17233-3-git-send-email-stripathi@apm.com>
+References: <1427726768-17233-1-git-send-email-stripathi@apm.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from denmail01-v4020.amcc.com ([192.195.68.30]:53879 "EHLO
+	denmail01.apm.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752839AbbC3Or1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Mar 2015 10:47:27 -0400
+In-Reply-To: <1427726768-17233-1-git-send-email-stripathi@apm.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: chris@printf.net, anton@enomsg.org, arnd@arndb.de
+Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ddutile@redhat.com, jcm@redhat.com, mlangsdo@redhat.com, patches@apm.com, Suman Tripathi <stripathi@apm.com>
 
-To allow UHS modes to work properly we need to provide the st specific
-set_uhs_signaling callback function. This function differs from the
-generic sdhci_set_uhs_signaling callback in that we need to configure
-the correct delay depending on the UHS mode, and also set the V18_EN
-bit.
+This patch adds some quirks support to be read from fdt.
 
-Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
-Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
+Signed-off-by: Suman Tripathi <stripathi@apm.com>
 ---
- drivers/mmc/host/sdhci-st.c | 51 +++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 51 insertions(+)
+ drivers/mmc/host/sdhci-pltfm.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-index 1ce5a01..fc9565f 100644
---- a/drivers/mmc/host/sdhci-st.c
-+++ b/drivers/mmc/host/sdhci-st.c
-@@ -261,6 +261,56 @@ static int sdhci_st_set_dll_for_clock(struct sdhci_host *host)
- 	return ret;
- }
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index bef250e..9f6a4b9 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -85,6 +85,21 @@ void sdhci_get_of_property(struct platform_device *pdev)
  
-+static void sdhci_st_set_uhs_signaling(struct sdhci_host *host,
-+					unsigned int uhs)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	u16 ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	int ret = 0;
+ 		if (of_get_property(np, "broken-cd", NULL))
+ 			host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
++		
++		if (of_get_property(np, "delay-after-power", NULL))
++			host->quirks |= SDHCI_QUIRK_DELAY_AFTER_POWER;
 +
-+	/* Select Bus Speed Mode for host */
-+	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
-+	switch (uhs) {
-+	/*
-+	 * Set V18_EN -- UHS modes do not work without this.
-+	 * does not change signaling voltage
-+	 */
++		if (of_get_property(np, "no-hispd", NULL))
++			host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
 +
-+	case MMC_TIMING_UHS_SDR12:
-+		st_mmcss_set_static_delay(pdata->top_ioaddr);
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR12 | SDHCI_CTRL_VDD_180;
-+		break;
-+	case MMC_TIMING_UHS_SDR25:
-+		st_mmcss_set_static_delay(pdata->top_ioaddr);
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR25 | SDHCI_CTRL_VDD_180;
-+		break;
-+	case MMC_TIMING_UHS_SDR50:
-+		st_mmcss_set_static_delay(pdata->top_ioaddr);
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR50 | SDHCI_CTRL_VDD_180;
-+		ret = sdhci_st_set_dll_for_clock(host);
-+		break;
-+	case MMC_TIMING_UHS_SDR104:
-+	case MMC_TIMING_MMC_HS200:
-+		st_mmcss_set_static_delay(pdata->top_ioaddr);
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR104 | SDHCI_CTRL_VDD_180;
-+		ret =  sdhci_st_set_dll_for_clock(host);
-+		break;
-+	case MMC_TIMING_UHS_DDR50:
-+	case MMC_TIMING_MMC_DDR52:
-+		st_mmcss_set_static_delay(pdata->top_ioaddr);
-+		ctrl_2 |= SDHCI_CTRL_UHS_DDR50 | SDHCI_CTRL_VDD_180;
-+		break;
-+	}
++		if (of_get_property(np, "broken-adma", NULL))
++			host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
++		
++		if (of_get_property(np, "broken-dma", NULL))
++			host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
 +
-+	if (ret)
-+		dev_warn(mmc_dev(host->mmc), "Error setting dll for clock "
-+						"(uhs %d)\n", uhs);
-+
-+	dev_dbg(mmc_dev(host->mmc), "uhs %d, ctrl_2 %04X\n", uhs, ctrl_2);
-+
-+	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-+}
++		if (of_get_property(np, "no-cmd23", NULL))
++			host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
  
- static u32 sdhci_st_readl(struct sdhci_host *host, int reg)
- {
-@@ -284,6 +334,7 @@ static const struct sdhci_ops sdhci_st_ops = {
- 	.set_bus_width = sdhci_set_bus_width,
- 	.read_l = sdhci_st_readl,
- 	.reset = sdhci_reset,
-+	.set_uhs_signaling = sdhci_st_set_uhs_signaling,
- };
- 
- static const struct sdhci_pltfm_data sdhci_st_pdata = {
+ 		if (of_get_property(np, "no-1-8-v", NULL))
+ 			host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
 -- 
-1.9.1
+1.8.2.1
+
