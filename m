@@ -1,23 +1,26 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 5/6] mmc: omap_hsmmc: simplify card/cover detect isr
-Date: Mon, 30 Mar 2015 11:34:31 +0200
-Message-ID: <CAPDyKFqsw9f+UKdQMyMZ3qDocC6YbwwjA8chJfWTH7+5+Gm=YQ@mail.gmail.com>
+Subject: Re: [PATCH 6/6] mmc: omap_hsmmc: use generic slot-gpio isr to manage
+ card detect pin
+Date: Mon, 30 Mar 2015 11:34:46 +0200
+Message-ID: <CAPDyKFqu-ThZg2Qp7WaNf1F0fTj0Mty96M2LctJT2kWSHS+Y1A@mail.gmail.com>
 References: <1425385698-6588-1-git-send-email-afenkart@gmail.com>
-	<1425385698-6588-6-git-send-email-afenkart@gmail.com>
+	<1425385698-6588-7-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-omap-owner@vger.kernel.org>
-In-Reply-To: <1425385698-6588-6-git-send-email-afenkart@gmail.com>
-Sender: linux-omap-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f175.google.com ([209.85.216.175]:35852 "EHLO
+	mail-qc0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752503AbbC3Jer (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Mar 2015 05:34:47 -0400
+Received: by qcgx3 with SMTP id x3so8324152qcg.3
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Mar 2015 02:34:46 -0700 (PDT)
+In-Reply-To: <1425385698-6588-7-git-send-email-afenkart@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Andreas Fenkart <afenkart@gmail.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, NeilBrown <neilb@suse.de>, Tony Lindgren <tony@atomide.com>
-List-Id: linux-mmc@vger.kernel.org
 
 On 3 March 2015 at 13:28, Andreas Fenkart <afenkart@gmail.com> wrote:
-> strip the card dectet logic from cover detect isr and vice versa
-> the generic mmc_gpio_cd_irqt isr, uses 200ms on removal/insertion,
-> hence that should be fine here as well
->
 > Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 
 Thanks! Applied.
@@ -25,59 +28,49 @@ Thanks! Applied.
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/host/omap_hsmmc.c | 27 +++------------------------
->  1 file changed, 3 insertions(+), 24 deletions(-)
+>  drivers/mmc/host/omap_hsmmc.c | 13 -------------
+>  1 file changed, 13 deletions(-)
 >
 > diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index ed68e55..4f6fbe5 100644
+> index 4f6fbe5..0c3368e 100644
 > --- a/drivers/mmc/host/omap_hsmmc.c
 > +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1239,21 +1239,11 @@ static void omap_hsmmc_protect_card(struct omap_hsmmc_host *host)
->  static irqreturn_t omap_hsmmc_cover_irq(int irq, void *dev_id)
->  {
->         struct omap_hsmmc_host *host = dev_id;
-> -       int carddetect;
+> @@ -418,7 +418,6 @@ static inline int omap_hsmmc_have_reg(void)
 >
->         sysfs_notify(&host->mmc->class_dev.kobj, NULL, "cover_switch");
+>  #endif
 >
-> -       if (host->card_detect) {
-> -               carddetect = host->card_detect(host->dev);
-> -       } else {
-> -               omap_hsmmc_protect_card(host);
-> -               carddetect = -ENOSYS;
-> -       }
-> -
-> -       if (carddetect)
-> -               mmc_detect_change(host->mmc, (HZ * 200) / 1000);
-> -       else
-> -               mmc_detect_change(host->mmc, (HZ * 50) / 1000);
-> +       omap_hsmmc_protect_card(host);
-> +       mmc_detect_change(host->mmc, (HZ * 200) / 1000);
+> -static irqreturn_t omap_hsmmc_detect(int irq, void *dev_id);
+>  static irqreturn_t omap_hsmmc_cover_irq(int irq, void *dev_id);
+>
+>  static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
+> @@ -440,7 +439,6 @@ static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
+>                         return ret;
+>
+>                 host->card_detect = omap_hsmmc_card_detect;
+> -               mmc_gpio_set_cd_isr(mmc, omap_hsmmc_detect);
+>         }
+>
+>         if (gpio_is_valid(pdata->gpio_wp)) {
+> @@ -1247,17 +1245,6 @@ static irqreturn_t omap_hsmmc_cover_irq(int irq, void *dev_id)
 >         return IRQ_HANDLED;
 >  }
 >
-> @@ -1263,19 +1253,8 @@ static irqreturn_t omap_hsmmc_cover_irq(int irq, void *dev_id)
->  static irqreturn_t omap_hsmmc_detect(int irq, void *dev_id)
->  {
->         struct omap_hsmmc_host *host = dev_id;
-> -       int carddetect;
+> -/*
+> - * irq handler to notify the core about card insertion/removal
+> - */
+> -static irqreturn_t omap_hsmmc_detect(int irq, void *dev_id)
+> -{
+> -       struct omap_hsmmc_host *host = dev_id;
 > -
-> -       if (host->card_detect)
-> -               carddetect = host->card_detect(host->dev);
-> -       else {
-> -               omap_hsmmc_protect_card(host);
-> -               carddetect = -ENOSYS;
-> -       }
->
-> -       if (carddetect)
-> -               mmc_detect_change(host->mmc, (HZ * 200) / 1000);
-> -       else
-> -               mmc_detect_change(host->mmc, (HZ * 50) / 1000);
-> +       mmc_detect_change(host->mmc, (HZ * 200) / 1000);
->         return IRQ_HANDLED;
->  }
->
+> -       mmc_detect_change(host->mmc, (HZ * 200) / 1000);
+> -       return IRQ_HANDLED;
+> -}
+> -
+>  static void omap_hsmmc_dma_callback(void *param)
+>  {
+>         struct omap_hsmmc_host *host = param;
 > --
 > 2.1.4
 >
