@@ -1,69 +1,35 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Cleanup unused OF nodes while parsing for
- child nodes
-Date: Mon, 30 Mar 2015 17:09:40 +0200
-Message-ID: <CAPDyKFrwzp5eXO3BwuguaNFpaZ09ZSMtA8_rKEGYn9xEPEpWUg@mail.gmail.com>
-References: <1427707141-3152-1-git-send-email-ulf.hansson@linaro.org>
-	<551951B0.7090704@redhat.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Consider HLE errors to be data and command errors
+Date: Mon, 30 Mar 2015 08:47:14 -0700
+Message-ID: <CAD=FV=WFAZqAsXOqunt0fxw87M-FruwUrxuzW0MJsG6UvfSjzA@mail.gmail.com>
+References: <1426002490-2014-1-git-send-email-dianders@chromium.org>
+	<5502CA4E.9060401@samsung.com>
+	<CAD=FV=VX3ix-j4y95W1q8b-aVuVEN+4xsd8WLx2xcE7KPNJwRw@mail.gmail.com>
+	<5506707D.40708@samsung.com>
+	<55189F04.8000404@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f50.google.com ([209.85.192.50]:36078 "EHLO
-	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752931AbbC3PJl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Mar 2015 11:09:41 -0400
-Received: by qgf60 with SMTP id 60so172694166qgf.3
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Mar 2015 08:09:40 -0700 (PDT)
-In-Reply-To: <551951B0.7090704@redhat.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <55189F04.8000404@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 30 March 2015 at 15:37, Hans de Goede <hdegoede@redhat.com> wrote:
-> Hi,
+Jaehoon,
+
+On Sun, Mar 29, 2015 at 5:55 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Dear Doug,
 >
+> I'm considering to control HLE error..So holding this patch.
+> If this is absolutely necessary patch, let me know, plz.
 >
-> On 30-03-15 11:19, Ulf Hansson wrote:
->>
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->> ---
->>   drivers/mmc/core/core.c | 2 ++
->>   1 file changed, 2 insertions(+)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index c296bc0..e6b0bdb 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -1291,6 +1291,8 @@ struct device_node *mmc_of_find_child_device(struct
->> mmc_host *host,
->>         for_each_child_of_node(host->parent->of_node, node) {
->>                 if (mmc_of_get_func_num(node) == func_num)
->>                         return node;
->> +               else
->> +                       of_node_put(node);
->>         }
->>
->>         return NULL;
->>
->
-> I don't think this is right, non of the other users of
-> for_each_child_of_node
-> do this, I think that rather then doing this we should be changing the
-> callers
+> Best Regards,
+> Jaehoon Chung
 
-So, everybody don't follow the API. Cool. :-)
+Sounds OK.  I have certainly applied this locally and the driver isn't
+robust against insertions / removals without it, but once the card is
+inserted things are OK so it's probably not urgent that it be applied
+upstream.  Hopefully we can figure out a better solution...
 
-> of mmc_of_find_child_device to do: of_node_get(), except for the call which
-> my "mmc: Add support for marking hpi as broken through devicetree" patch
-> adds,
-> as that is intended to only take a temporary reference.
->
-
-In principle you are saying that the implementation of
-for_each_child_of_node() API needs to be adopted for how users
-actually use it, which means leave the of_node_get|put() to be done
-entirely by the caller, right?
-
-Kind regards
-Uffe
+-Doug
