@@ -1,62 +1,119 @@
 From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v3 6/9] mmc: sdhci-st: Update the quirks for this controller.
-Date: Mon, 30 Mar 2015 15:39:59 +0100
-Message-ID: <1427726402-7513-7-git-send-email-peter.griffin@linaro.org>
+Subject: [PATCH v3 3/9] mmc: sdhci-st: Add delay management functions for top registers (eMMC).
+Date: Mon, 30 Mar 2015 15:39:56 +0100
+Message-ID: <1427726402-7513-4-git-send-email-peter.griffin@linaro.org>
 References: <1427726402-7513-1-git-send-email-peter.griffin@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f176.google.com ([209.85.212.176]:35251 "EHLO
+	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753149AbbC3OkP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Mar 2015 10:40:15 -0400
+Received: by wicne17 with SMTP id ne17so34222768wic.0
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Mar 2015 07:40:14 -0700 (PDT)
 In-Reply-To: <1427726402-7513-1-git-send-email-peter.griffin@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com, chris@printf.net, ulf.hansson@linaro.org
 Cc: peter.griffin@linaro.org, lee.jones@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, peppe.cavallaro@st.com
-List-Id: linux-mmc@vger.kernel.org
 
-Some additional quirks need to be enabled now we support UHS
-modes. This avoids some spurious warnings like
+Due to the tight timing constraints in some UHS modes, it is required to have
+some delay management in the design. Two types of delay management are supported
+in the HW: -
 
-"Got data interrupt 0x00000002 even though no data operation was in progress"
+1) Static delay management
+2) Dynamic delay management
 
-Testing on stih410-b2120 board achieves the following speeds
-with HS200 eMMC card.
+NB: The delay management is only there when eMMC interface is selected.
 
-max-frequency = 200Mhz
-/dev/mmcblk0p1:
- Timing buffered disk reads: 270 MB in  3.02 seconds =  89.54 MB/sec
+1: Static delay management: is used to provide PVT dependent static delay on the
+clock/data lines to manage setup/hold requirements of the interface. The maximum
+delay possible is 3.25ns. These delays are PVT dependent, and thus delay values
+applied are not accurate and vary across provcess voltage and temperature range.
+Due to this these delays must not be used on the very time critical paths.
 
-max-frequency = 100Mhz
-root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
-/dev/mmcblk0p1:
- Timing buffered disk reads: 210 MB in  3.00 seconds =  70.00 MB/sec
+2. Dynamic delay locked loop (DLL): is used to provide dynamic delay management.
+The advantage of DLL is that it provides accurate & PVT indepedent delay.
 
-max-frequency = 50Mhz
-root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
-/dev/mmcblk0p1:
- Timing buffered disk reads: 118 MB in  3.00 seconds =  39.28 MB/sec
-
-This is better than the 3.10 kernel which achieves 77.59 MB/sec
-at 200Mhz clock (same board/soc/eMMC).
+The DLL is used to provide delay on the loopback clock on "Read Path" to capture
+read data reliably. On TX path the clock on which output data is transmitted is
+delayed, resulting in delay of TX data.
 
 Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
 Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
 ---
- drivers/mmc/host/sdhci-st.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-st.c | 59 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 59 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-index fc9565f..28ac38a 100644
+index 697c609..6c4c551 100644
 --- a/drivers/mmc/host/sdhci-st.c
 +++ b/drivers/mmc/host/sdhci-st.c
-@@ -340,7 +340,10 @@ static const struct sdhci_ops sdhci_st_ops = {
- static const struct sdhci_pltfm_data sdhci_st_pdata = {
- 	.ops = &sdhci_st_ops,
- 	.quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
--	    SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-+		SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-+		SDHCI_QUIRK_NO_HISPD_BIT,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+		SDHCI_QUIRK2_STOP_WITH_TC,
- };
+@@ -122,6 +122,65 @@ struct st_mmc_platform_data {
+ 		 ST_TOP_MMC_DLY_CTRL_ATUNE_NOT_CFG_DLY | \
+ 		 ST_TOP_MMC_START_DLL_LOCK)
  
- 
++/*
++ * For clock speeds greater than 90MHz, we need to check that the
++ * DLL procedure has finished before switching to ultra-speed modes.
++ */
++#define	CLK_TO_CHECK_DLL_LOCK	90000000
++
++static inline void st_mmcss_set_static_delay(void __iomem *ioaddr)
++{
++	if (!ioaddr)
++		return;
++
++	writel_relaxed(0x0, ioaddr + ST_TOP_MMC_DLY_CTRL);
++	writel_relaxed(ST_TOP_MMC_DLY_MAX,
++			ioaddr + ST_TOP_MMC_TX_CLK_DLY);
++}
++
++static inline void st_mmcss_set_dll(void __iomem *ioaddr)
++{
++	if (!ioaddr)
++		return;
++
++	writel_relaxed(ST_TOP_MMC_DYN_DLY_CONF,	ioaddr + ST_TOP_MMC_DLY_CTRL);
++	writel_relaxed(ST_TOP_MMC_TX_DLL_STEP_DLY_VALID,
++			ioaddr + ST_TOP_MMC_TX_DLL_STEP_DLY);
++}
++
++static int st_mmcss_lock_dll(void __iomem *ioaddr)
++{
++	unsigned long curr, value;
++	unsigned long finish = jiffies + HZ;
++
++	/* Checks if the DLL procedure is finished */
++	do {
++		curr = jiffies;
++		value = readl(ioaddr + ST_MMC_STATUS_R);
++		if (value & 0x1)
++			return 0;
++
++		cpu_relax();
++	} while (!time_after_eq(curr, finish));
++
++	return -EBUSY;
++}
++
++static int sdhci_st_set_dll_for_clock(struct sdhci_host *host)
++{
++	int ret = 0;
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct st_mmc_platform_data *pdata = pltfm_host->priv;
++
++	if (host->clock > CLK_TO_CHECK_DLL_LOCK) {
++		st_mmcss_set_dll(pdata->top_ioaddr);
++		ret = st_mmcss_lock_dll(host->ioaddr);
++	}
++
++	return ret;
++}
++
++
+ static u32 sdhci_st_readl(struct sdhci_host *host, int reg)
+ {
+ 	u32 ret;
 -- 
 1.9.1
+
