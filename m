@@ -1,35 +1,89 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: dw_mmc: Consider HLE errors to be data and command errors
-Date: Mon, 30 Mar 2015 08:47:14 -0700
-Message-ID: <CAD=FV=WFAZqAsXOqunt0fxw87M-FruwUrxuzW0MJsG6UvfSjzA@mail.gmail.com>
-References: <1426002490-2014-1-git-send-email-dianders@chromium.org>
-	<5502CA4E.9060401@samsung.com>
-	<CAD=FV=VX3ix-j4y95W1q8b-aVuVEN+4xsd8WLx2xcE7KPNJwRw@mail.gmail.com>
-	<5506707D.40708@samsung.com>
-	<55189F04.8000404@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Mylene JOSSERAND <josserand.mylene@gmail.com>
+Subject: [PATCH] mmc: sdhci-tegra: convert to use GPIO descriptors
+Date: Mon, 30 Mar 2015 23:39:25 +0200
+Message-ID: <1427751565-30377-1-git-send-email-josserand.mylene@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <55189F04.8000404@samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: ulf.hansson@linaro.org, swarren@wwwdotorg.org, thierry.reding@gmail.com, gnurou@gmail.com, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Mylene JOSSERAND <josserand.mylene@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Jaehoon,
+Modify the driver to handle GPIOs using the descriptor API.
 
-On Sun, Mar 29, 2015 at 5:55 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Dear Doug,
->
-> I'm considering to control HLE error..So holding this patch.
-> If this is absolutely necessary patch, let me know, plz.
->
-> Best Regards,
-> Jaehoon Chung
+Signed-off-by: Mylene JOSSERAND <josserand.mylene@gmail.com>
+---
+ drivers/mmc/host/sdhci-tegra.c |   32 ++++++++------------------------
+ 1 file changed, 8 insertions(+), 24 deletions(-)
 
-Sounds OK.  I have certainly applied this locally and the driver isn't
-robust against insertions / removals without it, but once the card is
-inserted things are OK so it's probably not urgent that it be applied
-upstream.  Hopefully we can figure out a better solution...
-
--Doug
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 93834ab..ad28b49 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -20,11 +20,10 @@
+ #include <linux/io.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
+-#include <linux/of_gpio.h>
+-#include <linux/gpio.h>
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/slot-gpio.h>
++#include <linux/gpio/consumer.h>
+ 
+ #include "sdhci-pltfm.h"
+ 
+@@ -49,7 +48,7 @@ struct sdhci_tegra_soc_data {
+ 
+ struct sdhci_tegra {
+ 	const struct sdhci_tegra_soc_data *soc_data;
+-	int power_gpio;
++	struct gpio_desc *power_gpio;
+ };
+ 
+ static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
+@@ -246,17 +245,6 @@ static const struct of_device_id sdhci_tegra_dt_match[] = {
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_tegra_dt_match);
+ 
+-static int sdhci_tegra_parse_dt(struct device *dev)
+-{
+-	struct device_node *np = dev->of_node;
+-	struct sdhci_host *host = dev_get_drvdata(dev);
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_tegra *tegra_host = pltfm_host->priv;
+-
+-	tegra_host->power_gpio = of_get_named_gpio(np, "power-gpios", 0);
+-	return mmc_of_parse(host->mmc);
+-}
+-
+ static int sdhci_tegra_probe(struct platform_device *pdev)
+ {
+ 	const struct of_device_id *match;
+@@ -286,19 +274,15 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+ 	tegra_host->soc_data = soc_data;
+ 	pltfm_host->priv = tegra_host;
+ 
+-	rc = sdhci_tegra_parse_dt(&pdev->dev);
++	rc = mmc_of_parse(host->mmc);
+ 	if (rc)
+ 		goto err_parse_dt;
+ 
+-	if (gpio_is_valid(tegra_host->power_gpio)) {
+-		rc = devm_gpio_request(&pdev->dev, tegra_host->power_gpio,
+-				       "sdhci_power");
+-		if (rc) {
+-			dev_err(mmc_dev(host->mmc),
+-				"failed to allocate power gpio\n");
+-			goto err_power_req;
+-		}
+-		gpio_direction_output(tegra_host->power_gpio, 1);
++	tegra_host->power_gpio = devm_gpiod_get_optional(&pdev->dev, "power",
++							 GPIOD_OUT_HIGH);
++	if (IS_ERR(tegra_host->power_gpio)) {
++		rc = PTR_ERR(tegra_host->power_gpio);
++		goto err_power_req;
+ 	}
+ 
+ 	clk = devm_clk_get(mmc_dev(host->mmc), NULL);
+-- 
+1.7.10.4
