@@ -1,89 +1,136 @@
-From: Mylene JOSSERAND <josserand.mylene@gmail.com>
-Subject: [PATCH] mmc: sdhci-tegra: convert to use GPIO descriptors
-Date: Mon, 30 Mar 2015 23:39:25 +0200
-Message-ID: <1427751565-30377-1-git-send-email-josserand.mylene@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, swarren@wwwdotorg.org, thierry.reding@gmail.com, gnurou@gmail.com, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Mylene JOSSERAND <josserand.mylene@gmail.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: [PATCH] mmc: core: Cleanup unused OF nodes while parsing for
+ child nodes
+Date: Tue, 31 Mar 2015 09:06:09 +0200
+Message-ID: <551A4761.2070803@redhat.com>
+References: <1427707141-3152-1-git-send-email-ulf.hansson@linaro.org>	<551951B0.7090704@redhat.com> <CAPDyKFrwzp5eXO3BwuguaNFpaZ09ZSMtA8_rKEGYn9xEPEpWUg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:60667 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750774AbbCaHGO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 31 Mar 2015 03:06:14 -0400
+In-Reply-To: <CAPDyKFrwzp5eXO3BwuguaNFpaZ09ZSMtA8_rKEGYn9xEPEpWUg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Modify the driver to handle GPIOs using the descriptor API.
+Hi,
 
-Signed-off-by: Mylene JOSSERAND <josserand.mylene@gmail.com>
----
- drivers/mmc/host/sdhci-tegra.c |   32 ++++++++------------------------
- 1 file changed, 8 insertions(+), 24 deletions(-)
+On 30-03-15 17:09, Ulf Hansson wrote:
+> On 30 March 2015 at 15:37, Hans de Goede <hdegoede@redhat.com> wrote:
+>> Hi,
+>>
+>>
+>> On 30-03-15 11:19, Ulf Hansson wrote:
+>>>
+>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>> ---
+>>>    drivers/mmc/core/core.c | 2 ++
+>>>    1 file changed, 2 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>>> index c296bc0..e6b0bdb 100644
+>>> --- a/drivers/mmc/core/core.c
+>>> +++ b/drivers/mmc/core/core.c
+>>> @@ -1291,6 +1291,8 @@ struct device_node *mmc_of_find_child_device(struct
+>>> mmc_host *host,
+>>>          for_each_child_of_node(host->parent->of_node, node) {
+>>>                  if (mmc_of_get_func_num(node) == func_num)
+>>>                          return node;
+>>> +               else
+>>> +                       of_node_put(node);
+>>>          }
+>>>
+>>>          return NULL;
+>>>
+>>
+>> I don't think this is right, non of the other users of
+>> for_each_child_of_node
+>> do this, I think that rather then doing this we should be changing the
+>> callers
+>
+> So, everybody don't follow the API. Cool. :-)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 93834ab..ad28b49 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -20,11 +20,10 @@
- #include <linux/io.h>
- #include <linux/of.h>
- #include <linux/of_device.h>
--#include <linux/of_gpio.h>
--#include <linux/gpio.h>
- #include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/slot-gpio.h>
-+#include <linux/gpio/consumer.h>
- 
- #include "sdhci-pltfm.h"
- 
-@@ -49,7 +48,7 @@ struct sdhci_tegra_soc_data {
- 
- struct sdhci_tegra {
- 	const struct sdhci_tegra_soc_data *soc_data;
--	int power_gpio;
-+	struct gpio_desc *power_gpio;
- };
- 
- static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
-@@ -246,17 +245,6 @@ static const struct of_device_id sdhci_tegra_dt_match[] = {
- };
- MODULE_DEVICE_TABLE(of, sdhci_tegra_dt_match);
- 
--static int sdhci_tegra_parse_dt(struct device *dev)
--{
--	struct device_node *np = dev->of_node;
--	struct sdhci_host *host = dev_get_drvdata(dev);
--	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_tegra *tegra_host = pltfm_host->priv;
--
--	tegra_host->power_gpio = of_get_named_gpio(np, "power-gpios", 0);
--	return mmc_of_parse(host->mmc);
--}
--
- static int sdhci_tegra_probe(struct platform_device *pdev)
- {
- 	const struct of_device_id *match;
-@@ -286,19 +274,15 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 	tegra_host->soc_data = soc_data;
- 	pltfm_host->priv = tegra_host;
- 
--	rc = sdhci_tegra_parse_dt(&pdev->dev);
-+	rc = mmc_of_parse(host->mmc);
- 	if (rc)
- 		goto err_parse_dt;
- 
--	if (gpio_is_valid(tegra_host->power_gpio)) {
--		rc = devm_gpio_request(&pdev->dev, tegra_host->power_gpio,
--				       "sdhci_power");
--		if (rc) {
--			dev_err(mmc_dev(host->mmc),
--				"failed to allocate power gpio\n");
--			goto err_power_req;
--		}
--		gpio_direction_output(tegra_host->power_gpio, 1);
-+	tegra_host->power_gpio = devm_gpiod_get_optional(&pdev->dev, "power",
-+							 GPIOD_OUT_HIGH);
-+	if (IS_ERR(tegra_host->power_gpio)) {
-+		rc = PTR_ERR(tegra_host->power_gpio);
-+		goto err_power_req;
- 	}
- 
- 	clk = devm_clk_get(mmc_dev(host->mmc), NULL);
--- 
-1.7.10.4
+Hmm, I don't know where (if anywhere) the API is specified, but if I look at
+the actual implementation in include/linux/of.h
+
+#define for_each_child_of_node(parent, child) \
+         for (child = of_get_next_child(parent, NULL); child != NULL; \
+              child = of_get_next_child(parent, child))
+
+And in drivers/of/base.c:
+
+static struct device_node *__of_get_next_child(const struct device_node *node,
+                                                 struct device_node *prev)
+{
+         struct device_node *next;
+
+         if (!node)
+                 return NULL;
+
+         next = prev ? prev->sibling : node->child;
+         for (; next; next = next->sibling)
+                 if (of_node_get(next))
+                         break;
+         of_node_put(prev);
+         return next;
+}
+
+(the non __ prefixed version takes a lock then calls into this one)
+
+Note the "of_node_put(prev);" in the of_get_next_child implementation,
+so yes we've a ref while going through the loop, but its gets freed
+on the "increment" part of the for.
+
+Also see e.g. include/linux/of.h :
+
+static inline int of_get_child_count(const struct device_node *np)
+{
+         struct device_node *child;
+         int num = 0;
+
+         for_each_child_of_node(np, child)
+                 num++;
+
+         return num;
+}
+
+Which I would expect to get things right.
+
+>> of mmc_of_find_child_device to do: of_node_get(), except for the call which
+>> my "mmc: Add support for marking hpi as broken through devicetree" patch
+>> adds,
+>> as that is intended to only take a temporary reference.
+>>
+>
+> In principle you are saying that the implementation of
+> for_each_child_of_node() API needs to be adopted for how users
+> actually use it, which means leave the of_node_get|put() to be done
+> entirely by the caller, right?
+
+What I'm saying is that, if I'm not reading the code the wrong way, that
+is already how the for_each_child_of_node() API works.
+
+As for the mmc subsys it seems that means that no changes are necessary,
+since we do:
+
+         for_each_child_of_node(host->parent->of_node, node) {
+                 if (mmc_of_get_func_num(node) == func_num)
+                         return node;
+         }
+
+So when we've found the right node, we jump out of the loop, returning
+the reference we have while in the loop.
+
+This does mean that my: "mmc: Add support for marking hpi as broken through devicetree"
+patch needs to be changed as I ended up calling mmc_of_find_child_device twice
+in there, since in that patch I need the of_node before mmc_add_card() gets called,
+so I'm leaking a reference there. I'll do a v2 fixing this.
+
+Regards,
+
+Hans
