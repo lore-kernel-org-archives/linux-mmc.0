@@ -1,101 +1,93 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-tegra: convert to use GPIO descriptors
-Date: Wed, 1 Apr 2015 12:59:43 +0200
-Message-ID: <CAPDyKFpo-c0iS5TCh5b4vGDNfp=57Pf3C16e9OpCLd=tmWBFpQ@mail.gmail.com>
-References: <1427751565-30377-1-git-send-email-josserand.mylene@gmail.com>
+Subject: Re: [PATCH] mmc: sleep notification
+Date: Wed, 1 Apr 2015 13:46:02 +0200
+Message-ID: <CAPDyKFo0S=5Xek_i4TRo-YAHxE5UKa4PLw_t7awrtdd_AtuTZQ@mail.gmail.com>
+References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
+	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFqLUBYUx9XrhnMeUtf8HU_=4PH_4Vf7m8mM-CT63jG24Q@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA1245B@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFrhfPZG4ZnqNTSEgbnpukw342gaeyi22OqAt6PA==E8ug@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA14148@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFrRAMRDNRX+zW-Odh+-ouZO7b0S4RvKQka+90D63uqBDQ@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA3FA3A@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFroXQ8CThExfbn3F+wMX6=6+-OgLawx2+RA8WC-Y-EKrw@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA5B753@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1427751565-30377-1-git-send-email-josserand.mylene@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mylene JOSSERAND <josserand.mylene@gmail.com>
-Cc: Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Alexandre Courbot <gnurou@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f41.google.com ([209.85.192.41]:35639 "EHLO
+	mail-qg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751711AbbDALqD convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Apr 2015 07:46:03 -0400
+Received: by qgh3 with SMTP id 3so39434513qgh.2
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Apr 2015 04:46:02 -0700 (PDT)
+In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED5333FA5B753@SACMBXIP01.sdcorp.global.sandisk.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-On 30 March 2015 at 23:39, Mylene JOSSERAND <josserand.mylene@gmail.com> wrote:
-> Modify the driver to handle GPIOs using the descriptor API.
+[...]
+
+>> Okay, so to me, I think the SLEEP notification needs to be sent as a=
+ part of the
+>> system PM suspend phase. And more exactly from the
+>> bus_ops->suspend() callback.
+>>
 >
-> Signed-off-by: Mylene JOSSERAND <josserand.mylene@gmail.com>
+> PM suspend phase is a right place for PON Sleep_Notification,
+> but it also the critical one and need to be completed as fast as poss=
+ible.
+>
+> If I'm not mistaken, during the PM Suspend, the user space is freezin=
+g.
+> Is it OK to let PON Sleep_Notification to be called at that stage?
 
-Thanks! Applied.
+Of course we shall strive in minimizing the system PM suspend time.
+Though to me, I think the system PM _resume_ time is of more
+importance.
+
+In this case we don't have any option. We need to issue the sleep
+notification as part of the the system PM suspend phase and that will
+unfortunate and likely increase the total system PM suspend time.
+
+>
+> Calling from the notifier_call (mmc_pm_notify()) will allow to comple=
+te
+> Sleep_Notification process before entering to the critical part - the=
+ Suspend.
+> Isn't it?
+
+Why is mmc_pm_notify() a less critical part?
+
+More importantly as stated several times, we can still get I/O
+requests after the mmc_pm_notify() phase and then the sleep
+notification needs to be interrupted and re-issued anyway.
+
+>
+>> In addition to that, we should be able improve the situation by also=
+ sending the
+>> SLEEP notification as part of an "idle operation". With "idle operat=
+ion" I mean
+>> the mmc block layer hasn=E2=80=99t received any new request for a wh=
+ile (the
+>> framework for this is already implemented by using runtime PM).
+>
+> OK, sounds like a good approach.
+> In case runtime PM is supported, we can call PON Sleep_Notification f=
+rom
+> mmc_runtime_suspend() during the "idle operation",
+> and then call it again during PM Suspend.
+
+Yes.
+
+If you plan to send a new version of $subject patch, please split into
+at least two patches. One which adds the system PM part and one which
+adds the "idle operation" part.
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sdhci-tegra.c |   32 ++++++++------------------------
->  1 file changed, 8 insertions(+), 24 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 93834ab..ad28b49 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -20,11 +20,10 @@
->  #include <linux/io.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> -#include <linux/of_gpio.h>
-> -#include <linux/gpio.h>
->  #include <linux/mmc/card.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/slot-gpio.h>
-> +#include <linux/gpio/consumer.h>
->
->  #include "sdhci-pltfm.h"
->
-> @@ -49,7 +48,7 @@ struct sdhci_tegra_soc_data {
->
->  struct sdhci_tegra {
->         const struct sdhci_tegra_soc_data *soc_data;
-> -       int power_gpio;
-> +       struct gpio_desc *power_gpio;
->  };
->
->  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
-> @@ -246,17 +245,6 @@ static const struct of_device_id sdhci_tegra_dt_match[] = {
->  };
->  MODULE_DEVICE_TABLE(of, sdhci_tegra_dt_match);
->
-> -static int sdhci_tegra_parse_dt(struct device *dev)
-> -{
-> -       struct device_node *np = dev->of_node;
-> -       struct sdhci_host *host = dev_get_drvdata(dev);
-> -       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -       struct sdhci_tegra *tegra_host = pltfm_host->priv;
-> -
-> -       tegra_host->power_gpio = of_get_named_gpio(np, "power-gpios", 0);
-> -       return mmc_of_parse(host->mmc);
-> -}
-> -
->  static int sdhci_tegra_probe(struct platform_device *pdev)
->  {
->         const struct of_device_id *match;
-> @@ -286,19 +274,15 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->         tegra_host->soc_data = soc_data;
->         pltfm_host->priv = tegra_host;
->
-> -       rc = sdhci_tegra_parse_dt(&pdev->dev);
-> +       rc = mmc_of_parse(host->mmc);
->         if (rc)
->                 goto err_parse_dt;
->
-> -       if (gpio_is_valid(tegra_host->power_gpio)) {
-> -               rc = devm_gpio_request(&pdev->dev, tegra_host->power_gpio,
-> -                                      "sdhci_power");
-> -               if (rc) {
-> -                       dev_err(mmc_dev(host->mmc),
-> -                               "failed to allocate power gpio\n");
-> -                       goto err_power_req;
-> -               }
-> -               gpio_direction_output(tegra_host->power_gpio, 1);
-> +       tegra_host->power_gpio = devm_gpiod_get_optional(&pdev->dev, "power",
-> +                                                        GPIOD_OUT_HIGH);
-> +       if (IS_ERR(tegra_host->power_gpio)) {
-> +               rc = PTR_ERR(tegra_host->power_gpio);
-> +               goto err_power_req;
->         }
->
->         clk = devm_clk_get(mmc_dev(host->mmc), NULL);
-> --
-> 1.7.10.4
->
