@@ -1,93 +1,129 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sleep notification
-Date: Wed, 1 Apr 2015 13:46:02 +0200
-Message-ID: <CAPDyKFo0S=5Xek_i4TRo-YAHxE5UKa4PLw_t7awrtdd_AtuTZQ@mail.gmail.com>
-References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
-	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFqLUBYUx9XrhnMeUtf8HU_=4PH_4Vf7m8mM-CT63jG24Q@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA1245B@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFrhfPZG4ZnqNTSEgbnpukw342gaeyi22OqAt6PA==E8ug@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA14148@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFrRAMRDNRX+zW-Odh+-ouZO7b0S4RvKQka+90D63uqBDQ@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA3FA3A@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFroXQ8CThExfbn3F+wMX6=6+-OgLawx2+RA8WC-Y-EKrw@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA5B753@SACMBXIP01.sdcorp.global.sandisk.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V4 01/15] mmc: host: Add facility to support re-tuning
+Date: Wed, 01 Apr 2015 14:47:54 +0300
+Message-ID: <551BDAEA.20405@intel.com>
+References: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>	<1427489863-9050-2-git-send-email-adrian.hunter@intel.com> <CAPDyKFrs4X+nDDkikUNSO5uz+Wsoz3TmkLJ9RwvvdjYqd8+Ygg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f41.google.com ([209.85.192.41]:35639 "EHLO
-	mail-qg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751711AbbDALqD convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Apr 2015 07:46:03 -0400
-Received: by qgh3 with SMTP id 3so39434513qgh.2
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Apr 2015 04:46:02 -0700 (PDT)
-In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED5333FA5B753@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mga01.intel.com ([192.55.52.88]:53098 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751933AbbDALuI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 1 Apr 2015 07:50:08 -0400
+In-Reply-To: <CAPDyKFrs4X+nDDkikUNSO5uz+Wsoz3TmkLJ9RwvvdjYqd8+Ygg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-[...]
-
->> Okay, so to me, I think the SLEEP notification needs to be sent as a=
- part of the
->> system PM suspend phase. And more exactly from the
->> bus_ops->suspend() callback.
+On 01/04/15 12:50, Ulf Hansson wrote:
+> On 27 March 2015 at 21:57, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> Currently, there is core support for tuning during
+>> initialization. There can also be a need to re-tune
+>> periodically (e.g. sdhci) or to re-tune after the
+>> host controller is powered off (e.g. after PM
+>> runtime suspend / resume) or to re-tune in response
+>> to CRC errors.
 >>
->
-> PM suspend phase is a right place for PON Sleep_Notification,
-> but it also the critical one and need to be completed as fast as poss=
-ible.
->
-> If I'm not mistaken, during the PM Suspend, the user space is freezin=
-g.
-> Is it OK to let PON Sleep_Notification to be called at that stage?
+>> The main requirements for re-tuning are:
+> 
+> It's a bit hard to follow why these requirements.
 
-Of course we shall strive in minimizing the system PM suspend time.
-Though to me, I think the system PM _resume_ time is of more
-importance.
+Yes they are driven by SDHCI requirements.
 
-In this case we don't have any option. We need to issue the sleep
-notification as part of the the system PM suspend phase and that will
-unfortunate and likely increase the total system PM suspend time.
+> 
+> I am giving some comments below, also for my own reference. Please
+> tell me if I am way off.
+> 
+>>   - ability to enable / disable re-tuning
+> 
+> Handled internally by the mmc core.
 
->
-> Calling from the notifier_call (mmc_pm_notify()) will allow to comple=
-te
-> Sleep_Notification process before entering to the critical part - the=
- Suspend.
-> Isn't it?
+The host controller driver enables re-tuning based on whether the host
+controller requires it for that transfer mode. For example, only the SDHCI
+host controller knows if tuning is required for SDR50 mode according to the
+SDHCI capability register bit 45.
 
-Why is mmc_pm_notify() a less critical part?
+> 
+> Or maybe SDIO func drivers needs an API to control this?
 
-More importantly as stated several times, we can still get I/O
-requests after the mmc_pm_notify() phase and then the sleep
-notification needs to be interrupted and re-issued anyway.
+No - it is for the host controller drivers.
 
->
->> In addition to that, we should be able improve the situation by also=
- sending the
->> SLEEP notification as part of an "idle operation". With "idle operat=
-ion" I mean
->> the mmc block layer hasn=E2=80=99t received any new request for a wh=
-ile (the
->> framework for this is already implemented by using runtime PM).
->
-> OK, sounds like a good approach.
-> In case runtime PM is supported, we can call PON Sleep_Notification f=
-rom
-> mmc_runtime_suspend() during the "idle operation",
-> and then call it again during PM Suspend.
+> 
+>>   - ability to flag that re-tuning is needed
+> 
+> Both from mmc core and mmc host point of view.
 
-Yes.
+At the moment only the host controller driver flags re-tuning is needed.
 
-If you plan to send a new version of $subject patch, please split into
-at least two patches. One which adds the system PM part and one which
-adds the "idle operation" part.
+> 
+>>   - ability to re-tune before any request
+> 
+> Internal mechanism by the core.
 
-Kind regards
-Uffe
+Yes
+
+> 
+>>   - ability to hold off re-tuning if the card is busy
+> 
+> What do you mean by "card is busy"?
+
+I guess, more accurately, any time the card is in a state that is incapable
+of supporting re-tuning. For example:
+	- DAT0 busy
+	- between dependent commands like erase start, end, etc
+	- card is asleep
+Also SDIO cards can have a custom sleep state where tuning won't work.
+
+> Is this requirement due to that the re-tune timer may complete at any
+> point, which then flags that a re-tune is needed?
+
+Primarily. But control is also needed when handling recovery. Or in the SDIO
+custom sleep case.
+
+There is also SDHCI re-tuning modes 2 and 3 (presently not supported) where
+the host controller itself indicates that re-tuning is needed via the
+present state and interrupt status registers.
+
+> 
+>>   - ability to hold off re-tuning if re-tuning is in
+>>   progress
+> 
+> This I don't understand. How can a re-tune sequence be triggered when
+> there is already a request ongoing towards the host. I mean the host
+> is claimed during the re-tuning process, so why do we need one more
+> layer of protection?
+
+This is primarily for safety. We shouldn't have to think about what would
+happen if the need_retune flag is set at an inopportune time.
+
+> 
+>>   - ability to run a re-tuning timer
+> 
+> As we discussed earlier, it's not obvious when it make sense to run this timer.
+> 
+> For the SDIO case, we should likely run it all the time, since we want
+> to prevent I/O errors as long as possible.
+> 
+> For MMC/SD, I would rather see that we perform re-tune as a part of an
+> "idle operation" and not from a timer (yes I know about the SDHCI
+> spec, but it doesn't make sense). We can do this because we are able
+> to re-cover from I/O errors (re-trying when getting CRC errors for
+> example).
+
+It makes sense to attempt to re-tune before CRC errors occur. If the
+hardware vendor has gone to the trouble to determine when that might be,
+then it makes sense to use that timeout. It is surely an approximation
+(SDHCI only has values in powers-of-2 with units of seconds) but it seems
+unreasonable to use a completely different value.
+
+Doing it in the idle operation would not work because we would then runtime
+suspend and just have to do it again after resuming.
+
+> 
+> I will continue to review the rest of series in more detail.
+
+Thank you! :-)
+
+
