@@ -1,132 +1,26 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V4 03/15] mmc: core: Add support for re-tuning before each request
-Date: Wed, 1 Apr 2015 12:13:56 +0200
-Message-ID: <CAPDyKFpxZ5mvy2Q+s62E0AadoUYvbtYLikxX4PGQf6M_0bBevA@mail.gmail.com>
-References: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>
-	<1427489863-9050-4-git-send-email-adrian.hunter@intel.com>
+From: Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] mmc: sdhci-tegra: convert to use GPIO descriptors
+Date: Wed, 1 Apr 2015 19:43:34 +0900
+Message-ID: <CAAVeFuKNB_W8du4Cxr3cTtFMGUBxp1m4bLmN0+DhNqvR+p47+w@mail.gmail.com>
+References: <1427751565-30377-1-git-send-email-josserand.mylene@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f47.google.com ([209.85.192.47]:34258 "EHLO
-	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750848AbbDAKN4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Apr 2015 06:13:56 -0400
-Received: by qgep97 with SMTP id p97so37922538qge.1
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Apr 2015 03:13:56 -0700 (PDT)
-In-Reply-To: <1427489863-9050-4-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1427751565-30377-1-git-send-email-josserand.mylene-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mylene JOSSERAND <josserand.mylene-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-On 27 March 2015 at 21:57, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> At the start of each request, re-tune if needed and
-> then hold off re-tuning again until the request is done.
->
-> Note that though there is one function that starts
-> requests (mmc_start_request) there are two that wait for
-> the request to be done (mmc_wait_for_req_done and
-> mmc_wait_for_data_req_done).  Also note that
-> mmc_wait_for_data_req_done can return even when the
-> request is not done (which allows the block driver
-> to prepare a newly arrived request while still
-> waiting for the previous request).
->
-> This patch ensures re-tuning is held for the duration
-> of a request.  Subsequent patches will also hold
-> re-tuning at other times when it might cause a
-> conflict.
+On Tue, Mar 31, 2015 at 6:39 AM, Mylene JOSSERAND
+<josserand.mylene-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> Modify the driver to handle GPIOs using the descriptor API.
 
-How about holding of re-tune from __mmc_claim_host() (after
-pm_runtime_get_sync() ) -> mmc_release_host(). Would that work? If so,
-that would simplify a lot around this.
+Reviewed-by: Alexandre Courbot <acourbot-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Tested-by: Alexandre Courbot <acourbot-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-Kind regards
-Uffe
-
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->  drivers/mmc/core/core.c | 32 +++++++++++++++++++++++++-------
->  1 file changed, 25 insertions(+), 7 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 2679264..bb50d82 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -186,12 +186,29 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
->
->  EXPORT_SYMBOL(mmc_request_done);
->
-> +static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
-> +{
-> +       int err;
-> +
-> +       /* Assumes host controller has been runtime resumed by mmc_claim_host */
-> +       err = mmc_retune(host);
-> +       if (err) {
-> +               mrq->cmd->error = err;
-> +               mmc_request_done(host, mrq);
-> +               return;
-> +       }
-> +
-> +       host->ops->request(host, mrq);
-> +}
-> +
->  static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
->  {
->  #ifdef CONFIG_MMC_DEBUG
->         unsigned int i, sz;
->         struct scatterlist *sg;
->  #endif
-> +       mmc_retune_hold(host);
-> +
->         if (mmc_card_removed(host->card))
->                 return -ENOMEDIUM;
->
-> @@ -252,7 +269,7 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
->         }
->         mmc_host_clk_hold(host);
->         led_trigger_event(host->led, LED_FULL);
-> -       host->ops->request(host, mrq);
-> +       __mmc_start_request(host, mrq);
->
->         return 0;
->  }
-> @@ -422,17 +439,16 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
->                                         cmd->opcode, cmd->error);
->                                 cmd->retries--;
->                                 cmd->error = 0;
-> -                               host->ops->request(host, mrq);
-> +                               __mmc_start_request(host, mrq);
->                                 continue; /* wait for done/new event again */
->                         }
->                 } else if (context_info->is_new_req) {
->                         context_info->is_new_req = false;
-> -                       if (!next_req) {
-> -                               err = MMC_BLK_NEW_REQUEST;
-> -                               break; /* return err */
-> -                       }
-> +                       if (!next_req)
-> +                               return MMC_BLK_NEW_REQUEST;
->                 }
->         }
-> +       mmc_retune_release(host);
->         return err;
->  }
->
-> @@ -471,8 +487,10 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
->                          mmc_hostname(host), cmd->opcode, cmd->error);
->                 cmd->retries--;
->                 cmd->error = 0;
-> -               host->ops->request(host, mrq);
-> +               __mmc_start_request(host, mrq);
->         }
-> +
-> +       mmc_retune_release(host);
->  }
->
->  /**
-> --
-> 1.9.1
->
+Both the eMMC (not using power GPIO) and SD slot (using power GPIO) of
+my Jetson are happy with this patch. While reviewing it I also noticed
+that it improves error handling: any error returned by
+of_get_named_gpio(), including -EPROBE_DEFER, were ignored and and
+driver would successfully probe without powering the controller.
