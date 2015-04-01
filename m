@@ -1,73 +1,65 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [PATCH] mmc: sleep notification
-Date: Tue, 31 Mar 2015 16:22:58 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333FA5B753@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
-	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFqLUBYUx9XrhnMeUtf8HU_=4PH_4Vf7m8mM-CT63jG24Q@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA1245B@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFrhfPZG4ZnqNTSEgbnpukw342gaeyi22OqAt6PA==E8ug@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA14148@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFrRAMRDNRX+zW-Odh+-ouZO7b0S4RvKQka+90D63uqBDQ@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA3FA3A@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAPDyKFroXQ8CThExfbn3F+wMX6=6+-OgLawx2+RA8WC-Y-EKrw@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V4 00/15] mmc: host: Add facility to support re-tuning
+Date: Wed, 01 Apr 2015 09:21:47 +0300
+Message-ID: <551B8E7B.9020605@intel.com>
+References: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0096.outbound.protection.outlook.com ([157.56.111.96]:3040
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751271AbbCaQ5z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 31 Mar 2015 12:57:55 -0400
-In-Reply-To: <CAPDyKFroXQ8CThExfbn3F+wMX6=6+-OgLawx2+RA8WC-Y-EKrw@mail.gmail.com>
-Content-Language: en-US
+Received: from mga09.intel.com ([134.134.136.24]:63532 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751302AbbDAGXv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 1 Apr 2015 02:23:51 -0400
+In-Reply-To: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-SGkgVWxmLA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5z
-c29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogRnJpZGF5LCBNYXJj
-aCAyNywgMjAxNSAzOjU3IFBNDQo+IFRvOiBBbGV4IExlbWJlcmcNCj4gQ2M6IEF2aSBTaGNoaXNs
-b3dza2k7IGxpbnV4LW1tYzsgQ2hyaXMgQmFsbA0KPiBTdWJqZWN0OiBSZTogW1BBVENIXSBtbWM6
-IHNsZWVwIG5vdGlmaWNhdGlvbg0KPiANCj4gWy4uLl0NCj4gDQo+ID4+ID4gV2hhdCBpZiBTbGVl
-cF9Ob3RpZmljYXRpb24gd2lsbCB0YWtlIHNldmVyYWwgc2Vjb25kcz8NCj4gPj4NCj4gPj4gWWVz
-LCB0aGF0IGhvcnJpYmxlISBZb3Ugc2hvdWxkIHRlbGwgeW91ciBjb2xsZWFndWVzIGRlc2lnbmlu
-ZyBGVExzIHRvDQo+ID4+IG1ha2Ugc3VyZSB0aGF0IF9uZXZlcl8gaGFwcGVucy4NCj4gPg0KPiA+
-IEFncmVlLCBidXQgd2UgbmVlZCB0byBjb25zaWRlciBhbmQgdGFrZSBjYXJlIG9mIGFsbCBzdWNo
-IGNhc2VzIGluIHRoZSBkcml2ZXINCj4gc2lkZS4NCj4gPiBEZXZpY2UgbWlnaHQgYmUgYnVzeSB3
-aXRoIGl0cyBpbnRlcm5hbCBnYXJiYWdlIGNvbGxlY3Rpb24sIGFuZCBhcyBzcGVjDQo+ID4gYWxs
-b3dzLCBpdCB3aWxsIGNvbXBsZXRlIGl0IGluIGEgZ3JlYXQgbWFubmVyIGFmdGVyIGhvc3Qgc2Vu
-ZHMgUE9OIGNvbW1hbmQuDQo+ID4NCj4gDQo+IE9rYXksIHNvIHRvIG1lLCBJIHRoaW5rIHRoZSBT
-TEVFUCBub3RpZmljYXRpb24gbmVlZHMgdG8gYmUgc2VudCBhcyBhIHBhcnQgb2YgdGhlDQo+IHN5
-c3RlbSBQTSBzdXNwZW5kIHBoYXNlLiBBbmQgbW9yZSBleGFjdGx5IGZyb20gdGhlDQo+IGJ1c19v
-cHMtPnN1c3BlbmQoKSBjYWxsYmFjay4NCj4gDQoNClBNIHN1c3BlbmQgcGhhc2UgaXMgYSByaWdo
-dCBwbGFjZSBmb3IgUE9OIFNsZWVwX05vdGlmaWNhdGlvbiwNCmJ1dCBpdCBhbHNvIHRoZSBjcml0
-aWNhbCBvbmUgYW5kIG5lZWQgdG8gYmUgY29tcGxldGVkIGFzIGZhc3QgYXMgcG9zc2libGUuDQoN
-CklmIEknbSBub3QgbWlzdGFrZW4sIGR1cmluZyB0aGUgUE0gU3VzcGVuZCwgdGhlIHVzZXIgc3Bh
-Y2UgaXMgZnJlZXppbmcuDQpJcyBpdCBPSyB0byBsZXQgUE9OIFNsZWVwX05vdGlmaWNhdGlvbiB0
-byBiZSBjYWxsZWQgYXQgdGhhdCBzdGFnZT8NCg0KQ2FsbGluZyBmcm9tIHRoZSBub3RpZmllcl9j
-YWxsIChtbWNfcG1fbm90aWZ5KCkpIHdpbGwgYWxsb3cgdG8gY29tcGxldGUgDQpTbGVlcF9Ob3Rp
-ZmljYXRpb24gcHJvY2VzcyBiZWZvcmUgZW50ZXJpbmcgdG8gdGhlIGNyaXRpY2FsIHBhcnQgLSB0
-aGUgU3VzcGVuZC4NCklzbid0IGl0Pw0KDQo+IEluIGFkZGl0aW9uIHRvIHRoYXQsIHdlIHNob3Vs
-ZCBiZSBhYmxlIGltcHJvdmUgdGhlIHNpdHVhdGlvbiBieSBhbHNvIHNlbmRpbmcgdGhlDQo+IFNM
-RUVQIG5vdGlmaWNhdGlvbiBhcyBwYXJ0IG9mIGFuICJpZGxlIG9wZXJhdGlvbiIuIFdpdGggImlk
-bGUgb3BlcmF0aW9uIiBJIG1lYW4NCj4gdGhlIG1tYyBibG9jayBsYXllciBoYXNu4oCZdCByZWNl
-aXZlZCBhbnkgbmV3IHJlcXVlc3QgZm9yIGEgd2hpbGUgKHRoZQ0KPiBmcmFtZXdvcmsgZm9yIHRo
-aXMgaXMgYWxyZWFkeSBpbXBsZW1lbnRlZCBieSB1c2luZyBydW50aW1lIFBNKS4NCg0KT0ssIHNv
-dW5kcyBsaWtlIGEgZ29vZCBhcHByb2FjaC4gDQpJbiBjYXNlIHJ1bnRpbWUgUE0gaXMgc3VwcG9y
-dGVkLCB3ZSBjYW4gY2FsbCBQT04gU2xlZXBfTm90aWZpY2F0aW9uIGZyb20gDQptbWNfcnVudGlt
-ZV9zdXNwZW5kKCkgZHVyaW5nIHRoZSAiaWRsZSBvcGVyYXRpb24iLA0KYW5kIHRoZW4gY2FsbCBp
-dCBhZ2FpbiBkdXJpbmcgUE0gU3VzcGVuZC4NCg0KPiANCj4gU28gaWYgdGhlIFNMRUVQIG5vdGlm
-aWNhdGlvbiB3YXMgc2VudCBkdXJpbmcgdGhlICJpZGxlIG9wZXJhdGlvbiIgYW5kIG5vIG5ldw0K
-PiByZXF1ZXN0IHdhcyBuZWVkZWQgZHVyaW5nIHRoZSBzeXN0ZW0gUE0gc3VzcGVuZCBwaGFzZSB3
-ZSB3b3VsZG4ndCBoYXZlIHRvDQo+IHdha2UgdXAgdGhlIGNhcmQgYWdhaW4gdXNpbmcgSFBJLCBi
-dXQgaW5zdGVhZCBqdXN0IGxlYXZlIGl0ICJzbGVlcGluZyIgYW5kIHNlbmQNCj4gQ01ENS4NCj4g
-DQo+IFN0aWxsLCB0aGVyZSB3b3VsZCBiZSBubyBndWFyYW50ZWVzIHRoYXQgImlkbGUgb3BlcmF0
-aW9ucyIgaXMgZXhlY3V0ZWQgYmVmb3JlIGENCj4gc3lzdGVtIFBNIHN1c3BlbmQgcGhhc2Ugc3Rh
-cnRzLiBTbyB0aGVyZSBhcmUgbm8gd2F5IHdlIGNhbiBpbXByb3ZlIHRoZQ0KPiB3b3JzdCBjYXNl
-IHNjZW5hcmlvLg0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg==
+On 27/03/15 22:57, Adrian Hunter wrote:
+> Hi
+> 
+> Here is V4 of some patches to move re-tuning support
+> out of sdhci and into the core, and add support for HS400
+> re-tuning.
+> 
+> Currently sdhci does re-tuning transparently by
+> calling sdhci_execute_tuning() from its ->request()
+> function.
+> 
+> The problem with HS400 re-tuning is that it must be
+> done in HS200 mode. That means using switch commands
+> and making ios changes. That means it potentially
+> conflicts with other command sequences. The new
+> re-tuning support accomodates that.
+> 
+> These patches now depend on Ulf's patch:
+> 
+>     mmc: core: Enable runtime PM management of host devices
+> 
+> 
+> Changes in V4:
+> 
+>     mmc: host: Add facility to support re-tuning
+> 
+> 	Assume mmc_claim_host() runtime resumes the host
+> 	controller so there are no races with runtime pm.
+> 	Consequently remove now un-needed re-tuning host
+> 	operations.
+> 
+>     mmc: core: Add support for re-tuning before each request
+> 
+> 	Call mmc_retune() prior to ->request()
+> 
+>     mmc: sdhci: Change to new way of doing re-tuning
+> 
+> 	Updated to reflect the changes above.
+
+Hi
+
+What is the status of this?
+
+Regards
+Adrian
+
