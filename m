@@ -1,73 +1,117 @@
-From: Arend van Spriel <arend@broadcom.com>
-Subject: Re: [PATCH V4 01/15] mmc: host: Add facility to support re-tuning
-Date: Thu, 2 Apr 2015 12:30:49 +0200
-Message-ID: <551D1A59.5060803@broadcom.com>
-References: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>	<1427489863-9050-2-git-send-email-adrian.hunter@intel.com>	<CAPDyKFrs4X+nDDkikUNSO5uz+Wsoz3TmkLJ9RwvvdjYqd8+Ygg@mail.gmail.com>	<551BDAEA.20405@intel.com>	<551C0A4C.9020602@broadcom.com> <CAPDyKFp=DBj1==KVBxbZqE9Zo9F7QAxENcU_dqXUb5pvyNrv5A@mail.gmail.com>
+From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
+Subject: RE: [PATCH 0/5] mmc: Soft Command queue implementation for eMMC5.1
+ device
+Date: Thu, 2 Apr 2015 10:52:09 +0000
+Message-ID: <17296D9F8FF2234F831FC3DF505A87A911C49E08@shsmsx102.ccr.corp.intel.com>
+References: <20150317110955.GA17141@intel.com>
+ <282CEDFCBC30114F83C499CB8F2ED5333FA64788@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:1826 "EHLO
-	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751149AbbDBKaz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Apr 2015 06:30:55 -0400
-In-Reply-To: <CAPDyKFp=DBj1==KVBxbZqE9Zo9F7QAxENcU_dqXUb5pvyNrv5A@mail.gmail.com>
+Received: from mga09.intel.com ([134.134.136.24]:27790 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750711AbbDBKwN convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Apr 2015 06:52:13 -0400
+In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED5333FA64788@SACMBXIP01.sdcorp.global.sandisk.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>
 
-On 04/02/15 10:43, Ulf Hansson wrote:
-> [...]
->>>>>     - ability to hold off re-tuning if the card is busy
->>>>
->>>>
->>>> What do you mean by "card is busy"?
->>>
->>>
->>> I guess, more accurately, any time the card is in a state that is
->>> incapable
->>> of supporting re-tuning. For example:
->>>          - DAT0 busy
->>
->>
->> This state is not specific to re-tuning. An SDIO device can keep DAT0 busy
->> at which the host controller can not start another request.
->
-> Not entirely true. Some commands are allowed during this period, for
-> example CMD13 (which doesn't exist for SDIO)
+Thanks Alex for review.
 
-Yeah. I was wondering whether to mention that.
+>From my understanding, if host->areq == areq, then means the areq is the current running request. By this way, driver will clear the executable ready bit in slots and continue to find the next one. So the task with the same ID won't be executed at the same time.
 
-> Anyway, I get the point. Thanks!
->
->>
->>>          - between dependent commands like erase start, end, etc
->>>          - card is asleep
->>> Also SDIO cards can have a custom sleep state where tuning won't work.
->>
->>
->> Our SDIO wifi device has such a state and it can only come out of it upon
->> CMD52 write or CMD14 (ExitSleep).
->
-> So how will the mmc core know about these states? I guess we will
-> require SDIO func drivers to deal with enable/disable or hold/release
-> of re-tuning then?
++	do {
++		id = find_first_bit(&slots, mq->qdepth);
++		if (id < mq->qdepth) {
++			areq = &mq->mqrq[id].mmc_active;
++			if (host->areq == areq)
++				goto next;
+.....
+......
++next:
++		__clear_bit(id, &slots);
++	} while (status);
 
-This is actually why in the past we tried to only kick off retuning 
-before a request that requires use of data line(s) so mmc core (or 
-sdhci) would not do re-tuning when SDIO func used CMD52 to wakeup the 
-device. I never tried CMD14 approach and not even sure from which spec 
-it comes (maybe eMMC).
+I also prepared patch set v1, which won't send CMD13 to poll cmdq ready during a cmdq request is executing by CMD46/47. Will send them out later.
 
-> I don't like this, but if there is no other way... Also, we must be
-> very careful on which API we exports for SDIO func drivers to use. The
-> can easily be misinterpreted.
->
-> [...]
->
-> Kind regards
-> Uffe
+Thanks
+Chuanxiao
 
-Regards,
-Arend
+> -----Original Message-----
+> From: Alex Lemberg [mailto:Alex.Lemberg@sandisk.com]
+> Sent: Thursday, April 02, 2015 4:57 PM
+> To: Dong, Chuanxiao; linux-mmc@vger.kernel.org
+> Cc: Yuliy Izrailov
+> Subject: RE: [PATCH 0/5] mmc: Soft Command queue implementation for
+> eMMC5.1 device
+> 
+> Hi Chuanxiao,
+> 
+> 
+> > -----Original Message-----
+> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > owner@vger.kernel.org] On Behalf Of Chuanxiao Dong
+> > Sent: Tuesday, March 17, 2015 1:10 PM
+> > To: linux-mmc@vger.kernel.org
+> > Subject: [PATCH 0/5] mmc: Soft Command queue implementation for
+> > eMMC5.1 device
+> >
+> > Hello
+> >
+> > This serial of patches can implement the eMMC5.1 device command queue
+> > feature even a host controller doesn't support CMDQ. Several weeks ago
+> > I submitted RFC patches for review and collected some review comments.
+> > Right now these comments are fixed thus I submit again as the offical
+> > patches. Please have a review.
+> 
+> Thanks for sending the new patch.
+> We have reviewed and see issues still exists like in previous patch version.
+> The driver flow where request with the same TID is executed right after
+> completing its data transfer, is still possible.
+> We suspect that the new solution is not covering the case of driver thread
+> context switch, Specifically the following condition in block.c:
+> 
+> +			if (host->areq == areq)
+> +				goto next;
+> 
+> 
+> Thanks,
+> Alex
+> 
+> >
+> > Chuanxiao Dong (5):
+> >   mmc: replace sbc to precmd and add postcmd
+> >   mmc: host: add runtime PM for host class dev
+> >   mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
+> >   mmc: core: add support for CMDQ feature in MMC Core stack
+> >   mmc: sdhci: add SW CMDQ support for SDHCI host
+> >
+> >  drivers/mmc/card/block.c      |  538
+> > ++++++++++++++++++++++++++++++++++++++---
+> >  drivers/mmc/card/queue.c      |  213 ++++++++--------
+> >  drivers/mmc/card/queue.h      |   14 +-
+> >  drivers/mmc/core/core.c       |   85 ++++++-
+> >  drivers/mmc/core/host.c       |   13 +
+> >  drivers/mmc/core/mmc.c        |   37 ++-
+> >  drivers/mmc/host/dw_mmc.c     |    8 +-
+> >  drivers/mmc/host/mmci.c       |   14 +-
+> >  drivers/mmc/host/omap_hsmmc.c |   18 +-
+> >  drivers/mmc/host/sdhci-acpi.c |    1 -
+> >  drivers/mmc/host/sdhci-pci.c  |    1 -
+> >  drivers/mmc/host/sdhci.c      |  137 +++++++++--
+> >  drivers/mmc/host/sdhci.h      |    1 +
+> >  include/linux/mmc/card.h      |    3 +
+> >  include/linux/mmc/core.h      |    5 +-
+> >  include/linux/mmc/host.h      |    5 +
+> >  include/linux/mmc/mmc.h       |   21 ++
+> >  include/linux/mmc/pm.h        |    1 +
+> >  18 files changed, 911 insertions(+), 204 deletions(-)
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > info at http://vger.kernel.org/majordomo-info.html
