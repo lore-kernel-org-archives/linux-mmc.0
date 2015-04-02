@@ -1,124 +1,121 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [PATCH V4 01/15] mmc: host: Add facility to support re-tuning
-Date: Thu, 02 Apr 2015 15:43:27 +0300
-Message-ID: <551D396F.1020301@intel.com>
-References: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>	<1427489863-9050-2-git-send-email-adrian.hunter@intel.com>	<CAPDyKFrs4X+nDDkikUNSO5uz+Wsoz3TmkLJ9RwvvdjYqd8+Ygg@mail.gmail.com>	<551BDAEA.20405@intel.com>	<551C0A4C.9020602@broadcom.com>	<CAPDyKFp=DBj1==KVBxbZqE9Zo9F7QAxENcU_dqXUb5pvyNrv5A@mail.gmail.com>	<551D1A59.5060803@broadcom.com>	<CAPDyKFqdwQVEoKWH-Et32PZxVrcOabt7rek=Xq01yLmebgXuOA@mail.gmail.com>	<551D3391.8040508@intel.com> <CAPDyKFrFoiKFC+i_TF_NR9Mg6b9JxzqRHyyN72z331s+0Gge2A@mail.gmail.com> <551D35C6.7070605@broadcom.com>
+Date: Thu, 2 Apr 2015 15:05:39 +0200
+Message-ID: <CAPDyKFrve0VmhvPk-=V64Cab8AcqvMkGxOM1Aju8gV+u3vFxyg@mail.gmail.com>
+References: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>
+	<1427489863-9050-2-git-send-email-adrian.hunter@intel.com>
+	<CAPDyKFrs4X+nDDkikUNSO5uz+Wsoz3TmkLJ9RwvvdjYqd8+Ygg@mail.gmail.com>
+	<551BDAEA.20405@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:26513 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752232AbbDBMpb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 2 Apr 2015 08:45:31 -0400
-In-Reply-To: <551D35C6.7070605@broadcom.com>
+Received: from mail-qg0-f48.google.com ([209.85.192.48]:33796 "EHLO
+	mail-qg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750828AbbDBNFk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Apr 2015 09:05:40 -0400
+Received: by qgep97 with SMTP id p97so68573980qge.1
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Apr 2015 06:05:39 -0700 (PDT)
+In-Reply-To: <551BDAEA.20405@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arend van Spriel <arend@broadcom.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-On 02/04/15 15:27, Arend van Spriel wrote:
-> On 04/02/15 14:25, Ulf Hansson wrote:
->> On 2 April 2015 at 14:18, Adrian Hunter<adrian.hunter@intel.com>  wrote:
->>> On 02/04/15 15:10, Ulf Hansson wrote:
->>>> On 2 April 2015 at 12:30, Arend van Spriel<arend@broadcom.com>  wrote:
->>>>> On 04/02/15 10:43, Ulf Hansson wrote:
->>>>>>
->>>>>> [...]
->>>>>>>>>>
->>>>>>>>>>      - ability to hold off re-tuning if the card is busy
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> What do you mean by "card is busy"?
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>> I guess, more accurately, any time the card is in a state that is
->>>>>>>> incapable
->>>>>>>> of supporting re-tuning. For example:
->>>>>>>>           - DAT0 busy
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>> This state is not specific to re-tuning. An SDIO device can keep DAT0
->>>>>>> busy
->>>>>>> at which the host controller can not start another request.
->>>>>>
->>>>>>
->>>>>> Not entirely true. Some commands are allowed during this period, for
->>>>>> example CMD13 (which doesn't exist for SDIO)
->>>>>
->>>>>
->>>>> Yeah. I was wondering whether to mention that.
->>>>>
->>>>>> Anyway, I get the point. Thanks!
->>>>>>
->>>>>>>
->>>>>>>>           - between dependent commands like erase start, end, etc
->>>>>>>>           - card is asleep
->>>>>>>> Also SDIO cards can have a custom sleep state where tuning won't work.
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>> Our SDIO wifi device has such a state and it can only come out of it
->>>>>>> upon
->>>>>>> CMD52 write or CMD14 (ExitSleep).
->>>>>>
->>>>>>
->>>>>> So how will the mmc core know about these states? I guess we will
->>>>>> require SDIO func drivers to deal with enable/disable or hold/release
->>>>>> of re-tuning then?
->>>>>
->>>>>
->>>>> This is actually why in the past we tried to only kick off retuning
->>>>> before a
->>>>> request that requires use of data line(s) so mmc core (or sdhci) would not
->>>>> do re-tuning when SDIO func used CMD52 to wakeup the device. I never tried
->>>>> CMD14 approach and not even sure from which spec it comes (maybe eMMC).
->>>>
->>>> That's an interesting idea. It would eliminate the need for SDIO func
->>>> drivers to care about holding/releasing re-tuning.
->>>>
->>>> Would be nice to hear about Adrian's thoughts around this as well.
->>>
->>> I don't see how it would work because re-tuning is needed after the host
->>> controller runtime resumes. i.e. once the SDIO wifi card stops being active
->>> the host controller will runtime suspend.
+[...]
+
 >>
->> Why do we always need to re-tune from this phase?
+>>>   - ability to enable / disable re-tuning
 >>
->> What Arend points out is that we could "delay" the re-tune until we
->> know there is a DATA request. Wouldn't that work for SDHCI as well?
-> 
-> You beat me to it, but that is indeed what I meant.
+>> Handled internally by the mmc core.
+>
+> The host controller driver enables re-tuning based on whether the host
+> controller requires it for that transfer mode. For example, only the SDHCI
+> host controller knows if tuning is required for SDR50 mode according to the
+> SDHCI capability register bit 45.
 
-The CMD line needs tuning too, so delaying tuning on every command will
-cause errors. It is better to hold tuning for the specific command used to
-wake-up.
+That seems a bit silly.
 
-> 
-> Regards,
-> Arend
-> 
->>>
->>> Also I would expect doing re-tuning before every data request would likely
->>> be unacceptable from a performance point of view.
->>>
->>>>
->>>>>
->>>>>> I don't like this, but if there is no other way... Also, we must be
->>>>>> very careful on which API we exports for SDIO func drivers to use. The
->>>>>> can easily be misinterpreted.
->>>>>>
->>>>>> [...]
->>>>
->>>> Kind regards
->>>> Uffe
->>>>
->>>>
->>>
-> 
-> 
-> 
+All hosts wants the re-tuning to be "enabled" if the current used
+speed mode requires it. It's not a host driver thing to deal with,
+just the core.
 
+What's needed for the SDHCI case (in runtime PM suspend), is to be
+able to disable the re-tune timer and to flag that a re-tune is
+needed. Both of these things can be dealt with from the
+mmc_retune_needed() API, since I believe there should never be a case
+when we want the re-tune timer to continue to run, when someone have
+set the need_retune flag.
+
+[...]
+
+>>>   - ability to hold off re-tuning if the card is busy
+>>
+>> What do you mean by "card is busy"?
+>
+> I guess, more accurately, any time the card is in a state that is incapable
+> of supporting re-tuning. For example:
+>         - DAT0 busy
+>         - between dependent commands like erase start, end, etc
+>         - card is asleep
+> Also SDIO cards can have a custom sleep state where tuning won't work.
+>
+>> Is this requirement due to that the re-tune timer may complete at any
+>> point, which then flags that a re-tune is needed?
+>
+> Primarily. But control is also needed when handling recovery. Or in the SDIO
+> custom sleep case.
+>
+> There is also SDHCI re-tuning modes 2 and 3 (presently not supported) where
+> the host controller itself indicates that re-tuning is needed via the
+> present state and interrupt status registers.
+
+To me, I assume mmc_retune_needed() API should be enough to cover
+SDHCI mode 2 and 3, right?
+
+Potentially mmc_retune_needed() may then be called from IRQ context so
+we just have to be sure the API also copes with that (thinking that
+cancelling the timer must not "sleep").
+
+[...]
+
+>>
+>>>   - ability to run a re-tuning timer
+>>
+>> As we discussed earlier, it's not obvious when it make sense to run this timer.
+>>
+>> For the SDIO case, we should likely run it all the time, since we want
+>> to prevent I/O errors as long as possible.
+>>
+>> For MMC/SD, I would rather see that we perform re-tune as a part of an
+>> "idle operation" and not from a timer (yes I know about the SDHCI
+>> spec, but it doesn't make sense). We can do this because we are able
+>> to re-cover from I/O errors (re-trying when getting CRC errors for
+>> example).
+>
+> It makes sense to attempt to re-tune before CRC errors occur. If the
+> hardware vendor has gone to the trouble to determine when that might be,
+> then it makes sense to use that timeout. It is surely an approximation
+> (SDHCI only has values in powers-of-2 with units of seconds) but it seems
+> unreasonable to use a completely different value.
+
+I agree in cases where the hardware itself can measure heat and thus
+anticipate+signal when a re-tuning is needed. SDHCI mode 1 doesn't
+work like that, it's just a guess - as good as any. Therefore I would
+only use a timer in the SDIO case and rely on the recover sequence for
+the SD/MMC case.
+
+Now, I am not going to argue about this any more. Let's follow your
+suggestion and to make it possible to use a timer for _all_ cases.
+
+>
+> Doing it in the idle operation would not work because we would then runtime
+> suspend and just have to do it again after resuming.
+
+That's correct, it will be completely useless for SDHCI. That's isn't
+the case for other hosts.
+
+Anyway, let's leave the "idle operation" scenarios out of this
+discussion. If considered, later it needs to be a configurable option.
+
+Kind regards
+Uffe
