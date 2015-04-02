@@ -1,66 +1,88 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V4 01/15] mmc: host: Add facility to support re-tuning
-Date: Thu, 2 Apr 2015 10:43:30 +0200
-Message-ID: <CAPDyKFp=DBj1==KVBxbZqE9Zo9F7QAxENcU_dqXUb5pvyNrv5A@mail.gmail.com>
-References: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>
-	<1427489863-9050-2-git-send-email-adrian.hunter@intel.com>
-	<CAPDyKFrs4X+nDDkikUNSO5uz+Wsoz3TmkLJ9RwvvdjYqd8+Ygg@mail.gmail.com>
-	<551BDAEA.20405@intel.com>
-	<551C0A4C.9020602@broadcom.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [PATCH 0/5] mmc: Soft Command queue implementation for eMMC5.1
+ device
+Date: Thu, 2 Apr 2015 08:57:15 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333FA64788@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <20150317110955.GA17141@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f45.google.com ([209.85.192.45]:35973 "EHLO
-	mail-qg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752056AbbDBInb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Apr 2015 04:43:31 -0400
-Received: by qgeb100 with SMTP id b100so23361751qge.3
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Apr 2015 01:43:30 -0700 (PDT)
-In-Reply-To: <551C0A4C.9020602@broadcom.com>
+Received: from mail-bn1on0082.outbound.protection.outlook.com ([157.56.110.82]:51479
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752436AbbDBI5W convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Apr 2015 04:57:22 -0400
+In-Reply-To: <20150317110955.GA17141@intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arend van Spriel <arend@broadcom.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>
 
-[...]
->>>>    - ability to hold off re-tuning if the card is busy
->>>
->>>
->>> What do you mean by "card is busy"?
->>
->>
->> I guess, more accurately, any time the card is in a state that is
->> incapable
->> of supporting re-tuning. For example:
->>         - DAT0 busy
->
->
-> This state is not specific to re-tuning. An SDIO device can keep DAT0 busy
-> at which the host controller can not start another request.
+Hi Chuanxiao,
 
-Not entirely true. Some commands are allowed during this period, for
-example CMD13 (which doesn't exist for SDIO)
 
-Anyway, I get the point. Thanks!
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Chuanxiao Dong
+> Sent: Tuesday, March 17, 2015 1:10 PM
+> To: linux-mmc@vger.kernel.org
+> Subject: [PATCH 0/5] mmc: Soft Command queue implementation for
+> eMMC5.1 device
+> 
+> Hello
+> 
+> This serial of patches can implement the eMMC5.1 device command queue
+> feature even a host controller doesn't support CMDQ. Several weeks ago I
+> submitted RFC patches for review and collected some review comments. Right
+> now these comments are fixed thus I submit again as the offical patches. Please
+> have a review.
 
->
->>         - between dependent commands like erase start, end, etc
->>         - card is asleep
->> Also SDIO cards can have a custom sleep state where tuning won't work.
->
->
-> Our SDIO wifi device has such a state and it can only come out of it upon
-> CMD52 write or CMD14 (ExitSleep).
+Thanks for sending the new patch. 
+We have reviewed and see issues still exists like in previous patch version.
+The driver flow where request with the same TID is executed right after completing
+its data transfer, is still possible.
+We suspect that the new solution is not covering the case of driver thread context switch,
+Specifically the following condition in block.c:
 
-So how will the mmc core know about these states? I guess we will
-require SDIO func drivers to deal with enable/disable or hold/release
-of re-tuning then?
++			if (host->areq == areq)
++				goto next;
 
-I don't like this, but if there is no other way... Also, we must be
-very careful on which API we exports for SDIO func drivers to use. The
-can easily be misinterpreted.
 
-[...]
+Thanks,
+Alex
 
-Kind regards
-Uffe
+> 
+> Chuanxiao Dong (5):
+>   mmc: replace sbc to precmd and add postcmd
+>   mmc: host: add runtime PM for host class dev
+>   mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
+>   mmc: core: add support for CMDQ feature in MMC Core stack
+>   mmc: sdhci: add SW CMDQ support for SDHCI host
+> 
+>  drivers/mmc/card/block.c      |  538
+> ++++++++++++++++++++++++++++++++++++++---
+>  drivers/mmc/card/queue.c      |  213 ++++++++--------
+>  drivers/mmc/card/queue.h      |   14 +-
+>  drivers/mmc/core/core.c       |   85 ++++++-
+>  drivers/mmc/core/host.c       |   13 +
+>  drivers/mmc/core/mmc.c        |   37 ++-
+>  drivers/mmc/host/dw_mmc.c     |    8 +-
+>  drivers/mmc/host/mmci.c       |   14 +-
+>  drivers/mmc/host/omap_hsmmc.c |   18 +-
+>  drivers/mmc/host/sdhci-acpi.c |    1 -
+>  drivers/mmc/host/sdhci-pci.c  |    1 -
+>  drivers/mmc/host/sdhci.c      |  137 +++++++++--
+>  drivers/mmc/host/sdhci.h      |    1 +
+>  include/linux/mmc/card.h      |    3 +
+>  include/linux/mmc/core.h      |    5 +-
+>  include/linux/mmc/host.h      |    5 +
+>  include/linux/mmc/mmc.h       |   21 ++
+>  include/linux/mmc/pm.h        |    1 +
+>  18 files changed, 911 insertions(+), 204 deletions(-)
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the body
+> of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
