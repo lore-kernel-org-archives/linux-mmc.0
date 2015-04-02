@@ -1,88 +1,132 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [PATCH 0/5] mmc: Soft Command queue implementation for eMMC5.1
- device
-Date: Thu, 2 Apr 2015 08:57:15 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED5333FA64788@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <20150317110955.GA17141@intel.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 1/2] mmc: Add support for marking hpi as
+ broken through devicetree
+Date: Thu, 2 Apr 2015 11:01:28 +0200
+Message-ID: <CAPDyKFpUw+9OepiHL3wfALz98nyCWkGPAwqtGK3+YPJ+eG7dLA@mail.gmail.com>
+References: <1427901984-26469-1-git-send-email-hdegoede@redhat.com>
+Reply-To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1on0082.outbound.protection.outlook.com ([157.56.110.82]:51479
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752436AbbDBI5W convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Apr 2015 04:57:22 -0400
-In-Reply-To: <20150317110955.GA17141@intel.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sunxi+bncBDF57NG2XIHRB2EK6SUAKGQEJYPC43A-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <1427901984-26469-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <http://groups.google.com/group/linux-sunxi/subscribe>
+To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chuanxiao Dong <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>
 
-Hi Chuanxiao,
+On 1 April 2015 at 17:26, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> The eMMC on a tablet I've will stop working / communicating as soon as
+> the kernel executes:
+>
+>                 mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>                                 EXT_CSD_HPI_MGMT, 1,
+>                                 card->ext_csd.generic_cmd6_time);
+>
+> There seems to be no way to reliable identify eMMC-s which have a broken
+> hpi implementation, but at least for eMMC's which are soldered onto a board
+> we can work around this by specifying that hpi is broken in devicetree.
+>
+> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
+Thanks! Applied for next.
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Chuanxiao Dong
-> Sent: Tuesday, March 17, 2015 1:10 PM
-> To: linux-mmc@vger.kernel.org
-> Subject: [PATCH 0/5] mmc: Soft Command queue implementation for
-> eMMC5.1 device
-> 
-> Hello
-> 
-> This serial of patches can implement the eMMC5.1 device command queue
-> feature even a host controller doesn't support CMDQ. Several weeks ago I
-> submitted RFC patches for review and collected some review comments. Right
-> now these comments are fixed thus I submit again as the offical patches. Please
-> have a review.
+Kind regards
+Uffe
 
-Thanks for sending the new patch. 
-We have reviewed and see issues still exists like in previous patch version.
-The driver flow where request with the same TID is executed right after completing
-its data transfer, is still possible.
-We suspect that the new solution is not covering the case of driver thread context switch,
-Specifically the following condition in block.c:
-
-+			if (host->areq == areq)
-+				goto next;
-
-
-Thanks,
-Alex
-
-> 
-> Chuanxiao Dong (5):
->   mmc: replace sbc to precmd and add postcmd
->   mmc: host: add runtime PM for host class dev
->   mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
->   mmc: core: add support for CMDQ feature in MMC Core stack
->   mmc: sdhci: add SW CMDQ support for SDHCI host
-> 
->  drivers/mmc/card/block.c      |  538
-> ++++++++++++++++++++++++++++++++++++++---
->  drivers/mmc/card/queue.c      |  213 ++++++++--------
->  drivers/mmc/card/queue.h      |   14 +-
->  drivers/mmc/core/core.c       |   85 ++++++-
->  drivers/mmc/core/host.c       |   13 +
->  drivers/mmc/core/mmc.c        |   37 ++-
->  drivers/mmc/host/dw_mmc.c     |    8 +-
->  drivers/mmc/host/mmci.c       |   14 +-
->  drivers/mmc/host/omap_hsmmc.c |   18 +-
->  drivers/mmc/host/sdhci-acpi.c |    1 -
->  drivers/mmc/host/sdhci-pci.c  |    1 -
->  drivers/mmc/host/sdhci.c      |  137 +++++++++--
->  drivers/mmc/host/sdhci.h      |    1 +
->  include/linux/mmc/card.h      |    3 +
->  include/linux/mmc/core.h      |    5 +-
->  include/linux/mmc/host.h      |    5 +
->  include/linux/mmc/mmc.h       |   21 ++
->  include/linux/mmc/pm.h        |    1 +
->  18 files changed, 911 insertions(+), 204 deletions(-)
-> 
+> ---
+> Changes in v2:
+> -Fix of_node leakage
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc-card.txt | 31 ++++++++++++++++++++++
+>  drivers/mmc/core/mmc.c                             | 10 ++++++-
+>  2 files changed, 40 insertions(+), 1 deletion(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/mmc-card.txt
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.txt b/Documentation/devicetree/bindings/mmc/mmc-card.txt
+> new file mode 100644
+> index 0000000..a70fcd6
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-card.txt
+> @@ -0,0 +1,31 @@
+> +mmc-card / eMMC bindings
+> +------------------------
+> +
+> +This documents describes the devicetree bindings for a mmc-host controller
+> +child node describing a mmc-card / an eMMC, see "Use of Function subnodes"
+> +in mmc.txt
+> +
+> +Required properties:
+> +-compatible : Must be "mmc-card"
+> +-reg        : Must be <0>
+> +
+> +Optional properties:
+> +-broken-hpi : Use this to indicate that the mmc-card has a broken hpi
+> +              implementation, and that hpi should not be used
+> +
+> +Example:
+> +
+> +&mmc2 {
+> +       pinctrl-names = "default";
+> +       pinctrl-0 = <&mmc2_pins_a>;
+> +       vmmc-supply = <&reg_vcc3v3>;
+> +       bus-width = <8>;
+> +       non-removable;
+> +       status = "okay";
+> +
+> +       mmccard: mmccard@0 {
+> +               reg = <0>;
+> +               compatible = "mmc-card";
+> +               broken-hpi;
+> +       };
+> +};
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 1d41e85..c84131e 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -11,6 +11,7 @@
+>   */
+>
+>  #include <linux/err.h>
+> +#include <linux/of.h>
+>  #include <linux/slab.h>
+>  #include <linux/stat.h>
+>  #include <linux/pm_runtime.h>
+> @@ -336,6 +337,8 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  {
+>         int err = 0, idx;
+>         unsigned int part_size;
+> +       struct device_node *np;
+> +       bool broken_hpi = false;
+>
+>         /* Version is coded in the CSD_STRUCTURE byte in the EXT_CSD register */
+>         card->ext_csd.raw_ext_csd_structure = ext_csd[EXT_CSD_STRUCTURE];
+> @@ -349,6 +352,11 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>                 }
+>         }
+>
+> +       np = mmc_of_find_child_device(card->host, 0);
+> +       if (np && of_device_is_compatible(np, "mmc-card"))
+> +               broken_hpi = of_property_read_bool(np, "broken-hpi");
+> +       of_node_put(np);
+> +
+>         /*
+>          * The EXT_CSD format is meant to be forward compatible. As long
+>          * as CSD_STRUCTURE does not change, all values for EXT_CSD_REV
+> @@ -494,7 +502,7 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>                 }
+>
+>                 /* check whether the eMMC card supports HPI */
+> -               if (ext_csd[EXT_CSD_HPI_FEATURES] & 0x1) {
+> +               if (!broken_hpi && (ext_csd[EXT_CSD_HPI_FEATURES] & 0x1)) {
+>                         card->ext_csd.hpi = 1;
+>                         if (ext_csd[EXT_CSD_HPI_FEATURES] & 0x2)
+>                                 card->ext_csd.hpi_cmd = MMC_STOP_TRANSMISSION;
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the body
-> of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
+> 2.3.4
+>
