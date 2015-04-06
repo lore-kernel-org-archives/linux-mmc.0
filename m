@@ -1,142 +1,59 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [PATCH 0/5] mmc: Soft Command queue implementation for eMMC5.1
- device
-Date: Mon, 6 Apr 2015 13:47:58 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED53343B2DCC0@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <20150317110955.GA17141@intel.com>
- <282CEDFCBC30114F83C499CB8F2ED5333FA64788@SACMBXIP01.sdcorp.global.sandisk.com>
- <17296D9F8FF2234F831FC3DF505A87A911C49E08@shsmsx102.ccr.corp.intel.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 1/3] mmc: dw_mmc: Increase cmd11 timeout to 500ms
+Date: Mon, 6 Apr 2015 12:32:49 -0700
+Message-ID: <CAD=FV=XwC8Pc-cA3434XBwXOSPk1MXmCd0Az41afc5-4+==+LA@mail.gmail.com>
+References: <1428084787-8710-1-git-send-email-dianders@chromium.org>
+	<55226411.2060806@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2on0077.outbound.protection.outlook.com ([65.55.169.77]:56146
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753208AbbDFNsF convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Apr 2015 09:48:05 -0400
-In-Reply-To: <17296D9F8FF2234F831FC3DF505A87A911C49E08@shsmsx102.ccr.corp.intel.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <55226411.2060806@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>
 
-Hi Chuanxiao,
+Jaehoon,
 
+On Mon, Apr 6, 2015 at 3:46 AM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Hi, Doug.
+>
+> On 04/04/2015 03:13 AM, Doug Anderson wrote:
+>> The Designware databook claims that cmd11 should be finished in 2ms,
+>> but my testing showed that not to be the case in some situations.
+>> I've seen cmd11 timeouts of up to 130ms (!) during reboot tests.
+>> Let's bump the timeout way up so that we're absolutely sure.  CMD11 is
+>> only sent during card insertion, so this extra timeout shouldn't be
+>> terrible.
+>
+> Is it h/w problem? Could you explain to me about "some situations"?
+> As you said, this timeout only used during card inserting. So, it's not critical..
+> But there is much different between 2ms and 500ms(or 130ms).
 
-> -----Original Message-----
-> From: Dong, Chuanxiao [mailto:chuanxiao.dong@intel.com]
-> Sent: Thursday, April 02, 2015 1:52 PM
-> To: Alex Lemberg; linux-mmc@vger.kernel.org
-> Cc: Yuliy Izrailov
-> Subject: RE: [PATCH 0/5] mmc: Soft Command queue implementation for
-> eMMC5.1 device
-> 
-> Thanks Alex for review.
-> 
-> From my understanding, if host->areq == areq, then means the areq is the
-> current running request. By this way, driver will clear the executable ready bit
-> in slots and continue to find the next one. So the task with the same ID won't be
-> executed at the same time.
+Very good question, and it makes sense to dig into this...
 
-Right, but there is a case for context switch:
+OK, I think I've got it.  Dang printk bites me again.  I have serial
+console enabled and my printouts were actually causing these delays.
+With serial console turned off I reliably get ~280us for the interrupt
+to fire (tested across SD and WiFi across 137 + 128 + 111 + 127 = 503
+reboots)
 
-> 
-> +	do {
-> +		id = find_first_bit(&slots, mq->qdepth);
-> +		if (id < mq->qdepth) {
-> +			areq = &mq->mqrq[id].mmc_active;
+I think it makes sense to land this patch anyway, but with an updated
+description.  I'm happy to repost this or happy if you just want to
+update the description when applying.
 
-What if host->areq will be changed as the result of completion interrupt,
-in parallel or just before this if condition?
+---
 
-> +			if (host->areq == areq)
-> +				goto next;
-> .....
-> ......
-> +next:
-> +		__clear_bit(id, &slots);
-> +	} while (status);
-> 
-> I also prepared patch set v1, which won't send CMD13 to poll cmdq ready
-> during a cmdq request is executing by CMD46/47. Will send them out later.
-> 
-> Thanks
-> Chuanxiao
-> 
-> > -----Original Message-----
-> > From: Alex Lemberg [mailto:Alex.Lemberg@sandisk.com]
-> > Sent: Thursday, April 02, 2015 4:57 PM
-> > To: Dong, Chuanxiao; linux-mmc@vger.kernel.org
-> > Cc: Yuliy Izrailov
-> > Subject: RE: [PATCH 0/5] mmc: Soft Command queue implementation for
-> > eMMC5.1 device
-> >
-> > Hi Chuanxiao,
-> >
-> >
-> > > -----Original Message-----
-> > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > > owner@vger.kernel.org] On Behalf Of Chuanxiao Dong
-> > > Sent: Tuesday, March 17, 2015 1:10 PM
-> > > To: linux-mmc@vger.kernel.org
-> > > Subject: [PATCH 0/5] mmc: Soft Command queue implementation for
-> > > eMMC5.1 device
-> > >
-> > > Hello
-> > >
-> > > This serial of patches can implement the eMMC5.1 device command
-> > > queue feature even a host controller doesn't support CMDQ. Several
-> > > weeks ago I submitted RFC patches for review and collected some review
-> comments.
-> > > Right now these comments are fixed thus I submit again as the
-> > > offical patches. Please have a review.
-> >
-> > Thanks for sending the new patch.
-> > We have reviewed and see issues still exists like in previous patch version.
-> > The driver flow where request with the same TID is executed right
-> > after completing its data transfer, is still possible.
-> > We suspect that the new solution is not covering the case of driver
-> > thread context switch, Specifically the following condition in block.c:
-> >
-> > +			if (host->areq == areq)
-> > +				goto next;
-> >
-> >
-> > Thanks,
-> > Alex
-> >
-> > >
-> > > Chuanxiao Dong (5):
-> > >   mmc: replace sbc to precmd and add postcmd
-> > >   mmc: host: add runtime PM for host class dev
-> > >   mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
-> > >   mmc: core: add support for CMDQ feature in MMC Core stack
-> > >   mmc: sdhci: add SW CMDQ support for SDHCI host
-> > >
-> > >  drivers/mmc/card/block.c      |  538
-> > > ++++++++++++++++++++++++++++++++++++++---
-> > >  drivers/mmc/card/queue.c      |  213 ++++++++--------
-> > >  drivers/mmc/card/queue.h      |   14 +-
-> > >  drivers/mmc/core/core.c       |   85 ++++++-
-> > >  drivers/mmc/core/host.c       |   13 +
-> > >  drivers/mmc/core/mmc.c        |   37 ++-
-> > >  drivers/mmc/host/dw_mmc.c     |    8 +-
-> > >  drivers/mmc/host/mmci.c       |   14 +-
-> > >  drivers/mmc/host/omap_hsmmc.c |   18 +-
-> > >  drivers/mmc/host/sdhci-acpi.c |    1 -
-> > >  drivers/mmc/host/sdhci-pci.c  |    1 -
-> > >  drivers/mmc/host/sdhci.c      |  137 +++++++++--
-> > >  drivers/mmc/host/sdhci.h      |    1 +
-> > >  include/linux/mmc/card.h      |    3 +
-> > >  include/linux/mmc/core.h      |    5 +-
-> > >  include/linux/mmc/host.h      |    5 +
-> > >  include/linux/mmc/mmc.h       |   21 ++
-> > >  include/linux/mmc/pm.h        |    1 +
-> > >  18 files changed, 911 insertions(+), 204 deletions(-)
-> > >
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> > > in the body of a message to majordomo@vger.kernel.org More majordomo
-> > > info at http://vger.kernel.org/majordomo-info.html
+Although the cmd11 interrupt should come within 2ms, that's a very
+short time.  Let's increase the timeout to be really sure that we
+don't get an accidnetal timeout.  One case in particular this is
+useful is if you've got a serial console and printk in just the right
+places.  Under that scenario I've seen delays of up to 130ms before
+the interrupt fired.
+
+CMD11 is only sent during card insertion, so this extra timeout
+shouldn't be terrible.
+
+---
+
+-Doug
