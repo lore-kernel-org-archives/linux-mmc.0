@@ -1,66 +1,86 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/3] mmc: dw_mmc: Increase cmd11 timeout to 500ms
-Date: Mon, 06 Apr 2015 19:46:41 +0900
-Message-ID: <55226411.2060806@samsung.com>
-References: <1428084787-8710-1-git-send-email-dianders@chromium.org>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [PATCH] mmc: sleep notification
+Date: Mon, 6 Apr 2015 13:44:25 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED53343B2DC51@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
+	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFqLUBYUx9XrhnMeUtf8HU_=4PH_4Vf7m8mM-CT63jG24Q@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA1245B@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFrhfPZG4ZnqNTSEgbnpukw342gaeyi22OqAt6PA==E8ug@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA14148@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFrRAMRDNRX+zW-Odh+-ouZO7b0S4RvKQka+90D63uqBDQ@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA3FA3A@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFroXQ8CThExfbn3F+wMX6=6+-OgLawx2+RA8WC-Y-EKrw@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA5B753@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAPDyKFo0S=5Xek_i4TRo-YAHxE5UKa4PLw_t7awrtdd_AtuTZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:61793 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752654AbbDFKqn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Apr 2015 06:46:43 -0400
-In-reply-to: <1428084787-8710-1-git-send-email-dianders@chromium.org>
+Received: from mail-by2on0053.outbound.protection.outlook.com ([207.46.100.53]:13117
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753188AbbDFNoa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 6 Apr 2015 09:44:30 -0400
+In-Reply-To: <CAPDyKFo0S=5Xek_i4TRo-YAHxE5UKa4PLw_t7awrtdd_AtuTZQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, javier.martinez@collabora.co.uk, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-Hi, Doug.
-
-On 04/04/2015 03:13 AM, Doug Anderson wrote:
-> The Designware databook claims that cmd11 should be finished in 2ms,
-> but my testing showed that not to be the case in some situations.
-> I've seen cmd11 timeouts of up to 130ms (!) during reboot tests.
-> Let's bump the timeout way up so that we're absolutely sure.  CMD11 is
-> only sent during card insertion, so this extra timeout shouldn't be
-> terrible.
-
-Is it h/w problem? Could you explain to me about "some situations"?
-As you said, this timeout only used during card inserting. So, it's not critical..
-But there is much different between 2ms and 500ms(or 130ms).
-
-Best Regards,
-Jaehoon Chung
-
-> 
-> Fixes: 5c935165da79 ("mmc: dw_mmc: Add a timeout for sending CMD11")
-> Signed-off-by: Doug Anderson <dianders@chromium.org>
-> ---
->  drivers/mmc/host/dw_mmc.c | 8 +++++---
->  1 file changed, 5 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 3883fe6..339a929 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1023,11 +1023,13 @@ static void __dw_mci_start_request(struct dw_mci *host,
->  
->  	if (cmd->opcode == SD_SWITCH_VOLTAGE) {
->  		/*
-> -		 * Databook says to fail after 2ms w/ no response; give an
-> -		 * extra jiffy just in case we're about to roll over.
-> +		 * Databook says to fail after 2ms w/ no response, but evidence
-> +		 * shows that sometimes the cmd11 interrupt takes over 130ms.
-> +		 * We'll set to 500ms, plus an extra jiffy just in case jiffies
-> +		 * is just about to roll over.
->  		 */
->  		mod_timer(&host->cmd11_timer,
-> -			  jiffies + msecs_to_jiffies(2) + 1);
-> +			  jiffies + msecs_to_jiffies(500) + 1);
->  	}
->  
->  	if (mrq->stop)
-> 
-
+SGkgVWxmLA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5z
+c29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogV2VkbmVzZGF5LCBB
+cHJpbCAwMSwgMjAxNSAyOjQ2IFBNDQo+IFRvOiBBbGV4IExlbWJlcmcNCj4gQ2M6IEF2aSBTaGNo
+aXNsb3dza2k7IGxpbnV4LW1tYzsgQ2hyaXMgQmFsbA0KPiBTdWJqZWN0OiBSZTogW1BBVENIXSBt
+bWM6IHNsZWVwIG5vdGlmaWNhdGlvbg0KPiANCj4gWy4uLl0NCj4gDQo+ID4+IE9rYXksIHNvIHRv
+IG1lLCBJIHRoaW5rIHRoZSBTTEVFUCBub3RpZmljYXRpb24gbmVlZHMgdG8gYmUgc2VudCBhcyBh
+DQo+ID4+IHBhcnQgb2YgdGhlIHN5c3RlbSBQTSBzdXNwZW5kIHBoYXNlLiBBbmQgbW9yZSBleGFj
+dGx5IGZyb20gdGhlDQo+ID4+IGJ1c19vcHMtPnN1c3BlbmQoKSBjYWxsYmFjay4NCj4gPj4NCj4g
+Pg0KPiA+IFBNIHN1c3BlbmQgcGhhc2UgaXMgYSByaWdodCBwbGFjZSBmb3IgUE9OIFNsZWVwX05v
+dGlmaWNhdGlvbiwgYnV0IGl0DQo+ID4gYWxzbyB0aGUgY3JpdGljYWwgb25lIGFuZCBuZWVkIHRv
+IGJlIGNvbXBsZXRlZCBhcyBmYXN0IGFzIHBvc3NpYmxlLg0KPiA+DQo+ID4gSWYgSSdtIG5vdCBt
+aXN0YWtlbiwgZHVyaW5nIHRoZSBQTSBTdXNwZW5kLCB0aGUgdXNlciBzcGFjZSBpcyBmcmVlemlu
+Zy4NCj4gPiBJcyBpdCBPSyB0byBsZXQgUE9OIFNsZWVwX05vdGlmaWNhdGlvbiB0byBiZSBjYWxs
+ZWQgYXQgdGhhdCBzdGFnZT8NCj4gDQo+IE9mIGNvdXJzZSB3ZSBzaGFsbCBzdHJpdmUgaW4gbWlu
+aW1pemluZyB0aGUgc3lzdGVtIFBNIHN1c3BlbmQgdGltZS4NCj4gVGhvdWdoIHRvIG1lLCBJIHRo
+aW5rIHRoZSBzeXN0ZW0gUE0gX3Jlc3VtZV8gdGltZSBpcyBvZiBtb3JlIGltcG9ydGFuY2UuDQo+
+IA0KPiBJbiB0aGlzIGNhc2Ugd2UgZG9uJ3QgaGF2ZSBhbnkgb3B0aW9uLiBXZSBuZWVkIHRvIGlz
+c3VlIHRoZSBzbGVlcCBub3RpZmljYXRpb24gYXMNCj4gcGFydCBvZiB0aGUgdGhlIHN5c3RlbSBQ
+TSBzdXNwZW5kIHBoYXNlIGFuZCB0aGF0IHdpbGwgdW5mb3J0dW5hdGUgYW5kIGxpa2VseQ0KPiBp
+bmNyZWFzZSB0aGUgdG90YWwgc3lzdGVtIFBNIHN1c3BlbmQgdGltZS4NCj4gDQo+ID4NCj4gPiBD
+YWxsaW5nIGZyb20gdGhlIG5vdGlmaWVyX2NhbGwgKG1tY19wbV9ub3RpZnkoKSkgd2lsbCBhbGxv
+dyB0bw0KPiA+IGNvbXBsZXRlIFNsZWVwX05vdGlmaWNhdGlvbiBwcm9jZXNzIGJlZm9yZSBlbnRl
+cmluZyB0byB0aGUgY3JpdGljYWwgcGFydCAtIHRoZQ0KPiBTdXNwZW5kLg0KPiA+IElzbid0IGl0
+Pw0KPiANCj4gV2h5IGlzIG1tY19wbV9ub3RpZnkoKSBhIGxlc3MgY3JpdGljYWwgcGFydD8NCj4g
+DQo+IE1vcmUgaW1wb3J0YW50bHkgYXMgc3RhdGVkIHNldmVyYWwgdGltZXMsIHdlIGNhbiBzdGls
+bCBnZXQgSS9PIHJlcXVlc3RzIGFmdGVyDQo+IHRoZSBtbWNfcG1fbm90aWZ5KCkgcGhhc2UgYW5k
+IHRoZW4gdGhlIHNsZWVwIG5vdGlmaWNhdGlvbiBuZWVkcyB0byBiZQ0KPiBpbnRlcnJ1cHRlZCBh
+bmQgcmUtaXNzdWVkIGFueXdheS4NCg0KWW91IGFyZSByaWdodCAtIHRoZSBzbGVlcF9ub3RpZmlj
+YXRpb24gbWlnaHQgYmUgcmUtaXNzdWVkIHNldmVyYWwgdGltZXMsDQpidXQgaW4gY2FzZSBvZiBt
+bWNfcG1fbm90aWZ5KCkgdGhlIHVzZXIgc3BhY2UgaXMgbm90IGZyb3plbiB5ZXQsIGFuZCANCnN5
+c3RlbSB3aWxsIG5vdCBzdHVjayB1bnRpbCBzbGVlcF9ub3RpZmljYXRpb24gY29tcGxldGlvbiwg
+bGlrZSBpbiBjYXNlIG9mIA0KUE0gc3VzcGVuZC4NCg0KPiANCj4gPg0KPiA+PiBJbiBhZGRpdGlv
+biB0byB0aGF0LCB3ZSBzaG91bGQgYmUgYWJsZSBpbXByb3ZlIHRoZSBzaXR1YXRpb24gYnkgYWxz
+bw0KPiA+PiBzZW5kaW5nIHRoZSBTTEVFUCBub3RpZmljYXRpb24gYXMgcGFydCBvZiBhbiAiaWRs
+ZSBvcGVyYXRpb24iLiBXaXRoDQo+ID4+ICJpZGxlIG9wZXJhdGlvbiIgSSBtZWFuIHRoZSBtbWMg
+YmxvY2sgbGF5ZXIgaGFzbuKAmXQgcmVjZWl2ZWQgYW55IG5ldw0KPiA+PiByZXF1ZXN0IGZvciBh
+IHdoaWxlICh0aGUgZnJhbWV3b3JrIGZvciB0aGlzIGlzIGFscmVhZHkgaW1wbGVtZW50ZWQgYnkg
+dXNpbmcNCj4gcnVudGltZSBQTSkuDQo+ID4NCj4gPiBPSywgc291bmRzIGxpa2UgYSBnb29kIGFw
+cHJvYWNoLg0KPiA+IEluIGNhc2UgcnVudGltZSBQTSBpcyBzdXBwb3J0ZWQsIHdlIGNhbiBjYWxs
+IFBPTiBTbGVlcF9Ob3RpZmljYXRpb24NCj4gPiBmcm9tDQo+ID4gbW1jX3J1bnRpbWVfc3VzcGVu
+ZCgpIGR1cmluZyB0aGUgImlkbGUgb3BlcmF0aW9uIiwgYW5kIHRoZW4gY2FsbCBpdA0KPiA+IGFn
+YWluIGR1cmluZyBQTSBTdXNwZW5kLg0KPiANCj4gWWVzLg0KPiANCj4gSWYgeW91IHBsYW4gdG8g
+c2VuZCBhIG5ldyB2ZXJzaW9uIG9mICRzdWJqZWN0IHBhdGNoLCBwbGVhc2Ugc3BsaXQgaW50byBh
+dCBsZWFzdCB0d28NCj4gcGF0Y2hlcy4gT25lIHdoaWNoIGFkZHMgdGhlIHN5c3RlbSBQTSBwYXJ0
+IGFuZCBvbmUgd2hpY2ggYWRkcyB0aGUgImlkbGUNCj4gb3BlcmF0aW9uIiBwYXJ0Lg0KDQpBcyBm
+YXIgYXMgSSBzZWUsIHRoZSBzYW1lIF9tbWNfc3VzcGVuZCgpIGZ1bmN0aW9uIGlzIHVzZWQgaW4g
+Ym90aCBjYXNlcyAtIA0KUE0gU3VzcGVuZCBhbmQgImlkbGUgb3BlcmF0aW9uIi4NClRoZSBfbW1j
+X3N1c3BlbmQoKSBpcyBjYWxsZWQgZnJvbSBib3RoICAtIG1tY19zdXNwZW5kKCkgYW5kDQptbWNf
+cnVudGltZV9zdXNwZW5kKCkuDQpJbiBjYXNlIHdlIGRlY2lkZSB0byBnbyB3aXRoIFBNIFN1c3Bl
+bmQgYW5kICJpZGxlIG9wZXJhdGlvbiIsDQpzaG91bGQgd2UganVzdCBhZGQgdGhlIHNsZWVwX25v
+dGlmaWNhdGlvbiBzdXBwb3J0IHRvIF9tbWNfc3VzcGVuZCgpIGZvcg0KY292ZXJpbmcgYm90aCBj
+YXNlcz8NCg0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg==
