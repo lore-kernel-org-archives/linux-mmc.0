@@ -1,86 +1,142 @@
 From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [PATCH] mmc: sleep notification
-Date: Mon, 6 Apr 2015 13:44:25 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED53343B2DC51@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
-	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFqLUBYUx9XrhnMeUtf8HU_=4PH_4Vf7m8mM-CT63jG24Q@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA1245B@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFrhfPZG4ZnqNTSEgbnpukw342gaeyi22OqAt6PA==E8ug@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA14148@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFrRAMRDNRX+zW-Odh+-ouZO7b0S4RvKQka+90D63uqBDQ@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA3FA3A@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFroXQ8CThExfbn3F+wMX6=6+-OgLawx2+RA8WC-Y-EKrw@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED5333FA5B753@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAPDyKFo0S=5Xek_i4TRo-YAHxE5UKa4PLw_t7awrtdd_AtuTZQ@mail.gmail.com>
+Subject: RE: [PATCH 0/5] mmc: Soft Command queue implementation for eMMC5.1
+ device
+Date: Mon, 6 Apr 2015 13:47:58 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED53343B2DCC0@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <20150317110955.GA17141@intel.com>
+ <282CEDFCBC30114F83C499CB8F2ED5333FA64788@SACMBXIP01.sdcorp.global.sandisk.com>
+ <17296D9F8FF2234F831FC3DF505A87A911C49E08@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0053.outbound.protection.outlook.com ([207.46.100.53]:13117
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+Received: from mail-bl2on0077.outbound.protection.outlook.com ([65.55.169.77]:56146
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753188AbbDFNoa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 6 Apr 2015 09:44:30 -0400
-In-Reply-To: <CAPDyKFo0S=5Xek_i4TRo-YAHxE5UKa4PLw_t7awrtdd_AtuTZQ@mail.gmail.com>
+	id S1753208AbbDFNsF convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Apr 2015 09:48:05 -0400
+In-Reply-To: <17296D9F8FF2234F831FC3DF505A87A911C49E08@shsmsx102.ccr.corp.intel.com>
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
+To: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>
 
-SGkgVWxmLA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5z
-c29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogV2VkbmVzZGF5LCBB
-cHJpbCAwMSwgMjAxNSAyOjQ2IFBNDQo+IFRvOiBBbGV4IExlbWJlcmcNCj4gQ2M6IEF2aSBTaGNo
-aXNsb3dza2k7IGxpbnV4LW1tYzsgQ2hyaXMgQmFsbA0KPiBTdWJqZWN0OiBSZTogW1BBVENIXSBt
-bWM6IHNsZWVwIG5vdGlmaWNhdGlvbg0KPiANCj4gWy4uLl0NCj4gDQo+ID4+IE9rYXksIHNvIHRv
-IG1lLCBJIHRoaW5rIHRoZSBTTEVFUCBub3RpZmljYXRpb24gbmVlZHMgdG8gYmUgc2VudCBhcyBh
-DQo+ID4+IHBhcnQgb2YgdGhlIHN5c3RlbSBQTSBzdXNwZW5kIHBoYXNlLiBBbmQgbW9yZSBleGFj
-dGx5IGZyb20gdGhlDQo+ID4+IGJ1c19vcHMtPnN1c3BlbmQoKSBjYWxsYmFjay4NCj4gPj4NCj4g
-Pg0KPiA+IFBNIHN1c3BlbmQgcGhhc2UgaXMgYSByaWdodCBwbGFjZSBmb3IgUE9OIFNsZWVwX05v
-dGlmaWNhdGlvbiwgYnV0IGl0DQo+ID4gYWxzbyB0aGUgY3JpdGljYWwgb25lIGFuZCBuZWVkIHRv
-IGJlIGNvbXBsZXRlZCBhcyBmYXN0IGFzIHBvc3NpYmxlLg0KPiA+DQo+ID4gSWYgSSdtIG5vdCBt
-aXN0YWtlbiwgZHVyaW5nIHRoZSBQTSBTdXNwZW5kLCB0aGUgdXNlciBzcGFjZSBpcyBmcmVlemlu
-Zy4NCj4gPiBJcyBpdCBPSyB0byBsZXQgUE9OIFNsZWVwX05vdGlmaWNhdGlvbiB0byBiZSBjYWxs
-ZWQgYXQgdGhhdCBzdGFnZT8NCj4gDQo+IE9mIGNvdXJzZSB3ZSBzaGFsbCBzdHJpdmUgaW4gbWlu
-aW1pemluZyB0aGUgc3lzdGVtIFBNIHN1c3BlbmQgdGltZS4NCj4gVGhvdWdoIHRvIG1lLCBJIHRo
-aW5rIHRoZSBzeXN0ZW0gUE0gX3Jlc3VtZV8gdGltZSBpcyBvZiBtb3JlIGltcG9ydGFuY2UuDQo+
-IA0KPiBJbiB0aGlzIGNhc2Ugd2UgZG9uJ3QgaGF2ZSBhbnkgb3B0aW9uLiBXZSBuZWVkIHRvIGlz
-c3VlIHRoZSBzbGVlcCBub3RpZmljYXRpb24gYXMNCj4gcGFydCBvZiB0aGUgdGhlIHN5c3RlbSBQ
-TSBzdXNwZW5kIHBoYXNlIGFuZCB0aGF0IHdpbGwgdW5mb3J0dW5hdGUgYW5kIGxpa2VseQ0KPiBp
-bmNyZWFzZSB0aGUgdG90YWwgc3lzdGVtIFBNIHN1c3BlbmQgdGltZS4NCj4gDQo+ID4NCj4gPiBD
-YWxsaW5nIGZyb20gdGhlIG5vdGlmaWVyX2NhbGwgKG1tY19wbV9ub3RpZnkoKSkgd2lsbCBhbGxv
-dyB0bw0KPiA+IGNvbXBsZXRlIFNsZWVwX05vdGlmaWNhdGlvbiBwcm9jZXNzIGJlZm9yZSBlbnRl
-cmluZyB0byB0aGUgY3JpdGljYWwgcGFydCAtIHRoZQ0KPiBTdXNwZW5kLg0KPiA+IElzbid0IGl0
-Pw0KPiANCj4gV2h5IGlzIG1tY19wbV9ub3RpZnkoKSBhIGxlc3MgY3JpdGljYWwgcGFydD8NCj4g
-DQo+IE1vcmUgaW1wb3J0YW50bHkgYXMgc3RhdGVkIHNldmVyYWwgdGltZXMsIHdlIGNhbiBzdGls
-bCBnZXQgSS9PIHJlcXVlc3RzIGFmdGVyDQo+IHRoZSBtbWNfcG1fbm90aWZ5KCkgcGhhc2UgYW5k
-IHRoZW4gdGhlIHNsZWVwIG5vdGlmaWNhdGlvbiBuZWVkcyB0byBiZQ0KPiBpbnRlcnJ1cHRlZCBh
-bmQgcmUtaXNzdWVkIGFueXdheS4NCg0KWW91IGFyZSByaWdodCAtIHRoZSBzbGVlcF9ub3RpZmlj
-YXRpb24gbWlnaHQgYmUgcmUtaXNzdWVkIHNldmVyYWwgdGltZXMsDQpidXQgaW4gY2FzZSBvZiBt
-bWNfcG1fbm90aWZ5KCkgdGhlIHVzZXIgc3BhY2UgaXMgbm90IGZyb3plbiB5ZXQsIGFuZCANCnN5
-c3RlbSB3aWxsIG5vdCBzdHVjayB1bnRpbCBzbGVlcF9ub3RpZmljYXRpb24gY29tcGxldGlvbiwg
-bGlrZSBpbiBjYXNlIG9mIA0KUE0gc3VzcGVuZC4NCg0KPiANCj4gPg0KPiA+PiBJbiBhZGRpdGlv
-biB0byB0aGF0LCB3ZSBzaG91bGQgYmUgYWJsZSBpbXByb3ZlIHRoZSBzaXR1YXRpb24gYnkgYWxz
-bw0KPiA+PiBzZW5kaW5nIHRoZSBTTEVFUCBub3RpZmljYXRpb24gYXMgcGFydCBvZiBhbiAiaWRs
-ZSBvcGVyYXRpb24iLiBXaXRoDQo+ID4+ICJpZGxlIG9wZXJhdGlvbiIgSSBtZWFuIHRoZSBtbWMg
-YmxvY2sgbGF5ZXIgaGFzbuKAmXQgcmVjZWl2ZWQgYW55IG5ldw0KPiA+PiByZXF1ZXN0IGZvciBh
-IHdoaWxlICh0aGUgZnJhbWV3b3JrIGZvciB0aGlzIGlzIGFscmVhZHkgaW1wbGVtZW50ZWQgYnkg
-dXNpbmcNCj4gcnVudGltZSBQTSkuDQo+ID4NCj4gPiBPSywgc291bmRzIGxpa2UgYSBnb29kIGFw
-cHJvYWNoLg0KPiA+IEluIGNhc2UgcnVudGltZSBQTSBpcyBzdXBwb3J0ZWQsIHdlIGNhbiBjYWxs
-IFBPTiBTbGVlcF9Ob3RpZmljYXRpb24NCj4gPiBmcm9tDQo+ID4gbW1jX3J1bnRpbWVfc3VzcGVu
-ZCgpIGR1cmluZyB0aGUgImlkbGUgb3BlcmF0aW9uIiwgYW5kIHRoZW4gY2FsbCBpdA0KPiA+IGFn
-YWluIGR1cmluZyBQTSBTdXNwZW5kLg0KPiANCj4gWWVzLg0KPiANCj4gSWYgeW91IHBsYW4gdG8g
-c2VuZCBhIG5ldyB2ZXJzaW9uIG9mICRzdWJqZWN0IHBhdGNoLCBwbGVhc2Ugc3BsaXQgaW50byBh
-dCBsZWFzdCB0d28NCj4gcGF0Y2hlcy4gT25lIHdoaWNoIGFkZHMgdGhlIHN5c3RlbSBQTSBwYXJ0
-IGFuZCBvbmUgd2hpY2ggYWRkcyB0aGUgImlkbGUNCj4gb3BlcmF0aW9uIiBwYXJ0Lg0KDQpBcyBm
-YXIgYXMgSSBzZWUsIHRoZSBzYW1lIF9tbWNfc3VzcGVuZCgpIGZ1bmN0aW9uIGlzIHVzZWQgaW4g
-Ym90aCBjYXNlcyAtIA0KUE0gU3VzcGVuZCBhbmQgImlkbGUgb3BlcmF0aW9uIi4NClRoZSBfbW1j
-X3N1c3BlbmQoKSBpcyBjYWxsZWQgZnJvbSBib3RoICAtIG1tY19zdXNwZW5kKCkgYW5kDQptbWNf
-cnVudGltZV9zdXNwZW5kKCkuDQpJbiBjYXNlIHdlIGRlY2lkZSB0byBnbyB3aXRoIFBNIFN1c3Bl
-bmQgYW5kICJpZGxlIG9wZXJhdGlvbiIsDQpzaG91bGQgd2UganVzdCBhZGQgdGhlIHNsZWVwX25v
-dGlmaWNhdGlvbiBzdXBwb3J0IHRvIF9tbWNfc3VzcGVuZCgpIGZvcg0KY292ZXJpbmcgYm90aCBj
-YXNlcz8NCg0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg==
+Hi Chuanxiao,
+
+
+> -----Original Message-----
+> From: Dong, Chuanxiao [mailto:chuanxiao.dong@intel.com]
+> Sent: Thursday, April 02, 2015 1:52 PM
+> To: Alex Lemberg; linux-mmc@vger.kernel.org
+> Cc: Yuliy Izrailov
+> Subject: RE: [PATCH 0/5] mmc: Soft Command queue implementation for
+> eMMC5.1 device
+> 
+> Thanks Alex for review.
+> 
+> From my understanding, if host->areq == areq, then means the areq is the
+> current running request. By this way, driver will clear the executable ready bit
+> in slots and continue to find the next one. So the task with the same ID won't be
+> executed at the same time.
+
+Right, but there is a case for context switch:
+
+> 
+> +	do {
+> +		id = find_first_bit(&slots, mq->qdepth);
+> +		if (id < mq->qdepth) {
+> +			areq = &mq->mqrq[id].mmc_active;
+
+What if host->areq will be changed as the result of completion interrupt,
+in parallel or just before this if condition?
+
+> +			if (host->areq == areq)
+> +				goto next;
+> .....
+> ......
+> +next:
+> +		__clear_bit(id, &slots);
+> +	} while (status);
+> 
+> I also prepared patch set v1, which won't send CMD13 to poll cmdq ready
+> during a cmdq request is executing by CMD46/47. Will send them out later.
+> 
+> Thanks
+> Chuanxiao
+> 
+> > -----Original Message-----
+> > From: Alex Lemberg [mailto:Alex.Lemberg@sandisk.com]
+> > Sent: Thursday, April 02, 2015 4:57 PM
+> > To: Dong, Chuanxiao; linux-mmc@vger.kernel.org
+> > Cc: Yuliy Izrailov
+> > Subject: RE: [PATCH 0/5] mmc: Soft Command queue implementation for
+> > eMMC5.1 device
+> >
+> > Hi Chuanxiao,
+> >
+> >
+> > > -----Original Message-----
+> > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > > owner@vger.kernel.org] On Behalf Of Chuanxiao Dong
+> > > Sent: Tuesday, March 17, 2015 1:10 PM
+> > > To: linux-mmc@vger.kernel.org
+> > > Subject: [PATCH 0/5] mmc: Soft Command queue implementation for
+> > > eMMC5.1 device
+> > >
+> > > Hello
+> > >
+> > > This serial of patches can implement the eMMC5.1 device command
+> > > queue feature even a host controller doesn't support CMDQ. Several
+> > > weeks ago I submitted RFC patches for review and collected some review
+> comments.
+> > > Right now these comments are fixed thus I submit again as the
+> > > offical patches. Please have a review.
+> >
+> > Thanks for sending the new patch.
+> > We have reviewed and see issues still exists like in previous patch version.
+> > The driver flow where request with the same TID is executed right
+> > after completing its data transfer, is still possible.
+> > We suspect that the new solution is not covering the case of driver
+> > thread context switch, Specifically the following condition in block.c:
+> >
+> > +			if (host->areq == areq)
+> > +				goto next;
+> >
+> >
+> > Thanks,
+> > Alex
+> >
+> > >
+> > > Chuanxiao Dong (5):
+> > >   mmc: replace sbc to precmd and add postcmd
+> > >   mmc: host: add runtime PM for host class dev
+> > >   mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
+> > >   mmc: core: add support for CMDQ feature in MMC Core stack
+> > >   mmc: sdhci: add SW CMDQ support for SDHCI host
+> > >
+> > >  drivers/mmc/card/block.c      |  538
+> > > ++++++++++++++++++++++++++++++++++++++---
+> > >  drivers/mmc/card/queue.c      |  213 ++++++++--------
+> > >  drivers/mmc/card/queue.h      |   14 +-
+> > >  drivers/mmc/core/core.c       |   85 ++++++-
+> > >  drivers/mmc/core/host.c       |   13 +
+> > >  drivers/mmc/core/mmc.c        |   37 ++-
+> > >  drivers/mmc/host/dw_mmc.c     |    8 +-
+> > >  drivers/mmc/host/mmci.c       |   14 +-
+> > >  drivers/mmc/host/omap_hsmmc.c |   18 +-
+> > >  drivers/mmc/host/sdhci-acpi.c |    1 -
+> > >  drivers/mmc/host/sdhci-pci.c  |    1 -
+> > >  drivers/mmc/host/sdhci.c      |  137 +++++++++--
+> > >  drivers/mmc/host/sdhci.h      |    1 +
+> > >  include/linux/mmc/card.h      |    3 +
+> > >  include/linux/mmc/core.h      |    5 +-
+> > >  include/linux/mmc/host.h      |    5 +
+> > >  include/linux/mmc/mmc.h       |   21 ++
+> > >  include/linux/mmc/pm.h        |    1 +
+> > >  18 files changed, 911 insertions(+), 204 deletions(-)
+> > >
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
+> > > in the body of a message to majordomo@vger.kernel.org More majordomo
+> > > info at http://vger.kernel.org/majordomo-info.html
