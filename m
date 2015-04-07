@@ -1,41 +1,24 @@
-From: <micky_ching@realsil.com.cn>
-Subject: [PATCH] sdhci: rtsx: fix 64 BIT DMA quirks
-Date: Tue, 7 Apr 2015 11:32:01 +0800
-Message-ID: <1428377521-16619-1-git-send-email-micky_ching@realsil.com.cn>
+From: ph <2k8hazza2k8@googlemail.com>
+Subject: =?utf-8?B?dmV1cmVwZXJjcmV1cmUgUmU6YnU=?=
+	=?utf-8?B?ZW4gZMOtYQ==?=
+Date: Tue, 7 Apr 2015 12:16:57 +0800
+Message-ID: <696498EA8505BA46F49666C8F9E9F0EB@kbr>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rtits2.realtek.com ([60.250.210.242]:39955 "EHLO
-	rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753012AbbDGDcd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Apr 2015 23:32:33 -0400
+Received: from mail-wi0-f193.google.com ([209.85.212.193]:34314 "EHLO
+	mail-wi0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750756AbbDGESd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Apr 2015 00:18:33 -0400
+Received: by wivr20 with SMTP id r20so356476wiv.1
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Apr 2015 21:18:32 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: chris@printf.net, ulf.hansson@linaro.org, sameo@linux.intel.com
-Cc: gregkh@linuxfoundation.org, dan.carpenter@oracle.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, rogerable@realtek.com, wei_wang@realsil.com.cn, Micky Ching <micky_ching@realsil.com.cn>
 
-From: Micky Ching <micky_ching@realsil.com.cn>
+YnVlbiBkw61hDQpvcmRlbmFkb3IgcG9ydMOhdGlsLCB0ZWxldmlzacOzbiwgbW90b2NpY2xldGEs
+IGPDoW1hcmEgZGlnaXRhbCwgcmVsb2ogLi4uLi4gZWwgZW52w61vIGVzIGdyYXRpcw0KaXBob25l
+IDYsIDI5NSDigqwNCncgZSBiIDogIGVyZWFhYWwgIC4gY29tDQo=
 
-rts5250 chip failed handle 64 bit ADMA for address below 4G.
-Add 64 BIT quirks to disable this feature.
-
-Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
----
- drivers/mmc/host/sdhci-pci.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index 0342775..ae8e450 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -650,6 +650,7 @@ static int rtsx_probe_slot(struct sdhci_pci_slot *slot)
- 
- static const struct sdhci_pci_fixes sdhci_rtsx = {
- 	.quirks2	= SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+			SDHCI_QUIRK2_BROKEN_64_BIT_DMA |
- 			SDHCI_QUIRK2_BROKEN_DDR50,
- 	.probe_slot	= rtsx_probe_slot,
- };
--- 
-1.9.1
 
