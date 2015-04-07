@@ -1,164 +1,41 @@
-From: "Dong, Chuanxiao" <chuanxiao.dong@intel.com>
-Subject: RE: [PATCH 0/5] mmc: Soft Command queue implementation for eMMC5.1
- device
-Date: Tue, 7 Apr 2015 02:48:42 +0000
-Message-ID: <17296D9F8FF2234F831FC3DF505A87A911C4D097@shsmsx102.ccr.corp.intel.com>
-References: <20150317110955.GA17141@intel.com>
- <282CEDFCBC30114F83C499CB8F2ED5333FA64788@SACMBXIP01.sdcorp.global.sandisk.com>
- <17296D9F8FF2234F831FC3DF505A87A911C49E08@shsmsx102.ccr.corp.intel.com>
- <282CEDFCBC30114F83C499CB8F2ED53343B2DCC0@SACMBXIP01.sdcorp.global.sandisk.com>
+From: <micky_ching@realsil.com.cn>
+Subject: [PATCH] sdhci: rtsx: fix 64 BIT DMA quirks
+Date: Tue, 7 Apr 2015 11:32:01 +0800
+Message-ID: <1428377521-16619-1-git-send-email-micky_ching@realsil.com.cn>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:16804 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752947AbbDGCsr convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Apr 2015 22:48:47 -0400
-In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED53343B2DCC0@SACMBXIP01.sdcorp.global.sandisk.com>
-Content-Language: en-US
+Received: from rtits2.realtek.com ([60.250.210.242]:39955 "EHLO
+	rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753012AbbDGDcd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Apr 2015 23:32:33 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>
+To: chris@printf.net, ulf.hansson@linaro.org, sameo@linux.intel.com
+Cc: gregkh@linuxfoundation.org, dan.carpenter@oracle.com, devel@linuxdriverproject.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, rogerable@realtek.com, wei_wang@realsil.com.cn, Micky Ching <micky_ching@realsil.com.cn>
 
-Hi Alex,
+From: Micky Ching <micky_ching@realsil.com.cn>
 
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org
-> [mailto:linux-mmc-owner@vger.kernel.org] On Behalf Of Alex Lemberg
-> Sent: Monday, April 06, 2015 9:48 PM
-> To: Dong, Chuanxiao; linux-mmc@vger.kernel.org
-> Cc: Yuliy Izrailov
-> Subject: RE: [PATCH 0/5] mmc: Soft Command queue implementation for
-> eMMC5.1 device
-> 
-> Hi Chuanxiao,
-> 
-> 
-> > -----Original Message-----
-> > From: Dong, Chuanxiao [mailto:chuanxiao.dong@intel.com]
-> > Sent: Thursday, April 02, 2015 1:52 PM
-> > To: Alex Lemberg; linux-mmc@vger.kernel.org
-> > Cc: Yuliy Izrailov
-> > Subject: RE: [PATCH 0/5] mmc: Soft Command queue implementation for
-> > eMMC5.1 device
-> >
-> > Thanks Alex for review.
-> >
-> > From my understanding, if host->areq == areq, then means the areq is
-> > the current running request. By this way, driver will clear the
-> > executable ready bit in slots and continue to find the next one. So
-> > the task with the same ID won't be executed at the same time.
-> 
-> Right, but there is a case for context switch:
-> 
-> >
-> > +	do {
-> > +		id = find_first_bit(&slots, mq->qdepth);
-> > +		if (id < mq->qdepth) {
-> > +			areq = &mq->mqrq[id].mmc_active;
-> 
-> What if host->areq will be changed as the result of completion interrupt, in
-> parallel or just before this if condition?
-Host->areq will be changed after this "if", in function "mmc_execute_cmdq".They are synchronize. Except "mmc_execute_cmdq", host->areq is changed nowhere.
+rts5250 chip failed handle 64 bit ADMA for address below 4G.
+Add 64 BIT quirks to disable this feature.
 
-Thanks
-Chuanxiao
+Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
+---
+ drivers/mmc/host/sdhci-pci.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-> 
-> > +			if (host->areq == areq)
-> > +				goto next;
-> > .....
-> > ......
-> > +next:
-> > +		__clear_bit(id, &slots);
-> > +	} while (status);
-> >
-> > I also prepared patch set v1, which won't send CMD13 to poll cmdq
-> > ready during a cmdq request is executing by CMD46/47. Will send them out
-> later.
-> >
-> > Thanks
-> > Chuanxiao
-> >
-> > > -----Original Message-----
-> > > From: Alex Lemberg [mailto:Alex.Lemberg@sandisk.com]
-> > > Sent: Thursday, April 02, 2015 4:57 PM
-> > > To: Dong, Chuanxiao; linux-mmc@vger.kernel.org
-> > > Cc: Yuliy Izrailov
-> > > Subject: RE: [PATCH 0/5] mmc: Soft Command queue implementation for
-> > > eMMC5.1 device
-> > >
-> > > Hi Chuanxiao,
-> > >
-> > >
-> > > > -----Original Message-----
-> > > > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > > > owner@vger.kernel.org] On Behalf Of Chuanxiao Dong
-> > > > Sent: Tuesday, March 17, 2015 1:10 PM
-> > > > To: linux-mmc@vger.kernel.org
-> > > > Subject: [PATCH 0/5] mmc: Soft Command queue implementation for
-> > > > eMMC5.1 device
-> > > >
-> > > > Hello
-> > > >
-> > > > This serial of patches can implement the eMMC5.1 device command
-> > > > queue feature even a host controller doesn't support CMDQ. Several
-> > > > weeks ago I submitted RFC patches for review and collected some
-> > > > review
-> > comments.
-> > > > Right now these comments are fixed thus I submit again as the
-> > > > offical patches. Please have a review.
-> > >
-> > > Thanks for sending the new patch.
-> > > We have reviewed and see issues still exists like in previous patch version.
-> > > The driver flow where request with the same TID is executed right
-> > > after completing its data transfer, is still possible.
-> > > We suspect that the new solution is not covering the case of driver
-> > > thread context switch, Specifically the following condition in block.c:
-> > >
-> > > +			if (host->areq == areq)
-> > > +				goto next;
-> > >
-> > >
-> > > Thanks,
-> > > Alex
-> > >
-> > > >
-> > > > Chuanxiao Dong (5):
-> > > >   mmc: replace sbc to precmd and add postcmd
-> > > >   mmc: host: add runtime PM for host class dev
-> > > >   mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
-> > > >   mmc: core: add support for CMDQ feature in MMC Core stack
-> > > >   mmc: sdhci: add SW CMDQ support for SDHCI host
-> > > >
-> > > >  drivers/mmc/card/block.c      |  538
-> > > > ++++++++++++++++++++++++++++++++++++++---
-> > > >  drivers/mmc/card/queue.c      |  213 ++++++++--------
-> > > >  drivers/mmc/card/queue.h      |   14 +-
-> > > >  drivers/mmc/core/core.c       |   85 ++++++-
-> > > >  drivers/mmc/core/host.c       |   13 +
-> > > >  drivers/mmc/core/mmc.c        |   37 ++-
-> > > >  drivers/mmc/host/dw_mmc.c     |    8 +-
-> > > >  drivers/mmc/host/mmci.c       |   14 +-
-> > > >  drivers/mmc/host/omap_hsmmc.c |   18 +-
-> > > >  drivers/mmc/host/sdhci-acpi.c |    1 -
-> > > >  drivers/mmc/host/sdhci-pci.c  |    1 -
-> > > >  drivers/mmc/host/sdhci.c      |  137 +++++++++--
-> > > >  drivers/mmc/host/sdhci.h      |    1 +
-> > > >  include/linux/mmc/card.h      |    3 +
-> > > >  include/linux/mmc/core.h      |    5 +-
-> > > >  include/linux/mmc/host.h      |    5 +
-> > > >  include/linux/mmc/mmc.h       |   21 ++
-> > > >  include/linux/mmc/pm.h        |    1 +
-> > > >  18 files changed, 911 insertions(+), 204 deletions(-)
-> > > >
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> > > > in the body of a message to majordomo@vger.kernel.org More
-> > > > majordomo info at http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the body
-> of a message to majordomo@vger.kernel.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index 0342775..ae8e450 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -650,6 +650,7 @@ static int rtsx_probe_slot(struct sdhci_pci_slot *slot)
+ 
+ static const struct sdhci_pci_fixes sdhci_rtsx = {
+ 	.quirks2	= SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++			SDHCI_QUIRK2_BROKEN_64_BIT_DMA |
+ 			SDHCI_QUIRK2_BROKEN_DDR50,
+ 	.probe_slot	= rtsx_probe_slot,
+ };
+-- 
+1.9.1
+
