@@ -1,69 +1,141 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/2] mmc: host: Add some quirks to be read from fdt in sdhci-pltm.c
-Date: Wed, 8 Apr 2015 11:40:16 +0200
-Message-ID: <CAPDyKFoc0V5BdKCO8v92Y1qHzEPgwxRdYR3cCj8nCyU-s25NuQ@mail.gmail.com>
-References: <1427726768-17233-1-git-send-email-stripathi@apm.com>
-	<1427726768-17233-3-git-send-email-stripathi@apm.com>
+Subject: Re: [PATCH] mmc: sleep notification
+Date: Wed, 8 Apr 2015 11:49:08 +0200
+Message-ID: <CAPDyKFopOFH1rHrf6hu_oTJj+EmiDLSyPn9pKc34iUtANbYTsA@mail.gmail.com>
+References: <1425980197-823-1-git-send-email-avi.shchislowski@sandisk.com>
+	<CAPDyKFooK=F88mO+8T0o1WAS=a+NntJszt-fa9+Ddkh_LpJsQg@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333F9FF93F@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFr2HoMveZ7t=U+CevXuO3hZmN-DivFKEaDnqpPtBYquWA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA0429D@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFqLUBYUx9XrhnMeUtf8HU_=4PH_4Vf7m8mM-CT63jG24Q@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA1245B@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFrhfPZG4ZnqNTSEgbnpukw342gaeyi22OqAt6PA==E8ug@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA14148@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFrRAMRDNRX+zW-Odh+-ouZO7b0S4RvKQka+90D63uqBDQ@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA3FA3A@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFroXQ8CThExfbn3F+wMX6=6+-OgLawx2+RA8WC-Y-EKrw@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED5333FA5B753@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFo0S=5Xek_i4TRo-YAHxE5UKa4PLw_t7awrtdd_AtuTZQ@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED53343B2DC51@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f179.google.com ([209.85.220.179]:35380 "EHLO
-	mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751287AbbDHJkS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Apr 2015 05:40:18 -0400
-Received: by qkhg7 with SMTP id g7so78640350qkh.2
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Apr 2015 02:40:17 -0700 (PDT)
-In-Reply-To: <1427726768-17233-3-git-send-email-stripathi@apm.com>
+Received: from mail-qk0-f182.google.com ([209.85.220.182]:34359 "EHLO
+	mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752944AbbDHJtI convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Apr 2015 05:49:08 -0400
+Received: by qkgx75 with SMTP id x75so78902857qkg.1
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Apr 2015 02:49:08 -0700 (PDT)
+In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED53343B2DC51@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Suman Tripathi <stripathi@apm.com>
-Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, ddutile@redhat.com, jcm@redhat.com, mlangsdo@redhat.com, patches@apm.com
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-On 30 March 2015 at 16:46, Suman Tripathi <stripathi@apm.com> wrote:
-> This patch adds some quirks support to be read from fdt.
+On 6 April 2015 at 15:44, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote=
+:
+> Hi Ulf,
 >
-> Signed-off-by: Suman Tripathi <stripathi@apm.com>
-> ---
->  drivers/mmc/host/sdhci-pltfm.c | 15 +++++++++++++++
->  1 file changed, 15 insertions(+)
+>> -----Original Message-----
+>> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+>> Sent: Wednesday, April 01, 2015 2:46 PM
+>> To: Alex Lemberg
+>> Cc: Avi Shchislowski; linux-mmc; Chris Ball
+>> Subject: Re: [PATCH] mmc: sleep notification
+>>
+>> [...]
+>>
+>> >> Okay, so to me, I think the SLEEP notification needs to be sent a=
+s a
+>> >> part of the system PM suspend phase. And more exactly from the
+>> >> bus_ops->suspend() callback.
+>> >>
+>> >
+>> > PM suspend phase is a right place for PON Sleep_Notification, but =
+it
+>> > also the critical one and need to be completed as fast as possible=
+=2E
+>> >
+>> > If I'm not mistaken, during the PM Suspend, the user space is free=
+zing.
+>> > Is it OK to let PON Sleep_Notification to be called at that stage?
+>>
+>> Of course we shall strive in minimizing the system PM suspend time.
+>> Though to me, I think the system PM _resume_ time is of more importa=
+nce.
+>>
+>> In this case we don't have any option. We need to issue the sleep no=
+tification as
+>> part of the the system PM suspend phase and that will unfortunate an=
+d likely
+>> increase the total system PM suspend time.
+>>
+>> >
+>> > Calling from the notifier_call (mmc_pm_notify()) will allow to
+>> > complete Sleep_Notification process before entering to the critica=
+l part - the
+>> Suspend.
+>> > Isn't it?
+>>
+>> Why is mmc_pm_notify() a less critical part?
+>>
+>> More importantly as stated several times, we can still get I/O reque=
+sts after
+>> the mmc_pm_notify() phase and then the sleep notification needs to b=
+e
+>> interrupted and re-issued anyway.
 >
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index bef250e..9f6a4b9 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -85,6 +85,21 @@ void sdhci_get_of_property(struct platform_device *pdev)
+> You are right - the sleep_notification might be re-issued several tim=
+es,
+> but in case of mmc_pm_notify() the user space is not frozen yet, and
+> system will not stuck until sleep_notification completion, like in ca=
+se of
+> PM suspend.
 >
->                 if (of_get_property(np, "broken-cd", NULL))
->                         host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-> +
-> +               if (of_get_property(np, "delay-after-power", NULL))
-> +                       host->quirks |= SDHCI_QUIRK_DELAY_AFTER_POWER;
-> +
-> +               if (of_get_property(np, "no-hispd", NULL))
-> +                       host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
-> +
-> +               if (of_get_property(np, "broken-adma", NULL))
-> +                       host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
-> +
-> +               if (of_get_property(np, "broken-dma", NULL))
-> +                       host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
-> +
-> +               if (of_get_property(np, "no-cmd23", NULL))
-> +                       host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+>>
+>> >
+>> >> In addition to that, we should be able improve the situation by a=
+lso
+>> >> sending the SLEEP notification as part of an "idle operation". Wi=
+th
+>> >> "idle operation" I mean the mmc block layer hasn=E2=80=99t receiv=
+ed any new
+>> >> request for a while (the framework for this is already implemente=
+d by using
+>> runtime PM).
+>> >
+>> > OK, sounds like a good approach.
+>> > In case runtime PM is supported, we can call PON Sleep_Notificatio=
+n
+>> > from
+>> > mmc_runtime_suspend() during the "idle operation", and then call i=
+t
+>> > again during PM Suspend.
+>>
+>> Yes.
+>>
+>> If you plan to send a new version of $subject patch, please split in=
+to at least two
+>> patches. One which adds the system PM part and one which adds the "i=
+dle
+>> operation" part.
+>
+> As far as I see, the same _mmc_suspend() function is used in both cas=
+es -
+> PM Suspend and "idle operation".
+> The _mmc_suspend() is called from both  - mmc_suspend() and
+> mmc_runtime_suspend().
+> In case we decide to go with PM Suspend and "idle operation",
+> should we just add the sleep_notification support to _mmc_suspend() f=
+or
+> covering both cases?
 
-Can't at least some of these be distinguished from what sdhci variant
-that is being used? Instead of having them in DT...
+That works as a start.
+
+Though, it would mean MMC_CAP_AGGRESSIVE_PM is needed to enable "idle
+operations" for this case. It might be good enough. If not, we need to
+send the sleep notification from mmc_runtime_suspend() as well.
 
 Kind regards
 Uffe
-
->
->                 if (of_get_property(np, "no-1-8-v", NULL))
->                         host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
-> --
-> 1.8.2.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
