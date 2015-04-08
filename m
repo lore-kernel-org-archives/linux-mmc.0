@@ -1,87 +1,103 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V4 01/15] mmc: host: Add facility to support re-tuning
-Date: Wed, 08 Apr 2015 10:42:09 +0300
-Message-ID: <5524DBD1.8020606@intel.com>
-References: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>	<1427489863-9050-2-git-send-email-adrian.hunter@intel.com>	<CAPDyKFrs4X+nDDkikUNSO5uz+Wsoz3TmkLJ9RwvvdjYqd8+Ygg@mail.gmail.com>	<551BDAEA.20405@intel.com>	<551C0A4C.9020602@broadcom.com>	<CAPDyKFp=DBj1==KVBxbZqE9Zo9F7QAxENcU_dqXUb5pvyNrv5A@mail.gmail.com>	<551D1A59.5060803@broadcom.com>	<CAPDyKFqdwQVEoKWH-Et32PZxVrcOabt7rek=Xq01yLmebgXuOA@mail.gmail.com>	<551D3391.8040508@intel.com>	<CAPDyKFrFoiKFC+i_TF_NR9Mg6b9JxzqRHyyN72z331s+0Gge2A@mail.gmail.com>	<551D35C6.7070605@broadcom.com>	<551D396F.1020301@intel.com> <CAPDyKFpyu5fYw4e_ptP-WYfsQWmJairu4CnVk7abOvE5pZJU8g@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 0/9] Add sd/emmc support for stih407 family silicon
+Date: Wed, 8 Apr 2015 10:03:27 +0200
+Message-ID: <CAPDyKFo7p6jRWTDvnPjUdfQoMvR=MUDogDqD_bSqqK=F08Mifw@mail.gmail.com>
+References: <1427726402-7513-1-git-send-email-peter.griffin@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:59529 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751694AbbDHHoP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 8 Apr 2015 03:44:15 -0400
-In-Reply-To: <CAPDyKFpyu5fYw4e_ptP-WYfsQWmJairu4CnVk7abOvE5pZJU8g@mail.gmail.com>
+Received: from mail-qk0-f169.google.com ([209.85.220.169]:34640 "EHLO
+	mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752863AbbDHID2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Apr 2015 04:03:28 -0400
+Received: by qkgx75 with SMTP id x75so76475180qkg.1
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Apr 2015 01:03:27 -0700 (PDT)
+In-Reply-To: <1427726402-7513-1-git-send-email-peter.griffin@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Arend van Spriel <arend@broadcom.com>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Neil Brown <neil@brown.name>
+To: Peter Griffin <peter.griffin@linaro.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Maxime Coquelin <maxime.coquelin@st.com>, Patrice CHOTARD <patrice.chotard@st.com>, Srinivas Kandagatla <srinivas.kandagatla@gmail.com>, Chris Ball <chris@printf.net>, Lee Jones <lee.jones@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Giuseppe Cavallaro <peppe.cavallaro@st.com>
 
-On 02/04/15 17:00, Ulf Hansson wrote:
-> [...]
-> 
->>>>>>>>>> Also SDIO cards can have a custom sleep state where tuning won't work.
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>> Our SDIO wifi device has such a state and it can only come out of it
->>>>>>>>> upon
->>>>>>>>> CMD52 write or CMD14 (ExitSleep).
->>>>>>>>
->>>>>>>>
->>>>>>>> So how will the mmc core know about these states? I guess we will
->>>>>>>> require SDIO func drivers to deal with enable/disable or hold/release
->>>>>>>> of re-tuning then?
->>>>>>>
->>>>>>>
->>>>>>> This is actually why in the past we tried to only kick off retuning
->>>>>>> before a
->>>>>>> request that requires use of data line(s) so mmc core (or sdhci) would not
->>>>>>> do re-tuning when SDIO func used CMD52 to wakeup the device. I never tried
->>>>>>> CMD14 approach and not even sure from which spec it comes (maybe eMMC).
->>>>>>
->>>>>> That's an interesting idea. It would eliminate the need for SDIO func
->>>>>> drivers to care about holding/releasing re-tuning.
->>>>>>
->>>>>> Would be nice to hear about Adrian's thoughts around this as well.
->>>>>
->>>>> I don't see how it would work because re-tuning is needed after the host
->>>>> controller runtime resumes. i.e. once the SDIO wifi card stops being active
->>>>> the host controller will runtime suspend.
->>>>
->>>> Why do we always need to re-tune from this phase?
->>>>
->>>> What Arend points out is that we could "delay" the re-tune until we
->>>> know there is a DATA request. Wouldn't that work for SDHCI as well?
->>>
->>> You beat me to it, but that is indeed what I meant.
->>
->> The CMD line needs tuning too, so delaying tuning on every command will
->> cause errors. It is better to hold tuning for the specific command used to
->> wake-up.
-> 
-> Hmm.
-> 
-> This touches the discussion where Neil Brown also was involved, around
-> how to handle "idle operations" for SDIO.
-> 
-> How does SDIO func drivers detects "request inactivity", which
-> triggers them to send its device to "sleep mode"? That answer should
-> be runtime PM.
+On 30 March 2015 at 16:39, Peter Griffin <peter.griffin@linaro.org> wrote:
+> Hi,
+>
+> This series adds sd/emmc support to the sdhci-st.c driver for stih407
+> family silicon. The changes mainly involve configuring some extra glue
+> registers in the flashSS which configure the Arasan controller.
+>
+> This series also adds support for UHS modes for eMMC. To allow
+> UHS HS200/SD104 modes to function correctly, due to the
+> tight timing constriants, support for delay management is also added.
+> Two types of delay management are supported, static delay management and
+> dynamic delay management, this delay management is only available
+> on eMMC pads on stih410 and later silicon.
+>
+> This series has been tested with stih410-b2120 revd on eMMC and sd, at
+> various clock speeds. As part of this testing a bug was also found in the
+> upstream flexgen clock set_rate implementation (now fixed upstream).
+>
+>     max-frequency = 200Mhz
+>     /dev/mmcblk0p1:
+>      Timing buffered disk reads: 270 MB in  3.02 seconds =  89.54 MB/sec
+>
+>     max-frequency = 100Mhz
+>     root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
+>     /dev/mmcblk0p1:
+>      Timing buffered disk reads: 210 MB in  3.00 seconds =  70.00 MB/sec
+>
+>     max-frequency = 50Mhz
+>     root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
+>     /dev/mmcblk0p1:
+>      Timing buffered disk reads: 118 MB in  3.00 seconds =  39.28 MB/sec
+>
+> It has also been tested on stih416-b2020 to ensure we have caused no
+> regressions. Finally the dt documentation has been updated to reflect
+> the changes in the driver code. Intrestingly it seems we are the first
+> upstream platform to be using some of the uhs bindings such as
+> sd-uhs-sdr104.
+>
+> Changes since v2:
+>  - Some whitespace fixups (Max)
+>  - if (!ioaddr) suggestion (Max)
+>  - Add stih418-b2199 suport (Max)
+>  - Stih410 to STiH410 fixes (Max)
+>  - rebased on v4.0-rc6 (Pete)
+>
+> Changes since v1:
+>  - Partition the changes into smaller patches to aid review process (Ulf)
+>
+> regards,
+>
+> Peter.
+>
+> Peter Griffin (9):
+>   mmc: sdhci-st: Add macros for register offsets and bitfields for mmcss
+>     glue regs
+>   mmc: sdhci-st: Add support for de-asserting reset signal and top regs
+>     resource
+>   mmc: sdhci-st: Add delay management functions for top registers
+>     (eMMC).
+>   mmc: sdhci-st: Add st_mmcss_cconfig function to configure mmcss glue
+>     registers.
+>   mmc: sdhci-st: Add sdhci_st_set_uhs_signaling function.
+>   mmc: sdhci-st: Update the quirks for this controller.
+>   mmc: sdhci-st: Update ST SDHCI binding documentation.
+>   ARM: STi: DT: STiH407: Add dt nodes for sdhci and emmc.
+>   ARM: STi: DT: STiH418: Add dt nodes for sdhci and emmc.
+>
+>  Documentation/devicetree/bindings/mmc/sdhci-st.txt | 100 +++++-
+>  arch/arm/boot/dts/stih407-family.dtsi              |  30 ++
+>  arch/arm/boot/dts/stih410-b2120.dts                |  10 +
+>  arch/arm/boot/dts/stih418-b2199.dts                |  12 +
+>  arch/arm/boot/dts/stihxxx-b2120.dtsi               |   8 +
+>  drivers/mmc/host/sdhci-st.c                        | 346 ++++++++++++++++++++-
+>  6 files changed, 492 insertions(+), 14 deletions(-)
+>
 
-Using runtime pm for custom sleep states would seem to conflict with its use
-by the power domain. For example ACPI will enumerate embedded SDIO function
-devices and link them to the ACPI power domain. Then ACPI will choose the
-lowest power state for runtime suspend.
+Hi Peter,
 
-It isn't obvious how a driver that doesn't know its power domain should
-handle runtime pm, other than assuming it means power off.
+I was about to apply patches 1->7. Patch2, I can't apply, it needs a rebase.
+While doing that, please also fix the checkpatch warning for patch5.
 
-> 
-> So, from mmc core perspective we should be able to get notifications
-> through runtime PM callbacks (from mmc or sdio bus) to understand
-> whether we need to hold of re-tune.
-
-That doesn't match the requirement. Re-tuning needs to be held for the
-wake-up command, not while asleep.
-
+Kind regards
+Uffe
