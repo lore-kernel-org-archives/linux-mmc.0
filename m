@@ -1,103 +1,177 @@
 From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v5 5/9] mmc: sdhci-st: Add sdhci_st_set_uhs_signaling function.
-Date: Fri, 10 Apr 2015 10:40:27 +0100
-Message-ID: <1428658831-14308-6-git-send-email-peter.griffin@linaro.org>
+Subject: [PATCH v5 2/9] mmc: sdhci-st: Add support for de-asserting reset
+ signal and top regs resource
+Date: Fri, 10 Apr 2015 10:40:24 +0100
+Message-ID: <1428658831-14308-3-git-send-email-peter.griffin@linaro.org>
 References: <1428658831-14308-1-git-send-email-peter.griffin@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f54.google.com ([74.125.82.54]:34333 "EHLO
-	mail-wg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932455AbbDJJk7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Apr 2015 05:40:59 -0400
-Received: by wgso17 with SMTP id o17so12211434wgs.1
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Apr 2015 02:40:58 -0700 (PDT)
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1428658831-14308-1-git-send-email-peter.griffin@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, maxime.coquelin@st.com, patrice.chotard@st.com, ulf.hansson@linaro.org, peppe.cavallaro@st.com
-Cc: peter.griffin@linaro.org, lee.jones@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: peter.griffin@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, lee.jones@linaro.org
+List-Id: linux-mmc@vger.kernel.org
 
-To allow UHS modes to work properly we need to provide the st specific
-set_uhs_signaling callback function. This function differs from the
-generic sdhci_set_uhs_signaling callback in that we need to configure
-the correct delay depending on the UHS mode, and also set the V18_EN
-bit.
+STiH407 family SoC's can have a reset signal for the controller which needs to
+be managed. Also the eMMC controller has some additional 'top' memory mapped
+registers which are used to manage the dynamic and static delay required for
+UHS modes. This patch adds support for creating the mapping, which will be used
+by subsequent patches.
 
 Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
 Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
 Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
 ---
- drivers/mmc/host/sdhci-st.c | 51 +++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 51 insertions(+)
+ drivers/mmc/host/sdhci-st.c | 60 ++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 57 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-index 10989ed..42a361c 100644
+index a80de93..74213b0 100644
 --- a/drivers/mmc/host/sdhci-st.c
 +++ b/drivers/mmc/host/sdhci-st.c
-@@ -261,6 +261,56 @@ static int sdhci_st_set_dll_for_clock(struct sdhci_host *host)
- 	return ret;
- }
+@@ -23,9 +23,14 @@
+ #include <linux/module.h>
+ #include <linux/err.h>
+ #include <linux/mmc/host.h>
+-
++#include <linux/reset.h>
+ #include "sdhci-pltfm.h"
  
-+static void sdhci_st_set_uhs_signaling(struct sdhci_host *host,
-+					unsigned int uhs)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	u16 ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	int ret = 0;
++struct st_mmc_platform_data {
++	struct  reset_control *rstc;
++	void __iomem *top_ioaddr;
++};
 +
-+	/* Select Bus Speed Mode for host */
-+	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
-+	switch (uhs) {
-+	/*
-+	 * Set V18_EN -- UHS modes do not work without this.
-+	 * does not change signaling voltage
-+	 */
+ /* MMCSS glue logic to setup the HC on some ST SoCs (e.g. STiH407 family) */
+ 
+ #define ST_MMC_CCONFIG_REG_1		0x400
+@@ -151,10 +156,16 @@ static const struct sdhci_pltfm_data sdhci_st_pdata = {
+ static int sdhci_st_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host;
++	struct st_mmc_platform_data *pdata;
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct clk *clk;
+ 	int ret = 0;
+ 	u16 host_version;
++	struct resource *res;
 +
-+	case MMC_TIMING_UHS_SDR12:
-+		st_mmcss_set_static_delay(pdata->top_ioaddr);
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR12 | SDHCI_CTRL_VDD_180;
-+		break;
-+	case MMC_TIMING_UHS_SDR25:
-+		st_mmcss_set_static_delay(pdata->top_ioaddr);
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR25 | SDHCI_CTRL_VDD_180;
-+		break;
-+	case MMC_TIMING_UHS_SDR50:
-+		st_mmcss_set_static_delay(pdata->top_ioaddr);
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR50 | SDHCI_CTRL_VDD_180;
-+		ret = sdhci_st_set_dll_for_clock(host);
-+		break;
-+	case MMC_TIMING_UHS_SDR104:
-+	case MMC_TIMING_MMC_HS200:
-+		st_mmcss_set_static_delay(pdata->top_ioaddr);
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR104 | SDHCI_CTRL_VDD_180;
-+		ret =  sdhci_st_set_dll_for_clock(host);
-+		break;
-+	case MMC_TIMING_UHS_DDR50:
-+	case MMC_TIMING_MMC_DDR52:
-+		st_mmcss_set_static_delay(pdata->top_ioaddr);
-+		ctrl_2 |= SDHCI_CTRL_UHS_DDR50 | SDHCI_CTRL_VDD_180;
-+		break;
++	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
++	if (!pdata)
++		return -ENOMEM;
+ 
+ 	clk =  devm_clk_get(&pdev->dev, "mmc");
+ 	if (IS_ERR(clk)) {
+@@ -162,10 +173,17 @@ static int sdhci_st_probe(struct platform_device *pdev)
+ 		return PTR_ERR(clk);
+ 	}
+ 
++	pdata->rstc = devm_reset_control_get(&pdev->dev, NULL);
++	if (IS_ERR(pdata->rstc))
++		pdata->rstc = NULL;
++	else
++		reset_control_deassert(pdata->rstc);
++
+ 	host = sdhci_pltfm_init(pdev, &sdhci_st_pdata, 0);
+ 	if (IS_ERR(host)) {
+ 		dev_err(&pdev->dev, "Failed sdhci_pltfm_init\n");
+-		return PTR_ERR(host);
++		ret = PTR_ERR(host);
++		goto err_pltfm_init;
+ 	}
+ 
+ 	ret = mmc_of_parse(host->mmc);
+@@ -176,7 +194,17 @@ static int sdhci_st_probe(struct platform_device *pdev)
+ 
+ 	clk_prepare_enable(clk);
+ 
++	/* Configure the FlashSS Top registers for setting eMMC TX/RX delay */
++	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
++					   "top-mmc-delay");
++	pdata->top_ioaddr = devm_ioremap_resource(&pdev->dev, res);
++	if (IS_ERR(pdata->top_ioaddr)) {
++		dev_warn(&pdev->dev, "FlashSS Top Dly registers not available");
++		pdata->top_ioaddr = NULL;
 +	}
 +
-+	if (ret)
-+		dev_warn(mmc_dev(host->mmc), "Error setting dll for clock "
-+						"(uhs %d)\n", uhs);
+ 	pltfm_host = sdhci_priv(host);
++	pltfm_host->priv = pdata;
+ 	pltfm_host->clk = clk;
+ 
+ 	ret = sdhci_add_host(host);
+@@ -200,6 +228,24 @@ err_out:
+ 	clk_disable_unprepare(clk);
+ err_of:
+ 	sdhci_pltfm_free(pdev);
++err_pltfm_init:
++	if (pdata->rstc)
++		reset_control_assert(pdata->rstc);
 +
-+	dev_dbg(mmc_dev(host->mmc), "uhs %d, ctrl_2 %04X\n", uhs, ctrl_2);
-+
-+	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
++	return ret;
 +}
++
++static int sdhci_st_remove(struct platform_device *pdev)
++{
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct st_mmc_platform_data *pdata = pltfm_host->priv;
++	int ret;
++
++	ret = sdhci_pltfm_unregister(pdev);
++
++	if (pdata->rstc)
++		reset_control_assert(pdata->rstc);
  
- static u32 sdhci_st_readl(struct sdhci_host *host, int reg)
+ 	return ret;
+ }
+@@ -209,11 +255,15 @@ static int sdhci_st_suspend(struct device *dev)
  {
-@@ -284,6 +334,7 @@ static const struct sdhci_ops sdhci_st_ops = {
- 	.set_bus_width = sdhci_set_bus_width,
- 	.read_l = sdhci_st_readl,
- 	.reset = sdhci_reset,
-+	.set_uhs_signaling = sdhci_st_set_uhs_signaling,
- };
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct st_mmc_platform_data *pdata = pltfm_host->priv;
+ 	int ret = sdhci_suspend_host(host);
  
- static const struct sdhci_pltfm_data sdhci_st_pdata = {
+ 	if (ret)
+ 		goto out;
+ 
++	if (pdata->rstc)
++		reset_control_assert(pdata->rstc);
++
+ 	clk_disable_unprepare(pltfm_host->clk);
+ out:
+ 	return ret;
+@@ -223,9 +273,13 @@ static int sdhci_st_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct st_mmc_platform_data *pdata = pltfm_host->priv;
+ 
+ 	clk_prepare_enable(pltfm_host->clk);
+ 
++	if (pdata->rstc)
++		reset_control_deassert(pdata->rstc);
++
+ 	return sdhci_resume_host(host);
+ }
+ #endif
+@@ -241,7 +295,7 @@ MODULE_DEVICE_TABLE(of, st_sdhci_match);
+ 
+ static struct platform_driver sdhci_st_driver = {
+ 	.probe = sdhci_st_probe,
+-	.remove = sdhci_pltfm_unregister,
++	.remove = sdhci_st_remove,
+ 	.driver = {
+ 		   .name = "sdhci-st",
+ 		   .pm = &sdhci_st_pmops,
 -- 
 1.9.1
-
