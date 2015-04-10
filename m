@@ -1,81 +1,103 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V4 00/15] mmc: host: Add facility to support re-tuning
-Date: Fri, 10 Apr 2015 12:52:02 +0200
-Message-ID: <CAPDyKFp8gyK8aXSK3ZM4V4RoB_ws5MWO6n2NYJp7CxxUV8LFgg@mail.gmail.com>
-References: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>
-	<551B8E7B.9020605@intel.com>
-	<5527A877.9030204@intel.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v5 0/9] Add sd/emmc support for stih407 family silicon
+Date: Fri, 10 Apr 2015 13:06:01 +0200
+Message-ID: <CAPDyKFouXDCbPB9Ow6vzRdHdWkscDs3fjThCX69mA97fwZ+Lfw@mail.gmail.com>
+References: <1428658831-14308-1-git-send-email-peter.griffin@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f182.google.com ([209.85.220.182]:33376 "EHLO
-	mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932277AbbDJKwD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Apr 2015 06:52:03 -0400
-Received: by qkx62 with SMTP id 62so24966328qkx.0
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Apr 2015 03:52:02 -0700 (PDT)
-In-Reply-To: <5527A877.9030204@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1428658831-14308-1-git-send-email-peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Maxime Coquelin <maxime.coquelin-qxv4g6HH51o@public.gmane.org>, Patrice CHOTARD <patrice.chotard-qxv4g6HH51o@public.gmane.org>, Giuseppe Cavallaro <peppe.cavallaro-qxv4g6HH51o@public.gmane.org>, Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-On 10 April 2015 at 12:39, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 01/04/15 09:21, Adrian Hunter wrote:
->> On 27/03/15 22:57, Adrian Hunter wrote:
->>> Hi
->>>
->>> Here is V4 of some patches to move re-tuning support
->>> out of sdhci and into the core, and add support for HS400
->>> re-tuning.
->>>
->>> Currently sdhci does re-tuning transparently by
->>> calling sdhci_execute_tuning() from its ->request()
->>> function.
->>>
->>> The problem with HS400 re-tuning is that it must be
->>> done in HS200 mode. That means using switch commands
->>> and making ios changes. That means it potentially
->>> conflicts with other command sequences. The new
->>> re-tuning support accomodates that.
->>>
->>> These patches now depend on Ulf's patch:
->>>
->>>     mmc: core: Enable runtime PM management of host devices
->>>
->>>
->>> Changes in V4:
->>>
->>>     mmc: host: Add facility to support re-tuning
->>>
->>>      Assume mmc_claim_host() runtime resumes the host
->>>      controller so there are no races with runtime pm.
->>>      Consequently remove now un-needed re-tuning host
->>>      operations.
->>>
->>>     mmc: core: Add support for re-tuning before each request
->>>
->>>      Call mmc_retune() prior to ->request()
->>>
->>>     mmc: sdhci: Change to new way of doing re-tuning
->>>
->>>      Updated to reflect the changes above.
->>
->> Hi
->>
->> What is the status of this?
+On 10 April 2015 at 11:40, Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> Hi,
 >
-> Hi
+> This series adds sd/emmc support to the sdhci-st.c driver for stih407
+> family silicon. The changes mainly involve configuring some extra glue
+> registers in the flashSS which configure the Arasan controller.
 >
-> What needs to be done to move this forward?
+> This series also adds support for UHS modes for eMMC. To allow
+> UHS HS200/SD104 modes to function correctly, due to the
+> tight timing constriants, support for delay management is also added.
+> Two types of delay management are supported, static delay management and
+> dynamic delay management, this delay management is only available
+> on eMMC pads on stih410 and later silicon.
+>
+> This series has been tested with stih410-b2120 revd on eMMC and sd, at
+> various clock speeds. As part of this testing a bug was also found in the
+> upstream flexgen clock set_rate implementation (now fixed upstream).
+>
+>     max-frequency = 200Mhz
+>     /dev/mmcblk0p1:
+>      Timing buffered disk reads: 270 MB in  3.02 seconds =  89.54 MB/sec
+>
+>     max-frequency = 100Mhz
+>     root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
+>     /dev/mmcblk0p1:
+>      Timing buffered disk reads: 210 MB in  3.00 seconds =  70.00 MB/sec
+>
+>     max-frequency = 50Mhz
+>     root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
+>     /dev/mmcblk0p1:
+>      Timing buffered disk reads: 118 MB in  3.00 seconds =  39.28 MB/sec
+>
+> It has also been tested on stih416-b2020 to ensure we have caused no
+> regressions. Finally the dt documentation has been updated to reflect
+> the changes in the driver code. Intrestingly it seems we are the first
+> upstream platform to be using some of the uhs bindings such as
+> sd-uhs-sdr104.
+>
+> Changes since v4:
+>  - Fixup typo (Pete)
+>
+> Changes since v3:
+>  - Rebased on Ulf's mmc next branch (rc5 based) (Ulf)
+>
+> Changes since v2:
+>  - Some whitespace fixups (Max)
+>  - if (!ioaddr) suggestion (Max)
+>  - Add stih418-b2199 suport (Max)
+>  - Stih410 to STiH410 fixes (Max)
+>  - rebased on v4.0-rc6 (Pete)
+>
+> Changes since v1:
+>  - Partition the changes into smaller patches to aid review process (Ulf)
+>
+> Peter Griffin (9):
+>   mmc: sdhci-st: Add macros for register offsets and bitfields for mmcss
+>     glue regs
+>   mmc: sdhci-st: Add support for de-asserting reset signal and top regs
+>     resource
+>   mmc: sdhci-st: Add delay management functions for top registers
+>     (eMMC).
+>   mmc: sdhci-st: Add st_mmcss_cconfig function to configure mmcss glue
+>     registers.
+>   mmc: sdhci-st: Add sdhci_st_set_uhs_signaling function.
+>   mmc: sdhci-st: Update the quirks for this controller.
+>   mmc: sdhci-st: Update ST SDHCI binding documentation.
+>   ARM: STi: DT: STiH407: Add dt nodes for sdhci and emmc.
+>   ARM: STi: DT: STiH418: Add dt nodes for sdhci and emmc.
+>
+>  Documentation/devicetree/bindings/mmc/sdhci-st.txt | 100 +++++-
+>  arch/arm/boot/dts/stih407-family.dtsi              |  30 ++
+>  arch/arm/boot/dts/stih410-b2120.dts                |  10 +
+>  arch/arm/boot/dts/stih418-b2199.dts                |  12 +
+>  arch/arm/boot/dts/stihxxx-b2120.dtsi               |   8 +
+>  drivers/mmc/host/sdhci-st.c                        | 354 ++++++++++++++++++++-
+>  6 files changed, 500 insertions(+), 14 deletions(-)
+>
+> --
+> 1.9.1
+>
 
-I need some more time to think about it, from a design perspective.
-Give me a few days, please.
+Thanks! Applied.
 
 Kind regards
 Uffe
-
->
-> Regards
-> Adrian
->
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
