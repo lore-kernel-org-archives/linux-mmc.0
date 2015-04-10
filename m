@@ -1,7 +1,7 @@
 From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v4 6/9] mmc: sdhci-st: Update the quirks for this controller.
-Date: Fri, 10 Apr 2015 09:58:28 +0100
-Message-ID: <1428656311-2605-7-git-send-email-peter.griffin@linaro.org>
+Subject: [PATCH v4 1/9] mmc: sdhci-st: Add macros for register offsets and bitfields for mmcss glue regs
+Date: Fri, 10 Apr 2015 09:58:23 +0100
+Message-ID: <1428656311-2605-2-git-send-email-peter.griffin@linaro.org>
 References: <1428656311-2605-1-git-send-email-peter.griffin@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1428656311-2605-1-git-send-email-peter.griffin@linaro.org>
@@ -10,53 +10,120 @@ To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, ulf.hans
 Cc: peter.griffin@linaro.org, lee.jones@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, peppe.cavallaro@st.com
 List-Id: linux-mmc@vger.kernel.org
 
-Some additional quirks need to be enabled now we support UHS
-modes. This avoids some spurious warnings like
+The stih407 family SoC's have additional glue registers in the flashSS which
+are used to configure the Arasan controller.
 
-"Got data interrupt 0x00000002 even though no data operation was in progress"
-
-Testing on stih410-b2120 board achieves the following speeds
-with HS200 eMMC card.
-
-max-frequency = 200Mhz
-/dev/mmcblk0p1:
- Timing buffered disk reads: 270 MB in  3.02 seconds =  89.54 MB/sec
-
-max-frequency = 100Mhz
-root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
-/dev/mmcblk0p1:
- Timing buffered disk reads: 210 MB in  3.00 seconds =  70.00 MB/sec
-
-max-frequency = 50Mhz
-root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
-/dev/mmcblk0p1:
- Timing buffered disk reads: 118 MB in  3.00 seconds =  39.28 MB/sec
-
-This is better than the 3.10 kernel which achieves 77.59 MB/sec
-at 200Mhz clock (same board/soc/eMMC).
+This patch adds macros for the register offsets and bitfields which will be
+used by subsequent patches to support stih407 family SoC's.
 
 Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
 Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
 Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
 ---
- drivers/mmc/host/sdhci-st.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-st.c | 91 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 91 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-index 2ce842b..751452b 100644
+index 594a4ef..a80de93 100644
 --- a/drivers/mmc/host/sdhci-st.c
 +++ b/drivers/mmc/host/sdhci-st.c
-@@ -340,7 +340,10 @@ static const struct sdhci_ops sdhci_st_ops = {
- static const struct sdhci_pltfm_data sdhci_st_pdata = {
- 	.ops = &sdhci_st_ops,
- 	.quirks = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
--	    SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-+		SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-+		SDHCI_QUIRK_NO_HISPD_BIT,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+		SDHCI_QUIRK2_STOP_WITH_TC,
- };
+@@ -26,6 +26,97 @@
  
+ #include "sdhci-pltfm.h"
  
++/* MMCSS glue logic to setup the HC on some ST SoCs (e.g. STiH407 family) */
++
++#define ST_MMC_CCONFIG_REG_1		0x400
++#define ST_MMC_CCONFIG_TIMEOUT_CLK_UNIT	BIT(24)
++#define ST_MMC_CCONFIG_TIMEOUT_CLK_FREQ	BIT(12)
++#define ST_MMC_CCONFIG_TUNING_COUNT_DEFAULT	BIT(8)
++#define ST_MMC_CCONFIG_ASYNC_WAKEUP	BIT(0)
++#define ST_MMC_CCONFIG_1_DEFAULT	\
++				((ST_MMC_CCONFIG_TIMEOUT_CLK_UNIT) | \
++				 (ST_MMC_CCONFIG_TIMEOUT_CLK_FREQ) | \
++				 (ST_MMC_CCONFIG_TUNING_COUNT_DEFAULT))
++
++#define ST_MMC_CCONFIG_REG_2		0x404
++#define ST_MMC_CCONFIG_HIGH_SPEED	BIT(28)
++#define ST_MMC_CCONFIG_ADMA2		BIT(24)
++#define ST_MMC_CCONFIG_8BIT		BIT(20)
++#define ST_MMC_CCONFIG_MAX_BLK_LEN	16
++#define  MAX_BLK_LEN_1024		1
++#define  MAX_BLK_LEN_2048		2
++#define BASE_CLK_FREQ_200		0xc8
++#define BASE_CLK_FREQ_100		0x64
++#define BASE_CLK_FREQ_50		0x32
++#define ST_MMC_CCONFIG_2_DEFAULT \
++	(ST_MMC_CCONFIG_HIGH_SPEED | ST_MMC_CCONFIG_ADMA2 | \
++	 ST_MMC_CCONFIG_8BIT | \
++	 (MAX_BLK_LEN_1024 << ST_MMC_CCONFIG_MAX_BLK_LEN))
++
++#define ST_MMC_CCONFIG_REG_3			0x408
++#define ST_MMC_CCONFIG_EMMC_SLOT_TYPE		BIT(28)
++#define ST_MMC_CCONFIG_64BIT			BIT(24)
++#define ST_MMC_CCONFIG_ASYNCH_INTR_SUPPORT	BIT(20)
++#define ST_MMC_CCONFIG_1P8_VOLT			BIT(16)
++#define ST_MMC_CCONFIG_3P0_VOLT			BIT(12)
++#define ST_MMC_CCONFIG_3P3_VOLT			BIT(8)
++#define ST_MMC_CCONFIG_SUSP_RES_SUPPORT		BIT(4)
++#define ST_MMC_CCONFIG_SDMA			BIT(0)
++#define ST_MMC_CCONFIG_3_DEFAULT	\
++			 (ST_MMC_CCONFIG_ASYNCH_INTR_SUPPORT	| \
++			  ST_MMC_CCONFIG_3P3_VOLT		| \
++			  ST_MMC_CCONFIG_SUSP_RES_SUPPORT	| \
++			  ST_MMC_CCONFIG_SDMA)
++
++#define ST_MMC_CCONFIG_REG_4	0x40c
++#define ST_MMC_CCONFIG_D_DRIVER	BIT(20)
++#define ST_MMC_CCONFIG_C_DRIVER	BIT(16)
++#define ST_MMC_CCONFIG_A_DRIVER	BIT(12)
++#define ST_MMC_CCONFIG_DDR50	BIT(8)
++#define ST_MMC_CCONFIG_SDR104	BIT(4)
++#define ST_MMC_CCONFIG_SDR50	BIT(0)
++#define ST_MMC_CCONFIG_4_DEFAULT	0
++
++#define ST_MMC_CCONFIG_REG_5		0x410
++#define ST_MMC_CCONFIG_TUNING_FOR_SDR50	BIT(8)
++#define RETUNING_TIMER_CNT_MAX		0xf
++#define ST_MMC_CCONFIG_5_DEFAULT	0
++
++/* I/O configuration for Arasan IP */
++#define ST_MMC_GP_OUTPUT	0x450
++#define ST_MMC_GP_OUTPUT_CD	BIT(12)
++
++#define ST_MMC_STATUS_R		0x460
++
++#define ST_TOP_MMC_DLY_FIX_OFF(x)	(x - 0x8)
++
++/* TOP config registers to manage static and dynamic delay */
++#define ST_TOP_MMC_TX_CLK_DLY			ST_TOP_MMC_DLY_FIX_OFF(0x8)
++#define ST_TOP_MMC_RX_CLK_DLY			ST_TOP_MMC_DLY_FIX_OFF(0xc)
++/* MMC delay control register */
++#define ST_TOP_MMC_DLY_CTRL			ST_TOP_MMC_DLY_FIX_OFF(0x18)
++#define ST_TOP_MMC_DLY_CTRL_DLL_BYPASS_CMD	BIT(0)
++#define ST_TOP_MMC_DLY_CTRL_DLL_BYPASS_PH_SEL	BIT(1)
++#define ST_TOP_MMC_DLY_CTRL_TX_DLL_ENABLE	BIT(8)
++#define ST_TOP_MMC_DLY_CTRL_RX_DLL_ENABLE	BIT(9)
++#define ST_TOP_MMC_DLY_CTRL_ATUNE_NOT_CFG_DLY	BIT(10)
++#define ST_TOP_MMC_START_DLL_LOCK		BIT(11)
++
++/* register to provide the phase-shift value for DLL */
++#define ST_TOP_MMC_TX_DLL_STEP_DLY		ST_TOP_MMC_DLY_FIX_OFF(0x1c)
++#define ST_TOP_MMC_RX_DLL_STEP_DLY		ST_TOP_MMC_DLY_FIX_OFF(0x20)
++#define ST_TOP_MMC_RX_CMD_STEP_DLY		ST_TOP_MMC_DLY_FIX_OFF(0x24)
++
++/* phase shift delay on the tx clk 2.188ns */
++#define ST_TOP_MMC_TX_DLL_STEP_DLY_VALID	0x6
++
++#define ST_TOP_MMC_DLY_MAX			0xf
++
++#define ST_TOP_MMC_DYN_DLY_CONF	\
++		(ST_TOP_MMC_DLY_CTRL_TX_DLL_ENABLE | \
++		 ST_TOP_MMC_DLY_CTRL_ATUNE_NOT_CFG_DLY | \
++		 ST_TOP_MMC_START_DLL_LOCK)
++
+ static u32 sdhci_st_readl(struct sdhci_host *host, int reg)
+ {
+ 	u32 ret;
 -- 
 1.9.1
