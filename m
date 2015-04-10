@@ -1,7 +1,7 @@
 From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v4 2/9] mmc: sdhci-st: Add support for de-asserting reset signal and top regs resource
-Date: Fri, 10 Apr 2015 09:58:24 +0100
-Message-ID: <1428656311-2605-3-git-send-email-peter.griffin@linaro.org>
+Subject: [PATCH v4 4/9] mmc: sdhci-st: Add st_mmcss_cconfig function to configure mmcss glue registers.
+Date: Fri, 10 Apr 2015 09:58:26 +0100
+Message-ID: <1428656311-2605-5-git-send-email-peter.griffin@linaro.org>
 References: <1428656311-2605-1-git-send-email-peter.griffin@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1428656311-2605-1-git-send-email-peter.griffin@linaro.org>
@@ -10,155 +10,142 @@ To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, ulf.hans
 Cc: peter.griffin@linaro.org, lee.jones@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, peppe.cavallaro@st.com
 List-Id: linux-mmc@vger.kernel.org
 
-STiH407 family SoC's can have a reset signal for the controller which needs to
-be managed. Also the eMMC controller has some additional 'top' memory mapped
-registers which are used to manage the dynamic and static delay required for
-UHS modes. This patch adds support for creating the mapping, which will be used
-by subsequent patches.
+STiH407 family SoC's have glue registers in the flashSS subsystem which
+are used to configure the Arasan HC. This patch configures these glue
+registers according to what has been specified in the DT.
 
 Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
 Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
 Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
 ---
- drivers/mmc/host/sdhci-st.c | 59 ++++++++++++++++++++++++++++++++++++++++++---
- 1 file changed, 56 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci-st.c | 88 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 88 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-index a80de93..f6f2a48 100644
+index b5e4df8..821be34 100644
 --- a/drivers/mmc/host/sdhci-st.c
 +++ b/drivers/mmc/host/sdhci-st.c
-@@ -23,9 +23,14 @@
- #include <linux/module.h>
- #include <linux/err.h>
- #include <linux/mmc/host.h>
--
-+#include <linux/reset.h>
- #include "sdhci-pltfm.h"
+@@ -138,6 +138,87 @@ static inline void st_mmcss_set_static_delay(void __iomem *ioaddr)
+ 			ioaddr + ST_TOP_MMC_TX_CLK_DLY);
+ }
  
-+struct st_mmc_platform_data {
-+	struct  reset_control *rstc;
-+	void __iomem *top_ioaddr;
-+};
++/**
++ * st_mmcss_cconfig: configure the Arasan HC inside the flashSS.
++ * @np: dt device node.
++ * @host: sdhci host
++ * Description: this function is to configure the Arasan host controller.
++ * On some ST SoCs, i.e. STiH407 family, the MMC devices inside a dedicated
++ * flashSS sub-system which needs to be configured to be compliant to eMMC 4.5
++ * or eMMC4.3.  This has to be done before registering the sdhci host.
++ */
++static void st_mmcss_cconfig(struct device_node *np, struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct mmc_host *mhost = host->mmc;
++	u32 cconf2, cconf3, cconf4, cconf5;
 +
- /* MMCSS glue logic to setup the HC on some ST SoCs (e.g. STiH407 family) */
- 
- #define ST_MMC_CCONFIG_REG_1		0x400
-@@ -151,10 +156,16 @@ static const struct sdhci_pltfm_data sdhci_st_pdata = {
- static int sdhci_st_probe(struct platform_device *pdev)
- {
- 	struct sdhci_host *host;
-+	struct st_mmc_platform_data *pdata;
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct clk *clk;
- 	int ret = 0;
- 	u16 host_version;
-+	struct resource *res;
++	if (!of_device_is_compatible(np, "st,sdhci-stih407"))
++		return;
 +
-+	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
-+	if (!pdata)
-+		return -ENOMEM;
- 
- 	clk =  devm_clk_get(&pdev->dev, "mmc");
- 	if (IS_ERR(clk)) {
-@@ -162,10 +173,17 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 		return PTR_ERR(clk);
- 	}
- 
-+	pdata->rstc = devm_reset_control_get(&pdev->dev, NULL);
-+	if (IS_ERR(pdata->rstc))
-+		pdata->rstc = NULL;
-+	else
-+		reset_control_deassert(pdata->rstc);
++	cconf2 = ST_MMC_CCONFIG_2_DEFAULT;
++	cconf3 = ST_MMC_CCONFIG_3_DEFAULT;
++	cconf4 = ST_MMC_CCONFIG_4_DEFAULT;
++	cconf5 = ST_MMC_CCONFIG_5_DEFAULT;
 +
- 	host = sdhci_pltfm_init(pdev, &sdhci_st_pdata, 0);
- 	if (IS_ERR(host)) {
- 		dev_err(&pdev->dev, "Failed sdhci_pltfm_init\n");
--		return PTR_ERR(host);
-+		ret = PTR_ERR(host);
-+		goto err_pltfm_init;
- 	}
- 
- 	ret = mmc_of_parse(host->mmc);
-@@ -176,7 +194,17 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 
- 	clk_prepare_enable(clk);
- 
-+	/* Configure the FlashSS Top registers for setting eMMC TX/RX delay */
-+	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
-+					   "top-mmc-delay");
-+	pdata->top_ioaddr = devm_ioremap_resource(&pdev->dev, res);
-+	if (IS_ERR(pdata->top_ioaddr)) {
-+		dev_warn(&pdev->dev, "FlashSS Top Dly registers not available");
-+		pdata->top_ioaddr = NULL;
++	writel_relaxed(ST_MMC_CCONFIG_1_DEFAULT,
++			host->ioaddr + ST_MMC_CCONFIG_REG_1);
++
++	/* Set clock frequency, default to 50MHz if max-frequency is not
++	 * provided */
++
++	switch (mhost->f_max) {
++	case 200000000:
++		clk_set_rate(pltfm_host->clk, mhost->f_max);
++		cconf2 |= BASE_CLK_FREQ_200;
++		break;
++	case 100000000:
++		clk_set_rate(pltfm_host->clk, mhost->f_max);
++		cconf2 |= BASE_CLK_FREQ_100;
++		break;
++	default:
++		clk_set_rate(pltfm_host->clk, 50000000);
++		cconf2 |= BASE_CLK_FREQ_50;
 +	}
 +
- 	pltfm_host = sdhci_priv(host);
-+	pltfm_host->priv = pdata;
- 	pltfm_host->clk = clk;
- 
- 	ret = sdhci_add_host(host);
-@@ -200,6 +228,23 @@ err_out:
- 	clk_disable_unprepare(clk);
- err_of:
- 	sdhci_pltfm_free(pdev);
-+err_pltfm_init:
-+	if (pdata->rstc)
-+		reset_control_assert(pdata->rstc);
++	writel_relaxed(cconf2, host->ioaddr + ST_MMC_CCONFIG_REG_2);
 +
-+	return ret;
++	if (mhost->caps & MMC_CAP_NONREMOVABLE)
++		cconf3 |= ST_MMC_CCONFIG_EMMC_SLOT_TYPE;
++	else
++		/* CARD _D ET_CTRL */
++		writel_relaxed(ST_MMC_GP_OUTPUT_CD,
++				host->ioaddr + ST_MMC_GP_OUTPUT);
++
++	if (mhost->caps & MMC_CAP_UHS_SDR50) {
++		/* use 1.8V */
++		cconf3 |= ST_MMC_CCONFIG_1P8_VOLT;
++		cconf4 |= ST_MMC_CCONFIG_SDR50;
++		/* Use tuning */
++		cconf5 |= ST_MMC_CCONFIG_TUNING_FOR_SDR50;
++		/* Max timeout for retuning */
++		cconf5 |= RETUNING_TIMER_CNT_MAX;
++	}
++
++	if (mhost->caps & MMC_CAP_UHS_SDR104) {
++		/*
++		 * SDR104 implies the HC can support HS200 mode, so
++		 * it's mandatory to use 1.8V
++		 */
++		cconf3 |= ST_MMC_CCONFIG_1P8_VOLT;
++		cconf4 |= ST_MMC_CCONFIG_SDR104;
++		/* Max timeout for retuning */
++		cconf5 |= RETUNING_TIMER_CNT_MAX;
++	}
++
++	if (mhost->caps & MMC_CAP_UHS_DDR50)
++		cconf4 |= ST_MMC_CCONFIG_DDR50;
++
++	writel_relaxed(cconf3, host->ioaddr + ST_MMC_CCONFIG_REG_3);
++	writel_relaxed(cconf4, host->ioaddr + ST_MMC_CCONFIG_REG_4);
++	writel_relaxed(cconf5, host->ioaddr + ST_MMC_CCONFIG_REG_5);
 +}
 +
-+static int sdhci_st_remove(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	int ret;
-+
-+	ret = sdhci_pltfm_unregister(pdev);
-+
-+	if (pdata->rstc)
-+		reset_control_assert(pdata->rstc);
- 
- 	return ret;
- }
-@@ -209,11 +254,15 @@ static int sdhci_st_suspend(struct device *dev)
+ static inline void st_mmcss_set_dll(void __iomem *ioaddr)
  {
+ 	if (!ioaddr)
+@@ -214,6 +295,7 @@ static const struct sdhci_pltfm_data sdhci_st_pdata = {
+ 
+ static int sdhci_st_probe(struct platform_device *pdev)
+ {
++	struct device_node *np = pdev->dev.of_node;
+ 	struct sdhci_host *host;
+ 	struct st_mmc_platform_data *pdata;
+ 	struct sdhci_pltfm_host *pltfm_host;
+@@ -266,6 +348,9 @@ static int sdhci_st_probe(struct platform_device *pdev)
+ 	pltfm_host->priv = pdata;
+ 	pltfm_host->clk = clk;
+ 
++	/* Configure the Arasan HC inside the flashSS */
++	st_mmcss_cconfig(np, host);
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "Failed sdhci_add_host\n");
+@@ -332,12 +417,15 @@ static int sdhci_st_resume(struct device *dev)
  	struct sdhci_host *host = dev_get_drvdata(dev);
  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct st_mmc_platform_data *pdata = pltfm_host->priv;
- 	int ret = sdhci_suspend_host(host);
- 
- 	if (ret)
- 		goto out;
- 
-+	if (pdata->rstc)
-+		reset_control_assert(pdata->rstc);
-+
- 	clk_disable_unprepare(pltfm_host->clk);
- out:
- 	return ret;
-@@ -223,9 +272,13 @@ static int sdhci_st_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct st_mmc_platform_data *pdata = pltfm_host->priv;
+ 	struct st_mmc_platform_data *pdata = pltfm_host->priv;
++	struct device_node *np = dev->of_node;
  
  	clk_prepare_enable(pltfm_host->clk);
  
-+	if (pdata->rstc)
-+		reset_control_deassert(pdata->rstc);
+ 	if (pdata->rstc)
+ 		reset_control_deassert(pdata->rstc);
+ 
++	st_mmcss_cconfig(np, host);
 +
  	return sdhci_resume_host(host);
  }
  #endif
-@@ -241,7 +294,7 @@ MODULE_DEVICE_TABLE(of, st_sdhci_match);
- 
- static struct platform_driver sdhci_st_driver = {
- 	.probe = sdhci_st_probe,
--	.remove = sdhci_pltfm_unregister,
-+	.remove = sdhci_st_remove,
- 	.driver = {
- 		   .name = "sdhci-st",
- 		   .pm = &sdhci_st_pmops,
 -- 
 1.9.1
