@@ -1,158 +1,119 @@
 From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v5 4/9] mmc: sdhci-st: Add st_mmcss_cconfig function to configure mmcss glue registers.
-Date: Fri, 10 Apr 2015 10:40:26 +0100
-Message-ID: <1428658831-14308-5-git-send-email-peter.griffin@linaro.org>
+Subject: [PATCH v5 3/9] mmc: sdhci-st: Add delay management functions for top registers (eMMC).
+Date: Fri, 10 Apr 2015 10:40:25 +0100
+Message-ID: <1428658831-14308-4-git-send-email-peter.griffin@linaro.org>
 References: <1428658831-14308-1-git-send-email-peter.griffin@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f41.google.com ([74.125.82.41]:36713 "EHLO
-	mail-wg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932438AbbDJJkz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Apr 2015 05:40:55 -0400
-Received: by wgsk9 with SMTP id k9so12140420wgs.3
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Apr 2015 02:40:54 -0700 (PDT)
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:36554 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932422AbbDJJks (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Apr 2015 05:40:48 -0400
+Received: by wizk4 with SMTP id k4so121831794wiz.1
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Apr 2015 02:40:47 -0700 (PDT)
 In-Reply-To: <1428658831-14308-1-git-send-email-peter.griffin@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, maxime.coquelin@st.com, patrice.chotard@st.com, ulf.hansson@linaro.org, peppe.cavallaro@st.com
 Cc: peter.griffin@linaro.org, lee.jones@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
 
-STiH407 family SoC's have glue registers in the flashSS subsystem which
-are used to configure the Arasan HC. This patch configures these glue
-registers according to what has been specified in the DT.
+Due to the tight timing constraints in some UHS modes, it is required to have
+some delay management in the design. Two types of delay management are supported
+in the HW: -
+
+1) Static delay management
+2) Dynamic delay management
+
+NB: The delay management is only there when eMMC interface is selected.
+
+1: Static delay management: is used to provide PVT dependent static delay on the
+clock/data lines to manage setup/hold requirements of the interface. The maximum
+delay possible is 3.25ns. These delays are PVT dependent, and thus delay values
+applied are not accurate and vary across provcess voltage and temperature range.
+Due to this these delays must not be used on the very time critical paths.
+
+2. Dynamic delay locked loop (DLL): is used to provide dynamic delay management.
+The advantage of DLL is that it provides accurate & PVT indepedent delay.
+
+The DLL is used to provide delay on the loopback clock on "Read Path" to capture
+read data reliably. On TX path the clock on which output data is transmitted is
+delayed, resulting in delay of TX data.
 
 Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
 Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
-Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
 ---
- drivers/mmc/host/sdhci-st.c | 88 +++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 88 insertions(+)
+ drivers/mmc/host/sdhci-st.c | 59 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 59 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-index 1fbea9a..10989ed 100644
+index 74213b0..1fbea9a 100644
 --- a/drivers/mmc/host/sdhci-st.c
 +++ b/drivers/mmc/host/sdhci-st.c
-@@ -138,6 +138,87 @@ static inline void st_mmcss_set_static_delay(void __iomem *ioaddr)
- 			ioaddr + ST_TOP_MMC_TX_CLK_DLY);
- }
+@@ -122,6 +122,65 @@ struct st_mmc_platform_data {
+ 		 ST_TOP_MMC_DLY_CTRL_ATUNE_NOT_CFG_DLY | \
+ 		 ST_TOP_MMC_START_DLL_LOCK)
  
-+/**
-+ * st_mmcss_cconfig: configure the Arasan HC inside the flashSS.
-+ * @np: dt device node.
-+ * @host: sdhci host
-+ * Description: this function is to configure the Arasan host controller.
-+ * On some ST SoCs, i.e. STiH407 family, the MMC devices inside a dedicated
-+ * flashSS sub-system which needs to be configured to be compliant to eMMC 4.5
-+ * or eMMC4.3.  This has to be done before registering the sdhci host.
++/*
++ * For clock speeds greater than 90MHz, we need to check that the
++ * DLL procedure has finished before switching to ultra-speed modes.
 + */
-+static void st_mmcss_cconfig(struct device_node *np, struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct mmc_host *mhost = host->mmc;
-+	u32 cconf2, cconf3, cconf4, cconf5;
++#define	CLK_TO_CHECK_DLL_LOCK	90000000
 +
-+	if (!of_device_is_compatible(np, "st,sdhci-stih407"))
++static inline void st_mmcss_set_static_delay(void __iomem *ioaddr)
++{
++	if (!ioaddr)
 +		return;
 +
-+	cconf2 = ST_MMC_CCONFIG_2_DEFAULT;
-+	cconf3 = ST_MMC_CCONFIG_3_DEFAULT;
-+	cconf4 = ST_MMC_CCONFIG_4_DEFAULT;
-+	cconf5 = ST_MMC_CCONFIG_5_DEFAULT;
-+
-+	writel_relaxed(ST_MMC_CCONFIG_1_DEFAULT,
-+			host->ioaddr + ST_MMC_CCONFIG_REG_1);
-+
-+	/* Set clock frequency, default to 50MHz if max-frequency is not
-+	 * provided */
-+
-+	switch (mhost->f_max) {
-+	case 200000000:
-+		clk_set_rate(pltfm_host->clk, mhost->f_max);
-+		cconf2 |= BASE_CLK_FREQ_200;
-+		break;
-+	case 100000000:
-+		clk_set_rate(pltfm_host->clk, mhost->f_max);
-+		cconf2 |= BASE_CLK_FREQ_100;
-+		break;
-+	default:
-+		clk_set_rate(pltfm_host->clk, 50000000);
-+		cconf2 |= BASE_CLK_FREQ_50;
-+	}
-+
-+	writel_relaxed(cconf2, host->ioaddr + ST_MMC_CCONFIG_REG_2);
-+
-+	if (mhost->caps & MMC_CAP_NONREMOVABLE)
-+		cconf3 |= ST_MMC_CCONFIG_EMMC_SLOT_TYPE;
-+	else
-+		/* CARD _D ET_CTRL */
-+		writel_relaxed(ST_MMC_GP_OUTPUT_CD,
-+				host->ioaddr + ST_MMC_GP_OUTPUT);
-+
-+	if (mhost->caps & MMC_CAP_UHS_SDR50) {
-+		/* use 1.8V */
-+		cconf3 |= ST_MMC_CCONFIG_1P8_VOLT;
-+		cconf4 |= ST_MMC_CCONFIG_SDR50;
-+		/* Use tuning */
-+		cconf5 |= ST_MMC_CCONFIG_TUNING_FOR_SDR50;
-+		/* Max timeout for retuning */
-+		cconf5 |= RETUNING_TIMER_CNT_MAX;
-+	}
-+
-+	if (mhost->caps & MMC_CAP_UHS_SDR104) {
-+		/*
-+		 * SDR104 implies the HC can support HS200 mode, so
-+		 * it's mandatory to use 1.8V
-+		 */
-+		cconf3 |= ST_MMC_CCONFIG_1P8_VOLT;
-+		cconf4 |= ST_MMC_CCONFIG_SDR104;
-+		/* Max timeout for retuning */
-+		cconf5 |= RETUNING_TIMER_CNT_MAX;
-+	}
-+
-+	if (mhost->caps & MMC_CAP_UHS_DDR50)
-+		cconf4 |= ST_MMC_CCONFIG_DDR50;
-+
-+	writel_relaxed(cconf3, host->ioaddr + ST_MMC_CCONFIG_REG_3);
-+	writel_relaxed(cconf4, host->ioaddr + ST_MMC_CCONFIG_REG_4);
-+	writel_relaxed(cconf5, host->ioaddr + ST_MMC_CCONFIG_REG_5);
++	writel_relaxed(0x0, ioaddr + ST_TOP_MMC_DLY_CTRL);
++	writel_relaxed(ST_TOP_MMC_DLY_MAX,
++			ioaddr + ST_TOP_MMC_TX_CLK_DLY);
 +}
 +
- static inline void st_mmcss_set_dll(void __iomem *ioaddr)
- {
- 	if (!ioaddr)
-@@ -214,6 +295,7 @@ static const struct sdhci_pltfm_data sdhci_st_pdata = {
- 
- static int sdhci_st_probe(struct platform_device *pdev)
- {
-+	struct device_node *np = pdev->dev.of_node;
- 	struct sdhci_host *host;
- 	struct st_mmc_platform_data *pdata;
- 	struct sdhci_pltfm_host *pltfm_host;
-@@ -266,6 +348,9 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 	pltfm_host->priv = pdata;
- 	pltfm_host->clk = clk;
- 
-+	/* Configure the Arasan HC inside the flashSS */
-+	st_mmcss_cconfig(np, host);
++static inline void st_mmcss_set_dll(void __iomem *ioaddr)
++{
++	if (!ioaddr)
++		return;
 +
- 	ret = sdhci_add_host(host);
- 	if (ret) {
- 		dev_err(&pdev->dev, "Failed sdhci_add_host\n");
-@@ -333,12 +418,15 @@ static int sdhci_st_resume(struct device *dev)
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	struct device_node *np = dev->of_node;
- 
- 	clk_prepare_enable(pltfm_host->clk);
- 
- 	if (pdata->rstc)
- 		reset_control_deassert(pdata->rstc);
- 
-+	st_mmcss_cconfig(np, host);
++	writel_relaxed(ST_TOP_MMC_DYN_DLY_CONF,	ioaddr + ST_TOP_MMC_DLY_CTRL);
++	writel_relaxed(ST_TOP_MMC_TX_DLL_STEP_DLY_VALID,
++			ioaddr + ST_TOP_MMC_TX_DLL_STEP_DLY);
++}
 +
- 	return sdhci_resume_host(host);
- }
- #endif
++static int st_mmcss_lock_dll(void __iomem *ioaddr)
++{
++	unsigned long curr, value;
++	unsigned long finish = jiffies + HZ;
++
++	/* Checks if the DLL procedure is finished */
++	do {
++		curr = jiffies;
++		value = readl(ioaddr + ST_MMC_STATUS_R);
++		if (value & 0x1)
++			return 0;
++
++		cpu_relax();
++	} while (!time_after_eq(curr, finish));
++
++	return -EBUSY;
++}
++
++static int sdhci_st_set_dll_for_clock(struct sdhci_host *host)
++{
++	int ret = 0;
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct st_mmc_platform_data *pdata = pltfm_host->priv;
++
++	if (host->clock > CLK_TO_CHECK_DLL_LOCK) {
++		st_mmcss_set_dll(pdata->top_ioaddr);
++		ret = st_mmcss_lock_dll(host->ioaddr);
++	}
++
++	return ret;
++}
++
++
+ static u32 sdhci_st_readl(struct sdhci_host *host, int reg)
+ {
+ 	u32 ret;
 -- 
 1.9.1
 
