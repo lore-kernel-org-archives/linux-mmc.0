@@ -1,83 +1,164 @@
 From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v4 0/9] Add sd/emmc support for stih407 family silicon
-Date: Fri, 10 Apr 2015 09:58:22 +0100
-Message-ID: <1428656311-2605-1-git-send-email-peter.griffin@linaro.org>
+Subject: [PATCH v4 2/9] mmc: sdhci-st: Add support for de-asserting reset signal and top regs resource
+Date: Fri, 10 Apr 2015 09:58:24 +0100
+Message-ID: <1428656311-2605-3-git-send-email-peter.griffin@linaro.org>
+References: <1428656311-2605-1-git-send-email-peter.griffin@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1428656311-2605-1-git-send-email-peter.griffin@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, ulf.hansson@linaro.org, maxime.coquelin@st.com, patrice.chotard@st.com, srinivas.kandagatla@gmail.com
 Cc: peter.griffin@linaro.org, lee.jones@linaro.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, peppe.cavallaro@st.com
 List-Id: linux-mmc@vger.kernel.org
 
-This series adds sd/emmc support to the sdhci-st.c driver for stih407
-family silicon. The changes mainly involve configuring some extra glue
-registers in the flashSS which configure the Arasan controller.
+STiH407 family SoC's can have a reset signal for the controller which needs to
+be managed. Also the eMMC controller has some additional 'top' memory mapped
+registers which are used to manage the dynamic and static delay required for
+UHS modes. This patch adds support for creating the mapping, which will be used
+by subsequent patches.
 
-This series also adds support for UHS modes for eMMC. To allow
-UHS HS200/SD104 modes to function correctly, due to the
-tight timing constriants, support for delay management is also added.
-Two types of delay management are supported, static delay management and
-dynamic delay management, this delay management is only available
-on eMMC pads on stih410 and later silicon.
+Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+Signed-off-by: Giuseppe Cavallaro <peppe.cavallaro@st.com>
+Acked-by: Maxime Coquelin <maxime.coquelin@st.com>
+---
+ drivers/mmc/host/sdhci-st.c | 59 ++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 56 insertions(+), 3 deletions(-)
 
-This series has been tested with stih410-b2120 revd on eMMC and sd, at
-various clock speeds. As part of this testing a bug was also found in the
-upstream flexgen clock set_rate implementation (now fixed upstream).
-
-    max-frequency = 200Mhz
-    /dev/mmcblk0p1:
-     Timing buffered disk reads: 270 MB in  3.02 seconds =  89.54 MB/sec
-    
-    max-frequency = 100Mhz
-    root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
-    /dev/mmcblk0p1:
-     Timing buffered disk reads: 210 MB in  3.00 seconds =  70.00 MB/sec
-    
-    max-frequency = 50Mhz
-    root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
-    /dev/mmcblk0p1:
-     Timing buffered disk reads: 118 MB in  3.00 seconds =  39.28 MB/sec
-
-It has also been tested on stih416-b2020 to ensure we have caused no
-regressions. Finally the dt documentation has been updated to reflect
-the changes in the driver code. Intrestingly it seems we are the first
-upstream platform to be using some of the uhs bindings such as
-sd-uhs-sdr104.
-
-Changes since v3:
- - Rebased on Ulf's mmc next branch (rc5 based) (Ulf)
-
-Changes since v2:
- - Some whitespace fixups (Max)
- - if (!ioaddr) suggestion (Max)
- - Add stih418-b2199 suport (Max)
- - Stih410 to STiH410 fixes (Max)
- - rebased on v4.0-rc6 (Pete)
-
-Changes since v1:
- - Partition the changes into smaller patches to aid review process (Ulf)
-
-Peter Griffin (9):
-  mmc: sdhci-st: Add macros for register offsets and bitfields for mmcss
-    glue regs
-  mmc: sdhci-st: Add support for de-asserting reset signal and top regs
-    resource
-  mmc: sdhci-st: Add delay management functions for top registers
-    (eMMC).
-  mmc: sdhci-st: Add st_mmcss_cconfig function to configure mmcss glue
-    registers.
-  mmc: sdhci-st: Add sdhci_st_set_uhs_signaling function.
-  mmc: sdhci-st: Update the quirks for this controller.
-  mmc: sdhci-st: Update ST SDHCI binding documentation.
-  ARM: STi: DT: STiH407: Add dt nodes for sdhci and emmc.
-  ARM: STi: DT: STiH418: Add dt nodes for sdhci and emmc.
-
- Documentation/devicetree/bindings/mmc/sdhci-st.txt | 100 +++++-
- arch/arm/boot/dts/stih407-family.dtsi              |  30 ++
- arch/arm/boot/dts/stih410-b2120.dts                |  10 +
- arch/arm/boot/dts/stih418-b2199.dts                |  12 +
- arch/arm/boot/dts/stihxxx-b2120.dtsi               |   8 +
- drivers/mmc/host/sdhci-st.c                        | 353 ++++++++++++++++++++-
- 6 files changed, 499 insertions(+), 14 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+index a80de93..f6f2a48 100644
+--- a/drivers/mmc/host/sdhci-st.c
++++ b/drivers/mmc/host/sdhci-st.c
+@@ -23,9 +23,14 @@
+ #include <linux/module.h>
+ #include <linux/err.h>
+ #include <linux/mmc/host.h>
+-
++#include <linux/reset.h>
+ #include "sdhci-pltfm.h"
+ 
++struct st_mmc_platform_data {
++	struct  reset_control *rstc;
++	void __iomem *top_ioaddr;
++};
++
+ /* MMCSS glue logic to setup the HC on some ST SoCs (e.g. STiH407 family) */
+ 
+ #define ST_MMC_CCONFIG_REG_1		0x400
+@@ -151,10 +156,16 @@ static const struct sdhci_pltfm_data sdhci_st_pdata = {
+ static int sdhci_st_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host;
++	struct st_mmc_platform_data *pdata;
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct clk *clk;
+ 	int ret = 0;
+ 	u16 host_version;
++	struct resource *res;
++
++	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
++	if (!pdata)
++		return -ENOMEM;
+ 
+ 	clk =  devm_clk_get(&pdev->dev, "mmc");
+ 	if (IS_ERR(clk)) {
+@@ -162,10 +173,17 @@ static int sdhci_st_probe(struct platform_device *pdev)
+ 		return PTR_ERR(clk);
+ 	}
+ 
++	pdata->rstc = devm_reset_control_get(&pdev->dev, NULL);
++	if (IS_ERR(pdata->rstc))
++		pdata->rstc = NULL;
++	else
++		reset_control_deassert(pdata->rstc);
++
+ 	host = sdhci_pltfm_init(pdev, &sdhci_st_pdata, 0);
+ 	if (IS_ERR(host)) {
+ 		dev_err(&pdev->dev, "Failed sdhci_pltfm_init\n");
+-		return PTR_ERR(host);
++		ret = PTR_ERR(host);
++		goto err_pltfm_init;
+ 	}
+ 
+ 	ret = mmc_of_parse(host->mmc);
+@@ -176,7 +194,17 @@ static int sdhci_st_probe(struct platform_device *pdev)
+ 
+ 	clk_prepare_enable(clk);
+ 
++	/* Configure the FlashSS Top registers for setting eMMC TX/RX delay */
++	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
++					   "top-mmc-delay");
++	pdata->top_ioaddr = devm_ioremap_resource(&pdev->dev, res);
++	if (IS_ERR(pdata->top_ioaddr)) {
++		dev_warn(&pdev->dev, "FlashSS Top Dly registers not available");
++		pdata->top_ioaddr = NULL;
++	}
++
+ 	pltfm_host = sdhci_priv(host);
++	pltfm_host->priv = pdata;
+ 	pltfm_host->clk = clk;
+ 
+ 	ret = sdhci_add_host(host);
+@@ -200,6 +228,23 @@ err_out:
+ 	clk_disable_unprepare(clk);
+ err_of:
+ 	sdhci_pltfm_free(pdev);
++err_pltfm_init:
++	if (pdata->rstc)
++		reset_control_assert(pdata->rstc);
++
++	return ret;
++}
++
++static int sdhci_st_remove(struct platform_device *pdev)
++{
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct st_mmc_platform_data *pdata = pltfm_host->priv;
++	int ret;
++
++	ret = sdhci_pltfm_unregister(pdev);
++
++	if (pdata->rstc)
++		reset_control_assert(pdata->rstc);
+ 
+ 	return ret;
+ }
+@@ -209,11 +254,15 @@ static int sdhci_st_suspend(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct st_mmc_platform_data *pdata = pltfm_host->priv;
+ 	int ret = sdhci_suspend_host(host);
+ 
+ 	if (ret)
+ 		goto out;
+ 
++	if (pdata->rstc)
++		reset_control_assert(pdata->rstc);
++
+ 	clk_disable_unprepare(pltfm_host->clk);
+ out:
+ 	return ret;
+@@ -223,9 +272,13 @@ static int sdhci_st_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct st_mmc_platform_data *pdata = pltfm_host->priv;
+ 
+ 	clk_prepare_enable(pltfm_host->clk);
+ 
++	if (pdata->rstc)
++		reset_control_deassert(pdata->rstc);
++
+ 	return sdhci_resume_host(host);
+ }
+ #endif
+@@ -241,7 +294,7 @@ MODULE_DEVICE_TABLE(of, st_sdhci_match);
+ 
+ static struct platform_driver sdhci_st_driver = {
+ 	.probe = sdhci_st_probe,
+-	.remove = sdhci_pltfm_unregister,
++	.remove = sdhci_st_remove,
+ 	.driver = {
+ 		   .name = "sdhci-st",
+ 		   .pm = &sdhci_st_pmops,
 -- 
 1.9.1
