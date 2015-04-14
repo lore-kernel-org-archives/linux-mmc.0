@@ -1,65 +1,180 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V5 12/15] mmc: sdhci: Flag re-tuning is needed on CRC or End-Bit errors
-Date: Tue, 14 Apr 2015 16:12:23 +0300
-Message-ID: <1429017146-15981-13-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V5 10/15] mmc: core: Add support for HS400 re-tuning
+Date: Tue, 14 Apr 2015 16:12:21 +0300
+Message-ID: <1429017146-15981-11-git-send-email-adrian.hunter@intel.com>
 References: <1429017146-15981-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga09.intel.com ([134.134.136.24]:65351 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932428AbbDNNPJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 14 Apr 2015 09:15:09 -0400
+	id S1753805AbbDNNPD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 14 Apr 2015 09:15:03 -0400
 In-Reply-To: <1429017146-15981-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-CRC or End-Bit errors could possibly be alleviated by
-re-tuning so flag re-tuning needed in those cases.
-Note this has no effect if re-tuning has not been
-enabled.
+HS400 re-tuning must be done in HS200 mode. Add
+the ability to switch from HS400 mode to HS200
+mode before re-tuning and switch back to HS400
+after re-tuning.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 14 +++++++++-----
- 1 file changed, 9 insertions(+), 5 deletions(-)
+ drivers/mmc/core/core.h |  2 ++
+ drivers/mmc/core/host.c | 17 ++++++++++
+ drivers/mmc/core/mmc.c  | 88 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 107 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index b345844..d11fae7 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2307,8 +2307,10 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *mask)
- 	if (intmask & SDHCI_INT_TIMEOUT)
- 		host->cmd->error = -ETIMEDOUT;
- 	else if (intmask & (SDHCI_INT_CRC | SDHCI_INT_END_BIT |
--			SDHCI_INT_INDEX))
-+			SDHCI_INT_INDEX)) {
- 		host->cmd->error = -EILSEQ;
-+		mmc_retune_needed(host->mmc);
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index cfba3c0..e6f2de7 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -88,6 +88,8 @@ void mmc_remove_card_debugfs(struct mmc_card *card);
+ void mmc_init_context_info(struct mmc_host *host);
+ 
+ int mmc_execute_tuning(struct mmc_card *card);
++int mmc_hs200_to_hs400(struct mmc_card *card);
++int mmc_hs400_to_hs200(struct mmc_card *card);
+ 
+ #endif
+ 
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 271986c..f480cb7 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -342,6 +342,7 @@ EXPORT_SYMBOL(mmc_retune_release);
+ 
+ int mmc_retune(struct mmc_host *host)
+ {
++	bool return_to_hs400 = false;
+ 	int err;
+ 
+ 	if (host->retune_now)
+@@ -356,8 +357,24 @@ int mmc_retune(struct mmc_host *host)
+ 
+ 	host->doing_retune = 1;
+ 
++	if (host->ios.timing == MMC_TIMING_MMC_HS400) {
++		err = mmc_hs400_to_hs200(host->card);
++		if (err)
++			goto out;
++
++		return_to_hs400 = true;
++
++		if (host->ops->prepare_hs400_tuning)
++			host->ops->prepare_hs400_tuning(host, &host->ios);
 +	}
++
+ 	err = mmc_execute_tuning(host->card);
++	if (err)
++		goto out;
  
- 	if (host->cmd->error) {
- 		tasklet_schedule(&host->finish_tasklet);
-@@ -2433,13 +2435,15 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
++	if (return_to_hs400)
++		err = mmc_hs200_to_hs400(host->card);
++out:
+ 	host->doing_retune = 0;
  
- 	if (intmask & SDHCI_INT_DATA_TIMEOUT)
- 		host->data->error = -ETIMEDOUT;
--	else if (intmask & SDHCI_INT_DATA_END_BIT)
-+	else if (intmask & SDHCI_INT_DATA_END_BIT) {
- 		host->data->error = -EILSEQ;
--	else if ((intmask & SDHCI_INT_DATA_CRC) &&
-+		mmc_retune_needed(host->mmc);
-+	} else if ((intmask & SDHCI_INT_DATA_CRC) &&
- 		SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))
--			!= MMC_BUS_TEST_R)
-+			!= MMC_BUS_TEST_R) {
- 		host->data->error = -EILSEQ;
--	else if (intmask & SDHCI_INT_ADMA_ERROR) {
-+		mmc_retune_needed(host->mmc);
-+	} else if (intmask & SDHCI_INT_ADMA_ERROR) {
- 		pr_err("%s: ADMA error\n", mmc_hostname(host->mmc));
- 		sdhci_adma_show_error(host);
- 		host->data->error = -EIO;
+ 	return err;
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 53a9cb3..5a52b26 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1091,6 +1091,94 @@ static int mmc_select_hs400(struct mmc_card *card)
+ 	return 0;
+ }
+ 
++int mmc_hs200_to_hs400(struct mmc_card *card)
++{
++	return mmc_select_hs400(card);
++}
++
++/* Caller must hold re-tuning */
++static int mmc_switch_status(struct mmc_card *card)
++{
++	u32 status;
++	int err;
++
++	err = mmc_send_status(card, &status);
++	if (err)
++		return err;
++
++	return mmc_switch_status_error(card->host, status);
++}
++
++int mmc_hs400_to_hs200(struct mmc_card *card)
++{
++	struct mmc_host *host = card->host;
++	bool send_status = true;
++	unsigned int max_dtr;
++	int err;
++
++	if (host->caps & MMC_CAP_WAIT_WHILE_BUSY)
++		send_status = false;
++
++	/* Reduce frequency to HS */
++	max_dtr = card->ext_csd.hs_max_dtr;
++	mmc_set_clock(host, max_dtr);
++
++	/* Switch HS400 to HS DDR */
++	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
++			   EXT_CSD_TIMING_HS, card->ext_csd.generic_cmd6_time,
++			   true, send_status, true);
++	if (err)
++		goto out_err;
++
++	mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
++
++	if (!send_status) {
++		err = mmc_switch_status(card);
++		if (err)
++			goto out_err;
++	}
++
++	/* Switch HS DDR to HS */
++	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BUS_WIDTH,
++			   EXT_CSD_BUS_WIDTH_8, card->ext_csd.generic_cmd6_time,
++			   true, send_status, true);
++	if (err)
++		goto out_err;
++
++	mmc_set_timing(host, MMC_TIMING_MMC_HS);
++
++	if (!send_status) {
++		err = mmc_switch_status(card);
++		if (err)
++			goto out_err;
++	}
++
++	/* Switch HS to HS200 */
++	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
++			   EXT_CSD_TIMING_HS200,
++			   card->ext_csd.generic_cmd6_time, true, send_status,
++			   true);
++	if (err)
++		goto out_err;
++
++	mmc_set_timing(host, MMC_TIMING_MMC_HS200);
++
++	if (!send_status) {
++		err = mmc_switch_status(card);
++		if (err)
++			goto out_err;
++	}
++
++	mmc_set_bus_speed(card);
++
++	return 0;
++
++out_err:
++	pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
++	       __func__, err);
++	return err;
++}
++
+ /*
+  * For device supporting HS200 mode, the following sequence
+  * should be done before executing the tuning process.
 -- 
 1.9.1
 
