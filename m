@@ -1,55 +1,56 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/1] mmc: pwrseq: Fix error code propagation in mmc_pwrseq_simple_alloc()
-Date: Tue, 14 Apr 2015 11:20:40 +0200
-Message-ID: <CAPDyKFqnpj3StC-3VKosn2EJnXzbxJgHfMP0FOi7_KUBa-0vDA@mail.gmail.com>
-References: <1428934061-29217-1-git-send-email-javier.martinez@collabora.co.uk>
+From: Juergen Borleis <jbe@pengutronix.de>
+Subject: Re: [RFC] i.MX25/35/SDHCI: switch off DMA usage
+Date: Tue, 14 Apr 2015 11:42:00 +0200
+Message-ID: <201504141142.00237.jbe@pengutronix.de>
+References: <201503271152.04348.jbe@pengutronix.de> <20150327114400.GA20277@shlinux1.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1428934061-29217-1-git-send-email-javier.martinez@collabora.co.uk>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
-Cc: Alexandre Courbot <acourbot@nvidia.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Olof Johansson <olof@lixom.net>, Doug Anderson <dianders@chromium.org>, Kevin Hilman <khilman@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>
+Content-Type: Text/Plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:49373 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752479AbbDNJj2 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Apr 2015 05:39:28 -0400
+In-Reply-To: <20150327114400.GA20277@shlinux1.ap.freescale.net>
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <b29396@freescale.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Guo <shawn.guo@linaro.org>, linux-kernel@vger.kernel.org
 
-On 13 April 2015 at 16:07, Javier Martinez Canillas
-<javier.martinez@collabora.co.uk> wrote:
-> If the struct mmc_pwrseq_match .alloc function used to allocate a
-> struct mmc_pwrseq fails, the error is propagated to mmc_of_parse().
->
-> But instead of returning the error code in pwrseq, host->pwrseq is
-> returned which will always be 0. So mmc_of_parse() succeeds even if
-> the pwrseq .alloc function failed and host->pwrseq is NULL.
->
-> This makes the SDIO device to not be powered if the power sequencing
-> .alloc functions wants to be deferred due a missing resource because
-> the mmc controller driver probe did wrongly succeed.
->
-> Fixes: 0f12a0ce4ce4a ("mmc: pwrseq: simplify alloc/free hooks")
-> Signed-off-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
+Hi,
 
-Thanks! Applied for fixes.
+On Friday 27 March 2015 12:44:03 Dong Aisheng wrote:
+> On Fri, Mar 27, 2015 at 11:52:04AM +0100, Juergen Borleis wrote:
+> > DMA and the required overhead on very small data blocks seems an
+> > expensive operation. Due to erratum ENGCM07207 for i.MX25 and i.MX3=
+5 SoCs
+> > the support for multiblock transfers is disabled which results into=
+ a
+> > huge amount of single 512 byte sector transfers and interrupts. Thi=
+s
+> > slows down the transmission speed to below 500 kiB/s (even at 50 MH=
+z SD
+> > card clock). Using PIO instead of DMA to avoid ENGCM07207 happens a=
+nd
+> > re-enabling multiblock transfers again improve the transmission
+> > capability up to about 2.5 MiB/s.
+> >
+> > I'm still not sure if ENGCM07207 is related to DMA only and can not
+> > happen when PIO is used instead. Someone out there with experience
+> > regarding this topic?
+>
+> The errata does not state it's related to DMA only.
+> http://cache.freescale.com/files/dsp/doc/errata/IMX35CE.pdf
+> I could double check with our IC guys to confirm it.
 
-Kind regards
-Uffe
+Gentle ping.
 
-> ---
->  drivers/mmc/core/pwrseq.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
-> index ab2129781161..4c1d1757dbf9 100644
-> --- a/drivers/mmc/core/pwrseq.c
-> +++ b/drivers/mmc/core/pwrseq.c
-> @@ -73,7 +73,7 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
->
->         pwrseq = match->alloc(host, &pdev->dev);
->         if (IS_ERR(pwrseq)) {
-> -               ret = PTR_ERR(host->pwrseq);
-> +               ret = PTR_ERR(pwrseq);
->                 goto err;
->         }
->
-> --
-> 2.1.4
->
+Regards,
+Juergen
+
+--=20
+Pengutronix e.K. =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
+ =A0| Juergen Borleis =A0 =A0 =A0 =A0 =A0 =A0 |
+Industrial Linux Solutions               =A0 =A0 =A0| http://www.pengut=
+ronix.de/  |
