@@ -1,58 +1,91 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V5 07/15] mmc: core: Hold re-tuning while bkops ongoing
-Date: Tue, 14 Apr 2015 16:12:18 +0300
-Message-ID: <1429017146-15981-8-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V5 14/15] mmc: block: Retry errored data requests when re-tuning is needed
+Date: Tue, 14 Apr 2015 16:12:25 +0300
+Message-ID: <1429017146-15981-15-git-send-email-adrian.hunter@intel.com>
 References: <1429017146-15981-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga09.intel.com ([134.134.136.24]:65351 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932439AbbDNNOy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 14 Apr 2015 09:14:54 -0400
+	id S932428AbbDNNPN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 14 Apr 2015 09:15:13 -0400
 In-Reply-To: <1429017146-15981-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-Hold re-tuning during bkops to prevent
-it from conflicting with the busy state.
+Retry errored data requests when re-tuning is needed and
+add a flag to struct mmc_blk_request so that the retry
+is only done once.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+ drivers/mmc/card/block.c | 11 ++++++++++-
+ drivers/mmc/card/queue.h |  1 +
+ 2 files changed, 11 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index dbd7a77..4a42174 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -316,6 +316,8 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
- 	} else {
- 		timeout = 0;
- 		use_busy_signal = false;
-+		/* Hold re-tuning for ongoing bkops */
-+		mmc_retune_hold(card->host);
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 293e938..3baf7ea 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1195,6 +1195,7 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 						    mmc_active);
+ 	struct mmc_blk_request *brq = &mq_mrq->brq;
+ 	struct request *req = mq_mrq->req;
++	int need_retune = card->host->need_retune;
+ 	int ecc_err = 0, gen_err = 0;
+ 
+ 	/*
+@@ -1262,6 +1263,12 @@ static int mmc_blk_err_check(struct mmc_card *card,
  	}
  
- 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-@@ -324,6 +326,9 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
- 	if (err) {
- 		pr_warn("%s: Error %d starting bkops\n",
- 			mmc_hostname(card->host), err);
-+		/* bkops not ongoing, so release re-tuning */
-+		if (!use_busy_signal)
-+			mmc_retune_release(card->host);
- 		goto out;
- 	}
+ 	if (brq->data.error) {
++		if (need_retune && !brq->retune_retry_done) {
++			pr_info("%s: retrying because a re-tune was needed\n",
++				req->rq_disk->disk_name);
++			brq->retune_retry_done = 1;
++			return MMC_BLK_RETRY;
++		}
+ 		pr_err("%s: error %d transferring data, sector %u, nr %u, cmd response %#x, card status %#x\n",
+ 		       req->rq_disk->disk_name, brq->data.error,
+ 		       (unsigned)blk_rq_pos(req),
+@@ -1821,7 +1828,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	struct mmc_blk_data *md = mq->data;
+ 	struct mmc_card *card = md->queue.card;
+ 	struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
+-	int ret = 1, disable_multi = 0, retry = 0, type;
++	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
+ 	enum mmc_blk_status status;
+ 	struct mmc_queue_req *mq_rq;
+ 	struct request *req = rqc;
+@@ -1905,6 +1912,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 				break;
+ 			goto cmd_abort;
+ 		case MMC_BLK_RETRY:
++			retune_retry_done = brq->retune_retry_done;
+ 			if (retry++ < 5)
+ 				break;
+ 			/* Fall through */
+@@ -1967,6 +1975,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 				mmc_start_req(card->host,
+ 						&mq_rq->mmc_active, NULL);
+ 			}
++			mq_rq->brq.retune_retry_done = retune_retry_done;
+ 		}
+ 	} while (ret);
  
-@@ -749,6 +754,7 @@ int mmc_stop_bkops(struct mmc_card *card)
- 	 */
- 	if (!err || (err == -EINVAL)) {
- 		mmc_card_clr_doing_bkops(card);
-+		mmc_retune_release(card->host);
- 		err = 0;
- 	}
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index 5752d50..7e27915 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -12,6 +12,7 @@ struct mmc_blk_request {
+ 	struct mmc_command	cmd;
+ 	struct mmc_command	stop;
+ 	struct mmc_data		data;
++	int			retune_retry_done;
+ };
  
+ enum mmc_packed_type {
 -- 
 1.9.1
 
