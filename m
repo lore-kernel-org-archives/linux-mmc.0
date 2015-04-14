@@ -1,273 +1,299 @@
-From: Yangbo Lu <yangbo.lu@freescale.com>
-Subject: [v2, 4/4] mmc: esdhc: add eMMC DDR mode support
-Date: Tue, 14 Apr 2015 18:05:43 +0800
-Message-ID: <1429005943-21235-1-git-send-email-yangbo.lu@freescale.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] Revert "mmc: core: Convert mmc_driver to device_driver"
+Date: Tue, 14 Apr 2015 13:54:16 +0200
+Message-ID: <1429012456-29648-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0135.outbound.protection.outlook.com ([207.46.100.135]:38200
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753532AbbDNKY0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 14 Apr 2015 06:24:26 -0400
+Received: from mail-lb0-f178.google.com ([209.85.217.178]:33572 "EHLO
+	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754830AbbDNLy1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Apr 2015 07:54:27 -0400
+Received: by lbbzk7 with SMTP id zk7so6153422lbb.0
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Apr 2015 04:54:25 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org
-Cc: Yangbo Lu <yangbo.lu@freescale.com>
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-Add eMMC DDR mode support for Freescale SDHC adapter card.
-The u-boot should provide device tree properties 'adapter-type'
-and 'periperal-frequency' for this feature, if not, the card
-would not use DDR mode.
+This reverts commit 6685ac62b2f0 ("mmc: core: Convert mmc_driver to
+device_driver")
 
-Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+The reverted commit went too far in simplifing the device driver parts
+for mmc.
+
+Let's restore the old mmc_driver to enable driver core to sooner
+or later to remove the ->probe(), ->remove() and ->shutdown() callbacks
+from the struct device_driver.
+
+Note that, the old ->suspend|resume() callbacks in the struct
+mmc_driver don't need to be restored, since the mmc block layer has
+converted to the modern system PM ops.
+
+Fixes: 6685ac62b2f0 ("mmc: core: Convert mmc_driver to device_driver")
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/sdhci-esdhc.h    |  24 +++++++
- drivers/mmc/host/sdhci-of-esdhc.c | 132 ++++++++++++++++++++++++++++++++++++--
- 2 files changed, 152 insertions(+), 4 deletions(-)
+ drivers/mmc/card/block.c    | 34 +++++++++++++++++-----------------
+ drivers/mmc/card/mmc_test.c | 18 +++++++-----------
+ drivers/mmc/core/bus.c      | 41 +++++++++++++++++++++++++++++++++--------
+ include/linux/mmc/card.h    | 14 ++++++++++++--
+ 4 files changed, 69 insertions(+), 38 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index 3497cfa..a6f887e 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -27,10 +27,32 @@
- #define ESDHC_CLOCK_MASK	0x0000fff0
- #define ESDHC_PREDIV_SHIFT	8
- #define ESDHC_DIVIDER_SHIFT	4
-+#define ESDHC_CLOCK_CRDEN	0x00000008
- #define ESDHC_CLOCK_PEREN	0x00000004
- #define ESDHC_CLOCK_HCKEN	0x00000002
- #define ESDHC_CLOCK_IPGEN	0x00000001
- 
-+#define ESDHCI_PRESENT_STATE	0x24
-+#define ESDHC_CLK_STABLE	0x00000008
-+
-+#define ESDHC_CAPABILITIES_1	0x114
-+#define ESDHC_MODE_MASK		0x00000007
-+#define ESDHC_MODE_DDR50_SEL	0xfffffffc
-+#define ESDHC_MODE_DDR50	0x00000004
-+
-+#define ESDHC_CLOCK_CONTROL	0x144
-+#define ESDHC_CLKLPBK_EXTPIN	0x80000000
-+#define ESDHC_CMDCLK_SHIFTED	0x00008000
-+
-+/* SDHC Adapter Card Type */
-+#define ESDHC_ADAPTER_TYPE_EMMC45       0x1	/* eMMC Card Rev4.5 */
-+#define ESDHC_ADAPTER_TYPE_SDMMC_LEGACY 0x2	/* SD/MMC Legacy Card */
-+#define ESDHC_ADAPTER_TYPE_EMMC44       0x3	/* eMMC Card Rev4.4 */
-+#define ESDHC_ADAPTER_TYPE_RSV          0x4	/* Reserved */
-+#define ESDHC_ADAPTER_TYPE_MMC          0x5	/* MMC Card */
-+#define ESDHC_ADAPTER_TYPE_SD           0x6	/* SD Card Rev2.0 Rev3.0 */
-+#define ESDHC_NO_ADAPTER                0x7	/* No Card is Present*/
-+
- /* pltfm-specific */
- #define ESDHC_HOST_CONTROL_LE	0x20
- 
-@@ -44,6 +66,8 @@
- /* OF-specific */
- #define ESDHC_DMA_SYSCTL	0x40c
- #define ESDHC_DMA_SNOOP		0x00000040
-+#define ESDHC_FLUSH_ASYNC_FIFO          0x00040000
-+#define ESDHC_USE_PERIPHERAL_CLK        0x00080000
- 
- #define ESDHC_HOST_CONTROL_RES	0x05
- 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 858d65d..284094c 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -24,11 +24,30 @@
- 
- #define VENDOR_V_22	0x12
- #define VENDOR_V_23	0x13
-+
-+static u32 adapter_type;
-+static bool peripheral_clk_available;
-+
- static u32 esdhc_readl(struct sdhci_host *host, int reg)
- {
- 	u32 ret;
- 
--	ret = sdhci_32bs_readl(host, reg);
-+	if (reg == SDHCI_CAPABILITIES_1) {
-+		ret = sdhci_32bs_readl(host, ESDHC_CAPABILITIES_1);
-+		switch (adapter_type) {
-+		case ESDHC_ADAPTER_TYPE_EMMC44:
-+			if (ret & ESDHC_MODE_DDR50) {
-+				ret &= ESDHC_MODE_DDR50_SEL;
-+				/* enable 1/8V DDR capable */
-+				host->mmc->caps |= MMC_CAP_1_8V_DDR;
-+			} else
-+				ret &= ~ESDHC_MODE_MASK;
-+			break;
-+		default:
-+			ret &= ~ESDHC_MODE_MASK;
-+		}
-+	} else
-+		ret = sdhci_32bs_readl(host, reg);
- 	/*
- 	 * The bit of ADMA flag in eSDHC is not compatible with standard
- 	 * SDHC register, so set fake flag SDHCI_CAN_DO_ADMA2 when ADMA is
-@@ -159,8 +178,11 @@ static void esdhc_writeb(struct sdhci_host *host, u8 val, int reg)
- 	}
- 
- 	/* Prevent SDHCI core from writing reserved bits (e.g. HISPD). */
--	if (reg == SDHCI_HOST_CONTROL)
-+	if (reg == SDHCI_HOST_CONTROL) {
- 		val &= ~ESDHC_HOST_CONTROL_RES;
-+		val &= ~SDHCI_CTRL_HISPD;
-+		val |= (sdhci_32bs_readl(host, reg) & SDHCI_CTRL_HISPD);
-+	}
- 	sdhci_clrsetbits(host, 0xff, val, reg);
- }
- 
-@@ -307,6 +329,84 @@ static void esdhc_reset(struct sdhci_host *host, u8 mask)
- 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
- }
- 
-+static void esdhc_clock_control(struct sdhci_host *host, bool enable)
-+{
-+	u32 value;
-+	u32 time_out;
-+
-+	value = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
-+
-+	if (enable)
-+		value |= ESDHC_CLOCK_CRDEN;
-+	else
-+		value &= ~ESDHC_CLOCK_CRDEN;
-+
-+	sdhci_writel(host, value, ESDHC_SYSTEM_CONTROL);
-+
-+	time_out = 20;
-+	value = ESDHC_CLK_STABLE;
-+	while (!(sdhci_readl(host, ESDHCI_PRESENT_STATE) & value)) {
-+		if (time_out == 0) {
-+			pr_err("%s: Internal clock never stabilised.\n",
-+				mmc_hostname(host->mmc));
-+			break;
-+		}
-+		time_out--;
-+		mdelay(1);
-+	}
-+}
-+
-+static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
-+{
-+	u16 ctrl_2;
-+	u32 time_out;
-+	u32 value;
-+
-+	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	/* Select Bus Speed Mode for host */
-+	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
-+	if ((uhs == MMC_TIMING_MMC_HS200) ||
-+		(uhs == MMC_TIMING_UHS_SDR104))
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
-+	else if (uhs == MMC_TIMING_UHS_SDR12)
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
-+	else if (uhs == MMC_TIMING_UHS_SDR25)
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
-+	else if (uhs == MMC_TIMING_UHS_SDR50)
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
-+	else if (uhs == MMC_TIMING_UHS_DDR50)
-+		ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
-+
-+	if (uhs == MMC_TIMING_UHS_DDR50) {
-+		esdhc_clock_control(host, false);
-+		sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-+		value = sdhci_readl(host, ESDHC_CLOCK_CONTROL);
-+		value |= (ESDHC_CLKLPBK_EXTPIN | ESDHC_CMDCLK_SHIFTED);
-+		sdhci_writel(host, value, ESDHC_CLOCK_CONTROL);
-+		esdhc_clock_control(host, true);
-+
-+		esdhc_clock_control(host, false);
-+		value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
-+		value |= ESDHC_FLUSH_ASYNC_FIFO;
-+		sdhci_writel(host, value, ESDHC_DMA_SYSCTL);
-+		/* Wait max 20 ms */
-+		time_out = 20;
-+		value = ESDHC_FLUSH_ASYNC_FIFO;
-+		while (sdhci_readl(host, ESDHC_DMA_SYSCTL) & value) {
-+			if (time_out == 0) {
-+				pr_err("%s: FAF bit is auto cleaned failed.\n",
-+					mmc_hostname(host->mmc));
-+
-+				break;
-+			}
-+			time_out--;
-+			mdelay(1);
-+		}
-+		esdhc_clock_control(host, true);
-+	} else
-+		sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-+}
-+
- static const struct sdhci_ops sdhci_esdhc_ops = {
- 	.read_l = esdhc_readl,
- 	.read_w = esdhc_readw,
-@@ -322,7 +422,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
- 	.adma_workaround = esdhci_of_adma_workaround,
- 	.set_bus_width = esdhc_pltfm_set_bus_width,
- 	.reset = esdhc_reset,
--	.set_uhs_signaling = sdhci_set_uhs_signaling,
-+	.set_uhs_signaling = esdhc_set_uhs_signaling,
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index c69afb5..e192bf1 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2418,9 +2418,8 @@ static const struct mmc_fixup blk_fixups[] =
+ 	END_FIXUP
  };
  
- #ifdef CONFIG_PM
-@@ -376,6 +476,8 @@ static void esdhc_get_property(struct platform_device *pdev)
- 	struct device_node *np = pdev->dev.of_node;
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	const __be32 *value;
-+	int size;
- 
- 	sdhci_get_of_property(pdev);
- 
-@@ -383,6 +485,18 @@ static void esdhc_get_property(struct platform_device *pdev)
- 	mmc_of_parse(host->mmc);
- 	mmc_of_parse_voltage(np, &host->ocr_mask);
- 
-+	value = of_get_property(np, "adapter-type", &size);
-+	if (value && size == sizeof(*value) && *value)
-+		adapter_type = be32_to_cpup(value);
-+
-+	/* If getting a peripheral-frequency, use it instead */
-+	value = of_get_property(np, "peripheral-frequency", &size);
-+	if (value && size == sizeof(*value) && *value) {
-+		pltfm_host->clock = be32_to_cpup(value);
-+		peripheral_clk_available = true;
-+	} else
-+		peripheral_clk_available = false;
-+
- 	if (of_device_is_compatible(np, "fsl,p2020-esdhc")) {
- 		/*
- 		 * Freescale messed up with P2020 as it has a non-standard
-@@ -402,13 +516,23 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+-static int mmc_blk_probe(struct device *dev)
++static int mmc_blk_probe(struct mmc_card *card)
  {
- 	struct sdhci_host *host;
- 	int ret;
+-	struct mmc_card *card = mmc_dev_to_card(dev);
+ 	struct mmc_blk_data *md, *part_md;
+ 	char cap_str[10];
+ 
+@@ -2445,7 +2444,7 @@ static int mmc_blk_probe(struct device *dev)
+ 	if (mmc_blk_alloc_parts(card, md))
+ 		goto out;
+ 
+-	dev_set_drvdata(dev, md);
++	dev_set_drvdata(&card->dev, md);
+ 
+ 	if (mmc_add_disk(md))
+ 		goto out;
+@@ -2475,10 +2474,9 @@ static int mmc_blk_probe(struct device *dev)
+ 	return 0;
+ }
+ 
+-static int mmc_blk_remove(struct device *dev)
++static void mmc_blk_remove(struct mmc_card *card)
+ {
+-	struct mmc_card *card = mmc_dev_to_card(dev);
+-	struct mmc_blk_data *md = dev_get_drvdata(dev);
++	struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
+ 
+ 	mmc_blk_remove_parts(card, md);
+ 	pm_runtime_get_sync(&card->dev);
+@@ -2489,15 +2487,13 @@ static int mmc_blk_remove(struct device *dev)
+ 		pm_runtime_disable(&card->dev);
+ 	pm_runtime_put_noidle(&card->dev);
+ 	mmc_blk_remove_req(md);
+-	dev_set_drvdata(dev, NULL);
 -
-+	u32 value;
+-	return 0;
++	dev_set_drvdata(&card->dev, NULL);
+ }
  
- 	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_pdata, 0);
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
+-static int _mmc_blk_suspend(struct device *dev)
++static int _mmc_blk_suspend(struct mmc_card *card)
+ {
+ 	struct mmc_blk_data *part_md;
+-	struct mmc_blk_data *md = dev_get_drvdata(dev);
++	struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
  
- 	esdhc_get_property(pdev);
+ 	if (md) {
+ 		mmc_queue_suspend(&md->queue);
+@@ -2508,15 +2504,17 @@ static int _mmc_blk_suspend(struct device *dev)
+ 	return 0;
+ }
+ 
+-static void mmc_blk_shutdown(struct device *dev)
++static void mmc_blk_shutdown(struct mmc_card *card)
+ {
+-	_mmc_blk_suspend(dev);
++	_mmc_blk_suspend(card);
+ }
+ 
+ #ifdef CONFIG_PM_SLEEP
+ static int mmc_blk_suspend(struct device *dev)
+ {
+-	return _mmc_blk_suspend(dev);
++	struct mmc_card *card = mmc_dev_to_card(dev);
 +
-+	/* Select peripheral clock as the eSDHC clock */
-+	if (peripheral_clk_available) {
-+		esdhc_clock_control(host, false);
-+		value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
-+		value |= ESDHC_USE_PERIPHERAL_CLK;
-+		sdhci_writel(host, value, ESDHC_DMA_SYSCTL);
-+		esdhc_clock_control(host, true);
-+	}
++	return _mmc_blk_suspend(card);
+ }
+ 
+ static int mmc_blk_resume(struct device *dev)
+@@ -2541,9 +2539,11 @@ static int mmc_blk_resume(struct device *dev)
+ 
+ static SIMPLE_DEV_PM_OPS(mmc_blk_pm_ops, mmc_blk_suspend, mmc_blk_resume);
+ 
+-static struct device_driver mmc_driver = {
+-	.name		= "mmcblk",
+-	.pm		= &mmc_blk_pm_ops,
++static struct mmc_driver mmc_driver = {
++	.drv		= {
++		.name	= "mmcblk",
++		.pm	= &mmc_blk_pm_ops,
++	},
+ 	.probe		= mmc_blk_probe,
+ 	.remove		= mmc_blk_remove,
+ 	.shutdown	= mmc_blk_shutdown,
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index 7dac469..53b7413 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -14,7 +14,6 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/slab.h>
+-#include <linux/device.h>
+ 
+ #include <linux/scatterlist.h>
+ #include <linux/swap.h>		/* For nr_free_buffer_pages() */
+@@ -2996,9 +2995,8 @@ err:
+ 	return ret;
+ }
+ 
+-static int mmc_test_probe(struct device *dev)
++static int mmc_test_probe(struct mmc_card *card)
+ {
+-	struct mmc_card *card = mmc_dev_to_card(dev);
+ 	int ret;
+ 
+ 	if (!mmc_card_mmc(card) && !mmc_card_sd(card))
+@@ -3013,22 +3011,20 @@ static int mmc_test_probe(struct device *dev)
+ 	return 0;
+ }
+ 
+-static int mmc_test_remove(struct device *dev)
++static void mmc_test_remove(struct mmc_card *card)
+ {
+-	struct mmc_card *card = mmc_dev_to_card(dev);
+-
+ 	mmc_test_free_result(card);
+ 	mmc_test_free_dbgfs_file(card);
+-
+-	return 0;
+ }
+ 
+-static void mmc_test_shutdown(struct device *dev)
++static void mmc_test_shutdown(struct mmc_card *card)
+ {
+ }
+ 
+-static struct device_driver mmc_driver = {
+-	.name	= "mmc_test",
++static struct mmc_driver mmc_driver = {
++	.drv		= {
++		.name	= "mmc_test",
++	},
+ 	.probe		= mmc_test_probe,
+ 	.remove		= mmc_test_remove,
+ 	.shutdown	= mmc_test_shutdown,
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index c5ef100..972ff84 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -26,6 +26,8 @@
+ #include "sdio_cis.h"
+ #include "bus.h"
+ 
++#define to_mmc_driver(d)	container_of(d, struct mmc_driver, drv)
 +
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto err;
+ static ssize_t type_show(struct device *dev,
+ 	struct device_attribute *attr, char *buf)
+ {
+@@ -105,14 +107,33 @@ mmc_bus_uevent(struct device *dev, struct kobj_uevent_env *env)
+ 	return retval;
+ }
+ 
++static int mmc_bus_probe(struct device *dev)
++{
++	struct mmc_driver *drv = to_mmc_driver(dev->driver);
++	struct mmc_card *card = mmc_dev_to_card(dev);
++
++	return drv->probe(card);
++}
++
++static int mmc_bus_remove(struct device *dev)
++{
++	struct mmc_driver *drv = to_mmc_driver(dev->driver);
++	struct mmc_card *card = mmc_dev_to_card(dev);
++
++	drv->remove(card);
++
++	return 0;
++}
++
+ static void mmc_bus_shutdown(struct device *dev)
+ {
++	struct mmc_driver *drv = to_mmc_driver(dev->driver);
+ 	struct mmc_card *card = mmc_dev_to_card(dev);
+ 	struct mmc_host *host = card->host;
+ 	int ret;
+ 
+-	if (dev->driver && dev->driver->shutdown)
+-		dev->driver->shutdown(dev);
++	if (dev->driver && drv->shutdown)
++		drv->shutdown(card);
+ 
+ 	if (host->bus_ops->shutdown) {
+ 		ret = host->bus_ops->shutdown(host);
+@@ -181,6 +202,8 @@ static struct bus_type mmc_bus_type = {
+ 	.dev_groups	= mmc_dev_groups,
+ 	.match		= mmc_bus_match,
+ 	.uevent		= mmc_bus_uevent,
++	.probe		= mmc_bus_probe,
++	.remove		= mmc_bus_remove,
+ 	.shutdown	= mmc_bus_shutdown,
+ 	.pm		= &mmc_bus_pm_ops,
+ };
+@@ -199,22 +222,24 @@ void mmc_unregister_bus(void)
+  *	mmc_register_driver - register a media driver
+  *	@drv: MMC media driver
+  */
+-int mmc_register_driver(struct device_driver *drv)
++int mmc_register_driver(struct mmc_driver *drv)
+ {
+-	drv->bus = &mmc_bus_type;
+-	return driver_register(drv);
++	drv->drv.bus = &mmc_bus_type;
++	return driver_register(&drv->drv);
+ }
++
+ EXPORT_SYMBOL(mmc_register_driver);
+ 
+ /**
+  *	mmc_unregister_driver - unregister a media driver
+  *	@drv: MMC media driver
+  */
+-void mmc_unregister_driver(struct device_driver *drv)
++void mmc_unregister_driver(struct mmc_driver *drv)
+ {
+-	drv->bus = &mmc_bus_type;
+-	driver_unregister(drv);
++	drv->drv.bus = &mmc_bus_type;
++	driver_unregister(&drv->drv);
+ }
++
+ EXPORT_SYMBOL(mmc_unregister_driver);
+ 
+ static void mmc_release_card(struct device *dev)
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index a6cf4c0..19f0175 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -512,8 +512,18 @@ static inline int mmc_card_broken_irq_polling(const struct mmc_card *c)
+ 
+ #define mmc_dev_to_card(d)	container_of(d, struct mmc_card, dev)
+ 
+-extern int mmc_register_driver(struct device_driver *);
+-extern void mmc_unregister_driver(struct device_driver *);
++/*
++ * MMC device driver (e.g., Flash card, I/O card...)
++ */
++struct mmc_driver {
++	struct device_driver drv;
++	int (*probe)(struct mmc_card *);
++	void (*remove)(struct mmc_card *);
++	void (*shutdown)(struct mmc_card *);
++};
++
++extern int mmc_register_driver(struct mmc_driver *);
++extern void mmc_unregister_driver(struct mmc_driver *);
+ 
+ extern void mmc_fixup_device(struct mmc_card *card,
+ 			     const struct mmc_fixup *table);
 -- 
-2.1.0.27.g96db324
+1.9.1
 
