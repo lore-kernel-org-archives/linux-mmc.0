@@ -1,180 +1,67 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V5 10/15] mmc: core: Add support for HS400 re-tuning
-Date: Tue, 14 Apr 2015 16:12:21 +0300
-Message-ID: <1429017146-15981-11-git-send-email-adrian.hunter@intel.com>
-References: <1429017146-15981-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH V4 01/15] mmc: host: Add facility to support re-tuning
+Date: Tue, 14 Apr 2015 16:13:53 +0300
+Message-ID: <552D1291.3010809@intel.com>
+References: <1427489863-9050-1-git-send-email-adrian.hunter@intel.com>	<1427489863-9050-2-git-send-email-adrian.hunter@intel.com>	<CAPDyKFrs4X+nDDkikUNSO5uz+Wsoz3TmkLJ9RwvvdjYqd8+Ygg@mail.gmail.com>	<551BDAEA.20405@intel.com>	<CAPDyKFrve0VmhvPk-=V64Cab8AcqvMkGxOM1Aju8gV+u3vFxyg@mail.gmail.com>	<551D6BCA.7040708@intel.com> <CAPDyKFp8yH9CMcAbx7T-zw1qjWbdc6kx4KErykcnCH=46dsAyw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:65351 "EHLO mga09.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:13478 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753805AbbDNNPD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 14 Apr 2015 09:15:03 -0400
-In-Reply-To: <1429017146-15981-1-git-send-email-adrian.hunter@intel.com>
+	id S1753805AbbDNNQB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 14 Apr 2015 09:16:01 -0400
+In-Reply-To: <CAPDyKFp8yH9CMcAbx7T-zw1qjWbdc6kx4KErykcnCH=46dsAyw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-HS400 re-tuning must be done in HS200 mode. Add
-the ability to switch from HS400 mode to HS200
-mode before re-tuning and switch back to HS400
-after re-tuning.
+On 13/04/15 15:30, Ulf Hansson wrote:
+> On 2 April 2015 at 18:18, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 2/04/2015 4:05 p.m., Ulf Hansson wrote:
+>>>
+>>> [...]
+>>>
+>>>>>
+>>>>>>    - ability to enable / disable re-tuning
+>>>>>
+>>>>>
+>>>>> Handled internally by the mmc core.
+>>>>
+>>>>
+>>>> The host controller driver enables re-tuning based on whether the host
+>>>> controller requires it for that transfer mode. For example, only the
+>>>> SDHCI
+>>>> host controller knows if tuning is required for SDR50 mode according to
+>>>> the
+>>>> SDHCI capability register bit 45.
+>>>
+>>>
+>>> That seems a bit silly.
+>>>
+>>> All hosts wants the re-tuning to be "enabled" if the current used
+>>> speed mode requires it. It's not a host driver thing to deal with,
+>>> just the core.
+>>
+>>
+>> No it is up to the host controller. That is how it is in the
+>> SD Host Controller Specification. Both whether to tune SDR50 and
+>> whether to run a re-tuning timer.
+>>
+>> Tuning is inherently a host controller problem. The card can always
+>> receive correctly from the host, but the host has to adjust its
+>> "sampling point" to receive from the card. Only the host knows its
+>> capabilities in this regard.
+> 
+> The requirement of doing re-tuning is stated in the eMMC/SD specs. The
+> SDHCI spec is just adopting to what these specs already states. Then,
+> I think the mmc core is the only one, who shall be able of
+> enable/disable re-tuning and thus we shouldn't need any APIs for that.
+> 
+> Hosts needs to be able to flag that re-tuning is needed and to
+> configure the re-tuning timeout (optional).
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/core/core.h |  2 ++
- drivers/mmc/core/host.c | 17 ++++++++++
- drivers/mmc/core/mmc.c  | 88 +++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 107 insertions(+)
+OK sent patch set V5
 
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index cfba3c0..e6f2de7 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -88,6 +88,8 @@ void mmc_remove_card_debugfs(struct mmc_card *card);
- void mmc_init_context_info(struct mmc_host *host);
- 
- int mmc_execute_tuning(struct mmc_card *card);
-+int mmc_hs200_to_hs400(struct mmc_card *card);
-+int mmc_hs400_to_hs200(struct mmc_card *card);
- 
- #endif
- 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 271986c..f480cb7 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -342,6 +342,7 @@ EXPORT_SYMBOL(mmc_retune_release);
- 
- int mmc_retune(struct mmc_host *host)
- {
-+	bool return_to_hs400 = false;
- 	int err;
- 
- 	if (host->retune_now)
-@@ -356,8 +357,24 @@ int mmc_retune(struct mmc_host *host)
- 
- 	host->doing_retune = 1;
- 
-+	if (host->ios.timing == MMC_TIMING_MMC_HS400) {
-+		err = mmc_hs400_to_hs200(host->card);
-+		if (err)
-+			goto out;
-+
-+		return_to_hs400 = true;
-+
-+		if (host->ops->prepare_hs400_tuning)
-+			host->ops->prepare_hs400_tuning(host, &host->ios);
-+	}
-+
- 	err = mmc_execute_tuning(host->card);
-+	if (err)
-+		goto out;
- 
-+	if (return_to_hs400)
-+		err = mmc_hs200_to_hs400(host->card);
-+out:
- 	host->doing_retune = 0;
- 
- 	return err;
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 53a9cb3..5a52b26 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1091,6 +1091,94 @@ static int mmc_select_hs400(struct mmc_card *card)
- 	return 0;
- }
- 
-+int mmc_hs200_to_hs400(struct mmc_card *card)
-+{
-+	return mmc_select_hs400(card);
-+}
-+
-+/* Caller must hold re-tuning */
-+static int mmc_switch_status(struct mmc_card *card)
-+{
-+	u32 status;
-+	int err;
-+
-+	err = mmc_send_status(card, &status);
-+	if (err)
-+		return err;
-+
-+	return mmc_switch_status_error(card->host, status);
-+}
-+
-+int mmc_hs400_to_hs200(struct mmc_card *card)
-+{
-+	struct mmc_host *host = card->host;
-+	bool send_status = true;
-+	unsigned int max_dtr;
-+	int err;
-+
-+	if (host->caps & MMC_CAP_WAIT_WHILE_BUSY)
-+		send_status = false;
-+
-+	/* Reduce frequency to HS */
-+	max_dtr = card->ext_csd.hs_max_dtr;
-+	mmc_set_clock(host, max_dtr);
-+
-+	/* Switch HS400 to HS DDR */
-+	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
-+			   EXT_CSD_TIMING_HS, card->ext_csd.generic_cmd6_time,
-+			   true, send_status, true);
-+	if (err)
-+		goto out_err;
-+
-+	mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
-+
-+	if (!send_status) {
-+		err = mmc_switch_status(card);
-+		if (err)
-+			goto out_err;
-+	}
-+
-+	/* Switch HS DDR to HS */
-+	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BUS_WIDTH,
-+			   EXT_CSD_BUS_WIDTH_8, card->ext_csd.generic_cmd6_time,
-+			   true, send_status, true);
-+	if (err)
-+		goto out_err;
-+
-+	mmc_set_timing(host, MMC_TIMING_MMC_HS);
-+
-+	if (!send_status) {
-+		err = mmc_switch_status(card);
-+		if (err)
-+			goto out_err;
-+	}
-+
-+	/* Switch HS to HS200 */
-+	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
-+			   EXT_CSD_TIMING_HS200,
-+			   card->ext_csd.generic_cmd6_time, true, send_status,
-+			   true);
-+	if (err)
-+		goto out_err;
-+
-+	mmc_set_timing(host, MMC_TIMING_MMC_HS200);
-+
-+	if (!send_status) {
-+		err = mmc_switch_status(card);
-+		if (err)
-+			goto out_err;
-+	}
-+
-+	mmc_set_bus_speed(card);
-+
-+	return 0;
-+
-+out_err:
-+	pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
-+	       __func__, err);
-+	return err;
-+}
-+
- /*
-  * For device supporting HS200 mode, the following sequence
-  * should be done before executing the tuning process.
--- 
-1.9.1
 
