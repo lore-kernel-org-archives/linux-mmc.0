@@ -1,299 +1,209 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH] Revert "mmc: core: Convert mmc_driver to device_driver"
-Date: Tue, 14 Apr 2015 13:54:16 +0200
-Message-ID: <1429012456-29648-1-git-send-email-ulf.hansson@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V5 01/15] mmc: host: Add facility to support re-tuning
+Date: Tue, 14 Apr 2015 16:12:12 +0300
+Message-ID: <1429017146-15981-2-git-send-email-adrian.hunter@intel.com>
+References: <1429017146-15981-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f178.google.com ([209.85.217.178]:33572 "EHLO
-	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754830AbbDNLy1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Apr 2015 07:54:27 -0400
-Received: by lbbzk7 with SMTP id zk7so6153422lbb.0
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Apr 2015 04:54:25 -0700 (PDT)
+Received: from mga09.intel.com ([134.134.136.24]:65351 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753843AbbDNNOm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 14 Apr 2015 09:14:42 -0400
+In-Reply-To: <1429017146-15981-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-This reverts commit 6685ac62b2f0 ("mmc: core: Convert mmc_driver to
-device_driver")
+Currently, there is core support for tuning during
+initialization. There can also be a need to re-tune
+periodically (e.g. sdhci) or to re-tune after the
+host controller is powered off (e.g. after PM
+runtime suspend / resume) or to re-tune in response
+to CRC errors.
 
-The reverted commit went too far in simplifing the device driver parts
-for mmc.
+The main requirements for re-tuning are:
+  - ability to enable / disable re-tuning
+  - ability to flag that re-tuning is needed
+  - ability to re-tune before any request
+  - ability to hold off re-tuning if the card is busy
+  - ability to hold off re-tuning if re-tuning is in
+  progress
+  - ability to run a re-tuning timer
 
-Let's restore the old mmc_driver to enable driver core to sooner
-or later to remove the ->probe(), ->remove() and ->shutdown() callbacks
-from the struct device_driver.
+To support those requirements 7 members are added to struct
+mmc_host:
 
-Note that, the old ->suspend|resume() callbacks in the struct
-mmc_driver don't need to be restored, since the mmc block layer has
-converted to the modern system PM ops.
+  unsigned int		can_retune:1;	/* re-tuning can be used */
+  unsigned int		doing_retune:1;	/* re-tuning in progress */
+  unsigned int		retune_now:1;   /* do re-tuning at next req */
+  int			need_retune;	/* re-tuning is needed */
+  int			hold_retune;	/* hold off re-tuning */
+  unsigned int		retune_period;  /* re-tuning period in secs */
+  struct timer_list	retune_timer;	/* for periodic re-tuning */
 
-Fixes: 6685ac62b2f0 ("mmc: core: Convert mmc_driver to device_driver")
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+need_retune is an integer so it can be set without needing
+synchronization. hold_retune is a integer to allow nesting.
+
+Various simple functions are provided to set / clear those
+variables.
+
+Subsequent patches take those functions into use.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/block.c    | 34 +++++++++++++++++-----------------
- drivers/mmc/card/mmc_test.c | 18 +++++++-----------
- drivers/mmc/core/bus.c      | 41 +++++++++++++++++++++++++++++++++--------
- include/linux/mmc/card.h    | 14 ++++++++++++--
- 4 files changed, 69 insertions(+), 38 deletions(-)
+ drivers/mmc/core/host.c  | 71 ++++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/host.h | 33 ++++++++++++++++++++++
+ 2 files changed, 104 insertions(+)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index c69afb5..e192bf1 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -2418,9 +2418,8 @@ static const struct mmc_fixup blk_fixups[] =
- 	END_FIXUP
- };
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 8be0df7..271986c 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -301,6 +301,76 @@ static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
  
--static int mmc_blk_probe(struct device *dev)
-+static int mmc_blk_probe(struct mmc_card *card)
- {
--	struct mmc_card *card = mmc_dev_to_card(dev);
- 	struct mmc_blk_data *md, *part_md;
- 	char cap_str[10];
+ #endif
  
-@@ -2445,7 +2444,7 @@ static int mmc_blk_probe(struct device *dev)
- 	if (mmc_blk_alloc_parts(card, md))
- 		goto out;
- 
--	dev_set_drvdata(dev, md);
-+	dev_set_drvdata(&card->dev, md);
- 
- 	if (mmc_add_disk(md))
- 		goto out;
-@@ -2475,10 +2474,9 @@ static int mmc_blk_probe(struct device *dev)
- 	return 0;
- }
- 
--static int mmc_blk_remove(struct device *dev)
-+static void mmc_blk_remove(struct mmc_card *card)
- {
--	struct mmc_card *card = mmc_dev_to_card(dev);
--	struct mmc_blk_data *md = dev_get_drvdata(dev);
-+	struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
- 
- 	mmc_blk_remove_parts(card, md);
- 	pm_runtime_get_sync(&card->dev);
-@@ -2489,15 +2487,13 @@ static int mmc_blk_remove(struct device *dev)
- 		pm_runtime_disable(&card->dev);
- 	pm_runtime_put_noidle(&card->dev);
- 	mmc_blk_remove_req(md);
--	dev_set_drvdata(dev, NULL);
--
--	return 0;
-+	dev_set_drvdata(&card->dev, NULL);
- }
- 
--static int _mmc_blk_suspend(struct device *dev)
-+static int _mmc_blk_suspend(struct mmc_card *card)
- {
- 	struct mmc_blk_data *part_md;
--	struct mmc_blk_data *md = dev_get_drvdata(dev);
-+	struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
- 
- 	if (md) {
- 		mmc_queue_suspend(&md->queue);
-@@ -2508,15 +2504,17 @@ static int _mmc_blk_suspend(struct device *dev)
- 	return 0;
- }
- 
--static void mmc_blk_shutdown(struct device *dev)
-+static void mmc_blk_shutdown(struct mmc_card *card)
- {
--	_mmc_blk_suspend(dev);
-+	_mmc_blk_suspend(card);
- }
- 
- #ifdef CONFIG_PM_SLEEP
- static int mmc_blk_suspend(struct device *dev)
- {
--	return _mmc_blk_suspend(dev);
-+	struct mmc_card *card = mmc_dev_to_card(dev);
-+
-+	return _mmc_blk_suspend(card);
- }
- 
- static int mmc_blk_resume(struct device *dev)
-@@ -2541,9 +2539,11 @@ static int mmc_blk_resume(struct device *dev)
- 
- static SIMPLE_DEV_PM_OPS(mmc_blk_pm_ops, mmc_blk_suspend, mmc_blk_resume);
- 
--static struct device_driver mmc_driver = {
--	.name		= "mmcblk",
--	.pm		= &mmc_blk_pm_ops,
-+static struct mmc_driver mmc_driver = {
-+	.drv		= {
-+		.name	= "mmcblk",
-+		.pm	= &mmc_blk_pm_ops,
-+	},
- 	.probe		= mmc_blk_probe,
- 	.remove		= mmc_blk_remove,
- 	.shutdown	= mmc_blk_shutdown,
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index 7dac469..53b7413 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -14,7 +14,6 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
- #include <linux/slab.h>
--#include <linux/device.h>
- 
- #include <linux/scatterlist.h>
- #include <linux/swap.h>		/* For nr_free_buffer_pages() */
-@@ -2996,9 +2995,8 @@ err:
- 	return ret;
- }
- 
--static int mmc_test_probe(struct device *dev)
-+static int mmc_test_probe(struct mmc_card *card)
- {
--	struct mmc_card *card = mmc_dev_to_card(dev);
- 	int ret;
- 
- 	if (!mmc_card_mmc(card) && !mmc_card_sd(card))
-@@ -3013,22 +3011,20 @@ static int mmc_test_probe(struct device *dev)
- 	return 0;
- }
- 
--static int mmc_test_remove(struct device *dev)
-+static void mmc_test_remove(struct mmc_card *card)
- {
--	struct mmc_card *card = mmc_dev_to_card(dev);
--
- 	mmc_test_free_result(card);
- 	mmc_test_free_dbgfs_file(card);
--
--	return 0;
- }
- 
--static void mmc_test_shutdown(struct device *dev)
-+static void mmc_test_shutdown(struct mmc_card *card)
- {
- }
- 
--static struct device_driver mmc_driver = {
--	.name	= "mmc_test",
-+static struct mmc_driver mmc_driver = {
-+	.drv		= {
-+		.name	= "mmc_test",
-+	},
- 	.probe		= mmc_test_probe,
- 	.remove		= mmc_test_remove,
- 	.shutdown	= mmc_test_shutdown,
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index c5ef100..972ff84 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -26,6 +26,8 @@
- #include "sdio_cis.h"
- #include "bus.h"
- 
-+#define to_mmc_driver(d)	container_of(d, struct mmc_driver, drv)
-+
- static ssize_t type_show(struct device *dev,
- 	struct device_attribute *attr, char *buf)
- {
-@@ -105,14 +107,33 @@ mmc_bus_uevent(struct device *dev, struct kobj_uevent_env *env)
- 	return retval;
- }
- 
-+static int mmc_bus_probe(struct device *dev)
++void mmc_retune_enable(struct mmc_host *host)
 +{
-+	struct mmc_driver *drv = to_mmc_driver(dev->driver);
-+	struct mmc_card *card = mmc_dev_to_card(dev);
-+
-+	return drv->probe(card);
++	host->can_retune = 1;
++	if (host->retune_period)
++		mod_timer(&host->retune_timer,
++			  jiffies + host->retune_period * HZ);
 +}
 +
-+static int mmc_bus_remove(struct device *dev)
++void mmc_retune_disable(struct mmc_host *host)
 +{
-+	struct mmc_driver *drv = to_mmc_driver(dev->driver);
-+	struct mmc_card *card = mmc_dev_to_card(dev);
-+
-+	drv->remove(card);
-+
-+	return 0;
++	host->can_retune = 0;
++	del_timer_sync(&host->retune_timer);
++	host->retune_now = 0;
++	host->need_retune = 0;
 +}
 +
- static void mmc_bus_shutdown(struct device *dev)
- {
-+	struct mmc_driver *drv = to_mmc_driver(dev->driver);
- 	struct mmc_card *card = mmc_dev_to_card(dev);
- 	struct mmc_host *host = card->host;
- 	int ret;
- 
--	if (dev->driver && dev->driver->shutdown)
--		dev->driver->shutdown(dev);
-+	if (dev->driver && drv->shutdown)
-+		drv->shutdown(card);
- 
- 	if (host->bus_ops->shutdown) {
- 		ret = host->bus_ops->shutdown(host);
-@@ -181,6 +202,8 @@ static struct bus_type mmc_bus_type = {
- 	.dev_groups	= mmc_dev_groups,
- 	.match		= mmc_bus_match,
- 	.uevent		= mmc_bus_uevent,
-+	.probe		= mmc_bus_probe,
-+	.remove		= mmc_bus_remove,
- 	.shutdown	= mmc_bus_shutdown,
- 	.pm		= &mmc_bus_pm_ops,
- };
-@@ -199,22 +222,24 @@ void mmc_unregister_bus(void)
-  *	mmc_register_driver - register a media driver
-  *	@drv: MMC media driver
-  */
--int mmc_register_driver(struct device_driver *drv)
-+int mmc_register_driver(struct mmc_driver *drv)
- {
--	drv->bus = &mmc_bus_type;
--	return driver_register(drv);
-+	drv->drv.bus = &mmc_bus_type;
-+	return driver_register(&drv->drv);
- }
++void mmc_retune_timer_stop(struct mmc_host *host)
++{
++	del_timer_sync(&host->retune_timer);
++}
++EXPORT_SYMBOL(mmc_retune_timer_stop);
 +
- EXPORT_SYMBOL(mmc_register_driver);
- 
++void mmc_retune_hold(struct mmc_host *host)
++{
++	if (!host->hold_retune)
++		host->retune_now = 1;
++	host->hold_retune += 1;
++}
++EXPORT_SYMBOL(mmc_retune_hold);
++
++void mmc_retune_release(struct mmc_host *host)
++{
++	if (host->hold_retune)
++		host->hold_retune -= 1;
++	else
++		WARN_ON(1);
++}
++EXPORT_SYMBOL(mmc_retune_release);
++
++int mmc_retune(struct mmc_host *host)
++{
++	int err;
++
++	if (host->retune_now)
++		host->retune_now = 0;
++	else
++		return 0;
++
++	if (!host->need_retune || host->doing_retune || !host->card)
++		return 0;
++
++	host->need_retune = 0;
++
++	host->doing_retune = 1;
++
++	err = mmc_execute_tuning(host->card);
++
++	host->doing_retune = 0;
++
++	return err;
++}
++EXPORT_SYMBOL(mmc_retune);
++
++static void mmc_retune_timer(unsigned long data)
++{
++	struct mmc_host *host = (struct mmc_host *)data;
++
++	mmc_retune_needed(host);
++}
++
  /**
-  *	mmc_unregister_driver - unregister a media driver
-  *	@drv: MMC media driver
-  */
--void mmc_unregister_driver(struct device_driver *drv)
-+void mmc_unregister_driver(struct mmc_driver *drv)
- {
--	drv->bus = &mmc_bus_type;
--	driver_unregister(drv);
-+	drv->drv.bus = &mmc_bus_type;
-+	driver_unregister(&drv->drv);
+  *	mmc_of_parse() - parse host's device-tree node
+  *	@host: host whose node should be parsed.
+@@ -504,6 +574,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ #ifdef CONFIG_PM
+ 	host->pm_notify.notifier_call = mmc_pm_notify;
+ #endif
++	setup_timer(&host->retune_timer, mmc_retune_timer, (unsigned long)host);
+ 
+ 	/*
+ 	 * By default, hosts do not support SGIO or large requests.
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index b5bedae..e9f693e 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -12,6 +12,7 @@
+ 
+ #include <linux/leds.h>
+ #include <linux/mutex.h>
++#include <linux/timer.h>
+ #include <linux/sched.h>
+ #include <linux/device.h>
+ #include <linux/fault-inject.h>
+@@ -321,10 +322,18 @@ struct mmc_host {
+ #ifdef CONFIG_MMC_DEBUG
+ 	unsigned int		removed:1;	/* host is being removed */
+ #endif
++	unsigned int		can_retune:1;	/* re-tuning can be used */
++	unsigned int		doing_retune:1;	/* re-tuning in progress */
++	unsigned int		retune_now:1;	/* do re-tuning at next req */
+ 
+ 	int			rescan_disable;	/* disable card detection */
+ 	int			rescan_entered;	/* used with nonremovable devices */
+ 
++	int			need_retune;	/* re-tuning is needed */
++	int			hold_retune;	/* hold off re-tuning */
++	unsigned int		retune_period;	/* re-tuning period in secs */
++	struct timer_list	retune_timer;	/* for periodic re-tuning */
++
+ 	bool			trigger_card_event; /* card_event necessary */
+ 
+ 	struct mmc_card		*card;		/* device attached to this host */
+@@ -513,4 +522,28 @@ static inline bool mmc_card_hs400(struct mmc_card *card)
+ 	return card->host->ios.timing == MMC_TIMING_MMC_HS400;
  }
+ 
++void mmc_retune_enable(struct mmc_host *host);
++void mmc_retune_disable(struct mmc_host *host);
++void mmc_retune_timer_stop(struct mmc_host *host);
++void mmc_retune_hold(struct mmc_host *host);
++void mmc_retune_release(struct mmc_host *host);
++int mmc_retune(struct mmc_host *host);
 +
- EXPORT_SYMBOL(mmc_unregister_driver);
- 
- static void mmc_release_card(struct device *dev)
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index a6cf4c0..19f0175 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -512,8 +512,18 @@ static inline int mmc_card_broken_irq_polling(const struct mmc_card *c)
- 
- #define mmc_dev_to_card(d)	container_of(d, struct mmc_card, dev)
- 
--extern int mmc_register_driver(struct device_driver *);
--extern void mmc_unregister_driver(struct device_driver *);
-+/*
-+ * MMC device driver (e.g., Flash card, I/O card...)
-+ */
-+struct mmc_driver {
-+	struct device_driver drv;
-+	int (*probe)(struct mmc_card *);
-+	void (*remove)(struct mmc_card *);
-+	void (*shutdown)(struct mmc_card *);
-+};
++static inline void mmc_retune_needed(struct mmc_host *host)
++{
++	if (host->can_retune)
++		host->need_retune = 1;
++}
 +
-+extern int mmc_register_driver(struct mmc_driver *);
-+extern void mmc_unregister_driver(struct mmc_driver *);
- 
- extern void mmc_fixup_device(struct mmc_card *card,
- 			     const struct mmc_fixup *table);
++static inline void mmc_retune_not_needed(struct mmc_host *host)
++{
++	host->need_retune = 0;
++}
++
++static inline void mmc_retune_recheck(struct mmc_host *host)
++{
++	if (host->hold_retune <= 1)
++		host->retune_now = 1;
++}
++
+ #endif /* LINUX_MMC_HOST_H */
 -- 
 1.9.1
 
