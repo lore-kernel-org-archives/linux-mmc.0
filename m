@@ -1,16 +1,16 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
 Subject: Re: [PATCH V5 02/15] mmc: core: Enable / disable re-tuning
-Date: Thu, 16 Apr 2015 16:14:18 +0300
-Message-ID: <552FB5AA.7010306@intel.com>
+Date: Thu, 16 Apr 2015 16:24:45 +0300
+Message-ID: <552FB81D.9060709@intel.com>
 References: <1429017146-15981-1-git-send-email-adrian.hunter@intel.com>	<1429017146-15981-3-git-send-email-adrian.hunter@intel.com>	<CAPDyKFpsBA+B3NbopfYQRgo+KKJpWsseo3bCJx-ToR5bOzJYUg@mail.gmail.com>	<552F805B.9080003@intel.com> <CAPDyKFr_7giwZt76z3TnoqqJbQPBUJqRj1cepFR888FiseraGg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:62326 "EHLO mga03.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:50998 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753503AbbDPNQ6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 16 Apr 2015 09:16:58 -0400
+	id S1753985AbbDPN0y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 16 Apr 2015 09:26:54 -0400
 In-Reply-To: <CAPDyKFr_7giwZt76z3TnoqqJbQPBUJqRj1cepFR888FiseraGg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -73,13 +73,26 @@ On 16/04/15 15:00, Ulf Hansson wrote:
 > So you are saying that we instead of relying on the CMD13 (for SD/MMC)
 > to check whether the card is still alive, it's fine to trigger a
 > re-tuning instead.
+
+(Oops forgot to answer this one, sorry)
+
+Yes, why not?
+
 > 
 > I don't think that is an effective way to remove a card.
+
+Generally we know the card is removed from card-detect so no commands are
+sent in either case.
+
 > 
 > Moreover, I find it quite unreasonable to say the check for an alive
 > card, would fail because of that a re-tuning is needed. That would in
 > principle mean that we never should be able to hold re-tune for any
 > commands sequences.
+
+Re-tuning must work if the card is alive. CMD13 might get a CRC error if
+re-tuning is needed.
+
 > 
 >>
 >>> 2) system PM (disable?)
@@ -89,18 +102,9 @@ On 16/04/15 15:00, Ulf Hansson wrote:
 > At System PM other commands will be sent to put the card into sleep
 > state. For example CMD5. These commands are invoked prior
 > mmc_power_off() is called.
-
-You can't do *any* commands after CMD5 except CMD0 or another CMD5 to wake up.
-
-So if you want to wake-up from sleep, then you need to hold re-tuning, but
-that is not what is happening at the moment.
-
 > 
 > In the SDIO case, mmc_power_off() might not even be called at all,
 > since SDIO func drivers might have enabled MMC_PM_KEEP_POWER.
-
-If the card is not going to be re-initialized then disabling is not necessary.
-
 > 
 >>
 >>> 3) runtime PM (disable?)
@@ -109,15 +113,6 @@ If the card is not going to be re-initialized then disabling is not necessary.
 > 
 > Again that's too late, since for example the CMD5 might have been sent
 > before this.
-
-CMD5 is only used by _mmc_suspend()
-
-Yes if it were used elsewhere then re-tuning would have to be held, which is
-why I added a comment before mmc_sleep()
-
-	/* If necessary, callers must hold re-tuning */
-	static int mmc_sleep(struct mmc_host *host)
-
 > 
 >>
 >> For anything else the card might be doing, the mmc_retune_hold() /
@@ -129,9 +124,12 @@ why I added a comment before mmc_sleep()
 > 
 > In the mmc case, CMD13 is sent prior that. Shouldn't we hold re-tune
 > during that period?
-
-If reset happens, then the next command will fail, whether it is re-tuning
-or CMD13, so no different.
-
-If reset doesn't happen, then it is no different to normal operations.
+> 
+>>
+>>
+> 
+> Kind regards
+> Uffe
+> 
+> 
 
