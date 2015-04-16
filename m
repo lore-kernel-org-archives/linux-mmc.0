@@ -1,86 +1,69 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V5 02/15] mmc: core: Enable / disable re-tuning
-Date: Thu, 16 Apr 2015 12:26:51 +0300
-Message-ID: <552F805B.9080003@intel.com>
-References: <1429017146-15981-1-git-send-email-adrian.hunter@intel.com>	<1429017146-15981-3-git-send-email-adrian.hunter@intel.com> <CAPDyKFpsBA+B3NbopfYQRgo+KKJpWsseo3bCJx-ToR5bOzJYUg@mail.gmail.com>
+Subject: Re: [PATCH V5 08/15] mmc: mmc: Comment that callers need to hold
+ re-tuning if the card is put to sleep
+Date: Thu, 16 Apr 2015 12:30:35 +0300
+Message-ID: <552F813B.3080301@intel.com>
+References: <1429017146-15981-1-git-send-email-adrian.hunter@intel.com>	<1429017146-15981-9-git-send-email-adrian.hunter@intel.com> <CAPDyKFoT-dz1BOVhBw-Y4xGmE7adM-1mSVUgj-ckWdMB2o2ikg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:45145 "EHLO mga02.intel.com"
+Received: from mga03.intel.com ([134.134.136.65]:29386 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753630AbbDPJ27 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 16 Apr 2015 05:28:59 -0400
-In-Reply-To: <CAPDyKFpsBA+B3NbopfYQRgo+KKJpWsseo3bCJx-ToR5bOzJYUg@mail.gmail.com>
+	id S964938AbbDPJco (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 16 Apr 2015 05:32:44 -0400
+In-Reply-To: <CAPDyKFoT-dz1BOVhBw-Y4xGmE7adM-1mSVUgj-ckWdMB2o2ikg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-On 16/04/15 11:57, Ulf Hansson wrote:
+On 16/04/15 12:01, Ulf Hansson wrote:
 > On 14 April 2015 at 15:12, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> Enable re-tuning when tuning is executed and
->> disable re-tuning when card is no longer initialized.
+>> Currently "mmc sleep" is only used before power off and
+>> is not paired with waking up.  If that ever changed,
+>> re-tuning might need to be held, so add a comment for that.
 >>
 >> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 >> ---
->>  drivers/mmc/core/core.c | 4 ++++
->>  1 file changed, 4 insertions(+)
+>>  drivers/mmc/core/mmc.c | 1 +
+>>  1 file changed, 1 insertion(+)
 >>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index c296bc0..dd43f9b 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -1109,6 +1109,8 @@ int mmc_execute_tuning(struct mmc_card *card)
->>
->>         if (err)
->>                 pr_err("%s: tuning execution failed\n", mmc_hostname(host));
->> +       else
->> +               mmc_retune_enable(host);
->>
->>         return err;
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index c84131e..53a9cb3 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1504,6 +1504,7 @@ static int mmc_can_sleep(struct mmc_card *card)
+>>         return (card && card->ext_csd.rev >= 3);
 >>  }
->> @@ -1140,6 +1142,8 @@ void mmc_set_bus_width(struct mmc_host *host, unsigned int width)
->>   */
->>  void mmc_set_initial_state(struct mmc_host *host)
+>>
+>> +/* If necessary, callers must hold re-tuning */
+> 
+> Instead of adding a comment, let's fix what needs to be fixed.
+> 
+> I believe the proper thing would be to disable re-tuning when the card
+> is about to enter system PM sleep state. So somewhere early in
+> _mmc_suspend() we should disable re-tune. Likewise for SD and SDIO.
+
+_mmc_suspend() calls mmc_power_off() which calls  mmc_set_initial_state()
+which disables re-tuning. Likewise for SD and SDIO.
+
+So it is already done?
+
+> 
+>>  static int mmc_sleep(struct mmc_host *host)
 >>  {
->> +       mmc_retune_disable(host);
->> +
->>         if (mmc_host_is_spi(host))
->>                 host->ios.chip_select = MMC_CS_HIGH;
->>         else
+>>         struct mmc_command cmd = {0};
 >> --
 >> 1.9.1
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> I don't think you have fully considered these cases for the mmc/sd/sdio cards.
-
-Thanks for look at this, but I don't see a problem - see below.
-
+> Kind regards
+> Uffe
 > 
-> 1) Card removal/detect (hold/release?)
-
-Re-tuning will be done if needed before detect (because it is done before a
-request), which is necessary because detect can fail if tuning is needed.
-
-Re-tuning is done before a request. Requests aren't started if the card has
-been removed i.e. mmc_start_request() calls mmc_card_removed()
-
-If tuning is executed while a card is being removed, then the tuning will
-fail and the request will be errored out.
-
-> 2) system PM (disable?)
-
-System pm does mmc_power_off() which calls mmc_set_initial_state()
-
-> 3) runtime PM (disable?)
-
-If the card powers off then mmc_set_initial_state() will called.
-
-For anything else the card might be doing, the mmc_retune_hold() /
-mmc_retune_release() functions are used.
-
-> 4) reset (?)
-
-Reset goes through mmc_set_initial_state()
-
+> 
 
