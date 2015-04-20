@@ -1,93 +1,47 @@
-From: "Dov Levenglick" <dovl@codeaurora.org>
-Subject: Re: [RFC PATCH 1/4] PM / QoS: Add pm_qos_cancel_request_lazy() that
- doesn't sleep
-Date: Mon, 20 Apr 2015 14:00:35 -0000
-Message-ID: <03394129c3ef5958dcfbe3726959ecd1.squirrel@www.codeaurora.org>
-References: <1427204440-3533-1-git-send-email-adrian.hunter@intel.com>
-    <1427204440-3533-2-git-send-email-adrian.hunter@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1427204440-3533-2-git-send-email-adrian.hunter@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Kevin Hilman <khilman@linaro.org>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
+Subject: [PATCH] sdhci-of-esdhc: Pre divider starts at 1
+Date: Mon, 20 Apr 2015 23:12:13 +0200
+Message-ID: <1429564333-30474-1-git-send-email-joakim.tjernlund@transmode.se>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.transmode.se ([31.15.61.139]:55990 "EHLO smtp.transmode.se"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751360AbbDTVTE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 20 Apr 2015 17:19:04 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Joakim Tjernlund <joakim.tjernlund@transmode.se>
 
-> Add pm_qos_cancel_request_lazy() which is convenient for
-> contexts that may not sleep.
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->  include/linux/pm_qos.h |  2 ++
->  kernel/power/qos.c     | 20 ++++++++++++++++++++
->  2 files changed, 22 insertions(+)
->
-> diff --git a/include/linux/pm_qos.h b/include/linux/pm_qos.h
-> index 7b3ae0c..f44d353 100644
-> --- a/include/linux/pm_qos.h
-> +++ b/include/linux/pm_qos.h
-> @@ -126,6 +126,8 @@ void pm_qos_update_request(struct pm_qos_request *req,
->  			   s32 new_value);
->  void pm_qos_update_request_timeout(struct pm_qos_request *req,
->  				   s32 new_value, unsigned long
-> timeout_us);
-> +void pm_qos_cancel_request_lazy(struct pm_qos_request *req,
-> +				unsigned int timeout_us);
->  void pm_qos_remove_request(struct pm_qos_request *req);
->
+For PowerPC esdhc pre divider starts at 1, fixing the increases
+the actual clock from 40KHz to 50 KHz.
 
-I think that this could be acheived using existing API if
-pm_qos_update_request_timeout() were to be called with the existing
-timeout value.
-Since reading the existing timeout value is missing - and I think would be
-a useful feature to have for other use-cases - do you agree with such an
-approach?
+Signed-off-by: Joakim Tjernlund <joakim.tjernlund@transmode.se>
+---
+ drivers/mmc/host/sdhci-of-esdhc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
->  int pm_qos_request(int pm_qos_class);
-> diff --git a/kernel/power/qos.c b/kernel/power/qos.c
-> index 97b0df7..ac131cb 100644
-> --- a/kernel/power/qos.c
-> +++ b/kernel/power/qos.c
-> @@ -517,6 +517,26 @@ void pm_qos_update_request_timeout(struct
-> pm_qos_request *req, s32 new_value,
->  }
->
->  /**
-> + * pm_qos_cancel_request_lazy - cancels an existing qos request lazily.
-> + * @req : handle to list element holding a pm_qos request to use
-> + * @timeout_us: the delay before cancelling this qos request in usecs.
-> + *
-> + * After timeout_us, this qos request is cancelled.
-> + */
-> +void pm_qos_cancel_request_lazy(struct pm_qos_request *req,
-> +				unsigned int timeout_us)
-> +{
-> +	if (!req)
-> +		return;
-> +	if (WARN(!pm_qos_request_active(req),
-> +		 "%s called for unknown object.", __func__))
-> +		return;
-> +
-> +	schedule_delayed_work(&req->work, usecs_to_jiffies(timeout_us));
-> +}
-> +EXPORT_SYMBOL_GPL(pm_qos_cancel_request_lazy);
-> +
-> +/**
->   * pm_qos_remove_request - modifies an existing qos request
->   * @req: handle to request list element
->   *
-> --
-> 1.9.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 7130130..ffd5625 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -207,7 +207,7 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
+ 
+ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+-	int pre_div = 2;
++	int pre_div = 1;
+ 	int div = 1;
+ 	u32 temp;
+ 
+@@ -237,7 +237,7 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 
+ 	dev_dbg(mmc_dev(host->mmc), "desired SD clock: %d, actual: %d\n",
+ 		clock, host->max_clk / pre_div / div);
+-
++	host->mmc->actual_clock = host->max_clk / pre_div / div;
+ 	pre_div >>= 1;
+ 	div--;
+ 
+-- 
+2.0.5
 
-
-QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
