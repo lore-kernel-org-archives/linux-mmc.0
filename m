@@ -1,47 +1,63 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V6 06/15] mmc: core: Hold re-tuning during erase commands
-Date: Mon, 20 Apr 2015 15:09:47 +0300
-Message-ID: <1429531796-21987-7-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V6 07/15] mmc: core: Hold re-tuning while bkops ongoing
+Date: Mon, 20 Apr 2015 15:09:48 +0300
+Message-ID: <1429531796-21987-8-git-send-email-adrian.hunter@intel.com>
 References: <1429531796-21987-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga11.intel.com ([192.55.52.93]:48044 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754965AbbDTMMn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 20 Apr 2015 08:12:43 -0400
+	id S1754958AbbDTMMo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 20 Apr 2015 08:12:44 -0400
 In-Reply-To: <1429531796-21987-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-Hold re-tuning during erase commands to prevent
-it from conflicting with the sequence of commands.
+Hold re-tuning during bkops to prevent
+it from conflicting with the busy state.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/core/core.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 08bf7e3..dbd7a77 100644
+index dbd7a77..7aae0ff 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -1995,6 +1995,8 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
- 	unsigned long timeout;
- 	int err;
+@@ -318,12 +318,15 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
+ 		use_busy_signal = false;
+ 	}
  
 +	mmc_retune_hold(card->host);
 +
- 	/*
- 	 * qty is used to calculate the erase timeout which depends on how many
- 	 * erase groups (or allocation units in SD terminology) are affected.
-@@ -2098,6 +2100,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
- 	} while (!(cmd.resp[0] & R1_READY_FOR_DATA) ||
- 		 (R1_CURRENT_STATE(cmd.resp[0]) == R1_STATE_PRG));
+ 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 			EXT_CSD_BKOPS_START, 1, timeout,
+ 			use_busy_signal, true, false);
+ 	if (err) {
+ 		pr_warn("%s: Error %d starting bkops\n",
+ 			mmc_hostname(card->host), err);
++		mmc_retune_release(card->host);
+ 		goto out;
+ 	}
+ 
+@@ -334,6 +337,8 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
+ 	 */
+ 	if (!use_busy_signal)
+ 		mmc_card_set_doing_bkops(card);
++	else
++		mmc_retune_release(card->host);
  out:
-+	mmc_retune_release(card->host);
- 	return err;
+ 	mmc_release_host(card->host);
  }
+@@ -749,6 +754,7 @@ int mmc_stop_bkops(struct mmc_card *card)
+ 	 */
+ 	if (!err || (err == -EINVAL)) {
+ 		mmc_card_clr_doing_bkops(card);
++		mmc_retune_release(card->host);
+ 		err = 0;
+ 	}
  
 -- 
 1.9.1
