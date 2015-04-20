@@ -1,46 +1,93 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH 5/7] mmc: host: sdhci-esdhc-imx: fix broken email address
-Date: Mon, 20 Apr 2015 15:51:42 +0200
-Message-ID: <1429537917-7433-5-git-send-email-wsa@the-dreams.de>
-References: <1429537917-7433-1-git-send-email-wsa@the-dreams.de>
+From: "Dov Levenglick" <dovl@codeaurora.org>
+Subject: Re: [RFC PATCH 1/4] PM / QoS: Add pm_qos_cancel_request_lazy() that
+ doesn't sleep
+Date: Mon, 20 Apr 2015 14:00:35 -0000
+Message-ID: <03394129c3ef5958dcfbe3726959ecd1.squirrel@www.codeaurora.org>
+References: <1427204440-3533-1-git-send-email-adrian.hunter@intel.com>
+    <1427204440-3533-2-git-send-email-adrian.hunter@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1429537917-7433-1-git-send-email-wsa@the-dreams.de>
+In-Reply-To: <1427204440-3533-2-git-send-email-adrian.hunter@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Wolfram Sang <wsa@the-dreams.de>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Kevin Hilman <khilman@linaro.org>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-My Pengutronix address is not valid anymore, redirect people to the Pengutronix
-kernel team.
+> Add pm_qos_cancel_request_lazy() which is convenient for
+> contexts that may not sleep.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>  include/linux/pm_qos.h |  2 ++
+>  kernel/power/qos.c     | 20 ++++++++++++++++++++
+>  2 files changed, 22 insertions(+)
+>
+> diff --git a/include/linux/pm_qos.h b/include/linux/pm_qos.h
+> index 7b3ae0c..f44d353 100644
+> --- a/include/linux/pm_qos.h
+> +++ b/include/linux/pm_qos.h
+> @@ -126,6 +126,8 @@ void pm_qos_update_request(struct pm_qos_request *req,
+>  			   s32 new_value);
+>  void pm_qos_update_request_timeout(struct pm_qos_request *req,
+>  				   s32 new_value, unsigned long
+> timeout_us);
+> +void pm_qos_cancel_request_lazy(struct pm_qos_request *req,
+> +				unsigned int timeout_us);
+>  void pm_qos_remove_request(struct pm_qos_request *req);
+>
 
-Reported-by: Harald Geyer <harald@ccbib.org>
-Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
-Acked-by: Robert Schwebel <r.schwebel@pengutronix.de>
----
-These patches shall go via the individual subsystem trees.
+I think that this could be acheived using existing API if
+pm_qos_update_request_timeout() were to be called with the existing
+timeout value.
+Since reading the existing timeout value is missing - and I think would be
+a useful feature to have for other use-cases - do you agree with such an
+approach?
 
- drivers/mmc/host/sdhci-esdhc-imx.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+>  int pm_qos_request(int pm_qos_class);
+> diff --git a/kernel/power/qos.c b/kernel/power/qos.c
+> index 97b0df7..ac131cb 100644
+> --- a/kernel/power/qos.c
+> +++ b/kernel/power/qos.c
+> @@ -517,6 +517,26 @@ void pm_qos_update_request_timeout(struct
+> pm_qos_request *req, s32 new_value,
+>  }
+>
+>  /**
+> + * pm_qos_cancel_request_lazy - cancels an existing qos request lazily.
+> + * @req : handle to list element holding a pm_qos request to use
+> + * @timeout_us: the delay before cancelling this qos request in usecs.
+> + *
+> + * After timeout_us, this qos request is cancelled.
+> + */
+> +void pm_qos_cancel_request_lazy(struct pm_qos_request *req,
+> +				unsigned int timeout_us)
+> +{
+> +	if (!req)
+> +		return;
+> +	if (WARN(!pm_qos_request_active(req),
+> +		 "%s called for unknown object.", __func__))
+> +		return;
+> +
+> +	schedule_delayed_work(&req->work, usecs_to_jiffies(timeout_us));
+> +}
+> +EXPORT_SYMBOL_GPL(pm_qos_cancel_request_lazy);
+> +
+> +/**
+>   * pm_qos_remove_request - modifies an existing qos request
+>   * @req: handle to request list element
+>   *
+> --
+> 1.9.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 10ef8244a23963..3d7aa50e04578a 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -4,7 +4,7 @@
-  * derived from the OF-version.
-  *
-  * Copyright (c) 2010 Pengutronix e.K.
-- *   Author: Wolfram Sang <w.sang@pengutronix.de>
-+ *   Author: Wolfram Sang <kernel@pengutronix.de>
-  *
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-@@ -1173,5 +1173,5 @@ static struct platform_driver sdhci_esdhc_imx_driver = {
- module_platform_driver(sdhci_esdhc_imx_driver);
- 
- MODULE_DESCRIPTION("SDHCI driver for Freescale i.MX eSDHC");
--MODULE_AUTHOR("Wolfram Sang <w.sang@pengutronix.de>");
-+MODULE_AUTHOR("Wolfram Sang <kernel@pengutronix.de>");
- MODULE_LICENSE("GPL v2");
--- 
-2.1.4
+
+QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project
