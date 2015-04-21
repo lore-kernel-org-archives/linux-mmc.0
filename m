@@ -1,194 +1,100 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 3/3 v3] mmc: sh_mmcif: calculate best clock with parent clock
-Date: Tue, 21 Apr 2015 12:31:21 +0200
-Message-ID: <CAMuHMdUM4Cizij6q+6o9mADF_UjkzpZSvsUCdG+Y=PHo=A_qLw@mail.gmail.com>
-References: <873840a4ch.wl%kuninori.morimoto.gx@renesas.com>
-	<87vbgpubvr.wl%kuninori.morimoto.gx@renesas.com>
-	<87r3rdubmv.wl%kuninori.morimoto.gx@renesas.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V6 02/15] mmc: core: Enable / disable re-tuning
+Date: Tue, 21 Apr 2015 13:37:48 +0300
+Message-ID: <5536287C.6060004@intel.com>
+References: <1429531796-21987-1-git-send-email-adrian.hunter@intel.com>	<1429531796-21987-3-git-send-email-adrian.hunter@intel.com> <CAPDyKFrx+yX2j5U6jrBh8eiN3fo5sDztaLLTeXYu0zbOa32smw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f175.google.com ([209.85.214.175]:33312 "EHLO
-	mail-ob0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751775AbbDUKbW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Apr 2015 06:31:22 -0400
-In-Reply-To: <87r3rdubmv.wl%kuninori.morimoto.gx@renesas.com>
+Received: from mga02.intel.com ([134.134.136.20]:44393 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751688AbbDUKkD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 21 Apr 2015 06:40:03 -0400
+In-Reply-To: <CAPDyKFrx+yX2j5U6jrBh8eiN3fo5sDztaLLTeXYu0zbOa32smw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Simon <horms@verge.net.au>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Laurent <laurent.pinchart@ideasonboard.com>, kobayashi <keita.kobayashi.ym@renesas.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-Hi Morimoto-san,
+On 21/04/15 11:59, Ulf Hansson wrote:
+> On 20 April 2015 at 14:09, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> Enable re-tuning when tuning is executed and
+>> disable re-tuning when card is no longer initialized.
+>>
+>> In the case of SDIO suspend, the card can keep power.
+>> In that case, re-tuning need not be disabled, but ensure
+>> the re-tuning timer is disabled.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>> ---
+>>  drivers/mmc/core/core.c | 4 ++++
+>>  drivers/mmc/core/sdio.c | 2 ++
+>>  2 files changed, 6 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index c296bc0..dd43f9b 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1109,6 +1109,8 @@ int mmc_execute_tuning(struct mmc_card *card)
+>>
+>>         if (err)
+>>                 pr_err("%s: tuning execution failed\n", mmc_hostname(host));
+>> +       else
+>> +               mmc_retune_enable(host);
+>>
+>>         return err;
+>>  }
+>> @@ -1140,6 +1142,8 @@ void mmc_set_bus_width(struct mmc_host *host, unsigned int width)
+>>   */
+>>  void mmc_set_initial_state(struct mmc_host *host)
+>>  {
+>> +       mmc_retune_disable(host);
+>> +
+>>         if (mmc_host_is_spi(host))
+>>                 host->ios.chip_select = MMC_CS_HIGH;
+>>         else
+>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+>> index 5bc6c7d..ee7bfd4 100644
+>> --- a/drivers/mmc/core/sdio.c
+>> +++ b/drivers/mmc/core/sdio.c
+>> @@ -936,6 +936,8 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+>>
+>>         if (!mmc_card_keep_power(host))
+>>                 mmc_power_off(host);
+>> +       else
+>> +               mmc_retune_timer_stop(host);
+>>
+> 
+> We also need to re-start the timer at the end of mmc_sdio_resume() in
+> case of mmc_card_keep_power().
 
-On Tue, Apr 21, 2015 at 10:31 AM, Kuninori Morimoto
-<kuninori.morimoto.gx@renesas.com> wrote:
-> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
->
-> MMCIF IP on R-Car series has parent clock which can be set
-> several rate, and it was not implemented on old SH-Mobile series
-> (= SH-Mobile series parent clock was fixed rate)
-> R-Car series MMCIF can use more high speed access if it setup
-> parent clock. This patch adds parent clock setup method,
-> and r8a7790/r8a7791 can use it.
->
-> renesas,mmcif already contain renesas,mmcif-r8a7790/r8a7791 on
-> compatible string. So there is no update for binding Document.
->
-> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-> Tested-by: Keita Kobayashi <keita.kobayashi.ym@renesas.com>
+It seems to me if a timer is being used, and the suspend can last an
+arbitrary length of time, then the safe thing to do is to re-tune after
+resume. i.e.
 
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 5282c5b..6ae836b 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
+        if (!mmc_card_keep_power(host)) {
+                mmc_power_off(host);
+        } else if (host->host->retune_period) {
+                mmc_retune_timer_stop(host);
+		mmc_retune_needed(host);
+	}
 
-> @@ -224,6 +225,12 @@ enum mmcif_wait_for {
->         MMCIF_WAIT_FOR_STOP,
->  };
->
-> +struct sh_mmcif_parent_clk {
-> +       unsigned int max; /* if exist: R-Car has MMC CKCR on CPG */
-> +       unsigned int min; /* if exist: R-Car has MMC CKCR on CPG */
-> +       u32 clkdiv_map;  /* see CE_CLK_CTRL::CLKDIV */
-> +};
-> +
->  struct sh_mmcif_host {
->         struct mmc_host *mmc;
->         struct mmc_request *mrq;
-> @@ -249,6 +256,7 @@ struct sh_mmcif_host {
->         bool ccs_enable;                /* Command Completion Signal support */
->         bool clk_ctrl2_enable;
->         struct mutex thread_lock;
-> +       const struct sh_mmcif_parent_clk *parent_clk;
->
->         /* DMA support */
->         struct dma_chan         *chan_rx;
-> @@ -257,8 +265,16 @@ struct sh_mmcif_host {
->         bool                    dma_active;
->  };
->
-> +static const struct sh_mmcif_parent_clk mmcif_gen2_parent_clk = {
-> +       .max = 97500000,
-> +       .min = 12187500,
-> +       .clkdiv_map = 0x3ff,
+That is what sdhci has to do anyway.
 
-Shouldn't this come from private data in the CPG clock driver, which supplies
-the parent clock? Then the mmcif driver will be independent from the parent
-clock.
+> 
+>>         return 0;
+>>  }
+>> --
+>> 1.9.1
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> Kind regards
+> Uffe
+> 
+> 
 
-> +};
-> +
->  static const struct of_device_id mmcif_of_match[] = {
->         { .compatible = "renesas,sh-mmcif" },
-> +       { .compatible = "renesas,mmcif-r8a7790", .data = &mmcif_gen2_parent_clk},
-> +       { .compatible = "renesas,mmcif-r8a7791", .data = &mmcif_gen2_parent_clk},
->         { }
->  };
->  MODULE_DEVICE_TABLE(of, mmcif_of_match);
-> @@ -490,12 +506,51 @@ static void sh_mmcif_clock_control(struct sh_mmcif_host *host, unsigned int clk)
->
->         if (!clk)
->                 return;
-> -       if (sup_pclk && clk == host->clk)
-> +
-> +       if (host->parent_clk) {
-> +               const struct sh_mmcif_parent_clk *pclk = host->parent_clk;
-> +               unsigned int parent_freq, clkdiv, myclk, diff_min, diff;
-> +               int i, j;
-> +
-> +               /* FIXME */
-> +               if (pclk->max != pclk->min * (pclk->max / pclk->min)) {
-> +                       dev_err(&host->pd->dev, "not assumed parent clk\n");
-> +                       return;
-> +               }
-
-Why?
-
-> +               parent_freq = 0;
-> +               clkdiv = 0;
-> +               diff_min = ~0;
-> +               for (i = pclk->max / pclk->min; i > 0; i--) {
-> +                       for (j = fls(pclk->clkdiv_map); j >= 0; j--) {
-> +                               if (!((1 << j) & pclk->clkdiv_map))
-> +                                       continue;
-> +
-> +                               myclk = ((pclk->min * i) / (1 << (j + 1)));
-> +                               diff = (myclk > clk) ? myclk - clk : clk - myclk;
-> +
-> +                               if (diff <= diff_min) {
-> +                                       parent_freq = pclk->min * i;
-> +                                       clkdiv = j;
-> +                                       diff_min = diff;
-> +                               }
-> +                       }
-> +               }
-
-Shouldn't the above be handled by the CPG clock driver, through a clk API?
-
-> +               dev_dbg(&host->pd->dev, "clk %d/%d (%d, %x)\n",
-
-"%u" (all four)
-
-> +                       (parent_freq / (1 << (clkdiv + 1))), clk,
-> +                       parent_freq, clkdiv);
-> +
-> +               clk_set_rate(host->hclk, parent_freq);
-
-Note that the last parameter of clk_set_rate() is "unsigned long", while
-parent_freq is "unsigned int".
-
-> +               sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL,
-> +                               CLK_CLEAR & (clkdiv << 16));
-> +       } else if (sup_pclk && clk == host->clk) {
->                 sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_SUP_PCLK);
-> -       else
-> +       } else {
->                 sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_CLEAR &
->                                 ((fls(DIV_ROUND_UP(host->clk,
->                                                    clk) - 1) - 1) << 16));
-> +       }
->
->         sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_ENABLE);
->  }
-> @@ -982,10 +1037,23 @@ static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
->  {
->         int ret = clk_prepare_enable(host->hclk);
->
-> -       if (!ret) {
-> +       if (ret)
-> +               return ret;
-> +
-> +       if (!host->parent_clk) {
->                 host->clk = clk_get_rate(host->hclk);
->                 host->mmc->f_max = host->clk / 2;
->                 host->mmc->f_min = host->clk / 512;
-> +       } else {
-> +               const struct sh_mmcif_parent_clk *pclk = host->parent_clk;
-> +
-> +               host->clk = clk_get_rate(host->hclk);
-
-clk_get_rate() returns "unsigned long", while "host->clk" is "unsigned int".
-
-> +               host->mmc->f_max = pclk->max / (1 << ffs(pclk->clkdiv_map));
-> +               host->mmc->f_min = pclk->min / (1 << fls(pclk->clkdiv_map));
-> +
-> +               dev_dbg(&host->pd->dev, "parent clk %d/%d, %d/%d\n",
-
-"%u" (all four)
-
-> +                       pclk->max, pclk->min,
-> +                       host->mmc->f_max, host->mmc->f_min);
->         }
->
->         return ret;
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
