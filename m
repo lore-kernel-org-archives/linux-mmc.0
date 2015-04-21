@@ -1,127 +1,38 @@
-From: Konstantin Dorfman <kdorfman@codeaurora.org>
-Subject: [RFC/PATCH] mmc: block: use block layer pm helpers for pm of card device
-Date: Tue, 21 Apr 2015 17:20:45 +0300
-Message-ID: <1429626045-12847-1-git-send-email-kdorfman@codeaurora.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:48905 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750937AbbDUOVM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Apr 2015 10:21:12 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Suman Tripathi <stripathi@apm.com>
+Subject: [PATCH v2 RESEND 0/2] Add SDHCI support for APM X-Gene SoC using
+ ARASAN SDHCI controller.
+Date: Tue, 21 Apr 2015 21:12:37 +0530
+Message-ID: <1429630959-32649-1-git-send-email-stripathi@apm.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: chris@printf.net, ulf.hansson@linaro.org, anton@enomsg.org, arnd@arndb.de
+Cc: devicetree@vger.kernel.org, mlangsdo@redhat.com, Suman Tripathi <stripathi@apm.com>, jcm@redhat.com, linux-mmc@vger.kernel.org, patches@apm.com, ddutile@redhat.com, linuxppc-dev@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Konstantin Dorfman <kdorfman@codeaurora.org>
 
-Use of block layer runtime PM helpers, implementing the block layer's
-request-based mechanism, simplifies data path of mmc core layer. It
-enables to remove synchronous call pm_runtime_get_sync() from mmc core
-data path.
-
-The idea and API is designed by Alan Stern and described here:
-    http://marc.info/?l=linux-scsi&m=133727953625963&w=2
-
-Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1fa4c80..de5f85d 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -2017,7 +2017,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 
- 	if (req && !mq->mqrq_prev->req)
- 		/* claim host only for the first request */
--		mmc_get_card(card);
-+		mmc_claim_host(card->host);
- 
- 	ret = mmc_blk_part_switch(card, md);
- 	if (ret) {
-@@ -2060,7 +2060,7 @@ out:
- 		 * In case sepecial request, there is no reentry to
- 		 * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
- 		 */
--		mmc_put_card(card);
-+		mmc_release_host(card->host);
- 	return ret;
- }
- 
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index feea926..e12c828 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -213,6 +213,11 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	if (mmc_can_erase(card))
- 		mmc_queue_setup_discard(mq->queue, card);
- 
-+	if (!subname) {
-+		blk_pm_runtime_init(mq->queue, &card->dev);
-+		card->q = mq->queue;
-+	}
-+
- #ifdef CONFIG_MMC_BLOCK_BOUNCE
- 	if (host->max_segs == 1) {
- 		unsigned int bouncesz;
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index a301a78..bf3f919 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -14,6 +14,7 @@
- #include <linux/slab.h>
- #include <linux/stat.h>
- #include <linux/pm_runtime.h>
-+#include <linux/blkdev.h>
- 
- #include <linux/mmc/host.h>
- #include <linux/mmc/card.h>
-@@ -1814,11 +1815,17 @@ static int mmc_runtime_suspend(struct mmc_host *host)
- 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
- 		return 0;
- 
-+	err = blk_pre_runtime_suspend(host->card->q);
-+	if (err)
-+		return err;
-+
- 	err = _mmc_suspend(host, true);
- 	if (err)
- 		pr_err("%s: error %d doing aggessive suspend\n",
- 			mmc_hostname(host), err);
- 
-+	blk_post_runtime_suspend(host->card->q, err);
-+
- 	return err;
- }
- 
-@@ -1832,12 +1839,16 @@ static int mmc_runtime_resume(struct mmc_host *host)
- 	if (!(host->caps & (MMC_CAP_AGGRESSIVE_PM | MMC_CAP_RUNTIME_RESUME)))
- 		return 0;
- 
-+	blk_pre_runtime_resume(host->card->q);
-+
- 	err = _mmc_resume(host);
- 	if (err)
- 		pr_err("%s: error %d doing aggessive resume\n",
- 			mmc_hostname(host), err);
- 
--	return 0;
-+	blk_post_runtime_resume(host->card->q, err);
-+
-+	return err;
- }
- 
- static int mmc_power_restore(struct mmc_host *host)
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index b0692d2..1f4810b 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -244,6 +244,7 @@ struct mmc_part {
- struct mmc_card {
- 	struct mmc_host		*host;		/* the host this device belongs to */
- 	struct device		dev;		/* the device */
-+	struct request_queue    *q;
- 	u32			ocr;		/* the current OCR setting */
- 	unsigned int		rca;		/* relative card address of device */
- 	unsigned int		type;		/* card type */
--- 
-Qualcomm Israel, on behalf of Qualcomm Innovation Center, Inc.
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
-
+VGhpcyBwYXRjaCBhZGRzIHRoZSBTREhDSSBzdXBwb3J0IGZvciBBUE0gWC1HZW5lIFNvQyB1c2lu
+ZyBBUkFTQU4gU0RIQ0kgY29udHJvbGxlci4KCnYxIGNoYW5nZToKICogVXNlIHRoZSBDT05GSUdf
+QVJNNjRfRE1BX0hBU19JT01NVSBmb3IgZG1hLW1hcHBpbmcuCgp2MiBjaGFuZ2U6CiAqIERyb3Ag
+dGhlIElPTU1VIHN1cHBvcnQgYW5kIHN3aXRjaGluZyB0byBQSU8gbW9kZSBmb3IgYXJhc2FuIAog
+ICBjb250cm9sbGVyIGludGVncmF0ZWQgaW5zaWRlIEFQTSBYLUdlbmUgU29DLgoKU2lnbmVkLW9m
+Zi1ieTogU3VtYW4gVHJpcGF0aGkgPHN0cmlwYXRoaUBhcG0uY29tPgoKU3VtYW4gVHJpcGF0aGkg
+KDIpOgogIGFybTY0OiBkdHM6IEFkZCB0aGUgYXJhc2FuIHNkaGMgbm9kZXMgaW4gYXBtLXN0b3Jt
+LmR0c2kuCiAgbW1jOiBob3N0OiBBZGQgc29tZSBxdWlya3MgdG8gYmUgcmVhZCBmcm9tIGZkdCBp
+biBzZGhjaS1wbHRtLmMKCiBhcmNoL2FybTY0L2Jvb3QvZHRzL2FwbS1zdG9ybS5kdHNpIHwgNDQg
+KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysKIGRyaXZlcnMvbW1jL2hvc3Qv
+c2RoY2ktcGx0Zm0uYyAgICAgfCAxNSArKysrKysrKysrKysrCiAyIGZpbGVzIGNoYW5nZWQsIDU5
+IGluc2VydGlvbnMoKykKCi0tIAoxLjguMi4xCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fXwpMaW51eHBwYy1kZXYgbWFpbGluZyBsaXN0CkxpbnV4cHBjLWRl
+dkBsaXN0cy5vemxhYnMub3JnCmh0dHBzOi8vbGlzdHMub3psYWJzLm9yZy9saXN0aW5mby9saW51
+eHBwYy1kZXY=
