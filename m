@@ -1,100 +1,127 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH 3/3 v3] mmc: sh_mmcif: calculate best clock with parent clock
-Date: Tue, 21 Apr 2015 16:07:37 +0300
-Message-ID: <1433253.xXE7ok9ACb@avalon>
-References: <873840a4ch.wl%kuninori.morimoto.gx@renesas.com> <87r3rdubmv.wl%kuninori.morimoto.gx@renesas.com> <CAMuHMdUM4Cizij6q+6o9mADF_UjkzpZSvsUCdG+Y=PHo=A_qLw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+From: Konstantin Dorfman <kdorfman@codeaurora.org>
+Subject: [RFC/PATCH] mmc: block: use block layer pm helpers for pm of card device
+Date: Tue, 21 Apr 2015 17:20:45 +0300
+Message-ID: <1429626045-12847-1-git-send-email-kdorfman@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from galahad.ideasonboard.com ([185.26.127.97]:54751 "EHLO
-	galahad.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750960AbbDUNH3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Apr 2015 09:07:29 -0400
-In-Reply-To: <CAMuHMdUM4Cizij6q+6o9mADF_UjkzpZSvsUCdG+Y=PHo=A_qLw@mail.gmail.com>
+Received: from smtp.codeaurora.org ([198.145.29.96]:48905 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750937AbbDUOVM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Apr 2015 10:21:12 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Simon <horms@verge.net.au>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, kobayashi <keita.kobayashi.ym@renesas.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Konstantin Dorfman <kdorfman@codeaurora.org>
 
-Hello,
+Use of block layer runtime PM helpers, implementing the block layer's
+request-based mechanism, simplifies data path of mmc core layer. It
+enables to remove synchronous call pm_runtime_get_sync() from mmc core
+data path.
 
-On Tuesday 21 April 2015 12:31:21 Geert Uytterhoeven wrote:
-> On Tue, Apr 21, 2015 at 10:31 AM, Kuninori Morimoto wrote:
-> > From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-> > 
-> > MMCIF IP on R-Car series has parent clock which can be set
-> > several rate, and it was not implemented on old SH-Mobile series
-> > (= SH-Mobile series parent clock was fixed rate)
-> > R-Car series MMCIF can use more high speed access if it setup
-> > parent clock. This patch adds parent clock setup method,
-> > and r8a7790/r8a7791 can use it.
-> > 
-> > renesas,mmcif already contain renesas,mmcif-r8a7790/r8a7791 on
-> > compatible string. So there is no update for binding Document.
-> > 
-> > Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-> > Tested-by: Keita Kobayashi <keita.kobayashi.ym@renesas.com>
-> > 
-> > diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> > index 5282c5b..6ae836b 100644
-> > --- a/drivers/mmc/host/sh_mmcif.c
-> > +++ b/drivers/mmc/host/sh_mmcif.c
-> > @@ -224,6 +225,12 @@ enum mmcif_wait_for {
-> >         MMCIF_WAIT_FOR_STOP,
-> >  };
-> > 
-> > +struct sh_mmcif_parent_clk {
+The idea and API is designed by Alan Stern and described here:
+    http://marc.info/?l=linux-scsi&m=133727953625963&w=2
 
-I'm not sure I would call this parent clock. It refers to the frequency of the 
-functional clock provided to the MMCIF, there's no concept of parent there. 
-True, the clock referenced by the MMCIF DT node is an MSTP gate clock, and 
-frequency control is implemented in the MSTP clock parent, but that hardware 
-architecture is internal to the CPG and shouldn't be considered by the MMCIF.
+Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
 
-> > +       unsigned int max; /* if exist: R-Car has MMC CKCR on CPG */
-> > +       unsigned int min; /* if exist: R-Car has MMC CKCR on CPG */
-> > +       u32 clkdiv_map;  /* see CE_CLK_CTRL::CLKDIV */
-> > +};
-> > +
-> >  struct sh_mmcif_host {
-> >         struct mmc_host *mmc;
-> >         struct mmc_request *mrq;
-> > @@ -249,6 +256,7 @@ struct sh_mmcif_host {
-> >         bool ccs_enable;                /* Command Completion Signal
-> >         support */
-> >         bool clk_ctrl2_enable;
-> >         struct mutex thread_lock;
-> > +       const struct sh_mmcif_parent_clk *parent_clk;
-> > 
-> >         /* DMA support */
-> >         struct dma_chan         *chan_rx;
-> > @@ -257,8 +265,16 @@ struct sh_mmcif_host {
-> >         bool                    dma_active;
-> >  };
-> > 
-> > +static const struct sh_mmcif_parent_clk mmcif_gen2_parent_clk = {
-> > +       .max = 97500000,
-> > +       .min = 12187500,
-> > +       .clkdiv_map = 0x3ff,
-> 
-> Shouldn't this come from private data in the CPG clock driver, which
-> supplies the parent clock? Then the mmcif driver will be independent from
-> the parent clock.
-
-The real question is where the constraint comes from. The Gen2 datasheet 
-documents the MMC clocks maximum frequency as 97.5 MHz in the CPG section. 
-However, I have a feeling the constraint doesn't come from the DIV6 which 
-should be able to output higher frequencies, but from the MMCIF, the clock 
-distribution tree, or both.
-
-There's also the option of specifying the admissible clock range in DT, either 
-in the CPG node or the MMCIF node.
-
-> > +};
-
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 1fa4c80..de5f85d 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2017,7 +2017,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 
+ 	if (req && !mq->mqrq_prev->req)
+ 		/* claim host only for the first request */
+-		mmc_get_card(card);
++		mmc_claim_host(card->host);
+ 
+ 	ret = mmc_blk_part_switch(card, md);
+ 	if (ret) {
+@@ -2060,7 +2060,7 @@ out:
+ 		 * In case sepecial request, there is no reentry to
+ 		 * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
+ 		 */
+-		mmc_put_card(card);
++		mmc_release_host(card->host);
+ 	return ret;
+ }
+ 
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index feea926..e12c828 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -213,6 +213,11 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 	if (mmc_can_erase(card))
+ 		mmc_queue_setup_discard(mq->queue, card);
+ 
++	if (!subname) {
++		blk_pm_runtime_init(mq->queue, &card->dev);
++		card->q = mq->queue;
++	}
++
+ #ifdef CONFIG_MMC_BLOCK_BOUNCE
+ 	if (host->max_segs == 1) {
+ 		unsigned int bouncesz;
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index a301a78..bf3f919 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -14,6 +14,7 @@
+ #include <linux/slab.h>
+ #include <linux/stat.h>
+ #include <linux/pm_runtime.h>
++#include <linux/blkdev.h>
+ 
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/card.h>
+@@ -1814,11 +1815,17 @@ static int mmc_runtime_suspend(struct mmc_host *host)
+ 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+ 		return 0;
+ 
++	err = blk_pre_runtime_suspend(host->card->q);
++	if (err)
++		return err;
++
+ 	err = _mmc_suspend(host, true);
+ 	if (err)
+ 		pr_err("%s: error %d doing aggessive suspend\n",
+ 			mmc_hostname(host), err);
+ 
++	blk_post_runtime_suspend(host->card->q, err);
++
+ 	return err;
+ }
+ 
+@@ -1832,12 +1839,16 @@ static int mmc_runtime_resume(struct mmc_host *host)
+ 	if (!(host->caps & (MMC_CAP_AGGRESSIVE_PM | MMC_CAP_RUNTIME_RESUME)))
+ 		return 0;
+ 
++	blk_pre_runtime_resume(host->card->q);
++
+ 	err = _mmc_resume(host);
+ 	if (err)
+ 		pr_err("%s: error %d doing aggessive resume\n",
+ 			mmc_hostname(host), err);
+ 
+-	return 0;
++	blk_post_runtime_resume(host->card->q, err);
++
++	return err;
+ }
+ 
+ static int mmc_power_restore(struct mmc_host *host)
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index b0692d2..1f4810b 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -244,6 +244,7 @@ struct mmc_part {
+ struct mmc_card {
+ 	struct mmc_host		*host;		/* the host this device belongs to */
+ 	struct device		dev;		/* the device */
++	struct request_queue    *q;
+ 	u32			ocr;		/* the current OCR setting */
+ 	unsigned int		rca;		/* relative card address of device */
+ 	unsigned int		type;		/* card type */
 -- 
-Regards,
-
-Laurent Pinchart
+Qualcomm Israel, on behalf of Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project
 
