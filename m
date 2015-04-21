@@ -1,135 +1,194 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC PATCH 1/4] PM / QoS: Add pm_qos_cancel_request_lazy() that
- doesn't sleep
-Date: Tue, 21 Apr 2015 13:25:45 +0300
-Message-ID: <553625A9.50506@intel.com>
-References: <1427204440-3533-1-git-send-email-adrian.hunter@intel.com>    <1427204440-3533-2-git-send-email-adrian.hunter@intel.com>    <03394129c3ef5958dcfbe3726959ecd1.squirrel@www.codeaurora.org>    <553609CA.8000806@intel.com> <c4537efead55f0b072d33d4e36090039.squirrel@www.codeaurora.org>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH 3/3 v3] mmc: sh_mmcif: calculate best clock with parent clock
+Date: Tue, 21 Apr 2015 12:31:21 +0200
+Message-ID: <CAMuHMdUM4Cizij6q+6o9mADF_UjkzpZSvsUCdG+Y=PHo=A_qLw@mail.gmail.com>
+References: <873840a4ch.wl%kuninori.morimoto.gx@renesas.com>
+	<87vbgpubvr.wl%kuninori.morimoto.gx@renesas.com>
+	<87r3rdubmv.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:2489 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751488AbbDUK14 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 21 Apr 2015 06:27:56 -0400
-In-Reply-To: <c4537efead55f0b072d33d4e36090039.squirrel@www.codeaurora.org>
+Received: from mail-ob0-f175.google.com ([209.85.214.175]:33312 "EHLO
+	mail-ob0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751775AbbDUKbW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Apr 2015 06:31:22 -0400
+In-Reply-To: <87r3rdubmv.wl%kuninori.morimoto.gx@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dov Levenglick <dovl@codeaurora.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Kevin Hilman <khilman@linaro.org>, Tomeu Vizoso <tomeu.vizoso@collabora.com>, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Simon <horms@verge.net.au>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Laurent <laurent.pinchart@ideasonboard.com>, kobayashi <keita.kobayashi.ym@renesas.com>
 
-On 21/04/15 13:18, Dov Levenglick wrote:
->> On 20/04/15 17:00, Dov Levenglick wrote:
->>>> Add pm_qos_cancel_request_lazy() which is convenient for
->>>> contexts that may not sleep.
->>>>
->>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>>> ---
->>>>  include/linux/pm_qos.h |  2 ++
->>>>  kernel/power/qos.c     | 20 ++++++++++++++++++++
->>>>  2 files changed, 22 insertions(+)
->>>>
->>>> diff --git a/include/linux/pm_qos.h b/include/linux/pm_qos.h
->>>> index 7b3ae0c..f44d353 100644
->>>> --- a/include/linux/pm_qos.h
->>>> +++ b/include/linux/pm_qos.h
->>>> @@ -126,6 +126,8 @@ void pm_qos_update_request(struct pm_qos_request
->> *req,
->>>>  			   s32 new_value);
->>>>  void pm_qos_update_request_timeout(struct pm_qos_request *req,
->>>>  				   s32 new_value, unsigned long
->>>> timeout_us);
->>>> +void pm_qos_cancel_request_lazy(struct pm_qos_request *req,
->>>> +				unsigned int timeout_us);
->>>>  void pm_qos_remove_request(struct pm_qos_request *req);
->>>>
->>>
->>> I think that this could be acheived using existing API if
->>> pm_qos_update_request_timeout() were to be called with the existing
->>> timeout value.
->>
->> I don't follow what you mean. There is no existing timeout value.
->> Did you mean existing request value? There is still the difference wrt
->> cancel_delayed_work_sync.
-> 
-> I did mean the existing request value. Thanks.
-> There is also the cancel_delayed_work_sync, however I think that that
-> should be called in any case in order to cancel any other pending timeout
-> changes.
+Hi Morimoto-san,
 
-That might sleep which defeats one of the reasons for creating
-pm_qos_cancel_request_lazy().
+On Tue, Apr 21, 2015 at 10:31 AM, Kuninori Morimoto
+<kuninori.morimoto.gx@renesas.com> wrote:
+> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+>
+> MMCIF IP on R-Car series has parent clock which can be set
+> several rate, and it was not implemented on old SH-Mobile series
+> (= SH-Mobile series parent clock was fixed rate)
+> R-Car series MMCIF can use more high speed access if it setup
+> parent clock. This patch adds parent clock setup method,
+> and r8a7790/r8a7791 can use it.
+>
+> renesas,mmcif already contain renesas,mmcif-r8a7790/r8a7791 on
+> compatible string. So there is no update for binding Document.
+>
+> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+> Tested-by: Keita Kobayashi <keita.kobayashi.ym@renesas.com>
 
-> 
->>
->>> Since reading the existing timeout value is missing - and I think would
->> be
->>> a useful feature to have for other use-cases - do you agree with such an
->>> approach?
->>>
->>>>  int pm_qos_request(int pm_qos_class);
->>>> diff --git a/kernel/power/qos.c b/kernel/power/qos.c
->>>> index 97b0df7..ac131cb 100644
->>>> --- a/kernel/power/qos.c
->>>> +++ b/kernel/power/qos.c
->>>> @@ -517,6 +517,26 @@ void pm_qos_update_request_timeout(struct
->>>> pm_qos_request *req, s32 new_value,
->>>>  }
->>>>
->>>>  /**
->>>> + * pm_qos_cancel_request_lazy - cancels an existing qos request
->> lazily.
->>>> + * @req : handle to list element holding a pm_qos request to use
->>>> + * @timeout_us: the delay before cancelling this qos request in usecs.
->>>> + *
->>>> + * After timeout_us, this qos request is cancelled.
->>>> + */
->>>> +void pm_qos_cancel_request_lazy(struct pm_qos_request *req,
->>>> +				unsigned int timeout_us)
->>>> +{
->>>> +	if (!req)
->>>> +		return;
->>>> +	if (WARN(!pm_qos_request_active(req),
->>>> +		 "%s called for unknown object.", __func__))
->>>> +		return;
->>>> +
->>>> +	schedule_delayed_work(&req->work, usecs_to_jiffies(timeout_us));
->>>> +}
->>>> +EXPORT_SYMBOL_GPL(pm_qos_cancel_request_lazy);
->>>> +
->>>> +/**
->>>>   * pm_qos_remove_request - modifies an existing qos request
->>>>   * @req: handle to request list element
->>>>   *
->>>> --
->>>> 1.9.1
->>>>
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>
->>>
->>> QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc.
->>> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora
->> Forum,
->>> a Linux Foundation Collaborative Project
->>>
->>>
->>>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-> 
-> 
-> QUALCOMM ISRAEL, on behalf of Qualcomm Innovation Center, Inc.
-> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-> a Linux Foundation Collaborative Project
-> 
-> 
-> 
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 5282c5b..6ae836b 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
 
+> @@ -224,6 +225,12 @@ enum mmcif_wait_for {
+>         MMCIF_WAIT_FOR_STOP,
+>  };
+>
+> +struct sh_mmcif_parent_clk {
+> +       unsigned int max; /* if exist: R-Car has MMC CKCR on CPG */
+> +       unsigned int min; /* if exist: R-Car has MMC CKCR on CPG */
+> +       u32 clkdiv_map;  /* see CE_CLK_CTRL::CLKDIV */
+> +};
+> +
+>  struct sh_mmcif_host {
+>         struct mmc_host *mmc;
+>         struct mmc_request *mrq;
+> @@ -249,6 +256,7 @@ struct sh_mmcif_host {
+>         bool ccs_enable;                /* Command Completion Signal support */
+>         bool clk_ctrl2_enable;
+>         struct mutex thread_lock;
+> +       const struct sh_mmcif_parent_clk *parent_clk;
+>
+>         /* DMA support */
+>         struct dma_chan         *chan_rx;
+> @@ -257,8 +265,16 @@ struct sh_mmcif_host {
+>         bool                    dma_active;
+>  };
+>
+> +static const struct sh_mmcif_parent_clk mmcif_gen2_parent_clk = {
+> +       .max = 97500000,
+> +       .min = 12187500,
+> +       .clkdiv_map = 0x3ff,
+
+Shouldn't this come from private data in the CPG clock driver, which supplies
+the parent clock? Then the mmcif driver will be independent from the parent
+clock.
+
+> +};
+> +
+>  static const struct of_device_id mmcif_of_match[] = {
+>         { .compatible = "renesas,sh-mmcif" },
+> +       { .compatible = "renesas,mmcif-r8a7790", .data = &mmcif_gen2_parent_clk},
+> +       { .compatible = "renesas,mmcif-r8a7791", .data = &mmcif_gen2_parent_clk},
+>         { }
+>  };
+>  MODULE_DEVICE_TABLE(of, mmcif_of_match);
+> @@ -490,12 +506,51 @@ static void sh_mmcif_clock_control(struct sh_mmcif_host *host, unsigned int clk)
+>
+>         if (!clk)
+>                 return;
+> -       if (sup_pclk && clk == host->clk)
+> +
+> +       if (host->parent_clk) {
+> +               const struct sh_mmcif_parent_clk *pclk = host->parent_clk;
+> +               unsigned int parent_freq, clkdiv, myclk, diff_min, diff;
+> +               int i, j;
+> +
+> +               /* FIXME */
+> +               if (pclk->max != pclk->min * (pclk->max / pclk->min)) {
+> +                       dev_err(&host->pd->dev, "not assumed parent clk\n");
+> +                       return;
+> +               }
+
+Why?
+
+> +               parent_freq = 0;
+> +               clkdiv = 0;
+> +               diff_min = ~0;
+> +               for (i = pclk->max / pclk->min; i > 0; i--) {
+> +                       for (j = fls(pclk->clkdiv_map); j >= 0; j--) {
+> +                               if (!((1 << j) & pclk->clkdiv_map))
+> +                                       continue;
+> +
+> +                               myclk = ((pclk->min * i) / (1 << (j + 1)));
+> +                               diff = (myclk > clk) ? myclk - clk : clk - myclk;
+> +
+> +                               if (diff <= diff_min) {
+> +                                       parent_freq = pclk->min * i;
+> +                                       clkdiv = j;
+> +                                       diff_min = diff;
+> +                               }
+> +                       }
+> +               }
+
+Shouldn't the above be handled by the CPG clock driver, through a clk API?
+
+> +               dev_dbg(&host->pd->dev, "clk %d/%d (%d, %x)\n",
+
+"%u" (all four)
+
+> +                       (parent_freq / (1 << (clkdiv + 1))), clk,
+> +                       parent_freq, clkdiv);
+> +
+> +               clk_set_rate(host->hclk, parent_freq);
+
+Note that the last parameter of clk_set_rate() is "unsigned long", while
+parent_freq is "unsigned int".
+
+> +               sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL,
+> +                               CLK_CLEAR & (clkdiv << 16));
+> +       } else if (sup_pclk && clk == host->clk) {
+>                 sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_SUP_PCLK);
+> -       else
+> +       } else {
+>                 sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_CLEAR &
+>                                 ((fls(DIV_ROUND_UP(host->clk,
+>                                                    clk) - 1) - 1) << 16));
+> +       }
+>
+>         sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_ENABLE);
+>  }
+> @@ -982,10 +1037,23 @@ static int sh_mmcif_clk_update(struct sh_mmcif_host *host)
+>  {
+>         int ret = clk_prepare_enable(host->hclk);
+>
+> -       if (!ret) {
+> +       if (ret)
+> +               return ret;
+> +
+> +       if (!host->parent_clk) {
+>                 host->clk = clk_get_rate(host->hclk);
+>                 host->mmc->f_max = host->clk / 2;
+>                 host->mmc->f_min = host->clk / 512;
+> +       } else {
+> +               const struct sh_mmcif_parent_clk *pclk = host->parent_clk;
+> +
+> +               host->clk = clk_get_rate(host->hclk);
+
+clk_get_rate() returns "unsigned long", while "host->clk" is "unsigned int".
+
+> +               host->mmc->f_max = pclk->max / (1 << ffs(pclk->clkdiv_map));
+> +               host->mmc->f_min = pclk->min / (1 << fls(pclk->clkdiv_map));
+> +
+> +               dev_dbg(&host->pd->dev, "parent clk %d/%d, %d/%d\n",
+
+"%u" (all four)
+
+> +                       pclk->max, pclk->min,
+> +                       host->mmc->f_max, host->mmc->f_min);
+>         }
+>
+>         return ret;
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
