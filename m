@@ -1,102 +1,118 @@
-From: Dong Aisheng <b29396@freescale.com>
-Subject: Re: [RFC] i.MX25/35/SDHCI: switch off DMA usage
-Date: Wed, 22 Apr 2015 15:33:00 +0800
-Message-ID: <20150422073258.GB25437@shlinux1.ap.freescale.net>
-References: <201503271152.04348.jbe@pengutronix.de>
- <20150327114400.GA20277@shlinux1.ap.freescale.net>
- <201504141142.00237.jbe@pengutronix.de>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH 3/3 v3] mmc: sh_mmcif: calculate best clock with parent clock
+Date: Wed, 22 Apr 2015 09:49:58 +0200
+Message-ID: <CAMuHMdVcHT-QaPc94CS85B5aX_8xe9LTxzGJzY3a5LriQq+wHQ@mail.gmail.com>
+References: <873840a4ch.wl%kuninori.morimoto.gx@renesas.com>
+	<87vbgpubvr.wl%kuninori.morimoto.gx@renesas.com>
+	<87r3rdubmv.wl%kuninori.morimoto.gx@renesas.com>
+	<CAMuHMdUM4Cizij6q+6o9mADF_UjkzpZSvsUCdG+Y=PHo=A_qLw@mail.gmail.com>
+	<87oamhm0uv.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <201504141142.00237.jbe@pengutronix.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Juergen Borleis <jbe@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Guo <shawn.guo@linaro.org>, linux-kernel@vger.kernel.org, eric@eukrea.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f179.google.com ([209.85.214.179]:36731 "EHLO
+	mail-ob0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964979AbbDVHt7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Apr 2015 03:49:59 -0400
+In-Reply-To: <87oamhm0uv.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Simon <horms@verge.net.au>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Laurent <laurent.pinchart@ideasonboard.com>, kobayashi <keita.kobayashi.ym@renesas.com>
 
-On Tue, Apr 14, 2015 at 11:42:00AM +0200, Juergen Borleis wrote:
-> Hi,
->=20
-> On Friday 27 March 2015 12:44:03 Dong Aisheng wrote:
-> > On Fri, Mar 27, 2015 at 11:52:04AM +0100, Juergen Borleis wrote:
-> > > DMA and the required overhead on very small data blocks seems an
-> > > expensive operation. Due to erratum ENGCM07207 for i.MX25 and i.M=
-X35 SoCs
-> > > the support for multiblock transfers is disabled which results in=
-to a
-> > > huge amount of single 512 byte sector transfers and interrupts. T=
-his
-> > > slows down the transmission speed to below 500 kiB/s (even at 50 =
-MHz SD
-> > > card clock). Using PIO instead of DMA to avoid ENGCM07207 happens=
- and
-> > > re-enabling multiblock transfers again improve the transmission
-> > > capability up to about 2.5 MiB/s.
-> > >
-> > > I'm still not sure if ENGCM07207 is related to DMA only and can n=
-ot
-> > > happen when PIO is used instead. Someone out there with experienc=
-e
-> > > regarding this topic?
-> >
-> > The errata does not state it's related to DMA only.
-> > http://cache.freescale.com/files/dsp/doc/errata/IMX35CE.pdf
-> > I could double check with our IC guys to confirm it.
->=20
-> Gentle ping.
->=20
+Hi Morimoto-san,
 
-Hi Juergen,
+On Wed, Apr 22, 2015 at 3:04 AM, Kuninori Morimoto
+<kuninori.morimoto.gx@renesas.com> wrote:
+>> > +static const struct sh_mmcif_parent_clk mmcif_gen2_parent_clk = {
+>> > +       .max = 97500000,
+>> > +       .min = 12187500,
+>> > +       .clkdiv_map = 0x3ff,
+>>
+>> Shouldn't this come from private data in the CPG clock driver, which supplies
+>> the parent clock? Then the mmcif driver will be independent from the parent
+>> clock.
+>
+> As Laurent mentioned in other feedback, parent clock (= CFG::MMCxCKCR)
+> is div6, and it can set 1/1 - 1/64 (= 780000000 - 12187500)
+> But, MMC can use 1/8 - 1/64 (= 97500000 - 12187500), we don't know this limit
+> came from. we thought that having limit on DIV6 is not good idea.
 
-Got the info from our IC guy.
-PIO mode is not related to AHB access, so AHB hang is not exist.
-But, he supposes the incorrect state machine of IP after sending CMD12 =
-should
-also exist on PIO mode. We may still needs reset the controller after s=
-ending
-CMD12.(Reset before sending CMD12 should also work)
+So the upper limit is a limitation of the MMCIF hardware, while the lower
+limit is a limitation of the CPG.
 
-BTW the errata already indicates a workaround for AHB hang:
-"To abort data transfers on the AHB, software can reset the eSDHC by
-writing 1 to SYSCTL[24] (RSTA)."
+Then the upper limit should be either in the driver (as you did, using
+different compatible values), or it can be described in DT.
+(cfr. "git grep max.*freq -- arch/arm/boot/dts/").
+Personally, I'm leaning towards the latter.
 
-So the issue could be avoided by reset controller.
+IMHO the lower limit doesn't belong here.
 
-And the current SDHCI driver already does reset if any error(cmd or dat=
-a)
-happens, and current MMC core seems only sending stop command when meet=
-s error.
-(not sending stop during normal transfer).
-So it looks to me the issue may already be workarounded and can not
-be reproduced.
+>> > +               /* FIXME */
+>> > +               if (pclk->max != pclk->min * (pclk->max / pclk->min)) {
+>> > +                       dev_err(&host->pd->dev, "not assumed parent clk\n");
+>> > +                       return;
+>> > +               }
+>>
+>> Why?
+>
+> This time, max/min = 97500000/12187500 = 8.
+> But, we don't know the future.
+> It will be non-assumed result if it was below or similar
+> max = 91406250
+> min = 12187500 (max = min * 15/2)
 
-I'm not sure if anyone really meets the issue.
+You can still calculate a divisor if max is not an integer multiple of min,
+can't you?
 
-By googling the original post of this patch, it seems the patch
-owner also did not reproduce this issue.
-See:
-http://lists.infradead.org/pipermail/linux-arm-kernel/2010-October/0298=
-18.html
+And currently the check above cannot trigger, as you have hardcoded values
+in the driver source that don't trigger it.
 
-I would suggest someone who has the MX35/MX25 boards, to run the test a=
-gain by
-manually triggering a data error.(e.g: shorting data line to ground dur=
-ing
-transfer). Then to see if the controller can still work well.
+>> > +               parent_freq = 0;
+>> > +               clkdiv = 0;
+>> > +               diff_min = ~0;
+>> > +               for (i = pclk->max / pclk->min; i > 0; i--) {
+>> > +                       for (j = fls(pclk->clkdiv_map); j >= 0; j--) {
+>> > +                               if (!((1 << j) & pclk->clkdiv_map))
+>> > +                                       continue;
+>> > +
+>> > +                               myclk = ((pclk->min * i) / (1 << (j + 1)));
+>> > +                               diff = (myclk > clk) ? myclk - clk : clk - myclk;
+>> > +
+>> > +                               if (diff <= diff_min) {
+>> > +                                       parent_freq = pclk->min * i;
+>> > +                                       clkdiv = j;
+>> > +                                       diff_min = diff;
+>> > +                               }
+>> > +                       }
+>> > +               }
+>>
+>> Shouldn't the above be handled by the CPG clock driver, through a clk API?
+>
+> I don't think so.
+> it calculates best of parent clock (= from CPG) and divider (= from MMC)
+> Why CPG driver need to care about MMC's divider ??
 
-If can not reproduce, then we can remove this errata and back to DMA mo=
-de.
+The MMCIF driver shouldn't need to be aware of the possible values supported
+by the CPG driver.
 
-Regards
-Dong Aisheng
+Can't you loop over all MMC dividers, and
+  1. calculate the needed parent clock rate for that MMC divider,
+  2. use clk_set_rate_range()[*] to find a (close) parent clock rate,
+  3. calculate the effective clock rate based on MMC divider and parent
+     clock rate.
+and use the best effective clock rate found?
 
-> Regards,
-> Juergen
->=20
-> --=20
-> Pengutronix e.K. =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0| Juergen Borleis =A0 =A0 =A0 =A0 =A0 =A0 |
-> Industrial Linux Solutions               =A0 =A0 =A0| http://www.peng=
-utronix.de/  |
+[*] It's a pity the clk API doesn't seem to have a function to query or check
+    clock rates without actually setting them. Or am I missing something?
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
