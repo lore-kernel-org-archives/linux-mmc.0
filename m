@@ -1,118 +1,61 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 3/3 v3] mmc: sh_mmcif: calculate best clock with parent clock
-Date: Wed, 22 Apr 2015 09:49:58 +0200
-Message-ID: <CAMuHMdVcHT-QaPc94CS85B5aX_8xe9LTxzGJzY3a5LriQq+wHQ@mail.gmail.com>
-References: <873840a4ch.wl%kuninori.morimoto.gx@renesas.com>
-	<87vbgpubvr.wl%kuninori.morimoto.gx@renesas.com>
-	<87r3rdubmv.wl%kuninori.morimoto.gx@renesas.com>
-	<CAMuHMdUM4Cizij6q+6o9mADF_UjkzpZSvsUCdG+Y=PHo=A_qLw@mail.gmail.com>
-	<87oamhm0uv.wl%kuninori.morimoto.gx@renesas.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.1 rc1
+Date: Wed, 22 Apr 2015 10:05:34 +0200
+Message-ID: <CAPDyKFr8njV4GAcR=W4BcRHKf1nZyBuw3kmOQeaNOtKjWk-d6A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f179.google.com ([209.85.214.179]:36731 "EHLO
-	mail-ob0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964979AbbDVHt7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Apr 2015 03:49:59 -0400
-In-Reply-To: <87oamhm0uv.wl%kuninori.morimoto.gx@renesas.com>
+Received: from mail-qk0-f175.google.com ([209.85.220.175]:34738 "EHLO
+	mail-qk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932124AbbDVIFf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Apr 2015 04:05:35 -0400
+Received: by qkgx75 with SMTP id x75so216414209qkg.1
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Apr 2015 01:05:34 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Simon <horms@verge.net.au>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Laurent <laurent.pinchart@ideasonboard.com>, kobayashi <keita.kobayashi.ym@renesas.com>
+To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi Morimoto-san,
+Hi Linus,
 
-On Wed, Apr 22, 2015 at 3:04 AM, Kuninori Morimoto
-<kuninori.morimoto.gx@renesas.com> wrote:
->> > +static const struct sh_mmcif_parent_clk mmcif_gen2_parent_clk = {
->> > +       .max = 97500000,
->> > +       .min = 12187500,
->> > +       .clkdiv_map = 0x3ff,
->>
->> Shouldn't this come from private data in the CPG clock driver, which supplies
->> the parent clock? Then the mmcif driver will be independent from the parent
->> clock.
->
-> As Laurent mentioned in other feedback, parent clock (= CFG::MMCxCKCR)
-> is div6, and it can set 1/1 - 1/64 (= 780000000 - 12187500)
-> But, MMC can use 1/8 - 1/64 (= 97500000 - 12187500), we don't know this limit
-> came from. we thought that having limit on DIV6 is not good idea.
+Here is two mmc fixes for v.4.1 rc1, based on your master branch a few days ago.
 
-So the upper limit is a limitation of the MMCIF hardware, while the lower
-limit is a limitation of the CPG.
+Details are as usual found in the signed tag. Please pull this in!
 
-Then the upper limit should be either in the driver (as you did, using
-different compatible values), or it can be described in DT.
-(cfr. "git grep max.*freq -- arch/arm/boot/dts/").
-Personally, I'm leaning towards the latter.
+Kind regards
+Ulf Hansson
 
-IMHO the lower limit doesn't belong here.
 
->> > +               /* FIXME */
->> > +               if (pclk->max != pclk->min * (pclk->max / pclk->min)) {
->> > +                       dev_err(&host->pd->dev, "not assumed parent clk\n");
->> > +                       return;
->> > +               }
->>
->> Why?
->
-> This time, max/min = 97500000/12187500 = 8.
-> But, we don't know the future.
-> It will be non-assumed result if it was below or similar
-> max = 91406250
-> min = 12187500 (max = min * 15/2)
+The following changes since commit 4fc8adcfec3da639da76e8314c9ccefe5bf9a045:
 
-You can still calculate a divisor if max is not an integer multiple of min,
-can't you?
+  Merge branch 'for-linus' of
+git://git.kernel.org/pub/scm/linux/kernel/git/viro/vfs (2015-04-16
+23:27:56 -0400)
 
-And currently the check above cannot trigger, as you have hardcoded values
-in the driver source that don't trigger it.
+are available in the git repository at:
 
->> > +               parent_freq = 0;
->> > +               clkdiv = 0;
->> > +               diff_min = ~0;
->> > +               for (i = pclk->max / pclk->min; i > 0; i--) {
->> > +                       for (j = fls(pclk->clkdiv_map); j >= 0; j--) {
->> > +                               if (!((1 << j) & pclk->clkdiv_map))
->> > +                                       continue;
->> > +
->> > +                               myclk = ((pclk->min * i) / (1 << (j + 1)));
->> > +                               diff = (myclk > clk) ? myclk - clk : clk - myclk;
->> > +
->> > +                               if (diff <= diff_min) {
->> > +                                       parent_freq = pclk->min * i;
->> > +                                       clkdiv = j;
->> > +                                       diff_min = diff;
->> > +                               }
->> > +                       }
->> > +               }
->>
->> Shouldn't the above be handled by the CPG clock driver, through a clk API?
->
-> I don't think so.
-> it calculates best of parent clock (= from CPG) and divider (= from MMC)
-> Why CPG driver need to care about MMC's divider ??
 
-The MMCIF driver shouldn't need to be aware of the possible values supported
-by the CPG driver.
+  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-4.1-rc1
 
-Can't you loop over all MMC dividers, and
-  1. calculate the needed parent clock rate for that MMC divider,
-  2. use clk_set_rate_range()[*] to find a (close) parent clock rate,
-  3. calculate the effective clock rate based on MMC divider and parent
-     clock rate.
-and use the best effective clock rate found?
+for you to fetch changes up to 96541bac0b4e62efa42e7900d9b32e6baa9a214c:
 
-[*] It's a pity the clk API doesn't seem to have a function to query or check
-    clock rates without actually setting them. Or am I missing something?
+  Revert "mmc: core: Convert mmc_driver to device_driver" (2015-04-17
+11:48:01 +0200)
 
-Gr{oetje,eeting}s,
+----------------------------------------------------------------
+MMC core:
+- Fix error code propagation in mmc_pwrseq_simple_alloc()
+- Revert "mmc: core: Convert mmc_driver to device_driver"
 
-                        Geert
+----------------------------------------------------------------
+Javier Martinez Canillas (1):
+      mmc: pwrseq: Fix error code propagation in mmc_pwrseq_simple_alloc()
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+Ulf Hansson (1):
+      Revert "mmc: core: Convert mmc_driver to device_driver"
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+ drivers/mmc/card/block.c    | 34 +++++++++++++++++-----------------
+ drivers/mmc/card/mmc_test.c | 18 +++++++-----------
+ drivers/mmc/core/bus.c      | 41 +++++++++++++++++++++++++++++++++--------
+ drivers/mmc/core/pwrseq.c   |  2 +-
+ include/linux/mmc/card.h    | 14 ++++++++++++--
+ 5 files changed, 70 insertions(+), 39 deletions(-)
