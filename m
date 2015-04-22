@@ -1,309 +1,153 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V6 08/15] mmc: mmc: Hold re-tuning if the card is put to sleep
-Date: Wed, 22 Apr 2015 10:45:48 +0200
-Message-ID: <CAPDyKFpf0z6pnm3Q3+OebL+qMqUGLRtLM_ORfPZxYXQ1H4J6TQ@mail.gmail.com>
-References: <1429531796-21987-1-git-send-email-adrian.hunter@intel.com>
-	<1429531796-21987-9-git-send-email-adrian.hunter@intel.com>
-	<CAPDyKFq3nncR09=TJ0o3vGEdwEw5bYPCxu38OFPZyaiKTUcAzw@mail.gmail.com>
-	<55362DE0.1070302@intel.com>
-	<CAPDyKFrYD=kqifhhcvPVcqCKtbZMng42vr+LmaCZYMPhPUhEjQ@mail.gmail.com>
-	<5536420F.5050201@intel.com>
-	<55369602.1010504@broadcom.com>
-	<55374CA0.70004@intel.com>
-	<55375C34.9000005@broadcom.com>
+From: Arend van Spriel <arend@broadcom.com>
+Subject: Re: [PATCH 07/10] brcmfmac: fix sdio suspend and resume
+Date: Wed, 22 Apr 2015 10:52:53 +0200
+Message-ID: <55376165.8030904@broadcom.com>
+References: <1429035033-14076-1-git-send-email-arend@broadcom.com>	<1429035033-14076-8-git-send-email-arend@broadcom.com> <CAPDyKFqGb81m9ExECL1ZCea8OuhekH+aWiXC=8zafnLN2T02Vw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f54.google.com ([209.85.192.54]:36191 "EHLO
-	mail-qg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934427AbbDVIpt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Apr 2015 04:45:49 -0400
-Received: by qgeb100 with SMTP id b100so80056757qge.3
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Apr 2015 01:45:48 -0700 (PDT)
-In-Reply-To: <55375C34.9000005@broadcom.com>
+Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:63626 "EHLO
+	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965680AbbDVIw4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Apr 2015 04:52:56 -0400
+In-Reply-To: <CAPDyKFqGb81m9ExECL1ZCea8OuhekH+aWiXC=8zafnLN2T02Vw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arend van Spriel <arend@broadcom.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 22 April 2015 at 10:30, Arend van Spriel <arend@broadcom.com> wrote:
-> On 04/22/15 09:24, Adrian Hunter wrote:
->>
->> On 21/04/15 21:25, Arend van Spriel wrote:
->>>
->>> On 04/21/15 14:26, Adrian Hunter wrote:
->>>>
->>>> On 21/04/15 14:53, Ulf Hansson wrote:
->>>>>
->>>>> On 21 April 2015 at 13:00, Adrian Hunter<adrian.hunter@intel.com>
->>>>> wrote:
->>>>>>
->>>>>> On 21/04/15 12:42, Ulf Hansson wrote:
->>>>>>>
->>>>>>> On 20 April 2015 at 14:09, Adrian Hunter<adrian.hunter@intel.com>
->>>>>>> wrote:
->>>>>>>>
->>>>>>>> Currently "mmc sleep" is used before power off and
->>>>>>>> is not paired with waking up. Nevertheless hold
->>>>>>>> re-tuning.
->>>>>>>>
->>>>>>>> Signed-off-by: Adrian Hunter<adrian.hunter@intel.com>
->>>>>>>> ---
->>>>>>>>    drivers/mmc/core/mmc.c | 14 +++++++++++---
->>>>>>>>    1 file changed, 11 insertions(+), 3 deletions(-)
->>>>>>>>
->>>>>>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>>>>>>> index f36c76f..daf9954 100644
->>>>>>>> --- a/drivers/mmc/core/mmc.c
->>>>>>>> +++ b/drivers/mmc/core/mmc.c
->>>>>>>> @@ -21,6 +21,7 @@
->>>>>>>>    #include<linux/mmc/mmc.h>
->>>>>>>>
->>>>>>>>    #include "core.h"
->>>>>>>> +#include "host.h"
->>>>>>>>    #include "bus.h"
->>>>>>>>    #include "mmc_ops.h"
->>>>>>>>    #include "sd_ops.h"
->>>>>>>> @@ -1504,6 +1505,7 @@ static int mmc_can_sleep(struct mmc_card
->>>>>>>> *card)
->>>>>>>>           return (card&&   card->ext_csd.rev>= 3);
->>>>>>>>    }
->>>>>>>>
->>>>>>>> +/* If necessary, callers must hold re-tuning */
->>>>>>>>    static int mmc_sleep(struct mmc_host *host)
->>>>>>>>    {
->>>>>>>>           struct mmc_command cmd = {0};
->>>>>>>> @@ -1631,6 +1633,7 @@ static int _mmc_suspend(struct mmc_host *host,
->>>>>>>> bool is_suspend)
->>>>>>>>           int err = 0;
->>>>>>>>           unsigned int notify_type = is_suspend ?
->>>>>>>> EXT_CSD_POWER_OFF_SHORT :
->>>>>>>>                                           EXT_CSD_POWER_OFF_LONG;
->>>>>>>> +       bool retune_release = false;
->>>>>>>>
->>>>>>>>           BUG_ON(!host);
->>>>>>>>           BUG_ON(!host->card);
->>>>>>>> @@ -1651,17 +1654,22 @@ static int _mmc_suspend(struct mmc_host
->>>>>>>> *host,
->>>>>>>> bool is_suspend)
->>>>>>>>                   goto out;
->>>>>>>>
->>>>>>>>           if (mmc_can_poweroff_notify(host->card)&&
->>>>>>>> -               ((host->caps2&   MMC_CAP2_FULL_PWR_CYCLE) ||
->>>>>>>> !is_suspend))
->>>>>>>> +               ((host->caps2&   MMC_CAP2_FULL_PWR_CYCLE) ||
->>>>>>>> !is_suspend)) {
->>>>>>>>                   err = mmc_poweroff_notify(host->card,
->>>>>>>> notify_type);
->>>>>>>> -       else if (mmc_can_sleep(host->card))
->>>>>>>> +       } else if (mmc_can_sleep(host->card)) {
->>>>>>>> +               mmc_retune_hold(host);
->>>>>>>>                   err = mmc_sleep(host);
->>>>>>>> -       else if (!mmc_host_is_spi(host))
->>>>>>>> +       } else if (!mmc_host_is_spi(host)) {
->>>>>>>>                   err = mmc_deselect_cards(host);
->>>>>>>> +       }
->>>>>>>>
->>>>>>>>           if (!err) {
->>>>>>>>                   mmc_power_off(host);
->>>>>>>>                   mmc_card_set_suspended(host->card);
->>>>>>>>           }
->>>>>>>> +
->>>>>>>> +       if (retune_release)
->>>>>>>> +               mmc_retune_release(host);
->>>>>>>>    out:
->>>>>>>>           mmc_release_host(host);
->>>>>>>>           return err;
->>>>>>>> --
->>>>>>>> 1.9.1
->>>>>>>>
->>>>>>>
->>>>>>> According to our previous discussions I have given this some more
->>>>>>> thinking.
->>>>>>>
->>>>>>> I don't think we can allow to hold/disable re-tune in this path at
->>>>>>> all. That's because we are claiming the host here and the sleep
->>>>>>> command might then be the first command we invoke during the system
->>>>>>> PM
->>>>>>> sequence.
->>>>>>>
->>>>>>> That means sdhci might have flagged need_retune, since it's been
->>>>>>> runtime PM suspended. And for those scenarios I guess we really need
->>>>>>> to do a re-tune prior sending the sleep command, right?
->>>>>>
->>>>>>
->>>>>> Yes, although that is how it works.
->>>>>
->>>>>
->>>>> Ohh, you are one step ahead of me. Good! :-)
->>>>>
->>>>>>
->>>>>> Previously I had two functions mmc_retune_hold() and
->>>>>> mmc_retune_and_hold()
->>>>>> but after one of the revisions I found that only one was needed. I
->>>>>> stuck
->>>>>> with the mmc_retune_hold() name because it doesn't necessarily cause a
->>>>>> re-tune, but only if the hold count was zero and a retune is needed.
->>>>>>
->>>>>>>
->>>>>>> Earlier I only had the re-tune timer in mind, which is why I was less
->>>>>>> restrictive and suggesting you to add hold/disable. Sorry about that.
->>>>>>>
->>>>>>> Now, with the above in mind I believe you have similar issues with
->>>>>>> patch5 (mmc: core: Hold re-tuning during switch commands) and patch6
->>>>>>> (mmc: core: Hold re-tuning during erase commands). And that's because
->>>>>>> there are cases when the switch/erase commands are the first commands
->>>>>>> sent, after the sdhci host has been runtime PM suspended. I guess we
->>>>>>> need a way to make sure we don't hold re-tune for these cases.
->>>>>>>
->>>>>>> An option to deal with that is to use a separate flag set by host
->>>>>>> drivers, though the mmc_needs_retune() API and let that one override
->>>>>>> another.
->>>>>>>
->>>>>>> Forgive me for pushing you back and forth for how to do this, but it
->>>>>>
->>>>>>
->>>>>> Not a problem. Thanks for persevering.
->>>>>>
->>>>>>> seems like we still have some outstanding issues to resolve.
->>>>>
->>>>>
->>>>> So that then more or less leaves us with one outstanding issue. The
->>>>> SDIO irq wakeup scenario.
->>>>>
->>>>> How will that work for sdhci?
->>>>>
->>>>> Your suggestion is to hold re-tune for the SDIO wakeup command. If I
->>>>> understand correct that could be overridden when the host flags
->>>>> need_retune from its runtime PM suspend callback, right?
->>>>>
->>>>> That then mean that the re-tuning will be done prior sending the
->>>>> wakeup command? That wouldn't work, unless the re-tune command also
->>>>> act as wakeup, which I doubt.
->>>>
->>>>
->>>> The wakeup command has to come first.
->>>>
->>>>>
->>>>> If I _haven't_ understand correctly and you mean that the SDIO wakeup
->>>>> command shall be invoked prior re-tuning is done; that would mean that
->>>>> SDHCI will send a command to the card without first satisfying its
->>>>> need for a re-tune. And that wouldn't work either, right?
->>>>
->>>>
->>>> My understanding is that the wakeup command will still work but there
->>>> might
->>>> be a CRC error.
->>>>
->>>> Need Arend to comment on this since it is his driver we are talking
->>>> about.
->>>
->>>
->>> Are we?
->>
->>
->> At a guess, something that would have the effect of:
->>
->> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/sdio.c
->> b/drivers/net/wireless/brcm80211/brcmfmac/sdio.c
->> index ab0c898..4e5e97f 100644
->> --- a/drivers/net/wireless/brcm80211/brcmfmac/sdio.c
->> +++ b/drivers/net/wireless/brcm80211/brcmfmac/sdio.c
->> @@ -774,8 +774,12 @@ brcmf_sdio_kso_control(struct brcmf_sdio *bus, bool
->> on)
->>
->>          wr_val = (on<<  SBSDIO_FUNC1_SLEEPCSR_KSO_SHIFT);
->>          /* 1st KSO write goes to AOS wake up core if device is asleep  */
->> +       if (on)
->> +               bus->sdiodev->func[SDIO_FUNC_1]->card->host->hold_retune
->> += 1;
->>          brcmf_sdiod_regwb(bus->sdiodev, SBSDIO_FUNC1_SLEEPCSR,
->>                            wr_val,&err);
->> +       if (on)
->> +               bus->sdiodev->func[SDIO_FUNC_1]->card->host->hold_retune
->> -= 1;
->
->
-> I see. I was indeed wondering about the wakeup as the retune would fail
-> because the device will not respond to retune command. This function
-> currently is triggered by idle detection in the driver instead of using
-> runtime-pm. If we would add runtime-pm support and do pm_runtime_get() on
-> the function dev, would that also keep the host controller from entering
-> runtime-pm?
+- wireless list/maintainer
 
-Nope!
-
->
->>          if (on) {
->>                  /* device WAKEUP through KSO:
+On 04/22/15 09:32, Ulf Hansson wrote:
+> On 14 April 2015 at 20:10, Arend van Spriel<arend@broadcom.com>  wrote:
+>> commit 330b4e4be937 ("brcmfmac: Add wowl support for SDIO devices.")
+>> changed the behaviour by removing the MMC_PM_KEEP_POWER flag for
+>> non-wowl scenario, which needs to be restored. Another necessary
+>> change is to mark the card as being non-removable. With this in place
+>> the suspend resume test passes successfully doing:
 >>
+>>   # echo devices>  /sys/power/pm_test
+>>   # echo mem>  /sys/power/state
 >>
->>>
->>>> So the plan would be:
->>>>      - re-tuning hold_count is incremented
->>>>      - wakeup command is issued (and no re-tuning is done)
->>>>      - errors are ignored
->>>>      - re-tuning hold_count is decremented
->>>>      - continue as normal, re-tuning before the next request as needed
->>>>
->>>>>
->>>>> So then the only solution for SDHCI would be to prevent it from being
->>>>> runtime PM suspended when configured for SDIO. Urgh, that's really
->>>>> bad.
->>>>
->>>>
->>>> Yes that would defeat the point of sleeping.
->>>
->>>
->>> I recently submitted a patch in brcmfmac to disable runtime pm for the
->>> SDIO
->>> host controller as it interfered with communication between driver and
->>> device, ie. driver send request to device but response is never received
->>> because runtime-pm kicked in. Our sdio func driver does not provide
->>> runtime-pm (yet) and figured using pm_runtime_forbid() was the only way
->>> to
->>> let the host controller know this fact.
+>> Note that power may still be switched off when system is going
+>> in S3 state.
 >>
+>> Reported-by: Fu, Zhonghui<<zhonghui.fu@linux.intel.com>
+>> Reviewed-by: Pieter-Paul Giesberts<pieterpg@broadcom.com>
+>> Reviewed-by: Franky (Zhenhui) Lin<frankyl@broadcom.com>
+>> Signed-off-by: Arend van Spriel<arend@broadcom.com>
+>> ---
+>>   drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c | 18 +++++++++++++-----
+>>   1 file changed, 13 insertions(+), 5 deletions(-)
 >>
->> We need to sort this out properly at some point.
+>> diff --git a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
+>> index 9b508bd..8a69544 100644
+>> --- a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
+>> +++ b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
+>> @@ -1011,6 +1011,14 @@ static int brcmf_sdiod_remove(struct brcmf_sdio_dev *sdiodev)
+>>          return 0;
+>>   }
+>>
+>> +static void brcmf_sdiod_host_fixup(struct mmc_host *host)
+>> +{
+>> +       /* runtime-pm powers off the device */
+>> +       pm_runtime_forbid(host->parent);
 >
->
-> Agree. One thing that makes me raise my eyebrows is piece of code in
-> mmc_attach_sdio():
->
->         /*
->          * Enable runtime PM only if supported by host+card+board
->          */
->         if (host->caps & MMC_CAP_POWER_OFF_CARD) {
->                 /*
->                  * Let runtime PM core know our card is active
->                  */
->                 err = pm_runtime_set_active(&card->dev);
->                 if (err)
->                         goto remove;
->
->                 /*
->                  * Enable runtime PM for this card
->                  */
->                 pm_runtime_enable(&card->dev);
->         }
->
-> The comment above the if statement is what I would expect to be correct
-> behavior, but it only checks the host->caps.
+> That you need this, clearly shows that something is broken in the mmc
+> core/host layer.
 
-_I_ think the entire runtime PM implementation related to the
-MMC_CAP_POWER_OFF_CARD is a bit fragile to use. So I won't be
-surprised if SDIO func clients will have issues to use it.
+This patch only moved this. The patch introducing this is here [1].
 
-Currently, I would instead advise them to use
-mmc_power_save|restore_host() API, to accomplish the similar
-operations. I do realize that using that API does also have some
-limitations, for example when using SDIO combo cards and there are
-some corner cases around system PM.
+> Could you elaborate a bit on what configuration you are using. Like
+> what mmc host, which SDIO bus speed mode.
 
-We need to go over this piece of code in the mmc core to make it more
-robust. We also need to figure out which APIs SDIO func drivers shall
-use to deal with PM.
+Not just one. My test setup is a dev board hooked up to a card reader 
+slot using sdhci-pci driver. Another setup I have is a chromebook with 
+our device integrated with dw_mmc-rockchip driver. It is an arm platform 
+with dt entry:
 
-Kind regards
-Uffe
+&sdio0 {
+         broken-cd;
+         bus-width = <4>;
+         cap-sd-highspeed;
+         sd-uhs-sdr12;
+         sd-uhs-sdr25;
+         sd-uhs-sdr50;
+         sd-uhs-sdr104;
+         cap-sdio-irq;
+         card-external-vcc-supply = <&wifi_regulator>;
+         clocks = <&cru HCLK_SDIO0>, <&cru SCLK_SDIO0>, <&cru 
+SCLK_SDIO0_DRV>,
+                  <&cru SCLK_SDIO0_SAMPLE>, <&rk808 RK808_CLKOUT1>;
+         clock-names = "biu", "ciu", "ciu_drv", "ciu_sample", 
+"card_ext_clock";
+         keep-power-in-suspend;
+         non-removable;
+         num-slots = <1>;
+         default-sample-phase = <90>;
+         pinctrl-names = "default";
+         pinctrl-0 = <&sdio0_clk &sdio0_cmd &sdio0_bus4>;
+         status = "okay";
+         vmmc-supply = <&vcc33_sys>;
+         vqmmc-supply = <&vcc18_wl>;
+};
+
+I think card-external-vcc-supply is property that chromeos kernel 
+handles to power the device.
+
+> And have you tested different configurations? Like what happens if you
+> use a different SDIO bus speed mode?
+
+Regards,
+Arend
+
+[1] https://patchwork.kernel.org/patch/6038511/
+
+>> +       /* avoid removal detection upon resume */
+>> +       host->caps |= MMC_CAP_NONREMOVABLE;
+>> +}
+>> +
+>>   static int brcmf_sdiod_probe(struct brcmf_sdio_dev *sdiodev)
+>>   {
+>>          struct sdio_func *func;
+>> @@ -1076,7 +1084,7 @@ static int brcmf_sdiod_probe(struct brcmf_sdio_dev *sdiodev)
+>>                  ret = -ENODEV;
+>>                  goto out;
+>>          }
+>> -       pm_runtime_forbid(host->parent);
+>> +       brcmf_sdiod_host_fixup(host);
+>>   out:
+>>          if (ret)
+>>                  brcmf_sdiod_remove(sdiodev);
+>> @@ -1246,15 +1254,15 @@ static int brcmf_ops_sdio_suspend(struct device *dev)
+>>          brcmf_sdiod_freezer_on(sdiodev);
+>>          brcmf_sdio_wd_timer(sdiodev->bus, 0);
+>>
+>> +       sdio_flags = MMC_PM_KEEP_POWER;
+>>          if (sdiodev->wowl_enabled) {
+>> -               sdio_flags = MMC_PM_KEEP_POWER;
+>>                  if (sdiodev->pdata->oob_irq_supported)
+>>                          enable_irq_wake(sdiodev->pdata->oob_irq_nr);
+>>                  else
+>> -                       sdio_flags = MMC_PM_WAKE_SDIO_IRQ;
+>> -               if (sdio_set_host_pm_flags(sdiodev->func[1], sdio_flags))
+>> -                       brcmf_err("Failed to set pm_flags %x\n", sdio_flags);
+>> +                       sdio_flags |= MMC_PM_WAKE_SDIO_IRQ;
+>>          }
+>> +       if (sdio_set_host_pm_flags(sdiodev->func[1], sdio_flags))
+>> +               brcmf_err("Failed to set pm_flags %x\n", sdio_flags);
+>>          return 0;
+>>   }
+>>
+>> --
+>> 1.9.1
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> Kind regards
+> Uffe
+
