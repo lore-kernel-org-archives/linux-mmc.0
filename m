@@ -1,48 +1,41 @@
-From: Angelo Dureghello <angelo@sysam.it>
-Subject: emmc 4.4x fast boot question
-Date: Wed, 22 Apr 2015 15:11:24 +0200
-Message-ID: <55379DFC.4040907@sysam.it>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Leon Romanovsky <leon@leon.nu>
+Subject: [PATCH] mmc-utils: remove obsolete do_write_extcsd function declaration
+Date: Wed, 22 Apr 2015 20:42:23 +0300
+Message-ID: <1429724545-3174-1-git-send-email-leon@leon.nu>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from tbjjbihbhdcag.turbo-smtp.net ([199.187.173.206]:17470 "HELO
-	tbjjbihbhdcag.turbo-smtp.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1756802AbbDVNSA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Apr 2015 09:18:00 -0400
+Received: from mail-wi0-f182.google.com ([209.85.212.182]:37959 "EHLO
+	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751974AbbDVRma (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Apr 2015 13:42:30 -0400
+Received: by wiun10 with SMTP id n10so65955576wiu.1
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Apr 2015 10:42:29 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: chris@printf.net
+Cc: linux-mmc@vger.kernel.org, Leon Romanovsky <leon@leon.nu>
 
-hi experts,
+The do_write_extcsd() function was removed from the C-file in
+commit"b9c7a17 Rename extcsd read/write to writeprotect get/set".
 
-trying to use imx6q "eMMC Fast Boot" mode without success. Can't
-get any clarification from freescale still, so i try here.
+This patch removes this function definition from H-file too.
 
- From the imx6q boot flow diagram seems there can be some gain using it.
+Signed-off-by: Leon Romanovsky <leon@leon.nu>
+---
+ mmc_cmds.h |    1 -
+ 1 file changed, 1 deletion(-)
 
-Once studying on the Micron eMMC i have connected to imx6q, (as per
-TN-52-06: Booting from Embedded MMC - JEDEC 4.41 online pdf) i see
-this mode is just called "boot mode" or "alternate boot mode", and seems 
-to allow to boot from SLC mmcblk0boot0 or mmcblk0boot1
-partitions setting EXT_CSD[179] partition to 1 or 2 in bits 3to5.
-
-In this way i can boot from mmcblk0boot0. but if i enable the hw
-imx6q GPIO BOOT_CFG1[4] "Fast Boot" mode, i cannot boot anymore.
-
-If i look signal with scope, booting i don't see the initial
-CMD pulled low as should be for the Boot mode.
-If i enable imx6q "fast boot" (BOOT_CFG1[4]) i just see a
-continuos and long train of bits on both CMD and CLK from the reset.
-
-So i can boot from special SLC mmcblk0boot0 but without imx6
-"Fast Boot" enabled. So i am trying to understand why this Fast Boot 
-feature (BOOT_CFG1[4] set) can't be used.
-
-In case you can give any help on this it will be really appreciated.
-
-Best regards,
-Angelo Dureghello
-
-
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index 9e625c9..7a79e87 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -16,7 +16,6 @@
+ 
+ /* mmc_cmds.c */
+ int do_read_extcsd(int nargs, char **argv);
+-int do_write_extcsd(int nargs, char **argv);
+ int do_writeprotect_get(int nargs, char **argv);
+ int do_writeprotect_set(int nargs, char **argv);
+ int do_disable_512B_emulation(int nargs, char **argv);
+-- 
+1.7.9.5
 
