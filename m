@@ -1,42 +1,53 @@
-From: <grygorii.strashko@linaro.org>
-Subject: [PATCH] mmc: core: add missing pm event in mmc_pm_notify to fix hib restore
-Date: Thu, 23 Apr 2015 13:43:43 +0300
-Message-ID: <1429785823-16939-1-git-send-email-grygorii.strashko@linaro.org>
-Return-path: <linux-pm-owner@vger.kernel.org>
-Sender: linux-pm-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, Sumit Semwal <sumit.semwal@linaro.org>, linux-mmc@vger.kernel.org
-Cc: khilman@linaro.org, linux-pm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, Grygorii Strashko <Grygorii.Strashko@linaro.org>
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: [PATCH v2] mmc: sdio: add reset callback to bus operations
+Date: Thu, 23 Apr 2015 13:15:42 +0200
+Message-ID: <1429787742-4876-1-git-send-email-afenkart@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:33016 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933774AbbDWLPu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Apr 2015 07:15:50 -0400
+Received: by wiax7 with SMTP id x7so10138750wia.0
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Apr 2015 04:15:49 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, NeilBrown <neilb@suse.de>, Andreas Fenkart <afenkart@gmail.com>
 
-From: Grygorii Strashko <Grygorii.Strashko@linaro.org>
+Some drivers schedule automatic hw resets. An example is mwifiex,
+which schedules a card reset if the command handler between driver
+and card firmware becomes out of sync
 
-The PM_RESTORE_PREPARE is not handled now in mmc_pm_notify(),
-as result mmc_rescan() could be scheduled and executed at
-late hibernation restore stages when MMC device is suspended
-already - which, in turn, will lead to system crash on TI dra7-evm board:
-
-WARNING: CPU: 0 PID: 3188 at drivers/bus/omap_l3_noc.c:148 l3_interrupt_handler+0x258/0x374()
-44000000.ocp:L3 Custom Error: MASTER MPU TARGET L4_PER1_P3 (Idle): Data Access in User mode during Functional access
-
-Hence, add missed PM_RESTORE_PREPARE PM event in mmc_pm_notify().
-
-Signed-off-by: Grygorii Strashko <Grygorii.Strashko@linaro.org>
+Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 ---
- drivers/mmc/core/core.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/core/sdio.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index c296bc0..92e7671 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2651,6 +2651,7 @@ int mmc_pm_notify(struct notifier_block *notify_block,
- 	switch (mode) {
- 	case PM_HIBERNATION_PREPARE:
- 	case PM_SUSPEND_PREPARE:
-+	case PM_RESTORE_PREPARE:
- 		spin_lock_irqsave(&host->lock, flags);
- 		host->rescan_disable = 1;
- 		spin_unlock_irqrestore(&host->lock, flags);
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index ce6cc47..01255ef 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -1064,6 +1064,12 @@ static int mmc_sdio_runtime_resume(struct mmc_host *host)
+ 	return mmc_sdio_power_restore(host);
+ }
+ 
++static int mmc_sdio_reset(struct mmc_host *host)
++{
++	mmc_power_cycle(host, host->card->ocr);
++	return mmc_sdio_power_restore(host);
++}
++
+ static const struct mmc_bus_ops mmc_sdio_ops = {
+ 	.remove = mmc_sdio_remove,
+ 	.detect = mmc_sdio_detect,
+@@ -1074,6 +1080,7 @@ static const struct mmc_bus_ops mmc_sdio_ops = {
+ 	.runtime_resume = mmc_sdio_runtime_resume,
+ 	.power_restore = mmc_sdio_power_restore,
+ 	.alive = mmc_sdio_alive,
++	.reset = mmc_sdio_reset,
+ };
+ 
+ 
 -- 
-1.9.1
+2.1.4
 
