@@ -1,33 +1,32 @@
 From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 4/7 v4] mmc: sh_mmcif: separate sh_mmcif_clk_update() into
- setup and prepare
-Date: Thu, 23 Apr 2015 12:00:21 +0200
-Message-ID: <CAMuHMdXcVSQiE3QrdCo=ucFXV84qMFrU7JfJVpKsNkfWmvZtEw@mail.gmail.com>
+Subject: Re: [PATCH 3/7 v4] mmc: sh_mmcif: remove unnecessary int clk from
+ struct sh_mmcif_host
+Date: Thu, 23 Apr 2015 12:01:19 +0200
+Message-ID: <CAMuHMdWrsm4Z25pZSWZ-sgTVG5q3vmziAPV1jVGjK8cey+1fYw@mail.gmail.com>
 References: <873840a4ch.wl%kuninori.morimoto.gx@renesas.com>
 	<87d22vgt8u.wl%kuninori.morimoto.gx@renesas.com>
-	<87618ngt1d.wl%kuninori.morimoto.gx@renesas.com>
+	<877ft3gt2y.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f46.google.com ([209.85.218.46]:36007 "EHLO
-	mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756674AbbDWKAV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Apr 2015 06:00:21 -0400
-In-Reply-To: <87618ngt1d.wl%kuninori.morimoto.gx@renesas.com>
+Received: from mail-oi0-f49.google.com ([209.85.218.49]:34712 "EHLO
+	mail-oi0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751996AbbDWKBU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Apr 2015 06:01:20 -0400
+In-Reply-To: <877ft3gt2y.wl%kuninori.morimoto.gx@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, Simon <horms@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Laurent <laurent.pinchart@ideasonboard.com>, kobayashi <keita.kobayashi.ym@renesas.com>
 
-On Thu, Apr 23, 2015 at 10:16 AM, Kuninori Morimoto
+On Thu, Apr 23, 2015 at 10:15 AM, Kuninori Morimoto
 <kuninori.morimoto.gx@renesas.com> wrote:
 > From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 >
-> Current sh_mmcif_clk_update() is called from probe() and set_ios(),
-> but, the purpose of later one is just clk_prepare_enable().
-> No need to setup mmc->f_max/f_min in many times.
-> This patch separe sh_mmcif_clk_update() into clk_prepare_enable()
-> and mmc->f_max/f_min setup.
+> struct sh_mmcif_host has 1) int clk, 2) struct clock *hclk,
+> and host->clk = clk_get_rate(host->hclk).
+> This int clk is not necessary. Let's remove it.
+> And, current hclk is confusable naming. Let's rename it to clk.
 >
 > Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 > Tested-by: Keita Kobayashi <keita.kobayashi.ym@renesas.com>
