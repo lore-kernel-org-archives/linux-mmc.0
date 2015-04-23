@@ -1,20 +1,24 @@
 From: "Rajendra Nayak" <rnayak@codeaurora.org>
 Subject: Re: [RFC/RFT 4/6] mmc: sdhci-msm: convert driver to use runtime PM
  apis
-Date: Thu, 23 Apr 2015 13:42:52 -0000
-Message-ID: <f390840a65cdf503397b162f2f8f8133.squirrel@www.codeaurora.org>
+Date: Thu, 23 Apr 2015 13:43:37 -0000
+Message-ID: <09f49e8b5f77fa0a0f80e5cea1467a48.squirrel@www.codeaurora.org>
 References: <1429778744-13352-1-git-send-email-rnayak@codeaurora.org>
     <1429778744-13352-5-git-send-email-rnayak@codeaurora.org>
     <CAPDyKFpKPkKXutn-2OAC4r6Um254C2vQoF83SB4Dsk4MmZv=wQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
-Return-path: <linux-pm-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.codeaurora.org ([198.145.29.96]:60954 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934065AbbDWNni (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Apr 2015 09:43:38 -0400
 In-Reply-To: <CAPDyKFpKPkKXutn-2OAC4r6Um254C2vQoF83SB4Dsk4MmZv=wQ@mail.gmail.com>
-Sender: linux-pm-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Rajendra Nayak <rnayak@codeaurora.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
-List-Id: linux-mmc@vger.kernel.org
 
 
 > On 23 April 2015 at 10:45, Rajendra Nayak <rnayak@codeaurora.org> wrote:
