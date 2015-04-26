@@ -1,50 +1,41 @@
-From: "Grygorii.Strashko@linaro.org" <grygorii.strashko@linaro.org>
-Subject: Re: [PATCH] mmc: core: add missing pm event in mmc_pm_notify to fix
- hib restore
-Date: Fri, 24 Apr 2015 13:52:15 +0300
-Message-ID: <553A205F.6020608@linaro.org>
-References: <1429785823-16939-1-git-send-email-grygorii.strashko@linaro.org> <CAPDyKFqA5Wvod_0J-52FJ9Vktt1kdq7H7c9UcX-daJ0hazWU+Q@mail.gmail.com>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Subject: [PATCH mmc 0/4] Cleanup fixes for tmio_mmc
+Date: Mon, 27 Apr 2015 00:00:20 +0100
+Message-ID: <1430089220.5802.17.camel@xylophone.i.decadent.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqA5Wvod_0J-52FJ9Vktt1kdq7H7c9UcX-daJ0hazWU+Q@mail.gmail.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Grygorii Strashko <grygorii.strashko@linaro.org>
-Cc: Sumit Semwal <sumit.semwal@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Kevin Hilman <khilman@linaro.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-omap <linux-omap@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:34112 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751043AbbDZXA0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Apr 2015 19:00:26 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
+Cc: linux-kernel@lists.codethink.co.uk
 
-On 04/23/2015 04:19 PM, Ulf Hansson wrote:
-> On 23 April 2015 at 12:43,  <grygorii.strashko@linaro.org> wrote:
->> From: Grygorii Strashko <Grygorii.Strashko@linaro.org>
->>
->> The PM_RESTORE_PREPARE is not handled now in mmc_pm_notify(),
->> as result mmc_rescan() could be scheduled and executed at
->> late hibernation restore stages when MMC device is suspended
->> already - which, in turn, will lead to system crash on TI dra7-evm board:
->>
->> WARNING: CPU: 0 PID: 3188 at drivers/bus/omap_l3_noc.c:148 l3_interrupt_handler+0x258/0x374()
->> 44000000.ocp:L3 Custom Error: MASTER MPU TARGET L4_PER1_P3 (Idle): Data Access in User mode during Functional access
->>
->> Hence, add missed PM_RESTORE_PREPARE PM event in mmc_pm_notify().
->>
->> Signed-off-by: Grygorii Strashko <Grygorii.Strashko@linaro.org>
-> 
-> Huh, that was an old bug you found. :-)
+Ian, these are some of your fixes for tmio_mmc that didn't make it
+upstream yet, plus an update to MAINTAINERS.  Assuming you're still
+intending to maintain it, please can you ack these?
 
-oh yes. it's happened thanks to HW issue on my board which
-generates a flood of SDCD IRQs :)
+Ben.
 
-It's the worst case ever to track wrong/missed PM notifiers (
+Ben Hutchings (1):
+  MAINTAINERS: Update Ian Molton's address for tmio_mmc driver
 
-> 
-> I have applied it for fixes and added the below fixes tag.
-> 
-> Fixes: 4c2ef25fe0b8 (mmc: fix all hangs related to mmc/sd card
-> insert/removal during suspend/resume)
+Ian Molton (3):
+  mmc: TMIO: Ensure MFD cell is disabled on probe error path
+  mmc: TMIO: Fix I/O mapping leak on error using devm_ioremap()
+  mmc: TMIO: Use devm_request_irq()
 
-Thanks. 
+ MAINTAINERS                     |    2 +-
+ drivers/mmc/host/tmio_mmc.c     |   10 ++++++----
+ drivers/mmc/host/tmio_mmc_pio.c |    5 ++---
+ 3 files changed, 9 insertions(+), 8 deletions(-)
 
 -- 
-regards,
--grygorii
+1.7.10.4
+
+
+
