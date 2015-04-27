@@ -1,98 +1,113 @@
-From: Barry Song <21cnbao@gmail.com>
-Subject: [PATCH 2/2] mmc: sdhci-sirf: fake version and capbility registers
-Date: Mon, 27 Apr 2015 08:15:14 +0000
-Message-ID: <1430122514-6541-2-git-send-email-21cnbao@gmail.com>
-References: <1430122514-6541-1-git-send-email-21cnbao@gmail.com>
+From: Suman Tripathi <stripathi@apm.com>
+Subject: Re: [PATCH v2 RESEND 2/2] mmc: host: Add some quirks to be read from
+ fdt in sdhci-pltm.c
+Date: Mon, 27 Apr 2015 20:33:25 +0530
+Message-ID: <CAOHikRDkQwG+7EUddXmx427ZpEOjqTt22H_zzozABOE3a963tQ@mail.gmail.com>
+References: <1429630959-32649-1-git-send-email-stripathi@apm.com>
+	<1429630959-32649-3-git-send-email-stripathi@apm.com>
+	<8525627.D1S9aInyMV@wuerfel>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f171.google.com ([209.85.192.171]:32876 "EHLO
-	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932160AbbD0IL6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Apr 2015 04:11:58 -0400
-Received: by pdbnk13 with SMTP id nk13so120593144pdb.0
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Apr 2015 01:11:58 -0700 (PDT)
-In-Reply-To: <1430122514-6541-1-git-send-email-21cnbao@gmail.com>
+Received: from exprod5og125.obsmtp.com ([64.18.0.245]:54043 "EHLO
+	mail-wg0-f43.google.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S964932AbbD0PD2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Apr 2015 11:03:28 -0400
+Received: by wgso17 with SMTP id o17so119378238wgs.1
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Apr 2015 08:03:26 -0700 (PDT)
+In-Reply-To: <8525627.D1S9aInyMV@wuerfel>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, workgroup.linux@csr.com, Weijun Yang <Weijun.Yang@csr.com>, Barry Song <Baohua.Song@csr.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Anton Vorontsov <anton@enomsg.org>, linux-mmc <linux-mmc@vger.kernel.org>, linuxppc-dev@lists.ozlabs.org, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Don Dutile <ddutile@redhat.com>, Jon Masters <jcm@redhat.com>, Mark Langsdorf <mlangsdo@redhat.com>, patches <patches@apm.com>
 
-From: Weijun Yang <Weijun.Yang@csr.com>
+On Tuesday 21 April 2015 21:12:39 Suman Tripathi wrote:
+> index bef250e..9f6a4b9 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -85,6 +85,21 @@ void sdhci_get_of_property(struct platform_device *pdev)
+>
+>                 if (of_get_property(np, "broken-cd", NULL))
+>                         host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> +
+> +               if (of_get_property(np, "delay-after-power", NULL))
+> +                       host->quirks |= SDHCI_QUIRK_DELAY_AFTER_POWER;
+> +
+> +               if (of_get_property(np, "no-hispd", NULL))
+> +                       host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
+> +
+> +               if (of_get_property(np, "broken-adma", NULL))
+> +                       host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+> +
+> +               if (of_get_property(np, "broken-dma", NULL))
+> +                       host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
+> +
+> +               if (of_get_property(np, "no-cmd23", NULL))
+> +                       host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+>
+>                 if (of_get_property(np, "no-1-8-v", NULL))
+>                         host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+>
 
-chips have some issues for version and capbility registers, here we fake
-them.
+Any property you add needs to be documented in the DT binding.
 
-Signed-off-by: Weijun Yang <Weijun.Yang@csr.com>
-Signed-off-by: Barry Song <Baohua.Song@csr.com>
----
- drivers/mmc/host/Kconfig      |  1 +
- drivers/mmc/host/sdhci-sirf.c | 35 +++++++++++++++++++++++++++++++++++
- 2 files changed, 36 insertions(+)
+If possible, add generic properties for each bug you have mmc.txt
+rather than the driver specific sdhci.txt, and implement the
+I will add the binding in mmc.txt. I thought this was present but not.
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index b1f837e..d5e107b 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -219,6 +219,7 @@ config MMC_SDHCI_SIRF
- 	tristate "SDHCI support on CSR SiRFprimaII and SiRFmarco SoCs"
- 	depends on ARCH_SIRF
- 	depends on MMC_SDHCI_PLTFM
-+	select MMC_SDHCI_IO_ACCESSORS
- 	help
- 	  This selects the SDHCI support for SiRF System-on-Chip devices.
- 
-diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
-index 2201f76..0110bae 100644
---- a/drivers/mmc/host/sdhci-sirf.c
-+++ b/drivers/mmc/host/sdhci-sirf.c
-@@ -43,6 +43,39 @@ static void sdhci_sirf_set_bus_width(struct sdhci_host *host, int width)
- 	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
- }
- 
-+static u32 sdhci_sirf_readl_le(struct sdhci_host *host, int reg)
-+{
-+	u32 val = readl(host->ioaddr + reg);
-+
-+	if (unlikely((reg == SDHCI_CAPABILITIES_1) &&
-+			(host->mmc->caps & MMC_CAP_UHS_SDR50))) {
-+		/* fake CAP_1 register */
-+		val = SDHCI_SUPPORT_SDR50 | SDHCI_USE_SDR50_TUNING;
-+	}
-+
-+	if (unlikely(reg == SDHCI_SLOT_INT_STATUS)) {
-+		u32 prss = val;
-+		/* fake chips as V3.0 host conreoller */
-+		prss &= ~(0xFF << 16);
-+		val = prss | (SDHCI_SPEC_300 << 16);
-+	}
-+	return val;
-+}
-+
-+static u16 sdhci_sirf_readw_le(struct sdhci_host *host, int reg)
-+{
-+	u16 ret = 0;
-+
-+	ret = readw(host->ioaddr + reg);
-+
-+	if (unlikely(reg == SDHCI_HOST_VERSION)) {
-+		ret = readw(host->ioaddr + SDHCI_HOST_VERSION);
-+		ret |= SDHCI_SPEC_300;
-+	}
-+
-+	return ret;
-+}
-+
- static int sdhci_sirf_execute_tuning(struct sdhci_host *host, u32 opcode)
- {
- 	int tuning_seq_cnt = 3;
-@@ -113,6 +146,8 @@ retry:
- }
- 
- static struct sdhci_ops sdhci_sirf_ops = {
-+	.read_l = sdhci_sirf_readl_le,
-+	.read_w = sdhci_sirf_readw_le,
- 	.platform_execute_tuning = sdhci_sirf_execute_tuning,
- 	.set_clock = sdhci_set_clock,
- 	.get_max_clock	= sdhci_pltfm_clk_get_max_clock,
+parsing in a common function that is used for all mmc hosts.
+As per mine understanding the sdhci_get_of_porperty is a common
+parsing function  . Am I wrong ??
+
+An alternative would be to set all these bits based on the compatible
+string of your host, if that is the only one that has all these bugs.
+
+The host driver  (arasan) is reused but this quirks are needed due to
+board issues. so I have a control over dtb only to fix this.
+
+On Tue, Apr 21, 2015 at 9:16 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Tuesday 21 April 2015 21:12:39 Suman Tripathi wrote:
+>> index bef250e..9f6a4b9 100644
+>> --- a/drivers/mmc/host/sdhci-pltfm.c
+>> +++ b/drivers/mmc/host/sdhci-pltfm.c
+>> @@ -85,6 +85,21 @@ void sdhci_get_of_property(struct platform_device *pdev)
+>>
+>>                 if (of_get_property(np, "broken-cd", NULL))
+>>                         host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+>> +
+>> +               if (of_get_property(np, "delay-after-power", NULL))
+>> +                       host->quirks |= SDHCI_QUIRK_DELAY_AFTER_POWER;
+>> +
+>> +               if (of_get_property(np, "no-hispd", NULL))
+>> +                       host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
+>> +
+>> +               if (of_get_property(np, "broken-adma", NULL))
+>> +                       host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+>> +
+>> +               if (of_get_property(np, "broken-dma", NULL))
+>> +                       host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
+>> +
+>> +               if (of_get_property(np, "no-cmd23", NULL))
+>> +                       host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+>>
+>>                 if (of_get_property(np, "no-1-8-v", NULL))
+>>                         host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+>>
+>
+> Any property you add needs to be documented in the DT binding.
+>
+> If possible, add generic properties for each bug you have mmc.txt
+> rather than the driver specific sdhci.txt, and implement the
+> parsing in a common function that is used for all mmc hosts.
+>
+> An alternative would be to set all these bits based on the compatible
+> string of your host, if that is the only one that has all these bugs.
+>
+>         Arnd
+
+
+
 -- 
-2.3.5
-
+Thanks,
+with regards,
+Suman Tripathi
