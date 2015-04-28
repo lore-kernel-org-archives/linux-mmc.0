@@ -1,83 +1,101 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V7 02/15] mmc: core: Enable / disable re-tuning
-Date: Tue, 28 Apr 2015 16:18:14 +0300
-Message-ID: <1430227094-7611-1-git-send-email-adrian.hunter@intel.com>
-References: <5536287C.6060004@intel.com>
+Subject: [PATCH 1/2] mmc: core: Add functions for SDIO to hold re-tuning
+Date: Tue, 28 Apr 2015 17:45:40 +0300
+Message-ID: <1430232341-8307-2-git-send-email-adrian.hunter@intel.com>
+References: <1430232341-8307-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:2059 "EHLO mga11.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:26082 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965506AbbD1NUo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 28 Apr 2015 09:20:44 -0400
-In-Reply-To: <5536287C.6060004@intel.com>
+	id S1030298AbbD1Orw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 28 Apr 2015 10:47:52 -0400
+In-Reply-To: <1430232341-8307-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Arend van Spriel <arend@broadcom.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Enable re-tuning when tuning is executed and
-disable re-tuning when card is no longer initialized.
-
-In the case of SDIO suspend, the card can keep power.
-In that case, re-tuning need not be disabled, but, if
-a re-tuning timer is being used, ensure it is disabled
-and assume that re-tuning will be needed upon resume
-since it is not known how long the suspend will last.
+Add sdio_retune_hold_now() and sdio_retune_release()
+in order to allow SDIO function drivers to prevent
+re-tuning in cases where it conflicts with the
+device state.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
+ drivers/mmc/core/host.c       |  6 ++++++
+ drivers/mmc/core/host.h       |  1 +
+ drivers/mmc/core/sdio_io.c    | 13 +++++++++++++
+ include/linux/mmc/sdio_func.h |  3 +++
+ 4 files changed, 23 insertions(+)
 
-
-Changes in V7:
-
-
-	Also flag re-tune needed in SDIO 'keep_power'
-	case, when a re-tuning timer is being used.
-
-
- drivers/mmc/core/core.c | 4 ++++
- drivers/mmc/core/sdio.c | 6 +++++-
- 2 files changed, 9 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 92e7671..007c444 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1109,6 +1109,8 @@ int mmc_execute_tuning(struct mmc_card *card)
- 
- 	if (err)
- 		pr_err("%s: tuning execution failed\n", mmc_hostname(host));
-+	else
-+		mmc_retune_enable(host);
- 
- 	return err;
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 86c495b..63479fa 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -330,6 +330,12 @@ void mmc_retune_hold(struct mmc_host *host)
+ 	host->hold_retune += 1;
  }
-@@ -1140,6 +1142,8 @@ void mmc_set_bus_width(struct mmc_host *host, unsigned int width)
-  */
- void mmc_set_initial_state(struct mmc_host *host)
- {
-+	mmc_retune_disable(host);
+ 
++void mmc_retune_hold_now(struct mmc_host *host)
++{
++	host->retune_now = 0;
++	host->hold_retune += 1;
++}
 +
- 	if (mmc_host_is_spi(host))
- 		host->ios.chip_select = MMC_CS_HIGH;
- 	else
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 5bc6c7d..16e1f39 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -934,8 +934,12 @@ static int mmc_sdio_suspend(struct mmc_host *host)
- 		mmc_release_host(host);
- 	}
+ void mmc_retune_release(struct mmc_host *host)
+ {
+ 	if (host->hold_retune)
+diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
+index 992bf53..5e9a129 100644
+--- a/drivers/mmc/core/host.h
++++ b/drivers/mmc/core/host.h
+@@ -18,6 +18,7 @@ void mmc_unregister_host_class(void);
+ void mmc_retune_enable(struct mmc_host *host);
+ void mmc_retune_disable(struct mmc_host *host);
+ void mmc_retune_hold(struct mmc_host *host);
++void mmc_retune_hold_now(struct mmc_host *host);
+ void mmc_retune_release(struct mmc_host *host);
+ int mmc_retune(struct mmc_host *host);
  
--	if (!mmc_card_keep_power(host))
-+	if (!mmc_card_keep_power(host)) {
- 		mmc_power_off(host);
-+	} else if (host->retune_period) {
-+		mmc_retune_timer_stop(host);
-+		mmc_retune_needed(host);
-+	}
+diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+index 78cb4d5..01bce0c 100644
+--- a/drivers/mmc/core/sdio_io.c
++++ b/drivers/mmc/core/sdio_io.c
+@@ -15,6 +15,7 @@
+ #include <linux/mmc/sdio.h>
+ #include <linux/mmc/sdio_func.h>
  
++#include "host.h"
+ #include "sdio_ops.h"
+ 
+ /**
+@@ -720,3 +721,15 @@ int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags)
  	return 0;
  }
+ EXPORT_SYMBOL_GPL(sdio_set_host_pm_flags);
++
++void sdio_retune_hold_now(struct sdio_func *func)
++{
++	mmc_retune_hold_now(func->card->host);
++}
++EXPORT_SYMBOL_GPL(sdio_retune_hold_now);
++
++void sdio_retune_release(struct sdio_func *func)
++{
++	mmc_retune_release(func->card->host);
++}
++EXPORT_SYMBOL_GPL(sdio_retune_release);
+diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
+index aab032a..50d667b 100644
+--- a/include/linux/mmc/sdio_func.h
++++ b/include/linux/mmc/sdio_func.h
+@@ -159,4 +159,7 @@ extern void sdio_f0_writeb(struct sdio_func *func, unsigned char b,
+ extern mmc_pm_flag_t sdio_get_host_pm_caps(struct sdio_func *func);
+ extern int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags);
+ 
++extern void sdio_retune_hold_now(struct sdio_func *func);
++extern void sdio_retune_release(struct sdio_func *func);
++
+ #endif /* LINUX_MMC_SDIO_FUNC_H */
 -- 
 1.9.1
 
