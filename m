@@ -1,54 +1,51 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 2/2] brcmfmac: Prevent re-tuning conflicting with 'wake-up'
-Date: Tue, 28 Apr 2015 17:45:41 +0300
-Message-ID: <1430232341-8307-3-git-send-email-adrian.hunter@intel.com>
-References: <1430232341-8307-1-git-send-email-adrian.hunter@intel.com>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: 04e079cf6b24c794 to stable
+Date: Tue, 28 Apr 2015 12:46:56 -0300
+Message-ID: <CAOMZO5B_L42K=VQ58B8B9buy18_7few3H1Jhd_HXFJ8wsxZ05Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:26082 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965984AbbD1Ory (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 28 Apr 2015 10:47:54 -0400
-In-Reply-To: <1430232341-8307-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-lb0-f178.google.com ([209.85.217.178]:35268 "EHLO
+	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965820AbbD1Pq5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Apr 2015 11:46:57 -0400
+Received: by lbbuc2 with SMTP id uc2so110544602lbb.2
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Apr 2015 08:46:56 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Arend van Spriel <arend@broadcom.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: sbranden@broadcom.com, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Otavio Salvador <otavio@ossystems.com.br>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-If the device is in a custom sleep state, then re-tuning
-will fail. Add calls to sdio_retune_hold_now() and
-sdio_retune_release() to prevent re-tuning before the
-wake-up command. In the case re-tuning was needed, the
-wake-up command might return an error, but the wake-up
-is expected still to have happened, and the error is
-anyway ignored.
+Hi Ulf and Scott,
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/net/wireless/brcm80211/brcmfmac/sdio.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+Should the commit below be applied to stable?
 
-diff --git a/drivers/net/wireless/brcm80211/brcmfmac/sdio.c b/drivers/net/wireless/brcm80211/brcmfmac/sdio.c
-index ab0c898..2ce81fb 100644
---- a/drivers/net/wireless/brcm80211/brcmfmac/sdio.c
-+++ b/drivers/net/wireless/brcm80211/brcmfmac/sdio.c
-@@ -773,11 +773,17 @@ brcmf_sdio_kso_control(struct brcmf_sdio *bus, bool on)
- 	brcmf_dbg(TRACE, "Enter: on=%d\n", on);
- 
- 	wr_val = (on << SBSDIO_FUNC1_SLEEPCSR_KSO_SHIFT);
-+
-+	/* Cannot re-tune if device is asleep */
-+	if (on)
-+		sdio_retune_hold_now(bus->sdiodev->func[1]);
-+
- 	/* 1st KSO write goes to AOS wake up core if device is asleep  */
- 	brcmf_sdiod_regwb(bus->sdiodev, SBSDIO_FUNC1_SLEEPCSR,
- 			  wr_val, &err);
- 
- 	if (on) {
-+		sdio_retune_release(bus->sdiodev->func[1]);
- 		/* device WAKEUP through KSO:
- 		 * write bit 0 & read back until
- 		 * both bits 0 (kso bit) & 1 (dev on status) are set
--- 
-1.9.1
+commit 04e079cf6b24c794bbc52b04b370f84cb728540e
+Author: Scott Branden <sbranden@broadcom.com>
+Date:   Tue Mar 10 11:35:10 2015 -0700
 
+    mmc: sdhci: fix card presence logic in sdhci_request function
+
+    The sdhci_request function should consider a non-removable device
+    always present.
+    Call the correct logic already available in sdhci_do_get_cd function.
+
+    This fixes some logic paths where MMC requests are being made to
+    non-removable devices that do not have the card detect pin connected
+    on the hardware as it is non-removable.
+
+    Signed-off-by: Scott Branden <sbranden@broadcom.com>
+    Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+The reason I am asking is that we were seeing issues on mx6 boards
+running 4.0 kernel branch + 8d86e4fcccf61bafe5 ("mmc: sdhci-esdhc-imx:
+Call mmc_of_parse()"), which is 4.1-rc1 material.
+
+Otavio suggested me to apply 04e079cf6b24 in our tree and after that
+the SD card detection goes away.
+
+If you agree I can submit it to stable. Please let me know.
+
+Regards,
+
+Fabio Estevam
