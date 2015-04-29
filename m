@@ -1,44 +1,65 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH v2 RESEND 2/2] mmc: host: Add some quirks to be read from fdt in sdhci-pltm.c
-Date: Wed, 29 Apr 2015 16:45:30 +0200
-Message-ID: <2511590.IBzkZm5Ibi@wuerfel>
-References: <1429630959-32649-1-git-send-email-stripathi@apm.com> <17258495.kJWOqBBcrn@wuerfel> <CAOHikRD6enDS2VyYH4Nz_+wz_m2v-61QyBDLixZxm-Y0qYtojA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAOHikRD6enDS2VyYH4Nz_+wz_m2v-61QyBDLixZxm-Y0qYtojA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Don Dutile <ddutile-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jon Masters <jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Langsdorf <mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, patches <patches-qTEPVZfXA3Y@public.gmane.org>
+From: Yoshihiro Kaneko <ykaneko0929@gmail.com>
+Subject: [PATCH/RFC] mmc: sh_mmcif: Fix timeout value for command request
+Date: Thu, 30 Apr 2015 02:03:51 +0900
+Message-ID: <1430327031-8349-1-git-send-email-ykaneko0929@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f53.google.com ([209.85.220.53]:35914 "EHLO
+	mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753701AbbD2RER (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Apr 2015 13:04:17 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, linux-sh@vger.kernel.org
 
-On Wednesday 29 April 2015 19:55:53 Suman Tripathi wrote:
-> >
-> > The above assumes that the limitation is enforced by the bus (e.g. an
-> > AHB bus can only do 32-bit DMA). It would be a little different if you
-> > have a 64-bit AXI bus and the Arasan device itself is limited to 32-bit
-> > independent of the width of the bus it is connected to. Can you find out
-> > which of these two cases you have?
-> >
-> 
-> We have 64 bit AXI and Arasan device or controller is 32 bit . So there is
-> 64 bit AXI to 32 bit AHB translation.
+From: Takeshi Kihara <takeshi.kihara.df@renesas.com>
 
-Please be very specific here. If this is an AHB based MMC controller, you
-should model that AHB bus in DT, with the 32-bit dma-ranges.
+f9fd54f22e ("mmc: sh_mmcif: Use msecs_to_jiffies() for host->timeout")
+changed the timeout value from 1000 jiffies to 1s. In the case where
+HZ is 1000 the values are the same. However, for smaller HZ values the
+timeout is now smaller, 1s instead of 10s in the case of HZ=100.
 
-However, if this is an AXI based MMC controller that is limited to 32-bit
-DMA, the correct change would be to make ensure that the driver never
-asks for a 64-bit DMA mask with this hardware.
+Since the timeout occurs in spite of a normal data transfer a timeout of
+10s seems more appropriate. This restores the previous timeout in the
+case where HZ=100 and results in an increase over the previous timeout
+for larger values of HZ.
 
-Both will result in a 32-bit dma mask being used, and high DMA handled
-through the block bounce code or swiotlb, but it's best to ensure that
-the DT representation matches the actual hardware as closely as possible,
-so it keeps working when you change something in a future chip.
+Fixes: f9fd54f22e ("mmc: sh_mmcif: Use msecs_to_jiffies() for host->timeout")
+Signed-off-by: Takeshi Kihara <takeshi.kihara.df@renesas.com>
+[horms: rewrote changelog to refer to HZ]
+Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
+---
 
-	Arnd
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This patch is based on the for-next branch of Mark Brown's spi tree.
+
+A survey of the HZ resulting from of defconfigs that enable MMCIF is
+as follows:
+
+bockw_defconfig: CONFIG_HZ=1024
+kzm9g_defconfig: CONFIG_HZ=128
+multi_v7_defconfig: CONFIG_HZ=200
+shmobile_defconfig: CONFIG_HZ=100
+
+Simon Horman, SH Mobile maintainer, notes that it is the last defconfig
+that is recommended for use at this time.
+
+ drivers/mmc/host/sh_mmcif.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 072f670..b82b982 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -1411,7 +1411,7 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 	host		= mmc_priv(mmc);
+ 	host->mmc	= mmc;
+ 	host->addr	= reg;
+-	host->timeout	= msecs_to_jiffies(1000);
++	host->timeout	= msecs_to_jiffies(10000);
+ 	host->ccs_enable = !pd || !pd->ccs_unsupported;
+ 	host->clk_ctrl2_enable = pd && pd->clk_ctrl2_present;
+ 
+-- 
+1.9.1
+
