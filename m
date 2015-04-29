@@ -1,147 +1,139 @@
-From: Suman Tripathi <stripathi@apm.com>
-Subject: Re: [PATCH v2 RESEND 2/2] mmc: host: Add some quirks to be read from
- fdt in sdhci-pltm.c
-Date: Wed, 29 Apr 2015 12:34:41 +0530
-Message-ID: <CAOHikRAYtPt67-ZOFz890v46v28gtvQDPhgH1qA8d4xoSaQ7+Q@mail.gmail.com>
-References: <1429630959-32649-1-git-send-email-stripathi@apm.com>
-	<5771531.b7UhrXUGmv@wuerfel>
-	<CAOHikRDX7RZUkHFUmNs0kY+aYqXra5i=3cukpjz5yOECkcffbQ@mail.gmail.com>
-	<6927395.c8hJ4o34f5@wuerfel>
+From: Konstantin Dorfman <kdorfman@codeaurora.org>
+Subject: Re: [RFC/PATCH] mmc: block: use block layer pm helpers for pm of
+ card device
+Date: Wed, 29 Apr 2015 11:45:20 +0300
+Message-ID: <55409A20.6070600@codeaurora.org>
+References: <1429626045-12847-1-git-send-email-kdorfman@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og122.obsmtp.com ([64.18.0.192]:60221 "EHLO
-	mail-wg0-f53.google.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753511AbbD2HEn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Apr 2015 03:04:43 -0400
-Received: by wgso17 with SMTP id o17so17767922wgs.1
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Apr 2015 00:04:41 -0700 (PDT)
-In-Reply-To: <6927395.c8hJ4o34f5@wuerfel>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1429626045-12847-1-git-send-email-kdorfman@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Anton Vorontsov <anton@enomsg.org>, linux-mmc <linux-mmc@vger.kernel.org>, linuxppc-dev@lists.ozlabs.org, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Don Dutile <ddutile@redhat.com>, Jon Masters <jcm@redhat.com>, Mark Langsdorf <mlangsdo@redhat.com>, patches <patches@apm.com>
 
-Hi Arnd,
+Hello Ulf, Chris,
 
-Please ignore the previous reply.
+Now as rc1 is out and the patch format fixed, please look into it again.
 
-On Tue, Apr 28, 2015 at 1:19 AM, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Monday 27 April 2015 21:25:20 Suman Tripathi wrote:
->> > On Monday 27 April 2015 20:33:25 Suman Tripathi wrote:
->> > > > On Tuesday 21 April 2015 21:12:39 Suman Tripathi wrote:
->> > > > > +                       host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
->> > > > > +
->> > > > > +               if (of_get_property(np, "no-cmd23", NULL))
->> > > > > +                       host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
->> > > > >
->> > > > >                 if (of_get_property(np, "no-1-8-v", NULL))
->> > > > >
->> > > > >                         host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
->> > > >
->> > > > Any property you add needs to be documented in the DT binding.
->> > > > If possible, add generic properties for each bug you have mmc.txt
->> > > > rather than the driver specific sdhci.txt, and implement the
->> > >
->> > > I will add the binding in mmc.txt. I thought this was present but not.
->> > >
->> > > > parsing in a common function that is used for all mmc hosts.
->> > >
->> > > As per mine understanding the sdhci_get_of_porperty is a common
->> > > parsing function  . Am I wrong ??
->>
+Thanks,
+Kostya
+
+On 04/21/2015 05:20 PM, Konstantin Dorfman wrote:
+> Use of block layer runtime PM helpers, implementing the block layer's
+> request-based mechanism, simplifies data path of mmc core layer. It
+> enables to remove synchronous call pm_runtime_get_sync() from mmc core
+> data path.
 >
-> A small side note: please fix your email client to use proper attribution
-> of the citations. The way you reply, nobody knows what you are saying
-> compare to what you quote. Also, reduce the quotation to the parts you
-> are replying to.
+> The idea and API is designed by Alan Stern and described here:
+>      http://marc.info/?l=linux-scsi&m=133727953625963&w=2
 >
-
-Okay. Sorry for that. I fixed it.
-
->> > No, this is only used for sdhci, not for the other controllers.
->>
->> But our's is a SHCI variant so I added it in this file.
+> Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
 >
-> That's my point: a lot of the bugs are independent of the specific
-> host controller and could happen with any one of them. We want to
-> ensure that nobody tries to add another property with similar
-> semantics and a different name just because they are using a
-> different driver.
-
-Then I am not finding a reason why we have sdhci_get_of_property function ?? .
- I added a generic names like broken-adma that everyone can reuse it.
-I made mistake of not adding it in the binding.
-
-For eg : broken-cd is not added by me but I can use it. So I added
-something like broken-adma as it was not present.
-
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 1fa4c80..de5f85d 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2017,7 +2017,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
 >
->> > > An alternative would be to set all these bits based on the compatible
->> > > string of your host, if that is the only one that has all these bugs.
->> >
->> > The host driver  (arasan) is reused but this quirks are needed due to
->> > board issues. so I have a control over dtb only to fix this.
->>
->> What is the nature of the bug on that board? Is there a different
->> way to describe that without introducing six new properties?
->>
->> Sorry it is board and IP as well SoC errata's,
->>
->> 1. Delay after power is required due to some voltage issues that will
->> be fixed in next board revision
+>   	if (req && !mq->mqrq_prev->req)
+>   		/* claim host only for the first request */
+> -		mmc_get_card(card);
+> +		mmc_claim_host(card->host);
 >
-> This is clearly not sdhci-specific, so make that a generic property
-> for all mmc.
+>   	ret = mmc_blk_part_switch(card, md);
+>   	if (ret) {
+> @@ -2060,7 +2060,7 @@ out:
+>   		 * In case sepecial request, there is no reentry to
+>   		 * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
+>   		 */
+> -		mmc_put_card(card);
+> +		mmc_release_host(card->host);
+>   	return ret;
+>   }
 >
-
-Okay
-
->> 2. We need to support PIO mode as of now because DMA or ADMA requires
->> some kind of translation driver that I am working on.
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index feea926..e12c828 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -213,6 +213,11 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+>   	if (mmc_can_erase(card))
+>   		mmc_queue_setup_discard(mq->queue, card);
 >
-> But this does not describe the hardware properties. Don't add properties
-> that describe the lack of a kernel driver. If you can't do DMA yet,
-> use a dma-ranges property that lists one empty range to prevent
-> dma_set_mask() from working, so it will fall back to PIO mode. You
-> may have to fix the driver if that doesn't already work.
+> +	if (!subname) {
+> +		blk_pm_runtime_init(mq->queue, &card->dev);
+> +		card->q = mq->queue;
+> +	}
+> +
+>   #ifdef CONFIG_MMC_BLOCK_BOUNCE
+>   	if (host->max_segs == 1) {
+>   		unsigned int bouncesz;
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index a301a78..bf3f919 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -14,6 +14,7 @@
+>   #include <linux/slab.h>
+>   #include <linux/stat.h>
+>   #include <linux/pm_runtime.h>
+> +#include <linux/blkdev.h>
 >
-
-The generic sdhc framework doesn't have this capabiltiy. It uses the
-quirks to identify the broken DMA and ADMA modes even
-if the controller is capable of.
-
-> What kind of driver do you need here?
-
-For DMA and adma we need some 32 bit to 64 bit translation driver.
-The existing arasan driver only support 32 bit.
-
+>   #include <linux/mmc/host.h>
+>   #include <linux/mmc/card.h>
+> @@ -1814,11 +1815,17 @@ static int mmc_runtime_suspend(struct mmc_host *host)
+>   	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+>   		return 0;
 >
->> 3. The version of arasan variant we have in our SoC doesn't have the
->> HISPD  bit field in HI-SPEED SD card. So this makes HI-SPEED sdcard
->> work.
->>
->> 4. NO_CMD23 is required for eMMC cards.
->>
->> These are not new properties.  Only the fact is I am using it for our
->> SoC from dtb. These quirks are already there in mmc common framework.
->> Nothing is new.
+> +	err = blk_pre_runtime_suspend(host->card->q);
+> +	if (err)
+> +		return err;
+> +
+>   	err = _mmc_suspend(host, true);
+>   	if (err)
+>   		pr_err("%s: error %d doing aggessive suspend\n",
+>   			mmc_hostname(host), err);
 >
-> Are you sure that you have version 8.9a of the Arasan SDHCI? This sounds
-
-No We are using 4.9a ARASAN SDHCI
-
-> like version specific quirks, so they are probably present in each
-> SoC that uses the same version.
-
-Not sure
-
+> +	blk_post_runtime_suspend(host->card->q, err);
+> +
+>   	return err;
+>   }
 >
->         Arnd
-
+> @@ -1832,12 +1839,16 @@ static int mmc_runtime_resume(struct mmc_host *host)
+>   	if (!(host->caps & (MMC_CAP_AGGRESSIVE_PM | MMC_CAP_RUNTIME_RESUME)))
+>   		return 0;
+>
+> +	blk_pre_runtime_resume(host->card->q);
+> +
+>   	err = _mmc_resume(host);
+>   	if (err)
+>   		pr_err("%s: error %d doing aggessive resume\n",
+>   			mmc_hostname(host), err);
+>
+> -	return 0;
+> +	blk_post_runtime_resume(host->card->q, err);
+> +
+> +	return err;
+>   }
+>
+>   static int mmc_power_restore(struct mmc_host *host)
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index b0692d2..1f4810b 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -244,6 +244,7 @@ struct mmc_part {
+>   struct mmc_card {
+>   	struct mmc_host		*host;		/* the host this device belongs to */
+>   	struct device		dev;		/* the device */
+> +	struct request_queue    *q;
+>   	u32			ocr;		/* the current OCR setting */
+>   	unsigned int		rca;		/* relative card address of device */
+>   	unsigned int		type;		/* card type */
+>
 
 
 -- 
-Thanks,
-with regards,
-Suman Tripathi
+Qualcomm Israel, on behalf of Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
