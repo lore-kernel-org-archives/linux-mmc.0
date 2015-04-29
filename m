@@ -1,7 +1,7 @@
 From: <micky_ching@realsil.com.cn>
-Subject: [PATCH 10/12] mmc: sdhci: disable clock control for SD4.0 mode
-Date: Wed, 29 Apr 2015 09:23:42 +0800
-Message-ID: <8dae3acf6ece45ee4698991c1409dd5d45ff3cfe.1429845922.git.micky_ching@realsil.com.cn>
+Subject: [PATCH 11/12] mmc: sdhci: set DMA configure for SD4.0 mode
+Date: Wed, 29 Apr 2015 09:23:43 +0800
+Message-ID: <c0d23a5d274fd741970fe8150faccc055d000c5a.1429845922.git.micky_ching@realsil.com.cn>
 References: <cover.1429845922.git.micky_ching@realsil.com.cn>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,75 +23,54 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Micky Ching <micky_ching@realsil.com.cn>
 
-Skip clock control settings for UHSII mode. When card is in UHSII mode,
-we only allow poweroff.
+SD4.0 mode not using SDMA any more, and UHSII mode using different register
+to specify block size/count.
 
 Signed-off-by: Micky Ching <micky_ching@realsil.com.cn>
 Signed-off-by: Wei Wang <wei_wang@realsil.com.cn>
 ---
- drivers/mmc/host/sdhci.c | 22 ++++++++++++++--------
- 1 file changed, 14 insertions(+), 8 deletions(-)
+ drivers/mmc/host/sdhci.c | 22 +++++++++++++++++-----
+ 1 file changed, 17 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 3c56944..03df58c 100644
+index 03df58c..15bd7c8 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1346,7 +1346,8 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 
- 	host->mmc->actual_clock = 0;
- 
--	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-+	if (!host->uhsii_if_enabled)
-+		sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
- 
- 	if (clock == 0)
- 		return;
-@@ -1686,7 +1687,8 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 		!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN))
- 		sdhci_enable_preset_value(host, false);
- 
--	if (!ios->clock || ios->clock != host->clock) {
-+	if (!host->uhsii_if_enabled &&
-+		(!ios->clock || ios->clock != host->clock)) {
- 		host->ops->set_clock(host, ios->clock);
- 		host->clock = ios->clock;
- 
-@@ -1703,7 +1705,8 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
+@@ -883,8 +883,14 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 				host->flags &= ~SDHCI_REQ_USE_DMA;
+ 			} else {
+ 				WARN_ON(sg_cnt != 1);
+-				sdhci_writel(host, sg_dma_address(data->sg),
+-					SDHCI_DMA_ADDRESS);
++				if (host->uhsii_if_enabled)
++					sdhci_writel(host,
++						sg_dma_address(data->sg),
++						SDHCI_ADMA_ADDRESS);
++				else
++					sdhci_writel(host,
++						sg_dma_address(data->sg),
++						SDHCI_DMA_ADDRESS);
+ 			}
  		}
  	}
+@@ -924,9 +930,15 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 	sdhci_set_transfer_irqs(host);
  
--	sdhci_set_power(host, ios->power_mode, ios->vdd);
-+	if (!(host->uhsii_if_enabled && (ios->power_mode != MMC_POWER_OFF)))
-+		sdhci_set_power(host, ios->power_mode, ios->vdd);
+ 	/* Set the DMA boundary value and block size */
+-	sdhci_writew(host, SDHCI_MAKE_BLKSZ(SDHCI_DEFAULT_BOUNDARY_ARG,
+-		data->blksz), SDHCI_BLOCK_SIZE);
+-	sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
++	if (host->uhsii_if_enabled) {
++		sdhci_writew(host, SDHCI_MAKE_BLKSZ(SDHCI_DEFAULT_BOUNDARY_ARG,
++			data->blksz), SDHCI_UHSII_BLOCK_SIZE);
++		sdhci_writew(host, data->blocks, SDHCI_UHSII_BLOCK_COUNT);
++	} else {
++		sdhci_writew(host, SDHCI_MAKE_BLKSZ(SDHCI_DEFAULT_BOUNDARY_ARG,
++			data->blksz), SDHCI_BLOCK_SIZE);
++		sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
++	}
+ }
  
- 	if (host->ops->platform_send_init_74_clocks)
- 		host->ops->platform_send_init_74_clocks(host, ios->power_mode);
-@@ -1765,10 +1768,12 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 			host->ops->set_clock(host, host->clock);
- 		}
- 
--		/* Reset SD Clock Enable */
--		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
--		clk &= ~SDHCI_CLOCK_CARD_EN;
--		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+		if (!host->uhsii_if_enabled) {
-+			/* Reset SD Clock Enable */
-+			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+			clk &= ~SDHCI_CLOCK_CARD_EN;
-+			sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+		}
- 
- 		host->ops->set_uhs_signaling(host, ios->timing);
- 		host->timing = ios->timing;
-@@ -1788,7 +1793,8 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 		}
- 
- 		/* Re-enable SD Clock */
--		host->ops->set_clock(host, host->clock);
-+		if (!host->uhsii_if_enabled)
-+			host->ops->set_clock(host, host->clock);
- 	} else
- 		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
- 
+ static void sdhci_set_transfer_mode(struct sdhci_host *host,
 -- 
 1.9.1
