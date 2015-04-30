@@ -1,60 +1,99 @@
-From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: [RFC PATCH 0/7] UHS-I support for sh_mobile_sdhi
-Date: Thu, 30 Apr 2015 13:29:55 +0100
-Message-ID: <1430396995.5802.39.camel@xylophone.i.decadent.org.uk>
+From: Ben Hutchings <ben.hutchings-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
+Subject: [RFC PATCH 1/7] mmc: tmio: Add UHS-I mode support
+Date: Thu, 30 Apr 2015 13:30:51 +0100
+Message-ID: <1430397051.5802.40.camel@xylophone.i.decadent.org.uk>
+References: <1430396995.5802.39.camel@xylophone.i.decadent.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:45295 "EHLO
-	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750955AbbD3MaB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Apr 2015 08:30:01 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1430396995.5802.39.camel-2NU49sBE5Aze9VDwLV8dzJPsBRI6B4nW9dF7HbQ/qKg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ian Molton <ian-zdned+2MO1+9FHfhHBbuYA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-81qHHgoATdFT9dQujB1mzip2UmYkHbXO@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@lists.codethink.co.uk
 
-This series adds support for UHS-I in sh_mobile_sdhi, partly implemented
-in tmio_mmc.  This does not yet include tuning for SDR-104, but SDR-50
-works.
+Based on work by Shinobu Uehara and Ben Dooks.  This adds the
+voltage switch operation needed for all UHS-I modes, but not
+the tuning needed for SDR-104 which will come later.
 
-The pfc block needs to be configured for 1.8V or 3.3V signalling on the
-SDHI, separately from the external voltage regulator.  I've treated this
-as an additional regulator that sh_mobile_sdhi has to adjust, but I'm
-not entirely happy with this or the way it's represented in the DT.  I
-would appreciate advice on how to improve that.
+XXX The card_busy implementation is a bit of a guess.
 
-Ben.
+Signed-off-by: Ben Hutchings <ben.hutchings-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
+---
+ drivers/mmc/host/tmio_mmc.h     |    3 +++
+ drivers/mmc/host/tmio_mmc_pio.c |   31 +++++++++++++++++++++++++++++++
+ 2 files changed, 34 insertions(+)
 
-Ben Dooks (1):
-  ARM: shmobile: r8a7790-lager.dts: Set sdhi and mmcif clock rates
-
-Ben Hutchings (4):
-  mmc: tmio: Add UHS-I mode support
-  pinctrl: sh-pfc: r8a7790: Add regulators for SD voltage switch
-  ARM: shmobile: r8a7790: Add nodes for pfc SD voltage regulators
-  mmc: sh_mobile_sdhi: Add UHS-I mode support
-
-Shinobu Uehara (1):
-  mmc: sh_mobile_sdhi: Add actual clock rate support
-
-William Towle (1):
-  ARM: shmobile: r8a7790-lager.dts: Assert UHS-I SDR-50 capability
-
- arch/arm/boot/dts/r8a7790-lager.dts  |   21 ++++
- arch/arm/boot/dts/r8a7790.dtsi       |   21 ++++
- drivers/mmc/host/sh_mobile_sdhi.c    |   62 +++++++++++
- drivers/mmc/host/tmio_mmc.h          |    3 +
- drivers/mmc/host/tmio_mmc_pio.c      |   31 ++++++
- drivers/pinctrl/sh-pfc/Kconfig       |    1 +
- drivers/pinctrl/sh-pfc/core.c        |    2 +-
- drivers/pinctrl/sh-pfc/core.h        |    1 +
- drivers/pinctrl/sh-pfc/pfc-r8a7790.c |  189 ++++++++++++++++++++++++++++++++++
- 9 files changed, 330 insertions(+), 1 deletion(-)
-
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index fc3805ed69d1..a60380b94105 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -103,6 +103,9 @@ struct tmio_mmc_host {
+ 	void (*clk_disable)(struct platform_device *pdev);
+ 	int (*multi_io_quirk)(struct mmc_card *card,
+ 			      unsigned int direction, int blk_size);
++
++	int (*start_signal_voltage_switch)(struct tmio_mmc_host *host,
++					   unsigned char signal_voltage);
+ };
+ 
+ struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *pdev);
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index e3dcf31a8bd6..3c1e0e53c0b1 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -1011,12 +1011,43 @@ static int tmio_multi_io_quirk(struct mmc_card *card,
+ 	return blk_size;
+ }
+ 
++static int tmio_mmc_start_signal_voltage_switch(struct mmc_host *mmc,
++	struct mmc_ios *ios)
++{
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++
++	if (!host->start_signal_voltage_switch)
++		return 0;
++
++	return host->start_signal_voltage_switch(host, ios->signal_voltage);
++}
++
++static int tmio_mmc_card_busy(struct mmc_host *mmc)
++{
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++	u32 status;
++
++	pm_runtime_get_sync(mmc_dev(mmc));
++	status = sd_ctrl_read32(host, CTL_STATUS);
++	pm_runtime_mark_last_busy(mmc_dev(mmc));
++	pm_runtime_put_autosuspend(mmc_dev(mmc));
++
++	/*
++	 * Card signals busy by pulling down all of DAT[3:0].  This status
++	 * flag appears to reflect DAT3.
++	 */
++	return !(status & TMIO_STAT_SIGSTATE_A);
++}
++
+ static const struct mmc_host_ops tmio_mmc_ops = {
+ 	.request	= tmio_mmc_request,
+ 	.set_ios	= tmio_mmc_set_ios,
+ 	.get_ro         = tmio_mmc_get_ro,
+ 	.get_cd		= mmc_gpio_get_cd,
+ 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
++	.start_signal_voltage_switch
++			= tmio_mmc_start_signal_voltage_switch,
++	.card_busy	= tmio_mmc_card_busy,
+ 	.multi_io_quirk	= tmio_multi_io_quirk,
+ };
+ 
 -- 
 1.7.10.4
 
 
 
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
