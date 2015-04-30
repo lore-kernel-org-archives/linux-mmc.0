@@ -1,68 +1,72 @@
-From: Ben Hutchings <ben.hutchings-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
-Subject: [RFC PATCH 7/7] ARM: shmobile: r8a7790-lager.dts: Assert UHS-I
- SDR-50 capability
-Date: Thu, 30 Apr 2015 13:33:04 +0100
-Message-ID: <1430397184.5802.46.camel@xylophone.i.decadent.org.uk>
-References: <1430396995.5802.39.camel@xylophone.i.decadent.org.uk>
+From: Xuebing Wang <xbing6@gmail.com>
+Subject: Re: /dev/mmcblk0 (or /dev/mmcblk0p1) does not exist on
+ Freescale iMX6SL board
+Date: Thu, 30 Apr 2015 20:44:52 +0800
+Message-ID: <554223C4.9030506@gmail.com>
+References: <5541F3CC.4090000@gmail.com> <CAOMZO5Dm3v=ig+aXRf7DqmXcTsiepYcFpXB9G2hpfMtRPtE4ag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1430396995.5802.39.camel-2NU49sBE5Aze9VDwLV8dzJPsBRI6B4nW9dF7HbQ/qKg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ian Molton <ian-zdned+2MO1+9FHfhHBbuYA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-81qHHgoATdFT9dQujB1mzip2UmYkHbXO@public.gmane.org, William Towle <william.towle-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f173.google.com ([209.85.216.173]:35425 "EHLO
+	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750746AbbD3Mo6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Apr 2015 08:44:58 -0400
+Received: by qcbii10 with SMTP id ii10so28002686qcb.2
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Apr 2015 05:44:57 -0700 (PDT)
+In-Reply-To: <CAOMZO5Dm3v=ig+aXRf7DqmXcTsiepYcFpXB9G2hpfMtRPtE4ag@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Fabio Estevam <festevam@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, Ulf Hansson <ulf.hansson@linaro.org>, Felipe Balbi <balbi@ti.com>, niranjan Patil <Niranjan.Patil@infocus.com>, richard Jiang <Richard.Jiang@infocus.com>
 
-From: William Towle <william.towle-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
 
-[bwh: Also enable the 'regulators' on the pfc that we need]
-Signed-off-by: Ben Hutchings <ben.hutchings-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
----
- arch/arm/boot/dts/r8a7790-lager.dts |   10 ++++++++++
- 1 file changed, 10 insertions(+)
+On 04/30/2015 08:16 PM, Fabio Estevam wrote:
+> On Thu, Apr 30, 2015 at 6:20 AM, Xuebing Wang <xbing6@gmail.com> wrote:
+>> Hi linux-mmc community,
+>>
+>> I am working on a board which is very similar to Freescale iMX6SL EVK
+>> (evaluation board), but /dev/mmcblk0 does not exist for kernel v4.0.1
+> On my imx6sl-warp the eMMC is correctly detected when running kernel 4.0.
+>
+> Does it help if you apply this patch from 4.1-rc1?
+>
+> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/drivers/mmc/host/sdhci.c?id=04e079cf6b24c794bbc52b04b370f84cb728540e
 
-diff --git a/arch/arm/boot/dts/r8a7790-lager.dts b/arch/arm/boot/dts/r8a7790-lager.dts
-index 343ec0ccc8df..8bb4507f3112 100644
---- a/arch/arm/boot/dts/r8a7790-lager.dts
-+++ b/arch/arm/boot/dts/r8a7790-lager.dts
-@@ -384,6 +384,14 @@
- 		renesas,groups = "audio_clk_a";
- 		renesas,function = "audio_clk";
- 	};
-+
-+	sd-regulator@0 {
-+		status = "ok";
-+	};
-+
-+	sd-regulator@2 {
-+		status = "ok";
-+	};
- };
- 
- &ether {
-@@ -499,6 +507,7 @@
- 	vmmc-supply = <&vcc_sdhi0>;
- 	vqmmc-supply = <&vccq_sdhi0>;
- 	cd-gpios = <&gpio3 6 GPIO_ACTIVE_LOW>;
-+	sd-uhs-sdr50;
- 	status = "okay";
- };
- 
-@@ -512,6 +521,7 @@
- 	vmmc-supply = <&vcc_sdhi2>;
- 	vqmmc-supply = <&vccq_sdhi2>;
- 	cd-gpios = <&gpio3 22 GPIO_ACTIVE_LOW>;
-+	sd-uhs-sdr50;
- 	status = "okay";
- };
- 
+Fabio,
+
+Thanks for your help.
+
+Unfortunately, no, cherry-pick this patch from 4.1-rc1 into v4.0.1 has 
+the same result.
+-------------------
+[    1.274968] Driver 'mmcblk' needs updating - please use bus_type methods
+[    1.301492] sdhci-esdhc-imx 2190000.usdhc: No vmmc regulator found
+[    1.307783] sdhci-esdhc-imx 2190000.usdhc: No vqmmc regulator found
+[    1.353890] mmc0: SDHCI controller on 2190000.usdhc [2190000.usdhc] 
+using ADMA
+[    1.365351] sdhci-esdhc-imx 2194000.usdhc: No vmmc regulator found
+[    1.371563] sdhci-esdhc-imx 2194000.usdhc: No vqmmc regulator found
+[    1.423823] mmc1: SDHCI controller on 2194000.usdhc [2194000.usdhc] 
+using ADMA
+[    1.435612] sdhci-esdhc-imx 2198000.usdhc: No vmmc regulator found
+[    1.441817] sdhci-esdhc-imx 2198000.usdhc: No vqmmc regulator found
+[    1.493731] mmc2: SDHCI controller on 2198000.usdhc [2198000.usdhc] 
+using ADMA
+-------------------
+
+It is worse if I use v4.1-rc1, it always keeps outputing below: (without 
+stop)
+-------------------
+[   16.825778] mmc1: error -110 whilst initialising MMC card
+[   16.997726] mmc1: MAN_BKOPS_EN bit is not set
+-------------------
+
+
+> Regards,
+>
+> Fabio Estevam
+>
+
 -- 
-1.7.10.4
-
-
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Xuebing
