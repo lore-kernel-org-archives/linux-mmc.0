@@ -1,99 +1,68 @@
-From: Ben Hutchings <ben.hutchings-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
-Subject: [RFC PATCH 1/7] mmc: tmio: Add UHS-I mode support
-Date: Thu, 30 Apr 2015 13:30:51 +0100
-Message-ID: <1430397051.5802.40.camel@xylophone.i.decadent.org.uk>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Subject: [RFC PATCH 2/7] mmc: sh_mobile_sdhi: Add actual clock rate support
+Date: Thu, 30 Apr 2015 13:31:21 +0100
+Message-ID: <1430397081.5802.41.camel@xylophone.i.decadent.org.uk>
 References: <1430396995.5802.39.camel@xylophone.i.decadent.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1430396995.5802.39.camel-2NU49sBE5Aze9VDwLV8dzJPsBRI6B4nW9dF7HbQ/qKg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ian Molton <ian-zdned+2MO1+9FHfhHBbuYA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-81qHHgoATdFT9dQujB1mzip2UmYkHbXO@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:45404 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751798AbbD3Mb1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Apr 2015 08:31:27 -0400
+In-Reply-To: <1430396995.5802.39.camel@xylophone.i.decadent.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Shinobu Uehara <shinobu.uehara.xc@renesas.com>
 
-Based on work by Shinobu Uehara and Ben Dooks.  This adds the
-voltage switch operation needed for all UHS-I modes, but not
-the tuning needed for SDR-104 which will come later.
+From: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
 
-XXX The card_busy implementation is a bit of a guess.
+It is necessary to stop the SD clock before using
+the actual clock in case of SDHI controller.
 
-Signed-off-by: Ben Hutchings <ben.hutchings-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
+Signed-off-by: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
+Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 ---
- drivers/mmc/host/tmio_mmc.h     |    3 +++
- drivers/mmc/host/tmio_mmc_pio.c |   31 +++++++++++++++++++++++++++++++
- 2 files changed, 34 insertions(+)
+ drivers/mmc/host/sh_mobile_sdhi.c |   14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index fc3805ed69d1..a60380b94105 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -103,6 +103,9 @@ struct tmio_mmc_host {
- 	void (*clk_disable)(struct platform_device *pdev);
- 	int (*multi_io_quirk)(struct mmc_card *card,
- 			      unsigned int direction, int blk_size);
-+
-+	int (*start_signal_voltage_switch)(struct tmio_mmc_host *host,
-+					   unsigned char signal_voltage);
- };
- 
- struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *pdev);
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index e3dcf31a8bd6..3c1e0e53c0b1 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -1011,12 +1011,43 @@ static int tmio_multi_io_quirk(struct mmc_card *card,
- 	return blk_size;
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 6906a905cd54..92a58c6007fe 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -136,6 +136,18 @@ static void sh_mobile_sdhi_clk_disable(struct platform_device *pdev)
+ 	clk_disable_unprepare(priv->clk);
  }
  
-+static int tmio_mmc_start_signal_voltage_switch(struct mmc_host *mmc,
-+	struct mmc_ios *ios)
++static void sh_mobile_sdhi_set_clk_div(struct platform_device *pdev, int clk)
 +{
++	struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
 +	struct tmio_mmc_host *host = mmc_priv(mmc);
 +
-+	if (!host->start_signal_voltage_switch)
-+		return 0;
-+
-+	return host->start_signal_voltage_switch(host, ios->signal_voltage);
++	if (clk == true) {
++		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~0x0100 &
++				sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
++		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, 0x00ff);
++	}
 +}
 +
-+static int tmio_mmc_card_busy(struct mmc_host *mmc)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	u32 status;
-+
-+	pm_runtime_get_sync(mmc_dev(mmc));
-+	status = sd_ctrl_read32(host, CTL_STATUS);
-+	pm_runtime_mark_last_busy(mmc_dev(mmc));
-+	pm_runtime_put_autosuspend(mmc_dev(mmc));
-+
-+	/*
-+	 * Card signals busy by pulling down all of DAT[3:0].  This status
-+	 * flag appears to reflect DAT3.
-+	 */
-+	return !(status & TMIO_STAT_SIGSTATE_A);
-+}
-+
- static const struct mmc_host_ops tmio_mmc_ops = {
- 	.request	= tmio_mmc_request,
- 	.set_ios	= tmio_mmc_set_ios,
- 	.get_ro         = tmio_mmc_get_ro,
- 	.get_cd		= mmc_gpio_get_cd,
- 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
-+	.start_signal_voltage_switch
-+			= tmio_mmc_start_signal_voltage_switch,
-+	.card_busy	= tmio_mmc_card_busy,
- 	.multi_io_quirk	= tmio_multi_io_quirk,
- };
+ static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
+ {
+ 	int timeout = 1000;
+@@ -234,6 +246,8 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		goto eprobe;
+ 	}
  
++	host->set_clk_div	= sh_mobile_sdhi_set_clk_div;
++
+ 	host->dma		= dma_priv;
+ 	host->write16_hook	= sh_mobile_sdhi_write16_hook;
+ 	host->clk_enable	= sh_mobile_sdhi_clk_enable;
 -- 
 1.7.10.4
 
 
 
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
