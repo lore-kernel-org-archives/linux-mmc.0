@@ -1,66 +1,68 @@
-From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: [RFC PATCH 6/7] ARM: shmobile: r8a7790-lager.dts: Set sdhi and
- mmcif clock rates
-Date: Thu, 30 Apr 2015 13:32:46 +0100
-Message-ID: <1430397166.5802.45.camel@xylophone.i.decadent.org.uk>
+From: Ben Hutchings <ben.hutchings-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
+Subject: [RFC PATCH 7/7] ARM: shmobile: r8a7790-lager.dts: Assert UHS-I
+ SDR-50 capability
+Date: Thu, 30 Apr 2015 13:33:04 +0100
+Message-ID: <1430397184.5802.46.camel@xylophone.i.decadent.org.uk>
 References: <1430396995.5802.39.camel@xylophone.i.decadent.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1430396995.5802.39.camel@xylophone.i.decadent.org.uk>
-Sender: linux-sh-owner@vger.kernel.org
-To: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Ben Dooks <ben.dooks@codethink.co.uk>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1430396995.5802.39.camel-2NU49sBE5Aze9VDwLV8dzJPsBRI6B4nW9dF7HbQ/qKg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ian Molton <ian-zdned+2MO1+9FHfhHBbuYA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-81qHHgoATdFT9dQujB1mzip2UmYkHbXO@public.gmane.org, William Towle <william.towle-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ben Dooks <ben.dooks@codethink.co.uk>
+From: William Towle <william.towle-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
 
-[bwh: Fold in fix from Ian Molton]
-Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
+[bwh: Also enable the 'regulators' on the pfc that we need]
+Signed-off-by: Ben Hutchings <ben.hutchings-4yDnlxn2s6sWdaTGBSpHTA@public.gmane.org>
 ---
- arch/arm/boot/dts/r8a7790-lager.dts |   11 +++++++++++
- 1 file changed, 11 insertions(+)
+ arch/arm/boot/dts/r8a7790-lager.dts |   10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
 diff --git a/arch/arm/boot/dts/r8a7790-lager.dts b/arch/arm/boot/dts/r8a7790-lager.dts
-index aaa4f258e279..343ec0ccc8df 100644
+index 343ec0ccc8df..8bb4507f3112 100644
 --- a/arch/arm/boot/dts/r8a7790-lager.dts
 +++ b/arch/arm/boot/dts/r8a7790-lager.dts
-@@ -413,6 +413,11 @@
- 	vmmc-supply = <&fixedregulator3v3>;
- 	bus-width = <8>;
- 	non-removable;
+@@ -384,6 +384,14 @@
+ 		renesas,groups = "audio_clk_a";
+ 		renesas,function = "audio_clk";
+ 	};
 +
-+	assigned-clocks = <&mstp3_clks R8A7790_CLK_MMCIF1>;
-+	assigned-clock-rates = <97500000>;
-+	max-frequency = <50000000>;
++	sd-regulator@0 {
++		status = "ok";
++	};
 +
- 	status = "okay";
++	sd-regulator@2 {
++		status = "ok";
++	};
  };
  
-@@ -488,6 +493,9 @@
- 	pinctrl-0 = <&sdhi0_pins>;
- 	pinctrl-names = "default";
- 
-+	assigned-clocks = <&mstp3_clks R8A7790_CLK_SDHI0>;
-+	assigned-clock-rates = <156000000>;
-+
+ &ether {
+@@ -499,6 +507,7 @@
  	vmmc-supply = <&vcc_sdhi0>;
  	vqmmc-supply = <&vccq_sdhi0>;
  	cd-gpios = <&gpio3 6 GPIO_ACTIVE_LOW>;
-@@ -498,6 +506,9 @@
- 	pinctrl-0 = <&sdhi2_pins>;
- 	pinctrl-names = "default";
++	sd-uhs-sdr50;
+ 	status = "okay";
+ };
  
-+	assigned-clocks = <&mstp3_clks R8A7790_CLK_SDHI2>;
-+	assigned-clock-rates = <97500000>;
-+
+@@ -512,6 +521,7 @@
  	vmmc-supply = <&vcc_sdhi2>;
  	vqmmc-supply = <&vccq_sdhi2>;
  	cd-gpios = <&gpio3 22 GPIO_ACTIVE_LOW>;
++	sd-uhs-sdr50;
+ 	status = "okay";
+ };
+ 
 -- 
 1.7.10.4
 
 
 
-
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
