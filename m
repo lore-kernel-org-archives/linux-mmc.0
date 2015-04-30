@@ -1,58 +1,29 @@
-From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Subject: Re: [RFC PATCH 2/7] mmc: sh_mobile_sdhi: Add actual clock rate support
-Date: Thu, 30 Apr 2015 19:34:40 +0300
-Message-ID: <554259A0.9030307@cogentembedded.com>
-References: <1430396995.5802.39.camel@xylophone.i.decadent.org.uk> <1430397081.5802.41.camel@xylophone.i.decadent.org.uk>
+From: Christian Gmeiner <christian.gmeiner@gmail.com>
+Subject: Disable and/or RPMB partitions
+Date: Thu, 30 Apr 2015 18:34:21 +0200
+Message-ID: <CAH9NwWfow0d5Kk=Shj=CQhy0GRVkjvzQEYYVAYEubP2c6xM_ig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1430397081.5802.41.camel@xylophone.i.decadent.org.uk>
-Sender: linux-sh-owner@vger.kernel.org
-To: Ben Hutchings <ben.hutchings@codethink.co.uk>, Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Shinobu Uehara <shinobu.uehara.xc@renesas.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f42.google.com ([74.125.82.42]:35668 "EHLO
+	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751191AbbD3Qen (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Apr 2015 12:34:43 -0400
+Received: by wgyo15 with SMTP id o15so68591368wgy.2
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Apr 2015 09:34:41 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-On 04/30/2015 03:31 PM, Ben Hutchings wrote:
+Hi all.
 
-> From: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
+Is there a way to disable such partitions via e.g. device tree binding? I had
+a quick look at a custom kernel based on 3.14 and support for those
+partitions got patched away. How should this functionality be done that
+a possible patch hits mainline?
 
-> It is necessary to stop the SD clock before using
-> the actual clock in case of SDHI controller.
+greets
+--
+Christian Gmeiner, MSc
 
-> Signed-off-by: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
-> Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
-> ---
->   drivers/mmc/host/sh_mobile_sdhi.c |   14 ++++++++++++++
->   1 file changed, 14 insertions(+)
-
-> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> index 6906a905cd54..92a58c6007fe 100644
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -136,6 +136,18 @@ static void sh_mobile_sdhi_clk_disable(struct platform_device *pdev)
->   	clk_disable_unprepare(priv->clk);
->   }
->
-> +static void sh_mobile_sdhi_set_clk_div(struct platform_device *pdev, int clk)
-> +{
-> +	struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
-> +	struct tmio_mmc_host *host = mmc_priv(mmc);
-> +
-> +	if (clk == true) {
-
-    'clk' is *int*. Perhaps, should be just *if* (clk)?
-
-> +		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~0x0100 &
-> +				sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
-> +		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, 0x00ff);
-> +	}
-> +}
-> +
->   static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
->   {
->   	int timeout = 1000;
-[...]
-
-WBR, Sergei
-
+https://soundcloud.com/christian-gmeiner
