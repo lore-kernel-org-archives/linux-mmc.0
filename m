@@ -1,63 +1,112 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: init desc in dw_mci_idmac_init
-Date: Thu, 30 Apr 2015 17:01:03 +0900
-Message-ID: <5541E13F.2070908@samsung.com>
-References: <1430314316-15971-1-git-send-email-zhangfei.gao@linaro.org>
+From: Maxime Coquelin <maxime.coquelin@st.com>
+Subject: Re: [PATCH v5 0/9] Add sd/emmc support for stih407 family silicon
+Date: Thu, 30 Apr 2015 10:28:53 +0200
+Message-ID: <5541E7C5.1000903@st.com>
+References: <1428658831-14308-1-git-send-email-peter.griffin@linaro.org> <CAPDyKFouXDCbPB9Ow6vzRdHdWkscDs3fjThCX69mA97fwZ+Lfw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:60574 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750729AbbD3IBE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Apr 2015 04:01:04 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0NNM00F6O0XRZV10@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 30 Apr 2015 17:01:03 +0900 (KST)
-In-reply-to: <1430314316-15971-1-git-send-email-zhangfei.gao@linaro.org>
+Received: from mx08-00178001.pphosted.com ([91.207.212.93]:45127 "EHLO
+	mx08-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750730AbbD3I31 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Apr 2015 04:29:27 -0400
+In-Reply-To: <CAPDyKFouXDCbPB9Ow6vzRdHdWkscDs3fjThCX69mA97fwZ+Lfw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zhangfei Gao <zhangfei.gao@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Fei Wang <w.f@huawei.com>, CPGS <cpgs@samsung.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Peter Griffin <peter.griffin@linaro.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Patrice CHOTARD <patrice.chotard@st.com>, Giuseppe Cavallaro <peppe.cavallaro@st.com>, Lee Jones <lee.jones@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi.
+Hi Ulf,
 
-On 04/29/2015 10:31 PM, Zhangfei Gao wrote:
-> Set 0 to des1 in 32bit case.
-> Otherwise the random value of des1 will be used in
-> dw_mci_translate_sglist: IDMAC_64ADDR_SET_BUFFER1_SIZE(desc, length)
+On 04/10/2015 01:06 PM, Ulf Hansson wrote:
+> On 10 April 2015 at 11:40, Peter Griffin <peter.griffin@linaro.org> wrote:
+>> Hi,
+>>
+>> This series adds sd/emmc support to the sdhci-st.c driver for stih407
+>> family silicon. The changes mainly involve configuring some extra glue
+>> registers in the flashSS which configure the Arasan controller.
+>>
+>> This series also adds support for UHS modes for eMMC. To allow
+>> UHS HS200/SD104 modes to function correctly, due to the
+>> tight timing constriants, support for delay management is also added.
+>> Two types of delay management are supported, static delay management and
+>> dynamic delay management, this delay management is only available
+>> on eMMC pads on stih410 and later silicon.
+>>
+>> This series has been tested with stih410-b2120 revd on eMMC and sd, at
+>> various clock speeds. As part of this testing a bug was also found in the
+>> upstream flexgen clock set_rate implementation (now fixed upstream).
+>>
+>>      max-frequency = 200Mhz
+>>      /dev/mmcblk0p1:
+>>       Timing buffered disk reads: 270 MB in  3.02 seconds =  89.54 MB/sec
+>>
+>>      max-frequency = 100Mhz
+>>      root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
+>>      /dev/mmcblk0p1:
+>>       Timing buffered disk reads: 210 MB in  3.00 seconds =  70.00 MB/sec
+>>
+>>      max-frequency = 50Mhz
+>>      root@debian-armhf:~# hdparm -t /dev/mmcblk0p1
+>>      /dev/mmcblk0p1:
+>>       Timing buffered disk reads: 118 MB in  3.00 seconds =  39.28 MB/sec
+>>
+>> It has also been tested on stih416-b2020 to ensure we have caused no
+>> regressions. Finally the dt documentation has been updated to reflect
+>> the changes in the driver code. Intrestingly it seems we are the first
+>> upstream platform to be using some of the uhs bindings such as
+>> sd-uhs-sdr104.
+>>
+>> Changes since v4:
+>>   - Fixup typo (Pete)
+>>
+>> Changes since v3:
+>>   - Rebased on Ulf's mmc next branch (rc5 based) (Ulf)
+>>
+>> Changes since v2:
+>>   - Some whitespace fixups (Max)
+>>   - if (!ioaddr) suggestion (Max)
+>>   - Add stih418-b2199 suport (Max)
+>>   - Stih410 to STiH410 fixes (Max)
+>>   - rebased on v4.0-rc6 (Pete)
+>>
+>> Changes since v1:
+>>   - Partition the changes into smaller patches to aid review process (Ulf)
+>>
+>> Peter Griffin (9):
+>>    mmc: sdhci-st: Add macros for register offsets and bitfields for mmcss
+>>      glue regs
+>>    mmc: sdhci-st: Add support for de-asserting reset signal and top regs
+>>      resource
+>>    mmc: sdhci-st: Add delay management functions for top registers
+>>      (eMMC).
+>>    mmc: sdhci-st: Add st_mmcss_cconfig function to configure mmcss glue
+>>      registers.
+>>    mmc: sdhci-st: Add sdhci_st_set_uhs_signaling function.
+>>    mmc: sdhci-st: Update the quirks for this controller.
+>>    mmc: sdhci-st: Update ST SDHCI binding documentation.
+>>    ARM: STi: DT: STiH407: Add dt nodes for sdhci and emmc.
+>>    ARM: STi: DT: STiH418: Add dt nodes for sdhci and emmc.
+>>
+>>   Documentation/devicetree/bindings/mmc/sdhci-st.txt | 100 +++++-
+>>   arch/arm/boot/dts/stih407-family.dtsi              |  30 ++
+>>   arch/arm/boot/dts/stih410-b2120.dts                |  10 +
+>>   arch/arm/boot/dts/stih418-b2199.dts                |  12 +
+>>   arch/arm/boot/dts/stihxxx-b2120.dtsi               |   8 +
+>>   drivers/mmc/host/sdhci-st.c                        | 354 ++++++++++++++++++++-
+>>   6 files changed, 500 insertions(+), 14 deletions(-)
+>>
+>> --
+>> 1.9.1
+>>
+> Thanks! Applied.
+Do you confirm you didn't applied the DT patches?
 
-I'm not understanding this comment.
-how does it use the IDMAC_64ADDR_SET_BUFFER1_SIZE(desc, length)?
+Thanks,
+Maxime
 
-Best Regards,
-Jaehoon Chung
-> 
-> Signed-off-by: Fei Wang <w.f@huawei.com>
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-> ---
->  drivers/mmc/host/dw_mmc.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 241454f..488a8af 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -589,9 +589,11 @@ static int dw_mci_idmac_init(struct dw_mci *host)
->  		host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc);
->  
->  		/* Forward link the descriptor list */
-> -		for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++, p++)
-> +		for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++, p++) {
->  			p->des3 = cpu_to_le32(host->sg_dma +
->  					(sizeof(struct idmac_desc) * (i + 1)));
-> +			p->des1 = 0;
-> +		}
->  
->  		/* Set the last descriptor as the end-of-ring descriptor */
->  		p->des3 = cpu_to_le32(host->sg_dma);
-> 
+>
+> Kind regards
+> Uffe
 
