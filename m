@@ -1,13 +1,13 @@
 From: Krzysztof Kozlowski <k.kozlowski.k@gmail.com>
-Subject: [PATCH 5/6] mmc: sdhci-imx: Constify platform_device_id
-Date: Sat,  2 May 2015 00:49:21 +0900
-Message-ID: <1430495362-31506-5-git-send-email-k.kozlowski.k@gmail.com>
+Subject: [PATCH 4/6] mmc: s3cmci: Constify platform_device_id
+Date: Sat,  2 May 2015 00:49:20 +0900
+Message-ID: <1430495362-31506-4-git-send-email-k.kozlowski.k@gmail.com>
 References: <1430495362-31506-1-git-send-email-k.kozlowski.k@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f176.google.com ([209.85.192.176]:33935 "EHLO
-	mail-pd0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754338AbbEAPvb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 May 2015 11:51:31 -0400
+Received: from mail-pa0-f54.google.com ([209.85.220.54]:34629 "EHLO
+	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754376AbbEAPv1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 May 2015 11:51:27 -0400
 In-Reply-To: <1430495362-31506-1-git-send-email-k.kozlowski.k@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -19,22 +19,22 @@ const.
 
 Signed-off-by: Krzysztof Kozlowski <k.kozlowski.k@gmail.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
+ drivers/mmc/host/s3cmci.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 82f512d87cb8..7b6ff7067320 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -161,7 +161,7 @@ struct pltfm_imx_data {
- 	u32 is_ddr;
- };
+diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+index 94cddf381ba3..6291d5042ef2 100644
+--- a/drivers/mmc/host/s3cmci.c
++++ b/drivers/mmc/host/s3cmci.c
+@@ -1856,7 +1856,7 @@ static int s3cmci_remove(struct platform_device *pdev)
+ 	return 0;
+ }
  
--static struct platform_device_id imx_esdhc_devtype[] = {
-+static const struct platform_device_id imx_esdhc_devtype[] = {
+-static struct platform_device_id s3cmci_driver_ids[] = {
++static const struct platform_device_id s3cmci_driver_ids[] = {
  	{
- 		.name = "sdhci-esdhc-imx25",
- 		.driver_data = (kernel_ulong_t) &esdhc_imx25_data,
+ 		.name	= "s3c2410-sdi",
+ 		.driver_data	= 0,
 -- 
 2.1.4
 
