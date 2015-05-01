@@ -1,59 +1,46 @@
-From: Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
-Subject: [PATCH v3 2/3] mmc: host: arasan: Add the support for sdhci-arasan4.9a in sdhci-of-arasan.c.
-Date: Fri,  1 May 2015 10:24:11 +0530
-Message-ID: <1430456052-8888-3-git-send-email-stripathi@apm.com>
-References: <1430456052-8888-1-git-send-email-stripathi@apm.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1430456052-8888-1-git-send-email-stripathi-qTEPVZfXA3Y@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ddutile-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, patches-qTEPVZfXA3Y@public.gmane.org, Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
+From: Suman Tripathi <stripathi@apm.com>
+Subject: [PATCH v3 0/3] Add SDHCI support for APM X-Gene SoC using ARASAN SDHCI controller.
+Date: Fri,  1 May 2015 10:24:09 +0530
+Message-ID: <1430456052-8888-1-git-send-email-stripathi@apm.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from denmail01-v4020.amcc.com ([192.195.68.30]:42697 "EHLO
+	denmail01.amcc.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753014AbbEAEzj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 May 2015 00:55:39 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: chris@printf.net, anton@enomsg.org, arnd@arndb.de, michal.simek@xilinx.com
+Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ddutile@redhat.com, jcm@redhat.com, mlangsdo@redhat.com, patches@apm.com, Suman Tripathi <stripathi@apm.com>
 
-This patch adds the quirks and compatible string in sdhci-of-arasan.c
-to support sdhci-arasan4.9a version of controller.
+This patch adds the SDHCI support for APM X-Gene SoC using ARASAN SDHCI controller.
 
-Signed-off-by: Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
+v1 change:
+ * Use the CONFIG_ARM64_DMA_HAS_IOMMU for dma-mapping.
+
+v2 change:
+ * Drop the IOMMU support and switching to PIO mode for arasan.
+   controller integrated inside APM X-Gene SoC.
+
+v3 change:
+ * Change the sdhci-of-arasan.c to support arasan4.9a.
+ * Add quirks for arasan4.9a.
+
+Signed-off-by: Suman Tripathi <stripathi@apm.com>
 ---
- drivers/mmc/host/sdhci-of-arasan.c | 7 +++++++
- 1 file changed, 7 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 981d66e..92a4222 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -20,6 +20,7 @@
-  */
+Suman Tripathi (3):
+  arm64: dts: Add the arasan sdhc nodes in apm-storm.dtsi.
+  mmc: host: arasan: Add the support for sdhci-arasan4.9a in
+    sdhci-of-arasan.c
+  Documentation: mmc: Update Arasan SDHC documentation to support 4.9a
+    version of     Arasan SDHC controller.
 
- #include <linux/module.h>
-+#include <linux/of_device.h>
- #include "sdhci-pltfm.h"
+ .../devicetree/bindings/mmc/arasan,sdhci.txt       |  5 ++-
+ arch/arm64/boot/dts/apm-mustang.dts                |  4 ++
+ arch/arm64/boot/dts/apm-storm.dtsi                 | 44 ++++++++++++++++++++++
+ drivers/mmc/host/sdhci-of-arasan.c                 |  7 ++++
+ 4 files changed, 58 insertions(+), 2 deletions(-)
 
- #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
-@@ -169,6 +170,11 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 		goto clk_disable_all;
- 	}
-
-+	if (of_device_is_compatible(pdev->dev.of_node, "arasan,sdhci-4.9a")) {
-+		host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
-+		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
-+	}
-+
- 	sdhci_get_of_property(pdev);
- 	pltfm_host = sdhci_priv(host);
- 	pltfm_host->priv = sdhci_arasan;
-@@ -206,6 +212,7 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
-
- static const struct of_device_id sdhci_arasan_of_match[] = {
- 	{ .compatible = "arasan,sdhci-8.9a" },
-+	{ .compatible = "arasan,sdhci-4.9a" },
- 	{ }
- };
- MODULE_DEVICE_TABLE(of, sdhci_arasan_of_match);
 --
 1.8.2.1
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
