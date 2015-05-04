@@ -1,78 +1,105 @@
-From: Suman Tripathi <stripathi@apm.com>
-Subject: Re: [PATCH v3 3/3] Documentation: mmc: Update Arasan SDHC
- documentation to support 4.9a version of Arasan SDHC controller.
-Date: Mon, 4 May 2015 11:33:17 +0530
-Message-ID: <CAOHikRBbOYHOmnzA6Ycu6hwdNL6SgmXKVK0NLtJQfJL9KULuxg@mail.gmail.com>
+From: Michal Simek <michal.simek@xilinx.com>
+Subject: Re: [PATCH v3 1/3] arm64: dts: Add the arasan sdhc nodes in
+ apm-storm.dtsi.
+Date: Mon, 4 May 2015 08:03:31 +0200
+Message-ID: <19876f56-d3ce-4b70-9cb9-fcb43151d52d@BL2FFO11FD044.protection.gbl>
 References: <1430456052-8888-1-git-send-email-stripathi@apm.com>
-	<1430456052-8888-4-git-send-email-stripathi@apm.com>
-	<f442e594-ac5c-4e77-ab80-3055fb791066@BN1AFFO11FD021.protection.gbl>
+ <1430456052-8888-2-git-send-email-stripathi@apm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og102.obsmtp.com ([64.18.0.143]:58415 "EHLO
-	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751084AbbEDGDU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 May 2015 02:03:20 -0400
-Received: by wizk4 with SMTP id k4so109442323wiz.1
-        for <linux-mmc@vger.kernel.org>; Sun, 03 May 2015 23:03:18 -0700 (PDT)
-In-Reply-To: <f442e594-ac5c-4e77-ab80-3055fb791066@BN1AFFO11FD021.protection.gbl>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1430456052-8888-2-git-send-email-stripathi@apm.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Suman Tripathi <stripathi@apm.com>, chris@printf.net, anton@enomsg.org, arnd@arndb.de, michal.simek@xilinx.com
+Cc: devicetree@vger.kernel.org, mlangsdo@redhat.com, jcm@redhat.com, linux-mmc@vger.kernel.org, patches@apm.com, ddutile@redhat.com, linuxppc-dev@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Michal Simek <michal.simek@xilinx.com>
-Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, linuxppc-dev@lists.ozlabs.org, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Don Dutile <ddutile@redhat.com>, Jon Masters <jcm@redhat.com>, Mark Langsdorf <mlangsdo@redhat.com>, patches <patches@apm.com>
 
-Hi,
+On 05/01/2015 06:54 AM, Suman Tripathi wrote:
+> This patch adds the arasan sdhc nodes to reuse the of-arasan
+> driver for APM X-Gene SoC.
+> 
+> Signed-off-by: Suman Tripathi <stripathi@apm.com>
+> ---
+>  arch/arm64/boot/dts/apm-mustang.dts |  4 ++++
+>  arch/arm64/boot/dts/apm-storm.dtsi  | 44 +++++++++++++++++++++++++++++++++++++
+>  2 files changed, 48 insertions(+)
+> 
+> diff --git a/arch/arm64/boot/dts/apm-mustang.dts b/arch/arm64/boot/dts/apm-mustang.dts
+> index 8eb6d94..d0e52a9 100644
+> --- a/arch/arm64/boot/dts/apm-mustang.dts
+> +++ b/arch/arm64/boot/dts/apm-mustang.dts
+> @@ -44,3 +44,7 @@
+>  &xgenet {
+>  	status = "ok";
+>  };
+> +
+> +&sdhc0 {
+> +	status = "ok";
+> +};
+> diff --git a/arch/arm64/boot/dts/apm-storm.dtsi b/arch/arm64/boot/dts/apm-storm.dtsi
+> index 87d3205..d6c2216 100644
+> --- a/arch/arm64/boot/dts/apm-storm.dtsi
+> +++ b/arch/arm64/boot/dts/apm-storm.dtsi
+> @@ -144,6 +144,40 @@
+>  				clock-output-names = "socplldiv2";
+>  			};
+> 
+> +			ahbclk: ahbclk@1f2ac000 {
+> +				compatible = "apm,xgene-device-clock";
+> +				#clock-cells = <1>;
+> +				clocks = <&socplldiv2 0>;
+> +				reg = <0x0 0x1f2ac000 0x0 0x1000
+> +					0x0 0x17000000 0x0 0x2000>;
+> +				reg-names = "csr-reg", "div-reg";
+> +				csr-offset = <0x0>;
+> +				csr-mask = <0x1>;
+> +				enable-offset = <0x8>;
+> +				enable-mask = <0x1>;
+> +				divider-offset = <0x164>;
+> +				divider-width = <0x5>;
+> +				divider-shift = <0x0>;
+> +				clock-output-names = "ahbclk";
+> +			};
+> +
+> +			sdioclk: sdioclk@1f2ac000 {
+> +				compatible = "apm,xgene-device-clock";
+> +				#clock-cells = <1>;
+> +				clocks = <&socplldiv2 0>;
+> +				reg = <0x0 0x1f2ac000 0x0 0x1000
+> +					0x0 0x17000000 0x0 0x2000>;
+> +				reg-names = "csr-reg", "div-reg";
+> +				csr-offset = <0x0>;
+> +				csr-mask = <0x2>;
+> +				enable-offset = <0x8>;
+> +				enable-mask = <0x2>;
+> +				divider-offset = <0x178>;
+> +				divider-width = <0x8>;
+> +				divider-shift = <0x0>;
+> +				clock-output-names = "sdioclk";
+> +			};
+> +
+>  			qmlclk: qmlclk {
+>  				compatible = "apm,xgene-device-clock";
+>  				#clock-cells = <1>;
+> @@ -503,6 +537,16 @@
+>  			interrupts = <0x0 0x4f 0x4>;
+>  		};
+> 
+> +		sdhc0: sdhc@1c000000 {
+> +			device_type = "sdhc";
+> +			compatible = "arasan,sdhci-8.9a", "arasan,sdhci-4.9a";
 
-On Mon, May 4, 2015 at 11:30 AM, Michal Simek <michal.simek@xilinx.com> wrote:
-> On 05/01/2015 06:54 AM, Suman Tripathi wrote:
->> This patch updates Arasan SDHC documentation to support
->> 4.9a version of Arasan SDHC controller.
->>
->> Signed-off-by: Suman Tripathi <stripathi@apm.com>
->> ---
->>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 5 +++--
->>  1 file changed, 3 insertions(+), 2 deletions(-)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> index 98ee2ab..f01d41a 100644
->> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> @@ -8,7 +8,8 @@ Device Tree Bindings for the Arasan SDHCI Controller
->>    [3] Documentation/devicetree/bindings/interrupt-controller/interrupts.txt
->>
->>  Required Properties:
->> -  - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a'
->> +  - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a' or
->> +                'arasan,sdhci-4.9a'
->>    - reg: From mmc bindings: Register location and length.
->>    - clocks: From clock bindings: Handles to clock inputs.
->>    - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
->> @@ -18,7 +19,7 @@ Required Properties:
->>
->>  Example:
->>       sdhci@e0100000 {
->> -             compatible = "arasan,sdhci-8.9a";
->> +             compatible = "arasan,sdhci-8.9a", "arasan,sdhci-4.9a";
->
-> Is there any reason to change this example?
+I would just add 4.9a here because you want to use that quirks. We can
+add some quirks to 8.9a version if any new problem arises.
 
-Thought that if dts is updated so why not update the binding too.
-
-> You probably want to have just one compatible string not both.
-
-Okay will remove in next version.
-
->
-> Thanks,
-> Michal
->
->
->
->
-
-
-
--- 
 Thanks,
-with regards,
-Suman Tripathi
+Michal
