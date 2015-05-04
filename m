@@ -1,64 +1,106 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: init desc in dw_mci_idmac_init
-Date: Mon, 04 May 2015 09:07:00 +0900
-Message-ID: <5546B824.80203@samsung.com>
-References: <1430314316-15971-1-git-send-email-zhangfei.gao@linaro.org>
- <1430403388-4184-1-git-send-email-zhangfei.gao@linaro.org>
+Subject: Re: [PATCH 1/3] Document: dw_mmc-k3: add document of hi6220 mmc
+Date: Mon, 04 May 2015 09:15:50 +0900
+Message-ID: <5546BA36.5080608@samsung.com>
+References: <1430444818-7740-1-git-send-email-zhangfei.gao@linaro.org>
+ <1430444818-7740-2-git-send-email-zhangfei.gao@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:54622 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750969AbbEDAHD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 May 2015 20:07:03 -0400
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0NNS005UITNPV210@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 04 May 2015 09:07:01 +0900 (KST)
-In-reply-to: <1430403388-4184-1-git-send-email-zhangfei.gao@linaro.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:32235 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751384AbbEDAPw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 May 2015 20:15:52 -0400
+In-reply-to: <1430444818-7740-2-git-send-email-zhangfei.gao@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Zhangfei Gao <zhangfei.gao@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Fei Wang <w.f@huawei.com>, CPGS <cpgs@samsung.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 
 Hi, Zhangfei.
 
-Will apply this patch at my dw-mmc tree.
-Thanks!
+Is there no commit message for this patch?
+
+On 05/01/2015 10:46 AM, Zhangfei Gao wrote:
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+> ---
+>  .../devicetree/bindings/mmc/k3-dw-mshc.txt         | 50 ++++++++++++++++++++++
+>  1 file changed, 50 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+> index 3b35449..a353d0b 100644
+> --- a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+> @@ -13,6 +13,10 @@ Required Properties:
+>  
+>  * compatible: should be one of the following.
+>    - "hisilicon,hi4511-dw-mshc": for controllers with hi4511 specific extensions.
+> +  - "hisilicon,hi6220-dw-mshc": for controllers with hi6220 specific extensions.
+> +
+> +Optional Properties:
+> +- hisilicon,peripheral-syscon: phandle of syscon used to control peripheral.
+>  
+>  Example:
+>  
+> @@ -42,3 +46,49 @@ Example:
+>  		cap-mmc-highspeed;
+>  		cap-sd-highspeed;
+>  	};
+> +
+> +	/* for Hi6220 */
+> +
+> +	/* SoC portion */
+> +	dwmmc_0: dwmmc0@f723d000 {
+> +	        compatible = "hisilicon,hi6220-dw-mshc";
+> +	        num-slots = <0x1>;
+> +	        board-mmc-bus-clk = <0x0>;
+> +	        reg = <0x0 0xf723d000 0x0 0x1000>;
+> +	        interrupts = <0x0 0x48 0x4>;
+> +	        clocks = <&clock_sys HI6220_MMC0_CIUCLK>, <&clock_sys HI6220_MMC0_CLK>;
+> +	        clock-names = "ciu", "biu";
+> +	};
+> +
+> +	dwmmc_1: dwmmc1@f723e000 {
+> +		compatible = "hisilicon,hi6220-dw-mshc";
+> +		num-slots = <0x1>;
+> +		board-mmc-bus-clk = <0x0>;
+> +		card-detect-delay = <200>;
+> +		hisilicon,peripheral-syscon = <&ao_ctrl>;
+> +		reg = <0x0 0xf723e000 0x0 0x1000>;
+> +		interrupts = <0x0 0x49 0x4>;
+> +		clocks = <&clock_sys HI6220_MMC1_CIUCLK>, <&clock_sys HI6220_MMC1_CLK>;
+> +		clock-names = "ciu", "biu";
+> +	};
+
+this is example, so i think it doesn't need to add dwmmc_1's case.
+
+> +
+> +	/* Board portion */
+
+What are Board portion and SoC portion?
+This should be merged to one node. why do you separate this?
 
 Best Regards,
 Jaehoon Chung
-
-On 04/30/2015 11:16 PM, Zhangfei Gao wrote:
-> Set 0 to des1 in 32bit case.
-> Otherwise the random value of des1 will be used in
-> dw_mci_translate_sglist: IDMAC_SET_BUFFER1_SIZE(desc, length)
-> 
-> Signed-off-by: Fei Wang <w.f@huawei.com>
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-> ---
->  drivers/mmc/host/dw_mmc.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 241454f..488a8af 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -589,9 +589,11 @@ static int dw_mci_idmac_init(struct dw_mci *host)
->  		host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc);
->  
->  		/* Forward link the descriptor list */
-> -		for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++, p++)
-> +		for (i = 0, p = host->sg_cpu; i < host->ring_size - 1; i++, p++) {
->  			p->des3 = cpu_to_le32(host->sg_dma +
->  					(sizeof(struct idmac_desc) * (i + 1)));
-> +			p->des1 = 0;
-> +		}
->  
->  		/* Set the last descriptor as the end-of-ring descriptor */
->  		p->des3 = cpu_to_le32(host->sg_dma);
+> +	dwmmc_0: dwmmc0@f723d000 {
+> +		bus-width = <0x8>;
+> +	        broken-cd;
+> +		vmmc-supply = <&ldo19>;
+> +		pinctrl-names = "default";
+> +		pinctrl-0 = <&emmc_pmx_func &emmc_clk_cfg_func
+> +			     &emmc_cfg_func &emmc_rst_cfg_func>;
+> +	};
+> +
+> +	dwmmc_1: dwmmc1@f723e000 {
+> +		bus-width = <0x4>;
+> +		disable-wp;
+> +		cd-gpios = <&gpio1 0 1>;
+> +		pinctrl-names = "default", "idle";
+> +		pinctrl-0 = <&sd_pmx_func &sd_clk_cfg_func &sd_cfg_func>;
+> +		pinctrl-1 = <&sd_pmx_idle &sd_clk_cfg_idle &sd_cfg_idle>;
+> +		vqmmc-supply = <&ldo7>;
+> +		vmmc-supply = <&ldo10>;
+> +	};
 > 
 
