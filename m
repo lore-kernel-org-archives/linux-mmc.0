@@ -1,134 +1,64 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V6 03/15] mmc: core: Add support for re-tuning before each request
-Date: Mon, 4 May 2015 15:28:59 +0200
-Message-ID: <CAPDyKFqUowi29oqcRTSLEaSjXNv=RyzmxRGks-pHDri2FW-wYw@mail.gmail.com>
+Subject: Re: [PATCH V6 04/15] mmc: core: Check re-tuning before retrying
+Date: Mon, 4 May 2015 15:30:59 +0200
+Message-ID: <CAPDyKFqooH9AXbmGnA7ZBF+itpBpcgJqn3pWu+3PRJfzntOWZg@mail.gmail.com>
 References: <1429531796-21987-1-git-send-email-adrian.hunter@intel.com>
-	<1429531796-21987-4-git-send-email-adrian.hunter@intel.com>
+	<1429531796-21987-5-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f173.google.com ([209.85.216.173]:36451 "EHLO
-	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752324AbbEDN3A (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 May 2015 09:29:00 -0400
-Received: by qcbgy10 with SMTP id gy10so18565656qcb.3
-        for <linux-mmc@vger.kernel.org>; Mon, 04 May 2015 06:28:59 -0700 (PDT)
-In-Reply-To: <1429531796-21987-4-git-send-email-adrian.hunter@intel.com>
+Received: from mail-qk0-f175.google.com ([209.85.220.175]:33912 "EHLO
+	mail-qk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752320AbbEDNa7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 May 2015 09:30:59 -0400
+Received: by qkgx75 with SMTP id x75so84587561qkg.1
+        for <linux-mmc@vger.kernel.org>; Mon, 04 May 2015 06:30:59 -0700 (PDT)
+In-Reply-To: <1429531796-21987-5-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
 On 20 April 2015 at 14:09, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> At the start of each request, re-tune if needed and
-> then hold off re-tuning again until the request is done.
->
-> Note that though there is one function that starts
-> requests (mmc_start_request) there are two that wait for
-> the request to be done (mmc_wait_for_req_done and
-> mmc_wait_for_data_req_done).  Also note that
-> mmc_wait_for_data_req_done can return even when the
-> request is not done (which allows the block driver
-> to prepare a newly arrived request while still
-> waiting for the previous request).
->
-> This patch ensures re-tuning is held for the duration
-> of a request.  Subsequent patches will also hold
-> re-tuning at other times when it might cause a
-> conflict.
+> Possibly a command is failing because re-tuning is needed.
+> Use mmc_retune_recheck() to check re-tuning. At that point
+> re-tuning is held, at least by the request, so
+> mmc_retune_recheck() flags host->retune_now if the hold
+> count is 1.
 >
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Patch2 is calling mmc_retune_needed() and thus actually triggers a
-re-tune to potentially happen.
-
-To avoid bisectability issues about not holding re-tune when needed, I
-suggest we move $subject patch to after patch8.
+This patch should probably be folded into patch3.
 
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/core/core.c | 32 +++++++++++++++++++++++++-------
->  1 file changed, 25 insertions(+), 7 deletions(-)
+>  drivers/mmc/core/core.c | 3 +++
+>  1 file changed, 3 insertions(+)
 >
 > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index dd43f9b..a9936cb 100644
+> index a9936cb..08bf7e3 100644
 > --- a/drivers/mmc/core/core.c
 > +++ b/drivers/mmc/core/core.c
-> @@ -186,12 +186,29 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
->
->  EXPORT_SYMBOL(mmc_request_done);
->
-> +static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
-> +{
-> +       int err;
-> +
-> +       /* Assumes host controller has been runtime resumed by mmc_claim_host */
-> +       err = mmc_retune(host);
-> +       if (err) {
-> +               mrq->cmd->error = err;
-> +               mmc_request_done(host, mrq);
-> +               return;
-> +       }
-> +
-> +       host->ops->request(host, mrq);
-> +}
-> +
->  static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
->  {
->  #ifdef CONFIG_MMC_DEBUG
->         unsigned int i, sz;
->         struct scatterlist *sg;
->  #endif
-> +       mmc_retune_hold(host);
-> +
->         if (mmc_card_removed(host->card))
->                 return -ENOMEDIUM;
->
-> @@ -252,7 +269,7 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
->         }
->         mmc_host_clk_hold(host);
->         led_trigger_event(host->led, LED_FULL);
-> -       host->ops->request(host, mrq);
-> +       __mmc_start_request(host, mrq);
->
->         return 0;
->  }
-> @@ -422,17 +439,16 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
+> @@ -434,6 +434,7 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
+>                                                             host->areq);
+>                                 break; /* return err */
+>                         } else {
+> +                               mmc_retune_recheck(host);
+>                                 pr_info("%s: req failed (CMD%u): %d, retrying...\n",
+>                                         mmc_hostname(host),
 >                                         cmd->opcode, cmd->error);
->                                 cmd->retries--;
->                                 cmd->error = 0;
-> -                               host->ops->request(host, mrq);
-> +                               __mmc_start_request(host, mrq);
->                                 continue; /* wait for done/new event again */
->                         }
->                 } else if (context_info->is_new_req) {
->                         context_info->is_new_req = false;
-> -                       if (!next_req) {
-> -                               err = MMC_BLK_NEW_REQUEST;
-> -                               break; /* return err */
-> -                       }
-> +                       if (!next_req)
-> +                               return MMC_BLK_NEW_REQUEST;
->                 }
->         }
-> +       mmc_retune_release(host);
->         return err;
->  }
+> @@ -483,6 +484,8 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
+>                     mmc_card_removed(host->card))
+>                         break;
 >
-> @@ -471,8 +487,10 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
+> +               mmc_retune_recheck(host);
+> +
+>                 pr_debug("%s: req failed (CMD%u): %d, retrying...\n",
 >                          mmc_hostname(host), cmd->opcode, cmd->error);
 >                 cmd->retries--;
->                 cmd->error = 0;
-> -               host->ops->request(host, mrq);
-> +               __mmc_start_request(host, mrq);
->         }
-> +
-> +       mmc_retune_release(host);
->  }
->
->  /**
 > --
 > 1.9.1
 >
