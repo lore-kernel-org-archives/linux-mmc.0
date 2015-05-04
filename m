@@ -1,103 +1,110 @@
-From: Laurent Pinchart <laurent.pinchart@linaro.org>
-Subject: Re: [PATCH 3/3 v3] mmc: sh_mmcif: calculate best clock with parent clock
-Date: Mon, 04 May 2015 04:04:13 +0300
-Message-ID: <2477373.H5ReWsYloq@avalon>
-References: <873840a4ch.wl%kuninori.morimoto.gx@renesas.com> <1433253.xXE7ok9ACb@avalon> <87mw21m0ur.wl%kuninori.morimoto.gx@renesas.com>
+From: Krzysztof Kozlowski <k.kozlowski.k@gmail.com>
+Subject: Re: [PATCH RESEND] ARM: dts: exynos5422-odroidxu3: add mmc detect
+ gpio
+Date: Mon, 04 May 2015 18:45:53 +0900
+Message-ID: <55473FD1.7060605@gmail.com>
+References: <1423813734-20664-1-git-send-email-a.hajda@samsung.com> <CABxcv==sgCGGsVY8=RtdTGw501zUybufkpW-N_h-fopg37UFPg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <87mw21m0ur.wl%kuninori.morimoto.gx@renesas.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Simon <horms@verge.net.au>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, kobayashi <keita.kobayashi.ym@renesas.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f48.google.com ([209.85.220.48]:34877 "EHLO
+	mail-pa0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751613AbbEDJp7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 May 2015 05:45:59 -0400
+In-Reply-To: <CABxcv==sgCGGsVY8=RtdTGw501zUybufkpW-N_h-fopg37UFPg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Javier Martinez Canillas <javier@dowhile0.org>, Andrzej Hajda <a.hajda@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene@kernel.org>
 
-Hi Morimoto-san,
-
-Sorry for the late reply.
-
-On Wednesday 22 April 2015 01:05:59 Kuninori Morimoto wrote:
-> Hi Laurent
+W dniu 13.02.2015 o 19:03, Javier Martinez Canillas pisze:
+> Hello Andrzej,
 > 
-> >>> +struct sh_mmcif_parent_clk {
-> > 
-> > I'm not sure I would call this parent clock. It refers to the frequency of
-> > the functional clock provided to the MMCIF, there's no concept of parent
-> > there. True, the clock referenced by the MMCIF DT node is an MSTP gate
-> > clock, and frequency control is implemented in the MSTP clock parent, but
-> > that hardware architecture is internal to the CPG and shouldn't be
-> > considered by the MMCIF.
->
-> I couldn't understand about last 2 lines.
-> Do you mean I need to add these method in CPG ?
-> But, this calculates best clock of parent clock (= from CPG) and divider (=
-> on MMC) Why CPG need to care about MMC's divider,
-> and how to set it from CPG ??
-
-No, that's not what I meant. The CPG should certainly not care about any MMCIF 
-internal divider.
-
-My point was about the name of the structure. However, now that you mention 
-the internal MMCIF clock divider, the word "parent" indeed makes sense. Please 
-ignore my comment.
-
-> >> Shouldn't this come from private data in the CPG clock driver, which
-> >> supplies the parent clock? Then the mmcif driver will be independent
-> >> from the parent clock.
-> > 
-> > The real question is where the constraint comes from. The Gen2 datasheet
-> > documents the MMC clocks maximum frequency as 97.5 MHz in the CPG section.
-> > However, I have a feeling the constraint doesn't come from the DIV6 which
-> > should be able to output higher frequencies, but from the MMCIF, the clock
-> > distribution tree, or both.
-> > 
-> > There's also the option of specifying the admissible clock range in DT,
-> > either in the CPG node or the MMCIF node.
+> On Fri, Feb 13, 2015 at 8:48 AM, Andrzej Hajda <a.hajda@samsung.com> wrote:
+>> The patch adds gpio for detecting presence of MMC card.
+>> It fixes issue with kernel hang due when MMC card is missing.
 > 
-> It needs not only max/min range, but also divider's limit.
-> I don't know how to do it. but...
+> Maybe s/MMC/eMMC here? to make more clear that this patch is solving
+> an issue when the eMMC and not the uSD is missing.
 > 
->  1) add admissible max/min range on CPG node
->     add admissible divider range on MMC node
->      -> Does this max/min range really from CPG ?
->         but, we can reuse this on other DIV6
+>>
+>> Signed-off-by: Andrzej Hajda <a.hajda@samsung.com>
+>> ---
+>> Hi,
+>>
+>> This is just resend of the patch with added mmc ML and dw-mmc maintainers.
+>>
+>> Javier, I have no access to peach-pi(t) schematics, so I do not know if they
+>> have mmc-cd line connected to gpc0-2 gpio, but I guess it could be the case.
+>> You could check if similar patches will fix the issue for them.
+>>
 > 
->  2) add admissible max/min range on MMC node
->     add admissible divider range on MMC node
->      -> reasonable, but we can't reuse it on other DIV6
->         what is difference between 2) and 3) ?
+> Yes, both the eMMC and uSD card detection lines in the Peach Pit/Pi
+> are connected to the XMMC0CDN and XMMC2CDN built-in CD# pins so is the
+> same than the Odroid XU3 if I read the schematics correctly since the
+> those pins are also GPC0_2 and GPC2_2.
 > 
->  3) add admissible max/min range on MMC driver
->     add admissible divider range on MMC driver
->      -> This is the reason why we have SoC specific compatible name ?
->         These limit came from SoC.
+> Now, in the Peach Pit Chromebook the eMMC is not removable so card
+> detection is not an issue there, the problem I'm having is that card
+> detection for the uSD seems to be broken after adding Addy's patches:
 > 
-> In my opinion, I can accept 1) or 3).
+> mmc: dw_mmc: fix bug that cause 'Timeout sending command'
+> mmc: dw_mmc: Don't start command while data busy
+> 
+> And adding a cd-gpios property with a phandle to gpc2_2 to the mmc2
+> device node does not help.
+> 
+> But without those patches, I've timeouts when mmc commands are sent to
+> the SDIO slot which has the wifi chip connected to.
+> 
+>> Regards
+>> Andrzej
+>>
+>>  arch/arm/boot/dts/exynos5422-odroidxu3.dts | 5 +++--
+>>  1 file changed, 3 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/arch/arm/boot/dts/exynos5422-odroidxu3.dts b/arch/arm/boot/dts/exynos5422-odroidxu3.dts
+>> index 47ec9bf..a563811 100644
+>> --- a/arch/arm/boot/dts/exynos5422-odroidxu3.dts
+>> +++ b/arch/arm/boot/dts/exynos5422-odroidxu3.dts
+>> @@ -11,6 +11,7 @@
+>>  */
+>>
+>>  /dts-v1/;
+>> +#include <dt-bindings/gpio/gpio.h>
+>>  #include "exynos5800.dtsi"
+>>
+>>  / {
+>> @@ -355,13 +356,13 @@
+>>
+>>  &mmc_0 {
+>>         status = "okay";
+>> -       broken-cd;
+>> +       cd-gpios = <&gpc0 2 GPIO_ACTIVE_LOW>;
+>>         card-detect-delay = <200>;
+>>         samsung,dw-mshc-ciu-div = <3>;
+>>         samsung,dw-mshc-sdr-timing = <0 4>;
+>>         samsung,dw-mshc-ddr-timing = <0 2>;
+>>         pinctrl-names = "default";
+>> -       pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8>;
+>> +       pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4 &sd0_bus8 &sd0_cd>;
+>>         bus-width = <8>;
+>>         cap-mmc-highspeed;
+>>  };
+>> --
+> 
+> Your patch looks good to me though from what I've seen in the Odroid
+> XU3 schematic and taking into account that the eMMC can be removed in
+> that board.
+> 
+> Reviewed-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
 
-Once again it really depends where the constraints come from. If the MMC input 
-clock frequency range constraint is dictated by the MMCIF IP core only, 
-options 2 and 3 are equivalent and just differ by whether they specify the 
-range explicitly in DT (option 2) or implicitly through the compatible name 
-(option 3).
+Hi Andrzej,
 
-If the range constraint comes from the CPG, option 1 is the way to go, 
-(although the admissible divider range could also be speficied in the MMC 
-driver as in option 3).
+The patch no longer applies cleanly, so could you re-spin it with
+Javier's tag above?
 
-If the range constraint is a property of the integration of the MMCIF in the 
-SoC then I think option 2 is the best. The per-SoC compatible strings can be 
-used to express differences between IP core versions found in different SoCs, 
-but they shouldn't be used to express integration properties.
+Best regards,
+Krzysztof
 
-To clarify this with an example, it's fine for the DU driver to use the per-
-SoC compatible string to know how many display channels the DU contains, but 
-it can't be used to hardcode IRQ numbers in the driver, even if we know which 
-IRQ the DU is hooked to for each SoC. The former is a property of the DU 
-version, the latter is a property of the integration and should be expressed 
-in DT.
-
--- 
-Regards,
-
-Laurent Pinchart
