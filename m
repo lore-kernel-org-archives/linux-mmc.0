@@ -1,71 +1,48 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [v2, 1/4] mmc: sdhci-pltfm: add little-endian mode support for
- SDHCI platform
-Date: Mon, 4 May 2015 12:42:59 +0200
-Message-ID: <CAPDyKFpfOOLnGxtoE6DwyRbmD2x7nZkNdsrOw0uS2HSx--nrnQ@mail.gmail.com>
-References: <1429005883-21089-1-git-send-email-yangbo.lu@freescale.com>
+Subject: Re: [PATCH 0/2] mmc: cast to avoid unexpected error
+Date: Mon, 4 May 2015 12:43:15 +0200
+Message-ID: <CAPDyKFqd=nUStFwO6BAAKT=b4gVXV_YHmf3jZxOtZ7CH3iHPLg@mail.gmail.com>
+References: <redmine.issue-68414.20150330134838@dm.renesas.com>
+	<redmine.journal-531718.20150406210913@dm.renesas.com>
+	<87wq1n5bht.wl%kuninori.morimoto.gx@renesas.com>
+	<87sic3bbhd.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f181.google.com ([209.85.216.181]:33503 "EHLO
-	mail-qc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752738AbbEDKnA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 May 2015 06:43:00 -0400
-Received: by qcvz3 with SMTP id z3so20212989qcv.0
-        for <linux-mmc@vger.kernel.org>; Mon, 04 May 2015 03:42:59 -0700 (PDT)
-In-Reply-To: <1429005883-21089-1-git-send-email-yangbo.lu@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <87sic3bbhd.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: ryusuke.sakato.bx@renesas.com, yoshihiro.shimoda.uh@renesas.com, hiroyuki.yokoyama.vx@renesas.com, takeshi.kihara.df@renesas.com, Jaehoon Chung <jh80.chung@samsung.com>, Chris Ball <chris@printf.net>, Seungwon Jeon <tgih.jun@samsung.com>, =?UTF-8?B?R3LDqWdvcnkgU291dGFkw6k=?= <gsoutade@neotion.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@freescale.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>
 
-On 14 April 2015 at 12:04, Yangbo Lu <yangbo.lu@freescale.com> wrote:
-> This patch adds little-endian mode support for little-endian host
-> controller. To indicate the little-endian mode, we could add
-> 'little-endian' property in device tree node.
+On 14 April 2015 at 06:06, Kuninori Morimoto
+<kuninori.morimoto.gx@renesas.com> wrote:
+> Hi Ulf
 >
-> Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
-> ---
->  drivers/mmc/host/sdhci-pltfm.c | 12 ++++++-
->  drivers/mmc/host/sdhci-pltfm.h | 74 ++++++++++++++++++++++++++++++------------
->  2 files changed, 64 insertions(+), 22 deletions(-)
+> These are non RFC version of mmc data cast patches
+> which were posted in
+> Subject: [PATCH 0/2][RFC] mmc: cast to avoid unexpected error
+> Date: Wed, 8 Apr 2015 07:32:35 +0000
 >
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-> index a207f5a..7ef1dcb 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -121,6 +121,8 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
->                                     size_t priv_size)
->  {
->         struct sdhci_host *host;
-> +       struct device_node *np = pdev->dev.of_node;
-> +       struct sdhci_pltfm_host *pltfm_host;
->         struct resource *iomem;
->         int ret;
+> These 2 patches adds cast to avoid unexpected error.
+> It tries copy to u64 without cast.
+> The data will be 0xfff... if last bit was 1.
+> These are reported by coverity tool.
+> I'm happy if someone tests it, or can get deep review.
 >
-> @@ -141,6 +143,14 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
->                 goto err;
->         }
+> Kuninori Morimoto (2):
+>       mmc: cast u8 to unsigned long long to avoid unexpected error
+>       mmc: cast unsigned int to typeof(sector_t) to avoid unexpected error
 >
-> +       pltfm_host = sdhci_priv(host);
-> +       pltfm_host->endian_mode = BIG_ENDIAN_MODE;
-> +
-> +#ifdef CONFIG_OF
-> +       if (of_get_property(np, "little-endian", NULL))
-> +               pltfm_host->endian_mode = LITTLE_ENDIAN_MODE;
+>  drivers/mmc/card/block.c | 2 +-
+>  drivers/mmc/core/mmc.c   | 6 ++++--
+>  2 files changed, 5 insertions(+), 3 deletions(-)
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-This should be a generic mmc host property. Please have the DT parsing
-to be done via mmc_of_parse().
-
-I also I think the default should be LITTLE_ENDIAN_MODE, which is also
-what of_device_is_big_endian() API is doing. I suggest you use that
-API and assign a bool variable in the struct mmc_host to its return
-value, from mmc_of_parse(). That variable may then be used by those
-mmc host drivers that needs it.
-
-Don't forget to update the mmc DT documentation.
-
-[...]
+Please run another round of checkpatch for these.
 
 Kind regards
 Uffe
