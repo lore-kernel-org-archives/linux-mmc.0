@@ -1,21 +1,18 @@
 From: Andrzej Hajda <a.hajda@samsung.com>
-Subject: [PATCH] ARM: dts: exynos5422-odroidxu3: add mmc detect gpio
-Date: Mon, 04 May 2015 13:03:11 +0200
-Message-ID: <1430737391-7202-1-git-send-email-a.hajda@samsung.com>
+Subject: [PATCH RESEND] ARM: dts: exynos5422-odroidxu3: add mmc detect gpio
+Date: Mon, 04 May 2015 13:28:43 +0200
+Message-ID: <1430738923-7435-1-git-send-email-a.hajda@samsung.com>
+References: <55473FD1.7060605@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.w1.samsung.com ([210.118.77.12]:52110 "EHLO
-	mailout2.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752532AbbEDLDe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 May 2015 07:03:34 -0400
-Received: from eucpsbgm2.samsung.com (unknown [203.254.199.245])
- by mailout2.w1.samsung.com
- (Oracle Communications Messaging Server 7.0.5.31.0 64bit (built May  5 2014))
- with ESMTP id <0NNT004RLO1V1590@mailout2.w1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 04 May 2015 12:03:31 +0100 (BST)
+Received: from mailout3.w1.samsung.com ([210.118.77.13]:46782 "EHLO
+	mailout3.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751615AbbEDL2x (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 May 2015 07:28:53 -0400
+In-reply-to: <55473FD1.7060605@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Krzysztof Kozlowski <k.kozlowski.k@gmail.com>, Javier Martinez Canillas <javier@dowhile0.org>
-Cc: Andrzej Hajda <a.hajda@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Krzysztof Kozlowski <k.kozlowski.k@gmail.com>
+Cc: Andrzej Hajda <a.hajda@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Kyungmin Park <kyungmin.park@samsung.com>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Kukjin Kim <kgene@kernel.org>, Javier Martinez Canillas <javier@dowhile0.org>
 
 The patch adds gpio for detecting presence of MMC card.
 It fixes issue with kernel hang when MMC card is missing.
@@ -25,7 +22,10 @@ Reviewed-by: Javier Martinez Canillas <javier.martinez@collabora.co.uk>
 ---
 Hi Krzysztof,
 
-It is rebased on the latest next.
+This is 2nd try today, previously there were missing some
+addresses in Cc.
+
+The patch is rebased on the latest next.
 
 Regards
 Andrzej
