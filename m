@@ -1,57 +1,45 @@
-From: Eliad Peller <eliad@wizery.com>
-Subject: [PATCH] mmc: core: don't call bus_ops->power_restore if already on
-Date: Tue,  5 May 2015 19:03:47 +0300
-Message-ID: <1430841827-7834-1-git-send-email-eliad@wizery.com>
+From: Rob Herring <robherring2@gmail.com>
+Subject: Re: [PATCH v5 1/1] arm64: dts: Add the arasan sdhc nodes in apm-storm.dtsi.
+Date: Tue, 5 May 2015 14:41:21 -0500
+Message-ID: <CAL_JsqK0pCtL2pbG7RttYd7BDxQHxdECHN_9X9MpLTuVEOxzsQ@mail.gmail.com>
+References: <1430817426-5241-1-git-send-email-stripathi@apm.com> <1430817426-5241-2-git-send-email-stripathi@apm.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:37554 "EHLO
-	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753604AbbEEQJF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 12:09:05 -0400
-Received: by widdi4 with SMTP id di4so152903926wid.0
-        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2015 09:09:03 -0700 (PDT)
+Received: from mail-yh0-f47.google.com ([209.85.213.47]:33941 "EHLO
+	mail-yh0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753345AbbEETlm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 15:41:42 -0400
+In-Reply-To: <1430817426-5241-2-git-send-email-stripathi@apm.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ido Yariv <ido@wizery.com>
+To: Suman Tripathi <stripathi@apm.com>
+Cc: "chris@printf.net" <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Arnd Bergmann <arnd@arndb.de>, Michal Simek <michal.simek@xilinx.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, ddutile@redhat.com, "jcm@redhat.com" <jcm@redhat.com>, Mark Langsdorf <mlangsdo@redhat.com>, "patches@apm.com" <patches@apm.com>
 
-mmc_power_restore_host() calls mmc_power_up(), which
-returns immediately if power is already on.
+On Tue, May 5, 2015 at 4:17 AM, Suman Tripathi <stripathi@apm.com> wrote:
+> This patch adds the arasan sdhc nodes to reuse the of-arasan
+> driver for APM X-Gene SoC.
+>
+> Signed-off-by: Suman Tripathi <stripathi@apm.com>
+> ---
+>  arch/arm64/boot/dts/apm/apm-mustang.dts |  4 +++
+>  arch/arm64/boot/dts/apm/apm-storm.dtsi  | 44 +++++++++++++++++++++++++++++++++
+>  2 files changed, 48 insertions(+)
 
-However, it still calls host->bus_ops->power_restore,
-which might result in various errors if the bus_ops
-doesn't handle it well (e.g. failing to run init
-sequence twice)
+[...]
 
-Simply bail out in this case, without further calling
-bus_ops->power_restore.
+> @@ -533,6 +567,16 @@
+>                         interrupts = <0x0 0x4f 0x4>;
+>                 };
+>
+> +               sdhc0: sdhc@1c000000 {
+> +                       device_type = "sdhc";
 
-Specifically, this solves issue with wl18xx sdio card,
-where the mmc core powers on the card on resume (while
-MMC_PM_KEEP_POWER is not set), and the wl18xx device
-driver calls mmc_power_restore_host() once more.
+device_type generally should not be used (there are a few exceptions).
 
-Signed-off-by: Eliad Peller <eliad@wizery.com>
-Signed-off-by: Ido Yariv <ido@wizery.com>
----
- drivers/mmc/core/core.c | 5 +++++
- 1 file changed, 5 insertions(+)
+> +                       compatible = "arasan,sdhci-4.9a";
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index c296bc0..797b574 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2604,6 +2604,11 @@ int mmc_power_restore_host(struct mmc_host *host)
- 		return -EINVAL;
- 	}
- 
-+	if (host->ios.power_mode == MMC_POWER_ON) {
-+		mmc_bus_put(host);
-+		return 0;
-+	}
-+
- 	mmc_power_up(host, host->card->ocr);
- 	ret = host->bus_ops->power_restore(host);
- 
--- 
-1.8.5.2.229.g4448466.dirty
+If you ever have an integration or xgene specific problem, you need a
+chip specific compatible.
 
+Rob
