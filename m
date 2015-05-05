@@ -1,52 +1,62 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/6] mmc: davinci: Constify platform_device_id
-Date: Tue, 5 May 2015 10:36:21 +0200
-Message-ID: <CAPDyKFrpTiztS1UrMQRXX4o9=s1L7qzX9JTdNNHQUrx5sa5aiA@mail.gmail.com>
-References: <1430495362-31506-1-git-send-email-k.kozlowski.k@gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v4 0/3] Add SDHCI support for APM X-Gene SoC using ARASAN
+ SDHCI controller.
+Date: Tue, 5 May 2015 10:36:37 +0200
+Message-ID: <CAPDyKFqva7jioEpf1qBv+sSo9-ZWU69+wb9qTF1X+4cxOgf2uQ@mail.gmail.com>
+References: <1430746792-32574-1-git-send-email-stripathi@apm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f179.google.com ([209.85.220.179]:34823 "EHLO
-	mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030868AbbEEIgW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 04:36:22 -0400
-Received: by qkhg7 with SMTP id g7so100985935qkh.2
-        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2015 01:36:21 -0700 (PDT)
-In-Reply-To: <1430495362-31506-1-git-send-email-k.kozlowski.k@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1430746792-32574-1-git-send-email-stripathi-qTEPVZfXA3Y@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Don Dutile <ddutile-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, patches-qTEPVZfXA3Y@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Krzysztof Kozlowski <k.kozlowski.k@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Ben Dooks <ben-linux@fluff.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 1 May 2015 at 17:49, Krzysztof Kozlowski <k.kozlowski.k@gmail.com> wrote:
-> The platform_device_id is not modified by the driver and core uses it as
-> const.
+On 4 May 2015 at 15:39, Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org> wrote:
+> This patch adds the SDHCI support for APM X-Gene SoC using ARASAN SDHCI controller.
 >
-> Signed-off-by: Krzysztof Kozlowski <k.kozlowski.k@gmail.com>
+> v1 change:
+>  * Use the CONFIG_ARM64_DMA_HAS_IOMMU for dma-mapping.
+>
+> v2 change:
+>  * Drop the IOMMU support and switching to PIO mode for arasan.
+>    controller integrated inside APM X-Gene SoC.
+>
+> v3 change:
+>  * Change the sdhci-of-arasan.c to support arasan4.9a.
+>  * Add quirks for arasan4.9a.
+>
+> v4 change:
+>  * Cleanup the Documentation and dts.
+>
+> Signed-off-by: Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
+> ---
+>
+> Suman Tripathi (3):
+>   arm64: dts: Add the arasan sdhc nodes in apm-storm.dtsi.
+>   mmc: host: arasan: Add the support for sdhci-arasan4.9a in
+>     sdhci-of-arasan.c
+>   Documentation: mmc: Update Arasan SDHC documentation to support 4.9a
+>     version of     Arasan SDHC controller.
+>
+>  .../devicetree/bindings/mmc/arasan,sdhci.txt       |  3 +-
+>  arch/arm64/boot/dts/apm-mustang.dts                |  4 ++
+>  arch/arm64/boot/dts/apm-storm.dtsi                 | 44 ++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-of-arasan.c                 |  7 ++++
+>  4 files changed, 57 insertions(+), 1 deletion(-)
+>
 
-Thanks, applied all patches (1->6). The last one I updated the prefix
-in commit message header to "sdhci".
+Thanks!
+
+I have applied patch2 and patch3. Though, I decided to squash them
+into one patch and changed the commit message header a bit.
+
+I couldn't apply patch 1, so I guess that will be taken through arm soc?
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/davinci_mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-> index 1625f908dc70..ea2a2ebc6b91 100644
-> --- a/drivers/mmc/host/davinci_mmc.c
-> +++ b/drivers/mmc/host/davinci_mmc.c
-> @@ -1161,7 +1161,7 @@ static void __init init_mmcsd_host(struct mmc_davinci_host *host)
->         mmc_davinci_reset_ctrl(host, 0);
->  }
->
-> -static struct platform_device_id davinci_mmc_devtype[] = {
-> +static const struct platform_device_id davinci_mmc_devtype[] = {
->         {
->                 .name   = "dm6441-mmc",
->                 .driver_data = MMC_CTLR_VERSION_1,
-> --
-> 2.1.4
->
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
