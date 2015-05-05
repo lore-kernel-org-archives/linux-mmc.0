@@ -1,57 +1,76 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 5/7] mmc: host: sdhci-esdhc-imx: fix broken email address
-Date: Tue, 5 May 2015 10:33:57 +0200
-Message-ID: <CAPDyKFroUmeBTjOJxWbE5K9ygQPDrH1aEORBVxHE5eY1fwJ+Ow@mail.gmail.com>
-References: <1429537917-7433-1-git-send-email-wsa@the-dreams.de>
-	<1429537917-7433-5-git-send-email-wsa@the-dreams.de>
+Subject: Re: [PATCH] sdhci-of-esdhc: Support 8BIT bus width.
+Date: Tue, 5 May 2015 10:34:27 +0200
+Message-ID: <CAPDyKFpQuLDafARu6=5XqxPsShRzcC__ZFgjE1yUrP4SobFjGQ@mail.gmail.com>
+References: <1429564296-30396-1-git-send-email-joakim.tjernlund@transmode.se>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1429537917-7433-5-git-send-email-wsa@the-dreams.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f52.google.com ([209.85.192.52]:34997 "EHLO
+	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756811AbbEEIe3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 04:34:29 -0400
+Received: by qgej70 with SMTP id j70so77647570qge.2
+        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2015 01:34:28 -0700 (PDT)
+In-Reply-To: <1429564296-30396-1-git-send-email-joakim.tjernlund@transmode.se>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Joakim Tjernlund <joakim.tjernlund@transmode.se>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 20 April 2015 at 15:51, Wolfram Sang <wsa@the-dreams.de> wrote:
-> My Pengutronix address is not valid anymore, redirect people to the Pengutronix
-> kernel team.
->
-> Reported-by: Harald Geyer <harald@ccbib.org>
-> Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
-> Acked-by: Robert Schwebel <r.schwebel@pengutronix.de>
+On 20 April 2015 at 23:11, Joakim Tjernlund
+<joakim.tjernlund@transmode.se> wrote:
+> Signed-off-by: Joakim Tjernlund <joakim.tjernlund@transmode.se>
 
 Thanks, applied.
 
 Kind regards
 Uffe
 
+
 > ---
-> These patches shall go via the individual subsystem trees.
+>  drivers/mmc/host/sdhci-of-esdhc.c | 10 ++++++++++
+>  1 file changed, 10 insertions(+)
 >
->  drivers/mmc/host/sdhci-esdhc-imx.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 22e9111..7130130 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -82,6 +82,10 @@ static u8 esdhc_readb(struct sdhci_host *host, int reg)
+>                 /* fixup the result */
+>                 ret &= ~SDHCI_CTRL_DMA_MASK;
+>                 ret |= dma_bits;
+> +
+> +               /* 8BIT is bit 29 in Control register */
+> +               ret |= ((ret << 3) & SDHCI_CTRL_8BITBUS);
+> +               ret &= ~(SDHCI_CTRL_8BITBUS >> 3);
+>         }
 >
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 10ef8244a23963..3d7aa50e04578a 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -4,7 +4,7 @@
->   * derived from the OF-version.
->   *
->   * Copyright (c) 2010 Pengutronix e.K.
-> - *   Author: Wolfram Sang <w.sang@pengutronix.de>
-> + *   Author: Wolfram Sang <kernel@pengutronix.de>
->   *
->   * This program is free software; you can redistribute it and/or modify
->   * it under the terms of the GNU General Public License as published by
-> @@ -1173,5 +1173,5 @@ static struct platform_driver sdhci_esdhc_imx_driver = {
->  module_platform_driver(sdhci_esdhc_imx_driver);
+>         return ret;
+> @@ -134,6 +138,10 @@ static void esdhc_writeb(struct sdhci_host *host, u8 val, int reg)
+>                         dma_bits);
+>                 val &= ~SDHCI_CTRL_DMA_MASK;
+>                 val |= in_be32(host->ioaddr + reg) & SDHCI_CTRL_DMA_MASK;
+> +
+> +               /* 8BIT is bit 29 in Control register */
+> +               val |= ((val & SDHCI_CTRL_8BITBUS) >> 3);
+> +               val = (val & ~SDHCI_CTRL_8BITBUS);
+>         }
 >
->  MODULE_DESCRIPTION("SDHCI driver for Freescale i.MX eSDHC");
-> -MODULE_AUTHOR("Wolfram Sang <w.sang@pengutronix.de>");
-> +MODULE_AUTHOR("Wolfram Sang <kernel@pengutronix.de>");
->  MODULE_LICENSE("GPL v2");
+>         /* Prevent SDHCI core from writing reserved bits (e.g. HISPD). */
+> @@ -252,6 +260,8 @@ static void esdhc_of_platform_init(struct sdhci_host *host)
+>
+>         if (vvn > VENDOR_V_22)
+>                 host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
+> +
+> +       host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+>  }
+>
+>  static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
 > --
-> 2.1.4
+> 2.0.5
 >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
