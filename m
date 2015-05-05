@@ -1,41 +1,78 @@
-From: Zhangfei Gao <zhangfei.gao@linaro.org>
-Subject: [PATCH] mmc: dw_mmc: dw_mci_get_cd check MMC_CAP_NONREMOVABLE
-Date: Tue,  5 May 2015 16:54:49 +0800
-Message-ID: <1430816089-8857-1-git-send-email-zhangfei.gao@linaro.org>
+From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
+Subject: Re: [PATCH] sdhci-of-esdhc: Support 8BIT bus width.
+Date: Tue, 5 May 2015 09:04:33 +0000
+Message-ID: <1430816674.27859.71.camel@transmode.se>
+References: <1429564296-30396-1-git-send-email-joakim.tjernlund@transmode.se>
+	 <CAPDyKFpQuLDafARu6=5XqxPsShRzcC__ZFgjE1yUrP4SobFjGQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f180.google.com ([209.85.192.180]:35832 "EHLO
-	mail-pd0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1031013AbbEEIzD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 04:55:03 -0400
-Received: by pdbqd1 with SMTP id qd1so189244759pdb.2
-        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2015 01:55:03 -0700 (PDT)
+Received: from smtp.transmode.se ([31.15.61.139]:59193 "EHLO smtp.transmode.se"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1031094AbbEEJEj convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 05:04:39 -0400
+In-Reply-To: <CAPDyKFpQuLDafARu6=5XqxPsShRzcC__ZFgjE1yUrP4SobFjGQ@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <FBAAD645F43FD545BD7A21F9CB7F65A0@transmode.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org, Zhangfei Gao <zhangfei.gao@linaro.org>
+To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-When non-removable is used for emmc,  MMC_CAP_NONREMOVABLE should
-also be checked, otherwise detection fail since present=0
+On Tue, 2015-05-05 at 10:34 +0200, Ulf Hansson wrote:
+> On 20 April 2015 at 23:11, Joakim Tjernlund
+> <joakim.tjernlund@transmode.se> wrote:
+> > Signed-off-by: Joakim Tjernlund <joakim.tjernlund@transmode.se>
+> 
+> Thanks, applied.
+> 
+> Kind regards
+> Uffe
 
-Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
----
- drivers/mmc/host/dw_mmc.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+Argh, I just learned that this patch is buggy. Please "unapply"
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 488a8af..5d327e4 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1308,7 +1308,8 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
- 	int gpio_cd = mmc_gpio_get_cd(mmc);
- 
- 	/* Use platform get_cd function, else try onboard card detect */
--	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
-+	if ((brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION) ||
-+	    (mmc->caps & MMC_CAP_NONREMOVABLE))
- 		present = 1;
- 	else if (!IS_ERR_VALUE(gpio_cd))
- 		present = gpio_cd;
--- 
-1.9.1
+ Jocke
+
+> 
+> 
+> > ---
+> >  drivers/mmc/host/sdhci-of-esdhc.c | 10 ++++++++++
+> >  1 file changed, 10 insertions(+)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> > index 22e9111..7130130 100644
+> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> > @@ -82,6 +82,10 @@ static u8 esdhc_readb(struct sdhci_host *host, int reg)
+> >                 /* fixup the result */
+> >                 ret &= ~SDHCI_CTRL_DMA_MASK;
+> >                 ret |= dma_bits;
+> > +
+> > +               /* 8BIT is bit 29 in Control register */
+> > +               ret |= ((ret << 3) & SDHCI_CTRL_8BITBUS);
+> > +               ret &= ~(SDHCI_CTRL_8BITBUS >> 3);
+> >         }
+> > 
+> >         return ret;
+> > @@ -134,6 +138,10 @@ static void esdhc_writeb(struct sdhci_host *host, u8 val, int reg)
+> >                         dma_bits);
+> >                 val &= ~SDHCI_CTRL_DMA_MASK;
+> >                 val |= in_be32(host->ioaddr + reg) & SDHCI_CTRL_DMA_MASK;
+> > +
+> > +               /* 8BIT is bit 29 in Control register */
+> > +               val |= ((val & SDHCI_CTRL_8BITBUS) >> 3);
+> > +               val = (val & ~SDHCI_CTRL_8BITBUS);
+> >         }
+> > 
+> >         /* Prevent SDHCI core from writing reserved bits (e.g. HISPD). */
+> > @@ -252,6 +260,8 @@ static void esdhc_of_platform_init(struct sdhci_host *host)
+> > 
+> >         if (vvn > VENDOR_V_22)
+> >                 host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
+> > +
+> > +       host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+> >  }
+> > 
+> >  static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
 
