@@ -1,78 +1,60 @@
-From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
-Subject: Re: [PATCH] sdhci-of-esdhc: Support 8BIT bus width.
-Date: Tue, 5 May 2015 09:04:33 +0000
-Message-ID: <1430816674.27859.71.camel@transmode.se>
-References: <1429564296-30396-1-git-send-email-joakim.tjernlund@transmode.se>
-	 <CAPDyKFpQuLDafARu6=5XqxPsShRzcC__ZFgjE1yUrP4SobFjGQ@mail.gmail.com>
+From: Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>
+Subject: Re: [PATCH 2/2] mmc: sdhci: DT: Allow to specify that no write protect
+ signal is present
+Date: Tue, 05 May 2015 11:04:48 +0200
+Message-ID: <554887B0.4020407@metafoo.de>
+References: <1430214020-16816-1-git-send-email-lars@metafoo.de>	<1430214020-16816-2-git-send-email-lars@metafoo.de> <CAPDyKFpC9uc0n8HLiC1gWgdJOM-0DGVaNazkF3Q847r-sfXNtg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.transmode.se ([31.15.61.139]:59193 "EHLO smtp.transmode.se"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1031094AbbEEJEj convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 05:04:39 -0400
-In-Reply-To: <CAPDyKFpQuLDafARu6=5XqxPsShRzcC__ZFgjE1yUrP4SobFjGQ@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <FBAAD645F43FD545BD7A21F9CB7F65A0@transmode.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFpC9uc0n8HLiC1gWgdJOM-0DGVaNazkF3Q847r-sfXNtg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mike Looijmans <mike.looijmans-Oq418RWZeHk@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Tue, 2015-05-05 at 10:34 +0200, Ulf Hansson wrote:
-> On 20 April 2015 at 23:11, Joakim Tjernlund
-> <joakim.tjernlund@transmode.se> wrote:
-> > Signed-off-by: Joakim Tjernlund <joakim.tjernlund@transmode.se>
-> 
-> Thanks, applied.
-> 
-> Kind regards
-> Uffe
+On 05/05/2015 10:36 AM, Ulf Hansson wrote:
+[...]
+>> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+>> index 438899e..b068549 100644
+>> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+>> @@ -21,6 +21,7 @@ Optional properties:
+>>     below for the case, when a GPIO is used for the CD line
+>>   - wp-inverted: when present, polarity on the WP line is inverted. See the note
+>>     below for the case, when a GPIO is used for the WP line
+>> +- disable-wp: When set no physical WP line is present
+>
+> This requires some additional explanation, I believe. I assume this
+> property is only relevant for those controllers that have internal
+> logic to handle WP!?
 
-Argh, I just learned that this patch is buggy. Please "unapply"
+Yes, currently drivers for controllers that have a built-in WP detection 
+logic typically assume that if no WP GPIO is specified the built-in WP logic 
+should be used. But for some of them the value returned by the internal 
+detection logic will be bogus if there is no WP signal connected. So we need 
+a way to specify that that there is no WP signal and the internal detection 
+logic shouldn't be used either.
 
- Jocke
+>
+> For those that uses GPIO, this can't ever be a correct configuration. Right?
 
-> 
-> 
-> > ---
-> >  drivers/mmc/host/sdhci-of-esdhc.c | 10 ++++++++++
-> >  1 file changed, 10 insertions(+)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> > index 22e9111..7130130 100644
-> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> > @@ -82,6 +82,10 @@ static u8 esdhc_readb(struct sdhci_host *host, int reg)
-> >                 /* fixup the result */
-> >                 ret &= ~SDHCI_CTRL_DMA_MASK;
-> >                 ret |= dma_bits;
-> > +
-> > +               /* 8BIT is bit 29 in Control register */
-> > +               ret |= ((ret << 3) & SDHCI_CTRL_8BITBUS);
-> > +               ret &= ~(SDHCI_CTRL_8BITBUS >> 3);
-> >         }
-> > 
-> >         return ret;
-> > @@ -134,6 +138,10 @@ static void esdhc_writeb(struct sdhci_host *host, u8 val, int reg)
-> >                         dma_bits);
-> >                 val &= ~SDHCI_CTRL_DMA_MASK;
-> >                 val |= in_be32(host->ioaddr + reg) & SDHCI_CTRL_DMA_MASK;
-> > +
-> > +               /* 8BIT is bit 29 in Control register */
-> > +               val |= ((val & SDHCI_CTRL_8BITBUS) >> 3);
-> > +               val = (val & ~SDHCI_CTRL_8BITBUS);
-> >         }
-> > 
-> >         /* Prevent SDHCI core from writing reserved bits (e.g. HISPD). */
-> > @@ -252,6 +260,8 @@ static void esdhc_of_platform_init(struct sdhci_host *host)
-> > 
-> >         if (vvn > VENDOR_V_22)
-> >                 host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
-> > +
-> > +       host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-> >  }
-> > 
-> >  static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
+It wouldn't make much sense to use it with a GPIO based detection logic, 
+since you simply don't specify the wp-gpio property if it is not present. 
+One the other hand it wouldn't cause any harm to specify it in addition to 
+not specifying the wp-gpios property.
 
+How about:
+
+- disable-wp: When set no physical WP line is present. This property should 
+only be specified when the controller has a dedicated write-protect 
+detection logic. If a GPIO is used for write-protect detection logic is used 
+it is sufficient to not specify wp-gpios property in the absence of a WP line.
+
+[...]
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
