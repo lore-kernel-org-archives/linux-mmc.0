@@ -1,123 +1,75 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 1/1] arm64: dts: Add the arasan sdhc nodes in apm-storm.dtsi.
-Date: Tue, 5 May 2015 12:34:29 +0200
-Message-ID: <CAPDyKFpfiid4ny0fhw-yNfzCrynZnALNs+i51yeMhPneQ4XFFQ@mail.gmail.com>
-References: <1430817426-5241-1-git-send-email-stripathi@apm.com>
-	<1430817426-5241-2-git-send-email-stripathi@apm.com>
+Subject: Re: [PATCH] mmc: sdhci-{pxav2,pxav3}: Use of_match_ptr() macro
+Date: Tue, 5 May 2015 12:34:41 +0200
+Message-ID: <CAPDyKFrusYNvS3n6A6GzaUvF7Ei_GCwNpgAxNtwY85GqnH8W-Q@mail.gmail.com>
+References: <1430817114.20613.1.camel@ingics.com>
+	<20150505172429.4711e86f@xhacker>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f50.google.com ([209.85.192.50]:36429 "EHLO
-	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753350AbbEEKea (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 06:34:30 -0400
-Received: by qgeb100 with SMTP id b100so78571077qge.3
-        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2015 03:34:29 -0700 (PDT)
-In-Reply-To: <1430817426-5241-2-git-send-email-stripathi@apm.com>
+Received: from mail-qk0-f179.google.com ([209.85.220.179]:36444 "EHLO
+	mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751057AbbEEKem (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 06:34:42 -0400
+Received: by qku63 with SMTP id 63so102108869qku.3
+        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2015 03:34:41 -0700 (PDT)
+In-Reply-To: <20150505172429.4711e86f@xhacker>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Suman Tripathi <stripathi@apm.com>
-Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Arnd Bergmann <arnd@arndb.de>, Michal Simek <michal.simek@xilinx.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Don Dutile <ddutile@redhat.com>, Jon Masters <jcm@redhat.com>, Mark Langsdorf <mlangsdo@redhat.com>, patches <patches@apm.com>
+To: Jisheng Zhang <jszhang@marvell.com>, Axel Lin <axel.lin@ingics.com>
+Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 5 May 2015 at 11:17, Suman Tripathi <stripathi@apm.com> wrote:
-> This patch adds the arasan sdhc nodes to reuse the of-arasan
-> driver for APM X-Gene SoC.
+On 5 May 2015 at 11:24, Jisheng Zhang <jszhang@marvell.com> wrote:
+> On Tue, 5 May 2015 02:11:54 -0700
+> Axel Lin <axel.lin@ingics.com> wrote:
 >
-> Signed-off-by: Suman Tripathi <stripathi@apm.com>
+>> This eliminates having an #ifdef returning NULL for the case
+>> when OF is disabled.
+>>
+>> Signed-off-by: Axel Lin <axel.lin@ingics.com>
+>> ---
+>>  drivers/mmc/host/sdhci-pxav2.c | 4 +---
+>>  drivers/mmc/host/sdhci-pxav3.c | 4 +---
+>>  2 files changed, 2 insertions(+), 6 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+>> index f98008b..beffd86 100644
+>> --- a/drivers/mmc/host/sdhci-pxav2.c
+>> +++ b/drivers/mmc/host/sdhci-pxav2.c
+>> @@ -252,9 +252,7 @@ static int sdhci_pxav2_remove(struct platform_device *pdev)
+>>  static struct platform_driver sdhci_pxav2_driver = {
+>>       .driver         = {
+>>               .name   = "sdhci-pxav2",
+>> -#ifdef CONFIG_OF
+>> -             .of_match_table = sdhci_pxav2_of_match,
+>> -#endif
+>> +             .of_match_table = of_match_ptr(sdhci_pxav2_of_match),
+>>               .pm     = SDHCI_PLTFM_PMOPS,
+>>       },
+>>       .probe          = sdhci_pxav2_probe,
+>> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+>> index b5103a2..01cb2d3 100644
+>> --- a/drivers/mmc/host/sdhci-pxav3.c
+>> +++ b/drivers/mmc/host/sdhci-pxav3.c
+>> @@ -578,9 +578,7 @@ static const struct dev_pm_ops sdhci_pxav3_pmops = {
+>>  static struct platform_driver sdhci_pxav3_driver = {
+>>       .driver         = {
+>>               .name   = "sdhci-pxav3",
+>> -#ifdef CONFIG_OF
+>> -             .of_match_table = sdhci_pxav3_of_match,
+>> -#endif
+>> +             .of_match_table = of_match_ptr(sdhci_pxav3_of_match),
+>>               .pm     = SDHCI_PXAV3_PMOPS,
+>>       },
+>>       .probe          = sdhci_pxav3_probe,
+>
+> Looks good to me.
+>
+> Thanks
 
-I consider this one acked by Arnd, due to:
-http://www.spinics.net/lists/arm-kernel/msg415634.html
+I consider that as an ack.
 
-Thus applied to my mmc tree.
-
-Thanks!
+Thanks, applied.
 
 Kind regards
 Uffe
-
-> ---
->  arch/arm64/boot/dts/apm/apm-mustang.dts |  4 +++
->  arch/arm64/boot/dts/apm/apm-storm.dtsi  | 44 +++++++++++++++++++++++++++++++++
->  2 files changed, 48 insertions(+)
->
-> diff --git a/arch/arm64/boot/dts/apm/apm-mustang.dts b/arch/arm64/boot/dts/apm/apm-mustang.dts
-> index 83578e7..4cc5d07 100644
-> --- a/arch/arm64/boot/dts/apm/apm-mustang.dts
-> +++ b/arch/arm64/boot/dts/apm/apm-mustang.dts
-> @@ -52,3 +52,7 @@
->  &xgenet {
->         status = "ok";
->  };
-> +
-> +&sdhc0 {
-> +       status = "ok";
-> +};
-> diff --git a/arch/arm64/boot/dts/apm/apm-storm.dtsi b/arch/arm64/boot/dts/apm/apm-storm.dtsi
-> index c8d3e0e..240c793 100644
-> --- a/arch/arm64/boot/dts/apm/apm-storm.dtsi
-> +++ b/arch/arm64/boot/dts/apm/apm-storm.dtsi
-> @@ -145,6 +145,40 @@
->                                 clock-output-names = "socplldiv2";
->                         };
->
-> +                       ahbclk: ahbclk@1f2ac000 {
-> +                               compatible = "apm,xgene-device-clock";
-> +                               #clock-cells = <1>;
-> +                               clocks = <&socplldiv2 0>;
-> +                               reg = <0x0 0x1f2ac000 0x0 0x1000
-> +                                       0x0 0x17000000 0x0 0x2000>;
-> +                               reg-names = "csr-reg", "div-reg";
-> +                               csr-offset = <0x0>;
-> +                               csr-mask = <0x1>;
-> +                               enable-offset = <0x8>;
-> +                               enable-mask = <0x1>;
-> +                               divider-offset = <0x164>;
-> +                               divider-width = <0x5>;
-> +                               divider-shift = <0x0>;
-> +                               clock-output-names = "ahbclk";
-> +                       };
-> +
-> +                       sdioclk: sdioclk@1f2ac000 {
-> +                               compatible = "apm,xgene-device-clock";
-> +                               #clock-cells = <1>;
-> +                               clocks = <&socplldiv2 0>;
-> +                               reg = <0x0 0x1f2ac000 0x0 0x1000
-> +                                       0x0 0x17000000 0x0 0x2000>;
-> +                               reg-names = "csr-reg", "div-reg";
-> +                               csr-offset = <0x0>;
-> +                               csr-mask = <0x2>;
-> +                               enable-offset = <0x8>;
-> +                               enable-mask = <0x2>;
-> +                               divider-offset = <0x178>;
-> +                               divider-width = <0x8>;
-> +                               divider-shift = <0x0>;
-> +                               clock-output-names = "sdioclk";
-> +                       };
-> +
->                         qmlclk: qmlclk {
->                                 compatible = "apm,xgene-device-clock";
->                                 #clock-cells = <1>;
-> @@ -533,6 +567,16 @@
->                         interrupts = <0x0 0x4f 0x4>;
->                 };
->
-> +               sdhc0: sdhc@1c000000 {
-> +                       device_type = "sdhc";
-> +                       compatible = "arasan,sdhci-4.9a";
-> +                       reg = <0x0 0x1c000000 0x0 0x100>;
-> +                       interrupts = <0x0 0x49 0x4>;
-> +                       dma-coherent;
-> +                       clock-names = "clk_xin", "clk_ahb";
-> +                       clocks = <&sdioclk 0>, <&ahbclk 0>;
-> +               };
-> +
->                 phy1: phy@1f21a000 {
->                         compatible = "apm,xgene-phy";
->                         reg = <0x0 0x1f21a000 0x0 0x100>;
-> --
-> 1.8.2.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
