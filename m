@@ -1,85 +1,78 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] sdhci-of-esdhc: Support 8BIT bus width.
-Date: Tue, 5 May 2015 12:11:31 +0200
-Message-ID: <CAPDyKFo-j-9SCH+EBqqgCaRpDcHsNp3s_hOL7aAuUMiVmBe-ig@mail.gmail.com>
-References: <1429564296-30396-1-git-send-email-joakim.tjernlund@transmode.se>
-	<CAPDyKFpQuLDafARu6=5XqxPsShRzcC__ZFgjE1yUrP4SobFjGQ@mail.gmail.com>
-	<1430816674.27859.71.camel@transmode.se>
+Subject: Re: [PATCH 2/2] mmc: sdhci: DT: Allow to specify that no write
+ protect signal is present
+Date: Tue, 5 May 2015 12:15:13 +0200
+Message-ID: <CAPDyKFrpTLZokiHCKCafh6neBmYpDtk2hLq6X57rzR8GY-bgug@mail.gmail.com>
+References: <1430214020-16816-1-git-send-email-lars@metafoo.de>
+	<1430214020-16816-2-git-send-email-lars@metafoo.de>
+	<CAPDyKFpC9uc0n8HLiC1gWgdJOM-0DGVaNazkF3Q847r-sfXNtg@mail.gmail.com>
+	<554887B0.4020407@metafoo.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f174.google.com ([209.85.220.174]:36071 "EHLO
-	mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757522AbbEEKLc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 06:11:32 -0400
-Received: by qku63 with SMTP id 63so101851923qku.3
-        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2015 03:11:31 -0700 (PDT)
-In-Reply-To: <1430816674.27859.71.camel@transmode.se>
+Received: from mail-qk0-f171.google.com ([209.85.220.171]:35711 "EHLO
+	mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757675AbbEEKPO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 06:15:14 -0400
+Received: by qkhg7 with SMTP id g7so101998612qkh.2
+        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2015 03:15:14 -0700 (PDT)
+In-Reply-To: <554887B0.4020407@metafoo.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Joakim Tjernlund <joakim.tjernlund@transmode.se>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Lars-Peter Clausen <lars@metafoo.de>
+Cc: Mike Looijmans <mike.looijmans@topic.nl>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>
 
-On 5 May 2015 at 11:04, Joakim Tjernlund <joakim.tjernlund@transmode.se> wrote:
-> On Tue, 2015-05-05 at 10:34 +0200, Ulf Hansson wrote:
->> On 20 April 2015 at 23:11, Joakim Tjernlund
->> <joakim.tjernlund@transmode.se> wrote:
->> > Signed-off-by: Joakim Tjernlund <joakim.tjernlund@transmode.se>
+On 5 May 2015 at 11:04, Lars-Peter Clausen <lars@metafoo.de> wrote:
+> On 05/05/2015 10:36 AM, Ulf Hansson wrote:
+> [...]
+>>>
+>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt
+>>> b/Documentation/devicetree/bindings/mmc/mmc.txt
+>>> index 438899e..b068549 100644
+>>> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+>>> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+>>> @@ -21,6 +21,7 @@ Optional properties:
+>>>     below for the case, when a GPIO is used for the CD line
+>>>   - wp-inverted: when present, polarity on the WP line is inverted. See
+>>> the note
+>>>     below for the case, when a GPIO is used for the WP line
+>>> +- disable-wp: When set no physical WP line is present
 >>
->> Thanks, applied.
 >>
->> Kind regards
->> Uffe
+>> This requires some additional explanation, I believe. I assume this
+>> property is only relevant for those controllers that have internal
+>> logic to handle WP!?
 >
-> Argh, I just learned that this patch is buggy. Please "unapply"
 >
->  Jocke
+> Yes, currently drivers for controllers that have a built-in WP detection
+> logic typically assume that if no WP GPIO is specified the built-in WP logic
+> should be used. But for some of them the value returned by the internal
+> detection logic will be bogus if there is no WP signal connected. So we need
+> a way to specify that that there is no WP signal and the internal detection
+> logic shouldn't be used either.
 >
+>>
+>> For those that uses GPIO, this can't ever be a correct configuration.
+>> Right?
+>
+>
+> It wouldn't make much sense to use it with a GPIO based detection logic,
+> since you simply don't specify the wp-gpio property if it is not present.
+> One the other hand it wouldn't cause any harm to specify it in addition to
+> not specifying the wp-gpios property.
+>
+> How about:
+>
+> - disable-wp: When set no physical WP line is present. This property should
+> only be specified when the controller has a dedicated write-protect
+> detection logic. If a GPIO is used for write-protect detection logic is used
 
-Done!
+Remove the last "is used".
+
+> it is sufficient to not specify wp-gpios property in the absence of a WP
+> line.
+
+Looks good!
 
 Kind regards
 Uffe
-
->>
->>
->> > ---
->> >  drivers/mmc/host/sdhci-of-esdhc.c | 10 ++++++++++
->> >  1 file changed, 10 insertions(+)
->> >
->> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
->> > index 22e9111..7130130 100644
->> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
->> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
->> > @@ -82,6 +82,10 @@ static u8 esdhc_readb(struct sdhci_host *host, int reg)
->> >                 /* fixup the result */
->> >                 ret &= ~SDHCI_CTRL_DMA_MASK;
->> >                 ret |= dma_bits;
->> > +
->> > +               /* 8BIT is bit 29 in Control register */
->> > +               ret |= ((ret << 3) & SDHCI_CTRL_8BITBUS);
->> > +               ret &= ~(SDHCI_CTRL_8BITBUS >> 3);
->> >         }
->> >
->> >         return ret;
->> > @@ -134,6 +138,10 @@ static void esdhc_writeb(struct sdhci_host *host, u8 val, int reg)
->> >                         dma_bits);
->> >                 val &= ~SDHCI_CTRL_DMA_MASK;
->> >                 val |= in_be32(host->ioaddr + reg) & SDHCI_CTRL_DMA_MASK;
->> > +
->> > +               /* 8BIT is bit 29 in Control register */
->> > +               val |= ((val & SDHCI_CTRL_8BITBUS) >> 3);
->> > +               val = (val & ~SDHCI_CTRL_8BITBUS);
->> >         }
->> >
->> >         /* Prevent SDHCI core from writing reserved bits (e.g. HISPD). */
->> > @@ -252,6 +260,8 @@ static void esdhc_of_platform_init(struct sdhci_host *host)
->> >
->> >         if (vvn > VENDOR_V_22)
->> >                 host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
->> > +
->> > +       host->mmc->caps |= MMC_CAP_8_BIT_DATA;
->> >  }
->> >
->> >  static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
->
