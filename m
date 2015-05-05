@@ -1,75 +1,96 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-{pxav2,pxav3}: Use of_match_ptr() macro
-Date: Tue, 5 May 2015 12:34:41 +0200
-Message-ID: <CAPDyKFrusYNvS3n6A6GzaUvF7Ei_GCwNpgAxNtwY85GqnH8W-Q@mail.gmail.com>
-References: <1430817114.20613.1.camel@ingics.com>
-	<20150505172429.4711e86f@xhacker>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
+Subject: [PATCHv2] sdhci-of-esdhc: Support 8BIT bus width.
+Date: Tue,  5 May 2015 14:17:36 +0200
+Message-ID: <1430828256-6197-1-git-send-email-joakim.tjernlund@transmode.se>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f179.google.com ([209.85.220.179]:36444 "EHLO
-	mail-qk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751057AbbEEKem (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 06:34:42 -0400
-Received: by qku63 with SMTP id 63so102108869qku.3
-        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2015 03:34:41 -0700 (PDT)
-In-Reply-To: <20150505172429.4711e86f@xhacker>
+Received: from smtp.transmode.se ([31.15.61.139]:61837 "EHLO smtp.transmode.se"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752385AbbEEMRp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 5 May 2015 08:17:45 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>, Axel Lin <axel.lin@ingics.com>
-Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: Joakim Tjernlund <joakim.tjernlund@transmode.se>
 
-On 5 May 2015 at 11:24, Jisheng Zhang <jszhang@marvell.com> wrote:
-> On Tue, 5 May 2015 02:11:54 -0700
-> Axel Lin <axel.lin@ingics.com> wrote:
->
->> This eliminates having an #ifdef returning NULL for the case
->> when OF is disabled.
->>
->> Signed-off-by: Axel Lin <axel.lin@ingics.com>
->> ---
->>  drivers/mmc/host/sdhci-pxav2.c | 4 +---
->>  drivers/mmc/host/sdhci-pxav3.c | 4 +---
->>  2 files changed, 2 insertions(+), 6 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
->> index f98008b..beffd86 100644
->> --- a/drivers/mmc/host/sdhci-pxav2.c
->> +++ b/drivers/mmc/host/sdhci-pxav2.c
->> @@ -252,9 +252,7 @@ static int sdhci_pxav2_remove(struct platform_device *pdev)
->>  static struct platform_driver sdhci_pxav2_driver = {
->>       .driver         = {
->>               .name   = "sdhci-pxav2",
->> -#ifdef CONFIG_OF
->> -             .of_match_table = sdhci_pxav2_of_match,
->> -#endif
->> +             .of_match_table = of_match_ptr(sdhci_pxav2_of_match),
->>               .pm     = SDHCI_PLTFM_PMOPS,
->>       },
->>       .probe          = sdhci_pxav2_probe,
->> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
->> index b5103a2..01cb2d3 100644
->> --- a/drivers/mmc/host/sdhci-pxav3.c
->> +++ b/drivers/mmc/host/sdhci-pxav3.c
->> @@ -578,9 +578,7 @@ static const struct dev_pm_ops sdhci_pxav3_pmops = {
->>  static struct platform_driver sdhci_pxav3_driver = {
->>       .driver         = {
->>               .name   = "sdhci-pxav3",
->> -#ifdef CONFIG_OF
->> -             .of_match_table = sdhci_pxav3_of_match,
->> -#endif
->> +             .of_match_table = of_match_ptr(sdhci_pxav3_of_match),
->>               .pm     = SDHCI_PXAV3_PMOPS,
->>       },
->>       .probe          = sdhci_pxav3_probe,
->
-> Looks good to me.
->
-> Thanks
+The custom esdhc_pltfm_set_bus_width() is buggy w.r.t 8BIT
+and esdhc_readb()/esdhc_writeb() did not mask the proper bits either.
 
-I consider that as an ack.
+Just drop esdhc_pltfm_set_bus_width() and emulate SDHCI_CTRL_8BITBUS
+in esdhc_readb()/esdhc_writeb() properly.
 
-Thanks, applied.
+Note: This assumes that SDHCI_CTRL_8BITBUS and SDHCI_CTRL_4BITBUS cannot
+be set simultaneously in SDHCI_HOST_CONTROL.
 
-Kind regards
-Uffe
+Signed-off-by: Joakim Tjernlund <joakim.tjernlund@transmode.se>
+---
+ v2 - I had fogotten to add bus-width = <8> to my DTS.
+      Adding this simplified things
+ drivers/mmc/host/sdhci-of-esdhc.c | 31 ++++++++-----------------------
+ 1 file changed, 8 insertions(+), 23 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 1804bdb..7a98a22 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -82,6 +82,10 @@ static u8 esdhc_readb(struct sdhci_host *host, int reg)
+ 		/* fixup the result */
+ 		ret &= ~SDHCI_CTRL_DMA_MASK;
+ 		ret |= dma_bits;
++
++		/* 8BIT is bit 29 in Control register */
++		ret |= ((ret << 3) & SDHCI_CTRL_8BITBUS);
++		ret &= ~(SDHCI_CTRL_8BITBUS >> 3);
+ 	}
+ 
+ 	return ret;
+@@ -134,6 +138,10 @@ static void esdhc_writeb(struct sdhci_host *host, u8 val, int reg)
+ 			dma_bits);
+ 		val &= ~SDHCI_CTRL_DMA_MASK;
+ 		val |= in_be32(host->ioaddr + reg) & SDHCI_CTRL_DMA_MASK;
++
++		/* 8BIT is bit 29 in Control register */
++		val |= ((val & SDHCI_CTRL_8BITBUS) >> 3);
++		val = (val & ~SDHCI_CTRL_8BITBUS);
+ 	}
+ 
+ 	/* Prevent SDHCI core from writing reserved bits (e.g. HISPD). */
+@@ -254,28 +262,6 @@ static void esdhc_of_platform_init(struct sdhci_host *host)
+ 		host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
+ }
+ 
+-static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
+-{
+-	u32 ctrl;
+-
+-	switch (width) {
+-	case MMC_BUS_WIDTH_8:
+-		ctrl = ESDHC_CTRL_8BITBUS;
+-		break;
+-
+-	case MMC_BUS_WIDTH_4:
+-		ctrl = ESDHC_CTRL_4BITBUS;
+-		break;
+-
+-	default:
+-		ctrl = 0;
+-		break;
+-	}
+-
+-	clrsetbits_be32(host->ioaddr + SDHCI_HOST_CONTROL,
+-			ESDHC_CTRL_BUSWIDTH_MASK, ctrl);
+-}
+-
+ static void esdhc_reset(struct sdhci_host *host, u8 mask)
+ {
+ 	sdhci_reset(host, mask);
+@@ -297,7 +283,6 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
+ 	.get_min_clock = esdhc_of_get_min_clock,
+ 	.platform_init = esdhc_of_platform_init,
+ 	.adma_workaround = esdhci_of_adma_workaround,
+-	.set_bus_width = esdhc_pltfm_set_bus_width,
+ 	.reset = esdhc_reset,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ };
+-- 
+2.3.6
+
