@@ -1,131 +1,64 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH 5/7] mmc: sh_mobile_sdhi: Add UHS-I mode support
-Date: Tue, 5 May 2015 09:56:15 +0200
-Message-ID: <CAPDyKFodZscxZJmKgYyMV8m8mNWYc9GitkoKbixTKS5r7rv_fA@mail.gmail.com>
-References: <1430396995.5802.39.camel@xylophone.i.decadent.org.uk>
-	<1430397136.5802.44.camel@xylophone.i.decadent.org.uk>
+Subject: Re: [PATCH v2] mmc: sdio: add reset callback to bus operations
+Date: Tue, 5 May 2015 10:33:19 +0200
+Message-ID: <CAPDyKFppaHQ1TQ5jdLA4Nf6pfpSKegU22=WA0WqsV55tRiMpaQ@mail.gmail.com>
+References: <1429787742-4876-1-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1430397136.5802.44.camel@xylophone.i.decadent.org.uk>
-Sender: linux-sh-owner@vger.kernel.org
-To: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-kernel@lists.codethink.co.uk
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f47.google.com ([209.85.192.47]:36047 "EHLO
+	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756782AbbEEIdU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 04:33:20 -0400
+Received: by qgeb100 with SMTP id b100so77574927qge.3
+        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2015 01:33:20 -0700 (PDT)
+In-Reply-To: <1429787742-4876-1-git-send-email-afenkart@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, NeilBrown <neilb@suse.de>
 
-On 30 April 2015 at 14:32, Ben Hutchings <ben.hutchings@codethink.co.uk> wrote:
-> Implement voltage switch, supporting modes up to SDR-50.
+On 23 April 2015 at 13:15, Andreas Fenkart <afenkart@gmail.com> wrote:
+> Some drivers schedule automatic hw resets. An example is mwifiex,
+> which schedules a card reset if the command handler between driver
+> and card firmware becomes out of sync
 >
-> Based on work by Shinobu Uehara, Rob Taylor, William Towle and Ian Molton.
->
-> This uses two voltage regulators, one external and one on the pfc.
+> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 
-Why two? If there is a parent child relation ship, that should be
-handled through the regulator tree, right!? Please elaborate.
+Thanks, applied!
 
 Kind regards
 Uffe
 
->
-> Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 > ---
->  drivers/mmc/host/sh_mobile_sdhi.c |   48 +++++++++++++++++++++++++++++++++++++
->  1 file changed, 48 insertions(+)
+>  drivers/mmc/core/sdio.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> index 92a58c6007fe..c8538a256e22 100644
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -30,6 +30,7 @@
->  #include <linux/mfd/tmio.h>
->  #include <linux/sh_dma.h>
->  #include <linux/delay.h>
-> +#include <linux/regulator/consumer.h>
->
->  #include "tmio_mmc.h"
->
-> @@ -84,6 +85,7 @@ MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
->
->  struct sh_mobile_sdhi {
->         struct clk *clk;
-> +       struct regulator *vqmmc_ref;
->         struct tmio_mmc_data mmc_data;
->         struct tmio_mmc_dma dma_priv;
->  };
-> @@ -148,6 +150,41 @@ static void sh_mobile_sdhi_set_clk_div(struct platform_device *pdev, int clk)
->         }
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index ce6cc47..01255ef 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -1064,6 +1064,12 @@ static int mmc_sdio_runtime_resume(struct mmc_host *host)
+>         return mmc_sdio_power_restore(host);
 >  }
 >
-> +static int sh_mobile_sdhi_start_signal_voltage_switch(
-> +       struct tmio_mmc_host *host, unsigned char signal_voltage)
+> +static int mmc_sdio_reset(struct mmc_host *host)
 > +{
-> +       struct sh_mobile_sdhi *priv = host_to_priv(host);
-> +       int min_uV, max_uV;
-> +       int ret;
-> +
-> +       if (signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
-> +               min_uV = 2700000;
-> +               max_uV = 3600000;
-> +       } else if (signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
-> +               min_uV = 1700000;
-> +               max_uV = 1950000;
-> +       } else {
-> +               return -EINVAL;
-> +       }
-> +
-> +       if (!IS_ERR(host->mmc->supply.vqmmc)) {
-> +               ret = regulator_set_voltage(host->mmc->supply.vqmmc,
-> +                                           min_uV, max_uV);
-> +               if (ret)
-> +                       return ret;
-> +       }
-> +
-> +       if (!IS_ERR(priv->vqmmc_ref)) {
-> +               ret = regulator_set_voltage(priv->vqmmc_ref,
-> +                                           min_uV, max_uV);
-> +               if (ret)
-> +                       return ret;
-> +       }
-> +
-> +       usleep_range(5000, 5500);
-> +       return 0;
+> +       mmc_power_cycle(host, host->card->ocr);
+> +       return mmc_sdio_power_restore(host);
 > +}
 > +
->  static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
->  {
->         int timeout = 1000;
-> @@ -240,6 +277,13 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
->                 goto eprobe;
->         }
->
-> +       priv->vqmmc_ref = devm_regulator_get_optional(&pdev->dev, "vqmmc-ref");
-> +       if (IS_ERR(priv->vqmmc_ref)) {
-> +               if (PTR_ERR(priv->vqmmc_ref) == -EPROBE_DEFER)
-> +                       return -EPROBE_DEFER;
-> +               dev_info(&pdev->dev, "No vqmmc reference regulator found\n");
-> +       }
-> +
->         host = tmio_mmc_host_alloc(pdev);
->         if (!host) {
->                 ret = -ENOMEM;
-> @@ -253,6 +297,10 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
->         host->clk_enable        = sh_mobile_sdhi_clk_enable;
->         host->clk_disable       = sh_mobile_sdhi_clk_disable;
->         host->multi_io_quirk    = sh_mobile_sdhi_multi_io_quirk;
-> +
-> +       host->start_signal_voltage_switch
-> +                               = sh_mobile_sdhi_start_signal_voltage_switch;
-> +
->         /* SD control register space size is 0x100, 0x200 for bus_shift=1 */
->         if (resource_size(res) > 0x100)
->                 host->bus_shift = 1;
-> --
-> 1.7.10.4
->
->
+>  static const struct mmc_bus_ops mmc_sdio_ops = {
+>         .remove = mmc_sdio_remove,
+>         .detect = mmc_sdio_detect,
+> @@ -1074,6 +1080,7 @@ static const struct mmc_bus_ops mmc_sdio_ops = {
+>         .runtime_resume = mmc_sdio_runtime_resume,
+>         .power_restore = mmc_sdio_power_restore,
+>         .alive = mmc_sdio_alive,
+> +       .reset = mmc_sdio_reset,
+>  };
 >
 >
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 2.1.4
+>
