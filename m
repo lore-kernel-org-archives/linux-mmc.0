@@ -1,60 +1,63 @@
-From: Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci: DT: Allow to specify that no write protect
- signal is present
-Date: Tue, 05 May 2015 11:04:48 +0200
-Message-ID: <554887B0.4020407@metafoo.de>
-References: <1430214020-16816-1-git-send-email-lars@metafoo.de>	<1430214020-16816-2-git-send-email-lars@metafoo.de> <CAPDyKFpC9uc0n8HLiC1gWgdJOM-0DGVaNazkF3Q847r-sfXNtg@mail.gmail.com>
+From: Axel Lin <axel.lin@ingics.com>
+Subject: [PATCH] mmc: sdhci-{pxav2,pxav3}: Use of_match_ptr() macro
+Date: Tue, 05 May 2015 17:11:54 +0800
+Message-ID: <1430817114.20613.1.camel@ingics.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFpC9uc0n8HLiC1gWgdJOM-0DGVaNazkF3Q847r-sfXNtg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mike Looijmans <mike.looijmans-Oq418RWZeHk@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pd0-f172.google.com ([209.85.192.172]:34362 "EHLO
+	mail-pd0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751125AbbEEJL7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 05:11:59 -0400
+Received: by pdbqa5 with SMTP id qa5so189472017pdb.1
+        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2015 02:11:59 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, Jisheng Zhang <jszhang@marvell.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 05/05/2015 10:36 AM, Ulf Hansson wrote:
-[...]
->> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
->> index 438899e..b068549 100644
->> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
->> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
->> @@ -21,6 +21,7 @@ Optional properties:
->>     below for the case, when a GPIO is used for the CD line
->>   - wp-inverted: when present, polarity on the WP line is inverted. See the note
->>     below for the case, when a GPIO is used for the WP line
->> +- disable-wp: When set no physical WP line is present
->
-> This requires some additional explanation, I believe. I assume this
-> property is only relevant for those controllers that have internal
-> logic to handle WP!?
+This eliminates having an #ifdef returning NULL for the case
+when OF is disabled.
 
-Yes, currently drivers for controllers that have a built-in WP detection 
-logic typically assume that if no WP GPIO is specified the built-in WP logic 
-should be used. But for some of them the value returned by the internal 
-detection logic will be bogus if there is no WP signal connected. So we need 
-a way to specify that that there is no WP signal and the internal detection 
-logic shouldn't be used either.
+Signed-off-by: Axel Lin <axel.lin@ingics.com>
+---
+ drivers/mmc/host/sdhci-pxav2.c | 4 +---
+ drivers/mmc/host/sdhci-pxav3.c | 4 +---
+ 2 files changed, 2 insertions(+), 6 deletions(-)
 
->
-> For those that uses GPIO, this can't ever be a correct configuration. Right?
+diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+index f98008b..beffd86 100644
+--- a/drivers/mmc/host/sdhci-pxav2.c
++++ b/drivers/mmc/host/sdhci-pxav2.c
+@@ -252,9 +252,7 @@ static int sdhci_pxav2_remove(struct platform_device *pdev)
+ static struct platform_driver sdhci_pxav2_driver = {
+ 	.driver		= {
+ 		.name	= "sdhci-pxav2",
+-#ifdef CONFIG_OF
+-		.of_match_table = sdhci_pxav2_of_match,
+-#endif
++		.of_match_table = of_match_ptr(sdhci_pxav2_of_match),
+ 		.pm	= SDHCI_PLTFM_PMOPS,
+ 	},
+ 	.probe		= sdhci_pxav2_probe,
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index b5103a2..01cb2d3 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -578,9 +578,7 @@ static const struct dev_pm_ops sdhci_pxav3_pmops = {
+ static struct platform_driver sdhci_pxav3_driver = {
+ 	.driver		= {
+ 		.name	= "sdhci-pxav3",
+-#ifdef CONFIG_OF
+-		.of_match_table = sdhci_pxav3_of_match,
+-#endif
++		.of_match_table = of_match_ptr(sdhci_pxav3_of_match),
+ 		.pm	= SDHCI_PXAV3_PMOPS,
+ 	},
+ 	.probe		= sdhci_pxav3_probe,
+-- 
+2.1.0
 
-It wouldn't make much sense to use it with a GPIO based detection logic, 
-since you simply don't specify the wp-gpio property if it is not present. 
-One the other hand it wouldn't cause any harm to specify it in addition to 
-not specifying the wp-gpios property.
 
-How about:
 
-- disable-wp: When set no physical WP line is present. This property should 
-only be specified when the controller has a dedicated write-protect 
-detection logic. If a GPIO is used for write-protect detection logic is used 
-it is sufficient to not specify wp-gpios property in the absence of a WP line.
-
-[...]
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
