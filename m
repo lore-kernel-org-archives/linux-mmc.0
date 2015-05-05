@@ -1,64 +1,68 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdio: add reset callback to bus operations
-Date: Tue, 5 May 2015 10:33:19 +0200
-Message-ID: <CAPDyKFppaHQ1TQ5jdLA4Nf6pfpSKegU22=WA0WqsV55tRiMpaQ@mail.gmail.com>
-References: <1429787742-4876-1-git-send-email-afenkart@gmail.com>
+Subject: Re: [PATCH 0/7 v4] mmc: sh_mmcif: add parent clk support
+Date: Tue, 5 May 2015 10:33:31 +0200
+Message-ID: <CAPDyKFq3Q1xCZmhQJKraQohPF6WXxbwj8O8OV+8QRPW9DQypFg@mail.gmail.com>
+References: <873840a4ch.wl%kuninori.morimoto.gx@renesas.com>
+	<87d22vgt8u.wl%kuninori.morimoto.gx@renesas.com>
+	<3057568.fukq3GllLM@avalon>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f47.google.com ([209.85.192.47]:36047 "EHLO
-	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756782AbbEEIdU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 04:33:20 -0400
-Received: by qgeb100 with SMTP id b100so77574927qge.3
-        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2015 01:33:20 -0700 (PDT)
-In-Reply-To: <1429787742-4876-1-git-send-email-afenkart@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <3057568.fukq3GllLM@avalon>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Simon <horms@verge.net.au>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, kobayashi <keita.kobayashi.ym@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, NeilBrown <neilb@suse.de>
 
-On 23 April 2015 at 13:15, Andreas Fenkart <afenkart@gmail.com> wrote:
-> Some drivers schedule automatic hw resets. An example is mwifiex,
-> which schedules a card reset if the command handler between driver
-> and card firmware becomes out of sync
+On 23 April 2015 at 12:07, Laurent Pinchart
+<laurent.pinchart@ideasonboard.com> wrote:
+> Hi Morimoto-san,
 >
-> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+> Thank you for the patches.
+>
+> On Thursday 23 April 2015 08:11:36 Kuninori Morimoto wrote:
+>> Hi Ulf, Simon
+>>
+>> These patches are v4 of sh_mmcif.
+>> Current sh_mmcif driver was used on Renesas SH-Mobile series,
+>> and it is also used on Renesas R-Car series.
+>> But, R-Car series can setup parent clock.
+>> We couldn't setup it when SH-Mobile.
+>>
+>> These patches are tested by Kobayashi-san on Lager board.
+>>
+>> Simon
+>>
+>> 6), 7) are ARM side patches, but these doesn't depend on
+>> 1) - 5) patches.
+>>
+>> Kuninori Morimoto (7):
+>>   1) mmc: sh_mmcif: move mmcif_of_match to upside
+>>   2) mmc: sh_mmcif: cleanup to use dev instead of &pdev->dev
+>>   3) mmc: sh_mmcif: remove unnecessary int clk from struct sh_mmcif_host
+>>   4) mmc: sh_mmcif: separate sh_mmcif_clk_update() into setup and prepare
+>
+> For patches 1-4,
+>
+> Acked-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+>
+> I'll comment separately on patch 5.
+>
+>>   5) mmc: sh_mmcif: calculate best clock with parent clock
+>>   6) ARM: shmobile: r8a7790: add MMCIF parent clock range
+>>   7) ARM: shmobile: r8a7791: add MMCIF parent clock range
+>>
+>>  Documentation/devicetree/bindings/mmc/renesas,mmcif.txt |   3 ++
+>>  arch/arm/boot/dts/r8a7790.dtsi                          |   2 ++
+>>  arch/arm/boot/dts/r8a7791.dtsi                          |   1 +
+>>  drivers/mmc/host/sh_mmcif.c                             | 173 +++++++++----
+>>  4 files changed, 135 insertions(+), 44 deletions(-)
+>
+> --
 
-Thanks, applied!
+Thanks, applied patches 1->4.
+
+I am delaying patch 5, until it gets acked.
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/core/sdio.c | 7 +++++++
->  1 file changed, 7 insertions(+)
->
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index ce6cc47..01255ef 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -1064,6 +1064,12 @@ static int mmc_sdio_runtime_resume(struct mmc_host *host)
->         return mmc_sdio_power_restore(host);
->  }
->
-> +static int mmc_sdio_reset(struct mmc_host *host)
-> +{
-> +       mmc_power_cycle(host, host->card->ocr);
-> +       return mmc_sdio_power_restore(host);
-> +}
-> +
->  static const struct mmc_bus_ops mmc_sdio_ops = {
->         .remove = mmc_sdio_remove,
->         .detect = mmc_sdio_detect,
-> @@ -1074,6 +1080,7 @@ static const struct mmc_bus_ops mmc_sdio_ops = {
->         .runtime_resume = mmc_sdio_runtime_resume,
->         .power_restore = mmc_sdio_power_restore,
->         .alive = mmc_sdio_alive,
-> +       .reset = mmc_sdio_reset,
->  };
->
->
-> --
-> 2.1.4
->
