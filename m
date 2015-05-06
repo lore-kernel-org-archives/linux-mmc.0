@@ -1,170 +1,97 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V6 08/15] mmc: mmc: Hold re-tuning if the card is put
- to sleep
-Date: Wed, 06 May 2015 13:28:13 +0300
-Message-ID: <5549ECBD.3010608@intel.com>
-References: <1429531796-21987-1-git-send-email-adrian.hunter@intel.com>	<1429531796-21987-9-git-send-email-adrian.hunter@intel.com>	<CAPDyKFp0c5Gc9HpS+F_DV2-pxuKnWjqQ7UrGTFd5FcSSG9JT7Q@mail.gmail.com>	<5549D336.4040206@intel.com> <CAPDyKFp4A4UzEUN8pDHpjNn0PX3HcmCA6khHCdRH5R0GsO1Lrw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V6 03/15] mmc: core: Add support for re-tuning before each request
+Date: Wed, 6 May 2015 12:37:52 +0200
+Message-ID: <CAPDyKFrRoBg-WziC0_2VzJdx4s3nquYNuqB8=aseBCwi4YqeNQ@mail.gmail.com>
+References: <1429531796-21987-1-git-send-email-adrian.hunter@intel.com>
+	<1429531796-21987-4-git-send-email-adrian.hunter@intel.com>
+	<CAPDyKFqUowi29oqcRTSLEaSjXNv=RyzmxRGks-pHDri2FW-wYw@mail.gmail.com>
+	<5549CA93.5010803@intel.com>
+	<CAPDyKFpmj1PJ4s_K8KpD17W-za-Yq2BS7HEm-vVnyFgj1+gcGQ@mail.gmail.com>
+	<5549EA2A.3020309@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:63378 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750968AbbEFKaq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 6 May 2015 06:30:46 -0400
-In-Reply-To: <CAPDyKFp4A4UzEUN8pDHpjNn0PX3HcmCA6khHCdRH5R0GsO1Lrw@mail.gmail.com>
+Received: from mail-qc0-f172.google.com ([209.85.216.172]:32781 "EHLO
+	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751277AbbEFKhx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 May 2015 06:37:53 -0400
+Received: by qctx5 with SMTP id x5so2185904qct.0
+        for <linux-mmc@vger.kernel.org>; Wed, 06 May 2015 03:37:52 -0700 (PDT)
+In-Reply-To: <5549EA2A.3020309@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-On 06/05/15 12:32, Ulf Hansson wrote:
-> On 6 May 2015 at 10:39, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 04/05/15 16:44, Ulf Hansson wrote:
->>> On 20 April 2015 at 14:09, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>> Currently "mmc sleep" is used before power off and
->>>> is not paired with waking up. Nevertheless hold
->>>> re-tuning.
+On 6 May 2015 at 12:17, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 06/05/15 12:45, Ulf Hansson wrote:
+>> On 6 May 2015 at 10:02, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> On 04/05/15 16:28, Ulf Hansson wrote:
+>>>> On 20 April 2015 at 14:09, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>> At the start of each request, re-tune if needed and
+>>>>> then hold off re-tuning again until the request is done.
+>>>>>
+>>>>> Note that though there is one function that starts
+>>>>> requests (mmc_start_request) there are two that wait for
+>>>>> the request to be done (mmc_wait_for_req_done and
+>>>>> mmc_wait_for_data_req_done).  Also note that
+>>>>> mmc_wait_for_data_req_done can return even when the
+>>>>> request is not done (which allows the block driver
+>>>>> to prepare a newly arrived request while still
+>>>>> waiting for the previous request).
+>>>>>
+>>>>> This patch ensures re-tuning is held for the duration
+>>>>> of a request.  Subsequent patches will also hold
+>>>>> re-tuning at other times when it might cause a
+>>>>> conflict.
+>>>>>
+>>>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 >>>>
->>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>>> ---
->>>>  drivers/mmc/core/mmc.c | 14 +++++++++++---
->>>>  1 file changed, 11 insertions(+), 3 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>>> index f36c76f..daf9954 100644
->>>> --- a/drivers/mmc/core/mmc.c
->>>> +++ b/drivers/mmc/core/mmc.c
->>>> @@ -21,6 +21,7 @@
->>>>  #include <linux/mmc/mmc.h>
->>>>
->>>>  #include "core.h"
->>>> +#include "host.h"
->>>>  #include "bus.h"
->>>>  #include "mmc_ops.h"
->>>>  #include "sd_ops.h"
->>>> @@ -1504,6 +1505,7 @@ static int mmc_can_sleep(struct mmc_card *card)
->>>>         return (card && card->ext_csd.rev >= 3);
->>>>  }
->>>>
->>>> +/* If necessary, callers must hold re-tuning */
+>>>> Patch2 is calling mmc_retune_needed() and thus actually triggers a
+>>>> re-tune to potentially happen.
 >>>
->>> Remove this comment.
->>>
->>>>  static int mmc_sleep(struct mmc_host *host)
->>>>  {
->>>>         struct mmc_command cmd = {0};
->>>> @@ -1631,6 +1633,7 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
->>>>         int err = 0;
->>>>         unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
->>>>                                         EXT_CSD_POWER_OFF_LONG;
->>>> +       bool retune_release = false;
->>>>
->>>>         BUG_ON(!host);
->>>>         BUG_ON(!host->card);
->>>> @@ -1651,17 +1654,22 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
->>>>                 goto out;
->>>>
->>>>         if (mmc_can_poweroff_notify(host->card) &&
->>>> -               ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
->>>> +               ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend)) {
->>>>                 err = mmc_poweroff_notify(host->card, notify_type);
->>>> -       else if (mmc_can_sleep(host->card))
->>>> +       } else if (mmc_can_sleep(host->card)) {
->>>> +               mmc_retune_hold(host);
->>>>                 err = mmc_sleep(host);
->>>> -       else if (!mmc_host_is_spi(host))
->>>> +       } else if (!mmc_host_is_spi(host)) {
->>>>                 err = mmc_deselect_cards(host);
->>>> +       }
->>>>
->>>>         if (!err) {
->>>>                 mmc_power_off(host);
->>>>                 mmc_card_set_suspended(host->card);
->>>>         }
->>>> +
->>>> +       if (retune_release)
->>>> +               mmc_retune_release(host);
->>>>  out:
->>>>         mmc_release_host(host);
->>>>         return err;
->>>
->>> Instead of add mmc_retune_hold|release() to _mmc_suspend(), I would
->>> like you to move that handling into mmc_sleep(). The code should be
->>> easier and it becomes more clear that it's because of a command
->>> sequence.
->>>
->>> I think mmc_retune_hold() should be invoked before mmc_wait_for_cmd()
->>> and then mmc_retune_release() just after, in mmc_sleep(). That should
->>> work, right!?
+>>> That won't happen because host->retune_period is not set, so
+>>> mmc_retune_needed() won't be called.
 >>
->> That would be the same as holding re-tuning for that request, which is
->> what already happens i.e. adding hold()/release() around mmc_wait_for_cmd()
->> is redundant.
-> 
-> I don't understand your point, sorry.
-
-mmc_wait_for_cmd() calls mmc_wait_for_req() which calls __mmc_start_req()
-which calls mmc_start_request() which calls mmc_retune_hold()
-
-Then mmc_wait_for_req() calls mmc_wait_for_req_done() which calls
-mmc_retune_release().
-
-So
-	mmc_wait_for_cmd() (with no retries)
-has the same effect as
-	mmc_retune_hold()
-	mmc_wait_for_cmd()
-	mmc_retune_release()
-
-> 
-> Anyway, my proposal didn't quite work, which is due to that
-> mmc_deselect_cards() (invoked from mmc_sleep()) deals with retries. If
-> there had been only one try, I thought it could be okay to have that
-> command to be preceded by a re-tune.
-> 
-> Anyway, I would like you to move the mmc_retune_hold|release() calls
-> into the mmc_sleep() function.
-
-That would have no effect as explained above.
-
-> 
+>> mmc_retune_needed() is indeed called in patch2 (v7). From
+>> mmc_sdio_suspend() and when mmc_card_keep_power().
+>
+> Yes, here is the chunk but it checks host->retune_period which  is zero
+> because it never gets set.
+>
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 5bc6c7d..16e1f39 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -934,8 +934,12 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+>                 mmc_release_host(host);
+>         }
+>
+> -       if (!mmc_card_keep_power(host))
+> +       if (!mmc_card_keep_power(host)) {
+>                 mmc_power_off(host);
+> +       } else if (host->retune_period) {
+> +               mmc_retune_timer_stop(host);
+> +               mmc_retune_needed(host);
+> +       }
+>
+>         return 0;
+>  }
+>
 >>
->> The options for the caller are:
+>> I guess that wont be an issue!?
+>
+> So I don't see an issue.
+>
 >>
->> 1)
->>         hold re-tuning
->>         put emmc to sleep
->>         later wake up emmc
->>         release re-tuning
->>
->> 2)
->>         put emmc to sleep
->>         later increment hold_count
->>         wake up emmc ignoring CRC errors
->>         release re-tuning
->>
->> But there is no wake-up function and the suspend path is using an unbalanced
->> mmc_sleep i.e. no corresponding wake up.
->>
->> So that leaves what is happening now i.e. a comment plus explicit
->> hold()/release() in _mmc_suspend() so that future changes to _mmc_suspend()
->> know to take mmc_sleep re-tuning requirements into account.
-> 
-> Why all this complexity?
-> 
-> mmc_power_off() is called in _mmc_suspend(), that will eventually
-> disable re-tune. Thus re-tuning will be prevented for
-> commands/requests during the system PM resume sequence, until the card
-> has been fully re-initialized (and a tuning sequence done). Isn't that
-> sufficient?
+>> But I just felt that it seemed more appropriate to manage hold/release
+>> of re-tune before actually enabling the feature.
+>
+> Yes the feature is gated until setting host->retune_period or calling
+> mmc_retune_needed().
+>
 
-Yes my original patch did not have any of that complexity. I added it in
-response to our discussions.
+Okay, fair enough. Let's keep the order of patches as is.
 
-As you wrote, _mmc_suspend() does not need to do anything with retuning
-because mmc_sleep() is followed by mmc_power_off().
-
-The original patch added a comment to mmc_sleep() and that was all. That
-would still be the best approach.
-
+Kind regards
+Uffe
