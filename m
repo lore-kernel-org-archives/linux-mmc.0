@@ -1,69 +1,184 @@
-From: Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>
-Subject: [PATCH v2 2/4] mmc: dt: Allow to specify that no write protect signal is present
-Date: Wed,  6 May 2015 20:31:20 +0200
-Message-ID: <1430937082-27149-2-git-send-email-lars@metafoo.de>
+From: Lars-Peter Clausen <lars@metafoo.de>
+Subject: [PATCH v2 4/4] mmc: dw_mmc: Use core to handle absent write protect line
+Date: Wed,  6 May 2015 20:31:22 +0200
+Message-ID: <1430937082-27149-4-git-send-email-lars@metafoo.de>
 References: <1430937082-27149-1-git-send-email-lars@metafoo.de>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1430937082-27149-1-git-send-email-lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, =?UTF-8?q?S=C3=B6ren=20Brinkmann?= <soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Thomas Abraham <thomas.abraham-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mike Looijmans <mike.looijmans-Oq418RWZeHk@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp-out-205.synserver.de ([212.40.185.205]:1105 "EHLO
+	smtp-out-205.synserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751766AbbEFSb3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 May 2015 14:31:29 -0400
+In-Reply-To: <1430937082-27149-1-git-send-email-lars@metafoo.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Michal Simek <michal.simek@xilinx.com>, =?UTF-8?q?S=C3=B6ren=20Brinkmann?= <soren.brinkmann@xilinx.com>, Thomas Abraham <thomas.abraham@linaro.org>, Mike Looijmans <mike.looijmans@topic.nl>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Lars-Peter Clausen <lars@metafoo.de>
 
-Allow to specify in the device-tree that no physical write-protect signal
-is connected to a particular instance of a MMC controller. Setting the
-property will cause the core will assume that the SD card is always
-read-write.
+Use the new MMC_CAP2_NO_WRITE_PROTECT to let the core handle the case where
+no write protect line is present instead of having custom driver code to
+handle it.
 
-The name for the new property is 'disable-wp' and was chosen based on the
-property with the same function from the Synopsys designware mobile storage
-host controller DT bindings specification.
+dw_mci_of_get_slot_quirks() is slightly refactored to directly modify the
+mmc_host capabilities instead of returning a quirk mask.
 
-Signed-off-by: Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>
-Cc: Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
 ---
- Documentation/devicetree/bindings/mmc/mmc.txt | 5 +++++
- drivers/mmc/core/host.c                       | 3 +++
- 2 files changed, 8 insertions(+)
+Only compile tested.
+---
+ drivers/mmc/host/dw_mmc.c  | 53 +++++++++++++++-------------------------------
+ drivers/mmc/host/dw_mmc.h  |  3 ---
+ include/linux/mmc/dw_mmc.h |  6 ------
+ 3 files changed, 17 insertions(+), 45 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index 438899e..0384fc3 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -21,6 +21,11 @@ Optional properties:
-   below for the case, when a GPIO is used for the CD line
- - wp-inverted: when present, polarity on the WP line is inverted. See the note
-   below for the case, when a GPIO is used for the WP line
-+- disable-wp: When set no physical WP line is present. This property should
-+  only be specified when the controller has a dedicated write-protect
-+  detection logic. If a GPIO is always used for the write-protect detection
-+  logic it is sufficient to not specify wp-gpios property in the absence of a WP
-+  line.
- - max-frequency: maximum operating clock frequency
- - no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
-   this system, even if the controller claims it is.
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 8be0df7..1eabdd0 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -400,6 +400,9 @@ int mmc_of_parse(struct mmc_host *host)
- 	else if (ret != -ENOENT)
- 		return ret;
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 38b2926..0eedc5a 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1276,10 +1276,7 @@ static int dw_mci_get_ro(struct mmc_host *mmc)
+ 	int gpio_ro = mmc_gpio_get_ro(mmc);
  
-+	if (of_property_read_bool(np, "disable-wp"))
-+		host->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
+ 	/* Use platform get_ro function, else try on board write protect */
+-	if ((slot->quirks & DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT) ||
+-			(slot->host->quirks & DW_MCI_QUIRK_NO_WRITE_PROTECT))
+-		read_only = 0;
+-	else if (!IS_ERR_VALUE(gpio_ro))
++	if (!IS_ERR_VALUE(gpio_ro))
+ 		read_only = gpio_ro;
+ 	else
+ 		read_only =
+@@ -2277,9 +2274,10 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ }
+ 
+ #ifdef CONFIG_OF
+-/* given a slot id, find out the device node representing that slot */
+-static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
++/* given a slot, find out the device node representing that slot */
++static struct device_node *dw_mci_of_find_slot_node(struct dw_mci_slot *slot)
+ {
++	struct device *dev = slot->mmc->parent;
+ 	struct device_node *np;
+ 	const __be32 *addr;
+ 	int len;
+@@ -2291,42 +2289,28 @@ static struct device_node *dw_mci_of_find_slot_node(struct device *dev, u8 slot)
+ 		addr = of_get_property(np, "reg", &len);
+ 		if (!addr || (len < sizeof(int)))
+ 			continue;
+-		if (be32_to_cpup(addr) == slot)
++		if (be32_to_cpup(addr) == slot->id)
+ 			return np;
+ 	}
+ 	return NULL;
+ }
+ 
+-static struct dw_mci_of_slot_quirks {
+-	char *quirk;
+-	int id;
+-} of_slot_quirks[] = {
+-	{
+-		.quirk	= "disable-wp",
+-		.id	= DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT,
+-	},
+-};
+-
+-static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
++static void dw_mci_slot_of_parse(struct dw_mci_slot *slot)
+ {
+-	struct device_node *np = dw_mci_of_find_slot_node(dev, slot);
+-	int quirks = 0;
+-	int idx;
++	struct device_node *np = dw_mci_of_find_slot_node(slot);
+ 
+-	/* get quirks */
+-	for (idx = 0; idx < ARRAY_SIZE(of_slot_quirks); idx++)
+-		if (of_get_property(np, of_slot_quirks[idx].quirk, NULL)) {
+-			dev_warn(dev, "Slot quirk %s is deprecated\n",
+-					of_slot_quirks[idx].quirk);
+-			quirks |= of_slot_quirks[idx].id;
+-		}
++	if (!np)
++		return;
+ 
+-	return quirks;
++	if (of_property_read_bool(np, "disable-wp")) {
++		slot->mmc->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
++		dev_warn(slot->mmc->parent,
++			"Slot quirk 'disable-wp' is deprecated\n");
++	}
+ }
+ #else /* CONFIG_OF */
+-static int dw_mci_of_get_slot_quirks(struct device *dev, u8 slot)
++static void dw_mci_slot_of_parse(struct dw_mci_slot *slot)
+ {
+-	return 0;
+ }
+ #endif /* CONFIG_OF */
+ 
+@@ -2349,8 +2333,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	slot->host = host;
+ 	host->slot[id] = slot;
+ 
+-	slot->quirks = dw_mci_of_get_slot_quirks(host->dev, slot->id);
+-
+ 	mmc->ops = &dw_mci_ops;
+ 	if (of_property_read_u32_array(host->dev->of_node,
+ 				       "clock-freq-min-max", freq, 2)) {
+@@ -2388,6 +2370,8 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	if (host->pdata->caps2)
+ 		mmc->caps2 = host->pdata->caps2;
+ 
++	dw_mci_slot_of_parse(slot);
 +
- 	/* See the comment on CD inversion above */
- 	if (ro_cap_invert ^ ro_gpio_invert)
- 		host->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+ 	ret = mmc_of_parse(mmc);
+ 	if (ret)
+ 		goto err_host_allocated;
+@@ -2615,9 +2599,6 @@ static struct dw_mci_of_quirks {
+ 	{
+ 		.quirk	= "broken-cd",
+ 		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+-	}, {
+-		.quirk	= "disable-wp",
+-		.id	= DW_MCI_QUIRK_NO_WRITE_PROTECT,
+ 	},
+ };
+ 
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index f45ab91..2c6d350 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -227,7 +227,6 @@ extern int dw_mci_resume(struct dw_mci *host);
+  * struct dw_mci_slot - MMC slot state
+  * @mmc: The mmc_host representing this slot.
+  * @host: The MMC controller this slot is using.
+- * @quirks: Slot-level quirks (DW_MCI_SLOT_QUIRK_XXX)
+  * @ctype: Card type for this slot.
+  * @mrq: mmc_request currently being processed or waiting to be
+  *	processed, or NULL when the slot is idle.
+@@ -245,8 +244,6 @@ struct dw_mci_slot {
+ 	struct mmc_host		*mmc;
+ 	struct dw_mci		*host;
+ 
+-	int			quirks;
+-
+ 	u32			ctype;
+ 
+ 	struct mmc_request	*mrq;
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 1211199..5be9767 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -226,12 +226,6 @@ struct dw_mci_dma_ops {
+ #define DW_MCI_QUIRK_HIGHSPEED			BIT(2)
+ /* Unreliable card detection */
+ #define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
+-/* No write protect */
+-#define DW_MCI_QUIRK_NO_WRITE_PROTECT		BIT(4)
+-
+-/* Slot level quirks */
+-/* This slot has no write protect */
+-#define DW_MCI_SLOT_QUIRK_NO_WRITE_PROTECT	BIT(0)
+ 
+ struct dma_pdata;
+ 
 -- 
 1.8.0
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
