@@ -1,145 +1,53 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V6 03/15] mmc: core: Add support for re-tuning before
- each request
-Date: Wed, 06 May 2015 11:02:27 +0300
-Message-ID: <5549CA93.5010803@intel.com>
-References: <1429531796-21987-1-git-send-email-adrian.hunter@intel.com>	<1429531796-21987-4-git-send-email-adrian.hunter@intel.com> <CAPDyKFqUowi29oqcRTSLEaSjXNv=RyzmxRGks-pHDri2FW-wYw@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v5 1/1] arm64: dts: Add the arasan sdhc nodes in apm-storm.dtsi.
+Date: Wed, 06 May 2015 10:40:03 +0200
+Message-ID: <2568634.iEosTvMJpM@wuerfel>
+References: <1430817426-5241-1-git-send-email-stripathi@apm.com> <4635229.bceBxngCoe@wuerfel> <5549C68B.9090602@xilinx.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:12881 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751153AbbEFIEx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 6 May 2015 04:04:53 -0400
-In-Reply-To: <CAPDyKFqUowi29oqcRTSLEaSjXNv=RyzmxRGks-pHDri2FW-wYw@mail.gmail.com>
+Received: from mout.kundenserver.de ([212.227.126.131]:57037 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751114AbbEFIkS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 May 2015 04:40:18 -0400
+In-Reply-To: <5549C68B.9090602@xilinx.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
+To: Michal Simek <michal.simek@xilinx.com>
+Cc: Suman Tripathi <stripathi@apm.com>, Rob Herring <robherring2@gmail.com>, "chris@printf.net" <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Don Dutile <ddutile@redhat.com>, "jcm@redhat.com" <jcm@redhat.com>, Mark Langsdorf <mlangsdo@redhat.com>, "patches@apm.com" <patches@apm.com>
 
-On 04/05/15 16:28, Ulf Hansson wrote:
-> On 20 April 2015 at 14:09, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> At the start of each request, re-tune if needed and
->> then hold off re-tuning again until the request is done.
->>
->> Note that though there is one function that starts
->> requests (mmc_start_request) there are two that wait for
->> the request to be done (mmc_wait_for_req_done and
->> mmc_wait_for_data_req_done).  Also note that
->> mmc_wait_for_data_req_done can return even when the
->> request is not done (which allows the block driver
->> to prepare a newly arrived request while still
->> waiting for the previous request).
->>
->> This patch ensures re-tuning is held for the duration
->> of a request.  Subsequent patches will also hold
->> re-tuning at other times when it might cause a
->> conflict.
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+On Wednesday 06 May 2015 09:45:15 Michal Simek wrote:
+> On 05/06/2015 09:31 AM, Arnd Bergmann wrote:
+> > On Wednesday 06 May 2015 10:41:07 Suman Tripathi wrote:
+> >>>> @@ -533,6 +567,16 @@
+> >>>>                         interrupts = <0x0 0x4f 0x4>;
+> >>>>                 };
+> >>>>
+> >>>> +               sdhc0: sdhc@1c000000 {
+> >>>> +                       device_type = "sdhc";
+> >>>
+> >>> device_type generally should not be used (there are a few exceptions).
+> >>
+> >> Okay !!
+> >>
+> > 
+> > While we're at it, please change sdhc@1c000000 to mmc@1c000000.
+> > Even though Linux does not care, we try to use the standard device
+> > names for consistency.
 > 
-> Patch2 is calling mmc_retune_needed() and thus actually triggers a
-> re-tune to potentially happen.
-
-That won't happen because host->retune_period is not set, so
-mmc_retune_needed() won't be called.
-
+> Do we have a list of these names somewhere?
+> Normally I do use ePARP - generic names recommendation but mmc or sdhci
+> are not listed there.
+> Both combination mmc@ or sdhci@ are used in the kernel.
 > 
-> To avoid bisectability issues about not holding re-tune when needed, I
-> suggest we move $subject patch to after patch8.
-> 
-> Kind regards
-> Uffe
-> 
->> ---
->>  drivers/mmc/core/core.c | 32 +++++++++++++++++++++++++-------
->>  1 file changed, 25 insertions(+), 7 deletions(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index dd43f9b..a9936cb 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -186,12 +186,29 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
->>
->>  EXPORT_SYMBOL(mmc_request_done);
->>
->> +static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
->> +{
->> +       int err;
->> +
->> +       /* Assumes host controller has been runtime resumed by mmc_claim_host */
->> +       err = mmc_retune(host);
->> +       if (err) {
->> +               mrq->cmd->error = err;
->> +               mmc_request_done(host, mrq);
->> +               return;
->> +       }
->> +
->> +       host->ops->request(host, mrq);
->> +}
->> +
->>  static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
->>  {
->>  #ifdef CONFIG_MMC_DEBUG
->>         unsigned int i, sz;
->>         struct scatterlist *sg;
->>  #endif
->> +       mmc_retune_hold(host);
->> +
->>         if (mmc_card_removed(host->card))
->>                 return -ENOMEDIUM;
->>
->> @@ -252,7 +269,7 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
->>         }
->>         mmc_host_clk_hold(host);
->>         led_trigger_event(host->led, LED_FULL);
->> -       host->ops->request(host, mrq);
->> +       __mmc_start_request(host, mrq);
->>
->>         return 0;
->>  }
->> @@ -422,17 +439,16 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
->>                                         cmd->opcode, cmd->error);
->>                                 cmd->retries--;
->>                                 cmd->error = 0;
->> -                               host->ops->request(host, mrq);
->> +                               __mmc_start_request(host, mrq);
->>                                 continue; /* wait for done/new event again */
->>                         }
->>                 } else if (context_info->is_new_req) {
->>                         context_info->is_new_req = false;
->> -                       if (!next_req) {
->> -                               err = MMC_BLK_NEW_REQUEST;
->> -                               break; /* return err */
->> -                       }
->> +                       if (!next_req)
->> +                               return MMC_BLK_NEW_REQUEST;
->>                 }
->>         }
->> +       mmc_retune_release(host);
->>         return err;
->>  }
->>
->> @@ -471,8 +487,10 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
->>                          mmc_hostname(host), cmd->opcode, cmd->error);
->>                 cmd->retries--;
->>                 cmd->error = 0;
->> -               host->ops->request(host, mrq);
->> +               __mmc_start_request(host, mrq);
->>         }
->> +
->> +       mmc_retune_release(host);
->>  }
->>
->>  /**
->> --
->> 1.9.1
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+> On zynq and zynqmp we do use shdci@.
 > 
 
+Ah, I thought ePAPR listed mmc already. Using "sdhci" is a little too
+specific here, since a lot of mmc hosts are not sdhci compliant, and
+"sdhc" is completely wrong, because that identifies a specific card
+type, but a host that supports SDHC cards will generally also work
+with SD (less than 4GB) or SDXC (more than 48GB) cards.
+
+	Arnd
