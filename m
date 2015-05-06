@@ -1,131 +1,157 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: fix abort due to missing runtime PM
-Date: Wed, 6 May 2015 14:07:22 +0200
-Message-ID: <CAPDyKFo+6mA4aKWfrUWmPvdairJN6KMCD0XTe3HDDB2pirEJXw@mail.gmail.com>
-References: <1427715434-20881-1-git-send-email-stefan@agner.ch>
+From: Suman Tripathi <stripathi@apm.com>
+Subject: Re: [PATCH v5 1/1] arm64: dts: Add the arasan sdhc nodes in
+ apm-storm.dtsi.
+Date: Wed, 6 May 2015 17:27:07 +0530
+Message-ID: <CAOHikRBBy2VAG8sO=ZJJqCrqvGaSE1P4kPVvgsx9Q3Q9g8xemQ@mail.gmail.com>
+References: <1430817426-5241-1-git-send-email-stripathi@apm.com>
+ <4635229.bceBxngCoe@wuerfel> <5549C68B.9090602@xilinx.com>
+ <2568634.iEosTvMJpM@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1427715434-20881-1-git-send-email-stefan@agner.ch>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Stefan Agner <stefan@agner.ch>
-Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Dong Aisheng <b29396@freescale.com>, Shawn Guo <shawn.guo@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: multipart/mixed; boundary="===============3618844610586003767=="
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <2568634.iEosTvMJpM@wuerfel>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Mark Langsdorf <mlangsdo@redhat.com>, "jcm@redhat.com" <jcm@redhat.com>, Anton Vorontsov <anton@enomsg.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Michal Simek <michal.simek@xilinx.com>, "chris@printf.net" <chris@printf.net>, "patches@apm.com" <patches@apm.com>, Rob Herring <robherring2@gmail.com>, Don Dutile <ddutile@redhat.com>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 30 March 2015 at 13:37, Stefan Agner <stefan@agner.ch> wrote:
-> When entering suspend while the device is in runtime PM, the
-> sdhci_(suspend|resume)_host function are called with disabled clocks.
-> Since this functions access the SDHC host registers, this leads to an
-> external abort on Vybrid SoC:
+--===============3618844610586003767==
+Content-Type: multipart/alternative; boundary=047d7ba97f1a8a684b0515687ea2
+
+--047d7ba97f1a8a684b0515687ea2
+Content-Type: text/plain; charset=UTF-8
+
+On Wed, May 6, 2015 at 2:10 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+
+> On Wednesday 06 May 2015 09:45:15 Michal Simek wrote:
+> > On 05/06/2015 09:31 AM, Arnd Bergmann wrote:
+> > > On Wednesday 06 May 2015 10:41:07 Suman Tripathi wrote:
+> > >>>> @@ -533,6 +567,16 @@
+> > >>>>                         interrupts = <0x0 0x4f 0x4>;
+> > >>>>                 };
+> > >>>>
+> > >>>> +               sdhc0: sdhc@1c000000 {
+> > >>>> +                       device_type = "sdhc";
+> > >>>
+> > >>> device_type generally should not be used (there are a few
+> exceptions).
+> > >>
+> > >> Okay !!
+> > >>
+> > >
+> > > While we're at it, please change sdhc@1c000000 to mmc@1c000000.
+> > > Even though Linux does not care, we try to use the standard device
+> > > names for consistency.
+> >
+> > Do we have a list of these names somewhere?
+> > Normally I do use ePARP - generic names recommendation but mmc or sdhci
+> > are not listed there.
+> > Both combination mmc@ or sdhci@ are used in the kernel.
+> >
+> > On zynq and zynqmp we do use shdci@.
+> >
 >
-> [   37.772967] Unhandled fault: imprecise external abort (0x1c06) at 0x76f5f000
-> [   37.780304] Internal error: : 1c06 [#1] ARM
-> [   37.784670] Modules linked in:
-> [   37.787908] CPU: 0 PID: 428 Comm: sh Not tainted 3.18.0-rc5-00119-geefd097-dirty #1540
-> [   37.796142] task: 8e246c00 ti: 8ca6c000 task.ti: 8ca6c000
-> [   37.801785] PC is at esdhc_writel_le+0x40/0xec
-> [   37.806431] LR is at sdhci_set_card_detection+0xe0/0xe4
-> [   37.811877] pc : [<803f0584>]    lr : [<803eaaa0>]    psr: 400f0013
-> [   37.811877] sp : 8ca6dd28  ip : 00000001  fp : 8ca6dd3c
-> [   37.823766] r10: 807a233c  r9 : 00000000  r8 : 8e8b7210
-> [   37.829194] r7 : 802d8a08  r6 : 8082e928  r5 : 00000000  r4 : 00000002
-> [   37.835974] r3 : 8ea34e90  r2 : 00000038  r1 : 00000000  r0 : 8ea32ac0
-> ...
->
-> Clocks need to be enabled to access the registers. Fix the issue by
-> add driver specific implementation of suspend/resume functions which
-> take care of clocks using runtime PM API.
->
-> Signed-off-by: Stefan Agner <stefan@agner.ch>
-
-Hi Stefan,
-
-Sorry for the delay.
-
-Indeed sdhci seems to have some issues when combining runtime PM and system PM.
-
-> ---
-> The first version of this patch was part of a patchset sent back in
-> december. While the second patch of the patchset back then is invalid,
-> this fix is required to avoid the abort when switching into suspend
-> mode on Vybrid SoC.
->
-> During review of this patch I realized that my proposed solution to
-> fix this in the suspend/resume functions in sdhci-pltfm.c is not a
-> good idea since a lot of drivers use this functions without using the
-> runtime PM APIs.
->
-> Changes since v1:
-> - Create new sdhci_esdhc_(suspend|resume) functions in favor of adding a
->   hard requirement for runtime PM on SDHC platform implementations
->
->  drivers/mmc/host/sdhci-esdhc-imx.c | 28 +++++++++++++++++++++++++++-
->  1 file changed, 27 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 10ef824..84b3365 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1119,6 +1119,32 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
->  }
->
->  #ifdef CONFIG_PM
-> +static int sdhci_esdhc_suspend(struct device *dev)
-> +{
-> +       int ret;
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +
-> +       pm_runtime_get_sync(dev);
-
-This is indeed needed, since else it isn't safe to invoke sdhci_suspend_host().
-
-> +       ret = sdhci_suspend_host(host);
-> +       pm_runtime_mark_last_busy(dev);
-> +       pm_runtime_put_autosuspend(dev);
-
-The problem is, that this wont do what you think I believe.
-
-The device will be kept runtime PM resumed, since the PM core has
-increased a runtime PM reference count for your device, in the
-->prepare() phase (pm_runtime_get_noresume()).
-
-Potentially pm_runtime_force_suspend() could help you accomplish what you want.
-
-> +
-> +       return ret;
-> +}
-> +
-> +static int sdhci_esdhc_resume(struct device *dev)
-> +{
-> +       int ret;
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +
-> +       pm_runtime_get_sync(dev);
-> +       ret = sdhci_resume_host(host);
-> +       pm_runtime_mark_last_busy(dev);
-> +       pm_runtime_put_autosuspend(dev);
-> +
-
-Similar comments as above.
-
-> +       return ret;
-> +}
-> +
->  static int sdhci_esdhc_runtime_suspend(struct device *dev)
->  {
->         struct sdhci_host *host = dev_get_drvdata(dev);
-> @@ -1154,7 +1180,7 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
->  #endif
->
->  static const struct dev_pm_ops sdhci_esdhc_pmops = {
-> -       SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_suspend, sdhci_pltfm_resume)
-> +       SET_SYSTEM_SLEEP_PM_OPS(sdhci_esdhc_suspend, sdhci_esdhc_resume)
->         SET_RUNTIME_PM_OPS(sdhci_esdhc_runtime_suspend,
->                                 sdhci_esdhc_runtime_resume, NULL)
->  };
-> --
-> 2.3.3
+> Ah, I thought ePAPR listed mmc already. Using "sdhci" is a little too
+> specific here, since a lot of mmc hosts are not sdhci compliant, and
+> "sdhc" is completely wrong, because that identifies a specific card
+> type, but a host that supports SDHC cards will generally also work
+> with SD (less than 4GB) or SDXC (more than 48GB) cards.
 >
 
-Kind regards
-Uffe
+Agree on this . Will change it.
+
+>
+>         Arnd
+>
+
+
+
+-- 
+Thanks,
+with regards,
+Suman Tripathi
+
+--047d7ba97f1a8a684b0515687ea2
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><br><div class=3D"gmail_extra"><br><div class=3D"gmail_quo=
+te">On Wed, May 6, 2015 at 2:10 PM, Arnd Bergmann <span dir=3D"ltr">&lt;<a =
+href=3D"mailto:arnd@arndb.de" target=3D"_blank">arnd@arndb.de</a>&gt;</span=
+> wrote:<br><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;bo=
+rder-left:1px #ccc solid;padding-left:1ex"><div class=3D"HOEnZb"><div class=
+=3D"h5">On Wednesday 06 May 2015 09:45:15 Michal Simek wrote:<br>
+&gt; On 05/06/2015 09:31 AM, Arnd Bergmann wrote:<br>
+&gt; &gt; On Wednesday 06 May 2015 10:41:07 Suman Tripathi wrote:<br>
+&gt; &gt;&gt;&gt;&gt; @@ -533,6 +567,16 @@<br>
+&gt; &gt;&gt;&gt;&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0interrupts =3D &lt;0x0 0x4f 0x4&gt;;<=
+br>
+&gt; &gt;&gt;&gt;&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0};<br>
+&gt; &gt;&gt;&gt;&gt;<br>
+&gt; &gt;&gt;&gt;&gt; +=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0sdhc0: sdhc@1c000000 {<br>
+&gt; &gt;&gt;&gt;&gt; +=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0device_type =3D &quot;sdhc&quot;;<br>
+&gt; &gt;&gt;&gt;<br>
+&gt; &gt;&gt;&gt; device_type generally should not be used (there are a few=
+ exceptions).<br>
+&gt; &gt;&gt;<br>
+&gt; &gt;&gt; Okay !!<br>
+&gt; &gt;&gt;<br>
+&gt; &gt;<br>
+&gt; &gt; While we&#39;re at it, please change sdhc@1c000000 to mmc@1c00000=
+0.<br>
+&gt; &gt; Even though Linux does not care, we try to use the standard devic=
+e<br>
+&gt; &gt; names for consistency.<br>
+&gt;<br>
+&gt; Do we have a list of these names somewhere?<br>
+&gt; Normally I do use ePARP - generic names recommendation but mmc or sdhc=
+i<br>
+&gt; are not listed there.<br>
+&gt; Both combination mmc@ or sdhci@ are used in the kernel.<br>
+&gt;<br>
+&gt; On zynq and zynqmp we do use shdci@.<br>
+&gt;<br>
+<br>
+</div></div>Ah, I thought ePAPR listed mmc already. Using &quot;sdhci&quot;=
+ is a little too<br>
+specific here, since a lot of mmc hosts are not sdhci compliant, and<br>
+&quot;sdhc&quot; is completely wrong, because that identifies a specific ca=
+rd<br>
+type, but a host that supports SDHC cards will generally also work<br>
+with SD (less than 4GB) or SDXC (more than 48GB) cards.<br></blockquote><di=
+v><br></div><div>Agree on this . Will change it. =C2=A0</div><blockquote cl=
+ass=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;p=
+adding-left:1ex">
+<span class=3D"HOEnZb"><font color=3D"#888888"><br>
+=C2=A0 =C2=A0 =C2=A0 =C2=A0 Arnd<br>
+</font></span></blockquote></div><br><br clear=3D"all"><div><br></div>-- <b=
+r><div class=3D"gmail_signature"><div dir=3D"ltr"><div>Thanks,</div><div>wi=
+th regards,</div>Suman Tripathi</div></div>
+</div></div>
+
+--047d7ba97f1a8a684b0515687ea2--
+
+--===============3618844610586003767==
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: base64
+Content-Disposition: inline
+
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGludXhwcGMt
+ZGV2IG1haWxpbmcgbGlzdApMaW51eHBwYy1kZXZAbGlzdHMub3psYWJzLm9yZwpodHRwczovL2xp
+c3RzLm96bGFicy5vcmcvbGlzdGluZm8vbGludXhwcGMtZGV2
+
+--===============3618844610586003767==--
