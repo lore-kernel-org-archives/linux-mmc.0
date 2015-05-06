@@ -1,94 +1,148 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [Linux-kernel] [RFC PATCH 5/7] mmc: sh_mobile_sdhi: Add UHS-I
- mode support
-Date: Wed, 6 May 2015 10:44:16 +0200
-Message-ID: <CAPDyKFo7WsE2wTLZc0E9ANrZ1amVsL3n71oxCLFG0+QrF0xH_A@mail.gmail.com>
-References: <1430396995.5802.39.camel@xylophone.i.decadent.org.uk>
-	<1430397136.5802.44.camel@xylophone.i.decadent.org.uk>
-	<CAPDyKFodZscxZJmKgYyMV8m8mNWYc9GitkoKbixTKS5r7rv_fA@mail.gmail.com>
-	<554880C9.8080201@codethink.co.uk>
-	<CAPDyKFpv0BOX0mAvhZx9j5Gnayt__YTiUa8SxvcmsEcuazsg0w@mail.gmail.com>
-	<1430876333.4222.43.camel@xylophone.i.decadent.org.uk>
+Subject: Re: [PATCH V6 08/15] mmc: mmc: Hold re-tuning if the card is put to sleep
+Date: Wed, 6 May 2015 11:32:04 +0200
+Message-ID: <CAPDyKFp4A4UzEUN8pDHpjNn0PX3HcmCA6khHCdRH5R0GsO1Lrw@mail.gmail.com>
+References: <1429531796-21987-1-git-send-email-adrian.hunter@intel.com>
+	<1429531796-21987-9-git-send-email-adrian.hunter@intel.com>
+	<CAPDyKFp0c5Gc9HpS+F_DV2-pxuKnWjqQ7UrGTFd5FcSSG9JT7Q@mail.gmail.com>
+	<5549D336.4040206@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f169.google.com ([209.85.220.169]:35330 "EHLO
+Received: from mail-qk0-f169.google.com ([209.85.220.169]:35644 "EHLO
 	mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753383AbbEFIoR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 May 2015 04:44:17 -0400
-Received: by qkhg7 with SMTP id g7so1453223qkh.2
-        for <linux-mmc@vger.kernel.org>; Wed, 06 May 2015 01:44:16 -0700 (PDT)
-In-Reply-To: <1430876333.4222.43.camel@xylophone.i.decadent.org.uk>
+	with ESMTP id S1751205AbbEFJcG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 May 2015 05:32:06 -0400
+Received: by qkhg7 with SMTP id g7so1933763qkh.2
+        for <linux-mmc@vger.kernel.org>; Wed, 06 May 2015 02:32:05 -0700 (PDT)
+In-Reply-To: <5549D336.4040206@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Cc: Ben Dooks <ben.dooks@codethink.co.uk>, linux-kernel@lists.codethink.co.uk, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-On 6 May 2015 at 03:38, Ben Hutchings <ben.hutchings@codethink.co.uk> wrote:
-> On Tue, 2015-05-05 at 10:47 +0200, Ulf Hansson wrote:
->> On 5 May 2015 at 10:35, Ben Dooks <ben.dooks@codethink.co.uk> wrote:
->> > On 05/05/15 10:56, Ulf Hansson wrote:
->> >> On 30 April 2015 at 14:32, Ben Hutchings <ben.hutchings@codethink.co.uk> wrote:
->> >>> Implement voltage switch, supporting modes up to SDR-50.
->> >>>
->> >>> Based on work by Shinobu Uehara, Rob Taylor, William Towle and Ian Molton.
->> >>>
->> >>> This uses two voltage regulators, one external and one on the pfc.
->> >>
->> >> Why two? If there is a parent child relation ship, that should be
->> >> handled through the regulator tree, right!? Please elaborate.
->> >
->> > The card main power is separate from the IO line voltages.
->> >
->> > To get to the high-speed, card power is left at 3.3V and the IO
->> > voltage is changed to 1.8V.
->> >
->> > In the systems we have the power gate is separate from the controls
->> > for the IO but not integrated into the MMC controller itself.
->
-> In this case, there are *three* regulators:
->
-> 1. External regulator for card power (VDD pin): "vmmc"
-> 2. External regulator for pull-up voltage for the data pins: "vqmmc"
-
-Is this really a regulator and not just about changing a pinctrl setting?
-
-The reason why I wonder, is because there are several other mmc host
-driver's the use a specific pinctrl state for this.
-
-> 3. Internal regulator for input(?) level on the data pins:
->    "vqmmc_ref" (I'm open to suggestions of a better name)
->
->> Okay, that's what I was expecting and hoping for :-)
+On 6 May 2015 at 10:39, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 04/05/15 16:44, Ulf Hansson wrote:
+>> On 20 April 2015 at 14:09, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> Currently "mmc sleep" is used before power off and
+>>> is not paired with waking up. Nevertheless hold
+>>> re-tuning.
+>>>
+>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>>> ---
+>>>  drivers/mmc/core/mmc.c | 14 +++++++++++---
+>>>  1 file changed, 11 insertions(+), 3 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>>> index f36c76f..daf9954 100644
+>>> --- a/drivers/mmc/core/mmc.c
+>>> +++ b/drivers/mmc/core/mmc.c
+>>> @@ -21,6 +21,7 @@
+>>>  #include <linux/mmc/mmc.h>
+>>>
+>>>  #include "core.h"
+>>> +#include "host.h"
+>>>  #include "bus.h"
+>>>  #include "mmc_ops.h"
+>>>  #include "sd_ops.h"
+>>> @@ -1504,6 +1505,7 @@ static int mmc_can_sleep(struct mmc_card *card)
+>>>         return (card && card->ext_csd.rev >= 3);
+>>>  }
+>>>
+>>> +/* If necessary, callers must hold re-tuning */
 >>
->> Then you need to rework $subject patch according to below.
+>> Remove this comment.
 >>
->> 1) Use mmc_regulator_get_supply() to fetch both the I/O voltage
->> regulator (vqmmc) and the main power regulator (vmmc).
+>>>  static int mmc_sleep(struct mmc_host *host)
+>>>  {
+>>>         struct mmc_command cmd = {0};
+>>> @@ -1631,6 +1633,7 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+>>>         int err = 0;
+>>>         unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
+>>>                                         EXT_CSD_POWER_OFF_LONG;
+>>> +       bool retune_release = false;
+>>>
+>>>         BUG_ON(!host);
+>>>         BUG_ON(!host->card);
+>>> @@ -1651,17 +1654,22 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+>>>                 goto out;
+>>>
+>>>         if (mmc_can_poweroff_notify(host->card) &&
+>>> -               ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
+>>> +               ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend)) {
+>>>                 err = mmc_poweroff_notify(host->card, notify_type);
+>>> -       else if (mmc_can_sleep(host->card))
+>>> +       } else if (mmc_can_sleep(host->card)) {
+>>> +               mmc_retune_hold(host);
+>>>                 err = mmc_sleep(host);
+>>> -       else if (!mmc_host_is_spi(host))
+>>> +       } else if (!mmc_host_is_spi(host)) {
+>>>                 err = mmc_deselect_cards(host);
+>>> +       }
+>>>
+>>>         if (!err) {
+>>>                 mmc_power_off(host);
+>>>                 mmc_card_set_suspended(host->card);
+>>>         }
+>>> +
+>>> +       if (retune_release)
+>>> +               mmc_retune_release(host);
+>>>  out:
+>>>         mmc_release_host(host);
+>>>         return err;
+>>
+>> Instead of add mmc_retune_hold|release() to _mmc_suspend(), I would
+>> like you to move that handling into mmc_sleep(). The code should be
+>> easier and it becomes more clear that it's because of a command
+>> sequence.
+>>
+>> I think mmc_retune_hold() should be invoked before mmc_wait_for_cmd()
+>> and then mmc_retune_release() just after, in mmc_sleep(). That should
+>> work, right!?
 >
-> We already do that.
+> That would be the same as holding re-tuning for that request, which is
+> what already happens i.e. adding hold()/release() around mmc_wait_for_cmd()
+> is redundant.
 
-Okay, great!
+I don't understand your point, sorry.
+
+Anyway, my proposal didn't quite work, which is due to that
+mmc_deselect_cards() (invoked from mmc_sleep()) deals with retries. If
+there had been only one try, I thought it could be okay to have that
+command to be preceded by a re-tune.
+
+Anyway, I would like you to move the mmc_retune_hold|release() calls
+into the mmc_sleep() function.
 
 >
->> Your "vqmmc_ref" regulator should thus be renamed to "vmmc".
+> The options for the caller are:
 >
-> No, we have one of those already.
+> 1)
+>         hold re-tuning
+>         put emmc to sleep
+>         later wake up emmc
+>         release re-tuning
 >
->> 2) The vmmc regulator should not be handled from the
->> ->start_signal_voltage_switch() callback, since it's only vqmmc
->> voltage levels that should be changed from there.
+> 2)
+>         put emmc to sleep
+>         later increment hold_count
+>         wake up emmc ignoring CRC errors
+>         release re-tuning
 >
-> It isn't.
+> But there is no wake-up function and the suspend path is using an unbalanced
+> mmc_sleep i.e. no corresponding wake up.
 >
->> 3) The voltage levels changes for vmmc shall be handled via the
->> ->set_ios() callback.
->
-> We don't support UHS-II so we never change the voltage of this
-> regulator.
+> So that leaves what is happening now i.e. a comment plus explicit
+> hold()/release() in _mmc_suspend() so that future changes to _mmc_suspend()
+> know to take mmc_sleep re-tuning requirements into account.
 
-That's not related to UHS-II. Voltage level negotiation for vmmc is
-done even for legacy mode cards.
+Why all this complexity?
+
+mmc_power_off() is called in _mmc_suspend(), that will eventually
+disable re-tune. Thus re-tuning will be prevented for
+commands/requests during the system PM resume sequence, until the card
+has been fully re-initialized (and a tuning sequence done). Isn't that
+sufficient?
 
 Kind regards
 Uffe
