@@ -1,18 +1,18 @@
 From: zhangfei <zhangfei.gao@linaro.org>
 Subject: Re: [PATCH] mmc: dw_mmc: dw_mci_get_cd check MMC_CAP_NONREMOVABLE
-Date: Wed, 06 May 2015 09:53:48 +0800
-Message-ID: <5549742C.40701@linaro.org>
+Date: Wed, 06 May 2015 10:16:10 +0800
+Message-ID: <5549796A.5090703@linaro.org>
 References: <1430816089-8857-1-git-send-email-zhangfei.gao@linaro.org> <55496227.9000904@samsung.com> <CABQgh9E5B=q-5+go2FJXUbDpveGm2xEo+1LdKbG40sxrZ7vQnA@mail.gmail.com> <55496DC8.8060208@samsung.com> <55496F78.3080700@linaro.org> <554970B6.6020309@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f42.google.com ([209.85.220.42]:35972 "EHLO
-	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752585AbbEFBxx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 21:53:53 -0400
-Received: by pabsx10 with SMTP id sx10so211972726pab.3
-        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2015 18:53:53 -0700 (PDT)
+Received: from mail-pd0-f181.google.com ([209.85.192.181]:33911 "EHLO
+	mail-pd0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750699AbbEFCQQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 22:16:16 -0400
+Received: by pdbqa5 with SMTP id qa5so215327513pdb.1
+        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2015 19:16:15 -0700 (PDT)
 In-Reply-To: <554970B6.6020309@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -57,9 +57,25 @@ On 05/06/2015 09:39 AM, Jaehoon Chung wrote:
 >
 > I think that the below usage is not "must not".
 
-Sorry, not understand.
-Just want to use non-removable for emmc, and find it does not work.
-Use broken-cd for emmc is not correct.
+I understand you meaning, you suggest
+ >>> dwmmc0 {
+ >>>      non-removable;
+ >>>      broken-cd;
+ >>> };
+
+drivers/mmc/host/dw_mmc.c checks broken-cd, while mmc_of_parse checks 
+non-removable.
+Yes, it works.
+
+But is it a workaround? and a little tricky.
+It costs me some time to find why non-removable does not work, someone 
+else may meet the same issue.
+It does not align with Documentation/devicetree/bindings/mmc/mmc.txt, 
+which is the guideline to write dts.
+And see drivers/mmc/host/sdhci.c: sdhci_do_get_cd, it also checks both.
+
+Thanks
+
 
 >
 > Best Regards,
