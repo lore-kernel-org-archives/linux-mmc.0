@@ -1,87 +1,64 @@
-From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: Re: [Linux-kernel] [RFC PATCH 5/7] mmc: sh_mobile_sdhi: Add UHS-I
- mode support
-Date: Wed, 06 May 2015 14:49:03 +0100
-Message-ID: <1430920143.4222.74.camel@xylophone.i.decadent.org.uk>
-References: <1430396995.5802.39.camel@xylophone.i.decadent.org.uk>
-	 <1430397136.5802.44.camel@xylophone.i.decadent.org.uk>
-	 <CAPDyKFodZscxZJmKgYyMV8m8mNWYc9GitkoKbixTKS5r7rv_fA@mail.gmail.com>
-	 <554880C9.8080201@codethink.co.uk>
-	 <CAPDyKFpv0BOX0mAvhZx9j5Gnayt__YTiUa8SxvcmsEcuazsg0w@mail.gmail.com>
-	 <1430876333.4222.43.camel@xylophone.i.decadent.org.uk>
-	 <CAPDyKFo7WsE2wTLZc0E9ANrZ1amVsL3n71oxCLFG0+QrF0xH_A@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 2/7] mmc: mediatek: Add Mediatek MMC driver
+Date: Wed, 6 May 2015 18:31:07 +0200
+Message-ID: <CAPDyKFr+FTXAzYVn3F41dmw2zW01pSbSHPfGJHXbUFLJfvQ5CA@mail.gmail.com>
+References: <1430214525-19198-1-git-send-email-chaotian.jing@mediatek.com>
+	<1430214525-19198-3-git-send-email-chaotian.jing@mediatek.com>
+	<CAPDyKFq=R9B6ZHHgmDcSg-TNSfqQKAUKc2NjACvpwxFpmk954g@mail.gmail.com>
+	<1430895299.15154.9.camel@mhfsdcap03>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:56457 "EHLO
-	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750737AbbEFNtJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 May 2015 09:49:09 -0400
-In-Reply-To: <CAPDyKFo7WsE2wTLZc0E9ANrZ1amVsL3n71oxCLFG0+QrF0xH_A@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <1430895299.15154.9.camel@mhfsdcap03>
+Sender: linux-gpio-owner@vger.kernel.org
+To: "chaotian.jing" <chaotian.jing@mediatek.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>, Chris Ball <chris@printf.net>, Mark Rutland <mark.rutland@arm.com>, James Liao <jamesjj.liao@mediatek.com>, srv_heupstream <srv_heupstream@mediatek.com>, Arnd Bergmann <arnd@arndb.de>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Hongzhou Yang <hongzhou.yang@mediatek.com>, Catalin Marinas <catalin.marinas@arm.com>, linux-mmc <linux-mmc@vger.kernel.org>, Will Deacon <will.deacon@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, Sascha Hauer <kernel@pengutronix.de>, "Joe.C" <yingjoe.chen@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, =?UTF-8?B?QmluIFpoYW5nICjnq6Dmlowp?= <bin.zhang@mediatek.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ben Dooks <ben.dooks@codethink.co.uk>, linux-kernel@lists.codethink.co.uk, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>
 
-On Wed, 2015-05-06 at 10:44 +0200, Ulf Hansson wrote:
-> On 6 May 2015 at 03:38, Ben Hutchings <ben.hutchings@codethink.co.uk> wrote:
-> > On Tue, 2015-05-05 at 10:47 +0200, Ulf Hansson wrote:
-> >> On 5 May 2015 at 10:35, Ben Dooks <ben.dooks@codethink.co.uk> wrote:
-> >> > On 05/05/15 10:56, Ulf Hansson wrote:
-> >> >> On 30 April 2015 at 14:32, Ben Hutchings <ben.hutchings@codethink.co.uk> wrote:
-> >> >>> Implement voltage switch, supporting modes up to SDR-50.
-> >> >>>
-> >> >>> Based on work by Shinobu Uehara, Rob Taylor, William Towle and Ian Molton.
-> >> >>>
-> >> >>> This uses two voltage regulators, one external and one on the pfc.
-> >> >>
-> >> >> Why two? If there is a parent child relation ship, that should be
-> >> >> handled through the regulator tree, right!? Please elaborate.
-> >> >
-> >> > The card main power is separate from the IO line voltages.
-> >> >
-> >> > To get to the high-speed, card power is left at 3.3V and the IO
-> >> > voltage is changed to 1.8V.
-> >> >
-> >> > In the systems we have the power gate is separate from the controls
-> >> > for the IO but not integrated into the MMC controller itself.
-> >
-> > In this case, there are *three* regulators:
-> >
-> > 1. External regulator for card power (VDD pin): "vmmc"
-> > 2. External regulator for pull-up voltage for the data pins: "vqmmc"
-> 
-> Is this really a regulator and not just about changing a pinctrl setting?
+On 6 May 2015 at 08:54, chaotian.jing <chaotian.jing@mediatek.com> wrote:
+> Dear Ulf,
+>
+> Thanks for your review.
+> I must do a explain of our MMC host:
+> Source clock is source clock of the MMC bus, MMC host has a divider to
+> get different bus clock frequency. now the runtime suspend is gating
+> this clock.
+>
+> Hclk is the power domain of the MMC host, if Hclk is gated, the MMC host
+> cannot work(all registers readout is zero). and, all registers would be
+> reset to default value if Hclk is gated/ungated.
+> At MT8173, MSDC0 and MSDC2 has independent Hclk, MSDC1 and MSDC3's Hclk
+> was controlled by "Infra module".
 
-Looking at the Lager board, the pull-up voltage appears to be controlled
-by the external PMIC (DA9063), which is signalled using GPIOs (I don't
-know why, when it's also connected to I2C).
+Thanks for clarifying!
 
-> The reason why I wonder, is because there are several other mmc host
-> driver's the use a specific pinctrl state for this.
-> 
-> > 3. Internal regulator for input(?) level on the data pins:
-> >    "vqmmc_ref" (I'm open to suggestions of a better name)
+I don't have enough knowledge about your SoC to understand the detail,
+but it seems like we are mixing clocks and power domains. I would
+rather keep this separate - if the HW allows it.
 
-This one is implemented in the pinctrl (pfc) block.
+I guess the key question I have is the following:
+1) Is it hardware wise possible to gate the hclk, but without gating
+the power domain?
+2) At what level is the reference counting done for each device in the
+power domain? In HW or in sofftware?
 
-[...]
-> >> 3) The voltage levels changes for vmmc shall be handled via the
-> >> ->set_ios() callback.
-> >
-> > We don't support UHS-II so we never change the voltage of this
-> > regulator.
-> 
-> That's not related to UHS-II. Voltage level negotiation for vmmc is
-> done even for legacy mode cards.
+>
+> And, our MMC host has ability to control the gate/ungate of bus clock
+> automatically, in MSDC_CFG bit 1, if this bit is set to 0, then "bus
+> clock is gated to 0 if no command or data is transmitted".
+> So, if the runtime PM do not control the Source clock, Hclk, then the
+> runtime PM is needless.
+>
+> if runtime PM do gate/ungate Hclk, then need do save/restore the
+> registers meanwhile.
 
-I'm looking at "SD Specifications, Part 1, Physical Layer Simplified
-Specifications, Version 4.10" and it seems clear from that, that only
-UHS-II cards have a variable supply voltage.  Maybe that changed in a
-later version?  Anyway, I don't have any board that can change the
-supply voltage.
+Yes agree, that's a common thing to deal with from runtime PM callbacks.
 
-Ben.
+>
+> So, how about your suggestion ?
+> do we still need runtime PM ?
 
+Yes, I definitely think you need it!
 
+Kind regards
+Uffe
