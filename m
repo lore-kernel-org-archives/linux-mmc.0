@@ -1,45 +1,58 @@
-From: Rob Herring <robherring2@gmail.com>
-Subject: Re: [PATCH v5 1/1] arm64: dts: Add the arasan sdhc nodes in apm-storm.dtsi.
-Date: Tue, 5 May 2015 14:41:21 -0500
-Message-ID: <CAL_JsqK0pCtL2pbG7RttYd7BDxQHxdECHN_9X9MpLTuVEOxzsQ@mail.gmail.com>
-References: <1430817426-5241-1-git-send-email-stripathi@apm.com> <1430817426-5241-2-git-send-email-stripathi@apm.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: dw_mci_get_cd check MMC_CAP_NONREMOVABLE
+Date: Wed, 06 May 2015 09:36:55 +0900
+Message-ID: <55496227.9000904@samsung.com>
+References: <1430816089-8857-1-git-send-email-zhangfei.gao@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yh0-f47.google.com ([209.85.213.47]:33941 "EHLO
-	mail-yh0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753345AbbEETlm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 15:41:42 -0400
-In-Reply-To: <1430817426-5241-2-git-send-email-stripathi@apm.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:38044 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751847AbbEFAhA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 May 2015 20:37:00 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0NNW005CSKDMM210@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 06 May 2015 09:36:58 +0900 (KST)
+In-reply-to: <1430816089-8857-1-git-send-email-zhangfei.gao@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Suman Tripathi <stripathi@apm.com>
-Cc: "chris@printf.net" <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Arnd Bergmann <arnd@arndb.de>, Michal Simek <michal.simek@xilinx.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, ddutile@redhat.com, "jcm@redhat.com" <jcm@redhat.com>, Mark Langsdorf <mlangsdo@redhat.com>, "patches@apm.com" <patches@apm.com>
+To: Zhangfei Gao <zhangfei.gao@linaro.org>
+Cc: linux-mmc@vger.kernel.org
 
-On Tue, May 5, 2015 at 4:17 AM, Suman Tripathi <stripathi@apm.com> wrote:
-> This patch adds the arasan sdhc nodes to reuse the of-arasan
-> driver for APM X-Gene SoC.
->
-> Signed-off-by: Suman Tripathi <stripathi@apm.com>
+Hi, Zhangfei.
+
+If you want to check it, use the "broken-cd" and "non-removable" properties into dt-file.
+Did you use them?
+
+Best Regards,
+Jaehoon Chung
+
+On 05/05/2015 05:54 PM, Zhangfei Gao wrote:
+> When non-removable is used for emmc,  MMC_CAP_NONREMOVABLE should
+> also be checked, otherwise detection fail since present=0
+> 
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
 > ---
->  arch/arm64/boot/dts/apm/apm-mustang.dts |  4 +++
->  arch/arm64/boot/dts/apm/apm-storm.dtsi  | 44 +++++++++++++++++++++++++++++++++
->  2 files changed, 48 insertions(+)
+>  drivers/mmc/host/dw_mmc.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 488a8af..5d327e4 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1308,7 +1308,8 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>  	int gpio_cd = mmc_gpio_get_cd(mmc);
+>  
+>  	/* Use platform get_cd function, else try onboard card detect */
+> -	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+> +	if ((brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION) ||
+> +	    (mmc->caps & MMC_CAP_NONREMOVABLE))
+>  		present = 1;
+>  	else if (!IS_ERR_VALUE(gpio_cd))
+>  		present = gpio_cd;
+> 
 
-[...]
-
-> @@ -533,6 +567,16 @@
->                         interrupts = <0x0 0x4f 0x4>;
->                 };
->
-> +               sdhc0: sdhc@1c000000 {
-> +                       device_type = "sdhc";
-
-device_type generally should not be used (there are a few exceptions).
-
-> +                       compatible = "arasan,sdhci-4.9a";
-
-If you ever have an integration or xgene specific problem, you need a
-chip specific compatible.
-
-Rob
