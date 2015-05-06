@@ -1,70 +1,141 @@
-From: Michal Simek <michal.simek@xilinx.com>
-Subject: Re: [PATCH v5 1/1] arm64: dts: Add the arasan sdhc nodes in
- apm-storm.dtsi.
-Date: Wed, 6 May 2015 14:41:54 +0200
-Message-ID: <554A0C12.7080702@xilinx.com>
-References: <1430817426-5241-1-git-send-email-stripathi@apm.com>
- <4635229.bceBxngCoe@wuerfel> <5549C68B.9090602@xilinx.com>
- <2568634.iEosTvMJpM@wuerfel>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V6 08/15] mmc: mmc: Hold re-tuning if the card is put
+ to sleep
+Date: Wed, 06 May 2015 15:42:02 +0300
+Message-ID: <554A0C1A.60000@intel.com>
+References: <1429531796-21987-1-git-send-email-adrian.hunter@intel.com>	<1429531796-21987-9-git-send-email-adrian.hunter@intel.com>	<CAPDyKFp0c5Gc9HpS+F_DV2-pxuKnWjqQ7UrGTFd5FcSSG9JT7Q@mail.gmail.com>	<5549D336.4040206@intel.com>	<CAPDyKFp4A4UzEUN8pDHpjNn0PX3HcmCA6khHCdRH5R0GsO1Lrw@mail.gmail.com>	<5549ECBD.3010608@intel.com> <CAPDyKFpUNaMHKuw06VmAQPbWt3hh5GZJYJ_ZEdB4TePZ31N+RA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <2568634.iEosTvMJpM@wuerfel>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Arnd Bergmann <arnd@arndb.de>, Michal Simek <michal.simek@xilinx.com>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Mark Langsdorf <mlangsdo@redhat.com>, Suman Tripathi <stripathi@apm.com>, "jcm@redhat.com" <jcm@redhat.com>, Anton Vorontsov <anton@enomsg.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, "patches@apm.com" <patches@apm.com>, Don Dutile <ddutile@redhat.com>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:48492 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750942AbbEFMoP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 6 May 2015 08:44:15 -0400
+In-Reply-To: <CAPDyKFpUNaMHKuw06VmAQPbWt3hh5GZJYJ_ZEdB4TePZ31N+RA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-On 05/06/2015 10:40 AM, Arnd Bergmann wrote:
-> On Wednesday 06 May 2015 09:45:15 Michal Simek wrote:
->> On 05/06/2015 09:31 AM, Arnd Bergmann wrote:
->>> On Wednesday 06 May 2015 10:41:07 Suman Tripathi wrote:
->>>>>> @@ -533,6 +567,16 @@
->>>>>>                         interrupts = <0x0 0x4f 0x4>;
->>>>>>                 };
->>>>>>
->>>>>> +               sdhc0: sdhc@1c000000 {
->>>>>> +                       device_type = "sdhc";
+On 06/05/15 14:36, Ulf Hansson wrote:
+> [...]
+> 
+>>>>> Instead of add mmc_retune_hold|release() to _mmc_suspend(), I would
+>>>>> like you to move that handling into mmc_sleep(). The code should be
+>>>>> easier and it becomes more clear that it's because of a command
+>>>>> sequence.
 >>>>>
->>>>> device_type generally should not be used (there are a few exceptions).
+>>>>> I think mmc_retune_hold() should be invoked before mmc_wait_for_cmd()
+>>>>> and then mmc_retune_release() just after, in mmc_sleep(). That should
+>>>>> work, right!?
 >>>>
->>>> Okay !!
->>>>
+>>>> That would be the same as holding re-tuning for that request, which is
+>>>> what already happens i.e. adding hold()/release() around mmc_wait_for_cmd()
+>>>> is redundant.
 >>>
->>> While we're at it, please change sdhc@1c000000 to mmc@1c000000.
->>> Even though Linux does not care, we try to use the standard device
->>> names for consistency.
+>>> I don't understand your point, sorry.
 >>
->> Do we have a list of these names somewhere?
->> Normally I do use ePARP - generic names recommendation but mmc or sdhci
->> are not listed there.
->> Both combination mmc@ or sdhci@ are used in the kernel.
+>> mmc_wait_for_cmd() calls mmc_wait_for_req() which calls __mmc_start_req()
+>> which calls mmc_start_request() which calls mmc_retune_hold()
 >>
->> On zynq and zynqmp we do use shdci@.
+>> Then mmc_wait_for_req() calls mmc_wait_for_req_done() which calls
+>> mmc_retune_release().
+>>
+>> So
+>>         mmc_wait_for_cmd() (with no retries)
+>> has the same effect as
+>>         mmc_retune_hold()
+>>         mmc_wait_for_cmd()
+>>         mmc_retune_release()
 >>
 > 
-> Ah, I thought ePAPR listed mmc already. Using "sdhci" is a little too
-> specific here, since a lot of mmc hosts are not sdhci compliant, and
-> "sdhc" is completely wrong, because that identifies a specific card
-> type, but a host that supports SDHC cards will generally also work
-> with SD (less than 4GB) or SDXC (more than 48GB) cards.
+> Huh, you are right - again.
+> 
+> There have been a couple of iterations of this patchset, I don't
+> recall why we need to hold retune for all requests? It seems awkward.
+> Shouldn't we just hold retune for those requests that needs it?
 
-Yes "sdhc" is completely wrong.
+For data requests (which also call __mmc_start_req()) there is the
+possibility that a 'write' is not finished and is polled with CMD13.
+So re-tuning is held to avoid conflicting with the busy state.
+It also aids controlling when re-tuning happens in the recovery path
+i.e. we have a go at getting the status first and if that doesn't
+work first time, then re-tune if needed.
 
-Based on our datasheet(also version used on Zynq and ZynqMP) this IP is
-compliant with SD HC 3.00, SDIO 3.0, SD MC 3.01 SD MCS 1.01, MMC 4.51.
-Not sure about the version which they use.
-Also not sure which spec the IP should have to be able to say that we
-can use sdhci name. Do you have exact SPEC name?
+Also mmc_retune_hold() does not only hold retuning, it also causes
+re-tuning to happen if the hold_count was zero, so it does
+"make-retuning-happen-if-needed-and-not-already-held-and-then-hold-retuning"
 
-Thanks,
-Michal
+> 
+>>>
+>>> Anyway, my proposal didn't quite work, which is due to that
+>>> mmc_deselect_cards() (invoked from mmc_sleep()) deals with retries. If
+>>> there had been only one try, I thought it could be okay to have that
+>>> command to be preceded by a re-tune.
+>>>
+>>> Anyway, I would like you to move the mmc_retune_hold|release() calls
+>>> into the mmc_sleep() function.
+>>
+>> That would have no effect as explained above.
+> 
+> Then why did you add it to the _mmc_suspend() function? What am I missing here?
+
+It was added in response to our discussions. It was not in my original
+patches. I can take it out.
+
+> 
+>>
+>>>
+>>>>
+>>>> The options for the caller are:
+>>>>
+>>>> 1)
+>>>>         hold re-tuning
+>>>>         put emmc to sleep
+>>>>         later wake up emmc
+>>>>         release re-tuning
+>>>>
+>>>> 2)
+>>>>         put emmc to sleep
+>>>>         later increment hold_count
+>>>>         wake up emmc ignoring CRC errors
+>>>>         release re-tuning
+>>>>
+>>>> But there is no wake-up function and the suspend path is using an unbalanced
+>>>> mmc_sleep i.e. no corresponding wake up.
+>>>>
+>>>> So that leaves what is happening now i.e. a comment plus explicit
+>>>> hold()/release() in _mmc_suspend() so that future changes to _mmc_suspend()
+>>>> know to take mmc_sleep re-tuning requirements into account.
+>>>
+>>> Why all this complexity?
+>>>
+>>> mmc_power_off() is called in _mmc_suspend(), that will eventually
+>>> disable re-tune. Thus re-tuning will be prevented for
+>>> commands/requests during the system PM resume sequence, until the card
+>>> has been fully re-initialized (and a tuning sequence done). Isn't that
+>>> sufficient?
+>>
+>> Yes my original patch did not have any of that complexity. I added it in
+>> response to our discussions.
+>>
+>> As you wrote, _mmc_suspend() does not need to do anything with retuning
+>> because mmc_sleep() is followed by mmc_power_off().
+>>
+>> The original patch added a comment to mmc_sleep() and that was all. That
+>> would still be the best approach.
+>>
+> 
+> What I had in mind was that the re-tune timer could time out in the
+> middle of the _mmc_suspend() sequence.
+> 
+> If that happens in-between mmc_deselect_cards() and when the CMD5 is
+> to be sent, in mmc_sleep() - we must not allow a re-tune sequence.
+> Unless holding re-tune here, how is that prevented?
+
+Oh yes, I have overlooked that re-tuning can't be done on a de-selected
+card. So I will add mmc_retune_hold()/mmc_retune_release(). I will have to
+think about the error handling. It looks broken now anyway since it doesn't
+reselect the card in the error path.
+
