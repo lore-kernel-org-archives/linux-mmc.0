@@ -1,55 +1,101 @@
-From: Suman Tripathi <stripathi@apm.com>
-Subject: [PATCH v6 0/2] Add SDHCI support for APM X-Gene SoC using ARASAN SDHCI controller.
-Date: Wed,  6 May 2015 19:12:09 +0530
-Message-ID: <1430919731-9016-1-git-send-email-stripathi@apm.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from denmail01-v4020.amcc.com ([192.195.68.30]:36945 "EHLO
-	denmail01.amcc.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750818AbbEFNn2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 May 2015 09:43:28 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
+Subject: [PATCH v6 1/2] arm64: dts: Add the arasan sdhci nodes in apm-storm.dtsi.
+Date: Wed,  6 May 2015 19:12:10 +0530
+Message-ID: <1430919731-9016-2-git-send-email-stripathi@apm.com>
+References: <1430919731-9016-1-git-send-email-stripathi@apm.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1430919731-9016-1-git-send-email-stripathi-qTEPVZfXA3Y@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ddutile-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, patches-qTEPVZfXA3Y@public.gmane.org, Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: chris@printf.net, anton@enomsg.org, arnd@arndb.de, michal.simek@xilinx.com
-Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ddutile@redhat.com, jcm@redhat.com, mlangsdo@redhat.com, patches@apm.com, Suman Tripathi <stripathi@apm.com>
 
-This patch adds the SDHCI support for APM X-Gene SoC using ARASAN SDHCI controller.
+This patch adds the arasan sdhci nodes to reuse the of-arasan
+driver for APM X-Gene SoC.
 
-v1 change:
- * Use the CONFIG_ARM64_DMA_HAS_IOMMU for dma-mapping.
-
-v2 change:
- * Drop the IOMMU support and switching to PIO mode for arasan.
-   controller integrated inside APM X-Gene SoC.
-
-v3 change:
- * Change the sdhci-of-arasan.c to support arasan4.9a.
- * Add quirks for arasan4.9a.
-
-v4 change:
- * Cleanup the Documentation and dts.
-
-v5 change:
- * Rebase the dts files.
- * Drop patch 2 and 3 as it is applied.
-
-v6 change:
- * Clean the unrequired properties from dts.
- * Rename sdhc to sdhci.
- * support to disable timming using capability register read.
-
-Signed-off-by: Suman Tripathi <stripathi@apm.com>
+Signed-off-by: Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
 ---
-
-Suman Tripathi (2):
-  arm64: dts: Add the arasan sdhci nodes in apm-storm.dtsi.
-  mmc: sdhci: Add support to disable SDR104/SDR50/DDR50 based on
-    capability     register 0.
-
  arch/arm64/boot/dts/apm/apm-mustang.dts |  4 +++
  arch/arm64/boot/dts/apm/apm-storm.dtsi  | 43 +++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c                |  3 ++-
- 3 files changed, 49 insertions(+), 1 deletion(-)
+ 2 files changed, 47 insertions(+)
 
+diff --git a/arch/arm64/boot/dts/apm/apm-mustang.dts b/arch/arm64/boot/dts/apm/apm-mustang.dts
+index 83578e7..7ccd517 100644
+--- a/arch/arm64/boot/dts/apm/apm-mustang.dts
++++ b/arch/arm64/boot/dts/apm/apm-mustang.dts
+@@ -52,3 +52,7 @@
+ &xgenet {
+ 	status = "ok";
+ };
++
++&sdhci0 {
++	status = "ok";
++};
+diff --git a/arch/arm64/boot/dts/apm/apm-storm.dtsi b/arch/arm64/boot/dts/apm/apm-storm.dtsi
+index c8d3e0e..b5d2698 100644
+--- a/arch/arm64/boot/dts/apm/apm-storm.dtsi
++++ b/arch/arm64/boot/dts/apm/apm-storm.dtsi
+@@ -145,6 +145,40 @@
+ 				clock-output-names = "socplldiv2";
+ 			};
+
++			ahbclk: ahbclk@1f2ac000 {
++				compatible = "apm,xgene-device-clock";
++				#clock-cells = <1>;
++				clocks = <&socplldiv2 0>;
++				reg = <0x0 0x1f2ac000 0x0 0x1000
++					0x0 0x17000000 0x0 0x2000>;
++				reg-names = "csr-reg", "div-reg";
++				csr-offset = <0x0>;
++				csr-mask = <0x1>;
++				enable-offset = <0x8>;
++				enable-mask = <0x1>;
++				divider-offset = <0x164>;
++				divider-width = <0x5>;
++				divider-shift = <0x0>;
++				clock-output-names = "ahbclk";
++			};
++
++			sdioclk: sdioclk@1f2ac000 {
++				compatible = "apm,xgene-device-clock";
++				#clock-cells = <1>;
++				clocks = <&socplldiv2 0>;
++				reg = <0x0 0x1f2ac000 0x0 0x1000
++					0x0 0x17000000 0x0 0x2000>;
++				reg-names = "csr-reg", "div-reg";
++				csr-offset = <0x0>;
++				csr-mask = <0x2>;
++				enable-offset = <0x8>;
++				enable-mask = <0x2>;
++				divider-offset = <0x178>;
++				divider-width = <0x8>;
++				divider-shift = <0x0>;
++				clock-output-names = "sdioclk";
++			};
++
+ 			qmlclk: qmlclk {
+ 				compatible = "apm,xgene-device-clock";
+ 				#clock-cells = <1>;
+@@ -533,6 +567,15 @@
+ 			interrupts = <0x0 0x4f 0x4>;
+ 		};
+
++		sdhci0: sdhci@1c000000 {
++			compatible = "arasan,sdhci-4.9a";
++			reg = <0x0 0x1c000000 0x0 0x100>;
++			interrupts = <0x0 0x49 0x4>;
++			dma-coherent;
++			clock-names = "clk_xin", "clk_ahb";
++			clocks = <&sdioclk 0>, <&ahbclk 0>;
++		};
++
+ 		phy1: phy@1f21a000 {
+ 			compatible = "apm,xgene-phy";
+ 			reg = <0x0 0x1f21a000 0x0 0x100>;
 --
 1.8.2.1
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
