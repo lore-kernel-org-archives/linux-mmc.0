@@ -1,188 +1,89 @@
-From: Suman Tripathi <stripathi@apm.com>
-Subject: Re: [PATCH v5 1/1] arm64: dts: Add the arasan sdhc nodes in
- apm-storm.dtsi.
-Date: Wed, 6 May 2015 18:17:57 +0530
-Message-ID: <CAOHikRDT4vwkOkr8DVk0RrNeqVZwP7PXg53s0VBAXO5U+dpjHQ@mail.gmail.com>
-References: <1430817426-5241-1-git-send-email-stripathi@apm.com>
- <4635229.bceBxngCoe@wuerfel> <5549C68B.9090602@xilinx.com>
- <2568634.iEosTvMJpM@wuerfel> <554A0C12.7080702@xilinx.com>
+From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: Re: [PATCH v3 2/7] mmc: mediatek: Add Mediatek MMC driver
+Date: Thu, 7 May 2015 09:42:36 +0800
+Message-ID: <1430962956.15154.48.camel@mhfsdcap03>
+References: <1430214525-19198-1-git-send-email-chaotian.jing@mediatek.com>
+ <1430214525-19198-3-git-send-email-chaotian.jing@mediatek.com>
+ <CAPDyKFq=R9B6ZHHgmDcSg-TNSfqQKAUKc2NjACvpwxFpmk954g@mail.gmail.com>
+ <1430895299.15154.9.camel@mhfsdcap03>
+ <CAPDyKFr+FTXAzYVn3F41dmw2zW01pSbSHPfGJHXbUFLJfvQ5CA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============5009816003296575419=="
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <554A0C12.7080702@xilinx.com>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Michal Simek <michal.simek@xilinx.com>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Mark Langsdorf <mlangsdo@redhat.com>, Arnd Bergmann <arnd@arndb.de>, "jcm@redhat.com" <jcm@redhat.com>, Anton Vorontsov <anton@enomsg.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, "patches@apm.com" <patches@apm.com>, Rob Herring <robherring2@gmail.com>, Don Dutile <ddutile@redhat.com>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <CAPDyKFr+FTXAzYVn3F41dmw2zW01pSbSHPfGJHXbUFLJfvQ5CA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
+List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, srv_heupstream <srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Bin Zhang =?UTF-8?Q?=28=E7=AB=A0=E6=96=8C=29?= <bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kern>
 List-Id: linux-mmc@vger.kernel.org
 
---===============5009816003296575419==
-Content-Type: multipart/alternative; boundary=047d7ba978085ebea8051569341f
+Dear Ulf,
 
---047d7ba978085ebea8051569341f
-Content-Type: text/plain; charset=UTF-8
+Thanks!
+Below is my comment:
 
-On Wed, May 6, 2015 at 6:11 PM, Michal Simek <michal.simek@xilinx.com>
-wrote:
-
-> On 05/06/2015 10:40 AM, Arnd Bergmann wrote:
-> > On Wednesday 06 May 2015 09:45:15 Michal Simek wrote:
-> >> On 05/06/2015 09:31 AM, Arnd Bergmann wrote:
-> >>> On Wednesday 06 May 2015 10:41:07 Suman Tripathi wrote:
-> >>>>>> @@ -533,6 +567,16 @@
-> >>>>>>                         interrupts = <0x0 0x4f 0x4>;
-> >>>>>>                 };
-> >>>>>>
-> >>>>>> +               sdhc0: sdhc@1c000000 {
-> >>>>>> +                       device_type = "sdhc";
-> >>>>>
-> >>>>> device_type generally should not be used (there are a few
-> exceptions).
-> >>>>
-> >>>> Okay !!
-> >>>>
-> >>>
-> >>> While we're at it, please change sdhc@1c000000 to mmc@1c000000.
-> >>> Even though Linux does not care, we try to use the standard device
-> >>> names for consistency.
-> >>
-> >> Do we have a list of these names somewhere?
-> >> Normally I do use ePARP - generic names recommendation but mmc or sdhci
-> >> are not listed there.
-> >> Both combination mmc@ or sdhci@ are used in the kernel.
-> >>
-> >> On zynq and zynqmp we do use shdci@.
-> >>
+On Wed, 2015-05-06 at 18:31 +0200, Ulf Hansson wrote:
+> On 6 May 2015 at 08:54, chaotian.jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
+> > Dear Ulf,
 > >
-> > Ah, I thought ePAPR listed mmc already. Using "sdhci" is a little too
-> > specific here, since a lot of mmc hosts are not sdhci compliant, and
-> > "sdhc" is completely wrong, because that identifies a specific card
-> > type, but a host that supports SDHC cards will generally also work
-> > with SD (less than 4GB) or SDXC (more than 48GB) cards.
->
-> Yes "sdhc" is completely wrong.
->
+> > Thanks for your review.
+> > I must do a explain of our MMC host:
+> > Source clock is source clock of the MMC bus, MMC host has a divider to
+> > get different bus clock frequency. now the runtime suspend is gating
+> > this clock.
+> >
+> > Hclk is the power domain of the MMC host, if Hclk is gated, the MMC host
+> > cannot work(all registers readout is zero). and, all registers would be
+> > reset to default value if Hclk is gated/ungated.
+> > At MT8173, MSDC0 and MSDC2 has independent Hclk, MSDC1 and MSDC3's Hclk
+> > was controlled by "Infra module".
+Sorry for mistake, MSDC0 and MSDC3 has independent Hclk, MSDC1 and
+MSDC2's Hclk was controlled by "Infra module". the Infra module is a
+"power saving module", when the system go to sleep, Infra module will be
+set and MSDC1 & MSDC2's Hclk will be gated automatically.
+> 
+> Thanks for clarifying!
+> 
+> I don't have enough knowledge about your SoC to understand the detail,
+> but it seems like we are mixing clocks and power domains. I would
+> rather keep this separate - if the HW allows it.
+> 
+> I guess the key question I have is the following:
+> 1) Is it hardware wise possible to gate the hclk, but without gating
+> the power domain?
+> 2) At what level is the reference counting done for each device in the
+> power domain? In HW or in sofftware?
+> 
 
-But spec name in search engine's gives  SDHC 3.0 as general.
-
->
-> Based on our datasheet(also version used on Zynq and ZynqMP) this IP is
-> compliant with SD HC 3.00, SDIO 3.0, SD MC 3.01 SD MCS 1.01, MMC 4.51.
-> Not sure about the version which they use.
-> Also not sure which spec the IP should have to be able to say that we
-> can use sdhci name. Do you have exact SPEC name?
->
-
-I also think sdhci because the binding is sdhci written by Arasan. Anyway I
-will change to sdhci.
-
->
-> Thanks,
-> Michal
->
->
-
-
--- 
-Thanks,
-with regards,
-Suman Tripathi
-
---047d7ba978085ebea8051569341f
-Content-Type: text/html; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-
-<div dir=3D"ltr"><br><div class=3D"gmail_extra"><br><div class=3D"gmail_quo=
-te">On Wed, May 6, 2015 at 6:11 PM, Michal Simek <span dir=3D"ltr">&lt;<a h=
-ref=3D"mailto:michal.simek@xilinx.com" target=3D"_blank">michal.simek@xilin=
-x.com</a>&gt;</span> wrote:<br><blockquote class=3D"gmail_quote" style=3D"m=
-argin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><div class=3D=
-"HOEnZb"><div class=3D"h5">On 05/06/2015 10:40 AM, Arnd Bergmann wrote:<br>
-&gt; On Wednesday 06 May 2015 09:45:15 Michal Simek wrote:<br>
-&gt;&gt; On 05/06/2015 09:31 AM, Arnd Bergmann wrote:<br>
-&gt;&gt;&gt; On Wednesday 06 May 2015 10:41:07 Suman Tripathi wrote:<br>
-&gt;&gt;&gt;&gt;&gt;&gt; @@ -533,6 +567,16 @@<br>
-&gt;&gt;&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
-=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0interrupts =3D &lt;0x0 0x4f 0x4&gt=
-;;<br>
-&gt;&gt;&gt;&gt;&gt;&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
-=C2=A0 =C2=A0};<br>
-&gt;&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt;&gt; +=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
-=C2=A0sdhc0: sdhc@1c000000 {<br>
-&gt;&gt;&gt;&gt;&gt;&gt; +=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
-=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0device_type =3D &quot;sdhc&quot;;<br>
-&gt;&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt;&gt; device_type generally should not be used (there are a =
-few exceptions).<br>
-&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;&gt; Okay !!<br>
-&gt;&gt;&gt;&gt;<br>
-&gt;&gt;&gt;<br>
-&gt;&gt;&gt; While we&#39;re at it, please change sdhc@1c000000 to mmc@1c00=
-0000.<br>
-&gt;&gt;&gt; Even though Linux does not care, we try to use the standard de=
-vice<br>
-&gt;&gt;&gt; names for consistency.<br>
-&gt;&gt;<br>
-&gt;&gt; Do we have a list of these names somewhere?<br>
-&gt;&gt; Normally I do use ePARP - generic names recommendation but mmc or =
-sdhci<br>
-&gt;&gt; are not listed there.<br>
-&gt;&gt; Both combination mmc@ or sdhci@ are used in the kernel.<br>
-&gt;&gt;<br>
-&gt;&gt; On zynq and zynqmp we do use shdci@.<br>
-&gt;&gt;<br>
-&gt;<br>
-&gt; Ah, I thought ePAPR listed mmc already. Using &quot;sdhci&quot; is a l=
-ittle too<br>
-&gt; specific here, since a lot of mmc hosts are not sdhci compliant, and<b=
-r>
-&gt; &quot;sdhc&quot; is completely wrong, because that identifies a specif=
-ic card<br>
-&gt; type, but a host that supports SDHC cards will generally also work<br>
-&gt; with SD (less than 4GB) or SDXC (more than 48GB) cards.<br>
-<br>
-</div></div>Yes &quot;sdhc&quot; is completely wrong.<br></blockquote><div>=
-<br></div><div>But spec name in search engine&#39;s gives =C2=A0SDHC 3.0 as=
- general.=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 =
-0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
-<br>
-Based on our datasheet(also version used on Zynq and ZynqMP) this IP is<br>
-compliant with SD HC 3.00, SDIO 3.0, SD MC 3.01 SD MCS 1.01, MMC 4.51.<br>
-Not sure about the version which they use.<br>
-Also not sure which spec the IP should have to be able to say that we<br>
-can use sdhci name. Do you have exact SPEC name?<br></blockquote><div><br><=
-/div><div>I also think sdhci because the binding is sdhci written by Arasan=
-. Anyway I will change to sdhci.</div><blockquote class=3D"gmail_quote" sty=
-le=3D"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
-<br>
-Thanks,<br>
-Michal<br>
-<br>
-</blockquote></div><br><br clear=3D"all"><div><br></div>-- <br><div class=
-=3D"gmail_signature"><div dir=3D"ltr"><div>Thanks,</div><div>with regards,<=
-/div>Suman Tripathi</div></div>
-</div></div>
-
---047d7ba978085ebea8051569341f--
-
---===============5009816003296575419==
-Content-Type: text/plain; charset="utf-8"
-MIME-Version: 1.0
-Content-Transfer-Encoding: base64
-Content-Disposition: inline
-
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGludXhwcGMt
-ZGV2IG1haWxpbmcgbGlzdApMaW51eHBwYy1kZXZAbGlzdHMub3psYWJzLm9yZwpodHRwczovL2xp
-c3RzLm96bGFicy5vcmcvbGlzdGluZm8vbGludXhwcGMtZGV2
-
---===============5009816003296575419==--
+Actually, Our MMC host do not have power domain, all the control of the
+host is the Hclk.
+> >
+> > And, our MMC host has ability to control the gate/ungate of bus clock
+> > automatically, in MSDC_CFG bit 1, if this bit is set to 0, then "bus
+> > clock is gated to 0 if no command or data is transmitted".
+> > So, if the runtime PM do not control the Source clock, Hclk, then the
+> > runtime PM is needless.
+> >
+> > if runtime PM do gate/ungate Hclk, then need do save/restore the
+> > registers meanwhile.
+> 
+> Yes agree, that's a common thing to deal with from runtime PM callbacks.
+> That means that the runtime PM need gate/ungate source clock and Hclk ?
+If it is, then need do save registers before gate Hclk and restore
+registers after ungate Hclk.
+> >
+> > So, how about your suggestion ?
+> > do we still need runtime PM ?
+> 
+> Yes, I definitely think you need it!
+> 
+> Kind regards
+> Uffe
