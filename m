@@ -1,71 +1,54 @@
-From: Meng Wang <meng@tupleapes.com>
-Subject: Re: execution order of packed command in eMMC
-Date: Thu, 7 May 2015 10:38:00 -0400
-Message-ID: <CAP3VVE0+qkr+4wDQfRaVMdSL_Q0JkiE2FSyMRyg=tBA66Xp3-Q@mail.gmail.com>
-References: <CAP3VVE1idbQ2fLw1wpEBnuJiprGa0L46OuzR_Ng6zc_yxyfcRg@mail.gmail.com>
-	<554B0DE8.5000806@codeaurora.org>
+From: Fabio Estevam <fabio.estevam@freescale.com>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: Remove unneeded code
+Date: Thu, 7 May 2015 15:00:09 -0300
+Message-ID: <1431021609-6932-1-git-send-email-fabio.estevam@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f50.google.com ([209.85.218.50]:36078 "EHLO
-	mail-oi0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752099AbbEGOiB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 May 2015 10:38:01 -0400
-Received: by oift201 with SMTP id t201so34937035oif.3
-        for <linux-mmc@vger.kernel.org>; Thu, 07 May 2015 07:38:00 -0700 (PDT)
-In-Reply-To: <554B0DE8.5000806@codeaurora.org>
+Received: from mail-by2on0141.outbound.protection.outlook.com ([207.46.100.141]:27567
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751333AbbEGSP3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 7 May 2015 14:15:29 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Konstantin Dorfman <kdorfman@codeaurora.org>
-Cc: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: shawn.guo@linaro.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
 
-On Thu, May 7, 2015 at 3:02 AM, Konstantin Dorfman
-<kdorfman@codeaurora.org> wrote:
-> Hello,
->
-> On 05/06/2015 09:16 PM, Meng Wang wrote:
->>
->> sequence that they are listed in the packed command header. So when
->> error happens, I can safely assert it is completed for the first
->> PACKED_FAILURE_INDEX commands in one pack. Is my understanding
->> correct?
->
->
-> Yes, mmc_blk_end_packed_req() will complete packed requests till idx_failure
-> index.
->
-> From mmc_blk_issue_rw_rq():
->
-> case MMC_BLK_PARTIAL:
->                         /*
->                          * A block was successfully transferred.
->                          */
->                         mmc_blk_reset_success(md, type);
->
->                         if (mmc_packed_cmd(mq_rq->cmd_type)) {
->                                 ret = mmc_blk_end_packed_req(mq_rq);
->                                 break;
->                         } else {
->                                 ret = blk_end_request(req, 0,
->                                                 brq->data.bytes_xfered);
->                         }
->
-> Then, reminder will be re-issued with mmc_start_req():
->
-> ...
->                 if (ret) {
->                         if (mmc_packed_cmd(mq_rq->cmd_type)) {
->                                 if (!mq_rq->packed->retries)
->                                         goto cmd_abort;
->                                 mmc_blk_packed_hdr_wrq_prep(mq_rq, card,
-> mq);
->                                 mmc_start_req(card->host,
->                                               &mq_rq->mmc_active, NULL);
->
->
-Thanks.
+Since commit 8d86e4fcccf61 ("mmc: sdhci-esdhc-imx: Call mmc_of_parse()")
+the 'non-removable' and 'cd-gpios' properties are handled by
+mmc_of_parse(), so we can safely remove the pieces of code that still
+handles them.
 
-> --
-> Qualcomm Israel, on behalf of Qualcomm Innovation Center, Inc.
-> Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-> a Linux Foundation Collaborative Project
+Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 7 -------
+ 1 file changed, 7 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 8eed843..d7b0a39 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -872,19 +872,12 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ 	if (!np)
+ 		return -ENODEV;
+ 
+-	if (of_get_property(np, "non-removable", NULL))
+-		boarddata->cd_type = ESDHC_CD_PERMANENT;
+-
+ 	if (of_get_property(np, "fsl,cd-controller", NULL))
+ 		boarddata->cd_type = ESDHC_CD_CONTROLLER;
+ 
+ 	if (of_get_property(np, "fsl,wp-controller", NULL))
+ 		boarddata->wp_type = ESDHC_WP_CONTROLLER;
+ 
+-	boarddata->cd_gpio = of_get_named_gpio(np, "cd-gpios", 0);
+-	if (gpio_is_valid(boarddata->cd_gpio))
+-		boarddata->cd_type = ESDHC_CD_GPIO;
+-
+ 	boarddata->wp_gpio = of_get_named_gpio(np, "wp-gpios", 0);
+ 	if (gpio_is_valid(boarddata->wp_gpio))
+ 		boarddata->wp_type = ESDHC_WP_GPIO;
+-- 
+1.9.1
+
