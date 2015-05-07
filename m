@@ -1,71 +1,159 @@
-From: Zhangfei Gao <zhangfei.gao@linaro.org>
-Subject: [PATCH v2 1/3] Document: dw_mmc-k3: add document of hi6220 mmc
-Date: Thu,  7 May 2015 15:56:39 +0800
-Message-ID: <1430985401-12202-2-git-send-email-zhangfei.gao@linaro.org>
+From: Zhangfei Gao <zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2 3/3] mmc: dw_mmc: k3: support hi6220
+Date: Thu,  7 May 2015 15:56:41 +0800
+Message-ID: <1430985401-12202-4-git-send-email-zhangfei.gao@linaro.org>
 References: <1430985401-12202-1-git-send-email-zhangfei.gao@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f179.google.com ([209.85.192.179]:35410 "EHLO
-	mail-pd0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751181AbbEGH44 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 May 2015 03:56:56 -0400
-Received: by pdbqd1 with SMTP id qd1so34332610pdb.2
-        for <linux-mmc@vger.kernel.org>; Thu, 07 May 2015 00:56:55 -0700 (PDT)
-In-Reply-To: <1430985401-12202-1-git-send-email-zhangfei.gao@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1430985401-12202-1-git-send-email-zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Zhangfei Gao <zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Jorge A. Ramirez-Ortiz" <jorge.ramirez-ortiz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dan Yuan <yuandan-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Zhangfei Gao <zhangfei.gao@linaro.org>
 
-Add bindings for hi6220 mmc support
+Support hi6220, tested on hikey board
+emmc: support hs
+sd: support hs, sdr12, sdr25
 
-Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+Signed-off-by: Jorge A. Ramirez-Ortiz <jorge.ramirez-ortiz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Dan Yuan <yuandan-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>
+Signed-off-by: Zhangfei Gao <zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- .../devicetree/bindings/mmc/k3-dw-mshc.txt         | 28 ++++++++++++++++++++++
- 1 file changed, 28 insertions(+)
+ drivers/mmc/host/dw_mmc-k3.c | 101 ++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 99 insertions(+), 2 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-index 3b35449..df37058 100644
---- a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-@@ -13,6 +13,10 @@ Required Properties:
+diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+index 650f9cc..bc16bee 100644
+--- a/drivers/mmc/host/dw_mmc-k3.c
++++ b/drivers/mmc/host/dw_mmc-k3.c
+@@ -8,16 +8,28 @@
+  * (at your option) any later version.
+  */
  
- * compatible: should be one of the following.
-   - "hisilicon,hi4511-dw-mshc": for controllers with hi4511 specific extensions.
-+  - "hisilicon,hi6220-dw-mshc": for controllers with hi6220 specific extensions.
-+
-+Optional Properties:
-+- hisilicon,peripheral-syscon: phandle of syscon used to control peripheral.
+-#include <linux/module.h>
+-#include <linux/platform_device.h>
+ #include <linux/clk.h>
++#include <linux/mfd/syscon.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/dw_mmc.h>
++#include <linux/module.h>
+ #include <linux/of_address.h>
++#include <linux/platform_device.h>
++#include <linux/regmap.h>
++#include <linux/regulator/consumer.h>
  
- Example:
+ #include "dw_mmc.h"
+ #include "dw_mmc-pltfm.h"
  
-@@ -42,3 +46,27 @@ Example:
- 		cap-mmc-highspeed;
- 		cap-sd-highspeed;
- 	};
++#define AO_SCTRL_SEL18		BIT(10)
++#define AO_SCTRL_CTRL3		0x40C
 +
-+	/* for Hi6220 */
++#define SDMMC_CMD_DISABLE_BOOT	BIT(26)
 +
-+	dwmmc_1: dwmmc1@f723e000 {
-+		compatible = "hisilicon,hi6220-dw-mshc";
-+		num-slots = <0x1>;
-+		bus-width = <0x4>;
-+		disable-wp;
-+		cap-sd-highspeed;
-+		sd-uhs-sdr12;
-+		sd-uhs-sdr25;
-+		card-detect-delay = <200>;
-+		hisilicon,peripheral-syscon = <&ao_ctrl>;
-+		reg = <0x0 0xf723e000 0x0 0x1000>;
-+		interrupts = <0x0 0x49 0x4>;
-+		clocks = <&clock_sys HI6220_MMC1_CIUCLK>, <&clock_sys HI6220_MMC1_CLK>;
-+		clock-names = "ciu", "biu";
-+		cd-gpios = <&gpio1 0 1>;
-+		pinctrl-names = "default", "idle";
-+		pinctrl-0 = <&sd_pmx_func &sd_clk_cfg_func &sd_cfg_func>;
-+		pinctrl-1 = <&sd_pmx_idle &sd_clk_cfg_idle &sd_cfg_idle>;
-+		vqmmc-supply = <&ldo7>;
-+		vmmc-supply = <&ldo10>;
-+	};
++struct k3_priv {
++	struct regmap	*reg;
++};
++
+ static void dw_mci_k3_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ {
+ 	int ret;
+@@ -33,8 +45,93 @@ static const struct dw_mci_drv_data k3_drv_data = {
+ 	.set_ios		= dw_mci_k3_set_ios,
+ };
+ 
++static int dw_mci_hi6220_parse_dt(struct dw_mci *host)
++{
++	struct k3_priv *priv;
++
++	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
++	if (!priv)
++		return -ENOMEM;
++
++	priv->reg = syscon_regmap_lookup_by_phandle(host->dev->of_node,
++					 "hisilicon,peripheral-syscon");
++	if (IS_ERR(priv->reg))
++		priv->reg = NULL;
++
++	host->priv = priv;
++	return 0;
++}
++
++static int dw_mci_hi6220_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	struct dw_mci_slot *slot = mmc_priv(mmc);
++	struct k3_priv *priv;
++	struct dw_mci *host;
++	int min_uv, max_uv;
++	int ret;
++
++	host = slot->host;
++	priv = host->priv;
++
++	if (!priv || !priv->reg)
++		return 0;
++
++	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
++		ret = regmap_update_bits(priv->reg, AO_SCTRL_CTRL3,
++					 AO_SCTRL_SEL18, 0);
++		min_uv = 3000000;
++		max_uv = 3000000;
++	} else if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
++		ret = regmap_update_bits(priv->reg, AO_SCTRL_CTRL3,
++					 AO_SCTRL_SEL18, AO_SCTRL_SEL18);
++		min_uv = 1800000;
++		max_uv = 1800000;
++	} else {
++		dev_dbg(host->dev, "voltage not supported\n");
++		return -EINVAL;
++	}
++
++	if (ret) {
++		dev_dbg(host->dev, "switch voltage failed\n");
++		return ret;
++	}
++
++	if (IS_ERR_OR_NULL(mmc->supply.vqmmc))
++		return 0;
++
++	ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
++	if (ret) {
++		dev_dbg(host->dev, "Regulator set error %d: %d - %d\n",
++				 ret, min_uv, max_uv);
++		return ret;
++	}
++
++	return 0;
++}
++
++static void dw_mci_hi6220_set_ios(struct dw_mci *host, struct mmc_ios *ios)
++{
++	int ret;
++	unsigned int clock;
++
++	clock = (ios->clock <= 25000000) ? 25000000 : ios->clock;
++
++	ret = clk_set_rate(host->biu_clk, clock);
++	if (ret)
++		dev_warn(host->dev, "failed to set rate %uHz\n", clock);
++
++	host->bus_hz = clk_get_rate(host->biu_clk);
++}
++
++static const struct dw_mci_drv_data hi6220_data = {
++	.switch_voltage		= dw_mci_hi6220_switch_voltage,
++	.set_ios		= dw_mci_hi6220_set_ios,
++	.parse_dt		= dw_mci_hi6220_parse_dt,
++};
++
+ static const struct of_device_id dw_mci_k3_match[] = {
+ 	{ .compatible = "hisilicon,hi4511-dw-mshc", .data = &k3_drv_data, },
++	{ .compatible = "hisilicon,hi6220-dw-mshc", .data = &hi6220_data, },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, dw_mci_k3_match);
 -- 
 1.9.1
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
