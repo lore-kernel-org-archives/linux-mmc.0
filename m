@@ -1,255 +1,91 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V7 10/14] mmc: sdhci: Change to new way of doing re-tuning
-Date: Thu,  7 May 2015 13:10:21 +0300
-Message-ID: <1430993425-2777-11-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V7 13/14] mmc: block: Retry errored data requests when re-tuning is needed
+Date: Thu,  7 May 2015 13:10:24 +0300
+Message-ID: <1430993425-2777-14-git-send-email-adrian.hunter@intel.com>
 References: <1430993425-2777-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:40207 "EHLO mga11.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:52137 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751390AbbEGKNC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 7 May 2015 06:13:02 -0400
+	id S1753408AbbEGKNJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 7 May 2015 06:13:09 -0400
 In-Reply-To: <1430993425-2777-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-Make use of mmc core support for re-tuning instead
-of doing it all in the sdhci driver.
-
-This patch also changes to flag the need for re-tuning
-always after runtime suspend when tuning has been used
-at initialization. Previously it was only done if
-the re-tuning timer was in use.
+Retry errored data requests when re-tuning is needed and
+add a flag to struct mmc_blk_request so that the retry
+is only done once.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 112 ++++++-----------------------------------------
- drivers/mmc/host/sdhci.h |   3 --
- 2 files changed, 13 insertions(+), 102 deletions(-)
+ drivers/mmc/card/block.c | 11 ++++++++++-
+ drivers/mmc/card/queue.h |  1 +
+ 2 files changed, 11 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c80287a..b345844 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -52,7 +52,6 @@ static void sdhci_finish_data(struct sdhci_host *);
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 325ae1e..509fcca 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1195,6 +1195,7 @@ static int mmc_blk_err_check(struct mmc_card *card,
+ 						    mmc_active);
+ 	struct mmc_blk_request *brq = &mq_mrq->brq;
+ 	struct request *req = mq_mrq->req;
++	int need_retune = card->host->need_retune;
+ 	int ecc_err = 0, gen_err = 0;
  
- static void sdhci_finish_command(struct sdhci_host *);
- static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
--static void sdhci_tuning_timer(unsigned long data);
- static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
- static int sdhci_pre_dma_transfer(struct sdhci_host *host,
- 					struct mmc_data *data,
-@@ -254,17 +253,6 @@ static void sdhci_init(struct sdhci_host *host, int soft)
- static void sdhci_reinit(struct sdhci_host *host)
- {
- 	sdhci_init(host, 0);
--	/*
--	 * Retuning stuffs are affected by different cards inserted and only
--	 * applicable to UHS-I cards. So reset these fields to their initial
--	 * value when card is removed.
--	 */
--	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
--		host->flags &= ~SDHCI_USING_RETUNING_TIMER;
--
--		del_timer_sync(&host->tuning_timer);
--		host->flags &= ~SDHCI_NEEDS_RETUNING;
--	}
- 	sdhci_enable_card_detection(host);
- }
- 
-@@ -1353,7 +1341,6 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	struct sdhci_host *host;
- 	int present;
- 	unsigned long flags;
--	u32 tuning_opcode;
- 
- 	host = mmc_priv(mmc);
- 
-@@ -1387,39 +1374,6 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		host->mrq->cmd->error = -ENOMEDIUM;
- 		tasklet_schedule(&host->finish_tasklet);
- 	} else {
--		u32 present_state;
--
--		present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
--		/*
--		 * Check if the re-tuning timer has already expired and there
--		 * is no on-going data transfer and DAT0 is not busy. If so,
--		 * we need to execute tuning procedure before sending command.
--		 */
--		if ((host->flags & SDHCI_NEEDS_RETUNING) &&
--		    !(present_state & (SDHCI_DOING_WRITE | SDHCI_DOING_READ)) &&
--		    (present_state & SDHCI_DATA_0_LVL_MASK)) {
--			if (mmc->card) {
--				/* eMMC uses cmd21 but sd and sdio use cmd19 */
--				tuning_opcode =
--					mmc->card->type == MMC_TYPE_MMC ?
--					MMC_SEND_TUNING_BLOCK_HS200 :
--					MMC_SEND_TUNING_BLOCK;
--
--				/* Here we need to set the host->mrq to NULL,
--				 * in case the pending finish_tasklet
--				 * finishes it incorrectly.
--				 */
--				host->mrq = NULL;
--
--				spin_unlock_irqrestore(&host->lock, flags);
--				sdhci_execute_tuning(mmc, tuning_opcode);
--				spin_lock_irqsave(&host->lock, flags);
--
--				/* Restore original mmc_request structure */
--				host->mrq = mrq;
--			}
--		}
--
- 		if (mrq->sbc && !(host->flags & SDHCI_AUTO_CMD23))
- 			sdhci_send_command(host, mrq->sbc);
- 		else
-@@ -2065,23 +2019,18 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	/*
+@@ -1262,6 +1263,12 @@ static int mmc_blk_err_check(struct mmc_card *card,
  	}
  
- out:
--	host->flags &= ~SDHCI_NEEDS_RETUNING;
--
- 	if (tuning_count) {
--		host->flags |= SDHCI_USING_RETUNING_TIMER;
--		mod_timer(&host->tuning_timer, jiffies + tuning_count * HZ);
-+		/*
-+		 * In case tuning fails, host controllers which support
-+		 * re-tuning can try tuning again at a later time, when the
-+		 * re-tuning timer expires.  So for these controllers, we
-+		 * return 0. Since there might be other controllers who do not
-+		 * have this capability, we return error for them.
-+		 */
-+		err = 0;
- 	}
+ 	if (brq->data.error) {
++		if (need_retune && !brq->retune_retry_done) {
++			pr_info("%s: retrying because a re-tune was needed\n",
++				req->rq_disk->disk_name);
++			brq->retune_retry_done = 1;
++			return MMC_BLK_RETRY;
++		}
+ 		pr_err("%s: error %d transferring data, sector %u, nr %u, cmd response %#x, card status %#x\n",
+ 		       req->rq_disk->disk_name, brq->data.error,
+ 		       (unsigned)blk_rq_pos(req),
+@@ -1821,7 +1828,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	struct mmc_blk_data *md = mq->data;
+ 	struct mmc_card *card = md->queue.card;
+ 	struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
+-	int ret = 1, disable_multi = 0, retry = 0, type;
++	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
+ 	enum mmc_blk_status status;
+ 	struct mmc_queue_req *mq_rq;
+ 	struct request *req = rqc;
+@@ -1905,6 +1912,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 				break;
+ 			goto cmd_abort;
+ 		case MMC_BLK_RETRY:
++			retune_retry_done = brq->retune_retry_done;
+ 			if (retry++ < 5)
+ 				break;
+ 			/* Fall through */
+@@ -1967,6 +1975,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 				mmc_start_req(card->host,
+ 						&mq_rq->mmc_active, NULL);
+ 			}
++			mq_rq->brq.retune_retry_done = retune_retry_done;
+ 		}
+ 	} while (ret);
  
--	/*
--	 * In case tuning fails, host controllers which support re-tuning can
--	 * try tuning again at a later time, when the re-tuning timer expires.
--	 * So for these controllers, we return 0. Since there might be other
--	 * controllers who do not have this capability, we return error for
--	 * them. SDHCI_USING_RETUNING_TIMER means the host is currently using
--	 * a retuning timer to do the retuning for the card.
--	 */
--	if (err && (host->flags & SDHCI_USING_RETUNING_TIMER))
--		err = 0;
-+	host->mmc->retune_period = err ? 0 : tuning_count;
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index 5752d50..7e27915 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -12,6 +12,7 @@ struct mmc_blk_request {
+ 	struct mmc_command	cmd;
+ 	struct mmc_command	stop;
+ 	struct mmc_data		data;
++	int			retune_retry_done;
+ };
  
- 	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
- 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-@@ -2337,20 +2286,6 @@ static void sdhci_timeout_timer(unsigned long data)
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
--static void sdhci_tuning_timer(unsigned long data)
--{
--	struct sdhci_host *host;
--	unsigned long flags;
--
--	host = (struct sdhci_host *)data;
--
--	spin_lock_irqsave(&host->lock, flags);
--
--	host->flags |= SDHCI_NEEDS_RETUNING;
--
--	spin_unlock_irqrestore(&host->lock, flags);
--}
--
- /*****************************************************************************\
-  *                                                                           *
-  * Interrupt handling                                                        *
-@@ -2728,11 +2663,8 @@ int sdhci_suspend_host(struct sdhci_host *host)
- {
- 	sdhci_disable_card_detection(host);
- 
--	/* Disable tuning since we are suspending */
--	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
--		del_timer_sync(&host->tuning_timer);
--		host->flags &= ~SDHCI_NEEDS_RETUNING;
--	}
-+	mmc_retune_timer_stop(host->mmc);
-+	mmc_retune_needed(host->mmc);
- 
- 	if (!device_may_wakeup(mmc_dev(host->mmc))) {
- 		host->ier = 0;
-@@ -2782,10 +2714,6 @@ int sdhci_resume_host(struct sdhci_host *host)
- 
- 	sdhci_enable_card_detection(host);
- 
--	/* Set the re-tuning expiration flag */
--	if (host->flags & SDHCI_USING_RETUNING_TIMER)
--		host->flags |= SDHCI_NEEDS_RETUNING;
--
- 	return ret;
- }
- 
-@@ -2822,11 +2750,8 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
- {
- 	unsigned long flags;
- 
--	/* Disable tuning since we are suspending */
--	if (host->flags & SDHCI_USING_RETUNING_TIMER) {
--		del_timer_sync(&host->tuning_timer);
--		host->flags &= ~SDHCI_NEEDS_RETUNING;
--	}
-+	mmc_retune_timer_stop(host->mmc);
-+	mmc_retune_needed(host->mmc);
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 	host->ier &= SDHCI_INT_CARD_INT;
-@@ -2869,10 +2794,6 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
- 		spin_unlock_irqrestore(&host->lock, flags);
- 	}
- 
--	/* Set the re-tuning expiration flag */
--	if (host->flags & SDHCI_USING_RETUNING_TIMER)
--		host->flags |= SDHCI_NEEDS_RETUNING;
--
- 	spin_lock_irqsave(&host->lock, flags);
- 
- 	host->runtime_suspended = false;
-@@ -3408,13 +3329,6 @@ int sdhci_add_host(struct sdhci_host *host)
- 
- 	init_waitqueue_head(&host->buf_ready_int);
- 
--	if (host->version >= SDHCI_SPEC_300) {
--		/* Initialize re-tuning timer */
--		init_timer(&host->tuning_timer);
--		host->tuning_timer.data = (unsigned long)host;
--		host->tuning_timer.function = sdhci_tuning_timer;
--	}
--
- 	sdhci_init(host, 0);
- 
- 	ret = request_threaded_irq(host->irq, sdhci_irq, sdhci_thread_irq,
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index e639b7f..923ff22 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -432,13 +432,11 @@ struct sdhci_host {
- #define SDHCI_REQ_USE_DMA	(1<<2)	/* Use DMA for this req. */
- #define SDHCI_DEVICE_DEAD	(1<<3)	/* Device unresponsive */
- #define SDHCI_SDR50_NEEDS_TUNING (1<<4)	/* SDR50 needs tuning */
--#define SDHCI_NEEDS_RETUNING	(1<<5)	/* Host needs retuning */
- #define SDHCI_AUTO_CMD12	(1<<6)	/* Auto CMD12 support */
- #define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
- #define SDHCI_PV_ENABLED	(1<<8)	/* Preset value enabled */
- #define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
- #define SDHCI_SDR104_NEEDS_TUNING (1<<10)	/* SDR104/HS200 needs tuning */
--#define SDHCI_USING_RETUNING_TIMER (1<<11)	/* Host is using a retuning timer for the card */
- #define SDHCI_USE_64_BIT_DMA	(1<<12)	/* Use 64-bit DMA */
- #define SDHCI_HS400_TUNING	(1<<13)	/* Tuning for HS400 */
- 
-@@ -504,7 +502,6 @@ struct sdhci_host {
- 	unsigned int		tuning_count;	/* Timer count for re-tuning */
- 	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
- #define SDHCI_TUNING_MODE_1	0
--	struct timer_list	tuning_timer;	/* Timer for tuning */
- 
- 	struct sdhci_host_next	next_data;
- 	unsigned long private[0] ____cacheline_aligned;
+ enum mmc_packed_type {
 -- 
 1.9.1
 
