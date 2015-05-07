@@ -1,89 +1,213 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V7 08/14] mmc: core: Separate out the mmc_switch status check so it can be re-used
-Date: Thu,  7 May 2015 13:10:19 +0300
-Message-ID: <1430993425-2777-9-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V7 01/14] mmc: host: Add facility to support re-tuning
+Date: Thu,  7 May 2015 13:10:12 +0300
+Message-ID: <1430993425-2777-2-git-send-email-adrian.hunter@intel.com>
 References: <1430993425-2777-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:40207 "EHLO mga11.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:40400 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751390AbbEGKM5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 7 May 2015 06:12:57 -0400
+	id S1753434AbbEGKMl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 7 May 2015 06:12:41 -0400
 In-Reply-To: <1430993425-2777-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-Make a separate function to do the mmc_switch status check
-so it can be re-used. This is preparation for adding support
-for HS400 re-tuning.
+Currently, there is core support for tuning during
+initialization. There can also be a need to re-tune
+periodically (e.g. sdhci) or to re-tune after the
+host controller is powered off (e.g. after PM
+runtime suspend / resume) or to re-tune in response
+to CRC errors.
+
+The main requirements for re-tuning are:
+  - ability to enable / disable re-tuning
+  - ability to flag that re-tuning is needed
+  - ability to re-tune before any request
+  - ability to hold off re-tuning if the card is busy
+  - ability to hold off re-tuning if re-tuning is in
+  progress
+  - ability to run a re-tuning timer
+
+To support those requirements 7 members are added to struct
+mmc_host:
+
+  unsigned int		can_retune:1;	/* re-tuning can be used */
+  unsigned int		doing_retune:1;	/* re-tuning in progress */
+  unsigned int		retune_now:1;   /* do re-tuning at next req */
+  int			need_retune;	/* re-tuning is needed */
+  int			hold_retune;	/* hold off re-tuning */
+  unsigned int		retune_period;  /* re-tuning period in secs */
+  struct timer_list	retune_timer;	/* for periodic re-tuning */
+
+need_retune is an integer so it can be set without needing
+synchronization. hold_retune is a integer to allow nesting.
+
+Various simple functions are provided to set / clear those
+variables.
+
+Subsequent patches take those functions into use.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/mmc_ops.c | 30 ++++++++++++++++--------------
- drivers/mmc/core/mmc_ops.h |  1 +
- 2 files changed, 17 insertions(+), 14 deletions(-)
+ drivers/mmc/core/host.c  | 68 ++++++++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/host.h  |  6 +++++
+ include/linux/mmc/host.h | 23 ++++++++++++++++
+ 3 files changed, 97 insertions(+)
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 4cad5f0..0e9ae1c 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -450,6 +450,21 @@ int mmc_spi_set_crc(struct mmc_host *host, int use_crc)
- 	return err;
- }
- 
-+int mmc_switch_status_error(struct mmc_host *host, u32 status)
-+{
-+	if (mmc_host_is_spi(host)) {
-+		if (status & R1_SPI_ILLEGAL_COMMAND)
-+			return -EBADMSG;
-+	} else {
-+		if (status & 0xFDFFA000)
-+			pr_warn("%s: unexpected status %#x after switch\n",
-+				mmc_hostname(host), status);
-+		if (status & R1_SWITCH_ERROR)
-+			return -EBADMSG;
-+	}
-+	return 0;
-+}
-+
- /**
-  *	__mmc_switch - modify EXT_CSD register
-  *	@card: the MMC card associated with the data transfer
-@@ -558,20 +573,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 		}
- 	} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
- 
--	if (mmc_host_is_spi(host)) {
--		if (status & R1_SPI_ILLEGAL_COMMAND) {
--			err = -EBADMSG;
--			goto out;
--		}
--	} else {
--		if (status & 0xFDFFA000)
--			pr_warn("%s: unexpected status %#x after switch\n",
--				mmc_hostname(host), status);
--		if (status & R1_SWITCH_ERROR) {
--			err = -EBADMSG;
--			goto out;
--		}
--	}
-+	err = mmc_switch_status_error(host, status);
- out:
- 	mmc_retune_release(host);
- 
-diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
-index 6f4b00e..f498f9a 100644
---- a/drivers/mmc/core/mmc_ops.h
-+++ b/drivers/mmc/core/mmc_ops.h
-@@ -27,6 +27,7 @@ int mmc_spi_set_crc(struct mmc_host *host, int use_crc);
- int mmc_bus_test(struct mmc_card *card, u8 bus_width);
- int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status);
- int mmc_can_ext_csd(struct mmc_card *card);
-+int mmc_switch_status_error(struct mmc_host *host, u32 status);
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 8be0df7..e90e02f 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -301,6 +301,73 @@ static inline void mmc_host_clk_sysfs_init(struct mmc_host *host)
  
  #endif
  
++void mmc_retune_enable(struct mmc_host *host)
++{
++	host->can_retune = 1;
++	if (host->retune_period)
++		mod_timer(&host->retune_timer,
++			  jiffies + host->retune_period * HZ);
++}
++
++void mmc_retune_disable(struct mmc_host *host)
++{
++	host->can_retune = 0;
++	del_timer_sync(&host->retune_timer);
++	host->retune_now = 0;
++	host->need_retune = 0;
++}
++
++void mmc_retune_timer_stop(struct mmc_host *host)
++{
++	del_timer_sync(&host->retune_timer);
++}
++EXPORT_SYMBOL(mmc_retune_timer_stop);
++
++void mmc_retune_hold(struct mmc_host *host)
++{
++	if (!host->hold_retune)
++		host->retune_now = 1;
++	host->hold_retune += 1;
++}
++
++void mmc_retune_release(struct mmc_host *host)
++{
++	if (host->hold_retune)
++		host->hold_retune -= 1;
++	else
++		WARN_ON(1);
++}
++
++int mmc_retune(struct mmc_host *host)
++{
++	int err;
++
++	if (host->retune_now)
++		host->retune_now = 0;
++	else
++		return 0;
++
++	if (!host->need_retune || host->doing_retune || !host->card)
++		return 0;
++
++	host->need_retune = 0;
++
++	host->doing_retune = 1;
++
++	err = mmc_execute_tuning(host->card);
++
++	host->doing_retune = 0;
++
++	return err;
++}
++
++static void mmc_retune_timer(unsigned long data)
++{
++	struct mmc_host *host = (struct mmc_host *)data;
++
++	mmc_retune_needed(host);
++}
++
+ /**
+  *	mmc_of_parse() - parse host's device-tree node
+  *	@host: host whose node should be parsed.
+@@ -504,6 +571,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ #ifdef CONFIG_PM
+ 	host->pm_notify.notifier_call = mmc_pm_notify;
+ #endif
++	setup_timer(&host->retune_timer, mmc_retune_timer, (unsigned long)host);
+ 
+ 	/*
+ 	 * By default, hosts do not support SGIO or large requests.
+diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
+index f2ab9e5..992bf53 100644
+--- a/drivers/mmc/core/host.h
++++ b/drivers/mmc/core/host.h
+@@ -15,5 +15,11 @@
+ int mmc_register_host_class(void);
+ void mmc_unregister_host_class(void);
+ 
++void mmc_retune_enable(struct mmc_host *host);
++void mmc_retune_disable(struct mmc_host *host);
++void mmc_retune_hold(struct mmc_host *host);
++void mmc_retune_release(struct mmc_host *host);
++int mmc_retune(struct mmc_host *host);
++
+ #endif
+ 
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index b5bedae..f471193 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -12,6 +12,7 @@
+ 
+ #include <linux/leds.h>
+ #include <linux/mutex.h>
++#include <linux/timer.h>
+ #include <linux/sched.h>
+ #include <linux/device.h>
+ #include <linux/fault-inject.h>
+@@ -321,10 +322,18 @@ struct mmc_host {
+ #ifdef CONFIG_MMC_DEBUG
+ 	unsigned int		removed:1;	/* host is being removed */
+ #endif
++	unsigned int		can_retune:1;	/* re-tuning can be used */
++	unsigned int		doing_retune:1;	/* re-tuning in progress */
++	unsigned int		retune_now:1;	/* do re-tuning at next req */
+ 
+ 	int			rescan_disable;	/* disable card detection */
+ 	int			rescan_entered;	/* used with nonremovable devices */
+ 
++	int			need_retune;	/* re-tuning is needed */
++	int			hold_retune;	/* hold off re-tuning */
++	unsigned int		retune_period;	/* re-tuning period in secs */
++	struct timer_list	retune_timer;	/* for periodic re-tuning */
++
+ 	bool			trigger_card_event; /* card_event necessary */
+ 
+ 	struct mmc_card		*card;		/* device attached to this host */
+@@ -513,4 +522,18 @@ static inline bool mmc_card_hs400(struct mmc_card *card)
+ 	return card->host->ios.timing == MMC_TIMING_MMC_HS400;
+ }
+ 
++void mmc_retune_timer_stop(struct mmc_host *host);
++
++static inline void mmc_retune_needed(struct mmc_host *host)
++{
++	if (host->can_retune)
++		host->need_retune = 1;
++}
++
++static inline void mmc_retune_recheck(struct mmc_host *host)
++{
++	if (host->hold_retune <= 1)
++		host->retune_now = 1;
++}
++
+ #endif /* LINUX_MMC_HOST_H */
 -- 
 1.9.1
 
