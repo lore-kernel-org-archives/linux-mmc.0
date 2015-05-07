@@ -1,74 +1,48 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V7 02/14] mmc: core: Enable / disable re-tuning
-Date: Thu,  7 May 2015 13:10:13 +0300
-Message-ID: <1430993425-2777-3-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V7 05/14] mmc: core: Hold re-tuning during erase commands
+Date: Thu,  7 May 2015 13:10:16 +0300
+Message-ID: <1430993425-2777-6-git-send-email-adrian.hunter@intel.com>
 References: <1430993425-2777-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:33873 "EHLO mga11.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:29829 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753242AbbEGKMo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 7 May 2015 06:12:44 -0400
+	id S1751390AbbEGKMu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 7 May 2015 06:12:50 -0400
 In-Reply-To: <1430993425-2777-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-Enable re-tuning when tuning is executed and
-disable re-tuning when card is no longer initialized.
-
-In the case of SDIO suspend, the card can keep power.
-In that case, re-tuning need not be disabled, but, if
-a re-tuning timer is being used, ensure it is disabled
-and assume that re-tuning will be needed upon resume
-since it is not known how long the suspend will last.
+Hold re-tuning during erase commands to prevent
+it from conflicting with the sequence of commands.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c | 4 ++++
- drivers/mmc/core/sdio.c | 6 +++++-
- 2 files changed, 9 insertions(+), 1 deletion(-)
+ drivers/mmc/core/core.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 92e7671..007c444 100644
+index ec3453f..ff1e384 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -1109,6 +1109,8 @@ int mmc_execute_tuning(struct mmc_card *card)
+@@ -1995,6 +1995,8 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+ 	unsigned long timeout;
+ 	int err;
  
- 	if (err)
- 		pr_err("%s: tuning execution failed\n", mmc_hostname(host));
-+	else
-+		mmc_retune_enable(host);
- 
++	mmc_retune_hold(card->host);
++
+ 	/*
+ 	 * qty is used to calculate the erase timeout which depends on how many
+ 	 * erase groups (or allocation units in SD terminology) are affected.
+@@ -2098,6 +2100,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+ 	} while (!(cmd.resp[0] & R1_READY_FOR_DATA) ||
+ 		 (R1_CURRENT_STATE(cmd.resp[0]) == R1_STATE_PRG));
+ out:
++	mmc_retune_release(card->host);
  	return err;
  }
-@@ -1140,6 +1142,8 @@ void mmc_set_bus_width(struct mmc_host *host, unsigned int width)
-  */
- void mmc_set_initial_state(struct mmc_host *host)
- {
-+	mmc_retune_disable(host);
-+
- 	if (mmc_host_is_spi(host))
- 		host->ios.chip_select = MMC_CS_HIGH;
- 	else
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index f6c28a7..5c1423a3 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -934,8 +934,12 @@ static int mmc_sdio_suspend(struct mmc_host *host)
- 		mmc_release_host(host);
- 	}
  
--	if (!mmc_card_keep_power(host))
-+	if (!mmc_card_keep_power(host)) {
- 		mmc_power_off(host);
-+	} else if (host->retune_period) {
-+		mmc_retune_timer_stop(host);
-+		mmc_retune_needed(host);
-+	}
- 
- 	return 0;
- }
 -- 
 1.9.1
 
