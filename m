@@ -1,72 +1,180 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V7 07/14] mmc: mmc: Hold re-tuning in mmc_sleep()
-Date: Thu,  7 May 2015 13:10:18 +0300
-Message-ID: <1430993425-2777-8-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V7 09/14] mmc: core: Add support for HS400 re-tuning
+Date: Thu,  7 May 2015 13:10:20 +0300
+Message-ID: <1430993425-2777-10-git-send-email-adrian.hunter@intel.com>
 References: <1430993425-2777-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:29829 "EHLO mga11.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:40207 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753912AbbEGKMz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 7 May 2015 06:12:55 -0400
+	id S1752912AbbEGKNA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 7 May 2015 06:13:00 -0400
 In-Reply-To: <1430993425-2777-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-The sleep command is issued after deselecting the
-card, but re-tuning won't work on a deselected card
-so re-tuning must be held.
+HS400 re-tuning must be done in HS200 mode. Add
+the ability to switch from HS400 mode to HS200
+mode before re-tuning and switch back to HS400
+after re-tuning.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/mmc.c | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+ drivers/mmc/core/core.h |  2 ++
+ drivers/mmc/core/host.c | 17 ++++++++++
+ drivers/mmc/core/mmc.c  | 88 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 107 insertions(+)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index f36c76f..fd41b28 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -21,6 +21,7 @@
- #include <linux/mmc/mmc.h>
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index cfba3c0..e6f2de7 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -88,6 +88,8 @@ void mmc_remove_card_debugfs(struct mmc_card *card);
+ void mmc_init_context_info(struct mmc_host *host);
  
- #include "core.h"
-+#include "host.h"
- #include "bus.h"
- #include "mmc_ops.h"
- #include "sd_ops.h"
-@@ -1511,9 +1512,12 @@ static int mmc_sleep(struct mmc_host *host)
- 	unsigned int timeout_ms = DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000);
+ int mmc_execute_tuning(struct mmc_card *card);
++int mmc_hs200_to_hs400(struct mmc_card *card);
++int mmc_hs400_to_hs200(struct mmc_card *card);
+ 
+ #endif
+ 
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index e90e02f..86c495b 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -340,6 +340,7 @@ void mmc_retune_release(struct mmc_host *host)
+ 
+ int mmc_retune(struct mmc_host *host)
+ {
++	bool return_to_hs400 = false;
  	int err;
  
-+	/* Re-tuning can't be done once the card is deselected */
-+	mmc_retune_hold(host);
+ 	if (host->retune_now)
+@@ -354,8 +355,24 @@ int mmc_retune(struct mmc_host *host)
+ 
+ 	host->doing_retune = 1;
+ 
++	if (host->ios.timing == MMC_TIMING_MMC_HS400) {
++		err = mmc_hs400_to_hs200(host->card);
++		if (err)
++			goto out;
 +
- 	err = mmc_deselect_cards(host);
- 	if (err)
--		return err;
-+		goto out_release;
++		return_to_hs400 = true;
++
++		if (host->ops->prepare_hs400_tuning)
++			host->ops->prepare_hs400_tuning(host, &host->ios);
++	}
++
+ 	err = mmc_execute_tuning(host->card);
++	if (err)
++		goto out;
  
- 	cmd.opcode = MMC_SLEEP_AWAKE;
- 	cmd.arg = card->rca << 16;
-@@ -1534,7 +1538,7 @@ static int mmc_sleep(struct mmc_host *host)
++	if (return_to_hs400)
++		err = mmc_hs200_to_hs400(host->card);
++out:
+ 	host->doing_retune = 0;
  
- 	err = mmc_wait_for_cmd(host, &cmd, 0);
- 	if (err)
--		return err;
-+		goto out_release;
- 
- 	/*
- 	 * If the host does not wait while the card signals busy, then we will
-@@ -1545,6 +1549,8 @@ static int mmc_sleep(struct mmc_host *host)
- 	if (!cmd.busy_timeout || !(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
- 		mmc_delay(timeout_ms);
- 
-+out_release:
-+	mmc_retune_release(host);
  	return err;
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index fd41b28..a802863 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1092,6 +1092,94 @@ static int mmc_select_hs400(struct mmc_card *card)
+ 	return 0;
  }
  
++int mmc_hs200_to_hs400(struct mmc_card *card)
++{
++	return mmc_select_hs400(card);
++}
++
++/* Caller must hold re-tuning */
++static int mmc_switch_status(struct mmc_card *card)
++{
++	u32 status;
++	int err;
++
++	err = mmc_send_status(card, &status);
++	if (err)
++		return err;
++
++	return mmc_switch_status_error(card->host, status);
++}
++
++int mmc_hs400_to_hs200(struct mmc_card *card)
++{
++	struct mmc_host *host = card->host;
++	bool send_status = true;
++	unsigned int max_dtr;
++	int err;
++
++	if (host->caps & MMC_CAP_WAIT_WHILE_BUSY)
++		send_status = false;
++
++	/* Reduce frequency to HS */
++	max_dtr = card->ext_csd.hs_max_dtr;
++	mmc_set_clock(host, max_dtr);
++
++	/* Switch HS400 to HS DDR */
++	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
++			   EXT_CSD_TIMING_HS, card->ext_csd.generic_cmd6_time,
++			   true, send_status, true);
++	if (err)
++		goto out_err;
++
++	mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
++
++	if (!send_status) {
++		err = mmc_switch_status(card);
++		if (err)
++			goto out_err;
++	}
++
++	/* Switch HS DDR to HS */
++	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BUS_WIDTH,
++			   EXT_CSD_BUS_WIDTH_8, card->ext_csd.generic_cmd6_time,
++			   true, send_status, true);
++	if (err)
++		goto out_err;
++
++	mmc_set_timing(host, MMC_TIMING_MMC_HS);
++
++	if (!send_status) {
++		err = mmc_switch_status(card);
++		if (err)
++			goto out_err;
++	}
++
++	/* Switch HS to HS200 */
++	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
++			   EXT_CSD_TIMING_HS200,
++			   card->ext_csd.generic_cmd6_time, true, send_status,
++			   true);
++	if (err)
++		goto out_err;
++
++	mmc_set_timing(host, MMC_TIMING_MMC_HS200);
++
++	if (!send_status) {
++		err = mmc_switch_status(card);
++		if (err)
++			goto out_err;
++	}
++
++	mmc_set_bus_speed(card);
++
++	return 0;
++
++out_err:
++	pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
++	       __func__, err);
++	return err;
++}
++
+ /*
+  * For device supporting HS200 mode, the following sequence
+  * should be done before executing the tuning process.
 -- 
 1.9.1
 
