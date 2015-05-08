@@ -1,104 +1,61 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci-esdhc-imx: Do not break platform data boards
-Date: Fri, 8 May 2015 13:46:45 +0200
-Message-ID: <CAPDyKFr=y6Wjssv4K9ri281Su1ivY3DHwkMxJjFa-HoEOoWQ8w@mail.gmail.com>
-References: <1431064569-5947-1-git-send-email-festevam@gmail.com>
-	<1431064569-5947-2-git-send-email-festevam@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Remove unneeded code
+Date: Fri, 8 May 2015 13:49:07 +0200
+Message-ID: <CAPDyKFoWDCYq94jFXq5bO736hPvZLN7uiVWu2SHxUUPawc3xaQ@mail.gmail.com>
+References: <1431021609-6932-1-git-send-email-fabio.estevam@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f171.google.com ([209.85.220.171]:34003 "EHLO
-	mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752045AbbEHLqq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2015 07:46:46 -0400
-Received: by qkgx75 with SMTP id x75so45939095qkg.1
-        for <linux-mmc@vger.kernel.org>; Fri, 08 May 2015 04:46:45 -0700 (PDT)
-In-Reply-To: <1431064569-5947-2-git-send-email-festevam@gmail.com>
+Received: from mail-qc0-f171.google.com ([209.85.216.171]:35364 "EHLO
+	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750995AbbEHLtI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2015 07:49:08 -0400
+Received: by qcbgu10 with SMTP id gu10so35476599qcb.2
+        for <linux-mmc@vger.kernel.org>; Fri, 08 May 2015 04:49:07 -0700 (PDT)
+In-Reply-To: <1431021609-6932-1-git-send-email-fabio.estevam@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@freescale.com>
+To: Fabio Estevam <fabio.estevam@freescale.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 8 May 2015 at 07:56, Fabio Estevam <festevam@gmail.com> wrote:
-> From: Fabio Estevam <fabio.estevam@freescale.com>
->
-> The only user of this driver that has not been converted to fully
-> device tree is the i.MX35 SoC.
->
-> There is a i.MX35-based board (mach-pcm043.c) that uses platform data
-> to pass wp_gpio and cd_gpio information.
->
-> Commit 8d86e4fcccf61ba ("mmc: sdhci-esdhc-imx: Call mmc_of_parse()")
-> broke the platform data case by removing mmc_gpio_request_ro() and
-> mmc_gpio_request_cd(), so restore the functionality for the non-dt
-> case.
+On 7 May 2015 at 20:00, Fabio Estevam <fabio.estevam@freescale.com> wrote:
+> Since commit 8d86e4fcccf61 ("mmc: sdhci-esdhc-imx: Call mmc_of_parse()")
+> the 'non-removable' and 'cd-gpios' properties are handled by
+> mmc_of_parse(), so we can safely remove the pieces of code that still
+> handles them.
 >
 > Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
 > ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 36 +++++++++++++++++++++++++++++++++++-
->  1 file changed, 35 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 7 -------
+>  1 file changed, 7 deletions(-)
 >
 > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index a9980d7..812c670 100644
+> index 8eed843..d7b0a39 100644
 > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -918,6 +918,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
->         struct esdhc_platform_data *boarddata;
->         int err;
->         struct pltfm_imx_data *imx_data;
-> +       bool dt = true;
+> @@ -872,19 +872,12 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+>         if (!np)
+>                 return -ENODEV;
 >
->         host = sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata, 0);
->         if (IS_ERR(host))
-> @@ -1005,11 +1006,44 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
->                 }
->                 imx_data->boarddata = *((struct esdhc_platform_data *)
->                                         host->mmc->parent->platform_data);
-> +               dt = false;
-> +       }
-> +       /* write_protect */
-> +       if (boarddata->wp_type == ESDHC_WP_GPIO && !dt) {
-> +               err = mmc_gpio_request_ro(host->mmc, boarddata->wp_gpio);
-> +               if (err) {
-> +                       dev_err(mmc_dev(host->mmc),
-> +                               "failed to request write-protect gpio!\n");
-> +                       goto disable_clk;
-> +               }
-> +               host->mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
->         }
+> -       if (of_get_property(np, "non-removable", NULL))
+> -               boarddata->cd_type = ESDHC_CD_PERMANENT;
+> -
+>         if (of_get_property(np, "fsl,cd-controller", NULL))
+>                 boarddata->cd_type = ESDHC_CD_CONTROLLER;
 >
->         /* card_detect */
-> -       if (boarddata->cd_type == ESDHC_CD_CONTROLLER)
-> +       switch (boarddata->cd_type) {
+>         if (of_get_property(np, "fsl,wp-controller", NULL))
+>                 boarddata->wp_type = ESDHC_WP_CONTROLLER;
+>
+> -       boarddata->cd_gpio = of_get_named_gpio(np, "cd-gpios", 0);
+> -       if (gpio_is_valid(boarddata->cd_gpio))
+> -               boarddata->cd_type = ESDHC_CD_GPIO;
+> -
+>         boarddata->wp_gpio = of_get_named_gpio(np, "wp-gpios", 0);
 
-I don't think you want to do this "switch" for dt case, right?
+This seems like a leftover as well!?
 
-> +       case ESDHC_CD_GPIO:
-> +               if (dt)
-> +                       break;
-> +               err = mmc_gpio_request_cd(host->mmc, boarddata->cd_gpio, 0);
-> +               if (err) {
-> +                       dev_err(mmc_dev(host->mmc),
-> +                               "failed to request card-detect gpio!\n");
-> +                       goto disable_clk;
-> +               }
-> +               /* fall through */
-> +
-> +       case ESDHC_CD_CONTROLLER:
-> +               /* we have a working card_detect back */
->                 host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-> +               break;
-> +
-> +       case ESDHC_CD_PERMANENT:
-> +               host->mmc->caps |= MMC_CAP_NONREMOVABLE;
-> +               break;
-> +
-> +       case ESDHC_CD_NONE:
-> +               break;
-> +       }
->
->         switch (boarddata->max_bus_width) {
->         case 8:
+>         if (gpio_is_valid(boarddata->wp_gpio))
+>                 boarddata->wp_type = ESDHC_WP_GPIO;
 > --
 > 1.9.1
 >
