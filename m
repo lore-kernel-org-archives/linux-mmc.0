@@ -1,64 +1,42 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Remove unneeded code
-Date: Fri, 8 May 2015 13:49:07 +0200
-Message-ID: <CAPDyKFoWDCYq94jFXq5bO736hPvZLN7uiVWu2SHxUUPawc3xaQ@mail.gmail.com>
-References: <1431021609-6932-1-git-send-email-fabio.estevam@freescale.com>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-esdhc-imx: Do not break platform data boards
+Date: Fri, 8 May 2015 08:55:29 -0300
+Message-ID: <CAOMZO5DpF7JbdoEMRLRpOWR15gE2ZNcWBcc+tHwv3Gy0Z_Eypw@mail.gmail.com>
+References: <1431064569-5947-1-git-send-email-festevam@gmail.com>
+	<1431064569-5947-2-git-send-email-festevam@gmail.com>
+	<CAPDyKFr=y6Wjssv4K9ri281Su1ivY3DHwkMxJjFa-HoEOoWQ8w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f171.google.com ([209.85.216.171]:35364 "EHLO
-	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750995AbbEHLtI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2015 07:49:08 -0400
-Received: by qcbgu10 with SMTP id gu10so35476599qcb.2
-        for <linux-mmc@vger.kernel.org>; Fri, 08 May 2015 04:49:07 -0700 (PDT)
-In-Reply-To: <1431021609-6932-1-git-send-email-fabio.estevam@freescale.com>
+Received: from mail-la0-f44.google.com ([209.85.215.44]:34312 "EHLO
+	mail-la0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752666AbbEHLza (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2015 07:55:30 -0400
+Received: by laat2 with SMTP id t2so50924583laa.1
+        for <linux-mmc@vger.kernel.org>; Fri, 08 May 2015 04:55:29 -0700 (PDT)
+In-Reply-To: <CAPDyKFr=y6Wjssv4K9ri281Su1ivY3DHwkMxJjFa-HoEOoWQ8w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <fabio.estevam@freescale.com>
-Cc: Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@freescale.com>
 
-On 7 May 2015 at 20:00, Fabio Estevam <fabio.estevam@freescale.com> wrote:
-> Since commit 8d86e4fcccf61 ("mmc: sdhci-esdhc-imx: Call mmc_of_parse()")
-> the 'non-removable' and 'cd-gpios' properties are handled by
-> mmc_of_parse(), so we can safely remove the pieces of code that still
-> handles them.
->
-> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 7 -------
->  1 file changed, 7 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 8eed843..d7b0a39 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -872,19 +872,12 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
->         if (!np)
->                 return -ENODEV;
->
-> -       if (of_get_property(np, "non-removable", NULL))
-> -               boarddata->cd_type = ESDHC_CD_PERMANENT;
-> -
->         if (of_get_property(np, "fsl,cd-controller", NULL))
->                 boarddata->cd_type = ESDHC_CD_CONTROLLER;
->
->         if (of_get_property(np, "fsl,wp-controller", NULL))
->                 boarddata->wp_type = ESDHC_WP_CONTROLLER;
->
-> -       boarddata->cd_gpio = of_get_named_gpio(np, "cd-gpios", 0);
-> -       if (gpio_is_valid(boarddata->cd_gpio))
-> -               boarddata->cd_type = ESDHC_CD_GPIO;
-> -
->         boarddata->wp_gpio = of_get_named_gpio(np, "wp-gpios", 0);
+Hi Ulf,
 
-This seems like a leftover as well!?
+On Fri, May 8, 2015 at 8:46 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
->         if (gpio_is_valid(boarddata->wp_gpio))
->                 boarddata->wp_type = ESDHC_WP_GPIO;
-> --
-> 1.9.1
+>>         /* card_detect */
+>> -       if (boarddata->cd_type == ESDHC_CD_CONTROLLER)
+>> +       switch (boarddata->cd_type) {
 >
+> I don't think you want to do this "switch" for dt case, right?
 
-Kind regards
-Uffe
+dt case needs the switch in order not to break the users of the
+"fsl,cd-controller" property.
+
+Actually, I don't see any dts file really using it, but since it is
+documented in Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt,
+then we need to keep supporting it.
+
+Regards,
+
+Fabio Estevam
