@@ -1,249 +1,107 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V7 00/14] mmc: host: Add facility to support re-tuning
-Date: Fri, 8 May 2015 13:28:47 +0200
-Message-ID: <CAPDyKFrX-Vfi-QpNm+vatXoAMAYiXi9ShWMUujSbHywaQ=Wjfw@mail.gmail.com>
-References: <1430993425-2777-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-esdhc-imx: Do not break platform data boards
+Date: Fri, 8 May 2015 13:46:45 +0200
+Message-ID: <CAPDyKFr=y6Wjssv4K9ri281Su1ivY3DHwkMxJjFa-HoEOoWQ8w@mail.gmail.com>
+References: <1431064569-5947-1-git-send-email-festevam@gmail.com>
+	<1431064569-5947-2-git-send-email-festevam@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f52.google.com ([209.85.192.52]:34595 "EHLO
-	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752493AbbEHL2s (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2015 07:28:48 -0400
-Received: by qgfi89 with SMTP id i89so34712253qgf.1
-        for <linux-mmc@vger.kernel.org>; Fri, 08 May 2015 04:28:47 -0700 (PDT)
-In-Reply-To: <1430993425-2777-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-qk0-f171.google.com ([209.85.220.171]:34003 "EHLO
+	mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752045AbbEHLqq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2015 07:46:46 -0400
+Received: by qkgx75 with SMTP id x75so45939095qkg.1
+        for <linux-mmc@vger.kernel.org>; Fri, 08 May 2015 04:46:45 -0700 (PDT)
+In-Reply-To: <1431064569-5947-2-git-send-email-festevam@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aaron Lu <aaron.lu@intel.com>, Philip Rakity <prakity@nvidia.com>, Al Cooper <alcooperx@gmail.com>, Arend van Spriel <arend@broadcom.com>
+To: Fabio Estevam <festevam@gmail.com>
+Cc: Shawn Guo <shawn.guo@linaro.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@freescale.com>
 
-On 7 May 2015 at 12:10, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Hi
+On 8 May 2015 at 07:56, Fabio Estevam <festevam@gmail.com> wrote:
+> From: Fabio Estevam <fabio.estevam@freescale.com>
 >
-> Here is V7 of some patches to move re-tuning support
-> out of sdhci and into the core, and add support for HS400
-> re-tuning.
+> The only user of this driver that has not been converted to fully
+> device tree is the i.MX35 SoC.
 >
-> Currently sdhci does re-tuning transparently by
-> calling sdhci_execute_tuning() from its ->request()
-> function.
+> There is a i.MX35-based board (mach-pcm043.c) that uses platform data
+> to pass wp_gpio and cd_gpio information.
 >
-> The problem with HS400 re-tuning is that it must be
-> done in HS200 mode. That means using switch commands
-> and making ios changes. That means it potentially
-> conflicts with other command sequences. The new
-> re-tuning support accomodates that.
+> Commit 8d86e4fcccf61ba ("mmc: sdhci-esdhc-imx: Call mmc_of_parse()")
+> broke the platform data case by removing mmc_gpio_request_ro() and
+> mmc_gpio_request_cd(), so restore the functionality for the non-dt
+> case.
 >
-> Changes in V7:
+> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 36 +++++++++++++++++++++++++++++++++++-
+>  1 file changed, 35 insertions(+), 1 deletion(-)
 >
->     mmc: host: Add facility to support re-tuning
->         Remove unused mmc_retune_not_needed()
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index a9980d7..812c670 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -918,6 +918,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>         struct esdhc_platform_data *boarddata;
+>         int err;
+>         struct pltfm_imx_data *imx_data;
+> +       bool dt = true;
 >
->     mmc: core: Enable / disable re-tuning
->         As already sent separately as V7:
->         Also flag re-tune needed in SDIO 'keep_power'
->         case, when a re-tuning timer is being used.
+>         host = sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata, 0);
+>         if (IS_ERR(host))
+> @@ -1005,11 +1006,44 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>                 }
+>                 imx_data->boarddata = *((struct esdhc_platform_data *)
+>                                         host->mmc->parent->platform_data);
+> +               dt = false;
+> +       }
+> +       /* write_protect */
+> +       if (boarddata->wp_type == ESDHC_WP_GPIO && !dt) {
+> +               err = mmc_gpio_request_ro(host->mmc, boarddata->wp_gpio);
+> +               if (err) {
+> +                       dev_err(mmc_dev(host->mmc),
+> +                               "failed to request write-protect gpio!\n");
+> +                       goto disable_clk;
+> +               }
+> +               host->mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+>         }
 >
->     mmc: core: Add support for re-tuning before each request
->         Fold in next patch
->
->     mmc: core: Check re-tuning before retrying
->         Folded into previous patch
->
->     mmc: mmc: Hold re-tuning if the card is put to sleep
->         Change title to:
->     mmc: mmc: Hold re-tuning in mmc_sleep()
->         Remove changes from V6
->         Hold re-tuning while card is deselected
->
->     mmc: core: Flag re-tuning is needed on CRC errors
->         Do it from core rather than the host
->
-> Changes in V6:
->
->     mmc: host: Add facility to support re-tuning
->         Don't export functions only used in core
->
->     mmc: core: Enable / disable re-tuning
->         Ensure re-tuning timer is disabled in SDIO suspend
->
->     mmc: core: Hold re-tuning while bkops ongoing
->         Hold re-tuning always and release only if
->         bkops is not ongoing.
->
->     mmc: mmc: Hold re-tuning if the card is put to sleep
->         Hold re-tuning for mmc_sleep even if card is
->         immediately powered off, disabling re-tuning.
->
-> Changes in V5:
->
->     mmc: host: Add facility to support re-tuning
->         Make mmc_retune_enable() / mmc_retune_disable()
->         only called from core.
->
->     mmc: core: Enable / disable re-tuning
->         Replaces mmc: core: Disable re-tuning when card is no longer initialized
->         Enables re-tuning when tuning is executed
->
->     mmc: sdhci: Change to new way of doing re-tuning
->         Set host->retune_period instead of enabling re-tuning.
->
-> Changes in V4:
->
->     These patches now depend on Ulf's patch:
->         mmc: core: Enable runtime PM management of host devices
->
->     mmc: host: Add facility to support re-tuning
->
->         Assume mmc_claim_host() runtime resumes the host
->         controller so there are no races with runtime pm.
->         Consequently remove now un-needed re-tuning host
->         operations.
->
->     mmc: core: Add support for re-tuning before each request
->
->         Call mmc_retune() prior to ->request()
->
->     mmc: sdhci: Change to new way of doing re-tuning
->
->         Updated to reflect the changes above.
->
-> Changes in V3:
->
->     mmc: host: Add facility to support re-tuning
->
->         Add host->retune_now flag so re-tuning can be
->         started in the host drivers ->request()
->         function to avoid racing with Runtime PM.
->
->         Add host operations to let the host know when
->         re-tuning is held, for eaxmple, to enable
->         synchronization with runtime suspend / resume.
->
->         Ensure functions are exported.
->
->     mmc: core: Add support for re-tuning before each request
->         Updated to reflect the change above.
->
->     mmc: core: Check re-tuning before retrying
->         Updated to reflect the change above.
->
->     mmc: core: Hold re-tuning during switch commands
->         Updated to reflect the change above.
->
->     mmc: core: Hold re-tuning during erase commands
->         Updated to reflect the change above.
->
->     mmc: core: Hold re-tuning while bkops ongoing
->         Updated to reflect the change above.
->
->     mmc: core: Add support for HS400 re-tuning
->         Updated and as already sent separately as V3:
->         Remember to mmc_set_bus_speed(card) in mmc_hs400_to_hs200()
->
->     mmc: sdhci: Change to new way of doing re-tuning
->         Call mmc_retune() from ->request() function to
->         avoid racing with Runtime PM. And implement
->         hold_tuning / release_tuning operations to prevent
->         runtime suspend while re-tuning is held.
->
->     mmc: block: Retry errored data requests when re-tuning is needed
->         Updated and as already sent separately as V3:
->         Only retry when there is an error
->
-> Changes in V2:
->
->     Added support to the block driver for re-tuning
->     and retrying after a CRC error. The host driver
->     is left to decide when an error indicates re-tuning
->     is needed. The block driver will retry a data request
->     once if re-tuning is flagged as needed.
->
->     SDIO drivers need not be aware of re-tuning because
->     retrying will anyway cause re-tuning when re-tuning
->     is flagged as needed. Nevertheless SDIO drivers could
->     use the need_retune flag to instigate a retry when
->     otherwise they might not have.
->
->     mmc: core: Simplify by adding mmc_execute_tuning()
->         Dropped because it has been applied
->
->     mmc: host: Add facility to support re-tuning
->         Renamed mmc_retune_retry() to mmc_retune_recheck()
->         to better reflect what it does.
->
->     mmc: core: Move mmc_card_removed() into mmc_start_request()
->         Dropped because it has been applied
->
->     mmc: core: Add support for re-tuning before each request
->         Fixed un-balanced re-tune hold / release
->
->     mmc: sdhci: Always init buf_ready_int
->         Dropped because it has been applied
->
->     mmc: core: Separate out the mmc_switch status check so it can be re-used
->         New patch
->
->     mmc: core: Add support for HS400 re-tuning
->         It was found that that the original code was not reliable
->         after a CRC error. The problem was that the CMD13 after a
->         switch was faiing. So the code was changed to check the
->         switch status *after* changing the I/O state to match the
->         switch i.e. the new I/O state is the correct one to use
->         after a switch.
->
->     mmc: sdhci: Flag re-tuning is needed on CRC or End-Bit errors
->         New patch
->
->     mmc: block: Check re-tuning in the recovery path
->         New patch
->
->     mmc: block: Retry data requests when re-tuning is needed
->         New patch
->
->     mmc: core: Don't print reset warning if reset is not supported
->         New patch
->
->
-> Adrian Hunter (14):
->       mmc: host: Add facility to support re-tuning
->       mmc: core: Enable / disable re-tuning
->       mmc: core: Add support for re-tuning before each request
->       mmc: core: Hold re-tuning during switch commands
->       mmc: core: Hold re-tuning during erase commands
->       mmc: core: Hold re-tuning while bkops ongoing
->       mmc: mmc: Hold re-tuning in mmc_sleep()
->       mmc: core: Separate out the mmc_switch status check so it can be re-used
->       mmc: core: Add support for HS400 re-tuning
->       mmc: sdhci: Change to new way of doing re-tuning
->       mmc: core: Flag re-tuning is needed on CRC errors
->       mmc: block: Check re-tuning in the recovery path
->       mmc: block: Retry errored data requests when re-tuning is needed
->       mmc: core: Don't print reset warning if reset is not supported
->
->  drivers/mmc/card/block.c   |  14 +++++-
->  drivers/mmc/card/queue.h   |   1 +
->  drivers/mmc/core/core.c    |  57 +++++++++++++++++++----
->  drivers/mmc/core/core.h    |   2 +
->  drivers/mmc/core/host.c    |  85 ++++++++++++++++++++++++++++++++++
->  drivers/mmc/core/host.h    |   6 +++
->  drivers/mmc/core/mmc.c     |  98 ++++++++++++++++++++++++++++++++++++++-
->  drivers/mmc/core/mmc_ops.c |  44 +++++++++++-------
->  drivers/mmc/core/mmc_ops.h |   1 +
->  drivers/mmc/core/sdio.c    |   6 ++-
->  drivers/mmc/host/sdhci.c   | 112 ++++++---------------------------------------
->  drivers/mmc/host/sdhci.h   |   3 --
->  include/linux/mmc/host.h   |  23 ++++++++++
->  13 files changed, 322 insertions(+), 130 deletions(-)
->
->
-> Regards
-> Adrian
->
+>         /* card_detect */
+> -       if (boarddata->cd_type == ESDHC_CD_CONTROLLER)
+> +       switch (boarddata->cd_type) {
 
-Adrian, thanks for all your efforts around this patchset. I have now
-applied for my next branch.
+I don't think you want to do this "switch" for dt case, right?
+
+> +       case ESDHC_CD_GPIO:
+> +               if (dt)
+> +                       break;
+> +               err = mmc_gpio_request_cd(host->mmc, boarddata->cd_gpio, 0);
+> +               if (err) {
+> +                       dev_err(mmc_dev(host->mmc),
+> +                               "failed to request card-detect gpio!\n");
+> +                       goto disable_clk;
+> +               }
+> +               /* fall through */
+> +
+> +       case ESDHC_CD_CONTROLLER:
+> +               /* we have a working card_detect back */
+>                 host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> +               break;
+> +
+> +       case ESDHC_CD_PERMANENT:
+> +               host->mmc->caps |= MMC_CAP_NONREMOVABLE;
+> +               break;
+> +
+> +       case ESDHC_CD_NONE:
+> +               break;
+> +       }
+>
+>         switch (boarddata->max_bus_width) {
+>         case 8:
+> --
+> 1.9.1
+>
 
 Kind regards
 Uffe
