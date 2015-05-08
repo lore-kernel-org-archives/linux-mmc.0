@@ -1,54 +1,32 @@
-From: Fabio Estevam <fabio.estevam@freescale.com>
-Subject: [PATCH] mmc: sdhci-esdhc-imx: Remove unneeded code
-Date: Thu, 7 May 2015 15:00:09 -0300
-Message-ID: <1431021609-6932-1-git-send-email-fabio.estevam@freescale.com>
+From: Shawn Guo <shawn.guo@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Remove unneeded code
+Date: Fri, 8 May 2015 10:24:14 +0800
+Message-ID: <20150508022412.GP3162@dragon>
+References: <1431021609-6932-1-git-send-email-fabio.estevam@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0141.outbound.protection.outlook.com ([207.46.100.141]:27567
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751333AbbEGSP3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 7 May 2015 14:15:29 -0400
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:36853 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751050AbbEHCYe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 May 2015 22:24:34 -0400
+Received: by pabsx10 with SMTP id sx10so56188414pab.3
+        for <linux-mmc@vger.kernel.org>; Thu, 07 May 2015 19:24:34 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1431021609-6932-1-git-send-email-fabio.estevam@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: shawn.guo@linaro.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
+To: Fabio Estevam <fabio.estevam@freescale.com>
+Cc: ulf.hansson@linaro.org, kernel@pengutronix.de, linux-mmc@vger.kernel.org
 
-Since commit 8d86e4fcccf61 ("mmc: sdhci-esdhc-imx: Call mmc_of_parse()")
-the 'non-removable' and 'cd-gpios' properties are handled by
-mmc_of_parse(), so we can safely remove the pieces of code that still
-handles them.
+On Thu, May 07, 2015 at 03:00:09PM -0300, Fabio Estevam wrote:
+> Since commit 8d86e4fcccf61 ("mmc: sdhci-esdhc-imx: Call mmc_of_parse()")
+> the 'non-removable' and 'cd-gpios' properties are handled by
+> mmc_of_parse(), so we can safely remove the pieces of code that still
+> handles them.
+> 
+> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
 
-Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
----
- drivers/mmc/host/sdhci-esdhc-imx.c | 7 -------
- 1 file changed, 7 deletions(-)
+It looks like a left-over of commit 8d86e4fcccf61.
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 8eed843..d7b0a39 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -872,19 +872,12 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
- 	if (!np)
- 		return -ENODEV;
- 
--	if (of_get_property(np, "non-removable", NULL))
--		boarddata->cd_type = ESDHC_CD_PERMANENT;
--
- 	if (of_get_property(np, "fsl,cd-controller", NULL))
- 		boarddata->cd_type = ESDHC_CD_CONTROLLER;
- 
- 	if (of_get_property(np, "fsl,wp-controller", NULL))
- 		boarddata->wp_type = ESDHC_WP_CONTROLLER;
- 
--	boarddata->cd_gpio = of_get_named_gpio(np, "cd-gpios", 0);
--	if (gpio_is_valid(boarddata->cd_gpio))
--		boarddata->cd_type = ESDHC_CD_GPIO;
--
- 	boarddata->wp_gpio = of_get_named_gpio(np, "wp-gpios", 0);
- 	if (gpio_is_valid(boarddata->wp_gpio))
- 		boarddata->wp_type = ESDHC_WP_GPIO;
--- 
-1.9.1
-
+Acked-by: Shawn Guo <shawn.guo@linaro.org>
