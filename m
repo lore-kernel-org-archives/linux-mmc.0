@@ -1,71 +1,60 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.1 rc3
-Date: Fri, 8 May 2015 09:23:22 +0200
-Message-ID: <CAPDyKFqtYHORQxXZQ5bhC0gm0=Y_4iRq=fJwuxs7u8d3GTaqLg@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [v3, 2/6] mmc: sdhci-pltfm: support both LE and BE mode for SDHCI platform
+Date: Fri, 08 May 2015 09:40:42 +0200
+Message-ID: <2093374.CPZJl41Uyy@wuerfel>
+References: <1431067818-41378-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f177.google.com ([209.85.220.177]:35223 "EHLO
-	mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752178AbbEHHXX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2015 03:23:23 -0400
-Received: by qkhg7 with SMTP id g7so43069245qkh.2
-        for <linux-mmc@vger.kernel.org>; Fri, 08 May 2015 00:23:22 -0700 (PDT)
+Received: from mout.kundenserver.de ([212.227.126.131]:49736 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751015AbbEHHky (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 May 2015 03:40:54 -0400
+In-Reply-To: <1431067818-41378-1-git-send-email-yangbo.lu@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Yangbo Lu <yangbo.lu@freescale.com>
+Cc: linux-mmc@vger.kernel.org, chris@printf.net, ulf.hansson@linaro.org
 
-Hi Linus,
+On Friday 08 May 2015 14:50:18 Yangbo Lu wrote:
+> -static inline u32 sdhci_be32bs_readl(struct sdhci_host *host, int reg)
+> +static inline void sdhci_clrsetbits(struct sdhci_host *host, u32 mask,
+> +                                   u32 val, int reg)
+>  {
+> -       return in_be32(host->ioaddr + reg);
+> +       void __iomem *base = host->ioaddr + (reg & ~0x3);
+> +       u32 shift = (reg & 0x3) * 8;
+> +
+> +       if (host->mmc->big_endian_mode)
+> +               iowrite32be(((ioread32be(base) & ~(mask << shift)) |
+> +                           (val << shift)), base);
+> +       else
+> +               iowrite32(((ioread32(base) & ~(mask << shift)) |
+> +                         (val << shift)), base);
+>  }
+>  
+> 
 
-Here are some mmc fixes for v.4.1 rc3, based on v4.1-rc2.
+I think it would be better to use function pointers that are assigned at probe
+time than run-time checks here.
 
-Details are as usual found in the signed tag. Please pull this in!
+Have a look at drivers/mmc/host/sdhci-of-hlwd.c:
 
-Kind regards
-Ulf Hansson
+static const struct sdhci_ops sdhci_hlwd_ops = {
+        .read_l = sdhci_be32bs_readl,
+        .read_w = sdhci_be32bs_readw,
+        .read_b = sdhci_be32bs_readb,
+        .write_l = sdhci_hlwd_writel,
+        .write_w = sdhci_hlwd_writew,
+        .write_b = sdhci_hlwd_writeb,
+        .set_clock = sdhci_set_clock,
+        .set_bus_width = sdhci_set_bus_width,
+        .reset = sdhci_reset,
+        .set_uhs_signaling = sdhci_set_uhs_signaling,
+};
 
 
-The following changes since commit 5ebe6afaf0057ac3eaeb98defd5456894b446d22:
+You can copy this method into your own driver.
 
-  Linux 4.1-rc2 (2015-05-03 19:22:23 -0700)
-
-are available in the git repository at:
-
-  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-4.1-rc2
-
-for you to fetch changes up to 4de3bf66c61ef708d8f22d7f990339668a858e7d:
-
-  mmc: dw_mmc: dw_mci_get_cd check MMC_CAP_NONREMOVABLE (2015-05-08
-08:55:47 +0200)
-
-----------------------------------------------------------------
-MMC core:
-- Don't access RPMB partitions for normal read/write
-- Fix hibernation restore sequence
-
-MMC host:
-- dw_mmc: Fix card detection for non removable cards
-- dw_mmc: Fix sglist issue in 32-bit mode
-- sh_mmcif: Fix timeout value for command request
-
-----------------------------------------------------------------
-Chuanxiao Dong (1):
-      mmc: card: Don't access RPMB partitions for normal read/write
-
-Grygorii Strashko (1):
-      mmc: core: add missing pm event in mmc_pm_notify to fix hib restore
-
-Takeshi Kihara (1):
-      mmc: sh_mmcif: Fix timeout value for command request
-
-Zhangfei Gao (2):
-      mmc: dw_mmc: init desc in dw_mci_idmac_init
-      mmc: dw_mmc: dw_mci_get_cd check MMC_CAP_NONREMOVABLE
-
- drivers/mmc/card/block.c    | 12 ++++++++++++
- drivers/mmc/card/queue.c    |  2 +-
- drivers/mmc/card/queue.h    |  2 ++
- drivers/mmc/core/core.c     |  1 +
- drivers/mmc/host/dw_mmc.c   |  7 +++++--
- drivers/mmc/host/sh_mmcif.c |  2 +-
- 6 files changed, 22 insertions(+), 4 deletions(-)
+	Arnd
