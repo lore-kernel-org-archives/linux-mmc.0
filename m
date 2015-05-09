@@ -1,16 +1,14 @@
 From: Fabio Estevam <festevam@gmail.com>
-Subject: [PATCH 2/3] mmc: host: mxcmmc: Simplify a trivial if-return sequence
-Date: Sat,  9 May 2015 18:44:50 -0300
-Message-ID: <1431207891-21448-2-git-send-email-festevam@gmail.com>
-References: <1431207891-21448-1-git-send-email-festevam@gmail.com>
+Subject: [PATCH 1/3] mmc: card: mmc_test: Simplify a trivial if-return sequence
+Date: Sat,  9 May 2015 18:44:49 -0300
+Message-ID: <1431207891-21448-1-git-send-email-festevam@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f51.google.com ([209.85.192.51]:36416 "EHLO
-	mail-qg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751975AbbEIVp1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 9 May 2015 17:45:27 -0400
-Received: by qgeb100 with SMTP id b100so51969823qge.3
-        for <linux-mmc@vger.kernel.org>; Sat, 09 May 2015 14:45:26 -0700 (PDT)
-In-Reply-To: <1431207891-21448-1-git-send-email-festevam@gmail.com>
+Received: from mail-qg0-f47.google.com ([209.85.192.47]:35624 "EHLO
+	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752024AbbEIVpS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 9 May 2015 17:45:18 -0400
+Received: by qgej70 with SMTP id j70so52005265qge.2
+        for <linux-mmc@vger.kernel.org>; Sat, 09 May 2015 14:45:18 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org
@@ -29,26 +27,249 @@ http://coccinelle.lip6.fr/
 
 Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
 ---
- drivers/mmc/host/mxcmmc.c | 6 +-----
- 1 file changed, 1 insertion(+), 5 deletions(-)
+ drivers/mmc/card/mmc_test.c | 100 +++++++-------------------------------------
+ 1 file changed, 15 insertions(+), 85 deletions(-)
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 317d709..d110f9e 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -605,11 +605,7 @@ static int mxcmci_push(struct mxcmci_host *host, void *_buf, int bytes)
- 		mxcmci_writel(host, cpu_to_le32(tmp), MMC_REG_BUFFER_ACCESS);
- 	}
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index 53b7413..5e90b3f 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -268,8 +268,6 @@ static int mmc_test_wait_busy(struct mmc_test_card *test)
+ static int mmc_test_buffer_transfer(struct mmc_test_card *test,
+ 	u8 *buffer, unsigned addr, unsigned blksz, int write)
+ {
+-	int ret;
+-
+ 	struct mmc_request mrq = {0};
+ 	struct mmc_command cmd = {0};
+ 	struct mmc_command stop = {0};
+@@ -292,11 +290,7 @@ static int mmc_test_buffer_transfer(struct mmc_test_card *test,
+ 	if (data.error)
+ 		return data.error;
  
--	stat = mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
--	if (stat)
--		return stat;
+-	ret = mmc_test_wait_busy(test);
+-	if (ret)
+-		return ret;
 -
 -	return 0;
-+	return mxcmci_poll_status(host, STATUS_BUF_WRITE_RDY);
++	return mmc_test_wait_busy(test);
  }
  
- static int mxcmci_transfer_data(struct mxcmci_host *host)
+ static void mmc_test_free_mem(struct mmc_test_mem *mem)
+@@ -994,11 +988,7 @@ static int mmc_test_basic_write(struct mmc_test_card *test)
+ 
+ 	sg_init_one(&sg, test->buffer, 512);
+ 
+-	ret = mmc_test_simple_transfer(test, &sg, 1, 0, 1, 512, 1);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
++	return mmc_test_simple_transfer(test, &sg, 1, 0, 1, 512, 1);
+ }
+ 
+ static int mmc_test_basic_read(struct mmc_test_card *test)
+@@ -1012,44 +1002,29 @@ static int mmc_test_basic_read(struct mmc_test_card *test)
+ 
+ 	sg_init_one(&sg, test->buffer, 512);
+ 
+-	ret = mmc_test_simple_transfer(test, &sg, 1, 0, 1, 512, 0);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
++	return mmc_test_simple_transfer(test, &sg, 1, 0, 1, 512, 0);
+ }
+ 
+ static int mmc_test_verify_write(struct mmc_test_card *test)
+ {
+-	int ret;
+ 	struct scatterlist sg;
+ 
+ 	sg_init_one(&sg, test->buffer, 512);
+ 
+-	ret = mmc_test_transfer(test, &sg, 1, 0, 1, 512, 1);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
++	return mmc_test_transfer(test, &sg, 1, 0, 1, 512, 1);
+ }
+ 
+ static int mmc_test_verify_read(struct mmc_test_card *test)
+ {
+-	int ret;
+ 	struct scatterlist sg;
+ 
+ 	sg_init_one(&sg, test->buffer, 512);
+ 
+-	ret = mmc_test_transfer(test, &sg, 1, 0, 1, 512, 0);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
++	return mmc_test_transfer(test, &sg, 1, 0, 1, 512, 0);
+ }
+ 
+ static int mmc_test_multi_write(struct mmc_test_card *test)
+ {
+-	int ret;
+ 	unsigned int size;
+ 	struct scatterlist sg;
+ 
+@@ -1066,16 +1041,11 @@ static int mmc_test_multi_write(struct mmc_test_card *test)
+ 
+ 	sg_init_one(&sg, test->buffer, size);
+ 
+-	ret = mmc_test_transfer(test, &sg, 1, 0, size/512, 512, 1);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
++	return mmc_test_transfer(test, &sg, 1, 0, size/512, 512, 1);
+ }
+ 
+ static int mmc_test_multi_read(struct mmc_test_card *test)
+ {
+-	int ret;
+ 	unsigned int size;
+ 	struct scatterlist sg;
+ 
+@@ -1092,11 +1062,7 @@ static int mmc_test_multi_read(struct mmc_test_card *test)
+ 
+ 	sg_init_one(&sg, test->buffer, size);
+ 
+-	ret = mmc_test_transfer(test, &sg, 1, 0, size/512, 512, 0);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
++	return mmc_test_transfer(test, &sg, 1, 0, size/512, 512, 0);
+ }
+ 
+ static int mmc_test_pow2_write(struct mmc_test_card *test)
+@@ -1263,11 +1229,7 @@ static int mmc_test_xfersize_write(struct mmc_test_card *test)
+ 	if (ret)
+ 		return ret;
+ 
+-	ret = mmc_test_broken_transfer(test, 1, 512, 1);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
++	return mmc_test_broken_transfer(test, 1, 512, 1);
+ }
+ 
+ static int mmc_test_xfersize_read(struct mmc_test_card *test)
+@@ -1278,11 +1240,7 @@ static int mmc_test_xfersize_read(struct mmc_test_card *test)
+ 	if (ret)
+ 		return ret;
+ 
+-	ret = mmc_test_broken_transfer(test, 1, 512, 0);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
++	return mmc_test_broken_transfer(test, 1, 512, 0);
+ }
+ 
+ static int mmc_test_multi_xfersize_write(struct mmc_test_card *test)
+@@ -1296,11 +1254,7 @@ static int mmc_test_multi_xfersize_write(struct mmc_test_card *test)
+ 	if (ret)
+ 		return ret;
+ 
+-	ret = mmc_test_broken_transfer(test, 2, 512, 1);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
++	return mmc_test_broken_transfer(test, 2, 512, 1);
+ }
+ 
+ static int mmc_test_multi_xfersize_read(struct mmc_test_card *test)
+@@ -1314,48 +1268,33 @@ static int mmc_test_multi_xfersize_read(struct mmc_test_card *test)
+ 	if (ret)
+ 		return ret;
+ 
+-	ret = mmc_test_broken_transfer(test, 2, 512, 0);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
++	return mmc_test_broken_transfer(test, 2, 512, 0);
+ }
+ 
+ #ifdef CONFIG_HIGHMEM
+ 
+ static int mmc_test_write_high(struct mmc_test_card *test)
+ {
+-	int ret;
+ 	struct scatterlist sg;
+ 
+ 	sg_init_table(&sg, 1);
+ 	sg_set_page(&sg, test->highmem, 512, 0);
+ 
+-	ret = mmc_test_transfer(test, &sg, 1, 0, 1, 512, 1);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
++	return mmc_test_transfer(test, &sg, 1, 0, 1, 512, 1);
+ }
+ 
+ static int mmc_test_read_high(struct mmc_test_card *test)
+ {
+-	int ret;
+ 	struct scatterlist sg;
+ 
+ 	sg_init_table(&sg, 1);
+ 	sg_set_page(&sg, test->highmem, 512, 0);
+ 
+-	ret = mmc_test_transfer(test, &sg, 1, 0, 1, 512, 0);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
++	return mmc_test_transfer(test, &sg, 1, 0, 1, 512, 0);
+ }
+ 
+ static int mmc_test_multi_write_high(struct mmc_test_card *test)
+ {
+-	int ret;
+ 	unsigned int size;
+ 	struct scatterlist sg;
+ 
+@@ -1373,16 +1312,11 @@ static int mmc_test_multi_write_high(struct mmc_test_card *test)
+ 	sg_init_table(&sg, 1);
+ 	sg_set_page(&sg, test->highmem, size, 0);
+ 
+-	ret = mmc_test_transfer(test, &sg, 1, 0, size/512, 512, 1);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
++	return mmc_test_transfer(test, &sg, 1, 0, size/512, 512, 1);
+ }
+ 
+ static int mmc_test_multi_read_high(struct mmc_test_card *test)
+ {
+-	int ret;
+ 	unsigned int size;
+ 	struct scatterlist sg;
+ 
+@@ -1400,11 +1334,7 @@ static int mmc_test_multi_read_high(struct mmc_test_card *test)
+ 	sg_init_table(&sg, 1);
+ 	sg_set_page(&sg, test->highmem, size, 0);
+ 
+-	ret = mmc_test_transfer(test, &sg, 1, 0, size/512, 512, 0);
+-	if (ret)
+-		return ret;
+-
+-	return 0;
++	return mmc_test_transfer(test, &sg, 1, 0, size/512, 512, 0);
+ }
+ 
+ #else
 -- 
 1.9.1
 
