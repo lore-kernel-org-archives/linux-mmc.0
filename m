@@ -1,101 +1,70 @@
-From: Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
-Subject: [PATCH RESEND v6 1/2] arm64: dts: Add the arasan sdhci nodes in apm-storm.dtsi
-Date: Mon, 11 May 2015 14:08:50 +0530
-Message-ID: <1431333531-30491-2-git-send-email-stripathi@apm.com>
-References: <1431333531-30491-1-git-send-email-stripathi@apm.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1431333531-30491-1-git-send-email-stripathi-qTEPVZfXA3Y@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ddutile-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, patches-qTEPVZfXA3Y@public.gmane.org, Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: don't call bus_ops->power_restore if already on
+Date: Mon, 11 May 2015 10:48:20 +0200
+Message-ID: <CAPDyKFrF=6GRiSvDPnyV5mAozu1N54e+HrTvjRbH-FyTmj6hqA@mail.gmail.com>
+References: <1430841827-7834-1-git-send-email-eliad@wizery.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f170.google.com ([209.85.220.170]:34732 "EHLO
+	mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752102AbbEKIsV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 May 2015 04:48:21 -0400
+Received: by qkgx75 with SMTP id x75so82458076qkg.1
+        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2015 01:48:20 -0700 (PDT)
+In-Reply-To: <1430841827-7834-1-git-send-email-eliad@wizery.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Eliad Peller <eliad@wizery.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ido Yariv <ido@wizery.com>
 
-This patch adds the arasan sdhci nodes to reuse the of-arasan
-driver for APM X-Gene SoC.
+On 5 May 2015 at 18:03, Eliad Peller <eliad@wizery.com> wrote:
+> mmc_power_restore_host() calls mmc_power_up(), which
+> returns immediately if power is already on.
+>
+> However, it still calls host->bus_ops->power_restore,
+> which might result in various errors if the bus_ops
+> doesn't handle it well (e.g. failing to run init
+> sequence twice)
+>
+> Simply bail out in this case, without further calling
+> bus_ops->power_restore.
+>
+> Specifically, this solves issue with wl18xx sdio card,
+> where the mmc core powers on the card on resume (while
+> MMC_PM_KEEP_POWER is not set), and the wl18xx device
+> driver calls mmc_power_restore_host() once more.
 
-Signed-off-by: Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
----
- arch/arm64/boot/dts/apm/apm-mustang.dts |  4 +++
- arch/arm64/boot/dts/apm/apm-storm.dtsi  | 43 +++++++++++++++++++++++++++++++++
- 2 files changed, 47 insertions(+)
+Could you elaborate on why that driver calls mmc_power_restore_host()
+after the system PM suspend sequence? I am trying to understand the
+use case.
 
-diff --git a/arch/arm64/boot/dts/apm/apm-mustang.dts b/arch/arm64/boot/dts/apm/apm-mustang.dts
-index 83578e7..7ccd517 100644
---- a/arch/arm64/boot/dts/apm/apm-mustang.dts
-+++ b/arch/arm64/boot/dts/apm/apm-mustang.dts
-@@ -52,3 +52,7 @@
- &xgenet {
- 	status = "ok";
- };
-+
-+&sdhci0 {
-+	status = "ok";
-+};
-diff --git a/arch/arm64/boot/dts/apm/apm-storm.dtsi b/arch/arm64/boot/dts/apm/apm-storm.dtsi
-index c8d3e0e..b5d2698 100644
---- a/arch/arm64/boot/dts/apm/apm-storm.dtsi
-+++ b/arch/arm64/boot/dts/apm/apm-storm.dtsi
-@@ -145,6 +145,40 @@
- 				clock-output-names = "socplldiv2";
- 			};
+Kind regards
+Uffe
 
-+			ahbclk: ahbclk@1f2ac000 {
-+				compatible = "apm,xgene-device-clock";
-+				#clock-cells = <1>;
-+				clocks = <&socplldiv2 0>;
-+				reg = <0x0 0x1f2ac000 0x0 0x1000
-+					0x0 0x17000000 0x0 0x2000>;
-+				reg-names = "csr-reg", "div-reg";
-+				csr-offset = <0x0>;
-+				csr-mask = <0x1>;
-+				enable-offset = <0x8>;
-+				enable-mask = <0x1>;
-+				divider-offset = <0x164>;
-+				divider-width = <0x5>;
-+				divider-shift = <0x0>;
-+				clock-output-names = "ahbclk";
-+			};
-+
-+			sdioclk: sdioclk@1f2ac000 {
-+				compatible = "apm,xgene-device-clock";
-+				#clock-cells = <1>;
-+				clocks = <&socplldiv2 0>;
-+				reg = <0x0 0x1f2ac000 0x0 0x1000
-+					0x0 0x17000000 0x0 0x2000>;
-+				reg-names = "csr-reg", "div-reg";
-+				csr-offset = <0x0>;
-+				csr-mask = <0x2>;
-+				enable-offset = <0x8>;
-+				enable-mask = <0x2>;
-+				divider-offset = <0x178>;
-+				divider-width = <0x8>;
-+				divider-shift = <0x0>;
-+				clock-output-names = "sdioclk";
-+			};
-+
- 			qmlclk: qmlclk {
- 				compatible = "apm,xgene-device-clock";
- 				#clock-cells = <1>;
-@@ -533,6 +567,15 @@
- 			interrupts = <0x0 0x4f 0x4>;
- 		};
-
-+		sdhci0: sdhci@1c000000 {
-+			compatible = "arasan,sdhci-4.9a";
-+			reg = <0x0 0x1c000000 0x0 0x100>;
-+			interrupts = <0x0 0x49 0x4>;
-+			dma-coherent;
-+			clock-names = "clk_xin", "clk_ahb";
-+			clocks = <&sdioclk 0>, <&ahbclk 0>;
-+		};
-+
- 		phy1: phy@1f21a000 {
- 			compatible = "apm,xgene-phy";
- 			reg = <0x0 0x1f21a000 0x0 0x100>;
---
-1.8.2.1
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> Signed-off-by: Eliad Peller <eliad@wizery.com>
+> Signed-off-by: Ido Yariv <ido@wizery.com>
+> ---
+>  drivers/mmc/core/core.c | 5 +++++
+>  1 file changed, 5 insertions(+)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index c296bc0..797b574 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2604,6 +2604,11 @@ int mmc_power_restore_host(struct mmc_host *host)
+>                 return -EINVAL;
+>         }
+>
+> +       if (host->ios.power_mode == MMC_POWER_ON) {
+> +               mmc_bus_put(host);
+> +               return 0;
+> +       }
+> +
+>         mmc_power_up(host, host->card->ocr);
+>         ret = host->bus_ops->power_restore(host);
+>
+> --
+> 1.8.5.2.229.g4448466.dirty
+>
