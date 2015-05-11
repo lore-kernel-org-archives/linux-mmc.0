@@ -1,87 +1,111 @@
-From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: Re: [Linux-kernel] [RFC PATCH 5/7] mmc: sh_mobile_sdhi: Add UHS-I
- mode support
-Date: Mon, 11 May 2015 15:01:01 +0100
-Message-ID: <1431352861.4222.101.camel@xylophone.i.decadent.org.uk>
-References: <1430396995.5802.39.camel@xylophone.i.decadent.org.uk>
-	 <1430397136.5802.44.camel@xylophone.i.decadent.org.uk>
-	 <CAPDyKFodZscxZJmKgYyMV8m8mNWYc9GitkoKbixTKS5r7rv_fA@mail.gmail.com>
-	 <554880C9.8080201@codethink.co.uk>
-	 <CAPDyKFpv0BOX0mAvhZx9j5Gnayt__YTiUa8SxvcmsEcuazsg0w@mail.gmail.com>
-	 <1430876333.4222.43.camel@xylophone.i.decadent.org.uk>
-	 <CAPDyKFo7WsE2wTLZc0E9ANrZ1amVsL3n71oxCLFG0+QrF0xH_A@mail.gmail.com>
-	 <1430920143.4222.74.camel@xylophone.i.decadent.org.uk>
-	 <CAPDyKFq6pGmk5eiSLqEkVnQ1b5FVyVyXNfOmkFAm-x40v5jWZg@mail.gmail.com>
+From: Eliad Peller <eliad@wizery.com>
+Subject: Re: [PATCH] mmc: core: don't call bus_ops->power_restore if already on
+Date: Mon, 11 May 2015 17:04:43 +0300
+Message-ID: <CAB3XZEf53tqW6NtXm25cyF98MrVbyqZiT3A6sv-WuWkQeZoLcA@mail.gmail.com>
+References: <1430841827-7834-1-git-send-email-eliad@wizery.com>
+	<CAPDyKFrF=6GRiSvDPnyV5mAozu1N54e+HrTvjRbH-FyTmj6hqA@mail.gmail.com>
+	<CAB3XZEe_SjhHU-mRbG-X_7PNQHCaVGHfmx66dEUhdZsexYciyQ@mail.gmail.com>
+	<CAPDyKFoOKeBxUFcKVR0ueiO5nP4A_X5LhMDN_dOgVh=3xc5u7A@mail.gmail.com>
+	<CAB3XZEfO3PfqMk389shSYG_1=8m2jZdYE9ck07aNHLPLNbHZRQ@mail.gmail.com>
+	<CAPDyKFqywtVbGDxvo0oXtsKzyJXr-C5HjEQSCO+Pos7dihiXAg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFq6pGmk5eiSLqEkVnQ1b5FVyVyXNfOmkFAm-x40v5jWZg@mail.gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ben Dooks <ben.dooks@codethink.co.uk>, linux-kernel@lists.codethink.co.uk, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ie0-f172.google.com ([209.85.223.172]:36193 "EHLO
+	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750962AbbEKOEo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 May 2015 10:04:44 -0400
+Received: by iecmd7 with SMTP id md7so30779417iec.3
+        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2015 07:04:43 -0700 (PDT)
+In-Reply-To: <CAPDyKFqywtVbGDxvo0oXtsKzyJXr-C5HjEQSCO+Pos7dihiXAg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ido Yariv <ido@wizery.com>
 
-On Mon, 2015-05-11 at 10:54 +0200, Ulf Hansson wrote:
-> On 6 May 2015 at 15:49, Ben Hutchings <ben.hutchings@codethink.co.uk> wrote:
-> > On Wed, 2015-05-06 at 10:44 +0200, Ulf Hansson wrote:
-> >> On 6 May 2015 at 03:38, Ben Hutchings <ben.hutchings@codethink.co.uk> wrote:
-> >> > On Tue, 2015-05-05 at 10:47 +0200, Ulf Hansson wrote:
-> >> >> On 5 May 2015 at 10:35, Ben Dooks <ben.dooks@codethink.co.uk> wrote:
-> >> >> > On 05/05/15 10:56, Ulf Hansson wrote:
-> >> >> >> On 30 April 2015 at 14:32, Ben Hutchings <ben.hutchings@codethink.co.uk> wrote:
-> >> >> >>> Implement voltage switch, supporting modes up to SDR-50.
-> >> >> >>>
-> >> >> >>> Based on work by Shinobu Uehara, Rob Taylor, William Towle and Ian Molton.
-> >> >> >>>
-> >> >> >>> This uses two voltage regulators, one external and one on the pfc.
-> >> >> >>
-> >> >> >> Why two? If there is a parent child relation ship, that should be
-> >> >> >> handled through the regulator tree, right!? Please elaborate.
-> >> >> >
-> >> >> > The card main power is separate from the IO line voltages.
-> >> >> >
-> >> >> > To get to the high-speed, card power is left at 3.3V and the IO
-> >> >> > voltage is changed to 1.8V.
-> >> >> >
-> >> >> > In the systems we have the power gate is separate from the controls
-> >> >> > for the IO but not integrated into the MMC controller itself.
-> >> >
-> >> > In this case, there are *three* regulators:
-> >> >
-> >> > 1. External regulator for card power (VDD pin): "vmmc"
-> >> > 2. External regulator for pull-up voltage for the data pins: "vqmmc"
-> >>
-> >> Is this really a regulator and not just about changing a pinctrl setting?
-> >
-> > Looking at the Lager board, the pull-up voltage appears to be controlled
-> > by the external PMIC (DA9063), which is signalled using GPIOs (I don't
-> > know why, when it's also connected to I2C).
-> 
-> Okay, thus we should have a regulator for it.
-> 
-> >
-> >> The reason why I wonder, is because there are several other mmc host
-> >> driver's the use a specific pinctrl state for this.
-> >>
-> >> > 3. Internal regulator for input(?) level on the data pins:
-> >> >    "vqmmc_ref" (I'm open to suggestions of a better name)
-> >
-> > This one is implemented in the pinctrl (pfc) block.
-> 
-> I understand this as we should have a specific UHS pinctrl state,
-> instead of a regulator. Right?
+On Mon, May 11, 2015 at 4:50 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 11 May 2015 at 14:02, Eliad Peller <eliad@wizery.com> wrote:
+>> On Mon, May 11, 2015 at 2:47 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>> On 11 May 2015 at 13:07, Eliad Peller <eliad@wizery.com> wrote:
+>>>> On Mon, May 11, 2015 at 11:48 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>> On 5 May 2015 at 18:03, Eliad Peller <eliad@wizery.com> wrote:
+>>>>>> mmc_power_restore_host() calls mmc_power_up(), which
+>>>>>> returns immediately if power is already on.
+>>>>>>
+>>>>>> However, it still calls host->bus_ops->power_restore,
+>>>>>> which might result in various errors if the bus_ops
+>>>>>> doesn't handle it well (e.g. failing to run init
+>>>>>> sequence twice)
+>>>>>>
+>>>>>> Simply bail out in this case, without further calling
+>>>>>> bus_ops->power_restore.
+>>>>>>
+>>>>>> Specifically, this solves issue with wl18xx sdio card,
+>>>>>> where the mmc core powers on the card on resume (while
+>>>>>> MMC_PM_KEEP_POWER is not set), and the wl18xx device
+>>>>>> driver calls mmc_power_restore_host() once more.
+>>>>>
+>>>>> Could you elaborate on why that driver calls mmc_power_restore_host()
+>>>>> after the system PM suspend sequence? I am trying to understand the
+>>>>> use case.
+>>>>>
+>>>> The driver assumes control over the mmc power, in order to save power
+>>>> when no interface is up.
+>>>
+>>> Makes sense!
+>>>
+>>>> It basically uses runtime_pm for it, but calls the power functions
+>>>> explicitly if pm_runtime returned non-zero (this is needed for some
+>>>> corner cases, e.g. runtime pm is disabled).
+>>>
+>>> I have some ideas about changing the way runtime PM shall be used for
+>>> SDIO func drivers. Instead of using it to control power to the SDIO
+>>> card, it should be used to deal with "idle operations".
+>>>
+>>> That would mean SDIO func drivers would use only
+>>> mmc_power_save|restore_host() APIs, to control the power to the SDIO
+>>> card.
+>>>
+>>> Do you see any issues with such an approach?
+>>>
+>> actually, the current driver code (to use runtime_pm, and then call
+>> the power functions explicitly in some cases) looks a bit weird.
+>> so your approach makes sense to me.
+>>
+>
+> Okay, good.
+>
+>>>>
+>>>> On suspend (if wowlan is not configured), all the wlan interfaces are
+>>>> taken down, and the driver powers off the device.
+>>>> On resume, the interfaces are taken up again, and the driver powers on
+>>>> the device, by calling mmc_power_restore_host().
+>>>
+>>> That raises the following question.
+>>>
+>>> When mmc_power_save_host() has been called for an SDIO card, should
+>>> really the mmc core restore power to that card during system PM
+>>> resume? Isn't it better to leave that to the SDIO func driver?
+>>>
+>> yes. but i didn't want to make a major change :)
+>
+> I think we need to. :-)
+>
+>>
+>> note that the suspend/resume flow used to work properly.
+>> iirc, we did some bisect when the issue first showed up, which showed
+>> it started by:
+>> 7459026 mmc: core: Push common suspend|resume code into each bus_ops
+>> (the reason might have been different, but it did used to work before
+>> this patch)
+>
+> Yes, I that's my fault and I am terribly sorry about that. I will try
+> to fix it asap.
+>
+> Unfortunate I don't have HW to test this, but hopefully you or someone
+> else can help out doing that?
+>
+sure. i'll be able to test it.
+thanks for taking it :)
 
-That was another option I considered, but I didn't see anything in the
-pinctrl API that would allow changing the pin configuration dynamically.
-(And sh_mobile_sdhi doesn't explicitly do anything with pinctrl at the
-moment.)
-
-Now that you mention pinctrl states, I can see that might be a good way
-to handle this.  Since the states are identified by strings, does that
-mean it's OK to add a driver-specific state such as "sh-pfc-1.8v" and
-not add it to the common pinctrl headers?
-
-Ben.
-
-
+Eliad.
