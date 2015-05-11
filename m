@@ -1,123 +1,184 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: fix abort due to missing runtime PM
-Date: Mon, 11 May 2015 11:40:52 +0200
-Message-ID: <CAPDyKFqTANqi24pabfA9cAzg0zbjVeMJxtEemHokKLTTXx+b3Q@mail.gmail.com>
-References: <1427715434-20881-1-git-send-email-stefan@agner.ch>
-	<CAPDyKFo+6mA4aKWfrUWmPvdairJN6KMCD0XTe3HDDB2pirEJXw@mail.gmail.com>
-	<21627fa7fae565d09ea07fe24bd78b09@agner.ch>
+Subject: Re: [PATCH] mmc: core: Check for timeout before checking mmc device state
+Date: Mon, 11 May 2015 12:00:49 +0200
+Message-ID: <CAPDyKFp0kdu7d_mXKJMDhu=Njjb46YEZKsk+fuAUqwf8sMe3DA@mail.gmail.com>
+References: <1431052847-16270-1-git-send-email-matt.bennett@alliedtelesis.co.nz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f45.google.com ([209.85.192.45]:33123 "EHLO
-	mail-qg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752583AbbEKJkx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 May 2015 05:40:53 -0400
-Received: by qgdy78 with SMTP id y78so64804039qgd.0
-        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2015 02:40:52 -0700 (PDT)
-In-Reply-To: <21627fa7fae565d09ea07fe24bd78b09@agner.ch>
+Received: from mail-qk0-f175.google.com ([209.85.220.175]:36539 "EHLO
+	mail-qk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753404AbbEKKAu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 May 2015 06:00:50 -0400
+Received: by qku63 with SMTP id 63so83012784qku.3
+        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2015 03:00:49 -0700 (PDT)
+In-Reply-To: <1431052847-16270-1-git-send-email-matt.bennett@alliedtelesis.co.nz>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Agner <stefan@agner.ch>
-Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Dong Aisheng <b29396@freescale.com>, Shawn Guo <shawn.guo@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Matt Bennett <matt.bennett@alliedtelesis.co.nz>
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Jaehoon Chung <jh80.chung@samsung.com>, Stephen Boyd <sboyd@codeaurora.org>, Johan Rudholm <johan.rudholm@axis.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 6 May 2015 at 22:23, Stefan Agner <stefan@agner.ch> wrote:
-> On 2015-05-06 14:07, Ulf Hansson wrote:
->> On 30 March 2015 at 13:37, Stefan Agner <stefan@agner.ch> wrote:
->>> When entering suspend while the device is in runtime PM, the
->>> sdhci_(suspend|resume)_host function are called with disabled clocks.
->>> Since this functions access the SDHC host registers, this leads to an
->>> external abort on Vybrid SoC:
->>>
->>> [   37.772967] Unhandled fault: imprecise external abort (0x1c06) at 0x76f5f000
->>> [   37.780304] Internal error: : 1c06 [#1] ARM
->>> [   37.784670] Modules linked in:
->>> [   37.787908] CPU: 0 PID: 428 Comm: sh Not tainted 3.18.0-rc5-00119-geefd097-dirty #1540
->>> [   37.796142] task: 8e246c00 ti: 8ca6c000 task.ti: 8ca6c000
->>> [   37.801785] PC is at esdhc_writel_le+0x40/0xec
->>> [   37.806431] LR is at sdhci_set_card_detection+0xe0/0xe4
->>> [   37.811877] pc : [<803f0584>]    lr : [<803eaaa0>]    psr: 400f0013
->>> [   37.811877] sp : 8ca6dd28  ip : 00000001  fp : 8ca6dd3c
->>> [   37.823766] r10: 807a233c  r9 : 00000000  r8 : 8e8b7210
->>> [   37.829194] r7 : 802d8a08  r6 : 8082e928  r5 : 00000000  r4 : 00000002
->>> [   37.835974] r3 : 8ea34e90  r2 : 00000038  r1 : 00000000  r0 : 8ea32ac0
->>> ...
->>>
->>> Clocks need to be enabled to access the registers. Fix the issue by
->>> add driver specific implementation of suspend/resume functions which
->>> take care of clocks using runtime PM API.
->>>
->>> Signed-off-by: Stefan Agner <stefan@agner.ch>
->>
->> Hi Stefan,
->>
->> Sorry for the delay.
->>
->> Indeed sdhci seems to have some issues when combining runtime PM and system PM.
->>
->>> ---
->>> The first version of this patch was part of a patchset sent back in
->>> december. While the second patch of the patchset back then is invalid,
->>> this fix is required to avoid the abort when switching into suspend
->>> mode on Vybrid SoC.
->>>
->>> During review of this patch I realized that my proposed solution to
->>> fix this in the suspend/resume functions in sdhci-pltfm.c is not a
->>> good idea since a lot of drivers use this functions without using the
->>> runtime PM APIs.
->>>
->>> Changes since v1:
->>> - Create new sdhci_esdhc_(suspend|resume) functions in favor of adding a
->>>   hard requirement for runtime PM on SDHC platform implementations
->>>
->>>  drivers/mmc/host/sdhci-esdhc-imx.c | 28 +++++++++++++++++++++++++++-
->>>  1 file changed, 27 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
->>> index 10ef824..84b3365 100644
->>> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
->>> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
->>> @@ -1119,6 +1119,32 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
->>>  }
->>>
->>>  #ifdef CONFIG_PM
->>> +static int sdhci_esdhc_suspend(struct device *dev)
->>> +{
->>> +       int ret;
->>> +       struct sdhci_host *host = dev_get_drvdata(dev);
->>> +
->>> +       pm_runtime_get_sync(dev);
->>
->> This is indeed needed, since else it isn't safe to invoke sdhci_suspend_host().
->>
->>> +       ret = sdhci_suspend_host(host);
->>> +       pm_runtime_mark_last_busy(dev);
->>> +       pm_runtime_put_autosuspend(dev);
->>
->> The problem is, that this wont do what you think I believe.
->>
->> The device will be kept runtime PM resumed, since the PM core has
->> increased a runtime PM reference count for your device, in the
->> ->prepare() phase (pm_runtime_get_noresume()).
->
-> Which ->prepare() phase do you mean exactly? I don't see where
-> pm_runtime_get_noresume gets from this driver.
+On 8 May 2015 at 04:40, Matt Bennett <matt.bennett@alliedtelesis.co.nz> wrote:
+> On a system that has multiple devices on the mmc bus the host can
+> block on the mutex that protects access to the bus. Some operations
 
-It's not this driver that does it, it's the PM core.
+What mutex are you referring to?
 
-drivers/base/power/main.c
-
-dpm_prepare()
-  -> device_prepare()
-     -> pm_runtime_get_noresume()
-
->
->>
->> Potentially pm_runtime_force_suspend() could help you accomplish what you want.
->
-> I copied the implementation from the PXA driver (sdhci-pxav3.c), is the
-> driver suffering the same issue?
-
-Yes!
+And why, exactly, does it prevent parallel requests on different cards
+(devices)?
 
 Kind regards
 Uffe
+
+> require the status of the device to be polled to see when the device
+> finishes executing the previous command that was sent to it (if
+> there is no busy detection in hardware). The current execution order
+> to check the status is:
+>
+> LOOP
+> {
+>   1. Send command to device to retrieve the status (this can block).
+>   2. Check we haven't exceeded the timeout value. If we have then
+>      return an error.
+>   3. If the device is no longer in the program state then exit the
+>      loop and continue through the function.
+> }
+>
+> If the send command blocks (and the timeout is exceeded) then the
+> function returns (and prints) an error even though the device has
+> likely left the programming state (due to the lengthy period of
+> time while the bus is blocked). By moving the timeout check before
+> retrieving the device status in the loop we better handle the case
+> where the mmc bus has been blocked but the device has left the
+> programming state.
+>
+> Signed-off-by: Matt Bennett <matt.bennett@alliedtelesis.co.nz>
+> Cc: kuninori.morimoto.gx@renesas.com
+> Cc: jh80.chung@samsung.com
+> Cc: sboyd@codeaurora.org
+> Cc: johan.rudholm@axis.com
+> Cc: linux-kernel@vger.kernel.org
+> Cc: linux-mmc@vger.kernel.org
+> ---
+>  drivers/mmc/card/block.c   | 22 +++++++++++-----------
+>  drivers/mmc/core/core.c    | 20 ++++++++++----------
+>  drivers/mmc/core/mmc_ops.c | 14 +++++++-------
+>  3 files changed, 28 insertions(+), 28 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 2c25271..0abefde 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -747,6 +747,17 @@ static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
+>         u32 status;
+>
+>         do {
+> +               /*
+> +                * Timeout if the device never becomes ready for data and never
+> +                * leaves the program state.
+> +                */
+> +               if (time_after(jiffies, timeout)) {
+> +                       pr_err("%s: Card stuck in programming state! %s %s\n",
+> +                               mmc_hostname(card->host),
+> +                               req->rq_disk->disk_name, __func__);
+> +                       return -ETIMEDOUT;
+> +               }
+> +
+>                 err = get_card_status(card, &status, 5);
+>                 if (err) {
+>                         pr_err("%s: error %d requesting status\n",
+> @@ -766,17 +777,6 @@ static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
+>                         break;
+>
+>                 /*
+> -                * Timeout if the device never becomes ready for data and never
+> -                * leaves the program state.
+> -                */
+> -               if (time_after(jiffies, timeout)) {
+> -                       pr_err("%s: Card stuck in programming state! %s %s\n",
+> -                               mmc_hostname(card->host),
+> -                               req->rq_disk->disk_name, __func__);
+> -                       return -ETIMEDOUT;
+> -               }
+> -
+> -               /*
+>                  * Some cards mishandle the status bits,
+>                  * so make sure to check both the busy
+>                  * indication and the card state.
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index c296bc0..6e56cb3 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2047,6 +2047,16 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+>
+>         timeout = jiffies + msecs_to_jiffies(MMC_CORE_TIMEOUT_MS);
+>         do {
+> +               /* Timeout if the device never becomes ready for data and
+> +                * never leaves the program state.
+> +                */
+> +               if (time_after(jiffies, timeout)) {
+> +                       pr_err("%s: Card stuck in programming state! %s\n",
+> +                               mmc_hostname(card->host), __func__);
+> +                       err =  -EIO;
+> +                       goto out;
+> +               }
+> +
+>                 memset(&cmd, 0, sizeof(struct mmc_command));
+>                 cmd.opcode = MMC_SEND_STATUS;
+>                 cmd.arg = card->rca << 16;
+> @@ -2060,16 +2070,6 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+>                         goto out;
+>                 }
+>
+> -               /* Timeout if the device never becomes ready for data and
+> -                * never leaves the program state.
+> -                */
+> -               if (time_after(jiffies, timeout)) {
+> -                       pr_err("%s: Card stuck in programming state! %s\n",
+> -                               mmc_hostname(card->host), __func__);
+> -                       err =  -EIO;
+> -                       goto out;
+> -               }
+> -
+>         } while (!(cmd.resp[0] & R1_READY_FOR_DATA) ||
+>                  (R1_CURRENT_STATE(cmd.resp[0]) == R1_STATE_PRG));
+>  out:
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 0ea042d..b30ed91 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -526,6 +526,13 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>         /* Must check status to be sure of no errors. */
+>         timeout = jiffies + msecs_to_jiffies(timeout_ms);
+>         do {
+> +               /* Timeout if the device never leaves the program state. */
+> +               if (time_after(jiffies, timeout)) {
+> +                       pr_err("%s: Card stuck in programming state! %s\n",
+> +                               mmc_hostname(host), __func__);
+> +                       return -ETIMEDOUT;
+> +               }
+> +
+>                 if (send_status) {
+>                         err = __mmc_send_status(card, &status, ignore_crc);
+>                         if (err)
+> @@ -545,13 +552,6 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>                         mmc_delay(timeout_ms);
+>                         return 0;
+>                 }
+> -
+> -               /* Timeout if the device never leaves the program state. */
+> -               if (time_after(jiffies, timeout)) {
+> -                       pr_err("%s: Card stuck in programming state! %s\n",
+> -                               mmc_hostname(host), __func__);
+> -                       return -ETIMEDOUT;
+> -               }
+>         } while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+>
+>         if (mmc_host_is_spi(host)) {
+> --
+> 1.9.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
