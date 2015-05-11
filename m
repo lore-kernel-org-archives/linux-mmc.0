@@ -1,99 +1,90 @@
-From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH v3 2/7] mmc: mediatek: Add Mediatek MMC driver
-Date: Mon, 11 May 2015 17:18:05 +0800
-Message-ID: <1431335885.26820.7.camel@mhfsdcap03>
-References: <1430214525-19198-1-git-send-email-chaotian.jing@mediatek.com>
- <1430214525-19198-3-git-send-email-chaotian.jing@mediatek.com>
- <CAPDyKFq=R9B6ZHHgmDcSg-TNSfqQKAUKc2NjACvpwxFpmk954g@mail.gmail.com>
- <1430895299.15154.9.camel@mhfsdcap03>
- <CAPDyKFr+FTXAzYVn3F41dmw2zW01pSbSHPfGJHXbUFLJfvQ5CA@mail.gmail.com>
- <1430962956.15154.48.camel@mhfsdcap03>
- <CAPDyKFr5N_08HbLuY=4Wfv1BoVQLVR-VW+NKh_umL1hzi_KozA@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V2 00/11] mmc: Add support for drive strength for eMMCs
+Date: Mon, 11 May 2015 12:29:04 +0300
+Message-ID: <55507660.4010307@intel.com>
+References: <1423224781-27076-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <CAPDyKFr5N_08HbLuY=4Wfv1BoVQLVR-VW+NKh_umL1hzi_KozA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
-List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, srv_heupstream <srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Bin Zhang =?UTF-8?Q?=28=E7=AB=A0=E6=96=8C=29?= <bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kern>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga03.intel.com ([134.134.136.65]:10214 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752731AbbEKJbW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 May 2015 05:31:22 -0400
+In-Reply-To: <1423224781-27076-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Philip Rakity <prakity@nvidia.com>
 
-On Fri, 2015-05-08 at 14:12 +0200, Ulf Hansson wrote:
-> On 7 May 2015 at 03:42, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
-> > Dear Ulf,
-> >
-> > Thanks!
-> > Below is my comment:
-> >
-> > On Wed, 2015-05-06 at 18:31 +0200, Ulf Hansson wrote:
-> >> On 6 May 2015 at 08:54, chaotian.jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
-> >> > Dear Ulf,
-> >> >
-> >> > Thanks for your review.
-> >> > I must do a explain of our MMC host:
-> >> > Source clock is source clock of the MMC bus, MMC host has a divider to
-> >> > get different bus clock frequency. now the runtime suspend is gating
-> >> > this clock.
-> >> >
-> >> > Hclk is the power domain of the MMC host, if Hclk is gated, the MMC host
-> >> > cannot work(all registers readout is zero). and, all registers would be
-> >> > reset to default value if Hclk is gated/ungated.
-> >> > At MT8173, MSDC0 and MSDC2 has independent Hclk, MSDC1 and MSDC3's Hclk
-> >> > was controlled by "Infra module".
-> > Sorry for mistake, MSDC0 and MSDC3 has independent Hclk, MSDC1 and
-> > MSDC2's Hclk was controlled by "Infra module". the Infra module is a
-> > "power saving module", when the system go to sleep, Infra module will be
-> > set and MSDC1 & MSDC2's Hclk will be gated automatically.
-> >>
-> >> Thanks for clarifying!
-> >>
-> >> I don't have enough knowledge about your SoC to understand the detail,
-> >> but it seems like we are mixing clocks and power domains. I would
-> >> rather keep this separate - if the HW allows it.
-> >>
-> >> I guess the key question I have is the following:
-> >> 1) Is it hardware wise possible to gate the hclk, but without gating
-> >> the power domain?
-> >> 2) At what level is the reference counting done for each device in the
-> >> power domain? In HW or in sofftware?
-> >>
-> >
-> > Actually, Our MMC host do not have power domain, all the control of the
-> > host is the Hclk.
+On 06/02/15 14:12, Adrian Hunter wrote:
+> Hi
 > 
-> Okay, but I am not sure that fully answered my question.
+> Here is V2 of some patches to enable a host controller to select
+> driver strength for eMMCs using HS200 or HS400. These are based
+> on top of the re-tuning series.
 > 
-> You said that hclk will be gated when the power domain gets gated. And
-> the power domain (infra module, right?) will be gated at system PM
-> sleep. And when that happens the mmc controller loses register
-> context.
+> There can be some confusion over the term "driver strength".
+> SD calls it "drive strength" for the card but "driver type"
+> for the host. Whereas JEDEC calls it both "driver strength"
+> and "driver type". The values are the same for both SD
+> and eMMC:
 > 
-> But, again, can hclk be gated without gating the power domain?
+>   Value   Driver Type   Relative strength
+>     0       B             x1	default and mandatory support
+>     1       A             x1.5
+>     2       C             x0.75
+>     3       D             x0.5
 > 
-> No matter what, it seems like a good idea to gate the power domain
-> when all clients of it are idle. Yes we would need to manage register
-> save/restore context, but on the other hand allow you to save more
-> power, right?
+> Except eMMC also defines value 4:
 > 
-For MSDC0 & MSDC3, it has independent HCLK, do not have power domain.
-For MSDC1 & MSDC2, its HCLK was controlled by Infra module(This is a big
-power domain for many modules).
-So, for msdc0 & msdc3, we can control its Hclk, for msdc1 & msdc2, we
-cannot control it.
+>   Value   Driver Type   Relative strength
+>     4                     x1.2
+> 
+> 
+> Changes in V2:
+> 
+>     mmc: core: Add function to read driver-strength device property
+>         Dropped because there are still questions over how to use
+>         device properties.
+> 
+>     mmc: sdhci-pci: Add support for drive strength selection for SPT
+>         Amended to reflect the change above.
+> 
+> 
+> Adrian Hunter (11):
+>       mmc: core: Reset driver type to default
+>       mmc: core: Allow card drive strength to be different to host
+>       mmc: core: Simplify card drive strength mask
+>       mmc: core: Add 'card' to drive strength selection callback
+>       mmc: core: Factor out common code in drive strength selection
+>       mmc: core: Record card drive strength
+>       mmc: mmc: Read card's valid driver strength mask
+>       mmc: mmc: Add driver strength selection
+>       mmc: sdhci: Add a callback to select drive strength
+>       mmc: sdhci-pci: Add support for drive strength selection for SPT
+>       mmc: sdhci-pci: Enable HS400 for some Intel host controllers
+> 
+>  drivers/mmc/core/core.c            | 39 ++++++++++++++++++
+>  drivers/mmc/core/core.h            |  2 +
+>  drivers/mmc/core/mmc.c             | 46 +++++++++++++++++----
+>  drivers/mmc/core/sd.c              | 69 ++++++++-----------------------
+>  drivers/mmc/core/sdio.c            | 77 +++++++++++-----------------------
+>  drivers/mmc/host/sdhci-pci-data.c  |  3 ++
+>  drivers/mmc/host/sdhci-pci.c       | 84 ++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-pci.h       |  4 ++
+>  drivers/mmc/host/sdhci.c           | 13 ++++++
+>  drivers/mmc/host/sdhci.h           |  4 ++
+>  include/linux/mmc/card.h           |  2 +
+>  include/linux/mmc/host.h           |  4 +-
+>  include/linux/mmc/mmc.h            |  4 ++
+>  include/linux/mmc/sdhci-pci-data.h |  2 +
+>  14 files changed, 240 insertions(+), 113 deletions(-)
 
-Yes, I will do gate/ungate HCLK & source clock in PM.
-In addition, Since the gate/ungate HCLK is done by runtime PM, and all
-register operation should work at HCLK is on, so the msdc_init_hw() only
-can be called at set_ios(), because in probe(), the HCLK may have not
-been enabled.
-> Kind regards
-> Uffe
+Hi Ulf
+
+These patches still apply. Would have time to look at them?
+
+Regards
+Adrian
+
