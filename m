@@ -1,50 +1,37 @@
 From: Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
-Subject: [PATCH RESEND v6 0/2] Add SDHCI support for APM X-Gene SoC using ARASAN SDHCI controller.
-Date: Mon, 11 May 2015 14:08:49 +0530
-Message-ID: <1431333531-30491-1-git-send-email-stripathi@apm.com>
+Subject: [PATCH RESEND v6 2/2] mmc: sdhci: Add support to disable SDR104/SDR50/DDR50 based on capability register 0.
+Date: Mon, 11 May 2015 14:08:51 +0530
+Message-ID: <1431333531-30491-3-git-send-email-stripathi@apm.com>
+References: <1431333531-30491-1-git-send-email-stripathi@apm.com>
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1431333531-30491-1-git-send-email-stripathi-qTEPVZfXA3Y@public.gmane.org>
 Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org
 Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ddutile-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, patches-qTEPVZfXA3Y@public.gmane.org, Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds the SDHCI support for APM X-Gene SoC using ARASAN SDHCI controller.
-
-v1 change:
- * Use the CONFIG_ARM64_DMA_HAS_IOMMU for dma-mapping.
-
-v2 change:
- * Drop the IOMMU support and switching to PIO mode for arasan.
-   controller integrated inside APM X-Gene SoC.
-
-v3 change:
- * Change the sdhci-of-arasan.c to support arasan4.9a.
- * Add quirks for arasan4.9a.
-
-v4 change:
- * Cleanup the Documentation and dts.
-
-v5 change:
- * Rebase the dts files.
- * Drop patch 2 and 3 as it is applied.
-
-v6 change:
- * Clean the unrequired properties from dts.
- * Rename sdhc to sdhci.
- * support to disable timming using capability register read.
+The sdhci framework disables SDR104/SDR50/DDR50 based on only quirk.
+This patch adds the support to disable SDR104/SDR50/DDR50 based on
+reading the capability register 0.
 
 Signed-off-by: Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
 ---
+ drivers/mmc/host/sdhci.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Suman Tripathi (2):
-  arm64: dts: Add the arasan sdhci nodes in apm-storm.dtsi.
-  mmc: sdhci: Add support to disable SDR104/SDR50/DDR50 based on
-    capability     register 0.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c80287a..e024c64 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3199,7 +3199,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		}
+ 	}
 
- arch/arm64/boot/dts/apm/apm-mustang.dts |  4 +++
- arch/arm64/boot/dts/apm/apm-storm.dtsi  | 43 +++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c                |  3 ++-
- 3 files changed, 49 insertions(+), 1 deletion(-)
+-	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)
++	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V ||
++	    !(caps[0] & SDHCI_CAN_VDD_180))
+ 		caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+ 		       SDHCI_SUPPORT_DDR50);
 
 --
 1.8.2.1
