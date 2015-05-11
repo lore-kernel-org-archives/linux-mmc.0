@@ -1,71 +1,55 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 3/3] mmc: host: sdhci: Use BUG_ON()
-Date: Mon, 11 May 2015 12:31:01 +0200
-Message-ID: <CAPDyKFpJMRyGE+pidS_tL9WKoR3-SKuGgSWDFtYpM492H_L4tQ@mail.gmail.com>
-References: <1431207891-21448-1-git-send-email-festevam@gmail.com>
-	<1431207891-21448-3-git-send-email-festevam@gmail.com>
+From: Eliad Peller <eliad@wizery.com>
+Subject: Re: [PATCH] mmc: core: don't call bus_ops->power_restore if already on
+Date: Mon, 11 May 2015 14:07:47 +0300
+Message-ID: <CAB3XZEe_SjhHU-mRbG-X_7PNQHCaVGHfmx66dEUhdZsexYciyQ@mail.gmail.com>
+References: <1430841827-7834-1-git-send-email-eliad@wizery.com>
+	<CAPDyKFrF=6GRiSvDPnyV5mAozu1N54e+HrTvjRbH-FyTmj6hqA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f171.google.com ([209.85.216.171]:34144 "EHLO
-	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752833AbbEKKbD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 May 2015 06:31:03 -0400
-Received: by qcyk17 with SMTP id k17so66452169qcy.1
-        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2015 03:31:01 -0700 (PDT)
-In-Reply-To: <1431207891-21448-3-git-send-email-festevam@gmail.com>
+Received: from mail-ie0-f171.google.com ([209.85.223.171]:34843 "EHLO
+	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753112AbbEKLHs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 May 2015 07:07:48 -0400
+Received: by ieczm2 with SMTP id zm2so104725978iec.2
+        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2015 04:07:47 -0700 (PDT)
+In-Reply-To: <CAPDyKFrF=6GRiSvDPnyV5mAozu1N54e+HrTvjRbH-FyTmj6hqA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@freescale.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ido Yariv <ido@wizery.com>
 
-On 9 May 2015 at 23:44, Fabio Estevam <festevam@gmail.com> wrote:
-> From: Fabio Estevam <fabio.estevam@freescale.com>
+On Mon, May 11, 2015 at 11:48 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 5 May 2015 at 18:03, Eliad Peller <eliad@wizery.com> wrote:
+>> mmc_power_restore_host() calls mmc_power_up(), which
+>> returns immediately if power is already on.
+>>
+>> However, it still calls host->bus_ops->power_restore,
+>> which might result in various errors if the bus_ops
+>> doesn't handle it well (e.g. failing to run init
+>> sequence twice)
+>>
+>> Simply bail out in this case, without further calling
+>> bus_ops->power_restore.
+>>
+>> Specifically, this solves issue with wl18xx sdio card,
+>> where the mmc core powers on the card on resume (while
+>> MMC_PM_KEEP_POWER is not set), and the wl18xx device
+>> driver calls mmc_power_restore_host() once more.
 >
-> Use BUG_ON() instead of an 'if' condition followed by BUG().
+> Could you elaborate on why that driver calls mmc_power_restore_host()
+> after the system PM suspend sequence? I am trying to understand the
+> use case.
 >
-> The semantic patch that makes this change is available
-> in scripts/coccinelle/misc/bugon.cocci.
->
-> More information about semantic patching is available at
-> http://coccinelle.lip6.fr/
->
-> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
+The driver assumes control over the mmc power, in order to save power
+when no interface is up.
+It basically uses runtime_pm for it, but calls the power functions
+explicitly if pm_runtime returned non-zero (this is needed for some
+corner cases, e.g. runtime pm is disabled).
 
-Thanks, applied!
+On suspend (if wowlan is not configured), all the wlan interfaces are
+taken down, and the driver powers off the device.
+On resume, the interfaces are taken up again, and the driver powers on
+the device, by calling mmc_power_restore_host().
 
-Kind regards
-Uffe
-
-
-> ---
->  drivers/mmc/host/sdhci.c | 6 ++----
->  1 file changed, 2 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index c80287a..8d97fe0 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -328,8 +328,7 @@ static void sdhci_read_block_pio(struct sdhci_host *host)
->         local_irq_save(flags);
->
->         while (blksize) {
-> -               if (!sg_miter_next(&host->sg_miter))
-> -                       BUG();
-> +               BUG_ON(!sg_miter_next(&host->sg_miter));
->
->                 len = min(host->sg_miter.length, blksize);
->
-> @@ -374,8 +373,7 @@ static void sdhci_write_block_pio(struct sdhci_host *host)
->         local_irq_save(flags);
->
->         while (blksize) {
-> -               if (!sg_miter_next(&host->sg_miter))
-> -                       BUG();
-> +               BUG_ON(!sg_miter_next(&host->sg_miter));
->
->                 len = min(host->sg_miter.length, blksize);
->
-> --
-> 1.9.1
->
+Eliad.
