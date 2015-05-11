@@ -1,101 +1,113 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 2/7] mmc: mediatek: Add Mediatek MMC driver
-Date: Mon, 11 May 2015 12:29:42 +0200
-Message-ID: <CAPDyKFqeAzjpbZsyfcwb_WarC=dzoCsEeLTmxAbtvOo3Y4cYyg@mail.gmail.com>
-References: <1430214525-19198-1-git-send-email-chaotian.jing@mediatek.com>
-	<1430214525-19198-3-git-send-email-chaotian.jing@mediatek.com>
-	<CAPDyKFq=R9B6ZHHgmDcSg-TNSfqQKAUKc2NjACvpwxFpmk954g@mail.gmail.com>
-	<1430895299.15154.9.camel@mhfsdcap03>
-	<CAPDyKFr+FTXAzYVn3F41dmw2zW01pSbSHPfGJHXbUFLJfvQ5CA@mail.gmail.com>
-	<1430962956.15154.48.camel@mhfsdcap03>
-	<CAPDyKFr5N_08HbLuY=4Wfv1BoVQLVR-VW+NKh_umL1hzi_KozA@mail.gmail.com>
-	<1431335885.26820.7.camel@mhfsdcap03>
+Subject: Re: [PATCHv2] sdhci-of-esdhc: Support 8BIT bus width.
+Date: Mon, 11 May 2015 12:30:20 +0200
+Message-ID: <CAPDyKFoC7Sn4a3OMrvYKcVg5OOzXXmnvPhLi_2jUjpkH1EE20A@mail.gmail.com>
+References: <1430828256-6197-1-git-send-email-joakim.tjernlund@transmode.se>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <1431335885.26820.7.camel@mhfsdcap03>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>, Chris Ball <chris@printf.net>, Mark Rutland <mark.rutland@arm.com>, James Liao <jamesjj.liao@mediatek.com>, srv_heupstream <srv_heupstream@mediatek.com>, Arnd Bergmann <arnd@arndb.de>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Hongzhou Yang <hongzhou.yang@mediatek.com>, Catalin Marinas <catalin.marinas@arm.com>, linux-mmc <linux-mmc@vger.kernel.org>, Will Deacon <will.deacon@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, Sascha Hauer <kernel@pengutronix.de>, "Joe.C" <yingjoe.chen@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, =?UTF-8?B?QmluIFpoYW5nICjnq6Dmlowp?= <bin.zhang@mediatek.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f181.google.com ([209.85.220.181]:33619 "EHLO
+	mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753377AbbEKKaV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 May 2015 06:30:21 -0400
+Received: by qkx62 with SMTP id 62so83420266qkx.0
+        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2015 03:30:20 -0700 (PDT)
+In-Reply-To: <1430828256-6197-1-git-send-email-joakim.tjernlund@transmode.se>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Joakim Tjernlund <joakim.tjernlund@transmode.se>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 11 May 2015 at 11:18, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
-> On Fri, 2015-05-08 at 14:12 +0200, Ulf Hansson wrote:
->> On 7 May 2015 at 03:42, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
->> > Dear Ulf,
->> >
->> > Thanks!
->> > Below is my comment:
->> >
->> > On Wed, 2015-05-06 at 18:31 +0200, Ulf Hansson wrote:
->> >> On 6 May 2015 at 08:54, chaotian.jing <chaotian.jing@mediatek.com> wrote:
->> >> > Dear Ulf,
->> >> >
->> >> > Thanks for your review.
->> >> > I must do a explain of our MMC host:
->> >> > Source clock is source clock of the MMC bus, MMC host has a divider to
->> >> > get different bus clock frequency. now the runtime suspend is gating
->> >> > this clock.
->> >> >
->> >> > Hclk is the power domain of the MMC host, if Hclk is gated, the MMC host
->> >> > cannot work(all registers readout is zero). and, all registers would be
->> >> > reset to default value if Hclk is gated/ungated.
->> >> > At MT8173, MSDC0 and MSDC2 has independent Hclk, MSDC1 and MSDC3's Hclk
->> >> > was controlled by "Infra module".
->> > Sorry for mistake, MSDC0 and MSDC3 has independent Hclk, MSDC1 and
->> > MSDC2's Hclk was controlled by "Infra module". the Infra module is a
->> > "power saving module", when the system go to sleep, Infra module will be
->> > set and MSDC1 & MSDC2's Hclk will be gated automatically.
->> >>
->> >> Thanks for clarifying!
->> >>
->> >> I don't have enough knowledge about your SoC to understand the detail,
->> >> but it seems like we are mixing clocks and power domains. I would
->> >> rather keep this separate - if the HW allows it.
->> >>
->> >> I guess the key question I have is the following:
->> >> 1) Is it hardware wise possible to gate the hclk, but without gating
->> >> the power domain?
->> >> 2) At what level is the reference counting done for each device in the
->> >> power domain? In HW or in sofftware?
->> >>
->> >
->> > Actually, Our MMC host do not have power domain, all the control of the
->> > host is the Hclk.
->>
->> Okay, but I am not sure that fully answered my question.
->>
->> You said that hclk will be gated when the power domain gets gated. And
->> the power domain (infra module, right?) will be gated at system PM
->> sleep. And when that happens the mmc controller loses register
->> context.
->>
->> But, again, can hclk be gated without gating the power domain?
->>
->> No matter what, it seems like a good idea to gate the power domain
->> when all clients of it are idle. Yes we would need to manage register
->> save/restore context, but on the other hand allow you to save more
->> power, right?
->>
-> For MSDC0 & MSDC3, it has independent HCLK, do not have power domain.
-> For MSDC1 & MSDC2, its HCLK was controlled by Infra module(This is a big
-> power domain for many modules).
-> So, for msdc0 & msdc3, we can control its Hclk, for msdc1 & msdc2, we
-> cannot control it.
-
-Okay, thanks for the clarification!
-
+On 5 May 2015 at 14:17, Joakim Tjernlund <joakim.tjernlund@transmode.se> wrote:
+> The custom esdhc_pltfm_set_bus_width() is buggy w.r.t 8BIT
+> and esdhc_readb()/esdhc_writeb() did not mask the proper bits either.
 >
-> Yes, I will do gate/ungate HCLK & source clock in PM.
-> In addition, Since the gate/ungate HCLK is done by runtime PM, and all
-> register operation should work at HCLK is on, so the msdc_init_hw() only
-> can be called at set_ios(), because in probe(), the HCLK may have not
-> been enabled.
+> Just drop esdhc_pltfm_set_bus_width() and emulate SDHCI_CTRL_8BITBUS
+> in esdhc_readb()/esdhc_writeb() properly.
+>
+> Note: This assumes that SDHCI_CTRL_8BITBUS and SDHCI_CTRL_4BITBUS cannot
+> be set simultaneously in SDHCI_HOST_CONTROL.
+>
+> Signed-off-by: Joakim Tjernlund <joakim.tjernlund@transmode.se>
 
-I suggest you to enable HCLK in ->probe() and thus you may also call
-msdc_init_hw() from there.
-
-This should simplify for you, when adding the runtime PM support.
+Thanks, applied!
 
 Kind regards
 Uffe
+
+> ---
+>  v2 - I had fogotten to add bus-width = <8> to my DTS.
+>       Adding this simplified things
+>  drivers/mmc/host/sdhci-of-esdhc.c | 31 ++++++++-----------------------
+>  1 file changed, 8 insertions(+), 23 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 1804bdb..7a98a22 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -82,6 +82,10 @@ static u8 esdhc_readb(struct sdhci_host *host, int reg)
+>                 /* fixup the result */
+>                 ret &= ~SDHCI_CTRL_DMA_MASK;
+>                 ret |= dma_bits;
+> +
+> +               /* 8BIT is bit 29 in Control register */
+> +               ret |= ((ret << 3) & SDHCI_CTRL_8BITBUS);
+> +               ret &= ~(SDHCI_CTRL_8BITBUS >> 3);
+>         }
+>
+>         return ret;
+> @@ -134,6 +138,10 @@ static void esdhc_writeb(struct sdhci_host *host, u8 val, int reg)
+>                         dma_bits);
+>                 val &= ~SDHCI_CTRL_DMA_MASK;
+>                 val |= in_be32(host->ioaddr + reg) & SDHCI_CTRL_DMA_MASK;
+> +
+> +               /* 8BIT is bit 29 in Control register */
+> +               val |= ((val & SDHCI_CTRL_8BITBUS) >> 3);
+> +               val = (val & ~SDHCI_CTRL_8BITBUS);
+>         }
+>
+>         /* Prevent SDHCI core from writing reserved bits (e.g. HISPD). */
+> @@ -254,28 +262,6 @@ static void esdhc_of_platform_init(struct sdhci_host *host)
+>                 host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
+>  }
+>
+> -static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
+> -{
+> -       u32 ctrl;
+> -
+> -       switch (width) {
+> -       case MMC_BUS_WIDTH_8:
+> -               ctrl = ESDHC_CTRL_8BITBUS;
+> -               break;
+> -
+> -       case MMC_BUS_WIDTH_4:
+> -               ctrl = ESDHC_CTRL_4BITBUS;
+> -               break;
+> -
+> -       default:
+> -               ctrl = 0;
+> -               break;
+> -       }
+> -
+> -       clrsetbits_be32(host->ioaddr + SDHCI_HOST_CONTROL,
+> -                       ESDHC_CTRL_BUSWIDTH_MASK, ctrl);
+> -}
+> -
+>  static void esdhc_reset(struct sdhci_host *host, u8 mask)
+>  {
+>         sdhci_reset(host, mask);
+> @@ -297,7 +283,6 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
+>         .get_min_clock = esdhc_of_get_min_clock,
+>         .platform_init = esdhc_of_platform_init,
+>         .adma_workaround = esdhci_of_adma_workaround,
+> -       .set_bus_width = esdhc_pltfm_set_bus_width,
+>         .reset = esdhc_reset,
+>         .set_uhs_signaling = sdhci_set_uhs_signaling,
+>  };
+> --
+> 2.3.6
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
