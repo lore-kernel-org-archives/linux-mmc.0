@@ -1,65 +1,75 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH RESEND v6 1/2] arm64: dts: Add the arasan sdhci nodes in apm-storm.dtsi
-Date: Tue, 12 May 2015 14:30:29 +0200
-Message-ID: <CAPDyKFrY+UQETZy3cgtrS5UTGYLq6JyFsGXaNsAfg=9Eat6ooA@mail.gmail.com>
-References: <1431333531-30491-1-git-send-email-stripathi@apm.com>
-	<1431333531-30491-2-git-send-email-stripathi@apm.com>
-	<CAOHikRAeOH5Pt4WZFk1C29dUytO7H0ox_dgq578oW19ue8Eb8Q@mail.gmail.com>
-	<5446694.nHWK6QO1on@wuerfel>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <5446694.nHWK6QO1on@wuerfel>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Langsdorf <mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jon Masters <jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, patches <patches-qTEPVZfXA3Y@public.gmane.org>, Don Dutile <ddutile-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+From: Doug Anderson <dianders@chromium.org>
+Subject: [PATCH] RFC: mmc: core: Increase delay for voltage to stabilize from 3.3V to 1.8V
+Date: Tue, 12 May 2015 14:46:11 -0700
+Message-ID: <1431467171-12937-1-git-send-email-dianders@chromium.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ig0-f181.google.com ([209.85.213.181]:35227 "EHLO
+	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933928AbbELVqe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 May 2015 17:46:34 -0400
+Received: by igbyr2 with SMTP id yr2so121681262igb.0
+        for <linux-mmc@vger.kernel.org>; Tue, 12 May 2015 14:46:33 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Mark Brown <broonie@kernel.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Doug Anderson <dianders@chromium.org>, johan.rudholm@axis.com, adrian.hunter@intel.com, tim.kryger@gmail.com, javier.martinez@collabora.co.uk, andrew_gabbasov@mentor.com, s.hauer@pengutronix.de, linux-kernel@vger.kernel.org
 
-On 12 May 2015 at 09:28, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
-> On Tuesday 12 May 2015 11:03:46 Suman Tripathi wrote:
->> > @@ -533,6 +567,15 @@
->> >                         interrupts = <0x0 0x4f 0x4>;
->> >                 };
->> >
->> > +               sdhci0: sdhci@1c000000 {
->> > +                       compatible = "arasan,sdhci-4.9a";
->> > +                       reg = <0x0 0x1c000000 0x0 0x100>;
->> > +                       interrupts = <0x0 0x49 0x4>;
->> > +                       dma-coherent;
->> > +                       clock-names = "clk_xin", "clk_ahb";
->> > +                       clocks = <&sdioclk 0>, <&ahbclk 0>;
->> > +               };
->> > +
->> >                 phy1: phy@1f21a000 {
->> >                         compatible = "apm,xgene-phy";
->> >                         reg = <0x0 0x1f21a000 0x0 0x100>;
->> > --
->> > 1.8.2.1
->> >
->>
->> Can anyone from dt community review this patch ? I have changed the dts node
->> names from sdhc to sdhci as per Arnd, Michael comments .
->
-> I was actually asking for it to be named 'mmc', not 'sdhci', because the
-> name is supposed to indicate the purpose of the device, not the
-> implementation. I realize that we are inconsistent here, just as with
-> 'uart' vs 'serial', and that ePAPR does not define what to do.
+Since the regulator used for the SDMMC IO voltage is not expected to
+draw a lot of current, most systems will probably use an inexpensive
+LDO for it.  LDO regulators apparently have the feature that they
+don't actively drive the voltage down--they wait for other components
+in the system to drag the voltage down.  Thus they will transition
+faster under heavy loads and slower under light loads.
 
-Then we need a common name to address the following purposes: SD, MMC,
-eMMC, SDIO.
+During an SDMMC voltage change from 3.3V to 1.8V, we are almost
+certainly under a light load.  To be specific:
+* The regulator is hooked through pulls to CMD0-3 and DAT.  Probably
+  the CMD pulls are something like 47K and the DAT is something like
+  10K.
+* The card is supposed to be driving DAT0-3 low during voltage change
+  which will draw _some_ current, but not a lot.
+* The regulator is also provided to the SDMMC host controller, but the
+  SDMMC host controller is in open drain mode during the voltage
+  change and so shouldn't be drawing much current.
 
->
-> We should probably add something to Documentation/devicetree/bindings/mmc/mmc.txt
-> about this topic and change all the dts files accordingly (unless there
-> is a risk for regressions). At the moment, the mmc.txt file also includes
-> an example with 'sdhci', not 'mmc'.
->
+In order to keep the SDMMC host working properly (or for noise
+reasons), there might also be a capacitor attached to the SDMMC IO
+regulator.  This also will have the effect of slowing down transitions
+of the regulator, especially under light loads.
 
-I am happy to change, as long as we can come up with something better.
+>From experimental evidence, we've seen the voltage change fail if the
+card doesn't detect that the voltage fell to less than about 2.3V when
+we turn on the clock.  On one device (that admittedly had a 47K CMD
+pullup instead of a 10K CMD pullup) we saw that the voltage was just
+about 2.3V after 5ms and thus the voltage change would sometimes fail.
+Doubling the delay gave margin and made the voltage change work 100%
+of the time, despite the slightly weaker CMD pull.
 
-Kind regards
-Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+At the moment submitting this as an RFC patch since my problem _could_
+be fixed by increasing the pull strength (or using a smaller
+capacitor).  However being a little bit more lenient to strange
+hardware could also be a good thing.
+
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+---
+ drivers/mmc/core/core.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 92e7671..a7e6110 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1551,8 +1551,8 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, u32 ocr)
+ 		goto power_cycle;
+ 	}
+ 
+-	/* Keep clock gated for at least 5 ms */
+-	mmc_delay(5);
++	/* Keep clock gated for at least 10 ms, though spec only says 5 ms */
++	mmc_delay(10);
+ 	host->ios.clock = clock;
+ 	mmc_set_ios(host);
+ 
+-- 
+2.2.0.rc0.207.ga3a616c
+
