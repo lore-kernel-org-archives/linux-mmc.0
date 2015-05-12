@@ -1,241 +1,408 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH 5/7 v4] mmc: sh_mmcif: calculate best clock with parent clock
-Date: Tue, 12 May 2015 13:22:36 +0300
-Message-ID: <8472238.ZvlxlsYeIr@avalon>
-References: <873840a4ch.wl%kuninori.morimoto.gx@renesas.com> <87d22vgt8u.wl%kuninori.morimoto.gx@renesas.com> <874mo7gsza.wl%kuninori.morimoto.gx@renesas.com>
+From: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
+Subject: [RFC PATCH] mmc: sleep notification
+Date: Tue, 12 May 2015 11:50:51 +0000
+Message-ID: <FDD07FEB422EF948A392FDC201AEEAE64FA8B758@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <874mo7gsza.wl%kuninori.morimoto.gx@renesas.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Mike Turquette <mturquette@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Simon <horms@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, kobayashi <keita.kobayashi.ym@renesas.com>, devicetree@vger.kernel.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1on0085.outbound.protection.outlook.com ([157.56.110.85]:48096
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S932312AbbELMFm convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 May 2015 08:05:42 -0400
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alex Lemberg <Alex.Lemberg@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Morimoto-san,
+Hi Ulf,
 
-Thank you for the patch.
+Following your recommendation, we have moved the Sleep_Notification
+call from mmc_pm_notify() to mmc_suspend().
+As mentioned in MELS discussion, we are still experiencing system crash
+on Suspend, after making this change.
 
-I'm CC'ing the device-tree mailing list as well as Mike Turquette, please see 
-below for the discussion.
+We will appreciate your review and comments on this RFC.
 
-On Thursday 23 April 2015 08:17:23 Kuninori Morimoto wrote:
-> From: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-> 
-> MMCIF IP on R-Car series has parent clock which can be set
-> several rate, and it was not implemented on old SH-Mobile series
-> (= SH-Mobile series parent clock was fixed rate)
-> R-Car series MMCIF can use more high speed access if it setup
-> parent clock. This patch adds parent clock setup method,
-> and r8a7790/r8a7791 can use it.
-> 
-> Signed-off-by: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-> Tested-by: Keita Kobayashi <keita.kobayashi.ym@renesas.com>
-> ---
-> v3 -> v4
-> 
->  - add new clk-range on DT
->  - use clk_round_rate() for parent_clk
->  - struct sh_mmcif_ver instead of sh_mmcif_parent_clk
-> 
->  .../devicetree/bindings/mmc/renesas,mmcif.txt      |  3 +
->  drivers/mmc/host/sh_mmcif.c                        | 89 ++++++++++++++++++-
->  2 files changed, 90 insertions(+), 2 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
-> b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt index
-> 299081f..eb50f4e 100644
-> --- a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
-> +++ b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
-> @@ -14,6 +14,8 @@ Required properties:
-> 
->  - clocks: reference to the functional clock
-> 
-> +- clk-range: parent clock range
-> +
+This patch is implements the new additional state of
+Power_Off_Notification - SLEEP_NOTIFICATION.
+Until now, the implementation of Power_Off_Notification
+supported only three modes - POWERED_ON (0x01),
+POWER_OFF_SHORT (0x02) and POWER_OFF_LONG (0x03).
 
-I think the idea of a DT property to specify the admissible range for clock 
-frequencies is good. However, I have a couple of small comments regarding the 
-implementation.
+As part of eMMC5.0 before moving to Sleep state hosts may set the
+POWER_OFF_NOTIFICATION byte to SLEEP_NOTIFICATION (0x04).
+After setting SLEEP_NOTIFICATION, host should wait for
+the busy line to be de-asserted.
+The max timeout allowed for busy line de-assertion defined
+in SLEEP_NOTIFICATION_TIME byte in EXT_CSD [216].
+HPI may interrupt the SLEEP_NOTIFICATION operation.
+In that case POWER_OFF_NOTIFICATION byte will restore to POWERED_ON.
 
-First of all, this doesn't seem Renesas-specific to me (feel free to disagree, 
-but in that case the property should probably be called renesas,clk-range). 
-Wouldn't it make sense to specify the property in 
-Documentation/devicetree/bindings/clock/clock-bindings.txt instead ?
+Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
 
-Then, I think the documentation should be clarified a bit, as "parent clock 
-range" is probably a bit vague for people who haven't followed the development 
-of this patch series. How about something like "range of admissible 
-frequencies for the input clock" ?
-
-There's already a clock-ranges property with a totally different meaning. 
-That's quite confusing, it would thus be good to rename clk-range. How about 
-clock-freq-range or clock-frequency-range ?
-
-Finally, if a DT node references several clocks in its clocks property, we 
-need a way to specify the range for each of them.
-
->  - dmas: reference to the DMA channels, one per channel name listed in the
->    dma-names property.
->  - dma-names: must contain "tx" for the transmit DMA channel and "rx" for
-> the @@ -29,4 +31,5 @@ Example: R8A7790 (R-Car H2) MMCIF0
->  		clocks = <&mstp3_clks R8A7790_CLK_MMCIF0>;
->  		dmas = <&dmac0 0xd1>, <&dmac0 0xd2>;
->  		dma-names = "tx", "rx";
-> +		clk-range = <12187500 97500000>;
->  	};
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index d2f1158..437aa3c 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -57,6 +57,7 @@
->  #include <linux/mmc/slot-gpio.h>
->  #include <linux/mod_devicetable.h>
->  #include <linux/mutex.h>
-> +#include <linux/of_device.h>
->  #include <linux/pagemap.h>
->  #include <linux/platform_device.h>
->  #include <linux/pm_qos.h>
-> @@ -224,6 +225,13 @@ enum mmcif_wait_for {
->  	MMCIF_WAIT_FOR_STOP,
->  };
-> 
-> +/*
-> + * difference for each SoC
-> + */
-> +struct sh_mmcif_ver {
-> +	u32 clkdiv_map;	 /* see CE_CLK_CTRL::CLKDIV */
-> +};
-> +
->  struct sh_mmcif_host {
->  	struct mmc_host *mmc;
->  	struct mmc_request *mrq;
-> @@ -248,6 +256,7 @@ struct sh_mmcif_host {
->  	bool ccs_enable;		/* Command Completion Signal support */
->  	bool clk_ctrl2_enable;
->  	struct mutex thread_lock;
-> +	const struct sh_mmcif_ver *ver;
-> 
->  	/* DMA support */
->  	struct dma_chan		*chan_rx;
-> @@ -256,8 +265,14 @@ struct sh_mmcif_host {
->  	bool			dma_active;
->  };
-> 
-> +static const struct sh_mmcif_ver sh_mmcif_gen2 = {
-> +	.clkdiv_map = 0x3ff,
-> +};
-> +
->  static const struct of_device_id mmcif_of_match[] = {
->  	{ .compatible = "renesas,sh-mmcif" },
-> +	{ .compatible = "renesas,mmcif-r8a7790", .data = &sh_mmcif_gen2},
-> +	{ .compatible = "renesas,mmcif-r8a7791", .data = &sh_mmcif_gen2},
->  	{ }
->  };
->  MODULE_DEVICE_TABLE(of, mmcif_of_match);
-> @@ -490,12 +505,50 @@ static void sh_mmcif_clock_control(struct
-> sh_mmcif_host *host, unsigned int clk)
-> 
->  	if (!clk)
->  		return;
-> -	if (sup_pclk && clk == current_clk)
-> +
-> +	if (host->ver) {
-> +		const struct sh_mmcif_ver *ver = host->ver;
-> +		unsigned int freq, best_freq, myclk, clkdiv, div, diff_min, diff;
-> +		int i;
-> +
-> +		clkdiv = 0;
-> +		diff_min = ~0;
-> +		best_freq = 0;
-> +		for (i = fls(ver->clkdiv_map); i >= 0; i--) {
-> +			if (!((1 << i) & ver->clkdiv_map))
-> +				continue;
-> +
-> +			/*
-> +			 * clk = parent_freq / div
-> +			 * -> parent_freq = clk x div
-> +			 */
-> +
-> +			div = 1 << (i + 1);
-> +			freq = clk_round_rate(host->clk, clk * div);
-> +			myclk = freq / div;
-> +			diff = (myclk > clk) ? myclk - clk : clk - myclk;
-> +
-> +			if (diff <= diff_min) {
-> +				best_freq = freq;
-> +				clkdiv = i;
-> +				diff_min = diff;
-> +			}
-> +		}
-> +
-> +		dev_dbg(&host->pd->dev, "clk %u/%u (%u, 0x%x)\n",
-> +			(best_freq / (1 << (clkdiv + 1))), clk,
-> +			best_freq, clkdiv);
-> +
-> +		clk_set_rate(host->clk, best_freq);
-> +		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL,
-> +				CLK_CLEAR & (clkdiv << 16));
-> +	} else if (sup_pclk && clk == current_clk) {
->  		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_SUP_PCLK);
-> -	else
-> +	} else {
->  		sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_CLEAR &
->  				((fls(DIV_ROUND_UP(current_clk,
->  						   clk) - 1) - 1) << 16));
-> +	}
-> 
->  	sh_mmcif_bitset(host, MMCIF_CE_CLK_CTRL, CLK_ENABLE);
->  }
-> @@ -980,10 +1033,42 @@ static void sh_mmcif_request(struct mmc_host *mmc,
-> struct mmc_request *mrq)
-> 
->  static void sh_mmcif_clk_setup(struct sh_mmcif_host *host)
->  {
-> +	struct device *dev = &host->pd->dev;
-> +	const struct of_device_id *of_id = of_match_device(mmcif_of_match, dev);
->  	unsigned int clk = clk_get_rate(host->clk);
-> 
-> +	if (of_id) {
-> +		struct device_node *np = dev->of_node;
-> +		const struct sh_mmcif_ver *ver = of_id->data;
-> +		u32 range[2]; /* min/max */
-> +
-> +		if (!ver)
-> +			goto sh_mmcif_clk_setup_default;
-> +
-> +		if (0 != of_property_read_u32_array(np, "clk-range",
-> +						    range, ARRAY_SIZE(range)))
-> +			goto sh_mmcif_clk_setup_default;
-> +
-> +		if (range[0] > range[1])
-> +			goto sh_mmcif_clk_setup_default;
-> +
-> +		host->mmc->f_min = range[0] / (1 << fls(ver->clkdiv_map));
-> +		host->mmc->f_max = range[1] / (1 << ffs(ver->clkdiv_map));
-> +
-> +		dev_dbg(dev, "parent clk <%d - %d> (%d/%d)\n",
-> +			range[0], range[1],
-> +			host->mmc->f_max, host->mmc->f_min);
-> +
-> +		host->ver = ver;
-> +		return;
-> +	}
-> +
-> +sh_mmcif_clk_setup_default:
->  	host->mmc->f_max = clk / 2;
->  	host->mmc->f_min = clk / 512;
-> +
-> +	dev_dbg(dev, "clk max/min = %d/%d\n",
-> +		host->mmc->f_max, host->mmc->f_min);
->  }
-> 
->  static void sh_mmcif_set_power(struct sh_mmcif_host *host, struct mmc_ios
-> *ios)
-
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index eefdf25..9ad296d 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2034,9 +2034,26 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 	unsigned long flags;
+ 	unsigned int cmd_flags = req ? req->cmd_flags : 0;
+ 
+-	if (req && !mq->mqrq_prev->req)
++	if (unlikely(req && mmc_card_mmc(card) &&
++		(card->ext_csd.power_off_notification ==
++		EXT_CSD_SLEEP_NOTIFICATION))) {
++		/* restoring the power_off_notification
++		 * field's state to as it was before so
++		 * that the sleep notification will be
++		 * able to resume later
++		 */
++		card->ext_csd.power_off_notification = EXT_CSD_POWER_ON;
++	}
++
++	if (req && !mq->mqrq_prev->req) {
+ 		/* claim host only for the first request */
+ 		mmc_get_card(card);
++		if (unlikely(req &&
++			mmc_card_doing_sleep_notify(card))) {
++			mmc_interrupt_hpi(card);
++			mmc_card_clr_sleep_notify(card);
++		}
++	}
+ 
+ 	ret = mmc_blk_part_switch(card, md);
+ 	if (ret) {
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 8c61ddd..e1520c56 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -298,7 +298,8 @@ void mmc_start_bkops(struct mmc_card *card, bool from_exception)
+ 
+ 	BUG_ON(!card);
+ 
+-	if (!card->ext_csd.man_bkops_en || mmc_card_doing_bkops(card))
++	if (!card->ext_csd.man_bkops_en || mmc_card_doing_bkops(card) ||
++		mmc_card_doing_sleep_notify(card))
+ 		return;
+ 
+ 	err = mmc_read_bkops_status(card);
+@@ -2706,6 +2707,8 @@ int mmc_pm_notify(struct notifier_block *notify_block,
+ 			err = host->bus_ops->pre_suspend(host);
+ 		if (!err)
+ 			break;
++		if (host->card && host->bus_ops->suspend)
++			break;
+ 
+ 		/* Calling bus_ops->remove() with a claimed host can deadlock */
+ 		host->bus_ops->remove(host);
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index e6f2de7..a3086a0 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -14,6 +14,7 @@
+ #include <linux/delay.h>
+ 
+ #define MMC_CMD_RETRIES        3
++#define MMC_SLEEP_NOTIFY_MAX_TIME	0x17
+ 
+ struct mmc_bus_ops {
+ 	void (*remove)(struct mmc_host *);
+@@ -37,6 +38,7 @@ struct device_node *mmc_of_find_child_device(struct mmc_host *host,
+ 		unsigned func_num);
+ 
+ void mmc_init_erase(struct mmc_card *card);
++int mmc_sleep_notify(struct mmc_card *card);
+ 
+ void mmc_set_chip_select(struct mmc_host *host, int mode);
+ void mmc_set_clock(struct mmc_host *host, unsigned int hz);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index a802863..7688923 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -59,6 +59,11 @@ static const unsigned int tacc_mant[] = {
+ 		__res & __mask;						\
+ 	})
+ 
++#define GET_SLEEP_NOTIFY_TIME(value) \
++	(10 * (1 << (unsigned int)(value)))
++#define GET_SLEEP_NOTIFY_TIME_MSEC(value) \
++	(DIV_ROUND_UP(GET_SLEEP_NOTIFY_TIME(value), 1000))
++
+ /*
+  * Given the decoded CSD structure, decode the raw CID to our CID structure.
+  */
+@@ -582,6 +587,8 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		card->ext_csd.ffu_capable =
+ 			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
+ 			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
++		card->ext_csd.sleep_notify_time =
++			ext_csd[EXT_CSD_SLEEP_NOTIFICATION_TIME];
+ 	}
+ out:
+ 	return err;
+@@ -1529,6 +1536,15 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 			card->ext_csd.hpi_en = 1;
+ 	}
+ 
++	/* sleep notify enable/disable for eMMC 5.0 and above */
++	if ((card->ext_csd.rev >= 7) &&  card->ext_csd.hpi_en &&
++			(card->host->caps2 & MMC_CAP2_SLEEP_NOTIFY) &&
++			card->ext_csd.sleep_notify_time > 0 &&
++			card->ext_csd.sleep_notify_time <=
++				MMC_SLEEP_NOTIFY_MAX_TIME) {
++		card->can_sleep_notify = 1;
++	}
++
+ 	/*
+ 	 * If cache size is higher than 0, this indicates
+ 	 * the existence of cache and it can be turned on.
+@@ -1642,6 +1658,33 @@ out_release:
+ 	return err;
+ }
+ 
++/*
++ * check if device is in program state (busy)
++ */
++static bool mmc_device_prg_state(struct mmc_card *card)
++{
++	int rc;
++	u32 status;
++	bool state;
++
++	mmc_get_card(card);
++	rc = mmc_send_status(card, &status);
++	if (rc) {
++		pr_err("%s: Get card status fail. rc=%d\n",
++			mmc_hostname(card->host), rc);
++		state = false;
++		goto out;
++	}
++
++	if (R1_CURRENT_STATE(status) == R1_STATE_PRG)
++		state =  true;
++	else
++		state =  false;
++out:
++	mmc_put_card(card);
++	return state;
++}
++
+ static int mmc_can_poweroff_notify(const struct mmc_card *card)
+ {
+ 	return card &&
+@@ -1653,20 +1696,106 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
+ {
+ 	unsigned int timeout = card->ext_csd.generic_cmd6_time;
+ 	int err;
++	bool use_busy_signal;
+ 
+ 	/* Use EXT_CSD_POWER_OFF_SHORT as default notification type. */
+ 	if (notify_type == EXT_CSD_POWER_OFF_LONG)
+ 		timeout = card->ext_csd.power_off_longtime;
++	else if (notify_type == EXT_CSD_SLEEP_NOTIFICATION) {
++		/* calculate the maximum timeout for the
++		 * switch command when notifying the device
++		 * that it is about to move to sleep */
++		timeout = GET_SLEEP_NOTIFY_TIME_MSEC(
++			card->ext_csd.sleep_notify_time);
++	}
+ 
++	/* do not wait on busy signal in case of
++	 * Sleep Notification - to let host get
++	 * another requests
++	 */
++	use_busy_signal = (notify_type == EXT_CSD_SLEEP_NOTIFICATION) ?
++			false : true;
+ 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 			EXT_CSD_POWER_OFF_NOTIFICATION,
+-			notify_type, timeout, true, false, false);
+-	if (err)
++			notify_type, timeout,
++			use_busy_signal, false, false);
++	if (!err) {
++		card->ext_csd.power_off_notification = notify_type;
++	} else {
+ 		pr_err("%s: Power Off Notification timed out, %u\n",
+-		       mmc_hostname(card->host), timeout);
++			mmc_hostname(card->host), timeout);
++	}
+ 
+-	/* Disable the power off notification after the switch operation. */
+-	card->ext_csd.power_off_notification = EXT_CSD_NO_POWER_NOTIFICATION;
++	return err;
++}
++
++int mmc_sleep_notify(struct mmc_card *card)
++{
++	int err = 0;
++	bool is_busy = 0;
++	unsigned long prg_wait = 0;
++
++	if (!card->can_sleep_notify || !mmc_can_poweroff_notify(card))
++		return 0;
++
++	if (!mmc_card_doing_sleep_notify(card)) {
++		mmc_get_card(card);
++		mmc_card_set_sleep_notify(card);
++		err = mmc_poweroff_notify(card,
++			EXT_CSD_SLEEP_NOTIFICATION);
++		mmc_put_card(card);
++		if (err) {
++			pr_err("%s: mmc_poweroff_notify failed with %d\n",
++			       __func__, err);
++			goto out;
++		}
++
++		prg_wait = jiffies +
++			msecs_to_jiffies(GET_SLEEP_NOTIFY_TIME_MSEC(
++			card->ext_csd.sleep_notify_time));
++		}
++
++	/*
++	 * Loop will run until:
++	 * 1. Device is no more in Busy state
++	 * 2. Sleep notification is not interrupted by HPI & IO request
++	 */
++	do {
++		/* added some delay to avoid sending card status too often */
++		msleep(20);
++		err = 0;
++		/* Stop polling in case sleep notification was HPIed already */
++		if (!mmc_card_doing_sleep_notify(card)) {
++			is_busy = mmc_device_prg_state(card);
++			if (is_busy)
++				err = -EBUSY;
++			break;
++		}
++		is_busy = mmc_device_prg_state(card);
++		if (is_busy && time_after(jiffies, prg_wait)) {
++			/*
++			 * making sure we are still in busy before
++			 * sending HPI due to timeout error
++			 */
++			is_busy = mmc_device_prg_state(card);
++			if (is_busy) {
++				if (mmc_card_doing_sleep_notify(card)) {
++					card->ext_csd.power_off_notification =
++						EXT_CSD_POWER_ON;
++					mmc_interrupt_hpi(card);
++				}
++				err = -ETIMEDOUT;
++				break;
++			}
++		}
++	} while (is_busy);
++
++out:
++	mmc_card_clr_sleep_notify(card);
++	if (err) {
++		pr_err("%s: mmc_poweroff_notify for sleep failed with %d\n",
++		       mmc_hostname(card->host), err);
++	}
+ 
+ 	return err;
+ }
+@@ -1745,8 +1874,16 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+ 		goto out;
+ 
+ 	if (mmc_can_poweroff_notify(host->card) &&
+-		((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
+-		err = mmc_poweroff_notify(host->card, notify_type);
++		((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend)) {
++		if (!host->card->can_sleep_notify ||
++			!mmc_can_poweroff_notify(host->card)) {
++			err = mmc_poweroff_notify(host->card, notify_type);
++		} else {
++			err = mmc_sleep_notify(host->card);
++			if (err != -ETIMEDOUT)
++				err = mmc_sleep(host);
++		}
++	}
+ 	else if (mmc_can_sleep(host->card))
+ 		err = mmc_sleep(host);
+ 	else if (!mmc_host_is_spi(host))
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 19f0175..ed91e6f 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -62,6 +62,7 @@ struct mmc_ext_csd {
+ 	unsigned int		sa_timeout;		/* Units: 100ns */
+ 	unsigned int		generic_cmd6_time;	/* Units: 10ms */
+ 	unsigned int            power_off_longtime;     /* Units: ms */
++	unsigned int		sleep_notify_time;	/* Units: us */
+ 	u8			power_off_notification;	/* state */
+ 	unsigned int		hs_max_dtr;
+ 	unsigned int		hs200_max_dtr;
+@@ -262,6 +263,7 @@ struct mmc_card {
+ #define MMC_CARD_REMOVED	(1<<4)		/* card has been removed */
+ #define MMC_STATE_DOING_BKOPS	(1<<5)		/* card is doing BKOPS */
+ #define MMC_STATE_SUSPENDED	(1<<6)		/* card is suspended */
++#define MMC_STATE_SLEEP_NOTIFY (1<<7)		/* card in sleep notify */
+ 	unsigned int		quirks; 	/* card quirks */
+ #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
+ #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
+@@ -309,6 +311,7 @@ struct mmc_card {
+ 	struct dentry		*debugfs_root;
+ 	struct mmc_part	part[MMC_NUM_PHY_PARTITION]; /* physical partitions */
+ 	unsigned int    nr_parts;
++	u8 can_sleep_notify;	/* sleep_notify on/off */
+ };
+ 
+ /*
+@@ -427,6 +430,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+ #define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
+ #define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
+ #define mmc_card_suspended(c)	((c)->state & MMC_STATE_SUSPENDED)
++#define mmc_card_doing_sleep_notify(c) ((c)->state & MMC_STATE_SLEEP_NOTIFY)
+ 
+ #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
+ #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
+@@ -437,6 +441,8 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+ #define mmc_card_clr_doing_bkops(c)	((c)->state &= ~MMC_STATE_DOING_BKOPS)
+ #define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
+ #define mmc_card_clr_suspended(c) ((c)->state &= ~MMC_STATE_SUSPENDED)
++#define mmc_card_set_sleep_notify(c)	((c)->state |= MMC_STATE_SLEEP_NOTIFY)
++#define mmc_card_clr_sleep_notify(c)	((c)->state &= ~MMC_STATE_SLEEP_NOTIFY)
+ 
+ /*
+  * Quirk add/remove for MMC products.
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index f471193..111e05d 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -286,6 +286,7 @@ struct mmc_host {
+ 				 MMC_CAP2_HS400_1_2V)
+ #define MMC_CAP2_HSX00_1_2V	(MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS400_1_2V)
+ #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
++#define MMC_CAP2_SLEEP_NOTIFY	(1 << 18)	/* sleep notify supported */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 124f562..bbb71ae 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -309,6 +309,7 @@ struct _mmc_csd {
+ #define EXT_CSD_PWR_CL_52_360		202	/* RO */
+ #define EXT_CSD_PWR_CL_26_360		203	/* RO */
+ #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
++#define EXT_CSD_SLEEP_NOTIFICATION_TIME	216	/* RO */
+ #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
+ #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
+ #define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
+@@ -403,6 +404,7 @@ struct _mmc_csd {
+ #define EXT_CSD_POWER_ON		1
+ #define EXT_CSD_POWER_OFF_SHORT		2
+ #define EXT_CSD_POWER_OFF_LONG		3
++#define EXT_CSD_SLEEP_NOTIFICATION	4
+ 
+ #define EXT_CSD_PWR_CL_8BIT_MASK	0xF0	/* 8 bit PWR CLS */
+ #define EXT_CSD_PWR_CL_4BIT_MASK	0x0F	/* 8 bit PWR CLS */
 -- 
-Regards,
+1.7.9.5
 
-Laurent Pinchart
 
