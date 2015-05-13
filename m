@@ -1,43 +1,562 @@
-From: Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
-Subject: [PATCH v7 2/2] mmc: host: sdhci: Add support to disable SDR104/SDR50/DDR50 based on capability register 0.
-Date: Wed, 13 May 2015 17:21:52 +0530
-Message-ID: <1431517912-10322-3-git-send-email-stripathi@apm.com>
-References: <1431517912-10322-1-git-send-email-stripathi@apm.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1431517912-10322-1-git-send-email-stripathi-qTEPVZfXA3Y@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org, anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ddutile-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, patches-qTEPVZfXA3Y@public.gmane.org, Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [V2 PATCH 3/5] mmc: queue: change mqrq_cur and mqrq_pre to mq qdepth
+Date: Wed, 13 May 2015 14:11:31 +0200
+Message-ID: <CAPDyKFo2iGuDnHR10aXV3-QrKzT-ewQ759D+92VtG59tEjhV+Q@mail.gmail.com>
+References: <20150403112608.GD29880@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f173.google.com ([209.85.216.173]:33502 "EHLO
+	mail-qc0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754655AbbEMMLc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 May 2015 08:11:32 -0400
+Received: by qcvo8 with SMTP id o8so20927179qcv.0
+        for <linux-mmc@vger.kernel.org>; Wed, 13 May 2015 05:11:31 -0700 (PDT)
+In-Reply-To: <20150403112608.GD29880@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
 
-The sdhci framework disables SDR104/SDR50/DDR50 based on only quirk.
-This patch adds the support to disable SDR104/SDR50/DDR50 based on
-reading the capability register 0.
+On 3 April 2015 at 13:26, Chuanxiao Dong <chuanxiao.dong@intel.com> wrote:
+> Use qdepth for mmc request fetching. Currently the request fetching
+> mechanism indicate the qdepth is only 2.
 
-Signed-off-by: Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>
----
----
- drivers/mmc/host/sdhci.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+Certainly this patch requires some more information.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 58c1770..a3d9b8a 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3118,7 +3118,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 		}
- 	}
+First start out explaining what this patch does, then why. That will
+help me understand better.
 
--	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)
-+	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V ||
-+	    !(caps[0] & SDHCI_CAN_VDD_180))
- 		caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
- 		       SDHCI_SUPPORT_DDR50);
+>
+> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+> ---
+>  drivers/mmc/card/block.c |   43 ++++++----
+>  drivers/mmc/card/queue.c |  209 +++++++++++++++++++++++-----------------------
+>  drivers/mmc/card/queue.h |    8 +-
+>  3 files changed, 139 insertions(+), 121 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index ed62d6b..2407f52 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -122,6 +122,7 @@ struct mmc_blk_data {
+>         struct device_attribute force_ro;
+>         struct device_attribute power_ro_lock;
+>         int     area_type;
+> +       struct mmc_queue        *mq_curr;
+>  };
+>
+>  static DEFINE_MUTEX(open_lock);
+> @@ -138,6 +139,7 @@ MODULE_PARM_DESC(perdev_minors, "Minors numbers to allocate per device");
+>  static inline int mmc_blk_part_switch(struct mmc_card *card,
+>                                       struct mmc_blk_data *md);
+>  static int get_card_status(struct mmc_card *card, u32 *status, int retries);
+> +static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc);
+>
+>  static inline void mmc_blk_clear_packed(struct mmc_queue_req *mqrq)
+>  {
+> @@ -653,6 +655,13 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
+>         if (mmc_card_mmc(card)) {
+>                 u8 part_config = card->ext_csd.part_config;
+>
+> +               /*
+> +                * before switching partition, needs to make
+> +                * sure there is no active transferring in previous
+> +                * queue
+> +                */
+> +               mmc_blk_issue_rw_rq(main_md->mq_curr, NULL);
+> +
+>                 part_config &= ~EXT_CSD_PART_CONFIG_ACC_MASK;
+>                 part_config |= md->part_type;
+>
+> @@ -666,6 +675,7 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
+>         }
+>
+>         main_md->part_curr = md->part_type;
+> +       main_md->mq_curr = &md->queue;
+>         return 0;
+>  }
+>
+> @@ -1827,11 +1837,13 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+>         const u8 packed_nr = 2;
+>         u8 reqs = 0;
+>
+> -       if (!rqc && !mq->mqrq_prev->req)
+> +       if (!rqc && !atomic_read(&mq->active_slots))
+>                 return 0;
+>
+> -       if (rqc)
+> +       if (rqc) {
+>                 reqs = mmc_blk_prep_packed_list(mq, rqc);
+> +               atomic_inc(&mq->active_slots);
 
---
-1.8.2.1
+"active_slots", could we try to find a better name to this variable.
+It makes me think of HW mmc slots. :-)
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> +       }
+>
+>         do {
+>                 if (rqc) {
+> @@ -1856,11 +1868,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+>                 } else
+>                         areq = NULL;
+>                 areq = mmc_start_req(card->host, areq, (int *) &status);
+> -               if (!areq) {
+> -                       if (status == MMC_BLK_NEW_REQUEST)
+> -                               mq->flags |= MMC_QUEUE_NEW_REQUEST;
+> +               if (!areq)
+>                         return 0;
+> -               }
+>
+>                 mq_rq = container_of(areq, struct mmc_queue_req, mmc_active);
+>                 brq = &mq_rq->brq;
+> @@ -1968,6 +1977,9 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+>                 }
+>         } while (ret);
+>
+> +       clear_bit_unlock(mq_rq->task_id, &mq->cmdqslot);
+> +       atomic_dec(&mq->active_slots);
+
+I noticed that you are using atomic_* to manage the counts for active
+slots. Could eloborate why this is needed?
+
+> +
+>         return 1;
+>
+>   cmd_abort:
+> @@ -1982,10 +1994,14 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+>         }
+>
+>   start_new_req:
+> +       clear_bit_unlock(mq_rq->task_id, &mq->cmdqslot);
+> +       atomic_dec(&mq->active_slots);
+>         if (rqc) {
+>                 if (mmc_card_removed(card)) {
+>                         rqc->cmd_flags |= REQ_QUIET;
+>                         blk_end_request_all(rqc, -EIO);
+> +                       clear_bit_unlock(mq->mqrq_cur->task_id, &mq->cmdqslot);
+> +                       atomic_dec(&mq->active_slots);
+>                 } else {
+>                         /*
+>                          * If current request is packed, it needs to put back.
+> @@ -2011,7 +2027,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>         unsigned long flags;
+>         unsigned int cmd_flags = req ? req->cmd_flags : 0;
+>
+> -       if (req && !mq->mqrq_prev->req)
+> +       if (!atomic_read(&mq->active_slots))
+>                 /* claim host only for the first request */
+>                 mmc_get_card(card);
+>
+> @@ -2024,10 +2040,9 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>                 goto out;
+>         }
+>
+> -       mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
+>         if (cmd_flags & REQ_DISCARD) {
+>                 /* complete ongoing async transfer before issuing discard */
+> -               if (card->host->areq)
+> +               if (atomic_read(&mq->active_slots))
+>                         mmc_blk_issue_rw_rq(mq, NULL);
+>                 if (req->cmd_flags & REQ_SECURE)
+>                         ret = mmc_blk_issue_secdiscard_rq(mq, req);
+> @@ -2035,11 +2050,11 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>                         ret = mmc_blk_issue_discard_rq(mq, req);
+>         } else if (cmd_flags & REQ_FLUSH) {
+>                 /* complete ongoing async transfer before issuing flush */
+> -               if (card->host->areq)
+> +               if (atomic_read(&mq->active_slots))
+>                         mmc_blk_issue_rw_rq(mq, NULL);
+>                 ret = mmc_blk_issue_flush(mq, req);
+>         } else {
+> -               if (!req && host->areq) {
+> +               if (!req && (atomic_read(&mq->active_slots) == 1)) {
+>                         spin_lock_irqsave(&host->context_info.lock, flags);
+>                         host->context_info.is_waiting_last_req = true;
+>                         spin_unlock_irqrestore(&host->context_info.lock, flags);
+> @@ -2048,13 +2063,12 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>         }
+>
+>  out:
+> -       if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
+> -            (cmd_flags & MMC_REQ_SPECIAL_MASK))
+> +       if (!atomic_read(&mq->active_slots))
+>                 /*
+>                  * Release host when there are no more requests
+>                  * and after special request(discard, flush) is done.
+>                  * In case sepecial request, there is no reentry to
+> -                * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
+> +                * the 'mmc_blk_issue_rq'.
+>                  */
+>                 mmc_put_card(card);
+>         return ret;
+> @@ -2436,6 +2450,7 @@ static int mmc_blk_probe(struct device *dev)
+>         md = mmc_blk_alloc(card);
+>         if (IS_ERR(md))
+>                 return PTR_ERR(md);
+> +       md->mq_curr = &md->queue;
+>
+>         string_get_size((u64)get_capacity(md->disk) << 9, STRING_UNITS_2,
+>                         cap_str, sizeof(cap_str));
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index 236d194..c2d32e2 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -46,6 +46,27 @@ static int mmc_prep_request(struct request_queue *q, struct request *req)
+>         return BLKPREP_OK;
+>  }
+>
+> +static bool mmc_queue_get_free_slot(struct mmc_queue *mq,
+> +               unsigned long *free_slot)
+> +{
+> +       unsigned long slot;
+> +       int i;
+> +
+> +       if (!mq || !free_slot)
+> +               return false;
+> +
+> +       do {
+> +               slot = find_first_zero_bit(&mq->cmdqslot, mq->qdepth);
+> +               if (slot >= mq->qdepth)
+> +                       return false;
+> +
+> +               i = test_and_set_bit_lock(slot, &mq->cmdqslot);
+> +       } while (i);
+> +
+> +       *free_slot = slot;
+> +       return true;
+> +}
+> +
+>  static int mmc_queue_thread(void *d)
+>  {
+>         struct mmc_queue *mq = d;
+> @@ -56,39 +77,23 @@ static int mmc_queue_thread(void *d)
+>         down(&mq->thread_sem);
+>         do {
+>                 struct request *req = NULL;
+> -               struct mmc_queue_req *tmp;
+> -               unsigned int cmd_flags = 0;
+> +               unsigned long i;
+>
+>                 spin_lock_irq(q->queue_lock);
+>                 set_current_state(TASK_INTERRUPTIBLE);
+>                 req = blk_fetch_request(q);
+> -               mq->mqrq_cur->req = req;
+>                 spin_unlock_irq(q->queue_lock);
+>
+> -               if (req || mq->mqrq_prev->req) {
+> +               if (req && !(req->cmd_flags & (REQ_DISCARD | REQ_FLUSH))) {
+> +                       while (!mmc_queue_get_free_slot(mq, &i))
+> +                               mq->issue_fn(mq, NULL);
+> +                       mq->mqrq_cur = &mq->mqrq[i];
+> +                       mq->mqrq_cur->req = req;
+> +               }
+> +
+> +               if (req || atomic_read(&mq->active_slots)) {
+>                         set_current_state(TASK_RUNNING);
+> -                       cmd_flags = req ? req->cmd_flags : 0;
+>                         mq->issue_fn(mq, req);
+> -                       if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
+> -                               mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
+> -                               continue; /* fetch again */
+> -                       }
+> -
+> -                       /*
+> -                        * Current request becomes previous request
+> -                        * and vice versa.
+> -                        * In case of special requests, current request
+> -                        * has been finished. Do not assign it to previous
+> -                        * request.
+> -                        */
+> -                       if (cmd_flags & MMC_REQ_SPECIAL_MASK)
+> -                               mq->mqrq_cur->req = NULL;
+> -
+> -                       mq->mqrq_prev->brq.mrq.data = NULL;
+> -                       mq->mqrq_prev->req = NULL;
+> -                       tmp = mq->mqrq_prev;
+> -                       mq->mqrq_prev = mq->mqrq_cur;
+> -                       mq->mqrq_cur = tmp;
+>                 } else {
+>                         if (kthread_should_stop()) {
+>                                 set_current_state(TASK_RUNNING);
+> @@ -126,7 +131,7 @@ static void mmc_request_fn(struct request_queue *q)
+>         }
+>
+>         cntx = &mq->card->host->context_info;
+> -       if (!mq->mqrq_cur->req && mq->mqrq_prev->req) {
+> +       if (atomic_read(&mq->active_slots)) {
+>                 /*
+>                  * New MMC request arrived when MMC thread may be
+>                  * blocked on the previous request to be complete
+> @@ -138,7 +143,7 @@ static void mmc_request_fn(struct request_queue *q)
+>                         wake_up_interruptible(&cntx->wait);
+>                 }
+>                 spin_unlock_irqrestore(&cntx->lock, flags);
+> -       } else if (!mq->mqrq_cur->req && !mq->mqrq_prev->req)
+> +       } else
+>                 wake_up_process(mq->thread);
+>  }
+>
+> @@ -192,9 +197,9 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+>  {
+>         struct mmc_host *host = card->host;
+>         u64 limit = BLK_BOUNCE_HIGH;
+> -       int ret;
+> -       struct mmc_queue_req *mqrq_cur = &mq->mqrq[0];
+> -       struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
+> +       int ret, i = 0;
+> +       struct mmc_queue_req *mqrq = mq->mqrq;
+> +       bool    sg_allocated = false;
+>
+>         if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
+>                 limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+> @@ -204,8 +209,16 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+>         if (!mq->queue)
+>                 return -ENOMEM;
+>
+> -       mq->mqrq_cur = mqrq_cur;
+> -       mq->mqrq_prev = mqrq_prev;
+> +       mq->qdepth = 2;
+> +       mq->mqrq = kcalloc(mq->qdepth, sizeof(struct mmc_queue_req),
+> +                       GFP_KERNEL);
+> +       if (!mq->mqrq)
+> +               return -ENOMEM;
+> +
+> +       mqrq = mq->mqrq;
+> +       for (i = 0; i < mq->qdepth; i++)
+> +               mqrq[i].task_id = i;
+> +
+>         mq->queue->queuedata = mq;
+>
+>         blk_queue_prep_rq(mq->queue, mmc_prep_request);
+> @@ -227,65 +240,61 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+>                 if (bouncesz > (host->max_blk_count * 512))
+>                         bouncesz = host->max_blk_count * 512;
+>
+> +               /*
+> +                * init i to be -1 so if bounce_buf is not allcated
+> +                * at all, then we don't need to free it for errors
+> +                */
+
+Possible the part below could be split up in a refactoring patch that
+precedes $subject patch. What do you think?
+
+> +               i = -1;
+>                 if (bouncesz > 512) {
+> -                       mqrq_cur->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
+> -                       if (!mqrq_cur->bounce_buf) {
+> -                               pr_warn("%s: unable to allocate bounce cur buffer\n",
+> -                                       mmc_card_name(card));
+> -                       } else {
+> -                               mqrq_prev->bounce_buf =
+> -                                               kmalloc(bouncesz, GFP_KERNEL);
+> -                               if (!mqrq_prev->bounce_buf) {
+> -                                       pr_warn("%s: unable to allocate bounce prev buffer\n",
+> -                                               mmc_card_name(card));
+> -                                       kfree(mqrq_cur->bounce_buf);
+> -                                       mqrq_cur->bounce_buf = NULL;
+> -                               }
+> +                       for (i = 0; i < mq->qdepth; i++) {
+> +                               mqrq[i].bounce_buf =
+> +                                       kmalloc(bouncesz, GFP_KERNEL);
+> +                               if (!mqrq[i].bounce_buf)
+> +                                       break;
+>                         }
+>                 }
+>
+> -               if (mqrq_cur->bounce_buf && mqrq_prev->bounce_buf) {
+> +               /*
+> +                * if i is not equal to mq->qdept,
+> +                * then means there is no bounce_buf
+> +                */
+> +               if (i != mq->qdepth) {
+> +                       for (; i >= 0; i--) {
+> +                               kfree(mqrq[i].bounce_buf);
+> +                               mqrq[i].bounce_buf = NULL;
+> +                       }
+> +               } else {
+>                         blk_queue_bounce_limit(mq->queue, BLK_BOUNCE_ANY);
+>                         blk_queue_max_hw_sectors(mq->queue, bouncesz / 512);
+>                         blk_queue_max_segments(mq->queue, bouncesz / 512);
+>                         blk_queue_max_segment_size(mq->queue, bouncesz);
+>
+> -                       mqrq_cur->sg = mmc_alloc_sg(1, &ret);
+> -                       if (ret)
+> -                               goto cleanup_queue;
+> -
+> -                       mqrq_cur->bounce_sg =
+> -                               mmc_alloc_sg(bouncesz / 512, &ret);
+> -                       if (ret)
+> -                               goto cleanup_queue;
+> -
+> -                       mqrq_prev->sg = mmc_alloc_sg(1, &ret);
+> -                       if (ret)
+> -                               goto cleanup_queue;
+> -
+> -                       mqrq_prev->bounce_sg =
+> -                               mmc_alloc_sg(bouncesz / 512, &ret);
+> -                       if (ret)
+> -                               goto cleanup_queue;
+> +                       for (i = 0; i < mq->qdepth; i++) {
+> +                               mqrq[i].sg = mmc_alloc_sg(1, &ret);
+> +                               if (ret)
+> +                                       goto cleanup_queue;
+> +                               mqrq[i].bounce_sg =
+> +                                       mmc_alloc_sg(bouncesz / 512, &ret);
+> +                               if (ret)
+> +                                       goto cleanup_queue;
+> +                       }
+> +                       sg_allocated = true;
+>                 }
+>         }
+>  #endif
+>
+> -       if (!mqrq_cur->bounce_buf && !mqrq_prev->bounce_buf) {
+> +       if (!sg_allocated) {
+>                 blk_queue_bounce_limit(mq->queue, limit);
+>                 blk_queue_max_hw_sectors(mq->queue,
+>                         min(host->max_blk_count, host->max_req_size / 512));
+>                 blk_queue_max_segments(mq->queue, host->max_segs);
+>                 blk_queue_max_segment_size(mq->queue, host->max_seg_size);
+>
+> -               mqrq_cur->sg = mmc_alloc_sg(host->max_segs, &ret);
+> -               if (ret)
+> -                       goto cleanup_queue;
+> -
+> -
+> -               mqrq_prev->sg = mmc_alloc_sg(host->max_segs, &ret);
+> -               if (ret)
+> -                       goto cleanup_queue;
+> +               for (i = 0; i < mq->qdepth; i++) {
+> +                       mqrq[i].sg = mmc_alloc_sg(host->max_segs, &ret);
+> +                       if (ret)
+> +                               goto cleanup_queue;
+> +               }
+>         }
+>
+>         sema_init(&mq->thread_sem, 1);
+> @@ -300,21 +309,18 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+>
+>         return 0;
+>   free_bounce_sg:
+> -       kfree(mqrq_cur->bounce_sg);
+> -       mqrq_cur->bounce_sg = NULL;
+> -       kfree(mqrq_prev->bounce_sg);
+> -       mqrq_prev->bounce_sg = NULL;
+> +       for (i = 0; i < mq->qdepth; i++) {
+> +               kfree(mqrq[i].bounce_sg);
+> +               mqrq[i].bounce_sg = NULL;
+> +       }
+>
+>   cleanup_queue:
+> -       kfree(mqrq_cur->sg);
+> -       mqrq_cur->sg = NULL;
+> -       kfree(mqrq_cur->bounce_buf);
+> -       mqrq_cur->bounce_buf = NULL;
+> -
+> -       kfree(mqrq_prev->sg);
+> -       mqrq_prev->sg = NULL;
+> -       kfree(mqrq_prev->bounce_buf);
+> -       mqrq_prev->bounce_buf = NULL;
+> +       for (i = 0; i < mq->qdepth; i++) {
+> +               kfree(mqrq[i].sg);
+> +               mqrq[i].sg = NULL;
+> +               kfree(mqrq[i].bounce_buf);
+> +               mqrq[i].bounce_buf = NULL;
+> +       }
+>
+>         blk_cleanup_queue(mq->queue);
+>         return ret;
+> @@ -324,8 +330,7 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
+>  {
+>         struct request_queue *q = mq->queue;
+>         unsigned long flags;
+> -       struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
+> -       struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
+> +       int i;
+>
+>         /* Make sure the queue isn't suspended, as that will deadlock */
+>         mmc_queue_resume(mq);
+> @@ -339,23 +344,14 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
+>         blk_start_queue(q);
+>         spin_unlock_irqrestore(q->queue_lock, flags);
+>
+> -       kfree(mqrq_cur->bounce_sg);
+> -       mqrq_cur->bounce_sg = NULL;
+> -
+> -       kfree(mqrq_cur->sg);
+> -       mqrq_cur->sg = NULL;
+> -
+> -       kfree(mqrq_cur->bounce_buf);
+> -       mqrq_cur->bounce_buf = NULL;
+> -
+> -       kfree(mqrq_prev->bounce_sg);
+> -       mqrq_prev->bounce_sg = NULL;
+> -
+> -       kfree(mqrq_prev->sg);
+> -       mqrq_prev->sg = NULL;
+> -
+> -       kfree(mqrq_prev->bounce_buf);
+> -       mqrq_prev->bounce_buf = NULL;
+> +       for (i = 0; i < mq->qdepth; i++) {
+> +               kfree(mq->mqrq[i].bounce_sg);
+> +               mq->mqrq[i].bounce_sg = NULL;
+> +               kfree(mq->mqrq[i].sg);
+> +               mq->mqrq[i].sg = NULL;
+> +               kfree(mq->mqrq[i].bounce_buf);
+> +               mq->mqrq[i].bounce_buf = NULL;
+> +       }
+>
+>         mq->card = NULL;
+>  }
+> @@ -367,6 +363,11 @@ int mmc_packed_init(struct mmc_queue *mq, struct mmc_card *card)
+>         struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
+>         int ret = 0;
+>
+> +       /*
+> +        * the qdepth for PACK CMD is 2
+> +        */
+> +       if (!mqrq_cur || !mqrq_prev)
+> +               return -ENOMEM;
+>
+>         mqrq_cur->packed = kzalloc(sizeof(struct mmc_packed), GFP_KERNEL);
+>         if (!mqrq_cur->packed) {
+> diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+> index b129ddc..4f590bc 100644
+> --- a/drivers/mmc/card/queue.h
+> +++ b/drivers/mmc/card/queue.h
+> @@ -42,6 +42,7 @@ struct mmc_queue_req {
+>         struct mmc_async_req    mmc_active;
+>         enum mmc_packed_type    cmd_type;
+>         struct mmc_packed       *packed;
+> +       int task_id;    /* mmc slot number */
+
+The variable is named "task_id", but the comment says mmc slot number.
+It's a bit confusing.
+
+>  };
+>
+>  struct mmc_queue {
+> @@ -50,14 +51,15 @@ struct mmc_queue {
+>         struct semaphore        thread_sem;
+>         unsigned int            flags;
+>  #define MMC_QUEUE_SUSPENDED    (1 << 0)
+> -#define MMC_QUEUE_NEW_REQUEST  (1 << 1)
+>
+>         int                     (*issue_fn)(struct mmc_queue *, struct request *);
+>         void                    *data;
+>         struct request_queue    *queue;
+> -       struct mmc_queue_req    mqrq[2];
+> +       struct mmc_queue_req    *mqrq;
+>         struct mmc_queue_req    *mqrq_cur;
+> -       struct mmc_queue_req    *mqrq_prev;
+> +       unsigned long           cmdqslot;
+> +       unsigned long           qdepth;
+> +       atomic_t                active_slots;
+>  };
+>
+>  extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
+> --
+
+Kind regards
+Uffe
