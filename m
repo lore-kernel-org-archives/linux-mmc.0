@@ -1,39 +1,91 @@
-From: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>
-Subject: Re: Help with writing to micro SD card
-Date: Thu, 14 May 2015 23:07:31 +0100
-Message-ID: <20150514230731.6f063685@lxorguk.ukuu.org.uk>
-References: <5554FF76.2010206@lwfinger.net>
+From: Yangbo Lu <yangbo.lu@freescale.com>
+Subject: [PATCH v2, 1/2] powerpc/dts: add eSDHC compatible list
+Date: Fri, 15 May 2015 10:46:02 +0800
+Message-ID: <1431657962-42443-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 251.110.2.81.in-addr.arpa ([81.2.110.251]:54807 "EHLO
-	lxorguk.ukuu.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933686AbbENWHn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 May 2015 18:07:43 -0400
-In-Reply-To: <5554FF76.2010206@lwfinger.net>
+Received: from mail-by2on0112.outbound.protection.outlook.com ([207.46.100.112]:53843
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1423235AbbEOCuH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 14 May 2015 22:50:07 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Larry Finger <Larry.Finger@lwfinger.net>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, chrisball@gmail.com
+Cc: scottwood@freescale.com, Yangbo Lu <yangbo.lu@freescale.com>
 
-> When I received the tablet, I used dd to back up the internal card. When I used 
-> a block size of 4M in that operation, it also froze; however, the standard block 
-> size (512) worked. That suggests that the standard Linux r/w operations on the 
-> device are too fast.
+Add eSDHC compatible list for P2041/P3041/P4080/P5020/P5040.
 
-Unlikely.
+Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+---
+ arch/powerpc/boot/dts/fsl/p2041si-post.dtsi | 1 +
+ arch/powerpc/boot/dts/fsl/p3041si-post.dtsi | 1 +
+ arch/powerpc/boot/dts/fsl/p4080si-post.dtsi | 1 +
+ arch/powerpc/boot/dts/fsl/p5020si-post.dtsi | 1 +
+ arch/powerpc/boot/dts/fsl/p5040si-post.dtsi | 1 +
+ 5 files changed, 5 insertions(+)
 
-> What should I do to get some debug information?
+diff --git a/arch/powerpc/boot/dts/fsl/p2041si-post.dtsi b/arch/powerpc/boot/dts/fsl/p2041si-post.dtsi
+index efd74db..67ea0e9 100644
+--- a/arch/powerpc/boot/dts/fsl/p2041si-post.dtsi
++++ b/arch/powerpc/boot/dts/fsl/p2041si-post.dtsi
+@@ -363,6 +363,7 @@
+ 
+ /include/ "qoriq-esdhc-0.dtsi"
+ 	sdhc@114000 {
++		compatible = "fsl,p2041-esdhc", "fsl,esdhc";
+ 		fsl,iommu-parent = <&pamu1>;
+ 		fsl,liodn-reg = <&guts 0x530>; /* eSDHCLIODNR */
+ 		sdhci,auto-cmd12;
+diff --git a/arch/powerpc/boot/dts/fsl/p3041si-post.dtsi b/arch/powerpc/boot/dts/fsl/p3041si-post.dtsi
+index d7425ef..b6d92c5 100644
+--- a/arch/powerpc/boot/dts/fsl/p3041si-post.dtsi
++++ b/arch/powerpc/boot/dts/fsl/p3041si-post.dtsi
+@@ -390,6 +390,7 @@
+ 
+ /include/ "qoriq-esdhc-0.dtsi"
+ 	sdhc@114000 {
++		compatible = "fsl,p3041-esdhc", "fsl,esdhc";
+ 		fsl,iommu-parent = <&pamu1>;
+ 		fsl,liodn-reg = <&guts 0x530>; /* eSDHCLIODNR */
+ 		sdhci,auto-cmd12;
+diff --git a/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi b/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi
+index 7005a4a..bf3dad3 100644
+--- a/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi
++++ b/arch/powerpc/boot/dts/fsl/p4080si-post.dtsi
+@@ -462,6 +462,7 @@
+ 
+ /include/ "qoriq-esdhc-0.dtsi"
+ 	sdhc@114000 {
++		compatible = "fsl,p4080-esdhc", "fsl,esdhc";
+ 		fsl,iommu-parent = <&pamu1>;
+ 		fsl,liodn-reg = <&guts 0x530>; /* eSDHCLIODNR */
+ 		voltage-ranges = <3300 3300>;
+diff --git a/arch/powerpc/boot/dts/fsl/p5020si-post.dtsi b/arch/powerpc/boot/dts/fsl/p5020si-post.dtsi
+index 5583421..dbc2c8b 100644
+--- a/arch/powerpc/boot/dts/fsl/p5020si-post.dtsi
++++ b/arch/powerpc/boot/dts/fsl/p5020si-post.dtsi
+@@ -377,6 +377,7 @@
+ 
+ /include/ "qoriq-esdhc-0.dtsi"
+ 	sdhc@114000 {
++		compatible = "fsl,p5020-esdhc", "fsl,esdhc";
+ 		fsl,iommu-parent = <&pamu1>;
+ 		fsl,liodn-reg = <&guts 0x530>; /* eSDHCLIODNR */
+ 		sdhci,auto-cmd12;
+diff --git a/arch/powerpc/boot/dts/fsl/p5040si-post.dtsi b/arch/powerpc/boot/dts/fsl/p5040si-post.dtsi
+index 6e4cd6c..207d02f 100644
+--- a/arch/powerpc/boot/dts/fsl/p5040si-post.dtsi
++++ b/arch/powerpc/boot/dts/fsl/p5040si-post.dtsi
+@@ -355,6 +355,7 @@
+ 
+ /include/ "qoriq-esdhc-0.dtsi"
+ 	sdhc@114000 {
++		compatible = "fsl,p5040-esdhc", "fsl,esdhc";
+ 		fsl,iommu-parent = <&pamu2>;
+ 		fsl,liodn-reg = <&guts 0x530>; /* eSDHCLIODNR */
+ 		sdhci,auto-cmd12;
+-- 
+2.1.0.27.g96db324
 
-As its Baytrail-T make sure you have
-
-- Current BIOS
-- Latest kernel
-
-If it persists try disabling power management on the SD card interface.
-It may be worth reading through the ASUS T100TA bug reports and
-workarounds as that is probably the most poked at platform for BYT/T
-
-
-Alan
