@@ -1,82 +1,74 @@
 From: Kevin Hao <haokexin@gmail.com>
 Subject: Re: [PATCH] Revert "sdhci-of-esdhc: Support 8BIT bus width."
-Date: Fri, 15 May 2015 15:36:17 +0800
-Message-ID: <20150515073617.GO8870@pek-khao-d1.corp.ad.wrs.com>
+Date: Fri, 15 May 2015 15:42:54 +0800
+Message-ID: <20150515074254.GP8870@pek-khao-d1.corp.ad.wrs.com>
 References: <1431671349-12759-1-git-send-email-haokexin@gmail.com>
  <1431673364.13197.10.camel@transmode.se>
+ <1431674695.13197.14.camel@transmode.se>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="jx/LfW4V5TfZLeq7"
+	protocol="application/pgp-signature"; boundary="Bd2KlmcTHfsQFEJ+"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f177.google.com ([209.85.220.177]:35379 "EHLO
-	mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932092AbbEOHg0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2015 03:36:26 -0400
-Received: by qkgy4 with SMTP id y4so65342817qkg.2
-        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2015 00:36:26 -0700 (PDT)
+Received: from mail-qg0-f47.google.com ([209.85.192.47]:36598 "EHLO
+	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932335AbbEOHnF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2015 03:43:05 -0400
+Received: by qgg76 with SMTP id 76so23202498qgg.3
+        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2015 00:43:04 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <1431673364.13197.10.camel@transmode.se>
+In-Reply-To: <1431674695.13197.14.camel@transmode.se>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Joakim Tjernlund <joakim.tjernlund@transmode.se>
 Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
 
---jx/LfW4V5TfZLeq7
+--Bd2KlmcTHfsQFEJ+
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, May 15, 2015 at 07:02:44AM +0000, Joakim Tjernlund wrote:
-> Reverting this seem a bit to much. Looking in the log it seems commit
->  2317f56c055fcad524bf6a873df48a754e7ebc4d=20
-> introduced the error by not checking for host->ops->set_bus_width before
-> calling it.
+On Fri, May 15, 2015 at 07:24:55AM +0000, Joakim Tjernlund wrote:
+> Ahh, now I see. Drivers are supposed to call sdhci_set_bus_width instead =
+of NULL:
+> Instead of reverting this add:
 >=20
-> How does this work for you?
-
-No. My sd card still don't work with this change.
-
+>  diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-=
+of-esdhc.c
+> index 7a98a22..07b9df2 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -283,6 +283,7 @@ static const struct sdhci_ops sdhci_esdhc_ops =3D {
+>         .get_min_clock =3D esdhc_of_get_min_clock,
+>         .platform_init =3D esdhc_of_platform_init,
+>         .adma_workaround =3D esdhci_of_adma_workaround,
+> +       .set_bus_width =3D sdhci_set_bus_width,
+>         .reset =3D esdhc_reset,
+>         .set_uhs_signaling =3D sdhci_set_uhs_signaling,
+>  };
 >=20
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index c80287a..23603b2 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1528,7 +1528,10 @@ static void sdhci_do_set_ios(struct sdhci_host *ho=
-st, struct mmc_ios *ios)
->         if (host->ops->platform_send_init_74_clocks)
->                 host->ops->platform_send_init_74_clocks(host, ios->power_=
-mode);
-> =20
-> -       host->ops->set_bus_width(host, ios->bus_width);
-> +       if (host->ops->set_bus_width)
-> +               host->ops->set_bus_width(host, ios->bus_width);
-> +       else
-> +               sdhci_set_bus_width(host, ios->bus_width);
+> Should I repost the full "sdhci-of-esdhc: Support 8BIT bus width." with t=
+his fix added
+> of just the above fix?
 
-The default sdhci_set_bus_width() doesn't apply to the esdhc controller on =
-my
-board (p2020rdb). This controller is compatible with the sd host specificat=
-ion
-2.0 and the implementation of sdhci_set_bus_width() can't set the bus width
-correctly for it.
+Sorry, this still don't work.
 
 Thanks,
 Kevin
 
---jx/LfW4V5TfZLeq7
+--Bd2KlmcTHfsQFEJ+
 Content-Type: application/pgp-signature
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2
 
-iQEcBAEBAgAGBQJVVaHxAAoJEJNY7TDerrFxA4EIAM16Ks8JkHuwdHnSdjuQyPmT
-UHY2atPPnCCRZ5dcAW+rcN6oRYvu07L+7TWmA6R4vrH7g2KiZDJFkIkPPFAnukdc
-adMQoUNEVhCXZ2ZY+NtlPzKc+VfKDk/82R3oAsrN7IE1IIEv1O7J17JOq29gcK0L
-4MnQEYDpBRQ+stNimzzGTtE6+B3h8hSC4CwaM2JSWfyKlm+IHN2rxAVDPoc9lrEO
-cTM3GoMuCJxOG7BVgwZCrB3d3ClhLC8U0nrsBHmc48dNuWTxtbSgwaENYIGrtoM4
-ocpqKI+LLAlR1z6tolvSGatrfJJbK2hohHSEBQS3hAbInkWccUO+7SPWvKiwWMQ=
-=SDLA
+iQEcBAEBAgAGBQJVVaN+AAoJEJNY7TDerrFx/iwH+wQx1Tz1+/YdkX2hFRhhS8rm
+vzEOglfFJQfkNfHhJGCMTjQEGDh1DDfbQky+xiBFG1n95GFCL3gabj3PQYIYiwUh
+jyVkulLK7L5M5UgGPzQJ8N6JDZ8ht1qNVNQbrdvo4aZn/5KJRGCVg4PzHwpgdZfm
+gmI7kcDVQ+1o4H2PvRKmJyD4+niYQKSsR8XmfPwWBGq8r1+2QWWoLOmj7MdXSg82
+K2c4PcfPTxx20R6EkjYDSTV6vuZpN9DYIYjHNk0Gkf4zer6XlW6YtRsTWoD/FvYQ
+9s7EgciTq/BIywJt7L9gU6NZv/ErNm7vDOvsib5QsSj1hEYhM9QGb4SUXPRxSaU=
+=6p5c
 -----END PGP SIGNATURE-----
 
---jx/LfW4V5TfZLeq7--
+--Bd2KlmcTHfsQFEJ+--
