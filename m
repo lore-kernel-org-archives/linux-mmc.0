@@ -1,96 +1,73 @@
-From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
-Subject: Re: [PATCH] Revert "sdhci-of-esdhc: Support 8BIT bus width."
-Date: Fri, 15 May 2015 12:40:35 +0000
-Message-ID: <1431693634.13197.29.camel@transmode.se>
-References: <1431671349-12759-1-git-send-email-haokexin@gmail.com>
-	 <1431673364.13197.10.camel@transmode.se>
-	 <1431674695.13197.14.camel@transmode.se>
-	 <20150515074254.GP8870@pek-khao-d1.corp.ad.wrs.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] RFC: mmc: core: Increase delay for voltage to stabilize
+ from 3.3V to 1.8V
+Date: Fri, 15 May 2015 10:34:42 -0700
+Message-ID: <CAD=FV=V6HtTVFo=0NSf8i8_aaKmcwJf_KsAT4c8Gy5aAB9r1Vw@mail.gmail.com>
+References: <1431467171-12937-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.transmode.se ([31.15.61.139]:50335 "EHLO smtp.transmode.se"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1422756AbbEOMkj convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 May 2015 08:40:39 -0400
-In-Reply-To: <20150515074254.GP8870@pek-khao-d1.corp.ad.wrs.com>
-Content-Language: en-US
-Content-ID: <F1E30C94585AD2469C34D0D8749C7D78@transmode.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1431467171-12937-1-git-send-email-dianders@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Mark Brown <broonie@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Doug Anderson <dianders@chromium.org>, Johan Rudholm <johan.rudholm@axis.com>, Adrian Hunter <adrian.hunter@intel.com>, Tim Kryger <tim.kryger@gmail.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Andrew Gabbasov <andrew_gabbasov@mentor.com>, Sascha Hauer <s.hauer@pengutronix.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: "haokexin@gmail.com" <haokexin@gmail.com>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Fri, 2015-05-15 at 15:42 +0800, Kevin Hao wrote:
-> On Fri, May 15, 2015 at 07:24:55AM +0000, Joakim Tjernlund wrote:
-> > Ahh, now I see. Drivers are supposed to call sdhci_set_bus_width instead of NULL:
-> > Instead of reverting this add:
-> > 
-> >  diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> > index 7a98a22..07b9df2 100644
-> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> > @@ -283,6 +283,7 @@ static const struct sdhci_ops sdhci_esdhc_ops = {
-> >         .get_min_clock = esdhc_of_get_min_clock,
-> >         .platform_init = esdhc_of_platform_init,
-> >         .adma_workaround = esdhci_of_adma_workaround,
-> > +       .set_bus_width = sdhci_set_bus_width,
-> >         .reset = esdhc_reset,
-> >         .set_uhs_signaling = sdhci_set_uhs_signaling,
-> >  };
-> > 
-> > Should I repost the full "sdhci-of-esdhc: Support 8BIT bus width." with this fix added
-> > of just the above fix?
-> 
-> Sorry, this still don't work.
+Hi,
 
-How about this one:
+On Tue, May 12, 2015 at 2:46 PM, Doug Anderson <dianders@chromium.org> wrote:
+> Since the regulator used for the SDMMC IO voltage is not expected to
+> draw a lot of current, most systems will probably use an inexpensive
+> LDO for it.  LDO regulators apparently have the feature that they
+> don't actively drive the voltage down--they wait for other components
+> in the system to drag the voltage down.  Thus they will transition
+> faster under heavy loads and slower under light loads.
+>
+> During an SDMMC voltage change from 3.3V to 1.8V, we are almost
+> certainly under a light load.  To be specific:
+> * The regulator is hooked through pulls to CMD0-3 and DAT.  Probably
+>   the CMD pulls are something like 47K and the DAT is something like
+>   10K.
+> * The card is supposed to be driving DAT0-3 low during voltage change
+>   which will draw _some_ current, but not a lot.
+> * The regulator is also provided to the SDMMC host controller, but the
+>   SDMMC host controller is in open drain mode during the voltage
+>   change and so shouldn't be drawing much current.
+>
+> In order to keep the SDMMC host working properly (or for noise
+> reasons), there might also be a capacitor attached to the SDMMC IO
+> regulator.  This also will have the effect of slowing down transitions
+> of the regulator, especially under light loads.
+>
+> From experimental evidence, we've seen the voltage change fail if the
+> card doesn't detect that the voltage fell to less than about 2.3V when
+> we turn on the clock.  On one device (that admittedly had a 47K CMD
+> pullup instead of a 10K CMD pullup) we saw that the voltage was just
+> about 2.3V after 5ms and thus the voltage change would sometimes fail.
+> Doubling the delay gave margin and made the voltage change work 100%
+> of the time, despite the slightly weaker CMD pull.
+>
+> At the moment submitting this as an RFC patch since my problem _could_
+> be fixed by increasing the pull strength (or using a smaller
+> capacitor).  However being a little bit more lenient to strange
+> hardware could also be a good thing.
+>
+> Signed-off-by: Doug Anderson <dianders@chromium.org>
+> ---
+>  drivers/mmc/core/core.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 
->From af6b18c056b6064424bd2ab1f9989bbadae5e701 Mon Sep 17 00:00:00 2001
-From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
-Date: Mon, 20 Apr 2015 22:36:55 +0200
-Subject: [PATCHv3] sdhci-of-esdhc: Support 8BIT bus width.
+One other note is that I'm now seeing this even on a device that has
+the proper external pulls.  Maybe external capacitor is too big, but
+it's too late to change that now.  I didn't see it before on that
+device because we (accidentally) also had the internal pulls turned on
+which were draining voltage faster.  I could try adding the internal
+pulls back in, but that somehow seems worse than this.  One other
+benefit of adding a little bit longer delay is that when we start
+tuning it's more likely that we'll be tuning at a more stable voltage,
+even if we don't actually get an error.
 
-esdhc_readb()/esdhc_writeb() did not adjust for 8BIT.
+I'm planning to apply this locally, but still up to you of course
+whether you want to take it upstream.  :)
 
-Signed-off-by: Joakim Tjernlund <joakim.tjernlund@transmode.se>
----
- v3 - v2 had a few misunderstandings in it w.r.t bus_with handling.
-      sdhci-of-esdhc.c appears to be a bit of a mess w.r.t to this so
-      here is v3 which only touchs esdhc_readb()/esdhc_writeb() so
-      8BIT is preserverd.
-
- v2 - I had fogotten to add bus-width = <8> to my DTS.
-      Adding this simplified things
- drivers/mmc/host/sdhci-of-esdhc.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 1804bdb..233e38d 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -82,6 +82,10 @@ static u8 esdhc_readb(struct sdhci_host *host, int reg)
-                /* fixup the result */
-                ret &= ~SDHCI_CTRL_DMA_MASK;
-                ret |= dma_bits;
-+
-+               /* 8BIT is bit 29 in Control register */
-+               ret |= ((ret << 3) & SDHCI_CTRL_8BITBUS);
-+               ret &= ~(SDHCI_CTRL_8BITBUS >> 3);
-        }
- 
-        return ret;
-@@ -134,6 +138,10 @@ static void esdhc_writeb(struct sdhci_host *host, u8 val, int reg)
-                        dma_bits);
-                val &= ~SDHCI_CTRL_DMA_MASK;
-                val |= in_be32(host->ioaddr + reg) & SDHCI_CTRL_DMA_MASK;
-+
-+               /* 8BIT is bit 29 in Control register */
-+               val |= ((val & SDHCI_CTRL_8BITBUS) >> 3);
-+               val = (val & ~SDHCI_CTRL_8BITBUS);
-        }
- 
-        /* Prevent SDHCI core from writing reserved bits (e.g. HISPD). */
--- 
-2.3.6
+-Doug
