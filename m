@@ -1,56 +1,52 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 5/6] ARM: shmobile: lager: Set sdhi and mmcif clock rates
-Date: Sun, 17 May 2015 10:13:13 +0200
-Message-ID: <CAMuHMdWN1EPdq+TAdtZ5wW+G2r5he55SnjYEsHDg6T3-=n6r=g@mail.gmail.com>
-References: <1431822459.4222.166.camel@xylophone.i.decadent.org.uk>
-	<1431822574.4222.172.camel@xylophone.i.decadent.org.uk>
+From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
+Subject: Re: [PATCH] Revert "sdhci-of-esdhc: Support 8BIT bus width."
+Date: Sun, 17 May 2015 08:36:07 +0000
+Message-ID: <1431851766.6782.7.camel@transmode.se>
+References: <1431671349-12759-1-git-send-email-haokexin@gmail.com>
+	 <1431673364.13197.10.camel@transmode.se>
+	 <1431674695.13197.14.camel@transmode.se>
+	 <20150515074254.GP8870@pek-khao-d1.corp.ad.wrs.com>
+	 <1431693634.13197.29.camel@transmode.se>
+	 <20150517050602.GB23513@pek-khao-d1.corp.ad.wrs.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f169.google.com ([209.85.214.169]:33232 "EHLO
-	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752764AbbEQINO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 17 May 2015 04:13:14 -0400
-In-Reply-To: <1431822574.4222.172.camel@xylophone.i.decadent.org.uk>
+Received: from smtp.transmode.se ([31.15.61.139]:58545 "EHLO smtp.transmode.se"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752317AbbEQIgM convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 17 May 2015 04:36:12 -0400
+In-Reply-To: <20150517050602.GB23513@pek-khao-d1.corp.ad.wrs.com>
+Content-Language: en-US
+Content-ID: <604DF0BC898ED04893F94872253B3A6E@transmode.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Cc: Ian Molton <ian@mnementh.co.uk>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>
+To: "haokexin@gmail.com" <haokexin@gmail.com>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Sun, May 17, 2015 at 2:29 AM, Ben Hutchings
-<ben.hutchings@codethink.co.uk> wrote:
-> From: Ben Dooks <ben.dooks@codethink.co.uk>
->
-> [bwh: Fold in fix from Ian Molton]
-> Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
-> ---
->  arch/arm/boot/dts/r8a7790-lager.dts |   11 +++++++++++
->  1 file changed, 11 insertions(+)
->
-> diff --git a/arch/arm/boot/dts/r8a7790-lager.dts b/arch/arm/boot/dts/r8a7790-lager.dts
-> index aaa4f258e279..343ec0ccc8df 100644
-> --- a/arch/arm/boot/dts/r8a7790-lager.dts
-> +++ b/arch/arm/boot/dts/r8a7790-lager.dts
-> @@ -413,6 +413,11 @@
->         vmmc-supply = <&fixedregulator3v3>;
->         bus-width = <8>;
->         non-removable;
-> +
-> +       assigned-clocks = <&mstp3_clks R8A7790_CLK_MMCIF1>;
-> +       assigned-clock-rates = <97500000>;
-> +       max-frequency = <50000000>;
+On Sun, 2015-05-17 at 13:06 +0800, Kevin Hao wrote:
+> > 
+> > How about this one:
+> > 
+> > From af6b18c056b6064424bd2ab1f9989bbadae5e701 Mon Sep 17 00:00:00 2001
+> > From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
+> > Date: Mon, 20 Apr 2015 22:36:55 +0200
+> > Subject: [PATCHv3] sdhci-of-esdhc: Support 8BIT bus width.
+> > 
+> > esdhc_readb()/esdhc_writeb() did not adjust for 8BIT.
+> 
+> Do we really need this for the 8bit bus support? There is already a specific
+> API for setting the bus width, this change seems unnecessary to me. That is
+> also why I choose to revert that patch. Did I miss something?
 
-Are all these properties Lager-specific, or r8a7790-specific?
-If the latter, they belong in r8a7790.dtsi.
-Same comment for the other nodes.
+We do, the bus API really only works well when the bus bits are in another 
+register but the HOST_CONTROL register.
+The only reason 4BIT works is because its bit placement is where 
+SDHCI expects it to be. 8BIT is not, so unless readb/writeb funktions compensate
+for that they will overwrite what the bus API set earlier.
 
-Gr{oetje,eeting}s,
+Atleast this is my understanding, Ulf?
 
-                        Geert
+Didn't this patch work for you either?
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+ Jocke
