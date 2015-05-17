@@ -1,14 +1,16 @@
 From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: [PATCH kernel 1/6] mmc: tmio: Add UHS-I mode support
-Date: Sun, 17 May 2015 01:28:14 +0100
-Message-ID: <1431822494.4222.167.camel@xylophone.i.decadent.org.uk>
+Subject: [PATCH 1/6] mmc: tmio: Add UHS-I mode support
+Date: Sun, 17 May 2015 01:28:26 +0100
+Message-ID: <1431822506.4222.168.camel@xylophone.i.decadent.org.uk>
+References: <1431822459.4222.166.camel@xylophone.i.decadent.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1431822459.4222.166.camel@xylophone.i.decadent.org.uk>
 Sender: linux-sh-owner@vger.kernel.org
 To: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk
+Cc: linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
 Based on work by Shinobu Uehara and Ben Dooks.  This adds the
