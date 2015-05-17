@@ -1,8 +1,7 @@
 From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: [PATCH 3/6] pinctrl: sh-pfc: r8a7790: Add separate functions for
- SDHI 1.8V operation
-Date: Sun, 17 May 2015 01:28:55 +0100
-Message-ID: <1431822535.4222.170.camel@xylophone.i.decadent.org.uk>
+Subject: [PATCH 4/6] mmc: sh_mobile_sdhi: Add UHS-I mode support
+Date: Sun, 17 May 2015 01:29:09 +0100
+Message-ID: <1431822549.4222.171.camel@xylophone.i.decadent.org.uk>
 References: <1431822459.4222.166.camel@xylophone.i.decadent.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
@@ -14,161 +13,112 @@ To: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
 Cc: linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-All the SHDIs can operate with either 3.3V or 1.8V signals, depending
-on negotiation with the card.
+Implement voltage switch, supporting modes up to SDR-50.
 
-Add separate functions for the 1.8V mode, and implement the set_mux
-operation on all SDHI functions to configure the voltage for each
-group of pins.
+Based on work by Shinobu Uehara, Rob Taylor, William Towle and Ian Molton.
 
 Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 ---
- drivers/pinctrl/sh-pfc/core.c        |    2 +-
- drivers/pinctrl/sh-pfc/core.h        |    1 +
- drivers/pinctrl/sh-pfc/pfc-r8a7790.c |   70 ++++++++++++++++++++++++++++++++--
- 3 files changed, 68 insertions(+), 5 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c |   58 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 58 insertions(+)
 
-diff --git a/drivers/pinctrl/sh-pfc/core.c b/drivers/pinctrl/sh-pfc/core.c
-index 7b2c9495c383..7d51f96afc9a 100644
---- a/drivers/pinctrl/sh-pfc/core.c
-+++ b/drivers/pinctrl/sh-pfc/core.c
-@@ -92,7 +92,7 @@ static int sh_pfc_map_resources(struct sh_pfc *pfc,
- 	return 0;
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 354f4f335ed5..b96d7c084c2e 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -30,6 +30,9 @@
+ #include <linux/mfd/tmio.h>
+ #include <linux/sh_dma.h>
+ #include <linux/delay.h>
++#include <linux/pinctrl/consumer.h>
++#include <linux/pinctrl/pinctrl-state.h>
++#include <linux/regulator/consumer.h>
+ 
+ #include "tmio_mmc.h"
+ 
+@@ -86,6 +89,8 @@ struct sh_mobile_sdhi {
+ 	struct clk *clk;
+ 	struct tmio_mmc_data mmc_data;
+ 	struct tmio_mmc_dma dma_priv;
++	struct pinctrl *pinctrl;
++	struct pinctrl_state *pinctrl_3v3, *pinctrl_1v8;
+ };
+ 
+ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
+@@ -136,6 +141,47 @@ static void sh_mobile_sdhi_clk_disable(struct platform_device *pdev)
+ 	clk_disable_unprepare(priv->clk);
  }
  
--static void __iomem *sh_pfc_phys_to_virt(struct sh_pfc *pfc, u32 reg)
-+void __iomem *sh_pfc_phys_to_virt(struct sh_pfc *pfc, u32 reg)
- {
- 	struct sh_pfc_window *window;
- 	phys_addr_t address = reg;
-diff --git a/drivers/pinctrl/sh-pfc/core.h b/drivers/pinctrl/sh-pfc/core.h
-index 6dc8a6fc2746..af355629c5d2 100644
---- a/drivers/pinctrl/sh-pfc/core.h
-+++ b/drivers/pinctrl/sh-pfc/core.h
-@@ -57,6 +57,7 @@ int sh_pfc_unregister_gpiochip(struct sh_pfc *pfc);
- int sh_pfc_register_pinctrl(struct sh_pfc *pfc);
- int sh_pfc_unregister_pinctrl(struct sh_pfc *pfc);
- 
-+void __iomem *sh_pfc_phys_to_virt(struct sh_pfc *pfc, u32 address);
- u32 sh_pfc_read_raw_reg(void __iomem *mapped_reg, unsigned int reg_width);
- void sh_pfc_write_raw_reg(void __iomem *mapped_reg, unsigned int reg_width,
- 			  u32 data);
-diff --git a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-index 22a5470889f5..baba3151687f 100644
---- a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-+++ b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-@@ -4472,6 +4472,8 @@ static const char * const sdhi0_groups[] = {
- 	"sdhi0_wp",
- };
- 
-+#define sdhi0_1v8_groups sdhi0_groups
-+
- static const char * const sdhi1_groups[] = {
- 	"sdhi1_data1",
- 	"sdhi1_data4",
-@@ -4480,6 +4482,8 @@ static const char * const sdhi1_groups[] = {
- 	"sdhi1_wp",
- };
- 
-+#define sdhi1_1v8_groups sdhi1_groups
-+
- static const char * const sdhi2_groups[] = {
- 	"sdhi2_data1",
- 	"sdhi2_data4",
-@@ -4488,6 +4492,8 @@ static const char * const sdhi2_groups[] = {
- 	"sdhi2_wp",
- };
- 
-+#define sdhi2_1v8_groups sdhi2_groups
-+
- static const char * const sdhi3_groups[] = {
- 	"sdhi3_data1",
- 	"sdhi3_data4",
-@@ -4496,6 +4502,8 @@ static const char * const sdhi3_groups[] = {
- 	"sdhi3_wp",
- };
- 
-+#define sdhi3_1v8_groups sdhi3_groups
-+
- static const char * const ssi_groups[] = {
- 	"ssi0_data",
- 	"ssi0129_ctrl",
-@@ -4595,6 +4603,56 @@ static const char * const vin3_groups[] = {
- 	"vin3_clk",
- };
- 
-+static void sdhi_set_voltage(struct sh_pfc *pfc,
-+			     const struct sh_pfc_function *func,
-+			     const struct sh_pfc_pin_group *grp)
++static int sh_mobile_sdhi_start_signal_voltage_switch(
++	struct tmio_mmc_host *host, unsigned char signal_voltage)
 +{
-+	void __iomem *mapped_reg;
-+	u32 data, mask;
-+	int index;
++	struct sh_mobile_sdhi *priv = host_to_priv(host);
++	struct pinctrl_state *state;
++	int min_uV, max_uV;
++	int ret;
 +
-+	if (WARN_ON(strncmp(func->name, "sdhi", 4)))
-+		return;
-+	if (WARN_ON(strncmp(func->name, grp->name, 5)))
-+		return;
++	if (IS_ERR(priv->pinctrl) || IS_ERR(host->mmc->supply.vqmmc))
++		return -EOPNOTSUPP;
 +
-+	/* Calculate mask in IOCTRL6 based on the group */
-+	index = func->name[4] - '0';
-+	if (WARN_ON(index < 0 || index > 3))
-+		return;
-+	if (!strcmp(grp->name + 5, "_data1"))
-+		mask = 0x20;
-+	else if (!strcmp(grp->name + 5, "_data4"))
-+		mask = 0x3c;
-+	else if (!strcmp(grp->name + 5, "_ctrl"))
-+		mask = 0xc0;
-+	else if (!strcmp(grp->name + 5, "_cd"))
-+		mask = 0x02;
-+	else if (!strcmp(grp->name + 5, "_wp"))
-+		mask = 0x01;
-+	else {
-+		WARN_ON(1);
-+		return;
++	switch (signal_voltage) {
++	case MMC_SIGNAL_VOLTAGE_330:
++		min_uV = 2700000;
++		max_uV = 3600000;
++		state = priv->pinctrl_3v3;
++		break;
++	case MMC_SIGNAL_VOLTAGE_180:
++		min_uV = 1700000;
++		max_uV = 1950000;
++		state = priv->pinctrl_1v8;
++		break;
++	default:
++		return -EINVAL;
 +	}
-+	mask <<= 8 * (3 - index);
 +
-+	/* Map IOCTRL6 */
-+	mapped_reg = sh_pfc_phys_to_virt(pfc, 0xe606008c);
++	if (IS_ERR(state))
++		return PTR_ERR(state);
 +
-+	data = sh_pfc_read_raw_reg(mapped_reg, 32);
++	ret = regulator_set_voltage(host->mmc->supply.vqmmc, min_uV, max_uV);
++	if (ret)
++		return ret;
 +
-+	/* Set for 3.3V (high) or 1.8V (low) depending on the function name */
-+	if (strcmp(func->name + 5, "_1v8"))
-+		data |= mask;
-+	else
-+		data &= ~mask;
++	ret = pinctrl_select_state(priv->pinctrl, state);
++	if (ret)
++		return ret;
 +
-+	sh_pfc_write_raw_reg(
-+		sh_pfc_phys_to_virt(pfc, pfc->info->unlock_reg), 32,
-+		~data);
-+	sh_pfc_write_raw_reg(mapped_reg, 32, data);
++	usleep_range(5000, 5500);
++	return 0;
 +}
 +
- static const struct sh_pfc_function pinmux_functions[] = {
- 	SH_PFC_FUNCTION(audio_clk),
- 	SH_PFC_FUNCTION(avb),
-@@ -4631,10 +4689,14 @@ static const struct sh_pfc_function pinmux_functions[] = {
- 	SH_PFC_FUNCTION(scifb0),
- 	SH_PFC_FUNCTION(scifb1),
- 	SH_PFC_FUNCTION(scifb2),
--	SH_PFC_FUNCTION(sdhi0),
--	SH_PFC_FUNCTION(sdhi1),
--	SH_PFC_FUNCTION(sdhi2),
--	SH_PFC_FUNCTION(sdhi3),
-+	SH_PFC_FUNCTION_SPECIAL(sdhi0, sdhi_set_voltage),
-+	SH_PFC_FUNCTION_SPECIAL(sdhi0_1v8, sdhi_set_voltage),
-+	SH_PFC_FUNCTION_SPECIAL(sdhi1, sdhi_set_voltage),
-+	SH_PFC_FUNCTION_SPECIAL(sdhi1_1v8, sdhi_set_voltage),
-+	SH_PFC_FUNCTION_SPECIAL(sdhi2, sdhi_set_voltage),
-+	SH_PFC_FUNCTION_SPECIAL(sdhi2_1v8, sdhi_set_voltage),
-+	SH_PFC_FUNCTION_SPECIAL(sdhi3, sdhi_set_voltage),
-+	SH_PFC_FUNCTION_SPECIAL(sdhi3_1v8, sdhi_set_voltage),
- 	SH_PFC_FUNCTION(ssi),
- 	SH_PFC_FUNCTION(tpu0),
- 	SH_PFC_FUNCTION(usb0),
+ static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
+ {
+ 	int timeout = 1000;
+@@ -228,6 +274,14 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		goto eprobe;
+ 	}
+ 
++	priv->pinctrl = devm_pinctrl_get(&pdev->dev);
++	if (!IS_ERR(priv->pinctrl)) {
++		priv->pinctrl_3v3 = pinctrl_lookup_state(priv->pinctrl,
++							 PINCTRL_STATE_DEFAULT);
++		priv->pinctrl_1v8 = pinctrl_lookup_state(priv->pinctrl,
++							 "1v8");
++	}
++
+ 	host = tmio_mmc_host_alloc(pdev);
+ 	if (!host) {
+ 		ret = -ENOMEM;
+@@ -239,6 +293,10 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	host->clk_enable	= sh_mobile_sdhi_clk_enable;
+ 	host->clk_disable	= sh_mobile_sdhi_clk_disable;
+ 	host->multi_io_quirk	= sh_mobile_sdhi_multi_io_quirk;
++
++	host->start_signal_voltage_switch
++				= sh_mobile_sdhi_start_signal_voltage_switch;
++
+ 	/* SD control register space size is 0x100, 0x200 for bus_shift=1 */
+ 	if (resource_size(res) > 0x100)
+ 		host->bus_shift = 1;
 -- 
 1.7.10.4
 
