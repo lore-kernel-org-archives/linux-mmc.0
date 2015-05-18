@@ -1,88 +1,75 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: [PATCH] mmc: dw_mmc: Wait for data transfer after response errors
-Date: Mon, 18 May 2015 08:53:22 -0700
-Message-ID: <1431964402-27457-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, javier.martinez@collabora.co.uk, Chris Zhong <zyw@rock-chips.com>, Caesar Wang <wxt@rock-chips.com>, Doug Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Subject: Re: [PATCH 4/6] mmc: sh_mobile_sdhi: Add UHS-I mode support
+Date: Mon, 18 May 2015 18:00:15 +0100
+Message-ID: <1431968415.1970.4.camel@codethink.co.uk>
+References: <1431822459.4222.166.camel@xylophone.i.decadent.org.uk>
+	 <1431822549.4222.171.camel@xylophone.i.decadent.org.uk>
+	 <87d21yu27f.wl%kuninori.morimoto.gx@renesas.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:34533 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751000AbbERRAU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2015 13:00:20 -0400
+In-Reply-To: <87d21yu27f.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>
 
-According to the DesignWare state machine description, after we get a
-"response error" or "response CRC error" we move into data transfer
-mode.  That means that we don't necessarily need to special case
-trying to deal with the failure right away.  We can wait until we are
-notified that the data transfer is complete (with or without errors)
-and then we can deal with the failure.
+On Mon, 2015-05-18 at 01:05 +0000, Kuninori Morimoto wrote:
+> Hi Ben
+> 
+> > Implement voltage switch, supporting modes up to SDR-50.
+> > 
+> > Based on work by Shinobu Uehara, Rob Taylor, William Towle and Ian Molton.
+> > 
+> > Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
+> > ---
+> 
+> I have 1 concern about .start_signal_voltage_switch return value
+> 
+> > +static int sh_mobile_sdhi_start_signal_voltage_switch(
+> > +	struct tmio_mmc_host *host, unsigned char signal_voltage)
+> > +{
+> > +	struct sh_mobile_sdhi *priv = host_to_priv(host);
+> > +	struct pinctrl_state *state;
+> > +	int min_uV, max_uV;
+> > +	int ret;
+> > +
+> > +	if (IS_ERR(priv->pinctrl) || IS_ERR(host->mmc->supply.vqmmc))
+> > +		return -EOPNOTSUPP;
+> (snip)
+> > @@ -239,6 +293,10 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+> >  	host->clk_enable	= sh_mobile_sdhi_clk_enable;
+> >  	host->clk_disable	= sh_mobile_sdhi_clk_disable;
+> >  	host->multi_io_quirk	= sh_mobile_sdhi_multi_io_quirk;
+> > +
+> > +	host->start_signal_voltage_switch
+> > +				= sh_mobile_sdhi_start_signal_voltage_switch;
+> > +
+> 
+> This sh_mobile_sdhi_start_signal_voltage_switch() will return -EOPNOTSUPP
+> if IS_ERR(xx) cases, and it will be used on .tmio_mmc_start_signal_voltage_switch /
+> mmc_set_signal_voltage. These will think it is error and goes to error case or try again.
+> But, not supported is not error ?
 
-It may sound strange to defer dealing with a command that we know will
-fail anyway, but this appears to fix a bug.  During tuning (CMD19) on
-a specific card on an rk3288-based system, we found that we could get
-a "response CRC error".  Sending the stop command after the "response
-CRC error" would then throw the system into a confused state causing
-all future tuning phases to report failure.
+It is if we need to switch to a lower voltage.
 
-When in the confused state, the controller would show these (hex codes
-are interrupt status register):
- CMD ERR: 0x00000046 (cmd=19)
- CMD ERR: 0x0000004e (cmd=12)
- DATA ERR: 0x00000208
- DATA ERR: 0x0000020c
- CMD ERR: 0x00000104 (cmd=19)
- CMD ERR: 0x00000104 (cmd=12)
- DATA ERR: 0x00000208
- DATA ERR: 0x0000020c
- ...
- ...
+> Maybe we need this kind of code somewhere ? (ex. ALSA SoC has similar method)
+> 
+> 	/* EOPNOTSUPP is not error */
+> 	if (ret == -EOPNOTSUPP)
+> 		ret = 0;
+> 
+> I have no objection if my concern never happen.
 
-It is inherently difficult to deal with the complexity of trying to
-correctly send a stop command while a data transfer is taking place
-since you need to deal with different corner cases caused by the fact
-that the data transfer could complete (with errors or without errors)
-during various places in sending the stop command (dw_mci_stop_dma,
-send_stop_abort, etc)
+I think the driver should do something like this if the requested
+voltage is MMC_SIGNAL_VOLTAGE_330.  I'll fix that in the next version.
 
-Instead of adding a bunch of extra complexity to deal with this, it
-seems much simpler to just use the more straightforward (and less
-error-prone) path of letting the data transfer finish.  There
-shouldn't be any huge benefit to sending the stop command slightly
-earlier, anyway.
+Ben.
 
-Signed-off-by: Doug Anderson <dianders@chromium.org>
----
- drivers/mmc/host/dw_mmc.c | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 5f5adaf..c081ce2 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1574,6 +1574,26 @@ static void dw_mci_tasklet_func(unsigned long priv)
- 			}
- 
- 			if (cmd->data && err) {
-+				/*
-+				 * Controller will move into a data transfer
-+				 * state after a response error or response CRC
-+				 * error.  Let's let that finish before trying
-+				 * to send a stop, so we'll go to
-+				 * STATE_SENDING_DATA.
-+				 *
-+				 * Although letting the data transfer take place
-+				 * will waste a bit of time (we already know
-+				 * the command was bad), it can't cause any
-+				 * errors since it's possible it would have
-+				 * taken place anyway if this tasklet got
-+				 * delayed.  Allowing the transfer to take place
-+				 * avoids races and keeps things simple.
-+				 */
-+				if (err != -ETIMEDOUT) {
-+					state = STATE_SENDING_DATA;
-+					continue;
-+				}
-+
- 				dw_mci_stop_dma(host);
- 				send_stop_abort(host, data);
- 				state = STATE_SENDING_STOP;
--- 
-2.2.0.rc0.207.ga3a616c
+
