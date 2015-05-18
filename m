@@ -1,84 +1,56 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2, 2/2] mmc: sdhci-pltfm: enable interrupt mode to detect card
-Date: Mon, 18 May 2015 11:49:40 +0200
-Message-ID: <CAPDyKFpB2a=9J1T2+EwKUCx-6f27CbJyJSfXVMkK5sL0DsJL2Q@mail.gmail.com>
-References: <1431657984-42484-1-git-send-email-yangbo.lu@freescale.com>
-	<CAPDyKFrgr5-xL3xG83AdFd8sAf20TUetCN=7etCg9rsKoZ317g@mail.gmail.com>
-	<BY1PR0301MB11920E68DD9C4B17F1B1373FF2C40@BY1PR0301MB1192.namprd03.prod.outlook.com>
+From: Prabu Thangamuthu <Prabu.T@synopsys.com>
+Subject: [PATCH 1/1] dw_mmc: insmod followed by rmmod will hung for eMMC
+Date: Mon, 18 May 2015 14:23:16 +0000
+Message-ID: <705D14B1C7978B40A723277C067CEDE245182CD0@IN01WEMBXB.internal.synopsys.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f170.google.com ([209.85.216.170]:35437 "EHLO
-	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753253AbbERJtl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2015 05:49:41 -0400
-Received: by qcbgu10 with SMTP id gu10so86288238qcb.2
-        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2015 02:49:40 -0700 (PDT)
-In-Reply-To: <BY1PR0301MB11920E68DD9C4B17F1B1373FF2C40@BY1PR0301MB1192.namprd03.prod.outlook.com>
+Received: from us01smtprelay-2.synopsys.com ([198.182.60.111]:35905 "EHLO
+	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753072AbbEROXV convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2015 10:23:21 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Lu Y.B." <yangbo.lu@freescale.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chrisball@gmail.com>, Scott Wood <scottwood@freescale.com>
+To: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Manjunath M Bettegowda <Manjunath.MB@synopsys.com>, "prabu.t@synopsys.com" <prabu.t@synopsys.com>
 
-On 18 May 2015 at 11:30, Lu Y.B. <yangbo.lu@freescale.com> wrote:
->
->
->> -----Original Message-----
->> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
->> Sent: Monday, May 18, 2015 5:04 PM
->> To: Lu Yangbo-B47093
->> Cc: linux-mmc; Chris Ball; Wood Scott-B07421
->> Subject: Re: [PATCH v2, 2/2] mmc: sdhci-pltfm: enable interrupt mode to
->> detect card
->>
->> On 15 May 2015 at 04:46, Yangbo Lu <yangbo.lu@freescale.com> wrote:
->> > Enable interrupt mode to detect card instead of polling mode for
->> > P1020/P4080/P5020/P5040/T1040 by removing the quirk
->> > SDHCI_QUIRK_BROKEN_CARD_DETECTION. This could improve data
->> > transferring performance and avoid the call trace caused by polling
->> > card status sometime.
->> >
->> > Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
->> > ----
->> > Changes for v2:
->> >         - Aligned all "of_device_is_compatibles" in same column
->> > ---
->> >  drivers/mmc/host/sdhci-pltfm.c | 7 +++++++
->> >  1 file changed, 7 insertions(+)
->> >
->> > diff --git a/drivers/mmc/host/sdhci-pltfm.c
->> > b/drivers/mmc/host/sdhci-pltfm.c index c5b01d6..97128f3 100644
->> > --- a/drivers/mmc/host/sdhci-pltfm.c
->> > +++ b/drivers/mmc/host/sdhci-pltfm.c
->> > @@ -102,6 +102,13 @@ void sdhci_get_of_property(struct platform_device
->> *pdev)
->> >                     of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
->> >                         host->quirks |=
->> > SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
->> >
->> > +               if (of_device_is_compatible(np, "fsl,p5040-esdhc") ||
->> > +                   of_device_is_compatible(np, "fsl,p5020-esdhc") ||
->> > +                   of_device_is_compatible(np, "fsl,p4080-esdhc") ||
->> > +                   of_device_is_compatible(np, "fsl,p1020-esdhc") ||
->> > +                   of_device_is_compatible(np, "fsl,t1040-esdhc"))
->> > +                       host->quirks &=
->> > + ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
->>
->> This looks strange to me.
->>
->> Why not just change the DT files for the relevant platforms to not enable
->> "broken-cd"?
->>
-> Thanks Uffe.
-> Because most platforms using sdhci-of-esdhc have broken CD, we hope this quirk is selected in default.
-> Only several platforms could use CD to detect and we clear this bit for them.
+Removing dw_mmc driver immediately after inserting the dw_mmc driver is 
+getting hung for eMMC device. Root cause for this issue is, dw_mci_remove
+will disable all the interrupts then it will call dw_mci_cleanup_slot.
+dw_mci_cleanup_slot is issuing CMD6 to disable boot partition access and
+it's waiting for command complete interrupt. Since INTMASK was already
+cleared by dw_mci_remove, command complete interrupt is not reaching 
+the system. This leads to process hung.
 
-Hmm.
+Signed-off-by: Prabu Thangamuthu <prabu.t@synopsys.com>
+---
+ drivers/mmc/host/dw_mmc.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
 
-Those platforms could still update their DT files and add "broken-cd",
-since that would be the proper description of the HW. Once that's
-done, it would enable you to remove the
-SDHCI_QUIRK_BROKEN_CARD_DETECTION as default, right?
-
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 5f5adaf..f0a0aff 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2941,15 +2941,15 @@ void dw_mci_remove(struct dw_mci *host)
+ {
+ 	int i;
+ 
+-	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+-	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
+-
+ 	for (i = 0; i < host->num_slots; i++) {
+ 		dev_dbg(host->dev, "remove slot %d\n", i);
+ 		if (host->slot[i])
+ 			dw_mci_cleanup_slot(host->slot[i], i);
+ 	}
+ 
++	mci_writel(host, RINTSTS, 0xFFFFFFFF);
++	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
++
+ 	/* disable clock to CIU */
+ 	mci_writel(host, CLKENA, 0);
+ 	mci_writel(host, CLKSRC, 0);
+-- 
+1.7.6.5
