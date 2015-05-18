@@ -1,49 +1,58 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [PATCH v2, 1/2] powerpc/dts: add eSDHC compatible list
-Date: Mon, 18 May 2015 14:14:22 -0500
-Message-ID: <1431976462.27761.0.camel@freescale.com>
-References: <1431657962-42443-1-git-send-email-yangbo.lu@freescale.com>
-	 <1431735910.3868.213.camel@freescale.com>
-	 <CAPDyKFrFdnnq6esR-JPB30sPnT_DZAUvgP9_3rN8O6A9f+8Hpw@mail.gmail.com>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Subject: Re: [PATCH 5/6] ARM: shmobile: lager: Set sdhi and mmcif clock rates
+Date: Mon, 18 May 2015 20:48:44 +0100
+Message-ID: <1431978524.22824.6.camel@codethink.co.uk>
+References: <1431822459.4222.166.camel@xylophone.i.decadent.org.uk>
+	 <1431822574.4222.172.camel@xylophone.i.decadent.org.uk>
+	 <CAMuHMdWN1EPdq+TAdtZ5wW+G2r5he55SnjYEsHDg6T3-=n6r=g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1on0113.outbound.protection.outlook.com ([157.56.110.113]:23062
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S964781AbbERTra (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 18 May 2015 15:47:30 -0400
-In-Reply-To: <CAPDyKFrFdnnq6esR-JPB30sPnT_DZAUvgP9_3rN8O6A9f+8Hpw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <CAMuHMdWN1EPdq+TAdtZ5wW+G2r5he55SnjYEsHDg6T3-=n6r=g@mail.gmail.com>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Ian Molton <ian@mnementh.co.uk>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Yangbo Lu <yangbo.lu@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chrisball@gmail.com>
 
-On Mon, 2015-05-18 at 11:03 +0200, Ulf Hansson wrote:
-> On 16 May 2015 at 02:25, Scott Wood <scottwood@freescale.com> wrote:
-> > On Fri, 2015-05-15 at 10:46 +0800, Yangbo Lu wrote:
-> >> Add eSDHC compatible list for P2041/P3041/P4080/P5020/P5040.
-> >>
-> >> Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
-> >> ---
-> >>  arch/powerpc/boot/dts/fsl/p2041si-post.dtsi | 1 +
-> >>  arch/powerpc/boot/dts/fsl/p3041si-post.dtsi | 1 +
-> >>  arch/powerpc/boot/dts/fsl/p4080si-post.dtsi | 1 +
-> >>  arch/powerpc/boot/dts/fsl/p5020si-post.dtsi | 1 +
-> >>  arch/powerpc/boot/dts/fsl/p5040si-post.dtsi | 1 +
-> >>  5 files changed, 5 insertions(+)
+On Sun, 2015-05-17 at 10:13 +0200, Geert Uytterhoeven wrote:
+> On Sun, May 17, 2015 at 2:29 AM, Ben Hutchings
+> <ben.hutchings@codethink.co.uk> wrote:
+> > From: Ben Dooks <ben.dooks@codethink.co.uk>
 > >
-> > Acked-by: Scott Wood <scottwood@freescale.com>
+> > [bwh: Fold in fix from Ian Molton]
+> > Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
+> > ---
+> >  arch/arm/boot/dts/r8a7790-lager.dts |   11 +++++++++++
+> >  1 file changed, 11 insertions(+)
 > >
-> > -Scott
+> > diff --git a/arch/arm/boot/dts/r8a7790-lager.dts b/arch/arm/boot/dts/r8a7790-lager.dts
+> > index aaa4f258e279..343ec0ccc8df 100644
+> > --- a/arch/arm/boot/dts/r8a7790-lager.dts
+> > +++ b/arch/arm/boot/dts/r8a7790-lager.dts
+> > @@ -413,6 +413,11 @@
+> >         vmmc-supply = <&fixedregulator3v3>;
+> >         bus-width = <8>;
+> >         non-removable;
+> > +
+> > +       assigned-clocks = <&mstp3_clks R8A7790_CLK_MMCIF1>;
+> > +       assigned-clock-rates = <97500000>;
+> > +       max-frequency = <50000000>;
 > 
-> Hi Scott,
-> 
-> Does the above ack mean you want me to pick up and take it through my mmc tree?
+> Are all these properties Lager-specific, or r8a7790-specific?
+> If the latter, they belong in r8a7790.dtsi.
+> Same comment for the other nodes.
 
-That'd be fine.
+The clock assignments are not specific to Lager so they probably belong
+in r8a7790.dtsi; the dividers are configurable and could be
+board-specific.
 
--Scott
+The board design could conceivably limit the usable frequency to below
+the chip's maximum, though presumably that won't usually happen.
+Currently the clk-rcar-gen2 driver only configures the dividers for
+sdhi{0,1}.  That leaves the rest of them effectively controlled by the
+board's firmware.
+
+Ben.
 
 
