@@ -1,115 +1,56 @@
 From: Suman Tripathi <stripathi@apm.com>
-Subject: Re: [PATCH v7 1/2] arm64: dts: Add the arasan mmc nodes in apm-storm.dtsi
-Date: Mon, 18 May 2015 12:34:52 +0530
-Message-ID: <CAOHikRAV4i_R8LhmJgRRePSbJ+YG_eb6c94idQZWHS+fh6SAVQ@mail.gmail.com>
+Subject: Re: [PATCH v7 2/2] mmc: host: sdhci: Add support to disable
+ SDR104/SDR50/DDR50 based on capability register 0.
+Date: Mon, 18 May 2015 12:36:07 +0530
+Message-ID: <CAOHikRBU9yrGQU3BbTqs4sWZN5osqEYKzD3VjXPar180aQj67Q@mail.gmail.com>
 References: <1431517912-10322-1-git-send-email-stripathi@apm.com>
-	<1431517912-10322-2-git-send-email-stripathi@apm.com>
+	<1431517912-10322-3-git-send-email-stripathi@apm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og121.obsmtp.com ([64.18.0.139]:35756 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751976AbbERHEz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2015 03:04:55 -0400
-Received: by wibt6 with SMTP id t6so58125565wib.0
-        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2015 00:04:53 -0700 (PDT)
-In-Reply-To: <1431517912-10322-2-git-send-email-stripathi@apm.com>
+Received: from exprod5og107.obsmtp.com ([64.18.0.184]:47575 "EHLO
+	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752208AbbERHGJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2015 03:06:09 -0400
+Received: by wizk4 with SMTP id k4so66617128wiz.1
+        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2015 00:06:07 -0700 (PDT)
+In-Reply-To: <1431517912-10322-3-git-send-email-stripathi@apm.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Arnd Bergmann <arnd@arndb.de>, Michal Simek <michal.simek@xilinx.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Don Dutile <ddutile@redhat.com>, Jon Masters <jcm@redhat.com>, Mark Langsdorf <mlangsdo@redhat.com>, patches <patches@apm.com>, Suman Tripathi <stripathi@apm.com>
 
-Hi Arnd,
-
 On Wed, May 13, 2015 at 5:21 PM, Suman Tripathi <stripathi@apm.com> wrote:
-> This patch adds the arasan mmc nodes to reuse the of-arasan
-> driver for APM X-Gene SoC.
+> The sdhci framework disables SDR104/SDR50/DDR50 based on only quirk.
+> This patch adds the support to disable SDR104/SDR50/DDR50 based on
+> reading the capability register 0.
 >
 > Signed-off-by: Suman Tripathi <stripathi@apm.com>
 > ---
 > ---
->  arch/arm64/boot/dts/apm/apm-mustang.dts |  4 +++
->  arch/arm64/boot/dts/apm/apm-storm.dtsi  | 43 +++++++++++++++++++++++++++++++++
->  2 files changed, 47 insertions(+)
+>  drivers/mmc/host/sdhci.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 >
-> diff --git a/arch/arm64/boot/dts/apm/apm-mustang.dts b/arch/arm64/boot/dts/apm/apm-mustang.dts
-> index 83578e7..7a3ea72 100644
-> --- a/arch/arm64/boot/dts/apm/apm-mustang.dts
-> +++ b/arch/arm64/boot/dts/apm/apm-mustang.dts
-> @@ -52,3 +52,7 @@
->  &xgenet {
->         status = "ok";
->  };
-> +
-> +&mmc0 {
-> +       status = "ok";
-> +};
-> diff --git a/arch/arm64/boot/dts/apm/apm-storm.dtsi b/arch/arm64/boot/dts/apm/apm-storm.dtsi
-> index c8d3e0e..8e03ecd 100644
-> --- a/arch/arm64/boot/dts/apm/apm-storm.dtsi
-> +++ b/arch/arm64/boot/dts/apm/apm-storm.dtsi
-> @@ -145,6 +145,40 @@
->                                 clock-output-names = "socplldiv2";
->                         };
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 58c1770..a3d9b8a 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3118,7 +3118,8 @@ int sdhci_add_host(struct sdhci_host *host)
+>                 }
+>         }
 >
-> +                       ahbclk: ahbclk@1f2ac000 {
-> +                               compatible = "apm,xgene-device-clock";
-> +                               #clock-cells = <1>;
-> +                               clocks = <&socplldiv2 0>;
-> +                               reg = <0x0 0x1f2ac000 0x0 0x1000
-> +                                       0x0 0x17000000 0x0 0x2000>;
-> +                               reg-names = "csr-reg", "div-reg";
-> +                               csr-offset = <0x0>;
-> +                               csr-mask = <0x1>;
-> +                               enable-offset = <0x8>;
-> +                               enable-mask = <0x1>;
-> +                               divider-offset = <0x164>;
-> +                               divider-width = <0x5>;
-> +                               divider-shift = <0x0>;
-> +                               clock-output-names = "ahbclk";
-> +                       };
-> +
-> +                       sdioclk: sdioclk@1f2ac000 {
-> +                               compatible = "apm,xgene-device-clock";
-> +                               #clock-cells = <1>;
-> +                               clocks = <&socplldiv2 0>;
-> +                               reg = <0x0 0x1f2ac000 0x0 0x1000
-> +                                       0x0 0x17000000 0x0 0x2000>;
-> +                               reg-names = "csr-reg", "div-reg";
-> +                               csr-offset = <0x0>;
-> +                               csr-mask = <0x2>;
-> +                               enable-offset = <0x8>;
-> +                               enable-mask = <0x2>;
-> +                               divider-offset = <0x178>;
-> +                               divider-width = <0x8>;
-> +                               divider-shift = <0x0>;
-> +                               clock-output-names = "sdioclk";
-> +                       };
-> +
->                         qmlclk: qmlclk {
->                                 compatible = "apm,xgene-device-clock";
->                                 #clock-cells = <1>;
-> @@ -533,6 +567,15 @@
->                         interrupts = <0x0 0x4f 0x4>;
->                 };
+> -       if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)
+> +       if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V ||
+> +           !(caps[0] & SDHCI_CAN_VDD_180))
+>                 caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+>                        SDHCI_SUPPORT_DDR50);
 >
-> +               mmc0: mmc@1c000000 {
-> +                       compatible = "arasan,sdhci-4.9a";
-> +                       reg = <0x0 0x1c000000 0x0 0x100>;
-> +                       interrupts = <0x0 0x49 0x4>;
-> +                       dma-coherent;
-> +                       clock-names = "clk_xin", "clk_ahb";
-> +                       clocks = <&sdioclk 0>, <&ahbclk 0>;
-> +               };
-> +
->                 phy1: phy@1f21a000 {
->                         compatible = "apm,xgene-phy";
->                         reg = <0x0 0x1f21a000 0x0 0x100>;
 > --
 > 1.8.2.1
 >
 
-Can you review this ?
+I didn't get any comments on this patch . Can anyone review it
+(Michal , Ulf , Arnd etc ...)?
 
 
 -- 
