@@ -1,63 +1,71 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] Revert "sdhci-of-esdhc: Support 8BIT bus width."
-Date: Mon, 18 May 2015 09:58:40 +0200
-Message-ID: <CAPDyKFqa1O-=TvgH-XyXC0L+XkEBOp1vUkt9YhuuDdg=jjVdVw@mail.gmail.com>
-References: <1431671349-12759-1-git-send-email-haokexin@gmail.com>
-	<1431673364.13197.10.camel@transmode.se>
-	<1431674695.13197.14.camel@transmode.se>
-	<20150515074254.GP8870@pek-khao-d1.corp.ad.wrs.com>
-	<1431693634.13197.29.camel@transmode.se>
-	<20150517050602.GB23513@pek-khao-d1.corp.ad.wrs.com>
-	<1431851766.6782.7.camel@transmode.se>
+Subject: Re: [GIT PULL] Update dw-mmc controller
+Date: Mon, 18 May 2015 10:25:27 +0200
+Message-ID: <CAPDyKFopBSkRuUWoCKtmEke0DmbJY5L0464mpk41ez5zGHTrAw@mail.gmail.com>
+References: <55596011.7030308@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f182.google.com ([209.85.220.182]:34285 "EHLO
-	mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752012AbbERH6l (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2015 03:58:41 -0400
-Received: by qkgx75 with SMTP id x75so104501036qkg.1
-        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2015 00:58:40 -0700 (PDT)
-In-Reply-To: <1431851766.6782.7.camel@transmode.se>
+Received: from mail-qg0-f42.google.com ([209.85.192.42]:36472 "EHLO
+	mail-qg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752438AbbERIZ2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 May 2015 04:25:28 -0400
+Received: by qgf59 with SMTP id 59so11748031qgf.3
+        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2015 01:25:27 -0700 (PDT)
+In-Reply-To: <55596011.7030308@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Joakim Tjernlund <joakim.tjernlund@transmode.se>, "haokexin@gmail.com" <haokexin@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Zhangfei Gao <zhangfei.gao@linaro.org>, Lars-Peter Clausen <lars@metafoo.de>
 
-On 17 May 2015 at 10:36, Joakim Tjernlund <joakim.tjernlund@transmode.se> wrote:
-> On Sun, 2015-05-17 at 13:06 +0800, Kevin Hao wrote:
->> >
->> > How about this one:
->> >
->> > From af6b18c056b6064424bd2ab1f9989bbadae5e701 Mon Sep 17 00:00:00 2001
->> > From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
->> > Date: Mon, 20 Apr 2015 22:36:55 +0200
->> > Subject: [PATCHv3] sdhci-of-esdhc: Support 8BIT bus width.
->> >
->> > esdhc_readb()/esdhc_writeb() did not adjust for 8BIT.
->>
->> Do we really need this for the 8bit bus support? There is already a specific
->> API for setting the bus width, this change seems unnecessary to me. That is
->> also why I choose to revert that patch. Did I miss something?
+On 18 May 2015 at 05:44, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Dear, Ulf.
 >
-> We do, the bus API really only works well when the bus bits are in another
-> register but the HOST_CONTROL register.
-> The only reason 4BIT works is because its bit placement is where
-> SDHCI expects it to be. 8BIT is not, so unless readb/writeb funktions compensate
-> for that they will overwrite what the bus API set earlier.
->
-> Atleast this is my understanding, Ulf?
+> Could you pull these patches for mmc-next?
 
-Sorry, I don't have enough knowledge about sdhci to give you good answer.
-
->
-> Didn't this patch work for you either?
-
-I have dropped the "sdhci-of-edsdhc: Support 8-bit..." from my next
-branch for now.
-
-A "Tested-by" confirmation of a new version of $subject patch, would
-help me to know when it can go in.
+Thanks, pulled!
 
 Kind regards
 Uffe
+
+>
+> Best Regards,
+> Jaehoon Chung
+>
+> The following changes since commit d689a660983cf600bd73e5f79650785471f3c13a:
+>
+>   mmc: cast unsigned int to typeof(sector_t) to avoid unexpected error (2015-05-11 12:16:38 +0200)
+>
+> are available in the git repository at:
+>
+>   https://github.com/jh80chung/dw-mmc.git tags/dw_mmc-next-for-ulf
+>
+> for you to fetch changes up to 33865962d87357cd39e446fc89e5509557483668:
+>
+>   mmc: dw_mmc: rockchip: Fix modalias to make module auto-loading work (2015-05-18 05:41:28 +0900)
+>
+> ----------------------------------------------------------------
+> - Support the hi6200
+> - Fix modailis to make module auto-loading work
+> - Use core to handle absent write protect line
+>
+> ----------------------------------------------------------------
+> Lars-Peter Clausen (1):
+>       mmc: dw_mmc: Use core to handle absent write protect line
+>
+> Zhangfei Gao (6):
+>       Document: dw_mmc-k3: add document of hi6220 mmc
+>       mmc: dw_mmc: add switch_voltage
+>       mmc: dw_mmc: k3: support hi6220
+>       mmc: dw_mmc: k3: Fix modalias to make module auto-loading work
+>       mmc: dw_mmc: exynos: Fix modalias to make module auto-loading work
+>       mmc: dw_mmc: rockchip: Fix modalias to make module auto-loading work
+>
+>  .../devicetree/bindings/mmc/k3-dw-mshc.txt         |  28 ++++++
+>  drivers/mmc/host/dw_mmc-exynos.c                   |   2 +-
+>  drivers/mmc/host/dw_mmc-k3.c                       | 105 ++++++++++++++++++++-
+>  drivers/mmc/host/dw_mmc-rockchip.c                 |   2 +-
+>  drivers/mmc/host/dw_mmc.c                          |  57 +++++------
+>  drivers/mmc/host/dw_mmc.h                          |   5 +-
+>  include/linux/mmc/dw_mmc.h                         |   6 --
+>  7 files changed, 155 insertions(+), 50 deletions(-)
