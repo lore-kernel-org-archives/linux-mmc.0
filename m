@@ -1,140 +1,206 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [PATCH v2, 2/2] mmc: sdhci-pltfm: enable interrupt mode to
- detect card
-Date: Mon, 18 May 2015 22:06:35 -0500
-Message-ID: <1432004795.27761.57.camel@freescale.com>
-References: <1431657984-42484-1-git-send-email-yangbo.lu@freescale.com>
-	 <CAPDyKFrgr5-xL3xG83AdFd8sAf20TUetCN=7etCg9rsKoZ317g@mail.gmail.com>
-	 <BY1PR0301MB11920E68DD9C4B17F1B1373FF2C40@BY1PR0301MB1192.namprd03.prod.outlook.com>
-	 <CAPDyKFpB2a=9J1T2+EwKUCx-6f27CbJyJSfXVMkK5sL0DsJL2Q@mail.gmail.com>
-	 <BY1PR0301MB1192B676B858B31C3B1893C1F2C40@BY1PR0301MB1192.namprd03.prod.outlook.com>
-	 <1431981783.27761.5.camel@freescale.com>
-	 <DM2PR0301MB1199D37E394B9CF805CD220DF2C30@DM2PR0301MB1199.namprd03.prod.outlook.com>
-	 <1432002463.27761.49.camel@freescale.com>
-	 <DM2PR0301MB1199F34464FC9F372A74ED60F2C30@DM2PR0301MB1199.namprd03.prod.outlook.com>
+From: Yangbo Lu <yangbo.lu@freescale.com>
+Subject: [PATCH v2] mmc: sdhci-of-esdhc: add workaround for clock glitch issue
+Date: Tue, 19 May 2015 13:40:29 +0800
+Message-ID: <1432014029-21152-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bn0105.outbound.protection.outlook.com ([157.56.110.105]:8992
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+Received: from mail-by2on0104.outbound.protection.outlook.com ([207.46.100.104]:5150
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752592AbbESDGo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 18 May 2015 23:06:44 -0400
-In-Reply-To: <DM2PR0301MB1199F34464FC9F372A74ED60F2C30@DM2PR0301MB1199.namprd03.prod.outlook.com>
+	id S1750728AbbESFo1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 19 May 2015 01:44:27 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lu Yangbo-B47093 <yangbo.lu@freescale.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chrisball@gmail.com>
+To: linux-mmc@vger.kernel.org, chrisball@gmail.com, ulf.hansson@linaro.org, jh80.chung@samsung.com
+Cc: Yangbo Lu <yangbo.lu@freescale.com>
 
-On Mon, 2015-05-18 at 21:49 -0500, Lu Yangbo-B47093 wrote:
->=20
->=20
-> > -----Original Message-----
-> > From: Wood Scott-B07421
-> > Sent: Tuesday, May 19, 2015 10:28 AM
-> > To: Lu Yangbo-B47093
-> > Cc: Ulf Hansson; linux-mmc; Chris Ball
-> > Subject: Re: [PATCH v2, 2/2] mmc: sdhci-pltfm: enable interrupt mod=
-e to
-> > detect card
-> >=20
-> > On Mon, 2015-05-18 at 21:16 -0500, Lu Yangbo-B47093 wrote:
-> > >
-> > >
-> > > > -----Original Message-----
-> > > > From: Wood Scott-B07421
-> > > > Sent: Tuesday, May 19, 2015 4:43 AM
-> > > > To: Lu Yangbo-B47093
-> > > > Cc: Ulf Hansson; linux-mmc; Chris Ball
-> > > > Subject: Re: [PATCH v2, 2/2] mmc: sdhci-pltfm: enable interrupt=
- mode
-> > > > to detect card
-> > > >
-> > > > On Mon, 2015-05-18 at 04:55 -0500, Lu Yangbo-B47093 wrote:
-> > > > >
-> > > > >
-> > > > > > -----Original Message-----
-> > > > > > From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
-> > > > > > Sent: Monday, May 18, 2015 5:50 PM
-> > > > > > To: Lu Yangbo-B47093
-> > > > > > Cc: linux-mmc; Chris Ball; Wood Scott-B07421
-> > > > > > Subject: Re: [PATCH v2, 2/2] mmc: sdhci-pltfm: enable inter=
-rupt
-> > > > > > mode to detect card
-> > > > > >
-> > > > > > Those platforms could still update their DT files and add
-> > > > > > "broken-cd", since that would be the proper description of =
-the HW.
-> > > > > > Once that's done, it would enable you to remove the
-> > > > > > SDHCI_QUIRK_BROKEN_CARD_DETECTION as default, right?
-> > > > > >
-> > > > > Yes, and if remove SDHCI_QUIRK_BROKEN_CARD_DETECTION as defau=
-lt,
-> > > > 'borken-cd' would be needed to be added for most platforms usin=
-g
-> > esdhc.
-> > > >
-> > > > I was OK with changing the device tree if it just meant that th=
-ings
-> > > > that previously didn't work now work.  I'm not OK with requirin=
-g the
-> > > > device trees to change in order for things that already work to=
- stay
-> > working.
-> > > >
-> > > > In general it is not reasonable to expect device trees to enume=
-rate
-> > > > hardware bugs since the bugs (or the need to work aronud them) =
-are
-> > > > often discovered after the device tree has been created.
-> > > >
-> > > > Yangbo, when I asked why you couldn't use SVR you said that it =
-was a
-> > > > common SDHC file.  But, the file that sets
-> > > > SDHCI_QUIRK_BROKEN_CARD_DETECTION in the first place is
-> > > > sdhci-of-esdhc.c which is Freescale-specific.  Why not just tes=
-t SVR
-> > > > in there to determine whether the quirk should be set?
-> > > Thanks Scott.
-> > > The SVR testing could be only used for PPC. It doesn=E2=80=99t su=
-pport ARM that
-> > we will use.
-> > > I think using the dts should be better way.
-> >=20
-> > None of the chips that this patch looks for are ARM chips.  Are you=
-'re
-> > saying our ARM chips don't have any form of identification?  Even i=
-f
-> > that's the case, there's nothing wrong with looking at the device t=
-ree;
-> > it's changing the device tree that I'm objecting to if there's an
-> > alternative.
-> >=20
-> > In any case, I don't know why these checks are being added to commo=
-n code
-> > rather than sdhci-of-esdhc.c.
-> >=20
-> Scott, I know what you mean now.
-> What about moving these checks to sdhci-of-esdhc and still using dts?
+A-003980: SDHC: Glitch is generated on the card clock with software reset
+or clock divider change
+Description: A glitch may occur on the SDHC card clock when the software
+sets the RSTA bit (software reset) in the system control register. It can
+also be generated by setting the clock divider value. The glitch produced
+can cause the external card to switch to an unknown state. The occurrence
+is not deterministic.
 
-The only thing I'm strongly opposed to is requiring chips that are
-already working to add broken-cd to their device trees to continue
-working.  I'd rather see SVR be used, as we do for errata in other
-devices, but assuming the chips affected by this patch have never had
-this feature work I'm not insisting on it.
+Workaround:
+A simple workaround is to disable the SD card clock before the software
+reset, and enable it when the module resumes normal operation. The Host
+and the SD card are in a master-slave relationship. The Host provides
+clock and control transfer across the interface. Therefore, any existing
+operation is discarded when the Host controller is reset.
+The recommended flow is as follows:
+1. Software disable bit[3], SDCLKEN, of the System Control Register
+2. Trigger software reset and/or set clock divider
+3. Check bit[3], SDSTB, of the Present State Register for stable clock
+4. Enable bit[3], SDCLKEN, of the System Control Register
+Using the above method, the eSDHC cannot send command or transfer data
+when there is a glitch in the clock line, and the glitch does not cause
+any issue.
 
-> I know the SVR checks is from <asm/mpc85xx.h> and we will need to che=
-ck
-> ARM architecture like LS2085A later although it hasn't been exist on
-> upstream now. =20
+Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+---
+Changes for v2
+	- Used sdhci_ops reset instead of platform_reset_enter/out's work
+	- Changed commit message
+---
+ drivers/mmc/host/sdhci-esdhc.h    |  4 ++
+ drivers/mmc/host/sdhci-of-esdhc.c | 90 +++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 91 insertions(+), 3 deletions(-)
 
-Again, ARM can use the device tree (ESDHC isn't described in the
-upstream LS2085A device tree yet, and the internal one already has
-"fsl,ls2085a-esdhc").  And looking at the manual, LS2085A *does* have
-SVR.  You'd need to read it from the DCFG block rather than a core
-register, but it's there.
-
--Scott
-
+diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
+index 3497cfa..ede49f5 100644
+--- a/drivers/mmc/host/sdhci-esdhc.h
++++ b/drivers/mmc/host/sdhci-esdhc.h
+@@ -27,10 +27,14 @@
+ #define ESDHC_CLOCK_MASK	0x0000fff0
+ #define ESDHC_PREDIV_SHIFT	8
+ #define ESDHC_DIVIDER_SHIFT	4
++#define ESDHC_CLOCK_CRDEN	0x00000008
+ #define ESDHC_CLOCK_PEREN	0x00000004
+ #define ESDHC_CLOCK_HCKEN	0x00000002
+ #define ESDHC_CLOCK_IPGEN	0x00000001
+ 
++#define ESDHCI_PRESENT_STATE	0x24
++#define ESDHC_CLK_STABLE	0x00000008
++
+ /* pltfm-specific */
+ #define ESDHC_HOST_CONTROL_LE	0x20
+ 
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 22e9111..db78b75 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -21,9 +21,16 @@
+ #include <linux/mmc/host.h>
+ #include "sdhci-pltfm.h"
+ #include "sdhci-esdhc.h"
++#ifdef CONFIG_PPC
++#include <asm/mpc85xx.h>
++#endif
+ 
+ #define VENDOR_V_22	0x12
+ #define VENDOR_V_23	0x13
++
++#ifdef CONFIG_PPC
++static u32 svr;
++#endif
+ static u32 esdhc_readl(struct sdhci_host *host, int reg)
+ {
+ 	u32 ret;
+@@ -202,6 +209,7 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	int pre_div = 2;
+ 	int div = 1;
+ 	u32 temp;
++	u32 timeout;
+ 
+ 	host->mmc->actual_clock = 0;
+ 
+@@ -218,7 +226,7 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 
+ 	temp = sdhci_readl(host, ESDHC_SYSTEM_CONTROL);
+ 	temp &= ~(ESDHC_CLOCK_IPGEN | ESDHC_CLOCK_HCKEN | ESDHC_CLOCK_PEREN
+-		| ESDHC_CLOCK_MASK);
++		| ESDHC_CLOCK_MASK | ESDHC_CLOCK_CRDEN);
+ 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+ 
+ 	while (host->max_clk / pre_div / 16 > clock && pre_div < 256)
+@@ -238,7 +246,21 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		| (div << ESDHC_DIVIDER_SHIFT)
+ 		| (pre_div << ESDHC_PREDIV_SHIFT));
+ 	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+-	mdelay(1);
++
++	/* Wait max 20 ms */
++	timeout = 20;
++	while (!(sdhci_readl(host, ESDHCI_PRESENT_STATE) & ESDHC_CLK_STABLE)) {
++		if (timeout == 0) {
++			pr_err("%s: Internal clock never stabilised.\n",
++				mmc_hostname(host->mmc));
++			return;
++		}
++		timeout--;
++		mdelay(1);
++	}
++
++	temp |= ESDHC_CLOCK_CRDEN;
++	sdhci_writel(host, temp, ESDHC_SYSTEM_CONTROL);
+ }
+ 
+ static void esdhc_of_platform_init(struct sdhci_host *host)
+@@ -276,9 +298,71 @@ static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
+ 			ESDHC_CTRL_BUSWIDTH_MASK, ctrl);
+ }
+ 
++/*
++ * A-003980: SDHC: Glitch is generated on the card clock with software reset
++ * or clock divider change
++ * Workaround:
++ * A simple workaround is to disable the SD card clock before the software
++ * reset, and enable it when the module resumes normal operation. The Host
++ * and the SD card are in a master-slave relationship. The Host provides
++ * clock and control transfer across the interface. Therefore, any existing
++ * operation is discarded when the Host controller is reset.
++ */
++static int esdhc_of_reset_workaround(struct sdhci_host *host, u8 mask)
++{
++	u16 clk;
++	bool disable_clk_before_reset = false;
++
++#ifdef CONFIG_PPC
++	svr =  mfspr(SPRN_SVR);
++	/*
++	 * Check for A-003980
++	 * Impact list:
++	 * T4240-4160-R1.0 B4860-4420-R1.0-R2.0 P3041-R1.0-R1.1-R2.0
++	 * P2041-2040-R1.0-R1.1-R2.0 P1010-1014-R1.0 P5020-5010-R1.0-R2.0
++	 * P5040-5021-R1.0-R2.0-R2.1
++	 */
++	if (((SVR_SOC_VER(svr) == SVR_T4240) && (SVR_REV(svr) == 0x10)) ||
++	    ((SVR_SOC_VER(svr) == SVR_T4240) && (SVR_REV(svr) == 0x20)) ||
++	    ((SVR_SOC_VER(svr) == SVR_T4160) && (SVR_REV(svr) == 0x10)) ||
++	    ((SVR_SOC_VER(svr) == SVR_T4160) && (SVR_REV(svr) == 0x20)) ||
++	    ((SVR_SOC_VER(svr) == SVR_B4860) && (SVR_REV(svr) == 0x10)) ||
++	    ((SVR_SOC_VER(svr) == SVR_B4860) && (SVR_REV(svr) == 0x20)) ||
++	    ((SVR_SOC_VER(svr) == SVR_B4420) && (SVR_REV(svr) == 0x10)) ||
++	    ((SVR_SOC_VER(svr) == SVR_B4420) && (SVR_REV(svr) == 0x20)) ||
++	    ((SVR_SOC_VER(svr) == SVR_P5040) && (SVR_REV(svr) <= 0x21)) ||
++	    ((SVR_SOC_VER(svr) == SVR_P5020) && (SVR_REV(svr) <= 0x20)) ||
++	    ((SVR_SOC_VER(svr) == SVR_P5021) && (SVR_REV(svr) <= 0x21)) ||
++	    ((SVR_SOC_VER(svr) == SVR_P5010) && (SVR_REV(svr) <= 0x20)) ||
++	    ((SVR_SOC_VER(svr) == SVR_P3041) && (SVR_REV(svr) <= 0x20)) ||
++	    ((SVR_SOC_VER(svr) == SVR_P2041) && (SVR_REV(svr) <= 0x20)) ||
++	    ((SVR_SOC_VER(svr) == SVR_P2040) && (SVR_REV(svr) <= 0x20)) ||
++	    ((SVR_SOC_VER(svr) == SVR_P1014) && (SVR_REV(svr) == 0x10)) ||
++	    ((SVR_SOC_VER(svr) == SVR_P1010) && (SVR_REV(svr) == 0x10)))
++		disable_clk_before_reset = true;
++#endif
++
++	if (disable_clk_before_reset && (mask & SDHCI_RESET_ALL)) {
++		clk = esdhc_readw(host, SDHCI_CLOCK_CONTROL);
++		clk &= ~ESDHC_CLOCK_CRDEN;
++		esdhc_writew(host, clk, SDHCI_CLOCK_CONTROL);
++		sdhci_reset(host, mask);
++		clk = esdhc_readw(host, SDHCI_CLOCK_CONTROL);
++		clk |= ESDHC_CLOCK_CRDEN;
++		esdhc_writew(host, clk, SDHCI_CLOCK_CONTROL);
++		return 1;
++	}
++	return 0;
++}
++
+ static void esdhc_reset(struct sdhci_host *host, u8 mask)
+ {
+-	sdhci_reset(host, mask);
++	int ret;
++
++	ret = esdhc_of_reset_workaround(host, mask);
++
++	if (!ret)
++		sdhci_reset(host, mask);
+ 
+ 	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+ 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+-- 
+2.1.0.27.g96db324
 
