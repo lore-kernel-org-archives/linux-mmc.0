@@ -1,56 +1,74 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: sdhci(imx6): misbehaves while installing debian jessie, "Got data
- interrupt 0x00100000"
-Date: Tue, 19 May 2015 23:23:21 +0100
-Message-ID: <20150519222320.GM2067@n2100.arm.linux.org.uk>
+From: Al Cooper <alcooperx@gmail.com>
+Subject: [PATCH V3 3/8] mmc: lock: Add function to unlock a password locked card
+Date: Tue, 19 May 2015 19:11:09 -0400
+Message-ID: <1432077074-8422-4-git-send-email-alcooperx@gmail.com>
+References: <1432077074-8422-1-git-send-email-alcooperx@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:58124 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750862AbbESWX0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2015 18:23:26 -0400
-Content-Disposition: inline
+Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:24279 "EHLO
+	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751812AbbESXMJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2015 19:12:09 -0400
+In-Reply-To: <1432077074-8422-1-git-send-email-alcooperx@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, pgynther@google.com
+Cc: Al Cooper <alcooperx@gmail.com>
 
-iMX6 with a Samsung EVO UHS-1 16GB card.
+This function will try to get a password for the card and use the
+password to unlock it. It will leave the card state flag set
+appropriately.
 
-There's actually two problems here.
+Signed-off-by: Al Cooper <alcooperx@gmail.com>
+---
+ drivers/mmc/core/core.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
 
-1. SDHCI chooses to impose a 10 second timeout on any data operation.
-   This magic value of 10 seconds is rediculous.  Consider that SD
-   cards are typically slower than ATA, and ATA has a timeout of more
-   than one minute for a stuck command...  And yes, I've had this fire
-   a good 10 seconds before I then got...
-
-2. "Got data interrupt 0x00100000 even though no data operation was in progress."
-
-   That's SDHCI_INT_DATA_TIMEOUT.
-
-   Unfortunately, I have no other information, as the registers are
-   dumped at pr_debug() level, which means that they're all compiled
-   out in normal kernel builds.  In any case, I have no way to copy
-   information off of the installing system; debian does not start up
-   a ssh daemon during the install, so remote login is not possible.
-   Nor can I photograph the rather reflective TV screen.
-
-The side-effect of this is that the entire MMC IO subsystem locks up
-and I'm left with lots of processes stuck in IO-wait state, with the
-hungtask detector spewing onto the console.
-
-This happens while installing Debian Jessie, which is an "expensive"
-operation: not only in time (it takes 45 minutes or so to reproduce,
-requiring the stupid debian installer to be babysat during that time)
-but also because it's having to download the entire distro for each
-attempt (which eats into my monthly bandwidth allowance, so I can
-_only_ do this after 8pm local time.)
-
-I've tried twice tonight (which is about the limit that I can do in an
-evening), the second time after having up-ed the stupid 10 second limit
-to 60 seconds.  However (2) still occurs.
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 4b0d26e..61f1f78 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2777,6 +2777,27 @@ static inline void mmc_unregister_key_type(void)
+ 	unregister_key_type(&key_type_mmc);
+ }
+ 
++int mmc_unlock_card(struct mmc_card *card)
++{
++	int stat;
++	struct mmc_password password;
++
++	mmc_card_set_locked(card);
++	stat = mmc_get_password(card, &password);
++	if (stat) {
++		pr_warn("%s: Cannot find matching key\n",
++			mmc_hostname(card->host));
++		return stat;
++	}
++	stat = mmc_lock_unlock(card, &password, MMC_LOCK_MODE_UNLOCK);
++	if (stat)
++		pr_warn("%s: Password failed to unlock card\n",
++			mmc_hostname(card->host));
++	else
++		mmc_card_clear_locked(card);
++	return stat;
++}
++
+ #else /* CONFIG_MMC_LOCK */
+ 
+ int mmc_get_password(struct mmc_card *card, struct mmc_password *password)
+@@ -2793,6 +2814,11 @@ static inline void mmc_unregister_key_type(void)
+ {
+ }
+ 
++int mmc_unlock_card(struct mmc_card *card)
++{
++	return -ENOKEY;
++}
++
+ #endif /* CONFIG_MMC_LOCK */
+ 
+ static int __init mmc_init(void)
 -- 
-FTTC broadband for 0.8mile line: currently at 10.5Mbps down 400kbps up
-according to speedtest.net.
+1.9.0.138.g2de3478
+
