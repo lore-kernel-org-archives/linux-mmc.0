@@ -1,278 +1,34 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Sascha Hauer <s.hauer@pengutronix.de>
 Subject: Re: [PATCH v4 3/7] mmc: mediatek: Add PM support for MMC driver
-Date: Tue, 19 May 2015 12:41:19 +0200
-Message-ID: <CAPDyKFrQtFL9tTa7uhxX5k5CwgBk6SQ+W+Fi3aM6BDB0VdM-JA@mail.gmail.com>
+Date: Tue, 19 May 2015 13:04:53 +0200
+Message-ID: <20150519110453.GD26575@pengutronix.de>
 References: <1432017411-2996-1-git-send-email-chaotian.jing@mediatek.com>
-	<1432017411-2996-4-git-send-email-chaotian.jing@mediatek.com>
+ <1432017411-2996-4-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-gpio-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <1432017411-2996-4-git-send-email-chaotian.jing@mediatek.com>
-Sender: linux-gpio-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>, Chris Ball <chris@printf.net>, Mark Rutland <mark.rutland@arm.com>, James Liao <jamesjj.liao@mediatek.com>, srv_heupstream <srv_heupstream@mediatek.com>, Arnd Bergmann <arnd@arndb.de>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Hongzhou Yang <hongzhou.yang@mediatek.com>, Catalin Marinas <catalin.marinas@arm.com>, linux-mmc <linux-mmc@vger.kernel.org>, Will Deacon <will.deacon@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, Sascha Hauer <kernel@pengutronix.de>, "Joe.C" <yingjoe.chen@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, =?UTF-8?B?QmluIFpoYW5nICjnq6Dmlowp?= <bin.zhang@mediatek.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek
+Cc: Rob Herring <robh+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, James Liao <jamesjj.liao@mediatek.com>, srv_heupstream@mediatek.com, Arnd Bergmann <arnd@arndb.de>, devicetree@vger.kernel.org, Hongzhou Yang <hongzhou.yang@mediatek.com>, Catalin Marinas <catalin.marinas@arm.com>, bin.zhang@mediatek.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Will Deacon <will.deacon@arm.com>, linux-gpio@vger.kernel.org, linux-mediatek@lists.infradead.org, Sascha Hauer <kernel@pengutronix.de>, "Joe.C" <yingjoe.chen@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 19 May 2015 at 08:36, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+Hi Chaotian,
+
+On Tue, May 19, 2015 at 02:36:47PM +0800, Chaotian Jing wrote:
 > Add PM support for Mediatek MMC driver
 > Save/restore registers when PM
->
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-> ---
->  drivers/mmc/host/mtk-sd.c | 99 +++++++++++++++++++++++++++++++++++++++++++++--
->  1 file changed, 95 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 26e9590..c0b2e2d 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -22,6 +22,7 @@
->  #include <linux/of_gpio.h>
->  #include <linux/pinctrl/consumer.h>
->  #include <linux/platform_device.h>
-> +#include <linux/pm_runtime.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/spinlock.h>
->
-> @@ -212,6 +213,7 @@
->  #define MSDC_ASYNC_FLAG (0x1 << 1)
->  #define MSDC_MMAP_FLAG (0x1 << 2)
->
-> +#define MTK_MMC_AUTOSUSPEND_DELAY      50
->  #define CMD_TIMEOUT         (HZ/10 * 5)        /* 100ms x5 */
->  #define DAT_TIMEOUT         (HZ    * 5)        /* 1000ms x5 */
->
-> @@ -254,6 +256,15 @@ struct msdc_dma {
->         dma_addr_t bd_addr;     /* the physical address of bd array */
->  };
->
-> +struct msdc_save_para {
-> +       u32 msdc_cfg;
-> +       u32 iocon;
-> +       u32 sdc_cfg;
-> +       u32 pad_tune;
-> +       u32 patch_bit0;
-> +       u32 patch_bit1;
-> +};
-> +
->  struct msdc_host {
->         struct device *dev;
->         struct mmc_host *mmc;   /* mmc structure */
-> @@ -287,6 +298,8 @@ struct msdc_host {
->         bool vqmmc_enabled;
->         bool sclk_enabled;      /* source clock enabled */
->         bool hclk_enabled;      /* Hclk enabled */
-> +       bool in_suspend;        /* used for apply restore regs */
 
-You shouldn't need to track this.
+Has anyone asked you to add a new driver in two steps? I find it hard to
+review if a driver is introduced and changed right afterwards.
+Presumably you find it hard to maintain the patches like this also.
+Please ignore if this is indeed requested by someone.
 
-> +       struct msdc_save_para save_para; /* used when gate HCLK */
->  };
->
->  static void sdr_set_bits(void __iomem *reg, u32 bs)
-> @@ -459,6 +472,30 @@ static void msdc_set_timeout(struct msdc_host *host, u32 ns, u32 clks)
->         sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC, timeout);
->  }
->
-> +static void msdc_save_reg(struct msdc_host *host)
-> +{
-> +       host->save_para.msdc_cfg = readl(host->base + MSDC_CFG);
-> +       host->save_para.iocon = readl(host->base + MSDC_IOCON);
-> +       host->save_para.sdc_cfg = readl(host->base + SDC_CFG);
-> +       host->save_para.pad_tune = readl(host->base + MSDC_PAD_TUNE);
-> +       host->save_para.patch_bit0 = readl(host->base + MSDC_PATCH_BIT);
-> +       host->save_para.patch_bit1 = readl(host->base + MSDC_PATCH_BIT1);
-> +       host->in_suspend = true;
-> +}
-> +
-> +static void msdc_restore_reg(struct msdc_host *host)
-> +{
-> +       if (host->in_suspend == false)
-> +               return;
-> +       writel(host->save_para.msdc_cfg, host->base + MSDC_CFG);
-> +       writel(host->save_para.iocon, host->base + MSDC_IOCON);
-> +       writel(host->save_para.sdc_cfg, host->base + SDC_CFG);
-> +       writel(host->save_para.pad_tune, host->base + MSDC_PAD_TUNE);
-> +       writel(host->save_para.patch_bit0, host->base + MSDC_PATCH_BIT);
-> +       writel(host->save_para.patch_bit1, host->base + MSDC_PATCH_BIT1);
-> +       host->in_suspend = false;
-> +}
-> +
->  static void msdc_disable_src_clk(struct msdc_host *host)
->  {
->         if (host->sclk_enabled) {
-> @@ -479,6 +516,10 @@ static void msdc_enable_src_clk(struct msdc_host *host)
->
->  static void msdc_gate_clock(struct msdc_host *host)
->  {
-> +       /* Save register first, only when clk is on */
-> +       if (host->sclk_enabled)
-> +               msdc_save_reg(host);
+Sascha
 
-Please move msdc_save_reg() outside the msdc_gate_clock() function,
-since I think these things should be somewhat decoupled for each
-other.
-
-> +
->         msdc_disable_src_clk(host);
->         if (!IS_ERR(host->h_clk) && host->hclk_enabled) {
->                 clk_disable_unprepare(host->h_clk);
-> @@ -493,6 +534,8 @@ static void msdc_ungate_clock(struct msdc_host *host)
->                 host->hclk_enabled = true;
->         }
->         msdc_enable_src_clk(host);
-> +       /* Then restore register */
-> +       msdc_restore_reg(host);
-
-As above, please do msdc_restore_reg() outside of msdc_ungate_clock().
-
->  }
->
->  static void msdc_set_mclk(struct msdc_host *host, int ddr, u32 hz)
-> @@ -710,6 +753,9 @@ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
->         if (mrq->data)
->                 msdc_unprepare_data(host, mrq);
->         mmc_request_done(host->mmc, mrq);
-> +
-> +       pm_runtime_mark_last_busy(host->dev);
-> +       pm_runtime_put_autosuspend(host->dev);
->  }
->
->  /* returns true if command is fully handled; returns false otherwise */
-> @@ -866,6 +912,8 @@ static void msdc_ops_request(struct mmc_host *mmc, struct mmc_request *mrq)
->                 WARN_ON(host->mrq);
->         spin_unlock_irqrestore(&host->lock, flags);
->
-> +       pm_runtime_get_sync(host->dev);
-> +
->         if (mrq->data)
->                 msdc_prepare_data(host, mrq);
->
-> @@ -1130,7 +1178,8 @@ static void msdc_init_hw(struct msdc_host *host)
->         sdr_set_field(host->base + MSDC_PATCH_BIT, MSDC_CKGEN_MSDC_DLY_SEL, 1);
->         writel(0xffff0089, host->base + MSDC_PATCH_BIT1);
->         /* Configure to enable SDIO mode.
-> -          it's must otherwise sdio cmd5 failed */
-> +        * it's must otherwise sdio cmd5 failed
-> +        */
-
-White space.
-
->         sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIO);
->
->         /* disable detect SDIO device interrupt function */
-> @@ -1185,6 +1234,8 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->         int ret;
->         u32 ddr = 0;
->
-> +       pm_runtime_get_sync(host->dev);
-> +
->         if (ios->timing == MMC_TIMING_UHS_DDR50 ||
->                         ios->timing == MMC_TIMING_MMC_DDR52)
->                 ddr = 1;
-> @@ -1200,7 +1251,7 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->                                         ios->vdd);
->                         if (ret) {
->                                 dev_err(host->dev, "Failed to set vmmc power!\n");
-> -                               return;
-> +                               goto end;
->                         }
->                 }
->                 break;
-> @@ -1234,6 +1285,10 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->
->         if (host->mclk != ios->clock || host->ddr != ddr)
->                 msdc_set_mclk(host, ddr, ios->clock);
-> +
-> +end:
-> +       pm_runtime_mark_last_busy(host->dev);
-> +       pm_runtime_put_autosuspend(host->dev);
->  }
->
->  static struct mmc_host_ops mt_msdc_ops = {
-> @@ -1355,12 +1410,18 @@ static int msdc_drv_probe(struct platform_device *pdev)
->         if (ret)
->                 goto release;
->
-> +       pm_runtime_set_active(host->dev);
-> +       pm_runtime_set_autosuspend_delay(host->dev, MTK_MMC_AUTOSUSPEND_DELAY);
-> +       pm_runtime_use_autosuspend(host->dev);
-> +       pm_runtime_enable(host->dev);
->         ret = mmc_add_host(mmc);
-> +
->         if (ret)
-> -               goto release;
-> +               goto end;
->
->         return 0;
-> -
-> +end:
-> +       pm_runtime_disable(host->dev);
->  release:
->         platform_set_drvdata(pdev, NULL);
->         msdc_deinit_hw(host);
-> @@ -1388,10 +1449,15 @@ static int msdc_drv_remove(struct platform_device *pdev)
->         mmc = platform_get_drvdata(pdev);
->         host = mmc_priv(mmc);
->
-> +       pm_runtime_get_sync(host->dev);
-> +
->         platform_set_drvdata(pdev, NULL);
->         mmc_remove_host(host->mmc);
->         msdc_deinit_hw(host);
-> +       msdc_gate_clock(host);
-
-As per comment on patch 2. This clock gating should be a part of that
-patch instead.
-
->
-> +       pm_runtime_disable(host->dev);
-> +       pm_runtime_put_noidle(host->dev);
->         dma_free_coherent(&pdev->dev,
->                         sizeof(struct mt_gpdma_desc),
->                         host->dma.gpd, host->dma.gpd_addr);
-> @@ -1403,6 +1469,30 @@ static int msdc_drv_remove(struct platform_device *pdev)
->         return 0;
->  }
->
-> +#ifdef CONFIG_PM
-> +static int msdc_runtime_suspend(struct device *dev)
-> +{
-> +       struct mmc_host *mmc = dev_get_drvdata(dev);
-> +       struct msdc_host *host = mmc_priv(mmc);
-> +
-> +       msdc_gate_clock(host);
-> +       return 0;
-> +}
-> +
-> +static int msdc_runtime_resume(struct device *dev)
-> +{
-> +       struct mmc_host *mmc = dev_get_drvdata(dev);
-> +       struct msdc_host *host = mmc_priv(mmc);
-> +
-> +       msdc_ungate_clock(host);
-> +       return 0;
-> +}
-> +#endif
-> +
-> +static const struct dev_pm_ops msdc_dev_pm_ops = {
-> +       SET_RUNTIME_PM_OPS(msdc_runtime_suspend, msdc_runtime_resume, NULL)
-> +};
-> +
->  static const struct of_device_id msdc_of_ids[] = {
->         {   .compatible = "mediatek,mt8135-mmc", },
->         {}
-> @@ -1414,6 +1504,7 @@ static struct platform_driver mt_msdc_driver = {
->         .driver = {
->                 .name = "mtk-msdc",
->                 .of_match_table = msdc_of_ids,
-> +               .pm = &msdc_dev_pm_ops,
->         },
->  };
->
-> --
-> 1.8.1.1.dirty
->
-
-Kind regards
-Uffe
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
