@@ -1,74 +1,47 @@
 From: Al Cooper <alcooperx@gmail.com>
-Subject: [PATCH V3 3/8] mmc: lock: Add function to unlock a password locked card
-Date: Tue, 19 May 2015 19:11:09 -0400
-Message-ID: <1432077074-8422-4-git-send-email-alcooperx@gmail.com>
+Subject: [PATCH V3 6/8] mmc: lock: Prevent partition table read for locked cards.
+Date: Tue, 19 May 2015 19:11:12 -0400
+Message-ID: <1432077074-8422-7-git-send-email-alcooperx@gmail.com>
 References: <1432077074-8422-1-git-send-email-alcooperx@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:24279 "EHLO
 	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751812AbbESXMJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2015 19:12:09 -0400
+	with ESMTP id S1752148AbbESXMK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2015 19:12:10 -0400
 In-Reply-To: <1432077074-8422-1-git-send-email-alcooperx@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, pgynther@google.com
 Cc: Al Cooper <alcooperx@gmail.com>
 
-This function will try to get a password for the card and use the
-password to unlock it. It will leave the card state flag set
-appropriately.
+Change the MMC block layer to avoid reading the partition table
+when the card is locked because read commands will fail.
 
 Signed-off-by: Al Cooper <alcooperx@gmail.com>
 ---
- drivers/mmc/core/core.c | 26 ++++++++++++++++++++++++++
- 1 file changed, 26 insertions(+)
+ drivers/mmc/card/block.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 4b0d26e..61f1f78 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2777,6 +2777,27 @@ static inline void mmc_unregister_key_type(void)
- 	unregister_key_type(&key_type_mmc);
- }
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 60f7141..5650748 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2147,6 +2147,13 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 		md->disk->flags |= GENHD_FL_NO_PART_SCAN;
  
-+int mmc_unlock_card(struct mmc_card *card)
-+{
-+	int stat;
-+	struct mmc_password password;
+ 	/*
++	 * If the card is locked, reads will fail so prevent partition
++	 * table scan
++	 */
++	if (mmc_card_locked(card))
++		md->disk->flags |= GENHD_FL_NO_PART_SCAN;
 +
-+	mmc_card_set_locked(card);
-+	stat = mmc_get_password(card, &password);
-+	if (stat) {
-+		pr_warn("%s: Cannot find matching key\n",
-+			mmc_hostname(card->host));
-+		return stat;
-+	}
-+	stat = mmc_lock_unlock(card, &password, MMC_LOCK_MODE_UNLOCK);
-+	if (stat)
-+		pr_warn("%s: Password failed to unlock card\n",
-+			mmc_hostname(card->host));
-+	else
-+		mmc_card_clear_locked(card);
-+	return stat;
-+}
-+
- #else /* CONFIG_MMC_LOCK */
- 
- int mmc_get_password(struct mmc_card *card, struct mmc_password *password)
-@@ -2793,6 +2814,11 @@ static inline void mmc_unregister_key_type(void)
- {
- }
- 
-+int mmc_unlock_card(struct mmc_card *card)
-+{
-+	return -ENOKEY;
-+}
-+
- #endif /* CONFIG_MMC_LOCK */
- 
- static int __init mmc_init(void)
++	/*
+ 	 * As discussed on lkml, GENHD_FL_REMOVABLE should:
+ 	 *
+ 	 * - be set for removable media with permanent block devices
 -- 
 1.9.0.138.g2de3478
 
