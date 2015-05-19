@@ -1,14 +1,11 @@
 From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH v4 7/7] ARM: multi_v7_defconfig: Enable Mediatek MMC support
- multi-v7
-Date: Tue, 19 May 2015 14:36:51 +0800
-Message-ID: <1432017411-2996-8-git-send-email-chaotian.jing@mediatek.com>
-References: <1432017411-2996-1-git-send-email-chaotian.jing@mediatek.com>
+Subject: [PATCH v4 0/7] Add Mediatek MMC driver
+Date: Tue, 19 May 2015 14:36:44 +0800
+Message-ID: <1432017411-2996-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1432017411-2996-1-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
  <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
@@ -19,30 +16,48 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
 Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 To: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Yingjoe Chen <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+This series enables MMC support on the MT8135/MT8173 platform.
+MT8135 has 5 MMC controllers and MT8173 has 4 MMC controllers.
 
-Add CONFIG_MMC_MTK=y in defconfig
+Changes base on Ulf and Sascha's comments
+Move the msdc_ungate_clock to ->probe()
+Add ops->card_busy for SD3.0 voltage switch check
+Disable HCLK at runtime pm suspend
+Save/restore registers at runtime pm suspend/resume
+Make bus clock free running to avoid ambiguity when the
+MMC core layer want to enable bus clock
+Modify MSDC register range from 0x108 to 0x1000
 
-Signed-off-by: Yingjoe Chen <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
----
- arch/arm/configs/multi_v7_defconfig | 1 +
- 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
-index bc673e7..35447b2 100644
---- a/arch/arm/configs/multi_v7_defconfig
-+++ b/arch/arm/configs/multi_v7_defconfig
-@@ -451,6 +451,7 @@ CONFIG_MMC_DW_EXYNOS=y
- CONFIG_MMC_DW_ROCKCHIP=y
- CONFIG_MMC_SH_MMCIF=y
- CONFIG_MMC_SUNXI=y
-+CONFIG_MMC_MTK=y
- CONFIG_NEW_LEDS=y
- CONFIG_LEDS_CLASS=y
- CONFIG_LEDS_GPIO=y
+Chaotian Jing (3):
+  mmc: dt-bindings: add Mediatek MMC bindings
+  mmc: mediatek: Add Mediatek MMC driver
+  mmc: mediatek: Add PM support for MMC driver
+
+Eddie Huang (2):
+  arm64: dts: mediatek: Add MT8173 MMC dts
+  arm64: mediatek: Add Mediatek MMC support in defconfig
+
+Yingjoe Chen (2):
+  ARM: mediatek: dts: Add emmc support to mt8135
+  ARM: multi_v7_defconfig: Enable Mediatek MMC support multi-v7
+
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt |   33 +
+ arch/arm/boot/dts/mt8135-evbp1.dts               |  139 ++
+ arch/arm/boot/dts/mt8135.dtsi                    |   26 +
+ arch/arm/configs/multi_v7_defconfig              |    1 +
+ arch/arm64/boot/dts/mediatek/mt8173-evb.dts      |  115 ++
+ arch/arm64/boot/dts/mediatek/mt8173.dtsi         |   43 +-
+ arch/arm64/configs/defconfig                     |    1 +
+ drivers/mmc/host/Kconfig                         |    8 +
+ drivers/mmc/host/Makefile                        |    1 +
+ drivers/mmc/host/mtk-sd.c                        | 1513 ++++++++++++++++++++++
+ 10 files changed, 1879 insertions(+), 1 deletion(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.txt
+ create mode 100644 drivers/mmc/host/mtk-sd.c
+
 -- 
 1.8.1.1.dirty
