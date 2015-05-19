@@ -1,78 +1,115 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v4 1/7] mmc: dt-bindings: add Mediatek MMC bindings
-Date: Tue, 19 May 2015 11:41:46 +0200
-Message-ID: <CAPDyKFq+YAz2pt1820YnqWaVKO6sn5eB+NxuM2dhP236FSKa9g@mail.gmail.com>
-References: <1432017411-2996-1-git-send-email-chaotian.jing@mediatek.com>
-	<1432017411-2996-2-git-send-email-chaotian.jing@mediatek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: sdhci-of-esdhc: add workaround for clock glitch issue
+Date: Tue, 19 May 2015 11:59:21 +0200
+Message-ID: <CAPDyKFozk9dYF2QhW9w3byrthR0TOCJVvtVayOkNCXEUH4wbSQ@mail.gmail.com>
+References: <1432014029-21152-1-git-send-email-yangbo.lu@freescale.com>
+	<CAPDyKFrqgZR-nZwscYNR9QXYq5s+2=eL6aLJ+MekDv4ApPBkYA@mail.gmail.com>
+	<BN3PR0301MB1188A4E63014C251A39F6096F2C30@BN3PR0301MB1188.namprd03.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1432017411-2996-2-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, srv_heupstream <srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, =?UTF-8?B?QmluIFpoYW5nICjnq6Dmlowp?= <bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-mediatek
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f171.google.com ([209.85.220.171]:32921 "EHLO
+	mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751100AbbESJ7W (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2015 05:59:22 -0400
+Received: by qkgv12 with SMTP id v12so5786033qkg.0
+        for <linux-mmc@vger.kernel.org>; Tue, 19 May 2015 02:59:21 -0700 (PDT)
+In-Reply-To: <BN3PR0301MB1188A4E63014C251A39F6096F2C30@BN3PR0301MB1188.namprd03.prod.outlook.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Lu Y.B." <yangbo.lu@freescale.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chrisball@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 19 May 2015 at 08:36, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
-> Document the device-tree binding of Mediatek MMC host
->
-> Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-> ---
->  Documentation/devicetree/bindings/mmc/mtk-sd.txt | 33 ++++++++++++++++++++++++
->  1 file changed, 33 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.txt
->
-> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> new file mode 100644
-> index 0000000..ba6d668
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> @@ -0,0 +1,33 @@
-> +* MTK MMC controller
-> +
-> +The MTK  MSDC can act as a MMC controller
-> +to support MMC, SD, and SDIO types of memory cards.
-> +
-> +This file documents differences between the core properties in mmc.txt
-> +and the properties used by the msdc driver.
-> +
-> +Required properties:
-> +- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc".
-> +- interrupts: Should contain MSDC interrupt number
-> +- clocks: MSDC source clock, HCLK, HCLK is mandatory when it is not controlled by Infra
+On 19 May 2015 at 10:59, Lu Y.B. <yangbo.lu@freescale.com> wrote:
+>> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+>> Sent: Tuesday, May 19, 2015 4:37 PM
+>> To: Lu Yangbo-B47093
+>> Cc: linux-mmc; Chris Ball; Jaehoon Chung
+>> Subject: Re: [PATCH v2] mmc: sdhci-of-esdhc: add workaround for clock
+>> glitch issue
+>>
+>> On 19 May 2015 at 07:40, Yangbo Lu <yangbo.lu@freescale.com> wrote:
+>> > A-003980: SDHC: Glitch is generated on the card clock with software
+>> > reset or clock divider change
+>> > Description: A glitch may occur on the SDHC card clock when the
+>> > software sets the RSTA bit (software reset) in the system control
+>> > register. It can also be generated by setting the clock divider value.
+>> > The glitch produced can cause the external card to switch to an
+>> > unknown state. The occurrence is not deterministic.
+>> >
+>> > Workaround:
+>> > A simple workaround is to disable the SD card clock before the
+>> > software reset, and enable it when the module resumes normal
+>> > operation. The Host and the SD card are in a master-slave
+>> > relationship. The Host provides clock and control transfer across the
+>> > interface. Therefore, any existing operation is discarded when the Host
+>> controller is reset.
+>> > The recommended flow is as follows:
+>> > 1. Software disable bit[3], SDCLKEN, of the System Control Register 2.
+>> > Trigger software reset and/or set clock divider 3. Check bit[3],
+>> > SDSTB, of the Present State Register for stable clock 4. Enable
+>> > bit[3], SDCLKEN, of the System Control Register Using the above
+>> > method, the eSDHC cannot send command or transfer data when there is a
+>> > glitch in the clock line, and the glitch does not cause any issue.
+>> >
+>> > Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+>> > ---
+>> > Changes for v2
+>> >         - Used sdhci_ops reset instead of platform_reset_enter/out's
+>> work
+>> >         - Changed commit message
+>> > ---
+>> >  drivers/mmc/host/sdhci-esdhc.h    |  4 ++
+>> >  drivers/mmc/host/sdhci-of-esdhc.c | 90
+>> > +++++++++++++++++++++++++++++++++++++--
+>> >  2 files changed, 91 insertions(+), 3 deletions(-)
+>> >
+>> > diff --git a/drivers/mmc/host/sdhci-esdhc.h
+>> > b/drivers/mmc/host/sdhci-esdhc.h index 3497cfa..ede49f5 100644
+>> > --- a/drivers/mmc/host/sdhci-esdhc.h
+>> > +++ b/drivers/mmc/host/sdhci-esdhc.h
+>> > @@ -27,10 +27,14 @@
+>> >  #define ESDHC_CLOCK_MASK       0x0000fff0
+>> >  #define ESDHC_PREDIV_SHIFT     8
+>> >  #define ESDHC_DIVIDER_SHIFT    4
+>> > +#define ESDHC_CLOCK_CRDEN      0x00000008
+>> >  #define ESDHC_CLOCK_PEREN      0x00000004
+>> >  #define ESDHC_CLOCK_HCKEN      0x00000002
+>> >  #define ESDHC_CLOCK_IPGEN      0x00000001
+>> >
+>> > +#define ESDHCI_PRESENT_STATE   0x24
+>> > +#define ESDHC_CLK_STABLE       0x00000008
+>> > +
+>> >  /* pltfm-specific */
+>> >  #define ESDHC_HOST_CONTROL_LE  0x20
+>> >
+>> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c
+>> > b/drivers/mmc/host/sdhci-of-esdhc.c
+>> > index 22e9111..db78b75 100644
+>> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
+>> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+>> > @@ -21,9 +21,16 @@
+>> >  #include <linux/mmc/host.h>
+>> >  #include "sdhci-pltfm.h"
+>> >  #include "sdhci-esdhc.h"
+>> > +#ifdef CONFIG_PPC
+>> > +#include <asm/mpc85xx.h>
+>>
+>> As Jaehoon already pointed out, we don't want to include machine specific
+>> headers in drivers. Please find another solution to this.
+>>
+> Do you mean I should include this .h file in sdhci-esdhc.h, or all the PPC-specific code in this patch is not good?
 
-This seems strange. Either it's mandatory since it's under the
-"Required properties" section or it should be moved to the "Optional
-properties" section.
+I assume this header is included to identify the version of the SoC?
 
-> +- clock-names: "source", "hclk"
-> +- pinctrl-names: should be "default", "state_uhs"
-> +- pinctrl-0: should contain default/high speed pin ctrl
-> +- pinctrl-1: should contain uhs mode pin ctrl
-> +- vmmc-supply: power to the Core
-> +
-> +Optional properties:
-> +- vqmmc-supply: power to the IO(for SD/SDIO)
-> +
-> +Examples:
-> +mmc0: mmc@11230000 {
-> +       compatible = "mediatek,mt8173-mmc", "mediatek,mt8135-mmc";
-> +       reg = <0 0x11230000 0 0x108>;
-> +       interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
-> +       vmmc-supply = <&mt6397_vemc_3v3_reg>;
-> +       clocks = <&pericfg CLK_PERI_MSDC30_0>, <&topckgen CLK_TOP_MSDC50_0_H_SEL>;
-> +       clock-names = "source", "hclk";
-> +       pinctrl-names = "default", "state_uhs";
-> +       pinctrl-0 = <&mmc0_pins_default>;
-> +       pinctrl-1 = <&mmc0_pins_uhs>;
-> +};
-> --
-> 1.8.1.1.dirty
->
+Normally we do such things through DT via compatible strings. Earlier
+that was done via platform callbacks and prior that as how you
+suggested it in $subject patch.
+
+If you have the possibility to enumerate the device ID (reading device
+information directly from the HW), you should do that when adding the
+device to its subsystem level bus, not while probing. That's because
+you need to be able to match for a compatible driver.
 
 Kind regards
 Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
