@@ -1,56 +1,56 @@
-From: Petri Gynther <pgynther@google.com>
-Subject: Re: [PATCH] mmc: sdhci: fix DRIVER_TYPE_D handling in sdhci_do_set_ios()
-Date: Tue, 19 May 2015 11:12:14 -0700
-Message-ID: <CAGXr9JHCsOYH7xDkjBwB=ychJWMnu_sHpxp8pmi5ZiR0eRq5cg@mail.gmail.com>
-References: <20150514045500.D88EC220492@puck.mtv.corp.google.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: sdhci(imx6): misbehaves while installing debian jessie, "Got data
+ interrupt 0x00100000"
+Date: Tue, 19 May 2015 23:23:21 +0100
+Message-ID: <20150519222320.GM2067@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f177.google.com ([209.85.220.177]:34958 "EHLO
-	mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751523AbbESSMP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2015 14:12:15 -0400
-Received: by qkdn188 with SMTP id n188so10732627qkd.2
-        for <linux-mmc@vger.kernel.org>; Tue, 19 May 2015 11:12:14 -0700 (PDT)
-In-Reply-To: <20150514045500.D88EC220492@puck.mtv.corp.google.com>
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:58124 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750862AbbESWX0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2015 18:23:26 -0400
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-Any objections to this patch? In my opinion, this is a must-have fix
-for sdhci_do_set_ios() when host->preset_enabled == false and
-ios->drv_type == MMC_SET_DRIVER_TYPE_D.
+iMX6 with a Samsung EVO UHS-1 16GB card.
 
-To be complete, I could also add handling for ios->drv_type ==
-MMC_SET_DRIVER_TYPE_B, i.e.:
-else if (ios->drv_type == MMC_SET_DRIVER_TYPE_B)
-    ctrl_2 |= SDHCI_CTRL_DRV_TYPE_B;
+There's actually two problems here.
 
-but that's not absolutely necessary since:
-#define  SDHCI_CTRL_DRV_TYPE_B  0x0000
+1. SDHCI chooses to impose a 10 second timeout on any data operation.
+   This magic value of 10 seconds is rediculous.  Consider that SD
+   cards are typically slower than ATA, and ATA has a timeout of more
+   than one minute for a stuck command...  And yes, I've had this fire
+   a good 10 seconds before I then got...
 
-On Wed, May 13, 2015 at 9:55 PM, Petri Gynther <pgynther@google.com> wrote:
-> sdhci_do_set_ios() doesn't currently program SDHCI_HOST_CONTROL2
-> register correctly when ios->drv_type == MMC_SET_DRIVER_TYPE_D.
->
-> Signed-off-by: Petri Gynther <pgynther@google.com>
-> ---
->  drivers/mmc/host/sdhci.c | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index c80287a..fe6094d 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1564,6 +1564,8 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
->                                 ctrl_2 |= SDHCI_CTRL_DRV_TYPE_A;
->                         else if (ios->drv_type == MMC_SET_DRIVER_TYPE_C)
->                                 ctrl_2 |= SDHCI_CTRL_DRV_TYPE_C;
-> +                       else if (ios->drv_type == MMC_SET_DRIVER_TYPE_D)
-> +                               ctrl_2 |= SDHCI_CTRL_DRV_TYPE_D;
->
->                         sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
->                 } else {
-> --
-> 2.2.0.rc0.207.ga3a616c
->
+2. "Got data interrupt 0x00100000 even though no data operation was in progress."
+
+   That's SDHCI_INT_DATA_TIMEOUT.
+
+   Unfortunately, I have no other information, as the registers are
+   dumped at pr_debug() level, which means that they're all compiled
+   out in normal kernel builds.  In any case, I have no way to copy
+   information off of the installing system; debian does not start up
+   a ssh daemon during the install, so remote login is not possible.
+   Nor can I photograph the rather reflective TV screen.
+
+The side-effect of this is that the entire MMC IO subsystem locks up
+and I'm left with lots of processes stuck in IO-wait state, with the
+hungtask detector spewing onto the console.
+
+This happens while installing Debian Jessie, which is an "expensive"
+operation: not only in time (it takes 45 minutes or so to reproduce,
+requiring the stupid debian installer to be babysat during that time)
+but also because it's having to download the entire distro for each
+attempt (which eats into my monthly bandwidth allowance, so I can
+_only_ do this after 8pm local time.)
+
+I've tried twice tonight (which is about the limit that I can do in an
+evening), the second time after having up-ed the stupid 10 second limit
+to 60 seconds.  However (2) still occurs.
+
+-- 
+FTTC broadband for 0.8mile line: currently at 10.5Mbps down 400kbps up
+according to speedtest.net.
