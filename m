@@ -1,198 +1,136 @@
 From: Al Cooper <alcooperx@gmail.com>
-Subject: [PATCH V3 1/8] mmc: lock: Use the kernel "KEYS" subsystem to get a card's password
-Date: Tue, 19 May 2015 19:11:07 -0400
-Message-ID: <1432077074-8422-2-git-send-email-alcooperx@gmail.com>
+Subject: [PATCH V3 4/8] mmc: lock: Add card lock/unlock maintenance commands
+Date: Tue, 19 May 2015 19:11:10 -0400
+Message-ID: <1432077074-8422-5-git-send-email-alcooperx@gmail.com>
 References: <1432077074-8422-1-git-send-email-alcooperx@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:44679 "EHLO
 	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752148AbbESXMQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2015 19:12:16 -0400
+	with ESMTP id S1751509AbbESXMS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 May 2015 19:12:18 -0400
 In-Reply-To: <1432077074-8422-1-git-send-email-alcooperx@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, pgynther@google.com
 Cc: Al Cooper <alcooperx@gmail.com>
 
-Use the kernel "KEYS" subsystem to get a password for a card based on
-the card's CID. This code was based on a patch set submitted by
-Anderson Briglia in 2006.
+Create a sysfs interface that allows a user to manage an inserted
+cards lock state. The sysfs attribute "lock" will be added to the
+device's sysfs directory. The following commands are supported:
+"setpw"   - Set the cards password
+"clearpw" - Clear the cards password
+"lock"    - Lock the card
+"unlock"  - Unlock the card
+"erase"   - Force erase the card, clear the password and unlock it
+Commands that require a password will request the password through
+the kernels KEYS subsystem.
 
 Signed-off-by: Al Cooper <alcooperx@gmail.com>
 ---
- drivers/mmc/core/Kconfig |  8 ++++
- drivers/mmc/core/core.c  | 97 ++++++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/core.h  | 10 ++++-
- 3 files changed, 114 insertions(+), 1 deletion(-)
+ drivers/mmc/core/mmc.c | 81 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 81 insertions(+)
 
-diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
-index 9ebee72..1d073cd 100644
---- a/drivers/mmc/core/Kconfig
-+++ b/drivers/mmc/core/Kconfig
-@@ -11,3 +11,11 @@ config MMC_CLKGATE
- 	  support handling this in order for it to be of any use.
- 
- 	  If unsure, say N.
-+
-+config MMC_LOCK
-+	bool "MMC/SD password based card lock/unlock"
-+	select KEYS
-+	help
-+	  This will add the ability to lock/unlock SD and MMC cards.
-+
-+	  If unsure, say N.
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 92e7671..f7d7ad9 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -29,6 +29,7 @@
- #include <linux/random.h>
- #include <linux/slab.h>
- #include <linux/of.h>
-+#include <linux/key-type.h>
- 
- #include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
-@@ -2707,6 +2708,96 @@ void mmc_init_context_info(struct mmc_host *host)
- 	init_waitqueue_head(&host->context_info.wait);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index f36c76f..8e94eb8 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -697,6 +697,84 @@ static int mmc_compare_ext_csds(struct mmc_card *card, unsigned bus_width)
+ 	return err;
  }
  
 +#ifdef CONFIG_MMC_LOCK
 +
-+static int mmc_key_instantiate(struct key *key,
-+			       struct key_preparsed_payload *prep)
++ssize_t mmc_lock_show(struct device *dev, struct device_attribute *att,
++			  char *buf)
 +{
-+	char *payload;
++	struct mmc_card *card = mmc_dev_to_card(dev);
 +
-+	if (prep->datalen <= 0 || prep->datalen > MMC_PASSWORD_MAX ||
-+	    !prep->data) {
-+		pr_warn("Invalid data\n");
-+		return  -EINVAL;
-+	}
-+
-+	payload = kmalloc(prep->datalen, GFP_KERNEL);
-+	if (!payload)
-+		return -ENOMEM;
-+	memcpy(payload, prep->data, prep->datalen);
-+	key->payload.data = payload;
-+	key->datalen = prep->datalen;
-+	return 0;
++	if (!mmc_card_lockable(card))
++		return sprintf(buf, "unsupported\n");
++	else
++		return sprintf(buf, "%slocked\n", mmc_card_locked(card) ?
++			       "" : "un");
 +}
 +
-+/*
-+ * dispose of the data dangling from the corpse of a mmc key
-+ */
-+static void mmc_key_destroy(struct key *key)
-+{
-+	kfree(key->payload.data);
-+}
 +
-+struct key_type key_type_mmc = {
-+	.name		= "mmc",
-+	.instantiate	= mmc_key_instantiate,
-+	.destroy	= mmc_key_destroy,
++static struct lock_cmd {
++	const char *name;
++	int io_cmd;
++	int locked_required;
++	int need_pw;
++} lock_cmds[] = {
++	{ "erase", MMC_LOCK_MODE_ERASE,  true,  false },
++	{ "clrpw", MMC_LOCK_MODE_CLR_PWD, false, true },
++	{ "setpw", MMC_LOCK_MODE_SET_PWD, false, true },
++	{ "lock", MMC_LOCK_MODE_LOCK, false,  true },
++	{ "unlock", MMC_LOCK_MODE_UNLOCK, true,  true },
 +};
 +
-+int mmc_get_password(struct mmc_card *card, struct mmc_password *password)
++/*
++ * implement MMC password functions: force erase, set password,
++ * clear password, lock and unlock.
++ */
++ssize_t mmc_lock_store(struct device *dev, struct device_attribute *att,
++			   const char *data, size_t len)
 +{
-+	struct key *mmc_key;
-+	char key_desc[(sizeof(card->raw_cid) * 2) + 1];
++	struct mmc_card *card = mmc_dev_to_card(dev);
++	int res = -EINVAL;
++	int x;
++	struct mmc_password password;
 +
-+	/* Use the CID to uniquely identify the card */
-+	snprintf(key_desc, sizeof(key_desc), "%08x%08x%08x%08x",
-+		 card->raw_cid[0], card->raw_cid[1],
-+		 card->raw_cid[2], card->raw_cid[3]);
-+
-+	mmc_key = request_key(&key_type_mmc, key_desc,
-+			      "password");
-+	if (IS_ERR(mmc_key)) {
-+		dev_warn(&card->dev, "Error, request_key %ld\n",
-+			 PTR_ERR(mmc_key));
-+		return PTR_ERR(mmc_key);
++	mmc_claim_host(card->host);
++	if (!mmc_card_lockable(card))
++		goto out;
++	for (x = 0; x < ARRAY_SIZE(lock_cmds); x++) {
++		if (sysfs_streq(data, lock_cmds[x].name))
++			break;
 +	}
-+	dev_dbg(&card->dev, "Found matching key\n");
-+	memcpy(&password->password, mmc_key->payload.data,
-+	       mmc_key->datalen);
-+	password->length = mmc_key->datalen;
-+	key_put(mmc_key);
++	if (x >= ARRAY_SIZE(lock_cmds))
++		goto out;
 +
-+	return 0;
++	if ((lock_cmds[x].locked_required && !mmc_card_locked(card)) ||
++	    (!lock_cmds[x].locked_required && mmc_card_locked(card))) {
++		dev_warn(dev, "%s requires %slocked card\n",
++			 lock_cmds[x].name,
++			 lock_cmds[x].locked_required ? "" : "un");
++		goto out;
++	}
++	if (lock_cmds[x].need_pw) {
++		res = mmc_get_password(card, &password);
++		if (res)
++			goto out;
++	}
++	res = mmc_lock_unlock(card, &password, lock_cmds[x].io_cmd);
++out:
++	mmc_release_host(card->host);
++	if (res == 0)
++		return len;
++	else
++		return res;
 +}
 +
-+static inline int mmc_register_key_type(void)
-+{
-+	return register_key_type(&key_type_mmc);
-+}
++static DEVICE_ATTR(lock, S_IWUSR | S_IRUGO,
++		   mmc_lock_show, mmc_lock_store);
 +
-+static inline void mmc_unregister_key_type(void)
-+{
-+	unregister_key_type(&key_type_mmc);
-+}
-+
-+#else /* CONFIG_MMC_LOCK */
-+
-+int mmc_get_password(struct mmc_card *card, struct mmc_password *password)
-+{
-+	return -ENOKEY;
-+}
-+
-+static inline int mmc_register_key_type(void)
-+{
-+	return 0;
-+}
-+
-+static inline void mmc_unregister_key_type(void)
-+{
-+}
 +
 +#endif /* CONFIG_MMC_LOCK */
 +
- static int __init mmc_init(void)
- {
- 	int ret;
-@@ -2727,8 +2818,13 @@ static int __init mmc_init(void)
- 	if (ret)
- 		goto unregister_host_class;
- 
-+	ret = mmc_register_key_type();
-+	if (ret)
-+		goto unregister_sdio_bus;
- 	return 0;
- 
-+unregister_sdio_bus:
-+	sdio_unregister_bus();
- unregister_host_class:
- 	mmc_unregister_host_class();
- unregister_bus:
-@@ -2741,6 +2837,7 @@ destroy_workqueue:
- 
- static void __exit mmc_exit(void)
- {
-+	mmc_unregister_key_type();
- 	sdio_unregister_bus();
- 	mmc_unregister_host_class();
- 	mmc_unregister_bus();
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index cfba3c0..b91bc3e 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -89,5 +89,13 @@ void mmc_init_context_info(struct mmc_host *host);
- 
- int mmc_execute_tuning(struct mmc_card *card);
- 
--#endif
-+/* Lock/Unlock functionality */
-+#define MMC_PASSWORD_MAX 16
-+struct mmc_password {
-+	char password[MMC_PASSWORD_MAX];
-+	int length;
-+};
-+int mmc_unlock_card(struct mmc_card *card);
-+int mmc_get_password(struct mmc_card *card, struct mmc_password *password);
- 
-+#endif
++
+ MMC_DEV_ATTR(cid, "%08x%08x%08x%08x\n", card->raw_cid[0], card->raw_cid[1],
+ 	card->raw_cid[2], card->raw_cid[3]);
+ MMC_DEV_ATTR(csd, "%08x%08x%08x%08x\n", card->raw_csd[0], card->raw_csd[1],
+@@ -751,6 +829,9 @@ static struct attribute *mmc_std_attrs[] = {
+ 	&dev_attr_enhanced_area_size.attr,
+ 	&dev_attr_raw_rpmb_size_mult.attr,
+ 	&dev_attr_rel_sectors.attr,
++#ifdef CONFIG_MMC_LOCK
++	&dev_attr_lock.attr,
++#endif /* CONFIG_MMC_LOCK */
+ 	NULL,
+ };
+ ATTRIBUTE_GROUPS(mmc_std);
 -- 
 1.9.0.138.g2de3478
 
