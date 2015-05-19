@@ -1,7 +1,8 @@
 From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH v4 1/7] mmc: dt-bindings: add Mediatek MMC bindings
-Date: Tue, 19 May 2015 14:36:45 +0800
-Message-ID: <1432017411-2996-2-git-send-email-chaotian.jing@mediatek.com>
+Subject: [PATCH v4 7/7] ARM: multi_v7_defconfig: Enable Mediatek MMC support
+ multi-v7
+Date: Tue, 19 May 2015 14:36:51 +0800
+Message-ID: <1432017411-2996-8-git-send-email-chaotian.jing@mediatek.com>
 References: <1432017411-2996-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,52 +22,27 @@ To: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matthias Brug
 Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Document the device-tree binding of Mediatek MMC host
+From: Yingjoe Chen <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 
+Add CONFIG_MMC_MTK=y in defconfig
+
+Signed-off-by: Yingjoe Chen <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 ---
- Documentation/devicetree/bindings/mmc/mtk-sd.txt | 33 ++++++++++++++++++++++++
- 1 file changed, 33 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.txt
+ arch/arm/configs/multi_v7_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-new file mode 100644
-index 0000000..ba6d668
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-@@ -0,0 +1,33 @@
-+* MTK MMC controller
-+
-+The MTK  MSDC can act as a MMC controller
-+to support MMC, SD, and SDIO types of memory cards.
-+
-+This file documents differences between the core properties in mmc.txt
-+and the properties used by the msdc driver.
-+
-+Required properties:
-+- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc".
-+- interrupts: Should contain MSDC interrupt number
-+- clocks: MSDC source clock, HCLK, HCLK is mandatory when it is not controlled by Infra
-+- clock-names: "source", "hclk"
-+- pinctrl-names: should be "default", "state_uhs"
-+- pinctrl-0: should contain default/high speed pin ctrl
-+- pinctrl-1: should contain uhs mode pin ctrl
-+- vmmc-supply: power to the Core
-+
-+Optional properties:
-+- vqmmc-supply: power to the IO(for SD/SDIO)
-+
-+Examples:
-+mmc0: mmc@11230000 {
-+	compatible = "mediatek,mt8173-mmc", "mediatek,mt8135-mmc";
-+	reg = <0 0x11230000 0 0x108>;
-+	interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
-+	vmmc-supply = <&mt6397_vemc_3v3_reg>;
-+	clocks = <&pericfg CLK_PERI_MSDC30_0>, <&topckgen CLK_TOP_MSDC50_0_H_SEL>;
-+	clock-names = "source", "hclk";
-+	pinctrl-names = "default", "state_uhs";
-+	pinctrl-0 = <&mmc0_pins_default>;
-+	pinctrl-1 = <&mmc0_pins_uhs>;
-+};
+diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
+index bc673e7..35447b2 100644
+--- a/arch/arm/configs/multi_v7_defconfig
++++ b/arch/arm/configs/multi_v7_defconfig
+@@ -451,6 +451,7 @@ CONFIG_MMC_DW_EXYNOS=y
+ CONFIG_MMC_DW_ROCKCHIP=y
+ CONFIG_MMC_SH_MMCIF=y
+ CONFIG_MMC_SUNXI=y
++CONFIG_MMC_MTK=y
+ CONFIG_NEW_LEDS=y
+ CONFIG_LEDS_CLASS=y
+ CONFIG_LEDS_GPIO=y
 -- 
 1.8.1.1.dirty
