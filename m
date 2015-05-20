@@ -1,67 +1,49 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci: fix DRIVER_TYPE_D handling in sdhci_do_set_ios()
-Date: Wed, 20 May 2015 12:44:43 +0200
-Message-ID: <CAPDyKFogZ0g7auQFvyEKGunjpr1W2kkcojtRWqFbOnUq9kzJyw@mail.gmail.com>
-References: <20150514045500.D88EC220492@puck.mtv.corp.google.com>
-	<CAGXr9JHCsOYH7xDkjBwB=ychJWMnu_sHpxp8pmi5ZiR0eRq5cg@mail.gmail.com>
+Subject: [GIT PULL] MMC fixes for v.4.1 rc5
+Date: Wed, 20 May 2015 14:31:38 +0200
+Message-ID: <CAPDyKFrG8QisuV3EAei_pmA-BUuPKyUH6y3um39+9Czz5XuMeg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f49.google.com ([209.85.192.49]:35770 "EHLO
-	mail-qg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752766AbbETKoo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 May 2015 06:44:44 -0400
-Received: by qgew3 with SMTP id w3so21209262qge.2
-        for <linux-mmc@vger.kernel.org>; Wed, 20 May 2015 03:44:44 -0700 (PDT)
-In-Reply-To: <CAGXr9JHCsOYH7xDkjBwB=ychJWMnu_sHpxp8pmi5ZiR0eRq5cg@mail.gmail.com>
+Received: from mail-qg0-f51.google.com ([209.85.192.51]:33427 "EHLO
+	mail-qg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752560AbbETMbj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 May 2015 08:31:39 -0400
+Received: by qgfa63 with SMTP id a63so2841957qgf.0
+        for <linux-mmc@vger.kernel.org>; Wed, 20 May 2015 05:31:38 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Petri Gynther <pgynther@google.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 19 May 2015 at 20:12, Petri Gynther <pgynther@google.com> wrote:
-> Any objections to this patch? In my opinion, this is a must-have fix
-> for sdhci_do_set_ios() when host->preset_enabled == false and
-> ios->drv_type == MMC_SET_DRIVER_TYPE_D.
->
-> To be complete, I could also add handling for ios->drv_type ==
-> MMC_SET_DRIVER_TYPE_B, i.e.:
-> else if (ios->drv_type == MMC_SET_DRIVER_TYPE_B)
->     ctrl_2 |= SDHCI_CTRL_DRV_TYPE_B;
->
-> but that's not absolutely necessary since:
-> #define  SDHCI_CTRL_DRV_TYPE_B  0x0000
+Hi Linus,
 
-Well to be consistent, I would rather see that you add above else if as well.
+Here's one more mmc fix intended for v4.1 rc5 and it's based on v4.1-rc3.
 
-Can you please send a new version?
+Details are as usual found in the signed tag. Please pull this in!
 
 Kind regards
-Uffe
+Ulf Hansson
 
->
-> On Wed, May 13, 2015 at 9:55 PM, Petri Gynther <pgynther@google.com> wrote:
->> sdhci_do_set_ios() doesn't currently program SDHCI_HOST_CONTROL2
->> register correctly when ios->drv_type == MMC_SET_DRIVER_TYPE_D.
->>
->> Signed-off-by: Petri Gynther <pgynther@google.com>
->> ---
->>  drivers/mmc/host/sdhci.c | 2 ++
->>  1 file changed, 2 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index c80287a..fe6094d 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1564,6 +1564,8 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
->>                                 ctrl_2 |= SDHCI_CTRL_DRV_TYPE_A;
->>                         else if (ios->drv_type == MMC_SET_DRIVER_TYPE_C)
->>                                 ctrl_2 |= SDHCI_CTRL_DRV_TYPE_C;
->> +                       else if (ios->drv_type == MMC_SET_DRIVER_TYPE_D)
->> +                               ctrl_2 |= SDHCI_CTRL_DRV_TYPE_D;
->>
->>                         sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
->>                 } else {
->> --
->> 2.2.0.rc0.207.ga3a616c
->>
+
+The following changes since commit 030bbdbf4c833bc69f502eae58498bc5572db736:
+
+  Linux 4.1-rc3 (2015-05-10 15:12:29 -0700)
+
+are available in the git repository at:
+
+  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-4.1-rc3
+
+for you to fetch changes up to 60c8f783a18feb95ad967c87e9660caf09fb4700:
+
+  mmc: atmel-mci: fix bad variable type for clkdiv (2015-05-18 09:04:42 +0200)
+
+----------------------------------------------------------------
+MMC host:
+- atmel-mci: fix bad variable type for clkdiv
+
+----------------------------------------------------------------
+Ludovic Desroches (1):
+      mmc: atmel-mci: fix bad variable type for clkdiv
+
+ drivers/mmc/host/atmel-mci.c | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
