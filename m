@@ -1,71 +1,74 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [PATCH v2, 2/2] mmc: sdhci-pltfm: enable interrupt mode to
- detect card
-Date: Wed, 20 May 2015 21:59:03 -0500
-Message-ID: <1432177143.27761.193.camel@freescale.com>
-References: <1431657984-42484-1-git-send-email-yangbo.lu@freescale.com>
-	 <CAPDyKFrgr5-xL3xG83AdFd8sAf20TUetCN=7etCg9rsKoZ317g@mail.gmail.com>
-	 <BY1PR0301MB11920E68DD9C4B17F1B1373FF2C40@BY1PR0301MB1192.namprd03.prod.outlook.com>
-	 <CAPDyKFpB2a=9J1T2+EwKUCx-6f27CbJyJSfXVMkK5sL0DsJL2Q@mail.gmail.com>
-	 <BY1PR0301MB1192B676B858B31C3B1893C1F2C40@BY1PR0301MB1192.namprd03.prod.outlook.com>
-	 <1431981783.27761.5.camel@freescale.com>
-	 <CAPDyKFpw9Uk14Ovfwc7_Gfu78pZZMO4qeD_BiBOmojP5WSNm8Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: Stefan Agner <stefan@agner.ch>
+Subject: [PATCH v3 2/2] mmc: sdhci-pxav3: use runtime_pm enabled pltfm suspend/resume
+Date: Thu, 21 May 2015 09:15:04 +0200
+Message-ID: <1432192504-3601-2-git-send-email-stefan@agner.ch>
+References: <1432192504-3601-1-git-send-email-stefan@agner.ch>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1on0131.outbound.protection.outlook.com ([157.56.110.131]:6545
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754774AbbEUDOm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 May 2015 23:14:42 -0400
-In-Reply-To: <CAPDyKFpw9Uk14Ovfwc7_Gfu78pZZMO4qeD_BiBOmojP5WSNm8Q@mail.gmail.com>
+Received: from mail.kmu-office.ch ([178.209.48.109]:49659 "EHLO
+	mail.kmu-office.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753643AbbEUHPK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 May 2015 03:15:10 -0400
+In-Reply-To: <1432192504-3601-1-git-send-email-stefan@agner.ch>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Lu Yangbo-B47093 <yangbo.lu@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chrisball@gmail.com>
+To: ulf.hansson@linaro.org
+Cc: gregory.clement@free-electrons.com, zhangfei.gao@marvell.com, jszhang@marvell.com, chris@printf.net, anton@enomsg.org, b29396@freescale.com, shawn.guo@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, stefan@agner.ch
 
-On Tue, 2015-05-19 at 09:46 +0200, Ulf Hansson wrote:
-> [...]
-> 
-> >> > Those platforms could still update their DT files and add "broken-cd",
-> >> > since that would be the proper description of the HW. Once that's done,
-> >> > it would enable you to remove the SDHCI_QUIRK_BROKEN_CARD_DETECTION as
-> >> > default, right?
-> >> >
-> >> Yes, and if remove SDHCI_QUIRK_BROKEN_CARD_DETECTION as default, 'borken-cd' would be needed to be added for most platforms using esdhc.
-> >
-> > I was OK with changing the device tree if it just meant that things that
-> > previously didn't work now work.  I'm not OK with requiring the device
-> > trees to change in order for things that already work to stay working.
-> 
-> I get your point, but.. considering maintaince from mmc code point of
-> view, I don't like the suggested approach in $subject patch.
-> 
-> As this patch anyway requires updating DTBs,
+Use the runtime_pm enabled platform suspend/resume functions.
 
-Not in a way that causes things that used to work to stop working if
-someone uses a new kernel with an old device tree.
+Signed-off-by: Stefan Agner <stefan@agner.ch>
+---
+ drivers/mmc/host/sdhci-pxav3.c | 30 +-----------------------------
+ 1 file changed, 1 insertion(+), 29 deletions(-)
 
-> I would like to know the involved platforms and at what level of
-> deployment the DTBs are in. In principle what I am asking is, how hard
-> is it to update the DTBs?
-
-The change you asked for would affect all platforms with esdhc that are
-not on the list being excluded by this patch.  I counted 29 files in
-arch/powerpc/boot/dts with "esdhc".  The oldest patch I see introducing
-esdhc to a device tree is 5761bc5dae6 from 2008.  This is not new
-stuff.
-
-The patch adding the quirk to the esdhc files is 3bb2a9f6a7c08 from
-2011, so the driver behavior is also not new.
-
-> BTW, is it only sdhci-of-esdhc.c we are discussing here?
-
-It's only sdhci-of-esdhc.c that would be affected by this patch (though
-sdhci-esdhc-imx also sets SDHCI_QUIRK_BROKEN_CARD_DETECTION by default).
-If the tests are moved into that file, would you be OK with it?
-
--Scott
-
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index b5103a2..5ac4030 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -501,34 +501,6 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
+-#ifdef CONFIG_PM_SLEEP
+-static int sdhci_pxav3_suspend(struct device *dev)
+-{
+-	int ret;
+-	struct sdhci_host *host = dev_get_drvdata(dev);
+-
+-	pm_runtime_get_sync(dev);
+-	ret = sdhci_suspend_host(host);
+-	pm_runtime_mark_last_busy(dev);
+-	pm_runtime_put_autosuspend(dev);
+-
+-	return ret;
+-}
+-
+-static int sdhci_pxav3_resume(struct device *dev)
+-{
+-	int ret;
+-	struct sdhci_host *host = dev_get_drvdata(dev);
+-
+-	pm_runtime_get_sync(dev);
+-	ret = sdhci_resume_host(host);
+-	pm_runtime_mark_last_busy(dev);
+-	pm_runtime_put_autosuspend(dev);
+-
+-	return ret;
+-}
+-#endif
+-
+ #ifdef CONFIG_PM
+ static int sdhci_pxav3_runtime_suspend(struct device *dev)
+ {
+@@ -564,7 +536,7 @@ static int sdhci_pxav3_runtime_resume(struct device *dev)
+ 
+ #ifdef CONFIG_PM
+ static const struct dev_pm_ops sdhci_pxav3_pmops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pxav3_suspend, sdhci_pxav3_resume)
++	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_rpm_suspend, sdhci_pltfm_rpm_resume)
+ 	SET_RUNTIME_PM_OPS(sdhci_pxav3_runtime_suspend,
+ 		sdhci_pxav3_runtime_resume, NULL)
+ };
+-- 
+2.4.1
 
