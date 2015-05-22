@@ -1,59 +1,43 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/3 v6] mmc: sh_mmcif: add parent clk support
-Date: Fri, 22 May 2015 16:01:06 +0200
-Message-ID: <CAPDyKFpi6NXx+s1eCJ0T9h_sxmQsXZRUxXi8=kmp5ohLJBHuwA@mail.gmail.com>
-References: <873840a4ch.wl%kuninori.morimoto.gx@renesas.com>
-	<87617vpqy3.wl%kuninori.morimoto.gx@renesas.com>
+From: Krishna Konda <kkonda@codeaurora.org>
+Subject: Secure Trim vs Discard & Sanitize
+Date: Fri, 22 May 2015 11:30:42 -0700
+Message-ID: <555F75D2.4020501@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f181.google.com ([209.85.216.181]:36802 "EHLO
-	mail-qc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757003AbbEVOBH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 May 2015 10:01:07 -0400
-Received: by qcir1 with SMTP id r1so8247154qci.3
-        for <linux-mmc@vger.kernel.org>; Fri, 22 May 2015 07:01:06 -0700 (PDT)
-In-Reply-To: <87617vpqy3.wl%kuninori.morimoto.gx@renesas.com>
+Received: from smtp.codeaurora.org ([198.145.29.96]:58855 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757125AbbEVSao (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 May 2015 14:30:44 -0400
+Received: from [10.46.164.83] (i-global254.qualcomm.com [199.106.103.254])
+	(using TLSv1.2 with cipher DHE-RSA-AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	(Authenticated sender: kkonda@smtp.codeaurora.org)
+	by smtp.codeaurora.org (Postfix) with ESMTPSA id 59789141060
+	for <linux-mmc@vger.kernel.org>; Fri, 22 May 2015 18:30:43 +0000 (UTC)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Simon <horms@verge.net.au>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Laurent <laurent.pinchart@ideasonboard.com>, Geert Uytterhoeven <geert@linux-m68k.org>, kobayashi <keita.kobayashi.ym@renesas.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 14 May 2015 at 09:20, Kuninori Morimoto
-<kuninori.morimoto.gx@renesas.com> wrote:
->
-> Hi Ulf, Simon
->
-> These patches are v6 of sh_mmcif clock support.
->
-> 1) - 2) : cleanup patches
-> 3)      : v6 patch for clk
-> 4) - 5) : DTS patch
->
-> Simon
->
->  1) - 3) only : driver uses default clock
->  4) - 5) only : driver uses it, but it is updated to default clock
->  1) - 5) all  : it uses new method
->
-> so, you can check 4) - 5) without thinking about 1) - 3).
->
-> Kuninori Morimoto (5):
->       1) mmc: sh_mmcif: add sh_mmcif_host_to_dev() macro and use it.
->       2) mmc: sh_mmcif: use sh_mmcif_xxx prefix for all functions
->       3) mmc: sh_mmcif: calculate best clock with parent clock
->       4) ARM: shmobile: r8a7790: add MMCIF max-frequency
->       5) ARM: shmobile: r8a7791: add MMCIF max-frequency
->
->  Documentation/devicetree/bindings/mmc/renesas,mmcif.txt |   3 ++
->  arch/arm/boot/dts/r8a7790.dtsi                          |   2 +
->  arch/arm/boot/dts/r8a7791.dtsi                          |   1 +
->  drivers/mmc/host/sh_mmcif.c                             | 220 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-------------------------------
->  4 files changed, 161 insertions(+), 65 deletions(-)
+The eMMC 4.5 and later specifications mention that the "Secure Erase" 
+and "Secure Trim" operations are not meant for eMMC 4.5 and later 
+devices but the driver still performs those operations on when block 
+layer issues a SECDISCARD (or REQ_DISCARD|REQ_SECURE) request.
 
-Thanks, applied patch 1->3. I leave 4->5 to Simon.
+I dont know why the driver did not move to TRIM + SANITIZE or DISCARD + 
+SANITIZE and I could not find any email discussions about this.
 
-Thanks!
+I have seen the patches that provide sanitize via ioctls but I am more 
+interested if the driver should use the newer commands and should it 
+invoke sanitize when performing a secure discard operation..
 
-Kind regards
-Uffe
+
+-- 
+Thanks,
+Krishna Konda
+-----------------------------------------------------------------------
+Employee of Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
+-----------------------------------------------------------------------
