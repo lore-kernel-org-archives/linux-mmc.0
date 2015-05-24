@@ -1,43 +1,95 @@
-From: Krishna Konda <kkonda@codeaurora.org>
-Subject: Secure Trim vs Discard & Sanitize
-Date: Fri, 22 May 2015 11:30:42 -0700
-Message-ID: <555F75D2.4020501@codeaurora.org>
+From: Michal Suchanek <hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH 1/2] mmc: sunxi: fix timeout in sunxi_mmc_oclk_onoff
+Date: Sun, 24 May 2015 20:07:32 +0200
+Message-ID: <4011290915a42fce8b9c19d59f3ca9c3289a6817.1432491958.git.hramrach@gmail.com>
+References: <cover.1432491958.git.hramrach@gmail.com>
+Reply-To: hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:58855 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757125AbbEVSao (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 May 2015 14:30:44 -0400
-Received: from [10.46.164.83] (i-global254.qualcomm.com [199.106.103.254])
-	(using TLSv1.2 with cipher DHE-RSA-AES128-SHA (128/128 bits))
-	(No client certificate requested)
-	(Authenticated sender: kkonda@smtp.codeaurora.org)
-	by smtp.codeaurora.org (Postfix) with ESMTPSA id 59789141060
-	for <linux-mmc@vger.kernel.org>; Fri, 22 May 2015 18:30:43 +0000 (UTC)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sunxi+bncBCQMLUOX54MBBYF3RCVQKGQEJLFCTPA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <cover.1432491958.git.hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <http://groups.google.com/group/linux-sunxi/subscribe>
+To: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Michal Suchanek <hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-The eMMC 4.5 and later specifications mention that the "Secure Erase" 
-and "Secure Trim" operations are not meant for eMMC 4.5 and later 
-devices but the driver still performs those operations on when block 
-layer issues a SECDISCARD (or REQ_DISCARD|REQ_SECURE) request.
+The 250ms timeout is too short.
 
-I dont know why the driver did not move to TRIM + SANITIZE or DISCARD + 
-SANITIZE and I could not find any email discussions about this.
+On my system enabling the oclk takes under 50ms and disabling slightly
+over 100ms when idle. Under load disabling the clock can take over
+350ms.
 
-I have seen the patches that provide sanitize via ioctls but I am more 
-interested if the driver should use the newer commands and should it 
-invoke sanitize when performing a secure discard operation..
+This does not make mmc clock gating look like good option to have on
+sunxi but the system should not crash with mmc clock gating enabled
+nonetheless.
 
+This patch sets the timeout to 750ms and adds debug prints which show
+how long enabling/disabling the clock took so more data can be collected
+from other systems.
 
+Signed-off-by: Michal Suchanek <hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+---
+ drivers/mmc/host/sunxi-mmc.c | 22 +++++++++++++++++++---
+ 1 file changed, 19 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 4d3e1ff..7cdeecd 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -595,7 +595,7 @@ static irqreturn_t sunxi_mmc_handle_manual_stop(int irq, void *dev_id)
+ 
+ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+ {
+-	unsigned long expire = jiffies + msecs_to_jiffies(250);
++	unsigned long start, end;
+ 	u32 rval;
+ 
+ 	rval = mmc_readl(host, REG_CLKCR);
+@@ -604,6 +604,8 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+ 	if (oclk_en)
+ 		rval |= SDXC_CARD_CLOCK_ON;
+ 
++	start = jiffies;
++	end = start + msecs_to_jiffies(750);
+ 	mmc_writel(host, REG_CLKCR, rval);
+ 
+ 	rval = SDXC_START | SDXC_UPCLK_ONLY | SDXC_WAIT_PRE_OVER;
+@@ -611,15 +613,29 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+ 
+ 	do {
+ 		rval = mmc_readl(host, REG_CMDR);
+-	} while (time_before(jiffies, expire) && (rval & SDXC_START));
++	} while (time_before(jiffies, end) && (rval & SDXC_START));
++	end = jiffies;
+ 
+ 	/* clear irq status bits set by the command */
+ 	mmc_writel(host, REG_RINTR,
+ 		   mmc_readl(host, REG_RINTR) & ~SDXC_SDIO_INTERRUPT);
+ 
+ 	if (rval & SDXC_START) {
+-		dev_err(mmc_dev(host->mmc), "fatal err update clk timeout\n");
++		dev_err(mmc_dev(host->mmc),
++			"fatal err update oclk timeout. Could not %s in %ims.\n",
++			oclk_en ? "enable" : "disable",
++			jiffies_to_msecs(end-start));
+ 		return -EIO;
++	} else {
++		int msecs = jiffies_to_msecs(end-start);
++		const char *ing = oclk_en ? "enabling" : "disabling";
++
++		if ((msecs > 150) || (oclk_en && (msecs > 50)))
++			dev_warn(mmc_dev(host->mmc),
++				 "%s oclk took %ims", ing, msecs);
++		else
++			dev_dbg(mmc_dev(host->mmc),
++				 "%s oclk took %ims", ing, msecs);
+ 	}
+ 
+ 	return 0;
 -- 
-Thanks,
-Krishna Konda
------------------------------------------------------------------------
-Employee of Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
------------------------------------------------------------------------
+2.1.4
