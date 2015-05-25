@@ -1,54 +1,103 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 0/3 v6] mmc: sh_mmcif: add parent clk support
-Date: Mon, 25 May 2015 09:50:08 +0900
-Message-ID: <20150525005005.GJ19830@verge.net.au>
-References: <87iobhjxxc.wl%kuninori.morimoto.gx@renesas.com>
+Subject: Re: [PATCH 6/6] ARM: shmobile: lager: Enable UHS-I SDR-50
+Date: Mon, 25 May 2015 10:07:24 +0900
+Message-ID: <20150525010724.GD24690@verge.net.au>
+References: <1431822459.4222.166.camel@xylophone.i.decadent.org.uk>
+ <1431823184.4222.180.camel@xylophone.i.decadent.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <87iobhjxxc.wl%kuninori.morimoto.gx@renesas.com>
- <87k2vxjyj9.wl%kuninori.morimoto.gx@renesas.com>
+In-Reply-To: <1431823184.4222.180.camel@xylophone.i.decadent.org.uk>
 Sender: linux-sh-owner@vger.kernel.org
-To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Laurent <laurent.pinchart@ideasonboard.com>, Geert Uytterhoeven <geert@linux-m68k.org>, kobayashi <keita.kobayashi.ym@renesas.com>
+To: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Morimoto-san,
+[CC Morimoto-san]
 
-On Mon, May 25, 2015 at 12:24:59AM +0000, Kuninori Morimoto wrote:
+On Sun, May 17, 2015 at 01:39:44AM +0100, Ben Hutchings wrote:
+> Add the "1v8" pinctrl state and sd-uhs-sdr50 property to SDHI{0,2}.
 > 
-> Hi Simon, Ulf
-> 
-> > > Kuninori Morimoto (5):
-> > >       1) mmc: sh_mmcif: add sh_mmcif_host_to_dev() macro and use it.
-> > >       2) mmc: sh_mmcif: use sh_mmcif_xxx prefix for all functions
-> > >       3) mmc: sh_mmcif: calculate best clock with parent clock
-> > >       4) ARM: shmobile: r8a7790: add MMCIF max-frequency
-> > >       5) ARM: shmobile: r8a7791: add MMCIF max-frequency
-> (snip)
-> > Thanks, applied patch 1->3. I leave 4->5 to Simon.
-> 
-> Thank you Ulf.
-> Simon, please check 4) 5)
-> 
-> Best regards
+> Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 > ---
-> Kuninori Morimoto
-> 
+> None of the states includes the CD pins, as they can't be allocated both
+> through pinctrl and as GPIOs.  But the Lager manual shows these signals
+> being pulled up to the same variable voltage as the other signals.  This
+> might possibly lead to spurious card detect interrupts after switching
+> to 1.8V signalling.
 
-On Mon, May 25, 2015 at 12:38:08AM +0000, Kuninori Morimoto wrote:
-> 
-> Hi Simon
-> 
-> > > Thanks, applied patch 1->3. I leave 4->5 to Simon.
-> > 
-> > Thanks Ulf.
-> > 
-> > Morimoto-san, can I confirm that I should go ahead and queue up 4->5 ?
-> 
-> Thank you for your help.
-> Yes, please. you don't need to care about 1) - 3) for 4) - 5) patches.
-> 
+Morimoto-san,
 
-Thanks, I have queued up 5 & 5 for v4.2.
+I would appreciate your opinion on this change.
+
+Thanks.
+
+>  arch/arm/boot/dts/r8a7790-lager.dts |   18 ++++++++++++++++--
+>  1 file changed, 16 insertions(+), 2 deletions(-)
+> 
+> diff --git a/arch/arm/boot/dts/r8a7790-lager.dts b/arch/arm/boot/dts/r8a7790-lager.dts
+> index 343ec0ccc8df..5584e835d0f5 100644
+> --- a/arch/arm/boot/dts/r8a7790-lager.dts
+> +++ b/arch/arm/boot/dts/r8a7790-lager.dts
+> @@ -314,11 +314,21 @@
+>  		renesas,function = "sdhi0";
+>  	};
+>  
+> +	sdhi0_pins_1v8: sd0_1v8 {
+> +		renesas,groups = "sdhi0_data4", "sdhi0_ctrl";
+> +		renesas,function = "sdhi0_1v8";
+> +	};
+> +
+>  	sdhi2_pins: sd2 {
+>  		renesas,groups = "sdhi2_data4", "sdhi2_ctrl";
+>  		renesas,function = "sdhi2";
+>  	};
+>  
+> +	sdhi2_pins_1v8: sd2_1v8 {
+> +		renesas,groups = "sdhi2_data4", "sdhi2_ctrl";
+> +		renesas,function = "sdhi2_1v8";
+> +	};
+> +
+>  	mmc1_pins: mmc1 {
+>  		renesas,groups = "mmc1_data8", "mmc1_ctrl";
+>  		renesas,function = "mmc1";
+> @@ -491,7 +501,8 @@
+>  
+>  &sdhi0 {
+>  	pinctrl-0 = <&sdhi0_pins>;
+> -	pinctrl-names = "default";
+> +	pinctrl-1 = <&sdhi0_pins_1v8>;
+> +	pinctrl-names = "default", "1v8";
+>  
+>  	assigned-clocks = <&mstp3_clks R8A7790_CLK_SDHI0>;
+>  	assigned-clock-rates = <156000000>;
+> @@ -499,12 +510,14 @@
+>  	vmmc-supply = <&vcc_sdhi0>;
+>  	vqmmc-supply = <&vccq_sdhi0>;
+>  	cd-gpios = <&gpio3 6 GPIO_ACTIVE_LOW>;
+> +	sd-uhs-sdr50;
+>  	status = "okay";
+>  };
+>  
+>  &sdhi2 {
+>  	pinctrl-0 = <&sdhi2_pins>;
+> -	pinctrl-names = "default";
+> +	pinctrl-1 = <&sdhi2_pins_1v8>;
+> +	pinctrl-names = "default", "1v8";
+>  
+>  	assigned-clocks = <&mstp3_clks R8A7790_CLK_SDHI2>;
+>  	assigned-clock-rates = <97500000>;
+> @@ -512,6 +525,7 @@
+>  	vmmc-supply = <&vcc_sdhi2>;
+>  	vqmmc-supply = <&vccq_sdhi2>;
+>  	cd-gpios = <&gpio3 22 GPIO_ACTIVE_LOW>;
+> +	sd-uhs-sdr50;
+>  	status = "okay";
+>  };
+>  
+> -- 
+> 1.7.10.4
+> 
+> 
+> 
