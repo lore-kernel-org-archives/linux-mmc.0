@@ -1,130 +1,62 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V2 00/11] mmc: Add support for drive strength for eMMCs
-Date: Mon, 25 May 2015 10:01:58 +0300
-Message-ID: <5562C8E6.4050508@intel.com>
-References: <1423224781-27076-1-git-send-email-adrian.hunter@intel.com>	<55507660.4010307@intel.com> <CAPDyKFoZ6+MzHL=iu2OXG1Hj+ctVVSbFW5r_2ZYwHO50tgreew@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/3 v6] mmc: sh_mmcif: add parent clk support
+Date: Mon, 25 May 2015 10:44:26 +0200
+Message-ID: <CAPDyKFrqZMv25rYEwGopNQAajUAsXbFucX3X4wmRveFtQfbZ6Q@mail.gmail.com>
+References: <873840a4ch.wl%kuninori.morimoto.gx@renesas.com>
+	<87617vpqy3.wl%kuninori.morimoto.gx@renesas.com>
+	<CAPDyKFpi6NXx+s1eCJ0T9h_sxmQsXZRUxXi8=kmp5ohLJBHuwA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:55631 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750793AbbEYHEQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 25 May 2015 03:04:16 -0400
-In-Reply-To: <CAPDyKFoZ6+MzHL=iu2OXG1Hj+ctVVSbFW5r_2ZYwHO50tgreew@mail.gmail.com>
+Received: from mail-qk0-f180.google.com ([209.85.220.180]:34633 "EHLO
+	mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750843AbbEYIo0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 May 2015 04:44:26 -0400
+Received: by qkgx75 with SMTP id x75so59757207qkg.1
+        for <linux-mmc@vger.kernel.org>; Mon, 25 May 2015 01:44:26 -0700 (PDT)
+In-Reply-To: <CAPDyKFpi6NXx+s1eCJ0T9h_sxmQsXZRUxXi8=kmp5ohLJBHuwA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Philip Rakity <prakity@nvidia.com>
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Simon <horms@verge.net.au>, Magnus <magnus.damm@gmail.com>, Linux-SH <linux-sh@vger.kernel.org>, Laurent <laurent.pinchart@ideasonboard.com>, Geert Uytterhoeven <geert@linux-m68k.org>, kobayashi <keita.kobayashi.ym@renesas.com>
 
-On 11/05/15 13:23, Ulf Hansson wrote:
-> On 11 May 2015 at 11:29, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 06/02/15 14:12, Adrian Hunter wrote:
->>> Hi
->>>
->>> Here is V2 of some patches to enable a host controller to select
->>> driver strength for eMMCs using HS200 or HS400. These are based
->>> on top of the re-tuning series.
->>>
->>> There can be some confusion over the term "driver strength".
->>> SD calls it "drive strength" for the card but "driver type"
->>> for the host. Whereas JEDEC calls it both "driver strength"
->>> and "driver type". The values are the same for both SD
->>> and eMMC:
->>>
->>>   Value   Driver Type   Relative strength
->>>     0       B             x1  default and mandatory support
->>>     1       A             x1.5
->>>     2       C             x0.75
->>>     3       D             x0.5
->>>
->>> Except eMMC also defines value 4:
->>>
->>>   Value   Driver Type   Relative strength
->>>     4                     x1.2
->>>
->>>
->>> Changes in V2:
->>>
->>>     mmc: core: Add function to read driver-strength device property
->>>         Dropped because there are still questions over how to use
->>>         device properties.
->>>
->>>     mmc: sdhci-pci: Add support for drive strength selection for SPT
->>>         Amended to reflect the change above.
->>>
->>>
->>> Adrian Hunter (11):
->>>       mmc: core: Reset driver type to default
->>>       mmc: core: Allow card drive strength to be different to host
->>>       mmc: core: Simplify card drive strength mask
->>>       mmc: core: Add 'card' to drive strength selection callback
->>>       mmc: core: Factor out common code in drive strength selection
->>>       mmc: core: Record card drive strength
->>>       mmc: mmc: Read card's valid driver strength mask
->>>       mmc: mmc: Add driver strength selection
->>>       mmc: sdhci: Add a callback to select drive strength
->>>       mmc: sdhci-pci: Add support for drive strength selection for SPT
->>>       mmc: sdhci-pci: Enable HS400 for some Intel host controllers
->>>
->>>  drivers/mmc/core/core.c            | 39 ++++++++++++++++++
->>>  drivers/mmc/core/core.h            |  2 +
->>>  drivers/mmc/core/mmc.c             | 46 +++++++++++++++++----
->>>  drivers/mmc/core/sd.c              | 69 ++++++++-----------------------
->>>  drivers/mmc/core/sdio.c            | 77 +++++++++++-----------------------
->>>  drivers/mmc/host/sdhci-pci-data.c  |  3 ++
->>>  drivers/mmc/host/sdhci-pci.c       | 84 ++++++++++++++++++++++++++++++++++++++
->>>  drivers/mmc/host/sdhci-pci.h       |  4 ++
->>>  drivers/mmc/host/sdhci.c           | 13 ++++++
->>>  drivers/mmc/host/sdhci.h           |  4 ++
->>>  include/linux/mmc/card.h           |  2 +
->>>  include/linux/mmc/host.h           |  4 +-
->>>  include/linux/mmc/mmc.h            |  4 ++
->>>  include/linux/mmc/sdhci-pci-data.h |  2 +
->>>  14 files changed, 240 insertions(+), 113 deletions(-)
+On 22 May 2015 at 16:01, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 14 May 2015 at 09:20, Kuninori Morimoto
+> <kuninori.morimoto.gx@renesas.com> wrote:
 >>
->> Hi Ulf
+>> Hi Ulf, Simon
 >>
->> These patches still apply. Would have time to look at them?
-> 
-> Thanks for the reminder!
-> 
-> I am walking through my backlog, but I don't want to give you any
-> promises about when, since I never seems to be able to keep them. :-)
+>> These patches are v6 of sh_mmcif clock support.
+>>
+>> 1) - 2) : cleanup patches
+>> 3)      : v6 patch for clk
+>> 4) - 5) : DTS patch
+>>
+>> Simon
+>>
+>>  1) - 3) only : driver uses default clock
+>>  4) - 5) only : driver uses it, but it is updated to default clock
+>>  1) - 5) all  : it uses new method
+>>
+>> so, you can check 4) - 5) without thinking about 1) - 3).
+>>
+>> Kuninori Morimoto (5):
+>>       1) mmc: sh_mmcif: add sh_mmcif_host_to_dev() macro and use it.
+>>       2) mmc: sh_mmcif: use sh_mmcif_xxx prefix for all functions
+>>       3) mmc: sh_mmcif: calculate best clock with parent clock
+>>       4) ARM: shmobile: r8a7790: add MMCIF max-frequency
+>>       5) ARM: shmobile: r8a7791: add MMCIF max-frequency
+>>
+>>  Documentation/devicetree/bindings/mmc/renesas,mmcif.txt |   3 ++
+>>  arch/arm/boot/dts/r8a7790.dtsi                          |   2 +
+>>  arch/arm/boot/dts/r8a7791.dtsi                          |   1 +
+>>  drivers/mmc/host/sh_mmcif.c                             | 220 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-------------------------------
+>>  4 files changed, 161 insertions(+), 65 deletions(-)
+>
+> Thanks, applied patch 1->3. I leave 4->5 to Simon.
 
-Hi
+I realized the patch 3 caused a compiler warning. I have fixed it up,
+so no worries!
 
-Here's another reminder :-)
-
-I would really like these patches and there is really not much to review.
-
-Patch 1 is quite trivial - only 1 line changed.
-
-Patch 2 is a change the select_drive_strength() host op to allow card driver
-strength to be different from host driver strength. It has no effect on
-current drivers.
-
-Patch 3 is just tidying up.
-
-Patch 4 is another change to the select_drive_strength() host op (to add
-'card' as a parameter) and also has no effect on current drivers.
-
-Patch 5 is another tidy up.
-
-Patch 6 is a very small patch to add drive_strength to struct mmc_card.
-
-Patch 7 is a very small change to read eMMC supported driver strengths from
-EXT-CSD.
-
-Patch 8 adds driver strength selection for eMMC
-
-Patch 9, 10 implement the select_drive_strength() for Intel SPT with the
-sdhci-pci driver.
-
-Patch 11 finally just enables HS400 for Intel
-
-This shouldn't really take that long to review ;-)
-
-Regards
-Adrian
-
+Kind regards
+Uffe
