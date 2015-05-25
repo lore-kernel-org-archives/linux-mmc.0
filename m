@@ -1,103 +1,73 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 6/6] ARM: shmobile: lager: Enable UHS-I SDR-50
-Date: Mon, 25 May 2015 10:07:24 +0900
-Message-ID: <20150525010724.GD24690@verge.net.au>
-References: <1431822459.4222.166.camel@xylophone.i.decadent.org.uk>
- <1431823184.4222.180.camel@xylophone.i.decadent.org.uk>
+From: Julian Calaby <julian.calaby-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 1/2] mmc: sunxi: fix timeout in sunxi_mmc_oclk_onoff
+Date: Mon, 25 May 2015 11:44:37 +1000
+Message-ID: <CAGRGNgXukmS8hAYbmgeMZUbWqjAF49J_v-S8EtudaEkfYgP9Mw@mail.gmail.com>
+References: <cover.1432491958.git.hramrach@gmail.com> <4011290915a42fce8b9c19d59f3ca9c3289a6817.1432491958.git.hramrach@gmail.com>
+Reply-To: julian.calaby-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1431823184.4222.180.camel@xylophone.i.decadent.org.uk>
-Sender: linux-sh-owner@vger.kernel.org
-To: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sunxi+bncBDQIP76OUQLBBGX5RGVQKGQEMYWCNBQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <4011290915a42fce8b9c19d59f3ca9c3289a6817.1432491958.git.hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <http://groups.google.com/group/linux-sunxi/subscribe>
+To: Michal Suchanek <hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Mailing List, Arm" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-[CC Morimoto-san]
+Hi Michal,
 
-On Sun, May 17, 2015 at 01:39:44AM +0100, Ben Hutchings wrote:
-> Add the "1v8" pinctrl state and sd-uhs-sdr50 property to SDHI{0,2}.
-> 
-> Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
+On Mon, May 25, 2015 at 4:07 AM, Michal Suchanek <hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> The 250ms timeout is too short.
+>
+> On my system enabling the oclk takes under 50ms and disabling slightly
+> over 100ms when idle. Under load disabling the clock can take over
+> 350ms.
+>
+> This does not make mmc clock gating look like good option to have on
+> sunxi but the system should not crash with mmc clock gating enabled
+> nonetheless.
+>
+> This patch sets the timeout to 750ms and adds debug prints which show
+> how long enabling/disabling the clock took so more data can be collected
+> from other systems.
+>
+> Signed-off-by: Michal Suchanek <hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 > ---
-> None of the states includes the CD pins, as they can't be allocated both
-> through pinctrl and as GPIOs.  But the Lager manual shows these signals
-> being pulled up to the same variable voltage as the other signals.  This
-> might possibly lead to spurious card detect interrupts after switching
-> to 1.8V signalling.
+>  drivers/mmc/host/sunxi-mmc.c | 22 +++++++++++++++++++---
+>  1 file changed, 19 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index 4d3e1ff..7cdeecd 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -595,7 +595,7 @@ static irqreturn_t sunxi_mmc_handle_manual_stop(int irq, void *dev_id)
+>
+>  static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+>  {
+> -       unsigned long expire = jiffies + msecs_to_jiffies(250);
+> +       unsigned long start, end;
+>         u32 rval;
+>
+>         rval = mmc_readl(host, REG_CLKCR);
+> @@ -604,6 +604,8 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+>         if (oclk_en)
+>                 rval |= SDXC_CARD_CLOCK_ON;
+>
+> +       start = jiffies;
+> +       end = start + msecs_to_jiffies(750);
 
-Morimoto-san,
+You might want to make the timeout value a #define so it's not buried
+in the code like this.
 
-I would appreciate your opinion on this change.
+Thanks,
 
-Thanks.
+-- 
+Julian Calaby
 
->  arch/arm/boot/dts/r8a7790-lager.dts |   18 ++++++++++++++++--
->  1 file changed, 16 insertions(+), 2 deletions(-)
-> 
-> diff --git a/arch/arm/boot/dts/r8a7790-lager.dts b/arch/arm/boot/dts/r8a7790-lager.dts
-> index 343ec0ccc8df..5584e835d0f5 100644
-> --- a/arch/arm/boot/dts/r8a7790-lager.dts
-> +++ b/arch/arm/boot/dts/r8a7790-lager.dts
-> @@ -314,11 +314,21 @@
->  		renesas,function = "sdhi0";
->  	};
->  
-> +	sdhi0_pins_1v8: sd0_1v8 {
-> +		renesas,groups = "sdhi0_data4", "sdhi0_ctrl";
-> +		renesas,function = "sdhi0_1v8";
-> +	};
-> +
->  	sdhi2_pins: sd2 {
->  		renesas,groups = "sdhi2_data4", "sdhi2_ctrl";
->  		renesas,function = "sdhi2";
->  	};
->  
-> +	sdhi2_pins_1v8: sd2_1v8 {
-> +		renesas,groups = "sdhi2_data4", "sdhi2_ctrl";
-> +		renesas,function = "sdhi2_1v8";
-> +	};
-> +
->  	mmc1_pins: mmc1 {
->  		renesas,groups = "mmc1_data8", "mmc1_ctrl";
->  		renesas,function = "mmc1";
-> @@ -491,7 +501,8 @@
->  
->  &sdhi0 {
->  	pinctrl-0 = <&sdhi0_pins>;
-> -	pinctrl-names = "default";
-> +	pinctrl-1 = <&sdhi0_pins_1v8>;
-> +	pinctrl-names = "default", "1v8";
->  
->  	assigned-clocks = <&mstp3_clks R8A7790_CLK_SDHI0>;
->  	assigned-clock-rates = <156000000>;
-> @@ -499,12 +510,14 @@
->  	vmmc-supply = <&vcc_sdhi0>;
->  	vqmmc-supply = <&vccq_sdhi0>;
->  	cd-gpios = <&gpio3 6 GPIO_ACTIVE_LOW>;
-> +	sd-uhs-sdr50;
->  	status = "okay";
->  };
->  
->  &sdhi2 {
->  	pinctrl-0 = <&sdhi2_pins>;
-> -	pinctrl-names = "default";
-> +	pinctrl-1 = <&sdhi2_pins_1v8>;
-> +	pinctrl-names = "default", "1v8";
->  
->  	assigned-clocks = <&mstp3_clks R8A7790_CLK_SDHI2>;
->  	assigned-clock-rates = <97500000>;
-> @@ -512,6 +525,7 @@
->  	vmmc-supply = <&vcc_sdhi2>;
->  	vqmmc-supply = <&vccq_sdhi2>;
->  	cd-gpios = <&gpio3 22 GPIO_ACTIVE_LOW>;
-> +	sd-uhs-sdr50;
->  	status = "okay";
->  };
->  
-> -- 
-> 1.7.10.4
-> 
-> 
-> 
+Email: julian.calaby-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Profile: http://www.google.com/profiles/julian.calaby/
