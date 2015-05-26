@@ -1,49 +1,127 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RESEND v7 2/2] mmc: host: sdhci: Add support to disable
- SDR104/SDR50/DDR50 based on capability register 0.
-Date: Tue, 26 May 2015 14:36:49 +0200
-Message-ID: <CAPDyKFpxkNF9C8AOJ6+18CEcpZTKycPR0i5OuwPRr1Zc+VPJ5Q@mail.gmail.com>
-References: <1432197817-22110-1-git-send-email-stripathi@apm.com>
- <1432197817-22110-3-git-send-email-stripathi@apm.com>
+Subject: Re: [PATCH v2] mmc: sdhci-of-esdhc: add workaround for clock glitch issue
+Date: Tue, 26 May 2015 14:42:16 +0200
+Message-ID: <CAPDyKFpF2w1_ZznXFGPMoqTuyJabY=vyFyBiCcP6ri4MeU06Wg@mail.gmail.com>
+References: <1432014029-21152-1-git-send-email-yangbo.lu@freescale.com>
+	<CAPDyKFrqgZR-nZwscYNR9QXYq5s+2=eL6aLJ+MekDv4ApPBkYA@mail.gmail.com>
+	<BN3PR0301MB1188A4E63014C251A39F6096F2C30@BN3PR0301MB1188.namprd03.prod.outlook.com>
+	<CAPDyKFozk9dYF2QhW9w3byrthR0TOCJVvtVayOkNCXEUH4wbSQ@mail.gmail.com>
+	<BY1PR0301MB1192BD58244C41ABF6239192F2CC0@BY1PR0301MB1192.namprd03.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <1432197817-22110-3-git-send-email-stripathi@apm.com>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Suman Tripathi <stripathi@apm.com>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Mark Langsdorf <mlangsdo@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jon Masters <jcm@redhat.com>, Anton Vorontsov <anton@enomsg.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Michal Simek <michal.simek@xilinx.com>, patches <patches@apm.com>, Don Dutile <ddutile@redhat.com>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f176.google.com ([209.85.220.176]:34245 "EHLO
+	mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752480AbbEZMo0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 May 2015 08:44:26 -0400
+Received: by qkgx75 with SMTP id x75so87179064qkg.1
+        for <linux-mmc@vger.kernel.org>; Tue, 26 May 2015 05:42:16 -0700 (PDT)
+In-Reply-To: <BY1PR0301MB1192BD58244C41ABF6239192F2CC0@BY1PR0301MB1192.namprd03.prod.outlook.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Lu Y.B." <yangbo.lu@freescale.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chrisball@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
-T24gMjEgTWF5IDIwMTUgYXQgMTA6NDMsIFN1bWFuIFRyaXBhdGhpIDxzdHJpcGF0aGlAYXBtLmNv
-bT4gd3JvdGU6Cj4gVGhlIHNkaGNpIGZyYW1ld29yayBkaXNhYmxlcyBTRFIxMDQvU0RSNTAvRERS
-NTAgYmFzZWQgb24gb25seSBxdWlyay4KPiBUaGlzIHBhdGNoIGFkZHMgdGhlIHN1cHBvcnQgdG8g
-ZGlzYWJsZSBTRFIxMDQvU0RSNTAvRERSNTAgYmFzZWQgb24KPiByZWFkaW5nIHRoZSBjYXBhYmls
-aXR5IHJlZ2lzdGVyIDAuCj4KPiBTaWduZWQtb2ZmLWJ5OiBTdW1hbiBUcmlwYXRoaSA8c3RyaXBh
-dGhpQGFwbS5jb20+Cj4gLS0tCj4gLS0tCj4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyB8IDMg
-KystCj4gIDEgZmlsZSBjaGFuZ2VkLCAyIGluc2VydGlvbnMoKyksIDEgZGVsZXRpb24oLSkKPgo+
-IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmMgYi9kcml2ZXJzL21tYy9ob3N0
-L3NkaGNpLmMKPiBpbmRleCA1OGMxNzcwLi5hM2Q5YjhhIDEwMDY0NAo+IC0tLSBhL2RyaXZlcnMv
-bW1jL2hvc3Qvc2RoY2kuYwo+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYwo+IEBAIC0z
-MTE4LDcgKzMxMTgsOCBAQCBpbnQgc2RoY2lfYWRkX2hvc3Qoc3RydWN0IHNkaGNpX2hvc3QgKmhv
-c3QpCj4gICAgICAgICAgICAgICAgIH0KPiAgICAgICAgIH0KPgo+IC0gICAgICAgaWYgKGhvc3Qt
-PnF1aXJrczIgJiBTREhDSV9RVUlSSzJfTk9fMV84X1YpCj4gKyAgICAgICBpZiAoaG9zdC0+cXVp
-cmtzMiAmIFNESENJX1FVSVJLMl9OT18xXzhfViB8fAo+ICsgICAgICAgICAgICEoY2Fwc1swXSAm
-IFNESENJX0NBTl9WRERfMTgwKSkKPiAgICAgICAgICAgICAgICAgY2Fwc1sxXSAmPSB+KFNESENJ
-X1NVUFBPUlRfU0RSMTA0IHwgU0RIQ0lfU1VQUE9SVF9TRFI1MCB8Cj4gICAgICAgICAgICAgICAg
-ICAgICAgICBTREhDSV9TVVBQT1JUX0REUjUwKTsKPgo+IC0tCj4gMS44LjIuMQo+CgpJIGhhdmUg
-bm8gcHJvYmxlbSB3aXRoIHRoaXMgcGF0Y2gsIGV4Y2VwdCB0aGF0IGl0IHdvdWxkIGJlIG5pY2Ug
-dG8gZ2V0CmEgZmV3ICJ0ZXN0ZWQgYnkiIHRvIG1ha2Ugc3VyZSBpdCBkb2Vzbid0IGJyZWFrIFVI
-UyBzdXBwb3J0IGZvciBzb21lClNvQ3MuCgpLaW5kIHJlZ2FyZHMKVWZmZQpfX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eHBwYy1kZXYgbWFpbGluZyBs
-aXN0CkxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnCmh0dHBzOi8vbGlzdHMub3psYWJzLm9y
-Zy9saXN0aW5mby9saW51eHBwYy1kZXY=
+On 26 May 2015 at 10:43, Lu Y.B. <yangbo.lu@freescale.com> wrote:
+>> >> On 19 May 2015 at 07:40, Yangbo Lu <yangbo.lu@freescale.com> wrote:
+>> >> > A-003980: SDHC: Glitch is generated on the card clock with software
+>> >> > reset or clock divider change
+>> >> > Description: A glitch may occur on the SDHC card clock when the
+>> >> > software sets the RSTA bit (software reset) in the system control
+>> >> > register. It can also be generated by setting the clock divider
+>> value.
+>> >> > The glitch produced can cause the external card to switch to an
+>> >> > unknown state. The occurrence is not deterministic.
+>> >> >
+>> >> > Workaround:
+>> >> > A simple workaround is to disable the SD card clock before the
+>> >> > software reset, and enable it when the module resumes normal
+>> >> > operation. The Host and the SD card are in a master-slave
+>> >> > relationship. The Host provides clock and control transfer across
+>> >> > the interface. Therefore, any existing operation is discarded when
+>> >> > the Host
+>> >> controller is reset.
+>> >> > The recommended flow is as follows:
+>> >> > 1. Software disable bit[3], SDCLKEN, of the System Control Register
+>> 2.
+>> >> > Trigger software reset and/or set clock divider 3. Check bit[3],
+>> >> > SDSTB, of the Present State Register for stable clock 4. Enable
+>> >> > bit[3], SDCLKEN, of the System Control Register Using the above
+>> >> > method, the eSDHC cannot send command or transfer data when there
+>> >> > is a glitch in the clock line, and the glitch does not cause any
+>> issue.
+>> >> >
+>> >> > Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+>> >> > ---
+>> >> > Changes for v2
+>> >> >         - Used sdhci_ops reset instead of
+>> >> > platform_reset_enter/out's
+>> >> work
+>> >> >         - Changed commit message
+>> >> > ---
+>> >> >  drivers/mmc/host/sdhci-esdhc.h    |  4 ++
+>> >> >  drivers/mmc/host/sdhci-of-esdhc.c | 90
+>> >> > +++++++++++++++++++++++++++++++++++++--
+>> >> >  2 files changed, 91 insertions(+), 3 deletions(-)
+>> >> >
+>> >> > diff --git a/drivers/mmc/host/sdhci-esdhc.h
+>> >> > b/drivers/mmc/host/sdhci-esdhc.h index 3497cfa..ede49f5 100644
+>> >> > --- a/drivers/mmc/host/sdhci-esdhc.h
+>> >> > +++ b/drivers/mmc/host/sdhci-esdhc.h
+>> >> > @@ -27,10 +27,14 @@
+>> >> >  #define ESDHC_CLOCK_MASK       0x0000fff0
+>> >> >  #define ESDHC_PREDIV_SHIFT     8
+>> >> >  #define ESDHC_DIVIDER_SHIFT    4
+>> >> > +#define ESDHC_CLOCK_CRDEN      0x00000008
+>> >> >  #define ESDHC_CLOCK_PEREN      0x00000004
+>> >> >  #define ESDHC_CLOCK_HCKEN      0x00000002
+>> >> >  #define ESDHC_CLOCK_IPGEN      0x00000001
+>> >> >
+>> >> > +#define ESDHCI_PRESENT_STATE   0x24
+>> >> > +#define ESDHC_CLK_STABLE       0x00000008
+>> >> > +
+>> >> >  /* pltfm-specific */
+>> >> >  #define ESDHC_HOST_CONTROL_LE  0x20
+>> >> >
+>> >> > diff --git a/drivers/mmc/host/sdhci-of-esdhc.c
+>> >> > b/drivers/mmc/host/sdhci-of-esdhc.c
+>> >> > index 22e9111..db78b75 100644
+>> >> > --- a/drivers/mmc/host/sdhci-of-esdhc.c
+>> >> > +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+>> >> > @@ -21,9 +21,16 @@
+>> >> >  #include <linux/mmc/host.h>
+>> >> >  #include "sdhci-pltfm.h"
+>> >> >  #include "sdhci-esdhc.h"
+>> >> > +#ifdef CONFIG_PPC
+>> >> > +#include <asm/mpc85xx.h>
+>> >>
+>> >> As Jaehoon already pointed out, we don't want to include machine
+>> >> specific headers in drivers. Please find another solution to this.
+>> >>
+>> > Do you mean I should include this .h file in sdhci-esdhc.h, or all the
+>> PPC-specific code in this patch is not good?
+>>
+>> I assume this header is included to identify the version of the SoC?
+> Yes! Actually the sdhci-of-esdhc.c is only used for PowerPC presently.
+>>
+>> Normally we do such things through DT via compatible strings. Earlier
+>> that was done via platform callbacks and prior that as how you suggested
+>> it in $subject patch.
+> The DTS is not a proper method since this would add more dts files just for different silicon rev.
+
+We do that already, but I understand your point.
+
+>>
+>> If you have the possibility to enumerate the device ID (reading device
+>> information directly from the HW), you should do that when adding the
+>> device to its subsystem level bus, not while probing. That's because you
+>> need to be able to match for a compatible driver.
+> Thanks. Could you provide a reference in present code if you know? I'd like to try.
+
+I guess the are several subsystem to look into, but maybe AMBA is one
+that you could have a look at.
+
+drivers/amba/bus.c
+
+Kind regards
+Uffe
