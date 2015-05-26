@@ -1,85 +1,80 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: sdhci(imx6): misbehaves while installing debian jessie, "Got
- data interrupt 0x00100000"
-Date: Tue, 26 May 2015 16:01:22 +0100
-Message-ID: <20150526150122.GP2067@n2100.arm.linux.org.uk>
-References: <20150519222320.GM2067@n2100.arm.linux.org.uk>
- <CAPDyKFqR3NwBd9O40BPzHG7Y4wyyJwgdB4NsA_GUO=YEyqFSXQ@mail.gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 03/13] serial: 8250_dma: Support for
+ deferred probing when requesting DMA channels
+Date: Tue, 26 May 2015 08:08:53 -0700
+Message-ID: <20150526150852.GC16525@atomide.com>
+References: <1432646768-12532-1-git-send-email-peter.ujfalusi@ti.com>
+ <1432646768-12532-4-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:44174 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752647AbbEZPBa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 May 2015 11:01:30 -0400
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <alsa-devel-bounces@alsa-project.org>
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFqR3NwBd9O40BPzHG7Y4wyyJwgdB4NsA_GUO=YEyqFSXQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1432646768-12532-4-git-send-email-peter.ujfalusi@ti.com>
+List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
+List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
+List-Post: <mailto:alsa-devel@alsa-project.org>
+List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
+List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
+ <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
+Errors-To: alsa-devel-bounces@alsa-project.org
+Sender: alsa-devel-bounces@alsa-project.org
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: devicetree@vger.kernel.org, alsa-devel@alsa-project.org, vinod.koul@intel.com, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-spi@vger.kernel.org, linux-crypto@vger.kernel.org, linux-serial@vger.kernel.org, dmaengine@vger.kernel.org, dan.j.williams@intel.com, linux-omap@vger.kernel.org, linux-media@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Tue, May 26, 2015 at 04:49:34PM +0200, Ulf Hansson wrote:
-> On 20 May 2015 at 00:23, Russell King - ARM Linux
-> <linux@arm.linux.org.uk> wrote:
-> > iMX6 with a Samsung EVO UHS-1 16GB card.
-> >
-> > There's actually two problems here.
-> >
-> > 1. SDHCI chooses to impose a 10 second timeout on any data operation.
-> >    This magic value of 10 seconds is rediculous.  Consider that SD
-> >    cards are typically slower than ATA, and ATA has a timeout of more
-> >    than one minute for a stuck command...  And yes, I've had this fire
-> >    a good 10 seconds before I then got...
-> >
-> > 2. "Got data interrupt 0x00100000 even though no data operation was in progress."
-> >
-> >    That's SDHCI_INT_DATA_TIMEOUT.
-> >
-> >    Unfortunately, I have no other information, as the registers are
-> >    dumped at pr_debug() level, which means that they're all compiled
-> >    out in normal kernel builds.  In any case, I have no way to copy
-> >    information off of the installing system; debian does not start up
-> >    a ssh daemon during the install, so remote login is not possible.
-> >    Nor can I photograph the rather reflective TV screen.
-> >
-> > The side-effect of this is that the entire MMC IO subsystem locks up
-> > and I'm left with lots of processes stuck in IO-wait state, with the
-> > hungtask detector spewing onto the console.
+* Peter Ujfalusi <peter.ujfalusi@ti.com> [150526 06:28]:
+> Switch to use ma_request_slave_channel_compat_reason() to request the DMA
+> channels. In case of error, return the error code we received including
+> -EPROBE_DEFER
 > 
-> Sorry, I can't tell much around the host driver and HW as such. I
-> don't have any iMX6 boards at hand.
+> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+> CC: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> ---
+>  drivers/tty/serial/8250/8250_dma.c | 18 ++++++++----------
+>  1 file changed, 8 insertions(+), 10 deletions(-)
 > 
-> Though, the side-effect you are describing isn't very nice. Even if it
-> doesn't solve you problem, perhaps we should discuss about converting
-> from wait_for_completion() to wait_for_completion_timeout(), when the
-> mmc core waits for the host driver to return the result for the
-> request.
-> 
-> I guess the tricky part is to find a decent value for the "timeout".
+> diff --git a/drivers/tty/serial/8250/8250_dma.c b/drivers/tty/serial/8250/8250_dma.c
+> index 21d01a491405..a617eca4e97d 100644
+> --- a/drivers/tty/serial/8250/8250_dma.c
+> +++ b/drivers/tty/serial/8250/8250_dma.c
+> @@ -182,21 +182,19 @@ int serial8250_request_dma(struct uart_8250_port *p)
+>  	dma_cap_set(DMA_SLAVE, mask);
+>  
+>  	/* Get a channel for RX */
+> -	dma->rxchan = dma_request_slave_channel_compat(mask,
+> -						       dma->fn, dma->rx_param,
+> -						       p->port.dev, "rx");
+> -	if (!dma->rxchan)
+> -		return -ENODEV;
+> +	dma->rxchan = dma_request_slave_channel_compat_reason(mask, dma->fn,
+> +					dma->rx_param, p->port.dev, "rx");
+> +	if (IS_ERR(dma->rxchan))
+> +		return PTR_ERR(dma->rxchan);
+>  
+>  	dmaengine_slave_config(dma->rxchan, &dma->rxconf);
+>  
+>  	/* Get a channel for TX */
+> -	dma->txchan = dma_request_slave_channel_compat(mask,
+> -						       dma->fn, dma->tx_param,
+> -						       p->port.dev, "tx");
+> -	if (!dma->txchan) {
+> +	dma->txchan = dma_request_slave_channel_compat_reason(mask, dma->fn,
+> +					dma->tx_param, p->port.dev, "tx");
+> +	if (IS_ERR(dma->txchan)) {
+>  		dma_release_channel(dma->rxchan);
+> -		return -ENODEV;
+> +		return PTR_ERR(dma->txchan);
+>  	}
+>  
+>  	dmaengine_slave_config(dma->txchan, &dma->txconf);
 
-There's two issues which would need solving for that:
+In general the drivers need to work just fine also without DMA.
 
-1. The only sane timeout is one which will never trigger under normal
-   operating circumstances, and abnormal load conditions.
+Does this handle the case properly where no DMA channel is configured
+for the driver in the dts file?
 
-2. When the timeout occurs, the core would need some way to reset the
-   host driver back to a sane state before retrying the command.
+Regards,
 
-However, the better question to ask is what's causing this.  It seemed
-to lock up at the same point in the installation - after the base system
-had been installed, but while it was installing additional stuff (for
-xfce.)  From what I remember, it was exactly the same package that the
-MMC host failed at.
-
-I suppose it's entirely possible that the Debian install is running
-some package scripts which end up poking about in memory, which are
-screwing up the MMC host - nothing would surprise me... the Debian
-Jessie install is screwed in other ways (if you select Gnome instead,
-the installer aborts because it discovers that the distro packages
-are missing some dependencies, though I had put that down to the UK
-mirror possibly being out of date...)
-
--- 
-FTTC broadband for 0.8mile line: currently at 10.5Mbps down 400kbps up
-according to speedtest.net.
+Tony
