@@ -1,71 +1,142 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: sdhci(imx6): misbehaves while installing debian jessie, "Got
- data interrupt 0x00100000"
-Date: Wed, 27 May 2015 10:59:03 +0100
-Message-ID: <20150527095903.GR2067@n2100.arm.linux.org.uk>
-References: <20150519222320.GM2067@n2100.arm.linux.org.uk>
- <CAPDyKFqR3NwBd9O40BPzHG7Y4wyyJwgdB4NsA_GUO=YEyqFSXQ@mail.gmail.com>
- <20150526150122.GP2067@n2100.arm.linux.org.uk>
- <CAPDyKFp57ucUa5r+6RW1hDS2tci+xerc27ga5eoSwO6Wq57gig@mail.gmail.com>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: Re: [PATCH v3 1/2] mmc: sdhci: fix abort due to missing runtime PM
+Date: Wed, 27 May 2015 18:05:26 +0800
+Message-ID: <20150527100524.GA1294@shlinux1.ap.freescale.net>
+References: <1432192504-3601-1-git-send-email-stefan@agner.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:45835 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750755AbbE0J7Q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 May 2015 05:59:16 -0400
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFp57ucUa5r+6RW1hDS2tci+xerc27ga5eoSwO6Wq57gig@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1432192504-3601-1-git-send-email-stefan@agner.ch>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Stefan Agner <stefan@agner.ch>
+Cc: ulf.hansson@linaro.org, gregory.clement@free-electrons.com, zhangfei.gao@marvell.com, jszhang@marvell.com, chris@printf.net, anton@enomsg.org, shawn.guo@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Wed, May 27, 2015 at 11:44:59AM +0200, Ulf Hansson wrote:
-> [...]
+On Thu, May 21, 2015 at 09:15:03AM +0200, Stefan Agner wrote:
+> When using i.MX ESDHC driver, while entering suspend while the device
+> is in runtime PM, the sdhci_(suspend|resume)_host function are called
+> with disabled clocks. Since this functions access the SDHC host
+> registers, this leads to an external abort on Vybrid SoC:
 > 
-> >> Though, the side-effect you are describing isn't very nice. Even if it
-> >> doesn't solve you problem, perhaps we should discuss about converting
-> >> from wait_for_completion() to wait_for_completion_timeout(), when the
-> >> mmc core waits for the host driver to return the result for the
-> >> request.
-> >>
-> >> I guess the tricky part is to find a decent value for the "timeout".
-> >
-> > There's two issues which would need solving for that:
-> >
-> > 1. The only sane timeout is one which will never trigger under normal
-> >    operating circumstances, and abnormal load conditions.
+> [   37.772967] Unhandled fault: imprecise external abort (0x1c06) at 0x76f5f000
+> [   37.780304] Internal error: : 1c06 [#1] ARM
+> [   37.784670] Modules linked in:
+> [   37.787908] CPU: 0 PID: 428 Comm: sh Not tainted 3.18.0-rc5-00119-geefd097-dirty #1540
+> [   37.796142] task: 8e246c00 ti: 8ca6c000 task.ti: 8ca6c000
+> [   37.801785] PC is at esdhc_writel_le+0x40/0xec
+> [   37.806431] LR is at sdhci_set_card_detection+0xe0/0xe4
+> [   37.811877] pc : [<803f0584>]    lr : [<803eaaa0>]    psr: 400f0013
+> [   37.811877] sp : 8ca6dd28  ip : 00000001  fp : 8ca6dd3c
+> [   37.823766] r10: 807a233c  r9 : 00000000  r8 : 8e8b7210
+> [   37.829194] r7 : 802d8a08  r6 : 8082e928  r5 : 00000000  r4 : 00000002
+> [   37.835974] r3 : 8ea34e90  r2 : 00000038  r1 : 00000000  r0 : 8ea32ac0
+> ...
 > 
-> Perhaps we could have the timeout calculated per request?
+> Clocks need to be enabled to access the registers. Fix the issue by
+> add runtime PM enabled pltfm implementation of suspend/resume which
+> take care of clocks by using the runtime PM API properly.
 > 
-> By using the current bus-speed and bus-width we can calculate the
-> available bandwidth. Obviously we need to also account for overhead
-> both at host and card side. Probably that overhead is taken from "best
-> guesses", not sure.
+> Signed-off-by: Stefan Agner <stefan@agner.ch>
+> ---
+> Changes since v2:
+> - Implement a generic pltfm suspend/resume function instead of a local
+>   function in sdhci-esdhc-imx.c
+> - Convert sdhci-pxav3 to use the runtime PM enabled pltfm suspend/resume
+>   function too
 > 
-> Finally considering the amount of data for the request, we can
-> calculate a value for the timeout.
+>  drivers/mmc/host/sdhci-esdhc-imx.c |  2 +-
+>  drivers/mmc/host/sdhci-pltfm.c     | 36 ++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-pltfm.h     |  2 ++
+>  3 files changed, 39 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 82f512d..7b7b3a3 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1132,7 +1132,7 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
+>  #endif
+>  
+>  static const struct dev_pm_ops sdhci_esdhc_pmops = {
+> -	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_suspend, sdhci_pltfm_resume)
+> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_rpm_suspend, sdhci_pltfm_rpm_resume)
+>  	SET_RUNTIME_PM_OPS(sdhci_esdhc_runtime_suspend,
+>  				sdhci_esdhc_runtime_resume, NULL)
+>  };
+> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+> index a207f5a..38c03cd 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -31,6 +31,7 @@
+>  #include <linux/err.h>
+>  #include <linux/module.h>
+>  #include <linux/of.h>
+> +#include <linux/pm_runtime.h>
+>  #ifdef CONFIG_PPC
+>  #include <asm/machdep.h>
+>  #endif
+> @@ -256,6 +257,41 @@ const struct dev_pm_ops sdhci_pltfm_pmops = {
+>  	.resume		= sdhci_pltfm_resume,
+>  };
+>  EXPORT_SYMBOL_GPL(sdhci_pltfm_pmops);
+> +
+> +int sdhci_pltfm_rpm_suspend(struct device *dev)
 
-The MMC specs already have this: cards specify exactly that in the
-data.  However, that doesn't stop a card being buggy and supplying
-incorrect values (hey, it works for Windows, ship it!)
+Why invent a new API?
+Can't put into sdhci_pltfm_suspend?
 
-The host is responsible for that part already (many hosts need to
-have that programmed.)  So it doesn't make sense to use this.
+Regards
+Dong Aisheng
 
-What we're after here is something rather different: failure of the
-host itself.  That should be a much longer timeout, one which we can
-be sure will never trigger unless something has definitely gone wrong.
-That's why I'd suggest something along the lines of ATA, around 60 to
-120 seconds.  If the host has been dead for that long, it's definitely
-dead.
-
-(I know ATA's timeout very well, each time I put my very old Thinkpad
-into standby mode, its APM talks to the drive, which then upsets Linux,
-triggering that timeout... because it has disabled BM-DMA in one of the
-control registers without Linux knowing.)
-
--- 
-FTTC broadband for 0.8mile line: currently at 10.5Mbps down 400kbps up
-according to speedtest.net.
+> +{
+> +	int ret;
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +
+> +	pm_runtime_get_sync(dev);
+> +	ret = sdhci_suspend_host(host);
+> +	pm_runtime_mark_last_busy(dev);
+> +	pm_runtime_put_autosuspend(dev);
+> +	if (ret)
+> +		return ret;
+> +
+> +	return pm_runtime_force_suspend(dev);
+> +}
+> +EXPORT_SYMBOL_GPL(sdhci_pltfm_rpm_suspend);
+> +
+> +int sdhci_pltfm_rpm_resume(struct device *dev)
+> +{
+> +	int ret;
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +
+> +	ret = pm_runtime_force_resume(dev);
+> +
+> +	if (ret)
+> +		return ret;
+> +
+> +	pm_runtime_get_sync(dev);
+> +	ret = sdhci_resume_host(host);
+> +	pm_runtime_mark_last_busy(dev);
+> +	pm_runtime_put_autosuspend(dev);
+> +
+> +	return ret;
+> +}
+> +EXPORT_SYMBOL_GPL(sdhci_pltfm_rpm_resume);
+>  #endif	/* CONFIG_PM */
+>  
+>  static int __init sdhci_pltfm_drv_init(void)
+> diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+> index 04bc248..ac5f6ea 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.h
+> +++ b/drivers/mmc/host/sdhci-pltfm.h
+> @@ -114,6 +114,8 @@ static inline void *sdhci_pltfm_priv(struct sdhci_pltfm_host *host)
+>  extern int sdhci_pltfm_suspend(struct device *dev);
+>  extern int sdhci_pltfm_resume(struct device *dev);
+>  extern const struct dev_pm_ops sdhci_pltfm_pmops;
+> +extern int sdhci_pltfm_rpm_suspend(struct device *dev);
+> +extern int sdhci_pltfm_rpm_resume(struct device *dev);
+>  #define SDHCI_PLTFM_PMOPS (&sdhci_pltfm_pmops)
+>  #else
+>  #define SDHCI_PLTFM_PMOPS NULL
+> -- 
+> 2.4.1
+> 
