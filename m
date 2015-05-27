@@ -1,118 +1,152 @@
-From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH v4 2/7] mmc: mediatek: Add Mediatek MMC driver
-Date: Wed, 27 May 2015 19:34:40 +0800
-Message-ID: <1432726480.647.16.camel@mhfsdcap03>
-References: <1432017411-2996-1-git-send-email-chaotian.jing@mediatek.com>
- <1432017411-2996-3-git-send-email-chaotian.jing@mediatek.com>
- <CAPDyKFo5788uRqAaXUZ-OiS1XF8NPmg4tn2ipZNJdx4dci+KMQ@mail.gmail.com>
- <1432284000.23435.38.camel@mhfsdcap03>
- <CAPDyKFpWCvJXL-W5P83ucBM2-b5cDFEtSLnN6J6WLyR_9CuvWw@mail.gmail.com>
- <1432620991.647.6.camel@mhfsdcap03>
- <CAPDyKFrNQ6E4cU1_gK56ZNYgb=9EzHoJ=vXyraYoKNnRL=Umyg@mail.gmail.com>
+From: Suman Tripathi <stripathi@apm.com>
+Subject: Re: [PATCH RESEND v7 2/2] mmc: host: sdhci: Add support to disable
+ SDR104/SDR50/DDR50 based on capability register 0.
+Date: Wed, 27 May 2015 19:46:59 +0530
+Message-ID: <CAOHikRASDmy7PwFjqmX7JAjW52DYR+d3RkE3yd_45NN5sHK7Pg@mail.gmail.com>
+References: <1432197817-22110-1-git-send-email-stripathi@apm.com>
+ <1432197817-22110-3-git-send-email-stripathi@apm.com>
+ <CAPDyKFpxkNF9C8AOJ6+18CEcpZTKycPR0i5OuwPRr1Zc+VPJ5Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <CAPDyKFrNQ6E4cU1_gK56ZNYgb=9EzHoJ=vXyraYoKNnRL=Umyg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
-List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, srv_heupstream <srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Bin Zhang =?UTF-8?Q?=28=E7=AB=A0=E6=96=8C=29?= <bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kern>
+Content-Type: multipart/mixed; boundary="===============6725973021630904225=="
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <CAPDyKFpxkNF9C8AOJ6+18CEcpZTKycPR0i5OuwPRr1Zc+VPJ5Q@mail.gmail.com>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Mark Langsdorf <mlangsdo@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Jon Masters <jcm@redhat.com>, Anton Vorontsov <anton@enomsg.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Michal Simek <michal.simek@xilinx.com>, patches <patches@apm.com>, Don Dutile <ddutile@redhat.com>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, 2015-05-26 at 14:33 +0200, Ulf Hansson wrote:
-> [...]
-> 
-> >> >> > +{
-> >> >> > +       unsigned long tmo = jiffies + msecs_to_jiffies(20);
-> >> >> > +
-> >> >> > +       while ((readl(host->base + SDC_STS) & SDC_STS_CMDBUSY)
-> >> >> > +                       && time_before(jiffies, tmo))
-> >> >> > +               continue;
-> >> >> > +
-> >> >> > +       if (readl(host->base + SDC_STS) & SDC_STS_CMDBUSY) {
-> >> >> > +               dev_err(host->dev, "CMD bus busy detected\n");
-> >> >> > +               host->error |= REQ_CMD_BUSY;
-> >> >> > +               msdc_cmd_done(host, MSDC_INT_CMDTMO, mrq, cmd);
-> >> >> > +               return false;
-> >> >> > +       }
-> >> >> > +
-> >> >> > +       if (mmc_resp_type(cmd) == MMC_RSP_R1B || cmd->data) {
-> >> >> > +               /* R1B or with data, should check SDCBUSY */
-> >> >> > +               while (readl(host->base + SDC_STS) & SDC_STS_SDCBUSY)
-> >> >> > +                       cpu_relax();
-> >> >> > +       }
-> >> >>
-> >> >> MSDC seems to be handling card busy detection in HW, right?
-> >> >>
-> >> > Do not have this ability, HW only know if CMD/DAT is low, but do not
-> >> > have any interrupt for it,
-> >>
-> >> I see, but doesn't the above polling mean that msdc will not propagate
-> >> the response until the card have stopped signal busy? That's what
-> >> MMC_CAP_WAIT_WHILE_BUSY shall be used for.
-> >>
-> > As you see, we only check the "busy state" BEFORE issue a R1B command or
-> > with data command, but do not check if AFTER the request was done, that
-> > would do not match the "MMC_CAP_WAIT_WHILE_BUSY"(eg. CMD5 to sleep)
-> 
-> Okay, fair enough. Still, I don't understand why you want to do that?
-> 
-Below is the description of these 2 bits:
-1	CMDBSY	CMDBUSY	SD Command line busy status
-S/W should always read this bit to make sure the command line is not
-busy before sending the next command. 
-If the command is R1B or data read/write command, S/W should check
-SDCBUSY bit too.
-Note: When Auto command 12 is enabled, this bit will be asserted
-immediately after SDC_CMD is written and de-asserted after auto-command
-12 finishes.
-1'b0: No transmission is going on CMD line on SD bus
-1'b1: There exists transmission going on CMD line on SD bus
-0	SDCBSY	SDCBUSY	SD controller busy status
-1'b0: SD controller is idle
-1'b1: SD controller is busy
+--===============6725973021630904225==
+Content-Type: multipart/alternative; boundary=047d7ba97f1a656728051710e5e3
 
-> > In addition, about CMD5, I find that the suspend/resume flow of EMMC is
-> > stranger in new kernel version, when suspend, it may issue CMD5 to enter
-> > sleep mode, then power off MMC, but when resume, it will
-> > re-initialization, So that why need do the redundant CMD5 in suspend ?
-> 
-> Both CMD0 and CMD5 are valid as wakeup commands.
-> 
-> To be able to use CMD5, the VCCQ regulator must be kept enabled in the
-> sleep state. That's when it becomes a bit tricky, due to the range of
-> different host drivers and SoCs for how VCCQ is managed.
-> 
-> To be safe we have chosen to use CMD0, since it works for *all* cases
-> no matter if VCCQ get gated or not.
-> 
-> Moreover, using CMD5 as the wakeup command would require added
-> complexity in the code dealing with suspend/resume. I don't think the
-> effort is worth it, at least until someone has proven that the resume
-> time is greatly decreased by using CMD5.
-> 
+--047d7ba97f1a656728051710e5e3
+Content-Type: text/plain; charset=UTF-8
+
+On Tue, May 26, 2015 at 6:06 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+
+> On 21 May 2015 at 10:43, Suman Tripathi <stripathi@apm.com> wrote:
+> > The sdhci framework disables SDR104/SDR50/DDR50 based on only quirk.
+> > This patch adds the support to disable SDR104/SDR50/DDR50 based on
+> > reading the capability register 0.
 > >
-> >> Perhaps you should remove the above polling, and rely on the MMC core
-> >> to poll with CMD13 instead?
-> > before any read/write command, core will issue CMD13 to confirm card
-> > status, here is just only do double confirm to avoid HW issue.
-> 
-> What HW issue and why do you need to double confirm? It seems strange.
-Some fake SD card, even the CMD13 get card status is in transfer state,
-but when we do read/write, the data0 was pull low.
-
-By the way, do you think need do some spinlock protect in our code ?
-I cannot find a good reason to use spin lock, it seems no need
-it,although there will be many thread(mmcqd, mmcqd/0boot1,) and the irq
-handler.
-> 
+> > Signed-off-by: Suman Tripathi <stripathi@apm.com>
+> > ---
+> > ---
+> >  drivers/mmc/host/sdhci.c | 3 ++-
+> >  1 file changed, 2 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index 58c1770..a3d9b8a 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -3118,7 +3118,8 @@ int sdhci_add_host(struct sdhci_host *host)
+> >                 }
+> >         }
+> >
+> > -       if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)
+> > +       if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V ||
+> > +           !(caps[0] & SDHCI_CAN_VDD_180))
+> >                 caps[1] &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
+> >                        SDHCI_SUPPORT_DDR50);
+> >
+> > --
+> > 1.8.2.1
+> >
+>
+> I have no problem with this patch, except that it would be nice to get
+> a few "tested by" to make sure it doesn't break UHS support for some
+> SoCs.
+>
 > Kind regards
 > Uffe
+>
+
+Can anyone test this in some other SoC ? Appreciate your help ..
+
+
+-- 
+Thanks,
+with regards,
+Suman Tripathi
+
+--047d7ba97f1a656728051710e5e3
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><br><div class=3D"gmail_extra"><br><div class=3D"gmail_quo=
+te">On Tue, May 26, 2015 at 6:06 PM, Ulf Hansson <span dir=3D"ltr">&lt;<a h=
+ref=3D"mailto:ulf.hansson@linaro.org" target=3D"_blank">ulf.hansson@linaro.=
+org</a>&gt;</span> wrote:<br><blockquote class=3D"gmail_quote" style=3D"mar=
+gin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><div class=3D"H=
+OEnZb"><div class=3D"h5">On 21 May 2015 at 10:43, Suman Tripathi &lt;<a hre=
+f=3D"mailto:stripathi@apm.com">stripathi@apm.com</a>&gt; wrote:<br>
+&gt; The sdhci framework disables SDR104/SDR50/DDR50 based on only quirk.<b=
+r>
+&gt; This patch adds the support to disable SDR104/SDR50/DDR50 based on<br>
+&gt; reading the capability register 0.<br>
+&gt;<br>
+&gt; Signed-off-by: Suman Tripathi &lt;<a href=3D"mailto:stripathi@apm.com"=
+>stripathi@apm.com</a>&gt;<br>
+&gt; ---<br>
+&gt; ---<br>
+&gt;=C2=A0 drivers/mmc/host/sdhci.c | 3 ++-<br>
+&gt;=C2=A0 1 file changed, 2 insertions(+), 1 deletion(-)<br>
+&gt;<br>
+&gt; diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c<br>
+&gt; index 58c1770..a3d9b8a 100644<br>
+&gt; --- a/drivers/mmc/host/sdhci.c<br>
+&gt; +++ b/drivers/mmc/host/sdhci.c<br>
+&gt; @@ -3118,7 +3118,8 @@ int sdhci_add_host(struct sdhci_host *host)<br>
+&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0}<br>
+&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0}<br>
+&gt;<br>
+&gt; -=C2=A0 =C2=A0 =C2=A0 =C2=A0if (host-&gt;quirks2 &amp; SDHCI_QUIRK2_NO=
+_1_8_V)<br>
+&gt; +=C2=A0 =C2=A0 =C2=A0 =C2=A0if (host-&gt;quirks2 &amp; SDHCI_QUIRK2_NO=
+_1_8_V ||<br>
+&gt; +=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0!(caps[0] &amp; SDHCI_CAN_VD=
+D_180))<br>
+&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0caps[1] &=
+amp;=3D ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |<br>
+&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =
+=C2=A0 =C2=A0 SDHCI_SUPPORT_DDR50);<br>
+&gt;<br>
+&gt; --<br>
+&gt; 1.8.2.1<br>
+&gt;<br>
+<br>
+</div></div>I have no problem with this patch, except that it would be nice=
+ to get<br>
+a few &quot;tested by&quot; to make sure it doesn&#39;t break UHS support f=
+or some<br>
+SoCs.<br>
+<br>
+Kind regards<br>
+Uffe<br>
+</blockquote></div><div class=3D"gmail_extra"><br></div>Can anyone test thi=
+s in some other SoC ? Appreciate your help ..<br><br clear=3D"all"><div><br=
+></div>-- <br><div class=3D"gmail_signature"><div dir=3D"ltr"><div>Thanks,<=
+/div><div>with regards,</div>Suman Tripathi</div></div>
+</div></div>
+
+--047d7ba97f1a656728051710e5e3--
+
+--===============6725973021630904225==
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: base64
+Content-Disposition: inline
+
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGludXhwcGMt
+ZGV2IG1haWxpbmcgbGlzdApMaW51eHBwYy1kZXZAbGlzdHMub3psYWJzLm9yZwpodHRwczovL2xp
+c3RzLm96bGFicy5vcmcvbGlzdGluZm8vbGludXhwcGMtZGV2
+
+--===============6725973021630904225==--
