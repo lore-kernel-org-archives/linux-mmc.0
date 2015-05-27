@@ -1,8 +1,8 @@
 From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: [PATCH 1/6] mmc: sdhci-esdhc-imx: merge the same register check into
- one place
-Date: Wed, 27 May 2015 18:13:26 +0800
-Message-ID: <1432721611-31214-2-git-send-email-aisheng.dong@freescale.com>
+Subject: [PATCH 2/6] mmc: sdhci-esdhc-imx: usdhc does not have missing card
+ interrupt issue
+Date: Wed, 27 May 2015 18:13:27 +0800
+Message-ID: <1432721611-31214-3-git-send-email-aisheng.dong@freescale.com>
 References: <1432721611-31214-1-git-send-email-aisheng.dong@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,45 +22,26 @@ To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, chris@printf.net, b51421@freescale.com, shawn.guo@linaro.org, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-In esdhc_writel_le() function, there's duplicated checking of the same
-register as follows:
-"if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE))".
-Merge them into one and remove the duplicated one.
+The usdhc does not have missing card interrupt issue, so don't execute
+workaround for usdhc.
 
 Signed-off-by: Dong Aisheng <aisheng.dong@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 12 +++++-------
- 1 file changed, 5 insertions(+), 7 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index ef290a5..0c89293 100644
+index 0c89293..fda07eb 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -313,6 +313,11 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
- 			data |= ESDHC_CTRL_D3CD;
- 			writel(data, host->ioaddr + SDHCI_HOST_CONTROL);
- 		}
-+
-+		if (val & SDHCI_INT_ADMA_ERROR) {
-+			val &= ~SDHCI_INT_ADMA_ERROR;
-+			val |= ESDHC_INT_VENDOR_SPEC_DMA_ERR;
-+		}
- 	}
+@@ -298,7 +298,7 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+ 	u32 data;
  
- 	if (unlikely((imx_data->socdata->flags & ESDHC_FLAG_MULTIBLK_NO_INT)
-@@ -333,13 +338,6 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
- 			}
- 	}
- 
--	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
--		if (val & SDHCI_INT_ADMA_ERROR) {
--			val &= ~SDHCI_INT_ADMA_ERROR;
--			val |= ESDHC_INT_VENDOR_SPEC_DMA_ERR;
--		}
--	}
--
- 	writel(val, host->ioaddr + reg);
- }
- 
+ 	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
+-		if (val & SDHCI_INT_CARD_INT) {
++		if ((val & SDHCI_INT_CARD_INT) && !esdhc_is_usdhc(imx_data)) {
+ 			/*
+ 			 * Clear and then set D3CD bit to avoid missing the
+ 			 * card interrupt.  This is a eSDHC controller problem
 -- 
 1.9.1
