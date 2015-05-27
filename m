@@ -1,8 +1,7 @@
 From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: [PATCH 2/6] mmc: sdhci-esdhc-imx: usdhc does not have missing card
- interrupt issue
-Date: Wed, 27 May 2015 18:13:27 +0800
-Message-ID: <1432721611-31214-3-git-send-email-aisheng.dong@freescale.com>
+Subject: [PATCH 3/6] mmc: sdhci-esdhc-imx: add ADMA Length Mismatch errata fix
+Date: Wed, 27 May 2015 18:13:28 +0800
+Message-ID: <1432721611-31214-4-git-send-email-aisheng.dong@freescale.com>
 References: <1432721611-31214-1-git-send-email-aisheng.dong@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,26 +21,66 @@ To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, chris@printf.net, b51421@freescale.com, shawn.guo@linaro.org, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-The usdhc does not have missing card interrupt issue, so don't execute
-workaround for usdhc.
+The uSDHC has an ADMA Length Mismatch errata ERR004536 which may
+cause ADMA work abnormally. The errata has already been fixed for
+i.MX6Q TO1.2 and i.MX6DL TO1.1 by enable the bit 7 in 0x6c register.
+Unfortunately this fix is not included in i.MX6SL.
+So we disable ADMA for i.MX6SL and use SDMA instead.
 
 Signed-off-by: Dong Aisheng <aisheng.dong@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 0c89293..fda07eb 100644
+index fda07eb..a3b82d1 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -298,7 +298,7 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
- 	u32 data;
+@@ -112,6 +112,12 @@
+ #define ESDHC_FLAG_STD_TUNING		BIT(5)
+ /* The IP has SDHCI_CAPABILITIES_1 register */
+ #define ESDHC_FLAG_HAVE_CAP1		BIT(6)
++/*
++ * The IP has errata ERR004536
++ * uSDHC: ADMA Length Mismatch Error occurs if the AHB read access is slow,
++ * when reading data from the card
++ */
++#define ESDHC_FLAG_ERR004536		BIT(7)
  
- 	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
--		if (val & SDHCI_INT_CARD_INT) {
-+		if ((val & SDHCI_INT_CARD_INT) && !esdhc_is_usdhc(imx_data)) {
- 			/*
- 			 * Clear and then set D3CD bit to avoid missing the
- 			 * card interrupt.  This is a eSDHC controller problem
+ struct esdhc_soc_data {
+ 	u32 flags;
+@@ -139,7 +145,7 @@ static struct esdhc_soc_data usdhc_imx6q_data = {
+ 
+ static struct esdhc_soc_data usdhc_imx6sl_data = {
+ 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+-			| ESDHC_FLAG_HAVE_CAP1,
++			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536,
+ };
+ 
+ struct pltfm_imx_data {
+@@ -991,6 +997,13 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
+ 		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+ 		host->mmc->caps |= MMC_CAP_1_8V_DDR;
++
++		/*
++		* errata ESDHC_FLAG_ERR004536 fix for MX6Q TO1.2 and MX6DL
++		* TO1.1, it's harmless for MX6SL
++		*/
++		writel(readl(host->ioaddr + 0x6c) | BIT(7),
++			host->ioaddr + 0x6c);
+ 	}
+ 
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
+@@ -1002,6 +1015,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 			ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP,
+ 			host->ioaddr + ESDHC_TUNING_CTRL);
+ 
++	if (imx_data->socdata->flags & ESDHC_FLAG_ERR004536)
++		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
++
+ 	boarddata = &imx_data->boarddata;
+ 	if (sdhci_esdhc_imx_probe_dt(pdev, host, boarddata) < 0) {
+ 		if (!host->mmc->parent->platform_data) {
 -- 
 1.9.1
