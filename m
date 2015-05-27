@@ -1,7 +1,8 @@
 From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: [PATCH 3/6] mmc: sdhci-esdhc-imx: add ADMA Length Mismatch errata fix
-Date: Wed, 27 May 2015 18:13:28 +0800
-Message-ID: <1432721611-31214-4-git-send-email-aisheng.dong@freescale.com>
+Subject: [PATCH 6/6] mmc: sdhci-esdhc-imx: add quirk SDHCI_QUIRK2_BROKEN_HS200
+ for imx6qdl
+Date: Wed, 27 May 2015 18:13:31 +0800
+Message-ID: <1432721611-31214-7-git-send-email-aisheng.dong@freescale.com>
 References: <1432721611-31214-1-git-send-email-aisheng.dong@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,66 +22,52 @@ To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, chris@printf.net, b51421@freescale.com, shawn.guo@linaro.org, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-The uSDHC has an ADMA Length Mismatch errata ERR004536 which may
-cause ADMA work abnormally. The errata has already been fixed for
-i.MX6Q TO1.2 and i.MX6DL TO1.1 by enable the bit 7 in 0x6c register.
-Unfortunately this fix is not included in i.MX6SL.
-So we disable ADMA for i.MX6SL and use SDMA instead.
+The iMX6Q/DL can not support HS200 mode while iMX6SL and iMX6SX can,
+so introduce a new flag to distinguish them.
 
 Signed-off-by: Dong Aisheng <aisheng.dong@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 18 +++++++++++++++++-
- 1 file changed, 17 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index fda07eb..a3b82d1 100644
+index bcb5673..faf0cb9 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -112,6 +112,12 @@
- #define ESDHC_FLAG_STD_TUNING		BIT(5)
- /* The IP has SDHCI_CAPABILITIES_1 register */
- #define ESDHC_FLAG_HAVE_CAP1		BIT(6)
-+/*
-+ * The IP has errata ERR004536
-+ * uSDHC: ADMA Length Mismatch Error occurs if the AHB read access is slow,
-+ * when reading data from the card
-+ */
-+#define ESDHC_FLAG_ERR004536		BIT(7)
+@@ -118,6 +118,8 @@
+  * when reading data from the card
+  */
+ #define ESDHC_FLAG_ERR004536		BIT(7)
++/* The IP supports HS200 mode */
++#define ESDHC_FLAG_HS200		BIT(8)
  
  struct esdhc_soc_data {
  	u32 flags;
-@@ -139,7 +145,7 @@ static struct esdhc_soc_data usdhc_imx6q_data = {
+@@ -145,12 +147,13 @@ static struct esdhc_soc_data usdhc_imx6q_data = {
  
  static struct esdhc_soc_data usdhc_imx6sl_data = {
  	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+-			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536,
++			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536
++			| ESDHC_FLAG_HS200,
+ };
+ 
+ static struct esdhc_soc_data usdhc_imx6sx_data = {
+ 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
 -			| ESDHC_FLAG_HAVE_CAP1,
-+			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536,
++			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200,
  };
  
  struct pltfm_imx_data {
-@@ -991,6 +997,13 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 		writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
+@@ -1004,6 +1007,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
  		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
  		host->mmc->caps |= MMC_CAP_1_8V_DDR;
-+
-+		/*
-+		* errata ESDHC_FLAG_ERR004536 fix for MX6Q TO1.2 and MX6DL
-+		* TO1.1, it's harmless for MX6SL
-+		*/
-+		writel(readl(host->ioaddr + 0x6c) | BIT(7),
-+			host->ioaddr + 0x6c);
- 	}
  
- 	if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
-@@ -1002,6 +1015,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 			ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP,
- 			host->ioaddr + ESDHC_TUNING_CTRL);
- 
-+	if (imx_data->socdata->flags & ESDHC_FLAG_ERR004536)
-+		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
++		if (!(imx_data->socdata->flags & ESDHC_FLAG_HS200))
++			host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
 +
- 	boarddata = &imx_data->boarddata;
- 	if (sdhci_esdhc_imx_probe_dt(pdev, host, boarddata) < 0) {
- 		if (!host->mmc->parent->platform_data) {
+ 		/*
+ 		* errata ESDHC_FLAG_ERR004536 fix for MX6Q TO1.2 and MX6DL
+ 		* TO1.1, it's harmless for MX6SL
 -- 
 1.9.1
