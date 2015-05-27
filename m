@@ -1,76 +1,64 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Wait for data transfer after response errors
-Date: Wed, 27 May 2015 10:53:07 +0900
-Message-ID: <55652383.2020204@samsung.com>
-References: <1431964402-27457-1-git-send-email-dianders@chromium.org>
- <CAGOxZ53WfNbaMe0_AM0qBqU47kAfgmPBVZC8K8Y-_J3mDMqW4A@mail.gmail.com>
- <CAD=FV=WPKV78=Wx5qE43+LsVpx_X9KAfKvcXKWy2hZfDoRLi0w@mail.gmail.com>
+From: Prabu Thangamuthu <Prabu.T@synopsys.com>
+Subject: RE: [PATCH 1/1] dw_mmc: insmod followed by rmmod will hung for eMMC
+Date: Wed, 27 May 2015 05:15:16 +0000
+Message-ID: <705D14B1C7978B40A723277C067CEDE24518411D@IN01WEMBXB.internal.synopsys.com>
+References: <705D14B1C7978B40A723277C067CEDE245182CD0@IN01WEMBXB.internal.synopsys.com>
+ <CAPDyKFrqsTN50V-WqbPWnYTs3QoWEHz=iBiGpxXAwLwsrS4SQQ@mail.gmail.com>
+ <556522C8.3000605@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:42943 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751309AbbE0BxJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 May 2015 21:53:09 -0400
-In-reply-to: <CAD=FV=WPKV78=Wx5qE43+LsVpx_X9KAfKvcXKWy2hZfDoRLi0w@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <556522C8.3000605@samsung.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>, "prabu.t@synopsys.com" <prabu.t@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>, Alim Akhtar <alim.akhtar@gmail.com>
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Chris Zhong <zyw@rock-chips.com>, Caesar Wang <wxt@rock-chips.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi, All.
-
-Thanks for your effort and sorry for late!
-
-On 05/27/2015 05:44 AM, Doug Anderson wrote:
-> Alim,
-> 
-> On Tue, May 26, 2015 at 11:02 AM, Alim Akhtar <alim.akhtar@gmail.com> wrote:
->> Hi Doug,
->> On peach-pi, I got a hung task once in 4 cold boot as [1].
-> 
-> OK, I'll have to get my peach-pi or peach-pit up and running again.  I
-> ran out of desk space and I haven't gotten it set back up.  :(
-> 
-> I've been testing on an rk3288-based device.  Past experience has
-> taught me that the rk3288 dw_mmc works differently than the exynos
-> one, so perhaps this is a difference.
-> 
-> Could you possibly patch in something like
-> <https://chromium-review.googlesource.com/#/c/244347/> and provide the
-> console for the failure?  I'll put it on my list to try this myself,
-> too
-
-I don't test with this..but if needs, i will test.
-It needs to fix the Alim's problem.
-
-> 
-> 
->> I was checking on v4.1-rc5, git hash as below:
->>
->> 862e58a mmc: dw_mmc: Wait for data transfer after response errors
->> ba155e2 Linux 4.1-rc5
->> 5b13966
->>
->> Not sure if I missed any dependent patch??
-> 
-> I'm currently testing out of tree, but my dw_mmc is very close to mainline.
-> 
-> 
->> Have not checked the dw TRM for this change, will do that as soon as I
->> get access to it.
-> 
-> OK, sounds good.  I have some old version of the DesignWare TRM, so
-> possibly something is different in the newer one...
-
-Which version do you have? I also need to check the TRM version.
-
-Best Regards,
-Jaehoon Chung
-
-> 
-> 
-> -Doug
-> 
-
+SGkgVWxmLCBKYWVob29uLA0KDQpUaGFua3MgZm9yIHlvdXIgY29tbWVudHMsIEkgd2lsbCB1cGRh
+dGUgYW5kIHNlbmQgYSBuZXcgUGF0Y2guDQoNCj4gT24gIDA1LzI3LzIwMTUgNzoyMCBBTSwgSmFl
+aG9vbiBDaHVuZyBXcm90ZToNCj4NCj4gSGksIFByYWR1Lg0KPiANCj4gU29ycnkgZm9yIGxhdGUu
+DQpObyBQcm9ibGVtLg0KPiBJIHdpbGwgd2FpdCBmb3IgeW91ciBuZXh0IHZlcnNpb24gdGhhbiBp
+IHdpbGwgY2hlY2sgeW91cnMuDQo+IFRvIFVsZi4NCj4gDQo+IFRoYW5rcyBmb3IgcmV2aWV3IQ0K
+PiANCj4gQmVzdCBSZWdhcmRzLA0KPiBKYWVob29uIENodW5nDQo+IA0KPiBPbiAwNS8yMi8yMDE1
+IDEwOjIxIFBNLCBVbGYgSGFuc3NvbiB3cm90ZToNCj4gPiBPbiAxOCBNYXkgMjAxNSBhdCAxNjoy
+MywgUHJhYnUgVGhhbmdhbXV0aHUgPFByYWJ1LlRAc3lub3BzeXMuY29tPg0KPiB3cm90ZToNCj4g
+Pj4gUmVtb3ZpbmcgZHdfbW1jIGRyaXZlciBpbW1lZGlhdGVseSBhZnRlciBpbnNlcnRpbmcgdGhl
+IGR3X21tYyBkcml2ZXINCj4gPj4gaXMNCj4gPg0KPiA+IEkgZ3Vlc3MgaXQgaGFuZ3MgZXZlbiBp
+ZiB5b3UgcmVtb3ZlIGl0IGFmdGVyIGEgY291cGxlIG9mIGRheXM/IDotKQ0KPiA+DQo+ID4gUGVy
+aGFwcyBtYWtlcyB0aGlzIGEgYml0IG1vcmUgY2xlYXI/DQo+ID4NCj4gPj4gZ2V0dGluZyBodW5n
+IGZvciBlTU1DIGRldmljZS4gUm9vdCBjYXVzZSBmb3IgdGhpcyBpc3N1ZSBpcywNCj4gPj4gZHdf
+bWNpX3JlbW92ZSB3aWxsIGRpc2FibGUgYWxsIHRoZSBpbnRlcnJ1cHRzIHRoZW4gaXQgd2lsbCBj
+YWxsDQo+IGR3X21jaV9jbGVhbnVwX3Nsb3QuDQo+ID4+IGR3X21jaV9jbGVhbnVwX3Nsb3QgaXMg
+aXNzdWluZyBDTUQ2IHRvIGRpc2FibGUgYm9vdCBwYXJ0aXRpb24gYWNjZXNzDQo+ID4+IGFuZCBp
+dCdzIHdhaXRpbmcgZm9yIGNvbW1hbmQgY29tcGxldGUgaW50ZXJydXB0LiBTaW5jZSBJTlRNQVNL
+IHdhcw0KPiA+PiBhbHJlYWR5IGNsZWFyZWQgYnkgZHdfbWNpX3JlbW92ZSwgY29tbWFuZCBjb21w
+bGV0ZSBpbnRlcnJ1cHQgaXMgbm90DQo+ID4+IHJlYWNoaW5nIHRoZSBzeXN0ZW0uIFRoaXMgbGVh
+ZHMgdG8gcHJvY2VzcyBodW5nLg0KPiA+DQo+ID4gL3MgZHdfbWNpX3JlbW92ZSAvIGR3X21jaV9y
+ZW1vdmUoKQ0KPiA+DQo+ID4+DQo+ID4+IFNpZ25lZC1vZmYtYnk6IFByYWJ1IFRoYW5nYW11dGh1
+IDxwcmFidS50QHN5bm9wc3lzLmNvbT4NCj4gPg0KPiA+IFRoaXMgcGF0Y2ggbG9va3MgZ29vZCBv
+dmVyYWxsLCBidXQgcGxlYXNlIHNlbmQgYSBuZXcgdmVyc2lvbiB3aXRoDQo+ID4gdXBkYXRlZCBj
+aGFuZ2Vsb2cuIE1vcmVvdmVyLCBwbGVhc2UgdXNlICJtbWM6IGR3X21tYzoiIGFzIHByZWZpeCBm
+b3INCj4gPiB0aGUgY29tbWl0IG1lc3NhZ2UgaGVhZGVyLg0KPiA+DQo+ID4gS2luZCByZWdhcmRz
+DQo+ID4gVWZmZQ0KPiA+DQo+ID4+IC0tLQ0KPiA+PiAgZHJpdmVycy9tbWMvaG9zdC9kd19tbWMu
+YyB8ICAgIDYgKysrLS0tDQo+ID4+ICAxIGZpbGVzIGNoYW5nZWQsIDMgaW5zZXJ0aW9ucygrKSwg
+MyBkZWxldGlvbnMoLSkNCj4gPj4NCj4gPj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qv
+ZHdfbW1jLmMgYi9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy5jDQo+ID4+IGluZGV4IDVmNWFkYWYu
+LmYwYTBhZmYgMTAwNjQ0DQo+ID4+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMNCj4g
+Pj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYw0KPiA+PiBAQCAtMjk0MSwxNSArMjk0
+MSwxNSBAQCB2b2lkIGR3X21jaV9yZW1vdmUoc3RydWN0IGR3X21jaSAqaG9zdCkgIHsNCj4gPj4g
+ICAgICAgICBpbnQgaTsNCj4gPj4NCj4gPj4gLSAgICAgICBtY2lfd3JpdGVsKGhvc3QsIFJJTlRT
+VFMsIDB4RkZGRkZGRkYpOw0KPiA+PiAtICAgICAgIG1jaV93cml0ZWwoaG9zdCwgSU5UTUFTSywg
+MCk7IC8qIGRpc2FibGUgYWxsIG1tYyBpbnRlcnJ1cHQgZmlyc3QgKi8NCj4gPj4gLQ0KPiA+PiAg
+ICAgICAgIGZvciAoaSA9IDA7IGkgPCBob3N0LT5udW1fc2xvdHM7IGkrKykgew0KPiA+PiAgICAg
+ICAgICAgICAgICAgZGV2X2RiZyhob3N0LT5kZXYsICJyZW1vdmUgc2xvdCAlZFxuIiwgaSk7DQo+
+ID4+ICAgICAgICAgICAgICAgICBpZiAoaG9zdC0+c2xvdFtpXSkNCj4gPj4gICAgICAgICAgICAg
+ICAgICAgICAgICAgZHdfbWNpX2NsZWFudXBfc2xvdChob3N0LT5zbG90W2ldLCBpKTsNCj4gPj4g
+ICAgICAgICB9DQo+ID4+DQo+ID4+ICsgICAgICAgbWNpX3dyaXRlbChob3N0LCBSSU5UU1RTLCAw
+eEZGRkZGRkZGKTsNCj4gPj4gKyAgICAgICBtY2lfd3JpdGVsKGhvc3QsIElOVE1BU0ssIDApOyAv
+KiBkaXNhYmxlIGFsbCBtbWMgaW50ZXJydXB0DQo+ID4+ICsgZmlyc3QgKi8NCj4gPj4gKw0KPiA+
+PiAgICAgICAgIC8qIGRpc2FibGUgY2xvY2sgdG8gQ0lVICovDQo+ID4+ICAgICAgICAgbWNpX3dy
+aXRlbChob3N0LCBDTEtFTkEsIDApOw0KPiA+PiAgICAgICAgIG1jaV93cml0ZWwoaG9zdCwgQ0xL
+U1JDLCAwKTsNCj4gPj4gLS0NCj4gPj4gMS43LjYuNQ0KPiA+DQoNClRoYW5rcyAmIFJlZ2FyZHMs
+DQpQcmFidSBUaGFuZ2FtdXRodS4NCg==
