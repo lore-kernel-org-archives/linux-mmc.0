@@ -1,118 +1,83 @@
-From: Stefan Agner <stefan@agner.ch>
-Subject: Re: [PATCH v3 1/2] mmc: sdhci: fix abort due to missing runtime PM
-Date: Wed, 27 May 2015 12:40:11 +0200
-Message-ID: <6af042a9e109b258ac7ba49958bf6ab4@agner.ch>
-References: <1432192504-3601-1-git-send-email-stefan@agner.ch>
- <20150527100524.GA1294@shlinux1.ap.freescale.net>
+From: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Subject: Re: [PATCH 03/13] serial: 8250_dma: Support for deferred probing
+ when requesting DMA channels
+Date: Wed, 27 May 2015 13:58:25 +0300
+Message-ID: <5565A351.7020409@ti.com>
+References: <1432646768-12532-1-git-send-email-peter.ujfalusi@ti.com> <1432646768-12532-4-git-send-email-peter.ujfalusi@ti.com> <20150526150852.GC16525@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150527100524.GA1294@shlinux1.ap.freescale.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>
-Cc: ulf.hansson@linaro.org, gregory.clement@free-electrons.com, zhangfei.gao@marvell.com, jszhang@marvell.com, chris@printf.net, anton@enomsg.org, shawn.guo@linaro.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-crypto-owner@vger.kernel.org>
+In-Reply-To: <20150526150852.GC16525@atomide.com>
+Sender: linux-crypto-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: vinod.koul@intel.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, dan.j.williams@intel.com, dmaengine@vger.kernel.org, linux-serial@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-crypto@vger.kernel.org, linux-spi@vger.kernel.org, linux-media@vger.kernel.org, alsa-devel@alsa-project.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2015-05-27 12:05, Dong Aisheng wrote:
-<snip>
->> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
->> index 82f512d..7b7b3a3 100644
->> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
->> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
->> @@ -1132,7 +1132,7 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
->>  #endif
+On 05/26/2015 06:08 PM, Tony Lindgren wrote:
+> * Peter Ujfalusi <peter.ujfalusi@ti.com> [150526 06:28]:
+>> Switch to use ma_request_slave_channel_compat_reason() to request th=
+e DMA
+>> channels. In case of error, return the error code we received includ=
+ing
+>> -EPROBE_DEFER
 >>
->>  static const struct dev_pm_ops sdhci_esdhc_pmops = {
->> -	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_suspend, sdhci_pltfm_resume)
->> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_rpm_suspend, sdhci_pltfm_rpm_resume)
->>  	SET_RUNTIME_PM_OPS(sdhci_esdhc_runtime_suspend,
->>  				sdhci_esdhc_runtime_resume, NULL)
->>  };
->> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
->> index a207f5a..38c03cd 100644
->> --- a/drivers/mmc/host/sdhci-pltfm.c
->> +++ b/drivers/mmc/host/sdhci-pltfm.c
->> @@ -31,6 +31,7 @@
->>  #include <linux/err.h>
->>  #include <linux/module.h>
->>  #include <linux/of.h>
->> +#include <linux/pm_runtime.h>
->>  #ifdef CONFIG_PPC
->>  #include <asm/machdep.h>
->>  #endif
->> @@ -256,6 +257,41 @@ const struct dev_pm_ops sdhci_pltfm_pmops = {
->>  	.resume		= sdhci_pltfm_resume,
->>  };
->>  EXPORT_SYMBOL_GPL(sdhci_pltfm_pmops);
->> +
->> +int sdhci_pltfm_rpm_suspend(struct device *dev)
-> 
-> Why invent a new API?
-> Can't put into sdhci_pltfm_suspend?
-
-There are several drivers making use of the API without runtime PM
-support. Afaik, you can't call the pm_runtime functions without having
-runtime PM support, at least pm_runtime_force_suspend seems to return an
-error when runtime_suspend callback is not there... Maybe I'm wrong on
-that?
-
---
-Stefan
-
-> 
-> Regards
-> Dong Aisheng
-> 
->> +{
->> +	int ret;
->> +	struct sdhci_host *host = dev_get_drvdata(dev);
->> +
->> +	pm_runtime_get_sync(dev);
->> +	ret = sdhci_suspend_host(host);
->> +	pm_runtime_mark_last_busy(dev);
->> +	pm_runtime_put_autosuspend(dev);
->> +	if (ret)
->> +		return ret;
->> +
->> +	return pm_runtime_force_suspend(dev);
->> +}
->> +EXPORT_SYMBOL_GPL(sdhci_pltfm_rpm_suspend);
->> +
->> +int sdhci_pltfm_rpm_resume(struct device *dev)
->> +{
->> +	int ret;
->> +	struct sdhci_host *host = dev_get_drvdata(dev);
->> +
->> +	ret = pm_runtime_force_resume(dev);
->> +
->> +	if (ret)
->> +		return ret;
->> +
->> +	pm_runtime_get_sync(dev);
->> +	ret = sdhci_resume_host(host);
->> +	pm_runtime_mark_last_busy(dev);
->> +	pm_runtime_put_autosuspend(dev);
->> +
->> +	return ret;
->> +}
->> +EXPORT_SYMBOL_GPL(sdhci_pltfm_rpm_resume);
->>  #endif	/* CONFIG_PM */
+>> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+>> CC: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+>> ---
+>>  drivers/tty/serial/8250/8250_dma.c | 18 ++++++++----------
+>>  1 file changed, 8 insertions(+), 10 deletions(-)
 >>
->>  static int __init sdhci_pltfm_drv_init(void)
->> diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
->> index 04bc248..ac5f6ea 100644
->> --- a/drivers/mmc/host/sdhci-pltfm.h
->> +++ b/drivers/mmc/host/sdhci-pltfm.h
->> @@ -114,6 +114,8 @@ static inline void *sdhci_pltfm_priv(struct sdhci_pltfm_host *host)
->>  extern int sdhci_pltfm_suspend(struct device *dev);
->>  extern int sdhci_pltfm_resume(struct device *dev);
->>  extern const struct dev_pm_ops sdhci_pltfm_pmops;
->> +extern int sdhci_pltfm_rpm_suspend(struct device *dev);
->> +extern int sdhci_pltfm_rpm_resume(struct device *dev);
->>  #define SDHCI_PLTFM_PMOPS (&sdhci_pltfm_pmops)
->>  #else
->>  #define SDHCI_PLTFM_PMOPS NULL
->> --
->> 2.4.1
->>
+>> diff --git a/drivers/tty/serial/8250/8250_dma.c b/drivers/tty/serial=
+/8250/8250_dma.c
+>> index 21d01a491405..a617eca4e97d 100644
+>> --- a/drivers/tty/serial/8250/8250_dma.c
+>> +++ b/drivers/tty/serial/8250/8250_dma.c
+>> @@ -182,21 +182,19 @@ int serial8250_request_dma(struct uart_8250_po=
+rt *p)
+>>  	dma_cap_set(DMA_SLAVE, mask);
+>> =20
+>>  	/* Get a channel for RX */
+>> -	dma->rxchan =3D dma_request_slave_channel_compat(mask,
+>> -						       dma->fn, dma->rx_param,
+>> -						       p->port.dev, "rx");
+>> -	if (!dma->rxchan)
+>> -		return -ENODEV;
+>> +	dma->rxchan =3D dma_request_slave_channel_compat_reason(mask, dma-=
+>fn,
+>> +					dma->rx_param, p->port.dev, "rx");
+>> +	if (IS_ERR(dma->rxchan))
+>> +		return PTR_ERR(dma->rxchan);
+>> =20
+>>  	dmaengine_slave_config(dma->rxchan, &dma->rxconf);
+>> =20
+>>  	/* Get a channel for TX */
+>> -	dma->txchan =3D dma_request_slave_channel_compat(mask,
+>> -						       dma->fn, dma->tx_param,
+>> -						       p->port.dev, "tx");
+>> -	if (!dma->txchan) {
+>> +	dma->txchan =3D dma_request_slave_channel_compat_reason(mask, dma-=
+>fn,
+>> +					dma->tx_param, p->port.dev, "tx");
+>> +	if (IS_ERR(dma->txchan)) {
+>>  		dma_release_channel(dma->rxchan);
+>> -		return -ENODEV;
+>> +		return PTR_ERR(dma->txchan);
+>>  	}
+>> =20
+>>  	dmaengine_slave_config(dma->txchan, &dma->txconf);
+>=20
+> In general the drivers need to work just fine also without DMA.
+>=20
+> Does this handle the case properly where no DMA channel is configured
+> for the driver in the dts file?
+
+The 8250 core will fall back to PIO mode if the DMA can not be requeste=
+d.
+At the morning I was looking at the 8250 stack and realized that
+serial8250_request_dma() will not be called at driver probe time so thi=
+s patch
+can be ignored and will be dropped from the v2 series.
+
+--=20
+P=E9ter
