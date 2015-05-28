@@ -1,47 +1,52 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH 13/13] ASoC: omap-pcm: Switch to use
- dma_request_slave_channel_compat_reason()
-Date: Wed, 27 May 2015 18:48:42 +0100
-Message-ID: <20150527174842.GL21577@sirena.org.uk>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 04/13] mmc: omap_hsmmc: No need to check DMA channel
+ validity at module remove
+Date: Thu, 28 May 2015 09:20:18 +0200
+Message-ID: <CAPDyKFrOUOuctSMpx+RFixB_ub=d66YqXEsa7D78gyFeiGiNkQ@mail.gmail.com>
 References: <1432646768-12532-1-git-send-email-peter.ujfalusi@ti.com>
- <1432646768-12532-14-git-send-email-peter.ujfalusi@ti.com>
+	<1432646768-12532-5-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="nt+vFqn/aPO6zu0j"
-Return-path: <linux-omap-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1432646768-12532-14-git-send-email-peter.ujfalusi@ti.com>
-Sender: linux-omap-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-media-owner@vger.kernel.org>
+In-Reply-To: <1432646768-12532-5-git-send-email-peter.ujfalusi@ti.com>
+Sender: linux-media-owner@vger.kernel.org
 To: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: vinod.koul@intel.com, tony@atomide.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, dan.j.williams@intel.com, dmaengine@vger.kernel.org, linux-serial@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-crypto@vger.kernel.org, linux-spi@vger.kernel.org, linux-media@vger.kernel.org, alsa-devel@alsa-project.org, Jarkko Nikula <jarkko.nikula@bitmer.com>, Liam Girdwood <lgirdwood@gmail.com>
+Cc: Vinod Koul <vinod.koul@intel.com>, Tony Lindgren <tony@atomide.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Dan Williams <dan.j.williams@intel.com>, dmaengine@vger.kernel.org, linux-serial@vger.kernel.org, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-crypto@vger.kernel.org, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, linux-media@vger.kernel.org, alsa-devel@alsa-project.org
 List-Id: linux-mmc@vger.kernel.org
 
+On 26 May 2015 at 15:25, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
+> The driver will not probe without valid DMA channels so no need to check
+> if they are valid when the module is removed.
+>
+> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+> CC: Ulf Hansson <ulf.hansson@linaro.org>
 
---nt+vFqn/aPO6zu0j
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-On Tue, May 26, 2015 at 04:26:08PM +0300, Peter Ujfalusi wrote:
-> dmaengine provides a wrapper function to handle DT and non DT boots when
-> requesting DMA channel. Use that instead of checking for of_node in the
-> platform driver.
+Kind regards
+Uffe
 
-Acked-by: Mark Brown <broonie@kernel.org>
-
---nt+vFqn/aPO6zu0j
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJVZgN6AAoJECTWi3JdVIfQK9QH/0/yPag64vn/82FuyAK+qqjP
-yKDVu5pt9gu5mC9wK69tm9TyqijJ4MLRFLYvaiLfSFgchTZN2upb6fxCEZAlsLNX
-5VSso5EVNC3XAnP4Ong5EgAJluhf3X29RIc/TNinG426/0mPD0E9udZKpYDddxI9
-MSgLVt1UELbHdcXC2pESJWxu2AID0kvaGfPV99vH8U3qOAtyimM/Au/DpXaiji6m
-1XFlwGwNITHD0ZsjpkH39Q6MjQU2WItVL+Kr7m+4SrAo85jMvrP3MQ5Po6jlpx3s
-urUiv2OWG7FyRfnaJQcxLC+KeC5E9WgzkrqGbtjfwSDOQWNJMek0daZkIMoTo2Q=
-=pr+m
------END PGP SIGNATURE-----
-
---nt+vFqn/aPO6zu0j--
+> ---
+>  drivers/mmc/host/omap_hsmmc.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 2cd828f42151..57bb85930f81 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -2190,10 +2190,8 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
+>         if (host->use_reg)
+>                 omap_hsmmc_reg_put(host);
+>
+> -       if (host->tx_chan)
+> -               dma_release_channel(host->tx_chan);
+> -       if (host->rx_chan)
+> -               dma_release_channel(host->rx_chan);
+> +       dma_release_channel(host->tx_chan);
+> +       dma_release_channel(host->rx_chan);
+>
+>         pm_runtime_put_sync(host->dev);
+>         pm_runtime_disable(host->dev);
+> --
+> 2.3.5
+>
