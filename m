@@ -1,61 +1,80 @@
-From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 2/2] mmc: sunxi: Also set SDXC_LOW_POWER_ON
-Date: Thu, 28 May 2015 10:04:28 +0200
-Message-ID: <5566CC0C.1050103@redhat.com>
-References: <cover.1432491958.git.hramrach@gmail.com>	<29e003a6fb8253b1e103f341405d4e8322e3edc2.1432491958.git.hramrach@gmail.com>	<5562C90D.8070507@redhat.com> <CAPDyKFrvB1AZGdvQ1fb6ShC8v-3DbVabiki13L8gG7M2saJALA@mail.gmail.com>
-Reply-To: hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: card: Fixup request missing in mmc_blk_issue_rw_rq
+Date: Thu, 28 May 2015 10:29:16 +0200
+Message-ID: <CAPDyKFrpScGLoUAmO07YPmF+6gG1iYg0X4zuyUtWQFTb9hJ4RQ@mail.gmail.com>
+References: <dbf65349aac343abbd215129dd3ceefb@SHMBX03.spreadtrum.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBEMYTOVQKGQEMY6G3RI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <CAPDyKFrvB1AZGdvQ1fb6ShC8v-3DbVabiki13L8gG7M2saJALA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <http://groups.google.com/group/linux-sunxi/subscribe>
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Michal Suchanek <hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, =?UTF-8?B?RGF2aWQgTGFuemVuZMO2cmZlcg==?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Peter Griffin <peter.griffin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <dbf65349aac343abbd215129dd3ceefb@SHMBX03.spreadtrum.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: =?UTF-8?B?SnVzdGluIFdhbmcgKOeOi+S4gSk=?= <Justin.Wang@spreadtrum.com>
+Cc: "kuninori.morimoto.gx@renesas.com" <kuninori.morimoto.gx@renesas.com>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "JBottomley@Odin.com" <JBottomley@odin.com>, "ben@decadent.org.uk" <ben@decadent.org.uk>, "chuanxiao.dong@intel.com" <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On 28-05-15 10:02, Ulf Hansson wrote:
-> On 25 May 2015 at 09:02, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> Hi,
->>
->> On 24-05-15 20:04, Michal Suchanek wrote:
->>>
->>> The function sunxi_mmc_oclk_onoff filters out the SDXC_LOW_POWER_ON flag
->>> but never sets it.
->>>
->>> Set SDXC_LOW_POWER_ON when oclk is disabled.
->>
->>
->> Nack, looking at the datasheet I do not thing this patch actually
->> does anything, according to the datasheet setting this bit to 1 results
->> in: "Turn off card clock when FSM in IDLE state", iow this does mmc clock
->> gating on idle automatically in hardware, since we completely disable the
->> clock on clock-off by clearing SDXC_CARD_CLOCK_ON setting this bit on
->> clock-off is a nop.
->>
->> We could consider actually setting this to safe power when setting the clock
->> on, for doing that it would be good to look at the android code and see if
->> it ever sets this bit and if so when.
->>
->> WRT CONFIG_MMC_CLKGATE we are probably better off using SDXC_LOW_POWER_ON
->> then that when it is enabled. So maybe we should set SDXC_LOW_POWER_ON
->> based on #ifdef WRT CONFIG_MMC_CLKGATE, and have some way to tell the
->> mmc core to not do clock gating on this host ?
+On 19 May 2015 at 08:32, Justin Wang (=E7=8E=8B=E4=B8=81) <Justin.Wang@=
+spreadtrum.com> wrote:
+> From 05849da563c80c20597ab6275d5881a8ed426f96 Mon Sep 17 00:00:00 200=
+1
+> From: justin.wang <justin.wang@spreadtrum.com>
+> Date: Mon, 18 May 2015 20:14:15 +0800
+> Subject: [PATCH] mmc: card: Fixup request missing in mmc_blk_issue_rw=
+_rq
 >
-> I am planning to remove the entire thing for CONFIG_MMC_CLKGATE, maybe
-> it's time to do that now!?
+> The current handler of MMC_BLK_CMD_ERR in mmc_blk_issue_rw_rq functio=
+n
+> may cause new coming request permanent missing when the ongoing
+> request (previoulsy started) complete end.
 
-Removing it now sounds like a good plan to me, we would still need
-to look into maybe enabling SDXC_LOW_POWER_ON on sunxi in some cases
-to save power, but that is an orthogonal problem.
+I think you need to elaborate a bit more here. In exactly what
+scenario does this problem occur?
 
-Regards,
+>
+> This would cause the process related to the missing request stay at '=
+D'
+> state forever.
 
-Hans
+'D' state?
+
+I suppose it waits for a response for its IO request. Doesn't also the
+block layer complain or timeout somehow? Would be interesting to know
+a bit more about what really happens when things goes wrong.
+
+>
+
+Seems like we should have a fixes tag here as well, could you possibly
+try to find what commit that introduced this bug?
+
+> Signed-off-by: Ding Wang <justin.wang@spreadtrum.com>
+> ---
+>  drivers/mmc/card/block.c |    8 +++++---
+>  1 files changed, 5 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 60f7141..f05cd1f 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -1910,9 +1910,11 @@ static int mmc_blk_issue_rw_rq(struct mmc_queu=
+e *mq, struct request *rqc)
+>                         break;
+>                 case MMC_BLK_CMD_ERR:
+>                         ret =3D mmc_blk_cmd_err(md, card, brq, req, r=
+et);
+> -                       if (!mmc_blk_reset(md, card->host, type))
+> -                               break;
+> -                       goto cmd_abort;
+> +                       if (mmc_blk_reset(md, card->host, type))
+> +                               goto cmd_abort;
+> +                       if (!ret)
+> +                               goto start_new_req;
+> +                       break;
+>                 case MMC_BLK_RETRY:
+>                         if (retry++ < 5)
+>                                 break;
+> --
+> 1.7.4.1
+>
+
+Kind regards
+Uffe
