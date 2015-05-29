@@ -1,65 +1,38 @@
-From: Prabu Thangamuthu <Prabu.T@synopsys.com>
-Subject: [PATCH v2] mmc: dw_mmc: insmod followed by rmmod will hung for eMMC
-Date: Thu, 28 May 2015 12:21:06 +0000
-Message-ID: <705D14B1C7978B40A723277C067CEDE245184BC7@IN01WEMBXB.internal.synopsys.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from us01smtprelay-2.synopsys.com ([198.182.60.111]:41918 "EHLO
-	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1754103AbbE1MVL convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 May 2015 08:21:11 -0400
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+From: Eric Anholt <eric@anholt.net>
+Subject: [PATCH] mmc: sdhci-bcm2835: Actually enable the clock
+Date: Thu, 28 May 2015 17:03:12 -0700
+Message-ID: <1432857792-7421-1-git-send-email-eric@anholt.net>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: linux-rpi-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Eric Anholt <eric@anholt.net>
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: Manjunath M Bettegowda <Manjunath.MB@synopsys.com>, "prabu.t@synopsys.com" <prabu.t@synopsys.com>
 
-Remove module of dw_mmc driver will hung for eMMC devices if we follow the
-steps which are listed below,
-	insmod dw_mmc.ko
-	insmod dw_mmc-pci.ko
-	rmmod dw_mmc-pci.ko
+We're currently using a fixed frequency clock specified in the DT, so
+enabling is a no-op.  However, the RPi firmware-based clocks driver
+can actually disable unused clocks, so when switching to use it we
+ended up losing our MMC clock once all devices were probed.
 
-The root cause for this issue is, dw_mci_remove() will disable all the
-interrupts by programming 0x0 to INTMASK register then it will call
-dw_mci_cleanup_slot(). But dw_mci_cleanup_slot() is issuing CMD6 to
-disable the eMMC boot partition and it is waiting for Command Complete
-interrupt. Since INTMASK was already cleared by dw_mci_remove(), Command
-Complete interrupt is not reaching the system. This leads to process hung.
-
-Signed-off-by: Prabu Thangamuthu <prabu.t@synopsys.com>
+Signed-off-by: Eric Anholt <eric@anholt.net>
 ---
-Change log v2:
-	-Added prefix "mmc:" to the commit message header.
-	-Updated the Commit Message.
+ drivers/mmc/host/sdhci-bcm2835.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
- drivers/mmc/host/dw_mmc.c |    6 +++---
- 1 files changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 55179f1..40e9d8e 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2926,15 +2926,15 @@ void dw_mci_remove(struct dw_mci *host)
- {
- 	int i;
- 
--	mci_writel(host, RINTSTS, 0xFFFFFFFF);
--	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
--
- 	for (i = 0; i < host->num_slots; i++) {
- 		dev_dbg(host->dev, "remove slot %d\n", i);
- 		if (host->slot[i])
- 			dw_mci_cleanup_slot(host->slot[i], i);
+diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
+index 0ef0343..09aff3a 100644
+--- a/drivers/mmc/host/sdhci-bcm2835.c
++++ b/drivers/mmc/host/sdhci-bcm2835.c
+@@ -172,6 +172,11 @@ static int bcm2835_sdhci_probe(struct platform_device *pdev)
+ 		ret = PTR_ERR(pltfm_host->clk);
+ 		goto err;
  	}
++	ret = clk_prepare_enable(pltfm_host->clk);
++	if (ret) {
++		dev_err(&pdev->dev, "failed to enable host clk\n");
++		goto err;
++	}
  
-+	mci_writel(host, RINTSTS, 0xFFFFFFFF);
-+	mci_writel(host, INTMASK, 0); /* disable all mmc interrupt first */
-+
- 	/* disable clock to CIU */
- 	mci_writel(host, CLKENA, 0);
- 	mci_writel(host, CLKSRC, 0);
+ 	return sdhci_add_host(host);
+ 
 -- 
-1.7.6.5
+2.1.4
