@@ -1,51 +1,72 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH] mmc: sdhci-bcm2835: Actually enable the clock
-Date: Fri, 29 May 2015 09:35:41 +0100
-Message-ID: <20150529083541.GH2067@n2100.arm.linux.org.uk>
-References: <1432857792-7421-1-git-send-email-eric@anholt.net>
+From: Vinod Koul <vinod.koul@intel.com>
+Subject: Re: [PATCH 02/13] dmaengine: Introduce
+ dma_request_slave_channel_compat_reason()
+Date: Fri, 29 May 2015 15:03:17 +0530
+Message-ID: <20150529093317.GF3140@localhost>
+References: <1432646768-12532-1-git-send-email-peter.ujfalusi@ti.com>
+ <1432646768-12532-3-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:50662 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754337AbbE2If5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 May 2015 04:35:57 -0400
+Return-path: <linux-crypto-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1432857792-7421-1-git-send-email-eric@anholt.net>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1432646768-12532-3-git-send-email-peter.ujfalusi@ti.com>
+Sender: linux-crypto-owner@vger.kernel.org
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: tony@atomide.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, dan.j.williams@intel.com, dmaengine@vger.kernel.org, linux-serial@vger.kernel.org, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-crypto@vger.kernel.org, linux-spi@vger.kernel.org, linux-media@vger.kernel.org, alsa-devel@alsa-project.org
 List-Id: linux-mmc@vger.kernel.org
-To: Eric Anholt <eric@anholt.net>
-Cc: linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rpi-kernel@lists.infradead.org
 
-On Thu, May 28, 2015 at 05:03:12PM -0700, Eric Anholt wrote:
-> We're currently using a fixed frequency clock specified in the DT, so
-> enabling is a no-op.  However, the RPi firmware-based clocks driver
-> can actually disable unused clocks, so when switching to use it we
-> ended up losing our MMC clock once all devices were probed.
+On Tue, May 26, 2015 at 04:25:57PM +0300, Peter Ujfalusi wrote:
+> dma_request_slave_channel_compat() 'eats' up the returned error codes which
+> prevents drivers using the compat call to be able to do deferred probing.
 > 
-> Signed-off-by: Eric Anholt <eric@anholt.net>
-> ---
->  drivers/mmc/host/sdhci-bcm2835.c | 5 +++++
->  1 file changed, 5 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
-> index 0ef0343..09aff3a 100644
-> --- a/drivers/mmc/host/sdhci-bcm2835.c
-> +++ b/drivers/mmc/host/sdhci-bcm2835.c
-> @@ -172,6 +172,11 @@ static int bcm2835_sdhci_probe(struct platform_device *pdev)
->  		ret = PTR_ERR(pltfm_host->clk);
->  		goto err;
->  	}
-> +	ret = clk_prepare_enable(pltfm_host->clk);
-> +	if (ret) {
-> +		dev_err(&pdev->dev, "failed to enable host clk\n");
-> +		goto err;
-> +	}
->  
->  	return sdhci_add_host(host);
+> The new wrapper is identical in functionality but it will return with error
+> code in case of failure and will pass the -EPROBE_DEFER to the caller in
+> case dma_request_slave_channel_reason() returned with it.
+This is okay but am worried about one more warpper, how about fixing
+dma_request_slave_channel_compat()
 
-Where's the error clean-up path for a failed sdhci_add_host()?
 
 -- 
-FTTC broadband for 0.8mile line: currently at 10.5Mbps down 400kbps up
-according to speedtest.net.
+~Vinod
+> 
+> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+> ---
+>  include/linux/dmaengine.h | 22 ++++++++++++++++++++++
+>  1 file changed, 22 insertions(+)
+> 
+> diff --git a/include/linux/dmaengine.h b/include/linux/dmaengine.h
+> index abf63ceabef9..6c777394835c 100644
+> --- a/include/linux/dmaengine.h
+> +++ b/include/linux/dmaengine.h
+> @@ -1120,4 +1120,26 @@ static inline struct dma_chan
+>  
+>  	return __dma_request_channel(mask, fn, fn_param);
+>  }
+> +
+> +#define dma_request_slave_channel_compat_reason(mask, x, y, dev, name) \
+> +	__dma_request_slave_channel_compat_reason(&(mask), x, y, dev, name)
+> +
+> +static inline struct dma_chan
+> +*__dma_request_slave_channel_compat_reason(const dma_cap_mask_t *mask,
+> +				  dma_filter_fn fn, void *fn_param,
+> +				  struct device *dev, char *name)
+> +{
+> +	struct dma_chan *chan;
+> +
+> +	chan = dma_request_slave_channel_reason(dev, name);
+> +	/* Try via legacy API if not requesting for deferred probing */
+> +	if (IS_ERR(chan) && PTR_ERR(chan) != -EPROBE_DEFER)
+> +		chan = __dma_request_channel(mask, fn, fn_param);
+> +
+> +	if (!chan)
+> +		chan = ERR_PTR(-ENODEV);
+> +
+> +	return chan;
+> +}
+> +
+>  #endif /* DMAENGINE_H */
+> -- 
+> 2.3.5
+> 
+
+-- 
