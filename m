@@ -1,57 +1,63 @@
-From: Eric Anholt <eric@anholt.net>
-Subject: [PATCH v2 2/2] mmc: sdhci-bcm2835: Actually enable the clock
-Date: Fri, 29 May 2015 14:06:12 -0700
-Message-ID: <1432933572-8695-2-git-send-email-eric@anholt.net>
-References: <1432933572-8695-1-git-send-email-eric@anholt.net>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gabe.freedesktop.org ([131.252.210.177]:58111 "EHLO
-	gabe.freedesktop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756544AbbE2VGN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 May 2015 17:06:13 -0400
-In-Reply-To: <1432933572-8695-1-git-send-email-eric@anholt.net>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: powerpc/corenet: enable eSDHC
+Date: Fri, 29 May 2015 19:03:31 -0500
+Message-ID: <20150530000331.GA9143@home.buserror.net>
+References: <1430893748-38821-1-git-send-email-yangbo.lu@freescale.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+Content-Disposition: inline
+In-Reply-To: <1430893748-38821-1-git-send-email-yangbo.lu@freescale.com>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Yangbo Lu <yangbo.lu@freescale.com>
+Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: linux-rpi-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Eric Anholt <eric@anholt.net>
 
-We're currently using a fixed frequency clock specified in the DT, so
-enabling is a no-op.  However, the RPi firmware-based clocks driver
-can actually disable unused clocks, so when switching to use it we
-ended up losing our MMC clock once all devices were probed.
-
-Signed-off-by: Eric Anholt <eric@anholt.net>
----
-
-v2: Re-disable our clock on sdhci_add_host() failure.
-
- drivers/mmc/host/sdhci-bcm2835.c | 9 ++++++++-
- 1 file changed, 8 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
-index 32f4046..1c65d46 100644
---- a/drivers/mmc/host/sdhci-bcm2835.c
-+++ b/drivers/mmc/host/sdhci-bcm2835.c
-@@ -172,12 +172,19 @@ static int bcm2835_sdhci_probe(struct platform_device *pdev)
- 		ret = PTR_ERR(pltfm_host->clk);
- 		goto err;
- 	}
-+	ret = clk_prepare_enable(pltfm_host->clk);
-+	if (ret) {
-+		dev_err(&pdev->dev, "failed to enable host clk\n");
-+		goto err;
-+	}
- 
- 	ret = sdhci_add_host(host);
- 	if (ret)
--		goto err;
-+		goto err_clk;
- 
- 	return 0;
-+err_clk:
-+	clk_disable_unprepare(pltfm_host->clk);
- err:
- 	sdhci_pltfm_free(pdev);
- 	return ret;
--- 
-2.1.4
-
+T24gV2VkLCBNYXkgMDYsIDIwMTUgYXQgMDI6Mjk6MDhQTSArMDgwMCwgWWFuZ2JvIEx1IHdyb3Rl
+Ogo+IFNpZ25lZC1vZmYtYnk6IFlhbmdibyBMdSA8eWFuZ2JvLmx1QGZyZWVzY2FsZS5jb20+Cj4g
+LS0tCj4gIGFyY2gvcG93ZXJwYy9jb25maWdzL2NvcmVuZXQzMl9zbXBfZGVmY29uZmlnIHwgMiAr
+Kwo+ICBhcmNoL3Bvd2VycGMvY29uZmlncy9jb3JlbmV0NjRfc21wX2RlZmNvbmZpZyB8IDIgKysK
+PiAgMiBmaWxlcyBjaGFuZ2VkLCA0IGluc2VydGlvbnMoKykKPiAKPiBkaWZmIC0tZ2l0IGEvYXJj
+aC9wb3dlcnBjL2NvbmZpZ3MvY29yZW5ldDMyX3NtcF9kZWZjb25maWcgYi9hcmNoL3Bvd2VycGMv
+Y29uZmlncy9jb3JlbmV0MzJfc21wX2RlZmNvbmZpZwo+IGluZGV4IGNhNzk1N2IuLjE3ZmIyZTAg
+MTAwNjQ0Cj4gLS0tIGEvYXJjaC9wb3dlcnBjL2NvbmZpZ3MvY29yZW5ldDMyX3NtcF9kZWZjb25m
+aWcKPiArKysgYi9hcmNoL3Bvd2VycGMvY29uZmlncy9jb3JlbmV0MzJfc21wX2RlZmNvbmZpZwo+
+IEBAIC0xMzAsNiArMTMwLDggQEAgQ09ORklHX1VTQl9PSENJX0hDRF9QUENfT0ZfTEU9eQo+ICBD
+T05GSUdfVVNCX1NUT1JBR0U9eQo+ICBDT05GSUdfTU1DPXkKPiAgQ09ORklHX01NQ19TREhDST15
+Cj4gK0NPTkZJR19NTUNfU0RIQ0lfUExURk09eQo+ICtDT05GSUdfTU1DX1NESENJX09GX0VTREhD
+PXkKPiAgQ09ORklHX0VEQUM9eQo+ICBDT05GSUdfRURBQ19NTV9FREFDPXkKPiAgQ09ORklHX0VE
+QUNfTVBDODVYWD15Cj4gZGlmZiAtLWdpdCBhL2FyY2gvcG93ZXJwYy9jb25maWdzL2NvcmVuZXQ2
+NF9zbXBfZGVmY29uZmlnIGIvYXJjaC9wb3dlcnBjL2NvbmZpZ3MvY29yZW5ldDY0X3NtcF9kZWZj
+b25maWcKPiBpbmRleCAwNDczN2FhLi40NjA1YTU1IDEwMDY0NAo+IC0tLSBhL2FyY2gvcG93ZXJw
+Yy9jb25maWdzL2NvcmVuZXQ2NF9zbXBfZGVmY29uZmlnCj4gKysrIGIvYXJjaC9wb3dlcnBjL2Nv
+bmZpZ3MvY29yZW5ldDY0X3NtcF9kZWZjb25maWcKPiBAQCAtMTEyLDYgKzExMiw4IEBAIENPTkZJ
+R19VU0JfRUhDSV9GU0w9eQo+ICBDT05GSUdfVVNCX1NUT1JBR0U9eQo+ICBDT05GSUdfTU1DPXkK
+PiAgQ09ORklHX01NQ19TREhDST15Cj4gK0NPTkZJR19NTUNfU0RIQ0lfUExURk09eQo+ICtDT05G
+SUdfTU1DX1NESENJX09GX0VTREhDPXkKPiAgQ09ORklHX0VEQUM9eQo+ICBDT05GSUdfRURBQ19N
+TV9FREFDPXkKPiAgQ09ORklHX1JUQ19DTEFTUz15CgpXaXRoIHRoaXMgb24gdDQyNDByZGIgSSdt
+IGNvbnRpbnVhbGx5IHNwYW1tZWQgd2l0aDoKc2RoY2ktZXNkaGMgZmZlMTE0MDAwLnNkaGM6IG5v
+IHN1cHBvcnQgZm9yIGNhcmQncyB2b2x0cwptbWMwOiBlcnJvciAtMjIgd2hpbHN0IGluaXRpYWxp
+c2luZyBTRCBjYXJkCnNkaGNpLWVzZGhjIGZmZTExNDAwMC5zZGhjOiBubyBzdXBwb3J0IGZvciBj
+YXJkJ3Mgdm9sdHMKbW1jMDogZXJyb3IgLTIyIHdoaWxzdCBpbml0aWFsaXNpbmcgU0QgY2FyZAoK
+UmVsZXZlYW50IGJvb3QgbWVzc2FnZXMgaW5jbHVkZToKc2RoY2k6IFNlY3VyZSBEaWdpdGFsIEhv
+c3QgQ29udHJvbGxlciBJbnRlcmZhY2UgZHJpdmVyCnNkaGNpOiBDb3B5cmlnaHQoYykgUGllcnJl
+IE9zc21hbgpzZGhjaS1wbHRmbTogU0RIQ0kgcGxhdGZvcm0gYW5kIE9GIGRyaXZlciBoZWxwZXIK
+c2RoY2ktZXNkaGMgZmZlMTE0MDAwLnNkaGM6IE5vIHZtbWMgcmVndWxhdG9yIGZvdW5kCnNkaGNp
+LWVzZGhjIGZmZTExNDAwMC5zZGhjOiBObyB2cW1tYyByZWd1bGF0b3IgZm91bmQKbW1jMDogU0RI
+Q0kgY29udHJvbGxlciBvbiBmZmUxMTQwMDAuc2RoYyBbZmZlMTE0MDAwLnNkaGNdIHVzaW5nIEFE
+TUEKLi4uCm1tYzA6IGVycm9yIC0yMiB3aGlsc3QgaW5pdGlhbGlzaW5nIFNEIGNhcmQKLi4uCnNk
+aGNpLWVzZGhjIGZmZTExNDAwMC5zZGhjOiBubyBzdXBwb3J0IGZvciBjYXJkJ3Mgdm9sdHMKbW1j
+MDogZXJyb3IgLTIyIHdoaWxzdCBpbml0aWFsaXNpbmcgU0QgY2FyZAoKLVNjb3R0Cl9fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCkxpbnV4cHBjLWRldiBtYWls
+aW5nIGxpc3QKTGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmcKaHR0cHM6Ly9saXN0cy5vemxh
+YnMub3JnL2xpc3RpbmZvL2xpbnV4cHBjLWRldg==
