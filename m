@@ -1,60 +1,75 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH] mmc: core: Attach PM domain prior probing of SDIO func
- driver
-Date: Tue, 2 Jun 2015 09:51:01 +0100
-Message-ID: <20150602085101.GY2067@n2100.arm.linux.org.uk>
-References: <1433153905-25204-1-git-send-email-ulf.hansson@linaro.org>
- <20150601194209.GB30024@dtor-ws>
- <CAPDyKFr+SucSGZRigc4a6zei9TR4f5TuNHXTqWDDj2YQK1yn5A@mail.gmail.com>
+From: =?utf-8?B?SnVzdGluIFdhbmcgKOeOi+S4gSk=?=
+	<Justin.Wang@spreadtrum.com>
+Subject: RE: [PATCH] mmc: card: Fixup request missing in mmc_blk_issue_rw_rq
+Date: Tue, 2 Jun 2015 09:14:30 +0000
+Message-ID: <7889e15acf1b483289661554a617f942@SHMBX03.spreadtrum.com>
+References: <dbf65349aac343abbd215129dd3ceefb@SHMBX03.spreadtrum.com>
+ <CAPDyKFrpScGLoUAmO07YPmF+6gG1iYg0X4zuyUtWQFTb9hJ4RQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:59309 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753285AbbFBIvQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jun 2015 04:51:16 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFr+SucSGZRigc4a6zei9TR4f5TuNHXTqWDDj2YQK1yn5A@mail.gmail.com>
+Received: from sci-ig2.spreadtrum.com ([222.66.158.135]:17137 "EHLO
+	SHSQR01.spreadtrum.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753146AbbFBJOn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jun 2015 05:14:43 -0400
+In-Reply-To: <CAPDyKFrpScGLoUAmO07YPmF+6gG1iYg0X4zuyUtWQFTb9hJ4RQ@mail.gmail.com>
+Content-Language: zh-CN
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Kevin Hilman <khilman@kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Aaron Lu <aaron.lu@intel.com>
+To: 'Ulf Hansson' <ulf.hansson@linaro.org>
+Cc: "kuninori.morimoto.gx@renesas.com" <kuninori.morimoto.gx@renesas.com>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "JBottomley@Odin.com" <JBottomley@odin.com>, "ben@decadent.org.uk" <ben@decadent.org.uk>, "chuanxiao.dong@intel.com" <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Tue, Jun 02, 2015 at 09:54:13AM +0200, Ulf Hansson wrote:
-> On the other hand, the "long term plan" is to have PM domain pointers
-> assigned at device registration point instead of at probe. Since
-> driver core then invokes the ->activate|sync|dismiss() callbacks, it
-> will make the dev_pm_domain_attach|detach() APIs redundant.
-
-How does that work if the PM domain doesn't exist yet, because the driver
-supplying it hasn't had its own device probed ?
-
-You can't return -EPROBE_DEFER to anything that isn't being called via a
-driver's probe function.  So, when the OF code is scanning the device
-tree, creating the various struct device's, returning -EPROBE_DEFER will
-cause it to fail to register that struct device and there is no mechanism
-to retry.
-
-Also, your idea above goes against the grain that other resources are
-heading - that is, towards probe time resolution of resources.  IRQ
-resources have the same problem, and this has caused real problems on
-platforms to have the IRQ resources resolved to a number at registration
-time.
-
-To me, your idea sounds like the wrong approach and unworkable.
-
-What would resolve that would be to have the device registration succeed,
-but also to scan all devices in the system when a PM domain is attached
-and attach the PM domain to matching devices.  The problem you then have
-is the same race between attaching the PM domain to all devices in the
-domain, and devices being probed.  Remember, this may not be happening at
-boot time, but during module load, which on some systems is multithreaded.
-So, the problem of not having all devices in the PM domain hasn't changed
-and nothing is solved by this approach - the only thing is the code has
-become more complex.
-
-I don't think that's an improvement.
-
--- 
-FTTC broadband for 0.8mile line: currently at 10.5Mbps down 400kbps up
-according to speedtest.net.
+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5zc29uIFttYWls
+dG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogVGh1cnNkYXksIE1heSAyOCwgMjAx
+NSA0OjI5IFBNDQo+IFRvOiBKdXN0aW4gV2FuZyAo546L5LiBKQ0KPiBDYzoga3VuaW5vcmkubW9y
+aW1vdG8uZ3hAcmVuZXNhcy5jb207IGpoODAuY2h1bmdAc2Ftc3VuZy5jb207DQo+IGFrcG1AbGlu
+dXgtZm91bmRhdGlvbi5vcmc7IEpCb3R0b21sZXlAT2Rpbi5jb207IGJlbkBkZWNhZGVudC5vcmcu
+dWs7DQo+IGNodWFueGlhby5kb25nQGludGVsLmNvbTsgbGludXgtbW1jQHZnZXIua2VybmVsLm9y
+ZzsNCj4gbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENI
+XSBtbWM6IGNhcmQ6IEZpeHVwIHJlcXVlc3QgbWlzc2luZyBpbiBtbWNfYmxrX2lzc3VlX3J3X3Jx
+DQo+IEltcG9ydGFuY2U6IEhpZ2gNCj4gDQo+IE9uIDE5IE1heSAyMDE1IGF0IDA4OjMyLCBKdXN0
+aW4gV2FuZyAo546L5LiBKSA8SnVzdGluLldhbmdAc3ByZWFkdHJ1bS5jb20+DQo+IHdyb3RlOg0K
+PiA+IEZyb20gMDU4NDlkYTU2M2M4MGMyMDU5N2FiNjI3NWQ1ODgxYThlZDQyNmY5NiBNb24gU2Vw
+IDE3IDAwOjAwOjAwDQo+IDIwMDENCj4gPiBGcm9tOiBqdXN0aW4ud2FuZyA8anVzdGluLndhbmdA
+c3ByZWFkdHJ1bS5jb20+DQo+ID4gRGF0ZTogTW9uLCAxOCBNYXkgMjAxNSAyMDoxNDoxNSArMDgw
+MA0KPiA+IFN1YmplY3Q6IFtQQVRDSF0gbW1jOiBjYXJkOiBGaXh1cCByZXF1ZXN0IG1pc3Npbmcg
+aW4gbW1jX2Jsa19pc3N1ZV9yd19ycQ0KPiA+DQo+ID4gVGhlIGN1cnJlbnQgaGFuZGxlciBvZiBN
+TUNfQkxLX0NNRF9FUlIgaW4gbW1jX2Jsa19pc3N1ZV9yd19ycQ0KPiBmdW5jdGlvbg0KPiA+IG1h
+eSBjYXVzZSBuZXcgY29taW5nIHJlcXVlc3QgcGVybWFuZW50IG1pc3Npbmcgd2hlbiB0aGUgb25n
+b2luZw0KPiA+IHJlcXVlc3QgKHByZXZpb3Vsc3kgc3RhcnRlZCkgY29tcGxldGUgZW5kLg0KPiAN
+Cj4gSSB0aGluayB5b3UgbmVlZCB0byBlbGFib3JhdGUgYSBiaXQgbW9yZSBoZXJlLiBJbiBleGFj
+dGx5IHdoYXQNCj4gc2NlbmFyaW8gZG9lcyB0aGlzIHByb2JsZW0gb2NjdXI/DQo+IA0KDQpUaGFu
+a3MsIEkgd2lsbCBnaXZlIGEgZGV0YWlsZWQgZGVzY3JpcHRpb24gbmV4dCBwYXRjaC4NCg0KPiA+
+DQo+ID4gVGhpcyB3b3VsZCBjYXVzZSB0aGUgcHJvY2VzcyByZWxhdGVkIHRvIHRoZSBtaXNzaW5n
+IHJlcXVlc3Qgc3RheSBhdCAnRCcNCj4gPiBzdGF0ZSBmb3JldmVyLg0KPiANCj4gJ0QnIHN0YXRl
+Pw0KPiANCj4gSSBzdXBwb3NlIGl0IHdhaXRzIGZvciBhIHJlc3BvbnNlIGZvciBpdHMgSU8gcmVx
+dWVzdC4gRG9lc24ndCBhbHNvIHRoZQ0KPiBibG9jayBsYXllciBjb21wbGFpbiBvciB0aW1lb3V0
+IHNvbWVob3c/IFdvdWxkIGJlIGludGVyZXN0aW5nIHRvIGtub3cNCj4gYSBiaXQgbW9yZSBhYm91
+dCB3aGF0IHJlYWxseSBoYXBwZW5zIHdoZW4gdGhpbmdzIGdvZXMgd3JvbmcuDQo+IA0KDQpZZXMs
+IHByb2Nlc3Mgd2lsbCB3YWl0IHRoZSBtaXNzZWQgcmVxdWVzdCBjb21wbGV0ZSBmb3JldmVyLCBu
+byB0aW1lb3V0IGluIGJsb2NrIGxheWVyLg0KVGhlIHJlbGF0ZWQgcHJvY2VzcyB3aWxsIGJlIGJs
+b2NrZWQuDQo+ID4NCj4gDQo+IFNlZW1zIGxpa2Ugd2Ugc2hvdWxkIGhhdmUgYSBmaXhlcyB0YWcg
+aGVyZSBhcyB3ZWxsLCBjb3VsZCB5b3UgcG9zc2libHkNCj4gdHJ5IHRvIGZpbmQgd2hhdCBjb21t
+aXQgdGhhdCBpbnRyb2R1Y2VkIHRoaXMgYnVnPw0KPiANCj4gPiBTaWduZWQtb2ZmLWJ5OiBEaW5n
+IFdhbmcgPGp1c3Rpbi53YW5nQHNwcmVhZHRydW0uY29tPg0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJz
+L21tYy9jYXJkL2Jsb2NrLmMgfCAgICA4ICsrKysrLS0tDQo+ID4gIDEgZmlsZXMgY2hhbmdlZCwg
+NSBpbnNlcnRpb25zKCspLCAzIGRlbGV0aW9ucygtKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2Ry
+aXZlcnMvbW1jL2NhcmQvYmxvY2suYyBiL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYw0KPiA+IGlu
+ZGV4IDYwZjcxNDEuLmYwNWNkMWYgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvY2FyZC9i
+bG9jay5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jDQo+ID4gQEAgLTE5MTAs
+OSArMTkxMCwxMSBAQCBzdGF0aWMgaW50IG1tY19ibGtfaXNzdWVfcndfcnEoc3RydWN0DQo+IG1t
+Y19xdWV1ZSAqbXEsIHN0cnVjdCByZXF1ZXN0ICpycWMpDQo+ID4gICAgICAgICAgICAgICAgICAg
+ICAgICAgYnJlYWs7DQo+ID4gICAgICAgICAgICAgICAgIGNhc2UgTU1DX0JMS19DTURfRVJSOg0K
+PiA+ICAgICAgICAgICAgICAgICAgICAgICAgIHJldCA9IG1tY19ibGtfY21kX2VycihtZCwgY2Fy
+ZCwgYnJxLCByZXEsDQo+IHJldCk7DQo+ID4gLSAgICAgICAgICAgICAgICAgICAgICAgaWYgKCFt
+bWNfYmxrX3Jlc2V0KG1kLCBjYXJkLT5ob3N0LCB0eXBlKSkNCj4gPiAtICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgIGJyZWFrOw0KPiA+IC0gICAgICAgICAgICAgICAgICAgICAgIGdvdG8g
+Y21kX2Fib3J0Ow0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGlmIChtbWNfYmxrX3Jlc2V0
+KG1kLCBjYXJkLT5ob3N0LCB0eXBlKSkNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgIGdvdG8gY21kX2Fib3J0Ow0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGlmICghcmV0
+KQ0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZ290byBzdGFydF9uZXdfcmVx
+Ow0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGJyZWFrOw0KPiA+ICAgICAgICAgICAgICAg
+ICBjYXNlIE1NQ19CTEtfUkVUUlk6DQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgaWYgKHJl
+dHJ5KysgPCA1KQ0KPiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYnJlYWs7DQo+
+ID4gLS0NCj4gPiAxLjcuNC4xDQo+ID4NCj4gDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo=
