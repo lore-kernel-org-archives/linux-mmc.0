@@ -1,75 +1,55 @@
-From: =?utf-8?B?SnVzdGluIFdhbmcgKOeOi+S4gSk=?=
-	<Justin.Wang@spreadtrum.com>
-Subject: RE: [PATCH] mmc: card: Fixup request missing in mmc_blk_issue_rw_rq
-Date: Tue, 2 Jun 2015 09:14:30 +0000
-Message-ID: <7889e15acf1b483289661554a617f942@SHMBX03.spreadtrum.com>
-References: <dbf65349aac343abbd215129dd3ceefb@SHMBX03.spreadtrum.com>
- <CAPDyKFrpScGLoUAmO07YPmF+6gG1iYg0X4zuyUtWQFTb9hJ4RQ@mail.gmail.com>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: [PATCH] mmc: sdhci-pxav3: fix device wakeup initialization
+Date: Tue, 2 Jun 2015 18:38:35 +0800
+Message-ID: <1433241515-2093-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sci-ig2.spreadtrum.com ([222.66.158.135]:17137 "EHLO
-	SHSQR01.spreadtrum.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753146AbbFBJOn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jun 2015 05:14:43 -0400
-In-Reply-To: <CAPDyKFrpScGLoUAmO07YPmF+6gG1iYg0X4zuyUtWQFTb9hJ4RQ@mail.gmail.com>
-Content-Language: zh-CN
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:44591 "EHLO
+	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751772AbbFBKjD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jun 2015 06:39:03 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: 'Ulf Hansson' <ulf.hansson@linaro.org>
-Cc: "kuninori.morimoto.gx@renesas.com" <kuninori.morimoto.gx@renesas.com>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "JBottomley@Odin.com" <JBottomley@odin.com>, "ben@decadent.org.uk" <ben@decadent.org.uk>, "chuanxiao.dong@intel.com" <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jisheng Zhang <jszhang@marvell.com>
 
-DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5zc29uIFttYWls
-dG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogVGh1cnNkYXksIE1heSAyOCwgMjAx
-NSA0OjI5IFBNDQo+IFRvOiBKdXN0aW4gV2FuZyAo546L5LiBKQ0KPiBDYzoga3VuaW5vcmkubW9y
-aW1vdG8uZ3hAcmVuZXNhcy5jb207IGpoODAuY2h1bmdAc2Ftc3VuZy5jb207DQo+IGFrcG1AbGlu
-dXgtZm91bmRhdGlvbi5vcmc7IEpCb3R0b21sZXlAT2Rpbi5jb207IGJlbkBkZWNhZGVudC5vcmcu
-dWs7DQo+IGNodWFueGlhby5kb25nQGludGVsLmNvbTsgbGludXgtbW1jQHZnZXIua2VybmVsLm9y
-ZzsNCj4gbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogW1BBVENI
-XSBtbWM6IGNhcmQ6IEZpeHVwIHJlcXVlc3QgbWlzc2luZyBpbiBtbWNfYmxrX2lzc3VlX3J3X3Jx
-DQo+IEltcG9ydGFuY2U6IEhpZ2gNCj4gDQo+IE9uIDE5IE1heSAyMDE1IGF0IDA4OjMyLCBKdXN0
-aW4gV2FuZyAo546L5LiBKSA8SnVzdGluLldhbmdAc3ByZWFkdHJ1bS5jb20+DQo+IHdyb3RlOg0K
-PiA+IEZyb20gMDU4NDlkYTU2M2M4MGMyMDU5N2FiNjI3NWQ1ODgxYThlZDQyNmY5NiBNb24gU2Vw
-IDE3IDAwOjAwOjAwDQo+IDIwMDENCj4gPiBGcm9tOiBqdXN0aW4ud2FuZyA8anVzdGluLndhbmdA
-c3ByZWFkdHJ1bS5jb20+DQo+ID4gRGF0ZTogTW9uLCAxOCBNYXkgMjAxNSAyMDoxNDoxNSArMDgw
-MA0KPiA+IFN1YmplY3Q6IFtQQVRDSF0gbW1jOiBjYXJkOiBGaXh1cCByZXF1ZXN0IG1pc3Npbmcg
-aW4gbW1jX2Jsa19pc3N1ZV9yd19ycQ0KPiA+DQo+ID4gVGhlIGN1cnJlbnQgaGFuZGxlciBvZiBN
-TUNfQkxLX0NNRF9FUlIgaW4gbW1jX2Jsa19pc3N1ZV9yd19ycQ0KPiBmdW5jdGlvbg0KPiA+IG1h
-eSBjYXVzZSBuZXcgY29taW5nIHJlcXVlc3QgcGVybWFuZW50IG1pc3Npbmcgd2hlbiB0aGUgb25n
-b2luZw0KPiA+IHJlcXVlc3QgKHByZXZpb3Vsc3kgc3RhcnRlZCkgY29tcGxldGUgZW5kLg0KPiAN
-Cj4gSSB0aGluayB5b3UgbmVlZCB0byBlbGFib3JhdGUgYSBiaXQgbW9yZSBoZXJlLiBJbiBleGFj
-dGx5IHdoYXQNCj4gc2NlbmFyaW8gZG9lcyB0aGlzIHByb2JsZW0gb2NjdXI/DQo+IA0KDQpUaGFu
-a3MsIEkgd2lsbCBnaXZlIGEgZGV0YWlsZWQgZGVzY3JpcHRpb24gbmV4dCBwYXRjaC4NCg0KPiA+
-DQo+ID4gVGhpcyB3b3VsZCBjYXVzZSB0aGUgcHJvY2VzcyByZWxhdGVkIHRvIHRoZSBtaXNzaW5n
-IHJlcXVlc3Qgc3RheSBhdCAnRCcNCj4gPiBzdGF0ZSBmb3JldmVyLg0KPiANCj4gJ0QnIHN0YXRl
-Pw0KPiANCj4gSSBzdXBwb3NlIGl0IHdhaXRzIGZvciBhIHJlc3BvbnNlIGZvciBpdHMgSU8gcmVx
-dWVzdC4gRG9lc24ndCBhbHNvIHRoZQ0KPiBibG9jayBsYXllciBjb21wbGFpbiBvciB0aW1lb3V0
-IHNvbWVob3c/IFdvdWxkIGJlIGludGVyZXN0aW5nIHRvIGtub3cNCj4gYSBiaXQgbW9yZSBhYm91
-dCB3aGF0IHJlYWxseSBoYXBwZW5zIHdoZW4gdGhpbmdzIGdvZXMgd3JvbmcuDQo+IA0KDQpZZXMs
-IHByb2Nlc3Mgd2lsbCB3YWl0IHRoZSBtaXNzZWQgcmVxdWVzdCBjb21wbGV0ZSBmb3JldmVyLCBu
-byB0aW1lb3V0IGluIGJsb2NrIGxheWVyLg0KVGhlIHJlbGF0ZWQgcHJvY2VzcyB3aWxsIGJlIGJs
-b2NrZWQuDQo+ID4NCj4gDQo+IFNlZW1zIGxpa2Ugd2Ugc2hvdWxkIGhhdmUgYSBmaXhlcyB0YWcg
-aGVyZSBhcyB3ZWxsLCBjb3VsZCB5b3UgcG9zc2libHkNCj4gdHJ5IHRvIGZpbmQgd2hhdCBjb21t
-aXQgdGhhdCBpbnRyb2R1Y2VkIHRoaXMgYnVnPw0KPiANCj4gPiBTaWduZWQtb2ZmLWJ5OiBEaW5n
-IFdhbmcgPGp1c3Rpbi53YW5nQHNwcmVhZHRydW0uY29tPg0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJz
-L21tYy9jYXJkL2Jsb2NrLmMgfCAgICA4ICsrKysrLS0tDQo+ID4gIDEgZmlsZXMgY2hhbmdlZCwg
-NSBpbnNlcnRpb25zKCspLCAzIGRlbGV0aW9ucygtKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2Ry
-aXZlcnMvbW1jL2NhcmQvYmxvY2suYyBiL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYw0KPiA+IGlu
-ZGV4IDYwZjcxNDEuLmYwNWNkMWYgMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvY2FyZC9i
-bG9jay5jDQo+ID4gKysrIGIvZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jDQo+ID4gQEAgLTE5MTAs
-OSArMTkxMCwxMSBAQCBzdGF0aWMgaW50IG1tY19ibGtfaXNzdWVfcndfcnEoc3RydWN0DQo+IG1t
-Y19xdWV1ZSAqbXEsIHN0cnVjdCByZXF1ZXN0ICpycWMpDQo+ID4gICAgICAgICAgICAgICAgICAg
-ICAgICAgYnJlYWs7DQo+ID4gICAgICAgICAgICAgICAgIGNhc2UgTU1DX0JMS19DTURfRVJSOg0K
-PiA+ICAgICAgICAgICAgICAgICAgICAgICAgIHJldCA9IG1tY19ibGtfY21kX2VycihtZCwgY2Fy
-ZCwgYnJxLCByZXEsDQo+IHJldCk7DQo+ID4gLSAgICAgICAgICAgICAgICAgICAgICAgaWYgKCFt
-bWNfYmxrX3Jlc2V0KG1kLCBjYXJkLT5ob3N0LCB0eXBlKSkNCj4gPiAtICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgIGJyZWFrOw0KPiA+IC0gICAgICAgICAgICAgICAgICAgICAgIGdvdG8g
-Y21kX2Fib3J0Ow0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGlmIChtbWNfYmxrX3Jlc2V0
-KG1kLCBjYXJkLT5ob3N0LCB0eXBlKSkNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgIGdvdG8gY21kX2Fib3J0Ow0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGlmICghcmV0
-KQ0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZ290byBzdGFydF9uZXdfcmVx
-Ow0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGJyZWFrOw0KPiA+ICAgICAgICAgICAgICAg
-ICBjYXNlIE1NQ19CTEtfUkVUUlk6DQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgaWYgKHJl
-dHJ5KysgPCA1KQ0KPiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYnJlYWs7DQo+
-ID4gLS0NCj4gPiAxLjcuNC4xDQo+ID4NCj4gDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo=
+MMC_PM_KEEP_POWER doesn't imply MMC_PM_WAKE_SDIO_IRQ, we should only
+enable device wake up when MMC_PM_WAKE_SDIO_IRQ is set. And "pm_flags"
+is the requested pm features, we should not set it in the host driver.
+
+At the same time, device wakeup is disabled by default, so there's no
+need to disable device wakeup explicitly.
+
+This patch fixes the warning as following:
+
+[   64.616651] ------------[ cut here ]------------
+[   64.616665] WARNING: CPU: 0 PID: 79 at linux/kernel/irq/manage.c:603 irq_set_irq_wake+0xf0/0x11c()
+[   64.616667] Unbalanced IRQ 87 wake disable
+
+Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+---
+ drivers/mmc/host/sdhci-pxav3.c | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 01cb2d3..9cd5fc6 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -457,12 +457,8 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 
+ 	platform_set_drvdata(pdev, host);
+ 
+-	if (host->mmc->pm_caps & MMC_PM_KEEP_POWER) {
++	if (host->mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ)
+ 		device_init_wakeup(&pdev->dev, 1);
+-		host->mmc->pm_flags |= MMC_PM_WAKE_SDIO_IRQ;
+-	} else {
+-		device_init_wakeup(&pdev->dev, 0);
+-	}
+ 
+ 	pm_runtime_put_autosuspend(&pdev->dev);
+ 
+-- 
+2.1.4
+
