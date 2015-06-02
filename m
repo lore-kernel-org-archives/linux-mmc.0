@@ -1,94 +1,60 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Attach PM domain prior probing of SDIO func driver
-Date: Tue, 2 Jun 2015 09:54:13 +0200
-Message-ID: <CAPDyKFr+SucSGZRigc4a6zei9TR4f5TuNHXTqWDDj2YQK1yn5A@mail.gmail.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH] mmc: core: Attach PM domain prior probing of SDIO func
+ driver
+Date: Tue, 2 Jun 2015 09:51:01 +0100
+Message-ID: <20150602085101.GY2067@n2100.arm.linux.org.uk>
 References: <1433153905-25204-1-git-send-email-ulf.hansson@linaro.org>
-	<20150601194209.GB30024@dtor-ws>
+ <20150601194209.GB30024@dtor-ws>
+ <CAPDyKFr+SucSGZRigc4a6zei9TR4f5TuNHXTqWDDj2YQK1yn5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f52.google.com ([209.85.192.52]:36770 "EHLO
-	mail-qg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752854AbbFBHyO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jun 2015 03:54:14 -0400
-Received: by qgf2 with SMTP id 2so56082830qgf.3
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Jun 2015 00:54:13 -0700 (PDT)
-In-Reply-To: <20150601194209.GB30024@dtor-ws>
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:59309 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753285AbbFBIvQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Jun 2015 04:51:16 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFr+SucSGZRigc4a6zei9TR4f5TuNHXTqWDDj2YQK1yn5A@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dmitry Torokhov <dmitry.torokhov@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, Kevin Hilman <khilman@kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Aaron Lu <aaron.lu@intel.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Dmitry Torokhov <dmitry.torokhov@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Kevin Hilman <khilman@kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Aaron Lu <aaron.lu@intel.com>
 
-On 1 June 2015 at 21:42, Dmitry Torokhov <dmitry.torokhov@gmail.com> wrote:
-> Hi Ulf,
->
-> On Mon, Jun 01, 2015 at 12:18:25PM +0200, Ulf Hansson wrote:
->> Other subsystem buses attach PM domains during probe, but prior calling
->> the driver's ->probe() method. During the removal phase, detaching the PM
->> domain will be done after invoking the driver's ->remove() callback.
->>
->> Convert the SDIO bus to follow this behavior and add error handling.
->>
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->> ---
->>
->> A similar patch as $subject patch has been posted and discussed earlier.
->>
->> According to Aaron Lu, who added the initial support for the ACPI PM domain to
->> the SDIO bus, this change is safe.
->> http://www.spinics.net/lists/linux-mmc/msg28946.html
->>
->> ---
->>  drivers/mmc/core/sdio_bus.c | 12 ++++++++----
->>  1 file changed, 8 insertions(+), 4 deletions(-)
->>
->> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
->> index bee02e6..7e327a6 100644
->> --- a/drivers/mmc/core/sdio_bus.c
->> +++ b/drivers/mmc/core/sdio_bus.c
->> @@ -137,6 +137,10 @@ static int sdio_bus_probe(struct device *dev)
->>       if (!id)
->>               return -ENODEV;
->>
->> +     ret = dev_pm_domain_attach(dev, false);
->> +     if (ret == -EPROBE_DEFER)
->> +             return ret;
->
-> Why do we handle only -EPROBE_DEFER? What about other errors? Maybe
-> dev_pm_domain_attach() is too chatty?
+On Tue, Jun 02, 2015 at 09:54:13AM +0200, Ulf Hansson wrote:
+> On the other hand, the "long term plan" is to have PM domain pointers
+> assigned at device registration point instead of at probe. Since
+> driver core then invokes the ->activate|sync|dismiss() callbacks, it
+> will make the dev_pm_domain_attach|detach() APIs redundant.
 
-Agree.
+How does that work if the PM domain doesn't exist yet, because the driver
+supplying it hasn't had its own device probed ?
 
->
->> +
->>       /* Unbound SDIO functions are always suspended.
->>        * During probe, the function is set active and the usage count
->>        * is incremented.  If the driver supports runtime PM,
->> @@ -166,6 +170,7 @@ static int sdio_bus_probe(struct device *dev)
->>  disable_runtimepm:
->>       if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
->>               pm_runtime_put_noidle(dev);
->> +     dev_pm_domain_detach(dev, false);
->
-> If dev_pm_domain_attach() returned -EEXIST (which means that someone
-> else attached the device to the domain) should we be detaching it?
->
-> I realize that the other buses do the same thing, so these questions are
-> general.
+You can't return -EPROBE_DEFER to anything that isn't being called via a
+driver's probe function.  So, when the OF code is scanning the device
+tree, creating the various struct device's, returning -EPROBE_DEFER will
+cause it to fail to register that struct device and there is no mechanism
+to retry.
 
-dev_pm_domain_attach() could take a closer look at what errors it gets
-from acpi_dev_pm_attach() and genpd_dev_pm_attach(). In principle we
-want the caller of dev_pm_domain_attach() to be able to consider all
-returned error codes as errors, instead of just -EPROBE_DEFER.
+Also, your idea above goes against the grain that other resources are
+heading - that is, towards probe time resolution of resources.  IRQ
+resources have the same problem, and this has caused real problems on
+platforms to have the IRQ resources resolved to a number at registration
+time.
 
-On the other hand, the "long term plan" is to have PM domain pointers
-assigned at device registration point instead of at probe. Since
-driver core then invokes the ->activate|sync|dismiss() callbacks, it
-will make the dev_pm_domain_attach|detach() APIs redundant.
+To me, your idea sounds like the wrong approach and unworkable.
 
-So, I wonder if it's worth to update the buses/APIs in an intermediate
-step (even if it would be an improvement), instead of working on
-adopting the "long term plan". What do you think?
+What would resolve that would be to have the device registration succeed,
+but also to scan all devices in the system when a PM domain is attached
+and attach the PM domain to matching devices.  The problem you then have
+is the same race between attaching the PM domain to all devices in the
+domain, and devices being probed.  Remember, this may not be happening at
+boot time, but during module load, which on some systems is multithreaded.
+So, the problem of not having all devices in the PM domain hasn't changed
+and nothing is solved by this approach - the only thing is the code has
+become more complex.
 
-Kind regards
-Uffe
+I don't think that's an improvement.
+
+-- 
+FTTC broadband for 0.8mile line: currently at 10.5Mbps down 400kbps up
+according to speedtest.net.
