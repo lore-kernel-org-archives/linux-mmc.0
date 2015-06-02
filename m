@@ -1,79 +1,59 @@
-From: Dmitry Torokhov <dmitry.torokhov@gmail.com>
-Subject: Re: [PATCH] mmc: core: Attach PM domain prior probing of SDIO func
- driver
-Date: Mon, 1 Jun 2015 12:42:09 -0700
-Message-ID: <20150601194209.GB30024@dtor-ws>
-References: <1433153905-25204-1-git-send-email-ulf.hansson@linaro.org>
+From: Yangbo Lu <yangbo.lu@freescale.com>
+Subject: [PATCH 1/2] mmc: sdhci: add SDHCI_QUIRK2_CIRCUIT_SUPPORT_VS33 quirk support
+Date: Tue, 2 Jun 2015 15:09:40 +0800
+Message-ID: <1433228980-5676-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ie0-f171.google.com ([209.85.223.171]:36013 "EHLO
-	mail-ie0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751946AbbFATmO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Jun 2015 15:42:14 -0400
-Received: by ieclw1 with SMTP id lw1so21909435iec.3
-        for <linux-mmc@vger.kernel.org>; Mon, 01 Jun 2015 12:42:13 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <1433153905-25204-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-by2on0139.outbound.protection.outlook.com ([207.46.100.139]:36192
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751082AbbFBHNs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 2 Jun 2015 03:13:48 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Russell King <linux@arm.linux.org.uk>, Kevin Hilman <khilman@kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Aaron Lu <aaron.lu@intel.com>
+To: linux-mmc@vger.kernel.org, chrisball@gmail.com, ulf.hansson@linaro.org
+Cc: Yangbo Lu <yangbo.lu@freescale.com>
 
-Hi Ulf,
+This quirk is used for controllers that can only support 1.8V
+voltage but the peripheral hardware circuit has capability to
+support 3.3V voltage.
 
-On Mon, Jun 01, 2015 at 12:18:25PM +0200, Ulf Hansson wrote:
-> Other subsystem buses attach PM domains during probe, but prior calling
-> the driver's ->probe() method. During the removal phase, detaching the PM
-> domain will be done after invoking the driver's ->remove() callback.
-> 
-> Convert the SDIO bus to follow this behavior and add error handling.
-> 
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
-> 
-> A similar patch as $subject patch has been posted and discussed earlier.
-> 
-> According to Aaron Lu, who added the initial support for the ACPI PM domain to
-> the SDIO bus, this change is safe.
-> http://www.spinics.net/lists/linux-mmc/msg28946.html
-> 
-> ---
->  drivers/mmc/core/sdio_bus.c | 12 ++++++++----
->  1 file changed, 8 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-> index bee02e6..7e327a6 100644
-> --- a/drivers/mmc/core/sdio_bus.c
-> +++ b/drivers/mmc/core/sdio_bus.c
-> @@ -137,6 +137,10 @@ static int sdio_bus_probe(struct device *dev)
->  	if (!id)
->  		return -ENODEV;
->  
-> +	ret = dev_pm_domain_attach(dev, false);
-> +	if (ret == -EPROBE_DEFER)
-> +		return ret;
+Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+---
+ drivers/mmc/host/sdhci.c | 3 +++
+ drivers/mmc/host/sdhci.h | 4 ++++
+ 2 files changed, 7 insertions(+)
 
-Why do we handle only -EPROBE_DEFER? What about other errors? Maybe
-dev_pm_domain_attach() is too chatty?
-
-> +
->  	/* Unbound SDIO functions are always suspended.
->  	 * During probe, the function is set active and the usage count
->  	 * is incremented.  If the driver supports runtime PM,
-> @@ -166,6 +170,7 @@ static int sdio_bus_probe(struct device *dev)
->  disable_runtimepm:
->  	if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
->  		pm_runtime_put_noidle(dev);
-> +	dev_pm_domain_detach(dev, false);
-
-If dev_pm_domain_attach() returned -EEXIST (which means that someone
-else attached the device to the domain) should we be detaching it?
-
-I realize that the other buses do the same thing, so these questions are
-general.
-
-Thanks.
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c80287a..40de0d3 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2959,6 +2959,9 @@ int sdhci_add_host(struct sdhci_host *host)
+ 			host->caps1 :
+ 			sdhci_readl(host, SDHCI_CAPABILITIES_1);
+ 
++	if (host->quirks2 & SDHCI_QUIRK2_CIRCUIT_SUPPORT_VS33)
++		caps[0] = caps[0] | SDHCI_CAN_VDD_330;
++
+ 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+ 		host->flags |= SDHCI_USE_SDMA;
+ 	else if (!(caps[0] & SDHCI_CAN_DO_SDMA))
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index e639b7f..2704daf1 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -409,6 +409,10 @@ struct sdhci_host {
+ #define SDHCI_QUIRK2_SUPPORT_SINGLE			(1<<13)
+ /* Controller broken with using ACMD23 */
+ #define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<14)
++/* Controller only supports 1.8V, but the peripheral hardware
++ * circuit has capability to support 3.3V
++ */
++#define SDHCI_QUIRK2_CIRCUIT_SUPPORT_VS33		(1<<15)
+ 
+ 	int irq;		/* Device IRQ */
+ 	void __iomem *ioaddr;	/* Mapped address */
 -- 
-Dmitry
+2.1.0.27.g96db324
+
