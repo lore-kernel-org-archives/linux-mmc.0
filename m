@@ -1,52 +1,130 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: esdhc: add quirk to support 3.3v for T4240
-Date: Thu, 4 Jun 2015 09:50:59 +0200
-Message-ID: <CAPDyKFp7=2L2_Vt1ha3jcFV=P2EDHEg0UwpcRu_t8r+ED-jDdA@mail.gmail.com>
-References: <1433228991-24324-1-git-send-email-yangbo.lu@freescale.com>
+Subject: Re: [PATCH] mmc: core: Fix off-by-one error in mmc_do_calc_max_discard()
+Date: Thu, 4 Jun 2015 10:15:28 +0200
+Message-ID: <CAPDyKFpDcSr=z0wfQk_e85jcSMf9sJ9RbiyeAoeYzxn6W6tvSQ@mail.gmail.com>
+References: <1433150435-19997-1-git-send-email-david@protonic.nl>
+	<556C35BD.4050809@intel.com>
+	<20150601133200.79ff41e2@archvile>
+	<556C4717.4000202@intel.com>
+	<20150601143007.7bb284a0@archvile>
+	<556C525B.7070304@intel.com>
+	<20150601153246.7b74acbb@archvile>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f172.google.com ([209.85.216.172]:34454 "EHLO
-	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750805AbbFDHvA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jun 2015 03:51:00 -0400
-Received: by qcej9 with SMTP id j9so14728682qce.1
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Jun 2015 00:50:59 -0700 (PDT)
-In-Reply-To: <1433228991-24324-1-git-send-email-yangbo.lu@freescale.com>
+Received: from mail-qc0-f171.google.com ([209.85.216.171]:34396 "EHLO
+	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753241AbbFDIP3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jun 2015 04:15:29 -0400
+Received: by qcej9 with SMTP id j9so14898414qce.1
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Jun 2015 01:15:28 -0700 (PDT)
+In-Reply-To: <20150601153246.7b74acbb@archvile>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@freescale.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chrisball@gmail.com>
+To: David Jander <david@protonic.nl>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Sascha Hauer <s.hauer@pengutronix.de>, Johan Rudholm <johan.rudholm@axis.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 2 June 2015 at 09:09, Yangbo Lu <yangbo.lu@freescale.com> wrote:
-> Add SDHCI_QUIRK2_CIRCUIT_SUPPORT_VS33 for T4240
+On 1 June 2015 at 15:32, David Jander <david@protonic.nl> wrote:
+> On Mon, 01 Jun 2015 15:38:51 +0300
+> Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
-> ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 3 +++
->  1 file changed, 3 insertions(+)
+>> On 01/06/15 15:30, David Jander wrote:
+>> > On Mon, 01 Jun 2015 14:50:47 +0300
+>> > Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> >
+>> >> On 01/06/15 14:32, David Jander wrote:
+>> >>> On Mon, 01 Jun 2015 13:36:45 +0300
+>> >>> Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> >>>
+>> >>>> On 01/06/15 12:20, David Jander wrote:
+>> >>>>> qty is the maximum number of discard that _do_ fit in the timeout, not
+>> >>>>> the first amount that does _not_ fit anymore.
+>> >>>>> This seemingly harmless error has a very severe performance impact when
+>> >>>>> the timeout value is enough for only 1 erase group.
+>> >>>>>
+>> >>>>> Signed-off-by: David Jander <david@protonic.nl>
+>> >>>>> ---
+>> >>>>>  drivers/mmc/core/core.c | 7 ++-----
+>> >>>>>  1 file changed, 2 insertions(+), 5 deletions(-)
+>> >>>>>
+>> >>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> >>>>> index 92e7671..1f9573b 100644
+>> >>>>> --- a/drivers/mmc/core/core.c
+>> >>>>> +++ b/drivers/mmc/core/core.c
+>> >>>>> @@ -2234,16 +2234,13 @@ static unsigned int
+>> >>>>> mmc_do_calc_max_discard(struct mmc_card *card, if (!qty)
+>> >>>>>                 return 0;
+>> >>>>>
+>> >>>>> -       if (qty == 1)
+>> >>>>> -               return 1;
+>> >>>>> -
+>> >>>>>         /* Convert qty to sectors */
+>> >>>>>         if (card->erase_shift)
+>> >>>>> -               max_discard = --qty << card->erase_shift;
+>> >>>>> +               max_discard = qty << card->erase_shift;
+>> >>>>>         else if (mmc_card_sd(card))
+>> >>>>>                 max_discard = qty;
+>> >>>>>         else
+>> >>>>> -               max_discard = --qty * card->erase_size;
+>> >>>>> +               max_discard = qty * card->erase_size;
+>> >>>>>
+>> >>>>>         return max_discard;
+>> >>>>>  }
+>> >>>>>
+>> >>>>
+>> >>>> This keeps coming up but there is more to it than that.  See here:
+>> >>>>
+>> >>>>  http://marc.info/?l=linux-mmc&m=142504164427546
+>> >>>>
+>> >>>
+>> >>> Thanks for the link. I think it is time to put a comment on that piece of
+>> >>> code to clarify this.
+>> >>> Also, this code badly needs optimizing. I happen to have one of those
+>> >>> unfortunate cases, where the maximum timeout of the MMC controller
+>> >>> (Freescale i.MX6 uSDHCI) is 5.4 seconds, and the eMMC device (Micron 16GB
+>> >>> eMMC) TRIM_MULT is 15 (4.5 seconds). As a result
+>> >>> mmc_do_calc_max_discard() returns 1 and mkfs.ext4 takes several hours!!
+>> >>> I think it is pretty clear that this is unacceptable and needs to be
+>> >>> fixed. AFAICS, the "correct fix" for this would implicate that discard
+>> >>> knows about the erase-group boundaries... something that could reach
+>> >>> into the block-layer even... right?
+>> >>
+>> >> Not necessarily. You could regard the "can only do 1 erase block at a
+>> >> time" case as special, flag it, and in that case have mmc_erase() split
+>> >> along erase block boundaries and call mmc_do_erase() multiple times. Then
+>> >> you could set max_discard to something arbitrarily bigger.
+>> >
+>> > Right. I was just looking at mmc_erase() and thought about splitting the
+>> > erase at the next boundary if it was not aligned. That way my patch could
+>> > be used in every case, since we would ensure that mmc_do_erase() will
+>> > always start erase-group aligned. Would you agree to such a solution?
+>>
+>> Why would people who don't have your problem want their erase performance
+>> potentially degraded by unnecessary splitting.
 >
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 22e9111..4f5fe42 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -369,6 +369,9 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
->                 host->quirks2 |= SDHCI_QUIRK2_BROKEN_HOST_CONTROL;
->         }
+> This penalty would exist only when erasing a small amount of sectors. If we
+> approach the timeout limit, this penalty is canceled-out by the gain of being
+> able to erase double the amount of sectors in one operation. I have no idea
+> what the typical workload of this function will be, so I take your hint and
+> treat the "can only do 1 erase block at a time" case as special.
 >
-> +       if (of_device_is_compatible(np, "fsl,t4240-esdhc"))
-> +               host->quirks2 |= SDHCI_QUIRK2_CIRCUIT_SUPPORT_VS33;
-> +
+>>[...]
+>> >>> Has anybody even started to look into this?
+>> >>
+>> >> Ulf was looking at supporting R1 response instead of R1b response from the
+>> >> erase command and using a software timeout instead of the host
+>> >> controller's hardware timeout.
+>> >
+>> > That would also be an option, specially if the TRIM_MULT becomes larger
+>> > than what the controller can handle!
+>> > @Ulf: How far are you with this?
 
-Instead of checking the compatible, could you check the "ocr_avail"
-mask which mmc_of_parse() create from the vmmc regulator?
+It's been forever in my TODO list. It would be great if you could take
+a closer look, I will happily review your patches.
 
->         /* call to generic mmc_of_parse to support additional capabilities */
->         ret = mmc_of_parse(host->mmc);
->         if (ret)
-> --
-> 2.1.0.27.g96db324
->
+As note, a while ago I fixed similar busy timeout issues for the
+switch commands (CMD6). You can likely be influenced by that to find
+out what makes sense for the erase command.
 
 Kind regards
 Uffe
