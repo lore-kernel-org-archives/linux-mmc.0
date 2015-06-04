@@ -1,159 +1,77 @@
-From: David Jander <david@protonic.nl>
-Subject: Re: [RFC PATCH 2/2] mmc: core.c: Add comment to clarify special
- cases of ERASE/TRIM
-Date: Thu, 4 Jun 2015 14:19:49 +0200
-Message-ID: <20150604141949.01641d76@archvile>
-References: <CAPDyKFocxYD+q_CQQ4Kz6ZZ88P+DwWcwfrEGEJJEEgkFT5r+MA@mail.gmail.com>
-	<1433413214-21614-1-git-send-email-david@protonic.nl>
-	<55703387.8060509@intel.com>
+From: Bastien Nocera <hadess@hadess.net>
+Subject: "Out of SW-IOMMU space" reading films from SD card
+Date: Thu, 04 Jun 2015 15:39:40 +0200
+Message-ID: <1433425180.5346.34.camel@hadess.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <55703387.8060509@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Sascha Hauer <s.hauer@pengutronix.de>, Johan Rudholm <johan.rudholm@axis.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from relay5-d.mail.gandi.net ([217.70.183.197]:36218 "EHLO
+	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752081AbbFDNjo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Jun 2015 09:39:44 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
+Hey,
 
-Dear Adrian,
+I was travelling recently and stuffed a micro SD card full of films. I
+started reading the films on my laptop's builtin SD card reader, but
+started getting garbage on the screen after a little while.
 
-Thanks for reacting.
+The error (repeated multiple times a second, until I stopped reading
+from the device):
+[   51.582128] ------------[ cut here ]------------
+[   51.582134] WARNING: CPU: 3 PID: 0 at drivers/mmc/host/sdhci.c:857 sdhci_send_command+0xa73/0xc50 [sdhci]()
+[   51.582135] Modules linked in: bnep bluetooth fuse xt_CHECKSUM ipt_MASQUERADE nf_nat_masquerade_ipv4 tun nf_conntrack_netbios_ns nf_conntrack_broadcast ip6t_rpfilter ip6t_REJECT nf_reject_ipv6 xt_conntrack ebtable_nat ebtable_broute bridge stp llc ebtable_filter ebtables ip6table_nat nf_conntrack_ipv6 nf_defrag_ipv6 nf_nat_ipv6 ip6table_mangle ip6table_security ip6table_raw ip6table_filter ip6_tables iptable_nat nf_conntrack_ipv4 nf_defrag_ipv4 nf_nat_ipv4 nf_nat nf_conntrack iptable_mangle iptable_security iptable_raw uvcvideo videobuf2_vmalloc videobuf2_core videobuf2_memops intel_rapl iosf_mbi v4l2_common videodev iTCO_wdt iTCO_vendor_support x86_pkg_temp_thermal coretemp kvm_intel arc4 kvm vfat fat iwldvm snd_hda_codec_hdmi mac80211 crct10dif_pclmul snd_hda_codec_realtek media snd_h
+ da_codec_generic
+[   51.582154]  crc32_pclmul crc32c_intel ghash_clmulni_intel snd_hda_intel snd_hda_controller snd_hda_codec joydev iwlwifi hid_multitouch snd_hwdep snd_seq cfg80211 i2c_i801 snd_seq_device serio_raw tpm_tis snd_pcm tpm thinkpad_acpi wmi rfkill snd_timer snd mei_me soc_button_array intel_rst mei soundcore shpchp lpc_ich mfd_core nfsd auth_rpcgss nfs_acl lockd grace sunrpc dm_multipath mmc_block i915 sdhci_pci i2c_algo_bit drm_kms_helper sdhci mmc_core drm video
+[   51.582168] CPU: 3 PID: 0 Comm: swapper/3 Tainted: G        W       4.0.4-301.fc22.x86_64 #1
+[   51.582169] Hardware name: LENOVO 3444CUU/3444CUU, BIOS G6ET93WW (2.53 ) 02/04/2013
+[   51.582170]  0000000000000000 fe4349754b3971e3 ffff88021e2c3d08 ffffffff81782644
+[   51.582172]  0000000000000000 0000000000000000 ffff88021e2c3d48 ffffffff8109c66a
+[   51.582173]  ffff88021407e4c0 ffff88021407e4c0 ffff88003f81d0f0 ffff88003f81d170
+[   51.582175] Call Trace:
+[   51.582176]  <IRQ>  [<ffffffff81782644>] dump_stack+0x45/0x57
+[   51.582180]  [<ffffffff8109c66a>] warn_slowpath_common+0x8a/0xc0
+[   51.582181]  [<ffffffff8109c79a>] warn_slowpath_null+0x1a/0x20
+[   51.582186]  [<ffffffffa00a5e93>] sdhci_send_command+0xa73/0xc50 [sdhci]
+[   51.582188]  [<ffffffff810dedeb>] ? autoremove_wake_function+0x2b/0x40
+[   51.582192]  [<ffffffffa00a6ce4>] sdhci_finish_command+0x154/0x160 [sdhci]
+[   51.582196]  [<ffffffffa00a7023>] sdhci_irq+0x273/0x9ba [sdhci]
+[   51.582202]  [<ffffffffa00779a0>] ? mmc_wait_data_done+0x30/0x40 [mmc_core]
+[   51.582204]  [<ffffffff810f45d7>] handle_irq_event_percpu+0x77/0x1a0
+[   51.582206]  [<ffffffff810f473b>] handle_irq_event+0x3b/0x60
+[   51.582208]  [<ffffffff810f7759>] handle_fasteoi_irq+0x79/0x120
+[   51.582211]  [<ffffffff81016514>] handle_irq+0x74/0x140
+[   51.582213]  [<ffffffff810bc57a>] ? atomic_notifier_call_chain+0x1a/0x20
+[   51.582215]  [<ffffffff8178ba1f>] do_IRQ+0x4f/0xf0
+[   51.582217]  [<ffffffff8178976d>] common_interrupt+0x6d/0x6d
+[   51.582218]  <EOI>  [<ffffffff81618b7d>] ? cpuidle_enter_state+0x5d/0x170
+[   51.582221]  [<ffffffff81618b6d>] ? cpuidle_enter_state+0x4d/0x170
+[   51.582223]  [<ffffffff81618cc7>] cpuidle_enter+0x17/0x20
+[   51.582224]  [<ffffffff810df3c4>] cpu_startup_entry+0x314/0x430
+[   51.582226]  [<ffffffff8111283c>] ? clockevents_register_device+0xbc/0x130
+[   51.582228]  [<ffffffff8104a9b5>] start_secondary+0x1a5/0x1f0
+[   51.582230] ---[ end trace c1501b3328e6f175 ]---
+[   51.585285] DMA: Out of SW-IOMMU space for 65536 bytes at device 0000:02:00.0
+[   51.588335] DMA: Out of SW-IOMMU space for 65536 bytes at device 0000:02:00.0
+[   51.591419] DMA: Out of SW-IOMMU space for 65536 bytes at device 0000:02:00.0
+[   51.594506] DMA: Out of SW-IOMMU space for 65536 bytes at device 0000:02:00.0
+[   51.597581] DMA: Out of SW-IOMMU space for 65536 bytes at device 0000:02:00.0
 
-On Thu, 04 Jun 2015 14:16:23 +0300
-Adrian Hunter <adrian.hunter@intel.com> wrote:
+The kernel would tell me that I had 64 megs of software IO TLB on boot
+up, by default. Bumping it to 256 megs using "swiotlb=131072" on the
+kernel command-line would fix all my movie watching problems:
+May 30 15:57:50 nuvo kernel: PCI-DMA: Using software bounce buffering for IO (SWIOTLB)
+May 30 15:57:50 nuvo kernel: software IO TLB [mem 0xbd9fe000-0xcd9fe000] (256MB) mapped at [ffff8800bd9fe000-ffff8800cd9fdfff]
 
-> On 04/06/15 13:20, David Jander wrote:
-> > Signed-off-by: David Jander <david@protonic.nl>
-> 
-> Please never send delta patches.  Always send a new version of the whole
-> patch.
+The laptop is a Lenovo Carbon X1 first generation, using Fedora's 4.0.4
+kernel on Fedora 22.
 
-Sorry for that. This was meant as a separate patch though... the original
-would be part 1/2 and this is part 2/2 (as noted in the subject), and I did it
-only to get an idea if I understood Ulf correctly (RFC).
+Is it a firmware bug? A driver bug? I'd very much like this sort of
+error to be, at least, reported back to user space instead of making me
+think that the SD card is dying.
 
-> > ---
-> >  drivers/mmc/core/core.c | 28 +++++++++++++++++++++++++++-
-> >  1 file changed, 27 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > index 6c9611b..b6aa9ad 100644
-> > --- a/drivers/mmc/core/core.c
-> > +++ b/drivers/mmc/core/core.c
-> > @@ -2109,11 +2109,20 @@ int mmc_erase(struct mmc_card *card, unsigned int
-> > from, unsigned int nr, !(card->ext_csd.sec_feature_support &
-> > EXT_CSD_SEC_GB_CL_EN)) return -EOPNOTSUPP;
-> >  
-> > +	/*
-> > +	 * Sanity check: If we do not erase aligned, whole erase-groups,
-> > return
-> > +	 * an error, since we intended a "secure" erase, silently not
-> > erasing
-> > +	 * something would be unacceptable.
-> > +	 */
-> 
-> I am not sure the value of a comment that can anyway be inferred from the
-> code.
-
-Neither am I, but Ulf suggested to put some more comments to the code in this
-function. At least that's what I understood... I figured it was not so obvious
-why we take different approaches to ERASE and SECURE_ERASE, so some explaining
-might have been desirable. I even took the time to go through the eMMC
-specification to see if there was some recommendation about this...
-
-> >  	if (arg == MMC_SECURE_ERASE_ARG) {
-> >  		if (from % card->erase_size || nr % card->erase_size)
-> >  			return -EINVAL;
-> >  	}
-> >  
-> > +	/*
-> > +	 * Make sure only erase-groups that are fully contained in the
-> > erase
-> > +	 * region are erased. Silently ignore the rest.
-> > +	 */
-> 
-> Ditto
-> 
-> >  	if (arg == MMC_ERASE_ARG) {
-> >  		rem = from % card->erase_size;
-> >  		if (rem) {
-> > @@ -2140,6 +2149,14 @@ int mmc_erase(struct mmc_card *card, unsigned int
-> > from, unsigned int nr, /* 'from' and 'to' are inclusive */
-> >  	to -= 1;
-> >  
-> > +	/*
-> > +	 * Special case where only one erase-group fits in the timout
-> > budget:
-> 
-> timout -> timeout
-
-Oops. Thanks.
-
-> > +	 * If the region crosses an erase-group boundary on this
-> > particular
-> > +	 * case, we will be trimming more than one erase-group which,
-> > does not
-> > +	 * fit in the timeout budget of the controller, so we need to
-> > split it
-> > +	 * and call mmc_do_erase() twice if necessary. This special case
-> > is
-> > +	 * identified by the card->eg_boundary flag.
-> > +	 */
-> >  	if ((arg & MMC_TRIM_ARGS) && (card->eg_boundary) &&
-> >  	    (from % card->erase_size)) {
-> >  		rem = card->erase_size - (from % card->erase_size);
-> > @@ -2244,7 +2261,16 @@ static unsigned int mmc_do_calc_max_discard(struct
-> > mmc_card *card, if (!qty)
-> >  		return 0;
-> >  
-> > -	/* We can only erase one erase group special case */
-> > +	/*
-> > +	 * When specifying a sector range to trim, chances are we might
-> > cross
-> > +	 * an erase-group boundary even if the amount of sectors is less
-> > than
-> > +	 * one erase-group.
-> > +	 * If we can only fit one erase-group in the controller timeout
-> > budget,
-> > +	 * we have to care that erase-group boundaries are not crossed by
-> > a
-> > +	 * single trim operation. We flag that special case with
-> > "eg_boundary".
-> > +	 * In all other cases we can just decrement qty and pretend that
-> > we
-> > +	 * always touch (qty + 1) erase-groups as a simple optimization.
-> 
-> The language seems a little odd here. We are setting the max_discard limit
-> which does not involve "pretending" or "optimization", it is just a
-> calculation.  The important point is that the calculation has to count the
-> maximum number of erase blocks affected not the size in erase blocks.  You
-> could give an example e.g. if a 2 sector trim crosses an erase block
-> boundary then that counts as 2 erase blocks affected.
-
-Sorry to disagree here. Strictly speaking we are not only calculating
-max_discard, because max_discard is useless for a function that takes sectors
-as arguments, when this value depends on erase-groups and not sectors. There
-is no valid function converting from one to the other, so we _need_ to pretend
-something. That's what the somewhat obscure "if (qty==1) return 1" trickery
-does, together with the magical "--qty" afterwards. The original code pretends
-that we always cross an erase-group boundary, hence the --qty. This needs
-explaining, because strictly speaking it is not correct because max_discard
-can be higher. It just doesn't produce wrong results because we "are on the
-safe side". And doing something different for the case qty==1 is definitely an
-optimization... which is what the first patch intends to do.
-Maybe the name of the function is misleading...?
-
-> > +	 */
-> >  	if (qty == 1)
-> >  		card->eg_boundary = 1;
-> >  	else
-> > 
-> 
-
-Best regards,
-
--- 
-David Jander
-Protonic Holland.
+Cheers
