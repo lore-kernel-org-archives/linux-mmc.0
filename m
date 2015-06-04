@@ -1,60 +1,64 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-pxav3: fix device wakeup initialization
-Date: Thu, 4 Jun 2015 10:34:24 +0200
-Message-ID: <CAPDyKFrEkzTso9KciqoufFknMeHDxWS6s8FPVuzk6Kq66PzjPA@mail.gmail.com>
-References: <1433241515-2093-1-git-send-email-jszhang@marvell.com>
+From: Sascha Hauer <s.hauer@pengutronix.de>
+Subject: Re: [PATCH v4 2/7] mmc: mediatek: Add Mediatek MMC driver
+Date: Thu, 4 Jun 2015 11:02:12 +0200
+Message-ID: <20150604090212.GY6325@pengutronix.de>
+References: <1432017411-2996-1-git-send-email-chaotian.jing@mediatek.com>
+ <1432017411-2996-3-git-send-email-chaotian.jing@mediatek.com>
+ <20150519111558.GD6325@pengutronix.de>
+ <1433386443.3304.2.camel@mhfsdcap03>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1433241515-2093-1-git-send-email-jszhang@marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-gpio-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1433386443.3304.2.camel@mhfsdcap03>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, James Liao <jamesjj.liao@mediatek.com>, srv_heupstream@mediatek.com, Arnd Bergmann <arnd@arndb.de>, devicetree@vger.kernel.org, Hongzhou Yang <hongzhou.yang@mediatek.com>, Catalin Marinas <catalin.marinas@arm.com>, bin.zhang@mediatek.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Will Deacon <will.deacon@arm.com>, linux-gpio@vger.kernel.org, linux-mediatek@lists.infradead.org, Sascha Hauer <kernel@pengutronix.de>, "Joe.C" <yingjoe.chen@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 2 June 2015 at 12:38, Jisheng Zhang <jszhang@marvell.com> wrote:
-> MMC_PM_KEEP_POWER doesn't imply MMC_PM_WAKE_SDIO_IRQ, we should only
-> enable device wake up when MMC_PM_WAKE_SDIO_IRQ is set. And "pm_flags"
-> is the requested pm features, we should not set it in the host driver.
->
-> At the same time, device wakeup is disabled by default, so there's no
-> need to disable device wakeup explicitly.
->
-> This patch fixes the warning as following:
->
-> [   64.616651] ------------[ cut here ]------------
-> [   64.616665] WARNING: CPU: 0 PID: 79 at linux/kernel/irq/manage.c:603 irq_set_irq_wake+0xf0/0x11c()
-> [   64.616667] Unbalanced IRQ 87 wake disable
->
-> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+On Thu, Jun 04, 2015 at 10:54:03AM +0800, Chaotian Jing wrote:
+> On Tue, 2015-05-19 at 13:15 +0200, Sascha Hauer wrote:
+> > On Tue, May 19, 2015 at 02:36:46PM +0800, Chaotian Jing wrote:
+> > > Add Mediatek MMC driver code
+> > > Support eMMC/SD/SDIO
+> > > 
+> > > Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> > > ---
+> > >  drivers/mmc/host/Kconfig  |    8 +
+> > >  drivers/mmc/host/Makefile |    1 +
+> > >  drivers/mmc/host/mtk-sd.c | 1422 +++++++++++++++++++++++++++++++++++++++++++++
+> > >  3 files changed, 1431 insertions(+)
+> > >  create mode 100644 drivers/mmc/host/mtk-sd.c
+> > > 
+> > > +
+> > > +	host->src_clk = devm_clk_get(&pdev->dev, "source");
+> > > +	if (IS_ERR(host->src_clk)) {
+> > > +		ret = PTR_ERR(host->src_clk);
+> > > +		goto host_free;
+> > > +	}
+> > > +
+> > > +	host->h_clk = devm_clk_get(&pdev->dev, "hclk");
+> > > +	if (IS_ERR(host->h_clk)) {
+> > > +		/* host->h_clk is optional, Only for MSDC0/3 at MT8173 */
+> > > +		dev_dbg(&pdev->dev,
+> > > +				"Invalied hclk from the device tree!\n");
+> > > +	}
+> > 
+> > s/Invalied/Invalid/
+> > 
+> > According to my reference manual the controller always needs a hclk. It
+> > seems on some controllers it is just not software controllable. If
+> > that's the case you should always provide a hclk to the driver and make
+> > this clock mandatory.
+> For MT8173, MSDC1, MSDC2's HCLK are in Infra, software cannot control
+> it. So just set the HCLK to clk_null ?
 
-Thanks, applied.
+Yes, please.
 
-Kind regards
-Uffe
+Sascha
 
-> ---
->  drivers/mmc/host/sdhci-pxav3.c | 6 +-----
->  1 file changed, 1 insertion(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> index 01cb2d3..9cd5fc6 100644
-> --- a/drivers/mmc/host/sdhci-pxav3.c
-> +++ b/drivers/mmc/host/sdhci-pxav3.c
-> @@ -457,12 +457,8 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->
->         platform_set_drvdata(pdev, host);
->
-> -       if (host->mmc->pm_caps & MMC_PM_KEEP_POWER) {
-> +       if (host->mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ)
->                 device_init_wakeup(&pdev->dev, 1);
-> -               host->mmc->pm_flags |= MMC_PM_WAKE_SDIO_IRQ;
-> -       } else {
-> -               device_init_wakeup(&pdev->dev, 0);
-> -       }
->
->         pm_runtime_put_autosuspend(&pdev->dev);
->
-> --
-> 2.1.4
->
+-- 
+Pengutronix e.K.                           |                             |
+Industrial Linux Solutions                 | http://www.pengutronix.de/  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
