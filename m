@@ -1,92 +1,66 @@
-From: Guenter Roeck <linux@roeck-us.net>
-Subject: Re: Usage of restart_handler in pwrseq_emmc
-Date: Wed, 03 Jun 2015 08:03:52 -0700
-Message-ID: <556F1758.4030207@roeck-us.net>
-References: <1789396.sexGZzDeEb@diego> <556ED06B.9030601@samsung.com>
+From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: Re: [PATCH v4 2/7] mmc: mediatek: Add Mediatek MMC driver
+Date: Thu, 4 Jun 2015 10:54:03 +0800
+Message-ID: <1433386443.3304.2.camel@mhfsdcap03>
+References: <1432017411-2996-1-git-send-email-chaotian.jing@mediatek.com>
+ <1432017411-2996-3-git-send-email-chaotian.jing@mediatek.com>
+ <20150519111558.GD6325@pengutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <556ED06B.9030601@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>, =?UTF-8?B?SGVpa28gU3TDvGI=?= =?UTF-8?B?bmVy?= <heiko@sntech.de>, Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20150519111558.GD6325-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
+List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 06/03/2015 03:01 AM, Marek Szyprowski wrote:
-> Hello,
->
-> On 2015-06-02 17:29, Heiko St=C3=BCbner wrote:
->> I'm confused by the pwrseq-emmc registering a restart_handler for re=
-setting an
->> emmc in a panic-reboot case at priority 129 to "schedules it just be=
-fore
->> system reboot".
->>
->> >From what I remember from the restart-handler discussion the actual=
-l usage is
->> traversing the ordered list until one registered handler sucessfully=
- restarts
->> the system and not to have arbitary actions in there not related to =
-the actual
->> restart process?
->>
->> The actual documentation in kernel/reboot.c supports this assumption=
-,
->> describing register_restart_handler as "Register function to be call=
-ed to
->> reset the system".
->>
->>
->> Additionally, 128 isn't even _the_ priority to reboot the system as =
-described
->> above and some drivers use higher priorities per default, see in
->> drivers/power/reset arm-versatile-reboot.c; at91-reset.c; rmobile-re=
-set.c and
->> some more.
->>
->>
->> So I guess this should use some other mechanism (reboot notifier) in=
-stead of
->> restart_handlers?
->
-> The first problem with reboot notifiers is that they are called too e=
-arly - before
-> device_shutdown(), what interferes with the code in mmc_bus_shutdown =
-and causes
-> lockup. The second problem is
-> that reboot notifiers are not called from emergency_restart() path. I=
- agree that
-> 129 value for priority might not be the best, maybe according to docu=
-mentation,
-> 255 value should be used to ensure that the handler will be called fi=
-rst before
-> any real restart handler.
->
+On Tue, 2015-05-19 at 13:15 +0200, Sascha Hauer wrote:
+> On Tue, May 19, 2015 at 02:36:46PM +0800, Chaotian Jing wrote:
+> > Add Mediatek MMC driver code
+> > Support eMMC/SD/SDIO
+> > 
+> > Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+> > ---
+> >  drivers/mmc/host/Kconfig  |    8 +
+> >  drivers/mmc/host/Makefile |    1 +
+> >  drivers/mmc/host/mtk-sd.c | 1422 +++++++++++++++++++++++++++++++++++++++++++++
+> >  3 files changed, 1431 insertions(+)
+> >  create mode 100644 drivers/mmc/host/mtk-sd.c
+> > 
+> > +
+> > +	host->src_clk = devm_clk_get(&pdev->dev, "source");
+> > +	if (IS_ERR(host->src_clk)) {
+> > +		ret = PTR_ERR(host->src_clk);
+> > +		goto host_free;
+> > +	}
+> > +
+> > +	host->h_clk = devm_clk_get(&pdev->dev, "hclk");
+> > +	if (IS_ERR(host->h_clk)) {
+> > +		/* host->h_clk is optional, Only for MSDC0/3 at MT8173 */
+> > +		dev_dbg(&pdev->dev,
+> > +				"Invalied hclk from the device tree!\n");
+> > +	}
+> 
+> s/Invalied/Invalid/
+> 
+> According to my reference manual the controller always needs a hclk. It
+> seems on some controllers it is just not software controllable. If
+> that's the case you should always provide a hclk to the driver and make
+> this clock mandatory.
+For MT8173, MSDC1, MSDC2's HCLK are in Infra, software cannot control
+it. So just set the HCLK to clk_null ?
 
-There is no non-real restart handler, and the documentation does not sa=
-y anything
-about "called first before any real restart handler". Even with a prior=
-ity of 255
-you would have no guarantee that your handler is called. Restart handle=
-rs are
-supposed to restart the system, nothing else. Actually, you have no gua=
-rantee
-that the restart handler is called in the first place - not all archite=
-ctures
-support it (currently only arm, arm64, and mips do). Presumably mmc sup=
-port is
-not limited to those architectures.
-
-> If you have any idea how to avoid restart handler and ensure proper e=
-MMC card
-> reboot sequence on any system reboot, I'm open for suggestions.
->
-
-Why not execute the device-specific restart in the shutdown function ?
-You could register a reboot notifier to mark that a reboot is happening=
-,
-and then execute the restart at the end of mmc_bus_shutdown.
-
-Guenter
+If it is, will set HCLK to clk_null at next revision, and the same
+changes will make for MT8135.
+> 
+> Sascha
+> 
