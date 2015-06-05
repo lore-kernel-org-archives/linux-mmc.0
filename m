@@ -1,82 +1,41 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: sdhci: add SDHCI_QUIRK2_CIRCUIT_SUPPORT_VS33
- quirk support
-Date: Fri, 5 Jun 2015 10:54:05 +0200
-Message-ID: <CAPDyKFq4x_YqN5qUEqq2Kwo=2+AwHYHDNnkyFZB99Z4K_jXTZQ@mail.gmail.com>
-References: <1433228980-5676-1-git-send-email-yangbo.lu@freescale.com>
-	<CAPDyKFqb3y9xV8ouZyK0bapMs0P+gA+KLux10yHz3K8mbitLHw@mail.gmail.com>
-	<BY1PR0301MB119204EF6D256D7D7C82925CF2B30@BY1PR0301MB1192.namprd03.prod.outlook.com>
-	<CAPDyKFq42d5TeAK9PmzFfWbuKUSN0-KPmPp89zeH8Lk+CNFvCA@mail.gmail.com>
-	<BN3PR0301MB1188CE0D699261777B4B030CF2B20@BN3PR0301MB1188.namprd03.prod.outlook.com>
-	<CAPDyKFrfizAYpvGyuYL80wttzbd_Ww_K8c4MR++oV_Cxi-JexQ@mail.gmail.com>
-	<BN3PR0301MB118808064A13CAC949253151F2B20@BN3PR0301MB1188.namprd03.prod.outlook.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH] SDHCI: Change AMD SDHCI quirk application scope
+Date: Fri, 5 Jun 2015 11:20:01 +0200
+Message-ID: <20150605092001.GB3679@pd.tnic>
+References: <1433428437-6067-1-git-send-email-Vincent.Wan@amd.com>
+ <20150604153220.GA4521@pd.tnic>
+ <CAKT61h8E3=gvO=ZfFDPhBuWsWuPnGCxtxYa-izSOJk=RWKyUtQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f181.google.com ([209.85.216.181]:35481 "EHLO
-	mail-qc0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932313AbbFEIyF convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jun 2015 04:54:05 -0400
-Received: by qczw4 with SMTP id w4so27466399qcz.2
-        for <linux-mmc@vger.kernel.org>; Fri, 05 Jun 2015 01:54:05 -0700 (PDT)
-In-Reply-To: <BN3PR0301MB118808064A13CAC949253151F2B20@BN3PR0301MB1188.namprd03.prod.outlook.com>
+Received: from mail.skyhub.de ([78.46.96.112]:54499 "EHLO mail.skyhub.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753726AbbFEJUD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 5 Jun 2015 05:20:03 -0400
+Content-Disposition: inline
+In-Reply-To: <CAKT61h8E3=gvO=ZfFDPhBuWsWuPnGCxtxYa-izSOJk=RWKyUtQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Lu Y.B." <yangbo.lu@freescale.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chrisball@gmail.com>
+To: Wan ZongShun <mcuos.com@gmail.com>
+Cc: Wan ZongShun <Vincent.Wan@amd.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Wan ZongShun <linux@mcuos.com>
 
-On 5 June 2015 at 10:49, Lu Y.B. <yangbo.lu@freescale.com> wrote:
->> On 5 June 2015 at 10:10, Lu Y.B. <yangbo.lu@freescale.com> wrote:
->> >> >> On 2 June 2015 at 09:09, Yangbo Lu <yangbo.lu@freescale.com> w=
-rote:
->> >> >> > This quirk is used for controllers that can only support 1.8=
-V
->> >> >> > voltage but the peripheral hardware circuit has capability t=
-o
->> >> >> > support 3.3V voltage.
->> >> >>
->> >> >> Which voltage are you referring to? The I/O voltage or the pow=
-er
->> >> >> to the card? VCC or VCCQ?
->> >> >>
->> >> >> Kind regards
->> >> >> Uffe
->> >> >
->> >> > The voltage here means I/O voltage.
->> >> > Although the controller only supports 1.8v, the hardware circui=
-t
->> >> > has a
->> >> level translator for supporting 3.3v.
->> >>
->> >> Thanks for clarifying.
->> >
->> > Sorry, it should be power voltage...
->> > This quirk is used to set capability register "Voltage Support 3.3=
-V"
->> bit since the controller self doesn=E2=80=99t support but circuit su=
-pports.
->> >
->>
->> Okay.
->>
->> So then please tell me, exactly, how is the power being controlled w=
-hen
->> using this "hardware circuit"?
->>
->> This patchset only tries to change the content of the ocr_mask, but =
-there
->> is no logic added to support changing voltage levels by using the
->> "external circuit". At least to my understanding.
->>
->
-> As I said, the controller only support 1.8v but we could use adapter =
-card or add level translator on board directly to make sd *only* work o=
-n 3.3v power and 3.3v IO voltage.
-> Thanks.
+On Fri, Jun 05, 2015 at 09:37:09AM +0800, Wan ZongShun wrote:
+> Boris, I means I put this KERCZ Mircro in pci_ids.h, and I also will
+> send the other patch to instead the following '0x790b' of codes. I
+> think it is reasonable, right?
 
-How does this level translator work? Doesn't it need to be controlled
-somehow? Do you have a datasheet you can share for it?
+No, it means two things:
 
-Kind regards
-Uffe
+* why does it contain KERNCZ? What does that mean?
+
+* #define PCI_DEVICE_ID_AMD_<better_name>_SMBUS 0x790b should be in
+drivers/mmc/host/sdhci-pci.c as it is used only there.
+
+Thanks.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
+--
