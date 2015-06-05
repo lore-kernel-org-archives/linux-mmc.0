@@ -1,44 +1,64 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: esdhc: add quirk to support 3.3v for T4240
-Date: Fri, 5 Jun 2015 10:19:14 +0200
-Message-ID: <CAPDyKFqFqwjbP6=wbLtf35B31ou4npxYkQTcCDWAt8TnHVND7w@mail.gmail.com>
-References: <1433228991-24324-1-git-send-email-yangbo.lu@freescale.com>
-	<CAPDyKFp7=2L2_Vt1ha3jcFV=P2EDHEg0UwpcRu_t8r+ED-jDdA@mail.gmail.com>
-	<BY1PR0301MB1192D4F50E8155073F771DC5F2B30@BY1PR0301MB1192.namprd03.prod.outlook.com>
-	<CAPDyKFoo+iejT2S8EQ2hgVQxd3Bj7geYPE_JqHkZ5WK0xKmxxA@mail.gmail.com>
-	<BN3PR0301MB11880D7C297EE4636D9E721CF2B20@BN3PR0301MB1188.namprd03.prod.outlook.com>
-	<CAPDyKFqHmspn5E_TN8A8FxGWu=em4X++K-7Xrp+GzZSk=NPfkQ@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci: add SDHCI_QUIRK2_CIRCUIT_SUPPORT_VS33
+ quirk support
+Date: Fri, 5 Jun 2015 10:32:51 +0200
+Message-ID: <CAPDyKFrfizAYpvGyuYL80wttzbd_Ww_K8c4MR++oV_Cxi-JexQ@mail.gmail.com>
+References: <1433228980-5676-1-git-send-email-yangbo.lu@freescale.com>
+	<CAPDyKFqb3y9xV8ouZyK0bapMs0P+gA+KLux10yHz3K8mbitLHw@mail.gmail.com>
+	<BY1PR0301MB119204EF6D256D7D7C82925CF2B30@BY1PR0301MB1192.namprd03.prod.outlook.com>
+	<CAPDyKFq42d5TeAK9PmzFfWbuKUSN0-KPmPp89zeH8Lk+CNFvCA@mail.gmail.com>
+	<BN3PR0301MB1188CE0D699261777B4B030CF2B20@BN3PR0301MB1188.namprd03.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qc0-f176.google.com ([209.85.216.176]:36185 "EHLO
-	mail-qc0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751285AbbFEITP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jun 2015 04:19:15 -0400
-Received: by qcxw10 with SMTP id w10so27348436qcx.3
-        for <linux-mmc@vger.kernel.org>; Fri, 05 Jun 2015 01:19:14 -0700 (PDT)
-In-Reply-To: <CAPDyKFqHmspn5E_TN8A8FxGWu=em4X++K-7Xrp+GzZSk=NPfkQ@mail.gmail.com>
+Received: from mail-qg0-f41.google.com ([209.85.192.41]:34536 "EHLO
+	mail-qg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753964AbbFEIcw convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jun 2015 04:32:52 -0400
+Received: by qgf75 with SMTP id 75so25276808qgf.1
+        for <linux-mmc@vger.kernel.org>; Fri, 05 Jun 2015 01:32:51 -0700 (PDT)
+In-Reply-To: <BN3PR0301MB1188CE0D699261777B4B030CF2B20@BN3PR0301MB1188.namprd03.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: "Lu Y.B." <yangbo.lu@freescale.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chrisball@gmail.com>
 
-[...]
+On 5 June 2015 at 10:10, Lu Y.B. <yangbo.lu@freescale.com> wrote:
+>> >> On 2 June 2015 at 09:09, Yangbo Lu <yangbo.lu@freescale.com> wrot=
+e:
+>> >> > This quirk is used for controllers that can only support 1.8V
+>> >> > voltage but the peripheral hardware circuit has capability to
+>> >> > support 3.3V voltage.
+>> >>
+>> >> Which voltage are you referring to? The I/O voltage or the power =
+to
+>> >> the card? VCC or VCCQ?
+>> >>
+>> >> Kind regards
+>> >> Uffe
+>> >
+>> > The voltage here means I/O voltage.
+>> > Although the controller only supports 1.8v, the hardware circuit h=
+as a
+>> level translator for supporting 3.3v.
+>>
+>> Thanks for clarifying.
+>
+> Sorry, it should be power voltage...
+> This quirk is used to set capability register "Voltage Support 3.3V" =
+bit since the controller self doesn=E2=80=99t support but circuit suppo=
+rts.
+>
 
->> But the "&" operation will make host->ocr_mask to have no use for other voltage supporting.
->> I think using "|" instead or just assigning host->ocr_mask to ocr_avail should be ok.
->> If so, there is no need to add this quirk.
->
-> This is kind of a policy change for how to treat the configuration
-> from DT. I have cc:ed Haijun Zhang, which invented the binding to see
-> if we can get some feeback from him.
->
-> The commit is: 6e9e318b304fd7373a0754805a76a02ddbc69a41 ("mmc: core:
-> parse voltage from device-tree")
->
+Okay.
 
-The email of Haijun Zhang, bounced so I guess we shouldn't expect any
-response from him.
+So then please tell me, exactly, how is the power being controlled
+when using this "hardware circuit"?
+
+This patchset only tries to change the content of the ocr_mask, but
+there is no logic added to support changing voltage levels by using
+the "external circuit". At least to my understanding.
 
 Kind regards
 Uffe
