@@ -1,61 +1,58 @@
-From: Wan ZongShun <mcuos.com@gmail.com>
-Subject: Re: [PATCH] SDHCI: Change AMD SDHCI quirk application scope
-Date: Fri, 5 Jun 2015 18:01:56 +0800
-Message-ID: <CAKT61h8kN33D03jV7pJ7b25p9M6JSPm2WxLgh4DhJxnteHQnrw@mail.gmail.com>
-References: <1433428437-6067-1-git-send-email-Vincent.Wan@amd.com>
- <20150604153220.GA4521@pd.tnic> <CAKT61h8E3=gvO=ZfFDPhBuWsWuPnGCxtxYa-izSOJk=RWKyUtQ@mail.gmail.com>
- <20150605092001.GB3679@pd.tnic>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] mmc: sdhci: Restore behavior while creating OCR mask
+Date: Fri,  5 Jun 2015 12:06:57 +0200
+Message-ID: <1433498817-16679-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f171.google.com ([209.85.220.171]:34688 "EHLO
-	mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751700AbbFEKCR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jun 2015 06:02:17 -0400
-In-Reply-To: <20150605092001.GB3679@pd.tnic>
+Received: from mail-la0-f48.google.com ([209.85.215.48]:36034 "EHLO
+	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753796AbbFEKHH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jun 2015 06:07:07 -0400
+Received: by laar3 with SMTP id r3so1609855laa.3
+        for <linux-mmc@vger.kernel.org>; Fri, 05 Jun 2015 03:07:06 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Wan ZongShun <Vincent.Wan@amd.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Wan ZongShun <linux@mcuos.com>
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Yangbo Lu <yangbo.lu@freescale.com>, Tim Kryger <tim.kryger@gmail.com>
 
-2015-06-05 17:20 GMT+08:00 Borislav Petkov <bp@alien8.de>:
-> On Fri, Jun 05, 2015 at 09:37:09AM +0800, Wan ZongShun wrote:
->> Boris, I means I put this KERCZ Mircro in pci_ids.h, and I also will
->> send the other patch to instead the following '0x790b' of codes. I
->> think it is reasonable, right?
->
-> No, it means two things:
->
-> * why does it contain KERNCZ? What does that mean?
+Commit 3a48edc4bd68 ("mmc: sdhci: Use mmc core regulator infrastucture")
+changed the behavior for how to assign the ocr_avail mask for the mmc
+host. More precisely it started to mask the bits instead of assigning
+them.
 
-The KERNCZ is new AMD SB/FCH generation name, like HUDSON2 is old FCH
-generation.
-We will adopt 0x790b as device ID since from this KERNCZ gereration.
+Restore the behavior, but also make it clear that an OCR mask created
+from an external regulator overrides the other ones.
 
->
-> * #define PCI_DEVICE_ID_AMD_<better_name>_SMBUS 0x790b should be in
-> drivers/mmc/host/sdhci-pci.c as it is used only there.
+Fixes: 3a48edc4bd68 ("mmc: sdhci: Use mmc core regulator infrastucture")
+Cc: Tim Kryger <tim.kryger@gmail.com>
+Reported-by: Yangbo Lu <yangbo.lu@freescale.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/sdhci.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
-
-The i2cpiix4.c driver and eMMC driver both will use this device ID
-macro, Do you think I should submit two patches synchronously? like
-patch1: change i2cpiix4 driver to use PCI_DEVICE_ID_AMD_KERNCZ_SMBUS,
-patch2: for eMMC quirk in sdhci-pci.c?
-
-And then the PCI_DEVICE_ID_AMD_KERNCZ_SMBUS can be go into pci ids.h?
-
->
-> Thanks.
->
-> --
-> Regards/Gruss,
->     Boris.
->
-> ECO tip #101: Trim your mails when you reply.
-> --
-
-
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 1b4861d..706bb60 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3256,13 +3256,14 @@ int sdhci_add_host(struct sdhci_host *host)
+ 				   SDHCI_MAX_CURRENT_MULTIPLIER;
+ 	}
+ 
+-	/* If OCR set by external regulators, use it instead */
++	/* If OCR set by host, use it instead. */
++	if (host->ocr_mask)
++		ocr_avail = host->ocr_mask;
++
++	/* If OCR set by external regulators, give it highest prio. */
+ 	if (mmc->ocr_avail)
+ 		ocr_avail = mmc->ocr_avail;
+ 
+-	if (host->ocr_mask)
+-		ocr_avail &= host->ocr_mask;
+-
+ 	mmc->ocr_avail = ocr_avail;
+ 	mmc->ocr_avail_sdio = ocr_avail;
+ 	if (host->ocr_avail_sdio)
 -- 
-Wan ZongShun.
-www.mcuos.com
+1.9.1
+
