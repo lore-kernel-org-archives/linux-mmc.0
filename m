@@ -1,58 +1,50 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH] mmc: sdhci: Restore behavior while creating OCR mask
-Date: Fri,  5 Jun 2015 12:06:57 +0200
-Message-ID: <1433498817-16679-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f48.google.com ([209.85.215.48]:36034 "EHLO
-	mail-la0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753796AbbFEKHH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jun 2015 06:07:07 -0400
-Received: by laar3 with SMTP id r3so1609855laa.3
-        for <linux-mmc@vger.kernel.org>; Fri, 05 Jun 2015 03:07:06 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH] SDHCI: Change AMD SDHCI quirk application scope
+Date: Fri, 5 Jun 2015 15:52:30 +0200
+Message-ID: <20150605135230.GJ3679@pd.tnic>
+References: <1433428437-6067-1-git-send-email-Vincent.Wan@amd.com>
+ <20150604153220.GA4521@pd.tnic>
+ <CAKT61h8E3=gvO=ZfFDPhBuWsWuPnGCxtxYa-izSOJk=RWKyUtQ@mail.gmail.com>
+ <20150605092001.GB3679@pd.tnic>
+ <CAKT61h8kN33D03jV7pJ7b25p9M6JSPm2WxLgh4DhJxnteHQnrw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAKT61h8kN33D03jV7pJ7b25p9M6JSPm2WxLgh4DhJxnteHQnrw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Wan ZongShun <mcuos.com@gmail.com>
+Cc: Wan ZongShun <Vincent.Wan@amd.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Wan ZongShun <linux@mcuos.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Yangbo Lu <yangbo.lu@freescale.com>, Tim Kryger <tim.kryger@gmail.com>
 
-Commit 3a48edc4bd68 ("mmc: sdhci: Use mmc core regulator infrastucture")
-changed the behavior for how to assign the ocr_avail mask for the mmc
-host. More precisely it started to mask the bits instead of assigning
-them.
+On Fri, Jun 05, 2015 at 06:01:56PM +0800, Wan ZongShun wrote:
+> The KERNCZ is new AMD SB/FCH generation name, like HUDSON2 is old FCH
+> generation.
+> We will adopt 0x790b as device ID since from this KERNCZ gereration.
 
-Restore the behavior, but also make it clear that an OCR mask created
-from an external regulator overrides the other ones.
+True story. Strange name that.
 
-Fixes: 3a48edc4bd68 ("mmc: sdhci: Use mmc core regulator infrastucture")
-Cc: Tim Kryger <tim.kryger@gmail.com>
-Reported-by: Yangbo Lu <yangbo.lu@freescale.com>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/host/sdhci.c | 9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+> The i2cpiix4.c driver and eMMC driver both will use this device ID
+> macro, Do you think I should submit two patches synchronously? like
+> patch1: change i2cpiix4 driver to use PCI_DEVICE_ID_AMD_KERNCZ_SMBUS,
+> patch2: for eMMC quirk in sdhci-pci.c?
+> 
+> And then the PCI_DEVICE_ID_AMD_KERNCZ_SMBUS can be go into pci ids.h?
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 1b4861d..706bb60 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3256,13 +3256,14 @@ int sdhci_add_host(struct sdhci_host *host)
- 				   SDHCI_MAX_CURRENT_MULTIPLIER;
- 	}
- 
--	/* If OCR set by external regulators, use it instead */
-+	/* If OCR set by host, use it instead. */
-+	if (host->ocr_mask)
-+		ocr_avail = host->ocr_mask;
-+
-+	/* If OCR set by external regulators, give it highest prio. */
- 	if (mmc->ocr_avail)
- 		ocr_avail = mmc->ocr_avail;
- 
--	if (host->ocr_mask)
--		ocr_avail &= host->ocr_mask;
--
- 	mmc->ocr_avail = ocr_avail;
- 	mmc->ocr_avail_sdio = ocr_avail;
- 	if (host->ocr_avail_sdio)
+If you have all those patches ready, you could do a first patch adding
+the PCI ID to pci_ids.h only.
+
+Then follow with the different driver changes, i.e. sdhci-pci.c,
+i2cpiix4, and so on and make it clear in the 0/n message that they all
+depend on the first one.
+
+Or something along those lines.
+
+Thanks.
+
 -- 
-1.9.1
+Regards/Gruss,
+    Boris.
 
+ECO tip #101: Trim your mails when you reply.
+--
