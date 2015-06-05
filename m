@@ -1,113 +1,133 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: sdhci: add SDHCI_QUIRK2_CIRCUIT_SUPPORT_VS33
- quirk support
-Date: Fri, 5 Jun 2015 11:32:21 +0200
-Message-ID: <CAPDyKFq6wQ1md1LZ_05KGa2Tn0t7z141cHF4g6ZjV1sS1Jt0Jw@mail.gmail.com>
-References: <1433228980-5676-1-git-send-email-yangbo.lu@freescale.com>
-	<CAPDyKFqb3y9xV8ouZyK0bapMs0P+gA+KLux10yHz3K8mbitLHw@mail.gmail.com>
-	<BY1PR0301MB119204EF6D256D7D7C82925CF2B30@BY1PR0301MB1192.namprd03.prod.outlook.com>
-	<CAPDyKFq42d5TeAK9PmzFfWbuKUSN0-KPmPp89zeH8Lk+CNFvCA@mail.gmail.com>
-	<BN3PR0301MB1188CE0D699261777B4B030CF2B20@BN3PR0301MB1188.namprd03.prod.outlook.com>
-	<CAPDyKFrfizAYpvGyuYL80wttzbd_Ww_K8c4MR++oV_Cxi-JexQ@mail.gmail.com>
-	<BN3PR0301MB118808064A13CAC949253151F2B20@BN3PR0301MB1188.namprd03.prod.outlook.com>
-	<CAPDyKFq4x_YqN5qUEqq2Kwo=2+AwHYHDNnkyFZB99Z4K_jXTZQ@mail.gmail.com>
-	<BN3PR0301MB1188E932F40441475562AF9BF2B20@BN3PR0301MB1188.namprd03.prod.outlook.com>
+Subject: Re: [PATCH 2/2] mmc: esdhc: add quirk to support 3.3v for T4240
+Date: Fri, 5 Jun 2015 11:38:29 +0200
+Message-ID: <CAPDyKFqO7rPbp61wKWTGSxox0Poix6zD_B8wZS+NZRUVm=MswQ@mail.gmail.com>
+References: <1433228991-24324-1-git-send-email-yangbo.lu@freescale.com>
+	<CAPDyKFp7=2L2_Vt1ha3jcFV=P2EDHEg0UwpcRu_t8r+ED-jDdA@mail.gmail.com>
+	<BY1PR0301MB1192D4F50E8155073F771DC5F2B30@BY1PR0301MB1192.namprd03.prod.outlook.com>
+	<CAPDyKFoo+iejT2S8EQ2hgVQxd3Bj7geYPE_JqHkZ5WK0xKmxxA@mail.gmail.com>
+	<BN3PR0301MB11880D7C297EE4636D9E721CF2B20@BN3PR0301MB1188.namprd03.prod.outlook.com>
+	<CAPDyKFqHmspn5E_TN8A8FxGWu=em4X++K-7Xrp+GzZSk=NPfkQ@mail.gmail.com>
+	<BN3PR0301MB118815B464D4ECAB2987F565F2B20@BN3PR0301MB1188.namprd03.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f171.google.com ([209.85.220.171]:36200 "EHLO
-	mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751475AbbFEJcW convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jun 2015 05:32:22 -0400
-Received: by qkx62 with SMTP id 62so37550276qkx.3
-        for <linux-mmc@vger.kernel.org>; Fri, 05 Jun 2015 02:32:21 -0700 (PDT)
-In-Reply-To: <BN3PR0301MB1188E932F40441475562AF9BF2B20@BN3PR0301MB1188.namprd03.prod.outlook.com>
+Received: from mail-qg0-f44.google.com ([209.85.192.44]:33132 "EHLO
+	mail-qg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751223AbbFEJia convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Jun 2015 05:38:30 -0400
+Received: by qgh96 with SMTP id 96so75948qgh.0
+        for <linux-mmc@vger.kernel.org>; Fri, 05 Jun 2015 02:38:29 -0700 (PDT)
+In-Reply-To: <BN3PR0301MB118815B464D4ECAB2987F565F2B20@BN3PR0301MB1188.namprd03.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: "Lu Y.B." <yangbo.lu@freescale.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chrisball@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Haijun Zhang <Haijun.Zhang@freescale.com>
 
-On 5 June 2015 at 11:09, Lu Y.B. <yangbo.lu@freescale.com> wrote:
->> On 5 June 2015 at 10:49, Lu Y.B. <yangbo.lu@freescale.com> wrote:
->> >> On 5 June 2015 at 10:10, Lu Y.B. <yangbo.lu@freescale.com> wrote:
->> >> >> >> On 2 June 2015 at 09:09, Yangbo Lu <yangbo.lu@freescale.com=
->
->> wrote:
->> >> >> >> > This quirk is used for controllers that can only support =
-1.8V
->> >> >> >> > voltage but the peripheral hardware circuit has capabilit=
-y to
->> >> >> >> > support 3.3V voltage.
->> >> >> >>
->> >> >> >> Which voltage are you referring to? The I/O voltage or the
->> >> >> >> power to the card? VCC or VCCQ?
->> >> >> >>
->> >> >> >> Kind regards
->> >> >> >> Uffe
->> >> >> >
->> >> >> > The voltage here means I/O voltage.
->> >> >> > Although the controller only supports 1.8v, the hardware cir=
-cuit
->> >> >> > has a
->> >> >> level translator for supporting 3.3v.
->> >> >>
->> >> >> Thanks for clarifying.
->> >> >
->> >> > Sorry, it should be power voltage...
->> >> > This quirk is used to set capability register "Voltage Support =
-3.3V"
->> >> bit since the controller self doesn=E2=80=99t support but circuit=
- supports.
->> >> >
->> >>
->> >> Okay.
->> >>
->> >> So then please tell me, exactly, how is the power being controlle=
-d
->> >> when using this "hardware circuit"?
->> >>
->> >> This patchset only tries to change the content of the ocr_mask, b=
-ut
->> >> there is no logic added to support changing voltage levels by usi=
-ng
->> >> the "external circuit". At least to my understanding.
->> >>
+[...]
+
+>> > Actually the sdhci-of-esdhc driver would set host->ocr_mask when i=
+t
+>> probes.
+>> > mmc_of_parse_voltage(np, &host->ocr_mask);
+>>
+>> Okay, got it - thanks!
+>>
+>> So I tried to understand when the voltage-range binding should be us=
+ed,
+>> but the DT documentation is quite poor for it.
+>>
+>> Anyway, I assumes the binding is there to describe internal HW
+>> characteristics of the what regulator levels the mmc controller can
+>> support. And the regulator levels are for the power to the card, *no=
+t*
+>> for the IO voltage.
+>>
+>> So, is this according to what you expects as well, especially since =
+you
+>> were aiming to fix something for the IO voltage in patch1?
+>>
 >> >
->> > As I said, the controller only support 1.8v but we could use adapt=
-er
->> card or add level translator on board directly to make sd *only* wor=
-k on
->> 3.3v power and 3.3v IO voltage.
->> > Thanks.
+>> > But the "&" operation will make host->ocr_mask to have no use for =
+other
+>> voltage supporting.
+>> > I think using "|" instead or just assigning host->ocr_mask to ocr_=
+avail
+>> should be ok.
+>> > If so, there is no need to add this quirk.
 >>
->> How does this level translator work? Doesn't it need to be controlle=
-d
->> somehow? Do you have a datasheet you can share for it?
+>> This is kind of a policy change for how to treat the configuration f=
+rom
+>> DT. I have cc:ed Haijun Zhang, which invented the binding to see if =
+we
+>> can get some feeback from him.
 >>
+>> The commit is: 6e9e318b304fd7373a0754805a76a02ddbc69a41 ("mmc: core:
+>> parse voltage from device-tree")
 >
-> I attached a adapter picture for you.
-> we would never control the power to change.
-> Although the io voltage could be control in design, we would never co=
-ntrol it either. Always connect Vccb_SEL to GND.
-> Thanks.
+> Haijun Zhang had left his job. And I have worked instead of him recen=
+tly.
+> I have new find about this.
+>
+> commit c0b887b66c95fe5abaac071b8332b8c21113d84b
+> Author: Haijun Zhang <Haijun.Zhang@freescale.com>
+> Date:   Mon Aug 26 09:19:23 2013 +0800
+>
+>     mmc: sdhci: get voltage from sdhc host
+>
+>     We use host->ocr_mask to hold the voltage get from device-tree
+>     node, In case host->ocr_mask was available, we use host->ocr_mask
+>     as the final available voltage can be used by MMC/SD/SDIO card.
+>
+>     Signed-off-by: Haijun Zhang <haijun.zhang@freescale.com>
+>     Reviewed-by: Anton Vorontsov <anton@enomsg.org>
+>     Signed-off-by: Chris Ball <cjb@laptop.org>
+>
+> This was change by commit 3a48edc4bd68f841c07c7bc86358d2f02133f247.
+> But I didn=E2=80=99t see the reason.
+
+Oh, that's unfortunate. I think it shouldn't have done that.
+
+>
+>>
+>> >
+>> >>
+>> >> Looking a bit further up in the code in sdhci_add_host(), you wil=
+l
+>> >> find that the ocr_avail mask is created by calling
+>> >> mmc_regulator_get_supply() (and not mmc_of_parse() as told you be=
+fore).
+>> >> If there are external regulators, the ocr_avail mask will then
+>> >> override the values from SDHCI's caps register.
+>> >
+>> > But there is no external regulator on boards that using eSDHC...
+>> >
+>>
+>> Quoted from your response in patch1:
+>> "Although the controller only supports 1.8v, the hardware circuit ha=
+s a
+>> level translator for supporting 3.3v".
+>>
+>> Again, that seems to concern the IO voltage, but if not - could it b=
+e
+>> modelled as regulator and thus used to fetch the ocr mask from?
+>>
+>> It's quite common that we use GPIO regulators in the mmc subsystem f=
+or
+>> this matter.
+>>
+> I am afraid not.
+> Such as, some boards only support 1.8v, but we used adapter card that=
+ makes sd work on 3.3v power voltage and 3.3v IO voltage.
+> And some boards may be integrated the level translator on the board t=
+o make sd card work on 3.3v power and 3.3v IO voltage.
+>
 >
 
-This make it crystal clear to me, but I think you have some more
-homework to do. :-)
-
-This is a commonly used circuit to be able to boost the IO voltage
-levels from the SoC, towards the card. According to the SD spec, all
-cards needs to support the IO legacy voltage levels (2.7-3.6V).
-
-UHS-I SD cards, are also operate using 1.8V IO voltage, but the early
-initialization must be done using the legacy IO voltage level domain.
-
-So, I assume that when grounding Vccb_SEL, the IO voltage will be 2.9
-V, which means you will always remain in legacy IO voltage level
-domain. That's fine, as long as you don't care about UHS cards.
-
-So, again this patchset really doesn't make sense.
+I believe am starting to understand the problem now. You are likely
+suffering from the change in 3a48edc4bd68f841c07c7bc86358d2f02133f247.
+I will cook a patch for you that you can test.
 
 Kind regards
 Uffe
