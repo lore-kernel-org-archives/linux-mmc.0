@@ -1,7 +1,7 @@
 From: Wan ZongShun <Vincent.Wan@amd.com>
-Subject: [PATCH 3/3] SDHCI: Change AMD SDHCI quirk application scope
-Date: Sat, 6 Jun 2015 21:13:40 +0800
-Message-ID: <1433596420-5612-3-git-send-email-Vincent.Wan@amd.com>
+Subject: [PATCH 2/3] i2c-piix4: Use Macro for AMD CZ SMBus device ID
+Date: Sat, 6 Jun 2015 21:13:39 +0800
+Message-ID: <1433596420-5612-2-git-send-email-Vincent.Wan@amd.com>
 References: <1433596420-5612-1-git-send-email-Vincent.Wan@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,59 +12,36 @@ To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-i2c@vger.kernel.org
 Cc: linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, Wan ZongShun <Vincent.Wan@amd.com>, Wan ZongShun <mcuos.com@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Change this quirk to apply to AMD Carrizo platform.
+Change AMD CZ SMBUS device ID from 0x790b to
+use Macro definition
 
 Signed-off-by: Wan ZongShun <Vincent.Wan@amd.com>
 Signed-off-by: Wan ZongShun <mcuos.com@gmail.com>
-
-Tested-by: Nath, Arindam <Arindam.Nath@amd.com>
-Tested-by: Ramesh, Ramya <Ramya.Ramesh@amd.com>
 ---
- drivers/mmc/host/sdhci-pci.c | 25 ++++++++++++++++++++++++-
- 1 file changed, 24 insertions(+), 1 deletion(-)
+ drivers/i2c/busses/i2c-piix4.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index f208f20..94f54d2 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -724,14 +724,37 @@ static const struct sdhci_pci_fixes sdhci_rtsx = {
- 	.probe_slot	= rtsx_probe_slot,
- };
- 
-+/*AMD chipset generation*/
-+enum amd_chipset_gen {
-+	AMD_CHIPSET_BEFORE_ML,
-+	AMD_CHIPSET_CZ,
-+	AMD_CHIPSET_NL,
-+	AMD_CHIPSET_UNKNOWN,
-+};
-+
- static int amd_probe(struct sdhci_pci_chip *chip)
- {
- 	struct pci_dev	*smbus_dev;
-+	enum amd_chipset_gen gen;
- 
- 	smbus_dev = pci_get_device(PCI_VENDOR_ID_AMD,
- 			PCI_DEVICE_ID_AMD_HUDSON2_SMBUS, NULL);
-+	if (smbus_dev) {
-+		gen = AMD_CHIPSET_BEFORE_ML;
-+	} else {
-+		smbus_dev = pci_get_device(PCI_VENDOR_ID_AMD,
-+				PCI_DEVICE_ID_AMD_KERNCZ_SMBUS, NULL);
-+		if (smbus_dev) {
-+			if (smbus_dev->revision < 0x51)
-+				gen = AMD_CHIPSET_CZ;
-+			else
-+				gen = AMD_CHIPSET_NL;
-+		} else {
-+			gen = AMD_CHIPSET_UNKNOWN;
-+		}
-+	}
- 
--	if (smbus_dev && (smbus_dev->revision < 0x51)) {
-+	if ((gen == AMD_CHIPSET_BEFORE_ML) || (gen == AMD_CHIPSET_CZ)) {
- 		chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
- 		chip->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
- 	}
+diff --git a/drivers/i2c/busses/i2c-piix4.c b/drivers/i2c/busses/i2c-piix4.c
+index 67cbec6..630bce6 100644
+--- a/drivers/i2c/busses/i2c-piix4.c
++++ b/drivers/i2c/busses/i2c-piix4.c
+@@ -245,7 +245,7 @@ static int piix4_setup_sb800(struct pci_dev *PIIX4_dev,
+ 	     PIIX4_dev->device == PCI_DEVICE_ID_AMD_HUDSON2_SMBUS &&
+ 	     PIIX4_dev->revision >= 0x41) ||
+ 	    (PIIX4_dev->vendor == PCI_VENDOR_ID_AMD &&
+-	     PIIX4_dev->device == 0x790b &&
++	     PIIX4_dev->device == PCI_DEVICE_ID_AMD_KERNCZ_SMBUS &&
+ 	     PIIX4_dev->revision >= 0x49))
+ 		smb_en = 0x00;
+ 	else
+@@ -545,7 +545,7 @@ static const struct pci_device_id piix4_ids[] = {
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_ATI_IXP400_SMBUS) },
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_ATI_SBX00_SMBUS) },
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_HUDSON2_SMBUS) },
+-	{ PCI_DEVICE(PCI_VENDOR_ID_AMD, 0x790b) },
++	{ PCI_DEVICE(PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_KERNCZ_SMBUS) },
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_SERVERWORKS,
+ 		     PCI_DEVICE_ID_SERVERWORKS_OSB4) },
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_SERVERWORKS,
 -- 
 1.9.1
