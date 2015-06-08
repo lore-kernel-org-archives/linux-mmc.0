@@ -1,330 +1,412 @@
-From: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
-Subject: [RFC PATCH v3] mmc: sleep notification
-Date: Mon, 8 Jun 2015 06:46:17 +0000
-Message-ID: <FDD07FEB422EF948A392FDC201AEEAE64FAAD701@SACMBXIP02.sdcorp.global.sandisk.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: host: pxamci: switch over to dmaengine use
+Date: Mon, 8 Jun 2015 10:17:38 +0200
+Message-ID: <CAPDyKFpWaRdwHAFAjmnWXC5=H989uANafd_HtFmSJLVgTvAiKQ@mail.gmail.com>
+References: <1433625322-28449-1-git-send-email-robert.jarzmik@free.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0091.outbound.protection.outlook.com ([207.46.100.91]:19964
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751731AbbFHHBG convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jun 2015 03:01:06 -0400
-Content-Language: en-US
+Received: from mail-qc0-f178.google.com ([209.85.216.178]:35198 "EHLO
+	mail-qc0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752195AbbFHIRj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jun 2015 04:17:39 -0400
+Received: by qczw4 with SMTP id w4so47627273qcz.2
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Jun 2015 01:17:38 -0700 (PDT)
+In-Reply-To: <1433625322-28449-1-git-send-email-robert.jarzmik@free.fr>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Alex Lemberg <Alex.Lemberg@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Robert Jarzmik <robert.jarzmik@free.fr>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Daniel Mack <zonque@gmail.com>
 
-Hi Ulf,
+On 6 June 2015 at 23:15, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+> From: Daniel Mack <zonque@gmail.com>
+>
+> Switch over pxamci to dmaengine. This prepares the devicetree full
+> support of pxamci.
+>
+> This was successfully tested on a PXA3xx board, as well as PXA27x.
+>
+> Signed-off-by: Daniel Mack <zonque@gmail.com>
+> [adapted to pxa-dma]
+> Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
+> ---
+>  drivers/mmc/host/pxamci.c | 200 ++++++++++++++++++++++++++--------------------
+>  1 file changed, 114 insertions(+), 86 deletions(-)
+>
+> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+> index 1b6d0bf..1420f29 100644
+> --- a/drivers/mmc/host/pxamci.c
+> +++ b/drivers/mmc/host/pxamci.c
+> @@ -22,7 +22,9 @@
+>  #include <linux/platform_device.h>
+>  #include <linux/delay.h>
+>  #include <linux/interrupt.h>
+> +#include <linux/dmaengine.h>
+>  #include <linux/dma-mapping.h>
+> +#include <linux/dma/pxa-dma.h>
 
-Here is a V3 per your request.
-Please review.
+I can't find this header file in my tree, but apparantly it's in
+linux-next. Probably it went through Vinod's dma tree, right?
 
-This patch is implements the new additional state of
-Power_Off_Notification - SLEEP_NOTIFICATION.
-Until now, the implementation of Power_Off_Notification
-supported only three modes - POWERED_ON (0x01),
-POWER_OFF_SHORT (0x02) and POWER_OFF_LONG (0x03).
+Anyway, I can pick it up for the next-next release cycle or you may
+ask Vinod to pick it up right now. Please tell me what you prefer.
+Here's my ack.
 
-As part of eMMC5.0 before moving to Sleep state hosts may set the
-POWER_OFF_NOTIFICATION byte to SLEEP_NOTIFICATION (0x04).
-After setting SLEEP_NOTIFICATION, host should wait for
-the busy line to be de-asserted.
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
-Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
+Kind regards
+Uffe
 
----------
-V3:
-- remove macros
-- remove hpi_en dependency
-- add helper function for sleep notification
-
-v2:
-- remove calling mmc_interrupt_hpi in case the device is doing
-  sleep notification from block.c
-- remove call of "mmc_card_doing_sleep_notify" from core.c
-- mmc_sleep_notify changed to static function
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index a802863..56dae18 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -60,6 +60,14 @@ static const unsigned int tacc_mant[] = {
- 	})
- 
- /*
-+ * Indicates the maximum allowed timeout - 83.88s
-+ * as defined in eMMC Spec for the Sleep Notification
-+ * SWITCH command when notifying the device that it is
-+ * about to be moved to sleep state.
-+ */
-+#define MMC_SLEEP_NOTIFY_MAX_TIME	0x17
-+
-+/*
-  * Given the decoded CSD structure, decode the raw CID to our CID structure.
-  */
- static int mmc_decode_cid(struct mmc_card *card)
-@@ -582,6 +590,8 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		card->ext_csd.ffu_capable =
- 			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
- 			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
-+		card->ext_csd.sleep_notify_time =
-+			ext_csd[EXT_CSD_SLEEP_NOTIFICATION_TIME];
- 	}
- out:
- 	return err;
-@@ -1642,6 +1652,44 @@ out_release:
- 	return err;
- }
- 
-+/*
-+ * check if device is in program state (busy)
-+ */
-+static bool mmc_device_prg_state(struct mmc_card *card)
-+{
-+	int rc;
-+	u32 status;
-+	bool state;
-+
-+	mmc_get_card(card);
-+	rc = mmc_send_status(card, &status);
-+	if (rc) {
-+		pr_err("%s: Get card status fail. rc=%d\n",
-+			mmc_hostname(card->host), rc);
-+		state = false;
-+		goto out;
-+	}
-+
-+	if (R1_CURRENT_STATE(status) == R1_STATE_PRG)
-+		state =  true;
-+	else
-+		state =  false;
-+out:
-+	mmc_put_card(card);
-+	return state;
-+}
-+
-+static int can_sleep_notify(struct mmc_card *card)
-+{
-+	/* sleep notify enable/disable for eMMC 5.0 and above */
-+	return (card && card->ext_csd.rev >= 7 &&
-+			(card->host->caps2 & MMC_CAP2_SLEEP_NOTIFY) &&
-+			card->ext_csd.sleep_notify_time > 0 &&
-+			card->ext_csd.sleep_notify_time <=
-+				MMC_SLEEP_NOTIFY_MAX_TIME &&
-+			card->ext_csd.power_off_notification == EXT_CSD_POWER_ON);
-+}
-+
- static int mmc_can_poweroff_notify(const struct mmc_card *card)
- {
- 	return card &&
-@@ -1653,17 +1701,32 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
- {
- 	unsigned int timeout = card->ext_csd.generic_cmd6_time;
- 	int err;
-+	bool use_busy_signal;
- 
- 	/* Use EXT_CSD_POWER_OFF_SHORT as default notification type. */
- 	if (notify_type == EXT_CSD_POWER_OFF_LONG)
- 		timeout = card->ext_csd.power_off_longtime;
-+	else if (notify_type == EXT_CSD_SLEEP_NOTIFICATION) {
-+		/* calculate the maximum timeout for the
-+		 * switch command when notifying the device
-+		 * that it is about to move to sleep */
- 
-+		timeout = DIV_ROUND_UP((10 *
-+			(1 << (unsigned int)(card->ext_csd.sleep_notify_time))),1000);
-+		}
-+
-+	use_busy_signal = (notify_type == EXT_CSD_SLEEP_NOTIFICATION) ?
-+			false : true;
- 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 			EXT_CSD_POWER_OFF_NOTIFICATION,
--			notify_type, timeout, true, false, false);
--	if (err)
-+			notify_type, timeout,
-+			use_busy_signal, false, false);
-+	if (!err) {
-+		card->ext_csd.power_off_notification = notify_type;
-+	} else {
- 		pr_err("%s: Power Off Notification timed out, %u\n",
--		       mmc_hostname(card->host), timeout);
-+			mmc_hostname(card->host), timeout);
-+	}
- 
- 	/* Disable the power off notification after the switch operation. */
- 	card->ext_csd.power_off_notification = EXT_CSD_NO_POWER_NOTIFICATION;
-@@ -1671,6 +1734,70 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
- 	return err;
- }
- 
-+static int mmc_sleep_notify(struct mmc_card *card)
-+{
-+	int err = 0;
-+	bool is_busy = 0;
-+	unsigned long prg_wait = 0;
-+	unsigned int timeout;
-+
-+	if (!can_sleep_notify(card) || !mmc_can_poweroff_notify(card))
-+		return 0;
-+
-+	if (!mmc_card_doing_sleep_notify(card)) {
-+		mmc_get_card(card);
-+		mmc_card_set_sleep_notify(card);
-+		err = mmc_poweroff_notify(card,
-+			EXT_CSD_SLEEP_NOTIFICATION);
-+		mmc_put_card(card);
-+		if (err) {
-+			pr_err("%s: mmc_poweroff_notify failed with %d\n",
-+			       __func__, err);
-+			goto out;
-+		}
-+		timeout = DIV_ROUND_UP((10 *
-+				(1 << (unsigned int)(card->ext_csd.sleep_notify_time)))
-+				,1000);
-+		prg_wait = jiffies + msecs_to_jiffies(timeout);
-+	}
-+	/*
-+		 * Loop will run until  Device is no
-+		 * more in Busy state
-+		 */
-+
-+	do {
-+		/* added some delay to avoid sending card status too often */
-+		msleep(20);
-+		err = 0;
-+		is_busy = mmc_device_prg_state(card);
-+		if (is_busy && time_after(jiffies, prg_wait)) {
-+			/*
-+			 * making sure we are still in busy before
-+			 * sending HPI due to timeout error
-+			 */
-+			is_busy = mmc_device_prg_state(card);
-+			if (is_busy) {
-+				if (mmc_card_doing_sleep_notify(card)) {
-+					card->ext_csd.power_off_notification =
-+						EXT_CSD_POWER_ON;
-+					mmc_interrupt_hpi(card);
-+				}
-+				err = -ETIMEDOUT;
-+				break;
-+			}
-+		}
-+	} while (is_busy);
-+
-+out:
-+	mmc_card_clr_sleep_notify(card);
-+	if (err) {
-+		pr_err("%s: mmc_poweroff_notify for sleep failed with %d\n",
-+		       mmc_hostname(card->host), err);
-+	}
-+
-+	return err;
-+}
-+
- /*
-  * Host is being removed. Free up the current card.
-  */
-@@ -1744,14 +1871,19 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
- 	if (err)
- 		goto out;
- 
--	if (mmc_can_poweroff_notify(host->card) &&
--		((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
--		err = mmc_poweroff_notify(host->card, notify_type);
--	else if (mmc_can_sleep(host->card))
-+    if (mmc_can_poweroff_notify(host->card)) {
-+    	if (!can_sleep_notify(host->card)) {
-+    		err = mmc_poweroff_notify(host->card, notify_type);
-+    	} else if (is_suspend) {
-+    		err = mmc_sleep_notify(host->card);
-+    		if (err != -ETIMEDOUT)
-+    			err = mmc_sleep(host);
-+    	}
-+    } else if (mmc_can_sleep(host->card)) {
- 		err = mmc_sleep(host);
--	else if (!mmc_host_is_spi(host))
-+    } else if (!mmc_host_is_spi(host)) {
- 		err = mmc_deselect_cards(host);
--
-+    }
- 	if (!err) {
- 		mmc_power_off(host);
- 		mmc_card_set_suspended(host->card);
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 19f0175..3189e73 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -62,6 +62,7 @@ struct mmc_ext_csd {
- 	unsigned int		sa_timeout;		/* Units: 100ns */
- 	unsigned int		generic_cmd6_time;	/* Units: 10ms */
- 	unsigned int            power_off_longtime;     /* Units: ms */
-+	unsigned int		sleep_notify_time;	/* Units: us */
- 	u8			power_off_notification;	/* state */
- 	unsigned int		hs_max_dtr;
- 	unsigned int		hs200_max_dtr;
-@@ -262,6 +263,7 @@ struct mmc_card {
- #define MMC_CARD_REMOVED	(1<<4)		/* card has been removed */
- #define MMC_STATE_DOING_BKOPS	(1<<5)		/* card is doing BKOPS */
- #define MMC_STATE_SUSPENDED	(1<<6)		/* card is suspended */
-+#define MMC_STATE_SLEEP_NOTIFY (1<<7)		/* card in sleep notify */
- 	unsigned int		quirks; 	/* card quirks */
- #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
- #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksize */
-@@ -427,6 +429,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
- #define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
- #define mmc_card_suspended(c)	((c)->state & MMC_STATE_SUSPENDED)
-+#define mmc_card_doing_sleep_notify(c) ((c)->state & MMC_STATE_SLEEP_NOTIFY)
- 
- #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
- #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
-@@ -437,6 +440,8 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
- #define mmc_card_clr_doing_bkops(c)	((c)->state &= ~MMC_STATE_DOING_BKOPS)
- #define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
- #define mmc_card_clr_suspended(c) ((c)->state &= ~MMC_STATE_SUSPENDED)
-+#define mmc_card_set_sleep_notify(c)	((c)->state |= MMC_STATE_SLEEP_NOTIFY)
-+#define mmc_card_clr_sleep_notify(c)	((c)->state &= ~MMC_STATE_SLEEP_NOTIFY)
- 
- /*
-  * Quirk add/remove for MMC products.
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index f471193..111e05d 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -286,6 +286,7 @@ struct mmc_host {
- 				 MMC_CAP2_HS400_1_2V)
- #define MMC_CAP2_HSX00_1_2V	(MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS400_1_2V)
- #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
-+#define MMC_CAP2_SLEEP_NOTIFY	(1 << 18)	/* sleep notify supported */
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
- 
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 124f562..bbb71ae 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -309,6 +309,7 @@ struct _mmc_csd {
- #define EXT_CSD_PWR_CL_52_360		202	/* RO */
- #define EXT_CSD_PWR_CL_26_360		203	/* RO */
- #define EXT_CSD_SEC_CNT			212	/* RO, 4 bytes */
-+#define EXT_CSD_SLEEP_NOTIFICATION_TIME	216	/* RO */
- #define EXT_CSD_S_A_TIMEOUT		217	/* RO */
- #define EXT_CSD_REL_WR_SEC_C		222	/* RO */
- #define EXT_CSD_HC_WP_GRP_SIZE		221	/* RO */
-@@ -403,6 +404,7 @@ struct _mmc_csd {
- #define EXT_CSD_POWER_ON		1
- #define EXT_CSD_POWER_OFF_SHORT		2
- #define EXT_CSD_POWER_OFF_LONG		3
-+#define EXT_CSD_SLEEP_NOTIFICATION	4
- 
- #define EXT_CSD_PWR_CL_8BIT_MASK	0xF0	/* 8 bit PWR CLS */
- #define EXT_CSD_PWR_CL_4BIT_MASK	0x0F	/* 8 bit PWR CLS */
--- 
-1.7.9.5
-
-
-
+>  #include <linux/clk.h>
+>  #include <linux/err.h>
+>  #include <linux/mmc/host.h>
+> @@ -37,7 +39,6 @@
+>  #include <asm/sizes.h>
+>
+>  #include <mach/hardware.h>
+> -#include <mach/dma.h>
+>  #include <linux/platform_data/mmc-pxamci.h>
+>
+>  #include "pxamci.h"
+> @@ -58,7 +59,6 @@ struct pxamci_host {
+>         struct clk              *clk;
+>         unsigned long           clkrate;
+>         int                     irq;
+> -       int                     dma;
+>         unsigned int            clkrt;
+>         unsigned int            cmdat;
+>         unsigned int            imask;
+> @@ -69,8 +69,10 @@ struct pxamci_host {
+>         struct mmc_command      *cmd;
+>         struct mmc_data         *data;
+>
+> +       struct dma_chan         *dma_chan_rx;
+> +       struct dma_chan         *dma_chan_tx;
+> +       dma_cookie_t            dma_cookie;
+>         dma_addr_t              sg_dma;
+> -       struct pxa_dma_desc     *sg_cpu;
+>         unsigned int            dma_len;
+>
+>         unsigned int            dma_dir;
+> @@ -173,14 +175,18 @@ static void pxamci_disable_irq(struct pxamci_host *host, unsigned int mask)
+>         spin_unlock_irqrestore(&host->lock, flags);
+>  }
+>
+> +static void pxamci_dma_irq(void *param);
+> +
+>  static void pxamci_setup_data(struct pxamci_host *host, struct mmc_data *data)
+>  {
+> +       struct dma_async_tx_descriptor *tx;
+> +       enum dma_data_direction direction;
+> +       struct dma_slave_config config;
+> +       struct dma_chan *chan;
+>         unsigned int nob = data->blocks;
+>         unsigned long long clks;
+>         unsigned int timeout;
+> -       bool dalgn = 0;
+> -       u32 dcmd;
+> -       int i;
+> +       int ret;
+>
+>         host->data = data;
+>
+> @@ -195,54 +201,48 @@ static void pxamci_setup_data(struct pxamci_host *host, struct mmc_data *data)
+>         timeout = (unsigned int)clks + (data->timeout_clks << host->clkrt);
+>         writel((timeout + 255) / 256, host->base + MMC_RDTO);
+>
+> +       memset(&config, 0, sizeof(config));
+> +       config.src_addr_width = DMA_SLAVE_BUSWIDTH_1_BYTE;
+> +       config.dst_addr_width = DMA_SLAVE_BUSWIDTH_1_BYTE;
+> +       config.src_addr = host->res->start + MMC_RXFIFO;
+> +       config.dst_addr = host->res->start + MMC_TXFIFO;
+> +       config.src_maxburst = 32;
+> +       config.dst_maxburst = 32;
+> +
+>         if (data->flags & MMC_DATA_READ) {
+>                 host->dma_dir = DMA_FROM_DEVICE;
+> -               dcmd = DCMD_INCTRGADDR | DCMD_FLOWSRC;
+> -               DRCMR(host->dma_drcmrtx) = 0;
+> -               DRCMR(host->dma_drcmrrx) = host->dma | DRCMR_MAPVLD;
+> +               direction = DMA_DEV_TO_MEM;
+> +               chan = host->dma_chan_rx;
+>         } else {
+>                 host->dma_dir = DMA_TO_DEVICE;
+> -               dcmd = DCMD_INCSRCADDR | DCMD_FLOWTRG;
+> -               DRCMR(host->dma_drcmrrx) = 0;
+> -               DRCMR(host->dma_drcmrtx) = host->dma | DRCMR_MAPVLD;
+> +               direction = DMA_MEM_TO_DEV;
+> +               chan = host->dma_chan_tx;
+>         }
+>
+> -       dcmd |= DCMD_BURST32 | DCMD_WIDTH1;
+> +       config.direction = direction;
+> +
+> +       ret = dmaengine_slave_config(chan, &config);
+> +       if (ret < 0) {
+> +               dev_err(mmc_dev(host->mmc), "dma slave config failed\n");
+> +               return;
+> +       }
+>
+> -       host->dma_len = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
+> +       host->dma_len = dma_map_sg(chan->device->dev, data->sg, data->sg_len,
+>                                    host->dma_dir);
+>
+> -       for (i = 0; i < host->dma_len; i++) {
+> -               unsigned int length = sg_dma_len(&data->sg[i]);
+> -               host->sg_cpu[i].dcmd = dcmd | length;
+> -               if (length & 31 && !(data->flags & MMC_DATA_READ))
+> -                       host->sg_cpu[i].dcmd |= DCMD_ENDIRQEN;
+> -               /* Not aligned to 8-byte boundary? */
+> -               if (sg_dma_address(&data->sg[i]) & 0x7)
+> -                       dalgn = 1;
+> -               if (data->flags & MMC_DATA_READ) {
+> -                       host->sg_cpu[i].dsadr = host->res->start + MMC_RXFIFO;
+> -                       host->sg_cpu[i].dtadr = sg_dma_address(&data->sg[i]);
+> -               } else {
+> -                       host->sg_cpu[i].dsadr = sg_dma_address(&data->sg[i]);
+> -                       host->sg_cpu[i].dtadr = host->res->start + MMC_TXFIFO;
+> -               }
+> -               host->sg_cpu[i].ddadr = host->sg_dma + (i + 1) *
+> -                                       sizeof(struct pxa_dma_desc);
+> +       tx = dmaengine_prep_slave_sg(chan, data->sg, host->dma_len, direction,
+> +                                    DMA_PREP_INTERRUPT);
+> +       if (!tx) {
+> +               dev_err(mmc_dev(host->mmc), "prep_slave_sg() failed\n");
+> +               return;
+>         }
+> -       host->sg_cpu[host->dma_len - 1].ddadr = DDADR_STOP;
+> -       wmb();
+>
+> -       /*
+> -        * The PXA27x DMA controller encounters overhead when working with
+> -        * unaligned (to 8-byte boundaries) data, so switch on byte alignment
+> -        * mode only if we have unaligned data.
+> -        */
+> -       if (dalgn)
+> -               DALGN |= (1 << host->dma);
+> -       else
+> -               DALGN &= ~(1 << host->dma);
+> -       DDADR(host->dma) = host->sg_dma;
+> +       if (!(data->flags & MMC_DATA_READ)) {
+> +               tx->callback = pxamci_dma_irq;
+> +               tx->callback_param = host;
+> +       }
+> +
+> +       host->dma_cookie = dmaengine_submit(tx);
+>
+>         /*
+>          * workaround for erratum #91:
+> @@ -251,7 +251,7 @@ static void pxamci_setup_data(struct pxamci_host *host, struct mmc_data *data)
+>          * before starting DMA.
+>          */
+>         if (!cpu_is_pxa27x() || data->flags & MMC_DATA_READ)
+> -               DCSR(host->dma) = DCSR_RUN;
+> +               dma_async_issue_pending(chan);
+>  }
+>
+>  static void pxamci_start_cmd(struct pxamci_host *host, struct mmc_command *cmd, unsigned int cmdat)
+> @@ -343,7 +343,7 @@ static int pxamci_cmd_done(struct pxamci_host *host, unsigned int stat)
+>                  * enable DMA late
+>                  */
+>                 if (cpu_is_pxa27x() && host->data->flags & MMC_DATA_WRITE)
+> -                       DCSR(host->dma) = DCSR_RUN;
+> +                       dma_async_issue_pending(host->dma_chan_tx);
+>         } else {
+>                 pxamci_finish_request(host, host->mrq);
+>         }
+> @@ -354,13 +354,17 @@ static int pxamci_cmd_done(struct pxamci_host *host, unsigned int stat)
+>  static int pxamci_data_done(struct pxamci_host *host, unsigned int stat)
+>  {
+>         struct mmc_data *data = host->data;
+> +       struct dma_chan *chan;
+>
+>         if (!data)
+>                 return 0;
+>
+> -       DCSR(host->dma) = 0;
+> -       dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
+> -                    host->dma_dir);
+> +       if (data->flags & MMC_DATA_READ)
+> +               chan = host->dma_chan_rx;
+> +       else
+> +               chan = host->dma_chan_tx;
+> +       dma_unmap_sg(chan->device->dev,
+> +                    data->sg, data->sg_len, host->dma_dir);
+>
+>         if (stat & STAT_READ_TIME_OUT)
+>                 data->error = -ETIMEDOUT;
+> @@ -552,20 +556,37 @@ static const struct mmc_host_ops pxamci_ops = {
+>         .enable_sdio_irq        = pxamci_enable_sdio_irq,
+>  };
+>
+> -static void pxamci_dma_irq(int dma, void *devid)
+> +static void pxamci_dma_irq(void *param)
+>  {
+> -       struct pxamci_host *host = devid;
+> -       int dcsr = DCSR(dma);
+> -       DCSR(dma) = dcsr & ~DCSR_STOPIRQEN;
+> +       struct pxamci_host *host = param;
+> +       struct dma_tx_state state;
+> +       enum dma_status status;
+> +       struct dma_chan *chan;
+> +       unsigned long flags;
+> +
+> +       spin_lock_irqsave(&host->lock, flags);
+> +
+> +       if (!host->data)
+> +               goto out_unlock;
+>
+> -       if (dcsr & DCSR_ENDINTR) {
+> +       if (host->data->flags & MMC_DATA_READ)
+> +               chan = host->dma_chan_rx;
+> +       else
+> +               chan = host->dma_chan_tx;
+> +
+> +       status = dmaengine_tx_status(chan, host->dma_cookie, &state);
+> +
+> +       if (likely(status == DMA_COMPLETE)) {
+>                 writel(BUF_PART_FULL, host->base + MMC_PRTBUF);
+>         } else {
+> -               pr_err("%s: DMA error on channel %d (DCSR=%#x)\n",
+> -                      mmc_hostname(host->mmc), dma, dcsr);
+> +               pr_err("%s: DMA error on %s channel\n", mmc_hostname(host->mmc),
+> +                       host->data->flags & MMC_DATA_READ ? "rx" : "tx");
+>                 host->data->error = -EIO;
+>                 pxamci_data_done(host, 0);
+>         }
+> +
+> +out_unlock:
+> +       spin_unlock_irqrestore(&host->lock, flags);
+>  }
+>
+>  static irqreturn_t pxamci_detect_irq(int irq, void *devid)
+> @@ -625,7 +646,9 @@ static int pxamci_probe(struct platform_device *pdev)
+>         struct mmc_host *mmc;
+>         struct pxamci_host *host = NULL;
+>         struct resource *r, *dmarx, *dmatx;
+> +       struct pxad_param param_rx, param_tx;
+>         int ret, irq, gpio_cd = -1, gpio_ro = -1, gpio_power = -1;
+> +       dma_cap_mask_t mask;
+>
+>         ret = pxamci_of_init(pdev);
+>         if (ret)
+> @@ -671,7 +694,6 @@ static int pxamci_probe(struct platform_device *pdev)
+>
+>         host = mmc_priv(mmc);
+>         host->mmc = mmc;
+> -       host->dma = -1;
+>         host->pdata = pdev->dev.platform_data;
+>         host->clkrt = CLKRT_OFF;
+>
+> @@ -702,12 +724,6 @@ static int pxamci_probe(struct platform_device *pdev)
+>                                      MMC_CAP_SD_HIGHSPEED;
+>         }
+>
+> -       host->sg_cpu = dma_alloc_coherent(&pdev->dev, PAGE_SIZE, &host->sg_dma, GFP_KERNEL);
+> -       if (!host->sg_cpu) {
+> -               ret = -ENOMEM;
+> -               goto out;
+> -       }
+> -
+>         spin_lock_init(&host->lock);
+>         host->res = r;
+>         host->irq = irq;
+> @@ -728,32 +744,45 @@ static int pxamci_probe(struct platform_device *pdev)
+>         writel(64, host->base + MMC_RESTO);
+>         writel(host->imask, host->base + MMC_I_MASK);
+>
+> -       host->dma = pxa_request_dma(DRIVER_NAME, DMA_PRIO_LOW,
+> -                                   pxamci_dma_irq, host);
+> -       if (host->dma < 0) {
+> -               ret = -EBUSY;
+> -               goto out;
+> -       }
+> -
+>         ret = request_irq(host->irq, pxamci_irq, 0, DRIVER_NAME, host);
+>         if (ret)
+>                 goto out;
+>
+>         platform_set_drvdata(pdev, mmc);
+>
+> -       dmarx = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+> -       if (!dmarx) {
+> -               ret = -ENXIO;
+> +       if (!pdev->dev.of_node) {
+> +               dmarx = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+> +               dmatx = platform_get_resource(pdev, IORESOURCE_DMA, 1);
+> +               if (!dmarx || !dmatx) {
+> +                       ret = -ENXIO;
+> +                       goto out;
+> +               }
+> +               param_rx.prio = PXAD_PRIO_LOWEST;
+> +               param_rx.drcmr = dmarx->start;
+> +               param_tx.prio = PXAD_PRIO_LOWEST;
+> +               param_tx.drcmr = dmatx->start;
+> +       }
+> +
+> +       dma_cap_zero(mask);
+> +       dma_cap_set(DMA_SLAVE, mask);
+> +
+> +       host->dma_chan_rx =
+> +               dma_request_slave_channel_compat(mask, pxad_filter_fn,
+> +                                                &param_rx, &pdev->dev, "rx");
+> +       if (host->dma_chan_rx == NULL) {
+> +               dev_err(&pdev->dev, "unable to request rx dma channel\n");
+> +               ret = -ENODEV;
+>                 goto out;
+>         }
+> -       host->dma_drcmrrx = dmarx->start;
+>
+> -       dmatx = platform_get_resource(pdev, IORESOURCE_DMA, 1);
+> -       if (!dmatx) {
+> -               ret = -ENXIO;
+> +       host->dma_chan_tx =
+> +               dma_request_slave_channel_compat(mask, pxad_filter_fn,
+> +                                                &param_tx,  &pdev->dev, "tx");
+> +       if (host->dma_chan_tx == NULL) {
+> +               dev_err(&pdev->dev, "unable to request tx dma channel\n");
+> +               ret = -ENODEV;
+>                 goto out;
+>         }
+> -       host->dma_drcmrtx = dmatx->start;
+>
+>         if (host->pdata) {
+>                 gpio_cd = host->pdata->gpio_card_detect;
+> @@ -814,12 +843,12 @@ err_gpio_ro:
+>         gpio_free(gpio_power);
+>   out:
+>         if (host) {
+> -               if (host->dma >= 0)
+> -                       pxa_free_dma(host->dma);
+> +               if (host->dma_chan_rx)
+> +                       dma_release_channel(host->dma_chan_rx);
+> +               if (host->dma_chan_tx)
+> +                       dma_release_channel(host->dma_chan_tx);
+>                 if (host->base)
+>                         iounmap(host->base);
+> -               if (host->sg_cpu)
+> -                       dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
+>                 if (host->clk)
+>                         clk_put(host->clk);
+>         }
+> @@ -863,13 +892,12 @@ static int pxamci_remove(struct platform_device *pdev)
+>                        END_CMD_RES|PRG_DONE|DATA_TRAN_DONE,
+>                        host->base + MMC_I_MASK);
+>
+> -               DRCMR(host->dma_drcmrrx) = 0;
+> -               DRCMR(host->dma_drcmrtx) = 0;
+> -
+>                 free_irq(host->irq, host);
+> -               pxa_free_dma(host->dma);
+> +               dmaengine_terminate_all(host->dma_chan_rx);
+> +               dmaengine_terminate_all(host->dma_chan_tx);
+> +               dma_release_channel(host->dma_chan_rx);
+> +               dma_release_channel(host->dma_chan_tx);
+>                 iounmap(host->base);
+> -               dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
+>
+>                 clk_put(host->clk);
+>
+> --
+> 2.1.4
+>
