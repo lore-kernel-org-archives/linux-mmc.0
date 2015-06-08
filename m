@@ -1,106 +1,155 @@
-From: Lu Y.B. <yangbo.lu@freescale.com>
-Subject: RE: powerpc/corenet: enable eSDHC
-Date: Mon, 8 Jun 2015 10:12:52 +0000
-Message-ID: <BY1PR0301MB119286F6B8EBD6EED07C8B15F2BF0@BY1PR0301MB1192.namprd03.prod.outlook.com>
-References: <1430893748-38821-1-git-send-email-yangbo.lu@freescale.com>
- <20150530000331.GA9143@home.buserror.net>
+From: Daniel Lockyer <thisisdaniellockyer@gmail.com>
+Subject: [PATCH] MMC: Fix checkpatch.pl issues
+Date: Mon, 8 Jun 2015 13:04:16 +0100
+Message-ID: <20150608120416.GA7771@eve.soton.ac.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <20150530000331.GA9143@home.buserror.net>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Scott Wood <scottwood@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f169.google.com ([209.85.212.169]:33210 "EHLO
+	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750917AbbFHMES (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jun 2015 08:04:18 -0400
+Received: by wiwd19 with SMTP id d19so83822537wiw.0
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Jun 2015 05:04:16 -0700 (PDT)
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org
 
-VGhhbmtzIGEgbG90LCBTY290dC4KQW5kIG5vdyBhIHBhdGNoIHdhcyBtZXJnZWQgb24gZ2l0Oi8v
-Z2l0LmxpbmFyby5vcmcvcGVvcGxlL3VsZi5oYW5zc29uL21tYy5naXQgbmV4dCBicmFuY2ggdG8g
-Zml4IHRoaXMgaXNzdWUuCkl0IHNob3VsZCBiZSBubyBwcm9ibGVtLgoKCkZyb20gNWZkMjZjN2Vj
-YjMyMDgyNzQ1YjBiZDMzYzhlMzViYWRkMWNiNWE5MSBNb24gU2VwIDE3IDAwOjAwOjAwIDIwMDEK
-RnJvbTogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+CkRhdGU6IEZyaSwgNSBK
-dW4gMjAxNSAxMTo0MDowOCArMDIwMApTdWJqZWN0OiBbUEFUQ0hdIG1tYzogc2RoY2k6IFJlc3Rv
-cmUgYmVoYXZpb3Igd2hpbGUgY3JlYXRpbmcgT0NSIG1hc2sKCkNvbW1pdCAzYTQ4ZWRjNGJkNjgg
-KCJtbWM6IHNkaGNpOiBVc2UgbW1jIGNvcmUgcmVndWxhdG9yIGluZnJhc3R1Y3R1cmUiKQpjaGFu
-Z2VkIHRoZSBiZWhhdmlvciBmb3IgaG93IHRvIGFzc2lnbiB0aGUgb2NyX2F2YWlsIG1hc2sgZm9y
-IHRoZSBtbWMKaG9zdC4gTW9yZSBwcmVjaXNlbHkgaXQgc3RhcnRlZCB0byBtYXNrIHRoZSBiaXRz
-IGluc3RlYWQgb2YgYXNzaWduaW5nCnRoZW0uCgpSZXN0b3JlIHRoZSBiZWhhdmlvciwgYnV0IGFs
-c28gbWFrZSBpdCBjbGVhciB0aGF0IGFuIE9DUiBtYXNrIGNyZWF0ZWQKZnJvbSBhbiBleHRlcm5h
-bCByZWd1bGF0b3Igb3ZlcnJpZGVzIHRoZSBvdGhlciBvbmVzLiBUaGUgT0NSIG1hc2sgaXMKZGV0
-ZXJtaW5lZCBieSBvbmUgb2YgdGhlIGZvbGxvd2luZyB3aXRoIHRoaXMgcHJpb3JpdHk6CgoxLiBT
-dXBwb3J0ZWQgcmFuZ2VzIG9mIGV4dGVybmFsIHJlZ3VsYXRvciBpZiBvbmUgc3VwcGxpZXMgVkRE
-CjIuIEhvc3QgT0NSIG1hc2sgaWYgc2V0IGJ5IHRoZSBkcml2ZXIgKGJhc2VkIG9uIERUIHByb3Bl
-cnRpZXMpCjMuIFRoZSBjYXBhYmlsaXRpZXMgcmVwb3J0ZWQgYnkgdGhlIGNvbnRyb2xsZXIgaXRz
-ZWxmCgpGaXhlczogM2E0OGVkYzRiZDY4ICgibW1jOiBzZGhjaTogVXNlIG1tYyBjb3JlIHJlZ3Vs
-YXRvciBpbmZyYXN0dWN0dXJlIikKQ2M6IFRpbSBLcnlnZXIgPHRpbS5rcnlnZXJAZ21haWwuY29t
-PgpSZXBvcnRlZC1ieTogWWFuZ2JvIEx1IDx5YW5nYm8ubHVAZnJlZXNjYWxlLmNvbT4KU2lnbmVk
-LW9mZi1ieTogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+ClJldmlld2VkLWJ5
-OiBUaW0gS3J5Z2VyIDx0aW0ua3J5Z2VyQGdtYWlsLmNvbT4KLS0tCiBkcml2ZXJzL21tYy9ob3N0
-L3NkaGNpLmMgfCA5ICsrKysrLS0tLQogMSBmaWxlIGNoYW5nZWQsIDUgaW5zZXJ0aW9ucygrKSwg
-NCBkZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmMgYi9k
-cml2ZXJzL21tYy9ob3N0L3NkaGNpLmMKaW5kZXggMWI0ODYxZC4uNzA2YmI2MCAxMDA2NDQKLS0t
-IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jCisrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ku
-YwpAQCAtMzI1NiwxMyArMzI1NiwxNCBAQCBpbnQgc2RoY2lfYWRkX2hvc3Qoc3RydWN0IHNkaGNp
-X2hvc3QgKmhvc3QpCiAJCQkJICAgU0RIQ0lfTUFYX0NVUlJFTlRfTVVMVElQTElFUjsKIAl9CiAK
-LQkvKiBJZiBPQ1Igc2V0IGJ5IGV4dGVybmFsIHJlZ3VsYXRvcnMsIHVzZSBpdCBpbnN0ZWFkICov
-CisJLyogSWYgT0NSIHNldCBieSBob3N0LCB1c2UgaXQgaW5zdGVhZC4gKi8KKwlpZiAoaG9zdC0+
-b2NyX21hc2spCisJCW9jcl9hdmFpbCA9IGhvc3QtPm9jcl9tYXNrOworCisJLyogSWYgT0NSIHNl
-dCBieSBleHRlcm5hbCByZWd1bGF0b3JzLCBnaXZlIGl0IGhpZ2hlc3QgcHJpby4gKi8KIAlpZiAo
-bW1jLT5vY3JfYXZhaWwpCiAJCW9jcl9hdmFpbCA9IG1tYy0+b2NyX2F2YWlsOwogCi0JaWYgKGhv
-c3QtPm9jcl9tYXNrKQotCQlvY3JfYXZhaWwgJj0gaG9zdC0+b2NyX21hc2s7Ci0KIAltbWMtPm9j
-cl9hdmFpbCA9IG9jcl9hdmFpbDsKIAltbWMtPm9jcl9hdmFpbF9zZGlvID0gb2NyX2F2YWlsOwog
-CWlmIChob3N0LT5vY3JfYXZhaWxfc2RpbykKLS0gCjIuMS4wLjI3Lmc5NmRiMzI0CgoKCkJlc3Qg
-cmVnYXJkcywKWWFuZ2JvIEx1CgoKPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQo+IEZyb206
-IFdvb2QgU2NvdHQtQjA3NDIxCj4gU2VudDogU2F0dXJkYXksIE1heSAzMCwgMjAxNSA4OjA0IEFN
-Cj4gVG86IEx1IFlhbmdiby1CNDcwOTMKPiBDYzogbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5v
-cmc7IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmcKPiBTdWJqZWN0OiBSZTogcG93ZXJwYy9jb3Jl
-bmV0OiBlbmFibGUgZVNESEMKPiAKPiBPbiBXZWQsIE1heSAwNiwgMjAxNSBhdCAwMjoyOTowOFBN
-ICswODAwLCBZYW5nYm8gTHUgd3JvdGU6Cj4gPiBTaWduZWQtb2ZmLWJ5OiBZYW5nYm8gTHUgPHlh
-bmdiby5sdUBmcmVlc2NhbGUuY29tPgo+ID4gLS0tCj4gPiAgYXJjaC9wb3dlcnBjL2NvbmZpZ3Mv
-Y29yZW5ldDMyX3NtcF9kZWZjb25maWcgfCAyICsrCj4gPiBhcmNoL3Bvd2VycGMvY29uZmlncy9j
-b3JlbmV0NjRfc21wX2RlZmNvbmZpZyB8IDIgKysKPiA+ICAyIGZpbGVzIGNoYW5nZWQsIDQgaW5z
-ZXJ0aW9ucygrKQo+ID4KPiA+IGRpZmYgLS1naXQgYS9hcmNoL3Bvd2VycGMvY29uZmlncy9jb3Jl
-bmV0MzJfc21wX2RlZmNvbmZpZwo+ID4gYi9hcmNoL3Bvd2VycGMvY29uZmlncy9jb3JlbmV0MzJf
-c21wX2RlZmNvbmZpZwo+ID4gaW5kZXggY2E3OTU3Yi4uMTdmYjJlMCAxMDA2NDQKPiA+IC0tLSBh
-L2FyY2gvcG93ZXJwYy9jb25maWdzL2NvcmVuZXQzMl9zbXBfZGVmY29uZmlnCj4gPiArKysgYi9h
-cmNoL3Bvd2VycGMvY29uZmlncy9jb3JlbmV0MzJfc21wX2RlZmNvbmZpZwo+ID4gQEAgLTEzMCw2
-ICsxMzAsOCBAQCBDT05GSUdfVVNCX09IQ0lfSENEX1BQQ19PRl9MRT15Cj4gPiBDT05GSUdfVVNC
-X1NUT1JBR0U9eSAgQ09ORklHX01NQz15ICBDT05GSUdfTU1DX1NESENJPXkKPiA+ICtDT05GSUdf
-TU1DX1NESENJX1BMVEZNPXkKPiA+ICtDT05GSUdfTU1DX1NESENJX09GX0VTREhDPXkKPiA+ICBD
-T05GSUdfRURBQz15Cj4gPiAgQ09ORklHX0VEQUNfTU1fRURBQz15Cj4gPiAgQ09ORklHX0VEQUNf
-TVBDODVYWD15Cj4gPiBkaWZmIC0tZ2l0IGEvYXJjaC9wb3dlcnBjL2NvbmZpZ3MvY29yZW5ldDY0
-X3NtcF9kZWZjb25maWcKPiA+IGIvYXJjaC9wb3dlcnBjL2NvbmZpZ3MvY29yZW5ldDY0X3NtcF9k
-ZWZjb25maWcKPiA+IGluZGV4IDA0NzM3YWEuLjQ2MDVhNTUgMTAwNjQ0Cj4gPiAtLS0gYS9hcmNo
-L3Bvd2VycGMvY29uZmlncy9jb3JlbmV0NjRfc21wX2RlZmNvbmZpZwo+ID4gKysrIGIvYXJjaC9w
-b3dlcnBjL2NvbmZpZ3MvY29yZW5ldDY0X3NtcF9kZWZjb25maWcKPiA+IEBAIC0xMTIsNiArMTEy
-LDggQEAgQ09ORklHX1VTQl9FSENJX0ZTTD15ICBDT05GSUdfVVNCX1NUT1JBR0U9eQo+ID4gQ09O
-RklHX01NQz15ICBDT05GSUdfTU1DX1NESENJPXkKPiA+ICtDT05GSUdfTU1DX1NESENJX1BMVEZN
-PXkKPiA+ICtDT05GSUdfTU1DX1NESENJX09GX0VTREhDPXkKPiA+ICBDT05GSUdfRURBQz15Cj4g
-PiAgQ09ORklHX0VEQUNfTU1fRURBQz15Cj4gPiAgQ09ORklHX1JUQ19DTEFTUz15Cj4gCj4gV2l0
-aCB0aGlzIG9uIHQ0MjQwcmRiIEknbSBjb250aW51YWxseSBzcGFtbWVkIHdpdGg6Cj4gc2RoY2kt
-ZXNkaGMgZmZlMTE0MDAwLnNkaGM6IG5vIHN1cHBvcnQgZm9yIGNhcmQncyB2b2x0cwo+IG1tYzA6
-IGVycm9yIC0yMiB3aGlsc3QgaW5pdGlhbGlzaW5nIFNEIGNhcmQgc2RoY2ktZXNkaGMgZmZlMTE0
-MDAwLnNkaGM6Cj4gbm8gc3VwcG9ydCBmb3IgY2FyZCdzIHZvbHRzCj4gbW1jMDogZXJyb3IgLTIy
-IHdoaWxzdCBpbml0aWFsaXNpbmcgU0QgY2FyZAo+IAo+IFJlbGV2ZWFudCBib290IG1lc3NhZ2Vz
-IGluY2x1ZGU6Cj4gc2RoY2k6IFNlY3VyZSBEaWdpdGFsIEhvc3QgQ29udHJvbGxlciBJbnRlcmZh
-Y2UgZHJpdmVyCj4gc2RoY2k6IENvcHlyaWdodChjKSBQaWVycmUgT3NzbWFuCj4gc2RoY2ktcGx0
-Zm06IFNESENJIHBsYXRmb3JtIGFuZCBPRiBkcml2ZXIgaGVscGVyIHNkaGNpLWVzZGhjCj4gZmZl
-MTE0MDAwLnNkaGM6IE5vIHZtbWMgcmVndWxhdG9yIGZvdW5kIHNkaGNpLWVzZGhjIGZmZTExNDAw
-MC5zZGhjOiBObwo+IHZxbW1jIHJlZ3VsYXRvciBmb3VuZAo+IG1tYzA6IFNESENJIGNvbnRyb2xs
-ZXIgb24gZmZlMTE0MDAwLnNkaGMgW2ZmZTExNDAwMC5zZGhjXSB1c2luZyBBRE1BIC4uLgo+IG1t
-YzA6IGVycm9yIC0yMiB3aGlsc3QgaW5pdGlhbGlzaW5nIFNEIGNhcmQgLi4uCj4gc2RoY2ktZXNk
-aGMgZmZlMTE0MDAwLnNkaGM6IG5vIHN1cHBvcnQgZm9yIGNhcmQncyB2b2x0cwo+IG1tYzA6IGVy
-cm9yIC0yMiB3aGlsc3QgaW5pdGlhbGlzaW5nIFNEIGNhcmQKPiAKPiAtU2NvdHQKX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGludXhwcGMtZGV2IG1haWxp
-bmcgbGlzdApMaW51eHBwYy1kZXZAbGlzdHMub3psYWJzLm9yZwpodHRwczovL2xpc3RzLm96bGFi
-cy5vcmcvbGlzdGluZm8vbGludXhwcGMtZGV2
+Remove unneeded braces and fixed spacing.
+Also changed include of asm/uaccess.h to linux/uaccess.h.
+
+Signed-off-by: Daniel Lockyer <thisisdaniellockyer@gmail.com>
+---
+ drivers/mmc/card/block.c     | 2 +-
+ drivers/mmc/card/sdio_uart.c | 2 +-
+ drivers/mmc/core/mmc_ops.c   | 4 ++--
+ drivers/mmc/core/sd_ops.c    | 5 ++---
+ drivers/mmc/core/sdio.c      | 5 ++---
+ drivers/mmc/core/sdio_cis.c  | 4 ++--
+ 6 files changed, 10 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 60f7141..94d5fdb 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -42,7 +42,7 @@
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/sd.h>
+ 
+-#include <asm/uaccess.h>
++#include <linux/uaccess.h>
+ 
+ #include "queue.h"
+ 
+diff --git a/drivers/mmc/card/sdio_uart.c b/drivers/mmc/card/sdio_uart.c
+index d2de592..ef3bf63 100644
+--- a/drivers/mmc/card/sdio_uart.c
++++ b/drivers/mmc/card/sdio_uart.c
+@@ -768,7 +768,7 @@ static int sdio_uart_open(struct tty_struct *tty, struct file *filp)
+ 	return tty_port_open(&port->port, tty, filp);
+ }
+ 
+-static void sdio_uart_close(struct tty_struct *tty, struct file * filp)
++static void sdio_uart_close(struct tty_struct *tty, struct file *filp)
+ {
+ 	struct sdio_uart_port *port = tty->driver_data;
+ 	tty_port_close(&port->port, tty, filp);
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 0ea042d..0d4790c 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -353,7 +353,7 @@ int mmc_send_csd(struct mmc_card *card, u32 *csd)
+ 	if (ret)
+ 		goto err;
+ 
+-	for (i = 0;i < 4;i++)
++	for (i = 0; i < 4; i++)
+ 		csd[i] = be32_to_cpu(csd_tmp[i]);
+ 
+ err:
+@@ -381,7 +381,7 @@ int mmc_send_cid(struct mmc_host *host, u32 *cid)
+ 	if (ret)
+ 		goto err;
+ 
+-	for (i = 0;i < 4;i++)
++	for (i = 0; i < 4; i++)
+ 		cid[i] = be32_to_cpu(cid_tmp[i]);
+ 
+ err:
+diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+index 48d0c93..e7ce495 100644
+--- a/drivers/mmc/core/sd_ops.c
++++ b/drivers/mmc/core/sd_ops.c
+@@ -54,7 +54,7 @@ EXPORT_SYMBOL_GPL(mmc_app_cmd);
+ 
+ /**
+  *	mmc_wait_for_app_cmd - start an application command and wait for
+- 			       completion
++ *			       completion
+  *	@host: MMC host to start command
+  *	@card: Card to send MMC_APP_CMD to
+  *	@cmd: MMC command to start
+@@ -81,7 +81,7 @@ int mmc_wait_for_app_cmd(struct mmc_host *host, struct mmc_card *card,
+ 	 * We have to resend MMC_APP_CMD for each attempt so
+ 	 * we cannot use the retries field in mmc_command.
+ 	 */
+-	for (i = 0;i <= retries;i++) {
++	for (i = 0; i <= retries; i++) {
+ 		err = mmc_app_cmd(host, card);
+ 		if (err) {
+ 			/* no point in retrying; no APP commands allowed */
+@@ -115,7 +115,6 @@ int mmc_wait_for_app_cmd(struct mmc_host *host, struct mmc_card *card,
+ 
+ 	return err;
+ }
+-
+ EXPORT_SYMBOL(mmc_wait_for_app_cmd);
+ 
+ int mmc_app_set_bus_width(struct mmc_card *card, int width)
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 5bc6c7d..08c74b6 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -723,9 +723,8 @@ try_again:
+ 		 */
+ 		mmc_set_clock(host, card->cis.max_dtr);
+ 
+-		if (card->cccr.high_speed) {
++		if (card->cccr.high_speed)
+ 			mmc_set_timing(card->host, MMC_TIMING_SD_HS);
+-		}
+ 
+ 		goto finish;
+ 	}
+@@ -827,7 +826,7 @@ static void mmc_sdio_remove(struct mmc_host *host)
+ 	BUG_ON(!host);
+ 	BUG_ON(!host->card);
+ 
+-	for (i = 0;i < host->card->sdio_funcs;i++) {
++	for (i = 0; i < host->card->sdio_funcs; i++) {
+ 		if (host->card->sdio_func[i]) {
+ 			sdio_remove_func(host->card->sdio_func[i]);
+ 			host->card->sdio_func[i] = NULL;
+diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
+index 8e94e55..09e3f55 100644
+--- a/drivers/mmc/core/sdio_cis.c
++++ b/drivers/mmc/core/sdio_cis.c
+@@ -47,11 +47,11 @@ static int cistpl_vers_1(struct mmc_card *card, struct sdio_func *func,
+ 
+ 	size = i;
+ 
+-	buffer = kzalloc(sizeof(char*) * nr_strings + size, GFP_KERNEL);
++	buffer = kzalloc(sizeof(char *) * nr_strings + size, GFP_KERNEL);
+ 	if (!buffer)
+ 		return -ENOMEM;
+ 
+-	string = (char*)(buffer + nr_strings);
++	string = (char *)(buffer + nr_strings);
+ 
+ 	for (i = 0; i < nr_strings; i++) {
+ 		buffer[i] = string;
+-- 
+2.4.2
+
