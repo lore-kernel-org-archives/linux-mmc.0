@@ -1,354 +1,83 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH v3] mmc: sleep notification
-Date: Mon, 8 Jun 2015 11:03:37 +0200
-Message-ID: <CAPDyKFoPqwDC_w1QTe7zQtJfH_5m2Gp_5uewJKy=x_LeaFqYhA@mail.gmail.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE64FAAD701@SACMBXIP02.sdcorp.global.sandisk.com>
+Subject: Re: [PATCH] mmc: sdhci: Restore behavior while creating OCR mask
+Date: Mon, 8 Jun 2015 11:21:42 +0200
+Message-ID: <CAPDyKFqS7tks=fkU8DiMCNBgahJLXavfgFzcv7EV0ncHNVay+w@mail.gmail.com>
+References: <1433498817-16679-1-git-send-email-ulf.hansson@linaro.org>
+	<CAD7vxxKGV__f-r3yc+=9g8=97DRFTEiwZH6Fj_6y3+9ze+VB3g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f43.google.com ([209.85.192.43]:35510 "EHLO
-	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753094AbbFHJDi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jun 2015 05:03:38 -0400
-Received: by qgg3 with SMTP id 3so21795791qgg.2
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Jun 2015 02:03:37 -0700 (PDT)
-In-Reply-To: <FDD07FEB422EF948A392FDC201AEEAE64FAAD701@SACMBXIP02.sdcorp.global.sandisk.com>
+Received: from mail-qg0-f51.google.com ([209.85.192.51]:35463 "EHLO
+	mail-qg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752968AbbFHJVn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jun 2015 05:21:43 -0400
+Received: by qgg3 with SMTP id 3so21910701qgg.2
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Jun 2015 02:21:42 -0700 (PDT)
+In-Reply-To: <CAD7vxxKGV__f-r3yc+=9g8=97DRFTEiwZH6Fj_6y3+9ze+VB3g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
-Cc: Alex Lemberg <Alex.Lemberg@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Tim Kryger <tim.kryger@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Yangbo Lu <yangbo.lu@freescale.com>
 
-On 8 June 2015 at 08:46, Avi Shchislowski <Avi.Shchislowski@sandisk.com> wrote:
-> Hi Ulf,
+On 6 June 2015 at 20:52, Tim Kryger <tim.kryger@gmail.com> wrote:
+> On Fri, Jun 5, 2015 at 3:06 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> Commit 3a48edc4bd68 ("mmc: sdhci: Use mmc core regulator infrastucture")
+>> changed the behavior for how to assign the ocr_avail mask for the mmc
+>> host. More precisely it started to mask the bits instead of assigning
+>> them.
+>>
+>> Restore the behavior, but also make it clear that an OCR mask created
+>> from an external regulator overrides the other ones.
+>>
+>> Fixes: 3a48edc4bd68 ("mmc: sdhci: Use mmc core regulator infrastucture")
+>> Cc: Tim Kryger <tim.kryger@gmail.com>
+>> Reported-by: Yangbo Lu <yangbo.lu@freescale.com>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> ---
+>>  drivers/mmc/host/sdhci.c | 9 +++++----
+>>  1 file changed, 5 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 1b4861d..706bb60 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -3256,13 +3256,14 @@ int sdhci_add_host(struct sdhci_host *host)
+>>                                    SDHCI_MAX_CURRENT_MULTIPLIER;
+>>         }
+>>
+>> -       /* If OCR set by external regulators, use it instead */
+>> +       /* If OCR set by host, use it instead. */
+>> +       if (host->ocr_mask)
+>> +               ocr_avail = host->ocr_mask;
+>> +
+>> +       /* If OCR set by external regulators, give it highest prio. */
+>>         if (mmc->ocr_avail)
+>>                 ocr_avail = mmc->ocr_avail;
+>>
+>> -       if (host->ocr_mask)
+>> -               ocr_avail &= host->ocr_mask;
+>> -
+>>         mmc->ocr_avail = ocr_avail;
+>>         mmc->ocr_avail_sdio = ocr_avail;
+>>         if (host->ocr_avail_sdio)
+>> --
+>> 1.9.1
+>>
 >
-> Here is a V3 per your request.
-> Please review.
+> The patch looks good.  Perhaps include this in the commit message.
 >
-> This patch is implements the new additional state of
-> Power_Off_Notification - SLEEP_NOTIFICATION.
-> Until now, the implementation of Power_Off_Notification
-> supported only three modes - POWERED_ON (0x01),
-> POWER_OFF_SHORT (0x02) and POWER_OFF_LONG (0x03).
+> The OCR mask is determined by one of the following with this priority:
 >
-> As part of eMMC5.0 before moving to Sleep state hosts may set the
-> POWER_OFF_NOTIFICATION byte to SLEEP_NOTIFICATION (0x04).
-> After setting SLEEP_NOTIFICATION, host should wait for
-> the busy line to be de-asserted.
+>   1. Supported ranges of external regulator if one supplies VDD
+>   2. Host OCR mask if set by the driver (based on DT properties)
+>   3. The capabilities reported by the controller itself
 >
-> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
-> Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
+> Reviewed-by: Tim Kryger <tim.kryger@gmail.com>
 
-You need to trim your change-log here. I can't apply patches which
-comes in this format and run checkpatch, please.
+Tim, thanks for you review!
 
-Moreover, try answer the *what* and *why* question in the change log.
-
->
-> ---------
-
-It's nice that you provide a history, but don't include that into the
-commit message.
-Change the above nine "-" to three "-", to make the history below be
-posted as a appended message for the patch.
-
-> V3:
-> - remove macros
-> - remove hpi_en dependency
-> - add helper function for sleep notification
->
-> v2:
-> - remove calling mmc_interrupt_hpi in case the device is doing
->   sleep notification from block.c
-> - remove call of "mmc_card_doing_sleep_notify" from core.c
-> - mmc_sleep_notify changed to static function
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index a802863..56dae18 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -60,6 +60,14 @@ static const unsigned int tacc_mant[] = {
->         })
->
->  /*
-> + * Indicates the maximum allowed timeout - 83.88s
-> + * as defined in eMMC Spec for the Sleep Notification
-> + * SWITCH command when notifying the device that it is
-> + * about to be moved to sleep state.
-> + */
-> +#define MMC_SLEEP_NOTIFY_MAX_TIME      0x17
-> +
-> +/*
->   * Given the decoded CSD structure, decode the raw CID to our CID structure.
->   */
->  static int mmc_decode_cid(struct mmc_card *card)
-> @@ -582,6 +590,8 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
->                 card->ext_csd.ffu_capable =
->                         (ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
->                         !(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
-> +               card->ext_csd.sleep_notify_time =
-> +                       ext_csd[EXT_CSD_SLEEP_NOTIFICATION_TIME];
->         }
->  out:
->         return err;
-> @@ -1642,6 +1652,44 @@ out_release:
->         return err;
->  }
->
-> +/*
-> + * check if device is in program state (busy)
-> + */
-> +static bool mmc_device_prg_state(struct mmc_card *card)
-> +{
-> +       int rc;
-> +       u32 status;
-> +       bool state;
-> +
-> +       mmc_get_card(card);
-> +       rc = mmc_send_status(card, &status);
-> +       if (rc) {
-> +               pr_err("%s: Get card status fail. rc=%d\n",
-> +                       mmc_hostname(card->host), rc);
-> +               state = false;
-> +               goto out;
-> +       }
-> +
-> +       if (R1_CURRENT_STATE(status) == R1_STATE_PRG)
-> +               state =  true;
-> +       else
-> +               state =  false;
-> +out:
-> +       mmc_put_card(card);
-> +       return state;
-> +}
-> +
-> +static int can_sleep_notify(struct mmc_card *card)
-> +{
-> +       /* sleep notify enable/disable for eMMC 5.0 and above */
-> +       return (card && card->ext_csd.rev >= 7 &&
-> +                       (card->host->caps2 & MMC_CAP2_SLEEP_NOTIFY) &&
-> +                       card->ext_csd.sleep_notify_time > 0 &&
-> +                       card->ext_csd.sleep_notify_time <=
-> +                               MMC_SLEEP_NOTIFY_MAX_TIME &&
-> +                       card->ext_csd.power_off_notification == EXT_CSD_POWER_ON);
-> +}
-> +
->  static int mmc_can_poweroff_notify(const struct mmc_card *card)
->  {
->         return card &&
-> @@ -1653,17 +1701,32 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
->  {
->         unsigned int timeout = card->ext_csd.generic_cmd6_time;
->         int err;
-> +       bool use_busy_signal;
->
->         /* Use EXT_CSD_POWER_OFF_SHORT as default notification type. */
->         if (notify_type == EXT_CSD_POWER_OFF_LONG)
->                 timeout = card->ext_csd.power_off_longtime;
-> +       else if (notify_type == EXT_CSD_SLEEP_NOTIFICATION) {
-> +               /* calculate the maximum timeout for the
-> +                * switch command when notifying the device
-> +                * that it is about to move to sleep */
->
-> +               timeout = DIV_ROUND_UP((10 *
-> +                       (1 << (unsigned int)(card->ext_csd.sleep_notify_time))),1000);
-> +               }
-> +
-> +       use_busy_signal = (notify_type == EXT_CSD_SLEEP_NOTIFICATION) ?
-> +                       false : true;
->         err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->                         EXT_CSD_POWER_OFF_NOTIFICATION,
-> -                       notify_type, timeout, true, false, false);
-> -       if (err)
-> +                       notify_type, timeout,
-> +                       use_busy_signal, false, false);
-> +       if (!err) {
-> +               card->ext_csd.power_off_notification = notify_type;
-> +       } else {
->                 pr_err("%s: Power Off Notification timed out, %u\n",
-> -                      mmc_hostname(card->host), timeout);
-> +                       mmc_hostname(card->host), timeout);
-> +       }
->
->         /* Disable the power off notification after the switch operation. */
->         card->ext_csd.power_off_notification = EXT_CSD_NO_POWER_NOTIFICATION;
-> @@ -1671,6 +1734,70 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
->         return err;
->  }
->
-> +static int mmc_sleep_notify(struct mmc_card *card)
-> +{
-> +       int err = 0;
-> +       bool is_busy = 0;
-> +       unsigned long prg_wait = 0;
-> +       unsigned int timeout;
-> +
-> +       if (!can_sleep_notify(card) || !mmc_can_poweroff_notify(card))
-> +               return 0;
-> +
-> +       if (!mmc_card_doing_sleep_notify(card)) {
-> +               mmc_get_card(card);
-> +               mmc_card_set_sleep_notify(card);
-> +               err = mmc_poweroff_notify(card,
-> +                       EXT_CSD_SLEEP_NOTIFICATION);
-> +               mmc_put_card(card);
-> +               if (err) {
-> +                       pr_err("%s: mmc_poweroff_notify failed with %d\n",
-> +                              __func__, err);
-> +                       goto out;
-> +               }
-> +               timeout = DIV_ROUND_UP((10 *
-> +                               (1 << (unsigned int)(card->ext_csd.sleep_notify_time)))
-> +                               ,1000);
-> +               prg_wait = jiffies + msecs_to_jiffies(timeout);
-> +       }
-> +       /*
-> +                * Loop will run until  Device is no
-> +                * more in Busy state
-> +                */
-> +
-> +       do {
-> +               /* added some delay to avoid sending card status too often */
-> +               msleep(20);
-> +               err = 0;
-> +               is_busy = mmc_device_prg_state(card);
-> +               if (is_busy && time_after(jiffies, prg_wait)) {
-> +                       /*
-> +                        * making sure we are still in busy before
-> +                        * sending HPI due to timeout error
-> +                        */
-> +                       is_busy = mmc_device_prg_state(card);
-> +                       if (is_busy) {
-> +                               if (mmc_card_doing_sleep_notify(card)) {
-> +                                       card->ext_csd.power_off_notification =
-> +                                               EXT_CSD_POWER_ON;
-> +                                       mmc_interrupt_hpi(card);
-> +                               }
-> +                               err = -ETIMEDOUT;
-> +                               break;
-> +                       }
-> +               }
-> +       } while (is_busy);
-> +
-> +out:
-> +       mmc_card_clr_sleep_notify(card);
-> +       if (err) {
-> +               pr_err("%s: mmc_poweroff_notify for sleep failed with %d\n",
-> +                      mmc_hostname(card->host), err);
-> +       }
-> +
-> +       return err;
-> +}
-> +
->  /*
->   * Host is being removed. Free up the current card.
->   */
-> @@ -1744,14 +1871,19 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
->         if (err)
->                 goto out;
->
-> -       if (mmc_can_poweroff_notify(host->card) &&
-> -               ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
-> -               err = mmc_poweroff_notify(host->card, notify_type);
-> -       else if (mmc_can_sleep(host->card))
-> +    if (mmc_can_poweroff_notify(host->card)) {
-> +       if (!can_sleep_notify(host->card)) {
-> +               err = mmc_poweroff_notify(host->card, notify_type);
-> +       } else if (is_suspend) {
-> +               err = mmc_sleep_notify(host->card);
-> +               if (err != -ETIMEDOUT)
-> +                       err = mmc_sleep(host);
-> +       }
-> +    } else if (mmc_can_sleep(host->card)) {
->                 err = mmc_sleep(host);
-> -       else if (!mmc_host_is_spi(host))
-> +    } else if (!mmc_host_is_spi(host)) {
->                 err = mmc_deselect_cards(host);
-> -
-> +    }
->         if (!err) {
->                 mmc_power_off(host);
->                 mmc_card_set_suspended(host->card);
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 19f0175..3189e73 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -62,6 +62,7 @@ struct mmc_ext_csd {
->         unsigned int            sa_timeout;             /* Units: 100ns */
->         unsigned int            generic_cmd6_time;      /* Units: 10ms */
->         unsigned int            power_off_longtime;     /* Units: ms */
-> +       unsigned int            sleep_notify_time;      /* Units: us */
->         u8                      power_off_notification; /* state */
->         unsigned int            hs_max_dtr;
->         unsigned int            hs200_max_dtr;
-> @@ -262,6 +263,7 @@ struct mmc_card {
->  #define MMC_CARD_REMOVED       (1<<4)          /* card has been removed */
->  #define MMC_STATE_DOING_BKOPS  (1<<5)          /* card is doing BKOPS */
->  #define MMC_STATE_SUSPENDED    (1<<6)          /* card is suspended */
-> +#define MMC_STATE_SLEEP_NOTIFY (1<<7)          /* card in sleep notify */
->         unsigned int            quirks;         /* card quirks */
->  #define MMC_QUIRK_LENIENT_FN0  (1<<0)          /* allow SDIO FN0 writes outside of the VS CCCR range */
->  #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)   /* use func->cur_blksize */
-> @@ -427,6 +429,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
->  #define mmc_card_removed(c)    ((c) && ((c)->state & MMC_CARD_REMOVED))
->  #define mmc_card_doing_bkops(c)        ((c)->state & MMC_STATE_DOING_BKOPS)
->  #define mmc_card_suspended(c)  ((c)->state & MMC_STATE_SUSPENDED)
-> +#define mmc_card_doing_sleep_notify(c) ((c)->state & MMC_STATE_SLEEP_NOTIFY)
->
->  #define mmc_card_set_present(c)        ((c)->state |= MMC_STATE_PRESENT)
->  #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
-> @@ -437,6 +440,8 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
->  #define mmc_card_clr_doing_bkops(c)    ((c)->state &= ~MMC_STATE_DOING_BKOPS)
->  #define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
->  #define mmc_card_clr_suspended(c) ((c)->state &= ~MMC_STATE_SUSPENDED)
-> +#define mmc_card_set_sleep_notify(c)   ((c)->state |= MMC_STATE_SLEEP_NOTIFY)
-> +#define mmc_card_clr_sleep_notify(c)   ((c)->state &= ~MMC_STATE_SLEEP_NOTIFY)
->
->  /*
->   * Quirk add/remove for MMC products.
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index f471193..111e05d 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -286,6 +286,7 @@ struct mmc_host {
->                                  MMC_CAP2_HS400_1_2V)
->  #define MMC_CAP2_HSX00_1_2V    (MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS400_1_2V)
->  #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
-> +#define MMC_CAP2_SLEEP_NOTIFY  (1 << 18)       /* sleep notify supported */
->
->         mmc_pm_flag_t           pm_caps;        /* supported pm features */
->
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 124f562..bbb71ae 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -309,6 +309,7 @@ struct _mmc_csd {
->  #define EXT_CSD_PWR_CL_52_360          202     /* RO */
->  #define EXT_CSD_PWR_CL_26_360          203     /* RO */
->  #define EXT_CSD_SEC_CNT                        212     /* RO, 4 bytes */
-> +#define EXT_CSD_SLEEP_NOTIFICATION_TIME        216     /* RO */
->  #define EXT_CSD_S_A_TIMEOUT            217     /* RO */
->  #define EXT_CSD_REL_WR_SEC_C           222     /* RO */
->  #define EXT_CSD_HC_WP_GRP_SIZE         221     /* RO */
-> @@ -403,6 +404,7 @@ struct _mmc_csd {
->  #define EXT_CSD_POWER_ON               1
->  #define EXT_CSD_POWER_OFF_SHORT                2
->  #define EXT_CSD_POWER_OFF_LONG         3
-> +#define EXT_CSD_SLEEP_NOTIFICATION     4
->
->  #define EXT_CSD_PWR_CL_8BIT_MASK       0xF0    /* 8 bit PWR CLS */
->  #define EXT_CSD_PWR_CL_4BIT_MASK       0x0F    /* 8 bit PWR CLS */
-> --
-> 1.7.9.5
->
->
->
-
-One of my comments for v2, was that I think you should remove all code
-which was related to HPI to interrupt sleep notification from the
-runtime PM resume path. Instead I wanted you to add that functionality
-as separate patch based on top of this patch.
-
-You haven't done that in v3, why?
+I have applied the patch for my next branch and updated the commit
+message according to your proposal.
 
 Kind regards
 Uffe
