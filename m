@@ -1,121 +1,106 @@
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: Re: Usage of restart_handler in pwrseq_emmc
-Date: Mon, 08 Jun 2015 11:36:17 +0200
-Message-ID: <55756211.1050109@samsung.com>
-References: <1789396.sexGZzDeEb@diego> <556ED06B.9030601@samsung.com>
- <556F1758.4030207@roeck-us.net>
+From: Lu Y.B. <yangbo.lu@freescale.com>
+Subject: RE: powerpc/corenet: enable eSDHC
+Date: Mon, 8 Jun 2015 10:12:52 +0000
+Message-ID: <BY1PR0301MB119286F6B8EBD6EED07C8B15F2BF0@BY1PR0301MB1192.namprd03.prod.outlook.com>
+References: <1430893748-38821-1-git-send-email-yangbo.lu@freescale.com>
+ <20150530000331.GA9143@home.buserror.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.w1.samsung.com ([210.118.77.11]:45275 "EHLO
-	mailout1.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752653AbbFHJgX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jun 2015 05:36:23 -0400
-In-reply-to: <556F1758.4030207@roeck-us.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <20150530000331.GA9143@home.buserror.net>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Scott Wood <scottwood@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Guenter Roeck <linux@roeck-us.net>, =?UTF-8?B?SGVpa28gU3TDvGJuZXI=?= <heiko@sntech.de>, Ulf Hansson <ulf.hansson@linaro.org>, Alexandre Courbot <acourbot@nvidia.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hello,
-
-On 2015-06-03 17:03, Guenter Roeck wrote:
-> On 06/03/2015 03:01 AM, Marek Szyprowski wrote:
->> Hello,
->>
->> On 2015-06-02 17:29, Heiko St=C3=BCbner wrote:
->>> I'm confused by the pwrseq-emmc registering a restart_handler for=20
->>> resetting an
->>> emmc in a panic-reboot case at priority 129 to "schedules it just=20
->>> before
->>> system reboot".
->>>
->>> >From what I remember from the restart-handler discussion the=20
->>> actuall usage is
->>> traversing the ordered list until one registered handler sucessfull=
-y=20
->>> restarts
->>> the system and not to have arbitary actions in there not related to=
-=20
->>> the actual
->>> restart process?
->>>
->>> The actual documentation in kernel/reboot.c supports this assumptio=
-n,
->>> describing register_restart_handler as "Register function to be=20
->>> called to
->>> reset the system".
->>>
->>>
->>> Additionally, 128 isn't even _the_ priority to reboot the system as=
-=20
->>> described
->>> above and some drivers use higher priorities per default, see in
->>> drivers/power/reset arm-versatile-reboot.c; at91-reset.c;=20
->>> rmobile-reset.c and
->>> some more.
->>>
->>>
->>> So I guess this should use some other mechanism (reboot notifier)=20
->>> instead of
->>> restart_handlers?
->>
->> The first problem with reboot notifiers is that they are called too=20
->> early - before
->> device_shutdown(), what interferes with the code in mmc_bus_shutdown=
-=20
->> and causes
->> lockup. The second problem is
->> that reboot notifiers are not called from emergency_restart() path. =
-I=20
->> agree that
->> 129 value for priority might not be the best, maybe according to=20
->> documentation,
->> 255 value should be used to ensure that the handler will be called=20
->> first before
->> any real restart handler.
->>
->
-> There is no non-real restart handler, and the documentation does not=20
-> say anything
-> about "called first before any real restart handler". Even with a=20
-> priority of 255
-> you would have no guarantee that your handler is called. Restart=20
-> handlers are
-> supposed to restart the system, nothing else. Actually, you have no=20
-> guarantee
-> that the restart handler is called in the first place - not all=20
-> architectures
-> support it (currently only arm, arm64, and mips do). Presumably mmc=20
-> support is
-> not limited to those architectures.
->
->> If you have any idea how to avoid restart handler and ensure proper=20
->> eMMC card
->> reboot sequence on any system reboot, I'm open for suggestions.
->>
->
-> Why not execute the device-specific restart in the shutdown function =
-?
-> You could register a reboot notifier to mark that a reboot is happeni=
-ng,
-> and then execute the restart at the end of mmc_bus_shutdown.
-
-Okay, this will solve one issue with reboot notifier, but there is stil=
-l=20
-a problem
-with emergency_restart(). Do you think that it will be okay to add a ca=
-ll to
-restart_notifiers (for example with some higher priority) also for=20
-emergency case?
-If so, I can rework my emmc pwr seq driver to use it and propose a patc=
-h for
-emergency restart code.
-
-Best regards
---=20
-Marek Szyprowski, PhD
-Samsung R&D Institute Poland
-
+VGhhbmtzIGEgbG90LCBTY290dC4KQW5kIG5vdyBhIHBhdGNoIHdhcyBtZXJnZWQgb24gZ2l0Oi8v
+Z2l0LmxpbmFyby5vcmcvcGVvcGxlL3VsZi5oYW5zc29uL21tYy5naXQgbmV4dCBicmFuY2ggdG8g
+Zml4IHRoaXMgaXNzdWUuCkl0IHNob3VsZCBiZSBubyBwcm9ibGVtLgoKCkZyb20gNWZkMjZjN2Vj
+YjMyMDgyNzQ1YjBiZDMzYzhlMzViYWRkMWNiNWE5MSBNb24gU2VwIDE3IDAwOjAwOjAwIDIwMDEK
+RnJvbTogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+CkRhdGU6IEZyaSwgNSBK
+dW4gMjAxNSAxMTo0MDowOCArMDIwMApTdWJqZWN0OiBbUEFUQ0hdIG1tYzogc2RoY2k6IFJlc3Rv
+cmUgYmVoYXZpb3Igd2hpbGUgY3JlYXRpbmcgT0NSIG1hc2sKCkNvbW1pdCAzYTQ4ZWRjNGJkNjgg
+KCJtbWM6IHNkaGNpOiBVc2UgbW1jIGNvcmUgcmVndWxhdG9yIGluZnJhc3R1Y3R1cmUiKQpjaGFu
+Z2VkIHRoZSBiZWhhdmlvciBmb3IgaG93IHRvIGFzc2lnbiB0aGUgb2NyX2F2YWlsIG1hc2sgZm9y
+IHRoZSBtbWMKaG9zdC4gTW9yZSBwcmVjaXNlbHkgaXQgc3RhcnRlZCB0byBtYXNrIHRoZSBiaXRz
+IGluc3RlYWQgb2YgYXNzaWduaW5nCnRoZW0uCgpSZXN0b3JlIHRoZSBiZWhhdmlvciwgYnV0IGFs
+c28gbWFrZSBpdCBjbGVhciB0aGF0IGFuIE9DUiBtYXNrIGNyZWF0ZWQKZnJvbSBhbiBleHRlcm5h
+bCByZWd1bGF0b3Igb3ZlcnJpZGVzIHRoZSBvdGhlciBvbmVzLiBUaGUgT0NSIG1hc2sgaXMKZGV0
+ZXJtaW5lZCBieSBvbmUgb2YgdGhlIGZvbGxvd2luZyB3aXRoIHRoaXMgcHJpb3JpdHk6CgoxLiBT
+dXBwb3J0ZWQgcmFuZ2VzIG9mIGV4dGVybmFsIHJlZ3VsYXRvciBpZiBvbmUgc3VwcGxpZXMgVkRE
+CjIuIEhvc3QgT0NSIG1hc2sgaWYgc2V0IGJ5IHRoZSBkcml2ZXIgKGJhc2VkIG9uIERUIHByb3Bl
+cnRpZXMpCjMuIFRoZSBjYXBhYmlsaXRpZXMgcmVwb3J0ZWQgYnkgdGhlIGNvbnRyb2xsZXIgaXRz
+ZWxmCgpGaXhlczogM2E0OGVkYzRiZDY4ICgibW1jOiBzZGhjaTogVXNlIG1tYyBjb3JlIHJlZ3Vs
+YXRvciBpbmZyYXN0dWN0dXJlIikKQ2M6IFRpbSBLcnlnZXIgPHRpbS5rcnlnZXJAZ21haWwuY29t
+PgpSZXBvcnRlZC1ieTogWWFuZ2JvIEx1IDx5YW5nYm8ubHVAZnJlZXNjYWxlLmNvbT4KU2lnbmVk
+LW9mZi1ieTogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+ClJldmlld2VkLWJ5
+OiBUaW0gS3J5Z2VyIDx0aW0ua3J5Z2VyQGdtYWlsLmNvbT4KLS0tCiBkcml2ZXJzL21tYy9ob3N0
+L3NkaGNpLmMgfCA5ICsrKysrLS0tLQogMSBmaWxlIGNoYW5nZWQsIDUgaW5zZXJ0aW9ucygrKSwg
+NCBkZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmMgYi9k
+cml2ZXJzL21tYy9ob3N0L3NkaGNpLmMKaW5kZXggMWI0ODYxZC4uNzA2YmI2MCAxMDA2NDQKLS0t
+IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jCisrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ku
+YwpAQCAtMzI1NiwxMyArMzI1NiwxNCBAQCBpbnQgc2RoY2lfYWRkX2hvc3Qoc3RydWN0IHNkaGNp
+X2hvc3QgKmhvc3QpCiAJCQkJICAgU0RIQ0lfTUFYX0NVUlJFTlRfTVVMVElQTElFUjsKIAl9CiAK
+LQkvKiBJZiBPQ1Igc2V0IGJ5IGV4dGVybmFsIHJlZ3VsYXRvcnMsIHVzZSBpdCBpbnN0ZWFkICov
+CisJLyogSWYgT0NSIHNldCBieSBob3N0LCB1c2UgaXQgaW5zdGVhZC4gKi8KKwlpZiAoaG9zdC0+
+b2NyX21hc2spCisJCW9jcl9hdmFpbCA9IGhvc3QtPm9jcl9tYXNrOworCisJLyogSWYgT0NSIHNl
+dCBieSBleHRlcm5hbCByZWd1bGF0b3JzLCBnaXZlIGl0IGhpZ2hlc3QgcHJpby4gKi8KIAlpZiAo
+bW1jLT5vY3JfYXZhaWwpCiAJCW9jcl9hdmFpbCA9IG1tYy0+b2NyX2F2YWlsOwogCi0JaWYgKGhv
+c3QtPm9jcl9tYXNrKQotCQlvY3JfYXZhaWwgJj0gaG9zdC0+b2NyX21hc2s7Ci0KIAltbWMtPm9j
+cl9hdmFpbCA9IG9jcl9hdmFpbDsKIAltbWMtPm9jcl9hdmFpbF9zZGlvID0gb2NyX2F2YWlsOwog
+CWlmIChob3N0LT5vY3JfYXZhaWxfc2RpbykKLS0gCjIuMS4wLjI3Lmc5NmRiMzI0CgoKCkJlc3Qg
+cmVnYXJkcywKWWFuZ2JvIEx1CgoKPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQo+IEZyb206
+IFdvb2QgU2NvdHQtQjA3NDIxCj4gU2VudDogU2F0dXJkYXksIE1heSAzMCwgMjAxNSA4OjA0IEFN
+Cj4gVG86IEx1IFlhbmdiby1CNDcwOTMKPiBDYzogbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5v
+cmc7IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmcKPiBTdWJqZWN0OiBSZTogcG93ZXJwYy9jb3Jl
+bmV0OiBlbmFibGUgZVNESEMKPiAKPiBPbiBXZWQsIE1heSAwNiwgMjAxNSBhdCAwMjoyOTowOFBN
+ICswODAwLCBZYW5nYm8gTHUgd3JvdGU6Cj4gPiBTaWduZWQtb2ZmLWJ5OiBZYW5nYm8gTHUgPHlh
+bmdiby5sdUBmcmVlc2NhbGUuY29tPgo+ID4gLS0tCj4gPiAgYXJjaC9wb3dlcnBjL2NvbmZpZ3Mv
+Y29yZW5ldDMyX3NtcF9kZWZjb25maWcgfCAyICsrCj4gPiBhcmNoL3Bvd2VycGMvY29uZmlncy9j
+b3JlbmV0NjRfc21wX2RlZmNvbmZpZyB8IDIgKysKPiA+ICAyIGZpbGVzIGNoYW5nZWQsIDQgaW5z
+ZXJ0aW9ucygrKQo+ID4KPiA+IGRpZmYgLS1naXQgYS9hcmNoL3Bvd2VycGMvY29uZmlncy9jb3Jl
+bmV0MzJfc21wX2RlZmNvbmZpZwo+ID4gYi9hcmNoL3Bvd2VycGMvY29uZmlncy9jb3JlbmV0MzJf
+c21wX2RlZmNvbmZpZwo+ID4gaW5kZXggY2E3OTU3Yi4uMTdmYjJlMCAxMDA2NDQKPiA+IC0tLSBh
+L2FyY2gvcG93ZXJwYy9jb25maWdzL2NvcmVuZXQzMl9zbXBfZGVmY29uZmlnCj4gPiArKysgYi9h
+cmNoL3Bvd2VycGMvY29uZmlncy9jb3JlbmV0MzJfc21wX2RlZmNvbmZpZwo+ID4gQEAgLTEzMCw2
+ICsxMzAsOCBAQCBDT05GSUdfVVNCX09IQ0lfSENEX1BQQ19PRl9MRT15Cj4gPiBDT05GSUdfVVNC
+X1NUT1JBR0U9eSAgQ09ORklHX01NQz15ICBDT05GSUdfTU1DX1NESENJPXkKPiA+ICtDT05GSUdf
+TU1DX1NESENJX1BMVEZNPXkKPiA+ICtDT05GSUdfTU1DX1NESENJX09GX0VTREhDPXkKPiA+ICBD
+T05GSUdfRURBQz15Cj4gPiAgQ09ORklHX0VEQUNfTU1fRURBQz15Cj4gPiAgQ09ORklHX0VEQUNf
+TVBDODVYWD15Cj4gPiBkaWZmIC0tZ2l0IGEvYXJjaC9wb3dlcnBjL2NvbmZpZ3MvY29yZW5ldDY0
+X3NtcF9kZWZjb25maWcKPiA+IGIvYXJjaC9wb3dlcnBjL2NvbmZpZ3MvY29yZW5ldDY0X3NtcF9k
+ZWZjb25maWcKPiA+IGluZGV4IDA0NzM3YWEuLjQ2MDVhNTUgMTAwNjQ0Cj4gPiAtLS0gYS9hcmNo
+L3Bvd2VycGMvY29uZmlncy9jb3JlbmV0NjRfc21wX2RlZmNvbmZpZwo+ID4gKysrIGIvYXJjaC9w
+b3dlcnBjL2NvbmZpZ3MvY29yZW5ldDY0X3NtcF9kZWZjb25maWcKPiA+IEBAIC0xMTIsNiArMTEy
+LDggQEAgQ09ORklHX1VTQl9FSENJX0ZTTD15ICBDT05GSUdfVVNCX1NUT1JBR0U9eQo+ID4gQ09O
+RklHX01NQz15ICBDT05GSUdfTU1DX1NESENJPXkKPiA+ICtDT05GSUdfTU1DX1NESENJX1BMVEZN
+PXkKPiA+ICtDT05GSUdfTU1DX1NESENJX09GX0VTREhDPXkKPiA+ICBDT05GSUdfRURBQz15Cj4g
+PiAgQ09ORklHX0VEQUNfTU1fRURBQz15Cj4gPiAgQ09ORklHX1JUQ19DTEFTUz15Cj4gCj4gV2l0
+aCB0aGlzIG9uIHQ0MjQwcmRiIEknbSBjb250aW51YWxseSBzcGFtbWVkIHdpdGg6Cj4gc2RoY2kt
+ZXNkaGMgZmZlMTE0MDAwLnNkaGM6IG5vIHN1cHBvcnQgZm9yIGNhcmQncyB2b2x0cwo+IG1tYzA6
+IGVycm9yIC0yMiB3aGlsc3QgaW5pdGlhbGlzaW5nIFNEIGNhcmQgc2RoY2ktZXNkaGMgZmZlMTE0
+MDAwLnNkaGM6Cj4gbm8gc3VwcG9ydCBmb3IgY2FyZCdzIHZvbHRzCj4gbW1jMDogZXJyb3IgLTIy
+IHdoaWxzdCBpbml0aWFsaXNpbmcgU0QgY2FyZAo+IAo+IFJlbGV2ZWFudCBib290IG1lc3NhZ2Vz
+IGluY2x1ZGU6Cj4gc2RoY2k6IFNlY3VyZSBEaWdpdGFsIEhvc3QgQ29udHJvbGxlciBJbnRlcmZh
+Y2UgZHJpdmVyCj4gc2RoY2k6IENvcHlyaWdodChjKSBQaWVycmUgT3NzbWFuCj4gc2RoY2ktcGx0
+Zm06IFNESENJIHBsYXRmb3JtIGFuZCBPRiBkcml2ZXIgaGVscGVyIHNkaGNpLWVzZGhjCj4gZmZl
+MTE0MDAwLnNkaGM6IE5vIHZtbWMgcmVndWxhdG9yIGZvdW5kIHNkaGNpLWVzZGhjIGZmZTExNDAw
+MC5zZGhjOiBObwo+IHZxbW1jIHJlZ3VsYXRvciBmb3VuZAo+IG1tYzA6IFNESENJIGNvbnRyb2xs
+ZXIgb24gZmZlMTE0MDAwLnNkaGMgW2ZmZTExNDAwMC5zZGhjXSB1c2luZyBBRE1BIC4uLgo+IG1t
+YzA6IGVycm9yIC0yMiB3aGlsc3QgaW5pdGlhbGlzaW5nIFNEIGNhcmQgLi4uCj4gc2RoY2ktZXNk
+aGMgZmZlMTE0MDAwLnNkaGM6IG5vIHN1cHBvcnQgZm9yIGNhcmQncyB2b2x0cwo+IG1tYzA6IGVy
+cm9yIC0yMiB3aGlsc3QgaW5pdGlhbGlzaW5nIFNEIGNhcmQKPiAKPiAtU2NvdHQKX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGludXhwcGMtZGV2IG1haWxp
+bmcgbGlzdApMaW51eHBwYy1kZXZAbGlzdHMub3psYWJzLm9yZwpodHRwczovL2xpc3RzLm96bGFi
+cy5vcmcvbGlzdGluZm8vbGludXhwcGMtZGV2
