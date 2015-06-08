@@ -1,74 +1,354 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH RESEND v7 2/2] mmc: host: sdhci: Add support to disable
- SDR104/SDR50/DDR50 based on capability register 0.
-Date: Mon, 8 Jun 2015 10:38:22 +0200
-Message-ID: <CAPDyKFqA5BGXUV+_r63Xwtpm6Bzi2HB=UN0pDcu6FkjtHOaqew@mail.gmail.com>
-References: <1432197817-22110-1-git-send-email-stripathi@apm.com>
-	<1432197817-22110-3-git-send-email-stripathi@apm.com>
-	<CAPDyKFpxkNF9C8AOJ6+18CEcpZTKycPR0i5OuwPRr1Zc+VPJ5Q@mail.gmail.com>
-	<CAOHikRASDmy7PwFjqmX7JAjW52DYR+d3RkE3yd_45NN5sHK7Pg@mail.gmail.com>
-	<CAOHikRBB9Uyh4Z34_pFTdmA0A-vnV09zTi8iYEU+01XvmzSr_A@mail.gmail.com>
-	<20150605145323.GA15110@shlinux1.ap.freescale.net>
-	<CAOHikRCXuJryKgo7pjehi-SyosE1Rr2zFjc+9yWJwke_ib=Azw@mail.gmail.com>
-	<CAPDyKFqk1_B-wH0Z2QwfxftJy8LLH6Ey9cg56eFxAj7zmeFmOg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC PATCH v3] mmc: sleep notification
+Date: Mon, 8 Jun 2015 11:03:37 +0200
+Message-ID: <CAPDyKFoPqwDC_w1QTe7zQtJfH_5m2Gp_5uewJKy=x_LeaFqYhA@mail.gmail.com>
+References: <FDD07FEB422EF948A392FDC201AEEAE64FAAD701@SACMBXIP02.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFqk1_B-wH0Z2QwfxftJy8LLH6Ey9cg56eFxAj7zmeFmOg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>, Dong Aisheng <b29396-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Cc: Dong Aisheng <aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Don Dutile <ddutile-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jon Masters <jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Langsdorf <mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, patches <patches-qTEPVZfXA3Y@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f43.google.com ([209.85.192.43]:35510 "EHLO
+	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753094AbbFHJDi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Jun 2015 05:03:38 -0400
+Received: by qgg3 with SMTP id 3so21795791qgg.2
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Jun 2015 02:03:37 -0700 (PDT)
+In-Reply-To: <FDD07FEB422EF948A392FDC201AEEAE64FAAD701@SACMBXIP02.sdcorp.global.sandisk.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
+Cc: Alex Lemberg <Alex.Lemberg@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 8 June 2015 at 10:37, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> [...]
+On 8 June 2015 at 08:46, Avi Shchislowski <Avi.Shchislowski@sandisk.com> wrote:
+> Hi Ulf,
 >
->>> >
->>> >    Can you test this patch  on imx SoC ?
->>> >
->>>
->>> (Your email have some format issue.)
->>
->> Yeah missed to sent in plain text mode.
->>
->>>
->>> I have tested this patch and it does not break imx SoC.
->>> You can add my tag.
->>> Tested-by: Dong Aisheng <aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
->>
->> Thanks Dong !!
->>
->>>
->>> However, it looks to me SDHCI_CAN_VDD_180 is only indicating the host VDD
->>> capabiliies, not IO voltage capability.
+> Here is a V3 per your request.
+> Please review.
 >
-> I think Dong is correct. I don't think SDHCI_CAN_VDD_180 is not
+> This patch is implements the new additional state of
+> Power_Off_Notification - SLEEP_NOTIFICATION.
+> Until now, the implementation of Power_Off_Notification
+> supported only three modes - POWERED_ON (0x01),
+> POWER_OFF_SHORT (0x02) and POWER_OFF_LONG (0x03).
+>
+> As part of eMMC5.0 before moving to Sleep state hosts may set the
+> POWER_OFF_NOTIFICATION byte to SLEEP_NOTIFICATION (0x04).
+> After setting SLEEP_NOTIFICATION, host should wait for
+> the busy line to be de-asserted.
+>
+> Signed-off-by: Alex Lemberg <alex.lemberg@sandisk.com>
+> Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
 
-/s /is not /is
+You need to trim your change-log here. I can't apply patches which
+comes in this format and run checkpatch, please.
 
-> related to UHS modes at all.
+Moreover, try answer the *what* and *why* question in the change log.
+
 >
-> At least the name of the field (SDHCI_CAN_VDD_180) indicates it's
-> about VDD/VCC, the core power and not the IO voltage.
+> ---------
+
+It's nice that you provide a history, but don't include that into the
+commit message.
+Change the above nine "-" to three "-", to make the history below be
+posted as a appended message for the patch.
+
+> V3:
+> - remove macros
+> - remove hpi_en dependency
+> - add helper function for sleep notification
 >
->> Are you sure on this ?? If SDHCI host VDD is  1.8V then the cards are
->> also capable to operate at 1.8V ? Didn't understand what you mean by
->> IO voltage capability
->>
->>
->>> SD3.0 cards require 1.8v IO voltage support.
->>> So should this bit affect SD3.0 support?
->>
->> The preset value resgister says that  SDR modes requires 1.8V and we
->> disable the modes based on capability or quirk.
+> v2:
+> - remove calling mmc_interrupt_hpi in case the device is doing
+>   sleep notification from block.c
+> - remove call of "mmc_card_doing_sleep_notify" from core.c
+> - mmc_sleep_notify changed to static function
 >
-> It requires 1.8V *IO voltage*, not VDD/VCC.
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index a802863..56dae18 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -60,6 +60,14 @@ static const unsigned int tacc_mant[] = {
+>         })
 >
-> [...]
+>  /*
+> + * Indicates the maximum allowed timeout - 83.88s
+> + * as defined in eMMC Spec for the Sleep Notification
+> + * SWITCH command when notifying the device that it is
+> + * about to be moved to sleep state.
+> + */
+> +#define MMC_SLEEP_NOTIFY_MAX_TIME      0x17
+> +
+> +/*
+>   * Given the decoded CSD structure, decode the raw CID to our CID structure.
+>   */
+>  static int mmc_decode_cid(struct mmc_card *card)
+> @@ -582,6 +590,8 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>                 card->ext_csd.ffu_capable =
+>                         (ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
+>                         !(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
+> +               card->ext_csd.sleep_notify_time =
+> +                       ext_csd[EXT_CSD_SLEEP_NOTIFICATION_TIME];
+>         }
+>  out:
+>         return err;
+> @@ -1642,6 +1652,44 @@ out_release:
+>         return err;
+>  }
 >
-> Kind regards
-> Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> +/*
+> + * check if device is in program state (busy)
+> + */
+> +static bool mmc_device_prg_state(struct mmc_card *card)
+> +{
+> +       int rc;
+> +       u32 status;
+> +       bool state;
+> +
+> +       mmc_get_card(card);
+> +       rc = mmc_send_status(card, &status);
+> +       if (rc) {
+> +               pr_err("%s: Get card status fail. rc=%d\n",
+> +                       mmc_hostname(card->host), rc);
+> +               state = false;
+> +               goto out;
+> +       }
+> +
+> +       if (R1_CURRENT_STATE(status) == R1_STATE_PRG)
+> +               state =  true;
+> +       else
+> +               state =  false;
+> +out:
+> +       mmc_put_card(card);
+> +       return state;
+> +}
+> +
+> +static int can_sleep_notify(struct mmc_card *card)
+> +{
+> +       /* sleep notify enable/disable for eMMC 5.0 and above */
+> +       return (card && card->ext_csd.rev >= 7 &&
+> +                       (card->host->caps2 & MMC_CAP2_SLEEP_NOTIFY) &&
+> +                       card->ext_csd.sleep_notify_time > 0 &&
+> +                       card->ext_csd.sleep_notify_time <=
+> +                               MMC_SLEEP_NOTIFY_MAX_TIME &&
+> +                       card->ext_csd.power_off_notification == EXT_CSD_POWER_ON);
+> +}
+> +
+>  static int mmc_can_poweroff_notify(const struct mmc_card *card)
+>  {
+>         return card &&
+> @@ -1653,17 +1701,32 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
+>  {
+>         unsigned int timeout = card->ext_csd.generic_cmd6_time;
+>         int err;
+> +       bool use_busy_signal;
+>
+>         /* Use EXT_CSD_POWER_OFF_SHORT as default notification type. */
+>         if (notify_type == EXT_CSD_POWER_OFF_LONG)
+>                 timeout = card->ext_csd.power_off_longtime;
+> +       else if (notify_type == EXT_CSD_SLEEP_NOTIFICATION) {
+> +               /* calculate the maximum timeout for the
+> +                * switch command when notifying the device
+> +                * that it is about to move to sleep */
+>
+> +               timeout = DIV_ROUND_UP((10 *
+> +                       (1 << (unsigned int)(card->ext_csd.sleep_notify_time))),1000);
+> +               }
+> +
+> +       use_busy_signal = (notify_type == EXT_CSD_SLEEP_NOTIFICATION) ?
+> +                       false : true;
+>         err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>                         EXT_CSD_POWER_OFF_NOTIFICATION,
+> -                       notify_type, timeout, true, false, false);
+> -       if (err)
+> +                       notify_type, timeout,
+> +                       use_busy_signal, false, false);
+> +       if (!err) {
+> +               card->ext_csd.power_off_notification = notify_type;
+> +       } else {
+>                 pr_err("%s: Power Off Notification timed out, %u\n",
+> -                      mmc_hostname(card->host), timeout);
+> +                       mmc_hostname(card->host), timeout);
+> +       }
+>
+>         /* Disable the power off notification after the switch operation. */
+>         card->ext_csd.power_off_notification = EXT_CSD_NO_POWER_NOTIFICATION;
+> @@ -1671,6 +1734,70 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
+>         return err;
+>  }
+>
+> +static int mmc_sleep_notify(struct mmc_card *card)
+> +{
+> +       int err = 0;
+> +       bool is_busy = 0;
+> +       unsigned long prg_wait = 0;
+> +       unsigned int timeout;
+> +
+> +       if (!can_sleep_notify(card) || !mmc_can_poweroff_notify(card))
+> +               return 0;
+> +
+> +       if (!mmc_card_doing_sleep_notify(card)) {
+> +               mmc_get_card(card);
+> +               mmc_card_set_sleep_notify(card);
+> +               err = mmc_poweroff_notify(card,
+> +                       EXT_CSD_SLEEP_NOTIFICATION);
+> +               mmc_put_card(card);
+> +               if (err) {
+> +                       pr_err("%s: mmc_poweroff_notify failed with %d\n",
+> +                              __func__, err);
+> +                       goto out;
+> +               }
+> +               timeout = DIV_ROUND_UP((10 *
+> +                               (1 << (unsigned int)(card->ext_csd.sleep_notify_time)))
+> +                               ,1000);
+> +               prg_wait = jiffies + msecs_to_jiffies(timeout);
+> +       }
+> +       /*
+> +                * Loop will run until  Device is no
+> +                * more in Busy state
+> +                */
+> +
+> +       do {
+> +               /* added some delay to avoid sending card status too often */
+> +               msleep(20);
+> +               err = 0;
+> +               is_busy = mmc_device_prg_state(card);
+> +               if (is_busy && time_after(jiffies, prg_wait)) {
+> +                       /*
+> +                        * making sure we are still in busy before
+> +                        * sending HPI due to timeout error
+> +                        */
+> +                       is_busy = mmc_device_prg_state(card);
+> +                       if (is_busy) {
+> +                               if (mmc_card_doing_sleep_notify(card)) {
+> +                                       card->ext_csd.power_off_notification =
+> +                                               EXT_CSD_POWER_ON;
+> +                                       mmc_interrupt_hpi(card);
+> +                               }
+> +                               err = -ETIMEDOUT;
+> +                               break;
+> +                       }
+> +               }
+> +       } while (is_busy);
+> +
+> +out:
+> +       mmc_card_clr_sleep_notify(card);
+> +       if (err) {
+> +               pr_err("%s: mmc_poweroff_notify for sleep failed with %d\n",
+> +                      mmc_hostname(card->host), err);
+> +       }
+> +
+> +       return err;
+> +}
+> +
+>  /*
+>   * Host is being removed. Free up the current card.
+>   */
+> @@ -1744,14 +1871,19 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+>         if (err)
+>                 goto out;
+>
+> -       if (mmc_can_poweroff_notify(host->card) &&
+> -               ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend))
+> -               err = mmc_poweroff_notify(host->card, notify_type);
+> -       else if (mmc_can_sleep(host->card))
+> +    if (mmc_can_poweroff_notify(host->card)) {
+> +       if (!can_sleep_notify(host->card)) {
+> +               err = mmc_poweroff_notify(host->card, notify_type);
+> +       } else if (is_suspend) {
+> +               err = mmc_sleep_notify(host->card);
+> +               if (err != -ETIMEDOUT)
+> +                       err = mmc_sleep(host);
+> +       }
+> +    } else if (mmc_can_sleep(host->card)) {
+>                 err = mmc_sleep(host);
+> -       else if (!mmc_host_is_spi(host))
+> +    } else if (!mmc_host_is_spi(host)) {
+>                 err = mmc_deselect_cards(host);
+> -
+> +    }
+>         if (!err) {
+>                 mmc_power_off(host);
+>                 mmc_card_set_suspended(host->card);
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 19f0175..3189e73 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -62,6 +62,7 @@ struct mmc_ext_csd {
+>         unsigned int            sa_timeout;             /* Units: 100ns */
+>         unsigned int            generic_cmd6_time;      /* Units: 10ms */
+>         unsigned int            power_off_longtime;     /* Units: ms */
+> +       unsigned int            sleep_notify_time;      /* Units: us */
+>         u8                      power_off_notification; /* state */
+>         unsigned int            hs_max_dtr;
+>         unsigned int            hs200_max_dtr;
+> @@ -262,6 +263,7 @@ struct mmc_card {
+>  #define MMC_CARD_REMOVED       (1<<4)          /* card has been removed */
+>  #define MMC_STATE_DOING_BKOPS  (1<<5)          /* card is doing BKOPS */
+>  #define MMC_STATE_SUSPENDED    (1<<6)          /* card is suspended */
+> +#define MMC_STATE_SLEEP_NOTIFY (1<<7)          /* card in sleep notify */
+>         unsigned int            quirks;         /* card quirks */
+>  #define MMC_QUIRK_LENIENT_FN0  (1<<0)          /* allow SDIO FN0 writes outside of the VS CCCR range */
+>  #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)   /* use func->cur_blksize */
+> @@ -427,6 +429,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+>  #define mmc_card_removed(c)    ((c) && ((c)->state & MMC_CARD_REMOVED))
+>  #define mmc_card_doing_bkops(c)        ((c)->state & MMC_STATE_DOING_BKOPS)
+>  #define mmc_card_suspended(c)  ((c)->state & MMC_STATE_SUSPENDED)
+> +#define mmc_card_doing_sleep_notify(c) ((c)->state & MMC_STATE_SLEEP_NOTIFY)
+>
+>  #define mmc_card_set_present(c)        ((c)->state |= MMC_STATE_PRESENT)
+>  #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
+> @@ -437,6 +440,8 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+>  #define mmc_card_clr_doing_bkops(c)    ((c)->state &= ~MMC_STATE_DOING_BKOPS)
+>  #define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
+>  #define mmc_card_clr_suspended(c) ((c)->state &= ~MMC_STATE_SUSPENDED)
+> +#define mmc_card_set_sleep_notify(c)   ((c)->state |= MMC_STATE_SLEEP_NOTIFY)
+> +#define mmc_card_clr_sleep_notify(c)   ((c)->state &= ~MMC_STATE_SLEEP_NOTIFY)
+>
+>  /*
+>   * Quirk add/remove for MMC products.
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index f471193..111e05d 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -286,6 +286,7 @@ struct mmc_host {
+>                                  MMC_CAP2_HS400_1_2V)
+>  #define MMC_CAP2_HSX00_1_2V    (MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS400_1_2V)
+>  #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
+> +#define MMC_CAP2_SLEEP_NOTIFY  (1 << 18)       /* sleep notify supported */
+>
+>         mmc_pm_flag_t           pm_caps;        /* supported pm features */
+>
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 124f562..bbb71ae 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -309,6 +309,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_PWR_CL_52_360          202     /* RO */
+>  #define EXT_CSD_PWR_CL_26_360          203     /* RO */
+>  #define EXT_CSD_SEC_CNT                        212     /* RO, 4 bytes */
+> +#define EXT_CSD_SLEEP_NOTIFICATION_TIME        216     /* RO */
+>  #define EXT_CSD_S_A_TIMEOUT            217     /* RO */
+>  #define EXT_CSD_REL_WR_SEC_C           222     /* RO */
+>  #define EXT_CSD_HC_WP_GRP_SIZE         221     /* RO */
+> @@ -403,6 +404,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_POWER_ON               1
+>  #define EXT_CSD_POWER_OFF_SHORT                2
+>  #define EXT_CSD_POWER_OFF_LONG         3
+> +#define EXT_CSD_SLEEP_NOTIFICATION     4
+>
+>  #define EXT_CSD_PWR_CL_8BIT_MASK       0xF0    /* 8 bit PWR CLS */
+>  #define EXT_CSD_PWR_CL_4BIT_MASK       0x0F    /* 8 bit PWR CLS */
+> --
+> 1.7.9.5
+>
+>
+>
+
+One of my comments for v2, was that I think you should remove all code
+which was related to HPI to interrupt sleep notification from the
+runtime PM resume path. Instead I wanted you to add that functionality
+as separate patch based on top of this patch.
+
+You haven't done that in v3, why?
+
+Kind regards
+Uffe
