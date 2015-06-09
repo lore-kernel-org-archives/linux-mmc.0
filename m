@@ -1,77 +1,72 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/2] drivers: mmc: add quirk
- SDHCI_QUIRK_CLOCK_DIV_ZERO_BROKEN
-Date: Tue, 09 Jun 2015 17:44:10 +0900
-Message-ID: <5576A75A.5050104@samsung.com>
-References: <1433835111-32522-1-git-send-email-suneel.garapati@xilinx.com>
- <1433835111-32522-2-git-send-email-suneel.garapati@xilinx.com>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Subject: [PATCH v2 0/6] UHS-I support for sh_mobile_sdhi
+Date: Wed, 10 Jun 2015 00:21:44 +0100
+Message-ID: <1433892104.12074.49.camel@codethink.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:51324 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751956AbbFIIoM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jun 2015 04:44:12 -0400
-In-reply-to: <1433835111-32522-2-git-send-email-suneel.garapati@xilinx.com>
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:34227 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751158AbbFIXVt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Jun 2015 19:21:49 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Suneel Garapati <suneel.garapati@xilinx.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, michals@xilinx.com, sorenb@xilinx.com, Adrian Hunter <adrian.hunter@intel.com>, Aisheng Dong <b29396@freescale.com>, Haibo Chen <haibo.chen@freescale.com>, Tim Kryger <tim.kryger@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Yi Sun <yi.y.sun@intel.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, stripathi@apm.com
+To: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
+Cc: linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 
-Hi,
+This series adds support for UHS-I in sh_mobile_sdhi, partly implemented
+in tmio_mmc.  This does not yet include tuning for SDR-104, but SDR-50 now
+works on the R8A7790 Lager board and another development board.
 
-On 06/09/2015 04:31 PM, Suneel Garapati wrote:
-> adds quirk for controllers whose clock divider zero is broken,
-> sdhci_set_clock function will incorporate this modification.
-> 
-> Signed-off-by: Suneel Garapati <suneel.garapati@xilinx.com>
-> ---
->  drivers/mmc/host/sdhci.c | 4 ++++
->  drivers/mmc/host/sdhci.h | 2 ++
->  2 files changed, 6 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 1b4861d..087327e 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1210,6 +1210,10 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
-> 			}
-> 			real_div = div;
-> 			div >>= 1;
-> +			if ((host->quirks2 & SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN)
-> +				&& !div && host->max_clk <= 25000000) {
-> +				div = 1;
-> +			}
+The pfc block needs to be reconfigured from 3.3V to 1.8V signalling on
+the pins wired to the SD card.  This is supported by adding separate
+functions for 1.8V signalling in sh-pfc ("sdhi0_1v8" etc.).  I expect
+that several SH SoCs have this capability, but I only have the R8A7790
+data sheet so I only implemented it for that one.
 
-I can't understand fully. how can it be broken for divider zero?
-When formatting error is occurred, do you check really clock value?
-I think your patch looks like just hard-coding for control clock.
+Changes since v1:
+- Reword commit message for "mmc: tmio: Add UHS-I mode support"
+- Make sh_mobile_sdhi_start_signal_voltage_switch() succeed if asked
+  to switch to 3.3V and the regulator or pinctrl or pinctrl state is
+  missing
+- Drop change to mmcif clock on Lager
+- Correct original author for sdhi clock changes on Lager
 
-Best Regards,
-Jaehoon Chung
+Changes since the RFC:
+- Replace the 'regulator' devices for signal voltage switching with
+  pinctrl functions and states
+- Drop 'mmc: sh_mobile_sdhi: Add actual clock rate support' as it's
+  redundant
+- Use a switch statement in sh_mobile_sdhi_start_signal_voltage_switch()
+- Fix subject prefix for the DT changes
 
-> 		}
-> 	} else {
-> 		/* Version 2.00 divisors must be a power of 2. */
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 5521d29..67046ca 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -409,6 +409,8 @@ struct sdhci_host {
->  #define SDHCI_QUIRK2_SUPPORT_SINGLE			(1<<13)
->  /* Controller broken with using ACMD23 */
->  #define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<14)
-> +/* Broken Clock divider zero in controller */
-> +#define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
-> 
-> 	int irq;		/* Device IRQ */
-> 	void __iomem *ioaddr;	/* Mapped address */
-> --
-> 2.1.2
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Ben.
+
+Ben Hutchings (5):
+  mmc: tmio: Add UHS-I mode support
+  pinctrl: sh-pfc: Add set_mux operation to struct sh_pfc_function
+  pinctrl: sh-pfc: r8a7790: Add separate functions for SDHI 1.8V
+    operation
+  mmc: sh_mobile_sdhi: Add UHS-I mode support
+  ARM: shmobile: lager: Enable UHS-I SDR-50
+
+Ian Molton (1):
+  ARM: shmobile: lager: Set clock rates for SDHI
+
+ arch/arm/boot/dts/r8a7790-lager.dts  | 24 +++++++++++--
+ drivers/mmc/host/sh_mobile_sdhi.c    | 60 +++++++++++++++++++++++++++++++
+ drivers/mmc/host/tmio_mmc.h          |  3 ++
+ drivers/mmc/host/tmio_mmc_pio.c      | 31 ++++++++++++++++
+ drivers/pinctrl/sh-pfc/core.c        |  2 +-
+ drivers/pinctrl/sh-pfc/core.h        |  1 +
+ drivers/pinctrl/sh-pfc/pfc-r8a7790.c | 70 +++++++++++++++++++++++++++++++++---
+ drivers/pinctrl/sh-pfc/pinctrl.c     |  4 +++
+ drivers/pinctrl/sh-pfc/sh_pfc.h      | 10 +++++-
+ 9 files changed, 197 insertions(+), 8 deletions(-)
+
+-- 
+2.1.4
+
+
 
