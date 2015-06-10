@@ -1,7 +1,7 @@
 From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH v5 5/7] ARM: mediatek: dts: Add emmc support to mt8135
-Date: Wed, 10 Jun 2015 10:24:46 +0800
-Message-ID: <1433903088-14407-6-git-send-email-chaotian.jing@mediatek.com>
+Subject: [PATCH v5 4/7] arm64: dts: mediatek: Add MT8173 MMC dts
+Date: Wed, 10 Jun 2015 10:24:45 +0800
+Message-ID: <1433903088-14407-5-git-send-email-chaotian.jing@mediatek.com>
 References: <1433903088-14407-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,23 +21,24 @@ To: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matthias Brug
 Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Yingjoe Chen <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+From: Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 
-Add emmc node for mt8135.dtsi & mt8135-evbp1.dts
+Add node mmc0 ~ mmc3 for mt8173.dtsi
+Add node mmc0, mmc1 for mt8173-evb.dts
 
-Signed-off-by: Yingjoe Chen <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Signed-off-by: Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 ---
- arch/arm/boot/dts/mt8135-evbp1.dts | 158 +++++++++++++++++++++++++++++++++++++
- arch/arm/boot/dts/mt8135.dtsi      |  55 +++++++++++++
- 2 files changed, 213 insertions(+)
+ arch/arm64/boot/dts/mediatek/mt8173-evb.dts | 126 ++++++++++++++++++++++++++++
+ arch/arm64/boot/dts/mediatek/mt8173.dtsi    |  45 +++++++++-
+ 2 files changed, 170 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/mt8135-evbp1.dts b/arch/arm/boot/dts/mt8135-evbp1.dts
-index 357a91f..043d997 100644
---- a/arch/arm/boot/dts/mt8135-evbp1.dts
-+++ b/arch/arm/boot/dts/mt8135-evbp1.dts
-@@ -24,6 +24,164 @@
- 	};
+diff --git a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
+index b1560c9..762ec61 100644
+--- a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
++++ b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
+@@ -33,6 +33,132 @@
+ 	chosen { };
  };
  
 +&mmc0 {
@@ -49,6 +50,7 @@ index 357a91f..043d997 100644
 +	max-frequency = <50000000>;
 +	cap-mmc-highspeed;
 +	vmmc-supply = <&mt6397_vemc_3v3_reg>;
++	vqmmc-supply = <&mt6397_vio18_reg>;
 +	non-removable;
 +};
 +
@@ -59,140 +61,107 @@ index 357a91f..043d997 100644
 +	status = "okay";
 +	bus-width = <4>;
 +	max-frequency = <50000000>;
-+	vmmc-supply = <&mt6397_vmch_reg>;
-+	vqmmc-supply = <&mt6397_vmc_reg>;
-+	cd-gpios = <&pio 63 0>;
 +	cap-sd-highspeed;
 +	sd-uhs-sdr25;
++	cd-gpios = <&pio 132 0>;
++	vmmc-supply = <&mt6397_vmch_reg>;
++	vqmmc-supply = <&mt6397_vmc_reg>;
 +};
 +
 +&pio {
 +	mmc0_pins_default: mmc0default {
 +		pins_cmd_dat {
-+			pinmux = <MT8135_PIN_9_MSDC0_DAT0__FUNC_MSDC0_DAT0>,
-+				<MT8135_PIN_8_MSDC0_DAT1__FUNC_MSDC0_DAT1>,
-+				<MT8135_PIN_7_MSDC0_DAT2__FUNC_MSDC0_DAT2>,
-+				<MT8135_PIN_6_MSDC0_DAT3__FUNC_MSDC0_DAT3>,
-+				<MT8135_PIN_3_MSDC0_DAT4__FUNC_MSDC0_DAT4>,
-+				<MT8135_PIN_2_MSDC0_DAT5__FUNC_MSDC0_DAT5>,
-+				<MT8135_PIN_1_MSDC0_DAT6__FUNC_MSDC0_DAT6>,
-+				<MT8135_PIN_0_MSDC0_DAT7__FUNC_MSDC0_DAT7>,
-+				<MT8135_PIN_4_MSDC0_CMD__FUNC_MSDC0_CMD>;
++			pinmux = <MT8173_PIN_57_MSDC0_DAT0__FUNC_MSDC0_DAT0>,
++				<MT8173_PIN_58_MSDC0_DAT1__FUNC_MSDC0_DAT1>,
++				<MT8173_PIN_59_MSDC0_DAT2__FUNC_MSDC0_DAT2>,
++				<MT8173_PIN_60_MSDC0_DAT3__FUNC_MSDC0_DAT3>,
++				<MT8173_PIN_61_MSDC0_DAT4__FUNC_MSDC0_DAT4>,
++				<MT8173_PIN_62_MSDC0_DAT5__FUNC_MSDC0_DAT5>,
++				<MT8173_PIN_63_MSDC0_DAT6__FUNC_MSDC0_DAT6>,
++				<MT8173_PIN_64_MSDC0_DAT7__FUNC_MSDC0_DAT7>,
++				<MT8173_PIN_66_MSDC0_CMD__FUNC_MSDC0_CMD>;
++			input-enable;
 +			bias-pull-up;
 +		};
 +
 +		pins_clk {
-+			pinmux = <MT8135_PIN_5_MSDC0_CLK__FUNC_MSDC0_CLK>;
++			pinmux = <MT8173_PIN_65_MSDC0_CLK__FUNC_MSDC0_CLK>;
 +			bias-pull-down;
 +		};
 +
 +		pins_rst {
-+			pinmux = <MT8135_PIN_33_MSDC0_RSTB__FUNC_MSDC0_RSTB>;
++			pinmux = <MT8173_PIN_68_MSDC0_RST___FUNC_MSDC0_RSTB>;
 +			bias-pull-up;
 +		};
 +	};
 +
 +	mmc1_pins_default: mmc1default {
 +		pins_cmd_dat {
-+			pinmux = <MT8135_PIN_83_MSDC1_DAT0__FUNC_MSDC1_DAT0>,
-+				<MT8135_PIN_84_MSDC1_DAT1__FUNC_MSDC1_DAT1>,
-+				<MT8135_PIN_87_MSDC1_DAT2__FUNC_MSDC1_DAT2>,
-+				<MT8135_PIN_88_MSDC1_DAT3__FUNC_MSDC1_DAT3>,
-+				<MT8135_PIN_85_MSDC1_CMD__FUNC_MSDC1_CMD>;
-+			bias-pull-up;
++			pinmux = <MT8173_PIN_73_MSDC1_DAT0__FUNC_MSDC1_DAT0>,
++			     <MT8173_PIN_74_MSDC1_DAT1__FUNC_MSDC1_DAT1>,
++			     <MT8173_PIN_75_MSDC1_DAT2__FUNC_MSDC1_DAT2>,
++			     <MT8173_PIN_76_MSDC1_DAT3__FUNC_MSDC1_DAT3>,
++			     <MT8173_PIN_78_MSDC1_CMD__FUNC_MSDC1_CMD>;
++			input-enable;
++			drive-strength = <MTK_DRIVE_4mA>;
++			bias-pull-up = <MTK_PUPD_SET_R1R0_10>;
 +		};
 +
 +		pins_clk {
-+			pinmux = <MT8135_PIN_86_MSDC1_CLK__FUNC_MSDC1_CLK>;
++			pinmux = <MT8173_PIN_77_MSDC1_CLK__FUNC_MSDC1_CLK>;
 +			bias-pull-down;
++			drive-strength = <MTK_DRIVE_4mA>;
 +		};
 +
-+		pins_insi {
-+			pinmux = <MT8135_PIN_63_MSDC1_INSI__FUNC_MSDC1_INSI>;
++		pins_insert {
++			pinmux = <MT8173_PIN_132_I2S0_DATA1__FUNC_GPIO132>;
 +			bias-pull-up;
 +		};
 +	};
 +
-+	mmc2_pins_default: mmc2default {
++	mmc0_pins_uhs: mmc0@0{
 +		pins_cmd_dat {
-+			pinmux = <MT8135_PIN_82_MSDC2_DAT0__FUNC_MSDC2_DAT0>,
-+				<MT8135_PIN_81_MSDC2_DAT1__FUNC_MSDC2_DAT1>,
-+				<MT8135_PIN_77_MSDC2_DAT2__FUNC_MSDC2_DAT2>,
-+				<MT8135_PIN_78_MSDC2_DAT3__FUNC_MSDC2_DAT3>,
-+				<MT8135_PIN_79_MSDC2_CMD__FUNC_MSDC2_CMD>;
-+			bias-pull-up;
-+		};
-+
-+		pins_clk {
-+			pinmux = <MT8135_PIN_80_MSDC2_CLK__FUNC_MSDC2_CLK>;
-+			bias-pull-down;
-+		};
-+
-+		pins_insi {
-+			pinmux = <MT8135_PIN_65_MSDC2_INSI__FUNC_MSDC2_INSI>;
-+			bias-pull-up;
-+		};
-+	};
-+
-+	mmc0_pins_uhs: mmc0@0 {
-+		pins_cmd_dat {
-+			pinmux = <MT8135_PIN_9_MSDC0_DAT0__FUNC_MSDC0_DAT0>,
-+				<MT8135_PIN_8_MSDC0_DAT1__FUNC_MSDC0_DAT1>,
-+				<MT8135_PIN_7_MSDC0_DAT2__FUNC_MSDC0_DAT2>,
-+				<MT8135_PIN_6_MSDC0_DAT3__FUNC_MSDC0_DAT3>,
-+				<MT8135_PIN_3_MSDC0_DAT4__FUNC_MSDC0_DAT4>,
-+				<MT8135_PIN_2_MSDC0_DAT5__FUNC_MSDC0_DAT5>,
-+				<MT8135_PIN_1_MSDC0_DAT6__FUNC_MSDC0_DAT6>,
-+				<MT8135_PIN_0_MSDC0_DAT7__FUNC_MSDC0_DAT7>,
-+				<MT8135_PIN_4_MSDC0_CMD__FUNC_MSDC0_CMD>;
-+			drive-strength = <MTK_DRIVE_6mA>;
++			pinmux = <MT8173_PIN_57_MSDC0_DAT0__FUNC_MSDC0_DAT0>,
++				<MT8173_PIN_58_MSDC0_DAT1__FUNC_MSDC0_DAT1>,
++				<MT8173_PIN_59_MSDC0_DAT2__FUNC_MSDC0_DAT2>,
++				<MT8173_PIN_60_MSDC0_DAT3__FUNC_MSDC0_DAT3>,
++				<MT8173_PIN_61_MSDC0_DAT4__FUNC_MSDC0_DAT4>,
++				<MT8173_PIN_62_MSDC0_DAT5__FUNC_MSDC0_DAT5>,
++				<MT8173_PIN_63_MSDC0_DAT6__FUNC_MSDC0_DAT6>,
++				<MT8173_PIN_64_MSDC0_DAT7__FUNC_MSDC0_DAT7>,
++				<MT8173_PIN_66_MSDC0_CMD__FUNC_MSDC0_CMD>;
++			input-enable;
++			drive-strength = <MTK_DRIVE_2mA>;
 +			bias-pull-up = <MTK_PUPD_SET_R1R0_01>;
 +		};
 +
 +		pins_clk {
-+			pinmux = <MT8135_PIN_5_MSDC0_CLK__FUNC_MSDC0_CLK>;
-+			drive-strength = <MTK_DRIVE_6mA>;
++			pinmux = <MT8173_PIN_65_MSDC0_CLK__FUNC_MSDC0_CLK>;
++			drive-strength = <MTK_DRIVE_2mA>;
 +			bias-pull-down = <MTK_PUPD_SET_R1R0_01>;
 +		};
 +
 +		pins_rst {
-+			pinmux = <MT8135_PIN_33_MSDC0_RSTB__FUNC_MSDC0_RSTB>;
++			pinmux = <MT8173_PIN_68_MSDC0_RST___FUNC_MSDC0_RSTB>;
 +			bias-pull-up;
 +		};
 +	};
 +
 +	mmc1_pins_uhs: mmc1@0 {
 +		pins_cmd_dat {
-+			pinmux = <MT8135_PIN_83_MSDC1_DAT0__FUNC_MSDC1_DAT0>,
-+				<MT8135_PIN_84_MSDC1_DAT1__FUNC_MSDC1_DAT1>,
-+				<MT8135_PIN_87_MSDC1_DAT2__FUNC_MSDC1_DAT2>,
-+				<MT8135_PIN_88_MSDC1_DAT3__FUNC_MSDC1_DAT3>,
-+				<MT8135_PIN_85_MSDC1_CMD__FUNC_MSDC1_CMD>;
-+			drive-strength = <MTK_DRIVE_8mA>;
-+			bias-pull-up;
-+		};
-+
-+		pins_clk {
-+			pinmux = <MT8135_PIN_86_MSDC1_CLK__FUNC_MSDC1_CLK>;
-+			drive-strength = <MTK_DRIVE_8mA>;
-+			bias-pull-down;
-+		};
-+	};
-+
-+	mmc2_pins_uhs: mmc2@0 {
-+		pins_cmd_dat {
-+			pinmux = <MT8135_PIN_82_MSDC2_DAT0__FUNC_MSDC2_DAT0>,
-+				<MT8135_PIN_81_MSDC2_DAT1__FUNC_MSDC2_DAT1>,
-+				<MT8135_PIN_77_MSDC2_DAT2__FUNC_MSDC2_DAT2>,
-+				<MT8135_PIN_78_MSDC2_DAT3__FUNC_MSDC2_DAT3>,
-+				<MT8135_PIN_79_MSDC2_CMD__FUNC_MSDC2_CMD>;
-+			drive-strength = <MTK_DRIVE_8mA>;
++			pinmux = <MT8173_PIN_73_MSDC1_DAT0__FUNC_MSDC1_DAT0>,
++			     <MT8173_PIN_74_MSDC1_DAT1__FUNC_MSDC1_DAT1>,
++			     <MT8173_PIN_75_MSDC1_DAT2__FUNC_MSDC1_DAT2>,
++			     <MT8173_PIN_76_MSDC1_DAT3__FUNC_MSDC1_DAT3>,
++			     <MT8173_PIN_78_MSDC1_CMD__FUNC_MSDC1_CMD>;
++			input-enable;
++			drive-strength = <MTK_DRIVE_4mA>;
 +			bias-pull-up = <MTK_PUPD_SET_R1R0_10>;
 +		};
 +
 +		pins_clk {
-+			pinmux = <MT8135_PIN_80_MSDC2_CLK__FUNC_MSDC2_CLK>;
-+			drive-strength = <MTK_DRIVE_8mA>;
++			pinmux = <MT8173_PIN_77_MSDC1_CLK__FUNC_MSDC1_CLK>;
++			drive-strength = <MTK_DRIVE_4mA>;
 +			bias-pull-down = <MTK_PUPD_SET_R1R0_10>;
 +		};
 +	};
@@ -201,77 +170,61 @@ index 357a91f..043d997 100644
  &pwrap {
  	pmic: mt6397 {
  		compatible = "mediatek,mt6397";
-diff --git a/arch/arm/boot/dts/mt8135.dtsi b/arch/arm/boot/dts/mt8135.dtsi
-index fec0ac5..9cc42f0 100644
---- a/arch/arm/boot/dts/mt8135.dtsi
-+++ b/arch/arm/boot/dts/mt8135.dtsi
-@@ -78,6 +78,12 @@
- 		compatible = "simple-bus";
- 		ranges;
- 
-+		clk_null: clk_null {
-+			compatible = "fixed-clock";
-+			#clock-cells = <0>;
-+			clock-frequency = <0>;
-+		};
-+
- 		system_clk: dummy13m {
- 			compatible = "fixed-clock";
- 			clock-frequency = <13000000>;
-@@ -241,5 +247,54 @@
- 			status = "disabled";
+diff --git a/arch/arm64/boot/dts/mediatek/mt8173.dtsi b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
+index 512e4eb..56ea429 100644
+--- a/arch/arm64/boot/dts/mediatek/mt8173.dtsi
++++ b/arch/arm64/boot/dts/mediatek/mt8173.dtsi
+@@ -288,7 +288,50 @@
+ 			reg = <0 0x19000000 0 0x1000>;
+ 			#clock-cells = <1>;
  		};
+-	};
  
 +		mmc0: mmc@11230000 {
-+			compatible = "mediatek,mt8135-mmc";
++			compatible = "mediatek,mt8173-mmc",
++				     "mediatek,mt8135-mmc";
 +			reg = <0 0x11230000 0 0x1000>;
-+			interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
-+			clocks = <&pericfg CLK_PERI_MSDC20_1>,
-+				 <&clk_null>;
++			interrupts = <GIC_SPI 71 IRQ_TYPE_LEVEL_LOW>;
++			clocks = <&pericfg CLK_PERI_MSDC30_0>,
++				 <&topckgen CLK_TOP_MSDC50_0_H_SEL>;
 +			clock-names = "source", "hclk";
 +			status = "disabled";
 +		};
 +
 +		mmc1: mmc@11240000 {
-+			compatible = "mediatek,mt8135-mmc";
++			compatible = "mediatek,mt8173-mmc",
++				     "mediatek,mt8135-mmc";
 +			reg = <0 0x11240000 0 0x1000>;
-+			interrupts = <GIC_SPI 40 IRQ_TYPE_LEVEL_LOW>;
-+			clocks = <&pericfg CLK_PERI_MSDC20_2>,
-+				 <&clk_null>;
-+			clock-names = "source", "hclk";
-+			status = "disabled";
-+		};
-+
-+		mmc2: mmc@11250000 {
-+			compatible = "mediatek,mt8135-mmc";
-+			reg = <0 0x11250000 0 0x1000>;
-+			interrupts = <GIC_SPI 41 IRQ_TYPE_LEVEL_LOW>;
++			interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_LOW>;
 +			clocks = <&pericfg CLK_PERI_MSDC30_1>,
 +				 <&clk_null>;
 +			clock-names = "source", "hclk";
 +			status = "disabled";
 +		};
 +
-+		mmc3: mmc@11260000 {
-+			compatible = "mediatek,mt8135-mmc";
-+			reg = <0 0x11260000 0 0x1000>;
-+			interrupts = <GIC_SPI 42 IRQ_TYPE_LEVEL_LOW>;
++		mmc2: mmc@11250000 {
++			compatible = "mediatek,mt8173-mmc",
++				     "mediatek,mt8135-mmc";
++			reg = <0 0x11250000 0 0x1000>;
++			interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_LOW>;
 +			clocks = <&pericfg CLK_PERI_MSDC30_2>,
 +				 <&clk_null>;
 +			clock-names = "source", "hclk";
 +			status = "disabled";
 +		};
 +
-+		mmc4: mmc@11270000 {
-+			compatible = "mediatek,mt8135-mmc";
-+			reg = <0 0x11270000 0 0x1000>;
-+			interrupts = <GIC_SPI 43 IRQ_TYPE_LEVEL_LOW>;
++		mmc3: mmc@11260000 {
++			compatible = "mediatek,mt8173-mmc",
++				     "mediatek,mt8135-mmc";
++			reg = <0 0x11260000 0 0x1000>;
++			interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_LOW>;
 +			clocks = <&pericfg CLK_PERI_MSDC30_3>,
-+				 <&clk_null>;
++				 <&topckgen CLK_TOP_MSDC50_2_H_SEL>;
 +			clock-names = "source", "hclk";
 +			status = "disabled";
 +		};
- 	};
++	};
  };
+ 
 -- 
 1.8.1.1.dirty
