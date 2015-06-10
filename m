@@ -1,132 +1,93 @@
-From: Suman Tripathi <stripathi@apm.com>
-Subject: Re: [PATCH v7 1/2] arm64: dts: Add the arasan mmc nodes in apm-storm.dtsi
-Date: Wed, 10 Jun 2015 23:56:20 +0530
-Message-ID: <CAOHikRBAU=P56A2JhRJiB5gWANMfrZPp+fXR-BGUGyDGYAusKA@mail.gmail.com>
-References: <1431517912-10322-1-git-send-email-stripathi@apm.com>
-	<1431517912-10322-2-git-send-email-stripathi@apm.com>
-	<CAOHikRAV4i_R8LhmJgRRePSbJ+YG_eb6c94idQZWHS+fh6SAVQ@mail.gmail.com>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Subject: Re: [PATCH v2 0/6] UHS-I support for sh_mobile_sdhi
+Date: Thu, 11 Jun 2015 00:57:57 +0100
+Message-ID: <1433980677.12074.74.camel@codethink.co.uk>
+References: <1433892104.12074.49.camel@codethink.co.uk>
+	 <CAPDyKFq+fZrH1hMdMd8FEzy8h1U9pu8PbaMQtBDOEe+UySqJkA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from exprod5og118.obsmtp.com ([64.18.0.160]:47820 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752467AbbFJS0W (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Jun 2015 14:26:22 -0400
-Received: by wgv5 with SMTP id 5so42060464wgv.1
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Jun 2015 11:26:20 -0700 (PDT)
-In-Reply-To: <CAOHikRAV4i_R8LhmJgRRePSbJ+YG_eb6c94idQZWHS+fh6SAVQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFq+fZrH1hMdMd8FEzy8h1U9pu8PbaMQtBDOEe+UySqJkA@mail.gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Arnd Bergmann <arnd@arndb.de>, Michal Simek <michal.simek@xilinx.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Don Dutile <ddutile@redhat.com>, Jon Masters <jcm@redhat.com>, Mark Langsdorf <mlangsdo@redhat.com>, patches <patches@apm.com>, Suman Tripathi <stripathi@apm.com>
 
-Hi Arnd and all
+On Wed, 2015-06-10 at 11:16 +0200, Ulf Hansson wrote:
+> On 10 June 2015 at 01:21, Ben Hutchings <ben.hutchings@codethink.co.uk> wrote:
+> > This series adds support for UHS-I in sh_mobile_sdhi, partly implemented
+> > in tmio_mmc.  This does not yet include tuning for SDR-104, but SDR-50 now
+> > works on the R8A7790 Lager board and another development board.
+> >
+> > The pfc block needs to be reconfigured from 3.3V to 1.8V signalling on
+> > the pins wired to the SD card.  This is supported by adding separate
+> > functions for 1.8V signalling in sh-pfc ("sdhi0_1v8" etc.).  I expect
+> > that several SH SoCs have this capability, but I only have the R8A7790
+> > data sheet so I only implemented it for that one.
+> >
+> > Changes since v1:
+> > - Reword commit message for "mmc: tmio: Add UHS-I mode support"
+> > - Make sh_mobile_sdhi_start_signal_voltage_switch() succeed if asked
+> >   to switch to 3.3V and the regulator or pinctrl or pinctrl state is
+> >   missing
+> > - Drop change to mmcif clock on Lager
+> > - Correct original author for sdhi clock changes on Lager
+> >
+> > Changes since the RFC:
+> > - Replace the 'regulator' devices for signal voltage switching with
+> >   pinctrl functions and states
+> > - Drop 'mmc: sh_mobile_sdhi: Add actual clock rate support' as it's
+> >   redundant
+> > - Use a switch statement in sh_mobile_sdhi_start_signal_voltage_switch()
+> > - Fix subject prefix for the DT changes
+> >
+> > Ben.
+> >
+> > Ben Hutchings (5):
+> >   mmc: tmio: Add UHS-I mode support
+> >   pinctrl: sh-pfc: Add set_mux operation to struct sh_pfc_function
+> >   pinctrl: sh-pfc: r8a7790: Add separate functions for SDHI 1.8V
+> >     operation
+> >   mmc: sh_mobile_sdhi: Add UHS-I mode support
+> >   ARM: shmobile: lager: Enable UHS-I SDR-50
+> >
+> > Ian Molton (1):
+> >   ARM: shmobile: lager: Set clock rates for SDHI
+> >
+> >  arch/arm/boot/dts/r8a7790-lager.dts  | 24 +++++++++++--
+> >  drivers/mmc/host/sh_mobile_sdhi.c    | 60 +++++++++++++++++++++++++++++++
+> >  drivers/mmc/host/tmio_mmc.h          |  3 ++
+> >  drivers/mmc/host/tmio_mmc_pio.c      | 31 ++++++++++++++++
+> >  drivers/pinctrl/sh-pfc/core.c        |  2 +-
+> >  drivers/pinctrl/sh-pfc/core.h        |  1 +
+> >  drivers/pinctrl/sh-pfc/pfc-r8a7790.c | 70 +++++++++++++++++++++++++++++++++---
+> >  drivers/pinctrl/sh-pfc/pinctrl.c     |  4 +++
+> >  drivers/pinctrl/sh-pfc/sh_pfc.h      | 10 +++++-
+> >  9 files changed, 197 insertions(+), 8 deletions(-)
+> >
+> > --
+> > 2.1.4
+> >
+> 
+> Hi Ben,
+> 
+> I have looked at the mmc patches, those looks good to me. Regarding
+> the pinctrl and ARM patches, I suppose these can be taken through
+> their respective trees and I can take the mmc patches?
 
-On Mon, May 18, 2015 at 12:34 PM, Suman Tripathi <stripathi@apm.com> wrote:
-> Hi Arnd,
->
-> On Wed, May 13, 2015 at 5:21 PM, Suman Tripathi <stripathi@apm.com> wrote:
->> This patch adds the arasan mmc nodes to reuse the of-arasan
->> driver for APM X-Gene SoC.
->>
->> Signed-off-by: Suman Tripathi <stripathi@apm.com>
->> ---
->> ---
->>  arch/arm64/boot/dts/apm/apm-mustang.dts |  4 +++
->>  arch/arm64/boot/dts/apm/apm-storm.dtsi  | 43 +++++++++++++++++++++++++++++++++
->>  2 files changed, 47 insertions(+)
->>
->> diff --git a/arch/arm64/boot/dts/apm/apm-mustang.dts b/arch/arm64/boot/dts/apm/apm-mustang.dts
->> index 83578e7..7a3ea72 100644
->> --- a/arch/arm64/boot/dts/apm/apm-mustang.dts
->> +++ b/arch/arm64/boot/dts/apm/apm-mustang.dts
->> @@ -52,3 +52,7 @@
->>  &xgenet {
->>         status = "ok";
->>  };
->> +
->> +&mmc0 {
->> +       status = "ok";
->> +};
->> diff --git a/arch/arm64/boot/dts/apm/apm-storm.dtsi b/arch/arm64/boot/dts/apm/apm-storm.dtsi
->> index c8d3e0e..8e03ecd 100644
->> --- a/arch/arm64/boot/dts/apm/apm-storm.dtsi
->> +++ b/arch/arm64/boot/dts/apm/apm-storm.dtsi
->> @@ -145,6 +145,40 @@
->>                                 clock-output-names = "socplldiv2";
->>                         };
->>
->> +                       ahbclk: ahbclk@1f2ac000 {
->> +                               compatible = "apm,xgene-device-clock";
->> +                               #clock-cells = <1>;
->> +                               clocks = <&socplldiv2 0>;
->> +                               reg = <0x0 0x1f2ac000 0x0 0x1000
->> +                                       0x0 0x17000000 0x0 0x2000>;
->> +                               reg-names = "csr-reg", "div-reg";
->> +                               csr-offset = <0x0>;
->> +                               csr-mask = <0x1>;
->> +                               enable-offset = <0x8>;
->> +                               enable-mask = <0x1>;
->> +                               divider-offset = <0x164>;
->> +                               divider-width = <0x5>;
->> +                               divider-shift = <0x0>;
->> +                               clock-output-names = "ahbclk";
->> +                       };
->> +
->> +                       sdioclk: sdioclk@1f2ac000 {
->> +                               compatible = "apm,xgene-device-clock";
->> +                               #clock-cells = <1>;
->> +                               clocks = <&socplldiv2 0>;
->> +                               reg = <0x0 0x1f2ac000 0x0 0x1000
->> +                                       0x0 0x17000000 0x0 0x2000>;
->> +                               reg-names = "csr-reg", "div-reg";
->> +                               csr-offset = <0x0>;
->> +                               csr-mask = <0x2>;
->> +                               enable-offset = <0x8>;
->> +                               enable-mask = <0x2>;
->> +                               divider-offset = <0x178>;
->> +                               divider-width = <0x8>;
->> +                               divider-shift = <0x0>;
->> +                               clock-output-names = "sdioclk";
->> +                       };
->> +
->>                         qmlclk: qmlclk {
->>                                 compatible = "apm,xgene-device-clock";
->>                                 #clock-cells = <1>;
->> @@ -533,6 +567,15 @@
->>                         interrupts = <0x0 0x4f 0x4>;
->>                 };
->>
->> +               mmc0: mmc@1c000000 {
->> +                       compatible = "arasan,sdhci-4.9a";
->> +                       reg = <0x0 0x1c000000 0x0 0x100>;
->> +                       interrupts = <0x0 0x49 0x4>;
->> +                       dma-coherent;
->> +                       clock-names = "clk_xin", "clk_ahb";
->> +                       clocks = <&sdioclk 0>, <&ahbclk 0>;
->> +               };
->> +
->>                 phy1: phy@1f21a000 {
->>                         compatible = "apm,xgene-phy";
->>                         reg = <0x0 0x1f21a000 0x0 0x100>;
->> --
->> 1.8.2.1
->>
->
-> Can you review this ?
+The problem with that is that I think the device tree change will cause
+a regression if it's applied without the driver changes.  I would much
+prefer if I could get the pinctrl and device tree changes acked by the
+respective maintainers to go through the MMC tree.  (I should probably
+have said that up front.)
 
-Sorry to bother on this again . Can you review it ?
+> BTW, I noticed that the pinctrl maintainer wasn't in the to-field, you
+> may need to repost.
 
->
->
-> --
-> Thanks,
-> with regards,
-> Suman Tripathi
+I have the relevant _list_ (linux-gpio) in cc and thought that would be
+sufficient, but maybe not, so cc'ing this message.
+
+Ben.
 
 
-
--- 
-Thanks,
-with regards,
-Suman Tripathi
