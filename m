@@ -1,37 +1,49 @@
-From: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: 3.18 SDIO driver re-attach issue
-Date: Wed, 10 Jun 2015 17:30:13 +0100
-Message-ID: <55786615.7020701@codethink.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+From: Fabian Frederick <fabf@skynet.be>
+Subject: [PATCH 1/1 linux-next] mmc: queue: use swap() in mmc_queue_thread()
+Date: Wed, 10 Jun 2015 18:30:53 +0200
+Message-ID: <1433953854-23343-1-git-send-email-fabf@skynet.be>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:57883 "EHLO
-	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965792AbbFJQaV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Jun 2015 12:30:21 -0400
+Received: from mailrelay110.isp.belgacom.be ([195.238.20.137]:25820 "EHLO
+	mailrelay110.isp.belgacom.be" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752622AbbFJQbI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Jun 2015 12:31:08 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linux MMC List <linux-mmc@vger.kernel.org>
-Cc: =?UTF-8?B?TWFya2t1IEFodmVuasOkcnZp?= <markku.ahvenjarvi@nomovok.com>
+To: linux-kernel@vger.kernel.org
+Cc: Julia Lawall <Julia.Lawall@lip6.fr>, Fabian Frederick <fabf@skynet.be>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-We are having an issue with 3.18 on an OMAP3517 and a TI WL1271
-Wifi SDIO card attached to an hsmmc port. The module is powered
-from the main 3.3/1.8V supply rails so cannot be powered down.
+Use kernel.h macro definition.
 
-The wifi driver is built as a module, and when the module is
-unloaded and then reloaded the driver attach fails. The issue
-is sdio_bus_probe() calls the sdio_set_block_size(, func, 0)
-which fails with -110 (ETIMEDOUT) on the second load.
+Thanks to Julia Lawall for Coccinelle scripting support.
 
-Is it possible we need to either ignore the error, or try and
-re-set the function when either the driver un-binds / if the
-first sdio_set_block_size(, func, 0) call happens?
+Signed-off-by: Fabian Frederick <fabf@skynet.be>
+---
+ drivers/mmc/card/queue.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
 
-Currently we ignore the error and the wifi driver seems to be
-working with the device. If there is a better fix then we would
-like to know so it can be fixed properly up-stream.
-
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 8efa368..d34e09b 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -56,7 +56,6 @@ static int mmc_queue_thread(void *d)
+ 	down(&mq->thread_sem);
+ 	do {
+ 		struct request *req = NULL;
+-		struct mmc_queue_req *tmp;
+ 		unsigned int cmd_flags = 0;
+ 
+ 		spin_lock_irq(q->queue_lock);
+@@ -86,9 +85,7 @@ static int mmc_queue_thread(void *d)
+ 
+ 			mq->mqrq_prev->brq.mrq.data = NULL;
+ 			mq->mqrq_prev->req = NULL;
+-			tmp = mq->mqrq_prev;
+-			mq->mqrq_prev = mq->mqrq_cur;
+-			mq->mqrq_cur = tmp;
++			swap(mq->mqrq_prev, mq->mqrq_cur);
+ 		} else {
+ 			if (kthread_should_stop()) {
+ 				set_current_state(TASK_RUNNING);
 -- 
-Ben Dooks				http://www.codethink.co.uk/
-Senior Engineer				Codethink - Providing Genius
+2.4.2
+
