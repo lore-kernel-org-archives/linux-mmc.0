@@ -1,13 +1,11 @@
 From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH v5 1/7] mmc: dt-bindings: add Mediatek MMC bindings
-Date: Wed, 10 Jun 2015 10:24:42 +0800
-Message-ID: <1433903088-14407-2-git-send-email-chaotian.jing@mediatek.com>
-References: <1433903088-14407-1-git-send-email-chaotian.jing@mediatek.com>
+Subject: [PATCH v5 0/7] Add Mediatek MMC driver
+Date: Wed, 10 Jun 2015 10:24:41 +0800
+Message-ID: <1433903088-14407-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1433903088-14407-1-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
  <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
@@ -18,54 +16,45 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
 Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 To: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Document the device-tree binding of Mediatek MMC host
+This series enables MMC support on the MT8135/MT8173 platform.
+MT8135 has 5 MMC controllers and MT8173 has 4 MMC controllers.
 
-Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
----
- Documentation/devicetree/bindings/mmc/mtk-sd.txt | 32 ++++++++++++++++++++++++
- 1 file changed, 32 insertions(+)
+Changes base on Ulf and Sascha's comments
+Make hclk mandatory
+Disable source clock and HCLK in runtime pm suspend
+Fix dma_map_sg issue
+Seclect pinctrl only when setting the signal voltage
+
+Chaotian Jing (3):
+  mmc: dt-bindings: add Mediatek MMC bindings
+  mmc: mediatek: Add Mediatek MMC driver
+  mmc: mediatek: Add PM support for MMC driver
+
+Eddie Huang (2):
+  arm64: dts: mediatek: Add MT8173 MMC dts
+  arm64: mediatek: Add Mediatek MMC support in defconfig
+
+Yingjoe Chen (2):
+  ARM: mediatek: dts: Add emmc support to mt8135
+  ARM: multi_v7_defconfig: Enable Mediatek MMC support multi-v7
+
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt |   32 +
+ arch/arm/boot/dts/mt8135-evbp1.dts               |  158 +++
+ arch/arm/boot/dts/mt8135.dtsi                    |   55 +
+ arch/arm/configs/multi_v7_defconfig              |    1 +
+ arch/arm64/boot/dts/mediatek/mt8173-evb.dts      |  126 ++
+ arch/arm64/boot/dts/mediatek/mt8173.dtsi         |   45 +-
+ arch/arm64/configs/defconfig                     |    1 +
+ drivers/mmc/host/Kconfig                         |    8 +
+ drivers/mmc/host/Makefile                        |    1 +
+ drivers/mmc/host/mtk-sd.c                        | 1464 ++++++++++++++++++++++
+ include/linux/mmc/core.h                         |    1 +
+ 11 files changed, 1891 insertions(+), 1 deletion(-)
  create mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.txt
+ create mode 100644 drivers/mmc/host/mtk-sd.c
 
-diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-new file mode 100644
-index 0000000..a1adfa4
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-@@ -0,0 +1,32 @@
-+* MTK MMC controller
-+
-+The MTK  MSDC can act as a MMC controller
-+to support MMC, SD, and SDIO types of memory cards.
-+
-+This file documents differences between the core properties in mmc.txt
-+and the properties used by the msdc driver.
-+
-+Required properties:
-+- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc"
-+- interrupts: Should contain MSDC interrupt number
-+- clocks: MSDC source clock, HCLK
-+- clock-names: "source", "hclk"
-+- pinctrl-names: should be "default", "state_uhs"
-+- pinctrl-0: should contain default/high speed pin ctrl
-+- pinctrl-1: should contain uhs mode pin ctrl
-+- vmmc-supply: power to the Core
-+- vqmmc-supply: power to the IO
-+
-+Examples:
-+mmc0: mmc@11230000 {
-+	compatible = "mediatek,mt8173-mmc", "mediatek,mt8135-mmc";
-+	reg = <0 0x11230000 0 0x108>;
-+	interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
-+	vmmc-supply = <&mt6397_vemc_3v3_reg>;
-+	vqmmc-supply = <&mt6397_vio18_reg>;
-+	clocks = <&pericfg CLK_PERI_MSDC30_0>, <&topckgen CLK_TOP_MSDC50_0_H_SEL>;
-+	clock-names = "source", "hclk";
-+	pinctrl-names = "default", "state_uhs";
-+	pinctrl-0 = <&mmc0_pins_default>;
-+	pinctrl-1 = <&mmc0_pins_uhs>;
-+};
 -- 
 1.8.1.1.dirty
