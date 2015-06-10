@@ -1,87 +1,71 @@
-From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: [PATCH v2 6/6] ARM: shmobile: lager: Enable UHS-I SDR-50
-Date: Wed, 10 Jun 2015 00:24:29 +0100
-Message-ID: <1433892269.12074.55.camel@codethink.co.uk>
-References: <1433892104.12074.49.camel@codethink.co.uk>
+From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: [PATCH v5 1/7] mmc: dt-bindings: add Mediatek MMC bindings
+Date: Wed, 10 Jun 2015 10:24:42 +0800
+Message-ID: <1433903088-14407-2-git-send-email-chaotian.jing@mediatek.com>
+References: <1433903088-14407-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <1433892104.12074.49.camel@codethink.co.uk>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1433903088-14407-1-git-send-email-chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
+List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add the "1v8" pinctrl state and sd-uhs-sdr50 property to SDHI{0,2}.
+Document the device-tree binding of Mediatek MMC host
 
-Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 ---
- arch/arm/boot/dts/r8a7790-lager.dts | 18 ++++++++++++++++--
- 1 file changed, 16 insertions(+), 2 deletions(-)
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt | 32 ++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.txt
 
-diff --git a/arch/arm/boot/dts/r8a7790-lager.dts b/arch/arm/boot/dts/r8a7790-lager.dts
-index 5f68e53c58ae..ff5eea8ea765 100644
---- a/arch/arm/boot/dts/r8a7790-lager.dts
-+++ b/arch/arm/boot/dts/r8a7790-lager.dts
-@@ -314,11 +314,21 @@
- 		renesas,function = "sdhi0";
- 	};
- 
-+	sdhi0_pins_1v8: sd0_1v8 {
-+		renesas,groups = "sdhi0_data4", "sdhi0_ctrl";
-+		renesas,function = "sdhi0_1v8";
-+	};
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+new file mode 100644
+index 0000000..a1adfa4
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+@@ -0,0 +1,32 @@
++* MTK MMC controller
 +
- 	sdhi2_pins: sd2 {
- 		renesas,groups = "sdhi2_data4", "sdhi2_ctrl";
- 		renesas,function = "sdhi2";
- 	};
- 
-+	sdhi2_pins_1v8: sd2_1v8 {
-+		renesas,groups = "sdhi2_data4", "sdhi2_ctrl";
-+		renesas,function = "sdhi2_1v8";
-+	};
++The MTK  MSDC can act as a MMC controller
++to support MMC, SD, and SDIO types of memory cards.
 +
- 	mmc1_pins: mmc1 {
- 		renesas,groups = "mmc1_data8", "mmc1_ctrl";
- 		renesas,function = "mmc1";
-@@ -486,7 +496,8 @@
- 
- &sdhi0 {
- 	pinctrl-0 = <&sdhi0_pins>;
--	pinctrl-names = "default";
-+	pinctrl-1 = <&sdhi0_pins_1v8>;
-+	pinctrl-names = "default", "1v8";
- 
- 	assigned-clocks = <&mstp3_clks R8A7790_CLK_SDHI0>;
- 	assigned-clock-rates = <156000000>;
-@@ -494,12 +505,14 @@
- 	vmmc-supply = <&vcc_sdhi0>;
- 	vqmmc-supply = <&vccq_sdhi0>;
- 	cd-gpios = <&gpio3 6 GPIO_ACTIVE_LOW>;
-+	sd-uhs-sdr50;
- 	status = "okay";
- };
- 
- &sdhi2 {
- 	pinctrl-0 = <&sdhi2_pins>;
--	pinctrl-names = "default";
-+	pinctrl-1 = <&sdhi2_pins_1v8>;
-+	pinctrl-names = "default", "1v8";
- 
- 	assigned-clocks = <&mstp3_clks R8A7790_CLK_SDHI2>;
- 	assigned-clock-rates = <97500000>;
-@@ -507,6 +520,7 @@
- 	vmmc-supply = <&vcc_sdhi2>;
- 	vqmmc-supply = <&vccq_sdhi2>;
- 	cd-gpios = <&gpio3 22 GPIO_ACTIVE_LOW>;
-+	sd-uhs-sdr50;
- 	status = "okay";
- };
- 
++This file documents differences between the core properties in mmc.txt
++and the properties used by the msdc driver.
++
++Required properties:
++- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc"
++- interrupts: Should contain MSDC interrupt number
++- clocks: MSDC source clock, HCLK
++- clock-names: "source", "hclk"
++- pinctrl-names: should be "default", "state_uhs"
++- pinctrl-0: should contain default/high speed pin ctrl
++- pinctrl-1: should contain uhs mode pin ctrl
++- vmmc-supply: power to the Core
++- vqmmc-supply: power to the IO
++
++Examples:
++mmc0: mmc@11230000 {
++	compatible = "mediatek,mt8173-mmc", "mediatek,mt8135-mmc";
++	reg = <0 0x11230000 0 0x108>;
++	interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
++	vmmc-supply = <&mt6397_vemc_3v3_reg>;
++	vqmmc-supply = <&mt6397_vio18_reg>;
++	clocks = <&pericfg CLK_PERI_MSDC30_0>, <&topckgen CLK_TOP_MSDC50_0_H_SEL>;
++	clock-names = "source", "hclk";
++	pinctrl-names = "default", "state_uhs";
++	pinctrl-0 = <&mmc0_pins_default>;
++	pinctrl-1 = <&mmc0_pins_uhs>;
++};
 -- 
-2.1.4
-
-
-
+1.8.1.1.dirty
