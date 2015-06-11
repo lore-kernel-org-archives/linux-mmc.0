@@ -1,184 +1,118 @@
-From: "Sun, Yi Y" <yi.y.sun@intel.com>
-Subject: RE: [PATCH v2] mmc: enable Enhance Strobe for HS400.
-Date: Thu, 11 Jun 2015 13:58:48 +0000
-Message-ID: <525EAED47491124EB5123A51BD2FC79101AAE733@SHSMSX101.ccr.corp.intel.com>
-References: <1433472602-3851-1-git-send-email-yi.y.sun@intel.com>
- <CALk7dXqVyGubDreAfev4xx7QkoHWzan1DvmNLwpgtqFhZe5NdQ@mail.gmail.com>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Subject: Re: [PATCH v2 0/6] UHS-I support for sh_mobile_sdhi
+Date: Thu, 11 Jun 2015 16:02:04 +0100
+Message-ID: <1434034924.26252.10.camel@codethink.co.uk>
+References: <1433892104.12074.49.camel@codethink.co.uk>
+	 <CAPDyKFq+fZrH1hMdMd8FEzy8h1U9pu8PbaMQtBDOEe+UySqJkA@mail.gmail.com>
+	 <1433980677.12074.74.camel@codethink.co.uk>
+	 <20150611024938.GB6904@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:2211 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752111AbbFKOFN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 11 Jun 2015 10:05:13 -0400
-In-Reply-To: <CALk7dXqVyGubDreAfev4xx7QkoHWzan1DvmNLwpgtqFhZe5NdQ@mail.gmail.com>
-Content-Language: en-US
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:35509 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752282AbbFKPCJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Jun 2015 11:02:09 -0400
+In-Reply-To: <20150611024938.GB6904@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Harjani <ritesh.list@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+To: Simon Horman <horms@verge.net.au>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ian Molton <ian@mnementh.co.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linus Walleij <linus.walleij@linaro.org>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
 
-SGksDQoNClRoYW5rcyBmb3IgcmV2aWV3IGFuZCBzb3JyeSBmb3IgbGF0ZSB0byByZXBseS4gSSBh
-bSBvbiBhIGJ1c2luZXNzIHRyYXZlbC4NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZy
-b206IHJpdGVzaC5oYXJqYW5pQGdtYWlsLmNvbSBbbWFpbHRvOnJpdGVzaC5oYXJqYW5pQGdtYWls
-LmNvbV0gT24gQmVoYWxmIE9mIFJpdGVzaCBIYXJqYW5pDQpTZW50OiBTYXR1cmRheSwgSnVuZSAw
-NiwgMjAxNSA1OjUwIEFNDQpUbzogU3VuLCBZaSBZDQpDYzogbGludXgtbW1jQHZnZXIua2VybmVs
-Lm9yZzsgdWxmLmhhbnNzb25AbGluYXJvLm9yZw0KU3ViamVjdDogUmU6IFtQQVRDSCB2Ml0gbW1j
-OiBlbmFibGUgRW5oYW5jZSBTdHJvYmUgZm9yIEhTNDAwLg0KDQo+IEhpIFN1biwNCg0KPiBEaWQg
-eW91IGdldCB0byB0ZXN0IHRoaXMgZmVhdHVyZSBvbiBhbnkgb2YgdGhlIHRhcmdldD8NClllcywg
-dGhpcyBmZWF0dXJlIGlzIHRlc3RlZCBvbiBGUEdBIGJvYXJkLiBIUzQwMCBpbml0aWFsaXphdGlv
-biBwYXNzIGFuZCByZWFkL3dyaXRlIHdvcmsgd2VsbC4NCg0KDQpPbiBGcmksIEp1biA1LCAyMDE1
-IGF0IDg6MjAgQU0sIFlpIFN1biA8eWkueS5zdW5AaW50ZWwuY29tPj4gd3JvdGU6DQo+PiBFbmhh
-bmNlIFN0cm9iZSBpcyBkZWZpbmVkIGluIHY1LjEgZU1NQyBzcGVjLiBUaGlzIGNvbW1pdCBpcyB0
-byANCj4+IGltcGxlbWVudCBpdC4NCj4+DQo+PiBOb3JtYWwgU3Ryb2JlIHNpZ25hbCBmb3IgSFM0
-MDAgaXMgb25seSBwcm92aWRlZCBkdXJpbmcgRGF0YSBPdXQgYW5kIA0KPj4gQ1JDIFJlc3BvbnNl
-LiBXaGlsZSBFbmhhbmNlIFN0cm9iZSBpcyBlbmFibGVkLCBTdHJvYmUgc2lnbmFsIGlzIA0KPj4g
-cHJvdmlkZWQgZHVyaW5nIERhdGEgT3V0LCBDUkMgUmVzcG9uc2UgYW5kIENNRCBSZXNwb25zZS4N
-Cj4+DQo+PiBXaGlsZSBlbmFibGluZyBFbmhhbmNlIFN0cm9iZSwgdGhlIGluaXRpYWxpemF0aW9u
-IG9mIEhTNDAwIGRvZXMgbm90IA0KPj4gbmVlZCBlbmFibGluZyBIUzIwMCBhbmQgZXhlY3V0aW5n
-IHR1bmluZyBhbnltb3JlLg0KPiBJZiBlbmhhbmNlZCBzdHJvYmUgaXMgZW5hYmxlZCwgd2hhdCBh
-Ym91dCBTREhDSV9ORUVEU19SRVRVTklORyBmbGFnID8NCj4gSW4gY2FzZSBvZiBDUkMgZXJyb3Is
-IHdlIGRvIGV4ZWN1dGUgdHVuaW5nLCBidXQgbm93IGFmdGVyIHN1cHBvcnQgb2YgZW5oYW5jZWQg
-c3Ryb2JlLCBob3cgd2lsbCB0aGF0IGJlIHRha2VuIGNhcmUgb2Y/DQpQZXIgbXkga25vd2xlZGdl
-LCByZS10dW5pbmcgaXMgbm90IG5lZWRlZCBmb3IgRW5oYW5jZSBTdHJvYmUuIE90aGVyd2lzZSwg
-dGhlIGVNTUMgSFM0MDAgaW5pdGlhbGl6YXRpb24gcHJvY2VzcyBzaG91bGQgZG8gaXQgdG9vLCBs
-aWtlIEhTMjAwLiBCdXQgSSByZWFsbHkgbWlzcyBzb21ldGhpbmcgaGVyZSBub3QgdG8gZG8gcmUt
-dHVuaW5nIGlmIEVuaGFuY2UgU3Ryb2JlIGlzIGVuYWJsZWQuIEkgd2lsbCBhZGQgaXQuIFRvIGJl
-IGZyYW5rbHksIG9uIEZQR0EsIHRoZXJlIGlzIG5vIFBNIGFuZCBDUkMgZXJyb3IgaGFwcGVuZWQg
-c28gSSBkbyBub3QgdmVyaWZ5IGl0LiBJIHdpbGwgYWxzbyB0cnkgdG8gc2ltdWxhdGUgc29tZSBz
-Y2VuYXJpb3MgdG8gdmVyaWZ5IHRoZSBwcm9jZXNzLg0KDQo+PiBUaGlzIHNpbXBsaWZpZXMgdGhl
-IEhTNDAwIGluaXRpYWxpemF0aW9uIHByb2Nlc3MgbXVjaC4NCj4+DQo+PiBQZXIgc3BlYywgdGhl
-cmUgaXMgYSBTVFJPQkVfU1VQUE9SVCBhZGRlZCBpbiBFWFRfQ1NEIHJlZ2lzdGVyIHRvIA0KPj4g
-aW5kaWNhdGUgdGhhdCBjYXJkIHN1cHBvcnRzIEVuaGFuY2UgU3Ryb2JlIG9yIG5vdC4gSWYgaXQg
-aXMgc3VwcG9ydGVkLCANCj4+IGhvc3QgY2FuIGVuYWJsZSB0aGlzIGZlYXR1cmUgYnkgZW5hYmxp
-bmcgdGhlIG1vc3Qgc2lnbmlmaWNhbnQgYml0IG9mIA0KPj4gQlVTX1dJRFRIIGJlZm9yZSBzZXQg
-SFNfVElNSU5HIHRvIEhTNDAwLg0KPiBlbmhhbmNlZCBzdHJvYmUgZmVhdHVyZSBhbHNvIHJlcXVp
-cmVzIHN1cHBvcnQgZnJvbSBob3N0IGNvbnRyb2xsZXIgc2lkZSBhcyB3ZWxsLiBEb250IHlvdSB0
-aGluayB3ZSBzaG91bGQgcHJvdmlkZSBzb21lIG9wcyBoZXJlIGZvciB0aGF0Pw0KWWVzLCB0aGFu
-a3MgZm9yIHN1Z2dlc3Rpb24hDQoNCj4+DQo+PiBTaWduZWQtb2ZmLWJ5OiBZaSBTdW4gPHlpLnku
-c3VuQGludGVsLmNvbT4+DQo+PiAtLS0NCj4+ICBkcml2ZXJzL21tYy9jb3JlL21tYy5jICAgfCAg
-IDYxICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKy0tLS0NCj4+ICBp
-bmNsdWRlL2xpbnV4L21tYy9jYXJkLmggfCAgICAxICsNCj4+ICBpbmNsdWRlL2xpbnV4L21tYy9t
-bWMuaCAgfCAgICAyICsrDQo+PiAgMyBmaWxlcyBjaGFuZ2VkLCA1OSBpbnNlcnRpb25zKCspLCA1
-IGRlbGV0aW9ucygtKQ0KPj4NCj4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL21tYy5j
-IGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYyBpbmRleCANCj4+IGU1MTllMzEuLmM5ZWYyZGUgMTAw
-NjQ0DQo+PiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jDQo+PiArKysgYi9kcml2ZXJzL21t
-Yy9jb3JlL21tYy5jDQo+PiBAQCAtNTg1LDYgKzU4NSwxMiBAQCBzdGF0aWMgaW50IG1tY19kZWNv
-ZGVfZXh0X2NzZChzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQsIHU4ICpleHRfY3NkKQ0KPj4gICAgICAg
-ICAgICAgICAgIGNhcmQtPmV4dF9jc2QuZmZ1X2NhcGFibGUgPQ0KPj4gICAgICAgICAgICAgICAg
-ICAgICAgICAgKGV4dF9jc2RbRVhUX0NTRF9TVVBQT1JURURfTU9ERV0gJiAweDEpICYmDQo+PiAg
-ICAgICAgICAgICAgICAgICAgICAgICAhKGV4dF9jc2RbRVhUX0NTRF9GV19DT05GSUddICYgMHgx
-KTsNCj4+ICsNCj4+ICsgICAgICAgICAgICAgICAvKiBFbmhhbmNlIFN0cm9iZSBpcyBzdXBwb3J0
-ZWQgc2luY2UgdjUuMSB3aGljaCByZXYgc2hvdWxkIGJlDQo+PiArICAgICAgICAgICAgICAgICog
-OCBidXQgc29tZSBlTU1DIGRldmljZXMgY2FuIHN1cHBvcnQgaXQgd2l0aCByZXYgNy4gU28gaGFu
-ZGxlDQo+PiArICAgICAgICAgICAgICAgICogRW5oYW5jZSBTdHJvYmUgaGVyZS4NCj4+ICsgICAg
-ICAgICAgICAgICAgKi8NCj4+ICsgICAgICAgICAgICAgICBjYXJkLT5leHRfY3NkLnN0cm9iZV9z
-dXBwb3J0ID0gDQo+PiArIGV4dF9jc2RbRVhUX0NTRF9TVFJPQkVfU1VQUE9SVF07DQo+PiAgICAg
-ICAgIH0NCj4+ICBvdXQ6DQo+PiAgICAgICAgIHJldHVybiBlcnI7DQo+PiBAQCAtMTA0OSw5ICsx
-MDU1LDI4IEBAIHN0YXRpYyBpbnQgbW1jX3NlbGVjdF9oczQwMChzdHJ1Y3QgbW1jX2NhcmQgKmNh
-cmQpDQo+PiAgICAgICAgIC8qDQo+PiAgICAgICAgICAqIEhTNDAwIG1vZGUgcmVxdWlyZXMgOC1i
-aXQgYnVzIHdpZHRoDQo+PiAgICAgICAgICAqLw0KY29tbWVudCBub3QgdmFsaWQ/DQoNCj4+IC0g
-ICAgICAgaWYgKCEoY2FyZC0+bW1jX2F2YWlsX3R5cGUgJiBFWFRfQ1NEX0NBUkRfVFlQRV9IUzQw
-MCAmJg0KPj4gLSAgICAgICAgICAgICBob3N0LT5pb3MuYnVzX3dpZHRoID09IE1NQ19CVVNfV0lE
-VEhfOCkpDQo+PiAtICAgICAgICAgICAgICAgcmV0dXJuIDA7DQo+PiArICAgICAgIGlmIChjYXJk
-LT5leHRfY3NkLnN0cm9iZV9zdXBwb3J0KSB7DQo+PiArICAgICAgICAgICAgICAgaWYgKCEoY2Fy
-ZC0+bW1jX2F2YWlsX3R5cGUgJiBFWFRfQ1NEX0NBUkRfVFlQRV9IUzQwMCAmJg0KPj4gKyAgICAg
-ICAgICAgICAgICAgICBob3N0LT5jYXBzICYgTU1DX0NBUF84X0JJVF9EQVRBKSkNCj4+ICsgICAg
-ICAgICAgICAgICAgICAgICAgIHJldHVybiAwOw0KPj4gKw0KPj4gKyAgICAgICAgICAgICAgIC8q
-IEZvciBFbmhhbmNlIFN0cm9iZSBmbG93LiBGb3Igbm9uIEVuaGFuY2UgU3Ryb2JlLCBzaWduYWwN
-Cj4+ICsgICAgICAgICAgICAgICAgKiB2b2x0YWdlIHdpbGwgbm90IGJlIHNldC4NCj4+ICsgICAg
-ICAgICAgICAgICAgKi8NCj4+ICsgICAgICAgICAgICAgICBpZiAoY2FyZC0+bW1jX2F2YWlsX3R5
-cGUgJiBFWFRfQ1NEX0NBUkRfVFlQRV9IUzIwMF8xXzJWKQ0KPj4gKyAgICAgICAgICAgICAgICAg
-ICAgICAgZXJyID0gX19tbWNfc2V0X3NpZ25hbF92b2x0YWdlKGhvc3QsDQo+PiArICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgTU1DX1NJR05BTF9WT0xUQUdFXzEyMCk7DQo+
-PiArDQo+PiArICAgICAgICAgICAgICAgaWYgKGVyciAmJiBjYXJkLT5tbWNfYXZhaWxfdHlwZSAm
-IEVYVF9DU0RfQ0FSRF9UWVBFX0hTMjAwXzFfOFYpDQo+PiArICAgICAgICAgICAgICAgICAgICAg
-ICBlcnIgPSBfX21tY19zZXRfc2lnbmFsX3ZvbHRhZ2UoaG9zdCwNCj4+ICsgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICBNTUNfU0lHTkFMX1ZPTFRBR0VfMTgwKTsNCj4+ICsg
-ICAgICAgICAgICAgICBpZiAoZXJyKQ0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJu
-IGVycjsNCj4+ICsgICAgICAgfSBlbHNlIHsNCj4+ICsgICAgICAgICAgICAgICBpZiAoIShjYXJk
-LT5tbWNfYXZhaWxfdHlwZSAmIEVYVF9DU0RfQ0FSRF9UWVBFX0hTNDAwICYmDQo+PiArICAgICAg
-ICAgICAgICAgICAgIGhvc3QtPmlvcy5idXNfd2lkdGggPT0gTU1DX0JVU19XSURUSF84KSkNCj4+
-ICsgICAgICAgICAgICAgICAgICAgICAgIHJldHVybiAwOw0KPj4gKyAgICAgICB9DQo+Pg0KPj4g
-ICAgICAgICAvKg0KPj4gICAgICAgICAgKiBCZWZvcmUgc3dpdGNoaW5nIHRvIGR1YWwgZGF0YSBy
-YXRlIG9wZXJhdGlvbiBmb3IgSFM0MDAsIEBAIA0KPj4gLTEwNzIsMTUgKzEwOTcsMzYgQEAgc3Rh
-dGljIGludCBtbWNfc2VsZWN0X2hzNDAwKHN0cnVjdCBtbWNfY2FyZCAqY2FyZCkNCj4+ICAgICAg
-ICAgICAgICAgICByZXR1cm4gZXJyOw0KPj4gICAgICAgICB9DQo+Pg0KPj4gKyAgICAgICB2YWwg
-PSBFWFRfQ1NEX0REUl9CVVNfV0lEVEhfODsNCj4+ICsgICAgICAgaWYgKGNhcmQtPmV4dF9jc2Qu
-c3Ryb2JlX3N1cHBvcnQpDQo+PiArICAgICAgICAgICAgICAgdmFsIHw9IEVYVF9DU0RfQlVTX1dJ
-RFRIX1NUUk9CRTsNCj4+ICAgICAgICAgZXJyID0gbW1jX3N3aXRjaChjYXJkLCBFWFRfQ1NEX0NN
-RF9TRVRfTk9STUFMLA0KPj4gICAgICAgICAgICAgICAgICAgICAgICAgIEVYVF9DU0RfQlVTX1dJ
-RFRILA0KPj4gLSAgICAgICAgICAgICAgICAgICAgICAgIEVYVF9DU0RfRERSX0JVU19XSURUSF84
-LA0KPj4gKyAgICAgICAgICAgICAgICAgICAgICAgIHZhbCwNCj4+ICAgICAgICAgICAgICAgICAg
-ICAgICAgICBjYXJkLT5leHRfY3NkLmdlbmVyaWNfY21kNl90aW1lKTsNCj4+ICAgICAgICAgaWYg
-KGVycikgew0KPj4gICAgICAgICAgICAgICAgIHByX2VycigiJXM6IHN3aXRjaCB0byBidXMgd2lk
-dGggZm9yIGhzNDAwIGZhaWxlZCwgZXJyOiVkXG4iLA0KPj4gICAgICAgICAgICAgICAgICAgICAg
-ICAgbW1jX2hvc3RuYW1lKGhvc3QpLCBlcnIpOw0KPj4gICAgICAgICAgICAgICAgIHJldHVybiBl
-cnI7DQo+PiAgICAgICAgIH0NCj4+ICsgICAgICAgaWYgKGNhcmQtPmV4dF9jc2Quc3Ryb2JlX3N1
-cHBvcnQpIHsNCj4+ICsgICAgICAgICAgICAgICBtbWNfc2V0X2J1c193aWR0aChob3N0LCBNTUNf
-QlVTX1dJRFRIXzgpOw0KPj4gKyAgICAgICAgICAgICAgIC8qDQo+PiArICAgICAgICAgICAgICAg
-ICogSWYgY29udHJvbGxlciBjYW4ndCBoYW5kbGUgYnVzIHdpZHRoIHRlc3QsDQo+PiArICAgICAg
-ICAgICAgICAgICogY29tcGFyZSBleHRfY3NkIHByZXZpb3VzbHkgcmVhZCBpbiAxIGJpdCBtb2Rl
-DQo+PiArICAgICAgICAgICAgICAgICogYWdhaW5zdCBleHRfY3NkIGF0IG5ldyBidXMgd2lkdGgN
-Cj4+ICsgICAgICAgICAgICAgICAgKi8NCj4+ICsgICAgICAgICAgICAgICBpZiAoIShob3N0LT5j
-YXBzICYgTU1DX0NBUF9CVVNfV0lEVEhfVEVTVCkpDQo+PiArICAgICAgICAgICAgICAgICAgICAg
-ICBlcnIgPSBtbWNfY29tcGFyZV9leHRfY3NkcyhjYXJkLCBNTUNfQlVTX1dJRFRIXzgpOw0KPj4g
-KyAgICAgICAgICAgICAgIGVsc2UNCj4+ICsgICAgICAgICAgICAgICAgICAgICAgIGVyciA9IG1t
-Y19idXNfdGVzdChjYXJkLCBNTUNfQlVTX1dJRFRIXzgpOw0KPj4gKw0KPj4gKyAgICAgICAgICAg
-ICAgIGlmIChlcnIpIHsNCj4+ICsgICAgICAgICAgICAgICAgICAgICAgIHByX3dhcm4oIiVzOiBz
-d2l0Y2ggdG8gYnVzIHdpZHRoICVkIGZhaWxlZFxuIiwNCj4+ICsgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgbW1jX2hvc3RuYW1lKGhvc3QpLCBNTUNfQlVTX1dJRFRIXzgpOw0KPj4gKyAg
-ICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIGVycjsNCj4+ICsgICAgICAgICAgICAgICB9DQo+
-PiArICAgICAgIH0NCj4+DQo+PiAgICAgICAgIHZhbCA9IEVYVF9DU0RfVElNSU5HX0hTNDAwIHwN
-Cj4+ICAgICAgICAgICAgICAgY2FyZC0+ZHJpdmVfc3RyZW5ndGggPDwgRVhUX0NTRF9EUlZfU1RS
-X1NISUZUOyBAQCANCj4+IC0xMjYzLDcgKzEzMDksMTIgQEAgc3RhdGljIGludCBtbWNfc2VsZWN0
-X3RpbWluZyhzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQpDQo+PiAgICAgICAgIGlmICghbW1jX2Nhbl9l
-eHRfY3NkKGNhcmQpKQ0KPj4gICAgICAgICAgICAgICAgIGdvdG8gYnVzX3NwZWVkOw0KPj4NCj4+
-IC0gICAgICAgaWYgKGNhcmQtPm1tY19hdmFpbF90eXBlICYgRVhUX0NTRF9DQVJEX1RZUEVfSFMy
-MDApDQo+PiArICAgICAgIC8qIEZvciBFbmhhbmNlIFN0cm9iZSBIUzQwMCBmbG93ICovDQo+PiAr
-ICAgICAgIGlmIChjYXJkLT5leHRfY3NkLnN0cm9iZV9zdXBwb3J0ICYmDQo+PiArICAgICAgICAg
-ICBjYXJkLT5tbWNfYXZhaWxfdHlwZSAmIEVYVF9DU0RfQ0FSRF9UWVBFX0hTNDAwICYmDQo+PiAr
-ICAgICAgICAgICBjYXJkLT5ob3N0LT4+Y2FwcyAmIE1NQ19DQVBfOF9CSVRfREFUQSkNCj4+ICsg
-ICAgICAgICAgICAgICBlcnIgPSBtbWNfc2VsZWN0X2hzNDAwKGNhcmQpOw0KPj4gKyAgICAgICBl
-bHNlIGlmIChjYXJkLT5tbWNfYXZhaWxfdHlwZSAmIEVYVF9DU0RfQ0FSRF9UWVBFX0hTMjAwKQ0K
-Pj4gICAgICAgICAgICAgICAgIGVyciA9IG1tY19zZWxlY3RfaHMyMDAoY2FyZCk7DQo+PiAgICAg
-ICAgIGVsc2UgaWYgKGNhcmQtPm1tY19hdmFpbF90eXBlICYgRVhUX0NTRF9DQVJEX1RZUEVfSFMp
-DQo+PiAgICAgICAgICAgICAgICAgZXJyID0gbW1jX3NlbGVjdF9ocyhjYXJkKTsgZGlmZiAtLWdp
-dCANCj4+IGEvaW5jbHVkZS9saW51eC9tbWMvY2FyZC5oIGIvaW5jbHVkZS9saW51eC9tbWMvY2Fy
-ZC5oIGluZGV4IA0KPj4gNGQzNzc2ZC4uYjc5M2I2MSAxMDA2NDQNCj4+IC0tLSBhL2luY2x1ZGUv
-bGludXgvbW1jL2NhcmQuaA0KPj4gKysrIGIvaW5jbHVkZS9saW51eC9tbWMvY2FyZC5oDQo+PiBA
-QCAtOTUsNiArOTUsNyBAQCBzdHJ1Y3QgbW1jX2V4dF9jc2Qgew0KPj4gICAgICAgICB1OCAgICAg
-ICAgICAgICAgICAgICAgICByYXdfcGFydGl0aW9uX3N1cHBvcnQ7ICAvKiAxNjAgKi8NCj4+ICAg
-ICAgICAgdTggICAgICAgICAgICAgICAgICAgICAgcmF3X3JwbWJfc2l6ZV9tdWx0OyAgICAgLyog
-MTY4ICovDQo+PiAgICAgICAgIHU4ICAgICAgICAgICAgICAgICAgICAgIHJhd19lcmFzZWRfbWVt
-X2NvdW50OyAgIC8qIDE4MSAqLw0KPj4gKyAgICAgICB1OCAgICAgICAgICAgICAgICAgICAgICBz
-dHJvYmVfc3VwcG9ydDsgICAgICAgICAvKiAxODQgKi8NCj4+ICAgICAgICAgdTggICAgICAgICAg
-ICAgICAgICAgICAgcmF3X2V4dF9jc2Rfc3RydWN0dXJlOyAgLyogMTk0ICovDQo+PiAgICAgICAg
-IHU4ICAgICAgICAgICAgICAgICAgICAgIHJhd19jYXJkX3R5cGU7ICAgICAgICAgIC8qIDE5NiAq
-Lw0KPj4gICAgICAgICB1OCAgICAgICAgICAgICAgICAgICAgICByYXdfZHJpdmVyX3N0cmVuZ3Ro
-OyAgICAvKiAxOTcgKi8NCj4+IGRpZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L21tYy9tbWMuaCBi
-L2luY2x1ZGUvbGludXgvbW1jL21tYy5oIGluZGV4IA0KPj4gMTVmMmM0YS4uYTFiYjMyYyAxMDA2
-NDQNCj4+IC0tLSBhL2luY2x1ZGUvbGludXgvbW1jL21tYy5oDQo+PiArKysgYi9pbmNsdWRlL2xp
-bnV4L21tYy9tbWMuaA0KPj4gQEAgLTI5Nyw2ICsyOTcsNyBAQCBzdHJ1Y3QgX21tY19jc2Qgew0K
-Pj4gICNkZWZpbmUgRVhUX0NTRF9QQVJUX0NPTkZJRyAgICAgICAgICAgIDE3OSAgICAgLyogUi9X
-ICovDQo+PiAgI2RlZmluZSBFWFRfQ1NEX0VSQVNFRF9NRU1fQ09OVCAgICAgICAgICAgICAgICAx
-ODEgICAgIC8qIFJPICovDQo+PiAgI2RlZmluZSBFWFRfQ1NEX0JVU19XSURUSCAgICAgICAgICAg
-ICAgMTgzICAgICAvKiBSL1cgKi8NCj4+ICsjZGVmaW5lIEVYVF9DU0RfU1RST0JFX1NVUFBPUlQg
-ICAgICAgICAxODQgICAgIC8qIFJPICovDQo+PiAgI2RlZmluZSBFWFRfQ1NEX0hTX1RJTUlORyAg
-ICAgICAgICAgICAgMTg1ICAgICAvKiBSL1cgKi8NCj4+ICAjZGVmaW5lIEVYVF9DU0RfUE9XRVJf
-Q0xBU1MgICAgICAgICAgICAxODcgICAgIC8qIFIvVyAqLw0KPj4gICNkZWZpbmUgRVhUX0NTRF9S
-RVYgICAgICAgICAgICAgICAgICAgIDE5MiAgICAgLyogUk8gKi8NCj4+IEBAIC0zODYsNiArMzg3
-LDcgQEAgc3RydWN0IF9tbWNfY3NkIHsNCj4+ICAjZGVmaW5lIEVYVF9DU0RfQlVTX1dJRFRIXzgg
-ICAgMiAgICAgICAvKiBDYXJkIGlzIGluIDggYml0IG1vZGUgKi8NCj4+ICAjZGVmaW5lIEVYVF9D
-U0RfRERSX0JVU19XSURUSF80ICAgICAgICA1ICAgICAgIC8qIENhcmQgaXMgaW4gNCBiaXQgRERS
-IG1vZGUgKi8NCj4+ICAjZGVmaW5lIEVYVF9DU0RfRERSX0JVU19XSURUSF84ICAgICAgICA2ICAg
-ICAgIC8qIENhcmQgaXMgaW4gOCBiaXQgRERSIG1vZGUgKi8NCj4+ICsjZGVmaW5lIEVYVF9DU0Rf
-QlVTX1dJRFRIX1NUUk9CRSAgICAgICAweDgwICAgIC8qIENhcmQgaXMgaW4gOCBiaXQgRERSIG1v
-ZGUgKi8NCj4+DQo+PiAgI2RlZmluZSBFWFRfQ1NEX1RJTUlOR19CQyAgICAgIDAgICAgICAgLyog
-QmFja3dhcmRzIGNvbXBhdGlsaXR5ICovDQo+PiAgI2RlZmluZSBFWFRfQ1NEX1RJTUlOR19IUyAg
-ICAgIDEgICAgICAgLyogSGlnaCBzcGVlZCAqLw0KPj4gLS0NCj4+IDEuNy45LjUNCj4+DQo+PiAt
-LQ0KPj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vi
-c2NyaWJlIGxpbnV4LW1tYyIgDQo+PiBpbiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jk
-b21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9yZG9tbyANCj4+IGluZm8gYXQgIGh0dHA6Ly92
-Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbA0K
+On Thu, 2015-06-11 at 11:49 +0900, Simon Horman wrote:
+> On Thu, Jun 11, 2015 at 12:57:57AM +0100, Ben Hutchings wrote:
+> > On Wed, 2015-06-10 at 11:16 +0200, Ulf Hansson wrote:
+> > > On 10 June 2015 at 01:21, Ben Hutchings <ben.hutchings@codethink.co.uk> wrote:
+> > > > This series adds support for UHS-I in sh_mobile_sdhi, partly implemented
+> > > > in tmio_mmc.  This does not yet include tuning for SDR-104, but SDR-50 now
+> > > > works on the R8A7790 Lager board and another development board.
+> > > >
+> > > > The pfc block needs to be reconfigured from 3.3V to 1.8V signalling on
+> > > > the pins wired to the SD card.  This is supported by adding separate
+> > > > functions for 1.8V signalling in sh-pfc ("sdhi0_1v8" etc.).  I expect
+> > > > that several SH SoCs have this capability, but I only have the R8A7790
+> > > > data sheet so I only implemented it for that one.
+> > > >
+> > > > Changes since v1:
+> > > > - Reword commit message for "mmc: tmio: Add UHS-I mode support"
+> > > > - Make sh_mobile_sdhi_start_signal_voltage_switch() succeed if asked
+> > > >   to switch to 3.3V and the regulator or pinctrl or pinctrl state is
+> > > >   missing
+> > > > - Drop change to mmcif clock on Lager
+> > > > - Correct original author for sdhi clock changes on Lager
+> > > >
+> > > > Changes since the RFC:
+> > > > - Replace the 'regulator' devices for signal voltage switching with
+> > > >   pinctrl functions and states
+> > > > - Drop 'mmc: sh_mobile_sdhi: Add actual clock rate support' as it's
+> > > >   redundant
+> > > > - Use a switch statement in sh_mobile_sdhi_start_signal_voltage_switch()
+> > > > - Fix subject prefix for the DT changes
+> > > >
+> > > > Ben.
+> > > >
+> > > > Ben Hutchings (5):
+> > > >   mmc: tmio: Add UHS-I mode support
+> > > >   pinctrl: sh-pfc: Add set_mux operation to struct sh_pfc_function
+> > > >   pinctrl: sh-pfc: r8a7790: Add separate functions for SDHI 1.8V
+> > > >     operation
+> > > >   mmc: sh_mobile_sdhi: Add UHS-I mode support
+> > > >   ARM: shmobile: lager: Enable UHS-I SDR-50
+> > > >
+> > > > Ian Molton (1):
+> > > >   ARM: shmobile: lager: Set clock rates for SDHI
+> > > >
+> > > >  arch/arm/boot/dts/r8a7790-lager.dts  | 24 +++++++++++--
+> > > >  drivers/mmc/host/sh_mobile_sdhi.c    | 60 +++++++++++++++++++++++++++++++
+> > > >  drivers/mmc/host/tmio_mmc.h          |  3 ++
+> > > >  drivers/mmc/host/tmio_mmc_pio.c      | 31 ++++++++++++++++
+> > > >  drivers/pinctrl/sh-pfc/core.c        |  2 +-
+> > > >  drivers/pinctrl/sh-pfc/core.h        |  1 +
+> > > >  drivers/pinctrl/sh-pfc/pfc-r8a7790.c | 70 +++++++++++++++++++++++++++++++++---
+> > > >  drivers/pinctrl/sh-pfc/pinctrl.c     |  4 +++
+> > > >  drivers/pinctrl/sh-pfc/sh_pfc.h      | 10 +++++-
+> > > >  9 files changed, 197 insertions(+), 8 deletions(-)
+> > > >
+> > > > --
+> > > > 2.1.4
+> > > >
+> > > 
+> > > Hi Ben,
+> > > 
+> > > I have looked at the mmc patches, those looks good to me. Regarding
+> > > the pinctrl and ARM patches, I suppose these can be taken through
+> > > their respective trees and I can take the mmc patches?
+> > 
+> > The problem with that is that I think the device tree change will cause
+> > a regression if it's applied without the driver changes.  I would much
+> > prefer if I could get the pinctrl and device tree changes acked by the
+> > respective maintainers to go through the MMC tree.  (I should probably
+> > have said that up front.)
+> 
+> Hi Ben,
+> 
+> I may be misunderstanding the above, if so I apologise, but I would
+> strongly prefer to avoid an arrangement where the kernel and device tree
+> blob (DTS/DTSI -> DTB) need to be upgrade in lock-step as this tends not to
+> lead to a good experience for users.
+
+I agree.
+
+> My preference would be to maintain
+> backwards and forwards compatibility and if appropriate schedule removal of
+> such compatibility.
+[...]
+
+The problem is that the 'sd-uhs-sdr50' property is interpreted by the
+MMC core, so I think it will start trying to use this mode even if the
+driver hasn't implemented the necessary operations.  I don't see any way
+around that.
+
+The regression is relatively minor as I think the MMC core will fall
+back to a lower speed after failing to enable SDR50.  But it will slow
+down probing of a card.
+
+Ben.
+
+
