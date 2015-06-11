@@ -1,15 +1,15 @@
 From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH v5 1/7] mmc: dt-bindings: add Mediatek MMC bindings
-Date: Thu, 11 Jun 2015 09:33:51 +0800
-Message-ID: <1433986431.14592.2.camel@mhfsdcap03>
+Subject: Re: [PATCH v5 2/7] mmc: mediatek: Add Mediatek MMC driver
+Date: Thu, 11 Jun 2015 09:36:32 +0800
+Message-ID: <1433986592.14592.5.camel@mhfsdcap03>
 References: <1433903088-14407-1-git-send-email-chaotian.jing@mediatek.com>
- <1433903088-14407-2-git-send-email-chaotian.jing@mediatek.com>
- <CAPDyKFojmJYcQOdk3CkgsJ0xOzgjH86VVwvYCy2whjtiPxAFKg@mail.gmail.com>
+ <1433903088-14407-3-git-send-email-chaotian.jing@mediatek.com>
+ <CAPDyKFq=iHcsAXxQa0J0QEeG0c9LgpxaPUdo8KGL7NtbX6_eMA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <CAPDyKFojmJYcQOdk3CkgsJ0xOzgjH86VVwvYCy2whjtiPxAFKg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <CAPDyKFq=iHcsAXxQa0J0QEeG0c9LgpxaPUdo8KGL7NtbX6_eMA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
  <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
@@ -24,67 +24,156 @@ Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesj
 List-Id: linux-mmc@vger.kernel.org
 
 Dear Ulf,
-Thanks for your review!
-please see my comment:
-On Wed, 2015-06-10 at 14:02 +0200, Ulf Hansson wrote:
-> On 10 June 2015 at 04:24, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
-> > Document the device-tree binding of Mediatek MMC host
-> >
-> > Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-> > ---
-> >  Documentation/devicetree/bindings/mmc/mtk-sd.txt | 32 ++++++++++++++++++++++++
-> >  1 file changed, 32 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> > new file mode 100644
-> > index 0000000..a1adfa4
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
-> > @@ -0,0 +1,32 @@
-> > +* MTK MMC controller
-> > +
-> > +The MTK  MSDC can act as a MMC controller
-> > +to support MMC, SD, and SDIO types of memory cards.
-> > +
-> > +This file documents differences between the core properties in mmc.txt
-> > +and the properties used by the msdc driver.
-> > +
-> > +Required properties:
-> > +- compatible: Should be "mediatek,mt8173-mmc","mediatek,mt8135-mmc"
-> > +- interrupts: Should contain MSDC interrupt number
-> > +- clocks: MSDC source clock, HCLK
-> > +- clock-names: "source", "hclk"
-> 
-> According to the mmc driver, hclk is treated as an optional clock.
-> Therefore I think you should list it under an "Optional properties"
-> section instead.
-> 
-I will make the hclk to mandatory at next driver revision.
-if there was no hclk at dtsi, then the host would probe fail.
 
-> > +- pinctrl-names: should be "default", "state_uhs"
-> > +- pinctrl-0: should contain default/high speed pin ctrl
-> > +- pinctrl-1: should contain uhs mode pin ctrl
-> > +- vmmc-supply: power to the Core
-> > +- vqmmc-supply: power to the IO
+Thanks, please see my comment:
+
+On Wed, 2015-06-10 at 13:53 +0200, Ulf Hansson wrote:
+> [...]
+> 
+> > +static int msdc_drv_probe(struct platform_device *pdev)
+> > +{
+> > +       struct mmc_host *mmc;
+> > +       struct msdc_host *host;
+> > +       struct resource *res;
+> > +       int ret;
 > > +
-> > +Examples:
-> > +mmc0: mmc@11230000 {
-> > +       compatible = "mediatek,mt8173-mmc", "mediatek,mt8135-mmc";
-> > +       reg = <0 0x11230000 0 0x108>;
-> > +       interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
-> > +       vmmc-supply = <&mt6397_vemc_3v3_reg>;
-> > +       vqmmc-supply = <&mt6397_vio18_reg>;
-> > +       clocks = <&pericfg CLK_PERI_MSDC30_0>, <&topckgen CLK_TOP_MSDC50_0_H_SEL>;
-> > +       clock-names = "source", "hclk";
-> > +       pinctrl-names = "default", "state_uhs";
-> > +       pinctrl-0 = <&mmc0_pins_default>;
-> > +       pinctrl-1 = <&mmc0_pins_uhs>;
-> > +};
-> > --
-> > 1.8.1.1.dirty
-> >
+> > +       if (!pdev->dev.of_node) {
+> > +               dev_err(&pdev->dev, "No DT found\n");
+> > +               return -EINVAL;
+> > +       }
+> > +       /* Allocate MMC host for this device */
+> > +       mmc = mmc_alloc_host(sizeof(struct msdc_host), &pdev->dev);
+> > +       if (!mmc)
+> > +               return -ENOMEM;
+> > +
+> > +       host = mmc_priv(mmc);
+> > +       ret = mmc_of_parse(mmc);
+> > +       if (ret)
+> > +               goto host_free;
+> > +
+> > +       res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> > +       host->base = devm_ioremap_resource(&pdev->dev, res);
+> > +       if (IS_ERR(host->base)) {
+> > +               ret = PTR_ERR(host->base);
+> > +               goto host_free;
+> > +       }
+> > +
+> > +       ret = mmc_regulator_get_supply(mmc);
+> > +       if (ret == -EPROBE_DEFER)
+> > +               goto host_free;
+> > +
+> > +       host->src_clk = devm_clk_get(&pdev->dev, "source");
+> > +       if (IS_ERR(host->src_clk)) {
+> > +               ret = PTR_ERR(host->src_clk);
+> > +               goto host_free;
+> > +       }
+> > +
+> > +       host->h_clk = devm_clk_get(&pdev->dev, "hclk");
+> > +       if (IS_ERR(host->h_clk)) {
+> > +               /* host->h_clk is optional, Only for MSDC0/3 at MT8173 */
+> > +               dev_dbg(&pdev->dev,
+> > +                               "Invalid hclk from the device tree!\n");
+> > +       }
+> > +
+> > +       host->irq = platform_get_irq(pdev, 0);
+> > +       if (host->irq < 0) {
+> > +               ret = -EINVAL;
+> > +               goto host_free;
+> > +       }
+> > +
+> > +       host->pinctrl = devm_pinctrl_get(&pdev->dev);
+> > +       if (IS_ERR(host->pinctrl)) {
+> > +               ret = PTR_ERR(host->pinctrl);
+> > +               dev_err(&pdev->dev, "Cannot find pinctrl!\n");
+> > +               goto host_free;
+> > +       }
+> > +
+> > +       host->pins_default = pinctrl_lookup_state(host->pinctrl, "default");
+> > +       if (IS_ERR(host->pins_default)) {
+> > +               ret = PTR_ERR(host->pins_default);
+> > +               dev_err(&pdev->dev, "Cannot find pinctrl default!\n");
+> > +               goto host_free;
+> > +       }
+> > +
+> > +       host->pins_uhs = pinctrl_lookup_state(host->pinctrl, "state_uhs");
+> > +       if (IS_ERR(host->pins_uhs)) {
+> > +               ret = PTR_ERR(host->pins_uhs);
+> > +               dev_err(&pdev->dev, "Cannot find pinctrl uhs!\n");
+> > +               goto host_free;
+> > +       }
+> > +
+> > +       host->dev = &pdev->dev;
+> > +       host->mmc = mmc;
+> > +       host->hclk = clk_get_rate(host->src_clk);
+> 
+> This looks odd. The clock rate for the source clock is assigned as the
+> speed of hclk!? Why?
+> Yes, the name is odd, here the host->hclk is indicate the source clock frequency, but not the HCLK frequency.
+I will modify the name to host->src_clk_freq at next revision.
+> > +       /* Set host parameters to mmc */
+> > +       mmc->ops = &mt_msdc_ops;
+> > +       mmc->f_min = host->hclk / (4 * 255);
+> > +
+> > +       mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
+> > +       /* MMC core transfer sizes tunable parameters */
+> > +       mmc->max_segs = MAX_BD_NUM;
+> > +       mmc->max_seg_size = BDMA_DESC_BUFLEN;
+> > +       mmc->max_blk_size = 2048;
+> > +       mmc->max_req_size = 512 * 1024;
+> > +       mmc->max_blk_count = mmc->max_req_size / 512;
+> > +       host->dma_mask = DMA_BIT_MASK(32);
+> > +       mmc_dev(mmc)->dma_mask = &host->dma_mask;
+> > +
+> > +       host->timeout_clks = 3 * 1048576;
+> > +       host->dma.gpd = dma_alloc_coherent(&pdev->dev,
+> > +                               sizeof(struct mt_gpdma_desc),
+> > +                               &host->dma.gpd_addr, GFP_KERNEL);
+> > +       host->dma.bd = dma_alloc_coherent(&pdev->dev,
+> > +                               MAX_BD_NUM * sizeof(struct mt_bdma_desc),
+> > +                               &host->dma.bd_addr, GFP_KERNEL);
+> > +       if (!host->dma.gpd || !host->dma.bd) {
+> > +               ret = -ENOMEM;
+> > +               goto release_mem;
+> > +       }
+> > +       msdc_init_gpd_bd(host, &host->dma);
+> > +       INIT_DELAYED_WORK(&host->req_timeout, msdc_request_timeout);
+> > +       spin_lock_init(&host->lock);
+> > +
+> > +       platform_set_drvdata(pdev, mmc);
+> > +       msdc_ungate_clock(host);
+> > +       msdc_init_hw(host);
+> > +
+> > +       ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
+> > +               IRQF_TRIGGER_LOW | IRQF_ONESHOT, pdev->name, host);
+> > +       if (ret)
+> > +               goto release;
+> > +
+> > +       ret = mmc_add_host(mmc);
+> > +       if (ret)
+> > +               goto release;
+> > +
+> > +       return 0;
+> > +
+> > +release:
+> > +       platform_set_drvdata(pdev, NULL);
+> > +       msdc_deinit_hw(host);
+> > +       msdc_gate_clock(host);
+> > +release_mem:
+> > +       if (host->dma.gpd)
+> > +               dma_free_coherent(&pdev->dev,
+> > +                       sizeof(struct mt_gpdma_desc),
+> > +                       host->dma.gpd, host->dma.gpd_addr);
+> > +       if (host->dma.bd)
+> > +               dma_free_coherent(&pdev->dev,
+> > +                       MAX_BD_NUM * sizeof(struct mt_bdma_desc),
+> > +                       host->dma.bd, host->dma.bd_addr);
+> > +host_free:
+> > +       mmc_free_host(mmc);
+> > +
+> > +       return ret;
+> > +}
+> 
+> [...]
 > 
 > Kind regards
 > Uffe
