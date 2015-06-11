@@ -1,102 +1,52 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH v2 0/6] UHS-I support for sh_mobile_sdhi
-Date: Thu, 11 Jun 2015 11:49:41 +0900
-Message-ID: <20150611024938.GB6904@verge.net.au>
-References: <1433892104.12074.49.camel@codethink.co.uk>
- <CAPDyKFq+fZrH1hMdMd8FEzy8h1U9pu8PbaMQtBDOEe+UySqJkA@mail.gmail.com>
- <1433980677.12074.74.camel@codethink.co.uk>
+From: Wan ZongShun <Vincent.Wan@amd.com>
+Subject: [PATCH V2 2/3] i2c-piix4: Use Macro for AMD CZ SMBus device ID
+Date: Thu, 11 Jun 2015 20:11:46 +0800
+Message-ID: <1434024707-6245-2-git-send-email-Vincent.Wan@amd.com>
+References: <1434024707-6245-1-git-send-email-Vincent.Wan@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-gpio-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1433980677.12074.74.camel@codethink.co.uk>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ian Molton <ian@mnementh.co.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linus Walleij <linus.walleij@linaro.org>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-by2on0141.outbound.protection.outlook.com ([207.46.100.141]:25728
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753160AbbFKMKt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 11 Jun 2015 08:10:49 -0400
+In-Reply-To: <1434024707-6245-1-git-send-email-Vincent.Wan@amd.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-i2c@vger.kernel.org, bp@alien8.de, jdelvare@suse.de
+Cc: linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, mcuos.com@gmail.com, Wan ZongShun <Vincent.Wan@amd.com>
 
-On Thu, Jun 11, 2015 at 12:57:57AM +0100, Ben Hutchings wrote:
-> On Wed, 2015-06-10 at 11:16 +0200, Ulf Hansson wrote:
-> > On 10 June 2015 at 01:21, Ben Hutchings <ben.hutchings@codethink.co.uk> wrote:
-> > > This series adds support for UHS-I in sh_mobile_sdhi, partly implemented
-> > > in tmio_mmc.  This does not yet include tuning for SDR-104, but SDR-50 now
-> > > works on the R8A7790 Lager board and another development board.
-> > >
-> > > The pfc block needs to be reconfigured from 3.3V to 1.8V signalling on
-> > > the pins wired to the SD card.  This is supported by adding separate
-> > > functions for 1.8V signalling in sh-pfc ("sdhi0_1v8" etc.).  I expect
-> > > that several SH SoCs have this capability, but I only have the R8A7790
-> > > data sheet so I only implemented it for that one.
-> > >
-> > > Changes since v1:
-> > > - Reword commit message for "mmc: tmio: Add UHS-I mode support"
-> > > - Make sh_mobile_sdhi_start_signal_voltage_switch() succeed if asked
-> > >   to switch to 3.3V and the regulator or pinctrl or pinctrl state is
-> > >   missing
-> > > - Drop change to mmcif clock on Lager
-> > > - Correct original author for sdhi clock changes on Lager
-> > >
-> > > Changes since the RFC:
-> > > - Replace the 'regulator' devices for signal voltage switching with
-> > >   pinctrl functions and states
-> > > - Drop 'mmc: sh_mobile_sdhi: Add actual clock rate support' as it's
-> > >   redundant
-> > > - Use a switch statement in sh_mobile_sdhi_start_signal_voltage_switch()
-> > > - Fix subject prefix for the DT changes
-> > >
-> > > Ben.
-> > >
-> > > Ben Hutchings (5):
-> > >   mmc: tmio: Add UHS-I mode support
-> > >   pinctrl: sh-pfc: Add set_mux operation to struct sh_pfc_function
-> > >   pinctrl: sh-pfc: r8a7790: Add separate functions for SDHI 1.8V
-> > >     operation
-> > >   mmc: sh_mobile_sdhi: Add UHS-I mode support
-> > >   ARM: shmobile: lager: Enable UHS-I SDR-50
-> > >
-> > > Ian Molton (1):
-> > >   ARM: shmobile: lager: Set clock rates for SDHI
-> > >
-> > >  arch/arm/boot/dts/r8a7790-lager.dts  | 24 +++++++++++--
-> > >  drivers/mmc/host/sh_mobile_sdhi.c    | 60 +++++++++++++++++++++++++++++++
-> > >  drivers/mmc/host/tmio_mmc.h          |  3 ++
-> > >  drivers/mmc/host/tmio_mmc_pio.c      | 31 ++++++++++++++++
-> > >  drivers/pinctrl/sh-pfc/core.c        |  2 +-
-> > >  drivers/pinctrl/sh-pfc/core.h        |  1 +
-> > >  drivers/pinctrl/sh-pfc/pfc-r8a7790.c | 70 +++++++++++++++++++++++++++++++++---
-> > >  drivers/pinctrl/sh-pfc/pinctrl.c     |  4 +++
-> > >  drivers/pinctrl/sh-pfc/sh_pfc.h      | 10 +++++-
-> > >  9 files changed, 197 insertions(+), 8 deletions(-)
-> > >
-> > > --
-> > > 2.1.4
-> > >
-> > 
-> > Hi Ben,
-> > 
-> > I have looked at the mmc patches, those looks good to me. Regarding
-> > the pinctrl and ARM patches, I suppose these can be taken through
-> > their respective trees and I can take the mmc patches?
-> 
-> The problem with that is that I think the device tree change will cause
-> a regression if it's applied without the driver changes.  I would much
-> prefer if I could get the pinctrl and device tree changes acked by the
-> respective maintainers to go through the MMC tree.  (I should probably
-> have said that up front.)
+Change AMD CZ SMBUS device ID from 0x790b to
+use Macro definition
 
-Hi Ben,
+Signed-off-by: Wan ZongShun <Vincent.Wan@amd.com>
+---
+ drivers/i2c/busses/i2c-piix4.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-I may be misunderstanding the above, if so I apologise, but I would
-strongly prefer to avoid an arrangement where the kernel and device tree
-blob (DTS/DTSI -> DTB) need to be upgrade in lock-step as this tends not to
-lead to a good experience for users.  My preference would be to maintain
-backwards and forwards compatibility and if appropriate schedule removal of
-such compatibility.
+diff --git a/drivers/i2c/busses/i2c-piix4.c b/drivers/i2c/busses/i2c-piix4.c
+index 67cbec6..630bce6 100644
+--- a/drivers/i2c/busses/i2c-piix4.c
++++ b/drivers/i2c/busses/i2c-piix4.c
+@@ -245,7 +245,7 @@ static int piix4_setup_sb800(struct pci_dev *PIIX4_dev,
+ 	     PIIX4_dev->device == PCI_DEVICE_ID_AMD_HUDSON2_SMBUS &&
+ 	     PIIX4_dev->revision >= 0x41) ||
+ 	    (PIIX4_dev->vendor == PCI_VENDOR_ID_AMD &&
+-	     PIIX4_dev->device == 0x790b &&
++	     PIIX4_dev->device == PCI_DEVICE_ID_AMD_KERNCZ_SMBUS &&
+ 	     PIIX4_dev->revision >= 0x49))
+ 		smb_en = 0x00;
+ 	else
+@@ -545,7 +545,7 @@ static const struct pci_device_id piix4_ids[] = {
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_ATI_IXP400_SMBUS) },
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_ATI_SBX00_SMBUS) },
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_HUDSON2_SMBUS) },
+-	{ PCI_DEVICE(PCI_VENDOR_ID_AMD, 0x790b) },
++	{ PCI_DEVICE(PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_KERNCZ_SMBUS) },
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_SERVERWORKS,
+ 		     PCI_DEVICE_ID_SERVERWORKS_OSB4) },
+ 	{ PCI_DEVICE(PCI_VENDOR_ID_SERVERWORKS,
+-- 
+1.9.1
 
-> > BTW, I noticed that the pinctrl maintainer wasn't in the to-field, you
-> > may need to repost.
-> 
-> I have the relevant _list_ (linux-gpio) in cc and thought that would be
-> sufficient, but maybe not, so cc'ing this message.
-
-Thanks. I have also CCed Laurent who has done extensive work on sh-pfc.
