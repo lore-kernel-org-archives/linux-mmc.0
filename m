@@ -1,56 +1,47 @@
-From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH v5 3/7] mmc: mediatek: Add PM support for MMC driver
-Date: Thu, 11 Jun 2015 09:37:24 +0800
-Message-ID: <1433986644.14592.6.camel@mhfsdcap03>
-References: <1433903088-14407-1-git-send-email-chaotian.jing@mediatek.com>
- <1433903088-14407-4-git-send-email-chaotian.jing@mediatek.com>
- <CAPDyKFrdw6m8C6oXRRC1cxmOPda8WqrFwwuP87rDBqEehdTaTA@mail.gmail.com>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Subject: Re: [PATCH v2 5/6] ARM: shmobile: lager: Set clock rates for SDHI
+Date: Thu, 11 Jun 2015 02:47:17 +0100
+Message-ID: <1433987237.12074.95.camel@codethink.co.uk>
+References: <1433892104.12074.49.camel@codethink.co.uk>
+	 <1433892257.12074.54.camel@codethink.co.uk>
+	 <87r3pjcabj.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <CAPDyKFrdw6m8C6oXRRC1cxmOPda8WqrFwwuP87rDBqEehdTaTA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
-List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, srv_heupstream <srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Bin Zhang =?UTF-8?Q?=28=E7=AB=A0=E6=96=8C=29?= <bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kern>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <87r3pjcabj.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 2015-06-10 at 13:59 +0200, Ulf Hansson wrote:
-> On 10 June 2015 at 04:24, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
-> > Add PM support for Mediatek MMC driver
-> > Save/restore registers when PM
-> >
-> > Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-> > ---
-> >  drivers/mmc/host/mtk-sd.c | 88 +++++++++++++++++++++++++++++++++++++++++++++--
-> >  1 file changed, 85 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> > index 8de3299..62e966f 100644
-> > --- a/drivers/mmc/host/mtk-sd.c
-> > +++ b/drivers/mmc/host/mtk-sd.c
-> > @@ -22,6 +22,7 @@
-> >  #include <linux/of_gpio.h>
-> >  #include <linux/pinctrl/consumer.h>
-> >  #include <linux/platform_device.h>
+On Thu, 2015-06-11 at 01:20 +0000, Kuninori Morimoto wrote:
+> Hi Ben
 > 
-> Add pm.h as well.
+> Sorry for my small amount of question, but I would like to ask 1 thing
 > 
-OK, will add it.
-> > +#include <linux/pm_runtime.h>
-> >  #include <linux/regulator/consumer.h>
-> >  #include <linux/spinlock.h>
-> >
+> > diff --git a/arch/arm/boot/dts/r8a7790-lager.dts b/arch/arm/boot/dts/r8a7790-lager.dts
+> > index aaa4f258e279..5f68e53c58ae 100644
+> > --- a/arch/arm/boot/dts/r8a7790-lager.dts
+> > +++ b/arch/arm/boot/dts/r8a7790-lager.dts
+> > @@ -488,6 +488,9 @@
+> >  	pinctrl-0 = <&sdhi0_pins>;
+> >  	pinctrl-names = "default";
+> >  
+> > +	assigned-clocks = <&mstp3_clks R8A7790_CLK_SDHI0>;
+> > +	assigned-clock-rates = <156000000>;
 > 
-> [...]
-> 
-> Kind regards
-> Uffe
+> Can we use "max-frequency" here ?
+> tmio/sh_mobile_sdhi have tmio_mmc_clk_update/sh_mobile_sdhi_clk_enable
+
+The purpose of these properties is to configure the frequency of the
+clock supplied to the SDHI block.  sh_mobile_sdhi has no code to do that
+but these properties are handled by the clock core.
+
+The max-frequency property tells the MMC core the maximum clock
+frequency that the host can run the SD bus at, but anyway tmio_mmc and
+sh_mobile_sdhi seem to always override it.
+
+Ben.
+
+
