@@ -1,34 +1,69 @@
-From: Wan ZongShun <Vincent.Wan-5C7GfCeVMHo@public.gmane.org>
-Subject: [PATCH V2 1/3] pci_ids: Add AMD KERNCZ device ID support
-Date: Thu, 11 Jun 2015 20:11:45 +0800
-Message-ID: <1434024707-6245-1-git-send-email-Vincent.Wan@amd.com>
+From: Wan ZongShun <Vincent.Wan@amd.com>
+Subject: [PATCH V2 3/3] SDHCI: Change AMD SDHCI quirk application scope
+Date: Thu, 11 Jun 2015 20:11:47 +0800
+Message-ID: <1434024707-6245-3-git-send-email-Vincent.Wan@amd.com>
+References: <1434024707-6245-1-git-send-email-Vincent.Wan@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-i2c-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, jdelvare-l3A5Bk7waGM@public.gmane.org
-Cc: linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mcuos.com-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Wan ZongShun <Vincent.Wan-5C7GfCeVMHo@public.gmane.org>
+Return-path: <linux-pci-owner@vger.kernel.org>
+In-Reply-To: <1434024707-6245-1-git-send-email-Vincent.Wan@amd.com>
+Sender: linux-pci-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-i2c@vger.kernel.org, bp@alien8.de, jdelvare@suse.de
+Cc: linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, mcuos.com@gmail.com, Wan ZongShun <Vincent.Wan@amd.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The KERNCZ is new AMD SB/FCH generation name, like HUDSON2.
-We will adopt 0x790b as device ID since from this gereration.
+Change this quirk to apply to AMD Carrizo platform.
 
-Signed-off-by: Wan ZongShun <Vincent.Wan-5C7GfCeVMHo@public.gmane.org>
+Signed-off-by: Wan ZongShun <Vincent.Wan@amd.com>
+
+Tested-by: Nath, Arindam <Arindam.Nath@amd.com>
+Tested-by: Ramesh, Ramya <Ramya.Ramesh@amd.com>
 ---
- include/linux/pci_ids.h | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/sdhci-pci.c | 25 ++++++++++++++++++++++++-
+ 1 file changed, 24 insertions(+), 1 deletion(-)
 
-diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
-index 2f7b9a4..cb63a7b 100644
---- a/include/linux/pci_ids.h
-+++ b/include/linux/pci_ids.h
-@@ -579,6 +579,7 @@
- #define PCI_DEVICE_ID_AMD_HUDSON2_SATA_IDE	0x7800
- #define PCI_DEVICE_ID_AMD_HUDSON2_SMBUS		0x780b
- #define PCI_DEVICE_ID_AMD_HUDSON2_IDE		0x780c
-+#define PCI_DEVICE_ID_AMD_KERNCZ_SMBUS  0x790b
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index f208f20..94f54d2 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -724,14 +724,37 @@ static const struct sdhci_pci_fixes sdhci_rtsx = {
+ 	.probe_slot	= rtsx_probe_slot,
+ };
  
- #define PCI_VENDOR_ID_TRIDENT		0x1023
- #define PCI_DEVICE_ID_TRIDENT_4DWAVE_DX	0x2000
++/*AMD chipset generation*/
++enum amd_chipset_gen {
++	AMD_CHIPSET_BEFORE_ML,
++	AMD_CHIPSET_CZ,
++	AMD_CHIPSET_NL,
++	AMD_CHIPSET_UNKNOWN,
++};
++
+ static int amd_probe(struct sdhci_pci_chip *chip)
+ {
+ 	struct pci_dev	*smbus_dev;
++	enum amd_chipset_gen gen;
+ 
+ 	smbus_dev = pci_get_device(PCI_VENDOR_ID_AMD,
+ 			PCI_DEVICE_ID_AMD_HUDSON2_SMBUS, NULL);
++	if (smbus_dev) {
++		gen = AMD_CHIPSET_BEFORE_ML;
++	} else {
++		smbus_dev = pci_get_device(PCI_VENDOR_ID_AMD,
++				PCI_DEVICE_ID_AMD_KERNCZ_SMBUS, NULL);
++		if (smbus_dev) {
++			if (smbus_dev->revision < 0x51)
++				gen = AMD_CHIPSET_CZ;
++			else
++				gen = AMD_CHIPSET_NL;
++		} else {
++			gen = AMD_CHIPSET_UNKNOWN;
++		}
++	}
+ 
+-	if (smbus_dev && (smbus_dev->revision < 0x51)) {
++	if ((gen == AMD_CHIPSET_BEFORE_ML) || (gen == AMD_CHIPSET_CZ)) {
+ 		chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
+ 		chip->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
+ 	}
 -- 
 1.9.1
