@@ -1,73 +1,41 @@
-From: Mirza Krak <mirza.krak@hostmobility.com>
-Subject: [PATCH 1/1] mmc: sdhci-esdhc-imx: Use pinctrl PM helpers
-Date: Fri, 12 Jun 2015 11:31:13 +0200
-Message-ID: <1434101473-4109-1-git-send-email-mirza.krak@hostmobility.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f52.google.com ([209.85.215.52]:34497 "EHLO
-	mail-la0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750931AbbFLJb4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Jun 2015 05:31:56 -0400
-Received: by laew7 with SMTP id w7so17950916lae.1
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2015 02:31:54 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Do not set MMC_CAP_1_8V_DDR in the
+ 'no-1-8-v' case
+Date: Fri, 12 Jun 2015 09:22:15 -0300
+Message-ID: <CAOMZO5CSG0uu+yC7tYnW2MXZz_5ZGfpD68QE1uiXfNPxAT_29g@mail.gmail.com>
+References: <1434060503-10260-1-git-send-email-festevam@gmail.com>
+	<20150612032223.GC16730@shlinux1.ap.freescale.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20150612032223.GC16730@shlinux1.ap.freescale.net>
+Sender: stable-owner@vger.kernel.org
+To: Dong Aisheng <b29396@freescale.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Aisheng Dong <aisheng.dong@freescale.com>, kevin.lemoi@savant.com, Otavio Salvador <otavio@ossystems.com.br>, Sascha Hauer <kernel@pengutronix.de>, Russell King <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@freescale.com>, stable <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: chris@printf.net, ulf.hansson@linaro.org
-Cc: shawn.guo@linaro.org, dirk.behme@de.bosch.com, peter.griffin@linaro.org, stefan@agner.ch, linux-mmc@vger.kernel.org, Mirza Krak <mirza.krak@hostmobility.com>
 
-From: Mirza Krak <mirza.krak@hostmobility.com>
+Hi Dong,
 
-Add support for current states of pinctrl, which are "default", "idle"
-and "sleep".
+On Fri, Jun 12, 2015 at 12:22 AM, Dong Aisheng <b29396@freescale.com> wrote:
 
-The "default" pinctrl state is set by Drivers core before
-calling the driver's probe, hence we do not need a initial call to
-"default" state.
+> I think this patch will break the eMMC DDR 3.3v mode support.
 
-Signed-off-by: Mirza Krak <mirza.krak@hostmobility.com>
----
- drivers/mmc/host/sdhci-esdhc-imx.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
+I don't think so.
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 84b3365e4773..6d51a4f48361 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1129,6 +1129,8 @@ static int sdhci_esdhc_suspend(struct device *dev)
- 	pm_runtime_mark_last_busy(dev);
- 	pm_runtime_put_autosuspend(dev);
- 
-+	pinctrl_pm_select_sleep_state(dev);
-+
- 	return ret;
- }
- 
-@@ -1137,6 +1139,8 @@ static int sdhci_esdhc_resume(struct device *dev)
- 	int ret;
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 
-+	pinctrl_pm_select_default_state(dev);
-+
- 	pm_runtime_get_sync(dev);
- 	ret = sdhci_resume_host(host);
- 	pm_runtime_mark_last_busy(dev);
-@@ -1160,6 +1164,8 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
- 	}
- 	clk_disable_unprepare(imx_data->clk_ahb);
- 
-+	pinctrl_pm_select_idle_state(dev);
-+
- 	return ret;
- }
- 
-@@ -1169,6 +1175,8 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
- 
-+	pinctrl_pm_select_default_state(dev);
-+
- 	if (!sdhci_sdio_irq_enabled(host)) {
- 		clk_prepare_enable(imx_data->clk_per);
- 		clk_prepare_enable(imx_data->clk_ipg);
--- 
-2.1.0
+This patch only changes the behaviour when 'no-1-8-v' property is used.
 
+This custom board has an eMMC that can operate at 1.8V, but the board
+itself can only provide 3.3V.
+
+In this case we need to pass 'no-1-8-v' as explained in
+Documentation/devicetree/bindings/mmc/mmc.txt:
+
+"- no-1-8-v: when present, denotes that 1.8v card voltage is not supported on
+  this system, even if the controller claims it is."
+
+Then in this case we should not set MMC_CAP_1_8V_DDR, which will make
+the card to work at 3.3V.
+
+Regards,
+
+Fabio Estevam
