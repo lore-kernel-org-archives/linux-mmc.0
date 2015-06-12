@@ -1,55 +1,55 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH v2 3/6] pinctrl: sh-pfc: r8a7790: Add separate functions for SDHI 1.8V operation
-Date: Fri, 12 Jun 2015 22:07:19 +0300
-Message-ID: <34148355.aYdSK9R7Ck@avalon>
-References: <1433892104.12074.49.camel@codethink.co.uk> <2554026.6LTcTIWBdF@avalon> <1434115435.25446.1.camel@codethink.co.uk>
+From: Bjorn Helgaas <bhelgaas@google.com>
+Subject: Re: [PATCH V2 1/3] pci_ids: Add AMD KERNCZ device ID support
+Date: Fri, 12 Jun 2015 15:34:18 -0500
+Message-ID: <20150612203418.GJ23119@google.com>
+References: <1434024707-6245-1-git-send-email-Vincent.Wan@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from galahad.ideasonboard.com ([185.26.127.97]:60868 "EHLO
-	galahad.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752617AbbFLTGj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Jun 2015 15:06:39 -0400
-In-Reply-To: <1434115435.25446.1.camel@codethink.co.uk>
+Received: from mail-ig0-f177.google.com ([209.85.213.177]:36824 "EHLO
+	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752430AbbFLUeX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Jun 2015 16:34:23 -0400
+Received: by igbpi8 with SMTP id pi8so19074812igb.1
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2015 13:34:22 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1434024707-6245-1-git-send-email-Vincent.Wan@amd.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linus Walleij <linus.walleij@linaro.org>
+To: Wan ZongShun <Vincent.Wan@amd.com>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-i2c@vger.kernel.org, bp@alien8.de, jdelvare@suse.de, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, mcuos.com@gmail.com
 
-Hi Ben,
+On Thu, Jun 11, 2015 at 08:11:45PM +0800, Wan ZongShun wrote:
+> The KERNCZ is new AMD SB/FCH generation name, like HUDSON2.
+> We will adopt 0x790b as device ID since from this gereration.
 
-On Friday 12 June 2015 14:23:55 Ben Hutchings wrote:
-> On Fri, 2015-06-12 at 10:18 +0300, Laurent Pinchart wrote:
-> > Hi Ben,
-> > 
-> > (CC'ing Linus Walleij)
-> > 
-> > Thank you for the patch.
-> > 
-> > On Wednesday 10 June 2015 00:23:31 Ben Hutchings wrote:
-> > > All the SHDIs can operate with either 3.3V or 1.8V signals, depending
-> > > on negotiation with the card.
-> > > 
-> > > Add separate functions for the 1.8V mode, and implement the set_mux
-> > > operation on all SDHI functions to configure the voltage for each
-> > > group of pins.
-> > 
-> > I don't think duplicating all functions for 1.8V and 3.3V is the right way
-> > to go. Can't we use the pinconf API instead, and in particular the
-> > PIN_CONFIG_POWER_SOURCE configuration ?
+s/We will adopt 0x790b as device ID since from/0x790b is the device ID for/
+s/gereration/generation/
+
+> Signed-off-by: Wan ZongShun <Vincent.Wan@amd.com>
+
+Acked-by: Bjorn Helgaas <bhelgaas@google.com>
+
+> ---
+>  include/linux/pci_ids.h | 1 +
+>  1 file changed, 1 insertion(+)
 > 
-> [...]
+> diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h
+> index 2f7b9a4..cb63a7b 100644
+> --- a/include/linux/pci_ids.h
+> +++ b/include/linux/pci_ids.h
+> @@ -579,6 +579,7 @@
+>  #define PCI_DEVICE_ID_AMD_HUDSON2_SATA_IDE	0x7800
+>  #define PCI_DEVICE_ID_AMD_HUDSON2_SMBUS		0x780b
+>  #define PCI_DEVICE_ID_AMD_HUDSON2_IDE		0x780c
+> +#define PCI_DEVICE_ID_AMD_KERNCZ_SMBUS  0x790b
+>  
+>  #define PCI_VENDOR_ID_TRIDENT		0x1023
+>  #define PCI_DEVICE_ID_TRIDENT_4DWAVE_DX	0x2000
+> -- 
+> 1.9.1
 > 
-> So far as I could see, you can't use the pinconf API with pinmux groups.
-
-Can't you ? Both Documentation/devicetree/bindings/pinctrl/pinctrl-
-bindings.txt and Documentation/devicetree/bindings/pinctrl/renesas,pfc-
-pinctrl.txt document the usage of pinconf with groups (see for instance 
-example 3 in the latter).
-
--- 
-Regards,
-
-Laurent Pinchart
-
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-pci" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
