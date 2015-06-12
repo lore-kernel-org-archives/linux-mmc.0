@@ -1,42 +1,37 @@
-From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: Re: [PATCH v2 3/6] pinctrl: sh-pfc: r8a7790: Add separate functions
- for SDHI 1.8V operation
-Date: Fri, 12 Jun 2015 14:23:55 +0100
-Message-ID: <1434115435.25446.1.camel@codethink.co.uk>
-References: <1433892104.12074.49.camel@codethink.co.uk>
-	 <1433892211.12074.52.camel@codethink.co.uk> <2554026.6LTcTIWBdF@avalon>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Do not set MMC_CAP_1_8V_DDR in the
+ 'no-1-8-v' case
+Date: Fri, 12 Jun 2015 13:00:03 -0300
+Message-ID: <CAOMZO5CU56Ty7XC5WPVtqc43W2MLEPnc-j6v9_jtsXVYHzDgng@mail.gmail.com>
+References: <1434060503-10260-1-git-send-email-festevam@gmail.com>
+	<20150612032223.GC16730@shlinux1.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <2554026.6LTcTIWBdF@avalon>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linus Walleij <linus.walleij@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:36732 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750970AbbFLQAF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Jun 2015 12:00:05 -0400
+In-Reply-To: <20150612032223.GC16730@shlinux1.ap.freescale.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <b29396@freescale.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Aisheng Dong <aisheng.dong@freescale.com>, kevin.lemoi@savant.com, Otavio Salvador <otavio@ossystems.com.br>, Sascha Hauer <kernel@pengutronix.de>, Russell King <linux@arm.linux.org.uk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@freescale.com>, stable <stable@vger.kernel.org>
 
-On Fri, 2015-06-12 at 10:18 +0300, Laurent Pinchart wrote:
-> Hi Ben,
-> 
-> (CC'ing Linus Walleij)
-> 
-> Thank you for the patch.
-> 
-> On Wednesday 10 June 2015 00:23:31 Ben Hutchings wrote:
-> > All the SHDIs can operate with either 3.3V or 1.8V signals, depending
-> > on negotiation with the card.
-> > 
-> > Add separate functions for the 1.8V mode, and implement the set_mux
-> > operation on all SDHI functions to configure the voltage for each
-> > group of pins.
-> 
-> I don't think duplicating all functions for 1.8V and 3.3V is the right way to 
-> go. Can't we use the pinconf API instead, and in particular the 
-> PIN_CONFIG_POWER_SOURCE configuration ?
-[...]
+On Fri, Jun 12, 2015 at 12:22 AM, Dong Aisheng <b29396@freescale.com> wrote:
 
-So far as I could see, you can't use the pinconf API with pinmux groups.
+> I think this patch will break the eMMC DDR 3.3v mode support.
 
-Ben.
+I think you are right.
 
+On a imx6q-sabresd which has 'no-1-8-v' in the emmc node we have originally:
 
+mmc2: new DDR MMC card at address 0001
+
+After applying this patch I get:
+
+mmc2: new high speed MMC card at address 0001
+
+I will try to come up with a different solution.
+
+Thanks
