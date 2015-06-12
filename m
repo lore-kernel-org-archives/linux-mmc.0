@@ -1,56 +1,76 @@
-From: =?utf-8?B?SnVzdGluIFdhbmcgKOeOi+S4gSk=?=
-	<Justin.Wang@spreadtrum.com>
-Subject: [PATCH v2] mmc: card: Fixup request missing in mmc_blk_issue_rw_rq
-Date: Fri, 12 Jun 2015 12:38:39 +0000
-Message-ID: <bf6c98d20e3e4fae9bf942e7682aba85@SHMBX03.spreadtrum.com>
-References: <dbf65349aac343abbd215129dd3ceefb@SHMBX03.spreadtrum.com>
+From: Vinod Koul <vinod.koul@intel.com>
+Subject: Re: [PATCH 02/13] dmaengine: Introduce
+ dma_request_slave_channel_compat_reason()
+Date: Fri, 12 Jun 2015 18:28:37 +0530
+Message-ID: <20150612125837.GJ28601@localhost>
+References: <1432646768-12532-1-git-send-email-peter.ujfalusi@ti.com>
+ <1432646768-12532-3-git-send-email-peter.ujfalusi@ti.com>
+ <20150529093317.GF3140@localhost>
+ <CAMuHMdVJ0h9qXxBWH9L2y4O2KLkEq12KW_6k8rTgi+Lux=C0gw@mail.gmail.com>
+ <20150529101846.GG3140@localhost>
+ <55687892.7050606@ti.com>
+ <20150602125535.GS3140@localhost>
+ <5570758E.6030302@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sci-ig2.spreadtrum.com ([222.66.158.135]:63804 "EHLO
-	SHSQR01.spreadtrum.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752220AbbFLMij (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Jun 2015 08:38:39 -0400
-In-Reply-To: <dbf65349aac343abbd215129dd3ceefb@SHMBX03.spreadtrum.com>
-Content-Language: zh-CN
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-crypto-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <5570758E.6030302@ti.com>
+Sender: linux-crypto-owner@vger.kernel.org
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Tony Lindgren <tony@atomide.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Dan Williams <dan.j.williams@intel.com>, dmaengine@vger.kernel.org, "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, linux-crypto@vger.kernel.org, linux-spi <linux-spi@vger.kernel.org>, Linux Media Mailing List <linux-media@vger.kernel.org>, ALSA Development Mailing List <alsa-devel@alsa-project.org>
 List-Id: linux-mmc@vger.kernel.org
-To: "'ulf.hansson@linaro.org'" <ulf.hansson@linaro.org>, "'kuninori.morimoto.gx@renesas.com'" <kuninori.morimoto.gx@renesas.com>, "'jh80.chung@samsung.com'" <jh80.chung@samsung.com>, "'akpm@linux-foundation.org'" <akpm@linux-foundation.org>, "'JBottomley@Odin.com'" <JBottomley@Odin.com>, "'ben@decadent.org.uk'" <ben@decadent.org.uk>, "'chuanxiao.dong@intel.com'" <chuanxiao.dong@intel.com>
-Cc: "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>, "'linux-kernel@vger.kernel.org'" <linux-kernel@vger.kernel.org>
 
-RnJvbSAwZTAxZTc1NDY3NDVmMzk4NDNkNTQ4MTBmNzRjMTk4ZTAxY2I4MjI2IE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQ0KRnJvbToganVzdGluLndhbmcgPGp1c3Rpbi53YW5nQHNwcmVhZHRydW0u
-Y29tPg0KRGF0ZTogTW9uLCAxOCBNYXkgMjAxNSAyMDoxNDoxNSArMDgwMA0KU3ViamVjdDogW1BB
-VENIIHYyXSBtbWM6IGNhcmQ6IEZpeHVwIHJlcXVlc3QgbWlzc2luZyBpbiBtbWNfYmxrX2lzc3Vl
-X3J3X3JxDQoNClRoZSBjdXJyZW50IGhhbmRsZXIgb2YgTU1DX0JMS19DTURfRVJSIGluIG1tY19i
-bGtfaXNzdWVfcndfcnEgZnVuY3Rpb24NCm1heSBjYXVzZSBuZXcgY29taW5nIHJlcXVlc3QgcGVy
-bWFuZW50IG1pc3Npbmcgd2hlbiB0aGUgb25nb2luZw0KcmVxdWVzdCAocHJldmlvdWxzeSBzdGFy
-dGVkKSBjb21wbGV0ZSBlbmQuDQoNClRoZSBwcm9ibGVtIHNjZW5hcmlvIGlzIGFzIGZvbGxvd3M6
-DQooMSkgUmVxdWVzdCBBIGlzIG9uZ29pbmc7DQooMikgUmVxdWVzdCBCIGFycml2ZWQsIGFuZCBm
-aW5hbGx5IG1tY19ibGtfaXNzdWVfcndfcnEoKSBpcyBjYWxsZWQ7DQooMykgUmVxdWVzdCBBIGVu
-Y291bnRlcnMgdGhlIE1NQ19CTEtfQ01EX0VSUiBlcnJvcjsNCig0KSBJbiB0aGUgZXJyb3IgaGFu
-ZGxpbmcgb2YgTU1DX0JMS19DTURfRVJSLCBzdXBwb3NlIG1tY19ibGtfY21kX2VycigpDQogICAg
-ZW5kIHJlcXVlc3QgQSBjb21wbGV0ZWQgYW5kIHJldHVybiB6ZXJvLiBDb250aW51ZSB0aGUgZXJy
-b3IgaGFuZGxpbmcsDQogICAgc3VwcG9zZSBtbWNfYmxrX3Jlc2V0KCkgcmVzZXQgZGV2aWNlIHN1
-Y2Nlc3M7DQooNSkgQ29udGludWUgdGhlIGV4ZWN1dGlvbiwgd2hpbGUgbG9vcCBjb21wbGV0ZWQg
-YmVjYXVzZSB2YXJpYWJsZSByZXQNCiAgICBpcyB6ZXJvIG5vdzsNCig2KSBGaW5hbGx5LCBtbWNf
-YmxrX2lzc3VlX3J3X3JxKCkgcmV0dXJuIHdpdGhvdXQgcHJvY2Vzc2luZyByZXF1ZXN0IEIuDQoN
-ClRoZSBwcm9jZXNzIHJlbGF0ZWQgdG8gdGhlIG1pc3NpbmcgcmVxdWVzdCBtYXkgd2FpdCB0aGF0
-IElPIHJlcXVlc3QNCmNvbXBsZXRlIGZvcmV2ZXIsIHBvc3NpYmx5IGNyYXNoaW5nIHRoZSBhcHBs
-aWNhdGlvbiBvciBoYW5naW5nIHRoZSBzeXN0ZW0uDQoNCkZpeCB0aGlzIGlzc3VlIGJ5IHN0YXJ0
-aW5nIG5ldyByZXF1ZXN0IHdoZW4gcmVzZXQgc3VjY2Vzcy4NCg0KU2lnbmVkLW9mZi1ieTogRGlu
-ZyBXYW5nIDxqdXN0aW4ud2FuZ0BzcHJlYWR0cnVtLmNvbT4NCi0tLQ0KIGRyaXZlcnMvbW1jL2Nh
-cmQvYmxvY2suYyB8ICAgIDggKysrKystLS0NCiAxIGZpbGVzIGNoYW5nZWQsIDUgaW5zZXJ0aW9u
-cygrKSwgMyBkZWxldGlvbnMoLSkNCg0KZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NhcmQvYmxv
-Y2suYyBiL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYw0KaW5kZXggNjBmNzE0MS4uZjA1Y2QxZiAx
-MDA2NDQNCi0tLSBhL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYw0KKysrIGIvZHJpdmVycy9tbWMv
-Y2FyZC9ibG9jay5jDQpAQCAtMTkxMCw5ICsxOTEwLDExIEBAIHN0YXRpYyBpbnQgbW1jX2Jsa19p
-c3N1ZV9yd19ycShzdHJ1Y3QgbW1jX3F1ZXVlICptcSwgc3RydWN0IHJlcXVlc3QgKnJxYykNCiAJ
-CQlicmVhazsNCiAJCWNhc2UgTU1DX0JMS19DTURfRVJSOg0KIAkJCXJldCA9IG1tY19ibGtfY21k
-X2VycihtZCwgY2FyZCwgYnJxLCByZXEsIHJldCk7DQotCQkJaWYgKCFtbWNfYmxrX3Jlc2V0KG1k
-LCBjYXJkLT5ob3N0LCB0eXBlKSkNCi0JCQkJYnJlYWs7DQotCQkJZ290byBjbWRfYWJvcnQ7DQor
-CQkJaWYgKG1tY19ibGtfcmVzZXQobWQsIGNhcmQtPmhvc3QsIHR5cGUpKQ0KKwkJCQlnb3RvIGNt
-ZF9hYm9ydDsNCisJCQlpZiAoIXJldCkNCisJCQkJZ290byBzdGFydF9uZXdfcmVxOw0KKwkJCWJy
-ZWFrOw0KIAkJY2FzZSBNTUNfQkxLX1JFVFJZOg0KIAkJCWlmIChyZXRyeSsrIDwgNSkNCiAJCQkJ
-YnJlYWs7DQotLSANCjEuNy40LjENCg0K
+On Thu, Jun 04, 2015 at 06:58:06PM +0300, Peter Ujfalusi wrote:
+> Vinod,
+> 
+> On 06/02/2015 03:55 PM, Vinod Koul wrote:
+> > On Fri, May 29, 2015 at 05:32:50PM +0300, Peter Ujfalusi wrote:
+> >> On 05/29/2015 01:18 PM, Vinod Koul wrote:
+> >>> On Fri, May 29, 2015 at 11:42:27AM +0200, Geert Uytterhoeven wrote:
+> >>>> On Fri, May 29, 2015 at 11:33 AM, Vinod Koul <vinod.koul@intel.com> wrote:
+> >>>>> On Tue, May 26, 2015 at 04:25:57PM +0300, Peter Ujfalusi wrote:
+> >>>>>> dma_request_slave_channel_compat() 'eats' up the returned error codes which
+> >>>>>> prevents drivers using the compat call to be able to do deferred probing.
+> >>>>>>
+> >>>>>> The new wrapper is identical in functionality but it will return with error
+> >>>>>> code in case of failure and will pass the -EPROBE_DEFER to the caller in
+> >>>>>> case dma_request_slave_channel_reason() returned with it.
+> >>>>> This is okay but am worried about one more warpper, how about fixing
+> >>>>> dma_request_slave_channel_compat()
+> >>>>
+> >>>> Then all callers of dma_request_slave_channel_compat() have to be
+> >>>> modified to handle ERR_PTR first.
+> >>>>
+> >>>> The same is true for (the existing) dma_request_slave_channel_reason()
+> >>>> vs. dma_request_slave_channel().
+> >>> Good point, looking again, I think we should rather fix
+> >>> dma_request_slave_channel_reason() as it was expected to return err code and
+> >>> add new users. Anyway users of this API do expect the reason...
+> >>
+> >> Hrm, they are for different use.dma_request_slave_channel()/_reason() is for
+> >> drivers only working via DT or ACPI while
+> >> dma_request_slave_channel_compat()/_reason() is for drivers expected to run in
+> >> DT/ACPI or legacy mode as well.
+> >>
+> >> I added the dma_request_slave_channel_compat_reason() because OMAP/daVinci
+> >> drivers are using this to request channels - they need to support DT and
+> >> legacy mode.
+> > I think we should hide these things behind the API and do this behind the
+> > hood for ACPI/DT systems.
+> > 
+> > Also it makes sense to use right API and mark rest as depricated
+> 
+> So to convert the dma_request_slave_channel_compat() and not to create _reason
+> variant?
+> 
+> Or to have single API to request channel? The problem with that is that we
+> need different parameters for legacy and DT for example.
+Sorry this slipped thru
+
+Thinking about it again, I think we should coverge to two APIs and mark the
+legacy depracuated and look to convert folks and phase that out
+
+
+-- 
+~Vinod
