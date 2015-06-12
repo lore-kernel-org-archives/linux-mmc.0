@@ -1,76 +1,42 @@
-From: Vinod Koul <vinod.koul@intel.com>
-Subject: Re: [PATCH 02/13] dmaengine: Introduce
- dma_request_slave_channel_compat_reason()
-Date: Fri, 12 Jun 2015 18:28:37 +0530
-Message-ID: <20150612125837.GJ28601@localhost>
-References: <1432646768-12532-1-git-send-email-peter.ujfalusi@ti.com>
- <1432646768-12532-3-git-send-email-peter.ujfalusi@ti.com>
- <20150529093317.GF3140@localhost>
- <CAMuHMdVJ0h9qXxBWH9L2y4O2KLkEq12KW_6k8rTgi+Lux=C0gw@mail.gmail.com>
- <20150529101846.GG3140@localhost>
- <55687892.7050606@ti.com>
- <20150602125535.GS3140@localhost>
- <5570758E.6030302@ti.com>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Subject: Re: [PATCH v2 3/6] pinctrl: sh-pfc: r8a7790: Add separate functions
+ for SDHI 1.8V operation
+Date: Fri, 12 Jun 2015 14:23:55 +0100
+Message-ID: <1434115435.25446.1.camel@codethink.co.uk>
+References: <1433892104.12074.49.camel@codethink.co.uk>
+	 <1433892211.12074.52.camel@codethink.co.uk> <2554026.6LTcTIWBdF@avalon>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-crypto-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <5570758E.6030302@ti.com>
-Sender: linux-crypto-owner@vger.kernel.org
-To: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Tony Lindgren <tony@atomide.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Dan Williams <dan.j.williams@intel.com>, dmaengine@vger.kernel.org, "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, linux-crypto@vger.kernel.org, linux-spi <linux-spi@vger.kernel.org>, Linux Media Mailing List <linux-media@vger.kernel.org>, ALSA Development Mailing List <alsa-devel@alsa-project.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-gpio-owner@vger.kernel.org>
+In-Reply-To: <2554026.6LTcTIWBdF@avalon>
+Sender: linux-gpio-owner@vger.kernel.org
+To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jun 04, 2015 at 06:58:06PM +0300, Peter Ujfalusi wrote:
-> Vinod,
+On Fri, 2015-06-12 at 10:18 +0300, Laurent Pinchart wrote:
+> Hi Ben,
 > 
-> On 06/02/2015 03:55 PM, Vinod Koul wrote:
-> > On Fri, May 29, 2015 at 05:32:50PM +0300, Peter Ujfalusi wrote:
-> >> On 05/29/2015 01:18 PM, Vinod Koul wrote:
-> >>> On Fri, May 29, 2015 at 11:42:27AM +0200, Geert Uytterhoeven wrote:
-> >>>> On Fri, May 29, 2015 at 11:33 AM, Vinod Koul <vinod.koul@intel.com> wrote:
-> >>>>> On Tue, May 26, 2015 at 04:25:57PM +0300, Peter Ujfalusi wrote:
-> >>>>>> dma_request_slave_channel_compat() 'eats' up the returned error codes which
-> >>>>>> prevents drivers using the compat call to be able to do deferred probing.
-> >>>>>>
-> >>>>>> The new wrapper is identical in functionality but it will return with error
-> >>>>>> code in case of failure and will pass the -EPROBE_DEFER to the caller in
-> >>>>>> case dma_request_slave_channel_reason() returned with it.
-> >>>>> This is okay but am worried about one more warpper, how about fixing
-> >>>>> dma_request_slave_channel_compat()
-> >>>>
-> >>>> Then all callers of dma_request_slave_channel_compat() have to be
-> >>>> modified to handle ERR_PTR first.
-> >>>>
-> >>>> The same is true for (the existing) dma_request_slave_channel_reason()
-> >>>> vs. dma_request_slave_channel().
-> >>> Good point, looking again, I think we should rather fix
-> >>> dma_request_slave_channel_reason() as it was expected to return err code and
-> >>> add new users. Anyway users of this API do expect the reason...
-> >>
-> >> Hrm, they are for different use.dma_request_slave_channel()/_reason() is for
-> >> drivers only working via DT or ACPI while
-> >> dma_request_slave_channel_compat()/_reason() is for drivers expected to run in
-> >> DT/ACPI or legacy mode as well.
-> >>
-> >> I added the dma_request_slave_channel_compat_reason() because OMAP/daVinci
-> >> drivers are using this to request channels - they need to support DT and
-> >> legacy mode.
-> > I think we should hide these things behind the API and do this behind the
-> > hood for ACPI/DT systems.
+> (CC'ing Linus Walleij)
+> 
+> Thank you for the patch.
+> 
+> On Wednesday 10 June 2015 00:23:31 Ben Hutchings wrote:
+> > All the SHDIs can operate with either 3.3V or 1.8V signals, depending
+> > on negotiation with the card.
 > > 
-> > Also it makes sense to use right API and mark rest as depricated
+> > Add separate functions for the 1.8V mode, and implement the set_mux
+> > operation on all SDHI functions to configure the voltage for each
+> > group of pins.
 > 
-> So to convert the dma_request_slave_channel_compat() and not to create _reason
-> variant?
-> 
-> Or to have single API to request channel? The problem with that is that we
-> need different parameters for legacy and DT for example.
-Sorry this slipped thru
+> I don't think duplicating all functions for 1.8V and 3.3V is the right way to 
+> go. Can't we use the pinconf API instead, and in particular the 
+> PIN_CONFIG_POWER_SOURCE configuration ?
+[...]
 
-Thinking about it again, I think we should coverge to two APIs and mark the
-legacy depracuated and look to convert folks and phase that out
+So far as I could see, you can't use the pinconf API with pinmux groups.
+
+Ben.
 
 
--- 
-~Vinod
