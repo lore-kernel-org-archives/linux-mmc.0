@@ -1,78 +1,52 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: host: Fix mmc_alloc_host() error path
-Date: Fri, 12 Jun 2015 10:22:47 +0300
-Message-ID: <557A88C7.3020306@intel.com>
-References: <1434083961-32540-1-git-send-email-festevam@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [GIT PULL] Update dw-mmc controller
+Date: Fri, 12 Jun 2015 09:33:43 +0200
+Message-ID: <CAPDyKFr7zhPgBgDD_BTQ6wUqhwBRJ6u85G-Md49K6n26MQRWew@mail.gmail.com>
+References: <557A3BD6.2080001@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:27731 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752786AbbFLHZ1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 12 Jun 2015 03:25:27 -0400
-In-Reply-To: <1434083961-32540-1-git-send-email-festevam@gmail.com>
+Received: from mail-qk0-f177.google.com ([209.85.220.177]:35958 "EHLO
+	mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751057AbbFLHdo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Jun 2015 03:33:44 -0400
+Received: by qkx62 with SMTP id 62so13771504qkx.3
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2015 00:33:43 -0700 (PDT)
+In-Reply-To: <557A3BD6.2080001@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Prabu Thangamuthu <Prabu.T@synopsys.com>
 
-On 12/06/15 07:39, Fabio Estevam wrote:
-> From: Fabio Estevam <fabio.estevam@freescale.com>
-> 
-> If mmc_gpio_alloc() fails we miss to call 'kfree(host)', so rearrange
-> the error path to fix it. 
+On 12 June 2015 at 03:54, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Dear, Ulf.
+>
+> Could you pull this patch for mmc-next?
+>
+> Best Regards,
+> Jaehoon Chung
+>
+>
+> The following changes since commit 5fd26c7ecb32082745b0bd33c8e35badd1cb5a91:
+>
+>   mmc: sdhci: Restore behavior while creating OCR mask (2015-06-08 09:49:57 +0200)
+>
+> are available in the git repository at:
+>
+>   https://github.com/jh80chung/dw-mmc.git tags/dw_mmc-next-for-ulf
+>
+> for you to fetch changes up to d15283723e066512f7d4d18c78cf68d15a400b29:
+>
+>   mmc: dw_mmc: insmod followed by rmmod will hung for eMMC (2015-06-12 01:42:02 +0900)
+>
+> ----------------------------------------------------------------
+> Prabu Thangamuthu (1):
+>       mmc: dw_mmc: insmod followed by rmmod will hung for eMMC
+>
+>  drivers/mmc/host/dw_mmc.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
 
-Are you sure it doesn't get freed through put_device()?
+Thanks Jaehoon, pulled into my next branch!
 
-> 
-> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
-> ---
->  drivers/mmc/core/host.c | 18 ++++++++++--------
->  1 file changed, 10 insertions(+), 8 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 99a9c90..01fa1ed 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -566,10 +566,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
->  		host->index = err;
->  	spin_unlock(&mmc_host_lock);
->  	idr_preload_end();
-> -	if (err < 0) {
-> -		kfree(host);
-> -		return NULL;
-> -	}
-> +	if (err < 0)
-> +		goto err_kfree;
->  
->  	dev_set_name(&host->class_dev, "mmc%d", host->index);
->  
-> @@ -578,10 +576,8 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
->  	host->class_dev.class = &mmc_host_class;
->  	device_initialize(&host->class_dev);
->  
-> -	if (mmc_gpio_alloc(host)) {
-> -		put_device(&host->class_dev);
-> -		return NULL;
-> -	}
-> +	if (mmc_gpio_alloc(host))
-> +		goto err_put_device;
->  
->  	mmc_host_clk_init(host);
->  
-> @@ -605,6 +601,12 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
->  	host->max_blk_count = PAGE_CACHE_SIZE / 512;
->  
->  	return host;
-> +
-> +err_put_device:
-> +	put_device(&host->class_dev);
-> +err_kfree:
-> +	kfree(host);
-> +	return NULL;
->  }
->  
->  EXPORT_SYMBOL(mmc_alloc_host);
-> 
-
+Kind regards
+Uffe
