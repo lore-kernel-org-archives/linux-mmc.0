@@ -1,52 +1,59 @@
-From: Yoshihiro Kaneko <ykaneko0929@gmail.com>
-Subject: [PATCH/RFC] mmc: tmio: Fix timeout value for command request
-Date: Mon, 15 Jun 2015 02:23:26 +0900
-Message-ID: <1434302606-31040-1-git-send-email-ykaneko0929@gmail.com>
-Return-path: <linux-sh-owner@vger.kernel.org>
-Sender: linux-sh-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Ian Molton <ian.molton@codethink.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, linux-sh@vger.kernel.org
+From: Rabin Vincent <rabin.vincent@axis.com>
+Subject: [PATCH] mmc: queue: prevent soft lockups on PREEMPT=n
+Date: Sun, 14 Jun 2015 19:26:11 +0200
+Message-ID: <1434302771-9599-1-git-send-email-rabin.vincent@axis.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bastet.se.axis.com ([195.60.68.11]:50641 "EHLO
+	bastet.se.axis.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751982AbbFNR0S (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Jun 2015 13:26:18 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Rabin Vincent <rabinv@axis.com>
 
-From: Takeshi Kihara <takeshi.kihara.df@renesas.com>
+On systems with CONFIG_PREEMPT=n, under certain circumstances, mmcqd
+can continuously process requests for several seconds without blocking,
+triggering the soft lockup watchdog.  For example, this can happen if
+mmcqd runs on the CPU which services the controller's interrupt, and
+a process on a different CPU continuously writes to the MMC block
+device.
 
-Fix the problem which timeout occurs at the time of command request with
-several cards.
+ NMI watchdog: BUG: soft lockup - CPU#0 stuck for 22s! [mmcqd/0:664]
+ CPU: 0 PID: 664 Comm: mmcqd/0 Not tainted 4.1.0-rc7+ #4
+ PC is at _raw_spin_unlock_irqrestore+0x24/0x28
+ LR is at mmc_start_request+0x104/0x134
+ ...
+ [<805112a8>] (_raw_spin_unlock_irqrestore) from [<803db664>] (mmc_start_request+0x104/0x134)
+ [<803db664>] (mmc_start_request) from [<803dc008>] (mmc_start_req+0x274/0x394)
+ [<803dc008>] (mmc_start_req) from [<803eb2c4>] (mmc_blk_issue_rw_rq+0xd0/0xb98)
+ [<803eb2c4>] (mmc_blk_issue_rw_rq) from [<803ebe8c>] (mmc_blk_issue_rq+0x100/0x470)
+ [<803ebe8c>] (mmc_blk_issue_rq) from [<803ecab8>] (mmc_queue_thread+0xd0/0x170)
+ [<803ecab8>] (mmc_queue_thread) from [<8003fd14>] (kthread+0xe0/0xfc)
+ [<8003fd14>] (kthread) from [<8000f768>] (ret_from_fork+0x14/0x2c)
 
-The timeout value was insufficient as a verification of several cards,
-so it was changed 5 seconds from 2 seconds.
+Fix it by adding a cond_resched() in the request handling loop so that
+other processes get a chance to run.
 
-Signed-off-by: Takeshi Kihara <takeshi.kihara.df@renesas.com>
-Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
+Signed-off-by: Rabin Vincent <rabin.vincent@axis.com>
 ---
+ drivers/mmc/card/queue.c |    1 +
+ 1 file changed, 1 insertion(+)
 
-This patch is based on mmc-next branch of Ulf Hansson's mmc tree.
-
- drivers/mmc/host/tmio_mmc_pio.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index e3dcf31..0f7c4ae 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -230,7 +230,7 @@ static void tmio_mmc_reset_work(struct work_struct *work)
- 	 */
- 	if (IS_ERR_OR_NULL(mrq)
- 	    || time_is_after_jiffies(host->last_req_ts +
--		msecs_to_jiffies(2000))) {
-+		msecs_to_jiffies(5000))) {
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		return;
- 	}
-@@ -818,7 +818,7 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	ret = tmio_mmc_start_command(host, mrq->cmd);
- 	if (!ret) {
- 		schedule_delayed_work(&host->delayed_reset_work,
--				      msecs_to_jiffies(2000));
-+				      msecs_to_jiffies(5000));
- 		return;
- 	}
- 
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 8efa368..e78ae97 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -69,6 +69,7 @@ static int mmc_queue_thread(void *d)
+ 			set_current_state(TASK_RUNNING);
+ 			cmd_flags = req ? req->cmd_flags : 0;
+ 			mq->issue_fn(mq, req);
++			cond_resched();
+ 			if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
+ 				mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
+ 				continue; /* fetch again */
 -- 
-1.9.1
+1.7.10.4
 
