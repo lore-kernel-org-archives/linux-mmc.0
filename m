@@ -1,57 +1,46 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH v2 0/6] UHS-I support for sh_mobile_sdhi
-Date: Sun, 14 Jun 2015 09:36:53 +0200
-Message-ID: <CAMuHMdXdKWKQshRk9QzAncGy1zyDYRMbhjYYEg2CPYc=PtD6QQ@mail.gmail.com>
-References: <1433892104.12074.49.camel@codethink.co.uk>
-	<CAPDyKFq+fZrH1hMdMd8FEzy8h1U9pu8PbaMQtBDOEe+UySqJkA@mail.gmail.com>
-	<1433980677.12074.74.camel@codethink.co.uk>
-	<20150611024938.GB6904@verge.net.au>
-	<1434034924.26252.10.camel@codethink.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <1434034924.26252.10.camel@codethink.co.uk>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Cc: Simon Horman <horms@verge.net.au>, Ulf Hansson <ulf.hansson@linaro.org>, Ian Molton <ian@mnementh.co.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linus Walleij <linus.walleij@linaro.org>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+From: Yoshihiro Kaneko <ykaneko0929@gmail.com>
+Subject: [PATCH/RFC] mmc: sh_mmcif: Fix suspend process
+Date: Mon, 15 Jun 2015 02:20:43 +0900
+Message-ID: <1434302443-30905-1-git-send-email-ykaneko0929@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pd0-f177.google.com ([209.85.192.177]:34084 "EHLO
+	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752034AbbFNRVP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Jun 2015 13:21:15 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, linux-sh@vger.kernel.org
 
-On Thu, Jun 11, 2015 at 5:02 PM, Ben Hutchings
-<ben.hutchings@codethink.co.uk> wrote:
->> I may be misunderstanding the above, if so I apologise, but I would
->> strongly prefer to avoid an arrangement where the kernel and device tree
->> blob (DTS/DTSI -> DTB) need to be upgrade in lock-step as this tends not to
->> lead to a good experience for users.
->
-> I agree.
->
->> My preference would be to maintain
->> backwards and forwards compatibility and if appropriate schedule removal of
->> such compatibility.
-> [...]
->
-> The problem is that the 'sd-uhs-sdr50' property is interpreted by the
-> MMC core, so I think it will start trying to use this mode even if the
-> driver hasn't implemented the necessary operations.  I don't see any way
-> around that.
+From: Koji Matsuoka <koji.matsuoka.xm@renesas.com>
 
-Can't the core check for driver capabilities?
-I'm not familiar with the MMC core, but e.g. the SPI core only tries modes
-that match both SPI master (spi_master.mode_bits) and slave (spi_device.mode).
+The clock should be enable when SDHI registers are accessed.
 
-> The regression is relatively minor as I think the MMC core will fall
-> back to a lower speed after failing to enable SDR50.  But it will slow
-> down probing of a card.
+Signed-off-by: Koji Matsuoka <koji.matsuoka.xm@renesas.com>
+Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
+---
 
-So it does fall back (after a while). That's good.
+This patch is based on mmc-next branch of Ulf Hansson's mmc tree.
 
-Gr{oetje,eeting}s,
+* Perhaps this relates to the need to enhance clock management
 
-                        Geert
+ drivers/mmc/host/sh_mmcif.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 5a1fdd4..ad9ffea 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -1632,7 +1632,9 @@ static int sh_mmcif_suspend(struct device *dev)
+ {
+ 	struct sh_mmcif_host *host = dev_get_drvdata(dev);
+ 
++	pm_runtime_get_sync(dev);
+ 	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
++	pm_runtime_put(dev);
+ 
+ 	return 0;
+ }
+-- 
+1.9.1
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
