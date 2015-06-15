@@ -1,71 +1,90 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/1] mmc: sdhci: fix low memory corruption
-Date: Mon, 15 Jun 2015 11:55:40 +0200
-Message-ID: <CAPDyKFoxNTq+Wnx4Mere8HkJrGUxKby4AqhdYu0Sk69vPWXp9g@mail.gmail.com>
-References: <557A9C71.6090700@suse.cz>
-	<1434102302-11189-1-git-send-email-jslaby@suse.cz>
+Subject: Re: [PATCH v2] mmc: card: Fixup request missing in mmc_blk_issue_rw_rq
+Date: Mon, 15 Jun 2015 11:55:50 +0200
+Message-ID: <CAPDyKFq9L26iHUoK_2bV=bgCZWurADJZ=iDNCPQjYH0aSqQv0Q@mail.gmail.com>
+References: <dbf65349aac343abbd215129dd3ceefb@SHMBX03.spreadtrum.com>
+	<bf6c98d20e3e4fae9bf942e7682aba85@SHMBX03.spreadtrum.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1434102302-11189-1-git-send-email-jslaby@suse.cz>
-Sender: stable-owner@vger.kernel.org
-To: Jiri Slaby <jslaby@suse.cz>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, konrad.wilk@oracle.com, linux-mmc <linux-mmc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>, Haibo Chen <haibo.chen@freescale.com>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <bf6c98d20e3e4fae9bf942e7682aba85@SHMBX03.spreadtrum.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: =?UTF-8?B?SnVzdGluIFdhbmcgKOeOi+S4gSk=?= <Justin.Wang@spreadtrum.com>
+Cc: "kuninori.morimoto.gx@renesas.com" <kuninori.morimoto.gx@renesas.com>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "JBottomley@Odin.com" <JBottomley@odin.com>, "ben@decadent.org.uk" <ben@decadent.org.uk>, "chuanxiao.dong@intel.com" <chuanxiao.dong@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 12 June 2015 at 11:45, Jiri Slaby <jslaby@suse.cz> wrote:
-> When dma mapping (dma_map_sg) fails in sdhci_pre_dma_transfer, -EINVAL
-> is returned. There are 3 callers of sdhci_pre_dma_transfer:
-> * sdhci_pre_req and sdhci_adma_table_pre: handle negative return
-> * sdhci_prepare_data: handles 0 (error) and "else" (good) only
+On 12 June 2015 at 14:38, Justin Wang (=E7=8E=8B=E4=B8=81) <Justin.Wang=
+@spreadtrum.com> wrote:
+> From 0e01e7546745f39843d54810f74c198e01cb8226 Mon Sep 17 00:00:00 200=
+1
+> From: justin.wang <justin.wang@spreadtrum.com>
+> Date: Mon, 18 May 2015 20:14:15 +0800
+> Subject: [PATCH v2] mmc: card: Fixup request missing in mmc_blk_issue=
+_rw_rq
 >
-> sdhci_prepare_data is therefore broken. When it receives -EINVAL from
-> sdhci_pre_dma_transfer, it assumes 1 sg mapping was mapped. Later,
-> this non-existant mapping with address 0 is kmap'ped and written to:
-> Corrupted low memory at ffff880000001000 (1000 phys) = 22b7d67df2f6d1cf
-> Corrupted low memory at ffff880000001008 (1008 phys) = 63848a5216b7dd95
-> Corrupted low memory at ffff880000001010 (1010 phys) = 330eb7ddef39e427
-> Corrupted low memory at ffff880000001018 (1018 phys) = 8017ac7295039bda
-> Corrupted low memory at ffff880000001020 (1020 phys) = 8ce039eac119074f
-> ...
+> The current handler of MMC_BLK_CMD_ERR in mmc_blk_issue_rw_rq functio=
+n
+> may cause new coming request permanent missing when the ongoing
+> request (previoulsy started) complete end.
 >
-> So teach sdhci_prepare_data to understand negative return values from
-> sdhci_pre_dma_transfer and disable DMA in that case, as well as for
-> zero.
+> The problem scenario is as follows:
+> (1) Request A is ongoing;
+> (2) Request B arrived, and finally mmc_blk_issue_rw_rq() is called;
+> (3) Request A encounters the MMC_BLK_CMD_ERR error;
+> (4) In the error handling of MMC_BLK_CMD_ERR, suppose mmc_blk_cmd_err=
+()
+>     end request A completed and return zero. Continue the error handl=
+ing,
+>     suppose mmc_blk_reset() reset device success;
+> (5) Continue the execution, while loop completed because variable ret
+>     is zero now;
+> (6) Finally, mmc_blk_issue_rw_rq() return without processing request =
+B.
 >
-> It was introduced in 348487cb28e66b032bae1b38424d81bf5b444408 (mmc:
-> sdhci: use pipeline mmc requests to improve performance). The commit
-> seems to be suspicious also by assigning host->sg_count both in
-> sdhci_pre_dma_transfer and sdhci_adma_table_pre.
+> The process related to the missing request may wait that IO request
+> complete forever, possibly crashing the application or hanging the sy=
+stem.
 >
-> Signed-off-by: Jiri Slaby <jslaby@suse.cz>
-> Cc: stable@vger.kernel.org # 4.0+
-> Fixes: 348487cb28e6
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Haibo Chen <haibo.chen@freescale.com>
+> Fix this issue by starting new request when reset success.
+>
+> Signed-off-by: Ding Wang <justin.wang@spreadtrum.com>
 
 Thanks, applied for next.
+
+I have added a the following fixes tag:
+=46ixes 67716327eec7 ("mmc: block: add eMMC hardware reset support")
+I am not sure, whether the bug were introduced even earlier than that,
+but I think $subject patch should be trivial to apply on top that one.
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/card/block.c |    8 +++++---
+>  1 files changed, 5 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 1b4861ddfb38..55e7f9a9858a 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -834,7 +834,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->                         int sg_cnt;
->
->                         sg_cnt = sdhci_pre_dma_transfer(host, data, NULL);
-> -                       if (sg_cnt == 0) {
-> +                       if (sg_cnt <= 0) {
->                                 /*
->                                  * This only happens when someone fed
->                                  * us an invalid request.
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 60f7141..f05cd1f 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -1910,9 +1910,11 @@ static int mmc_blk_issue_rw_rq(struct mmc_queu=
+e *mq, struct request *rqc)
+>                         break;
+>                 case MMC_BLK_CMD_ERR:
+>                         ret =3D mmc_blk_cmd_err(md, card, brq, req, r=
+et);
+> -                       if (!mmc_blk_reset(md, card->host, type))
+> -                               break;
+> -                       goto cmd_abort;
+> +                       if (mmc_blk_reset(md, card->host, type))
+> +                               goto cmd_abort;
+> +                       if (!ret)
+> +                               goto start_new_req;
+> +                       break;
+>                 case MMC_BLK_RETRY:
+>                         if (retry++ < 5)
+>                                 break;
 > --
-> 2.4.2
+> 1.7.4.1
 >
