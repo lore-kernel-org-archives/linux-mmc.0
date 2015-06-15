@@ -1,87 +1,71 @@
-From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH v2 3/6] pinctrl: sh-pfc: r8a7790: Add separate functions for SDHI 1.8V operation
-Date: Mon, 15 Jun 2015 05:02:50 +0300
-Message-ID: <11872302.fE1vlhM93k@avalon>
-References: <1433892104.12074.49.camel@codethink.co.uk> <34148355.aYdSK9R7Ck@avalon> <1434328840.25446.50.camel@codethink.co.uk>
+From: Leon Romanovsky <leon@leon.nu>
+Subject: Re: [PATCH/RFC] mmc: tmio: Fix timeout value for command request
+Date: Mon, 15 Jun 2015 08:49:34 +0300
+Message-ID: <CALq1K=+kP2qwbhreMMTg9T362AVjinW9bZObgBi7sP7z5y-Dhw@mail.gmail.com>
+References: <1434302606-31040-1-git-send-email-ykaneko0929@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1434328840.25446.50.camel@codethink.co.uk>
+In-Reply-To: <1434302606-31040-1-git-send-email-ykaneko0929@gmail.com>
 Sender: linux-sh-owner@vger.kernel.org
-To: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linus Walleij <linus.walleij@linaro.org>
+To: Yoshihiro Kaneko <ykaneko0929@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Ian Molton <ian.molton@codethink.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ben,
+On Sun, Jun 14, 2015 at 8:23 PM, Yoshihiro Kaneko <ykaneko0929@gmail.com> wrote:
+> From: Takeshi Kihara <takeshi.kihara.df@renesas.com>
+>
+> Fix the problem which timeout occurs at the time of command request with
+> several cards.
+>
+> The timeout value was insufficient as a verification of several cards,
+> so it was changed 5 seconds from 2 seconds.
+Hi Yoshihiro,
+Can you please throw a light on which cards you were reuqested to
+increase the timeout?
 
-On Monday 15 June 2015 01:40:40 Ben Hutchings wrote:
-> On Fri, 2015-06-12 at 22:07 +0300, Laurent Pinchart wrote:
-> > On Friday 12 June 2015 14:23:55 Ben Hutchings wrote:
-> >> On Fri, 2015-06-12 at 10:18 +0300, Laurent Pinchart wrote:
-> >>> On Wednesday 10 June 2015 00:23:31 Ben Hutchings wrote:
-> >>>> All the SHDIs can operate with either 3.3V or 1.8V signals,
-> >>>> depending on negotiation with the card.
-> >>>> 
-> >>>> Add separate functions for the 1.8V mode, and implement the set_mux
-> >>>> operation on all SDHI functions to configure the voltage for each
-> >>>> group of pins.
-> >>> 
-> >>> I don't think duplicating all functions for 1.8V and 3.3V is the right
-> >>> way to go. Can't we use the pinconf API instead, and in particular the
-> >>> PIN_CONFIG_POWER_SOURCE configuration ?
-> >> 
-> >> [...]
-> >> 
-> >> So far as I could see, you can't use the pinconf API with pinmux groups.
-> > 
-> > Can't you ? Both Documentation/devicetree/bindings/pinctrl/pinctrl-
-> > bindings.txt and Documentation/devicetree/bindings/pinctrl/renesas,pfc-
-> > pinctrl.txt document the usage of pinconf with groups (see for instance
-> > example 3 in the latter).
-> 
-> Sorry, I should say you can't use them with pinmux *functions*.  You can
-> either bind a group to a function *or* set the various pinconf
-> properties for the group, but not both.  Unless I'm very much mistaken.
+>
+> Signed-off-by: Takeshi Kihara <takeshi.kihara.df@renesas.com>
+> Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
+> ---
+>
+> This patch is based on mmc-next branch of Ulf Hansson's mmc tree.
+>
+>  drivers/mmc/host/tmio_mmc_pio.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index e3dcf31..0f7c4ae 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -230,7 +230,7 @@ static void tmio_mmc_reset_work(struct work_struct *work)
+>          */
+>         if (IS_ERR_OR_NULL(mrq)
+>             || time_is_after_jiffies(host->last_req_ts +
+> -               msecs_to_jiffies(2000))) {
+> +               msecs_to_jiffies(5000))) {
+>                 spin_unlock_irqrestore(&host->lock, flags);
+>                 return;
+>         }
+> @@ -818,7 +818,7 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>         ret = tmio_mmc_start_command(host, mrq->cmd);
+>         if (!ret) {
+>                 schedule_delayed_work(&host->delayed_reset_work,
+> -                                     msecs_to_jiffies(2000));
+> +                                     msecs_to_jiffies(5000));
+>                 return;
+>         }
+>
+> --
+> 1.9.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-One of us probably is :-)
 
-I'd have to recheck whether this is really a standard behaviour, but the PFC 
-driver at least supports setting both functions and configuration as far as I 
-can tell. The relevant example from the PFC bindings is
-
-        mmcif_pins: mmcif {
-                mux {
-                        renesas,groups = "mmc0_data8_0", "mmc0_ctrl_0";
-                        renesas,function = "mmc0";
-                };
-                cfg {
-                        renesas,groups = "mmc0_data8_0";
-                        renesas,pins = "PORT279";
-                        bias-pull-up;
-                };
-        };
-
-It's a bit more verbose than I'd like, but I think the following should work 
-too.
-
-        mmcif_pins: mmcif {
-                renesas,groups = "mmc0_data8_0";
-                renesas,function = "mmc0";
-                bias-pull-up;
-        };
-
-(it requires all pins from the groups to use the same configuration though)
-
-I believe the former is the intended way to set both function and config, 
-while the latter is a PFC "extension".
-
-On a side note, I have a patch to support the standard "groups", "functions" 
-and "pins" properties instead of the Renesas-specific versions, I'll try to 
-revive it.
 
 -- 
-Regards,
-
-Laurent Pinchart
-
+Leon Romanovsky | Independent Linux Consultant
+        www.leon.nu | leon@leon.nu
