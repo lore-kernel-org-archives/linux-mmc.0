@@ -1,8 +1,7 @@
 From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH v6 7/7] ARM: multi_v7_defconfig: Enable Mediatek MMC support
- multi-v7
-Date: Mon, 15 Jun 2015 19:20:53 +0800
-Message-ID: <1434367253-26577-8-git-send-email-chaotian.jing@mediatek.com>
+Subject: [PATCH v6 6/7] arm64: mediatek: Add Mediatek MMC support in defconfig
+Date: Mon, 15 Jun 2015 19:20:52 +0800
+Message-ID: <1434367253-26577-7-git-send-email-chaotian.jing@mediatek.com>
 References: <1434367253-26577-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,27 +21,27 @@ To: Rob Herring <robh+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>,
 Cc: Mark Rutland <mark.rutland@arm.com>, James Liao <jamesjj.liao@mediatek.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, srv_heupstream@mediatek.com, Arnd Bergmann <arnd@arndb.de>, devicetree@vger.kernel.org, Hongzhou Yang <hongzhou.yang@mediatek.com>, Catalin Marinas <catalin.marinas@arm.com>, bin.zhang@mediatek.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Will Deacon <will.deacon@arm.com>, linux-gpio@vger.kernel.org, linux-mediatek@lists.infradead.org, Chaotian Jing <chaotian.jing@mediatek.com>, Sascha Hauer <kernel@pengutronix.de>, "Joe.C" <yingjoe.chen@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Yingjoe Chen <yingjoe.chen@mediatek.com>
+From: Eddie Huang <eddie.huang@mediatek.com>
 
 Add CONFIG_MMC_MTK=y in defconfig
 
-Signed-off-by: Yingjoe Chen <yingjoe.chen@mediatek.com>
 Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+Signed-off-by: Eddie Huang <eddie.huang@mediatek.com>
 ---
- arch/arm/configs/multi_v7_defconfig | 1 +
+ arch/arm64/configs/defconfig | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
-index bc673e7..35447b2 100644
---- a/arch/arm/configs/multi_v7_defconfig
-+++ b/arch/arm/configs/multi_v7_defconfig
-@@ -451,6 +451,7 @@ CONFIG_MMC_DW_EXYNOS=y
- CONFIG_MMC_DW_ROCKCHIP=y
- CONFIG_MMC_SH_MMCIF=y
- CONFIG_MMC_SUNXI=y
+diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
+index d3cedb5..78e3234 100644
+--- a/arch/arm64/configs/defconfig
++++ b/arch/arm64/configs/defconfig
+@@ -140,6 +140,7 @@ CONFIG_MMC_ARMMMCI=y
+ CONFIG_MMC_SDHCI=y
+ CONFIG_MMC_SDHCI_PLTFM=y
+ CONFIG_MMC_SPI=y
 +CONFIG_MMC_MTK=y
- CONFIG_NEW_LEDS=y
- CONFIG_LEDS_CLASS=y
- CONFIG_LEDS_GPIO=y
+ CONFIG_RTC_CLASS=y
+ CONFIG_RTC_DRV_EFI=y
+ CONFIG_RTC_DRV_XGENE=y
 -- 
 1.8.1.1.dirty
