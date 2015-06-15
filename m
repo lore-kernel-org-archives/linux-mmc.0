@@ -1,57 +1,62 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH v3] mmc: sleep notification
-Date: Mon, 15 Jun 2015 10:23:46 +0200
-Message-ID: <CAPDyKFoZuNoYB1KA4bt64+qoeEmjioW9qCnwkhYAnnSD4jMxag@mail.gmail.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE64FAAD701@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CAPDyKFoPqwDC_w1QTe7zQtJfH_5m2Gp_5uewJKy=x_LeaFqYhA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED53343C1F6EA@SACMBXIP01.sdcorp.global.sandisk.com>
+Subject: Re: [PATCH 1/1 linux-next] mmc: queue: use swap() in mmc_queue_thread()
+Date: Mon, 15 Jun 2015 11:54:32 +0200
+Message-ID: <CAPDyKFqqBk-j80T3DZSoeT6o=+E+2ze62EPnQji9B5s+5bkdsQ@mail.gmail.com>
+References: <1433953854-23343-1-git-send-email-fabf@skynet.be>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f177.google.com ([209.85.220.177]:35769 "EHLO
-	mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754035AbbFOIXr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Jun 2015 04:23:47 -0400
-Received: by qkhq76 with SMTP id q76so50113492qkh.2
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Jun 2015 01:23:46 -0700 (PDT)
-In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED53343C1F6EA@SACMBXIP01.sdcorp.global.sandisk.com>
+Received: from mail-qg0-f54.google.com ([209.85.192.54]:34082 "EHLO
+	mail-qg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754121AbbFOJyd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Jun 2015 05:54:33 -0400
+Received: by qgf75 with SMTP id 75so24864961qgf.1
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Jun 2015 02:54:32 -0700 (PDT)
+In-Reply-To: <1433953854-23343-1-git-send-email-fabf@skynet.be>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Fabian Frederick <fabf@skynet.be>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Julia Lawall <Julia.Lawall@lip6.fr>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 8 June 2015 at 15:17, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
-> Hi Ulf,
+On 10 June 2015 at 18:30, Fabian Frederick <fabf@skynet.be> wrote:
+> Use kernel.h macro definition.
 >
-> [...]
+> Thanks to Julia Lawall for Coccinelle scripting support.
 >
->>
->> One of my comments for v2, was that I think you should remove all code which
->> was related to HPI to interrupt sleep notification from the runtime PM resume
->> path. Instead I wanted you to add that functionality as separate patch based on
->> top of this patch.
->>
->> You haven't done that in v3, why?
->
-> The sleep_notify call was moved to suspend() per your recommendation.
-> As far as I understand, no new requests should be sent during mmc_suspend() process,
-> thus HPI support is not needed anymore.
-> Is this the correct assumption?
+> Signed-off-by: Fabian Frederick <fabf@skynet.be>
 
-Yes.
-
-I don't think you need mmc_card_set_sleep_notify() and the
-corresponding new MMC_STATE_SLEEP_NOTIFY , mmc_device_prg_state(),
-etc.
-
-Overall, I think this patch could be simplified yet another step.
-
-> The only case where HPI is used in this patch - is during sleep_notify timeout error.
-
-Why?
-
-One final question, I noticed that you have removed the check for
-MMC_CAP2_FULL_PWR_CYCLE in the _mmc_suspend() function, why?
+Thanks, applied.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/card/queue.c | 5 +----
+>  1 file changed, 1 insertion(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index 8efa368..d34e09b 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -56,7 +56,6 @@ static int mmc_queue_thread(void *d)
+>         down(&mq->thread_sem);
+>         do {
+>                 struct request *req = NULL;
+> -               struct mmc_queue_req *tmp;
+>                 unsigned int cmd_flags = 0;
+>
+>                 spin_lock_irq(q->queue_lock);
+> @@ -86,9 +85,7 @@ static int mmc_queue_thread(void *d)
+>
+>                         mq->mqrq_prev->brq.mrq.data = NULL;
+>                         mq->mqrq_prev->req = NULL;
+> -                       tmp = mq->mqrq_prev;
+> -                       mq->mqrq_prev = mq->mqrq_cur;
+> -                       mq->mqrq_cur = tmp;
+> +                       swap(mq->mqrq_prev, mq->mqrq_cur);
+>                 } else {
+>                         if (kthread_should_stop()) {
+>                                 set_current_state(TASK_RUNNING);
+> --
+> 2.4.2
+>
