@@ -1,68 +1,59 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2 2/3] i2c-piix4: Use Macro for AMD CZ SMBus device ID
-Date: Mon, 15 Jun 2015 11:55:00 +0200
-Message-ID: <CAPDyKFopmbRr1LsDvPe01PUDgMcYC5ExyqZGdPn_cRaWUZg5rg@mail.gmail.com>
-References: <1434024707-6245-1-git-send-email-Vincent.Wan@amd.com>
-	<1434024707-6245-2-git-send-email-Vincent.Wan@amd.com>
-	<20150611130734.GA1510@katana>
+From: Mirza Krak <mirza.krak@hostmobility.com>
+Subject: Re: [PATCH 1/1] mmc: sdhci-esdhc-imx: Use pinctrl PM helpers
+Date: Mon, 15 Jun 2015 12:03:44 +0200
+Message-ID: <CAJ=nTsuOEaV8oUr5z+rrTxrpcU6fJYqZzU+aKNVm21w04=tEkw@mail.gmail.com>
+References: <1434101473-4109-1-git-send-email-mirza.krak@hostmobility.com>
+	<CAPDyKFoqAV4fW=V56vvPh5-9=w+0Di8VzTBNRmpF_2ETp_pHNA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-pci-owner@vger.kernel.org>
-In-Reply-To: <20150611130734.GA1510@katana>
-Sender: linux-pci-owner@vger.kernel.org
-To: Wan ZongShun <Vincent.Wan@amd.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Wolfram Sang <wsa@the-dreams.de>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, bp@alien8.de, Jean Delvare <jdelvare@suse.de>, Linux PCI <linux-pci@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, ZongShun Wan <mcuos.com@gmail.com>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f175.google.com ([209.85.217.175]:35900 "EHLO
+	mail-lb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755503AbbFOKDp convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Jun 2015 06:03:45 -0400
+Received: by lbbqq2 with SMTP id qq2so50104785lbb.3
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Jun 2015 03:03:44 -0700 (PDT)
+In-Reply-To: <CAPDyKFoqAV4fW=V56vvPh5-9=w+0Di8VzTBNRmpF_2ETp_pHNA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Shawn Guo <shawn.guo@linaro.org>, Dirk Behme <dirk.behme@de.bosch.com>, Peter Griffin <peter.griffin@linaro.org>, Stefan Agner <stefan@agner.ch>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 11 June 2015 at 15:07, Wolfram Sang <wsa@the-dreams.de> wrote:
-> On Thu, Jun 11, 2015 at 08:11:46PM +0800, Wan ZongShun wrote:
->> Change AMD CZ SMBUS device ID from 0x790b to
->> use Macro definition
+2015-06-15 11:55 GMT+02:00 Ulf Hansson <ulf.hansson@linaro.org>:
+> On 12 June 2015 at 11:31, Mirza Krak <mirza.krak@hostmobility.com> wr=
+ote:
+>> From: Mirza Krak <mirza.krak@hostmobility.com>
 >>
->> Signed-off-by: Wan ZongShun <Vincent.Wan@amd.com>
->
-> I think it makes sense that this patch goes in via MMC. This I2C change
-> is trivial, but for MMC there is more to handle. I don't expect
-> conflicts. So:
->
-> Acked-by: Wolfram Sang <wsa@the-dreams.de>
-
-Thanks, applied!
-
-Kind regards
-Uffe
-
->
->> ---
->>  drivers/i2c/busses/i2c-piix4.c | 4 ++--
->>  1 file changed, 2 insertions(+), 2 deletions(-)
+>> Add support for current states of pinctrl, which are "default", "idl=
+e"
+>> and "sleep".
 >>
->> diff --git a/drivers/i2c/busses/i2c-piix4.c b/drivers/i2c/busses/i2c-piix4.c
->> index 67cbec6..630bce6 100644
->> --- a/drivers/i2c/busses/i2c-piix4.c
->> +++ b/drivers/i2c/busses/i2c-piix4.c
->> @@ -245,7 +245,7 @@ static int piix4_setup_sb800(struct pci_dev *PIIX4_dev,
->>            PIIX4_dev->device == PCI_DEVICE_ID_AMD_HUDSON2_SMBUS &&
->>            PIIX4_dev->revision >= 0x41) ||
->>           (PIIX4_dev->vendor == PCI_VENDOR_ID_AMD &&
->> -          PIIX4_dev->device == 0x790b &&
->> +          PIIX4_dev->device == PCI_DEVICE_ID_AMD_KERNCZ_SMBUS &&
->>            PIIX4_dev->revision >= 0x49))
->>               smb_en = 0x00;
->>       else
->> @@ -545,7 +545,7 @@ static const struct pci_device_id piix4_ids[] = {
->>       { PCI_DEVICE(PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_ATI_IXP400_SMBUS) },
->>       { PCI_DEVICE(PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_ATI_SBX00_SMBUS) },
->>       { PCI_DEVICE(PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_HUDSON2_SMBUS) },
->> -     { PCI_DEVICE(PCI_VENDOR_ID_AMD, 0x790b) },
->> +     { PCI_DEVICE(PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_KERNCZ_SMBUS) },
->>       { PCI_DEVICE(PCI_VENDOR_ID_SERVERWORKS,
->>                    PCI_DEVICE_ID_SERVERWORKS_OSB4) },
->>       { PCI_DEVICE(PCI_VENDOR_ID_SERVERWORKS,
->> --
->> 1.9.1
+>> The "default" pinctrl state is set by Drivers core before
+>> calling the driver's probe, hence we do not need a initial call to
+>> "default" state.
 >>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-i2c" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Signed-off-by: Mirza Krak <mirza.krak@hostmobility.com>
+>
+> Hi Mirza,
+>
+> This looks okay to me, but it seems like it needs a re-base towards m=
+y
+> mmc next branch.
+
+Ok, will do that.
+--=20
+Med V=C3=A4nliga H=C3=A4lsningar / Best Regards
+
+*******************************************************************
+Mirza Krak
+Host Mobility AB
+mirza.krak@hostmobility.com
+Anders Personsgatan 12, 416 64 G=C3=B6teborg
+Sweden
+http://www.hostmobility.com
+Direct: +46 31 31 32 704
+Phone: +46 31 31 32 700
+=46ax: +46 31 80 67 51
+Mobile: +46 730 28 06 22
+*******************************************************************
