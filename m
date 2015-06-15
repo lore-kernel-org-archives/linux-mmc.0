@@ -1,87 +1,71 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/1] mmc: sdhci-esdhc-imx: Use pinctrl PM helpers
-Date: Mon, 15 Jun 2015 11:55:24 +0200
-Message-ID: <CAPDyKFoqAV4fW=V56vvPh5-9=w+0Di8VzTBNRmpF_2ETp_pHNA@mail.gmail.com>
-References: <1434101473-4109-1-git-send-email-mirza.krak@hostmobility.com>
+Subject: Re: [PATCH 1/1] mmc: sdhci: fix low memory corruption
+Date: Mon, 15 Jun 2015 11:55:40 +0200
+Message-ID: <CAPDyKFoxNTq+Wnx4Mere8HkJrGUxKby4AqhdYu0Sk69vPWXp9g@mail.gmail.com>
+References: <557A9C71.6090700@suse.cz>
+	<1434102302-11189-1-git-send-email-jslaby@suse.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f181.google.com ([209.85.220.181]:36505 "EHLO
-	mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755787AbbFOJzZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Jun 2015 05:55:25 -0400
-Received: by qkfe185 with SMTP id e185so10384570qkf.3
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Jun 2015 02:55:24 -0700 (PDT)
-In-Reply-To: <1434101473-4109-1-git-send-email-mirza.krak@hostmobility.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1434102302-11189-1-git-send-email-jslaby@suse.cz>
+Sender: stable-owner@vger.kernel.org
+To: Jiri Slaby <jslaby@suse.cz>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, konrad.wilk@oracle.com, linux-mmc <linux-mmc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>, Haibo Chen <haibo.chen@freescale.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Mirza Krak <mirza.krak@hostmobility.com>
-Cc: Chris Ball <chris@printf.net>, Shawn Guo <shawn.guo@linaro.org>, Dirk Behme <dirk.behme@de.bosch.com>, Peter Griffin <peter.griffin@linaro.org>, Stefan Agner <stefan@agner.ch>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 12 June 2015 at 11:31, Mirza Krak <mirza.krak@hostmobility.com> wrote:
-> From: Mirza Krak <mirza.krak@hostmobility.com>
+On 12 June 2015 at 11:45, Jiri Slaby <jslaby@suse.cz> wrote:
+> When dma mapping (dma_map_sg) fails in sdhci_pre_dma_transfer, -EINVAL
+> is returned. There are 3 callers of sdhci_pre_dma_transfer:
+> * sdhci_pre_req and sdhci_adma_table_pre: handle negative return
+> * sdhci_prepare_data: handles 0 (error) and "else" (good) only
 >
-> Add support for current states of pinctrl, which are "default", "idle"
-> and "sleep".
+> sdhci_prepare_data is therefore broken. When it receives -EINVAL from
+> sdhci_pre_dma_transfer, it assumes 1 sg mapping was mapped. Later,
+> this non-existant mapping with address 0 is kmap'ped and written to:
+> Corrupted low memory at ffff880000001000 (1000 phys) = 22b7d67df2f6d1cf
+> Corrupted low memory at ffff880000001008 (1008 phys) = 63848a5216b7dd95
+> Corrupted low memory at ffff880000001010 (1010 phys) = 330eb7ddef39e427
+> Corrupted low memory at ffff880000001018 (1018 phys) = 8017ac7295039bda
+> Corrupted low memory at ffff880000001020 (1020 phys) = 8ce039eac119074f
+> ...
 >
-> The "default" pinctrl state is set by Drivers core before
-> calling the driver's probe, hence we do not need a initial call to
-> "default" state.
+> So teach sdhci_prepare_data to understand negative return values from
+> sdhci_pre_dma_transfer and disable DMA in that case, as well as for
+> zero.
 >
-> Signed-off-by: Mirza Krak <mirza.krak@hostmobility.com>
+> It was introduced in 348487cb28e66b032bae1b38424d81bf5b444408 (mmc:
+> sdhci: use pipeline mmc requests to improve performance). The commit
+> seems to be suspicious also by assigning host->sg_count both in
+> sdhci_pre_dma_transfer and sdhci_adma_table_pre.
+>
+> Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+> Cc: stable@vger.kernel.org # 4.0+
+> Fixes: 348487cb28e6
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Haibo Chen <haibo.chen@freescale.com>
 
-Hi Mirza,
-
-This looks okay to me, but it seems like it needs a re-base towards my
-mmc next branch.
+Thanks, applied for next.
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
+>  drivers/mmc/host/sdhci.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 84b3365e4773..6d51a4f48361 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1129,6 +1129,8 @@ static int sdhci_esdhc_suspend(struct device *dev)
->         pm_runtime_mark_last_busy(dev);
->         pm_runtime_put_autosuspend(dev);
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 1b4861ddfb38..55e7f9a9858a 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -834,7 +834,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>                         int sg_cnt;
 >
-> +       pinctrl_pm_select_sleep_state(dev);
-> +
->         return ret;
->  }
->
-> @@ -1137,6 +1139,8 @@ static int sdhci_esdhc_resume(struct device *dev)
->         int ret;
->         struct sdhci_host *host = dev_get_drvdata(dev);
->
-> +       pinctrl_pm_select_default_state(dev);
-> +
->         pm_runtime_get_sync(dev);
->         ret = sdhci_resume_host(host);
->         pm_runtime_mark_last_busy(dev);
-> @@ -1160,6 +1164,8 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
->         }
->         clk_disable_unprepare(imx_data->clk_ahb);
->
-> +       pinctrl_pm_select_idle_state(dev);
-> +
->         return ret;
->  }
->
-> @@ -1169,6 +1175,8 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct pltfm_imx_data *imx_data = pltfm_host->priv;
->
-> +       pinctrl_pm_select_default_state(dev);
-> +
->         if (!sdhci_sdio_irq_enabled(host)) {
->                 clk_prepare_enable(imx_data->clk_per);
->                 clk_prepare_enable(imx_data->clk_ipg);
+>                         sg_cnt = sdhci_pre_dma_transfer(host, data, NULL);
+> -                       if (sg_cnt == 0) {
+> +                       if (sg_cnt <= 0) {
+>                                 /*
+>                                  * This only happens when someone fed
+>                                  * us an invalid request.
 > --
-> 2.1.0
+> 2.4.2
 >
