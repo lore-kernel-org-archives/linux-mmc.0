@@ -1,47 +1,46 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH v6 6/7] arm64: mediatek: Add Mediatek MMC support in defconfig
-Date: Mon, 15 Jun 2015 19:20:52 +0800
-Message-ID: <1434367253-26577-7-git-send-email-chaotian.jing@mediatek.com>
-References: <1434367253-26577-1-git-send-email-chaotian.jing@mediatek.com>
+From: Otavio Salvador <otavio@ossystems.com.br>
+Subject: Re: [PATCH v2] mmc: core: Do not set mmc voltage to 1.8V when
+ 'no-1-8-v' is present
+Date: Mon, 15 Jun 2015 08:44:35 -0300
+Message-ID: <CAP9ODKp5c9fq+og8pcYAK0LvZKQVj62e+-xa2seVM+dWTky+SA@mail.gmail.com>
+References: <1434227067-9600-1-git-send-email-festevam@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1434367253-26577-1-git-send-email-chaotian.jing@mediatek.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Rob Herring <robh+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, James Liao <jamesjj.liao@mediatek.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, srv_heupstream@mediatek.com, Arnd Bergmann <arnd@arndb.de>, devicetree@vger.kernel.org, Hongzhou Yang <hongzhou.yang@mediatek.com>, Catalin Marinas <catalin.marinas@arm.com>, bin.zhang@mediatek.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Will Deacon <will.deacon@arm.com>, linux-gpio@vger.kernel.org, linux-mediatek@lists.infradead.org, Chaotian Jing <chaotian.jing@mediatek.com>, Sascha Hauer <kernel@pengutronix.de>, "Joe.C" <yingjoe.chen@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pd0-f180.google.com ([209.85.192.180]:33379 "EHLO
+	mail-pd0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753861AbbFOLog (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Jun 2015 07:44:36 -0400
+Received: by pdjn11 with SMTP id n11so71396837pdj.0
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Jun 2015 04:44:35 -0700 (PDT)
+In-Reply-To: <1434227067-9600-1-git-send-email-festevam@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Fabio Estevam <festevam@gmail.com>
+Cc: ulf.hansson@linaro.org, aisheng.dong@freescale.com, Kevin Lemoi <kevin.lemoi@savant.com>, kernel@pengutronix.de, Russell King <linux@arm.linux.org.uk>, chuanxiao.dong@intel.com, linux-mmc@vger.kernel.org, Fabio Estevam <fabio.estevam@freescale.com>
 
-From: Eddie Huang <eddie.huang@mediatek.com>
+On Sat, Jun 13, 2015 at 5:24 PM, Fabio Estevam <festevam@gmail.com> wrote:
+> From: Fabio Estevam <fabio.estevam@freescale.com>
+>
+> Since commit 312449efd16bb06 ("mmc: core: Fix sequence for I/O voltage
+> in DDR mode for eMMC") the mmc voltage is set to 1.8V inside
+> mmc_select_hs_ddr(), even if 'no-1-8-v' property is present.
+>
+> This causes the following error on a mx6sl board with the 'no-1-8-v'
+> property passed in the device tree:
+>
+> mmc0: power class selection to bus width 8 ddr 4 failed
+> mmc0: error -110 whilst initialising MMC card
+>
+> Fix this problem by only setting the mmc voltage to 1.8V if the
+> 'no-1-8-v' property is absent.
+>
+> Reported-by: Kevin Lemoi <kevin.lemoi@savant.com>
+> Signed-off-by: Fabio Estevam <fabio.estevam@freescale.com>
 
-Add CONFIG_MMC_MTK=y in defconfig
+Acked-by: Otavio Salvador <otavio@ossystems.com.br>
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-Signed-off-by: Eddie Huang <eddie.huang@mediatek.com>
----
- arch/arm64/configs/defconfig | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index d3cedb5..78e3234 100644
---- a/arch/arm64/configs/defconfig
-+++ b/arch/arm64/configs/defconfig
-@@ -140,6 +140,7 @@ CONFIG_MMC_ARMMMCI=y
- CONFIG_MMC_SDHCI=y
- CONFIG_MMC_SDHCI_PLTFM=y
- CONFIG_MMC_SPI=y
-+CONFIG_MMC_MTK=y
- CONFIG_RTC_CLASS=y
- CONFIG_RTC_DRV_EFI=y
- CONFIG_RTC_DRV_XGENE=y
 -- 
-1.8.1.1.dirty
+Otavio Salvador                             O.S. Systems
+http://www.ossystems.com.br        http://code.ossystems.com.br
+Mobile: +55 (53) 9981-7854            Mobile: +1 (347) 903-9750
