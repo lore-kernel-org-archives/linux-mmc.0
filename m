@@ -1,7 +1,7 @@
 From: Ben Hutchings <ben.hutchings@codethink.co.uk>
 Subject: Re: [PATCH v2 0/6] UHS-I support for sh_mobile_sdhi
-Date: Mon, 15 Jun 2015 01:30:41 +0100
-Message-ID: <1434328241.25446.43.camel@codethink.co.uk>
+Date: Mon, 15 Jun 2015 01:30:53 +0100
+Message-ID: <1434328253.25446.45.camel@codethink.co.uk>
 References: <1433892104.12074.49.camel@codethink.co.uk>
 	 <CAPDyKFq+fZrH1hMdMd8FEzy8h1U9pu8PbaMQtBDOEe+UySqJkA@mail.gmail.com>
 	 <1433980677.12074.74.camel@codethink.co.uk>
@@ -11,9 +11,9 @@ References: <1433892104.12074.49.camel@codethink.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-gpio-owner@vger.kernel.org>
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <CAMuHMdXdKWKQshRk9QzAncGy1zyDYRMbhjYYEg2CPYc=PtD6QQ@mail.gmail.com>
-Sender: linux-gpio-owner@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: Geert Uytterhoeven <geert@linux-m68k.org>
 Cc: Simon Horman <horms@verge.net.au>, Ulf Hansson <ulf.hansson@linaro.org>, Ian Molton <ian@mnementh.co.uk>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linus Walleij <linus.walleij@linaro.org>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
 List-Id: linux-mmc@vger.kernel.org
