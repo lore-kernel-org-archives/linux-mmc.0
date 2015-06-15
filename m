@@ -1,59 +1,61 @@
-From: Jean Delvare <jdelvare@suse.de>
-Subject: Re: [PATCH V2 2/3] i2c-piix4: Use Macro for AMD CZ SMBus device ID
-Date: Mon, 15 Jun 2015 14:27:57 +0200
-Message-ID: <20150615142757.0142351c@endymion.delvare>
-References: <1434024707-6245-1-git-send-email-Vincent.Wan@amd.com>
-	<1434024707-6245-2-git-send-email-Vincent.Wan@amd.com>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: [PATCH v2] mmc: core: Do not set mmc voltage to 1.8V when
+ 'no-1-8-v' is present
+Date: Mon, 15 Jun 2015 09:49:33 -0300
+Message-ID: <CAOMZO5Amb9hR=DOxd_wynwqc3Dfo0rLfdJS-dkKiOqB89PyMwQ@mail.gmail.com>
+References: <1434227067-9600-1-git-send-email-festevam@gmail.com>
+	<CAPDyKFq29S3K0sxCkUHO=QO0MqM0PskcjoM62EZysNc19SxP6w@mail.gmail.com>
+	<CAOMZO5CSvYHNwmeRsSJ+KYfAkisX+_2DePawd6AWHP-ANErq5Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:48557 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753198AbbFOM2D (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 15 Jun 2015 08:28:03 -0400
-In-Reply-To: <1434024707-6245-2-git-send-email-Vincent.Wan@amd.com>
+Received: from mail-lb0-f179.google.com ([209.85.217.179]:35971 "EHLO
+	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755674AbbFOMtg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Jun 2015 08:49:36 -0400
+Received: by lbbqq2 with SMTP id qq2so52704484lbb.3
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Jun 2015 05:49:33 -0700 (PDT)
+In-Reply-To: <CAOMZO5CSvYHNwmeRsSJ+KYfAkisX+_2DePawd6AWHP-ANErq5Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wan ZongShun <Vincent.Wan@amd.com>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-i2c@vger.kernel.org, bp@alien8.de, linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org, mcuos.com@gmail.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Dong Aisheng <aisheng.dong@freescale.com>, Kevin Lemoi <kevin.lemoi@savant.com>, Otavio Salvador <otavio@ossystems.com.br>, Sascha Hauer <kernel@pengutronix.de>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@freescale.com>
 
-On Thu, 11 Jun 2015 20:11:46 +0800, Wan ZongShun wrote:
-> Change AMD CZ SMBUS device ID from 0x790b to
-> use Macro definition
-> 
-> Signed-off-by: Wan ZongShun <Vincent.Wan@amd.com>
-> ---
->  drivers/i2c/busses/i2c-piix4.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/i2c/busses/i2c-piix4.c b/drivers/i2c/busses/i2c-piix4.c
-> index 67cbec6..630bce6 100644
-> --- a/drivers/i2c/busses/i2c-piix4.c
-> +++ b/drivers/i2c/busses/i2c-piix4.c
-> @@ -245,7 +245,7 @@ static int piix4_setup_sb800(struct pci_dev *PIIX4_dev,
->  	     PIIX4_dev->device == PCI_DEVICE_ID_AMD_HUDSON2_SMBUS &&
->  	     PIIX4_dev->revision >= 0x41) ||
->  	    (PIIX4_dev->vendor == PCI_VENDOR_ID_AMD &&
-> -	     PIIX4_dev->device == 0x790b &&
-> +	     PIIX4_dev->device == PCI_DEVICE_ID_AMD_KERNCZ_SMBUS &&
->  	     PIIX4_dev->revision >= 0x49))
->  		smb_en = 0x00;
->  	else
-> @@ -545,7 +545,7 @@ static const struct pci_device_id piix4_ids[] = {
->  	{ PCI_DEVICE(PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_ATI_IXP400_SMBUS) },
->  	{ PCI_DEVICE(PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_ATI_SBX00_SMBUS) },
->  	{ PCI_DEVICE(PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_HUDSON2_SMBUS) },
-> -	{ PCI_DEVICE(PCI_VENDOR_ID_AMD, 0x790b) },
-> +	{ PCI_DEVICE(PCI_VENDOR_ID_AMD, PCI_DEVICE_ID_AMD_KERNCZ_SMBUS) },
->  	{ PCI_DEVICE(PCI_VENDOR_ID_SERVERWORKS,
->  		     PCI_DEVICE_ID_SERVERWORKS_OSB4) },
->  	{ PCI_DEVICE(PCI_VENDOR_ID_SERVERWORKS,
+On Mon, Jun 15, 2015 at 9:23 AM, Fabio Estevam <festevam@gmail.com> wrote:
+> Hi Ulf,
+>
+> On Mon, Jun 15, 2015 at 9:08 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+>> What card (eMMC, SD, MMC) and which host driver is being used here?
+>
+> It is an eMMC and the host driver is sdhci-esdhc-imx.c.
+>
+>>> --- a/drivers/mmc/core/host.c
+>>> +++ b/drivers/mmc/core/host.c
+>>> @@ -527,6 +527,8 @@ int mmc_of_parse(struct mmc_host *host)
+>>>                 host->caps2 |= MMC_CAP2_HS400_1_8V | MMC_CAP2_HS200_1_8V_SDR;
+>>>         if (of_find_property(np, "mmc-hs400-1_2v", &len))
+>>>                 host->caps2 |= MMC_CAP2_HS400_1_2V | MMC_CAP2_HS200_1_2V_SDR;
+>>> +       if (of_find_property(np, "no-1-8-v", &len))
+>>> +               host->caps2 |= MMC_CAP_3_3V_ONLY_DDR;
+>>
+>> Do you intend to use 3.3V as the I/O voltage level for an eMMCs
+>> running in DDR mode? Isn't that violation of the eMMC spec?
+>
+> Yes, I would like to use 3.3V as the I/O voltage level for an eMMC in DDR mode.
+>
+> This was the behaviour prior to 312449efd16bb0, which I would like to
+> keep so that our custom board based on mx6sl could work. It works fine
+> with 3.14 kernel, but not on 4.1-rc due to the fact that the board
+> cannot provide 1.8V level, hence 'no-1-8-v' property is passed in the
+> device tree. With this patch applied 3.3V is applied and the eMMC can
+> successfully operate in 3.3V DDR mode.
 
-Probably too late but anyway:
+Also, looked at the eMMC spec and the only restriction I saw about
+using 3.3V voltage is with HS200 or HS400 devices:
 
-Acked-by: Jean Delvare <jdelvare@suse.de>
+"VCCQ (I/O) 3.3 V range is not supported in either HS200 or HS400 devices"
 
--- 
-Jean Delvare
-SUSE L3 Support
+Regards,
+
+Fabio Estevam
