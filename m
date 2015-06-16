@@ -1,69 +1,64 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v6 0/7] Add Mediatek MMC driver
-Date: Tue, 16 Jun 2015 10:03:06 +0200
-Message-ID: <CAPDyKFrAbAFR7_p5O4bPh6FZEBVhGZ2rq3htCKcF2QgQuCEf2g@mail.gmail.com>
-References: <1434367253-26577-1-git-send-email-chaotian.jing@mediatek.com>
+Subject: Re: [PATCH] mmc: queue: prevent soft lockups on PREEMPT=n
+Date: Tue, 16 Jun 2015 10:06:40 +0200
+Message-ID: <CAPDyKFog6um=pMg2fdmvzgNAdtJuAxha=-vhLrZ3k=8dxsUgGw@mail.gmail.com>
+References: <1434302771-9599-1-git-send-email-rabin.vincent@axis.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f53.google.com ([209.85.192.53]:35281 "EHLO
-	mail-qg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756409AbbFPIDI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Jun 2015 04:03:08 -0400
-Received: by qgeu36 with SMTP id u36so2490354qge.2
-        for <linux-mmc@vger.kernel.org>; Tue, 16 Jun 2015 01:03:06 -0700 (PDT)
-In-Reply-To: <1434367253-26577-1-git-send-email-chaotian.jing@mediatek.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1434302771-9599-1-git-send-email-rabin.vincent@axis.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Rabin Vincent <rabin.vincent@axis.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rabin Vincent <rabinv@axis.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>, Chris Ball <chris@printf.net>, Mark Rutland <mark.rutland@arm.com>, James Liao <jamesjj.liao@mediatek.com>, srv_heupstream <srv_heupstream@mediatek.com>, Arnd Bergmann <arnd@arndb.de>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Hongzhou Yang <hongzhou.yang@mediatek.com>, Catalin Marinas <catalin.marinas@arm.com>, linux-mmc <linux-mmc@vger.kernel.org>, Will Deacon <will.deacon@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, Sascha Hauer <kernel@pengutronix.de>, "Joe.C" <yingjoe.chen@mediatek.com>, Eddie Huang <eddie.huang@mediatek.com>, =?UTF-8?B?QmluIFpoYW5nICjnq6Dmlowp?= <bin.zhang@mediatek.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek
 
-On 15 June 2015 at 13:20, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
-> This series enables MMC support on the MT8135/MT8173 platform.
-> MT8135 has 5 MMC controllers and MT8173 has 4 MMC controllers.
+On 14 June 2015 at 19:26, Rabin Vincent <rabin.vincent@axis.com> wrote:
+> On systems with CONFIG_PREEMPT=n, under certain circumstances, mmcqd
+> can continuously process requests for several seconds without blocking,
+> triggering the soft lockup watchdog.  For example, this can happen if
+> mmcqd runs on the CPU which services the controller's interrupt, and
+> a process on a different CPU continuously writes to the MMC block
+> device.
 >
-> Changes base on Ulf's comments
-> Make hclk mandatory in the driver code
-> Change host->hclk to host->src_clk_freq
-> Add linux/pm.h
+>  NMI watchdog: BUG: soft lockup - CPU#0 stuck for 22s! [mmcqd/0:664]
+>  CPU: 0 PID: 664 Comm: mmcqd/0 Not tainted 4.1.0-rc7+ #4
+>  PC is at _raw_spin_unlock_irqrestore+0x24/0x28
+>  LR is at mmc_start_request+0x104/0x134
+>  ...
+>  [<805112a8>] (_raw_spin_unlock_irqrestore) from [<803db664>] (mmc_start_request+0x104/0x134)
+>  [<803db664>] (mmc_start_request) from [<803dc008>] (mmc_start_req+0x274/0x394)
+>  [<803dc008>] (mmc_start_req) from [<803eb2c4>] (mmc_blk_issue_rw_rq+0xd0/0xb98)
+>  [<803eb2c4>] (mmc_blk_issue_rw_rq) from [<803ebe8c>] (mmc_blk_issue_rq+0x100/0x470)
+>  [<803ebe8c>] (mmc_blk_issue_rq) from [<803ecab8>] (mmc_queue_thread+0xd0/0x170)
+>  [<803ecab8>] (mmc_queue_thread) from [<8003fd14>] (kthread+0xe0/0xfc)
+>  [<8003fd14>] (kthread) from [<8000f768>] (ret_from_fork+0x14/0x2c)
 >
-> Chaotian Jing (3):
->   mmc: dt-bindings: add Mediatek MMC bindings
->   mmc: mediatek: Add Mediatek MMC driver
->   mmc: mediatek: Add PM support for MMC driver
+> Fix it by adding a cond_resched() in the request handling loop so that
+> other processes get a chance to run.
 >
-> Eddie Huang (2):
->   arm64: dts: mediatek: Add MT8173 MMC dts
->   arm64: mediatek: Add Mediatek MMC support in defconfig
->
-> Yingjoe Chen (2):
->   ARM: mediatek: dts: Add emmc support to mt8135
->   ARM: multi_v7_defconfig: Enable Mediatek MMC support multi-v7
->
->  Documentation/devicetree/bindings/mmc/mtk-sd.txt |   32 +
->  arch/arm/boot/dts/mt8135-evbp1.dts               |  158 +++
->  arch/arm/boot/dts/mt8135.dtsi                    |   55 +
->  arch/arm/configs/multi_v7_defconfig              |    1 +
->  arch/arm64/boot/dts/mediatek/mt8173-evb.dts      |  126 ++
->  arch/arm64/boot/dts/mediatek/mt8173.dtsi         |   45 +-
->  arch/arm64/configs/defconfig                     |    1 +
->  drivers/mmc/host/Kconfig                         |    8 +
->  drivers/mmc/host/Makefile                        |    1 +
->  drivers/mmc/host/mtk-sd.c                        | 1461 ++++++++++++++++++++++
->  include/linux/mmc/core.h                         |    1 +
->  11 files changed, 1888 insertions(+), 1 deletion(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.txt
->  create mode 100644 drivers/mmc/host/mtk-sd.c
->
-> --
-> 1.8.1.1.dirty
->
+> Signed-off-by: Rabin Vincent <rabin.vincent@axis.com>
 
-Hi Chaotian,
-
-I have applied patch 1->3 for my next branch, which thus includes the
-mmc driver parts. I could potentially also pick the ARM patches, but
-then those needs to be acked from the ARM SoC folks.
+Thanks, applied!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/card/queue.c |    1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index 8efa368..e78ae97 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -69,6 +69,7 @@ static int mmc_queue_thread(void *d)
+>                         set_current_state(TASK_RUNNING);
+>                         cmd_flags = req ? req->cmd_flags : 0;
+>                         mq->issue_fn(mq, req);
+> +                       cond_resched();
+>                         if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
+>                                 mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
+>                                 continue; /* fetch again */
+> --
+> 1.7.10.4
+>
