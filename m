@@ -1,74 +1,75 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH/RFC] mmc: tmio: Fix timeout value for command request
-Date: Mon, 15 Jun 2015 18:34:31 +0200
-Message-ID: <20150615163431.GA1583@katana>
-References: <1434302606-31040-1-git-send-email-ykaneko0929@gmail.com>
+From: Mirza Krak <mirza.krak@hostmobility.com>
+Subject: Re: [PATCH 1/1] mmc: sdhci-esdhc-imx: Use pinctrl PM helpers
+Date: Tue, 16 Jun 2015 08:52:53 +0200
+Message-ID: <CAJ=nTsvT-0UZTRhGrRvqG0Gp5yhPVhUWzMtupXrXVxnwwhfS=Q@mail.gmail.com>
+References: <1434101473-4109-1-git-send-email-mirza.krak@hostmobility.com>
+	<CAPDyKFoqAV4fW=V56vvPh5-9=w+0Di8VzTBNRmpF_2ETp_pHNA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="lrZ03NoBR/3+SXJZ"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:55501 "EHLO pokefinder.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755451AbbFOQef (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 15 Jun 2015 12:34:35 -0400
-Content-Disposition: inline
-In-Reply-To: <1434302606-31040-1-git-send-email-ykaneko0929@gmail.com>
+Received: from mail-lb0-f169.google.com ([209.85.217.169]:35428 "EHLO
+	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752870AbbFPGwy convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Jun 2015 02:52:54 -0400
+Received: by lbbwc1 with SMTP id wc1so4514319lbb.2
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Jun 2015 23:52:53 -0700 (PDT)
+In-Reply-To: <CAPDyKFoqAV4fW=V56vvPh5-9=w+0Di8VzTBNRmpF_2ETp_pHNA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yoshihiro Kaneko <ykaneko0929@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Ian Molton <ian.molton@codethink.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, linux-sh@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Shawn Guo <shawn.guo@linaro.org>, Dirk Behme <dirk.behme@de.bosch.com>, Peter Griffin <peter.griffin@linaro.org>, Stefan Agner <stefan@agner.ch>, linux-mmc <linux-mmc@vger.kernel.org>
 
+2015-06-15 11:55 GMT+02:00 Ulf Hansson <ulf.hansson@linaro.org>:
+> On 12 June 2015 at 11:31, Mirza Krak <mirza.krak@hostmobility.com> wr=
+ote:
+>> From: Mirza Krak <mirza.krak@hostmobility.com>
+>>
+>> Add support for current states of pinctrl, which are "default", "idl=
+e"
+>> and "sleep".
+>>
+>> The "default" pinctrl state is set by Drivers core before
+>> calling the driver's probe, hence we do not need a initial call to
+>> "default" state.
+>>
+>> Signed-off-by: Mirza Krak <mirza.krak@hostmobility.com>
+>
+> Hi Mirza,
+>
+> This looks okay to me, but it seems like it needs a re-base towards m=
+y
+> mmc next branch.
+>
+> Kind regards
+> Uffe
 
---lrZ03NoBR/3+SXJZ
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Looked at the mmc next branch.
 
-Hi,
+I see that the suspend/resume methods of sdhci-esdhci-imx have been
+removed and the generic sdhci_pltfm_suspend/resume are used. So I am
+unsure if it is OK to set the pinctl "sleep" state in
+sdhci_pltfm_suspend or is there a better location for this.
 
-> @@ -230,7 +230,7 @@ static void tmio_mmc_reset_work(struct work_struct *work)
->  	 */
->  	if (IS_ERR_OR_NULL(mrq)
->  	    || time_is_after_jiffies(host->last_req_ts +
-> -		msecs_to_jiffies(2000))) {
-> +		msecs_to_jiffies(5000))) {
->  		spin_unlock_irqrestore(&host->lock, flags);
->  		return;
->  	}
-> @@ -818,7 +818,7 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  	ret = tmio_mmc_start_command(host, mrq->cmd);
->  	if (!ret) {
->  		schedule_delayed_work(&host->delayed_reset_work,
-> -				      msecs_to_jiffies(2000));
-> +				      msecs_to_jiffies(5000));
+I am thinking sdhci_suspend_host would be good location, but then the
+change will effect a lot more drivers. Maybe a good thing?
 
-What about using a define here since the same kind of magic value is
-used in two different places?
+Regarding the "idle" state of pinctrl, this could also be moved to
+sdhci_runtime_suspend_host, affecting more drivers. Again a good
+thing?
 
-Kind regards,
+--=20
+Med V=C3=A4nliga H=C3=A4lsningar / Best Regards
 
-   Wolfram
-
-
---lrZ03NoBR/3+SXJZ
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJVfv6XAAoJEBQN5MwUoCm2AgUP/R7katf+BayySPc8UnWPUxZi
-sEe3u+oXixVfKlZDmQUUKraIoe/3PPYyhE+6CQZ+0pvxrRHtQ9HezQni3G28swmG
-ctsqWC0vObQ/z7nEuSsbX9Ya8NET311l77mAjmSOWCBk+A3sUetU9PLWFZ3RUeXm
-aFcnxEEgLMuswcrQMgUfGDTX6O8MtqyPIoql814QLaNMVuG+CCoVteY3420Qfr05
-ExBzNoVaX2WG+ZvFPWeTuroisA8XigJL2TqeUNgCSqyHMWAE1Kmnvk7+9grVRCR1
-ExarukiOfnZUkYj7lDHx4/BmTosTr72ZT8RzrqOycHBElhfJuI5+40IKKQHMv4dj
-aQQXJgikD5V9SQkh8K+EacDKaqBvEApt+wiObaUQJsBlvH7ABqUY5UQq9soDYzj3
-Fs9MXnryywukBF/iGaCteEAhvu8vBtT1Kcor16DGKqZTQO0fwCE4qGIcRqH86Cd4
-MTVijCw0hKZh+T+rGkVjEVSGriQ90YkoabGcU35dc4NOdzIHi9vIUNW7E/5fI9xS
-aO/g9yQcFvBfYEg6+L/LRRocyT8L63j/6bU0WgjU4TwRsSkAIFx68X4sgZUwPaln
-SIRpYSryosN6IZpiV7vQ5MXavDifdJ+VZ6GQhwWdodtlA82dlAZU7zDOCtHGJtXG
-oogn4lzL1FFvT9RaXQPk
-=ButM
------END PGP SIGNATURE-----
-
---lrZ03NoBR/3+SXJZ--
+*******************************************************************
+Mirza Krak
+Host Mobility AB
+mirza.krak@hostmobility.com
+Anders Personsgatan 12, 416 64 G=C3=B6teborg
+Sweden
+http://www.hostmobility.com
+Direct: +46 31 31 32 704
+Phone: +46 31 31 32 700
+=46ax: +46 31 80 67 51
+Mobile: +46 730 28 06 22
+*******************************************************************
