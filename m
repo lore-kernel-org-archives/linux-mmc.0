@@ -1,15 +1,15 @@
 From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: [PATCH 1/5] dts: imx51: fix sd card gpio polarity specified in device tree
-Date: Thu, 18 Jun 2015 01:33:34 +0800
-Message-ID: <1434562418-24090-2-git-send-email-aisheng.dong@freescale.com>
+Subject: [PATCH 2/5] dts: imx53: fix sd card gpio polarity specified in device tree
+Date: Thu, 18 Jun 2015 01:33:35 +0800
+Message-ID: <1434562418-24090-3-git-send-email-aisheng.dong@freescale.com>
 References: <1434562418-24090-1-git-send-email-aisheng.dong@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0110.outbound.protection.outlook.com ([157.56.111.110]:63776
+Received: from mail-bn1bon0141.outbound.protection.outlook.com ([157.56.111.141]:46080
 	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1757222AbbFQRgP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	id S1757264AbbFQRgP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
 	Wed, 17 Jun 2015 13:36:15 -0400
 In-Reply-To: <1434562418-24090-1-git-send-email-aisheng.dong@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -24,20 +24,125 @@ specified in DT after switch to common parsing function mmc_of_parse().
 
 Signed-off-by: Dong Aisheng <aisheng.dong@freescale.com>
 ---
- arch/arm/boot/dts/imx51-apf51dev.dts | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/arm/boot/dts/imx53-ard.dts         | 4 ++--
+ arch/arm/boot/dts/imx53-m53evk.dts      | 4 ++--
+ arch/arm/boot/dts/imx53-qsb-common.dtsi | 4 ++--
+ arch/arm/boot/dts/imx53-smd.dts         | 4 ++--
+ arch/arm/boot/dts/imx53-tqma53.dtsi     | 4 ++--
+ arch/arm/boot/dts/imx53-tx53.dtsi       | 4 ++--
+ arch/arm/boot/dts/imx53-voipac-bsb.dts  | 4 ++--
+ 7 files changed, 14 insertions(+), 14 deletions(-)
 
-diff --git a/arch/arm/boot/dts/imx51-apf51dev.dts b/arch/arm/boot/dts/imx51-apf51dev.dts
-index 93d3ea1..0f3fe29 100644
---- a/arch/arm/boot/dts/imx51-apf51dev.dts
-+++ b/arch/arm/boot/dts/imx51-apf51dev.dts
-@@ -98,7 +98,7 @@
+diff --git a/arch/arm/boot/dts/imx53-ard.dts b/arch/arm/boot/dts/imx53-ard.dts
+index e9337ad..3bc1883 100644
+--- a/arch/arm/boot/dts/imx53-ard.dts
++++ b/arch/arm/boot/dts/imx53-ard.dts
+@@ -103,8 +103,8 @@
  &esdhc1 {
  	pinctrl-names = "default";
  	pinctrl-0 = <&pinctrl_esdhc1>;
--	cd-gpios = <&gpio2 29 GPIO_ACTIVE_HIGH>;
-+	cd-gpios = <&gpio2 29 GPIO_ACTIVE_LOW>;
- 	bus-width = <4>;
+-	cd-gpios = <&gpio1 1 0>;
+-	wp-gpios = <&gpio1 9 0>;
++	cd-gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
++	wp-gpios = <&gpio1 9 GPIO_ACTIVE_HIGH>;
+ 	status = "okay";
+ };
+ 
+diff --git a/arch/arm/boot/dts/imx53-m53evk.dts b/arch/arm/boot/dts/imx53-m53evk.dts
+index d0e0f57..53f4088 100644
+--- a/arch/arm/boot/dts/imx53-m53evk.dts
++++ b/arch/arm/boot/dts/imx53-m53evk.dts
+@@ -124,8 +124,8 @@
+ &esdhc1 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_esdhc1>;
+-	cd-gpios = <&gpio1 1 0>;
+-	wp-gpios = <&gpio1 9 0>;
++	cd-gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
++	wp-gpios = <&gpio1 9 GPIO_ACTIVE_HIGH>;
+ 	status = "okay";
+ };
+ 
+diff --git a/arch/arm/boot/dts/imx53-qsb-common.dtsi b/arch/arm/boot/dts/imx53-qsb-common.dtsi
+index 181ae5e..1f55187 100644
+--- a/arch/arm/boot/dts/imx53-qsb-common.dtsi
++++ b/arch/arm/boot/dts/imx53-qsb-common.dtsi
+@@ -147,8 +147,8 @@
+ &esdhc3 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_esdhc3>;
+-	cd-gpios = <&gpio3 11 0>;
+-	wp-gpios = <&gpio3 12 0>;
++	cd-gpios = <&gpio3 11 GPIO_ACTIVE_LOW>;
++	wp-gpios = <&gpio3 12 GPIO_ACTIVE_HIGH>;
+ 	bus-width = <8>;
+ 	status = "okay";
+ };
+diff --git a/arch/arm/boot/dts/imx53-smd.dts b/arch/arm/boot/dts/imx53-smd.dts
+index 1d32557..fc89ce1 100644
+--- a/arch/arm/boot/dts/imx53-smd.dts
++++ b/arch/arm/boot/dts/imx53-smd.dts
+@@ -41,8 +41,8 @@
+ &esdhc1 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_esdhc1>;
+-	cd-gpios = <&gpio3 13 0>;
+-	wp-gpios = <&gpio4 11 0>;
++	cd-gpios = <&gpio3 13 GPIO_ACTIVE_LOW>;
++	wp-gpios = <&gpio4 11 GPIO_ACTIVE_HIGH>;
+ 	status = "okay";
+ };
+ 
+diff --git a/arch/arm/boot/dts/imx53-tqma53.dtsi b/arch/arm/boot/dts/imx53-tqma53.dtsi
+index 4f1f0e2..e03373a 100644
+--- a/arch/arm/boot/dts/imx53-tqma53.dtsi
++++ b/arch/arm/boot/dts/imx53-tqma53.dtsi
+@@ -41,8 +41,8 @@
+ 	pinctrl-0 = <&pinctrl_esdhc2>,
+ 		    <&pinctrl_esdhc2_cdwp>;
+ 	vmmc-supply = <&reg_3p3v>;
+-	wp-gpios = <&gpio1 2 0>;
+-	cd-gpios = <&gpio1 4 0>;
++	wp-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
++	cd-gpios = <&gpio1 4 GPIO_ACTIVE_LOW>;
+ 	status = "disabled";
+ };
+ 
+diff --git a/arch/arm/boot/dts/imx53-tx53.dtsi b/arch/arm/boot/dts/imx53-tx53.dtsi
+index 704bd72..d3e50b2 100644
+--- a/arch/arm/boot/dts/imx53-tx53.dtsi
++++ b/arch/arm/boot/dts/imx53-tx53.dtsi
+@@ -183,7 +183,7 @@
+ };
+ 
+ &esdhc1 {
+-	cd-gpios = <&gpio3 24 GPIO_ACTIVE_HIGH>;
++	cd-gpios = <&gpio3 24 GPIO_ACTIVE_LOW>;
+ 	fsl,wp-controller;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_esdhc1>;
+@@ -191,7 +191,7 @@
+ };
+ 
+ &esdhc2 {
+-	cd-gpios = <&gpio3 25 GPIO_ACTIVE_HIGH>;
++	cd-gpios = <&gpio3 25 GPIO_ACTIVE_LOW>;
+ 	fsl,wp-controller;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_esdhc2>;
+diff --git a/arch/arm/boot/dts/imx53-voipac-bsb.dts b/arch/arm/boot/dts/imx53-voipac-bsb.dts
+index c17d3ad..fc51b87 100644
+--- a/arch/arm/boot/dts/imx53-voipac-bsb.dts
++++ b/arch/arm/boot/dts/imx53-voipac-bsb.dts
+@@ -119,8 +119,8 @@
+ &esdhc2 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_esdhc2>;
+-	cd-gpios = <&gpio3 25 0>;
+-	wp-gpios = <&gpio2 19 0>;
++	cd-gpios = <&gpio3 25 GPIO_ACTIVE_LOW>;
++	wp-gpios = <&gpio2 19 GPIO_ACTIVE_HIGH>;
+ 	vmmc-supply = <&reg_3p3v>;
  	status = "okay";
  };
 -- 
