@@ -1,48 +1,85 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: 3.18 SDIO driver re-attach issue
-Date: Wed, 17 Jun 2015 13:51:23 +0200
-Message-ID: <CAPDyKFo+N1N5GVb0NE6rK_nNSmNuZqqYmNsrTQnfYnJG9NPBdA@mail.gmail.com>
-References: <55786615.7020701@codethink.co.uk>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: [PATCH v2] mmc: core: Do not set mmc voltage to 1.8V when
+ 'no-1-8-v' is present
+Date: Wed, 17 Jun 2015 13:25:21 -0300
+Message-ID: <CAOMZO5Aq-aTjQ1rddBJcrJ56jRV1Q=dLgK5j4TasKdykiWLniQ@mail.gmail.com>
+References: <1434227067-9600-1-git-send-email-festevam@gmail.com>
+	<CAPDyKFq29S3K0sxCkUHO=QO0MqM0PskcjoM62EZysNc19SxP6w@mail.gmail.com>
+	<CAOMZO5CSvYHNwmeRsSJ+KYfAkisX+_2DePawd6AWHP-ANErq5Q@mail.gmail.com>
+	<CAOMZO5Amb9hR=DOxd_wynwqc3Dfo0rLfdJS-dkKiOqB89PyMwQ@mail.gmail.com>
+	<CAPDyKFotVdm5vDwjqUw=cD9jmRU86ZBbq1c-qmiFa4Yj2JivxQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f169.google.com ([209.85.220.169]:34912 "EHLO
-	mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750900AbbFQLvY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Jun 2015 07:51:24 -0400
-Received: by qkbp125 with SMTP id p125so20229953qkb.2
-        for <linux-mmc@vger.kernel.org>; Wed, 17 Jun 2015 04:51:23 -0700 (PDT)
-In-Reply-To: <55786615.7020701@codethink.co.uk>
+Received: from mail-la0-f46.google.com ([209.85.215.46]:33464 "EHLO
+	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751001AbbFQQZY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Jun 2015 12:25:24 -0400
+Received: by laka10 with SMTP id a10so36906811lak.0
+        for <linux-mmc@vger.kernel.org>; Wed, 17 Jun 2015 09:25:22 -0700 (PDT)
+In-Reply-To: <CAPDyKFotVdm5vDwjqUw=cD9jmRU86ZBbq1c-qmiFa4Yj2JivxQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Dooks <ben.dooks@codethink.co.uk>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, =?UTF-8?Q?Markku_Ahvenj=C3=A4rvi?= <markku.ahvenjarvi@nomovok.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Dong Aisheng <aisheng.dong@freescale.com>, Kevin Lemoi <kevin.lemoi@savant.com>, Otavio Salvador <otavio@ossystems.com.br>, Sascha Hauer <kernel@pengutronix.de>, Russell King - ARM Linux <linux@arm.linux.org.uk>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@freescale.com>
 
-On 10 June 2015 at 18:30, Ben Dooks <ben.dooks@codethink.co.uk> wrote:
-> We are having an issue with 3.18 on an OMAP3517 and a TI WL1271
-> Wifi SDIO card attached to an hsmmc port. The module is powered
-> from the main 3.3/1.8V supply rails so cannot be powered down.
+Hi Ulf,
+
+On Tue, Jun 16, 2015 at 6:31 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+
+> I had a closer look, should have done that before.
 >
-> The wifi driver is built as a module, and when the module is
-> unloaded and then reloaded the driver attach fails. The issue
-> is sdio_bus_probe() calls the sdio_set_block_size(, func, 0)
-> which fails with -110 (ETIMEDOUT) on the second load.
+> I think we need to decide what "no-1-8-v" should be used for.
+> Currently the DT documentation is unclear and depending on what SDHCI
+> variant, the binding has different purpose. It's a mess!
+
+Thanks for your feedback.
+
 >
-> Is it possible we need to either ignore the error, or try and
-> re-set the function when either the driver un-binds / if the
-> first sdio_set_block_size(, func, 0) call happens?
+> sdhci-pltfm + sdhci-esdhc-imx use the "no-1-8-v" DT binding to enable
+> the SDHCI_QUIRK2_NO_1_8_V. The sdhci driver uses this quirk to mask
+> the bus speed modes for SD UHS cards.
 >
-> Currently we ignore the error and the wifi driver seems to be
-> working with the device. If there is a better fix then we would
-> like to know so it can be fixed properly up-stream.
+> In this regards, consider the two below options.
+>
+> 1) We have DT bindings for SD UHS speed modes, which somehow makes the
+> "no-1-8-v" binding redundant (or deprecated).
+>
+> 2) If you can model the VCCQ power supply as as a regulator, you could
+> use regulator_is_supported_voltage() API to find out similar
+> information used to set SDHCI_QUIRK2_NO_1_8_V. In fact, sdhci already
+> does that to mask MMC_CAP2_HSX00_1_2V, unless 1.2V is supported.
+>
+> In a third case, sdhci-pxav3 use the "no-1-8-v" DT binding to mask
+> SDHCI_CAN_VDD_180/SDHCI_CAN_VDD_330, which seems wrong, as it has
+> nothing to do with the power to the card (VMMC). It's also used it to
+> mask MMC_CAP_1_8V_DDR.
+>
+> The summary, is that I would rather see us to move away from using the
+> "no-1-8-v" DT binding and use the proper SD UHS bus speed modes
+> binding instead.
 
-I don't think it should fail. So instead of applying a workaround
-(ignoring/re-setting/re-trying), I would rather try to find the reason
-to *why* the error occurs.
+Makes sense indeed.
 
-Just a simple test you could do is to *not* call sdio_set_block_size()
-the second time in ->probe(), and see if that will give you other
-issues.
+The challenge here is that we still need to keep the old dtb's working.
 
-Kind regards
-Uffe
+Motivation for this patch was a custom mx6sl board that works fine
+with 3.14, but after upgrading the kernel to 4.0 the eMMC no longer
+can mount the rootfs. This is a regression caused by commit
+312449efd16bb06, which applies 1.8V to the eMMC card that can only
+operate at 3.3V.
+
+Same thing happens on imx6q-sabresd: we have 3.3V voltage being
+supplied to the eMMC, but now we are operating it at 1.8V, even though
+if we have 'no-1-8-v' property in the device tree.
+
+While I understand the need for improvement that you clearly
+described, I would also like that the old dtb's could still work
+'as-is' with a modern kernel.
+
+The path I propose here was the minimal invasive method I could come
+up to allow the old dtb compatibility.
+
+Thanks,
+
+Fabio Estevam
