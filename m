@@ -1,63 +1,33 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [RFC PATCH v3] mmc: sleep notification
-Date: Thu, 18 Jun 2015 14:57:59 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED53343C409C9@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE64FAAD701@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CAPDyKFoPqwDC_w1QTe7zQtJfH_5m2Gp_5uewJKy=x_LeaFqYhA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED53343C1F6EA@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAPDyKFoZuNoYB1KA4bt64+qoeEmjioW9qCnwkhYAnnSD4jMxag@mail.gmail.com>
+From: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+Subject: Re: [Linux-am33-list] [PATCH v2 0/7] fix build failure of mn10300
+Date: Thu, 18 Jun 2015 16:44:41 +0100
+Message-ID: <20150618154441.GP7557@n2100.arm.linux.org.uk>
+References: <1434629873-11668-1-git-send-email-sudipm.mukherjee@gmail.com>
+ <20150618145138.GN7557@n2100.arm.linux.org.uk>
+ <CAA0PaPGMtePS+fmpi1QBZi8uHtuU3Z7_Y+9f0+O38o+8xfo+1Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0086.outbound.protection.outlook.com ([207.46.100.86]:65440
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754065AbbFRPMU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 18 Jun 2015 11:12:20 -0400
-In-Reply-To: <CAPDyKFoZuNoYB1KA4bt64+qoeEmjioW9qCnwkhYAnnSD4jMxag@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAA0PaPGMtePS+fmpi1QBZi8uHtuU3Z7_Y+9f0+O38o+8xfo+1Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Jay C. Polmar" <speedreadamerica-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Sudip Mukherjee <sudipm.mukherjee-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-am33-list-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Johan Hovold <johan-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-SGkgVWxmLA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5z
-c29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogTW9uZGF5LCBKdW5l
-IDE1LCAyMDE1IDExOjI0IEFNDQo+IFRvOiBBbGV4IExlbWJlcmcNCj4gQ2M6IEF2aSBTaGNoaXNs
-b3dza2k7IGxpbnV4LW1tYw0KPiBTdWJqZWN0OiBSZTogW1JGQyBQQVRDSCB2M10gbW1jOiBzbGVl
-cCBub3RpZmljYXRpb24NCj4gDQo+IE9uIDggSnVuZSAyMDE1IGF0IDE1OjE3LCBBbGV4IExlbWJl
-cmcgPEFsZXguTGVtYmVyZ0BzYW5kaXNrLmNvbT4NCj4gd3JvdGU6DQo+ID4gSGkgVWxmLA0KPiA+
-DQo+ID4gWy4uLl0NCj4gPg0KPiA+Pg0KPiA+PiBPbmUgb2YgbXkgY29tbWVudHMgZm9yIHYyLCB3
-YXMgdGhhdCBJIHRoaW5rIHlvdSBzaG91bGQgcmVtb3ZlIGFsbA0KPiA+PiBjb2RlIHdoaWNoIHdh
-cyByZWxhdGVkIHRvIEhQSSB0byBpbnRlcnJ1cHQgc2xlZXAgbm90aWZpY2F0aW9uIGZyb20NCj4g
-Pj4gdGhlIHJ1bnRpbWUgUE0gcmVzdW1lIHBhdGguIEluc3RlYWQgSSB3YW50ZWQgeW91IHRvIGFk
-ZCB0aGF0DQo+ID4+IGZ1bmN0aW9uYWxpdHkgYXMgc2VwYXJhdGUgcGF0Y2ggYmFzZWQgb24gdG9w
-IG9mIHRoaXMgcGF0Y2guDQo+ID4+DQo+ID4+IFlvdSBoYXZlbid0IGRvbmUgdGhhdCBpbiB2Mywg
-d2h5Pw0KPiA+DQo+ID4gVGhlIHNsZWVwX25vdGlmeSBjYWxsIHdhcyBtb3ZlZCB0byBzdXNwZW5k
-KCkgcGVyIHlvdXIgcmVjb21tZW5kYXRpb24uDQo+ID4gQXMgZmFyIGFzIEkgdW5kZXJzdGFuZCwg
-bm8gbmV3IHJlcXVlc3RzIHNob3VsZCBiZSBzZW50IGR1cmluZw0KPiA+IG1tY19zdXNwZW5kKCkg
-cHJvY2VzcywgdGh1cyBIUEkgc3VwcG9ydCBpcyBub3QgbmVlZGVkIGFueW1vcmUuDQo+ID4gSXMg
-dGhpcyB0aGUgY29ycmVjdCBhc3N1bXB0aW9uPw0KPiANCj4gWWVzLg0KPiANCj4gSSBkb24ndCB0
-aGluayB5b3UgbmVlZCBtbWNfY2FyZF9zZXRfc2xlZXBfbm90aWZ5KCkgYW5kIHRoZSBjb3JyZXNw
-b25kaW5nDQo+IG5ldyBNTUNfU1RBVEVfU0xFRVBfTk9USUZZICwgbW1jX2RldmljZV9wcmdfc3Rh
-dGUoKSwgZXRjLg0KDQptbWNfY2FyZF9zZXRfc2xlZXBfbm90aWZ5KCksIE1NQ19TVEFURV9TTEVF
-UF9OT1RJRlkgYW5kIHRoZSBjb3JyZXNwb25kaW5nIC0gV2UgYXJlIHJlbW92aW5nIGl0IGZyb20g
-dGhlIGN1cnJlbnQgcGF0Y2guIFByb2JhYmx5IHdpbGwgYWRkIHRoZW0gYXMgYSBzZXBhcmF0ZSBw
-YXRjaCBpbiBmdXR1cmUuDQptbWNfZGV2aWNlX3ByZ19zdGF0ZSgpIC0gaXMgcmVxdWlyZWQgZm9y
-IHdhaXRpbmcgZm9yIFNsZWVwX05vdGlmaWNhdGlvbiBjb21wbGV0aW9uL3RpbWVvdXQsIGFsdGhv
-dWdoIHdlIHdvdWxkIGxpa2UgdG8gbGVhdmUgdGhpcyBmdW5jdGlvbi4NCg0KPiANCj4gT3ZlcmFs
-bCwgSSB0aGluayB0aGlzIHBhdGNoIGNvdWxkIGJlIHNpbXBsaWZpZWQgeWV0IGFub3RoZXIgc3Rl
-cC4NCj4gDQo+ID4gVGhlIG9ubHkgY2FzZSB3aGVyZSBIUEkgaXMgdXNlZCBpbiB0aGlzIHBhdGNo
-IC0gaXMgZHVyaW5nIHNsZWVwX25vdGlmeQ0KPiB0aW1lb3V0IGVycm9yLg0KPiANCj4gV2h5Pw0K
-DQpJbiBjYXNlIG9mIHRpbWVvdXQgZXJyb3IsIHdlIHdvdWxkIGxpa2UgdG8gaGFuZGxlIGl0IGJ5
-IHNlbmRpbmcgSFBJIC0gdG8gbGV0IGRldmljZSBpbnRlcnJ1cHQvc3RvcCB0aGUgcHJnIHN0YXRl
-LiANCg0KPiANCj4gT25lIGZpbmFsIHF1ZXN0aW9uLCBJIG5vdGljZWQgdGhhdCB5b3UgaGF2ZSBy
-ZW1vdmVkIHRoZSBjaGVjayBmb3INCj4gTU1DX0NBUDJfRlVMTF9QV1JfQ1lDTEUgaW4gdGhlIF9t
-bWNfc3VzcGVuZCgpIGZ1bmN0aW9uLCB3aHk/DQoNCkFzIGZhciBhcyB3ZSB1bmRlcnN0YW5kLCB0
-aGlzIE1NQ19DQVAyX0ZVTExfUFdSX0NZQ0xFIHdhcyB1c2VkIHRvIGRpc3Rpbmd1aXNoIGJldHdl
-ZW4gUE9OICh3aGVuIHRoZSBwb3dlciBjYW4gYmUgY3V0KSANCmFuZCBTbGVlcCAod2hlbiB0aGUg
-cG93ZXIgaGF2ZSB0byBzdGF5IE9OKS4gDQpOb3cgd2UgaGF2ZSBTbGVlcF9Ob3RpZmljYXRpb24g
-UE9OLCB3aGljaCBhbGxvd3MgdG8gY3V0IHRoZSBwb3dlciBhbHNvIGluIGNhc2Ugb2YgU2xlZXAu
-DQpIb3BlIHRoZSBpbnRlcnByZXRhdGlvbiBhYm92ZSBpcyBjb3JyZWN0Lg0KDQo+IA0KPiBLaW5k
-IHJlZ2FyZHMNCj4gVWZmZQ0K
+On Thu, Jun 18, 2015 at 10:31:07AM -0500, Jay C. Polmar wrote:
+> I am on this list by mistake and 5/15/2011 we requested to be removed,
+> can someone remove me from this list?
+
+There are six mailing lists in the Cc line.  For all of the lists
+present there, I can't help you, but you should be able to unsubscribe
+yourself.  Look at the footer on any message you receive from the list
+and it should tell you how to get more information on that subject.
+
+-- 
+FTTC broadband for 0.8mile line: currently at 10.5Mbps down 400kbps up
+according to speedtest.net.
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
