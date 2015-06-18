@@ -1,34 +1,63 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH v2 0/7] fix build failure of mn10300
-Date: Thu, 18 Jun 2015 15:51:38 +0100
-Message-ID: <20150618145138.GN7557@n2100.arm.linux.org.uk>
-References: <1434629873-11668-1-git-send-email-sudipm.mukherjee@gmail.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [RFC PATCH v3] mmc: sleep notification
+Date: Thu, 18 Jun 2015 14:57:59 +0000
+Message-ID: <282CEDFCBC30114F83C499CB8F2ED53343C409C9@SACMBXIP01.sdcorp.global.sandisk.com>
+References: <FDD07FEB422EF948A392FDC201AEEAE64FAAD701@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CAPDyKFoPqwDC_w1QTe7zQtJfH_5m2Gp_5uewJKy=x_LeaFqYhA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED53343C1F6EA@SACMBXIP01.sdcorp.global.sandisk.com>
+ <CAPDyKFoZuNoYB1KA4bt64+qoeEmjioW9qCnwkhYAnnSD4jMxag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:40505 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754439AbbFROvv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Jun 2015 10:51:51 -0400
-Content-Disposition: inline
-In-Reply-To: <1434629873-11668-1-git-send-email-sudipm.mukherjee@gmail.com>
+Received: from mail-by2on0086.outbound.protection.outlook.com ([207.46.100.86]:65440
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754065AbbFRPMU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 18 Jun 2015 11:12:20 -0400
+In-Reply-To: <CAPDyKFoZuNoYB1KA4bt64+qoeEmjioW9qCnwkhYAnnSD4jMxag@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sudip Mukherjee <sudipm.mukherjee@gmail.com>
-Cc: David Howells <dhowells@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, Matthias Brugger <matthias.bgg@gmail.com>, Johan Hovold <johan@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-am33-list@redhat.com, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mediatek@lists.infradead.org, linux-arm-kernel@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Thu, Jun 18, 2015 at 05:47:46PM +0530, Sudip Mukherjee wrote:
-> This is an attempt to fix the build failures when building mn10300 with
-> allmodconfig. As I have never worked with arch files so I hope you will
-> point me to right direction to correct my mistakes in this attempt.
-
-Why has the linux-arm-kernel mailing list been copied for something
-which clearly has nothing to do with ARM?  Am I missing something
-in this series?
-
-(Or is there a competition on to see who can add as many entries in
-the Cc without getting caught by any filtering? :) )
-
--- 
-FTTC broadband for 0.8mile line: currently at 10.5Mbps down 400kbps up
-according to speedtest.net.
+SGkgVWxmLA0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5z
+c29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogTW9uZGF5LCBKdW5l
+IDE1LCAyMDE1IDExOjI0IEFNDQo+IFRvOiBBbGV4IExlbWJlcmcNCj4gQ2M6IEF2aSBTaGNoaXNs
+b3dza2k7IGxpbnV4LW1tYw0KPiBTdWJqZWN0OiBSZTogW1JGQyBQQVRDSCB2M10gbW1jOiBzbGVl
+cCBub3RpZmljYXRpb24NCj4gDQo+IE9uIDggSnVuZSAyMDE1IGF0IDE1OjE3LCBBbGV4IExlbWJl
+cmcgPEFsZXguTGVtYmVyZ0BzYW5kaXNrLmNvbT4NCj4gd3JvdGU6DQo+ID4gSGkgVWxmLA0KPiA+
+DQo+ID4gWy4uLl0NCj4gPg0KPiA+Pg0KPiA+PiBPbmUgb2YgbXkgY29tbWVudHMgZm9yIHYyLCB3
+YXMgdGhhdCBJIHRoaW5rIHlvdSBzaG91bGQgcmVtb3ZlIGFsbA0KPiA+PiBjb2RlIHdoaWNoIHdh
+cyByZWxhdGVkIHRvIEhQSSB0byBpbnRlcnJ1cHQgc2xlZXAgbm90aWZpY2F0aW9uIGZyb20NCj4g
+Pj4gdGhlIHJ1bnRpbWUgUE0gcmVzdW1lIHBhdGguIEluc3RlYWQgSSB3YW50ZWQgeW91IHRvIGFk
+ZCB0aGF0DQo+ID4+IGZ1bmN0aW9uYWxpdHkgYXMgc2VwYXJhdGUgcGF0Y2ggYmFzZWQgb24gdG9w
+IG9mIHRoaXMgcGF0Y2guDQo+ID4+DQo+ID4+IFlvdSBoYXZlbid0IGRvbmUgdGhhdCBpbiB2Mywg
+d2h5Pw0KPiA+DQo+ID4gVGhlIHNsZWVwX25vdGlmeSBjYWxsIHdhcyBtb3ZlZCB0byBzdXNwZW5k
+KCkgcGVyIHlvdXIgcmVjb21tZW5kYXRpb24uDQo+ID4gQXMgZmFyIGFzIEkgdW5kZXJzdGFuZCwg
+bm8gbmV3IHJlcXVlc3RzIHNob3VsZCBiZSBzZW50IGR1cmluZw0KPiA+IG1tY19zdXNwZW5kKCkg
+cHJvY2VzcywgdGh1cyBIUEkgc3VwcG9ydCBpcyBub3QgbmVlZGVkIGFueW1vcmUuDQo+ID4gSXMg
+dGhpcyB0aGUgY29ycmVjdCBhc3N1bXB0aW9uPw0KPiANCj4gWWVzLg0KPiANCj4gSSBkb24ndCB0
+aGluayB5b3UgbmVlZCBtbWNfY2FyZF9zZXRfc2xlZXBfbm90aWZ5KCkgYW5kIHRoZSBjb3JyZXNw
+b25kaW5nDQo+IG5ldyBNTUNfU1RBVEVfU0xFRVBfTk9USUZZICwgbW1jX2RldmljZV9wcmdfc3Rh
+dGUoKSwgZXRjLg0KDQptbWNfY2FyZF9zZXRfc2xlZXBfbm90aWZ5KCksIE1NQ19TVEFURV9TTEVF
+UF9OT1RJRlkgYW5kIHRoZSBjb3JyZXNwb25kaW5nIC0gV2UgYXJlIHJlbW92aW5nIGl0IGZyb20g
+dGhlIGN1cnJlbnQgcGF0Y2guIFByb2JhYmx5IHdpbGwgYWRkIHRoZW0gYXMgYSBzZXBhcmF0ZSBw
+YXRjaCBpbiBmdXR1cmUuDQptbWNfZGV2aWNlX3ByZ19zdGF0ZSgpIC0gaXMgcmVxdWlyZWQgZm9y
+IHdhaXRpbmcgZm9yIFNsZWVwX05vdGlmaWNhdGlvbiBjb21wbGV0aW9uL3RpbWVvdXQsIGFsdGhv
+dWdoIHdlIHdvdWxkIGxpa2UgdG8gbGVhdmUgdGhpcyBmdW5jdGlvbi4NCg0KPiANCj4gT3ZlcmFs
+bCwgSSB0aGluayB0aGlzIHBhdGNoIGNvdWxkIGJlIHNpbXBsaWZpZWQgeWV0IGFub3RoZXIgc3Rl
+cC4NCj4gDQo+ID4gVGhlIG9ubHkgY2FzZSB3aGVyZSBIUEkgaXMgdXNlZCBpbiB0aGlzIHBhdGNo
+IC0gaXMgZHVyaW5nIHNsZWVwX25vdGlmeQ0KPiB0aW1lb3V0IGVycm9yLg0KPiANCj4gV2h5Pw0K
+DQpJbiBjYXNlIG9mIHRpbWVvdXQgZXJyb3IsIHdlIHdvdWxkIGxpa2UgdG8gaGFuZGxlIGl0IGJ5
+IHNlbmRpbmcgSFBJIC0gdG8gbGV0IGRldmljZSBpbnRlcnJ1cHQvc3RvcCB0aGUgcHJnIHN0YXRl
+LiANCg0KPiANCj4gT25lIGZpbmFsIHF1ZXN0aW9uLCBJIG5vdGljZWQgdGhhdCB5b3UgaGF2ZSBy
+ZW1vdmVkIHRoZSBjaGVjayBmb3INCj4gTU1DX0NBUDJfRlVMTF9QV1JfQ1lDTEUgaW4gdGhlIF9t
+bWNfc3VzcGVuZCgpIGZ1bmN0aW9uLCB3aHk/DQoNCkFzIGZhciBhcyB3ZSB1bmRlcnN0YW5kLCB0
+aGlzIE1NQ19DQVAyX0ZVTExfUFdSX0NZQ0xFIHdhcyB1c2VkIHRvIGRpc3Rpbmd1aXNoIGJldHdl
+ZW4gUE9OICh3aGVuIHRoZSBwb3dlciBjYW4gYmUgY3V0KSANCmFuZCBTbGVlcCAod2hlbiB0aGUg
+cG93ZXIgaGF2ZSB0byBzdGF5IE9OKS4gDQpOb3cgd2UgaGF2ZSBTbGVlcF9Ob3RpZmljYXRpb24g
+UE9OLCB3aGljaCBhbGxvd3MgdG8gY3V0IHRoZSBwb3dlciBhbHNvIGluIGNhc2Ugb2YgU2xlZXAu
+DQpIb3BlIHRoZSBpbnRlcnByZXRhdGlvbiBhYm92ZSBpcyBjb3JyZWN0Lg0KDQo+IA0KPiBLaW5k
+IHJlZ2FyZHMNCj4gVWZmZQ0K
