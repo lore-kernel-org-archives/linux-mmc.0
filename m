@@ -1,51 +1,63 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 3/7] mmc: mediatek: build as module
-Date: Thu, 18 Jun 2015 15:10:10 +0200
-Message-ID: <CAPDyKFq-s+xFY0zxVP7SEEEWVLh83VQiMPjJseRXkparmQY7fg@mail.gmail.com>
-References: <1434629873-11668-1-git-send-email-sudipm.mukherjee@gmail.com>
-	<1434629873-11668-4-git-send-email-sudipm.mukherjee@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH/RFC] mmc: tmio: Fix suspend process
+Date: Thu, 18 Jun 2015 15:33:45 +0200
+Message-ID: <CAPDyKFrF9UK6LRGX4Jc5aZxikx4+4=Pya+x4QZC=GyRbi33U7Q@mail.gmail.com>
+References: <1434302565-30996-1-git-send-email-ykaneko0929@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1434629873-11668-4-git-send-email-sudipm.mukherjee-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Sudip Mukherjee <sudipm.mukherjee-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Johan Hovold <johan-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-am33-list-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qc0-f171.google.com ([209.85.216.171]:35521 "EHLO
+	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755901AbbFRNdq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Jun 2015 09:33:46 -0400
+Received: by qcsf5 with SMTP id f5so23472747qcs.2
+        for <linux-mmc@vger.kernel.org>; Thu, 18 Jun 2015 06:33:45 -0700 (PDT)
+In-Reply-To: <1434302565-30996-1-git-send-email-ykaneko0929@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Yoshihiro Kaneko <ykaneko0929@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ian Molton <ian.molton@codethink.co.uk>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-sh list <linux-sh@vger.kernel.org>
 
-On 18 June 2015 at 14:17, Sudip Mukherjee <sudipm.mukherjee-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> while building as module with mn10300 it failed with:
+On 14 June 2015 at 19:22, Yoshihiro Kaneko <ykaneko0929@gmail.com> wrote:
+> From: Koji Matsuoka <koji.matsuoka.xm@renesas.com>
 >
-> warning: data definition has no type or storage class
->         module_init(__driver##_init);
+> The clock should be enable when SDHI registers are accessed.
 >
-> Signed-off-by: Sudip Mukherjee <sudip-ofJRbWXBVFamYgehrs7/Lw@public.gmane.org>
+> Signed-off-by: Koji Matsuoka <koji.matsuoka.xm@renesas.com>
+> Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
+> ---
+>
+> This patch is based on mmc-next branch of Ulf Hansson's mmc tree.
+>
+> * Perhaps this relates to the need to enhance clock management
+>
+>  drivers/mmc/host/tmio_mmc_pio.c | 2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index e3dcf31..ec10bcd 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -1240,7 +1240,9 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
+>         struct mmc_host *mmc = dev_get_drvdata(dev);
+>         struct tmio_mmc_host *host = mmc_priv(mmc);
+>
+> +       pm_runtime_get_sync(dev);
 
-Thanks for the patch. It's although already been fixed on my next branch.
+I don't recommend doing a pm_runtime_get_sync() from your
+->runtime_suspend() callback. There a often cases where this can
+deadlock.
+
+Anyway, isn't the clock already enabled here?
+
+>         tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
+> +       pm_runtime_put(dev);
+>
+>         if (host->clk_cache)
+>                 tmio_mmc_clk_stop(host);
+> --
+> 1.9.1
+>
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/mtk-sd.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 7c20f28..ea6ae36 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -33,6 +33,7 @@
->  #include <linux/mmc/mmc.h>
->  #include <linux/mmc/sd.h>
->  #include <linux/mmc/sdio.h>
-> +#include <linux/module.h>
->
->  #define MAX_BD_NUM          1024
->
-> --
-> 1.8.1.2
->
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
