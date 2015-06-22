@@ -1,151 +1,299 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: host: sdhci check parameters before call dma_free_coherent
-Date: Mon, 22 Jun 2015 10:04:22 +0300
-Message-ID: <5587B376.4030904@intel.com>
-References: <1434944483-4888-1-git-send-email-van.freenix@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC for v.4.2
+Date: Mon, 22 Jun 2015 13:28:25 +0200
+Message-ID: <CAPDyKFoNhD3Y71b+wdoKXH6-fcsq-H-5rby72Ru1+n5q6QiATw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:53018 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932079AbbFVHHH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 22 Jun 2015 03:07:07 -0400
-In-Reply-To: <1434944483-4888-1-git-send-email-van.freenix@gmail.com>
+Received: from mail-qk0-f177.google.com ([209.85.220.177]:33352 "EHLO
+	mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754282AbbFVL20 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Jun 2015 07:28:26 -0400
+Received: by qkhu186 with SMTP id u186so98618265qkh.0
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Jun 2015 04:28:25 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Peng Fan <van.freenix@gmail.com>, ulf.hansson@linaro.org
-Cc: tim.kryger@gmail.com, b29396@freescale.com, haibo.chen@freescale.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
 
-On 22/06/15 06:41, Peng Fan wrote:
-> We should not call dma_free_coherent if host->adma_table is NULL,
-> otherwise may trigger panic.
-> 
->>From DMA-API.txt:
-> "
-> void
-> dma_free_coherent(struct device *dev, size_t size, void *cpu_addr,
->                   dma_addr_t dma_handle)
-> 
-> Free a region of consistent memory you previously allocated.  dev,
-> size and dma_handle must all be the same as those passed into
-> dma_alloc_coherent().  cpu_addr must be the virtual address returned by
-> the dma_alloc_coherent().
-> "
-> So we should check cpu_addr, but not directly call dma_free_coherent.
-> 
-> I met this when porting xen, log: "
-> sdhci: Secure Digital Host Controller Interface driver
-> sdhci: Copyright(c) Pierre Ossman
-> sdhci-pltfm: SDHCI platform and OF driver helper
-> Unable to handle kernel NULL pointer dereference at virtual address 00000000
-> pgd = 80004000
-> [00000000] *pgd=00000000
-> Internal error: Oops: 5 [#1] PREEMPT SMP ARM
-> Modules linked in:
-> CPU: 0 PID: 1 Comm: swapper/0 Not tainted 3.14.38-02383-g5ccf32b-dirty #22
-> task: 84074000 ti: 84078000 task.ti: 84078000
-> PC is at bitmap_clear+0xc0/0xdc
-> LR is at bitmap_clear+0x54/0xdc
-> pc : [<8029deb8>]    lr : [<8029de4c>]    psr: 20000193
-> sp : 84079d80  ip : 00000001  fp : 00000000
-> r10: 00077fff  r9 : 00000404  r8 : 00000001
-> r7 : 00000001  r6 : 00000001  r5 : 00000000  r4 : ffffffff
-> r3 : 00000001  r2 : 00000001  r1 : 20000193  r0 : 00000015
-> Flags: nzCv  IRQs off  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
-> Control: 10c53c7d  Table: 8800406a  DAC: 00000015
-> Process swapper/0 (pid: 1, stack limit = 0x84078238)
-> Stack: (0x84079d80 to 0x8407a000)
-> 9d80: 80000113 00000000 87efa000 81109918 00001000 800197f8 84128558 00080008
-> 9da0: 84079dec 000000d0 84bfeac0 84126c10 84126c10 ffffffff 00000404 ffffffff
-> 9dc0: 00000000 00000402 00000000 00000000 84126c10 80310ba8 ffffffff 00000000
-> 9de0: 00000000 00000524 84078000 00000000 00000000 ffffffff ffffffff 84bfeac0
-> 9e00: 84bfe800 8000b407 07eb0000 8116e0f8 00000000 804ee81c ffffffff ffffffff
-> 9e20: 00000000 84126c10 84c92010 84bfeac0 00000000 84126c10 84126c00 84bfeac0
-> 9e40: 84078030 804f08e4 804f03d8 84126c10 fffffdfb 8115401c 8115401c 00000000
-> 9e60: 0000010f 80362330 803622ec 84126c10 811c8098 00000000 8115401c 80360b1c
-> 9e80: 84126c10 8115401c 84126c44 00000000 80de1888 80360d28 00000000 8115401c
-> 9ea0: 80360c9c 8035f10c 8406965c 84123634 8115401c 84c8bf80 8112f3c8 803602bc
-> 9ec0: 80d08314 8115401c 00000006 8115401c 00000006 8116e080 8116e080 8036130c
-> 9ee0: 00000000 80e00f78 00000006 800088dc 8400f900 80c94fe0 840bd480 80735184
-> 9f00: 00000000 8116e080 0000150c 8012d430 00000000 811105b0 60000113 00000001
-> 9f20: 87ffc576 8075ca38 0000010f 8004b0f0 80d66884 00000006 87ffc583 00000006
-> 9f40: 811105a0 80e00f78 00000006 8116e080 8116e080 80da150c 0000010f 80df4154
-> 9f60: 80df4148 80da1c4c 00000006 00000006 80da150c 9355553c 84079f9c 80731338
-> 9f80: 00000000 00000000 80727254 00000000 00000000 00000000 00000000 00000000
-> 9fa0: 00000000 8072725c 00000000 8000ecf8 00000000 00000000 00000000 00000000
-> 9fc0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
-> 9fe0: 00000000 00000000 00000000 00000000 00000013 00000000 9355553c 9355553c
-> [<8029deb8>] (bitmap_clear) from [<800197f8>] (__arm_dma_free.isra.18+0xe4/0x228)
-> [<800197f8>] (__arm_dma_free.isra.18) from [<80310ba8>] (xen_swiotlb_free_coherent+0xfc/0x140)
-> [<80310ba8>] (xen_swiotlb_free_coherent) from [<804ee81c>] (sdhci_add_host+0xb34/0xe64)
-> [<804ee81c>] (sdhci_add_host) from [<804f08e4>] (sdhci_esdhc_imx_probe+0x50c/0x808)
-> [<804f08e4>] (sdhci_esdhc_imx_probe) from [<80362330>] (platform_drv_probe+0x44/0xa4)
-> [<80362330>] (platform_drv_probe) from [<80360b1c>] (driver_probe_device+0x120/0x25c)
-> [<80360b1c>] (driver_probe_device) from [<80360d28>] (__driver_attach+0x8c/0x90)
-> [<80360d28>] (__driver_attach) from [<8035f10c>] (bus_for_each_dev+0x60/0x94)
-> [<8035f10c>] (bus_for_each_dev) from [<803602bc>] (bus_add_driver+0x148/0x1f0)
-> [<803602bc>] (bus_add_driver) from [<8036130c>] (driver_register+0x78/0xf8)
-> [<8036130c>] (driver_register) from [<800088dc>] (do_one_initcall+0xf8/0x144)
-> [<800088dc>] (do_one_initcall) from [<80da1c4c>] (kernel_init_freeable+0x138/0x1d8)
-> [<80da1c4c>] (kernel_init_freeable) from [<8072725c>] (kernel_init+0x8/0xf0)
-> [<8072725c>] (kernel_init) from [<8000ecf8>] (ret_from_fork+0x14/0x3c)
-> Code: 10866003 1206601f 10633006 11e02312 (e5953000)
-> ---[ end trace f6f103bb73cc0503 ]---
-> note: swapper/0[1] exited with preempt_count 1
-> Kernel panic - not syncing: Attempted to kill init! exitcode=0x0000000b"
-> 
-> Because dma_alloc_coherent fail, it returns NULL, then
-> "if (!host->adma_table || !host->align_buffer)" will return true, then
-> dma_free_coherent trigger panic.
-> 
-> After applying this patch, no panic and all work well, kernel log:
-> "
-> sdhci: Secure Digital Host Controller Interface driver
-> sdhci: Copyright(c) Pierre Ossman
-> sdhci-pltfm: SDHCI platform and OF driver helper
-> mmc0: Unable to allocate ADMA buffers. Falling back to standard DMA.
-> mmc0: no vqmmc regulator found
-> mmc0: SDHCI controller on 30b40000.usdhc [30b40000.usdhc] using DMA
-> "
-> 
-> Signed-off-by: Peng Fan <van.freenix@gmail.com>
+Hi Linus,
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Here are the PR for MMC for v4.2.
 
-Looks like the problem started in v3.16 with:
+Details about the MMC highlights are found in the signed tag. Please
+pull this in!
 
-commit d1e49f77d7c7b75fdc022e1d46c1549bbc91c5b7
-Author: Russell King <rmk+kernel@arm.linux.org.uk>
-Date:   Fri Apr 25 12:58:34 2014 +0100
-
-    mmc: sdhci: convert ADMA descriptors to a coherent allocation
+Kind regards
+Ulf Hansson
 
 
+The following changes since commit ba155e2d21f6bf05de86a78dbe5bfd8757604a65:
 
-> ---
->  drivers/mmc/host/sdhci.c | 7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 706bb60..52e2327 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2978,8 +2978,11 @@ int sdhci_add_host(struct sdhci_host *host)
->  						      GFP_KERNEL);
->  		host->align_buffer = kmalloc(host->align_buffer_sz, GFP_KERNEL);
->  		if (!host->adma_table || !host->align_buffer) {
-> -			dma_free_coherent(mmc_dev(mmc), host->adma_table_sz,
-> -					  host->adma_table, host->adma_addr);
-> +			if (host->adma_table)
-> +				dma_free_coherent(mmc_dev(mmc),
-> +						  host->adma_table_sz,
-> +						  host->adma_table,
-> +						  host->adma_addr);
->  			kfree(host->align_buffer);
->  			pr_warn("%s: Unable to allocate ADMA buffers - falling back to standard DMA\n",
->  				mmc_hostname(mmc));
-> 
+  Linux 4.1-rc5 (2015-05-24 18:22:35 -0700)
 
+are available in the git repository at:
+
+  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v4.2
+
+for you to fetch changes up to a8c27c0bea45c6531fbc1e3be79ddd5a9bc1ba3e:
+
+  mmc: queue: prevent soft lockups on PREEMPT=n (2015-06-18 09:21:04 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Fix an error path in the mmc block layer
+ - Fix PM domain attachment for the SDIO bus
+ - Add support for driver strength selection
+ - Increase a delay to let voltage stabilize
+ - Add support for disabling write-protect detection
+ - Add facility to support re-tuning
+ - Re-tune and retry in the recovery path
+ - Add reset option for SDIO
+ - Consolidations and clean-ups
+
+MMC host:
+ - Add Mediatek MMC driver
+ - Constify platform_device_id for a couple of hosts
+ - Fix modalias to make module auto-loading work for a couple of hosts
+ - sdhci: Add support for sdhci-arasan4.9a
+ - sdhci: Fix low memory corruption
+ - sdhci: Restore behavior while creating OCR mask
+ - sdhci: Add a callback to select drive strength
+ - sdhci: Fix driver type B and D handling
+ - sdhci: Add support for drive strength selection for SPT
+ - sdhci: Enable HS400 for some Intel host controllers
+ - sdhci: Convert to use the new re-tuning facility
+ - sdhci: Various minor fixes and clean-ups
+ - dw_mmc: Add support for hi6220
+ - dw_mmc: Use core to handle absent write protect line
+ - dw_mmc: Add support to switch voltage
+ - tmio: Some fixes and modernizations
+ - sh_mmcif: Improve clock rate calculation
+
+----------------------------------------------------------------
+Adrian Hunter (25):
+      mmc: host: Add facility to support re-tuning
+      mmc: core: Enable / disable re-tuning
+      mmc: core: Add support for re-tuning before each request
+      mmc: core: Hold re-tuning during switch commands
+      mmc: core: Hold re-tuning during erase commands
+      mmc: core: Hold re-tuning while bkops ongoing
+      mmc: mmc: Hold re-tuning in mmc_sleep()
+      mmc: core: Separate out the mmc_switch status check so it can be re-used
+      mmc: core: Add support for HS400 re-tuning
+      mmc: sdhci: Change to new way of doing re-tuning
+      mmc: core: Flag re-tuning is needed on CRC errors
+      mmc: block: Check re-tuning in the recovery path
+      mmc: block: Retry errored data requests when re-tuning is needed
+      mmc: core: Don't print reset warning if reset is not supported
+      mmc: core: Reset driver type to default
+      mmc: core: Allow card drive strength to be different to host
+      mmc: core: Simplify card drive strength mask
+      mmc: core: Add 'card' to drive strength selection callback
+      mmc: core: Factor out common code in drive strength selection
+      mmc: core: Record card drive strength
+      mmc: mmc: Read card's valid driver strength mask
+      mmc: mmc: Add driver strength selection
+      mmc: sdhci: Add a callback to select drive strength
+      mmc: sdhci-pci: Add support for drive strength selection for SPT
+      mmc: sdhci-pci: Enable HS400 for some Intel host controllers
+
+Andreas Fenkart (2):
+      mmc: sdio: add reset callback to bus operations
+      mmc: pwrseq: dt: example with reset clock and active low pin
+
+Axel Lin (3):
+      mmc: sdhci_f_sdh30: Staticize local functions
+      mmc: sdhci_f_sdh30: Fix the size passed to sdhci_alloc_host
+      mmc: sdhci-{pxav2,pxav3}: Use of_match_ptr() macro
+
+Ben Hutchings (1):
+      MAINTAINERS: mmc: Update Ian Molton's address for tmio_mmc driver
+
+Chaotian Jing (3):
+      mmc: dt-bindings: add Mediatek MMC bindings
+      mmc: mediatek: Add Mediatek MMC driver
+      mmc: mediatek: Add PM support for MMC driver
+
+Ding Wang (1):
+      mmc: card: Fixup request missing in mmc_blk_issue_rw_rq
+
+Dong Aisheng (6):
+      mmc: sdhci-esdhc-imx: merge the same register check into one place
+      mmc: sdhci-esdhc-imx: usdhc does not have missing card interrupt issue
+      mmc: sdhci-esdhc-imx: add ADMA Length Mismatch errata fix
+      mmc: sdhci-esdhc-imx: using specific compatible string in binding doc
+      mmc: sdhci-esdhc-imx: add imx6sx support
+      mmc: sdhci-esdhc-imx: add quirk SDHCI_QUIRK2_BROKEN_HS200 for imx6qdl
+
+Doug Anderson (1):
+      mmc: core: Increase delay for voltage to stabilize from 3.3V to 1.8V
+
+Eric Anholt (2):
+      mmc: sdhci-bcm2835: Clean up platform allocations if sdhci init fails.
+      mmc: sdhci-bcm2835: Actually enable the clock
+
+Fabian Frederick (2):
+      mmc: mmc-test: use swap() in mmc_test_nonblock_transfer()
+      mmc: queue: use swap() in mmc_queue_thread()
+
+Fabio Estevam (5):
+      mmc: sdhci-esdhc-imx: Move mmc_of_parse() to the dt probe
+      mmc: sdhci-esdhc-imx: Do not break platform data boards
+      mmc: card: mmc_test: Simplify a trivial if-return sequence
+      mmc: host: mxcmmc: Simplify a trivial if-return sequence
+      mmc: host: sdhci: Use BUG_ON()
+
+Ian Molton (3):
+      mmc: TMIO: Ensure MFD cell is disabled on probe error path
+      mmc: TMIO: Fix I/O mapping leak on error using devm_ioremap()
+      mmc: TMIO: Use devm_request_irq()
+
+Jiri Slaby (1):
+      mmc: sdhci: fix low memory corruption
+
+Jisheng Zhang (1):
+      mmc: sdhci-pxav3: fix device wakeup initialization
+
+Joakim Tjernlund (1):
+      mmc: sdhci-of-esdhc: Pre divider starts at 1
+
+Krzysztof Kozlowski (6):
+      mmc: davinci: Constify platform_device_id
+      mmc: mxs: Constify platform_device_id
+      mmc: rtsx: Constify platform_device_id
+      mmc: s3cmci: Constify platform_device_id
+      mmc: sdhci-imx: Constify platform_device_id
+      mmc: sdhci-s3c: Constify platform_device_id
+
+Kuninori Morimoto (9):
+      mmc: sh_mmcif: move mmcif_of_match to upside
+      mmc: sh_mmcif: cleanup to use dev instead of &pdev->dev
+      mmc: sh_mmcif: remove unnecessary int clk from struct sh_mmcif_host
+      mmc: sh_mmcif: separate sh_mmcif_clk_update() into setup and prepare
+      mmc: cast u8 to unsigned long long to avoid unexpected error
+      mmc: cast unsigned int to typeof(sector_t) to avoid unexpected error
+      mmc: sh_mmcif: add sh_mmcif_host_to_dev() macro and use it.
+      mmc: sh_mmcif: use sh_mmcif_xxx prefix for all functions
+      mmc: sh_mmcif: calculate best clock with parent clock
+
+Lars-Peter Clausen (3):
+      mmc: Add support for disabling write-protect detection
+      mmc: dt: Allow to specify that no write protect signal is present
+      mmc: dw_mmc: Use core to handle absent write protect line
+
+Petri Gynther (1):
+      mmc: sdhci: fix driver type B and D handling in sdhci_do_set_ios()
+
+Prabu Thangamuthu (1):
+      mmc: dw_mmc: insmod followed by rmmod will hung for eMMC
+
+Rabin Vincent (1):
+      mmc: queue: prevent soft lockups on PREEMPT=n
+
+Suman Tripathi (1):
+      mmc: sdhci-of-arasan: Add the support for sdhci-arasan4.9a
+
+Ulf Hansson (4):
+      mmc: core: Remove redundant ->power_restore() callback for MMC
+      mmc: core: Remove redundant ->power_restore() callback for SD
+      mmc: core: Attach PM domain prior probing of SDIO func driver
+      mmc: sdhci: Restore behavior while creating OCR mask
+
+Vincent Wan (3):
+      pci_ids: Add AMD KERNCZ device ID support
+      i2c-piix4: Use Macro for AMD CZ SMBus device ID
+      mmc: sdhci-pci: Change AMD SDHCI quirk application scope
+
+Weijun Yang (2):
+      mmc: sdhci-sirf: fix the tuning count in platform_execute_tuning
+      mmc: sdhci-sirf: fake version and capbility registers
+
+Wolfram Sang (1):
+      mmc: host: sdhci-esdhc-imx: fix broken email address
+
+Yangbo Lu (2):
+      powerpc/dts: add eSDHC compatible list
+      mmc: sdhci-of-esdhc: enable interrupt mode to detect card
+
+Zhangfei Gao (7):
+      Document: dw_mmc-k3: add document of hi6220 mmc
+      mmc: dw_mmc: add switch_voltage
+      mmc: dw_mmc: k3: support hi6220
+      mmc: dw_mmc: k3: Fix modalias to make module auto-loading work
+      mmc: dw_mmc: exynos: Fix modalias to make module auto-loading work
+      mmc: dw_mmc: rockchip: Fix modalias to make module auto-loading work
+      mmc: sdhci-st: Fix modalias to make module auto-loading work
+
+ .../devicetree/bindings/mmc/arasan,sdhci.txt       |    3 +-
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |    9 +-
+ .../devicetree/bindings/mmc/k3-dw-mshc.txt         |   28 +
+ .../devicetree/bindings/mmc/mmc-pwrseq-simple.txt  |    4 +-
+ Documentation/devicetree/bindings/mmc/mmc.txt      |    5 +
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt   |   32 +
+ .../devicetree/bindings/mmc/renesas,mmcif.txt      |    3 +
+ MAINTAINERS                                        |    2 +-
+ arch/powerpc/boot/dts/fsl/p2041si-post.dtsi        |    1 +
+ arch/powerpc/boot/dts/fsl/p3041si-post.dtsi        |    1 +
+ arch/powerpc/boot/dts/fsl/p4080si-post.dtsi        |    1 +
+ arch/powerpc/boot/dts/fsl/p5020si-post.dtsi        |    1 +
+ arch/powerpc/boot/dts/fsl/p5040si-post.dtsi        |    1 +
+ drivers/i2c/busses/i2c-piix4.c                     |    4 +-
+ drivers/mmc/card/block.c                           |   25 +-
+ drivers/mmc/card/mmc_test.c                        |  104 +-
+ drivers/mmc/card/queue.c                           |    6 +-
+ drivers/mmc/card/queue.h                           |    1 +
+ drivers/mmc/core/core.c                            |  100 +-
+ drivers/mmc/core/core.h                            |    4 +
+ drivers/mmc/core/host.c                            |   88 ++
+ drivers/mmc/core/host.h                            |    6 +
+ drivers/mmc/core/mmc.c                             |  156 ++-
+ drivers/mmc/core/mmc_ops.c                         |   44 +-
+ drivers/mmc/core/mmc_ops.h                         |    1 +
+ drivers/mmc/core/sd.c                              |  113 +-
+ drivers/mmc/core/sdio.c                            |   90 +-
+ drivers/mmc/core/sdio_bus.c                        |   12 +-
+ drivers/mmc/host/Kconfig                           |    9 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/davinci_mmc.c                     |    2 +-
+ drivers/mmc/host/dw_mmc-exynos.c                   |    2 +-
+ drivers/mmc/host/dw_mmc-k3.c                       |  105 +-
+ drivers/mmc/host/dw_mmc-rockchip.c                 |    2 +-
+ drivers/mmc/host/dw_mmc.c                          |   63 +-
+ drivers/mmc/host/dw_mmc.h                          |    5 +-
+ drivers/mmc/host/mtk-sd.c                          | 1462 ++++++++++++++++++++
+ drivers/mmc/host/mxcmmc.c                          |    6 +-
+ drivers/mmc/host/mxs-mmc.c                         |    2 +-
+ drivers/mmc/host/rtsx_pci_sdmmc.c                  |    2 +-
+ drivers/mmc/host/rtsx_usb_sdmmc.c                  |    2 +-
+ drivers/mmc/host/s3cmci.c                          |    2 +-
+ drivers/mmc/host/sdhci-bcm2835.c                   |   12 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c                 |   94 +-
+ drivers/mmc/host/sdhci-of-arasan.c                 |    7 +
+ drivers/mmc/host/sdhci-of-esdhc.c                  |   11 +-
+ drivers/mmc/host/sdhci-pci-data.c                  |    3 +
+ drivers/mmc/host/sdhci-pci.c                       |  109 +-
+ drivers/mmc/host/sdhci-pci.h                       |    4 +
+ drivers/mmc/host/sdhci-pxav2.c                     |    4 +-
+ drivers/mmc/host/sdhci-pxav3.c                     |   10 +-
+ drivers/mmc/host/sdhci-s3c.c                       |    2 +-
+ drivers/mmc/host/sdhci-sirf.c                      |   44 +-
+ drivers/mmc/host/sdhci-st.c                        |    2 +-
+ drivers/mmc/host/sdhci.c                           |  151 +-
+ drivers/mmc/host/sdhci.h                           |    7 +-
+ drivers/mmc/host/sdhci_f_sdh30.c                   |    9 +-
+ drivers/mmc/host/sh_mmcif.c                        |  296 ++--
+ drivers/mmc/host/tmio_mmc.c                        |   10 +-
+ drivers/mmc/host/tmio_mmc_pio.c                    |    5 +-
+ include/linux/mmc/card.h                           |    2 +
+ include/linux/mmc/core.h                           |    1 +
+ include/linux/mmc/dw_mmc.h                         |    6 -
+ include/linux/mmc/host.h                           |   28 +-
+ include/linux/mmc/mmc.h                            |    4 +
+ include/linux/mmc/sdhci-pci-data.h                 |    2 +
+ include/linux/pci_ids.h                            |    1 +
+ 67 files changed, 2727 insertions(+), 607 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.txt
+ create mode 100644 drivers/mmc/host/mtk-sd.c
 --
 To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
