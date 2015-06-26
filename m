@@ -1,155 +1,154 @@
 From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: [PATCH v3 2/6] pinctrl: sh-pfc: Implement pinconf power-source
- param for voltage switching
-Date: Fri, 26 Jun 2015 16:23:24 +0100
-Message-ID: <1435332204.23818.9.camel@codethink.co.uk>
+Subject: [PATCH v3 3/6] pinctrl: sh-pfc: r8a7790: Implement voltage
+ switching for SDHI
+Date: Fri, 26 Jun 2015 16:23:30 +0100
+Message-ID: <1435332210.23818.10.camel@codethink.co.uk>
 References: <1435332116.23818.7.camel@codethink.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-gpio-owner@vger.kernel.org>
 In-Reply-To: <1435332116.23818.7.camel@codethink.co.uk>
-Sender: linux-sh-owner@vger.kernel.org
+Sender: linux-gpio-owner@vger.kernel.org
 To: Ian Molton <ian@mnementh.co.uk>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>
 Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The pfc in the R8A7790 (and probably others in the R-Car gen 2 family)
-supports switching SDHI signals between 3.3V and 1.8V voltage, and the
-SD driver should do that when selecting a higher-speed mode.
+All the SHDIs can operate with either 3.3V or 1.8V signals, depending
+on negotiation with the card.
 
-Add a flag for pins that support low voltage mode and SoC operations to
-get and set it.  Implement the pinconf power-source parameter using these
-operations.
+Implement the {get,set}_low_voltage operations and set the low-voltage
+capability flag for the associated pins.
 
 Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 ---
- .../bindings/pinctrl/renesas,pfc-pinctrl.txt       |  4 ++-
- drivers/pinctrl/sh-pfc/pinctrl.c                   | 34 ++++++++++++++++++++--
- drivers/pinctrl/sh-pfc/sh_pfc.h                    |  6 ++++
- 3 files changed, 41 insertions(+), 3 deletions(-)
+ drivers/pinctrl/sh-pfc/core.c        |  2 +-
+ drivers/pinctrl/sh-pfc/core.h        |  1 +
+ drivers/pinctrl/sh-pfc/pfc-r8a7790.c | 67 +++++++++++++++++++++++++++++++++++-
+ 3 files changed, 68 insertions(+), 2 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/pinctrl/renesas,pfc-pinctrl.txt b/Documentation/devicetree/bindings/pinctrl/renesas,pfc-pinctrl.txt
-index bfe72ec055e3..93651742f1c1 100644
---- a/Documentation/devicetree/bindings/pinctrl/renesas,pfc-pinctrl.txt
-+++ b/Documentation/devicetree/bindings/pinctrl/renesas,pfc-pinctrl.txt
-@@ -69,7 +69,9 @@ Pin Configuration Node Properties:
+diff --git a/drivers/pinctrl/sh-pfc/core.c b/drivers/pinctrl/sh-pfc/core.c
+index 7b2c9495c383..7d51f96afc9a 100644
+--- a/drivers/pinctrl/sh-pfc/core.c
++++ b/drivers/pinctrl/sh-pfc/core.c
+@@ -92,7 +92,7 @@ static int sh_pfc_map_resources(struct sh_pfc *pfc,
+ 	return 0;
+ }
  
- The pin configuration parameters use the generic pinconf bindings defined in
- pinctrl-bindings.txt in this directory. The supported parameters are
--bias-disable, bias-pull-up and bias-pull-down.
-+bias-disable, bias-pull-up, bias-pull-down and power-source. For pins that
-+can operate with either 3.3V or 1.8V signals, the power-source value should
-+be 0 for 3.3V or 1 for 1.8V.
+-static void __iomem *sh_pfc_phys_to_virt(struct sh_pfc *pfc, u32 reg)
++void __iomem *sh_pfc_phys_to_virt(struct sh_pfc *pfc, u32 reg)
+ {
+ 	struct sh_pfc_window *window;
+ 	phys_addr_t address = reg;
+diff --git a/drivers/pinctrl/sh-pfc/core.h b/drivers/pinctrl/sh-pfc/core.h
+index 6dc8a6fc2746..af355629c5d2 100644
+--- a/drivers/pinctrl/sh-pfc/core.h
++++ b/drivers/pinctrl/sh-pfc/core.h
+@@ -57,6 +57,7 @@ int sh_pfc_unregister_gpiochip(struct sh_pfc *pfc);
+ int sh_pfc_register_pinctrl(struct sh_pfc *pfc);
+ int sh_pfc_unregister_pinctrl(struct sh_pfc *pfc);
  
-
- GPIO
-diff --git a/drivers/pinctrl/sh-pfc/pinctrl.c b/drivers/pinctrl/sh-pfc/pinctrl.c
-index 072e7c62cab7..fa4066d4bc61 100644
---- a/drivers/pinctrl/sh-pfc/pinctrl.c
-+++ b/drivers/pinctrl/sh-pfc/pinctrl.c
-@@ -465,6 +465,9 @@ static bool sh_pfc_pinconf_validate(struct sh_pfc *pfc, unsigned int _pin,
- 	case PIN_CONFIG_BIAS_PULL_DOWN:
- 		return pin->configs & SH_PFC_PIN_CFG_PULL_DOWN;
++void __iomem *sh_pfc_phys_to_virt(struct sh_pfc *pfc, u32 address);
+ u32 sh_pfc_read_raw_reg(void __iomem *mapped_reg, unsigned int reg_width);
+ void sh_pfc_write_raw_reg(void __iomem *mapped_reg, unsigned int reg_width,
+ 			  u32 data);
+diff --git a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
+index 22a5470889f5..38be7cbea4ca 100644
+--- a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
++++ b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
+@@ -1739,10 +1739,20 @@ static const u16 pinmux_data[] = {
+ #define PIN_NUMBER(r, c) (((r) - 'A') * 31 + (c) + 200)
+ #define PIN_A_NUMBER(r, c) PIN_NUMBER(ROW_GROUP_A(r), c)
  
-+	case PIN_CONFIG_POWER_SOURCE:
-+		return pin->configs & SH_PFC_PIN_CFG_LOW_VOLTAGE;
++#define PIN_LOW_VOLTAGE(bank, _pin, _name, sfx)		\
++	[RCAR_GP_PIN(bank, _pin)].configs = SH_PFC_PIN_CFG_LOW_VOLTAGE
 +
- 	default:
- 		return false;
- 	}
-@@ -477,7 +480,6 @@ static int sh_pfc_pinconf_get(struct pinctrl_dev *pctldev, unsigned _pin,
- 	struct sh_pfc *pfc = pmx->pfc;
- 	enum pin_config_param param = pinconf_to_config_param(*config);
- 	unsigned long flags;
--	unsigned int bias;
+ static const struct sh_pfc_pin pinmux_pins[] = {
+ 	PINMUX_GPIO_GP_ALL(),
  
- 	if (!sh_pfc_pinconf_validate(pfc, _pin, param))
- 		return -ENOTSUPP;
-@@ -485,7 +487,9 @@ static int sh_pfc_pinconf_get(struct pinctrl_dev *pctldev, unsigned _pin,
- 	switch (param) {
- 	case PIN_CONFIG_BIAS_DISABLE:
- 	case PIN_CONFIG_BIAS_PULL_UP:
--	case PIN_CONFIG_BIAS_PULL_DOWN:
-+	case PIN_CONFIG_BIAS_PULL_DOWN: {
-+		unsigned int bias;
+-	/* Pins not associated with a GPIO port */
++	/*
++	 * All pins assigned to GPIO bank 3 can be used for SD interfaces
++	 * in which case they support low voltage (1.8V) signalling.
++	 */
++	PORT_GP_32(3, PIN_LOW_VOLTAGE, unused),
 +
- 		if (!pfc->info->ops || !pfc->info->ops->get_bias)
- 			return -ENOTSUPP;
- 
-@@ -498,6 +502,16 @@ static int sh_pfc_pinconf_get(struct pinctrl_dev *pctldev, unsigned _pin,
- 
- 		*config = 0;
- 		break;
-+	}
-+
-+	case PIN_CONFIG_POWER_SOURCE:
-+		if (!pfc->info->ops || !pfc->info->ops->get_low_voltage)
-+			return -ENOTSUPP;
-+
-+		spin_lock_irqsave(&pfc->lock, flags);
-+		*config = pfc->info->ops->get_low_voltage(pfc, _pin);
-+		spin_unlock_irqrestore(&pfc->lock, flags);
-+		break;
- 
- 	default:
- 		return -ENOTSUPP;
-@@ -534,6 +548,22 @@ static int sh_pfc_pinconf_set(struct pinctrl_dev *pctldev, unsigned _pin,
- 
- 			break;
- 
-+		case PIN_CONFIG_POWER_SOURCE: {
-+			unsigned int arg =
-+				pinconf_to_config_argument(configs[i]);
-+
-+			if (!pfc->info->ops || !pfc->info->ops->set_low_voltage)
-+				return -ENOTSUPP;
-+			if (arg > 1)
-+				return -ENOTSUPP;
-+
-+			spin_lock_irqsave(&pfc->lock, flags);
-+			pfc->info->ops->set_low_voltage(pfc, _pin, arg);
-+			spin_unlock_irqrestore(&pfc->lock, flags);
-+
-+			break;
-+		}
-+
- 		default:
- 			return -ENOTSUPP;
- 		}
-diff --git a/drivers/pinctrl/sh-pfc/sh_pfc.h b/drivers/pinctrl/sh-pfc/sh_pfc.h
-index c7508d5f6886..b95d60bf2f1b 100644
---- a/drivers/pinctrl/sh-pfc/sh_pfc.h
-+++ b/drivers/pinctrl/sh-pfc/sh_pfc.h
-@@ -13,6 +13,7 @@
- 
- #include <linux/bug.h>
- #include <linux/stringify.h>
-+#include <linux/pinctrl/pinconf-generic.h>
- 
- enum {
- 	PINMUX_TYPE_NONE,
-@@ -26,8 +27,11 @@ enum {
- #define SH_PFC_PIN_CFG_OUTPUT		(1 << 1)
- #define SH_PFC_PIN_CFG_PULL_UP		(1 << 2)
- #define SH_PFC_PIN_CFG_PULL_DOWN	(1 << 3)
-+#define SH_PFC_PIN_CFG_LOW_VOLTAGE	(1 << 4)
- #define SH_PFC_PIN_CFG_NO_GPIO		(1 << 31)
- 
-+struct sh_pfc;
-+
- struct sh_pfc_pin {
- 	u16 pin;
- 	u16 enum_id;
-@@ -121,6 +125,8 @@ struct sh_pfc_soc_operations {
- 	unsigned int (*get_bias)(struct sh_pfc *pfc, unsigned int pin);
- 	void (*set_bias)(struct sh_pfc *pfc, unsigned int pin,
- 			 unsigned int bias);
-+	bool (*get_low_voltage)(struct sh_pfc *pfc, unsigned int pin);
-+	void (*set_low_voltage)(struct sh_pfc *pfc, unsigned int pin, bool low);
++	/* Pins not associated with a GPIO port, placed after all the GPIOs */
++	[RCAR_GP_PIN(5, 31) + 1] =
+ 	SH_PFC_PIN_NAMED(ROW_GROUP_A('F'), 15, AF15),
+ 	SH_PFC_PIN_NAMED(ROW_GROUP_A('G'), 15, AG15),
+ 	SH_PFC_PIN_NAMED(ROW_GROUP_A('H'), 15, AH15),
+@@ -4595,6 +4605,55 @@ static const char * const vin3_groups[] = {
+ 	"vin3_clk",
  };
  
- struct sh_pfc_soc_info {
++static bool sdhi_get_low_voltage(struct sh_pfc *pfc, unsigned int pin)
++{
++	void __iomem *mapped_reg;
++	u32 data, mask;
++
++	if (WARN(pin < RCAR_GP_PIN(3, 0) || pin > RCAR_GP_PIN(3, 31),
++		 "sdhi_get_low_voltage: invalid pin %#x", pin))
++		return 0;
++
++	/* Map IOCTRL6 */
++	mapped_reg = sh_pfc_phys_to_virt(pfc, 0xe606008c);
++
++	/* Bits in IOCTRL6 are numbered in opposite order to pins */
++	mask = 0x80000000 >> (pin & 0x1f);
++
++	data = sh_pfc_read_raw_reg(mapped_reg, 32);
++
++	return !(data & mask);
++}
++
++static void
++sdhi_set_low_voltage(struct sh_pfc *pfc, unsigned int pin, bool low)
++{
++	void __iomem *mapped_reg;
++	u32 data, mask;
++
++	if (WARN(pin < RCAR_GP_PIN(3, 0) || pin > RCAR_GP_PIN(3, 31),
++		 "sdhi_set_low_voltage: invalid pin %#x", pin))
++		return;
++
++	/* Map IOCTRL6 */
++	mapped_reg = sh_pfc_phys_to_virt(pfc, 0xe606008c);
++
++	/* Bits in IOCTRL6 are numbered in opposite order to pins */
++	mask = 0x80000000 >> (pin & 0x1f);
++
++	data = sh_pfc_read_raw_reg(mapped_reg, 32);
++
++	if (low)
++		data &= ~mask;
++	else
++		data |= mask;
++
++	sh_pfc_write_raw_reg(
++		sh_pfc_phys_to_virt(pfc, pfc->info->unlock_reg), 32,
++		~data);
++	sh_pfc_write_raw_reg(mapped_reg, 32, data);
++}
++
+ static const struct sh_pfc_function pinmux_functions[] = {
+ 	SH_PFC_FUNCTION(audio_clk),
+ 	SH_PFC_FUNCTION(avb),
+@@ -5586,8 +5645,14 @@ static const struct pinmux_cfg_reg pinmux_config_regs[] = {
+ 	{ },
+ };
+ 
++static const struct sh_pfc_soc_operations pinmux_ops = {
++	.get_low_voltage = sdhi_get_low_voltage,
++	.set_low_voltage = sdhi_set_low_voltage,
++};
++
+ const struct sh_pfc_soc_info r8a7790_pinmux_info = {
+ 	.name = "r8a77900_pfc",
++	.ops = &pinmux_ops,
+ 	.unlock_reg = 0xe6060000, /* PMMR */
+ 
+ 	.function = { PINMUX_FUNCTION_BEGIN, PINMUX_FUNCTION_END },
 -- 
 2.1.4
 
