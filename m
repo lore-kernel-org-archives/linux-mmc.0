@@ -1,7 +1,8 @@
 From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: [PATCH v3 1/6] mmc: tmio: Add UHS-I mode support
-Date: Fri, 26 Jun 2015 16:22:33 +0100
-Message-ID: <1435332153.23818.8.camel@codethink.co.uk>
+Subject: [PATCH v3 2/6] pinctrl: sh-pfc: Implement pinconf power-source
+ param for voltage switching
+Date: Fri, 26 Jun 2015 16:23:24 +0100
+Message-ID: <1435332204.23818.9.camel@codethink.co.uk>
 References: <1435332116.23818.7.camel@codethink.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
@@ -13,81 +14,142 @@ To: Ian Molton <ian@mnementh.co.uk>, Laurent Pinchart <laurent.pinchart@ideasonb
 Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Based on work by Shinobu Uehara and Ben Dooks.  This adds the voltage
-switch operation needed for all UHS-I modes, but not the tuning needed
-for SDR-104 which will come later.
+The pfc in the R8A7790 (and probably others in the R-Car gen 2 family)
+supports switching SDHI signals between 3.3V and 1.8V voltage, and the
+SD driver should do that when selecting a higher-speed mode.
 
-The card_busy implementation is a bit of a guess, but works for me on
-an R8A7790 chip.
+Add a flag for pins that support low voltage mode and SoC operations to
+get and set it.  Implement the pinconf power-source parameter using these
+operations.
 
 Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 ---
- drivers/mmc/host/tmio_mmc.h     |  3 +++
- drivers/mmc/host/tmio_mmc_pio.c | 31 +++++++++++++++++++++++++++++++
- 2 files changed, 34 insertions(+)
+ .../bindings/pinctrl/renesas,pfc-pinctrl.txt       |  4 ++-
+ drivers/pinctrl/sh-pfc/pinctrl.c                   | 34 ++++++++++++++++++++--
+ drivers/pinctrl/sh-pfc/sh_pfc.h                    |  6 ++++
+ 3 files changed, 41 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 4a597f5a53e2..a1a009879946 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -99,6 +99,9 @@ struct tmio_mmc_host {
- 	void (*clk_disable)(struct platform_device *pdev);
- 	int (*multi_io_quirk)(struct mmc_card *card,
- 			      unsigned int direction, int blk_size);
+diff --git a/Documentation/devicetree/bindings/pinctrl/renesas,pfc-pinctrl.txt b/Documentation/devicetree/bindings/pinctrl/renesas,pfc-pinctrl.txt
+index bfe72ec055e3..93651742f1c1 100644
+--- a/Documentation/devicetree/bindings/pinctrl/renesas,pfc-pinctrl.txt
++++ b/Documentation/devicetree/bindings/pinctrl/renesas,pfc-pinctrl.txt
+@@ -69,7 +69,9 @@ Pin Configuration Node Properties:
+ 
+ The pin configuration parameters use the generic pinconf bindings defined in
+ pinctrl-bindings.txt in this directory. The supported parameters are
+-bias-disable, bias-pull-up and bias-pull-down.
++bias-disable, bias-pull-up, bias-pull-down and power-source. For pins that
++can operate with either 3.3V or 1.8V signals, the power-source value should
++be 0 for 3.3V or 1 for 1.8V.
+ 
+
+ GPIO
+diff --git a/drivers/pinctrl/sh-pfc/pinctrl.c b/drivers/pinctrl/sh-pfc/pinctrl.c
+index 072e7c62cab7..fa4066d4bc61 100644
+--- a/drivers/pinctrl/sh-pfc/pinctrl.c
++++ b/drivers/pinctrl/sh-pfc/pinctrl.c
+@@ -465,6 +465,9 @@ static bool sh_pfc_pinconf_validate(struct sh_pfc *pfc, unsigned int _pin,
+ 	case PIN_CONFIG_BIAS_PULL_DOWN:
+ 		return pin->configs & SH_PFC_PIN_CFG_PULL_DOWN;
+ 
++	case PIN_CONFIG_POWER_SOURCE:
++		return pin->configs & SH_PFC_PIN_CFG_LOW_VOLTAGE;
 +
-+	int (*start_signal_voltage_switch)(struct tmio_mmc_host *host,
-+					   unsigned char signal_voltage);
+ 	default:
+ 		return false;
+ 	}
+@@ -477,7 +480,6 @@ static int sh_pfc_pinconf_get(struct pinctrl_dev *pctldev, unsigned _pin,
+ 	struct sh_pfc *pfc = pmx->pfc;
+ 	enum pin_config_param param = pinconf_to_config_param(*config);
+ 	unsigned long flags;
+-	unsigned int bias;
+ 
+ 	if (!sh_pfc_pinconf_validate(pfc, _pin, param))
+ 		return -ENOTSUPP;
+@@ -485,7 +487,9 @@ static int sh_pfc_pinconf_get(struct pinctrl_dev *pctldev, unsigned _pin,
+ 	switch (param) {
+ 	case PIN_CONFIG_BIAS_DISABLE:
+ 	case PIN_CONFIG_BIAS_PULL_UP:
+-	case PIN_CONFIG_BIAS_PULL_DOWN:
++	case PIN_CONFIG_BIAS_PULL_DOWN: {
++		unsigned int bias;
++
+ 		if (!pfc->info->ops || !pfc->info->ops->get_bias)
+ 			return -ENOTSUPP;
+ 
+@@ -498,6 +502,16 @@ static int sh_pfc_pinconf_get(struct pinctrl_dev *pctldev, unsigned _pin,
+ 
+ 		*config = 0;
+ 		break;
++	}
++
++	case PIN_CONFIG_POWER_SOURCE:
++		if (!pfc->info->ops || !pfc->info->ops->get_low_voltage)
++			return -ENOTSUPP;
++
++		spin_lock_irqsave(&pfc->lock, flags);
++		*config = pfc->info->ops->get_low_voltage(pfc, _pin);
++		spin_unlock_irqrestore(&pfc->lock, flags);
++		break;
+ 
+ 	default:
+ 		return -ENOTSUPP;
+@@ -534,6 +548,22 @@ static int sh_pfc_pinconf_set(struct pinctrl_dev *pctldev, unsigned _pin,
+ 
+ 			break;
+ 
++		case PIN_CONFIG_POWER_SOURCE: {
++			unsigned int arg =
++				pinconf_to_config_argument(configs[i]);
++
++			if (!pfc->info->ops || !pfc->info->ops->set_low_voltage)
++				return -ENOTSUPP;
++			if (arg > 1)
++				return -ENOTSUPP;
++
++			spin_lock_irqsave(&pfc->lock, flags);
++			pfc->info->ops->set_low_voltage(pfc, _pin, arg);
++			spin_unlock_irqrestore(&pfc->lock, flags);
++
++			break;
++		}
++
+ 		default:
+ 			return -ENOTSUPP;
+ 		}
+diff --git a/drivers/pinctrl/sh-pfc/sh_pfc.h b/drivers/pinctrl/sh-pfc/sh_pfc.h
+index c7508d5f6886..b95d60bf2f1b 100644
+--- a/drivers/pinctrl/sh-pfc/sh_pfc.h
++++ b/drivers/pinctrl/sh-pfc/sh_pfc.h
+@@ -13,6 +13,7 @@
+ 
+ #include <linux/bug.h>
+ #include <linux/stringify.h>
++#include <linux/pinctrl/pinconf-generic.h>
+ 
+ enum {
+ 	PINMUX_TYPE_NONE,
+@@ -26,8 +27,11 @@ enum {
+ #define SH_PFC_PIN_CFG_OUTPUT		(1 << 1)
+ #define SH_PFC_PIN_CFG_PULL_UP		(1 << 2)
+ #define SH_PFC_PIN_CFG_PULL_DOWN	(1 << 3)
++#define SH_PFC_PIN_CFG_LOW_VOLTAGE	(1 << 4)
+ #define SH_PFC_PIN_CFG_NO_GPIO		(1 << 31)
+ 
++struct sh_pfc;
++
+ struct sh_pfc_pin {
+ 	u16 pin;
+ 	u16 enum_id;
+@@ -121,6 +125,8 @@ struct sh_pfc_soc_operations {
+ 	unsigned int (*get_bias)(struct sh_pfc *pfc, unsigned int pin);
+ 	void (*set_bias)(struct sh_pfc *pfc, unsigned int pin,
+ 			 unsigned int bias);
++	bool (*get_low_voltage)(struct sh_pfc *pfc, unsigned int pin);
++	void (*set_low_voltage)(struct sh_pfc *pfc, unsigned int pin, bool low);
  };
  
- struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *pdev);
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index e3dcf31a8bd6..3c1e0e53c0b1 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -1011,12 +1011,43 @@ static int tmio_multi_io_quirk(struct mmc_card *card,
- 	return blk_size;
- }
- 
-+static int tmio_mmc_start_signal_voltage_switch(struct mmc_host *mmc,
-+	struct mmc_ios *ios)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+
-+	if (!host->start_signal_voltage_switch)
-+		return 0;
-+
-+	return host->start_signal_voltage_switch(host, ios->signal_voltage);
-+}
-+
-+static int tmio_mmc_card_busy(struct mmc_host *mmc)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	u32 status;
-+
-+	pm_runtime_get_sync(mmc_dev(mmc));
-+	status = sd_ctrl_read32(host, CTL_STATUS);
-+	pm_runtime_mark_last_busy(mmc_dev(mmc));
-+	pm_runtime_put_autosuspend(mmc_dev(mmc));
-+
-+	/*
-+	 * Card signals busy by pulling down all of DAT[3:0].  This status
-+	 * flag appears to reflect DAT3.
-+	 */
-+	return !(status & TMIO_STAT_SIGSTATE_A);
-+}
-+
- static const struct mmc_host_ops tmio_mmc_ops = {
- 	.request	= tmio_mmc_request,
- 	.set_ios	= tmio_mmc_set_ios,
- 	.get_ro         = tmio_mmc_get_ro,
- 	.get_cd		= mmc_gpio_get_cd,
- 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
-+	.start_signal_voltage_switch
-+			= tmio_mmc_start_signal_voltage_switch,
-+	.card_busy	= tmio_mmc_card_busy,
- 	.multi_io_quirk	= tmio_multi_io_quirk,
- };
- 
+ struct sh_pfc_soc_info {
 -- 
 2.1.4
 
