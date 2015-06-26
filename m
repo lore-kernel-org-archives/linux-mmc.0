@@ -1,48 +1,49 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 02/13] dmaengine: Introduce dma_request_slave_channel_compat_reason()
-Date: Thu, 25 Jun 2015 13:15:57 +0200
-Message-ID: <4970019.av0JOFIyTW@wuerfel>
-References: <1432646768-12532-1-git-send-email-peter.ujfalusi@ti.com> <5587F1F4.1060905@ti.com> <20150624162401.GP19530@localhost>
+From: David Jander <david@protonic.nl>
+Subject: Re: [RFC PATCH] mmc: core: Optimize case for exactly one
+ erase-group budget TRIM
+Date: Fri, 26 Jun 2015 08:56:42 +0200
+Message-ID: <20150626085642.5cdad2e3@archvile>
+References: <1433320469-29453-1-git-send-email-david@protonic.nl>
+	<CAPDyKFocxYD+q_CQQ4Kz6ZZ88P+DwWcwfrEGEJJEEgkFT5r+MA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-crypto-owner@vger.kernel.org>
-In-Reply-To: <20150624162401.GP19530@localhost>
-Sender: linux-crypto-owner@vger.kernel.org
-To: Vinod Koul <vinod.koul@intel.com>
-Cc: Peter Ujfalusi <peter.ujfalusi@ti.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Tony Lindgren <tony@atomide.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Dan Williams <dan.j.williams@intel.com>, dmaengine@vger.kernel.org, "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, linux-crypto@vger.kernel.org, linux-spi <linux-spi@vger.kernel.org>, Linux Media Mailing List <linux-media@vger.kernel.org>, ALSA Development Mailing List <alsa-devel@alsa-project.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from protonic.xs4all.nl ([83.163.252.89]:14693 "EHLO
+	protonic.xs4all.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751704AbbFZG4o (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Jun 2015 02:56:44 -0400
+In-Reply-To: <CAPDyKFocxYD+q_CQQ4Kz6ZZ88P+DwWcwfrEGEJJEEgkFT5r+MA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Pierre Ossman <pierre@ossman.eu>, Sascha Hauer <s.hauer@pengutronix.de>, Johan Rudholm <johan.rudholm@axis.com>, Adrian Hunter <adrian.hunter@intel.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Wednesday 24 June 2015 21:54:01 Vinod Koul wrote:
-> > It would be nice to find another name for the
-> > dma_request_slave_channel_compat() so with the new name we could have chance
-> > to rearrange the parameters: (dev, name, mask, fn, fn_param)
-> > 
-> > We would end up with the following APIs, all returning with error code on failure:
-> > dma_request_slave_channel(dev, name);
-> > dma_request_channel_legacy(mask, fn, fn_param);
-> > dma_request_slave_channel_compat(mask, fn, fn_param, dev, name);
-> > dma_request_any_channel(mask);
-> This is good idea but still we end up with 4 APIs. Why not just converge to
-> two API, one legacy + memcpy + filer fn and one untimate API for slave?
+
+Dear Ulf,
+
+On Thu, 4 Jun 2015 10:31:59 +0200
+Ulf Hansson <ulf.hansson@linaro.org> wrote:
+
+> On 3 June 2015 at 10:34, David Jander <david@protonic.nl> wrote:
+> > In the (not so unlikely) case that the mmc controller timeout budget is
+> > enough for exactly one erase-group, the simplification of allowing one
+> > sector has an enormous performance penalty. We optimize this special case
+> > by introducing a flag that prohibits erase-group boundary crossing, so
+> > that we can allow trimming more than one sector at a time.
+> >
+> > Signed-off-by: David Jander <david@protonic.nl>
 > 
-> Internally we may have 4 APIs for cleaner handling...
+> Hi David,
 > 
+> Thanks for working on this!
 
-Not sure if it's realistic, but I think it would be nice to have
-a way for converting the current slave drivers that use the
-mask/filter/param API to the dev/name based API. We should
-be able to do this by registering a lookup table from platform
-code that translates one to the other, like we do with the
-clkdev lookup to find a device clock based on a local identifier.
+I have since sent an updated patch that includes more comment. It would be
+great if you could find the time to review it. I hope the comments are clear
+enough.
 
-The main downside of this is that it's a lot of work if we want
-to completely remove dma_request_channel() for slave drivers,
-but it could be done more gradually.
+Best regards,
 
-Another upside is that we could come up with a mechanism to
-avoid the link-time dependency on the filter-function that
-causes problems when that filter is defined in a loadable
-module for the dmaengine driver.
-
-	Arnd
+-- 
+David Jander
+Protonic Holland.
