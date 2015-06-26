@@ -1,44 +1,51 @@
 From: "Ivan T. Ivanov" <ivan.ivanov@linaro.org>
-Subject: [PATCH 3/3] mmc: sdhci: properly check card present state when quirk NO_CARD_NO_RESET is set
-Date: Fri, 26 Jun 2015 13:00:10 +0300
-Message-ID: <1435312810-23957-4-git-send-email-ivan.ivanov@linaro.org>
+Subject: [PATCH 1/3] mmc: sdhci: let GPIO based card detection have higher precedence
+Date: Fri, 26 Jun 2015 13:00:08 +0300
+Message-ID: <1435312810-23957-2-git-send-email-ivan.ivanov@linaro.org>
 References: <1435312810-23957-1-git-send-email-ivan.ivanov@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f50.google.com ([74.125.82.50]:33450 "EHLO
-	mail-wg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752119AbbFZKAS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Jun 2015 06:00:18 -0400
-Received: by wgck11 with SMTP id k11so84259937wgc.0
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Jun 2015 03:00:17 -0700 (PDT)
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1435312810-23957-1-git-send-email-ivan.ivanov@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Adrian Hunter <adrian.hunter@intel.com>, Tim Kryger <tim.kryger@gmail.com>, Aisheng Dong <b29396@freescale.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-Controller could have both NO_CARD_NO_RESET and BROKEN_CARD_DETECTION
-quirks set. Use sdhci_do_get_cd() when applying NO_CARD_NO_RESET, which
-properly check for BROKEN_CARD_DETECTION quirk.
+Controller could have BROKEN_CARD_DETECTION quirk set, but drivers
+could use GPIO to detect card present state. Let, when defined, GPIO
+take precedence, so drivers could properly detect card state and not
+use polling.
 
 Signed-off-by: Ivan T. Ivanov <ivan.ivanov@linaro.org>
 ---
- drivers/mmc/host/sdhci.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ drivers/mmc/host/sdhci.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 0b65752..912a3bb 100644
+index bc14452..8bafb9f 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -207,8 +207,7 @@ EXPORT_SYMBOL_GPL(sdhci_reset);
- static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
- {
- 	if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
--		if (!(sdhci_readl(host, SDHCI_PRESENT_STATE) &
--			SDHCI_CARD_PRESENT))
-+		if (!sdhci_do_get_cd(host))
- 			return;
- 	}
+@@ -1601,15 +1601,18 @@ static int sdhci_do_get_cd(struct sdhci_host *host)
+ 	if (host->flags & SDHCI_DEVICE_DEAD)
+ 		return 0;
 
++	/*
++	 * Try slot gpio detect, if defined it take precedence
++	 * over build in controller functionality
++	 */
++	if (!IS_ERR_VALUE(gpio_cd))
++		return !!gpio_cd;
++
+ 	/* If polling/nonremovable, assume that the card is always present. */
+ 	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
+ 	    (host->mmc->caps & MMC_CAP_NONREMOVABLE))
+ 		return 1;
+
+-	/* Try slot gpio detect */
+-	if (!IS_ERR_VALUE(gpio_cd))
+-		return !!gpio_cd;
+-
+ 	/* Host native card detect */
+ 	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
+ }
 --
 1.9.1
-
