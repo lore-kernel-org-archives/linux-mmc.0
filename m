@@ -1,154 +1,126 @@
 From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: [PATCH v3 3/6] pinctrl: sh-pfc: r8a7790: Implement voltage
- switching for SDHI
-Date: Fri, 26 Jun 2015 16:23:30 +0100
-Message-ID: <1435332210.23818.10.camel@codethink.co.uk>
+Subject: [PATCH v3 4/6] mmc: sh_mobile_sdhi: Add UHS-I mode support
+Date: Fri, 26 Jun 2015 16:23:39 +0100
+Message-ID: <1435332219.23818.11.camel@codethink.co.uk>
 References: <1435332116.23818.7.camel@codethink.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-gpio-owner@vger.kernel.org>
+Return-path: <linux-sh-owner@vger.kernel.org>
 In-Reply-To: <1435332116.23818.7.camel@codethink.co.uk>
-Sender: linux-gpio-owner@vger.kernel.org
+Sender: linux-sh-owner@vger.kernel.org
 To: Ian Molton <ian@mnementh.co.uk>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>
 Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-All the SHDIs can operate with either 3.3V or 1.8V signals, depending
-on negotiation with the card.
+Implement voltage switch, supporting modes up to SDR-50.
 
-Implement the {get,set}_low_voltage operations and set the low-voltage
-capability flag for the associated pins.
+Based on work by Shinobu Uehara, Rob Taylor, William Towle and Ian Molton.
 
 Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 ---
- drivers/pinctrl/sh-pfc/core.c        |  2 +-
- drivers/pinctrl/sh-pfc/core.h        |  1 +
- drivers/pinctrl/sh-pfc/pfc-r8a7790.c | 67 +++++++++++++++++++++++++++++++++++-
- 3 files changed, 68 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c | 60 +++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 60 insertions(+)
 
-diff --git a/drivers/pinctrl/sh-pfc/core.c b/drivers/pinctrl/sh-pfc/core.c
-index 7b2c9495c383..7d51f96afc9a 100644
---- a/drivers/pinctrl/sh-pfc/core.c
-+++ b/drivers/pinctrl/sh-pfc/core.c
-@@ -92,7 +92,7 @@ static int sh_pfc_map_resources(struct sh_pfc *pfc,
- 	return 0;
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 354f4f335ed5..2e65b855a7f7 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -30,6 +30,9 @@
+ #include <linux/mfd/tmio.h>
+ #include <linux/sh_dma.h>
+ #include <linux/delay.h>
++#include <linux/pinctrl/consumer.h>
++#include <linux/pinctrl/pinctrl-state.h>
++#include <linux/regulator/consumer.h>
+ 
+ #include "tmio_mmc.h"
+ 
+@@ -86,6 +89,8 @@ struct sh_mobile_sdhi {
+ 	struct clk *clk;
+ 	struct tmio_mmc_data mmc_data;
+ 	struct tmio_mmc_dma dma_priv;
++	struct pinctrl *pinctrl;
++	struct pinctrl_state *pinctrl_3v3, *pinctrl_1v8;
+ };
+ 
+ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
+@@ -136,6 +141,49 @@ static void sh_mobile_sdhi_clk_disable(struct platform_device *pdev)
+ 	clk_disable_unprepare(priv->clk);
  }
  
--static void __iomem *sh_pfc_phys_to_virt(struct sh_pfc *pfc, u32 reg)
-+void __iomem *sh_pfc_phys_to_virt(struct sh_pfc *pfc, u32 reg)
- {
- 	struct sh_pfc_window *window;
- 	phys_addr_t address = reg;
-diff --git a/drivers/pinctrl/sh-pfc/core.h b/drivers/pinctrl/sh-pfc/core.h
-index 6dc8a6fc2746..af355629c5d2 100644
---- a/drivers/pinctrl/sh-pfc/core.h
-+++ b/drivers/pinctrl/sh-pfc/core.h
-@@ -57,6 +57,7 @@ int sh_pfc_unregister_gpiochip(struct sh_pfc *pfc);
- int sh_pfc_register_pinctrl(struct sh_pfc *pfc);
- int sh_pfc_unregister_pinctrl(struct sh_pfc *pfc);
- 
-+void __iomem *sh_pfc_phys_to_virt(struct sh_pfc *pfc, u32 address);
- u32 sh_pfc_read_raw_reg(void __iomem *mapped_reg, unsigned int reg_width);
- void sh_pfc_write_raw_reg(void __iomem *mapped_reg, unsigned int reg_width,
- 			  u32 data);
-diff --git a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-index 22a5470889f5..38be7cbea4ca 100644
---- a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-+++ b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-@@ -1739,10 +1739,20 @@ static const u16 pinmux_data[] = {
- #define PIN_NUMBER(r, c) (((r) - 'A') * 31 + (c) + 200)
- #define PIN_A_NUMBER(r, c) PIN_NUMBER(ROW_GROUP_A(r), c)
- 
-+#define PIN_LOW_VOLTAGE(bank, _pin, _name, sfx)		\
-+	[RCAR_GP_PIN(bank, _pin)].configs = SH_PFC_PIN_CFG_LOW_VOLTAGE
++static int sh_mobile_sdhi_start_signal_voltage_switch(
++	struct tmio_mmc_host *host, unsigned char signal_voltage)
++{
++	struct sh_mobile_sdhi *priv = host_to_priv(host);
++	struct pinctrl_state *state;
++	int min_uV, max_uV;
++	int ret;
 +
- static const struct sh_pfc_pin pinmux_pins[] = {
- 	PINMUX_GPIO_GP_ALL(),
- 
--	/* Pins not associated with a GPIO port */
++	switch (signal_voltage) {
++	case MMC_SIGNAL_VOLTAGE_330:
++		min_uV = 2700000;
++		max_uV = 3600000;
++		state = priv->pinctrl_3v3;
++		break;
++	case MMC_SIGNAL_VOLTAGE_180:
++		min_uV = 1700000;
++		max_uV = 1950000;
++		state = priv->pinctrl_1v8;
++		break;
++	default:
++		return -EINVAL;
++	}
++
 +	/*
-+	 * All pins assigned to GPIO bank 3 can be used for SD interfaces
-+	 * in which case they support low voltage (1.8V) signalling.
++	 * If anything is missing, assume signal voltage is fixed at
++	 * 3.3V and succeed/fail accordingly.
 +	 */
-+	PORT_GP_32(3, PIN_LOW_VOLTAGE, unused),
++	if (IS_ERR(host->mmc->supply.vqmmc) ||
++	    IS_ERR(priv->pinctrl) || IS_ERR(state))
++		return signal_voltage == MMC_SIGNAL_VOLTAGE_330 ? 0 : -EINVAL;
 +
-+	/* Pins not associated with a GPIO port, placed after all the GPIOs */
-+	[RCAR_GP_PIN(5, 31) + 1] =
- 	SH_PFC_PIN_NAMED(ROW_GROUP_A('F'), 15, AF15),
- 	SH_PFC_PIN_NAMED(ROW_GROUP_A('G'), 15, AG15),
- 	SH_PFC_PIN_NAMED(ROW_GROUP_A('H'), 15, AH15),
-@@ -4595,6 +4605,55 @@ static const char * const vin3_groups[] = {
- 	"vin3_clk",
- };
- 
-+static bool sdhi_get_low_voltage(struct sh_pfc *pfc, unsigned int pin)
-+{
-+	void __iomem *mapped_reg;
-+	u32 data, mask;
++	ret = regulator_set_voltage(host->mmc->supply.vqmmc, min_uV, max_uV);
++	if (ret)
++		return ret;
 +
-+	if (WARN(pin < RCAR_GP_PIN(3, 0) || pin > RCAR_GP_PIN(3, 31),
-+		 "sdhi_get_low_voltage: invalid pin %#x", pin))
-+		return 0;
++	ret = pinctrl_select_state(priv->pinctrl, state);
++	if (ret)
++		return ret;
 +
-+	/* Map IOCTRL6 */
-+	mapped_reg = sh_pfc_phys_to_virt(pfc, 0xe606008c);
-+
-+	/* Bits in IOCTRL6 are numbered in opposite order to pins */
-+	mask = 0x80000000 >> (pin & 0x1f);
-+
-+	data = sh_pfc_read_raw_reg(mapped_reg, 32);
-+
-+	return !(data & mask);
++	usleep_range(5000, 5500);
++	return 0;
 +}
 +
-+static void
-+sdhi_set_low_voltage(struct sh_pfc *pfc, unsigned int pin, bool low)
-+{
-+	void __iomem *mapped_reg;
-+	u32 data, mask;
-+
-+	if (WARN(pin < RCAR_GP_PIN(3, 0) || pin > RCAR_GP_PIN(3, 31),
-+		 "sdhi_set_low_voltage: invalid pin %#x", pin))
-+		return;
-+
-+	/* Map IOCTRL6 */
-+	mapped_reg = sh_pfc_phys_to_virt(pfc, 0xe606008c);
-+
-+	/* Bits in IOCTRL6 are numbered in opposite order to pins */
-+	mask = 0x80000000 >> (pin & 0x1f);
-+
-+	data = sh_pfc_read_raw_reg(mapped_reg, 32);
-+
-+	if (low)
-+		data &= ~mask;
-+	else
-+		data |= mask;
-+
-+	sh_pfc_write_raw_reg(
-+		sh_pfc_phys_to_virt(pfc, pfc->info->unlock_reg), 32,
-+		~data);
-+	sh_pfc_write_raw_reg(mapped_reg, 32, data);
-+}
-+
- static const struct sh_pfc_function pinmux_functions[] = {
- 	SH_PFC_FUNCTION(audio_clk),
- 	SH_PFC_FUNCTION(avb),
-@@ -5586,8 +5645,14 @@ static const struct pinmux_cfg_reg pinmux_config_regs[] = {
- 	{ },
- };
+ static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
+ {
+ 	int timeout = 1000;
+@@ -228,6 +276,14 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		goto eprobe;
+ 	}
  
-+static const struct sh_pfc_soc_operations pinmux_ops = {
-+	.get_low_voltage = sdhi_get_low_voltage,
-+	.set_low_voltage = sdhi_set_low_voltage,
-+};
++	priv->pinctrl = devm_pinctrl_get(&pdev->dev);
++	if (!IS_ERR(priv->pinctrl)) {
++		priv->pinctrl_3v3 = pinctrl_lookup_state(priv->pinctrl,
++							 PINCTRL_STATE_DEFAULT);
++		priv->pinctrl_1v8 = pinctrl_lookup_state(priv->pinctrl,
++							 "1v8");
++	}
 +
- const struct sh_pfc_soc_info r8a7790_pinmux_info = {
- 	.name = "r8a77900_pfc",
-+	.ops = &pinmux_ops,
- 	.unlock_reg = 0xe6060000, /* PMMR */
- 
- 	.function = { PINMUX_FUNCTION_BEGIN, PINMUX_FUNCTION_END },
+ 	host = tmio_mmc_host_alloc(pdev);
+ 	if (!host) {
+ 		ret = -ENOMEM;
+@@ -239,6 +295,10 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	host->clk_enable	= sh_mobile_sdhi_clk_enable;
+ 	host->clk_disable	= sh_mobile_sdhi_clk_disable;
+ 	host->multi_io_quirk	= sh_mobile_sdhi_multi_io_quirk;
++
++	host->start_signal_voltage_switch
++				= sh_mobile_sdhi_start_signal_voltage_switch;
++
+ 	/* SD control register space size is 0x100, 0x200 for bus_shift=1 */
+ 	if (resource_size(res) > 0x100)
+ 		host->bus_shift = 1;
 -- 
 2.1.4
 
