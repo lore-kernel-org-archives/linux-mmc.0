@@ -1,49 +1,31 @@
-From: David Jander <david@protonic.nl>
-Subject: Re: [RFC PATCH] mmc: core: Optimize case for exactly one
- erase-group budget TRIM
-Date: Fri, 26 Jun 2015 08:56:42 +0200
-Message-ID: <20150626085642.5cdad2e3@archvile>
-References: <1433320469-29453-1-git-send-email-david@protonic.nl>
-	<CAPDyKFocxYD+q_CQQ4Kz6ZZ88P+DwWcwfrEGEJJEEgkFT5r+MA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+From: "Ivan T. Ivanov" <ivan.ivanov@linaro.org>
+Subject: [PATCH 0/3] mmc: sdhci: Card detection fixes
+Date: Fri, 26 Jun 2015 13:00:07 +0300
+Message-ID: <1435312810-23957-1-git-send-email-ivan.ivanov@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from protonic.xs4all.nl ([83.163.252.89]:14693 "EHLO
-	protonic.xs4all.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751704AbbFZG4o (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Jun 2015 02:56:44 -0400
-In-Reply-To: <CAPDyKFocxYD+q_CQQ4Kz6ZZ88P+DwWcwfrEGEJJEEgkFT5r+MA@mail.gmail.com>
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:34035 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751568AbbFZKAP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Jun 2015 06:00:15 -0400
+Received: by wicnd19 with SMTP id nd19so40680379wic.1
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Jun 2015 03:00:13 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Pierre Ossman <pierre@ossman.eu>, Sascha Hauer <s.hauer@pengutronix.de>, Johan Rudholm <johan.rudholm@axis.com>, Adrian Hunter <adrian.hunter@intel.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Tim Kryger <tim.kryger@gmail.com>, Aisheng Dong <b29396@freescale.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 
+Following changes aimed to fix some aspects of card detection, when
+BROKEN_CARD_DETECTION quirk is set.
 
-Dear Ulf,
+Ivan T. Ivanov (3):
+  mmc: sdhci: let GPIO based card detection have higher precedence
+  mmc: sdhci: don't use card state polling when CD GPIO is defined
+  mmc: sdhci: properly check card present state when quirk
+    NO_CARD_NO_RESET is set
 
-On Thu, 4 Jun 2015 10:31:59 +0200
-Ulf Hansson <ulf.hansson@linaro.org> wrote:
+ drivers/mmc/host/sdhci.c | 17 ++++++++++-------
+ 1 file changed, 10 insertions(+), 7 deletions(-)
 
-> On 3 June 2015 at 10:34, David Jander <david@protonic.nl> wrote:
-> > In the (not so unlikely) case that the mmc controller timeout budget is
-> > enough for exactly one erase-group, the simplification of allowing one
-> > sector has an enormous performance penalty. We optimize this special case
-> > by introducing a flag that prohibits erase-group boundary crossing, so
-> > that we can allow trimming more than one sector at a time.
-> >
-> > Signed-off-by: David Jander <david@protonic.nl>
-> 
-> Hi David,
-> 
-> Thanks for working on this!
+--
+1.9.1
 
-I have since sent an updated patch that includes more comment. It would be
-great if you could find the time to review it. I hope the comments are clear
-enough.
-
-Best regards,
-
--- 
-David Jander
-Protonic Holland.
