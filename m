@@ -1,7 +1,7 @@
 From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: [PATCH v4 5/8] mmc: tmio: Add UHS-I mode support
-Date: Tue, 30 Jun 2015 17:56:59 +0100
-Message-ID: <1435683419.23818.67.camel@codethink.co.uk>
+Subject: [PATCH v4 6/8] mmc: sh_mobile_sdhi: Add UHS-I mode support
+Date: Tue, 30 Jun 2015 17:57:07 +0100
+Message-ID: <1435683427.23818.68.camel@codethink.co.uk>
 References: <1435683177.23818.60.camel@codethink.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
@@ -13,81 +13,114 @@ To: Ian Molton <ian@mnementh.co.uk>, Laurent Pinchart <laurent.pinchart@ideasonb
 Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Based on work by Shinobu Uehara and Ben Dooks.  This adds the voltage
-switch operation needed for all UHS-I modes, but not the tuning needed
-for SDR-104 which will come later.
+Implement voltage switch, supporting modes up to SDR-50.
 
-The card_busy implementation is a bit of a guess, but works for me on
-an R8A7790 chip.
+Based on work by Shinobu Uehara, Rob Taylor, William Towle and Ian Molton.
 
 Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 ---
- drivers/mmc/host/tmio_mmc.h     |  3 +++
- drivers/mmc/host/tmio_mmc_pio.c | 31 +++++++++++++++++++++++++++++++
- 2 files changed, 34 insertions(+)
+ drivers/mmc/host/sh_mobile_sdhi.c | 60 +++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 60 insertions(+)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index b44b58902906..aabd36955e73 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -101,6 +101,9 @@ struct tmio_mmc_host {
- 	void (*clk_disable)(struct tmio_mmc_host *host);
- 	int (*multi_io_quirk)(struct mmc_card *card,
- 			      unsigned int direction, int blk_size);
-+
-+	int (*start_signal_voltage_switch)(struct tmio_mmc_host *host,
-+					   unsigned char signal_voltage);
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 6ed36b984e6e..76899b90946e 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -30,6 +30,9 @@
+ #include <linux/mfd/tmio.h>
+ #include <linux/sh_dma.h>
+ #include <linux/delay.h>
++#include <linux/pinctrl/consumer.h>
++#include <linux/pinctrl/pinctrl-state.h>
++#include <linux/regulator/consumer.h>
+ 
+ #include "tmio_mmc.h"
+ 
+@@ -86,6 +89,8 @@ struct sh_mobile_sdhi {
+ 	struct clk *clk;
+ 	struct tmio_mmc_data mmc_data;
+ 	struct tmio_mmc_dma dma_priv;
++	struct pinctrl *pinctrl;
++	struct pinctrl_state *pinctrl_3v3, *pinctrl_1v8;
  };
  
- struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *pdev);
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 4869dd9ffa9f..192bf3dda964 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -1008,12 +1008,43 @@ static int tmio_multi_io_quirk(struct mmc_card *card,
- 	return blk_size;
+ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
+@@ -185,6 +190,49 @@ static void sh_mobile_sdhi_clk_disable(struct tmio_mmc_host *host)
+ 	clk_disable_unprepare(priv->clk);
  }
  
-+static int tmio_mmc_start_signal_voltage_switch(struct mmc_host *mmc,
-+	struct mmc_ios *ios)
++static int sh_mobile_sdhi_start_signal_voltage_switch(
++	struct tmio_mmc_host *host, unsigned char signal_voltage)
 +{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct sh_mobile_sdhi *priv = host_to_priv(host);
++	struct pinctrl_state *state;
++	int min_uV, max_uV;
++	int ret;
 +
-+	if (!host->start_signal_voltage_switch)
-+		return 0;
-+
-+	return host->start_signal_voltage_switch(host, ios->signal_voltage);
-+}
-+
-+static int tmio_mmc_card_busy(struct mmc_host *mmc)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	u32 status;
-+
-+	pm_runtime_get_sync(mmc_dev(mmc));
-+	status = sd_ctrl_read32(host, CTL_STATUS);
-+	pm_runtime_mark_last_busy(mmc_dev(mmc));
-+	pm_runtime_put_autosuspend(mmc_dev(mmc));
++	switch (signal_voltage) {
++	case MMC_SIGNAL_VOLTAGE_330:
++		min_uV = 2700000;
++		max_uV = 3600000;
++		state = priv->pinctrl_3v3;
++		break;
++	case MMC_SIGNAL_VOLTAGE_180:
++		min_uV = 1700000;
++		max_uV = 1950000;
++		state = priv->pinctrl_1v8;
++		break;
++	default:
++		return -EINVAL;
++	}
 +
 +	/*
-+	 * Card signals busy by pulling down all of DAT[3:0].  This status
-+	 * flag appears to reflect DAT3.
++	 * If anything is missing, assume signal voltage is fixed at
++	 * 3.3V and succeed/fail accordingly.
 +	 */
-+	return !(status & TMIO_STAT_SIGSTATE_A);
++	if (IS_ERR(host->mmc->supply.vqmmc) ||
++	    IS_ERR(priv->pinctrl) || IS_ERR(state))
++		return signal_voltage == MMC_SIGNAL_VOLTAGE_330 ? 0 : -EINVAL;
++
++	ret = regulator_set_voltage(host->mmc->supply.vqmmc, min_uV, max_uV);
++	if (ret)
++		return ret;
++
++	ret = pinctrl_select_state(priv->pinctrl, state);
++	if (ret)
++		return ret;
++
++	usleep_range(5000, 5500);
++	return 0;
 +}
 +
- static const struct mmc_host_ops tmio_mmc_ops = {
- 	.request	= tmio_mmc_request,
- 	.set_ios	= tmio_mmc_set_ios,
- 	.get_ro         = tmio_mmc_get_ro,
- 	.get_cd		= mmc_gpio_get_cd,
- 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
-+	.start_signal_voltage_switch
-+			= tmio_mmc_start_signal_voltage_switch,
-+	.card_busy	= tmio_mmc_card_busy,
- 	.multi_io_quirk	= tmio_multi_io_quirk,
- };
+ static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
+ {
+ 	int timeout = 1000;
+@@ -277,6 +325,14 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		goto eprobe;
+ 	}
  
++	priv->pinctrl = devm_pinctrl_get(&pdev->dev);
++	if (!IS_ERR(priv->pinctrl)) {
++		priv->pinctrl_3v3 = pinctrl_lookup_state(priv->pinctrl,
++							 PINCTRL_STATE_DEFAULT);
++		priv->pinctrl_1v8 = pinctrl_lookup_state(priv->pinctrl,
++							 "1v8");
++	}
++
+ 	host = tmio_mmc_host_alloc(pdev);
+ 	if (!host) {
+ 		ret = -ENOMEM;
+@@ -289,6 +345,10 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	host->clk_update	= sh_mobile_sdhi_clk_update;
+ 	host->clk_disable	= sh_mobile_sdhi_clk_disable;
+ 	host->multi_io_quirk	= sh_mobile_sdhi_multi_io_quirk;
++
++	host->start_signal_voltage_switch
++				= sh_mobile_sdhi_start_signal_voltage_switch;
++
+ 	/* SD control register space size is 0x100, 0x200 for bus_shift=1 */
+ 	if (resource_size(res) > 0x100)
+ 		host->bus_shift = 1;
 -- 
 2.1.4
 
