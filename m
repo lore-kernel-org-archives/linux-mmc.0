@@ -1,50 +1,88 @@
-From: Venkatraman S <svenkatr@gmail.com>
-Subject: Re: mmc driver read/write detect problem with Baytrail tablet
-Date: Tue, 30 Jun 2015 12:06:11 -0400
-Message-ID: <CAOyx1Loar=hRrqgbuQqWuy4XswoLcNP6Wr5X+jdapt9PxA3P9Q@mail.gmail.com>
-References: <CAGwpYodzn4TGiCp7L1+KQgb+JreMx2y07wgRmUsDHG-3fwetLg@mail.gmail.com>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Subject: [PATCH v4 0/8] UHS-I support for sh_mobile_sdhi
+Date: Tue, 30 Jun 2015 17:52:57 +0100
+Message-ID: <1435683177.23818.60.camel@codethink.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vn0-f45.google.com ([209.85.216.45]:35366 "EHLO
-	mail-vn0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753414AbbF3QGM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Jun 2015 12:06:12 -0400
-Received: by vnbg190 with SMTP id g190so2294576vnb.2
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Jun 2015 09:06:11 -0700 (PDT)
-In-Reply-To: <CAGwpYodzn4TGiCp7L1+KQgb+JreMx2y07wgRmUsDHG-3fwetLg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: Ian Molton <ian@mnementh.co.uk>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Paul Mansfield <paul@mansfield.co.uk>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Tue, Jun 30, 2015 at 10:13 AM, Paul Mansfield <paul@mansfield.co.uk> wrote:
->
-> Hello,
->
-> I am trying to get a baytrail-t based convertible tablet working with
-> linux, using kernel 4.1 built for 32 bit Debian Jessie. I've made
-> good progress, making my Toshiba Click Mini work
-> sufficiently well to be useable with a USB wifi adaptor (the driver
-> for the integrated SDIO wifi makes it unstable).
->
-> A major sticking point is that the internal microSDHC slot is always
-> read only; the device node /dev/mmcblk1 is read-write but when I
-> try and mount it the kernel complains it's not writable.
->
-> Meanwhile the tablet has a dock which has an full sized SDHC slot,
-> and that works perfectly. I can put cards in the internal and dock
-> card slots and they come up as separate devices, so they're
-> definitely different devices on different buses.
->
-> Is there some debug I can enable to let me find out why the driver
-> thinks that internal card slot is read only?
->
-> Is there some way to override the mmc driver read-only/write-protect
-> function to force the driver to allow writing?
->
-> Needless to say the card works fine in Windows 8.1.
->
+This series adds support for UHS-I in sh_mobile_sdhi, partly implemented
+in tmio_mmc.  This does not yet include tuning for SDR-104, but SDR-50 now
+works on the R8A7790 Lager board and another development board.
 
-Are the reads working properly ?
-Can you enable MMC_DEBUG in the kernel config to collect more information ?
+The pfc block needs to be reconfigured from 3.3V to 1.8V signalling on
+the pins wired to the SD card.  This is supported by implementing the
+pinconf power-source parameter.  I expect that several SH SoCs have this
+capability, but I only have the R8A7790 data sheet so I only implemented
+it for that one.
+
+Changes since v3:
+- Change pinconf power-source argument to millivolts instead of boolean
+  for low voltage
+- Rename pinctrl voltage operations accordingly
+- Use io{read,write}32() instead of sh_pfc_{read,write}_raw_reg()
+- Change tmio, sh_mobile_sdhi to adjust input clock frequency to match
+  requested bus frequency more closely
+- Replace SDHI assigned-clock{,-rate}s properties with max-frequency
+- Reorder patch series to put all pinctrl changes first
+
+Changes since v2:
+- Implement the pinconf power-source parameter instead of separate
+  functions for the low-voltage mode
+- Adjust low-voltage mode setter function and device tree accordingly
+- Add low-voltage mode getter function for R8A7790
+
+Changes since v1:
+- Reword commit message for "mmc: tmio: Add UHS-I mode support"
+- Make sh_mobile_sdhi_start_signal_voltage_switch() succeed if asked
+  to switch to 3.3V and the regulator or pinctrl or pinctrl state is
+  missing
+- Drop change to mmcif clock on Lager
+- Correct original author for sdhi clock changes on Lager
+
+Changes since the RFC:
+- Replace the 'regulator' devices for signal voltage switching with
+  pinctrl functions and states
+- Drop 'mmc: sh_mobile_sdhi: Add actual clock rate support' as it's
+  redundant
+- Use a switch statement in sh_mobile_sdhi_start_signal_voltage_switch()
+- Fix subject prefix for the DT changes
+
+Ben.
+
+Ben Hutchings (8):
+  pinctrl: sh-pfc: Implement pinconf power-source param for voltage
+    switching
+  pinctrl: sh-pfc: r8a7790: Implement voltage switching for SDHI
+  mmc: tmio, sh_mobile_sdhi: Pass tmio_mmc_host ptr to
+    clk_{enable,disable} ops
+  mmc: tmio, sh_mobile_sdhi: Add support for variable input clock
+    frequency
+  mmc: tmio: Add UHS-I mode support
+  mmc: sh_mobile_sdhi: Add UHS-I mode support
+  ARM: shmobile: r8a7790: Set maximum frequencies for SDHI clocks
+  ARM: shmobile: lager: Enable UHS-I SDR-50
+
+ .../bindings/pinctrl/renesas,pfc-pinctrl.txt       |   4 +-
+ arch/arm/boot/dts/r8a7790-lager.dts                |  22 +++-
+ arch/arm/boot/dts/r8a7790.dtsi                     |   4 +
+ drivers/mmc/host/sh_mobile_sdhi.c                  | 126 +++++++++++++++++++--
+ drivers/mmc/host/tmio_mmc.h                        |   9 +-
+ drivers/mmc/host/tmio_mmc_pio.c                    |  56 ++++++---
+ drivers/pinctrl/sh-pfc/core.c                      |   2 +-
+ drivers/pinctrl/sh-pfc/core.h                      |   1 +
+ drivers/pinctrl/sh-pfc/pfc-r8a7790.c               |  71 +++++++++++-
+ drivers/pinctrl/sh-pfc/pinctrl.c                   |  44 ++++++-
+ drivers/pinctrl/sh-pfc/sh_pfc.h                    |   5 +
+ 11 files changed, 313 insertions(+), 31 deletions(-)
+
+-- 
+2.1.4
+
+
+
