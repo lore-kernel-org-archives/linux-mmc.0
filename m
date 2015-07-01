@@ -1,50 +1,39 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH] mmc: core: Set load on vmmc and vqmmc
-Date: Wed, 1 Jul 2015 11:59:25 +0100
-Message-ID: <20150701105925.GT11162@sirena.org.uk>
-References: <1435725525-4367-1-git-send-email-bjorn.andersson@sonymobile.com>
+From: Bastien Nocera <hadess@hadess.net>
+Subject: Re: [Regression: mmc: sdhci-esdhc-imx: add runtime pm support]
+Date: Wed, 1 Jul 2015 13:13:46 +0000 (UTC)
+Message-ID: <loom.20150701T150850-834@post.gmane.org>
+References: <52F3A267.8030302@parkeon.com> <CAA+hA=Qvnm4S1tEQbfopegTeE4uHDdu9nY=fnYAYqdzPrUP8CQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="HtRZva1Vzv8iP5ye"
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mezzanine.sirena.org.uk ([106.187.55.193]:34890 "EHLO
-	mezzanine.sirena.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753197AbbGAK7f (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jul 2015 06:59:35 -0400
-Content-Disposition: inline
-In-Reply-To: <1435725525-4367-1-git-send-email-bjorn.andersson@sonymobile.com>
+Received: from plane.gmane.org ([80.91.229.3]:58865 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753958AbbGANPG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 1 Jul 2015 09:15:06 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1ZAHqx-0006lX-6A
+	for linux-mmc@vger.kernel.org; Wed, 01 Jul 2015 15:15:03 +0200
+Received: from mon69-7-83-155-44-161.fbx.proxad.net ([83.155.44.161])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Jul 2015 15:15:03 +0200
+Received: from hadess by mon69-7-83-155-44-161.fbx.proxad.net with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Jul 2015 15:15:03 +0200
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bjorn Andersson <bjorn.andersson@sonymobile.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
+Hey Dong,
+<snip>
+> Some SDIO cards may not be able to work well without clock.
 
---HtRZva1Vzv8iP5ye
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+I've been needing to use this particular patch on a BayTrail tablet with a
+Realtek 8723BS SDIO Wi-Fi chip to get Wi-Fi to be stable. This is using
+the most recent upstream Linus kernels as well. Is there any reason this
+particular patch did not get sent for merging?
 
-On Tue, Jun 30, 2015 at 09:38:45PM -0700, Bjorn Andersson wrote:
+Cheers
 
-> +- vmmc-load: requested load for the vmmc regulator, in mA
-> +- vqmmc-load: requested load for the vqmmc regulator, in mA
-
-Isn't this something that should have default values from the spec?  The
-binding also ought to say what a "requested load" is.
-
---HtRZva1Vzv8iP5ye
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJVk8gMAAoJECTWi3JdVIfQ/F8H/1zbZ/Cz+O2qCTwqijuWpnmY
-Dhrz3oJn6yEBq6lRu3ZAnebhA9qV0vgCQOxnbMWrf4CXrarLSP470SIpciWiD+aq
-Z+SkTDKtbGbEMv2Xn/8zrw7jsprW8KJnVbi0OqOy8+oCvWoblhajovfPPityBiEP
-qst+ANqrF3/8kgST56pJBGbM4tDf+AVf7fUdYp2MebHuYp7UDEv1vrFTdXkynyQH
-+faadFPTAi7sDMVKNhPgt5cHd3Ryghj1SkKlJjVgifw6VwSHaewY5H5CBjm5UBXA
-MqM+HlaBeIP0zi4t4C/6XF+v1kVED8mM1kxCq9X9+dy5SR5clax6OzioMv0hbMs=
-=LfQn
------END PGP SIGNATURE-----
-
---HtRZva1Vzv8iP5ye--
