@@ -1,18 +1,18 @@
-From: Paul Mansfield <paul@mansfield.co.uk>
+From: Paul Mansfield <paul-kernel@mansfield.co.uk>
 Subject: Re: mmc driver read/write detect problem with Baytrail tablet
-Date: Wed, 1 Jul 2015 23:07:42 +0100
-Message-ID: <CAGwpYodfH6JZbgaWrt_K14At5-ZMK=4eMZ4RNmuQxxMMYLsodg@mail.gmail.com>
+Date: Wed, 1 Jul 2015 23:08:27 +0100
+Message-ID: <CAGwpYoc7J74KWC+oveCuoLQOeirADkgBBkxWTCn3hpb5SNyxGg@mail.gmail.com>
 References: <CAGwpYodzn4TGiCp7L1+KQgb+JreMx2y07wgRmUsDHG-3fwetLg@mail.gmail.com>
  <CAOyx1Loar=hRrqgbuQqWuy4XswoLcNP6Wr5X+jdapt9PxA3P9Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f175.google.com ([209.85.212.175]:35610 "EHLO
-	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752321AbbGAWID (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jul 2015 18:08:03 -0400
-Received: by wiga1 with SMTP id a1so137291208wig.0
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Jul 2015 15:08:02 -0700 (PDT)
+Received: from mail-wg0-f45.google.com ([74.125.82.45]:33889 "EHLO
+	mail-wg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750963AbbGAWIs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jul 2015 18:08:48 -0400
+Received: by wgqq4 with SMTP id q4so47943964wgq.1
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Jul 2015 15:08:47 -0700 (PDT)
 In-Reply-To: <CAOyx1Loar=hRrqgbuQqWuy4XswoLcNP6Wr5X+jdapt9PxA3P9Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
