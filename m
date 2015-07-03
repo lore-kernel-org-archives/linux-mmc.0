@@ -1,93 +1,96 @@
-From: Orson Zhai <orsonzhai-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [RFC PATCH] mmc: sprd: add MMC host driver for Spreadtrum SoC
-Date: Fri, 3 Jul 2015 10:50:19 +0800
-Message-ID: <CA+H2tpFO2uz3Pr4bxoesqc8teF+SYhw-GqKOdk_w4_p5KvJR6A@mail.gmail.com>
+From: =?gb2312?B?QmlsbG93cyBXdSAozuS66czOKQ==?=
+	<Billows.Wu@spreadtrum.com>
+Subject: RE: [RFC PATCH] mmc: sprd: add MMC host driver for Spreadtrum SoC
+Date: Fri, 3 Jul 2015 05:44:17 +0000
+Message-ID: <f3e0e99497ba4b729fb0e016677f4e16@SHMBX03.spreadtrum.com>
 References: <1435735399-15333-1-git-send-email-chunyan.zhang@spreadtrum.com>
 	<CAL_JsqKcZ-7rM5YrkpJSP7OfECmRg4hWPRFy=UqZn1y74R8qsg@mail.gmail.com>
 	<CA+H2tpG+_pCR-j3nZ+SeAhpj6QfiPK2=Q0pwjndQoG9R4+LMYw@mail.gmail.com>
-	<CAL_JsqKk0KOheyGvc=EBkgH3K4fPDsppLQGtXjNA4cekW57bvQ@mail.gmail.com>
+	<CAL_JsqKk0KOheyGvc=EBkgH3K4fPDsppLQGtXjNA4cekW57bvQ@mail.gmail.com>,<CA+H2tpFO2uz3Pr4bxoesqc8teF+SYhw-GqKOdk_w4_p5KvJR6A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAL_JsqKk0KOheyGvc=EBkgH3K4fPDsppLQGtXjNA4cekW57bvQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robherring2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Chunyan Zhang <chunyan.zhang-lxIno14LUO0EEoCn2XhGlw@public.gmane.org>, "chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org" <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Shawn Guo <shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, billows.wu-lxIno14LUO0EEoCn2XhGlw@public.gmane.org, =?UTF-8?B?V2VpIFFpYW8gKOS5lOS8nyk=?= <wei.qiao-lxIno14LUO0EEoCn2XhGlw@public.gmane.org>, baolin.wang-lxIno14LUO0EEoCn2XhGlw@public.gmane.org, ning.yang-lxIno14LUO0EEoCn2XhGlw@public.gmane.org, =?UTF-8?B?T3Jzb24gWmhhaSjnv5/kuqwp?= <orson.zhai-lxIno14LUO0EEoCn2XhGlw@public.gmane.org>, jason.wu-lxIno14LUO0EEoCn2XhGlw@public.gmane.org, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CA+H2tpFO2uz3Pr4bxoesqc8teF+SYhw-GqKOdk_w4_p5KvJR6A@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Orson Zhai <orsonzhai@gmail.com>, Rob Herring <robherring2@gmail.com>
+Cc: =?gb2312?B?Q2h1bnlhbiBaaGFuZyAo1cW0utHeKQ==?= <Chunyan.Zhang@spreadtrum.com>, "chris@printf.net" <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Lee Jones <lee.jones@linaro.org>, Shawn Guo <shawn.guo@linaro.org>, Grant Likely <grant.likely@linaro.org>, Rob Herring <robh+dt@kernel.org>, Arnd Bergmann <arnd@arndb.de>, =?gb2312?B?V2VpIFFpYW8gKMfHzrAp?= <Wei.Qiao@spreadtrum.com>, =?gb2312?B?QmFvbGluIFdhbmcgKM31sabB1ik=?= <Baolin.Wang@spreadtrum.com>, =?gb2312?B?TmluZyBZYW5nICjR7sT+KQ==?= <Ning.Yang@spreadtrum.com>, =?gb2312?B?T3Jzb24gWmhhaSAotdS+qSk=?= <Orson.Zhai@spreadtrum.com>, =?gb2312?B?SmFzb24gV3UgKM7i9qvLrCk=?= <Jason.Wu@spreadtrum.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jul 2, 2015 at 11:47 PM, Rob Herring <robherring2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> On Thu, Jul 2, 2015 at 4:26 AM, Orson Zhai <orsonzhai-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->> Hi Rob,
->>
->> Thanks for your quick reply.
->> I have one question to your last comment.
->>
->> On Thu, Jul 2, 2015 at 1:50 AM, Rob Herring <robherring2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
->>> On Wed, Jul 1, 2015 at 2:23 AM, Chunyan Zhang
->>> <chunyan.zhang-lxIno14LUO0EEoCn2XhGlw@public.gmane.org> wrote:
->>>> From: Billows Wu <billows.wu-lxIno14LUO0EEoCn2XhGlw@public.gmane.org>
->
-> [...]
->
->>>> +const struct of_device_id sdhost_of_match[] = {
->>>> +       {.compatible = "sprd,sd-sdhost-3.0", .data = &sd_caps_info,},
->>>> +       {.compatible = "sprd,wifi-sdhost-3.0", .data = &wifi_caps_info,},
->>>> +       {.compatible = "sprd,emmc-sdhost-3.0",  .data = &emmc_caps_info,},
->>>
->>> What these are connected to is irrelevant to the driver and compatible
->>> string. All these differences belong in the DT unless the IP blocks
->>> are really different.
->>
->> It's my idea to let Billows do like this.
->> I learn from SSP part in freescale  "arch/arm/boot/dts/imx28-evk.dts"
->> Their ssp0-ssp2 each have 2 roles, mmc or generic spi bus.
->> And they may write one of their combo configuration like this:
->
-> That is a bit different as the host controller is operating in
-> completely different modes. In your case, the host controller is the
-> same and functions the same way, but just has different cards
-> attached.
->
->>
->>  43                         ssp1: ssp@80012000 {
->>  44                                 compatible = "fsl,imx28-mmc";
->>  45                                 bus-width = <8>;
->>  46                                 wp-gpios = <&gpio0 28 0>;
->>  47                         };
->>  48
->>  49                         ssp2: ssp@80014000 {
->>  50                                 #address-cells = <1>;
->>  51                                 #size-cells = <0>;
->>  52                                 compatible = "fsl,imx28-spi";
->>  53                                 pinctrl-names = "default";
->>  54                                 pinctrl-0 = <&spi2_pins_a>;
->>  55                                 status = "okay";
->>  56
->>  57                                 flash: m25p80@0 {
->>  58                                         #address-cells = <1>;
->>  59                                         #size-cells = <1>;
->>  60                                         compatible = "sst,sst25vf016b";
->>  61                                         spi-max-frequency = <40000000>;
->>  62                                         reg = <0>;
->>  63                                 };
->>  64                         };
->>
->> Billows tell me they also have 3 roles in their sd host controller
->> corresponding to 3 kinds of different operation.
->> He used to create "sprd,name" property for this. Is it a good way or
->> anything else better?
->
-> Why do you need to know? You can define parameters which can't be
-> probed such as bus width, voltage, and clock freq. in DT for each
-> host. The MMC subsys core will figure out the type of device attached.
-
-I think you're right.
-Thanks!
--orson
-
->
-> Rob
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgUm9iLAoKVGhhbmtzIGZvciB5b3VyIHJlcGx5LgpUaGUgTU1DIHN1YnN5cyBjb3JlIGNhbiBm
+aWd1cmUgb3V0IHRoZSB0eXBlIG9mIHRoZSBkZXZpY2UgYXR0YWNoZWQuIEJ1dCBpdCBoYXBwYXBl
+ZCBhZnRlciBNTUMgcHJvYmUgZnVuY3Rpb24gcnVuIG92ZXIuIApJZiB3ZSB3YW50IHRvIGRpc3Rp
+bmd1aXNoIE1NQ6OsU0Qgb3IgV2ktRmkgaW4gY29udHJvbGxlcidzIHByb2JlIGZ1bmN0aW9uLCB3
+ZSBtYXkgYnkgY29udHJvbGxlcidzIHJlZ2lzdGVyIHBoeXNpY2FsIGFkZHJlc3MsIGZvciBleGFt
+cGxlICAyMDYwMDAwMC5zZGlvo6wyLjQwMDAwMC5zZGlvIG9yIDIwMzAwMDAwLnNkaW8uICAgU28g
+d2UgbXVzdCBrbm93IE1NQyBjb250cm9sbGVyJ3MgcGh5c2ljYWwgYWRkcmVzcyBpcyAweDIwNjAw
+MDAwIGFuZCBTRCBjb250cm9sbGVyJ3MgcGh5c2ljYWwgYWRkcmVzcyBpcyAweDIwMzAwMDAwLiBU
+aGlzIHJlZHVjZXMgdGhlIGNvZGUgcmVhZGFiaWxpdHkuIApJZiB5b3UgaGF2ZSBhIGdvb2Qgb3Bp
+bmlvbiBob3cgdG8gZGlzdGluZ3Vpc2ggTU1DIGZvcm0gU0Qgb3IgU0RJTyBkZXZpY2UgaW4gaG9z
+dCBjb250cm9sbGVyIHByb2JlIGZ1bmN0aW9uIG5vdCBieSBwaHlzaWNhbCBhZGRyZXNzLCBwbGVh
+c2UgdGVsbCB1cy4KClRoYW5rcyEgICAgICAgICAgICAgICAgICAgIAotLWJpbGxvd3MKX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX18KRnJvbTogT3Jzb24gWmhhaSA8b3Jzb256aGFp
+QGdtYWlsLmNvbT4KU2VudDogRnJpZGF5LCBKdWx5IDMsIDIwMTUgMTA6NTAgQU0KVG86IFJvYiBI
+ZXJyaW5nCkNjOiBDaHVueWFuIFpoYW5nICjVxbS60d4pOyBjaHJpc0BwcmludGYubmV0OyBVbGYg
+SGFuc3NvbjsgTGVlIEpvbmVzOyBTaGF3biBHdW87IEdyYW50IExpa2VseTsgUm9iIEhlcnJpbmc7
+IEFybmQgQmVyZ21hbm47IEJpbGxvd3MgV3UgKM7kuunMzik7IFdlaSBRaWFvICjHx86wKTsgQmFv
+bGluIFdhbmcgKM31sabB1ik7IE5pbmcgWWFuZyAo0e7E/ik7IE9yc29uIFpoYWkgKLXUvqkpOyBK
+YXNvbiBXdSAozuL2q8usKTsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgbGludXgta2VybmVs
+QHZnZXIua2VybmVsLm9yZzsgZGV2aWNldHJlZUB2Z2VyLmtlcm5lbC5vcmcKU3ViamVjdDogUmU6
+IFtSRkMgUEFUQ0hdIG1tYzogc3ByZDogYWRkIE1NQyBob3N0IGRyaXZlciBmb3IgU3ByZWFkdHJ1
+bSBTb0MKCk9uIFRodSwgSnVsIDIsIDIwMTUgYXQgMTE6NDcgUE0sIFJvYiBIZXJyaW5nIDxyb2Jo
+ZXJyaW5nMkBnbWFpbC5jb20+IHdyb3RlOgo+IE9uIFRodSwgSnVsIDIsIDIwMTUgYXQgNDoyNiBB
+TSwgT3Jzb24gWmhhaSA8b3Jzb256aGFpQGdtYWlsLmNvbT4gd3JvdGU6Cj4+IEhpIFJvYiwKPj4K
+Pj4gVGhhbmtzIGZvciB5b3VyIHF1aWNrIHJlcGx5Lgo+PiBJIGhhdmUgb25lIHF1ZXN0aW9uIHRv
+IHlvdXIgbGFzdCBjb21tZW50Lgo+Pgo+PiBPbiBUaHUsIEp1bCAyLCAyMDE1IGF0IDE6NTAgQU0s
+IFJvYiBIZXJyaW5nIDxyb2JoZXJyaW5nMkBnbWFpbC5jb20+IHdyb3RlOgo+Pj4gT24gV2VkLCBK
+dWwgMSwgMjAxNSBhdCAyOjIzIEFNLCBDaHVueWFuIFpoYW5nCj4+PiA8Y2h1bnlhbi56aGFuZ0Bz
+cHJlYWR0cnVtLmNvbT4gd3JvdGU6Cj4+Pj4gRnJvbTogQmlsbG93cyBXdSA8YmlsbG93cy53dUBz
+cHJlYWR0cnVtLmNvbT4KPgo+IFsuLi5dCj4KPj4+PiArY29uc3Qgc3RydWN0IG9mX2RldmljZV9p
+ZCBzZGhvc3Rfb2ZfbWF0Y2hbXSA9IHsKPj4+PiArICAgICAgIHsuY29tcGF0aWJsZSA9ICJzcHJk
+LHNkLXNkaG9zdC0zLjAiLCAuZGF0YSA9ICZzZF9jYXBzX2luZm8sfSwKPj4+PiArICAgICAgIHsu
+Y29tcGF0aWJsZSA9ICJzcHJkLHdpZmktc2Rob3N0LTMuMCIsIC5kYXRhID0gJndpZmlfY2Fwc19p
+bmZvLH0sCj4+Pj4gKyAgICAgICB7LmNvbXBhdGlibGUgPSAic3ByZCxlbW1jLXNkaG9zdC0zLjAi
+LCAgLmRhdGEgPSAmZW1tY19jYXBzX2luZm8sfSwKPj4+Cj4+PiBXaGF0IHRoZXNlIGFyZSBjb25u
+ZWN0ZWQgdG8gaXMgaXJyZWxldmFudCB0byB0aGUgZHJpdmVyIGFuZCBjb21wYXRpYmxlCj4+PiBz
+dHJpbmcuIEFsbCB0aGVzZSBkaWZmZXJlbmNlcyBiZWxvbmcgaW4gdGhlIERUIHVubGVzcyB0aGUg
+SVAgYmxvY2tzCj4+PiBhcmUgcmVhbGx5IGRpZmZlcmVudC4KPj4KPj4gSXQncyBteSBpZGVhIHRv
+IGxldCBCaWxsb3dzIGRvIGxpa2UgdGhpcy4KPj4gSSBsZWFybiBmcm9tIFNTUCBwYXJ0IGluIGZy
+ZWVzY2FsZSAgImFyY2gvYXJtL2Jvb3QvZHRzL2lteDI4LWV2ay5kdHMiCj4+IFRoZWlyIHNzcDAt
+c3NwMiBlYWNoIGhhdmUgMiByb2xlcywgbW1jIG9yIGdlbmVyaWMgc3BpIGJ1cy4KPj4gQW5kIHRo
+ZXkgbWF5IHdyaXRlIG9uZSBvZiB0aGVpciBjb21ibyBjb25maWd1cmF0aW9uIGxpa2UgdGhpczoK
+Pgo+IFRoYXQgaXMgYSBiaXQgZGlmZmVyZW50IGFzIHRoZSBob3N0IGNvbnRyb2xsZXIgaXMgb3Bl
+cmF0aW5nIGluCj4gY29tcGxldGVseSBkaWZmZXJlbnQgbW9kZXMuIEluIHlvdXIgY2FzZSwgdGhl
+IGhvc3QgY29udHJvbGxlciBpcyB0aGUKPiBzYW1lIGFuZCBmdW5jdGlvbnMgdGhlIHNhbWUgd2F5
+LCBidXQganVzdCBoYXMgZGlmZmVyZW50IGNhcmRzCj4gYXR0YWNoZWQuCj4KPj4KPj4gIDQzICAg
+ICAgICAgICAgICAgICAgICAgICAgIHNzcDE6IHNzcEA4MDAxMjAwMCB7Cj4+ICA0NCAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgIGNvbXBhdGlibGUgPSAiZnNsLGlteDI4LW1tYyI7Cj4+
+ICA0NSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGJ1cy13aWR0aCA9IDw4PjsKPj4g
+IDQ2ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgd3AtZ3Bpb3MgPSA8JmdwaW8wIDI4
+IDA+Owo+PiAgNDcgICAgICAgICAgICAgICAgICAgICAgICAgfTsKPj4gIDQ4Cj4+ICA0OSAgICAg
+ICAgICAgICAgICAgICAgICAgICBzc3AyOiBzc3BAODAwMTQwMDAgewo+PiAgNTAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAjYWRkcmVzcy1jZWxscyA9IDwxPjsKPj4gIDUxICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgI3NpemUtY2VsbHMgPSA8MD47Cj4+ICA1MiAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNvbXBhdGlibGUgPSAiZnNsLGlteDI4LXNwaSI7
+Cj4+ICA1MyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBpbmN0cmwtbmFtZXMgPSAi
+ZGVmYXVsdCI7Cj4+ICA1NCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBpbmN0cmwt
+MCA9IDwmc3BpMl9waW5zX2E+Owo+PiAgNTUgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICBzdGF0dXMgPSAib2theSI7Cj4+ICA1Ngo+PiAgNTcgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICBmbGFzaDogbTI1cDgwQDAgewo+PiAgNTggICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICNhZGRyZXNzLWNlbGxzID0gPDE+Owo+PiAgNTkgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICNzaXplLWNlbGxzID0gPDE+Owo+PiAgNjAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNvbXBhdGlibGUgPSAic3N0LHNz
+dDI1dmYwMTZiIjsKPj4gIDYxICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICBzcGktbWF4LWZyZXF1ZW5jeSA9IDw0MDAwMDAwMD47Cj4+ICA2MiAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgcmVnID0gPDA+Owo+PiAgNjMgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICB9Owo+PiAgNjQgICAgICAgICAgICAgICAgICAgICAgICAgfTsKPj4K
+Pj4gQmlsbG93cyB0ZWxsIG1lIHRoZXkgYWxzbyBoYXZlIDMgcm9sZXMgaW4gdGhlaXIgc2QgaG9z
+dCBjb250cm9sbGVyCj4+IGNvcnJlc3BvbmRpbmcgdG8gMyBraW5kcyBvZiBkaWZmZXJlbnQgb3Bl
+cmF0aW9uLgo+PiBIZSB1c2VkIHRvIGNyZWF0ZSAic3ByZCxuYW1lIiBwcm9wZXJ0eSBmb3IgdGhp
+cy4gSXMgaXQgYSBnb29kIHdheSBvcgo+PiBhbnl0aGluZyBlbHNlIGJldHRlcj8KPgo+IFdoeSBk
+byB5b3UgbmVlZCB0byBrbm93PyBZb3UgY2FuIGRlZmluZSBwYXJhbWV0ZXJzIHdoaWNoIGNhbid0
+IGJlCj4gcHJvYmVkIHN1Y2ggYXMgYnVzIHdpZHRoLCB2b2x0YWdlLCBhbmQgY2xvY2sgZnJlcS4g
+aW4gRFQgZm9yIGVhY2gKPiBob3N0LiBUaGUgTU1DIHN1YnN5cyBjb3JlIHdpbGwgZmlndXJlIG91
+dCB0aGUgdHlwZSBvZiBkZXZpY2UgYXR0YWNoZWQuCgpJIHRoaW5rIHlvdSdyZSByaWdodC4KVGhh
+bmtzIQotb3Jzb24KCj4KPiBSb2IK
