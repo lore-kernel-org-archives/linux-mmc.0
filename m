@@ -1,204 +1,93 @@
-From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: Re: [PATCH v4 2/8] pinctrl: sh-pfc: r8a7790: Implement voltage
- switching for SDHI
-Date: Fri, 03 Jul 2015 00:21:50 +0100
-Message-ID: <1435879310.7541.2.camel@codethink.co.uk>
-References: <1435683177.23818.60.camel@codethink.co.uk>
-	 <1435683249.23818.62.camel@codethink.co.uk> <6355006.FnTDFbP0bb@avalon>
+From: Orson Zhai <orsonzhai-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [RFC PATCH] mmc: sprd: add MMC host driver for Spreadtrum SoC
+Date: Fri, 3 Jul 2015 10:50:19 +0800
+Message-ID: <CA+H2tpFO2uz3Pr4bxoesqc8teF+SYhw-GqKOdk_w4_p5KvJR6A@mail.gmail.com>
+References: <1435735399-15333-1-git-send-email-chunyan.zhang@spreadtrum.com>
+	<CAL_JsqKcZ-7rM5YrkpJSP7OfECmRg4hWPRFy=UqZn1y74R8qsg@mail.gmail.com>
+	<CA+H2tpG+_pCR-j3nZ+SeAhpj6QfiPK2=Q0pwjndQoG9R4+LMYw@mail.gmail.com>
+	<CAL_JsqKk0KOheyGvc=EBkgH3K4fPDsppLQGtXjNA4cekW57bvQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <6355006.FnTDFbP0bb@avalon>
-Sender: linux-sh-owner@vger.kernel.org
-To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAL_JsqKk0KOheyGvc=EBkgH3K4fPDsppLQGtXjNA4cekW57bvQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Rob Herring <robherring2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Chunyan Zhang <chunyan.zhang-lxIno14LUO0EEoCn2XhGlw@public.gmane.org>, "chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org" <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Shawn Guo <shawn.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, billows.wu-lxIno14LUO0EEoCn2XhGlw@public.gmane.org, =?UTF-8?B?V2VpIFFpYW8gKOS5lOS8nyk=?= <wei.qiao-lxIno14LUO0EEoCn2XhGlw@public.gmane.org>, baolin.wang-lxIno14LUO0EEoCn2XhGlw@public.gmane.org, ning.yang-lxIno14LUO0EEoCn2XhGlw@public.gmane.org, =?UTF-8?B?T3Jzb24gWmhhaSjnv5/kuqwp?= <orson.zhai-lxIno14LUO0EEoCn2XhGlw@public.gmane.org>, jason.wu-lxIno14LUO0EEoCn2XhGlw@public.gmane.org, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 2015-07-01 at 10:37 +0300, Laurent Pinchart wrote:
-[...]
-> > +#define PIN_IO_VOLTAGE(bank, _pin, _name, sfx)		\
-> > +	[RCAR_GP_PIN(bank, _pin)].configs = SH_PFC_PIN_CFG_IO_VOLTAGE
-> > +
-> >  static const struct sh_pfc_pin pinmux_pins[] = {
-> >  	PINMUX_GPIO_GP_ALL(),
-> > 
-> > -	/* Pins not associated with a GPIO port */
-> > +	/*
-> > +	 * All pins assigned to GPIO bank 3 can be used for SD interfaces
-> > +	 * in which case they support both 3.3V and 1.8V signalling.
-> > +	 */
-> > +	PORT_GP_32(3, PIN_IO_VOLTAGE, unused),
-> > +
-> > +	/* Pins not associated with a GPIO port, placed after all the GPIOs */
-> > +	[RCAR_GP_PIN(5, 31) + 1] =
-> 
-> I'm sorry but I still don't like this. gcc outputs a warning when overriding 
-> an initializer if you enable -Wextra, which leads me to believe this construct 
-> is dubious. It should at least be tested with LLVM.
-> 
-> I'd much prefer replacing PINMUX_GPIO_GP_ALL() with a version that will 
-> initialize the pins correctly right away.
-[...]
+On Thu, Jul 2, 2015 at 11:47 PM, Rob Herring <robherring2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> On Thu, Jul 2, 2015 at 4:26 AM, Orson Zhai <orsonzhai-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>> Hi Rob,
+>>
+>> Thanks for your quick reply.
+>> I have one question to your last comment.
+>>
+>> On Thu, Jul 2, 2015 at 1:50 AM, Rob Herring <robherring2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+>>> On Wed, Jul 1, 2015 at 2:23 AM, Chunyan Zhang
+>>> <chunyan.zhang-lxIno14LUO0EEoCn2XhGlw@public.gmane.org> wrote:
+>>>> From: Billows Wu <billows.wu-lxIno14LUO0EEoCn2XhGlw@public.gmane.org>
+>
+> [...]
+>
+>>>> +const struct of_device_id sdhost_of_match[] = {
+>>>> +       {.compatible = "sprd,sd-sdhost-3.0", .data = &sd_caps_info,},
+>>>> +       {.compatible = "sprd,wifi-sdhost-3.0", .data = &wifi_caps_info,},
+>>>> +       {.compatible = "sprd,emmc-sdhost-3.0",  .data = &emmc_caps_info,},
+>>>
+>>> What these are connected to is irrelevant to the driver and compatible
+>>> string. All these differences belong in the DT unless the IP blocks
+>>> are really different.
+>>
+>> It's my idea to let Billows do like this.
+>> I learn from SSP part in freescale  "arch/arm/boot/dts/imx28-evk.dts"
+>> Their ssp0-ssp2 each have 2 roles, mmc or generic spi bus.
+>> And they may write one of their combo configuration like this:
+>
+> That is a bit different as the host controller is operating in
+> completely different modes. In your case, the host controller is the
+> same and functions the same way, but just has different cards
+> attached.
+>
+>>
+>>  43                         ssp1: ssp@80012000 {
+>>  44                                 compatible = "fsl,imx28-mmc";
+>>  45                                 bus-width = <8>;
+>>  46                                 wp-gpios = <&gpio0 28 0>;
+>>  47                         };
+>>  48
+>>  49                         ssp2: ssp@80014000 {
+>>  50                                 #address-cells = <1>;
+>>  51                                 #size-cells = <0>;
+>>  52                                 compatible = "fsl,imx28-spi";
+>>  53                                 pinctrl-names = "default";
+>>  54                                 pinctrl-0 = <&spi2_pins_a>;
+>>  55                                 status = "okay";
+>>  56
+>>  57                                 flash: m25p80@0 {
+>>  58                                         #address-cells = <1>;
+>>  59                                         #size-cells = <1>;
+>>  60                                         compatible = "sst,sst25vf016b";
+>>  61                                         spi-max-frequency = <40000000>;
+>>  62                                         reg = <0>;
+>>  63                                 };
+>>  64                         };
+>>
+>> Billows tell me they also have 3 roles in their sd host controller
+>> corresponding to 3 kinds of different operation.
+>> He used to create "sprd,name" property for this. Is it a good way or
+>> anything else better?
+>
+> Why do you need to know? You can define parameters which can't be
+> probed such as bus width, voltage, and clock freq. in DT for each
+> host. The MMC subsys core will figure out the type of device attached.
 
-Something like this?
+I think you're right.
+Thanks!
+-orson
 
-diff --git a/drivers/pinctrl/sh-pfc/pfc-emev2.c b/drivers/pinctrl/sh-pfc/pfc-emev2.c
-index 849c6943ed30..ad1a8281a91b 100644
---- a/drivers/pinctrl/sh-pfc/pfc-emev2.c
-+++ b/drivers/pinctrl/sh-pfc/pfc-emev2.c
-@@ -228,7 +228,7 @@ enum {
- 
- /* Expand to a list of sh_pfc_pin entries (named PORT#).
-  * NOTE: No config are recorded since the driver do not handle pinconf. */
--#define __PIN_CFG(pn, pfx, sfx)  SH_PFC_PIN_CFG(pfx, 0)
-+#define __PIN_CFG(pn, pfx, sfx)  SH_PFC_PORT_CFG(pfx, 0)
- #define PINMUX_EMEV_GPIO_ALL()	  CPU_ALL_PORT(__PIN_CFG, , unused)
- 
- static const struct sh_pfc_pin pinmux_pins[] = {
-diff --git a/drivers/pinctrl/sh-pfc/pfc-r8a73a4.c b/drivers/pinctrl/sh-pfc/pfc-r8a73a4.c
-index 280a56f97786..ca1538371563 100644
---- a/drivers/pinctrl/sh-pfc/pfc-r8a73a4.c
-+++ b/drivers/pinctrl/sh-pfc/pfc-r8a73a4.c
-@@ -1272,8 +1272,8 @@ static const u16 pinmux_data[] = {
- #define __IO	(SH_PFC_PIN_CFG_INPUT | SH_PFC_PIN_CFG_OUTPUT)
- #define __PUD	(SH_PFC_PIN_CFG_PULL_DOWN | SH_PFC_PIN_CFG_PULL_UP)
- 
--#define R8A73A4_PIN_IO_PU_PD(pin)       SH_PFC_PIN_CFG(pin, __IO | __PUD)
--#define R8A73A4_PIN_O(pin)              SH_PFC_PIN_CFG(pin, __O)
-+#define R8A73A4_PIN_IO_PU_PD(pin)       SH_PFC_PORT_CFG(pin, __IO | __PUD)
-+#define R8A73A4_PIN_O(pin)              SH_PFC_PORT_CFG(pin, __O)
- 
- static const struct sh_pfc_pin pinmux_pins[] = {
- 	R8A73A4_PIN_IO_PU_PD(0), R8A73A4_PIN_IO_PU_PD(1),
-diff --git a/drivers/pinctrl/sh-pfc/pfc-r8a7740.c b/drivers/pinctrl/sh-pfc/pfc-r8a7740.c
-index b486e9d20cc2..92939cbd7ad0 100644
---- a/drivers/pinctrl/sh-pfc/pfc-r8a7740.c
-+++ b/drivers/pinctrl/sh-pfc/pfc-r8a7740.c
-@@ -1535,15 +1535,15 @@ static const u16 pinmux_data[] = {
- #define __PU		(SH_PFC_PIN_CFG_PULL_UP)
- #define __PUD		(SH_PFC_PIN_CFG_PULL_DOWN | SH_PFC_PIN_CFG_PULL_UP)
- 
--#define R8A7740_PIN_I_PD(pin)		SH_PFC_PIN_CFG(pin, __I | __PD)
--#define R8A7740_PIN_I_PU(pin)		SH_PFC_PIN_CFG(pin, __I | __PU)
--#define R8A7740_PIN_I_PU_PD(pin)	SH_PFC_PIN_CFG(pin, __I | __PUD)
--#define R8A7740_PIN_IO(pin)		SH_PFC_PIN_CFG(pin, __IO)
--#define R8A7740_PIN_IO_PD(pin)		SH_PFC_PIN_CFG(pin, __IO | __PD)
--#define R8A7740_PIN_IO_PU(pin)		SH_PFC_PIN_CFG(pin, __IO | __PU)
--#define R8A7740_PIN_IO_PU_PD(pin)	SH_PFC_PIN_CFG(pin, __IO | __PUD)
--#define R8A7740_PIN_O(pin)		SH_PFC_PIN_CFG(pin, __O)
--#define R8A7740_PIN_O_PU_PD(pin)	SH_PFC_PIN_CFG(pin, __O | __PUD)
-+#define R8A7740_PIN_I_PD(pin)		SH_PFC_PORT_CFG(pin, __I | __PD)
-+#define R8A7740_PIN_I_PU(pin)		SH_PFC_PORT_CFG(pin, __I | __PU)
-+#define R8A7740_PIN_I_PU_PD(pin)	SH_PFC_PORT_CFG(pin, __I | __PUD)
-+#define R8A7740_PIN_IO(pin)		SH_PFC_PORT_CFG(pin, __IO)
-+#define R8A7740_PIN_IO_PD(pin)		SH_PFC_PORT_CFG(pin, __IO | __PD)
-+#define R8A7740_PIN_IO_PU(pin)		SH_PFC_PORT_CFG(pin, __IO | __PU)
-+#define R8A7740_PIN_IO_PU_PD(pin)	SH_PFC_PORT_CFG(pin, __IO | __PUD)
-+#define R8A7740_PIN_O(pin)		SH_PFC_PORT_CFG(pin, __O)
-+#define R8A7740_PIN_O_PU_PD(pin)	SH_PFC_PORT_CFG(pin, __O | __PUD)
- 
- static const struct sh_pfc_pin pinmux_pins[] = {
- 	/* Table 56-1 (I/O and Pull U/D) */
-diff --git a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-index 1137bbc810cd..1e59e1775374 100644
---- a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-+++ b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-@@ -1740,20 +1740,23 @@ static const u16 pinmux_data[] = {
- #define PIN_NUMBER(r, c) (((r) - 'A') * 31 + (c) + 200)
- #define PIN_A_NUMBER(r, c) PIN_NUMBER(ROW_GROUP_A(r), c)
- 
--#define PIN_IO_VOLTAGE(bank, _pin, _name, sfx)		\
--	[RCAR_GP_PIN(bank, _pin)].configs = SH_PFC_PIN_CFG_IO_VOLTAGE
-+/*
-+ * All pins assigned to GPIO bank 3 can be used for SD interfaces in
-+ * which case they support both 3.3V and 1.8V signalling.
-+ */
-+#define GP_GPIO_IO_VOLTAGE(bank, _pin, _name, sfx)			\
-+	[RCAR_GP_PIN(bank, _pin)] =					\
-+		SH_PFC_GPIO_CFG(bank, _pin, _name, SH_PFC_PIN_CFG_IO_VOLTAGE)
- 
- static const struct sh_pfc_pin pinmux_pins[] = {
--	PINMUX_GPIO_GP_ALL(),
--
--	/*
--	 * All pins assigned to GPIO bank 3 can be used for SD interfaces
--	 * in which case they support both 3.3V and 1.8V signalling.
--	 */
--	PORT_GP_32(3, PIN_IO_VOLTAGE, unused),
-+	PORT_GP_32(0, _GP_GPIO, unused),
-+	PORT_GP_32(1, _GP_GPIO, unused),
-+	PORT_GP_32(2, _GP_GPIO, unused),
-+	PORT_GP_32(3, GP_GPIO_IO_VOLTAGE, unused),
-+	PORT_GP_32(4, _GP_GPIO, unused),
-+	PORT_GP_32(5, _GP_GPIO, unused),
- 
- 	/* Pins not associated with a GPIO port, placed after all the GPIOs */
--	[RCAR_GP_PIN(5, 31) + 1] =
- 	SH_PFC_PIN_NAMED(ROW_GROUP_A('F'), 15, AF15),
- 	SH_PFC_PIN_NAMED(ROW_GROUP_A('G'), 15, AG15),
- 	SH_PFC_PIN_NAMED(ROW_GROUP_A('H'), 15, AH15),
-diff --git a/drivers/pinctrl/sh-pfc/pfc-sh73a0.c b/drivers/pinctrl/sh-pfc/pfc-sh73a0.c
-index d2efbfb776ac..2c798550cd8c 100644
---- a/drivers/pinctrl/sh-pfc/pfc-sh73a0.c
-+++ b/drivers/pinctrl/sh-pfc/pfc-sh73a0.c
-@@ -1166,14 +1166,14 @@ static const u16 pinmux_data[] = {
- #define __PU		(SH_PFC_PIN_CFG_PULL_UP)
- #define __PUD		(SH_PFC_PIN_CFG_PULL_DOWN | SH_PFC_PIN_CFG_PULL_UP)
- 
--#define SH73A0_PIN_I_PD(pin)		SH_PFC_PIN_CFG(pin, __I | __PD)
--#define SH73A0_PIN_I_PU(pin)		SH_PFC_PIN_CFG(pin, __I | __PU)
--#define SH73A0_PIN_I_PU_PD(pin)		SH_PFC_PIN_CFG(pin, __I | __PUD)
--#define SH73A0_PIN_IO(pin)		SH_PFC_PIN_CFG(pin, __IO)
--#define SH73A0_PIN_IO_PD(pin)		SH_PFC_PIN_CFG(pin, __IO | __PD)
--#define SH73A0_PIN_IO_PU(pin)		SH_PFC_PIN_CFG(pin, __IO | __PU)
--#define SH73A0_PIN_IO_PU_PD(pin)	SH_PFC_PIN_CFG(pin, __IO | __PUD)
--#define SH73A0_PIN_O(pin)		SH_PFC_PIN_CFG(pin, __O)
-+#define SH73A0_PIN_I_PD(pin)		SH_PFC_PORT_CFG(pin, __I | __PD)
-+#define SH73A0_PIN_I_PU(pin)		SH_PFC_PORT_CFG(pin, __I | __PU)
-+#define SH73A0_PIN_I_PU_PD(pin)		SH_PFC_PORT_CFG(pin, __I | __PUD)
-+#define SH73A0_PIN_IO(pin)		SH_PFC_PORT_CFG(pin, __IO)
-+#define SH73A0_PIN_IO_PD(pin)		SH_PFC_PORT_CFG(pin, __IO | __PD)
-+#define SH73A0_PIN_IO_PU(pin)		SH_PFC_PORT_CFG(pin, __IO | __PU)
-+#define SH73A0_PIN_IO_PU_PD(pin)	SH_PFC_PORT_CFG(pin, __IO | __PUD)
-+#define SH73A0_PIN_O(pin)		SH_PFC_PORT_CFG(pin, __O)
- 
- /* Pin numbers for pins without a corresponding GPIO port number are computed
-  * from the row and column numbers with a 1000 offset to avoid collisions with
-diff --git a/drivers/pinctrl/sh-pfc/sh_pfc.h b/drivers/pinctrl/sh-pfc/sh_pfc.h
-index 734f7a92229c..3eca740bba02 100644
---- a/drivers/pinctrl/sh-pfc/sh_pfc.h
-+++ b/drivers/pinctrl/sh-pfc/sh_pfc.h
-@@ -272,14 +272,18 @@ struct sh_pfc_soc_info {
- 		.enum_id = _pin##_DATA,					\
- 	}
- 
--/* SH_PFC_PIN_CFG - Expand to a sh_pfc_pin entry (named PORT#) with config */
--#define SH_PFC_PIN_CFG(_pin, cfgs)					\
-+/* SH_PFC_{PORT,GPIO}_CFG - Expand to a sh_pfc_pin entry with config */
-+#define _SH_PFC_PIN_CFG(_pin, _name, cfgs)				\
- 	{								\
- 		.pin = _pin,						\
--		.name = __stringify(PORT##_pin),			\
--		.enum_id = PORT##_pin##_DATA,				\
-+		.name = __stringify(_name),				\
-+		.enum_id = _name##_DATA,				\
- 		.configs = cfgs,					\
- 	}
-+#define SH_PFC_PORT_CFG(_pin, cfgs)				\
-+	_SH_PFC_PIN_CFG(PORT##_pin, PORT##_pin, cfgs)
-+#define SH_PFC_GPIO_CFG(bank, _pin, _name, cfgs)		\
-+	_SH_PFC_PIN_CFG((bank * 32) + _pin, _name, cfgs)
- 
- /* SH_PFC_PIN_NAMED - Expand to a sh_pfc_pin entry with the given name */
- #define SH_PFC_PIN_NAMED(row, col, _name)				\
---- END ---
-
-If you're happy with that, I'll re-send the series (hopefully for the
-last time!) with the r8a7790 changes squashed into "pinctrl: sh-pfc:
-r8a7790: Implement voltage switching for SDHI" and the SH_PFC_PIN_CFG
-macro change as a new patch before it.
-
-Ben.
-
-
+>
+> Rob
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
