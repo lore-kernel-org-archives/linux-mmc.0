@@ -1,31 +1,46 @@
-From: Shawn Guo <shawnguo@kernel.org>
-Subject: Re: [PATCH 2/6] mmc: sdhci-esdhc-imx: add tuning-step seting support
-Date: Fri, 3 Jul 2015 19:10:18 +0800
-Message-ID: <20150703111017.GA17553@localhost>
-References: <1433926244-29244-1-git-send-email-haibo.chen@freescale.com>
- <1433926244-29244-3-git-send-email-haibo.chen@freescale.com>
+From: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH 0/3] introduce driver for the Atmel SDMMC
+Date: Fri, 3 Jul 2015 16:17:14 +0200
+Message-ID: <1435933037-12889-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.136]:47689 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754894AbbGCLPS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 3 Jul 2015 07:15:18 -0400
-Content-Disposition: inline
-In-Reply-To: <1433926244-29244-3-git-send-email-haibo.chen@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, nicolas.ferre-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, alexandre.belloni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org, Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Haibo Chen <haibo.chen@freescale.com>
-Cc: linux-mmc@vger.kernel.org, aisheng.dong@freescale.com, ulf.hansson@linaro.org, chris@printf.net, shawn.guo@linaro.org, linux-arm-kernel@lists.infradead.org
 
-On Wed, Jun 10, 2015 at 04:50:40PM +0800, Haibo Chen wrote:
-> @@ -969,6 +976,8 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
->  
->  	of_property_read_u32(np, "max-frequency", &boarddata->f_max);
->  
-> +	of_property_read_u32(np, "tuning-step", &boarddata->tuning_step);
-> +
+Hi,
 
-Where is the binding doc for this device tree property?
+This set of patches introduce a driver for the new Atmel SDMMC device avaible
+on SAMA5D2 SoC.
 
-Shawn
+There is also a resend of an old patch which has not been taken. Ulf asked
+for some reviews since it could impact all sdhci devices but nobody did it...
+
+
+Regards
+
+Ludovic Desroches (3):
+  mmc: sdhci: switch from programmable clock mode to divided one if
+    needed
+  mmc: sdhci-of-at91: introduce driver for the Atmel SDMMC
+  MAINTAINERS: add entry for Atmel sdhci-of-at91 driver
+
+ .../devicetree/bindings/mmc/sdhci-atmel.txt        |  21 +++
+ MAINTAINERS                                        |   6 +
+ drivers/mmc/host/Kconfig                           |   8 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/sdhci-of-at91.c                   | 188 +++++++++++++++++++++
+ drivers/mmc/host/sdhci.c                           |  29 +++-
+ 6 files changed, 244 insertions(+), 9 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
+ create mode 100644 drivers/mmc/host/sdhci-of-at91.c
+
+-- 
+2.2.0
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
