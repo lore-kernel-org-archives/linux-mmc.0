@@ -1,44 +1,24 @@
-From: Paul Bolle <pebolle@tiscali.nl>
-Subject: Re: [PATCH 2/3] mmc: sdhci-of-at91: introduce driver for the Atmel
- SDMMC
-Date: Sat, 04 Jul 2015 10:30:28 +0200
-Message-ID: <1435998628.20057.26.camel@tiscali.nl>
-References: <1435933037-12889-1-git-send-email-ludovic.desroches@atmel.com>
-	 <1435933037-12889-3-git-send-email-ludovic.desroches@atmel.com>
+From: Paul Mansfield <paul-kernel@mansfield.co.uk>
+Subject: Re: mmc driver read/write detect problem with Baytrail tablet
+Date: Sat, 4 Jul 2015 22:38:09 +0100
+Message-ID: <CAGwpYod4=UO7kzz_zpoKu1b851zosYRLDhD5xz1A-19s8hM=Nw@mail.gmail.com>
+References: <CAGwpYodzn4TGiCp7L1+KQgb+JreMx2y07wgRmUsDHG-3fwetLg@mail.gmail.com>
+ <CAGwpYoez+2DVLxs6Hd_zqoF7UZ8D_WvrKiPTwvdP-VYxQTnzBQ@mail.gmail.com>
+ <CAOGqxeWzuvrkkdXB9upUFbn_ws7k_hMkFY+RwCN1NBmABd0VfA@mail.gmail.com> <CAGwpYoeJtM1+iLn6QVrai5D9BWBM5zF-2rHd7EswAZ1dRN-TUA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lb2-smtp-cloud6.xs4all.net ([194.109.24.28]:42599 "EHLO
-	lb2-smtp-cloud6.xs4all.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751839AbbGEI5T (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Jul 2015 04:57:19 -0400
-In-Reply-To: <1435933037-12889-3-git-send-email-ludovic.desroches@atmel.com>
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:33617 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755459AbbGEJAx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Jul 2015 05:00:53 -0400
+Received: by wiwl6 with SMTP id l6so259966340wiw.0
+        for <linux-mmc@vger.kernel.org>; Sun, 05 Jul 2015 02:00:51 -0700 (PDT)
+In-Reply-To: <CAGwpYoeJtM1+iLn6QVrai5D9BWBM5zF-2rHd7EswAZ1dRN-TUA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
-Cc: ulf.hansson@linaro.org, nicolas.ferre@atmel.com, alexandre.belloni@free-electrons.com
+To: linux-mmc@vger.kernel.org
 
-A nit only: a license mismatch.
-
-On vr, 2015-07-03 at 16:17 +0200, Ludovic Desroches wrote:
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> 
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or (at
-> + * your option) any later version.
-
-This states the license is GPL v2 or later.
-
-> +MODULE_LICENSE("GPL v2");
-
-And, according to include/linux/module.h, this states the license is
-(only) GPL v2. So I think that either the comment at the top of this
-file or the ident used in MODULE_LICENSE() needs to change.
-
-Thanks,
-
-
-Paul Bolle
+Oh, and many thanks to Alan Cooper for the answer, the chances of me
+finding that out for myself in any reasonable period of time would
+have been very unlikely, saved me a lot of hair pulling!
