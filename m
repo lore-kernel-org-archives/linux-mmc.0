@@ -1,54 +1,55 @@
-From: "Ivan T. Ivanov" <ivan.ivanov@linaro.org>
-Subject: [PATCH v2 1/3] mmc: sdhci: let GPIO based card detection have higher precedence
-Date: Mon,  6 Jul 2015 15:16:19 +0300
-Message-ID: <1436184981-16719-2-git-send-email-ivan.ivanov@linaro.org>
-References: <1436184981-16719-1-git-send-email-ivan.ivanov@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1436184981-16719-1-git-send-email-ivan.ivanov@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Tim Kryger <tim.kryger@gmail.com>, Aisheng Dong <b29396@freescale.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: Re: [PATCH 1/1] mmc: block: don't use parameter prefix if built as
+ module
+Date: Mon, 06 Jul 2015 15:23:23 +0300
+Message-ID: <1436185403.10819.0.camel@linux.intel.com>
+References: <1435145541-127393-1-git-send-email-andriy.shevchenko@linux.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:60503 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753970AbbGFMXZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 6 Jul 2015 08:23:25 -0400
+In-Reply-To: <1435145541-127393-1-git-send-email-andriy.shevchenko@linux.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
 
-Controller could have BROKEN_CARD_DETECTION quirk set, but drivers
-could use GPIO to detect card present state. Let, when defined, GPIO
-take precedence, so drivers could properly detect card state and not
-use polling.
+On Wed, 2015-06-24 at 14:32 +0300, Andy Shevchenko wrote:
+> It's excessive to use prefix for the parameters when you do
+> 	modrpobe mmc-block mmcblk.perdev_minors=16
+> 
+> Make this available only for built-in case.
 
-Signed-off-by: Ivan T. Ivanov <ivan.ivanov@linaro.org>
----
- drivers/mmc/host/sdhci.c | 14 ++++++++++----
- 1 file changed, 10 insertions(+), 4 deletions(-)
+Any comments on this?
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index bc14452..dd91b24 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1601,15 +1601,21 @@ static int sdhci_do_get_cd(struct sdhci_host *host)
- 	if (host->flags & SDHCI_DEVICE_DEAD)
- 		return 0;
+> 
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> ---
+>  drivers/mmc/card/block.c | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index c9c3d20..b94540b 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -47,10 +47,13 @@
+>  #include "queue.h"
+>  
+>  MODULE_ALIAS("mmc:block");
+> +
+> +#ifdef KERNEL
+>  #ifdef MODULE_PARAM_PREFIX
+>  #undef MODULE_PARAM_PREFIX
+>  #endif
+>  #define MODULE_PARAM_PREFIX "mmcblk."
+> +#endif
+>  
+>  #define INAND_CMD38_ARG_EXT_CSD  113
+>  #define INAND_CMD38_ARG_ERASE    0x00
 
--	/* If polling/nonremovable, assume that the card is always present. */
--	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
--	    (host->mmc->caps & MMC_CAP_NONREMOVABLE))
-+	/* If nonremovable, assume that the card is always present. */
-+	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
- 		return 1;
-
--	/* Try slot gpio detect */
-+	/*
-+	 * Try slot gpio detect, if defined it take precedence
-+	 * over build in controller functionality
-+	 */
- 	if (!IS_ERR_VALUE(gpio_cd))
- 		return !!gpio_cd;
-
-+	/* If polling, assume that the card is always present. */
-+	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
-+		return 1;
-+
- 	/* Host native card detect */
- 	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
- }
---
-1.9.1
+-- 
+Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Intel Finland Oy
