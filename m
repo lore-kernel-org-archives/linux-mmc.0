@@ -1,37 +1,35 @@
-From: Vignesh R <vigneshr@ti.com>
-Subject: Re: [PATCH 0/3] omap_hsmmc: Fix card enumeration failure on
-Date: Mon, 6 Jul 2015 11:42:46 +0530
-Message-ID: <559A1C5E.6000706@ti.com>
-References: <1434451039-18195-1-git-send-email-vigneshr@ti.com>
+From: Alexey Brodkin <Alexey.Brodkin@synopsys.com>
+Subject: Re: [PATCH] mmc: dw_mmc: handle data blocks > than 4kB if IDMAC is
+ used
+Date: Mon, 6 Jul 2015 07:12:19 +0000
+Message-ID: <1436166739.3246.1.camel@synopsys.com>
+References: <1435220707-7250-1-git-send-email-abrodkin@synopsys.com>
+	 <1435744933.4689.31.camel@synopsys.com> <5593BD51.5010100@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-7"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1434451039-18195-1-git-send-email-vigneshr@ti.com>
+In-Reply-To: <5593BD51.5010100@samsung.com>
+Content-Language: en-US
+Content-ID: <293FB6CDF6582646B8B4C91F3BAF3DC9@internal.synopsys.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Andreas Fenkart <afenkart@gmail.com>, Tony Lindgren <tony@atomide.com>, NeilBrown <neilb@suse.de>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "jh80.chung@samsung.com" <jh80.chung@samsung.com>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "arc-linux-dev@synopsys.com" <arc-linux-dev@synopsys.com>, "Vineet.Gupta1@synopsys.com" <Vineet.Gupta1@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
 
+Hi Jaehoon,
 
+On Wed, 2015-07-01 at 19:13 +-0900, Jaehoon Chung wrote:
++AD4- Hi, Alexey.
++AD4- 
++AD4- Sorry for reviewing late. i missed this patch.
++AD4- I will check your patch and reply at mailing.
++AD4- Thanks a lot for noticing this.
++AD4- 
++AD4- Best Regards,
++AD4- Jaehoon Chung
 
-On Tuesday 16 June 2015 04:07 PM, Vignesh R wrote:
-> 
-> Hi,
-> 
-> When using omap_hsmmc driver, if sd-card repeatedly plug unplugged
-> multiple times quickly, card enumeration stops after few iterations.
-> This can be easily reproduced on DRA74X EVM which uses omap_hsmmc driver.
-> This patch series addresses the above problem. The first patch fixes irq
-> handler to report all DTOs to mmc-core. Second patch adds handling for
-> BADA, DEB and CEB interrupts. The last patch introduces driver specific
-> card detect irq handler to cleanup pending requests before card removal.
-> 
-> Tested on DRA74X amd DRA72X and AM437X-GP EVMs, by repeated intense
-> plug/unplug iterations.
+Please treat this as a polite reminder, would be nice to get some
+comments on that patch.
 
-Gentle ping...
-
--- 
-Regards
-Vignesh
+-Alexey
