@@ -1,66 +1,54 @@
-From: Paul Mansfield <paul-kernel@mansfield.co.uk>
-Subject: Re: mmc driver read/write detect problem with Baytrail tablet
-Date: Sat, 4 Jul 2015 18:59:12 +0100
-Message-ID: <CAGwpYoeJtM1+iLn6QVrai5D9BWBM5zF-2rHd7EswAZ1dRN-TUA@mail.gmail.com>
-References: <CAGwpYodzn4TGiCp7L1+KQgb+JreMx2y07wgRmUsDHG-3fwetLg@mail.gmail.com>
- <CAGwpYoez+2DVLxs6Hd_zqoF7UZ8D_WvrKiPTwvdP-VYxQTnzBQ@mail.gmail.com> <CAOGqxeWzuvrkkdXB9upUFbn_ws7k_hMkFY+RwCN1NBmABd0VfA@mail.gmail.com>
+From: Chen Bough <Haibo.Chen@freescale.com>
+Subject: RE: [PATCH 2/6] mmc: sdhci-esdhc-imx: add tuning-step seting support
+Date: Mon, 6 Jul 2015 03:05:47 +0000
+Message-ID: <BY1PR03MB138801E1ECE136F138F7D4A99A930@BY1PR03MB1388.namprd03.prod.outlook.com>
+References: <1433926244-29244-1-git-send-email-haibo.chen@freescale.com>
+ <1433926244-29244-3-git-send-email-haibo.chen@freescale.com>
+ <20150703111017.GA17553@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f171.google.com ([209.85.212.171]:34571 "EHLO
-	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751138AbbGEKQw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Jul 2015 06:16:52 -0400
-Received: by wifm2 with SMTP id m2so5865309wif.1
-        for <linux-mmc@vger.kernel.org>; Sun, 05 Jul 2015 03:16:51 -0700 (PDT)
-In-Reply-To: <CAOGqxeWzuvrkkdXB9upUFbn_ws7k_hMkFY+RwCN1NBmABd0VfA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20150703111017.GA17553@localhost>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Shawn Guo <shawnguo@kernel.org>
+Cc: "Dong A.S." <Aisheng.Dong@freescale.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "chris@printf.net" <chris@printf.net>, "shawn.guo@linaro.org" <shawn.guo@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-
-On 2 July 2015 at 13:40, Alan Cooper <alcooperx@gmail.com> wrote:
-> On Wed, Jul 1, 2015 at 6:11 PM, Paul Mansfield
-> <paul-kernel@mansfield.co.uk> wrote:
->> On 1 July 2015 at 14:24, Alan Cooper <alcooperx@.......> wrote:
->>> There is a WRITE PROTECT signal from the card socket to the host
->>> controller that may not be connected. You can try booting the kernel
->>> with "sdhci.debug_quirks=0x10000". This tells the driver that the WP
->>> signal is inverted.
->>
->> thanks.
->> won't that cause the dock's SD card slot to switch from being writable
->> whilst making the internal one writable?
-
-> Yes, that will cause the SD dock to be read-only for read/write cards,
-> but this is a quick way to tell if this is the problem.
-
-Ok, I tried the quirks mode kernel option and it solves the problem of
-making the microSDHC card slot writable, yay!
-
-Interesting, it didn't break the dock's SDHC card slot and make it
-read-only, so I would guess that's connected using a USB bridge; that
-comes out as mmcblk2
-
-And neither did it break the eMMC in the tablet, that's writable too,
-so again a great result.
-
-Is the "sdhci.debug_quirks" command line flag available without full
-debugging on?
-
-Now the only obstacle remaining is that grub can't see the internal
-memory card slot, so I guess I will need to have a small boot
-partition in the eMMC.
-
-At the moment I've made the tablet triple boot. With rEFInd on the
-eMMC's EFI partition and the SDHC card EFI partition, the UEFI
-firmware offers me both devices as a boot option. Windows is in the
-eMMC, along with a small linux install, then a full install in a
-partition in the SDHC card.
-
-Each EFI partitions' grub-efi finds its relevant linux installation
-(it seems grub-efi patches the bootable program since the grub menu
-and modules lives in the ext4 linux partition).
 
 
-sorry for the brain dump but I thought it would be useful for anyone
-else treading this
+> -----Original Message-----
+> From: Shawn Guo [mailto:shawnguo@kernel.org]
+> Sent: Friday, July 03, 2015 7:10 PM
+> To: Chen Haibo-B51421
+> Cc: linux-mmc@vger.kernel.org; Dong Aisheng-B29396;
+> ulf.hansson@linaro.org; chris@printf.net; shawn.guo@linaro.org; linux-
+> arm-kernel@lists.infradead.org
+> Subject: Re: [PATCH 2/6] mmc: sdhci-esdhc-imx: add tuning-step seting
+> support
+> 
+> On Wed, Jun 10, 2015 at 04:50:40PM +0800, Haibo Chen wrote:
+> > @@ -969,6 +976,8 @@ sdhci_esdhc_imx_probe_dt(struct platform_device
+> *pdev,
+> >
+> >  	of_property_read_u32(np, "max-frequency", &boarddata->f_max);
+> >
+> > +	of_property_read_u32(np, "tuning-step", &boarddata->tuning_step);
+> > +
+> 
+> Where is the binding doc for this device tree property?
+> 
+> Shawn
+
+I will add this in next version, Thanks for your review.
+
+
+Haibo
