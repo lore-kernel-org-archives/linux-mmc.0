@@ -1,42 +1,56 @@
-From: "Ivan T. Ivanov" <ivan.ivanov@linaro.org>
-Subject: [PATCH v2] mmc: sdhci-msm: Boost controller core clock
-Date: Mon,  6 Jul 2015 14:53:38 +0300
-Message-ID: <1436183618-15330-1-git-send-email-ivan.ivanov@linaro.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Georgi Djakov <georgi.djakov@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Peter Griffin <peter.griffin@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+From: Johan Derycke <johan.derycke@barco.com>
+Subject: Re: [PATCH 0/6] mmc: sdhci-esdhci-imx: fix cd/wp regression
+Date: Mon, 6 Jul 2015 11:57:19 +0000 (UTC)
+Message-ID: <loom.20150706T134729-84@post.gmane.org>
+References: <1434564337-24720-1-git-send-email-aisheng.dong@freescale.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from plane.gmane.org ([80.91.229.3]:50681 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754591AbbGFMAH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 6 Jul 2015 08:00:07 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <glkm-linux-mmc@m.gmane.org>)
+	id 1ZC549-0005yr-I6
+	for linux-mmc@vger.kernel.org; Mon, 06 Jul 2015 14:00:05 +0200
+Received: from 68.172-183-91.adsl-static.isp.belgacom.be ([68.172-183-91.adsl-static.isp.belgacom.be])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2015 14:00:05 +0200
+Received: from johan.derycke by 68.172-183-91.adsl-static.isp.belgacom.be with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2015 14:00:05 +0200
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-Ensure SDCC is working with maximum clock otherwise card
-detection could be extremely slow, up to 7 seconds.
+Dong Aisheng <aisheng.dong <at> freescale.com> writes:
 
-Signed-off-by: Ivan T. Ivanov <ivan.ivanov@linaro.org>
-Reviewed-by: Georgi Djakov <georgi.djakov@linaro.org>
-Acked-by: Stephen Boyd <sboyd@codeaurora.org>
----
+> 
+> Commit 8d86e4f mmc: sdhci-esdhc-imx: Call mmc_of_parse()
+> seriously break the sd card detect/write protect function
+> of most IMX platforms since a lot of GPIO flags of cd-gpios/wp-gpios
+> are wrongly set in devicetree.
+ 
+ 
+...
 
-Changes since v0:
-- s/falied/failed in warning message.
 
- drivers/mmc/host/sdhci-msm.c | 5 +++++
- 1 file changed, 5 insertions(+)
+Hi,
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 4a09f76..4bcee03 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -489,6 +489,11 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 		goto pclk_disable;
- 	}
+Reviewed-by: Johan Derycke <johan.derycke@barco.com>
 
-+	/* Vote for maximum clock rate for maximum performance */
-+	ret = clk_set_rate(msm_host->clk, INT_MAX);
-+	if (ret)
-+		dev_warn(&pdev->dev, "core clock boost failed\n");
-+
- 	ret = clk_prepare_enable(msm_host->clk);
- 	if (ret)
- 		goto pclk_disable;
---
-1.9.1
+I have tested this patches on a nitrogen board and two custom boards with 
+imx6dl. They seem to be working OK. I had continuous mmc interrupts before 
+they were applied.
+Will they be included in 4.2 or is it to late for that?
+
+Best regards,
+
+Johan
+
+
+
+
