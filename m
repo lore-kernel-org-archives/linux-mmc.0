@@ -1,45 +1,42 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH 2/3] mmc: sdhci-of-at91: introduce driver for the Atmel
- SDMMC
-Date: Mon, 6 Jul 2015 09:33:52 +0200
-Message-ID: <20150706073352.GB24167@odux.rfo.atmel.com>
-References: <1435933037-12889-1-git-send-email-ludovic.desroches@atmel.com>
- <1435933037-12889-3-git-send-email-ludovic.desroches@atmel.com>
- <1435998628.20057.26.camel@tiscali.nl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1435998628.20057.26.camel@tiscali.nl>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Paul Bolle <pebolle@tiscali.nl>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, ulf.hansson@linaro.org, nicolas.ferre@atmel.com, alexandre.belloni@free-electrons.com
+From: "Ivan T. Ivanov" <ivan.ivanov@linaro.org>
+Subject: [PATCH v2] mmc: sdhci-msm: Boost controller core clock
+Date: Mon,  6 Jul 2015 14:53:38 +0300
+Message-ID: <1436183618-15330-1-git-send-email-ivan.ivanov@linaro.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Georgi Djakov <georgi.djakov@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Peter Griffin <peter.griffin@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, Jul 04, 2015 at 10:30:28AM +0200, Paul Bolle wrote:
-> A nit only: a license mismatch.
+Ensure SDCC is working with maximum clock otherwise card
+detection could be extremely slow, up to 7 seconds.
 
-Thanks Paul, I'll correct it.
+Signed-off-by: Ivan T. Ivanov <ivan.ivanov@linaro.org>
+Reviewed-by: Georgi Djakov <georgi.djakov@linaro.org>
+Acked-by: Stephen Boyd <sboyd@codeaurora.org>
+---
 
-> 
-> On vr, 2015-07-03 at 16:17 +0200, Ludovic Desroches wrote:
-> > --- /dev/null
-> > +++ b/drivers/mmc/host/sdhci-of-at91.c
-> > 
-> > + * This program is free software; you can redistribute it and/or modify
-> > + * it under the terms of the GNU General Public License as published by
-> > + * the Free Software Foundation; either version 2 of the License, or (at
-> > + * your option) any later version.
-> 
-> This states the license is GPL v2 or later.
-> 
-> > +MODULE_LICENSE("GPL v2");
-> 
-> And, according to include/linux/module.h, this states the license is
-> (only) GPL v2. So I think that either the comment at the top of this
-> file or the ident used in MODULE_LICENSE() needs to change.
-> 
-> Thanks,
-> 
-> 
-> Paul Bolle
+Changes since v0:
+- s/falied/failed in warning message.
+
+ drivers/mmc/host/sdhci-msm.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 4a09f76..4bcee03 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -489,6 +489,11 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 		goto pclk_disable;
+ 	}
+
++	/* Vote for maximum clock rate for maximum performance */
++	ret = clk_set_rate(msm_host->clk, INT_MAX);
++	if (ret)
++		dev_warn(&pdev->dev, "core clock boost failed\n");
++
+ 	ret = clk_prepare_enable(msm_host->clk);
+ 	if (ret)
+ 		goto pclk_disable;
+--
+1.9.1
