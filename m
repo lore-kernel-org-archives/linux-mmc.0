@@ -1,101 +1,152 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: SDHCI: mdelay() in hot path in esdhc_pltfm_set_clock looses CAN
- (!) frames
-Date: Tue, 7 Jul 2015 15:17:08 -0300
-Message-ID: <CAOMZO5D02tarn9QrOuS3i1ekn=1Jupngo6RBOfyVm9QASPA23A@mail.gmail.com>
-References: <CAOpc7mG7-RyZ2LSX8n1kh_KWaVf6N=Lo0LGt4ckLJWzp541FZg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAOpc7mG7-RyZ2LSX8n1kh_KWaVf6N=Lo0LGt4ckLJWzp541FZg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Holger Schurig <holgerschurig@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, open list <linux-kernel@vger.kernel.org>, Dong Aisheng <b29396@freescale.com>, Sascha Hauer <kernel@pengutronix.de>, Russell King <linux@arm.linux.org.uk>
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: [PATCH 1/2] mmc: omap_hsmmc: call omap_hsmmc_set_power directly
+Date: Tue,  7 Jul 2015 20:24:52 +0200
+Message-ID: <1436293493-5607-1-git-send-email-afenkart@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wg0-f47.google.com ([74.125.82.47]:33437 "EHLO
+	mail-wg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933196AbbGGSZG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jul 2015 14:25:06 -0400
+Received: by wgck11 with SMTP id k11so175568042wgc.0
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Jul 2015 11:25:03 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Andreas Fenkart <afenkart@gmail.com>
 
-Hi Holger,
+If no pdata.set_power was set by the platform code, the driver
+was updating pdata with its own fallback function. This is a no-no
+since pdata shall be read-only.
+This patch pushes the check 'pdata->set_power != NULL' down into
+the fallback functions. If pdata.set_power is really set, it calls them
+and exits, otherwise the fallback code is used.
 
-Adding some more folks on Cc.
+Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+---
+ drivers/mmc/host/omap_hsmmc.c | 32 +++++++++++++++++---------------
+ 1 file changed, 17 insertions(+), 15 deletions(-)
 
-On Tue, Jun 30, 2015 at 10:43 AM, Holger Schurig
-<holgerschurig@gmail.com> wrote:
-> Hi,
->
-> I noticed in a kernel 4.0.7 that I loose CAN packets when an incoming
-> rsync transfer changes my eMMC or SD-Card image. I used CONFIG_FRACE
-> to find why this is the case, and came to this trace:
->
-> # tracer: preemptoff
-> #
-> # preemptoff latency trace v1.1.5 on 4.0.7
-> # --------------------------------------------------------------------
-> # latency: 1046 us, #756/756, CPU#2 | (M:preempt VP:0, KP:0, SP:0 HP:0 #P:4)
-> #    -----------------
-> #    | task: mmcqd/0-76 (uid:0 nice:0 policy:0 rt_prio:0)
-> #    -----------------
-> #  => started at: sdhci_do_set_ios
-> #  => ended at:   sdhci_do_set_ios
-> #
-> #
-> #                  _------=> CPU#
-> #                 / _-----=> irqs-off
-> #                | / _----=> need-resched
-> #                || / _---=> hardirq/softirq
-> #                ||| / _--=> preempt-depth
-> #                |||| /     delay
-> #  cmd     pid   ||||| time  |   caller
-> #     \   /      |||||  \    |   /
-> mmcqd/0-76      2d..1    1us : _raw_spin_lock_irq <-sdhci_do_set_ios
-> mmcqd/0-76      2d..2    2us : esdhc_writeb_le <-sdhci_do_set_ios
-> mmcqd/0-76      2d..2    4us : esdhc_pltfm_set_bus_width <-sdhci_do_set_ios
-> mmcqd/0-76      2d..2    5us : l2c210_sync <-esdhc_pltfm_set_bus_width
-> mmcqd/0-76      2d..2    7us : esdhc_writeb_le <-sdhci_do_set_ios
-> mmcqd/0-76      2d..2    9us : l2c210_sync <-esdhc_writeb_le
-> mmcqd/0-76      2d..2   10us : esdhc_readw_le <-sdhci_do_set_ios
-> mmcqd/0-76      2d..2   12us : esdhc_writew_le <-sdhci_do_set_ios
-> mmcqd/0-76      2d..2   14us : l2c210_sync <-esdhc_writew_le
-> mmcqd/0-76      2d..2   16us : l2c210_sync <-esdhc_writew_le
-> mmcqd/0-76      2d..2   18us : esdhc_readw_le <-sdhci_do_set_ios
-> mmcqd/0-76      2d..2   19us : esdhc_writew_le <-sdhci_do_set_ios
-> mmcqd/0-76      2d..2   21us : l2c210_sync <-esdhc_writew_le
-> mmcqd/0-76      2d..2   22us : esdhc_set_uhs_signaling <-sdhci_do_set_ios
-> mmcqd/0-76      2d..2   24us : pinctrl_select_state <-esdhc_set_uhs_signaling
-> mmcqd/0-76      2d..2   26us : esdhc_readl_le <-esdhc_pltfm_set_clock
-> mmcqd/0-76      2d..2   28us : esdhc_writel_le <-esdhc_pltfm_set_clock
-> mmcqd/0-76      2d..2   29us : l2c210_sync <-esdhc_writel_le
-> mmcqd/0-76      2d..2   31us : esdhc_readl_le <-esdhc_pltfm_set_clock
-> mmcqd/0-76      2d..2   33us : esdhc_writel_le <-esdhc_pltfm_set_clock
-> mmcqd/0-76      2d..2   34us : l2c210_sync <-esdhc_writel_le
-> mmcqd/0-76      2d..2   36us : l2c210_sync <-esdhc_pltfm_set_clock
-> mmcqd/0-76      2d..2   37us : __timer_const_udelay <-esdhc_pltfm_set_clock
-> mmcqd/0-76      2d..2   39us : __timer_delay <-__timer_const_udelay
-> mmcqd/0-76      2d..2   40us : read_current_timer <-__timer_delay
-> mmcqd/0-76      2d..2   41us : imx_read_current_timer <-read_current_timer
-> mmcqd/0-76      2d..2   43us : read_current_timer <-__timer_delay
-> mmcqd/0-76      2d..2   44us : imx_read_current_timer <-read_current_timer
-> mmcqd/0-76      2d..2   45us : read_current_timer <-__timer_delay
-> ....
->
-> So it seems that esdhc_pltfm_set_clock() somehow waits. And really
-> there is an mdelay(1) there. So it waits a whopping millisecond there!
->
-> What's worse: I put a printk() into this function, just before the
-> mdelay(). And it get's called hundreds of times when I boot, or when I
-> update via rsync. And I believe that for each call the mdelay() kills
-> preemption.
->
-> This is bad because in the FlexCAN driver the ISR calls
-> napi_schedule(), which in turn clears the CAN RxFIFO. And if this
-> scheduling is taking too long, CAN packets are dropped. With 50 bits
-> per CAN packet anf 500000 bit/s this can happen quite easily (the
-> RxFIFO is a hardware component that can hold only 6 CAN frames before
-> data is lost).
->
-> The mdelay() is also bad because it makes eMMC/SD-Card access WAY
-> slower than they could be.
->
-> I'm not firm with SDHCI, I only see that esdhc_pltfm_set_clock() is
-> all the time called with 0 Hz and then with 20000000 Hz. Any tips on
-> how to get rid of this clock-off-clock-on dance?
->
-> Holger
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index b2b411d..fe7cee5 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -213,7 +213,6 @@ struct omap_hsmmc_host {
+ 	int			context_loss;
+ 	int			protect_card;
+ 	int			reqs_blocked;
+-	int			use_reg;
+ 	int			req_in_progress;
+ 	unsigned long		clk_rate;
+ 	unsigned int		flags;
+@@ -262,6 +261,9 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
+ 		platform_get_drvdata(to_platform_device(dev));
+ 	int ret = 0;
+ 
++	if (mmc_pdata(host)->set_power)
++		return mmc_pdata(host)->set_power(dev, power_on, vdd);
++
+ 	/*
+ 	 * If we don't see a Vcc regulator, assume it's a fixed
+ 	 * voltage always-on regulator.
+@@ -344,6 +346,9 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 	struct regulator *reg;
+ 	int ocr_value = 0;
+ 
++	if (mmc_pdata(host)->set_power)
++		return 0;
++
+ 	reg = devm_regulator_get(host->dev, "vmmc");
+ 	if (IS_ERR(reg)) {
+ 		dev_err(host->dev, "unable to get vmmc regulator %ld\n",
+@@ -363,7 +368,6 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 			}
+ 		}
+ 	}
+-	mmc_pdata(host)->set_power = omap_hsmmc_set_power;
+ 
+ 	/* Allow an aux regulator */
+ 	reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
+@@ -383,8 +387,8 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 	    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
+ 		int vdd = ffs(mmc_pdata(host)->ocr_mask) - 1;
+ 
+-		mmc_pdata(host)->set_power(host->dev, 1, vdd);
+-		mmc_pdata(host)->set_power(host->dev, 0, 0);
++		omap_hsmmc_set_power(host->dev, 1, vdd);
++		omap_hsmmc_set_power(host->dev, 0, 0);
+ 	}
+ 
+ 	return 0;
+@@ -392,7 +396,8 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 
+ static void omap_hsmmc_reg_put(struct omap_hsmmc_host *host)
+ {
+-	mmc_pdata(host)->set_power = NULL;
++	if (mmc_pdata(host)->set_power)
++		return;
+ }
+ 
+ static inline int omap_hsmmc_have_reg(void)
+@@ -1148,11 +1153,11 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
+ 		clk_disable_unprepare(host->dbclk);
+ 
+ 	/* Turn the power off */
+-	ret = mmc_pdata(host)->set_power(host->dev, 0, 0);
++	ret = omap_hsmmc_set_power(host->dev, 0, 0);
+ 
+ 	/* Turn the power ON with given VDD 1.8 or 3.0v */
+ 	if (!ret)
+-		ret = mmc_pdata(host)->set_power(host->dev, 1, vdd);
++		ret = omap_hsmmc_set_power(host->dev, 1, vdd);
+ 	pm_runtime_get_sync(host->dev);
+ 	if (host->dbclk)
+ 		clk_prepare_enable(host->dbclk);
+@@ -1551,10 +1556,10 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if (ios->power_mode != host->power_mode) {
+ 		switch (ios->power_mode) {
+ 		case MMC_POWER_OFF:
+-			mmc_pdata(host)->set_power(host->dev, 0, 0);
++			omap_hsmmc_set_power(host->dev, 0, 0);
+ 			break;
+ 		case MMC_POWER_UP:
+-			mmc_pdata(host)->set_power(host->dev, 1, ios->vdd);
++			omap_hsmmc_set_power(host->dev, 1, ios->vdd);
+ 			break;
+ 		case MMC_POWER_ON:
+ 			do_send_init_stream = 1;
+@@ -2077,11 +2082,10 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 		goto err_irq;
+ 	}
+ 
+-	if (omap_hsmmc_have_reg() && !mmc_pdata(host)->set_power) {
++	if (omap_hsmmc_have_reg()) {
+ 		ret = omap_hsmmc_reg_get(host);
+ 		if (ret)
+ 			goto err_irq;
+-		host->use_reg = 1;
+ 	}
+ 
+ 	mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
+@@ -2124,8 +2128,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 
+ err_slot_name:
+ 	mmc_remove_host(mmc);
+-	if (host->use_reg)
+-		omap_hsmmc_reg_put(host);
++	omap_hsmmc_reg_put(host);
+ err_irq:
+ 	device_init_wakeup(&pdev->dev, false);
+ 	if (host->tx_chan)
+@@ -2149,8 +2152,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
+ 
+ 	pm_runtime_get_sync(host->dev);
+ 	mmc_remove_host(host->mmc);
+-	if (host->use_reg)
+-		omap_hsmmc_reg_put(host);
++	omap_hsmmc_reg_put(host);
+ 
+ 	if (host->tx_chan)
+ 		dma_release_channel(host->tx_chan);
+-- 
+2.1.4
+
