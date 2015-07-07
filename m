@@ -1,36 +1,41 @@
-From: "Stojsavljevic, Zoran" <zoran.stojsavljevic@intel.com>
-Subject: Bug 100861 - Kingston EMMC32G-S100 issue on Congatec AG QA3 [Q7]
- board
-Date: Tue, 7 Jul 2015 09:18:16 +0000
-Message-ID: <67BFA875989E5748A862DFF55409F2A2444D9E50@IRSMSX104.ger.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: [PATCH] Documentation: dt: update ti,am33xx-hsmmc swakeup workaround
+Date: Tue,  7 Jul 2015 19:53:10 +0200
+Message-ID: <1436291591-31271-1-git-send-email-afenkart@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:64128 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756606AbbGGJSS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jul 2015 05:18:18 -0400
-Content-Language: en-US
+Received: from mail-wi0-f180.google.com ([209.85.212.180]:33515 "EHLO
+	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932198AbbGGRx0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jul 2015 13:53:26 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: devicetree@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Andreas Fenkart <afenkart@gmail.com>
 
-Hello to eMMC maintainers,
+Before 5b83b2234be6733cf the driver was hard coding the wakeup irq to
+be active low. The generic pm wakeirq does not override the active
+high/low parameter, hence it must be specified correctly in the
+device tree.
+Mind that SDIO IRQ is active low as defined in the SDIO specification
 
-This issue is urgent. We have kernel eMMC driver which is not compliant:
-https://bugzilla.kernel.org/show_bug.cgi?id=100861
+Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+---
+ Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-I would like to thank you in advance,
-Zoran Stojsavljevic
-_______
-Most of The Time you should be "intel inside" to be capable to think "out of the box".
-
-Intel Deutschland GmbH
-Registered Address: Am Campeon 10-12, 85579 Neubiberg, Germany
-Tel: +49 89 99 8853-0, www.intel.de
-Managing Directors: Christin Eisenschmid, Prof. Dr. Hermann Eul
-Chairperson of the Supervisory Board: Tiffany Doon Silva
-Registered Office: Munich
-Commercial Register: Amtsgericht Muenchen HRB 186928
+diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+index 76bf087..74166a0 100644
+--- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
++++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+@@ -102,7 +102,7 @@ not every application needs SDIO irq, e.g. MMC cards.
+ 		pinctrl-1 = <&mmc1_idle>;
+ 		pinctrl-2 = <&mmc1_sleep>;
+ 		...
+-		interrupts-extended = <&intc 64 &gpio2 28 0>;
++		interrupts-extended = <&intc 64 &gpio2 28 GPIO_ACTIVE_LOW>;
+ 	};
+ 
+ 	mmc1_idle : pinmux_cirq_pin {
+-- 
+2.1.4
 
