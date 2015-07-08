@@ -1,228 +1,28 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: handle data blocks > than 4kB if IDMAC is used
-Date: Wed, 08 Jul 2015 13:14:05 +0900
-Message-ID: <559CA38D.10700@samsung.com>
-References: <1435220707-7250-1-git-send-email-abrodkin@synopsys.com>
+From: Holger Schurig <holgerschurig@gmail.com>
+Subject: Re: SDHCI: mdelay() in hot path in esdhc_pltfm_set_clock looses CAN
+ (!) frames
+Date: Wed, 8 Jul 2015 08:22:57 +0200
+Message-ID: <CAOpc7mGgD1c4BW1DXEEZQ06njQO6tgUKi0ssAGyL4SJXajDRGw@mail.gmail.com>
+References: <CAOpc7mG7-RyZ2LSX8n1kh_KWaVf6N=Lo0LGt4ckLJWzp541FZg@mail.gmail.com>
+	<CAOMZO5D02tarn9QrOuS3i1ekn=1Jupngo6RBOfyVm9QASPA23A@mail.gmail.com>
+	<20150707205243.GK7557@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:44465 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751066AbbGHEOH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jul 2015 00:14:07 -0400
-In-reply-to: <1435220707-7250-1-git-send-email-abrodkin@synopsys.com>
+Received: from mail-wg0-f50.google.com ([74.125.82.50]:34578 "EHLO
+	mail-wg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754051AbbGHGW6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jul 2015 02:22:58 -0400
+In-Reply-To: <20150707205243.GK7557@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alexey Brodkin <Alexey.Brodkin@synopsys.com>, linux-mmc@vger.kernel.org
-Cc: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, arc-linux-dev@synopsys.com, linux-kernel@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Fabio Estevam <festevam@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, open list <linux-kernel@vger.kernel.org>, Dong Aisheng <b29396@freescale.com>, Sascha Hauer <kernel@pengutronix.de>
 
-Hi, Alexey.
+Wow, at last some reaction. And I thought nobody cares ...
 
-On 06/25/2015 05:25 PM, Alexey Brodkin wrote:
-> As per DW MobileStorage databook "each descriptor can transfer up to 4kB
-> of data in chained mode", moreover buffer size that is put in "des1" is
-> limited to 13 bits, i.e. for example on attempt to
-> IDMAC_SET_BUFFER1_SIZE(desc, 8192) size value that's effectively written
-> will be 0.
-> 
-> On the platform with 8kB PAGE_SIZE I see dw_mmc gets data blocks in
-> SG-list of 8kB size and that leads to unpredictable behavior of the
-> SD/MMC controller.
+BTW, removing CONFIG_MMC_CLKGATE helped a bit, because the pointless
+clock-off-clock-on while the device is booting (or accessing multiple
+sectors within a short time) isn't going to happen anymore.
 
-I didn't see your problem, since i didn't test with 8K PAGE_SIZE.
-But I think your patch is reasonable.
-As possible, I want to know in more detail what unpredictable behavior.
-(Just stuck behavior?)
-
-> 
-> In particular on write to FAT partition of SD-card the controller will
-> stuck in the middle of DMA transaction.
-> 
-> Solution to the problem is simple - we need to pass large (> 4kB) data
-> buffers to the controller via multiple descriptors. And that's what
-> that change does.
-> 
-> What's interesting I did try original driver on same platform but
-> configured with 4kB PAGE_SIZE and may confirm that data blocks passed
-> in SG-list to dw_mmc never exeed 4kB limit - that explains why nobody
-> ever faced a problem I did.
-> 
-> Signed-off-by: Alexey Brodkin <abrodkin@synopsys.com>
-> Cc: Seungwon Jeon <tgih.jun@samsung.com>
-> Cc: Jaehoon Chung <jh80.chung@samsung.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: arc-linux-dev@synopsys.com
-> Cc: linux-kernel@vger.kernel.org
-> ---
->  drivers/mmc/host/dw_mmc.c | 109 ++++++++++++++++++++++++++++++----------------
->  1 file changed, 71 insertions(+), 38 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 40e9d8e..e41fb74 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -99,6 +99,9 @@ struct idmac_desc {
->  
->  	__le32		des3;	/* buffer 2 physical address */
->  };
-> +
-> +/* Each descriptor can transfer up to 4KB of data in chained mode */
-> +#define DW_MCI_DESC_DATA_LENGTH	0x1000
->  #endif /* CONFIG_MMC_DW_IDMAC */
->  
->  static bool dw_mci_reset(struct dw_mci *host);
-> @@ -462,66 +465,96 @@ static void dw_mci_idmac_complete_dma(struct dw_mci *host)
->  static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
->  				    unsigned int sg_len)
->  {
-> +	unsigned int desc_len;
->  	int i;
->  	if (host->dma_64bit_address == 1) {
-> -		struct idmac_desc_64addr *desc = host->sg_cpu;
-> +		struct idmac_desc_64addr *desc_first, *desc_last, *desc;
-
-Why it needs desc_first?
-
-> +
-> +		desc_first = desc_last = desc = host->sg_cpu;
->  
-> -		for (i = 0; i < sg_len; i++, desc++) {
-> +		for (i = 0; i < sg_len; i++) {
->  			unsigned int length = sg_dma_len(&data->sg[i]);
->  			u64 mem_addr = sg_dma_address(&data->sg[i]);
->  
-> -			/*
-> -			 * Set the OWN bit and disable interrupts for this
-> -			 * descriptor
-> -			 */
-> -			desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC |
-> -						IDMAC_DES0_CH;
-> -			/* Buffer length */
-> -			IDMAC_64ADDR_SET_BUFFER1_SIZE(desc, length);
-> -
-> -			/* Physical address to DMA to/from */
-> -			desc->des4 = mem_addr & 0xffffffff;
-> -			desc->des5 = mem_addr >> 32;
-> +			for ( ; length ; desc++) {
-
-Is there no infinite loop case?
-
-Best Regards,
-Jaehoon Chung
-
-> +				desc_len = (length <= DW_MCI_DESC_DATA_LENGTH) ?
-> +					   length : DW_MCI_DESC_DATA_LENGTH;
-> +
-> +				length -= desc_len;
-> +
-> +				/*
-> +				 * Set the OWN bit and disable interrupts
-> +				 * for this descriptor
-> +				 */
-> +				desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC |
-> +							IDMAC_DES0_CH;
-> +
-> +				/* Buffer length */
-> +				IDMAC_64ADDR_SET_BUFFER1_SIZE(desc, desc_len);
-> +
-> +				/* Physical address to DMA to/from */
-> +				desc->des4 = mem_addr & 0xffffffff;
-> +				desc->des5 = mem_addr >> 32;
-> +
-> +				/* Update physical address for the next desc */
-> +				mem_addr += desc_len;
-> +
-> +				/* Save pointer to the last descriptor */
-> +				desc_last = desc;
-> +			}
->  		}
->  
->  		/* Set first descriptor */
-> -		desc = host->sg_cpu;
-> -		desc->des0 |= IDMAC_DES0_FD;
-> +		desc_first->des0 |= IDMAC_DES0_FD;
->  
->  		/* Set last descriptor */
-> -		desc = host->sg_cpu + (i - 1) *
-> -				sizeof(struct idmac_desc_64addr);
-> -		desc->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
-> -		desc->des0 |= IDMAC_DES0_LD;
-> +		desc_last->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
-> +		desc_last->des0 |= IDMAC_DES0_LD;
->  
->  	} else {
-> -		struct idmac_desc *desc = host->sg_cpu;
-> +		struct idmac_desc *desc_first, *desc_last, *desc;
-> +
-> +		desc_first = desc_last = desc = host->sg_cpu;
->  
-> -		for (i = 0; i < sg_len; i++, desc++) {
-> +		for (i = 0; i < sg_len; i++) {
->  			unsigned int length = sg_dma_len(&data->sg[i]);
->  			u32 mem_addr = sg_dma_address(&data->sg[i]);
->  
-> -			/*
-> -			 * Set the OWN bit and disable interrupts for this
-> -			 * descriptor
-> -			 */
-> -			desc->des0 = cpu_to_le32(IDMAC_DES0_OWN |
-> -					IDMAC_DES0_DIC | IDMAC_DES0_CH);
-> -			/* Buffer length */
-> -			IDMAC_SET_BUFFER1_SIZE(desc, length);
-> +			for ( ; length ; desc++) {
-> +				desc_len = (length <= DW_MCI_DESC_DATA_LENGTH) ?
-> +					   length : DW_MCI_DESC_DATA_LENGTH;
-> +
-> +				length -= desc_len;
-> +
-> +				/*
-> +				 * Set the OWN bit and disable interrupts
-> +				 * for this descriptor
-> +				 */
-> +				desc->des0 = cpu_to_le32(IDMAC_DES0_OWN |
-> +							 IDMAC_DES0_DIC |
-> +							 IDMAC_DES0_CH);
-> +
-> +				/* Buffer length */
-> +				IDMAC_SET_BUFFER1_SIZE(desc, desc_len);
->  
-> -			/* Physical address to DMA to/from */
-> -			desc->des2 = cpu_to_le32(mem_addr);
-> +				/* Physical address to DMA to/from */
-> +				desc->des2 = cpu_to_le32(mem_addr);
-> +
-> +				/* Update physical address for the next desc */
-> +				mem_addr += desc_len;
-> +
-> +				/* Save pointer to the last descriptor */
-> +				desc_last = desc;
-> +			}
->  		}
->  
->  		/* Set first descriptor */
-> -		desc = host->sg_cpu;
-> -		desc->des0 |= cpu_to_le32(IDMAC_DES0_FD);
-> +		desc_first->des0 |= cpu_to_le32(IDMAC_DES0_FD);
->  
->  		/* Set last descriptor */
-> -		desc = host->sg_cpu + (i - 1) * sizeof(struct idmac_desc);
-> -		desc->des0 &= cpu_to_le32(~(IDMAC_DES0_CH | IDMAC_DES0_DIC));
-> -		desc->des0 |= cpu_to_le32(IDMAC_DES0_LD);
-> +		desc_last->des0 &= cpu_to_le32(~(IDMAC_DES0_CH |
-> +					       IDMAC_DES0_DIC));
-> +		desc_last->des0 |= cpu_to_le32(IDMAC_DES0_LD);
->  	}
->  
->  	wmb();
-> @@ -2394,7 +2427,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->  #ifdef CONFIG_MMC_DW_IDMAC
->  		mmc->max_segs = host->ring_size;
->  		mmc->max_blk_size = 65536;
-> -		mmc->max_seg_size = 0x1000;
-> +		mmc->max_seg_size = DW_MCI_DESC_DATA_LENGTH;
->  		mmc->max_req_size = mmc->max_seg_size * host->ring_size;
->  		mmc->max_blk_count = mmc->max_req_size / 512;
->  #else
-> 
-
+But really, a mdelay(1) in a driver ...
