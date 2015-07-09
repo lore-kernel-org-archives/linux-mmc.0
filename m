@@ -1,148 +1,211 @@
-From: Dong Aisheng <b29396@freescale.com>
-Subject: Re: [PATCH 0/6] mmc: sdhci-esdhci-imx: fix cd/wp regression
-Date: Thu, 9 Jul 2015 17:29:50 +0800
-Message-ID: <20150709092949.GB3917@shlinux1.ap.freescale.net>
-References: <1434564337-24720-1-git-send-email-aisheng.dong@freescale.com>
- <20150709075032.GD23464@tiger>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Subject: Re: [PATCH v4 2/8] pinctrl: sh-pfc: r8a7790: Implement voltage
+ switching for SDHI
+Date: Thu, 09 Jul 2015 13:34:34 +0100
+Message-ID: <1436445274.25102.0.camel@codethink.co.uk>
+References: <1435683177.23818.60.camel@codethink.co.uk>
+	 <1435683249.23818.62.camel@codethink.co.uk> <6355006.FnTDFbP0bb@avalon>
+	 <1435879310.7541.2.camel@codethink.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0129.outbound.protection.outlook.com ([207.46.100.129]:35552
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750923AbbGIJgK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 9 Jul 2015 05:36:10 -0400
-Content-Disposition: inline
-In-Reply-To: <20150709075032.GD23464@tiger>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1435879310.7541.2.camel@codethink.co.uk>
+Sender: linux-sh-owner@vger.kernel.org
+To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, linux-gpio@vger.kernel.org, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Guo <shawnguo@kernel.org>
-Cc: Dong Aisheng <aisheng.dong@freescale.com>, linux-mmc@vger.kernel.org, fabio.estevam@freescale.com, marex@denx.de, ulf.hansson@linaro.org, s.trumtrar@pengutronix.de, smoch@web.de, linux-arm-kernel@lists.infradead.org, robertcnelson@gmail.com, s.hauer@pengutronix.de, chris@printf.net, rabeeh@solid-run.com, troy.kisky@boundarydevices.com, lisovy@gmail.com, hs@denx.de, gwenhael.goavec-merou@armadeus.com, p.zabel@pengutronix.de, rmk+kernel@arm.linux.org.uk, shawn.guo@linaro.org, tharvey@gateworks.com, LW@KARO-electronics.de, ipaton0@gmail.com
 
-On Thu, Jul 09, 2015 at 03:50:32PM +0800, Shawn Guo wrote:
-> On Thu, Jun 18, 2015 at 02:05:31AM +0800, Dong Aisheng wrote:
-> > Commit 8d86e4f mmc: sdhci-esdhc-imx: Call mmc_of_parse()
-> > seriously break the sd card detect/write protect function
-> > of most IMX platforms since a lot of GPIO flags of cd-gpios/wp-gpios
-> > are wrongly set in devicetree.
+On Fri, 2015-07-03 at 00:21 +0100, Ben Hutchings wrote:
+> On Wed, 2015-07-01 at 10:37 +0300, Laurent Pinchart wrote:
+> [...]
+> > > +#define PIN_IO_VOLTAGE(bank, _pin, _name, sfx)		\
+> > > +	[RCAR_GP_PIN(bank, _pin)].configs = SH_PFC_PIN_CFG_IO_VOLTAGE
+> > > +
+> > >  static const struct sh_pfc_pin pinmux_pins[] = {
+> > >  	PINMUX_GPIO_GP_ALL(),
+> > > 
+> > > -	/* Pins not associated with a GPIO port */
+> > > +	/*
+> > > +	 * All pins assigned to GPIO bank 3 can be used for SD interfaces
+> > > +	 * in which case they support both 3.3V and 1.8V signalling.
+> > > +	 */
+> > > +	PORT_GP_32(3, PIN_IO_VOLTAGE, unused),
+> > > +
+> > > +	/* Pins not associated with a GPIO port, placed after all the GPIOs */
+> > > +	[RCAR_GP_PIN(5, 31) + 1] =
 > > 
-> > It breaks the following things:
+> > I'm sorry but I still don't like this. gcc outputs a warning when overriding 
+> > an initializer if you enable -Wextra, which leads me to believe this construct 
+> > is dubious. It should at least be tested with LLVM.
+> > 
+> > I'd much prefer replacing PINMUX_GPIO_GP_ALL() with a version that will 
+> > initialize the pins correctly right away.
+> [...]
 > 
-> My opinion would be that we revert the commit 8d86e4f for v4.2, as it's
-> so broken.
+> Something like this?
+
+Laurent, please can you answer whether this is the right way to go.
+
+Ben.
+
+> diff --git a/drivers/pinctrl/sh-pfc/pfc-emev2.c b/drivers/pinctrl/sh-pfc/pfc-emev2.c
+> index 849c6943ed30..ad1a8281a91b 100644
+> --- a/drivers/pinctrl/sh-pfc/pfc-emev2.c
+> +++ b/drivers/pinctrl/sh-pfc/pfc-emev2.c
+> @@ -228,7 +228,7 @@ enum {
+>  
+>  /* Expand to a list of sh_pfc_pin entries (named PORT#).
+>   * NOTE: No config are recorded since the driver do not handle pinconf. */
+> -#define __PIN_CFG(pn, pfx, sfx)  SH_PFC_PIN_CFG(pfx, 0)
+> +#define __PIN_CFG(pn, pfx, sfx)  SH_PFC_PORT_CFG(pfx, 0)
+>  #define PINMUX_EMEV_GPIO_ALL()	  CPU_ALL_PORT(__PIN_CFG, , unused)
+>  
+>  static const struct sh_pfc_pin pinmux_pins[] = {
+> diff --git a/drivers/pinctrl/sh-pfc/pfc-r8a73a4.c b/drivers/pinctrl/sh-pfc/pfc-r8a73a4.c
+> index 280a56f97786..ca1538371563 100644
+> --- a/drivers/pinctrl/sh-pfc/pfc-r8a73a4.c
+> +++ b/drivers/pinctrl/sh-pfc/pfc-r8a73a4.c
+> @@ -1272,8 +1272,8 @@ static const u16 pinmux_data[] = {
+>  #define __IO	(SH_PFC_PIN_CFG_INPUT | SH_PFC_PIN_CFG_OUTPUT)
+>  #define __PUD	(SH_PFC_PIN_CFG_PULL_DOWN | SH_PFC_PIN_CFG_PULL_UP)
+>  
+> -#define R8A73A4_PIN_IO_PU_PD(pin)       SH_PFC_PIN_CFG(pin, __IO | __PUD)
+> -#define R8A73A4_PIN_O(pin)              SH_PFC_PIN_CFG(pin, __O)
+> +#define R8A73A4_PIN_IO_PU_PD(pin)       SH_PFC_PORT_CFG(pin, __IO | __PUD)
+> +#define R8A73A4_PIN_O(pin)              SH_PFC_PORT_CFG(pin, __O)
+>  
+>  static const struct sh_pfc_pin pinmux_pins[] = {
+>  	R8A73A4_PIN_IO_PU_PD(0), R8A73A4_PIN_IO_PU_PD(1),
+> diff --git a/drivers/pinctrl/sh-pfc/pfc-r8a7740.c b/drivers/pinctrl/sh-pfc/pfc-r8a7740.c
+> index b486e9d20cc2..92939cbd7ad0 100644
+> --- a/drivers/pinctrl/sh-pfc/pfc-r8a7740.c
+> +++ b/drivers/pinctrl/sh-pfc/pfc-r8a7740.c
+> @@ -1535,15 +1535,15 @@ static const u16 pinmux_data[] = {
+>  #define __PU		(SH_PFC_PIN_CFG_PULL_UP)
+>  #define __PUD		(SH_PFC_PIN_CFG_PULL_DOWN | SH_PFC_PIN_CFG_PULL_UP)
+>  
+> -#define R8A7740_PIN_I_PD(pin)		SH_PFC_PIN_CFG(pin, __I | __PD)
+> -#define R8A7740_PIN_I_PU(pin)		SH_PFC_PIN_CFG(pin, __I | __PU)
+> -#define R8A7740_PIN_I_PU_PD(pin)	SH_PFC_PIN_CFG(pin, __I | __PUD)
+> -#define R8A7740_PIN_IO(pin)		SH_PFC_PIN_CFG(pin, __IO)
+> -#define R8A7740_PIN_IO_PD(pin)		SH_PFC_PIN_CFG(pin, __IO | __PD)
+> -#define R8A7740_PIN_IO_PU(pin)		SH_PFC_PIN_CFG(pin, __IO | __PU)
+> -#define R8A7740_PIN_IO_PU_PD(pin)	SH_PFC_PIN_CFG(pin, __IO | __PUD)
+> -#define R8A7740_PIN_O(pin)		SH_PFC_PIN_CFG(pin, __O)
+> -#define R8A7740_PIN_O_PU_PD(pin)	SH_PFC_PIN_CFG(pin, __O | __PUD)
+> +#define R8A7740_PIN_I_PD(pin)		SH_PFC_PORT_CFG(pin, __I | __PD)
+> +#define R8A7740_PIN_I_PU(pin)		SH_PFC_PORT_CFG(pin, __I | __PU)
+> +#define R8A7740_PIN_I_PU_PD(pin)	SH_PFC_PORT_CFG(pin, __I | __PUD)
+> +#define R8A7740_PIN_IO(pin)		SH_PFC_PORT_CFG(pin, __IO)
+> +#define R8A7740_PIN_IO_PD(pin)		SH_PFC_PORT_CFG(pin, __IO | __PD)
+> +#define R8A7740_PIN_IO_PU(pin)		SH_PFC_PORT_CFG(pin, __IO | __PU)
+> +#define R8A7740_PIN_IO_PU_PD(pin)	SH_PFC_PORT_CFG(pin, __IO | __PUD)
+> +#define R8A7740_PIN_O(pin)		SH_PFC_PORT_CFG(pin, __O)
+> +#define R8A7740_PIN_O_PU_PD(pin)	SH_PFC_PORT_CFG(pin, __O | __PUD)
+>  
+>  static const struct sh_pfc_pin pinmux_pins[] = {
+>  	/* Table 56-1 (I/O and Pull U/D) */
+> diff --git a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
+> index 1137bbc810cd..1e59e1775374 100644
+> --- a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
+> +++ b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
+> @@ -1740,20 +1740,23 @@ static const u16 pinmux_data[] = {
+>  #define PIN_NUMBER(r, c) (((r) - 'A') * 31 + (c) + 200)
+>  #define PIN_A_NUMBER(r, c) PIN_NUMBER(ROW_GROUP_A(r), c)
+>  
+> -#define PIN_IO_VOLTAGE(bank, _pin, _name, sfx)		\
+> -	[RCAR_GP_PIN(bank, _pin)].configs = SH_PFC_PIN_CFG_IO_VOLTAGE
+> +/*
+> + * All pins assigned to GPIO bank 3 can be used for SD interfaces in
+> + * which case they support both 3.3V and 1.8V signalling.
+> + */
+> +#define GP_GPIO_IO_VOLTAGE(bank, _pin, _name, sfx)			\
+> +	[RCAR_GP_PIN(bank, _pin)] =					\
+> +		SH_PFC_GPIO_CFG(bank, _pin, _name, SH_PFC_PIN_CFG_IO_VOLTAGE)
+>  
+>  static const struct sh_pfc_pin pinmux_pins[] = {
+> -	PINMUX_GPIO_GP_ALL(),
+> -
+> -	/*
+> -	 * All pins assigned to GPIO bank 3 can be used for SD interfaces
+> -	 * in which case they support both 3.3V and 1.8V signalling.
+> -	 */
+> -	PORT_GP_32(3, PIN_IO_VOLTAGE, unused),
+> +	PORT_GP_32(0, _GP_GPIO, unused),
+> +	PORT_GP_32(1, _GP_GPIO, unused),
+> +	PORT_GP_32(2, _GP_GPIO, unused),
+> +	PORT_GP_32(3, GP_GPIO_IO_VOLTAGE, unused),
+> +	PORT_GP_32(4, _GP_GPIO, unused),
+> +	PORT_GP_32(5, _GP_GPIO, unused),
+>  
+>  	/* Pins not associated with a GPIO port, placed after all the GPIOs */
+> -	[RCAR_GP_PIN(5, 31) + 1] =
+>  	SH_PFC_PIN_NAMED(ROW_GROUP_A('F'), 15, AF15),
+>  	SH_PFC_PIN_NAMED(ROW_GROUP_A('G'), 15, AG15),
+>  	SH_PFC_PIN_NAMED(ROW_GROUP_A('H'), 15, AH15),
+> diff --git a/drivers/pinctrl/sh-pfc/pfc-sh73a0.c b/drivers/pinctrl/sh-pfc/pfc-sh73a0.c
+> index d2efbfb776ac..2c798550cd8c 100644
+> --- a/drivers/pinctrl/sh-pfc/pfc-sh73a0.c
+> +++ b/drivers/pinctrl/sh-pfc/pfc-sh73a0.c
+> @@ -1166,14 +1166,14 @@ static const u16 pinmux_data[] = {
+>  #define __PU		(SH_PFC_PIN_CFG_PULL_UP)
+>  #define __PUD		(SH_PFC_PIN_CFG_PULL_DOWN | SH_PFC_PIN_CFG_PULL_UP)
+>  
+> -#define SH73A0_PIN_I_PD(pin)		SH_PFC_PIN_CFG(pin, __I | __PD)
+> -#define SH73A0_PIN_I_PU(pin)		SH_PFC_PIN_CFG(pin, __I | __PU)
+> -#define SH73A0_PIN_I_PU_PD(pin)		SH_PFC_PIN_CFG(pin, __I | __PUD)
+> -#define SH73A0_PIN_IO(pin)		SH_PFC_PIN_CFG(pin, __IO)
+> -#define SH73A0_PIN_IO_PD(pin)		SH_PFC_PIN_CFG(pin, __IO | __PD)
+> -#define SH73A0_PIN_IO_PU(pin)		SH_PFC_PIN_CFG(pin, __IO | __PU)
+> -#define SH73A0_PIN_IO_PU_PD(pin)	SH_PFC_PIN_CFG(pin, __IO | __PUD)
+> -#define SH73A0_PIN_O(pin)		SH_PFC_PIN_CFG(pin, __O)
+> +#define SH73A0_PIN_I_PD(pin)		SH_PFC_PORT_CFG(pin, __I | __PD)
+> +#define SH73A0_PIN_I_PU(pin)		SH_PFC_PORT_CFG(pin, __I | __PU)
+> +#define SH73A0_PIN_I_PU_PD(pin)		SH_PFC_PORT_CFG(pin, __I | __PUD)
+> +#define SH73A0_PIN_IO(pin)		SH_PFC_PORT_CFG(pin, __IO)
+> +#define SH73A0_PIN_IO_PD(pin)		SH_PFC_PORT_CFG(pin, __IO | __PD)
+> +#define SH73A0_PIN_IO_PU(pin)		SH_PFC_PORT_CFG(pin, __IO | __PU)
+> +#define SH73A0_PIN_IO_PU_PD(pin)	SH_PFC_PORT_CFG(pin, __IO | __PUD)
+> +#define SH73A0_PIN_O(pin)		SH_PFC_PORT_CFG(pin, __O)
+>  
+>  /* Pin numbers for pins without a corresponding GPIO port number are computed
+>   * from the row and column numbers with a 1000 offset to avoid collisions with
+> diff --git a/drivers/pinctrl/sh-pfc/sh_pfc.h b/drivers/pinctrl/sh-pfc/sh_pfc.h
+> index 734f7a92229c..3eca740bba02 100644
+> --- a/drivers/pinctrl/sh-pfc/sh_pfc.h
+> +++ b/drivers/pinctrl/sh-pfc/sh_pfc.h
+> @@ -272,14 +272,18 @@ struct sh_pfc_soc_info {
+>  		.enum_id = _pin##_DATA,					\
+>  	}
+>  
+> -/* SH_PFC_PIN_CFG - Expand to a sh_pfc_pin entry (named PORT#) with config */
+> -#define SH_PFC_PIN_CFG(_pin, cfgs)					\
+> +/* SH_PFC_{PORT,GPIO}_CFG - Expand to a sh_pfc_pin entry with config */
+> +#define _SH_PFC_PIN_CFG(_pin, _name, cfgs)				\
+>  	{								\
+>  		.pin = _pin,						\
+> -		.name = __stringify(PORT##_pin),			\
+> -		.enum_id = PORT##_pin##_DATA,				\
+> +		.name = __stringify(_name),				\
+> +		.enum_id = _name##_DATA,				\
+>  		.configs = cfgs,					\
+>  	}
+> +#define SH_PFC_PORT_CFG(_pin, cfgs)				\
+> +	_SH_PFC_PIN_CFG(PORT##_pin, PORT##_pin, cfgs)
+> +#define SH_PFC_GPIO_CFG(bank, _pin, _name, cfgs)		\
+> +	_SH_PFC_PIN_CFG((bank * 32) + _pin, _name, cfgs)
+>  
+>  /* SH_PFC_PIN_NAMED - Expand to a sh_pfc_pin entry with the given name */
+>  #define SH_PFC_PIN_NAMED(row, col, _name)				\
+> --- END ---
+> 
+> If you're happy with that, I'll re-send the series (hopefully for the
+> last time!) with the r8a7790 changes squashed into "pinctrl: sh-pfc:
+> r8a7790: Implement voltage switching for SDHI" and the SH_PFC_PIN_CFG
+> macro change as a new patch before it.
+> 
+> Ben.
 > 
 
-It may be a bit difficult since there're a few successive patches already
-in Ulf's tree based on 8d86e4f.
-Most are also fixes for 8d86e4f by Fabio.
 
-> > 1) cd-gpio function enable
-> > Most IMX boards GPIO card detect function becomes unwork and using card
-> > polling mode instead by mistake.
-> > Openning CONFIG_MMC_DEBUG will easily see that.
-> > It is caused by the default quirk SDHCI_QUIRK_BROKEN_CARD_DETECTION
-> > is not cleared for dt platform by commit 8d86e4f, then
-> > MMC_CAP_NEEDS_POLL is wrongly set.
-> > Patch 1~2 is to fix it.
-> > 
-> > 2) cd-gpio/wp-gpio polarity
-> > Before commit 8d86e4f, we do not use GPIO flags passed from
-> > devicetree. But after it, GPIO flags specfied in dt becomes valid
-> > and will affect the normal cd/wp function.
-> > 
-> > This is fixed by another dts fix patch series:
-> > [PATCH 0/5] dts: imx: fix sd card gpio polarity specified in device tree
-> > http://www.spinics.net/lists/arm-kernel/msg426156.html
-> > 
-> > Since it needs to change a lot board dts files, so i cook the patch
-> > based on Shawn/for-next branch to make sure all board dts file are
-> > changed in the same time.
-> > 
-> > The dts fix patches series should be picked before this series since
-> > the driver fixes depend on the correct dts(correct GPIO polarity)
-> > to work properly.
-> 
-> So this is a device tree ABI breakage.  All the existing DTBs already
-> installed on devices will be broken with the new kernel.  You can argue
-> that the device trees are buggy and we're fixing bugs.  But if a bugfix
-> breaks things, we should be conservative.  Here is my suggestion:
-> 
-
-I agree that it's a pain, but we may have to suffer.
-Your below suggestion can't eventually avoid this pain.
-The old dts will finally not work again if upgrade to new kernel.
-
-As currently dts and kernel tree are still not separated, it may be not
-a serious issue and usually user uses new kernel and dts together.
-
-> 1. Revert commit 8d86e4f for v4.2
-> 2. I queue up your dts fixing series for v4.2
-> 3. Keep things as they are for a few releases and then consider to move
->    to mmc_of_parse() with the hope that those buggy DTBs have been
->    upgraded during that period.
-> 
-
-I agree with you.
-One difference is that i'd like to fix it ASAP without reverting 8d86e4f
-due to more patches depends on it is already there as i mentioned above..
-Revert it may need to revert a lot others.
-
-The pain is that v4.1 is left broken.
-
-How about you queue dts fixing first for v4.2 rc1,
-then we can fix the driver in v4.2 rc2?
-
-Regards
-Dong Aisheng
-
-> Shawn
-> 
-> > 
-> > 3) max-frequency not work in sdhci
-> > mmc_of_parse will parse the max-frequency from devicetree,
-> > however, its value will be overwritten by common sdhci driver
-> > finnally,so it does not actually work.
-> > Patch 3 is to fix it.
-> > 
-> > 4) patch 4~6 clear unneeded parsing code after switch to mmc_of_parse().
-> > 
-> > The series is based on ulf/next tree.
-> > 
-> > I also CCed this patch series to all board maintainer related in this
-> > change, hope they can help test it.
-> > I only tested some freescale IMX boards.
-> > 
-> > BTW, There's indeed a problem here that dts fix patch series needs to
-> > be picked before this series, but it can't go through Ulf tree
-> > since some board dts changed does not in Ulf's tree.
-> > And this patch series also can not go through Shawn's tree,
-> > since mmc part change depends on some patches in Ulf tree.
-> > Two series are cross dependant.
-> > Hope you guy can find a solution for it.
-> > 
-> > Those two patch series is an important fix, hopefully can catch up the
-> > final 4.1 merge window.
-> > 
-> > Dong Aisheng (6):
-> >   mmc: sdhci-esdhc-imx: fix cd regression for dt platform
-> >   mmc: sdhci-esdhc-imx: move all non dt probe code into one function
-> >   mmc: sdhci: make max-frequency property in device tree work
-> >   mmc: sdhci-esdhc-imx: remove duplicated dts parsing
-> >   mmc: sdhci-esdhc-imx: clear f_max in boarddata
-> >   dts: mmc: fsl-imx-esdhc: remove fsl,cd-controller support
-> > 
-> >  .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   2 -
-> >  drivers/mmc/host/sdhci-esdhc-imx.c                 | 210 ++++++++++-----------
-> >  drivers/mmc/host/sdhci.c                           |   9 +-
-> >  include/linux/platform_data/mmc-esdhc-imx.h        |   1 -
-> >  4 files changed, 111 insertions(+), 111 deletions(-)
-> > 
-> > -- 
-> > 1.9.1
-> > 
-> > 
-> > _______________________________________________
-> > linux-arm-kernel mailing list
-> > linux-arm-kernel@lists.infradead.org
-> > http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-> > 
