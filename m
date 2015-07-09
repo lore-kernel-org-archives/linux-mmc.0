@@ -1,33 +1,35 @@
-From: Alexey Brodkin <Alexey.Brodkin@synopsys.com>
-Subject: Re: [PATCH] mmc: dw_mmc: handle data blocks > than 4kB if IDMAC is
- used
-Date: Thu, 9 Jul 2015 13:04:50 +0000
-Message-ID: <1436447090.16269.0.camel@synopsys.com>
-References: <1435220707-7250-1-git-send-email-abrodkin@synopsys.com>
-	 <559CA38D.10700@samsung.com> <1436345145.2890.4.camel@synopsys.com>
+From: Shawn Guo <shawnguo@kernel.org>
+Subject: Re: [PATCH 0/6] mmc: sdhci-esdhci-imx: fix cd/wp regression
+Date: Thu, 9 Jul 2015 21:27:36 +0800
+Message-ID: <20150709132736.GG23464@tiger>
+References: <1434564337-24720-1-git-send-email-aisheng.dong@freescale.com>
+ <20150709075032.GD23464@tiger>
+ <20150709092949.GB3917@shlinux1.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-7"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtprelay.synopsys.com ([198.182.47.9]:37940 "EHLO
-	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752128AbbGINEz convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jul 2015 09:04:55 -0400
-In-Reply-To: <1436345145.2890.4.camel@synopsys.com>
-Content-Language: en-US
-Content-ID: <AA702EAFEC3144488C7D9B164C7E05BF@internal.synopsys.com>
+Received: from mail.kernel.org ([198.145.29.136]:46393 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752197AbbGIN16 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 9 Jul 2015 09:27:58 -0400
+Content-Disposition: inline
+In-Reply-To: <20150709092949.GB3917@shlinux1.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "jh80.chung@samsung.com" <jh80.chung@samsung.com>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, "arc-linux-dev@synopsys.com" <arc-linux-dev@synopsys.com>
+To: Dong Aisheng <b29396@freescale.com>
+Cc: Dong Aisheng <aisheng.dong@freescale.com>, ulf.hansson@linaro.org, chris@printf.net, smoch@web.de, s.trumtrar@pengutronix.de, LW@KARO-electronics.de, marex@denx.de, rabeeh@solid-run.com, gwenhael.goavec-merou@armadeus.com, rmk+kernel@arm.linux.org.uk, hs@denx.de, tharvey@gateworks.com, s.hauer@pengutronix.de, troy.kisky@boundarydevices.com, lisovy@gmail.com, robertcnelson@gmail.com, linux-arm-kernel@lists.infradead.org, ipaton0@gmail.com, fabio.estevam@freescale.com, linux-mmc@vger.kernel.org, p.zabel@pengutronix.de, shawn.guo@linaro.org
 
-Hi Jaehoon,
+On Thu, Jul 09, 2015 at 05:29:50PM +0800, Dong Aisheng wrote:
+> I agree with you.
+> One difference is that i'd like to fix it ASAP without reverting 8d86e4f
+> due to more patches depends on it is already there as i mentioned above..
+> Revert it may need to revert a lot others.
+> 
+> The pain is that v4.1 is left broken.
 
-On Wed, 2015-07-08 at 11:45 +-0300, Alexey Brodkin wrote:
-+AD4- 
-+AD4- Let me know if that description makes sense to you.
+Oh, crap!  I thought it's been there with only v4.2-rc1, and did not
+know v4.1 is already broken.  In that case, reverting 8d86e4f isn't
+the best option.  I suggest you rebase the dts series on top of
+v4.2-rc1, and send it via mmc tree.
 
-I'm wondering if you had a chance to look at my comments and if
-those comments make sense or you need more input from me.
-
--Alexey
+Shawn
