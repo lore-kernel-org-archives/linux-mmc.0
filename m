@@ -1,59 +1,99 @@
-From: Yangbo Lu <yangbo.lu@freescale.com>
-Subject: [PATCH] mmc: bus: check suspend/resume hooks for bus_ops before calling
-Date: Fri, 10 Jul 2015 16:38:46 +0800
-Message-ID: <1436517526-19392-1-git-send-email-yangbo.lu@freescale.com>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] mmc: sunxi: Don't start commands while the card
+ is busy
+Date: Fri, 10 Jul 2015 17:07:55 +0200
+Message-ID: <1436540875-11570-1-git-send-email-hdegoede@redhat.com>
+Reply-To: hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2on0120.outbound.protection.outlook.com ([65.55.169.120]:41113
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752487AbbGJInd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 10 Jul 2015 04:43:33 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBUF776WAKGQEAYHT4BI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <http://groups.google.com/group/linux-sunxi/subscribe>
+To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Cc: Yangbo Lu <yangbo.lu@freescale.com>
 
-It needs to check suspend/resume hooks before calling them to avoid
-call trace during hibernation.
+Some sdio wifi modules have not been working reliable with the sunxi-mmc
+host code. This turns out to be caused by it starting new commands while
+the card signals that it is still busy processing a previous command.
 
-Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+This commit fixes this, thereby fixing the wifi reliability issues on
+the Cubietruck and other sunxi boards using sdio wifi.
+
+Cc: Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- drivers/mmc/core/bus.c | 13 ++++++++-----
- 1 file changed, 8 insertions(+), 5 deletions(-)
+ drivers/mmc/host/sunxi-mmc.c | 32 ++++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 972ff84..fc6b5e5 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -154,7 +154,8 @@ static int mmc_bus_suspend(struct device *dev)
- 	if (ret)
- 		return ret;
- 
--	ret = host->bus_ops->suspend(host);
-+	if (host->bus_ops->suspend)
-+		ret = host->bus_ops->suspend(host);
- 	return ret;
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 4d3e1ff..daa90b7 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -289,6 +289,24 @@ static int sunxi_mmc_init_host(struct mmc_host *mmc)
+ 	return 0;
  }
  
-@@ -164,10 +165,12 @@ static int mmc_bus_resume(struct device *dev)
- 	struct mmc_host *host = card->host;
- 	int ret;
- 
--	ret = host->bus_ops->resume(host);
--	if (ret)
--		pr_warn("%s: error %d during resume (card was removed?)\n",
--			mmc_hostname(host), ret);
-+	if (host->bus_ops->resume) {
-+		ret = host->bus_ops->resume(host);
-+		if (ret)
-+			pr_warn("%s: error %d during resume (card was removed?)\n",
-+				mmc_hostname(host), ret);
++/* Wait for card to report ready before starting a new cmd */
++static int sunxi_mmc_wait_card_ready(struct sunxi_mmc_host *host)
++{
++	unsigned long expire = jiffies + msecs_to_jiffies(500);
++	u32 rval;
++
++	do {
++		rval = mmc_readl(host, REG_STAS);
++	} while (time_before(jiffies, expire) && (rval & SDXC_CARD_DATA_BUSY));
++
++	if (rval & SDXC_CARD_DATA_BUSY) {
++		dev_err(mmc_dev(host->mmc), "Error R1 ready timeout\n");
++		return -EIO;
 +	}
++
++	return 0;
++}
++
+ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
+ 				    struct mmc_data *data)
+ {
+@@ -383,6 +401,8 @@ static void sunxi_mmc_send_manual_stop(struct sunxi_mmc_host *host,
+ 	u32 arg, cmd_val, ri;
+ 	unsigned long expire = jiffies + msecs_to_jiffies(1000);
  
- 	ret = pm_generic_resume(dev);
- 	return ret;
++	sunxi_mmc_wait_card_ready(host);
++
+ 	cmd_val = SDXC_START | SDXC_RESP_EXPIRE |
+ 		  SDXC_STOP_ABORT_CMD | SDXC_CHECK_RESPONSE_CRC;
+ 
+@@ -597,6 +617,11 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+ {
+ 	unsigned long expire = jiffies + msecs_to_jiffies(250);
+ 	u32 rval;
++	int ret;
++
++	ret = sunxi_mmc_wait_card_ready(host);
++	if (ret)
++		return ret;
+ 
+ 	rval = mmc_readl(host, REG_CLKCR);
+ 	rval &= ~(SDXC_CARD_CLOCK_ON | SDXC_LOW_POWER_ON);
+@@ -785,6 +810,13 @@ static void sunxi_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		return;
+ 	}
+ 
++	ret = sunxi_mmc_wait_card_ready(host);
++	if (ret) {
++		mrq->cmd->error = ret;
++		mmc_request_done(mmc, mrq);
++		return;
++	}
++
+ 	if (data) {
+ 		ret = sunxi_mmc_map_dma(host, data);
+ 		if (ret < 0) {
 -- 
-2.1.0.27.g96db324
-
+2.4.3
