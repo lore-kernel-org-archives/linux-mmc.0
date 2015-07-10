@@ -1,22 +1,16 @@
-From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH] mmc: sunxi: Don't start commands while the card
- is busy
-Date: Fri, 10 Jul 2015 17:07:55 +0200
-Message-ID: <1436540875-11570-1-git-send-email-hdegoede@redhat.com>
-Reply-To: hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBUF776WAKGQEAYHT4BI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <http://groups.google.com/group/linux-sunxi/subscribe>
-To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Cc: Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: [PATCH v2] mmc: sunxi: Don't start commands while the card is busy
+Date: Fri, 10 Jul 2015 17:14:44 +0200
+Message-ID: <1436541284-11800-1-git-send-email-hdegoede@redhat.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:57446 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932747AbbGJPOs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 10 Jul 2015 11:14:48 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Mike Turquette <mturquette@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree <devicetree@vger.kernel.org>, linux-sunxi@googlegroups.com, Hans de Goede <hdegoede@redhat.com>, Eugene K <sigintmailru@gmail.com>
 
 Some sdio wifi modules have not been working reliable with the sunxi-mmc
 host code. This turns out to be caused by it starting new commands while
@@ -25,8 +19,14 @@ the card signals that it is still busy processing a previous command.
 This commit fixes this, thereby fixing the wifi reliability issues on
 the Cubietruck and other sunxi boards using sdio wifi.
 
-Cc: Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Reported-by: Eugene K <sigintmailru@gmail.com>
+Suggested-by: Eugene K <sigintmailru@gmail.com>
+Cc: Eugene K <sigintmailru@gmail.com>
+Cc: Arend van Spriel <arend@broadcom.com>
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+Changes in v2:
+-Properly accredit Eugene K for coming up with the fix for this
 ---
  drivers/mmc/host/sunxi-mmc.c | 32 ++++++++++++++++++++++++++++++++
  1 file changed, 32 insertions(+)
@@ -97,3 +97,4 @@ index 4d3e1ff..daa90b7 100644
  		if (ret < 0) {
 -- 
 2.4.3
+
