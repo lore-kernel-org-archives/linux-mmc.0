@@ -1,43 +1,42 @@
 From: Yangbo Lu <yangbo.lu@freescale.com>
-Subject: [PATCH] mmc: sdhci-pltfm: add broken ADMA quirk for T4240 board
-Date: Fri, 10 Jul 2015 11:41:11 +0800
-Message-ID: <1436499671-16153-1-git-send-email-yangbo.lu@freescale.com>
+Subject: [PATCH] mmc: sdhci-esdhc: add default quirk SDHCI_QUIRK_NO_HISPD_BIT
+Date: Fri, 10 Jul 2015 11:42:37 +0800
+Message-ID: <1436499757-16342-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0134.outbound.protection.outlook.com ([157.56.111.134]:2101
+Received: from mail-bn1bon0137.outbound.protection.outlook.com ([157.56.111.137]:36994
 	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750805AbbGJDp4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 9 Jul 2015 23:45:56 -0400
+	id S1751720AbbGJDrY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 9 Jul 2015 23:47:24 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
 Cc: Yangbo Lu <yangbo.lu@freescale.com>
 
-eMMC build-in on T4240 board can't work when using ADMA to transfer
-data, but SDHC card could work well. No erratum provided, use SDMA
-instead to get it to work first.
+eSDHC supports high speed mode, but has no enabling bit for it.
+Add this quirk to avoid writing to eSDHC_PROCTL[DTW] by mistake.
 
 Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
 ---
- drivers/mmc/host/sdhci-pltfm.c | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/host/sdhci-esdhc.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index a207f5a..0b4d059 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -95,6 +95,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
- 	if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
- 		host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
+diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
+index 3497cfa..1b2c4f9 100644
+--- a/drivers/mmc/host/sdhci-esdhc.h
++++ b/drivers/mmc/host/sdhci-esdhc.h
+@@ -21,7 +21,8 @@
+ #define ESDHC_DEFAULT_QUIRKS	(SDHCI_QUIRK_FORCE_BLK_SZ_2048 | \
+ 				SDHCI_QUIRK_NO_BUSY_IRQ | \
+ 				SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK | \
+-				SDHCI_QUIRK_PIO_NEEDS_DELAY)
++				SDHCI_QUIRK_PIO_NEEDS_DELAY | \
++				SDHCI_QUIRK_NO_HISPD_BIT)
  
-+	if (of_device_is_compatible(np, "fsl,t4240-esdhc"))
-+		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
-+
- 	if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
- 	    of_device_is_compatible(np, "fsl,p1010-esdhc") ||
- 	    of_device_is_compatible(np, "fsl,t4240-esdhc") ||
+ #define ESDHC_SYSTEM_CONTROL	0x2c
+ #define ESDHC_CLOCK_MASK	0x0000fff0
 -- 
 2.1.0.27.g96db324
 
