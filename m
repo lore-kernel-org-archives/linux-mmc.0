@@ -1,52 +1,49 @@
-From: "R, Vignesh" <vigneshr@ti.com>
-Subject: Re: [PATCH 0/3] omap_hsmmc: Fix card enumeration failure on
-Date: Sat, 11 Jul 2015 15:55:42 +0530
-Message-ID: <55A0EF26.7060501@ti.com>
-References: <1434451039-18195-1-git-send-email-vigneshr@ti.com>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: Re: [PATCH 0/6] mmc: sdhci-esdhci-imx: fix cd/wp regression
+Date: Mon, 13 Jul 2015 19:43:13 +0800
+Message-ID: <20150713114310.GA9453@shlinux1.ap.freescale.net>
+References: <1434564337-24720-1-git-send-email-aisheng.dong@freescale.com>
+ <20150709075032.GD23464@tiger>
+ <20150709092949.GB3917@shlinux1.ap.freescale.net>
+ <20150709132736.GG23464@tiger>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:40238 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752318AbbGKK0L (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 11 Jul 2015 06:26:11 -0400
-In-Reply-To: <1434451039-18195-1-git-send-email-vigneshr@ti.com>
+Received: from mail-bn1bon0140.outbound.protection.outlook.com ([157.56.111.140]:45609
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751623AbbGMLuE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 13 Jul 2015 07:50:04 -0400
+Content-Disposition: inline
+In-Reply-To: <20150709132736.GG23464@tiger>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Andreas Fenkart <afenkart@gmail.com>, Tony Lindgren <tony@atomide.com>, NeilBrown <neilb@suse.de>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Shawn Guo <shawnguo@kernel.org>
+Cc: Dong Aisheng <aisheng.dong@freescale.com>, ulf.hansson@linaro.org, chris@printf.net, smoch@web.de, s.trumtrar@pengutronix.de, LW@KARO-electronics.de, marex@denx.de, rabeeh@solid-run.com, gwenhael.goavec-merou@armadeus.com, rmk+kernel@arm.linux.org.uk, hs@denx.de, tharvey@gateworks.com, s.hauer@pengutronix.de, troy.kisky@boundarydevices.com, lisovy@gmail.com, robertcnelson@gmail.com, linux-arm-kernel@lists.infradead.org, ipaton0@gmail.com, fabio.estevam@freescale.com, linux-mmc@vger.kernel.org, p.zabel@pengutronix.de, shawn.guo@linaro.org
 
-
-
-On 6/16/2015 4:07 PM, Vignesh R wrote:
+On Thu, Jul 09, 2015 at 09:27:36PM +0800, Shawn Guo wrote:
+> On Thu, Jul 09, 2015 at 05:29:50PM +0800, Dong Aisheng wrote:
+> > I agree with you.
+> > One difference is that i'd like to fix it ASAP without reverting 8d86e4f
+> > due to more patches depends on it is already there as i mentioned above..
+> > Revert it may need to revert a lot others.
+> > 
+> > The pain is that v4.1 is left broken.
 > 
-> Hi,
-> 
-> When using omap_hsmmc driver, if sd-card repeatedly plug unplugged
-> multiple times quickly, card enumeration stops after few iterations.
-> This can be easily reproduced on DRA74X EVM which uses omap_hsmmc driver.
-> This patch series addresses the above problem. The first patch fixes irq
-> handler to report all DTOs to mmc-core. Second patch adds handling for
-> BADA, DEB and CEB interrupts. The last patch introduces driver specific
-> card detect irq handler to cleanup pending requests before card removal.
-> 
-> Tested on DRA74X amd DRA72X and AM437X-GP EVMs, by repeated intense
-> plug/unplug iterations.
+> Oh, crap!  I thought it's been there with only v4.2-rc1, and did not
+> know v4.1 is already broken.  In that case, reverting 8d86e4f isn't
+> the best option.  I suggest you rebase the dts series on top of
+> v4.2-rc1, and send it via mmc tree.
 > 
 
-Gentle ping.. These patches fix bugs related to interrupt handling in
-omap_hsmmc. It also fixes bugs with unexpected card removal during data
-transfer. Can this go into 4.2-rc??
+Yes, will go that way.
 
-> 
-> Kishon Vijay Abraham I (1):
->   mmc: host: omap_hsmmc: Fix DTO and DCRC handling
-> 
-> Vignesh R (2):
->   mmc: host: omap_hsmmc: Handle BADA, DEB and CEB interrupts
->   mmc: host: omap_hsmmc: Add custom card detect irq handler
-> 
->  drivers/mmc/host/omap_hsmmc.c | 84 ++++++++++++++++++++++++++++++++---
->  1 file changed, 78 insertions(+), 6 deletions(-)
-> 
+Then you may need help take care of new dts going through your tree
+to make sure no broken code in again.
+
+Thanks
+
+Regards
+Dong Aisheng
+
+> Shawn
