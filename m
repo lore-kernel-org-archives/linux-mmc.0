@@ -1,84 +1,51 @@
-From: Franklin S Cooper Jr <fcooper@ti.com>
-Subject: [PATCH] mmc: omap_hsmmc: Update driver to support without regulators
-Date: Tue, 14 Jul 2015 14:29:46 -0500
-Message-ID: <1436902186-6542-1-git-send-email-fcooper@ti.com>
+From: Lu Y.B. <yangbo.lu@freescale.com>
+Subject: RE: powerpc/corenet: enable eSDHC
+Date: Thu, 16 Jul 2015 02:37:21 +0000
+Message-ID: <BY1PR0301MB1192803896118A14B8A2ABF3F2990@BY1PR0301MB1192.namprd03.prod.outlook.com>
+References: <1430893748-38821-1-git-send-email-yangbo.lu@freescale.com>
+ <20150530000331.GA9143@home.buserror.net>
+ <BY1PR0301MB119286F6B8EBD6EED07C8B15F2BF0@BY1PR0301MB1192.namprd03.prod.outlook.com>
+ <1433795433.2477.62.camel@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:45576 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752627AbbGNTaK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 14 Jul 2015 15:30:10 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <1433795433.2477.62.camel@freescale.com>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Scott Wood <scottwood@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-omap@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kishon@ti.com, rogerq@ti.com, Lokesh Vutla <lokeshvutla@ti.com>, Murali Karicheri <m-karicheri2@ti.com>, Franklin S Cooper Jr <fcooper@ti.com>
 
-From: Roger Quadros <rogerq@ti.com>
-
-Update driver to support without regulators.
-
-Without this patch boards that do not enable regulator config options will
-fail to boot with a kernel panic.
-
-Signed-off-by: Roger Quadros <rogerq@ti.com>
-Signed-off-by: Lokesh Vutla <lokeshvutla@ti.com>
-Signed-off-by: Murali Karicheri <m-karicheri2@ti.com>
-Signed-off-by: Franklin S Cooper Jr <fcooper@ti.com>
----
- Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt |  2 ++
- drivers/mmc/host/omap_hsmmc.c                           | 14 ++++++++++----
- 2 files changed, 12 insertions(+), 4 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-index 76bf087..2408e87 100644
---- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-@@ -22,6 +22,8 @@ ti,dual-volt: boolean, supports dual voltage cards
- ti,non-removable: non-removable slot (like eMMC)
- ti,needs-special-reset: Requires a special softreset sequence
- ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
-+voltage-ranges: Specify the voltage range supported if regulator framework
-+isn't enabled.
- dmas: List of DMA specifiers with the controller specific format
- as described in the generic DMA client binding. A tx and rx
- specifier is required.
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index b2b411d..16c870f 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1551,10 +1551,13 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	if (ios->power_mode != host->power_mode) {
- 		switch (ios->power_mode) {
- 		case MMC_POWER_OFF:
--			mmc_pdata(host)->set_power(host->dev, 0, 0);
-+			if (host->use_reg)
-+				mmc_pdata(host)->set_power(host->dev, 0, 0);
- 			break;
- 		case MMC_POWER_UP:
--			mmc_pdata(host)->set_power(host->dev, 1, ios->vdd);
-+			if (host->use_reg)
-+				mmc_pdata(host)->set_power(host->dev, 1,
-+							   ios->vdd);
- 			break;
- 		case MMC_POWER_ON:
- 			do_send_init_stream = 1;
-@@ -2082,10 +2085,13 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 		if (ret)
- 			goto err_irq;
- 		host->use_reg = 1;
-+		mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
-+	} else {
-+		ret = mmc_of_parse_voltage(pdev->dev.of_node, &mmc->ocr_avail);
-+		if (ret)
-+			goto err_irq;
- 	}
- 
--	mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
--
- 	omap_hsmmc_disable_irq(host);
- 
- 	/*
--- 
-1.9.1
-
+SGkgU2NvdHQsDQoNCk5vdyB0aGUgcGF0Y2ggYmVsb3cgaGFzIGJlZW4gbWVyZ2VkIG9uIGdpdDov
+L2dpdC5rZXJuZWwub3JnL3B1Yi9zY20vbGludXgva2VybmVsL2dpdC90b3J2YWxkcy9saW51eC5n
+aXQuDQpUaGlzIGlzc3VlIHNob3VsZCBoYXZlIGJlZW4gcmVzb2x2ZWQuIA0KVGhhbmtzLg0KDQoN
+CmNvbW1pdCA1ZmQyNmM3ZWNiMzIwODI3NDViMGJkMzNjOGUzNWJhZGQxY2I1YTkxDQpBdXRob3I6
+IFVsZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPg0KRGF0ZTogICBGcmkgSnVuIDUg
+MTE6NDA6MDggMjAxNSArMDIwMA0KDQogICAgbW1jOiBzZGhjaTogUmVzdG9yZSBiZWhhdmlvciB3
+aGlsZSBjcmVhdGluZyBPQ1IgbWFzaw0KDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
+Cj4gRnJvbTogV29vZCBTY290dC1CMDc0MjENCj4gU2VudDogVHVlc2RheSwgSnVuZSAwOSwgMjAx
+NSA0OjMxIEFNDQo+IFRvOiBMdSBZYW5nYm8tQjQ3MDkzDQo+IENjOiBsaW51eHBwYy1kZXZAbGlz
+dHMub3psYWJzLm9yZzsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTog
+cG93ZXJwYy9jb3JlbmV0OiBlbmFibGUgZVNESEMNCj4gDQo+IE9uIE1vbiwgMjAxNS0wNi0wOCBh
+dCAwNToxMiAtMDUwMCwgTHUgWWFuZ2JvLUI0NzA5MyB3cm90ZToNCj4gPiBUaGFua3MgYSBsb3Qs
+IFNjb3R0Lg0KPiA+IEFuZCBub3cgYSBwYXRjaCB3YXMgbWVyZ2VkIG9uDQo+ID4gZ2l0Oi8vZ2l0
+LmxpbmFyby5vcmcvcGVvcGxlL3VsZi5oYW5zc29uL21tYy5naXQgbmV4dCBicmFuY2ggdG8gZml4
+DQo+ID4gdGhpcyBpc3N1ZS4NCj4gPiBJdCBzaG91bGQgYmUgbm8gcHJvYmxlbS4NCj4gDQo+IEFz
+c3VtaW5nIHRoYXQgcGF0Y2ggZml4ZXMgaXQgYW5kIGdldHMgcHVsbGVkIGZvciA0LjIsIHRoaXMg
+Y29uZmlnIHBhdGNoDQo+IGNhbiBnbyBpbiBmb3IgNC4zLg0KPiANCj4gVGhhdCBzYWlkLCBpdCB3
+b3VsZCBiZSBuaWNlIGlmLCBhcGFydCBmcm9tIGZpeGluZyB0aGUgcHJvYmxlbSBpdHNlbGYsIHRo
+ZQ0KPiBNTUMgY29kZSBmYWlsZWQgbW9yZSBncmFjZWZ1bGx5IGluc3RlYWQgb2YgZW5kbGVzc2x5
+IHJlcGVhdGluZyBhbmQNCj4gZmlsbGluZyB1cCB0aGUgbG9nL2NvbnNvbGUuDQo+IA0KPiAtU2Nv
+dHQNCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGlu
+dXhwcGMtZGV2IG1haWxpbmcgbGlzdApMaW51eHBwYy1kZXZAbGlzdHMub3psYWJzLm9yZwpodHRw
+czovL2xpc3RzLm96bGFicy5vcmcvbGlzdGluZm8vbGludXhwcGMtZGV2
