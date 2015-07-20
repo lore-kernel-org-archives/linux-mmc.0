@@ -1,38 +1,37 @@
-From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
-Subject: [PATCH] sdhci-esdhc: Make 8BIT bus work.
-Date: Mon, 20 Jul 2015 18:19:47 +0200
-Message-ID: <1437409187-7039-1-git-send-email-joakim.tjernlund@transmode.se>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.transmode.se ([31.15.61.139]:54026 "EHLO smtp.transmode.se"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756274AbbGTQ0B (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 20 Jul 2015 12:26:01 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: Re: [PATCH] mmc: host: pxamci: switch over to dmaengine use
+Date: Mon, 20 Jul 2015 21:22:05 +0200
+Message-ID: <871tg2hbxe.fsf@belgarion.home>
+References: <1433625322-28449-1-git-send-email-robert.jarzmik@free.fr>
+	<CAPDyKFpm5Vf=vzVFyhrmjZ61FE-JbMm=+xhF=6AMX96cKF5BXg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFpm5Vf=vzVFyhrmjZ61FE-JbMm=+xhF=6AMX96cKF5BXg@mail.gmail.com>
+	(Ulf Hansson's message of "Mon, 20 Jul 2015 13:19:22 +0200")
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Daniel Mack <zonque@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Kevin Hao <haokexin@gmail.com>
-Cc: Joakim Tjernlund <joakim.tjernlund@transmode.se>
 
-Support for 8BIT bus with was added some time ago to sdhci-esdhc but
-then missed to remove the 8BIT from the reserved bit mask which made
-8BIT non functional.
+Ulf Hansson <ulf.hansson@linaro.org> writes:
 
-Signed-off-by: Joakim Tjernlund <joakim.tjernlund@transmode.se>
----
- drivers/mmc/host/sdhci-esdhc.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> On 6 June 2015 at 23:15, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
+>> From: Daniel Mack <zonque@gmail.com>
+>>
+>> Switch over pxamci to dmaengine. This prepares the devicetree full
+>> support of pxamci.
+>>
+>> This was successfully tested on a PXA3xx board, as well as PXA27x.
+>>
+>> Signed-off-by: Daniel Mack <zonque@gmail.com>
+>> [adapted to pxa-dma]
+>> Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
+>
+> Thanks, applied!
+Great, thanks Ulf.
 
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index 3497cfa..a870c42 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -45,6 +45,6 @@
- #define ESDHC_DMA_SYSCTL	0x40c
- #define ESDHC_DMA_SNOOP		0x00000040
- 
--#define ESDHC_HOST_CONTROL_RES	0x05
-+#define ESDHC_HOST_CONTROL_RES	0x01
- 
- #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */
--- 
-2.3.6
+Cheers.
 
+--
+Robert
