@@ -1,95 +1,63 @@
-From: Leon Romanovsky <leon@leon.nu>
-Subject: Re: [PATCH v2] mmc: tmio: Fix timeout value for command request
-Date: Mon, 20 Jul 2015 08:03:19 +0300
-Message-ID: <CALq1K=JbgNGpik6jTXvd+JHzRP9HGFhgu9PgDC3bE_ftBG1FSQ@mail.gmail.com>
-References: <1437323999-7938-1-git-send-email-ykaneko0929@gmail.com>
+From: Lu Y.B. <yangbo.lu@freescale.com>
+Subject: RE: powerpc/corenet: enable eSDHC
+Date: Mon, 20 Jul 2015 06:43:44 +0000
+Message-ID: <BY1PR0301MB119285C61D7CDC037DD240DAF2850@BY1PR0301MB1192.namprd03.prod.outlook.com>
+References: <1430893748-38821-1-git-send-email-yangbo.lu@freescale.com>
+ <20150530000331.GA9143@home.buserror.net>
+ <BY1PR0301MB119286F6B8EBD6EED07C8B15F2BF0@BY1PR0301MB1192.namprd03.prod.outlook.com>
+ <1433795433.2477.62.camel@freescale.com>
+ <BY1PR0301MB1192803896118A14B8A2ABF3F2990@BY1PR0301MB1192.namprd03.prod.outlook.com>
+ <1437078653.2993.121.camel@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wg0-f43.google.com ([74.125.82.43]:33384 "EHLO
-	mail-wg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750783AbbGTFDk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jul 2015 01:03:40 -0400
-Received: by wgmn9 with SMTP id n9so121466407wgm.0
-        for <linux-mmc@vger.kernel.org>; Sun, 19 Jul 2015 22:03:39 -0700 (PDT)
-In-Reply-To: <1437323999-7938-1-git-send-email-ykaneko0929@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <1437078653.2993.121.camel@freescale.com>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Scott Wood <scottwood@freescale.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Yoshihiro Kaneko <ykaneko0929@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Ian Molton <ian.molton@codethink.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, linux-sh@vger.kernel.org
 
-On Sun, Jul 19, 2015 at 7:39 PM, Yoshihiro Kaneko <ykaneko0929@gmail.com> wrote:
-> From: Takeshi Kihara <takeshi.kihara.df@renesas.com>
->
-> Fix the problem which timeout occurs at the time of command request with
-> several cards.
-Hi Yoshihiro,
-I afraid that I missed the answer to my concern about such cards [1].
-It is good to write this information in commit message and/or comment
-in the code.
-
-It is extremely valuable to know which cards are required x2.5 timeout increase.
-
-[1] http://www.spinics.net/lists/linux-mmc/msg32295.html
-
->
-> The timeout value was insufficient as a verification of several cards,
-> so it was changed 5 seconds from 2 seconds.
->
-> Signed-off-by: Takeshi Kihara <takeshi.kihara.df@renesas.com>
-> Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
-> ---
->
-> This patch is based on mmc-next branch of Ulf Hansson's mmc tree.
->
-> v2 [Yoshihiro Kaneko]
-> * As suggested by Wolfram Sang
-> - use a definition instead of a magic value
->
->  drivers/mmc/host/tmio_mmc_pio.c | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index e3dcf31..a10fde4 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -83,6 +83,8 @@ static int tmio_mmc_next_sg(struct tmio_mmc_host *host)
->         return --host->sg_len;
->  }
->
-> +#define CMDREQ_TIMEOUT 5000
-> +
->  #ifdef CONFIG_MMC_DEBUG
->
->  #define STATUS_TO_TEXT(a, status, i) \
-> @@ -230,7 +232,7 @@ static void tmio_mmc_reset_work(struct work_struct *work)
->          */
->         if (IS_ERR_OR_NULL(mrq)
->             || time_is_after_jiffies(host->last_req_ts +
-> -               msecs_to_jiffies(2000))) {
-> +               msecs_to_jiffies(CMDREQ_TIMEOUT))) {
->                 spin_unlock_irqrestore(&host->lock, flags);
->                 return;
->         }
-> @@ -818,7 +820,7 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->         ret = tmio_mmc_start_command(host, mrq->cmd);
->         if (!ret) {
->                 schedule_delayed_work(&host->delayed_reset_work,
-> -                                     msecs_to_jiffies(2000));
-> +                                     msecs_to_jiffies(CMDREQ_TIMEOUT));
->                 return;
->         }
->
-> --
-> 1.9.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
-
--- 
-Leon Romanovsky | Independent Linux Consultant
-        www.leon.nu | leon@leon.nu
+PiBPSywgdGhhbmtzLiAgQXNzdW1pbmcgbm8gc2ltaWxhciBpc3N1ZXMgd2hlbiB0ZXN0aW5nLCBJ
+J2xsIGFwcGx5IHRoaXMNCj4gcGF0Y2ggdGhlIG5leHQgdGltZSBJIGRvIGEgYmF0Y2ggb2YgcGF0
+Y2ggYXBwbGljYXRpb24uDQo+IA0KPiBBbnkgdGhvdWdodHMgcmVnYXJkaW5nIGJldHRlciBlcnJv
+ciBoYW5kbGluZz8NCj4gDQo+IC1TY290dA0KDQpEbyB5b3UgbWVhbiBTRCB0ZXN0Pw0KQWN0dWFs
+bHkgU0QgcGF0Y2hlcyBuZWVkaW5nIHRvIHNlbnQgdG8gdXBzdHJlYW0gYXJlIHRlc3RlZCBvbiBM
+aSBZYW5nJ3MgTGludXggdHJlZS4NCkFuZCB0aGUgSklSQSB0aWNrZXQgaXMgUU9SSVFMVS0xOS4N
+Cg0KDQo+IA0KPiBPbiBXZWQsIDIwMTUtMDctMTUgYXQgMjE6MzcgLTA1MDAsIEx1IFlhbmdiby1C
+NDcwOTMgd3JvdGU6DQo+ID4gSGkgU2NvdHQsDQo+ID4NCj4gPiBOb3cgdGhlIHBhdGNoIGJlbG93
+IGhhcyBiZWVuIG1lcmdlZCBvbg0KPiA+IGdpdDovL2dpdC5rZXJuZWwub3JnL3B1Yi9zY20vbGlu
+dXgva2VybmVsL2dpdC90b3J2YWxkcy9saW51eC5naXQuDQo+ID4gVGhpcyBpc3N1ZSBzaG91bGQg
+aGF2ZSBiZWVuIHJlc29sdmVkLg0KPiA+IFRoYW5rcy4NCj4gPg0KPiA+DQo+ID4gY29tbWl0IDVm
+ZDI2YzdlY2IzMjA4Mjc0NWIwYmQzM2M4ZTM1YmFkZDFjYjVhOTENCj4gPiBBdXRob3I6IFVsZiBI
+YW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPg0KPiA+IERhdGU6ICAgRnJpIEp1biA1IDEx
+OjQwOjA4IDIwMTUgKzAyMDANCj4gPg0KPiA+ICAgICBtbWM6IHNkaGNpOiBSZXN0b3JlIGJlaGF2
+aW9yIHdoaWxlIGNyZWF0aW5nIE9DUiBtYXNrDQo+ID4NCj4gPg0KPiA+ID4gLS0tLS1PcmlnaW5h
+bCBNZXNzYWdlLS0tLS0NCj4gPiA+IEZyb206IFdvb2QgU2NvdHQtQjA3NDIxDQo+ID4gPiBTZW50
+OiBUdWVzZGF5LCBKdW5lIDA5LCAyMDE1IDQ6MzEgQU0NCj4gPiA+IFRvOiBMdSBZYW5nYm8tQjQ3
+MDkzDQo+ID4gPiBDYzogbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmc7IGxpbnV4LW1tY0B2
+Z2VyLmtlcm5lbC5vcmcNCj4gPiA+IFN1YmplY3Q6IFJlOiBwb3dlcnBjL2NvcmVuZXQ6IGVuYWJs
+ZSBlU0RIQw0KPiA+ID4NCj4gPiA+IE9uIE1vbiwgMjAxNS0wNi0wOCBhdCAwNToxMiAtMDUwMCwg
+THUgWWFuZ2JvLUI0NzA5MyB3cm90ZToNCj4gPiA+ID4gVGhhbmtzIGEgbG90LCBTY290dC4NCj4g
+PiA+ID4gQW5kIG5vdyBhIHBhdGNoIHdhcyBtZXJnZWQgb24NCj4gPiA+ID4gZ2l0Oi8vZ2l0Lmxp
+bmFyby5vcmcvcGVvcGxlL3VsZi5oYW5zc29uL21tYy5naXQgbmV4dCBicmFuY2ggdG8gZml4DQo+
+ID4gPiA+IHRoaXMgaXNzdWUuDQo+ID4gPiA+IEl0IHNob3VsZCBiZSBubyBwcm9ibGVtLg0KPiA+
+ID4NCj4gPiA+IEFzc3VtaW5nIHRoYXQgcGF0Y2ggZml4ZXMgaXQgYW5kIGdldHMgcHVsbGVkIGZv
+ciA0LjIsIHRoaXMgY29uZmlnDQo+ID4gPiBwYXRjaCBjYW4gZ28gaW4gZm9yIDQuMy4NCj4gPiA+
+DQo+ID4gPiBUaGF0IHNhaWQsIGl0IHdvdWxkIGJlIG5pY2UgaWYsIGFwYXJ0IGZyb20gZml4aW5n
+IHRoZSBwcm9ibGVtDQo+ID4gPiBpdHNlbGYsIHRoZSBNTUMgY29kZSBmYWlsZWQgbW9yZSBncmFj
+ZWZ1bGx5IGluc3RlYWQgb2YgZW5kbGVzc2x5DQo+ID4gPiByZXBlYXRpbmcgYW5kIGZpbGxpbmcg
+dXAgdGhlIGxvZy9jb25zb2xlLg0KPiA+ID4NCj4gPiA+IC1TY290dA0KPiA+DQpfX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eHBwYy1kZXYgbWFpbGlu
+ZyBsaXN0CkxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnCmh0dHBzOi8vbGlzdHMub3psYWJz
+Lm9yZy9saXN0aW5mby9saW51eHBwYy1kZXY=
