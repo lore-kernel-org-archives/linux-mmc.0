@@ -1,51 +1,122 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] adds quirk SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN
-Date: Mon, 20 Jul 2015 13:18:59 +0200
-Message-ID: <CAPDyKFoe2YsAhNSG=kVcscLUesXPUAiKH4ffOMHjGBCJU41s_A@mail.gmail.com>
-References: <1433835111-32522-1-git-send-email-suneel.garapati@xilinx.com>
+Subject: Re: [FRC PATCH v2] mmc: core: Optimize case for exactly one
+ erase-group budget TRIM
+Date: Mon, 20 Jul 2015 13:19:09 +0200
+Message-ID: <CAPDyKFpHTTmDktyxyabUA4Gwwx0qX9Lxr+EcXenno=Bme2XOXw@mail.gmail.com>
+References: <1435052632-32441-1-git-send-email-david@protonic.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f176.google.com ([209.85.220.176]:33974 "EHLO
-	mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751878AbbGTLTA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jul 2015 07:19:00 -0400
-Received: by qkfc129 with SMTP id c129so66703596qkf.1
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Jul 2015 04:18:59 -0700 (PDT)
-In-Reply-To: <1433835111-32522-1-git-send-email-suneel.garapati@xilinx.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1435052632-32441-1-git-send-email-david@protonic.nl>
+Sender: linux-kernel-owner@vger.kernel.org
+To: David Jander <david@protonic.nl>
+Cc: Pierre Ossman <pierre@ossman.eu>, Sascha Hauer <s.hauer@pengutronix.de>, Johan Rudholm <johan.rudholm@axis.com>, Adrian Hunter <adrian.hunter@intel.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Suneel Garapati <suneel.garapati@xilinx.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, michals@xilinx.com, sorenb@xilinx.com, Adrian Hunter <adrian.hunter@intel.com>, Aisheng Dong <b29396@freescale.com>, Haibo Chen <haibo.chen@freescale.com>, Tim Kryger <tim.kryger@gmail.com>, Shawn Guo <shawn.guo@linaro.org>, Yi Sun <yi.y.sun@intel.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Suman Tripathi <stripathi@apm.com>
 
-On 9 June 2015 at 09:31, Suneel Garapati <suneel.garapati@xilinx.com> wrote:
-> This quirk will support controllers whose clock divider zero is broken
-> and if the calculation results to zero, forcing the divider to next value.
-> This is tested on zynq ep108 and enables support for UHS cards where formatting
-> cards fail. Added few quirks to arasan platform driver as the base clock reported in
-> registers is broken and preset values are broken too and tested on zynq ep108
-> platform. max-frequency devicetree parameter is alternative to get upper limit .
+On 23 June 2015 at 11:43, David Jander <david@protonic.nl> wrote:
+> In the (not so unlikely) case that the mmc controller timeout budget is
+> enough for exactly one erase-group, the simplification of allowing one
+> sector has an enormous performance penalty. We optimize this special case
+> by introducing a flag that prohibits erase-group boundary crossing, so
+> that we can allow trimming more than one sector at a time.
 >
-> Suneel Garapati (2):
->   drivers: mmc: add quirk SDHCI_QUIRK_CLOCK_DIV_ZERO_BROKEN
->   drivers: mmc: add quirks for broken clock base
->
->  drivers/mmc/host/sdhci-of-arasan.c | 3 +++
->  drivers/mmc/host/sdhci.c           | 4 ++++
->  drivers/mmc/host/sdhci.h           | 2 ++
->  3 files changed, 9 insertions(+)
->
-> --
-> 2.1.2
+> Signed-off-by: David Jander <david@protonic.nl>
 
 Thanks, applied!
 
-Do note that both patches had checkpatch errors, which complained
-about the patch format.
-I decided to fix them, but next time please make sure to run checkpatch.
-
-Also, I changed the prefix of patch1 to "mmc: sdhci: and for patch 2
-to "mmc: sdhci-of-arasan".
-
 Kind regards
 Uffe
+
+> ---
+>
+> Changes since v1:
+>  - Added more comment
+>
+>  drivers/mmc/core/core.c  | 38 ++++++++++++++++++++++++++++++++++----
+>  include/linux/mmc/card.h |  1 +
+>  2 files changed, 35 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 92e7671..2771391 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2089,6 +2089,7 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+>               unsigned int arg)
+>  {
+>         unsigned int rem, to = from + nr;
+> +       int err;
+>
+>         if (!(card->host->caps & MMC_CAP_ERASE) ||
+>             !(card->csd.cmdclass & CCC_ERASE))
+> @@ -2139,6 +2140,23 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+>         /* 'from' and 'to' are inclusive */
+>         to -= 1;
+>
+> +       /*
+> +        * Special case where only one erase-group fits in the timeout budget:
+> +        * If the region crosses an erase-group boundary on this particular
+> +        * case, we will be trimming more than one erase-group which, does not
+> +        * fit in the timeout budget of the controller, so we need to split it
+> +        * and call mmc_do_erase() twice if necessary. This special case is
+> +        * identified by the card->eg_boundary flag.
+> +        */
+> +       if ((arg & MMC_TRIM_ARGS) && (card->eg_boundary) &&
+> +           (from % card->erase_size)) {
+> +               rem = card->erase_size - (from % card->erase_size);
+> +               err = mmc_do_erase(card, from, from + rem - 1, arg);
+> +               from += rem;
+> +               if ((err) || (to <= from))
+> +                       return err;
+> +       }
+> +
+>         return mmc_do_erase(card, from, to, arg);
+>  }
+>  EXPORT_SYMBOL(mmc_erase);
+> @@ -2234,16 +2252,28 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
+>         if (!qty)
+>                 return 0;
+>
+> +       /*
+> +        * When specifying a sector range to trim, chances are we might cross
+> +        * an erase-group boundary even if the amount of sectors is less than
+> +        * one erase-group.
+> +        * If we can only fit one erase-group in the controller timeout budget,
+> +        * we have to care that erase-group boundaries are not crossed by a
+> +        * single trim operation. We flag that special case with "eg_boundary".
+> +        * In all other cases we can just decrement qty and pretend that we
+> +        * always touch (qty + 1) erase-groups as a simple optimization.
+> +        */
+>         if (qty == 1)
+> -               return 1;
+> +               card->eg_boundary = 1;
+> +       else
+> +               qty--;
+>
+>         /* Convert qty to sectors */
+>         if (card->erase_shift)
+> -               max_discard = --qty << card->erase_shift;
+> +               max_discard = qty << card->erase_shift;
+>         else if (mmc_card_sd(card))
+> -               max_discard = qty;
+> +               max_discard = qty + 1;
+>         else
+> -               max_discard = --qty * card->erase_size;
+> +               max_discard = qty * card->erase_size;
+>
+>         return max_discard;
+>  }
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 19f0175..704b60d 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -282,6 +282,7 @@ struct mmc_card {
+>         unsigned int            erase_size;     /* erase size in sectors */
+>         unsigned int            erase_shift;    /* if erase unit is power 2 */
+>         unsigned int            pref_erase;     /* in sectors */
+> +       unsigned int            eg_boundary;    /* don't cross erase-group boundaries */
+>         u8                      erased_byte;    /* value of erased bytes */
+>
+>         u32                     raw_cid[4];     /* raw card CID */
+> --
+> 2.1.4
+>
