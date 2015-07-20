@@ -1,58 +1,105 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/6] mmc: sdhci-esdhci-imx: fix cd/wp regression
-Date: Mon, 20 Jul 2015 14:44:07 +0200
-Message-ID: <CAPDyKFruDiS=DV=AjiaGWvDxFN_Zj5Hp0LifROxCUpCySAeQpA@mail.gmail.com>
-References: <1434564337-24720-1-git-send-email-aisheng.dong@freescale.com>
-	<20150709075032.GD23464@tiger>
-	<20150709092949.GB3917@shlinux1.ap.freescale.net>
-	<20150709132736.GG23464@tiger>
-	<20150713114310.GA9453@shlinux1.ap.freescale.net>
+From: Yoshihiro Kaneko <ykaneko0929@gmail.com>
+Subject: Re: [PATCH v2] mmc: tmio: Fix timeout value for command request
+Date: Mon, 20 Jul 2015 23:08:18 +0900
+Message-ID: <CAH1o70JPcdFYdhJ=0ap2EZfZB87vjJV+WeHf2gGwhPigoh_DdQ@mail.gmail.com>
+References: <1437323999-7938-1-git-send-email-ykaneko0929@gmail.com>
+	<CALq1K=JbgNGpik6jTXvd+JHzRP9HGFhgu9PgDC3bE_ftBG1FSQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f46.google.com ([209.85.192.46]:33105 "EHLO
-	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752548AbbGTMoI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jul 2015 08:44:08 -0400
-Received: by qged69 with SMTP id d69so42329513qge.0
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Jul 2015 05:44:07 -0700 (PDT)
-In-Reply-To: <20150713114310.GA9453@shlinux1.ap.freescale.net>
+Received: from mail-ig0-f173.google.com ([209.85.213.173]:38563 "EHLO
+	mail-ig0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751052AbbGTOIT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jul 2015 10:08:19 -0400
+In-Reply-To: <CALq1K=JbgNGpik6jTXvd+JHzRP9HGFhgu9PgDC3bE_ftBG1FSQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <b29396@freescale.com>, Shawn Guo <shawnguo@kernel.org>
-Cc: Dong Aisheng <aisheng.dong@freescale.com>, Chris Ball <chris@printf.net>, smoch@web.de, Steffen Trumtrar <s.trumtrar@pengutronix.de>, LW@karo-electronics.de, =?UTF-8?B?TWFyZWsgVmHFoXV0?= <marex@denx.de>, rabeeh@solid-run.com, gwenhael.goavec-merou@armadeus.com, Russell King <rmk+kernel@arm.linux.org.uk>, hs@denx.de, tharvey@gateworks.com, Sascha Hauer <s.hauer@pengutronix.de>, troy.kisky@boundarydevices.com, lisovy@gmail.com, robertcnelson@gmail.com, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, ipaton0@gmail.com, Fabio Estevam <fabio.estevam@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, Philipp Zabel <p.zabel@pengutronix.de>, Shawn Guo <shawn.guo@linaro.org>
+To: Leon Romanovsky <leon@leon.nu>
+Cc: linux-mmc@vger.kernel.org, Ian Molton <ian.molton@codethink.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-sh list <linux-sh@vger.kernel.org>
 
-On 13 July 2015 at 13:43, Dong Aisheng <b29396@freescale.com> wrote:
-> On Thu, Jul 09, 2015 at 09:27:36PM +0800, Shawn Guo wrote:
->> On Thu, Jul 09, 2015 at 05:29:50PM +0800, Dong Aisheng wrote:
->> > I agree with you.
->> > One difference is that i'd like to fix it ASAP without reverting 8d86e4f
->> > due to more patches depends on it is already there as i mentioned above..
->> > Revert it may need to revert a lot others.
->> >
->> > The pain is that v4.1 is left broken.
+Hi Leon,
+
+2015-07-20 14:03 GMT+09:00 Leon Romanovsky <leon@leon.nu>:
+> On Sun, Jul 19, 2015 at 7:39 PM, Yoshihiro Kaneko <ykaneko0929@gmail.com> wrote:
+>> From: Takeshi Kihara <takeshi.kihara.df@renesas.com>
 >>
->> Oh, crap!  I thought it's been there with only v4.2-rc1, and did not
->> know v4.1 is already broken.  In that case, reverting 8d86e4f isn't
->> the best option.  I suggest you rebase the dts series on top of
->> v4.2-rc1, and send it via mmc tree.
+>> Fix the problem which timeout occurs at the time of command request with
+>> several cards.
+> Hi Yoshihiro,
+> I afraid that I missed the answer to my concern about such cards [1].
+> It is good to write this information in commit message and/or comment
+> in the code.
+>
+> It is extremely valuable to know which cards are required x2.5 timeout increase.
+
+I apologize for the lack of information.
+However, I have not yet obtained information about which cards corresponds to.
+I intend to update the commit message if I obtain information.
+
+Thanks,
+Kaneko
+
+>
+> [1] http://www.spinics.net/lists/linux-mmc/msg32295.html
+>
 >>
+>> The timeout value was insufficient as a verification of several cards,
+>> so it was changed 5 seconds from 2 seconds.
+>>
+>> Signed-off-by: Takeshi Kihara <takeshi.kihara.df@renesas.com>
+>> Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
+>> ---
+>>
+>> This patch is based on mmc-next branch of Ulf Hansson's mmc tree.
+>>
+>> v2 [Yoshihiro Kaneko]
+>> * As suggested by Wolfram Sang
+>> - use a definition instead of a magic value
+>>
+>>  drivers/mmc/host/tmio_mmc_pio.c | 6 ++++--
+>>  1 file changed, 4 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+>> index e3dcf31..a10fde4 100644
+>> --- a/drivers/mmc/host/tmio_mmc_pio.c
+>> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+>> @@ -83,6 +83,8 @@ static int tmio_mmc_next_sg(struct tmio_mmc_host *host)
+>>         return --host->sg_len;
+>>  }
+>>
+>> +#define CMDREQ_TIMEOUT 5000
+>> +
+>>  #ifdef CONFIG_MMC_DEBUG
+>>
+>>  #define STATUS_TO_TEXT(a, status, i) \
+>> @@ -230,7 +232,7 @@ static void tmio_mmc_reset_work(struct work_struct *work)
+>>          */
+>>         if (IS_ERR_OR_NULL(mrq)
+>>             || time_is_after_jiffies(host->last_req_ts +
+>> -               msecs_to_jiffies(2000))) {
+>> +               msecs_to_jiffies(CMDREQ_TIMEOUT))) {
+>>                 spin_unlock_irqrestore(&host->lock, flags);
+>>                 return;
+>>         }
+>> @@ -818,7 +820,7 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>         ret = tmio_mmc_start_command(host, mrq->cmd);
+>>         if (!ret) {
+>>                 schedule_delayed_work(&host->delayed_reset_work,
+>> -                                     msecs_to_jiffies(2000));
+>> +                                     msecs_to_jiffies(CMDREQ_TIMEOUT));
+>>                 return;
+>>         }
+>>
+>> --
+>> 1.9.1
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
-> Yes, will go that way.
 >
-> Then you may need help take care of new dts going through your tree
-> to make sure no broken code in again.
-
-Dong, Shawn,
-
-I am happy to help out, I assume you want this to go as fixes for 4.2rc[n].
-
-Correct me if I am wrong, you want me to apply the DTS patches prior
-the MMC patches. I tried applying the DTS patches on 4.2rc3 - it still
-works nicely so no re-base is needed.
-
-
-So, then I need an ack from Shawn for the DTS series...
-
-Kind regards
-Uffe
+>
+> --
+> Leon Romanovsky | Independent Linux Consultant
+>         www.leon.nu | leon@leon.nu
