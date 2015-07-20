@@ -1,57 +1,51 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/1 linux-next] mmc: omap: use for_each_sg() for
- scatterlist parsing
-Date: Mon, 20 Jul 2015 16:20:49 +0200
-Message-ID: <CAPDyKFqCBN1BT3O62-N9hL8ga0YgiOurkrnVOJqbTtVvtWZBuQ@mail.gmail.com>
-References: <1434482116-29583-1-git-send-email-fabf@skynet.be>
+Subject: Re: [PATCH 0/3] omap_hsmmc: Fix card enumeration failure on
+Date: Mon, 20 Jul 2015 16:20:59 +0200
+Message-ID: <CAPDyKFrzMm0_QMjKbPPasoBrS2C9LPD8Rr7_Tw4jq3XwOND+Bw@mail.gmail.com>
+References: <1434451039-18195-1-git-send-email-vigneshr@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1434482116-29583-1-git-send-email-fabf@skynet.be>
+In-Reply-To: <1434451039-18195-1-git-send-email-vigneshr@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Fabian Frederick <fabf@skynet.be>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Vignesh R <vigneshr@ti.com>
+Cc: Andreas Fenkart <afenkart@gmail.com>, Tony Lindgren <tony@atomide.com>, NeilBrown <neilb@suse.de>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 16 June 2015 at 21:15, Fabian Frederick <fabf@skynet.be> wrote:
-> See Documentation/DMA-API.txt - Part Id
+On 16 June 2015 at 12:37, Vignesh R <vigneshr@ti.com> wrote:
 >
-> Signed-off-by: Fabian Frederick <fabf@skynet.be>
+> Hi,
+>
+> When using omap_hsmmc driver, if sd-card repeatedly plug unplugged
+> multiple times quickly, card enumeration stops after few iterations.
+> This can be easily reproduced on DRA74X EVM which uses omap_hsmmc driver.
+> This patch series addresses the above problem. The first patch fixes irq
+> handler to report all DTOs to mmc-core. Second patch adds handling for
+> BADA, DEB and CEB interrupts. The last patch introduces driver specific
+> card detect irq handler to cleanup pending requests before card removal.
+>
+> Tested on DRA74X amd DRA72X and AM437X-GP EVMs, by repeated intense
+> plug/unplug iterations.
+>
+>
+> Kishon Vijay Abraham I (1):
+>   mmc: host: omap_hsmmc: Fix DTO and DCRC handling
+>
+> Vignesh R (2):
+>   mmc: host: omap_hsmmc: Handle BADA, DEB and CEB interrupts
+>   mmc: host: omap_hsmmc: Add custom card detect irq handler
+>
+>  drivers/mmc/host/omap_hsmmc.c | 84 ++++++++++++++++++++++++++++++++---
+>  1 file changed, 78 insertions(+), 6 deletions(-)
+>
+> --
+> 2.4.1
+>
 
-Thanks, applied!
+I have applied patch1 and patch 2 for fixes. Regarding patch 3, let's
+give Andreas some more time to comment.
+
+Thanks and sorry for the delay!
 
 Kind regards
 Uffe
-
-> ---
-> This is untested.
->
->  drivers/mmc/host/omap.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-> index 68dd6c7..70dcf07 100644
-> --- a/drivers/mmc/host/omap.c
-> +++ b/drivers/mmc/host/omap.c
-> @@ -948,6 +948,7 @@ mmc_omap_prepare_data(struct mmc_omap_host *host, struct mmc_request *req)
->  {
->         struct mmc_data *data = req->data;
->         int i, use_dma = 1, block_size;
-> +       struct scatterlist *sg;
->         unsigned sg_len;
->
->         host->data = data;
-> @@ -972,8 +973,8 @@ mmc_omap_prepare_data(struct mmc_omap_host *host, struct mmc_request *req)
->         sg_len = (data->blocks == 1) ? 1 : data->sg_len;
->
->         /* Only do DMA for entire blocks */
-> -       for (i = 0; i < sg_len; i++) {
-> -               if ((data->sg[i].length % block_size) != 0) {
-> +       for_each_sg(data->sg, sg, sg_len, i) {
-> +               if ((sg->length % block_size) != 0) {
->                         use_dma = 0;
->                         break;
->                 }
-> --
-> 2.4.2
->
