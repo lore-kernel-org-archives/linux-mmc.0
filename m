@@ -1,42 +1,44 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 0/3] mmc: sdhci: Card detection fixes
-Date: Mon, 20 Jul 2015 16:21:58 +0200
-Message-ID: <CAPDyKFrr_MhvVQ_rJWbU8SYz3gK6CQEi9o6j6oUzh-h+zA7q=A@mail.gmail.com>
-References: <1436184981-16719-1-git-send-email-ivan.ivanov@linaro.org>
+Subject: Re: [PATCH v2 0/2] mmc: omap_hsmmc: omap_hsmmc_set_power cleanup
+Date: Mon, 20 Jul 2015 16:22:04 +0200
+Message-ID: <CAPDyKFpkTRmgGRN5LGLn2UAvLOqmR9d29bi+unsrVZu4w1Xjqg@mail.gmail.com>
+References: <1436294324-18666-1-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1436184981-16719-1-git-send-email-ivan.ivanov@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Ivan T. Ivanov" <ivan.ivanov@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Tim Kryger <tim.kryger@gmail.com>, Aisheng Dong <b29396@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f170.google.com ([209.85.220.170]:34062 "EHLO
+	mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932665AbbGTOWF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jul 2015 10:22:05 -0400
+Received: by qkfc129 with SMTP id c129so69986174qkf.1
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Jul 2015 07:22:04 -0700 (PDT)
+In-Reply-To: <1436294324-18666-1-git-send-email-afenkart@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 6 July 2015 at 14:16, Ivan T. Ivanov <ivan.ivanov@linaro.org> wrote:
-> Following changes aimed to fix some aspects of card detection, when
-> BROKEN_CARD_DETECTION quirk is set.
+On 7 July 2015 at 20:38, Andreas Fenkart <afenkart@gmail.com> wrote:
+> v2:
+> - add empty omap_hsmmc_set_power in case CONFIG_REGULATOR is undefined
 >
-> Changes since first version [1]:
+> Andreas Fenkart (2):
+>   mmc: omap_hsmmc: call omap_hsmmc_set_power directly
+>   mmc: omap_hsmmc: regulator automatically released by devm
 >
-> * Patch 1/3 is a modified to first check for MMC_CAP_NONREMOVABLE
->   and then check for a valid value in "gpio_cd"
->
-> [1] http://permalink.gmane.org/gmane.linux.kernel.mmc/32875
->
-> Ivan T. Ivanov (3):
->   mmc: sdhci: let GPIO based card detection have higher precedence
->   mmc: sdhci: don't use card state polling when CD GPIO is defined
->   mmc: sdhci: properly check card present state when quirk
->     NO_CARD_NO_RESET is set
->
->  drivers/mmc/host/sdhci.c | 20 +++++++++++++-------
->  1 file changed, 13 insertions(+), 7 deletions(-)
->
-> --
-> 1.9.1
->
+>  drivers/mmc/host/omap_hsmmc.c | 39 +++++++++++++++++----------------------
+>  1 file changed, 17 insertions(+), 22 deletions(-)
 
-Thanks, applied!
+Thanks, applied.
 
 Kind regards
 Uffe
+
+>
+> --
+> 2.1.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
