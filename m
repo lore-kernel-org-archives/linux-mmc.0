@@ -1,31 +1,24 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/1] mmc: block: don't use parameter prefix if built as module
-Date: Mon, 20 Jul 2015 16:21:13 +0200
-Message-ID: <CAPDyKFro3jVapPkbGrvPFSCN3eWrHbx3=vMwcGsZtcGCrFb7Qg@mail.gmail.com>
-References: <1435145541-127393-1-git-send-email-andriy.shevchenko@linux.intel.com>
+Subject: Re: [PATCH v2] mmc: sdhci-msm: Boost controller core clock
+Date: Mon, 20 Jul 2015 16:21:52 +0200
+Message-ID: <CAPDyKFoU9a6Ta_c8Q=cnOhWdsaYok1mrNZJgz1Jx+BD_HYbpwg@mail.gmail.com>
+References: <1436183618-15330-1-git-send-email-ivan.ivanov@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f54.google.com ([209.85.192.54]:35927 "EHLO
-	mail-qg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932262AbbGTOVO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jul 2015 10:21:14 -0400
-Received: by qgy5 with SMTP id 5so73086107qgy.3
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Jul 2015 07:21:13 -0700 (PDT)
-In-Reply-To: <1435145541-127393-1-git-send-email-andriy.shevchenko@linux.intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1436183618-15330-1-git-send-email-ivan.ivanov@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Ivan T. Ivanov" <ivan.ivanov@linaro.org>
+Cc: Georgi Djakov <georgi.djakov@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Peter Griffin <peter.griffin@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 24 June 2015 at 13:32, Andy Shevchenko
-<andriy.shevchenko@linux.intel.com> wrote:
-> It's excessive to use prefix for the parameters when you do
->         modrpobe mmc-block mmcblk.perdev_minors=16
+On 6 July 2015 at 13:53, Ivan T. Ivanov <ivan.ivanov@linaro.org> wrote:
+> Ensure SDCC is working with maximum clock otherwise card
+> detection could be extremely slow, up to 7 seconds.
 >
-> Make this available only for built-in case.
->
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> Signed-off-by: Ivan T. Ivanov <ivan.ivanov@linaro.org>
+> Reviewed-by: Georgi Djakov <georgi.djakov@linaro.org>
+> Acked-by: Stephen Boyd <sboyd@codeaurora.org>
 
 Thanks, applied!
 
@@ -33,27 +26,29 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/card/block.c | 3 +++
->  1 file changed, 3 insertions(+)
 >
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index c9c3d20..b94540b 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -47,10 +47,13 @@
->  #include "queue.h"
+> Changes since v0:
+> - s/falied/failed in warning message.
 >
->  MODULE_ALIAS("mmc:block");
+>  drivers/mmc/host/sdhci-msm.c | 5 +++++
+>  1 file changed, 5 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 4a09f76..4bcee03 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -489,6 +489,11 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>                 goto pclk_disable;
+>         }
+>
+> +       /* Vote for maximum clock rate for maximum performance */
+> +       ret = clk_set_rate(msm_host->clk, INT_MAX);
+> +       if (ret)
+> +               dev_warn(&pdev->dev, "core clock boost failed\n");
 > +
-> +#ifdef KERNEL
->  #ifdef MODULE_PARAM_PREFIX
->  #undef MODULE_PARAM_PREFIX
->  #endif
->  #define MODULE_PARAM_PREFIX "mmcblk."
-> +#endif
->
->  #define INAND_CMD38_ARG_EXT_CSD  113
->  #define INAND_CMD38_ARG_ERASE    0x00
+>         ret = clk_prepare_enable(msm_host->clk);
+>         if (ret)
+>                 goto pclk_disable;
 > --
-> 2.1.4
+> 1.9.1
 >
