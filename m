@@ -1,63 +1,51 @@
-From: Lu Y.B. <yangbo.lu@freescale.com>
-Subject: RE: powerpc/corenet: enable eSDHC
-Date: Mon, 20 Jul 2015 06:43:44 +0000
-Message-ID: <BY1PR0301MB119285C61D7CDC037DD240DAF2850@BY1PR0301MB1192.namprd03.prod.outlook.com>
-References: <1430893748-38821-1-git-send-email-yangbo.lu@freescale.com>
- <20150530000331.GA9143@home.buserror.net>
- <BY1PR0301MB119286F6B8EBD6EED07C8B15F2BF0@BY1PR0301MB1192.namprd03.prod.outlook.com>
- <1433795433.2477.62.camel@freescale.com>
- <BY1PR0301MB1192803896118A14B8A2ABF3F2990@BY1PR0301MB1192.namprd03.prod.outlook.com>
- <1437078653.2993.121.camel@freescale.com>
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH v2] mmc: sunxi: Don't start commands while
+ the card is busy
+Date: Mon, 20 Jul 2015 10:00:07 +0200
+Message-ID: <20150720080007.GR28632@lukather>
+References: <1436541284-11800-1-git-send-email-hdegoede@redhat.com>
+Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <1437078653.2993.121.camel@freescale.com>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Scott Wood <scottwood@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="F1UMmCLUB5xxGl5w"
+Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBLWXWKWQKGQECZ7W47Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1436541284-11800-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <http://groups.google.com/group/linux-sunxi/subscribe>
+To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Eugene K <sigintmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-PiBPSywgdGhhbmtzLiAgQXNzdW1pbmcgbm8gc2ltaWxhciBpc3N1ZXMgd2hlbiB0ZXN0aW5nLCBJ
-J2xsIGFwcGx5IHRoaXMNCj4gcGF0Y2ggdGhlIG5leHQgdGltZSBJIGRvIGEgYmF0Y2ggb2YgcGF0
-Y2ggYXBwbGljYXRpb24uDQo+IA0KPiBBbnkgdGhvdWdodHMgcmVnYXJkaW5nIGJldHRlciBlcnJv
-ciBoYW5kbGluZz8NCj4gDQo+IC1TY290dA0KDQpEbyB5b3UgbWVhbiBTRCB0ZXN0Pw0KQWN0dWFs
-bHkgU0QgcGF0Y2hlcyBuZWVkaW5nIHRvIHNlbnQgdG8gdXBzdHJlYW0gYXJlIHRlc3RlZCBvbiBM
-aSBZYW5nJ3MgTGludXggdHJlZS4NCkFuZCB0aGUgSklSQSB0aWNrZXQgaXMgUU9SSVFMVS0xOS4N
-Cg0KDQo+IA0KPiBPbiBXZWQsIDIwMTUtMDctMTUgYXQgMjE6MzcgLTA1MDAsIEx1IFlhbmdiby1C
-NDcwOTMgd3JvdGU6DQo+ID4gSGkgU2NvdHQsDQo+ID4NCj4gPiBOb3cgdGhlIHBhdGNoIGJlbG93
-IGhhcyBiZWVuIG1lcmdlZCBvbg0KPiA+IGdpdDovL2dpdC5rZXJuZWwub3JnL3B1Yi9zY20vbGlu
-dXgva2VybmVsL2dpdC90b3J2YWxkcy9saW51eC5naXQuDQo+ID4gVGhpcyBpc3N1ZSBzaG91bGQg
-aGF2ZSBiZWVuIHJlc29sdmVkLg0KPiA+IFRoYW5rcy4NCj4gPg0KPiA+DQo+ID4gY29tbWl0IDVm
-ZDI2YzdlY2IzMjA4Mjc0NWIwYmQzM2M4ZTM1YmFkZDFjYjVhOTENCj4gPiBBdXRob3I6IFVsZiBI
-YW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPg0KPiA+IERhdGU6ICAgRnJpIEp1biA1IDEx
-OjQwOjA4IDIwMTUgKzAyMDANCj4gPg0KPiA+ICAgICBtbWM6IHNkaGNpOiBSZXN0b3JlIGJlaGF2
-aW9yIHdoaWxlIGNyZWF0aW5nIE9DUiBtYXNrDQo+ID4NCj4gPg0KPiA+ID4gLS0tLS1PcmlnaW5h
-bCBNZXNzYWdlLS0tLS0NCj4gPiA+IEZyb206IFdvb2QgU2NvdHQtQjA3NDIxDQo+ID4gPiBTZW50
-OiBUdWVzZGF5LCBKdW5lIDA5LCAyMDE1IDQ6MzEgQU0NCj4gPiA+IFRvOiBMdSBZYW5nYm8tQjQ3
-MDkzDQo+ID4gPiBDYzogbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmc7IGxpbnV4LW1tY0B2
-Z2VyLmtlcm5lbC5vcmcNCj4gPiA+IFN1YmplY3Q6IFJlOiBwb3dlcnBjL2NvcmVuZXQ6IGVuYWJs
-ZSBlU0RIQw0KPiA+ID4NCj4gPiA+IE9uIE1vbiwgMjAxNS0wNi0wOCBhdCAwNToxMiAtMDUwMCwg
-THUgWWFuZ2JvLUI0NzA5MyB3cm90ZToNCj4gPiA+ID4gVGhhbmtzIGEgbG90LCBTY290dC4NCj4g
-PiA+ID4gQW5kIG5vdyBhIHBhdGNoIHdhcyBtZXJnZWQgb24NCj4gPiA+ID4gZ2l0Oi8vZ2l0Lmxp
-bmFyby5vcmcvcGVvcGxlL3VsZi5oYW5zc29uL21tYy5naXQgbmV4dCBicmFuY2ggdG8gZml4DQo+
-ID4gPiA+IHRoaXMgaXNzdWUuDQo+ID4gPiA+IEl0IHNob3VsZCBiZSBubyBwcm9ibGVtLg0KPiA+
-ID4NCj4gPiA+IEFzc3VtaW5nIHRoYXQgcGF0Y2ggZml4ZXMgaXQgYW5kIGdldHMgcHVsbGVkIGZv
-ciA0LjIsIHRoaXMgY29uZmlnDQo+ID4gPiBwYXRjaCBjYW4gZ28gaW4gZm9yIDQuMy4NCj4gPiA+
-DQo+ID4gPiBUaGF0IHNhaWQsIGl0IHdvdWxkIGJlIG5pY2UgaWYsIGFwYXJ0IGZyb20gZml4aW5n
-IHRoZSBwcm9ibGVtDQo+ID4gPiBpdHNlbGYsIHRoZSBNTUMgY29kZSBmYWlsZWQgbW9yZSBncmFj
-ZWZ1bGx5IGluc3RlYWQgb2YgZW5kbGVzc2x5DQo+ID4gPiByZXBlYXRpbmcgYW5kIGZpbGxpbmcg
-dXAgdGhlIGxvZy9jb25zb2xlLg0KPiA+ID4NCj4gPiA+IC1TY290dA0KPiA+DQpfX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eHBwYy1kZXYgbWFpbGlu
-ZyBsaXN0CkxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnCmh0dHBzOi8vbGlzdHMub3psYWJz
-Lm9yZy9saXN0aW5mby9saW51eHBwYy1kZXY=
+--F1UMmCLUB5xxGl5w
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
+
+Hi,
+
+On Fri, Jul 10, 2015 at 05:14:44PM +0200, Hans de Goede wrote:
+> Some sdio wifi modules have not been working reliable with the sunxi-mmc
+> host code. This turns out to be caused by it starting new commands while
+> the card signals that it is still busy processing a previous command.
+> 
+> This commit fixes this, thereby fixing the wifi reliability issues on
+> the Cubietruck and other sunxi boards using sdio wifi.
+> 
+> Reported-by: Eugene K <sigintmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> Suggested-by: Eugene K <sigintmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> Cc: Eugene K <sigintmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+
+You should use the "real" name here, and not some shortening.
+
+Maxime
+
+-- 
+Maxime Ripard, Free Electrons
+Embedded Linux, Kernel and Android engineering
+http://free-electrons.com
+--F1UMmCLUB5xxGl5w--
