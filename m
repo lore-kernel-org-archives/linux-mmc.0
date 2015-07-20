@@ -1,50 +1,59 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: MMC_MTK should depend on HAS_DMA
-Date: Mon, 20 Jul 2015 16:21:05 +0200
-Message-ID: <CAPDyKFqTsfVJuLnbVXpq8ivshLBtNFPtGdvKR719si7w4+5FqA@mail.gmail.com>
-References: <1435320566-5069-1-git-send-email-geert@linux-m68k.org>
+Subject: Re: [PATCH 1/1] mmc: block: don't use parameter prefix if built as module
+Date: Mon, 20 Jul 2015 16:21:13 +0200
+Message-ID: <CAPDyKFro3jVapPkbGrvPFSCN3eWrHbx3=vMwcGsZtcGCrFb7Qg@mail.gmail.com>
+References: <1435145541-127393-1-git-send-email-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1435320566-5069-1-git-send-email-geert@linux-m68k.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Chaotian Jing <chaotian.jing@mediatek.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f54.google.com ([209.85.192.54]:35927 "EHLO
+	mail-qg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932262AbbGTOVO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jul 2015 10:21:14 -0400
+Received: by qgy5 with SMTP id 5so73086107qgy.3
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Jul 2015 07:21:13 -0700 (PDT)
+In-Reply-To: <1435145541-127393-1-git-send-email-andriy.shevchenko@linux.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 26 June 2015 at 14:09, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> If NO_DMA=y:
+On 24 June 2015 at 13:32, Andy Shevchenko
+<andriy.shevchenko@linux.intel.com> wrote:
+> It's excessive to use prefix for the parameters when you do
+>         modrpobe mmc-block mmcblk.perdev_minors=16
 >
->     ERROR: "dma_alloc_coherent" [drivers/mmc/host/mtk-sd.ko] undefined!
->     ERROR: "dma_unmap_sg" [drivers/mmc/host/mtk-sd.ko] undefined!
->     ERROR: "dma_map_sg" [drivers/mmc/host/mtk-sd.ko] undefined!
->     ERROR: "dma_free_coherent" [drivers/mmc/host/mtk-sd.ko] undefined!
+> Make this available only for built-in case.
 >
-> Add a dependency on HAS_DMA to fix this.
->
-> Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-Thanks, applied for fixes.
+Thanks, applied!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/Kconfig | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/card/block.c | 3 +++
+>  1 file changed, 3 insertions(+)
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index fd9a58e216a50ffd..6a0f9c79be2652bd 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -779,6 +779,7 @@ config MMC_TOSHIBA_PCI
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index c9c3d20..b94540b 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -47,10 +47,13 @@
+>  #include "queue.h"
 >
->  config MMC_MTK
->         tristate "MediaTek SD/MMC Card Interface support"
-> +       depends on HAS_DMA
->         help
->           This selects the MediaTek(R) Secure digital and Multimedia card Interface.
->           If you have a machine with a integrated SD/MMC card reader, say Y or M here.
+>  MODULE_ALIAS("mmc:block");
+> +
+> +#ifdef KERNEL
+>  #ifdef MODULE_PARAM_PREFIX
+>  #undef MODULE_PARAM_PREFIX
+>  #endif
+>  #define MODULE_PARAM_PREFIX "mmcblk."
+> +#endif
+>
+>  #define INAND_CMD38_ARG_EXT_CSD  113
+>  #define INAND_CMD38_ARG_ERASE    0x00
 > --
-> 1.9.1
+> 2.1.4
 >
