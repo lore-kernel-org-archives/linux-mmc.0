@@ -1,51 +1,67 @@
-From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v2] mmc: sunxi: Don't start commands while
- the card is busy
-Date: Mon, 20 Jul 2015 10:00:07 +0200
-Message-ID: <20150720080007.GR28632@lukather>
-References: <1436541284-11800-1-git-send-email-hdegoede@redhat.com>
-Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
+From: Naveen Kumar Parna <pnaveenkos@gmail.com>
+Subject: PCIe: Xilinx: sdhci-pci: probe() issue
+Date: Mon, 20 Jul 2015 16:25:10 +0530
+Message-ID: <CAG0bkv+Sve7+XWtGk-kkQU=-64CPbpE=5RMbVq-RzWNgg--6ZQ__40530.7408924729$1437389723$gmane$org@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="F1UMmCLUB5xxGl5w"
-Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBLWXWKWQKGQECZ7W47Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1436541284-11800-1-git-send-email-hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <http://groups.google.com/group/linux-sunxi/subscribe>
-To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Eugene K <sigintmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-List-Id: linux-mmc@vger.kernel.org
-
---F1UMmCLUB5xxGl5w
 Content-Type: text/plain; charset=UTF-8
-Content-Disposition: inline
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ig0-f196.google.com ([209.85.213.196]:33744 "EHLO
+	mail-ig0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753512AbbGTKzL convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jul 2015 06:55:11 -0400
+Received: by igbqa2 with SMTP id qa2so7239381igb.0
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Jul 2015 03:55:10 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: linux-pci@vger.kernel.org
 
-Hi,
+Hi ,
 
-On Fri, Jul 10, 2015 at 05:14:44PM +0200, Hans de Goede wrote:
-> Some sdio wifi modules have not been working reliable with the sunxi-mmc
-> host code. This turns out to be caused by it starting new commands while
-> the card signals that it is still busy processing a previous command.
-> 
-> This commit fixes this, thereby fixing the wifi reliability issues on
-> the Cubietruck and other sunxi boards using sdio wifi.
-> 
-> Reported-by: Eugene K <sigintmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> Suggested-by: Eugene K <sigintmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> Cc: Eugene K <sigintmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+I have a Verilog image & hardware which provides a PCIe interface with
+two BAR=E2=80=99s(BAR0 & BAR1) to host.
 
-You should use the "real" name here, and not some shortening.
+BAR0 is having customized UART, GPIO and 1-wire prom modules. These
+modules are accessed via customized PCIe interface driver.
 
-Maxime
+BAR1 is having SD Host controller as per SD Specifications. Here
+requirement is such that we should use Linux kernel stack drivers
+(sdhci.ko & sdhci-pci.ko).
 
--- 
-Maxime Ripard, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
---F1UMmCLUB5xxGl5w--
+
+Here the issue is only one driver=E2=80=99s probe() function gets execu=
+ted
+i.e. either customized PCIe driver or sdhci-pci.ko.
+
+
+Output of lspci:
+02:00.0 SD Host controller: PLDA Device 5555
+
+
+Customized PCIe driver's struct pci_device_id:
+static struct pci_device_id pci_id_table[] =3D {
+
+    { PCI_DEVICE( 0x1556, 0x5555)},
+
+    { 0 },
+
+};
+
+
+=46or example: If I load the customized PCIe driver first and then
+sdhci-pci, then only customized PCIe driver=E2=80=99s probe() function =
+gets
+called.
+
+If I change the order of loading the module i.e. sdhci-pci first then
+only sdhci-pci=E2=80=99s probe gets called.
+
+
+Is there any better solution to use customized PCIe driver for BAR0
+and sdhci for BAR1?
+
+I will be happy to provide additional debugging info, just let me know.
+
+
+Thanks,
+Naveen
