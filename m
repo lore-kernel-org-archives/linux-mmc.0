@@ -1,119 +1,42 @@
-From: Leon Romanovsky <leon@leon.nu>
-Subject: Re: [PATCH v2] mmc: tmio: Fix timeout value for command request
-Date: Mon, 20 Jul 2015 22:33:28 +0300
-Message-ID: <CALq1K=KPSnzSu5uOzzN5h1EWNzCEM+aJ91LUg04KOLbmyN6JuA@mail.gmail.com>
-References: <1437323999-7938-1-git-send-email-ykaneko0929@gmail.com>
- <CALq1K=JbgNGpik6jTXvd+JHzRP9HGFhgu9PgDC3bE_ftBG1FSQ@mail.gmail.com> <CAH1o70JPcdFYdhJ=0ap2EZfZB87vjJV+WeHf2gGwhPigoh_DdQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCHv2] mmc:Add pointer cast to uintptr_t for slave_id_rx and
+ tx in the function, sh_mmcif_request_dma_one
+Date: Tue, 21 Jul 2015 09:41:30 +0200
+Message-ID: <CAPDyKFqccaucMWPVh6nnqoDcuj5+8nwUGopkMgspvTPF9qgBRQ@mail.gmail.com>
+References: <1431366550-22045-1-git-send-email-xerofoify@gmail.com>
+	<5589FD65.7040807@gmail.com>
+	<1435107273.2504.43.camel@perches.com>
+	<7719575.AWrtW5tPaL@wuerfel>
+	<55953D85.3000507@gmail.com>
+	<CAPDyKFqgo9-kFe+HPqG57m_RJytdT-HsLpF2ZDppWyHmOi8RcA@mail.gmail.com>
+	<55AD07E6.1060209@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f171.google.com ([209.85.212.171]:33626 "EHLO
-	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756264AbbGTTdt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jul 2015 15:33:49 -0400
-Received: by wicmv11 with SMTP id mv11so23319478wic.0
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Jul 2015 12:33:48 -0700 (PDT)
-In-Reply-To: <CAH1o70JPcdFYdhJ=0ap2EZfZB87vjJV+WeHf2gGwhPigoh_DdQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <55AD07E6.1060209@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: nick <xerofoify@gmail.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Joe Perches <joe@perches.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Ben Dooks <ben.dooks@codethink.co.uk>, Yoshihiro Kaneko <ykaneko0929@gmail.com>, Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Yoshihiro Kaneko <ykaneko0929@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Ian Molton <ian.molton@codethink.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-sh list <linux-sh@vger.kernel.org>
 
-On Mon, Jul 20, 2015 at 5:08 PM, Yoshihiro Kaneko <ykaneko0929@gmail.com> wrote:
-> Hi Leon,
+[...]
+
+>>
+>> Let's follow Arnd's suggestion!
+>>
+>> Kind regards
+>> Uffe
+>>
+> Uffe,
+> I also have this patch lying around and wasn't able to get a reply on it.
+> From 0c2cd9c7faecf70a5468659845e3561c4ceb4069 Mon Sep 17 00:00:00 2001
+> From: Nicholas Krause <xerofoify@gmail.com>
+> Date: Thu, 2 Jul 2015 21:08:18 -0400
+> Subject: [PATCH] mmc:Fix refcount leak in the function mmc_queue_resume for the semaphone thread_sem
 >
-> 2015-07-20 14:03 GMT+09:00 Leon Romanovsky <leon@leon.nu>:
->> On Sun, Jul 19, 2015 at 7:39 PM, Yoshihiro Kaneko <ykaneko0929@gmail.com> wrote:
->>> From: Takeshi Kihara <takeshi.kihara.df@renesas.com>
->>>
->>> Fix the problem which timeout occurs at the time of command request with
->>> several cards.
->> Hi Yoshihiro,
->> I afraid that I missed the answer to my concern about such cards [1].
->> It is good to write this information in commit message and/or comment
->> in the code.
->>
->> It is extremely valuable to know which cards are required x2.5 timeout increase.
->
-> I apologize for the lack of information.
-> However, I have not yet obtained information about which cards corresponds to.
-> I intend to update the commit message if I obtain information.
-Please don't hesitate to resend this patch when you will get such information.
 
-Thanks.
+I am working through my backlog, been out of office for a while. I
+will come to it soon, sorry for the delay.
 
-
->
-> Thanks,
-> Kaneko
->
->>
->> [1] http://www.spinics.net/lists/linux-mmc/msg32295.html
->>
->>>
->>> The timeout value was insufficient as a verification of several cards,
->>> so it was changed 5 seconds from 2 seconds.
->>>
->>> Signed-off-by: Takeshi Kihara <takeshi.kihara.df@renesas.com>
->>> Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
->>> ---
->>>
->>> This patch is based on mmc-next branch of Ulf Hansson's mmc tree.
->>>
->>> v2 [Yoshihiro Kaneko]
->>> * As suggested by Wolfram Sang
->>> - use a definition instead of a magic value
->>>
->>>  drivers/mmc/host/tmio_mmc_pio.c | 6 ++++--
->>>  1 file changed, 4 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
->>> index e3dcf31..a10fde4 100644
->>> --- a/drivers/mmc/host/tmio_mmc_pio.c
->>> +++ b/drivers/mmc/host/tmio_mmc_pio.c
->>> @@ -83,6 +83,8 @@ static int tmio_mmc_next_sg(struct tmio_mmc_host *host)
->>>         return --host->sg_len;
->>>  }
->>>
->>> +#define CMDREQ_TIMEOUT 5000
->>> +
->>>  #ifdef CONFIG_MMC_DEBUG
->>>
->>>  #define STATUS_TO_TEXT(a, status, i) \
->>> @@ -230,7 +232,7 @@ static void tmio_mmc_reset_work(struct work_struct *work)
->>>          */
->>>         if (IS_ERR_OR_NULL(mrq)
->>>             || time_is_after_jiffies(host->last_req_ts +
->>> -               msecs_to_jiffies(2000))) {
->>> +               msecs_to_jiffies(CMDREQ_TIMEOUT))) {
->>>                 spin_unlock_irqrestore(&host->lock, flags);
->>>                 return;
->>>         }
->>> @@ -818,7 +820,7 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>>         ret = tmio_mmc_start_command(host, mrq->cmd);
->>>         if (!ret) {
->>>                 schedule_delayed_work(&host->delayed_reset_work,
->>> -                                     msecs_to_jiffies(2000));
->>> +                                     msecs_to_jiffies(CMDREQ_TIMEOUT));
->>>                 return;
->>>         }
->>>
->>> --
->>> 1.9.1
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->>
->> --
->> Leon Romanovsky | Independent Linux Consultant
->>         www.leon.nu | leon@leon.nu
-
-
-
--- 
-Leon Romanovsky | Independent Linux Consultant
-        www.leon.nu | leon@leon.nu
+Kind regards
+Uffe
