@@ -1,95 +1,60 @@
 From: Yangbo Lu <yangbo.lu@freescale.com>
-Subject: [PATCH 3/3] mmc: sdhci-of-esdhc: add workaround for T4240 incorrect HOSTVER value
-Date: Tue, 21 Jul 2015 17:45:37 +0800
-Message-ID: <1437471937-34218-1-git-send-email-yangbo.lu@freescale.com>
+Subject: [PATCH 1/3] mmc: sdhci-of-esdhc: convert to use esdhc_get_property()
+Date: Tue, 21 Jul 2015 17:44:54 +0800
+Message-ID: <1437471894-34110-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bbn0101.outbound.protection.outlook.com ([157.56.111.101]:56768
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752757AbbGUJue (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 21 Jul 2015 05:50:34 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
 To: linuxppc-dev@lists.ozlabs.org, scottwood@freescale.com, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
 Cc: Yangbo Lu <yangbo.lu@freescale.com>
+List-Id: linux-mmc@vger.kernel.org
 
-For T4240-R1.0-R2.0, the HOSTVER register has incorrcet vender
-version value and sdhc spec version value. This will break down
-the ADMA data transfer. So add workaround to get right value
-VVN=0x13, SVN = 0x1.
-
-Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
----
- drivers/mmc/host/sdhci-esdhc.h    |  5 +++++
- drivers/mmc/host/sdhci-of-esdhc.c | 18 ++++++++++++++++++
- 2 files changed, 23 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-index 3497cfa..5174233 100644
---- a/drivers/mmc/host/sdhci-esdhc.h
-+++ b/drivers/mmc/host/sdhci-esdhc.h
-@@ -47,4 +47,9 @@
- 
- #define ESDHC_HOST_CONTROL_RES	0x05
- 
-+unsigned int esdhc_errata;
-+
-+/* Incorrect host version in T4240 HOSTVER register */
-+#define ESDHC_ERRATA_T4240_ERROR_HOSTVER		(1<<0)
-+
- #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 1295a96..c0ad765 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -59,6 +59,11 @@ static u16 esdhc_readw(struct sdhci_host *host, int reg)
- 		ret = in_be32(host->ioaddr + base) & 0xffff;
- 	else
- 		ret = (in_be32(host->ioaddr + base) >> shift) & 0xffff;
-+
-+	if ((reg == SDHCI_HOST_VERSION) &&
-+			(esdhc_errata & ESDHC_ERRATA_T4240_ERROR_HOSTVER))
-+		ret = (VENDOR_V_23 << SDHCI_VENDOR_VER_SHIFT) | SDHCI_SPEC_200;
-+
- 	return ret;
- }
- 
-@@ -352,6 +357,9 @@ static void esdhc_get_property(struct platform_device *pdev)
- {
- 	struct device_node *np = pdev->dev.of_node;
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct device_node *cpus;
-+	const u32 *prop;
-+	u8 rev = 0xff;
- 
- 	sdhci_get_of_property(pdev);
- 
-@@ -359,6 +367,11 @@ static void esdhc_get_property(struct platform_device *pdev)
- 	mmc_of_parse(host->mmc);
- 	mmc_of_parse_voltage(np, &host->ocr_mask);
- 
-+	cpus = of_find_node_by_path("/cpus");
-+	prop = of_get_property(cpus, "cpu-rev", NULL);
-+	if (prop)
-+		rev = *(u8 *)prop;
-+
- 	if (of_device_is_compatible(np, "fsl,p5040-esdhc") ||
- 	    of_device_is_compatible(np, "fsl,p5020-esdhc") ||
- 	    of_device_is_compatible(np, "fsl,p4080-esdhc") ||
-@@ -373,6 +386,11 @@ static void esdhc_get_property(struct platform_device *pdev)
- 		 */
- 		host->quirks2 |= SDHCI_QUIRK2_BROKEN_HOST_CONTROL;
- 	}
-+
-+	esdhc_errata = 0;
-+
-+	if (of_device_is_compatible(np, "fsl,t4240-esdhc") && rev <= 0x20)
-+		esdhc_errata |= ESDHC_ERRATA_T4240_ERROR_HOSTVER;
- }
- 
- static int sdhci_esdhc_probe(struct platform_device *pdev)
--- 
-2.1.0.27.g96db324
-
+TW92ZSBzZGhjaV9nZXRfb2ZfcHJvcGVydHkgYW5kIG90aGVyIGdldHRpbmcgcHJvcGVydHkgY29k
+ZSBmcm9tCnNkaGNpX2VzZGhjX3Byb2JlIGludG8gZXNkaGNfZ2V0X3Byb3BlcnR5LgoKU2lnbmVk
+LW9mZi1ieTogWWFuZ2JvIEx1IDx5YW5nYm8ubHVAZnJlZXNjYWxlLmNvbT4KLS0tCiBkcml2ZXJz
+L21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMgfCAzMSArKysrKysrKysrKysrKysrKy0tLS0tLS0t
+LS0tLS0tCiAxIGZpbGUgY2hhbmdlZCwgMTcgaW5zZXJ0aW9ucygrKSwgMTQgZGVsZXRpb25zKC0p
+CgpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jIGIvZHJpdmVy
+cy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jCmluZGV4IDc5N2JlNzUuLjEyOTVhOTYgMTAwNjQ0
+Ci0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYworKysgYi9kcml2ZXJzL21t
+Yy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMKQEAgLTM0OCwxOSArMzQ4LDE3IEBAIHN0YXRpYyBjb25z
+dCBzdHJ1Y3Qgc2RoY2lfcGx0Zm1fZGF0YSBzZGhjaV9lc2RoY19wZGF0YSA9IHsKIAkub3BzID0g
+JnNkaGNpX2VzZGhjX29wcywKIH07CiAKLXN0YXRpYyBpbnQgc2RoY2lfZXNkaGNfcHJvYmUoc3Ry
+dWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKK3N0YXRpYyB2b2lkIGVzZGhjX2dldF9wcm9wZXJ0
+eShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQogewotCXN0cnVjdCBzZGhjaV9ob3N0ICpo
+b3N0OwotCXN0cnVjdCBkZXZpY2Vfbm9kZSAqbnA7Ci0JaW50IHJldDsKLQotCWhvc3QgPSBzZGhj
+aV9wbHRmbV9pbml0KHBkZXYsICZzZGhjaV9lc2RoY19wZGF0YSwgMCk7Ci0JaWYgKElTX0VSUiho
+b3N0KSkKLQkJcmV0dXJuIFBUUl9FUlIoaG9zdCk7CisJc3RydWN0IGRldmljZV9ub2RlICpucCA9
+IHBkZXYtPmRldi5vZl9ub2RlOworCXN0cnVjdCBzZGhjaV9ob3N0ICpob3N0ID0gcGxhdGZvcm1f
+Z2V0X2RydmRhdGEocGRldik7CiAKIAlzZGhjaV9nZXRfb2ZfcHJvcGVydHkocGRldik7CiAKLQlu
+cCA9IHBkZXYtPmRldi5vZl9ub2RlOworCS8qIGNhbGwgdG8gZ2VuZXJpYyBtbWNfb2ZfcGFyc2Ug
+dG8gc3VwcG9ydCBhZGRpdGlvbmFsIGNhcGFiaWxpdGllcyAqLworCW1tY19vZl9wYXJzZShob3N0
+LT5tbWMpOworCW1tY19vZl9wYXJzZV92b2x0YWdlKG5wLCAmaG9zdC0+b2NyX21hc2spOworCiAJ
+aWYgKG9mX2RldmljZV9pc19jb21wYXRpYmxlKG5wLCAiZnNsLHA1MDQwLWVzZGhjIikgfHwKIAkg
+ICAgb2ZfZGV2aWNlX2lzX2NvbXBhdGlibGUobnAsICJmc2wscDUwMjAtZXNkaGMiKSB8fAogCSAg
+ICBvZl9kZXZpY2VfaXNfY29tcGF0aWJsZShucCwgImZzbCxwNDA4MC1lc2RoYyIpIHx8CkBAIC0z
+NzUsMTMgKzM3MywxOCBAQCBzdGF0aWMgaW50IHNkaGNpX2VzZGhjX3Byb2JlKHN0cnVjdCBwbGF0
+Zm9ybV9kZXZpY2UgKnBkZXYpCiAJCSAqLwogCQlob3N0LT5xdWlya3MyIHw9IFNESENJX1FVSVJL
+Ml9CUk9LRU5fSE9TVF9DT05UUk9MOwogCX0KK30KIAotCS8qIGNhbGwgdG8gZ2VuZXJpYyBtbWNf
+b2ZfcGFyc2UgdG8gc3VwcG9ydCBhZGRpdGlvbmFsIGNhcGFiaWxpdGllcyAqLwotCXJldCA9IG1t
+Y19vZl9wYXJzZShob3N0LT5tbWMpOwotCWlmIChyZXQpCi0JCWdvdG8gZXJyOworc3RhdGljIGlu
+dCBzZGhjaV9lc2RoY19wcm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQoreworCXN0
+cnVjdCBzZGhjaV9ob3N0ICpob3N0OworCWludCByZXQ7CiAKLQltbWNfb2ZfcGFyc2Vfdm9sdGFn
+ZShucCwgJmhvc3QtPm9jcl9tYXNrKTsKKwlob3N0ID0gc2RoY2lfcGx0Zm1faW5pdChwZGV2LCAm
+c2RoY2lfZXNkaGNfcGRhdGEsIDApOworCWlmIChJU19FUlIoaG9zdCkpCisJCXJldHVybiBQVFJf
+RVJSKGhvc3QpOworCisJZXNkaGNfZ2V0X3Byb3BlcnR5KHBkZXYpOwogCiAJcmV0ID0gc2RoY2lf
+YWRkX2hvc3QoaG9zdCk7CiAJaWYgKHJldCkKLS0gCjIuMS4wLjI3Lmc5NmRiMzI0CgpfX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eHBwYy1kZXYgbWFp
+bGluZyBsaXN0CkxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnCmh0dHBzOi8vbGlzdHMub3ps
+YWJzLm9yZy9saXN0aW5mby9saW51eHBwYy1kZXY=
