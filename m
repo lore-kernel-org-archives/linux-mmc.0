@@ -1,60 +1,112 @@
 From: Yangbo Lu <yangbo.lu@freescale.com>
-Subject: [PATCH 1/3] mmc: sdhci-of-esdhc: convert to use esdhc_get_property()
-Date: Tue, 21 Jul 2015 17:44:54 +0800
-Message-ID: <1437471894-34110-1-git-send-email-yangbo.lu@freescale.com>
+Subject: [PATCH 2/3] powerpc/85xx: add 'cpu-rev' property for cpus node
+Date: Tue, 21 Jul 2015 17:45:23 +0800
+Message-ID: <1437471923-34172-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-by2on0148.outbound.protection.outlook.com ([207.46.100.148]:18624
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754799AbbGUKFE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 21 Jul 2015 06:05:04 -0400
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linuxppc-dev@lists.ozlabs.org, scottwood@freescale.com, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
 Cc: Yangbo Lu <yangbo.lu@freescale.com>
-List-Id: linux-mmc@vger.kernel.org
 
-TW92ZSBzZGhjaV9nZXRfb2ZfcHJvcGVydHkgYW5kIG90aGVyIGdldHRpbmcgcHJvcGVydHkgY29k
-ZSBmcm9tCnNkaGNpX2VzZGhjX3Byb2JlIGludG8gZXNkaGNfZ2V0X3Byb3BlcnR5LgoKU2lnbmVk
-LW9mZi1ieTogWWFuZ2JvIEx1IDx5YW5nYm8ubHVAZnJlZXNjYWxlLmNvbT4KLS0tCiBkcml2ZXJz
-L21tYy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMgfCAzMSArKysrKysrKysrKysrKysrKy0tLS0tLS0t
-LS0tLS0tCiAxIGZpbGUgY2hhbmdlZCwgMTcgaW5zZXJ0aW9ucygrKSwgMTQgZGVsZXRpb25zKC0p
-CgpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jIGIvZHJpdmVy
-cy9tbWMvaG9zdC9zZGhjaS1vZi1lc2RoYy5jCmluZGV4IDc5N2JlNzUuLjEyOTVhOTYgMTAwNjQ0
-Ci0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtZXNkaGMuYworKysgYi9kcml2ZXJzL21t
-Yy9ob3N0L3NkaGNpLW9mLWVzZGhjLmMKQEAgLTM0OCwxOSArMzQ4LDE3IEBAIHN0YXRpYyBjb25z
-dCBzdHJ1Y3Qgc2RoY2lfcGx0Zm1fZGF0YSBzZGhjaV9lc2RoY19wZGF0YSA9IHsKIAkub3BzID0g
-JnNkaGNpX2VzZGhjX29wcywKIH07CiAKLXN0YXRpYyBpbnQgc2RoY2lfZXNkaGNfcHJvYmUoc3Ry
-dWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKK3N0YXRpYyB2b2lkIGVzZGhjX2dldF9wcm9wZXJ0
-eShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQogewotCXN0cnVjdCBzZGhjaV9ob3N0ICpo
-b3N0OwotCXN0cnVjdCBkZXZpY2Vfbm9kZSAqbnA7Ci0JaW50IHJldDsKLQotCWhvc3QgPSBzZGhj
-aV9wbHRmbV9pbml0KHBkZXYsICZzZGhjaV9lc2RoY19wZGF0YSwgMCk7Ci0JaWYgKElTX0VSUiho
-b3N0KSkKLQkJcmV0dXJuIFBUUl9FUlIoaG9zdCk7CisJc3RydWN0IGRldmljZV9ub2RlICpucCA9
-IHBkZXYtPmRldi5vZl9ub2RlOworCXN0cnVjdCBzZGhjaV9ob3N0ICpob3N0ID0gcGxhdGZvcm1f
-Z2V0X2RydmRhdGEocGRldik7CiAKIAlzZGhjaV9nZXRfb2ZfcHJvcGVydHkocGRldik7CiAKLQlu
-cCA9IHBkZXYtPmRldi5vZl9ub2RlOworCS8qIGNhbGwgdG8gZ2VuZXJpYyBtbWNfb2ZfcGFyc2Ug
-dG8gc3VwcG9ydCBhZGRpdGlvbmFsIGNhcGFiaWxpdGllcyAqLworCW1tY19vZl9wYXJzZShob3N0
-LT5tbWMpOworCW1tY19vZl9wYXJzZV92b2x0YWdlKG5wLCAmaG9zdC0+b2NyX21hc2spOworCiAJ
-aWYgKG9mX2RldmljZV9pc19jb21wYXRpYmxlKG5wLCAiZnNsLHA1MDQwLWVzZGhjIikgfHwKIAkg
-ICAgb2ZfZGV2aWNlX2lzX2NvbXBhdGlibGUobnAsICJmc2wscDUwMjAtZXNkaGMiKSB8fAogCSAg
-ICBvZl9kZXZpY2VfaXNfY29tcGF0aWJsZShucCwgImZzbCxwNDA4MC1lc2RoYyIpIHx8CkBAIC0z
-NzUsMTMgKzM3MywxOCBAQCBzdGF0aWMgaW50IHNkaGNpX2VzZGhjX3Byb2JlKHN0cnVjdCBwbGF0
-Zm9ybV9kZXZpY2UgKnBkZXYpCiAJCSAqLwogCQlob3N0LT5xdWlya3MyIHw9IFNESENJX1FVSVJL
-Ml9CUk9LRU5fSE9TVF9DT05UUk9MOwogCX0KK30KIAotCS8qIGNhbGwgdG8gZ2VuZXJpYyBtbWNf
-b2ZfcGFyc2UgdG8gc3VwcG9ydCBhZGRpdGlvbmFsIGNhcGFiaWxpdGllcyAqLwotCXJldCA9IG1t
-Y19vZl9wYXJzZShob3N0LT5tbWMpOwotCWlmIChyZXQpCi0JCWdvdG8gZXJyOworc3RhdGljIGlu
-dCBzZGhjaV9lc2RoY19wcm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQoreworCXN0
-cnVjdCBzZGhjaV9ob3N0ICpob3N0OworCWludCByZXQ7CiAKLQltbWNfb2ZfcGFyc2Vfdm9sdGFn
-ZShucCwgJmhvc3QtPm9jcl9tYXNrKTsKKwlob3N0ID0gc2RoY2lfcGx0Zm1faW5pdChwZGV2LCAm
-c2RoY2lfZXNkaGNfcGRhdGEsIDApOworCWlmIChJU19FUlIoaG9zdCkpCisJCXJldHVybiBQVFJf
-RVJSKGhvc3QpOworCisJZXNkaGNfZ2V0X3Byb3BlcnR5KHBkZXYpOwogCiAJcmV0ID0gc2RoY2lf
-YWRkX2hvc3QoaG9zdCk7CiAJaWYgKHJldCkKLS0gCjIuMS4wLjI3Lmc5NmRiMzI0CgpfX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eHBwYy1kZXYgbWFp
-bGluZyBsaXN0CkxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnCmh0dHBzOi8vbGlzdHMub3ps
-YWJzLm9yZy9saXN0aW5mby9saW51eHBwYy1kZXY=
+Add 'cpu-rev' property for cpus node to support getting cpu revision
+from dts, since it's not good to get cpu revision using powerpc specific
+function(like SVR_REV()) in common drivers.
+
+Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+---
+ arch/powerpc/platforms/85xx/common.c          | 34 +++++++++++++++++++++++++++
+ arch/powerpc/platforms/85xx/corenet_generic.c |  3 +++
+ arch/powerpc/platforms/85xx/mpc85xx.h         |  1 +
+ 3 files changed, 38 insertions(+)
+
+diff --git a/arch/powerpc/platforms/85xx/common.c b/arch/powerpc/platforms/85xx/common.c
+index 7bfb9b1..5c55c0a4 100644
+--- a/arch/powerpc/platforms/85xx/common.c
++++ b/arch/powerpc/platforms/85xx/common.c
+@@ -8,8 +8,10 @@
+ 
+ #include <linux/of_irq.h>
+ #include <linux/of_platform.h>
++#include <linux/slab.h>
+ 
+ #include <asm/qe.h>
++#include <asm/mpc85xx.h>
+ #include <sysdev/cpm2_pic.h>
+ 
+ #include "mpc85xx.h"
+@@ -44,8 +46,40 @@ static const struct of_device_id mpc85xx_common_ids[] __initconst = {
+ 	{},
+ };
+ 
++/* Add 'cpu-rev' property into cpus node of device tree */
++int of_add_cpu_rev_property(void)
++{
++	struct device_node *cpus;
++	struct property *cpu_rev;
++	u8 *revision;
++	u32 svr;
++
++	svr = mfspr(SPRN_SVR);
++
++	revision = kzalloc(sizeof(*revision), GFP_KERNEL);
++	if (!revision)
++		return 0;
++	*revision = SVR_REV(svr);
++
++	cpu_rev = kzalloc(sizeof(*cpu_rev), GFP_KERNEL);
++	if (!cpu_rev)
++		return 0;
++	cpu_rev->name = "cpu-rev";
++	cpu_rev->value = revision;
++	cpu_rev->length = sizeof(*revision);
++
++	cpus = of_find_node_by_path("/cpus");
++	if (of_add_property(cpus, cpu_rev))
++		return 0;
++
++	return 1;
++}
++
+ int __init mpc85xx_common_publish_devices(void)
+ {
++	if (!of_add_cpu_rev_property())
++		pr_info("Add 'cpu-rev' property into cpus node: failed!\n");
++
+ 	return of_platform_bus_probe(NULL, mpc85xx_common_ids, NULL);
+ }
+ #ifdef CONFIG_CPM2
+diff --git a/arch/powerpc/platforms/85xx/corenet_generic.c b/arch/powerpc/platforms/85xx/corenet_generic.c
+index bd839dc..880940f 100644
+--- a/arch/powerpc/platforms/85xx/corenet_generic.c
++++ b/arch/powerpc/platforms/85xx/corenet_generic.c
+@@ -132,6 +132,9 @@ static const struct of_device_id of_device_ids[] = {
+ 
+ int __init corenet_gen_publish_devices(void)
+ {
++	if (!of_add_cpu_rev_property())
++		pr_info("Add 'cpu-rev' property into cpus node: failed!\n");
++
+ 	return of_platform_bus_probe(NULL, of_device_ids, NULL);
+ }
+ 
+diff --git a/arch/powerpc/platforms/85xx/mpc85xx.h b/arch/powerpc/platforms/85xx/mpc85xx.h
+index 39056f6..bcc18e2 100644
+--- a/arch/powerpc/platforms/85xx/mpc85xx.h
++++ b/arch/powerpc/platforms/85xx/mpc85xx.h
+@@ -1,5 +1,6 @@
+ #ifndef MPC85xx_H
+ #define MPC85xx_H
++extern int of_add_cpu_rev_property(void);
+ extern int mpc85xx_common_publish_devices(void);
+ 
+ #ifdef CONFIG_CPM2
+-- 
+2.1.0.27.g96db324
+
