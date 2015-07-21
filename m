@@ -1,72 +1,54 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: bus: check suspend/resume hooks for bus_ops before calling
-Date: Tue, 21 Jul 2015 13:09:54 +0200
-Message-ID: <CAPDyKFo7ZXm8D1V6d94usmjFVx3_2jK=ELGR7kMdXCeAxzi-CA@mail.gmail.com>
-References: <1436517526-19392-1-git-send-email-yangbo.lu@freescale.com>
+Subject: Re: [PATCH] Documentation: dt: update ti,am33xx-hsmmc swakeup workaround
+Date: Tue, 21 Jul 2015 13:11:50 +0200
+Message-ID: <CAPDyKFqhcGgR3DW2u5mWMNe=0gu-BJYY+F_4wJMjW-P3EzHyKg@mail.gmail.com>
+References: <1436291591-31271-1-git-send-email-afenkart@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f173.google.com ([209.85.220.173]:33482 "EHLO
-	mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752585AbbGULJz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jul 2015 07:09:55 -0400
-Received: by qkdl129 with SMTP id l129so130075832qkd.0
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Jul 2015 04:09:54 -0700 (PDT)
-In-Reply-To: <1436517526-19392-1-git-send-email-yangbo.lu@freescale.com>
+Received: from mail-qg0-f42.google.com ([209.85.192.42]:36315 "EHLO
+	mail-qg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752817AbbGULLv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jul 2015 07:11:51 -0400
+Received: by qgy5 with SMTP id 5so85606382qgy.3
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Jul 2015 04:11:50 -0700 (PDT)
+In-Reply-To: <1436291591-31271-1-git-send-email-afenkart@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@freescale.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>
 
-On 10 July 2015 at 10:38, Yangbo Lu <yangbo.lu@freescale.com> wrote:
-> It needs to check suspend/resume hooks before calling them to avoid
-> call trace during hibernation.
+On 7 July 2015 at 19:53, Andreas Fenkart <afenkart@gmail.com> wrote:
+> Before 5b83b2234be6733cf the driver was hard coding the wakeup irq to
+> be active low. The generic pm wakeirq does not override the active
+> high/low parameter, hence it must be specified correctly in the
+> device tree.
+> Mind that SDIO IRQ is active low as defined in the SDIO specification
+>
+> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
 
-Could you elaborate more exactly what happens here, how do you trigger
-this error.
-
-Is this a bug fix?
-
->
-> Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
-> ---
->  drivers/mmc/core/bus.c | 13 ++++++++-----
->  1 file changed, 8 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> index 972ff84..fc6b5e5 100644
-> --- a/drivers/mmc/core/bus.c
-> +++ b/drivers/mmc/core/bus.c
-> @@ -154,7 +154,8 @@ static int mmc_bus_suspend(struct device *dev)
->         if (ret)
->                 return ret;
->
-> -       ret = host->bus_ops->suspend(host);
-> +       if (host->bus_ops->suspend)
-> +               ret = host->bus_ops->suspend(host);
->         return ret;
->  }
->
-> @@ -164,10 +165,12 @@ static int mmc_bus_resume(struct device *dev)
->         struct mmc_host *host = card->host;
->         int ret;
->
-> -       ret = host->bus_ops->resume(host);
-> -       if (ret)
-> -               pr_warn("%s: error %d during resume (card was removed?)\n",
-> -                       mmc_hostname(host), ret);
-> +       if (host->bus_ops->resume) {
-> +               ret = host->bus_ops->resume(host);
-> +               if (ret)
-> +                       pr_warn("%s: error %d during resume (card was removed?)\n",
-> +                               mmc_hostname(host), ret);
-> +       }
->
->         ret = pm_generic_resume(dev);
->         return ret;
-> --
-> 2.1.0.27.g96db324
->
+Thanks, applied!
 
 Kind regards
 Uffe
+
+> ---
+>  Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> index 76bf087..74166a0 100644
+> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+> @@ -102,7 +102,7 @@ not every application needs SDIO irq, e.g. MMC cards.
+>                 pinctrl-1 = <&mmc1_idle>;
+>                 pinctrl-2 = <&mmc1_sleep>;
+>                 ...
+> -               interrupts-extended = <&intc 64 &gpio2 28 0>;
+> +               interrupts-extended = <&intc 64 &gpio2 28 GPIO_ACTIVE_LOW>;
+>         };
+>
+>         mmc1_idle : pinmux_cirq_pin {
+> --
+> 2.1.4
+>
