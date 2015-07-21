@@ -1,160 +1,87 @@
-From: Suneel G <suneelgarapati@gmail.com>
-Subject: Re: [PATCH V3 0/8 RESEND] Add password protected lock/unlock support
- for SD/MMC
-Date: Tue, 21 Jul 2015 21:22:42 +0530
-Message-ID: <CAOZ77oherV7nmw6Kuir0YzNCuJNEb91y5PRkWpoP1n4=NiGtGA@mail.gmail.com>
-References: <1433526147-25941-1-git-send-email-alcooperx@gmail.com> <CAPDyKFrhHLykG5xSfo204Yh-z4-8RAhkh5S40Gb--4HkQ6KS9A@mail.gmail.com>
+From: Ben Hutchings <ben@decadent.org.uk>
+Subject: Re: [PATCH] mmc:Fix error handling in the function mmc_blk_remove
+Date: Tue, 21 Jul 2015 19:03:33 +0100
+Message-ID: <1437501813.29812.11.camel@decadent.org.uk>
+References: <1437485391-25505-1-git-send-email-xerofoify@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg="pgp-sha512";
+	protocol="application/pgp-signature"; boundary="=-EXC/8tm4uIjWbpMTe+vx"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f43.google.com ([209.85.218.43]:34651 "EHLO
-	mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932809AbbGUPxX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jul 2015 11:53:23 -0400
-Received: by oigd21 with SMTP id d21so84544085oig.1
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Jul 2015 08:53:22 -0700 (PDT)
-In-Reply-To: <CAPDyKFrhHLykG5xSfo204Yh-z4-8RAhkh5S40Gb--4HkQ6KS9A@mail.gmail.com>
+Received: from shadbolt.e.decadent.org.uk ([88.96.1.126]:33187 "EHLO
+	shadbolt.e.decadent.org.uk" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755042AbbGUSDy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jul 2015 14:03:54 -0400
+In-Reply-To: <1437485391-25505-1-git-send-email-xerofoify@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Al Cooper <alcooperx@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Petri Gynther <pgynther@google.com>
+To: Nicholas Krause <xerofoify@gmail.com>, ulf.hansson@linaro.org
+Cc: kuninori.morimoto.gx@renesas.com, jh80.chung@samsung.com, adrian.hunter@intel.com, chuanxiao.dong@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Ulf Hansson,
 
-One use case is whenever any host controller tries for specification
-compliance or certification, there are defined test cases for each
-spec version.
-If mmc/sd subsystem can validate most of them, if not all, out of
-tree, it would be of great advantage for users.
+--=-EXC/8tm4uIjWbpMTe+vx
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-I have performed recently this compliance testing for v3.0 host spec
-and found some features missing like lock/unlock, register
-programming, erase etc.
+On Tue, 2015-07-21 at 09:29 -0400, Nicholas Krause wrote:
+> This fixes error handling in the function mmc_blk_remove by
+> checking the return value of the call to mmc_blk_part_switch
+> and if it has failed by returning a error code we now print
+> out on the console to the user that removed the mmc device
+> has failed before returning immediately.
 
-These patches should defintely help linux get compliant atleast for SD
-Host Spec.
+A removal function isn't allowed to fail.  Printing an error message
+seems reasonable (though it should be printed using one of the dev_
+logging functions), but returning early is not.
 
-Defined Host Controller Test Specification is available from SD Card
-Association. www.sdcard.org
+Ben.
 
-Hope this helps,
+> Signed-off-by: Nicholas Krause <xerofoify@gmail.com>
+> ---
+>  drivers/mmc/card/block.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>=20
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index c9c3d20..24af338 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2508,7 +2508,10 @@ static void mmc_blk_remove(struct mmc_card *card)
+>  > 	> mmc_blk_remove_parts(card, md);
+>  > 	> pm_runtime_get_sync(&card->dev);
+>  > 	> mmc_claim_host(card->host);
+> -> 	> mmc_blk_part_switch(card, md);
+> +> 	> if (mmc_blk_part_switch(card, md)) {
+> +> 	> 	> pr_crit("Unable to successfully remove %s due to failed mmc_blk_=
+part_switch call\n", card->part[MMC_NUM_PHY_PARTITION].name);
+> +> 	> 	> return;
+> +> 	> }
+>  > 	> mmc_release_host(card->host);
+>  > 	> if (card->type !=3D MMC_TYPE_SD_COMBO)
+>  > 	> 	> pm_runtime_disable(&card->dev);
+--=20
+Ben Hutchings
+No political challenge can be met by shopping. - George Monbiot
 
-Regards,
-Suneel
 
-On Tue, Jul 21, 2015 at 7:34 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> Hi Al,
->
-> Let me start by apologizing for the long delay in feedback.
->
-> On 5 June 2015 at 19:42, Al Cooper <alcooperx@gmail.com> wrote:
->> This set of patches adds support for password protected locking
->> and unlocking of MMC and SD devices. It uses the LOCK/UNLOCK command
->> (CMD42) available in both the MMC and SD command sets.
->>
->> Some of this code was based on a patch set submitted in 2006 by
->> Anderson Briglia "Add MMC Password Protection (lock/unlock)". This
->> patch set never made it into mainline.
->
-> I lot have happened since 2006 and I don't know the history to why
-> this was rejected. Was it just that nobody cares to review it or
-> something else?
->
->>
->> By default, a card with no password assigned is always in "unlocked"
->> state. After password assignment, in the next power cycle the card
->> switches to a "locked" state where only the "basic" and "lock card"
->> command classes are accepted by the card. Only after unlocking it with
->> the correct password can the card be used for normal operations like
->> block I/O.
->>
->> Password management and caching is done through the "Kernel Key
->> Retention Service" mechanism and the sysfs filesystem. Two new sysfs
->> attributes were added. The "lock" attribute is used to lock, unlock,
->> assign a password, clear a password and force erase a card. The
->> "unlock_retry" attribute is used to retry an unlock that failed
->> during boot because the rootfs was not yet available with the password.
->
-> The rootfs issue makes this a bit complicated to handle. I think this
-> can be simplified, perhaps by allowing user-space to trigger a
-> mmc_rescan() to be run for a particular mmc host.
->
-> From a power management point of view I think that would be preferred,
-> as else you might be leaving a locked card powered forever.
->
->>
->> The user space software needed to test this new feature
->> is available on GitHub at:
->> https://github.com/alcooper/mmc-password-utils
->> See the README for a detailed description of the user space layer
->> and how to use this feature.
->
-> Really nice that you maintain such utility. If this feature enters
-> mainline, it would nice to merge this into Chris' mmc-utils.
->
->>
->> Changed for V3:
->>   - Ported the V2 patch set submitted Aug. 2013 to the latest mainline
->>     (v4.1-rc4).
->>   - Created a GitHub project for the user space layer.
->>   - Change the lock command (CMD42) to round up the data buffer
->>     size to 512 for SD but leave exact size for eMMC based on the
->>     SD and eMMC specs.
->>
->>
->> Changed for V2:
->> The V2 changes were not functional and were just general cleanup.
->>   - Use stub functions to reduce the number of CONFIG ifdefs.
->>   - Add static to a few functions that were local.
->>   - Use pr_warn instead of pr_warning.
->>   - Improve a few variable names and messages.
->>
->>
->> Abbas Raza (1):
->>   According to SD Physical Layer Specifications: Locked cards respond to
->>     (and execute) all commands in the "basic" command class (class 0),
->>     ACMD41, CMD16 and "lock card" command class. Thus, the host is
->>     allowed to reset, initialize, select, query for status, etc., but
->>     not to access data on the card.
->>
->> Al Cooper (7):
->>   mmc: lock: Use the kernel "KEYS" subsystem to get a card's password
->>   mmc: lock: Add low level LOCK_UNLOCK command
->>   mmc: lock: Add function to unlock a password locked card
->>   mmc: lock: Add card lock/unlock maintenance commands
->>   mmc: lock: Change SD init functionality to handle locked SD cards
->>   mmc: lock: Prevent partition table read for locked cards.
->>   mmc: lock: Change MMC init to handle locked cards.
->>
->>  drivers/mmc/card/block.c   |  14 ++++
->>  drivers/mmc/core/Kconfig   |   8 +++
->>  drivers/mmc/core/core.c    | 120 +++++++++++++++++++++++++++++++++
->>  drivers/mmc/core/core.h    |  14 +++-
->>  drivers/mmc/core/mmc.c     | 123 ++++++++++++++++++++++++++++++++++
->>  drivers/mmc/core/mmc_ops.c | 150 +++++++++++++++++++++++++++++++++++++++++
->>  drivers/mmc/core/mmc_ops.h |  13 ++++
->>  drivers/mmc/core/sd.c      | 161 +++++++++++++++++++++++++++++++--------------
->>  include/linux/mmc/card.h   |   6 ++
->>  9 files changed, 560 insertions(+), 49 deletions(-)
->>
->> --
->> 1.9.0.138.g2de3478
->>
->
-> This is just an initial review and before I spend more time going into
-> the details, I want to understand *why* we want this feature. Could
-> you elaborate on what use cases you see and whether you already know
-> someone actively using this?
->
-> From a code quality point of view, it overall looks okay, but let me
-> get back to the details once we discussed the above a bit.
->
-> Moreover, I would like to encourage other MMC developers to give there
-> overall opinion about this feature.
->
-> Kind regards
-> Uffe
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--=-EXC/8tm4uIjWbpMTe+vx
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIVAwUAVa6Jdee/yOyVhhEJAQoH0xAAlykfx4tFXZmIZlNLfq/54Ib/ec/z6+7s
+iLvg3K56EYuYWdXEqQhTPWgnebbk2GH6uv2CGIN7Ff9ZOCP8FgJyTIRxGVTq3YGy
+96g4kuLQmWBdxKMZom0Wx7O/AxwUZLwlqkICf4h7afoggZPEVfjt2DYQxJHMVqsM
+vycu5YNN62V2IHRN97CGevQ9TBeFp4+FR/bqDMyOQs/nP87VRSJRfcNSABxME2+2
+EbpPQt0QDCitWkmZdmicMT7sCuT5YhBgrAN1Ka9r9xHM9YdVAiXcgs2bTlwM6zK+
+iPFybxV5SJAnk/4zC+6c35X72gziEV+keJBjKXPPaJiJZiWaFxO+arrnLVeTFYU2
+WLjQf8Gnf+mfsRHRmZ3yA4ClsBlgJTRVVephCA3Rf9DNcquO4tzRRzBKOE/0ig4D
+yVc2IN4FwFE8Xvr6ng8PGXZmrqfibURucjlRfFZCl4Dfot4Z6umiAPkg+SFkqsiq
+g6jaBU/dnMNTakd+rLVEWClTd5ISZwVs7Jk8APJhnyiU1RlUS0cOxRiWBiwaOe01
+6LptbsJxkuuT8e6WTq5EZZcydw681at5fthgklSeqgaHmzjc156aNLT0nukFgmEM
+X3xi9FA8TF7ffK0wdJYSoYfRy8g6KSR1OhsSjvLCf+e+e1nDvwkffGYZ2EsG/qAA
+6D818Q/JaWQ=
+=2qVT
+-----END PGP SIGNATURE-----
+
+--=-EXC/8tm4uIjWbpMTe+vx--
