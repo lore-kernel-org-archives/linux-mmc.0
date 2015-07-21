@@ -1,72 +1,132 @@
-From: Suman Tripathi <stripathi@apm.com>
-Subject: Re: [PATCH v8 2/2] mmc: host: sdhci: Disable 1.8V signaling for
- arasan 4.9a version of SDHCI controller.
-Date: Tue, 21 Jul 2015 18:55:15 +0530
-Message-ID: <CAOHikRCRiLb+bDo0Cm8Wb-1R4t+EfYTjW3NxBaF9T3_qTsSggQ@mail.gmail.com>
-References: <1434715227-27399-1-git-send-email-stripathi@apm.com>
-	<1434715227-27399-3-git-send-email-stripathi@apm.com>
-	<CAOHikRBkDinUfcOR3Dg12e2Xy_P5TABOpHSnkSpZhRyhLRWGFA@mail.gmail.com>
-	<CAPDyKFqozGkHRSFYm=P61XnYj4F-kpoYG2CmVDc1tSkT_zQJ5w@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V3 0/8 RESEND] Add password protected lock/unlock support
+ for SD/MMC
+Date: Tue, 21 Jul 2015 16:04:05 +0200
+Message-ID: <CAPDyKFrhHLykG5xSfo204Yh-z4-8RAhkh5S40Gb--4HkQ6KS9A@mail.gmail.com>
+References: <1433526147-25941-1-git-send-email-alcooperx@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f51.google.com ([209.85.215.51]:35452 "EHLO
-	mail-la0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753287AbbGUNZR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jul 2015 09:25:17 -0400
-Received: by lahh5 with SMTP id h5so117654969lah.2
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Jul 2015 06:25:16 -0700 (PDT)
-In-Reply-To: <CAPDyKFqozGkHRSFYm=P61XnYj4F-kpoYG2CmVDc1tSkT_zQJ5w@mail.gmail.com>
+Received: from mail-qg0-f44.google.com ([209.85.192.44]:34096 "EHLO
+	mail-qg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754880AbbGUOEG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jul 2015 10:04:06 -0400
+Received: by qgeu79 with SMTP id u79so32269072qge.1
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Jul 2015 07:04:05 -0700 (PDT)
+In-Reply-To: <1433526147-25941-1-git-send-email-alcooperx@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, Anton Vorontsov <anton@enomsg.org>, Arnd Bergmann <arnd@arndb.de>, Michal Simek <michal.simek@xilinx.com>, Kevin Hilman <khilman@deeprootsystems.com>, Olof Johansson <olof@lixom.net>, linux-mmc <linux-mmc@vger.kernel.org>, "arm@kernel.org" <arm@kernel.org>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Don Dutile <ddutile@redhat.com>, Jon Masters <jcm@redhat.com>, Mark Langsdorf <mlangsdo@redhat.com>, patches <patches@apm.com>
+To: Al Cooper <alcooperx@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Petri Gynther <pgynther@google.com>
 
-On Tue, Jul 21, 2015 at 6:43 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 19 June 2015 at 14:28, Suman Tripathi <stripathi@apm.com> wrote:
->> Hi ,
->>
->> On Fri, Jun 19, 2015 at 5:30 PM, Suman Tripathi <stripathi@apm.com> wrote:
->>> This patch disables the 1.8V signaling for arasan 4.9a version
->>> of SDHCI controller with the help SDHCI_QUIRK2_NO_1_8_V quirk.
->>>
->>> Signed-off-by: Suman Tripathi <stripathi@apm.com>
->>> ---
->>> ---
->>>  drivers/mmc/host/sdhci-of-arasan.c | 3 ++-
->>>  1 file changed, 2 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
->>> index 21c0c08..4c99ea4 100644
->>> --- a/drivers/mmc/host/sdhci-of-arasan.c
->>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
->>> @@ -171,7 +171,8 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->>>
->>>         if (of_device_is_compatible(pdev->dev.of_node, "arasan,sdhci-4.9a")) {
->>>                 host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
->>> -               host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
->>> +               host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23 |
->>> +                                SDHCI_QUIRK2_NO_1_8_V;
->>>         }
->>
->>
->> I think I am  wrong here. No-1.8v is something related to board
->> regulator circuitry not related to IP version. So it should be dts
->> driven.
->
-> Agree!
->
-> So I guess that will change patch1 and this one can be completely dropped?
+Hi Al,
 
-yes.
+Let me start by apologizing for the long delay in feedback.
+
+On 5 June 2015 at 19:42, Al Cooper <alcooperx@gmail.com> wrote:
+> This set of patches adds support for password protected locking
+> and unlocking of MMC and SD devices. It uses the LOCK/UNLOCK command
+> (CMD42) available in both the MMC and SD command sets.
+>
+> Some of this code was based on a patch set submitted in 2006 by
+> Anderson Briglia "Add MMC Password Protection (lock/unlock)". This
+> patch set never made it into mainline.
+
+I lot have happened since 2006 and I don't know the history to why
+this was rejected. Was it just that nobody cares to review it or
+something else?
 
 >
-> Kind regards
-> Uffe
+> By default, a card with no password assigned is always in "unlocked"
+> state. After password assignment, in the next power cycle the card
+> switches to a "locked" state where only the "basic" and "lock card"
+> command classes are accepted by the card. Only after unlocking it with
+> the correct password can the card be used for normal operations like
+> block I/O.
+>
+> Password management and caching is done through the "Kernel Key
+> Retention Service" mechanism and the sysfs filesystem. Two new sysfs
+> attributes were added. The "lock" attribute is used to lock, unlock,
+> assign a password, clear a password and force erase a card. The
+> "unlock_retry" attribute is used to retry an unlock that failed
+> during boot because the rootfs was not yet available with the password.
 
+The rootfs issue makes this a bit complicated to handle. I think this
+can be simplified, perhaps by allowing user-space to trigger a
+mmc_rescan() to be run for a particular mmc host.
 
+>From a power management point of view I think that would be preferred,
+as else you might be leaving a locked card powered forever.
 
--- 
-Thanks,
-with regards,
-Suman Tripathi
+>
+> The user space software needed to test this new feature
+> is available on GitHub at:
+> https://github.com/alcooper/mmc-password-utils
+> See the README for a detailed description of the user space layer
+> and how to use this feature.
+
+Really nice that you maintain such utility. If this feature enters
+mainline, it would nice to merge this into Chris' mmc-utils.
+
+>
+> Changed for V3:
+>   - Ported the V2 patch set submitted Aug. 2013 to the latest mainline
+>     (v4.1-rc4).
+>   - Created a GitHub project for the user space layer.
+>   - Change the lock command (CMD42) to round up the data buffer
+>     size to 512 for SD but leave exact size for eMMC based on the
+>     SD and eMMC specs.
+>
+>
+> Changed for V2:
+> The V2 changes were not functional and were just general cleanup.
+>   - Use stub functions to reduce the number of CONFIG ifdefs.
+>   - Add static to a few functions that were local.
+>   - Use pr_warn instead of pr_warning.
+>   - Improve a few variable names and messages.
+>
+>
+> Abbas Raza (1):
+>   According to SD Physical Layer Specifications: Locked cards respond to
+>     (and execute) all commands in the "basic" command class (class 0),
+>     ACMD41, CMD16 and "lock card" command class. Thus, the host is
+>     allowed to reset, initialize, select, query for status, etc., but
+>     not to access data on the card.
+>
+> Al Cooper (7):
+>   mmc: lock: Use the kernel "KEYS" subsystem to get a card's password
+>   mmc: lock: Add low level LOCK_UNLOCK command
+>   mmc: lock: Add function to unlock a password locked card
+>   mmc: lock: Add card lock/unlock maintenance commands
+>   mmc: lock: Change SD init functionality to handle locked SD cards
+>   mmc: lock: Prevent partition table read for locked cards.
+>   mmc: lock: Change MMC init to handle locked cards.
+>
+>  drivers/mmc/card/block.c   |  14 ++++
+>  drivers/mmc/core/Kconfig   |   8 +++
+>  drivers/mmc/core/core.c    | 120 +++++++++++++++++++++++++++++++++
+>  drivers/mmc/core/core.h    |  14 +++-
+>  drivers/mmc/core/mmc.c     | 123 ++++++++++++++++++++++++++++++++++
+>  drivers/mmc/core/mmc_ops.c | 150 +++++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/core/mmc_ops.h |  13 ++++
+>  drivers/mmc/core/sd.c      | 161 +++++++++++++++++++++++++++++++--------------
+>  include/linux/mmc/card.h   |   6 ++
+>  9 files changed, 560 insertions(+), 49 deletions(-)
+>
+> --
+> 1.9.0.138.g2de3478
+>
+
+This is just an initial review and before I spend more time going into
+the details, I want to understand *why* we want this feature. Could
+you elaborate on what use cases you see and whether you already know
+someone actively using this?
+
+>From a code quality point of view, it overall looks okay, but let me
+get back to the details once we discussed the above a bit.
+
+Moreover, I would like to encourage other MMC developers to give there
+overall opinion about this feature.
+
+Kind regards
+Uffe
