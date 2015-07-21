@@ -1,87 +1,115 @@
-From: Ben Hutchings <ben@decadent.org.uk>
-Subject: Re: [PATCH] mmc:Fix error handling in the function mmc_blk_remove
-Date: Tue, 21 Jul 2015 19:03:33 +0100
-Message-ID: <1437501813.29812.11.camel@decadent.org.uk>
-References: <1437485391-25505-1-git-send-email-xerofoify@gmail.com>
+From: "Franklin S Cooper Jr." <fcooper@ti.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Update driver to support without regulators
+Date: Tue, 21 Jul 2015 14:39:52 -0500
+Message-ID: <55AEA008.6050808@ti.com>
+References: <1436902186-6542-1-git-send-email-fcooper@ti.com> <CAPDyKFq8NVqkZQ_8oL_5JM0_wYK6-gTaXr9ExHLa767tmcpxxA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha512";
-	protocol="application/pgp-signature"; boundary="=-EXC/8tm4uIjWbpMTe+vx"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from shadbolt.e.decadent.org.uk ([88.96.1.126]:33187 "EHLO
-	shadbolt.e.decadent.org.uk" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755042AbbGUSDy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jul 2015 14:03:54 -0400
-In-Reply-To: <1437485391-25505-1-git-send-email-xerofoify@gmail.com>
+Received: from bear.ext.ti.com ([192.94.94.41]:34647 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752035AbbGUTj7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 21 Jul 2015 15:39:59 -0400
+In-Reply-To: <CAPDyKFq8NVqkZQ_8oL_5JM0_wYK6-gTaXr9ExHLa767tmcpxxA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicholas Krause <xerofoify@gmail.com>, ulf.hansson@linaro.org
-Cc: kuninori.morimoto.gx@renesas.com, jh80.chung@samsung.com, adrian.hunter@intel.com, chuanxiao.dong@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kishon@ti.com, rogerq@ti.com, Lokesh Vutla <lokeshvutla@ti.com>, Murali Karicheri <m-karicheri2@ti.com>
 
 
---=-EXC/8tm4uIjWbpMTe+vx
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, 2015-07-21 at 09:29 -0400, Nicholas Krause wrote:
-> This fixes error handling in the function mmc_blk_remove by
-> checking the return value of the call to mmc_blk_part_switch
-> and if it has failed by returning a error code we now print
-> out on the console to the user that removed the mmc device
-> has failed before returning immediately.
+On 07/21/2015 06:40 AM, Ulf Hansson wrote:
+> On 14 July 2015 at 21:29, Franklin S Cooper Jr <fcooper@ti.com> wrote:
+>> From: Roger Quadros <rogerq@ti.com>
+>>
+>> Update driver to support without regulators.
+>>
+>> Without this patch boards that do not enable regulator config options will
+>> fail to boot with a kernel panic.
+> I guess that's because the rootfs is mounted on the card that doesn't
+> get detected, right?
+No at ramfs was used to validate this and was loaded via ethernet in U-boot.
+>
+>> Signed-off-by: Roger Quadros <rogerq@ti.com>
+>> Signed-off-by: Lokesh Vutla <lokeshvutla@ti.com>
+>> Signed-off-by: Murali Karicheri <m-karicheri2@ti.com>
+>> Signed-off-by: Franklin S Cooper Jr <fcooper@ti.com>
+>> ---
+>>  Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt |  2 ++
+>>  drivers/mmc/host/omap_hsmmc.c                           | 14 ++++++++++----
+>>  2 files changed, 12 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>> index 76bf087..2408e87 100644
+>> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>> @@ -22,6 +22,8 @@ ti,dual-volt: boolean, supports dual voltage cards
+>>  ti,non-removable: non-removable slot (like eMMC)
+>>  ti,needs-special-reset: Requires a special softreset sequence
+>>  ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
+>> +voltage-ranges: Specify the voltage range supported if regulator framework
+>> +isn't enabled.
+>>  dmas: List of DMA specifiers with the controller specific format
+>>  as described in the generic DMA client binding. A tx and rx
+>>  specifier is required.
+>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+>> index b2b411d..16c870f 100644
+>> --- a/drivers/mmc/host/omap_hsmmc.c
+>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>> @@ -1551,10 +1551,13 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>         if (ios->power_mode != host->power_mode) {
+>>                 switch (ios->power_mode) {
+>>                 case MMC_POWER_OFF:
+>> -                       mmc_pdata(host)->set_power(host->dev, 0, 0);
+>> +                       if (host->use_reg)
+>> +                               mmc_pdata(host)->set_power(host->dev, 0, 0);
+>>                         break;
+>>                 case MMC_POWER_UP:
+>> -                       mmc_pdata(host)->set_power(host->dev, 1, ios->vdd);
+>> +                       if (host->use_reg)
+>> +                               mmc_pdata(host)->set_power(host->dev, 1,
+>> +                                                          ios->vdd);
+>>                         break;
+>>                 case MMC_POWER_ON:
+>>                         do_send_init_stream = 1;
+>> @@ -2082,10 +2085,13 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>>                 if (ret)
+>>                         goto err_irq;
+>>                 host->use_reg = 1;
+>> +               mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
+>> +       } else {
+>> +               ret = mmc_of_parse_voltage(pdev->dev.of_node, &mmc->ocr_avail);
+>> +               if (ret)
+>> +                       goto err_irq;
+>>         }
+>>
+>> -       mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
+>> -
+>>         omap_hsmmc_disable_irq(host);
+>>
+>>         /*
+>> --
+>> 1.9.1
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> No, I don't like this patch. If your board have regulators which can
+> be used to find out the voltage levels, we shall use them. We shall
+> not use DT to workaround this.
+>
+> So, perhaps the Kconfig section for omap_hsmmc should select
+> CONFIG_REGULATOR (and friends)?
+Looking at the code the "ifdefCONFIG_REGULATOR" and the usage of use_reg
+(use regulator) shows that this driver is suppose to support boards that
+don't have the regulator framework enabled.
 
-A removal function isn't allowed to fail.  Printing an error message
-seems reasonable (though it should be printed using one of the dev_
-logging functions), but returning early is not.
+This patches insures that this driver can work without the regulator framework
+which is currently broken.
 
-Ben.
+>
+> Kind regards
+> Uffe
 
-> Signed-off-by: Nicholas Krause <xerofoify@gmail.com>
-> ---
->  drivers/mmc/card/block.c | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
->=20
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index c9c3d20..24af338 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -2508,7 +2508,10 @@ static void mmc_blk_remove(struct mmc_card *card)
->  > 	> mmc_blk_remove_parts(card, md);
->  > 	> pm_runtime_get_sync(&card->dev);
->  > 	> mmc_claim_host(card->host);
-> -> 	> mmc_blk_part_switch(card, md);
-> +> 	> if (mmc_blk_part_switch(card, md)) {
-> +> 	> 	> pr_crit("Unable to successfully remove %s due to failed mmc_blk_=
-part_switch call\n", card->part[MMC_NUM_PHY_PARTITION].name);
-> +> 	> 	> return;
-> +> 	> }
->  > 	> mmc_release_host(card->host);
->  > 	> if (card->type !=3D MMC_TYPE_SD_COMBO)
->  > 	> 	> pm_runtime_disable(&card->dev);
---=20
-Ben Hutchings
-No political challenge can be met by shopping. - George Monbiot
-
-
---=-EXC/8tm4uIjWbpMTe+vx
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIVAwUAVa6Jdee/yOyVhhEJAQoH0xAAlykfx4tFXZmIZlNLfq/54Ib/ec/z6+7s
-iLvg3K56EYuYWdXEqQhTPWgnebbk2GH6uv2CGIN7Ff9ZOCP8FgJyTIRxGVTq3YGy
-96g4kuLQmWBdxKMZom0Wx7O/AxwUZLwlqkICf4h7afoggZPEVfjt2DYQxJHMVqsM
-vycu5YNN62V2IHRN97CGevQ9TBeFp4+FR/bqDMyOQs/nP87VRSJRfcNSABxME2+2
-EbpPQt0QDCitWkmZdmicMT7sCuT5YhBgrAN1Ka9r9xHM9YdVAiXcgs2bTlwM6zK+
-iPFybxV5SJAnk/4zC+6c35X72gziEV+keJBjKXPPaJiJZiWaFxO+arrnLVeTFYU2
-WLjQf8Gnf+mfsRHRmZ3yA4ClsBlgJTRVVephCA3Rf9DNcquO4tzRRzBKOE/0ig4D
-yVc2IN4FwFE8Xvr6ng8PGXZmrqfibURucjlRfFZCl4Dfot4Z6umiAPkg+SFkqsiq
-g6jaBU/dnMNTakd+rLVEWClTd5ISZwVs7Jk8APJhnyiU1RlUS0cOxRiWBiwaOe01
-6LptbsJxkuuT8e6WTq5EZZcydw681at5fthgklSeqgaHmzjc156aNLT0nukFgmEM
-X3xi9FA8TF7ffK0wdJYSoYfRy8g6KSR1OhsSjvLCf+e+e1nDvwkffGYZ2EsG/qAA
-6D818Q/JaWQ=
-=2qVT
------END PGP SIGNATURE-----
-
---=-EXC/8tm4uIjWbpMTe+vx--
