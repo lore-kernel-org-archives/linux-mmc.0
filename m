@@ -1,115 +1,88 @@
-From: Felipe Balbi <balbi@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Update driver to support without
- regulators
-Date: Tue, 21 Jul 2015 15:14:15 -0500
-Message-ID: <20150721201415.GO25385@saruman.tx.rr.com>
-References: <1436902186-6542-1-git-send-email-fcooper@ti.com>
- <20150721195749.GM25385@saruman.tx.rr.com>
- <55AEA769.9080300@ti.com>
-Reply-To: <balbi@ti.com>
+From: Ben Hutchings <ben@decadent.org.uk>
+Subject: Re: [PATCH] mmc:Fix error handling in the function mmc_blk_remove
+Date: Tue, 21 Jul 2015 22:05:08 +0100
+Message-ID: <1437512708.29812.12.camel@decadent.org.uk>
+References: <1437504701-24429-1-git-send-email-xerofoify@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="c2gYorpyS4gG0T74"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:34863 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752558AbbGUUOR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 21 Jul 2015 16:14:17 -0400
-Content-Disposition: inline
-In-Reply-To: <55AEA769.9080300@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg="pgp-sha512";
+	protocol="application/pgp-signature"; boundary="=-stpvt92EIH8po3/vrQfz"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1437504701-24429-1-git-send-email-xerofoify@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Nicholas Krause <xerofoify@gmail.com>, ulf.hansson@linaro.org
+Cc: kuninori.morimoto.gx@renesas.com, jh80.chung@samsung.com, adrian.hunter@intel.com, chuanxiao.dong@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Franklin S Cooper Jr." <fcooper@ti.com>
-Cc: balbi@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kishon@ti.com, rogerq@ti.com, Lokesh Vutla <lokeshvutla@ti.com>, Murali Karicheri <m-karicheri2@ti.com>
 
---c2gYorpyS4gG0T74
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+
+--=-stpvt92EIH8po3/vrQfz
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Jul 21, 2015 at 03:11:21PM -0500, Franklin S Cooper Jr. wrote:
+On Tue, 2015-07-21 at 14:51 -0400, Nicholas Krause wrote:
+> This fixes error handling in the function mmc_blk_remove by
+> checking the return value of the call to mmc_blk_part_switch
+> and if it has failed by returning a error code we now print
+> out on the console to the user that removed the mmc device
+> has failed before returning immediately.
+> v2
+> Change pr_crit to preferred dev_crit for when printing to console
+> in device functions
+> Remove unneeded return statement after dev_crit statement due to
+> removal functions always needing to complete successfully
 >=20
+> Signed-off-by: Nicholas Krause <xerofoify@gmail.com>
+> ---
+>  drivers/mmc/card/block.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >=20
-> On 07/21/2015 02:57 PM, Felipe Balbi wrote:
-> > On Tue, Jul 14, 2015 at 02:29:46PM -0500, Franklin S Cooper Jr wrote:
-> >> From: Roger Quadros <rogerq@ti.com>
-> >>
-> >> Update driver to support without regulators.
-> >>
-> >> Without this patch boards that do not enable regulator config options =
-will
-> >> fail to boot with a kernel panic.
-> >>
-> >> Signed-off-by: Roger Quadros <rogerq@ti.com>
-> >> Signed-off-by: Lokesh Vutla <lokeshvutla@ti.com>
-> >> Signed-off-by: Murali Karicheri <m-karicheri2@ti.com>
-> >> Signed-off-by: Franklin S Cooper Jr <fcooper@ti.com>
-> >> ---
-> >>  Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt |  2 ++
-> >>  drivers/mmc/host/omap_hsmmc.c                           | 14 ++++++++=
-++----
-> >>  2 files changed, 12 insertions(+), 4 deletions(-)
-> >>
-> >> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b=
-/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> >> index 76bf087..2408e87 100644
-> >> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> >> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> >> @@ -22,6 +22,8 @@ ti,dual-volt: boolean, supports dual voltage cards
-> >>  ti,non-removable: non-removable slot (like eMMC)
-> >>  ti,needs-special-reset: Requires a special softreset sequence
-> >>  ti,needs-special-hs-handling: HSMMC IP needs special setting for hand=
-ling High Speed
-> >> +voltage-ranges: Specify the voltage range supported if regulator fram=
-ework
-> >> +isn't enabled.
-> >>  dmas: List of DMA specifiers with the controller specific format
-> >>  as described in the generic DMA client binding. A tx and rx
-> >>  specifier is required.
-> >> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsm=
-mc.c
-> >> index b2b411d..16c870f 100644
-> >> --- a/drivers/mmc/host/omap_hsmmc.c
-> >> +++ b/drivers/mmc/host/omap_hsmmc.c
-> >> @@ -1551,10 +1551,13 @@ static void omap_hsmmc_set_ios(struct mmc_host=
- *mmc, struct mmc_ios *ios)
-> >>  	if (ios->power_mode !=3D host->power_mode) {
-> >>  		switch (ios->power_mode) {
-> >>  		case MMC_POWER_OFF:
-> >> -			mmc_pdata(host)->set_power(host->dev, 0, 0);
-> >> +			if (host->use_reg)
-> >> +				mmc_pdata(host)->set_power(host->dev, 0, 0);
-> > looks like this driver should just be use regulator_get_optional(), then
-> > ->set_power() would still work, no ?
-> Wouldn't there still be a dependency on the regulator framework to get
-> that to work?
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index c9c3d20..5b50ddf 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2505,10 +2505,10 @@ static void mmc_blk_remove(struct mmc_card *card)
+>  {
+>  > 	> struct mmc_blk_data *md =3D dev_get_drvdata(&card->dev);
+> =20
+> -> 	> mmc_blk_remove_parts(card, md);
 
-I didn't look at the code, but I'd expect us to have a sensible stub on
-!REGULATOR builds
+No.
 
+Ben.
+
+>  	pm_runtime_get_sync(&card->dev);
+>  > 	> mmc_claim_host(card->host);
+> -> 	> mmc_blk_part_switch(card, md);
+> +> 	> if (mmc_blk_part_switch(card, md))
+> +> 	> 	> dev_crit(&card->dev, "Unable to successfully remove due to faile=
+d mmc_blk_part_switch call\n");
+>  > 	> mmc_release_host(card->host);
+>  > 	> if (card->type !=3D MMC_TYPE_SD_COMBO)
+>  > 	> 	> pm_runtime_disable(&card->dev);
 --=20
-balbi
+Ben Hutchings
+No political challenge can be met by shopping. - George Monbiot
 
---c2gYorpyS4gG0T74
+
+--=-stpvt92EIH8po3/vrQfz
 Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+Content-Description: This is a digitally signed message part
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1
 
-iQIcBAEBAgAGBQJVrqgXAAoJEIaOsuA1yqREswgP/iuoDxTPlOsmI9z78TPEgFf9
-mPyXev2WUe10Gq9TTdX3Bwdm/CIj4s25dUjqdQsuQ1VSKixjt6th1lMlZ9oHyxj1
-2Z35jeBrHx6o35pCpUlUkcsAPwuQKUja1aLvcYkwDlH4+s7OsE3i+TiPHQJUgoGd
-s20dtH6WiSCTx/B7Y8gIO3CBLSPPXWPwLV/C2VkkbHB2+hJXkvjkb6+6V3LZcVVi
-T00RhZtvWd58dpi0bLBYOCrQGTOBShdIQFRu4km5wTagiwQgtdvClzuSiJH+5W5L
-ebEKPidgM80Gj7raYURKquPYuG1Q2Tbm5Z6UOvIWQlNhoXnw4XxKlpM09W5fV918
-gG+tFl6JYXY11YsKZlnPDRaYiunItSRWHef15yfH7gCgOZIpCKqWiR3wziyKFJeY
-0n0PgPLtidNfr8MvX0JDJ4/CS4D5Zfd4BO7jCeAMc9W0WeiHT/UK3VrfBSTRU8fF
-CtHUSGA3JksTcXfYRbdUAMMbo30Q9jZxVQP/kmC1SKwkAwQUArUg1AG6tvvza9+M
-8+BRS1K8/2PKRdOe3oMP2hcxdzRfmKm1bAOYeGI3RmDuiBpAcOt3zBV193dnSVfV
-uhsRLXYiGFr4BIb1qu+5zrvhx6/KdSqFBLCnXT4bOvYcW0UDsbiClXcfvkGek2zz
-WdD0zOwBqFTP7gUy/QdT
-=+o/0
+iQIVAwUAVa60BOe/yOyVhhEJAQqcJQ//Xz94niPcgG1bn3LuGm+NFkrxz5QAx5hR
+pJB+UClkgmvAWTuiK0cPiypbtolasmRs8uDpp9J9/s8Fj4PY+VTkazp0e1k3Mdae
+Qky8AYElgN7U55dtLBQWmvsH2xJktPBHf9SJz288OjpBsCElskhoPBIGE/erqFAj
+Zz1qxBT6QUU65kMXKPmUn5P/Oq5QaG8cSrAnGUdouvgkkXk8SRD2Aryr6Taah/jg
+mlx6UF7UWbyx0yfUAWEPqVtOoZZLUTJrkCBO5eiuN6bVPhHDJiUkA2Wr21pc61lj
+gcSV5zoC0BxoiohY2bQbYCc5MtiY75JQVL5wyPBRwhstWW80SRmFaq/Cuy+qWs6Y
+okwH7nd0OfMKAcWE7cn8LaUOUaW0KClPLPC1zuufkkR3+NAPhaqjbgsosYMNGPJk
+By//72uA4HMvPSabjo26gKaOmQrfBeb0JHAfY02ZpZM+MFt8PPfyLn3zXRziqF7s
+xBuV1N8mSc0FArm+Y6H9M9lH8IGaQcfjaw9Rg3CkaUsOxDHifJsyEPd9vAM1F0Um
+hcAvlHHaqEqrfMnLI84VOzReeS4n/jWSFQ/8XcXIXvYQXi/F55znjQwdAoTf/AoG
+0DHJxeaSNpM00Y6v2WqAaB32ZhpaipfuqzF4equyYjOrCAv6mFOfEn/0USwI3DM1
+L1CrN2LDAZw=
+=1hZ6
 -----END PGP SIGNATURE-----
 
---c2gYorpyS4gG0T74--
+--=-stpvt92EIH8po3/vrQfz--
