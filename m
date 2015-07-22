@@ -1,73 +1,104 @@
-From: Dong Aisheng <b29396@freescale.com>
-Subject: Re: [PATCH 0/6] mmc: sdhci-esdhci-imx: fix cd/wp regression
-Date: Wed, 22 Jul 2015 22:05:00 +0800
-Message-ID: <20150722140459.GB13623@shlinux1.ap.freescale.net>
-References: <1434564337-24720-1-git-send-email-aisheng.dong@freescale.com>
- <20150709075032.GD23464@tiger>
- <20150709092949.GB3917@shlinux1.ap.freescale.net>
- <20150709132736.GG23464@tiger>
- <20150713114310.GA9453@shlinux1.ap.freescale.net>
- <CAPDyKFruDiS=DV=AjiaGWvDxFN_Zj5Hp0LifROxCUpCySAeQpA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC PATCH v3] mmc: sleep notification
+Date: Wed, 22 Jul 2015 16:40:54 +0200
+Message-ID: <CAPDyKFqV4pQYUUtZYJjFP72KNeAQJMV9qMV1uN2sKCT0At3s4g@mail.gmail.com>
+References: <FDD07FEB422EF948A392FDC201AEEAE64FAAD701@SACMBXIP02.sdcorp.global.sandisk.com>
+	<CAPDyKFoPqwDC_w1QTe7zQtJfH_5m2Gp_5uewJKy=x_LeaFqYhA@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED53343C1F6EA@SACMBXIP01.sdcorp.global.sandisk.com>
+	<CAPDyKFoZuNoYB1KA4bt64+qoeEmjioW9qCnwkhYAnnSD4jMxag@mail.gmail.com>
+	<282CEDFCBC30114F83C499CB8F2ED53343C409C9@SACMBXIP01.sdcorp.global.sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1on0114.outbound.protection.outlook.com ([157.56.110.114]:55173
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S965446AbbGVOMu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 22 Jul 2015 10:12:50 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFruDiS=DV=AjiaGWvDxFN_Zj5Hp0LifROxCUpCySAeQpA@mail.gmail.com>
+Received: from mail-qk0-f170.google.com ([209.85.220.170]:36528 "EHLO
+	mail-qk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934306AbbGVOkz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jul 2015 10:40:55 -0400
+Received: by qkdv3 with SMTP id v3so154400818qkd.3
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Jul 2015 07:40:55 -0700 (PDT)
+In-Reply-To: <282CEDFCBC30114F83C499CB8F2ED53343C409C9@SACMBXIP01.sdcorp.global.sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Shawn Guo <shawnguo@kernel.org>, Dong Aisheng <aisheng.dong@freescale.com>, Chris Ball <chris@printf.net>, smoch@web.de, Steffen Trumtrar <s.trumtrar@pengutronix.de>, LW@karo-electronics.de, Marek =?utf-8?B?VmHFoXV0?= <marex@denx.de>, rabeeh@solid-run.com, gwenhael.goavec-merou@armadeus.com, Russell King <rmk+kernel@arm.linux.org.uk>, hs@denx.de, tharvey@gateworks.com, Sascha Hauer <s.hauer@pengutronix.de>, troy.kisky@boundarydevices.com, lisovy@gmail.com, robertcnelson@gmail.com, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, ipaton0@gmail.com, Fabio Estevam <fabio.estevam@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, Philipp Zabel <p.zabel@pengutronix.de>, Shawn Guo <shawn.guo@linaro.org>
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Mon, Jul 20, 2015 at 02:44:07PM +0200, Ulf Hansson wrote:
-> On 13 July 2015 at 13:43, Dong Aisheng <b29396@freescale.com> wrote:
-> > On Thu, Jul 09, 2015 at 09:27:36PM +0800, Shawn Guo wrote:
-> >> On Thu, Jul 09, 2015 at 05:29:50PM +0800, Dong Aisheng wrote:
-> >> > I agree with you.
-> >> > One difference is that i'd like to fix it ASAP without reverting 8d86e4f
-> >> > due to more patches depends on it is already there as i mentioned above..
-> >> > Revert it may need to revert a lot others.
-> >> >
-> >> > The pain is that v4.1 is left broken.
-> >>
-> >> Oh, crap!  I thought it's been there with only v4.2-rc1, and did not
-> >> know v4.1 is already broken.  In that case, reverting 8d86e4f isn't
-> >> the best option.  I suggest you rebase the dts series on top of
-> >> v4.2-rc1, and send it via mmc tree.
-> >>
-> >
-> > Yes, will go that way.
-> >
-> > Then you may need help take care of new dts going through your tree
-> > to make sure no broken code in again.
-> 
-> Dong, Shawn,
-> 
-> I am happy to help out, I assume you want this to go as fixes for 4.2rc[n].
-> 
-> Correct me if I am wrong, you want me to apply the DTS patches prior
-> the MMC patches. I tried applying the DTS patches on 4.2rc3 - it still
-> works nicely so no re-base is needed.
-> 
-> 
-> So, then I need an ack from Shawn for the DTS series...
-> 
+On 18 June 2015 at 16:57, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
+> Hi Ulf,
+>
+>> -----Original Message-----
+>> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+>> Sent: Monday, June 15, 2015 11:24 AM
+>> To: Alex Lemberg
+>> Cc: Avi Shchislowski; linux-mmc
+>> Subject: Re: [RFC PATCH v3] mmc: sleep notification
+>>
+>> On 8 June 2015 at 15:17, Alex Lemberg <Alex.Lemberg@sandisk.com>
+>> wrote:
+>> > Hi Ulf,
+>> >
+>> > [...]
+>> >
+>> >>
+>> >> One of my comments for v2, was that I think you should remove all
+>> >> code which was related to HPI to interrupt sleep notification from
+>> >> the runtime PM resume path. Instead I wanted you to add that
+>> >> functionality as separate patch based on top of this patch.
+>> >>
+>> >> You haven't done that in v3, why?
+>> >
+>> > The sleep_notify call was moved to suspend() per your recommendation.
+>> > As far as I understand, no new requests should be sent during
+>> > mmc_suspend() process, thus HPI support is not needed anymore.
+>> > Is this the correct assumption?
+>>
+>> Yes.
+>>
+>> I don't think you need mmc_card_set_sleep_notify() and the corresponding
+>> new MMC_STATE_SLEEP_NOTIFY , mmc_device_prg_state(), etc.
+>
+> mmc_card_set_sleep_notify(), MMC_STATE_SLEEP_NOTIFY and the corresponding - We are removing it from the current patch. Probably will add them as a separate patch in future.
 
-Hi Ulf,
+Great!
 
-I have merged the two seris into one (dts changes is before controller changes)
-and rebase based on your ulf/next branch.
-The updated patch series is just sent out for review.
+> mmc_device_prg_state() - is required for waiting for Sleep_Notification completion/timeout, although we would like to leave this function.
 
-Shawn,
-Please help review and ACK for Ulf to apply.
+Doesn't __mmc_switch() already deal with this? No, I don't think it's needed.
 
-Regards
-Dong Aisheng
+>
+>>
+>> Overall, I think this patch could be simplified yet another step.
+>>
+>> > The only case where HPI is used in this patch - is during sleep_notify
+>> timeout error.
+>>
+>> Why?
+>
+> In case of timeout error, we would like to handle it by sending HPI - to let device interrupt/stop the prg state.
 
-> Kind regards
-> Uffe
+Is that according to the spec? I think it would be better to try a
+reset sequence to recover, by using CMD0 and so forth, what do you
+think?
+
+>
+>>
+>> One final question, I noticed that you have removed the check for
+>> MMC_CAP2_FULL_PWR_CYCLE in the _mmc_suspend() function, why?
+>
+> As far as we understand, this MMC_CAP2_FULL_PWR_CYCLE was used to distinguish between PON (when the power can be cut)
+> and Sleep (when the power have to stay ON).
+> Now we have Sleep_Notification PON, which allows to cut the power also in case of Sleep.
+> Hope the interpretation above is correct.
+
+Unfortunate your interpretation is wrong.
+
+MMC_CAP2_FULL_PWR_CYCLE, indicates whether the mmc host can cut *both*
+VCC and VCCQ.
+
+For the suspend case, the default behaviour is to send CMD5 (sleep),
+as we don't trust hosts to set MMC_CAP2_FULL_PWR_CYCLE even if it
+potentially could.
+Keeping this policy is important, as we don't want to issue PON unless
+we know that we will be cutting both VCC and VCCQ.
+
+Kind regards
+Uffe
