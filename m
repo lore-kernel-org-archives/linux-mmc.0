@@ -1,49 +1,53 @@
-From: Bastien Nocera <hadess@hadess.net>
-Subject: Re: [RFC PATCH 0/4] mmc: sdhci: Support maximum DMA latency request via PM QoS
-Date: Wed, 22 Jul 2015 12:03:46 +0000 (UTC)
-Message-ID: <loom.20150722T135723-76@post.gmane.org>
-References: <1427204440-3533-1-git-send-email-adrian.hunter@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Update driver to support without regulators
+Date: Wed, 22 Jul 2015 14:07:52 +0200
+Message-ID: <CAPDyKFpVh3EDJLX--h3H4qa4EDy2nDJQeRZtPQ8+uU9K43b_Tg@mail.gmail.com>
+References: <1436902186-6542-1-git-send-email-fcooper@ti.com>
+	<CAPDyKFq8NVqkZQ_8oL_5JM0_wYK6-gTaXr9ExHLa767tmcpxxA@mail.gmail.com>
+	<55AEA008.6050808@ti.com>
+	<55AF822F.8060507@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from plane.gmane.org ([80.91.229.3]:37201 "EHLO plane.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S934035AbbGVMEF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 22 Jul 2015 08:04:05 -0400
-Received: from list by plane.gmane.org with local (Exim 4.69)
-	(envelope-from <glkm-linux-mmc@m.gmane.org>)
-	id 1ZHskk-0004uB-48
-	for linux-mmc@vger.kernel.org; Wed, 22 Jul 2015 14:04:02 +0200
-Received: from mon69-7-83-155-44-161.fbx.proxad.net ([83.155.44.161])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Jul 2015 14:04:02 +0200
-Received: from hadess by mon69-7-83-155-44-161.fbx.proxad.net with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Jul 2015 14:04:02 +0200
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <55AF822F.8060507@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Franklin S Cooper Jr." <fcooper@ti.com>
+Cc: linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kishon <kishon@ti.com>, Roger Quadros <rogerq@ti.com>, Lokesh Vutla <lokeshvutla@ti.com>, Murali Karicheri <m-karicheri2@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-Adrian Hunter <adrian.hunter <at> intel.com> writes:
-> Ad hoc testing with Lenovo Thinkpad 10 showed a stress
-> test could run for at least 24 hours with the patches,
-> compared to less than an hour without.
+[...]
 
-I've had the same sort of problems on 2 different BayTrail tablets (a Onda
-v975w and a WinBook TW100), usually hanging hard during package installation
-and was wondering whether you would resubmit your patches to be merged (I
-understand that the CPU detection was problematic), or whether I should ship
-those in our vendor kernel in the meanwhile.
+> Hi Ulf,
+>
+> Just to clarify do you have an issue with this patch or in general
+> you rather nothave !CONFIG_REGULATOR supported? If its the latter
+> then wouldit be better to remove the !CONFIG_REGULATOR portion from
+> this driver all together.
 
-I'll report shortly how well that patch series works after testing.
+I don't like this patch as is, as it seems like you are replacing the
+VMMC regulator that actually exist in HW by parsing a DT property.
 
-> These patches are on top of my driver strength patches
-> which are on top of my re-tuning patches.
+I think mmc_of_parse_voltage() shall *only* be used when the OCR mask
+(->ocr_avail) can't be fetched by using a regulator. Typically that's
+when the VMMC voltage levels are managed within the mmc controller
+itself.
 
-Those 2 patchsets got merged upstream now, correct?
+I don't have a strong opinion on how you solve that, but I guess you
+have two options.
 
-Cheers
+1.
+Make sure the driver can be build and used both for CONFIG_REGULATOR
+and !CONFIG_REGULATOR. What you need to take care of then, is to
+assign the ->ocr_avail mask to a default value in the case when it
+can't be fetched from a regulator. Most mmc drivers has some kind of
+fall-back mechanism like this.
 
+For those SoC where you need/can control the VMMC regulator, make sure
+those enables CONFIG_REGULATOR to get the proper behaviour by
+omap_hsmmc.
 
+2.
+Force omap_hsmmc to be build with CONFIG_REGULATOR.
+
+Kind regards
+Uffe
