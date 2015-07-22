@@ -1,68 +1,124 @@
-From: Vignesh R <vigneshr@ti.com>
-Subject: Re: [PATCH 3/3] mmc: host: omap_hsmmc: Add custom card detect irq
- handler
-Date: Wed, 22 Jul 2015 13:01:21 +0530
-Message-ID: <55AF46C9.9050308@ti.com>
-References: <1434451039-18195-1-git-send-email-vigneshr@ti.com>	<1434451039-18195-4-git-send-email-vigneshr@ti.com>	<CALtMJEAy8p23dkqPYZT9wTfyvvjiwi6Swj9Fzpau9Y4K9dym5g@mail.gmail.com>	<55880B24.9010906@ti.com> <CALtMJEBnqzJsGgBoLDjkO+6iJ=67Cw1FXjQm0vfmcm1i3yZ5oA@mail.gmail.com>
+From: "Franklin S Cooper Jr." <fcooper@ti.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Update driver to support without regulators
+Date: Wed, 22 Jul 2015 06:44:47 -0500
+Message-ID: <55AF822F.8060507@ti.com>
+References: <1436902186-6542-1-git-send-email-fcooper@ti.com> <CAPDyKFq8NVqkZQ_8oL_5JM0_wYK6-gTaXr9ExHLa767tmcpxxA@mail.gmail.com> <55AEA008.6050808@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:52165 "EHLO arroyo.ext.ti.com"
+Received: from arroyo.ext.ti.com ([192.94.94.40]:60448 "EHLO arroyo.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751953AbbGVHbc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 22 Jul 2015 03:31:32 -0400
-In-Reply-To: <CALtMJEBnqzJsGgBoLDjkO+6iJ=67Cw1FXjQm0vfmcm1i3yZ5oA@mail.gmail.com>
+	id S933788AbbGVLox (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 22 Jul 2015 07:44:53 -0400
+In-Reply-To: <55AEA008.6050808@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, NeilBrown <neilb@suse.de>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, linux-kernel@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kishon@ti.com, rogerq@ti.com, Lokesh Vutla <lokeshvutla@ti.com>, Murali Karicheri <m-karicheri2@ti.com>
 
-Hi Andreas,
 
-On 07/21/2015 01:46 PM, Andreas Fenkart wrote:
-> Hi Vignesh,
-> 
-> Generally I don't like this patch, it will make it harder, not easier,
-> to maintain the omap hsmmc driver. Also given that the bug occurs
-> rarely, people will be reluctant to clean it up later or accept
-> patches.
-> 
-> see also comments below
-> 
-[snip]
-> 2015-06-22 15:18 GMT+02:00 Vignesh R <vigneshr@ti.com>:
+
+On 07/21/2015 02:39 PM, Franklin S Cooper Jr. wrote:
+>
+> On 07/21/2015 06:40 AM, Ulf Hansson wrote:
+>> On 14 July 2015 at 21:29, Franklin S Cooper Jr <fcooper@ti.com> wrote:
+>>> From: Roger Quadros <rogerq@ti.com>
+>>>
+>>> Update driver to support without regulators.
+>>>
+>>> Without this patch boards that do not enable regulator config options will
+>>> fail to boot with a kernel panic.
+>> I guess that's because the rootfs is mounted on the card that doesn't
+>> get detected, right?
+> No at ramfs was used to validate this and was loaded via ethernet in U-boot.
+>>> Signed-off-by: Roger Quadros <rogerq@ti.com>
+>>> Signed-off-by: Lokesh Vutla <lokeshvutla@ti.com>
+>>> Signed-off-by: Murali Karicheri <m-karicheri2@ti.com>
+>>> Signed-off-by: Franklin S Cooper Jr <fcooper@ti.com>
+>>> ---
+>>>  Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt |  2 ++
+>>>  drivers/mmc/host/omap_hsmmc.c                           | 14 ++++++++++----
+>>>  2 files changed, 12 insertions(+), 4 deletions(-)
+>>>
+>>> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>>> index 76bf087..2408e87 100644
+>>> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>>> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>>> @@ -22,6 +22,8 @@ ti,dual-volt: boolean, supports dual voltage cards
+>>>  ti,non-removable: non-removable slot (like eMMC)
+>>>  ti,needs-special-reset: Requires a special softreset sequence
+>>>  ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
+>>> +voltage-ranges: Specify the voltage range supported if regulator framework
+>>> +isn't enabled.
+>>>  dmas: List of DMA specifiers with the controller specific format
+>>>  as described in the generic DMA client binding. A tx and rx
+>>>  specifier is required.
+>>> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+>>> index b2b411d..16c870f 100644
+>>> --- a/drivers/mmc/host/omap_hsmmc.c
+>>> +++ b/drivers/mmc/host/omap_hsmmc.c
+>>> @@ -1551,10 +1551,13 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>>         if (ios->power_mode != host->power_mode) {
+>>>                 switch (ios->power_mode) {
+>>>                 case MMC_POWER_OFF:
+>>> -                       mmc_pdata(host)->set_power(host->dev, 0, 0);
+>>> +                       if (host->use_reg)
+>>> +                               mmc_pdata(host)->set_power(host->dev, 0, 0);
+>>>                         break;
+>>>                 case MMC_POWER_UP:
+>>> -                       mmc_pdata(host)->set_power(host->dev, 1, ios->vdd);
+>>> +                       if (host->use_reg)
+>>> +                               mmc_pdata(host)->set_power(host->dev, 1,
+>>> +                                                          ios->vdd);
+>>>                         break;
+>>>                 case MMC_POWER_ON:
+>>>                         do_send_init_stream = 1;
+>>> @@ -2082,10 +2085,13 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>>>                 if (ret)
+>>>                         goto err_irq;
+>>>                 host->use_reg = 1;
+>>> +               mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
+>>> +       } else {
+>>> +               ret = mmc_of_parse_voltage(pdev->dev.of_node, &mmc->ocr_avail);
+>>> +               if (ret)
+>>> +                       goto err_irq;
+>>>         }
+>>>
+>>> -       mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
+>>> -
+>>>         omap_hsmmc_disable_irq(host);
+>>>
+>>>         /*
+>>> --
+>>> 1.9.1
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> No, I don't like this patch. If your board have regulators which can
+>> be used to find out the voltage levels, we shall use them. We shall
+>> not use DT to workaround this.
 >>
-> 
->> But calls to omap_hsmmc_card_init or omap_hsmmc_get_cd are in the same
->> mmc_rescan thread. Hence, moving the recovery code to init_card does not
->> help.
-> 
-> what about clearing any pending transfer in
-> - mmc_gpio_cd_irqt, or
-> - mmc_detect_change
-> 
-> e.g. trigger the later mentioned .card_event callback from those
-> functions, instead mmc_rescan? Then you can install your
-> omap_hsmmc_request_clear as the card_event callback. This makes your
-> custom isr handler redundant, actually your isr handler became
-> standard.
-> 
+>> So, perhaps the Kconfig section for omap_hsmmc should select
+>> CONFIG_REGULATOR (and friends)?
+> Looking at the code the "ifdefCONFIG_REGULATOR" and the usage of use_reg
+> (use regulator) shows that this driver is suppose to support boards that
+> don't have the regulator framework enabled.
+>
+> This patches insures that this driver can work without the regulator framework
+> which is currently broken.
+Hi Ulf,
 
-I looked  at the commit fa372a51cb5f93800f711473e5a36e0e0c9a8f00 which
-moved .card_event out of mmc_gpio_cd_irqt. It points to two threads
-where discussion to move .card_event to mmc_rescan happened[1][2]. The
-concern there was this callback was being called from "atomic context"
-but, I don't understand how threaded irq is "atomic context". (I am not
-sure, if this is because those drivers have irqs disabled till threaded
-irq is complete) But, I believe moving card_event callback back to
-mmc_gpio_cd_irqt may break some drivers.
-I will look into this further.
-Do you have any insight on this commit? Thanks!
+Just to clarify do you have an issue with this patch or in general
+you rather nothave !CONFIG_REGULATOR supported? If its the latter
+then wouldit be better to remove the !CONFIG_REGULATOR portion from
+this driver all together.
+>> Kind regards
+>> Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-omap" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-[1]https://lkml.org/lkml/2014/3/19/79
-[2]https://lkml.org/lkml/2013/8/19/539
-
--- 
-Regards
-Vignesh
