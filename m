@@ -1,68 +1,115 @@
-From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
-Subject: Re: [PATCH] sdhci-esdhc: Make 8BIT bus work.
-Date: Wed, 22 Jul 2015 12:32:29 +0000
-Message-ID: <1437568349.10831.99.camel@transmode.se>
-References: <1437409187-7039-1-git-send-email-joakim.tjernlund@transmode.se>
-	 <CAPDyKFpzMrzoY3xDHsMTwOUk0Xkp1d-cY_UW7U0EEfoYQakU0A@mail.gmail.com>
+From: Dong Aisheng <aisheng.dong@freescale.com>
+Subject: [PATCH V2 00/11] mmc: sdhci-esdhci-imx: fix cd/wp regression
+Date: Wed, 22 Jul 2015 20:52:59 +0800
+Message-ID: <1437569590-5228-1-git-send-email-aisheng.dong@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.transmode.se ([31.15.61.139]:57533 "EHLO smtp.transmode.se"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S964802AbbGVMcf convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jul 2015 08:32:35 -0400
-In-Reply-To: <CAPDyKFpzMrzoY3xDHsMTwOUk0Xkp1d-cY_UW7U0EEfoYQakU0A@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <302D92A090D73F4C959EA7F25BA66199@transmode.com>
+Received: from mail-by2on0145.outbound.protection.outlook.com ([207.46.100.145]:44960
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751589AbbGVOC7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 22 Jul 2015 10:02:59 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "haokexin@gmail.com" <haokexin@gmail.com>
+To: linux-mmc@vger.kernel.org
+Cc: fabio.estevam@freescale.com, marex@denx.de, ulf.hansson@linaro.org, s.trumtrar@pengutronix.de, smoch@web.de, linux-arm-kernel@lists.infradead.org, robertcnelson@gmail.com, s.hauer@pengutronix.de, chris@printf.net, rabeeh@solid-run.com, troy.kisky@boundarydevices.com, lisovy@gmail.com, hs@denx.de, gwenhael.goavec-merou@armadeus.com, p.zabel@pengutronix.de, rmk+kernel@arm.linux.org.uk, shawn.guo@linaro.org, b29396@freescale.com, tharvey@gateworks.com, LW@KARO-electronics.de, ipaton0@gmail.com
 
-On Wed, 2015-07-22 at 14:18 +0200, Ulf Hansson wrote:
-> On 20 July 2015 at 18:19, Joakim Tjernlund
-> <joakim.tjernlund@transmode.se> wrote:
-> > Support for 8BIT bus with was added some time ago to sdhci-esdhc but
-> > then missed to remove the 8BIT from the reserved bit mask which made
-> > 8BIT non functional.
-> > 
-> > Signed-off-by: Joakim Tjernlund <joakim.tjernlund@transmode.se>
-> 
-> Should this be queued as a fix then? If so, please resend and include
-> a fixes tag.
+This is a rebase version of former two patch series:
+http://lists.infradead.org/pipermail/linux-arm-kernel/2015-June/351167.html
+http://www.spinics.net/lists/arm-kernel/msg426156.html
 
-8BIT never worked for this controller, when support for 8BIT was added no one
-noticed that it didn't work for sdhci-esdhc. I suspect it was never tested.
+No other changes.
 
-If that qualifies as a fix I can add an:
+Commit 8d86e4f mmc: sdhci-esdhc-imx: Call mmc_of_parse()
+seriously break the sd card detect/write protect function
+of most IMX platforms since a lot of GPIO flags of cd-gpios/wp-gpios
+are wrongly set in devicetree.
 
-Fixes: 66b50a00992d ("mmc: esdhc: Add support for 8-bit bus width and non-removable card")
+It breaks the following things:
+1) cd-gpio function enable
+Most IMX boards GPIO card detect function becomes unwork and using card
+polling mode instead by mistake.
+Openning CONFIG_MMC_DEBUG will easily see that.
+It is caused by the default quirk SDHCI_QUIRK_BROKEN_CARD_DETECTION
+is not cleared for dt platform by commit 8d86e4f, then
+MMC_CAP_NEEDS_POLL is wrongly set.
 
-> 
-> Kind regards
-> Uffe
-> 
-> > ---
-> >  drivers/mmc/host/sdhci-esdhc.h | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-> > index 3497cfa..a870c42 100644
-> > --- a/drivers/mmc/host/sdhci-esdhc.h
-> > +++ b/drivers/mmc/host/sdhci-esdhc.h
-> > @@ -45,6 +45,6 @@
-> >  #define ESDHC_DMA_SYSCTL       0x40c
-> >  #define ESDHC_DMA_SNOOP                0x00000040
-> > 
-> > -#define ESDHC_HOST_CONTROL_RES 0x05
-> > +#define ESDHC_HOST_CONTROL_RES 0x01
-> > 
-> >  #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */
-> > --
-> > 2.3.6
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This is fixed by patch 6~7
+
+2) cd-gpio/wp-gpio polarity
+Before commit 8d86e4f, we do not use GPIO flags passed from
+devicetree. But after it, GPIO flags specfied in dt becomes valid
+and will affect the normal cd/wp function.
+
+This is fixed by patch 1~5
+
+3) max-frequency not work in sdhci
+mmc_of_parse will parse the max-frequency from devicetree,
+however, its value will be overwritten by common sdhci driver
+finnally,so it does not actually work.
+Patch 8 is to fix it.
+
+4) patch 9~11 clear unneeded parsing code after switch to mmc_of_parse().
+
+The series is based on ulf/next tree.
+
+I also CCed this patch series to all board maintainer related in this
+change, hope they can help test it.
+I only tested some freescale IMX boards.
+
+Dong Aisheng (11):
+  dts: imx51: fix sd card gpio polarity specified in device tree
+  dts: imx53: fix sd card gpio polarity specified in device tree
+  dts: imx6: fix sd card gpio polarity specified in device tree
+  dts: imx25: fix sd card gpio polarity specified in device tree
+  dts: imx7: fix sd card gpio polarity specified in device tree
+  mmc: sdhci-esdhc-imx: fix cd regression for dt platform
+  mmc: sdhci-esdhc-imx: move all non dt probe code into one function
+  mmc: sdhci: make max-frequency property in device tree work
+  mmc: sdhci-esdhc-imx: remove duplicated dts parsing
+  mmc: sdhci-esdhc-imx: clear f_max in boarddata
+  dts: mmc: fsl-imx-esdhc: remove fsl,cd-controller support
+
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   2 -
+ arch/arm/boot/dts/imx25-pdk.dts                    |   4 +-
+ arch/arm/boot/dts/imx51-apf51dev.dts               |   2 +-
+ arch/arm/boot/dts/imx53-ard.dts                    |   4 +-
+ arch/arm/boot/dts/imx53-m53evk.dts                 |   4 +-
+ arch/arm/boot/dts/imx53-qsb-common.dtsi            |   4 +-
+ arch/arm/boot/dts/imx53-smd.dts                    |   4 +-
+ arch/arm/boot/dts/imx53-tqma53.dtsi                |   4 +-
+ arch/arm/boot/dts/imx53-tx53.dtsi                  |   4 +-
+ arch/arm/boot/dts/imx53-voipac-bsb.dts             |   4 +-
+ arch/arm/boot/dts/imx6dl-riotboard.dts             |   8 +-
+ arch/arm/boot/dts/imx6q-arm2.dts                   |   5 +-
+ arch/arm/boot/dts/imx6q-gk802.dts                  |   3 +-
+ arch/arm/boot/dts/imx6q-tbs2910.dts                |   4 +-
+ arch/arm/boot/dts/imx6qdl-aristainetos.dtsi        |   4 +-
+ arch/arm/boot/dts/imx6qdl-aristainetos2.dtsi       |   4 +-
+ arch/arm/boot/dts/imx6qdl-cubox-i.dtsi             |   2 +-
+ arch/arm/boot/dts/imx6qdl-dfi-fs700-m60.dtsi       |   4 +-
+ arch/arm/boot/dts/imx6qdl-gw52xx.dtsi              |   2 +-
+ arch/arm/boot/dts/imx6qdl-gw53xx.dtsi              |   2 +-
+ arch/arm/boot/dts/imx6qdl-gw54xx.dtsi              |   2 +-
+ arch/arm/boot/dts/imx6qdl-hummingboard.dtsi        |   2 +-
+ arch/arm/boot/dts/imx6qdl-nitrogen6x.dtsi          |   4 +-
+ arch/arm/boot/dts/imx6qdl-phytec-pfla02.dtsi       |   8 +-
+ arch/arm/boot/dts/imx6qdl-rex.dtsi                 |   4 +-
+ arch/arm/boot/dts/imx6qdl-sabreauto.dtsi           |   4 +-
+ arch/arm/boot/dts/imx6qdl-sabrelite.dtsi           |   6 +-
+ arch/arm/boot/dts/imx6qdl-sabresd.dtsi             |   8 +-
+ arch/arm/boot/dts/imx6qdl-tx6.dtsi                 |   4 +-
+ arch/arm/boot/dts/imx6qdl-wandboard.dtsi           |   6 +-
+ arch/arm/boot/dts/imx6sl-evk.dts                   |  10 +-
+ arch/arm/boot/dts/imx6sx-sabreauto.dts             |   4 +-
+ arch/arm/boot/dts/imx6sx-sdb.dtsi                  |   4 +-
+ arch/arm/boot/dts/imx7d-sdb.dts                    |   4 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c                 | 210 ++++++++++-----------
+ drivers/mmc/host/sdhci.c                           |   9 +-
+ include/linux/platform_data/mmc-esdhc-imx.h        |   1 -
+ 37 files changed, 185 insertions(+), 179 deletions(-)
+
+-- 
+1.9.1
+
