@@ -1,8 +1,8 @@
 From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: [PATCH V2 02/11] dts: imx53: fix sd card gpio polarity specified in
- device tree
-Date: Wed, 22 Jul 2015 20:53:01 +0800
-Message-ID: <1437569590-5228-3-git-send-email-aisheng.dong@freescale.com>
+Subject: [PATCH V2 07/11] mmc: sdhci-esdhc-imx: move all non dt probe code
+ into one function
+Date: Wed, 22 Jul 2015 20:53:06 +0800
+Message-ID: <1437569590-5228-8-git-send-email-aisheng.dong@freescale.com>
 References: <1437569590-5228-1-git-send-email-aisheng.dong@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,133 +22,256 @@ To: linux-mmc@vger.kernel.org
 Cc: fabio.estevam@freescale.com, marex@denx.de, ulf.hansson@linaro.org, hs@denx.de, p.zabel@pengutronix.de, tharvey@gateworks.com, shawn.guo@linaro.org, s.hauer@pengutronix.de, ipaton0@gmail.com, chris@printf.net, rabeeh@solid-run.com, troy.kisky@boundarydevices.com, smoch@web.de, gwenhael.goavec-merou@armadeus.com, rmk+kernel@arm.linux.org.uk, lisovy@gmail.com, s.trumtrar@pengutronix.de, robertcnelson@gmail.com, b29396@freescale.com, linux-arm-kernel@lists.infradead.org, LW@KARO-electronics.de
 List-Id: linux-mmc@vger.kernel.org
 
-cd-gpios polarity should be changed to GPIO_ACTIVE_LOW and wp-gpios
-should be changed to GPIO_ACTIVE_HIGH.
-Otherwise, the SD may not work properly due to wrong polarity inversion
-specified in DT after switch to common parsing function mmc_of_parse().
+This is an incremental fix of commit
+e62bd351b("mmc: sdhci-esdhc-imx: Do not break platform data boards").
+
+After commit 8d86e4fcccf6 ("mmc: sdhci-esdhc-imx: Call mmc_of_parse()"),
+we do not need to run the check of boarddata->wp_type/cd_type/max_bus_width
+again for dt platform since those are already handled by mmc_of_parse().
+
+Current code only exclude the checking of wp_type for dt platform which
+does not make sense.
+
+This patch moves all non dt probe code into one function.
+Besides, since we only support SD3.0/eMMC HS200 for dt platform, the
+support_vsel checking and ultra high speed pinctrl state are also merged
+into sdhci_esdhc_imx_probe_dt.
+
+Then we have two separately probe function for dt and non dt type.
+This can make the driver probe more clearly.
 
 Signed-off-by: Dong Aisheng <aisheng.dong@freescale.com>
 ---
- arch/arm/boot/dts/imx53-ard.dts         | 4 ++--
- arch/arm/boot/dts/imx53-m53evk.dts      | 4 ++--
- arch/arm/boot/dts/imx53-qsb-common.dtsi | 4 ++--
- arch/arm/boot/dts/imx53-smd.dts         | 4 ++--
- arch/arm/boot/dts/imx53-tqma53.dtsi     | 4 ++--
- arch/arm/boot/dts/imx53-tx53.dtsi       | 4 ++--
- arch/arm/boot/dts/imx53-voipac-bsb.dts  | 4 ++--
- 7 files changed, 14 insertions(+), 14 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 179 +++++++++++++++++++------------------
+ 1 file changed, 94 insertions(+), 85 deletions(-)
 
-diff --git a/arch/arm/boot/dts/imx53-ard.dts b/arch/arm/boot/dts/imx53-ard.dts
-index e9337ad..3bc1883 100644
---- a/arch/arm/boot/dts/imx53-ard.dts
-+++ b/arch/arm/boot/dts/imx53-ard.dts
-@@ -103,8 +103,8 @@
- &esdhc1 {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&pinctrl_esdhc1>;
--	cd-gpios = <&gpio1 1 0>;
--	wp-gpios = <&gpio1 9 0>;
-+	cd-gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
-+	wp-gpios = <&gpio1 9 GPIO_ACTIVE_HIGH>;
- 	status = "okay";
- };
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 4815391..10f03ee 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -878,14 +878,12 @@ static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
+ static int
+ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ 			 struct sdhci_host *host,
+-			 struct esdhc_platform_data *boarddata)
++			 struct pltfm_imx_data *imx_data)
+ {
+ 	struct device_node *np = pdev->dev.of_node;
++	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+ 	int ret;
  
-diff --git a/arch/arm/boot/dts/imx53-m53evk.dts b/arch/arm/boot/dts/imx53-m53evk.dts
-index d0e0f57..53f4088 100644
---- a/arch/arm/boot/dts/imx53-m53evk.dts
-+++ b/arch/arm/boot/dts/imx53-m53evk.dts
-@@ -124,8 +124,8 @@
- &esdhc1 {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&pinctrl_esdhc1>;
--	cd-gpios = <&gpio1 1 0>;
--	wp-gpios = <&gpio1 9 0>;
-+	cd-gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
-+	wp-gpios = <&gpio1 9 GPIO_ACTIVE_HIGH>;
- 	status = "okay";
- };
+-	if (!np)
+-		return -ENODEV;
+-
+ 	if (of_get_property(np, "non-removable", NULL))
+ 		boarddata->cd_type = ESDHC_CD_PERMANENT;
  
-diff --git a/arch/arm/boot/dts/imx53-qsb-common.dtsi b/arch/arm/boot/dts/imx53-qsb-common.dtsi
-index ab4ba39..b0d5542 100644
---- a/arch/arm/boot/dts/imx53-qsb-common.dtsi
-+++ b/arch/arm/boot/dts/imx53-qsb-common.dtsi
-@@ -147,8 +147,8 @@
- &esdhc3 {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&pinctrl_esdhc3>;
--	cd-gpios = <&gpio3 11 0>;
--	wp-gpios = <&gpio3 12 0>;
-+	cd-gpios = <&gpio3 11 GPIO_ACTIVE_LOW>;
-+	wp-gpios = <&gpio3 12 GPIO_ACTIVE_HIGH>;
- 	bus-width = <8>;
- 	status = "okay";
- };
-diff --git a/arch/arm/boot/dts/imx53-smd.dts b/arch/arm/boot/dts/imx53-smd.dts
-index 1d32557..fc89ce1 100644
---- a/arch/arm/boot/dts/imx53-smd.dts
-+++ b/arch/arm/boot/dts/imx53-smd.dts
-@@ -41,8 +41,8 @@
- &esdhc1 {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&pinctrl_esdhc1>;
--	cd-gpios = <&gpio3 13 0>;
--	wp-gpios = <&gpio4 11 0>;
-+	cd-gpios = <&gpio3 13 GPIO_ACTIVE_LOW>;
-+	wp-gpios = <&gpio4 11 GPIO_ACTIVE_HIGH>;
- 	status = "okay";
- };
+@@ -917,6 +915,26 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
  
-diff --git a/arch/arm/boot/dts/imx53-tqma53.dtsi b/arch/arm/boot/dts/imx53-tqma53.dtsi
-index 4f1f0e2..e03373a 100644
---- a/arch/arm/boot/dts/imx53-tqma53.dtsi
-+++ b/arch/arm/boot/dts/imx53-tqma53.dtsi
-@@ -41,8 +41,8 @@
- 	pinctrl-0 = <&pinctrl_esdhc2>,
- 		    <&pinctrl_esdhc2_cdwp>;
- 	vmmc-supply = <&reg_3p3v>;
--	wp-gpios = <&gpio1 2 0>;
--	cd-gpios = <&gpio1 4 0>;
-+	wp-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
-+	cd-gpios = <&gpio1 4 GPIO_ACTIVE_LOW>;
- 	status = "disabled";
- };
+ 	mmc_of_parse_voltage(np, &host->ocr_mask);
  
-diff --git a/arch/arm/boot/dts/imx53-tx53.dtsi b/arch/arm/boot/dts/imx53-tx53.dtsi
-index 704bd72..d3e50b2 100644
---- a/arch/arm/boot/dts/imx53-tx53.dtsi
-+++ b/arch/arm/boot/dts/imx53-tx53.dtsi
-@@ -183,7 +183,7 @@
- };
++	/* sdr50 and sdr104 needs work on 1.8v signal voltage */
++	if ((boarddata->support_vsel) && esdhc_is_usdhc(imx_data) &&
++	    !IS_ERR(imx_data->pins_default)) {
++		imx_data->pins_100mhz = pinctrl_lookup_state(imx_data->pinctrl,
++						ESDHC_PINCTRL_STATE_100MHZ);
++		imx_data->pins_200mhz = pinctrl_lookup_state(imx_data->pinctrl,
++						ESDHC_PINCTRL_STATE_200MHZ);
++		if (IS_ERR(imx_data->pins_100mhz) ||
++				IS_ERR(imx_data->pins_200mhz)) {
++			dev_warn(mmc_dev(host->mmc),
++				"could not get ultra high speed state, work on normal mode\n");
++			/*
++			 * fall back to not support uhs by specify no 1.8v quirk
++			 */
++			host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
++		}
++	} else {
++		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
++	}
++
+ 	/* call to generic mmc_of_parse to support additional capabilities */
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret)
+@@ -931,22 +949,85 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ static inline int
+ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ 			 struct sdhci_host *host,
+-			 struct esdhc_platform_data *boarddata)
++			 struct pltfm_imx_data *imx_data)
+ {
+ 	return -ENODEV;
+ }
+ #endif
  
- &esdhc1 {
--	cd-gpios = <&gpio3 24 GPIO_ACTIVE_HIGH>;
-+	cd-gpios = <&gpio3 24 GPIO_ACTIVE_LOW>;
- 	fsl,wp-controller;
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&pinctrl_esdhc1>;
-@@ -191,7 +191,7 @@
- };
++static int sdhci_esdhc_imx_probe_nondt(struct platform_device *pdev,
++			 struct sdhci_host *host,
++			 struct pltfm_imx_data *imx_data)
++{
++	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
++	int err;
++
++	if (!host->mmc->parent->platform_data) {
++		dev_err(mmc_dev(host->mmc), "no board data!\n");
++		return -EINVAL;
++	}
++
++	imx_data->boarddata = *((struct esdhc_platform_data *)
++				host->mmc->parent->platform_data);
++	/* write_protect */
++	if (boarddata->wp_type == ESDHC_WP_GPIO) {
++		err = mmc_gpio_request_ro(host->mmc, boarddata->wp_gpio);
++		if (err) {
++			dev_err(mmc_dev(host->mmc),
++				"failed to request write-protect gpio!\n");
++			return err;
++		}
++		host->mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
++	}
++
++	/* card_detect */
++	switch (boarddata->cd_type) {
++	case ESDHC_CD_GPIO:
++		err = mmc_gpio_request_cd(host->mmc, boarddata->cd_gpio, 0);
++		if (err) {
++			dev_err(mmc_dev(host->mmc),
++				"failed to request card-detect gpio!\n");
++			return err;
++		}
++		/* fall through */
++
++	case ESDHC_CD_CONTROLLER:
++		/* we have a working card_detect back */
++		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
++		break;
++
++	case ESDHC_CD_PERMANENT:
++		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
++		break;
++
++	case ESDHC_CD_NONE:
++		break;
++	}
++
++	switch (boarddata->max_bus_width) {
++	case 8:
++		host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA;
++		break;
++	case 4:
++		host->mmc->caps |= MMC_CAP_4_BIT_DATA;
++		break;
++	case 1:
++	default:
++		host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
++		break;
++	}
++
++	return 0;
++}
++
+ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ {
+ 	const struct of_device_id *of_id =
+ 			of_match_device(imx_esdhc_dt_ids, &pdev->dev);
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_host *host;
+-	struct esdhc_platform_data *boarddata;
+ 	int err;
+ 	struct pltfm_imx_data *imx_data;
+-	bool dt = true;
  
- &esdhc2 {
--	cd-gpios = <&gpio3 25 GPIO_ACTIVE_HIGH>;
-+	cd-gpios = <&gpio3 25 GPIO_ACTIVE_LOW>;
- 	fsl,wp-controller;
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&pinctrl_esdhc2>;
-diff --git a/arch/arm/boot/dts/imx53-voipac-bsb.dts b/arch/arm/boot/dts/imx53-voipac-bsb.dts
-index c17d3ad..fc51b87 100644
---- a/arch/arm/boot/dts/imx53-voipac-bsb.dts
-+++ b/arch/arm/boot/dts/imx53-voipac-bsb.dts
-@@ -119,8 +119,8 @@
- &esdhc2 {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&pinctrl_esdhc2>;
--	cd-gpios = <&gpio3 25 0>;
--	wp-gpios = <&gpio2 19 0>;
-+	cd-gpios = <&gpio3 25 GPIO_ACTIVE_LOW>;
-+	wp-gpios = <&gpio2 19 GPIO_ACTIVE_HIGH>;
- 	vmmc-supply = <&reg_3p3v>;
- 	status = "okay";
- };
+ 	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata, 0);
+ 	if (IS_ERR(host))
+@@ -1038,84 +1119,12 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_ERR004536)
+ 		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+ 
+-	boarddata = &imx_data->boarddata;
+-	if (sdhci_esdhc_imx_probe_dt(pdev, host, boarddata) < 0) {
+-		if (!host->mmc->parent->platform_data) {
+-			dev_err(mmc_dev(host->mmc), "no board data!\n");
+-			err = -EINVAL;
+-			goto disable_clk;
+-		}
+-		imx_data->boarddata = *((struct esdhc_platform_data *)
+-					host->mmc->parent->platform_data);
+-		dt = false;
+-	}
+-	/* write_protect */
+-	if (boarddata->wp_type == ESDHC_WP_GPIO && !dt) {
+-		err = mmc_gpio_request_ro(host->mmc, boarddata->wp_gpio);
+-		if (err) {
+-			dev_err(mmc_dev(host->mmc),
+-				"failed to request write-protect gpio!\n");
+-			goto disable_clk;
+-		}
+-		host->mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+-	}
+-
+-	/* card_detect */
+-	switch (boarddata->cd_type) {
+-	case ESDHC_CD_GPIO:
+-		if (dt)
+-			break;
+-		err = mmc_gpio_request_cd(host->mmc, boarddata->cd_gpio, 0);
+-		if (err) {
+-			dev_err(mmc_dev(host->mmc),
+-				"failed to request card-detect gpio!\n");
+-			goto disable_clk;
+-		}
+-		/* fall through */
+-
+-	case ESDHC_CD_CONTROLLER:
+-		/* we have a working card_detect back */
+-		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+-		break;
+-
+-	case ESDHC_CD_PERMANENT:
+-		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
+-		break;
+-
+-	case ESDHC_CD_NONE:
+-		break;
+-	}
+-
+-	switch (boarddata->max_bus_width) {
+-	case 8:
+-		host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA;
+-		break;
+-	case 4:
+-		host->mmc->caps |= MMC_CAP_4_BIT_DATA;
+-		break;
+-	case 1:
+-	default:
+-		host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
+-		break;
+-	}
+-
+-	/* sdr50 and sdr104 needs work on 1.8v signal voltage */
+-	if ((boarddata->support_vsel) && esdhc_is_usdhc(imx_data) &&
+-	    !IS_ERR(imx_data->pins_default)) {
+-		imx_data->pins_100mhz = pinctrl_lookup_state(imx_data->pinctrl,
+-						ESDHC_PINCTRL_STATE_100MHZ);
+-		imx_data->pins_200mhz = pinctrl_lookup_state(imx_data->pinctrl,
+-						ESDHC_PINCTRL_STATE_200MHZ);
+-		if (IS_ERR(imx_data->pins_100mhz) ||
+-				IS_ERR(imx_data->pins_200mhz)) {
+-			dev_warn(mmc_dev(host->mmc),
+-				"could not get ultra high speed state, work on normal mode\n");
+-			/* fall back to not support uhs by specify no 1.8v quirk */
+-			host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+-		}
+-	} else {
+-		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+-	}
++	if (of_id)
++		err = sdhci_esdhc_imx_probe_dt(pdev, host, imx_data);
++	else
++		err = sdhci_esdhc_imx_probe_nondt(pdev, host, imx_data);
++	if (err)
++		goto disable_clk;
+ 
+ 	err = sdhci_add_host(host);
+ 	if (err)
 -- 
 1.9.1
