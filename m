@@ -1,115 +1,45 @@
 From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: [PATCH V2 00/11] mmc: sdhci-esdhci-imx: fix cd/wp regression
-Date: Wed, 22 Jul 2015 20:52:59 +0800
-Message-ID: <1437569590-5228-1-git-send-email-aisheng.dong@freescale.com>
+Subject: [PATCH V2 01/11] dts: imx51: fix sd card gpio polarity specified in device tree
+Date: Wed, 22 Jul 2015 20:53:00 +0800
+Message-ID: <1437569590-5228-2-git-send-email-aisheng.dong@freescale.com>
+References: <1437569590-5228-1-git-send-email-aisheng.dong@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0145.outbound.protection.outlook.com ([207.46.100.145]:44960
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+Received: from mail-bn1bon0115.outbound.protection.outlook.com ([157.56.111.115]:61856
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751589AbbGVOC7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 22 Jul 2015 10:02:59 -0400
+	id S1751589AbbGVODG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 22 Jul 2015 10:03:06 -0400
+In-Reply-To: <1437569590-5228-1-git-send-email-aisheng.dong@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: fabio.estevam@freescale.com, marex@denx.de, ulf.hansson@linaro.org, s.trumtrar@pengutronix.de, smoch@web.de, linux-arm-kernel@lists.infradead.org, robertcnelson@gmail.com, s.hauer@pengutronix.de, chris@printf.net, rabeeh@solid-run.com, troy.kisky@boundarydevices.com, lisovy@gmail.com, hs@denx.de, gwenhael.goavec-merou@armadeus.com, p.zabel@pengutronix.de, rmk+kernel@arm.linux.org.uk, shawn.guo@linaro.org, b29396@freescale.com, tharvey@gateworks.com, LW@KARO-electronics.de, ipaton0@gmail.com
 
-This is a rebase version of former two patch series:
-http://lists.infradead.org/pipermail/linux-arm-kernel/2015-June/351167.html
-http://www.spinics.net/lists/arm-kernel/msg426156.html
+cd-gpios polarity should be changed to GPIO_ACTIVE_LOW and wp-gpios
+should be changed to GPIO_ACTIVE_HIGH.
+Otherwise, the SD may not work properly due to wrong polarity inversion
+specified in DT after switch to common parsing function mmc_of_parse().
 
-No other changes.
+Signed-off-by: Dong Aisheng <aisheng.dong@freescale.com>
+---
+ arch/arm/boot/dts/imx51-apf51dev.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Commit 8d86e4f mmc: sdhci-esdhc-imx: Call mmc_of_parse()
-seriously break the sd card detect/write protect function
-of most IMX platforms since a lot of GPIO flags of cd-gpios/wp-gpios
-are wrongly set in devicetree.
-
-It breaks the following things:
-1) cd-gpio function enable
-Most IMX boards GPIO card detect function becomes unwork and using card
-polling mode instead by mistake.
-Openning CONFIG_MMC_DEBUG will easily see that.
-It is caused by the default quirk SDHCI_QUIRK_BROKEN_CARD_DETECTION
-is not cleared for dt platform by commit 8d86e4f, then
-MMC_CAP_NEEDS_POLL is wrongly set.
-
-This is fixed by patch 6~7
-
-2) cd-gpio/wp-gpio polarity
-Before commit 8d86e4f, we do not use GPIO flags passed from
-devicetree. But after it, GPIO flags specfied in dt becomes valid
-and will affect the normal cd/wp function.
-
-This is fixed by patch 1~5
-
-3) max-frequency not work in sdhci
-mmc_of_parse will parse the max-frequency from devicetree,
-however, its value will be overwritten by common sdhci driver
-finnally,so it does not actually work.
-Patch 8 is to fix it.
-
-4) patch 9~11 clear unneeded parsing code after switch to mmc_of_parse().
-
-The series is based on ulf/next tree.
-
-I also CCed this patch series to all board maintainer related in this
-change, hope they can help test it.
-I only tested some freescale IMX boards.
-
-Dong Aisheng (11):
-  dts: imx51: fix sd card gpio polarity specified in device tree
-  dts: imx53: fix sd card gpio polarity specified in device tree
-  dts: imx6: fix sd card gpio polarity specified in device tree
-  dts: imx25: fix sd card gpio polarity specified in device tree
-  dts: imx7: fix sd card gpio polarity specified in device tree
-  mmc: sdhci-esdhc-imx: fix cd regression for dt platform
-  mmc: sdhci-esdhc-imx: move all non dt probe code into one function
-  mmc: sdhci: make max-frequency property in device tree work
-  mmc: sdhci-esdhc-imx: remove duplicated dts parsing
-  mmc: sdhci-esdhc-imx: clear f_max in boarddata
-  dts: mmc: fsl-imx-esdhc: remove fsl,cd-controller support
-
- .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   2 -
- arch/arm/boot/dts/imx25-pdk.dts                    |   4 +-
- arch/arm/boot/dts/imx51-apf51dev.dts               |   2 +-
- arch/arm/boot/dts/imx53-ard.dts                    |   4 +-
- arch/arm/boot/dts/imx53-m53evk.dts                 |   4 +-
- arch/arm/boot/dts/imx53-qsb-common.dtsi            |   4 +-
- arch/arm/boot/dts/imx53-smd.dts                    |   4 +-
- arch/arm/boot/dts/imx53-tqma53.dtsi                |   4 +-
- arch/arm/boot/dts/imx53-tx53.dtsi                  |   4 +-
- arch/arm/boot/dts/imx53-voipac-bsb.dts             |   4 +-
- arch/arm/boot/dts/imx6dl-riotboard.dts             |   8 +-
- arch/arm/boot/dts/imx6q-arm2.dts                   |   5 +-
- arch/arm/boot/dts/imx6q-gk802.dts                  |   3 +-
- arch/arm/boot/dts/imx6q-tbs2910.dts                |   4 +-
- arch/arm/boot/dts/imx6qdl-aristainetos.dtsi        |   4 +-
- arch/arm/boot/dts/imx6qdl-aristainetos2.dtsi       |   4 +-
- arch/arm/boot/dts/imx6qdl-cubox-i.dtsi             |   2 +-
- arch/arm/boot/dts/imx6qdl-dfi-fs700-m60.dtsi       |   4 +-
- arch/arm/boot/dts/imx6qdl-gw52xx.dtsi              |   2 +-
- arch/arm/boot/dts/imx6qdl-gw53xx.dtsi              |   2 +-
- arch/arm/boot/dts/imx6qdl-gw54xx.dtsi              |   2 +-
- arch/arm/boot/dts/imx6qdl-hummingboard.dtsi        |   2 +-
- arch/arm/boot/dts/imx6qdl-nitrogen6x.dtsi          |   4 +-
- arch/arm/boot/dts/imx6qdl-phytec-pfla02.dtsi       |   8 +-
- arch/arm/boot/dts/imx6qdl-rex.dtsi                 |   4 +-
- arch/arm/boot/dts/imx6qdl-sabreauto.dtsi           |   4 +-
- arch/arm/boot/dts/imx6qdl-sabrelite.dtsi           |   6 +-
- arch/arm/boot/dts/imx6qdl-sabresd.dtsi             |   8 +-
- arch/arm/boot/dts/imx6qdl-tx6.dtsi                 |   4 +-
- arch/arm/boot/dts/imx6qdl-wandboard.dtsi           |   6 +-
- arch/arm/boot/dts/imx6sl-evk.dts                   |  10 +-
- arch/arm/boot/dts/imx6sx-sabreauto.dts             |   4 +-
- arch/arm/boot/dts/imx6sx-sdb.dtsi                  |   4 +-
- arch/arm/boot/dts/imx7d-sdb.dts                    |   4 +-
- drivers/mmc/host/sdhci-esdhc-imx.c                 | 210 ++++++++++-----------
- drivers/mmc/host/sdhci.c                           |   9 +-
- include/linux/platform_data/mmc-esdhc-imx.h        |   1 -
- 37 files changed, 185 insertions(+), 179 deletions(-)
-
+diff --git a/arch/arm/boot/dts/imx51-apf51dev.dts b/arch/arm/boot/dts/imx51-apf51dev.dts
+index 93d3ea1..0f3fe29 100644
+--- a/arch/arm/boot/dts/imx51-apf51dev.dts
++++ b/arch/arm/boot/dts/imx51-apf51dev.dts
+@@ -98,7 +98,7 @@
+ &esdhc1 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_esdhc1>;
+-	cd-gpios = <&gpio2 29 GPIO_ACTIVE_HIGH>;
++	cd-gpios = <&gpio2 29 GPIO_ACTIVE_LOW>;
+ 	bus-width = <4>;
+ 	status = "okay";
+ };
 -- 
 1.9.1
 
