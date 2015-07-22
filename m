@@ -1,79 +1,79 @@
-From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: [PATCH V2 08/11] mmc: sdhci: make max-frequency property in device
- tree work
-Date: Wed, 22 Jul 2015 20:53:07 +0800
-Message-ID: <1437569590-5228-9-git-send-email-aisheng.dong@freescale.com>
-References: <1437569590-5228-1-git-send-email-aisheng.dong@freescale.com>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: Re: [PATCH 0/6] mmc: sdhci-esdhci-imx: fix cd/wp regression
+Date: Wed, 22 Jul 2015 21:59:42 +0800
+Message-ID: <20150722135939.GA13623@shlinux1.ap.freescale.net>
+References: <1434564337-24720-1-git-send-email-aisheng.dong@freescale.com>
+ <20150709075032.GD23464@tiger>
+ <20150709092949.GB3917@shlinux1.ap.freescale.net>
+ <20150709132736.GG23464@tiger>
+ <20150713114310.GA9453@shlinux1.ap.freescale.net>
+ <55A49D35.7010002@web.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1437569590-5228-1-git-send-email-aisheng.dong@freescale.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-mmc@vger.kernel.org
-Cc: fabio.estevam@freescale.com, marex@denx.de, ulf.hansson@linaro.org, hs@denx.de, p.zabel@pengutronix.de, tharvey@gateworks.com, shawn.guo@linaro.org, s.hauer@pengutronix.de, ipaton0@gmail.com, chris@printf.net, rabeeh@solid-run.com, troy.kisky@boundarydevices.com, smoch@web.de, gwenhael.goavec-merou@armadeus.com, rmk+kernel@arm.linux.org.uk, lisovy@gmail.com, s.trumtrar@pengutronix.de, robertcnelson@gmail.com, b29396@freescale.com, linux-arm-kernel@lists.infradead.org, LW@KARO-electronics.de
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1bbn0101.outbound.protection.outlook.com ([157.56.111.101]:40168
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S965518AbbGVOHj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 22 Jul 2015 10:07:39 -0400
+Content-Disposition: inline
+In-Reply-To: <55A49D35.7010002@web.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Soeren Moch <smoch@web.de>
+Cc: Shawn Guo <shawnguo@kernel.org>, Dong Aisheng <aisheng.dong@freescale.com>, ulf.hansson@linaro.org, chris@printf.net, s.trumtrar@pengutronix.de, LW@KARO-electronics.de, marex@denx.de, rabeeh@solid-run.com, gwenhael.goavec-merou@armadeus.com, rmk+kernel@arm.linux.org.uk, hs@denx.de, tharvey@gateworks.com, s.hauer@pengutronix.de, troy.kisky@boundarydevices.com, lisovy@gmail.com, robertcnelson@gmail.com, linux-arm-kernel@lists.infradead.org, ipaton0@gmail.com, fabio.estevam@freescale.com, linux-mmc@vger.kernel.org, p.zabel@pengutronix.de, shawn.guo@linaro.org
 
-Device tree provides option to specify the max freqency with property
-"max-frequency" in dts and common parse function mmc_of_parse() will
-parse it and use this value to set host->f_max to tell the MMC core
-the maxinum frequency the host works.
+On Tue, Jul 14, 2015 at 07:25:09AM +0200, Soeren Moch wrote:
+> 
+> 
+> On 13.07.2015 13:43, Dong Aisheng wrote:
+> > On Thu, Jul 09, 2015 at 09:27:36PM +0800, Shawn Guo wrote:
+> >> On Thu, Jul 09, 2015 at 05:29:50PM +0800, Dong Aisheng wrote:
+> >>> I agree with you.
+> >>> One difference is that i'd like to fix it ASAP without reverting 8d86e4f
+> >>> due to more patches depends on it is already there as i mentioned above..
+> >>> Revert it may need to revert a lot others.
+> >>>
+> >>> The pain is that v4.1 is left broken.
+> >>
+> >> Oh, crap!  I thought it's been there with only v4.2-rc1, and did not
+> >> know v4.1 is already broken.  In that case, reverting 8d86e4f isn't
+> >> the best option.  I suggest you rebase the dts series on top of
+> >> v4.2-rc1, and send it via mmc tree.
+> >>
+> > 
+> > Yes, will go that way.
+> > 
+> > Then you may need help take care of new dts going through your tree
+> > to make sure no broken code in again.
+> 
+> Dong,
+> 
+> I use a microSD card (mmc0) with the root filesystem on a tbs2910 board.
+> I cannot see any difference between linux-4.0 and linux-4.1 (vanilla
+> kernel with corresponding dtb), there is absolutely no problem with card
+> detect.
+> 
+> Can you please explain what exactly is broken in linux-4.1?
+> 
 
-However, current sdhci driver will finally overwrite this value with
-host->max_clk regardless of the max-frequency property.
+The CD function is broken.
+If you enable CONFIG_MMC_DEBUG, you will see the MMC core keep polling the
+card because MMC_CAP_NEEDS_POLL is wrongly set.
+You can refer to cover-letter for more detailed explaination.
 
-This patch makes sure not overwrite the max-frequency set from device
-tree and do basic sanity check.
+If you're using a non-removable card(having non-removable property in dts),
+you may not have this issue.
 
-Signed-off-by: Dong Aisheng <aisheng.dong@freescale.com>
----
- drivers/mmc/host/sdhci.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
+Regards
+Dong Aisheng
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 947033d..c83d110 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2874,6 +2874,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 	u32 max_current_caps;
- 	unsigned int ocr_avail;
- 	unsigned int override_timeout_clk;
-+	u32 max_clk;
- 	int ret;
- 
- 	WARN_ON(host == NULL);
-@@ -3058,18 +3059,22 @@ int sdhci_add_host(struct sdhci_host *host)
- 	 * Set host parameters.
- 	 */
- 	mmc->ops = &sdhci_ops;
--	mmc->f_max = host->max_clk;
-+	max_clk = host->max_clk;
-+
- 	if (host->ops->get_min_clock)
- 		mmc->f_min = host->ops->get_min_clock(host);
- 	else if (host->version >= SDHCI_SPEC_300) {
- 		if (host->clk_mul) {
- 			mmc->f_min = (host->max_clk * host->clk_mul) / 1024;
--			mmc->f_max = host->max_clk * host->clk_mul;
-+			max_clk = host->max_clk * host->clk_mul;
- 		} else
- 			mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_300;
- 	} else
- 		mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_200;
- 
-+	if (!mmc->f_max || (mmc->f_max && (mmc->f_max > max_clk)))
-+		mmc->f_max = max_clk;
-+
- 	if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
- 		host->timeout_clk = (caps[0] & SDHCI_TIMEOUT_CLK_MASK) >>
- 					SDHCI_TIMEOUT_CLK_SHIFT;
--- 
-1.9.1
+> Thanks,
+> Soeren
+> 
+> > Thanks
+> > 
+> > Regards
+> > Dong Aisheng
+> > 
+> >> Shawn
