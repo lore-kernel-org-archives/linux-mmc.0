@@ -1,18 +1,20 @@
-From: houjingj <houjingj@marvell.com>
+From: Jingju Hou <houjingj@marvell.com>
 Subject: [PATCH] mmc: sdhci-pxav3: fix platform_data is not initialized
-Date: Thu, 23 Jul 2015 12:24:58 +0800
-Message-ID: <1437625498-9364-1-git-send-email-houjingj@marvell.com>
+Date: Thu, 23 Jul 2015 12:42:04 +0800
+Message-ID: <1437626524-9714-1-git-send-email-houjingj@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:23910 "EHLO
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:52814 "EHLO
 	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750779AbbGWE2R (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jul 2015 00:28:17 -0400
+	by vger.kernel.org with ESMTP id S1750702AbbGWEp0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jul 2015 00:45:26 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, houjingj <houjingj@marvell.com>
+Cc: linux-mmc@vger.kernel.org, Jingju Hou <houjingj@marvell.com>
+
+From: Jingju Hou<houjingj@marvell.com>
 
 pdev->dev.platform_data is not initialized if match is true in function
 sdhci_pxav3_probe. Just local variable pdata is assigned the return value
@@ -32,7 +34,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev) {
      ...
 }
 
-Signed-off-by: houjingj <houjingj@marvell.com>
+Signed-off-by: Jingju Hou<houjingj@marvell.com>
 ---
  drivers/mmc/host/sdhci-pxav3.c |    1 +
  1 file changed, 1 insertion(+)
