@@ -1,56 +1,28 @@
-From: Jingju Hou <houjingj@marvell.com>
-Subject: [PATCH] mmc: sdhci-pxav3: fix platform_data is not initialized
-Date: Thu, 23 Jul 2015 12:42:04 +0800
-Message-ID: <1437626524-9714-1-git-send-email-houjingj@marvell.com>
+From: Shawn Guo <shawnguo@kernel.org>
+Subject: Re: [PATCH V2 00/11] mmc: sdhci-esdhci-imx: fix cd/wp regression
+Date: Thu, 23 Jul 2015 12:45:48 +0800
+Message-ID: <20150723044548.GG12927@tiger>
+References: <1437569590-5228-1-git-send-email-aisheng.dong@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:52814 "EHLO
-	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750702AbbGWEp0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jul 2015 00:45:26 -0400
+Received: from mail.kernel.org ([198.145.29.136]:37823 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750789AbbGWEqH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 23 Jul 2015 00:46:07 -0400
+Content-Disposition: inline
+In-Reply-To: <1437569590-5228-1-git-send-email-aisheng.dong@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, Jingju Hou <houjingj@marvell.com>
+To: Dong Aisheng <aisheng.dong@freescale.com>
+Cc: linux-mmc@vger.kernel.org, fabio.estevam@freescale.com, marex@denx.de, ulf.hansson@linaro.org, hs@denx.de, p.zabel@pengutronix.de, tharvey@gateworks.com, shawn.guo@linaro.org, s.hauer@pengutronix.de, ipaton0@gmail.com, chris@printf.net, rabeeh@solid-run.com, troy.kisky@boundarydevices.com, smoch@web.de, gwenhael.goavec-merou@armadeus.com, rmk+kernel@arm.linux.org.uk, lisovy@gmail.com, s.trumtrar@pengutronix.de, robertcnelson@gmail.com, b29396@freescale.com, linux-arm-kernel@lists.infradead.org, LW@KARO-electronics.de
 
-From: Jingju Hou<houjingj@marvell.com>
+On Wed, Jul 22, 2015 at 08:52:59PM +0800, Dong Aisheng wrote:
+> Dong Aisheng (11):
+>   dts: imx51: fix sd card gpio polarity specified in device tree
+>   dts: imx53: fix sd card gpio polarity specified in device tree
+>   dts: imx6: fix sd card gpio polarity specified in device tree
+>   dts: imx25: fix sd card gpio polarity specified in device tree
+>   dts: imx7: fix sd card gpio polarity specified in device tree
 
-pdev->dev.platform_data is not initialized if match is true in function
-sdhci_pxav3_probe. Just local variable pdata is assigned the return value
-from function pxav3_get_mmc_pdata().
-
-static int sdhci_pxav3_probe(struct platform_device *pdev) {
-
-    struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
-    ...
-    if (match) {
-		ret = mmc_of_parse(host->mmc);
-		if (ret)
-			goto err_of_parse;
-		sdhci_get_of_property(pdev);
-		pdata = pxav3_get_mmc_pdata(dev);
-     }
-     ...
-}
-
-Signed-off-by: Jingju Hou<houjingj@marvell.com>
----
- drivers/mmc/host/sdhci-pxav3.c |    1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 9cd5fc6..946d37f 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -411,6 +411,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 			goto err_of_parse;
- 		sdhci_get_of_property(pdev);
- 		pdata = pxav3_get_mmc_pdata(dev);
-+		pdev->dev.platform_data = pdata;
- 	} else if (pdata) {
- 		/* on-chip device */
- 		if (pdata->flags & PXA_FLAG_CARD_PERMANENT)
--- 
-1.7.9.5
-
+Acked-by: Shawn Guo <shawnguo@kernel.org>
