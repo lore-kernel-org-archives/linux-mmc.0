@@ -1,60 +1,54 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCHv2 ] sdhci-esdhc: Make 8BIT bus work.
-Date: Wed, 22 Jul 2015 16:50:31 +0200
-Message-ID: <CAPDyKFr3ibjhCN8EQgLJu-vi9_8OXJ3YJtrKwzq7PPKNgAy=uQ@mail.gmail.com>
-References: <1437576266-21120-1-git-send-email-joakim.tjernlund@transmode.se>
+From: houjingj <houjingj@marvell.com>
+Subject: [PATCH] mmc: sdhci-pxav3: fix platform_data is not initialized
+Date: Thu, 23 Jul 2015 12:24:58 +0800
+Message-ID: <1437625498-9364-1-git-send-email-houjingj@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f50.google.com ([209.85.192.50]:35786 "EHLO
-	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933694AbbGVOuc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jul 2015 10:50:32 -0400
-Received: by qgii95 with SMTP id i95so72644698qgi.2
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Jul 2015 07:50:31 -0700 (PDT)
-In-Reply-To: <1437576266-21120-1-git-send-email-joakim.tjernlund@transmode.se>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:23910 "EHLO
+	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750779AbbGWE2R (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jul 2015 00:28:17 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Joakim Tjernlund <joakim.tjernlund@transmode.se>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, houjingj <houjingj@marvell.com>
 
-On 22 July 2015 at 16:44, Joakim Tjernlund
-<joakim.tjernlund@transmode.se> wrote:
-> Support for 8BIT bus with was added some time ago to sdhci-esdhc but
-> then missed to remove the 8BIT from the reserved bit mask which made
-> 8BIT non functional.
->
-> Signed-off-by: Joakim Tjernlund <joakim.tjernlund@transmode.se>
-> Fixes: 66b50a00992d ("mmc: esdhc: Add support for 8-bit bus width and non-removable card")
+pdev->dev.platform_data is not initialized if match is true in function
+sdhci_pxav3_probe. Just local variable pdata is assigned the return value
+from function pxav3_get_mmc_pdata().
 
-Thanks, applied for fixes!
+static int sdhci_pxav3_probe(struct platform_device *pdev) {
 
-Kind regards
-Uffe
+    struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
+    ...
+    if (match) {
+		ret = mmc_of_parse(host->mmc);
+		if (ret)
+			goto err_of_parse;
+		sdhci_get_of_property(pdev);
+		pdata = pxav3_get_mmc_pdata(dev);
+     }
+     ...
+}
 
-> ---
->
->  - v2: Added Fixes: tag
->
->  drivers/mmc/host/sdhci-esdhc.h | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
-> index 3497cfa..a870c42 100644
-> --- a/drivers/mmc/host/sdhci-esdhc.h
-> +++ b/drivers/mmc/host/sdhci-esdhc.h
-> @@ -45,6 +45,6 @@
->  #define ESDHC_DMA_SYSCTL       0x40c
->  #define ESDHC_DMA_SNOOP                0x00000040
->
-> -#define ESDHC_HOST_CONTROL_RES 0x05
-> +#define ESDHC_HOST_CONTROL_RES 0x01
->
->  #endif /* _DRIVERS_MMC_SDHCI_ESDHC_H */
-> --
-> 2.3.6
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Signed-off-by: houjingj <houjingj@marvell.com>
+---
+ drivers/mmc/host/sdhci-pxav3.c |    1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 9cd5fc6..946d37f 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -411,6 +411,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 			goto err_of_parse;
+ 		sdhci_get_of_property(pdev);
+ 		pdata = pxav3_get_mmc_pdata(dev);
++		pdev->dev.platform_data = pdata;
+ 	} else if (pdata) {
+ 		/* on-chip device */
+ 		if (pdata->flags & PXA_FLAG_CARD_PERMANENT)
+-- 
+1.7.9.5
+
