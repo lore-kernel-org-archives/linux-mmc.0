@@ -1,44 +1,32 @@
 From: Scott Wood <scottwood@freescale.com>
-Subject: Re: powerpc/corenet: enable eSDHC
-Date: Fri, 24 Jul 2015 10:09:44 -0500
-Message-ID: <1437750584.2993.227.camel@freescale.com>
-References: <1430893748-38821-1-git-send-email-yangbo.lu@freescale.com>
- <20150530000331.GA9143@home.buserror.net>
- <BY1PR0301MB119286F6B8EBD6EED07C8B15F2BF0@BY1PR0301MB1192.namprd03.prod.outlook.com>
- <1433795433.2477.62.camel@freescale.com>
- <BY1PR0301MB1192803896118A14B8A2ABF3F2990@BY1PR0301MB1192.namprd03.prod.outlook.com>
- <1437078653.2993.121.camel@freescale.com>
- <BY1PR0301MB119285C61D7CDC037DD240DAF2850@BY1PR0301MB1192.namprd03.prod.outlook.com>
+Subject: Re: [PATCH 2/3] powerpc/85xx: add 'cpu-rev' property for cpus node
+Date: Fri, 24 Jul 2015 21:24:36 -0500
+Message-ID: <1437791076.2993.265.camel@freescale.com>
+References: <1437471923-34172-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <BY1PR0301MB119285C61D7CDC037DD240DAF2850@BY1PR0301MB1192.namprd03.prod.outlook.com>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Lu Yangbo-B47093 <yangbo.lu@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1bn0109.outbound.protection.outlook.com ([157.56.110.109]:13324
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753030AbbGYCYq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 24 Jul 2015 22:24:46 -0400
+In-Reply-To: <1437471923-34172-1-git-send-email-yangbo.lu@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Yangbo Lu <yangbo.lu@freescale.com>
+Cc: linuxppc-dev@lists.ozlabs.org, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
 
-T24gTW9uLCAyMDE1LTA3LTIwIGF0IDAxOjQzIC0wNTAwLCBMdSBZYW5nYm8tQjQ3MDkzIHdyb3Rl
-Ogo+ID4gT0ssIHRoYW5rcy4gIEFzc3VtaW5nIG5vIHNpbWlsYXIgaXNzdWVzIHdoZW4gdGVzdGlu
-ZywgSSdsbCBhcHBseSB0aGlzCj4gPiBwYXRjaCB0aGUgbmV4dCB0aW1lIEkgZG8gYSBiYXRjaCBv
-ZiBwYXRjaCBhcHBsaWNhdGlvbi4KPiA+IAo+ID4gQW55IHRob3VnaHRzIHJlZ2FyZGluZyBiZXR0
-ZXIgZXJyb3IgaGFuZGxpbmc/Cj4gPiAKPiA+IC1TY290dAo+IAo+IERvIHlvdSBtZWFuIFNEIHRl
-c3Q/CgpJIGp1c3QgbWVhbiB0aGF0IEkgd2lsbCB2ZXJpZnkgdGhhdCBlbmFibGluZyB0aGUgb3B0
-aW9uIGRvZXNuJ3QgbWFrZSB0aGluZ3MgCndvcnNlLgoKPiBBY3R1YWxseSBTRCBwYXRjaGVzIG5l
-ZWRpbmcgdG8gc2VudCB0byB1cHN0cmVhbSBhcmUgdGVzdGVkIG9uIExpIFlhbmcncyAKPiBMaW51
-eCB0cmVlLgoKSSB0aG91Z2h0IHlvdSBzYWlkIHRoZSBwYXRjaCB3YXMgYWxyZWFkeSBtZXJnZWQu
-Cgo+IEFuZCB0aGUgSklSQSB0aWNrZXQgaXMgUU9SSVFMVS0xOS4KCkRvbid0IHJlZmVyZW5jZSBp
-bnRlcm5hbCB0aWNrZXRzIG9uIHVwc3RyZWFtIGxpc3RzLgoKLVNjb3R0CgpfX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eHBwYy1kZXYgbWFpbGluZyBs
-aXN0CkxpbnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnCmh0dHBzOi8vbGlzdHMub3psYWJzLm9y
-Zy9saXN0aW5mby9saW51eHBwYy1kZXY=
+On Tue, 2015-07-21 at 17:45 +0800, Yangbo Lu wrote:
+> Add 'cpu-rev' property for cpus node to support getting cpu revision
+> from dts, since it's not good to get cpu revision using powerpc specific
+> function(like SVR_REV()) in common drivers.
+
+No.  Don't modify the device tree within Linux without a really good reason 
+(e.g. platform code to fix up a broken device tree).
+
+Why not just read SVR from guts, which works on both PPC and ARM?
+
+-Scott
+
