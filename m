@@ -1,54 +1,63 @@
-From: Lars-Peter Clausen <lars@metafoo.de>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Get quirks from device tree
-Date: Mon, 27 Jul 2015 17:19:27 +0200
-Message-ID: <55B64BFF.8030909@metafoo.de>
-References: <1437984249-18332-1-git-send-email-shawn.lin@rock-chips.com>
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: [PATCH 3/3] mmc: sdhci-of-esdhc: add workaround for T4240
+ incorrect HOSTVER value
+Date: Mon, 27 Jul 2015 10:57:18 -0500
+Message-ID: <1438012638.2993.289.camel@freescale.com>
+References: <1437471937-34218-1-git-send-email-yangbo.lu@freescale.com>
+	 <CAPDyKFpf6Ayw28dmbHhLJ8HSOSie60sUjaAnK7qqONHsRN4BDA@mail.gmail.com>
+	 <1437791242.2993.268.camel@freescale.com>
+	 <CAPDyKFp8ZStYVaFm8tjPL190dqV6vCE+oT706M=6wVCckWesLw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1437984249-18332-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: =?windows-1252?Q?S=F6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, Michal Simek <michal.simek@xilinx.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1on0119.outbound.protection.outlook.com ([157.56.110.119]:47328
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750917AbbG0UjO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 27 Jul 2015 16:39:14 -0400
+In-Reply-To: <CAPDyKFp8ZStYVaFm8tjPL190dqV6vCE+oT706M=6wVCckWesLw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Yangbo Lu <yangbo.lu@freescale.com>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 07/27/2015 10:04 AM, Shawn Lin wrote:
-> This patch adds the interface to get quirks from dts, and
-> there is no need to assign different quirks by condition statement
-> of arasan IP version.
->
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
->
->   drivers/mmc/host/sdhci-of-arasan.c | 7 +++++++
->   1 file changed, 7 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index ef5a7d2..db07788 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -132,6 +132,7 @@ static SIMPLE_DEV_PM_OPS(sdhci_arasan_dev_pm_ops, sdhci_arasan_suspend,
->   static int sdhci_arasan_probe(struct platform_device *pdev)
->   {
->   	int ret;
-> +	u32 quirktab[2];
->   	struct clk *clk_xin;
->   	struct sdhci_host *host;
->   	struct sdhci_pltfm_host *pltfm_host;
-> @@ -172,6 +173,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->   		goto clk_disable_all;
->   	}
->
-> +	if (of_property_read_u32_array(pdev->dev.of_node,
-> +				       "arasan,quirks", &quirktab[0], 2)) {
-> +		host->quirks |= quirktab[0];
-> +		host->quirks2 |= quirktab[1];
-> +	}
+On Mon, 2015-07-27 at 09:58 +0200, Ulf Hansson wrote:
+> On 25 July 2015 at 04:27, Scott Wood <scottwood@freescale.com> wrote:
+> > On Tue, 2015-07-21 at 15:02 +0200, Ulf Hansson wrote:
+> > > On 21 July 2015 at 11:45, Yangbo Lu <yangbo.lu@freescale.com> wrote:
+> > > > For T4240-R1.0-R2.0, the HOSTVER register has incorrcet vender
+> > > > version value and sdhc spec version value. This will break down
+> > > > the ADMA data transfer. So add workaround to get right value
+> > > > VVN=0x13, SVN = 0x1.
+> > > 
+> > > So T4240-R1.0-R2.0 is the version of the controller, right?
+> > > 
+> > > If I understand correct you are checking what CPU/SoC you are running
+> > > on, to figure out which controller version you are using, as that
+> > > can't be fetched (trusted) from the registers of the esdhc controller
+> > > itself!?
+> > > 
+> > > Instead, you could deal with this directly in the DTS files. I assume
+> > > you have some DTS file for each SoC/board variant, right?
+> > 
+> > No, we do not have a separate DTS file for each revision of an SoC -- and 
+> > if
+> > we did, we'd constantly have people using the wrong one.
+> > 
+> > > In principle, in your DTS file specific for the board/SoC that holds
+> > > the T4240-R1.0-R2.0 version of the controller, should add a specific
+> > > esdhc DT property to indicate this errata.
+> > 
+> > No, because (in addition to the above issue about chip revisions) the 
+> > device
+> > tree is stable ABI and errata are often discovered after device trees are
+> > deployed.
+> 
+> Fair enough. Then what is your suggestion for the solution here?
 
-The quirks are part of the Linux internal API, making them part of the 
-public ABI is not necessarily the best idea. It means they become fixed, you 
-can't remove any quirk types, can't change any quirk type, nor can add new 
-quirk types.
+As I said in my comment on patch 2/3, read SVR from the device-config/guts 
+MMIO block, which works on both PPC and ARM.
 
-- Lars
+-Scott
+
