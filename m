@@ -1,63 +1,65 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [PATCH 3/3] mmc: sdhci-of-esdhc: add workaround for T4240
- incorrect HOSTVER value
-Date: Mon, 27 Jul 2015 10:57:18 -0500
-Message-ID: <1438012638.2993.289.camel@freescale.com>
-References: <1437471937-34218-1-git-send-email-yangbo.lu@freescale.com>
-	 <CAPDyKFpf6Ayw28dmbHhLJ8HSOSie60sUjaAnK7qqONHsRN4BDA@mail.gmail.com>
-	 <1437791242.2993.268.camel@freescale.com>
-	 <CAPDyKFp8ZStYVaFm8tjPL190dqV6vCE+oT706M=6wVCckWesLw@mail.gmail.com>
+From: Scott Branden <sbranden@broadcom.com>
+Subject: Re: [RFC PATCH] mmc: Kconfig: Add dependency on GPIOLIB for Arasan
+ driver
+Date: Mon, 27 Jul 2015 14:55:04 -0700
+Message-ID: <55B6A8B8.3040404@broadcom.com>
+References: <920802cde8579bdfad47baba85d85212735ed90e.1437745991.git.michal.simek@xilinx.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="windows-1252"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1on0119.outbound.protection.outlook.com ([157.56.110.119]:47328
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750917AbbG0UjO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 27 Jul 2015 16:39:14 -0400
-In-Reply-To: <CAPDyKFp8ZStYVaFm8tjPL190dqV6vCE+oT706M=6wVCckWesLw@mail.gmail.com>
+Received: from mail-gw2-out.broadcom.com ([216.31.210.63]:58681 "EHLO
+	mail-gw2-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753934AbbG0Vz1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jul 2015 17:55:27 -0400
+In-Reply-To: <920802cde8579bdfad47baba85d85212735ed90e.1437745991.git.michal.simek@xilinx.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Yangbo Lu <yangbo.lu@freescale.com>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Michal Simek <michal.simek@xilinx.com>, linux-kernel@vger.kernel.org, monstr@monstr.eu
+Cc: Weijun Yang <Weijun.Yang@csr.com>, Andrew Bresticker <abrestic@chromium.org>, Jean Delvare <jdelvare@suse.de>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-mmc@vger.kernel.org, Alim Akhtar <alim.akhtar@samsung.com>, addy ke <addy.ke@rock-chips.com>, Stephen Boyd <sboyd@codeaurora.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Georgi Djakov <gdjakov@mm-sol.com>, Kevin Hao <haokexin@gmail.com>, Vincent Yang <vincent.yang.fujitsu@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-On Mon, 2015-07-27 at 09:58 +0200, Ulf Hansson wrote:
-> On 25 July 2015 at 04:27, Scott Wood <scottwood@freescale.com> wrote:
-> > On Tue, 2015-07-21 at 15:02 +0200, Ulf Hansson wrote:
-> > > On 21 July 2015 at 11:45, Yangbo Lu <yangbo.lu@freescale.com> wrote:
-> > > > For T4240-R1.0-R2.0, the HOSTVER register has incorrcet vender
-> > > > version value and sdhc spec version value. This will break down
-> > > > the ADMA data transfer. So add workaround to get right value
-> > > > VVN=0x13, SVN = 0x1.
-> > > 
-> > > So T4240-R1.0-R2.0 is the version of the controller, right?
-> > > 
-> > > If I understand correct you are checking what CPU/SoC you are running
-> > > on, to figure out which controller version you are using, as that
-> > > can't be fetched (trusted) from the registers of the esdhc controller
-> > > itself!?
-> > > 
-> > > Instead, you could deal with this directly in the DTS files. I assume
-> > > you have some DTS file for each SoC/board variant, right?
-> > 
-> > No, we do not have a separate DTS file for each revision of an SoC -- and 
-> > if
-> > we did, we'd constantly have people using the wrong one.
-> > 
-> > > In principle, in your DTS file specific for the board/SoC that holds
-> > > the T4240-R1.0-R2.0 version of the controller, should add a specific
-> > > esdhc DT property to indicate this errata.
-> > 
-> > No, because (in addition to the above issue about chip revisions) the 
-> > device
-> > tree is stable ABI and errata are often discovered after device trees are
-> > deployed.
-> 
-> Fair enough. Then what is your suggestion for the solution here?
+Hi Michal,
 
-As I said in my comment on patch 2/3, read SVR from the device-config/guts 
-MMIO block, which works on both PPC and ARM.
+comment in line
 
--Scott
+On 15-07-24 06:53 AM, Michal Simek wrote:
+> The patch "mmc: sdhci-of-arasan: Call OF parsing for MMC"
+> (sha1: 16b23787fc709fe60c5d2bd05927b1a3da33d4e9) introduce new
+> dependency on GPIOLIB which calls mmc_of_parse() ->
+> mmc_gpiod_request_cd() (slot-gpio.c) which calls devm_gpiod_get_index()
+> which returns -ENOSYS.
+>
+> Error log:
+> sdhci-arasan ff160000.sdhci: parsing dt failed (4294967258)
+> sdhci-arasan: probe of ff160000.sdhci failed with error -38
+>
+> Signed-off-by: Michal Simek <michal.simek@xilinx.com>
+> ---
+>
+> This problem is probably in all others drivers.
+> This is one way how this can be solved.
+> Maybe better way is to block return value for cd and wp.
+
+It appears there is gpio code in sdhci.c as well.  This uses slot-gpio.
+
+Perhaps a depends on needs to be added to MMC_SDHCI instead?
+
+>
+> ---
+>   drivers/mmc/host/Kconfig | 1 +
+>   1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index fd9a58e216a5..4b5854759cfc 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -120,6 +120,7 @@ config MMC_SDHCI_PLTFM
+>   config MMC_SDHCI_OF_ARASAN
+>   	tristate "SDHCI OF support for the Arasan SDHCI controllers"
+>   	depends on MMC_SDHCI_PLTFM
+> +	depends on GPIOLIB
+>   	depends on OF
+>   	help
+>   	  This selects the Arasan Secure Digital Host Controller Interface
+>
 
