@@ -1,152 +1,50 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 08/17] mmc: host: omap_hsmmc: add separate functions for enable/disable supply
-Date: Wed, 29 Jul 2015 16:39:38 +0530
-Message-ID: <1438168187-1614-9-git-send-email-kishon@ti.com>
-References: <1438168187-1614-1-git-send-email-kishon@ti.com>
+From: Muni Sekhar <munisekharrms@gmail.com>
+Subject: Virtex-5 FPGA PCIE single-function device
+Date: Wed, 29 Jul 2015 17:31:59 +0530
+Message-ID: <CAHhAz+gJ3FKgLQLEjro8P+Dn+FPHykLur4fmEkAwFdrLPNoQng@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1438168187-1614-1-git-send-email-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: tony@atomide.com, ulf.hansson@linaro.org, afenkart@gmail.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: nsekhar@ti.com, kishon@ti.com
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f171.google.com ([209.85.223.171]:35543 "EHLO
+	mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751368AbbG2MCA convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jul 2015 08:02:00 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-pci@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
 
-No functional change. Cleanup omap_hsmmc_set_power by adding separate
-functions for enable/disable supply and invoke it from
-omap_hsmmc_set_power.
+[ Please keep me in CC as I'm not subscribed to the list]
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |  101 +++++++++++++++++++++++++++--------------
- 1 file changed, 66 insertions(+), 35 deletions(-)
+Hello,
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index d308552..a0f8c1d 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -247,6 +247,65 @@ static int omap_hsmmc_get_cover_state(struct device *dev)
- 
- #ifdef CONFIG_REGULATOR
- 
-+static int omap_hsmmc_enable_supply(struct mmc_host *mmc, int vdd)
-+{
-+	int ret;
-+
-+	if (mmc->supply.vmmc) {
-+		ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	/* Enable interface voltage rail, if needed */
-+	if (mmc->supply.vqmmc) {
-+		ret = regulator_enable(mmc->supply.vqmmc);
-+		if (ret) {
-+			dev_err(mmc_dev(mmc), "vmmc_aux reg enable failed\n");
-+			goto err_vqmmc;
-+		}
-+	}
-+
-+	return 0;
-+
-+err_vqmmc:
-+	if (mmc->supply.vmmc)
-+		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-+
-+	return ret;
-+}
-+
-+static int omap_hsmmc_disable_supply(struct mmc_host *mmc)
-+{
-+	int ret;
-+	int status;
-+
-+	if (mmc->supply.vqmmc) {
-+		ret = regulator_disable(mmc->supply.vqmmc);
-+		if (ret) {
-+			dev_err(mmc_dev(mmc), "vmmc_aux reg disable failed\n");
-+			return ret;
-+		}
-+	}
-+
-+	if (mmc->supply.vmmc) {
-+		ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-+		if (ret)
-+			goto err_set_ocr;
-+	}
-+
-+	return 0;
-+
-+err_set_ocr:
-+	if (mmc->supply.vqmmc) {
-+		status = regulator_enable(mmc->supply.vqmmc);
-+		if (status)
-+			dev_err(mmc_dev(mmc), "vmmc_aux re-enable failed\n");
-+	}
-+
-+	return ret;
-+}
-+
- static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
- {
- 	struct omap_hsmmc_host *host =
-@@ -289,36 +348,13 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
- 	 * chips/cards need an interface voltage rail too.
- 	 */
- 	if (power_on) {
--		if (mmc->supply.vmmc) {
--			ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
--			if (ret)
--				return ret;
--		}
--
--		/* Enable interface voltage rail, if needed */
--		if (mmc->supply.vqmmc) {
--			ret = regulator_enable(mmc->supply.vqmmc);
--			if (ret) {
--				dev_err(dev, "vmmc_aux reg enable failed\n");
--				goto err_set_vqmmc;
--			}
--		}
-+		ret = omap_hsmmc_enable_supply(mmc, vdd);
-+		if (ret)
-+			return ret;
- 	} else {
--		/* Shut down the rail */
--		if (mmc->supply.vqmmc) {
--			ret = regulator_disable(mmc->supply.vqmmc);
--			if (ret) {
--				dev_err(dev, "vmmc_aux reg disable failed\n");
--				return ret;
--			}
--		}
--
--		if (mmc->supply.vmmc) {
--			/* Then proceed to shut down the local regulator */
--			ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
--			if (ret)
--				return ret;
--		}
-+		ret = omap_hsmmc_disable_supply(mmc);
-+		if (ret)
-+			return ret;
- 	}
- 
- 	if (host->pbias) {
-@@ -348,12 +384,7 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
- 	return 0;
- 
- err_set_voltage:
--	if (mmc->supply.vqmmc)
--		regulator_disable(mmc->supply.vqmmc);
--
--err_set_vqmmc:
--	if (mmc->supply.vmmc)
--		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-+	omap_hsmmc_disable_supply(mmc);
- 
- 	return ret;
- }
--- 
-1.7.9.5
+We are using the =E2=80=9CVirtex-5 FPGA Integrated Endpoint Block for P=
+CI
+Express=E2=80=9D in Linux platform. It supports only a single-function(=
+Header
+Type, Bit 7 is zero), but actually it is having different functions in
+different Bar=E2=80=99s.
+
+It has UART hardware module implemented in the first Base Address
+Register and MMC host controller in other Base Address Register.
+
+We are planning to develop our own pcie based uart driver for UART
+hardware and planning to use the MMC kernel stack for MMC host
+controller.
+
+By default MMC kernel stack gets attached to this device. In the pcie
+based uart driver, tried configuring the uart module after getting the
+pci_dev structure with pci_get_device(not used the
+pci_register_driver). After that I could able to communicate with the
+UART registers even though MMC stack is attached to the device.
+
+Now I am puzzled and stuck with how to proceed further on UART
+Interrupt Service Routine for this kind of device. Can I use
+request_irq() for uart isr, do you have any suggestion on this?
+
+Any hint or help would be greatly appreciated.
+
+
+Regards,
+Sekhar
