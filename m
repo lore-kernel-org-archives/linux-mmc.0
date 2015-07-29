@@ -1,57 +1,45 @@
-From: Haibo Chen <haibo.chen@freescale.com>
-Subject: [PATCH v3 3/6] ARM: dts: imx7d-sdb: add eMMC5.0 support
-Date: Wed, 29 Jul 2015 17:03:54 +0800
-Message-ID: <1438160637-28061-4-git-send-email-haibo.chen@freescale.com>
+From: Dong Aisheng <b29396@freescale.com>
+Subject: Re: [PATCH v3 0/6] mmc: imx: a few fixes and new feature
+Date: Wed, 29 Jul 2015 17:10:28 +0800
+Message-ID: <20150729091027.GC16916@shlinux1.ap.freescale.net>
 References: <1438160637-28061-1-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <1438160637-28061-1-git-send-email-haibo.chen@freescale.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawnguo@kernel.org, kernel@pengutronix.de, linux@arm.linux.org.uk, ulf.hansson@linaro.org, aisheng.dong@freescale.com
-Cc: fabio.estevam@freescale.com, devicetree@vger.kernel.org, haibo.chen@freescale.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, johan.derycke@barco.com, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: Haibo Chen <haibo.chen@freescale.com>
+Cc: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawnguo@kernel.org, kernel@pengutronix.de, linux@arm.linux.org.uk, ulf.hansson@linaro.org, aisheng.dong@freescale.com, johan.derycke@barco.com, fabio.estevam@freescale.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-imx7d-sdb board has a eMMC5.0 on usdhc3. This eMMC support HS400.
-This patch add usdhc3 support for HS400
+On Wed, Jul 29, 2015 at 05:03:51PM +0800, Haibo Chen wrote:
+> Changes for v3:
+> -Add property describe in binding doc.
+> 
+> Haibo Chen (6):
+>   mmc: sdhci-esdhc-imx: add imx7d support and support HS400
+>   mmc: sdhci-esdhc-imx: add tuning-step seting support
+>   ARM: dts: imx7d-sdb: add eMMC5.0 support
+>   mmc: sdhci-esdhc-imx: add compatible string in bingding doc
+>   mmc: sdhci-esdhc-imx: config watermark level and burst length
+>   mmc: sdhci-esdhc-imx: set back the burst_length_enable bit to 1
+> 
 
-Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
----
- arch/arm/boot/dts/imx7d-sdb.dts | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+Hi Haibo,
 
-diff --git a/arch/arm/boot/dts/imx7d-sdb.dts b/arch/arm/boot/dts/imx7d-sdb.dts
-index fdd1d7c..8059458 100644
---- a/arch/arm/boot/dts/imx7d-sdb.dts
-+++ b/arch/arm/boot/dts/imx7d-sdb.dts
-@@ -241,6 +241,19 @@
- 	status = "okay";
- };
- 
-+&usdhc3 {
-+	pinctrl-names = "default", "state_100mhz", "state_200mhz";
-+	pinctrl-0 = <&pinctrl_usdhc3>;
-+	pinctrl-1 = <&pinctrl_usdhc3_100mhz>;
-+	pinctrl-2 = <&pinctrl_usdhc3_200mhz>;
-+	assigned-clocks = <&clks IMX7D_USDHC3_ROOT_CLK>;
-+	assigned-clock-rates = <400000000>;
-+	bus-width = <8>;
-+	fsl,tuning-step = <2>;
-+	non-removable;
-+	status = "okay";
-+};
-+
- &iomuxc {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&pinctrl_hog>;
--- 
-1.9.1
+I'm a little busy these days.
+Will help review it ASAP, maybe can do it tomorrow.
+
+Regards
+Dong Aisheng
+
+>  .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |  2 +
+>  arch/arm/boot/dts/imx7d-sdb.dts                    | 13 +++
+>  drivers/mmc/host/sdhci-esdhc-imx.c                 | 97 +++++++++++++++++++++-
+>  include/linux/platform_data/mmc-esdhc-imx.h        |  1 +
+>  4 files changed, 112 insertions(+), 1 deletion(-)
+> 
+> -- 
+> 1.9.1
+> 
