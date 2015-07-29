@@ -1,7 +1,7 @@
 From: Haibo Chen <haibo.chen@freescale.com>
-Subject: [PATCH v3 6/6] mmc: sdhci-esdhc-imx: set back the burst_length_enable bit to 1
-Date: Wed, 29 Jul 2015 17:03:57 +0800
-Message-ID: <1438160637-28061-7-git-send-email-haibo.chen@freescale.com>
+Subject: [PATCH v3 5/6] mmc: sdhci-esdhc-imx: config watermark level and burst length
+Date: Wed, 29 Jul 2015 17:03:56 +0800
+Message-ID: <1438160637-28061-6-git-send-email-haibo.chen@freescale.com>
 References: <1438160637-28061-1-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,46 +12,53 @@ To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree
 Cc: johan.derycke@barco.com, haibo.chen@freescale.com, fabio.estevam@freescale.com, b29396@freescale.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Currently we find that if a usdhc is choosed to boot system, then ROM
-code will set the burst length enable bit of this usdhc as 0.
+i.MX7D support eMMC HS400 mode, this mode can run in 8 bit,200MHZ
+DDR mode. So the I/O speed improve a lot compare to SD3.0
 
-This will make performance drop a lot if this usdhc's burst length is
-16. So this patch set back the burst_length_enable bit as 1, which is
-the default value, and means burst length is enabled for INCR.
+The default burst length is 8, if we don't change this value, in
+HS400 mode, when we do eMMC read operation, we can find that the
+clock signal will stop for a period of time. This means the speed
+of data moving on AHB bus is slower than I/O speed. So we should
+improve the speed of data moving on AHB bus.
+
+For imx7d usdhc, this patch set the burst length as 16, and set
+watermark level as 64. The test result is the clock signal has
+no stop during the eMMC HS400 operation. For other imx usdhc, remain
+the default value: burst length as 8, watermark level as 16.
 
 Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 37d0095..dd945e5 100644
+index 158f93b..37d0095 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -32,6 +32,7 @@
- #include "sdhci-esdhc.h"
+@@ -239,6 +239,11 @@ static inline int is_imx6q_usdhc(struct pltfm_imx_data *data)
+ 	return data->socdata == &usdhc_imx6q_data;
+ }
  
- #define	ESDHC_CTRL_D3CD			0x08
-+#define ESDHC_BURST_LEN_EN_INCR		(1 << 27)
- /* VENDOR SPEC register */
- #define ESDHC_VENDOR_SPEC		0xc0
- #define  ESDHC_VENDOR_SPEC_SDIO_QUIRK	(1 << 1)
-@@ -1158,6 +1159,16 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
++static inline int is_imx7d_usdhc(struct pltfm_imx_data *data)
++{
++	return data->socdata == &usdhc_imx7d_data;
++}
++
+ static inline int esdhc_is_usdhc(struct pltfm_imx_data *data)
+ {
+ 	return !!(data->socdata->flags & ESDHC_FLAG_USDHC);
+@@ -1145,7 +1150,11 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	 * to something insane.  Change it back here.
+ 	 */
+ 	if (esdhc_is_usdhc(imx_data)) {
+-		writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
++		if (is_imx7d_usdhc(imx_data))
++			writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
++		else
++			writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
++
  		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
  		host->mmc->caps |= MMC_CAP_1_8V_DDR;
- 
-+		/*
-+		 * ROM code will change the burst_length_enable setting to
-+		 * zero if this usdhc is choosed to boot system. Change it
-+		 * back here, otherwise it will impact the performance a
-+		 * lot if the burst length is 16.
-+		 */
-+		writel(readl(host->ioaddr + SDHCI_HOST_CONTROL)
-+			| ESDHC_BURST_LEN_EN_INCR,
-+			host->ioaddr + SDHCI_HOST_CONTROL);
-+
- 		if (!(imx_data->socdata->flags & ESDHC_FLAG_HS200))
- 			host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
  
 -- 
 1.9.1
