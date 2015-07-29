@@ -1,108 +1,59 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 16/17] mmc: host: omap_hsmmc: remove CONFIG_REGULATOR check
-Date: Wed, 29 Jul 2015 16:39:46 +0530
-Message-ID: <1438168187-1614-17-git-send-email-kishon@ti.com>
+Subject: [PATCH 10/17] mmc: host: omap_hsmmc: avoid pbias regulator enable on
+ power off
+Date: Wed, 29 Jul 2015 16:39:40 +0530
+Message-ID: <1438168187-1614-11-git-send-email-kishon@ti.com>
 References: <1438168187-1614-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1438168187-1614-1-git-send-email-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: tony@atomide.com, ulf.hansson@linaro.org, afenkart@gmail.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 Cc: nsekhar@ti.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-Now that support for platforms which have optional regulator is added,
-remove CONFIG_REGULATOR check in omap_hsmmc.
+Fix omap_hsmmc_set_power so that pbias regulator is not enabled
+during power off.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   35 +++--------------------------------
- 1 file changed, 3 insertions(+), 32 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |    8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 5116c42..aa4ba28 100644
+index 8bb3f60..2e5c7cd 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -203,7 +203,6 @@ struct omap_hsmmc_host {
- 	int			context_loss;
- 	int			protect_card;
- 	int			reqs_blocked;
--	int			use_reg;
- 	int			req_in_progress;
- 	unsigned long		clk_rate;
- 	unsigned int		flags;
-@@ -244,8 +243,6 @@ static int omap_hsmmc_get_cover_state(struct device *dev)
- 	return mmc_gpio_get_cd(host->mmc);
- }
- 
--#ifdef CONFIG_REGULATOR
--
- static int omap_hsmmc_enable_supply(struct mmc_host *mmc)
- {
- 	int ret;
-@@ -513,29 +510,6 @@ static void omap_hsmmc_reg_put(struct omap_hsmmc_host *host)
- 	mmc_pdata(host)->set_power = NULL;
- }
- 
--static inline int omap_hsmmc_have_reg(void)
--{
--	return 1;
--}
--
--#else
--
--static inline int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
--{
--	return -EINVAL;
--}
--
--static inline void omap_hsmmc_reg_put(struct omap_hsmmc_host *host)
--{
--}
--
--static inline int omap_hsmmc_have_reg(void)
--{
--	return 0;
--}
--
--#endif
--
- static irqreturn_t omap_hsmmc_cover_irq(int irq, void *dev_id);
- 
- static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
-@@ -2195,11 +2169,10 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 		goto err_irq;
- 	}
- 
--	if (omap_hsmmc_have_reg() && !mmc_pdata(host)->set_power) {
-+	if (!mmc_pdata(host)->set_power) {
- 		ret = omap_hsmmc_reg_get(host);
+@@ -386,16 +386,16 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
+ 		ret = omap_hsmmc_enable_supply(mmc, vdd);
  		if (ret)
- 			goto err_irq;
--		host->use_reg = 1;
+ 			return ret;
++
++		ret = omap_hsmmc_set_pbias(host, true, vdd);
++		if (ret)
++			goto err_set_voltage;
+ 	} else {
+ 		ret = omap_hsmmc_disable_supply(mmc);
+ 		if (ret)
+ 			return ret;
  	}
  
- 	mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
-@@ -2242,8 +2215,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+-	ret = omap_hsmmc_set_pbias(host, true, vdd);
+-	if (ret)
+-		goto err_set_voltage;
+-
+ 	if (mmc_pdata(host)->after_set_reg)
+ 		mmc_pdata(host)->after_set_reg(dev, power_on, vdd);
  
- err_slot_name:
- 	mmc_remove_host(mmc);
--	if (host->use_reg)
--		omap_hsmmc_reg_put(host);
-+	omap_hsmmc_reg_put(host);
- err_irq:
- 	device_init_wakeup(&pdev->dev, false);
- 	if (host->tx_chan)
-@@ -2267,8 +2239,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
- 
- 	pm_runtime_get_sync(host->dev);
- 	mmc_remove_host(host->mmc);
--	if (host->use_reg)
--		omap_hsmmc_reg_put(host);
-+	omap_hsmmc_reg_put(host);
- 
- 	if (host->tx_chan)
- 		dma_release_channel(host->tx_chan);
 -- 
 1.7.9.5
