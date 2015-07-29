@@ -1,186 +1,175 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2] mmc: sunxi: Don't start commands while the card is
- busy
-Date: Wed, 29 Jul 2015 08:40:52 +0800
-Message-ID: <55B82114.5000505@rock-chips.com>
-References: <1436541284-11800-1-git-send-email-hdegoede@redhat.com>
- <CAPDyKFoNe0bghfSXs48stHzZToTc7Hjd5gVPy-VbDF8bzdVVMQ@mail.gmail.com>
- <55B7D676.1020800@broadcom.com>
+From: Haibo Chen <haibo.chen@freescale.com>
+Subject: [PATCH v3 1/6] mmc: sdhci-esdhc-imx: add imx7d support and support HS400
+Date: Wed, 29 Jul 2015 17:03:52 +0800
+Message-ID: <1438160637-28061-2-git-send-email-haibo.chen@freescale.com>
+References: <1438160637-28061-1-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from regular1.263xmail.com ([211.150.99.134]:56990 "EHLO
-	regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751138AbbG2AlA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jul 2015 20:41:00 -0400
-In-Reply-To: <55B7D676.1020800@broadcom.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1438160637-28061-1-git-send-email-haibo.chen@freescale.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawnguo@kernel.org, kernel@pengutronix.de, linux@arm.linux.org.uk, ulf.hansson@linaro.org, aisheng.dong@freescale.com
+Cc: johan.derycke@barco.com, haibo.chen@freescale.com, fabio.estevam@freescale.com, b29396@freescale.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arend van Spriel <arend@broadcom.com>, Ulf Hansson <ulf.hansson@linaro.org>, Hans de Goede <hdegoede@redhat.com>
-Cc: shawn.lin@rock-chips.com, Chris Ball <chris@printf.net>, Mike Turquette <mturquette@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, linux-sunxi@googlegroups.com, Eugene K <sigintmailru@gmail.com>
 
-=E5=9C=A8 2015/7/29 3:22, Arend van Spriel =E5=86=99=E9=81=93:
-> On 07/21/2015 02:15 PM, Ulf Hansson wrote:
->> On 10 July 2015 at 17:14, Hans de Goede <hdegoede@redhat.com> wrote:
->>> Some sdio wifi modules have not been working reliable with the sunx=
-i-mmc
->>> host code. This turns out to be caused by it starting new commands =
-while
->>> the card signals that it is still busy processing a previous comman=
-d.
->>
->> Which are those commands? Or more interesting, which response types =
-do
->> these commands expect?
->> I don't think this is a sunxi specific issue, I have seen similar
->> issues for other host controllers.
->
-> Indeed. A similar fix was needed for dw_mmc host controller.
-bit 10 in STATUS register of sysnopsys dw_mmc should be issued each tim=
-e=20
-you start a new cmd. It's hard to say whetehr a local hack or not,=20
-because it's a mandatory requirement from IP databook(refer to=20
-"Sysnopsys DesignWare cores Mobile Storage Host Databook" Chapter 7-=20
-Programming the DWC_mobile_storage).
+The imx7d usdhc is derived from imx6sx, the difference is that
+imx7d support HS400.
 
-Bit 10: indicate state-machine is ready, controller MUST guarantee all
-I/O used in "free state", actually high.
+So introduce a new compatible string for imx7d and add HS400
+support for imx7d usdhc.
 
-If dw_mmc's state-machine isn't ready, NO cmd can be issued, which mean=
-s=20
-even we configure cmd and cmdarg, start bit cannot be auto-clean by=20
-controller that leads to no cmd_done interrupt generated which dw_mmc's=
-=20
-tasklet state-machine need.
+Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 66 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 66 insertions(+)
 
->
->> I am thinking that perhaps this should be managed by the mmc core
->> instead of local hacks to sunxi. Potentially we could make the core =
-to
->> invoke the already existing host_ops->card_busy() callback when
->> needed...
->
-> The problem here is that there are a number of host controllers out
-> there not implementing that callback. That may be because the hardwar=
-e
-> is dealing properly with busy signalling, but I would not bet on that=
-=2E
->
-> Regards,
-> Arend
->
->> Within this context, could I ask whether you controller supports IRQ
->> based HW-busy detection? Or you need polling of the status register?
->>
->>>
->>> This commit fixes this, thereby fixing the wifi reliability issues =
-on
->>> the Cubietruck and other sunxi boards using sdio wifi.
->>>
->>> Reported-by: Eugene K <sigintmailru@gmail.com>
->>> Suggested-by: Eugene K <sigintmailru@gmail.com>
->>> Cc: Eugene K <sigintmailru@gmail.com>
->>> Cc: Arend van Spriel <arend@broadcom.com>
->>> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
->>> ---
->>> Changes in v2:
->>> -Properly accredit Eugene K for coming up with the fix for this
->>> ---
->>>   drivers/mmc/host/sunxi-mmc.c | 32 +++++++++++++++++++++++++++++++=
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index c6b9f64..b441eed 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -44,6 +44,7 @@
+ #define  ESDHC_MIX_CTRL_EXE_TUNE	(1 << 22)
+ #define  ESDHC_MIX_CTRL_SMPCLK_SEL	(1 << 23)
+ #define  ESDHC_MIX_CTRL_FBCLK_SEL	(1 << 25)
++#define  ESDHC_MIX_CTRL_HS400_EN	(1 << 26)
+ /* Bits 3 and 6 are not SDHCI standard definitions */
+ #define  ESDHC_MIX_CTRL_SDHCI_MASK	0xb7
+ /* Tuning bits */
+@@ -60,6 +61,16 @@
+ #define  ESDHC_TUNE_CTRL_MIN		0
+ #define  ESDHC_TUNE_CTRL_MAX		((1 << 7) - 1)
+ 
++/* strobe dll register */
++#define ESDHC_STROBE_DLL_CTRL		0x70
++#define ESDHC_STROBE_DLL_CTRL_ENABLE	(1 << 0)
++#define ESDHC_STROBE_DLL_CTRL_RESET	(1 << 1)
++#define ESDHC_STROBE_DLL_CTRL_SLV_DLY_TARGET_SHIFT	3
 +
->>>   1 file changed, 32 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-=
-mmc.c
->>> index 4d3e1ff..daa90b7 100644
->>> --- a/drivers/mmc/host/sunxi-mmc.c
->>> +++ b/drivers/mmc/host/sunxi-mmc.c
->>> @@ -289,6 +289,24 @@ static int sunxi_mmc_init_host(struct mmc_host
->>> *mmc)
->>>          return 0;
->>>   }
->>>
->>> +/* Wait for card to report ready before starting a new cmd */
->>> +static int sunxi_mmc_wait_card_ready(struct sunxi_mmc_host *host)
->>> +{
->>> +       unsigned long expire =3D jiffies + msecs_to_jiffies(500);
->>> +       u32 rval;
->>> +
->>> +       do {
->>> +               rval =3D mmc_readl(host, REG_STAS);
->>> +       } while (time_before(jiffies, expire) && (rval &
->>> SDXC_CARD_DATA_BUSY));
->>> +
->>> +       if (rval & SDXC_CARD_DATA_BUSY) {
->>> +               dev_err(mmc_dev(host->mmc), "Error R1 ready timeout=
-\n");
->>> +               return -EIO;
->>> +       }
->>> +
->>> +       return 0;
->>> +}
->>> +
->>>   static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
->>>                                      struct mmc_data *data)
->>>   {
->>> @@ -383,6 +401,8 @@ static void sunxi_mmc_send_manual_stop(struct
->>> sunxi_mmc_host *host,
->>>          u32 arg, cmd_val, ri;
->>>          unsigned long expire =3D jiffies + msecs_to_jiffies(1000);
->>>
->>> +       sunxi_mmc_wait_card_ready(host);
->>> +
->>>          cmd_val =3D SDXC_START | SDXC_RESP_EXPIRE |
->>>                    SDXC_STOP_ABORT_CMD | SDXC_CHECK_RESPONSE_CRC;
->>>
->>> @@ -597,6 +617,11 @@ static int sunxi_mmc_oclk_onoff(struct
->>> sunxi_mmc_host *host, u32 oclk_en)
->>>   {
->>>          unsigned long expire =3D jiffies + msecs_to_jiffies(250);
->>>          u32 rval;
->>> +       int ret;
->>> +
->>> +       ret =3D sunxi_mmc_wait_card_ready(host);
->>> +       if (ret)
->>> +               return ret;
->>>
->>>          rval =3D mmc_readl(host, REG_CLKCR);
->>>          rval &=3D ~(SDXC_CARD_CLOCK_ON | SDXC_LOW_POWER_ON);
->>> @@ -785,6 +810,13 @@ static void sunxi_mmc_request(struct mmc_host
->>> *mmc, struct mmc_request *mrq)
->>>                  return;
->>>          }
->>>
->>> +       ret =3D sunxi_mmc_wait_card_ready(host);
->>> +       if (ret) {
->>> +               mrq->cmd->error =3D ret;
->>> +               mmc_request_done(mmc, mrq);
->>> +               return;
->>> +       }
->>> +
->>>          if (data) {
->>>                  ret =3D sunxi_mmc_map_dma(host, data);
->>>                  if (ret < 0) {
->>> --
->>> 2.4.3
->>>
->>
->> Kind regards
->> Uffe
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-
-
---=20
-Shawn Lin
-
++#define ESDHC_STROBE_DLL_STATUS		0x74
++#define ESDHC_STROBE_DLL_STS_REF_LOCK	(1 << 1)
++#define ESDHC_STROBE_DLL_STS_SLV_LOCK	0x1
++
+ #define ESDHC_TUNING_CTRL		0xcc
+ #define ESDHC_STD_TUNING_EN		(1 << 24)
+ /* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
+@@ -120,6 +131,8 @@
+ #define ESDHC_FLAG_ERR004536		BIT(7)
+ /* The IP supports HS200 mode */
+ #define ESDHC_FLAG_HS200		BIT(8)
++/* The IP supports HS400 mode */
++#define ESDHC_FLAG_SUP_HS400		BIT(9)
+ 
+ struct esdhc_soc_data {
+ 	u32 flags;
+@@ -156,6 +169,12 @@ static struct esdhc_soc_data usdhc_imx6sx_data = {
+ 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200,
+ };
+ 
++static struct esdhc_soc_data usdhc_imx7d_data = {
++	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
++			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
++			| ESDHC_FLAG_SUP_HS400,
++};
++
+ struct pltfm_imx_data {
+ 	u32 scratchpad;
+ 	struct pinctrl *pinctrl;
+@@ -199,6 +218,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
+ 	{ .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
+ 	{ .compatible = "fsl,imx6sl-usdhc", .data = &usdhc_imx6sl_data, },
+ 	{ .compatible = "fsl,imx6q-usdhc", .data = &usdhc_imx6q_data, },
++	{ .compatible = "fsl,imx7d-usdhc", .data = &usdhc_imx7d_data, },
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, imx_esdhc_dt_ids);
+@@ -274,6 +294,10 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ 				val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
+ 					| SDHCI_SUPPORT_SDR50
+ 					| SDHCI_USE_SDR50_TUNING;
++
++			/* imx7d does not have a support_hs400 register, fake one */
++			if (imx_data->socdata->flags & ESDHC_FLAG_SUP_HS400)
++				val |= SDHCI_SUPPORT_HS400;
+ 		}
+ 	}
+ 
+@@ -774,6 +798,7 @@ static int esdhc_change_pinstate(struct sdhci_host *host,
+ 		break;
+ 	case MMC_TIMING_UHS_SDR104:
+ 	case MMC_TIMING_MMC_HS200:
++	case MMC_TIMING_MMC_HS400:
+ 		pinctrl = imx_data->pins_200mhz;
+ 		break;
+ 	default:
+@@ -784,6 +809,30 @@ static int esdhc_change_pinstate(struct sdhci_host *host,
+ 	return pinctrl_select_state(imx_data->pinctrl, pinctrl);
+ }
+ 
++static void esdhc_set_strobe_dll(struct sdhci_host *host)
++{
++	u32 v;
++
++	/* force a reset on strobe dll */
++	writel(ESDHC_STROBE_DLL_CTRL_RESET, host->ioaddr + ESDHC_STROBE_DLL_CTRL);
++	/*
++	 * enable strobe dll ctrl and adjust the delay target
++	 * for the uSDHC loopback read clock
++	 */
++	v = ESDHC_STROBE_DLL_CTRL_ENABLE |
++		(7 << ESDHC_STROBE_DLL_CTRL_SLV_DLY_TARGET_SHIFT);
++	writel(v, host->ioaddr + ESDHC_STROBE_DLL_CTRL);
++	/* wait 1us to make sure strobe dll status register stable */
++	udelay(1);
++	v = readl(host->ioaddr + ESDHC_STROBE_DLL_STATUS);
++	if (!(v & ESDHC_STROBE_DLL_STS_REF_LOCK))
++		dev_warn(mmc_dev(host->mmc),
++			"warning! HS400 strobe DLL status REF not lock!\n");
++	if (!(v & ESDHC_STROBE_DLL_STS_SLV_LOCK))
++		dev_warn(mmc_dev(host->mmc),
++			"warning! HS400 strobe DLL status SLV not lock!\n");
++}
++
+ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -795,7 +844,13 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
+ 	case MMC_TIMING_UHS_SDR25:
+ 	case MMC_TIMING_UHS_SDR50:
+ 	case MMC_TIMING_UHS_SDR104:
++		break;
+ 	case MMC_TIMING_MMC_HS200:
++		/* disable ddr mode and disable HS400 mode */
++		writel(readl(host->ioaddr + ESDHC_MIX_CTRL) &
++			~(ESDHC_MIX_CTRL_DDREN | ESDHC_MIX_CTRL_HS400_EN),
++			host->ioaddr + ESDHC_MIX_CTRL);
++		imx_data->is_ddr = 0;
+ 		break;
+ 	case MMC_TIMING_UHS_DDR50:
+ 	case MMC_TIMING_MMC_DDR52:
+@@ -813,6 +868,14 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
+ 			writel(v, host->ioaddr + ESDHC_DLL_CTRL);
+ 		}
+ 		break;
++	case MMC_TIMING_MMC_HS400:
++		writel(readl(host->ioaddr + ESDHC_MIX_CTRL) |
++				ESDHC_MIX_CTRL_DDREN | ESDHC_MIX_CTRL_HS400_EN,
++				host->ioaddr + ESDHC_MIX_CTRL);
++		imx_data->is_ddr = 1;
++		if (host->clock == 200000000)
++			esdhc_set_strobe_dll(host);
++		break;
+ 	}
+ 
+ 	esdhc_change_pinstate(host, timing);
+@@ -1100,6 +1163,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_ERR004536)
+ 		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+ 
++	if (imx_data->socdata->flags & ESDHC_FLAG_SUP_HS400)
++		host->quirks2 |= SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400;
++
+ 	if (of_id)
+ 		err = sdhci_esdhc_imx_probe_dt(pdev, host, imx_data);
+ 	else
+-- 
+1.9.1
