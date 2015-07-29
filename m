@@ -1,70 +1,77 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 14/17] mmc: host: omap_hsmmc: use regulator_is_enabled to find pbias status
-Date: Wed, 29 Jul 2015 16:39:44 +0530
-Message-ID: <1438168187-1614-15-git-send-email-kishon@ti.com>
+Subject: [PATCH 17/17] mmc: host: omap_hsmmc: use "mmc_of_parse_voltage" to get ocr_avail
+Date: Wed, 29 Jul 2015 16:39:47 +0530
+Message-ID: <1438168187-1614-18-git-send-email-kishon@ti.com>
 References: <1438168187-1614-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from comal.ext.ti.com ([198.47.26.152]:37043 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752612AbbG2LLY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jul 2015 07:11:24 -0400
 In-Reply-To: <1438168187-1614-1-git-send-email-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: tony@atomide.com, ulf.hansson@linaro.org, afenkart@gmail.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: nsekhar@ti.com, kishon@ti.com
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: tony@atomide.com, ulf.hansson@linaro.org, afenkart@gmail.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc: nsekhar@ti.com, kishon@ti.com, Roger Quadros <rogerq@ti.com>, Lokesh Vutla <lokeshvutla@ti.com>, Murali Karicheri <m-karicheri2@ti.com>, Franklin S Cooper Jr <fcooper@ti.com>
 
-Use regulator_is_enabled of pbias regulator to find pbias regulator
-status instead of maintaining a custom bookkeeping
-pbias_enabled variable.
+From: Roger Quadros <rogerq@ti.com>
 
+For platforms that doesn't have explicit regulator control in MMC,
+populate voltage-ranges in MMC device tree node and use
+mmc_of_parse_voltage to get ocr_avail
+
+Signed-off-by: Roger Quadros <rogerq@ti.com>
+Signed-off-by: Lokesh Vutla <lokeshvutla@ti.com>
+Signed-off-by: Murali Karicheri <m-karicheri2@ti.com>
+Signed-off-by: Franklin S Cooper Jr <fcooper@ti.com>
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |    8 ++------
- 1 file changed, 2 insertions(+), 6 deletions(-)
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    2 ++
+ drivers/mmc/host/omap_hsmmc.c                      |    9 ++++++++-
+ 2 files changed, 10 insertions(+), 1 deletion(-)
 
+diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+index 76bf087..2408e87 100644
+--- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
++++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+@@ -22,6 +22,8 @@ ti,dual-volt: boolean, supports dual voltage cards
+ ti,non-removable: non-removable slot (like eMMC)
+ ti,needs-special-reset: Requires a special softreset sequence
+ ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
++voltage-ranges: Specify the voltage range supported if regulator framework
++isn't enabled.
+ dmas: List of DMA specifiers with the controller specific format
+ as described in the generic DMA client binding. A tx and rx
+ specifier is required.
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 001f8a0..a50edbc 100644
+index aa4ba28..6d52873 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -182,7 +182,6 @@ struct omap_hsmmc_host {
- 	struct	clk		*fclk;
- 	struct	clk		*dbclk;
- 	struct	regulator	*pbias;
--	bool			pbias_enabled;
- 	void	__iomem		*base;
- 	resource_size_t		mapbase;
- 	spinlock_t		irq_lock; /* Prevent races with irq handler */
-@@ -326,22 +325,20 @@ static int omap_hsmmc_set_pbias(struct omap_hsmmc_host *host, bool power_on,
- 			return ret;
- 		}
- 
--		if (host->pbias_enabled == 0) {
-+		if (!regulator_is_enabled(host->pbias)) {
- 			ret = regulator_enable(host->pbias);
- 			if (ret) {
- 				dev_err(host->dev, "pbias reg enable fail\n");
- 				return ret;
- 			}
--			host->pbias_enabled = 1;
- 		}
- 	} else {
--		if (host->pbias_enabled == 1) {
-+		if (regulator_is_enabled(host->pbias)) {
- 			ret = regulator_disable(host->pbias);
- 			if (ret) {
- 				dev_err(host->dev, "pbias reg disable fail\n");
- 				return ret;
- 			}
--			host->pbias_enabled = 0;
- 		}
+@@ -2175,7 +2175,13 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 			goto err_irq;
  	}
  
-@@ -2073,7 +2070,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	host->base	= base + pdata->reg_offset;
- 	host->power_mode = MMC_POWER_OFF;
- 	host->next_data.cookie = 1;
--	host->pbias_enabled = 0;
+-	mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
++	if (!mmc_pdata(host)->ocr_mask) {
++		ret = mmc_of_parse_voltage(pdev->dev.of_node, &mmc->ocr_avail);
++		if (ret)
++			goto err_parse_voltage;
++	} else {
++		mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
++	}
  
- 	ret = omap_hsmmc_gpio_init(mmc, host, pdata);
- 	if (ret)
+ 	omap_hsmmc_disable_irq(host);
+ 
+@@ -2215,6 +2221,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 
+ err_slot_name:
+ 	mmc_remove_host(mmc);
++err_parse_voltage:
+ 	omap_hsmmc_reg_put(host);
+ err_irq:
+ 	device_init_wakeup(&pdev->dev, false);
 -- 
 1.7.9.5
+
