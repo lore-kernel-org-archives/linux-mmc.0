@@ -1,285 +1,48 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: [PATCH v2 2/3] mmc: sdhci-of-at91: introduce driver for the Atmel SDMMC
-Date: Wed, 29 Jul 2015 16:22:47 +0200
-Message-ID: <1438179768-818-3-git-send-email-ludovic.desroches@atmel.com>
-References: <1438179768-818-1-git-send-email-ludovic.desroches@atmel.com>
+From: Nishanth Menon <nm@ti.com>
+Subject: Re: [PATCH 12/17] ARM: dts: am57xx-beagle-x15: Fix regulator populated
+ in MMC1 dt node
+Date: Wed, 29 Jul 2015 14:37:44 -0500
+Message-ID: <55B92B88.1080409@ti.com>
+References: <1438168187-1614-1-git-send-email-kishon@ti.com> <1438168187-1614-13-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1438179768-818-1-git-send-email-ludovic.desroches@atmel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
-Cc: ulf.hansson@linaro.org, nicolas.ferre@atmel.com, alexandre.belloni@free-electrons.com, pebolle@tiscali.nl, arnd@arndb.de, Ludovic Desroches <ludovic.desroches@atmel.com>
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:35572 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752153AbbG2TiS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jul 2015 15:38:18 -0400
+In-Reply-To: <1438168187-1614-13-git-send-email-kishon@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kishon Vijay Abraham I <kishon@ti.com>, tony@atomide.com, ulf.hansson@linaro.org, afenkart@gmail.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc: nsekhar@ti.com
 
-Introduce driver for he Atmel SDMMC available on sama5d2. It is a sdhci
-compliant controller.
+On 07/29/2015 06:09 AM, Kishon Vijay Abraham I wrote:
+> For beagle x15, both the vdd and io lines are connected to the
+> same regulator (ldo1_reg). However vmmc_aux is populated to vdd_3v3.
+> Remove it.
+> 
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+> ---
+>  arch/arm/boot/dts/am57xx-beagle-x15.dts |    1 -
+>  1 file changed, 1 deletion(-)
+> 
+> diff --git a/arch/arm/boot/dts/am57xx-beagle-x15.dts b/arch/arm/boot/dts/am57xx-beagle-x15.dts
+> index a63bf78..d0db5c5 100644
+> --- a/arch/arm/boot/dts/am57xx-beagle-x15.dts
+> +++ b/arch/arm/boot/dts/am57xx-beagle-x15.dts
+> @@ -579,7 +579,6 @@
+>  	pinctrl-0 = <&mmc1_pins_default>;
+>  
+>  	vmmc-supply = <&ldo1_reg>;
+> -	vmmc_aux-supply = <&vdd_3v3>;
+>  	pbias-supply = <&pbias_mmc_reg>;
+>  	bus-width = <4>;
+>  	cd-gpios = <&gpio6 27 0>; /* gpio 219 */
+> 
+Acked-by: Nishanth Menon <nm@ti.com>
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
----
- .../devicetree/bindings/mmc/sdhci-atmel.txt        |  21 +++
- drivers/mmc/host/Kconfig                           |   8 +
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/sdhci-of-at91.c                   | 192 +++++++++++++++++++++
- 4 files changed, 222 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
- create mode 100644 drivers/mmc/host/sdhci-of-at91.c
-
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
-new file mode 100644
-index 0000000..1b662d7
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
-@@ -0,0 +1,21 @@
-+* Atmel SDHCI controller
-+
-+This file documents the differences between the core properties in
-+Documentation/devicetree/bindings/mmc/mmc.txt and the properties used by the
-+sdhci-of-at91 driver.
-+
-+Required properties:
-+- compatible:		Must be "atmel,sama5d2-sdhci".
-+- clocks:		Phandlers to the clocks.
-+- clock-names:		Must be "hclock", "multclk", "baseclk";
-+
-+
-+Example:
-+
-+sdmmc0: sdio-host@a0000000 {
-+	compatible = "atmel,sama5d2-sdhci";
-+	reg = <0xa0000000 0x300>;
-+	interrupts = <31 IRQ_TYPE_LEVEL_HIGH 0>;
-+	clocks = <&sdmmc0_hclk>, <&sdmmc0_gclk>, <&main>;
-+	clock-names = "hclock", "multclk", "baseclk";
-+};
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index fd9a58e..c1c75e8 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -129,6 +129,14 @@ config MMC_SDHCI_OF_ARASAN
- 
- 	  If unsure, say N.
- 
-+config MMC_SDHCI_OF_AT91
-+	tristate "SDHCI OF support for the Atmel SDMMC controller"
-+	depends on MMC_SDHCI_PLTFM
-+	depends on OF
-+	select MMC_SDHCI_IO_ACCESSORS
-+	help
-+	  This selects the Atmel SDMMC driver
-+
- config MMC_SDHCI_OF_ESDHC
- 	tristate "SDHCI OF support for the Freescale eSDHC controller"
- 	depends on MMC_SDHCI_PLTFM
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index e928d61..4f3452a 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -67,6 +67,7 @@ obj-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+= sdhci-esdhc-imx.o
- obj-$(CONFIG_MMC_SDHCI_DOVE)		+= sdhci-dove.o
- obj-$(CONFIG_MMC_SDHCI_TEGRA)		+= sdhci-tegra.o
- obj-$(CONFIG_MMC_SDHCI_OF_ARASAN)	+= sdhci-of-arasan.o
-+obj-$(CONFIG_MMC_SDHCI_OF_AT91)		+= sdhci-of-at91.o
- obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
- obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
- obj-$(CONFIG_MMC_SDHCI_BCM_KONA)	+= sdhci-bcm-kona.o
-diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-new file mode 100644
-index 0000000..7a9f4b1
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-of-at91.c
-@@ -0,0 +1,192 @@
-+/*
-+ * Atmel SDMMC controller driver.
-+ *
-+ * Copyright (C) 2015 Atmel,
-+ *		 2015 Ludovic Desroches <ludovic.desroches@atmel.com>
-+ *
-+ * This software is licensed under the terms of the GNU General Public
-+ * License version 2, as published by the Free Software Foundation, and
-+ * may be copied, distributed, and modified under those terms.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ */
-+
-+#include <linux/clk.h>
-+#include <linux/err.h>
-+#include <linux/io.h>
-+#include <linux/mmc/host.h>
-+#include <linux/module.h>
-+#include <linux/of.h>
-+#include <linux/of_device.h>
-+
-+#include "sdhci-pltfm.h"
-+
-+#define SDMMC_CACR	0x230
-+#define		SDMMC_CACR_CAPWREN	BIT(0)
-+#define		SDMMC_CACR_KEY		(0x46 << 8)
-+
-+struct sdhci_at91_priv {
-+	struct clk *hclock;
-+	struct clk *gck;
-+	struct clk *mainck;
-+};
-+
-+static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
-+	.set_clock		= sdhci_set_clock,
-+	.set_bus_width		= sdhci_set_bus_width,
-+	.reset			= sdhci_reset,
-+	.set_uhs_signaling	= sdhci_set_uhs_signaling,
-+};
-+
-+static const struct sdhci_pltfm_data soc_data_sama5d2 = {
-+	.ops = &sdhci_at91_sama5d2_ops,
-+};
-+
-+static const struct of_device_id sdhci_at91_dt_match[] = {
-+	{ .compatible = "atmel,sama5d2-sdhci", .data = &soc_data_sama5d2 },
-+	{}
-+};
-+
-+static int sdhci_at91_probe(struct platform_device *pdev)
-+{
-+	const struct of_device_id	*match;
-+	const struct sdhci_pltfm_data	*soc_data;
-+	struct sdhci_host		*host;
-+	struct sdhci_pltfm_host		*pltfm_host;
-+	struct sdhci_at91_priv		*priv;
-+	unsigned int			caps0, caps1;
-+	unsigned int			clk_base, clk_mul;
-+	unsigned int			gck_rate, real_gck_rate;
-+	int				ret;
-+
-+	match = of_match_device(sdhci_at91_dt_match, &pdev->dev);
-+	if (!match)
-+		return -EINVAL;
-+	soc_data = match->data;
-+
-+	priv = devm_kzalloc(&pdev->dev, sizeof(*priv), GFP_KERNEL);
-+	if (!priv) {
-+		dev_err(&pdev->dev, "unable to allocate private data\n");
-+		return -ENOMEM;
-+	}
-+
-+	priv->mainck = devm_clk_get(&pdev->dev, "baseclk");
-+	if (IS_ERR(priv->mainck)) {
-+		dev_err(&pdev->dev, "failed to get baseclk\n");
-+		return PTR_ERR(priv->mainck);
-+	}
-+
-+	priv->hclock = devm_clk_get(&pdev->dev, "hclock");
-+	if (IS_ERR(priv->hclock)) {
-+		dev_err(&pdev->dev, "failed to get hclock\n");
-+		return PTR_ERR(priv->hclock);
-+	}
-+
-+	priv->gck = devm_clk_get(&pdev->dev, "multclk");
-+	if (IS_ERR(priv->gck)) {
-+		dev_err(&pdev->dev, "failed to get multclk\n");
-+		return PTR_ERR(priv->gck);
-+	}
-+
-+	host = sdhci_pltfm_init(pdev, soc_data, 0);
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	/*
-+	 * The mult clock is provided by as a generated clock by the PMC
-+	 * controller. In order to set the rate of gck, we have to get the
-+	 * base clock rate and the clock mult from capabilities.
-+	 */
-+	clk_prepare_enable(priv->hclock);
-+	caps0 = readl(host->ioaddr + SDHCI_CAPABILITIES);
-+	caps1 = readl(host->ioaddr + SDHCI_CAPABILITIES_1);
-+	clk_base = (caps0 & SDHCI_CLOCK_V3_BASE_MASK) >> SDHCI_CLOCK_BASE_SHIFT;
-+	clk_mul = (caps1 & SDHCI_CLOCK_MUL_MASK) >> SDHCI_CLOCK_MUL_SHIFT;
-+	gck_rate = clk_base * 1000000 * (clk_mul + 1);
-+	ret = clk_set_rate(priv->gck, gck_rate);
-+	if (ret < 0) {
-+		dev_err(&pdev->dev, "failed to set gck");
-+		goto hclock_disable_unprepare;
-+		return -EINVAL;
-+	}
-+	/*
-+	 * We need to check if we have the requested rate for gck because in
-+	 * some cases this rate could be not supported. If it happens, the rate
-+	 * is the closest one gck can provide. We have to update the value
-+	 * of clk mul.
-+	 */
-+	real_gck_rate = clk_get_rate(priv->gck);
-+	if (real_gck_rate != gck_rate) {
-+		clk_mul = real_gck_rate / (clk_base * 1000000) - 1;
-+		caps1 &= (~SDHCI_CLOCK_MUL_MASK);
-+		caps1 |= ((clk_mul << SDHCI_CLOCK_MUL_SHIFT) & SDHCI_CLOCK_MUL_MASK);
-+		/* Set capabilities in r/w mode. */
-+		writel(SDMMC_CACR_KEY | SDMMC_CACR_CAPWREN, host->ioaddr + SDMMC_CACR);
-+		writel(caps1, host->ioaddr + SDHCI_CAPABILITIES_1);
-+		/* Set capabilities in ro mode. */
-+		writel(0, host->ioaddr + SDMMC_CACR);
-+		dev_info(&pdev->dev, "update clk mul to %u as gck rate is %u Hz\n",
-+			 clk_mul, real_gck_rate);
-+	}
-+
-+	clk_prepare_enable(priv->mainck);
-+	clk_prepare_enable(priv->gck);
-+
-+	pltfm_host = sdhci_priv(host);
-+	pltfm_host->priv = priv;
-+
-+	ret = mmc_of_parse(host->mmc);
-+	if (ret)
-+		goto clocks_disable_unprepare;
-+
-+	sdhci_get_of_property(pdev);
-+
-+	ret = sdhci_add_host(host);
-+	if (ret)
-+		goto clocks_disable_unprepare;
-+
-+	return 0;
-+
-+clocks_disable_unprepare:
-+	clk_disable_unprepare(priv->gck);
-+	clk_disable_unprepare(priv->mainck);
-+hclock_disable_unprepare:
-+	clk_disable_unprepare(priv->hclock);
-+	sdhci_pltfm_free(pdev);
-+	return ret;
-+}
-+
-+static int sdhci_at91_remove(struct platform_device *pdev)
-+{
-+	struct sdhci_host	*host = platform_get_drvdata(pdev);
-+	struct sdhci_pltfm_host	*pltfm_host = sdhci_priv(host);
-+	struct sdhci_at91_priv	*priv = pltfm_host->priv;
-+
-+	sdhci_pltfm_unregister(pdev);
-+
-+	clk_disable_unprepare(priv->gck);
-+	clk_disable_unprepare(priv->hclock);
-+	clk_disable_unprepare(priv->mainck);
-+
-+	return 0;
-+}
-+
-+static struct platform_driver sdhci_at91_driver = {
-+	.driver		= {
-+		.name	= "sdhci-at91",
-+		.owner	= THIS_MODULE,
-+		.of_match_table = sdhci_at91_dt_match,
-+		.pm	= SDHCI_PLTFM_PMOPS,
-+	},
-+	.probe		= sdhci_at91_probe,
-+	.remove		= sdhci_at91_remove,
-+};
-+
-+module_platform_driver(sdhci_at91_driver);
-+
-+MODULE_DESCRIPTION("SDHCI driver for at91");
-+MODULE_AUTHOR("Ludovic Desroches <ludovic.desroches@atmel.com>");
-+MODULE_LICENSE("GPL v2");
 -- 
-2.5.0
+Regards,
+Nishanth Menon
