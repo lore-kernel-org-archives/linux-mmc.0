@@ -1,64 +1,91 @@
 From: Haibo Chen <haibo.chen@freescale.com>
-Subject: [PATCH v3 5/6] mmc: sdhci-esdhc-imx: config watermark level and burst length
-Date: Wed, 29 Jul 2015 17:03:56 +0800
-Message-ID: <1438160637-28061-6-git-send-email-haibo.chen@freescale.com>
+Subject: [PATCH v3 2/6] mmc: sdhci-esdhc-imx: add tuning-step seting support
+Date: Wed, 29 Jul 2015 17:03:53 +0800
+Message-ID: <1438160637-28061-3-git-send-email-haibo.chen@freescale.com>
 References: <1438160637-28061-1-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1438160637-28061-1-git-send-email-haibo.chen@freescale.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawnguo@kernel.org, kernel@pengutronix.de, linux@arm.linux.org.uk, ulf.hansson@linaro.org, aisheng.dong@freescale.com
-Cc: johan.derycke@barco.com, haibo.chen@freescale.com, fabio.estevam@freescale.com, b29396@freescale.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc: fabio.estevam@freescale.com, devicetree@vger.kernel.org, haibo.chen@freescale.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, johan.derycke@barco.com, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-i.MX7D support eMMC HS400 mode, this mode can run in 8 bit,200MHZ
-DDR mode. So the I/O speed improve a lot compare to SD3.0
+tuning-step is the delay cell steps in tuning procedure. The default value
+of tuning-step is 1. For imx6 series usdhc, tuning procedure can be passed
+when the tuning-step value is 1. But imx7d usdhc need the tuning-step value
+as 2, otherwise it can't pass the tuning procedure.
 
-The default burst length is 8, if we don't change this value, in
-HS400 mode, when we do eMMC read operation, we can find that the
-clock signal will stop for a period of time. This means the speed
-of data moving on AHB bus is slower than I/O speed. So we should
-improve the speed of data moving on AHB bus.
-
-For imx7d usdhc, this patch set the burst length as 16, and set
-watermark level as 64. The test result is the clock signal has
-no stop during the eMMC HS400 operation. For other imx usdhc, remain
-the default value: burst length as 8, watermark level as 16.
+So this patch add the tuning-step setting in driver, so that user can set
+the tuning-step value in dts.
 
 Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c          | 9 +++++++++
+ include/linux/platform_data/mmc-esdhc-imx.h | 1 +
+ 2 files changed, 10 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 158f93b..37d0095 100644
+index b441eed..158f93b 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -239,6 +239,11 @@ static inline int is_imx6q_usdhc(struct pltfm_imx_data *data)
- 	return data->socdata == &usdhc_imx6q_data;
- }
+@@ -75,6 +75,7 @@
+ #define ESDHC_STD_TUNING_EN		(1 << 24)
+ /* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
+ #define ESDHC_TUNING_START_TAP		0x1
++#define ESDHC_TUNING_STEP_SHIFT		16
  
-+static inline int is_imx7d_usdhc(struct pltfm_imx_data *data)
-+{
-+	return data->socdata == &usdhc_imx7d_data;
-+}
-+
- static inline int esdhc_is_usdhc(struct pltfm_imx_data *data)
- {
- 	return !!(data->socdata->flags & ESDHC_FLAG_USDHC);
-@@ -1145,7 +1150,11 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 	 * to something insane.  Change it back here.
- 	 */
- 	if (esdhc_is_usdhc(imx_data)) {
--		writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
-+		if (is_imx7d_usdhc(imx_data))
-+			writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
-+		else
-+			writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
-+
- 		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
- 		host->mmc->caps |= MMC_CAP_1_8V_DDR;
+ /* pinctrl state */
+ #define ESDHC_PINCTRL_STATE_100MHZ	"state_100mhz"
+@@ -472,6 +473,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
+ 			u32 v = readl(host->ioaddr + SDHCI_ACMD12_ERR);
+ 			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
++			u32 tuning_ctrl;
+ 			if (val & SDHCI_CTRL_TUNED_CLK) {
+ 				v |= ESDHC_MIX_CTRL_SMPCLK_SEL;
+ 			} else {
+@@ -482,6 +484,11 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 			if (val & SDHCI_CTRL_EXEC_TUNING) {
+ 				v |= ESDHC_MIX_CTRL_EXE_TUNE;
+ 				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
++				tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
++				tuning_ctrl |= ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP;
++				if (imx_data->boarddata.tuning_step)
++					tuning_ctrl |= imx_data->boarddata.tuning_step << ESDHC_TUNING_STEP_SHIFT;
++					writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
+ 			} else {
+ 				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+ 			}
+@@ -949,6 +956,8 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ 	if (gpio_is_valid(boarddata->wp_gpio))
+ 		boarddata->wp_type = ESDHC_WP_GPIO;
  
++	of_property_read_u32(np, "fsl,tuning-step", &boarddata->tuning_step);
++
+ 	if (of_find_property(np, "no-1-8-v", NULL))
+ 		boarddata->support_vsel = false;
+ 	else
+diff --git a/include/linux/platform_data/mmc-esdhc-imx.h b/include/linux/platform_data/mmc-esdhc-imx.h
+index e1571ef..95ccab3 100644
+--- a/include/linux/platform_data/mmc-esdhc-imx.h
++++ b/include/linux/platform_data/mmc-esdhc-imx.h
+@@ -45,5 +45,6 @@ struct esdhc_platform_data {
+ 	int max_bus_width;
+ 	bool support_vsel;
+ 	unsigned int delay_line;
++	unsigned int tuning_step;       /* The delay cell steps in tuning procedure */
+ };
+ #endif /* __ASM_ARCH_IMX_ESDHC_H */
 -- 
 1.9.1
