@@ -1,61 +1,95 @@
-From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Subject: [PATCH 00/17] omap_hsmmc: regulator usage cleanup and fixes
-Date: Wed, 29 Jul 2015 16:39:30 +0530
-Message-ID: <1438168187-1614-1-git-send-email-kishon@ti.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH 03/17] mmc: host: omap_hsmmc: cleanup omap_hsmmc_reg_get()
+Date: Wed, 29 Jul 2015 16:39:33 +0530
+Message-ID: <1438168187-1614-4-git-send-email-kishon@ti.com>
+References: <1438168187-1614-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: nsekhar-l0cyMroinI0@public.gmane.org, kishon-l0cyMroinI0@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1438168187-1614-1-git-send-email-kishon@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: tony@atomide.com, ulf.hansson@linaro.org, afenkart@gmail.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc: nsekhar@ti.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-This patch series does the following
-*) Uses devm_regulator_get_optional() for vmmc and then removes the
-   CONFIG_REGULATOR check altogether.
-*) return on -EPROBE_DEFER
-*) enable/disable vmmc_aux regulator based on prior state
+No functional change. Instead of using a local regulator variable
+in omap_hsmmc_reg_get() for holding the return value of
+devm_regulator_get_optional() and then assigning to omap_hsmmc_host
+regulator members: vcc, vcc_aux and pbias, directly use the
+omap_hsmmc_host regulator members.
 
-This series is in preparation for implementing the voltage switch
-sequence so that UHS cards can be supported.
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Reviewed-by: Roger Quadros <rogerq@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |   38 ++++++++++++++++----------------------
+ 1 file changed, 16 insertions(+), 22 deletions(-)
 
-Did basic read/write test in J6, J6 Eco, Beagle-x15, AM437x EVM,
-Beaglebone black, OMAP5 uEVM and OMAP4 PANDA.
-
-Kishon Vijay Abraham I (16):
-  mmc: host: omap_hsmmc: use devm_regulator_get_optional() for vmmc
-  mmc: host: omap_hsmmc: return error from omap_hsmmc_reg_get on
-    -EPROBE_DEFER
-  mmc: host: omap_hsmmc: cleanup omap_hsmmc_reg_get()
-  mmc: host: omap_hsmmc: use the ocrmask provided by the vmmc regulator
-  mmc: host: omap_hsmmc: use mmc_host's vmmc and vqmmc
-  mmc: host: omap_hsmmc: remove unnecessary pbias set_voltage
-  mmc: host: omap_hsmmc: return error if any of the regulator APIs fail
-  mmc: host: omap_hsmmc: add separate functions for enable/disable
-    supply
-  mmc: host: omap_hsmmc: add separate function to set pbias
-  mmc: host: omap_hsmmc: avoid pbias regulator enable on power off
-  mmc: host: omap_hsmmc: don't use ->set_power to set initial regulator
-    state
-  ARM: dts: am57xx-beagle-x15: Fix regulator populated in MMC1 dt node
-  mmc: host: omap_hsmmc: enable/disable vmmc_aux regulator based on
-    prior state
-  mmc: host: omap_hsmmc: use regulator_is_enabled to find pbias status
-  mmc: host: omap_hsmmc: use ios->vdd for setting vmmc voltage
-  mmc: host: omap_hsmmc: remove CONFIG_REGULATOR check
-
-Roger Quadros (1):
-  mmc: host: omap_hsmmc: use "mmc_of_parse_voltage" to get ocr_avail
-
- .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    2 +
- arch/arm/boot/dts/am57xx-beagle-x15.dts            |    1 -
- drivers/mmc/host/omap_hsmmc.c                      |  333 +++++++++++++-------
- 3 files changed, 216 insertions(+), 120 deletions(-)
-
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 7f7625d..a78e15e 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -341,19 +341,17 @@ error_set_power:
+ 
+ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ {
+-	struct regulator *reg;
+ 	int ocr_value = 0;
+ 
+-	reg = devm_regulator_get_optional(host->dev, "vmmc");
+-	if (IS_ERR(reg)) {
+-		if (PTR_ERR(reg) == -EPROBE_DEFER)
++	host->vcc = devm_regulator_get_optional(host->dev, "vmmc");
++	if (IS_ERR(host->vcc)) {
++		if (PTR_ERR(host->vcc) == -EPROBE_DEFER)
+ 			return -EPROBE_DEFER;
+-		host->vcc = NULL;
+ 		dev_dbg(host->dev, "unable to get vmmc regulator %ld\n",
+-			PTR_ERR(reg));
++			PTR_ERR(host->vcc));
++		host->vcc = NULL;
+ 	} else {
+-		host->vcc = reg;
+-		ocr_value = mmc_regulator_get_ocrmask(reg);
++		ocr_value = mmc_regulator_get_ocrmask(host->vcc);
+ 		if (!mmc_pdata(host)->ocr_mask) {
+ 			mmc_pdata(host)->ocr_mask = ocr_value;
+ 		} else {
+@@ -368,26 +366,22 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 	mmc_pdata(host)->set_power = omap_hsmmc_set_power;
+ 
+ 	/* Allow an aux regulator */
+-	reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
+-	if (IS_ERR(reg)) {
+-		if (PTR_ERR(reg) == -EPROBE_DEFER)
++	host->vcc_aux = devm_regulator_get_optional(host->dev, "vmmc_aux");
++	if (IS_ERR(host->vcc_aux)) {
++		if (PTR_ERR(host->vcc_aux) == -EPROBE_DEFER)
+ 			return -EPROBE_DEFER;
+-		host->vcc_aux = NULL;
+ 		dev_dbg(host->dev, "unable to get vmmc_aux regulator %ld\n",
+-			PTR_ERR(reg));
+-	} else {
+-		host->vcc_aux = reg;
++			PTR_ERR(host->vcc_aux));
++		host->vcc_aux = NULL;
+ 	}
+ 
+-	reg = devm_regulator_get_optional(host->dev, "pbias");
+-	if (IS_ERR(reg)) {
+-		if (PTR_ERR(reg) == -EPROBE_DEFER)
++	host->pbias = devm_regulator_get_optional(host->dev, "pbias");
++	if (IS_ERR(host->pbias)) {
++		if (PTR_ERR(host->pbias) == -EPROBE_DEFER)
+ 			return -EPROBE_DEFER;
+-		host->pbias = NULL;
+ 		dev_dbg(host->dev, "unable to get pbias regulator %ld\n",
+-			PTR_ERR(reg));
+-	} else {
+-		host->pbias = reg;
++			PTR_ERR(host->pbias));
++		host->pbias = NULL;
+ 	}
+ 
+ 	/* For eMMC do not power off when not in sleep state */
 -- 
 1.7.9.5
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
