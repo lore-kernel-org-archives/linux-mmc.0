@@ -1,50 +1,69 @@
-From: Muni Sekhar <munisekharrms@gmail.com>
-Subject: Virtex-5 FPGA PCIE single-function device
-Date: Wed, 29 Jul 2015 17:31:59 +0530
-Message-ID: <CAHhAz+gJ3FKgLQLEjro8P+Dn+FPHykLur4fmEkAwFdrLPNoQng@mail.gmail.com>
+From: Grygorii Strashko <grygorii.strashko-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH 01/17] mmc: host: omap_hsmmc: use devm_regulator_get_optional()
+ for vmmc
+Date: Wed, 29 Jul 2015 15:09:09 +0300
+Message-ID: <55B8C265.1050801@ti.com>
+References: <1438168187-1614-1-git-send-email-kishon@ti.com> <1438168187-1614-2-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f171.google.com ([209.85.223.171]:35543 "EHLO
-	mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751368AbbG2MCA convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jul 2015 08:02:00 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1438168187-1614-2-git-send-email-kishon-l0cyMroinI0@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>, tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: nsekhar-l0cyMroinI0@public.gmane.org, Roger Quadros <rogerq-l0cyMroinI0@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-pci@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
 
-[ Please keep me in CC as I'm not subscribed to the list]
+On 07/29/2015 02:09 PM, Kishon Vijay Abraham I wrote:
+> Since vmmc can be optional for some platforms, use
+> devm_regulator_get_optional() for vmmc. Now return error only
+> in the case of -EPROBE_DEFER and for all other cases set
+> host->vcc to NULL.
+> 
+> Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+> ---
+>   drivers/mmc/host/omap_hsmmc.c |    8 +++++---
+>   1 file changed, 5 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 4d12032..b673e59 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -344,11 +344,13 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+>   	struct regulator *reg;
+>   	int ocr_value = 0;
+>   
+> -	reg = devm_regulator_get(host->dev, "vmmc");
+> +	reg = devm_regulator_get_optional(host->dev, "vmmc");
+>   	if (IS_ERR(reg)) {
+> -		dev_err(host->dev, "unable to get vmmc regulator %ld\n",
+> +		if (PTR_ERR(reg) == -EPROBE_DEFER)
+> +			return -EPROBE_DEFER;
+> +		host->vcc = NULL;
+> +		dev_dbg(host->dev, "unable to get vmmc regulator %ld\n",
+>   			PTR_ERR(reg));
+> -		return PTR_ERR(reg);
 
-Hello,
+I think, It could be unsafe to just drop this return.
+regulator_get_optional may return:
+1 valid pointer on regulator : success;
+2 ERR_PTR(-ENODEV)           : regulator is not assigned, can proceed.
+3 ERR_PTR(-EPROBE_DEFER)     : regulator is assigned, but not ready yet, retry.
+4 ERR_PTR(<other error codes>: regulator is assigned, but can't be retrieved, failure, can't proceed
 
-We are using the =E2=80=9CVirtex-5 FPGA Integrated Endpoint Block for P=
-CI
-Express=E2=80=9D in Linux platform. It supports only a single-function(=
-Header
-Type, Bit 7 is zero), but actually it is having different functions in
-different Bar=E2=80=99s.
+So, It's allowed to continue with host->vcc = NULL; only in case [2], while
+in case [4] probe should fail.
 
-It has UART hardware module implemented in the first Base Address
-Register and MMC host controller in other Base Address Register.
-
-We are planning to develop our own pcie based uart driver for UART
-hardware and planning to use the MMC kernel stack for MMC host
-controller.
-
-By default MMC kernel stack gets attached to this device. In the pcie
-based uart driver, tried configuring the uart module after getting the
-pci_dev structure with pci_get_device(not used the
-pci_register_driver). After that I could able to communicate with the
-UART registers even though MMC stack is attached to the device.
-
-Now I am puzzled and stuck with how to proceed further on UART
-Interrupt Service Routine for this kind of device. Can I use
-request_irq() for uart isr, do you have any suggestion on this?
-
-Any hint or help would be greatly appreciated.
+>   	} else {
+>   		host->vcc = reg;
+>   		ocr_value = mmc_regulator_get_ocrmask(reg);
+> 
 
 
-Regards,
-Sekhar
+-- 
+regards,
+-grygorii
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
