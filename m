@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 6/7] ARM: dts: dra7-evm: Fix spurious card insert/removal interrupt
-Date: Thu, 30 Jul 2015 13:43:39 +0530
-Message-ID: <1438244020-4244-7-git-send-email-kishon@ti.com>
+Subject: [PATCH 5/7] ARM: dts: am57xx-beagle-x15: mmc1: remove redundant pbias-supply property
+Date: Thu, 30 Jul 2015 13:43:38 +0530
+Message-ID: <1438244020-4244-6-git-send-email-kishon@ti.com>
 References: <1438244020-4244-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,32 +12,25 @@ To: tony@atomide.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
 Cc: bcousson@baylibre.com, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, linux@arm.linux.org.uk, nsekhar@ti.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-ldo1_reg in addition to being connected to the io lines is also
-connected to the card detect line. On card removal, omap_hsmmc
-driver does a regulator_disable causing card detect line to be
-pulled down. This raises a card insertion interrupt and once the
-MMC core detects there is no card inserted, it does a
-regulator disable which again raises a card insertion interrupt.
-This happens in a loop causing infinite MMC interrupts.
-
-Fix it by making ldo1_reg as always_on.
+pbias-supply is initialized in dra7.dtsi. Remove redundant initialization
+of pbias-supply from MMC1 dt node in am57xx-beagle-x15.dts
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- arch/arm/boot/dts/dra7-evm.dts |    1 +
- 1 file changed, 1 insertion(+)
+ arch/arm/boot/dts/am57xx-beagle-x15.dts |    1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/dra7-evm.dts b/arch/arm/boot/dts/dra7-evm.dts
-index 25f0a00..a6c82e5 100644
---- a/arch/arm/boot/dts/dra7-evm.dts
-+++ b/arch/arm/boot/dts/dra7-evm.dts
-@@ -358,6 +358,7 @@
- 					regulator-name = "ldo1";
- 					regulator-min-microvolt = <1800000>;
- 					regulator-max-microvolt = <3300000>;
-+					regulator-always-on;
- 					regulator-boot-on;
- 				};
+diff --git a/arch/arm/boot/dts/am57xx-beagle-x15.dts b/arch/arm/boot/dts/am57xx-beagle-x15.dts
+index d0db5c5..daf4f17 100644
+--- a/arch/arm/boot/dts/am57xx-beagle-x15.dts
++++ b/arch/arm/boot/dts/am57xx-beagle-x15.dts
+@@ -579,7 +579,6 @@
+ 	pinctrl-0 = <&mmc1_pins_default>;
  
+ 	vmmc-supply = <&ldo1_reg>;
+-	pbias-supply = <&pbias_mmc_reg>;
+ 	bus-width = <4>;
+ 	cd-gpios = <&gpio6 27 0>; /* gpio 219 */
+ };
 -- 
 1.7.9.5
