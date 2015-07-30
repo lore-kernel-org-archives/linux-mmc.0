@@ -1,43 +1,84 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 00/11] omap_hsmmc: voltage switching and tuning
-Date: Thu, 30 Jul 2015 13:16:23 +0530
-Message-ID: <1438242394-25599-1-git-send-email-kishon@ti.com>
+Subject: [PATCH 02/11] mmc: host: omap_hsmmc: separate setting voltage capabilities from bus power
+Date: Thu, 30 Jul 2015 13:16:25 +0530
+Message-ID: <1438242394-25599-3-git-send-email-kishon@ti.com>
+References: <1438242394-25599-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1438242394-25599-1-git-send-email-kishon@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: tony@atomide.com, ulf.hansson@linaro.org, afenkart@gmail.com, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 Cc: nsekhar@ti.com, kishon@ti.com, mugunthanvnm@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-Patch series implements voltage switching and tuning for omap_hsmmc
-driver.
+Added a separate function to set the voltage capabilities of the host
+controller. Voltage capabilities should be set only once during
+controller initialization but bus power can be changed every time there
+is a voltage switch and whenever a different card is inserted.
+This allows omap_hsmmc_conf_bus_power to be invoked every time there
+is a voltage switch.
 
-Did basic read/write test in J6, J6 Eco, Beagle-x15, AM437x EVM,
-Beaglebone black, OMAP5 uEVM and OMAP4 PANDA.
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |   28 +++++++++++++++++++---------
+ 1 file changed, 19 insertions(+), 9 deletions(-)
 
-Balaji T K (2):
-  mmc: host: omap_hsmmc: add voltage switch support for UHS SD card
-  mmc: host: omap_hsmmc: add tuning support
-
-Kishon Vijay Abraham I (8):
-  mmc: host: omap_hsmmc: Support pbias and vmmc_aux to switch to 1.8v
-  mmc: host: omap_hsmmc: separate setting voltage capabilities from bus
-    power
-  mmc: host: omap_hsmmc: program HCTL based on signal_voltage set by
-    mmc core
-  mmc: host: omap_hsmmc: set clk rate to the max frequency
-  mmc: host: omap_hsmmc: set timing in the UHSMS field
-  mmc: host: omap_hsmmc: Workaround for errata id i802
-  mmc: host: omap_hsmmc: Allow io voltage switch even for fixed vdd
-  mmc: host: omap_hsmmc: remove incorrect voltage switch sequence
-
-Mugunthan V N (1):
-  mmc: host: omap_hsmmc: add software timer when timeout greater than
-    hardware capablility
-
- drivers/mmc/host/omap_hsmmc.c |  670 +++++++++++++++++++++++++++++++++--------
- 1 file changed, 547 insertions(+), 123 deletions(-)
-
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 09e949f..2dfef11 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1812,25 +1812,34 @@ err:
+ 	return ret;
+ }
+ 
++static void omap_hsmmc_set_capabilities(struct omap_hsmmc_host *host)
++{
++	u32 val;
++
++	val = OMAP_HSMMC_READ(host->base, CAPA);
++
++	/* Only MMC1 supports 3.0V */
++	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT)
++		val |= (VS30 | VS18);
++	else
++		val |= VS18;
++
++	OMAP_HSMMC_WRITE(host->base, CAPA, val);
++}
++
+ static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
+ {
+-	u32 hctl, capa, value;
++	u32 hctl, value;
+ 
+ 	/* Only MMC1 supports 3.0V */
+-	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
++	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT)
+ 		hctl = SDVS30;
+-		capa = VS30 | VS18;
+-	} else {
++	else
+ 		hctl = SDVS18;
+-		capa = VS18;
+-	}
+ 
+ 	value = OMAP_HSMMC_READ(host->base, HCTL) & ~SDVS_MASK;
+ 	OMAP_HSMMC_WRITE(host->base, HCTL, value | hctl);
+ 
+-	value = OMAP_HSMMC_READ(host->base, CAPA);
+-	OMAP_HSMMC_WRITE(host->base, CAPA, value | capa);
+-
+ 	/* Set SD bus power bit */
+ 	set_sd_bus_power(host);
+ }
+@@ -2133,6 +2142,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 
+ 	mmc->pm_caps |= mmc_pdata(host)->pm_caps;
+ 
++	omap_hsmmc_set_capabilities(host);
+ 	omap_hsmmc_conf_bus_power(host);
+ 
+ 	if (!pdev->dev.of_node) {
 -- 
 1.7.9.5
