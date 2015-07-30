@@ -1,22 +1,48 @@
-From: Holger Schurig <holgerschurig-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v3 0/6] mmc: imx: a few fixes and new feature
-Date: Thu, 30 Jul 2015 11:44:52 +0200
-Message-ID: <CAOpc7mHjUZeucxvDK6WxKX-tUFTtvsAT72h7BaOzqCwiQEK+Qw@mail.gmail.com>
+From: Jan =?ISO-8859-1?Q?L=FCbbe?= <jlu@pengutronix.de>
+Subject: Re: [PATCH v3 2/6] mmc: sdhci-esdhc-imx: add tuning-step seting
+ support
+Date: Thu, 30 Jul 2015 18:25:06 +0200
+Message-ID: <1438273506.26075.2.camel@pengutronix.de>
 References: <1438160637-28061-1-git-send-email-haibo.chen@freescale.com>
-	<20150729091027.GC16916@shlinux1.ap.freescale.net>
+	 <1438160637-28061-3-git-send-email-haibo.chen@freescale.com>
+Reply-To: jlu@pengutronix.de
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150729091027.GC16916-KgLukfWpBlCctlrPMvKcciBecyulp+rMXqFh9Ls21Oc@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dong Aisheng <b29396-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Cc: Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, mark.rutland-5wv7dgnIgG8@public.gmane.org, aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, fabio.estevam-KZfg59tc24xl57MIdRCFDg@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, open list <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, johan.derycke-ob4gmnvZ1/cAvxtiuMwx3w@public.gmane.org, shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from metis.ext.pengutronix.de ([92.198.50.35]:39800 "EHLO
+	metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752901AbbG3QZb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jul 2015 12:25:31 -0400
+In-Reply-To: <1438160637-28061-3-git-send-email-haibo.chen@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Haibo Chen <haibo.chen@freescale.com>
+Cc: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawnguo@kernel.org, kernel@pengutronix.de, linux@arm.linux.org.uk, ulf.hansson@linaro.org, aisheng.dong@freescale.com, fabio.estevam@freescale.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, johan.derycke@barco.com, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
 
-Can you also fix the driver to NOT use mdelay(1) while in spinlock irqsafe?
+On Mi, 2015-07-29 at 17:03 +0800, Haibo Chen wrote:
+> tuning-step is the delay cell steps in tuning procedure. The default
+> value of tuning-step is 1. For imx6 series usdhc, tuning procedure ca=
+n
+> be passed when the tuning-step value is 1. But imx7d usdhc need the
+> tuning-step value as 2, otherwise it can't pass the tuning procedure.
+>=20
+> So this patch add the tuning-step setting in driver, so that user can
+> set the tuning-step value in dts.
 
-A driver with such a design should have gotten a NAK in the first place ...
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+=46rom your description, the correct tuning-step value only depends on =
+the
+SoC. Why not derive it from the compatible string?
+
+Regards,
+Jan L=C3=BCbbe
+--=20
+Pengutronix e.K.                           |                           =
+  |
+Industrial Linux Solutions                 | http://www.pengutronix.de/=
+  |
+Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0  =
+  |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-555=
+5 |
+
