@@ -1,128 +1,37 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 10/11] mmc: host: omap_hsmmc: remove incorrect voltage switch sequence
-Date: Thu, 30 Jul 2015 13:16:33 +0530
-Message-ID: <1438242394-25599-11-git-send-email-kishon@ti.com>
-References: <1438242394-25599-1-git-send-email-kishon@ti.com>
+Subject: [PATCH 0/7] ARM: dts: MMC fixes for DRA7 based boards
+Date: Thu, 30 Jul 2015 13:43:33 +0530
+Message-ID: <1438244020-4244-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1438242394-25599-1-git-send-email-kishon@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: tony@atomide.com, ulf.hansson@linaro.org, afenkart@gmail.com, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: nsekhar@ti.com, kishon@ti.com, mugunthanvnm@ti.com
+To: tony@atomide.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc: bcousson@baylibre.com, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, linux@arm.linux.org.uk, nsekhar@ti.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-ios->vdd is set only in mmc_power_up and mmc_power_off and not in
-mmc_select_voltage as mentioned in the code comment. This seems to be
-legacy code that has been carried for a long time without being
-tested.
-This will be replaced with a proper voltage switch sequence and
-populated in start_signal_voltage_switch ops to be used by
-mmc core for switching voltages.
+Miscellaneous fixes in dts files for MMC device tree nodes.
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
----
- drivers/mmc/host/omap_hsmmc.c |   81 -----------------------------------------
- 1 file changed, 81 deletions(-)
+Did basic read/write test in J6, J6 Eco and Beagle-x15
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 26010a3..6b02c7c 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1325,69 +1325,6 @@ static void set_sd_bus_power(struct omap_hsmmc_host *host)
- 	}
- }
- 
--/*
-- * Switch MMC interface voltage ... only relevant for MMC1.
-- *
-- * MMC2 and MMC3 use fixed 1.8V levels, and maybe a transceiver.
-- * The MMC2 transceiver controls are used instead of DAT4..DAT7.
-- * Some chips, like eMMC ones, use internal transceivers.
-- */
--static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
--{
--	u32 reg_val = 0;
--	int ret;
--
--	/* Disable the clocks */
--	pm_runtime_put_sync(host->dev);
--	if (host->dbclk)
--		clk_disable_unprepare(host->dbclk);
--
--	/* Turn the power off */
--	ret = mmc_pdata(host)->set_power(host->dev, 0, 0);
--
--	/* Turn the power ON with given VDD 1.8 or 3.0v */
--	if (!ret)
--		ret = mmc_pdata(host)->set_power(host->dev, 1, vdd);
--	pm_runtime_get_sync(host->dev);
--	if (host->dbclk)
--		clk_prepare_enable(host->dbclk);
--
--	if (ret != 0)
--		goto err;
--
--	OMAP_HSMMC_WRITE(host->base, HCTL,
--		OMAP_HSMMC_READ(host->base, HCTL) & SDVSCLR);
--	reg_val = OMAP_HSMMC_READ(host->base, HCTL);
--
--	/*
--	 * If a MMC dual voltage card is detected, the set_ios fn calls
--	 * this fn with VDD bit set for 1.8V. Upon card removal from the
--	 * slot, omap_hsmmc_set_ios sets the VDD back to 3V on MMC_POWER_OFF.
--	 *
--	 * Cope with a bit of slop in the range ... per data sheets:
--	 *  - "1.8V" for vdds_mmc1/vdds_mmc1a can be up to 2.45V max,
--	 *    but recommended values are 1.71V to 1.89V
--	 *  - "3.0V" for vdds_mmc1/vdds_mmc1a can be up to 3.5V max,
--	 *    but recommended values are 2.7V to 3.3V
--	 *
--	 * Board setup code shouldn't permit anything very out-of-range.
--	 * TWL4030-family VMMC1 and VSIM regulators are fine (avoiding the
--	 * middle range) but VSIM can't power DAT4..DAT7 at more than 3V.
--	 */
--	if ((1 << vdd) <= MMC_VDD_23_24)
--		reg_val |= SDVS18;
--	else
--		reg_val |= SDVS30;
--
--	OMAP_HSMMC_WRITE(host->base, HCTL, reg_val);
--	set_sd_bus_power(host);
--
--	return 0;
--err:
--	dev_err(mmc_dev(host->mmc), "Unable to switch operating voltage\n");
--	return ret;
--}
--
- /* Protect the card while the cover is open */
- static void omap_hsmmc_protect_card(struct omap_hsmmc_host *host)
- {
-@@ -1799,24 +1736,6 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 	omap_hsmmc_set_bus_width(host);
- 
--	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
--		/* Only MMC1 can interface at 3V without some flavor
--		 * of external transceiver; but they all handle 1.8V.
--		 */
--		if ((OMAP_HSMMC_READ(host->base, HCTL) & SDVSDET) &&
--			(ios->vdd == DUAL_VOLT_OCR_BIT)) {
--				/*
--				 * The mmc_select_voltage fn of the core does
--				 * not seem to set the power_mode to
--				 * MMC_POWER_UP upon recalculating the voltage.
--				 * vdd 1.8v.
--				 */
--			if (omap_hsmmc_switch_opcond(host, ios->vdd) != 0)
--				dev_dbg(mmc_dev(host->mmc),
--						"Switch operation failed\n");
--		}
--	}
--
- 	omap_hsmmc_set_clock(host);
- 
- 	if (ios->timing != host->timing) {
+Balaji T K (1):
+  ARM: dts: dra7-evm: add evm_3v3_sd regulator
+
+Kishon Vijay Abraham I (5):
+  ARM: dts: dra72-evm: add evm_3v3_sd regulator
+  ARM: dts: dra72-evm: Set max clock frequency of MMC1 and MMC2
+  ARM: dts: am57xx-beagle-x15: mmc1: remove redundant pbias-supply
+    property
+  ARM: dts: dra7-evm: Fix spurious card insert/removal interrupt
+  ARM: dts: dra72-evm: Fix spurious card insert/removal interrupt
+
+Nishanth Menon (1):
+  ARM: dts: dra7-evm: Add MMCSD card removal GPIO
+
+ arch/arm/boot/dts/am57xx-beagle-x15.dts |    1 -
+ arch/arm/boot/dts/dra7-evm.dts          |   18 +++++++++++++++++-
+ arch/arm/boot/dts/dra72-evm.dts         |   16 ++++++++++++++--
+ 3 files changed, 31 insertions(+), 4 deletions(-)
+
 -- 
 1.7.9.5
