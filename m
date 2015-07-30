@@ -1,86 +1,22 @@
-From: Jiri Slaby <jslaby@suse.cz>
-Subject: [SHDCI] Heavy (thousands) DMA leaks
-Date: Thu, 30 Jul 2015 11:31:46 +0200
-Message-ID: <55B9EF02.7040404@suse.cz>
+From: Holger Schurig <holgerschurig-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v3 0/6] mmc: imx: a few fixes and new feature
+Date: Thu, 30 Jul 2015 11:44:52 +0200
+Message-ID: <CAOpc7mHjUZeucxvDK6WxKX-tUFTtvsAT72h7BaOzqCwiQEK+Qw@mail.gmail.com>
+References: <1438160637-28061-1-git-send-email-haibo.chen@freescale.com>
+	<20150729091027.GC16916@shlinux1.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:36349 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752024AbbG3Jbu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jul 2015 05:31:50 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20150729091027.GC16916-KgLukfWpBlCctlrPMvKcciBecyulp+rMXqFh9Ls21Oc@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dong Aisheng <b29396-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+Cc: Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, mark.rutland-5wv7dgnIgG8@public.gmane.org, aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, fabio.estevam-KZfg59tc24xl57MIdRCFDg@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, open list <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, johan.derycke-ob4gmnvZ1/cAvxtiuMwx3w@public.gmane.org, shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: haibo.chen@freescale.com
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Linux kernel mailing list <linux-kernel@vger.kernel.org>
 
-Hi,
+Can you also fix the driver to NOT use mdelay(1) while in spinlock irqsafe?
 
-after
-commit 348487cb28e66b032bae1b38424d81bf5b444408
-Author: Haibo Chen <haibo.chen@freescale.com>
-Date:   Tue Dec 9 17:04:05 2014 +0800
-
-    mmc: sdhci: use pipeline mmc requests to improve performance
-
-I see heavy DMA leaks which result in warnings of the dma api debug code:
-WARNING: CPU: 0 PID: 0 at lib/dma-debug.c:509 add_dma_entry+0x138/0x150()
-DMA-API: exceeded 7 overlapping mappings of cacheline 0x000000000b20ec00
-
-
-
-And mainly this one upon sdhci module removal. It is over 4000 leaked
-mappings during one card transfer.
-mmc0: card e624 removed
-------------[ cut here ]------------
-WARNING: CPU: 2 PID: 1263 at lib/dma-debug.c:974
-dma_debug_device_change+0x158/0x1c0()
-pci 0000:02:00.0: DMA-API: device driver has pending DMA allocations
-while released from device [count=4041]
-One of leaked entries details: [device address=0x00000000ddff0000]
-[size=65536 bytes] [mapped with DMA_FROM_DEVICE] [mapped as scather-gather]
-Modules linked in:
-CPU: 2 PID: 1263 Comm: bash Tainted: G        W       4.2.0-rc4 #12
-Hardware name: LENOVO 23252SG/23252SG, BIOS G2ET33WW (1.13 ) 07/24/2012
- ffffffff81cc5e32 ffff8800d03c3b68 ffffffff81820938 0000000000000000
- ffff8800d03c3bb8 ffff8800d03c3ba8 ffffffff810b827a 0000000100260021
- ffff88030e500000 0000000000000fc9 ffff88030d95aeb8 ffff88030e4ddd68
-Call Trace:
- [<ffffffff81820938>] dump_stack+0x4c/0x6e
- [<ffffffff810b827a>] warn_slowpath_common+0x8a/0xc0
- [<ffffffff810b82f6>] warn_slowpath_fmt+0x46/0x50
- [<ffffffff813248c8>] dma_debug_device_change+0x158/0x1c0
- [<ffffffff810d4e9d>] notifier_call_chain+0x4d/0x80
- [<ffffffff810d51fd>] __blocking_notifier_call_chain+0x4d/0x70
- [<ffffffff810d5236>] blocking_notifier_call_chain+0x16/0x20
- [<ffffffff814db395>] __device_release_driver+0x105/0x130
- [<ffffffff814db3e3>] device_release_driver+0x23/0x30
- [<ffffffff814d95ca>] unbind_store+0xba/0xe0
- [<ffffffff8123c638>] ? kernfs_fop_write+0xe8/0x170
- [<ffffffff814d8ac4>] drv_attr_store+0x24/0x30
- [<ffffffff8123ce4a>] sysfs_kf_write+0x3a/0x50
- [<ffffffff8123c670>] kernfs_fop_write+0x120/0x170
- [<ffffffff811ce9e8>] __vfs_write+0x28/0xe0
- [<ffffffff811d1209>] ? __sb_start_write+0x49/0xe0
- [<ffffffff810e3ba5>] ? local_clock+0x25/0x30
- [<ffffffff811cf041>] vfs_write+0xa1/0x170
- [<ffffffff810e43c4>] ? vtime_account_user+0x54/0x60
- [<ffffffff811cfce6>] SyS_write+0x46/0xa0
- [<ffffffff81180f83>] ? context_tracking_user_exit+0x13/0x20
- [<ffffffff8182a017>] entry_SYSCALL_64_fastpath+0x12/0x6a
----[ end trace 398181ad32332b33 ]---
-Mapped at:
- [<ffffffff81324492>] debug_dma_map_sg+0x122/0x140
- [<ffffffff81616dd3>] sdhci_pre_dma_transfer+0xc3/0x1b0
- [<ffffffff81616f02>] sdhci_pre_req+0x42/0x70
- [<ffffffff81601492>] mmc_pre_req+0x42/0x60
- [<ffffffff8160290e>] mmc_start_req+0x3e/0x400
-
-I already fixed one symptom -- memory corruption. Could you revisit the
-commit once again, as there is surely at least one more bug?
-
-thanks,
--- 
-js
-suse labs
+A driver with such a design should have gotten a NAK in the first place ...
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
