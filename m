@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH 08/11] mmc: host: omap_hsmmc: Workaround for errata id i802
-Date: Thu, 30 Jul 2015 13:16:31 +0530
-Message-ID: <1438242394-25599-9-git-send-email-kishon@ti.com>
+Subject: [PATCH 10/11] mmc: host: omap_hsmmc: remove incorrect voltage switch sequence
+Date: Thu, 30 Jul 2015 13:16:33 +0530
+Message-ID: <1438242394-25599-11-git-send-email-kishon@ti.com>
 References: <1438242394-25599-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,47 +12,117 @@ To: tony@atomide.com, ulf.hansson@linaro.org, afenkart@gmail.com, linux-kernel@v
 Cc: nsekhar@ti.com, kishon@ti.com, mugunthanvnm@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-According to errata i802, DCRC error interrupts
-(MMCHS_STAT[21] DCRC=0x1) can occur during the tuning procedure.
-
-The DCRC interrupt, occurs when the last tuning block fails
-(the last ratio tested). The delay from CRC check until the
-interrupt is asserted is bigger than the delay until assertion
-of the tuning end flag. Assertion of tuning end flag is what
-masks the interrupts. Because of this race, an erroneous DCRC
-interrupt occurs.
-
-The suggested  workaround is to disable DCRC interrupts during
-the tuning procedure which is implemented here.
+ios->vdd is set only in mmc_power_up and mmc_power_off and not in
+mmc_select_voltage as mentioned in the code comment. This seems to be
+legacy code that has been carried for a long time without being
+tested.
+This will be replaced with a proper voltage switch sequence and
+populated in start_signal_voltage_switch ops to be used by
+mmc core for switching voltages.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-Signed-off-by: Sekhar Nori <nsekhar@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+ drivers/mmc/host/omap_hsmmc.c |   81 -----------------------------------------
+ 1 file changed, 81 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index dcfa92e..96dd406 100644
+index 26010a3..6b02c7c 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -656,8 +656,17 @@ static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
- 	is_tuning = (cmd->opcode == MMC_SEND_TUNING_BLOCK) ||
- 		    (cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200);
+@@ -1325,69 +1325,6 @@ static void set_sd_bus_power(struct omap_hsmmc_host *host)
+ 	}
+ }
  
--	if (!is_tuning && host->use_dma)
-+	if (is_tuning) {
-+		/*
-+		 * OMAP5/DRA74X/DRA72x Errata i802:
-+		 * DCRC error interrupts (MMCHS_STAT[21] DCRC=0x1) can occur
-+		 * during the tuning procedure. So disable it during the
-+		 * tuning procedure.
-+		 */
-+		irq_mask &= ~DCRC_EN;
-+	} else if (host->use_dma) {
- 		irq_mask &= ~(BRR_EN | BWR_EN);
-+	}
+-/*
+- * Switch MMC interface voltage ... only relevant for MMC1.
+- *
+- * MMC2 and MMC3 use fixed 1.8V levels, and maybe a transceiver.
+- * The MMC2 transceiver controls are used instead of DAT4..DAT7.
+- * Some chips, like eMMC ones, use internal transceivers.
+- */
+-static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
+-{
+-	u32 reg_val = 0;
+-	int ret;
+-
+-	/* Disable the clocks */
+-	pm_runtime_put_sync(host->dev);
+-	if (host->dbclk)
+-		clk_disable_unprepare(host->dbclk);
+-
+-	/* Turn the power off */
+-	ret = mmc_pdata(host)->set_power(host->dev, 0, 0);
+-
+-	/* Turn the power ON with given VDD 1.8 or 3.0v */
+-	if (!ret)
+-		ret = mmc_pdata(host)->set_power(host->dev, 1, vdd);
+-	pm_runtime_get_sync(host->dev);
+-	if (host->dbclk)
+-		clk_prepare_enable(host->dbclk);
+-
+-	if (ret != 0)
+-		goto err;
+-
+-	OMAP_HSMMC_WRITE(host->base, HCTL,
+-		OMAP_HSMMC_READ(host->base, HCTL) & SDVSCLR);
+-	reg_val = OMAP_HSMMC_READ(host->base, HCTL);
+-
+-	/*
+-	 * If a MMC dual voltage card is detected, the set_ios fn calls
+-	 * this fn with VDD bit set for 1.8V. Upon card removal from the
+-	 * slot, omap_hsmmc_set_ios sets the VDD back to 3V on MMC_POWER_OFF.
+-	 *
+-	 * Cope with a bit of slop in the range ... per data sheets:
+-	 *  - "1.8V" for vdds_mmc1/vdds_mmc1a can be up to 2.45V max,
+-	 *    but recommended values are 1.71V to 1.89V
+-	 *  - "3.0V" for vdds_mmc1/vdds_mmc1a can be up to 3.5V max,
+-	 *    but recommended values are 2.7V to 3.3V
+-	 *
+-	 * Board setup code shouldn't permit anything very out-of-range.
+-	 * TWL4030-family VMMC1 and VSIM regulators are fine (avoiding the
+-	 * middle range) but VSIM can't power DAT4..DAT7 at more than 3V.
+-	 */
+-	if ((1 << vdd) <= MMC_VDD_23_24)
+-		reg_val |= SDVS18;
+-	else
+-		reg_val |= SDVS30;
+-
+-	OMAP_HSMMC_WRITE(host->base, HCTL, reg_val);
+-	set_sd_bus_power(host);
+-
+-	return 0;
+-err:
+-	dev_err(mmc_dev(host->mmc), "Unable to switch operating voltage\n");
+-	return ret;
+-}
+-
+ /* Protect the card while the cover is open */
+ static void omap_hsmmc_protect_card(struct omap_hsmmc_host *host)
+ {
+@@ -1799,24 +1736,6 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  
- 	/* Disable timeout for erases */
- 	if (cmd->opcode == MMC_ERASE)
+ 	omap_hsmmc_set_bus_width(host);
+ 
+-	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
+-		/* Only MMC1 can interface at 3V without some flavor
+-		 * of external transceiver; but they all handle 1.8V.
+-		 */
+-		if ((OMAP_HSMMC_READ(host->base, HCTL) & SDVSDET) &&
+-			(ios->vdd == DUAL_VOLT_OCR_BIT)) {
+-				/*
+-				 * The mmc_select_voltage fn of the core does
+-				 * not seem to set the power_mode to
+-				 * MMC_POWER_UP upon recalculating the voltage.
+-				 * vdd 1.8v.
+-				 */
+-			if (omap_hsmmc_switch_opcond(host, ios->vdd) != 0)
+-				dev_dbg(mmc_dev(host->mmc),
+-						"Switch operation failed\n");
+-		}
+-	}
+-
+ 	omap_hsmmc_set_clock(host);
+ 
+ 	if (ios->timing != host->timing) {
 -- 
 1.7.9.5
