@@ -1,74 +1,86 @@
-From: Dong Aisheng <aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Subject: Re: [PATCH v3 6/6] mmc: sdhci-esdhc-imx: set back the
- burst_length_enable bit to 1
-Date: Fri, 31 Jul 2015 22:57:52 +0800
-Message-ID: <20150731145751.GG27806@shlinux1.ap.freescale.net>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH v3 5/6] mmc: sdhci-esdhc-imx: config watermark level and
+ burst length
+Date: Fri, 31 Jul 2015 16:13:45 +0100
+Message-ID: <20150731151345.GX7557@n2100.arm.linux.org.uk>
 References: <1438160637-28061-1-git-send-email-haibo.chen@freescale.com>
- <1438160637-28061-7-git-send-email-haibo.chen@freescale.com>
+ <1438160637-28061-6-git-send-email-haibo.chen@freescale.com>
+ <20150731145140.GE27806@shlinux1.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:54025 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753204AbbGaPOM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Jul 2015 11:14:12 -0400
 Content-Disposition: inline
-In-Reply-To: <1438160637-28061-7-git-send-email-haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Cc: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, johan.derycke-ob4gmnvZ1/cAvxtiuMwx3w@public.gmane.org, fabio.estevam-KZfg59tc24xl57MIdRCFDg@public.gmane.org, b29396-KZfg59tc24xl57MIdRCFDg@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <20150731145140.GE27806@shlinux1.ap.freescale.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <aisheng.dong@freescale.com>
+Cc: Haibo Chen <haibo.chen@freescale.com>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawnguo@kernel.org, kernel@pengutronix.de, ulf.hansson@linaro.org, johan.derycke@barco.com, fabio.estevam@freescale.com, b29396@freescale.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-On Wed, Jul 29, 2015 at 05:03:57PM +0800, Haibo Chen wrote:
-> Currently we find that if a usdhc is choosed to boot system, then ROM
-> code will set the burst length enable bit of this usdhc as 0.
+On Fri, Jul 31, 2015 at 10:51:41PM +0800, Dong Aisheng wrote:
+> On Wed, Jul 29, 2015 at 05:03:56PM +0800, Haibo Chen wrote:
+> > i.MX7D support eMMC HS400 mode, this mode can run in 8 bit,200MHZ
+> > DDR mode. So the I/O speed improve a lot compare to SD3.0
+> > 
+> > The default burst length is 8, if we don't change this value, in
+> > HS400 mode, when we do eMMC read operation, we can find that the
+> > clock signal will stop for a period of time. This means the speed
+> > of data moving on AHB bus is slower than I/O speed. So we should
+> > improve the speed of data moving on AHB bus.
+> > 
+> > For imx7d usdhc, this patch set the burst length as 16, and set
+> > watermark level as 64. The test result is the clock signal has
+> > no stop during the eMMC HS400 operation. For other imx usdhc, remain
+> > the default value: burst length as 8, watermark level as 16.
+> > 
+> > Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
+> > ---
+> >  drivers/mmc/host/sdhci-esdhc-imx.c | 11 ++++++++++-
+> >  1 file changed, 10 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> > index 158f93b..37d0095 100644
+> > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> > @@ -239,6 +239,11 @@ static inline int is_imx6q_usdhc(struct pltfm_imx_data *data)
+> >  	return data->socdata == &usdhc_imx6q_data;
+> >  }
+> >  
+> > +static inline int is_imx7d_usdhc(struct pltfm_imx_data *data)
+> > +{
+> > +	return data->socdata == &usdhc_imx7d_data;
+> > +}
 > 
-> This will make performance drop a lot if this usdhc's burst length is
-> 16. So this patch set back the burst_length_enable bit as 1, which is
-> the default value, and means burst length is enabled for INCR.
-> 
-> Signed-off-by: Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 11 +++++++++++
->  1 file changed, 11 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 37d0095..dd945e5 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -32,6 +32,7 @@
->  #include "sdhci-esdhc.h"
->  
->  #define	ESDHC_CTRL_D3CD			0x08
-> +#define ESDHC_BURST_LEN_EN_INCR		(1 << 27)
->  /* VENDOR SPEC register */
->  #define ESDHC_VENDOR_SPEC		0xc0
->  #define  ESDHC_VENDOR_SPEC_SDIO_QUIRK	(1 << 1)
-> @@ -1158,6 +1159,16 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
->  		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
->  		host->mmc->caps |= MMC_CAP_1_8V_DDR;
->  
-> +		/*
-> +		 * ROM code will change the burst_length_enable setting to
-> +		 * zero if this usdhc is choosed to boot system. Change it
-> +		 * back here, otherwise it will impact the performance a
-> +		 * lot if the burst length is 16.
+> Can we using flag to check instead of adding more is_imx_usdhc()?
 
-Can you clarify a bit more on why performance drops a lot if burst
-length is 16?
-Caused by the burst length setting did not work due to ROM disabled it?
+No, not more flags.  Do the job properly and parameterise the differences.
 
-Regards
-Dong Aisheng
+> >  static inline int esdhc_is_usdhc(struct pltfm_imx_data *data)
+> >  {
+> >  	return !!(data->socdata->flags & ESDHC_FLAG_USDHC);
+> > @@ -1145,7 +1150,11 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+> >  	 * to something insane.  Change it back here.
+> >  	 */
+> >  	if (esdhc_is_usdhc(imx_data)) {
+> > -		writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
+> > +		if (is_imx7d_usdhc(imx_data))
+> > +			writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
+> > +		else
+> > +			writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
 
-> +		 */
-> +		writel(readl(host->ioaddr + SDHCI_HOST_CONTROL)
-> +			| ESDHC_BURST_LEN_EN_INCR,
-> +			host->ioaddr + SDHCI_HOST_CONTROL);
-> +
->  		if (!(imx_data->socdata->flags & ESDHC_FLAG_HS200))
->  			host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
->  
-> -- 
-> 1.9.1
-> 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+So the value to be written to this register should come from the
+driver data, which is already used as a struct esdhc_soc_data to
+extrapolate out the differences.
+
+Going down the flag path will lead you to an even more of a stinking
+shitpile than sdhci already is - if another version of the SoC requires
+a different value there, what are you going to do?  Add yet another
+flag for the next value?  What are you going to do when you have 16
+different values?  Use 16 different flags?  Clearly that path is insane.
+
+-- 
+FTTC broadband for 0.8mile line: currently at 10.5Mbps down 400kbps up
+according to speedtest.net.
