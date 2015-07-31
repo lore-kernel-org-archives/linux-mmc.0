@@ -1,61 +1,97 @@
-From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: Re: [PATCH v3 2/6] mmc: sdhci-esdhc-imx: add tuning-step seting
- support
-Date: Fri, 31 Jul 2015 12:41:49 +0800
-Message-ID: <20150731044146.GA27806@shlinux1.ap.freescale.net>
-References: <1438160637-28061-1-git-send-email-haibo.chen@freescale.com>
- <1438160637-28061-3-git-send-email-haibo.chen@freescale.com>
- <1438273506.26075.2.camel@pengutronix.de>
+From: Chen Bough <Haibo.Chen@freescale.com>
+Subject: RE: [SHDCI] Heavy (thousands) DMA leaks
+Date: Fri, 31 Jul 2015 06:56:42 +0000
+Message-ID: <BY1PR03MB13887903354C9C4BEDFB86B59A8A0@BY1PR03MB1388.namprd03.prod.outlook.com>
+References: <55B9EF02.7040404@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1on0118.outbound.protection.outlook.com ([157.56.110.118]:60048
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750804AbbGaEuh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 31 Jul 2015 00:50:37 -0400
-Content-Disposition: inline
-In-Reply-To: <1438273506.26075.2.camel@pengutronix.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <55B9EF02.7040404@suse.cz>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jiri Slaby <jslaby@suse.cz>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux kernel mailing list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jan =?iso-8859-1?Q?L=FCbbe?= <jlu@pengutronix.de>
-Cc: Haibo Chen <haibo.chen@freescale.com>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawnguo@kernel.org, kernel@pengutronix.de, linux@arm.linux.org.uk, ulf.hansson@linaro.org, fabio.estevam@freescale.com, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, johan.derycke@barco.com, b29396@freescale.com, linux-arm-kernel@lists.infradead.org
 
-On Thu, Jul 30, 2015 at 06:25:06PM +0200, Jan L=FCbbe wrote:
-> On Mi, 2015-07-29 at 17:03 +0800, Haibo Chen wrote:
-> > tuning-step is the delay cell steps in tuning procedure. The defaul=
-t
-> > value of tuning-step is 1. For imx6 series usdhc, tuning procedure =
-can
-> > be passed when the tuning-step value is 1. But imx7d usdhc need the
-> > tuning-step value as 2, otherwise it can't pass the tuning procedur=
-e.
-> >=20
-> > So this patch add the tuning-step setting in driver, so that user c=
-an
-> > set the tuning-step value in dts.
->=20
-> From your description, the correct tuning-step value only depends on =
-the
-> SoC. Why not derive it from the compatible string?
->=20
+Hi Jiri,
 
-'tuning-step' actually depends on board and card.
-The commit message should be reformed a bit.
+I will check this issue ASAP, thanks for report this!
 
-Regards
-Dong Aisheng
 
-> Regards,
-> Jan L=FCbbe
-> --=20
-> Pengutronix e.K.                           |                         =
-    |
-> Industrial Linux Solutions                 | http://www.pengutronix.d=
-e/  |
-> Peiner Str. 6-8, 31137 Hildesheim, Germany | Phone: +49-5121-206917-0=
-    |
-> Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5=
-555 |
->=20
+Best Regards
+Haibo Chen
+
+
+> -----Original Message-----
+> From: Jiri Slaby [mailto:jslaby@suse.cz]
+> Sent: Thursday, July 30, 2015 5:32 PM
+> To: Chen Haibo-B51421
+> Cc: Ulf Hansson; linux-mmc@vger.kernel.org; Linux kernel mailing list
+> Subject: [SHDCI] Heavy (thousands) DMA leaks
+> 
+> Hi,
+> 
+> after
+> commit 348487cb28e66b032bae1b38424d81bf5b444408
+> Author: Haibo Chen <haibo.chen@freescale.com>
+> Date:   Tue Dec 9 17:04:05 2014 +0800
+> 
+>     mmc: sdhci: use pipeline mmc requests to improve performance
+> 
+> I see heavy DMA leaks which result in warnings of the dma api debug code:
+> WARNING: CPU: 0 PID: 0 at lib/dma-debug.c:509 add_dma_entry+0x138/0x150()
+> DMA-API: exceeded 7 overlapping mappings of cacheline 0x000000000b20ec00
+> 
+> 
+> 
+> And mainly this one upon sdhci module removal. It is over 4000 leaked
+> mappings during one card transfer.
+> mmc0: card e624 removed
+> ------------[ cut here ]------------
+> WARNING: CPU: 2 PID: 1263 at lib/dma-debug.c:974
+> dma_debug_device_change+0x158/0x1c0()
+> pci 0000:02:00.0: DMA-API: device driver has pending DMA allocations
+> while released from device [count=4041] One of leaked entries details:
+> [device address=0x00000000ddff0000]
+> [size=65536 bytes] [mapped with DMA_FROM_DEVICE] [mapped as scather-
+> gather] Modules linked in:
+> CPU: 2 PID: 1263 Comm: bash Tainted: G        W       4.2.0-rc4 #12
+> Hardware name: LENOVO 23252SG/23252SG, BIOS G2ET33WW (1.13 ) 07/24/2012
+>  ffffffff81cc5e32 ffff8800d03c3b68 ffffffff81820938 0000000000000000
+>  ffff8800d03c3bb8 ffff8800d03c3ba8 ffffffff810b827a 0000000100260021
+>  ffff88030e500000 0000000000000fc9 ffff88030d95aeb8 ffff88030e4ddd68 Call
+> Trace:
+>  [<ffffffff81820938>] dump_stack+0x4c/0x6e  [<ffffffff810b827a>]
+> warn_slowpath_common+0x8a/0xc0  [<ffffffff810b82f6>]
+> warn_slowpath_fmt+0x46/0x50  [<ffffffff813248c8>]
+> dma_debug_device_change+0x158/0x1c0
+>  [<ffffffff810d4e9d>] notifier_call_chain+0x4d/0x80  [<ffffffff810d51fd>]
+> __blocking_notifier_call_chain+0x4d/0x70
+>  [<ffffffff810d5236>] blocking_notifier_call_chain+0x16/0x20
+>  [<ffffffff814db395>] __device_release_driver+0x105/0x130
+>  [<ffffffff814db3e3>] device_release_driver+0x23/0x30
+> [<ffffffff814d95ca>] unbind_store+0xba/0xe0  [<ffffffff8123c638>] ?
+> kernfs_fop_write+0xe8/0x170  [<ffffffff814d8ac4>]
+> drv_attr_store+0x24/0x30  [<ffffffff8123ce4a>] sysfs_kf_write+0x3a/0x50
+> [<ffffffff8123c670>] kernfs_fop_write+0x120/0x170  [<ffffffff811ce9e8>]
+> __vfs_write+0x28/0xe0  [<ffffffff811d1209>] ? __sb_start_write+0x49/0xe0
+> [<ffffffff810e3ba5>] ? local_clock+0x25/0x30  [<ffffffff811cf041>]
+> vfs_write+0xa1/0x170  [<ffffffff810e43c4>] ? vtime_account_user+0x54/0x60
+> [<ffffffff811cfce6>] SyS_write+0x46/0xa0  [<ffffffff81180f83>] ?
+> context_tracking_user_exit+0x13/0x20
+>  [<ffffffff8182a017>] entry_SYSCALL_64_fastpath+0x12/0x6a
+> ---[ end trace 398181ad32332b33 ]---
+> Mapped at:
+>  [<ffffffff81324492>] debug_dma_map_sg+0x122/0x140  [<ffffffff81616dd3>]
+> sdhci_pre_dma_transfer+0xc3/0x1b0  [<ffffffff81616f02>]
+> sdhci_pre_req+0x42/0x70  [<ffffffff81601492>] mmc_pre_req+0x42/0x60
+> [<ffffffff8160290e>] mmc_start_req+0x3e/0x400
+> 
+> I already fixed one symptom -- memory corruption. Could you revisit the
+> commit once again, as there is surely at least one more bug?
+> 
+> thanks,
+> --
+> js
+> suse labs
