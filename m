@@ -1,175 +1,90 @@
-From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v2] mmc: sunxi: Don't start commands while the card is
- busy
-Date: Sat, 1 Aug 2015 11:01:18 +0200
-Message-ID: <55BC8ADE.3070802@redhat.com>
-References: <1436541284-11800-1-git-send-email-hdegoede@redhat.com>
- <CAPDyKFoNe0bghfSXs48stHzZToTc7Hjd5gVPy-VbDF8bzdVVMQ@mail.gmail.com>
+From: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Subject: Re: [PATCH] DT: mmc: sh_mmcif: fix "compatible" property text
+Date: Sat, 01 Aug 2015 12:41:52 +0300
+Message-ID: <2743376.X2l1zDXaCd@avalon>
+References: <201404250239.39150.sergei.shtylyov@cogentembedded.com> <3979266.lQrOKbu0yo@wasted.cogentembedded.com> <CANqRtoSVU77Q7hnoMJ2_VbqprJYxbvbbe5MHBReH_dVxyvGAQQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFoNe0bghfSXs48stHzZToTc7Hjd5gVPy-VbDF8bzdVVMQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Mike Turquette <mturquette-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Eugene K <sigintmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from galahad.ideasonboard.com ([185.26.127.97]:59727 "EHLO
+	galahad.ideasonboard.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751171AbbHAJlN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Aug 2015 05:41:13 -0400
+In-Reply-To: <CANqRtoSVU77Q7hnoMJ2_VbqprJYxbvbbe5MHBReH_dVxyvGAQQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, "ijc+devicetree@hellion.org.uk" <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, SH-Linux <linux-sh@vger.kernel.org>, "Simon Horman [Horms]" <horms@verge.net.au>, Geert Uytterhoeven <geert+renesas@glider.be>
 
-Hi,
+On Friday 31 July 2015 11:23:04 Magnus Damm wrote:
+> On Fri, Jul 31, 2015 at 4:59 AM, Sergei Shtylyov wrote:
+> > The "compatible" property text contradicts even the example given in the
+> > MMCIF binding document itself; moreover, the Renesas MMCIF driver only 
+> > matches  on the generic "compatible" string, and doesn't look for at SoC
+> > specific strings currently at all. Thus describe "renesas,sh-mmcif"
+> > string as mandatory and the others as optional.
+> > 
+> > Fixes: b4c27763d749 ("mmc: sh_mmcif: Document DT bindings")
+> > Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+> 
+> Thanks for your efforts trying to improve the DT binding documentation.
+> 
+> > --- renesas.orig/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+> > +++ renesas/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+> > @@ -6,11 +6,11 @@ and the properties used by the MMCIF dev
+> > 
+> >  Required properties:
+> > -- compatible: must contain one of the following
+> > +- compatible: must contain "renesas,sh-mmcif"; may also contain one of
+> > 
+> > +  the following:
+> >         - "renesas,mmcif-r8a7740" for the MMCIF found in r8a7740 SoCs
+> >         - "renesas,mmcif-r8a7790" for the MMCIF found in r8a7790 SoCs
+> >         - "renesas,mmcif-r8a7791" for the MMCIF found in r8a7791 SoCs
+> > 
+> > -       - "renesas,sh-mmcif" for the generic MMCIF
+> 
+> As you know, each SoC contains a wide range of on-chip devices and the
+> MMCIF device is just one of them. Exactly how to manage the DT
+> bindings must be up to each maintainer and of course this needs to be
+> aligned with the SoC maintainer and SoC vendor with policies used for
+> SoC support and BSPs and whatnot. Changing policy like this for a
+> single device without at least discussing this with the SoC
+> maintainers does not help.
+> 
+> For Renesas hardware we so far use both SoC part number and optionally
+> a generic binding as well. As commonly expected, the DT binding is
+> supposed to describe the hardware and if hardware devices are
+> compatible. Unless we use SoC part number in the compatible string
+> there is a risk that the SoC integrator simply copy-and-pastes generic
+> bindings "because it works" but this will result in DT binding based
+> on software compatibility and not hardware compatibility. Later when
+> the driver support is extended this may result in broken software due
+> to incorrect compatibility information through generic bindings.
+> 
+> If anything is unclear please ask and feel free to discuss this DT
+> topic with Simon, Laurent, Geert and/or me.
 
-On 21-07-15 14:15, Ulf Hansson wrote:
-> On 10 July 2015 at 17:14, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> Some sdio wifi modules have not been working reliable with the sunxi-mmc
->> host code. This turns out to be caused by it starting new commands while
->> the card signals that it is still busy processing a previous command.
->
-> Which are those commands?
+To clarify this, the current DT compatible strings policy for Renesas SoCs is 
+to use a mandatory SoC-based string followed by a optional generic strings. 
+Optional here refers to the fact that individual DT bindings can decide 
+whether to use a generic string or not, based on hardware information. An IP 
+core that has a different, incompatible implementation for each SoC it is 
+present in can't make use of a generic compatible string. If a particular 
+binding defines generic compatible strings those should be made mandatory by 
+that binding.
 
-The code were things get stuck when not waiting for the busy signal uses
-the following sdio helper functions:
+In the MMCIF case, I would propose wording it as
 
-sdio_readb/sdio_writeb
-sdio_f0_readb/sdio_f0_writeb
-sdio_readw/sdio_writew
-sdio_readl/sdio_writel
-sdio_readsb
-sdio_memcpy_fromio/sdio_memcpy_toio
+- compatible: must contain one of the following
+      - "renesas,mmcif-r8a7740" for the MMCIF found in r8a7740 SoCs
+      - "renesas,mmcif-r8a7790" for the MMCIF found in r8a7790 SoCs
+      - "renesas,mmcif-r8a7791" for the MMCIF found in r8a7791 SoCs
+  followed by "renesas,sh-mmcif".
 
-And directly issues the following command:
-
-         mmc_dat.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
-         mmc_cmd.opcode = SD_IO_RW_EXTENDED;
-         mmc_cmd.arg = write ? 1<<31 : 0;        /* write flag  */
-         mmc_cmd.arg |= (fn & 0x7) << 28;        /* SDIO func num */
-         mmc_cmd.arg |= 1<<27;                   /* block mode */
-         /* for function 1 the addr will be incremented */
-         mmc_cmd.arg |= (fn == 1) ? 1<<26 : 0;
-         mmc_cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
-
-I do not know if the busy wait is necessary for all
-of these, but the hack in the android kernel code,
-which inserts calls to a wait_card_busy function directly
-into: drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
-
-Does so for all of these.
-
- > Or more interesting, which response types do
-> these commands expect?
-> I don't think this is a sunxi specific issue, I have seen similar
-> issues for other host controllers.
-
-Agreed, recent dw-mmc patches address the same issue, also involving
-broadcom sdio wifi chips.
-
-> I am thinking that perhaps this should be managed by the mmc core
-> instead of local hacks to sunxi. Potentially we could make the core to
-> invoke the already existing host_ops->card_busy() callback when
-> needed...
-
-I'm fine with solving this either way, implementing host_ops->card_busy()
-for sunxi is easy, and if the core os modified to call that function
-before issue sdio io ops (which seems to be the common thing here),
-then that indeed is better then having the sunxi code always do
-the busy check.
-
-> Within this context, could I ask whether you controller supports IRQ
-> based HW-busy detection? Or you need polling of the status register?
-
-I'm afraid that we need to poll the status register. I've been unable
-to find an irq flag corresponding to this.
-
+-- 
 Regards,
 
-Hans
+Laurent Pinchart
 
-
->> This commit fixes this, thereby fixing the wifi reliability issues on
->> the Cubietruck and other sunxi boards using sdio wifi.
->>
->> Reported-by: Eugene K <sigintmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
->> Suggested-by: Eugene K <sigintmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
->> Cc: Eugene K <sigintmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
->> Cc: Arend van Spriel <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
->> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->> ---
->> Changes in v2:
->> -Properly accredit Eugene K for coming up with the fix for this
->> ---
->>   drivers/mmc/host/sunxi-mmc.c | 32 ++++++++++++++++++++++++++++++++
->>   1 file changed, 32 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
->> index 4d3e1ff..daa90b7 100644
->> --- a/drivers/mmc/host/sunxi-mmc.c
->> +++ b/drivers/mmc/host/sunxi-mmc.c
->> @@ -289,6 +289,24 @@ static int sunxi_mmc_init_host(struct mmc_host *mmc)
->>          return 0;
->>   }
->>
->> +/* Wait for card to report ready before starting a new cmd */
->> +static int sunxi_mmc_wait_card_ready(struct sunxi_mmc_host *host)
->> +{
->> +       unsigned long expire = jiffies + msecs_to_jiffies(500);
->> +       u32 rval;
->> +
->> +       do {
->> +               rval = mmc_readl(host, REG_STAS);
->> +       } while (time_before(jiffies, expire) && (rval & SDXC_CARD_DATA_BUSY));
->> +
->> +       if (rval & SDXC_CARD_DATA_BUSY) {
->> +               dev_err(mmc_dev(host->mmc), "Error R1 ready timeout\n");
->> +               return -EIO;
->> +       }
->> +
->> +       return 0;
->> +}
->> +
->>   static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
->>                                      struct mmc_data *data)
->>   {
->> @@ -383,6 +401,8 @@ static void sunxi_mmc_send_manual_stop(struct sunxi_mmc_host *host,
->>          u32 arg, cmd_val, ri;
->>          unsigned long expire = jiffies + msecs_to_jiffies(1000);
->>
->> +       sunxi_mmc_wait_card_ready(host);
->> +
->>          cmd_val = SDXC_START | SDXC_RESP_EXPIRE |
->>                    SDXC_STOP_ABORT_CMD | SDXC_CHECK_RESPONSE_CRC;
->>
->> @@ -597,6 +617,11 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
->>   {
->>          unsigned long expire = jiffies + msecs_to_jiffies(250);
->>          u32 rval;
->> +       int ret;
->> +
->> +       ret = sunxi_mmc_wait_card_ready(host);
->> +       if (ret)
->> +               return ret;
->>
->>          rval = mmc_readl(host, REG_CLKCR);
->>          rval &= ~(SDXC_CARD_CLOCK_ON | SDXC_LOW_POWER_ON);
->> @@ -785,6 +810,13 @@ static void sunxi_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>                  return;
->>          }
->>
->> +       ret = sunxi_mmc_wait_card_ready(host);
->> +       if (ret) {
->> +               mrq->cmd->error = ret;
->> +               mmc_request_done(mmc, mrq);
->> +               return;
->> +       }
->> +
->>          if (data) {
->>                  ret = sunxi_mmc_map_dma(host, data);
->>                  if (ret < 0) {
->> --
->> 2.4.3
->>
->
-> Kind regards
-> Uffe
->
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
