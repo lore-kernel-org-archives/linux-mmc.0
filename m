@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v2 03/16] mmc: host: omap_hsmmc: cleanup omap_hsmmc_reg_get()
-Date: Mon, 3 Aug 2015 17:56:28 +0530
-Message-ID: <1438604801-11823-4-git-send-email-kishon@ti.com>
+Subject: [PATCH v2 04/16] mmc: host: omap_hsmmc: use the ocrmask provided by the vmmc regulator
+Date: Mon, 3 Aug 2015 17:56:29 +0530
+Message-ID: <1438604801-11823-5-git-send-email-kishon@ti.com>
 References: <1438604801-11823-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,88 +12,38 @@ To: ulf.hansson@linaro.org, afenkart@gmail.com, tony@atomide.com, devicetree@vge
 Cc: nsekhar@ti.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-No functional change. Instead of using a local regulator variable
-in omap_hsmmc_reg_get() for holding the return value of
-devm_regulator_get_optional() and then assigning to omap_hsmmc_host
-regulator members: vcc, vcc_aux and pbias, directly use the
-omap_hsmmc_host regulator members.
+If the vmmc regulator provides a valid ocrmask, use it. By this even if
+the pdata has a valid ocrmask, it will be overwritten with the ocrmask
+of the vmmc regulator.
+Also remove the unnecessary compatibility check between the ocrmask in
+the pdata and the ocrmask from the vmmc regulator.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-Reviewed-by: Roger Quadros <rogerq@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   38 ++++++++++++++++----------------------
- 1 file changed, 16 insertions(+), 22 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   10 +---------
+ 1 file changed, 1 insertion(+), 9 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 5637793..9d062a1 100644
+index 9d062a1..8cf040f 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -341,21 +341,19 @@ error_set_power:
- 
- static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- {
--	struct regulator *reg;
- 	int ocr_value = 0;
- 	int ret;
- 
--	reg = devm_regulator_get_optional(host->dev, "vmmc");
--	if (IS_ERR(reg)) {
--		ret = PTR_ERR(reg);
-+	host->vcc = devm_regulator_get_optional(host->dev, "vmmc");
-+	if (IS_ERR(host->vcc)) {
-+		ret = PTR_ERR(host->vcc);
- 		if (ret != -ENODEV)
- 			return ret;
--		host->vcc = NULL;
- 		dev_dbg(host->dev, "unable to get vmmc regulator %ld\n",
--			PTR_ERR(reg));
-+			PTR_ERR(host->vcc));
-+		host->vcc = NULL;
+@@ -354,16 +354,8 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 		host->vcc = NULL;
  	} else {
--		host->vcc = reg;
--		ocr_value = mmc_regulator_get_ocrmask(reg);
-+		ocr_value = mmc_regulator_get_ocrmask(host->vcc);
- 		if (!mmc_pdata(host)->ocr_mask) {
+ 		ocr_value = mmc_regulator_get_ocrmask(host->vcc);
+-		if (!mmc_pdata(host)->ocr_mask) {
++		if (ocr_value > 0)
  			mmc_pdata(host)->ocr_mask = ocr_value;
- 		} else {
-@@ -370,28 +368,24 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+-		} else {
+-			if (!(mmc_pdata(host)->ocr_mask & ocr_value)) {
+-				dev_err(host->dev, "ocrmask %x is not supported\n",
+-					mmc_pdata(host)->ocr_mask);
+-				mmc_pdata(host)->ocr_mask = 0;
+-				return -EINVAL;
+-			}
+-		}
+ 	}
  	mmc_pdata(host)->set_power = omap_hsmmc_set_power;
  
- 	/* Allow an aux regulator */
--	reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
--	if (IS_ERR(reg)) {
--		ret = PTR_ERR(reg);
-+	host->vcc_aux = devm_regulator_get_optional(host->dev, "vmmc_aux");
-+	if (IS_ERR(host->vcc_aux)) {
-+		ret = PTR_ERR(host->vcc_aux);
- 		if (ret != -ENODEV)
- 			return ret;
--		host->vcc_aux = NULL;
- 		dev_dbg(host->dev, "unable to get vmmc_aux regulator %ld\n",
--			PTR_ERR(reg));
--	} else {
--		host->vcc_aux = reg;
-+			PTR_ERR(host->vcc_aux));
-+		host->vcc_aux = NULL;
- 	}
- 
--	reg = devm_regulator_get_optional(host->dev, "pbias");
--	if (IS_ERR(reg)) {
--		ret = PTR_ERR(reg);
-+	host->pbias = devm_regulator_get_optional(host->dev, "pbias");
-+	if (IS_ERR(host->pbias)) {
-+		ret = PTR_ERR(host->pbias);
- 		if (ret != -ENODEV)
- 			return ret;
--		host->pbias = NULL;
- 		dev_dbg(host->dev, "unable to get pbias regulator %ld\n",
--			PTR_ERR(reg));
--	} else {
--		host->pbias = reg;
-+			PTR_ERR(host->pbias));
-+		host->pbias = NULL;
- 	}
- 
- 	/* For eMMC do not power off when not in sleep state */
 -- 
 1.7.9.5
