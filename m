@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v2 04/16] mmc: host: omap_hsmmc: use the ocrmask provided by the vmmc regulator
-Date: Mon, 3 Aug 2015 17:56:29 +0530
-Message-ID: <1438604801-11823-5-git-send-email-kishon@ti.com>
+Subject: [PATCH v2 02/16] mmc: host: omap_hsmmc: return on fatal errors from omap_hsmmc_reg_get
+Date: Mon, 3 Aug 2015 17:56:27 +0530
+Message-ID: <1438604801-11823-3-git-send-email-kishon@ti.com>
 References: <1438604801-11823-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,38 +12,50 @@ To: ulf.hansson@linaro.org, afenkart@gmail.com, tony@atomide.com, devicetree@vge
 Cc: nsekhar@ti.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-If the vmmc regulator provides a valid ocrmask, use it. By this even if
-the pdata has a valid ocrmask, it will be overwritten with the ocrmask
-of the vmmc regulator.
-Also remove the unnecessary compatibility check between the ocrmask in
-the pdata and the ocrmask from the vmmc regulator.
+Now return error only if the return value of
+devm_regulator_get_optional() is not the same as -ENODEV, since with
+-EPROBE_DEFER, the regulator can be obtained later and all other
+errors are fatal.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   10 +---------
- 1 file changed, 1 insertion(+), 9 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   22 ++++++++++++++++++++--
+ 1 file changed, 20 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 9d062a1..8cf040f 100644
+index b4b1bde..5637793 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -354,16 +354,8 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 		host->vcc = NULL;
- 	} else {
- 		ocr_value = mmc_regulator_get_ocrmask(host->vcc);
--		if (!mmc_pdata(host)->ocr_mask) {
-+		if (ocr_value > 0)
- 			mmc_pdata(host)->ocr_mask = ocr_value;
--		} else {
--			if (!(mmc_pdata(host)->ocr_mask & ocr_value)) {
--				dev_err(host->dev, "ocrmask %x is not supported\n",
--					mmc_pdata(host)->ocr_mask);
--				mmc_pdata(host)->ocr_mask = 0;
--				return -EINVAL;
--			}
--		}
- 	}
- 	mmc_pdata(host)->set_power = omap_hsmmc_set_power;
+@@ -371,10 +371,28 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
  
+ 	/* Allow an aux regulator */
+ 	reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
+-	host->vcc_aux = IS_ERR(reg) ? NULL : reg;
++	if (IS_ERR(reg)) {
++		ret = PTR_ERR(reg);
++		if (ret != -ENODEV)
++			return ret;
++		host->vcc_aux = NULL;
++		dev_dbg(host->dev, "unable to get vmmc_aux regulator %ld\n",
++			PTR_ERR(reg));
++	} else {
++		host->vcc_aux = reg;
++	}
+ 
+ 	reg = devm_regulator_get_optional(host->dev, "pbias");
+-	host->pbias = IS_ERR(reg) ? NULL : reg;
++	if (IS_ERR(reg)) {
++		ret = PTR_ERR(reg);
++		if (ret != -ENODEV)
++			return ret;
++		host->pbias = NULL;
++		dev_dbg(host->dev, "unable to get pbias regulator %ld\n",
++			PTR_ERR(reg));
++	} else {
++		host->pbias = reg;
++	}
+ 
+ 	/* For eMMC do not power off when not in sleep state */
+ 	if (mmc_pdata(host)->no_regulator_off_init)
 -- 
 1.7.9.5
