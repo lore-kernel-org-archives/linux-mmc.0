@@ -1,99 +1,82 @@
-From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH v2] mmc: dw_mmc: Add external dma interface support
-Date: Mon, 03 Aug 2015 13:17:25 +0200
-Message-ID: <2599339.pPeKCdCNNQ@diego>
-References: <1438572439-654-1-git-send-email-shawn.lin@rock-chips.com>
+From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH 00/17] omap_hsmmc: regulator usage cleanup and fixes
+Date: Mon, 3 Aug 2015 17:42:57 +0530
+Message-ID: <55BF5AC9.9000007@ti.com>
+References: <1438168187-1614-1-git-send-email-kishon@ti.com> <CALtMJEDP1-Q9W=x-0hq3tZQ1QZ2LVwVj47=ADYDjT7BsfanffA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:57245 "EHLO gloria.sntech.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752479AbbHCLRw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 3 Aug 2015 07:17:52 -0400
-In-Reply-To: <1438572439-654-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CALtMJEDP1-Q9W=x-0hq3tZQ1QZ2LVwVj47=ADYDjT7BsfanffA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andreas Fenkart <afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, nsekhar-l0cyMroinI0@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-rockchip@lists.infradead.org
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, addy ke <addy.ke@rock-chips.com>, Weijun Yang <Weijun.Yang@csr.com>, Kevin Hao <haokexin@gmail.com>, Scott Branden <sbranden@broadcom.com>, Andrew Bresticker <abrestic@chromium.org>, Vincent Yang <vincent.yang.fujitsu@gmail.com>, Stephen Boyd <sboyd@codeaurora.org>, dianders@chromium.org, linux-kernel@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, linux-mmc@vger.kernel.org, Jean Delvare <jdelvare@suse.de>
 
-Hi Shawn,
+Hi,
 
-Am Montag, 3. August 2015, 11:27:19 schrieb Shawn Lin:
-> DesignWare MMC Controller can support two types of DMA
-> mode: external dma and internal dma. We get a RK312x platform
-> integrated dw_mmc and ARM pl330 dma controller. This patch add
-> edmac ops to suuport these platforms. I've tested it on RK312x
-> platform with edmac mode and RK3288 platform with idmac mode.
+On Monday 03 August 2015 12:58 PM, Andreas Fenkart wrote:
+> Hi Kishon,
 > 
-> Patch is based on next of git://git.linaro.org/people/ulf.hansson/mmc
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> 
-> ---
-> 
-> Changes in v2:
-> - Fix typo of dev_info msg
-> - remove unused dmach from declaration of dw_mci_dma_slave
-> 
->  drivers/mmc/host/Kconfig        |  24 +++++-
->  drivers/mmc/host/dw_mmc-pltfm.c |   4 +
->  drivers/mmc/host/dw_mmc.c       | 169
-> ++++++++++++++++++++++++++++++++++++++-- include/linux/mmc/dw_mmc.h      | 
-> 18 ++++-
->  4 files changed, 205 insertions(+), 10 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 6a0f9c7..2a66b08 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -607,16 +607,36 @@ config MMC_DW
->  	help
->  	  This selects support for the Synopsys DesignWare Mobile Storage IP
->  	  block, this provides host support for SD and MMC interfaces, in both
-> -	  PIO and external DMA modes.
-> +	  PIO, internal DMA mode and external DMA modes.
-> +
-> +choice
-> +	prompt "DesignWare MMC transfer mode"
-> +	depends on MMC_DW
-> +
-> +config MMC_DW_PIO
-> +	bool "Use PIO transfers only"
-> +	help
-> +	  Use PIO to transfer data between memory and the hardware.
-> +	  PIO is slower than DMA as it requires CPU instructions to
-> +	  move the data. This has been the traditional default for
-> +	  the DW MCI driver.
-> 
->  config MMC_DW_IDMAC
->  	bool "Internal DMAC interface"
-> -	depends on MMC_DW
->  	help
->  	  This selects support for the internal DMAC block within the Synopsys
->  	  Designware Mobile Storage IP block. This disables the external DMA
->  	  interface.
-> 
-> +config MMC_DW_EDMAC
-> +	bool "External DMAC interface"
-> +	help
-> +	  This selects support for the external DMAC block outside the Synopsys
-> +	  Designware Mobile Storage IP block. This disables the internal DMA
-> +	  interface.
-> +
-> +endchoice
-> +
+> Thanks for taking a look at the regulator code. Do you have a public
+> git repository so I can pull your patches instead of cherry picking
+> 1-by-1?
 
-more a drive-by comment:
+I'll post v2 shortly. With that I'll have the patches in a git tree.
 
-This should definitly not be a "choice". We're in multiplatform times, where 
-you can have support for a multitude of socs using dw_mmc in one kernel. And 
-one might want to use pio, one might want to use the internal dma while 
-another one might want to use the external dma.
+Thanks
+Kishon
 
-So which dma to use should definitly be decided at runtime and not at compile-
-time.
-
-
-Heiko
-
+> 
+> /Andi
+> 
+> 2015-07-29 13:09 GMT+02:00 Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>:
+>> This patch series does the following
+>> *) Uses devm_regulator_get_optional() for vmmc and then removes the
+>>    CONFIG_REGULATOR check altogether.
+>> *) return on -EPROBE_DEFER
+>> *) enable/disable vmmc_aux regulator based on prior state
+>>
+>> This series is in preparation for implementing the voltage switch
+>> sequence so that UHS cards can be supported.
+>>
+>> Did basic read/write test in J6, J6 Eco, Beagle-x15, AM437x EVM,
+>> Beaglebone black, OMAP5 uEVM and OMAP4 PANDA.
+>>
+>> Kishon Vijay Abraham I (16):
+>>   mmc: host: omap_hsmmc: use devm_regulator_get_optional() for vmmc
+>>   mmc: host: omap_hsmmc: return error from omap_hsmmc_reg_get on
+>>     -EPROBE_DEFER
+>>   mmc: host: omap_hsmmc: cleanup omap_hsmmc_reg_get()
+>>   mmc: host: omap_hsmmc: use the ocrmask provided by the vmmc regulator
+>>   mmc: host: omap_hsmmc: use mmc_host's vmmc and vqmmc
+>>   mmc: host: omap_hsmmc: remove unnecessary pbias set_voltage
+>>   mmc: host: omap_hsmmc: return error if any of the regulator APIs fail
+>>   mmc: host: omap_hsmmc: add separate functions for enable/disable
+>>     supply
+>>   mmc: host: omap_hsmmc: add separate function to set pbias
+>>   mmc: host: omap_hsmmc: avoid pbias regulator enable on power off
+>>   mmc: host: omap_hsmmc: don't use ->set_power to set initial regulator
+>>     state
+>>   ARM: dts: am57xx-beagle-x15: Fix regulator populated in MMC1 dt node
+>>   mmc: host: omap_hsmmc: enable/disable vmmc_aux regulator based on
+>>     prior state
+>>   mmc: host: omap_hsmmc: use regulator_is_enabled to find pbias status
+>>   mmc: host: omap_hsmmc: use ios->vdd for setting vmmc voltage
+>>   mmc: host: omap_hsmmc: remove CONFIG_REGULATOR check
+>>
+>> Roger Quadros (1):
+>>   mmc: host: omap_hsmmc: use "mmc_of_parse_voltage" to get ocr_avail
+>>
+>>  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    2 +
+>>  arch/arm/boot/dts/am57xx-beagle-x15.dts            |    1 -
+>>  drivers/mmc/host/omap_hsmmc.c                      |  333 +++++++++++++-------
+>>  3 files changed, 216 insertions(+), 120 deletions(-)
+>>
+>> --
+>> 1.7.9.5
+>>
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
