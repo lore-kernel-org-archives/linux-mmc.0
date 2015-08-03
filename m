@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v2 05/16] mmc: host: omap_hsmmc: use mmc_host's vmmc and vqmmc
-Date: Mon, 3 Aug 2015 17:56:30 +0530
-Message-ID: <1438604801-11823-6-git-send-email-kishon@ti.com>
+Subject: [PATCH v2 08/16] mmc: host: omap_hsmmc: add separate functions for enable/disable supply
+Date: Mon, 3 Aug 2015 17:56:33 +0530
+Message-ID: <1438604801-11823-9-git-send-email-kishon@ti.com>
 References: <1438604801-11823-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,142 +12,141 @@ To: ulf.hansson@linaro.org, afenkart@gmail.com, tony@atomide.com, devicetree@vge
 Cc: nsekhar@ti.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-No functional change. Instead of using omap_hsmmc_host's vcc and vcc_aux
-members, use vmmc and vqmmc present in mmc_host which is present
-for the same purpose.
+No functional change. Cleanup omap_hsmmc_set_power by adding separate
+functions for enable/disable supply and invoke it from
+omap_hsmmc_set_power.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-Reviewed-by: Roger Quadros <rogerq@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   63 ++++++++++++++++++-----------------------
- 1 file changed, 28 insertions(+), 35 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |  101 +++++++++++++++++++++++++++--------------
+ 1 file changed, 66 insertions(+), 35 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 8cf040f..f6b056f 100644
+index 63c9fe7..81bec66 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -181,15 +181,6 @@ struct omap_hsmmc_host {
- 	struct	mmc_data	*data;
- 	struct	clk		*fclk;
- 	struct	clk		*dbclk;
--	/*
--	 * vcc == configured supply
--	 * vcc_aux == optional
--	 *   -	MMC1, supply for DAT4..DAT7
--	 *   -	MMC2/MMC2, external level shifter voltage supply, for
--	 *	chip (SDIO, eMMC, etc) or transceiver (MMC2 only)
--	 */
--	struct	regulator	*vcc;
--	struct	regulator	*vcc_aux;
- 	struct	regulator	*pbias;
- 	bool			pbias_enabled;
- 	void	__iomem		*base;
-@@ -260,13 +251,14 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
+@@ -247,6 +247,65 @@ static int omap_hsmmc_get_cover_state(struct device *dev)
+ 
+ #ifdef CONFIG_REGULATOR
+ 
++static int omap_hsmmc_enable_supply(struct mmc_host *mmc, int vdd)
++{
++	int ret;
++
++	if (mmc->supply.vmmc) {
++		ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
++		if (ret)
++			return ret;
++	}
++
++	/* Enable interface voltage rail, if needed */
++	if (mmc->supply.vqmmc) {
++		ret = regulator_enable(mmc->supply.vqmmc);
++		if (ret) {
++			dev_err(mmc_dev(mmc), "vmmc_aux reg enable failed\n");
++			goto err_vqmmc;
++		}
++	}
++
++	return 0;
++
++err_vqmmc:
++	if (mmc->supply.vmmc)
++		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
++
++	return ret;
++}
++
++static int omap_hsmmc_disable_supply(struct mmc_host *mmc)
++{
++	int ret;
++	int status;
++
++	if (mmc->supply.vqmmc) {
++		ret = regulator_disable(mmc->supply.vqmmc);
++		if (ret) {
++			dev_err(mmc_dev(mmc), "vmmc_aux reg disable failed\n");
++			return ret;
++		}
++	}
++
++	if (mmc->supply.vmmc) {
++		ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
++		if (ret)
++			goto err_set_ocr;
++	}
++
++	return 0;
++
++err_set_ocr:
++	if (mmc->supply.vqmmc) {
++		status = regulator_enable(mmc->supply.vqmmc);
++		if (status)
++			dev_err(mmc_dev(mmc), "vmmc_aux re-enable failed\n");
++	}
++
++	return ret;
++}
++
+ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
  {
  	struct omap_hsmmc_host *host =
- 		platform_get_drvdata(to_platform_device(dev));
-+	struct mmc_host *mmc = host->mmc;
- 	int ret = 0;
- 
- 	/*
- 	 * If we don't see a Vcc regulator, assume it's a fixed
- 	 * voltage always-on regulator.
- 	 */
--	if (!host->vcc)
-+	if (!mmc->supply.vmmc)
- 		return 0;
- 
- 	if (mmc_pdata(host)->before_set_reg)
-@@ -295,23 +287,23 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
+@@ -289,36 +348,13 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
  	 * chips/cards need an interface voltage rail too.
  	 */
  	if (power_on) {
--		if (host->vcc)
--			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
-+		if (mmc->supply.vmmc)
-+			ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
- 		/* Enable interface voltage rail, if needed */
--		if (ret == 0 && host->vcc_aux) {
--			ret = regulator_enable(host->vcc_aux);
--			if (ret < 0 && host->vcc)
--				ret = mmc_regulator_set_ocr(host->mmc,
--							host->vcc, 0);
-+		if (ret == 0 && mmc->supply.vqmmc) {
-+			ret = regulator_enable(mmc->supply.vqmmc);
-+			if (ret < 0 && mmc->supply.vmmc)
-+				ret = mmc_regulator_set_ocr(mmc,
-+							    mmc->supply.vmmc,
-+							    0);
- 		}
+-		if (mmc->supply.vmmc) {
+-			ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+-			if (ret)
+-				return ret;
+-		}
+-
+-		/* Enable interface voltage rail, if needed */
+-		if (mmc->supply.vqmmc) {
+-			ret = regulator_enable(mmc->supply.vqmmc);
+-			if (ret) {
+-				dev_err(dev, "vmmc_aux reg enable failed\n");
+-				goto err_set_vqmmc;
+-			}
+-		}
++		ret = omap_hsmmc_enable_supply(mmc, vdd);
++		if (ret)
++			return ret;
  	} else {
- 		/* Shut down the rail */
--		if (host->vcc_aux)
--			ret = regulator_disable(host->vcc_aux);
--		if (host->vcc) {
-+		if (mmc->supply.vqmmc)
-+			ret = regulator_disable(mmc->supply.vqmmc);
-+		if (mmc->supply.vmmc) {
- 			/* Then proceed to shut down the local regulator */
--			ret = mmc_regulator_set_ocr(host->mmc,
--						host->vcc, 0);
-+			ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
- 		}
+-		/* Shut down the rail */
+-		if (mmc->supply.vqmmc) {
+-			ret = regulator_disable(mmc->supply.vqmmc);
+-			if (ret) {
+-				dev_err(dev, "vmmc_aux reg disable failed\n");
+-				return ret;
+-			}
+-		}
+-
+-		if (mmc->supply.vmmc) {
+-			/* Then proceed to shut down the local regulator */
+-			ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+-			if (ret)
+-				return ret;
+-		}
++		ret = omap_hsmmc_disable_supply(mmc);
++		if (ret)
++			return ret;
  	}
  
-@@ -343,31 +335,32 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- {
- 	int ocr_value = 0;
- 	int ret;
-+	struct mmc_host *mmc = host->mmc;
+ 	if (host->pbias) {
+@@ -348,12 +384,7 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
+ 	return 0;
  
--	host->vcc = devm_regulator_get_optional(host->dev, "vmmc");
--	if (IS_ERR(host->vcc)) {
--		ret = PTR_ERR(host->vcc);
-+	mmc->supply.vmmc = devm_regulator_get_optional(host->dev, "vmmc");
-+	if (IS_ERR(mmc->supply.vmmc)) {
-+		ret = PTR_ERR(mmc->supply.vmmc);
- 		if (ret != -ENODEV)
- 			return ret;
- 		dev_dbg(host->dev, "unable to get vmmc regulator %ld\n",
--			PTR_ERR(host->vcc));
--		host->vcc = NULL;
-+			PTR_ERR(mmc->supply.vmmc));
-+		mmc->supply.vmmc = NULL;
- 	} else {
--		ocr_value = mmc_regulator_get_ocrmask(host->vcc);
-+		ocr_value = mmc_regulator_get_ocrmask(mmc->supply.vmmc);
- 		if (ocr_value > 0)
- 			mmc_pdata(host)->ocr_mask = ocr_value;
- 	}
- 	mmc_pdata(host)->set_power = omap_hsmmc_set_power;
+ err_set_voltage:
+-	if (mmc->supply.vqmmc)
+-		regulator_disable(mmc->supply.vqmmc);
+-
+-err_set_vqmmc:
+-	if (mmc->supply.vmmc)
+-		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
++	omap_hsmmc_disable_supply(mmc);
  
- 	/* Allow an aux regulator */
--	host->vcc_aux = devm_regulator_get_optional(host->dev, "vmmc_aux");
--	if (IS_ERR(host->vcc_aux)) {
--		ret = PTR_ERR(host->vcc_aux);
-+	mmc->supply.vqmmc = devm_regulator_get_optional(host->dev, "vmmc_aux");
-+	if (IS_ERR(mmc->supply.vqmmc)) {
-+		ret = PTR_ERR(mmc->supply.vqmmc);
- 		if (ret != -ENODEV)
- 			return ret;
- 		dev_dbg(host->dev, "unable to get vmmc_aux regulator %ld\n",
--			PTR_ERR(host->vcc_aux));
--		host->vcc_aux = NULL;
-+			PTR_ERR(mmc->supply.vqmmc));
-+		mmc->supply.vqmmc = NULL;
- 	}
- 
- 	host->pbias = devm_regulator_get_optional(host->dev, "pbias");
-@@ -387,8 +380,8 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 	 * To disable boot_on regulator, enable regulator
- 	 * to increase usecount and then disable it.
- 	 */
--	if ((host->vcc && regulator_is_enabled(host->vcc) > 0) ||
--	    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
-+	if ((mmc->supply.vmmc && regulator_is_enabled(mmc->supply.vmmc) > 0) ||
-+	    (mmc->supply.vqmmc && regulator_is_enabled(mmc->supply.vqmmc))) {
- 		int vdd = ffs(mmc_pdata(host)->ocr_mask) - 1;
- 
- 		mmc_pdata(host)->set_power(host->dev, 1, vdd);
+ 	return ret;
+ }
 -- 
 1.7.9.5
