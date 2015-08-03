@@ -1,131 +1,85 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2] mmc: dw_mmc: Add external dma interface support
-Date: Mon, 3 Aug 2015 21:23:15 +0800
-Message-ID: <55BF6B43.1050105@rock-chips.com>
-References: <1438572439-654-1-git-send-email-shawn.lin@rock-chips.com>
- <2599339.pPeKCdCNNQ@diego>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+Subject: [PATCH] mmc: dw_mmc: fix pio mode when internal dmac is enabled
+Date: Mon, 03 Aug 2015 17:04:10 +0200
+Message-ID: <3018549.c8iX1Dbrhm@diego>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from regular1.263xmail.com ([211.150.99.131]:47932 "EHLO
-	regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751288AbbHCNXh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Aug 2015 09:23:37 -0400
-In-Reply-To: <2599339.pPeKCdCNNQ@diego>
+Received: from gloria.sntech.de ([95.129.55.99]:59011 "EHLO gloria.sntech.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753122AbbHCPEQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 3 Aug 2015 11:04:16 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko@sntech.de>, linux-rockchip@lists.infradead.org
-Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, addy ke <addy.ke@rock-chips.com>, Weijun Yang <Weijun.Yang@csr.com>, Kevin Hao <haokexin@gmail.com>, Scott Branden <sbranden@broadcom.com>, Andrew Bresticker <abrestic@chromium.org>, Vincent Yang <vincent.yang.fujitsu@gmail.com>, Stephen Boyd <sboyd@codeaurora.org>, dianders@chromium.org, linux-kernel@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, linux-mmc@vger.kernel.org, Jean Delvare <jdelvare@suse.de>
+To: Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 2015/8/3 19:17, Heiko St=FCbner wrote:
-> Hi Shawn,
->
-> Am Montag, 3. August 2015, 11:27:19 schrieb Shawn Lin:
->> DesignWare MMC Controller can support two types of DMA
->> mode: external dma and internal dma. We get a RK312x platform
->> integrated dw_mmc and ARM pl330 dma controller. This patch add
->> edmac ops to suuport these platforms. I've tested it on RK312x
->> platform with edmac mode and RK3288 platform with idmac mode.
->>
->> Patch is based on next of git://git.linaro.org/people/ulf.hansson/mm=
-c
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>
->> ---
->>
->> Changes in v2:
->> - Fix typo of dev_info msg
->> - remove unused dmach from declaration of dw_mci_dma_slave
->>
->>   drivers/mmc/host/Kconfig        |  24 +++++-
->>   drivers/mmc/host/dw_mmc-pltfm.c |   4 +
->>   drivers/mmc/host/dw_mmc.c       | 169
->> ++++++++++++++++++++++++++++++++++++++-- include/linux/mmc/dw_mmc.h =
-     |
->> 18 ++++-
->>   4 files changed, 205 insertions(+), 10 deletions(-)
->>
->> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->> index 6a0f9c7..2a66b08 100644
->> --- a/drivers/mmc/host/Kconfig
->> +++ b/drivers/mmc/host/Kconfig
->> @@ -607,16 +607,36 @@ config MMC_DW
->>   	help
->>   	  This selects support for the Synopsys DesignWare Mobile Storage=
- IP
->>   	  block, this provides host support for SD and MMC interfaces, in=
- both
->> -	  PIO and external DMA modes.
->> +	  PIO, internal DMA mode and external DMA modes.
->> +
->> +choice
->> +	prompt "DesignWare MMC transfer mode"
->> +	depends on MMC_DW
->> +
->> +config MMC_DW_PIO
->> +	bool "Use PIO transfers only"
->> +	help
->> +	  Use PIO to transfer data between memory and the hardware.
->> +	  PIO is slower than DMA as it requires CPU instructions to
->> +	  move the data. This has been the traditional default for
->> +	  the DW MCI driver.
->>
->>   config MMC_DW_IDMAC
->>   	bool "Internal DMAC interface"
->> -	depends on MMC_DW
->>   	help
->>   	  This selects support for the internal DMAC block within the Syn=
-opsys
->>   	  Designware Mobile Storage IP block. This disables the external =
-DMA
->>   	  interface.
->>
->> +config MMC_DW_EDMAC
->> +	bool "External DMAC interface"
->> +	help
->> +	  This selects support for the external DMAC block outside the Syn=
-opsys
->> +	  Designware Mobile Storage IP block. This disables the internal D=
-MA
->> +	  interface.
->> +
->> +endchoice
->> +
-> more a drive-by comment:
->
-> This should definitly not be a "choice". We're in multiplatform times=
-, where
-> you can have support for a multitude of socs using dw_mmc in one kern=
-el. And
-> one might want to use pio, one might want to use the internal dma whi=
-le
-> another one might want to use the external dma.
->
-> So which dma to use should definitly be decided at runtime and not at=
- compile-
-> time.
+The dw_mci_init_dma() may decide to not use dma, but pio instead, caused
+by things like wrong dma settings in the system.
 
-Thanks for comment, Heiko.
-Definitly it should be decided at runtime. So more DT-bindings' patches=
-=20
-should be
-ACKed as well if we want to remove all the compile-time transfer mode.
+Till now the code dw_mci_init_slot() always assumed that dma is available
+when CONFIG_MMC_DW_IDMAC was defined, ignoring the host->use_dma var
+set during dma init.
 
-Hi, Jaehoon Chung
-Any suggestion?
+So when now the dma init failed for whatever reason, the transfer sizes
+would still be set for dma transfers, especially including the maximum
+block-count calculated from host->ring_size and resulting in a
 
->
-> Heiko
->
->
->
->
+[    4.991109] ------------[ cut here ]------------
+[    4.991111] kernel BUG at drivers/mmc/core/core.c:256!
+[    4.991113] Internal error: Oops - BUG: 0 [#1] SMP ARM
 
+because host->ring_size is 0 in this case and the slot init code uses
+the wrong code to calculate the values.
 
---=20
-Shawn Lin
+Fix this by selecting the correct calculations using the host->use_dma
+variable instead of the CONFIG_MMC_DW_IDMAC config option.
+
+Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+---
+ drivers/mmc/host/dw_mmc.c | 27 ++++++++++++++-------------
+ 1 file changed, 14 insertions(+), 13 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 40e9d8e..9ec3521 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2391,19 +2391,20 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 		mmc->max_seg_size = host->pdata->blk_settings->max_seg_size;
+ 	} else {
+ 		/* Useful defaults if platform data is unset. */
+-#ifdef CONFIG_MMC_DW_IDMAC
+-		mmc->max_segs = host->ring_size;
+-		mmc->max_blk_size = 65536;
+-		mmc->max_seg_size = 0x1000;
+-		mmc->max_req_size = mmc->max_seg_size * host->ring_size;
+-		mmc->max_blk_count = mmc->max_req_size / 512;
+-#else
+-		mmc->max_segs = 64;
+-		mmc->max_blk_size = 65536; /* BLKSIZ is 16 bits */
+-		mmc->max_blk_count = 512;
+-		mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+-		mmc->max_seg_size = mmc->max_req_size;
+-#endif /* CONFIG_MMC_DW_IDMAC */
++		if (host->use_dma) {
++			mmc->max_segs = host->ring_size;
++			mmc->max_blk_size = 65536;
++			mmc->max_seg_size = 0x1000;
++			mmc->max_req_size = mmc->max_seg_size * host->ring_size;
++			mmc->max_blk_count = mmc->max_req_size / 512;
++		} else {
++			mmc->max_segs = 64;
++			mmc->max_blk_size = 65536; /* BLKSIZ is 16 bits */
++			mmc->max_blk_count = 512;
++			mmc->max_req_size = mmc->max_blk_size *
++					    mmc->max_blk_count;
++			mmc->max_seg_size = mmc->max_req_size;
++		}
+ 	}
+ 
+ 	if (dw_mci_get_cd(mmc))
+-- 
+2.1.4
 
 
