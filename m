@@ -1,143 +1,99 @@
-From: Dong Aisheng <aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Subject: Re: [PATCH v3 5/6] mmc: sdhci-esdhc-imx: config watermark level
- and burst length
-Date: Mon, 3 Aug 2015 18:14:26 +0800
-Message-ID: <20150803101423.GA24870@shlinux1.ap.freescale.net>
-References: <1438160637-28061-1-git-send-email-haibo.chen@freescale.com>
- <1438160637-28061-6-git-send-email-haibo.chen@freescale.com>
- <20150731145140.GE27806@shlinux1.ap.freescale.net>
- <20150731151345.GX7557@n2100.arm.linux.org.uk>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCH v2] mmc: dw_mmc: Add external dma interface support
+Date: Mon, 03 Aug 2015 13:17:25 +0200
+Message-ID: <2599339.pPeKCdCNNQ@diego>
+References: <1438572439-654-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20150731151345.GX7557-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Cc: Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, johan.derycke-ob4gmnvZ1/cAvxtiuMwx3w@public.gmane.org, fabio.estevam-KZfg59tc24xl57MIdRCFDg@public.gmane.org, b29396-KZfg59tc24xl57MIdRCFDg@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gloria.sntech.de ([95.129.55.99]:57245 "EHLO gloria.sntech.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752479AbbHCLRw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 3 Aug 2015 07:17:52 -0400
+In-Reply-To: <1438572439-654-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-rockchip@lists.infradead.org
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, addy ke <addy.ke@rock-chips.com>, Weijun Yang <Weijun.Yang@csr.com>, Kevin Hao <haokexin@gmail.com>, Scott Branden <sbranden@broadcom.com>, Andrew Bresticker <abrestic@chromium.org>, Vincent Yang <vincent.yang.fujitsu@gmail.com>, Stephen Boyd <sboyd@codeaurora.org>, dianders@chromium.org, linux-kernel@vger.kernel.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, linux-mmc@vger.kernel.org, Jean Delvare <jdelvare@suse.de>
 
-On Fri, Jul 31, 2015 at 04:13:45PM +0100, Russell King - ARM Linux wrote:
-> On Fri, Jul 31, 2015 at 10:51:41PM +0800, Dong Aisheng wrote:
-> > On Wed, Jul 29, 2015 at 05:03:56PM +0800, Haibo Chen wrote:
-> > > i.MX7D support eMMC HS400 mode, this mode can run in 8 bit,200MHZ
-> > > DDR mode. So the I/O speed improve a lot compare to SD3.0
-> > > 
-> > > The default burst length is 8, if we don't change this value, in
-> > > HS400 mode, when we do eMMC read operation, we can find that the
-> > > clock signal will stop for a period of time. This means the speed
-> > > of data moving on AHB bus is slower than I/O speed. So we should
-> > > improve the speed of data moving on AHB bus.
-> > > 
-> > > For imx7d usdhc, this patch set the burst length as 16, and set
-> > > watermark level as 64. The test result is the clock signal has
-> > > no stop during the eMMC HS400 operation. For other imx usdhc, remain
-> > > the default value: burst length as 8, watermark level as 16.
-> > > 
-> > > Signed-off-by: Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-> > > ---
-> > >  drivers/mmc/host/sdhci-esdhc-imx.c | 11 ++++++++++-
-> > >  1 file changed, 10 insertions(+), 1 deletion(-)
-> > > 
-> > > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > > index 158f93b..37d0095 100644
-> > > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> > > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > > @@ -239,6 +239,11 @@ static inline int is_imx6q_usdhc(struct pltfm_imx_data *data)
-> > >  	return data->socdata == &usdhc_imx6q_data;
-> > >  }
-> > >  
-> > > +static inline int is_imx7d_usdhc(struct pltfm_imx_data *data)
-> > > +{
-> > > +	return data->socdata == &usdhc_imx7d_data;
-> > > +}
-> > 
-> > Can we using flag to check instead of adding more is_imx_usdhc()?
+Hi Shawn,
+
+Am Montag, 3. August 2015, 11:27:19 schrieb Shawn Lin:
+> DesignWare MMC Controller can support two types of DMA
+> mode: external dma and internal dma. We get a RK312x platform
+> integrated dw_mmc and ARM pl330 dma controller. This patch add
+> edmac ops to suuport these platforms. I've tested it on RK312x
+> platform with edmac mode and RK3288 platform with idmac mode.
 > 
-> No, not more flags.  Do the job properly and parameterise the differences.
+> Patch is based on next of git://git.linaro.org/people/ulf.hansson/mmc
 > 
-
-Hi Russell,
-
-Thanks for the review.
-
-I mean using the exist flag to do like:
-if (imx_data->socdata->flags & ESDHC_FLAG_SUP_HS400)
-        writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
-else    
-        writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
-Not adding another new flag.
-
-ESDHC_FLAG_SUP_HS400 represents the new feature support of HS400 which is
-already added in patch
-[PATCH v3 1/6] mmc: sdhci-esdhc-imx: add imx7d support and support HS400
-
-> > >  static inline int esdhc_is_usdhc(struct pltfm_imx_data *data)
-> > >  {
-> > >  	return !!(data->socdata->flags & ESDHC_FLAG_USDHC);
-> > > @@ -1145,7 +1150,11 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
-> > >  	 * to something insane.  Change it back here.
-> > >  	 */
-> > >  	if (esdhc_is_usdhc(imx_data)) {
-> > > -		writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
-> > > +		if (is_imx7d_usdhc(imx_data))
-> > > +			writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
-> > > +		else
-> > > +			writel(0x08100810, host->ioaddr + ESDHC_WTMK_LVL);
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 > 
-> So the value to be written to this register should come from the
-> driver data, which is already used as a struct esdhc_soc_data to
-> extrapolate out the differences.
+> ---
 > 
-> Going down the flag path will lead you to an even more of a stinking
-> shitpile than sdhci already is - if another version of the SoC requires
-> a different value there, what are you going to do?  Add yet another
-> flag for the next value?  What are you going to do when you have 16
-> different values?  Use 16 different flags?  Clearly that path is insane.
+> Changes in v2:
+> - Fix typo of dev_info msg
+> - remove unused dmach from declaration of dw_mci_dma_slave
 > 
+>  drivers/mmc/host/Kconfig        |  24 +++++-
+>  drivers/mmc/host/dw_mmc-pltfm.c |   4 +
+>  drivers/mmc/host/dw_mmc.c       | 169
+> ++++++++++++++++++++++++++++++++++++++-- include/linux/mmc/dw_mmc.h      | 
+> 18 ++++-
+>  4 files changed, 205 insertions(+), 10 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 6a0f9c7..2a66b08 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -607,16 +607,36 @@ config MMC_DW
+>  	help
+>  	  This selects support for the Synopsys DesignWare Mobile Storage IP
+>  	  block, this provides host support for SD and MMC interfaces, in both
+> -	  PIO and external DMA modes.
+> +	  PIO, internal DMA mode and external DMA modes.
+> +
+> +choice
+> +	prompt "DesignWare MMC transfer mode"
+> +	depends on MMC_DW
+> +
+> +config MMC_DW_PIO
+> +	bool "Use PIO transfers only"
+> +	help
+> +	  Use PIO to transfer data between memory and the hardware.
+> +	  PIO is slower than DMA as it requires CPU instructions to
+> +	  move the data. This has been the traditional default for
+> +	  the DW MCI driver.
+> 
+>  config MMC_DW_IDMAC
+>  	bool "Internal DMAC interface"
+> -	depends on MMC_DW
+>  	help
+>  	  This selects support for the internal DMAC block within the Synopsys
+>  	  Designware Mobile Storage IP block. This disables the external DMA
+>  	  interface.
+> 
+> +config MMC_DW_EDMAC
+> +	bool "External DMAC interface"
+> +	help
+> +	  This selects support for the external DMAC block outside the Synopsys
+> +	  Designware Mobile Storage IP block. This disables the internal DMA
+> +	  interface.
+> +
+> +endchoice
+> +
 
-I understand your concern for the potential bad situation.
+more a drive-by comment:
 
-Here the watermark level setting of mx7d is dependant on the new feature
-of HS400, so it seems make senese to use that flag to set value and does
-not need adding new flag.
+This should definitly not be a "choice". We're in multiplatform times, where 
+you can have support for a multitude of socs using dw_mmc in one kernel. And 
+one might want to use pio, one might want to use the internal dma while 
+another one might want to use the external dma.
 
-Actually that is the current approach for uSDHC driver to distinguish
-the difference between register offset/settings by checking feature flags.
-e.g. ESDHC_FLAG_USDHC, ESDHC_FLAG_STD_TUNING, ESDHC_FLAG_HS200 and etc.
-This approach can save us a lot more flags for SoC checking for common
-feature part. And up till now, things seem good.
+So which dma to use should definitly be decided at runtime and not at compile-
+time.
 
-If really new SoC comes while it requires a different value, if it's feature
-dependant, we may still use feature flag for it.
-If not, probably a quirk may be needed if it's IP limitation.
 
-If it's normal situation and such situation happened too many in the future,
-we may choose to parameterise all these normal feature independent settings
-into esdhc_soc_data to avoid adding meaningless flags.
-e.g.
-static struct esdhc_soc_data usdhc_imx6sx_data = {
-        .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
-                        | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200,
-        .wml = 32,
-};
+Heiko
 
-static struct esdhc_soc_data usdhc_imx7d_data = {
-        .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
-                        | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200,
-        .wml = 64,
-};
-
-But currently i still did not see such urgent requirement to do it for only
-water mark level settings.
-
-Regards
-Dong Aisheng
-
-> -- 
-> FTTC broadband for 0.8mile line: currently at 10.5Mbps down 400kbps up
-> according to speedtest.net.
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
