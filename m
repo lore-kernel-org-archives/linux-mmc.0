@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v2 15/16] mmc: host: omap_hsmmc: remove CONFIG_REGULATOR check
-Date: Mon, 3 Aug 2015 17:56:40 +0530
-Message-ID: <1438604801-11823-16-git-send-email-kishon@ti.com>
+Subject: [PATCH v2 11/16] mmc: host: omap_hsmmc: don't use ->set_power to set initial regulator state
+Date: Mon, 3 Aug 2015 17:56:36 +0530
+Message-ID: <1438604801-11823-12-git-send-email-kishon@ti.com>
 References: <1438604801-11823-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,97 +12,102 @@ To: ulf.hansson@linaro.org, afenkart@gmail.com, tony@atomide.com, devicetree@vge
 Cc: nsekhar@ti.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-Now that support for platforms which have optional regulator is added,
-remove CONFIG_REGULATOR check in omap_hsmmc.
+If the regulator is enabled on boot (checked using regulator_is_enabled),
+invoke regulator_enable() so that the usecount reflects the correct
+state of the regulator and then disable the regulator so that the
+initial state of the regulator is disabled. Avoid using ->set_power,
+since set_power also takes care of setting the voltages which is not
+needed at this point.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   35 +++--------------------------------
- 1 file changed, 3 insertions(+), 32 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   66 ++++++++++++++++++++++++++++++++++-------
+ 1 file changed, 56 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 9a28719..15973f1 100644
+index 4af902d..635ac18 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -204,7 +204,6 @@ struct omap_hsmmc_host {
- 	int			context_loss;
- 	int			protect_card;
- 	int			reqs_blocked;
--	int			use_reg;
- 	int			req_in_progress;
- 	unsigned long		clk_rate;
- 	unsigned int		flags;
-@@ -245,8 +244,6 @@ static int omap_hsmmc_get_cover_state(struct device *dev)
- 	return mmc_gpio_get_cd(host->mmc);
+@@ -407,6 +407,59 @@ err_set_voltage:
+ 	return ret;
  }
  
--#ifdef CONFIG_REGULATOR
--
- static int omap_hsmmc_enable_supply(struct mmc_host *mmc)
++static int omap_hsmmc_disable_boot_regulator(struct regulator *reg)
++{
++	int ret;
++
++	if (!reg)
++		return 0;
++
++	if (regulator_is_enabled(reg)) {
++		ret = regulator_enable(reg);
++		if (ret)
++			return ret;
++
++		ret = regulator_disable(reg);
++		if (ret)
++			return ret;
++	}
++
++	return 0;
++}
++
++static int omap_hsmmc_disable_boot_regulators(struct omap_hsmmc_host *host)
++{
++	struct mmc_host *mmc = host->mmc;
++	int ret;
++
++	/*
++	 * disable regulators enabled during boot and get the usecount
++	 * right so that regulators can be enabled/disabled by checking
++	 * the return value of regulator_is_enabled
++	 */
++	ret = omap_hsmmc_disable_boot_regulator(mmc->supply.vmmc);
++	if (ret) {
++		dev_err(host->dev, "fail to disable boot enabled vmmc reg\n");
++		return ret;
++	}
++
++	ret = omap_hsmmc_disable_boot_regulator(mmc->supply.vqmmc);
++	if (ret) {
++		dev_err(host->dev,
++			"fail to disable boot enabled vmmc_aux reg\n");
++		return ret;
++	}
++
++	ret = omap_hsmmc_disable_boot_regulator(host->pbias);
++	if (ret) {
++		dev_err(host->dev,
++			"failed to disable boot enabled pbias reg\n");
++		return ret;
++	}
++
++	return 0;
++}
++
+ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
  {
- 	int ret;
-@@ -521,29 +518,6 @@ static void omap_hsmmc_reg_put(struct omap_hsmmc_host *host)
- 	mmc_pdata(host)->set_power = NULL;
+ 	int ocr_value = 0;
+@@ -452,17 +505,10 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 	/* For eMMC do not power off when not in sleep state */
+ 	if (mmc_pdata(host)->no_regulator_off_init)
+ 		return 0;
+-	/*
+-	 * To disable boot_on regulator, enable regulator
+-	 * to increase usecount and then disable it.
+-	 */
+-	if ((mmc->supply.vmmc && regulator_is_enabled(mmc->supply.vmmc) > 0) ||
+-	    (mmc->supply.vqmmc && regulator_is_enabled(mmc->supply.vqmmc))) {
+-		int vdd = ffs(mmc_pdata(host)->ocr_mask) - 1;
+ 
+-		mmc_pdata(host)->set_power(host->dev, 1, vdd);
+-		mmc_pdata(host)->set_power(host->dev, 0, 0);
+-	}
++	ret = omap_hsmmc_disable_boot_regulators(host);
++	if (ret)
++		return ret;
+ 
+ 	return 0;
  }
- 
--static inline int omap_hsmmc_have_reg(void)
--{
--	return 1;
--}
--
--#else
--
--static inline int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
--{
--	return -EINVAL;
--}
--
--static inline void omap_hsmmc_reg_put(struct omap_hsmmc_host *host)
--{
--}
--
--static inline int omap_hsmmc_have_reg(void)
--{
--	return 0;
--}
--
--#endif
--
- static irqreturn_t omap_hsmmc_cover_irq(int irq, void *dev_id);
- 
- static int omap_hsmmc_gpio_init(struct mmc_host *mmc,
-@@ -2204,11 +2178,10 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 		goto err_irq;
- 	}
- 
--	if (omap_hsmmc_have_reg() && !mmc_pdata(host)->set_power) {
-+	if (!mmc_pdata(host)->set_power) {
- 		ret = omap_hsmmc_reg_get(host);
- 		if (ret)
- 			goto err_irq;
--		host->use_reg = 1;
- 	}
- 
- 	mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
-@@ -2251,8 +2224,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 
- err_slot_name:
- 	mmc_remove_host(mmc);
--	if (host->use_reg)
--		omap_hsmmc_reg_put(host);
-+	omap_hsmmc_reg_put(host);
- err_irq:
- 	device_init_wakeup(&pdev->dev, false);
- 	if (host->tx_chan)
-@@ -2276,8 +2248,7 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
- 
- 	pm_runtime_get_sync(host->dev);
- 	mmc_remove_host(host->mmc);
--	if (host->use_reg)
--		omap_hsmmc_reg_put(host);
-+	omap_hsmmc_reg_put(host);
- 
- 	if (host->tx_chan)
- 		dma_release_channel(host->tx_chan);
 -- 
 1.7.9.5
