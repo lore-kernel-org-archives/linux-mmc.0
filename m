@@ -1,74 +1,56 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v2 00/16] omap_hsmmc: regulator usage cleanup and fixes
-Date: Mon, 3 Aug 2015 17:56:25 +0530
-Message-ID: <1438604801-11823-1-git-send-email-kishon@ti.com>
+Subject: [PATCH v2 01/16] mmc: host: omap_hsmmc: use devm_regulator_get_optional() for vmmc
+Date: Mon, 3 Aug 2015 17:56:26 +0530
+Message-ID: <1438604801-11823-2-git-send-email-kishon@ti.com>
+References: <1438604801-11823-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:41927 "EHLO arroyo.ext.ti.com"
+Received: from bear.ext.ti.com ([192.94.94.41]:33907 "EHLO bear.ext.ti.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753248AbbHCM0u (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 3 Aug 2015 08:26:50 -0400
+	id S1753248AbbHCM0x (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 3 Aug 2015 08:26:53 -0400
+In-Reply-To: <1438604801-11823-1-git-send-email-kishon@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org, afenkart@gmail.com, tony@atomide.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
 Cc: nsekhar@ti.com, kishon@ti.com
 
-Changes from v1:
-*) return on -EPROBE_DEFER and other fatal errors. (Don't return only
-   if the return value is -ENODEV)
-*) Remove the beagle x15 dts patch. It can be part of a different
-   series.
-*) Avoid using regulator_is_enabled for vqmmc since if the regulator
-   is shared and the other users are not using regulator_is_enabled
-   then there can be unbalanced regulator_enable/regulator_disable
+Since vmmc can be optional for some platforms, use
+devm_regulator_get_optional() for vmmc. Now return error only
+if the return value of devm_regulator_get_optional() is not the
+same as -ENODEV, since with -EPROBE_DEFER, the regulator can be
+obtained later and all other errors are fatal.
 
-This patch series does the following
-*) Uses devm_regulator_get_optional() for vmmc and then removes the
-   CONFIG_REGULATOR check altogether.
-*) return on -EPROBE_DEFER and any other fatal errors
-*) enable/disable vmmc_aux regulator based on prior state
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |   10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
 
-I've pushed this patch series to
-git://git.ti.com/linux-phy/linux-phy.git mmc_regulator_cleanup_fixes_v2
-
-Please note the branch also has the pbias fixes [1] & [2].
-[1] -> https://lkml.org/lkml/2015/7/27/358
-[2] -> https://lkml.org/lkml/2015/7/27/391
-
-This series is in preparation for implementing the voltage switch
-sequence so that UHS cards can be supported.
-
-Did basic read/write test in J6, J6 Eco, Beagle-x15, AM437x EVM,
-Beaglebone black, OMAP5 uEVM and OMAP4 PANDA.
-
-Kishon Vijay Abraham I (15):
-  mmc: host: omap_hsmmc: use devm_regulator_get_optional() for vmmc
-  mmc: host: omap_hsmmc: return on fatal errors from omap_hsmmc_reg_get
-  mmc: host: omap_hsmmc: cleanup omap_hsmmc_reg_get()
-  mmc: host: omap_hsmmc: use the ocrmask provided by the vmmc regulator
-  mmc: host: omap_hsmmc: use mmc_host's vmmc and vqmmc
-  mmc: host: omap_hsmmc: remove unnecessary pbias set_voltage
-  mmc: host: omap_hsmmc: return error if any of the regulator APIs fail
-  mmc: host: omap_hsmmc: add separate functions for enable/disable
-    supply
-  mmc: host: omap_hsmmc: add separate function to set pbias
-  mmc: host: omap_hsmmc: avoid pbias regulator enable on power off
-  mmc: host: omap_hsmmc: don't use ->set_power to set initial regulator
-    state
-  mmc: host: omap_hsmmc: enable/disable vmmc_aux regulator based on
-    previous state
-  mmc: host: omap_hsmmc: use regulator_is_enabled to find pbias status
-  mmc: host: omap_hsmmc: use ios->vdd for setting vmmc voltage
-  mmc: host: omap_hsmmc: remove CONFIG_REGULATOR check
-
-Roger Quadros (1):
-  mmc: host: omap_hsmmc: use "mmc_of_parse_voltage" to get ocr_avail
-
- .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    2 +
- drivers/mmc/host/omap_hsmmc.c                      |  340 +++++++++++++-------
- 2 files changed, 224 insertions(+), 118 deletions(-)
-
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 4d12032..b4b1bde 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -343,12 +343,16 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ {
+ 	struct regulator *reg;
+ 	int ocr_value = 0;
++	int ret;
+ 
+-	reg = devm_regulator_get(host->dev, "vmmc");
++	reg = devm_regulator_get_optional(host->dev, "vmmc");
+ 	if (IS_ERR(reg)) {
+-		dev_err(host->dev, "unable to get vmmc regulator %ld\n",
++		ret = PTR_ERR(reg);
++		if (ret != -ENODEV)
++			return ret;
++		host->vcc = NULL;
++		dev_dbg(host->dev, "unable to get vmmc regulator %ld\n",
+ 			PTR_ERR(reg));
+-		return PTR_ERR(reg);
+ 	} else {
+ 		host->vcc = reg;
+ 		ocr_value = mmc_regulator_get_ocrmask(reg);
 -- 
 1.7.9.5
 
