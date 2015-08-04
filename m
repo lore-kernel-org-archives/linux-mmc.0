@@ -1,96 +1,80 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [RFC PATCH v3] mmc: sleep notification
-Date: Mon, 3 Aug 2015 12:44:26 +0000
-Message-ID: <282CEDFCBC30114F83C499CB8F2ED53343C9F474@SACMBXIP01.sdcorp.global.sandisk.com>
-References: <FDD07FEB422EF948A392FDC201AEEAE64FAAD701@SACMBXIP02.sdcorp.global.sandisk.com>
-	<CAPDyKFoPqwDC_w1QTe7zQtJfH_5m2Gp_5uewJKy=x_LeaFqYhA@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED53343C1F6EA@SACMBXIP01.sdcorp.global.sandisk.com>
-	<CAPDyKFoZuNoYB1KA4bt64+qoeEmjioW9qCnwkhYAnnSD4jMxag@mail.gmail.com>
-	<282CEDFCBC30114F83C499CB8F2ED53343C409C9@SACMBXIP01.sdcorp.global.sandisk.com>
- <CAPDyKFqV4pQYUUtZYJjFP72KNeAQJMV9qMV1uN2sKCT0At3s4g@mail.gmail.com>
+From: Dong Aisheng <aisheng.dong@freescale.com>
+Subject: Re: [PATCH v3 1/6] mmc: sdhci-esdhc-imx: add imx7d support and
+ support HS400
+Date: Tue, 4 Aug 2015 11:25:15 +0800
+Message-ID: <20150804032513.GD24870@shlinux1.ap.freescale.net>
+References: <1438160637-28061-1-git-send-email-haibo.chen@freescale.com>
+ <1438160637-28061-2-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0088.outbound.protection.outlook.com ([207.46.100.88]:43456
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752878AbbHCPSn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 3 Aug 2015 11:18:43 -0400
-In-Reply-To: <CAPDyKFqV4pQYUUtZYJjFP72KNeAQJMV9qMV1uN2sKCT0At3s4g@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1438160637-28061-2-git-send-email-haibo.chen@freescale.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Haibo Chen <haibo.chen@freescale.com>
+Cc: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawnguo@kernel.org, kernel@pengutronix.de, linux@arm.linux.org.uk, ulf.hansson@linaro.org, johan.derycke@barco.com, fabio.estevam@freescale.com, b29396@freescale.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-SGkgVWxmLA0KDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhh
-bnNzb24gW21haWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiBTZW50OiBXZWRuZXNkYXks
-IEp1bHkgMjIsIDIwMTUgNTo0MSBQTQ0KPiBUbzogQWxleCBMZW1iZXJnDQo+IENjOiBBdmkgU2hj
-aGlzbG93c2tpOyBsaW51eC1tbWMNCj4gU3ViamVjdDogUmU6IFtSRkMgUEFUQ0ggdjNdIG1tYzog
-c2xlZXAgbm90aWZpY2F0aW9uDQo+IA0KPiBPbiAxOCBKdW5lIDIwMTUgYXQgMTY6NTcsIEFsZXgg
-TGVtYmVyZyA8QWxleC5MZW1iZXJnQHNhbmRpc2suY29tPg0KPiB3cm90ZToNCj4gPiBIaSBVbGYs
-DQo+ID4NCj4gPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPj4gRnJvbTogVWxmIEhh
-bnNzb24gW21haWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPiA+PiBTZW50OiBNb25kYXks
-IEp1bmUgMTUsIDIwMTUgMTE6MjQgQU0NCj4gPj4gVG86IEFsZXggTGVtYmVyZw0KPiA+PiBDYzog
-QXZpIFNoY2hpc2xvd3NraTsgbGludXgtbW1jDQo+ID4+IFN1YmplY3Q6IFJlOiBbUkZDIFBBVENI
-IHYzXSBtbWM6IHNsZWVwIG5vdGlmaWNhdGlvbg0KPiA+Pg0KPiA+PiBPbiA4IEp1bmUgMjAxNSBh
-dCAxNToxNywgQWxleCBMZW1iZXJnIDxBbGV4LkxlbWJlcmdAc2FuZGlzay5jb20+DQo+ID4+IHdy
-b3RlOg0KPiA+PiA+IEhpIFVsZiwNCj4gPj4gPg0KPiA+PiA+IFsuLi5dDQo+ID4+ID4NCj4gPj4g
-Pj4NCj4gPj4gPj4gT25lIG9mIG15IGNvbW1lbnRzIGZvciB2Miwgd2FzIHRoYXQgSSB0aGluayB5
-b3Ugc2hvdWxkIHJlbW92ZSBhbGwNCj4gPj4gPj4gY29kZSB3aGljaCB3YXMgcmVsYXRlZCB0byBI
-UEkgdG8gaW50ZXJydXB0IHNsZWVwIG5vdGlmaWNhdGlvbiBmcm9tDQo+ID4+ID4+IHRoZSBydW50
-aW1lIFBNIHJlc3VtZSBwYXRoLiBJbnN0ZWFkIEkgd2FudGVkIHlvdSB0byBhZGQgdGhhdA0KPiA+
-PiA+PiBmdW5jdGlvbmFsaXR5IGFzIHNlcGFyYXRlIHBhdGNoIGJhc2VkIG9uIHRvcCBvZiB0aGlz
-IHBhdGNoLg0KPiA+PiA+Pg0KPiA+PiA+PiBZb3UgaGF2ZW4ndCBkb25lIHRoYXQgaW4gdjMsIHdo
-eT8NCj4gPj4gPg0KPiA+PiA+IFRoZSBzbGVlcF9ub3RpZnkgY2FsbCB3YXMgbW92ZWQgdG8gc3Vz
-cGVuZCgpIHBlciB5b3VyDQo+IHJlY29tbWVuZGF0aW9uLg0KPiA+PiA+IEFzIGZhciBhcyBJIHVu
-ZGVyc3RhbmQsIG5vIG5ldyByZXF1ZXN0cyBzaG91bGQgYmUgc2VudCBkdXJpbmcNCj4gPj4gPiBt
-bWNfc3VzcGVuZCgpIHByb2Nlc3MsIHRodXMgSFBJIHN1cHBvcnQgaXMgbm90IG5lZWRlZCBhbnlt
-b3JlLg0KPiA+PiA+IElzIHRoaXMgdGhlIGNvcnJlY3QgYXNzdW1wdGlvbj8NCj4gPj4NCj4gPj4g
-WWVzLg0KPiA+Pg0KPiA+PiBJIGRvbid0IHRoaW5rIHlvdSBuZWVkIG1tY19jYXJkX3NldF9zbGVl
-cF9ub3RpZnkoKSBhbmQgdGhlDQo+ID4+IGNvcnJlc3BvbmRpbmcgbmV3IE1NQ19TVEFURV9TTEVF
-UF9OT1RJRlkgLA0KPiBtbWNfZGV2aWNlX3ByZ19zdGF0ZSgpLCBldGMuDQo+ID4NCj4gPiBtbWNf
-Y2FyZF9zZXRfc2xlZXBfbm90aWZ5KCksIE1NQ19TVEFURV9TTEVFUF9OT1RJRlkgYW5kIHRoZQ0K
-PiBjb3JyZXNwb25kaW5nIC0gV2UgYXJlIHJlbW92aW5nIGl0IGZyb20gdGhlIGN1cnJlbnQgcGF0
-Y2guIFByb2JhYmx5IHdpbGwgYWRkDQo+IHRoZW0gYXMgYSBzZXBhcmF0ZSBwYXRjaCBpbiBmdXR1
-cmUuDQo+IA0KPiBHcmVhdCENCj4gDQo+ID4gbW1jX2RldmljZV9wcmdfc3RhdGUoKSAtIGlzIHJl
-cXVpcmVkIGZvciB3YWl0aW5nIGZvciBTbGVlcF9Ob3RpZmljYXRpb24NCj4gY29tcGxldGlvbi90
-aW1lb3V0LCBhbHRob3VnaCB3ZSB3b3VsZCBsaWtlIHRvIGxlYXZlIHRoaXMgZnVuY3Rpb24uDQo+
-IA0KPiBEb2Vzbid0IF9fbW1jX3N3aXRjaCgpIGFscmVhZHkgZGVhbCB3aXRoIHRoaXM/IE5vLCBJ
-IGRvbid0IHRoaW5rIGl0J3MgbmVlZGVkLg0KWW91IGFyZSByaWdodCwgX19tbWNfc3dpdGNoKCkg
-d2FpdCBsb29wIGlzIGVub3VnaCwgaWYgSFBJIGlzIG5vdCBnb2luZyB0byBiZSBpbiB1c2UgZHVy
-aW5nIHNsZWVwX25vdGlmaWNhdGlvbi4NCj4gDQo+ID4NCj4gPj4NCj4gPj4gT3ZlcmFsbCwgSSB0
-aGluayB0aGlzIHBhdGNoIGNvdWxkIGJlIHNpbXBsaWZpZWQgeWV0IGFub3RoZXIgc3RlcC4NCj4g
-Pj4NCj4gPj4gPiBUaGUgb25seSBjYXNlIHdoZXJlIEhQSSBpcyB1c2VkIGluIHRoaXMgcGF0Y2gg
-LSBpcyBkdXJpbmcNCj4gPj4gPiBzbGVlcF9ub3RpZnkNCj4gPj4gdGltZW91dCBlcnJvci4NCj4g
-Pj4NCj4gPj4gV2h5Pw0KPiA+DQo+ID4gSW4gY2FzZSBvZiB0aW1lb3V0IGVycm9yLCB3ZSB3b3Vs
-ZCBsaWtlIHRvIGhhbmRsZSBpdCBieSBzZW5kaW5nIEhQSSAtIHRvIGxldA0KPiBkZXZpY2UgaW50
-ZXJydXB0L3N0b3AgdGhlIHByZyBzdGF0ZS4NCj4gDQo+IElzIHRoYXQgYWNjb3JkaW5nIHRvIHRo
-ZSBzcGVjPyBJIHRoaW5rIGl0IHdvdWxkIGJlIGJldHRlciB0byB0cnkgYSByZXNldA0KPiBzZXF1
-ZW5jZSB0byByZWNvdmVyLCBieSB1c2luZyBDTUQwIGFuZCBzbyBmb3J0aCwgd2hhdCBkbyB5b3Ug
-dGhpbms/DQoNCk5vdCBtdXN0IGJ5IHRoZSBzcGVjLCBidXQgdGhlcmUgYXJlIHNldmVyYWwgb3B0
-aW9ucyBob3cgdG8gaGFuZGxlIHRpbWVvdXQgZXJyb3IuDQpDaGVja2luZyB0aGUgZXhpc3Rpbmcg
-ZHJpdmVyLCB0aGUgJy1FVElNRURPVVQnIGVycm9yIGlzIGhhbmRsZWQgYnkgbW1jX2ludGVycnVw
-dF9ocGkgKCkNCmluIGNhc2Ugb2YgIG1tY193YWl0X2Zvcl9yZXFfZG9uZSgpIGZ1bmN0aW9uLiAN
-CkNhbiB3ZSB1c2UgdGhlIHNhbWUgYXBwcm9hY2g/DQoNCj4gDQo+ID4NCj4gPj4NCj4gPj4gT25l
-IGZpbmFsIHF1ZXN0aW9uLCBJIG5vdGljZWQgdGhhdCB5b3UgaGF2ZSByZW1vdmVkIHRoZSBjaGVj
-ayBmb3INCj4gPj4gTU1DX0NBUDJfRlVMTF9QV1JfQ1lDTEUgaW4gdGhlIF9tbWNfc3VzcGVuZCgp
-IGZ1bmN0aW9uLCB3aHk/DQo+ID4NCj4gPiBBcyBmYXIgYXMgd2UgdW5kZXJzdGFuZCwgdGhpcyBN
-TUNfQ0FQMl9GVUxMX1BXUl9DWUNMRSB3YXMgdXNlZCB0bw0KPiA+IGRpc3Rpbmd1aXNoIGJldHdl
-ZW4gUE9OICh3aGVuIHRoZSBwb3dlciBjYW4gYmUgY3V0KSBhbmQgU2xlZXAgKHdoZW4gdGhlDQo+
-IHBvd2VyIGhhdmUgdG8gc3RheSBPTikuDQo+ID4gTm93IHdlIGhhdmUgU2xlZXBfTm90aWZpY2F0
-aW9uIFBPTiwgd2hpY2ggYWxsb3dzIHRvIGN1dCB0aGUgcG93ZXIgYWxzbw0KPiBpbiBjYXNlIG9m
-IFNsZWVwLg0KPiA+IEhvcGUgdGhlIGludGVycHJldGF0aW9uIGFib3ZlIGlzIGNvcnJlY3QuDQo+
-IA0KPiBVbmZvcnR1bmF0ZSB5b3VyIGludGVycHJldGF0aW9uIGlzIHdyb25nLg0KPiANCj4gTU1D
-X0NBUDJfRlVMTF9QV1JfQ1lDTEUsIGluZGljYXRlcyB3aGV0aGVyIHRoZSBtbWMgaG9zdCBjYW4g
-Y3V0DQo+ICpib3RoKiBWQ0MgYW5kIFZDQ1EuDQo+IA0KPiBGb3IgdGhlIHN1c3BlbmQgY2FzZSwg
-dGhlIGRlZmF1bHQgYmVoYXZpb3VyIGlzIHRvIHNlbmQgQ01ENSAoc2xlZXApLCBhcyB3ZQ0KPiBk
-b24ndCB0cnVzdCBob3N0cyB0byBzZXQgTU1DX0NBUDJfRlVMTF9QV1JfQ1lDTEUgZXZlbiBpZiBp
-dCBwb3RlbnRpYWxseQ0KPiBjb3VsZC4NCj4gS2VlcGluZyB0aGlzIHBvbGljeSBpcyBpbXBvcnRh
-bnQsIGFzIHdlIGRvbid0IHdhbnQgdG8gaXNzdWUgUE9OIHVubGVzcyB3ZQ0KPiBrbm93IHRoYXQg
-d2Ugd2lsbCBiZSBjdXR0aW5nIGJvdGggVkNDIGFuZCBWQ0NRLg0KDQpZb3UgYXJlIHJpZ2h0LCBz
-cGVjIGRvZXNu4oCZdCB0YWxrIGFib3V0IHZjY3EgaW4gY2FzZSBvZiBTbGVlcF9Ob3RpZmljYXRp
-b24sIGJ1dA0Kb25seSAgYWJvdXQgdmNjLg0KV2Ugd2lsbCBzdGF5IHdpdGggZXhpc3RpbmcgbG9n
-aWMgYW5kIGFkZCBzbGVlcF9ub3RpZmljYXRpb24gY2FsbCBiZWZvcmUgc2VuZGluZyBzbGVlcCBj
-b21tYW5kLg0KDQpUaGFua3MsDQpBbGV4DQoNCj4gDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo=
+On Wed, Jul 29, 2015 at 05:03:52PM +0800, Haibo Chen wrote:
+> The imx7d usdhc is derived from imx6sx, the difference is that
+> imx7d support HS400.
+> 
+> So introduce a new compatible string for imx7d and add HS400
+> support for imx7d usdhc.
+> 
+> Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 66 ++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 66 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index c6b9f64..b441eed 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -44,6 +44,7 @@
+>  #define  ESDHC_MIX_CTRL_EXE_TUNE	(1 << 22)
+>  #define  ESDHC_MIX_CTRL_SMPCLK_SEL	(1 << 23)
+>  #define  ESDHC_MIX_CTRL_FBCLK_SEL	(1 << 25)
+> +#define  ESDHC_MIX_CTRL_HS400_EN	(1 << 26)
+>  /* Bits 3 and 6 are not SDHCI standard definitions */
+>  #define  ESDHC_MIX_CTRL_SDHCI_MASK	0xb7
+>  /* Tuning bits */
+> @@ -60,6 +61,16 @@
+>  #define  ESDHC_TUNE_CTRL_MIN		0
+>  #define  ESDHC_TUNE_CTRL_MAX		((1 << 7) - 1)
+>  
+> +/* strobe dll register */
+> +#define ESDHC_STROBE_DLL_CTRL		0x70
+> +#define ESDHC_STROBE_DLL_CTRL_ENABLE	(1 << 0)
+> +#define ESDHC_STROBE_DLL_CTRL_RESET	(1 << 1)
+> +#define ESDHC_STROBE_DLL_CTRL_SLV_DLY_TARGET_SHIFT	3
+> +
+> +#define ESDHC_STROBE_DLL_STATUS		0x74
+> +#define ESDHC_STROBE_DLL_STS_REF_LOCK	(1 << 1)
+> +#define ESDHC_STROBE_DLL_STS_SLV_LOCK	0x1
+> +
+>  #define ESDHC_TUNING_CTRL		0xcc
+>  #define ESDHC_STD_TUNING_EN		(1 << 24)
+>  /* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
+> @@ -120,6 +131,8 @@
+>  #define ESDHC_FLAG_ERR004536		BIT(7)
+>  /* The IP supports HS200 mode */
+>  #define ESDHC_FLAG_HS200		BIT(8)
+> +/* The IP supports HS400 mode */
+> +#define ESDHC_FLAG_SUP_HS400		BIT(9)
+>  
+>  struct esdhc_soc_data {
+>  	u32 flags;
+> @@ -156,6 +169,12 @@ static struct esdhc_soc_data usdhc_imx6sx_data = {
+>  			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200,
+>  };
+>  
+> +static struct esdhc_soc_data usdhc_imx7d_data = {
+> +	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+> +			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+> +			| ESDHC_FLAG_SUP_HS400,
+
+Better to use ESDHC_FLAG_HS400 to keep align with exist ESDHC_FLAG_HS200.
+
+Regards
+Dong Aisheng
