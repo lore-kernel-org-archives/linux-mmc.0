@@ -1,86 +1,38 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [RFC PATCH v3 5/5] ARM: dts: add supports-idmac property
-Date: Wed, 5 Aug 2015 17:25:47 +0800
-Message-ID: <55C1D69B.4060308@rock-chips.com>
-References: <1438762614-22154-1-git-send-email-shawn.lin@rock-chips.com>
- <1438762730-22368-1-git-send-email-shawn.lin@rock-chips.com>
- <1438764734.3504.9.camel@synopsys.com>
+From: Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+Subject: [PATCH v4 0/6] mmc: imx: a few fixes and new feature
+Date: Wed, 5 Aug 2015 18:38:36 +0800
+Message-ID: <1438771122-8601-1-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-        format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mips-bounce@linux-mips.org>
-In-Reply-To: <1438764734.3504.9.camel@synopsys.com>
-Sender: linux-mips-bounce@linux-mips.org
-Errors-to: linux-mips-bounce@linux-mips.org
-List-help: <mailto:ecartis@linux-mips.org?Subject=help>
-List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
-List-software: Ecartis version 1.0.0
-List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
-List-owner: <mailto:ralf@linux-mips.org>
-List-post: <mailto:linux-mips@linux-mips.org>
-List-archive: <http://www.linux-mips.org/archives/linux-mips/>
-To: Alexey Brodkin <Alexey.Brodkin@synopsys.com>
-Cc: shawn.lin@rock-chips.com, "dianders@chromium.org" <dianders@chromium.org>, "wangzhou.bry@gmail.com" <wangzhou.bry@gmail.com>, "tomeu.vizoso@collabora.com" <tomeu.vizoso@collabora.com>, "pawel.moll@arm.com" <pawel.moll@arm.com>, "javier.martinez@collabora.co.uk" <javier.martinez@collabora.co.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-rockchip@lists.infradead.org" <linux-rockchip@lists.infradead.org>, "haokexin@gmail.com" <haokexin@gmail.com>, "stefan@agner.ch" <stefan@agner.ch>, "addy.ke@rock-chips.com" <addy.ke@rock-chips.com>, "galak@codeaurora.org" <galak@codeaurora.org>, "olof@lixom.net" <olof@lixom.net>, "long.wanglong@huawei.com" <long.wanglong@huawei.com>, "peter.griffin@linaro.org" <peter.griffin@linaro.org>, mark.rut
+Content-Type: text/plain
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org
+Cc: haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org, johan.derycke-ob4gmnvZ1/cAvxtiuMwx3w@public.gmane.org, mkl-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, fabio.estevam-KZfg59tc24xl57MIdRCFDg@public.gmane.org, b29396-KZfg59tc24xl57MIdRCFDg@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-=E5=9C=A8 2015/8/5 16:52, Alexey Brodkin =E5=86=99=E9=81=93:
-> Hi Shawn,
->
-> On Wed, 2015-08-05 at 16:18 +0800, Shawn Lin wrote:
->> DesignWare MMC Controller's transfer mode should be decided
->> at runtime instead of compile-time. Add "supports-idmac" for
->> all platforms that use internal dma mode to enable this feature
->> at runtime.
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> ---
->>
->> Changes in v3: None
->> Changes in v2: None
->>
->>   arch/arm/boot/dts/exynos3250-monk.dts              | 1 +
->>   arch/arm/boot/dts/exynos3250-rinato.dts            | 1 +
->>   arch/arm/boot/dts/exynos4412-odroid-common.dtsi    | 1 +
->>   arch/arm/boot/dts/exynos4412-origen.dts            | 1 +
->>   arch/arm/boot/dts/exynos4412-trats2.dts            | 1 +
->>   arch/arm/boot/dts/exynos4x12.dtsi                  | 1 +
->>   arch/arm/boot/dts/exynos5250-arndale.dts           | 2 ++
->>   arch/arm/boot/dts/exynos5250-smdk5250.dts          | 2 ++
->>   arch/arm/boot/dts/exynos5250-snow.dts              | 3 +++
->>   arch/arm/boot/dts/exynos5250-spring.dts            | 2 ++
->>   arch/arm/boot/dts/exynos5260-xyref5260.dts         | 2 ++
->>   arch/arm/boot/dts/exynos5410-smdk5410.dts          | 2 ++
->>   arch/arm/boot/dts/exynos5420-arndale-octa.dts      | 2 ++
->>   arch/arm/boot/dts/exynos5420-peach-pit.dts         | 3 +++
->>   arch/arm/boot/dts/exynos5420-smdk5420.dts          | 2 ++
->>   arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi | 2 ++
->>   arch/arm/boot/dts/exynos5800-peach-pi.dts          | 3 +++
->>   arch/arm/boot/dts/hisi-x5hd2.dtsi                  | 2 ++
->>   arch/arm/boot/dts/rk3288-evb.dtsi                  | 2 ++
->>   arch/arm/boot/dts/rk3288-firefly.dtsi              | 3 +++
->>   arch/arm/boot/dts/rk3288-popmetal.dts              | 2 ++
->>   arch/arm64/boot/dts/exynos/exynos7-espresso.dts    | 2 ++
->>   22 files changed, 42 insertions(+)
-> I'm wondering if you're going to care about other platforms
-> that use DW MMC?
->
-> Just grep for "snps,dw-mshc", "altr,socfpga-dw-mshc",
-> "img,pistachio-dw-mshc" and you'll see more dt* files to
-> be updated.
-   Thanks,  Alexey.
-   Yes,  I missed some ARC dt*  files just as Vineet told me. It will b=
-e=20
-fixed in v4.
-   Btw, I cannot find "img,pistachio-dw-mshc" in 4.2.0-rc3. And no more=
-=20
-"dw-mshc" or "dwmmc"
-   is found.
+Changes for v4:
+-Call esdhc_set_strobe_dll() only when device clock is over 100MHz in HS400 mode.
+-Add detail description of tuning-step.
+-Change to default watermark level and burst length for all imx SoC, not only imx7d.
 
-> -Alexey
->
->
+Haibo Chen (6):
+  mmc: sdhci-esdhc-imx: add imx7d support and support HS400
+  mmc: sdhci-esdhc-imx: add tuning-step seting support
+  mmc: sdhci-esdhc-imx: add compatible string in bingding doc
+  ARM: dts: imx7d-sdb: add eMMC5.0 support
+  mmc: sdhci-esdhc-imx: change default watermark level and burst length
+  mmc: sdhci-esdhc-imx: set back the burst_length_enable bit to 1
 
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   6 ++
+ arch/arm/boot/dts/imx7d-sdb.dts                    |  13 +++
+ drivers/mmc/host/sdhci-esdhc-imx.c                 | 109 ++++++++++++++++++++-
+ include/linux/platform_data/mmc-esdhc-imx.h        |   1 +
+ 4 files changed, 128 insertions(+), 1 deletion(-)
 
---=20
-Shawn Lin
+-- 
+1.9.1
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
