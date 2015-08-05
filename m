@@ -1,54 +1,176 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH 0/7] ARM: dts: MMC fixes for DRA7 based boards
-Date: Wed, 5 Aug 2015 20:36:25 +0530
-Message-ID: <55C22671.1060906@ti.com>
-References: <1438244020-4244-1-git-send-email-kishon@ti.com> <20150805105400.GF16878@atomide.com>
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: [RFC] sdhci: fix DMA leaks [was: [SHDCI] Heavy (thousands) DMA leaks]
+Date: Wed, 5 Aug 2015 17:11:48 +0200
+Message-ID: <55C227B4.3030102@suse.cz>
+References: <55B9EF02.7040404@suse.cz>
+ <BY1PR03MB138811AD7FAB3C561CC683679A770@BY1PR03MB1388.namprd03.prod.outlook.com>
+ <55BF36D6.4080504@suse.cz> <55C1F919.4080002@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+ boundary="------------020103000507070906010301"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:41991 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751226AbbHEPHW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 5 Aug 2015 11:07:22 -0400
-In-Reply-To: <20150805105400.GF16878@atomide.com>
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:35434 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751657AbbHEPLv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Aug 2015 11:11:51 -0400
+In-Reply-To: <55C1F919.4080002@suse.cz>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, bcousson@baylibre.com, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, linux@arm.linux.org.uk, nsekhar@ti.com
+To: Chen Bough <Haibo.Chen@freescale.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux kernel mailing list <linux-kernel@vger.kernel.org>
 
-Hi,
+This is a multi-part message in MIME format.
+--------------020103000507070906010301
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 
-On Wednesday 05 August 2015 04:24 PM, Tony Lindgren wrote:
-> * Kishon Vijay Abraham I <kishon@ti.com> [150730 01:16]:
->> Miscellaneous fixes in dts files for MMC device tree nodes.
->>
->> Did basic read/write test in J6, J6 Eco and Beagle-x15
->>
->> Balaji T K (1):
->>   ARM: dts: dra7-evm: add evm_3v3_sd regulator
->>
->> Kishon Vijay Abraham I (5):
->>   ARM: dts: dra72-evm: add evm_3v3_sd regulator
->>   ARM: dts: dra72-evm: Set max clock frequency of MMC1 and MMC2
->>   ARM: dts: am57xx-beagle-x15: mmc1: remove redundant pbias-supply
->>     property
->>   ARM: dts: dra7-evm: Fix spurious card insert/removal interrupt
->>   ARM: dts: dra72-evm: Fix spurious card insert/removal interrupt
->>
->> Nishanth Menon (1):
->>   ARM: dts: dra7-evm: Add MMCSD card removal GPIO
->>
->>  arch/arm/boot/dts/am57xx-beagle-x15.dts |    1 -
->>  arch/arm/boot/dts/dra7-evm.dts          |   18 +++++++++++++++++-
->>  arch/arm/boot/dts/dra72-evm.dts         |   16 ++++++++++++++--
->>  3 files changed, 31 insertions(+), 4 deletions(-)
+On 08/05/2015, 01:52 PM, Jiri Slaby wrote:
+>> Yes, I see:
+>> sdhci-pci 0000:02:00.0: swiotlb buffer is full (sz: 65536 bytes)
+>> after some time. The driver falls back to non-DMA transfers after that.
+>> It also generates a warning about that:
+>> WARNING: CPU: 0 PID: 0 at drivers/mmc/host/sdhci.c:857
+>> sdhci_prepare_data+0x8ec/0x900 [sdhci]()
 > 
-> Thanks applying all these into omap-for-v4.3/dt.
+> I am attaching a debug patch and a debug log. You can see where
+> 0x00000000fffb0000 and 0x00000000fffe0000 is leaked. It is when 'invalid
+> cookie' error happens.
 
-Thanks. Please take [1] one too.
+And you could see the cookie handling is totally bogus.
 
-[1] -> https://lkml.org/lkml/2015/8/5/443
+With this rewrite, I no longer see the problems. Could you confirm it
+still does the good job with respect to performance -- the numbers you
+mentioned in your commit.
 
-Thanks
-Kishon
+Ulf, what do you think about the attached patch? (Do not look at the
+commented info prints.)
+
+thanks,
+-- 
+js
+suse labs
+
+--------------020103000507070906010301
+Content-Type: application/mbox;
+ name="fix.patch"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="fix.patch"
+
+ZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyBiL2RyaXZlcnMvbW1jL2hv
+c3Qvc2RoY2kuYwppbmRleCAxZGJlOTMyMzIwMzAuLjFmMjhmYWFiOTkxMyAxMDA2NDQKLS0t
+IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jCisrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2Ro
+Y2kuYwpAQCAtNDUsNiArNDUsMTIgQEAKIAogI2RlZmluZSBNQVhfVFVOSU5HX0xPT1AgNDAK
+IAorZW51bSBzZGhjaV9jb29raWUgeworCUNPT0tJRV9VTk1BUFBFRCwKKwlDT09LSUVfTUFQ
+UEVELAorCUNPT0tJRV9HSVZFTiwKK307CisKIHN0YXRpYyB1bnNpZ25lZCBpbnQgZGVidWdf
+cXVpcmtzID0gMDsKIHN0YXRpYyB1bnNpZ25lZCBpbnQgZGVidWdfcXVpcmtzMjsKIApAQCAt
+NTQsOCArNjAsNyBAQCBzdGF0aWMgdm9pZCBzZGhjaV9maW5pc2hfY29tbWFuZChzdHJ1Y3Qg
+c2RoY2lfaG9zdCAqKTsKIHN0YXRpYyBpbnQgc2RoY2lfZXhlY3V0ZV90dW5pbmcoc3RydWN0
+IG1tY19ob3N0ICptbWMsIHUzMiBvcGNvZGUpOwogc3RhdGljIHZvaWQgc2RoY2lfZW5hYmxl
+X3ByZXNldF92YWx1ZShzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwgYm9vbCBlbmFibGUpOwog
+c3RhdGljIGludCBzZGhjaV9wcmVfZG1hX3RyYW5zZmVyKHN0cnVjdCBzZGhjaV9ob3N0ICpo
+b3N0LAotCQkJCQlzdHJ1Y3QgbW1jX2RhdGEgKmRhdGEsCi0JCQkJCXN0cnVjdCBzZGhjaV9o
+b3N0X25leHQgKm5leHQpOworCQkJCQlzdHJ1Y3QgbW1jX2RhdGEgKmRhdGEpOwogc3RhdGlj
+IGludCBzZGhjaV9kb19nZXRfY2Qoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QpOwogCiAjaWZk
+ZWYgQ09ORklHX1BNCkBAIC00OTYsNyArNTAxLDcgQEAgc3RhdGljIGludCBzZGhjaV9hZG1h
+X3RhYmxlX3ByZShzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwKIAkJZ290byBmYWlsOwogCUJV
+R19PTihob3N0LT5hbGlnbl9hZGRyICYgaG9zdC0+YWxpZ25fbWFzayk7CiAKLQlob3N0LT5z
+Z19jb3VudCA9IHNkaGNpX3ByZV9kbWFfdHJhbnNmZXIoaG9zdCwgZGF0YSwgTlVMTCk7CisJ
+aG9zdC0+c2dfY291bnQgPSBzZGhjaV9wcmVfZG1hX3RyYW5zZmVyKGhvc3QsIGRhdGEpOwog
+CWlmIChob3N0LT5zZ19jb3VudCA8IDApCiAJCWdvdG8gdW5tYXBfYWxpZ247CiAKQEAgLTYz
+NSw5ICs2NDAsMTIgQEAgc3RhdGljIHZvaWQgc2RoY2lfYWRtYV90YWJsZV9wb3N0KHN0cnVj
+dCBzZGhjaV9ob3N0ICpob3N0LAogCQl9CiAJfQogCi0JaWYgKCFkYXRhLT5ob3N0X2Nvb2tp
+ZSkKKwlpZiAoZGF0YS0+aG9zdF9jb29raWUgPT0gQ09PS0lFX0dJVkVOIHx8IGRhdGEtPmhv
+c3RfY29va2llID09IENPT0tJRV9NQVBQRUQpIHsKKy8vCQlwcl9pbmZvKCIlczogdW5tYXBw
+aW5nICVwIHBoeXM9JXBhZCBjb29raWU9JWRcbiIsIF9fZnVuY19fLCBkYXRhLT5zZywgJnNn
+X2RtYV9hZGRyZXNzKGRhdGEtPnNnKSwgZGF0YS0+aG9zdF9jb29raWUpOwogCQlkbWFfdW5t
+YXBfc2cobW1jX2Rldihob3N0LT5tbWMpLCBkYXRhLT5zZywKIAkJCWRhdGEtPnNnX2xlbiwg
+ZGlyZWN0aW9uKTsKKwkJZGF0YS0+aG9zdF9jb29raWUgPSBDT09LSUVfVU5NQVBQRUQ7CisJ
+fQogfQogCiBzdGF0aWMgdTggc2RoY2lfY2FsY190aW1lb3V0KHN0cnVjdCBzZGhjaV9ob3N0
+ICpob3N0LCBzdHJ1Y3QgbW1jX2NvbW1hbmQgKmNtZCkKQEAgLTgzMyw3ICs4NDEsNyBAQCBz
+dGF0aWMgdm9pZCBzZGhjaV9wcmVwYXJlX2RhdGEoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3Qs
+IHN0cnVjdCBtbWNfY29tbWFuZCAqY21kKQogCQl9IGVsc2UgewogCQkJaW50IHNnX2NudDsK
+IAotCQkJc2dfY250ID0gc2RoY2lfcHJlX2RtYV90cmFuc2Zlcihob3N0LCBkYXRhLCBOVUxM
+KTsKKwkJCXNnX2NudCA9IHNkaGNpX3ByZV9kbWFfdHJhbnNmZXIoaG9zdCwgZGF0YSk7CiAJ
+CQlpZiAoc2dfY250IDw9IDApIHsKIAkJCQkvKgogCQkJCSAqIFRoaXMgb25seSBoYXBwZW5z
+IHdoZW4gc29tZW9uZSBmZWQKQEAgLTk0OSwxMSArOTU3LDE0IEBAIHN0YXRpYyB2b2lkIHNk
+aGNpX2ZpbmlzaF9kYXRhKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0KQogCQlpZiAoaG9zdC0+
+ZmxhZ3MgJiBTREhDSV9VU0VfQURNQSkKIAkJCXNkaGNpX2FkbWFfdGFibGVfcG9zdChob3N0
+LCBkYXRhKTsKIAkJZWxzZSB7Ci0JCQlpZiAoIWRhdGEtPmhvc3RfY29va2llKQorCQkJaWYg
+KGRhdGEtPmhvc3RfY29va2llID09IENPT0tJRV9HSVZFTiB8fCBkYXRhLT5ob3N0X2Nvb2tp
+ZSA9PSBDT09LSUVfTUFQUEVEKSB7CisvLwkJCQlwcl9pbmZvKCIlczogdW5tYXBwaW5nICVw
+IHBoeXM9JXBhZCBjb29raWU9JWRcbiIsIF9fZnVuY19fLCBkYXRhLT5zZywgJnNnX2RtYV9h
+ZGRyZXNzKGRhdGEtPnNnKSwgZGF0YS0+aG9zdF9jb29raWUpOwogCQkJCWRtYV91bm1hcF9z
+ZyhtbWNfZGV2KGhvc3QtPm1tYyksCiAJCQkJCWRhdGEtPnNnLCBkYXRhLT5zZ19sZW4sCiAJ
+CQkJCShkYXRhLT5mbGFncyAmIE1NQ19EQVRBX1JFQUQpID8KIAkJCQkJRE1BX0ZST01fREVW
+SUNFIDogRE1BX1RPX0RFVklDRSk7CisJCQkJZGF0YS0+aG9zdF9jb29raWUgPSBDT09LSUVf
+VU5NQVBQRUQ7CisJCQl9CiAJCX0KIAl9CiAKQEAgLTIwOTcsNDkgKzIxMDgsNDEgQEAgc3Rh
+dGljIHZvaWQgc2RoY2lfcG9zdF9yZXEoc3RydWN0IG1tY19ob3N0ICptbWMsIHN0cnVjdCBt
+bWNfcmVxdWVzdCAqbXJxLAogCXN0cnVjdCBtbWNfZGF0YSAqZGF0YSA9IG1ycS0+ZGF0YTsK
+IAogCWlmIChob3N0LT5mbGFncyAmIFNESENJX1JFUV9VU0VfRE1BKSB7Ci0JCWlmIChkYXRh
+LT5ob3N0X2Nvb2tpZSkKKwkJaWYgKGRhdGEtPmhvc3RfY29va2llID09IENPT0tJRV9HSVZF
+TiB8fCBkYXRhLT5ob3N0X2Nvb2tpZSA9PSBDT09LSUVfTUFQUEVEKSB7CisvLwkJCXByX2lu
+Zm8oIiVzOiB1bm1hcHBpbmcgJXAgcGh5cz0lcGFkIGNvb2tpZT0lZFxuIiwgX19mdW5jX18s
+IGRhdGEtPnNnLCAmc2dfZG1hX2FkZHJlc3MoZGF0YS0+c2cpLCBkYXRhLT5ob3N0X2Nvb2tp
+ZSk7CiAJCQlkbWFfdW5tYXBfc2cobW1jX2Rldihob3N0LT5tbWMpLCBkYXRhLT5zZywgZGF0
+YS0+c2dfbGVuLAogCQkJCQkgZGF0YS0+ZmxhZ3MgJiBNTUNfREFUQV9XUklURSA/CiAJCQkJ
+CSBETUFfVE9fREVWSUNFIDogRE1BX0ZST01fREVWSUNFKTsKLQkJbXJxLT5kYXRhLT5ob3N0
+X2Nvb2tpZSA9IDA7CisJCX0KKwkJZGF0YS0+aG9zdF9jb29raWUgPSBDT09LSUVfVU5NQVBQ
+RUQ7CiAJfQogfQogCiBzdGF0aWMgaW50IHNkaGNpX3ByZV9kbWFfdHJhbnNmZXIoc3RydWN0
+IHNkaGNpX2hvc3QgKmhvc3QsCi0JCQkJICAgICAgIHN0cnVjdCBtbWNfZGF0YSAqZGF0YSwK
+LQkJCQkgICAgICAgc3RydWN0IHNkaGNpX2hvc3RfbmV4dCAqbmV4dCkKKwkJCQkgICAgICAg
+c3RydWN0IG1tY19kYXRhICpkYXRhKQogewogCWludCBzZ19jb3VudDsKIAotCWlmICghbmV4
+dCAmJiBkYXRhLT5ob3N0X2Nvb2tpZSAmJgotCSAgICBkYXRhLT5ob3N0X2Nvb2tpZSAhPSBo
+b3N0LT5uZXh0X2RhdGEuY29va2llKSB7Ci0JCXByX2RlYnVnKERSSVZFUl9OQU1FICJbJXNd
+IGludmFsaWQgY29va2llOiAlZCwgbmV4dC1jb29raWUgJWRcbiIsCi0JCQlfX2Z1bmNfXywg
+ZGF0YS0+aG9zdF9jb29raWUsIGhvc3QtPm5leHRfZGF0YS5jb29raWUpOwotCQlkYXRhLT5o
+b3N0X2Nvb2tpZSA9IDA7Ci0JfQotCi0JLyogQ2hlY2sgaWYgbmV4dCBqb2IgaXMgYWxyZWFk
+eSBwcmVwYXJlZCAqLwotCWlmIChuZXh0IHx8Ci0JICAgICghbmV4dCAmJiBkYXRhLT5ob3N0
+X2Nvb2tpZSAhPSBob3N0LT5uZXh0X2RhdGEuY29va2llKSkgewotCQlzZ19jb3VudCA9IGRt
+YV9tYXBfc2cobW1jX2Rldihob3N0LT5tbWMpLCBkYXRhLT5zZywKLQkJCQkgICAgIGRhdGEt
+PnNnX2xlbiwKLQkJCQkgICAgIGRhdGEtPmZsYWdzICYgTU1DX0RBVEFfV1JJVEUgPwotCQkJ
+CSAgICAgRE1BX1RPX0RFVklDRSA6IERNQV9GUk9NX0RFVklDRSk7Ci0KLQl9IGVsc2Ugewot
+CQlzZ19jb3VudCA9IGhvc3QtPm5leHRfZGF0YS5zZ19jb3VudDsKLQkJaG9zdC0+bmV4dF9k
+YXRhLnNnX2NvdW50ID0gMDsKKwlpZiAoZGF0YS0+aG9zdF9jb29raWUgPT0gQ09PS0lFX01B
+UFBFRCkgeworCQlkYXRhLT5ob3N0X2Nvb2tpZSA9IENPT0tJRV9HSVZFTjsKKwkJcmV0dXJu
+IGhvc3QtPnNnX2NvdW50OwogCX0KIAorCVdBUk5fT04oZGF0YS0+aG9zdF9jb29raWUgPT0g
+Q09PS0lFX0dJVkVOKTsKIAorCXNnX2NvdW50ID0gZG1hX21hcF9zZyhtbWNfZGV2KGhvc3Qt
+Pm1tYyksIGRhdGEtPnNnLAorCQkJICAgICBkYXRhLT5zZ19sZW4sCisJCQkgICAgIGRhdGEt
+PmZsYWdzICYgTU1DX0RBVEFfV1JJVEUgPworCQkJICAgICBETUFfVE9fREVWSUNFIDogRE1B
+X0ZST01fREVWSUNFKTsKIAlpZiAoc2dfY291bnQgPT0gMCkKLQkJcmV0dXJuIC1FSU5WQUw7
+CisJCXJldHVybiAtRU5PTUVNOwogCi0JaWYgKG5leHQpIHsKLQkJbmV4dC0+c2dfY291bnQg
+PSBzZ19jb3VudDsKLQkJZGF0YS0+aG9zdF9jb29raWUgPSArK25leHQtPmNvb2tpZSA8IDAg
+PyAxIDogbmV4dC0+Y29va2llOwotCX0gZWxzZQotCQlob3N0LT5zZ19jb3VudCA9IHNnX2Nv
+dW50OworLy8JcHJfaW5mbygiJXMgW2Zyb20gJXBGXTogbWFwcGVkICVwICVwYWQsIGhjb29r
+PSVkXG4iLAorLy8JCQlfX2Z1bmNfXywgX19idWlsdGluX3JldHVybl9hZGRyZXNzKDApLCBk
+YXRhLT5zZywgJnNnX2RtYV9hZGRyZXNzKGRhdGEtPnNnKSwgZGF0YS0+aG9zdF9jb29raWUp
+OworCisJLyogc2V0dGluZyBzZ19jb3VudCBwZXIgaG9zdCBoZXJlIHdhcyBuZXZlciBPSyAq
+LworCWhvc3QtPnNnX2NvdW50ID0gc2dfY291bnQ7CisJZGF0YS0+aG9zdF9jb29raWUgPSBD
+T09LSUVfTUFQUEVEOwogCiAJcmV0dXJuIHNnX2NvdW50OwogfQpAQCAtMjE0OSwxNiArMjE1
+Miw4IEBAIHN0YXRpYyB2b2lkIHNkaGNpX3ByZV9yZXEoc3RydWN0IG1tY19ob3N0ICptbWMs
+IHN0cnVjdCBtbWNfcmVxdWVzdCAqbXJxLAogewogCXN0cnVjdCBzZGhjaV9ob3N0ICpob3N0
+ID0gbW1jX3ByaXYobW1jKTsKIAotCWlmIChtcnEtPmRhdGEtPmhvc3RfY29va2llKSB7Ci0J
+CW1ycS0+ZGF0YS0+aG9zdF9jb29raWUgPSAwOwotCQlyZXR1cm47Ci0JfQotCiAJaWYgKGhv
+c3QtPmZsYWdzICYgU0RIQ0lfUkVRX1VTRV9ETUEpCi0JCWlmIChzZGhjaV9wcmVfZG1hX3Ry
+YW5zZmVyKGhvc3QsCi0JCQkJCW1ycS0+ZGF0YSwKLQkJCQkJJmhvc3QtPm5leHRfZGF0YSkg
+PCAwKQotCQkJbXJxLT5kYXRhLT5ob3N0X2Nvb2tpZSA9IDA7CisJCXNkaGNpX3ByZV9kbWFf
+dHJhbnNmZXIoaG9zdCwgbXJxLT5kYXRhKTsKIH0KIAogc3RhdGljIHZvaWQgc2RoY2lfY2Fy
+ZF9ldmVudChzdHJ1Y3QgbW1jX2hvc3QgKm1tYykKQEAgLTMwMzAsNyArMzAyNSw2IEBAIGlu
+dCBzZGhjaV9hZGRfaG9zdChzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCkKIAkJaG9zdC0+bWF4
+X2NsayA9IGhvc3QtPm9wcy0+Z2V0X21heF9jbG9jayhob3N0KTsKIAl9CiAKLQlob3N0LT5u
+ZXh0X2RhdGEuY29va2llID0gMTsKIAkvKgogCSAqIEluIGNhc2Ugb2YgSG9zdCBDb250cm9s
+bGVyIHYzLjAwLCBmaW5kIG91dCB3aGV0aGVyIGNsb2NrCiAJICogbXVsdGlwbGllciBpcyBz
+dXBwb3J0ZWQuCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmggYi9kcml2
+ZXJzL21tYy9ob3N0L3NkaGNpLmgKaW5kZXggNTUyMWQyOTM2OGU0Li5iNThmMjI2MDBiMTEg
+MTAwNjQ0Ci0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuaAorKysgYi9kcml2ZXJzL21t
+Yy9ob3N0L3NkaGNpLmgKQEAgLTMwOSwxMSArMzA5LDYgQEAgc3RydWN0IHNkaGNpX2FkbWEy
+XzY0X2Rlc2MgewogICovCiAjZGVmaW5lIFNESENJX01BWF9TRUdTCQkxMjgKIAotc3RydWN0
+IHNkaGNpX2hvc3RfbmV4dCB7Ci0JdW5zaWduZWQgaW50CXNnX2NvdW50OwotCXMzMgkJY29v
+a2llOwotfTsKLQogc3RydWN0IHNkaGNpX2hvc3QgewogCS8qIERhdGEgc2V0IGJ5IGhhcmR3
+YXJlIGludGVyZmFjZSBkcml2ZXIgKi8KIAljb25zdCBjaGFyICpod19uYW1lOwkvKiBIYXJk
+d2FyZSBidXMgbmFtZSAqLwpAQCAtNTAzLDcgKzQ5OCw2IEBAIHN0cnVjdCBzZGhjaV9ob3N0
+IHsKIAl1bnNpZ25lZCBpbnQJCXR1bmluZ19tb2RlOwkvKiBSZS10dW5pbmcgbW9kZSBzdXBw
+b3J0ZWQgYnkgaG9zdCAqLwogI2RlZmluZSBTREhDSV9UVU5JTkdfTU9ERV8xCTAKIAotCXN0
+cnVjdCBzZGhjaV9ob3N0X25leHQJbmV4dF9kYXRhOwogCXVuc2lnbmVkIGxvbmcgcHJpdmF0
+ZVswXSBfX19fY2FjaGVsaW5lX2FsaWduZWQ7CiB9OwogCg==
+--------------020103000507070906010301--
