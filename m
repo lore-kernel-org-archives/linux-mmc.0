@@ -1,17 +1,17 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [RFC PATCH v3 2/5] Documentation: synopsys-dw-mshc: add bindings
- for idmac and edmac
-Date: Wed, 5 Aug 2015 16:56:10 +0800
-Message-ID: <55C1CFAA.4090100@rock-chips.com>
+Subject: Re: [RFC PATCH v3 1/5] mmc: dw_mmc: Add external dma interface
+ support
+Date: Wed, 5 Aug 2015 17:11:50 +0800
+Message-ID: <55C1D356.5030302@rock-chips.com>
 References: <1438762614-22154-1-git-send-email-shawn.lin@rock-chips.com>
- <55C1C8E9.1060808@samsung.com> <55C1CCA8.7040304@rock-chips.com>
- <2567191.z5Kn3VDlTS@diego>
+ <1438762648-22202-1-git-send-email-shawn.lin@rock-chips.com>
+ <8177347.dLpRuMxaEU@diego>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
+Content-Type: text/plain; charset=UTF-8;
         format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mips-bounce@linux-mips.org>
-In-Reply-To: <2567191.z5Kn3VDlTS@diego>
+In-Reply-To: <8177347.dLpRuMxaEU@diego>
 Sender: linux-mips-bounce@linux-mips.org
 Errors-to: linux-mips-bounce@linux-mips.org
 List-help: <mailto:ecartis@linux-mips.org?Subject=help>
@@ -22,146 +22,80 @@ List-owner: <mailto:ralf@linux-mips.org>
 List-post: <mailto:linux-mips@linux-mips.org>
 List-archive: <http://www.linux-mips.org/archives/linux-mips/>
 To: =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko@sntech.de>
-Cc: shawn.lin@rock-chips.com, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, dianders@chromium.org, linux-mips@linux-mips.org, Arnd Bergmann <arnd@arndb.de>, Alexandre Belloni <alexandre.belloni@free-electrons.com>, Alexey Brodkin <abrodkin@synopsys.com>, Stefan Agner <stefan@agner.ch>, Zhou Wang <wangzhou.bry@gmail.com>, Kumar Gala <galak@codeaurora.org>, Alim Akhtar <alim.akhtar@samsung.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Wang Long <long.wanglong@huawei.com>, Rob Herring <robh+dt@kernel.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Lukasz Majewski <l.majewski@samsung.com>, Jun Nie <jun.nie@linaro.org>, Catalin
+Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, dianders@chromium.org, linux-mips@linux-mips.org, Arnd Bergmann <arnd@arndb.de>, Alexandre Belloni <alexandre.belloni@free-electrons.com>, Alexey Brodkin <abrodkin@synopsys.com>, Stefan Agner <stefan@agner.ch>, Zhou Wang <wangzhou.bry@gmail.com>, Kumar Gala <galak@codeaurora.org>, Alim Akhtar <alim.akhtar@samsung.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Wang Long <long.wanglong@huawei.com>, Rob Herring <robh+dt@kernel.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Lukasz Majewski <l.majewski@samsung.com>, Jun Nie <jun.nie@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Kevin Hao <haokexin@>
 List-Id: linux-mmc@vger.kernel.org
 
-=E5=9C=A8 2015/8/5 16:45, Heiko St=C3=BCbner =E5=86=99=E9=81=93:
-> Am Mittwoch, 5. August 2015, 16:43:20 schrieb Shawn Lin:
->> =E5=9C=A8 2015/8/5 16:27, Krzysztof Kozlowski =E5=86=99=E9=81=93:
->>> On 05.08.2015 17:17, Shawn Lin wrote:
->>>> synopsys-dw-mshc supports three types of transfer mode. We add bin=
-dings
->>>> and description for how to use them at runtime. Without idmac and =
-edmac
->>>> property, pio is the default transfer mode. Make sure that Idmac a=
-nd
->>>> emdac
->>>> should not be used simultaneously.
->>>>
->>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>>> ---
->>>>
->>>> Changes in v3: None
->>>> Changes in v2: None
->>>>
->>>>    .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   | 41
->>>>    ++++++++++++++++++++++ 1 file changed, 41 insertions(+)
->>>>
->>>> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-msh=
-c.txt
->>>> b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt index
->>>> 346c609..30369cb 100644
->>>> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
->>>> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
->>>>
->>>> @@ -75,6 +75,25 @@ Optional properties:
->>>>    * vmmc-supply: The phandle to the regulator to use for vmmc.  I=
-f this
->>>>    is
->>>>   =20
->>>>      specified we'll defer probe until we can find this regulator.
->>>>
->>>> +* supports-idmac: Enables support for internal DMAC block within =
-the
->>>> Synopsys +  Designware Mobile Storage IP block. If supports-idmac
->>>> property is present, then +  we MUST NOT add supports-edmac proper=
-ty
->>>> since we'd assume that dw-mshc IP is +  integrated with only one t=
-ype of
->>>> dma master.
->>>> +
->>>> +* supports-edmac: Enables support for external DMAC block outside=
- the
->>>> Synopsys +  Designware Mobile Storage IP block. If supports-edmac
->>>> property is present, then +  we MUST NOT add supports-idmac proper=
-ty
->>>> since we'd assume that dw-mshc IP is +  integrated with only one t=
-ype of
->>>> dma master.
->>>> +
->>>> +  (Without "supports-idmac" and "supports-edmac", use PIO as defa=
-ult
->>>> transfer mode)>
->>> Aren't you breaking here backward compatibility with existing DTB?
->>>
->>> Best regards,
->>> Krzysztof
->>    Thanks, Krzysztof.
->>    I guess you mean that I should keep existing DTB w/o these two
->> properties work fine using idmac?
-> yep
-   Okay, I got it.
+=E5=9C=A8 2015/8/5 16:49, Heiko St=C3=BCbner =E5=86=99=E9=81=93:
+> Am Mittwoch, 5. August 2015, 16:17:28 schrieb Shawn Lin:
+>> DesignWare MMC Controller can supports two types of DMA
+>> mode: external dma and internal dma. We get a RK312x platform
+>> integrated dw_mmc and ARM pl330 dma controller. This patch add
+>> edmac ops to support these platforms. I've tested it on RK312x
+>> platform with edmac mode and RK3288 platform with idmac mode.
+>>
+>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>
+>> ---
+> [...]
 >
->>>> +
->>>> +* dmas: List of DMA specifiers with the controller specific forma=
-t as
->>>> described +  in the generic DMA client binding. This property shou=
-ld be
->>>> combined with +  supports-edmac. Refer to dma.txt for details.
->>>> +
->>>> +* dma-names: DMA request names. Must be "rx-tx". And This propert=
-y
->>>> should be +  combined with supports-edmac. Refer to dma.txt for de=
-tails.
->>>> +
-> Similarly the use of an external dmac could simply be detected, by th=
-e
-> presence of the dma-* properties. So when the machine defines dma cha=
-nnels use
-> the external dma, otherwise the internal (or none). So you wouldn't n=
-eed
-> separate new properties at all.
-   Thanks, Heiko.  I understand your point.
-   It will be done in v4.
+>> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+>> index 5be9767..6c1c7ea 100644
+>> --- a/include/linux/mmc/dw_mmc.h
+>> +++ b/include/linux/mmc/dw_mmc.h
+>> @@ -16,6 +16,7 @@
+>>
+>>   #include <linux/scatterlist.h>
+>>   #include <linux/mmc/core.h>
+>> +#include <linux/dmaengine.h>
+>>
+>>   #define MAX_MCI_SLOTS	2
+>>
+>> @@ -40,6 +41,17 @@ enum {
+>>
+>>   struct mmc_data;
+>>
+>> +enum {
+>> +	TRANS_MODE_PIO =3D 0,
+>> +	TRANS_MODE_IDMAC,
+>> +	TRANS_MODE_EDMAC
+>> +};
+>> +
+>> +struct dw_mci_dma_slave {
+>> +	struct dma_chan *ch;
+>> +	enum dma_transfer_direction direction;
+>> +};
+>> +
+>>   /**
+>>    * struct dw_mci - MMC controller state shared between all slots
+>>    * @lock: Spinlock protecting the queue and associated data.
+>> @@ -147,17 +159,23 @@ struct dw_mci {
+>>
+>>   	/* DMA interface members*/
+>>   	int			use_dma;
+>> +	int			trans_mode;
+> you're introducing this new trans_mode, but we have "use_dma" already=
+=2E
 >
->>>>    Aliases:
->>>>   =20
->>>>    - All the MSHC controller nodes should be represented in the al=
-iases
->>>>    node using>>
->>>> @@ -95,6 +114,8 @@ board specific portions as listed below.
->>>>
->>>>    		#size-cells =3D <0>;
->>>>    =09
->>>>    	};
->>>>
->>>> +[board specific internal DMA resources]
->>>> +
->>>>
->>>>    	dwmmc0@12200000 {
->>>>    =09
->>>>    		clock-frequency =3D <400000000>;
->>>>    		clock-freq-min-max =3D <400000 200000000>;
->>>>
->>>> @@ -106,4 +127,24 @@ board specific portions as listed below.
->>>>
->>>>    		bus-width =3D <8>;
->>>>    		cap-mmc-highspeed;
->>>>    		cap-sd-highspeed;
->>>>
->>>> +		supports-idmac;
->>>>
->>>>    	};
->>>>
->>>> +
->>>> +[board specific generic DMA request binding]
->>>> +
->>>> +	dwmmc0@12200000 {
->>>> +		clock-frequency =3D <400000000>;
->>>> +		clock-freq-min-max =3D <400000 200000000>;
->>>> +		num-slots =3D <1>;
->>>> +		broken-cd;
->>>> +		fifo-depth =3D <0x80>;
->>>> +		card-detect-delay =3D <200>;
->>>> +		vmmc-supply =3D <&buck8>;
->>>> +		bus-width =3D <8>;
->>>> +		cap-mmc-highspeed;
->>>> +		cap-sd-highspeed;
->>>> +		supports-edmac;
->>>> +		dmas =3D <&pdma 12>;
->>>> +		dma-names =3D "rx-tx";
->>>> +	};
->>>> +
+> So you could just define
+>
+> enum {
+> 	TRANS_DMA_PIO =3D 0,
+> 	TRANS_DMA_IDMAC,
+> 	TRANS_DMA_EDMAC
+> };
+>
+> and fill use_dma appropriately. "0" is meaning PIO already, which I a=
+lso did fix
+> up some days ago in "[PATCH] mmc: dw_mmc: fix pio mode when internal =
+dmac is
+> enabled" [0].
+    I  agree.  "trans_mode" is redundant here since it does the same=20
+work as "use_dma" to some degree.
+    Thanks.
+>
+> Heiko
+>
+> [0] https://lkml.org/lkml/2015/8/3/407
 >
 >
 >
