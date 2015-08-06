@@ -1,64 +1,75 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 00/11] omap_hsmmc: voltage switching and tuning
-Date: Wed, 5 Aug 2015 23:48:21 -0700
-Message-ID: <20150806064821.GO16878@atomide.com>
-References: <1438242394-25599-1-git-send-email-kishon@ti.com>
- <20150805104355.GE16878@atomide.com>
- <55C22524.5050304@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [RFC PATCH v4 2/9] Documentation: synopsys-dw-mshc: add bindings for idmac and edmac
+Date: Thu,  6 Aug 2015 14:45:02 +0800
+Message-ID: <1438843502-23894-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1438843469-23807-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <55C22524.5050304@ti.com>
+In-Reply-To: <1438843469-23807-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: ulf.hansson@linaro.org, afenkart@gmail.com, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com, mugunthanvnm@ti.com
+To: jh80.chung@samsung.com, ulf.hansson@linaro.org
+Cc: heiko@sntech.de, dianders@chromium.org, Vineet.Gupta1@synopsys.com, Wei Xu <xuwei5@hisilicon.com>, Joachim Eastwood <manabian@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Russell King <linux@arm.linux.org.uk>, Jun Nie <jun.nie@linaro.org>, Ralf Baechle <ralf@linux-mips.org>, Govindraj Raja <govindraj.raja@imgtec.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
 
-* Kishon Vijay Abraham I <kishon@ti.com> [150805 08:03]:
-> Hi,
-> 
-> On Wednesday 05 August 2015 04:13 PM, Tony Lindgren wrote:
-> > * Kishon Vijay Abraham I <kishon@ti.com> [150730 00:49]:
-> >> Patch series implements voltage switching and tuning for omap_hsmmc
-> >> driver.
-> >>
-> >> Did basic read/write test in J6, J6 Eco, Beagle-x15, AM437x EVM,
-> >> Beaglebone black, OMAP5 uEVM and OMAP4 PANDA.
-> > 
-> > Your tests are missing omap3?
-> 
-> I don't have one at my disposal :-( I'll try to find one and add omap3 tests.
+synopsys-dw-mshc supports three types of transfer mode. We add
+bindings and description for how to use them at runtime.
 
-Great :) Beagle xm is a good one to test the USB PHY stuff on
-and also MMC. Having USB cable connected or EHCI loaded blocks the PM
-though, so NFSroot is not very usable for testing on it.
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-If you want to test PM over NFSroot, boards with the smsc911x known
-to work with PM  are at least omap3-evm-37xx.dts and
-logicpd-torpedo-37xx-devkit.dts.  Since you tinker with the USB PHYs,
-torpedo has MUSB working the same way as the beagle boards, EVM I
-think can be modified that way but by default has diffent PHY.
+Changes in v4: None
+Changes in v3: None
+Changes in v2: None
 
-Also overo tobi boards work with PM but only for retntion idle and
-not off idle, and map3-sbc-t3517.dts probably can be made to work
-with PM but I have mine as a gateway and have not been able to test
-with it.
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   | 25 ++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
 
-Probably also zoom3 boards with later processor boards can be made
-to work, the LDP has early omap34xx variants and can't be made to
-work reliably.
-
-I don't have omap3-lilly, but I'd assume that can also be made
-to work with PM if not already working.
-
-> > I suggest you add some omap3 tests in general as otherwise you are
-> > only testing a subset of the driver features and completely missing
-> > things like rutnime PM and save and restore for the deeper idle
-> > states.
-> 
-> yeah, I'll do those tests and re-post the series.
-
-Thanks!
-
-Tony
+diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+index 346c609..8636f5a 100644
+--- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+@@ -75,6 +75,12 @@ Optional properties:
+ * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
+   specified we'll defer probe until we can find this regulator.
+ 
++* dmas: List of DMA specifiers with the controller specific format as described
++  in the generic DMA client binding. Refer to dma.txt for details.
++
++* dma-names: request names for generic DMA client binding. Must be "rx-tx".
++  Refer to dma.txt for details.
++
+ Aliases:
+ 
+ - All the MSHC controller nodes should be represented in the aliases node using
+@@ -95,6 +101,23 @@ board specific portions as listed below.
+ 		#size-cells = <0>;
+ 	};
+ 
++[board specific internal DMA resources]
++
++	dwmmc0@12200000 {
++		clock-frequency = <400000000>;
++		clock-freq-min-max = <400000 200000000>;
++		num-slots = <1>;
++		broken-cd;
++		fifo-depth = <0x80>;
++		card-detect-delay = <200>;
++		vmmc-supply = <&buck8>;
++		bus-width = <8>;
++		cap-mmc-highspeed;
++		cap-sd-highspeed;
++	};
++
++[board specific generic DMA request binding]
++
+ 	dwmmc0@12200000 {
+ 		clock-frequency = <400000000>;
+ 		clock-freq-min-max = <400000 200000000>;
+@@ -106,4 +129,6 @@ board specific portions as listed below.
+ 		bus-width = <8>;
+ 		cap-mmc-highspeed;
+ 		cap-sd-highspeed;
++		dmas = <&pdma 12>;
++		dma-names = "rx-tx";
+ 	};
+-- 
+2.3.7
