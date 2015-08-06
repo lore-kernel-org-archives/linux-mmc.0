@@ -1,36 +1,43 @@
-From: Jiri Slaby <jslaby@suse.cz>
-Subject: Re: [RFC] sdhci: fix DMA leaks [was: [SHDCI] Heavy (thousands) DMA
+From: Chen Bough <Haibo.Chen@freescale.com>
+Subject: RE: [RFC] sdhci: fix DMA leaks [was: [SHDCI] Heavy (thousands) DMA
  leaks]
-Date: Thu, 6 Aug 2015 11:06:45 +0200
-Message-ID: <55C323A5.6050303@suse.cz>
+Date: Thu, 6 Aug 2015 09:17:22 +0000
+Message-ID: <BY1PR03MB1388AE95AA9000BB9B8B47559A740@BY1PR03MB1388.namprd03.prod.outlook.com>
 References: <55B9EF02.7040404@suse.cz>
  <BY1PR03MB138811AD7FAB3C561CC683679A770@BY1PR03MB1388.namprd03.prod.outlook.com>
  <55BF36D6.4080504@suse.cz> <55C1F919.4080002@suse.cz>
  <55C227B4.3030102@suse.cz>
  <BY1PR03MB13889A6C31FC542DB544CE479A740@BY1PR03MB1388.namprd03.prod.outlook.com>
+ <55C323A5.6050303@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <BY1PR03MB13889A6C31FC542DB544CE479A740@BY1PR03MB1388.namprd03.prod.outlook.com>
+In-Reply-To: <55C323A5.6050303@suse.cz>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chen Bough <Haibo.Chen@freescale.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Jiri Slaby <jslaby@suse.cz>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux kernel mailing list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 08/06/2015, 09:42 AM, Chen Bough wrote:
-> I read your attached log and patch, yes, dma memory leak will happen when
-> more than one pre_request execute. The method of ++next->cookie is not good,
-> your patch seems good, but I still need some time to test the patch, because
-> you unmap the dma in sdhci_finish_data rather than the sdhci_post_req.
-
-Hi,
-
-yes, this is not correct. We can perhaps differentiate according to the
-COOKIE value. Should I fix it or are you going to prepare a patch based
-on my RFC?
-
-thanks,
--- 
-js
-suse labs
+SSB3aWxsIGZvcm1hdCBhIHBhdGNoIGJhc2VkIG9uIHlvdXIgZGlmZiBmaWxlIGZpcnN0bHkuIEkg
+d2lsbCB0ZXN0IHRoaXMgb24gbXkgc2lkZSwNCklmIGFueSBpc3N1ZSwgbGlrZSBkbWEgaXNzdWUg
+b3IgcGVyZm9ybWFuY2UgaXNzdWUsIEkgd2lsbCBhZGQgc29tZSBtb2RpZmljYXRpb24uDQpUaGVu
+IEkgd2lsbCBzZW5kIHRoZSBwYXRjaCBmb3IgcmV2aWV3LCBhbmQgeW91IGNhbiB0ZXN0IHRoZSBw
+YXRjaCBvbiB5b3VyIHBsYXRmb3JtLg0KDQpCZXN0IFJlZ2FyZHMNCkhhaWJvIENoZW4NCg0KDQo+
+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEppcmkgU2xhYnkgW21haWx0bzpq
+c2xhYnlAc3VzZS5jel0NCj4gU2VudDogVGh1cnNkYXksIEF1Z3VzdCAwNiwgMjAxNSA1OjA3IFBN
+DQo+IFRvOiBDaGVuIEhhaWJvLUI1MTQyMTsgVWxmIEhhbnNzb24NCj4gQ2M6IGxpbnV4LW1tY0B2
+Z2VyLmtlcm5lbC5vcmc7IExpbnV4IGtlcm5lbCBtYWlsaW5nIGxpc3QNCj4gU3ViamVjdDogUmU6
+IFtSRkNdIHNkaGNpOiBmaXggRE1BIGxlYWtzIFt3YXM6IFtTSERDSV0gSGVhdnkgKHRob3VzYW5k
+cykNCj4gRE1BIGxlYWtzXQ0KPiANCj4gT24gMDgvMDYvMjAxNSwgMDk6NDIgQU0sIENoZW4gQm91
+Z2ggd3JvdGU6DQo+ID4gSSByZWFkIHlvdXIgYXR0YWNoZWQgbG9nIGFuZCBwYXRjaCwgeWVzLCBk
+bWEgbWVtb3J5IGxlYWsgd2lsbCBoYXBwZW4NCj4gPiB3aGVuIG1vcmUgdGhhbiBvbmUgcHJlX3Jl
+cXVlc3QgZXhlY3V0ZS4gVGhlIG1ldGhvZCBvZiArK25leHQtPmNvb2tpZQ0KPiA+IGlzIG5vdCBn
+b29kLCB5b3VyIHBhdGNoIHNlZW1zIGdvb2QsIGJ1dCBJIHN0aWxsIG5lZWQgc29tZSB0aW1lIHRv
+IHRlc3QNCj4gPiB0aGUgcGF0Y2gsIGJlY2F1c2UgeW91IHVubWFwIHRoZSBkbWEgaW4gc2RoY2lf
+ZmluaXNoX2RhdGEgcmF0aGVyIHRoYW4NCj4gdGhlIHNkaGNpX3Bvc3RfcmVxLg0KPiANCj4gSGks
+DQo+IA0KPiB5ZXMsIHRoaXMgaXMgbm90IGNvcnJlY3QuIFdlIGNhbiBwZXJoYXBzIGRpZmZlcmVu
+dGlhdGUgYWNjb3JkaW5nIHRvIHRoZQ0KPiBDT09LSUUgdmFsdWUuIFNob3VsZCBJIGZpeCBpdCBv
+ciBhcmUgeW91IGdvaW5nIHRvIHByZXBhcmUgYSBwYXRjaCBiYXNlZA0KPiBvbiBteSBSRkM/DQo+
+IA0KPiB0aGFua3MsDQo+IC0tDQo+IGpzDQo+IHN1c2UgbGFicw0K
