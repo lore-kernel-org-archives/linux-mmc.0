@@ -1,36 +1,91 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: Re: [RFC PATCH v4 5/9] arm: exynos_defconfig: remove
- CONFIG_MMC_DW_IDMAC
-Date: Thu, 06 Aug 2015 16:08:56 +0900
-Message-ID: <55C30808.1020704@samsung.com>
-References: <1438843469-23807-1-git-send-email-shawn.lin@rock-chips.com>
- <1438843539-24017-1-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1438843539-24017-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, jh80.chung@samsung.com, ulf.hansson@linaro.org
-Cc: heiko@sntech.de, dianders@chromium.org, Vineet.Gupta1@synopsys.com, Wei Xu <xuwei5@hisilicon.com>, Joachim Eastwood <manabian@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Kukjin Kim <kgene@kernel.org>, Russell King <linux@arm.linux.org.uk>, Jun Nie <jun.nie@linaro.org>, Ralf Baechle <ralf@linux-mips.org>, Govindraj Raja <govindraj.raja@imgtec.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH 2/3] mmc: dw_mmc: remove the unused blk_setting
+Date: Thu, 06 Aug 2015 16:23:25 +0900
+Message-ID: <1438845806-4486-2-git-send-email-jh80.chung@samsung.com>
+References: <1438845806-4486-1-git-send-email-jh80.chung@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:46420 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754614AbbHFHXa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Aug 2015 03:23:30 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0NSN02JGOGJ48840@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 06 Aug 2015 16:23:28 +0900 (KST)
+In-reply-to: <1438845806-4486-1-git-send-email-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 06.08.2015 15:45, Shawn Lin wrote:
-> DesignWare MMC Controller's transfer mode should be decided
-> at runtime instead of compile-time. So we remove this config
-> option and read dw_mmc's register to select DMA master.
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
-> 
-> Changes in v4: None
-> Changes in v3: None
-> Changes in v2: None
-> 
->  arch/arm/configs/exynos_defconfig | 1 -
->  1 file changed, 1 deletion(-)
+"blk_setting" doesn't use anywhere.
 
-Acked-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c  | 34 +++++++++++++---------------------
+ include/linux/mmc/dw_mmc.h |  1 -
+ 2 files changed, 13 insertions(+), 22 deletions(-)
 
-Best regards,
-Krzysztof
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index de88e64..091df65 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2436,28 +2436,20 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	if (ret)
+ 		goto err_host_allocated;
+ 
+-	if (host->pdata->blk_settings) {
+-		mmc->max_segs = host->pdata->blk_settings->max_segs;
+-		mmc->max_blk_size = host->pdata->blk_settings->max_blk_size;
+-		mmc->max_blk_count = host->pdata->blk_settings->max_blk_count;
+-		mmc->max_req_size = host->pdata->blk_settings->max_req_size;
+-		mmc->max_seg_size = host->pdata->blk_settings->max_seg_size;
++	/* Useful defaults if platform data is unset. */
++	if (host->use_dma) {
++		mmc->max_segs = host->ring_size;
++		mmc->max_blk_size = 65536;
++		mmc->max_seg_size = 0x1000;
++		mmc->max_req_size = mmc->max_seg_size * host->ring_size;
++		mmc->max_blk_count = mmc->max_req_size / 512;
+ 	} else {
+-		/* Useful defaults if platform data is unset. */
+-		if (host->use_dma) {
+-			mmc->max_segs = host->ring_size;
+-			mmc->max_blk_size = 65536;
+-			mmc->max_seg_size = 0x1000;
+-			mmc->max_req_size = mmc->max_seg_size * host->ring_size;
+-			mmc->max_blk_count = mmc->max_req_size / 512;
+-		} else {
+-			mmc->max_segs = 64;
+-			mmc->max_blk_size = 65536; /* BLKSIZ is 16 bits */
+-			mmc->max_blk_count = 512;
+-			mmc->max_req_size = mmc->max_blk_size *
+-					    mmc->max_blk_count;
+-			mmc->max_seg_size = mmc->max_req_size;
+-		}
++		mmc->max_segs = 64;
++		mmc->max_blk_size = 65536; /* BLKSIZ is 16 bits */
++		mmc->max_blk_count = 512;
++		mmc->max_req_size = mmc->max_blk_size *
++				    mmc->max_blk_count;
++		mmc->max_seg_size = mmc->max_req_size;
+ 	}
+ 
+ 	if (dw_mci_get_cd(mmc))
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 5be9767..9c06f2d 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -259,7 +259,6 @@ struct dw_mci_board {
+ 
+ 	struct dw_mci_dma_ops *dma_ops;
+ 	struct dma_pdata *data;
+-	struct block_settings *blk_settings;
+ };
+ 
+ #endif /* LINUX_MMC_DW_MMC_H */
+-- 
+1.9.1
+
