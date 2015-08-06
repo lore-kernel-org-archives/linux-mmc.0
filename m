@@ -1,13 +1,13 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RFC PATCH v4 6/9] arm: hisi_defconfig: remove CONFIG_MMC_DW_IDMAC
-Date: Thu,  6 Aug 2015 14:45:53 +0800
-Message-ID: <1438843553-24058-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [RFC PATCH v4 7/9] arm: lpc18xx_defconfig: remove CONFIG_MMC_DW_IDMAC
+Date: Thu,  6 Aug 2015 14:46:30 +0800
+Message-ID: <1438843590-24101-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1438843469-23807-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:58592 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.130]:51151 "EHLO
 	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754537AbbHFGtr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Aug 2015 02:49:47 -0400
+	with ESMTP id S1754766AbbHFGuB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Aug 2015 02:50:01 -0400
 In-Reply-To: <1438843469-23807-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -25,21 +25,21 @@ Changes in v4: None
 Changes in v3: None
 Changes in v2: None
 
- arch/arm/configs/hisi_defconfig | 1 -
+ arch/arm/configs/lpc18xx_defconfig | 1 -
  1 file changed, 1 deletion(-)
 
-diff --git a/arch/arm/configs/hisi_defconfig b/arch/arm/configs/hisi_defconfig
-index 5997dbc..b2e340b 100644
---- a/arch/arm/configs/hisi_defconfig
-+++ b/arch/arm/configs/hisi_defconfig
-@@ -69,7 +69,6 @@ CONFIG_NOP_USB_XCEIV=y
+diff --git a/arch/arm/configs/lpc18xx_defconfig b/arch/arm/configs/lpc18xx_defconfig
+index 1c47f86..b7e8cda 100644
+--- a/arch/arm/configs/lpc18xx_defconfig
++++ b/arch/arm/configs/lpc18xx_defconfig
+@@ -119,7 +119,6 @@ CONFIG_USB_EHCI_HCD=y
+ CONFIG_USB_EHCI_ROOT_HUB_TT=y
  CONFIG_MMC=y
- CONFIG_RTC_CLASS=y
  CONFIG_MMC_DW=y
 -CONFIG_MMC_DW_IDMAC=y
- CONFIG_MMC_DW_PLTFM=y
- CONFIG_RTC_DRV_PL031=y
- CONFIG_DMADEVICES=y
+ CONFIG_NEW_LEDS=y
+ CONFIG_LEDS_CLASS=y
+ CONFIG_LEDS_PCA9532=y
 -- 
 2.3.7
 
