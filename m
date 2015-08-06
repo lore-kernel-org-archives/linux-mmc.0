@@ -1,43 +1,54 @@
-From: Chen Bough <Haibo.Chen@freescale.com>
-Subject: RE: [RFC] sdhci: fix DMA leaks [was: [SHDCI] Heavy (thousands) DMA
- leaks]
-Date: Thu, 6 Aug 2015 09:17:22 +0000
-Message-ID: <BY1PR03MB1388AE95AA9000BB9B8B47559A740@BY1PR03MB1388.namprd03.prod.outlook.com>
-References: <55B9EF02.7040404@suse.cz>
- <BY1PR03MB138811AD7FAB3C561CC683679A770@BY1PR03MB1388.namprd03.prod.outlook.com>
- <55BF36D6.4080504@suse.cz> <55C1F919.4080002@suse.cz>
- <55C227B4.3030102@suse.cz>
- <BY1PR03MB13889A6C31FC542DB544CE479A740@BY1PR03MB1388.namprd03.prod.outlook.com>
- <55C323A5.6050303@suse.cz>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v1 1/1] mmc: atmel-mci: allow DMA transfers for AVR32
+Date: Thu, 06 Aug 2015 15:16:42 +0200
+Message-ID: <3145453.Up7YqQQtr8@wuerfel>
+References: <1437998010-12036-1-git-send-email-andriy.shevchenko@linux.intel.com> <1438008334.29746.92.camel@linux.intel.com> <20150806070156.GA19553@odux.rfo.atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <55C323A5.6050303@suse.cz>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jiri Slaby <jslaby@suse.cz>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux kernel mailing list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.126.187]:50512 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752820AbbHFNQu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Aug 2015 09:16:50 -0400
+In-Reply-To: <20150806070156.GA19553@odux.rfo.atmel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-SSB3aWxsIGZvcm1hdCBhIHBhdGNoIGJhc2VkIG9uIHlvdXIgZGlmZiBmaWxlIGZpcnN0bHkuIEkg
-d2lsbCB0ZXN0IHRoaXMgb24gbXkgc2lkZSwNCklmIGFueSBpc3N1ZSwgbGlrZSBkbWEgaXNzdWUg
-b3IgcGVyZm9ybWFuY2UgaXNzdWUsIEkgd2lsbCBhZGQgc29tZSBtb2RpZmljYXRpb24uDQpUaGVu
-IEkgd2lsbCBzZW5kIHRoZSBwYXRjaCBmb3IgcmV2aWV3LCBhbmQgeW91IGNhbiB0ZXN0IHRoZSBw
-YXRjaCBvbiB5b3VyIHBsYXRmb3JtLg0KDQpCZXN0IFJlZ2FyZHMNCkhhaWJvIENoZW4NCg0KDQo+
-IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEppcmkgU2xhYnkgW21haWx0bzpq
-c2xhYnlAc3VzZS5jel0NCj4gU2VudDogVGh1cnNkYXksIEF1Z3VzdCAwNiwgMjAxNSA1OjA3IFBN
-DQo+IFRvOiBDaGVuIEhhaWJvLUI1MTQyMTsgVWxmIEhhbnNzb24NCj4gQ2M6IGxpbnV4LW1tY0B2
-Z2VyLmtlcm5lbC5vcmc7IExpbnV4IGtlcm5lbCBtYWlsaW5nIGxpc3QNCj4gU3ViamVjdDogUmU6
-IFtSRkNdIHNkaGNpOiBmaXggRE1BIGxlYWtzIFt3YXM6IFtTSERDSV0gSGVhdnkgKHRob3VzYW5k
-cykNCj4gRE1BIGxlYWtzXQ0KPiANCj4gT24gMDgvMDYvMjAxNSwgMDk6NDIgQU0sIENoZW4gQm91
-Z2ggd3JvdGU6DQo+ID4gSSByZWFkIHlvdXIgYXR0YWNoZWQgbG9nIGFuZCBwYXRjaCwgeWVzLCBk
-bWEgbWVtb3J5IGxlYWsgd2lsbCBoYXBwZW4NCj4gPiB3aGVuIG1vcmUgdGhhbiBvbmUgcHJlX3Jl
-cXVlc3QgZXhlY3V0ZS4gVGhlIG1ldGhvZCBvZiArK25leHQtPmNvb2tpZQ0KPiA+IGlzIG5vdCBn
-b29kLCB5b3VyIHBhdGNoIHNlZW1zIGdvb2QsIGJ1dCBJIHN0aWxsIG5lZWQgc29tZSB0aW1lIHRv
-IHRlc3QNCj4gPiB0aGUgcGF0Y2gsIGJlY2F1c2UgeW91IHVubWFwIHRoZSBkbWEgaW4gc2RoY2lf
-ZmluaXNoX2RhdGEgcmF0aGVyIHRoYW4NCj4gdGhlIHNkaGNpX3Bvc3RfcmVxLg0KPiANCj4gSGks
-DQo+IA0KPiB5ZXMsIHRoaXMgaXMgbm90IGNvcnJlY3QuIFdlIGNhbiBwZXJoYXBzIGRpZmZlcmVu
-dGlhdGUgYWNjb3JkaW5nIHRvIHRoZQ0KPiBDT09LSUUgdmFsdWUuIFNob3VsZCBJIGZpeCBpdCBv
-ciBhcmUgeW91IGdvaW5nIHRvIHByZXBhcmUgYSBwYXRjaCBiYXNlZA0KPiBvbiBteSBSRkM/DQo+
-IA0KPiB0aGFua3MsDQo+IC0tDQo+IGpzDQo+IHN1c2UgbGFicw0K
+On Thursday 06 August 2015 09:01:56 Ludovic Desroches wrote:
+> Hi Andy,
+> 
+> Your patch does a bit more than reverting commit ecb89f2f5f3e. I will
+> split it in order to see well which previous patches have been reverted.
+> 
+> On Mon, Jul 27, 2015 at 05:45:34PM +0300, Andy Shevchenko wrote:
+> > On Mon, 2015-07-27 at 14:24 +0200, Arnd Bergmann wrote:
+> > > On Monday 27 July 2015 14:53:30 you wrote:
+> > > > The commit ecb89f2f5f3e (mmc: atmel-mci: remove compat for non DT 
+> > > > board when
+> > > > requesting dma chan) removes compat transfer which breaks DMA
+> > > > support for ATNGW100. This patch returns back that functionality.
+> > > > 
+> > > > Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
+> > > > Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> > > > 
+> > > 
+> > > How about moving that filter function into arch/avr32 to make the
+> > > mmc driver independent of the underlying dma engine implementation
+> > > at the same time?
+> 
+> It would be great to not keep code which becomes architecture dependant.
+> If we can move the filter function somewhere in arch/avr32, we will have
+> to revert commit fda1b26 and use dma_request_slave_channel_compat.
+> 
+> I had a look to the arch/avr32 directory but I don't know where to put
+> this kind of stuff.
+
+Next to the at32_add_device_mci() function, with a pointer to the filter
+function added to struct mci_platform_data, and the mci_dma_data
+structure replaced with a void pointer after moving the definition
+to the same place.
+
+	Arnd
