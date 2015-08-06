@@ -1,163 +1,50 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: Re: [RFC PATCH v4 1/9] mmc: dw_mmc: Add external dma interface support
-Date: Thu, 06 Aug 2015 16:37:43 +0900
-Message-ID: <55C30EC7.7010604@samsung.com>
-References: <1438843469-23807-1-git-send-email-shawn.lin@rock-chips.com>
- <1438843491-23853-1-git-send-email-shawn.lin@rock-chips.com>
- <55C307D4.1020209@samsung.com> <55C30C1C.6070801@rock-chips.com>
+From: Chen Bough <Haibo.Chen@freescale.com>
+Subject: RE: [RFC] sdhci: fix DMA leaks [was: [SHDCI] Heavy (thousands) DMA
+ leaks]
+Date: Thu, 6 Aug 2015 07:42:46 +0000
+Message-ID: <BY1PR03MB13889A6C31FC542DB544CE479A740@BY1PR03MB1388.namprd03.prod.outlook.com>
+References: <55B9EF02.7040404@suse.cz>
+ <BY1PR03MB138811AD7FAB3C561CC683679A770@BY1PR03MB1388.namprd03.prod.outlook.com>
+ <55BF36D6.4080504@suse.cz> <55C1F919.4080002@suse.cz>
+ <55C227B4.3030102@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <55C30C1C.6070801@rock-chips.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, jh80.chung@samsung.com, ulf.hansson@linaro.org
-Cc: heiko@sntech.de, dianders@chromium.org, Vineet.Gupta1@synopsys.com, Wei Xu <xuwei5@hisilicon.com>, Joachim Eastwood <manabian@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Kukjin Kim <kgene@kernel.org>, Russell King <linux@arm.linux.org.uk>, Jun Nie <jun.nie@linaro.org>, Ralf Baechle <ralf@linux-mips.org>, Govindraj Raja <govindraj.raja@imgtec.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <55C227B4.3030102@suse.cz>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jiri Slaby <jslaby@suse.cz>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux kernel mailing list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 06.08.2015 16:26, Shawn Lin wrote:
-> =E5=9C=A8 2015/8/6 15:08, Krzysztof Kozlowski =E5=86=99=E9=81=93:
->> On 06.08.2015 15:44, Shawn Lin wrote:
->>> DesignWare MMC Controller can supports two types of DMA
->>> mode: external dma and internal dma. We get a RK312x platform
->>> integrated dw_mmc and ARM pl330 dma controller. This patch add
->>> edmac ops to support these platforms. I've tested it on RK312x
->>> platform with edmac mode and RK3288 platform with idmac mode.
->>>
->>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>>
->>> ---
->>>
->>> Changes in v4:
->>> - remove "host->trans_mode" and use "host->use_dma" to indicate
->>>    transfer mode.
->>> - remove all bt-bindings' changes since we don't need new properiti=
-es.
->>> - check transfer mode at runtime by reading HCON reg
->>> - spilt defconfig changes for each sub-architecture
->>> - fix the title of cover letter
->> How did you fixed the title? It is still empty :)
->>     Subject: [RFC PATCH v4 0/9]
->   I mentioned that in ChangeLog-v4 but unfortunately I forgot it.
->   Thanks, Krzysztof.  I will be more careful and add it for next vers=
-ion.
->=20
->>
->>> - reuse some code for reducing code size
->>>
->>> Changes in v3:
->>> - choose transfer mode at runtime
->>> - remove all CONFIG_MMC_DW_IDMAC config option
->>> - add supports-idmac property for some platforms
->>>
->>> Changes in v2:
->>> - Fix typo of dev_info msg
->>> - remove unused dmach from declaration of dw_mci_dma_slave
->>>
->>>   drivers/mmc/host/Kconfig        |  11 +-
->>>   drivers/mmc/host/dw_mmc-pltfm.c |   2 +
->>>   drivers/mmc/host/dw_mmc.c       | 258
->>> ++++++++++++++++++++++++++++++++--------
->>>   include/linux/mmc/dw_mmc.h      |  27 ++++-
->>>   4 files changed, 232 insertions(+), 66 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->>> index 6a0f9c7..a86c0eb 100644
->>> --- a/drivers/mmc/host/Kconfig
->>> +++ b/drivers/mmc/host/Kconfig
->>> @@ -607,15 +607,7 @@ config MMC_DW
->>>       help
->>>         This selects support for the Synopsys DesignWare Mobile
->>> Storage IP
->>>         block, this provides host support for SD and MMC interfaces=
-,
->>> in both
->>> -      PIO and external DMA modes.
->>> -
->>> -config MMC_DW_IDMAC
->>> -    bool "Internal DMAC interface"
->>> -    depends on MMC_DW
->>> -    help
->>> -      This selects support for the internal DMAC block within the
->>> Synopsys
->>> -      Designware Mobile Storage IP block. This disables the extern=
-al
->>> DMA
->>> -      interface.
->>> +      PIO, internal DMA mode and external DMA modes.
->>>     config MMC_DW_PLTFM
->>>       tristate "Synopsys Designware MCI Support as platform device"
->>> @@ -644,7 +636,6 @@ config MMC_DW_K3
->>>       tristate "K3 specific extensions for Synopsys DW Memory Card
->>> Interface"
->>>       depends on MMC_DW
->>>       select MMC_DW_PLTFM
->>> -    select MMC_DW_IDMAC
->>>       help
->>>         This selects support for Hisilicon K3 SoC specific extensio=
-ns
->>> to the
->>>         Synopsys DesignWare Memory Card Interface driver. Select th=
-is
->>> option
->>> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c
->>> b/drivers/mmc/host/dw_mmc-pltfm.c
->>> index ec6dbcd..7e1d13b 100644
->>> --- a/drivers/mmc/host/dw_mmc-pltfm.c
->>> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
->>> @@ -59,6 +59,8 @@ int dw_mci_pltfm_register(struct platform_device
->>> *pdev,
->>>       host->pdata =3D pdev->dev.platform_data;
->>>         regs =3D platform_get_resource(pdev, IORESOURCE_MEM, 0);
->>> +    /* Get registers' physical base address */
->>> +    host->phy_regs =3D (void *)(regs->start);
->>>       host->regs =3D devm_ioremap_resource(&pdev->dev, regs);
->>>       if (IS_ERR(host->regs))
->>>           return PTR_ERR(host->regs);
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>> index 40e9d8e..5d6cdff 100644
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -56,7 +56,7 @@
->>>   #define DW_MCI_FREQ_MAX    200000000    /* unit: HZ */
->>>   #define DW_MCI_FREQ_MIN    400000        /* unit: HZ */
->>>   -#ifdef CONFIG_MMC_DW_IDMAC
->>> +
->>>   #define IDMAC_INT_CLR        (SDMMC_IDMAC_INT_AI |
->>> SDMMC_IDMAC_INT_NI | \
->>>                    SDMMC_IDMAC_INT_CES | SDMMC_IDMAC_INT_DU | \
->>>                    SDMMC_IDMAC_INT_FBE | SDMMC_IDMAC_INT_RI | \
->>> @@ -99,7 +99,6 @@ struct idmac_desc {
->>>         __le32        des3;    /* buffer 2 physical address */
->>>   };
->>> -#endif /* CONFIG_MMC_DW_IDMAC */
->>>     static bool dw_mci_reset(struct dw_mci *host);
->>>   static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
->>> @@ -403,7 +402,6 @@ static int dw_mci_get_dma_dir(struct mmc_data *=
-data)
->>>           return DMA_FROM_DEVICE;
->>>   }
->>>   -#ifdef CONFIG_MMC_DW_IDMAC
->>>   static void dw_mci_dma_cleanup(struct dw_mci *host)
->>>   {
->>>       struct mmc_data *data =3D host->data;
->>> @@ -441,12 +439,21 @@ static void dw_mci_idmac_stop_dma(struct dw_m=
-ci
->>> *host)
->>>       mci_writel(host, BMOD, temp);
->>>   }
->>>   -static void dw_mci_idmac_complete_dma(struct dw_mci *host)
->>> +static void dw_mci_dmac_complete_dma(void *arg)
->>>   {
->>> +    struct dw_mci *host =3D arg;
->> Why changing the argument to void*?
->=20
-> This function will be used as callback hook of dmaengine, and the
-> prototype is
-> "typedef void (*dma_async_tx_callback)(void *dma_async_param);".
-> w/o this change, we meet a warning  for incompatible pointer case.
-
-Thanks for clarifying.
-
-Best regards,
-Krzysztof
+SGkgSnMsDQoNCkkgcmVhZCB5b3VyIGF0dGFjaGVkIGxvZyBhbmQgcGF0Y2gsIHllcywgZG1hIG1l
+bW9yeSBsZWFrIHdpbGwgaGFwcGVuIHdoZW4NCm1vcmUgdGhhbiBvbmUgcHJlX3JlcXVlc3QgZXhl
+Y3V0ZS4gVGhlIG1ldGhvZCBvZiArK25leHQtPmNvb2tpZSBpcyBub3QgZ29vZCwNCnlvdXIgcGF0
+Y2ggc2VlbXMgZ29vZCwgYnV0IEkgc3RpbGwgbmVlZCBzb21lIHRpbWUgdG8gdGVzdCB0aGUgcGF0
+Y2gsIGJlY2F1c2UNCnlvdSB1bm1hcCB0aGUgZG1hIGluIHNkaGNpX2ZpbmlzaF9kYXRhIHJhdGhl
+ciB0aGFuIHRoZSBzZGhjaV9wb3N0X3JlcS4NCg0KQW55d2F5LCB0aGFua3MgZm9yIHJlcG9ydCBh
+bmQgZGVidWcgdGhpcyBpc3N1ZS4gSSB3aWxsIGdpdmUgeW91IG15IHRlc3QgcmVzdWx0DQpBU0FQ
+LiAgDQoNCkJlc3QgUmVnYXJkcw0KSGFpYm8gQ2hlbg0KDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNz
+YWdlLS0tLS0NCj4gRnJvbTogSmlyaSBTbGFieSBbbWFpbHRvOmpzbGFieUBzdXNlLmN6XQ0KPiBT
+ZW50OiBXZWRuZXNkYXksIEF1Z3VzdCAwNSwgMjAxNSAxMToxMiBQTQ0KPiBUbzogQ2hlbiBIYWli
+by1CNTE0MjE7IFVsZiBIYW5zc29uDQo+IENjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBM
+aW51eCBrZXJuZWwgbWFpbGluZyBsaXN0DQo+IFN1YmplY3Q6IFtSRkNdIHNkaGNpOiBmaXggRE1B
+IGxlYWtzIFt3YXM6IFtTSERDSV0gSGVhdnkgKHRob3VzYW5kcykgRE1BDQo+IGxlYWtzXQ0KPiAN
+Cj4gT24gMDgvMDUvMjAxNSwgMDE6NTIgUE0sIEppcmkgU2xhYnkgd3JvdGU6DQo+ID4+IFllcywg
+SSBzZWU6DQo+ID4+IHNkaGNpLXBjaSAwMDAwOjAyOjAwLjA6IHN3aW90bGIgYnVmZmVyIGlzIGZ1
+bGwgKHN6OiA2NTUzNiBieXRlcykNCj4gPj4gYWZ0ZXIgc29tZSB0aW1lLiBUaGUgZHJpdmVyIGZh
+bGxzIGJhY2sgdG8gbm9uLURNQSB0cmFuc2ZlcnMgYWZ0ZXIgdGhhdC4NCj4gPj4gSXQgYWxzbyBn
+ZW5lcmF0ZXMgYSB3YXJuaW5nIGFib3V0IHRoYXQ6DQo+ID4+IFdBUk5JTkc6IENQVTogMCBQSUQ6
+IDAgYXQgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jOjg1Nw0KPiA+PiBzZGhjaV9wcmVwYXJlX2Rh
+dGErMHg4ZWMvMHg5MDAgW3NkaGNpXSgpDQo+ID4NCj4gPiBJIGFtIGF0dGFjaGluZyBhIGRlYnVn
+IHBhdGNoIGFuZCBhIGRlYnVnIGxvZy4gWW91IGNhbiBzZWUgd2hlcmUNCj4gPiAweDAwMDAwMDAw
+ZmZmYjAwMDAgYW5kIDB4MDAwMDAwMDBmZmZlMDAwMCBpcyBsZWFrZWQuIEl0IGlzIHdoZW4NCj4g
+PiAnaW52YWxpZCBjb29raWUnIGVycm9yIGhhcHBlbnMuDQo+IA0KPiBBbmQgeW91IGNvdWxkIHNl
+ZSB0aGUgY29va2llIGhhbmRsaW5nIGlzIHRvdGFsbHkgYm9ndXMuDQo+IA0KPiBXaXRoIHRoaXMg
+cmV3cml0ZSwgSSBubyBsb25nZXIgc2VlIHRoZSBwcm9ibGVtcy4gQ291bGQgeW91IGNvbmZpcm0g
+aXQNCj4gc3RpbGwgZG9lcyB0aGUgZ29vZCBqb2Igd2l0aCByZXNwZWN0IHRvIHBlcmZvcm1hbmNl
+IC0tIHRoZSBudW1iZXJzIHlvdQ0KPiBtZW50aW9uZWQgaW4geW91ciBjb21taXQuDQo+IA0KPiBV
+bGYsIHdoYXQgZG8geW91IHRoaW5rIGFib3V0IHRoZSBhdHRhY2hlZCBwYXRjaD8gKERvIG5vdCBs
+b29rIGF0IHRoZQ0KPiBjb21tZW50ZWQgaW5mbyBwcmludHMuKQ0KPiANCj4gdGhhbmtzLA0KPiAt
+LQ0KPiBqcw0KPiBzdXNlIGxhYnMNCg==
