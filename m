@@ -1,207 +1,98 @@
-From: Dong Aisheng <aisheng.dong@freescale.com>
-Subject: Re: [PATCH v4 1/6] mmc: sdhci-esdhc-imx: add imx7d support and
- support HS400
-Date: Fri, 7 Aug 2015 15:38:56 +0800
-Message-ID: <20150807073854.GA6935@shlinux1.ap.freescale.net>
+From: Dong Aisheng <aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+Subject: Re: [PATCH v4 2/6] mmc: sdhci-esdhc-imx: add tuning-step seting
+ support
+Date: Fri, 7 Aug 2015 15:40:20 +0800
+Message-ID: <20150807074019.GB6935@shlinux1.ap.freescale.net>
 References: <1438771122-8601-1-git-send-email-haibo.chen@freescale.com>
- <1438771122-8601-2-git-send-email-haibo.chen@freescale.com>
+ <1438771122-8601-3-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0130.outbound.protection.outlook.com ([157.56.111.130]:11072
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754005AbbHGHsc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 7 Aug 2015 03:48:32 -0400
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1438771122-8601-2-git-send-email-haibo.chen@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1438771122-8601-3-git-send-email-haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+Cc: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, johan.derycke-ob4gmnvZ1/cAvxtiuMwx3w@public.gmane.org, mkl-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, fabio.estevam-KZfg59tc24xl57MIdRCFDg@public.gmane.org, b29396-KZfg59tc24xl57MIdRCFDg@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haibo Chen <haibo.chen@freescale.com>
-Cc: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawnguo@kernel.org, kernel@pengutronix.de, linux@arm.linux.org.uk, ulf.hansson@linaro.org, johan.derycke@barco.com, mkl@pengutronix.de, fabio.estevam@freescale.com, b29396@freescale.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-On Wed, Aug 05, 2015 at 06:38:37PM +0800, Haibo Chen wrote:
-> The imx7d usdhc is derived from imx6sx, the difference is that
-> imx7d support HS400.
+On Wed, Aug 05, 2015 at 06:38:38PM +0800, Haibo Chen wrote:
+> tuning-step is the delay cell steps in tuning procedure. The default value
+> of tuning-step is 1. Some boards or cards need another value to pass the
+> tuning procedure. For example, imx7d-sdb board need the tuning-step value
+> as 2, otherwise it can't pass the tuning procedure.
 > 
-> So introduce a new compatible string for imx7d and add HS400
-> support for imx7d usdhc.
+> So this patch add the tuning-step setting in driver, so that user can set
+> the tuning-step value in dts.
 > 
-> Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
+> Signed-off-by: Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
 > ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 81 ++++++++++++++++++++++++++++++++++++++
->  1 file changed, 81 insertions(+)
+>  drivers/mmc/host/sdhci-esdhc-imx.c          | 9 +++++++++
+>  include/linux/platform_data/mmc-esdhc-imx.h | 1 +
+>  2 files changed, 10 insertions(+)
 > 
 > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index c6b9f64..48f009c 100644
+> index 48f009c..803d24f 100644
 > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -44,6 +44,7 @@
->  #define  ESDHC_MIX_CTRL_EXE_TUNE	(1 << 22)
->  #define  ESDHC_MIX_CTRL_SMPCLK_SEL	(1 << 23)
->  #define  ESDHC_MIX_CTRL_FBCLK_SEL	(1 << 25)
-> +#define  ESDHC_MIX_CTRL_HS400_EN	(1 << 26)
->  /* Bits 3 and 6 are not SDHCI standard definitions */
->  #define  ESDHC_MIX_CTRL_SDHCI_MASK	0xb7
->  /* Tuning bits */
-> @@ -60,6 +61,16 @@
->  #define  ESDHC_TUNE_CTRL_MIN		0
->  #define  ESDHC_TUNE_CTRL_MAX		((1 << 7) - 1)
->  
-> +/* strobe dll register */
-> +#define ESDHC_STROBE_DLL_CTRL		0x70
-> +#define ESDHC_STROBE_DLL_CTRL_ENABLE	(1 << 0)
-> +#define ESDHC_STROBE_DLL_CTRL_RESET	(1 << 1)
-> +#define ESDHC_STROBE_DLL_CTRL_SLV_DLY_TARGET_SHIFT	3
-> +
-> +#define ESDHC_STROBE_DLL_STATUS		0x74
-> +#define ESDHC_STROBE_DLL_STS_REF_LOCK	(1 << 1)
-> +#define ESDHC_STROBE_DLL_STS_SLV_LOCK	0x1
-> +
->  #define ESDHC_TUNING_CTRL		0xcc
+> @@ -75,6 +75,7 @@
 >  #define ESDHC_STD_TUNING_EN		(1 << 24)
 >  /* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
-> @@ -120,6 +131,11 @@
->  #define ESDHC_FLAG_ERR004536		BIT(7)
->  /* The IP supports HS200 mode */
->  #define ESDHC_FLAG_HS200		BIT(8)
-> +/* The IP supports HS400 mode */
-> +#define ESDHC_FLAG_HS400		BIT(9)
-> +
-> +/* A higher clock ferquency than this rate requires strobell dll control */
-> +#define ESDHC_STROBE_DLL_CLK_FREQ	100000000
+>  #define ESDHC_TUNING_START_TAP		0x1
+> +#define ESDHC_TUNING_STEP_SHIFT		16
 >  
->  struct esdhc_soc_data {
->  	u32 flags;
-> @@ -156,6 +172,12 @@ static struct esdhc_soc_data usdhc_imx6sx_data = {
->  			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200,
->  };
->  
-> +static struct esdhc_soc_data usdhc_imx7d_data = {
-> +	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
-> +			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
-> +			| ESDHC_FLAG_HS400,
-> +};
-> +
->  struct pltfm_imx_data {
->  	u32 scratchpad;
->  	struct pinctrl *pinctrl;
-> @@ -199,6 +221,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
->  	{ .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
->  	{ .compatible = "fsl,imx6sl-usdhc", .data = &usdhc_imx6sl_data, },
->  	{ .compatible = "fsl,imx6q-usdhc", .data = &usdhc_imx6q_data, },
-> +	{ .compatible = "fsl,imx7d-usdhc", .data = &usdhc_imx7d_data, },
->  	{ /* sentinel */ }
->  };
->  MODULE_DEVICE_TABLE(of, imx_esdhc_dt_ids);
-> @@ -274,6 +297,9 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
->  				val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
->  					| SDHCI_SUPPORT_SDR50
->  					| SDHCI_USE_SDR50_TUNING;
-> +
-> +			if (imx_data->socdata->flags & ESDHC_FLAG_HS400)
-> +				val |= SDHCI_SUPPORT_HS400;
->  		}
->  	}
->  
-> @@ -774,6 +800,7 @@ static int esdhc_change_pinstate(struct sdhci_host *host,
->  		break;
->  	case MMC_TIMING_UHS_SDR104:
->  	case MMC_TIMING_MMC_HS200:
-> +	case MMC_TIMING_MMC_HS400:
->  		pinctrl = imx_data->pins_200mhz;
->  		break;
->  	default:
-> @@ -784,6 +811,44 @@ static int esdhc_change_pinstate(struct sdhci_host *host,
->  	return pinctrl_select_state(imx_data->pinctrl, pinctrl);
->  }
->  
-> +/*
-> + * For HS400 eMMC, there is a data_strobe line, this signal is generated
-> + * by the device and used for data output and CRC status response output
-> + * in HS400 mode. The frequency of this signal follows the frequency of
-> + * CLK generated by host. Host receive the data which is aligned to the
-> + * edge of data_strobe line. Due to the time delay between CLK line and
-> + * data_strobe line, if the delay time is larger than one clock cycle,
-> + * then CLK and data_strobe line will misaligned, read error shows up.
-> + * So when the CLK is higher than 100MHz, each clock cycle is short enough,
-> + * host should config the delay target.
-> + */
-> +static void esdhc_set_strobe_dll(struct sdhci_host *host)
-> +{
-> +	u32 v;
-> +
-> +	if (host->mmc->actual_clock > ESDHC_STROBE_DLL_CLK_FREQ) {
-> +		/* force a reset on strobe dll */
-> +		writel(ESDHC_STROBE_DLL_CTRL_RESET,
-> +			host->ioaddr + ESDHC_STROBE_DLL_CTRL);
-> +		/*
-> +		 * enable strobe dll ctrl and adjust the delay target
-> +		 * for the uSDHC loopback read clock
-> +		 */
-> +		v = ESDHC_STROBE_DLL_CTRL_ENABLE |
-> +			(7 << ESDHC_STROBE_DLL_CTRL_SLV_DLY_TARGET_SHIFT);
-> +		writel(v, host->ioaddr + ESDHC_STROBE_DLL_CTRL);
-> +		/* wait 1us to make sure strobe dll status register stable */
-> +		udelay(1);
-> +		v = readl(host->ioaddr + ESDHC_STROBE_DLL_STATUS);
-> +		if (!(v & ESDHC_STROBE_DLL_STS_REF_LOCK))
-> +			dev_warn(mmc_dev(host->mmc),
-> +				"warning! HS400 strobe DLL status REF not lock!\n");
-> +		if (!(v & ESDHC_STROBE_DLL_STS_SLV_LOCK))
-> +			dev_warn(mmc_dev(host->mmc),
-> +				"warning! HS400 strobe DLL status SLV not lock!\n");
-> +	}
-> +}
-> +
->  static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -795,7 +860,13 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
->  	case MMC_TIMING_UHS_SDR25:
->  	case MMC_TIMING_UHS_SDR50:
->  	case MMC_TIMING_UHS_SDR104:
-> +		break;
->  	case MMC_TIMING_MMC_HS200:
-> +		/* disable ddr mode and disable HS400 mode */
-> +		writel(readl(host->ioaddr + ESDHC_MIX_CTRL) &
-> +			~(ESDHC_MIX_CTRL_DDREN | ESDHC_MIX_CTRL_HS400_EN),
-> +			host->ioaddr + ESDHC_MIX_CTRL);
-> +		imx_data->is_ddr = 0;
+>  /* pinctrl state */
+>  #define ESDHC_PINCTRL_STATE_100MHZ	"state_100mhz"
+> @@ -474,6 +475,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+>  		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
+>  			u32 v = readl(host->ioaddr + SDHCI_ACMD12_ERR);
+>  			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +			u32 tuning_ctrl;
+>  			if (val & SDHCI_CTRL_TUNED_CLK) {
+>  				v |= ESDHC_MIX_CTRL_SMPCLK_SEL;
+>  			} else {
+> @@ -484,6 +486,11 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+>  			if (val & SDHCI_CTRL_EXEC_TUNING) {
+>  				v |= ESDHC_MIX_CTRL_EXE_TUNE;
+>  				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
+> +				tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
+> +				tuning_ctrl |= ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP;
+> +				if (imx_data->boarddata.tuning_step)
+> +					tuning_ctrl |= imx_data->boarddata.tuning_step << ESDHC_TUNING_STEP_SHIFT;
+> +					writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
 
-Can you please explain why need above code?
-Any issues if not do it?
+Is there a code indent issue here?
+Otherwise, the patch looks good to me.
 
 Regards
 Dong Aisheng
 
->  		break;
->  	case MMC_TIMING_UHS_DDR50:
->  	case MMC_TIMING_MMC_DDR52:
-> @@ -813,6 +884,13 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
->  			writel(v, host->ioaddr + ESDHC_DLL_CTRL);
->  		}
->  		break;
-> +	case MMC_TIMING_MMC_HS400:
-> +		writel(readl(host->ioaddr + ESDHC_MIX_CTRL) |
-> +				ESDHC_MIX_CTRL_DDREN | ESDHC_MIX_CTRL_HS400_EN,
-> +				host->ioaddr + ESDHC_MIX_CTRL);
-> +		imx_data->is_ddr = 1;
-> +		esdhc_set_strobe_dll(host);
-> +		break;
->  	}
+>  			} else {
+>  				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+>  			}
+> @@ -964,6 +971,8 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+>  	if (gpio_is_valid(boarddata->wp_gpio))
+>  		boarddata->wp_type = ESDHC_WP_GPIO;
 >  
->  	esdhc_change_pinstate(host, timing);
-> @@ -1100,6 +1178,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
->  	if (imx_data->socdata->flags & ESDHC_FLAG_ERR004536)
->  		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
->  
-> +	if (imx_data->socdata->flags & ESDHC_FLAG_HS400)
-> +		host->quirks2 |= SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400;
+> +	of_property_read_u32(np, "fsl,tuning-step", &boarddata->tuning_step);
 > +
->  	if (of_id)
->  		err = sdhci_esdhc_imx_probe_dt(pdev, host, imx_data);
+>  	if (of_find_property(np, "no-1-8-v", NULL))
+>  		boarddata->support_vsel = false;
 >  	else
+> diff --git a/include/linux/platform_data/mmc-esdhc-imx.h b/include/linux/platform_data/mmc-esdhc-imx.h
+> index e1571ef..95ccab3 100644
+> --- a/include/linux/platform_data/mmc-esdhc-imx.h
+> +++ b/include/linux/platform_data/mmc-esdhc-imx.h
+> @@ -45,5 +45,6 @@ struct esdhc_platform_data {
+>  	int max_bus_width;
+>  	bool support_vsel;
+>  	unsigned int delay_line;
+> +	unsigned int tuning_step;       /* The delay cell steps in tuning procedure */
+>  };
+>  #endif /* __ASM_ARCH_IMX_ESDHC_H */
 > -- 
 > 1.9.1
 > 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
