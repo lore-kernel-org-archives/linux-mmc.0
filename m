@@ -1,219 +1,41 @@
-From: Haibo Chen <haibo.chen@freescale.com>
-Subject: [PATCH] mmc: sdhci: fix dma memory leak in sdhci_pre_req()
-Date: Fri, 7 Aug 2015 17:29:50 +0800
-Message-ID: <1438939790-28310-1-git-send-email-haibo.chen@freescale.com>
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: Re: [PATCH] mmc: sdhci: fix dma memory leak in sdhci_pre_req()
+Date: Fri, 7 Aug 2015 11:34:31 +0200
+Message-ID: <55C47BA7.1050500@suse.cz>
+References: <1438939790-28310-1-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2on0107.outbound.protection.outlook.com ([65.55.169.107]:17248
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751483AbbHGJ3s (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 7 Aug 2015 05:29:48 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=iso-8859-2
+Content-Transfer-Encoding: 7bit
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1438939790-28310-1-git-send-email-haibo.chen@freescale.com>
+Sender: stable-owner@vger.kernel.org
+To: Haibo Chen <haibo.chen@freescale.com>, ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, aisheng.dong@freescale.com, shawn.guo@linaro.org, stable@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: jslaby@suse.cz, ulf.hansson@linaro.org
-Cc: adrian.hunter@intel.com, aisheng.dong@freescale.com, haibo.chen@freescale.com, shawn.guo@linaro.org, stable@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Currently one mrq->data maybe execute dma_map_sg() twice
-when mmc subsystem prepare over one new request, and the
-following log show up:
-	sdhci[sdhci_pre_dma_transfer] invalid cookie: 24, next-cookie 25
+On 08/07/2015, 11:29 AM, Haibo Chen wrote:
+> Currently one mrq->data maybe execute dma_map_sg() twice
+> when mmc subsystem prepare over one new request, and the
+> following log show up:
+> 	sdhci[sdhci_pre_dma_transfer] invalid cookie: 24, next-cookie 25
 
-In this condition, mrq->date map a dma-memory(1) in sdhci_pre_req
-for the first time, and map another dma-memory(2) in sdhci_prepare_data
-for the second time. But driver only unmap the dma-memory(2), and
-dma-memory(1) never unmapped, which cause the dma memory leak issue.
+Thanks, I will test it shortly.
 
-This patch use another method to map the dma memory for the mrq->data
-which can fix this dma memory leak issue.
+> @@ -2157,16 +2147,10 @@ static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
+>  {
+>  	struct sdhci_host *host = mmc_priv(mmc);
+>  
+> -	if (mrq->data->host_cookie) {
+> -		mrq->data->host_cookie = 0;
+> -		return;
+> -	}
+> +	mrq->data->host_cookie = COOKIE_UNMAPPED;
 
-Fixes: commit 348487cb28e66b0 ("mmc: sdhci: use pipeline mmc requests to improve performance")
-Cc: stable@vger.kernel.org # 4.0+
-Reported-by: Jiri Slaby <jslaby@suse.cz>
-Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
----
- drivers/mmc/host/sdhci.c | 67 ++++++++++++++++++------------------------------
- drivers/mmc/host/sdhci.h |  8 +++---
- 2 files changed, 29 insertions(+), 46 deletions(-)
+Just one question. Should we warn if host_cookie != COOKIE_UNMAPPED
+instead of the assignment? In other words, if the assignment is
+mandatory, it deserves a comment why.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index c83d110..8d2864b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -54,8 +54,7 @@ static void sdhci_finish_command(struct sdhci_host *);
- static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
- static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
- static int sdhci_pre_dma_transfer(struct sdhci_host *host,
--					struct mmc_data *data,
--					struct sdhci_host_next *next);
-+					struct mmc_data *data);
- static int sdhci_do_get_cd(struct sdhci_host *host);
- 
- #ifdef CONFIG_PM
-@@ -495,7 +494,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
- 		goto fail;
- 	BUG_ON(host->align_addr & host->align_mask);
- 
--	host->sg_count = sdhci_pre_dma_transfer(host, data, NULL);
-+	host->sg_count = sdhci_pre_dma_transfer(host, data);
- 	if (host->sg_count < 0)
- 		goto unmap_align;
- 
-@@ -634,9 +633,11 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
- 		}
- 	}
- 
--	if (!data->host_cookie)
-+	if (data->host_cookie == COOKIE_MAPPED) {
- 		dma_unmap_sg(mmc_dev(host->mmc), data->sg,
- 			data->sg_len, direction);
-+		data->host_cookie = COOKIE_UNMAPPED;
-+	}
- }
- 
- static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
-@@ -832,7 +833,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- 		} else {
- 			int sg_cnt;
- 
--			sg_cnt = sdhci_pre_dma_transfer(host, data, NULL);
-+			sg_cnt = sdhci_pre_dma_transfer(host, data);
- 			if (sg_cnt <= 0) {
- 				/*
- 				 * This only happens when someone fed
-@@ -948,11 +949,13 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 		if (host->flags & SDHCI_USE_ADMA)
- 			sdhci_adma_table_post(host, data);
- 		else {
--			if (!data->host_cookie)
-+			if (data->host_cookie == COOKIE_MAPPED) {
- 				dma_unmap_sg(mmc_dev(host->mmc),
- 					data->sg, data->sg_len,
- 					(data->flags & MMC_DATA_READ) ?
- 					DMA_FROM_DEVICE : DMA_TO_DEVICE);
-+				data->host_cookie = COOKIE_UNMAPPED;
-+			}
- 		}
- 	}
- 
-@@ -2105,49 +2108,36 @@ static void sdhci_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
- 	struct mmc_data *data = mrq->data;
- 
- 	if (host->flags & SDHCI_REQ_USE_DMA) {
--		if (data->host_cookie)
-+		if (data->host_cookie == COOKIE_GIVEN ||
-+				data->host_cookie == COOKIE_MAPPED)
- 			dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
- 					 data->flags & MMC_DATA_WRITE ?
- 					 DMA_TO_DEVICE : DMA_FROM_DEVICE);
--		mrq->data->host_cookie = 0;
-+		data->host_cookie = COOKIE_UNMAPPED;
- 	}
- }
- 
- static int sdhci_pre_dma_transfer(struct sdhci_host *host,
--				       struct mmc_data *data,
--				       struct sdhci_host_next *next)
-+				       struct mmc_data *data)
- {
- 	int sg_count;
- 
--	if (!next && data->host_cookie &&
--	    data->host_cookie != host->next_data.cookie) {
--		pr_debug(DRIVER_NAME "[%s] invalid cookie: %d, next-cookie %d\n",
--			__func__, data->host_cookie, host->next_data.cookie);
--		data->host_cookie = 0;
-+	if (data->host_cookie == COOKIE_MAPPED) {
-+		data->host_cookie = COOKIE_GIVEN;
-+		return data->sg_count;
- 	}
- 
--	/* Check if next job is already prepared */
--	if (next ||
--	    (!next && data->host_cookie != host->next_data.cookie)) {
--		sg_count = dma_map_sg(mmc_dev(host->mmc), data->sg,
--				     data->sg_len,
--				     data->flags & MMC_DATA_WRITE ?
--				     DMA_TO_DEVICE : DMA_FROM_DEVICE);
--
--	} else {
--		sg_count = host->next_data.sg_count;
--		host->next_data.sg_count = 0;
--	}
-+	WARN_ON(data->host_cookie == COOKIE_GIVEN);
- 
-+	sg_count = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
-+				data->flags & MMC_DATA_WRITE ?
-+				DMA_TO_DEVICE : DMA_FROM_DEVICE);
- 
- 	if (sg_count == 0)
--		return -EINVAL;
-+		return -ENOSPC;
- 
--	if (next) {
--		next->sg_count = sg_count;
--		data->host_cookie = ++next->cookie < 0 ? 1 : next->cookie;
--	} else
--		host->sg_count = sg_count;
-+	data->sg_count = sg_count;
-+	data->host_cookie = COOKIE_MAPPED;
- 
- 	return sg_count;
- }
-@@ -2157,16 +2147,10 @@ static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
- 
--	if (mrq->data->host_cookie) {
--		mrq->data->host_cookie = 0;
--		return;
--	}
-+	mrq->data->host_cookie = COOKIE_UNMAPPED;
- 
- 	if (host->flags & SDHCI_REQ_USE_DMA)
--		if (sdhci_pre_dma_transfer(host,
--					mrq->data,
--					&host->next_data) < 0)
--			mrq->data->host_cookie = 0;
-+		sdhci_pre_dma_transfer(host, mrq->data);
- }
- 
- static void sdhci_card_event(struct mmc_host *mmc)
-@@ -3038,7 +3022,6 @@ int sdhci_add_host(struct sdhci_host *host)
- 		host->max_clk = host->ops->get_max_clock(host);
- 	}
- 
--	host->next_data.cookie = 1;
- 	/*
- 	 * In case of Host Controller v3.00, find out whether clock
- 	 * multiplier is supported.
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 67046ca..7c02ff4 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -309,9 +309,10 @@ struct sdhci_adma2_64_desc {
-  */
- #define SDHCI_MAX_SEGS		128
- 
--struct sdhci_host_next {
--	unsigned int	sg_count;
--	s32		cookie;
-+enum sdhci_cookie {
-+	COOKIE_UNMAPPED,
-+	COOKIE_MAPPED,
-+	COOKIE_GIVEN,
- };
- 
- struct sdhci_host {
-@@ -505,7 +506,6 @@ struct sdhci_host {
- 	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
- #define SDHCI_TUNING_MODE_1	0
- 
--	struct sdhci_host_next	next_data;
- 	unsigned long private[0] ____cacheline_aligned;
- };
- 
+thanks,
 -- 
-1.9.1
-
+js
+suse labs
