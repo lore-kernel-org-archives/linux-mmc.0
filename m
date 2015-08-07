@@ -1,96 +1,75 @@
-From: Michael Trimarchi <michael@amarulasolutions.com>
-Subject: [RFC PATCH] ARM: dts: rockchip: Add wifi support for firefly
-Date: Fri,  7 Aug 2015 16:12:05 +0200
-Message-ID: <1438956725-4188-1-git-send-email-michael@amarulasolutions.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH 00/11] omap_hsmmc: voltage switching and tuning
+Date: Fri, 7 Aug 2015 20:15:02 +0530
+Message-ID: <55C4C46E.9080200@ti.com>
+References: <1438242394-25599-1-git-send-email-kishon@ti.com> <20150805104355.GE16878@atomide.com> <55C22524.5050304@ti.com> <20150806064821.GO16878@atomide.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:36555 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753690AbbHGOLp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Aug 2015 10:11:45 -0400
-Received: by wicgj17 with SMTP id gj17so63186415wic.1
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Aug 2015 07:11:43 -0700 (PDT)
+Received: from bear.ext.ti.com ([192.94.94.41]:35406 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753323AbbHGOpk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 7 Aug 2015 10:45:40 -0400
+In-Reply-To: <20150806064821.GO16878@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: heiko@sntech.de, michael@amarulasolutions.com
-Cc: linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, dianders@chromium.org, romain.perier@gmail.com
+To: Tony Lindgren <tony@atomide.com>
+Cc: ulf.hansson@linaro.org, afenkart@gmail.com, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com, mugunthanvnm@ti.com
 
-This patch enable wifi support for the firefly board.
-Card answer to me that support from 2.0V but regulator is connected
-to 1.8V, so voltage capability is wrong. In order to avoid this
-we just defined a fixed regulator trigger by the wifi enable gpio
-that report 2.0V.
+Hi,
 
-Signed-off-by: Michael Trimarchi <michael@amarulasolutions.com>
----
- arch/arm/boot/dts/rk3288-firefly.dtsi | 43 +++++++++++++++++++++++++++++++++--
- 1 file changed, 41 insertions(+), 2 deletions(-)
+On Thursday 06 August 2015 12:18 PM, Tony Lindgren wrote:
+> * Kishon Vijay Abraham I <kishon@ti.com> [150805 08:03]:
+>> Hi,
+>>
+>> On Wednesday 05 August 2015 04:13 PM, Tony Lindgren wrote:
+>>> * Kishon Vijay Abraham I <kishon@ti.com> [150730 00:49]:
+>>>> Patch series implements voltage switching and tuning for omap_hsmmc
+>>>> driver.
+>>>>
+>>>> Did basic read/write test in J6, J6 Eco, Beagle-x15, AM437x EVM,
+>>>> Beaglebone black, OMAP5 uEVM and OMAP4 PANDA.
+>>>
+>>> Your tests are missing omap3?
+>>
+>> I don't have one at my disposal :-( I'll try to find one and add omap3 tests.
+> 
+> Great :) Beagle xm is a good one to test the USB PHY stuff on
+> and also MMC. Having USB cable connected or EHCI loaded blocks the PM
+> though, so NFSroot is not very usable for testing on it.
 
-diff --git a/arch/arm/boot/dts/rk3288-firefly.dtsi b/arch/arm/boot/dts/rk3288-firefly.dtsi
-index 0b42372..fcf234e 100644
---- a/arch/arm/boot/dts/rk3288-firefly.dtsi
-+++ b/arch/arm/boot/dts/rk3288-firefly.dtsi
-@@ -116,6 +116,28 @@
- 		vin-supply = <&vcc_io>;
- 	};
- 
-+	io_domains: io-domains {
-+		compatible = "rockchip,rk3288-io-voltage-domain";
-+		rockchip,grf = <&grf>;
-+
-+		wifi-supply = <&vcc_18>;
-+		audio-supply = <&vcca_33>;
-+	};
-+
-+	vcc_wifi: wifi-regulator {
-+		compatible = "regulator-fixed";
-+		enable-active-high;
-+		gpio = <&gpio4 28 GPIO_ACTIVE_HIGH>;
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&sdio0_pwr>;
-+		regulator-name = "vcc_wifi";
-+		regulator-min-microvolt = <2000000>;
-+		regulator-max-microvolt = <2000000>;
-+		startup-delay-us = <100000>;
-+		regulator-always-on;
-+		vin-supply = <&vcc_io>;
-+	};
-+
- 	vcc_flash: flash-regulator {
- 		compatible = "regulator-fixed";
- 		regulator-name = "vcc_flash";
-@@ -437,13 +459,30 @@
- &sdio0 {
- 	broken-cd;
- 	bus-width = <4>;
-+	clock-freq-min-max = <400000 50000000>;
- 	disable-wp;
- 	non-removable;
-+	cap-sd-highspeed;
- 	num-slots = <1>;
- 	pinctrl-names = "default";
--	pinctrl-0 = <&sdio0_bus4>, <&sdio0_cmd>, <&sdio0_clk>;
--	vmmc-supply = <&vcc_18>;
-+	pinctrl-0 = <&sdio0_bus4>, <&sdio0_cmd>, <&sdio0_clk>, <&sdio0_int>;
-+
-+	sd-uhs-sdr50;
-+	sd-uhs-sdr104;
-+	sd-uhs-ddr50;
-+	cap-sdio-irq;
-+
-+	vmmc-supply = <&vcc_wifi>;
- 	status = "okay";
-+
-+	brcmf: bcrmf@0 {
-+		compatible = "brcm,bcm4329-fmac";
-+		interrupt-parent = <&gpio4>;
-+		reg = <0>;
-+		interrupts = <30 IRQ_TYPE_EDGE_FALLING>;
-+		interrupt-names = "host-wake";
-+		status = "okay";
-+	};
- };
- 
- &sdmmc {
--- 
-1.9.1
+I found a beagle xm. So I should be able to get back to this early next week.
 
+Thanks
+Kishon
+> 
+> If you want to test PM over NFSroot, boards with the smsc911x known
+> to work with PM  are at least omap3-evm-37xx.dts and
+> logicpd-torpedo-37xx-devkit.dts.  Since you tinker with the USB PHYs,
+> torpedo has MUSB working the same way as the beagle boards, EVM I
+> think can be modified that way but by default has diffent PHY.
+> 
+> Also overo tobi boards work with PM but only for retntion idle and
+> not off idle, and map3-sbc-t3517.dts probably can be made to work
+> with PM but I have mine as a gateway and have not been able to test
+> with it.
+> 
+> Probably also zoom3 boards with later processor boards can be made
+> to work, the LDP has early omap34xx variants and can't be made to
+> work reliably.
+> 
+> I don't have omap3-lilly, but I'd assume that can also be made
+> to work with PM if not already working.
+> 
+>>> I suggest you add some omap3 tests in general as otherwise you are
+>>> only testing a subset of the driver features and completely missing
+>>> things like rutnime PM and save and restore for the deeper idle
+>>> states.
+>>
+>> yeah, I'll do those tests and re-post the series.
+> 
+> Thanks!
+> 
+> Tony
+> 
