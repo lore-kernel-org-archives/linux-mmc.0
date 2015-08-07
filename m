@@ -1,98 +1,85 @@
-From: Dong Aisheng <aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Subject: Re: [PATCH v4 2/6] mmc: sdhci-esdhc-imx: add tuning-step seting
- support
-Date: Fri, 7 Aug 2015 15:40:20 +0800
-Message-ID: <20150807074019.GB6935@shlinux1.ap.freescale.net>
+From: Dong Aisheng <aisheng.dong@freescale.com>
+Subject: Re: [PATCH v4 6/6] mmc: sdhci-esdhc-imx: set back the
+ burst_length_enable bit to 1
+Date: Fri, 7 Aug 2015 15:50:51 +0800
+Message-ID: <20150807075050.GC6935@shlinux1.ap.freescale.net>
 References: <1438771122-8601-1-git-send-email-haibo.chen@freescale.com>
- <1438771122-8601-3-git-send-email-haibo.chen@freescale.com>
+ <1438771122-8601-7-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <1438771122-8601-3-git-send-email-haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Cc: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, johan.derycke-ob4gmnvZ1/cAvxtiuMwx3w@public.gmane.org, mkl-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, fabio.estevam-KZfg59tc24xl57MIdRCFDg@public.gmane.org, b29396-KZfg59tc24xl57MIdRCFDg@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <1438771122-8601-7-git-send-email-haibo.chen@freescale.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Haibo Chen <haibo.chen@freescale.com>
+Cc: mark.rutland@arm.com, fabio.estevam@freescale.com, ulf.hansson@linaro.org, linux@arm.linux.org.uk, pawel.moll@arm.com, ijc+devicetree@hellion.org.uk, b29396@freescale.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, robh+dt@kernel.org, mkl@pengutronix.de, kernel@pengutronix.de, galak@codeaurora.org, johan.derycke@barco.com, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Aug 05, 2015 at 06:38:38PM +0800, Haibo Chen wrote:
-> tuning-step is the delay cell steps in tuning procedure. The default value
-> of tuning-step is 1. Some boards or cards need another value to pass the
-> tuning procedure. For example, imx7d-sdb board need the tuning-step value
-> as 2, otherwise it can't pass the tuning procedure.
+On Wed, Aug 05, 2015 at 06:38:42PM +0800, Haibo Chen wrote:
+> Currently we find that if a usdhc is choosed to boot system, then ROM
+> code will set the burst length enable bit of this usdhc as 0.
 > 
-> So this patch add the tuning-step setting in driver, so that user can set
-> the tuning-step value in dts.
+> This will make performance drop a lot if this usdhc's burst length is
+> configed. So this patch set back the burst_length_enable bit as 1,
+> which is the default value, and means burst length is enabled for INCR.
 > 
-> Signed-off-by: Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c          | 9 +++++++++
->  include/linux/platform_data/mmc-esdhc-imx.h | 1 +
->  2 files changed, 10 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 48f009c..803d24f 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -75,6 +75,7 @@
->  #define ESDHC_STD_TUNING_EN		(1 << 24)
->  /* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
->  #define ESDHC_TUNING_START_TAP		0x1
-> +#define ESDHC_TUNING_STEP_SHIFT		16
->  
->  /* pinctrl state */
->  #define ESDHC_PINCTRL_STATE_100MHZ	"state_100mhz"
-> @@ -474,6 +475,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
->  		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
->  			u32 v = readl(host->ioaddr + SDHCI_ACMD12_ERR);
->  			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
-> +			u32 tuning_ctrl;
->  			if (val & SDHCI_CTRL_TUNED_CLK) {
->  				v |= ESDHC_MIX_CTRL_SMPCLK_SEL;
->  			} else {
-> @@ -484,6 +486,11 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
->  			if (val & SDHCI_CTRL_EXEC_TUNING) {
->  				v |= ESDHC_MIX_CTRL_EXE_TUNE;
->  				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
-> +				tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
-> +				tuning_ctrl |= ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP;
-> +				if (imx_data->boarddata.tuning_step)
-> +					tuning_ctrl |= imx_data->boarddata.tuning_step << ESDHC_TUNING_STEP_SHIFT;
-> +					writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
 
-Is there a code indent issue here?
-Otherwise, the patch looks good to me.
+This patch should be put before patch 5 to avoid function break, right?
+[PATCH v4 5/6] mmc: sdhci-esdhc-imx: change default watermark level and burst length
+
+Other than that, this patch looks good to me.
 
 Regards
 Dong Aisheng
 
->  			} else {
->  				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
->  			}
-> @@ -964,6 +971,8 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
->  	if (gpio_is_valid(boarddata->wp_gpio))
->  		boarddata->wp_type = ESDHC_WP_GPIO;
+> Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 16 ++++++++++++++++
+>  1 file changed, 16 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 97aa944..3334762 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -32,6 +32,7 @@
+>  #include "sdhci-esdhc.h"
 >  
-> +	of_property_read_u32(np, "fsl,tuning-step", &boarddata->tuning_step);
+>  #define	ESDHC_CTRL_D3CD			0x08
+> +#define ESDHC_BURST_LEN_EN_INCR		(1 << 27)
+>  /* VENDOR SPEC register */
+>  #define ESDHC_VENDOR_SPEC		0xc0
+>  #define  ESDHC_VENDOR_SPEC_SDIO_QUIRK	(1 << 1)
+> @@ -1165,6 +1166,21 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>  		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+>  		host->mmc->caps |= MMC_CAP_1_8V_DDR;
+>  
+> +		/*
+> +		 * ROM code will change the bit burst_length_enable setting
+> +		 * to zero if this usdhc is choosed to boot system. Change
+> +		 * it back here, otherwise it will impact the performance a
+> +		 * lot. This bit is used to enable/disable the burst length
+> +		 * for the external AHB2AXI bridge, it's usefully especially
+> +		 * for INCR transfer because without burst length indicator,
+> +		 * the AHB2AXI bridge does not know the burst length in
+> +		 * advance. And without burst length indicator, AHB INCR
+> +		 * transfer can only be converted to singles on the AXI side.
+> +		 */
+> +		writel(readl(host->ioaddr + SDHCI_HOST_CONTROL)
+> +			| ESDHC_BURST_LEN_EN_INCR,
+> +			host->ioaddr + SDHCI_HOST_CONTROL);
 > +
->  	if (of_find_property(np, "no-1-8-v", NULL))
->  		boarddata->support_vsel = false;
->  	else
-> diff --git a/include/linux/platform_data/mmc-esdhc-imx.h b/include/linux/platform_data/mmc-esdhc-imx.h
-> index e1571ef..95ccab3 100644
-> --- a/include/linux/platform_data/mmc-esdhc-imx.h
-> +++ b/include/linux/platform_data/mmc-esdhc-imx.h
-> @@ -45,5 +45,6 @@ struct esdhc_platform_data {
->  	int max_bus_width;
->  	bool support_vsel;
->  	unsigned int delay_line;
-> +	unsigned int tuning_step;       /* The delay cell steps in tuning procedure */
->  };
->  #endif /* __ASM_ARCH_IMX_ESDHC_H */
+>  		if (!(imx_data->socdata->flags & ESDHC_FLAG_HS200))
+>  			host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
+>  
 > -- 
 > 1.9.1
 > 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
