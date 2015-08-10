@@ -1,54 +1,62 @@
 From: Haibo Chen <haibo.chen@freescale.com>
-Subject: [PATCH v5 4/6] ARM: dts: imx7d-sdb: add eMMC5.0 support
-Date: Mon, 10 Aug 2015 16:18:06 +0800
-Message-ID: <1439194688-18335-5-git-send-email-haibo.chen@freescale.com>
+Subject: [PATCH v5 5/6] mmc: sdhci-esdhc-imx: set back the burst_length_enable bit to 1
+Date: Mon, 10 Aug 2015 16:18:07 +0800
+Message-ID: <1439194688-18335-6-git-send-email-haibo.chen@freescale.com>
 References: <1439194688-18335-1-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2on0136.outbound.protection.outlook.com ([65.55.169.136]:38720
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753382AbbHJIQS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 10 Aug 2015 04:16:18 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1439194688-18335-1-git-send-email-haibo.chen@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawnguo@kernel.org, kernel@pengutronix.de, linux@arm.linux.org.uk, ulf.hansson@linaro.org, aisheng.dong@freescale.com
 Cc: johan.derycke@barco.com, mkl@pengutronix.de, haibo.chen@freescale.com, fabio.estevam@freescale.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-imx7d-sdb board has a eMMC5.0 on usdhc3. This eMMC support HS400.
-This patch add usdhc3 support for HS400
+Currently we find that if a usdhc is choosed to boot system, then ROM
+code will set the burst length enable bit of this usdhc as 0.
+
+This will make performance drop a lot if this usdhc's burst length is
+configed. So this patch set back the burst_length_enable bit as 1,
+which is the default value, and means burst length is enabled for INCR.
 
 Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
 ---
- arch/arm/boot/dts/imx7d-sdb.dts | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
 
-diff --git a/arch/arm/boot/dts/imx7d-sdb.dts b/arch/arm/boot/dts/imx7d-sdb.dts
-index fdd1d7c..8059458 100644
---- a/arch/arm/boot/dts/imx7d-sdb.dts
-+++ b/arch/arm/boot/dts/imx7d-sdb.dts
-@@ -241,6 +241,19 @@
- 	status = "okay";
- };
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 03c9f33..d7ec993 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -32,6 +32,7 @@
+ #include "sdhci-esdhc.h"
  
-+&usdhc3 {
-+	pinctrl-names = "default", "state_100mhz", "state_200mhz";
-+	pinctrl-0 = <&pinctrl_usdhc3>;
-+	pinctrl-1 = <&pinctrl_usdhc3_100mhz>;
-+	pinctrl-2 = <&pinctrl_usdhc3_200mhz>;
-+	assigned-clocks = <&clks IMX7D_USDHC3_ROOT_CLK>;
-+	assigned-clock-rates = <400000000>;
-+	bus-width = <8>;
-+	fsl,tuning-step = <2>;
-+	non-removable;
-+	status = "okay";
-+};
+ #define	ESDHC_CTRL_D3CD			0x08
++#define ESDHC_BURST_LEN_EN_INCR		(1 << 27)
+ /* VENDOR SPEC register */
+ #define ESDHC_VENDOR_SPEC		0xc0
+ #define  ESDHC_VENDOR_SPEC_SDIO_QUIRK	(1 << 1)
+@@ -1165,6 +1166,21 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+ 		host->mmc->caps |= MMC_CAP_1_8V_DDR;
+ 
++		/*
++		 * ROM code will change the bit burst_length_enable setting
++		 * to zero if this usdhc is choosed to boot system. Change
++		 * it back here, otherwise it will impact the performance a
++		 * lot. This bit is used to enable/disable the burst length
++		 * for the external AHB2AXI bridge, it's usefully especially
++		 * for INCR transfer because without burst length indicator,
++		 * the AHB2AXI bridge does not know the burst length in
++		 * advance. And without burst length indicator, AHB INCR
++		 * transfer can only be converted to singles on the AXI side.
++		 */
++		writel(readl(host->ioaddr + SDHCI_HOST_CONTROL)
++			| ESDHC_BURST_LEN_EN_INCR,
++			host->ioaddr + SDHCI_HOST_CONTROL);
 +
- &iomuxc {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&pinctrl_hog>;
+ 		if (!(imx_data->socdata->flags & ESDHC_FLAG_HS200))
+ 			host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
+ 
 -- 
 1.9.1
-
