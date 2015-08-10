@@ -1,82 +1,54 @@
 From: Haibo Chen <haibo.chen@freescale.com>
-Subject: [PATCH v5 2/6] mmc: sdhci-esdhc-imx: add tuning-step seting support
-Date: Mon, 10 Aug 2015 16:18:04 +0800
-Message-ID: <1439194688-18335-3-git-send-email-haibo.chen@freescale.com>
+Subject: [PATCH v5 4/6] ARM: dts: imx7d-sdb: add eMMC5.0 support
+Date: Mon, 10 Aug 2015 16:18:06 +0800
+Message-ID: <1439194688-18335-5-git-send-email-haibo.chen@freescale.com>
 References: <1439194688-18335-1-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bl2on0136.outbound.protection.outlook.com ([65.55.169.136]:38720
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753382AbbHJIQS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 10 Aug 2015 04:16:18 -0400
 In-Reply-To: <1439194688-18335-1-git-send-email-haibo.chen@freescale.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawnguo@kernel.org, kernel@pengutronix.de, linux@arm.linux.org.uk, ulf.hansson@linaro.org, aisheng.dong@freescale.com
 Cc: johan.derycke@barco.com, mkl@pengutronix.de, haibo.chen@freescale.com, fabio.estevam@freescale.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
 
-tuning-step is the delay cell steps in tuning procedure. The default value
-of tuning-step is 1. Some boards or cards need another value to pass the
-tuning procedure. For example, imx7d-sdb board need the tuning-step value
-as 2, otherwise it can't pass the tuning procedure.
-
-So this patch add the tuning-step setting in driver, so that user can set
-the tuning-step value in dts.
+imx7d-sdb board has a eMMC5.0 on usdhc3. This eMMC support HS400.
+This patch add usdhc3 support for HS400
 
 Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c          | 9 +++++++++
- include/linux/platform_data/mmc-esdhc-imx.h | 1 +
- 2 files changed, 10 insertions(+)
+ arch/arm/boot/dts/imx7d-sdb.dts | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 2a816ad..03c9f33 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -75,6 +75,7 @@
- #define ESDHC_STD_TUNING_EN		(1 << 24)
- /* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
- #define ESDHC_TUNING_START_TAP		0x1
-+#define ESDHC_TUNING_STEP_SHIFT		16
- 
- /* pinctrl state */
- #define ESDHC_PINCTRL_STATE_100MHZ	"state_100mhz"
-@@ -474,6 +475,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
- 			u32 v = readl(host->ioaddr + SDHCI_ACMD12_ERR);
- 			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
-+			u32 tuning_ctrl;
- 			if (val & SDHCI_CTRL_TUNED_CLK) {
- 				v |= ESDHC_MIX_CTRL_SMPCLK_SEL;
- 			} else {
-@@ -484,6 +486,11 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 			if (val & SDHCI_CTRL_EXEC_TUNING) {
- 				v |= ESDHC_MIX_CTRL_EXE_TUNE;
- 				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
-+				tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
-+				tuning_ctrl |= ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP;
-+				if (imx_data->boarddata.tuning_step)
-+					tuning_ctrl |= imx_data->boarddata.tuning_step << ESDHC_TUNING_STEP_SHIFT;
-+					writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
- 			} else {
- 				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
- 			}
-@@ -965,6 +972,8 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
- 	if (gpio_is_valid(boarddata->wp_gpio))
- 		boarddata->wp_type = ESDHC_WP_GPIO;
- 
-+	of_property_read_u32(np, "fsl,tuning-step", &boarddata->tuning_step);
-+
- 	if (of_find_property(np, "no-1-8-v", NULL))
- 		boarddata->support_vsel = false;
- 	else
-diff --git a/include/linux/platform_data/mmc-esdhc-imx.h b/include/linux/platform_data/mmc-esdhc-imx.h
-index e1571ef..95ccab3 100644
---- a/include/linux/platform_data/mmc-esdhc-imx.h
-+++ b/include/linux/platform_data/mmc-esdhc-imx.h
-@@ -45,5 +45,6 @@ struct esdhc_platform_data {
- 	int max_bus_width;
- 	bool support_vsel;
- 	unsigned int delay_line;
-+	unsigned int tuning_step;       /* The delay cell steps in tuning procedure */
+diff --git a/arch/arm/boot/dts/imx7d-sdb.dts b/arch/arm/boot/dts/imx7d-sdb.dts
+index fdd1d7c..8059458 100644
+--- a/arch/arm/boot/dts/imx7d-sdb.dts
++++ b/arch/arm/boot/dts/imx7d-sdb.dts
+@@ -241,6 +241,19 @@
+ 	status = "okay";
  };
- #endif /* __ASM_ARCH_IMX_ESDHC_H */
+ 
++&usdhc3 {
++	pinctrl-names = "default", "state_100mhz", "state_200mhz";
++	pinctrl-0 = <&pinctrl_usdhc3>;
++	pinctrl-1 = <&pinctrl_usdhc3_100mhz>;
++	pinctrl-2 = <&pinctrl_usdhc3_200mhz>;
++	assigned-clocks = <&clks IMX7D_USDHC3_ROOT_CLK>;
++	assigned-clock-rates = <400000000>;
++	bus-width = <8>;
++	fsl,tuning-step = <2>;
++	non-removable;
++	status = "okay";
++};
++
+ &iomuxc {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_hog>;
 -- 
 1.9.1
+
