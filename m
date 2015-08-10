@@ -1,60 +1,64 @@
-From: Jaehoon Chung <jh80.chung@gmail.com>
-Subject: [GIT PULL] Update dw-mmc controller
-Date: Tue, 11 Aug 2015 01:54:21 +0900
-Message-ID: <55C8D73D.10709@gmail.com>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH 1/3] mmc: dw_mmc: fix the wrong condition checking
+Date: Mon, 10 Aug 2015 22:36:40 +0530
+Message-ID: <CAGOxZ50G8hYZcArL+ybzyMcBaJpT-4JWYaVcso-qLqzQZMPdjA@mail.gmail.com>
+References: <1438845806-4486-1-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f173.google.com ([209.85.192.173]:34239 "EHLO
-	mail-pd0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754636AbbHJQy1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Aug 2015 12:54:27 -0400
-Received: by pdbfa8 with SMTP id fa8so33249612pdb.1
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Aug 2015 09:54:26 -0700 (PDT)
+Received: from mail-qg0-f46.google.com ([209.85.192.46]:35592 "EHLO
+	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754423AbbHJRHV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Aug 2015 13:07:21 -0400
+Received: by qgj62 with SMTP id 62so96695630qgj.2
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Aug 2015 10:07:20 -0700 (PDT)
+In-Reply-To: <1438845806-4486-1-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, =?UTF-8?B?SGVpa28gU3TDvGJuZXI=?= <heiko@sntech.de>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, Addy Ke <addy.ke@rock-chips.com>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Dear, Ulf.
+Hi Jaehoon
 
-Could you pull these patches into your repository?
+On Thu, Aug 6, 2015 at 12:53 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>
+> When num-slots is lower than 1, it's right that should be returned -ENODEV.
+>
+make sense.
 
-Best Regards,
-Jaehoon Chung
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-The following changes since commit 77a5f675e2d80469b93c3dea1913c0450c4942be:
+Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
+Tested-by: Alim Akhtar <alim.akhtar@samsung.com>
 
-  mmc: block: add fixup of broken CMD23 for Sandisk card (2015-07-23 14:28:47 +0200)
+> ---
+>  drivers/mmc/host/dw_mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 3c0e199..de88e64 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2760,7 +2760,7 @@ int dw_mci_probe(struct dw_mci *host)
+>                 }
+>         }
+>
+> -       if (host->pdata->num_slots > 1) {
+> +       if (host->pdata->num_slots < 1) {
+>                 dev_err(host->dev,
+>                         "Platform data must supply num_slots.\n");
+>                 return -ENODEV;
+> --
+> 1.9.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-are available in the git repository at:
 
-  https://github.com/jh80chung/dw-mmc.git tags/dw-mmc-for-ulf-v4.2
 
-for you to fetch changes up to a4c8b2edf78584dc7148ce06208d0f12d3b04a1b:
 
-  mmc: dw_mmc: add quirk for broken data transfer over scheme (2015-08-11 01:33:32 +0900)
-
-----------------------------------------------------------------
-Addy Ke (1):
-      mmc: dw_mmc: add quirk for broken data transfer over scheme
-
-Alexey Brodkin (1):
-      mmc: dw_mmc: handle data blocks > than 4kB if IDMAC is used
-
-Heiko Stuebner (1):
-      mmc: dw_mmc: fix pio mode when internal dmac is enabled
-
-Jaehoon Chung (3):
-      mmc: dw_mmc: fix the wrong condition checking
-      mmc: dw_mmc: remove the unused blk_setting
-      mmc: dw_mmc: print the message for deprecated property
-
-Shawn Lin (1):
-      mmc: dw_mmc: Fix coding style issues
-
- drivers/mmc/host/dw_mmc-rockchip.c |   3 +
- drivers/mmc/host/dw_mmc.c          | 284 +++++++++++++++++++++++++------------
- include/linux/mmc/dw_mmc.h         |   5 +-
- 3 files changed, 204 insertions(+), 88 deletions(-)
+-- 
+Regards,
+Alim
