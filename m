@@ -1,51 +1,58 @@
-From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
-Subject: Re: [PATCH v2] mmc: sdhci-of-esdhc: add workaround for pre divider
- initial value
-Date: Tue, 11 Aug 2015 08:11:36 +0000
-Message-ID: <1439280697.3120.98.camel@transmode.se>
-References: <1439261614-38605-1-git-send-email-yangbo.lu@freescale.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Barry Song <21cnbao@gmail.com>
+Subject: [PATCH 1/2] mmc: core: enable CMD19 tuning for DDR50 mode
+Date: Tue, 11 Aug 2015 08:41:32 +0000
+Message-ID: <1439282492-6274-1-git-send-email-21cnbao@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.transmode.se ([31.15.61.139]:56978 "EHLO smtp.transmode.se"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932079AbbHKILm convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Aug 2015 04:11:42 -0400
-In-Reply-To: <1439261614-38605-1-git-send-email-yangbo.lu@freescale.com>
-Content-Language: en-US
-Content-ID: <1AFE9721A189294B9A1D30E3186A692A@transmode.com>
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:33699 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752344AbbHKIet (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Aug 2015 04:34:49 -0400
+Received: by pabyb7 with SMTP id yb7so125537879pab.0
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Aug 2015 01:34:48 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "yangbo.lu@freescale.com" <yangbo.lu@freescale.com>
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, workgroup.linux@csr.com, Weijun Yang <york.yang@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-On Tue, 2015-08-11 at 10:53 +0800, Yangbo Lu wrote:
-> For eSDHC(version < 2.3), the pre divider only could divide base clock
-> by 2 at least. Add workaround for this to avoid unexpected issue.
-> 
-> Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
-> ---
-Thanks a lot, here is my:
+From: Weijun Yang <york.yang@csr.com>
 
-Acked-by: Joakim Tjernlund <Joakim.Tjernlund@transmode.se>
+As SD Specifications Part1 Physical Layer Specification Version
+3.01 says, CMD19 tuning is available for unlocked cards in transfer
+state of 1.8V signaling mode. The small difference between v3.00
+and 3.01 spec means that CMD19 tuning is also available for DDR50
+mode.
 
->  drivers/mmc/host/sdhci-of-esdhc.c | 6 ++++++
->  1 file changed, 6 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 797be75..653f335 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -208,6 +208,12 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
->  	if (clock == 0)
->  		return;
->  
-> +	/* Workaround to start pre_div at 2 for VNN < VENDOR_V_23 */
-> +	temp = esdhc_readw(host, SDHCI_HOST_VERSION);
-> +	temp = (temp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
-> +	if (temp < VENDOR_V_23)
-> +		pre_div = 2;
-> +
->  	/* Workaround to reduce the clock frequency for p1010 esdhc */
->  	if (of_find_compatible_node(NULL, NULL, "fsl,p1010-esdhc")) {
->  		if (clock > 20000000)
+Signed-off-by: Weijun Yang <york.yang@csr.com>
+Signed-off-by: Barry Song <Baohua.Song@csr.com>
+---
+ drivers/mmc/core/sd.c    | 1 +
+ drivers/mmc/host/sdhci.c | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 4e7366a..a1ed24d 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -629,6 +629,7 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
+ 	 */
+ 	if (!mmc_host_is_spi(card->host) &&
+ 	    (card->sd_bus_speed == UHS_SDR50_BUS_SPEED ||
++	     card->sd_bus_speed == UHS_DDR50_BUS_SPEED ||
+ 	     card->sd_bus_speed == UHS_SDR104_BUS_SPEED))
+ 		err = mmc_execute_tuning(card);
+ out:
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 1dbe932..812c19b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1891,6 +1891,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		break;
+ 
+ 	case MMC_TIMING_UHS_SDR104:
++	case MMC_TIMING_UHS_DDR50:
+ 		break;
+ 
+ 	case MMC_TIMING_UHS_SDR50:
+-- 
+1.9.1
+
