@@ -1,38 +1,54 @@
-From: Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Subject: [PATCH v6 0/6] mmc: imx: a few fixes and new feature
-Date: Tue, 11 Aug 2015 19:38:25 +0800
-Message-ID: <1439293111-21077-1-git-send-email-haibo.chen@freescale.com>
+From: Haibo Chen <haibo.chen@freescale.com>
+Subject: [PATCH v6 3/6] mmc: sdhci-esdhc-imx: add imx7d support in bingding doc
+Date: Tue, 11 Aug 2015 19:38:28 +0800
+Message-ID: <1439293111-21077-4-git-send-email-haibo.chen@freescale.com>
+References: <1439293111-21077-1-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org
-Cc: johan.derycke-ob4gmnvZ1/cAvxtiuMwx3w@public.gmane.org, mkl-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org, haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org, fabio.estevam-KZfg59tc24xl57MIdRCFDg@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bl2on0127.outbound.protection.outlook.com ([65.55.169.127]:39936
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S933911AbbHKLgb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 11 Aug 2015 07:36:31 -0400
+In-Reply-To: <1439293111-21077-1-git-send-email-haibo.chen@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawnguo@kernel.org, kernel@pengutronix.de, linux@arm.linux.org.uk, ulf.hansson@linaro.org, aisheng.dong@freescale.com
+Cc: johan.derycke@barco.com, mkl@pengutronix.de, haibo.chen@freescale.com, fabio.estevam@freescale.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-Changes for v6:
--remove duplicate code in esdhc_set_uhs_signaling().
--fix a typo for patch-2.
--make commit log of patch-3 more specific.
+Add a required property "fsl,imx7d-usdhc" in binding doc.
+Add an optional property "fsl,tuning-step" in binding doc.
 
-Haibo Chen (6):
-  mmc: sdhci-esdhc-imx: add imx7d support and support HS400
-  mmc: sdhci-esdhc-imx: add tuning-step setting support
-  mmc: sdhci-esdhc-imx: add imx7d support in bingding doc
-  ARM: dts: imx7d-sdb: add eMMC5.0 support
-  mmc: sdhci-esdhc-imx: set back the burst_length_enable bit to 1
-  mmc: sdhci-esdhc-imx: change default watermark level and burst length
+Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
+---
+ Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
- .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   6 ++
- arch/arm/boot/dts/imx7d-sdb.dts                    |  13 +++
- drivers/mmc/host/sdhci-esdhc-imx.c                 | 114 ++++++++++++++++++++-
- include/linux/platform_data/mmc-esdhc-imx.h        |   1 +
- 4 files changed, 130 insertions(+), 4 deletions(-)
-
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+index 211e778..dca56d6 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+@@ -15,6 +15,7 @@ Required properties:
+ 	       "fsl,imx6q-usdhc"
+ 	       "fsl,imx6sl-usdhc"
+ 	       "fsl,imx6sx-usdhc"
++	       "fsl,imx7d-usdhc"
+ 
+ Optional properties:
+ - fsl,wp-controller : Indicate to use controller internal write protection
+@@ -27,6 +28,11 @@ Optional properties:
+   transparent level shifters on the outputs of the controller. Two cells are
+   required, first cell specifies minimum slot voltage (mV), second cell
+   specifies maximum slot voltage (mV). Several ranges could be specified.
++- fsl,tuning-step: Specify the increasing delay cell steps in tuning procedure.
++  The uSDHC use one delay cell as default increasing step to do tuning process.
++  This property allows user to change the tuning step to more than one delay
++  cells which is useful for some special boards or cards when the default
++  tuning step can't find the proper delay window within limited tuning retries.
+ 
+ Examples:
+ 
 -- 
 1.9.1
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
