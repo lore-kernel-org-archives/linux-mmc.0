@@ -1,60 +1,45 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RFC PATCH] mmc: sdhci-of-arasan: Add the support for sdhci-5.1
-Date: Tue, 11 Aug 2015 09:34:48 +0800
-Message-ID: <1439256888-6658-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Michal Simek <michal.simek@xilinx.com>, =?UTF-8?q?S=C3=B6ren=20Brinkmann?= <soren.brinkmann@xilinx.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+From: Yangbo Lu <yangbo.lu@freescale.com>
+Subject: [PATCH v2] mmc: sdhci-of-esdhc: add workaround for pre divider initial value
+Date: Tue, 11 Aug 2015 10:53:34 +0800
+Message-ID: <1439261614-38605-1-git-send-email-yangbo.lu@freescale.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-by2on0139.outbound.protection.outlook.com ([207.46.100.139]:20576
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S933433AbbHKC6x (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 10 Aug 2015 22:58:53 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, joakim.tjernlund@transmode.se
+Cc: Yangbo Lu <yangbo.lu@freescale.com>
 
-This patch adds the quirks and compatible string in sdhci-of-arasan.c
-to support sdhci-arasan5.1 version of controller. No documented controller
-IP version is found in the TRM, so we use ths version of command queueing
-engine integrated into this controller by arasan to specify our controller.
+For eSDHC(version < 2.3), the pre divider only could divide base clock
+by 2 at least. Add workaround for this to avoid unexpected issue.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-
+Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
 ---
+ drivers/mmc/host/sdhci-of-esdhc.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
- Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 2 +-
- drivers/mmc/host/sdhci-of-arasan.c                     | 4 ++++
- 2 files changed, 5 insertions(+), 1 deletion(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-index 7e94903..da541c3 100644
---- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-@@ -9,7 +9,7 @@ Device Tree Bindings for the Arasan SDHCI Controller
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 797be75..653f335 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -208,6 +208,12 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	if (clock == 0)
+ 		return;
  
- Required Properties:
-   - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a' or
--                'arasan,sdhci-4.9a'
-+                'arasan,sdhci-4.9a' or 'arasan,sdhci-5.1'
-   - reg: From mmc bindings: Register location and length.
-   - clocks: From clock bindings: Handles to clock inputs.
-   - clock-names: From clock bindings: Tuple including "clk_xin" and "clk_ahb"
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index ef5a7d2..c9012f5 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -175,6 +175,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 	if (of_device_is_compatible(pdev->dev.of_node, "arasan,sdhci-4.9a")) {
- 		host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
- 		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
-+	} else if (of_device_is_compatible(pdev->dev.of_node,
-+					   "arasan,sdhci-5.1")) {
-+		host->quirks |= SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
- 	}
- 
- 	sdhci_get_of_property(pdev);
-@@ -217,6 +220,7 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
- 
- static const struct of_device_id sdhci_arasan_of_match[] = {
- 	{ .compatible = "arasan,sdhci-8.9a" },
-+	{ .compatible = "arasan,sdhci-5.1" },
- 	{ .compatible = "arasan,sdhci-4.9a" },
- 	{ }
- };
++	/* Workaround to start pre_div at 2 for VNN < VENDOR_V_23 */
++	temp = esdhc_readw(host, SDHCI_HOST_VERSION);
++	temp = (temp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
++	if (temp < VENDOR_V_23)
++		pre_div = 2;
++
+ 	/* Workaround to reduce the clock frequency for p1010 esdhc */
+ 	if (of_find_compatible_node(NULL, NULL, "fsl,p1010-esdhc")) {
+ 		if (clock > 20000000)
 -- 
-2.3.7
+2.1.0.27.g96db324
+
