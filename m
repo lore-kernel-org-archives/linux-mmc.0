@@ -1,7 +1,7 @@
 From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Subject: [PATCH v2] DT: mmc: sh_mmcif: fix "compatible" property text
-Date: Wed, 12 Aug 2015 01:37:28 +0300
-Message-ID: <1643858.nkRxsQo3O3@wasted.cogentembedded.com>
+Subject: [PATCH v2] DT: mmc: sh_mmcif: document R8A779[34] support
+Date: Wed, 12 Aug 2015 01:57:45 +0300
+Message-ID: <28226759.dUa3lFkaxJ@wasted.cogentembedded.com>
 References: <201404250239.39150.sergei.shtylyov@cogentembedded.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -13,35 +13,31 @@ To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree
 Cc: linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The "compatible" property text contradicts even the example given in the MMCIF
-binding document itself;  moreover, the Renesas MMCIF driver only matches on
-the generic "compatible" string and doesn't look for the SoC specific strings
-at all. Thus describe "renesas,sh-mmcif" as a fallback value.
+Renesas R8A7794 SoC also has the MMCIF controller...
 
-Fixes: b4c27763d749 ("mmc: sh_mmcif: Document DT bindings")
 Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
 
 ---
-The patch is against Ulf Hansson's 'mmc.git' repo's 'fixes' and 'next' branches.
+The patch is against Ulf Hansson's 'mmc.git'  repo's 'next' branch plus the
+patch I posted earlier today...
 
 Changes in version 2:
-- kept the SoC specific "compatible" property values mandatory and made the
-  generic string a fallback.
+- deferred R8A7793 support to the patch posted earlier by Ulrich Hecht;
+- fixed typo in the changelog.
 
- Documentation/devicetree/bindings/mmc/renesas,mmcif.txt |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ Documentation/devicetree/bindings/mmc/renesas,mmcif.txt |    1 +
+ 1 file changed, 1 insertion(+)
 
 Index: mmc/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
 ===================================================================
 --- mmc.orig/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
 +++ mmc/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
-@@ -10,7 +10,7 @@ Required properties:
+@@ -10,6 +10,7 @@ Required properties:
  	- "renesas,mmcif-r8a7740" for the MMCIF found in r8a7740 SoCs
  	- "renesas,mmcif-r8a7790" for the MMCIF found in r8a7790 SoCs
  	- "renesas,mmcif-r8a7791" for the MMCIF found in r8a7791 SoCs
--	- "renesas,sh-mmcif" for the generic MMCIF
-+  followed by "renesas,sh-mmcif".
++	- "renesas,mmcif-r8a7794" for the MMCIF found in r8a7794 SoCs
+   followed by "renesas,sh-mmcif".
  
  - clocks: reference to the functional clock
- 
 
