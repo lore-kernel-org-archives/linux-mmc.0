@@ -1,44 +1,53 @@
-From: Barry Song <21cnbao@gmail.com>
-Subject: [PATCH 2/2] mmc: sirf: fix the capbility to support DDR50
-Date: Tue, 11 Aug 2015 08:42:47 +0000
-Message-ID: <1439282567-6362-1-git-send-email-21cnbao@gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 00/11] omap_hsmmc: voltage switching and tuning
+Date: Tue, 11 Aug 2015 03:40:43 -0700
+Message-ID: <20150811104043.GL4215@atomide.com>
+References: <1438242394-25599-1-git-send-email-kishon@ti.com>
+ <20150805104355.GE16878@atomide.com>
+ <55C22524.5050304@ti.com>
+ <20150806064821.GO16878@atomide.com>
+ <55C4C46E.9080200@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f42.google.com ([209.85.220.42]:34697 "EHLO
-	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755149AbbHKIgI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Aug 2015 04:36:08 -0400
-Received: by pawu10 with SMTP id u10so159569708paw.1
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Aug 2015 01:36:05 -0700 (PDT)
+Received: from muru.com ([72.249.23.125]:42800 "EHLO muru.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933875AbbHKKkr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 11 Aug 2015 06:40:47 -0400
+Content-Disposition: inline
+In-Reply-To: <55C4C46E.9080200@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, workgroup.linux@csr.com, Weijun Yang <york.yang@csr.com>, Barry Song <Baohua.Song@csr.com>
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: ulf.hansson@linaro.org, afenkart@gmail.com, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com, mugunthanvnm@ti.com
 
-From: Weijun Yang <york.yang@csr.com>
+* Kishon Vijay Abraham I <kishon@ti.com> [150807 07:48]:
+> Hi,
+> 
+> On Thursday 06 August 2015 12:18 PM, Tony Lindgren wrote:
+> > * Kishon Vijay Abraham I <kishon@ti.com> [150805 08:03]:
+> >> Hi,
+> >>
+> >> On Wednesday 05 August 2015 04:13 PM, Tony Lindgren wrote:
+> >>> * Kishon Vijay Abraham I <kishon@ti.com> [150730 00:49]:
+> >>>> Patch series implements voltage switching and tuning for omap_hsmmc
+> >>>> driver.
+> >>>>
+> >>>> Did basic read/write test in J6, J6 Eco, Beagle-x15, AM437x EVM,
+> >>>> Beaglebone black, OMAP5 uEVM and OMAP4 PANDA.
+> >>>
+> >>> Your tests are missing omap3?
+> >>
+> >> I don't have one at my disposal :-( I'll try to find one and add omap3 tests.
+> > 
+> > Great :) Beagle xm is a good one to test the USB PHY stuff on
+> > and also MMC. Having USB cable connected or EHCI loaded blocks the PM
+> > though, so NFSroot is not very usable for testing on it.
+> 
+> I found a beagle xm. So I should be able to get back to this early next week.
 
-According to hardware spec, validate DDR50 mode
-for SDXC.
+OK great!
 
-Signed-off-by: Weijun Yang <york.yang@csr.com>
-Signed-off-by: Barry Song <Baohua.Song@csr.com>
----
- drivers/mmc/host/sdhci-sirf.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+Thanks,
 
-diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
-index 0110bae..03efcfc 100644
---- a/drivers/mmc/host/sdhci-sirf.c
-+++ b/drivers/mmc/host/sdhci-sirf.c
-@@ -50,7 +50,8 @@ static u32 sdhci_sirf_readl_le(struct sdhci_host *host, int reg)
- 	if (unlikely((reg == SDHCI_CAPABILITIES_1) &&
- 			(host->mmc->caps & MMC_CAP_UHS_SDR50))) {
- 		/* fake CAP_1 register */
--		val = SDHCI_SUPPORT_SDR50 | SDHCI_USE_SDR50_TUNING;
-+		val = SDHCI_SUPPORT_DDR50 |
-+			SDHCI_SUPPORT_SDR50 | SDHCI_USE_SDR50_TUNING;
- 	}
- 
- 	if (unlikely(reg == SDHCI_SLOT_INT_STATUS)) {
--- 
-1.9.1
-
+Tony
