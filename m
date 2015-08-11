@@ -1,91 +1,67 @@
-From: Haibo Chen <haibo.chen@freescale.com>
-Subject: [PATCH v6 2/6] mmc: sdhci-esdhc-imx: add tuning-step setting support
-Date: Tue, 11 Aug 2015 19:38:27 +0800
-Message-ID: <1439293111-21077-3-git-send-email-haibo.chen@freescale.com>
-References: <1439293111-21077-1-git-send-email-haibo.chen@freescale.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1439293111-21077-1-git-send-email-haibo.chen@freescale.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawnguo@kernel.org, kernel@pengutronix.de, linux@arm.linux.org.uk, ulf.hansson@linaro.org, aisheng.dong@freescale.com
-Cc: fabio.estevam@freescale.com, devicetree@vger.kernel.org, haibo.chen@freescale.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, mkl@pengutronix.de, johan.derycke@barco.com, linux-arm-kernel@lists.infradead.org
+From: Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: [PATCH] mmc: sh_mmcif: Silence DMA slave ID compile warnings on 64-bit
+Date: Tue, 11 Aug 2015 14:48:34 +0200
+Message-ID: <1439297314-29118-1-git-send-email-geert+renesas@glider.be>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from andre.telenet-ops.be ([195.130.132.53]:40277 "EHLO
+	andre.telenet-ops.be" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964918AbbHKMsh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Aug 2015 08:48:37 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Cc: linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>
 
-tuning-step is the delay cell steps in tuning procedure. The default value
-of tuning-step is 1. Some boards or cards need another value to pass the
-tuning procedure. For example, imx7d-sdb board need the tuning-step value
-as 2, otherwise it can't pass the tuning procedure.
+On arm64:
 
-So this patch add the tuning-step setting in driver, so that user can set
-the tuning-step value in dts.
+    drivers/mmc/host/sh_mmcif.c: In function 'sh_mmcif_request_dma_one':
+    drivers/mmc/host/sh_mmcif.c:417:4: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+	(void *)pdata->slave_id_tx :
+	^
+    drivers/mmc/host/sh_mmcif.c:418:4: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+	(void *)pdata->slave_id_rx;
+	^
 
-Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
+Add an intermediate cast to "uintptr_t" to kill the compile warning.
+
+While we're at it, replace "void *slave_data" by "unsigned int slave_id"
+to avoid having to cast in two places, and because it's a DMA slave ID,
+not a platform data pointer.
+
+Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c          | 9 +++++++++
- include/linux/platform_data/mmc-esdhc-imx.h | 1 +
- 2 files changed, 10 insertions(+)
+ drivers/mmc/host/sh_mmcif.c | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index b8b7e88..298551d 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -75,6 +75,7 @@
- #define ESDHC_STD_TUNING_EN		(1 << 24)
- /* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
- #define ESDHC_TUNING_START_TAP		0x1
-+#define ESDHC_TUNING_STEP_SHIFT		16
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 5a1fdd405b1af14f..51ac09b8a5770df2 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -403,7 +403,7 @@ sh_mmcif_request_dma_one(struct sh_mmcif_host *host,
+ {
+ 	struct dma_slave_config cfg = { 0, };
+ 	struct dma_chan *chan;
+-	void *slave_data = NULL;
++	unsigned int slave_id = 0;
+ 	struct resource *res;
+ 	struct device *dev = sh_mmcif_host_to_dev(host);
+ 	dma_cap_mask_t mask;
+@@ -413,12 +413,11 @@ sh_mmcif_request_dma_one(struct sh_mmcif_host *host,
+ 	dma_cap_set(DMA_SLAVE, mask);
  
- /* pinctrl state */
- #define ESDHC_PINCTRL_STATE_100MHZ	"state_100mhz"
-@@ -474,6 +475,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
- 			u32 v = readl(host->ioaddr + SDHCI_ACMD12_ERR);
- 			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
-+			u32 tuning_ctrl;
- 			if (val & SDHCI_CTRL_TUNED_CLK) {
- 				v |= ESDHC_MIX_CTRL_SMPCLK_SEL;
- 			} else {
-@@ -484,6 +486,11 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 			if (val & SDHCI_CTRL_EXEC_TUNING) {
- 				v |= ESDHC_MIX_CTRL_EXE_TUNE;
- 				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
-+				tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
-+				tuning_ctrl |= ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP;
-+				if (imx_data->boarddata.tuning_step)
-+					tuning_ctrl |= imx_data->boarddata.tuning_step << ESDHC_TUNING_STEP_SHIFT;
-+					writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
- 			} else {
- 				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
- 			}
-@@ -963,6 +970,8 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
- 	if (gpio_is_valid(boarddata->wp_gpio))
- 		boarddata->wp_type = ESDHC_WP_GPIO;
+ 	if (pdata)
+-		slave_data = direction == DMA_MEM_TO_DEV ?
+-			(void *)pdata->slave_id_tx :
+-			(void *)pdata->slave_id_rx;
++		slave_id = direction == DMA_MEM_TO_DEV ?
++			pdata->slave_id_tx : pdata->slave_id_rx;
  
-+	of_property_read_u32(np, "fsl,tuning-step", &boarddata->tuning_step);
-+
- 	if (of_find_property(np, "no-1-8-v", NULL))
- 		boarddata->support_vsel = false;
- 	else
-diff --git a/include/linux/platform_data/mmc-esdhc-imx.h b/include/linux/platform_data/mmc-esdhc-imx.h
-index e1571ef..95ccab3 100644
---- a/include/linux/platform_data/mmc-esdhc-imx.h
-+++ b/include/linux/platform_data/mmc-esdhc-imx.h
-@@ -45,5 +45,6 @@ struct esdhc_platform_data {
- 	int max_bus_width;
- 	bool support_vsel;
- 	unsigned int delay_line;
-+	unsigned int tuning_step;       /* The delay cell steps in tuning procedure */
- };
- #endif /* __ASM_ARCH_IMX_ESDHC_H */
+ 	chan = dma_request_slave_channel_compat(mask, shdma_chan_filter,
+-				slave_data, dev,
++				(void *)(uintptr_t)slave_id, dev,
+ 				direction == DMA_MEM_TO_DEV ? "tx" : "rx");
+ 
+ 	dev_dbg(dev, "%s: %s: got channel %p\n", __func__,
 -- 
 1.9.1
+
