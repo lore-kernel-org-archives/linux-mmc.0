@@ -1,65 +1,76 @@
-From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Subject: Re: [PATCH v2] DT: mmc: sh_mmcif: fix "compatible" property text
-Date: Wed, 12 Aug 2015 13:41:40 +0300
-Message-ID: <55CB22E4.5040904@cogentembedded.com>
-References: <201404250239.39150.sergei.shtylyov@cogentembedded.com>
- <1643858.nkRxsQo3O3@wasted.cogentembedded.com>
- <20150812005628.GE15957@verge.net.au>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: re: mmc: Driver for CB710/720 memory card reader (MMC part)
+Date: Wed, 12 Aug 2015 14:00:51 +0300
+Message-ID: <20150812110051.GC22571@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f178.google.com ([209.85.217.178]:34121 "EHLO
-	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754830AbbHLKln (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Aug 2015 06:41:43 -0400
-Received: by lbbtg9 with SMTP id tg9so7101263lbb.1
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Aug 2015 03:41:42 -0700 (PDT)
-In-Reply-To: <20150812005628.GE15957@verge.net.au>
+Received: from aserp1040.oracle.com ([141.146.126.69]:44076 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754151AbbHLLBE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Aug 2015 07:01:04 -0400
+Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
+To: mirq-linux@rere.qmqm.pl
+Cc: linux-mmc@vger.kernel.org
 
-On 8/12/2015 3:56 AM, Simon Horman wrote:
+Hello Micha=C5=82 Miros=C5=82aw,
 
->> The "compatible" property text contradicts even the example given in the MMCIF
->> binding document itself;  moreover, the Renesas MMCIF driver only matches on
->> the generic "compatible" string and doesn't look for the SoC specific strings
->> at all. Thus describe "renesas,sh-mmcif" as a fallback value.
+The patch 5f5bac8272be: "mmc: Driver for CB710/720 memory card reader
+(MMC part)" from May 22, 2009, leads to the following static checker
+warning:
 
->> Fixes: b4c27763d749 ("mmc: sh_mmcif: Document DT bindings")
->> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+	drivers/mmc/host/cb710-mmc.c:579 cb710_mmc_set_ios()
+	warn: 'err' can be either negative or positive
 
-> I don't believe this file is the appropriate place to describe
-> best-practice for the ordering of compatible strings which must surely be
-> documented elsewhere.
+drivers/mmc/host/cb710-mmc.c
+   112 =20
+   113  static int cb710_check_event(struct cb710_slot *slot, u8 what)
+   114  {
+   115          u16 status;
+   116 =20
+   117          status =3D cb710_read_port_16(slot, CB710_MMC_STATUS_PO=
+RT);
+   118 =20
+   119          if (status & CB710_MMC_S0_FIFO_UNDERFLOW) {
+   120                  /* it is just a guess, so log it */
+   121                  dev_dbg(cb710_slot_dev(slot),
+   122                          "CHECK : ignoring bit 6 in status %04X\=
+n", status);
+   123                  cb710_write_port_8(slot, CB710_MMC_STATUS0_PORT=
+,
+   124                          CB710_MMC_S0_FIFO_UNDERFLOW);
+   125                  status &=3D ~CB710_MMC_S0_FIFO_UNDERFLOW;
+   126          }
+   127 =20
+   128          if (status & CB710_MMC_STATUS_ERROR_EVENTS) {
+   129                  dev_dbg(cb710_slot_dev(slot),
+   130                          "CHECK : returning EIO on status %04X\n=
+", status);
+   131                  cb710_write_port_8(slot, CB710_MMC_STATUS0_PORT=
+, status & 0xFF);
+   132                  cb710_write_port_8(slot, CB710_MMC_STATUS1_PORT=
+,
+   133                          CB710_MMC_S1_RESET);
+   134                  return -EIO;
+   135          }
+   136 =20
+   137          /* 'what' is a bit in MMC_STATUS1 */
+   138          if ((status >> 8) & what) {
+   139                  cb710_write_port_8(slot, CB710_MMC_STATUS1_PORT=
+, what);
+   140                  return 1;
 
-    Where? I have no idea what you mean...
-    And let me reiterate: this text is *wrong* and needs to be fixed anyway.
+There are two callers to this function.  It appears to me that one
+expects zero on error and one expects non-zero on error.  It is
+confusing and there are no comments explaining the return codes.
 
->> ---
->> The patch is against Ulf Hansson's 'mmc.git' repo's 'fixes' and 'next' branches.
->>
->> Changes in version 2:
->> - kept the SoC specific "compatible" property values mandatory and made the
->>    generic string a fallback.
->>
->>   Documentation/devicetree/bindings/mmc/renesas,mmcif.txt |    2 +-
->>   1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> Index: mmc/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
->> ===================================================================
->> --- mmc.orig/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
->> +++ mmc/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
->> @@ -10,7 +10,7 @@ Required properties:
->>   	- "renesas,mmcif-r8a7740" for the MMCIF found in r8a7740 SoCs
->>   	- "renesas,mmcif-r8a7790" for the MMCIF found in r8a7790 SoCs
->>   	- "renesas,mmcif-r8a7791" for the MMCIF found in r8a7791 SoCs
->> -	- "renesas,sh-mmcif" for the generic MMCIF
->> +  followed by "renesas,sh-mmcif".
- >>
->>   - clocks: reference to the functional clock
+   141          }
+   142 =20
+   143          return 0;
+   144  }
 
-MBR, Sergei
-
+regards,
+dan carpenter
