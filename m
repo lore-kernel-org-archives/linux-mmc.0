@@ -1,71 +1,228 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH] mmc: sh_mmcif: Silence DMA slave ID compile warnings on 64-bit
-Date: Wed, 12 Aug 2015 17:13:31 +0200
-Message-ID: <CAMuHMdWR0u9X36Dsw0QufmGO0phiY_w-tn1f-EmnL69FZ7NhMQ@mail.gmail.com>
-References: <1439297314-29118-1-git-send-email-geert+renesas@glider.be>
-	<1539991.LpcThZV47z@wuerfel>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [PATCH] [wip] repair mci dma transfers for avr32
+Date: Wed, 12 Aug 2015 17:49:08 +0200
+Message-ID: <1439394548-1020-1-git-send-email-ludovic.desroches@atmel.com>
+References: <1437998010-12036-1-git-send-email-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1539991.LpcThZV47z@wuerfel>
-Sender: linux-sh-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Ulf Hansson <ulf.hansson@linaro.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eusmtp01.atmel.com ([212.144.249.242]:19057 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932065AbbHLPsz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Aug 2015 11:48:55 -0400
+In-Reply-To: <1437998010-12036-1-git-send-email-andriy.shevchenko@linux.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, andriy.shevchenko@linux.intel.com, arnd@arndb.de, hskinnemoen@gmail.com, egtvedt@samfundet.no, nicolas.ferre@atmel.com, alexandre.belloni@free-electrons.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Hi Arnd,
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
 
-On Wed, Aug 12, 2015 at 4:50 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Tuesday 11 August 2015 14:48:34 Geert Uytterhoeven wrote:
->>         dma_cap_mask_t mask;
->> @@ -413,12 +413,11 @@ sh_mmcif_request_dma_one(struct sh_mmcif_host *host,
->>         dma_cap_set(DMA_SLAVE, mask);
->>
->>         if (pdata)
->> -               slave_data = direction == DMA_MEM_TO_DEV ?
->> -                       (void *)pdata->slave_id_tx :
->> -                       (void *)pdata->slave_id_rx;
->> +               slave_id = direction == DMA_MEM_TO_DEV ?
->> +                       pdata->slave_id_tx : pdata->slave_id_rx;
->>
->>         chan = dma_request_slave_channel_compat(mask, shdma_chan_filter,
->> -                               slave_data, dev,
->> +                               (void *)(uintptr_t)slave_id, dev,
->>                                 direction == DMA_MEM_TO_DEV ? "tx" : "rx");
->>
->>         dev_dbg(dev, "%s: %s: got channel %p\n", __func__,
->
-> How about changing the type of the slave_id_rx/slave_id_tx fields
-> to void*? That way, the hack can be moved to arch/sh/boards/board-sh7757lcr.c,
-> which is now the only file passing data this way. Ideally, we'd also
+Hi,
 
-And to the other SH boards... This is not limited to the mmcif driver.
+Here is a rough draft to fix the regression. I have only compiled it. I will
+update all the boards later.
 
-Ah, I see tmio_mmc_data already does it this way.
+I have removed the mci_dma_data since it is no more used for ARM platforms.
 
-This will break out-of-tree boards at compile-time though. Given the limited
-number of wired up DMA channels under arch/sh/, they may actually be
-more in use out-of-tree than in-tree?
+ arch/avr32/boards/atngw100/setup.c          |  1 +
+ arch/avr32/mach-at32ap/at32ap700x.c         | 31 +++++++++++++++++++++--------
+ arch/avr32/mach-at32ap/include/mach/board.h |  2 ++
+ drivers/mmc/host/atmel-mci.c                | 16 +++++++++++++--
+ include/linux/atmel-mci.h                   |  2 ++
+ include/linux/platform_data/mmc-atmel-mci.h | 22 --------------------
+ 6 files changed, 42 insertions(+), 32 deletions(-)
+ delete mode 100644 include/linux/platform_data/mmc-atmel-mci.h
 
-Alternatively, perhaps we should just drop pdata DMA configuration from
-some drivers?
+diff --git a/arch/avr32/boards/atngw100/setup.c b/arch/avr32/boards/atngw100/setup.c
+index afeae89..8b4f3d1 100644
+--- a/arch/avr32/boards/atngw100/setup.c
++++ b/arch/avr32/boards/atngw100/setup.c
+@@ -131,6 +131,7 @@ static struct mci_platform_data __initdata mci0_data = {
+ 		.wp_pin		= GPIO_PIN_PE(0),
+ #endif
+ 	},
++	.dma_filter = &atmci_filter,
+ };
+ 
+ static struct usba_platform_data atngw100_usba_data __initdata = {
+diff --git a/arch/avr32/mach-at32ap/at32ap700x.c b/arch/avr32/mach-at32ap/at32ap700x.c
+index 1d8b147..8c6f77e 100644
+--- a/arch/avr32/mach-at32ap/at32ap700x.c
++++ b/arch/avr32/mach-at32ap/at32ap700x.c
+@@ -7,6 +7,7 @@
+  */
+ #include <linux/clk.h>
+ #include <linux/delay.h>
++#include <linux/dmaengine.h>
+ #include <linux/platform_data/dma-dw.h>
+ #include <linux/fb.h>
+ #include <linux/init.h>
+@@ -17,7 +18,6 @@
+ #include <linux/spi/spi.h>
+ #include <linux/usb/atmel_usba_udc.h>
+ 
+-#include <linux/platform_data/mmc-atmel-mci.h>
+ #include <linux/atmel-mci.h>
+ 
+ #include <asm/io.h>
+@@ -1332,7 +1332,7 @@ struct platform_device *__init
+ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+ {
+ 	struct platform_device		*pdev;
+-	struct mci_dma_data	        *slave;
++	struct dw_dma_slave     	*slave;
+ 	u32				pioa_mask;
+ 	u32				piob_mask;
+ 
+@@ -1351,15 +1351,15 @@ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+ 				ARRAY_SIZE(atmel_mci0_resource)))
+ 		goto fail;
+ 
+-	slave = kzalloc(sizeof(struct mci_dma_data), GFP_KERNEL);
++	slave = kzalloc(sizeof(*slave), GFP_KERNEL);
+ 	if (!slave)
+ 		goto fail;
+ 
+-	slave->sdata.dma_dev = &dw_dmac0_device.dev;
+-	slave->sdata.src_id = 0;
+-	slave->sdata.dst_id = 1;
+-	slave->sdata.src_master = 1;
+-	slave->sdata.dst_master = 0;
++	slave->dma_dev = &dw_dmac0_device.dev;
++	slave->src_id = 0;
++	slave->dst_id = 1;
++	slave->src_master = 1;
++	slave->dst_master = 0;
+ 
+ 	data->dma_slave = slave;
+ 
+@@ -1435,6 +1435,21 @@ fail:
+ 	return NULL;
+ }
+ 
++bool atmci_filter(struct dma_chan *chan, void *pdata)
++{
++	struct dw_dma_slave *sl_pdata = pdata;
++
++	if (!sl_pdata)
++		return false;
++
++	if (sl_pdata->dma_dev == chan->device->dev) {
++		chan->private = sl_pdata;
++		return true;
++	} else {
++		return false;
++	}
++}
++
+ /* --------------------------------------------------------------------
+  *  LCDC
+  * -------------------------------------------------------------------- */
+diff --git a/arch/avr32/mach-at32ap/include/mach/board.h b/arch/avr32/mach-at32ap/include/mach/board.h
+index f1a316d..e6f9e56 100644
+--- a/arch/avr32/mach-at32ap/include/mach/board.h
++++ b/arch/avr32/mach-at32ap/include/mach/board.h
+@@ -4,6 +4,7 @@
+ #ifndef __ASM_ARCH_BOARD_H
+ #define __ASM_ARCH_BOARD_H
+ 
++#include <linux/dmaengine.h>
+ #include <linux/types.h>
+ #include <linux/serial.h>
+ #include <linux/platform_data/macb.h>
+@@ -86,6 +87,7 @@ struct platform_device *at32_add_device_twi(unsigned int id,
+ struct mci_platform_data;
+ struct platform_device *
+ at32_add_device_mci(unsigned int id, struct mci_platform_data *data);
++bool atmci_filter(struct dma_chan *chan, void *pdata);
+ 
+ struct ac97c_platform_data;
+ struct platform_device *
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 9a39e0b..1d80135 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -30,7 +30,6 @@
+ #include <linux/stat.h>
+ #include <linux/types.h>
+ #include <linux/platform_data/atmel.h>
+-#include <linux/platform_data/mmc-atmel-mci.h>
+ 
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/sdio.h>
+@@ -2281,8 +2280,21 @@ static int atmci_configure_dma(struct atmel_mci *host)
+ {
+ 	host->dma.chan = dma_request_slave_channel_reason(&host->pdev->dev,
+ 							"rxtx");
+-	if (IS_ERR(host->dma.chan))
++	if (IS_ERR(host->dma.chan) == -ENODEV) {
++		dma_cap_mask_t mask;
++		struct mci_platform_data *pdata = host->pdev->dev.platform_data;
++		/*  */
++		dma_cap_zero(mask);
++		dma_cap_set(DMA_SLAVE, mask);
++
++		host->dma.chan = dma_request_channel(mask,
++						     pdata->dma_filter,
++						     pdata->dma_slave);
++		if (!host->dma.chan)
++			return -ENODEV;
++	} else {
+ 		return PTR_ERR(host->dma.chan);
++	}
+ 
+ 	dev_info(&host->pdev->dev, "using %s for DMA transfers\n",
+ 		 dma_chan_name(host->dma.chan));
+diff --git a/include/linux/atmel-mci.h b/include/linux/atmel-mci.h
+index 9177947..fe5d72f 100644
+--- a/include/linux/atmel-mci.h
++++ b/include/linux/atmel-mci.h
+@@ -1,6 +1,7 @@
+ #ifndef __LINUX_ATMEL_MCI_H
+ #define __LINUX_ATMEL_MCI_H
+ 
++#include <linux/dmaengine.h>
+ #include <linux/types.h>
+ 
+ #define ATMCI_MAX_NR_SLOTS	2
+@@ -38,6 +39,7 @@ struct mci_slot_pdata {
+ struct mci_platform_data {
+ 	struct mci_dma_data	*dma_slave;
+ 	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
++	bool (*dma_filter) 	(struct dma_chan *chan, void *pdata);
+ };
+ 
+ #endif /* __LINUX_ATMEL_MCI_H */
+diff --git a/include/linux/platform_data/mmc-atmel-mci.h b/include/linux/platform_data/mmc-atmel-mci.h
+deleted file mode 100644
+index 399a2d5..0000000
+--- a/include/linux/platform_data/mmc-atmel-mci.h
++++ /dev/null
+@@ -1,22 +0,0 @@
+-#ifndef __MMC_ATMEL_MCI_H
+-#define __MMC_ATMEL_MCI_H
+-
+-#include <linux/platform_data/dma-atmel.h>
+-#include <linux/platform_data/dma-dw.h>
+-
+-/**
+- * struct mci_dma_data - DMA data for MCI interface
+- */
+-struct mci_dma_data {
+-#ifdef CONFIG_ARM
+-	struct at_dma_slave     sdata;
+-#else
+-	struct dw_dma_slave     sdata;
+-#endif
+-};
+-
+-/* accessor macros */
+-#define	slave_data_ptr(s)	(&(s)->sdata)
+-#define find_slave_dev(s)	((s)->sdata.dma_dev)
+-
+-#endif /* __MMC_ATMEL_MCI_H */
+-- 
+2.5.0
 
-> pass the shdma_chan_filter function pointer in pdata to avoid the link
-> time dependency on a particular dmaengine driver.
-
-That's actually more tricky, as a NULL filter function means something
-completely different, and causes funny failures if the DTS lacks "dmas"
-properties, cfr. "dmaengine: shdma: Make dummy shdma_chan_filter() always
-return false".
-https://git.kernel.org/cgit/linux/kernel/git/vkoul/slave-dma.git/commit/?h=next&id=056f6c87028544de934f27caf95aa1545d585767
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
