@@ -1,14 +1,15 @@
 From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH resend 1/3] mmc: sunxi: fix timeout in sunxi_mmc_oclk_onoff
-Date: Wed, 12 Aug 2015 14:32:23 +0200
-Message-ID: <55CB3CD7.2050200@redhat.com>
+Subject: Re: [PATCH 3/3] mmc: sunxi: use controller automatic
+ clock gating.
+Date: Wed, 12 Aug 2015 14:35:30 +0200
+Message-ID: <55CB3D92.6040403@redhat.com>
 References: <cover.1439381423.git.hramrach@gmail.com>
- <7f9c6f99b31702c02436ef3356b3ebffa4754260.1439381423.git.hramrach@gmail.com>
+ <c33b221f9b622e3bad9d855a7ad1887b82827244.1439381423.git.hramrach@gmail.com>
 Reply-To: hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBXHZVSXAKGQEKOWTAXA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <7f9c6f99b31702c02436ef3356b3ebffa4754260.1439381423.git.hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBGP3VSXAKGQE4X46EZQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <c33b221f9b622e3bad9d855a7ad1887b82827244.1439381423.git.hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <http://groups.google.com/group/linux-sunxi
@@ -16,105 +17,59 @@ Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
  <http://groups.google.com/group/linux-sunxi/subscribe>
-To: michal.suchanek-vlPZI//2HHjtwjQa/ONI9g@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, =?UTF-8?Q?David_Lanzend=c3=b6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Michal Suchanek <hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, =?UTF-8?Q?David_Lanzend=c3=b6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
 Hi,
 
-On 12-08-15 14:23, michal.suchanek-vlPZI//2HHjtwjQa/ONI9g@public.gmane.org wrote:
-> The 250ms timeout is too short.
->
-> On my system enabling the oclk takes under 50ms and disabling slightly
-> over 100ms when idle. Under load disabling the clock can take over
-> 350ms.
->
-> This does not make mmc clock gating look like good option to have on
-> sunxi but the system should not crash with mmc clock gating enabled
-> nonetheless.
->
-> This patch sets the timeout to 750ms and adds debug prints which show
-> how long enabling/disabling the clock took so more data can be collected
-> from other systems.
+On 12-08-15 14:23, Michal Suchanek wrote:
+> When core does not set the MMC_QUIRK_BROKEN_CLK_GATING flag enable
+> automatic hardware controlled clock gating on the mmc interface.
 >
 > Signed-off-by: Michal Suchanek <hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 
-This is a big patch for just changing a timeout, most of this is in
-extra verbosity which IMHO has little value, in the error path w
-know we will have waited aprox 750 ms, so printing the waiting
-time there is not worth all the extra code.
+In general this looks good, but I wonder how intensively this has
+been tested ? Also given the long latencies when using manual
+clock on/off support, have you done any testing to check what
+sort of latencies this adds, e.g. Both with and without
+the patch, dump all the filesystem caches:
 
-As for adding the warning I'm even less of a big fan of that,
-if we need higher timeouts, we need higher timeouts, spamming the
-kernel logs with that we are actually hitting the higher timeouts
-is not productive IMHO.
+echo 3 > /proc/sys/vm/drop_caches
 
-Can you please resend this as a one-liner just changing the timeout ?
+And then do:
+
+time cat /some/small/file/on/the/sdcard
+
+Do this at least 3 time both with and without the patch, and see
+if there are any noticable differences ?
 
 Regards,
 
 Hans
 
 
->
-> --
->
->   - fix formatting
+
 > ---
->   drivers/mmc/host/sunxi-mmc.c | 22 +++++++++++++++++++---
->   1 file changed, 19 insertions(+), 3 deletions(-)
+>   drivers/mmc/host/sunxi-mmc.c | 7 ++++++-
+>   1 file changed, 6 insertions(+), 1 deletion(-)
 >
 > diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 4d3e1ff..f808a02 100644
+> index f808a02..443cab5 100644
 > --- a/drivers/mmc/host/sunxi-mmc.c
 > +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -595,7 +595,7 @@ static irqreturn_t sunxi_mmc_handle_manual_stop(int irq, void *dev_id)
->
->   static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
->   {
-> -	unsigned long expire = jiffies + msecs_to_jiffies(250);
-> +	unsigned long start, end;
->   	u32 rval;
->
+> @@ -601,8 +601,13 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
 >   	rval = mmc_readl(host, REG_CLKCR);
-> @@ -604,6 +604,8 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
->   	if (oclk_en)
+>   	rval &= ~(SDXC_CARD_CLOCK_ON | SDXC_LOW_POWER_ON);
+>
+> -	if (oclk_en)
+> +	if (oclk_en) {
 >   		rval |= SDXC_CARD_CLOCK_ON;
->
-> +	start = jiffies;
-> +	end = start + msecs_to_jiffies(750);
->   	mmc_writel(host, REG_CLKCR, rval);
->
->   	rval = SDXC_START | SDXC_UPCLK_ONLY | SDXC_WAIT_PRE_OVER;
-> @@ -611,15 +613,29 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
->
->   	do {
->   		rval = mmc_readl(host, REG_CMDR);
-> -	} while (time_before(jiffies, expire) && (rval & SDXC_START));
-> +	} while (time_before(jiffies, end) && (rval & SDXC_START));
-> +	end = jiffies;
->
->   	/* clear irq status bits set by the command */
->   	mmc_writel(host, REG_RINTR,
->   		   mmc_readl(host, REG_RINTR) & ~SDXC_SDIO_INTERRUPT);
->
->   	if (rval & SDXC_START) {
-> -		dev_err(mmc_dev(host->mmc), "fatal err update clk timeout\n");
-> +		dev_err(mmc_dev(host->mmc),
-> +			"fatal err update oclk timeout. Could not %s in %ims.\n",
-> +			oclk_en ? "enable" : "disable",
-> +			jiffies_to_msecs(end - start));
->   		return -EIO;
-> +	} else {
-> +		int msecs = jiffies_to_msecs(end - start);
-> +		const char *ing = oclk_en ? "enabling" : "disabling";
+> +		if (!host->mmc->card ||
+> +		     !(host->mmc->card->quirks & MMC_QUIRK_BROKEN_CLK_GATING))
 > +
-> +		if ((msecs > 150) || (oclk_en && (msecs > 50)))
-> +			dev_warn(mmc_dev(host->mmc),
-> +				 "%s oclk took %ims", ing, msecs);
-> +		else
-> +			dev_dbg(mmc_dev(host->mmc),
-> +				 "%s oclk took %ims", ing, msecs);
->   	}
+> +			rval |= SDXC_LOW_POWER_ON;
+> +	}
 >
->   	return 0;
+>   	start = jiffies;
+>   	end = start + msecs_to_jiffies(750);
 >
