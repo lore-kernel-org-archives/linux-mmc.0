@@ -1,44 +1,38 @@
-From: Barry Song <21cnbao@gmail.com>
-Subject: [PATCH] mmc: sirf: corrent quirk according to real chips
-Date: Wed, 12 Aug 2015 06:59:33 +0000
-Message-ID: <1439362773-32515-1-git-send-email-21cnbao@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pd0-f182.google.com ([209.85.192.182]:34528 "EHLO
-	mail-pd0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752458AbbHLGwx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Aug 2015 02:52:53 -0400
-Received: by pdbfa8 with SMTP id fa8so4115736pdb.1
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Aug 2015 23:52:53 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: [PATCH 0/4] msdc: Add tuning support of Mediatek MMC host
+Date: Wed, 12 Aug 2015 16:24:01 +0800
+Message-ID: <1439367845-5891-1-git-send-email-chaotian.jing@mediatek.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
+List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Wenbin Mei <sin_wenbinmei-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Liuquan Ji <liuquan.ji-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: workgroup.linux@csr.com, Barry Song <Baohua.Song@csr.com>
 
-From: Barry Song <Baohua.Song@csr.com>
+This series add tuning support for EMMC/SD transfer.
+The tuning thread was start when CMD/DAT crc error deteted,
+for some SD card, tune DAT crc error may occur data timeout,
+in this case, try to reset card to recover.
+With tuning support, can support SDR104/HS200/HS400 modes
 
-the current quirk set is for an old FPGA, and this patch corrects
-quirks according to real SoC.
+Chaotian Jing (4):
+  mmc: mediatek: Add online-tuning support of EMMC/SD
+  mmc: mediatek: Add HS400 support
+  arm64: dts: mediatek: Support SD/EMMC SDR104/HS200/HS400
+  mmc: dt-bindings:  Add 400Mhz clock source
 
-Signed-off-by: Barry Song <Baohua.Song@csr.com>
----
- drivers/mmc/host/sdhci-sirf.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
-index 0110bae..8842945 100644
---- a/drivers/mmc/host/sdhci-sirf.c
-+++ b/drivers/mmc/host/sdhci-sirf.c
-@@ -161,8 +161,8 @@ static struct sdhci_pltfm_data sdhci_sirf_pdata = {
- 	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
- 		SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
- 		SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
--		SDHCI_QUIRK_INVERTED_WRITE_PROTECT |
--		SDHCI_QUIRK_DELAY_AFTER_POWER,
-+		SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- };
- 
- static int sdhci_sirf_probe(struct platform_device *pdev)
--- 
-1.9.1
-
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt |  10 +-
+ arch/arm64/boot/dts/mediatek/mt8173-evb.dts      |  10 +-
+ arch/arm64/boot/dts/mediatek/mt8173.dtsi         |   5 +-
+ drivers/mmc/host/mtk-sd.c                        | 256 ++++++++++++++++++++---
+ 4 files changed, 248 insertions(+), 33 deletions(-)
