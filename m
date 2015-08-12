@@ -1,38 +1,78 @@
-From: Ralf Baechle <ralf@linux-mips.org>
-Subject: Re: [RFC PATCH v4 3/9] mips: pistachio_defconfig: remove
- CONFIG_MMC_DW_IDMAC
-Date: Thu, 13 Aug 2015 00:05:00 +0200
-Message-ID: <20150812220500.GD11636@linux-mips.org>
-References: <1438843469-23807-1-git-send-email-shawn.lin@rock-chips.com>
- <1438843515-23935-1-git-send-email-shawn.lin@rock-chips.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v2] DT: mmc: sh_mmcif: fix "compatible" property text
+Date: Thu, 13 Aug 2015 08:58:31 +0900
+Message-ID: <20150812235828.GA5221@verge.net.au>
+References: <201404250239.39150.sergei.shtylyov@cogentembedded.com>
+ <1643858.nkRxsQo3O3@wasted.cogentembedded.com>
+ <20150812005628.GE15957@verge.net.au>
+ <55CB22E4.5040904@cogentembedded.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Return-path: <linux-sh-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1438843515-23935-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: jh80.chung@samsung.com, ulf.hansson@linaro.org, heiko@sntech.de, dianders@chromium.org, Vineet.Gupta1@synopsys.com, Wei Xu <xuwei5@hisilicon.com>, Joachim Eastwood <manabian@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Russell King <linux@arm.linux.org.uk>, Jun Nie <jun.nie@linaro.org>, Govindraj Raja <govindraj.raja@imgtec.com>, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org
+In-Reply-To: <55CB22E4.5040904@cogentembedded.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Cc: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Aug 06, 2015 at 02:45:15PM +0800, Shawn Lin wrote:
-
-> DesignWare MMC Controller's transfer mode should be decided
-> at runtime instead of compile-time. So we remove this config
-> option and read dw_mmc's register to select DMA master.
+On Wed, Aug 12, 2015 at 01:41:40PM +0300, Sergei Shtylyov wrote:
+> On 8/12/2015 3:56 AM, Simon Horman wrote:
 > 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
+> >>The "compatible" property text contradicts even the example given in the MMCIF
+> >>binding document itself;  moreover, the Renesas MMCIF driver only matches on
+> >>the generic "compatible" string and doesn't look for the SoC specific strings
+> >>at all. Thus describe "renesas,sh-mmcif" as a fallback value.
 > 
-> Changes in v4: None
-> Changes in v3: None
-> Changes in v2: None
+> >>Fixes: b4c27763d749 ("mmc: sh_mmcif: Document DT bindings")
+> >>Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
 > 
->  arch/mips/configs/pistachio_defconfig | 1 -
+> >I don't believe this file is the appropriate place to describe
+> >best-practice for the ordering of compatible strings which must surely be
+> >documented elsewhere.
+> 
+>    Where? I have no idea what you mean...
+>    And let me reiterate: this text is *wrong* and needs to be fixed anyway.
 
-Acked-by: Ralf Baechle <ralf@linux-mips.org>
+The document lists the acceptable compat strings for the driver.
+Some are currently implemented by the driver. Some are not.
+This provides a mechanism for enhancing the driver while maintaining
+compatibility with existing DT blobs.
 
-Please feel free to merge this patch with the remainder
-of the series.
+The document does not describe the way to order the compat strings, which I
+believe is a more generic issue as many drivers have more and less specific
+compat strings to describe hardware which is compatible with each other. To
+some extent I believe it is up to the user, that is the person writing DT
+files, to understand what the hardware they are dealing with is compatible
+with. And to some extent I believe the ordering is a best-practice that
+ought to be described in a high-level document if it is not already.
 
-  Ralf
+Your proposed update assumes that all past and future hardware handled by
+current and future versions of the driver will be compatible with
+"renesas,sh-mmcif". How can you possibly know that is true?
+
+> >>---
+> >>The patch is against Ulf Hansson's 'mmc.git' repo's 'fixes' and 'next' branches.
+> >>
+> >>Changes in version 2:
+> >>- kept the SoC specific "compatible" property values mandatory and made the
+> >>   generic string a fallback.
+> >>
+> >>  Documentation/devicetree/bindings/mmc/renesas,mmcif.txt |    2 +-
+> >>  1 file changed, 1 insertion(+), 1 deletion(-)
+> >>
+> >>Index: mmc/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+> >>===================================================================
+> >>--- mmc.orig/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+> >>+++ mmc/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+> >>@@ -10,7 +10,7 @@ Required properties:
+> >>  	- "renesas,mmcif-r8a7740" for the MMCIF found in r8a7740 SoCs
+> >>  	- "renesas,mmcif-r8a7790" for the MMCIF found in r8a7790 SoCs
+> >>  	- "renesas,mmcif-r8a7791" for the MMCIF found in r8a7791 SoCs
+> >>-	- "renesas,sh-mmcif" for the generic MMCIF
+> >>+  followed by "renesas,sh-mmcif".
+> >>
+> >>  - clocks: reference to the functional clock
+> 
+> MBR, Sergei
+> 
