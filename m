@@ -1,52 +1,64 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH v2] DT: mmc: sh_mmcif: document R8A779[34] support
-Date: Thu, 13 Aug 2015 08:59:36 +0900
-Message-ID: <20150812235935.GB5221@verge.net.au>
-References: <201404250239.39150.sergei.shtylyov@cogentembedded.com>
- <28226759.dUa3lFkaxJ@wasted.cogentembedded.com>
- <20150812005901.GF15957@verge.net.au>
- <55CB220A.5040209@cogentembedded.com>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: Re: [RFC PATCH v4 3/9] mips: pistachio_defconfig: remove
+ CONFIG_MMC_DW_IDMAC
+Date: Thu, 13 Aug 2015 08:08:22 +0800
+Message-ID: <55CBDFF6.9090900@rock-chips.com>
+References: <1438843469-23807-1-git-send-email-shawn.lin@rock-chips.com>
+ <1438843515-23935-1-git-send-email-shawn.lin@rock-chips.com>
+ <20150812220500.GD11636@linux-mips.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <55CB220A.5040209@cogentembedded.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Cc: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-sh@vger.kernel.org, Ulrich Hecht <ulrich.hecht+renesas@gmail.com>, Geert Uytterhoeven <geert+renesas@glider.be>
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20150812220500.GD11636-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ralf Baechle <ralf-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org>
+Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Vineet.Gupta1-HKixBCOQz3hWk0Htik3J/w@public.gmane.org, Wei Xu <xuwei5-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>, Joachim Eastwood <manabian-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexey Brodkin <abrodkin-HKixBCOQz3hWk0Htik3J/w@public.gmane.org>, Kukjin Kim <kgene-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Govindraj Raja <govindraj.raja-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-[CC: Ulrich, Geert]
+=E5=9C=A8 2015/8/13 6:05, Ralf Baechle =E5=86=99=E9=81=93:
+> On Thu, Aug 06, 2015 at 02:45:15PM +0800, Shawn Lin wrote:
+>
+>> DesignWare MMC Controller's transfer mode should be decided
+>> at runtime instead of compile-time. So we remove this config
+>> option and read dw_mmc's register to select DMA master.
+>>
+>> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+>> ---
+>>
+>> Changes in v4: None
+>> Changes in v3: None
+>> Changes in v2: None
+>>
+>>   arch/mips/configs/pistachio_defconfig | 1 -
+>
+> Acked-by: Ralf Baechle <ralf-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org>
+>
+> Please feel free to merge this patch with the remainder
+> of the series.
+>
 
-On Wed, Aug 12, 2015 at 01:38:02PM +0300, Sergei Shtylyov wrote:
-> Hello.
-> 
-> On 8/12/2015 3:59 AM, Simon Horman wrote:
-> 
-> >>Renesas R8A7794 SoC also has the MMCIF controller...
-> 
-> >>Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-> 
-> >This new compat string looks good to me.
-> 
-> >Acked-by: Simon Horman <horms+renesas@verge.net.au>
-> 
->    Thank you. I've messed up the subject, so need to re-post.
-> 
-> >>---
-> >>The patch is against Ulf Hansson's 'mmc.git'  repo's 'next' branch plus the
-> >>patch I posted earlier today...
-> >>
-> >>Changes in version 2:
-> >>- deferred R8A7793 support to the patch posted earlier by Ulrich Hecht;
-> 
-> >Perhaps it would be best to co-ordinate the R8A7793 and R8A7794
-> >changes to avoid tedious conflicts.
-> 
->    I thought about taking out Ulrich's binding patch and re-posting it
->    along with this one but finally decided not to ruin his series. Do you
->    mean that I should have posted his patch along with mine?
+Thanks, Ralf. :)
 
-I mean we sould talk about this to come up with a plan that makes things
-easy for the maintainer to pick up the compat strings for the R8A7793 and
-R8A7794.
+v5 is coming which will be rebased on=20
+"https://github.com/jh80chung/dw-mmc.git tags/dw-mmc-for-ulf-v4.2" for=20
+the next merge window
+that make Jeahoon do it easier. Also define new macro for reading
+HCON register suggested by Joachim.
+
+
+>    Ralf
+>
+>
+>
+
+
+--=20
+Shawn Lin
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" i=
+n
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
