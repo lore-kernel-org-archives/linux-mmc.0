@@ -1,75 +1,58 @@
-From: "FedEx International Next Flight" <calvin.brewer@hosting.web.de>
-Subject: Problem with parcel shipping, ID:0000712920
-Date: Sat, 15 Aug 2015 08:46:45 +0200
-Message-ID: <30ffa818ee13bdec921c69d7c63bf806@hosting.web.de>
-Reply-To: "FedEx International Next Flight" <calvin.brewer@hosting.web.de>
+From: LIYONG <sdliyong@gmail.com>
+Subject: RE: [PATCH] mmc: block: disable the reliable write If the card does
+ not support CMD23
+Date: Sat, 15 Aug 2015 20:14:05 +0800
+Message-ID: <BLU168-W190F53E1D56BC43511D7BFD67B0@phx.gbl>
+References: <1439537446-7713-1-git-send-email-sdliyong@gmail.com>,<55CDA30E.7030208@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="b1_fc687f4c67974aee4da911badc1ba98d"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.130]:64664 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751548AbbHOGqr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Aug 2015 02:46:47 -0400
+Received: from mail-qk0-f177.google.com ([209.85.220.177]:34752 "EHLO
+	mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750943AbbHOMOI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Aug 2015 08:14:08 -0400
+In-Reply-To: <55CDA30E.7030208@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, "chris@printf.net" <chris@printf.net>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-
---b1_fc687f4c67974aee4da911badc1ba98d
-Content-Type: text/plain; charset=us-ascii
-
-Dear Customer,
-
-Courier was unable to deliver the parcel to you.
-Shipment Label is attached to this email.
-
-Kind regards,
-Calvin Brewer,
-FedEx Operation Agent.
-
-
---b1_fc687f4c67974aee4da911badc1ba98d
-Content-Type: application/zip; name="FedEx_ID_0000712920.zip"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename=FedEx_ID_0000712920.zip
-
-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
-SAAAAAUHAAAAAA==
-
-
---b1_fc687f4c67974aee4da911badc1ba98d--
-
+VGhhbmtzIFNoYXduLiBQbGVhc2UgaGVscCB0byBjaGVjayB0aGUgYmVsb3cgaW4gdGhlwqBtbWNf
+YmxrX3J3X3JxX3ByZXA6CglpZiAoZG9fcmVsX3dyKQoJCW1tY19hcHBseV9yZWxfcncoYnJxLCBj
+YXJkLCByZXEpOwoKSSB0aGluayB3ZSBuZWVkIHRvIHNldCB0aGUgZG9fcmVsX3dyIHRvIGZhbHNl
+KCBhdCB0aGUgYmVnaW5uaW5nIG9mIHRoaXMgZnVuY3Rpb24pIGlmIHRoZSBjYXJkIGRvZXMgbm90
+IHN1cHBvcnQgdGhlIENNRDIzLiBUaGUgYWJvdmUgY29kZSBpcyBleGVjdXRlZCBiZWZvcmUgdGhl
+ICJpZiAoKG1kLT5mbGFncyAmIE1NQ19CTEtfQ01EMjMpIiBjb2RlLgoKVGhhbmtzLApZb25nIExp
+Ci0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiBTdWJqZWN0OiBSZTog
+W1BBVENIXSBtbWM6IGJsb2NrOiBkaXNhYmxlIHRoZSByZWxpYWJsZSB3cml0ZSBJZiB0aGUgY2Fy
+ZCBkb2VzIG5vdCBzdXBwb3J0IENNRDIzCj4gVG86IHNkbGl5b25nQGdtYWlsLmNvbTsgY2hyaXNA
+cHJpbnRmLm5ldDsgdWxmLmhhbnNzb25AbGluYXJvLm9yZzsgbGludXgtbW1jQHZnZXIua2VybmVs
+Lm9yZzsgbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZwo+IENDOiBzaGF3bi5saW5Acm9jay1j
+aGlwcy5jb20KPiBGcm9tOiBzaGF3bi5saW5Acm9jay1jaGlwcy5jb20KPiBEYXRlOiBGcmksIDE0
+IEF1ZyAyMDE1IDE2OjEzOjAyICswODAwCj4KPiDlnKggMjAxNS84LzE0IDE1OjMwLCBzZGxpeW9u
+Z0BnbWFpbC5jb20g5YaZ6YGTOgo+PiBGcm9tOiBZb25nIExpIDxzZGxpeW9uZ0BnbWFpbC5jb20+
+Cj4+Cj4+IFNpZ25lZC1vZmYtYnk6IFlvbmcgTGkgPHNkbGl5b25nQGdtYWlsLmNvbT4KPj4gLS0t
+Cj4+IGRyaXZlcnMvbW1jL2NhcmQvYmxvY2suYyB8IDMgKystCj4+IDEgZmlsZSBjaGFuZ2VkLCAy
+IGluc2VydGlvbnMoKyksIDEgZGVsZXRpb24oLSkKPj4KPj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMv
+bW1jL2NhcmQvYmxvY2suYyBiL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYwo+PiBpbmRleCA0NTI3
+ODJiLi5kOWUzYzQ1IDEwMDY0NAo+PiAtLS0gYS9kcml2ZXJzL21tYy9jYXJkL2Jsb2NrLmMKPj4g
+KysrIGIvZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jCj4+IEBAIC0xMzY2LDcgKzEzNjYsOCBAQCBz
+dGF0aWMgdm9pZCBtbWNfYmxrX3J3X3JxX3ByZXAoc3RydWN0IG1tY19xdWV1ZV9yZXEgKm1xcnEs
+Cj4+IGJvb2wgZG9fcmVsX3dyID0gKChyZXEtPmNtZF9mbGFncyAmIFJFUV9GVUEpIHx8Cj4+IChy
+ZXEtPmNtZF9mbGFncyAmIFJFUV9NRVRBKSkgJiYKPj4gKHJxX2RhdGFfZGlyKHJlcSkgPT0gV1JJ
+VEUpICYmCj4+IC0gKG1kLT5mbGFncyAmIE1NQ19CTEtfUkVMX1dSKTsKPj4gKyAobWQtPmZsYWdz
+ICYgTU1DX0JMS19SRUxfV1IpICYmCj4+ICsgIShjYXJkLT5xdWlya3MgJiBNTUNfUVVJUktfQkxL
+X05PX0NNRDIzKTsKPgo+IEhpIFlvbmcsCj4KPiBwbHMgY2hlY2sgdGhhdCBjb2RlIGJlbG93Lgo+
+Cj4gTU1DX0JMS19SRUxfV1Igd2lsbCBub3QgYmUgZW5hYmxlZCBpZiB3ZSBrbm93IHRoaXMgY2Fy
+ZCBDQU5OT1Qgc3VwcG9ydAo+IENNRDIzIGZvcm0gU0NSLiBBTkTvvIwgImNhcmQtPnF1aXJrcyAm
+IE1NQ19RVUlSS19CTEtfTk9fQ01EMjMiIHdvdWxkIGJlCj4gY2hlY2tlZCBoZXJlIGFzIHdlbGwu
+IFNvIEkgdGhpbmsgeW91ciBjb2RlIGlzIHVubmVjZXNzYXJ5Lgo+Cj4gaWYgKChtZC0+ZmxhZ3Mg
+JiBNTUNfQkxLX0NNRDIzKSAmJiBtbWNfb3BfbXVsdGkoYnJxLT5jbWQub3Bjb2RlKSAmJgo+IChk
+b19yZWxfd3IgfHwgIShjYXJkLT5xdWlya3MgJiBNTUNfUVVJUktfQkxLX05PX0NNRDIzKSB8fAo+
+IGRvX2RhdGFfdGFnKSkgewo+IGJycS0+c2JjLm9wY29kZSA9IE1NQ19TRVRfQkxPQ0tfQ09VTlQ7
+Cj4gYnJxLT5zYmMuYXJnID0gYnJxLT5kYXRhLmJsb2NrcyB8Cj4gKGRvX3JlbF93ciA/ICgxIDw8
+IDMxKSA6IDApIHwKPiAoZG9fZGF0YV90YWcgPyAoMSA8PCAyOSkgOiAwKTsKPiBicnEtPnNiYy5m
+bGFncyA9IE1NQ19SU1BfUjEgfCBNTUNfQ01EX0FDOwo+IGJycS0+bXJxLnNiYyA9ICZicnEtPnNi
+YzsKPiB9Cj4KPiBUaGFua3MuCj4gU2hhd24KPgo+Pgo+PiBtZW1zZXQoYnJxLCAwLCBzaXplb2Yo
+c3RydWN0IG1tY19ibGtfcmVxdWVzdCkpOwo+PiBicnEtPm1ycS5jbWQgPSAmYnJxLT5jbWQ7Cj4+
+Cj4KPgo+IC0tCj4gU2hhd24gTGluCj4KIAkJIAkgICAJCSAg
