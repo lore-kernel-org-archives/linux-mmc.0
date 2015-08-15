@@ -1,58 +1,78 @@
-From: LIYONG <sdliyong@gmail.com>
-Subject: RE: [PATCH] mmc: block: disable the reliable write If the card does
- not support CMD23
-Date: Sat, 15 Aug 2015 20:14:05 +0800
-Message-ID: <BLU168-W190F53E1D56BC43511D7BFD67B0@phx.gbl>
-References: <1439537446-7713-1-git-send-email-sdliyong@gmail.com>,<55CDA30E.7030208@rock-chips.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] mmc: sh_mmcif: Silence DMA slave ID compile warnings on 64-bit
+Date: Sat, 15 Aug 2015 22:26:39 +0200
+Message-ID: <2503249.0HMJqMtNHP@wuerfel>
+References: <1439297314-29118-1-git-send-email-geert+renesas@glider.be> <1539991.LpcThZV47z@wuerfel> <CAMuHMdWR0u9X36Dsw0QufmGO0phiY_w-tn1f-EmnL69FZ7NhMQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f177.google.com ([209.85.220.177]:34752 "EHLO
-	mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750943AbbHOMOI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Aug 2015 08:14:08 -0400
-In-Reply-To: <55CDA30E.7030208@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <CAMuHMdWR0u9X36Dsw0QufmGO0phiY_w-tn1f-EmnL69FZ7NhMQ@mail.gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Ulf Hansson <ulf.hansson@linaro.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, "chris@printf.net" <chris@printf.net>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-VGhhbmtzIFNoYXduLiBQbGVhc2UgaGVscCB0byBjaGVjayB0aGUgYmVsb3cgaW4gdGhlwqBtbWNf
-YmxrX3J3X3JxX3ByZXA6CglpZiAoZG9fcmVsX3dyKQoJCW1tY19hcHBseV9yZWxfcncoYnJxLCBj
-YXJkLCByZXEpOwoKSSB0aGluayB3ZSBuZWVkIHRvIHNldCB0aGUgZG9fcmVsX3dyIHRvIGZhbHNl
-KCBhdCB0aGUgYmVnaW5uaW5nIG9mIHRoaXMgZnVuY3Rpb24pIGlmIHRoZSBjYXJkIGRvZXMgbm90
-IHN1cHBvcnQgdGhlIENNRDIzLiBUaGUgYWJvdmUgY29kZSBpcyBleGVjdXRlZCBiZWZvcmUgdGhl
-ICJpZiAoKG1kLT5mbGFncyAmIE1NQ19CTEtfQ01EMjMpIiBjb2RlLgoKVGhhbmtzLApZb25nIExp
-Ci0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KPiBTdWJqZWN0OiBSZTog
-W1BBVENIXSBtbWM6IGJsb2NrOiBkaXNhYmxlIHRoZSByZWxpYWJsZSB3cml0ZSBJZiB0aGUgY2Fy
-ZCBkb2VzIG5vdCBzdXBwb3J0IENNRDIzCj4gVG86IHNkbGl5b25nQGdtYWlsLmNvbTsgY2hyaXNA
-cHJpbnRmLm5ldDsgdWxmLmhhbnNzb25AbGluYXJvLm9yZzsgbGludXgtbW1jQHZnZXIua2VybmVs
-Lm9yZzsgbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZwo+IENDOiBzaGF3bi5saW5Acm9jay1j
-aGlwcy5jb20KPiBGcm9tOiBzaGF3bi5saW5Acm9jay1jaGlwcy5jb20KPiBEYXRlOiBGcmksIDE0
-IEF1ZyAyMDE1IDE2OjEzOjAyICswODAwCj4KPiDlnKggMjAxNS84LzE0IDE1OjMwLCBzZGxpeW9u
-Z0BnbWFpbC5jb20g5YaZ6YGTOgo+PiBGcm9tOiBZb25nIExpIDxzZGxpeW9uZ0BnbWFpbC5jb20+
-Cj4+Cj4+IFNpZ25lZC1vZmYtYnk6IFlvbmcgTGkgPHNkbGl5b25nQGdtYWlsLmNvbT4KPj4gLS0t
-Cj4+IGRyaXZlcnMvbW1jL2NhcmQvYmxvY2suYyB8IDMgKystCj4+IDEgZmlsZSBjaGFuZ2VkLCAy
-IGluc2VydGlvbnMoKyksIDEgZGVsZXRpb24oLSkKPj4KPj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMv
-bW1jL2NhcmQvYmxvY2suYyBiL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYwo+PiBpbmRleCA0NTI3
-ODJiLi5kOWUzYzQ1IDEwMDY0NAo+PiAtLS0gYS9kcml2ZXJzL21tYy9jYXJkL2Jsb2NrLmMKPj4g
-KysrIGIvZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jCj4+IEBAIC0xMzY2LDcgKzEzNjYsOCBAQCBz
-dGF0aWMgdm9pZCBtbWNfYmxrX3J3X3JxX3ByZXAoc3RydWN0IG1tY19xdWV1ZV9yZXEgKm1xcnEs
-Cj4+IGJvb2wgZG9fcmVsX3dyID0gKChyZXEtPmNtZF9mbGFncyAmIFJFUV9GVUEpIHx8Cj4+IChy
-ZXEtPmNtZF9mbGFncyAmIFJFUV9NRVRBKSkgJiYKPj4gKHJxX2RhdGFfZGlyKHJlcSkgPT0gV1JJ
-VEUpICYmCj4+IC0gKG1kLT5mbGFncyAmIE1NQ19CTEtfUkVMX1dSKTsKPj4gKyAobWQtPmZsYWdz
-ICYgTU1DX0JMS19SRUxfV1IpICYmCj4+ICsgIShjYXJkLT5xdWlya3MgJiBNTUNfUVVJUktfQkxL
-X05PX0NNRDIzKTsKPgo+IEhpIFlvbmcsCj4KPiBwbHMgY2hlY2sgdGhhdCBjb2RlIGJlbG93Lgo+
-Cj4gTU1DX0JMS19SRUxfV1Igd2lsbCBub3QgYmUgZW5hYmxlZCBpZiB3ZSBrbm93IHRoaXMgY2Fy
-ZCBDQU5OT1Qgc3VwcG9ydAo+IENNRDIzIGZvcm0gU0NSLiBBTkTvvIwgImNhcmQtPnF1aXJrcyAm
-IE1NQ19RVUlSS19CTEtfTk9fQ01EMjMiIHdvdWxkIGJlCj4gY2hlY2tlZCBoZXJlIGFzIHdlbGwu
-IFNvIEkgdGhpbmsgeW91ciBjb2RlIGlzIHVubmVjZXNzYXJ5Lgo+Cj4gaWYgKChtZC0+ZmxhZ3Mg
-JiBNTUNfQkxLX0NNRDIzKSAmJiBtbWNfb3BfbXVsdGkoYnJxLT5jbWQub3Bjb2RlKSAmJgo+IChk
-b19yZWxfd3IgfHwgIShjYXJkLT5xdWlya3MgJiBNTUNfUVVJUktfQkxLX05PX0NNRDIzKSB8fAo+
-IGRvX2RhdGFfdGFnKSkgewo+IGJycS0+c2JjLm9wY29kZSA9IE1NQ19TRVRfQkxPQ0tfQ09VTlQ7
-Cj4gYnJxLT5zYmMuYXJnID0gYnJxLT5kYXRhLmJsb2NrcyB8Cj4gKGRvX3JlbF93ciA/ICgxIDw8
-IDMxKSA6IDApIHwKPiAoZG9fZGF0YV90YWcgPyAoMSA8PCAyOSkgOiAwKTsKPiBicnEtPnNiYy5m
-bGFncyA9IE1NQ19SU1BfUjEgfCBNTUNfQ01EX0FDOwo+IGJycS0+bXJxLnNiYyA9ICZicnEtPnNi
-YzsKPiB9Cj4KPiBUaGFua3MuCj4gU2hhd24KPgo+Pgo+PiBtZW1zZXQoYnJxLCAwLCBzaXplb2Yo
-c3RydWN0IG1tY19ibGtfcmVxdWVzdCkpOwo+PiBicnEtPm1ycS5jbWQgPSAmYnJxLT5jbWQ7Cj4+
-Cj4KPgo+IC0tCj4gU2hhd24gTGluCj4KIAkJIAkgICAJCSAg
+On Wednesday 12 August 2015 17:13:31 Geert Uytterhoeven wrote:
+> Hi Arnd,
+> 
+> On Wed, Aug 12, 2015 at 4:50 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> > On Tuesday 11 August 2015 14:48:34 Geert Uytterhoeven wrote:
+> >>         dma_cap_mask_t mask;
+> >> @@ -413,12 +413,11 @@ sh_mmcif_request_dma_one(struct sh_mmcif_host *host,
+> >>         dma_cap_set(DMA_SLAVE, mask);
+> >>
+> >>         if (pdata)
+> >> -               slave_data = direction == DMA_MEM_TO_DEV ?
+> >> -                       (void *)pdata->slave_id_tx :
+> >> -                       (void *)pdata->slave_id_rx;
+> >> +               slave_id = direction == DMA_MEM_TO_DEV ?
+> >> +                       pdata->slave_id_tx : pdata->slave_id_rx;
+> >>
+> >>         chan = dma_request_slave_channel_compat(mask, shdma_chan_filter,
+> >> -                               slave_data, dev,
+> >> +                               (void *)(uintptr_t)slave_id, dev,
+> >>                                 direction == DMA_MEM_TO_DEV ? "tx" : "rx");
+> >>
+> >>         dev_dbg(dev, "%s: %s: got channel %p\n", __func__,
+> >
+> > How about changing the type of the slave_id_rx/slave_id_tx fields
+> > to void*? That way, the hack can be moved to arch/sh/boards/board-sh7757lcr.c,
+> > which is now the only file passing data this way. Ideally, we'd also
+> 
+> And to the other SH boards... This is not limited to the mmcif driver.
+> 
+> Ah, I see tmio_mmc_data already does it this way.
+
+I probably made a similar comment there, now I just did 'git grep slave_id_.x'
+
+> This will break out-of-tree boards at compile-time though. Given the limited
+> number of wired up DMA channels under arch/sh/, they may actually be
+> more in use out-of-tree than in-tree?
+> 
+> Alternatively, perhaps we should just drop pdata DMA configuration from
+> some drivers?
+
+I think that would be helpful, but it would not work for this driver as
+long as we keep arch/sh/boards/board-sh7757lcr.c in the kernel.
+
+> > pass the shdma_chan_filter function pointer in pdata to avoid the link
+> > time dependency on a particular dmaengine driver.
+> 
+> That's actually more tricky, as a NULL filter function means something
+> completely different, and causes funny failures if the DTS lacks "dmas"
+> properties, cfr. "dmaengine: shdma: Make dummy shdma_chan_filter() always
+> return false".
+> https://git.kernel.org/cgit/linux/kernel/git/vkoul/slave-dma.git/commit/?h=next&id=056f6c87028544de934f27caf95aa1545d585767
+
+Ah, this is nasty, I had not thought of that case. This makes the entire
+dma_request_slave_channel_compat() interface (which I never liked, fwiw)
+dangerous to use, because a lot of other drivers will get the filter
+function pointer from pdata already (any driver that works with more
+than one dmaengine master has to).
+
+I wonder if we should enforce this in __dma_request_slave_channel_compat()
+by checking both the fn and fn_param arguments to ensure they are not
+NULL before calling the legacy fallback using __dma_request_channel.
+
+	Arnd
