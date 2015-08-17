@@ -1,30 +1,23 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [RFC PATCH v5 1/9] mmc: dw_mmc: Add external dma interface support
-Date: Sun, 16 Aug 2015 14:10:46 -0700
-Message-ID: <CAD=FV=W1dzqoJuJtJsD5TPKmSBpUbBcifGz654o9x8J1rX6-GQ@mail.gmail.com>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: Re: [RFC PATCH v5 1/9] mmc: dw_mmc: Add external dma interface
+ support
+Date: Mon, 17 Aug 2015 09:11:07 +0800
+Message-ID: <55D134AB.80403@rock-chips.com>
 References: <1439541232-30100-1-git-send-email-shawn.lin@rock-chips.com>
-	<1439541275-30146-1-git-send-email-shawn.lin@rock-chips.com>
-	<1522710.BT6Gc0L6oH@diego>
+ <1439541275-30146-1-git-send-email-shawn.lin@rock-chips.com>
+ <1522710.BT6Gc0L6oH@diego>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f180.google.com ([209.85.160.180]:35996 "EHLO
-	mail-yk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751107AbbHPVKr convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 16 Aug 2015 17:10:47 -0400
-Received: by ykfw73 with SMTP id w73so56703988ykf.3
-        for <linux-mmc@vger.kernel.org>; Sun, 16 Aug 2015 14:10:46 -0700 (PDT)
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1522710.BT6Gc0L6oH@diego>
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Vineet.Gupta1-HKixBCOQz3hWk0Htik3J/w@public.gmane.org, Wei Xu <xuwei5-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>, Joachim Eastwood <manabian-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexey Brodkin <abrodkin-HKixBCOQz3hWk0Htik3J/w@public.gmane.org>, Kukjin Kim <kgene-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Zhangfei Gao <zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Jun Nie <jun.nie-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ralf Baechle <ralf-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org>, Govindraj Raja <govindraj.raja-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Vineet.Gupta1@synopsys.com, Wei Xu <xuwei5@hisilicon.com>, Joachim Eastwood <manabian@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Russell King <linux@arm.linux.org.uk>, Zhangfei Gao <zhangfei.gao@linaro.org>, Jun Nie <jun.nie@linaro.org>, Ralf Baechle <ralf@linux-mips.org>, Govindraj Raja <govindraj.raja@imgtec.com>, Arnd Bergmann <arnd@arndb.de>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mips@linux-mips.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.>
 
-Heiko,
-
-On Fri, Aug 14, 2015 at 3:13 PM, Heiko St=C3=BCbner <heiko@sntech.de> w=
-rote:
+=E5=9C=A8 2015/8/15 6:13, Heiko St=C3=BCbner =E5=86=99=E9=81=93:
 > Hi Shawn,
 >
 > Am Freitag, 14. August 2015, 16:34:35 schrieb Shawn Lin:
@@ -34,7 +27,7 @@ rote:
 >> edmac ops to support these platforms. I've tested it on RK312x
 >> platform with edmac mode and RK3288 platform with idmac mode.
 >>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 >
 > judging by your "from", I guess you're running this on some older Roc=
 kchip soc
@@ -48,26 +41,131 @@ O mode
 > I guess I overlooked just some tiny detail, but to me the dma channel=
  ids seem
 > correct after all. Maybe you have any hints what I'm doing wrong?
+>
 
-If I were a guessing man (which I'm not), I'd guess that perhaps
-you're running into troubles with our friend the PL330.
+Thanks, HeiKo.
 
-There appear to be strange issues with the PL330 on Rockchip SoCs.  I
-was only peripherally involved with them, but I know at least about
-some of the patches in our tree, like:
+yes, I'm running a quite older low-end Rockchip soc w/o idma.
 
-https://chromium-review.googlesource.com/237607
-=46ROMLIST: DMA: pl330: support burst mode for dev-to-mem and mem-to-de=
-v transmit
+Hmm... from your failure to read CSR, I think generic DMA of Radxa Rock=
+=20
+was not runing properly. Your dma channel ids is correct, but it=20
+certainly work on my platform=E3=80=82 I will try to find a Radxa Rock =
+to=20
+re-test my patch ASAP.
 
-https://chromium-review.googlesource.com/237393
-CHROMIUM: dmaengine: pl330: support quirks for some broken
 
-https://chromium-review.googlesource.com/237396
-CHROMIUM: dmaengine: pl330: add quirk for broken no flushp
 
-https://chromium-review.googlesource.com/237394
-CHROMIUM: ARM: dts: rockchip: Add broken-no-flushp into rk3288.dtsi
+> diff --git a/arch/arm/boot/dts/rk3xxx.dtsi b/arch/arm/boot/dts/rk3xxx=
+=2Edtsi
+> index 4497d28..92d7156 100644
+> --- a/arch/arm/boot/dts/rk3xxx.dtsi
+> +++ b/arch/arm/boot/dts/rk3xxx.dtsi
+> @@ -217,6 +217,8 @@
+>                  interrupts =3D <GIC_SPI 23 IRQ_TYPE_LEVEL_HIGH>;
+>                  clocks =3D <&cru HCLK_SDMMC>, <&cru SCLK_SDMMC>;
+>                  clock-names =3D "biu", "ciu";
+> +             dmas =3D <&dmac2 1>;
+> +             dma-names =3D "rx-tx";
+>                  fifo-depth =3D <256>;
+>                  status =3D "disabled";
+>          };
+> @@ -227,6 +229,8 @@
+>                  interrupts =3D <GIC_SPI 24 IRQ_TYPE_LEVEL_HIGH>;
+>                  clocks =3D <&cru HCLK_SDIO>, <&cru SCLK_SDIO>;
+>                  clock-names =3D "biu", "ciu";
+> +             dmas =3D <&dmac2 3>;
+> +             dma-names =3D "rx-tx";
+>                  fifo-depth =3D <256>;
+>                  status =3D "disabled";
+>          };
+> @@ -237,6 +241,8 @@
+>                  interrupts =3D <GIC_SPI 25 IRQ_TYPE_LEVEL_HIGH>;
+>                  clocks =3D <&cru HCLK_EMMC>, <&cru SCLK_EMMC>;
+>                  clock-names =3D "biu", "ciu";
+> +             dmas =3D <&dmac2 4>;
+> +             dma-names =3D "rx-tx";
+>                  fifo-depth =3D <256>;
+>                  status =3D "disabled";
+>          };
+>
+>
+> [...]
+>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index fcbf552..e01ead3 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -2517,8 +2642,23 @@ static void dw_mci_cleanup_slot(struct dw_mci=
+_slot
+>> *slot, unsigned int id) static void dw_mci_init_dma(struct dw_mci *h=
+ost)
+>>   {
+>>   	int addr_config;
+>> +	int trans_mode;
+>> +	struct device *dev =3D host->dev;
+>> +	struct device_node *np =3D dev->of_node;
+>> +
+>> +	/* Check tansfer mode */
+>> +	trans_mode =3D SDMMC_GET_TRANS_MODE(mci_readl(host, HCON));
+>> +	if (trans_mode =3D=3D 0) {
+>> +		trans_mode =3D TRANS_MODE_IDMAC;
+>> +	} else if (trans_mode =3D=3D 1 || trans_mode =3D=3D 2) {
+>> +		trans_mode =3D TRANS_MODE_EDMAC;
+>> +	} else {
+>> +		trans_mode =3D TRANS_MODE_PIO;
+>> +		goto no_dma;
+>> +	}
+>> +
+>>   	/* Check ADDR_CONFIG bit in HCON to find IDMAC address bus width =
+*/
+>> -	addr_config =3D (mci_readl(host, HCON) >> 27) & 0x01;
+>> +	addr_config =3D SDMMC_GET_ADDR_CONFIG(mci_readl(host, HCON));
+>>
+>>   	if (addr_config =3D=3D 1) {
+>>   		/* host supports IDMAC in 64-bit address mode */
+>
+> I guess the idmac address size checking block
+>
+>          /* Check ADDR_CONFIG bit in HCON to find IDMAC address bus w=
+idth */
+>          addr_config =3D SDMMC_GET_ADDR_CONFIG(mci_readl(host, HCON))=
+;
+>
+>          if (addr_config =3D=3D 1) {
+>                  /* host supports IDMAC in 64-bit address mode */
+>                  host->dma_64bit_address =3D 1;
+>                  dev_info(host->dev, "IDMAC supports 64-bit address m=
+ode.\n");
+>                  if (!dma_set_mask(host->dev, DMA_BIT_MASK(64)))
+>                          dma_set_coherent_mask(host->dev, DMA_BIT_MAS=
+K(64));
+>          } else {
+>                  /* host supports IDMAC in 32-bit address mode */
+>                  host->dma_64bit_address =3D 0;
+>                  dev_info(host->dev, "IDMAC supports 32-bit address m=
+ode.\n");
+>          }
+>
+> could either live inside the trans_mode =3D=3D 0 conditional above or=
+ get its own
+> if (trans_mode =3D=3D 0) conditional. Either way I guess it should no=
+t talk about
+> idmac when either pio or extdmac are used.
+>
+>
+> Thanks
+> Heiko
+>
+>
+>
 
-https://chromium-review.googlesource.com/242063
-CHROMIUM: ASoC: rockchip_i2s: modify DMA max burst to 1
+
+--=20
+Shawn Lin
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" i=
+n
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
