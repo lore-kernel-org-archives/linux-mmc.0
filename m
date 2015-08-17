@@ -1,117 +1,77 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: block: disable the reliable write If the card does
- not support CMD23
-Date: Mon, 17 Aug 2015 14:48:03 +0800
-Message-ID: <55D183A3.5010601@rock-chips.com>
-References: <1439537446-7713-1-git-send-email-sdliyong@gmail.com>
- <55CDA30E.7030208@rock-chips.com>
- <BLU168-W190F53E1D56BC43511D7BFD67B0@phx.gbl>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] MMC/SDIO: enable SDIO device to suspend/resume asynchronously
+Date: Mon, 17 Aug 2015 09:48:33 +0300
+Message-ID: <55D183C1.1030209@intel.com>
+References: <55B9D4EF.2010704@linux.intel.com> <55D1546D.1070900@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from regular1.263xmail.com ([211.150.99.135]:51236 "EHLO
-	regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750754AbbHQGsK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Aug 2015 02:48:10 -0400
-In-Reply-To: <BLU168-W190F53E1D56BC43511D7BFD67B0@phx.gbl>
+Received: from mga01.intel.com ([192.55.52.88]:24324 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750774AbbHQGvQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 17 Aug 2015 02:51:16 -0400
+In-Reply-To: <55D1546D.1070900@linux.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: LIYONG <sdliyong@gmail.com>, "chris@printf.net" <chris@printf.net>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: shawn.lin@rock-chips.com
+To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, neilb@suse.de, Jaehoon Chung <jh80.chung@samsung.com>, afenkart@gmail.com, joe@perches.com
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 2015/8/15 20:14, LIYONG wrote:
-> Thanks Shawn. Please help to check the below in the mmc_blk_rw_rq_pre=
-p:
-> 	if (do_rel_wr)
-> 		mmc_apply_rel_rw(brq, card, req);
->
-> I think we need to set the do_rel_wr to false( at the beginning of th=
-is function) if the card does not support the CMD23. The above code is =
-executed before the "if ((md->flags & MMC_BLK_CMD23)" code.
->
-
-ok, it makes sense.:)
-
+On 17/08/15 06:26, Fu, Zhonghui wrote:
+> 
+> Hi,
+> 
+> Any comments are welcome.
+> 
+> 
 > Thanks,
-> Yong Li
-> ----------------------------------------
->> Subject: Re: [PATCH] mmc: block: disable the reliable write If the c=
-ard does not support CMD23
->> To: sdliyong@gmail.com; chris@printf.net; ulf.hansson@linaro.org; li=
-nux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
->> CC: shawn.lin@rock-chips.com
->> From: shawn.lin@rock-chips.com
->> Date: Fri, 14 Aug 2015 16:13:02 +0800
->>
->> =E5=9C=A8 2015/8/14 15:30, sdliyong@gmail.com =E5=86=99=E9=81=93:
->>> From: Yong Li <sdliyong@gmail.com>
->>>
->>> Signed-off-by: Yong Li <sdliyong@gmail.com>
->>> ---
->>> drivers/mmc/card/block.c | 3 ++-
->>> 1 file changed, 2 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->>> index 452782b..d9e3c45 100644
->>> --- a/drivers/mmc/card/block.c
->>> +++ b/drivers/mmc/card/block.c
->>> @@ -1366,7 +1366,8 @@ static void mmc_blk_rw_rq_prep(struct mmc_que=
-ue_req *mqrq,
->>> bool do_rel_wr =3D ((req->cmd_flags & REQ_FUA) ||
->>> (req->cmd_flags & REQ_META)) &&
->>> (rq_data_dir(req) =3D=3D WRITE) &&
->>> - (md->flags & MMC_BLK_REL_WR);
->>> + (md->flags & MMC_BLK_REL_WR) &&
->>> + !(card->quirks & MMC_QUIRK_BLK_NO_CMD23);
->>
->> Hi Yong,
->>
->> pls check that code below.
->>
->> MMC_BLK_REL_WR will not be enabled if we know this card CANNOT suppo=
-rt
->> CMD23 form SCR. AND=EF=BC=8C "card->quirks & MMC_QUIRK_BLK_NO_CMD23"=
- would be
->> checked here as well. So I think your code is unnecessary.
->>
->> if ((md->flags & MMC_BLK_CMD23) && mmc_op_multi(brq->cmd.opcode) &&
->> (do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO_CMD23) ||
->> do_data_tag)) {
->> brq->sbc.opcode =3D MMC_SET_BLOCK_COUNT;
->> brq->sbc.arg =3D brq->data.blocks |
->> (do_rel_wr ? (1 << 31) : 0) |
->> (do_data_tag ? (1 << 29) : 0);
->> brq->sbc.flags =3D MMC_RSP_R1 | MMC_CMD_AC;
->> brq->mrq.sbc =3D &brq->sbc;
->> }
->>
->> Thanks.
->> Shawn
->>
->>>
->>> memset(brq, 0, sizeof(struct mmc_blk_request));
->>> brq->mrq.cmd =3D &brq->cmd;
->>>
->>
->>
->> --
->> Shawn Lin
->>
->   		 	   		  N=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDr=EF=BF=BD=
-=EF=BF=BDy=EF=BF=BD=EF=BF=BD=EF=BF=BDb=EF=BF=BDX=EF=BF=BD=EF=BF=BD=C7=A7=
-v=EF=BF=BD^=EF=BF=BD)=DE=BA{.n=EF=BF=BD+=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=
-=BD{=EF=BF=BD=EF=BF=BDg"=EF=BF=BD=EF=BF=BD^n=EF=BF=BDr=EF=BF=BD=EF=BF=BD=
-=EF=BF=BDz=EF=BF=BD=1A=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=
-=BF=BD&=EF=BF=BD=EF=BF=BD=1E=EF=BF=BDG=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=
-=BD=03(=EF=BF=BD=E9=9A=8E=EF=BF=BD=DD=A2j"=EF=BF=BD=EF=BF=BD=1A=EF=BF=BD=
-=1Bm=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BD=EF=BF=BDz=EF=BF=BD=DE=96=EF=BF=
-=BD=EF=BF=BD=EF=BF=BDf=EF=BF=BD=EF=BF=BD=EF=BF=BDh=EF=BF=BD=EF=BF=BD=EF=
-=BF=BD~=EF=BF=BDmml=3D=3D
->
+> Zhonghui
+> 
+> On 2015/7/30 15:40, Fu, Zhonghui wrote:
+>> Enable SDIO card and function device to suspend/resume asynchronously.
+>> This can improve system suspend/resume speed.
 
+For me, it needs more explanation.
 
---=20
-Shawn Lin
+For example, why is this worth doing?  Can you give an example where it does
+significantly improve suspend/resume speed?  Are there any cases where it
+could be worse?
+
+Why is it safe?  Presumably it is safe if there are no dependencies on the
+device outside the device hierarchy. Is that so?  Are there any other
+potential pitfalls to enabling async_suspend?
+
+>>
+>> Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
+>> ---
+>>  drivers/mmc/core/sdio.c |    4 ++++
+>>  1 files changed, 4 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+>> index b91abed..6719b77 100644
+>> --- a/drivers/mmc/core/sdio.c
+>> +++ b/drivers/mmc/core/sdio.c
+>> @@ -1106,6 +1106,8 @@ int mmc_attach_sdio(struct mmc_host *host)
+>>  		pm_runtime_enable(&card->dev);
+>>  	}
+>>  
+>> +	device_enable_async_suspend(&card->dev);
+>> +
+>>  	/*
+>>  	 * The number of functions on the card is encoded inside
+>>  	 * the ocr.
+>> @@ -1126,6 +1128,8 @@ int mmc_attach_sdio(struct mmc_host *host)
+>>  		 */
+>>  		if (host->caps & MMC_CAP_POWER_OFF_CARD)
+>>  			pm_runtime_enable(&card->sdio_func[i]->dev);
+>> +
+>> +		device_enable_async_suspend(&card->sdio_func[i]->dev);
+>>  	}
+>>  
+>>  	/*
+>> -- 1.7.1
+>>
+> 
+> 
+> 
 
