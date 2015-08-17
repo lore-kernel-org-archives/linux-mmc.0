@@ -1,79 +1,71 @@
-From: Alim Akhtar <alim.akhtar@gmail.com>
-Subject: Re: [PATCH 2/3] mmc: dw_mmc: simplify the SDMMC_CLKEN_LOW_PWR logic
-Date: Mon, 17 Aug 2015 21:51:26 +0530
-Message-ID: <CAGOxZ53FipjSbYMeBfr_+OWxn_WxpDfbfr8Vzs4uX6t3TBS3vw@mail.gmail.com>
-References: <cover.1439381423.git.hramrach@gmail.com> <3d03bfe2c18789eefa038018467c9c63c94ae4a2.1439381423.git.hramrach@gmail.com>
- <55D13F07.70309@samsung.com> <CAOMqctQ8DHj6qPg8zR93OGRHXAZDd0yUmG_J8Vz7dGFuDpCgRQ@mail.gmail.com>
- <55D1C4CD.4040200@samsung.com> <CAGOxZ51oHoX+zQSO8tRp8V5RUmDg8CAnM9HO5FQ5h6JeCy=1og@mail.gmail.com>
- <CAOMqctQ_gA=QxRVFQ8L=q7kBX3GROvz9mnHGu2yo1VrBO1Le6w@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: core: enable CMD19 tuning for DDR50 mode
+Date: Mon, 17 Aug 2015 19:11:15 +0200
+Message-ID: <CAPDyKFpXZD28NwNAhKQyxmWasVhk_7AeyOW6oXaBPHKuSTmGUA@mail.gmail.com>
+References: <1439282492-6274-1-git-send-email-21cnbao@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f177.google.com ([209.85.213.177]:38339 "EHLO
-	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753776AbbHQQWG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Aug 2015 12:22:06 -0400
-In-Reply-To: <CAOMqctQ_gA=QxRVFQ8L=q7kBX3GROvz9mnHGu2yo1VrBO1Le6w@mail.gmail.com>
+Received: from mail-ig0-f175.google.com ([209.85.213.175]:37508 "EHLO
+	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751442AbbHQRLP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Aug 2015 13:11:15 -0400
+Received: by igui7 with SMTP id i7so60278523igu.0
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Aug 2015 10:11:15 -0700 (PDT)
+In-Reply-To: <1439282492-6274-1-git-send-email-21cnbao@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Michal Suchanek <hramrach@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-sunxi <linux-sunxi@googlegroups.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer@o2s.ch>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Barry Song <21cnbao@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, Weijun Yang <york.yang@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-Hi Michal,
+On 11 August 2015 at 10:41, Barry Song <21cnbao@gmail.com> wrote:
+> From: Weijun Yang <york.yang@csr.com>
+>
+> As SD Specifications Part1 Physical Layer Specification Version
+> 3.01 says, CMD19 tuning is available for unlocked cards in transfer
+> state of 1.8V signaling mode. The small difference between v3.00
+> and 3.01 spec means that CMD19 tuning is also available for DDR50
+> mode.
 
-On Mon, Aug 17, 2015 at 8:25 PM, Michal Suchanek <hramrach@gmail.com> wrote:
->  Hello,
->
-> On 17 August 2015 at 16:42, Alim Akhtar <alim.akhtar@gmail.com> wrote:
->> HI
->>
->> On Mon, Aug 17, 2015 at 4:56 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>> On 08/17/2015 02:52 PM, Michal Suchanek wrote:
->>>> Hello,
->>>>
->>>> On 17 August 2015 at 03:55, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>>>> Hi, Michal.
->>>>>
->>>>> On 08/12/2015 09:23 PM, Michal Suchanek wrote:
->>>>>> The driver has open-coded test for SDIO cards. Use the mmc core provided
->>>>>> MMC_QUIRK_BROKEN_CLK_GATING flag instead.
->>>>>
->>>>> Did you use the clock-gating for SDIO cards?
->>>>> Doesn't MMC_CAP_SDIO_IRQ bit set? Which case is broken?
->>>>> Could you explain to me more?
->>>>
->>>> The core flag for disabling power saving is MMC_QUIRK_BROKEN_CLK_GATING.
->>>
->>> I understood your intention. And i read the comment into mmc/core/quirks.c
->>> I will test SDIO card with this patch. Thanks.
->>>
->> When you test, please check if SDIO IRQ still works, we need to put
->> dw_mmc in low_power mode otherwise SDIO IRQ will be not be generated
->> by dw_mmc host controller.
->>
->
-> As far as I understand the logic which is removed in this patch and
-> the core logic which replaces it is the same -  low power by means of
-> clock gating is *not* enabled for SDIO cards in either case.
->
-> The original code also checks for SDIO IRQ and disables clock gating
-> regardless of card type which is probably redundant. If not it should
-> be fixed in mmc core.
->
-> My recent kernel builds which I run on a system with mwifiex card
-> probably include this patch.
->
-I have no objection to this patch as such, it just that some extra
-testing on few other boards will be good, which I am sure Jeahoon will
-take care.
-Thanks!!
+So what happens with cards following the 3.0 spec version, those
+doesn't need to support the tuning CMD right? Perhaps that needs to be
+addressed in this patch well!?
 
-> Thanks
+Kind regards
+Uffe
+
 >
-> Michal
-
-
-
--- 
-Regards,
-Alim
+> Signed-off-by: Weijun Yang <york.yang@csr.com>
+> Signed-off-by: Barry Song <Baohua.Song@csr.com>
+> ---
+>  drivers/mmc/core/sd.c    | 1 +
+>  drivers/mmc/host/sdhci.c | 1 +
+>  2 files changed, 2 insertions(+)
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 4e7366a..a1ed24d 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -629,6 +629,7 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
+>          */
+>         if (!mmc_host_is_spi(card->host) &&
+>             (card->sd_bus_speed == UHS_SDR50_BUS_SPEED ||
+> +            card->sd_bus_speed == UHS_DDR50_BUS_SPEED ||
+>              card->sd_bus_speed == UHS_SDR104_BUS_SPEED))
+>                 err = mmc_execute_tuning(card);
+>  out:
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 1dbe932..812c19b 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1891,6 +1891,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>                 break;
+>
+>         case MMC_TIMING_UHS_SDR104:
+> +       case MMC_TIMING_UHS_DDR50:
+>                 break;
+>
+>         case MMC_TIMING_UHS_SDR50:
+> --
+> 1.9.1
+>
