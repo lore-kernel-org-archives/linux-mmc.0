@@ -1,61 +1,34 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: enable mmc host device to suspend/resume asynchronously
-Date: Mon, 17 Aug 2015 09:52:29 +0300
-Message-ID: <55D184AD.4050904@intel.com>
-References: <55BF60F5.8040602@linux.intel.com> <55D156B1.7060501@linux.intel.com>
+From: Muni Sekhar <munisekharrms@gmail.com>
+Subject: vmmc & vqmmc O2 Micro SD Host Controller
+Date: Mon, 17 Aug 2015 13:01:31 +0530
+Message-ID: <CAHhAz+iG82ocsT_jzKDxN4LjQpuE4LKgXi22g0Lgzb6O93Wm9g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:16021 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752345AbbHQGzM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 17 Aug 2015 02:55:12 -0400
-In-Reply-To: <55D156B1.7060501@linux.intel.com>
+Received: from mail-ig0-f196.google.com ([209.85.213.196]:36820 "EHLO
+	mail-ig0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750754AbbHQHbb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Aug 2015 03:31:31 -0400
+Received: by igcwe12 with SMTP id we12so6342718igc.3
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Aug 2015 00:31:31 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linus.walleij@linaro.org, Markus.Niebel@tq-group.com, lars@metafoo.de, s.hauer@pengutronix.de, kristina.martsenko@gmail.com, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
 
-On 17/08/15 06:36, Fu, Zhonghui wrote:
-> 
-> Hi,
-> 
-> Any comments are welcome.
+Hi,
 
-Same comments as here:
 
-	http://marc.info/?l=linux-kernel&m=143979428424353&w=2
+I need to test the O2 Micro SD Host Controller.
+ Once the driver is loaded, I see the following two power structs
+kernel messages.
 
-> 
-> 
-> Thanks,
-> Zhonghui
-> 
-> On 2015/8/3 20:39, Fu, Zhonghui wrote:
->> Enable mmc host device to suspend/resume asynchronously.
->> This can improve system suspend/resume speed.
->>
->> Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
->> ---
->>  drivers/mmc/core/host.c |    1 +
->>  1 files changed, 1 insertions(+), 0 deletions(-)
->>
->> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
->> index 99a9c90..85f2bbb 100644
->> --- a/drivers/mmc/core/host.c
->> +++ b/drivers/mmc/core/host.c
->> @@ -577,6 +577,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
->>  	host->class_dev.parent = dev;
->>  	host->class_dev.class = &mmc_host_class;
->>  	device_initialize(&host->class_dev);
->> +	device_enable_async_suspend(&host->class_dev);
->>  
->>  	if (mmc_gpio_alloc(host)) {
->>  		put_device(&host->class_dev);
->> -- 1.7.1
->>
-> 
-> 
-> 
+ [    2.159972] mmc0: no vqmmc regulator found
+ [    2.159975] mmc0: no vmmc regulator found
 
+I would like to know about vmmc & vqmmc, what are these? Is it okay to
+ignore these messages?
+
+
+
+Thanks,
+Sekhar
