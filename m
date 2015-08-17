@@ -1,59 +1,126 @@
-From: Alexey Brodkin <Alexey.Brodkin@synopsys.com>
-Subject: Re: [GIT PULL] Update dw-mmc controller
-Date: Mon, 17 Aug 2015 11:11:42 +0000
-Message-ID: <1439809902.28471.1.camel@synopsys.com>
-References: <55C8D73D.10709@gmail.com>
-	 <CAPDyKFqN9FxQNbwoiCj1A+BUUWHm_H8RXNhKVzUkV0xOUUdCFA@mail.gmail.com>
-	 <1439806320.3667.39.camel@synopsys.com>
-	 <CAPDyKFowfusQa+geBxjZZ1KCffVu5BnGM4jD52k3Ztf3wSt7og@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH 2/3] mmc: dw_mmc: simplify the SDMMC_CLKEN_LOW_PWR logic
+Date: Mon, 17 Aug 2015 20:26:05 +0900
+Message-ID: <55D1C4CD.4040200@samsung.com>
+References: <cover.1439381423.git.hramrach@gmail.com>
+ <3d03bfe2c18789eefa038018467c9c63c94ae4a2.1439381423.git.hramrach@gmail.com>
+ <55D13F07.70309@samsung.com>
+ <CAOMqctQ8DHj6qPg8zR93OGRHXAZDd0yUmG_J8Vz7dGFuDpCgRQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-7"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtprelay.synopsys.com ([198.182.47.9]:59924 "EHLO
-	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754225AbbHQLMI convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Aug 2015 07:12:08 -0400
-In-Reply-To: <CAPDyKFowfusQa+geBxjZZ1KCffVu5BnGM4jD52k3Ztf3wSt7og@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <AEB405A72A40864BB1B6A06875DE814C@internal.synopsys.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:37671 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750937AbbHQL0H (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Aug 2015 07:26:07 -0400
+In-reply-to: <CAOMqctQ8DHj6qPg8zR93OGRHXAZDd0yUmG_J8Vz7dGFuDpCgRQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "jh80.chung@samsung.com" <jh80.chung@samsung.com>, "jh80.chung@gmail.com" <jh80.chung@gmail.com>, "heiko@sntech.de" <heiko@sntech.de>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "addy.ke@rock-chips.com" <addy.ke@rock-chips.com>, Vineet Gupta <Vineet.Gupta1@synopsys.com>
+To: Michal Suchanek <hramrach@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-sunxi <linux-sunxi@googlegroups.com>, Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, =?UTF-8?B?RGF2aWQgTGFuemVuZMO2cmZlcg==?= <david.lanzendoerfer@o2s.ch>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi Ulf,
+On 08/17/2015 02:52 PM, Michal Suchanek wrote:
+> Hello,
+> 
+> On 17 August 2015 at 03:55, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> Hi, Michal.
+>>
+>> On 08/12/2015 09:23 PM, Michal Suchanek wrote:
+>>> The driver has open-coded test for SDIO cards. Use the mmc core provided
+>>> MMC_QUIRK_BROKEN_CLK_GATING flag instead.
+>>
+>> Did you use the clock-gating for SDIO cards?
+>> Doesn't MMC_CAP_SDIO_IRQ bit set? Which case is broken?
+>> Could you explain to me more?
+> 
+> The core flag for disabling power saving is MMC_QUIRK_BROKEN_CLK_GATING.
 
-On Mon, 2015-08-17 at 12:32 +-0200, Ulf Hansson wrote:
-+AD4- On 17 August 2015 at 12:12, Alexey Brodkin +ADw-Alexey.Brodkin+AEA-synopsys.com+AD4- wrote:
-+AD4- +AD4- Hi Ulf,
-+AD4- +AD4- 
-+AD4- +AD4- On Mon, 2015-08-17 at 11:47 +-0200, Ulf Hansson wrote:
-+AD4- +AD4- +AD4- On 10 August 2015 at 18:54, Jaehoon Chung +ADw-jh80.chung+AEA-gmail.com+AD4- wrote:
-+AD4- +AD4- +AD4- +AD4- Dear, Ulf.
-+AD4- +AD4- +AD4- +AD4- 
-+AD4- +AD4- +AD4- +AD4- Could you pull these patches into your repository?
-+AD4- +AD4- +AD4- +AD4- 
-+AD4- +AD4- +AD4- +AD4- Best Regards,
-+AD4- +AD4- +AD4- +AD4- Jaehoon Chung
-+AD4- +AD4- +AD4- 
-+AD4- +AD4- +AD4- Thanks+ACE- Pulled into my next branch.
-+AD4- +AD4- +AD4- 
-+AD4- +AD4- +AD4- Kind regards
-+AD4- +AD4- +AD4- Uffe
-+AD4- +AD4- 
-+AD4- +AD4- I'm wondering if mentioned fixes only hit 4.3 (you mentioned your
-+AD4- +AD4- +ACI-next+ACI- branch) or there's a chance for them to be pulled in the next 4.2-rcX?
-+AD4- +AD4- 
-+AD4- +AD4- The thing is we need at least +ACI-mmc: dw+AF8-mmc: handle data blocks +AD4- than 4kB if IDMAC is used+ACI-
-+AD4- +AD4- to get our AXS board upstreamed in full in that 4.2, see:
-+AD4- +AD4- http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id+AD0-0890a264794f33df540fbaf274699146903b4e6b)
-+AD4- +AD4- functional with SD/MMC.
-+AD4- 
-+AD4- Is the above mentioned patch a fix for a regression? If not, it's too
-+AD4- late for 4.2.
+I understood your intention. And i read the comment into mmc/core/quirks.c
+I will test SDIO card with this patch. Thanks.
 
-Ok then we'll need to apply selected patches (probably all but then we'll need
-feedback of other interested parties) on top of 4.2 stable a bit later.
+Best Regards,
+Jaehoon Chung
 
--Alexey
+> 
+> It may coincide with MMC_CAP_SDIO_IRQ but that's different flag for
+> different purpose.
+> 
+> MMC_QUIRK_BROKEN_CLK_GATING is currently set for all SDIO cards except
+> for cards on a whitelist.
+> 
+> I don't know any particular SDIO card that has problems when the clock
+> is off and does not use an IRQ.
+> 
+> Thanks
+> 
+> Michal
+> 
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>>>
+>>> As a bonus this may enable clock gating on SDIO cards that are known to
+>>> work with it.
+>>>
+>>> Signed-off-by: Michal Suchanek <hramrach@gmail.com>
+>>> ---
+>>>  drivers/mmc/host/dw_mmc.c | 33 +++++++++++++++------------------
+>>>  1 file changed, 15 insertions(+), 18 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index 40e9d8e..3bc9fd7 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -1335,27 +1335,24 @@ static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
+>>>        * description of the CLKENA register we should disable low power mode
+>>>        * for SDIO cards if we need SDIO interrupts to work.
+>>>        */
+>>> -     if (mmc->caps & MMC_CAP_SDIO_IRQ) {
+>>> -             const u32 clken_low_pwr = SDMMC_CLKEN_LOW_PWR << slot->id;
+>>> -             u32 clk_en_a_old;
+>>> -             u32 clk_en_a;
+>>> +     const u32 clken_low_pwr = SDMMC_CLKEN_LOW_PWR << slot->id;
+>>> +     u32 clk_en_a_old;
+>>> +     u32 clk_en_a;
+>>>
+>>> -             clk_en_a_old = mci_readl(host, CLKENA);
+>>> +     clk_en_a_old = mci_readl(host, CLKENA);
+>>>
+>>> -             if (card->type == MMC_TYPE_SDIO ||
+>>> -                 card->type == MMC_TYPE_SD_COMBO) {
+>>> -                     set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+>>> -                     clk_en_a = clk_en_a_old & ~clken_low_pwr;
+>>> -             } else {
+>>> -                     clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+>>> -                     clk_en_a = clk_en_a_old | clken_low_pwr;
+>>> -             }
+>>> +     if (card->quirks & MMC_QUIRK_BROKEN_CLK_GATING) {
+>>> +             set_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+>>> +             clk_en_a = clk_en_a_old & ~clken_low_pwr;
+>>> +     } else {
+>>> +             clear_bit(DW_MMC_CARD_NO_LOW_PWR, &slot->flags);
+>>> +             clk_en_a = clk_en_a_old | clken_low_pwr;
+>>> +     }
+>>>
+>>> -             if (clk_en_a != clk_en_a_old) {
+>>> -                     mci_writel(host, CLKENA, clk_en_a);
+>>> -                     mci_send_cmd(slot, SDMMC_CMD_UPD_CLK |
+>>> -                                  SDMMC_CMD_PRV_DAT_WAIT, 0);
+>>> -             }
+>>> +     if (clk_en_a != clk_en_a_old) {
+>>> +             mci_writel(host, CLKENA, clk_en_a);
+>>> +             mci_send_cmd(slot, SDMMC_CMD_UPD_CLK |
+>>> +                             SDMMC_CMD_PRV_DAT_WAIT, 0);
+>>>       }
+>>>  }
+>>>
+>>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
