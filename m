@@ -1,51 +1,51 @@
 From: Rabin Vincent <rabin.vincent@axis.com>
-Subject: [PATCH 1/3] mmc: usdhi6rol0: handle probe deferral for regulator
-Date: Wed, 19 Aug 2015 15:41:34 +0200
-Message-ID: <1439991696-28488-1-git-send-email-rabin.vincent@axis.com>
+Subject: [PATCH 2/3] mmc: usdhi6rol0: fix NULL pointer deref in debug print
+Date: Wed, 19 Aug 2015 15:41:35 +0200
+Message-ID: <1439991696-28488-2-git-send-email-rabin.vincent@axis.com>
+References: <1439991696-28488-1-git-send-email-rabin.vincent@axis.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bastet.se.axis.com ([195.60.68.11]:44738 "EHLO
-	bastet.se.axis.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751239AbbHSNlt (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Aug 2015 09:41:49 -0400
+Received: from bes.se.axis.com ([195.60.68.10]:33740 "EHLO bes.se.axis.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751512AbbHSNlt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 19 Aug 2015 09:41:49 -0400
+In-Reply-To: <1439991696-28488-1-git-send-email-rabin.vincent@axis.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org
 Cc: g.liakhovetski@gmx.de, linux-mmc@vger.kernel.org, Rabin Vincent <rabinv@axis.com>
 
-We ignore errors from mmc_regulator_get_supply() because the usage of
-the regulators is optional for the driver, but we still need to check
-for and handle EPROBE_DEFER, like it's done in for example dw_mmc.
-Otherwise we might end up not using the specified regulators just
-because of probe order.
+host->sg is only set when we're transferring multiple blocks.  Check for
+its availibility before dereferencing it in the timeout work debug
+print.
 
 Signed-off-by: Rabin Vincent <rabin.vincent@axis.com>
 ---
- drivers/mmc/host/usdhi6rol0.c |    6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ drivers/mmc/host/usdhi6rol0.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-index 54b082b..63d5d72 100644
+index 63d5d72..4188e84e 100644
 --- a/drivers/mmc/host/usdhi6rol0.c
 +++ b/drivers/mmc/host/usdhi6rol0.c
-@@ -1715,12 +1715,14 @@ static int usdhi6_probe(struct platform_device *pdev)
- 	if (!mmc)
- 		return -ENOMEM;
+@@ -1634,6 +1634,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
+ 	struct usdhi6_host *host = container_of(d, struct usdhi6_host, timeout_work);
+ 	struct mmc_request *mrq = host->mrq;
+ 	struct mmc_data *data = mrq ? mrq->data : NULL;
++	struct scatterlist *sg = host->sg ?: data->sg;
  
-+	ret = mmc_regulator_get_supply(mmc);
-+	if (ret == -EPROBE_DEFER)
-+		goto e_free_mmc;
-+
- 	ret = mmc_of_parse(mmc);
- 	if (ret < 0)
- 		goto e_free_mmc;
- 
--	mmc_regulator_get_supply(mmc);
--
- 	host		= mmc_priv(mmc);
- 	host->mmc	= mmc;
- 	host->wait	= USDHI6_WAIT_FOR_REQUEST;
+ 	dev_warn(mmc_dev(host->mmc),
+ 		 "%s timeout wait %u CMD%d: IRQ 0x%08x:0x%08x, last IRQ 0x%08x\n",
+@@ -1669,7 +1670,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
+ 			"%c: page #%u @ +0x%zx %ux%u in SG%u. Current SG %u bytes @ %u\n",
+ 			data->flags & MMC_DATA_READ ? 'R' : 'W', host->page_idx,
+ 			host->offset, data->blocks, data->blksz, data->sg_len,
+-			sg_dma_len(host->sg), host->sg->offset);
++			sg_dma_len(sg), sg->offset);
+ 		usdhi6_sg_unmap(host, true);
+ 		/*
+ 		 * If USDHI6_WAIT_FOR_DATA_END times out, we have already unmapped
 -- 
 1.7.10.4
 
