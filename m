@@ -1,7 +1,7 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RFC PATCH v6 3/9] mips: pistachio_defconfig: remove CONFIG_MMC_DW_IDMAC
-Date: Thu, 20 Aug 2015 16:44:23 +0800
-Message-ID: <1440060263-26326-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [RFC PATCH v6 4/9] arc: axs10x_defconfig: remove CONFIG_MMC_DW_IDMAC
+Date: Thu, 20 Aug 2015 16:44:45 +0800
+Message-ID: <1440060285-26367-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1440060204-26203-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1440060204-26203-1-git-send-email-shawn.lin@rock-chips.com>
@@ -15,8 +15,7 @@ at runtime instead of compile-time. So we remove this config
 option and read dw_mmc's register to select DMA master.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-Acked-by: Govindraj Raja <govindraj.raja@imgtec.com>
-Acked-by: Ralf Baechle <ralf@linux-mips.org>
+Acked-by: Vineet Gupta <vgupta@synopsys.com>
 ---
 
 Changes in v6: None
@@ -25,20 +24,46 @@ Changes in v4: None
 Changes in v3: None
 Changes in v2: None
 
- arch/mips/configs/pistachio_defconfig | 1 -
- 1 file changed, 1 deletion(-)
+ arch/arc/configs/axs101_defconfig     | 1 -
+ arch/arc/configs/axs103_defconfig     | 1 -
+ arch/arc/configs/axs103_smp_defconfig | 1 -
+ 3 files changed, 3 deletions(-)
 
-diff --git a/arch/mips/configs/pistachio_defconfig b/arch/mips/configs/pistachio_defconfig
-index 1646cce..013c62c 100644
---- a/arch/mips/configs/pistachio_defconfig
-+++ b/arch/mips/configs/pistachio_defconfig
-@@ -257,7 +257,6 @@ CONFIG_MMC=y
- CONFIG_MMC_BLOCK_MINORS=16
- CONFIG_MMC_TEST=m
+diff --git a/arch/arc/configs/axs101_defconfig b/arch/arc/configs/axs101_defconfig
+index 562dac6..c92c0ef 100644
+--- a/arch/arc/configs/axs101_defconfig
++++ b/arch/arc/configs/axs101_defconfig
+@@ -89,7 +89,6 @@ CONFIG_MMC=y
+ CONFIG_MMC_SDHCI=y
+ CONFIG_MMC_SDHCI_PLTFM=y
  CONFIG_MMC_DW=y
 -CONFIG_MMC_DW_IDMAC=y
- CONFIG_NEW_LEDS=y
- CONFIG_LEDS_CLASS=y
- CONFIG_RTC_CLASS=y
+ # CONFIG_IOMMU_SUPPORT is not set
+ CONFIG_EXT3_FS=y
+ CONFIG_EXT4_FS=y
+diff --git a/arch/arc/configs/axs103_defconfig b/arch/arc/configs/axs103_defconfig
+index 83a6d8d..cfac24e 100644
+--- a/arch/arc/configs/axs103_defconfig
++++ b/arch/arc/configs/axs103_defconfig
+@@ -95,7 +95,6 @@ CONFIG_MMC=y
+ CONFIG_MMC_SDHCI=y
+ CONFIG_MMC_SDHCI_PLTFM=y
+ CONFIG_MMC_DW=y
+-CONFIG_MMC_DW_IDMAC=y
+ # CONFIG_IOMMU_SUPPORT is not set
+ CONFIG_EXT3_FS=y
+ CONFIG_EXT4_FS=y
+diff --git a/arch/arc/configs/axs103_smp_defconfig b/arch/arc/configs/axs103_smp_defconfig
+index f1e1c84..9922a11 100644
+--- a/arch/arc/configs/axs103_smp_defconfig
++++ b/arch/arc/configs/axs103_smp_defconfig
+@@ -96,7 +96,6 @@ CONFIG_MMC=y
+ CONFIG_MMC_SDHCI=y
+ CONFIG_MMC_SDHCI_PLTFM=y
+ CONFIG_MMC_DW=y
+-CONFIG_MMC_DW_IDMAC=y
+ # CONFIG_IOMMU_SUPPORT is not set
+ CONFIG_EXT3_FS=y
+ CONFIG_EXT4_FS=y
 -- 
 2.3.7
