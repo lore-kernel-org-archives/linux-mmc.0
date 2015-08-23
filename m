@@ -1,59 +1,42 @@
-From: Julia Lawall <Julia.Lawall@lip6.fr>
-Subject: [PATCH 06/11] mmc: usdhi6rol0: fix error return code
-Date: Sun, 23 Aug 2015 02:11:17 +0200
-Message-ID: <1440288682-12732-7-git-send-email-Julia.Lawall@lip6.fr>
-References: <1440288682-12732-1-git-send-email-Julia.Lawall@lip6.fr>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1440288682-12732-1-git-send-email-Julia.Lawall@lip6.fr>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: kernel-janitors@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Yoshihiro Kaneko <ykaneko0929@gmail.com>
+Subject: [PATCH repost] mmc: sh_mmcif: Fix suspend process
+Date: Sun, 23 Aug 2015 21:58:08 +0900
+Message-ID: <1440334688-20674-1-git-send-email-ykaneko0929@gmail.com>
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, linux-sh@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Propagate error code on failure.
+From: Koji Matsuoka <koji.matsuoka.xm@renesas.com>
 
-A simplified version of the semantic match that finds this problem is as
-follows: (http://coccinelle.lip6.fr/)
+The clock should be enable when SDHI registers are accessed.
 
-// <smpl>
-@@
-identifier ret; expression e1,e2;
-@@
-(
-if (\(ret < 0\|ret != 0\))
- { ... return ret; }
-|
-ret = 0
-)
-... when != ret = e1
-    when != &ret
-*if(...)
-{
-  ... when != ret = e2
-      when forall
- return ret;
-}
-// </smpl>
-
-Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
-
+Signed-off-by: Koji Matsuoka <koji.matsuoka.xm@renesas.com>
+Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
 ---
- drivers/mmc/host/usdhi6rol0.c |    4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-index 54b082b..99f894c 100644
---- a/drivers/mmc/host/usdhi6rol0.c
-+++ b/drivers/mmc/host/usdhi6rol0.c
-@@ -1734,8 +1734,10 @@ static int usdhi6_probe(struct platform_device *pdev)
- 	}
+This patch is based on mmc-next branch of Ulf Hansson's mmc tree.
+
+* Perhaps this relates to the need to enhance clock management
+
+ drivers/mmc/host/sh_mmcif.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 5a1fdd4..ad9ffea 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -1632,7 +1632,9 @@ static int sh_mmcif_suspend(struct device *dev)
+ {
+ 	struct sh_mmcif_host *host = dev_get_drvdata(dev);
  
- 	host->clk = devm_clk_get(dev, NULL);
--	if (IS_ERR(host->clk))
-+	if (IS_ERR(host->clk)) {
-+		ret = PTR_ERR(host->clk);
- 		goto e_free_mmc;
-+	}
++	pm_runtime_get_sync(dev);
+ 	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
++	pm_runtime_put(dev);
  
- 	host->imclk = clk_get_rate(host->clk);
- 
+ 	return 0;
+ }
+-- 
+1.9.1
+
