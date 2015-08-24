@@ -1,74 +1,75 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [RFC PATCH 1/2] mmc: core: sdio: move mmc_sdio_init_card to a separate function
-Date: Mon, 24 Aug 2015 15:45:16 +0530
-Message-ID: <1440411317-8813-1-git-send-email-kishon@ti.com>
+From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Subject: Re: [PATCH] mmc: enable mmc host device to suspend/resume asynchronously
+Date: Mon, 24 Aug 2015 23:11:00 +0800
+Message-ID: <55DB3404.6090200@linux.intel.com>
+References: <55BF60F5.8040602@linux.intel.com> <55D156B1.7060501@linux.intel.com> <55D184AD.4050904@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nsekhar@ti.com
-Cc: adrian.hunter@intel.com, neilb@suse.de, zhonghui.fu@linux.intel.com, afenkart@gmail.com, kishon@ti.com
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga03.intel.com ([134.134.136.65]:53032 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752395AbbHXPLG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 24 Aug 2015 11:11:06 -0400
+In-Reply-To: <55D184AD.4050904@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linus.walleij@linaro.org, Markus.Niebel@tq-group.com, lars@metafoo.de, s.hauer@pengutronix.de, kristina.martsenko@gmail.com, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-No functional change. Move mmc_sdio_init_card to a separate
-function (_mmc_sdio_power_restore) and invoke it from
-mmc_sdio_power_restore. This is in preparation to invoke
-_mmc_sdio_power_restore from mmc_sdio_runtime_resume so that
-mmc_claim_host can be invoked before mmc_power_up.
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
----
- drivers/mmc/core/sdio.c |   22 ++++++++++++++--------
- 1 file changed, 14 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index b91abed..0cbbfb8 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -970,15 +970,10 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 	return err;
- }
- 
--static int mmc_sdio_power_restore(struct mmc_host *host)
-+static int _mmc_sdio_power_restore(struct mmc_host *host)
- {
- 	int ret;
- 
--	BUG_ON(!host);
--	BUG_ON(!host->card);
--
--	mmc_claim_host(host);
--
- 	/*
- 	 * Reset the card by performing the same steps that are taken by
- 	 * mmc_rescan_try_freq() and mmc_attach_sdio() during a "normal" probe.
-@@ -1002,14 +997,25 @@ static int mmc_sdio_power_restore(struct mmc_host *host)
- 
- 	ret = mmc_send_io_op_cond(host, 0, NULL);
- 	if (ret)
--		goto out;
-+		return ret;
- 
- 	ret = mmc_sdio_init_card(host, host->card->ocr, host->card,
- 				mmc_card_keep_power(host));
- 	if (!ret && host->sdio_irqs)
- 		mmc_signal_sdio_irq(host);
- 
--out:
-+	return 0;
-+}
-+
-+static int mmc_sdio_power_restore(struct mmc_host *host)
-+{
-+	int ret;
-+
-+	BUG_ON(!host);
-+	BUG_ON(!host->card);
-+
-+	mmc_claim_host(host);
-+	ret = _mmc_sdio_power_restore(host);
- 	mmc_release_host(host);
- 
- 	return ret;
--- 
-1.7.9.5
+On 2015/8/17 14:52, Adrian Hunter wrote:
+> On 17/08/15 06:36, Fu, Zhonghui wrote:
+>> Hi,
+>>
+>> Any comments are welcome.
+> Same comments as here:
+>
+> 	http://marc.info/?l=linux-kernel&m=143979428424353&w=2
+
+Now, PM core support asynchronous device suspend/resume mode. If one device has been set to support asynchronous PM mode, it's suspend/resume operation can be performed in a separate kernel thread and take advantage of multicore feature to improve overall system suspend/resume speed. The worst case is that all device suspend/resume threads will be scheduled to the same CPU, it hardly occur.
+
+PM core ensure all the suspend/resume dependency related to one device. Actually, async suspend/resume mode is one feature of PM core, every device subsystem may use it or not use it. Once one device subsystem choose to use this feature, its safety is up to PM core as long as device subsystem has initialized fully this device.
+
+
+Thanks,
+Zhonghui 
+
+
+>
+>>
+>> Thanks,
+>> Zhonghui
+>>
+>> On 2015/8/3 20:39, Fu, Zhonghui wrote:
+>>> Enable mmc host device to suspend/resume asynchronously.
+>>> This can improve system suspend/resume speed.
+>>>
+>>> Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
+>>> ---
+>>>  drivers/mmc/core/host.c |    1 +
+>>>  1 files changed, 1 insertions(+), 0 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+>>> index 99a9c90..85f2bbb 100644
+>>> --- a/drivers/mmc/core/host.c
+>>> +++ b/drivers/mmc/core/host.c
+>>> @@ -577,6 +577,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+>>>  	host->class_dev.parent = dev;
+>>>  	host->class_dev.class = &mmc_host_class;
+>>>  	device_initialize(&host->class_dev);
+>>> +	device_enable_async_suspend(&host->class_dev);
+>>>  
+>>>  	if (mmc_gpio_alloc(host)) {
+>>>  		put_device(&host->class_dev);
+>>> -- 1.7.1
+>>>
+>>
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
+
