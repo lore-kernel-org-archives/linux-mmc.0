@@ -1,23 +1,22 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RFC PATCH v7 02/10] mmc: dw_mmc: use macro for HCON register operations
-Date: Mon, 24 Aug 2015 09:25:54 +0800
-Message-ID: <1440379554-24444-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [RFC PATCH v7 04/10] mips: pistachio_defconfig: remove CONFIG_MMC_DW_IDMAC
+Date: Mon, 24 Aug 2015 09:26:32 +0800
+Message-ID: <1440379592-24528-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1440379479-24308-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from regular1.263xmail.com ([211.150.99.138]:44133 "EHLO
-	regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753832AbbHXB1D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 23 Aug 2015 21:27:03 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1440379479-24308-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: jh80.chung@samsung.com, ulf.hansson@linaro.org
 Cc: Vineet.Gupta1@synopsys.com, Wei Xu <xuwei5@hisilicon.com>, Joachim Eastwood <manabian@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Russell King <linux@arm.linux.org.uk>, Zhangfei Gao <zhangfei.gao@linaro.org>, Jun Nie <jun.nie@linaro.org>, Ralf Baechle <ralf@linux-mips.org>, Govindraj Raja <govindraj.raja@imgtec.com>, Arnd Bergmann <arnd@arndb.de>, heiko@sntech.de, dianders@chromium.org, linux-samsung-soc@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
+List-Id: linux-mmc@vger.kernel.org
 
-This patch add some macros for HCON register operations
-to make code more readable.
+DesignWare MMC Controller's transfer mode should be decided
+at runtime instead of compile-time. So we remove this config
+option and read dw_mmc's register to select DMA master.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Acked-by: Govindraj Raja <govindraj.raja@imgtec.com>
+Acked-by: Ralf Baechle <ralf@linux-mips.org>
 ---
 
 Changes in v7: None
@@ -27,56 +26,20 @@ Changes in v4: None
 Changes in v3: None
 Changes in v2: None
 
- drivers/mmc/host/dw_mmc.c | 6 +++---
- drivers/mmc/host/dw_mmc.h | 3 +++
- 2 files changed, 6 insertions(+), 3 deletions(-)
+ arch/mips/configs/pistachio_defconfig | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 9c91983..0a3c63c 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2678,7 +2678,7 @@ static void dw_mci_init_dma(struct dw_mci *host)
- 		* Check ADDR_CONFIG bit in HCON to find
- 		* IDMAC address bus width
- 		*/
--		addr_config = (mci_readl(host, HCON) >> 27) & 0x01;
-+		addr_config = SDMMC_GET_ADDR_CONFIG(mci_readl(host, HCON));
- 
- 		if (addr_config == 1) {
- 			/* host supports IDMAC in 64-bit address mode */
-@@ -3060,7 +3060,7 @@ int dw_mci_probe(struct dw_mci *host)
- 	 * Get the host data width - this assumes that HCON has been set with
- 	 * the correct values.
- 	 */
--	i = (mci_readl(host, HCON) >> 7) & 0x7;
-+	i = SDMMC_GET_HDATA_WIDTH(mci_readl(host, HCON));
- 	if (!i) {
- 		host->push_data = dw_mci_push_data16;
- 		host->pull_data = dw_mci_pull_data16;
-@@ -3142,7 +3142,7 @@ int dw_mci_probe(struct dw_mci *host)
- 	if (host->pdata->num_slots)
- 		host->num_slots = host->pdata->num_slots;
- 	else
--		host->num_slots = ((mci_readl(host, HCON) >> 1) & 0x1F) + 1;
-+		host->num_slots = SDMMC_GET_SLOT_NUM(mci_readl(host, HCON));
- 
- 	/*
- 	 * Enable interrupts for command done, data over, data empty,
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 811d467..f2a88d4 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -154,6 +154,9 @@
- #define DMA_INTERFACE_GDMA		(0x2)
- #define DMA_INTERFACE_NODMA		(0x3)
- #define SDMMC_GET_TRANS_MODE(x)		(((x)>>16) & 0x3)
-+#define SDMMC_GET_SLOT_NUM(x)		((((x)>>1) & 0x1F) + 1)
-+#define SDMMC_GET_HDATA_WIDTH(x)	(((x)>>7) & 0x7)
-+#define SDMMC_GET_ADDR_CONFIG(x)	(((x)>>27) & 0x1)
- /* Internal DMAC interrupt defines */
- #define SDMMC_IDMAC_INT_AI		BIT(9)
- #define SDMMC_IDMAC_INT_NI		BIT(8)
+diff --git a/arch/mips/configs/pistachio_defconfig b/arch/mips/configs/pistachio_defconfig
+index 1646cce..013c62c 100644
+--- a/arch/mips/configs/pistachio_defconfig
++++ b/arch/mips/configs/pistachio_defconfig
+@@ -257,7 +257,6 @@ CONFIG_MMC=y
+ CONFIG_MMC_BLOCK_MINORS=16
+ CONFIG_MMC_TEST=m
+ CONFIG_MMC_DW=y
+-CONFIG_MMC_DW_IDMAC=y
+ CONFIG_NEW_LEDS=y
+ CONFIG_LEDS_CLASS=y
+ CONFIG_RTC_CLASS=y
 -- 
 2.3.7
-
-
