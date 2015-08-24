@@ -1,77 +1,63 @@
-From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
-Subject: Re: [PATCH] mmc/sdhci-acpi: enable sdhci-acpi device to suspend/resume
- asynchronously
-Date: Mon, 24 Aug 2015 23:14:01 +0800
-Message-ID: <55DB34B9.40303@linux.intel.com>
-References: <55BF6843.4050502@linux.intel.com> <55D15718.9080107@linux.intel.com> <55D18479.50506@intel.com>
+From: Laura Abbott <labbott@redhat.com>
+Subject: Re: [RFC] sdhci: fix DMA leaks [was: [SHDCI] Heavy (thousands) DMA
+ leaks]
+Date: Mon, 24 Aug 2015 09:26:32 -0700
+Message-ID: <55DB45B8.3020106@redhat.com>
+References: <55B9EF02.7040404@suse.cz>
+ <BY1PR03MB138811AD7FAB3C561CC683679A770@BY1PR03MB1388.namprd03.prod.outlook.com>
+ <55BF36D6.4080504@suse.cz> <55C1F919.4080002@suse.cz>
+ <55C227B4.3030102@suse.cz>
+ <BY1PR03MB13889A6C31FC542DB544CE479A740@BY1PR03MB1388.namprd03.prod.outlook.com>
+ <55C323A5.6050303@suse.cz>
+ <BY1PR03MB1388AE95AA9000BB9B8B47559A740@BY1PR03MB1388.namprd03.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:60917 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753837AbbHXPOG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 24 Aug 2015 11:14:06 -0400
-In-Reply-To: <55D18479.50506@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <BY1PR03MB1388AE95AA9000BB9B8B47559A740@BY1PR03MB1388.namprd03.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chen Bough <Haibo.Chen@freescale.com>, Jiri Slaby <jslaby@suse.cz>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux kernel mailing list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, andriy.shevchenko@linux.intel.com
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, yunpeng.gao@intel.com, peter.griffin@linaro.org, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-
-
-On 2015/8/17 14:51, Adrian Hunter wrote:
-> On 17/08/15 06:38, Fu, Zhonghui wrote:
->> Hi,
->>
->> Any comments are welcome.
-> Same comments as here:
+On 08/06/2015 02:17 AM, Chen Bough wrote:
+> I will format a patch based on your diff file firstly. I will test this on my side,
+> If any issue, like dma issue or performance issue, I will add some modification.
+> Then I will send the patch for review, and you can test the patch on your platform.
 >
-> 	http://marc.info/?l=linux-kernel&m=143979428424353&w=2
+> Best Regards
+> Haibo Chen
+>
 
-Now, PM core support asynchronous device suspend/resume mode. If one device has been set to support asynchronous PM mode, it's suspend/resume operation can be performed in a separate kernel thread and take advantage of multicore feature to improve overall system suspend/resume speed. The worst case is that all device suspend/resume threads will be scheduled to the same CPU, it hardly occur.
-
-PM core ensure all the suspend/resume dependency related to one device. Actually, async suspend/resume mode is one feature of PM core, every device subsystem may use it or not use it. Once one device subsystem choose to use this feature, its safety is up to PM core as long as device subsystem has initialized fully this device.
-
+Did I miss the follow up patch or is this still pending? If it's still pending,
+would you mind Ccing me when it's available for testing?
 
 Thanks,
-Zhonghui
-
-
+Laura
+  
 >
+>> -----Original Message-----
+>> From: Jiri Slaby [mailto:jslaby@suse.cz]
+>> Sent: Thursday, August 06, 2015 5:07 PM
+>> To: Chen Haibo-B51421; Ulf Hansson
+>> Cc: linux-mmc@vger.kernel.org; Linux kernel mailing list
+>> Subject: Re: [RFC] sdhci: fix DMA leaks [was: [SHDCI] Heavy (thousands)
+>> DMA leaks]
 >>
->> Thanks,
->> Zhonghui
+>> On 08/06/2015, 09:42 AM, Chen Bough wrote:
+>>> I read your attached log and patch, yes, dma memory leak will happen
+>>> when more than one pre_request execute. The method of ++next->cookie
+>>> is not good, your patch seems good, but I still need some time to test
+>>> the patch, because you unmap the dma in sdhci_finish_data rather than
+>> the sdhci_post_req.
 >>
->> On 2015/8/3 21:10, Fu, Zhonghui wrote:
->>> Enable sdhci-acpi device to suspend/resume asynchronously.
->>> This can improve system suspend/resume speed.
->>>
->>> Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
->>> ---
->>>  drivers/mmc/host/sdhci-acpi.c |    2 ++
->>>  1 files changed, 2 insertions(+), 0 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
->>> index 22d929f..67e6263 100644
->>> --- a/drivers/mmc/host/sdhci-acpi.c
->>> +++ b/drivers/mmc/host/sdhci-acpi.c
->>> @@ -379,6 +379,8 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
->>>  		pm_runtime_enable(dev);
->>>  	}
->>>  
->>> +	device_enable_async_suspend(dev);
->>> +
->>>  	return 0;
->>>  
->>>  err_free:
->>> -- 1.7.1
->>>
+>> Hi,
 >>
+>> yes, this is not correct. We can perhaps differentiate according to the
+>> COOKIE value. Should I fix it or are you going to prepare a patch based
+>> on my RFC?
 >>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
-
+>> thanks,
+>> --
+>> js
+>> suse labs
