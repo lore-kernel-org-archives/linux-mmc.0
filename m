@@ -1,33 +1,65 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH v4 1/8] pinctrl: sh-pfc: Implement pinconf power-source
- param for voltage switching
-Date: Mon, 24 Aug 2015 10:45:49 +0200
-Message-ID: <CACRpkdamQEhxGVC0r94yM=PNTSonB9NcyUgBQPTLyRm0egct+Q@mail.gmail.com>
-References: <1435683177.23818.60.camel@codethink.co.uk>
-	<1435683239.23818.61.camel@codethink.co.uk>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [RFC PATCH 2/2] mmc: core: sdio: claim host before power up or power off
+Date: Mon, 24 Aug 2015 15:45:17 +0530
+Message-ID: <1440411317-8813-2-git-send-email-kishon@ti.com>
+References: <1440411317-8813-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-gpio-owner@vger.kernel.org>
-In-Reply-To: <1435683239.23818.61.camel@codethink.co.uk>
-Sender: linux-gpio-owner@vger.kernel.org
-To: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Cc: Ian Molton <ian@mnementh.co.uk>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>, linux-kernel@lists.codethink.co.uk, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bear.ext.ti.com ([192.94.94.41]:44539 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754177AbbHXKPa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 24 Aug 2015 06:15:30 -0400
+In-Reply-To: <1440411317-8813-1-git-send-email-kishon@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nsekhar@ti.com
+Cc: adrian.hunter@intel.com, neilb@suse.de, zhonghui.fu@linux.intel.com, afenkart@gmail.com, kishon@ti.com
 
-On Tue, Jun 30, 2015 at 6:53 PM, Ben Hutchings
-<ben.hutchings@codethink.co.uk> wrote:
+mmc_sdio_runtime_resume and mmc_sdio_runtime_suspend does power up and
+power off respectively but does so without claiming the host. Among other
+things mmc_claim_host inovkes pm_runtime_get_sync to enable the clocks.
+Invoke mmc_claim_host before mmc_power_up and mmc_power_off in
+mmc_sdio_runtime_resume and mmc_sdio_runtime_suspend respectively.
 
-> The pfc in the R8A7790 (and probably others in the R-Car gen 2 family)
-> supports switching SDHI signals between 3.3V and 1.8V nominal voltage,
-> and the SD driver should do that when switching to and from UHS modes.
->
-> Add a flag for pins that have configurable I/O voltage and SoC
-> operations to get and set the nominal voltage.  Implement the pinconf
-> power-source parameter using these operations.
->
-> Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
+This is required since certain platforms (like TI SoCs) access
+the controller registers during power up.
 
-Patch applied with Laurent's ACK.
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+---
+ drivers/mmc/core/sdio.c |   10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
 
-Yours,
-Linus Walleij
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 0cbbfb8..40795b2 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -1023,16 +1023,24 @@ static int mmc_sdio_power_restore(struct mmc_host *host)
+ 
+ static int mmc_sdio_runtime_suspend(struct mmc_host *host)
+ {
++	mmc_claim_host(host);
+ 	/* No references to the card, cut the power to it. */
+ 	mmc_power_off(host);
++	mmc_release_host(host);
+ 	return 0;
+ }
+ 
+ static int mmc_sdio_runtime_resume(struct mmc_host *host)
+ {
++	int ret;
++
++	mmc_claim_host(host);
+ 	/* Restore power and re-initialize. */
+ 	mmc_power_up(host, host->card->ocr);
+-	return mmc_sdio_power_restore(host);
++	ret = _mmc_sdio_power_restore(host);
++	mmc_release_host(host);
++
++	return ret;
+ }
+ 
+ static int mmc_sdio_reset(struct mmc_host *host)
+-- 
+1.7.9.5
+
