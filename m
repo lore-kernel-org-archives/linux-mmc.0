@@ -1,62 +1,52 @@
-From: Haibo Chen <haibo.chen@freescale.com>
-Subject: Re: [PATCH v6 0/6] mmc: imx: a few fixes and new feature
-Date: Tue, 25 Aug 2015 11:34:19 +0800
-Message-ID: <20150825033418.GA15468@b51421-server.ap.freescale.net>
-References: <1439293111-21077-1-git-send-email-haibo.chen@freescale.com>
- <20150813085854.GA19166@shlinux1.ap.freescale.net>
+From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH 12/17] ARM: dts: am57xx-beagle-x15: Fix regulator populated
+ in MMC1 dt node
+Date: Tue, 25 Aug 2015 12:06:55 +0530
+Message-ID: <55DC0D07.7030504@ti.com>
+References: <1438168187-1614-1-git-send-email-kishon@ti.com> <1438168187-1614-13-git-send-email-kishon@ti.com> <55B92B88.1080409@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1on0140.outbound.protection.outlook.com ([157.56.110.140]:55521
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752220AbbHYDbF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 24 Aug 2015 23:31:05 -0400
-Content-Disposition: inline
-In-Reply-To: <20150813085854.GA19166@shlinux1.ap.freescale.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <55B92B88.1080409-l0cyMroinI0@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Nishanth Menon <nm-l0cyMroinI0@public.gmane.org>, tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: nsekhar-l0cyMroinI0@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <aisheng.dong@freescale.com>, ulf.hansson@linaro.org
-Cc: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, shawnguo@kernel.org, kernel@pengutronix.de, linux@arm.linux.org.uk, johan.derycke@barco.com, mkl@pengutronix.de, haibo.chen@freescale.com, fabio.estevam@freescale.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 
-On Thu, Aug 13, 2015 at 04:58:56PM +0800, Dong Aisheng wrote:
-> On Tue, Aug 11, 2015 at 07:38:25PM +0800, Haibo Chen wrote:
-> > Changes for v6:
-> > -remove duplicate code in esdhc_set_uhs_signaling().
-> > -fix a typo for patch-2.
-> > -make commit log of patch-3 more specific.
-> > 
-> > Haibo Chen (6):
-> >   mmc: sdhci-esdhc-imx: add imx7d support and support HS400
-> >   mmc: sdhci-esdhc-imx: add tuning-step setting support
-> >   mmc: sdhci-esdhc-imx: add imx7d support in bingding doc
-> >   ARM: dts: imx7d-sdb: add eMMC5.0 support
-> >   mmc: sdhci-esdhc-imx: set back the burst_length_enable bit to 1
-> >   mmc: sdhci-esdhc-imx: change default watermark level and burst length
-> > 
-> >  .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   6 ++
-> >  arch/arm/boot/dts/imx7d-sdb.dts                    |  13 +++
-> >  drivers/mmc/host/sdhci-esdhc-imx.c                 | 114 ++++++++++++++++++++-
-> >  include/linux/platform_data/mmc-esdhc-imx.h        |   1 +
-> >  4 files changed, 130 insertions(+), 4 deletions(-)
-> > 
-> > -- 
-> > 1.9.1
-> > 
-> 
-> The patch set looks good to me.
-> 
-> Acked-by: Dong Aisheng <aisheng.dong@freescale.com>
-> 
-> Regards
-> Dong Aisheng
+Hi Tony,
 
-Hi Ulf,
+On Thursday 30 July 2015 01:07 AM, Nishanth Menon wrote:
+> On 07/29/2015 06:09 AM, Kishon Vijay Abraham I wrote:
+>> For beagle x15, both the vdd and io lines are connected to the
+>> same regulator (ldo1_reg). However vmmc_aux is populated to vdd_3v3.
+>> Remove it.
+>>
+>> Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+>> ---
+>>  arch/arm/boot/dts/am57xx-beagle-x15.dts |    1 -
+>>  1 file changed, 1 deletion(-)
+>>
+>> diff --git a/arch/arm/boot/dts/am57xx-beagle-x15.dts b/arch/arm/boot/dts/am57xx-beagle-x15.dts
+>> index a63bf78..d0db5c5 100644
+>> --- a/arch/arm/boot/dts/am57xx-beagle-x15.dts
+>> +++ b/arch/arm/boot/dts/am57xx-beagle-x15.dts
+>> @@ -579,7 +579,6 @@
+>>  	pinctrl-0 = <&mmc1_pins_default>;
+>>  
+>>  	vmmc-supply = <&ldo1_reg>;
+>> -	vmmc_aux-supply = <&vdd_3v3>;
+>>  	pbias-supply = <&pbias_mmc_reg>;
+>>  	bus-width = <4>;
+>>  	cd-gpios = <&gpio6 27 0>; /* gpio 219 */
+>>
+> Acked-by: Nishanth Menon <nm-l0cyMroinI0@public.gmane.org>
 
-Can you help pull these patches into your branch?
+Can you pick this one or you want me to resend it?
 
-
-Best regards
-
-Haibo
--- 
+Thanks
+Kishon
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
