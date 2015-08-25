@@ -1,80 +1,71 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 00/16] omap_hsmmc: regulator usage cleanup and fixes
-Date: Tue, 25 Aug 2015 13:50:19 +0200
-Message-ID: <CAPDyKFpSst5wnR-ZJd3w1J-iWYXqKvXAJTaye_DK=NH_cBzsgw@mail.gmail.com>
-References: <1438604801-11823-1-git-send-email-kishon@ti.com>
+Subject: Re: Re: [v4,1/6] mmc: dt: add DT binding for big endian controller
+Date: Tue, 25 Aug 2015 14:02:19 +0200
+Message-ID: <CAPDyKFpR=qbheQ8hJueAbHA_5f9kBDNb9_zqanGTna+1POhbdg@mail.gmail.com>
+References: <DM2PR0301MB0734002AABE322D7106D3AF6BA620@DM2PR0301MB0734.namprd03.prod.outlook.com>
+	<BY1PR0301MB1192D64A16D187E5485796DCF2610@BY1PR0301MB1192.namprd03.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1438604801-11823-1-git-send-email-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Andreas Fenkart <afenkart@gmail.com>, Tony Lindgren <tony@atomide.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ig0-f172.google.com ([209.85.213.172]:33915 "EHLO
+	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754083AbbHYMCU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2015 08:02:20 -0400
+Received: by igui7 with SMTP id i7so9339946igu.1
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2015 05:02:19 -0700 (PDT)
+In-Reply-To: <BY1PR0301MB1192D64A16D187E5485796DCF2610@BY1PR0301MB1192.namprd03.prod.outlook.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Lu Y.B." <yangbo.lu@freescale.com>
+Cc: Li Leo <LeoLi@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 
-On 3 August 2015 at 14:26, Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> Changes from v1:
-> *) return on -EPROBE_DEFER and other fatal errors. (Don't return only
->    if the return value is -ENODEV)
-> *) Remove the beagle x15 dts patch. It can be part of a different
->    series.
-> *) Avoid using regulator_is_enabled for vqmmc since if the regulator
->    is shared and the other users are not using regulator_is_enabled
->    then there can be unbalanced regulator_enable/regulator_disable
+On 25 August 2015 at 12:27, Lu Y.B. <yangbo.lu@freescale.com> wrote:
+> Please see my comments below.
 >
-> This patch series does the following
-> *) Uses devm_regulator_get_optional() for vmmc and then removes the
->    CONFIG_REGULATOR check altogether.
-> *) return on -EPROBE_DEFER and any other fatal errors
-> *) enable/disable vmmc_aux regulator based on prior state
+>> -----Original Message-----
+>> From: Li Yang-Leo-R58472
+>> Sent: Tuesday, August 25, 2015 6:56 AM
+>> To: Lu Yangbo-B47093
+>> Cc: linux-mmc@vger.kernel.org; ulf.hansson@linaro.org;
+>> devicetree@vger.kernel.org
+>> Subject: Re: [v4,1/6] mmc: dt: add DT binding for big endian controller
+>>
+>> > Add specification of 'big-endian' property. if the controller is big
+>> > endian mode, specify this property in device tree node.
+>> > The default endian mode is little endian.
+>>
+>> You shouldn't make the default endian mode to be little endian because in
+>> the original binding without this new property we are actually expecting
+>> big-endian hardware.  Making little-endian the default is breaking the
+>> compatibility with the original binding.
+>>
+>> Regards,
+>> Leo
 >
-> I've pushed this patch series to
-> git://git.ti.com/linux-phy/linux-phy.git mmc_regulator_cleanup_fixes_v2
+> Thanks a lot, Leo.
 >
-> Please note the branch also has the pbias fixes [1] & [2].
-> [1] -> https://lkml.org/lkml/2015/7/27/358
-> [2] -> https://lkml.org/lkml/2015/7/27/391
+> Hi Uffe,
 >
-> This series is in preparation for implementing the voltage switch
-> sequence so that UHS cards can be supported.
->
-> Did basic read/write test in J6, J6 Eco, Beagle-x15, AM437x EVM,
-> Beaglebone black, OMAP5 uEVM and OMAP4 PANDA.
->
-> Kishon Vijay Abraham I (15):
->   mmc: host: omap_hsmmc: use devm_regulator_get_optional() for vmmc
->   mmc: host: omap_hsmmc: return on fatal errors from omap_hsmmc_reg_get
->   mmc: host: omap_hsmmc: cleanup omap_hsmmc_reg_get()
->   mmc: host: omap_hsmmc: use the ocrmask provided by the vmmc regulator
->   mmc: host: omap_hsmmc: use mmc_host's vmmc and vqmmc
->   mmc: host: omap_hsmmc: remove unnecessary pbias set_voltage
->   mmc: host: omap_hsmmc: return error if any of the regulator APIs fail
->   mmc: host: omap_hsmmc: add separate functions for enable/disable
->     supply
->   mmc: host: omap_hsmmc: add separate function to set pbias
->   mmc: host: omap_hsmmc: avoid pbias regulator enable on power off
->   mmc: host: omap_hsmmc: don't use ->set_power to set initial regulator
->     state
->   mmc: host: omap_hsmmc: enable/disable vmmc_aux regulator based on
->     previous state
->   mmc: host: omap_hsmmc: use regulator_is_enabled to find pbias status
->   mmc: host: omap_hsmmc: use ios->vdd for setting vmmc voltage
->   mmc: host: omap_hsmmc: remove CONFIG_REGULATOR check
->
-> Roger Quadros (1):
->   mmc: host: omap_hsmmc: use "mmc_of_parse_voltage" to get ocr_avail
->
->  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    2 +
->  drivers/mmc/host/omap_hsmmc.c                      |  340 +++++++++++++-------
->  2 files changed, 224 insertions(+), 118 deletions(-)
->
-> --
-> 1.7.9.5
->
+> Since it doesn't make sense to extend the common MMC DT parser, mmc_of_parse(), to fetch the endian mode,
+> I'd like to move endian fetching code and all LE/BE accessors definition to eSDHC driver.
 
-I tried to apply this on top of my next branch, but it didn't work.
-Could you please rebase and send a v3!?
-While you do that, please add Tony's tested-by tag as well.
+Please them parts of the sdhci generic code, as library functions.
+
+>
+> And the default endian would be set to big-endian again for eSDHC.
+
+That's okay, just make sure it's properly documented in the DT binding
+doc for esdhc.
+
+>
+> Use function pointers that are assigned in probe according endian mode to avoid checking endian every time.
+> I'd also like to separate eMMC DDR mode patch from this patchset. Would send it with other UHS-1 speed mode patches together.
+
+Makes perfect sense!
+
+So in your sdhci host specific driver, you will find out the endian
+type and make use of the corresponding library functions gets assigned
+in the host ops which is provided to sdhci_pltfm_init.
 
 Kind regards
 Uffe
