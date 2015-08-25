@@ -1,20 +1,26 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 01/11] mmc: omap: fix error return code
-Date: Tue, 25 Aug 2015 17:26:51 +0200
-Message-ID: <CAPDyKFotb6+iz=HkiLp=0XtBDgwFhWUBkVZ3beAU5eMKfACteA@mail.gmail.com>
+Subject: Re: [PATCH 06/11] mmc: usdhi6rol0: fix error return code
+Date: Tue, 25 Aug 2015 17:26:57 +0200
+Message-ID: <CAPDyKFq06+rb12D1N59dKbojm1N+1WwbXUFrvRvktzDFjSV_TQ@mail.gmail.com>
 References: <1440288682-12732-1-git-send-email-Julia.Lawall@lip6.fr>
-	<1440288682-12732-2-git-send-email-Julia.Lawall@lip6.fr>
+	<1440288682-12732-7-git-send-email-Julia.Lawall@lip6.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1440288682-12732-2-git-send-email-Julia.Lawall@lip6.fr>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Julia Lawall <Julia.Lawall@lip6.fr>
-Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>, kernel-janitors@vger.kernel.org, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ig0-f182.google.com ([209.85.213.182]:38542 "EHLO
+	mail-ig0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751315AbbHYP06 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2015 11:26:58 -0400
+Received: by igfj19 with SMTP id j19so13878768igf.1
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2015 08:26:57 -0700 (PDT)
+In-Reply-To: <1440288682-12732-7-git-send-email-Julia.Lawall@lip6.fr>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Julia Lawall <Julia.Lawall@lip6.fr>
+Cc: kernel-janitors@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
 On 23 August 2015 at 02:11, Julia Lawall <Julia.Lawall@lip6.fr> wrote:
-> Return a negative error code on failure.
+> Propagate error code on failure.
 >
 > A simplified version of the semantic match that finds this problem is as
 > follows: (http://coccinelle.lip6.fr/)
@@ -46,25 +52,26 @@ Thanks, applied for next!
 Kind regards
 Uffe
 
+
 >
 > ---
->  drivers/mmc/host/omap.c |    4 +++-
+>  drivers/mmc/host/usdhi6rol0.c |    4 +++-
 >  1 file changed, 3 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-> index 70dcf07..b763b11 100644
-> --- a/drivers/mmc/host/omap.c
-> +++ b/drivers/mmc/host/omap.c
-> @@ -1420,8 +1420,10 @@ static int mmc_omap_probe(struct platform_device *pdev)
->         host->reg_shift = (mmc_omap7xx() ? 1 : 2);
+> diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
+> index 54b082b..99f894c 100644
+> --- a/drivers/mmc/host/usdhi6rol0.c
+> +++ b/drivers/mmc/host/usdhi6rol0.c
+> @@ -1734,8 +1734,10 @@ static int usdhi6_probe(struct platform_device *pdev)
+>         }
 >
->         host->mmc_omap_wq = alloc_workqueue("mmc_omap", 0, 0);
-> -       if (!host->mmc_omap_wq)
-> +       if (!host->mmc_omap_wq) {
-> +               ret = -ENOMEM;
->                 goto err_plat_cleanup;
+>         host->clk = devm_clk_get(dev, NULL);
+> -       if (IS_ERR(host->clk))
+> +       if (IS_ERR(host->clk)) {
+> +               ret = PTR_ERR(host->clk);
+>                 goto e_free_mmc;
 > +       }
 >
->         for (i = 0; i < pdata->nr_slots; i++) {
->                 ret = mmc_omap_new_slot(host, i);
+>         host->imclk = clk_get_rate(host->clk);
+>
 >
