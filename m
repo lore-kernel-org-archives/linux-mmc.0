@@ -1,90 +1,70 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 16/16] mmc: host: omap_hsmmc: use "mmc_of_parse_voltage"
- to get ocr_avail
-Date: Tue, 25 Aug 2015 16:50:13 +0200
-Message-ID: <CAPDyKFoctSjBb0aPFNe0cyHe0uoD_DkWooQ-yyTX-P+bGJa_Vw@mail.gmail.com>
-References: <1438604801-11823-1-git-send-email-kishon@ti.com>
-	<1438604801-11823-17-git-send-email-kishon@ti.com>
+Subject: Re: [PATCH 01/11] mmc: omap: fix error return code
+Date: Tue, 25 Aug 2015 17:26:51 +0200
+Message-ID: <CAPDyKFotb6+iz=HkiLp=0XtBDgwFhWUBkVZ3beAU5eMKfACteA@mail.gmail.com>
+References: <1440288682-12732-1-git-send-email-Julia.Lawall@lip6.fr>
+	<1440288682-12732-2-git-send-email-Julia.Lawall@lip6.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1438604801-11823-17-git-send-email-kishon@ti.com>
+In-Reply-To: <1440288682-12732-2-git-send-email-Julia.Lawall@lip6.fr>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Andreas Fenkart <afenkart@gmail.com>, Tony Lindgren <tony@atomide.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, Roger Quadros <rogerq@ti.com>, Lokesh Vutla <lokeshvutla@ti.com>, Murali Karicheri <m-karicheri2@ti.com>, Franklin S Cooper Jr <fcooper@ti.com>
+To: Julia Lawall <Julia.Lawall@lip6.fr>
+Cc: Jarkko Lavinen <jarkko.lavinen@nokia.com>, kernel-janitors@vger.kernel.org, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 3 August 2015 at 14:26, Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> From: Roger Quadros <rogerq@ti.com>
+On 23 August 2015 at 02:11, Julia Lawall <Julia.Lawall@lip6.fr> wrote:
+> Return a negative error code on failure.
 >
-> For platforms that doesn't have explicit regulator control in MMC,
-> populate voltage-ranges in MMC device tree node and use
-> mmc_of_parse_voltage to get ocr_avail
+> A simplified version of the semantic match that finds this problem is as
+> follows: (http://coccinelle.lip6.fr/)
+>
+> // <smpl>
+> @@
+> identifier ret; expression e1,e2;
+> @@
+> (
+> if (\(ret < 0\|ret != 0\))
+>  { ... return ret; }
+> |
+> ret = 0
+> )
+> ... when != ret = e1
+>     when != &ret
+> *if(...)
+> {
+>   ... when != ret = e2
+>       when forall
+>  return ret;
+> }
+> // </smpl>
+>
+> Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
 
-I don't like this.
-
-If we are able to fetch the OCR mask via an external regulator, that
-shall be done.
-
-I think the mmc_of_parse_voltage() API and the corresponding DT
-binding it parses, should be used for those HW when we don't have an
-external regulator to use. For example if the MMC controller itself
-somehow controls the voltage levels. Is that really the case for you?
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
 >
-> Signed-off-by: Roger Quadros <rogerq@ti.com>
-> Signed-off-by: Lokesh Vutla <lokeshvutla@ti.com>
-> Signed-off-by: Murali Karicheri <m-karicheri2@ti.com>
-> Signed-off-by: Franklin S Cooper Jr <fcooper@ti.com>
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 > ---
->  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    2 ++
->  drivers/mmc/host/omap_hsmmc.c                      |    9 ++++++++-
->  2 files changed, 10 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/omap.c |    4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> index 76bf087..2408e87 100644
-> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-> @@ -22,6 +22,8 @@ ti,dual-volt: boolean, supports dual voltage cards
->  ti,non-removable: non-removable slot (like eMMC)
->  ti,needs-special-reset: Requires a special softreset sequence
->  ti,needs-special-hs-handling: HSMMC IP needs special setting for handling High Speed
-> +voltage-ranges: Specify the voltage range supported if regulator framework
-> +isn't enabled.
->  dmas: List of DMA specifiers with the controller specific format
->  as described in the generic DMA client binding. A tx and rx
->  specifier is required.
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 15973f1..d884d8f 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -2184,7 +2184,13 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->                         goto err_irq;
->         }
+> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+> index 70dcf07..b763b11 100644
+> --- a/drivers/mmc/host/omap.c
+> +++ b/drivers/mmc/host/omap.c
+> @@ -1420,8 +1420,10 @@ static int mmc_omap_probe(struct platform_device *pdev)
+>         host->reg_shift = (mmc_omap7xx() ? 1 : 2);
 >
-> -       mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
-> +       if (!mmc_pdata(host)->ocr_mask) {
-> +               ret = mmc_of_parse_voltage(pdev->dev.of_node, &mmc->ocr_avail);
-> +               if (ret)
-> +                       goto err_parse_voltage;
-> +       } else {
-> +               mmc->ocr_avail = mmc_pdata(host)->ocr_mask;
+>         host->mmc_omap_wq = alloc_workqueue("mmc_omap", 0, 0);
+> -       if (!host->mmc_omap_wq)
+> +       if (!host->mmc_omap_wq) {
+> +               ret = -ENOMEM;
+>                 goto err_plat_cleanup;
 > +       }
 >
->         omap_hsmmc_disable_irq(host);
->
-> @@ -2224,6 +2230,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->
->  err_slot_name:
->         mmc_remove_host(mmc);
-> +err_parse_voltage:
->         omap_hsmmc_reg_put(host);
->  err_irq:
->         device_init_wakeup(&pdev->dev, false);
-> --
-> 1.7.9.5
+>         for (i = 0; i < pdata->nr_slots; i++) {
+>                 ret = mmc_omap_new_slot(host, i);
 >
