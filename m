@@ -1,8 +1,8 @@
-From: Laura Abbott <labbott@redhat.com>
-Subject: Re: [RFC] sdhci: fix DMA leaks [was: [SHDCI] Heavy (thousands) DMA
+From: Chen Bough <Haibo.Chen@freescale.com>
+Subject: RE: [RFC] sdhci: fix DMA leaks [was: [SHDCI] Heavy (thousands) DMA
  leaks]
-Date: Mon, 24 Aug 2015 09:26:32 -0700
-Message-ID: <55DB45B8.3020106@redhat.com>
+Date: Tue, 25 Aug 2015 01:50:13 +0000
+Message-ID: <BY1PR03MB1388595A035A8369343C8B9E9A610@BY1PR03MB1388.namprd03.prod.outlook.com>
 References: <55B9EF02.7040404@suse.cz>
  <BY1PR03MB138811AD7FAB3C561CC683679A770@BY1PR03MB1388.namprd03.prod.outlook.com>
  <55BF36D6.4080504@suse.cz> <55C1F919.4080002@suse.cz>
@@ -10,54 +10,51 @@ References: <55B9EF02.7040404@suse.cz>
  <BY1PR03MB13889A6C31FC542DB544CE479A740@BY1PR03MB1388.namprd03.prod.outlook.com>
  <55C323A5.6050303@suse.cz>
  <BY1PR03MB1388AE95AA9000BB9B8B47559A740@BY1PR03MB1388.namprd03.prod.outlook.com>
+ <55DB45B8.3020106@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <BY1PR03MB1388AE95AA9000BB9B8B47559A740@BY1PR03MB1388.namprd03.prod.outlook.com>
+In-Reply-To: <55DB45B8.3020106@redhat.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chen Bough <Haibo.Chen@freescale.com>, Jiri Slaby <jslaby@suse.cz>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Laura Abbott <labbott@redhat.com>, Jiri Slaby <jslaby@suse.cz>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux kernel mailing list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 08/06/2015 02:17 AM, Chen Bough wrote:
-> I will format a patch based on your diff file firstly. I will test this on my side,
-> If any issue, like dma issue or performance issue, I will add some modification.
-> Then I will send the patch for review, and you can test the patch on your platform.
->
-> Best Regards
-> Haibo Chen
->
-
-Did I miss the follow up patch or is this still pending? If it's still pending,
-would you mind Ccing me when it's available for testing?
-
-Thanks,
-Laura
-  
->
->> -----Original Message-----
->> From: Jiri Slaby [mailto:jslaby@suse.cz]
->> Sent: Thursday, August 06, 2015 5:07 PM
->> To: Chen Haibo-B51421; Ulf Hansson
->> Cc: linux-mmc@vger.kernel.org; Linux kernel mailing list
->> Subject: Re: [RFC] sdhci: fix DMA leaks [was: [SHDCI] Heavy (thousands)
->> DMA leaks]
->>
->> On 08/06/2015, 09:42 AM, Chen Bough wrote:
->>> I read your attached log and patch, yes, dma memory leak will happen
->>> when more than one pre_request execute. The method of ++next->cookie
->>> is not good, your patch seems good, but I still need some time to test
->>> the patch, because you unmap the dma in sdhci_finish_data rather than
->> the sdhci_post_req.
->>
->> Hi,
->>
->> yes, this is not correct. We can perhaps differentiate according to the
->> COOKIE value. Should I fix it or are you going to prepare a patch based
->> on my RFC?
->>
->> thanks,
->> --
->> js
->> suse labs
+SGkgTGF1cmEsDQoNCllvdSBjYW4gZmluZCB0aGUgcGF0Y2ggaGVyZToNCmh0dHA6Ly9wYXRjaHdv
+cmsua2VybmVybC54eXovcGF0Y2gvNjk2NzE2MS8NCg0KSSB3aWxsIHNlbmQgdGhpcyBwYXRjaCBh
+Z2FpbiBhbmQgY2MgdG8geW91Lg0KDQoNCkJlc3QgcmVnYXJkcw0KDQpIYWlibw0KDQoNCg0KPiAt
+LS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBMYXVyYSBBYmJvdHQgW21haWx0bzps
+YWJib3R0QHJlZGhhdC5jb21dDQo+IFNlbnQ6IFR1ZXNkYXksIEF1Z3VzdCAyNSwgMjAxNSAxMjoy
+NyBBTQ0KPiBUbzogQ2hlbiBIYWliby1CNTE0MjE7IEppcmkgU2xhYnk7IFVsZiBIYW5zc29uDQo+
+IENjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBMaW51eCBrZXJuZWwgbWFpbGluZyBsaXN0
+DQo+IFN1YmplY3Q6IFJlOiBbUkZDXSBzZGhjaTogZml4IERNQSBsZWFrcyBbd2FzOiBbU0hEQ0ld
+IEhlYXZ5ICh0aG91c2FuZHMpDQo+IERNQSBsZWFrc10NCj4gDQo+IE9uIDA4LzA2LzIwMTUgMDI6
+MTcgQU0sIENoZW4gQm91Z2ggd3JvdGU6DQo+ID4gSSB3aWxsIGZvcm1hdCBhIHBhdGNoIGJhc2Vk
+IG9uIHlvdXIgZGlmZiBmaWxlIGZpcnN0bHkuIEkgd2lsbCB0ZXN0DQo+ID4gdGhpcyBvbiBteSBz
+aWRlLCBJZiBhbnkgaXNzdWUsIGxpa2UgZG1hIGlzc3VlIG9yIHBlcmZvcm1hbmNlIGlzc3VlLCBJ
+DQo+IHdpbGwgYWRkIHNvbWUgbW9kaWZpY2F0aW9uLg0KPiA+IFRoZW4gSSB3aWxsIHNlbmQgdGhl
+IHBhdGNoIGZvciByZXZpZXcsIGFuZCB5b3UgY2FuIHRlc3QgdGhlIHBhdGNoIG9uDQo+IHlvdXIg
+cGxhdGZvcm0uDQo+ID4NCj4gPiBCZXN0IFJlZ2FyZHMNCj4gPiBIYWlibyBDaGVuDQo+ID4NCj4g
+DQo+IERpZCBJIG1pc3MgdGhlIGZvbGxvdyB1cCBwYXRjaCBvciBpcyB0aGlzIHN0aWxsIHBlbmRp
+bmc/IElmIGl0J3Mgc3RpbGwNCj4gcGVuZGluZywgd291bGQgeW91IG1pbmQgQ2NpbmcgbWUgd2hl
+biBpdCdzIGF2YWlsYWJsZSBmb3IgdGVzdGluZz8NCj4gDQo+IFRoYW5rcywNCj4gTGF1cmENCj4g
+DQo+ID4NCj4gPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPj4gRnJvbTogSmlyaSBT
+bGFieSBbbWFpbHRvOmpzbGFieUBzdXNlLmN6XQ0KPiA+PiBTZW50OiBUaHVyc2RheSwgQXVndXN0
+IDA2LCAyMDE1IDU6MDcgUE0NCj4gPj4gVG86IENoZW4gSGFpYm8tQjUxNDIxOyBVbGYgSGFuc3Nv
+bg0KPiA+PiBDYzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgTGludXgga2VybmVsIG1haWxp
+bmcgbGlzdA0KPiA+PiBTdWJqZWN0OiBSZTogW1JGQ10gc2RoY2k6IGZpeCBETUEgbGVha3MgW3dh
+czogW1NIRENJXSBIZWF2eQ0KPiA+PiAodGhvdXNhbmRzKSBETUEgbGVha3NdDQo+ID4+DQo+ID4+
+IE9uIDA4LzA2LzIwMTUsIDA5OjQyIEFNLCBDaGVuIEJvdWdoIHdyb3RlOg0KPiA+Pj4gSSByZWFk
+IHlvdXIgYXR0YWNoZWQgbG9nIGFuZCBwYXRjaCwgeWVzLCBkbWEgbWVtb3J5IGxlYWsgd2lsbCBo
+YXBwZW4NCj4gPj4+IHdoZW4gbW9yZSB0aGFuIG9uZSBwcmVfcmVxdWVzdCBleGVjdXRlLiBUaGUg
+bWV0aG9kIG9mICsrbmV4dC0+Y29va2llDQo+ID4+PiBpcyBub3QgZ29vZCwgeW91ciBwYXRjaCBz
+ZWVtcyBnb29kLCBidXQgSSBzdGlsbCBuZWVkIHNvbWUgdGltZSB0bw0KPiA+Pj4gdGVzdCB0aGUg
+cGF0Y2gsIGJlY2F1c2UgeW91IHVubWFwIHRoZSBkbWEgaW4gc2RoY2lfZmluaXNoX2RhdGENCj4g
+Pj4+IHJhdGhlciB0aGFuDQo+ID4+IHRoZSBzZGhjaV9wb3N0X3JlcS4NCj4gPj4NCj4gPj4gSGks
+DQo+ID4+DQo+ID4+IHllcywgdGhpcyBpcyBub3QgY29ycmVjdC4gV2UgY2FuIHBlcmhhcHMgZGlm
+ZmVyZW50aWF0ZSBhY2NvcmRpbmcgdG8NCj4gPj4gdGhlIENPT0tJRSB2YWx1ZS4gU2hvdWxkIEkg
+Zml4IGl0IG9yIGFyZSB5b3UgZ29pbmcgdG8gcHJlcGFyZSBhIHBhdGNoDQo+ID4+IGJhc2VkIG9u
+IG15IFJGQz8NCj4gPj4NCj4gPj4gdGhhbmtzLA0KPiA+PiAtLQ0KPiA+PiBqcw0KPiA+PiBzdXNl
+IGxhYnMNCg0K
