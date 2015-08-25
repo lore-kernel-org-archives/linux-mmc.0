@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v2 02/11] mmc: host: omap_hsmmc: separate setting voltage capabilities from bus power
-Date: Tue, 25 Aug 2015 14:35:33 +0530
-Message-ID: <1440493542-26150-3-git-send-email-kishon@ti.com>
+Subject: [PATCH v2 01/11] mmc: host: omap_hsmmc: Support vmmc_aux to switch to 1.8v
+Date: Tue, 25 Aug 2015 14:35:32 +0530
+Message-ID: <1440493542-26150-2-git-send-email-kishon@ti.com>
 References: <1440493542-26150-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,73 +12,129 @@ To: ulf.hansson@linaro.org, afenkart@gmail.com, tony@atomide.com, linux-mmc@vger
 Cc: neilb@suse.de, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-Added a separate function to set the voltage capabilities of the host
-controller. Voltage capabilities should be set only once during
-controller initialization but bus power can be changed every time there
-is a voltage switch and whenever a different card is inserted.
-This allows omap_hsmmc_conf_bus_power to be invoked every time there
-is a voltage switch.
+Add support for vmmc_aux to switch to 1.8v. Also use "iov" instead of
+"vdd" to indicate io voltage. This is in preparation for adding support
+for io signal voltage switch.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   28 +++++++++++++++++++---------
- 1 file changed, 19 insertions(+), 9 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   48 +++++++++++++++++++++++++++--------------
+ 1 file changed, 32 insertions(+), 16 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 9c13157..fd8cc81 100644
+index d884d8f..9c13157 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1821,25 +1821,34 @@ err:
- 	return ret;
+@@ -244,11 +244,12 @@ static int omap_hsmmc_get_cover_state(struct device *dev)
+ 	return mmc_gpio_get_cd(host->mmc);
  }
  
-+static void omap_hsmmc_set_capabilities(struct omap_hsmmc_host *host)
-+{
-+	u32 val;
-+
-+	val = OMAP_HSMMC_READ(host->base, CAPA);
-+
-+	/* Only MMC1 supports 3.0V */
-+	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT)
-+		val |= (VS30 | VS18);
-+	else
-+		val |= VS18;
-+
-+	OMAP_HSMMC_WRITE(host->base, CAPA, val);
-+}
-+
- static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
+-static int omap_hsmmc_enable_supply(struct mmc_host *mmc)
++static int omap_hsmmc_enable_supply(struct mmc_host *mmc, int iov)
  {
--	u32 hctl, capa, value;
-+	u32 hctl, value;
+ 	int ret;
+ 	struct omap_hsmmc_host *host = mmc_priv(mmc);
+ 	struct mmc_ios *ios = &mmc->ios;
++	int uvoltage;
  
- 	/* Only MMC1 supports 3.0V */
--	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT) {
-+	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT)
- 		hctl = SDVS30;
--		capa = VS30 | VS18;
--	} else {
-+	else
- 		hctl = SDVS18;
--		capa = VS18;
--	}
+ 	if (mmc->supply.vmmc) {
+ 		ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
+@@ -257,7 +258,25 @@ static int omap_hsmmc_enable_supply(struct mmc_host *mmc)
+ 	}
  
- 	value = OMAP_HSMMC_READ(host->base, HCTL) & ~SDVS_MASK;
- 	OMAP_HSMMC_WRITE(host->base, HCTL, value | hctl);
- 
--	value = OMAP_HSMMC_READ(host->base, CAPA);
--	OMAP_HSMMC_WRITE(host->base, CAPA, value | capa);
--
- 	/* Set SD bus power bit */
- 	set_sd_bus_power(host);
+ 	/* Enable interface voltage rail, if needed */
+-	if (mmc->supply.vqmmc && !host->vqmmc_enabled) {
++	if (mmc->supply.vqmmc) {
++		if (host->vqmmc_enabled) {
++			ret = regulator_disable(mmc->supply.vqmmc);
++			if (ret) {
++				dev_err(mmc_dev(mmc),
++					"vmmc_aux reg disable failed\n");
++				goto err_vqmmc;
++			}
++			host->vqmmc_enabled = 0;
++		}
++
++		uvoltage = (iov == VDD_165_195) ? VDD_1V8 : VDD_3V0;
++		ret = regulator_set_voltage(mmc->supply.vqmmc, uvoltage,
++					    uvoltage);
++		if (ret) {
++			dev_err(mmc_dev(mmc), "vmmc_aux set voltage failed\n");
++			goto err_vqmmc;
++		}
++
+ 		ret = regulator_enable(mmc->supply.vqmmc);
+ 		if (ret) {
+ 			dev_err(mmc_dev(mmc), "vmmc_aux reg enable failed\n");
+@@ -309,22 +328,19 @@ err_set_ocr:
  }
-@@ -2143,6 +2152,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
  
- 	mmc->pm_caps |= mmc_pdata(host)->pm_caps;
+ static int omap_hsmmc_set_pbias(struct omap_hsmmc_host *host, bool power_on,
+-				int vdd)
++				int iov)
+ {
+ 	int ret;
++	int uvoltage;
  
-+	omap_hsmmc_set_capabilities(host);
- 	omap_hsmmc_conf_bus_power(host);
+ 	if (!host->pbias)
+ 		return 0;
  
- 	if (!pdev->dev.of_node) {
+ 	if (power_on) {
+-		if (vdd <= VDD_165_195)
+-			ret = regulator_set_voltage(host->pbias, VDD_1V8,
+-						    VDD_1V8);
+-		else
+-			ret = regulator_set_voltage(host->pbias, VDD_3V0,
+-						    VDD_3V0);
+-		if (ret < 0) {
+-			dev_err(host->dev, "pbias set voltage fail\n");
++		uvoltage = (iov <= VDD_165_195) ? VDD_1V8 : VDD_3V0;
++		ret = regulator_set_voltage(host->pbias, uvoltage, uvoltage);
++		if (ret) {
++			dev_err(host->dev, "pbias set voltage failed\n");
+ 			return ret;
+ 		}
+ 
+@@ -348,7 +364,7 @@ static int omap_hsmmc_set_pbias(struct omap_hsmmc_host *host, bool power_on,
+ 	return 0;
+ }
+ 
+-static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
++static int omap_hsmmc_set_power(struct device *dev, int power_on, int iov)
+ {
+ 	struct omap_hsmmc_host *host =
+ 		platform_get_drvdata(to_platform_device(dev));
+@@ -363,7 +379,7 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
+ 		return 0;
+ 
+ 	if (mmc_pdata(host)->before_set_reg)
+-		mmc_pdata(host)->before_set_reg(dev, power_on, vdd);
++		mmc_pdata(host)->before_set_reg(dev, power_on, iov);
+ 
+ 	ret = omap_hsmmc_set_pbias(host, false, 0);
+ 	if (ret)
+@@ -383,11 +399,11 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
+ 	 * chips/cards need an interface voltage rail too.
+ 	 */
+ 	if (power_on) {
+-		ret = omap_hsmmc_enable_supply(mmc);
++		ret = omap_hsmmc_enable_supply(mmc, iov);
+ 		if (ret)
+ 			return ret;
+ 
+-		ret = omap_hsmmc_set_pbias(host, true, vdd);
++		ret = omap_hsmmc_set_pbias(host, true, iov);
+ 		if (ret)
+ 			goto err_set_voltage;
+ 	} else {
+@@ -397,7 +413,7 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
+ 	}
+ 
+ 	if (mmc_pdata(host)->after_set_reg)
+-		mmc_pdata(host)->after_set_reg(dev, power_on, vdd);
++		mmc_pdata(host)->after_set_reg(dev, power_on, iov);
+ 
+ 	return 0;
+ 
 -- 
 1.7.9.5
