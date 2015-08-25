@@ -1,78 +1,63 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] mmc: sdhci: also get preset value and driver type for MMC_DDR52
-Date: Tue, 25 Aug 2015 14:06:48 +0200
-Message-ID: <CAPDyKFpj+Mw5w43MD3wUssryn9y-Vyr6oNNQ+WVk2bLrbRUXjA@mail.gmail.com>
-References: <1439886099-5531-1-git-send-email-jszhang@marvell.com>
+Subject: Re: [PATCH] pwrseq: bind pinctrl pins before using the gpios
+Date: Tue, 25 Aug 2015 14:06:54 +0200
+Message-ID: <CAPDyKFqMOr5DwDcOjDTUV4Eaqp4VK1Q-Dt2_KcG-GtsNOr8JkQ@mail.gmail.com>
+References: <1439812687-18259-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1439886099-5531-1-git-send-email-jszhang@marvell.com>
+In-Reply-To: <1439812687-18259-1-git-send-email-srinivas.kandagatla@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 18 August 2015 at 10:21, Jisheng Zhang <jszhang@marvell.com> wrote:
-> commit bb8175a8aa42 ("mmc: sdhci: clarify DDR timing mode between
-> SD-UHS and eMMC") added MMC_DDR52 as eMMC's DDR mode to be
-> distinguished from SD-UHS, but it missed setting driver type for
-> MMC_DDR52 timing mode.
+On 17 August 2015 at 13:58, Srinivas Kandagatla
+<srinivas.kandagatla@linaro.org> wrote:
+> Some of the pin-controllers like the Qualcomms "qcom,pm8921", which
+> require a pinconf to be setup to use pins as gpios. Using the pins
+> directly without pinconf setup would result in incorrect output voltage
+> or load settings. On the other hand pwrseq code does not configure the
+> pinctrl by default as it does not go thru the driver core.
 >
-> So sometimes we get the following error on Marvell BG2Q DMP board:
+> This patch adds a call to pinctrl_bind_pins() to bind pins which
+> are going to be used as gpios.
 >
-> [    1.559598] mmcblk0: error -84 transferring data, sector 0, nr 8, cmd
-> response 0x900, card status 0xb00
-> [    1.569314] mmcblk0: retrying using single block read
-> [    1.575676] mmcblk0: error -84 transferring data, sector 2, nr 6, cmd
-> response 0x900, card status 0x0
-> [    1.585202] blk_update_request: I/O error, dev mmcblk0, sector 2
-> [    1.591818] mmcblk0: error -84 transferring data, sector 3, nr 5, cmd
-> response 0x900, card status 0x0
-> [    1.601341] blk_update_request: I/O error, dev mmcblk0, sector 3
->
-> This patches fixes this by adding the missing driver type setting.
->
-> Fixes: bb8175a8aa42 ("mmc: sdhci: clarify DDR timing mode ...")
-> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-Thanks, applied for next!
+Thanks, applied for next! I add the "mmc:" to the prefix of the commit
+message header.
 
 Kind regards
 Uffe
 
 > ---
->  Since v2:
->   - fix sdhci_get_preset_value for MMC_DDR52
->   - add typical emmc error log which this patch intends to fix
+>  drivers/mmc/core/pwrseq.c | 5 +++++
+>  1 file changed, 5 insertions(+)
 >
->  Since v1:
->   - correct commit-msg
+> diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
+> index 4c1d175..6e5d8b3 100644
+> --- a/drivers/mmc/core/pwrseq.c
+> +++ b/drivers/mmc/core/pwrseq.c
+> @@ -12,6 +12,7 @@
+>  #include <linux/err.h>
+>  #include <linux/of.h>
+>  #include <linux/of_platform.h>
+> +#include <linux/pinctrl/devinfo.h>
 >
->  drivers/mmc/host/sdhci.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+>  #include <linux/mmc/host.h>
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 1dbe932..673d703 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1132,6 +1132,7 @@ static u16 sdhci_get_preset_value(struct sdhci_host *host)
->                 preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR104);
->                 break;
->         case MMC_TIMING_UHS_DDR50:
-> +       case MMC_TIMING_MMC_DDR52:
->                 preset = sdhci_readw(host, SDHCI_PRESET_FOR_DDR50);
->                 break;
->         case MMC_TIMING_MMC_HS400:
-> @@ -1559,7 +1560,8 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
->                                  (ios->timing == MMC_TIMING_UHS_SDR25) ||
->                                  (ios->timing == MMC_TIMING_UHS_SDR50) ||
->                                  (ios->timing == MMC_TIMING_UHS_SDR104) ||
-> -                                (ios->timing == MMC_TIMING_UHS_DDR50))) {
-> +                                (ios->timing == MMC_TIMING_UHS_DDR50) ||
-> +                                (ios->timing == MMC_TIMING_MMC_DDR52))) {
->                         u16 preset;
+> @@ -65,6 +66,10 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
+>                 goto err;
+>         }
 >
->                         sdhci_enable_preset_value(host, true);
+> +       ret = pinctrl_bind_pins(&pdev->dev);
+> +       if (ret)
+> +               goto err;
+> +
+>         match = mmc_pwrseq_find(np);
+>         if (IS_ERR(match)) {
+>                 ret = PTR_ERR(match);
 > --
-> 2.5.0
+> 1.9.1
 >
