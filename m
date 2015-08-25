@@ -1,52 +1,56 @@
-From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH 12/17] ARM: dts: am57xx-beagle-x15: Fix regulator populated
- in MMC1 dt node
-Date: Tue, 25 Aug 2015 12:06:55 +0530
-Message-ID: <55DC0D07.7030504@ti.com>
-References: <1438168187-1614-1-git-send-email-kishon@ti.com> <1438168187-1614-13-git-send-email-kishon@ti.com> <55B92B88.1080409@ti.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH v2 00/11] omap_hsmmc: voltage switching and tuning
+Date: Tue, 25 Aug 2015 14:35:31 +0530
+Message-ID: <1440493542-26150-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <55B92B88.1080409-l0cyMroinI0@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Nishanth Menon <nm-l0cyMroinI0@public.gmane.org>, tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, afenkart-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: nsekhar-l0cyMroinI0@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from comal.ext.ti.com ([198.47.26.152]:48912 "EHLO comal.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755725AbbHYJFw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 25 Aug 2015 05:05:52 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, afenkart@gmail.com, tony@atomide.com, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, nsekhar@ti.com
+Cc: neilb@suse.de, kishon@ti.com
 
-Hi Tony,
+Patch series implements voltage switching and tuning for omap_hsmmc
+driver.
 
-On Thursday 30 July 2015 01:07 AM, Nishanth Menon wrote:
-> On 07/29/2015 06:09 AM, Kishon Vijay Abraham I wrote:
->> For beagle x15, both the vdd and io lines are connected to the
->> same regulator (ldo1_reg). However vmmc_aux is populated to vdd_3v3.
->> Remove it.
->>
->> Signed-off-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
->> ---
->>  arch/arm/boot/dts/am57xx-beagle-x15.dts |    1 -
->>  1 file changed, 1 deletion(-)
->>
->> diff --git a/arch/arm/boot/dts/am57xx-beagle-x15.dts b/arch/arm/boot/dts/am57xx-beagle-x15.dts
->> index a63bf78..d0db5c5 100644
->> --- a/arch/arm/boot/dts/am57xx-beagle-x15.dts
->> +++ b/arch/arm/boot/dts/am57xx-beagle-x15.dts
->> @@ -579,7 +579,6 @@
->>  	pinctrl-0 = <&mmc1_pins_default>;
->>  
->>  	vmmc-supply = <&ldo1_reg>;
->> -	vmmc_aux-supply = <&vdd_3v3>;
->>  	pbias-supply = <&pbias_mmc_reg>;
->>  	bus-width = <4>;
->>  	cd-gpios = <&gpio6 27 0>; /* gpio 219 */
->>
-> Acked-by: Nishanth Menon <nm-l0cyMroinI0@public.gmane.org>
+Changes from v1:
+*) rebased on top of [1]
+*) Patch breaking omap3 beagle xm is fixed. (set clk rate patch was
+   breaking beagle xm)
 
-Can you pick this one or you want me to resend it?
+[1] -> https://lkml.org/lkml/2015/8/21/125
 
-Thanks
-Kishon
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Did basic read/write test in J6, J6 Eco, Beagle-x15, AM437x EVM,
+Beaglebone black, OMAP5 uEVM and OMAP4 PANDA, OMAP3 beagle xm.
+Also performed PM suspend/resume test with OMAP3 beagle xm.
+
+Balaji T K (2):
+  mmc: host: omap_hsmmc: add voltage switch support for UHS SD card
+  mmc: host: omap_hsmmc: add tuning support
+
+Kishon Vijay Abraham I (8):
+  mmc: host: omap_hsmmc: Support vmmc_aux to switch to 1.8v
+  mmc: host: omap_hsmmc: separate setting voltage capabilities from bus
+    power
+  mmc: host: omap_hsmmc: program HCTL based on signal_voltage set by
+    mmc core
+  mmc: host: omap_hsmmc: set clk rate to the max frequency
+  mmc: host: omap_hsmmc: set timing in the UHSMS field
+  mmc: host: omap_hsmmc: Workaround for errata id i802
+  mmc: host: omap_hsmmc: Allow io voltage switch even for fixed vdd
+  mmc: host: omap_hsmmc: remove incorrect voltage switch sequence
+
+Mugunthan V N (1):
+  mmc: host: omap_hsmmc: add software timer when timeout greater than
+    hardware capablility
+
+ drivers/mmc/host/omap_hsmmc.c |  677 +++++++++++++++++++++++++++++++++--------
+ 1 file changed, 554 insertions(+), 123 deletions(-)
+
+-- 
+1.7.9.5
+
