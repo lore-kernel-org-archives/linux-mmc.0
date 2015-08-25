@@ -1,56 +1,95 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v2 00/11] omap_hsmmc: voltage switching and tuning
-Date: Tue, 25 Aug 2015 14:35:31 +0530
-Message-ID: <1440493542-26150-1-git-send-email-kishon@ti.com>
+Subject: [PATCH v2 03/11] mmc: host: omap_hsmmc: program HCTL based on signal_voltage set by mmc core
+Date: Tue, 25 Aug 2015 14:35:34 +0530
+Message-ID: <1440493542-26150-4-git-send-email-kishon@ti.com>
+References: <1440493542-26150-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:48912 "EHLO comal.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755725AbbHYJFw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 25 Aug 2015 05:05:52 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1440493542-26150-1-git-send-email-kishon@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, afenkart@gmail.com, tony@atomide.com, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, nsekhar@ti.com
 Cc: neilb@suse.de, kishon@ti.com
+List-Id: linux-mmc@vger.kernel.org
 
-Patch series implements voltage switching and tuning for omap_hsmmc
-driver.
+HCTL is now set based on ios.signal_voltage set by mmc core and not
+hardcoded to 3V0 if OMAP_HSMMC_SUPPORTS_DUAL_VOLT is set. If
+OMAP_HSMMC_SUPPORTS_DUAL_VOLT is set, it means HCTL can be set to either
+3V0 or 1V8. And it should be set to 3V0 or 1V8 depending on
+ios.signal_voltage.
+Also it is now set on power mode status being changed to MMC_POWER_ON.
 
-Changes from v1:
-*) rebased on top of [1]
-*) Patch breaking omap3 beagle xm is fixed. (set clk rate patch was
-   breaking beagle xm)
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |   16 +++++++---------
+ 1 file changed, 7 insertions(+), 9 deletions(-)
 
-[1] -> https://lkml.org/lkml/2015/8/21/125
-
-Did basic read/write test in J6, J6 Eco, Beagle-x15, AM437x EVM,
-Beaglebone black, OMAP5 uEVM and OMAP4 PANDA, OMAP3 beagle xm.
-Also performed PM suspend/resume test with OMAP3 beagle xm.
-
-Balaji T K (2):
-  mmc: host: omap_hsmmc: add voltage switch support for UHS SD card
-  mmc: host: omap_hsmmc: add tuning support
-
-Kishon Vijay Abraham I (8):
-  mmc: host: omap_hsmmc: Support vmmc_aux to switch to 1.8v
-  mmc: host: omap_hsmmc: separate setting voltage capabilities from bus
-    power
-  mmc: host: omap_hsmmc: program HCTL based on signal_voltage set by
-    mmc core
-  mmc: host: omap_hsmmc: set clk rate to the max frequency
-  mmc: host: omap_hsmmc: set timing in the UHSMS field
-  mmc: host: omap_hsmmc: Workaround for errata id i802
-  mmc: host: omap_hsmmc: Allow io voltage switch even for fixed vdd
-  mmc: host: omap_hsmmc: remove incorrect voltage switch sequence
-
-Mugunthan V N (1):
-  mmc: host: omap_hsmmc: add software timer when timeout greater than
-    hardware capablility
-
- drivers/mmc/host/omap_hsmmc.c |  677 +++++++++++++++++++++++++++++++++--------
- 1 file changed, 554 insertions(+), 123 deletions(-)
-
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index fd8cc81..d3fe0f8 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -229,6 +229,7 @@ struct omap_mmc_of_data {
+ };
+ 
+ static void omap_hsmmc_start_dma_transfer(struct omap_hsmmc_host *host);
++static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host, int iov);
+ 
+ static int omap_hsmmc_card_detect(struct device *dev)
+ {
+@@ -1674,6 +1675,7 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 			mmc_pdata(host)->set_power(host->dev, 1, ios->vdd);
+ 			break;
+ 		case MMC_POWER_ON:
++			omap_hsmmc_conf_bus_power(host, ios->signal_voltage);
+ 			do_send_init_stream = 1;
+ 			break;
+ 		}
+@@ -1836,17 +1838,12 @@ static void omap_hsmmc_set_capabilities(struct omap_hsmmc_host *host)
+ 	OMAP_HSMMC_WRITE(host->base, CAPA, val);
+ }
+ 
+-static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host)
++static void omap_hsmmc_conf_bus_power(struct omap_hsmmc_host *host, int iov)
+ {
+ 	u32 hctl, value;
+ 
+-	/* Only MMC1 supports 3.0V */
+-	if (host->pdata->controller_flags & OMAP_HSMMC_SUPPORTS_DUAL_VOLT)
+-		hctl = SDVS30;
+-	else
+-		hctl = SDVS18;
+-
+ 	value = OMAP_HSMMC_READ(host->base, HCTL) & ~SDVS_MASK;
++	hctl = (iov == MMC_SIGNAL_VOLTAGE_180) ? SDVS18 : SDVS30;
+ 	OMAP_HSMMC_WRITE(host->base, HCTL, value | hctl);
+ 
+ 	/* Set SD bus power bit */
+@@ -2153,7 +2150,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	mmc->pm_caps |= mmc_pdata(host)->pm_caps;
+ 
+ 	omap_hsmmc_set_capabilities(host);
+-	omap_hsmmc_conf_bus_power(host);
+ 
+ 	if (!pdev->dev.of_node) {
+ 		res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
+@@ -2328,6 +2324,7 @@ static int omap_hsmmc_suspend(struct device *dev)
+ static int omap_hsmmc_resume(struct device *dev)
+ {
+ 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
++	struct mmc_ios *ios;
+ 
+ 	if (!host)
+ 		return 0;
+@@ -2337,8 +2334,9 @@ static int omap_hsmmc_resume(struct device *dev)
+ 	if (host->dbclk)
+ 		clk_prepare_enable(host->dbclk);
+ 
++	ios = &host->mmc->ios;
+ 	if (!(host->mmc->pm_flags & MMC_PM_KEEP_POWER))
+-		omap_hsmmc_conf_bus_power(host);
++		omap_hsmmc_conf_bus_power(host, ios->signal_voltage);
+ 
+ 	omap_hsmmc_protect_card(host);
+ 	pm_runtime_mark_last_busy(host->dev);
 -- 
 1.7.9.5
-
