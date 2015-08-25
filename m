@@ -1,90 +1,122 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH v1] mmc: sdhci-of-arasan: Add the support for sdhci-5.1
-Date: Tue, 25 Aug 2015 14:07:07 +0200
-Message-ID: <CAPDyKFrAGd-xDKLK=xAm_L=jgM0t4eQpspngZkwy+B3923BndQ@mail.gmail.com>
-References: <1439279190-9556-1-git-send-email-shawn.lin@rock-chips.com>
-	<55CA0C6F.7000002@xilinx.com>
-	<55CAD499.5070701@xilinx.com>
-	<55D270FF.5030309@rock-chips.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: [PATCH v2] mmc: sunxi: Don't start commands while the card is
+ busy
+Date: Tue, 25 Aug 2015 14:09:45 +0200
+Message-ID: <55DC5B09.2020705@redhat.com>
+References: <1436541284-11800-1-git-send-email-hdegoede@redhat.com>
+ <CAPDyKFoNe0bghfSXs48stHzZToTc7Hjd5gVPy-VbDF8bzdVVMQ@mail.gmail.com>
+ <55BC8ADE.3070802@redhat.com>
+ <CAPDyKFrYvL33DsaATg4fyAJg=G3SEuOP+xU=o_UwasmNZ+a07Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <55D270FF.5030309@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Michal Simek <michal.simek@xilinx.com>, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:47898 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755058AbbHYMJs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 25 Aug 2015 08:09:48 -0400
+In-Reply-To: <CAPDyKFrYvL33DsaATg4fyAJg=G3SEuOP+xU=o_UwasmNZ+a07Q@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chris Ball <chris@printf.net>, Mike Turquette <mturquette@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Arend van Spriel <arend@broadcom.com>, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>, linux-sunxi@googlegroups.com, Eugene K <sigintmailru@gmail.com>
 
-On 18 August 2015 at 01:40, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> Hi Ulf,
->
->
-> On 2015/8/12 13:07, Michal Simek wrote:
+Hi,
+
+On 25-08-15 14:05, Ulf Hansson wrote:
+> On 1 August 2015 at 11:01, Hans de Goede <hdegoede@redhat.com> wrote:
+>> Hi,
 >>
->> +linux-mmc
+>> On 21-07-15 14:15, Ulf Hansson wrote:
+>>>
+>>> On 10 July 2015 at 17:14, Hans de Goede <hdegoede@redhat.com> wrote:
+>>>>
+>>>> Some sdio wifi modules have not been working reliable with the sunxi-mmc
+>>>> host code. This turns out to be caused by it starting new commands while
+>>>> the card signals that it is still busy processing a previous command.
+>>>
+>>>
+>>> Which are those commands?
 >>
->> On 08/11/2015 04:53 PM, Michal Simek wrote:
+>>
+>> The code were things get stuck when not waiting for the busy signal uses
+>> the following sdio helper functions:
+>>
+>> sdio_readb/sdio_writeb
+>> sdio_f0_readb/sdio_f0_writeb
+>> sdio_readw/sdio_writew
+>> sdio_readl/sdio_writel
+>> sdio_readsb
+>> sdio_memcpy_fromio/sdio_memcpy_toio
+>>
+>> And directly issues the following command:
+>>
+>>          mmc_dat.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
+>>          mmc_cmd.opcode = SD_IO_RW_EXTENDED;
+>>          mmc_cmd.arg = write ? 1<<31 : 0;        /* write flag  */
+>>          mmc_cmd.arg |= (fn & 0x7) << 28;        /* SDIO func num */
+>>          mmc_cmd.arg |= 1<<27;                   /* block mode */
+>>          /* for function 1 the addr will be incremented */
+>>          mmc_cmd.arg |= (fn == 1) ? 1<<26 : 0;
+>>          mmc_cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
+>>
+>> I do not know if the busy wait is necessary for all
+>> of these, but the hack in the android kernel code,
+>> which inserts calls to a wait_card_busy function directly
+>> into: drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c
+>>
+>> Does so for all of these.
+>>
+>>> Or more interesting, which response types do
 >>>
->>> On 08/11/2015 09:46 AM, Shawn Lin wrote:
->>>>
->>>> This patch adds the compatible string in sdhci-of-arasan.c to
->>>> support sdhci-arasan5.1 version of controller. No documented
->>>> controller IP version is found in the TRM, so we use ths version
->>>> of command queueing engine integrated into this controller by arasan
->>>> to specify our controller.
->>>>
->>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>>>
->>>> ---
->>>>
->>>> Changes in v1:
->>>> - Remove redundant SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN for "arasan,
->>>> sdhci-5.1" since
->>>>    SDHCI will check "host->max_clk == 0" and let driver get it from
->>>> host->ops->get_max_clock.
->>>>
->>>>   Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 2 +-
->>>>   drivers/mmc/host/sdhci-of-arasan.c                     | 1 +
->>>>   2 files changed, 2 insertions(+), 1 deletion(-)
->>>>
->>>> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->>>> b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->>>> index 7e94903..da541c3 100644
->>>> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->>>> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->>>> @@ -9,7 +9,7 @@ Device Tree Bindings for the Arasan SDHCI Controller
->>>>
->>>>   Required Properties:
->>>>     - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a' or
->>>> -                'arasan,sdhci-4.9a'
->>>> +                'arasan,sdhci-4.9a' or 'arasan,sdhci-5.1'
->>>>     - reg: From mmc bindings: Register location and length.
->>>>     - clocks: From clock bindings: Handles to clock inputs.
->>>>     - clock-names: From clock bindings: Tuple including "clk_xin" and
->>>> "clk_ahb"
->>>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c
->>>> b/drivers/mmc/host/sdhci-of-arasan.c
->>>> index ef5a7d2..75379cb 100644
->>>> --- a/drivers/mmc/host/sdhci-of-arasan.c
->>>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
->>>> @@ -217,6 +217,7 @@ static int sdhci_arasan_remove(struct
->>>> platform_device *pdev)
->>>>
->>>>   static const struct of_device_id sdhci_arasan_of_match[] = {
->>>>         { .compatible = "arasan,sdhci-8.9a" },
->>>> +       { .compatible = "arasan,sdhci-5.1" },
->>>>         { .compatible = "arasan,sdhci-4.9a" },
->>>>         { }
->>>>   };
->>>>
->>>
->>> Acked-by: Michal Simek <michal.simek@xilinx.com>
+>>> these commands expect?
+>>> I don't think this is a sunxi specific issue, I have seen similar
+>>> issues for other host controllers.
+>>
+>>
+>> Agreed, recent dw-mmc patches address the same issue, also involving
+>> broadcom sdio wifi chips.
+>>
+>>> I am thinking that perhaps this should be managed by the mmc core
+>>> instead of local hacks to sunxi. Potentially we could make the core to
+>>> invoke the already existing host_ops->card_busy() callback when
+>>> needed...
+>>
+>>
+>> I'm fine with solving this either way, implementing host_ops->card_busy()
+>> for sunxi is easy, and if the core os modified to call that function
+>> before issue sdio io ops (which seems to be the common thing here),
+>> then that indeed is better then having the sunxi code always do
+>> the busy check.
 >
->
-> Could you pull this patch into your repository?
->
+> Okay, so let's make the core to call the ->card_busy() callback and
+> then it's up to each host driver to implement that callback.
 
-Thanks, applied for next!
+Ok, do you plan to do a patch for this, or do you expect to get
+one submitted to you ?
 
-Kind regards
-Uffe
+Regards,
+
+Hans
+
+
+> As an optimization, we might consider (in a separate step) to add
+> MMC_RSP_BUSY to the response type. I realize that would somewhat be a
+> violation of the spec, but apparently the SDIO spec isn't really clear
+> on this area.
+>
+>>
+>>> Within this context, could I ask whether you controller supports IRQ
+>>> based HW-busy detection? Or you need polling of the status register?
+>>
+>>
+>> I'm afraid that we need to poll the status register. I've been unable
+>> to find an irq flag corresponding to this.
+>
+> Okay, thanks for the info.
+>
+> [...]
+>
+> Kind regards
+> Uffe
+>
