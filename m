@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v2 08/11] mmc: host: omap_hsmmc: Workaround for errata id i802
-Date: Tue, 25 Aug 2015 14:35:39 +0530
-Message-ID: <1440493542-26150-9-git-send-email-kishon@ti.com>
+Subject: [PATCH v2 09/11] mmc: host: omap_hsmmc: Allow io voltage switch even for fixed vdd
+Date: Tue, 25 Aug 2015 14:35:40 +0530
+Message-ID: <1440493542-26150-10-git-send-email-kishon@ti.com>
 References: <1440493542-26150-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,47 +12,31 @@ To: ulf.hansson@linaro.org, afenkart@gmail.com, tony@atomide.com, linux-mmc@vger
 Cc: neilb@suse.de, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-According to errata i802, DCRC error interrupts
-(MMCHS_STAT[21] DCRC=0x1) can occur during the tuning procedure.
-
-The DCRC interrupt, occurs when the last tuning block fails
-(the last ratio tested). The delay from CRC check until the
-interrupt is asserted is bigger than the delay until assertion
-of the tuning end flag. Assertion of tuning end flag is what
-masks the interrupts. Because of this race, an erroneous DCRC
-interrupt occurs.
-
-The suggested  workaround is to disable DCRC interrupts during
-the tuning procedure which is implemented here.
+Now that vmmc regulator is made optional, do not bail out if vmmc
+regulator is not found.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-Signed-off-by: Sekhar Nori <nsekhar@ti.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+ drivers/mmc/host/omap_hsmmc.c |    7 -------
+ 1 file changed, 7 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 43485c3..9ab0f6e 100644
+index 9ab0f6e..f553b5f 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -665,8 +665,17 @@ static void omap_hsmmc_enable_irq(struct omap_hsmmc_host *host,
- 	is_tuning = (cmd->opcode == MMC_SEND_TUNING_BLOCK) ||
- 		    (cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200);
+@@ -440,13 +440,6 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int iov)
+ 	struct mmc_host *mmc = host->mmc;
+ 	int ret = 0;
  
--	if (!is_tuning && host->use_dma)
-+	if (is_tuning) {
-+		/*
-+		 * OMAP5/DRA74X/DRA72x Errata i802:
-+		 * DCRC error interrupts (MMCHS_STAT[21] DCRC=0x1) can occur
-+		 * during the tuning procedure. So disable it during the
-+		 * tuning procedure.
-+		 */
-+		irq_mask &= ~DCRC_EN;
-+	} else if (host->use_dma) {
- 		irq_mask &= ~(BRR_EN | BWR_EN);
-+	}
+-	/*
+-	 * If we don't see a Vcc regulator, assume it's a fixed
+-	 * voltage always-on regulator.
+-	 */
+-	if (!mmc->supply.vmmc)
+-		return 0;
+-
+ 	if (mmc_pdata(host)->before_set_reg)
+ 		mmc_pdata(host)->before_set_reg(dev, power_on, iov);
  
- 	/* Disable timeout for erases */
- 	if (cmd->opcode == MMC_ERASE)
 -- 
 1.7.9.5
