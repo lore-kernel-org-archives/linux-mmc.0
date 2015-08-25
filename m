@@ -1,56 +1,48 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-of-esdhc: add workaround for pre divider
- initial value
-Date: Tue, 25 Aug 2015 14:05:44 +0200
-Message-ID: <CAPDyKFpxcDWARoHhWejg69LxukjctB2iFdECYdSj23-cFjwMhQ@mail.gmail.com>
-References: <1439261614-38605-1-git-send-email-yangbo.lu@freescale.com>
+Subject: Re: [PATCH 1/2] mmc: core: enable CMD19 tuning for DDR50 mode
+Date: Tue, 25 Aug 2015 14:05:56 +0200
+Message-ID: <CAPDyKFpEwWvu3tnbMT9ZvM0TUvEHp0Qa8PADohyJoTaNZ9HS9g@mail.gmail.com>
+References: <1439282492-6274-1-git-send-email-21cnbao@gmail.com>
+	<CAPDyKFpXZD28NwNAhKQyxmWasVhk_7AeyOW6oXaBPHKuSTmGUA@mail.gmail.com>
+	<CAGsJ_4wvvQdyjFi=JmWfASm-LbJMybrhC=Wxxn7jHZEP5dUfEw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f170.google.com ([209.85.213.170]:38888 "EHLO
-	mail-ig0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755711AbbHYMFp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2015 08:05:45 -0400
-Received: by igfj19 with SMTP id j19so9156438igf.1
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2015 05:05:45 -0700 (PDT)
-In-Reply-To: <1439261614-38605-1-git-send-email-yangbo.lu@freescale.com>
+Received: from mail-ig0-f174.google.com ([209.85.213.174]:37561 "EHLO
+	mail-ig0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755745AbbHYMF4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2015 08:05:56 -0400
+Received: by igui7 with SMTP id i7so9130357igu.0
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2015 05:05:56 -0700 (PDT)
+In-Reply-To: <CAGsJ_4wvvQdyjFi=JmWfASm-LbJMybrhC=Wxxn7jHZEP5dUfEw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@freescale.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Joakim Tjernlund <joakim.tjernlund@transmode.se>
+To: Barry Song <21cnbao@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, Weijun Yang <york.yang@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-On 11 August 2015 at 04:53, Yangbo Lu <yangbo.lu@freescale.com> wrote:
-> For eSDHC(version < 2.3), the pre divider only could divide base clock
-> by 2 at least. Add workaround for this to avoid unexpected issue.
+On 20 August 2015 at 02:16, Barry Song <21cnbao@gmail.com> wrote:
+> 2015-08-18 1:11 GMT+08:00 Ulf Hansson <ulf.hansson@linaro.org>:
+>> On 11 August 2015 at 10:41, Barry Song <21cnbao@gmail.com> wrote:
+>>> From: Weijun Yang <york.yang@csr.com>
+>>>
+>>> As SD Specifications Part1 Physical Layer Specification Version
+>>> 3.01 says, CMD19 tuning is available for unlocked cards in transfer
+>>> state of 1.8V signaling mode. The small difference between v3.00
+>>> and 3.01 spec means that CMD19 tuning is also available for DDR50
+>>> mode.
+>>
+>> So what happens with cards following the 3.0 spec version, those
+>> doesn't need to support the tuning CMD right? Perhaps that needs to be
+>> addressed in this patch well!?
 >
-> Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+> from HW registers of the card, we cann't know whether the HW needs
+> tuning. it is said 3.0.x need tuning, but 3.0 doesn't need.  @weijun,
+> pls fix me if i am wrong.
+> if so, it seems we need a static flag somewhere to indicate whether
+> the tuning is needed. we can't detect to find the tuning requirement.
 
-Thanks, applied for next!
+Another way is to always try doing the tuning for DDR50, but in case
+of errors just ignore them and print a debug/info message!?
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 6 ++++++
->  1 file changed, 6 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 797be75..653f335 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -208,6 +208,12 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
->         if (clock == 0)
->                 return;
->
-> +       /* Workaround to start pre_div at 2 for VNN < VENDOR_V_23 */
-> +       temp = esdhc_readw(host, SDHCI_HOST_VERSION);
-> +       temp = (temp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
-> +       if (temp < VENDOR_V_23)
-> +               pre_div = 2;
-> +
->         /* Workaround to reduce the clock frequency for p1010 esdhc */
->         if (of_find_compatible_node(NULL, NULL, "fsl,p1010-esdhc")) {
->                 if (clock > 20000000)
-> --
-> 2.1.0.27.g96db324
->
