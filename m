@@ -1,67 +1,69 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
 Subject: Re: [PATCH v2] mmc: host: use of_property_read_bool()
-Date: Tue, 25 Aug 2015 23:19:02 +0200
-Message-ID: <CAPDyKFqjUZv2950ekKTiJCdt5TZe-YXWaX+DWeRbbep_AURSmg@mail.gmail.com>
+Date: Wed, 26 Aug 2015 00:49:56 +0300
+Message-ID: <55DCE304.7020001@cogentembedded.com>
 References: <3376063.1JTtbbjJ3D@wasted.cogentembedded.com>
-	<CAPDyKFrBoa6Jdg6qpYV2UXKgm11q-CQu33j0JCnFkXOsURhtYg@mail.gmail.com>
-	<55DC98A7.5000202@cogentembedded.com>
+ <CAPDyKFrBoa6Jdg6qpYV2UXKgm11q-CQu33j0JCnFkXOsURhtYg@mail.gmail.com>
+ <55DC98A7.5000202@cogentembedded.com>
+ <CAPDyKFqjUZv2950ekKTiJCdt5TZe-YXWaX+DWeRbbep_AURSmg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f180.google.com ([209.85.223.180]:34368 "EHLO
-	mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752291AbbHYVTD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2015 17:19:03 -0400
-Received: by iodb91 with SMTP id b91so202509043iod.1
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2015 14:19:02 -0700 (PDT)
-In-Reply-To: <55DC98A7.5000202@cogentembedded.com>
+Received: from mail-lb0-f171.google.com ([209.85.217.171]:35373 "EHLO
+	mail-lb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751624AbbHYVt7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2015 17:49:59 -0400
+Received: by lbcbn3 with SMTP id bn3so108322456lbc.2
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2015 14:49:58 -0700 (PDT)
+In-Reply-To: <CAPDyKFqjUZv2950ekKTiJCdt5TZe-YXWaX+DWeRbbep_AURSmg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 25 August 2015 at 18:32, Sergei Shtylyov
-<sergei.shtylyov@cogentembedded.com> wrote:
-> On 08/25/2015 03:05 PM, Ulf Hansson wrote:
->
->>> Use more compact of_property_read_bool() calls instead of the
->>> of_find_property()
->>> calls.
->
->
->>> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
->
->
->> Thanks, applied for next!
->
->
->    Thanks to you! :-)
->
->> Next, time please run checkpatch to remove errors/warnings.
->
->
->    Hum, I just did and the patch seems clean:
->
-> [headless@wasted mmc]$ scripts/checkpatch.pl
-> patches/mmc-host-use-of_property_read_bool.patch
-> total: 0 errors, 0 warnings, 81 lines checked
->
-> patches/mmc-host-use-of_property_read_bool.patch has no obvious style
-> problems and is ready for submission.
->
->    What do you mean?
+On 08/26/2015 12:19 AM, Ulf Hansson wrote:
 
-WARNING: Possible unwrapped commit description (prefer a maximum 75
-chars per line)
-#12:
-Use more compact of_property_read_bool() calls instead of the of_find_property()
+>>>> Use more compact of_property_read_bool() calls instead of the
+>>>> of_find_property()
+>>>> calls.
 
-total: 0 errors, 1 warnings, 81 lines checked
+>>>> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+>>
+>>> Thanks, applied for next!
+>>
+>>     Thanks to you! :-)
+>>
+>>> Next, time please run checkpatch to remove errors/warnings.
+>>
+>>     Hum, I just did and the patch seems clean:
+>>
+>> [headless@wasted mmc]$ scripts/checkpatch.pl
+>> patches/mmc-host-use-of_property_read_bool.patch
+>> total: 0 errors, 0 warnings, 81 lines checked
+>>
+>> patches/mmc-host-use-of_property_read_bool.patch has no obvious style
+>> problems and is ready for submission.
+>>
+>>     What do you mean?
 
-I suspect we might use different versions of the checkpatch script.
-Mine is from 4.2rc7.
+> WARNING: Possible unwrapped commit description (prefer a maximum 75
+> chars per line)
+> #12:
+> Use more compact of_property_read_bool() calls instead of the of_find_property()
 
-No worries then!
+> total: 0 errors, 1 warnings, 81 lines checked
 
-Kind regards
-Uffe
+> I suspect we might use different versions of the checkpatch script.
+> Mine is from 4.2rc7.
+
+    Tried several variants, the last one was in your repo's 'next' branch 
+(4.2-rc7 based). No warning. :-)
+
+> No worries then!
+
+> Kind regards
+> Uffe
+
+MBR, Sergei
+
