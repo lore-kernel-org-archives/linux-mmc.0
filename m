@@ -1,82 +1,72 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: tmio: Fix timeout value for command request
-Date: Tue, 25 Aug 2015 14:03:44 +0200
-Message-ID: <CAPDyKFoO5N20Wiw3GhRMG2WOZ8dfW4esBpdYStfo39otyfohWw@mail.gmail.com>
-References: <1437323999-7938-1-git-send-email-ykaneko0929@gmail.com>
+Subject: Re: [PATCH 3/3] mmc: sdhci-of-esdhc: add workaround for T4240
+ incorrect HOSTVER value
+Date: Tue, 25 Aug 2015 14:04:17 +0200
+Message-ID: <CAPDyKFoBch9zSq_CwuZnXH9Lo9+AcAbkXqAQevpJuBCErOK1Wg@mail.gmail.com>
+References: <1437471937-34218-1-git-send-email-yangbo.lu@freescale.com>
+	<CAPDyKFpf6Ayw28dmbHhLJ8HSOSie60sUjaAnK7qqONHsRN4BDA@mail.gmail.com>
+	<1437791242.2993.268.camel@freescale.com>
+	<CAPDyKFp8ZStYVaFm8tjPL190dqV6vCE+oT706M=6wVCckWesLw@mail.gmail.com>
+	<1438012638.2993.289.camel@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f177.google.com ([209.85.223.177]:33922 "EHLO
-	mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751691AbbHYMDo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2015 08:03:44 -0400
-Received: by iodb91 with SMTP id b91so182490680iod.1
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2015 05:03:44 -0700 (PDT)
-In-Reply-To: <1437323999-7938-1-git-send-email-ykaneko0929@gmail.com>
+Received: from mail-ig0-f182.google.com ([209.85.213.182]:34931 "EHLO
+	mail-ig0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751087AbbHYMES (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Aug 2015 08:04:18 -0400
+Received: by igbjg10 with SMTP id jg10so10196614igb.0
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2015 05:04:17 -0700 (PDT)
+In-Reply-To: <1438012638.2993.289.camel@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yoshihiro Kaneko <ykaneko0929@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ian Molton <ian.molton@codethink.co.uk>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-sh list <linux-sh@vger.kernel.org>
+To: Scott Wood <scottwood@freescale.com>
+Cc: Yangbo Lu <yangbo.lu@freescale.com>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 19 July 2015 at 18:39, Yoshihiro Kaneko <ykaneko0929@gmail.com> wrote:
-> From: Takeshi Kihara <takeshi.kihara.df@renesas.com>
+On 27 July 2015 at 17:57, Scott Wood <scottwood@freescale.com> wrote:
+> On Mon, 2015-07-27 at 09:58 +0200, Ulf Hansson wrote:
+>> On 25 July 2015 at 04:27, Scott Wood <scottwood@freescale.com> wrote:
+>> > On Tue, 2015-07-21 at 15:02 +0200, Ulf Hansson wrote:
+>> > > On 21 July 2015 at 11:45, Yangbo Lu <yangbo.lu@freescale.com> wrote:
+>> > > > For T4240-R1.0-R2.0, the HOSTVER register has incorrcet vender
+>> > > > version value and sdhc spec version value. This will break down
+>> > > > the ADMA data transfer. So add workaround to get right value
+>> > > > VVN=0x13, SVN = 0x1.
+>> > >
+>> > > So T4240-R1.0-R2.0 is the version of the controller, right?
+>> > >
+>> > > If I understand correct you are checking what CPU/SoC you are running
+>> > > on, to figure out which controller version you are using, as that
+>> > > can't be fetched (trusted) from the registers of the esdhc controller
+>> > > itself!?
+>> > >
+>> > > Instead, you could deal with this directly in the DTS files. I assume
+>> > > you have some DTS file for each SoC/board variant, right?
+>> >
+>> > No, we do not have a separate DTS file for each revision of an SoC -- and
+>> > if
+>> > we did, we'd constantly have people using the wrong one.
+>> >
+>> > > In principle, in your DTS file specific for the board/SoC that holds
+>> > > the T4240-R1.0-R2.0 version of the controller, should add a specific
+>> > > esdhc DT property to indicate this errata.
+>> >
+>> > No, because (in addition to the above issue about chip revisions) the
+>> > device
+>> > tree is stable ABI and errata are often discovered after device trees are
+>> > deployed.
+>>
+>> Fair enough. Then what is your suggestion for the solution here?
 >
-> Fix the problem which timeout occurs at the time of command request with
-> several cards.
+> As I said in my comment on patch 2/3, read SVR from the device-config/guts
+> MMIO block, which works on both PPC and ARM.
 >
-> The timeout value was insufficient as a verification of several cards,
-> so it was changed 5 seconds from 2 seconds.
->
-> Signed-off-by: Takeshi Kihara <takeshi.kihara.df@renesas.com>
-> Signed-off-by: Yoshihiro Kaneko <ykaneko0929@gmail.com>
 
-Thanks, applied for next!
+That's okay, as long as don't have include sections of non generic
+header files in the driver.
+
+To be more clear, this is not okay to have:
+#include <mach/*>
 
 Kind regards
 Uffe
-
-> ---
->
-> This patch is based on mmc-next branch of Ulf Hansson's mmc tree.
->
-> v2 [Yoshihiro Kaneko]
-> * As suggested by Wolfram Sang
-> - use a definition instead of a magic value
->
->  drivers/mmc/host/tmio_mmc_pio.c | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index e3dcf31..a10fde4 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -83,6 +83,8 @@ static int tmio_mmc_next_sg(struct tmio_mmc_host *host)
->         return --host->sg_len;
->  }
->
-> +#define CMDREQ_TIMEOUT 5000
-> +
->  #ifdef CONFIG_MMC_DEBUG
->
->  #define STATUS_TO_TEXT(a, status, i) \
-> @@ -230,7 +232,7 @@ static void tmio_mmc_reset_work(struct work_struct *work)
->          */
->         if (IS_ERR_OR_NULL(mrq)
->             || time_is_after_jiffies(host->last_req_ts +
-> -               msecs_to_jiffies(2000))) {
-> +               msecs_to_jiffies(CMDREQ_TIMEOUT))) {
->                 spin_unlock_irqrestore(&host->lock, flags);
->                 return;
->         }
-> @@ -818,7 +820,7 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->         ret = tmio_mmc_start_command(host, mrq->cmd);
->         if (!ret) {
->                 schedule_delayed_work(&host->delayed_reset_work,
-> -                                     msecs_to_jiffies(2000));
-> +                                     msecs_to_jiffies(CMDREQ_TIMEOUT));
->                 return;
->         }
->
-> --
-> 1.9.1
->
