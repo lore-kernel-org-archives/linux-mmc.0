@@ -1,60 +1,219 @@
-From: Chen Bough <Haibo.Chen@freescale.com>
-Subject: RE: [RFC] sdhci: fix DMA leaks [was: [SHDCI] Heavy (thousands) DMA
- leaks]
-Date: Tue, 25 Aug 2015 01:50:13 +0000
-Message-ID: <BY1PR03MB1388595A035A8369343C8B9E9A610@BY1PR03MB1388.namprd03.prod.outlook.com>
-References: <55B9EF02.7040404@suse.cz>
- <BY1PR03MB138811AD7FAB3C561CC683679A770@BY1PR03MB1388.namprd03.prod.outlook.com>
- <55BF36D6.4080504@suse.cz> <55C1F919.4080002@suse.cz>
- <55C227B4.3030102@suse.cz>
- <BY1PR03MB13889A6C31FC542DB544CE479A740@BY1PR03MB1388.namprd03.prod.outlook.com>
- <55C323A5.6050303@suse.cz>
- <BY1PR03MB1388AE95AA9000BB9B8B47559A740@BY1PR03MB1388.namprd03.prod.outlook.com>
- <55DB45B8.3020106@redhat.com>
+From: Haibo Chen <haibo.chen@freescale.com>
+Subject: [PATCH] mmc: sdhci: fix dma memory leak in sdhci_pre_req()
+Date: Tue, 25 Aug 2015 10:02:11 +0800
+Message-ID: <1440468131-9473-1-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <55DB45B8.3020106@redhat.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Laura Abbott <labbott@redhat.com>, Jiri Slaby <jslaby@suse.cz>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux kernel mailing list <linux-kernel@vger.kernel.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1bn0101.outbound.protection.outlook.com ([157.56.110.101]:20928
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751841AbbHYB7D (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 24 Aug 2015 21:59:03 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: labbott@redhat.com, ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, aisheng.dong@freescale.com, jslaby@suse.cz, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-SGkgTGF1cmEsDQoNCllvdSBjYW4gZmluZCB0aGUgcGF0Y2ggaGVyZToNCmh0dHA6Ly9wYXRjaHdv
-cmsua2VybmVybC54eXovcGF0Y2gvNjk2NzE2MS8NCg0KSSB3aWxsIHNlbmQgdGhpcyBwYXRjaCBh
-Z2FpbiBhbmQgY2MgdG8geW91Lg0KDQoNCkJlc3QgcmVnYXJkcw0KDQpIYWlibw0KDQoNCg0KPiAt
-LS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBMYXVyYSBBYmJvdHQgW21haWx0bzps
-YWJib3R0QHJlZGhhdC5jb21dDQo+IFNlbnQ6IFR1ZXNkYXksIEF1Z3VzdCAyNSwgMjAxNSAxMjoy
-NyBBTQ0KPiBUbzogQ2hlbiBIYWliby1CNTE0MjE7IEppcmkgU2xhYnk7IFVsZiBIYW5zc29uDQo+
-IENjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBMaW51eCBrZXJuZWwgbWFpbGluZyBsaXN0
-DQo+IFN1YmplY3Q6IFJlOiBbUkZDXSBzZGhjaTogZml4IERNQSBsZWFrcyBbd2FzOiBbU0hEQ0ld
-IEhlYXZ5ICh0aG91c2FuZHMpDQo+IERNQSBsZWFrc10NCj4gDQo+IE9uIDA4LzA2LzIwMTUgMDI6
-MTcgQU0sIENoZW4gQm91Z2ggd3JvdGU6DQo+ID4gSSB3aWxsIGZvcm1hdCBhIHBhdGNoIGJhc2Vk
-IG9uIHlvdXIgZGlmZiBmaWxlIGZpcnN0bHkuIEkgd2lsbCB0ZXN0DQo+ID4gdGhpcyBvbiBteSBz
-aWRlLCBJZiBhbnkgaXNzdWUsIGxpa2UgZG1hIGlzc3VlIG9yIHBlcmZvcm1hbmNlIGlzc3VlLCBJ
-DQo+IHdpbGwgYWRkIHNvbWUgbW9kaWZpY2F0aW9uLg0KPiA+IFRoZW4gSSB3aWxsIHNlbmQgdGhl
-IHBhdGNoIGZvciByZXZpZXcsIGFuZCB5b3UgY2FuIHRlc3QgdGhlIHBhdGNoIG9uDQo+IHlvdXIg
-cGxhdGZvcm0uDQo+ID4NCj4gPiBCZXN0IFJlZ2FyZHMNCj4gPiBIYWlibyBDaGVuDQo+ID4NCj4g
-DQo+IERpZCBJIG1pc3MgdGhlIGZvbGxvdyB1cCBwYXRjaCBvciBpcyB0aGlzIHN0aWxsIHBlbmRp
-bmc/IElmIGl0J3Mgc3RpbGwNCj4gcGVuZGluZywgd291bGQgeW91IG1pbmQgQ2NpbmcgbWUgd2hl
-biBpdCdzIGF2YWlsYWJsZSBmb3IgdGVzdGluZz8NCj4gDQo+IFRoYW5rcywNCj4gTGF1cmENCj4g
-DQo+ID4NCj4gPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPj4gRnJvbTogSmlyaSBT
-bGFieSBbbWFpbHRvOmpzbGFieUBzdXNlLmN6XQ0KPiA+PiBTZW50OiBUaHVyc2RheSwgQXVndXN0
-IDA2LCAyMDE1IDU6MDcgUE0NCj4gPj4gVG86IENoZW4gSGFpYm8tQjUxNDIxOyBVbGYgSGFuc3Nv
-bg0KPiA+PiBDYzogbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgTGludXgga2VybmVsIG1haWxp
-bmcgbGlzdA0KPiA+PiBTdWJqZWN0OiBSZTogW1JGQ10gc2RoY2k6IGZpeCBETUEgbGVha3MgW3dh
-czogW1NIRENJXSBIZWF2eQ0KPiA+PiAodGhvdXNhbmRzKSBETUEgbGVha3NdDQo+ID4+DQo+ID4+
-IE9uIDA4LzA2LzIwMTUsIDA5OjQyIEFNLCBDaGVuIEJvdWdoIHdyb3RlOg0KPiA+Pj4gSSByZWFk
-IHlvdXIgYXR0YWNoZWQgbG9nIGFuZCBwYXRjaCwgeWVzLCBkbWEgbWVtb3J5IGxlYWsgd2lsbCBo
-YXBwZW4NCj4gPj4+IHdoZW4gbW9yZSB0aGFuIG9uZSBwcmVfcmVxdWVzdCBleGVjdXRlLiBUaGUg
-bWV0aG9kIG9mICsrbmV4dC0+Y29va2llDQo+ID4+PiBpcyBub3QgZ29vZCwgeW91ciBwYXRjaCBz
-ZWVtcyBnb29kLCBidXQgSSBzdGlsbCBuZWVkIHNvbWUgdGltZSB0bw0KPiA+Pj4gdGVzdCB0aGUg
-cGF0Y2gsIGJlY2F1c2UgeW91IHVubWFwIHRoZSBkbWEgaW4gc2RoY2lfZmluaXNoX2RhdGENCj4g
-Pj4+IHJhdGhlciB0aGFuDQo+ID4+IHRoZSBzZGhjaV9wb3N0X3JlcS4NCj4gPj4NCj4gPj4gSGks
-DQo+ID4+DQo+ID4+IHllcywgdGhpcyBpcyBub3QgY29ycmVjdC4gV2UgY2FuIHBlcmhhcHMgZGlm
-ZmVyZW50aWF0ZSBhY2NvcmRpbmcgdG8NCj4gPj4gdGhlIENPT0tJRSB2YWx1ZS4gU2hvdWxkIEkg
-Zml4IGl0IG9yIGFyZSB5b3UgZ29pbmcgdG8gcHJlcGFyZSBhIHBhdGNoDQo+ID4+IGJhc2VkIG9u
-IG15IFJGQz8NCj4gPj4NCj4gPj4gdGhhbmtzLA0KPiA+PiAtLQ0KPiA+PiBqcw0KPiA+PiBzdXNl
-IGxhYnMNCg0K
+Currently one mrq->data maybe execute dma_map_sg() twice
+when mmc subsystem prepare over one new request, and the
+following log show up:
+	sdhci[sdhci_pre_dma_transfer] invalid cookie: 24, next-cookie 25
+
+In this condition, mrq->date map a dma-memory(1) in sdhci_pre_req
+for the first time, and map another dma-memory(2) in sdhci_prepare_data
+for the second time. But driver only unmap the dma-memory(2), and
+dma-memory(1) never unmapped, which cause the dma memory leak issue.
+
+This patch use another method to map the dma memory for the mrq->data
+which can fix this dma memory leak issue.
+
+Fixes: commit 348487cb28e66b0 ("mmc: sdhci: use pipeline mmc requests to improve performance")
+Cc: stable@vger.kernel.org # 4.0+
+Reported-and-tested-by: Jiri Slaby <jslaby@suse.cz>
+Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
+---
+ drivers/mmc/host/sdhci.c | 67 ++++++++++++++++++------------------------------
+ drivers/mmc/host/sdhci.h |  8 +++---
+ 2 files changed, 29 insertions(+), 46 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c83d110..8d2864b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -54,8 +54,7 @@ static void sdhci_finish_command(struct sdhci_host *);
+ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
+ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
+ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
+-					struct mmc_data *data,
+-					struct sdhci_host_next *next);
++					struct mmc_data *data);
+ static int sdhci_do_get_cd(struct sdhci_host *host);
+ 
+ #ifdef CONFIG_PM
+@@ -495,7 +494,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
+ 		goto fail;
+ 	BUG_ON(host->align_addr & host->align_mask);
+ 
+-	host->sg_count = sdhci_pre_dma_transfer(host, data, NULL);
++	host->sg_count = sdhci_pre_dma_transfer(host, data);
+ 	if (host->sg_count < 0)
+ 		goto unmap_align;
+ 
+@@ -634,9 +633,11 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
+ 		}
+ 	}
+ 
+-	if (!data->host_cookie)
++	if (data->host_cookie == COOKIE_MAPPED) {
+ 		dma_unmap_sg(mmc_dev(host->mmc), data->sg,
+ 			data->sg_len, direction);
++		data->host_cookie = COOKIE_UNMAPPED;
++	}
+ }
+ 
+ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+@@ -832,7 +833,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 		} else {
+ 			int sg_cnt;
+ 
+-			sg_cnt = sdhci_pre_dma_transfer(host, data, NULL);
++			sg_cnt = sdhci_pre_dma_transfer(host, data);
+ 			if (sg_cnt <= 0) {
+ 				/*
+ 				 * This only happens when someone fed
+@@ -948,11 +949,13 @@ static void sdhci_finish_data(struct sdhci_host *host)
+ 		if (host->flags & SDHCI_USE_ADMA)
+ 			sdhci_adma_table_post(host, data);
+ 		else {
+-			if (!data->host_cookie)
++			if (data->host_cookie == COOKIE_MAPPED) {
+ 				dma_unmap_sg(mmc_dev(host->mmc),
+ 					data->sg, data->sg_len,
+ 					(data->flags & MMC_DATA_READ) ?
+ 					DMA_FROM_DEVICE : DMA_TO_DEVICE);
++				data->host_cookie = COOKIE_UNMAPPED;
++			}
+ 		}
+ 	}
+ 
+@@ -2105,49 +2108,36 @@ static void sdhci_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
+ 	struct mmc_data *data = mrq->data;
+ 
+ 	if (host->flags & SDHCI_REQ_USE_DMA) {
+-		if (data->host_cookie)
++		if (data->host_cookie == COOKIE_GIVEN ||
++				data->host_cookie == COOKIE_MAPPED)
+ 			dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
+ 					 data->flags & MMC_DATA_WRITE ?
+ 					 DMA_TO_DEVICE : DMA_FROM_DEVICE);
+-		mrq->data->host_cookie = 0;
++		data->host_cookie = COOKIE_UNMAPPED;
+ 	}
+ }
+ 
+ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
+-				       struct mmc_data *data,
+-				       struct sdhci_host_next *next)
++				       struct mmc_data *data)
+ {
+ 	int sg_count;
+ 
+-	if (!next && data->host_cookie &&
+-	    data->host_cookie != host->next_data.cookie) {
+-		pr_debug(DRIVER_NAME "[%s] invalid cookie: %d, next-cookie %d\n",
+-			__func__, data->host_cookie, host->next_data.cookie);
+-		data->host_cookie = 0;
++	if (data->host_cookie == COOKIE_MAPPED) {
++		data->host_cookie = COOKIE_GIVEN;
++		return data->sg_count;
+ 	}
+ 
+-	/* Check if next job is already prepared */
+-	if (next ||
+-	    (!next && data->host_cookie != host->next_data.cookie)) {
+-		sg_count = dma_map_sg(mmc_dev(host->mmc), data->sg,
+-				     data->sg_len,
+-				     data->flags & MMC_DATA_WRITE ?
+-				     DMA_TO_DEVICE : DMA_FROM_DEVICE);
+-
+-	} else {
+-		sg_count = host->next_data.sg_count;
+-		host->next_data.sg_count = 0;
+-	}
++	WARN_ON(data->host_cookie == COOKIE_GIVEN);
+ 
++	sg_count = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
++				data->flags & MMC_DATA_WRITE ?
++				DMA_TO_DEVICE : DMA_FROM_DEVICE);
+ 
+ 	if (sg_count == 0)
+-		return -EINVAL;
++		return -ENOSPC;
+ 
+-	if (next) {
+-		next->sg_count = sg_count;
+-		data->host_cookie = ++next->cookie < 0 ? 1 : next->cookie;
+-	} else
+-		host->sg_count = sg_count;
++	data->sg_count = sg_count;
++	data->host_cookie = COOKIE_MAPPED;
+ 
+ 	return sg_count;
+ }
+@@ -2157,16 +2147,10 @@ static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+ 
+-	if (mrq->data->host_cookie) {
+-		mrq->data->host_cookie = 0;
+-		return;
+-	}
++	mrq->data->host_cookie = COOKIE_UNMAPPED;
+ 
+ 	if (host->flags & SDHCI_REQ_USE_DMA)
+-		if (sdhci_pre_dma_transfer(host,
+-					mrq->data,
+-					&host->next_data) < 0)
+-			mrq->data->host_cookie = 0;
++		sdhci_pre_dma_transfer(host, mrq->data);
+ }
+ 
+ static void sdhci_card_event(struct mmc_host *mmc)
+@@ -3038,7 +3022,6 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		host->max_clk = host->ops->get_max_clock(host);
+ 	}
+ 
+-	host->next_data.cookie = 1;
+ 	/*
+ 	 * In case of Host Controller v3.00, find out whether clock
+ 	 * multiplier is supported.
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 67046ca..7c02ff4 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -309,9 +309,10 @@ struct sdhci_adma2_64_desc {
+  */
+ #define SDHCI_MAX_SEGS		128
+ 
+-struct sdhci_host_next {
+-	unsigned int	sg_count;
+-	s32		cookie;
++enum sdhci_cookie {
++	COOKIE_UNMAPPED,
++	COOKIE_MAPPED,
++	COOKIE_GIVEN,
+ };
+ 
+ struct sdhci_host {
+@@ -505,7 +506,6 @@ struct sdhci_host {
+ 	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
+ #define SDHCI_TUNING_MODE_1	0
+ 
+-	struct sdhci_host_next	next_data;
+ 	unsigned long private[0] ____cacheline_aligned;
+ };
+ 
+-- 
+1.9.1
+
