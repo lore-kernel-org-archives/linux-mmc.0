@@ -1,89 +1,110 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 1/3] mmc: sunxi: fix timeout in sunxi_mmc_oclk_onoff
-Date: Tue, 25 Aug 2015 14:06:31 +0200
-Message-ID: <CAPDyKFp67DTNXYiphqPKsKL9ZtGO28x_UZa-d-KifD-7EXGzhw@mail.gmail.com>
-References: <cover.1439381423.git.hramrach@gmail.com>
-	<7f9c6f99b31702c02436ef3356b3ebffa4754260.1439381423.git.hramrach@gmail.com>
-	<bdcb7ce26f359b7fedbd8559eb275c324bfb52bb.1439386047.git.hramrach@gmail.com>
-	<55CB5CE6.1000303@redhat.com>
-Reply-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v1] mmc: block: skip trim for some kingston eMMCs
+Date: Tue, 25 Aug 2015 14:06:18 +0200
+Message-ID: <CAPDyKFodtrSgHgzUtxQcxc=TndVOBmqf+FZnNnhpr5-ifL5f7A@mail.gmail.com>
+References: <1439356112-10734-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBDF57NG2XIHRBSFU6GXAKGQE3D7VRWY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <55CB5CE6.1000303-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <http://groups.google.com/group/linux-sunxi/subscribe>
-To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Michal Suchanek <hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, =?UTF-8?Q?David_Lanzend=C3=B6rfer?= <david.lanzendoerfer-Z7Kmv9EsliU@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Tomeu Vizoso <tomeu.vizoso-ZGY8ohtN/8qB+jHODAdFcQ@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1439356112-10734-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 12 August 2015 at 16:49, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> Hi,
+On 12 August 2015 at 07:08, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> For some mass production of kingston eMMCs which adopt Phison's
+> firmware will meet an unrecoverable data conrruption occasionally
+> if performing trim due to a firmware bug confirmed by vendor. We
+> found it on Intel-C3230RK platform. So we add fixup of broken trim
+> for it.
 >
-> On 08/12/2015 03:29 PM, Michal Suchanek wrote:
->>
->> The 250ms timeout is too short.
->>
->> On my system enabling the oclk takes under 50ms and disabling slightly
->> over 100ms when idle. Under load disabling the clock can take over
->> 350ms.
->>
->> This does not make mmc clock gating look like good option to have on
->> sunxi but the system should not crash with mmc clock gating enabled
->> nonetheless.
->>
->> This patch sets the timeout to 750ms.
->>
->> Signed-off-by: Michal Suchanek <hramrach-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
->>
->> ---
->> v3
->>   - remove debug message
->
->
-> Thanks, this one looks good to me:
->
-> Acked-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->
-> Ulf, can you apply this one please?
->
-> Thanks & Regards,
->
-> Hans
->
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Thanks, applied for next!
+Thanks, applied for next with a minor change (see below).
 
 Kind regards
 Uffe
 
 >
+> ---
 >
->> v2
->>   - fix formatting
->> ---
->>   drivers/mmc/host/sunxi-mmc.c | 2 +-
->>   1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
->> index 4d3e1ff..a7b7a67 100644
->> --- a/drivers/mmc/host/sunxi-mmc.c
->> +++ b/drivers/mmc/host/sunxi-mmc.c
->> @@ -595,7 +595,7 @@ static irqreturn_t sunxi_mmc_handle_manual_stop(int
->> irq, void *dev_id)
->>
->>   static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32
->> oclk_en)
->>   {
->> -       unsigned long expire = jiffies + msecs_to_jiffies(250);
->> +       unsigned long expire = jiffies + msecs_to_jiffies(750);
->>         u32 rval;
->>
->>         rval = mmc_readl(host, REG_CLKCR);
->>
+>  drivers/mmc/card/block.c | 11 +++++++++++
+>  drivers/mmc/core/core.c  |  3 ++-
+>  include/linux/mmc/card.h |  2 ++
+>  3 files changed, 15 insertions(+), 1 deletion(-)
 >
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index a58287e..48be57b 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2389,6 +2389,7 @@ force_ro_fail:
+>  #define CID_MANFID_TOSHIBA     0x11
+>  #define CID_MANFID_MICRON      0x13
+>  #define CID_MANFID_SAMSUNG     0x15
+> +#define CID_MANFID_KINGSTON    0x70
+>
+>  static const struct mmc_fixup blk_fixups[] =
+>  {
+> @@ -2422,6 +2423,7 @@ static const struct mmc_fixup blk_fixups[] =
+>         MMC_FIXUP("MMC32G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_mmc,
+>                   MMC_QUIRK_BLK_NO_CMD23),
+>
+> +
+
+This whitespace change I removed from the patch.
+
+>         /*
+>          * Some Micron MMC cards needs longer data read timeout than
+>          * indicated in CSD.
+> @@ -2451,6 +2453,15 @@ static const struct mmc_fixup blk_fixups[] =
+>         MMC_FIXUP("VZL00M", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
+>                   MMC_QUIRK_SEC_ERASE_TRIM_BROKEN),
+>
+> +       /*
+> +        *  On Some Kingston eMMCs, performing trim can result in
+> +        *  unrecoverable data conrruption occasionally due to a firmware bug.
+> +        */
+> +       MMC_FIXUP("V10008", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
+> +                 MMC_QUIRK_TRIM_BROKEN),
+> +       MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
+> +                 MMC_QUIRK_TRIM_BROKEN),
+> +
+>         END_FIXUP
+>  };
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 083cade..8bbcc42 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2251,7 +2251,8 @@ EXPORT_SYMBOL(mmc_can_erase);
+>
+>  int mmc_can_trim(struct mmc_card *card)
+>  {
+> -       if (card->ext_csd.sec_feature_support & EXT_CSD_SEC_GB_CL_EN)
+> +       if ((card->ext_csd.sec_feature_support & EXT_CSD_SEC_GB_CL_EN) &&
+> +           (!(card->quirks & MMC_QUIRK_TRIM_BROKEN)))
+>                 return 1;
+>         return 0;
+>  }
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 8fcbcd1..fdd0779 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -279,6 +279,8 @@ struct mmc_card {
+>  #define MMC_QUIRK_LONG_READ_TIME (1<<9)                /* Data read time > CSD says */
+>  #define MMC_QUIRK_SEC_ERASE_TRIM_BROKEN (1<<10)        /* Skip secure for erase/trim */
+>  #define MMC_QUIRK_BROKEN_IRQ_POLLING   (1<<11) /* Polling SDIO_CCCR_INTx could create a fake interrupt */
+> +#define MMC_QUIRK_TRIM_BROKEN  (1<<12)         /* Skip trim */
+> +
+>
+>         unsigned int            erase_size;     /* erase size in sectors */
+>         unsigned int            erase_shift;    /* if erase unit is power 2 */
+> --
+> 2.3.7
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
