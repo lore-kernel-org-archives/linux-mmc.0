@@ -1,97 +1,145 @@
-From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH 1/4] mmc: mediatek: Add online-tuning support of EMMC/SD
-Date: Wed, 26 Aug 2015 16:40:16 +0800
-Message-ID: <1440578416.26912.12.camel@mhfsdcap03>
-References: <1439367845-5891-1-git-send-email-chaotian.jing@mediatek.com>
- <1439367845-5891-2-git-send-email-chaotian.jing@mediatek.com>
- <CAPDyKFpX4Pp1+U9eNBuGd83sBeBgLU17qysAJ-2V-ABZZHYAGQ@mail.gmail.com>
- <1439812888.5627.9.camel@mhfsdcap03>
- <CAPDyKFpGk9gcLLjBnN=+BD5WP-7dZ0+XHC1bcEEGGLvLbTyKHw@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [REGRESSION] dereference NULL pointer when removing mmc card
+Date: Wed, 26 Aug 2015 18:34:52 +0900
+Message-ID: <55DD883C.9050805@samsung.com>
+References: <CAFMg4WALTEmjYk=QMUAcku+VPosMHsMeZ6YCAN40ku1MJEWC=w@mail.gmail.com>
+ <CAPDyKFroMyRDWTLWrSGS7GAUoFdfTouOvwL9zuY0TB2Hi0k0Og@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <CAPDyKFpGk9gcLLjBnN=+BD5WP-7dZ0+XHC1bcEEGGLvLbTyKHw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
-List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Wenbin Mei <sin_wenbinmei-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Bin Zhang =?UTF-8?Q?=28=E7=AB=A0=E6=96=8C=29?= <bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Liuquan Ji <liuquan.ji-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, srv_heupstream <srv_heupstrea>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:33425 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756649AbbHZJey (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Aug 2015 05:34:54 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0NTO031CVNY40TB0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 26 Aug 2015 18:34:52 +0900 (KST)
+In-reply-to: <CAPDyKFroMyRDWTLWrSGS7GAUoFdfTouOvwL9zuY0TB2Hi0k0Og@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Igor Gnatenko <i.gnatenko.brain@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On Tue, 2015-08-25 at 14:07 +0200, Ulf Hansson wrote:
-> On 17 August 2015 at 14:01, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
-> > Hi Ulf,
-> > Thanks, please see my comment:
-> > On Mon, 2015-08-17 at 13:31 +0200, Ulf Hansson wrote:
-> >> On 12 August 2015 at 10:24, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
-> >> > Schedule a workqueue to do tuning when CRC error
-> >> > Call mmc_hw_reset to re-init card when data timeout
-> >>
-> >> Thanks to Adrian Hunter, the mmc core already supports re-tuning for
-> >> the above scenarios through the mmc_retune_*() APIs.
-> >>
-> >> SDHCI driver has already adopted to use that feature, you should do
-> >> that for the mtk-sd driver as well.
-> >>
-> >> Kind regards
-> >> Uffe
-> >>
-> > I also noticed that the mmc core already supports re-tuning, but it is
-> > not suitable for our host.
-> > For EMMC, the CMD21 only support HS200/HS400 mode, for SD card, CMD19
-> > only support SDR50/SDR104 mode, but in our host, even 50Mhz clock
-> > frequency may also occur CRC error, Cannot find a parameter that can
-> > cover all SD cards which running at 50Mhz, even 25Mhz, will occur CRC
-> > error for stress test, DDR50 mode is worse.
+On 08/26/2015 12:27 AM, Ulf Hansson wrote:
+> On 22 August 2015 at 09:17, Igor Gnatenko <i.gnatenko.brain@gmail.com> wrote:
+>> mmc0: card 59b4 removed
+>> BUG: unable to handle kernel NULL pointer dereference at 0000000000000558
+>> IP: [<ffffffff813895a6>] __blkg_lookup+0x26/0x70
+>> PGD 0
+>> Oops: 0000 [#1] SMP
+>> Modules linked in: rfcomm cmac ccm fuse nf_conntrack_netbios_ns
+>> nf_conntrack_broadcast ip6t_rpfilter ip6t_REJECT nf_reject_ipv6
+>> xt_conntrack ebtable_nat ebtable_filter ebtable_broute bridge stp llc
+>> ebtables ip6table_nat nf_conntrack_ipv6 nf_defrag_ipv6 nf_nat_ipv6
+>> ip6table_raw ip6table_security ip6table_mangle ip6table_filter
+>> ip6_tables iptable_nat nf_conntrack_ipv4 nf_defrag_ipv4 nf_nat_ipv4
+>> nf_nat nf_conntrack iptable_raw iptable_security iptable_mangle bnep
+>> intel_rapl iosf_mbi btusb x86_pkg_temp_thermal coretemp kvm_intel
+>> btrtl btbcm btintel bluetooth kvm vfat fat snd_hda_codec_hdmi arc4
+>> snd_hda_codec_realtek iTCO_wdt iTCO_vendor_support
+>> snd_hda_codec_generic iwldvm snd_hda_intel snd_hda_codec mac80211
+>> snd_hda_core snd_hwdep snd_seq snd_seq_device crct10dif_pclmul
+>> uvcvideo crc32_pclmul
+>>  crc32c_intel videobuf2_vmalloc videobuf2_core videobuf2_memops
+>> snd_pcm iwlwifi v4l2_common videodev ghash_clmulni_intel cfg80211
+>> cdc_acm media thinkpad_acpi mmc_block mei_me snd_timer i2c_i801 snd
+>> mei shpchp lpc_ich tpm_tis soundcore tpm rfkill soc_button_array wmi
+>> nfsd auth_rpcgss nfs_acl lockd grace sunrpc i915 i2c_algo_bit
+>> drm_kms_helper drm sdhci_pci serio_raw sdhci mmc_core video cdc_mbim
+>> cdc_ncm usbnet mii cdc_wdm kdbus
+>> CPU: 0 PID: 113 Comm: kworker/u16:4 Not tainted
+>> 4.2.0-0.rc6.git0.1.fc24.x86_64 #1
+>> Hardware name: LENOVO 3444FHG/3444FHG, BIOS G6ETA6WW (2.66 ) 05/28/2014
+>> Workqueue: kmmcd mmc_rescan [mmc_core]
+>> task: ffff8802122b9b80 ti: ffff8802122e4000 task.ti: ffff8802122e4000
+>> RIP: 0010:[<ffffffff813895a6>]  [<ffffffff813895a6>] __blkg_lookup+0x26/0x70
+>> RSP: 0018:ffff8802122e7988  EFLAGS: 00010046
+>> RAX: 0000000000000000 RBX: 0000000000000000 RCX: 0000000000000000
+>> RDX: 0000000000000000 RSI: 0000000000000000 RDI: ffffffff820176a0
+>> RBP: ffff8802122e79a8 R08: 00000000118de901 R09: 000000018020001e
+>> R10: ffff8802118de900 R11: 0000000000000004 R12: ffff8802118de700
+>> R13: ffff880212390898 R14: ffff8802136edd90 R15: ffff8802136edcd0
+>> FS:  0000000000000000(0000) GS:ffff88021e200000(0000) knlGS:0000000000000000
+>> CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+>> CR2: 0000000000000558 CR3: 00000001f54ac000 CR4: 00000000001406f0
+>> Stack:
+>>  ffffffff82017700 ffffffff820176a0 ffff8802118de700 ffff880212390898
+>>  ffff8802122e79d8 ffffffff8138cfaa ffff8802136edd90 ffff880212390898
+>>  ffffffff81cb3320 0000000000000000 ffff8802122e79e8 ffffffff81389f68
+>> Call Trace:
+>>  [<ffffffff8138cfaa>] blk_throtl_drain+0x5a/0x110
+>>  [<ffffffff81389f68>] blkcg_drain_queue+0x18/0x20
+>>  [<ffffffff813698d0>] __blk_drain_queue+0xc0/0x170
+>>  [<ffffffff81369f61>] blk_queue_bypass_start+0x61/0x80
+>>  [<ffffffff81388ab9>] blkcg_deactivate_policy+0x39/0x100
+>>  [<ffffffff81393545>] cfq_exit_queue+0xd5/0xf0
+>>  [<ffffffff8136719f>] elevator_exit+0x2f/0x50
+>>  [<ffffffff81370003>] blk_release_queue+0x53/0xc0
+>>  [<ffffffff8139bb1a>] kobject_release+0x7a/0x190
+>>  [<ffffffff8139b9cf>] kobject_put+0x2f/0x60
+>>  [<ffffffff81369805>] blk_put_queue+0x15/0x20
+>>  [<ffffffff8137d142>] disk_release+0xa2/0xe0
+>>  [<ffffffff814c8466>] device_release+0x36/0xa0
+>>  [<ffffffff8139bb1a>] kobject_release+0x7a/0x190
+>>  [<ffffffff8139b9cf>] kobject_put+0x2f/0x60
+>>  [<ffffffff8137c447>] put_disk+0x17/0x20
+>>  [<ffffffffa031a158>] mmc_blk_put+0x68/0x90 [mmc_block]
+>>  [<ffffffffa031a1c8>] mmc_blk_remove_req+0x48/0xb0 [mmc_block]
+>>  [<ffffffffa031bcb6>] mmc_blk_remove+0xb6/0x130 [mmc_block]
+>>  [<ffffffffa005cdda>] mmc_bus_remove+0x1a/0x20 [mmc_core]
+>>  [<ffffffff814cd1e1>] __device_release_driver+0xa1/0x150
+>>  [<ffffffff814cd2b3>] device_release_driver+0x23/0x30
+>>  [<ffffffff814cc905>] bus_remove_device+0x105/0x180
+>>  [<ffffffff814c8d49>] device_del+0x139/0x260
+>>  [<ffffffffa005d3a2>] mmc_remove_card+0x52/0xa0 [mmc_core]
+>>  [<ffffffffa0061f4a>] mmc_sd_remove+0x2a/0x40 [mmc_core]
+>>  [<ffffffffa006205e>] mmc_sd_detect+0x4e/0x80 [mmc_core]
+>>  [<ffffffffa005c8bf>] mmc_rescan+0x16f/0x300 [mmc_core]
+>>  [<ffffffff810b64ae>] process_one_work+0x19e/0x3f0
+>>  [<ffffffff810b674e>] worker_thread+0x4e/0x450
+>>  [<ffffffff810b6700>] ? process_one_work+0x3f0/0x3f0
+>>  [<ffffffff810bc858>] kthread+0xd8/0xf0
+>>  [<ffffffff810bc780>] ? kthread_worker_fn+0x160/0x160
+>>  [<ffffffff817773df>] ret_from_fork+0x3f/0x70
+>>  [<ffffffff810bc780>] ? kthread_worker_fn+0x160/0x160
+>> Code: eb bf 0f 1f 00 0f 1f 44 00 00 55 48 89 e5 41 55 41 54 53 48 83
+>> ec 08 48 8b 87 c8 00 00 00 48 85 c0 74 05 48 39 30 74 45 48 89 f3 <48>
+>> 63 b6 58 05 00 00 49 89 fd 48 8d bf b8 00 00 00 41 89 d4 e8
+>> RIP  [<ffffffff813895a6>] __blkg_lookup+0x26/0x70
+>>  RSP <ffff8802122e7988>
+>> CR2: 0000000000000558
+>> ---[ end trace 365f1479450a495f ]---
+>> BUG: unable to handle kernel paging request at ffffffffffffffd8
+>> IP: [<ffffffff810bcce0>] kthread_data+0x10/0x20
+>>
+>>
+>> Probably this regression caused by:
+>> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/drivers/mmc/card/block.c?id=96541bac0b4e62efa42e7900d9b32e6baa9a214c
 > 
-> I don't follow. You may run for example HS200 in lower speed, nothing
-> will prevent tuning and re-tuning from happen for these scenarios.
+> Igor, thanks for the report!
 > 
-> Or you are talking about other speed modes than HS200/400 and
-> SDR50/104? If so, which speed modes are these?
+> Unfortunate, I don't have any SDHCI (MMC controller) HW at hand for
+> now. I will try some testing on some of my other boards.
 > 
-Yes, I am talking about other speed modes.
-For SD card, the speed mode is High Speed, for EMMC, the speed may be
-High Speed or DDR mode.
-If CRC error occurs at these speed modes, the MMC core layer will never
-handler it. even propagate the -EILSEQ towards to the mmc core, it will
-not start mmc_retune.
-> BTW, there are currently a patch being discussed which is about adding
-> tuning for DDR mode. Please have look.
-> http://www.spinics.net/lists/arm-kernel/msg438434.html
+> Where there any specific test circumstances needs to trigger this bug
+> or it occurs frequently?
+
+I can test with sdhci controller. If there is any specific environment, let me know, plz.
+Otherwise, i will check this.
+
+Best Regards,
+Jaehoon Chung
+
 > 
-> Regarding re-tuning on CRC errors, that's already supported by the mmc
-> core. More precisely when a host driver returns -EILSEQ for a request.
-> 
-> > By the way,there are too many tune parameters need try for response,
-> > read data, write crc status CRC error, these parameters are
-> > multidimensional, it is hard to find a best parameter, and, try
-> > thousands of parameters will take long time.
-> 
-> As I see, it's your responsibility from the host driver to propagate
-> the proper error code towards the mmc core. If you encounter an error
-> that you want to trigger a retune, just return -EILSEQ.
-> 
-> Moreover, if you see a need to extend the tuning/re-tuning support in
-> the mmc core to suit your need - I am definitely open to look into
-> that. More importantly, I don't want to see host specific hacks trying
-> to deal with this.
-> 
-In addition, the CMD21 is only valid for HS200 mode, do not support
-HS400, So that there is no chance to tune the HS400 read/write data with
-current mmc core layer codes.
-As you see, in our platform, tune of HS200 and HS400 is different, but
-if use the CMD21, it will never work at HS400 mode, even with
-"prepare_hs400_tuning", but it prepare what ? what we need is that
-running at HS400 mode and tune the read/write parameters, but not HS200,
-because for data Rx path, the tune result of HS200 is meaningless for
-HS400.
 > Kind regards
 > Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
