@@ -1,107 +1,68 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: block: disable the reliable write If the card does
- not support CMD23
-Date: Wed, 26 Aug 2015 15:20:11 +0800
-Message-ID: <55DD68AB.30006@rock-chips.com>
-References: <1439537446-7713-1-git-send-email-sdliyong@gmail.com>
- <CAPDyKFp51gzyNaGkGWDXs0ATX2hom2yfcLHXT4o=dzw2=AbWNw@mail.gmail.com>
- <BLU168-W65065971596DEBF42F841D6600@phx.gbl>
+From: Lu Y.B. <yangbo.lu@freescale.com>
+Subject: RE: [PATCH 3/3] mmc: sdhci-of-esdhc: add workaround for T4240
+ incorrect HOSTVER value
+Date: Wed, 26 Aug 2015 07:49:52 +0000
+Message-ID: <BY1PR0301MB119219D4C4E53A73216BCF53F2600@BY1PR0301MB1192.namprd03.prod.outlook.com>
+References: <1437471937-34218-1-git-send-email-yangbo.lu@freescale.com>
+ <CAPDyKFpf6Ayw28dmbHhLJ8HSOSie60sUjaAnK7qqONHsRN4BDA@mail.gmail.com>
+ <1437791242.2993.268.camel@freescale.com>
+ <CAPDyKFp8ZStYVaFm8tjPL190dqV6vCE+oT706M=6wVCckWesLw@mail.gmail.com>
+ <1438012638.2993.289.camel@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:60315 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751951AbbHZHUT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Aug 2015 03:20:19 -0400
-In-Reply-To: <BLU168-W65065971596DEBF42F841D6600@phx.gbl>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <1438012638.2993.289.camel@freescale.com>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Scott Wood <scottwood@freescale.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
 List-Id: linux-mmc@vger.kernel.org
-To: LIYONG <sdliyong@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 2015/8/26 14:15, LIYONG wrote:
-> Hi Uffe,
->
-> The bool variable do_rel_wr is used on line 1408 and line 1436:
-> if (brq->data.blocks> 1 || do_rel_wr) {
-> 		/* SPI multiblock writes terminate using a special
-> 		 * token, not a STOP_TRANSMISSION request.
-> 		 */
->
-> 	if (do_rel_wr)
-> 		mmc_apply_rel_rw(brq, card, req);
->
-> If a card does not support CMD23, I think we need to set the do_rel_wr to false at the beginning of this mmc_blk_rw_rq_prep function
-
-Hi Yong,
-
-You miss the point, Ulf means you should remove
-"(do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO_CMD23)" as well.
-
-No need to check card->quirks & MMC_QUIRK_BLK_NO_CMD23 twice, you have 
-did it while checking do_rel_wr, right?
-
-bool do_rel_wr = ((req->cmd_flags & REQ_FUA) ||
-(req->cmd_flags & REQ_META)) &&
-(rq_data_dir(req) == WRITE) &&
-- (md->flags & MMC_BLK_REL_WR);
-+ (md->flags & MMC_BLK_REL_WR) &&
-+ !(card->quirks & MMC_QUIRK_BLK_NO_CMD23);
-
->
-> Thanks,
-> Yong Li
-> ----------------------------------------
->> Date: Tue, 25 Aug 2015 14:06:43 +0200
->> Subject: Re: [PATCH] mmc: block: disable the reliable write If the card does not support CMD23
->> From: ulf.hansson@linaro.org
->> To: sdliyong@gmail.com
->> CC: chris@printf.net; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
->>
->> On 14 August 2015 at 09:30, <sdliyong@gmail.com> wrote:
->>> From: Yong Li <sdliyong@gmail.com>
->>>
->>> Signed-off-by: Yong Li <sdliyong@gmail.com>
->>> ---
->>> drivers/mmc/card/block.c | 3 ++-
->>> 1 file changed, 2 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->>> index 452782b..d9e3c45 100644
->>> --- a/drivers/mmc/card/block.c
->>> +++ b/drivers/mmc/card/block.c
->>> @@ -1366,7 +1366,8 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
->>> bool do_rel_wr = ((req->cmd_flags & REQ_FUA) ||
->>> (req->cmd_flags & REQ_META)) &&
->>> (rq_data_dir(req) == WRITE) &&
->>> - (md->flags & MMC_BLK_REL_WR);
->>> + (md->flags & MMC_BLK_REL_WR) &&
->>> + !(card->quirks & MMC_QUIRK_BLK_NO_CMD23);
->>
->> Further down in mmc_blk_rw_rq_prep() we check for
->> MMC_QUIRK_BLK_NO_CMD23. That check becomes redundant after this
->> change, please remove that check as a part of this patch as well.
->>
->>>
->>> memset(brq, 0, sizeof(struct mmc_blk_request));
->>> brq->mrq.cmd = &brq->cmd;
->>> --
->>> 2.1.0
->>>
->>
->> Kind regards
->> Uffe
->   		 	   		  --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-
-
--- 
-Best Regards
-Shawn Lin
-
+PiA+ID4gPiA+IEZvciBUNDI0MC1SMS4wLVIyLjAsIHRoZSBIT1NUVkVSIHJlZ2lzdGVyIGhhcyBp
+bmNvcnJjZXQgdmVuZGVyDQo+ID4gPiA+ID4gdmVyc2lvbiB2YWx1ZSBhbmQgc2RoYyBzcGVjIHZl
+cnNpb24gdmFsdWUuIFRoaXMgd2lsbCBicmVhayBkb3duDQo+ID4gPiA+ID4gdGhlIEFETUEgZGF0
+YSB0cmFuc2Zlci4gU28gYWRkIHdvcmthcm91bmQgdG8gZ2V0IHJpZ2h0IHZhbHVlDQo+ID4gPiA+
+ID4gVlZOPTB4MTMsIFNWTiA9IDB4MS4NCj4gPiA+ID4NCj4gPiA+ID4gU28gVDQyNDAtUjEuMC1S
+Mi4wIGlzIHRoZSB2ZXJzaW9uIG9mIHRoZSBjb250cm9sbGVyLCByaWdodD8NCj4gPiA+ID4NCj4g
+PiA+ID4gSWYgSSB1bmRlcnN0YW5kIGNvcnJlY3QgeW91IGFyZSBjaGVja2luZyB3aGF0IENQVS9T
+b0MgeW91IGFyZQ0KPiA+ID4gPiBydW5uaW5nIG9uLCB0byBmaWd1cmUgb3V0IHdoaWNoIGNvbnRy
+b2xsZXIgdmVyc2lvbiB5b3UgYXJlIHVzaW5nLA0KPiA+ID4gPiBhcyB0aGF0IGNhbid0IGJlIGZl
+dGNoZWQgKHRydXN0ZWQpIGZyb20gdGhlIHJlZ2lzdGVycyBvZiB0aGUgZXNkaGMNCj4gPiA+ID4g
+Y29udHJvbGxlciBpdHNlbGYhPw0KPiA+ID4gPg0KPiA+ID4gPiBJbnN0ZWFkLCB5b3UgY291bGQg
+ZGVhbCB3aXRoIHRoaXMgZGlyZWN0bHkgaW4gdGhlIERUUyBmaWxlcy4gSQ0KPiA+ID4gPiBhc3N1
+bWUgeW91IGhhdmUgc29tZSBEVFMgZmlsZSBmb3IgZWFjaCBTb0MvYm9hcmQgdmFyaWFudCwgcmln
+aHQ/DQo+ID4gPg0KPiA+ID4gTm8sIHdlIGRvIG5vdCBoYXZlIGEgc2VwYXJhdGUgRFRTIGZpbGUg
+Zm9yIGVhY2ggcmV2aXNpb24gb2YgYW4gU29DDQo+ID4gPiAtLSBhbmQgaWYgd2UgZGlkLCB3ZSdk
+IGNvbnN0YW50bHkgaGF2ZSBwZW9wbGUgdXNpbmcgdGhlIHdyb25nIG9uZS4NCj4gPiA+DQo+ID4g
+PiA+IEluIHByaW5jaXBsZSwgaW4geW91ciBEVFMgZmlsZSBzcGVjaWZpYyBmb3IgdGhlIGJvYXJk
+L1NvQyB0aGF0DQo+ID4gPiA+IGhvbGRzIHRoZSBUNDI0MC1SMS4wLVIyLjAgdmVyc2lvbiBvZiB0
+aGUgY29udHJvbGxlciwgc2hvdWxkIGFkZCBhDQo+ID4gPiA+IHNwZWNpZmljIGVzZGhjIERUIHBy
+b3BlcnR5IHRvIGluZGljYXRlIHRoaXMgZXJyYXRhLg0KPiA+ID4NCj4gPiA+IE5vLCBiZWNhdXNl
+IChpbiBhZGRpdGlvbiB0byB0aGUgYWJvdmUgaXNzdWUgYWJvdXQgY2hpcCByZXZpc2lvbnMpDQo+
+ID4gPiB0aGUgZGV2aWNlIHRyZWUgaXMgc3RhYmxlIEFCSSBhbmQgZXJyYXRhIGFyZSBvZnRlbiBk
+aXNjb3ZlcmVkIGFmdGVyDQo+ID4gPiBkZXZpY2UgdHJlZXMgYXJlIGRlcGxveWVkLg0KPiA+DQo+
+ID4gRmFpciBlbm91Z2guIFRoZW4gd2hhdCBpcyB5b3VyIHN1Z2dlc3Rpb24gZm9yIHRoZSBzb2x1
+dGlvbiBoZXJlPw0KPiANCj4gQXMgSSBzYWlkIGluIG15IGNvbW1lbnQgb24gcGF0Y2ggMi8zLCBy
+ZWFkIFNWUiBmcm9tIHRoZSBkZXZpY2UtDQo+IGNvbmZpZy9ndXRzIE1NSU8gYmxvY2ssIHdoaWNo
+IHdvcmtzIG9uIGJvdGggUFBDIGFuZCBBUk0uDQo+IA0KPiAtU2NvdHQNCg0KVGhhbmtzLCBTY290
+dC4NCkkgY2hlY2tlZCB0aGUgZGV2aWNlIG5vZGVzIG9mIGRldmljZS1jb25maWcvZ3V0cywgZmlu
+ZGluZyBhbGwgdGhlIHBsYXRmb3JtcyBoYXMgbm90IGEgdW5pZm9ybSBjb21wYXRpYmxlIG5hbWUu
+DQpDb3VsZCBJIGFkZCBhIGNvbXBhdGlibGUgbmFtZSBjYWxsZWQgImZzbCwgZGNmZyIoImZzbCwg
+Z3V0cyIgaWYgdXNpbmcgZ3V0cykgZm9yIFBvd2VyUEMgUCBzZXJpZXMsIFQgc2VyaWVzLCBCIHNl
+cmllcyBib2FyZHMsIHNvIHRoYXQgSSBjb3VsZCBnZXQgdGhpcyBkZXZpY2Ugbm9kZSBieSBjb21w
+YXRpYmxlIHdpdGhvdXQga25vd2luZyBwbGF0Zm9ybT8gDQoNCk9yIERvIHlvdSBrbm93IHRoZXJl
+IGlzIGFub3RoZXIgbWV0aG9kIHRvIGdldCB0aGlzIGRldmljZSBub2RlIGluIGNvZGUgZWFzaWx5
+IHdpdGhvdXQga25vd2luZyBwbGF0Zm9ybT8NCg0KQmVzdCByZWdhcmRzLA0KWWFuZ2JvIEx1DQoN
+Cg0KDQoNCg0KDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fCkxpbnV4cHBjLWRldiBtYWlsaW5nIGxpc3QKTGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5v
+cmcKaHR0cHM6Ly9saXN0cy5vemxhYnMub3JnL2xpc3RpbmZvL2xpbnV4cHBjLWRldg==
