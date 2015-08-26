@@ -1,68 +1,97 @@
-From: Lu Y.B. <yangbo.lu@freescale.com>
-Subject: RE: [PATCH 3/3] mmc: sdhci-of-esdhc: add workaround for T4240
- incorrect HOSTVER value
-Date: Wed, 26 Aug 2015 07:49:52 +0000
-Message-ID: <BY1PR0301MB119219D4C4E53A73216BCF53F2600@BY1PR0301MB1192.namprd03.prod.outlook.com>
-References: <1437471937-34218-1-git-send-email-yangbo.lu@freescale.com>
- <CAPDyKFpf6Ayw28dmbHhLJ8HSOSie60sUjaAnK7qqONHsRN4BDA@mail.gmail.com>
- <1437791242.2993.268.camel@freescale.com>
- <CAPDyKFp8ZStYVaFm8tjPL190dqV6vCE+oT706M=6wVCckWesLw@mail.gmail.com>
- <1438012638.2993.289.camel@freescale.com>
+From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: Re: [PATCH 1/4] mmc: mediatek: Add online-tuning support of EMMC/SD
+Date: Wed, 26 Aug 2015 16:40:16 +0800
+Message-ID: <1440578416.26912.12.camel@mhfsdcap03>
+References: <1439367845-5891-1-git-send-email-chaotian.jing@mediatek.com>
+ <1439367845-5891-2-git-send-email-chaotian.jing@mediatek.com>
+ <CAPDyKFpX4Pp1+U9eNBuGd83sBeBgLU17qysAJ-2V-ABZZHYAGQ@mail.gmail.com>
+ <1439812888.5627.9.camel@mhfsdcap03>
+ <CAPDyKFpGk9gcLLjBnN=+BD5WP-7dZ0+XHC1bcEEGGLvLbTyKHw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-Reply-To: <1438012638.2993.289.camel@freescale.com>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: Scott Wood <scottwood@freescale.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <CAPDyKFpGk9gcLLjBnN=+BD5WP-7dZ0+XHC1bcEEGGLvLbTyKHw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
+List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, James Liao <jamesjj.liao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Wenbin Mei <sin_wenbinmei-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Hongzhou Yang <hongzhou.yang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "Joe.C" <yingjoe.chen-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Bin Zhang =?UTF-8?Q?=28=E7=AB=A0=E6=96=8C=29?= <bin.zhang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-gpio-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Eddie Huang <eddie.huang-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Liuquan Ji <liuquan.ji-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, srv_heupstream <srv_heupstrea>
 List-Id: linux-mmc@vger.kernel.org
 
-PiA+ID4gPiA+IEZvciBUNDI0MC1SMS4wLVIyLjAsIHRoZSBIT1NUVkVSIHJlZ2lzdGVyIGhhcyBp
-bmNvcnJjZXQgdmVuZGVyDQo+ID4gPiA+ID4gdmVyc2lvbiB2YWx1ZSBhbmQgc2RoYyBzcGVjIHZl
-cnNpb24gdmFsdWUuIFRoaXMgd2lsbCBicmVhayBkb3duDQo+ID4gPiA+ID4gdGhlIEFETUEgZGF0
-YSB0cmFuc2Zlci4gU28gYWRkIHdvcmthcm91bmQgdG8gZ2V0IHJpZ2h0IHZhbHVlDQo+ID4gPiA+
-ID4gVlZOPTB4MTMsIFNWTiA9IDB4MS4NCj4gPiA+ID4NCj4gPiA+ID4gU28gVDQyNDAtUjEuMC1S
-Mi4wIGlzIHRoZSB2ZXJzaW9uIG9mIHRoZSBjb250cm9sbGVyLCByaWdodD8NCj4gPiA+ID4NCj4g
-PiA+ID4gSWYgSSB1bmRlcnN0YW5kIGNvcnJlY3QgeW91IGFyZSBjaGVja2luZyB3aGF0IENQVS9T
-b0MgeW91IGFyZQ0KPiA+ID4gPiBydW5uaW5nIG9uLCB0byBmaWd1cmUgb3V0IHdoaWNoIGNvbnRy
-b2xsZXIgdmVyc2lvbiB5b3UgYXJlIHVzaW5nLA0KPiA+ID4gPiBhcyB0aGF0IGNhbid0IGJlIGZl
-dGNoZWQgKHRydXN0ZWQpIGZyb20gdGhlIHJlZ2lzdGVycyBvZiB0aGUgZXNkaGMNCj4gPiA+ID4g
-Y29udHJvbGxlciBpdHNlbGYhPw0KPiA+ID4gPg0KPiA+ID4gPiBJbnN0ZWFkLCB5b3UgY291bGQg
-ZGVhbCB3aXRoIHRoaXMgZGlyZWN0bHkgaW4gdGhlIERUUyBmaWxlcy4gSQ0KPiA+ID4gPiBhc3N1
-bWUgeW91IGhhdmUgc29tZSBEVFMgZmlsZSBmb3IgZWFjaCBTb0MvYm9hcmQgdmFyaWFudCwgcmln
-aHQ/DQo+ID4gPg0KPiA+ID4gTm8sIHdlIGRvIG5vdCBoYXZlIGEgc2VwYXJhdGUgRFRTIGZpbGUg
-Zm9yIGVhY2ggcmV2aXNpb24gb2YgYW4gU29DDQo+ID4gPiAtLSBhbmQgaWYgd2UgZGlkLCB3ZSdk
-IGNvbnN0YW50bHkgaGF2ZSBwZW9wbGUgdXNpbmcgdGhlIHdyb25nIG9uZS4NCj4gPiA+DQo+ID4g
-PiA+IEluIHByaW5jaXBsZSwgaW4geW91ciBEVFMgZmlsZSBzcGVjaWZpYyBmb3IgdGhlIGJvYXJk
-L1NvQyB0aGF0DQo+ID4gPiA+IGhvbGRzIHRoZSBUNDI0MC1SMS4wLVIyLjAgdmVyc2lvbiBvZiB0
-aGUgY29udHJvbGxlciwgc2hvdWxkIGFkZCBhDQo+ID4gPiA+IHNwZWNpZmljIGVzZGhjIERUIHBy
-b3BlcnR5IHRvIGluZGljYXRlIHRoaXMgZXJyYXRhLg0KPiA+ID4NCj4gPiA+IE5vLCBiZWNhdXNl
-IChpbiBhZGRpdGlvbiB0byB0aGUgYWJvdmUgaXNzdWUgYWJvdXQgY2hpcCByZXZpc2lvbnMpDQo+
-ID4gPiB0aGUgZGV2aWNlIHRyZWUgaXMgc3RhYmxlIEFCSSBhbmQgZXJyYXRhIGFyZSBvZnRlbiBk
-aXNjb3ZlcmVkIGFmdGVyDQo+ID4gPiBkZXZpY2UgdHJlZXMgYXJlIGRlcGxveWVkLg0KPiA+DQo+
-ID4gRmFpciBlbm91Z2guIFRoZW4gd2hhdCBpcyB5b3VyIHN1Z2dlc3Rpb24gZm9yIHRoZSBzb2x1
-dGlvbiBoZXJlPw0KPiANCj4gQXMgSSBzYWlkIGluIG15IGNvbW1lbnQgb24gcGF0Y2ggMi8zLCBy
-ZWFkIFNWUiBmcm9tIHRoZSBkZXZpY2UtDQo+IGNvbmZpZy9ndXRzIE1NSU8gYmxvY2ssIHdoaWNo
-IHdvcmtzIG9uIGJvdGggUFBDIGFuZCBBUk0uDQo+IA0KPiAtU2NvdHQNCg0KVGhhbmtzLCBTY290
-dC4NCkkgY2hlY2tlZCB0aGUgZGV2aWNlIG5vZGVzIG9mIGRldmljZS1jb25maWcvZ3V0cywgZmlu
-ZGluZyBhbGwgdGhlIHBsYXRmb3JtcyBoYXMgbm90IGEgdW5pZm9ybSBjb21wYXRpYmxlIG5hbWUu
-DQpDb3VsZCBJIGFkZCBhIGNvbXBhdGlibGUgbmFtZSBjYWxsZWQgImZzbCwgZGNmZyIoImZzbCwg
-Z3V0cyIgaWYgdXNpbmcgZ3V0cykgZm9yIFBvd2VyUEMgUCBzZXJpZXMsIFQgc2VyaWVzLCBCIHNl
-cmllcyBib2FyZHMsIHNvIHRoYXQgSSBjb3VsZCBnZXQgdGhpcyBkZXZpY2Ugbm9kZSBieSBjb21w
-YXRpYmxlIHdpdGhvdXQga25vd2luZyBwbGF0Zm9ybT8gDQoNCk9yIERvIHlvdSBrbm93IHRoZXJl
-IGlzIGFub3RoZXIgbWV0aG9kIHRvIGdldCB0aGlzIGRldmljZSBub2RlIGluIGNvZGUgZWFzaWx5
-IHdpdGhvdXQga25vd2luZyBwbGF0Zm9ybT8NCg0KQmVzdCByZWdhcmRzLA0KWWFuZ2JvIEx1DQoN
-Cg0KDQoNCg0KDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fCkxpbnV4cHBjLWRldiBtYWlsaW5nIGxpc3QKTGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5v
-cmcKaHR0cHM6Ly9saXN0cy5vemxhYnMub3JnL2xpc3RpbmZvL2xpbnV4cHBjLWRldg==
+On Tue, 2015-08-25 at 14:07 +0200, Ulf Hansson wrote:
+> On 17 August 2015 at 14:01, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
+> > Hi Ulf,
+> > Thanks, please see my comment:
+> > On Mon, 2015-08-17 at 13:31 +0200, Ulf Hansson wrote:
+> >> On 12 August 2015 at 10:24, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
+> >> > Schedule a workqueue to do tuning when CRC error
+> >> > Call mmc_hw_reset to re-init card when data timeout
+> >>
+> >> Thanks to Adrian Hunter, the mmc core already supports re-tuning for
+> >> the above scenarios through the mmc_retune_*() APIs.
+> >>
+> >> SDHCI driver has already adopted to use that feature, you should do
+> >> that for the mtk-sd driver as well.
+> >>
+> >> Kind regards
+> >> Uffe
+> >>
+> > I also noticed that the mmc core already supports re-tuning, but it is
+> > not suitable for our host.
+> > For EMMC, the CMD21 only support HS200/HS400 mode, for SD card, CMD19
+> > only support SDR50/SDR104 mode, but in our host, even 50Mhz clock
+> > frequency may also occur CRC error, Cannot find a parameter that can
+> > cover all SD cards which running at 50Mhz, even 25Mhz, will occur CRC
+> > error for stress test, DDR50 mode is worse.
+> 
+> I don't follow. You may run for example HS200 in lower speed, nothing
+> will prevent tuning and re-tuning from happen for these scenarios.
+> 
+> Or you are talking about other speed modes than HS200/400 and
+> SDR50/104? If so, which speed modes are these?
+> 
+Yes, I am talking about other speed modes.
+For SD card, the speed mode is High Speed, for EMMC, the speed may be
+High Speed or DDR mode.
+If CRC error occurs at these speed modes, the MMC core layer will never
+handler it. even propagate the -EILSEQ towards to the mmc core, it will
+not start mmc_retune.
+> BTW, there are currently a patch being discussed which is about adding
+> tuning for DDR mode. Please have look.
+> http://www.spinics.net/lists/arm-kernel/msg438434.html
+> 
+> Regarding re-tuning on CRC errors, that's already supported by the mmc
+> core. More precisely when a host driver returns -EILSEQ for a request.
+> 
+> > By the way,there are too many tune parameters need try for response,
+> > read data, write crc status CRC error, these parameters are
+> > multidimensional, it is hard to find a best parameter, and, try
+> > thousands of parameters will take long time.
+> 
+> As I see, it's your responsibility from the host driver to propagate
+> the proper error code towards the mmc core. If you encounter an error
+> that you want to trigger a retune, just return -EILSEQ.
+> 
+> Moreover, if you see a need to extend the tuning/re-tuning support in
+> the mmc core to suit your need - I am definitely open to look into
+> that. More importantly, I don't want to see host specific hacks trying
+> to deal with this.
+> 
+In addition, the CMD21 is only valid for HS200 mode, do not support
+HS400, So that there is no chance to tune the HS400 read/write data with
+current mmc core layer codes.
+As you see, in our platform, tune of HS200 and HS400 is different, but
+if use the CMD21, it will never work at HS400 mode, even with
+"prepare_hs400_tuning", but it prepare what ? what we need is that
+running at HS400 mode and tune the read/write parameters, but not HS200,
+because for data Rx path, the tune result of HS200 is meaningless for
+HS400.
+> Kind regards
+> Uffe
