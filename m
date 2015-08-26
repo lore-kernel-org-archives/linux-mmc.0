@@ -1,139 +1,73 @@
-From: LIYONG <sdliyong@gmail.com>
-Subject: RE: [PATCH] mmc: block: disable the reliable write If the card does
- not support CMD23
-Date: Wed, 26 Aug 2015 20:38:14 +0800
-Message-ID: <BLU168-W82A87998B6D70A69827831D6600@phx.gbl>
-References: <1439537446-7713-1-git-send-email-sdliyong@gmail.com>,<CAPDyKFp51gzyNaGkGWDXs0ATX2hom2yfcLHXT4o=dzw2=AbWNw@mail.gmail.com>,<BLU168-W65065971596DEBF42F841D6600@phx.gbl>,<55DD68AB.30006@rock-chips.com>
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: [PATCH 3/3] mmc: sdhci-of-esdhc: add workaround for T4240
+ incorrect HOSTVER value
+Date: Wed, 26 Aug 2015 09:16:22 -0500
+Message-ID: <1440598582.16577.109.camel@freescale.com>
+References: <1437471937-34218-1-git-send-email-yangbo.lu@freescale.com>
+	 <CAPDyKFpf6Ayw28dmbHhLJ8HSOSie60sUjaAnK7qqONHsRN4BDA@mail.gmail.com>
+	 <1437791242.2993.268.camel@freescale.com>
+	 <CAPDyKFp8ZStYVaFm8tjPL190dqV6vCE+oT706M=6wVCckWesLw@mail.gmail.com>
+	 <1438012638.2993.289.camel@freescale.com>
+	 <BY1PR0301MB119219D4C4E53A73216BCF53F2600@BY1PR0301MB1192.namprd03.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f174.google.com ([209.85.220.174]:36257 "EHLO
-	mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751791AbbHZMiS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Aug 2015 08:38:18 -0400
-In-Reply-To: <55DD68AB.30006@rock-chips.com>
+Received: from mail-bn1bon0138.outbound.protection.outlook.com ([157.56.111.138]:51552
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1756188AbbHZOQb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 26 Aug 2015 10:16:31 -0400
+In-Reply-To: <BY1PR0301MB119219D4C4E53A73216BCF53F2600@BY1PR0301MB1192.namprd03.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Lu Yangbo-B47093 <yangbo.lu@freescale.com>
+Cc: "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Thanks Shawn. I got your point. You mean we can remove the=A0|| !(card-=
->quirks & MMC_QUIRK_BLK_NO_CMD23) at line 1468.
+On Wed, 2015-08-26 at 02:49 -0500, Lu Yangbo-B47093 wrote:
+> > > > > > For T4240-R1.0-R2.0, the HOSTVER register has incorrcet vender
+> > > > > > version value and sdhc spec version value. This will break down
+> > > > > > the ADMA data transfer. So add workaround to get right value
+> > > > > > VVN=0x13, SVN = 0x1.
+> > > > > 
+> > > > > So T4240-R1.0-R2.0 is the version of the controller, right?
+> > > > > 
+> > > > > If I understand correct you are checking what CPU/SoC you are
+> > > > > running on, to figure out which controller version you are using,
+> > > > > as that can't be fetched (trusted) from the registers of the esdhc
+> > > > > controller itself!?
+> > > > > 
+> > > > > Instead, you could deal with this directly in the DTS files. I
+> > > > > assume you have some DTS file for each SoC/board variant, right?
+> > > > 
+> > > > No, we do not have a separate DTS file for each revision of an SoC
+> > > > -- and if we did, we'd constantly have people using the wrong one.
+> > > > 
+> > > > > In principle, in your DTS file specific for the board/SoC that
+> > > > > holds the T4240-R1.0-R2.0 version of the controller, should add a
+> > > > > specific esdhc DT property to indicate this errata.
+> > > > 
+> > > > No, because (in addition to the above issue about chip revisions)
+> > > > the device tree is stable ABI and errata are often discovered after
+> > > > device trees are deployed.
+> > > 
+> > > Fair enough. Then what is your suggestion for the solution here?
+> > 
+> > As I said in my comment on patch 2/3, read SVR from the device-
+> > config/guts MMIO block, which works on both PPC and ARM.
+> > 
+> > -Scott
+> 
+> Thanks, Scott.
+> I checked the device nodes of device-config/guts, finding all the platforms 
+> has not a uniform compatible name.
+> Could I add a compatible name called "fsl, dcfg"("fsl, guts" if using guts) 
+> for PowerPC P series, T series, B series boards, so that I could get this 
+> device node by compatible without knowing platform? 
 
-But considering this case: The do_rel_wr =3D false and the card does su=
-pport CMD23.
-do_rel_wr =3D false;=A0
-!(card->quirks & MMC_QUIRK_BLK_NO_CMD23) =3D true;
+No.  It's too vague.  Linux should keep a list of all the nodes it can match 
+against for this.  Centralize it in one place rather than having each driver 
+that cares about SVR do it.
 
-At line 1468,=A0do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO_CMD23) s=
-hould be true;
+-Scott
 
-If re remove the=A0|| !(card->quirks & MMC_QUIRK_BLK_NO_CMD23), it will=
- be false
-
-It seems that we cannot modify the line 1468?
-
-Thanks,
-Yong Li
-----------------------------------------
-> Subject: Re: [PATCH] mmc: block: disable the reliable write If the ca=
-rd does not support CMD23
-> To: sdliyong@gmail.com; ulf.hansson@linaro.org
-> CC: shawn.lin@rock-chips.com; chris@printf.net; linux-mmc@vger.kernel=
-=2Eorg; linux-kernel@vger.kernel.org
-> From: shawn.lin@rock-chips.com
-> Date: Wed, 26 Aug 2015 15:20:11 +0800
->
-> On 2015/8/26 14:15, LIYONG wrote:
->> Hi Uffe,
->>
->> The bool variable do_rel_wr is used on line 1408 and line 1436:
->> if (brq->data.blocks> 1 || do_rel_wr) {
->> /* SPI multiblock writes terminate using a special
->> * token, not a STOP_TRANSMISSION request.
->> */
->>
->> if (do_rel_wr)
->> mmc_apply_rel_rw(brq, card, req);
->>
->> If a card does not support CMD23, I think we need to set the do_rel_=
-wr to false at the beginning of this mmc_blk_rw_rq_prep function
->
-> Hi Yong,
->
-> You miss the point, Ulf means you should remove
-> "(do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO_CMD23)" as well.
->
-> No need to check card->quirks & MMC_QUIRK_BLK_NO_CMD23 twice, you hav=
-e
-> did it while checking do_rel_wr, right?
->
-> bool do_rel_wr =3D ((req->cmd_flags & REQ_FUA) ||
-> (req->cmd_flags & REQ_META)) &&
-> (rq_data_dir(req) =3D=3D WRITE) &&
-> - (md->flags & MMC_BLK_REL_WR);
-> + (md->flags & MMC_BLK_REL_WR) &&
-> + !(card->quirks & MMC_QUIRK_BLK_NO_CMD23);
->
->>
->> Thanks,
->> Yong Li
->> ----------------------------------------
->>> Date: Tue, 25 Aug 2015 14:06:43 +0200
->>> Subject: Re: [PATCH] mmc: block: disable the reliable write If the =
-card does not support CMD23
->>> From: ulf.hansson@linaro.org
->>> To: sdliyong@gmail.com
->>> CC: chris@printf.net; linux-mmc@vger.kernel.org; linux-kernel@vger.=
-kernel.org
->>>
->>> On 14 August 2015 at 09:30, <sdliyong@gmail.com> wrote:
->>>> From: Yong Li <sdliyong@gmail.com>
->>>>
->>>> Signed-off-by: Yong Li <sdliyong@gmail.com>
->>>> ---
->>>> drivers/mmc/card/block.c | 3 ++-
->>>> 1 file changed, 2 insertions(+), 1 deletion(-)
->>>>
->>>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->>>> index 452782b..d9e3c45 100644
->>>> --- a/drivers/mmc/card/block.c
->>>> +++ b/drivers/mmc/card/block.c
->>>> @@ -1366,7 +1366,8 @@ static void mmc_blk_rw_rq_prep(struct mmc_qu=
-eue_req *mqrq,
->>>> bool do_rel_wr =3D ((req->cmd_flags & REQ_FUA) ||
->>>> (req->cmd_flags & REQ_META)) &&
->>>> (rq_data_dir(req) =3D=3D WRITE) &&
->>>> - (md->flags & MMC_BLK_REL_WR);
->>>> + (md->flags & MMC_BLK_REL_WR) &&
->>>> + !(card->quirks & MMC_QUIRK_BLK_NO_CMD23);
->>>
->>> Further down in mmc_blk_rw_rq_prep() we check for
->>> MMC_QUIRK_BLK_NO_CMD23. That check becomes redundant after this
->>> change, please remove that check as a part of this patch as well.
->>>
->>>>
->>>> memset(brq, 0, sizeof(struct mmc_blk_request));
->>>> brq->mrq.cmd =3D &brq->cmd;
->>>> --
->>>> 2.1.0
->>>>
->>>
->>> Kind regards
->>> Uffe
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
- in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at http://vger.kernel.org/majordomo-info.html
->>
->>
->>
->
->
-> --
-> Best Regards
-> Shawn Lin
->
- 		 	   		  
