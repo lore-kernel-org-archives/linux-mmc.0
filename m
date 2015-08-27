@@ -1,131 +1,82 @@
-From: Michal Simek <michal.simek@xilinx.com>
-Subject: Re: [PATCH] mmc: Kconfig: Add dependency on GPIOLIB for MMC_SDHCI
-Date: Thu, 27 Aug 2015 16:26:20 +0200
-Message-ID: <55DF1E0C.70505@xilinx.com>
-References: <6906e34b62f162018984a5fbd12b3ef6cd5e3a29.1438839562.git.michal.simek@xilinx.com>
- <CAPDyKFqgLonYZT86ixOAwJ3G5tsozxee6dEs+QRFYzwOWFUNNQ@mail.gmail.com>
- <CAPDyKFoPDMcO_19_pg7=aFUUCQrnxnoZD+YGpjYaBcRWu4ArJw@mail.gmail.com>
- <55DEF7FD.8020904@xilinx.com>
- <CAPDyKFo=DfMkg-wn7FEhsT4keMgWw0fYogvEo0xPBczGP6s9nQ@mail.gmail.com>
- <55DF1413.3030004@xilinx.com>
- <CAPDyKFq8aAQzpUJt2oZuP=ofO1GakZUtezDzFW=bRy4OD7P9Vw@mail.gmail.com>
+From: Joakim Tjernlund <joakim.tjernlund@transmode.se>
+Subject: Re: Initial signal voltage ?
+Date: Thu, 27 Aug 2015 14:33:21 +0000
+Message-ID: <1440686001.3349.115.camel@transmode.se>
+References: <1439225438.3120.94.camel@transmode.se>
+	 <CAPDyKFpDzBV9zXAZH_KddZVdUQ_t2W3Qb3yG70ceagv4+oy7cQ@mail.gmail.com>
+	 <1440505201.3349.59.camel@transmode.se>
+	 <CAPDyKFpv3HyZSvGXWb-dzD1nec0173TyzegxRiWuhTdm9GdXAg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0055.outbound.protection.outlook.com ([207.46.100.55]:30107
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754014AbbH0O0i (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 27 Aug 2015 10:26:38 -0400
-In-Reply-To: <CAPDyKFq8aAQzpUJt2oZuP=ofO1GakZUtezDzFW=bRy4OD7P9Vw@mail.gmail.com>
+Received: from smtp.transmode.se ([31.15.61.139]:61806 "EHLO smtp.transmode.se"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752033AbbH0Od0 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2015 10:33:26 -0400
+In-Reply-To: <CAPDyKFpv3HyZSvGXWb-dzD1nec0173TyzegxRiWuhTdm9GdXAg@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <5AE5C71C5547CD45A3F6F3EE9BB371ED@transmode.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Michal Simek <michal.simek@xilinx.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Michal Simek <monstr@monstr.eu>, Scott Branden <sbranden@broadcom.com>, Weijun Yang <Weijun.Yang@csr.com>, Andrew Bresticker <abrestic@chromium.org>, Jean Delvare <jdelvare@suse.de>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alim Akhtar <alim.akhtar@samsung.com>, addy ke <addy.ke@rock-chips.com>, Stephen Boyd <sboyd@codeaurora.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Kevin Hao <haokexin@gmail.com>, Vincent Yang <vincent.yang.fujitsu@gmail.com>
+To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 08/27/2015 04:12 PM, Ulf Hansson wrote:
-> On 27 August 2015 at 15:43, Michal Simek <michal.simek@xilinx.com> wrote:
->> On 08/27/2015 02:30 PM, Ulf Hansson wrote:
->>> On 27 August 2015 at 13:43, Michal Simek <michal.simek@xilinx.com> wrote:
->>>> Hi Ulf,
->>>>
->>>> On 08/27/2015 01:32 PM, Ulf Hansson wrote:
->>>>> On 25 August 2015 at 14:04, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>>>>> On 6 August 2015 at 07:39, Michal Simek <michal.simek@xilinx.com> wrote:
->>>>>>> Add GPIOLIB dependency for MMC_SDHCI.
->>>>>>>
->>>>>>> Problem was observed after adding the patch
->>>>>>> "mmc: sdhci-of-arasan: Call OF parsing for MMC"
->>>>>>> (sha1: 16b23787fc709fe60c5d2bd05927b1a3da33d4e9) which calls
->>>>>>> mmc_of_parse() -> mmc_gpiod_request_cd() (slot-gpio.c) which
->>>>>>> calls devm_gpiod_get_index() which returns -ENOSYS.
->>>>>>>
->>>>>>> Error log:
->>>>>>> sdhci-arasan ff160000.sdhci: parsing dt failed (4294967258)
->>>>>>> sdhci-arasan: probe of ff160000.sdhci failed with error -38
->>>>>>>
->>>>>>> Signed-off-by: Michal Simek <michal.simek@xilinx.com>
->>>>>>
->>>>>> Thanks, applied for next!
->>>>>
->>>>> kbuild test robot reports a warning for this one, so I am dropping it
->>>>> from my next branch.
->>>>
->>>> I think is just better to fix the problem there instead of dropping this
->>>> patch which fix GPIO dependency.
->>>>
->>>> Fix is quite easy.
->>>> diff --git a/arch/powerpc/platforms/44x/Kconfig
->>>> b/arch/powerpc/platforms/44x/Kconfig
->>>> index 5538e57c36c1..874f07c7d0b8 100644
->>>> --- a/arch/powerpc/platforms/44x/Kconfig
->>>> +++ b/arch/powerpc/platforms/44x/Kconfig
->>>> @@ -219,6 +219,7 @@ config AKEBONO
->>>>         select USB_EHCI_HCD_PLATFORM if USB_EHCI_HCD
->>>>         select MMC_SDHCI
->>>>         select MMC_SDHCI_PLTFM
->>>> +       select GPIOLIB
->>>>         select ATA
->>>>         select SATA_AHCI_PLATFORM
->>>>         help
->>>>
->>>> But the question is if we should keep these ancient targets in the tree.
->>>>
->>>> I am happy to send this patch but it should go via PPC tree. Or are you
->>>> happy to apply it to your tree?
->>>
->>> It's getting really late for 4.3 so I would rather postpone this to
->>> the next release cycle.
->>
->> No problem at all. :-)
->>
->>>
->>> As I stated in my earlier reply, do we really want to add the GPIOLIB
->>> dependency to the Kconfig file for SDHCI?
->>> I assume we have lots of other Kconfig dependencies, then these should
->>> also to be added for the same reasons. I doubt this is the right thing
->>> to do.
->>
->> Is it the right solution not to list them if they are there?
+On Thu, 2015-08-27 at 16:01 +0200, Ulf Hansson wrote:
+> On 25 August 2015 at 14:20, Joakim Tjernlund
+> <joakim.tjernlund@transmode.se> wrote:
+> > On Tue, 2015-08-25 at 14:05 +0200, Ulf Hansson wrote:
+> > > On 10 August 2015 at 18:50, Joakim Tjernlund
+> > > <joakim.tjernlund@transmode.se> wrote:
+> > > > in mmc_power_up() we have:
+> > > >         /* Try to set signal voltage to 3.3V but fall back to 1.8v or 1.2v */
+> > > >         if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330) == 0)
+> > > >                 dev_err(mmc_dev(host), "Initial signal voltage of 3.3v\n");
+> > > >         else if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180) == 0)
+> > > >                 dev_err(mmc_dev(host), "Initial signal voltage of 1.8v\n");
+> > > >         else if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120) == 0)
+> > > >                 dev_err(mmc_dev(host), "Initial signal voltage of 1.2v\n");
+> > > > 
+> > > > Here one jut brutally tries to set the initial power to 3.3 but nowhere in
+> > > > general code there is a check if the controller can handle this w.r.t
+> > > > HOST CAPS.
+> > > 
+> > > You are right, it's brutal. :-)
+> > > 
+> > > Perhaps the host driver should return -EINVAL when a voltage level
+> > > can't be reached. The above code should not print messages as errors,
+> > > at least as long some voltage level can be used.
+> > > 
+> > > > Where should this check be performed, I am guessing either here or in sdhci?
+> > > > This is all new to me so I am just throwing this out there
+> > > 
+> > > Do you want to send a patch?
+> > 
+> > No, you didn't answer the question
 > 
-> Well, I don't think there are *one* answer to this.
+> Sorry for being a bit vague. I looked a bit more into this.
 > 
-> Still, the reason to why we have API implementing stubs when used is
-> to manage these cases.
-> 
->>
->>> How about if the mmc core instead treat GPIOs as optional from an API
->>> point of view and thus it won't cause ->probe() to fail. Is that a way
->>> forward for you?
->>
->> In my test case I am not using GPIO at all and probe is failing. If this
->> is fixed because it is probably common setting for others we don't need
->> to list this dependency.
->> But really for my case and I am not using gpio at all probe just failed
->> which is incorrect and should be fixed.
->>
-> 
-> Thanks for clarifying. In this regard I think it's pretty obvious that
-> we need to make GPIO optional.
-> Else we will force the footprint to increase for the kernel image,
-> even when not needed.
+> Currently drivers return error codes according to when they can't set
+> the requested voltage level, so that's all fine - right?
 
-right. Footprint is valid argument.
+Yes, they should. Hovever it seems like my fsl controller cannot.
+There is VS18,VS30 and VS33 bits in hostcap register but theses are
+always set :(
 
 > 
-> Typically checking for -ENOSYS from the response from the GPIOLIB
-> would do the trick. That's actually what we do already for GPIOs in
-> mmc pwrseq simple case.
+> Moreover, the above code snippet is modified by you (or someone else)
+> locally, since in the upstream version of the code, the prints are
 
-I didn't parse the gpio code to be 100% sure that this is enough. Also
-if this will cover all cases which we can have. Depends on gpio error
-code consistency.
+ahh, yes a did that while debugging.
 
-> Do you want to send another patch?
+> done a debug level. That's also okay, I think.
+> Perhaps changing the last print to warn level instead, since reaching
+> that point would mean all attempts have failed.
 
-I would love to but I am quite occupied right now but I am happy to test
-on our SoC when we have right fix for it.
+Since not all controllers can tell what VS is you have to specify that, in my case I
+do it in my device tree as there is a way to do that already.
 
-Thanks,
-Michal
+So I think mmc_power_up() should mask away VS not supported and then try the remaining.
+The exact way to do this escapes me as I am not familiar with this area yet.
+
+ Jocke
