@@ -1,73 +1,62 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v3 00/15] omap_hsmmc: regulator usage cleanup and fixes
-Date: Thu, 27 Aug 2015 14:43:52 +0530
-Message-ID: <1440666847-12594-1-git-send-email-kishon@ti.com>
+Subject: [PATCH v3 02/15] mmc: host: omap_hsmmc: return on fatal errors from omap_hsmmc_reg_get
+Date: Thu, 27 Aug 2015 14:43:54 +0530
+Message-ID: <1440666847-12594-3-git-send-email-kishon@ti.com>
+References: <1440666847-12594-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:46711 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750982AbbH0JOR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2015 05:14:17 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1440666847-12594-1-git-send-email-kishon@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, afenkart@gmail.com, tony@atomide.com, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, nsekhar@ti.com
 Cc: neilb@suse.de, kishon@ti.com
+List-Id: linux-mmc@vger.kernel.org
 
-This patch series does the following
-*) Uses devm_regulator_get_optional() for vmmc and then removes the
-   CONFIG_REGULATOR check altogether.
-*) return on -EPROBE_DEFER and any other fatal errors
-*) enable/disable vmmc_aux regulator based on prior state
+Now return error only if the return value of
+devm_regulator_get_optional() is not the same as -ENODEV, since with
+-EPROBE_DEFER, the regulator can be obtained later and all other
+errors are fatal.
 
-Changes from v2:
-*) rebased to mmc -next branch
-*) dropped using "mmc_of_parse_voltage" to get ocr_avail patch.
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Tested-by: Tony Lindgren <tony@atomide.com>
+---
+ drivers/mmc/host/omap_hsmmc.c |   22 ++++++++++++++++++++--
+ 1 file changed, 20 insertions(+), 2 deletions(-)
 
-Changes from v1:
-*) return on -EPROBE_DEFER and other fatal errors. (Don't return only
-   if the return value is -ENODEV)
-*) Remove the beagle x15 dts patch. It can be part of a different
-   series.
-*) Avoid using regulator_is_enabled for vqmmc since if the regulator
-   is shared and the other users are not using regulator_is_enabled
-   then there can be unbalanced regulator_enable/regulator_disable
-
-I've pushed this patch series to
-git://git.ti.com/linux-phy/linux-phy.git mmc_for-next
-
-Please note the branch also has the pbias fixes [1].
-[1] -> https://lkml.org/lkml/2015/7/27/358
-
-This series is in preparation for implementing the voltage switch
-sequence so that UHS cards can be supported.
-
-Did basic read/write test in J6, J6 Eco, Beagle-x15, AM437x EVM,
-Beaglebone black, OMAP5 uEVM, OMAP4 PANDA and OMAP3gle xm.
-
-Kishon Vijay Abraham I (15):
-  mmc: host: omap_hsmmc: use devm_regulator_get_optional() for vmmc
-  mmc: host: omap_hsmmc: return on fatal errors from omap_hsmmc_reg_get
-  mmc: host: omap_hsmmc: cleanup omap_hsmmc_reg_get()
-  mmc: host: omap_hsmmc: use the ocrmask provided by the vmmc regulator
-  mmc: host: omap_hsmmc: use mmc_host's vmmc and vqmmc
-  mmc: host: omap_hsmmc: remove unnecessary pbias set_voltage
-  mmc: host: omap_hsmmc: return error if any of the regulator APIs fail
-  mmc: host: omap_hsmmc: add separate functions for enable/disable
-    supply
-  mmc: host: omap_hsmmc: add separate function to set pbias
-  mmc: host: omap_hsmmc: avoid pbias regulator enable on power off
-  mmc: host: omap_hsmmc: don't use ->set_power to set initial regulator
-    state
-  mmc: host: omap_hsmmc: enable/disable vmmc_aux regulator based on
-    previous state
-  mmc: host: omap_hsmmc: use regulator_is_enabled to find pbias status
-  mmc: host: omap_hsmmc: use ios->vdd for setting vmmc voltage
-  mmc: host: omap_hsmmc: remove CONFIG_REGULATOR check
-
- drivers/mmc/host/omap_hsmmc.c |  326 +++++++++++++++++++++++++++--------------
- 1 file changed, 212 insertions(+), 114 deletions(-)
-
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 9b335af..2eafd6f 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -375,10 +375,28 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 
+ 	/* Allow an aux regulator */
+ 	reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
+-	host->vcc_aux = IS_ERR(reg) ? NULL : reg;
++	if (IS_ERR(reg)) {
++		ret = PTR_ERR(reg);
++		if (ret != -ENODEV)
++			return ret;
++		host->vcc_aux = NULL;
++		dev_dbg(host->dev, "unable to get vmmc_aux regulator %ld\n",
++			PTR_ERR(reg));
++	} else {
++		host->vcc_aux = reg;
++	}
+ 
+ 	reg = devm_regulator_get_optional(host->dev, "pbias");
+-	host->pbias = IS_ERR(reg) ? NULL : reg;
++	if (IS_ERR(reg)) {
++		ret = PTR_ERR(reg);
++		if (ret != -ENODEV)
++			return ret;
++		host->pbias = NULL;
++		dev_dbg(host->dev, "unable to get pbias regulator %ld\n",
++			PTR_ERR(reg));
++	} else {
++		host->pbias = reg;
++	}
+ 
+ 	/* For eMMC do not power off when not in sleep state */
+ 	if (mmc_pdata(host)->no_regulator_off_init)
 -- 
 1.7.9.5
-
