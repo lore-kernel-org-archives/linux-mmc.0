@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v3 09/15] mmc: host: omap_hsmmc: add separate function to set pbias
-Date: Thu, 27 Aug 2015 14:44:01 +0530
-Message-ID: <1440666847-12594-10-git-send-email-kishon@ti.com>
+Subject: [PATCH v3 03/15] mmc: host: omap_hsmmc: cleanup omap_hsmmc_reg_get()
+Date: Thu, 27 Aug 2015 14:43:55 +0530
+Message-ID: <1440666847-12594-4-git-send-email-kishon@ti.com>
 References: <1440666847-12594-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,117 +12,92 @@ To: ulf.hansson@linaro.org, afenkart@gmail.com, tony@atomide.com, linux-mmc@vger
 Cc: neilb@suse.de, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-No functional change. Cleanup omap_hsmmc_set_power by adding separate
-functions to set pbias and invoke it from omap_hsmmc_set_power.
+No functional change. Instead of using a local regulator variable
+in omap_hsmmc_reg_get() for holding the return value of
+devm_regulator_get_optional() and then assigning to omap_hsmmc_host
+regulator members: vcc, vcc_aux and pbias, directly use the
+omap_hsmmc_host regulator members.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Reviewed-by: Roger Quadros <rogerq@ti.com>
 Tested-by: Tony Lindgren <tony@atomide.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   78 +++++++++++++++++++++++++----------------
- 1 file changed, 48 insertions(+), 30 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   38 ++++++++++++++++----------------------
+ 1 file changed, 16 insertions(+), 22 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 3fa78d4..810d612 100644
+index 2eafd6f..3fde2f9 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -305,6 +305,48 @@ err_set_ocr:
- 	return ret;
- }
+@@ -343,24 +343,22 @@ error_set_power:
  
-+static int omap_hsmmc_set_pbias(struct omap_hsmmc_host *host, bool power_on,
-+				int vdd)
-+{
-+	int ret;
-+
-+	if (!host->pbias)
-+		return 0;
-+
-+	if (power_on) {
-+		if (vdd <= VDD_165_195)
-+			ret = regulator_set_voltage(host->pbias, VDD_1V8,
-+						    VDD_1V8);
-+		else
-+			ret = regulator_set_voltage(host->pbias, VDD_3V0,
-+						    VDD_3V0);
-+		if (ret < 0) {
-+			dev_err(host->dev, "pbias set voltage fail\n");
-+			return ret;
-+		}
-+
-+		if (host->pbias_enabled == 0) {
-+			ret = regulator_enable(host->pbias);
-+			if (ret) {
-+				dev_err(host->dev, "pbias reg enable fail\n");
-+				return ret;
-+			}
-+			host->pbias_enabled = 1;
-+		}
-+	} else {
-+		if (host->pbias_enabled == 1) {
-+			ret = regulator_disable(host->pbias);
-+			if (ret) {
-+				dev_err(host->dev, "pbias reg disable fail\n");
-+				return ret;
-+			}
-+			host->pbias_enabled = 0;
-+		}
-+	}
-+
-+	return 0;
-+}
-+
- static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
+ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
  {
- 	struct omap_hsmmc_host *host =
-@@ -325,16 +367,9 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
- 	if (mmc_pdata(host)->before_set_reg)
- 		mmc_pdata(host)->before_set_reg(dev, power_on, vdd);
+-	struct regulator *reg;
+ 	int ocr_value = 0;
+ 	int ret;
  
--	if (host->pbias) {
--		if (host->pbias_enabled == 1) {
--			ret = regulator_disable(host->pbias);
--			if (ret) {
--				dev_err(dev, "pbias reg disable failed\n");
--				return ret;
--			}
--			host->pbias_enabled = 0;
--		}
--	}
-+	ret = omap_hsmmc_set_pbias(host, false, 0);
-+	if (ret)
-+		return ret;
+ 	if (mmc_pdata(host)->set_power)
+ 		return 0;
  
- 	/*
- 	 * Assume Vcc regulator is used only to power the card ... OMAP
-@@ -359,26 +394,9 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
+-	reg = devm_regulator_get_optional(host->dev, "vmmc");
+-	if (IS_ERR(reg)) {
+-		ret = PTR_ERR(reg);
++	host->vcc = devm_regulator_get_optional(host->dev, "vmmc");
++	if (IS_ERR(host->vcc)) {
++		ret = PTR_ERR(host->vcc);
+ 		if (ret != -ENODEV)
  			return ret;
+-		host->vcc = NULL;
+ 		dev_dbg(host->dev, "unable to get vmmc regulator %ld\n",
+-			PTR_ERR(reg));
++			PTR_ERR(host->vcc));
++		host->vcc = NULL;
+ 	} else {
+-		host->vcc = reg;
+-		ocr_value = mmc_regulator_get_ocrmask(reg);
++		ocr_value = mmc_regulator_get_ocrmask(host->vcc);
+ 		if (!mmc_pdata(host)->ocr_mask) {
+ 			mmc_pdata(host)->ocr_mask = ocr_value;
+ 		} else {
+@@ -374,28 +372,24 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
  	}
  
--	if (host->pbias) {
--		if (vdd <= VDD_165_195)
--			ret = regulator_set_voltage(host->pbias, VDD_1V8,
--								VDD_1V8);
--		else
--			ret = regulator_set_voltage(host->pbias, VDD_3V0,
--								VDD_3V0);
--		if (ret < 0)
--			goto err_set_voltage;
--
--		if (host->pbias_enabled == 0) {
--			ret = regulator_enable(host->pbias);
--			if (ret) {
--				dev_err(dev, "pbias reg enable failed\n");
--				goto err_set_voltage;
--			} else {
--				host->pbias_enabled = 1;
--			}
--		}
--	}
-+	ret = omap_hsmmc_set_pbias(host, true, vdd);
-+	if (ret)
-+		goto err_set_voltage;
+ 	/* Allow an aux regulator */
+-	reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
+-	if (IS_ERR(reg)) {
+-		ret = PTR_ERR(reg);
++	host->vcc_aux = devm_regulator_get_optional(host->dev, "vmmc_aux");
++	if (IS_ERR(host->vcc_aux)) {
++		ret = PTR_ERR(host->vcc_aux);
+ 		if (ret != -ENODEV)
+ 			return ret;
+-		host->vcc_aux = NULL;
+ 		dev_dbg(host->dev, "unable to get vmmc_aux regulator %ld\n",
+-			PTR_ERR(reg));
+-	} else {
+-		host->vcc_aux = reg;
++			PTR_ERR(host->vcc_aux));
++		host->vcc_aux = NULL;
+ 	}
  
- 	if (mmc_pdata(host)->after_set_reg)
- 		mmc_pdata(host)->after_set_reg(dev, power_on, vdd);
+-	reg = devm_regulator_get_optional(host->dev, "pbias");
+-	if (IS_ERR(reg)) {
+-		ret = PTR_ERR(reg);
++	host->pbias = devm_regulator_get_optional(host->dev, "pbias");
++	if (IS_ERR(host->pbias)) {
++		ret = PTR_ERR(host->pbias);
+ 		if (ret != -ENODEV)
+ 			return ret;
+-		host->pbias = NULL;
+ 		dev_dbg(host->dev, "unable to get pbias regulator %ld\n",
+-			PTR_ERR(reg));
+-	} else {
+-		host->pbias = reg;
++			PTR_ERR(host->pbias));
++		host->pbias = NULL;
+ 	}
+ 
+ 	/* For eMMC do not power off when not in sleep state */
 -- 
 1.7.9.5
