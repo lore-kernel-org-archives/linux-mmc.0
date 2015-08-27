@@ -1,86 +1,64 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH v3 00/15] omap_hsmmc: regulator usage cleanup and fixes
-Date: Thu, 27 Aug 2015 18:50:30 +0530
-Message-ID: <55DF0E9E.4010000@ti.com>
-References: <1440666847-12594-1-git-send-email-kishon@ti.com> <CAPDyKFrLmDyxdjxcZKiy5DJJbPbPz38MsjvnbKkokU7McRDmeg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: block: disable the reliable write If the card does
+ not support CMD23
+Date: Thu, 27 Aug 2015 15:22:44 +0200
+Message-ID: <CAPDyKFpVN8aK6aF2Fk9UNgFfJU5W1CT4v4YBtJDF6t57cwXsKg@mail.gmail.com>
+References: <1439537446-7713-1-git-send-email-sdliyong@gmail.com>
+	<CAPDyKFp51gzyNaGkGWDXs0ATX2hom2yfcLHXT4o=dzw2=AbWNw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:54932 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752479AbbH0NUl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2015 09:20:41 -0400
-In-Reply-To: <CAPDyKFrLmDyxdjxcZKiy5DJJbPbPz38MsjvnbKkokU7McRDmeg@mail.gmail.com>
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:37566 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752681AbbH0NWp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2015 09:22:45 -0400
+Received: by widdq5 with SMTP id dq5so45068561wid.0
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2015 06:22:44 -0700 (PDT)
+In-Reply-To: <CAPDyKFp51gzyNaGkGWDXs0ATX2hom2yfcLHXT4o=dzw2=AbWNw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Andreas Fenkart <afenkart@gmail.com>, Tony Lindgren <tony@atomide.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, Neil Brown <neilb@suse.de>
+To: Yong Li <sdliyong@gmail.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-
-
-On Thursday 27 August 2015 06:39 PM, Ulf Hansson wrote:
-> On 27 August 2015 at 11:13, Kishon Vijay Abraham I <kishon@ti.com> wrote:
->> This patch series does the following
->> *) Uses devm_regulator_get_optional() for vmmc and then removes the
->>    CONFIG_REGULATOR check altogether.
->> *) return on -EPROBE_DEFER and any other fatal errors
->> *) enable/disable vmmc_aux regulator based on prior state
+On 25 August 2015 at 14:06, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 14 August 2015 at 09:30,  <sdliyong@gmail.com> wrote:
+>> From: Yong Li <sdliyong@gmail.com>
 >>
->> Changes from v2:
->> *) rebased to mmc -next branch
->> *) dropped using "mmc_of_parse_voltage" to get ocr_avail patch.
+>> Signed-off-by: Yong Li <sdliyong@gmail.com>
+>> ---
+>>  drivers/mmc/card/block.c | 3 ++-
+>>  1 file changed, 2 insertions(+), 1 deletion(-)
 >>
->> Changes from v1:
->> *) return on -EPROBE_DEFER and other fatal errors. (Don't return only
->>    if the return value is -ENODEV)
->> *) Remove the beagle x15 dts patch. It can be part of a different
->>    series.
->> *) Avoid using regulator_is_enabled for vqmmc since if the regulator
->>    is shared and the other users are not using regulator_is_enabled
->>    then there can be unbalanced regulator_enable/regulator_disable
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index 452782b..d9e3c45 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -1366,7 +1366,8 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>>         bool do_rel_wr = ((req->cmd_flags & REQ_FUA) ||
+>>                           (req->cmd_flags & REQ_META)) &&
+>>                 (rq_data_dir(req) == WRITE) &&
+>> -               (md->flags & MMC_BLK_REL_WR);
+>> +               (md->flags & MMC_BLK_REL_WR) &&
+>> +               !(card->quirks & MMC_QUIRK_BLK_NO_CMD23);
+>
+> Further down in mmc_blk_rw_rq_prep() we check for
+> MMC_QUIRK_BLK_NO_CMD23. That check becomes redundant after this
+> change, please remove that check as a part of this patch as well.
+>
 >>
->> I've pushed this patch series to
->> git://git.ti.com/linux-phy/linux-phy.git mmc_for-next
->>
->> Please note the branch also has the pbias fixes [1].
->> [1] -> https://lkml.org/lkml/2015/7/27/358
->>
->> This series is in preparation for implementing the voltage switch
->> sequence so that UHS cards can be supported.
->>
->> Did basic read/write test in J6, J6 Eco, Beagle-x15, AM437x EVM,
->> Beaglebone black, OMAP5 uEVM, OMAP4 PANDA and OMAP3gle xm.
->>
->> Kishon Vijay Abraham I (15):
->>   mmc: host: omap_hsmmc: use devm_regulator_get_optional() for vmmc
->>   mmc: host: omap_hsmmc: return on fatal errors from omap_hsmmc_reg_get
->>   mmc: host: omap_hsmmc: cleanup omap_hsmmc_reg_get()
->>   mmc: host: omap_hsmmc: use the ocrmask provided by the vmmc regulator
->>   mmc: host: omap_hsmmc: use mmc_host's vmmc and vqmmc
->>   mmc: host: omap_hsmmc: remove unnecessary pbias set_voltage
->>   mmc: host: omap_hsmmc: return error if any of the regulator APIs fail
->>   mmc: host: omap_hsmmc: add separate functions for enable/disable
->>     supply
->>   mmc: host: omap_hsmmc: add separate function to set pbias
->>   mmc: host: omap_hsmmc: avoid pbias regulator enable on power off
->>   mmc: host: omap_hsmmc: don't use ->set_power to set initial regulator
->>     state
->>   mmc: host: omap_hsmmc: enable/disable vmmc_aux regulator based on
->>     previous state
->>   mmc: host: omap_hsmmc: use regulator_is_enabled to find pbias status
->>   mmc: host: omap_hsmmc: use ios->vdd for setting vmmc voltage
->>   mmc: host: omap_hsmmc: remove CONFIG_REGULATOR check
->>
->>  drivers/mmc/host/omap_hsmmc.c |  326 +++++++++++++++++++++++++++--------------
->>  1 file changed, 212 insertions(+), 114 deletions(-)
->>
+>>         memset(brq, 0, sizeof(struct mmc_blk_request));
+>>         brq->mrq.cmd = &brq->cmd;
 >> --
->> 1.7.9.5
+>> 2.1.0
 >>
-> 
-> Thanks, applied for next!
+>
 
-Thank you.
+Please ignore my previous answer. MMC_QUIRK_BLK_NO_CMD23 is intended
+to indicate to the mmc block layer whether using CMD23 for regular
+block IO request could have a performance impact for some cards. If
+that's the case we don't use it - except when using reliable write!
 
--Kishon
+So this patch is just plain wrong.
+
+Kind regards
+Uffe
