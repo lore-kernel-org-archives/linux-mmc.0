@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v3 11/15] mmc: host: omap_hsmmc: don't use ->set_power to set initial regulator state
-Date: Thu, 27 Aug 2015 14:44:03 +0530
-Message-ID: <1440666847-12594-12-git-send-email-kishon@ti.com>
+Subject: [PATCH v3 14/15] mmc: host: omap_hsmmc: use ios->vdd for setting vmmc voltage
+Date: Thu, 27 Aug 2015 14:44:06 +0530
+Message-ID: <1440666847-12594-15-git-send-email-kishon@ti.com>
 References: <1440666847-12594-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,103 +12,46 @@ To: ulf.hansson@linaro.org, afenkart@gmail.com, tony@atomide.com, linux-mmc@vger
 Cc: neilb@suse.de, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-If the regulator is enabled on boot (checked using regulator_is_enabled),
-invoke regulator_enable() so that the usecount reflects the correct
-state of the regulator and then disable the regulator so that the
-initial state of the regulator is disabled. Avoid using ->set_power,
-since set_power also takes care of setting the voltages which is not
-needed at this point.
+vdd voltage is set in mmc core to ios->vdd and vmmc should actually
+be set to this voltage. Modify omap_hsmmc_enable_supply
+to not take vdd as argument since now it's directly set to
+the voltage in ios->vdd.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 Tested-by: Tony Lindgren <tony@atomide.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   66 ++++++++++++++++++++++++++++++++++-------
- 1 file changed, 56 insertions(+), 10 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |    7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index eec6975..cd4bd6d 100644
+index 4cd7a58..58683b3 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -409,6 +409,59 @@ err_set_voltage:
- 	return ret;
- }
+@@ -246,13 +246,14 @@ static int omap_hsmmc_get_cover_state(struct device *dev)
  
-+static int omap_hsmmc_disable_boot_regulator(struct regulator *reg)
-+{
-+	int ret;
-+
-+	if (!reg)
-+		return 0;
-+
-+	if (regulator_is_enabled(reg)) {
-+		ret = regulator_enable(reg);
-+		if (ret)
-+			return ret;
-+
-+		ret = regulator_disable(reg);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	return 0;
-+}
-+
-+static int omap_hsmmc_disable_boot_regulators(struct omap_hsmmc_host *host)
-+{
-+	struct mmc_host *mmc = host->mmc;
-+	int ret;
-+
-+	/*
-+	 * disable regulators enabled during boot and get the usecount
-+	 * right so that regulators can be enabled/disabled by checking
-+	 * the return value of regulator_is_enabled
-+	 */
-+	ret = omap_hsmmc_disable_boot_regulator(mmc->supply.vmmc);
-+	if (ret) {
-+		dev_err(host->dev, "fail to disable boot enabled vmmc reg\n");
-+		return ret;
-+	}
-+
-+	ret = omap_hsmmc_disable_boot_regulator(mmc->supply.vqmmc);
-+	if (ret) {
-+		dev_err(host->dev,
-+			"fail to disable boot enabled vmmc_aux reg\n");
-+		return ret;
-+	}
-+
-+	ret = omap_hsmmc_disable_boot_regulator(host->pbias);
-+	if (ret) {
-+		dev_err(host->dev,
-+			"failed to disable boot enabled pbias reg\n");
-+		return ret;
-+	}
-+
-+	return 0;
-+}
-+
- static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ #ifdef CONFIG_REGULATOR
+ 
+-static int omap_hsmmc_enable_supply(struct mmc_host *mmc, int vdd)
++static int omap_hsmmc_enable_supply(struct mmc_host *mmc)
  {
- 	int ocr_value = 0;
-@@ -456,17 +509,10 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
- 	/* For eMMC do not power off when not in sleep state */
- 	if (mmc_pdata(host)->no_regulator_off_init)
- 		return 0;
--	/*
--	 * To disable boot_on regulator, enable regulator
--	 * to increase usecount and then disable it.
--	 */
--	if ((mmc->supply.vmmc && regulator_is_enabled(mmc->supply.vmmc) > 0) ||
--	    (mmc->supply.vqmmc && regulator_is_enabled(mmc->supply.vqmmc))) {
--		int vdd = ffs(mmc_pdata(host)->ocr_mask) - 1;
+ 	int ret;
+ 	struct omap_hsmmc_host *host = mmc_priv(mmc);
++	struct mmc_ios *ios = &mmc->ios;
  
--		omap_hsmmc_set_power(host->dev, 1, vdd);
--		omap_hsmmc_set_power(host->dev, 0, 0);
--	}
-+	ret = omap_hsmmc_disable_boot_regulators(host);
-+	if (ret)
-+		return ret;
+ 	if (mmc->supply.vmmc) {
+-		ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
++		ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
+ 		if (ret)
+ 			return ret;
+ 	}
+@@ -387,7 +388,7 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
+ 	 * chips/cards need an interface voltage rail too.
+ 	 */
+ 	if (power_on) {
+-		ret = omap_hsmmc_enable_supply(mmc, vdd);
++		ret = omap_hsmmc_enable_supply(mmc);
+ 		if (ret)
+ 			return ret;
  
- 	return 0;
- }
 -- 
 1.7.9.5
