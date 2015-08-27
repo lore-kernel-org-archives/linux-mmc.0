@@ -1,49 +1,52 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 13/15] mmc: host: omap_hsmmc: use regulator_is_enabled
- to find pbias status
-Date: Thu, 27 Aug 2015 14:49:28 +0200
-Message-ID: <CAPDyKFq7cNzDJ4-oPnLmqa9yhBnkntFx6_6scctH=4tZjc7TPA@mail.gmail.com>
-References: <1440666847-12594-1-git-send-email-kishon@ti.com>
-	<1440666847-12594-14-git-send-email-kishon@ti.com>
-	<CAPDyKFqkwHPiiLVXpwNB_nBt3bdXAOhUH46cD5npS8OFsBrfeQ@mail.gmail.com>
-	<CAPDyKFpm1BsKvD0f_hNvPM1LmKbd2AL8yddYRpayLPKsN2UQfw@mail.gmail.com>
-	<55DF06CE.9030600@ti.com>
+Subject: Re: [PATCH] mmc: enable mmc host device to suspend/resume asynchronously
+Date: Thu, 27 Aug 2015 15:05:58 +0200
+Message-ID: <CAPDyKFpRpGyCCoOU44CwiUxsJW1fMs8FxShvVga+uFHKvy7BBQ@mail.gmail.com>
+References: <55BF60F5.8040602@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f171.google.com ([209.85.212.171]:32840 "EHLO
-	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753123AbbH0Mt3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2015 08:49:29 -0400
-Received: by wicge2 with SMTP id ge2so897592wic.0
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2015 05:49:28 -0700 (PDT)
-In-Reply-To: <55DF06CE.9030600@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <55BF60F5.8040602@linux.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Markus Niebel <Markus.Niebel@tq-group.com>, Lars-Peter Clausen <lars@metafoo.de>, Sascha Hauer <s.hauer@pengutronix.de>, =?UTF-8?Q?Kristina_Mart=C5=A1enko?= <kristina.martsenko@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Andreas Fenkart <afenkart@gmail.com>, Tony Lindgren <tony@atomide.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, Neil Brown <neilb@suse.de>
 
-On 27 August 2015 at 14:47, Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> Hi Uffe,
->
-> On Thursday 27 August 2015 06:12 PM, Ulf Hansson wrote:
->> On 27 August 2015 at 14:41, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> On 27 August 2015 at 11:14, Kishon Vijay Abraham I <kishon@ti.com> wrote:
->>>> Use regulator_is_enabled of pbias regulator to find pbias regulator
->>>> status instead of maintaining a custom bookkeeping
->>>> pbias_enabled variable.
->>>
->>> Doesn't this cause a problem for the scenario when the initial state
->>> of the regulator is enabled?
->
-> Patch 11 of this series "mmc: host: omap_hsmmc: don't use ->set_power to
-> set initial regulator state" disables the pbias regulator if the initial
-> state of the regulator is enabled.
->
+On 3 August 2015 at 14:39, Fu, Zhonghui <zhonghui.fu@linux.intel.com> wrote:
+> Enable mmc host device to suspend/resume asynchronously.
+> This can improve system suspend/resume speed.
 
-Got it, thanks!
+Can or will?
 
-[...]
+It would be nice to see some statistics of this to justify the change.
+Can you share that?
+
+Moreover we already have the runtime PM support, which enables the
+reinitialization sequence of the mmc/sd card to be postponed from the
+system PM resume path. Instead that's done when the next
+pm_runtime_get_sync() for the card's device gets called. You my tried
+that feature by enabling MMC_CAP_RUNTIME_RESUME for the mmc hosts.
 
 Kind regards
 Uffe
+
+>
+> Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
+> ---
+>  drivers/mmc/core/host.c |    1 +
+>  1 files changed, 1 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 99a9c90..85f2bbb 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -577,6 +577,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+>         host->class_dev.parent = dev;
+>         host->class_dev.class = &mmc_host_class;
+>         device_initialize(&host->class_dev);
+> +       device_enable_async_suspend(&host->class_dev);
+>
+>         if (mmc_gpio_alloc(host)) {
+>                 put_device(&host->class_dev);
+> -- 1.7.1
+>
