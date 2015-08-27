@@ -1,7 +1,7 @@
 From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v3 03/15] mmc: host: omap_hsmmc: cleanup omap_hsmmc_reg_get()
-Date: Thu, 27 Aug 2015 14:43:55 +0530
-Message-ID: <1440666847-12594-4-git-send-email-kishon@ti.com>
+Subject: [PATCH v3 05/15] mmc: host: omap_hsmmc: use mmc_host's vmmc and vqmmc
+Date: Thu, 27 Aug 2015 14:43:57 +0530
+Message-ID: <1440666847-12594-6-git-send-email-kishon@ti.com>
 References: <1440666847-12594-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,92 +12,146 @@ To: ulf.hansson@linaro.org, afenkart@gmail.com, tony@atomide.com, linux-mmc@vger
 Cc: neilb@suse.de, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-No functional change. Instead of using a local regulator variable
-in omap_hsmmc_reg_get() for holding the return value of
-devm_regulator_get_optional() and then assigning to omap_hsmmc_host
-regulator members: vcc, vcc_aux and pbias, directly use the
-omap_hsmmc_host regulator members.
+No functional change. Instead of using omap_hsmmc_host's vcc and vcc_aux
+members, use vmmc and vqmmc present in mmc_host which is present
+for the same purpose.
 
 Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 Reviewed-by: Roger Quadros <rogerq@ti.com>
 Tested-by: Tony Lindgren <tony@atomide.com>
 ---
- drivers/mmc/host/omap_hsmmc.c |   38 ++++++++++++++++----------------------
- 1 file changed, 16 insertions(+), 22 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c |   63 ++++++++++++++++++-----------------------
+ 1 file changed, 28 insertions(+), 35 deletions(-)
 
 diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 2eafd6f..3fde2f9 100644
+index 30f363d..58e4ffd 100644
 --- a/drivers/mmc/host/omap_hsmmc.c
 +++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -343,24 +343,22 @@ error_set_power:
- 
- static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+@@ -181,15 +181,6 @@ struct omap_hsmmc_host {
+ 	struct	mmc_data	*data;
+ 	struct	clk		*fclk;
+ 	struct	clk		*dbclk;
+-	/*
+-	 * vcc == configured supply
+-	 * vcc_aux == optional
+-	 *   -	MMC1, supply for DAT4..DAT7
+-	 *   -	MMC2/MMC2, external level shifter voltage supply, for
+-	 *	chip (SDIO, eMMC, etc) or transceiver (MMC2 only)
+-	 */
+-	struct	regulator	*vcc;
+-	struct	regulator	*vcc_aux;
+ 	struct	regulator	*pbias;
+ 	bool			pbias_enabled;
+ 	void	__iomem		*base;
+@@ -259,6 +250,7 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
  {
--	struct regulator *reg;
+ 	struct omap_hsmmc_host *host =
+ 		platform_get_drvdata(to_platform_device(dev));
++	struct mmc_host *mmc = host->mmc;
+ 	int ret = 0;
+ 
+ 	if (mmc_pdata(host)->set_power)
+@@ -268,7 +260,7 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
+ 	 * If we don't see a Vcc regulator, assume it's a fixed
+ 	 * voltage always-on regulator.
+ 	 */
+-	if (!host->vcc)
++	if (!mmc->supply.vmmc)
+ 		return 0;
+ 
+ 	if (mmc_pdata(host)->before_set_reg)
+@@ -297,23 +289,23 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
+ 	 * chips/cards need an interface voltage rail too.
+ 	 */
+ 	if (power_on) {
+-		if (host->vcc)
+-			ret = mmc_regulator_set_ocr(host->mmc, host->vcc, vdd);
++		if (mmc->supply.vmmc)
++			ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+ 		/* Enable interface voltage rail, if needed */
+-		if (ret == 0 && host->vcc_aux) {
+-			ret = regulator_enable(host->vcc_aux);
+-			if (ret < 0 && host->vcc)
+-				ret = mmc_regulator_set_ocr(host->mmc,
+-							host->vcc, 0);
++		if (ret == 0 && mmc->supply.vqmmc) {
++			ret = regulator_enable(mmc->supply.vqmmc);
++			if (ret < 0 && mmc->supply.vmmc)
++				ret = mmc_regulator_set_ocr(mmc,
++							    mmc->supply.vmmc,
++							    0);
+ 		}
+ 	} else {
+ 		/* Shut down the rail */
+-		if (host->vcc_aux)
+-			ret = regulator_disable(host->vcc_aux);
+-		if (host->vcc) {
++		if (mmc->supply.vqmmc)
++			ret = regulator_disable(mmc->supply.vqmmc);
++		if (mmc->supply.vmmc) {
+ 			/* Then proceed to shut down the local regulator */
+-			ret = mmc_regulator_set_ocr(host->mmc,
+-						host->vcc, 0);
++			ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+ 		}
+ 	}
+ 
+@@ -345,33 +337,34 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ {
  	int ocr_value = 0;
  	int ret;
++	struct mmc_host *mmc = host->mmc;
  
  	if (mmc_pdata(host)->set_power)
  		return 0;
  
--	reg = devm_regulator_get_optional(host->dev, "vmmc");
--	if (IS_ERR(reg)) {
--		ret = PTR_ERR(reg);
-+	host->vcc = devm_regulator_get_optional(host->dev, "vmmc");
-+	if (IS_ERR(host->vcc)) {
-+		ret = PTR_ERR(host->vcc);
+-	host->vcc = devm_regulator_get_optional(host->dev, "vmmc");
+-	if (IS_ERR(host->vcc)) {
+-		ret = PTR_ERR(host->vcc);
++	mmc->supply.vmmc = devm_regulator_get_optional(host->dev, "vmmc");
++	if (IS_ERR(mmc->supply.vmmc)) {
++		ret = PTR_ERR(mmc->supply.vmmc);
  		if (ret != -ENODEV)
  			return ret;
--		host->vcc = NULL;
  		dev_dbg(host->dev, "unable to get vmmc regulator %ld\n",
--			PTR_ERR(reg));
-+			PTR_ERR(host->vcc));
-+		host->vcc = NULL;
+-			PTR_ERR(host->vcc));
+-		host->vcc = NULL;
++			PTR_ERR(mmc->supply.vmmc));
++		mmc->supply.vmmc = NULL;
  	} else {
--		host->vcc = reg;
--		ocr_value = mmc_regulator_get_ocrmask(reg);
-+		ocr_value = mmc_regulator_get_ocrmask(host->vcc);
- 		if (!mmc_pdata(host)->ocr_mask) {
+-		ocr_value = mmc_regulator_get_ocrmask(host->vcc);
++		ocr_value = mmc_regulator_get_ocrmask(mmc->supply.vmmc);
+ 		if (ocr_value > 0)
  			mmc_pdata(host)->ocr_mask = ocr_value;
- 		} else {
-@@ -374,28 +372,24 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
  	}
  
  	/* Allow an aux regulator */
--	reg = devm_regulator_get_optional(host->dev, "vmmc_aux");
--	if (IS_ERR(reg)) {
--		ret = PTR_ERR(reg);
-+	host->vcc_aux = devm_regulator_get_optional(host->dev, "vmmc_aux");
-+	if (IS_ERR(host->vcc_aux)) {
-+		ret = PTR_ERR(host->vcc_aux);
+-	host->vcc_aux = devm_regulator_get_optional(host->dev, "vmmc_aux");
+-	if (IS_ERR(host->vcc_aux)) {
+-		ret = PTR_ERR(host->vcc_aux);
++	mmc->supply.vqmmc = devm_regulator_get_optional(host->dev, "vmmc_aux");
++	if (IS_ERR(mmc->supply.vqmmc)) {
++		ret = PTR_ERR(mmc->supply.vqmmc);
  		if (ret != -ENODEV)
  			return ret;
--		host->vcc_aux = NULL;
  		dev_dbg(host->dev, "unable to get vmmc_aux regulator %ld\n",
--			PTR_ERR(reg));
--	} else {
--		host->vcc_aux = reg;
-+			PTR_ERR(host->vcc_aux));
-+		host->vcc_aux = NULL;
+-			PTR_ERR(host->vcc_aux));
+-		host->vcc_aux = NULL;
++			PTR_ERR(mmc->supply.vqmmc));
++		mmc->supply.vqmmc = NULL;
  	}
  
--	reg = devm_regulator_get_optional(host->dev, "pbias");
--	if (IS_ERR(reg)) {
--		ret = PTR_ERR(reg);
-+	host->pbias = devm_regulator_get_optional(host->dev, "pbias");
-+	if (IS_ERR(host->pbias)) {
-+		ret = PTR_ERR(host->pbias);
- 		if (ret != -ENODEV)
- 			return ret;
--		host->pbias = NULL;
- 		dev_dbg(host->dev, "unable to get pbias regulator %ld\n",
--			PTR_ERR(reg));
--	} else {
--		host->pbias = reg;
-+			PTR_ERR(host->pbias));
-+		host->pbias = NULL;
- 	}
+ 	host->pbias = devm_regulator_get_optional(host->dev, "pbias");
+@@ -391,8 +384,8 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 	 * To disable boot_on regulator, enable regulator
+ 	 * to increase usecount and then disable it.
+ 	 */
+-	if ((host->vcc && regulator_is_enabled(host->vcc) > 0) ||
+-	    (host->vcc_aux && regulator_is_enabled(host->vcc_aux))) {
++	if ((mmc->supply.vmmc && regulator_is_enabled(mmc->supply.vmmc) > 0) ||
++	    (mmc->supply.vqmmc && regulator_is_enabled(mmc->supply.vqmmc))) {
+ 		int vdd = ffs(mmc_pdata(host)->ocr_mask) - 1;
  
- 	/* For eMMC do not power off when not in sleep state */
+ 		omap_hsmmc_set_power(host->dev, 1, vdd);
 -- 
 1.7.9.5
