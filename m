@@ -1,113 +1,131 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Michal Simek <michal.simek@xilinx.com>
 Subject: Re: [PATCH] mmc: Kconfig: Add dependency on GPIOLIB for MMC_SDHCI
-Date: Thu, 27 Aug 2015 16:12:44 +0200
-Message-ID: <CAPDyKFq8aAQzpUJt2oZuP=ofO1GakZUtezDzFW=bRy4OD7P9Vw@mail.gmail.com>
+Date: Thu, 27 Aug 2015 16:26:20 +0200
+Message-ID: <55DF1E0C.70505@xilinx.com>
 References: <6906e34b62f162018984a5fbd12b3ef6cd5e3a29.1438839562.git.michal.simek@xilinx.com>
-	<CAPDyKFqgLonYZT86ixOAwJ3G5tsozxee6dEs+QRFYzwOWFUNNQ@mail.gmail.com>
-	<CAPDyKFoPDMcO_19_pg7=aFUUCQrnxnoZD+YGpjYaBcRWu4ArJw@mail.gmail.com>
-	<55DEF7FD.8020904@xilinx.com>
-	<CAPDyKFo=DfMkg-wn7FEhsT4keMgWw0fYogvEo0xPBczGP6s9nQ@mail.gmail.com>
-	<55DF1413.3030004@xilinx.com>
+ <CAPDyKFqgLonYZT86ixOAwJ3G5tsozxee6dEs+QRFYzwOWFUNNQ@mail.gmail.com>
+ <CAPDyKFoPDMcO_19_pg7=aFUUCQrnxnoZD+YGpjYaBcRWu4ArJw@mail.gmail.com>
+ <55DEF7FD.8020904@xilinx.com>
+ <CAPDyKFo=DfMkg-wn7FEhsT4keMgWw0fYogvEo0xPBczGP6s9nQ@mail.gmail.com>
+ <55DF1413.3030004@xilinx.com>
+ <CAPDyKFq8aAQzpUJt2oZuP=ofO1GakZUtezDzFW=bRy4OD7P9Vw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <55DF1413.3030004@xilinx.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Michal Simek <michal.simek@xilinx.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Michal Simek <monstr@monstr.eu>, Scott Branden <sbranden@broadcom.com>, Weijun Yang <Weijun.Yang@csr.com>, Andrew Bresticker <abrestic@chromium.org>, Jean Delvare <jdelvare@suse.de>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alim Akhtar <alim.akhtar@samsung.com>, addy ke <addy.ke@rock-chips.com>, Stephen Boyd <sboyd@codeaurora.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Kevin Hao <haokexin@gmail.com>, Vincent Yang <vincent.yang.fujitsu@gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-by2on0055.outbound.protection.outlook.com ([207.46.100.55]:30107
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754014AbbH0O0i (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 27 Aug 2015 10:26:38 -0400
+In-Reply-To: <CAPDyKFq8aAQzpUJt2oZuP=ofO1GakZUtezDzFW=bRy4OD7P9Vw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Michal Simek <michal.simek@xilinx.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Michal Simek <monstr@monstr.eu>, Scott Branden <sbranden@broadcom.com>, Weijun Yang <Weijun.Yang@csr.com>, Andrew Bresticker <abrestic@chromium.org>, Jean Delvare <jdelvare@suse.de>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alim Akhtar <alim.akhtar@samsung.com>, addy ke <addy.ke@rock-chips.com>, Stephen Boyd <sboyd@codeaurora.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Kevin Hao <haokexin@gmail.com>, Vincent Yang <vincent.yang.fujitsu@gmail.com>
 
-On 27 August 2015 at 15:43, Michal Simek <michal.simek@xilinx.com> wrote:
-> On 08/27/2015 02:30 PM, Ulf Hansson wrote:
->> On 27 August 2015 at 13:43, Michal Simek <michal.simek@xilinx.com> wrote:
->>> Hi Ulf,
->>>
->>> On 08/27/2015 01:32 PM, Ulf Hansson wrote:
->>>> On 25 August 2015 at 14:04, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>>>> On 6 August 2015 at 07:39, Michal Simek <michal.simek@xilinx.com> wrote:
->>>>>> Add GPIOLIB dependency for MMC_SDHCI.
->>>>>>
->>>>>> Problem was observed after adding the patch
->>>>>> "mmc: sdhci-of-arasan: Call OF parsing for MMC"
->>>>>> (sha1: 16b23787fc709fe60c5d2bd05927b1a3da33d4e9) which calls
->>>>>> mmc_of_parse() -> mmc_gpiod_request_cd() (slot-gpio.c) which
->>>>>> calls devm_gpiod_get_index() which returns -ENOSYS.
->>>>>>
->>>>>> Error log:
->>>>>> sdhci-arasan ff160000.sdhci: parsing dt failed (4294967258)
->>>>>> sdhci-arasan: probe of ff160000.sdhci failed with error -38
->>>>>>
->>>>>> Signed-off-by: Michal Simek <michal.simek@xilinx.com>
->>>>>
->>>>> Thanks, applied for next!
+On 08/27/2015 04:12 PM, Ulf Hansson wrote:
+> On 27 August 2015 at 15:43, Michal Simek <michal.simek@xilinx.com> wrote:
+>> On 08/27/2015 02:30 PM, Ulf Hansson wrote:
+>>> On 27 August 2015 at 13:43, Michal Simek <michal.simek@xilinx.com> wrote:
+>>>> Hi Ulf,
 >>>>
->>>> kbuild test robot reports a warning for this one, so I am dropping it
->>>> from my next branch.
+>>>> On 08/27/2015 01:32 PM, Ulf Hansson wrote:
+>>>>> On 25 August 2015 at 14:04, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>>> On 6 August 2015 at 07:39, Michal Simek <michal.simek@xilinx.com> wrote:
+>>>>>>> Add GPIOLIB dependency for MMC_SDHCI.
+>>>>>>>
+>>>>>>> Problem was observed after adding the patch
+>>>>>>> "mmc: sdhci-of-arasan: Call OF parsing for MMC"
+>>>>>>> (sha1: 16b23787fc709fe60c5d2bd05927b1a3da33d4e9) which calls
+>>>>>>> mmc_of_parse() -> mmc_gpiod_request_cd() (slot-gpio.c) which
+>>>>>>> calls devm_gpiod_get_index() which returns -ENOSYS.
+>>>>>>>
+>>>>>>> Error log:
+>>>>>>> sdhci-arasan ff160000.sdhci: parsing dt failed (4294967258)
+>>>>>>> sdhci-arasan: probe of ff160000.sdhci failed with error -38
+>>>>>>>
+>>>>>>> Signed-off-by: Michal Simek <michal.simek@xilinx.com>
+>>>>>>
+>>>>>> Thanks, applied for next!
+>>>>>
+>>>>> kbuild test robot reports a warning for this one, so I am dropping it
+>>>>> from my next branch.
+>>>>
+>>>> I think is just better to fix the problem there instead of dropping this
+>>>> patch which fix GPIO dependency.
+>>>>
+>>>> Fix is quite easy.
+>>>> diff --git a/arch/powerpc/platforms/44x/Kconfig
+>>>> b/arch/powerpc/platforms/44x/Kconfig
+>>>> index 5538e57c36c1..874f07c7d0b8 100644
+>>>> --- a/arch/powerpc/platforms/44x/Kconfig
+>>>> +++ b/arch/powerpc/platforms/44x/Kconfig
+>>>> @@ -219,6 +219,7 @@ config AKEBONO
+>>>>         select USB_EHCI_HCD_PLATFORM if USB_EHCI_HCD
+>>>>         select MMC_SDHCI
+>>>>         select MMC_SDHCI_PLTFM
+>>>> +       select GPIOLIB
+>>>>         select ATA
+>>>>         select SATA_AHCI_PLATFORM
+>>>>         help
+>>>>
+>>>> But the question is if we should keep these ancient targets in the tree.
+>>>>
+>>>> I am happy to send this patch but it should go via PPC tree. Or are you
+>>>> happy to apply it to your tree?
 >>>
->>> I think is just better to fix the problem there instead of dropping this
->>> patch which fix GPIO dependency.
->>>
->>> Fix is quite easy.
->>> diff --git a/arch/powerpc/platforms/44x/Kconfig
->>> b/arch/powerpc/platforms/44x/Kconfig
->>> index 5538e57c36c1..874f07c7d0b8 100644
->>> --- a/arch/powerpc/platforms/44x/Kconfig
->>> +++ b/arch/powerpc/platforms/44x/Kconfig
->>> @@ -219,6 +219,7 @@ config AKEBONO
->>>         select USB_EHCI_HCD_PLATFORM if USB_EHCI_HCD
->>>         select MMC_SDHCI
->>>         select MMC_SDHCI_PLTFM
->>> +       select GPIOLIB
->>>         select ATA
->>>         select SATA_AHCI_PLATFORM
->>>         help
->>>
->>> But the question is if we should keep these ancient targets in the tree.
->>>
->>> I am happy to send this patch but it should go via PPC tree. Or are you
->>> happy to apply it to your tree?
+>>> It's getting really late for 4.3 so I would rather postpone this to
+>>> the next release cycle.
 >>
->> It's getting really late for 4.3 so I would rather postpone this to
->> the next release cycle.
->
-> No problem at all. :-)
->
+>> No problem at all. :-)
 >>
->> As I stated in my earlier reply, do we really want to add the GPIOLIB
->> dependency to the Kconfig file for SDHCI?
->> I assume we have lots of other Kconfig dependencies, then these should
->> also to be added for the same reasons. I doubt this is the right thing
->> to do.
->
-> Is it the right solution not to list them if they are there?
+>>>
+>>> As I stated in my earlier reply, do we really want to add the GPIOLIB
+>>> dependency to the Kconfig file for SDHCI?
+>>> I assume we have lots of other Kconfig dependencies, then these should
+>>> also to be added for the same reasons. I doubt this is the right thing
+>>> to do.
+>>
+>> Is it the right solution not to list them if they are there?
+> 
+> Well, I don't think there are *one* answer to this.
+> 
+> Still, the reason to why we have API implementing stubs when used is
+> to manage these cases.
+> 
+>>
+>>> How about if the mmc core instead treat GPIOs as optional from an API
+>>> point of view and thus it won't cause ->probe() to fail. Is that a way
+>>> forward for you?
+>>
+>> In my test case I am not using GPIO at all and probe is failing. If this
+>> is fixed because it is probably common setting for others we don't need
+>> to list this dependency.
+>> But really for my case and I am not using gpio at all probe just failed
+>> which is incorrect and should be fixed.
+>>
+> 
+> Thanks for clarifying. In this regard I think it's pretty obvious that
+> we need to make GPIO optional.
+> Else we will force the footprint to increase for the kernel image,
+> even when not needed.
 
-Well, I don't think there are *one* answer to this.
+right. Footprint is valid argument.
 
-Still, the reason to why we have API implementing stubs when used is
-to manage these cases.
+> 
+> Typically checking for -ENOSYS from the response from the GPIOLIB
+> would do the trick. That's actually what we do already for GPIOs in
+> mmc pwrseq simple case.
 
->
->> How about if the mmc core instead treat GPIOs as optional from an API
->> point of view and thus it won't cause ->probe() to fail. Is that a way
->> forward for you?
->
-> In my test case I am not using GPIO at all and probe is failing. If this
-> is fixed because it is probably common setting for others we don't need
-> to list this dependency.
-> But really for my case and I am not using gpio at all probe just failed
-> which is incorrect and should be fixed.
->
+I didn't parse the gpio code to be 100% sure that this is enough. Also
+if this will cover all cases which we can have. Depends on gpio error
+code consistency.
 
-Thanks for clarifying. In this regard I think it's pretty obvious that
-we need to make GPIO optional.
-Else we will force the footprint to increase for the kernel image,
-even when not needed.
+> Do you want to send another patch?
 
-Typically checking for -ENOSYS from the response from the GPIOLIB
-would do the trick. That's actually what we do already for GPIOs in
-mmc pwrseq simple case.
+I would love to but I am quite occupied right now but I am happy to test
+on our SoC when we have right fix for it.
 
-Do you want to send another patch?
-
-Kind regards
-Uffe
+Thanks,
+Michal
