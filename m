@@ -1,93 +1,94 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: Re: [v4,1/6] mmc: dt: add DT binding for big endian controller
-Date: Thu, 27 Aug 2015 15:35:51 +0200
-Message-ID: <CAPDyKFqteCuod9wztRUMYB1uNEBnHGTue_v6qCDmqN6XUio=Jw@mail.gmail.com>
-References: <DM2PR0301MB0734002AABE322D7106D3AF6BA620@DM2PR0301MB0734.namprd03.prod.outlook.com>
-	<BY1PR0301MB1192D64A16D187E5485796DCF2610@BY1PR0301MB1192.namprd03.prod.outlook.com>
-	<CAPDyKFpR=qbheQ8hJueAbHA_5f9kBDNb9_zqanGTna+1POhbdg@mail.gmail.com>
-	<BY1PR0301MB11925C4491BEA2DC7ECB5C75F2600@BY1PR0301MB1192.namprd03.prod.outlook.com>
-	<CAPDyKFoYXEU+1k9nsdnrc2pUTgtN3-FvsPGVjDNYxwaEHOQmvA@mail.gmail.com>
+From: Michal Simek <michal.simek@xilinx.com>
+Subject: Re: [PATCH] mmc: Kconfig: Add dependency on GPIOLIB for MMC_SDHCI
+Date: Thu, 27 Aug 2015 15:43:47 +0200
+Message-ID: <55DF1413.3030004@xilinx.com>
+References: <6906e34b62f162018984a5fbd12b3ef6cd5e3a29.1438839562.git.michal.simek@xilinx.com>
+ <CAPDyKFqgLonYZT86ixOAwJ3G5tsozxee6dEs+QRFYzwOWFUNNQ@mail.gmail.com>
+ <CAPDyKFoPDMcO_19_pg7=aFUUCQrnxnoZD+YGpjYaBcRWu4ArJw@mail.gmail.com>
+ <55DEF7FD.8020904@xilinx.com>
+ <CAPDyKFo=DfMkg-wn7FEhsT4keMgWw0fYogvEo0xPBczGP6s9nQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:36634 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752153AbbH0Nfx convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2015 09:35:53 -0400
-Received: by wicgk12 with SMTP id gk12so8955123wic.1
-        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2015 06:35:52 -0700 (PDT)
-In-Reply-To: <CAPDyKFoYXEU+1k9nsdnrc2pUTgtN3-FvsPGVjDNYxwaEHOQmvA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFo=DfMkg-wn7FEhsT4keMgWw0fYogvEo0xPBczGP6s9nQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Michal Simek <michal.simek@xilinx.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Michal Simek <monstr@monstr.eu>, Scott Branden <sbranden@broadcom.com>, Weijun Yang <Weijun.Yang@csr.com>, Andrew Bresticker <abrestic@chromium.org>, Jean Delvare <jdelvare@suse.de>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alim Akhtar <alim.akhtar@samsung.com>, addy ke <addy.ke@rock-chips.com>, Stephen Boyd <sboyd@codeaurora.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Kevin Hao <haokexin@gmail.com>, Vincent Yang <vincent.yang.fujitsu@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "Lu Y.B." <yangbo.lu@freescale.com>
-Cc: Li Leo <LeoLi@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 
-On 27 August 2015 at 15:34, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> [...]
->
+On 08/27/2015 02:30 PM, Ulf Hansson wrote:
+> On 27 August 2015 at 13:43, Michal Simek <michal.simek@xilinx.com> wrote:
+>> Hi Ulf,
 >>
->> What I had in mind is replacing in_be32() with a esdhc_ops->readl() in this function. And the esdhc_ops->readl() would be assigned at the beginning according endian.
+>> On 08/27/2015 01:32 PM, Ulf Hansson wrote:
+>>> On 25 August 2015 at 14:04, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>> On 6 August 2015 at 07:39, Michal Simek <michal.simek@xilinx.com> wrote:
+>>>>> Add GPIOLIB dependency for MMC_SDHCI.
+>>>>>
+>>>>> Problem was observed after adding the patch
+>>>>> "mmc: sdhci-of-arasan: Call OF parsing for MMC"
+>>>>> (sha1: 16b23787fc709fe60c5d2bd05927b1a3da33d4e9) which calls
+>>>>> mmc_of_parse() -> mmc_gpiod_request_cd() (slot-gpio.c) which
+>>>>> calls devm_gpiod_get_index() which returns -ENOSYS.
+>>>>>
+>>>>> Error log:
+>>>>> sdhci-arasan ff160000.sdhci: parsing dt failed (4294967258)
+>>>>> sdhci-arasan: probe of ff160000.sdhci failed with error -38
+>>>>>
+>>>>> Signed-off-by: Michal Simek <michal.simek@xilinx.com>
+>>>>
+>>>> Thanks, applied for next!
+>>>
+>>> kbuild test robot reports a warning for this one, so I am dropping it
+>>> from my next branch.
 >>
->> static u32 esdhc_readl(struct sdhci_host *host, int reg)
->> {
->>         u32 ret;
+>> I think is just better to fix the problem there instead of dropping this
+>> patch which fix GPIO dependency.
 >>
->>         ret = in_be32(host->ioaddr + reg);
->>         /*
->>          * The bit of ADMA flag in eSDHC is not compatible with standard
->>          * SDHC register, so set fake flag SDHCI_CAN_DO_ADMA2 when ADMA is
->>          * supported by eSDHC.
->>          * And for many FSL eSDHC controller, the reset value of field
->>          * SDHCI_CAN_DO_ADMA1 is one, but some of them can't support ADMA,
->>          * only these vendor version is greater than 2.2/0x12 support ADMA.
->>          * For FSL eSDHC, must aligned 4-byte, so use 0xFC to read the
->>          * the verdor version number, oxFE is SDHCI_HOST_VERSION.
->>          */
->>         if ((reg == SDHCI_CAPABILITIES) && (ret & SDHCI_CAN_DO_ADMA1)) {
->>                 u32 tmp = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
->>                 tmp = (tmp & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
->>                 if (tmp > VENDOR_V_22)
->>                         ret |= SDHCI_CAN_DO_ADMA2;
->>         }
+>> Fix is quite easy.
+>> diff --git a/arch/powerpc/platforms/44x/Kconfig
+>> b/arch/powerpc/platforms/44x/Kconfig
+>> index 5538e57c36c1..874f07c7d0b8 100644
+>> --- a/arch/powerpc/platforms/44x/Kconfig
+>> +++ b/arch/powerpc/platforms/44x/Kconfig
+>> @@ -219,6 +219,7 @@ config AKEBONO
+>>         select USB_EHCI_HCD_PLATFORM if USB_EHCI_HCD
+>>         select MMC_SDHCI
+>>         select MMC_SDHCI_PLTFM
+>> +       select GPIOLIB
+>>         select ATA
+>>         select SATA_AHCI_PLATFORM
+>>         help
 >>
->>         return ret;
->> }
+>> But the question is if we should keep these ancient targets in the tree.
 >>
->> The LE and BE accessors could be defined in sdhci-esdhc.h for esdhc_ops->readl() as below.
->> static u32 esdhc_be32bs_readl(struct sdhci_host *host, int reg)
->> {
->>        return ioread32be(host->ioaddr + reg);
->> }
->>
->> static u32 esdhc_le32bs_readl(struct sdhci_host *host, int reg)
->> {
->>        return ioread32(host->ioaddr + reg);
->> }
->>
->> Do you think it is ok for you?
->
-> It becomes a bit "hacky", but currently I can't think of a better solution.
->
->>
->>
->> Or Maybe there is another method, use conditional compilation. The previous method would delete the MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER to use accessors defined in sdhci-esdhc.h, and add dependency of ARM. This method could use 'select <accessors> if <ARCH>' to compile LE or BE accessors according ARCH.
->
-> I don't really follow your suggestion.
->
-> Isn't the problem that you need the
-> MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER for configurations and for
-> some you don't? More precisely, for those where you don't you would
-> rather just use the regulator ioread* functions since those will
+>> I am happy to send this patch but it should go via PPC tree. Or are you
+>> happy to apply it to your tree?
+> 
+> It's getting really late for 4.3 so I would rather postpone this to
+> the next release cycle.
 
-/s/regulator/regular
+No problem at all. :-)
 
-> internally deal with the endianess in runtime?
->
-> If you can make these decisions at compile time an depending of the
-> ARCH - I believe I would be fine with that as well.
->
-> [...]
->
-> Kind regards
-> Uffe
+> 
+> As I stated in my earlier reply, do we really want to add the GPIOLIB
+> dependency to the Kconfig file for SDHCI?
+> I assume we have lots of other Kconfig dependencies, then these should
+> also to be added for the same reasons. I doubt this is the right thing
+> to do.
+
+Is it the right solution not to list them if they are there?
+
+> How about if the mmc core instead treat GPIOs as optional from an API
+> point of view and thus it won't cause ->probe() to fail. Is that a way
+> forward for you?
+
+In my test case I am not using GPIO at all and probe is failing. If this
+is fixed because it is probably common setting for others we don't need
+to list this dependency.
+But really for my case and I am not using gpio at all probe just failed
+which is incorrect and should be fixed.
+
+Thanks,
+Michal
