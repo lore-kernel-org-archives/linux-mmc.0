@@ -1,85 +1,114 @@
-From: LIYONG <sdliyong@gmail.com>
-Subject: RE: [PATCH] mmc: block: disable the reliable write If the card does
- not support CMD23
-Date: Fri, 28 Aug 2015 08:38:22 +0800
-Message-ID: <BLU168-W13574B00F22F09F6F0E357FD66E0@phx.gbl>
-References: <1439537446-7713-1-git-send-email-sdliyong@gmail.com>,<CAPDyKFp51gzyNaGkGWDXs0ATX2hom2yfcLHXT4o=dzw2=AbWNw@mail.gmail.com>,<CAPDyKFpVN8aK6aF2Fk9UNgFfJU5W1CT4v4YBtJDF6t57cwXsKg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [RESEND PATCH] mmc: core: fix race condition in mmc_wait_data_done
+Date: Fri, 28 Aug 2015 11:13:09 +0800
+Message-ID: <1440731589-22241-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f52.google.com ([209.85.220.52]:34680 "EHLO
-	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751124AbbH1Ai1 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2015 20:38:27 -0400
-In-Reply-To: <CAPDyKFpVN8aK6aF2Fk9UNgFfJU5W1CT4v4YBtJDF6t57cwXsKg@mail.gmail.com>
+Received: from lucky1.263xmail.com ([211.157.147.132]:34801 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751014AbbH1DOR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Aug 2015 23:14:17 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Jialing Fu <jlfu@marvell.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Uffe,
+From: Jialing Fu <jlfu@marvell.com>
 
-Since=A0Reliable Write depends on the CMD23. I think we need to disable=
-=A0Reliable Write if the card does not support CMD23(due to performance=
- impact issue), so I add this patch.
+The following panic is captured in ker3.14, but the issue still exists
+in latest kernel.
+---------------------------------------------------------------------
+[   20.738217] c0 3136 (Compiler) Unable to handle kernel NULL pointer dereference
+at virtual address 00000578
+......
+[   20.738499] c0 3136 (Compiler) PC is at _raw_spin_lock_irqsave+0x24/0x60
+[   20.738527] c0 3136 (Compiler) LR is at _raw_spin_lock_irqsave+0x20/0x60
+[   20.740134] c0 3136 (Compiler) Call trace:
+[   20.740165] c0 3136 (Compiler) [<ffffffc0008ee900>] _raw_spin_lock_irqsave+0x24/0x60
+[   20.740200] c0 3136 (Compiler) [<ffffffc0000dd024>] __wake_up+0x1c/0x54
+[   20.740230] c0 3136 (Compiler) [<ffffffc000639414>] mmc_wait_data_done+0x28/0x34
+[   20.740262] c0 3136 (Compiler) [<ffffffc0006391a0>] mmc_request_done+0xa4/0x220
+[   20.740314] c0 3136 (Compiler) [<ffffffc000656894>] sdhci_tasklet_finish+0xac/0x264
+[   20.740352] c0 3136 (Compiler) [<ffffffc0000a2b58>] tasklet_action+0xa0/0x158
+[   20.740382] c0 3136 (Compiler) [<ffffffc0000a2078>] __do_softirq+0x10c/0x2e4
+[   20.740411] c0 3136 (Compiler) [<ffffffc0000a24bc>] irq_exit+0x8c/0xc0
+[   20.740439] c0 3136 (Compiler) [<ffffffc00008489c>] handle_IRQ+0x48/0xac
+[   20.740469] c0 3136 (Compiler) [<ffffffc000081428>] gic_handle_irq+0x38/0x7c
+----------------------------------------------------------------------
+Because in SMP, "mrq" has race condition between below two paths:
+path1: CPU0: <tasklet context>
+  static void mmc_wait_data_done(struct mmc_request *mrq)
+  {
+     mrq->host->context_info.is_done_rcv = true;
+     //
+     // If CPU0 has just finished "is_done_rcv = true" in path1, and at
+     // this moment, IRQ or ICache line missing happens in CPU0.
+     // What happens in CPU1 (path2)?
+     //
+     // If the mmcqd thread in CPU1(path2) hasn't entered to sleep mode:
+     // path2 would have chance to break from wait_event_interruptible
+     // in mmc_wait_for_data_req_done and continue to run for next
+     // mmc_request (mmc_blk_rw_rq_prep).
+     //
+     // Within mmc_blk_rq_prep, mrq is cleared to 0.
+     // If below line still gets host from "mrq" as the result of
+     // compiler, the panic happens as we traced.
+     wake_up_interruptible(&mrq->host->context_info.wait);
+  }
 
-Do you think we still need to enable=A0Reliable Write even if the card =
-does not support CMD23?
+path2: CPU1: <The mmcqd thread runs mmc_queue_thread>
+  static int mmc_wait_for_data_req_done(...
+  {
+     ...
+     while (1) {
+           wait_event_interruptible(context_info->wait,
+                   (context_info->is_done_rcv ||
+                    context_info->is_new_req));
+     	   static void mmc_blk_rw_rq_prep(...
+           {
+           ...
+           memset(brq, 0, sizeof(struct mmc_blk_request));
 
-Thanks,
-Yong Li
-----------------------------------------
-> Date: Thu, 27 Aug 2015 15:22:44 +0200
-> Subject: Re: [PATCH] mmc: block: disable the reliable write If the ca=
-rd does not support CMD23
-> From: ulf.hansson@linaro.org
-> To: sdliyong@gmail.com
-> CC: chris@printf.net; linux-mmc@vger.kernel.org; linux-kernel@vger.ke=
-rnel.org
->
-> On 25 August 2015 at 14:06, Ulf Hansson <ulf.hansson@linaro.org> wrot=
-e:
->> On 14 August 2015 at 09:30, <sdliyong@gmail.com> wrote:
->>> From: Yong Li <sdliyong@gmail.com>
->>>
->>> Signed-off-by: Yong Li <sdliyong@gmail.com>
->>> ---
->>> drivers/mmc/card/block.c | 3 ++-
->>> 1 file changed, 2 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->>> index 452782b..d9e3c45 100644
->>> --- a/drivers/mmc/card/block.c
->>> +++ b/drivers/mmc/card/block.c
->>> @@ -1366,7 +1366,8 @@ static void mmc_blk_rw_rq_prep(struct mmc_que=
-ue_req *mqrq,
->>> bool do_rel_wr =3D ((req->cmd_flags & REQ_FUA) ||
->>> (req->cmd_flags & REQ_META)) &&
->>> (rq_data_dir(req) =3D=3D WRITE) &&
->>> - (md->flags & MMC_BLK_REL_WR);
->>> + (md->flags & MMC_BLK_REL_WR) &&
->>> + !(card->quirks & MMC_QUIRK_BLK_NO_CMD23);
->>
->> Further down in mmc_blk_rw_rq_prep() we check for
->> MMC_QUIRK_BLK_NO_CMD23. That check becomes redundant after this
->> change, please remove that check as a part of this patch as well.
->>
->>>
->>> memset(brq, 0, sizeof(struct mmc_blk_request));
->>> brq->mrq.cmd =3D &brq->cmd;
->>> --
->>> 2.1.0
->>>
->>
->
-> Please ignore my previous answer. MMC_QUIRK_BLK_NO_CMD23 is intended
-> to indicate to the mmc block layer whether using CMD23 for regular
-> block IO request could have a performance impact for some cards. If
-> that's the case we don't use it - except when using reliable write!
->
-> So this patch is just plain wrong.
->
-> Kind regards
-> Uffe
- 		 	   		  
+This issue happens very coincidentally; however adding mdelay(1) in
+mmc_wait_data_done as below could duplicate it easily.
+
+   static void mmc_wait_data_done(struct mmc_request *mrq)
+   {
+     mrq->host->context_info.is_done_rcv = true;
++    mdelay(1);
+     wake_up_interruptible(&mrq->host->context_info.wait);
+    }
+
+At runtime, IRQ or ICache line missing may just happen at the same place
+of the mdelay(1).
+
+This patch gets the mmc_context_info at the beginning of function, it can
+avoid this race condition.
+
+Signed-off-by: Jialing Fu <jlfu@marvell.com>
+Tested-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
+
+ drivers/mmc/core/core.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 664b617..0520064 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -358,8 +358,10 @@ EXPORT_SYMBOL(mmc_start_bkops);
+  */
+ static void mmc_wait_data_done(struct mmc_request *mrq)
+ {
+-	mrq->host->context_info.is_done_rcv = true;
+-	wake_up_interruptible(&mrq->host->context_info.wait);
++	struct mmc_context_info *context_info = &mrq->host->context_info;
++
++	context_info->is_done_rcv = true;
++	wake_up_interruptible(&context_info->wait);
+ }
+ 
+ static void mmc_wait_done(struct mmc_request *mrq)
+-- 
+2.3.7
+
+
