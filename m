@@ -1,65 +1,51 @@
-From: Chen Bough <Haibo.Chen@freescale.com>
-Subject: RE: [PATCH v6 0/6] mmc: imx: a few fixes and new feature
-Date: Fri, 28 Aug 2015 06:53:36 +0000
-Message-ID: <BY1PR03MB1388F0A45EF1A6CC38D2A4489A6E0@BY1PR03MB1388.namprd03.prod.outlook.com>
-References: <1439293111-21077-1-git-send-email-haibo.chen@freescale.com>
- <CAPDyKFriWeJTsymd+Ha0ZY+UWjpbEdKMwZgw1hA2zZhw5khPaw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: Re: [v4,1/6] mmc: dt: add DT binding for big endian controller
+Date: Fri, 28 Aug 2015 09:46:20 +0200
+Message-ID: <CAPDyKFqc_fQQz-5xJkr3ZBkPXS=0yK6bOdbpkDFwyLKJKwWnzg@mail.gmail.com>
+References: <DM2PR0301MB0734002AABE322D7106D3AF6BA620@DM2PR0301MB0734.namprd03.prod.outlook.com>
+	<BY1PR0301MB1192D64A16D187E5485796DCF2610@BY1PR0301MB1192.namprd03.prod.outlook.com>
+	<CAPDyKFpR=qbheQ8hJueAbHA_5f9kBDNb9_zqanGTna+1POhbdg@mail.gmail.com>
+	<BY1PR0301MB11925C4491BEA2DC7ECB5C75F2600@BY1PR0301MB1192.namprd03.prod.outlook.com>
+	<CAPDyKFoYXEU+1k9nsdnrc2pUTgtN3-FvsPGVjDNYxwaEHOQmvA@mail.gmail.com>
+	<DM2PR0301MB07348CE40074F4DDA239B172BA6F0@DM2PR0301MB0734.namprd03.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFriWeJTsymd+Ha0ZY+UWjpbEdKMwZgw1hA2zZhw5khPaw@mail.gmail.com>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, "Dong A.S." <Aisheng.Dong@freescale.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Fabio Estevam <Fabio.Estevam@freescale.com>, Pawe? Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Marc Kleine-Budde <mkl@pengutronix.de>, Sascha Hauer <kernel@pengutronix.de>, Kumar Gala <galak@codeaurora.org>, Johan Derycke <johan.derycke@barco.com>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <DM2PR0301MB07348CE40074F4DDA239B172BA6F0-Cwg/PA1lyPnRfvLtmsd4/5wN6zqB+hSMnBOFsp37pqbUKgpGm//BTAC/G2K4zDHf@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Li Leo <LeoLi-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+Cc: "Lu Y.B." <yangbo.lu-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-VGhhbmtz77yMIFVmZmUuDQoNCg0KSGkgU2hhd24gYW5kIFNhc2NoYSwNCg0KQ2FuIHlvdSBoZWxw
-IHB1bGwgdGhlIHBhdGNoNCBpbiB5b3VyIGJyYW5jaD8gDQoNCg0KQmVzdCBSZWdhcmRzDQpIYWli
-byBDaGVuDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFu
-c3NvbiBbbWFpbHRvOnVsZi5oYW5zc29uQGxpbmFyby5vcmddDQo+IFNlbnQ6IFR1ZXNkYXksIEF1
-Z3VzdCAyNSwgMjAxNSA4OjA2IFBNDQo+IFRvOiBDaGVuIEhhaWJvLUI1MTQyMQ0KPiBDYzogUm9i
-IEhlcnJpbmc7IFBhd2XFgiBNb2xsOyBNYXJrIFJ1dGxhbmQ7IElhbiBDYW1wYmVsbDsgS3VtYXIg
-R2FsYTsNCj4gU2hhd24gR3VvOyBTYXNjaGEgSGF1ZXI7IFJ1c3NlbGwgS2luZyAtIEFSTSBMaW51
-eDsgRG9uZyBBaXNoZW5nLUIyOTM5NjsNCj4gSm9oYW4gRGVyeWNrZTsgTWFyYyBLbGVpbmUtQnVk
-ZGU7IEVzdGV2YW0gRmFiaW8tUjQ5NDk2Ow0KPiBkZXZpY2V0cmVlQHZnZXIua2VybmVsLm9yZzsg
-bGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZzsgbGludXgtYXJtLQ0KPiBrZXJuZWxAbGlzdHMu
-aW5mcmFkZWFkLm9yZzsgbGludXgtbW1jDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggdjYgMC82XSBt
-bWM6IGlteDogYSBmZXcgZml4ZXMgYW5kIG5ldyBmZWF0dXJlDQo+IA0KPiBPbiAxMSBBdWd1c3Qg
-MjAxNSBhdCAxMzozOCwgSGFpYm8gQ2hlbiA8aGFpYm8uY2hlbkBmcmVlc2NhbGUuY29tPiB3cm90
-ZToNCj4gPiBDaGFuZ2VzIGZvciB2NjoNCj4gPiAtcmVtb3ZlIGR1cGxpY2F0ZSBjb2RlIGluIGVz
-ZGhjX3NldF91aHNfc2lnbmFsaW5nKCkuDQo+ID4gLWZpeCBhIHR5cG8gZm9yIHBhdGNoLTIuDQo+
-ID4gLW1ha2UgY29tbWl0IGxvZyBvZiBwYXRjaC0zIG1vcmUgc3BlY2lmaWMuDQo+ID4NCj4gPiBI
-YWlibyBDaGVuICg2KToNCj4gPiAgIG1tYzogc2RoY2ktZXNkaGMtaW14OiBhZGQgaW14N2Qgc3Vw
-cG9ydCBhbmQgc3VwcG9ydCBIUzQwMA0KPiA+ICAgbW1jOiBzZGhjaS1lc2RoYy1pbXg6IGFkZCB0
-dW5pbmctc3RlcCBzZXR0aW5nIHN1cHBvcnQNCj4gPiAgIG1tYzogc2RoY2ktZXNkaGMtaW14OiBh
-ZGQgaW14N2Qgc3VwcG9ydCBpbiBiaW5nZGluZyBkb2MNCj4gPiAgIEFSTTogZHRzOiBpbXg3ZC1z
-ZGI6IGFkZCBlTU1DNS4wIHN1cHBvcnQNCj4gPiAgIG1tYzogc2RoY2ktZXNkaGMtaW14OiBzZXQg
-YmFjayB0aGUgYnVyc3RfbGVuZ3RoX2VuYWJsZSBiaXQgdG8gMQ0KPiA+ICAgbW1jOiBzZGhjaS1l
-c2RoYy1pbXg6IGNoYW5nZSBkZWZhdWx0IHdhdGVybWFyayBsZXZlbCBhbmQgYnVyc3QNCj4gPiBs
-ZW5ndGgNCj4gPg0KPiA+ICAuLi4vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvZnNsLWlteC1lc2Ro
-Yy50eHQgICAgICB8ICAgNiArKw0KPiA+ICBhcmNoL2FybS9ib290L2R0cy9pbXg3ZC1zZGIuZHRz
-ICAgICAgICAgICAgICAgICAgICB8ICAxMyArKysNCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9zZGhj
-aS1lc2RoYy1pbXguYyAgICAgICAgICAgICAgICAgfCAxMTQNCj4gKysrKysrKysrKysrKysrKysr
-KystDQo+ID4gIGluY2x1ZGUvbGludXgvcGxhdGZvcm1fZGF0YS9tbWMtZXNkaGMtaW14LmggICAg
-ICAgIHwgICAxICsNCj4gPiAgNCBmaWxlcyBjaGFuZ2VkLCAxMzAgaW5zZXJ0aW9ucygrKSwgNCBk
-ZWxldGlvbnMoLSkNCj4gPg0KPiA+IC0tDQo+ID4gMS45LjENCj4gPg0KPiANCj4gSSBoYXZlIGFw
-cGxpZWQgdGhpcyBmb3IgbmV4dCAtIGV4Y2VwdCBwYXRjaDQgYXMgaXQgbmVlZHMgYW5kIGFjayBm
-cm9tIHRoZQ0KPiBJTVggU09DIG1haW50YWluZXIsIG9yIGl0IG1heSBiZSBiZXR0ZXIgdG8gdGFr
-ZSB0aGF0IHBhdGNoIHRocm91Z2ggQVJNDQo+IHNvYy4uLg0KPiANCj4gUmVnYXJkaW5nIHBhdGNo
-Mywgd2hpY2ggZG9jdW1lbnQgdGhlIG5ldyBiaW5kaW5ncyBhbmQgdGhlIGNvbXBhdGlibGUNCj4g
-c3RyaW5nLCBJIG1vdmVkIHRoaXMgdG8gYmUgdGhlIGZpcnN0IHBhdGNoIGFuZCBmaXhlZCB0aGUg
-c3BlbGxpbmcgb2YgdGhlDQo+IGNvbW1pdCBtZXNzYWdlIGhlYWRlci4NCj4gDQo+IFRoYW5rcyEN
-Cj4gDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1h
-cm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcv
-bWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
+On 27 August 2015 at 20:39, Li Leo <LeoLi-KZfg59tc24xl57MIdRCFDg@public.gmane.org> wrote:
+>> > Or Maybe there is another method, use conditional compilation. The previous
+>> method would delete the MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER to
+>> use accessors defined in sdhci-esdhc.h, and add dependency of ARM. This
+>> method could use 'select <accessors> if <ARCH>' to compile LE or BE accessors
+>> according ARCH.
+>>
+>> I don't really follow your suggestion.
+>>
+>> Isn't the problem that you need the
+>> MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER for configurations and for
+>> some you don't? More precisely, for those where you don't you would
+>> rather just use the regulator ioread* functions since those will
+>> internally deal with the endianess in runtime?
+>>
+>> If you can make these decisions at compile time an depending of the
+>> ARCH - I believe I would be fine with that as well.
+>
+> I know it is a little bit weird.  But the endian of the peripheral device is not always consistent with the type/endian of the core.
+
+Yes got it. So it seems relying on the ARCH in compile time isn't
+going to be a long term solution.
+
+Then it's better to have a default mode and then via DT be able to
+change that, right? As you suggested above.
+
+Kind regards
+Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
