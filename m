@@ -1,51 +1,45 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: Re: [v4,1/6] mmc: dt: add DT binding for big endian controller
-Date: Fri, 28 Aug 2015 09:46:20 +0200
-Message-ID: <CAPDyKFqc_fQQz-5xJkr3ZBkPXS=0yK6bOdbpkDFwyLKJKwWnzg@mail.gmail.com>
-References: <DM2PR0301MB0734002AABE322D7106D3AF6BA620@DM2PR0301MB0734.namprd03.prod.outlook.com>
-	<BY1PR0301MB1192D64A16D187E5485796DCF2610@BY1PR0301MB1192.namprd03.prod.outlook.com>
-	<CAPDyKFpR=qbheQ8hJueAbHA_5f9kBDNb9_zqanGTna+1POhbdg@mail.gmail.com>
-	<BY1PR0301MB11925C4491BEA2DC7ECB5C75F2600@BY1PR0301MB1192.namprd03.prod.outlook.com>
-	<CAPDyKFoYXEU+1k9nsdnrc2pUTgtN3-FvsPGVjDNYxwaEHOQmvA@mail.gmail.com>
-	<DM2PR0301MB07348CE40074F4DDA239B172BA6F0@DM2PR0301MB0734.namprd03.prod.outlook.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: block: disable the reliable write If the card does
+ not support CMD23
+Date: Fri, 28 Aug 2015 10:08:34 +0200
+Message-ID: <CAPDyKFp5-6Zpb8E9KqFJ3hCqCqpknVWWhf52PA5=LJvbw6ui0Q@mail.gmail.com>
+References: <1439537446-7713-1-git-send-email-sdliyong@gmail.com>
+	<CAPDyKFp51gzyNaGkGWDXs0ATX2hom2yfcLHXT4o=dzw2=AbWNw@mail.gmail.com>
+	<CAPDyKFpVN8aK6aF2Fk9UNgFfJU5W1CT4v4YBtJDF6t57cwXsKg@mail.gmail.com>
+	<BLU168-W13574B00F22F09F6F0E357FD66E0@phx.gbl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <DM2PR0301MB07348CE40074F4DDA239B172BA6F0-Cwg/PA1lyPnRfvLtmsd4/5wN6zqB+hSMnBOFsp37pqbUKgpGm//BTAC/G2K4zDHf@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Li Leo <LeoLi-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
-Cc: "Lu Y.B." <yangbo.lu-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f176.google.com ([209.85.212.176]:32858 "EHLO
+	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751703AbbH1IIf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Aug 2015 04:08:35 -0400
+Received: by wieo17 with SMTP id o17so6682271wie.0
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2015 01:08:34 -0700 (PDT)
+In-Reply-To: <BLU168-W13574B00F22F09F6F0E357FD66E0@phx.gbl>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: LIYONG <sdliyong@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 27 August 2015 at 20:39, Li Leo <LeoLi-KZfg59tc24xl57MIdRCFDg@public.gmane.org> wrote:
->> > Or Maybe there is another method, use conditional compilation. The previous
->> method would delete the MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER to
->> use accessors defined in sdhci-esdhc.h, and add dependency of ARM. This
->> method could use 'select <accessors> if <ARCH>' to compile LE or BE accessors
->> according ARCH.
->>
->> I don't really follow your suggestion.
->>
->> Isn't the problem that you need the
->> MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER for configurations and for
->> some you don't? More precisely, for those where you don't you would
->> rather just use the regulator ioread* functions since those will
->> internally deal with the endianess in runtime?
->>
->> If you can make these decisions at compile time an depending of the
->> ARCH - I believe I would be fine with that as well.
+- Chris and LKML,
+
+On 28 August 2015 at 02:38, LIYONG <sdliyong@gmail.com> wrote:
+> Hi Uffe,
 >
-> I know it is a little bit weird.  But the endian of the peripheral device is not always consistent with the type/endian of the core.
+> Since Reliable Write depends on the CMD23. I think we need to disable Reliable Write if the card does not support CMD23(due to performance impact issue), so I add this patch.
+>
+> Do you think we still need to enable Reliable Write even if the card does not support CMD23?
 
-Yes got it. So it seems relying on the ARCH in compile time isn't
-going to be a long term solution.
+MMC_QUIRK_BLK_NO_CMD23 does *not* tell us whether the card support
+CMD23. Instead it tells us that the card may suffer a bit from
+performance point of view while using the "CMD23 way" to send
+requests.
 
-Then it's better to have a default mode and then via DT be able to
-change that, right? As you suggested above.
+Now, as reliable write needs to be sent in the "CMD23-way", then
+that's what we need to do - no matter of MMC_QUIRK_BLK_NO_CMD23.
+
+[...]
 
 Kind regards
 Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
