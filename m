@@ -1,130 +1,65 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [RESEND PATCH] mmc: core: fix race condition in
- mmc_wait_data_done
-Date: Fri, 28 Aug 2015 11:25:43 +0800
-Message-ID: <55DFD4B7.3070601@rock-chips.com>
-References: <1440731589-22241-1-git-send-email-shawn.lin@rock-chips.com>
+From: Chen Bough <Haibo.Chen@freescale.com>
+Subject: RE: [PATCH v6 0/6] mmc: imx: a few fixes and new feature
+Date: Fri, 28 Aug 2015 06:53:36 +0000
+Message-ID: <BY1PR03MB1388F0A45EF1A6CC38D2A4489A6E0@BY1PR03MB1388.namprd03.prod.outlook.com>
+References: <1439293111-21077-1-git-send-email-haibo.chen@freescale.com>
+ <CAPDyKFriWeJTsymd+Ha0ZY+UWjpbEdKMwZgw1hA2zZhw5khPaw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1440731589-22241-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAPDyKFriWeJTsymd+Ha0ZY+UWjpbEdKMwZgw1hA2zZhw5khPaw@mail.gmail.com>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jialing Fu <jlfu@marvell.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Mark Rutland <mark.rutland@arm.com>, "Dong A.S." <Aisheng.Dong@freescale.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Fabio Estevam <Fabio.Estevam@freescale.com>, Pawe? Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Marc Kleine-Budde <mkl@pengutronix.de>, Sascha Hauer <kernel@pengutronix.de>, Kumar Gala <galak@codeaurora.org>, Johan Derycke <johan.derycke@barco.com>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2015/8/28 11:13, Shawn Lin wrote:
-> From: Jialing Fu <jlfu@marvell.com>
->
-> The following panic is captured in ker3.14, but the issue still exists
-> in latest kernel.
-> ---------------------------------------------------------------------
-> [   20.738217] c0 3136 (Compiler) Unable to handle kernel NULL pointer dereference
-> at virtual address 00000578
-> ......
-> [   20.738499] c0 3136 (Compiler) PC is at _raw_spin_lock_irqsave+0x24/0x60
-> [   20.738527] c0 3136 (Compiler) LR is at _raw_spin_lock_irqsave+0x20/0x60
-> [   20.740134] c0 3136 (Compiler) Call trace:
-> [   20.740165] c0 3136 (Compiler) [<ffffffc0008ee900>] _raw_spin_lock_irqsave+0x24/0x60
-> [   20.740200] c0 3136 (Compiler) [<ffffffc0000dd024>] __wake_up+0x1c/0x54
-> [   20.740230] c0 3136 (Compiler) [<ffffffc000639414>] mmc_wait_data_done+0x28/0x34
-> [   20.740262] c0 3136 (Compiler) [<ffffffc0006391a0>] mmc_request_done+0xa4/0x220
-> [   20.740314] c0 3136 (Compiler) [<ffffffc000656894>] sdhci_tasklet_finish+0xac/0x264
-> [   20.740352] c0 3136 (Compiler) [<ffffffc0000a2b58>] tasklet_action+0xa0/0x158
-> [   20.740382] c0 3136 (Compiler) [<ffffffc0000a2078>] __do_softirq+0x10c/0x2e4
-> [   20.740411] c0 3136 (Compiler) [<ffffffc0000a24bc>] irq_exit+0x8c/0xc0
-> [   20.740439] c0 3136 (Compiler) [<ffffffc00008489c>] handle_IRQ+0x48/0xac
-> [   20.740469] c0 3136 (Compiler) [<ffffffc000081428>] gic_handle_irq+0x38/0x7c
-> ----------------------------------------------------------------------
-> Because in SMP, "mrq" has race condition between below two paths:
-> path1: CPU0: <tasklet context>
->    static void mmc_wait_data_done(struct mmc_request *mrq)
->    {
->       mrq->host->context_info.is_done_rcv = true;
->       //
->       // If CPU0 has just finished "is_done_rcv = true" in path1, and at
->       // this moment, IRQ or ICache line missing happens in CPU0.
->       // What happens in CPU1 (path2)?
->       //
->       // If the mmcqd thread in CPU1(path2) hasn't entered to sleep mode:
->       // path2 would have chance to break from wait_event_interruptible
->       // in mmc_wait_for_data_req_done and continue to run for next
->       // mmc_request (mmc_blk_rw_rq_prep).
->       //
->       // Within mmc_blk_rq_prep, mrq is cleared to 0.
->       // If below line still gets host from "mrq" as the result of
->       // compiler, the panic happens as we traced.
->       wake_up_interruptible(&mrq->host->context_info.wait);
->    }
->
-> path2: CPU1: <The mmcqd thread runs mmc_queue_thread>
->    static int mmc_wait_for_data_req_done(...
->    {
->       ...
->       while (1) {
->             wait_event_interruptible(context_info->wait,
->                     (context_info->is_done_rcv ||
->                      context_info->is_new_req));
->       	   static void mmc_blk_rw_rq_prep(...
->             {
->             ...
->             memset(brq, 0, sizeof(struct mmc_blk_request));
->
-> This issue happens very coincidentally; however adding mdelay(1) in
-> mmc_wait_data_done as below could duplicate it easily.
->
->     static void mmc_wait_data_done(struct mmc_request *mrq)
->     {
->       mrq->host->context_info.is_done_rcv = true;
-> +    mdelay(1);
->       wake_up_interruptible(&mrq->host->context_info.wait);
->      }
->
-
-Hi, ulf
-
-We find this bug on Intel-C3230RK platform for very small probability.
-
-Whereas I can easily reproduce this case if I add a mdelay(1) or  longer 
-delay as Jialing did.
-
-This patch seems useful to me. Should we push it forward? :)
-
-
-> At runtime, IRQ or ICache line missing may just happen at the same place
-> of the mdelay(1).
->
-> This patch gets the mmc_context_info at the beginning of function, it can
-> avoid this race condition.
->
-> Signed-off-by: Jialing Fu <jlfu@marvell.com>
-> Tested-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
->
->   drivers/mmc/core/core.c | 6 ++++--
->   1 file changed, 4 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 664b617..0520064 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -358,8 +358,10 @@ EXPORT_SYMBOL(mmc_start_bkops);
->    */
->   static void mmc_wait_data_done(struct mmc_request *mrq)
->   {
-> -	mrq->host->context_info.is_done_rcv = true;
-> -	wake_up_interruptible(&mrq->host->context_info.wait);
-> +	struct mmc_context_info *context_info = &mrq->host->context_info;
-> +
-> +	context_info->is_done_rcv = true;
-> +	wake_up_interruptible(&context_info->wait);
->   }
->
->   static void mmc_wait_done(struct mmc_request *mrq)
->
-
-
--- 
-Best Regards
-Shawn Lin
+VGhhbmtz77yMIFVmZmUuDQoNCg0KSGkgU2hhd24gYW5kIFNhc2NoYSwNCg0KQ2FuIHlvdSBoZWxw
+IHB1bGwgdGhlIHBhdGNoNCBpbiB5b3VyIGJyYW5jaD8gDQoNCg0KQmVzdCBSZWdhcmRzDQpIYWli
+byBDaGVuDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFu
+c3NvbiBbbWFpbHRvOnVsZi5oYW5zc29uQGxpbmFyby5vcmddDQo+IFNlbnQ6IFR1ZXNkYXksIEF1
+Z3VzdCAyNSwgMjAxNSA4OjA2IFBNDQo+IFRvOiBDaGVuIEhhaWJvLUI1MTQyMQ0KPiBDYzogUm9i
+IEhlcnJpbmc7IFBhd2XFgiBNb2xsOyBNYXJrIFJ1dGxhbmQ7IElhbiBDYW1wYmVsbDsgS3VtYXIg
+R2FsYTsNCj4gU2hhd24gR3VvOyBTYXNjaGEgSGF1ZXI7IFJ1c3NlbGwgS2luZyAtIEFSTSBMaW51
+eDsgRG9uZyBBaXNoZW5nLUIyOTM5NjsNCj4gSm9oYW4gRGVyeWNrZTsgTWFyYyBLbGVpbmUtQnVk
+ZGU7IEVzdGV2YW0gRmFiaW8tUjQ5NDk2Ow0KPiBkZXZpY2V0cmVlQHZnZXIua2VybmVsLm9yZzsg
+bGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZzsgbGludXgtYXJtLQ0KPiBrZXJuZWxAbGlzdHMu
+aW5mcmFkZWFkLm9yZzsgbGludXgtbW1jDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggdjYgMC82XSBt
+bWM6IGlteDogYSBmZXcgZml4ZXMgYW5kIG5ldyBmZWF0dXJlDQo+IA0KPiBPbiAxMSBBdWd1c3Qg
+MjAxNSBhdCAxMzozOCwgSGFpYm8gQ2hlbiA8aGFpYm8uY2hlbkBmcmVlc2NhbGUuY29tPiB3cm90
+ZToNCj4gPiBDaGFuZ2VzIGZvciB2NjoNCj4gPiAtcmVtb3ZlIGR1cGxpY2F0ZSBjb2RlIGluIGVz
+ZGhjX3NldF91aHNfc2lnbmFsaW5nKCkuDQo+ID4gLWZpeCBhIHR5cG8gZm9yIHBhdGNoLTIuDQo+
+ID4gLW1ha2UgY29tbWl0IGxvZyBvZiBwYXRjaC0zIG1vcmUgc3BlY2lmaWMuDQo+ID4NCj4gPiBI
+YWlibyBDaGVuICg2KToNCj4gPiAgIG1tYzogc2RoY2ktZXNkaGMtaW14OiBhZGQgaW14N2Qgc3Vw
+cG9ydCBhbmQgc3VwcG9ydCBIUzQwMA0KPiA+ICAgbW1jOiBzZGhjaS1lc2RoYy1pbXg6IGFkZCB0
+dW5pbmctc3RlcCBzZXR0aW5nIHN1cHBvcnQNCj4gPiAgIG1tYzogc2RoY2ktZXNkaGMtaW14OiBh
+ZGQgaW14N2Qgc3VwcG9ydCBpbiBiaW5nZGluZyBkb2MNCj4gPiAgIEFSTTogZHRzOiBpbXg3ZC1z
+ZGI6IGFkZCBlTU1DNS4wIHN1cHBvcnQNCj4gPiAgIG1tYzogc2RoY2ktZXNkaGMtaW14OiBzZXQg
+YmFjayB0aGUgYnVyc3RfbGVuZ3RoX2VuYWJsZSBiaXQgdG8gMQ0KPiA+ICAgbW1jOiBzZGhjaS1l
+c2RoYy1pbXg6IGNoYW5nZSBkZWZhdWx0IHdhdGVybWFyayBsZXZlbCBhbmQgYnVyc3QNCj4gPiBs
+ZW5ndGgNCj4gPg0KPiA+ICAuLi4vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvZnNsLWlteC1lc2Ro
+Yy50eHQgICAgICB8ICAgNiArKw0KPiA+ICBhcmNoL2FybS9ib290L2R0cy9pbXg3ZC1zZGIuZHRz
+ICAgICAgICAgICAgICAgICAgICB8ICAxMyArKysNCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9zZGhj
+aS1lc2RoYy1pbXguYyAgICAgICAgICAgICAgICAgfCAxMTQNCj4gKysrKysrKysrKysrKysrKysr
+KystDQo+ID4gIGluY2x1ZGUvbGludXgvcGxhdGZvcm1fZGF0YS9tbWMtZXNkaGMtaW14LmggICAg
+ICAgIHwgICAxICsNCj4gPiAgNCBmaWxlcyBjaGFuZ2VkLCAxMzAgaW5zZXJ0aW9ucygrKSwgNCBk
+ZWxldGlvbnMoLSkNCj4gPg0KPiA+IC0tDQo+ID4gMS45LjENCj4gPg0KPiANCj4gSSBoYXZlIGFw
+cGxpZWQgdGhpcyBmb3IgbmV4dCAtIGV4Y2VwdCBwYXRjaDQgYXMgaXQgbmVlZHMgYW5kIGFjayBm
+cm9tIHRoZQ0KPiBJTVggU09DIG1haW50YWluZXIsIG9yIGl0IG1heSBiZSBiZXR0ZXIgdG8gdGFr
+ZSB0aGF0IHBhdGNoIHRocm91Z2ggQVJNDQo+IHNvYy4uLg0KPiANCj4gUmVnYXJkaW5nIHBhdGNo
+Mywgd2hpY2ggZG9jdW1lbnQgdGhlIG5ldyBiaW5kaW5ncyBhbmQgdGhlIGNvbXBhdGlibGUNCj4g
+c3RyaW5nLCBJIG1vdmVkIHRoaXMgdG8gYmUgdGhlIGZpcnN0IHBhdGNoIGFuZCBmaXhlZCB0aGUg
+c3BlbGxpbmcgb2YgdGhlDQo+IGNvbW1pdCBtZXNzYWdlIGhlYWRlci4NCj4gDQo+IFRoYW5rcyEN
+Cj4gDQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQpfX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1h
+cm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcv
+bWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
