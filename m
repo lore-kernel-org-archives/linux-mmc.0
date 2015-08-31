@@ -1,78 +1,106 @@
 From: Heiko Stuebner <heiko@sntech.de>
-Subject: [PATCH 7/8] ARM: dts: rockchip: Add drive/sample clocks for rk3288 dw_mmc devices
-Date: Mon, 31 Aug 2015 20:24:05 +0200
-Message-ID: <1441045446-30858-8-git-send-email-heiko@sntech.de>
+Subject: [PATCH 1/8] clk: rockchip: Allow more precision for some mmc clock phases
+Date: Mon, 31 Aug 2015 20:23:59 +0200
+Message-ID: <1441045446-30858-2-git-send-email-heiko@sntech.de>
 References: <1441045446-30858-1-git-send-email-heiko@sntech.de>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1441045446-30858-1-git-send-email-heiko@sntech.de>
 Sender: linux-kernel-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, mturquette@baylibre.com, sboyd@codeaurora.org, tgih.jun@samsung.com, jh80.chung@samsung.com
-Cc: linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, Alexandru M Stan <amstan@chromium.org>, Heiko Stuebner <heiko@sntech.de>
+Cc: linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, Douglas Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Alexandru M Stan <amstan@chromium.org>
+From: Douglas Anderson <dianders@chromium.org>
 
-The drive/sample clocks can be phase shifted.  The drive clock
-could be used in a future patch to adjust hold times.  The sample
-clock is used for tuning.
+Because of the inexact nature of the extra MMC delay elements (it's
+not possible to keep the phase monotonic and to also make phases (mod
+90) > 70), we previously only allowed phases (mod 90) of 22.5, 45,
+and 67.5.
 
-Signed-off-by: Alexandru M Stan <amstan@chromium.org>
+But it's not the end of the world if the MMC clock phase goes
+non-monotonic.  At most we'll be 25 degrees off.  It's way better to
+test more phases to look for bad ones than to be 25 degrees off, because
+in the case of MMC really the point is to find bad phases and get as far
+asway from the as possible.  If we get to test extra phases by going
+slightly non-monotonic then that might be fine.  Worst case we would
+end up at a phases that's slight differnt than the one we wanted, but
+at least we'd still be quite far away from the a bad phase.
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+
+Fold in more precise variance-values of 44-77 instead of 40-80.
+Fold in the actual removal of the monotonic requirement and adapt
+patch message accordingly.
 Signed-off-by: Heiko Stuebner <heiko@sntech.de>
 ---
- arch/arm/boot/dts/rk3288.dtsi | 20 ++++++++++++--------
- 1 file changed, 12 insertions(+), 8 deletions(-)
+ drivers/clk/rockchip/clk-mmc-phase.c | 45 ++++++++++++++++++++++++------------
+ 1 file changed, 30 insertions(+), 15 deletions(-)
 
-diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
-index 118fe74..b084bc6 100644
---- a/arch/arm/boot/dts/rk3288.dtsi
-+++ b/arch/arm/boot/dts/rk3288.dtsi
-@@ -222,8 +222,9 @@
- 	sdmmc: dwmmc@ff0c0000 {
- 		compatible = "rockchip,rk3288-dw-mshc";
- 		clock-freq-min-max = <400000 150000000>;
--		clocks = <&cru HCLK_SDMMC>, <&cru SCLK_SDMMC>;
--		clock-names = "biu", "ciu";
-+		clocks = <&cru HCLK_SDMMC>, <&cru SCLK_SDMMC>,
-+			 <&cru SCLK_SDMMC_DRV>, <&cru SCLK_SDMMC_SAMPLE>;
-+		clock-names = "biu", "ciu", "ciu_drv", "ciu_sample";
- 		fifo-depth = <0x100>;
- 		interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_HIGH>;
- 		reg = <0xff0c0000 0x4000>;
-@@ -233,8 +234,9 @@
- 	sdio0: dwmmc@ff0d0000 {
- 		compatible = "rockchip,rk3288-dw-mshc";
- 		clock-freq-min-max = <400000 150000000>;
--		clocks = <&cru HCLK_SDIO0>, <&cru SCLK_SDIO0>;
--		clock-names = "biu", "ciu";
-+		clocks = <&cru HCLK_SDIO0>, <&cru SCLK_SDIO0>,
-+			 <&cru SCLK_SDIO0_DRV>, <&cru SCLK_SDIO0_SAMPLE>;
-+		clock-names = "biu", "ciu", "ciu_drv", "ciu_sample";
- 		fifo-depth = <0x100>;
- 		interrupts = <GIC_SPI 33 IRQ_TYPE_LEVEL_HIGH>;
- 		reg = <0xff0d0000 0x4000>;
-@@ -244,8 +246,9 @@
- 	sdio1: dwmmc@ff0e0000 {
- 		compatible = "rockchip,rk3288-dw-mshc";
- 		clock-freq-min-max = <400000 150000000>;
--		clocks = <&cru HCLK_SDIO1>, <&cru SCLK_SDIO1>;
--		clock-names = "biu", "ciu";
-+		clocks = <&cru HCLK_SDIO1>, <&cru SCLK_SDIO1>,
-+			 <&cru SCLK_SDIO1_DRV>, <&cru SCLK_SDIO1_SAMPLE>;
-+		clock-names = "biu", "ciu", "ciu_drv", "ciu_sample";
- 		fifo-depth = <0x100>;
- 		interrupts = <GIC_SPI 34 IRQ_TYPE_LEVEL_HIGH>;
- 		reg = <0xff0e0000 0x4000>;
-@@ -255,8 +258,9 @@
- 	emmc: dwmmc@ff0f0000 {
- 		compatible = "rockchip,rk3288-dw-mshc";
- 		clock-freq-min-max = <400000 150000000>;
--		clocks = <&cru HCLK_EMMC>, <&cru SCLK_EMMC>;
--		clock-names = "biu", "ciu";
-+		clocks = <&cru HCLK_EMMC>, <&cru SCLK_EMMC>,
-+			 <&cru SCLK_EMMC_DRV>, <&cru SCLK_EMMC_SAMPLE>;
-+		clock-names = "biu", "ciu", "ciu_drv", "ciu_sample";
- 		fifo-depth = <0x100>;
- 		interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
- 		reg = <0xff0f0000 0x4000>;
+diff --git a/drivers/clk/rockchip/clk-mmc-phase.c b/drivers/clk/rockchip/clk-mmc-phase.c
+index 9b61342..a797d86 100644
+--- a/drivers/clk/rockchip/clk-mmc-phase.c
++++ b/drivers/clk/rockchip/clk-mmc-phase.c
+@@ -45,8 +45,8 @@ static unsigned long rockchip_mmc_recalc(struct clk_hw *hw,
+ #define PSECS_PER_SEC 1000000000000LL
+ 
+ /*
+- * Each fine delay is between 40ps-80ps. Assume each fine delay is 60ps to
+- * simplify calculations. So 45degs could be anywhere between 33deg and 66deg.
++ * Each fine delay is between 44ps-77ps. Assume each fine delay is 60ps to
++ * simplify calculations. So 45degs could be anywhere between 33deg and 57.8deg.
+  */
+ #define ROCKCHIP_MMC_DELAY_ELEMENT_PSEC 60
+ 
+@@ -84,22 +84,37 @@ static int rockchip_mmc_set_phase(struct clk_hw *hw, int degrees)
+ 	u32 raw_value;
+ 	u64 delay;
+ 
+-	/* allow 22 to be 22.5 */
+-	degrees++;
+-	/* floor to 22.5 increment */
+-	degrees -= ((degrees) * 10 % 225) / 10;
+-
+ 	nineties = degrees / 90;
+-	/* 22.5 multiples */
+-	remainder = (degrees % 90) / 22;
+-
++	remainder = (degrees % 90);
++
++	/*
++	 * Due to the inexact nature of the "fine" delay, we might
++	 * actually go non-monotonic.  We don't go _too_ monotonic
++	 * though, so we should be OK.  Here are options of how we may
++	 * work:
++	 *
++	 * Ideally we end up with:
++	 *   1.0, 2.0, ..., 69.0, 70.0, ...,  89.0, 90.0
++	 *
++	 * On one extreme (if delay is actually 44ps):
++	 *   .73, 1.5, ..., 50.6, 51.3, ...,  65.3, 90.0
++	 * The other (if delay is actually 77ps):
++	 *   1.3, 2.6, ..., 88.6. 89.8, ..., 114.0, 90
++	 *
++	 * It's possible we might make a delay that is up to 25
++	 * degrees off from what we think we're making.  That's OK
++	 * though because we should be REALLY far from any bad range.
++	 */
++
++	/*
++	 * Convert to delay; do a little extra work to make sure we
++	 * don't overflow 32-bit / 64-bit numbers.
++	 */
+ 	delay = PSECS_PER_SEC;
+-	do_div(delay, rate);
+-	/* / 360 / 22.5 */
+-	do_div(delay, 16);
+-	do_div(delay, ROCKCHIP_MMC_DELAY_ELEMENT_PSEC);
+-
+ 	delay *= remainder;
++	do_div(delay, 10000);
++	do_div(delay, (rate / 1000) * 36 * ROCKCHIP_MMC_DELAY_ELEMENT_PSEC);
++
+ 	delay_num = (u8) min(delay, 255ULL);
+ 
+ 	raw_value = delay_num ? ROCKCHIP_MMC_DELAY_SEL : 0;
 -- 
 2.1.4
